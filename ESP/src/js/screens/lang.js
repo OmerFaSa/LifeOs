@@ -56,7 +56,7 @@ ESP.Screens.lang = (function(){
     if(!q){
       if(!d.total){
         return [K.Entry({
-          label:'ÇALIŞMA', meta:'deste boş',
+          label:'Çalışma', meta:'deste boş',
           body:K.Empty({ text:'Bu dilde hiç kart yok. Ekle sekmesinden bir liste '
             + 'yapıştırabilir ya da tek tek yazabilirsin.',
             action:K.Button({ label:'Kart ekle', tone:'primary', act:'tab-ekle' }) }),
@@ -64,7 +64,7 @@ ESP.Screens.lang = (function(){
       }
       if(!d.due){
         return [K.Entry({
-          label:'ÇALIŞMA', hint:'srs',
+          label:'Çalışma', hint:'srs',
           meta:'vadesi gelen kart yok',
           note:'Aralıklı tekrarın amacı her gün çalışmak değil, doğru günde '
              + 'çalışmaktır. Bugün sırası gelen kart yok.',
@@ -74,7 +74,7 @@ ESP.Screens.lang = (function(){
         })];
       }
       return [K.Entry({
-        label:'ÇALIŞMA', hint:'srs',
+        label:'Çalışma', hint:'srs',
         meta:d.due + ' kart vadeli' + (d.overdue ? ' · ' + d.overdue + ' gecikmiş' : ''),
         note:d.overdue
           ? 'En çok geciken kart ' + d.maxOverdueDays + ' gündür bekliyor.'
@@ -94,7 +94,7 @@ ESP.Screens.lang = (function(){
 
     const gecikme = ESP.SRS.overdueDays(kart);
     return [K.Entry({
-      label:'KART ' + (q.pos + 1) + '/' + q.ids.length,
+      label:'Kart ' + (q.pos + 1) + '/' + q.ids.length,
       meta:(ESP.LANG_BY_ID[kart.lang] || {}).label || kart.lang,
       note:gecikme ? gecikme + ' gündür bekliyor.' : 'Bugün vadeli.',
       action:K.Button({ label:'Oturumu bitir', size:'sm', act:'end-review', data:{ 'data-h-odak-cik':'1' } }),
@@ -130,7 +130,7 @@ ESP.Screens.lang = (function(){
 
   function finishRow(q){
     return K.Entry({
-      label:'OTURUM BİTTİ',
+      label:'Oturum bitti',
       meta:q.ids.length + ' kart',
       note:'Cevapladığın her kart yeni vadesine taşındı.',
       body:html`
@@ -153,7 +153,7 @@ ESP.Screens.lang = (function(){
       .sort((a, b) => (a.due || '').localeCompare(b.due || ''));
 
     return [K.Entry({
-      label:'DESTE',
+      label:'Deste',
       meta:hepsi.length + ' kart',
       note:'Vadesi yakın olan üstte. «Aktif» işareti kartın üretimde '
          + 'kullanıldığını söyler; tanımak ile kullanmak ayrı şeylerdir.',
@@ -181,7 +181,7 @@ ESP.Screens.lang = (function(){
     const res = S.ui.vocabParsed;
     return [
       K.Entry({
-        label:'LİSTE YAPIŞTIR',
+        label:'Liste yapıştır',
         meta:'kelime – karşılık',
         note:'Üç ayraç tanınır: tire, eşittir, iki nokta. Tanınmayan satır '
            + 'atılmaz — sana geri gösterilir ve elle bağlarsın.',
@@ -198,7 +198,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'TEK KART',
+        label:'Tek kart',
         meta:'elle',
         body:html`
           <div class="cols-3">
@@ -211,7 +211,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'TOHUM DESTE',
+        label:'Tohum deste',
         meta:'başlangıç için',
         note:'Bu kartlar senin ölçümün değildir; ilk ekranı boş bırakmamak için '
            + 'vardır ve istediğin zaman silinir.',
@@ -253,7 +253,7 @@ ESP.Screens.lang = (function(){
 
     return [
       K.Entry({
-        label:'RETANSİYON', hint:'retention',
+        label:'Retansiyon', hint:'retention',
         meta:d.retention.cert === 'missing' ? 'veri yok'
           : '%' + Math.round(d.retention.value * 100),
         note:d.retention.cert === 'missing'
@@ -271,7 +271,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'KUTU DAĞILIMI', hint:'srs',
+        label:'Kutu dağılımı', hint:'srs',
         meta:d.total + ' kart',
         note:'Kutu kaba sınıftır: bir kart doğru cevaplandıkça yukarı çıkar, '
            + 'unutulduğunda başa döner.',
@@ -284,7 +284,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'BANT', hint:'pedagogic',
+        label:'Bant', hint:'pedagogic',
         meta:bant.band ? bant.band.label : 'ölçülemedi',
         note:'Bant KİŞİYE değil ÜRETİME verilir ve iki ölçüm birden gerekir: '
            + 'aktif kelime sayısı ve retansiyon.',
@@ -302,7 +302,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'SHADOWING',
+        label:'Shadowing',
         meta:'kaynak türleri',
         note:'Süre ölçülür, kalite ölçülmez: sistem sesini dinlemez. '
            + 'Kendi işaretlediğin zorluk «tahmin» etiketiyle durur.',
@@ -334,7 +334,7 @@ ESP.Screens.lang = (function(){
 
     const rows = [
       K.Entry({
-        label:'İKİ EKSEN', hint:'grammar',
+        label:'İki eksen', hint:'grammar',
         meta:bant.band ? bant.band.label : 'bant yok',
         note:'Soldaki eksen kelime (ölçülür), sağdaki işlev (beyan edilir). '
            + 'İkisi ayrı durur çünkü biri ölçüm, öteki beyandır.',
@@ -365,7 +365,7 @@ ESP.Screens.lang = (function(){
     });
 
     rows.push(K.Entry({
-      label:'HATA GÜNLÜĞÜ', hint:'error-log',
+      label:'Hata günlüğü', hint:'error-log',
       meta:hataKartlari.length + ' kart',
       note:'Bir hatayı adlandırmak onu bir daha görmenin tek yolu: '
          + '«bir şeyler yanlıştı» tekrar eder, «edat eşleşmesi» tekrar etmez.',
@@ -402,7 +402,7 @@ ESP.Screens.lang = (function(){
 
     return [
       K.Entry({
-        label:'PRATİK', hint:'practice',
+        label:'Pratik', hint:'practice',
         meta:S.ui.practice && S.ui.practice.deck === dil ? 'oturum açık'
           : ESP.PRACTICE_LENGTH + ' soru',
         note:'Cevabın doğrudan aralıklı tekrara yazılır: pratik ayrı bir kayıt '
@@ -412,7 +412,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'KONULAR', hint:'topic',
+        label:'Konular', hint:'topic',
         meta:ESP.Lesson.topicSummary('lang').topics + ' konu · '
           + ESP.Lesson.topicSummary('lang').items + ' madde',
         note:'CEFR düzeylerine bağlı konu haritası. İşaretler beyandır: '
@@ -422,7 +422,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'ÜNİTELER', hint:'unit',
+        label:'Üniteler', hint:'unit',
         meta:ESP.Lesson.units('lang', dil).length + ' ünite',
         note:'İlerleme SRS\'ten okunur: bir kartı «bilinen» yapan şey bir kez '
            + 'doğru bilmek değil, aralığının uzamasıdır.',
@@ -438,7 +438,7 @@ ESP.Screens.lang = (function(){
       /* BAM'dan ünite (Part 8d): istek King'in onay kapısından geçer; ünite
          Bugün'e teklif olarak gelir ve ESP kendi koduyla sınamadan eklenmez. */
       K.Entry({
-        label:'ÜNİTE İSTE', hint:'unit',
+        label:'Ünite iste', hint:'unit',
         meta:(l.label || dil) + ' · HKM',
         note:'Başlık, ölçülebilir hedef, görev ve öğeler. Soru yazdırılmaz: pratik '
            + 'sorularını ESP kendi destenden kurar. Kaynaksızdır; yanlış kartı silersin.',

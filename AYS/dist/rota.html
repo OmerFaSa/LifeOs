@@ -3967,9 +3967,9 @@ body.is-dragging .drop.is-over{
 
 /* ---------- düğme ---------- */
 .btn{
-  min-height:38px; padding:0 15px;
+  min-height:36px; padding:0 14px;
   border-radius:var(--r-sm);
-  border:1px solid var(--border);
+  border:1px solid var(--border-strong);
   background:var(--surface); color:var(--text);
   font-size:var(--fs-base); font-weight:600; letter-spacing:0;
   gap:var(--sp-2);
@@ -3978,14 +3978,15 @@ body.is-dragging .drop.is-over{
 }
 .btn:hover{ background:var(--surface-2); border-color:var(--border-strong); }
 .btn svg{ width:16px; height:16px; stroke-width:1.8; }
-.btn--primary{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); }
-.btn--primary:hover{ background:var(--primary-hover); border-color:var(--primary-hover); color:var(--primary-ink); }
+/* v5 «Bir dolu düğme, gerisi sessiz»: birincil düğme NÖTRDÜR — koyu zemin,
+   açık yazı (koyu temada tersi). Modül rengi düğmeye girmez. */
+.btn--primary{ background:var(--text); border-color:var(--text); color:var(--bg); }
+.btn--primary:hover{ background:color-mix(in oklab, var(--text) 86%, var(--bg)); border-color:color-mix(in oklab, var(--text) 86%, var(--bg)); color:var(--bg); }
 .btn--ink{ background:var(--ink); border-color:var(--ink); color:var(--ink-on); }
 .btn--ink:hover{ background:var(--ink-2); border-color:var(--ink-2); color:var(--ink-on); }
-.btn--ghost{ border-color:transparent; background:transparent; color:var(--text-2); }
+.btn--ghost{ border-color:transparent; background:transparent; color:var(--text-2); font-weight:500; }
 .btn--ghost:hover{ background:var(--surface-2); color:var(--text); }
-.btn--danger{ background:transparent; color:var(--danger);
-  border-color:color-mix(in srgb, var(--danger) 40%, var(--border)); }
+.btn--danger{ background:transparent; color:var(--danger); border-color:transparent; font-weight:500; }
 .btn--danger:hover{ background:var(--danger-soft); }
 .btn--sm{ min-height:32px; padding:0 12px; font-size:var(--fs-sm); border-radius:var(--r-sm); }
 .btn--lg{ min-height:44px; padding:0 18px; font-size:var(--fs-md); border-radius:var(--r-md); }
@@ -4000,7 +4001,7 @@ body.is-dragging .drop.is-over{
   background:var(--surface); color:var(--text); font-weight:600;
   box-shadow:0 0 0 1px var(--border);
 }
-.seg--primary button.is-on{ background:var(--primary); color:var(--primary-ink); box-shadow:none; }
+.seg--primary button.is-on{ background:var(--surface); color:var(--text); box-shadow:0 0 0 1px var(--border); }
 
 /* ---------- rozet: hap burada kalır ---------- */
 .badge{ border-radius:var(--r-pill); font-weight:600; letter-spacing:0; }
@@ -4015,7 +4016,7 @@ body.is-dragging .drop.is-over{
   border:1px solid var(--border); color:var(--text-2); font-weight:500;
 }
 .chip--tap:hover{ background:var(--surface-2); border-color:var(--border-strong); color:var(--text); }
-.chip--on{ background:var(--primary-soft); border-color:transparent; color:var(--primary); font-weight:600; }
+.chip--on{ background:var(--surface); border-color:var(--text); color:var(--text); font-weight:600; }
 
 /* ---------- ipucu kabı (ⓘ) ---------- */
 .hint{ width:15px; height:15px; border:1.3px solid var(--text-3); color:var(--text-3); font-weight:600; }
@@ -4060,6 +4061,31 @@ body.is-dragging .drop.is-over{
 .ayrinti__ac[open] summary{ color:var(--text); }
 .ayrinti__govde{ margin-top:6px; color:var(--text-2); }
 .ayrinti__govde > * + *{ margin-top:6px; }
+
+
+/* ================================================================
+   v5 · VERİ PARÇALARI (LifeOS Tasarım Dili sürüm 5, «Dokuz parça»)
+   ================================================================ */
+/* Kutu: beyaz yüzey, 1 px çizgi, 14 px köşe; başlık satırında ad + ölçü. */
+.kutu{ border:1px solid var(--border); border-radius:14px; background:var(--surface); box-shadow:none; }
+.kutu__ad{ font-size:15px; font-weight:600; }
+/* Boş durum: kesikli çerçeve, sakin cümle, kalın bağlantı eylemi. «Boş olan
+   yer kaplamaz»: çizim küçük, kutu alçak. */
+.empty{ border:1px dashed var(--border-strong); border-radius:14px; background:transparent;
+  padding:18px 20px; text-align:left; align-items:flex-start; color:var(--text-2); }
+.empty svg, .empty .empty__motif{ display:none; }
+.empty p{ margin:0 0 8px; font-size:14px; color:var(--text-2); max-width:52ch; }
+.empty .btn{ min-height:24px; padding:0; border:0; background:none; color:var(--text); font-weight:600; display:inline-flex; align-items:center; }
+.empty .btn:hover{ background:none; text-decoration:underline; }
+/* Sakin hata: yüzeyli kutu, başlık, cümle, tek bağlantı eylemi. */
+.sakinhata .kutu{ background:var(--surface); }
+/* Kart kenarı yok: gölge yok, ton + çizgi. */
+.card{ border:1px solid var(--border); border-radius:14px; }
+/* Sayfa başı: büyük cümle, küçük özet (v5 «Özet satırı»). */
+.sayfabasi__baslik{ font-size:28px; letter-spacing:-.02em; font-weight:600; line-height:1.2; }
+.sayfabasi__ozet{ font-size:14px; color:var(--text-2); }
+/* Tablo satırları: ince çizgi, tablo hizalı rakam. */
+.table td, .table th{ border-bottom:1px solid var(--border); }
 
 /* ==== css/kart.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -4907,6 +4933,140 @@ body.is-dragging .drop.is-over{
 
 .bugun-cumle{ display:block; margin-top:var(--sp-1); color:var(--text); font-weight:500; }
 .kahraman{ min-width:0; }
+
+
+/* ================================================================
+   v5 · BUGÜN (LifeOS Tasarım Dili sürüm 5, «AYS · Bugün»)
+   Şimdi · Durum · Özet · Öneri alt alta; Durum/Özet kartları yan yana.
+   ================================================================ */
+.bugun__etiket{ margin:0 0 -4px; font-size:13px; font-weight:600; color:var(--text-2); letter-spacing:0; }
+.bugun__alan[aria-label="Durum"], .bugun__alan[aria-label="Özet"]{
+  flex-direction:row; flex-wrap:wrap; gap:16px; align-items:flex-start; }
+.bugun__alan[aria-label="Durum"] > *, .bugun__alan[aria-label="Özet"] > *{ flex:1 1 300px; min-width:0; }
+.bugun__alan > .bugun__etiket, .bugun__alan[aria-label] > p{ flex-basis:100%; margin:0; }
+.sayfabasi__ust{ margin:0 0 6px; font-size:13px; color:var(--text-2); }
+.site--v5 .sayfabasi__baslik{ font-size:28px; }
+
+/* Sıradaki blok kahramanı: modül zemini, simgesiz, büyük başlık. */
+.site--v5 .nextup, .kahraman .nextup{ background:var(--mod-t, var(--primary-soft)); border:0; border-radius:14px; padding:24px;
+  box-shadow:none; gap:20px; align-items:center; }
+.site--v5 .nextup__icon, .kahraman .nextup__icon{ display:none; }
+.site--v5 .nextup__label, .kahraman .nextup__label{ font-size:13px; font-weight:500; color:var(--text-2); text-transform:none; letter-spacing:0; }
+.site--v5 .nextup__label::before, .kahraman .nextup__label::before{ content:''; display:inline-block; width:8px; height:8px; margin-right:8px;
+  border-radius:2px; background:var(--primary); vertical-align:1px; }
+.kahraman .nextup__title{ font-size:26px; font-weight:700; letter-spacing:-.02em; line-height:1.2; margin-top:4px; }
+.site--v5 .nextup__why, .kahraman .nextup__why{ font-size:13px; color:var(--text-2); margin-top:4px; }
+@media (max-width:679px){ .kahraman .nextup{ padding:18px; } .kahraman .nextup__title{ font-size:22px; }
+  .site--v5 .sayfabasi__baslik{ font-size:22px; line-height:1.25; } .site--v5 .bugun{ gap:20px; } }
+
+/* v5 · DEFTER SATIRI: künye sütunu kalkar, künye içeriğin üstünde tek
+   satırdır (tasarım dili: alan etiketi + kutu). Üç modülün her ekranı. */
+.site--v5 .lrow{ grid-template-columns:minmax(0,1fr); gap:12px; padding-block:24px; }
+.site--v5 .ledger > .lrow:first-child{ padding-top:4px; }
+.site--v5 .lrow__side{ position:static; display:flex; align-items:baseline; gap:6px 12px; flex-wrap:wrap; }
+.site--v5 .lrow__label{ font-size:12px; letter-spacing:.06em; color:var(--text-2); }
+.site--v5 .lrow__meta{ margin-top:0; font-size:13px; }
+.site--v5 .lrow__note{ flex-basis:100%; margin:0; max-width:70ch; font-size:13px; }
+.site--v5 .lrow__act{ margin:0 0 0 auto; flex-direction:row; flex-wrap:wrap; }
+.site--v5 .lrow__act .btn{ width:auto; }
+.site--v5 .lrow.kahraman{ border-top:0; }
+
+/* v5 · ÖNERİ ALANI: Merkez'in sesi mor çerçevede durur (teklif, karar değil). */
+.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{
+  border:1px solid color-mix(in srgb, var(--mer) 40%, var(--border)); border-radius:14px;
+  padding:18px 20px; background:var(--surface); }
+.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + * .lrow{ padding-block:0; border:0; }
+
+/* v5 · SAYFA RİTMİ: başlık ile içerik arası 24 px (tasarım: 40 üst, 24 ara). */
+.site--v5 .sayfabasi{ padding-top:0; padding-bottom:24px; align-items:flex-end; }
+.site--v5 .content{ padding-block:0 56px; }
+.site--v5 .sayfabasi__baslik{ font-weight:700; letter-spacing:-.02em; }
+
+/* v5 · ETİKETLER: büyük harf ve harf aralığı kalkar; etiket 12-13 px,
+   ikinci metin rengi (tasarım dili «Yazı» panosu: etiket cümle düzeninde). */
+.site--v5 :is(.appear__label, .argcol__h, .asrow__kind, .ayar-ara__modul, .block__slot, .board__label,
+  .chain__kind, .chain__label, .cmdk__group, .desknote__label, .flashcard__side, .focusmode__slot,
+  .gauge__label, .haberci__ust, .hero__eyebrow, .herostat__label, .kmenu__bas, .lrow__label,
+  .masthead__wd, .mono-label, .nextup__label, .perde__ustyazi, .printdoc__h, .prop__kind, .qmsg__who,
+  .quizcard__src, .rail__label, .room3d__board-label, .rutbe-kart__ust, .rutbe-kunye__ust, .rx__kind,
+  .setup__kicker, .seviye-isler__tablo th, .seviye-rozet__ad, .sidestat__k, .sitefoot__k, .srsrow__day,
+  .stat__label, .symgrp__h, .topicgroup__head, .yenilik__baslik, th){
+  text-transform:none; letter-spacing:0; }
+.site--v5 :is(.lrow__label, .stat__label, .herostat__label, .sidestat__k, .rail__label, .board__label,
+  .topicgroup__head, .symgrp__h, .argcol__h, .gauge__label){ font-size:13px; font-weight:600; color:var(--text-2); }
+.site--v5 th{ font-size:12px; font-weight:500; color:var(--text-3); }
+
+.site--v5 .nextup{ padding:18px 20px; }
+.site--v5 .nextup__title{ font-size:18px; font-weight:700; letter-spacing:-.01em; }
+.site--v5 .kahraman .nextup{ padding:24px; }
+.site--v5 .kahraman .nextup__title{ font-size:26px; }
+
+/* v5 · SAYFA İÇİ BÖLÜM ÇUBUĞU: sayfa zemini beyazdır; üst şerit 52 px. */
+.site--v5{ --ust-h:52px; }
+.site--v5 .bolumcubugu--sayfa{ background:var(--surface); }
+.site--v5 .bolumcubugu__ad{ height:40px; font-size:14px; }
+.site--v5 .bolumcubugu__ad.is-on::after{ background:var(--text); }
+.site--v5 .sayfabolum__ad{ font-size:18px; font-weight:700; }
+
+@media (max-width:679px){
+  .site--v5 .kahraman .nextup{ padding:18px; }
+  .site--v5 .kahraman .nextup__title{ font-size:20px; }
+  .site--v5 .nextup__title{ font-size:16px; }
+}
+
+/* Kahraman dar kapta SARAR: düğmeler satıra sığmazsa metnin altına iner
+   (390 px'lik kapta gövde sıfır genişliğe sıkışıyordu — k2bugun oz-042). */
+.site--v5 .nextup, .kahraman .nextup{ flex-wrap:wrap; }
+.site--v5 .nextup__body, .kahraman .nextup__body{ flex:1 1 240px; min-width:0; }
+
+/* ================================================================
+   v5 · RAF DÜZENİ. Defter satırları alt alta uzamaz: her satır bir
+   kutudur ve kutular yan yana RAF olur. Künye kutunun başlığıdır; geniş
+   içerik (tablo, grafik, uzun form, geniş satır) rafın bütün enini alır.
+   Hiçbir satır gizlenmez; yalnız yerleşim değişir.
+   ================================================================ */
+.site--v5 .ledger{ display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap:16px; align-items:start; grid-auto-flow:row dense; }
+.site--v5 .ledger > .lrow, .site--v5 .ledger > .ledger__item{ min-width:0; margin:0; padding:16px 18px;
+  border:1px solid var(--border); border-radius:14px; background:var(--surface); }
+.site--v5 .ledger > .lrow:first-child{ padding-top:16px; }
+.site--v5 .ledger > .lrow:last-child{ padding-bottom:16px; }
+.site--v5 .ledger > .lrow--wide,
+.site--v5 .ledger > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ogrid, .grid, .ledger){
+  grid-column:1 / -1; }
+.site--v5 .ledger > .lrow.kahraman{ grid-column:1 / -1; padding:0; border:0; background:none; }
+.site--v5 .ledger > .lrow .lrow__main > * + *{ margin-top:12px; }
+/* İç içe defter: kutunun içindeki ikinci defter kutu çizmez, satırdır. */
+.site--v5 .ledger .ledger{ display:flex; flex-direction:column; gap:0; }
+.site--v5 .ledger .ledger > .lrow{ border:0; border-top:1px solid var(--border); border-radius:0; padding:12px 0;
+  background:none; }
+.site--v5 .ledger .ledger > .lrow:first-child{ border-top:0; padding-top:0; }
+/* Sayfa bölümleri de rafın katıdır: aralarında 32 px, başlık 16 px. */
+.site--v5 .sayfabolum + .sayfabolum{ margin-top:32px; }
+.site--v5 .sayfabolum__ad{ font-size:16px; margin-bottom:12px; }
+
+/* Kat düzeni: çubuklu sayfada yalnız seçili bölüm görünür (019). */
+.sayfabolumler--kat > .sayfabolum:not(.is-on){ display:none; }
+.sayfabolumler--kat > .sayfabolum + .sayfabolum{ margin-top:0; }
+.bolumcubugu--sayfa .bolumcubugu__ad.is-on{ color:var(--text); font-weight:600; }
+.bolumcubugu--sayfa .bolumcubugu__ad.is-on::after{ content:''; position:absolute; left:10px; right:10px; bottom:-1px;
+  height:2px; border-radius:1px; background:var(--text); }
+
+/* Raf: AYS'de Grid/Span/Stack = defter/bant/yığın. Bant ve yığın rafta
+   çizilmez (display:contents); içlerindeki her satır rafın bir kutusudur. */
+.site--v5 .ledger > .lband, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs){ display:contents; }
+.site--v5 .ledger > .lrow, .site--v5 .ledger > .lband > .lrow, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow{ min-width:0; margin:0; padding:16px 18px; border:1px solid var(--border); border-radius:14px;
+  background:var(--surface); }
+.site--v5 .ledger > .lrow.lrow--wide, .site--v5 .ledger > .lband > .lrow.lrow--wide, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow.lrow--wide,
+.site--v5 .ledger > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger), .site--v5 .ledger > .lband > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger), .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger){ grid-column:1 / -1; }
+.site--v5 .ledger > .lband > :not(.lrow):not(.stack):not(.stack-sm):not(.stack-xs),
+.site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > :not(.lrow){ grid-column:1 / -1; min-width:0; }
+/* Kutu sonsuza uzamaz: uzun tablo ya da liste kutunun İÇİNDE kayar,
+   tablo başlığı yapışır. Satırların hepsi yerinde; yalnız sayfa kısalır. */
+.site--v5 .ledger .lrow:not(.kahraman) > .lrow__main{ max-height:560px; overflow:auto; overscroll-behavior:contain;
+  scrollbar-width:thin; }
+.site--v5 .ledger .ledger .lrow > .lrow__main{ max-height:none; overflow:visible; }
+.site--v5 .ledger .lrow__main thead th{ position:sticky; top:0; background:var(--surface); z-index:1; }
 
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -8735,10 +8895,11 @@ tbody tr:hover{ background:var(--surface-2); }
 /* ================================================== Bugün: üç alan (03)
    Solda ŞİMDİ ve günün akışı, sağda özet, sayaç ve tek öneri. Telefonda
    tek sütun; sıra aynı kalır (önce şimdi). */
-.bugun{ display:grid; grid-template-columns:minmax(0,1fr) 380px; gap:20px; align-items:start; }
-.bugun__sol, .bugun__sag{ display:flex; flex-direction:column; gap:20px; min-width:0; }
+/* v5: Bugün TEK SÜTUNDUR (Şimdi · Durum · Özet · Öneri alt alta); iki
+   sütunlu eski ızgara dar kapta sol sütunu sıfıra indiriyordu. */
+.bugun{ display:flex; flex-direction:column; align-items:stretch; gap:28px; }
+.bugun__sol, .bugun__sag{ display:contents; }
 .bugun__alan{ display:flex; flex-direction:column; gap:16px; min-width:0; }
-@media (max-width:1023px){ .bugun{ grid-template-columns:minmax(0,1fr); } }
 
 /* Günün akışı (01'in liste hâli): sıra, bloğun adı, durum. */
 .akis{ list-style:none; margin:0; padding:4px 0; }
@@ -10512,7 +10673,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'5e5fa1b', at:'2026-09-24 22:26', dirty:true };
+R.BUILD = { id:'1978c32', at:'2026-09-24 23:00', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13498,6 +13659,7 @@ window.LIFEOS = window.LIFEOS || {};
     return '<div class="sayfabasi">'
       + '<div class="sayfabasi__metin">'
       + (yol.length > 1 ? '<p class="sayfabasi__yol">' + yol.map(kac).join('<span aria-hidden="true"> › </span>') + '</p>' : '')
+      + (o.ust ? '<p class="sayfabasi__ust">' + o.ust + '</p>' : '')
       + '<h1 class="sayfabasi__baslik hero__title">' + (o.baslikHtml || kac(o.baslik || '')) + '</h1>'
       + (o.ozet ? '<p class="sayfabasi__ozet">' + o.ozet + '</p>' : '')
       + '</div>'
@@ -29928,15 +30090,22 @@ R.C = (function(){
      ekranın bir kısmını SAKLARDI; burada hiçbir şey saklanmaz (§1.2:
      ekran içi sekme 0). Eski sekme eylemi (`act`) düğmede kalır ve ekranın
      işleyicisi `bolumeGit(id)` çağırır: aynı eylem, yeni davranış. */
+  /* v5 RAF DÜZENİ (Tasarım Dili sürüm 5, «Ayarlar › Merkez»): sayfa
+     aşağı doğru uzamaz; bölüm çubuğu bir KAT seçer ve o kat görünür.
+     Bütün bölümler DOM'da kalır (arama, derin bağlantı, bolumeGit); seçim
+     yeniden çizimde korunur (AKTIF_BOLUM, çubuğun eylemine göre). */
+  const AKTIF_BOLUM = {};
   function SayfaBolumleri(o){
     const b = (o.bolumler || []).filter(x => x && x.govde != null && String(x.govde) !== '');
+    const secili = AKTIF_BOLUM[o.act || ''];
+    const aktif = b.some(x => x.id === secili) ? secili : (b[0] && b[0].id);
     return html`
       ${when(b.length > 1, () => html`<nav class="bolumcubugu bolumcubugu--sayfa" data-oz="019"
-        aria-label="${o.aria || 'Bu sayfada'}">${map(b, x => html`<button class="bolumcubugu__ad"
-          ${attrs({ 'data-act':o.act, 'data-tab':x.id })}>${x.ad}${when(x.sayi != null,
+        aria-label="${o.aria || 'Bu sayfada'}">${map(b, x => html`<button class="${cls('bolumcubugu__ad', x.id === aktif && 'is-on')}"
+          ${attrs({ 'data-act':o.act, 'data-tab':x.id, 'aria-current':x.id === aktif ? 'true' : null })}>${x.ad}${when(x.sayi != null,
           () => html`<span class="bolumcubugu__rozet is-sessiz">${x.sayi}</span>`)}</button>`)}</nav>`)}
-      <div class="sayfabolumler">${map(b, x => html`
-        <section class="sayfabolum" id="${'bl-' + x.id}" aria-labelledby="${'bl-' + x.id + '-ad'}">
+      <div class="${cls('sayfabolumler', b.length > 1 && 'sayfabolumler--kat')}">${map(b, x => html`
+        <section class="${cls('sayfabolum', x.id === aktif && 'is-on')}" id="${'bl-' + x.id}" aria-labelledby="${'bl-' + x.id + '-ad'}">
           <h2 class="sayfabolum__ad" id="${'bl-' + x.id + '-ad'}" tabindex="-1">${x.ad}</h2>
           ${x.govde}
         </section>`)}</div>`;
@@ -29999,6 +30168,20 @@ R.C = (function(){
   function bolumeGit(id){
     const el = document.getElementById('bl-' + id);
     if(!el) return false;
+    /* Katı aç: kardeş bölümler gizlenir, çubukta seçim işaretlenir. */
+    const kap = el.parentElement;
+    if(kap && kap.classList.contains('sayfabolumler')){
+      Array.prototype.forEach.call(kap.children, s => s.classList.toggle('is-on', s === el));
+      const nav = kap.previousElementSibling;
+      if(nav && nav.classList.contains('bolumcubugu--sayfa')){
+        Array.prototype.forEach.call(nav.querySelectorAll('button[data-tab]'), btn => {
+          const on = btn.getAttribute('data-tab') === id;
+          btn.classList.toggle('is-on', on);
+          if(on){ btn.setAttribute('aria-current', 'true'); AKTIF_BOLUM[btn.getAttribute('data-act') || ''] = id; }
+          else btn.removeAttribute('aria-current');
+        });
+      }
+    }
     let az = true;
     try{ az = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
     el.scrollIntoView({ block:'start', behavior:az ? 'auto' : 'smooth' });
@@ -45736,19 +45919,19 @@ R.Screens.today = (function(){
 
     return html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
-        <section class="bugun__alan" aria-label="Şimdi">
+        <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${when(acil, () => acil.kart)}
           ${R.Setup.needed() ? raw(R.Setup.card()) : html`<div class="kahraman" data-oz="042">${NextUpCard()}</div>`}
           ${when(R.Signals && R.Signals.current(), () => SignalCard())}
         </section>
-        <section class="bugun__alan" aria-label="Durum">${AkisKutusu(day)}</section>
+        <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>${AkisKutusu(day)}</section>
       </div>
       <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Özet">
+        <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>
           ${OzetKutusu(day, dateISO)}
           ${SayacKutusu(day, dateISO)}
         </section>
-        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri">${oneri}</section>`)}
+        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
       </div>
     </div>`;
   }
@@ -46114,14 +46297,14 @@ R.Screens.today = (function(){
   return {
     id:'today',
     title:'Bugün',
-    subtitle(){ return tarihSatiri(); },
-    /* Kabuk `lede()`'yi tarih satırının YERİNE koyar; tarih kalsın diye
-       ikisi birlikte döner, cümle kendi satırında (kart.css .bugun-cumle). */
-    lede(){
-      const day = S.days[U.todayISO()];
-      const cumle = bugunCumlesi(day, U.todayISO());
-      return U.esc(tarihSatiri()) + (cumle ? '<span class="bugun-cumle" data-oz="004">' + U.esc(cumle) + '</span>' : '');
+    subtitle(){ return ''; },
+    /* v5: tarih üst satırda, günün cümlesi büyük başlık (004). */
+    ust(){ return U.esc(tarihSatiri()); },
+    headline(){
+      const d = S.days[U.todayISO()];
+      return (d && bugunCumlesi(d, U.todayISO())) || 'Bugün';
     },
+    lede(){ return ''; },
     cumle:bugunCumlesi,
     ozetSayilari,
     actions(){
@@ -57876,7 +58059,7 @@ R.App = (function(){
     const AY = window.LIFEOS && window.LIFEOS.AYAR;
     const eylem = (AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '')
       + (safe(() => sc.actions ? sc.actions() : '') || '');
-    return K.sayfaBasi({ yol:[], baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
+    return K.sayfaBasi({ yol:[], ust:safe(() => sc.ust ? String(sc.ust()) : ''), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
   }
 
   function bolumCubuguHtml(sc){

@@ -253,7 +253,7 @@ ESP.App = (function(){
     const AY = window.LIFEOS && window.LIFEOS.AYAR;
     const eylem = (AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '')
       + (safe(() => sc.actions ? sc.actions() : '') || '');
-    return K.sayfaBasi({ yol:[], baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
+    return K.sayfaBasi({ yol:[], ust:safe(() => sc.ust ? String(sc.ust()) : ''), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
   }
 
   function bolumCubuguHtml(sc){

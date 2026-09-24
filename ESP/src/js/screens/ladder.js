@@ -55,7 +55,7 @@ ESP.Screens.ladder = (function(){
     const rows = [];
 
     rows.push(K.Entry({
-      label:'GENEL KADEME', hint:'level',
+      label:'Genel kademe', hint:'level',
       meta:ov.cert === 'missing' ? 'veri yok' : ov.level.label,
       note:'Genel kademe disiplinlerin ortalaması değildir: ortalama ile en '
          + 'düşüğün arasıdır. Tek disiplinde üstat olup ötekileri bırakmak '
@@ -74,7 +74,7 @@ ESP.Screens.ladder = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'DİSİPLİNLER',
+      label:'Disiplinler',
       meta:hepsi.length + ' merdiven',
       note:'Kademe ardışıktır: alttaki kapı atlanarak üsttekine geçilmez. '
          + 'Atlanan kapı ileride her zaman geri gelir.',
@@ -105,7 +105,7 @@ ESP.Screens.ladder = (function(){
     const olcum = ESP.Mod.active().map(d => C().nextGate(d.id))
       .filter(g => g && g.action === 'measure');
     rows.push(K.Entry({
-      label:'ÖLÇÜLEMEYEN KAPILAR', hint:'unknown-gate',
+      label:'Ölçülemeyen kapılar', hint:'unknown-gate',
       meta:olcum.length ? olcum.length + ' kapı' : 'yok',
       note:'Ölçülemeyen kapı geçilmiş sayılmaz ama kalınmış da sayılmaz. '
          + 'Sıfır varsaymak, sistemin en pahalı hatasıdır.',
@@ -160,7 +160,7 @@ ESP.Screens.ladder = (function(){
        listedeki maddelerdedir ve sistem onların hiçbirini göremez. */
     if((lad.blind || []).length){
       rows.push(K.Entry({
-        label:'BU MERDİVENİN GÖREMEDİĞİ', hint:'blind',
+        label:'Bu merdivenin göremediği', hint:'blind',
         meta:lad.blind.length + ' madde',
         note:'Kapılar ölçülebilir olanı ölçer. Aşağıdakiler ölçülemez ve '
            + 'ölçülemediği için önemsiz değildir — asıl mesele çoğu zaman '
@@ -176,7 +176,7 @@ ESP.Screens.ladder = (function(){
 
     yol.steps.forEach(st => {
       rows.push(K.Entry({
-        label:'KADEME ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short,
+        label:'Kademe ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short,
         meta:st.state === 'done' ? 'geçildi'
           : (st.state === 'current' ? '%' + st.pct : 'ileride'),
         note:st.title,
@@ -214,7 +214,7 @@ ESP.Screens.ladder = (function(){
 
     return [
       K.Entry({
-        label:'SEVİYE TESPİTİ', hint:'placement',
+        label:'Seviye tespiti', hint:'placement',
         meta:(discOf(disc) || {}).label || disc,
         note:ESP.PLACEMENT.note,
         body:html`
@@ -233,7 +233,7 @@ ESP.Screens.ladder = (function(){
       }),
 
       K.Entry({
-        label:'SONUÇ',
+        label:'Sonuç',
         meta:tahmin.answered + '/' + tahmin.total + ' cevap',
         note:'Tahmin hiçbir kapıyı açmaz. Ölçülmüş kademe tahmini her zaman yener.',
         body:html`

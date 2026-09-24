@@ -304,7 +304,13 @@ function topla(arg){
   main.querySelectorAll('*').forEach(el => {
     if(kelimeSay(el.textContent) <= 30) return;
     if(!ADAY.test(getComputedStyle(el).display) || !gorunur(el)) return;
-    const blokCocuk = Array.from(el.children).some(c => BOLER.test(getComputedStyle(c).display));
+    /* display:contents kutu çizmez; çocukları ebeveynin kutusuna geçer
+       (v5 raf düzeni bantları ve yığınları böyle açar). İçinden bakılır. */
+    const blokMu = c => {
+      const d = getComputedStyle(c).display;
+      return d === 'contents' ? Array.from(c.children).some(blokMu) : BOLER.test(d);
+    };
+    const blokCocuk = Array.from(el.children).some(blokMu);
     if(!blokCocuk && kelimeSay(el.innerText) > 30) uzun++;
   });
   /* MERKEZ DISI MOR (katalog 110, ilke 1: «renk sahipligi soyler»). Mor

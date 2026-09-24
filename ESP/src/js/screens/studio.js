@@ -44,7 +44,7 @@ ESP.Screens.studio = (function(){
 
     return [
       K.Entry({
-        label:'KULAK EGZERSİZLERİ', hint:'ear',
+        label:'Kulak egzersizleri', hint:'ear',
         meta:ESP.EAR_DRILLS.length + ' egzersiz',
         note:'Ölçülen şey yetenek değil isabet: yirmi denemede kaç doğru. '
            + 'Sistem sesini dinlemez; sayıyı sen girersin.',
@@ -55,7 +55,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'ARALIKLAR', hint:'interval',
+        label:'Aralıklar', hint:'interval',
         meta:ESP.INTERVALS.length + ' aralık',
         note:'Kanca (hook) bir ezber kolaylığıdır, kural değil: kendi kancanı '
            + 'bulursan daha iyi tutar.',
@@ -66,7 +66,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'CAGED', hint:'caged',
+        label:'Caged', hint:'caged',
         meta:'beş şekil',
         note:'Bir sır değil bir harita: aynı akorun klavyede beş yerde nasıl '
            + 'kurulduğunu gösterir.',
@@ -75,7 +75,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'DEŞİFRE', hint:'sight-reading',
+        label:'Deşifre', hint:'sight-reading',
         meta:ESP.SIGHT_READING.length + ' kademe',
         note:'Okumak çalmaktan ayrı bir beceridir ve ayrı çalışılır.',
         body:K.Table({ tight:true, headers:[{ label:'Kademe', num:true }, 'Ne', 'Nasıl'],
@@ -83,7 +83,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'REPERTUAR BAKIMI', hint:'repertoire',
+        label:'Repertuar bakımı', hint:'repertoire',
         meta:eskiyen.length ? eskiyen.length + ' bakımsız' : 'güncel',
         note:'«Bitti» diye bir hâl yoktur: ' + ESP.REPERTOIRE_STALE_DAYS
            + ' günden uzun süredir çalınmayan parça çalınabilir ama garanti değil.',
@@ -153,7 +153,7 @@ ESP.Screens.studio = (function(){
 
     const rows = [
       K.Entry({
-        label:'METRONOM',
+        label:'Metronom',
         meta:bpm + ' BPM',
         note:'Temiz çalınan tempo, hızlı çalınan tempodan önce gelir. '
            + 'Eşik yalnızca «temiz» işaretlenen tekrarlardan açılır.',
@@ -179,7 +179,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'TEKRAR KAYDET',
+        label:'Tekrar kaydet',
         meta:acik ? acik.name : 'parça seç',
         note:'«Temiz» senin işaretindir: sistem duymaz. Bu yüzden tempo ve tarih '
            + '«ölçüldü», temizlik yargısı senindir.',
@@ -234,7 +234,7 @@ ESP.Screens.studio = (function(){
     });
 
     rows.push(K.Entry({
-      label:'PARÇA EKLE',
+      label:'Parça ekle',
       meta:'teknik ya da repertuar',
       body:html`
         <div class="cols-3">
@@ -256,7 +256,7 @@ ESP.Screens.studio = (function(){
     /* BAM'dan alıştırma paketi (Part 8d-2): istek King'in onay kapısından
        geçer; paket Bugün'e teklif olarak gelir ve ESP kendi koduyla sınar. */
     rows.push(K.Entry({
-      label:'PAKET İSTE',
+      label:'Paket iste',
       meta:'gitar · HKM',
       note:'Konu ve düzeyden alıştırma listesi (ton, derece ilerleyişi, başlangıç ve hedef '
          + 'tempo). Tempolar referanstır; eşik senin temiz tekrarından açılır.',
@@ -287,7 +287,7 @@ ESP.Screens.studio = (function(){
 
     return [
       K.Entry({
-        label:'ÇALIŞMA METNİ', hint:'articulation',
+        label:'Çalışma metni', hint:'articulation',
         meta:secili.kaynak ? 'kaynaklı okuma parçası' : 'düzey ' + secili.level + ' · ' + grup.label,
         note:'Hedef hızlı söylemek değil, hangi sesin düzeldiği. Hızlı ama bozuk '
            + 'bir tekerleme çalışmanın başarısı değil başarısızlığıdır.',
@@ -307,7 +307,7 @@ ESP.Screens.studio = (function(){
       /* Diksiyon belgesi (kullanıcı 2026-09-24: «ikisi birden»): telaffuz
          kuralı ve okuma parçası, BAM'ın web kaynaklarından; kural kaynağıyla. */
       K.Entry({
-        label:'TELAFFUZ KURALLARI', meta:dk.kurallar.length ? dk.kurallar.length + ' kural · kaynaklı' : 'henüz yok',
+        label:'Telaffuz kuralları', meta:dk.kurallar.length ? dk.kurallar.length + ' kural · kaynaklı' : 'henüz yok',
         note:'Kural ve okuma parçası web kaynaklarından gelir; alıntısı kaynakta bulunmayan satır eklenmez.',
         wide:true,
         body:html`
@@ -323,7 +323,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'KAYIT ÖLÇÜMÜ',
+        label:'Kayıt ölçümü',
         meta:'ses dosyası tutulmaz',
         note:'Saklanan şey süre, kelime ve senin işaretlediğin hata sayısıdır. '
            + 'Olmayan ses dosyası sızamaz.',
@@ -348,7 +348,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'KONUŞMA HIZI', hint:'wpm',
+        label:'Konuşma hızı', hint:'wpm',
         meta:d.cert === 'missing' ? 'veri yok'
           : (d.wpm.cert === 'missing' ? 'hesaplanamadı' : d.wpm.value + ' kelime/dk'),
         note:ESP.WPM_NOTE,
@@ -369,7 +369,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'NEFES VE VURGU',
+        label:'Nefes ve vurgu',
         meta:ESP.BREATH_DRILLS.length + ' çalışma',
         note:'Ölçülen şey süredir, «iyi yaptım» değil.',
         body:html`
@@ -384,7 +384,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'SON KAYITLAR',
+        label:'Son kayıtlar',
         meta:kayitlar.length + ' ölçüm',
         wide:true,
         body:kayitlar.length
@@ -414,7 +414,7 @@ ESP.Screens.studio = (function(){
 
     return [
       K.Entry({
-        label:'PLATO', hint:'plateau',
+        label:'Plato', hint:'plateau',
         meta:plato.length ? plato.length + ' teknik' : 'yok',
         note:'Plato bir başarısızlık değil bir sinyaldir: aynı çalışma aynı '
            + 'sonucu veriyorsa değişmesi gereken çalışmanın kendisidir.',
@@ -427,7 +427,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'HEDEFE ULAŞMA',
+        label:'Hedefe ulaşma',
         meta:m.progress && m.progress.cert !== 'missing'
           ? m.progress.reached + '/' + m.progress.n : 'veri yok',
         note:'Hedefi girilmemiş parça paydaya girmez: hedefsiz parça başarısız değildir.',
@@ -439,7 +439,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'DİKSİYON EĞİLİMİ',
+        label:'Diksiyon eğilimi',
         meta:t.cert === 'missing' ? 'veri yok' : t.direction,
         note:'İki pencere karşılaştırılır: son 14 gün ve ondan önceki 14 gün. '
            + 'İkisinde de ölçüm yoksa bulgu üretilmez.',
@@ -451,7 +451,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'ISINMA SIRASI',
+        label:'Isınma sırası',
         meta:'öneri',
         note:'Zorunlu değildir; sistem senin yerine karar vermez.',
         body:K.Table({ tight:true, headers:['Aşama', { label:'Dakika', num:true }, 'Not'],
@@ -465,8 +465,8 @@ ESP.Screens.studio = (function(){
      Isaretler beyandir ve oyle etiketlenir; hicbir kapiyi acmaz. */
   function topicRows(){
     return [
-      { id:'music', label:'MÜZİK KONULARI' },
-      { id:'diction', label:'DİKSİYON KONULARI' },
+      { id:'music', label:'Müzik konuları' },
+      { id:'diction', label:'Diksiyon konuları' },
     ].map(d => {
       const ozet = ESP.Lesson.topicSummary(d.id);
       return K.Entry({

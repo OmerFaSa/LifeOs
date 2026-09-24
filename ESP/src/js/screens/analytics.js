@@ -40,7 +40,7 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        label:'ENTELEKTÜEL SERMAYE', hint:'ehs',
+        label:'Entelektüel sermaye', hint:'ehs',
         meta:ehs.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(ehs.value * 10) / 10) + ' hacim',
         note:ehs.cert === 'missing'
@@ -67,7 +67,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'DENGE',
+        label:'Denge',
         meta:(function(){
           const b = ESP.Planner.balance(7);
           return b.cert === 'missing' ? 'veri yok' : (b.skewed ? 'dengesiz' : 'dengeli');
@@ -91,7 +91,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'HAFTALIK ROTA',
+        label:'Haftalık rota',
         meta:'öncelik sırasına göre',
         note:'Rota bir takvim değildir: hangi disiplinin öne geçtiğini söyler, '
            + '«salı 19:00» demez. Odak yalnızca eşitliği bozar.',
@@ -126,7 +126,7 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        label:'GÜNLÜK SÜRE',
+        label:'Günlük süre',
         meta:olculen.length + '/' + gunler.length + ' günde kayıt',
         note:'Girilmemiş gün grafikte boşluktur, sıfır değildir. '
            + 'Ortalama yalnızca kayıtlı günlerden hesaplanır.',
@@ -148,7 +148,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'SERİ', hint:'streak',
+        label:'Seri', hint:'streak',
         meta:M.streak() + ' gün',
         note:'Seri bir hedef değil bir gözlemdir. Hiç girilmemiş gün seriyi '
            + 'kırar; «0 dakika» girilen gün de kırar — ikisi ayrı şeydir.',
@@ -160,7 +160,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'RETANSİYON', hint:'retention',
+        label:'Retansiyon', hint:'retention',
         meta:(function(){
           const r = ESP.SRS.retention();
           return r.cert === 'missing' ? 'veri yok' : '%' + Math.round(r.value * 100);
@@ -188,7 +188,7 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        label:'HAFTALIK RAPOR',
+        label:'Haftalık rapor',
         meta:'kural motorundan',
         note:'İyi haber kötü haberin arkasına saklanmaz: kötü olan önce söylenir.',
         wide:true,
@@ -202,7 +202,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'ÇAPRAZ BULGULAR',
+        label:'Çapraz bulgular',
         meta:cross.length ? cross.length + ' bulgu' : 'yok',
         note:'İki AYRI masanın verisi birlikte anlam kazandığında çıkar. '
            + '«Birlikte hareket ediyor» denir, «sebep oldu» denmez.',
@@ -223,7 +223,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'GÜNÜN BRİFİNGİ',
+        label:'Günün brifingi',
         meta:gunluk ? (gunluk.source === 'model' ? 'model' : 'kural motoru') : 'üretilmedi',
         note:'Günde tek model çağrısı. Sonuç güne yazılır; aynı gün tekrar '
            + 'çağrılmaz.',
@@ -235,7 +235,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'SINIR', hint:'pedagogic',
+        label:'Sınır', hint:'pedagogic',
         meta:'ne söylenmez',
         body:html`
           ${K.Notice({ tone:'info', body:ESP.PEDAGOGIC.disclaimer })}
@@ -277,7 +277,7 @@ ESP.Screens.analytics = (function(){
     const kapali = ESP.Signals.closed().slice(-8).reverse();
 
     return K.Entry({
-      label:'DENETİM DEFTERİ', hint:'signal',
+      label:'Denetim defteri', hint:'signal',
       meta:e.opened ? e.answered + '/' + e.opened + ' cevaplandı' : 'sinyal yok',
       note:'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün '
          + 'ekranına tek satır olarak düşer. Burası o soruların defteri.',
@@ -333,7 +333,7 @@ ESP.Screens.analytics = (function(){
       signalLedgerRow(),
 
       K.Entry({
-        label:'SÜRTÜNME', hint:'friction',
+        label:'Sürtünme', hint:'friction',
         meta:f.cert === 'missing' ? 'veri yok'
           : f.window.perDay + ' dk/gün'
             + (f.window.ratio == null ? '' : ' · %' + Math.round(f.window.ratio * 100)),
@@ -359,7 +359,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'GÖSTERGE AYRIŞMASI', hint:'goodhart',
+        label:'Gösterge ayrışması', hint:'goodhart',
         meta:ayrisan.length ? ayrisan.length + ' ayrışma' : 'temiz',
         note:'Çaba arttı da sonuç yerinde mi saydı? Nöbetçi hüküm vermez, '
            + 'soru sorar: ayrışmanın meşru sebepleri vardır.',
@@ -401,7 +401,7 @@ ESP.Screens.analytics = (function(){
       })),
 
       K.Entry({
-        label:'KALİBRASYON', hint:'calib',
+        label:'Kalibrasyon', hint:'calib',
         meta:puan.cert === 'missing' ? puan.n + '/' + ESP.Calib.ASGARI + ' tahmin'
           : (puan.grade || (puan.brier == null ? '—' : 'brier ' + puan.brier.toFixed(2))),
         note:'Sistem söylemeden önce sen söyle. Ölçülen şey dardır: kayıtlı '

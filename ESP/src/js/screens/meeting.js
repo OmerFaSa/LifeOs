@@ -27,7 +27,7 @@ ESP.Screens.meeting = (function(){
     const secili = S.ui.meetingAgenda || adaylar[0].id;
 
     return K.Entry({
-      label:'GÜNDEM',
+      label:'Gündem',
       meta:adaylar.length + ' aday',
       note:'Gündemi model seçmez: puanlama seçer. En yüksek puanlı aday '
          + 'varsayılan olarak işaretlidir.',
@@ -49,7 +49,7 @@ ESP.Screens.meeting = (function(){
   function liveRows(){
     if(!canli) return [];
     return [K.Entry({
-      label:'TOPLANTI',
+      label:'Toplantı',
       meta:canli.turns.length + '/' + (ESP.Mod.activeAgents().length - 1) + ' tur',
       note:'Her tur geldiği anda basılır; hepsinin bitmesi beklenmez.',
       wide:true,
@@ -78,11 +78,11 @@ ESP.Screens.meeting = (function(){
   function minutesRows(){
     const liste = S.officeMeetings || [];
     if(!liste.length){
-      return [K.Entry({ label:'TUTANAKLAR', meta:'yok',
+      return [K.Entry({ label:'Tutanaklar', meta:'yok',
         body:K.Empty({ text:'Henüz toplantı yapılmadı.' }) })];
     }
     return liste.slice(0, 10).map(m => K.Entry({
-      label:'TUTANAK',
+      label:'Tutanak',
       meta:U.fmtDate(ESP.U.gunOf(m.at)) + ' · ' + m.agendaLabel,
       note:m.decision ? 'Karar: ' + m.decision.title : '',
       action:K.Button({ label:S.ui.meetingOpen === m.id ? 'Kapat' : 'Aç', size:'sm',
@@ -124,7 +124,7 @@ ESP.Screens.meeting = (function(){
     const acik = M.openDecisions();
     if(!acik.length) return [];
     return [K.Entry({
-      label:'TAKİPTEKİ KARARLAR',
+      label:'Takipteki kararlar',
       meta:acik.length + ' açık',
       note:'Karar vermek değil, kararın ne yaptığını görmek sistemi ilerletir. '
          + 'Bu yüzden kapatırken sonuç yazılır.',

@@ -23,7 +23,7 @@ ESP.Screens.guide = (function(){
   function usageRows(){
     return [
       K.Entry({
-        label:'NASIL ÇALIŞIR',
+        label:'Nasıl çalışır',
         meta:'üç cümle',
         body:html`
           <ul class="setup__list">
@@ -36,7 +36,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'SIFIR SÜRTÜNME',
+        label:'Sıfır sürtünme',
         meta:'en hızlı yol',
         note:'Palete «45 dk gitar» yazıp Enter\'a basmak bir oturum kaydeder. '
            + 'Yazmadan önce ne kaydedileceği gösterilir.',
@@ -50,7 +50,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'KISAYOLLAR',
+        label:'Kısayollar',
         meta:'klavye',
         body:K.Table({ tight:true, headers:['Tuş', 'İş'],
           rows:[
@@ -62,7 +62,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'MERDİVEN', hint:'ladder',
+        label:'Merdiven', hint:'ladder',
         meta:ESP.LEVELS.length - 1 + ' kademe',
         note:'Her bölümde sıfırdan üstatlığa beş basamak ve her basamakta '
            + 'ölçülebilir kapılar. Kademe kişiye değil ÜRETİME verilir: '
@@ -98,7 +98,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'BÖLÜMLER', hint:'modules',
+        label:'Bölümler', hint:'modules',
         meta:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length + ' açık',
         note:'Çalışmayacağın bölümü kapatabilirsin: gezinmeden kalkar, '
            + 'reçeteye ve denge hesabına girmez, ofiste masası kapanır.',
@@ -112,7 +112,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'YEDİ DİSİPLİN',
+        label:'Yedi disiplin',
         meta:ESP.DISCIPLINES.length + ' alan',
         note:'Ağırlıklar birbirine yakın tutulur: büyük fark, düşük katsayılı '
            + 'disiplini görünmez yapar ve kullanıcı onu bırakır.',
@@ -135,7 +135,7 @@ ESP.Screens.guide = (function(){
     const s = ESP.Office.settings();
     return [
       K.Entry({
-        label:'MODEL SAĞLAYICI',
+        label:'Model sağlayıcı',
         meta:ESP.Office.ready('patron') ? 'bağlı' : 'bağlı değil',
         note:'Model kapalıyken ofis kapanmaz. Bu bir yedek plan değil '
            + 'varsayılan plandır; model bir iyileştirmedir.',
@@ -158,7 +158,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'MODELE NE GİDER', hint:'brief',
+        label:'Modele ne gider', hint:'brief',
         meta:'yalnızca brifing',
         note:'Ham ses kaydı, tam taslak metni ve atomik notun kendi cümlesi '
            + 'gitmez. Bu bir testle denetlenir.',
@@ -175,7 +175,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'ÇIKTI DENETİMİ',
+        label:'Çıktı denetimi',
         meta:ESP.GROUNDING.banned.length + ' desen',
         note:'Denetim metni YENİDEN YAZMAZ, işaretler. Sessizce düzeltmek anlamı '
            + 'tersine çevirebilir; çağıran ya uyarıyı gösterir ya kural motorunun '
@@ -202,7 +202,7 @@ ESP.Screens.guide = (function(){
          "Depo %80 dolu" tek basina ise yaramaz: ne zaman dolacagini ve
          NEYIN sisdigini soylemez. Ikisi bambaska kararlar gerektirir. */
       K.Entry({
-        label:'DOKUZ AYLIK UFUK', hint:'storage',
+        label:'Dokuz aylık ufuk', hint:'storage',
         meta:hukum.title,
         note:'Bu sistem dokuz ay her gün kullanılırsa ne olur? Büyüme hızı '
            + 'ölçülür, tahmin edilmez: iki ölçümden az varsa hız bilinmiyordur.',
@@ -226,7 +226,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'NE BÜYÜYOR',
+        label:'Ne büyüyor',
         meta:dagilim.length + ' koleksiyon',
         note:'Toplam yüzde hangi kaydın şiştiğini söylemez; burada söyler. '
            + '«İçerik» işaretli olanlar senin girdiğin veridir ve sistem '
@@ -241,7 +241,7 @@ ESP.Screens.guide = (function(){
       }),
 
       ...(budanabilir.length ? [K.Entry({
-        label:'YER AÇ',
+        label:'Yer aç',
         meta:dp.fmtBytes(budanabilir.reduce((a, b) => a + b.bytes, 0)) + ' budanabilir',
         note:'Yalnızca sistemin kendi ürettiği kayıtlar listelenir. '
            + 'Girdiğin hiçbir oturum, kart ya da not burada yer almaz — '
@@ -261,7 +261,7 @@ ESP.Screens.guide = (function(){
       })] : []),
 
       K.Entry({
-        label:'NEREDE DURUYOR',
+        label:'Nerede duruyor',
         meta:ayak.bytes ? Math.round(ayak.bytes / 1024) + ' KB' : '—',
         note:ESP.PRIVACY.storage,
         body:html`
@@ -271,7 +271,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'YEDEK',
+        label:'Yedek',
         meta:(function(){ const n = M.backupAgeDays(); return n == null ? 'hiç' : n + ' gün önce'; })(),
         note:'Yedek dosyası şifresizdir; paylaşılan bir dizine konmaz.',
         body:html`
@@ -292,7 +292,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'HER ŞEYİ SİL',
+        label:'Her şeyi sil',
         meta:'geri alınamaz',
         body:html`
           ${K.Button({ label:'Bu profilin verisini sil', act:'wipe-data' })}
@@ -305,7 +305,7 @@ ESP.Screens.guide = (function(){
   function limitRows(){
     return [
       K.Entry({
-        label:'PEDAGOJİK SINIR', hint:'pedagogic',
+        label:'Pedagojik sınır', hint:'pedagogic',
         meta:'değişmez',
         body:html`
           ${K.Notice({ tone:'info', body:ESP.PEDAGOGIC.disclaimer })}
@@ -313,7 +313,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'DOKTRİN',
+        label:'Doktrin',
         meta:'dört kural',
         body:K.Table({ tight:true, headers:['Kural', 'Ne demek'],
           rows:[
@@ -325,14 +325,14 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'ÖNCELİK SIRASI', hint:'precedence',
+        label:'Öncelik sırası', hint:'precedence',
         meta:ESP.PRECEDENCE.length + ' kural',
         body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Kural', 'Neden'],
           rows:ESP.PRECEDENCE.map(p => [String(p.rank), p.label, p.note]) }),
       }),
 
       K.Entry({
-        label:'YAPILMAYACAKLAR',
+        label:'Yapılmayacaklar',
         meta:'bir eksiklik değil, bir karar',
         note:'Bunlar unutulmadı; reddedildi.',
         body:K.Table({ tight:true, headers:['Yapılmaz', 'Neden'],
@@ -350,7 +350,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'KARDEŞ PROJELER',
+        label:'Kardeş projeler',
         meta:'aynı depo',
         note:'Üçü ortak bir tasarım dili paylaşır ama kodları ayrıdır: farklı ad '
            + 'alanı, farklı depo anahtarı, farklı test paketi, farklı port. '
@@ -380,7 +380,7 @@ ESP.Screens.guide = (function(){
     const o = ESP.Belge ? ESP.Belge.dayanak('okumaHizi') : null;
     const T = ESP.Hedefler.cefrTablo();
     return K.Entry({
-      label:'TAHMİN TABLOLARI', hint:'evidence',
+      label:'Tahmin tabloları', hint:'evidence',
       meta:(c ? 'CEFR kaynaklı' : 'CEFR kaynak bekliyor') + ' · ' + (o ? 'okuma hızı kaynaklı' : 'okuma hızı kaynak bekliyor'),
       note:'Dil ve okuma hedeflerinin süre hesabı bu tablolara dayanır. Kaynağa bağlanınca hesap '
          + 'yine koddadır ve karar «tahmin» kalır; değişen, dayanağın kaynaklı olmasıdır.',
@@ -455,7 +455,7 @@ ESP.Screens.guide = (function(){
       }).filter(Boolean),
 
       K.Entry({
-        label:'DENETİM',
+        label:'Denetim',
         meta:denetim.length ? denetim.length + ' sorun' : 'temiz',
         body:html`
           ${denetim.length

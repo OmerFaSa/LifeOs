@@ -69,14 +69,17 @@
       expect(bulundu).toBe(true);
     });
 
-    it('dolu düğme modülün rengindedir; siyah düğme mürekkep', () => {
+    /* v5 (Tasarım Dili sürüm 5, «Kontroller»): dolu düğme NÖTR koyudur;
+       modül rengi düğmede durmaz, işarette ve zeminde durur. */
+    it('dolu düğme nötr koyudur (modül rengi değil); siyah düğme mürekkep', () => {
       const d = yerlestir(String(C.Button({ label:'Başla', tone:'primary', act:'x' }))
         + String(C.Button({ label:'Ekle', tone:'ink', act:'y' })));
       const [a, b] = d.querySelectorAll('.btn');
       const kok = getComputedStyle(document.documentElement);
       const renk = v => { const t = document.createElement('i'); t.style.color = v; document.body.appendChild(t);
         const c = getComputedStyle(t).color; t.remove(); return c; };
-      expect(getComputedStyle(a).backgroundColor).toBe(renk(kok.getPropertyValue('--primary').trim()));
+      expect(getComputedStyle(a).backgroundColor).toBe(renk(kok.getPropertyValue('--text').trim()));
+      expect(getComputedStyle(a).backgroundColor === renk(kok.getPropertyValue('--primary').trim())).toBe(false);
       expect(b.classList.contains('btn--ink')).toBe(true);
       expect(getComputedStyle(b).backgroundColor).toBe(renk(kok.getPropertyValue('--ink').trim()));
       d.remove();

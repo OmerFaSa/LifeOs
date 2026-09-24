@@ -327,10 +327,11 @@
 /* ================================================== Bugün: üç alan (03)
    Solda ŞİMDİ ve günün akışı, sağda özet, sayaç ve tek öneri. Telefonda
    tek sütun; sıra aynı kalır (önce şimdi). */
-.bugun{ display:grid; grid-template-columns:minmax(0,1fr) 380px; gap:20px; align-items:start; }
-.bugun__sol, .bugun__sag{ display:flex; flex-direction:column; gap:20px; min-width:0; }
+/* v5: Bugün TEK SÜTUNDUR (Şimdi · Durum · Özet · Öneri alt alta); iki
+   sütunlu eski ızgara dar kapta sol sütunu sıfıra indiriyordu. */
+.bugun{ display:flex; flex-direction:column; align-items:stretch; gap:28px; }
+.bugun__sol, .bugun__sag{ display:contents; }
 .bugun__alan{ display:flex; flex-direction:column; gap:16px; min-width:0; }
-@media (max-width:1023px){ .bugun{ grid-template-columns:minmax(0,1fr); } }
 
 /* Günün akışı (01'in liste hâli): sıra, bloğun adı, durum. */
 .akis{ list-style:none; margin:0; padding:4px 0; }

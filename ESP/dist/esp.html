@@ -3929,9 +3929,9 @@ body.is-dragging .drop.is-over{
 
 /* ---------- düğme ---------- */
 .btn{
-  min-height:38px; padding:0 15px;
+  min-height:36px; padding:0 14px;
   border-radius:var(--r-sm);
-  border:1px solid var(--border);
+  border:1px solid var(--border-strong);
   background:var(--surface); color:var(--text);
   font-size:var(--fs-base); font-weight:600; letter-spacing:0;
   gap:var(--sp-2);
@@ -3940,14 +3940,15 @@ body.is-dragging .drop.is-over{
 }
 .btn:hover{ background:var(--surface-2); border-color:var(--border-strong); }
 .btn svg{ width:16px; height:16px; stroke-width:1.8; }
-.btn--primary{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); }
-.btn--primary:hover{ background:var(--primary-hover); border-color:var(--primary-hover); color:var(--primary-ink); }
+/* v5 «Bir dolu düğme, gerisi sessiz»: birincil düğme NÖTRDÜR — koyu zemin,
+   açık yazı (koyu temada tersi). Modül rengi düğmeye girmez. */
+.btn--primary{ background:var(--text); border-color:var(--text); color:var(--bg); }
+.btn--primary:hover{ background:color-mix(in oklab, var(--text) 86%, var(--bg)); border-color:color-mix(in oklab, var(--text) 86%, var(--bg)); color:var(--bg); }
 .btn--ink{ background:var(--ink); border-color:var(--ink); color:var(--ink-on); }
 .btn--ink:hover{ background:var(--ink-2); border-color:var(--ink-2); color:var(--ink-on); }
-.btn--ghost{ border-color:transparent; background:transparent; color:var(--text-2); }
+.btn--ghost{ border-color:transparent; background:transparent; color:var(--text-2); font-weight:500; }
 .btn--ghost:hover{ background:var(--surface-2); color:var(--text); }
-.btn--danger{ background:transparent; color:var(--danger);
-  border-color:color-mix(in srgb, var(--danger) 40%, var(--border)); }
+.btn--danger{ background:transparent; color:var(--danger); border-color:transparent; font-weight:500; }
 .btn--danger:hover{ background:var(--danger-soft); }
 .btn--sm{ min-height:32px; padding:0 12px; font-size:var(--fs-sm); border-radius:var(--r-sm); }
 .btn--lg{ min-height:44px; padding:0 18px; font-size:var(--fs-md); border-radius:var(--r-md); }
@@ -3962,7 +3963,7 @@ body.is-dragging .drop.is-over{
   background:var(--surface); color:var(--text); font-weight:600;
   box-shadow:0 0 0 1px var(--border);
 }
-.seg--primary button.is-on{ background:var(--primary); color:var(--primary-ink); box-shadow:none; }
+.seg--primary button.is-on{ background:var(--surface); color:var(--text); box-shadow:0 0 0 1px var(--border); }
 
 /* ---------- rozet: hap burada kalır ---------- */
 .badge{ border-radius:var(--r-pill); font-weight:600; letter-spacing:0; }
@@ -3977,7 +3978,7 @@ body.is-dragging .drop.is-over{
   border:1px solid var(--border); color:var(--text-2); font-weight:500;
 }
 .chip--tap:hover{ background:var(--surface-2); border-color:var(--border-strong); color:var(--text); }
-.chip--on{ background:var(--primary-soft); border-color:transparent; color:var(--primary); font-weight:600; }
+.chip--on{ background:var(--surface); border-color:var(--text); color:var(--text); font-weight:600; }
 
 /* ---------- ipucu kabı (ⓘ) ---------- */
 .hint{ width:15px; height:15px; border:1.3px solid var(--text-3); color:var(--text-3); font-weight:600; }
@@ -4022,6 +4023,31 @@ body.is-dragging .drop.is-over{
 .ayrinti__ac[open] summary{ color:var(--text); }
 .ayrinti__govde{ margin-top:6px; color:var(--text-2); }
 .ayrinti__govde > * + *{ margin-top:6px; }
+
+
+/* ================================================================
+   v5 · VERİ PARÇALARI (LifeOS Tasarım Dili sürüm 5, «Dokuz parça»)
+   ================================================================ */
+/* Kutu: beyaz yüzey, 1 px çizgi, 14 px köşe; başlık satırında ad + ölçü. */
+.kutu{ border:1px solid var(--border); border-radius:14px; background:var(--surface); box-shadow:none; }
+.kutu__ad{ font-size:15px; font-weight:600; }
+/* Boş durum: kesikli çerçeve, sakin cümle, kalın bağlantı eylemi. «Boş olan
+   yer kaplamaz»: çizim küçük, kutu alçak. */
+.empty{ border:1px dashed var(--border-strong); border-radius:14px; background:transparent;
+  padding:18px 20px; text-align:left; align-items:flex-start; color:var(--text-2); }
+.empty svg, .empty .empty__motif{ display:none; }
+.empty p{ margin:0 0 8px; font-size:14px; color:var(--text-2); max-width:52ch; }
+.empty .btn{ min-height:24px; padding:0; border:0; background:none; color:var(--text); font-weight:600; display:inline-flex; align-items:center; }
+.empty .btn:hover{ background:none; text-decoration:underline; }
+/* Sakin hata: yüzeyli kutu, başlık, cümle, tek bağlantı eylemi. */
+.sakinhata .kutu{ background:var(--surface); }
+/* Kart kenarı yok: gölge yok, ton + çizgi. */
+.card{ border:1px solid var(--border); border-radius:14px; }
+/* Sayfa başı: büyük cümle, küçük özet (v5 «Özet satırı»). */
+.sayfabasi__baslik{ font-size:28px; letter-spacing:-.02em; font-weight:600; line-height:1.2; }
+.sayfabasi__ozet{ font-size:14px; color:var(--text-2); }
+/* Tablo satırları: ince çizgi, tablo hizalı rakam. */
+.table td, .table th{ border-bottom:1px solid var(--border); }
 
 /* ==== css/kart.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -4869,6 +4895,140 @@ body.is-dragging .drop.is-over{
 
 .bugun-cumle{ display:block; margin-top:var(--sp-1); color:var(--text); font-weight:500; }
 .kahraman{ min-width:0; }
+
+
+/* ================================================================
+   v5 · BUGÜN (LifeOS Tasarım Dili sürüm 5, «AYS · Bugün»)
+   Şimdi · Durum · Özet · Öneri alt alta; Durum/Özet kartları yan yana.
+   ================================================================ */
+.bugun__etiket{ margin:0 0 -4px; font-size:13px; font-weight:600; color:var(--text-2); letter-spacing:0; }
+.bugun__alan[aria-label="Durum"], .bugun__alan[aria-label="Özet"]{
+  flex-direction:row; flex-wrap:wrap; gap:16px; align-items:flex-start; }
+.bugun__alan[aria-label="Durum"] > *, .bugun__alan[aria-label="Özet"] > *{ flex:1 1 300px; min-width:0; }
+.bugun__alan > .bugun__etiket, .bugun__alan[aria-label] > p{ flex-basis:100%; margin:0; }
+.sayfabasi__ust{ margin:0 0 6px; font-size:13px; color:var(--text-2); }
+.site--v5 .sayfabasi__baslik{ font-size:28px; }
+
+/* Sıradaki blok kahramanı: modül zemini, simgesiz, büyük başlık. */
+.site--v5 .nextup, .kahraman .nextup{ background:var(--mod-t, var(--primary-soft)); border:0; border-radius:14px; padding:24px;
+  box-shadow:none; gap:20px; align-items:center; }
+.site--v5 .nextup__icon, .kahraman .nextup__icon{ display:none; }
+.site--v5 .nextup__label, .kahraman .nextup__label{ font-size:13px; font-weight:500; color:var(--text-2); text-transform:none; letter-spacing:0; }
+.site--v5 .nextup__label::before, .kahraman .nextup__label::before{ content:''; display:inline-block; width:8px; height:8px; margin-right:8px;
+  border-radius:2px; background:var(--primary); vertical-align:1px; }
+.kahraman .nextup__title{ font-size:26px; font-weight:700; letter-spacing:-.02em; line-height:1.2; margin-top:4px; }
+.site--v5 .nextup__why, .kahraman .nextup__why{ font-size:13px; color:var(--text-2); margin-top:4px; }
+@media (max-width:679px){ .kahraman .nextup{ padding:18px; } .kahraman .nextup__title{ font-size:22px; }
+  .site--v5 .sayfabasi__baslik{ font-size:22px; line-height:1.25; } .site--v5 .bugun{ gap:20px; } }
+
+/* v5 · DEFTER SATIRI: künye sütunu kalkar, künye içeriğin üstünde tek
+   satırdır (tasarım dili: alan etiketi + kutu). Üç modülün her ekranı. */
+.site--v5 .lrow{ grid-template-columns:minmax(0,1fr); gap:12px; padding-block:24px; }
+.site--v5 .ledger > .lrow:first-child{ padding-top:4px; }
+.site--v5 .lrow__side{ position:static; display:flex; align-items:baseline; gap:6px 12px; flex-wrap:wrap; }
+.site--v5 .lrow__label{ font-size:12px; letter-spacing:.06em; color:var(--text-2); }
+.site--v5 .lrow__meta{ margin-top:0; font-size:13px; }
+.site--v5 .lrow__note{ flex-basis:100%; margin:0; max-width:70ch; font-size:13px; }
+.site--v5 .lrow__act{ margin:0 0 0 auto; flex-direction:row; flex-wrap:wrap; }
+.site--v5 .lrow__act .btn{ width:auto; }
+.site--v5 .lrow.kahraman{ border-top:0; }
+
+/* v5 · ÖNERİ ALANI: Merkez'in sesi mor çerçevede durur (teklif, karar değil). */
+.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{
+  border:1px solid color-mix(in srgb, var(--mer) 40%, var(--border)); border-radius:14px;
+  padding:18px 20px; background:var(--surface); }
+.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + * .lrow{ padding-block:0; border:0; }
+
+/* v5 · SAYFA RİTMİ: başlık ile içerik arası 24 px (tasarım: 40 üst, 24 ara). */
+.site--v5 .sayfabasi{ padding-top:0; padding-bottom:24px; align-items:flex-end; }
+.site--v5 .content{ padding-block:0 56px; }
+.site--v5 .sayfabasi__baslik{ font-weight:700; letter-spacing:-.02em; }
+
+/* v5 · ETİKETLER: büyük harf ve harf aralığı kalkar; etiket 12-13 px,
+   ikinci metin rengi (tasarım dili «Yazı» panosu: etiket cümle düzeninde). */
+.site--v5 :is(.appear__label, .argcol__h, .asrow__kind, .ayar-ara__modul, .block__slot, .board__label,
+  .chain__kind, .chain__label, .cmdk__group, .desknote__label, .flashcard__side, .focusmode__slot,
+  .gauge__label, .haberci__ust, .hero__eyebrow, .herostat__label, .kmenu__bas, .lrow__label,
+  .masthead__wd, .mono-label, .nextup__label, .perde__ustyazi, .printdoc__h, .prop__kind, .qmsg__who,
+  .quizcard__src, .rail__label, .room3d__board-label, .rutbe-kart__ust, .rutbe-kunye__ust, .rx__kind,
+  .setup__kicker, .seviye-isler__tablo th, .seviye-rozet__ad, .sidestat__k, .sitefoot__k, .srsrow__day,
+  .stat__label, .symgrp__h, .topicgroup__head, .yenilik__baslik, th){
+  text-transform:none; letter-spacing:0; }
+.site--v5 :is(.lrow__label, .stat__label, .herostat__label, .sidestat__k, .rail__label, .board__label,
+  .topicgroup__head, .symgrp__h, .argcol__h, .gauge__label){ font-size:13px; font-weight:600; color:var(--text-2); }
+.site--v5 th{ font-size:12px; font-weight:500; color:var(--text-3); }
+
+.site--v5 .nextup{ padding:18px 20px; }
+.site--v5 .nextup__title{ font-size:18px; font-weight:700; letter-spacing:-.01em; }
+.site--v5 .kahraman .nextup{ padding:24px; }
+.site--v5 .kahraman .nextup__title{ font-size:26px; }
+
+/* v5 · SAYFA İÇİ BÖLÜM ÇUBUĞU: sayfa zemini beyazdır; üst şerit 52 px. */
+.site--v5{ --ust-h:52px; }
+.site--v5 .bolumcubugu--sayfa{ background:var(--surface); }
+.site--v5 .bolumcubugu__ad{ height:40px; font-size:14px; }
+.site--v5 .bolumcubugu__ad.is-on::after{ background:var(--text); }
+.site--v5 .sayfabolum__ad{ font-size:18px; font-weight:700; }
+
+@media (max-width:679px){
+  .site--v5 .kahraman .nextup{ padding:18px; }
+  .site--v5 .kahraman .nextup__title{ font-size:20px; }
+  .site--v5 .nextup__title{ font-size:16px; }
+}
+
+/* Kahraman dar kapta SARAR: düğmeler satıra sığmazsa metnin altına iner
+   (390 px'lik kapta gövde sıfır genişliğe sıkışıyordu — k2bugun oz-042). */
+.site--v5 .nextup, .kahraman .nextup{ flex-wrap:wrap; }
+.site--v5 .nextup__body, .kahraman .nextup__body{ flex:1 1 240px; min-width:0; }
+
+/* ================================================================
+   v5 · RAF DÜZENİ. Defter satırları alt alta uzamaz: her satır bir
+   kutudur ve kutular yan yana RAF olur. Künye kutunun başlığıdır; geniş
+   içerik (tablo, grafik, uzun form, geniş satır) rafın bütün enini alır.
+   Hiçbir satır gizlenmez; yalnız yerleşim değişir.
+   ================================================================ */
+.site--v5 .ledger{ display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap:16px; align-items:start; grid-auto-flow:row dense; }
+.site--v5 .ledger > .lrow, .site--v5 .ledger > .ledger__item{ min-width:0; margin:0; padding:16px 18px;
+  border:1px solid var(--border); border-radius:14px; background:var(--surface); }
+.site--v5 .ledger > .lrow:first-child{ padding-top:16px; }
+.site--v5 .ledger > .lrow:last-child{ padding-bottom:16px; }
+.site--v5 .ledger > .lrow--wide,
+.site--v5 .ledger > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ogrid, .grid, .ledger){
+  grid-column:1 / -1; }
+.site--v5 .ledger > .lrow.kahraman{ grid-column:1 / -1; padding:0; border:0; background:none; }
+.site--v5 .ledger > .lrow .lrow__main > * + *{ margin-top:12px; }
+/* İç içe defter: kutunun içindeki ikinci defter kutu çizmez, satırdır. */
+.site--v5 .ledger .ledger{ display:flex; flex-direction:column; gap:0; }
+.site--v5 .ledger .ledger > .lrow{ border:0; border-top:1px solid var(--border); border-radius:0; padding:12px 0;
+  background:none; }
+.site--v5 .ledger .ledger > .lrow:first-child{ border-top:0; padding-top:0; }
+/* Sayfa bölümleri de rafın katıdır: aralarında 32 px, başlık 16 px. */
+.site--v5 .sayfabolum + .sayfabolum{ margin-top:32px; }
+.site--v5 .sayfabolum__ad{ font-size:16px; margin-bottom:12px; }
+
+/* Kat düzeni: çubuklu sayfada yalnız seçili bölüm görünür (019). */
+.sayfabolumler--kat > .sayfabolum:not(.is-on){ display:none; }
+.sayfabolumler--kat > .sayfabolum + .sayfabolum{ margin-top:0; }
+.bolumcubugu--sayfa .bolumcubugu__ad.is-on{ color:var(--text); font-weight:600; }
+.bolumcubugu--sayfa .bolumcubugu__ad.is-on::after{ content:''; position:absolute; left:10px; right:10px; bottom:-1px;
+  height:2px; border-radius:1px; background:var(--text); }
+
+/* Raf: AYS'de Grid/Span/Stack = defter/bant/yığın. Bant ve yığın rafta
+   çizilmez (display:contents); içlerindeki her satır rafın bir kutusudur. */
+.site--v5 .ledger > .lband, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs){ display:contents; }
+.site--v5 .ledger > .lrow, .site--v5 .ledger > .lband > .lrow, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow{ min-width:0; margin:0; padding:16px 18px; border:1px solid var(--border); border-radius:14px;
+  background:var(--surface); }
+.site--v5 .ledger > .lrow.lrow--wide, .site--v5 .ledger > .lband > .lrow.lrow--wide, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow.lrow--wide,
+.site--v5 .ledger > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger), .site--v5 .ledger > .lband > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger), .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger){ grid-column:1 / -1; }
+.site--v5 .ledger > .lband > :not(.lrow):not(.stack):not(.stack-sm):not(.stack-xs),
+.site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > :not(.lrow){ grid-column:1 / -1; min-width:0; }
+/* Kutu sonsuza uzamaz: uzun tablo ya da liste kutunun İÇİNDE kayar,
+   tablo başlığı yapışır. Satırların hepsi yerinde; yalnız sayfa kısalır. */
+.site--v5 .ledger .lrow:not(.kahraman) > .lrow__main{ max-height:560px; overflow:auto; overscroll-behavior:contain;
+  scrollbar-width:thin; }
+.site--v5 .ledger .ledger .lrow > .lrow__main{ max-height:none; overflow:visible; }
+.site--v5 .ledger .lrow__main thead th{ position:sticky; top:0; background:var(--surface); z-index:1; }
 
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -8046,10 +8206,11 @@ button.rutbe-rozet:focus-visible{
 /* ================================================== Bugün: üç alan (03)
    Solda ŞİMDİ ve günün akışı, sağda özet, sayaç ve tek öneri. Telefonda
    tek sütun; sıra aynı kalır (önce şimdi). */
-.bugun{ display:grid; grid-template-columns:minmax(0,1fr) 380px; gap:20px; align-items:start; }
-.bugun__sol, .bugun__sag{ display:flex; flex-direction:column; gap:20px; min-width:0; }
+/* v5: Bugün TEK SÜTUNDUR (Şimdi · Durum · Özet · Öneri alt alta); iki
+   sütunlu eski ızgara dar kapta sol sütunu sıfıra indiriyordu. */
+.bugun{ display:flex; flex-direction:column; align-items:stretch; gap:28px; }
+.bugun__sol, .bugun__sag{ display:contents; }
 .bugun__alan{ display:flex; flex-direction:column; gap:16px; min-width:0; }
-@media (max-width:1023px){ .bugun{ grid-template-columns:minmax(0,1fr); } }
 
 /* Günün akışı (01'in liste hâli): sıra, bloğun adı, durum. */
 .akis{ list-style:none; margin:0; padding:4px 0; }
@@ -9820,7 +9981,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'5e5fa1b', at:'2026-09-24 22:26', dirty:true };
+ESP.BUILD = { id:'1978c32', at:'2026-09-24 22:59', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -12806,6 +12967,7 @@ window.LIFEOS = window.LIFEOS || {};
     return '<div class="sayfabasi">'
       + '<div class="sayfabasi__metin">'
       + (yol.length > 1 ? '<p class="sayfabasi__yol">' + yol.map(kac).join('<span aria-hidden="true"> › </span>') + '</p>' : '')
+      + (o.ust ? '<p class="sayfabasi__ust">' + o.ust + '</p>' : '')
       + '<h1 class="sayfabasi__baslik hero__title">' + (o.baslikHtml || kac(o.baslik || '')) + '</h1>'
       + (o.ozet ? '<p class="sayfabasi__ozet">' + o.ozet + '</p>' : '')
       + '</div>'
@@ -38127,15 +38289,22 @@ ESP.C = (function(){
      ekranın bir kısmını SAKLARDI; burada hiçbir şey saklanmaz (§1.2:
      ekran içi sekme 0). Eski sekme eylemi (`act`) düğmede kalır ve ekranın
      işleyicisi `bolumeGit(id)` çağırır: aynı eylem, yeni davranış. */
+  /* v5 RAF DÜZENİ (Tasarım Dili sürüm 5, «Ayarlar › Merkez»): sayfa
+     aşağı doğru uzamaz; bölüm çubuğu bir KAT seçer ve o kat görünür.
+     Bütün bölümler DOM'da kalır (arama, derin bağlantı, bolumeGit); seçim
+     yeniden çizimde korunur (AKTIF_BOLUM, çubuğun eylemine göre). */
+  const AKTIF_BOLUM = {};
   function SayfaBolumleri(o){
     const b = (o.bolumler || []).filter(x => x && x.govde != null && String(x.govde) !== '');
+    const secili = AKTIF_BOLUM[o.act || ''];
+    const aktif = b.some(x => x.id === secili) ? secili : (b[0] && b[0].id);
     return html`
       ${when(b.length > 1, () => html`<nav class="bolumcubugu bolumcubugu--sayfa" data-oz="019"
-        aria-label="${o.aria || 'Bu sayfada'}">${map(b, x => html`<button class="bolumcubugu__ad"
-          ${attrs({ 'data-act':o.act, 'data-tab':x.id })}>${x.ad}${when(x.sayi != null,
+        aria-label="${o.aria || 'Bu sayfada'}">${map(b, x => html`<button class="${cls('bolumcubugu__ad', x.id === aktif && 'is-on')}"
+          ${attrs({ 'data-act':o.act, 'data-tab':x.id, 'aria-current':x.id === aktif ? 'true' : null })}>${x.ad}${when(x.sayi != null,
           () => html`<span class="bolumcubugu__rozet is-sessiz">${x.sayi}</span>`)}</button>`)}</nav>`)}
-      <div class="sayfabolumler">${map(b, x => html`
-        <section class="sayfabolum" id="${'bl-' + x.id}" aria-labelledby="${'bl-' + x.id + '-ad'}">
+      <div class="${cls('sayfabolumler', b.length > 1 && 'sayfabolumler--kat')}">${map(b, x => html`
+        <section class="${cls('sayfabolum', x.id === aktif && 'is-on')}" id="${'bl-' + x.id}" aria-labelledby="${'bl-' + x.id + '-ad'}">
           <h2 class="sayfabolum__ad" id="${'bl-' + x.id + '-ad'}" tabindex="-1">${x.ad}</h2>
           ${x.govde}
         </section>`)}</div>`;
@@ -38198,6 +38367,20 @@ ESP.C = (function(){
   function bolumeGit(id){
     const el = document.getElementById('bl-' + id);
     if(!el) return false;
+    /* Katı aç: kardeş bölümler gizlenir, çubukta seçim işaretlenir. */
+    const kap = el.parentElement;
+    if(kap && kap.classList.contains('sayfabolumler')){
+      Array.prototype.forEach.call(kap.children, s => s.classList.toggle('is-on', s === el));
+      const nav = kap.previousElementSibling;
+      if(nav && nav.classList.contains('bolumcubugu--sayfa')){
+        Array.prototype.forEach.call(nav.querySelectorAll('button[data-tab]'), btn => {
+          const on = btn.getAttribute('data-tab') === id;
+          btn.classList.toggle('is-on', on);
+          if(on){ btn.setAttribute('aria-current', 'true'); AKTIF_BOLUM[btn.getAttribute('data-act') || ''] = id; }
+          else btn.removeAttribute('aria-current');
+        });
+      }
+    }
     let az = true;
     try{ az = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
     el.scrollIntoView({ block:'start', behavior:az ? 'auto' : 'smooth' });
@@ -42501,7 +42684,8 @@ ESP.Screens.today = (function(){
   function nextCard(){
     const n = ESP.Planner.nextAction();
     return K.Entry({
-      label:'SIRADAKİ İŞ', hint:'next-action',
+      class:'kahraman',
+      label:'Sıradaki iş', hint:'next-action',
       meta:n.rank ? 'Öncelik ' + n.rank : 'Bekleyen yok',
       note:n.why,
       body:K.NextUp({
@@ -42539,7 +42723,7 @@ ESP.Screens.today = (function(){
     if(!sig.seenAt) ESP.Signals.markSeen(sig.id);
 
     return K.Entry({
-      label:'BİR SORU', hint:'signal',
+      label:'Bir soru', hint:'signal',
       meta:sig.kind === 'friction' ? 'sürtünme' : 'gösterge',
       note:sig.title,
       body:html`
@@ -42569,7 +42753,7 @@ ESP.Screens.today = (function(){
     const disc = ESP.DISCIPLINE_BY_ID[d];
 
     return K.Entry({
-      label:'OTURUM EKLE', hint:'practice-log',
+      label:'Oturum ekle', hint:'practice-log',
       meta:U.fmtDate(gun()),
       note:'Süre ölçümdür: saatine bakıp yazdığın dakika da «ölçüldü» sayılır. '
          + 'Boş bıraktığın alan sıfır değil, «veri yok» olur.',
@@ -42631,7 +42815,7 @@ ESP.Screens.today = (function(){
   /* Serbest metin girisi — palet disinda da kullanilabilsin diye burada da var. */
   function quickForm(){
     return K.Entry({
-      label:'KONUŞARAK GİR',
+      label:'Konuşarak gir',
       meta:'tek satır',
       note:'«45 dakika gitar çalıştım ve 20 dakika kelime tekrarı yaptım» gibi '
          + 'yazabilirsin. Anlaşılmayan satır atılmaz, sana geri gösterilir.',
@@ -42672,14 +42856,14 @@ ESP.Screens.today = (function(){
     const rows = M.sessionsOf(gun());
     if(!rows.length){
       return K.Entry({
-        label:'BUGÜN', meta:'kayıt yok',
+        label:'Bugün', meta:'kayıt yok',
         body:K.Empty({ text:'Bu güne henüz oturum girilmedi. '
           + 'Girilmemiş gün sıfır sayılmaz — hiçbir ortalamaya katılmaz.' }),
       });
     }
     const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
     return K.Entry({
-      label:'BUGÜNÜN OTURUMLARI',
+      label:'Bugünün oturumları',
       meta:rows.length + ' oturum · ' + U.fmtMin(toplam),
       /* GÜNÜN ODAK ROZETİ — eylemlerin yanında, günün raporunda.
          Başarımlar sekmesindeki odak rozeti ömürlük rekordur; bu ise
@@ -42832,7 +43016,7 @@ ESP.Screens.today = (function(){
     if(!ESP.Hedefler) return null;
     const l = ESP.Hedefler.aktifler();
     return K.Entry({
-      label:'HEDEFLERİM', meta:l.length ? l.length + ' etkin' : 'yok',
+      label:'Hedeflerim', meta:l.length ? l.length + ' etkin' : 'yok',
       action:K.Button({ label:'Danışma’da hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
       body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
         : K.Ayrinti({ etiket:'Örnekler', ozet:'Henüz hedefin yok. Danışma’da tek cümleyle yazabilirsin.',
@@ -42854,7 +43038,7 @@ ESP.Screens.today = (function(){
     return [
       hedefRow(),
       K.Entry({
-        label:'GÜNÜN TOPLAMI',
+        label:'Günün toplamı',
         meta:rows.length ? U.fmtMin(toplam) : 'veri yok',
         note:'Taban ' + U.fmtMin(taban) + '. Taban bir hedef değil bir ölçüttür: '
            + 'altında kalmak başarısızlık değil, rotayı daraltan bir olgudur.',
@@ -42866,7 +43050,7 @@ ESP.Screens.today = (function(){
       }),
 
       K.Entry({
-        label:'ASGARİ GÜN', hint:'minimum-day',
+        label:'Asgari gün', hint:'minimum-day',
         meta:'kötü günün alt sınırı',
         note:ESP.MINIMUM_DAY.note,
         body:html`<ul class="setup__list">
@@ -42877,7 +43061,7 @@ ESP.Screens.today = (function(){
       }),
 
       K.Entry({
-        label:'ENTELEKTÜEL HACİM', hint:'ehs',
+        label:'Entelektüel hacim', hint:'ehs',
         meta:ehs.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(ehs.value * 10) / 10),
         note:ehs.cert === 'missing'
@@ -42896,7 +43080,7 @@ ESP.Screens.today = (function(){
       }),
 
       K.Entry({
-        label:'HAFTANIN DAĞILIMI',
+        label:'Haftanın dağılımı',
         meta:denge.cert === 'missing' ? 'veri yok' : U.fmtMin(denge.totalMinutes),
         note:denge.skewed
           ? 'Pratik ' + denge.top.label + ' tarafına yığılmış ve '
@@ -42920,7 +43104,7 @@ ESP.Screens.today = (function(){
     if(!ESP.Dunku || gun() !== U.todayISO()) return null;
     const a = ESP.Dunku.adaylar(U.todayISO());
     if(!a.oturumlar.length) return null;
-    return K.Entry({ label:'DÜNKÜNÜN AYNISI', meta:U.fmtShort(a.dun), wide:true,
+    return K.Entry({ label:'Dünkünün aynısı', meta:U.fmtShort(a.dun), wide:true,
       note:'Aynısını yaptıysan tek dokunuşla bugüne ekle; kalite puanı kopyalanmaz.',
       body:html`${map(a.oturumlar, o => html`<div class="row between wrap gap-6 mt-4">
         <span class="small"><b>${o.ad}</b> <span class="tiny dim">${o.dk} dk${o.sayim ? ' · ' + o.sayim : ''}</span></span>
@@ -42930,7 +43114,7 @@ ESP.Screens.today = (function(){
   /* Seri satiri Giris sekmesinde: «Bugün hastayım» ve «Tatil modu» aranmaz. */
   function seriRow(){
     if(!ESP.Seri) return null;
-    return K.Entry({ label:'SERİ', hint:'streak', meta:M.streak() + ' gün', wide:true,
+    return K.Entry({ label:'Seri', hint:'streak', meta:M.streak() + ' gün', wide:true,
       body:seriKontrol() });
   }
 
@@ -42980,7 +43164,7 @@ ESP.Screens.today = (function(){
     const dolu = gunler.filter(d => M.dayHasEntry(S.days[d]));
     return [
       K.Entry({
-        label:'SON 14 GÜN', hint:'streak',
+        label:'Son 14 gün', hint:'streak',
         meta:dolu.length + ' günde kayıt · seri ' + M.streak() + ' gün',
         note:'Boş gün «0 dakika» değil «veri yok» sayılır. İkisi ayrı renkte durur.',
         wide:true,
@@ -42999,7 +43183,7 @@ ESP.Screens.today = (function(){
         </div>`,
       }),
       K.Entry({
-        label:'SEÇİLİ GÜN',
+        label:'Seçili gün',
         meta:U.fmtDate(gun()),
         action:gun() !== U.todayISO()
           ? K.Button({ label:'Bugüne dön', size:'sm', act:'today-back' }) : '',
@@ -43070,7 +43254,7 @@ ESP.Screens.today = (function(){
     const asgari = ESP.Coach.minimumDay(gun());
 
     return K.Entry({
-      label:'GÜNÜN REÇETESİ', hint:'coach',
+      label:'Günün reçetesi', hint:'coach',
       meta:U.fmtMin(p.minutes),
       note:'Reçeteyi koç yazar, sırayı planlayıcı verir.',
       action:K.Button({ label:'Merdiven', size:'sm', act:'go',
@@ -43108,7 +43292,7 @@ ESP.Screens.today = (function(){
     const g = ESP.Plans.today(gun());
     if(!g) return '';
     return K.Entry({
-      label:'PLANDA BUGÜN', hint:'weekplan',
+      label:'Planda bugün', hint:'weekplan',
       meta:g.label,
       note:'Haftalık plandan geliyor. Plan bir takvim değil bir sıradır; '
          + 'saatini sen seçersin.',
@@ -43131,7 +43315,7 @@ ESP.Screens.today = (function(){
       .filter(r => ESP.Mod.isOn(r.disc));
     if(!bugun.length) return '';
     return K.Entry({
-      label:'HATIRLATMA', hint:'reminder',
+      label:'Hatırlatma', hint:'reminder',
       meta:bugun.length + ' satır',
       note:'Kendine söylediğin şeyler. Sistem hiçbirini zorunlu kılmaz; '
          + 'kaçırılan bir hatırlatıcı borç yazmaz.',
@@ -43224,7 +43408,7 @@ ESP.Screens.today = (function(){
   function yedekRow(){
     if(!M.backupDue()) return '';
     const yas = M.backupAgeDays();
-    return K.Entry({ label:'YEDEK', hint:'backup', wide:true,
+    return K.Entry({ label:'Yedek', hint:'backup', wide:true,
       meta:yas === null ? 'hiç alınmadı' : yas + ' gün önce',
       body:html`
         ${K.Notice({ tone:'info', body:(yas === null
@@ -43266,18 +43450,18 @@ ESP.Screens.today = (function(){
     const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
     return html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
-        <section class="bugun__alan" aria-label="Şimdi">
+        <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${K.Ledger(() => [nextCard(), quickForm(), signalRow()].filter(Boolean))}
         </section>
-        <section class="bugun__alan" aria-label="Durum">
+        <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
           ${K.Ledger(() => [sessionList(), planRowToday()].filter(Boolean))}
           <p class="small">${K.Button({ label:'Oturum gir ve bütün satırlar', size:'sm', tone:'ghost',
             act:'go', data:{ 'data-route':'gun' } })}</p>
         </section>
       </div>
       <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Özet">${OzetKutusu()}</section>
-        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri">${oneri}</section>`)}
+        <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>${OzetKutusu()}</section>
+        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
       </div>
     </div>`;
   }
@@ -43309,7 +43493,7 @@ ESP.Screens.today = (function(){
   function oneriRow(){
     const O = ESP.Screens.onaylar;
     if(!O || !O.bekleyen()) return '';
-    return K.Entry({ label:'ÖNERİ', wide:true, body:O.oneriAlani() });
+    return K.Entry({ label:'Öneri', wide:true, body:O.oneriAlani() });
   }
 
   /* Öneri kartının düğmeleri Onaylar'ın işleyicilerine gider: onay TEK
@@ -43539,19 +43723,23 @@ ESP.Screens.today = (function(){
   return {
     id:'today',
     title:'Bugün',
+    /* v5: üst satır tarih ve seri; büyük başlık günün cümlesi. Sıradaki
+       işin adı kahraman kartında durur, başlıkta tekrar edilmez. */
+    ust(){
+      const s = M.streak();
+      return U.esc(U.fmtDate(gun()) + (s ? ' · ' + s + ' günlük seri' : ''));
+    },
     headline(){
+      const rows = M.sessionsOf(gun());
       const n = ESP.Planner.nextAction();
-      return n.rank ? n.title : 'Bugün için bekleyen bir iş yok.';
+      if(!rows.length) return n.rank ? 'Bugün henüz oturum yok; sıradaki iş hazır.' : 'Bugün için bekleyen bir iş yok.';
+      const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
+      return rows.length + ' oturum, toplam ' + U.fmtMin(toplam) + '.'
+        + (n.rank ? ' Sıradaki iş hazır.' : ' Bekleyen iş kalmadı.');
     },
     lede(){
-      const rows = M.sessionsOf(gun());
-      if(!rows.length){
-        return 'Bu güne henüz oturum girilmedi. Girilmemiş gün sıfır sayılmaz; '
-             + 'hiçbir ortalamaya katılmaz.';
-      }
-      const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
-      return rows.length + ' oturum, toplam ' + U.fmtMin(toplam) + '. '
-           + 'Karşılığı Özet sekmesinde.';
+      return M.sessionsOf(gun()).length ? ''
+        : 'Girilmemiş gün sıfır sayılmaz; hiçbir ortalamaya katılmaz.';
     },
     stats(){
       const rows = M.sessionsOf(gun());
@@ -43565,7 +43753,7 @@ ESP.Screens.today = (function(){
         { value:ehs.cert === 'missing' ? '—' : U.fmtNum(Math.round(ehs.value)), label:'hacim' },
       ];
     },
-    subtitle(){ return U.fmtDate(gun()); },
+    subtitle(){ return ''; },
     actions(){ return ''; },
     render, handle, change,
     /* Bugün › Ayrıntı: aynı işleyiciler, ayrı bir çizim. */
@@ -43640,7 +43828,7 @@ ESP.Screens.lang = (function(){
     if(!q){
       if(!d.total){
         return [K.Entry({
-          label:'ÇALIŞMA', meta:'deste boş',
+          label:'Çalışma', meta:'deste boş',
           body:K.Empty({ text:'Bu dilde hiç kart yok. Ekle sekmesinden bir liste '
             + 'yapıştırabilir ya da tek tek yazabilirsin.',
             action:K.Button({ label:'Kart ekle', tone:'primary', act:'tab-ekle' }) }),
@@ -43648,7 +43836,7 @@ ESP.Screens.lang = (function(){
       }
       if(!d.due){
         return [K.Entry({
-          label:'ÇALIŞMA', hint:'srs',
+          label:'Çalışma', hint:'srs',
           meta:'vadesi gelen kart yok',
           note:'Aralıklı tekrarın amacı her gün çalışmak değil, doğru günde '
              + 'çalışmaktır. Bugün sırası gelen kart yok.',
@@ -43658,7 +43846,7 @@ ESP.Screens.lang = (function(){
         })];
       }
       return [K.Entry({
-        label:'ÇALIŞMA', hint:'srs',
+        label:'Çalışma', hint:'srs',
         meta:d.due + ' kart vadeli' + (d.overdue ? ' · ' + d.overdue + ' gecikmiş' : ''),
         note:d.overdue
           ? 'En çok geciken kart ' + d.maxOverdueDays + ' gündür bekliyor.'
@@ -43678,7 +43866,7 @@ ESP.Screens.lang = (function(){
 
     const gecikme = ESP.SRS.overdueDays(kart);
     return [K.Entry({
-      label:'KART ' + (q.pos + 1) + '/' + q.ids.length,
+      label:'Kart ' + (q.pos + 1) + '/' + q.ids.length,
       meta:(ESP.LANG_BY_ID[kart.lang] || {}).label || kart.lang,
       note:gecikme ? gecikme + ' gündür bekliyor.' : 'Bugün vadeli.',
       action:K.Button({ label:'Oturumu bitir', size:'sm', act:'end-review', data:{ 'data-h-odak-cik':'1' } }),
@@ -43714,7 +43902,7 @@ ESP.Screens.lang = (function(){
 
   function finishRow(q){
     return K.Entry({
-      label:'OTURUM BİTTİ',
+      label:'Oturum bitti',
       meta:q.ids.length + ' kart',
       note:'Cevapladığın her kart yeni vadesine taşındı.',
       body:html`
@@ -43737,7 +43925,7 @@ ESP.Screens.lang = (function(){
       .sort((a, b) => (a.due || '').localeCompare(b.due || ''));
 
     return [K.Entry({
-      label:'DESTE',
+      label:'Deste',
       meta:hepsi.length + ' kart',
       note:'Vadesi yakın olan üstte. «Aktif» işareti kartın üretimde '
          + 'kullanıldığını söyler; tanımak ile kullanmak ayrı şeylerdir.',
@@ -43765,7 +43953,7 @@ ESP.Screens.lang = (function(){
     const res = S.ui.vocabParsed;
     return [
       K.Entry({
-        label:'LİSTE YAPIŞTIR',
+        label:'Liste yapıştır',
         meta:'kelime – karşılık',
         note:'Üç ayraç tanınır: tire, eşittir, iki nokta. Tanınmayan satır '
            + 'atılmaz — sana geri gösterilir ve elle bağlarsın.',
@@ -43782,7 +43970,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'TEK KART',
+        label:'Tek kart',
         meta:'elle',
         body:html`
           <div class="cols-3">
@@ -43795,7 +43983,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'TOHUM DESTE',
+        label:'Tohum deste',
         meta:'başlangıç için',
         note:'Bu kartlar senin ölçümün değildir; ilk ekranı boş bırakmamak için '
            + 'vardır ve istediğin zaman silinir.',
@@ -43837,7 +44025,7 @@ ESP.Screens.lang = (function(){
 
     return [
       K.Entry({
-        label:'RETANSİYON', hint:'retention',
+        label:'Retansiyon', hint:'retention',
         meta:d.retention.cert === 'missing' ? 'veri yok'
           : '%' + Math.round(d.retention.value * 100),
         note:d.retention.cert === 'missing'
@@ -43855,7 +44043,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'KUTU DAĞILIMI', hint:'srs',
+        label:'Kutu dağılımı', hint:'srs',
         meta:d.total + ' kart',
         note:'Kutu kaba sınıftır: bir kart doğru cevaplandıkça yukarı çıkar, '
            + 'unutulduğunda başa döner.',
@@ -43868,7 +44056,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'BANT', hint:'pedagogic',
+        label:'Bant', hint:'pedagogic',
         meta:bant.band ? bant.band.label : 'ölçülemedi',
         note:'Bant KİŞİYE değil ÜRETİME verilir ve iki ölçüm birden gerekir: '
            + 'aktif kelime sayısı ve retansiyon.',
@@ -43886,7 +44074,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'SHADOWING',
+        label:'Shadowing',
         meta:'kaynak türleri',
         note:'Süre ölçülür, kalite ölçülmez: sistem sesini dinlemez. '
            + 'Kendi işaretlediğin zorluk «tahmin» etiketiyle durur.',
@@ -43918,7 +44106,7 @@ ESP.Screens.lang = (function(){
 
     const rows = [
       K.Entry({
-        label:'İKİ EKSEN', hint:'grammar',
+        label:'İki eksen', hint:'grammar',
         meta:bant.band ? bant.band.label : 'bant yok',
         note:'Soldaki eksen kelime (ölçülür), sağdaki işlev (beyan edilir). '
            + 'İkisi ayrı durur çünkü biri ölçüm, öteki beyandır.',
@@ -43949,7 +44137,7 @@ ESP.Screens.lang = (function(){
     });
 
     rows.push(K.Entry({
-      label:'HATA GÜNLÜĞÜ', hint:'error-log',
+      label:'Hata günlüğü', hint:'error-log',
       meta:hataKartlari.length + ' kart',
       note:'Bir hatayı adlandırmak onu bir daha görmenin tek yolu: '
          + '«bir şeyler yanlıştı» tekrar eder, «edat eşleşmesi» tekrar etmez.',
@@ -43986,7 +44174,7 @@ ESP.Screens.lang = (function(){
 
     return [
       K.Entry({
-        label:'PRATİK', hint:'practice',
+        label:'Pratik', hint:'practice',
         meta:S.ui.practice && S.ui.practice.deck === dil ? 'oturum açık'
           : ESP.PRACTICE_LENGTH + ' soru',
         note:'Cevabın doğrudan aralıklı tekrara yazılır: pratik ayrı bir kayıt '
@@ -43996,7 +44184,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'KONULAR', hint:'topic',
+        label:'Konular', hint:'topic',
         meta:ESP.Lesson.topicSummary('lang').topics + ' konu · '
           + ESP.Lesson.topicSummary('lang').items + ' madde',
         note:'CEFR düzeylerine bağlı konu haritası. İşaretler beyandır: '
@@ -44006,7 +44194,7 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'ÜNİTELER', hint:'unit',
+        label:'Üniteler', hint:'unit',
         meta:ESP.Lesson.units('lang', dil).length + ' ünite',
         note:'İlerleme SRS\'ten okunur: bir kartı «bilinen» yapan şey bir kez '
            + 'doğru bilmek değil, aralığının uzamasıdır.',
@@ -44022,7 +44210,7 @@ ESP.Screens.lang = (function(){
       /* BAM'dan ünite (Part 8d): istek King'in onay kapısından geçer; ünite
          Bugün'e teklif olarak gelir ve ESP kendi koduyla sınamadan eklenmez. */
       K.Entry({
-        label:'ÜNİTE İSTE', hint:'unit',
+        label:'Ünite iste', hint:'unit',
         meta:(l.label || dil) + ' · HKM',
         note:'Başlık, ölçülebilir hedef, görev ve öğeler. Soru yazdırılmaz: pratik '
            + 'sorularını ESP kendi destenden kurar. Kaynaksızdır; yanlış kartı silersin.',
@@ -44276,7 +44464,7 @@ ESP.Screens.symposium = (function(){
 
     return [
       K.Entry({
-        label:'DÜŞÜNCE DENEYLERİ', hint:'experiment',
+        label:'Düşünce deneyleri', hint:'experiment',
         meta:list.length + ' deney',
         note:'Deney bir tezi sınar. Tezini sarsmayan bir deney seçmek, '
            + 'sınamadan geçmiş saymaktır.',
@@ -44300,7 +44488,7 @@ ESP.Screens.symposium = (function(){
       }),
 
       K.Entry({
-        label:'ARGÜMAN ALIŞTIRMALARI', hint:'argument-drill',
+        label:'Argüman alıştırmaları', hint:'argument-drill',
         meta:ESP.ARGUMENT_DRILLS.length + ' alıştırma',
         note:'Safsata denetimi metinde desen arar; bunlar egzersizdir.',
         wide:true,
@@ -44395,7 +44583,7 @@ ESP.Screens.symposium = (function(){
   function openRows(){
     const rows = ESP.Intellect.openArguments();
     if(!rows.length){
-      return [K.Entry({ label:'AÇIK TEZ', meta:'yok',
+      return [K.Entry({ label:'Açık tez', meta:'yok',
         body:K.Empty({ text:'Açık tez yok. Tek cümlelik bir tez yazmak yeterli; '
           + 'gerisini itirazlar açar.',
           action:K.Button({ label:'Tez yaz', tone:'primary', act:'tab-ekle' }) }) })];
@@ -44406,7 +44594,7 @@ ESP.Screens.symposium = (function(){
   function closedRows(){
     const rows = (S.args || []).filter(a => a.status === 'closed');
     if(!rows.length){
-      return [K.Entry({ label:'KAPANAN TEZ', meta:'yok',
+      return [K.Entry({ label:'Kapanan tez', meta:'yok',
         body:K.Empty({ text:'Henüz kapanan tez yok. Bir tez ancak cevaplanmamış '
           + 'itirazı kalmadığında kapanır.' }) })];
     }
@@ -44417,7 +44605,7 @@ ESP.Screens.symposium = (function(){
     const res = S.ui.argParsed;
     return [
       K.Entry({
-        label:'YENİ TEZ', hint:'argument',
+        label:'Yeni tez', hint:'argument',
         meta:'tek cümle yeter',
         note:'Uzun deneme gerekmez. «X doğrudur çünkü Y. Ama Z olabilir.» yazarsan '
            + 'tez, destek ve itiraz ayrıştırılır — anlaşılmayan cümle atılmaz, sorulur.',
@@ -44449,7 +44637,7 @@ ESP.Screens.symposium = (function(){
       }),
 
       K.Entry({
-        label:'SOKRATİK SORULAR',
+        label:'Sokratik sorular',
         meta:ESP.SOCRATIC.length + ' kalıp',
         note:'Model kapalıyken Socrates bu kalıplardan sorar. Kalıp olmaları '
            + 'kasıtlı: bir soru ancak teze bağlandığında işe yarar.',
@@ -44463,7 +44651,7 @@ ESP.Screens.symposium = (function(){
     const kitaplar = (S.books || []);
     return [
       K.Entry({
-        label:'KAYNAKLAR', hint:'primary-text',
+        label:'Kaynaklar', hint:'primary-text',
         meta:kitaplar.length + ' kayıt',
         note:'Primer metin filozofun kendi metnidir; yorum ayrı tutulur. '
            + 'Sentez katsayısı yalnızca primer metinden kurulan bağları sayar.',
@@ -44482,7 +44670,7 @@ ESP.Screens.symposium = (function(){
       /* BAM'dan belge (Part 8f): konu → düşünür, eser ve tez; kaynaklı.
          Teklif Bugün'e gelir, ESP kendi koduyla sınamadan eklenmez. */
       K.Entry({
-        label:'BELGE İSTE', hint:'primary-text',
+        label:'Belge iste', hint:'primary-text',
         meta:'felsefe · HKM',
         note:'Konunun düşünürleri, eserleri ve ana tezleri web kaynaklarından çıkarılır; ad '
            + 'alıntıda doğrulanır. Tezler açık tartışma olarak gelir. Web kapalıysa belge yazılmaz.',
@@ -44495,7 +44683,7 @@ ESP.Screens.symposium = (function(){
       }),
 
       K.Entry({
-        label:'KANONDAN EKLE',
+        label:'Kanondan ekle',
         meta:ESP.CANON.length + ' eser',
         note:'Yazar adının iki farklı yazımı sentez katsayısının yazar sayısını '
            + 'ikiye katlıyordu; listeden seçmek bunu kapatır.',
@@ -44526,7 +44714,7 @@ ESP.Screens.symposium = (function(){
     const ozet = ESP.Lesson.topicSummary('philo');
     return [
       K.Entry({
-        label:'KONULAR', hint:'topic',
+        label:'Konular', hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
         note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
            + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
@@ -44816,7 +45004,7 @@ ESP.Screens.history = (function(){
 
     if(!evs().length){
       rows.push(K.Entry({
-        label:'BOŞ ŞERİT', hint:'chrono',
+        label:'Boş şerit', hint:'chrono',
         meta:'olay yok',
         note:'Kronoloji boşken kapsam ölçülmez. Sıfır kapsam ile ölçülmemiş '
            + 'kapsam aynı şey değildir.',
@@ -44834,7 +45022,7 @@ ESP.Screens.history = (function(){
     /* Dönem şeridi — her dönem kendi olay sayısıyla. */
     const donem = ESP.Chrono.spread('era');
     rows.push(K.Entry({
-      label:'DÖNEMLER', hint:'era',
+      label:'Dönemler', hint:'era',
       meta:st.eras.covered + '/' + st.eras.total + ' kapsandı',
       note:'Dönem sınırları tartışmalıdır ve öyle gösterilir: bir sınır bir '
          + 'ölçüm değil bir karardır.',
@@ -44864,7 +45052,7 @@ ESP.Screens.history = (function(){
 
     /* Yüzyıl boşlukları. */
     rows.push(K.Entry({
-      label:'YÜZYIL BOŞLUKLARI', hint:'gap',
+      label:'Yüzyıl boşlukları', hint:'gap',
       meta:st.gaps.length ? st.gaps.length + ' boşluk' : 'yok',
       note:'Üst üste üç yüzyıl boş kaldığında kör nokta sayılır. Her yüzyılda '
          + 'dönüm noktası olmak zorunda değil — ama üç yüzyıl sessizlik bir sorudur.',
@@ -44879,7 +45067,7 @@ ESP.Screens.history = (function(){
 
     /* Dağılım: alan ve bölge. */
     rows.push(K.Entry({
-      label:'DAĞILIM', hint:'coverage',
+      label:'Dağılım', hint:'coverage',
       meta:st.kinds.covered + '/' + st.kinds.total + ' alan',
       note:'Yalnızca savaş ve antlaşma girilirse nedensellik hep askerî kalır. '
          + 'Ekonomik ve düşünsel olaylar zinciri değiştirir.',
@@ -44918,7 +45106,7 @@ ESP.Screens.history = (function(){
     const rows = [];
 
     rows.push(K.Entry({
-      label:'OLAY EKLE', hint:'event',
+      label:'Olay ekle', hint:'event',
       meta:'yıl zorunlu',
       note:'Dönem yıldan türetilir, sorulmaz: aynı yıl iki döneme düşemez ve '
          + 'elle girilen dönem zamanla yanlış kalır.',
@@ -44946,13 +45134,13 @@ ESP.Screens.history = (function(){
     }));
 
     if(!list.length){
-      rows.push(K.Entry({ label:'OLAYLAR', meta:'yok',
+      rows.push(K.Entry({ label:'Olaylar', meta:'yok',
         body:K.Empty({ text:'Süzgece uyan olay yok.' }) }));
       return rows;
     }
 
     rows.push(K.Entry({
-      label:'OLAYLAR',
+      label:'Olaylar',
       meta:list.length + ' olay',
       action:K.Input({ id:'ev-q', value:S.ui.histQuery || '', size:'sm',
         placeholder:'Olay ara…', change:'hist-query', aria:'Olay ara' }),
@@ -45016,7 +45204,7 @@ ESP.Screens.history = (function(){
     /* BAM'dan belge (Part 8f): konu → olaylar ve kaynakları; yıl alıntıda
        doğrulanır. Teklif Bugün'e gelir, ESP kendi koduyla sınamadan eklemez. */
     rows.push(K.Entry({
-      label:'BELGE İSTE', hint:'source',
+      label:'Belge iste', hint:'source',
       meta:'tarih · HKM',
       note:'Konunun olayları web kaynaklarından çıkarılır; yıl alıntıda doğrulanır, her olay '
          + 'kaynağıyla gelir. Web kapalıysa belge yazılmaz.',
@@ -45029,7 +45217,7 @@ ESP.Screens.history = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'KAYNAK EKLE', hint:'source',
+      label:'Kaynak ekle', hint:'source',
       meta:'birincil / ikincil',
       note:'Tek kaynağa dayanan bir iddia bir tezdir, bir olgu değil.',
       body:html`
@@ -45055,7 +45243,7 @@ ESP.Screens.history = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'DENGE', hint:'balance',
+      label:'Denge', hint:'balance',
       meta:b.cert === 'missing' ? 'veri yok'
         : b.primary + '/' + b.total + ' birincil',
       note:'Birincil oran bir kalite değil bir kompozisyon ölçüsüdür: %100 '
@@ -45070,7 +45258,7 @@ ESP.Screens.history = (function(){
 
     if(srcs().length){
       rows.push(K.Entry({
-        label:'KAYNAKLAR', meta:srcs().length + ' kaynak', wide:true,
+        label:'Kaynaklar', meta:srcs().length + ' kaynak', wide:true,
         body:html`${map(srcs(), s => {
           const d = M.critiqueDepth(s);
           const okul = ESP.SCHOOL_BY_ID[s.school];
@@ -45118,7 +45306,7 @@ ESP.Screens.history = (function(){
     const acik = S.ui.chainOpen ? chs().filter(c => c.id === S.ui.chainOpen)[0] : null;
 
     rows.push(K.Entry({
-      label:'NEDEN ZİNCİRİ', hint:'causal',
+      label:'Neden zinciri', hint:'causal',
       meta:chs().length + ' zincir',
       note:'Yapısal koşul ile tetikleyici aynı şey değildir. Yalnızca kıvılcımdan '
          + 'kurulan bir açıklama, tarihin en yaygın hatasıdır.',
@@ -45192,7 +45380,7 @@ ESP.Screens.history = (function(){
     const due = ESP.SRS.dueCards().filter(c => c.lang === ESP.HISTORY_DECK);
 
     rows.push(K.Entry({
-      label:'BUGÜNÜN EGZERSİZİ', hint:'drill',
+      label:'Bugünün egzersizi', hint:'drill',
       meta:drill ? 'kademe ' + drill.level : '—',
       note:'Egzersizi kural motoru seçer, model değil: açığı olan eksen önce gelir.',
       body:drill
@@ -45202,7 +45390,7 @@ ESP.Screens.history = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'TARİH DESTESİ', hint:'srs',
+      label:'Tarih destesi', hint:'srs',
       meta:due.length ? due.length + ' kart vadeli' : 'vadesi gelen yok',
       note:'Tarih destesi dil destesinden AYRI ölçülür: birinin iyi olması '
          + 'ötekinin çöküşünü gizlememeli.',
@@ -45219,7 +45407,7 @@ ESP.Screens.history = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'ANAKRONİZM TUZAKLARI', hint:'anachronism',
+      label:'Anakronizm tuzakları', hint:'anachronism',
       meta:ESP.ANACHRONISMS.length + ' tuzak',
       note:'Bugünün gözüyle okumak, tarihin en sessiz hatasıdır: yanlış cevap '
          + 'vermez, yanlış soru sordurur.',
@@ -45228,7 +45416,7 @@ ESP.Screens.history = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'TARİH YAZIMI OKULLARI', hint:'school',
+      label:'Tarih yazımı okulları', hint:'school',
       meta:ESP.HISTORIOGRAPHY.length + ' okul',
       note:'Aynı olay, farklı okulda farklı bir hikâyedir. Bunu görmek, tarih '
          + 'bilmek ile tarihsel düşünmek arasındaki fark.',
@@ -45238,7 +45426,7 @@ ESP.Screens.history = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'EGZERSİZ KATALOĞU',
+      label:'Egzersiz kataloğu',
       meta:ESP.HISTORY_DRILLS.length + ' egzersiz',
       wide:true,
       body:K.Table({ tight:true,
@@ -45258,7 +45446,7 @@ ESP.Screens.history = (function(){
   function learnRows(){
     return [
       K.Entry({
-        label:'PRATİK', hint:'practice',
+        label:'Pratik', hint:'practice',
         meta:S.ui.practice && S.ui.practice.deck === ESP.HISTORY_DECK
           ? 'oturum açık' : ESP.PRACTICE_LENGTH + ' soru',
         note:'Tarih destesinde dört soru türü var: hatırla, seç, dönem ve '
@@ -45268,7 +45456,7 @@ ESP.Screens.history = (function(){
       }),
 
       K.Entry({
-        label:'KONULAR', hint:'topic',
+        label:'Konular', hint:'topic',
         meta:ESP.Lesson.topicSummary('history').topics + ' konu · '
           + ESP.Lesson.topicSummary('history').items + ' madde',
         note:'Kronoloji, nedensellik, kaynak eleştirisi ve tarih yazımı. '
@@ -45278,7 +45466,7 @@ ESP.Screens.history = (function(){
       }),
 
       K.Entry({
-        label:'ÜNİTELER', hint:'unit',
+        label:'Üniteler', hint:'unit',
         meta:ESP.Lesson.units('history').length + ' ünite',
         note:'Ünite bir dönemi, bölgeyi ya da alanı toplar. Eklenen kartlar '
            + '«tohum» etiketiyle durur: bu kartları sen yazmadın.',
@@ -45567,7 +45755,7 @@ ESP.Screens.ladder = (function(){
     const rows = [];
 
     rows.push(K.Entry({
-      label:'GENEL KADEME', hint:'level',
+      label:'Genel kademe', hint:'level',
       meta:ov.cert === 'missing' ? 'veri yok' : ov.level.label,
       note:'Genel kademe disiplinlerin ortalaması değildir: ortalama ile en '
          + 'düşüğün arasıdır. Tek disiplinde üstat olup ötekileri bırakmak '
@@ -45586,7 +45774,7 @@ ESP.Screens.ladder = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'DİSİPLİNLER',
+      label:'Disiplinler',
       meta:hepsi.length + ' merdiven',
       note:'Kademe ardışıktır: alttaki kapı atlanarak üsttekine geçilmez. '
          + 'Atlanan kapı ileride her zaman geri gelir.',
@@ -45617,7 +45805,7 @@ ESP.Screens.ladder = (function(){
     const olcum = ESP.Mod.active().map(d => C().nextGate(d.id))
       .filter(g => g && g.action === 'measure');
     rows.push(K.Entry({
-      label:'ÖLÇÜLEMEYEN KAPILAR', hint:'unknown-gate',
+      label:'Ölçülemeyen kapılar', hint:'unknown-gate',
       meta:olcum.length ? olcum.length + ' kapı' : 'yok',
       note:'Ölçülemeyen kapı geçilmiş sayılmaz ama kalınmış da sayılmaz. '
          + 'Sıfır varsaymak, sistemin en pahalı hatasıdır.',
@@ -45672,7 +45860,7 @@ ESP.Screens.ladder = (function(){
        listedeki maddelerdedir ve sistem onların hiçbirini göremez. */
     if((lad.blind || []).length){
       rows.push(K.Entry({
-        label:'BU MERDİVENİN GÖREMEDİĞİ', hint:'blind',
+        label:'Bu merdivenin göremediği', hint:'blind',
         meta:lad.blind.length + ' madde',
         note:'Kapılar ölçülebilir olanı ölçer. Aşağıdakiler ölçülemez ve '
            + 'ölçülemediği için önemsiz değildir — asıl mesele çoğu zaman '
@@ -45688,7 +45876,7 @@ ESP.Screens.ladder = (function(){
 
     yol.steps.forEach(st => {
       rows.push(K.Entry({
-        label:'KADEME ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short,
+        label:'Kademe ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short,
         meta:st.state === 'done' ? 'geçildi'
           : (st.state === 'current' ? '%' + st.pct : 'ileride'),
         note:st.title,
@@ -45726,7 +45914,7 @@ ESP.Screens.ladder = (function(){
 
     return [
       K.Entry({
-        label:'SEVİYE TESPİTİ', hint:'placement',
+        label:'Seviye tespiti', hint:'placement',
         meta:(discOf(disc) || {}).label || disc,
         note:ESP.PLACEMENT.note,
         body:html`
@@ -45745,7 +45933,7 @@ ESP.Screens.ladder = (function(){
       }),
 
       K.Entry({
-        label:'SONUÇ',
+        label:'Sonuç',
         meta:tahmin.answered + '/' + tahmin.total + ' cevap',
         note:'Tahmin hiçbir kapıyı açmaz. Ölçülmüş kademe tahmini her zaman yener.',
         body:html`
@@ -45895,7 +46083,7 @@ ESP.Screens.studio = (function(){
 
     return [
       K.Entry({
-        label:'KULAK EGZERSİZLERİ', hint:'ear',
+        label:'Kulak egzersizleri', hint:'ear',
         meta:ESP.EAR_DRILLS.length + ' egzersiz',
         note:'Ölçülen şey yetenek değil isabet: yirmi denemede kaç doğru. '
            + 'Sistem sesini dinlemez; sayıyı sen girersin.',
@@ -45906,7 +46094,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'ARALIKLAR', hint:'interval',
+        label:'Aralıklar', hint:'interval',
         meta:ESP.INTERVALS.length + ' aralık',
         note:'Kanca (hook) bir ezber kolaylığıdır, kural değil: kendi kancanı '
            + 'bulursan daha iyi tutar.',
@@ -45917,7 +46105,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'CAGED', hint:'caged',
+        label:'Caged', hint:'caged',
         meta:'beş şekil',
         note:'Bir sır değil bir harita: aynı akorun klavyede beş yerde nasıl '
            + 'kurulduğunu gösterir.',
@@ -45926,7 +46114,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'DEŞİFRE', hint:'sight-reading',
+        label:'Deşifre', hint:'sight-reading',
         meta:ESP.SIGHT_READING.length + ' kademe',
         note:'Okumak çalmaktan ayrı bir beceridir ve ayrı çalışılır.',
         body:K.Table({ tight:true, headers:[{ label:'Kademe', num:true }, 'Ne', 'Nasıl'],
@@ -45934,7 +46122,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'REPERTUAR BAKIMI', hint:'repertoire',
+        label:'Repertuar bakımı', hint:'repertoire',
         meta:eskiyen.length ? eskiyen.length + ' bakımsız' : 'güncel',
         note:'«Bitti» diye bir hâl yoktur: ' + ESP.REPERTOIRE_STALE_DAYS
            + ' günden uzun süredir çalınmayan parça çalınabilir ama garanti değil.',
@@ -46004,7 +46192,7 @@ ESP.Screens.studio = (function(){
 
     const rows = [
       K.Entry({
-        label:'METRONOM',
+        label:'Metronom',
         meta:bpm + ' BPM',
         note:'Temiz çalınan tempo, hızlı çalınan tempodan önce gelir. '
            + 'Eşik yalnızca «temiz» işaretlenen tekrarlardan açılır.',
@@ -46030,7 +46218,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'TEKRAR KAYDET',
+        label:'Tekrar kaydet',
         meta:acik ? acik.name : 'parça seç',
         note:'«Temiz» senin işaretindir: sistem duymaz. Bu yüzden tempo ve tarih '
            + '«ölçüldü», temizlik yargısı senindir.',
@@ -46085,7 +46273,7 @@ ESP.Screens.studio = (function(){
     });
 
     rows.push(K.Entry({
-      label:'PARÇA EKLE',
+      label:'Parça ekle',
       meta:'teknik ya da repertuar',
       body:html`
         <div class="cols-3">
@@ -46107,7 +46295,7 @@ ESP.Screens.studio = (function(){
     /* BAM'dan alıştırma paketi (Part 8d-2): istek King'in onay kapısından
        geçer; paket Bugün'e teklif olarak gelir ve ESP kendi koduyla sınar. */
     rows.push(K.Entry({
-      label:'PAKET İSTE',
+      label:'Paket iste',
       meta:'gitar · HKM',
       note:'Konu ve düzeyden alıştırma listesi (ton, derece ilerleyişi, başlangıç ve hedef '
          + 'tempo). Tempolar referanstır; eşik senin temiz tekrarından açılır.',
@@ -46138,7 +46326,7 @@ ESP.Screens.studio = (function(){
 
     return [
       K.Entry({
-        label:'ÇALIŞMA METNİ', hint:'articulation',
+        label:'Çalışma metni', hint:'articulation',
         meta:secili.kaynak ? 'kaynaklı okuma parçası' : 'düzey ' + secili.level + ' · ' + grup.label,
         note:'Hedef hızlı söylemek değil, hangi sesin düzeldiği. Hızlı ama bozuk '
            + 'bir tekerleme çalışmanın başarısı değil başarısızlığıdır.',
@@ -46158,7 +46346,7 @@ ESP.Screens.studio = (function(){
       /* Diksiyon belgesi (kullanıcı 2026-09-24: «ikisi birden»): telaffuz
          kuralı ve okuma parçası, BAM'ın web kaynaklarından; kural kaynağıyla. */
       K.Entry({
-        label:'TELAFFUZ KURALLARI', meta:dk.kurallar.length ? dk.kurallar.length + ' kural · kaynaklı' : 'henüz yok',
+        label:'Telaffuz kuralları', meta:dk.kurallar.length ? dk.kurallar.length + ' kural · kaynaklı' : 'henüz yok',
         note:'Kural ve okuma parçası web kaynaklarından gelir; alıntısı kaynakta bulunmayan satır eklenmez.',
         wide:true,
         body:html`
@@ -46174,7 +46362,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'KAYIT ÖLÇÜMÜ',
+        label:'Kayıt ölçümü',
         meta:'ses dosyası tutulmaz',
         note:'Saklanan şey süre, kelime ve senin işaretlediğin hata sayısıdır. '
            + 'Olmayan ses dosyası sızamaz.',
@@ -46199,7 +46387,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'KONUŞMA HIZI', hint:'wpm',
+        label:'Konuşma hızı', hint:'wpm',
         meta:d.cert === 'missing' ? 'veri yok'
           : (d.wpm.cert === 'missing' ? 'hesaplanamadı' : d.wpm.value + ' kelime/dk'),
         note:ESP.WPM_NOTE,
@@ -46220,7 +46408,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'NEFES VE VURGU',
+        label:'Nefes ve vurgu',
         meta:ESP.BREATH_DRILLS.length + ' çalışma',
         note:'Ölçülen şey süredir, «iyi yaptım» değil.',
         body:html`
@@ -46235,7 +46423,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'SON KAYITLAR',
+        label:'Son kayıtlar',
         meta:kayitlar.length + ' ölçüm',
         wide:true,
         body:kayitlar.length
@@ -46265,7 +46453,7 @@ ESP.Screens.studio = (function(){
 
     return [
       K.Entry({
-        label:'PLATO', hint:'plateau',
+        label:'Plato', hint:'plateau',
         meta:plato.length ? plato.length + ' teknik' : 'yok',
         note:'Plato bir başarısızlık değil bir sinyaldir: aynı çalışma aynı '
            + 'sonucu veriyorsa değişmesi gereken çalışmanın kendisidir.',
@@ -46278,7 +46466,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'HEDEFE ULAŞMA',
+        label:'Hedefe ulaşma',
         meta:m.progress && m.progress.cert !== 'missing'
           ? m.progress.reached + '/' + m.progress.n : 'veri yok',
         note:'Hedefi girilmemiş parça paydaya girmez: hedefsiz parça başarısız değildir.',
@@ -46290,7 +46478,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'DİKSİYON EĞİLİMİ',
+        label:'Diksiyon eğilimi',
         meta:t.cert === 'missing' ? 'veri yok' : t.direction,
         note:'İki pencere karşılaştırılır: son 14 gün ve ondan önceki 14 gün. '
            + 'İkisinde de ölçüm yoksa bulgu üretilmez.',
@@ -46302,7 +46490,7 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'ISINMA SIRASI',
+        label:'Isınma sırası',
         meta:'öneri',
         note:'Zorunlu değildir; sistem senin yerine karar vermez.',
         body:K.Table({ tight:true, headers:['Aşama', { label:'Dakika', num:true }, 'Not'],
@@ -46316,8 +46504,8 @@ ESP.Screens.studio = (function(){
      Isaretler beyandir ve oyle etiketlenir; hicbir kapiyi acmaz. */
   function topicRows(){
     return [
-      { id:'music', label:'MÜZİK KONULARI' },
-      { id:'diction', label:'DİKSİYON KONULARI' },
+      { id:'music', label:'Müzik konuları' },
+      { id:'diction', label:'Diksiyon konuları' },
     ].map(d => {
       const ozet = ESP.Lesson.topicSummary(d.id);
       return K.Entry({
@@ -46552,7 +46740,7 @@ ESP.Screens.library = (function(){
   function methodRows(){
     return [
       K.Entry({
-        label:'DÖRT DÜZEY', hint:'reading-level',
+        label:'Dört düzey', hint:'reading-level',
         meta:ESP.READING_LEVELS.length + ' düzey',
         note:'Hangi düzeyde okuduğunu bilmek, ne kadar okuduğunu bilmekten '
            + 'daha çok şey söyler.',
@@ -46563,7 +46751,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'ANALİTİK OKUMANIN DÖRT SORUSU', hint:'analytic',
+        label:'Analitik okumanın dört sorusu', hint:'analytic',
         meta:'kitap bitince',
         note:'Cevaplanmayan soru, okunmamış bir bölüm kadar eksiktir.',
         wide:true,
@@ -46575,7 +46763,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'OKUMA PROTOKOLÜ', hint:'protocol',
+        label:'Okuma protokolü', hint:'protocol',
         meta:ESP.READING_PROTOCOL.length + ' adım',
         note:'Not yazmak için okumayı durdurmak, okumayı da notu da bozar.',
         body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Adım', 'Ne yapılır'],
@@ -46583,7 +46771,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'NOT ŞABLONLARI', hint:'note-template',
+        label:'Not şablonları', hint:'note-template',
         meta:ESP.NOTE_TEMPLATES.length + ' şablon',
         note:'Şablonsuz not, sonradan ne için alındığı anlaşılmayan nottur.',
         wide:true,
@@ -46592,7 +46780,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'BIRAKMA İZNİ', hint:'abandon',
+        label:'Bırakma izni', hint:'abandon',
         meta:'kural',
         body:(function(){
           /* İlk cümle görünür; gerekçesi bir dokunuşla açılır (§1.2). */
@@ -46617,7 +46805,7 @@ ESP.Screens.library = (function(){
 
     const rows = [
       K.Entry({
-        label:'NOT EKLE', hint:'atomic-note',
+        label:'Not ekle', hint:'atomic-note',
         meta:'tek fikir, tek cümle',
         note:'Kitap özeti değil. İki fikir taşıyan not bağlanamaz; bölerek yaz.',
         body:html`
@@ -46635,14 +46823,14 @@ ESP.Screens.library = (function(){
     ];
 
     if(!hepsi.length){
-      rows.push(K.Entry({ label:'NOTLAR', meta:'yok',
+      rows.push(K.Entry({ label:'Notlar', meta:'yok',
         body:K.Empty({ text:q || kavram ? 'Süzgece uyan not yok.'
           : 'Henüz atomik not yok. Okuduğun tek bir fikri tek cümleyle yaz.' }) }));
       return rows;
     }
 
     rows.push(K.Entry({
-      label:'NOTLAR',
+      label:'Notlar',
       meta:hepsi.length + ' not' + (kavram ? ' · ' + (ESP.CONCEPT_BY_ID[kavram] || {}).label : ''),
       action:html`${K.Input({ id:'note-q', value:S.ui.noteQuery || '',
           placeholder:'Not ara…', change:'note-query', size:'sm', aria:'Not ara' })}
@@ -46723,7 +46911,7 @@ ESP.Screens.library = (function(){
 
     return [
       K.Entry({
-        label:'SENTEZ KATSAYISI', hint:'ssk',
+        label:'Sentez katsayısı', hint:'ssk',
         meta:ss.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(ss.value * 100) / 100),
         note:ss.cert === 'missing' ? (ss.why || 'Hesap için kaynak gerekir.')
@@ -46741,7 +46929,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'BAĞ ÖNERİLERİ', hint:'syntopic',
+        label:'Bağ önerileri', hint:'syntopic',
         meta:oneri.length + ' öneri',
         note:'Sistem bağı KURMAZ, önerir. Bağın nedenini sen yazarsın; '
            + 'sistem nedeni uyduramaz.',
@@ -46767,7 +46955,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'KAVRAM MATRİSİ',
+        label:'Kavram matrisi',
         meta:kavramSatirlari.length + ' kavram',
         note:'Bir kavramda kaç ayrı yazar okunduğu, o kavramın ne kadar '
            + 'sentopik çalışıldığını söyler. Tek yazar bir başlangıçtır, '
@@ -46807,7 +46995,7 @@ ESP.Screens.library = (function(){
     const k = S.ui.anlatSonuc;
     const son = secili ? ESP.Anlat.son(secili.id) : null;
     return K.Entry({
-      label:'ÖĞRENDİĞİNİ ANLAT', meta:'sesle ya da yazıyla',
+      label:'Öğrendiğini anlat', meta:'sesle ya da yazıyla',
       note:'Kaynağı kendi sözünle anlat; notlarındaki kavramlardan hangilerinin geçtiği sayılır. '
          + 'Anlatım notlanmaz ve metni kaydedilmez.',
       wide:true,
@@ -46845,7 +47033,7 @@ ESP.Screens.library = (function(){
 
     return [
       K.Entry({
-        label:'KAYNAKLAR', hint:'primary-text',
+        label:'Kaynaklar', hint:'primary-text',
         meta:kitaplar.length + ' kayıt',
         note:'Primer metin sentez katsayısına girer, yorum girmez. '
            + 'Yoksa bir özet kitabı on filozof okumuş gibi görünürdü.',
@@ -46872,7 +47060,7 @@ ESP.Screens.library = (function(){
       anlatEntry(),
 
       K.Entry({
-        label:'OKUMA LİSTESİ İSTE', hint:'primary-text',
+        label:'Okuma listesi iste', hint:'primary-text',
         meta:'okuma · HKM',
         note:'Konunun temel eserleri web kaynaklarından çıkarılır; yazar adı alıntıda doğrulanır. '
            + 'Eserler «başlanmadı» olarak gelir. Web kapalıysa liste yazılmaz.',
@@ -46885,7 +47073,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'KAYNAK EKLE',
+        label:'Kaynak ekle',
         meta:'elle',
         body:html`
           <div class="cols-3">
@@ -46907,7 +47095,7 @@ ESP.Screens.library = (function(){
     const ozet = ESP.Lesson.topicSummary('reading');
     return [
       K.Entry({
-        label:'KONULAR', hint:'topic',
+        label:'Konular', hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
         note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
            + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
@@ -47117,7 +47305,7 @@ ESP.Screens.writing = (function(){
       /* BAM'dan yazı örnekleri (Part 8f-2): üslubu örnek gösterilen yazarlar
          ve eserleri; kaynaklı. Eserler Okuma › Kaynaklar'a «başlanmadı» girer. */
       K2.Entry({
-        label:'YAZI ÖRNEKLERİ İSTE', hint:'revision',
+        label:'Yazı örnekleri iste', hint:'revision',
         meta:'yazı · HKM',
         note:'Üslubu örnek gösterilen yazarlar ve eserleri web kaynaklarından çıkarılır; yazar '
            + 'adı alıntıda doğrulanır. Eserler Okuma › Kaynaklar’a gelir.',
@@ -47130,7 +47318,7 @@ ESP.Screens.writing = (function(){
         </div>`,
       }),
       K2.Entry({
-        label:'REVİZYON GEÇİŞLERİ', hint:'revision',
+        label:'Revizyon geçişleri', hint:'revision',
         meta:ESP.REVISION_PASSES.length + ' geçiş',
         note:'Sıra önemlidir: yapı düzelmeden cümle cilalamak, silinecek '
            + 'paragrafı güzelleştirmektir.',
@@ -47142,7 +47330,7 @@ ESP.Screens.writing = (function(){
       }),
 
       K2.Entry({
-        label:'YAPI KALIPLARI', hint:'structure',
+        label:'Yapı kalıpları', hint:'structure',
         meta:ESP.STRUCTURES.length + ' kalıp',
         note:'Kalıp seçmek yaratıcılığı sınırlamaz; boş sayfayı sınırlar.',
         wide:true,
@@ -47155,7 +47343,7 @@ ESP.Screens.writing = (function(){
       }),
 
       K2.Entry({
-        label:'RETORİK FİGÜRLER', hint:'rhetoric',
+        label:'Retorik figürler', hint:'rhetoric',
         meta:ESP.RHETORIC.length + ' figür',
         note:'Bilerek yapılan tekrar figürdür; farkında olunmayan tekrar gürültü.',
         wide:true,
@@ -47180,7 +47368,7 @@ ESP.Screens.writing = (function(){
       const ok = ESP.Intellect.readability(acik.text, acik.id + (acik.updatedAt || ''));
       const tekrar = ESP.Intellect.repeats(acik.text);
       rows.push(K.Entry({
-        label:'TASLAK',
+        label:'Taslak',
         meta:acik.title || 'başlıksız',
         note:ok.cert === 'missing' ? 'Ölçüm için en az bir tam cümle gerekir.'
           : ok.words + ' kelime · ' + ok.sentences + ' cümle · cümle başına '
@@ -47224,7 +47412,7 @@ ESP.Screens.writing = (function(){
 
     const liste = S.drafts || [];
     rows.push(K.Entry({
-      label:'TASLAKLAR',
+      label:'Taslaklar',
       meta:liste.length + ' taslak',
       action:K.Button({ label:'Yeni taslak', tone:'primary', size:'sm', act:'new-draft' }),
       wide:true,
@@ -47262,7 +47450,7 @@ ESP.Screens.writing = (function(){
 
     return [
       K.Entry({
-        label:'HAFTALIK ÜRETİM',
+        label:'Haftalık üretim',
         meta:w.cert === 'missing' ? 'veri yok' : U.fmtNum(w.value) + ' kelime',
         note:w.cert === 'missing'
           ? 'Son 7 günde yazı oturumu girilmemiş. Taslağı açıp kapatmak üretim sayılmaz; '
@@ -47287,7 +47475,7 @@ ESP.Screens.writing = (function(){
       }),
 
       K.Entry({
-        label:'OKUNABİLİRLİK', hint:'readability',
+        label:'Okunabilirlik', hint:'readability',
         meta:olculen.length + ' taslak ölçüldü',
         note:'Ateşman formülü: 198,825 − 40,175 × (hece/kelime) − 2,610 × (kelime/cümle). '
            + 'Türkçede hece sayısı = ünlü harf sayısıdır; bu yüzden hece sayacı bir '
@@ -47308,7 +47496,7 @@ ESP.Screens.writing = (function(){
       }),
 
       K.Entry({
-        label:'PRATİK SÜRESİ',
+        label:'Pratik süresi',
         meta:h.cert === 'missing' ? 'veri yok' : U.fmtMin(h.minutes),
         note:h.cert === 'missing'
           ? 'Son 14 günde yazı oturumu yok.'
@@ -47321,7 +47509,7 @@ ESP.Screens.writing = (function(){
       }),
 
       K.Entry({
-        label:'SINIR', hint:'pedagogic',
+        label:'Sınır', hint:'pedagogic',
         meta:'ne söylenmez',
         note:'Bu ekran üslup yargılamaz.',
         body:K.Notice({ tone:'info',
@@ -47339,7 +47527,7 @@ ESP.Screens.writing = (function(){
     const ozet = ESP.Lesson.topicSummary('writing');
     return [
       K.Entry({
-        label:'KONULAR', hint:'topic',
+        label:'Konular', hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
         note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
            + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
@@ -47564,7 +47752,7 @@ ESP.Screens.office = (function(){
       ${K.Span(12, K.Ledger(() => [
 
         K.Entry({
-          label:'PATRON', hint:'rule-engine',
+          label:'Patron', hint:'rule-engine',
           meta:ESP.Office.ready('patron') ? 'model bağlı' : 'kural motoru',
           note:'Patron kendi hesabını yapmaz: yedi uzman ve bir koçun raporunu okur, '
              + 'çelişkiyi öncelik sırasına göre çözer.',
@@ -47578,7 +47766,7 @@ ESP.Screens.office = (function(){
         }),
 
         K.Entry({
-          label:'MASALAR ARASI DEVİR', hint:'handoff',
+          label:'Masalar arası devir', hint:'handoff',
           meta:devir.length ? devir.length + ' devir' : 'yok',
           note:'Devir bir tavsiye değildir: «şu ölçüldü, şu masaya düşüyor» der. '
              + 'Ölçülmemiş bir şey devredilemez — tahmin devir üretmez.',
@@ -47595,7 +47783,7 @@ ESP.Screens.office = (function(){
         }),
 
         K.Entry({
-          label:'UZMAN MASALARI',
+          label:'Uzman masaları',
           meta:uzmanlar.length + ' masa',
           note:'Her ajan yalnızca kendi alanına bakar. Alan dışı bir soru gelirse '
              + 'sahibine yönlendirir, cevap uydurmaz.',
@@ -47607,12 +47795,12 @@ ESP.Screens.office = (function(){
         }),
 
         /* Teklifler Onaylar çekmecesinde (tek yer, CEKMECE-HARITASI). */
-        K.Entry({ label:'TEKLİFLER', hint:'proposal', meta:ESP.Plans.all().length + ' teklif',
+        K.Entry({ label:'Teklifler', hint:'proposal', meta:ESP.Plans.all().length + ' teklif',
           body:K.Button({ label:'Onaylar’da gör', size:'sm', act:'go', data:{ 'data-route':'onaylar' } }) }),
 
 
         K.Entry({
-          label:'HAFTALIK PLAN', hint:'weekplan',
+          label:'Haftalık plan', hint:'weekplan',
           meta:ESP.Plans.plan() ? 'kurulu' : 'yok',
           note:'Takvim değil sıra: hangi gün hangi disiplinin düştüğünü söyler, '
              + 'saat vermez.',
@@ -47621,7 +47809,7 @@ ESP.Screens.office = (function(){
         }),
 
         K.Entry({
-          label:'ÖNCELİK SIRASI', hint:'precedence',
+          label:'Öncelik sırası', hint:'precedence',
           meta:ESP.PRECEDENCE.length + ' kural',
           note:'İki uzman ters şey söylediğinde Patron bu sıraya uyar. '
              + 'Üstteki alttakini her zaman yener.',
@@ -47735,7 +47923,7 @@ ESP.Screens.team = (function(){
       ${K.Span(12, K.Ledger(() => [
 
         K.Entry({
-          label:'MASA',
+          label:'Masa',
           meta:a.role,
           note:a.notScope,
           action:K.Badge({ label:hazir ? 'model bağlı' : 'kural motoru',
@@ -47754,7 +47942,7 @@ ESP.Screens.team = (function(){
         }),
 
         K.Entry({
-          label:'KURAL MOTORUNUN CÜMLESİ', hint:'rule-engine',
+          label:'Kural motorunun cümlesi', hint:'rule-engine',
           meta:'model olmadan',
           note:'Model kapalıyken ajanın konuştuğu dil budur. Yedek değil '
              + 'varsayılan: model bir iyileştirmedir.',
@@ -47762,7 +47950,7 @@ ESP.Screens.team = (function(){
         }),
 
         ...(devir.in.length || devir.out.length ? [K.Entry({
-          label:'BU MASANIN DEFTERİ', hint:'handoff',
+          label:'Bu masanın defteri', hint:'handoff',
           meta:(devir.in.length + devir.out.length) + ' satır',
           body:html`
             ${map(devir.in, h => html`<div class="deskflow__row deskflow__row--in">
@@ -47774,7 +47962,7 @@ ESP.Screens.team = (function(){
         })] : []),
 
         K.Entry({
-          label:'KONUŞMA',
+          label:'Konuşma',
           meta:mesajlar.length + ' mesaj',
           action:when(mesajlar.length, () => K.Button({ label:'Geçmişi temizle', size:'sm',
             act:'clear-chat' })),
@@ -47795,7 +47983,7 @@ ESP.Screens.team = (function(){
         }),
 
         K.Entry({
-          label:'BRİFİNG', hint:'brief',
+          label:'Brifing', hint:'brief',
           meta:'ajanın gördüğü tek şey',
           note:'Ham ses kaydı, tam taslak metni ve notun kendi cümlesi buraya '
              + 'girmez — yalnızca ölçülmüş metrikler ve durum etiketleri.',
@@ -47901,7 +48089,7 @@ ESP.Screens.meeting = (function(){
     const secili = S.ui.meetingAgenda || adaylar[0].id;
 
     return K.Entry({
-      label:'GÜNDEM',
+      label:'Gündem',
       meta:adaylar.length + ' aday',
       note:'Gündemi model seçmez: puanlama seçer. En yüksek puanlı aday '
          + 'varsayılan olarak işaretlidir.',
@@ -47923,7 +48111,7 @@ ESP.Screens.meeting = (function(){
   function liveRows(){
     if(!canli) return [];
     return [K.Entry({
-      label:'TOPLANTI',
+      label:'Toplantı',
       meta:canli.turns.length + '/' + (ESP.Mod.activeAgents().length - 1) + ' tur',
       note:'Her tur geldiği anda basılır; hepsinin bitmesi beklenmez.',
       wide:true,
@@ -47952,11 +48140,11 @@ ESP.Screens.meeting = (function(){
   function minutesRows(){
     const liste = S.officeMeetings || [];
     if(!liste.length){
-      return [K.Entry({ label:'TUTANAKLAR', meta:'yok',
+      return [K.Entry({ label:'Tutanaklar', meta:'yok',
         body:K.Empty({ text:'Henüz toplantı yapılmadı.' }) })];
     }
     return liste.slice(0, 10).map(m => K.Entry({
-      label:'TUTANAK',
+      label:'Tutanak',
       meta:U.fmtDate(ESP.U.gunOf(m.at)) + ' · ' + m.agendaLabel,
       note:m.decision ? 'Karar: ' + m.decision.title : '',
       action:K.Button({ label:S.ui.meetingOpen === m.id ? 'Kapat' : 'Aç', size:'sm',
@@ -47998,7 +48186,7 @@ ESP.Screens.meeting = (function(){
     const acik = M.openDecisions();
     if(!acik.length) return [];
     return [K.Entry({
-      label:'TAKİPTEKİ KARARLAR',
+      label:'Takipteki kararlar',
       meta:acik.length + ' açık',
       note:'Karar vermek değil, kararın ne yaptığını görmek sistemi ilerletir. '
          + 'Bu yüzden kapatırken sonuç yazılır.',
@@ -48149,7 +48337,7 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        label:'ENTELEKTÜEL SERMAYE', hint:'ehs',
+        label:'Entelektüel sermaye', hint:'ehs',
         meta:ehs.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(ehs.value * 10) / 10) + ' hacim',
         note:ehs.cert === 'missing'
@@ -48176,7 +48364,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'DENGE',
+        label:'Denge',
         meta:(function(){
           const b = ESP.Planner.balance(7);
           return b.cert === 'missing' ? 'veri yok' : (b.skewed ? 'dengesiz' : 'dengeli');
@@ -48200,7 +48388,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'HAFTALIK ROTA',
+        label:'Haftalık rota',
         meta:'öncelik sırasına göre',
         note:'Rota bir takvim değildir: hangi disiplinin öne geçtiğini söyler, '
            + '«salı 19:00» demez. Odak yalnızca eşitliği bozar.',
@@ -48235,7 +48423,7 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        label:'GÜNLÜK SÜRE',
+        label:'Günlük süre',
         meta:olculen.length + '/' + gunler.length + ' günde kayıt',
         note:'Girilmemiş gün grafikte boşluktur, sıfır değildir. '
            + 'Ortalama yalnızca kayıtlı günlerden hesaplanır.',
@@ -48257,7 +48445,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'SERİ', hint:'streak',
+        label:'Seri', hint:'streak',
         meta:M.streak() + ' gün',
         note:'Seri bir hedef değil bir gözlemdir. Hiç girilmemiş gün seriyi '
            + 'kırar; «0 dakika» girilen gün de kırar — ikisi ayrı şeydir.',
@@ -48269,7 +48457,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'RETANSİYON', hint:'retention',
+        label:'Retansiyon', hint:'retention',
         meta:(function(){
           const r = ESP.SRS.retention();
           return r.cert === 'missing' ? 'veri yok' : '%' + Math.round(r.value * 100);
@@ -48297,7 +48485,7 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        label:'HAFTALIK RAPOR',
+        label:'Haftalık rapor',
         meta:'kural motorundan',
         note:'İyi haber kötü haberin arkasına saklanmaz: kötü olan önce söylenir.',
         wide:true,
@@ -48311,7 +48499,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'ÇAPRAZ BULGULAR',
+        label:'Çapraz bulgular',
         meta:cross.length ? cross.length + ' bulgu' : 'yok',
         note:'İki AYRI masanın verisi birlikte anlam kazandığında çıkar. '
            + '«Birlikte hareket ediyor» denir, «sebep oldu» denmez.',
@@ -48332,7 +48520,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'GÜNÜN BRİFİNGİ',
+        label:'Günün brifingi',
         meta:gunluk ? (gunluk.source === 'model' ? 'model' : 'kural motoru') : 'üretilmedi',
         note:'Günde tek model çağrısı. Sonuç güne yazılır; aynı gün tekrar '
            + 'çağrılmaz.',
@@ -48344,7 +48532,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'SINIR', hint:'pedagogic',
+        label:'Sınır', hint:'pedagogic',
         meta:'ne söylenmez',
         body:html`
           ${K.Notice({ tone:'info', body:ESP.PEDAGOGIC.disclaimer })}
@@ -48386,7 +48574,7 @@ ESP.Screens.analytics = (function(){
     const kapali = ESP.Signals.closed().slice(-8).reverse();
 
     return K.Entry({
-      label:'DENETİM DEFTERİ', hint:'signal',
+      label:'Denetim defteri', hint:'signal',
       meta:e.opened ? e.answered + '/' + e.opened + ' cevaplandı' : 'sinyal yok',
       note:'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün '
          + 'ekranına tek satır olarak düşer. Burası o soruların defteri.',
@@ -48442,7 +48630,7 @@ ESP.Screens.analytics = (function(){
       signalLedgerRow(),
 
       K.Entry({
-        label:'SÜRTÜNME', hint:'friction',
+        label:'Sürtünme', hint:'friction',
         meta:f.cert === 'missing' ? 'veri yok'
           : f.window.perDay + ' dk/gün'
             + (f.window.ratio == null ? '' : ' · %' + Math.round(f.window.ratio * 100)),
@@ -48468,7 +48656,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'GÖSTERGE AYRIŞMASI', hint:'goodhart',
+        label:'Gösterge ayrışması', hint:'goodhart',
         meta:ayrisan.length ? ayrisan.length + ' ayrışma' : 'temiz',
         note:'Çaba arttı da sonuç yerinde mi saydı? Nöbetçi hüküm vermez, '
            + 'soru sorar: ayrışmanın meşru sebepleri vardır.',
@@ -48510,7 +48698,7 @@ ESP.Screens.analytics = (function(){
       })),
 
       K.Entry({
-        label:'KALİBRASYON', hint:'calib',
+        label:'Kalibrasyon', hint:'calib',
         meta:puan.cert === 'missing' ? puan.n + '/' + ESP.Calib.ASGARI + ' tahmin'
           : (puan.grade || (puan.brier == null ? '—' : 'brier ' + puan.brier.toFixed(2))),
         note:'Sistem söylemeden önce sen söyle. Ölçülen şey dardır: kayıtlı '
@@ -48690,7 +48878,7 @@ ESP.Screens.profile = (function(){
     const H = window.LIFEOS.Hafiza;
     const l = ESP.Hafizam.etkin();
     return K.Entry({
-      label:'HAFIZAM',
+      label:'Hafızam',
       meta:l.length ? l.length + ' kayıt' : 'boş',
       note:'Ofisin senin hakkında hatırladıkları; bu cihazda durur, HKM bağlıysa King de görür. '
          + 'Danışma’da «hatırla: …» diye de yazabilirsin.',
@@ -48721,7 +48909,7 @@ ESP.Screens.profile = (function(){
       ${K.Span(12, K.Ledger(() => [
 
         K.Entry({
-          label:'KİŞİ',
+          label:'Kişi',
           meta:p.name || 'adsız',
           note:'Ad yalnızca sana seslenmek için tutulur ve hiçbir modele gönderilmez.',
           body:html`
@@ -48749,7 +48937,7 @@ ESP.Screens.profile = (function(){
         }),
 
         K.Entry({
-          label:'BÖLÜMLER', hint:'modules',
+          label:'Bölümler', hint:'modules',
           meta:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length + ' açık',
           note:'Kapattığın bölüm gezinmeden kalkar, reçeteye ve denge hesabına '
              + 'girmez, ofiste masası kapanır. Verisi SİLİNMEZ: geri açtığında '
@@ -48800,7 +48988,7 @@ ESP.Screens.profile = (function(){
            çağırır — ayrı bir yol açmaz. Paletler ve beş düzen kullanıcı
            kararıyla kalktı (§8-4): yalnız tema kaldı. */
         K.Entry({
-          label:'GÖRÜNÜM',
+          label:'Görünüm',
           meta:({ system:'Sistem', light:'Açık', dark:'Koyu' })[p.theme || 'system'] || 'Sistem',
           note:'Aynı tercih üst çubuktaki görünüm düğmesinden de açılır ve ikisi aynı '
              + 'kaydı kullanır. Tek tasarım: renk modülü söyler.',
@@ -48811,12 +48999,12 @@ ESP.Screens.profile = (function(){
         }),
 
         /* Gizlilik kilidi (176, T5): kutu kendi içinde değişir. */
-        window.LIFEOS && window.LIFEOS.KILIT ? K.Entry({ label:'GİZLİLİK KİLİDİ', wide:true,
+        window.LIFEOS && window.LIFEOS.KILIT ? K.Entry({ label:'Gizlilik kilidi', wide:true,
           meta:window.LIFEOS.KILIT.aktifMi('esp') ? 'açık' : 'kapalı',
           body:raw(window.LIFEOS.KILIT.ayarHtml('esp', { govde:true })) }) : '',
 
         K.Entry({
-          label:'PROFİLLER',
+          label:'Profiller',
           meta:profiller.length + ' profil',
           note:'Her profil kendi depo anahtarında yaşar (esp.v1.<profil>). '
              + 'Profil geçişi sayfayı yeniden yükler.',
@@ -48839,7 +49027,7 @@ ESP.Screens.profile = (function(){
         }),
 
         K.Entry({
-          label:'MODEL',
+          label:'Model',
           meta:ESP.Office.ready('patron') ? 'bağlı' : 'bağlı değil',
           note:'Model bir iyileştirmedir, gereklilik değil: kapalıyken ofis '
              + 'kural motorunun cümlesiyle çalışmaya devam eder.',
@@ -48851,7 +49039,7 @@ ESP.Screens.profile = (function(){
         }),
 
         K.Entry({
-          label:'VERİ',
+          label:'Veri',
           meta:ayak.bytes ? Math.round(ayak.bytes / 1024) + ' KB' : '—',
           note:yedek == null ? 'Henüz yedek alınmadı.'
             : yedek + ' gün önce yedeklendi.',
@@ -48881,7 +49069,7 @@ ESP.Screens.profile = (function(){
         hkmEntry(),
 
         K.Entry({
-          label:'SINIR', hint:'pedagogic',
+          label:'Sınır', hint:'pedagogic',
           meta:'değişmez',
           body:html`
             ${K.Notice({ tone:'info', body:ESP.PEDAGOGIC.disclaimer })}
@@ -48901,7 +49089,7 @@ ESP.Screens.profile = (function(){
         + (a.lastNote || '')
       : 'Henüz hiç gönderilmedi.';
     return K.Entry({
-      label:'HKM İŞARETİ', hint:'hkm',
+      label:'HKM işareti', hint:'hkm',
       meta:a.enabled ? 'açık' : 'kapalı',
       wide:true,
       body:html`
@@ -50057,7 +50245,7 @@ ESP.Screens.guide = (function(){
   function usageRows(){
     return [
       K.Entry({
-        label:'NASIL ÇALIŞIR',
+        label:'Nasıl çalışır',
         meta:'üç cümle',
         body:html`
           <ul class="setup__list">
@@ -50070,7 +50258,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'SIFIR SÜRTÜNME',
+        label:'Sıfır sürtünme',
         meta:'en hızlı yol',
         note:'Palete «45 dk gitar» yazıp Enter\'a basmak bir oturum kaydeder. '
            + 'Yazmadan önce ne kaydedileceği gösterilir.',
@@ -50084,7 +50272,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'KISAYOLLAR',
+        label:'Kısayollar',
         meta:'klavye',
         body:K.Table({ tight:true, headers:['Tuş', 'İş'],
           rows:[
@@ -50096,7 +50284,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'MERDİVEN', hint:'ladder',
+        label:'Merdiven', hint:'ladder',
         meta:ESP.LEVELS.length - 1 + ' kademe',
         note:'Her bölümde sıfırdan üstatlığa beş basamak ve her basamakta '
            + 'ölçülebilir kapılar. Kademe kişiye değil ÜRETİME verilir: '
@@ -50132,7 +50320,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'BÖLÜMLER', hint:'modules',
+        label:'Bölümler', hint:'modules',
         meta:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length + ' açık',
         note:'Çalışmayacağın bölümü kapatabilirsin: gezinmeden kalkar, '
            + 'reçeteye ve denge hesabına girmez, ofiste masası kapanır.',
@@ -50146,7 +50334,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'YEDİ DİSİPLİN',
+        label:'Yedi disiplin',
         meta:ESP.DISCIPLINES.length + ' alan',
         note:'Ağırlıklar birbirine yakın tutulur: büyük fark, düşük katsayılı '
            + 'disiplini görünmez yapar ve kullanıcı onu bırakır.',
@@ -50169,7 +50357,7 @@ ESP.Screens.guide = (function(){
     const s = ESP.Office.settings();
     return [
       K.Entry({
-        label:'MODEL SAĞLAYICI',
+        label:'Model sağlayıcı',
         meta:ESP.Office.ready('patron') ? 'bağlı' : 'bağlı değil',
         note:'Model kapalıyken ofis kapanmaz. Bu bir yedek plan değil '
            + 'varsayılan plandır; model bir iyileştirmedir.',
@@ -50192,7 +50380,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'MODELE NE GİDER', hint:'brief',
+        label:'Modele ne gider', hint:'brief',
         meta:'yalnızca brifing',
         note:'Ham ses kaydı, tam taslak metni ve atomik notun kendi cümlesi '
            + 'gitmez. Bu bir testle denetlenir.',
@@ -50209,7 +50397,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'ÇIKTI DENETİMİ',
+        label:'Çıktı denetimi',
         meta:ESP.GROUNDING.banned.length + ' desen',
         note:'Denetim metni YENİDEN YAZMAZ, işaretler. Sessizce düzeltmek anlamı '
            + 'tersine çevirebilir; çağıran ya uyarıyı gösterir ya kural motorunun '
@@ -50236,7 +50424,7 @@ ESP.Screens.guide = (function(){
          "Depo %80 dolu" tek basina ise yaramaz: ne zaman dolacagini ve
          NEYIN sisdigini soylemez. Ikisi bambaska kararlar gerektirir. */
       K.Entry({
-        label:'DOKUZ AYLIK UFUK', hint:'storage',
+        label:'Dokuz aylık ufuk', hint:'storage',
         meta:hukum.title,
         note:'Bu sistem dokuz ay her gün kullanılırsa ne olur? Büyüme hızı '
            + 'ölçülür, tahmin edilmez: iki ölçümden az varsa hız bilinmiyordur.',
@@ -50260,7 +50448,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'NE BÜYÜYOR',
+        label:'Ne büyüyor',
         meta:dagilim.length + ' koleksiyon',
         note:'Toplam yüzde hangi kaydın şiştiğini söylemez; burada söyler. '
            + '«İçerik» işaretli olanlar senin girdiğin veridir ve sistem '
@@ -50275,7 +50463,7 @@ ESP.Screens.guide = (function(){
       }),
 
       ...(budanabilir.length ? [K.Entry({
-        label:'YER AÇ',
+        label:'Yer aç',
         meta:dp.fmtBytes(budanabilir.reduce((a, b) => a + b.bytes, 0)) + ' budanabilir',
         note:'Yalnızca sistemin kendi ürettiği kayıtlar listelenir. '
            + 'Girdiğin hiçbir oturum, kart ya da not burada yer almaz — '
@@ -50295,7 +50483,7 @@ ESP.Screens.guide = (function(){
       })] : []),
 
       K.Entry({
-        label:'NEREDE DURUYOR',
+        label:'Nerede duruyor',
         meta:ayak.bytes ? Math.round(ayak.bytes / 1024) + ' KB' : '—',
         note:ESP.PRIVACY.storage,
         body:html`
@@ -50305,7 +50493,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'YEDEK',
+        label:'Yedek',
         meta:(function(){ const n = M.backupAgeDays(); return n == null ? 'hiç' : n + ' gün önce'; })(),
         note:'Yedek dosyası şifresizdir; paylaşılan bir dizine konmaz.',
         body:html`
@@ -50326,7 +50514,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'HER ŞEYİ SİL',
+        label:'Her şeyi sil',
         meta:'geri alınamaz',
         body:html`
           ${K.Button({ label:'Bu profilin verisini sil', act:'wipe-data' })}
@@ -50339,7 +50527,7 @@ ESP.Screens.guide = (function(){
   function limitRows(){
     return [
       K.Entry({
-        label:'PEDAGOJİK SINIR', hint:'pedagogic',
+        label:'Pedagojik sınır', hint:'pedagogic',
         meta:'değişmez',
         body:html`
           ${K.Notice({ tone:'info', body:ESP.PEDAGOGIC.disclaimer })}
@@ -50347,7 +50535,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'DOKTRİN',
+        label:'Doktrin',
         meta:'dört kural',
         body:K.Table({ tight:true, headers:['Kural', 'Ne demek'],
           rows:[
@@ -50359,14 +50547,14 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'ÖNCELİK SIRASI', hint:'precedence',
+        label:'Öncelik sırası', hint:'precedence',
         meta:ESP.PRECEDENCE.length + ' kural',
         body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Kural', 'Neden'],
           rows:ESP.PRECEDENCE.map(p => [String(p.rank), p.label, p.note]) }),
       }),
 
       K.Entry({
-        label:'YAPILMAYACAKLAR',
+        label:'Yapılmayacaklar',
         meta:'bir eksiklik değil, bir karar',
         note:'Bunlar unutulmadı; reddedildi.',
         body:K.Table({ tight:true, headers:['Yapılmaz', 'Neden'],
@@ -50384,7 +50572,7 @@ ESP.Screens.guide = (function(){
       }),
 
       K.Entry({
-        label:'KARDEŞ PROJELER',
+        label:'Kardeş projeler',
         meta:'aynı depo',
         note:'Üçü ortak bir tasarım dili paylaşır ama kodları ayrıdır: farklı ad '
            + 'alanı, farklı depo anahtarı, farklı test paketi, farklı port. '
@@ -50414,7 +50602,7 @@ ESP.Screens.guide = (function(){
     const o = ESP.Belge ? ESP.Belge.dayanak('okumaHizi') : null;
     const T = ESP.Hedefler.cefrTablo();
     return K.Entry({
-      label:'TAHMİN TABLOLARI', hint:'evidence',
+      label:'Tahmin tabloları', hint:'evidence',
       meta:(c ? 'CEFR kaynaklı' : 'CEFR kaynak bekliyor') + ' · ' + (o ? 'okuma hızı kaynaklı' : 'okuma hızı kaynak bekliyor'),
       note:'Dil ve okuma hedeflerinin süre hesabı bu tablolara dayanır. Kaynağa bağlanınca hesap '
          + 'yine koddadır ve karar «tahmin» kalır; değişen, dayanağın kaynaklı olmasıdır.',
@@ -50489,7 +50677,7 @@ ESP.Screens.guide = (function(){
       }).filter(Boolean),
 
       K.Entry({
-        label:'DENETİM',
+        label:'Denetim',
         meta:denetim.length ? denetim.length + ' sorun' : 'temiz',
         body:html`
           ${denetim.length
@@ -50701,7 +50889,7 @@ ESP.Screens.onaylar = (function(){
   function KingTeklifKart(){
     const liste = S.ui.kingTeklifler || [];
     if(!liste.length) return '';
-    return K.Entry({ label:'KING TEKLİFİ', hint:'hkm', meta:liste.length + ' iş', wide:true,
+    return K.Entry({ label:'King teklifi', hint:'hkm', meta:liste.length + ' iş', wide:true,
       body:html`
         ${map(liste.filter(t => t.durum === 'ara_onay'), t => html`<div class="mt-8">
           <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
@@ -50738,7 +50926,7 @@ ESP.Screens.onaylar = (function(){
     const liste = S.ui.hkmIntents || [];
     const supheli = S.ui.hkmDoubts || [];
     if(!liste.length && !supheli.length) return '';
-    return K.Entry({ label:'HKM TEKLİFİ', hint:'hkm',
+    return K.Entry({ label:'HKM teklifi', hint:'hkm',
       meta:liste.length ? liste.length + ' teklif'
         : supheli.length + ' belirsiz', wide:true,
       body:html`
@@ -50869,7 +51057,7 @@ ESP.Screens.onaylar = (function(){
   function AjanKart(){
     const l = ESP.Plans ? ESP.Plans.all() : [];
     if(!l.length) return '';
-    return K.Entry({ label:'AJAN TEKLİFLERİ', hint:'proposal', meta:l.length + ' teklif', wide:true,
+    return K.Entry({ label:'Ajan teklifleri', hint:'proposal', meta:l.length + ' teklif', wide:true,
       body:ESP.Parts.proposalList(l, 'Bekleyen teklif yok.') });
   }
 
@@ -50998,7 +51186,7 @@ ESP.Screens.kutuphane = (function(){
       ${K.Button({ label:'Aç', size:'sm', act:'urun-ac', data:{ 'data-id':u.id } })}
       ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'urun-sil', data:{ 'data-id':u.id } })}
     </div>`)}</div>`;
-    return K.Entry({ label:'BAM ÜRÜNLERİ', hint:'hkm', meta:l.length + ' ürün', wide:true,
+    return K.Entry({ label:'BAM ürünleri', hint:'hkm', meta:l.length + ' ürün', wide:true,
       note:'Sohbette «… hakkında özet hazırla» dersen King’e iletilir; bitince teklif olarak gelir.',
       body:html`${govde}` });
   }
@@ -51006,7 +51194,7 @@ ESP.Screens.kutuphane = (function(){
   function uniteKart(){
     const l = ESP.Unite ? ESP.Unite.liste() : [];
     if(!l.length) return '';
-    return K.Entry({ label:'DİL ÜNİTELERİ', meta:l.length + ' ünite', wide:true,
+    return K.Entry({ label:'Dil üniteleri', meta:l.length + ' ünite', wide:true,
       body:html`<div class="stack-xs">${map(l, u => html`<div class="row gap-8 wrap">
         <span class="minw0"><b>${u.title || u.baslik || u.id}</b> <span class="tiny dim">·
           ${(u.bam && u.bam.dil) || ''} · ${(u.items || []).length} madde</span></span>
@@ -51309,7 +51497,7 @@ ESP.App = (function(){
     const AY = window.LIFEOS && window.LIFEOS.AYAR;
     const eylem = (AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '')
       + (safe(() => sc.actions ? sc.actions() : '') || '');
-    return K.sayfaBasi({ yol:[], baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
+    return K.sayfaBasi({ yol:[], ust:safe(() => sc.ust ? String(sc.ust()) : ''), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
   }
 
   function bolumCubuguHtml(sc){

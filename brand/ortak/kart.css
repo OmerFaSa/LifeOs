@@ -840,3 +840,137 @@
 
 .bugun-cumle{ display:block; margin-top:var(--sp-1); color:var(--text); font-weight:500; }
 .kahraman{ min-width:0; }
+
+
+/* ================================================================
+   v5 · BUGÜN (LifeOS Tasarım Dili sürüm 5, «AYS · Bugün»)
+   Şimdi · Durum · Özet · Öneri alt alta; Durum/Özet kartları yan yana.
+   ================================================================ */
+.bugun__etiket{ margin:0 0 -4px; font-size:13px; font-weight:600; color:var(--text-2); letter-spacing:0; }
+.bugun__alan[aria-label="Durum"], .bugun__alan[aria-label="Özet"]{
+  flex-direction:row; flex-wrap:wrap; gap:16px; align-items:flex-start; }
+.bugun__alan[aria-label="Durum"] > *, .bugun__alan[aria-label="Özet"] > *{ flex:1 1 300px; min-width:0; }
+.bugun__alan > .bugun__etiket, .bugun__alan[aria-label] > p{ flex-basis:100%; margin:0; }
+.sayfabasi__ust{ margin:0 0 6px; font-size:13px; color:var(--text-2); }
+.site--v5 .sayfabasi__baslik{ font-size:28px; }
+
+/* Sıradaki blok kahramanı: modül zemini, simgesiz, büyük başlık. */
+.site--v5 .nextup, .kahraman .nextup{ background:var(--mod-t, var(--primary-soft)); border:0; border-radius:14px; padding:24px;
+  box-shadow:none; gap:20px; align-items:center; }
+.site--v5 .nextup__icon, .kahraman .nextup__icon{ display:none; }
+.site--v5 .nextup__label, .kahraman .nextup__label{ font-size:13px; font-weight:500; color:var(--text-2); text-transform:none; letter-spacing:0; }
+.site--v5 .nextup__label::before, .kahraman .nextup__label::before{ content:''; display:inline-block; width:8px; height:8px; margin-right:8px;
+  border-radius:2px; background:var(--primary); vertical-align:1px; }
+.kahraman .nextup__title{ font-size:26px; font-weight:700; letter-spacing:-.02em; line-height:1.2; margin-top:4px; }
+.site--v5 .nextup__why, .kahraman .nextup__why{ font-size:13px; color:var(--text-2); margin-top:4px; }
+@media (max-width:679px){ .kahraman .nextup{ padding:18px; } .kahraman .nextup__title{ font-size:22px; }
+  .site--v5 .sayfabasi__baslik{ font-size:22px; line-height:1.25; } .site--v5 .bugun{ gap:20px; } }
+
+/* v5 · DEFTER SATIRI: künye sütunu kalkar, künye içeriğin üstünde tek
+   satırdır (tasarım dili: alan etiketi + kutu). Üç modülün her ekranı. */
+.site--v5 .lrow{ grid-template-columns:minmax(0,1fr); gap:12px; padding-block:24px; }
+.site--v5 .ledger > .lrow:first-child{ padding-top:4px; }
+.site--v5 .lrow__side{ position:static; display:flex; align-items:baseline; gap:6px 12px; flex-wrap:wrap; }
+.site--v5 .lrow__label{ font-size:12px; letter-spacing:.06em; color:var(--text-2); }
+.site--v5 .lrow__meta{ margin-top:0; font-size:13px; }
+.site--v5 .lrow__note{ flex-basis:100%; margin:0; max-width:70ch; font-size:13px; }
+.site--v5 .lrow__act{ margin:0 0 0 auto; flex-direction:row; flex-wrap:wrap; }
+.site--v5 .lrow__act .btn{ width:auto; }
+.site--v5 .lrow.kahraman{ border-top:0; }
+
+/* v5 · ÖNERİ ALANI: Merkez'in sesi mor çerçevede durur (teklif, karar değil). */
+.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{
+  border:1px solid color-mix(in srgb, var(--mer) 40%, var(--border)); border-radius:14px;
+  padding:18px 20px; background:var(--surface); }
+.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + * .lrow{ padding-block:0; border:0; }
+
+/* v5 · SAYFA RİTMİ: başlık ile içerik arası 24 px (tasarım: 40 üst, 24 ara). */
+.site--v5 .sayfabasi{ padding-top:0; padding-bottom:24px; align-items:flex-end; }
+.site--v5 .content{ padding-block:0 56px; }
+.site--v5 .sayfabasi__baslik{ font-weight:700; letter-spacing:-.02em; }
+
+/* v5 · ETİKETLER: büyük harf ve harf aralığı kalkar; etiket 12-13 px,
+   ikinci metin rengi (tasarım dili «Yazı» panosu: etiket cümle düzeninde). */
+.site--v5 :is(.appear__label, .argcol__h, .asrow__kind, .ayar-ara__modul, .block__slot, .board__label,
+  .chain__kind, .chain__label, .cmdk__group, .desknote__label, .flashcard__side, .focusmode__slot,
+  .gauge__label, .haberci__ust, .hero__eyebrow, .herostat__label, .kmenu__bas, .lrow__label,
+  .masthead__wd, .mono-label, .nextup__label, .perde__ustyazi, .printdoc__h, .prop__kind, .qmsg__who,
+  .quizcard__src, .rail__label, .room3d__board-label, .rutbe-kart__ust, .rutbe-kunye__ust, .rx__kind,
+  .setup__kicker, .seviye-isler__tablo th, .seviye-rozet__ad, .sidestat__k, .sitefoot__k, .srsrow__day,
+  .stat__label, .symgrp__h, .topicgroup__head, .yenilik__baslik, th){
+  text-transform:none; letter-spacing:0; }
+.site--v5 :is(.lrow__label, .stat__label, .herostat__label, .sidestat__k, .rail__label, .board__label,
+  .topicgroup__head, .symgrp__h, .argcol__h, .gauge__label){ font-size:13px; font-weight:600; color:var(--text-2); }
+.site--v5 th{ font-size:12px; font-weight:500; color:var(--text-3); }
+
+.site--v5 .nextup{ padding:18px 20px; }
+.site--v5 .nextup__title{ font-size:18px; font-weight:700; letter-spacing:-.01em; }
+.site--v5 .kahraman .nextup{ padding:24px; }
+.site--v5 .kahraman .nextup__title{ font-size:26px; }
+
+/* v5 · SAYFA İÇİ BÖLÜM ÇUBUĞU: sayfa zemini beyazdır; üst şerit 52 px. */
+.site--v5{ --ust-h:52px; }
+.site--v5 .bolumcubugu--sayfa{ background:var(--surface); }
+.site--v5 .bolumcubugu__ad{ height:40px; font-size:14px; }
+.site--v5 .bolumcubugu__ad.is-on::after{ background:var(--text); }
+.site--v5 .sayfabolum__ad{ font-size:18px; font-weight:700; }
+
+@media (max-width:679px){
+  .site--v5 .kahraman .nextup{ padding:18px; }
+  .site--v5 .kahraman .nextup__title{ font-size:20px; }
+  .site--v5 .nextup__title{ font-size:16px; }
+}
+
+/* Kahraman dar kapta SARAR: düğmeler satıra sığmazsa metnin altına iner
+   (390 px'lik kapta gövde sıfır genişliğe sıkışıyordu — k2bugun oz-042). */
+.site--v5 .nextup, .kahraman .nextup{ flex-wrap:wrap; }
+.site--v5 .nextup__body, .kahraman .nextup__body{ flex:1 1 240px; min-width:0; }
+
+/* ================================================================
+   v5 · RAF DÜZENİ. Defter satırları alt alta uzamaz: her satır bir
+   kutudur ve kutular yan yana RAF olur. Künye kutunun başlığıdır; geniş
+   içerik (tablo, grafik, uzun form, geniş satır) rafın bütün enini alır.
+   Hiçbir satır gizlenmez; yalnız yerleşim değişir.
+   ================================================================ */
+.site--v5 .ledger{ display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap:16px; align-items:start; grid-auto-flow:row dense; }
+.site--v5 .ledger > .lrow, .site--v5 .ledger > .ledger__item{ min-width:0; margin:0; padding:16px 18px;
+  border:1px solid var(--border); border-radius:14px; background:var(--surface); }
+.site--v5 .ledger > .lrow:first-child{ padding-top:16px; }
+.site--v5 .ledger > .lrow:last-child{ padding-bottom:16px; }
+.site--v5 .ledger > .lrow--wide,
+.site--v5 .ledger > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ogrid, .grid, .ledger){
+  grid-column:1 / -1; }
+.site--v5 .ledger > .lrow.kahraman{ grid-column:1 / -1; padding:0; border:0; background:none; }
+.site--v5 .ledger > .lrow .lrow__main > * + *{ margin-top:12px; }
+/* İç içe defter: kutunun içindeki ikinci defter kutu çizmez, satırdır. */
+.site--v5 .ledger .ledger{ display:flex; flex-direction:column; gap:0; }
+.site--v5 .ledger .ledger > .lrow{ border:0; border-top:1px solid var(--border); border-radius:0; padding:12px 0;
+  background:none; }
+.site--v5 .ledger .ledger > .lrow:first-child{ border-top:0; padding-top:0; }
+/* Sayfa bölümleri de rafın katıdır: aralarında 32 px, başlık 16 px. */
+.site--v5 .sayfabolum + .sayfabolum{ margin-top:32px; }
+.site--v5 .sayfabolum__ad{ font-size:16px; margin-bottom:12px; }
+
+/* Kat düzeni: çubuklu sayfada yalnız seçili bölüm görünür (019). */
+.sayfabolumler--kat > .sayfabolum:not(.is-on){ display:none; }
+.sayfabolumler--kat > .sayfabolum + .sayfabolum{ margin-top:0; }
+.bolumcubugu--sayfa .bolumcubugu__ad.is-on{ color:var(--text); font-weight:600; }
+.bolumcubugu--sayfa .bolumcubugu__ad.is-on::after{ content:''; position:absolute; left:10px; right:10px; bottom:-1px;
+  height:2px; border-radius:1px; background:var(--text); }
+
+/* Raf: AYS'de Grid/Span/Stack = defter/bant/yığın. Bant ve yığın rafta
+   çizilmez (display:contents); içlerindeki her satır rafın bir kutusudur. */
+.site--v5 .ledger > .lband, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs){ display:contents; }
+.site--v5 .ledger > .lrow, .site--v5 .ledger > .lband > .lrow, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow{ min-width:0; margin:0; padding:16px 18px; border:1px solid var(--border); border-radius:14px;
+  background:var(--surface); }
+.site--v5 .ledger > .lrow.lrow--wide, .site--v5 .ledger > .lband > .lrow.lrow--wide, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow.lrow--wide,
+.site--v5 .ledger > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger), .site--v5 .ledger > .lband > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger), .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger){ grid-column:1 / -1; }
+.site--v5 .ledger > .lband > :not(.lrow):not(.stack):not(.stack-sm):not(.stack-xs),
+.site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > :not(.lrow){ grid-column:1 / -1; min-width:0; }
+/* Kutu sonsuza uzamaz: uzun tablo ya da liste kutunun İÇİNDE kayar,
+   tablo başlığı yapışır. Satırların hepsi yerinde; yalnız sayfa kısalır. */
+.site--v5 .ledger .lrow:not(.kahraman) > .lrow__main{ max-height:560px; overflow:auto; overscroll-behavior:contain;
+  scrollbar-width:thin; }
+.site--v5 .ledger .ledger .lrow > .lrow__main{ max-height:none; overflow:visible; }
+.site--v5 .ledger .lrow__main thead th{ position:sticky; top:0; background:var(--surface); z-index:1; }

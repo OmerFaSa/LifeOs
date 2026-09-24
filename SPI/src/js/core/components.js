@@ -174,15 +174,22 @@ SP.C = (function(){
      ekranın bir kısmını SAKLARDI; burada hiçbir şey saklanmaz (§1.2:
      ekran içi sekme 0). Eski sekme eylemi (`act`) düğmede kalır ve ekranın
      işleyicisi `bolumeGit(id)` çağırır: aynı eylem, yeni davranış. */
+  /* v5 RAF DÜZENİ (Tasarım Dili sürüm 5, «Ayarlar › Merkez»): sayfa
+     aşağı doğru uzamaz; bölüm çubuğu bir KAT seçer ve o kat görünür.
+     Bütün bölümler DOM'da kalır (arama, derin bağlantı, bolumeGit); seçim
+     yeniden çizimde korunur (AKTIF_BOLUM, çubuğun eylemine göre). */
+  const AKTIF_BOLUM = {};
   function SayfaBolumleri(o){
     const b = (o.bolumler || []).filter(x => x && x.govde != null && String(x.govde) !== '');
+    const secili = AKTIF_BOLUM[o.act || ''];
+    const aktif = b.some(x => x.id === secili) ? secili : (b[0] && b[0].id);
     return html`
       ${when(b.length > 1, () => html`<nav class="bolumcubugu bolumcubugu--sayfa" data-oz="019"
-        aria-label="${o.aria || 'Bu sayfada'}">${map(b, x => html`<button class="bolumcubugu__ad"
-          ${attrs({ 'data-act':o.act, 'data-tab':x.id })}>${x.ad}${when(x.sayi != null,
+        aria-label="${o.aria || 'Bu sayfada'}">${map(b, x => html`<button class="${cls('bolumcubugu__ad', x.id === aktif && 'is-on')}"
+          ${attrs({ 'data-act':o.act, 'data-tab':x.id, 'aria-current':x.id === aktif ? 'true' : null })}>${x.ad}${when(x.sayi != null,
           () => html`<span class="bolumcubugu__rozet is-sessiz">${x.sayi}</span>`)}</button>`)}</nav>`)}
-      <div class="sayfabolumler">${map(b, x => html`
-        <section class="sayfabolum" id="${'bl-' + x.id}" aria-labelledby="${'bl-' + x.id + '-ad'}">
+      <div class="${cls('sayfabolumler', b.length > 1 && 'sayfabolumler--kat')}">${map(b, x => html`
+        <section class="${cls('sayfabolum', x.id === aktif && 'is-on')}" id="${'bl-' + x.id}" aria-labelledby="${'bl-' + x.id + '-ad'}">
           <h2 class="sayfabolum__ad" id="${'bl-' + x.id + '-ad'}" tabindex="-1">${x.ad}</h2>
           ${x.govde}
         </section>`)}</div>`;
@@ -258,6 +265,20 @@ SP.C = (function(){
   function bolumeGit(id){
     const el = document.getElementById('bl-' + id);
     if(!el) return false;
+    /* Katı aç: kardeş bölümler gizlenir, çubukta seçim işaretlenir. */
+    const kap = el.parentElement;
+    if(kap && kap.classList.contains('sayfabolumler')){
+      Array.prototype.forEach.call(kap.children, s => s.classList.toggle('is-on', s === el));
+      const nav = kap.previousElementSibling;
+      if(nav && nav.classList.contains('bolumcubugu--sayfa')){
+        Array.prototype.forEach.call(nav.querySelectorAll('button[data-tab]'), btn => {
+          const on = btn.getAttribute('data-tab') === id;
+          btn.classList.toggle('is-on', on);
+          if(on){ btn.setAttribute('aria-current', 'true'); AKTIF_BOLUM[btn.getAttribute('data-act') || ''] = id; }
+          else btn.removeAttribute('aria-current');
+        });
+      }
+    }
     let az = true;
     try{ az = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
     el.scrollIntoView({ block:'start', behavior:az ? 'auto' : 'smooth' });

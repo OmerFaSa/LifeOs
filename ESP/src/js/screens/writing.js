@@ -40,7 +40,7 @@ ESP.Screens.writing = (function(){
       /* BAM'dan yazı örnekleri (Part 8f-2): üslubu örnek gösterilen yazarlar
          ve eserleri; kaynaklı. Eserler Okuma › Kaynaklar'a «başlanmadı» girer. */
       K2.Entry({
-        label:'YAZI ÖRNEKLERİ İSTE', hint:'revision',
+        label:'Yazı örnekleri iste', hint:'revision',
         meta:'yazı · HKM',
         note:'Üslubu örnek gösterilen yazarlar ve eserleri web kaynaklarından çıkarılır; yazar '
            + 'adı alıntıda doğrulanır. Eserler Okuma › Kaynaklar’a gelir.',
@@ -53,7 +53,7 @@ ESP.Screens.writing = (function(){
         </div>`,
       }),
       K2.Entry({
-        label:'REVİZYON GEÇİŞLERİ', hint:'revision',
+        label:'Revizyon geçişleri', hint:'revision',
         meta:ESP.REVISION_PASSES.length + ' geçiş',
         note:'Sıra önemlidir: yapı düzelmeden cümle cilalamak, silinecek '
            + 'paragrafı güzelleştirmektir.',
@@ -65,7 +65,7 @@ ESP.Screens.writing = (function(){
       }),
 
       K2.Entry({
-        label:'YAPI KALIPLARI', hint:'structure',
+        label:'Yapı kalıpları', hint:'structure',
         meta:ESP.STRUCTURES.length + ' kalıp',
         note:'Kalıp seçmek yaratıcılığı sınırlamaz; boş sayfayı sınırlar.',
         wide:true,
@@ -78,7 +78,7 @@ ESP.Screens.writing = (function(){
       }),
 
       K2.Entry({
-        label:'RETORİK FİGÜRLER', hint:'rhetoric',
+        label:'Retorik figürler', hint:'rhetoric',
         meta:ESP.RHETORIC.length + ' figür',
         note:'Bilerek yapılan tekrar figürdür; farkında olunmayan tekrar gürültü.',
         wide:true,
@@ -103,7 +103,7 @@ ESP.Screens.writing = (function(){
       const ok = ESP.Intellect.readability(acik.text, acik.id + (acik.updatedAt || ''));
       const tekrar = ESP.Intellect.repeats(acik.text);
       rows.push(K.Entry({
-        label:'TASLAK',
+        label:'Taslak',
         meta:acik.title || 'başlıksız',
         note:ok.cert === 'missing' ? 'Ölçüm için en az bir tam cümle gerekir.'
           : ok.words + ' kelime · ' + ok.sentences + ' cümle · cümle başına '
@@ -147,7 +147,7 @@ ESP.Screens.writing = (function(){
 
     const liste = S.drafts || [];
     rows.push(K.Entry({
-      label:'TASLAKLAR',
+      label:'Taslaklar',
       meta:liste.length + ' taslak',
       action:K.Button({ label:'Yeni taslak', tone:'primary', size:'sm', act:'new-draft' }),
       wide:true,
@@ -185,7 +185,7 @@ ESP.Screens.writing = (function(){
 
     return [
       K.Entry({
-        label:'HAFTALIK ÜRETİM',
+        label:'Haftalık üretim',
         meta:w.cert === 'missing' ? 'veri yok' : U.fmtNum(w.value) + ' kelime',
         note:w.cert === 'missing'
           ? 'Son 7 günde yazı oturumu girilmemiş. Taslağı açıp kapatmak üretim sayılmaz; '
@@ -210,7 +210,7 @@ ESP.Screens.writing = (function(){
       }),
 
       K.Entry({
-        label:'OKUNABİLİRLİK', hint:'readability',
+        label:'Okunabilirlik', hint:'readability',
         meta:olculen.length + ' taslak ölçüldü',
         note:'Ateşman formülü: 198,825 − 40,175 × (hece/kelime) − 2,610 × (kelime/cümle). '
            + 'Türkçede hece sayısı = ünlü harf sayısıdır; bu yüzden hece sayacı bir '
@@ -231,7 +231,7 @@ ESP.Screens.writing = (function(){
       }),
 
       K.Entry({
-        label:'PRATİK SÜRESİ',
+        label:'Pratik süresi',
         meta:h.cert === 'missing' ? 'veri yok' : U.fmtMin(h.minutes),
         note:h.cert === 'missing'
           ? 'Son 14 günde yazı oturumu yok.'
@@ -244,7 +244,7 @@ ESP.Screens.writing = (function(){
       }),
 
       K.Entry({
-        label:'SINIR', hint:'pedagogic',
+        label:'Sınır', hint:'pedagogic',
         meta:'ne söylenmez',
         note:'Bu ekran üslup yargılamaz.',
         body:K.Notice({ tone:'info',
@@ -262,7 +262,7 @@ ESP.Screens.writing = (function(){
     const ozet = ESP.Lesson.topicSummary('writing');
     return [
       K.Entry({
-        label:'KONULAR', hint:'topic',
+        label:'Konular', hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
         note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
            + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',

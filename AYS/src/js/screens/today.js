@@ -995,19 +995,19 @@ R.Screens.today = (function(){
 
     return html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
-        <section class="bugun__alan" aria-label="Şimdi">
+        <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${when(acil, () => acil.kart)}
           ${R.Setup.needed() ? raw(R.Setup.card()) : html`<div class="kahraman" data-oz="042">${NextUpCard()}</div>`}
           ${when(R.Signals && R.Signals.current(), () => SignalCard())}
         </section>
-        <section class="bugun__alan" aria-label="Durum">${AkisKutusu(day)}</section>
+        <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>${AkisKutusu(day)}</section>
       </div>
       <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Özet">
+        <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>
           ${OzetKutusu(day, dateISO)}
           ${SayacKutusu(day, dateISO)}
         </section>
-        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri">${oneri}</section>`)}
+        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
       </div>
     </div>`;
   }
@@ -1373,14 +1373,14 @@ R.Screens.today = (function(){
   return {
     id:'today',
     title:'Bugün',
-    subtitle(){ return tarihSatiri(); },
-    /* Kabuk `lede()`'yi tarih satırının YERİNE koyar; tarih kalsın diye
-       ikisi birlikte döner, cümle kendi satırında (kart.css .bugun-cumle). */
-    lede(){
-      const day = S.days[U.todayISO()];
-      const cumle = bugunCumlesi(day, U.todayISO());
-      return U.esc(tarihSatiri()) + (cumle ? '<span class="bugun-cumle" data-oz="004">' + U.esc(cumle) + '</span>' : '');
+    subtitle(){ return ''; },
+    /* v5: tarih üst satırda, günün cümlesi büyük başlık (004). */
+    ust(){ return U.esc(tarihSatiri()); },
+    headline(){
+      const d = S.days[U.todayISO()];
+      return (d && bugunCumlesi(d, U.todayISO())) || 'Bugün';
     },
+    lede(){ return ''; },
     cumle:bugunCumlesi,
     ozetSayilari,
     actions(){

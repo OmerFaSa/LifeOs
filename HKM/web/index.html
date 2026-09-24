@@ -542,12 +542,106 @@ details.detay > summary:hover{ color:var(--fg); }
   }
 }
 
+
+/* ======================================================================
+   v5 · LifeOS Tasarım Dili sürüm 5 («Merkez · Bugün», «Kenar çubuğu»).
+   Masaüstünde üst şerit SOL KENAR ÇUBUĞU olur; içerik beyaz zeminde,
+   bölümler 14 px köşeli kutudur. Değerler jeton.css'inkidir (ad HKM'nin,
+   değer ortak). İkon kuralı sürer: çekmeceler sözcüktür.
+   ====================================================================== */
+:root{ --ays:#2D5BE3; --spi:#0E8C79; --esp:#C8741C; --mer:#7453D4; }
+@media (prefers-color-scheme: dark){
+  html:not([data-tema="acik"]){ --ays:#4F86FF; --spi:#2EC4A9; --esp:#F2A93B; --mer:#9A86FF; } }
+html[data-tema="koyu"]{ --ays:#4F86FF; --spi:#2EC4A9; --esp:#F2A93B; --mer:#9A86FF; }
+body{ font-size:14px; }
+.marka{ display:flex; align-items:center; gap:10px; font:600 14px/1 'Inter', ui-sans-serif, system-ui, sans-serif;
+  letter-spacing:-.01em; text-transform:none; }
+.marka__logo{ display:grid; grid-template-columns:repeat(2, 7px); gap:2px; }
+.marka__logo b{ width:7px; height:7px; border-radius:2px; background:var(--ays); }
+.marka__logo b:nth-child(2){ background:var(--spi); border-radius:50%; }
+.marka__logo b:nth-child(3){ background:var(--esp); transform:rotate(45deg) scale(.8); }
+.marka__logo b:nth-child(4){ background:var(--mer); }
+.moduller{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:2px; padding:3px;
+  background:var(--yuzey-2); border-radius:10px; }
+.modul{ height:44px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  border-radius:7px; font-size:11px; font-weight:500; color:var(--dim); text-decoration:none; }
+a.modul[href]:hover{ color:var(--fg); }
+a.modul:not([href]){ opacity:.7; }
+.modul.on{ background:var(--yuzey); color:var(--fg); font-weight:600;
+  box-shadow:0 0 0 1px var(--line), 0 1px 2px rgba(17,19,24,.06); }
+.nokta{ display:inline-block; width:8px; height:8px; }
+.nokta--ays{ background:var(--ays); border-radius:2px; }
+.nokta--spi{ background:var(--spi); border-radius:50%; }
+.nokta--esp{ background:var(--esp); transform:rotate(45deg) scale(.85); }
+.nokta--mer{ background:var(--mer); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+.baglam{ margin:-10px 0 0; padding:0 6px; font-size:12px; color:var(--dim); }
+button{ border-radius:8px; font-weight:500; }
+button.primary{ background:var(--fg); border-color:var(--fg); color:var(--bg); font-weight:600; }
+button.primary:hover{ background:color-mix(in srgb, var(--fg) 86%, var(--bg)); }
+input, select, textarea{ border-radius:8px; }
+.tag{ font:600 13px/1.3 'Inter', ui-sans-serif, system-ui, sans-serif; letter-spacing:0; text-transform:none;
+  color:var(--fg); }
+/* Etiketler cümle düzenindedir (tasarım dili «Yazı»): büyük harf ve
+   eşaralıklı yazı kalkar. Kod ve sayı sütunları eşaralıklı kalır. */
+:is(.tag, th, .tabs button, .yenilik__baslik, .serit__ad, .onay__baslik, .balon__kim){
+  text-transform:none; letter-spacing:0; font-family:'Inter', ui-sans-serif, system-ui, sans-serif; }
+.serit__ad, .onay__baslik{ font-size:13px; font-weight:600; }
+th{ font-size:12px; font-weight:500; color:var(--dim); }
+.tabs button{ font-size:14px; }
+@media (max-width:1023px){ .moduller, .baglam{ display:none; }
+  /* Telefonda marka ve tema tek satırda, çekmeceler altında kayar. */
+  .marka{ order:1; } .bosluk{ order:2; } #ust-araclar{ order:3; } .gez{ order:4; flex-basis:100%; }
+  h1{ font-size:22px; font-weight:700; letter-spacing:-.02em; line-height:1.25; }
+  .card{ background:var(--yuzey); border:1px solid var(--line); border-radius:14px; padding:16px; margin:0 0 12px; }
+  .card:first-child{ border-top:1px solid var(--line); }
+  .iki{ grid-template-columns:minmax(0,1fr); } .card{ min-width:0; } }
+@media (min-width:1024px){
+  body{ background:var(--yuzey); }
+  .ust{ position:fixed; left:0; top:0; bottom:0; width:240px; z-index:6; overflow-y:auto;
+    background:var(--bg); border-bottom:0; border-right:1px solid var(--line); }
+  .ust__ic{ max-width:none; margin:0; padding:16px 12px 12px; flex-direction:column; align-items:stretch;
+    flex-wrap:nowrap; gap:18px; }
+  .marka{ height:28px; padding:0 6px; }
+  .gez{ flex-direction:column; align-items:stretch; gap:2px; }
+  .gez a{ height:34px; display:flex; align-items:center; padding:0 10px; border-radius:7px; font-size:13.5px;
+    font-weight:500; color:var(--dim); border:0; }
+  .gez a:hover{ color:var(--fg); background:color-mix(in oklab, var(--yuzey) 60%, transparent); }
+  .gez a.on{ background:var(--yuzey); color:var(--fg); font-weight:600;
+    box-shadow:0 0 0 1px var(--line), 0 1px 2px rgba(17,19,24,.05); }
+  .bosluk{ display:none; }
+  /* Bölüm çubuğu kenar çubuğunda çekmecenin altına iner (019): iç kutu
+     açılır, öğeler tek sütunda sıralanır; tema düğmesi dipte durur. */
+  .ust{ display:flex; flex-direction:column; gap:18px; padding:16px 12px 12px; }
+  .ust__ic{ display:contents; }
+  .marka{ order:1; } .moduller{ order:2; } .baglam{ order:3; } .gez{ order:4; }
+  .bolumcubugu{ order:5; margin-top:-14px; border-top:0; background:none; }
+  #ust-araclar{ order:9; margin-top:auto; }
+  .bolumcubugu__ic{ max-width:none; padding:0 0 0 19px; flex-direction:column; align-items:stretch; }
+  .bolumcubugu a{ padding:6px 10px 6px 20px; border-bottom:0; border-left:1.5px solid var(--line-strong); }
+  .bolumcubugu a.on{ border-left-color:var(--fg); }
+  .wrap{ max-width:1180px; margin:0 0 0 240px; padding:40px 48px 72px; }
+  h1{ font-size:28px; font-weight:700; letter-spacing:-.02em; line-height:1.2; margin:0 0 4px; }
+  .sub{ font-size:14px; }
+  .card{ background:var(--yuzey); border:1px solid var(--line); border-radius:14px; padding:18px 20px;
+    margin:0 0 16px; }
+  .card:first-child{ border-top:1px solid var(--line); }
+}
 </style>
 </head>
 <body>
 <header class="ust">
   <div class="ust__ic">
-    <p class="marka"><img class="marka__ikon" src="/brand/favicon.png" alt="" aria-hidden="true"/>HKM</p>
+    <p class="marka"><span class="marka__logo" aria-hidden="true"><b></b><b></b><b></b><b></b></span>LifeOS</p>
+    <!-- v5 (LifeOS Tasarım Dili sürüm 5, «Kenar çubuğu» 008 155): dört
+         sistem geçişi. Merkez burasıdır; öteki üçü kendi kapısında açılır.
+         Kapı bilinmiyorsa (dosyadan açılmış yüz) bağlantı kurulmaz. -->
+    <div class="moduller" role="group" aria-label="Sistemler">
+      <a class="modul" data-kapi="4173"><i class="nokta nokta--ays" aria-hidden="true"></i>AYS</a>
+      <a class="modul" data-kapi="4183"><i class="nokta nokta--spi" aria-hidden="true"></i>SPİ</a>
+      <a class="modul" data-kapi="4193"><i class="nokta nokta--esp" aria-hidden="true"></i>ESP</a>
+      <span class="modul on" aria-current="true"><i class="nokta nokta--mer" aria-hidden="true"></i>Merkez</span>
+    </div>
+    <p class="baglam">HKM · King ve BAM</p>
     <!-- YEDİ ÇEKMECE (K7, ekip/CEKMECE-HARITASI.md «HKM yüzü»): Bugün ·
          Onaylar · Hedefler · Sistemler · Ofis · Sohbet · Ayarlar. Adresler
          DEĞİŞMEDİ (#/teklifler, #/profil…): derin bağlantılar ve denetimler
@@ -5273,6 +5367,18 @@ details.detay > summary:hover{ color:var(--fg); }
     if(alindi) bagla();
     else girisGoster('');
   })();
+})();
+</script>
+<script>
+/* v5 sistem geçişi: yüz dört kapıdan birinde açıldıysa öteki üçüne
+   bağlantı kurulur (brand/ortak/kabuk.js adres() ile aynı kural). */
+(function(){
+  var KAPI = [4173, 4183, 4193, 4200], l = window.location;
+  var bizim = /^https?:$/.test(l.protocol) && KAPI.indexOf(Number(l.port)) >= 0;
+  Array.prototype.forEach.call(document.querySelectorAll('.modul[data-kapi]'), function(a){
+    if(bizim) a.href = l.protocol + '//' + l.hostname + ':' + a.getAttribute('data-kapi') + '/';
+    else a.title = 'Ayrı kapıda açılır';
+  });
 })();
 </script>
 </body>

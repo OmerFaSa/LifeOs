@@ -24,7 +24,7 @@ ESP.Screens.kutuphane = (function(){
       ${K.Button({ label:'Aç', size:'sm', act:'urun-ac', data:{ 'data-id':u.id } })}
       ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'urun-sil', data:{ 'data-id':u.id } })}
     </div>`)}</div>`;
-    return K.Entry({ label:'BAM ÜRÜNLERİ', hint:'hkm', meta:l.length + ' ürün', wide:true,
+    return K.Entry({ label:'BAM ürünleri', hint:'hkm', meta:l.length + ' ürün', wide:true,
       note:'Sohbette «… hakkında özet hazırla» dersen King’e iletilir; bitince teklif olarak gelir.',
       body:html`${govde}` });
   }
@@ -32,7 +32,7 @@ ESP.Screens.kutuphane = (function(){
   function uniteKart(){
     const l = ESP.Unite ? ESP.Unite.liste() : [];
     if(!l.length) return '';
-    return K.Entry({ label:'DİL ÜNİTELERİ', meta:l.length + ' ünite', wide:true,
+    return K.Entry({ label:'Dil üniteleri', meta:l.length + ' ünite', wide:true,
       body:html`<div class="stack-xs">${map(l, u => html`<div class="row gap-8 wrap">
         <span class="minw0"><b>${u.title || u.baslik || u.id}</b> <span class="tiny dim">·
           ${(u.bam && u.bam.dil) || ''} · ${(u.items || []).length} madde</span></span>

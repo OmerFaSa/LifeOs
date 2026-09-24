@@ -44,7 +44,7 @@ ESP.Screens.symposium = (function(){
 
     return [
       K.Entry({
-        label:'DÜŞÜNCE DENEYLERİ', hint:'experiment',
+        label:'Düşünce deneyleri', hint:'experiment',
         meta:list.length + ' deney',
         note:'Deney bir tezi sınar. Tezini sarsmayan bir deney seçmek, '
            + 'sınamadan geçmiş saymaktır.',
@@ -68,7 +68,7 @@ ESP.Screens.symposium = (function(){
       }),
 
       K.Entry({
-        label:'ARGÜMAN ALIŞTIRMALARI', hint:'argument-drill',
+        label:'Argüman alıştırmaları', hint:'argument-drill',
         meta:ESP.ARGUMENT_DRILLS.length + ' alıştırma',
         note:'Safsata denetimi metinde desen arar; bunlar egzersizdir.',
         wide:true,
@@ -163,7 +163,7 @@ ESP.Screens.symposium = (function(){
   function openRows(){
     const rows = ESP.Intellect.openArguments();
     if(!rows.length){
-      return [K.Entry({ label:'AÇIK TEZ', meta:'yok',
+      return [K.Entry({ label:'Açık tez', meta:'yok',
         body:K.Empty({ text:'Açık tez yok. Tek cümlelik bir tez yazmak yeterli; '
           + 'gerisini itirazlar açar.',
           action:K.Button({ label:'Tez yaz', tone:'primary', act:'tab-ekle' }) }) })];
@@ -174,7 +174,7 @@ ESP.Screens.symposium = (function(){
   function closedRows(){
     const rows = (S.args || []).filter(a => a.status === 'closed');
     if(!rows.length){
-      return [K.Entry({ label:'KAPANAN TEZ', meta:'yok',
+      return [K.Entry({ label:'Kapanan tez', meta:'yok',
         body:K.Empty({ text:'Henüz kapanan tez yok. Bir tez ancak cevaplanmamış '
           + 'itirazı kalmadığında kapanır.' }) })];
     }
@@ -185,7 +185,7 @@ ESP.Screens.symposium = (function(){
     const res = S.ui.argParsed;
     return [
       K.Entry({
-        label:'YENİ TEZ', hint:'argument',
+        label:'Yeni tez', hint:'argument',
         meta:'tek cümle yeter',
         note:'Uzun deneme gerekmez. «X doğrudur çünkü Y. Ama Z olabilir.» yazarsan '
            + 'tez, destek ve itiraz ayrıştırılır — anlaşılmayan cümle atılmaz, sorulur.',
@@ -217,7 +217,7 @@ ESP.Screens.symposium = (function(){
       }),
 
       K.Entry({
-        label:'SOKRATİK SORULAR',
+        label:'Sokratik sorular',
         meta:ESP.SOCRATIC.length + ' kalıp',
         note:'Model kapalıyken Socrates bu kalıplardan sorar. Kalıp olmaları '
            + 'kasıtlı: bir soru ancak teze bağlandığında işe yarar.',
@@ -231,7 +231,7 @@ ESP.Screens.symposium = (function(){
     const kitaplar = (S.books || []);
     return [
       K.Entry({
-        label:'KAYNAKLAR', hint:'primary-text',
+        label:'Kaynaklar', hint:'primary-text',
         meta:kitaplar.length + ' kayıt',
         note:'Primer metin filozofun kendi metnidir; yorum ayrı tutulur. '
            + 'Sentez katsayısı yalnızca primer metinden kurulan bağları sayar.',
@@ -250,7 +250,7 @@ ESP.Screens.symposium = (function(){
       /* BAM'dan belge (Part 8f): konu → düşünür, eser ve tez; kaynaklı.
          Teklif Bugün'e gelir, ESP kendi koduyla sınamadan eklenmez. */
       K.Entry({
-        label:'BELGE İSTE', hint:'primary-text',
+        label:'Belge iste', hint:'primary-text',
         meta:'felsefe · HKM',
         note:'Konunun düşünürleri, eserleri ve ana tezleri web kaynaklarından çıkarılır; ad '
            + 'alıntıda doğrulanır. Tezler açık tartışma olarak gelir. Web kapalıysa belge yazılmaz.',
@@ -263,7 +263,7 @@ ESP.Screens.symposium = (function(){
       }),
 
       K.Entry({
-        label:'KANONDAN EKLE',
+        label:'Kanondan ekle',
         meta:ESP.CANON.length + ' eser',
         note:'Yazar adının iki farklı yazımı sentez katsayısının yazar sayısını '
            + 'ikiye katlıyordu; listeden seçmek bunu kapatır.',
@@ -294,7 +294,7 @@ ESP.Screens.symposium = (function(){
     const ozet = ESP.Lesson.topicSummary('philo');
     return [
       K.Entry({
-        label:'KONULAR', hint:'topic',
+        label:'Konular', hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
         note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
            + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',

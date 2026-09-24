@@ -321,7 +321,7 @@ SP.Screens.today = (function(){
     if(!SP.Dunku) return null;
     const a = SP.Dunku.adaylar(U.todayISO());
     if(!a.ogunler.length && !a.antrenmanlar.length) return null;
-    return K.Entry({ label:'DÜNKÜNÜN AYNISI', meta:U.fmtShort(a.dun), wide:true,
+    return K.Entry({ label:'Dünkünün aynısı', meta:U.fmtShort(a.dun), wide:true,
       note:'Aynısını yaptıysan tek dokunuşla bugüne ekle; zorlanma puanı kopyalanmaz, sorulur.',
       body:html`${map(a.ogunler, o => html`<div class="row between wrap gap-6 mt-4">
           <span class="small"><b>${o.ad}</b> <span class="tiny dim">${o.ozet}</span></span>
@@ -334,7 +334,7 @@ SP.Screens.today = (function(){
   /* Seri satiri her sekmede ustte: «Bugün hastayım» ve «Tatil modu» aranmaz. */
   function seriRow(){
     if(!SP.Seri) return null;
-    return K.Entry({ label:'SERİ', hint:'streak', meta:SP.Calc.streak() + ' gün', wide:true,
+    return K.Entry({ label:'Seri', hint:'streak', meta:SP.Calc.streak() + ' gün', wide:true,
       body:seriKontrol() });
   }
 
@@ -617,7 +617,7 @@ SP.Screens.today = (function(){
   function kingBildirimRow(){
     const l = S.ui.hkmBildirim || [];
     if(!l.length) return '';
-    return K.Entry({ label:'KİNG BİLDİRİMİ', hint:'hkm', meta:l.length + ' yeni', wide:true,
+    return K.Entry({ label:'King bildirimi', hint:'hkm', meta:l.length + ' yeni', wide:true,
       body:html`${map(l.slice(0, 5), b => html`<div class="mt-8">
         ${K.Notice({ tone:BILDIRIM_TON[b.tur] || 'info', body:b.metin })}
         <div class="row gap-8 mt-6">${K.Button({ label:'Okundu', size:'sm',
@@ -671,7 +671,7 @@ SP.Screens.today = (function(){
     if(!sig.seenAt) SP.Signals.markSeen(sig.id);
 
     return K.Entry({
-      label:'BİR SORU', hint:'signal',
+      label:'Bir soru', hint:'signal',
       meta:sig.kind === 'friction' ? 'sürtünme' : 'gösterge',
       note:sig.title,
       body:html`
@@ -865,7 +865,7 @@ SP.Screens.today = (function(){
 
     return String(html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
-        <section class="bugun__alan" aria-label="Şimdi">
+        <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${when(acil, () => acil.kart)}
           ${when(vakti, () => K.Ledger([vakti]))}
           ${when(soru, () => K.Ledger([soru]))}
@@ -874,12 +874,12 @@ SP.Screens.today = (function(){
         </section>
       </div>
       <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Durum">
+        <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
           ${ToparlanmaKutusu()}
           ${AsgariKutusu()}
           ${BeslenmeKutusu()}
         </section>
-        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri">${oneri}</section>`)}
+        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
       </div>
     </div>`);
   }
@@ -1192,11 +1192,13 @@ SP.Screens.today = (function(){
       if(f) out.push({ value:f, label:'kırmızı bayrak' });
       return out.slice(0, 4);
     },
-    subtitle(){
+    /* v5: tarih ve toparlanma üst satırdadır; alt başlık tekrar etmez. */
+    ust(){
       const d = shownDate();
       const r = SP.Move.readiness(d);
-      return U.fmtDate(d) + (r.ok ? ' · toparlanma ' + r.score : ' · veri bekliyor');
+      return U.esc(U.fmtDate(d) + (r.ok ? ' · toparlanma ' + r.score : ' · veri bekliyor'));
     },
+    subtitle(){ return ''; },
     actions(){
       const n = SP.Calc.nextAction();
       /* «Bütün alanlar» ölçüm kutusunda; burada yalnız sıradaki hamle

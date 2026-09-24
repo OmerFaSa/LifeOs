@@ -22,7 +22,7 @@ ESP.Screens.profile = (function(){
     const H = window.LIFEOS.Hafiza;
     const l = ESP.Hafizam.etkin();
     return K.Entry({
-      label:'HAFIZAM',
+      label:'Hafızam',
       meta:l.length ? l.length + ' kayıt' : 'boş',
       note:'Ofisin senin hakkında hatırladıkları; bu cihazda durur, HKM bağlıysa King de görür. '
          + 'Danışma’da «hatırla: …» diye de yazabilirsin.',
@@ -53,7 +53,7 @@ ESP.Screens.profile = (function(){
       ${K.Span(12, K.Ledger(() => [
 
         K.Entry({
-          label:'KİŞİ',
+          label:'Kişi',
           meta:p.name || 'adsız',
           note:'Ad yalnızca sana seslenmek için tutulur ve hiçbir modele gönderilmez.',
           body:html`
@@ -81,7 +81,7 @@ ESP.Screens.profile = (function(){
         }),
 
         K.Entry({
-          label:'BÖLÜMLER', hint:'modules',
+          label:'Bölümler', hint:'modules',
           meta:ESP.Mod.count() + '/' + ESP.DISCIPLINES.length + ' açık',
           note:'Kapattığın bölüm gezinmeden kalkar, reçeteye ve denge hesabına '
              + 'girmez, ofiste masası kapanır. Verisi SİLİNMEZ: geri açtığında '
@@ -132,7 +132,7 @@ ESP.Screens.profile = (function(){
            çağırır — ayrı bir yol açmaz. Paletler ve beş düzen kullanıcı
            kararıyla kalktı (§8-4): yalnız tema kaldı. */
         K.Entry({
-          label:'GÖRÜNÜM',
+          label:'Görünüm',
           meta:({ system:'Sistem', light:'Açık', dark:'Koyu' })[p.theme || 'system'] || 'Sistem',
           note:'Aynı tercih üst çubuktaki görünüm düğmesinden de açılır ve ikisi aynı '
              + 'kaydı kullanır. Tek tasarım: renk modülü söyler.',
@@ -143,12 +143,12 @@ ESP.Screens.profile = (function(){
         }),
 
         /* Gizlilik kilidi (176, T5): kutu kendi içinde değişir. */
-        window.LIFEOS && window.LIFEOS.KILIT ? K.Entry({ label:'GİZLİLİK KİLİDİ', wide:true,
+        window.LIFEOS && window.LIFEOS.KILIT ? K.Entry({ label:'Gizlilik kilidi', wide:true,
           meta:window.LIFEOS.KILIT.aktifMi('esp') ? 'açık' : 'kapalı',
           body:raw(window.LIFEOS.KILIT.ayarHtml('esp', { govde:true })) }) : '',
 
         K.Entry({
-          label:'PROFİLLER',
+          label:'Profiller',
           meta:profiller.length + ' profil',
           note:'Her profil kendi depo anahtarında yaşar (esp.v1.<profil>). '
              + 'Profil geçişi sayfayı yeniden yükler.',
@@ -171,7 +171,7 @@ ESP.Screens.profile = (function(){
         }),
 
         K.Entry({
-          label:'MODEL',
+          label:'Model',
           meta:ESP.Office.ready('patron') ? 'bağlı' : 'bağlı değil',
           note:'Model bir iyileştirmedir, gereklilik değil: kapalıyken ofis '
              + 'kural motorunun cümlesiyle çalışmaya devam eder.',
@@ -183,7 +183,7 @@ ESP.Screens.profile = (function(){
         }),
 
         K.Entry({
-          label:'VERİ',
+          label:'Veri',
           meta:ayak.bytes ? Math.round(ayak.bytes / 1024) + ' KB' : '—',
           note:yedek == null ? 'Henüz yedek alınmadı.'
             : yedek + ' gün önce yedeklendi.',
@@ -213,7 +213,7 @@ ESP.Screens.profile = (function(){
         hkmEntry(),
 
         K.Entry({
-          label:'SINIR', hint:'pedagogic',
+          label:'Sınır', hint:'pedagogic',
           meta:'değişmez',
           body:html`
             ${K.Notice({ tone:'info', body:ESP.PEDAGOGIC.disclaimer })}
@@ -233,7 +233,7 @@ ESP.Screens.profile = (function(){
         + (a.lastNote || '')
       : 'Henüz hiç gönderilmedi.';
     return K.Entry({
-      label:'HKM İŞARETİ', hint:'hkm',
+      label:'HKM işareti', hint:'hkm',
       meta:a.enabled ? 'açık' : 'kapalı',
       wide:true,
       body:html`

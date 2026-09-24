@@ -29,7 +29,8 @@ ESP.Screens.today = (function(){
   function nextCard(){
     const n = ESP.Planner.nextAction();
     return K.Entry({
-      label:'SIRADAKİ İŞ', hint:'next-action',
+      class:'kahraman',
+      label:'Sıradaki iş', hint:'next-action',
       meta:n.rank ? 'Öncelik ' + n.rank : 'Bekleyen yok',
       note:n.why,
       body:K.NextUp({
@@ -67,7 +68,7 @@ ESP.Screens.today = (function(){
     if(!sig.seenAt) ESP.Signals.markSeen(sig.id);
 
     return K.Entry({
-      label:'BİR SORU', hint:'signal',
+      label:'Bir soru', hint:'signal',
       meta:sig.kind === 'friction' ? 'sürtünme' : 'gösterge',
       note:sig.title,
       body:html`
@@ -97,7 +98,7 @@ ESP.Screens.today = (function(){
     const disc = ESP.DISCIPLINE_BY_ID[d];
 
     return K.Entry({
-      label:'OTURUM EKLE', hint:'practice-log',
+      label:'Oturum ekle', hint:'practice-log',
       meta:U.fmtDate(gun()),
       note:'Süre ölçümdür: saatine bakıp yazdığın dakika da «ölçüldü» sayılır. '
          + 'Boş bıraktığın alan sıfır değil, «veri yok» olur.',
@@ -159,7 +160,7 @@ ESP.Screens.today = (function(){
   /* Serbest metin girisi — palet disinda da kullanilabilsin diye burada da var. */
   function quickForm(){
     return K.Entry({
-      label:'KONUŞARAK GİR',
+      label:'Konuşarak gir',
       meta:'tek satır',
       note:'«45 dakika gitar çalıştım ve 20 dakika kelime tekrarı yaptım» gibi '
          + 'yazabilirsin. Anlaşılmayan satır atılmaz, sana geri gösterilir.',
@@ -200,14 +201,14 @@ ESP.Screens.today = (function(){
     const rows = M.sessionsOf(gun());
     if(!rows.length){
       return K.Entry({
-        label:'BUGÜN', meta:'kayıt yok',
+        label:'Bugün', meta:'kayıt yok',
         body:K.Empty({ text:'Bu güne henüz oturum girilmedi. '
           + 'Girilmemiş gün sıfır sayılmaz — hiçbir ortalamaya katılmaz.' }),
       });
     }
     const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
     return K.Entry({
-      label:'BUGÜNÜN OTURUMLARI',
+      label:'Bugünün oturumları',
       meta:rows.length + ' oturum · ' + U.fmtMin(toplam),
       /* GÜNÜN ODAK ROZETİ — eylemlerin yanında, günün raporunda.
          Başarımlar sekmesindeki odak rozeti ömürlük rekordur; bu ise
@@ -360,7 +361,7 @@ ESP.Screens.today = (function(){
     if(!ESP.Hedefler) return null;
     const l = ESP.Hedefler.aktifler();
     return K.Entry({
-      label:'HEDEFLERİM', meta:l.length ? l.length + ' etkin' : 'yok',
+      label:'Hedeflerim', meta:l.length ? l.length + ' etkin' : 'yok',
       action:K.Button({ label:'Danışma’da hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
       body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
         : K.Ayrinti({ etiket:'Örnekler', ozet:'Henüz hedefin yok. Danışma’da tek cümleyle yazabilirsin.',
@@ -382,7 +383,7 @@ ESP.Screens.today = (function(){
     return [
       hedefRow(),
       K.Entry({
-        label:'GÜNÜN TOPLAMI',
+        label:'Günün toplamı',
         meta:rows.length ? U.fmtMin(toplam) : 'veri yok',
         note:'Taban ' + U.fmtMin(taban) + '. Taban bir hedef değil bir ölçüttür: '
            + 'altında kalmak başarısızlık değil, rotayı daraltan bir olgudur.',
@@ -394,7 +395,7 @@ ESP.Screens.today = (function(){
       }),
 
       K.Entry({
-        label:'ASGARİ GÜN', hint:'minimum-day',
+        label:'Asgari gün', hint:'minimum-day',
         meta:'kötü günün alt sınırı',
         note:ESP.MINIMUM_DAY.note,
         body:html`<ul class="setup__list">
@@ -405,7 +406,7 @@ ESP.Screens.today = (function(){
       }),
 
       K.Entry({
-        label:'ENTELEKTÜEL HACİM', hint:'ehs',
+        label:'Entelektüel hacim', hint:'ehs',
         meta:ehs.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(ehs.value * 10) / 10),
         note:ehs.cert === 'missing'
@@ -424,7 +425,7 @@ ESP.Screens.today = (function(){
       }),
 
       K.Entry({
-        label:'HAFTANIN DAĞILIMI',
+        label:'Haftanın dağılımı',
         meta:denge.cert === 'missing' ? 'veri yok' : U.fmtMin(denge.totalMinutes),
         note:denge.skewed
           ? 'Pratik ' + denge.top.label + ' tarafına yığılmış ve '
@@ -448,7 +449,7 @@ ESP.Screens.today = (function(){
     if(!ESP.Dunku || gun() !== U.todayISO()) return null;
     const a = ESP.Dunku.adaylar(U.todayISO());
     if(!a.oturumlar.length) return null;
-    return K.Entry({ label:'DÜNKÜNÜN AYNISI', meta:U.fmtShort(a.dun), wide:true,
+    return K.Entry({ label:'Dünkünün aynısı', meta:U.fmtShort(a.dun), wide:true,
       note:'Aynısını yaptıysan tek dokunuşla bugüne ekle; kalite puanı kopyalanmaz.',
       body:html`${map(a.oturumlar, o => html`<div class="row between wrap gap-6 mt-4">
         <span class="small"><b>${o.ad}</b> <span class="tiny dim">${o.dk} dk${o.sayim ? ' · ' + o.sayim : ''}</span></span>
@@ -458,7 +459,7 @@ ESP.Screens.today = (function(){
   /* Seri satiri Giris sekmesinde: «Bugün hastayım» ve «Tatil modu» aranmaz. */
   function seriRow(){
     if(!ESP.Seri) return null;
-    return K.Entry({ label:'SERİ', hint:'streak', meta:M.streak() + ' gün', wide:true,
+    return K.Entry({ label:'Seri', hint:'streak', meta:M.streak() + ' gün', wide:true,
       body:seriKontrol() });
   }
 
@@ -508,7 +509,7 @@ ESP.Screens.today = (function(){
     const dolu = gunler.filter(d => M.dayHasEntry(S.days[d]));
     return [
       K.Entry({
-        label:'SON 14 GÜN', hint:'streak',
+        label:'Son 14 gün', hint:'streak',
         meta:dolu.length + ' günde kayıt · seri ' + M.streak() + ' gün',
         note:'Boş gün «0 dakika» değil «veri yok» sayılır. İkisi ayrı renkte durur.',
         wide:true,
@@ -527,7 +528,7 @@ ESP.Screens.today = (function(){
         </div>`,
       }),
       K.Entry({
-        label:'SEÇİLİ GÜN',
+        label:'Seçili gün',
         meta:U.fmtDate(gun()),
         action:gun() !== U.todayISO()
           ? K.Button({ label:'Bugüne dön', size:'sm', act:'today-back' }) : '',
@@ -598,7 +599,7 @@ ESP.Screens.today = (function(){
     const asgari = ESP.Coach.minimumDay(gun());
 
     return K.Entry({
-      label:'GÜNÜN REÇETESİ', hint:'coach',
+      label:'Günün reçetesi', hint:'coach',
       meta:U.fmtMin(p.minutes),
       note:'Reçeteyi koç yazar, sırayı planlayıcı verir.',
       action:K.Button({ label:'Merdiven', size:'sm', act:'go',
@@ -636,7 +637,7 @@ ESP.Screens.today = (function(){
     const g = ESP.Plans.today(gun());
     if(!g) return '';
     return K.Entry({
-      label:'PLANDA BUGÜN', hint:'weekplan',
+      label:'Planda bugün', hint:'weekplan',
       meta:g.label,
       note:'Haftalık plandan geliyor. Plan bir takvim değil bir sıradır; '
          + 'saatini sen seçersin.',
@@ -659,7 +660,7 @@ ESP.Screens.today = (function(){
       .filter(r => ESP.Mod.isOn(r.disc));
     if(!bugun.length) return '';
     return K.Entry({
-      label:'HATIRLATMA', hint:'reminder',
+      label:'Hatırlatma', hint:'reminder',
       meta:bugun.length + ' satır',
       note:'Kendine söylediğin şeyler. Sistem hiçbirini zorunlu kılmaz; '
          + 'kaçırılan bir hatırlatıcı borç yazmaz.',
@@ -752,7 +753,7 @@ ESP.Screens.today = (function(){
   function yedekRow(){
     if(!M.backupDue()) return '';
     const yas = M.backupAgeDays();
-    return K.Entry({ label:'YEDEK', hint:'backup', wide:true,
+    return K.Entry({ label:'Yedek', hint:'backup', wide:true,
       meta:yas === null ? 'hiç alınmadı' : yas + ' gün önce',
       body:html`
         ${K.Notice({ tone:'info', body:(yas === null
@@ -794,18 +795,18 @@ ESP.Screens.today = (function(){
     const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
     return html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
-        <section class="bugun__alan" aria-label="Şimdi">
+        <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${K.Ledger(() => [nextCard(), quickForm(), signalRow()].filter(Boolean))}
         </section>
-        <section class="bugun__alan" aria-label="Durum">
+        <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
           ${K.Ledger(() => [sessionList(), planRowToday()].filter(Boolean))}
           <p class="small">${K.Button({ label:'Oturum gir ve bütün satırlar', size:'sm', tone:'ghost',
             act:'go', data:{ 'data-route':'gun' } })}</p>
         </section>
       </div>
       <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Özet">${OzetKutusu()}</section>
-        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri">${oneri}</section>`)}
+        <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>${OzetKutusu()}</section>
+        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
       </div>
     </div>`;
   }
@@ -837,7 +838,7 @@ ESP.Screens.today = (function(){
   function oneriRow(){
     const O = ESP.Screens.onaylar;
     if(!O || !O.bekleyen()) return '';
-    return K.Entry({ label:'ÖNERİ', wide:true, body:O.oneriAlani() });
+    return K.Entry({ label:'Öneri', wide:true, body:O.oneriAlani() });
   }
 
   /* Öneri kartının düğmeleri Onaylar'ın işleyicilerine gider: onay TEK
@@ -1067,19 +1068,23 @@ ESP.Screens.today = (function(){
   return {
     id:'today',
     title:'Bugün',
+    /* v5: üst satır tarih ve seri; büyük başlık günün cümlesi. Sıradaki
+       işin adı kahraman kartında durur, başlıkta tekrar edilmez. */
+    ust(){
+      const s = M.streak();
+      return U.esc(U.fmtDate(gun()) + (s ? ' · ' + s + ' günlük seri' : ''));
+    },
     headline(){
+      const rows = M.sessionsOf(gun());
       const n = ESP.Planner.nextAction();
-      return n.rank ? n.title : 'Bugün için bekleyen bir iş yok.';
+      if(!rows.length) return n.rank ? 'Bugün henüz oturum yok; sıradaki iş hazır.' : 'Bugün için bekleyen bir iş yok.';
+      const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
+      return rows.length + ' oturum, toplam ' + U.fmtMin(toplam) + '.'
+        + (n.rank ? ' Sıradaki iş hazır.' : ' Bekleyen iş kalmadı.');
     },
     lede(){
-      const rows = M.sessionsOf(gun());
-      if(!rows.length){
-        return 'Bu güne henüz oturum girilmedi. Girilmemiş gün sıfır sayılmaz; '
-             + 'hiçbir ortalamaya katılmaz.';
-      }
-      const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
-      return rows.length + ' oturum, toplam ' + U.fmtMin(toplam) + '. '
-           + 'Karşılığı Özet sekmesinde.';
+      return M.sessionsOf(gun()).length ? ''
+        : 'Girilmemiş gün sıfır sayılmaz; hiçbir ortalamaya katılmaz.';
     },
     stats(){
       const rows = M.sessionsOf(gun());
@@ -1093,7 +1098,7 @@ ESP.Screens.today = (function(){
         { value:ehs.cert === 'missing' ? '—' : U.fmtNum(Math.round(ehs.value)), label:'hacim' },
       ];
     },
-    subtitle(){ return U.fmtDate(gun()); },
+    subtitle(){ return ''; },
     actions(){ return ''; },
     render, handle, change,
     /* Bugün › Ayrıntı: aynı işleyiciler, ayrı bir çizim. */

@@ -27,7 +27,7 @@ ESP.Screens.onaylar = (function(){
   function KingTeklifKart(){
     const liste = S.ui.kingTeklifler || [];
     if(!liste.length) return '';
-    return K.Entry({ label:'KING TEKLİFİ', hint:'hkm', meta:liste.length + ' iş', wide:true,
+    return K.Entry({ label:'King teklifi', hint:'hkm', meta:liste.length + ' iş', wide:true,
       body:html`
         ${map(liste.filter(t => t.durum === 'ara_onay'), t => html`<div class="mt-8">
           <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
@@ -64,7 +64,7 @@ ESP.Screens.onaylar = (function(){
     const liste = S.ui.hkmIntents || [];
     const supheli = S.ui.hkmDoubts || [];
     if(!liste.length && !supheli.length) return '';
-    return K.Entry({ label:'HKM TEKLİFİ', hint:'hkm',
+    return K.Entry({ label:'HKM teklifi', hint:'hkm',
       meta:liste.length ? liste.length + ' teklif'
         : supheli.length + ' belirsiz', wide:true,
       body:html`
@@ -195,7 +195,7 @@ ESP.Screens.onaylar = (function(){
   function AjanKart(){
     const l = ESP.Plans ? ESP.Plans.all() : [];
     if(!l.length) return '';
-    return K.Entry({ label:'AJAN TEKLİFLERİ', hint:'proposal', meta:l.length + ' teklif', wide:true,
+    return K.Entry({ label:'Ajan teklifleri', hint:'proposal', meta:l.length + ' teklif', wide:true,
       body:ESP.Parts.proposalList(l, 'Bekleyen teklif yok.') });
   }
 

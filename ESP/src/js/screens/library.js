@@ -33,7 +33,7 @@ ESP.Screens.library = (function(){
   function methodRows(){
     return [
       K.Entry({
-        label:'DÖRT DÜZEY', hint:'reading-level',
+        label:'Dört düzey', hint:'reading-level',
         meta:ESP.READING_LEVELS.length + ' düzey',
         note:'Hangi düzeyde okuduğunu bilmek, ne kadar okuduğunu bilmekten '
            + 'daha çok şey söyler.',
@@ -44,7 +44,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'ANALİTİK OKUMANIN DÖRT SORUSU', hint:'analytic',
+        label:'Analitik okumanın dört sorusu', hint:'analytic',
         meta:'kitap bitince',
         note:'Cevaplanmayan soru, okunmamış bir bölüm kadar eksiktir.',
         wide:true,
@@ -56,7 +56,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'OKUMA PROTOKOLÜ', hint:'protocol',
+        label:'Okuma protokolü', hint:'protocol',
         meta:ESP.READING_PROTOCOL.length + ' adım',
         note:'Not yazmak için okumayı durdurmak, okumayı da notu da bozar.',
         body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Adım', 'Ne yapılır'],
@@ -64,7 +64,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'NOT ŞABLONLARI', hint:'note-template',
+        label:'Not şablonları', hint:'note-template',
         meta:ESP.NOTE_TEMPLATES.length + ' şablon',
         note:'Şablonsuz not, sonradan ne için alındığı anlaşılmayan nottur.',
         wide:true,
@@ -73,7 +73,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'BIRAKMA İZNİ', hint:'abandon',
+        label:'Bırakma izni', hint:'abandon',
         meta:'kural',
         body:(function(){
           /* İlk cümle görünür; gerekçesi bir dokunuşla açılır (§1.2). */
@@ -98,7 +98,7 @@ ESP.Screens.library = (function(){
 
     const rows = [
       K.Entry({
-        label:'NOT EKLE', hint:'atomic-note',
+        label:'Not ekle', hint:'atomic-note',
         meta:'tek fikir, tek cümle',
         note:'Kitap özeti değil. İki fikir taşıyan not bağlanamaz; bölerek yaz.',
         body:html`
@@ -116,14 +116,14 @@ ESP.Screens.library = (function(){
     ];
 
     if(!hepsi.length){
-      rows.push(K.Entry({ label:'NOTLAR', meta:'yok',
+      rows.push(K.Entry({ label:'Notlar', meta:'yok',
         body:K.Empty({ text:q || kavram ? 'Süzgece uyan not yok.'
           : 'Henüz atomik not yok. Okuduğun tek bir fikri tek cümleyle yaz.' }) }));
       return rows;
     }
 
     rows.push(K.Entry({
-      label:'NOTLAR',
+      label:'Notlar',
       meta:hepsi.length + ' not' + (kavram ? ' · ' + (ESP.CONCEPT_BY_ID[kavram] || {}).label : ''),
       action:html`${K.Input({ id:'note-q', value:S.ui.noteQuery || '',
           placeholder:'Not ara…', change:'note-query', size:'sm', aria:'Not ara' })}
@@ -204,7 +204,7 @@ ESP.Screens.library = (function(){
 
     return [
       K.Entry({
-        label:'SENTEZ KATSAYISI', hint:'ssk',
+        label:'Sentez katsayısı', hint:'ssk',
         meta:ss.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(ss.value * 100) / 100),
         note:ss.cert === 'missing' ? (ss.why || 'Hesap için kaynak gerekir.')
@@ -222,7 +222,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'BAĞ ÖNERİLERİ', hint:'syntopic',
+        label:'Bağ önerileri', hint:'syntopic',
         meta:oneri.length + ' öneri',
         note:'Sistem bağı KURMAZ, önerir. Bağın nedenini sen yazarsın; '
            + 'sistem nedeni uyduramaz.',
@@ -248,7 +248,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'KAVRAM MATRİSİ',
+        label:'Kavram matrisi',
         meta:kavramSatirlari.length + ' kavram',
         note:'Bir kavramda kaç ayrı yazar okunduğu, o kavramın ne kadar '
            + 'sentopik çalışıldığını söyler. Tek yazar bir başlangıçtır, '
@@ -288,7 +288,7 @@ ESP.Screens.library = (function(){
     const k = S.ui.anlatSonuc;
     const son = secili ? ESP.Anlat.son(secili.id) : null;
     return K.Entry({
-      label:'ÖĞRENDİĞİNİ ANLAT', meta:'sesle ya da yazıyla',
+      label:'Öğrendiğini anlat', meta:'sesle ya da yazıyla',
       note:'Kaynağı kendi sözünle anlat; notlarındaki kavramlardan hangilerinin geçtiği sayılır. '
          + 'Anlatım notlanmaz ve metni kaydedilmez.',
       wide:true,
@@ -326,7 +326,7 @@ ESP.Screens.library = (function(){
 
     return [
       K.Entry({
-        label:'KAYNAKLAR', hint:'primary-text',
+        label:'Kaynaklar', hint:'primary-text',
         meta:kitaplar.length + ' kayıt',
         note:'Primer metin sentez katsayısına girer, yorum girmez. '
            + 'Yoksa bir özet kitabı on filozof okumuş gibi görünürdü.',
@@ -353,7 +353,7 @@ ESP.Screens.library = (function(){
       anlatEntry(),
 
       K.Entry({
-        label:'OKUMA LİSTESİ İSTE', hint:'primary-text',
+        label:'Okuma listesi iste', hint:'primary-text',
         meta:'okuma · HKM',
         note:'Konunun temel eserleri web kaynaklarından çıkarılır; yazar adı alıntıda doğrulanır. '
            + 'Eserler «başlanmadı» olarak gelir. Web kapalıysa liste yazılmaz.',
@@ -366,7 +366,7 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'KAYNAK EKLE',
+        label:'Kaynak ekle',
         meta:'elle',
         body:html`
           <div class="cols-3">
@@ -388,7 +388,7 @@ ESP.Screens.library = (function(){
     const ozet = ESP.Lesson.topicSummary('reading');
     return [
       K.Entry({
-        label:'KONULAR', hint:'topic',
+        label:'Konular', hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
         note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
            + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',

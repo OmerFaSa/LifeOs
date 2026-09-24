@@ -33,11 +33,9 @@
           R.LLM = { complete:() => { throw new Error('model kapalı'); }, ready:() => false };
           expect(R.Screens.today.cumle(gun, iso)).toBe(bir);
         }finally{ R.LLM = llm; }
-        const lede = dom(R.Screens.today.lede());
-        const c = lede.querySelector('[data-oz="004"]');
-        expect(c.textContent).toBe(bir);
-        /* Tarih satırı yerinde kalır. */
-        expect(lede.textContent.indexOf(R.Screens.today.subtitle()) === 0).toBeTruthy();
+        /* v5: cümle sayfanın BÜYÜK BAŞLIĞIDIR; tarih üst satırda kalır. */
+        expect(R.Screens.today.headline()).toBe(bir);
+        expect(dom(R.Screens.today.ust()).textContent.length > 0).toBeTruthy();
       });
     });
 
@@ -78,7 +76,9 @@
           const kahraman = simdi.querySelector('.kahraman[data-oz="042"]');
           expect(kahraman.querySelector('.nextup')).toBeTruthy();
           /* Şimdi alanında kahramandan önce yalnız acil uyarı durabilir. */
-          const once = Array.prototype.filter.call(simdi.children, el => el.compareDocumentPosition(kahraman) & 4);
+          /* Alan etiketi (v5 «Şimdi» yazısı) içerik değil, alanın adıdır. */
+          const once = Array.prototype.filter.call(simdi.children, el => !el.classList.contains('bugun__etiket')
+            && (el.compareDocumentPosition(kahraman) & 4));
           expect(once.length <= 1).toBeTruthy();
           /* En büyük: başlığı ekrandaki her kart başlığından büyük; alanın
              tek dolu düğmesi onun içinde. */

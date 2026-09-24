@@ -62,7 +62,7 @@ ESP.Screens.team = (function(){
       ${K.Span(12, K.Ledger(() => [
 
         K.Entry({
-          label:'MASA',
+          label:'Masa',
           meta:a.role,
           note:a.notScope,
           action:K.Badge({ label:hazir ? 'model bağlı' : 'kural motoru',
@@ -81,7 +81,7 @@ ESP.Screens.team = (function(){
         }),
 
         K.Entry({
-          label:'KURAL MOTORUNUN CÜMLESİ', hint:'rule-engine',
+          label:'Kural motorunun cümlesi', hint:'rule-engine',
           meta:'model olmadan',
           note:'Model kapalıyken ajanın konuştuğu dil budur. Yedek değil '
              + 'varsayılan: model bir iyileştirmedir.',
@@ -89,7 +89,7 @@ ESP.Screens.team = (function(){
         }),
 
         ...(devir.in.length || devir.out.length ? [K.Entry({
-          label:'BU MASANIN DEFTERİ', hint:'handoff',
+          label:'Bu masanın defteri', hint:'handoff',
           meta:(devir.in.length + devir.out.length) + ' satır',
           body:html`
             ${map(devir.in, h => html`<div class="deskflow__row deskflow__row--in">
@@ -101,7 +101,7 @@ ESP.Screens.team = (function(){
         })] : []),
 
         K.Entry({
-          label:'KONUŞMA',
+          label:'Konuşma',
           meta:mesajlar.length + ' mesaj',
           action:when(mesajlar.length, () => K.Button({ label:'Geçmişi temizle', size:'sm',
             act:'clear-chat' })),
@@ -122,7 +122,7 @@ ESP.Screens.team = (function(){
         }),
 
         K.Entry({
-          label:'BRİFİNG', hint:'brief',
+          label:'Brifing', hint:'brief',
           meta:'ajanın gördüğü tek şey',
           note:'Ham ses kaydı, tam taslak metni ve notun kendi cümlesi buraya '
              + 'girmez — yalnızca ölçülmüş metrikler ve durum etiketleri.',

@@ -32,7 +32,7 @@ SP.HatirlatUI = (function(){
     if(!SP.Hatirlat) return null;
     const l = H().bugun().filter(r => r.durum === 'vakti');
     if(!l.length) return null;
-    return K.Entry({ label:'HATIRLATMA', meta:l.length + ' bekliyor', wide:true,
+    return K.Entry({ label:'Hatırlatma', meta:l.length + ' bekliyor', wide:true,
       body:html`${map(l, satir)}` });
   }
 

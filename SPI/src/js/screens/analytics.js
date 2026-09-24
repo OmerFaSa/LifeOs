@@ -191,7 +191,7 @@ SP.Screens.analytics = (function(){
     const kapali = SP.Signals.closed().slice(-8).reverse();
 
     return K.Entry({
-      label:'DENETİM DEFTERİ', hint:'signal',
+      label:'Denetim defteri', hint:'signal',
       meta:e.opened ? e.answered + '/' + e.opened + ' cevaplandı' : 'sinyal yok',
       note:'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün '
          + 'ekranına tek kart olarak düşer. Burası o soruların defteri.',
@@ -230,7 +230,7 @@ SP.Screens.analytics = (function(){
     const f = SP.Friction.verdict();
     const rahat = SP.Friction.relief();
     return K.Entry({
-      label:'SÜRTÜNME', hint:'friction',
+      label:'Sürtünme', hint:'friction',
       meta:f.cert === 'missing' ? 'veri yok' : f.window.perDay + ' dk/gün',
       note:'SPİ\'de ORAN hesaplanmaz: sağlıklı yaşamak bir saat işi değildir. '
          + 'Uyumak, doğru yemek ve yürümek uygulamada dakika olarak görünmez; '
@@ -253,7 +253,7 @@ SP.Screens.analytics = (function(){
     const cifts = SP.Goodhart.scan();
     const ayrisan = cifts.filter(p => p.status === 'decoupled');
     return K.Entry({
-      label:'GÖSTERGE AYRIŞMASI', hint:'goodhart',
+      label:'Gösterge ayrışması', hint:'goodhart',
       meta:ayrisan.length ? ayrisan.length + ' ayrışma' : 'temiz',
       note:'Sağlık verisi gürültülüdür: pencere 56 gün, eşik %35. İki '
          + 'pencerede de ölçüm yoksa hüküm kurulmaz.',
@@ -296,7 +296,7 @@ SP.Screens.analytics = (function(){
     const puan = SP.Calib.score();
     const vade = SP.Calib.due();
     return K.Entry({
-      label:'KALİBRASYON', hint:'calib',
+      label:'Kalibrasyon', hint:'calib',
       meta:puan.cert === 'missing' ? puan.n + '/' + SP.Calib.ASGARI + ' tahmin'
         : (puan.grade || '—'),
       note:'Tahmin KÖR yazılır: değer ekranda dururken yazılan tahmin, tahmin değil kopyadır.',
@@ -352,7 +352,7 @@ SP.Screens.analytics = (function(){
     const hepsi = SP.Audit.all();
     const ciddi = hepsi.filter(f => f.severity !== 'none');
     return K.Entry({
-      label:'BAKIM BORCU', hint:'audit',
+      label:'Bakım borcu', hint:'audit',
       meta:ciddi.length ? ciddi.length + ' bulgu' : 'temiz',
       note:'Bu denetim teşhis koymaz: bir değerin ne anlama geldiği '
          + 'hekimin işidir. Söylediği tek şey kaydın durumudur — tahlil '

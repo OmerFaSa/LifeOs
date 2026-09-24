@@ -78,7 +78,7 @@ ESP.Screens.office = (function(){
       ${K.Span(12, K.Ledger(() => [
 
         K.Entry({
-          label:'PATRON', hint:'rule-engine',
+          label:'Patron', hint:'rule-engine',
           meta:ESP.Office.ready('patron') ? 'model bağlı' : 'kural motoru',
           note:'Patron kendi hesabını yapmaz: yedi uzman ve bir koçun raporunu okur, '
              + 'çelişkiyi öncelik sırasına göre çözer.',
@@ -92,7 +92,7 @@ ESP.Screens.office = (function(){
         }),
 
         K.Entry({
-          label:'MASALAR ARASI DEVİR', hint:'handoff',
+          label:'Masalar arası devir', hint:'handoff',
           meta:devir.length ? devir.length + ' devir' : 'yok',
           note:'Devir bir tavsiye değildir: «şu ölçüldü, şu masaya düşüyor» der. '
              + 'Ölçülmemiş bir şey devredilemez — tahmin devir üretmez.',
@@ -109,7 +109,7 @@ ESP.Screens.office = (function(){
         }),
 
         K.Entry({
-          label:'UZMAN MASALARI',
+          label:'Uzman masaları',
           meta:uzmanlar.length + ' masa',
           note:'Her ajan yalnızca kendi alanına bakar. Alan dışı bir soru gelirse '
              + 'sahibine yönlendirir, cevap uydurmaz.',
@@ -121,12 +121,12 @@ ESP.Screens.office = (function(){
         }),
 
         /* Teklifler Onaylar çekmecesinde (tek yer, CEKMECE-HARITASI). */
-        K.Entry({ label:'TEKLİFLER', hint:'proposal', meta:ESP.Plans.all().length + ' teklif',
+        K.Entry({ label:'Teklifler', hint:'proposal', meta:ESP.Plans.all().length + ' teklif',
           body:K.Button({ label:'Onaylar’da gör', size:'sm', act:'go', data:{ 'data-route':'onaylar' } }) }),
 
 
         K.Entry({
-          label:'HAFTALIK PLAN', hint:'weekplan',
+          label:'Haftalık plan', hint:'weekplan',
           meta:ESP.Plans.plan() ? 'kurulu' : 'yok',
           note:'Takvim değil sıra: hangi gün hangi disiplinin düştüğünü söyler, '
              + 'saat vermez.',
@@ -135,7 +135,7 @@ ESP.Screens.office = (function(){
         }),
 
         K.Entry({
-          label:'ÖNCELİK SIRASI', hint:'precedence',
+          label:'Öncelik sırası', hint:'precedence',
           meta:ESP.PRECEDENCE.length + ' kural',
           note:'İki uzman ters şey söylediğinde Patron bu sıraya uyar. '
              + 'Üstteki alttakini her zaman yener.',

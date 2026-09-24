@@ -49,7 +49,7 @@ ESP.Screens.history = (function(){
 
     if(!evs().length){
       rows.push(K.Entry({
-        label:'BOŞ ŞERİT', hint:'chrono',
+        label:'Boş şerit', hint:'chrono',
         meta:'olay yok',
         note:'Kronoloji boşken kapsam ölçülmez. Sıfır kapsam ile ölçülmemiş '
            + 'kapsam aynı şey değildir.',
@@ -67,7 +67,7 @@ ESP.Screens.history = (function(){
     /* Dönem şeridi — her dönem kendi olay sayısıyla. */
     const donem = ESP.Chrono.spread('era');
     rows.push(K.Entry({
-      label:'DÖNEMLER', hint:'era',
+      label:'Dönemler', hint:'era',
       meta:st.eras.covered + '/' + st.eras.total + ' kapsandı',
       note:'Dönem sınırları tartışmalıdır ve öyle gösterilir: bir sınır bir '
          + 'ölçüm değil bir karardır.',
@@ -97,7 +97,7 @@ ESP.Screens.history = (function(){
 
     /* Yüzyıl boşlukları. */
     rows.push(K.Entry({
-      label:'YÜZYIL BOŞLUKLARI', hint:'gap',
+      label:'Yüzyıl boşlukları', hint:'gap',
       meta:st.gaps.length ? st.gaps.length + ' boşluk' : 'yok',
       note:'Üst üste üç yüzyıl boş kaldığında kör nokta sayılır. Her yüzyılda '
          + 'dönüm noktası olmak zorunda değil — ama üç yüzyıl sessizlik bir sorudur.',
@@ -112,7 +112,7 @@ ESP.Screens.history = (function(){
 
     /* Dağılım: alan ve bölge. */
     rows.push(K.Entry({
-      label:'DAĞILIM', hint:'coverage',
+      label:'Dağılım', hint:'coverage',
       meta:st.kinds.covered + '/' + st.kinds.total + ' alan',
       note:'Yalnızca savaş ve antlaşma girilirse nedensellik hep askerî kalır. '
          + 'Ekonomik ve düşünsel olaylar zinciri değiştirir.',
@@ -151,7 +151,7 @@ ESP.Screens.history = (function(){
     const rows = [];
 
     rows.push(K.Entry({
-      label:'OLAY EKLE', hint:'event',
+      label:'Olay ekle', hint:'event',
       meta:'yıl zorunlu',
       note:'Dönem yıldan türetilir, sorulmaz: aynı yıl iki döneme düşemez ve '
          + 'elle girilen dönem zamanla yanlış kalır.',
@@ -179,13 +179,13 @@ ESP.Screens.history = (function(){
     }));
 
     if(!list.length){
-      rows.push(K.Entry({ label:'OLAYLAR', meta:'yok',
+      rows.push(K.Entry({ label:'Olaylar', meta:'yok',
         body:K.Empty({ text:'Süzgece uyan olay yok.' }) }));
       return rows;
     }
 
     rows.push(K.Entry({
-      label:'OLAYLAR',
+      label:'Olaylar',
       meta:list.length + ' olay',
       action:K.Input({ id:'ev-q', value:S.ui.histQuery || '', size:'sm',
         placeholder:'Olay ara…', change:'hist-query', aria:'Olay ara' }),
@@ -249,7 +249,7 @@ ESP.Screens.history = (function(){
     /* BAM'dan belge (Part 8f): konu → olaylar ve kaynakları; yıl alıntıda
        doğrulanır. Teklif Bugün'e gelir, ESP kendi koduyla sınamadan eklemez. */
     rows.push(K.Entry({
-      label:'BELGE İSTE', hint:'source',
+      label:'Belge iste', hint:'source',
       meta:'tarih · HKM',
       note:'Konunun olayları web kaynaklarından çıkarılır; yıl alıntıda doğrulanır, her olay '
          + 'kaynağıyla gelir. Web kapalıysa belge yazılmaz.',
@@ -262,7 +262,7 @@ ESP.Screens.history = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'KAYNAK EKLE', hint:'source',
+      label:'Kaynak ekle', hint:'source',
       meta:'birincil / ikincil',
       note:'Tek kaynağa dayanan bir iddia bir tezdir, bir olgu değil.',
       body:html`
@@ -288,7 +288,7 @@ ESP.Screens.history = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'DENGE', hint:'balance',
+      label:'Denge', hint:'balance',
       meta:b.cert === 'missing' ? 'veri yok'
         : b.primary + '/' + b.total + ' birincil',
       note:'Birincil oran bir kalite değil bir kompozisyon ölçüsüdür: %100 '
@@ -303,7 +303,7 @@ ESP.Screens.history = (function(){
 
     if(srcs().length){
       rows.push(K.Entry({
-        label:'KAYNAKLAR', meta:srcs().length + ' kaynak', wide:true,
+        label:'Kaynaklar', meta:srcs().length + ' kaynak', wide:true,
         body:html`${map(srcs(), s => {
           const d = M.critiqueDepth(s);
           const okul = ESP.SCHOOL_BY_ID[s.school];
@@ -351,7 +351,7 @@ ESP.Screens.history = (function(){
     const acik = S.ui.chainOpen ? chs().filter(c => c.id === S.ui.chainOpen)[0] : null;
 
     rows.push(K.Entry({
-      label:'NEDEN ZİNCİRİ', hint:'causal',
+      label:'Neden zinciri', hint:'causal',
       meta:chs().length + ' zincir',
       note:'Yapısal koşul ile tetikleyici aynı şey değildir. Yalnızca kıvılcımdan '
          + 'kurulan bir açıklama, tarihin en yaygın hatasıdır.',
@@ -425,7 +425,7 @@ ESP.Screens.history = (function(){
     const due = ESP.SRS.dueCards().filter(c => c.lang === ESP.HISTORY_DECK);
 
     rows.push(K.Entry({
-      label:'BUGÜNÜN EGZERSİZİ', hint:'drill',
+      label:'Bugünün egzersizi', hint:'drill',
       meta:drill ? 'kademe ' + drill.level : '—',
       note:'Egzersizi kural motoru seçer, model değil: açığı olan eksen önce gelir.',
       body:drill
@@ -435,7 +435,7 @@ ESP.Screens.history = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'TARİH DESTESİ', hint:'srs',
+      label:'Tarih destesi', hint:'srs',
       meta:due.length ? due.length + ' kart vadeli' : 'vadesi gelen yok',
       note:'Tarih destesi dil destesinden AYRI ölçülür: birinin iyi olması '
          + 'ötekinin çöküşünü gizlememeli.',
@@ -452,7 +452,7 @@ ESP.Screens.history = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'ANAKRONİZM TUZAKLARI', hint:'anachronism',
+      label:'Anakronizm tuzakları', hint:'anachronism',
       meta:ESP.ANACHRONISMS.length + ' tuzak',
       note:'Bugünün gözüyle okumak, tarihin en sessiz hatasıdır: yanlış cevap '
          + 'vermez, yanlış soru sordurur.',
@@ -461,7 +461,7 @@ ESP.Screens.history = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'TARİH YAZIMI OKULLARI', hint:'school',
+      label:'Tarih yazımı okulları', hint:'school',
       meta:ESP.HISTORIOGRAPHY.length + ' okul',
       note:'Aynı olay, farklı okulda farklı bir hikâyedir. Bunu görmek, tarih '
          + 'bilmek ile tarihsel düşünmek arasındaki fark.',
@@ -471,7 +471,7 @@ ESP.Screens.history = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'EGZERSİZ KATALOĞU',
+      label:'Egzersiz kataloğu',
       meta:ESP.HISTORY_DRILLS.length + ' egzersiz',
       wide:true,
       body:K.Table({ tight:true,
@@ -491,7 +491,7 @@ ESP.Screens.history = (function(){
   function learnRows(){
     return [
       K.Entry({
-        label:'PRATİK', hint:'practice',
+        label:'Pratik', hint:'practice',
         meta:S.ui.practice && S.ui.practice.deck === ESP.HISTORY_DECK
           ? 'oturum açık' : ESP.PRACTICE_LENGTH + ' soru',
         note:'Tarih destesinde dört soru türü var: hatırla, seç, dönem ve '
@@ -501,7 +501,7 @@ ESP.Screens.history = (function(){
       }),
 
       K.Entry({
-        label:'KONULAR', hint:'topic',
+        label:'Konular', hint:'topic',
         meta:ESP.Lesson.topicSummary('history').topics + ' konu · '
           + ESP.Lesson.topicSummary('history').items + ' madde',
         note:'Kronoloji, nedensellik, kaynak eleştirisi ve tarih yazımı. '
@@ -511,7 +511,7 @@ ESP.Screens.history = (function(){
       }),
 
       K.Entry({
-        label:'ÜNİTELER', hint:'unit',
+        label:'Üniteler', hint:'unit',
         meta:ESP.Lesson.units('history').length + ' ünite',
         note:'Ünite bir dönemi, bölgeyi ya da alanı toplar. Eklenen kartlar '
            + '«tohum» etiketiyle durur: bu kartları sen yazmadın.',
