@@ -50,7 +50,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 ## TASARIM (T)
 
 - **Şu an:** T1 temel (jetonlar, tema, Inter, temel bileşenler)
-- **T0 kararları:** soruldu (2026-09-24), cevap bekleniyor — T2 menüsü ve T3 cevaba kadar başlamaz
+- **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
   T1 temel kalıplar `brand/ortak/temel.css` + `C.Kutu` (02) + `C.ModulIsareti` (165) +
   alt çekmece tutamağı (162) · (bu commit)
@@ -61,8 +61,10 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   `ink` (siyah), `ghost`.
 - **Not (H):** üç `src/tests/index.html`'e `jeton.css` ve `temel.css` bağlantısı eklendi
   (test sayfası gerçek stil ortamında koşsun diye); test değiştirilmedi.
-- **Yarım / sıradaki:** T1 sürüyor (paletler/düzenler §8-4 cevabını bekliyor) →
-  (Kapı 1 + T0 cevabı) → T2 kabuk, T3 AYS
+- **K için bağlantılar:** üç `index.html`'e `css/kart.css` (temel.css'ten sonra) ve
+  `js/core/sayi.js` (kesinlik.js'ten sonra) eklendi.
+- **Yarım / sıradaki:** T1 son parça: paletler ve beş düzen kalkıyor (§8-4) → T2 kabuk →
+  T3 AYS
 - **Soru / öneri:** —
 
 ## HATA (H)

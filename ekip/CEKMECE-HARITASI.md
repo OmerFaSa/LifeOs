@@ -1,7 +1,12 @@
-# Çekmece haritası — Part 9 önerisi (ONAY BEKLİYOR, uygulanmadı)
+# Çekmece haritası — Part 9 (ONAYLANDI 2026-09-24, uygulanıyor: EKIP-PLANI T2–T3)
 
-> 2026-09-24: Bu harita artık `ekip/EKIP-PLANI.md`'nin girdisidir. Dört soru o planın §8'inde
-> (T0) kullanıcıya soruluyor; cevabı TASARIM rolü buraya işler.
+> **Kullanıcının cevabı (T0, 2026-09-24): «önerilerini uygula».** Aşağıdaki dört soru
+> öneri gibi kapandı: (1) sekiz çekmece bu ad ve sırayla; (2) Rütbe **Ayarlar › Rütbe**'de,
+> üst çubuktaki rütbe çipi oraya açılır; (3) telefon alt bandı **Bugün · Plan · Çalışma ·
+> Menü** + sağ altta **+**, Onaylar üst çubuktaki mor sayaçtan açılır (bu, aşağıdaki beş
+> düğmeli önerinin yerine geçer); (4) ESP'nin altı disiplini tek **Çalışma** çekmecesinde
+> bölüm. Ayrıca: paletler ve beş düzen kalkar (Görünüm: Açık · Koyu · Sistem), Inter tek
+> aile, varsayılan tema açık, HKM yüzü en sonda aynı dile geçer.
 
 > Bu belge bir **öneridir**. Kod değişmedi. Kullanıcı onaylarsa (ya da düzeltirse)
 > Part 9 buna göre uygulanır. Görsel tasarım (renk, yazı, boşluk) ayrı adımdır; burada
@@ -47,7 +52,8 @@ Bugün'de (HKM teklifi, King teklifi), Ofis'te (öneriler) ve Danışma'da ayrı
 | 7 | **Kütüphanem** | BAM'ın ürettikleri · Kendi kaynakların | Test kitabı, ünite, gıda bilgisi, ürünler, rapor. «Kütüphane» adı yalnız burada. |
 | 8 | **Ayarlar** | Profil · Görünüm ve veri · HKM · Rehber | Rütbe de burada bir bölüm olur (XP yalnız görünürlüktür, kendi çekmecesini gerektirmez). |
 
-Mobil alt çubuk (5 düğme): **Bugün · Plan · Çalışma · Onaylar · Menü**.
+Mobil alt çubuk (karar 3): **Bugün · Plan · Çalışma · Menü** + sağ altta **+** (hızlı
+ekle). Onaylar üst çubuktaki mor sayaçtan açılır.
 
 ## 3 · Çalışma çekmecesinin bölümleri (modüle özgü, en çok 6)
 

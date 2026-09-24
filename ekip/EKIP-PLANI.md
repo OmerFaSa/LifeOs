@@ -328,7 +328,12 @@ bağımsızdır.
 | 7 | ESP'nin altı disiplini tek Çalışma çekmecesinde bölüm olarak mı dursun? | Evet |
 | 8 | HKM yüzü bu ekiple mi aynı dile geçsin (T6, K6)? | Evet, en sonda |
 
-Cevaplar: *(T0'dan sonra T buraya işler.)*
+Cevaplar (kullanıcı, 2026-09-24: «önerilerini uygula»): **sekizi de öneri gibi.**
+1 evet, sekiz çekmece bu ad ve sırayla · 2 Ayarlar › Rütbe, üst çubuktaki çip oraya açılır ·
+3 Bugün · Plan · Çalışma · Menü + sağ altta +; Onaylar üst çubuktaki mor sayaçtan ·
+4 paletler ve beş düzen kalkar, yerine Görünüm: Açık · Koyu · Sistem · 5 Inter tek aile ·
+6 varsayılan açık, koyu sistemden ya da elle · 7 ESP'nin altı disiplini tek Çalışma
+çekmecesinde bölüm · 8 HKM yüzü de bu dile geçer, en sonda (T6, K6).
 
 ## 9. Başlatma mesajları — kullanıcı her Claude'a bir tanesini gönderir
 
