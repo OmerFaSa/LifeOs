@@ -8,7 +8,7 @@
 
      base.css     219 satir   x3
      layout.css   671 satir   x3
-     designs.css  565 satir   x3
+     designs.css  565 satir   x3   (2026-09-24 kalkti: tek tasarim, EKIP-PLANI §8-4)
                               = 4 365 satir birebir tekrar
 
    Birinde yapilan bir duzeltme digerlerinde unutulur ve fark ancak iki
@@ -135,7 +135,6 @@ DOSYALAR = {
     "jeton.css":    "css",
     "base.css":     "css",
     "layout.css":   "css",
-    "designs.css":  "css",
     # KESINLIK ETIKETI — dort etiketin adi, gorseli ve isaretlemesi.
     # Uc arayuzde de BIREBIR ayni olmak zorunda: ayni `measured`
     # birinde «olculdu» birinde baska bir sey gosterirse, deponun en

@@ -358,8 +358,6 @@ R.App = (function(){
   function appearanceHtml(){
     const p = S.profile || {};
     const theme = p.theme || 'system';
-    const palette = p.palette || R.DEFAULT_PALETTE;
-    const design = p.design || R.DEFAULT_DESIGN;
     const ad = (p.name || '').trim();
     return String(html`
       <div class="katman appear" id="appearance" role="dialog" aria-label="Profil ve görünüm">
@@ -377,31 +375,8 @@ R.App = (function(){
           </button>`)}
         </div>
 
-        <div class="appear__label">Palet</div>
-        <div class="appear__palettes">${map(R.PALETTES, pal => html`
-          <button class="${cls('palbtn', pal.id === palette && 'is-on')}"
-            data-act="set-palette" data-palette="${pal.id}" title="${pal.note}"
-            aria-pressed="${pal.id === palette ? 'true' : 'false'}">
-            <span class="palbtn__dot" style="background:${pal.swatch[0]}"></span>
-            <span>${pal.name}</span>
-          </button>`)}
-        </div>
-
-        <div class="appear__label">Düzen</div>
-        <div class="appear__designs">${map(R.DESIGNS, d => html`
-          <button class="${cls('desbtn', d.id === design && 'is-on')}"
-            data-act="set-design" data-design="${d.id}" title="${d.note}"
-            aria-pressed="${d.id === design ? 'true' : 'false'}">
-            <span class="${'desbtn__mini desbtn__mini--' + d.swatch}" aria-hidden="true"
-              >${raw('<i></i>'.repeat(d.swatch === 'nodes' ? 4 : 5))}</span>
-            <span class="desbtn__name">${d.name}</span>
-          </button>`)}
-        </div>
-
-        <p class="appear__note">Tema, palet ve düzen bu profile kaydedilir.
-          «Sistem» seçiliyken cihazın açık/koyu tercihi izlenir. Düzen yalnız
-          iskeleti değiştirir: durum renkleri ve kesinlik etiketleri
-          hiçbir düzende değişmez.</p>
+        <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
+          cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>
       </div>`);
   }
 
@@ -590,18 +565,6 @@ R.App = (function(){
     return true;
   }
 
-  /* Bolumun rengi KOKTE durur: CSS `--sec` jetonunu oradan okur.
-
-     palettes.css yedi bolum imzasi tasiyordu ama kimse `data-section`
-     yazmiyordu: alti bolumun altisi da ana rengi kullaniyordu, yani
-     «tek tasarim, alti imza» kurali yaziliydi ama calismiyordu.
-
-     Yeniden cizimde degil YONLENDIRMEDE yazilir ki her karede DOM'a
-     dokunulmasin. */
-  function applySection(route){
-    document.documentElement.setAttribute('data-section', bolumOf(route).id);
-  }
-
   function go(route){
     /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
        acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
@@ -620,7 +583,6 @@ R.App = (function(){
     if(gizliMi(route)) route = 'today';
     S.route = route;
     rotaDegisti = true;
-    applySection(route);
     S.sidebarOpen = false;
     /* Açık deneme ayrıntısı gezinmede KAPANMAZ: Deneme'ye dönen kişi
        bıraktığı denemeyi görür. (Burada `examOpen = examOpen` diye hiçbir şey
@@ -670,20 +632,11 @@ R.App = (function(){
     if(t === 'light') root.setAttribute('data-theme','light');
     else if(t === 'dark') root.setAttribute('data-theme','dark');
     else root.removeAttribute('data-theme');
-
-    const p = (S.profile && S.profile.palette) || R.DEFAULT_PALETTE;
-    if(p === R.DEFAULT_PALETTE) root.removeAttribute('data-palette');
-    else root.setAttribute('data-palette', p);
-
-    /* Duzen ISKELETI degistirir: gezinmenin nerede durdugunu, kartin
-       kutu mu cizgi mi oldugunu. Varsayilan olan hicbir sey YAZMAZ —
-       varsayilanin bedeli sifir olmalidir. */
-    /* TANIMSIZ DUZEN VARSAYILANA DUSER. Eski profillerde artik olmayan
-       bir duzen adi kayitli olabilir ('panel'); onu koke yazmak, hicbir
-       kurali olmayan bir nitelik birakir ve hata ayiklarken yaniltir. */
-    const d = (S.profile && S.profile.design) || R.DEFAULT_DESIGN;
-    if(d === R.DEFAULT_DESIGN || !R.DESIGN_BY_ID[d]) root.removeAttribute('data-design');
-    else root.setAttribute('data-design', d);
+    /* Paletler ve beş düzen kalktı (kullanıcı kararı §8-4, 2026-09-24):
+       eski profilde kalan `palette`/`design` değeri okunmaz; kökte
+       kalmış nitelik de silinir. */
+    root.removeAttribute('data-palette');
+    root.removeAttribute('data-design');
   }
 
   /* ---------- kuresel eylemler ---------- */
@@ -732,19 +685,6 @@ R.App = (function(){
       S.profile.theme = el.dataset.theme;
       await M.saveProfile();
       applyTheme(); refreshAppearance();
-    },
-    async 'set-palette'(el){
-      S.profile.palette = el.dataset.palette;
-      await M.saveProfile();
-      applyTheme(); refreshAppearance();
-    },
-    /* Duzen degisince sayfa YENIDEN CIZILIR: kimi duzen kabugun
-       izgarasini degistiriyor ve yapiskan sutunlarin yeni olcuyle
-       yerlesmesi gerekiyor. */
-    async 'set-design'(el){
-      S.profile.design = el.dataset.design;
-      await M.saveProfile();
-      applyTheme(); refreshAppearance(); render();
     },
     /* Sert yenileme: adrese bir kerelik damga eklenir, boylece tarayici
        sayfayi ve bagli dosyalari onbellekten degil sunucudan ister.
@@ -1335,7 +1275,6 @@ R.App = (function(){
         console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
       }
       applyTheme();
-      applySection(S.route);
       await render();
 
       // AI koc yetenegi acilisi bloklamaz; hazir olunca panelleri gostermek icin yeniden ciz.

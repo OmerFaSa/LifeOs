@@ -129,14 +129,13 @@ ESP.Screens.profile = (function(){
               hangisinin doğru olduğu sorusunu doğuruyor.
 
            Tek kaynak: `profile`. Bu ekran üst çubuğun kullandığı EYLEMLERİ
-           çağırır — ayrı bir yol açmaz. */
+           çağırır — ayrı bir yol açmaz. Paletler ve beş düzen kullanıcı
+           kararıyla kalktı (§8-4): yalnız tema kaldı. */
         K.Entry({
           label:'GÖRÜNÜM',
-          meta:(ESP.PALETTES.filter(x => x.id === ((p.palette) || ESP.DEFAULT_PALETTE))[0]
-            || {}).name || 'Kâğıt',
-          note:'Aynı üç tercih üst çubuktaki palet düğmesinden de açılır ve '
-             + 'ikisi aynı kaydı kullanır. Palet rengi, düzen iskeleti '
-             + 'değiştirir; durum renkleri ikisinden de etkilenmez.',
+          meta:({ system:'Sistem', light:'Açık', dark:'Koyu' })[p.theme || 'system'] || 'Sistem',
+          note:'Aynı tercih üst çubuktaki görünüm düğmesinden de açılır ve ikisi aynı '
+             + 'kaydı kullanır. Tek tasarım: renk modülü söyler.',
           wide:true,
           body:html`
             ${K.SectionTitle('Tema')}
@@ -146,21 +145,7 @@ ESP.Screens.profile = (function(){
                 { id:'dark', label:'Koyu', note:'Her zaman koyu' }],
               x => K.PickCard({ label:x.label, meta:x.note,
                 on:(p.theme || 'system') === x.id,
-                act:'set-theme', data:{ 'data-theme':x.id } }))}</div>
-            <div class="mt-10">
-              ${K.SectionTitle('Palet')}
-              <div class="picks picks--disc">${map(ESP.PALETTES, x => K.PickCard({
-                label:x.name, meta:x.note,
-                on:(p.palette || ESP.DEFAULT_PALETTE) === x.id,
-                act:'set-palette', data:{ 'data-palette':x.id } }))}</div>
-            </div>
-            <div class="mt-10">
-              ${K.SectionTitle('Düzen')}
-              <div class="picks picks--disc">${map(ESP.DESIGNS, x => K.PickCard({
-                label:x.name, meta:x.note,
-                on:(p.design || 'defter') === x.id,
-                act:'set-design', data:{ 'data-design':x.id } }))}</div>
-            </div>`,
+                act:'set-theme', data:{ 'data-theme':x.id } }))}</div>`,
         }),
 
         K.Entry({

@@ -8,7 +8,7 @@
 > - **Jetonlar tek kaynakta:** `brand/ortak/jeton.css` → `src/css/jeton.css`
 >   (kopyayı elle düzenleme; `python3 tools/ortak.py --yay`). Modülün
 >   `tokens.css`'i yalnız kuyruktur: `--mod-*` bağlaması, ajan, makro ve
->   grafik serisi renkleri. Yükleme: `fonts → jeton → tokens → palettes`.
+>   grafik serisi renkleri. Yükleme: `fonts → jeton → tokens`. Paletler ve beş düzen kalktı (§8-4): tek tasarım, tema Açık · Koyu · Sistem.
 > - **Renk sahipliği söyler:** mavi AYS (`--ays`), yeşil SPİ (`--spi`),
 >   turuncu ESP (`--esp`), mor Merkez (`--mer`). Yeşil ve kırmızı yalnız
 >   yön bildirir (`--ok`, `--bad`, `--now`). Derse, kategoriye, süse renk yok.

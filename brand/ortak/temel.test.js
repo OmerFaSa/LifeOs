@@ -78,5 +78,24 @@
       expect(getComputedStyle(b).backgroundColor).toBe(renk(kok.getPropertyValue('--ink').trim()));
       d.remove();
     });
+
+    /* §8-4 (kullanıcı kararı): paletler ve beş düzen kalktı. Bir stil
+       sayfası yeniden `[data-palette]`/`[data-design]` kuralı taşırsa, tek
+       tasarım sessizce ikiye ayrılır; bölüm rengi (--sec) de modülün
+       rengidir, bölüme göre değişmez. */
+    it('tek tasarım: palet ve düzen kuralı yok; bölüm rengi modül rengi', () => {
+      let kural = 0;
+      const tara = liste => Array.from(liste || []).forEach(r => {
+        if(/data-(palette|design)/.test(r.selectorText || '')) kural++;
+        if(r.cssRules) tara(r.cssRules);
+      });
+      Array.from(document.styleSheets).forEach(ss => { try{ tara(ss.cssRules); }catch(e){} });
+      expect(kural).toBe(0);
+      const kok = document.documentElement;
+      const v = n => getComputedStyle(kok).getPropertyValue(n).trim();
+      const renk = x => { const t = document.createElement('i'); t.style.color = x; document.body.appendChild(t);
+        const c = getComputedStyle(t).color; t.remove(); return c; };
+      expect(renk(v('--sec'))).toBe(renk(v('--primary')));
+    });
   });
 })();

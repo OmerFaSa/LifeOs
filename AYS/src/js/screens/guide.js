@@ -606,37 +606,12 @@ R.Screens.guide = (function(){
 
         when(R.Hafizam, () => hafizaCard()),
 
-        K.Card({ title:'Görünüm', sub:'Tema ve renk bu cihazda saklanır',
+        K.Card({ title:'Görünüm', sub:'Tema bu profile kaydedilir',
           body:html`
             ${K.Segmented({ items:THEMES, value:S.profile.theme || 'system', act:'set-theme',
               block:true, primary:true, aria:'Tema' })}
-
-            <span class="mono-label palettes__label">Renk paleti</span>
-            <div class="palettes">${map(R.PALETTES, p => html`
-              <button class="${(S.profile.palette || R.DEFAULT_PALETTE) === p.id ? 'palettebtn is-on' : 'palettebtn'}"
-                data-act="set-palette" data-palette="${p.id}"
-                aria-pressed="${(S.profile.palette || R.DEFAULT_PALETTE) === p.id ? 'true' : 'false'}">
-                <span class="palettebtn__dots">
-                  <span style="background:${p.swatch[0]}"></span>
-                  <span style="background:${p.swatch[1]}"></span>
-                </span>
-                <b>${p.name}</b><span class="tiny dim">${p.note}</span>
-              </button>`)}</div>
-
-            <p class="tiny dim mt-10">Koyu mod saf siyah üzerine saf beyaz kullanmaz;
-              her palet iki temada da WCAG AA kontrastına göre ayarlanmıştır.</p>
-
-            <span class="mono-label palettes__label">Düzen</span>
-            <p class="tiny dim" style="margin:-2px 0 8px">Palet RENGİ değiştirir,
-              düzen İSKELETİ: gezinmenin nerede durduğunu, kartın kutu mu çizgi mi
-              olduğunu. Durum renkleri ve kaynak etiketleri hiçbir düzende değişmez.</p>
-            <div class="palettes">${map(R.DESIGNS, d => html`
-              <button class="${(S.profile.design || R.DEFAULT_DESIGN) === d.id ? 'palettebtn is-on' : 'palettebtn'}"
-                data-act="set-design" data-design="${d.id}"
-                aria-pressed="${(S.profile.design || R.DEFAULT_DESIGN) === d.id ? 'true' : 'false'}">
-                <span class="dsgn dsgn--${d.swatch}" aria-hidden="true"></span>
-                <b>${d.name}</b><span class="tiny dim">${d.note}</span>
-              </button>`)}</div>` }),
+            <p class="tiny dim mt-10">Tek tasarım: renk modülü söyler (mavi AYS). «Sistem»
+              seçiliyken cihazın açık/koyu tercihi izlenir.</p>` }),
       ])),
       K.Span(6, K.Stack([
         dataCard(),
@@ -837,20 +812,6 @@ R.Screens.guide = (function(){
       S.profile.coachTone = el.dataset.value;
       await M.saveProfile();
       UI.toast('Koç üslubu: ' + R.COACH_TONES[el.dataset.value].name);
-      R.App.render();
-    },
-    async 'set-palette'(el){
-      S.profile.palette = el.dataset.palette;
-      await M.saveProfile();
-      R.App.applyTheme();
-      R.App.render();
-    },
-    /* Duzen ANINDA uygulanir: uzak bir «Kaydet» dugmesini beklemek,
-       secimin ise yaramadigi izlenimi veriyordu. */
-    async 'set-design'(el){
-      S.profile.design = el.dataset.design;
-      await M.saveProfile();
-      R.App.applyTheme();
       R.App.render();
     },
     async 'set-theme'(el){

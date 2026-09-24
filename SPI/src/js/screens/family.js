@@ -116,7 +116,6 @@ SP.Screens.family = (function(){
      Kaydet düğmesi yalnız hane sayısı için kalır. */
   function prefCard(){
     const p = S.prefs || M.defaultPrefs();
-    const design = S.profile.design || SP.DEFAULT_DESIGN;
     return K.Card({
       title:'Görünüm ve hane ayarı',
       body:html`
@@ -125,20 +124,13 @@ SP.Screens.family = (function(){
             input:K.Select({ id:'pref-theme', change:'set-look', value:S.profile.theme, options:[
               { value:'system', label:'Sistem' }, { value:'light', label:'Açık' },
               { value:'dark', label:'Koyu' }] }) })}
-          ${K.Field({ label:'Palet',
-            input:K.Select({ id:'pref-palette', change:'set-look',
-              value:S.profile.palette || SP.DEFAULT_PALETTE,
-              options:SP.PALETTES.map(x => ({ value:x.id, label:x.name })) }) })}
-          ${K.Field({ label:'Düzen', hint:SP.DESIGN_BY_ID[design].note,
-            input:K.Select({ id:'pref-design', change:'set-look', value:design,
-              options:SP.DESIGNS.map(x => ({ value:x.id, label:x.name })) }) })}
           ${K.Field({ label:'Hanedeki kişi sayısı', hint:'sepet hesabı için',
             input:K.Input({ id:'pref-size', type:'number', numeric:true, min:1, max:20,
               value:p.householdSize || 1 }) })}
         </div>
         ${K.Notice({ tone:'info', class:'mt-10',
-          body:'Tema, palet ve düzen seçildiği anda uygulanır. «Kaydet» yalnız '
-            + 'hanedeki kişi sayısı için.' })}`,
+          body:'Tema seçildiği anda uygulanır. «Kaydet» yalnız hanedeki kişi '
+            + 'sayısı için. Tek tasarım: renk modülü söyler.' })}`,
       foot:K.Button({ label:'Kaydet', size:'sm', tone:'primary', act:'save-prefs' }),
     });
   }
@@ -149,18 +141,15 @@ SP.Screens.family = (function(){
       <div class="mt-24">${raw(UI.rail(['profiles', 'macro-target', 'lab-linked-food', 'privacy']))}</div>`);
   }
 
-  /* Üç görünüm listesi de tek bir değişiklik işlevine bağlanır: hangisi
-     değiştiyse o okunur, profile yazılır ve kök hemen güncellenir. */
+  /* Görünüm listesi tek bir değişiklik işlevine bağlanır: profile yazılır
+     ve kök hemen güncellenir. Paletler ve beş düzen kullanıcı kararıyla
+     kalktı (§8-4); yalnız tema kaldı. */
   const change = {
     async 'set-look'(){
       const val = id => { const el = document.getElementById(id); return el ? el.value : null; };
       const patch = {};
       const theme = val('pref-theme');
-      const palette = val('pref-palette');
-      const design = val('pref-design');
       if(theme) patch.theme = theme;
-      if(palette) patch.palette = palette;
-      if(design && SP.DESIGN_BY_ID[design]) patch.design = design;
       await M.saveProfile(patch);
       SP.App.applyTheme();
       SP.App.render();

@@ -6,7 +6,7 @@
      2. Kimlik renkleri: ajan avatarları, makro şeridi, grafik serileri.
         Kimlik taşırlar, durum değil; yanlarında her zaman yazılı etiket durur.
 
-   Yükleme sırası: fonts.css → jeton.css → tokens.css → palettes.css. */
+   Yükleme sırası: fonts.css → jeton.css → tokens.css (paletler kalktı, §8-4). */
 
 :root{
   --mod:var(--spi);

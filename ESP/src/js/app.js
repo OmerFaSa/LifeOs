@@ -132,7 +132,7 @@ ESP.App = (function(){
             </button>`)}
           <div class="navtools">
             ${ESP.C.IconButton({ icon:'search', aria:'Komut paleti (Ctrl+K)', title:'Ctrl+K', act:'open-palette' })}
-            ${ESP.C.IconButton({ icon:'palette', aria:'Görünüm', title:'Tema ve palet',
+            ${ESP.C.IconButton({ icon:'palette', aria:'Görünüm', title:'Tema: Açık · Koyu · Sistem',
               act:'open-appearance', data:{ id:'appearance-btn' } })}
             ${ESP.C.IconButton({ icon:'sliders', aria:'Ayarlar', act:'go', data:{ 'data-route':'profile' } })}
             ${ESP.C.IconButton({ icon:'menu', aria:'Bölümler', act:'toggle-menu', class:'sitenav__menu' })}
@@ -388,8 +388,6 @@ ESP.App = (function(){
   function appearanceHtml(){
     const p = S.profile || {};
     const theme = p.theme || 'system';
-    const palette = p.palette || ESP.DEFAULT_PALETTE;
-    const design = p.design || ESP.DEFAULT_DESIGN;
     return String(html`
       <div class="appear" id="appearance" role="dialog" aria-label="Görünüm">
         <div class="appear__label">Tema</div>
@@ -401,31 +399,8 @@ ESP.App = (function(){
           </button>`)}
         </div>
 
-        <div class="appear__label">Palet</div>
-        <div class="appear__palettes">${map(ESP.PALETTES, pal => html`
-          <button class="${cls('palbtn', pal.id === palette && 'is-on')}"
-            data-act="set-palette" data-palette="${pal.id}" title="${pal.note}"
-            aria-pressed="${pal.id === palette ? 'true' : 'false'}">
-            <span class="palbtn__dot" style="background:${pal.swatch[0]}"></span>
-            <span>${pal.name}</span>
-          </button>`)}
-        </div>
-
-        <div class="appear__label">Düzen</div>
-        <div class="appear__designs">${map(ESP.DESIGNS, d => html`
-          <button class="${cls('desbtn', d.id === design && 'is-on')}"
-            data-act="set-design" data-design="${d.id}" title="${d.note}"
-            aria-pressed="${d.id === design ? 'true' : 'false'}">
-            <span class="${'desbtn__mini desbtn__mini--' + d.swatch}" aria-hidden="true"
-              >${raw('<i></i>'.repeat(d.swatch === 'nodes' ? 4 : 5))}</span>
-            <span class="desbtn__name">${d.name}</span>
-          </button>`)}
-        </div>
-
-        <p class="appear__note">Tema, palet ve düzen bu profile kaydedilir.
-          «Sistem» seçiliyken cihazın açık/koyu tercihi izlenir. Düzen yalnız
-          iskeleti değiştirir: durum renkleri ve kesinlik etiketleri
-          hiçbir düzende değişmez.</p>
+        <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
+          cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>
       </div>`);
   }
 
@@ -698,16 +673,11 @@ ESP.App = (function(){
     if(t === 'light') root.setAttribute('data-theme', 'light');
     else if(t === 'dark') root.setAttribute('data-theme', 'dark');
     else root.removeAttribute('data-theme');
-
-    const p = (S.profile && S.profile.palette) || ESP.DEFAULT_PALETTE;
-    if(p === ESP.DEFAULT_PALETTE) root.removeAttribute('data-palette');
-    else root.setAttribute('data-palette', p);
-
-    /* Düzen de kökte durur. Varsayılan «defter» hiçbir şey yazmaz:
-       designs.css yalnız data-design varken devreye girsin diye. */
-    const d = (S.profile && S.profile.design) || ESP.DEFAULT_DESIGN;
-    if(d === ESP.DEFAULT_DESIGN || !ESP.DESIGN_BY_ID[d]) root.removeAttribute('data-design');
-    else root.setAttribute('data-design', d);
+    /* Paletler ve beş düzen kalktı (kullanıcı kararı §8-4, 2026-09-24):
+       eski profilde kalan `palette`/`design` değeri okunmaz; kökte
+       kalmış nitelik de silinir. */
+    root.removeAttribute('data-palette');
+    root.removeAttribute('data-design');
   }
 
   /* ---------------------------------------------------------- küresel eylemler */
@@ -1028,20 +998,6 @@ ESP.App = (function(){
       await M.saveProfile({ theme:el.dataset.theme });
       applyTheme();
       refreshAppearance();
-    },
-    async 'set-palette'(el){
-      await M.saveProfile({ palette:el.dataset.palette });
-      applyTheme();
-      refreshAppearance();
-    },
-    /* Düzen değişince sayfa YENİDEN ÇİZİLİR: kimi düzen kabuğun
-       ızgarasını değiştiriyor ve yapışkan sütunların yeni ölçüyle
-       yerleşmesi gerekiyor. */
-    async 'set-design'(el){
-      await M.saveProfile({ design:el.dataset.design });
-      applyTheme();
-      refreshAppearance();
-      render();
     },
     async 'cmdk-run'(el){ ESP.Palette.runById(el.dataset.id); },
     async 'quick-save'(){ await ESP.Palette.saveQuick(); },

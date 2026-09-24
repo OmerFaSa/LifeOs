@@ -11,14 +11,13 @@
      bu istek acilisi kilitliyordu: olculdu, ag varken ilk cizim 12.552 ms,
      CDN yanit vermiyorken uygulama hic acilmiyordu. Gomulu surum ag
      istegi yapmaz. Bkz. tools/fonts.py -->
-<!-- base/layout/designs SPI (ve ESP) ile BIREBIR AYNIDIR. tokens/palettes/
-     components AYS'nin KENDI renk kimligini tasir, SPI ile birebir DEGIL
-     (cksum ile olculdu) — rota.css yalniz AYS'ye ozgu bilesenleri tasir
-     ve en sonda yuklenir. -->
+<!-- jeton/base/layout/temel/kabuk uc arayuzde BIREBIR AYNIDIR (brand/ortak).
+     tokens.css yalniz modulun kuyrugudur (--mod = AYS mavisi); rota.css
+     yalniz AYS'ye ozgu bilesenleri tasir. Paletler ve bes duzen kalkti
+     (EKIP-PLANI §8-4): tek tasarim. -->
 <link rel="stylesheet" href="css/fonts.css"/>
 <link rel="stylesheet" href="css/jeton.css"/>
 <link rel="stylesheet" href="css/tokens.css"/>
-<link rel="stylesheet" href="css/palettes.css"/>
 <link rel="stylesheet" href="css/base.css"/>
 <link rel="stylesheet" href="css/layout.css"/>
 <link rel="stylesheet" href="css/components.css"/>
@@ -28,7 +27,6 @@
 <link rel="stylesheet" href="css/kesinlik.css"/>
 <link rel="stylesheet" href="css/tanitim.css"/>
 <link rel="stylesheet" href="css/simge.css"/>
-<link rel="stylesheet" href="css/designs.css"/>
 <link rel="stylesheet" href="css/rota.css"/>
 <link rel="stylesheet" href="css/kabuk.css"/>
 <link id="pwa-manifest" rel="manifest"/>
@@ -164,8 +162,6 @@
 <script src="js/data/evidence.js"></script>
 <script src="js/data/activities.js"></script>
 <script src="js/data/scoring.js"></script>
-<script src="js/data/palettes.js"></script>
-<script src="js/data/designs.js"></script>
 <script src="js/data/templates.js"></script>
 <script src="js/data/hints.js"></script>
 <script src="js/data/rules.js"></script>

@@ -8,7 +8,8 @@
    `src/css/` klasörüne birebir kopyalanır. Kopyayı elle düzenleme.
 
    Yükleme sırası: fonts.css → jeton.css → tokens.css (modülün kuyruğu:
-   modül rengi bağlaması, ajan ve grafik serisi renkleri) → palettes.css.
+   modül rengi bağlaması, ajan ve grafik serisi renkleri). Paletler ve beş
+   düzen kalktı (EKIP-PLANI §8-4): tek tasarım, açık ve koyu tema.
 
    Kurallar:
    1. Adlar KORUNUR (--bg, --surface, --text…), değerler v4'tür. Yeni ad
@@ -68,6 +69,11 @@
   --info:#4A5363;
 
   --primary-soft:var(--mod-t);
+  /* Bölüm rengi (--sec) artık yoktur: renk modülü söyler (v4). Eski ad
+     odak halkası, seçim ve etkin sekme gibi yerlerde kullanılıyor; modül
+     rengine bağlanır. */
+  --sec:var(--primary);
+  --sec-soft:var(--primary-soft);
   --accent-soft:color-mix(in oklab, var(--accent) 12%, var(--surface));
   --danger-soft:color-mix(in oklab, var(--danger) 10%, var(--surface));
   --info-soft:color-mix(in oklab, var(--info) 8%, var(--surface));

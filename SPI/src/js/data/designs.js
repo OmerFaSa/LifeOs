@@ -1,39 +1,17 @@
-/* DÜZENLER — seçilebilir tasarım dilleri.
+/* DÜZENLER — 2026-09-24'ten beri TEK düzen (kullanıcı kararı, EKIP-PLANI
+   §8-4: paletler ve beş düzen kalktı). Liste, düzeni ölçen araçlar
+   (tools/designcheck.js, tasarimcheck.js) ve veri testleri için durur.
 
-   Palet rengi değiştirir; düzen İSKELETİ değiştirir: gezinmenin nerede
-   durduğunu, bir satırın kutu mu çizgi mi olduğunu, neyin büyük neyin
-   küçük yazıldığını.
-
-   Beşi de aynı DOM üzerinde çalışır. Ekranlar hangi düzenin seçili
-   olduğunu bilmez ve bilmemelidir; yoksa her ekran beş kez yazılırdı.
-   Düzen yalnız `:root[data-design]` altındaki CSS'tir (designs.css).
-
-   İki değişmez düzenden düzene geçmez:
-     · durum renkleri (referans altı / hedefte) hiçbir düzende değişmez
-     · kesinlik etiketleri (ölçüldü / tahmin) hiçbir düzende gizlenmez */
+   Önce beş düzen vardı (defter, odak, kraft, katmanlı, harita) ve
+   `:root[data-design]` altındaki CSS'le (designs.css) iskeleti
+   değiştiriyordu. v4 tek iskelettir: brand/ortak/kabuk.css. */
 
 window.SP = window.SP || {};
 
 SP.DESIGNS = [
   { id:'defter', name:'Defter',
-    note:'Varsayılan — solda künye sütunu, kutusuz satırlar, ince çizgiler',
+    note:'Tek tasarım (v4) — ton ve ince çizgi, renk modülü söyler',
     swatch:'lines' },
-
-  { id:'odak', name:'Odak',
-    note:'Ekranda tek bir büyük sayı; gerisi ikinci planda durur',
-    swatch:'single' },
-
-  { id:'kraft', name:'Kraft',
-    note:'Kâğıt dokusu ve daktilo künyesi — el defteri sıcaklığı',
-    swatch:'paper' },
-
-  { id:'katmanli', name:'Katmanlı',
-    note:'Bölümler sol kenar çubuğuna iner; masaüstü yazılımı düzeni',
-    swatch:'rail' },
-
-  { id:'harita', name:'Harita',
-    note:'Satırlar noktalı tuval üstünde düğüm kartlara döner',
-    swatch:'nodes' },
 ];
 
 SP.DEFAULT_DESIGN = 'defter';
