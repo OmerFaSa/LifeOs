@@ -112,5 +112,36 @@ LIFEOS.YedekAg = (function(){
     return { dene, baslat, son:() => son };
   }
 
-  return { kur };
+  /* YENİ CİHAZA TAŞIMA (fikir 54): HKM'deki EN YENİ yedeği çeker ve
+     döndürür; UYGULAMAZ. Uygulamak modülün kendi içe aktarma yoludur
+     (okuma denetimi, onay, geri alma noktası). HKM modüle yazmaz.
+     `hkmdenCek({ hkm:() => Beacon, modul:'ays', fetch? })`
+       → { ok, tarih, tarihYazi, boyut, obj } | { ok:false, why } */
+  async function hkmdenCek(ortam){
+    const b = ortam.hkm ? ortam.hkm() : null;
+    const a = b && typeof b.settings === 'function' ? (b.settings() || {}) : {};
+    const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
+    if(!b || !a.enabled || !a.token || !b.urlOk(a.url) || !f){
+      return { ok:false, why:'HKM bağlı değil. Önce Ayarlar › HKM bağlantısından eşle.' };
+    }
+    const url = String(a.url).replace(/\/$/, '');
+    const h = { 'Authorization':'Bearer ' + a.token };
+    try{
+      const l = await f(url + '/api/yedek', { headers:h });
+      if(l.status !== 200) return { ok:false, why:'HKM yedek listesini vermedi (' + l.status + ').' };
+      const son = (((await l.json()) || {}).moduller || {})[ortam.modul];
+      if(!Array.isArray(son) || !son.length) return { ok:false, why:'HKM’de bu modülün yedeği yok.' };
+      const y = son[0];
+      const r = await f(url + '/api/yedek/' + encodeURIComponent(ortam.modul) + '/'
+        + encodeURIComponent(y.tarih), { headers:h });
+      if(r.status !== 200) return { ok:false, why:'Yedek indirilemedi (' + r.status + ').' };
+      let obj;
+      try{ obj = JSON.parse(await r.text()); }catch(e){ return { ok:false, why:'Yedek okunamadı; dosya bozuk.' }; }
+      return { ok:true, tarih:y.tarih, tarihYazi:y.tarih_yazi || y.tarih, boyut:y.boyut || '', obj };
+    }catch(e){
+      return { ok:false, why:'HKM’ye ulaşılamadı.' };
+    }
+  }
+
+  return { kur, hkmdenCek };
 })();

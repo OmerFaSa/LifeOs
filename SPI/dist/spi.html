@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'1848640', at:'2026-09-24 10:11', dirty:true };
+SP.BUILD = { id:'f531289', at:'2026-09-24 10:24', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -10054,7 +10054,38 @@ LIFEOS.YedekAg = (function(){
     return { dene, baslat, son:() => son };
   }
 
-  return { kur };
+  /* YENİ CİHAZA TAŞIMA (fikir 54): HKM'deki EN YENİ yedeği çeker ve
+     döndürür; UYGULAMAZ. Uygulamak modülün kendi içe aktarma yoludur
+     (okuma denetimi, onay, geri alma noktası). HKM modüle yazmaz.
+     `hkmdenCek({ hkm:() => Beacon, modul:'ays', fetch? })`
+       → { ok, tarih, tarihYazi, boyut, obj } | { ok:false, why } */
+  async function hkmdenCek(ortam){
+    const b = ortam.hkm ? ortam.hkm() : null;
+    const a = b && typeof b.settings === 'function' ? (b.settings() || {}) : {};
+    const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
+    if(!b || !a.enabled || !a.token || !b.urlOk(a.url) || !f){
+      return { ok:false, why:'HKM bağlı değil. Önce Ayarlar › HKM bağlantısından eşle.' };
+    }
+    const url = String(a.url).replace(/\/$/, '');
+    const h = { 'Authorization':'Bearer ' + a.token };
+    try{
+      const l = await f(url + '/api/yedek', { headers:h });
+      if(l.status !== 200) return { ok:false, why:'HKM yedek listesini vermedi (' + l.status + ').' };
+      const son = (((await l.json()) || {}).moduller || {})[ortam.modul];
+      if(!Array.isArray(son) || !son.length) return { ok:false, why:'HKM’de bu modülün yedeği yok.' };
+      const y = son[0];
+      const r = await f(url + '/api/yedek/' + encodeURIComponent(ortam.modul) + '/'
+        + encodeURIComponent(y.tarih), { headers:h });
+      if(r.status !== 200) return { ok:false, why:'Yedek indirilemedi (' + r.status + ').' };
+      let obj;
+      try{ obj = JSON.parse(await r.text()); }catch(e){ return { ok:false, why:'Yedek okunamadı; dosya bozuk.' }; }
+      return { ok:true, tarih:y.tarih, tarihYazi:y.tarih_yazi || y.tarih, boyut:y.boyut || '', obj };
+    }catch(e){
+      return { ok:false, why:'HKM’ye ulaşılamadı.' };
+    }
+  }
+
+  return { kur, hkmdenCek };
 })();
 
 /* ==== js/core/kingteklif.js ==== */
@@ -41725,6 +41756,7 @@ SP.Screens.guide = (function(){
              + 'bu içe aktarma için geçerli.' }))}`,
       foot:html`${K.Button({ label:'Yedek indir', size:'sm', tone:'primary', act:'backup' })}
         ${K.Button({ label:'Yedek yükle', size:'sm', act:'restore' })}
+        ${when((SP.Beacon && SP.Beacon.settings().enabled), () => K.Button({ label:'HKM’deki yedekten yükle', size:'sm', act:'restore-hkm' }))}
         ${when(undo, () => K.Button({ label:'İçe aktarmayı geri al', size:'sm', tone:'danger', act:'undo-import' }))}
         ${K.Button({ label:'Bütün veriyi sil', size:'sm', tone:'danger', act:'wipe' })}`,
     });
@@ -42074,6 +42106,27 @@ SP.Screens.guide = (function(){
       await M.markBackup();
       UI.toast('Yedek indirildi');
       SP.App.render();
+    },
+    /* Yeni cihaza taşıma (fikir 54): HKM'deki en yeni yedek çekilir,
+       okuma denetiminden geçer, onayla uygulanır; «İçe aktarmayı geri al»
+       geri dönüş noktasıdır (büyük aksiyon, AGENTS §1.9). */
+    async 'restore-hkm'(){
+      const r = await LIFEOS.YedekAg.hkmdenCek({ hkm:() => SP.Beacon, modul:'spi' });
+      if(!r.ok){ UI.toast(r.why, { life:5000 }); return; }
+      const c = SP.Store.readBackup(r.obj);
+      if(!c.ok){ UI.toast(c.error || 'Geçersiz yedek'); return; }
+      UI.confirmSheet('HKM’deki yedek yüklensin mi?',
+        r.tarihYazi + ' tarihli yedek' + (r.boyut ? ' (' + r.boyut + ')' : '') + ' bu cihazdaki verinin '
+          + 'TAMAMINI değiştirir. Yanlışsa «İçe aktarmayı geri al» ile bir önceki duruma dönebilirsin.',
+        async () => {
+          try{
+            await SP.Store.importAll(r.obj);
+            UI.toast('HKM yedeği yüklendi — sayfa yenileniyor');
+            setTimeout(() => location.reload(), 900);
+          }catch(e){
+            UI.toast('Yükleme başarısız: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
+          }
+        }, true);
     },
     async restore(){
       const input = document.createElement('input');

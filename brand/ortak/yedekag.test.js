@@ -90,4 +90,36 @@
       expect(x.bildirilen).toEqual(['AYS yedeği bir öncekinin yarısından küçük.']);
     });
   });
+
+  /* Fikir 54: yeni cihaza taşıma. Modül HKM'deki EN YENİ yedeğini çeker;
+     uygulamaz — uygulamak modülün kendi içe aktarma yoludur (önizleme,
+     onay, geri alma). */
+  describe('HKM yedeğinden geri yükleme', () => {
+    const LISTE = { moduller:{ ays:[{ tarih:'2026-09-20', tarih_yazi:'20 Eylül 2026', boyut:'2 KB' },
+      { tarih:'2026-09-18', tarih_yazi:'18 Eylül 2026', boyut:'2 KB' }], spi:[] } };
+    function sunucu(giden){
+      return async (url, o) => {
+        giden.push(url);
+        if(/\/api\/yedek$/.test(url)) return { status:200, json:async () => LISTE };
+        return { status:200, text:async () => JSON.stringify(VERI) };
+      };
+    }
+    it('en yeni yedeği çeker, uygulamaz', async () => {
+      const giden = [];
+      const r = await Y().hkmdenCek({ hkm:() => beacon(true), modul:'ays', fetch:sunucu(giden) });
+      expect(r.ok).toBe(true);
+      expect([r.tarih, r.tarihYazi]).toEqual(['2026-09-20', '20 Eylül 2026']);
+      expect(r.obj).toEqual(VERI);
+      expect(giden).toEqual(['http://127.0.0.1:4200/api/yedek', 'http://127.0.0.1:4200/api/yedek/ays/2026-09-20']);
+    });
+    it('HKM bağlı değilse, yedek yoksa ya da bozuksa söyler', async () => {
+      expect((await Y().hkmdenCek({ hkm:() => beacon(false), modul:'ays', fetch:sunucu([]) })).why).toContain('bağlı değil');
+      expect((await Y().hkmdenCek({ hkm:() => beacon(true), modul:'spi', fetch:sunucu([]) })).why).toContain('yedeği yok');
+      const bozuk = async url => /\/api\/yedek$/.test(url)
+        ? { status:200, json:async () => LISTE } : { status:200, text:async () => '{bozuk' };
+      expect((await Y().hkmdenCek({ hkm:() => beacon(true), modul:'ays', fetch:bozuk })).why).toContain('okunamadı');
+      const dusuk = async () => { throw new Error('ağ'); };
+      expect((await Y().hkmdenCek({ hkm:() => beacon(true), modul:'ays', fetch:dusuk })).ok).toBe(false);
+    });
+  });
 })();

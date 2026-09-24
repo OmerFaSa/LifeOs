@@ -2547,7 +2547,15 @@ details.detay > summary:hover{ color:var(--fg); }
       + '<p class="muted">HKM’nin bütün kaydı ve üç modülün en yeni yedeği, ne olduğunu anlatan '
       + 'bir BENİOKU ile. Dosyalar düz JSON; her metin düzenleyiciyle okunur.</p>';
     h += '<p class="muted" id="modul-yedek-not" style="margin-top:10px">Geri yüklemek için '
-      + 'dosyayı indir, modülün Rehber › Veri bölümündeki yedek yükleme düğmesiyle seç.</p>';
+      + 'modülün Rehber › Veri bölümünde «HKM’deki yedekten yükle» düğmesi var; ya da dosyayı '
+      + 'indirip yedek yükleme düğmesiyle seç.</p>';
+    /* Yeni cihaza taşıma (fikir 54): adımların metni HKM'den gelir
+       (core/yedek.py TASIMA_ADIMLARI) — zip'teki BENİOKU ile aynı. */
+    if((v.tasima || []).length){
+      h += '<div class="tag" style="margin-top:14px">' + esc(v.tasima[0].replace(/:$/, '')) + '</div>'
+        + '<ol class="muted" style="margin:6px 0 0 18px;padding:0">' + v.tasima.slice(1).map(function(x){
+          return '<li>' + esc(x.replace(/^\s*\d+\.\s*/, '')) + '</li>'; }).join('') + '</ol>';
+    }
     $('modul-yedek').innerHTML = h;
   }
 

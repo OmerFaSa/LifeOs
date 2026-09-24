@@ -548,4 +548,38 @@
       expect(U.slug('Ayşe Çınar')).toBe('ayse-cinar');
     });
   });
+
+  /* Fikir 54: HKM'deki yedekten yükleme. Çekilen yedek okuma denetiminden
+     geçmeden onay sorulmaz; onay tarihi söyler; yazma başarısızsa sayfa
+     yenilenmez ve söylenir. (Başarılı yol sayfayı yeniler; burada koşmaz.) */
+  describe('HKM yedeğinden geri yükleme', () => {
+    it('denetimden geçmeyen yedek sorulmaz; onay tarihi söyler; hata söylenir', async () => {
+      const G = SP.Screens.guide.handle;
+      const eski = { cek:LIFEOS.YedekAg.hkmdenCek, onay:SP.UI.confirmSheet, toast:SP.UI.toast,
+        imp:SP.Store.importAll, oku:SP.Store.readBackup };
+      const tost = [], onaylar = [];
+      SP.UI.toast = m => tost.push(m);
+      SP.UI.confirmSheet = (b, m, f) => onaylar.push({ m, f });
+      try{
+        LIFEOS.YedekAg.hkmdenCek = async () => ({ ok:false, why:'HKM bağlı değil.' });
+        await G['restore-hkm']();
+        expect(tost.pop()).toBe('HKM bağlı değil.');
+        LIFEOS.YedekAg.hkmdenCek = async () => ({ ok:true, tarih:'2026-09-20', tarihYazi:'20 Eylül 2026',
+          boyut:'2 KB', obj:{ __meta:{ app:'baska' }, data:{} } });
+        SP.Store.readBackup = () => ({ ok:false, error:'Bu yedek başka bir uygulamadan.' });
+        await G['restore-hkm']();
+        expect(onaylar.length).toBe(0);
+        expect(tost.pop()).toContain('başka');
+        SP.Store.readBackup = () => ({ ok:true });
+        SP.Store.importAll = async () => { throw new Error('depo dolu'); };
+        await G['restore-hkm']();
+        expect(onaylar[0].m).toContain('20 Eylül 2026');
+        await onaylar[0].f();
+        expect(tost.pop()).toContain('depo dolu');
+      }finally{
+        LIFEOS.YedekAg.hkmdenCek = eski.cek; SP.UI.confirmSheet = eski.onay; SP.UI.toast = eski.toast;
+        SP.Store.importAll = eski.imp; SP.Store.readBackup = eski.oku;
+      }
+    });
+  });
 })();

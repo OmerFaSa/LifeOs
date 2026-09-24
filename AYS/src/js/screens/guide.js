@@ -341,8 +341,9 @@ R.Screens.guide = (function(){
         ${K.Row([
           K.Button({ label:'Yedek al (JSON)', icon:'download', tone:due ? 'primary' : null, act:'export-data' }),
           K.Button({ label:'Yedekten yükle', icon:'upload', act:'import-data' }),
+          (R.Beacon && R.Beacon.settings().enabled) ? K.Button({ label:'HKM’deki yedekten yükle', icon:'upload', act:'restore-hkm' }) : '',
           K.Button({ label:'Tümünü sıfırla', icon:'trash', tone:'danger', act:'reset-data' }),
-        ], { wrap:true })}
+        ].filter(Boolean), { wrap:true })}
         <p class="tiny dim mt-10">Uygulama çevrimdışı çalışır: her kayıt önce cihaza yazılır,
           bağlantı varsa hesabına eşlenir. Yerel kullanım: ${sizeKb} KB (%${q.pct}) · şema sürümü ${R.SCHEMA_VERSION}.</p>`,
     });
@@ -900,6 +901,27 @@ R.Screens.guide = (function(){
       await M.markBackup();
       UI.toast('Yedek alındı — '+Object.keys(payload.data).length+' kayıt');
       R.App.render();
+    },
+    /* Yeni cihaza taşıma (fikir 54): HKM'deki en yeni yedek çekilir,
+       okuma denetiminden geçer, onayla uygulanır; «İçe aktarmayı geri al»
+       geri dönüş noktasıdır (büyük aksiyon, AGENTS §1.9). */
+    async 'restore-hkm'(){
+      const r = await LIFEOS.YedekAg.hkmdenCek({ hkm:() => R.Beacon, modul:'ays' });
+      if(!r.ok){ UI.toast(r.why, { life:5000 }); return; }
+      const c = R.Store.readBackup(r.obj);
+      if(!c.ok){ UI.toast(c.error || 'Geçersiz yedek'); return; }
+      UI.confirmSheet('HKM’deki yedek yüklensin mi?',
+        r.tarihYazi + ' tarihli yedek' + (r.boyut ? ' (' + r.boyut + ')' : '') + ' bu cihazdaki verinin '
+          + 'TAMAMINI değiştirir. Yanlışsa «İçe aktarmayı geri al» ile bir önceki duruma dönebilirsin.',
+        async () => {
+          try{
+            await R.Store.importAll(r.obj);
+            UI.toast('HKM yedeği yüklendi — yeniden başlatılıyor');
+            setTimeout(() => location.reload(), 900);
+          }catch(e){
+            UI.toast('Yükleme başarısız: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
+          }
+        }, true);
     },
     async 'import-data'(){
       UI.sheet({

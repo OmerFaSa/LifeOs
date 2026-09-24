@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'65a7d16', at:'2026-09-24 10:08', dirty:true };
+R.BUILD = { id:'f531289', at:'2026-09-24 10:24', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -11602,7 +11602,38 @@ LIFEOS.YedekAg = (function(){
     return { dene, baslat, son:() => son };
   }
 
-  return { kur };
+  /* YENİ CİHAZA TAŞIMA (fikir 54): HKM'deki EN YENİ yedeği çeker ve
+     döndürür; UYGULAMAZ. Uygulamak modülün kendi içe aktarma yoludur
+     (okuma denetimi, onay, geri alma noktası). HKM modüle yazmaz.
+     `hkmdenCek({ hkm:() => Beacon, modul:'ays', fetch? })`
+       → { ok, tarih, tarihYazi, boyut, obj } | { ok:false, why } */
+  async function hkmdenCek(ortam){
+    const b = ortam.hkm ? ortam.hkm() : null;
+    const a = b && typeof b.settings === 'function' ? (b.settings() || {}) : {};
+    const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
+    if(!b || !a.enabled || !a.token || !b.urlOk(a.url) || !f){
+      return { ok:false, why:'HKM bağlı değil. Önce Ayarlar › HKM bağlantısından eşle.' };
+    }
+    const url = String(a.url).replace(/\/$/, '');
+    const h = { 'Authorization':'Bearer ' + a.token };
+    try{
+      const l = await f(url + '/api/yedek', { headers:h });
+      if(l.status !== 200) return { ok:false, why:'HKM yedek listesini vermedi (' + l.status + ').' };
+      const son = (((await l.json()) || {}).moduller || {})[ortam.modul];
+      if(!Array.isArray(son) || !son.length) return { ok:false, why:'HKM’de bu modülün yedeği yok.' };
+      const y = son[0];
+      const r = await f(url + '/api/yedek/' + encodeURIComponent(ortam.modul) + '/'
+        + encodeURIComponent(y.tarih), { headers:h });
+      if(r.status !== 200) return { ok:false, why:'Yedek indirilemedi (' + r.status + ').' };
+      let obj;
+      try{ obj = JSON.parse(await r.text()); }catch(e){ return { ok:false, why:'Yedek okunamadı; dosya bozuk.' }; }
+      return { ok:true, tarih:y.tarih, tarihYazi:y.tarih_yazi || y.tarih, boyut:y.boyut || '', obj };
+    }catch(e){
+      return { ok:false, why:'HKM’ye ulaşılamadı.' };
+    }
+  }
+
+  return { kur, hkmdenCek };
 })();
 
 /* ==== js/core/kingteklif.js ==== */
@@ -47286,8 +47317,9 @@ R.Screens.guide = (function(){
         ${K.Row([
           K.Button({ label:'Yedek al (JSON)', icon:'download', tone:due ? 'primary' : null, act:'export-data' }),
           K.Button({ label:'Yedekten yükle', icon:'upload', act:'import-data' }),
+          (R.Beacon && R.Beacon.settings().enabled) ? K.Button({ label:'HKM’deki yedekten yükle', icon:'upload', act:'restore-hkm' }) : '',
           K.Button({ label:'Tümünü sıfırla', icon:'trash', tone:'danger', act:'reset-data' }),
-        ], { wrap:true })}
+        ].filter(Boolean), { wrap:true })}
         <p class="tiny dim mt-10">Uygulama çevrimdışı çalışır: her kayıt önce cihaza yazılır,
           bağlantı varsa hesabına eşlenir. Yerel kullanım: ${sizeKb} KB (%${q.pct}) · şema sürümü ${R.SCHEMA_VERSION}.</p>`,
     });
@@ -47845,6 +47877,27 @@ R.Screens.guide = (function(){
       await M.markBackup();
       UI.toast('Yedek alındı — '+Object.keys(payload.data).length+' kayıt');
       R.App.render();
+    },
+    /* Yeni cihaza taşıma (fikir 54): HKM'deki en yeni yedek çekilir,
+       okuma denetiminden geçer, onayla uygulanır; «İçe aktarmayı geri al»
+       geri dönüş noktasıdır (büyük aksiyon, AGENTS §1.9). */
+    async 'restore-hkm'(){
+      const r = await LIFEOS.YedekAg.hkmdenCek({ hkm:() => R.Beacon, modul:'ays' });
+      if(!r.ok){ UI.toast(r.why, { life:5000 }); return; }
+      const c = R.Store.readBackup(r.obj);
+      if(!c.ok){ UI.toast(c.error || 'Geçersiz yedek'); return; }
+      UI.confirmSheet('HKM’deki yedek yüklensin mi?',
+        r.tarihYazi + ' tarihli yedek' + (r.boyut ? ' (' + r.boyut + ')' : '') + ' bu cihazdaki verinin '
+          + 'TAMAMINI değiştirir. Yanlışsa «İçe aktarmayı geri al» ile bir önceki duruma dönebilirsin.',
+        async () => {
+          try{
+            await R.Store.importAll(r.obj);
+            UI.toast('HKM yedeği yüklendi — yeniden başlatılıyor');
+            setTimeout(() => location.reload(), 900);
+          }catch(e){
+            UI.toast('Yükleme başarısız: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
+          }
+        }, true);
     },
     async 'import-data'(){
       UI.sheet({

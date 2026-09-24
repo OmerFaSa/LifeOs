@@ -177,6 +177,7 @@ def liste(klasor_kok):
             "HKM’de henüz yedeği yok. %s, HKM’ye bağlıyken günde bir kez kendiliğinden "
             "yollar." % MODUL_AD[m])
     return {"moduller": out, "metin": metin, "gunluk": GUNLUK, "aylik": AYLIK,
+            "tasima": TASIMA_ADIMLARI,
             "kural": "Son %d günün her biri ve son %d ayın her birinden ayın son yedeği "
                      "saklanır." % (GUNLUK, AYLIK)}
 
@@ -198,6 +199,19 @@ def oku(klasor_kok, modul, tarih):
 # modulun HKM'de sakli EN YENI yedegi + ne oldugunu anlatan BENIOKU.
 # Yalniz standart kutuphane (zipfile). Geri yukleme yine modulun kendi
 # ekranindadir; HKM module yazmaz.
+
+# Yeni cihaza tasima (fikir 54): uc durum, uc yol. HKM web'deki kart ayni
+# adimlari gosterir; iki yerde ayri yazilmasin diye metin burada.
+TASIMA_ADIMLARI = [
+    "Yeni cihaza taşıma:",
+    "  1. HKM bu bilgisayarda kalıyorsa: yeni cihazda modülü aç, Ayarlar › HKM bağlantısından "
+    "eşle, sonra Rehber › Veri › «HKM’deki yedekten yükle». Yanlışsa «İçe aktarmayı geri al».",
+    "  2. HKM de taşınıyorsa: yeni bilgisayarda HKM'yi kur, bu zip'i aç ve "
+    "«python3 hkm.py geri hkm/hkm-ambar.json» çalıştır; sonra 1. adım.",
+    "  3. HKM kullanmıyorsan: <modül>/<modül>-yedek-<tarih>.json dosyasını modülün "
+    "Rehber › Veri bölümündeki yedek yükleme düğmesiyle seç.",
+]
+
 
 def zip_paketi(con, klasor_kok, bugun):
     import io
@@ -224,7 +238,8 @@ def zip_paketi(con, klasor_kok, bugun):
                          % (m, m, tarih, MODUL_AD[m], tarih))
         satir += ["", "Geri yükleme: modül yedeğini modülün Rehber › Veri bölümündeki yedek "
                       "yükleme düğmesiyle seç. HKM ambarı HKM › Sistemler › Yedek ile geri yüklenir.",
-                  "Dosyalar düz JSON'dur; herhangi bir metin düzenleyiciyle okunabilir."]
+                  "Dosyalar düz JSON'dur; herhangi bir metin düzenleyiciyle okunabilir.", ""]
+        satir += TASIMA_ADIMLARI
         z.writestr("BENIOKU.txt", "\n".join(satir) + "\n")
     return tampon.getvalue()
 

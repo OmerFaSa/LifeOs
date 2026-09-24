@@ -277,6 +277,7 @@ ESP.Screens.guide = (function(){
         body:html`
           <div class="row wrap">
             ${K.Button({ label:'Yedek indir', tone:'primary', act:'export-data2' })}
+            ${when((ESP.Beacon && ESP.Beacon.settings().enabled), () => K.Button({ label:'HKM’deki yedekten yükle', act:'restore-hkm' }))}
             ${K.Drop({ id:'restore-drop', act:'restore-file',
               label:'Yedek dosyasını buraya bırak ya da seç' })}
           </div>
@@ -495,6 +496,27 @@ ESP.Screens.guide = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    /* Yeni cihaza taşıma (fikir 54): HKM'deki en yeni yedek çekilir,
+       okuma denetiminden geçer, onayla uygulanır; «İçe aktarmayı geri al»
+       geri dönüş noktasıdır (büyük aksiyon, AGENTS §1.9). */
+    async 'restore-hkm'(){
+      const r = await LIFEOS.YedekAg.hkmdenCek({ hkm:() => ESP.Beacon, modul:'esp' });
+      if(!r.ok){ ESP.UI.toast(r.why, { life:5000 }); return; }
+      const c = ESP.Store.readBackup(r.obj);
+      if(!c.ok){ ESP.UI.toast(c.error || 'Geçersiz yedek'); return; }
+      ESP.UI.confirmSheet('HKM’deki yedek yüklensin mi?',
+        r.tarihYazi + ' tarihli yedek' + (r.boyut ? ' (' + r.boyut + ')' : '') + ' bu cihazdaki verinin '
+          + 'TAMAMINI değiştirir. Yanlışsa «İçe aktarmayı geri al» ile bir önceki duruma dönebilirsin.',
+        async () => {
+          try{
+            await ESP.Store.importAll(r.obj);
+            ESP.UI.toast('HKM yedeği yüklendi — sayfa yenileniyor');
+            setTimeout(() => location.reload(), 900);
+          }catch(e){
+            ESP.UI.toast('Yükleme başarısız: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
+          }
+        }, true);
+    },
     async 'dayanak-iste'(el){
       const alan = el.dataset.alan;
       const r = await ESP.Belge.iste({ alan, konu:alan === 'cefr' ? 'CEFR rehberli öğrenme saatleri'

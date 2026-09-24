@@ -334,6 +334,7 @@ SP.Screens.guide = (function(){
              + 'bu içe aktarma için geçerli.' }))}`,
       foot:html`${K.Button({ label:'Yedek indir', size:'sm', tone:'primary', act:'backup' })}
         ${K.Button({ label:'Yedek yükle', size:'sm', act:'restore' })}
+        ${when((SP.Beacon && SP.Beacon.settings().enabled), () => K.Button({ label:'HKM’deki yedekten yükle', size:'sm', act:'restore-hkm' }))}
         ${when(undo, () => K.Button({ label:'İçe aktarmayı geri al', size:'sm', tone:'danger', act:'undo-import' }))}
         ${K.Button({ label:'Bütün veriyi sil', size:'sm', tone:'danger', act:'wipe' })}`,
     });
@@ -683,6 +684,27 @@ SP.Screens.guide = (function(){
       await M.markBackup();
       UI.toast('Yedek indirildi');
       SP.App.render();
+    },
+    /* Yeni cihaza taşıma (fikir 54): HKM'deki en yeni yedek çekilir,
+       okuma denetiminden geçer, onayla uygulanır; «İçe aktarmayı geri al»
+       geri dönüş noktasıdır (büyük aksiyon, AGENTS §1.9). */
+    async 'restore-hkm'(){
+      const r = await LIFEOS.YedekAg.hkmdenCek({ hkm:() => SP.Beacon, modul:'spi' });
+      if(!r.ok){ UI.toast(r.why, { life:5000 }); return; }
+      const c = SP.Store.readBackup(r.obj);
+      if(!c.ok){ UI.toast(c.error || 'Geçersiz yedek'); return; }
+      UI.confirmSheet('HKM’deki yedek yüklensin mi?',
+        r.tarihYazi + ' tarihli yedek' + (r.boyut ? ' (' + r.boyut + ')' : '') + ' bu cihazdaki verinin '
+          + 'TAMAMINI değiştirir. Yanlışsa «İçe aktarmayı geri al» ile bir önceki duruma dönebilirsin.',
+        async () => {
+          try{
+            await SP.Store.importAll(r.obj);
+            UI.toast('HKM yedeği yüklendi — sayfa yenileniyor');
+            setTimeout(() => location.reload(), 900);
+          }catch(e){
+            UI.toast('Yükleme başarısız: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
+          }
+        }, true);
     },
     async restore(){
       const input = document.createElement('input');

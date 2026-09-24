@@ -146,6 +146,9 @@ def run():
             oku = z.read("BENIOKU.txt").decode("utf-8")
             ok("ESP: HKM’de yedek yok" in oku and "2026-09-21" in oku, oku)
             ok("Rehber › Veri" in oku)
+            # Fikir 54: yeni cihaza tasima adimlari zip'in icinde yazar.
+            ok("Yeni cihaza taşıma" in oku and "python3 hkm.py geri hkm/hkm-ambar.json" in oku, oku)
+            ok("HKM’deki yedekten yükle" in oku, oku)
         finally:
             shutil.rmtree(kok)
     test("her sey tek zip'te, okunur; yedegi olmayan modul soylenir", t_tek_zip)

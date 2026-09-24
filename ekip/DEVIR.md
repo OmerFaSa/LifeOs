@@ -442,6 +442,14 @@ tanınmayan parça söylenir; tek iş olağan yoldan gider). HKM 587, yüz temiz
 — mevcut dikte `K.Mic` — ya da yazıyla; model NOTLAMAZ, yetenek yargısı yok: kaynağın notlarındaki
 kavramlardan kaçı geçti, kelime başında, Türkçe ek tolere; < 3 kavram ya da çok kısa anlatım → ölçü
 yok; kaydedilen yalnız tarih ve sayı, anlatımın METNİ kaydedilmez). ESP 1355; duman, 390 px, a11y temiz.
+· ✅ 54 yeni cihaza taşıma (ortak `yedekag.js` `hkmdenCek`: HKM'deki EN YENİ modül yedeğini çeker,
+UYGULAMAZ; üç modülde Rehber › Veri › «HKM’deki yedekten yükle» — yalnız HKM bağlıyken görünür,
+okuma denetimi → tarihli onay → mevcut içe aktarma + «İçe aktarmayı geri al» geri dönüş noktası;
+taşıma adımları TEK metin `yedek.TASIMA_ADIMLARI`: zip BENİOKU'su ve HKM › Sistemler › Modül
+yedekleri aynı metni gösterir — HKM kalıyorsa / HKM de taşınıyorsa `python3 hkm.py geri
+hkm/hkm-ambar.json` / HKM yoksa dosyadan). AYS 1683, SPİ 1332, ESP 1357, HKM 587; üç duman + yüz temiz.
+**41 FİKİR BİTTİ.** Yalnız Part 9 (tek tasarım + çekmece) kaldı; harita `ekip/CEKMECE-HARITASI.md`
+kullanıcı onayı bekliyor. Açık sorular: 10b, 14, Y1, Y10, diksiyon.
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
 
