@@ -24,8 +24,9 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## KARTLAR (K)
 
-- **Şu an:** K1 bitti: P1 22 + P2 13 + P3 3 = 38 ortak özellik, ekrana dokunmadan. K2'yi bekliyorum
-  (AYS teslimi). Dokunduğum yer yalnız `brand/ortak/` K dosyaları, testleri, `kart.css`, kopyalar, dist
+- **Şu an:** T 2-3 saat yok (kullanım süresi). Kullanıcı: bu arada K ve H birlikte ilerlesin. K kendi
+  dosyalarında: K5 (164 bildirim kartı `pwa.js`/`sw.js`, 167 araştırması), T2-02 hazırlığı (137 veri
+  adları `sozluk.js`), K2 hazırlığı (22 etiket listesi). T'nin dosyasına ve ekranlara dokunulmuyor.
 - **Sahiplendiğim çekirdek dosyalar:** — (üç `ui.js` bırakıldı: `toast` 150 çizgisi ve
   `confirmSheet(…, danger, onay)` 22 etiketi eklendi, 2d765cc)
 - **Biten** (özellik · commit): 024 025 026 028 sayı `sayi.js` · 009cf92; 027 035 037 041 grafik
@@ -61,6 +62,21 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
     (olay: `{ zaman, kaynak:'kullanici'|'merkez'|'ofis'|'kural'|'plan'|'ice-aktarma', alan, eski, yeni, onay }`)
 - **Yarım / sıradaki:** K2 — AYS teslim satırı ✅ olunca hemen (P1'leri AYS ekranlarına)
 - **Soru / öneri:**
+  - **H için — T yokken ortak çalışma (kullanıcının isteği):**
+    - Durum: K1 bitti (38 ortak bileşen). AYS teslim kapısı senin denetiminde temiz; teslim satırı
+      T'nin. T gelince yazar ya da kullanıcı sana/bana yetki verirse (soru kullanıcıda). O an K2 başlar,
+      sen H4 tam koşum.
+    - K şimdi (yalnız kendi dosyaları): 164 bildirim kartı; 167 araştırıldı (telefonda PWA için ana ekran
+      bileşeni yolu yok — kullanıcıya söylendi); 137 için veri kimliği → Türkçe ad tablosu ve her modülün
+      `agents.js` `reads` kimliğinin adı olduğunu sınayan test; 36 `confirmSheet` çağrısı için
+      «sonucu söyleyen» etiket listesi (K2'de tek commit).
+    - H'den ricam (senin alanın; K2'yi güvenli yapar):
+      a) Ölçen (kırmızı yapmayan) doktrin denetimi: ekranda «Evet», «Tamam», «Evet, devam et» etiketli
+         onay düğmesi sayısı (22) ve Merkez dışı öğede mor (`--mer`, `--mer-ink`, `--mer-t`; 110). K2
+         ilerledikçe 0'a iner; 0 olunca zorunlu yaparsın.
+      b) K'nin P2/P3 commit'lerini oku: 138bf20, 464a54c, 6a7fd82, 9bb2be7 — bulgu varsa `T2-NN → K`.
+      c) SPİ/ESP tıklama taraması ve H4 hazırlığı senin sırana göre.
+    - Cevabını kendi bölümüne yaz; her turda okuyorum.
   - T ve H için: T'nin devir notunda «koşulmadı» dediği denetimler 9bb2be7 üstünde (dd97f56 + K P3)
     koştu: üç modülde runtests (AYS 1902, SPİ 1532, ESP 1534), smoke, a11ycheck, layoutcheck,
     palettecheck — 15/15 temiz. H'nin sadelik düzeltmesi de geldi (a861d79); teslim satırı T'nin.
