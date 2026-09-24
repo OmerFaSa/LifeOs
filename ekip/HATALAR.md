@@ -20,11 +20,31 @@
 
 | Kod | Sahip | Durum | Özet |
 |---|---|---|---|
+| T2-06 | T | **açık · ACİL (main CI kırmızı)** | SPİ Rehber › Veri: HKM düğme satırı 390 px'te taşıyor (CI'da 11 px); `.lrow__act` telefonda sarmıyor |
 | T2-05 | H | ✅ b32fe7f | ESP test sayfası `audit.test.js`'i iki kez yüklüyordu (21 test iki kez koşuyordu) |
 | T2-04 | H | ✅ b32fe7f | Perde `hepsiniKapat` dinleyici ve sayaç bırakıyordu: sonraki ilk Esc yutuluyor, haberci 3 sn sonra perde açıyordu |
 | T2-03 | K | ✅ c063316 (H doğruladı) | Grafik parçaları zaman damgasından UTC gününü alıyor (gece 00–03 kaydı düne düşer) |
 | T2-02 | K (137) | açık | AYS Ofis ve Danışma'da ajanın okuduğu veri ham kimlikle yazılıyor |
 | T2-01 | K | ✅ a798671 (H doğruladı) | Fark rozeti yuvarlanıp 0 olan farkı «+0» ve iyi/kötü renkle gösteriyor |
+
+### T2-06 · SPİ Rehber › Veri: düğme satırı telefonda taşıyor — main CI kırmızı (yüksek)
+
+- **Konum:** `brand/ortak/layout.css` (kopyası `SPI/src/css/layout.css:572-574`):
+  `@media (max-width:900px){ .lrow__act{ … flex-direction:row; } }` — `flex-wrap`
+  yok. Aynısı `.lrow--wide .lrow__act` (`:558`). Satır: `SPI/src/js/screens/guide.js:303-307`
+  (Bağlan · Şimdi gönder · Geçmişi gönder (60 gün)).
+- **Ne yanlış:** defter satırının eylem kutusu telefonda yatay dizilir ama sarmaz.
+  9b12bef'teki v4 düğmesi (dolgu, Inter) üç düğmeyi genişletti; yerelde son düğmenin
+  sağ kenarı 387 px (gutter'ın 13 px dışında, pencerenin içinde), CI'ın tarayıcısında
+  11 px pencereyi aşıyor.
+- **Tekrar:** CI koşu 188'den (9b12bef) beri her main push'unda «SPI — bütün
+  denetimler › Telefon düzeni (390px)»: `✕ guide/veri: yatay taşma 11px — button.btn.btn--sm`.
+  Önceki koşu (187) yeşil.
+- **Doğrulama:** yerelde yazı birkaç piksel genişletilince (`letter-spacing:.06em`)
+  sayfa 418 px'e taşıyor; `.lrow__act{ flex-wrap:wrap }` eklenince 390 px'te kalıyor,
+  son düğme alta iniyor (sağ kenar 213).
+- **Düzeltme yönü:** iki `.lrow__act` kuralına `flex-wrap:wrap` (brand/ortak/layout.css,
+  `ortak.py --yay`, üç dist). Sahibi T (CSS); main kırmızı olduğu için öncelikli.
 
 ### T2-05 · ESP test sayfası aynı test dosyasını iki kez yüklüyordu (düşük) — düzeltildi
 
