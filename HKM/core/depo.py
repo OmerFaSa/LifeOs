@@ -185,14 +185,22 @@ def _izli_mi(k):
     return any(x.get("parmak") for x in (k.get("govde") or {}).get("kaynaklar") or [])
 
 
-def taze_mi(con, kayit_id, now=None):
+def taze_mi(con, kayit_id, now=None, en_cok_gun=None):
     """King'in kapisinda, AGA CIKMADAN: bu kaydin (ya da dayandigi
     arastirmanin) guncelligi yakin zamanda OLCULDU mu? Olculmediyse is
-    Depolama Burosu'na gider ve orada olculur. Doner: (bool, not)."""
+    Depolama Burosu'na gider ve orada olculur. Doner: (bool, not).
+
+    `en_cok_gun` (Part 8e): turun tazelik suresi. Fiyat gibi hizli eskiyen
+    veride kaynak degismemis olsa da YAS tek basina bayatliktir."""
     r = con.execute("SELECT id, tur, govde, created_at FROM bam_kayitlar WHERE id=?",
                     (int(kayit_id),)).fetchone()
     if not r:
         return False, "Kayıt yok."
+    if en_cok_gun is not None:
+        yas_saat = _saat(r["created_at"], _simdi(now))
+        if yas_saat is not None and yas_saat // 24 > en_cok_gun:
+            return False, ("Kayıt %d gün önce yazıldı; bu tür veri %d günde eskir."
+                           % (yas_saat // 24, en_cok_gun))
     try:
         g = json.loads(r["govde"] or "{}")
     except ValueError:
@@ -509,3 +517,39 @@ def kayit_depo(con, kayit_id, now=None):
             "kaynaklar": [{"n": k.get("n"), "baslik": k.get("baslik"), "url": k.get("url"),
                            "alan": k.get("alan"), "tur": k.get("tur"), "erisim": k.get("erisim")}
                           for k in g.get("kaynaklar") or []]}
+
+
+# ------------------------------------------------------------ kullanim (8e)
+
+KULLANIM_GUN = 30
+DURUM_AD = {"pending": "cevap bekliyor", "delivered": "cevap bekliyor",
+            "acknowledged": "görüldü, uygulanmadı", "dismissed": "istenmedi",
+            "expired": "süresi doldu", "unknown": "belirsiz"}
+
+
+def kullanilmayan(con, modul=None, now=None, gun=KULLANIM_GUN):
+    """Son `gun` gunde BAM'in birakip modulun UYGULAMADIGI ciktilar.
+    Olculen tek sey teklifin cevabidir; «acildi mi» olculmez ve iddia
+    edilmez. Doner: [{id, modul, tur, baslik, durum}] (yeniden eskiye)."""
+    t = _simdi(now)
+    try:
+        alt = (datetime.datetime.fromisoformat(t[:19])
+               - datetime.timedelta(days=gun)).isoformat(timespec="seconds")
+    except ValueError:
+        return []
+    q = ("SELECT id, module, kind, payload, state FROM intents WHERE source='bam' "
+         "AND state != 'applied' AND created_at >= ? AND created_at <= ?")
+    arg = [alt, t[:19]]
+    if modul:
+        q += " AND module=?"
+        arg.append(modul)
+    out = []
+    for r in con.execute(q + " ORDER BY id DESC", arg).fetchall():
+        try:
+            p = json.loads(r["payload"] or "{}")
+        except ValueError:
+            p = {}
+        out.append({"id": r["id"], "modul": r["module"], "tur": r["kind"],
+                    "baslik": str(p.get("baslik") or p.get("ad") or r["kind"])[:80],
+                    "durum": DURUM_AD.get(r["state"], r["state"])})
+    return out

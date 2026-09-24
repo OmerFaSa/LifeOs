@@ -20,7 +20,7 @@
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
 **Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · ✅ Grup 4 ·
-✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ⏳ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
+✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
 
@@ -109,8 +109,10 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
 - ✅ 8d-2 Gitar paketi (MIMARI §8.33 «Gitar paketi»): `esp.unite` + `alan:"gitar"`; tek
   çağrı, kod tempo/ton/derece süzer; ESP Stüdyo `pieces`'a referans tempoyla yazar; geri
   almada ölçülmüş alıştırma kalır. HKM 568/568, ESP 1328/1328, duman + a11y + 390px temiz.
-- ⏳ 8e Depo önce (King teklifinde «zaten var, bedava» / «tazeleyeyim mi?»), tazelik,
-  kullanım takibi (açılmamış çıktı bir sonraki pahalı teklifte söylenir).
+- ✅ 8e Depo önce + tazelik + kullanım (HKM MIMARI §8.34): tazelik türe göre (fiyat 30 gün,
+  yer 90, besin yaşla eskimez); süresi geçen depo kaydı teklifte «eskimiş olabilir», fiyatta
+  «tazelemek önerilir»; son 30 günde uygulanmamış BAM çıktısı orta+ teklifte not olarak
+  söylenir (ölçülen: teklifin cevabı). HKM 570/570, HKM yüzü, `tools/entegre.js` temiz.
 
 ### Cevabı gelen maddeler (sıra: Part 8'den sonra)
 - ⏳ Y5 Sağlık verisi içe aktarma — iPhone `export.xml` + Android Health Connect; önizleme

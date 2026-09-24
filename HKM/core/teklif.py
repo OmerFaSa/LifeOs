@@ -293,6 +293,18 @@ def kur(con, cfg, tur, govde, ofisler_of, tahmini_sure):
 # Burosu'ndan gecer ve kaynaklari acar (bam depo_aday).
 DEPO_TAZE_GUN = 90
 
+# Part 8e — TAZELIK TURE GOREDIR. Market fiyati bir ayda eskir, yer listesi
+# (acilan-kapanan salon, degisen uyelik) uc ayda; 100 gramin besin degeri
+# eskimez (None: yas tek basina bayatlik sebebi degildir, kaynak denetimi
+# yine yapilir). Kod karar verir, model degil.
+TAZE_GUN_SPI = {"fiyat": 30, "yer": 90, "besin": None}
+
+
+def taze_gun(tur, govde):
+    if tur == "spi.bilgi":
+        return TAZE_GUN_SPI.get(((govde or {}).get("bilgi") or {}).get("tur"), DEPO_TAZE_GUN)
+    return DEPO_TAZE_GUN
+
 
 def _gun_farki(a, b):
     try:
@@ -314,11 +326,14 @@ def yas_metni(gun):
     return "%d yıl önce yapıldı" % (gun // 365)
 
 
-def depo_secenegi(t, kayit, simdi):
-    """Teklifin en ustune depodaki kaydi koyar; oneriyi ve cumleyi yeniden kurar."""
+def depo_secenegi(t, kayit, simdi, taze_gun=DEPO_TAZE_GUN):
+    """Teklifin en ustune depodaki kaydi koyar; oneriyi ve cumleyi yeniden kurar.
+    `taze_gun` turun tazelik suresi (taze_gun()); None: yas bayatlik sebebi degil."""
     gun = _gun_farki(kayit.get("created_at"), simdi)
     yas = yas_metni(gun)
-    s = {"id": "depo", "ad": "depodaki kayıt (%s)" % yas, "sinif": "dusuk",
+    eski = taze_gun is not None and (gun is None or gun > taze_gun)
+    s = {"id": "depo", "ad": "depodaki kayıt (%s%s)" % (yas, " · eskimiş olabilir" if eski else ""),
+         "sinif": "dusuk",
          "sinif_ad": SINIF_AD["dusuk"], "kayit_id": kayit["id"],
          "birim": {"model": 0, "web": 0, "etiket": "hesaplandi", "dayanak": "depodan"},
          "maliyet": {"usd": 0.0, "usd_p90": 0.0, "etiket": "hesaplandi", "metin": "ücretsiz",
@@ -326,11 +341,30 @@ def depo_secenegi(t, kayit, simdi):
          "sure": {"sn": 0, "etiket": "hesaplandi", "metin": "hemen", "dayanak": "depodan"},
          "butce": {"pay_yuzde": 0, "sigar": True, "metin": "Bütçeden bir şey harcamaz."}}
     t["secenekler"] = [s] + [x for x in t["secenekler"] if x["id"] != "depo"]
-    if gun is not None and gun <= DEPO_TAZE_GUN:
+    if not eski:
         t["oneri"] = "depo"
         t["neden"] = ("aynı konu %s; bedava ve hemen gelir (güncelliği bu teklifte "
                       "denetlenmedi, «tam» seçenek kaynaklarını açar)" % yas)
+    elif taze_gun is not None and taze_gun < DEPO_TAZE_GUN:
+        # Hizli eskiyen veri (fiyat): depo durur ama tazelemek onerilir.
+        t["neden"] = ("depodaki kayıt %s ve bu tür veri %d günde eskir; tazelemek önerilir"
+                      % (yas, taze_gun))
     t["metin"] = metin(t["secenekler"], t["oneri"], t["neden"])
+    return t
+
+
+# Part 8e — KULLANIM TAKIBI. Olculen tek sey teklifin cevabidir: BAM'in
+# birakip modulun UYGULAMADIGI cikti (cevap bekliyor, istenmedi, suresi
+# doldu). Pahali (orta ve ustu) teklifte bir cumleyle soylenir; karar
+# kullanicinindir, teklif engellenmez.
+def kullanim_notu(t, liste):
+    if not t or not liste or t.get("sinif") not in ("orta", "yuksek", "ekstra"):
+        return t
+    t["kullanilmayan"] = liste[:5]
+    ad = ", ".join("«%s» (%s)" % (x["baslik"], x["durum"]) for x in liste[:3])
+    t["metin"] = (t["metin"] + " Not: son 30 günde BAM’ın hazırladığı %d çıktı henüz "
+                  "kullanılmadı: %s%s. Yenisinden önce onlara bakmak isteyebilirsin."
+                  % (len(liste), ad, " …" if len(liste) > 3 else ""))
     return t
 
 
@@ -358,6 +392,7 @@ def ozet(t):
     if not t:
         return None
     return {"sinif": t["sinif"], "oneri": t["oneri"], "neden": t["neden"], "metin": t["metin"],
+            "kullanilmayan": t.get("kullanilmayan") or [],
             "secenekler": [{k: v for k, v in s.items() if k != "govde"}
                            for s in t["secenekler"]]}
 

@@ -1077,6 +1077,21 @@ yargı yoktur. ESP paketi Stüdyo'nun `pieces` şemasına yazar (`targetRef:true
 «referans»; eşik kullanıcının temiz tekrarından açılır); var olan ad yeniden eklenmez; geri
 almada deneme kaydı olan alıştırma kalır. İstek: Stüdyo › Müzik › «Paket iste».
 
+## 8.34 Depo önce, tazelik, kullanım — `core/teklif.py`, `core/depo.py` (Part 8e)
+
+- **Depo önce** (fikir 46'nın genellemesi): aynı girdiyle bitmiş iş her türde yeniden
+  kurulmaz (bedava, hemen); araştırmaya dayanan kayıtta güncellik King'in kapısında ölçülür.
+- **Tazelik türe göredir** (`teklif.taze_gun`): market fiyatı 30 günde, yer listesi 90 günde
+  eskir; 100 gramın besin değeri yaşla eskimez (kaynak denetimi yine yapılır). Süresi geçen
+  kayıtta `depo.taze_mi(..., en_cok_gun)` yaşı tek başına bayatlık sayar; teklifte depo
+  seçeneği «eskimiş olabilir» diye durur ve önerilmez, fiyatta «tazelemek önerilir» denir.
+- **Kullanım takibi** (`depo.kullanilmayan`): son 30 günde BAM'ın bırakıp modülün UYGULAMADIĞI
+  çıktı (cevap bekliyor · istenmedi · süresi doldu). Ölçülen tek şey teklifin cevabıdır,
+  «açıldı mı» iddia edilmez. Orta ve üstü sınıf teklifin cümlesine bir not olarak eklenir
+  (`teklif.kullanim_notu`); karar kullanıcınındır, teklif engellenmez.
+
+Testler: `tests/test_teklif.py` (tazelik, kullanılmayan çıktı).
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

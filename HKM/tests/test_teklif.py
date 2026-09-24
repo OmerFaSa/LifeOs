@@ -12,7 +12,7 @@
      5. Is emri teklifi tasir; secenek govdesi ekrana cikmaz."""
 import json
 
-from core import bam, butce, db, king, models, teklif
+from core import bam, butce, db, intents, king, models, teklif
 from tests.harness import eq, no, ok, suite, test
 from tests.test_bam import _cfg
 
@@ -250,6 +250,57 @@ def run():
         # Ad ile cevap: «tam» sira degil secenegin kendisidir.
         ok(king.teklif_cevap(con2, cfg, "tam", now=AN).startswith("Onaylandı:"))
     test("once depo: teklifin en ustunde, bedava ve hemen", t_once_depo)
+
+    # Part 8e — tazelik ture gore; kullanilmayan cikti pahali teklifte soylenir.
+    def t_tazelik_ture_gore():
+        from core import depo
+        eq(teklif.taze_gun("spi.bilgi", {"bilgi": {"tur": "fiyat"}}), 30)
+        eq(teklif.taze_gun("spi.bilgi", {"bilgi": {"tur": "yer"}}), 90)
+        eq(teklif.taze_gun("spi.bilgi", {"bilgi": {"tur": "besin"}}), None)
+        eq(teklif.taze_gun("bam.arastirma", {}), 90)
+        con = db.connect(":memory:")
+        k = bam.kayit_ekle(con, "arastirma", "Tavuk fiyatı", {"tur": "fiyat"},
+                           now="2026-08-10T10:00:00")["id"]
+        taze, n = depo.taze_mi(con, k, now=AN, en_cok_gun=30)
+        eq(taze, False)
+        ok("44 gün önce" in n and "30 günde eskir" in n, n)
+        kd = bam.kayit_getir(con, k)
+        t = teklif.depo_secenegi({"secenekler": [{"id": "tam", "ad": "tam", "sinif_ad": "orta",
+                                                  "maliyet": {"metin": "$0.01", "usd": 0.01},
+                                                  "sure": {"metin": "2 dk"}, "butce": {}}],
+                                  "oneri": "tam", "neden": None}, kd, AN, taze_gun=30)
+        eq(t["oneri"], "tam")
+        ok("eskimiş olabilir" in t["secenekler"][0]["ad"] and "tazelemek" in t["neden"], t["metin"])
+        t = teklif.depo_secenegi({"secenekler": [dict(t["secenekler"][1])], "oneri": "tam",
+                                  "neden": None}, kd, "2026-08-20T10:00:00", taze_gun=30)
+        eq(t["oneri"], "depo")
+    test("tazelik ture gore: fiyat 30, yer 90, besin eskimez", t_tazelik_ture_gore)
+
+    def t_kullanilmayan_cikti():
+        from core import depo
+        con, cfg = db.connect(":memory:"), _cfg()
+        a = intents.create(con, "ays", "kitap.add", {"kayit_id": 5, "bolum": 2, "soru": 20,
+                                                     "baslik": "Türev testi"}, None, source="bam")
+        b = intents.create(con, "ays", "urun.add", {"kayit_id": 6, "urun": "ozet",
+                                                    "baslik": "Limit özeti"}, None, source="bam")
+        intents.create(con, "ays", "plan.add", {"date": "2026-09-24", "minutes": 30,
+                                                "topic": "türev"}, None, source="patron")
+        db.set_intent_state(con, b["intent"]["id"], "applied")
+        con.execute("UPDATE intents SET created_at=?", (AN,))
+        l = depo.kullanilmayan(con, now=AN)
+        eq([x["baslik"] for x in l], ["Türev testi"])
+        eq(l[0]["durum"], "cevap bekliyor")
+        eq(depo.kullanilmayan(con, now="2026-11-30T10:00:00"), [])     # 30 gunden eski
+        # Orta sinif teklif bunu soyler; dusuk sinif soylemez.
+        e = king.emir_ac(con, cfg, "ays", "test.kitabi", {"kitap": {"baslik": "İntegral",
+                         "bolumler": [{"ad": "Belirsiz", "konular": [], "adet": 15},
+                                      {"ad": "Belirli", "konular": [], "adet": 15}]}}, now=AN)["emir"]
+        ok("henüz kullanılmadı" in e["teklif"]["metin"] and "Türev testi" in e["teklif"]["metin"],
+           e["teklif"]["metin"])
+        eq(e["teklif"]["kullanilmayan"][0]["baslik"], "Türev testi")
+        t = teklif.kullanim_notu({"sinif": "dusuk", "metin": "x"}, l)
+        eq(t["metin"], "x")
+    test("kullanilmayan cikti pahali teklifte soylenir", t_kullanilmayan_cikti)
 
     def t_ne_zaman_sorulur():
         con = db.connect(":memory:")

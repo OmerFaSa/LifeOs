@@ -518,7 +518,8 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
         except ValueError:
             s = {}
         if s.get("kayit_id") and bam.kayit_getir(con, s["kayit_id"]):
-            taze, tnot = (depo.taze_mi(con, s["kayit_id"], now=at)
+            taze, tnot = (depo.taze_mi(con, s["kayit_id"], now=at,
+                                       en_cok_gun=tkl.taze_gun(tur, temiz))
                           if "arastirma" in ofisler_of(tur, temiz) else (True, ""))
             if taze:
                 depo_ = {"emir_id": onceki["id"], "kayit_id": s["kayit_id"]}
@@ -552,7 +553,10 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
             # ONCE DEPO teklifte EN USTTE: bedava ve hemen (fikir 46).
             kd = bam.kayit_getir(con, aday) if aday else None
             if kd:
-                tk = tkl.depo_secenegi(tk, kd, at)
+                tk = tkl.depo_secenegi(tk, kd, at, taze_gun=tkl.taze_gun(tur, temiz))
+            # KULLANIM TAKIBI (8e): kullanilmamis cikti pahali teklifte soylenir.
+            tk = tkl.kullanim_notu(tk, depo.kullanilmayan(con, None if modul == "hkm" else modul,
+                                                           now=at))
             tahmin = dict(tahmin, sn=tk["secenekler"][0]["sure"]["sn"],
                           metin=tk["secenekler"][0]["sure"]["metin"],
                           dayanak=tk["secenekler"][0]["sure"]["dayanak"])
