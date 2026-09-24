@@ -555,7 +555,9 @@
 }
 .lrow--wide .lrow__meta{ margin-top:0; }
 .lrow--wide .lrow__note{ flex-basis:100%; margin-top:0; max-width:70ch; }
-.lrow--wide .lrow__act{ margin-top:0; margin-left:auto; flex-direction:row; }
+/* Yatay dizilen eylem kutusu SARAR (HATALAR T2-06): v4 düğmesi daha
+   geniştir; üç düğmelik satır 390 pikselde pencereyi aşıyordu. */
+.lrow--wide .lrow__act{ margin-top:0; margin-left:auto; flex-direction:row; flex-wrap:wrap; }
 .lrow--wide .lrow__act .btn{ width:auto; }
 
 @media (max-width:900px){
@@ -570,7 +572,7 @@
   }
   .lrow__meta{ margin-top:0; }
   .lrow__note{ flex-basis:100%; margin-top:0; max-width:none; }
-  .lrow__act{ margin-top:0; margin-left:auto; flex-direction:row; }
+  .lrow__act{ margin-top:0; margin-left:auto; flex-direction:row; flex-wrap:wrap; }
   .lrow__act .btn{ width:auto; }
 }
 
