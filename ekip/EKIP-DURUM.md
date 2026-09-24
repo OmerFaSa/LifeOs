@@ -25,10 +25,10 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 ## KARTLAR (K)
 
 - **Şu an:** K2 · AYS (teslim b3c1733; AYS `screens/*.js` artık K'nin). ✅ Bugün 004 042 024 (bu
-  commit). Sıradaki: **H'nin bulguları T2-09 T2-10 T2-11 (önce kırmızı test)** → Bugün 060 (110 `oneri.js`
+  725fdf8). ✅ T2-09 T2-10 T2-11 (96037ce). Sıradaki: Bugün 060 (110 `oneri.js`
   bağlanınca) → Çalışma (46 55 35) → Analiz (27 37 41) → Ofis (129 139 + T2-02/137) → Onaylar/Plan
   (111 112 121) → 22 (onay etiketleri). Her ekrandan sonra envanter + sadelik + 15 denetim.
-- **K2 AYS Bugün (bu commit):** 004 sayfa başı cümlesi `R.Screens.today.cumle(gun, iso)` → `lede()`
+- **K2 AYS Bugün (725fdf8):** 004 sayfa başı cümlesi `R.Screens.today.cumle(gun, iso)` → `lede()`
   (`<span class="bugun-cumle" data-oz="004">`; kural koddan, model kapalıyken aynı) · 042 sıradaki blok
   `.kahraman[data-oz="042"]` Şimdi alanının ilk kartı, başlığı ekrandaki her kart başlığından büyük
   (18 > 15 px), alanın tek dolu düğmesi onda; 390 px'te ilk ekranda (ölçüldü: alt kenar 682 / 780) ·
@@ -40,6 +40,9 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
     AYS'de bir bloğun adımları (ısınma · ana set · yanlış notu) HİÇBİR kuralda tanımlı değil — v4
     görselindeki adımlar örnek veri. Uydurmadım. Kural yazılırsa (ör. «ana ders = 10 dk ısınma + ana
     set + 5 dk yanlış notu») çubuk `GRAFIK.yukHtml` ile tek satır.
+  - **H'ye (T2-11'in kullanımı, T devrinde app.js senin):** bir modül bildirimi bağladığında
+    `window.addEventListener('lifeos:bildirim', …)` ÖNCE, `LIFEOS.Pwa.bildirimDinle()` SONRA; olayda
+    `kapaliyken:true` varsa sessizce uygulanmaz, `LIFEOS.Pwa.bildirimSorusu(detay)` ile sorulur.
   - **H'ye (layoutcheck, senin aracın):** «042 kahraman 390×780'de ilk ekranda» ölçüsü şimdilik
     karalamada; istersen `.kahraman[data-oz="042"]` alt kenarı ≤ görünür yükseklik kuralı.
 - **Sahiplendiğim çekirdek dosyalar:** — (üç `ui.js` bırakıldı: `toast` 150 çizgisi ve
@@ -52,7 +55,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   (`grafik.js`) · 464a54c; 113 123 124 127 öneri ekleri (`oneri.js`) · 6a7fd82; P3: 032 036 040
   geçen dönem, dağılım, birikim (`grafik.js`) · 9bb2be7; T yokken: 137 veri adları tablosu (`sozluk.js`),
   164 bildirim kartı (`pwa.js`, `sw.js`) · c0b9d6c
-- **Bulgular:** T2-01 ✅ a798671 · T2-03 ✅ c063316 · (K'nin bulduğu, H kapattı: T2-04, T2-05,
+- **Bulgular:** T2-09 ✅ 96037ce · T2-10 ✅ 96037ce · T2-11 ✅ 96037ce (önce kırmızı test; H doğrulasın, HATALAR satırları senin) · T2-01 ✅ a798671 · T2-03 ✅ c063316 · (K'nin bulduğu, H kapattı: T2-04, T2-05,
   T2-07, T2-08) · T2-02 (AYS Ofis ham kimlik, 137) ekran dosyası
   (`office.js`, `team.js`): AYS teslim edilince K2'de 137 ile
 - **Hata (benim):** 076bb29 dist'i derlemeden gitti (T `kart.css`'i `index.html`'e bağlamıştı);
@@ -76,7 +79,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   - Güven: `GUVEN.yedekHtml({ damga, boyut, iz, kayit, bugun })` (kural `yedek.js`'ten),
     `silmeHtml({ nesne, sayi, donusNoktasi, yazilan })` + `silmeDurumu`, `gecmisHtml(olaylar)`
     (olay: `{ zaman, kaynak:'kullanici'|'merkez'|'ofis'|'kural'|'plan'|'ice-aktarma', alan, eski, yeni, onay }`)
-- **Yarım / sıradaki:** T2-09 T2-10 T2-11 → K2 AYS Bugün 060 → Çalışma
+- **Yarım / sıradaki:** K2 AYS Bugün 060 → Çalışma (46 55 35)
 - **Soru / öneri:**
   - **T'nin devrini alan H için (kullanıcı T'nin yarım işini H'ye verdi):** AYS `index.html`'e
     `js/core/grafik.js`, `oneri.js`, `sozluk.js`, `guven.js` bağlantısı (`sayi.js`'ten sonra; SPİ/ESP'de de).
