@@ -124,3 +124,28 @@ def run():
         finally:
             shutil.rmtree(kok)
     test("dosya adi disaridan kurulamaz", t_ad)
+
+    def t_tek_zip():
+        # Fikir 53: her sey TEK zip'te, okunur: HKM ambari + her modulun en
+        # yeni yedegi + BENIOKU. Yedegi olmayan modul «yedek yok» diye yazilir.
+        import io
+        import zipfile
+        from core import db
+        kok = tempfile.mkdtemp(prefix="hkm-yedek-")
+        try:
+            yedek.kaydet(kok, "ays", _govde(), bugun="2026-09-19")
+            yedek.kaydet(kok, "ays", _govde(kayit=4), bugun="2026-09-20")
+            yedek.kaydet(kok, "spi", _govde(app="spi-saglik"), bugun="2026-09-20")
+            con = db.connect(":memory:")
+            z = zipfile.ZipFile(io.BytesIO(yedek.zip_paketi(con, kok, "2026-09-21")))
+            adlar = sorted(z.namelist())
+            eq(adlar, ["BENIOKU.txt", "ays/ays-yedek-2026-09-20.json", "hkm/hkm-ambar.json",
+                       "spi/spi-yedek-2026-09-20.json"])
+            eq(json.loads(z.read("ays/ays-yedek-2026-09-20.json"))["data"]["k3"], "x" * 40)
+            ok("__meta" in json.loads(z.read("hkm/hkm-ambar.json")))
+            oku = z.read("BENIOKU.txt").decode("utf-8")
+            ok("ESP: HKM’de yedek yok" in oku and "2026-09-21" in oku, oku)
+            ok("Rehber › Veri" in oku)
+        finally:
+            shutil.rmtree(kok)
+    test("her sey tek zip'te, okunur; yedegi olmayan modul soylenir", t_tek_zip)

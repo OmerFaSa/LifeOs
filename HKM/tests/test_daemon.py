@@ -805,6 +805,16 @@ def run_extra(S):
                          {"Authorization": "Bearer " + TOKEN}, method="GET")
         eq((kod, json.loads(ham)), (200, govde))
         eq(len(ham.encode("utf-8")), r["bayt"])
+        # Fikir 53: tek zip — jetonsuz yok; icinde spi yedegi ve BENIOKU.
+        import io
+        import zipfile
+        eq(S.call("/api/disa-aktar", token=None)[0], 401)
+        req = urllib.request.Request(S.url("/api/disa-aktar"),
+                                     headers={"Authorization": "Bearer " + TOKEN})
+        with urllib.request.urlopen(req, timeout=10) as yan:
+            eq(yan.headers.get("Content-Type"), "application/zip")
+            z = zipfile.ZipFile(io.BytesIO(yan.read()))
+        ok("spi/spi-yedek-%s.json" % r["tarih"] in z.namelist() and "BENIOKU.txt" in z.namelist())
         eq(S.call("/api/yedek/spi/2026-02-31")[0], 404)
         eq(S.call("/api/yedek/spi/..%2Fays")[0], 404)
     test("yedek uclari: yazar, listeler, indirir — yetkili ve modulune ait", t_yedek_endpoints)

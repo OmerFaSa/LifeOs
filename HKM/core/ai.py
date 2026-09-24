@@ -321,7 +321,7 @@ DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
 
 
 def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
-        transport=None, now=None, duzeltme=True, denetim="olcum"):
+        transport=None, now=None, duzeltme=True, denetim="olcum", veri=None):
     """Bir kademe adina model cagirir.
 
     `denetim`: «olcum» (varsayilan) kullaniciya konusan cevaptir: dayanaksiz
@@ -384,7 +384,10 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
                      usd=usd, rate=float(b.get("usd_try") or 0),
                      ok=(hata is None),
                      note=hata or ("tahmini-fiyat" if tahmini else ""),
-                     now=now)
+                     now=now,
+                     # Gizlilik panosu (fikir 55): modele giden veri TURU.
+                     # BAM istemi konu metni ve web kaynagidir (kitap.py kural 5).
+                     veri=veri or (["bam_istegi"] if str(role).startswith("bam.") else None))
         if hata:
             return {"ok": False, "reason": "provider", "text": None,
                     "note": "Model çağrısı başarısız: %s" % hata}

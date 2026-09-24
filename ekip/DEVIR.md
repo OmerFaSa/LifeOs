@@ -358,7 +358,12 @@ zip · 54 taşıma sihirbazı · 55 gizlilik panosu.
 modül, `ays.` rolü → AYS, gerisi HKM; harcamasız modül «ölçülmedi»; HKM Ayarlar › Bütçe
 tablosu) · ✅ 51 ay sonu mektubu (`weekly.aylik_mesaj`: haftalık hesabın takvim ayı hâli,
 geçen ayla; `schedule.monthly` varsayılan KAPALI, ayın 1'i haftalık saatinde; HKM › Otomatik
-mesajlar kutusu). HKM 580, yüz temiz.
+mesajlar kutusu). HKM 580, yüz temiz. · ✅ 53 tek zip (`yedek.zip_paketi`, `GET /api/disa-aktar`:
+HKM ambarı + modüllerin en yeni yedeği + BENİOKU; yedeği olmayan modül söylenir; HKM ›
+Sistemler › «Her şeyi tek zip olarak indir») · ✅ 55 gizlilik panosu (`usage.veri` her çağrıda
+modele giden veri TÜRÜNÜ yazar — mesaj, sağlık/çalışma/gelişim özeti, ilkeler, hatırlananlar,
+BAM isteği; `core/gizlilik.py`, `GET /api/gizlilik`, HKM › Sistemler kartı: sağlık özeti gitti mi,
+kaç kez, son ne zaman; modüllerin kendi çağrıları HKM'den geçmez ve bu söylenir). HKM 582.
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
 

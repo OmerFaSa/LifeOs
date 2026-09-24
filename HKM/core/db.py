@@ -462,6 +462,9 @@ CREATE INDEX IF NOT EXISTS ix_motto_tag ON motto_tags(tag);
 # kaydi okuyamayan bir surumdur.
 MIGRATIONS = [
     # (tablo, sutun, tanim)
+    # Gizlilik panosu (fikir 55): cagrida modele giden veri TURLERI (icerik
+    # degil), virgulle: mesaj, bio, academic, intellect, ilkeler, hafiza...
+    ("usage", "veri", "TEXT"),
     ("decisions", "key", "TEXT"),          # oncelik kurali kimligi
     ("decisions", "answered_at", "TEXT"),  # kabul/ret ne zaman verildi
     # Hangi gorevliyle konusuldugu: king, bio, academic, intellect.

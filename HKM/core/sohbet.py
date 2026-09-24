@@ -92,11 +92,13 @@ def sistem_metni(gorevli, bg):
                            "baglam": bg}
 
 
-def baglam(con, date, gorevli="king", th=None):
+def baglam(con, date, gorevli="king", th=None, veri=None):
     """Modelin gorecegi TEK gercek: kural motorunun urettigi olculer.
 
     Ham veri gonderilmez, ozet gonderilir — ve her satir zaten kural
-    motorunun yazdigi cumledir."""
+    motorunun yazdigi cumledir. `veri` (kume) verilirse modele giden veri
+    TURLERI oraya yazilir (gizlilik panosu, core/gizlilik.py)."""
+    veri = veri if veri is not None else set()
     b = manager.brief(con, date, th=th)
     satir = ["Tarih: %s" % date]
     alan = ALAN.get(gorevli)
@@ -106,14 +108,17 @@ def baglam(con, date, gorevli="king", th=None):
         if l["kind"] in ("vp", "coverage", "blind", "streak", "cross",
                          "proposal"):
             satir.append("- " + l["text"])
+            veri.add(l.get("vp") or ("capraz" if l["kind"] in ("cross", "streak") else "genel"))
     if gorevli == "king":
         k = b.get("council") or {}
         for u in (k.get("members") or []):
+            veri.add(u.get("vp") or "genel")
             satir.append("- %s (%s): %s, %d bulgu%s"
                          % (u["title"], u["module_label"], u["verdict_text"],
                             u["findings"], " — bugün duyulan bu" if u["heard"]
                             else ""))
         for f in cross.findings(con, date)[:2]:
+            veri.add("capraz")
             satir.append("- Çapraz: " + f["note"])
         for f in streak.findings(con, date, th=th)[:2]:
             satir.append("- Üst üste: " + f["note"])
@@ -124,6 +129,7 @@ def baglam(con, date, gorevli="king", th=None):
         # Hayat Mottosu: YALNIZ one cikarilan kayitlar (core/motto.py).
         hm = motto.king_baglami(con)
         if hm:
+            veri.add("ilkeler")
             satir.append("Kullanıcının kendi ilkeleri (senin sözün; dikkate al, "
                          "değiştirme, kırmızı çizgiyi çiğneyen öneri yapma):")
             satir.append(hm)
@@ -458,9 +464,11 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         return {"ok": False, "mode": "yok", "text": None, "agent": gorevli,
                 "note": hazir["note"]}
 
-    bg = baglam(con, date, gorevli, th=th)
+    veri = {"mesaj"}
+    bg = baglam(con, date, gorevli, th=th, veri=veri)
     hb = memory.context(con, user=user, scope=gorevli)
     if hb:
+        veri.add("hafiza")
         bg += ("\nKullanıcı hakkında hatırlananlar (etiketiyle; «tahmin» kesin "
                "değildir, «senin sözün» kullanıcının kendi cümlesidir; hafızaya "
                "sen yazamazsın):\n" + hb)
@@ -468,7 +476,7 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     mesajlar = list(gecmis or []) + [{"role": "user", "content": metin}]
 
     r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
-               user=user, transport=transport)
+               user=user, transport=transport, veri=veri)
     if not r["ok"]:
         # Model konusamadiysa kural motoru devrede kalir: sohbet
         # bozulabilir, sistem bozulmaz.
@@ -558,9 +566,11 @@ def tani(con, cfg, date, gorevli="king", th=None, transport=None):
          "%d satır ölçüme dayanıyor" % len(bg.splitlines()))
 
     sistem = sistem_metni(gorevli, bg)
+    veri = {"sinama"}
+    baglam(con, date, gorevli, th=th, veri=veri)
     r = ai.ask(con, cfg, rol, "tani",
                [{"role": "user", "content": "Tek cümleyle merhaba de."}],
-               baglam=bg, sistem=sistem, transport=transport)
+               baglam=bg, sistem=sistem, transport=transport, veri=veri)
 
     if r.get("reason") == "provider":
         # Saglayicinin KENDI cumlesi burada durur: «HTTP 404» degil,

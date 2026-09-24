@@ -87,6 +87,25 @@ def run():
         no("raw_events" in sistem)
     test("serbest cumleye model cevap verir", t_model_answers_free_sentence)
 
+    def t_gizlilik_kaydi():
+        # Fikir 55: her cagrida modele HANGI veri turunun gittigi yazilir;
+        # gizlilik panosu saglik ozetinin gidip gitmedigini durustce soyler.
+        from core import gizlilik
+        con = _con()
+        tasiyici = _cevap("Uyku ölçümün bugün düşük görünüyor.")
+        sohbet.konus(con, _cfg(), "bugün odaklanamadım", BUGUN, transport=tasiyici)
+        veri = con.execute("SELECT veri FROM usage ORDER BY id DESC LIMIT 1").fetchone()["veri"]
+        ok("mesaj" in veri and "bio" in veri, veri)
+        import datetime
+        g = gizlilik.ozet(con, datetime.date.today().isoformat())   # cagri bugun yazilir
+        eq((g["saglik"]["gitti"], g["saglik"]["n"]), (True, 1))
+        ok(any(t["veri"] == "bio" and "sağlık özeti" in t["ad"] for t in g["turler"]))
+        # Hic cagri yoksa «gitmedi» der — «bilinmiyor» degil: her cagri yazilir.
+        g0 = gizlilik.ozet(db.connect(":memory:"), BUGUN)
+        eq((g0["cagri"], g0["saglik"]["gitti"]), (0, False))
+        ok("gitmedi" in g0["saglik"]["metin"])
+    test("gizlilik: modele giden veri turu kaydedilir ve panoda soylenir", t_gizlilik_kaydi)
+
     def t_invented_number_is_dropped():
         """Modelin uydurdugu bir olcum, olcum olmayan bir seyi olcum gibi
         gosterir. Cevapta gecip baglamda gecmeyen sayi DUSURULUR."""

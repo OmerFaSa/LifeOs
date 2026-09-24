@@ -58,6 +58,8 @@ Ucnoktalar:
     GET  /api/hedefler              uc modulun etkin hedefleri ve zaman butcesi (kod)
     POST /api/hedef/sync/<modul>    modulun hedef ozetlerinin anlik goruntusu
     POST /api/zaman                 kullanicinin gunluk toplam vakti (gunluk_dk, haftalik_gun)
+    GET  /api/disa-aktar            her sey tek zip: HKM ambari + modullerin en yeni yedegi
+    GET  /api/gizlilik              modele ne gitti, ne zaman (veri turu; icerik degil)
     GET  /api/yedek                 uc modulun HKM'de sakli otomatik yedekleri
     GET  /api/yedek/<modul>/<tarih> sakli bir yedegin kendisi (indirme)
     POST /api/yedek/<modul>         modulun gunluk yedegi (yaz, geri oku, dogrula)
@@ -737,6 +739,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, hedefag.pano(self.con))
         # Otomatik yedek (core/yedek.py): liste ve indirme. Ad disaridan
         # kurulmaz; modul ve tarih dogrulanmazsa dosyaya hic bakilmaz.
+        if u.path == "/api/gizlilik":
+            from core import gizlilik
+            return self._send(200, gizlilik.ozet(self.con, datetime.date.today().isoformat()))
+        if u.path == "/api/disa-aktar":
+            gun = datetime.date.today().isoformat()
+            return self._send_bytes(200, yedek.zip_paketi(self.con, yedek.kok(self.server.db_path), gun),
+                                    "application/zip", dosya="lifeos-%s.zip" % gun, indir=True)
         if u.path == "/api/yedek":
             return self._send(200, yedek.liste(yedek.kok(self.server.db_path)))
         if u.path.startswith("/api/yedek/"):

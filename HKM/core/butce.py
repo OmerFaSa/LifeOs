@@ -141,7 +141,7 @@ def is_baglami(is_id):
 
 def record(con, *, role, task, provider, model, user="ben", in_tok=0, out_tok=0,
            image_tok=0, reason_tok=0, usd=0.0, rate=0.0, cached=False,
-           escalated=False, ok=True, note="", now=None, is_id=None):
+           escalated=False, ok=True, note="", now=None, is_id=None, veri=None):
     """Bir cagriyi deftere yazar. BASARISIZ CAGRI DA YAZILIR: para, cevap
     alinmadan da harcanmis olabilir. `is_id` verilmezse is parcaciginin
     baglamindaki BAM isi yazilir (is_baglami)."""
@@ -151,12 +151,13 @@ def record(con, *, role, task, provider, model, user="ben", in_tok=0, out_tok=0,
     con.execute(
         "INSERT INTO usage(created_at, day, user, role, task, provider, model,"
         " in_tok, out_tok, image_tok, reason_tok, usd, try_, rate, cached,"
-        " escalated, ok, note, is_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        " escalated, ok, note, is_id, veri) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (t.isoformat(timespec="seconds"), t.date().isoformat(), user, role, task,
          provider, model, int(in_tok), int(out_tok), int(image_tok),
          int(reason_tok), float(usd), float(usd) * float(rate), float(rate),
          1 if cached else 0, 1 if escalated else 0, 1 if ok else 0, note or "",
-         int(is_id) if is_id else None))
+         int(is_id) if is_id else None,
+         ",".join(sorted(set(veri))) if veri else None))
     con.commit()
     return {"ok": True}
 

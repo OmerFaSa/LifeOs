@@ -190,3 +190,41 @@ def oku(klasor_kok, modul, tarih):
         return None
     with open(yol, "rb") as f:
         return f.read()
+
+
+# ------------------------------------------------------------ tek zip
+#
+# Fikir 53: her sey TEK dosyada, okunur. HKM ambari (db.export_all) + her
+# modulun HKM'de sakli EN YENI yedegi + ne oldugunu anlatan BENIOKU.
+# Yalniz standart kutuphane (zipfile). Geri yukleme yine modulun kendi
+# ekranindadir; HKM module yazmaz.
+
+def zip_paketi(con, klasor_kok, bugun):
+    import io
+    import json as _json
+    import zipfile
+    from core import db
+    tampon = io.BytesIO()
+    satir = ["LifeOS — tek dosya dışa aktarma (%s)" % bugun, "",
+             "İçindekiler:",
+             "  hkm/hkm-ambar.json   HKM'nin bütün kaydı (sohbet, kararlar, iş emirleri, ölçümler)"]
+    with zipfile.ZipFile(tampon, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("hkm/hkm-ambar.json",
+                   _json.dumps(db.export_all(con), ensure_ascii=False, indent=1, default=str))
+        for m in MODULLER:
+            l = _dosyalar(os.path.join(klasor_kok, m))
+            if not l:
+                satir.append("  %s: HKM’de yedek yok — %s, HKM’ye bağlıyken günde bir kez "
+                             "kendiliğinden yollar." % (MODUL_AD[m], MODUL_AD[m]))
+                continue
+            tarih, yol = l[0]
+            with open(yol, "rb") as f:
+                z.writestr("%s/%s-yedek-%s.json" % (m, m, tarih), f.read())
+            satir.append("  %s/%s-yedek-%s.json   %s'nin en yeni yedeği (%s)"
+                         % (m, m, tarih, MODUL_AD[m], tarih))
+        satir += ["", "Geri yükleme: modül yedeğini modülün Rehber › Veri bölümündeki yedek "
+                      "yükleme düğmesiyle seç. HKM ambarı HKM › Sistemler › Yedek ile geri yüklenir.",
+                  "Dosyalar düz JSON'dur; herhangi bir metin düzenleyiciyle okunabilir."]
+        z.writestr("BENIOKU.txt", "\n".join(satir) + "\n")
+    return tampon.getvalue()
+

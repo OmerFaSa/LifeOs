@@ -820,6 +820,7 @@ details.detay > summary:hover{ color:var(--fg); }
         <div class="card" id="kutu"></div>
         <div class="card" id="bakim"></div>
         <div class="card" id="modul-yedek"></div>
+        <div class="card" id="gizlilik"></div>
       </div>
     </div>
   </div>
@@ -2534,9 +2535,41 @@ details.detay > summary:hover{ color:var(--fg); }
       }
       h += '</div>';
     });
+    h += '<div class="row" style="margin-top:12px"><button id="tek-zip">Her şeyi tek zip '
+      + 'olarak indir</button></div>'
+      + '<p class="muted">HKM’nin bütün kaydı ve üç modülün en yeni yedeği, ne olduğunu anlatan '
+      + 'bir BENİOKU ile. Dosyalar düz JSON; her metin düzenleyiciyle okunur.</p>';
     h += '<p class="muted" id="modul-yedek-not" style="margin-top:10px">Geri yüklemek için '
       + 'dosyayı indir, modülün Rehber › Veri bölümündeki yedek yükleme düğmesiyle seç.</p>';
     $('modul-yedek').innerHTML = h;
+  }
+
+  /* Gizlilik panosu (fikir 55, core/gizlilik.py): modele NE gitti, NE ZAMAN.
+     Sayıları ve cümleyi HKM kurar; bu sayfa yalnız yazar. */
+  async function gizlilikYukle(){
+    var r = await api('/api/gizlilik');
+    if(r.status !== 200){
+      $('gizlilik').innerHTML = '<p class="danger">Gizlilik panosu alınamadı (' + esc(r.status) + ').</p>';
+      return;
+    }
+    var g = r.body;
+    var h = '<div class="tag">Gizlilik · modele ne gitti</div>'
+      + '<p><b>' + esc(g.saglik.metin) + '</b></p>'
+      + '<p class="muted">Son 30 günde ' + esc(g.cagri) + ' model çağrısı ('
+      + esc(g.pencere[0]) + ' → ' + esc(g.pencere[1]) + '). İçerik saklanmaz; yalnız giden veri türü.</p>';
+    if(g.turler.length){
+      h += '<div class="scroll"><table><thead><tr><th>Giden veri</th><th class="num">Çağrı</th>'
+        + '<th>Son</th></tr></thead><tbody>' + g.turler.map(function(t){
+          return '<tr><td>' + esc(t.ad) + '</td><td class="num">' + esc(t.n) + '</td><td>'
+            + esc(String(t.son || '').slice(0, 16).replace('T', ' ')) + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+    if(g.saglayicilar.length){
+      h += '<p class="muted">Sağlayıcı: ' + g.saglayicilar.map(function(s){
+        return esc(s.provider) + ' · ' + esc(s.model) + ' (' + esc(s.n) + ')'; }).join(' · ') + '</p>';
+    }
+    h += '<p class="muted">' + esc(g.not) + '</p>';
+    $('gizlilik').innerHTML = h;
   }
 
   async function modulYedekYukle(){
@@ -2545,6 +2578,24 @@ details.detay > summary:hover{ color:var(--fg); }
     else $('modul-yedek').innerHTML = '<p class="danger">Modül yedekleri alınamadı ('
       + esc(r.status) + ').</p>';
   }
+
+  /* Fikir 53: her sey tek zip'te (core/yedek.py zip_paketi). */
+  document.addEventListener('click', async function(ev){
+    if(!ev.target || ev.target.id !== 'tek-zip') return;
+    ev.preventDefault();
+    var r = await fetch('/api/disa-aktar', { headers:{ 'Authorization':'Bearer ' + token } });
+    if(r.status !== 200){
+      $('modul-yedek-not').textContent = 'Zip hazırlanamadı (' + r.status + ').';
+      return;
+    }
+    var blob = await r.blob();
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    var g = new Date(), iki = function(n){ return (n < 10 ? '0' : '') + n; };
+    a.download = 'lifeos-' + g.getFullYear() + '-' + iki(g.getMonth() + 1) + '-' + iki(g.getDate()) + '.zip';
+    document.body.appendChild(a); a.click(); a.remove();
+    $('modul-yedek-not').textContent = 'İndirildi: HKM kaydı ve modül yedekleri tek dosyada.';
+  });
 
   document.addEventListener('click', async function(ev){
     var el = ev.target.closest ? ev.target.closest('[data-modul-yedek]') : null;
@@ -4600,6 +4651,7 @@ details.detay > summary:hover{ color:var(--fg); }
     await butceYukle();
     bakimCiz();
     await modulYedekYukle();
+    await gizlilikYukle();
   }
 
   /* Mesaj: iki yerden de ayni kapidan gecer (Bugun ekrani ve Sohbetler).
