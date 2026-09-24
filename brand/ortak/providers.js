@@ -1,8 +1,3 @@
-/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
-   Düzeltme brand/ortak/providers.js içine yazılır; burası bir sonraki
-   `python3 tools/ortak.py --yay` ile yeniden üretilir.
-   Kaynak bir KALIPTIR: ad alanı ve depo öneki yayım
-   sırasında konur (__NS__, __DEPO__, __BASLIK__). */
 /* Model saglayicilari — ofis ajanlarinin kullandigi ucretsiz LLM uclari.
 
    Bu dosya ICERIKTIR, mantik degil: uc nokta adresleri, model kimlikleri ve
@@ -14,7 +9,7 @@
    surekli degisir, Google 2.0 Flash'i Mart 2026'da emekli etti. Bu yuzden
    asagidaki liste artik TEK kaynak degil, yalnizca TOHUMDUR: kullanici
    ayar ekranindaki "Modelleri yenile" ile saglayicinin KENDI listesini
-   ceker (ESP.LLM.listModels) ve secim o listeden yapilir. Buradaki liste
+   ceker (__NS__.LLM.listModels) ve secim o listeden yapilir. Buradaki liste
    yalnizca ilk acilista ve ag yokken kullanilir.
 
    SINIRLAR (limits): { rpm, rpd, tpm } — saglayicinin ucretsiz katmani.
@@ -40,9 +35,9 @@
    modelleri ve sinirlari gorur (2.0 Flash emekli olunca SPI ve ESP'de
    eski liste kalmisti). */
 
-window.ESP = window.ESP || {};
+window.__NS__ = window.__NS__ || {};
 
-ESP.PROVIDERS = {
+__NS__.PROVIDERS = {
 
   /* Uygulama Artifact olarak calisirken acik olan yerlesik yetenek.
      Anahtar istemez; ucretsiz modellerin hicbiri kurulmadan da ofis calisir. */
@@ -239,11 +234,11 @@ ESP.PROVIDERS = {
 };
 
 /* Sirali liste — ayar ekrani bu sirayla gosterir. */
-ESP.PROVIDER_ORDER = ['builtin', 'openrouter', 'groq', 'gemini', 'ollama', 'lmstudio', 'custom'];
+__NS__.PROVIDER_ORDER = ['builtin', 'openrouter', 'groq', 'gemini', 'ollama', 'lmstudio', 'custom'];
 
 /* Ajan basina onerilen model gucu: kural motoru zaten hesabi yapar,
    modelden beklenen yalnizca kisa ve net Turkce yorumdur. */
-ESP.MODEL_TIERS = {
+__NS__.MODEL_TIERS = {
   hiz:   { label:'Hızlı',   note:'Kısa yorumlar için yeterli' },
   denge: { label:'Dengeli', note:'Günlük kullanım' },
   analiz:{ label:'Derin',   note:'Toplantı ve kök neden için' },

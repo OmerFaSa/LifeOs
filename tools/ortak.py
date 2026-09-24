@@ -102,11 +102,11 @@
    HER DOSYA UC SISTEME GITMEZ
 
    `YALNIZ` tablosunda adi gecen dosya orada yazan sistemlere yayilir.
-   `llm.js` boyledir: SPI ile ESP kopyalari ayni dosyanin iki
-   kopyasidir (737 satir, fark yalnizca ad alani), AYS'ninki ise BASKA
-   BIR SEYDIR — 1337 satir ve otuz fazla islev (`diagnose`,
-   `listModels`, `visionChain`, `stripThinking`...). Uc kopyayi zorla
-   birlestirmek, AYS'nin uc aylik gelisimini geri almak olurdu.
+   `llm.js` boyleydi: SPI ile ESP ayni 737 satirlik kopyayi, AYS ise
+   1337 satirlik gelismis hali tasiyordu (`diagnose`, `listModels`,
+   `visionChain`...). 2026-09-24'te AYS'ninki (ve `providers.js`)
+   kalip olarak tek kaynak oldu; SPI ve ESP gelismis hali aldi, geri
+   alinan bir sey olmadi. Tablo su an bos; mekanizma yerinde duruyor.
 
    SIRA ANLAMDIR
 
@@ -214,21 +214,21 @@ DOSYALAR = {
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     "sw.js":          ".",
-    # MODEL KATMANI — yalniz SPİ ve ESP (bkz. YALNIZ).
+    # MODEL KATMANI — uc arayuz (2026-09-24'ten beri AYS'ninki tek kaynak).
     "llm.js":        "js/core",
+    "providers.js":  "js/data",
 }
 
 # Yayim sirasinda yer tutucusu degistirilen dosyalar. Otekiler bayt
 # duzeyinde kopyalanir; burasi bir dize degistirmedir, sablon motoru
 # degil — kural: yer tutucu YALNIZ ad alani ve depo oneki icin.
-KALIPLAR = {"quota.js", "llm.js", "quota.test.js", "store.test.js"}
+KALIPLAR = {"quota.js", "llm.js", "providers.js", "quota.test.js", "store.test.js"}
 
 # Varsayilan UC sistemdir. Burada adi gecen dosya yalnizca listedeki
 # sistemlere yayilir; otekiler o dosyaya hic sahip olmaz.
 YALNIZ = {
-    # AYS'nin `llm.js`'i bu dosyanin kopyasi DEGIL, gelismis halidir.
-    # Ayrintisi ust taraftaki "HER DOSYA UC SISTEME GITMEZ" bolumunde.
-    "llm.js": ["SPI", "ESP"],
+    # Bos: `llm.js` 2026-09-24'e kadar yalniz SPI ve ESP'ye gidiyordu;
+    # AYS'nin gelismis hali tek kaynak olunca ucune birden yayildi.
 }
 
 YERTUTUCU = {

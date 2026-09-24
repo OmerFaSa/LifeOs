@@ -1,3 +1,8 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/providers.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir.
+   Kaynak bir KALIPTIR: ad alanı ve depo öneki yayım
+   sırasında konur (__NS__, __DEPO__, __BASLIK__). */
 /* Model saglayicilari — ofis ajanlarinin kullandigi ucretsiz LLM uclari.
 
    Bu dosya ICERIKTIR, mantik degil: uc nokta adresleri, model kimlikleri ve
@@ -27,7 +32,13 @@
    Kaynak ve tarih her saglayicinin `checked` alaninda durur.
 
    Gizlilik: API anahtari yalnizca tarayicida, ayri bir localStorage
-   anahtarinda durur. Yedege girmez, buluta gitmez, LLM'e gonderilmez. */
+   anahtarinda durur. Yedege girmez, buluta gitmez, LLM'e gonderilmez.
+
+   ================== BU DOSYA TEK KAYNAKTIR ==================
+   Kaynagi `brand/ortak/providers.js`; `python3 tools/ortak.py --yay` ile
+   uc arayuze yayilir. Katalog bir kez guncellenir, uc sistem ayni
+   modelleri ve sinirlari gorur (2.0 Flash emekli olunca SPI ve ESP'de
+   eski liste kalmisti). */
 
 window.R = window.R || {};
 

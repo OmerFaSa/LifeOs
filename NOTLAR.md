@@ -1545,13 +1545,13 @@ yazmamış olurdum.
 |---|---|---|---|
 | ~~İçe aktarma geri alınamıyor~~ | — | — | **kapandı** — `undoImport` üç `core/store.js`'de de var |
 | Depo ölçeklenmesi | `core/store.js` | orta | §7.3 — yaşayan veride göç, sormadan yapma |
-| `SPI/screens/labs.js` 1482 satır | — | orta | kapsam **%24** (`node tools/kapsam.js SPI`) |
+| ~~`SPI/screens/labs.js` 1482 satır, kapsam %24~~ | — | — | **kapandı** — `labs.test.js` (7 sekme boş/dolu, alt sayfalar, giriş + geri al); %24 → **%62** |
 | `AYS/core/office.js` 2049 satır | — | düşük | kapsam **%84** — «%59» eskimiş bir sayıydı |
 | ~~`AYS/core/store.js` kapsamı %46~~ | — | — | **kapandı** — `store.test.js` 28 test, kapsam %88; §7.2'de ölçüm |
 | ~~ESP'de `ui.js`/`components.js` %0~~ | — | — | **kapandı** — `components.test.js`, 49 test |
 | ~~`llm.js` SPİ ve ESP'de İKİ KOPYA~~ | — | — | **kapandı** — `brand/ortak/llm.js`, yalnız SPİ+ESP'ye yayılır |
 | ~~`quota.js` ÜÇ KOPYA~~ | — | — | **kapandı** — `brand/ortak/quota.js` + `quota.test.js` (20 test x3) |
-| `AYS/core/llm.js` ayrı yaşıyor | 1337 satır | orta | otuz fazla işlev; ortak kaynağa çekilirse SPİ/ESP'ye model listeleme, teşhis ve görsel zinciri gelir |
+| ~~`AYS/core/llm.js` ayrı yaşıyor~~ | — | — | **kapandı** (2026-09-24) — AYS'nin `llm.js` ve `providers.js`'i kalıp olarak tek kaynak (`brand/ortak/`), üç arayüze yayılır; SPİ/ESP model listeleme, teşhis, görsel zinciri ve güncel kataloğu aldı (eski listede Mart 2026'da emekli Gemini 2.0 Flash duruyordu) |
 | ~~Ortak CSS kopyaları~~ | — | — | **kapandı** — `brand/ortak/` + `tools/ortak.py` |
 | ~~Telefonda çalıştırma yolu~~ | — | — | **kapandı** — Seçenek B (tek dosya + elle yedek), README «Telefonda kullanım» |
 | `palette.js` kapsamı | üçü | düşük | UI açan işlevler denenmiyor (kasıtlı) |
