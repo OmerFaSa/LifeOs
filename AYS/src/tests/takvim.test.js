@@ -135,4 +135,20 @@
       });
     });
   });
+  /* HATALAR O-10: sondaki «Z» (UTC) yakalanıp kullanılmıyordu; İstanbul'da
+     20 Haziran 01:00 olan etkinlik 19 Haziran'a düşüyordu. */
+  describe('Takvim — UTC saatli etkinlik (O-10)', () => {
+    it('UTC saati yerel güne çevrilir; UTC gece yarısı bitişi yerelde 03:00dür', () => {
+      const ics = ['BEGIN:VCALENDAR', 'BEGIN:VEVENT', 'UID:u1', 'SUMMARY:Gece dersi',
+        'DTSTART:20260619T220000Z', 'DTEND:20260620T000000Z', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+      const r = T().oku(ics);
+      expect(r.ok).toBe(true);
+      const e = r.etkinlikler[0];
+      expect([e.bas, e.bit]).toEqual(['2026-06-20', '2026-06-20']);
+      const yerel = ['BEGIN:VCALENDAR', 'BEGIN:VEVENT', 'UID:u2', 'SUMMARY:Yerel',
+        'DTSTART:20260619T220000', 'DTEND:20260620T000000', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+      const y = T().oku(yerel).etkinlikler[0];
+      expect([y.bas, y.bit]).toEqual(['2026-06-19', '2026-06-19']);
+    });
+  });
 })();

@@ -65,4 +65,46 @@
       expect(H().tik(saat('2026-09-20', '10:05'))).toBe(0);
     });
   });
+  /* HATALAR O-8: Android Chrome sayfa içinden `new Notification` kurmaya
+     izin vermez («Illegal constructor»); hata yutuluyor, izin verilmiş
+     görünürken hiçbir hatırlatma gelmiyordu. Önce hizmet çalışanının
+     `showNotification`'ı denenir; o da yoksa bu SÖYLENİR. */
+  describe('Hatırlatmalar — bildirim gösterilemeyen tarayıcı (O-8)', () => {
+    function kur(swKayit){
+      const eskiN = window.Notification;
+      const sahte = function(){ throw new TypeError('Illegal constructor'); };
+      sahte.permission = 'granted';
+      sahte.requestPermission = () => Promise.resolve('granted');
+      window.Notification = sahte;
+      Object.defineProperty(navigator, 'serviceWorker', { configurable:true,
+        value:swKayit === undefined ? undefined : { getRegistration:() => Promise.resolve(swKayit) } });
+      return () => { window.Notification = eskiN; delete navigator.serviceWorker; };
+    }
+
+    it('kurucu yoksa hizmet çalışanıyla gösterilir', async () => {
+      resetState();
+      const gosterilen = [];
+      const geri = kur({ showNotification:(t, o) => { gosterilen.push([t, o.body]); return Promise.resolve(); } });
+      try{
+        await H().ekle({ tur:'su', saatler:'10:00' });
+        expect((await H().bildirimAc()).ok).toBe(true);
+        expect(H().tik(saat('2026-09-20', '10:05'))).toBe(1);
+        await new Promise(r => setTimeout(r, 20));
+        expect(gosterilen).toHaveLength(1);
+        expect(H().bildirimSorunu()).toBe(null);
+      }finally{ geri(); }
+    });
+
+    it('hiçbir yol yoksa sessiz kalınmaz: sorun söylenir', async () => {
+      resetState();
+      const geri = kur(undefined);
+      try{
+        await H().ekle({ tur:'su', saatler:'10:00' });
+        await H().bildirimAc();
+        expect(H().tik(saat('2026-09-20', '10:05'))).toBe(0);
+        await new Promise(r => setTimeout(r, 20));
+        expect(H().bildirimSorunu()).toContain('Bugün ekranında');
+      }finally{ geri(); }
+    });
+  });
 })();

@@ -89,6 +89,14 @@ R.Takvim = (function(){
     if(!m) return null;
     const iso = m[1] + '-' + m[2] + '-' + m[3];
     if(!U.isISO(iso)) return null;
+    /* Sondaki «Z» UTC'dir: yerel gune ve saate cevrilir. Google Takvim
+       saatli etkinligi boyle disa aktarir; «20260619T220000Z» Istanbul'da
+       20 Haziran 01:00'dir, 19'u degil (ekip/HATALAR.md O-10). */
+    if(m[4] && m[7]){
+      const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0)));
+      if(isNaN(d.getTime())) return null;
+      return { iso:U.iso(d), saatli:true, saat:d.getHours() * 60 + d.getMinutes() };
+    }
     return { iso, saatli:!!m[4], saat:m[4] ? Number(m[4]) * 60 + Number(m[5]) : 0 };
   }
 

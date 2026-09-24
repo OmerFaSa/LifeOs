@@ -182,12 +182,32 @@ SP.Hatirlat = (function(){
       const k = gun + '|' + r.anahtar;
       if(r.durum !== 'vakti' || gosterildi[k] || n - dk(r.saat) > BILDIRIM_PENCERE_DK) return;
       gosterildi[k] = true;
-      try{ new window.Notification('SPİ · ' + r.saat, { body:r.ad, tag:'spi-' + r.anahtar }); say++; }
-      catch(e){ /* bildirim gösterilemedi; Bugün ekranı yine gösterir */ }
+      if(goster('SPİ · ' + r.saat, { body:r.ad, tag:'spi-' + r.anahtar })) say++;
     });
     return say;
   }
 
+  /* Android Chrome sayfa içinden `new Notification` kurmaya izin vermez
+     («Illegal constructor»); orada hizmet çalışanının showNotification'ı
+     gerekir. Hata yutuluyor, izin verilmiş görünürken hiçbir hatırlatma
+     gelmiyordu (ekip/HATALAR.md O-8). İkisi de olmazsa bu SÖYLENİR. */
+  let sorun = null;
+  const SORUN = 'Bu tarayıcı bildirimi gösteremedi (Android Chrome gibi). Hatırlatmalar '
+    + 'yalnız Bugün ekranında görünür.';
+  function goster(baslik, secenek){
+    try{ new window.Notification(baslik, secenek); sorun = null; return true; }
+    catch(e){
+      const sw = navigator.serviceWorker;
+      if(!sw || typeof sw.getRegistration !== 'function'){ sorun = SORUN; return false; }
+      sw.getRegistration().then(function(reg){
+        if(!reg || typeof reg.showNotification !== 'function') throw new Error('kayıt yok');
+        return reg.showNotification(baslik, secenek);
+      }).then(function(){ sorun = null; }, function(){ sorun = SORUN; });
+      return true;
+    }
+  }
+  function bildirimSorunu(){ return sorun; }
+
   return { TUR, yukle, kaydet, saatOku, ekle, sil, geriKoy, bugun, isaretle, adOf, durum,
-    bildirimVar, bildirimIzinli, bildirimAc, bildirimKapat, tik };
+    bildirimVar, bildirimIzinli, bildirimAc, bildirimKapat, bildirimSorunu, tik };
 })();

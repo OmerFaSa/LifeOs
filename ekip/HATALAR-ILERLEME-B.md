@@ -18,8 +18,8 @@ D-8, D-9, D-10, D-11, D-14, D-17, D-19.
 | Y-4 | düzeltildi | e68c718 |
 | Y-8 + B-2 + B-3 | düzeltildi | 313a704 |
 | Y-2 (AYS) | düzeltildi | 313a704 |
-| Y-7 (modül) | düzeltildi | (bu commit) |
-| O-3, O-5, O-8, O-10, O-11 | sırada | |
+| Y-7 (modül) | düzeltildi | 8051dde |
+| O-3, O-5, O-8, O-10, O-11 | düzeltildi | (bu commit) |
 | D-8, D-9, D-10, D-11, D-14, D-17, D-19 | **Claude A'ya geçti** (kullanıcı kararı); B dokunmaz | |
 
 ---
@@ -287,3 +287,57 @@ python3 build.py (üçü)        dist yeniden derlendi
 **Sınır.** Bağ aynı tarayıcı (aynı `localStorage`) içindeki profilleri
 ayırır. İki ayrı cihazdan iki kişinin aynı HKM'ye bağlanması HKM
 tarafının konusudur (profil alanını okumak); A'nın alanı.
+
+---
+
+## O-3 · O-5 · O-8 · O-10 · O-11
+
+- **O-3 (üç `store.js importAll`):** geri alma kopyası yazılamazsa (kota)
+  önceki içe aktarmanın kopyası da silinir; sonuç `geriAlinamaz:true`
+  taşır ve üç ekranın toast'ı «yer olmadığı için bu içe aktarma geri
+  alınamaz» der. Mevcut karar (kopya yazılamasa da içe aktarma denenir)
+  korundu; düzeltilen şey eski kopyanın «geri al» ile haftalar önceki
+  duruma dönüp aradaki kaydı silmesiydi. Test: `brand/ortak/store.test.js`
+  (üç arayüzde, önce üçünde de kırmızı).
+- **O-5 (AYS):** tek tanım `R.Calc.gunSorusu(day)` = blok + serbest +
+  paragraf + problem. HKM işareti, Goodhart, XP sayımı, rozet sayımı,
+  ajan aracı ve haftalık gerçekleşme (`questionRealization`) hep buradan
+  okur. Geniş tanım seçildi çünkü HKM `questions`'ı akademik VP, seri ve
+  etki için kullanıyor ve mevcut bir test («serbest, paragraf ve problem
+  soruları da günün sorusudur») yalnız paragraf çözülen günün HKM'de «veri
+  yok» görünmemesi için bunu bilerek istiyor. Sonuç: XP, rozet ve haftalık
+  gerçekleşme artık paragraf ve problemi de sayar. Test: AYS
+  `tests/beacon.test.js` «günün sorusu her yerde aynı tanımla sayılır».
+- **O-8 (SPİ `hatirlat.js`):** `new Notification` kurulamazsa hizmet
+  çalışanının `showNotification`'ı denenir; o da yoksa
+  `bildirimSorunu()` bir cümle döndürür ve hatırlatma ekranı bunu uyarı
+  olarak gösterir. Test: SPİ `tests/hatirlat.test.js` (kurucu atan sahte
+  `Notification`; iki yol).
+- **O-10 (AYS `takvim.js tarihOku`):** sondaki `Z` UTC'dir; yerel güne ve
+  saate çevrilir. `DTSTART:20260619T220000Z` → 20 Haziran; `DTEND
+  T000000Z` yerelde 03:00 olduğu için bir gün geri çekilmez. Yerel (Z'siz)
+  saatler eskisi gibi. Test: AYS `tests/takvim.test.js`.
+- **O-11 (AYS `istisna.js hafiflet`):** o gün zaten ara günüyse
+  hafifletilmez: «O gün zaten ara günü; yükü sıfır, hafifletilecek bir şey
+  yok.» HKM `load.reduce` teklifi bu nedenle uygulanamaz görünür, ara
+  korunur. Test: AYS `tests/beacon.test.js` «ara günü hafifletilmez».
+
+**Koşturulan denetimler ve çıktı.**
+
+```
+AYS  node tools/runtests.js   1729/1729 gecti
+SPI  node tools/runtests.js   1368/1368 gecti
+ESP  node tools/runtests.js   1386/1386 gecti
+AYS/SPI/ESP  node tools/smoke.js   Duman testi temiz (38 / 26 / 30 ekran, 2 hedefte)
+python3 build.py --denetle (üçü)   dist kaynaktan derlenmiş hâliyle aynı
+python3 tools/ortak.py --denetle   kopyalar kaynakla ayni (47 dosya, 141 kopya)
+```
+
+---
+
+## Tur sonu
+
+B'nin listesindeki bütün bulgular kapandı: KR-1, Y-6, Y-5, O-4, D-6, Y-4,
+Y-8, B-2, B-3, Y-2 (AYS), Y-7 (modül), O-3, O-5, O-8, O-10, O-11.
+D-8, D-9, D-10, D-11, D-14, D-17, D-19 kullanıcı kararıyla A'ya geçti.
+`tools/sayilar.py --yaz` koşulmadı (A en sonda koşacak).

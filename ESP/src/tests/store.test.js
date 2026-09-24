@@ -288,6 +288,31 @@
       }
     });
 
+    /* HATALAR O-3: kopya yazılamazsa (kota) ÖNCEKİ içe aktarmanın kopyası
+       kalıyordu; «geri al» haftalar önceki duruma dönüp aradaki kaydı
+       siliyordu. Yazılamayan kopya eski kopyayı da götürür ve bu söylenir. */
+    it('geri alma kopyası yazılamazsa eski kopya kalmaz, sonuç bunu söyler', async function(){
+      const undoKey = (await yerelAnahtar()) + '.oncesi';
+      const oncekiUndo = localStorage.getItem(undoKey);
+      const asil = Storage.prototype.setItem;
+      try{
+        localStorage.setItem(undoKey, JSON.stringify({ at:'2026-01-01T00:00:00.000Z', data:{} }));
+        expect(S.importUndoInfo()).toBeTruthy();
+        Storage.prototype.setItem = function(k, v){
+          if(k === undoKey) throw new Error('QuotaExceededError');
+          return asil.call(this, k, v);
+        };
+        const r = await S.importAll({ __meta:{ app:uygulamaKimligi(), schemaVersion:ESP.SCHEMA_VERSION },
+          data:S.exportAll().data });
+        Storage.prototype.setItem = asil;
+        expect(S.importUndoInfo()).toBeNull();
+        expect(r.geriAlinamaz).toBe(true);
+      }finally{
+        Storage.prototype.setItem = asil;
+        if(oncekiUndo === null) localStorage.removeItem(undoKey); else localStorage.setItem(undoKey, oncekiUndo);
+      }
+    });
+
     it('gecersiz geri alma istegini reddeder', async function(){
       const undoKey = (await yerelAnahtar()) + '.oncesi';
       const onceki = localStorage.getItem(undoKey);

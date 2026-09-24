@@ -471,6 +471,27 @@
       });
     });
 
+    /* HATALAR O-5: «günün sorusu» dört ayrı tanımla sayılıyordu (HKM ve
+       Goodhart 90, XP ve ajan 60, haftalık gerçekleşme 20). Tek tanım:
+       blok + serbest + paragraf + problem (HKM'nin bilerek kullandığı). */
+    it('günün sorusu her yerde aynı tanımla sayılır', async () => {
+      resetState();
+      await withTodayAsync(BUGUN, async () => {
+        await R.Model.ensureDay(BUGUN);
+        const d = R.S.days[BUGUN];
+        d.blocks = [{ id:'b1', slot:'Ders', status:'done', actualQ:20, actualMin:30 }];
+        d.freeQ = 40; d.paragraphActual = 15; d.problemActual = 15;
+        expect(R.Calc.gunSorusu(d)).toBe(90);
+        expect(B().collect(BUGUN).questions.value).toBe(90);
+        const n = R.Model.currentWeek();
+        await R.Model.ensureWeek(n);
+        expect(R.Calc.questionRealization(n).solved).toBe(90);
+        expect(R.XPSayim ? R.XPSayim.gunluk(BUGUN)['ays.soru'] : 90).toBe(90);
+        expect(R.Calc.gunSorusu({ blocks:[], freeQ:0 })).toBe(0);
+        expect(B().collect(R.U.iso(R.U.addDays(R.U.parse(BUGUN), -40))).questions.cert).toBe('missing');
+      });
+    });
+
     it('ölçülmüş gün gerçekten gönderilir', async () => {
       resetState();
       olculmusGun();
@@ -519,6 +540,22 @@
        Artık AYS kendi kuralıyla uygular: o gün için yarım süre istisnası
        (tatil dönüşüyle aynı kural), deneme/kapanış günü ve başlamış gün
        korunur, geçmişe yazılmaz, geri alınır. */
+    /* HATALAR O-11: ara verilmiş güne «yükü azalt» onaylanınca ara günü
+       90 dakikalık çalışma gününe dönüyordu (son eklenen kazanır). */
+    it('ara günü hafifletilmez; ara korunur', async () => {
+      resetState();
+      await withTodayAsync('2026-10-12', async () => {
+        await R.Model.ensurePlan(true);
+        const yarin = '2026-10-13';
+        expect((await R.Istisna.ekle({ tur:'ara', from:yarin, to:yarin })).ok).toBe(true);
+        expect(R.Istisna.gunYuku(yarin)).toBe(0);
+        const r = await B().applyIntent({ id:12, kind:'load.reduce', payload:{ date:yarin } });
+        expect(r.ok).toBe(false);
+        expect(r.error).toContain('ara');
+        expect(R.Istisna.gunYuku(yarin)).toBe(0);
+      });
+    });
+
     it('yük azaltma teklifi AYS kuralıyla uygulanır ve geri alınır', async () => {
       resetState();
       await withTodayAsync('2026-10-12', async () => {       /* Pazartesi */

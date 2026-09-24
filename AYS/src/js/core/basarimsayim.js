@@ -41,8 +41,7 @@ R.BasarimSayim = (function(){
     const bitenBlok = bloklar.filter(function(b){ return b.status === 'done'; }).length;
     const deneme = (S.exams || []).filter(function(e){ return e && e.date === gun; }).length;
 
-    const soru = bloklar.reduce(function(t, b){ return t + (Number(b.actualQ) || 0); }, 0)
-      + (Number(d && d.freeQ) || 0);
+    const soru = R.Calc.gunSorusu(d);   /* tek tanım (HATALAR O-5) */
     const gunKaydi = (soru > 0 || bloklar.some(function(b){ return b.status !== 'pending'; })
       || (d && d.note)) ? 1 : 0;
 

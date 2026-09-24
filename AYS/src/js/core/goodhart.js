@@ -102,11 +102,8 @@ R.Goodhart = (function(){
   }
 
   function questionsIn(w){
-    return daysIn(w).reduce((a, d) => {
-      const blok = (d.blocks || []).reduce((x, b) => x + (Number(b.actualQ) || 0), 0);
-      return a + blok + (Number(d.paragraphActual) || 0) + (Number(d.problemActual) || 0)
-        + (Number(d.freeQ) || 0);
-    }, 0);
+    /* Tek tanim: R.Calc.gunSorusu (HATALAR O-5). */
+    return daysIn(w).reduce((a, d) => a + R.Calc.gunSorusu(d), 0);
   }
 
   /* Blok doğruluk oranı: sayılan soruların kaçı doğru. */

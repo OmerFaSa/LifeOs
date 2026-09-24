@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'582e7d0', at:'2026-09-24 11:42', dirty:true };
+R.BUILD = { id:'8051dde', at:'2026-09-24 11:48', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -16854,9 +16854,17 @@ R.Store = (function(){
        tek islemdi. Yazma basarisiz olursa (kota dolu) geri alma imkani
        sessizce kaybolur ama import yine de denenir: hic geri alamamak,
        hic import edememekten daha az kotudur. */
+    /* Kopya yazilamazsa ONCEKI ice aktarmanin kopyasi da silinir: kalsaydi
+       «geri al» haftalar onceki duruma donup aradaki butun kaydi silerdi
+       (ekip/HATALAR.md O-3). Sonuc bu ice aktarmanin geri alinamayacagini
+       soyler. */
+    let geriAlinamaz = false;
     try{
       localStorage.setItem(UNDO_KEY, JSON.stringify({ at:new Date().toISOString(), data:localAll() }));
-    }catch(e){ /* kota dolu olabilir — asagidaki import denemesi engellenmez */ }
+    }catch(e){
+      geriAlinamaz = true;
+      try{ localStorage.removeItem(UNDO_KEY); }catch(e2){}
+    }
 
     /* YAZMA SONUCU DEGERLENDIRILIR. Once localWrite()'in donusu
        yutuluyordu: kota dolu bir tarayicida hicbir sey yazilmadigi halde
@@ -16884,7 +16892,7 @@ R.Store = (function(){
       }
     }
     return Object.assign({}, parsed.meta, {
-      local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata,
+      local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata, geriAlinamaz,
       partialCloud:bulutHata > 0,
     });
   }
@@ -20152,10 +20160,9 @@ R.XPSayim = (function(){
   function gunluk(gun){
     const d = S.days[gun];
     const bloklar = (d && Array.isArray(d.blocks)) ? d.blocks : [];
-    /* Günün sorusu: bloklara yazılanlar + derse bağlanmayan serbest
-       sorular. İkisini toplamak core/goodhart.js ile aynı okumadır. */
-    const soru = bloklar.reduce((t, b) => t + (Number(b.actualQ) || 0), 0)
-      + (Number(d && d.freeQ) || 0);
+    /* Günün sorusu tek tanımdır: R.Calc.gunSorusu (HATALAR O-5) — blok,
+       serbest, paragraf ve problem; core/goodhart.js ile aynı okuma. */
+    const soru = R.Calc.gunSorusu(d);
 
     return {
       'ays.soru':soru,
@@ -20227,8 +20234,7 @@ R.BasarimSayim = (function(){
     const bitenBlok = bloklar.filter(function(b){ return b.status === 'done'; }).length;
     const deneme = (S.exams || []).filter(function(e){ return e && e.date === gun; }).length;
 
-    const soru = bloklar.reduce(function(t, b){ return t + (Number(b.actualQ) || 0); }, 0)
-      + (Number(d && d.freeQ) || 0);
+    const soru = R.Calc.gunSorusu(d);   /* tek tanım (HATALAR O-5) */
     const gunKaydi = (soru > 0 || bloklar.some(function(b){ return b.status !== 'pending'; })
       || (d && d.note)) ? 1 : 0;
 
@@ -21042,6 +21048,13 @@ R.Istisna = (function(){
     if(etki(iso, iso).korunan.length){
       return fail('O günde girilmiş çalışma var; plan yeniden kurulmaz, girdiğin kaybolmasın.');
     }
+    /* Ara gunu zaten yuksuzdur; «son eklenen kazanir» kurali yuzunden bir
+       sure istisnasi arayi ezip gunu calisma gunune ceviriyordu
+       (ekip/HATALAR.md O-11). */
+    const var_ = gunIcin(iso);
+    if(var_ && var_.tur === 'ara'){
+      return fail('O gün zaten ara günü; yükü sıfır, hafifletilecek bir şey yok.');
+    }
     const temel = temelDakika(iso) || sablonDakikasi() || 120;
     const r = Number(oran);
     let dakika;
@@ -21209,6 +21222,14 @@ R.Takvim = (function(){
     if(!m) return null;
     const iso = m[1] + '-' + m[2] + '-' + m[3];
     if(!U.isISO(iso)) return null;
+    /* Sondaki «Z» UTC'dir: yerel gune ve saate cevrilir. Google Takvim
+       saatli etkinligi boyle disa aktarir; «20260619T220000Z» Istanbul'da
+       20 Haziran 01:00'dir, 19'u degil (ekip/HATALAR.md O-10). */
+    if(m[4] && m[7]){
+      const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +(m[6] || 0)));
+      if(isNaN(d.getTime())) return null;
+      return { iso:U.iso(d), saatli:true, saat:d.getHours() * 60 + d.getMinutes() };
+    }
     return { iso, saatli:!!m[4], saat:m[4] ? Number(m[4]) * 60 + Number(m[5]) : 0 };
   }
 
@@ -21850,10 +21871,22 @@ R.Calc = (function(){
     const score = blocks.reduce((s,b) => s + (b.status === 'done' ? 1 : b.status === 'partial' ? 0.5 : 0), 0);
     return U.pct(score, blocks.length);
   }
+  /* GUNUN SORUSU — tek tanim (ekip/HATALAR.md O-5): bloklara yazilan
+     soru + derse baglanmayan serbest soru («soru 40») + paragraf +
+     problem. Paragraf ve problem de YKS sorusudur; HKM isareti onlari
+     bilerek sayar (yalniz paragraf cozulen gun «veri yok» gorunmesin).
+     HKM isareti, Goodhart, XP, rozet, ajan araci ve haftalik gerceklesme
+     hep buradan okur; once dort ayri tanim vardi (90 / 60 / 20). */
+  function gunSorusu(day){
+    if(!day) return 0;
+    return U.sum((day.blocks || []).map(b => Number(b.actualQ) || 0)) + (Number(day.freeQ) || 0)
+      + (Number(day.paragraphActual) || 0) + (Number(day.problemActual) || 0);
+  }
+
   function questionRealization(n){
     const week = S.weeks[M.weekId(n)];
     if(!week) return null;
-    const solved = U.sum(weekBlocks(n).map(b => b.actualQ || 0));
+    const solved = U.sum(M.weekDates(n).map(d => gunSorusu(S.days[U.iso(d)])));
     /* Hedef, haftanin GUNCEL yukune orantilanir: «bu hafta 2 gun ara»
        diyen ya da takvime tatil yazan birinin haftasi tam hedefe gore
        «tutmadi» gorunmemeli. Ama hedef yazilirken plan ureteci o tatili
@@ -22791,7 +22824,7 @@ R.Calc = (function(){
     };
   }
 
-  return {
+  return { gunSorusu,
     onbesDakika, buHizla, haftaOzetMetni, verimliSaat,
     fullExams, comparableNets, medianTrend, examBase, testMedian, analysisDebt, examVolumeProgress,
     errorDistribution, errorPareto, topTags, openErrors,
@@ -26022,11 +26055,8 @@ R.Goodhart = (function(){
   }
 
   function questionsIn(w){
-    return daysIn(w).reduce((a, d) => {
-      const blok = (d.blocks || []).reduce((x, b) => x + (Number(b.actualQ) || 0), 0);
-      return a + blok + (Number(d.paragraphActual) || 0) + (Number(d.problemActual) || 0)
-        + (Number(d.freeQ) || 0);
-    }, 0);
+    /* Tek tanim: R.Calc.gunSorusu (HATALAR O-5). */
+    return daysIn(w).reduce((a, d) => a + R.Calc.gunSorusu(d), 0);
   }
 
   /* Blok doğruluk oranı: sayılan soruların kaçı doğru. */
@@ -26940,17 +26970,15 @@ R.Beacon = (function(){
     const gun = (S.days || {})[d];
     const bloklar = (gun && gun.blocks) || [];
 
-    /* Günün sorusu = blokların sorusu + serbest soru («soru 40», derssiz
-       giriş) + paragraf + problem (goodhart.js aynı toplamı kullanır).
-       Serbest/paragraf/problem alanı 0 ile başlar; 0 «girilmedi»dir, ölçüm
-       değil. Hiçbir parça girilmemişse veri yok — sıfır gönderilmez. */
+    /* Günün sorusu tek tanımdır: R.Calc.gunSorusu (blok + serbest +
+       paragraf + problem, HATALAR O-5). Serbest/paragraf/problem alanı 0
+       ile başlar; 0 «girilmedi»dir, ölçüm değil. Hiçbir parça
+       girilmemişse veri yok — sıfır gönderilmez. */
     const soru = bloklar.filter(function(b){ return b.actualQ != null; });
-    const serbest = gun ? ['freeQ', 'paragraphActual', 'problemActual']
-      .map(function(k){ return Number(gun[k]) || 0; })
-      .filter(function(n){ return n > 0; }) : [];
-    out.questions = (soru.length || serbest.length)
-      ? metric(soru.reduce(function(a, b){ return a + Number(b.actualQ || 0); }, 0)
-          + serbest.reduce(function(a, n){ return a + n; }, 0), 'measured')
+    const serbestVar = gun && ['freeQ', 'paragraphActual', 'problemActual']
+      .some(function(k){ return (Number(gun[k]) || 0) > 0; });
+    out.questions = (soru.length || serbestVar)
+      ? metric(R.Calc.gunSorusu(gun), 'measured')
       : metric(null, 'missing');
 
     const sure = bloklar.filter(function(b){ return b.actualMin != null; });
@@ -28610,7 +28638,7 @@ R.Tools = (function(){
         calisilanDakika:U.sum(blocks.map(b => b.actualMin || 0)),
         /* Serbest soru («soru 40», derssiz giriş) da çözülen sorudur.
            Paragraf 0 ile başlar: 0 «girilmedi»dir, ölçüm gibi gitmez. */
-        cozulenSoru:U.sum(blocks.map(b => b.actualQ || 0)) + (Number(d.freeQ) || 0),
+        cozulenSoru:R.Calc.gunSorusu(d),
         serbestSoru:Number(d.freeQ) || 0,
         paragraf:Number(d.paragraphActual) > 0 ? d.paragraphActual+'/'+d.paragraphTarget : null,
         uyku:d.sleepHours,
@@ -48483,7 +48511,8 @@ R.Screens.guide = (function(){
           UI.toast('Yedek bu cihaza yüklendi ama ' + meta.cloudFailed
             + ' kayıt buluta yazılamadı — yeniden başlatılıyor');
         }else{
-          UI.toast('Yedek yüklendi'+(meta.legacy ? ' (eski sürüm)' : '')+' — yeniden başlatılıyor');
+          UI.toast('Yedek yüklendi'+(meta.legacy ? ' (eski sürüm)' : '')
+            + (meta.geriAlinamaz ? '; yer olmadığı için bu içe aktarma geri alınamaz' : '')+' — yeniden başlatılıyor');
         }
         setTimeout(() => location.reload(), 900);
       }catch(e){

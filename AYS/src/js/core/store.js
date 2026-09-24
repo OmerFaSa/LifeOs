@@ -313,9 +313,17 @@ R.Store = (function(){
        tek islemdi. Yazma basarisiz olursa (kota dolu) geri alma imkani
        sessizce kaybolur ama import yine de denenir: hic geri alamamak,
        hic import edememekten daha az kotudur. */
+    /* Kopya yazilamazsa ONCEKI ice aktarmanin kopyasi da silinir: kalsaydi
+       «geri al» haftalar onceki duruma donup aradaki butun kaydi silerdi
+       (ekip/HATALAR.md O-3). Sonuc bu ice aktarmanin geri alinamayacagini
+       soyler. */
+    let geriAlinamaz = false;
     try{
       localStorage.setItem(UNDO_KEY, JSON.stringify({ at:new Date().toISOString(), data:localAll() }));
-    }catch(e){ /* kota dolu olabilir — asagidaki import denemesi engellenmez */ }
+    }catch(e){
+      geriAlinamaz = true;
+      try{ localStorage.removeItem(UNDO_KEY); }catch(e2){}
+    }
 
     /* YAZMA SONUCU DEGERLENDIRILIR. Once localWrite()'in donusu
        yutuluyordu: kota dolu bir tarayicida hicbir sey yazilmadigi halde
@@ -343,7 +351,7 @@ R.Store = (function(){
       }
     }
     return Object.assign({}, parsed.meta, {
-      local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata,
+      local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata, geriAlinamaz,
       partialCloud:bulutHata > 0,
     });
   }

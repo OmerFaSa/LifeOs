@@ -606,6 +606,9 @@ ESP.Screens.guide = (function(){
         async () => {
           try{
             const meta = await ESP.Store.importAll(obj);
+            if(meta.geriAlinamaz){
+              ESP.UI.toast('Yer olmadığı için bu içe aktarma geri alınamaz — sayfa yenileniyor');
+            }
             if(meta.partialCloud){
               ESP.UI.toast(meta.cloudFailed + ' kayıt buluta yazılamadı; '
                 + 'bu cihazda yüklendi — sayfa yenileniyor');

@@ -119,10 +119,22 @@ R.Calc = (function(){
     const score = blocks.reduce((s,b) => s + (b.status === 'done' ? 1 : b.status === 'partial' ? 0.5 : 0), 0);
     return U.pct(score, blocks.length);
   }
+  /* GUNUN SORUSU — tek tanim (ekip/HATALAR.md O-5): bloklara yazilan
+     soru + derse baglanmayan serbest soru («soru 40») + paragraf +
+     problem. Paragraf ve problem de YKS sorusudur; HKM isareti onlari
+     bilerek sayar (yalniz paragraf cozulen gun «veri yok» gorunmesin).
+     HKM isareti, Goodhart, XP, rozet, ajan araci ve haftalik gerceklesme
+     hep buradan okur; once dort ayri tanim vardi (90 / 60 / 20). */
+  function gunSorusu(day){
+    if(!day) return 0;
+    return U.sum((day.blocks || []).map(b => Number(b.actualQ) || 0)) + (Number(day.freeQ) || 0)
+      + (Number(day.paragraphActual) || 0) + (Number(day.problemActual) || 0);
+  }
+
   function questionRealization(n){
     const week = S.weeks[M.weekId(n)];
     if(!week) return null;
-    const solved = U.sum(weekBlocks(n).map(b => b.actualQ || 0));
+    const solved = U.sum(M.weekDates(n).map(d => gunSorusu(S.days[U.iso(d)])));
     /* Hedef, haftanin GUNCEL yukune orantilanir: «bu hafta 2 gun ara»
        diyen ya da takvime tatil yazan birinin haftasi tam hedefe gore
        «tutmadi» gorunmemeli. Ama hedef yazilirken plan ureteci o tatili
@@ -1060,7 +1072,7 @@ R.Calc = (function(){
     };
   }
 
-  return {
+  return { gunSorusu,
     onbesDakika, buHizla, haftaOzetMetni, verimliSaat,
     fullExams, comparableNets, medianTrend, examBase, testMedian, analysisDebt, examVolumeProgress,
     errorDistribution, errorPareto, topTags, openErrors,

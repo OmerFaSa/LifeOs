@@ -720,7 +720,8 @@ SP.Screens.guide = (function(){
             UI.toast('Yedek bu cihaza yüklendi ama ' + meta.cloudFailed
               + ' kayıt buluta yazılamadı — sayfa yenileniyor');
           }else{
-            UI.toast('Yedek yüklendi (şema ' + meta.schemaVersion + ') — sayfa yenileniyor');
+            UI.toast('Yedek yüklendi (şema ' + meta.schemaVersion + ')'
+              + (meta.geriAlinamaz ? '; yer olmadığı için bu içe aktarma geri alınamaz' : '') + ' — sayfa yenileniyor');
           }
           setTimeout(() => location.reload(), 900);
         }catch(e){

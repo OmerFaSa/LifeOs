@@ -955,7 +955,8 @@ R.Screens.guide = (function(){
           UI.toast('Yedek bu cihaza yüklendi ama ' + meta.cloudFailed
             + ' kayıt buluta yazılamadı — yeniden başlatılıyor');
         }else{
-          UI.toast('Yedek yüklendi'+(meta.legacy ? ' (eski sürüm)' : '')+' — yeniden başlatılıyor');
+          UI.toast('Yedek yüklendi'+(meta.legacy ? ' (eski sürüm)' : '')
+            + (meta.geriAlinamaz ? '; yer olmadığı için bu içe aktarma geri alınamaz' : '')+' — yeniden başlatılıyor');
         }
         setTimeout(() => location.reload(), 900);
       }catch(e){

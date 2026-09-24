@@ -28,10 +28,9 @@ R.XPSayim = (function(){
   function gunluk(gun){
     const d = S.days[gun];
     const bloklar = (d && Array.isArray(d.blocks)) ? d.blocks : [];
-    /* Günün sorusu: bloklara yazılanlar + derse bağlanmayan serbest
-       sorular. İkisini toplamak core/goodhart.js ile aynı okumadır. */
-    const soru = bloklar.reduce((t, b) => t + (Number(b.actualQ) || 0), 0)
-      + (Number(d && d.freeQ) || 0);
+    /* Günün sorusu tek tanımdır: R.Calc.gunSorusu (HATALAR O-5) — blok,
+       serbest, paragraf ve problem; core/goodhart.js ile aynı okuma. */
+    const soru = R.Calc.gunSorusu(d);
 
     return {
       'ays.soru':soru,

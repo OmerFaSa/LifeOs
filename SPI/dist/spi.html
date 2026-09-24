@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'582e7d0', at:'2026-09-24 11:42', dirty:true };
+SP.BUILD = { id:'8051dde', at:'2026-09-24 11:48', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -16612,9 +16612,17 @@ SP.Store = (function(){
        tek islemdi. Yazma basarisiz olursa (kota dolu) geri alma imkani
        sessizce kaybolur ama import yine de denenir: hic geri alamamak,
        hic import edememekten daha az kotudur. */
+    /* Kopya yazilamazsa ONCEKI ice aktarmanin kopyasi da silinir: kalsaydi
+       «geri al» haftalar onceki duruma donup aradaki butun kaydi silerdi
+       (ekip/HATALAR.md O-3). Sonuc bu ice aktarmanin geri alinamayacagini
+       soyler. */
+    let geriAlinamaz = false;
     try{
       localStorage.setItem(UNDO_KEY, JSON.stringify({ at:new Date().toISOString(), data:localAll() }));
-    }catch(e){ /* kota dolu olabilir — asagidaki import denemesi engellenmez */ }
+    }catch(e){
+      geriAlinamaz = true;
+      try{ localStorage.removeItem(UNDO_KEY); }catch(e2){}
+    }
 
     /* YAZMA SONUCU DEGERLENDIRILIR. Once localWrite()'in donusu
        yutuluyordu: kota dolu bir tarayicida hicbir sey yazilmadigi halde
@@ -16642,7 +16650,7 @@ SP.Store = (function(){
       }
     }
     return Object.assign({}, parsed.meta, {
-      local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata,
+      local:true, cloudWritten:bulutYazilan, cloudFailed:bulutHata, geriAlinamaz,
       partialCloud:bulutHata > 0,
     });
   }
@@ -31306,14 +31314,34 @@ SP.Hatirlat = (function(){
       const k = gun + '|' + r.anahtar;
       if(r.durum !== 'vakti' || gosterildi[k] || n - dk(r.saat) > BILDIRIM_PENCERE_DK) return;
       gosterildi[k] = true;
-      try{ new window.Notification('SPİ · ' + r.saat, { body:r.ad, tag:'spi-' + r.anahtar }); say++; }
-      catch(e){ /* bildirim gösterilemedi; Bugün ekranı yine gösterir */ }
+      if(goster('SPİ · ' + r.saat, { body:r.ad, tag:'spi-' + r.anahtar })) say++;
     });
     return say;
   }
 
+  /* Android Chrome sayfa içinden `new Notification` kurmaya izin vermez
+     («Illegal constructor»); orada hizmet çalışanının showNotification'ı
+     gerekir. Hata yutuluyor, izin verilmiş görünürken hiçbir hatırlatma
+     gelmiyordu (ekip/HATALAR.md O-8). İkisi de olmazsa bu SÖYLENİR. */
+  let sorun = null;
+  const SORUN = 'Bu tarayıcı bildirimi gösteremedi (Android Chrome gibi). Hatırlatmalar '
+    + 'yalnız Bugün ekranında görünür.';
+  function goster(baslik, secenek){
+    try{ new window.Notification(baslik, secenek); sorun = null; return true; }
+    catch(e){
+      const sw = navigator.serviceWorker;
+      if(!sw || typeof sw.getRegistration !== 'function'){ sorun = SORUN; return false; }
+      sw.getRegistration().then(function(reg){
+        if(!reg || typeof reg.showNotification !== 'function') throw new Error('kayıt yok');
+        return reg.showNotification(baslik, secenek);
+      }).then(function(){ sorun = null; }, function(){ sorun = SORUN; });
+      return true;
+    }
+  }
+  function bildirimSorunu(){ return sorun; }
+
   return { TUR, yukle, kaydet, saatOku, ekle, sil, geriKoy, bugun, isaretle, adOf, durum,
-    bildirimVar, bildirimIzinli, bildirimAc, bildirimKapat, tik };
+    bildirimVar, bildirimIzinli, bildirimAc, bildirimKapat, bildirimSorunu, tik };
 })();
 
 /* ==== js/core/barkod.js ==== */
@@ -33631,6 +33659,7 @@ SP.HatirlatUI = (function(){
         K.Notice({ tone:'info', body:'Hatırlatma yalnız SPİ açıkken gelir: Bugün ekranında görünür, '
           + 'izin verirsen tarayıcı bildirimi de olur. İlaç adı HKM\'ye gitmediği için Telegram\'dan '
           + 'hatırlatılmaz. «Aldım» bir işarettir; işaretlenmeyen saat «alınmadı» sayılmaz.' }),
+        when(H().bildirimSorunu(), () => K.Notice({ tone:'warn', body:H().bildirimSorunu() })),
         when(H().bildirimVar(), () => html`<div class="row wrap gap-6">
           ${d.bildirim && H().bildirimIzinli()
             ? K.Button({ label:'Tarayıcı bildirimini kapat', size:'sm', act:'ht-bildirim', data:{ 'data-v':'0' } })
@@ -42625,7 +42654,8 @@ SP.Screens.guide = (function(){
             UI.toast('Yedek bu cihaza yüklendi ama ' + meta.cloudFailed
               + ' kayıt buluta yazılamadı — sayfa yenileniyor');
           }else{
-            UI.toast('Yedek yüklendi (şema ' + meta.schemaVersion + ') — sayfa yenileniyor');
+            UI.toast('Yedek yüklendi (şema ' + meta.schemaVersion + ')'
+              + (meta.geriAlinamaz ? '; yer olmadığı için bu içe aktarma geri alınamaz' : '') + ' — sayfa yenileniyor');
           }
           setTimeout(() => location.reload(), 900);
         }catch(e){

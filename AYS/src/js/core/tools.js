@@ -136,7 +136,7 @@ R.Tools = (function(){
         calisilanDakika:U.sum(blocks.map(b => b.actualMin || 0)),
         /* Serbest soru («soru 40», derssiz giriş) da çözülen sorudur.
            Paragraf 0 ile başlar: 0 «girilmedi»dir, ölçüm gibi gitmez. */
-        cozulenSoru:U.sum(blocks.map(b => b.actualQ || 0)) + (Number(d.freeQ) || 0),
+        cozulenSoru:R.Calc.gunSorusu(d),
         serbestSoru:Number(d.freeQ) || 0,
         paragraf:Number(d.paragraphActual) > 0 ? d.paragraphActual+'/'+d.paragraphTarget : null,
         uyku:d.sleepHours,

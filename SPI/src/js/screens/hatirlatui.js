@@ -74,6 +74,7 @@ SP.HatirlatUI = (function(){
         K.Notice({ tone:'info', body:'Hatırlatma yalnız SPİ açıkken gelir: Bugün ekranında görünür, '
           + 'izin verirsen tarayıcı bildirimi de olur. İlaç adı HKM\'ye gitmediği için Telegram\'dan '
           + 'hatırlatılmaz. «Aldım» bir işarettir; işaretlenmeyen saat «alınmadı» sayılmaz.' }),
+        when(H().bildirimSorunu(), () => K.Notice({ tone:'warn', body:H().bildirimSorunu() })),
         when(H().bildirimVar(), () => html`<div class="row wrap gap-6">
           ${d.bildirim && H().bildirimIzinli()
             ? K.Button({ label:'Tarayıcı bildirimini kapat', size:'sm', act:'ht-bildirim', data:{ 'data-v':'0' } })

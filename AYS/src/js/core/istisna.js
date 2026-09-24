@@ -352,6 +352,13 @@ R.Istisna = (function(){
     if(etki(iso, iso).korunan.length){
       return fail('O günde girilmiş çalışma var; plan yeniden kurulmaz, girdiğin kaybolmasın.');
     }
+    /* Ara gunu zaten yuksuzdur; «son eklenen kazanir» kurali yuzunden bir
+       sure istisnasi arayi ezip gunu calisma gunune ceviriyordu
+       (ekip/HATALAR.md O-11). */
+    const var_ = gunIcin(iso);
+    if(var_ && var_.tur === 'ara'){
+      return fail('O gün zaten ara günü; yükü sıfır, hafifletilecek bir şey yok.');
+    }
     const temel = temelDakika(iso) || sablonDakikasi() || 120;
     const r = Number(oran);
     let dakika;

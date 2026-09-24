@@ -182,17 +182,15 @@ R.Beacon = (function(){
     const gun = (S.days || {})[d];
     const bloklar = (gun && gun.blocks) || [];
 
-    /* Günün sorusu = blokların sorusu + serbest soru («soru 40», derssiz
-       giriş) + paragraf + problem (goodhart.js aynı toplamı kullanır).
-       Serbest/paragraf/problem alanı 0 ile başlar; 0 «girilmedi»dir, ölçüm
-       değil. Hiçbir parça girilmemişse veri yok — sıfır gönderilmez. */
+    /* Günün sorusu tek tanımdır: R.Calc.gunSorusu (blok + serbest +
+       paragraf + problem, HATALAR O-5). Serbest/paragraf/problem alanı 0
+       ile başlar; 0 «girilmedi»dir, ölçüm değil. Hiçbir parça
+       girilmemişse veri yok — sıfır gönderilmez. */
     const soru = bloklar.filter(function(b){ return b.actualQ != null; });
-    const serbest = gun ? ['freeQ', 'paragraphActual', 'problemActual']
-      .map(function(k){ return Number(gun[k]) || 0; })
-      .filter(function(n){ return n > 0; }) : [];
-    out.questions = (soru.length || serbest.length)
-      ? metric(soru.reduce(function(a, b){ return a + Number(b.actualQ || 0); }, 0)
-          + serbest.reduce(function(a, n){ return a + n; }, 0), 'measured')
+    const serbestVar = gun && ['freeQ', 'paragraphActual', 'problemActual']
+      .some(function(k){ return (Number(gun[k]) || 0) > 0; });
+    out.questions = (soru.length || serbestVar)
+      ? metric(R.Calc.gunSorusu(gun), 'measured')
       : metric(null, 'missing');
 
     const sure = bloklar.filter(function(b){ return b.actualMin != null; });
