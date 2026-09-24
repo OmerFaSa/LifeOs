@@ -1365,6 +1365,8 @@ ESP.Model = (function(){
       ESP.Seri = ESP.Seri || LIFEOS.Seri.kur({ store:() => ESP.Store, bugun:() => ESP.U.todayISO() });
       await ESP.Seri.yukle();
     }
+    /* BAM dil üniteleri (core/unite.js, Part 8d). */
+    if(ESP.Unite) await ESP.Unite.yukle();
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
     if(ESP.Hedefler) await ESP.Hedefler.yukle();

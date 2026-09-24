@@ -462,7 +462,7 @@ ESP.Beacon = (function(){
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
   const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add', 'kayit.add',
-    'urun.add'];
+    'urun.add', 'unite.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -578,6 +578,12 @@ ESP.Beacon = (function(){
       if(n.kind !== 'kayit.add') continue;
       try{ n.okuma = kayitOku(n); }catch(e){ n.okuma = null; }
     }
+    /* BAM ünitesi de ONAYDAN ONCE sinanir (core/unite.js): kart «ESP şunu
+       ekleyecek» der ya da neden ekleyemeyecegini soyler. */
+    for(const n of gosterilecek){
+      if(n.kind !== 'unite.add' || !ESP.Unite) continue;
+      try{ n.unite = await ESP.Unite.onizle(n); }catch(e){ n.unite = null; }
+    }
     flushIntentReports().catch(function(){});
     return gosterilecek;
   }
@@ -623,11 +629,12 @@ ESP.Beacon = (function(){
      ESP'de bir «oturum» ölçülmüş bir çalışmadır; ileriye dönük bir teklif
      oturum olarak yazılamaz — yazılsaydı yapılmamış bir çalışma ölçülmüş
      görünürdü. Teklif bu yüzden bir HATIRLATICI olur. */
-  const APPLIABLE = ['plan.add', 'material.add', 'kayit.add', 'urun.add'];
+  const APPLIABLE = ['plan.add', 'material.add', 'kayit.add', 'urun.add', 'unite.add'];
 
   function canApply(n){
     if(!n || APPLIABLE.indexOf(n.kind) < 0) return false;
     if(n.kind === 'kayit.add') return !!(n.okuma && n.okuma.yazilacak.length);
+    if(n.kind === 'unite.add') return !!(n.unite && n.unite.ok);
     return true;
   }
 
@@ -749,6 +756,10 @@ ESP.Beacon = (function(){
 
   async function applyIntent(n){
     if(n && n.kind === 'kayit.add') return await kayitUygula(n);
+    if(n && n.kind === 'unite.add'){
+      if(!ESP.Unite) return { ok:false, error:'Ünite modülü yüklenmedi.' };
+      return await ESP.Unite.uygula(n.payload || {});
+    }
     if(n && n.kind === 'urun.add'){
       /* BAM ürünü (özet, rapor, sunum, pankart…): kayıt HKM'den çekilir,
          modülün KENDİ koduyla sınanır, kendi deposuna yazılır
@@ -808,6 +819,7 @@ ESP.Beacon = (function(){
         : (action === 'seen' ? 'acknowledged' : 'dismissed');
       let not = '';
       let uygulandi = false;
+      let geriAl = null;
       if(action === 'apply'){
         if(onceki && (onceki.state === 'applied' || onceki.state === 'applying')){
           /* En fazla BIR KEZ: daha once uygulanmis (ya da uygulanmis
@@ -821,6 +833,7 @@ ESP.Beacon = (function(){
             return { ok:false, error:r.error };
           }
           not = r.note;
+          geriAl = r.geriAl || null;
           uygulandi = true;
         }
       }
@@ -828,7 +841,7 @@ ESP.Beacon = (function(){
       const bildirim = await answerIntent(n.id, durum);
       if(bildirim.ok) await markIntent(n.id, durum, true, not);
       return { ok:true, applied:uygulandi, state:durum,
-        reported:!!bildirim.ok, note:not };
+        reported:!!bildirim.ok, note:not, geriAl };
     }finally{
       delete ISLEMDE[anahtar];
     }

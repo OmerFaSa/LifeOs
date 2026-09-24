@@ -36,13 +36,19 @@ ESP.Lesson = (function(){
 
   /* ------------------------------------------------------------- üniteler */
 
-  function langUnits(){ return ESP.LANG_UNITS || []; }
+  /* BAM üniteleri (core/unite.js) yerleşik ünitelerin ARDINDAN gelir ve
+     yalnız kendi dillerinde listelenir: Rusça bir ünite İngilizce destede
+     «malzemesi yok» diye görünmez. Dil verilmezse hepsi (kimlikle arama). */
+  function langUnits(dil){
+    const bam = ESP.Unite ? ESP.Unite.liste(dil) : [];
+    return (ESP.LANG_UNITS || []).concat(bam);
+  }
   function historyUnits(){ return ESP.HISTORY_UNITS || []; }
 
-  function units(discId){
+  function units(discId, dil){
     if(discId === 'history') return historyUnits().map(function(u){
       return Object.assign({ disc:'history' }, u); });
-    if(discId === 'lang') return langUnits().map(function(u){
+    if(discId === 'lang') return langUnits(dil).map(function(u){
       return Object.assign({ disc:'lang' }, u); });
     return [];
   }
@@ -125,7 +131,8 @@ ESP.Lesson = (function(){
         front:o.front, back:o.back, lang:o.lang,
         context:o.why || '',
         /* «tohum» etiketi kaybolmaz: bu kartı kullanıcı yazmadı. */
-        tags:['seed', 'unit:' + unit.id].concat(o.era ? [o.era] : []),
+        tags:['seed', 'unit:' + unit.id].concat(o.era ? [o.era] : [])
+          .concat(unit.bam ? ['bam', 'bam:' + unit.bam.kayitId] : []),
       }));
       eklenen++;
     }

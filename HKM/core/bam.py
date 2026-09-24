@@ -38,7 +38,7 @@ import datetime
 import json
 import re
 
-from core import (ai, butce, depo, editor, intents, kaynakli, kitap, mufredat, planlama, spibilgi,
+from core import (ai, butce, depo, editor, intents, kaynakli, kitap, mufredat, planlama, spibilgi, unite,
                   program, urunler, web)
 
 OFISLER = {
@@ -303,6 +303,8 @@ def arastirma_konusu(j):
         return "müfredat %s %s" % (m["sinav"], m.get("bolum") or "")
     if g.get("bilgi"):
         return spibilgi.konu(g["bilgi"])
+    if g.get("unite"):
+        return unite.konu(g["unite"])
     if g.get("arastirma"):
         a = g["arastirma"]
         return "%s %s" % (a["konu"], a.get("ayrinti") or "")
@@ -1186,6 +1188,37 @@ def _urun_adimi(con, cfg, j, g, transport, now):
                                         (", %d kaynak" % len(kaynaklar)) if kaynaklar else "")}
 
 
+def _unite_adimi(con, cfg, j, g, transport, now):
+    """ESP dil unitesi (core/unite.py): uret, bicimi ve yazi sistemini kodla
+    sina, ogeleri bagimsiz yargiyla denetle. Soru YAZDIRILMAZ."""
+    r = _cagri(con, cfg, "uretim", URETIM_BAS + unite.BICIM, unite.istem(g), transport)
+    if not r.get("ok"):
+        return {"durum": "beklemede" if r.get("reason") == "budget" else "hata",
+                "not": r.get("note") or "Model cevap vermedi."}
+    sonuc, hata = unite.ayikla(_json_ayikla(r["text"]), g)
+    if hata:
+        return {"durum": "hata", "not": "Ünite yazılmadı: " + hata}
+    uniteler, bicim_dusen = sonuc
+    duz = [o for u in uniteler for o in u["ogeler"]]
+    s_, hata = _denetle(con, cfg, "kart", duz, transport)
+    if hata:
+        return {"durum": "beklemede", "not": "Kalite kontrolü yapılamadı; ünite teklif "
+                "edilmedi. " + hata}
+    gecen, dusen = s_
+    kalan = unite.suz(uniteler, gecen)
+    if not kalan:
+        return {"durum": "hata", "not": "Kalite kontrolünden sonra en az %d öğeli ünite "
+                "kalmadı; kayıt yazılmadı." % unite.OGE[0]}
+    govde = {"tur": "unite", "dil": g["dil"], "duzey": g["duzey"], "konu": g["konu"],
+             "baslik": unite.baslik(g), "uniteler": kalan,
+             "kalite": {"kontrol": "yargı", "uretilen": len(duz),
+                        "gecen": sum(len(u["ogeler"]) for u in kalan),
+                        "dusen": dusen, "bicim_dusen": bicim_dusen}}
+    k = kayit_ekle(con, "materyal", unite.baslik(g), govde, dogruluk="dogrulanmadi",
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now, **_depo_yaz(j))
+    return {"durum": "tamam", "kayit_id": k["id"], "not": unite.ozet(govde)}
+
+
 def _uretim_adimi(con, cfg, j, transport, now):
     hazir = ai.hazir_mi(cfg, "bam.uretim")
     if not hazir["ok"]:
@@ -1196,6 +1229,9 @@ def _uretim_adimi(con, cfg, j, transport, now):
     g = (j.get("govde") or {}).get("kitap")
     if g:
         return _kitap_adimi(con, cfg, j, g, transport, now)
+    g = (j.get("govde") or {}).get("unite")
+    if g:
+        return _unite_adimi(con, cfg, j, g, transport, now)
     tur, adet = uretim_istegi(j["talep"])
     r = _cagri(con, cfg, "uretim", URETIM_BAS + URETIM_BICIM[tur],
                "Üretim talebi: %s\nAdet: %d" % (j["talep"], adet), transport)

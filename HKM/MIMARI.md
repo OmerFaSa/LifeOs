@@ -1050,6 +1050,26 @@ Testler: `tests/test_bildirim.py`, `tests/test_teklif.py` (önce depo), `tools/e
 Testler: `tests/test_ritim.py` (kazanımlar), `tests/test_bildirim.py` (tatil),
 `tests/test_cross.py` (Türkçe metin).
 
+## 8.33 ESP dil ünitesi — `core/unite.py` (Part 8d)
+
+King iş türü `esp.unite` (yalnız ESP): dil (ESP'nin sekiz dili), CEFR düzeyi, konu, 1–4 ünite
+× 6–20 öğe. Girdi kapalıdır, kişisel veri gitmez. Teklif: üretim 1 + bağımsız yargı 1 çağrı
+(düşük sınıf). Üretim Bürosu ünite başına başlık, ÖLÇÜLEBİLİR hedef, görev ve ön/arka öğe
+yazar; **soru ve çeldirici yazdırılmaz** (ESP'nin pratik motoru onları aynı desteden kurar,
+`ESP/src/js/core/lesson.js` kural 3). Kod süzer: ön yüz dilin yazı sistemini taşımalı (Rusça
+Kiril, Arapça Arap harfi, diğerleri Latin), arka yüz Türkçe ve ön yüzden farklı, tekrar eden
+ön yüz bir kez; bağımsız yargı «doğru» demeyen öğe düşer; 6 öğenin altına inen ünite girmez;
+hiç ünite kalmazsa kayıt ve teklif yok. Etiket «doğrulanmadı». Kayıt `unite.add` niyetiyle
+ESP'ye bırakılır (`king._teklif_unite`).
+
+**ESP tarafı (`ESP/src/js/core/unite.js`):** Dil › Öğren › «Ünite iste» (düzey + konu; dil
+etkin deste) → King onay kapısı. Teklif Bugün kartında ESP'nin KENDİ önizlemesiyle görünür;
+«Ekle» kaydı yeniden çeker, kendi kuralıyla yeniden sınar, üniteyi `meta/bamUniteler`'e yazar
+ve kartları `Lesson.addUnit` ile desteye koyar (`seed`, `bam`, `bam:<id>`, `unit:<id>`
+etiketleri). Ünite yalnız kendi dilinde listelenir; ilerleme SRS'ten okunur. «Geri al» üniteyi
+ve hiç tekrar edilmemiş kartları kaldırır; tekrar edilmiş kart kullanıcının emeğidir, kalır.
+Testler: `tests/test_unite.py`, `ESP/src/tests/unite.test.js`, `tools/entegre.js` §2.81.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

@@ -394,7 +394,7 @@ ESP.Screens.lang = (function(){
   function learnRows(){
     const dil = aktifDil();
     const l = ESP.LANG_BY_ID[dil] || {};
-    const malzemesiz = ESP.Lesson.units('lang')
+    const malzemesiz = ESP.Lesson.units('lang', dil)
       .filter(u => !ESP.Lesson.itemsOf(u, dil).length).length;
 
     return [
@@ -420,7 +420,7 @@ ESP.Screens.lang = (function(){
 
       K.Entry({
         label:'ÜNİTELER', hint:'unit',
-        meta:ESP.Lesson.units('lang').length + ' ünite',
+        meta:ESP.Lesson.units('lang', dil).length + ' ünite',
         note:'İlerleme SRS\'ten okunur: bir kartı «bilinen» yapan şey bir kez '
            + 'doğru bilmek değil, aralığının uzamasıdır.',
         wide:true,
@@ -430,6 +430,23 @@ ESP.Screens.lang = (function(){
               + 'Yanlış çeviriyle dolu bir ünite, boş bir üniteden pahalıdır: '
               + 'konusu duruyor, kartını sen yazarsın.' }))}
           ${ESP.Parts.units('lang', dil)}`,
+      }),
+
+      /* BAM'dan ünite (Part 8d): istek King'in onay kapısından geçer; ünite
+         Bugün'e teklif olarak gelir ve ESP kendi koduyla sınamadan eklenmez. */
+      K.Entry({
+        label:'ÜNİTE İSTE', hint:'unit',
+        meta:(l.label || dil) + ' · HKM',
+        note:'Başlık, ölçülebilir hedef, görev ve öğeler. Soru yazdırılmaz: pratik '
+           + 'sorularını ESP kendi destenden kurar. Kaynaksızdır; yanlış kartı silersin.',
+        wide:true,
+        body:html`<div class="row gap-8 wrap">
+          ${K.Select({ id:'unite-duzey', value:S.ui.uniteDuzey || 'A1', aria:'Düzey', size:'sm',
+            options:['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] })}
+          ${K.Input({ id:'unite-konu', placeholder:'Konu: selamlaşma, yiyecekler…', aria:'Konu',
+            size:'sm', class:'grow' })}
+          ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'unite-iste' })}
+        </div>`,
       }),
     ];
   }
@@ -460,6 +477,13 @@ ESP.Screens.lang = (function(){
   }
 
   const handle = {
+    async 'unite-iste'(){
+      const d = document.getElementById('unite-duzey'), k = document.getElementById('unite-konu');
+      S.ui.uniteDuzey = d ? d.value : 'A1';
+      const r = await ESP.Unite.iste({ dil:aktifDil(), duzey:S.ui.uniteDuzey, konu:k ? k.value : '' });
+      ESP.UI.toast(r.metin);
+      if(r.ok) ESP.App.render();
+    },
     async 'lang-tab'(el){ S.ui.langTab = el.dataset.tab; ESP.App.render(); },
 
     /* Beyan bir olcum degildir: prefs icinde durur, deste sayilarina

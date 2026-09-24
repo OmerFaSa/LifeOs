@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'08f1086', at:'2026-09-23 23:07', dirty:true };
+ESP.BUILD = { id:'7e5803f', at:'2026-09-24 00:04', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19075,6 +19075,8 @@ ESP.Model = (function(){
       ESP.Seri = ESP.Seri || LIFEOS.Seri.kur({ store:() => ESP.Store, bugun:() => ESP.U.todayISO() });
       await ESP.Seri.yukle();
     }
+    /* BAM dil üniteleri (core/unite.js, Part 8d). */
+    if(ESP.Unite) await ESP.Unite.yukle();
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
     if(ESP.Hedefler) await ESP.Hedefler.yukle();
@@ -25773,7 +25775,7 @@ ESP.Beacon = (function(){
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
   const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add', 'kayit.add',
-    'urun.add'];
+    'urun.add', 'unite.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -25889,6 +25891,12 @@ ESP.Beacon = (function(){
       if(n.kind !== 'kayit.add') continue;
       try{ n.okuma = kayitOku(n); }catch(e){ n.okuma = null; }
     }
+    /* BAM ünitesi de ONAYDAN ONCE sinanir (core/unite.js): kart «ESP şunu
+       ekleyecek» der ya da neden ekleyemeyecegini soyler. */
+    for(const n of gosterilecek){
+      if(n.kind !== 'unite.add' || !ESP.Unite) continue;
+      try{ n.unite = await ESP.Unite.onizle(n); }catch(e){ n.unite = null; }
+    }
     flushIntentReports().catch(function(){});
     return gosterilecek;
   }
@@ -25934,11 +25942,12 @@ ESP.Beacon = (function(){
      ESP'de bir «oturum» ölçülmüş bir çalışmadır; ileriye dönük bir teklif
      oturum olarak yazılamaz — yazılsaydı yapılmamış bir çalışma ölçülmüş
      görünürdü. Teklif bu yüzden bir HATIRLATICI olur. */
-  const APPLIABLE = ['plan.add', 'material.add', 'kayit.add', 'urun.add'];
+  const APPLIABLE = ['plan.add', 'material.add', 'kayit.add', 'urun.add', 'unite.add'];
 
   function canApply(n){
     if(!n || APPLIABLE.indexOf(n.kind) < 0) return false;
     if(n.kind === 'kayit.add') return !!(n.okuma && n.okuma.yazilacak.length);
+    if(n.kind === 'unite.add') return !!(n.unite && n.unite.ok);
     return true;
   }
 
@@ -26060,6 +26069,10 @@ ESP.Beacon = (function(){
 
   async function applyIntent(n){
     if(n && n.kind === 'kayit.add') return await kayitUygula(n);
+    if(n && n.kind === 'unite.add'){
+      if(!ESP.Unite) return { ok:false, error:'Ünite modülü yüklenmedi.' };
+      return await ESP.Unite.uygula(n.payload || {});
+    }
     if(n && n.kind === 'urun.add'){
       /* BAM ürünü (özet, rapor, sunum, pankart…): kayıt HKM'den çekilir,
          modülün KENDİ koduyla sınanır, kendi deposuna yazılır
@@ -26119,6 +26132,7 @@ ESP.Beacon = (function(){
         : (action === 'seen' ? 'acknowledged' : 'dismissed');
       let not = '';
       let uygulandi = false;
+      let geriAl = null;
       if(action === 'apply'){
         if(onceki && (onceki.state === 'applied' || onceki.state === 'applying')){
           /* En fazla BIR KEZ: daha once uygulanmis (ya da uygulanmis
@@ -26132,6 +26146,7 @@ ESP.Beacon = (function(){
             return { ok:false, error:r.error };
           }
           not = r.note;
+          geriAl = r.geriAl || null;
           uygulandi = true;
         }
       }
@@ -26139,7 +26154,7 @@ ESP.Beacon = (function(){
       const bildirim = await answerIntent(n.id, durum);
       if(bildirim.ok) await markIntent(n.id, durum, true, not);
       return { ok:true, applied:uygulandi, state:durum,
-        reported:!!bildirim.ok, note:not };
+        reported:!!bildirim.ok, note:not, geriAl };
     }finally{
       delete ISLEMDE[anahtar];
     }
@@ -27296,13 +27311,19 @@ ESP.Lesson = (function(){
 
   /* ------------------------------------------------------------- üniteler */
 
-  function langUnits(){ return ESP.LANG_UNITS || []; }
+  /* BAM üniteleri (core/unite.js) yerleşik ünitelerin ARDINDAN gelir ve
+     yalnız kendi dillerinde listelenir: Rusça bir ünite İngilizce destede
+     «malzemesi yok» diye görünmez. Dil verilmezse hepsi (kimlikle arama). */
+  function langUnits(dil){
+    const bam = ESP.Unite ? ESP.Unite.liste(dil) : [];
+    return (ESP.LANG_UNITS || []).concat(bam);
+  }
   function historyUnits(){ return ESP.HISTORY_UNITS || []; }
 
-  function units(discId){
+  function units(discId, dil){
     if(discId === 'history') return historyUnits().map(function(u){
       return Object.assign({ disc:'history' }, u); });
-    if(discId === 'lang') return langUnits().map(function(u){
+    if(discId === 'lang') return langUnits(dil).map(function(u){
       return Object.assign({ disc:'lang' }, u); });
     return [];
   }
@@ -27385,7 +27406,8 @@ ESP.Lesson = (function(){
         front:o.front, back:o.back, lang:o.lang,
         context:o.why || '',
         /* «tohum» etiketi kaybolmaz: bu kartı kullanıcı yazmadı. */
-        tags:['seed', 'unit:' + unit.id].concat(o.era ? [o.era] : []),
+        tags:['seed', 'unit:' + unit.id].concat(o.era ? [o.era] : [])
+          .concat(unit.bam ? ['bam', 'bam:' + unit.bam.kayitId] : []),
       }));
       eklenen++;
     }
@@ -29183,6 +29205,230 @@ ESP.Dunku = (function(){
   async function geriAl(bugun, id){ await ESP.Model.deleteSession(bugun, id); return { ok:true }; }
 
   return { adaylar, kopyala, geriAl };
+})();
+
+/* ==== js/core/unite.js ==== */
+/* BAM DİL ÜNİTESİ — HKM'nin hazırladığı üniteyi ESP'ye almak (Part 8d).
+
+   Kullanıcı Dil › Öğren'den «Rusça A1 selamlaşma» ister. İstek King'in
+   teklifinden ve onaydan geçer; BAM üniteyi (başlık, ölçülebilir hedef,
+   görev, ön/arka öğeler) yazar, öğeleri bağımsız yargıyla denetler
+   (HKM/core/unite.py) ve HKM onu `unite.add` teklifi olarak bırakır.
+
+   Sözler:
+     1. HKM YAZMAZ, ESP YAZAR. Kayıt HKM'den ÇEKİLİR ve ESP'nin KENDİ
+        koduyla yeniden sınanır (dil, yazı sistemi, öğe sayısı, tekrar);
+        onay anında yeniden çekilir, yeniden sınanır.
+     2. SORU MODELDEN GELMEZ. Ünite desteye kart olarak girer; pratik
+        soruları ve çeldiricileri ESP'nin kendi motoru AYNI DESTEDEN kurar
+        (core/lesson.js kural 3).
+     3. TOHUM, ÖLÇÜM DEĞİLDİR. Kartlar `seed` ve `bam` etiketi taşır;
+        ilerleme SRS'ten okunur, «tamamlandı» bayrağı tutulmaz.
+     4. GERİ ALINIR. Ünite kalkar; hiç tekrar edilmemiş kartları da kalkar.
+        Tekrar edilmiş kart kullanıcının emeğidir, silinmez — ve bu söylenir.
+     5. İSTEĞE KİŞİSEL VERİ GİTMEZ: dil, düzey, konu. */
+
+window.ESP = window.ESP || {};
+
+ESP.Unite = (function(){
+  const U = () => ESP.U;
+  const ANAHTAR = 'meta/bamUniteler';
+  const DUZEY = { A1:1, A2:2, B1:3, B2:4, C1:5, C2:5 };
+  const OGE = [6, 20], MAX_UNITE = 4, MAX_ON = 120, MAX_ARKA = 160;
+  const KIRIL = /[Ѐ-ӿ]/, ARAP = /[؀-ۿ]/, LATIN = /[A-Za-zÀ-ÿĀ-žḀ-ỿ]/;
+  const SURE = 5000;
+
+  function bosluk(s){ return String(s == null ? '' : s).replace(/\s+/g, ' ').trim(); }
+
+  /* Ön yüz dilin yazı sistemini taşıyor mu? (HKM'deki kuralın ESP kopyası
+     değil, ESP'nin KENDİ kuralı: karşı tarafın süzgecine güvenilmez.) */
+  function yaziTutar(dil, on){
+    if(dil === 'ru') return KIRIL.test(on) && !ARAP.test(on);
+    if(dil === 'ar') return ARAP.test(on) && !KIRIL.test(on);
+    return LATIN.test(on) && !KIRIL.test(on) && !ARAP.test(on);
+  }
+
+  /* ------------------------------------------------------------ HKM */
+
+  function baglanti(){
+    const b = ESP.Beacon;
+    const a = b && typeof b.settings === 'function' ? (b.settings() || {}) : {};
+    if(!b || !a.enabled || !a.token || !b.urlOk(a.url)) return null;
+    return { url:String(a.url).replace(/\/$/, ''), token:a.token };
+  }
+
+  async function istek(yol, govde){
+    const k = baglanti();
+    if(!k) return { ok:false, bagli:false };
+    const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    const zaman = ctrl ? setTimeout(() => ctrl.abort(), SURE) : null;
+    try{
+      const res = await fetch(k.url + yol, {
+        method:govde === undefined ? 'GET' : 'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        body:govde === undefined ? undefined : JSON.stringify(govde),
+        signal:ctrl ? ctrl.signal : undefined,
+      });
+      let g = null;
+      try{ g = await res.json(); }catch(e){ g = null; }
+      return { ok:res.status === 200, status:res.status, bagli:true, govde:g };
+    }catch(e){
+      return { ok:false, bagli:true, ag:true };
+    }finally{
+      if(zaman) clearTimeout(zaman);
+    }
+  }
+
+  function istekTemizle(o){
+    const dil = o && o.dil;
+    if(!ESP.LANG_BY_ID[dil]) return { ok:false, why:'Dil ESP’nin dillerinden biri olmalı.' };
+    const duzey = bosluk(o.duzey).toUpperCase();
+    if(!DUZEY[duzey]) return { ok:false, why:'Düzey A1–C2 olmalı.' };
+    const konu = bosluk(o.konu);
+    if(konu.length < 2 || konu.length > 80) return { ok:false, why:'Konu 2–80 karakter olmalı.' };
+    return { ok:true, unite:{ dil, duzey, konu } };
+  }
+
+  async function iste(o){
+    const t = istekTemizle(o);
+    if(!t.ok) return { ok:false, metin:t.why };
+    const r = await istek('/api/king/emir', { modul:'esp', tur:'esp.unite', konu:'',
+      neden:'ESP Dil › Öğren’den ünite istendi.', govde:{ unite:t.unite } });
+    if(!r.bagli) return { ok:false, metin:'Üniteyi HKM’deki Üretim Bürosu hazırlar ama HKM bağlı değil. '
+      + 'Rehber › HKM’den bağlanınca yeniden iste.' };
+    if(r.ag) return { ok:false, metin:'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden iste.' };
+    const g = r.govde || {};
+    if(!r.ok || !g.ok){
+      return { ok:false, metin:'King iş emrini almadı: ' + ((g.errors || []).join('; ') || g.note || ('HTTP ' + r.status)) };
+    }
+    if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
+    const e = g.emir || {};
+    return { ok:true, emir:e.id, metin:g.yeni === false
+      ? 'Bu istek zaten açık (iş emri #' + e.id + ').'
+      : 'King teklif hazırladı (iş emri #' + e.id + '). Onaylarsan Üretim Bürosu başlar; ünite '
+        + 'Bugün’e teklif olarak gelir.' };
+  }
+
+  async function kayitCek(kid){
+    const r = await istek('/api/bam/kayit/' + kid);
+    return r.ok && r.govde && r.govde.kayit ? r.govde.kayit : null;
+  }
+
+  /* ------------------------------------------------------------ sınama (saf) */
+
+  function sina(kayit, p){
+    const g = kayit && kayit.govde;
+    const kid = Number(kayit && kayit.id);
+    if(!g || !Number.isInteger(kid) || kid < 1 || kid !== Number(p && p.kayit_id)){
+      return { ok:false, why:'Kayıt teklifle eşleşmiyor.' };
+    }
+    if(g.tur !== 'unite') return { ok:false, why:'Kayıt ünite biçiminde değil.' };
+    const dil = g.dil, l = ESP.LANG_BY_ID[dil];
+    if(!l) return { ok:false, why:'Ünitenin dili ESP’de yok.' };
+    const duzey = String(g.duzey || '').toUpperCase();
+    if(!DUZEY[duzey]) return { ok:false, why:'Ünitenin düzeyi geçersiz.' };
+    if((ESP.S.bamUnits || []).some(u => u.bam && u.bam.kayitId === kid)){
+      return { ok:false, why:'Bu ünite zaten eklenmiş.' };
+    }
+    const gorulen = {};
+    let dusen = 0;
+    const uniteler = [];
+    (Array.isArray(g.uniteler) ? g.uniteler : []).slice(0, MAX_UNITE).forEach((u, i) => {
+      if(!u) return;
+      const title = bosluk(u.baslik).slice(0, 80), goal = bosluk(u.hedef).slice(0, 200);
+      if(title.length < 2 || goal.length < 8) return;
+      const ogeler = [];
+      (Array.isArray(u.ogeler) ? u.ogeler : []).slice(0, OGE[1] * 2).forEach(x => {
+        const on = bosluk(x && x.on), arka = bosluk(x && x.arka);
+        const gecerli = on && arka && on.length <= MAX_ON && arka.length <= MAX_ARKA
+          && yaziTutar(dil, on) && !KIRIL.test(arka) && !ARAP.test(arka)
+          && U().norm(on) !== U().norm(arka);
+        if(!gecerli){ dusen++; return; }
+        if(gorulen[U().norm(on)] || ogeler.length >= OGE[1]) return;
+        gorulen[U().norm(on)] = 1;
+        ogeler.push({ front:on, back:arka });
+      });
+      if(ogeler.length < OGE[0]) return;
+      uniteler.push({ id:'bam-' + kid + '-' + i, level:DUZEY[duzey], band:duzey, title, goal,
+        task:bosluk(u.gorev).slice(0, 240) || null, items:{ [dil]:ogeler },
+        bam:{ kayitId:kid, dil, at:String(kayit.created_at || '').slice(0, 10) || U().todayISO(),
+          dogruluk:kayit.dogruluk === 'kaynakli' ? 'kaynakli' : 'dogrulanmadi' } });
+    });
+    if(!uniteler.length) return { ok:false, why:'Hiçbir ünite ESP’nin denetimini geçmedi (en az '
+      + OGE[0] + ' geçerli öğe gerekir).' };
+    const toplam = uniteler.reduce((n, u) => n + u.items[dil].length, 0);
+    const uyari = ['Kaynaksız, model bilgisi: yanlış bulduğun kartı sil. Pratik sorularını ESP '
+      + 'kendi destenden kurar.'];
+    if(dusen) uyari.push(dusen + ' öğe ESP’nin denetimini geçmedi, eklenmeyecek.');
+    return { ok:true, uniteler, dil,
+      onizleme:{ baslik:l.label + ' ' + duzey + ' · ' + bosluk(g.konu) + ' — ' + uniteler.length
+          + ' ünite, ' + toplam + ' öğe',
+        satirlar:uniteler.map(u => u.title + ' (' + u.items[dil].length + ' öğe): ' + u.goal
+          + ' Örnek: ' + u.items[dil].slice(0, 3).map(x => x.front + ' — ' + x.back).join('; ')),
+        uyari } };
+  }
+
+  /* ------------------------------------------------------------ depo */
+
+  async function yaz(){ await ESP.Store.set(ANAHTAR, { liste:ESP.S.bamUnits || [] }); }
+
+  async function yukle(){
+    let d = null;
+    try{ d = await ESP.Store.get(ANAHTAR); }catch(e){ d = null; }
+    ESP.S.bamUnits = d && Array.isArray(d.liste) ? d.liste.filter(u => u && u.id && u.items) : [];
+  }
+
+  function liste(dil){
+    return (ESP.S.bamUnits || []).filter(u => !dil || (u.bam && u.bam.dil === dil));
+  }
+
+  async function onizle(n){
+    if(!n || n.kind !== 'unite.add') return null;
+    const kayit = await kayitCek(Number(n.payload && n.payload.kayit_id));
+    if(!kayit) return { ok:false, why:'Ünite HKM’den alınamadı; HKM açıkken yeniden dene.' };
+    return sina(kayit, n.payload || {});
+  }
+
+  /* Onay: YENİDEN çekilir, YENİDEN sınanır; ünite kaydedilir ve kartları
+     desteye girer (Lesson.addUnit: aynı ön yüz iki kez eklenmez). */
+  async function uygula(p){
+    const kid = Number(p && p.kayit_id);
+    if(!Number.isInteger(kid) || kid < 1) return { ok:false, error:'Kayıt kimliği geçersiz.' };
+    if(!baglanti()) return { ok:false, error:'HKM bağlantısı kurulmamış; ünite alınamaz.' };
+    const kayit = await kayitCek(kid);
+    if(!kayit) return { ok:false, error:'Ünite HKM’den alınamadı; HKM açıkken yeniden dene.' };
+    const s = sina(kayit, p);
+    if(!s.ok) return { ok:false, error:s.why };
+    ESP.S.bamUnits = (ESP.S.bamUnits || []).concat(s.uniteler);
+    await yaz();
+    let eklenen = 0, atlanan = 0;
+    for(const u of s.uniteler){
+      const r = await ESP.Lesson.addUnit(Object.assign({ disc:'lang' }, u), s.dil);
+      if(r.ok){ eklenen += r.added; atlanan += r.skipped; }
+    }
+    return { ok:true, note:s.uniteler.length + ' ünite eklendi; ' + eklenen + ' kart desteye girdi'
+      + (atlanan ? ' (' + atlanan + ' kart zaten vardı)' : '') + '. Dil › Öğren’de.',
+      geriAl:{ kayitId:kid } };
+  }
+
+  async function geriAl(g){
+    const kid = g && g.kayitId;
+    const ids = (ESP.S.bamUnits || []).filter(u => u.bam && u.bam.kayitId === kid).map(u => u.id);
+    if(!ids.length) return { ok:false };
+    ESP.S.bamUnits = (ESP.S.bamUnits || []).filter(u => ids.indexOf(u.id) < 0);
+    await yaz();
+    let kalan = 0;
+    const etiketler = ids.map(id => 'unit:' + id);
+    for(const c of (ESP.S.cards || []).slice()){
+      if(!(c.tags || []).some(t => etiketler.indexOf(t) >= 0)) continue;
+      if((c.reps || 0) > 0){ kalan++; continue; }
+      await ESP.Model.deleteCard(c.id);
+    }
+    return { ok:true, kalan };
+  }
+
+  return { DUZEY, yaziTutar, istekTemizle, iste, kayitCek, sina, onizle, uygula, geriAl,
+    yukle, liste };
 })();
 
 /* ==== js/core/voice.js ==== */
@@ -31634,7 +31880,7 @@ ESP.Parts = (function(){
 
      İlerleme çubuğu SRS'ten okunur; ayrı bir «tamamlandı» bayrağı yoktur. */
   function units(discId, lang){
-    const list = ESP.Lesson.units(discId);
+    const list = ESP.Lesson.units(discId, lang);
     if(!list.length) return K.Empty({ text:'Bu bölümde ünite tanımlı değil.' });
 
     return html`<div class="units">${map(list, u => {
@@ -31647,6 +31893,7 @@ ESP.Parts = (function(){
             <div class="unit__body">
               <b>${u.title}</b>
               <span class="small muted">${u.goal}</span>
+              ${when(u.bam, () => html`<span class="tiny dim">BAM · ${u.band} · doğrulanmadı — yanlış kartı sil</span>`)}
             </div>
             ${p.total
               ? K.Badge({ label:p.known + '/' + p.total + ' bilinen',
@@ -35205,9 +35452,10 @@ ESP.Screens.today = (function(){
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
           ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
+          ${when(n.kind === 'unite.add', () => uniteOnizleme(n))}
           <div class="row gap-8 mt-8">
             ${when(ESP.Beacon.canApply(n), () => K.Button({
-              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle' })[n.kind] || 'Uygula',
+              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'unite.add':'Ekle' })[n.kind] || 'Uygula',
               size:'sm', tone:'primary', act:'hkm-intent-yes',
               data:{ 'data-id':String(n.id) } }))}
             ${when(!ESP.Beacon.canApply(n), () => K.Button({ label:'Gördüm',
@@ -35361,6 +35609,20 @@ ESP.Screens.today = (function(){
     ESP.App.render();
   }
 
+  /* BAM ünitesi: ESP kaydı KENDİ koduyla sınadı; ne ekleneceği ya da neden
+     eklenemeyeceği onaydan ÖNCE görünür (core/unite.js). */
+  function uniteOnizleme(n){
+    const b = n.unite;
+    if(!b) return html`<p class="tiny dim mt-8">ESP bu üniteyi sınayamadı.</p>`;
+    if(!b.ok) return html`<p class="tiny dim mt-8">Eklenmeyecek: ${b.why}</p>`;
+    const o = b.onizleme;
+    return html`<div class="mt-8">
+      <p class="tiny"><b>ESP şunu ekleyecek:</b> ${o.baslik}</p>
+      <ul class="tiny mt-4">${map(o.satirlar, s => html`<li>${s}</li>`)}</ul>
+      ${map(o.uyari || [], u => html`<p class="tiny dim">${u}</p>`)}
+    </div>`;
+  }
+
   async function hkmCevap(id, action){
     const liste = S.ui.hkmIntents || [];
     const n = liste.filter(x => String(x.id) === String(id))[0];
@@ -35375,8 +35637,14 @@ ESP.Screens.today = (function(){
     const bas = r.state === 'applied' ? (r.note || 'Uygulandı')
       : (r.state === 'acknowledged' ? 'Görüldü olarak işaretlendi'
         : 'İstenmedi olarak işaretlendi');
-    ESP.UI.toast(r.reported ? bas
-      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.');
+    const metin = r.reported ? bas
+      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.';
+    /* BAM ünitesi geri alınır: ünite ve hiç tekrar edilmemiş kartları kalkar. */
+    if(r.geriAl && ESP.Unite){
+      ESP.UI.toast(metin, { undo:async () => { await ESP.Unite.geriAl(r.geriAl); ESP.App.render(); } });
+    }else{
+      ESP.UI.toast(metin);
+    }
     ESP.App.render();
   }
 
@@ -36046,7 +36314,7 @@ ESP.Screens.lang = (function(){
   function learnRows(){
     const dil = aktifDil();
     const l = ESP.LANG_BY_ID[dil] || {};
-    const malzemesiz = ESP.Lesson.units('lang')
+    const malzemesiz = ESP.Lesson.units('lang', dil)
       .filter(u => !ESP.Lesson.itemsOf(u, dil).length).length;
 
     return [
@@ -36072,7 +36340,7 @@ ESP.Screens.lang = (function(){
 
       K.Entry({
         label:'ÜNİTELER', hint:'unit',
-        meta:ESP.Lesson.units('lang').length + ' ünite',
+        meta:ESP.Lesson.units('lang', dil).length + ' ünite',
         note:'İlerleme SRS\'ten okunur: bir kartı «bilinen» yapan şey bir kez '
            + 'doğru bilmek değil, aralığının uzamasıdır.',
         wide:true,
@@ -36082,6 +36350,23 @@ ESP.Screens.lang = (function(){
               + 'Yanlış çeviriyle dolu bir ünite, boş bir üniteden pahalıdır: '
               + 'konusu duruyor, kartını sen yazarsın.' }))}
           ${ESP.Parts.units('lang', dil)}`,
+      }),
+
+      /* BAM'dan ünite (Part 8d): istek King'in onay kapısından geçer; ünite
+         Bugün'e teklif olarak gelir ve ESP kendi koduyla sınamadan eklenmez. */
+      K.Entry({
+        label:'ÜNİTE İSTE', hint:'unit',
+        meta:(l.label || dil) + ' · HKM',
+        note:'Başlık, ölçülebilir hedef, görev ve öğeler. Soru yazdırılmaz: pratik '
+           + 'sorularını ESP kendi destenden kurar. Kaynaksızdır; yanlış kartı silersin.',
+        wide:true,
+        body:html`<div class="row gap-8 wrap">
+          ${K.Select({ id:'unite-duzey', value:S.ui.uniteDuzey || 'A1', aria:'Düzey', size:'sm',
+            options:['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] })}
+          ${K.Input({ id:'unite-konu', placeholder:'Konu: selamlaşma, yiyecekler…', aria:'Konu',
+            size:'sm', class:'grow' })}
+          ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'unite-iste' })}
+        </div>`,
       }),
     ];
   }
@@ -36112,6 +36397,13 @@ ESP.Screens.lang = (function(){
   }
 
   const handle = {
+    async 'unite-iste'(){
+      const d = document.getElementById('unite-duzey'), k = document.getElementById('unite-konu');
+      S.ui.uniteDuzey = d ? d.value : 'A1';
+      const r = await ESP.Unite.iste({ dil:aktifDil(), duzey:S.ui.uniteDuzey, konu:k ? k.value : '' });
+      ESP.UI.toast(r.metin);
+      if(r.ok) ESP.App.render();
+    },
     async 'lang-tab'(el){ S.ui.langTab = el.dataset.tab; ESP.App.render(); },
 
     /* Beyan bir olcum degildir: prefs icinde durur, deste sayilarina

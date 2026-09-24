@@ -165,6 +165,28 @@ async function main(){
       { cwd:path.join(ROOT, 'HKM') }).toString().trim());
     }catch(e){ hatalar.push('spi bilgi kaydi yazilamadi: ' + e.message); }
 
+    /* 0.9 — ESP DIL UNITESI (Part 8d): Uretim Burosu'nun unite kaydiyla ayni
+       govde. Sinanan: ESP kaydi KENDI koduyla sinar, onizler, onayla kartlari
+       desteye koyar; pratik motoru sorusunu o desteden kurar. */
+    let uniteKaydi = null;
+    try{
+      uniteKaydi = Number(execFileSync('python3', ['-c', [
+        'import sys',
+        'from core import db, bam',
+        'con = db.connect(sys.argv[1])',
+        'ogeler = [{"on": a, "arka": b} for a, b in [("Привет", "merhaba"), ("Спасибо", "teşekkürler"),',
+        '          ("Пожалуйста", "lütfen"), ("До свидания", "hoşça kal"), ("Нет", "hayır"),',
+        '          ("Извините", "affedersiniz"), ("Доброе утро", "günaydın")]]',
+        'g = {"tur": "unite", "dil": "ru", "duzey": "A1", "konu": "selamlaşma",',
+        '     "baslik": "Rusça A1 · selamlaşma", "uniteler": [{"baslik": "Selamlaşma",',
+        '     "hedef": "Yedi selamlaşma kalıbını düşünmeden kurmak.", "gorev": None,',
+        '     "ogeler": ogeler}]}',
+        'k = bam.kayit_ekle(con, "materyal", "Rusça A1 · selamlaşma", g)',
+        'con.commit()',
+        'print(k["id"])'].join('\n'), path.join(tmp, 'hkm.db')],
+      { cwd:path.join(ROOT, 'HKM') }).toString().trim());
+    }catch(e){ hatalar.push('unite kaydi yazilamadi: ' + e.message); }
+
     for(const s of SISTEMLER){
       const srv = spawn('python3', [path.join(ROOT, s.id, 'devserver.py'), String(s.port)],
         { cwd:path.join(ROOT, s.id), stdio:'ignore' });
@@ -581,6 +603,45 @@ async function main(){
         else if(!bi.istek) hatalar.push('SPI: bilgi istegi King’e gitmedi — ' + bi.istMetin);
         else console.log('  SPI → BAM besin kaydi kendi koduyla sinandi, onizlendi, eklendi, geri alindi; '
           + 'Mutfak istegi King’e gitti');
+      }
+
+      /* 2.81 — ESP DIL UNITESI (Part 8d): `unite.add` teklifi Bugun kartinda
+         ESP'nin KENDI onizlemesiyle gorunur; «Ekle» kaydi yeniden ceker,
+         sinar, uniteyi Dil › Ogren'e ve kartlari desteye koyar; pratik
+         sorusu o desteden kurulur; «Geri al» kaldirir. Istek King'e gider. */
+      if(s.id === 'ESP' && uniteKaydi){
+        const bir = await (await hkmFetch('/api/intents/esp', { method:'POST',
+          body:JSON.stringify({ kind:'unite.add', source:'bam',
+            payload:{ kayit_id:uniteKaydi, baslik:'Rusça A1 · selamlaşma', dil:'ru', unite:1, oge:7 } }) })).json();
+        if(!bir.ok) hatalar.push('ESP: unite teklifi birakilamadi — ' + (bir.errors || []).join('; '));
+        const un = await page.evaluate(async () => {
+          const n = (await ESP.Beacon.intents()).find(x => x.kind === 'unite.add');
+          if(!n) return { yok:true };
+          ESP.S.ui.hkmIntents = [n];
+          ESP.App.go('today');
+          await new Promise(r => setTimeout(r, 400));
+          const kart = document.body.textContent.indexOf('ESP şunu ekleyecek') >= 0;
+          const r = await ESP.Beacon.resolveIntent(n, 'apply');
+          const u = ESP.Lesson.units('lang', 'ru').find(x => x.bam && x.bam.kayitId === n.payload.kayit_id);
+          const kartlar = ESP.S.cards.filter(c => (c.tags || []).indexOf('bam:' + n.payload.kayit_id) >= 0).length;
+          const p = ESP.Lesson.start('ru', { length:5 });
+          if(r.geriAl) await ESP.Unite.geriAl(r.geriAl);
+          const kaldi = ESP.S.cards.some(c => (c.tags || []).indexOf('bam:' + n.payload.kayit_id) >= 0);
+          const ist = await ESP.Unite.iste({ dil:'ru', duzey:'A2', konu:'yiyecekler' });
+          ESP.S.ui.hkmIntents = [];
+          return { onizleme:n.unite && n.unite.ok, kart, ok:r.ok, not:r.note || r.error,
+            bildirildi:r.reported, unite:!!u, kartlar, pratik:p.ok && p.questions.length, kaldi,
+            istek:ist.ok, istMetin:ist.metin };
+        });
+        if(un.yok) hatalar.push('ESP: unite teklifi modulde gorunmedi');
+        else if(!un.onizleme || !un.kart) hatalar.push('ESP: unite teklifi onaydan once onizlenmedi');
+        else if(!un.ok || !un.unite || un.kartlar !== 7) hatalar.push('ESP: unite eklenemedi — ' + un.not);
+        else if(!un.pratik) hatalar.push('ESP: pratik unite destesinden soru kurmadi');
+        else if(un.kaldi) hatalar.push('ESP: unite geri alinamadi');
+        else if(!un.bildirildi) hatalar.push('ESP: unite cevabi merkeze bildirilemedi');
+        else if(!un.istek) hatalar.push('ESP: unite istegi King’e gitmedi — ' + un.istMetin);
+        else console.log('  ESP → BAM unitesi kendi koduyla sinandi, onizlendi, 7 kart desteye girdi, '
+          + 'pratik ' + un.pratik + ' soru kurdu, geri alindi; unite istegi King’e gitti');
       }
 
       /* 2.8 — HEDEFTEN PLANA (ekip/PLAN.md Tur 2). Yalniz SPI: plan motoru

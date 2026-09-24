@@ -404,7 +404,7 @@ ESP.Parts = (function(){
 
      İlerleme çubuğu SRS'ten okunur; ayrı bir «tamamlandı» bayrağı yoktur. */
   function units(discId, lang){
-    const list = ESP.Lesson.units(discId);
+    const list = ESP.Lesson.units(discId, lang);
     if(!list.length) return K.Empty({ text:'Bu bölümde ünite tanımlı değil.' });
 
     return html`<div class="units">${map(list, u => {
@@ -417,6 +417,7 @@ ESP.Parts = (function(){
             <div class="unit__body">
               <b>${u.title}</b>
               <span class="small muted">${u.goal}</span>
+              ${when(u.bam, () => html`<span class="tiny dim">BAM · ${u.band} · doğrulanmadı — yanlış kartı sil</span>`)}
             </div>
             ${p.total
               ? K.Badge({ label:p.known + '/' + p.total + ' bilinen',

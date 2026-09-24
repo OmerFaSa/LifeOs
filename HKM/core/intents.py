@@ -132,6 +132,15 @@ KINDS = {
         "optional": ("baslik", "why"),
         "note": "BAM'ın kaynaktan topladığı yer listesini (spor salonu vb.) ekleme teklifi.",
     },
+    # ESP dil unitesi (core/unite.py, Part 8d). ESP kaydi HKM'den ceker,
+    # KENDI koduyla sinar (dil, yazi sistemi, oge sayisi) ve onayla ekler;
+    # pratik sorularini kendi motoru desteden kurar.
+    "unite.add": {
+        "modules": ("esp",),
+        "required": ("kayit_id", "baslik"),
+        "optional": ("dil", "unite", "oge", "why"),
+        "note": "BAM'ın hazırladığı dil ünitesini (hedef, görev, öğeler) ekleme teklifi.",
+    },
     "measure.ask": {
         "modules": ("spi",),
         "required": ("date", "metric"),
@@ -154,6 +163,7 @@ FIELD_RULES = {
     "ders": ("int", 1, 30), "konu": ("int", 1, 2000),
     "bolum": ("int", 1, 10), "soru": ("int", 1, 200), "urun": ("str", 1, 40),
     "metin": ("str", 3, 400), "ad": ("str", 1, 80),
+    "dil": ("str", 2, 2), "unite": ("int", 1, 4), "oge": ("int", 1, 80),
 }
 
 
@@ -264,6 +274,9 @@ def _cumle(module, kind, payload):
     if kind == "yer.add":
         return ("%s: BAM «%s» listesini çıkardı. Yer listene eklensin mi?"
                 % (ad, p.get("baslik") or p.get("ad")))
+    if kind == "unite.add":
+        return ("%s: BAM «%s» ünitesini hazırladı (%s ünite, %s öğe). Eklensin mi? Kaynaksız; "
+                "yanlış bulduğun kartı sil." % (ad, p.get("baslik"), p.get("unite"), p.get("oge")))
     if kind == "measure.ask":
         return "%s: %s günü için «%s» ölçümünü girmeyi unutma." % (
             ad, gun, p.get("metric"))

@@ -33,7 +33,7 @@ import json
 import re
 import statistics
 
-from core import (ai, bam, butce, depo, intents, kaynakli, kitap, mufredat, planlama, program, spibilgi,
+from core import (ai, bam, butce, depo, intents, kaynakli, kitap, mufredat, planlama, program, spibilgi, unite,
                   urunler, web)
 from core import teklif as tkl
 
@@ -111,6 +111,15 @@ TURLER = {
         "ofisler": ["kayit", "arastirma"],
         "model": True,
         "not": "Araştırma Bürosu kaynaktan tipli kayıt yazar; alıntı ve sayı kodla denetlenir.",
+    },
+    # ESP dil unitesi (core/unite.py, Part 8d): baslik, olculebilir hedef,
+    # gorev ve on/arka ogeler. Soru YAZILMAZ: ESP pratigi kendi desteden kurar.
+    "esp.unite": {
+        "ad": "ESP dil ünitesi",
+        "moduller": ("esp",),
+        "ofisler": ["kayit", "uretim"],
+        "model": True,
+        "not": "Üretim Bürosu üniteyi yazar; öğeler bağımsız yargıyla, yazı sistemi kodla denetlenir.",
     },
     "test.kitabi": {
         "ad": "Bölümlü test kitabı",
@@ -415,6 +424,11 @@ def _govde_temizle(tur, govde):
         if hatalar:
             return None, hatalar
         return {"bilgi": g}, []
+    if tur == "esp.unite":
+        g, hatalar = unite.temizle((govde or {}).get("unite"))
+        if hatalar:
+            return None, hatalar
+        return {"unite": g}, []
     return None, ["tanimsiz tur"]
 
 
@@ -423,6 +437,7 @@ def _govde_temizle(tur, govde):
 ANAHTAR = {"hedef.plan": planlama.anahtar, "sinav.mufredat": mufredat.anahtar,
            "test.kitabi": planlama.anahtar, "bam.urun": planlama.anahtar,
            "bam.plan": program.anahtar, "spi.bilgi": spibilgi.anahtar,
+           "esp.unite": unite.anahtar,
            "bam.arastirma": lambda t: depo.konu_anahtari(
                "%s %s" % (t["arastirma"]["konu"], t["arastirma"].get("ayrinti") or ""))}
 
@@ -460,6 +475,8 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
         konu = program.talep(temiz["program"])
     if tur == "spi.bilgi" and not str(konu or "").strip():
         konu = spibilgi.talep(temiz["bilgi"])
+    if tur == "esp.unite" and not str(konu or "").strip():
+        konu = unite.talep(temiz["unite"])
     if tur == "test.kitabi" and not str(konu or "").strip():
         konu = "«%s» — %d bölümlük test kitabı" % (temiz["kitap"]["baslik"],
                                                   len(temiz["kitap"]["bolumler"]))
@@ -848,6 +865,22 @@ def _teklif_spibilgi(con, e, kayit_id, now=None):
     return ""
 
 
+def _teklif_unite(con, e, kayit_id, now=None):
+    """Dil unitesini ESP'ye teklif olarak birakir. ESP kaydi ceker, KENDI
+    koduyla sinar, onizletir ve onayla yazar."""
+    g = (bam.kayit_getir(con, kayit_id) or {}).get("govde") or {}
+    if g.get("tur") != "unite" or not g.get("uniteler"):
+        return " Kayıt ünite biçiminde değil; teklif bırakılmadı."
+    payload = {"kayit_id": int(kayit_id), "baslik": str(g.get("baslik") or "Ünite")[:120],
+               "dil": g.get("dil"), "unite": len(g["uniteler"]),
+               "oge": sum(len(u.get("ogeler") or []) for u in g["uniteler"])}
+    n = intents.create(con, e["modul"], "unite.add", payload, None, source="bam")
+    if n.get("ok"):
+        bam.iz_ekle(con, "kayit", kayit_id, "niyet", n["intent"]["id"], now=now)
+        return " Ünite teklif olarak ESP’ye bırakıldı; ESP kendi koduyla sınayıp onayınla ekler."
+    return ""
+
+
 def _teklif_kitap(con, e, kayit_id, now=None):
     """Test kitabini AYS'ye teklif olarak birakir."""
     g = (bam.kayit_getir(con, kayit_id) or {}).get("govde") or {}
@@ -925,6 +958,8 @@ def _teklif(con, e, kayit_id, now=None):
         return _teklif_kitap(con, e, kayit_id, now=now)
     if e["tur"] == "spi.bilgi":
         return _teklif_spibilgi(con, e, kayit_id, now=now)
+    if e["tur"] == "esp.unite":
+        return _teklif_unite(con, e, kayit_id, now=now)
     if e["tur"] != "hedef.plan":
         return ""
     k = bam.kayit_getir(con, kayit_id) or {}

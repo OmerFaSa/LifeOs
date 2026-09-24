@@ -20,7 +20,7 @@
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
 **Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · ✅ Grup 4 ·
-✅ 8c-2 · ✅ 8c-3 · 🔜 8d · ⏳ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
+✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil (🔜 8d-2 gitar) · ⏳ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
 
@@ -99,8 +99,16 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   protein maliyetini söyler. Düzeltilen üç hata (önce testleri): protein/lif kaynak ve
   «en ucuz» listeleri boştu; bilinmeyen doymuş yağ/lif sıfır sayılıyordu; «N kalem
   tanınmadı» denetimi bilinmeyen mikroyu gıda sanıyordu. SPİ 1294/1294, duman temiz.
-- ⏳ 8d ESP ünite/ders paketi: `unite.add` — `lessons.js` ünite şeması + SRS kartları +
-  pratik soruları; merdivene (`curriculum.js`) bağlı; gitar verisi `guitar_tabs.js` şemasında.
+- ✅ 8d ESP dil ünitesi (HKM MIMARI §8.33): King işi `esp.unite` (dil · CEFR düzeyi · konu;
+  üretim + bağımsız yargı, düşük sınıf) → `unite.add` → ESP `core/unite.js` kendi koduyla sınar
+  (yazı sistemi, tekrar, ≥6 öğe), önizler, üniteyi Dil › Öğren'e ve kartları desteye koyar;
+  geri alınır. KARAR: pratik soruları modele YAZDIRILMAZ — ESP'nin pratik motoru soruyu ve
+  çeldiriciyi aynı desteden kurar (lesson.js kural 3; «uydurulmuş çeldirici yanlış öğretir»).
+  Merdiven bağı: ünitenin `level`i CEFR'den (A1→I … C1/C2→V). HKM 567/567, ESP 1327/1327,
+  duman + a11y + 390px, `tools/entegre.js` §2.81 temiz.
+- 🔜 8d-2 Gitar: `guitar_tabs.js` şemasında teknik/ilerleyiş paketi (tempo «referans»
+  etiketiyle; `startBpm` öneri, eşik kullanıcının ilk ölçümünden). Önce ESP müzik ekranının
+  tempo ölçümünü nasıl tuttuğuna bak (`screens/music*`, `core/…`), sonra aynı kalıp.
 - ⏳ 8e Depo önce (King teklifinde «zaten var, bedava» / «tazeleyeyim mi?»), tazelik,
   kullanım takibi (açılmamış çıktı bir sonraki pahalı teklifte söylenir).
 

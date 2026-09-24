@@ -203,7 +203,7 @@ ESP.Test = (function(){
     S.profile = testProfile();
     S.profiles = [];
     S.prefs = ESP.Model.defaultPrefs();
-    S.days = {}; S.cards = []; S.args = []; S.notes = []; S.books = [];
+    S.days = {}; S.cards = []; S.args = []; S.notes = []; S.books = []; S.bamUnits = [];
     S.pieces = []; S.recordings = []; S.drafts = []; S.goals = [];
     S.hedefler = []; S.hedefPlanlar = [];
     S.events = []; S.sources = []; S.chains = [];
