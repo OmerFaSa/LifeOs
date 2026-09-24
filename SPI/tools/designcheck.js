@@ -24,7 +24,7 @@ const { chromium } = require('playwright');
 const ROOT = path.resolve(__dirname, '..');
 const args = process.argv.slice(2);
 const SHOT = args.includes('--shot');
-const PORT = Number(args.find(a => /^\d+$/.test(a))) || 4291;
+const PORT = Number(args.find(a => /^\d+$/.test(a))) || 4290;
 const SHOTDIR = process.env.SHOT_DIR || path.join(ROOT, '.shots');
 
 /* Genişlikler: her düzenin kendi eşikleri var, aralarda kalan ölçüler

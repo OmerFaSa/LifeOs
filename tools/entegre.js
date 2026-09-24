@@ -26,7 +26,15 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const HKM_PORT = 4299;
 const TOKEN = 'entegre-denetimi-icin-gecici-jeton';
-const BUGUN = new Date().toISOString().slice(0, 10);
+/* GUN SINIRI (HATALAR KO-1): HKM gunu kullanicinin diliminde sayar
+   (HKM/core/saat.py, varsayilan Europe/Istanbul) ve kabin TZ'sine bakmaz.
+   Denetim de AYNI dilimde yasar: tarayici sayfalari o dilimde acilir ve
+   «bugun» o dilimin gunudur. Yoksa UTC bir kapta 21:00-24:00 arasi HKM
+   ertesi gunde, arayuzler onceki gunde kalir ve dokuz adim kirmizi olur. */
+const DILIM = 'Europe/Istanbul';
+const dilimGunu = (ms) => new Intl.DateTimeFormat('en-CA', { timeZone:DILIM,
+  year:'numeric', month:'2-digit', day:'2-digit' }).format(new Date(ms == null ? Date.now() : ms));
+const BUGUN = dilimGunu();
 
 const SISTEMLER = [
   { id:'AYS', ns:'R',   port:4271, mod:'ays' },
@@ -215,7 +223,7 @@ async function main(){
         hatalar.push(s.id + ': devserver acilmadi');
         continue;
       }
-      const page = await browser.newPage({ reducedMotion:'reduce' });
+      const page = await browser.newPage({ reducedMotion:'reduce', timezoneId:DILIM });
       const konsol = [];
       page.on('pageerror', e => konsol.push(String(e.message)));
       await page.goto(base + '/index.html', { waitUntil:'load' });
@@ -881,7 +889,7 @@ async function main(){
        bos profiller bunu uretmez. Bes gunluk SENTETIK seri, cizim kodunun
        kendisini dener — uc sistemin verisi degil, yuzun cizgisi. */
     for(let i = 5; i >= 1; i--){
-      const t = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+      const t = dilimGunu(Date.now() - i * 86400000);
       await hkmFetch('/api/sync/spi', { method:'POST', body:JSON.stringify({
         date:t, metrics:{ sleep_hours:{ value:6 + (i % 3), cert:'measured' } } }) });
     }
@@ -896,7 +904,7 @@ async function main(){
     /* 7 — HKM'nin kendi yuzu: gercek tarayicida acilir, jeton girilir,
        brifing cizilir ve oneri varsa cevaplanabilir. Yuklenmeyen bir
        sayfa curur; bu yuzden denetim sayfayi da gezer. */
-    const yuz = await browser.newPage();
+    const yuz = await browser.newPage({ timezoneId:DILIM });
     const yuzHata = [];
     yuz.on('pageerror', e => yuzHata.push(String(e.message)));
     await yuz.goto('http://127.0.0.1:' + HKM_PORT + '/', { waitUntil:'load' });

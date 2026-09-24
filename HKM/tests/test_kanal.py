@@ -7,9 +7,12 @@
    kesinlik etiketini tasir."""
 import datetime
 
-from core import db, kanal, manager, sync_engine
+from core import db, kanal, manager, saat, sync_engine
 from tests.harness import eq, no, ok, suite, test
 
+# Gun ICE AKTARMADA degil KOSUMDA ve HKM'nin kendi saatinden okunur:
+# brifing «bugun»u core/saat.py'den alir; ikisi ayri kaynaktan gelirse
+# gun siniri gecesinde ayrisir.
 BUGUN = datetime.date.today().isoformat()
 
 
@@ -23,6 +26,13 @@ def _tohum(con):
 
 
 def run():
+    global BUGUN
+    BUGUN = saat.bugun()
+    with saat.sabit(BUGUN):
+        _run()
+
+
+def _run():
     suite("kanal")
 
     def t_other_modules_only():

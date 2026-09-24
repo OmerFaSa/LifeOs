@@ -18,7 +18,7 @@ const path = require('path');
 const { chromium } = require('playwright');
 
 const ROOT = path.resolve(__dirname, '..');
-const PORT = Number(process.argv[2]) || 4292;
+const PORT = Number(process.argv[2]) || 4293;
 /* ÖLÇÜM ORTAMI EŞİĞİ DEĞİL, PAYI DEĞİŞTİRİR.
 
    Eşikler yerel bir makinede ölçülerek yazıldı; paylaşımlı bir koşum

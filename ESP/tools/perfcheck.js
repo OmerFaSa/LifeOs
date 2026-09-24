@@ -23,7 +23,7 @@
 const { spawn } = require('child_process');
 const path = require('path');
 
-const PORT = Number(process.argv[2]) || 4187;
+const PORT = Number(process.argv[2]) || 4197;
 const ROOT = path.resolve(__dirname, '..');
 
 /* Ekran başına bütçe (ms). Ofis en ağır ekran: sekiz masa, çapraz bulgular

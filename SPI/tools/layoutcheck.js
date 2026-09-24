@@ -21,7 +21,7 @@
 const { spawn } = require('child_process');
 const path = require('path');
 
-const PORT = Number(process.argv[2]) || 4188;
+const PORT = Number(process.argv[2]) || 4185;
 const ROOT = path.resolve(__dirname, '..');
 const WIDTH = 390, HEIGHT = 780;
 const MIN_TAP = 24;

@@ -31,7 +31,7 @@ const path = require('path');
 const { chromium } = require('playwright');
 
 const ROOT = path.resolve(__dirname, '..');
-const PORT = Number(process.argv[2]) || 4296;
+const PORT = Number(process.argv[2]) || 4298;
 
 /* Eşik SPİ'den alındı ve gerekçesi orada yazılı: 400 ms bir
    etkileşimin «anında» hissedilmesinin üst sınırıdır. Sistemden

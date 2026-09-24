@@ -562,11 +562,20 @@ def run_kurtarma():
         hedef = os.path.join(dizin, "hkm.db")
         eski = cli.load_config
         cli.load_config = lambda: {"db_path": hedef, "local_token": "t"}
+        # cli.main saat dilimini SUREC icin kurar (KO-1); geri konmazsa
+        # sonraki test modullerinin «bugun»u kayar (run.py muhafizi).
+        eski_tz = os.environ.get("TZ")
         try:
             eq(cli.main(["geri", yol]), 0)
             eq(cli.main(["geri", "/olmayan/dosya.json"]), 1)
         finally:
             cli.load_config = eski
+            if eski_tz is None:
+                os.environ.pop("TZ", None)
+            else:
+                os.environ["TZ"] = eski_tz
+            if hasattr(__import__("time"), "tzset"):
+                __import__("time").tzset()
         con = db.connect(hedef)
         eq(con.execute("SELECT COUNT(*) FROM raw_events").fetchone()[0], 120)
         con.close()

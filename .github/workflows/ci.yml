@@ -248,6 +248,11 @@ jobs:
         working-directory: ESP
         run: npm ci && npx playwright install --with-deps chromium
 
+      # Olcunun kendisi once denenir: yanlis sayan bir olcu butun
+      # ekranlari kirmizi (ya da yesil) gosterir (tools/envanter.test.js).
+      - name: Ölçü testi
+        run: node tools/envanter.test.js
+
       - name: Envanter
         run: node tools/envanter.js --json gezinti.json
 

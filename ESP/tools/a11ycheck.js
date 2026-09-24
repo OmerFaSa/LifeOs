@@ -28,7 +28,7 @@ const path = require('path');
 const { chromium } = require('playwright');
 
 const ROOT = path.resolve(__dirname, '..');
-const PORT = Number(process.argv[2]) || 4291;
+const PORT = Number(process.argv[2]) || 4295;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
 /* Kabul edilen, gerekçeli eksikler. Kapandıkça buradan silinir.
