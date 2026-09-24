@@ -466,6 +466,17 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             return {"ok": True, "mode": "komut", "command": "teklif", "text": tc,
                     "agent": gorevli}
 
+    # 0a° — FIS TASLAGI (core/fis.py): «fiş kaydet» / «fiş iptal». Yalniz BU
+    # kanalin (ve gonderenin) bekleyen taslagina dokunur.
+    if gorevli == "king":
+        from core import fis
+        fk = fis.komut(con, metin, kanal, hedef, date)
+        if fk:
+            if kayit:
+                patron.log(con, kanal, "user", metin, agent=gorevli)
+                patron.log(con, kanal, "manager", fk, agent=gorevli)
+            return {"ok": True, "mode": "komut", "command": "fis", "text": fk, "agent": gorevli}
+
     # 0a' — PARA (Y1, core/para.py): «market 450 TL». HKM'nin KENDI kaydi;
     # kucuk aksiyon: hemen yazilir, cevap geri alma yolunu soyler. Para
     # oldugu belli degilse (birim ya da para sozcugu yok) buraya girmez.

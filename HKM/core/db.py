@@ -325,6 +325,20 @@ CREATE TABLE IF NOT EXISTS para (
   created_at  TEXT NOT NULL
 );
 
+/* Fis taslagi (core/fis.py). Model fisi OKUR, kod dogrular; kullanici
+   onaylayana kadar burada BEKLER ve para kaydina girmez. Taslak gecicidir:
+   yedege girmez. */
+CREATE TABLE IF NOT EXISTS para_taslak (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  kanal       TEXT NOT NULL,
+  hedef       TEXT,
+  durum       TEXT NOT NULL DEFAULT 'bekliyor',   -- bekliyor | kaydedildi | iptal
+  govde       TEXT NOT NULL,
+  para_id     INTEGER,
+  created_at  TEXT NOT NULL,
+  karar_at    TEXT
+);
+
 /* Gunun dil karti (fikir 38, brand/ortak/hedefag.js `dilKarti` kancasi).
    Kartlari ESP'nin KENDI kodu secer (vadesi gelen, yoksa en zayif); HKM
    kullanicinin sectigi saatte yalniz dizer (core/schedule.py). */

@@ -228,7 +228,9 @@ koyulabilir: bütçe sayacından bağımsız **ikinci bir kilit**.
    harcamaz. *Kurulu olmak, çalışmak değildir.*
 4. **Görev dağılımı**nda King'e bir sağlayıcı ve model seç. Alt kademeler
    atama yoksa King'den **miras** alır; hepsini tek tek doldurmak
-   gerekmez.
+   gerekmez. **Fiş okuma** («Para · Fiş okuyan» kademesi) görsel okuyabilen
+   bir model ister (Gemini 2.5 Flash, Claude, GPT-5 ailesi okur). King'in
+   modeli görsel okumuyorsa bu kademeye ayrıca bir model ata.
 5. Ayarlar → **Bütçe**: aylık tavan (TL), USD/TRY kuru ve kurun tarihi.
    Kur elle girilir; sınıra varıldığında ücretli çağrı **durur**.
 

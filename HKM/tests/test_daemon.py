@@ -906,6 +906,30 @@ def run_extra(S):
         eq(S.call("/api/para/%d/sil" % pr["id"], body={})[0], 200)
         eq(S.call("/api/para/%d/sil" % pr["id"], body={})[0], 404)
         eq(S.call("/api/para?ay=eylul")[0], 400)
+        # Fis okuma (kullanici karari 2026-09-24): jetonsuz yok; bozuk govde
+        # 400; model atanmamissa okunmaz ve SOYLENIR; taslak onayla yazilir.
+        import base64 as _b64
+        png = _b64.b64encode(b"\x89PNG\r\n\x1a\n" + b"0" * 64).decode("ascii")
+        eq(S.call("/api/para/fis", body={"mime": "image/png", "data": png}, token=None)[0], 401)
+        eq(S.call("/api/para/fis", body={"mime": "image/gif", "data": png})[0], 400)
+        eq(S.call("/api/para/fis", body={"mime": "image/png", "data": "***"})[0], 400)
+        kod, fr = S.call("/api/para/fis", body={"mime": "image/png", "data": png})
+        eq(kod, 422)
+        ok("model" in fr["note"].lower(), fr)
+        from core import fis as _fis
+        c = db.connect(S.db_path)
+        tid = _fis._taslak_yaz(c, {"kurus": 24590, "birim": "TRY", "gun": BUGUN, "yon": "gider",
+                                   "kategori": "Gıda", "aciklama": "Migros", "kalemler": [],
+                                   "uyarilar": [], "etiket": "tahmin"}, "web", None)
+        c.close()
+        kod, pa = S.call("/api/para?ay=" + BUGUN[:7])
+        eq([t["id"] for t in pa["taslaklar"]], [tid])
+        eq(S.call("/api/para/fis/%d/kaydet" % tid, body={"tutar": "abc"})[0], 422)
+        kod, fk = S.call("/api/para/fis/%d/kaydet" % tid, body={"tutar": "250"})
+        eq(kod, 200)
+        eq(S.call("/api/para/fis/%d/kaydet" % tid, body={})[0], 409)
+        eq(S.call("/api/para/fis/%d/iptal" % tid, body={})[0], 404)
+        eq(S.call("/api/para/fis/abc/kaydet", body={})[0], 400)
         # Fikir 48 ve 55: durum ve gizlilik uclari calisir, jetonsuz yok.
         kod, tn = S.call("/api/tani")
         eq(kod, 200)

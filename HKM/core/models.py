@@ -170,6 +170,11 @@ for _ofis, _ad, _not in (
         ("kayit", "Depolama", "Depo, güncellik denetimi, sürüm; model gerektirmez.")):
     _rol("bam.%s" % _ofis, "BAM · %s" % _ad, _not, parent="bam", layer="bam")
 
+# HKM'nin KENDI kollari (para...). Atama yoksa King'den miras alir.
+_rol("para.fis", "Para · Fiş okuyan",
+     "Fişin fotoğrafını okur. Tutarı kod doğrular; kullanıcı onaylamadan yazılmaz.",
+     parent="king", layer="kol", capability="gorsel")
+
 for _mod, _ad in MODULLER.items():
     _ust = {"spi": "vp_bio", "ays": "vp_academic", "esp": "vp_intellect"}[_mod]
     for _yet, _not in YETENEKLER.items():
@@ -181,13 +186,14 @@ LAYER_LABEL = {
     "konsey": "HKM konseyi — üç alt patron",
     "modul": "Modül yetenekleri",
     "bam": "BAM — Bilgi ve Aksiyon Modülü",
+    "kol": "HKM kolları — para",
 }
 
 
 def layers():
     """Ekranin cizecegi sira: ustten alta, her kademe kendi grubunda."""
     out = []
-    for kat in ("king", "konsey", "modul", "bam"):
+    for kat in ("king", "konsey", "modul", "bam", "kol"):
         uyeler = [r for r in ROLES.values() if r["layer"] == kat]
         uyeler.sort(key=lambda r: r["key"])
         out.append({"layer": kat, "label": LAYER_LABEL[kat], "roles": uyeler})

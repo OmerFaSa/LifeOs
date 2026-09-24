@@ -71,8 +71,15 @@ def isle(con, cfg, kanal, m, th=None, transport=None, date=None):
     if ek:
         ad = {"photo": "Fotoğraf", "video": "Video", "voice": "Sesli mesaj",
               "audio": "Ses", "document": "Belge"}.get(ek["kind"], "Dosya")
-        cevap = (ad + " alındı ve analiz kuyruğuna kaydedildi. "
-                 "İçeriği henüz ölçülmedi; analiz tamamlanmadan sonuç üretilmeyecek.")
+        from core import fis
+        if ek["kind"] == "photo" and fis.BASLIK.search(m.get("text") or ""):
+            # Fis okuma (core/fis.py): ritim fotografi indirip okur; taslak buraya
+            # gelir. Onaylanmadan para kaydina hicbir sey yazilmaz.
+            cevap = ("Fiş fotoğrafı alındı. Okuyup taslağı buraya göndereceğim; "
+                     "sen onaylamadan hiçbir şey yazılmaz.")
+        else:
+            cevap = (ad + " alındı ve analiz kuyruğuna kaydedildi. "
+                     "İçeriği henüz ölçülmedi; analiz tamamlanmadan sonuç üretilmeyecek.")
         patron.log(con, kanal, "user", m.get("text") or "[%s]" % ad, agent="king")
         patron.log(con, kanal, "manager", cevap, agent="king")
         satir = outbox.enqueue(con, kanal, outbox.reply_kind(kimlik), gun,

@@ -2,9 +2,8 @@
 """Para kolu (Y1) — HKM'nin KENDI kaydi.
 
    Kullanici 2026-09-24: «para takibi HKM'de toplanacak; turlu turlu seyi
-   oradan girecegiz». Girisler: Telegram, HKM sohbeti, HKM › Para formu.
-   Fisin FOTOGRAFINDAN okuma HKM'nin model katmani goruntu okuyana kadar
-   YOKTUR ve bu soylenir (fis fotografi bugun «analiz kuyrugu»na duser).
+   oradan girecegiz». Girisler: Telegram, HKM sohbeti, HKM › Para formu ve
+   fis fotografi (core/fis.py: model okur, kod dogrular, kullanici onaylar).
 
    Bes kural:
 
@@ -160,8 +159,10 @@ def yaz(con, bulgu, kaynak, metin, bugun, now=None):
     return {"ok": True, "ids": ids, "grup": grup, "gun": gun}
 
 
-def ekle(con, veri, bugun, now=None):
-    """HKM › Para formu: {gun, yon, tutar, birim, kategori, aciklama}. Dogrular."""
+def ekle(con, veri, bugun, now=None, kaynak="web", metin=""):
+    """HKM › Para formu: {gun, yon, tutar, birim, kategori, aciklama}. Dogrular.
+
+    `kaynak`: «web» (form) ya da «fis» (onaylanmis fis taslagi, core/fis.py)."""
     if not isinstance(veri, dict):
         return {"ok": False, "errors": ["kayıt bir nesne olmalı"]}
     hata = []
@@ -188,7 +189,7 @@ def ekle(con, veri, bugun, now=None):
         return {"ok": False, "errors": hata}
     b = {"kayitlar": [{"yon": yon, "kurus": kurus, "birim": birim, "kategori": kategori,
                        "aciklama": str(veri.get("aciklama") or "").strip()[:80]}], "gun_kayma": 0}
-    r = yaz(con, b, "web", "", gun, now=now)
+    r = yaz(con, b, kaynak, metin, gun, now=now)
     return {"ok": True, "id": r["ids"][0]}
 
 

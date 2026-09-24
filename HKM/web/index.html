@@ -4287,7 +4287,15 @@ details.detay > summary:hover{ color:var(--fg); }
       + '<input id="para-gun" type="date" class="alan alan--dar" value="' + esc(bugun()) + '" aria-label="Gün"/>'
       + '<button class="primary" id="para-ekle-btn">Ekle</button></div>'
       + '<p class="muted" id="para-not">Telegram’a ya da HKM sohbetine «market 450 TL», «maaş 30.000 geldi» '
-      + 'yazman da yeter; yanlışsa «para geri al». Fişin fotoğrafından okuma henüz yok.</p>';
+      + 'yazman da yeter; yanlışsa «para geri al».</p>'
+      + '<div class="tag" style="margin-top:14px">Fiş fotoğrafı</div>'
+      + '<div class="row" style="flex-wrap:wrap;gap:8px;margin-top:8px">'
+      + '<input type="file" id="para-fis-dosya" accept="image/*" aria-label="Fiş fotoğrafı"/></div>'
+      + '<p class="muted">Fişin fotoğrafını buradan yükleyebilir ya da Telegram’a «fiş» yazarak '
+      + 'gönderebilirsin. Okunan tutar bir tahmindir; sen onaylamadan yazılmaz.</p>'
+      + '<div id="para-fis" aria-live="polite"></div>';
+    PARA_KAT = p.kategoriler_hepsi || [];
+    fisTaslakCiz((p.taslaklar || [])[0]);
     var l = p.kayitlar || [];
     $('para-liste').innerHTML = '<div class="tag">Kayıtlar</div>' + (l.length
       ? '<div class="scroll"><table><thead><tr><th>Gün</th><th>Açıklama</th><th>Kategori</th>'
@@ -4300,6 +4308,90 @@ details.detay > summary:hover{ color:var(--fg); }
         }).join('') + '</tbody></table></div>'
       : '<p class="muted">Bu ay kayıt yok.</p>');
   }
+
+  /* Fiş okuma (core/fis.py): fotoğraf KÜÇÜLTÜLÜR (en uzun kenar 1600 px,
+     JPEG) — model maliyeti ve gövde sınırı için. Okunan taslak DÜZENLENEBİLİR
+     gösterilir; yalnız «Kaydet» yazar. */
+  var PARA_KAT = [];
+  function fisKucult(dosya){
+    return new Promise(function(coz, red){
+      var fr = new FileReader();
+      fr.onerror = function(){ red(new Error('Dosya okunamadı.')); };
+      fr.onload = function(){
+        var img = new Image();
+        img.onerror = function(){ red(new Error('Görsel açılamadı.')); };
+        img.onload = function(){
+          var o = Math.min(1, 1600 / Math.max(img.width, img.height));
+          var c = document.createElement('canvas');
+          // Tuval kesirli boyutu kendisi keser; bu piksel, gösterilen sayı değil.
+          c.width = Math.max(1, img.width * o);
+          c.height = Math.max(1, img.height * o);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          coz(c.toDataURL('image/jpeg', 0.85));
+        };
+        img.src = fr.result;
+      };
+      fr.readAsDataURL(dosya);
+    });
+  }
+  function fisTaslakCiz(t){
+    if(!$('para-fis')) return;
+    if(!t){ $('para-fis').innerHTML = ''; return; }
+    var kat = PARA_KAT.map(function(k){
+      return '<option value="' + esc(k) + '"' + (k === t.kategori ? ' selected' : '') + '>' + esc(k) + '</option>';
+    }).join('');
+    $('para-fis').innerHTML = '<div class="card" style="margin-top:8px">'
+      + '<p><b>Fişten okundu</b> <span class="muted">· tahmin; sen onaylamadan yazılmaz</span></p>'
+      + ((t.uyarilar || []).length ? '<ul>' + t.uyarilar.map(function(u){
+          return '<li class="danger">' + esc(u) + '</li>'; }).join('') + '</ul>' : '')
+      + '<div class="row" style="flex-wrap:wrap;gap:8px;margin-top:8px">'
+      + '<input id="fis-tutar" class="alan alan--dar" inputmode="decimal" value="' + esc(t.tutar)
+      + '" aria-label="Fişin tutarı"/>'
+      + '<span class="muted">' + esc(t.birim === 'TRY' ? 'TL' : t.birim) + '</span>'
+      + '<select id="fis-kategori" aria-label="Fişin kategorisi">' + kat + '</select>'
+      + '<input id="fis-aciklama" class="alan" value="' + esc(t.aciklama || '') + '" aria-label="Fişin açıklaması"/>'
+      + '<input id="fis-gun" type="date" class="alan alan--dar" value="' + esc(t.gun) + '" aria-label="Fişin günü"/>'
+      + '<button class="primary" data-fis-kaydet="' + esc(t.id) + '">Kaydet</button>'
+      + '<button data-fis-iptal="' + esc(t.id) + '">Vazgeç</button></div>'
+      + ((t.kalemler || []).length ? '<p class="muted">Kalemler: ' + t.kalemler.map(function(k){
+          return esc(k.ad) + ' ' + esc(k.tutar); }).join(' · ') + '</p>' : '')
+      + '<p class="muted" id="fis-not"></p></div>';
+  }
+  document.addEventListener('change', async function(ev){
+    if(!ev.target || ev.target.id !== 'para-fis-dosya' || !ev.target.files || !ev.target.files[0]) return;
+    $('para-fis').innerHTML = '<p class="muted">Fiş okunuyor…</p>';
+    var veri;
+    try{ veri = await fisKucult(ev.target.files[0]); }
+    catch(e){ $('para-fis').innerHTML = '<p class="danger">' + esc(e.message) + '</p>'; return; }
+    var r = await api('/api/para/fis', { method:'POST', body:JSON.stringify({
+      mime:'image/jpeg', data:veri.split(',')[1] }) });
+    ev.target.value = '';
+    if(r.status !== 200){
+      $('para-fis').innerHTML = '<p class="danger">' + esc((r.body || {}).note || (r.body || {}).error
+        || ('Fiş okunamadı (' + r.status + ').')) + '</p>';
+      return;
+    }
+    fisTaslakCiz(Object.assign({}, r.body.taslak, { id:r.body.id }));
+  });
+  document.addEventListener('click', async function(ev){
+    var f = ev.target.closest ? ev.target.closest('[data-fis-kaydet],[data-fis-iptal]') : null;
+    if(!f) return;
+    ev.preventDefault();
+    if(f.dataset.fisIptal){
+      await api('/api/para/fis/' + encodeURIComponent(f.dataset.fisIptal) + '/iptal', { method:'POST', body:'{}' });
+      return yuklePara();
+    }
+    var r = await api('/api/para/fis/' + encodeURIComponent(f.dataset.fisKaydet) + '/kaydet', {
+      method:'POST', body:JSON.stringify({ tutar:$('fis-tutar').value.trim(), kategori:$('fis-kategori').value,
+        aciklama:$('fis-aciklama').value.trim(), gun:$('fis-gun').value }) });
+    if(r.status !== 200){
+      $('fis-not').textContent = 'Kaydedilmedi — ' + ((((r.body || {}).errors) || []).join(' · ')
+        || (r.body || {}).note || r.status);
+      return;
+    }
+    PARA_AY = ($('fis-gun').value || bugun()).slice(0, 7);
+    return yuklePara();
+  });
 
   document.addEventListener('click', async function(ev){
     var el = ev.target.closest ? ev.target.closest('#para-ekle-btn,[data-para-sil]') : null;

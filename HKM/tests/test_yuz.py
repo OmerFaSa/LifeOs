@@ -136,6 +136,19 @@ def t_bugun_yerel_gun():
     ok("getDate()" in govde)
 
 
+def t_fis_yukleme():
+    """Kullanici karari 2026-09-24: fis okuma. Yuz fotografi KUCULTUR
+    (maliyet ve boyut), okunan tutari DUZENLENEBILIR onizlemede gosterir
+    ve yalniz «Kaydet» ile yazar; «henuz yok» cumlesi kalkar."""
+    metin = _yuz()
+    ok('id="para-fis-dosya"' in metin and 'accept="image/*"' in metin)
+    ok("'/api/para/fis'" in metin)
+    ok("/kaydet'" in metin and "/iptal'" in metin)
+    ok("toDataURL('image/jpeg'" in metin, "fotograf kucultulmuyor")
+    ok("Fişin fotoğrafından okuma henüz yok" not in metin)
+    ok("sen onaylamadan" in metin)
+
+
 def t_para_sayfasi():
     """Para kolu (Y1): gezinmede, sayfasi ve formu var; ekran sayi hesaplamaz,
     HKM'nin cumlesini yazar."""
@@ -156,3 +169,4 @@ def run():
     test("mikrofon yazar, göndermez", t_mikrofon_yazar_gondermez)
     test("bugün yerel gündür", t_bugun_yerel_gun)
     test("para sayfası", t_para_sayfasi)
+    test("fiş yükleme: önizleme, onay, küçültme", t_fis_yukleme)

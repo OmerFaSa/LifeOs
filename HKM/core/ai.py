@@ -37,6 +37,7 @@
       kullanicinin secmedigi bir modele para odemesidir.
 """
 
+import base64
 import datetime
 import json
 import re
@@ -80,6 +81,64 @@ def _istek(url, baslik, govde, timeout=ZAMAN_ASIMI):
 KESILDI = {"length", "max_tokens", "MAX_TOKENS"}
 
 
+# ------------------------------------------------------------------ gorsel
+#
+# Gorsel OKUMAK (fis, ekran goruntusu) modelin isidir; okunanin DOGRULUGU
+# kodun ve kullanicinin. Gorsel son kullanici mesajina `gorseller` olarak
+# eklenir ve her saglayicinin kendi bicimine burada cevrilir.
+GORSEL_MIME = ("image/jpeg", "image/png", "image/webp")
+GORSEL_EN_COK_BAYT = 5 * 1024 * 1024
+GORSEL_EN_COK = 4
+# Bir gorselin giris jetonu saglayiciya ve boyuta gore degisir; cagri
+# ONCESI bilinemez. Tavan sorusu icin en kotu duruma yakin bir TAHMIN.
+GORSEL_JETON = 1600
+
+
+def gorsel_dogrula(gorseller):
+    """(temiz_liste, hata). Hata varsa hicbir gorsel gitmez."""
+    if not isinstance(gorseller, list) or not gorseller:
+        return [], "Görsel yok."
+    if len(gorseller) > GORSEL_EN_COK:
+        return [], "Bir seferde en çok %d görsel." % GORSEL_EN_COK
+    temiz = []
+    for g in gorseller:
+        if not isinstance(g, dict) or g.get("mime") not in GORSEL_MIME:
+            return [], "Görsel JPEG, PNG ya da WEBP olmalı."
+        try:
+            ham = base64.b64decode(str(g.get("data") or ""), validate=True)
+        except (ValueError, TypeError):
+            return [], "Görsel verisi okunamadı (base64 değil)."
+        if not ham:
+            return [], "Görsel boş."
+        if len(ham) > GORSEL_EN_COK_BAYT:
+            return [], "Görsel %d MB'tan büyük." % (GORSEL_EN_COK_BAYT // (1024 * 1024))
+        temiz.append({"mime": g["mime"], "data": str(g["data"])})
+    return temiz, None
+
+
+def _openai_mesaj(m):
+    g = m.get("gorseller")
+    if not g:
+        return {"role": m["role"], "content": m["content"]}
+    return {"role": m["role"], "content": [{"type": "text", "text": m["content"]}] + [
+        {"type": "image_url", "image_url": {"url": "data:%s;base64,%s" % (x["mime"], x["data"])}}
+        for x in g]}
+
+
+def _anthropic_mesaj(m):
+    g = m.get("gorseller")
+    if not g:
+        return {"role": m["role"], "content": m["content"]}
+    return {"role": m["role"], "content": [
+        {"type": "image", "source": {"type": "base64", "media_type": x["mime"], "data": x["data"]}}
+        for x in g] + [{"type": "text", "text": m["content"]}]}
+
+
+def _google_parcalar(m):
+    return [{"inline_data": {"mime_type": x["mime"], "data": x["data"]}}
+            for x in (m.get("gorseller") or [])] + [{"text": m["content"]}]
+
+
 def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
     """Saglayiciya gider.
 
@@ -87,7 +146,8 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
     tanim = models.PROVIDERS[provider]
     if provider in ("openrouter", "openai", "yerel"):
         url, baslik, govde = _openai_bicimi(
-            tanim["base"], anahtar or "", model, sistem, mesajlar,
+            tanim["base"], anahtar or "", model, sistem,
+            [_openai_mesaj(m) for m in mesajlar],
             {"HTTP-Referer": "http://127.0.0.1:4200", "X-Title": "HKM"}
             if provider == "openrouter" else None)
         y = _istek(url, baslik, govde, timeout)
@@ -100,7 +160,7 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
 
     if provider == "anthropic":
         govde = {"model": model, "max_tokens": EN_COK_JETON,
-                 "messages": mesajlar}
+                 "messages": [_anthropic_mesaj(m) for m in mesajlar]}
         if sistem:
             govde["system"] = sistem
         y = _istek(tanim["base"], {"Content-Type": "application/json",
@@ -117,7 +177,7 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
     if provider == "google":
         url = "%s/%s:generateContent" % (tanim["base"], model)
         icerik = [{"role": ("user" if m["role"] == "user" else "model"),
-                   "parts": [{"text": m["content"]}]} for m in mesajlar]
+                   "parts": _google_parcalar(m)} for m in mesajlar]
         govde = {"contents": icerik,
                  "generationConfig": {"maxOutputTokens": EN_COK_JETON}}
         if sistem:
@@ -322,7 +382,8 @@ DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
 
 
 def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
-        transport=None, now=None, duzeltme=True, denetim="olcum", veri=None):
+        transport=None, now=None, duzeltme=True, denetim="olcum", veri=None,
+        gorseller=None):
     """Bir kademe adina model cagirir.
 
     `denetim`: «olcum» (varsayilan) kullaniciya konusan cevaptir: dayanaksiz
@@ -345,6 +406,15 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
     # sistemi kullaniyorsa harcamalari da ayri gorunmeli.
     user = a.get("key_user") or user
     mesajlar = list(mesajlar or [])[-EN_COK_MESAJ:]
+    if gorseller is not None:
+        # Gorsel SON kullanici mesajina eklenir; dogrulanmayan hic gitmez.
+        temiz, hata = gorsel_dogrula(gorseller)
+        if hata:
+            return {"ok": False, "reason": "gorsel", "text": None, "note": hata}
+        if not mesajlar or mesajlar[-1].get("role") != "user":
+            return {"ok": False, "reason": "gorsel", "text": None,
+                    "note": "Görsel bir kullanıcı mesajına eklenmeli."}
+        mesajlar[-1] = dict(mesajlar[-1], gorseller=temiz)
     b = butce.settings(cfg)
     t0 = datetime.datetime.now()
 
@@ -353,8 +423,10 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         # HATALAR D-18: tavan cagri ONCESI en kotu durumla sorulur (istem
         # + en uzun cevap) ve cagri suresince bu pay AYRILIR: eszamanli
         # ikinci cagri ayni bos payi kullanamaz.
-        istem_jeton = _jeton_tahmini(sistem_metni, *[m.get("content")
-                                                      for m in gecmis])
+        istem_jeton = (_jeton_tahmini(sistem_metni, *[m.get("content")
+                                                       for m in gecmis])
+                       + GORSEL_JETON * sum(len(m.get("gorseller") or [])
+                                            for m in gecmis))
         en_kotu = _fiyat(a["provider"], a["model"], istem_jeton, EN_COK_JETON)
         izin = butce.guard(con, cfg, cost_usd=en_kotu)
         if not izin["ok"]:

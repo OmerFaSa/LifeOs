@@ -77,6 +77,7 @@ Dis dunyaya acilmaz: host varsayilani 127.0.0.1'dir ve config.json ile
 degistirilmesi bilincli bir karardir.
 """
 
+import base64
 import datetime
 import json
 import os
@@ -90,7 +91,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import (ai, bam, bildirim, butce, channels, cikti, cross, db, depo, gelen,  # noqa: E402
-                  hedefag, impact,
+                  fis, hedefag, impact,
                   intents, kanal, king, manager, media, memory, models, motto, outbox, patron,
                   profil, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
@@ -115,6 +116,7 @@ MAX_BODY = 1024 * 1024          # 1 MB — etiketli metrik govdesi icin fazlasiy
 # uretttigi yedek kendi geri yukleme yolundan gecemezdi. Genel sinir
 # GEVSETILMEZ; yalniz bu yol icin ayri ve acik bir sinir tanimlanir.
 RESTORE_BODY = 64 * 1024 * 1024
+FIS_BODY = 8 * 1024 * 1024        # fis fotografi (base64; ai.GORSEL_EN_COK_BAYT 5 MB)
 WEBHOOK_LIMIT = 60              # dakikada en fazla webhook istegi
 WEBHOOK_WINDOW = 60
 
@@ -345,6 +347,42 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Vary", "Origin")
         self.send_header("Content-Length", "0")
         self.end_headers()
+
+    def _para_fis(self, u):
+        if u.path == "/api/para/fis":
+            self._body_limit = FIS_BODY
+        ham, hata = self._read_body()
+        if hata:
+            return self._send(413, {"error": hata})
+        try:
+            govde = _nesne(ham)
+        except ValueError:
+            return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
+        bugun = datetime.date.today().isoformat()
+        if u.path == "/api/para/fis":
+            temiz, gh = ai.gorsel_dogrula([{"mime": govde.get("mime"), "data": govde.get("data")}])
+            if gh:
+                return self._send(400, {"error": gh})
+            r = fis.oku(self.con, self.server.config, base64.b64decode(temiz[0]["data"]),
+                        temiz[0]["mime"], bugun, kanal="web")
+            return self._send(200 if r.get("ok") else 422, r)
+        parca = u.path.strip("/").split("/")
+        if len(parca) != 5 or parca[4] not in ("kaydet", "iptal"):
+            return self._send(404, {"error": "yok"})
+        try:
+            tid = int(parca[3])
+        except ValueError:
+            return self._send(400, {"error": "taslak kimliği sayı olmalı"})
+        if parca[4] == "iptal":
+            r = fis.iptal(self.con, tid)
+            return self._send(200 if r["ok"] else 404, r)
+        t = fis.taslak(self.con, tid)
+        if not t:
+            return self._send(404, {"error": "taslak yok"})
+        if t["durum"] != "bekliyor":
+            return self._send(409, {"ok": False, "note": "Bu taslak zaten %s." % t["durum"]})
+        r = fis.kaydet(self.con, tid, govde, bugun)
+        return self._send(200 if r.get("ok") else 422, r)
 
     def _motto(self, u, body):
         """Motto uclari. Kimlik dogrulamasi cagiranda (TypeError/ValueError → 400)."""
@@ -851,6 +889,12 @@ class Handler(BaseHTTPRequestHandler):
             ay_ = (q.get("ay") or [datetime.date.today().isoformat()[:7]])[0]
             r = para.ay(self.con, ay_)
             r["kategoriler_hepsi"] = para.KATEGORILER
+            # Yarim kalan fis taslaklari (web): sayfa yenilense de kaybolmaz.
+            from core import fis
+            r["taslaklar"] = [dict(fis.taslak(self.con, x["id"])["govde"], id=x["id"])
+                              for x in self.con.execute(
+                                  "SELECT id FROM para_taslak WHERE durum='bekliyor' "
+                                  "AND kanal='web' ORDER BY id DESC LIMIT 5").fetchall()]
             return self._send(200 if r.get("ok") else 400, r)
         if u.path == "/api/gizlilik":
             from core import gizlilik
@@ -1313,6 +1357,9 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "hafiza kimligi sayi olmali"})
             r = memory.forget(self.con, id_)
             return self._send(200 if r.get("ok") else 404, r)
+        # Fis okuma (core/fis.py): fotograf → TASLAK; kaydet/iptal kullanicinin.
+        if u.path == "/api/para/fis" or u.path.startswith("/api/para/fis/"):
+            return self._para_fis(u)
         # Para kolu (Y1): form ile kayit ve silme. Silinen kayit isaretlenir.
         if u.path == "/api/para" or (u.path.startswith("/api/para/") and u.path.endswith("/sil")):
             from core import para
@@ -1559,6 +1606,8 @@ def _ritim(srv, aralik=60):
         try:
             schedule.tick(con, srv.config, th=srv.thresholds)
             media.process_next(con, srv.config)
+            # Fis: «fiş» baslikli indirilmis fotograf → taslak cevap (tikte bir).
+            fis.telegram_isle(con, srv.config)
             # BAM: her tikte EN FAZLA bir adim — uzun is sunucuyu kilitlemez.
             bam.ilerlet(con, srv.config)
             # King: isin durumu emre tasinir, DEGISIM bildirilir.

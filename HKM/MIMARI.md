@@ -1649,6 +1649,28 @@ boyut sınırı hem Telegram metaverisinden önce hem indirme sırasında uygula
 yarım dosya kalıcı ada taşınmaz. İçerik SHA-256 ile tekilleştirilir ve ham
 dosya saklama süresi ayarlanabilir.
 
+## Para kolu ve fiş okuma
+
+Para HKM'nin KENDİ kaydıdır (`core/para.py`, tablo `para`): Telegram'a ya da
+sohbete «market 450 TL», HKM › Para formu ve fiş fotoğrafı. Kur uydurulmaz;
+TL dışı tutar kendi biriminde ayrı toplanır.
+
+Fiş okuma (`core/fis.py`, kullanıcı kararı 2026-09-24) tek yönlü bir zincirdir:
+**model okur → kod doğrular → taslak → kullanıcı onaylar → para kaydı.**
+
+- Model yalnız fişte YAZANI JSON olarak okur (`para.fis` kademesi, atama
+  yoksa King'den miras; görsel okuyabilen bir model gerekir). Görsel üç
+  sağlayıcının kendi biçimine `ai.py`'de çevrilir; bütçe tavanı çağrıdan
+  önce görselin tahmini jetonunu da sayar.
+- Kod doğrular: toplam yoksa ya da sıfırsa taslak OLMAZ (tutar uydurulmaz);
+  tarih okunmaz ya da gelecekteyse bugün yazılır ve söylenir; kalemlerin
+  toplamı fişi tutmuyorsa söylenir. Kategoriyi model değil kod sözlüğü seçer.
+- Taslak (`para_taslak`) «tahmin» etiketlidir ve onaylanana kadar para
+  kaydına girmez. Web'de düzenlenebilir önizleme + «Kaydet»; Telegram'da
+  «fiş» başlıklı fotoğraf okunur, taslak cevap olarak gelir, «fiş kaydet» /
+  «fiş iptal» yalnız o kanalın taslağına dokunur. Başlıksız fotoğraf
+  modele gitmez. Gizlilik panosunda veri türü «fiş fotoğrafı».
+
 ## Kullanıcı onaylı hafıza
 
 Kalıcı hafıza yalnız açık bir `hatırla:` komutuyla veya yönetim API'siyle

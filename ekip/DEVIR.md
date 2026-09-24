@@ -375,7 +375,13 @@ yapıldı: varsayılan 42, «Tatil modu» satırında 0–365 gün, «Geri al»l
 (`LIFEOS.Seri.yillikTatilAyarla`, `meta/seriDondurma.yillikTatil`). (2) günün sorusunu
 SİSTEM belirlesin → B'nin birleşik tanımı (blok + serbest + paragraf + problem) kalır.
 (3) Sunucu şimdilik tek (ev) ağında; iş büyüyüp herkese açılınca sunucu üzerinden.
-(4) Fiş okuma gibi özellikler eklensin (HKM para kolu). (5) Tasarım (Part 9) bekliyor.
+(4) Fiş okuma gibi özellikler eklensin (HKM para kolu) → **fiş okuma yapıldı**:
+`core/fis.py` (model okur → kod doğrular → taslak → kullanıcı onayı), `ai.ask(gorseller=)`
+üç sağlayıcı biçimi + bütçe tahmini, `para.fis` kademesi, HKM › Para'da fiş yükle +
+düzenlenebilir önizleme, Telegram'da «fiş» başlıklı fotoğraf → taslak → «fiş kaydet» /
+«fiş iptal». Tarayıcıda sahte model cevabıyla uçtan uca denendi. (5) Tasarım (Part 9) bekliyor.
+**Açık soru:** telefonun ev ağından HKM'ye bağlanması için HKM'yi ev ağına açmak gerekiyor
+(şu an yalnız 127.0.0.1); «lokal ağa karışma» kuralı gereği kullanıcı onayı bekleniyor.
 
 B'nin ilerlemesi `ekip/HATALAR-ILERLEME-B.md`'de. A'nın payı (yalnız `HKM/`) **bitti**;
 her madde önce kırmızı test, sonra düzeltme:
