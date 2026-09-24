@@ -70,16 +70,12 @@ R.Screens.rutbe = (function(){
     { id:'defter',   label:'Defter' },
   ];
 
-  function tab(){
-    return TABS.some(t => t.id === S.ui.rutbeTab) ? S.ui.rutbeTab : TABS[0].id;
-  }
-
   /* Kademe rengini CSS'e geçiren sarmal. Ekranın her bölümü o anki
      kademenin rengiyle boyanır; renk katalogdan gelir, ekran kendi
      paletini uydurmaz. */
   function renkli(k, ic, sinif){
     return html`<div class="${'rutbe ' + (sinif || '')}"
-      style="${'--kademe-renk:' + (k && k.renk || '#888')
+      style="${'--kademe-renk:' + (k && k.renk || 'var(--text-3)')
         + ';--kademe-isik:' + (k && k.isik || '#ccc')}">${ic}</div>`;
   }
 
@@ -860,16 +856,23 @@ R.Screens.rutbe = (function(){
 
   function afterRender(){ videolariBagla(); }
 
+  /* Sekme yok (EKIP-PLANI §1.2): beş bölüm alt alta; bölüm çubuğu sayfa
+     içinde kaydırır. Bir bölüm çizilemezse yalnız o düşer. */
+  function govde(t){
+    try{ return (TAB_BODY[t.id] || simdiTab)(); }
+    catch(e){
+      console.error('Rütbe bölümü çizilemedi (' + t.id + '):', e);
+      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; defterin yerinde duruyor.' });
+    }
+  }
+
   async function render(){
-    const t = tab();
-    return String(K.Stack([
-      K.Subtabs({ items:TABS, value:t, act:'rutbe-tab', aria:'Rütbe bölümleri' }),
-      html`<div id="pane-rutbe">${(TAB_BODY[t] || simdiTab)()}</div>`,
-    ]));
+    return String(html`<div id="pane-rutbe">${K.SayfaBolumleri({ act:'rutbe-tab', aria:'Rütbe bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}</div>`);
   }
 
   const handle = {
-    async 'rutbe-tab'(el){ S.ui.rutbeTab = el.dataset.tab; R.App.render(); },
+    async 'rutbe-tab'(el){ K.bolumeGit(el.dataset.tab); },
     /* «Git» kullanıcıyı işin YAPILDIĞI ekrana götürür. Rota katalogdan
        gelir; ekran kendi listesini tutmaz. */
     async 'rutbe-git'(el){

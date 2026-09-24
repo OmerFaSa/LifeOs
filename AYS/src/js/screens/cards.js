@@ -17,7 +17,6 @@ R.Screens.cards = (function(){
     { rating:'remembered', label:'Hatırladım', key:'3', tone:'primary' },
   ];
 
-  function tab(){ return S.ui.cardTab || 'due'; }
   function stageLabel(stage){ return STAGES[stage] || 'yeni'; }
 
   /* ---------- due oturumu ---------- */
@@ -151,7 +150,7 @@ R.Screens.cards = (function(){
           : K.Button({ label:'Reçeteyi tamamla', size:'sm', act:'repair-done', data:{ 'data-id':e.id } })}
         ${e.closedAt
           ? K.Badge({ label:'kapandı · '+U.fmtShort(R.U.gunOf(e.closedAt)), tone:'ok' })
-          : K.Button({ label:'Kapat (çözümsüz doğru)', size:'sm', tone:'primary', act:'close-error', data:{ 'data-id':e.id } })}
+          : K.Button({ label:'Kapat (çözümsüz doğru)', size:'sm', act:'close-error', data:{ 'data-id':e.id } })}
       </div>` });
   }
 
@@ -163,10 +162,15 @@ R.Screens.cards = (function(){
     const list = showClosed ? closed : open;
     const pg = K.paginate(list, S.ui.nbPage || 1, 20);
 
+    /* Süzgeç sekme değil tek düğmedir (§1.2: ekran içi sekme 0): hangi
+       listenin gösterildiği başlıkta yazar, düğme ötekine geçer. */
     return K.Grid([
       K.Span(8, K.Stack([
-        K.Segmented({ act:'notebook-filter', value:showClosed ? '1' : '0', aria:'Yanlış defteri süzgeci',
-          items:[{ value:'0', label:'Açık ('+open.length+')' }, { value:'1', label:'Kapanmış ('+closed.length+')' }] }),
+        html`<div class="row between wrap"><span class="small muted">${showClosed
+          ? 'Kapanmış kayıtlar (' + closed.length + ')' : 'Açık kayıtlar (' + open.length + ')'}</span>
+          ${K.Button({ label:showClosed ? 'Açıkları göster (' + open.length + ')'
+            : 'Kapanmışları göster (' + closed.length + ')', size:'sm', tone:'ghost',
+            act:'notebook-filter', data:{ 'data-value':showClosed ? '0' : '1' } })}</div>`,
         list.length
           ? html`${K.Stack(map(pg.items, NotebookItem), 'sm')}
                  ${K.Pager({ page:pg.page, pages:pg.pages, total:pg.total, act:'nb-page' })}`
@@ -221,25 +225,29 @@ R.Screens.cards = (function(){
 
   /* ---------- ekran ---------- */
 
+  /* Üç görünüm (bugünün kartları, yanlış defteri, bütün kartlar) sekme
+     değil, alt alta bölümdür (§1.2); bölüm çubuğu sayfa içinde kaydırır. */
+  function bolumler(){
+    return [
+      { id:'due', ad:'Bugünün kartları', sayi:C.dueCards().length,
+        govde:html`<div class="cardsgrid">${K.Stack(dueSession())}${sidebar()}</div>` },
+      { id:'notebook', ad:'Yanlış defteri', sayi:C.openErrors().length, govde:notebook() },
+      { id:'all', ad:'Bütün kartlar', sayi:S.cards.length, govde:K.Stack(allCards()) },
+    ];
+  }
+
   function header(){
     const debt = C.cardDebt();
     const overdue = C.overdueCards().length;
-    const tabs = [
-      { id:'due', label:'Bugün due ('+C.dueCards().length+')' },
-      { id:'all', label:'Tüm kartlar ('+S.cards.length+')' },
-      { id:'notebook', label:'Yanlış defteri ('+C.openErrors().length+')' },
-    ];
-    return K.Span(12, K.Stack([
-      K.Subtabs({ items:tabs, value:tab(), act:'card-tab', aria:'Tekrar bölümleri' }),
-      when(debt > 10, () => K.Notice({ tone:'warn', title:'Tekrar borcu %'+debt+'.',
-        body:'Gecikmiş '+overdue+' kart var. %10 üzerindeki borçta yeni kart üretimi azaltılır; önce borcu sadeleştir.' })),
-    ], 'sm'));
+    if(debt <= 10) return '';
+    return K.Span(12, K.Notice({ tone:'warn', title:'Tekrar borcu %'+debt+'.',
+      body:'Gecikmiş '+overdue+' kart var. %10 üzerindeki borçta yeni kart üretimi azaltılır; önce borcu sadeleştir.' }));
   }
 
   function sidebar(){
     const debt = C.cardDebt();
     const due = C.dueCards().length;
-    return K.Span(4, K.Stack([
+    return html`<div>${K.Stack([
       K.Cols(2, [
         K.Stat({ label:'Due', value:due, tone:due ? null : 'ok' }),
         K.Stat({ label:'Borç', value:'%'+debt, tone:debt > 10 ? 'warn' : 'ok',
@@ -253,21 +261,27 @@ R.Screens.cards = (function(){
             <b class="srsrow__day">${p.day}</b>
             <span class="srsrow__detail">${p.detail}</span>
           </div>`)}</div>` }),
-    ]));
+    ])}</div>`;
   }
 
   async function render(){
-    if(tab() === 'notebook') return String(html`${K.Grid(header())}${notebook()}`);
     return String(K.Grid([
       header(),
-      K.Span(6, K.Stack(tab() === 'due' ? dueSession() : allCards())),
-      sidebar(),
+      K.Span(12, K.SayfaBolumleri({ act:'card-tab', aria:'Tekrar bölümleri', bolumler:bolumler() })),
       K.Span(12, raw(UI.rail(['srs', 'card-debt', 'recall', 'notebook']))),
     ]));
   }
 
+  /* Başka ekrandan «Yanlış defteri»ne gelindiyse (Bugün, `data-tab`)
+     çizimden sonra oraya kayılır; sonra istek düşer. */
+  function afterRender(){
+    const t = S.ui.cardTab;
+    S.ui.cardTab = 'due';
+    if(t && t !== 'due') K.bolumeGit(t);
+  }
+
   const handle = {
-    async 'card-tab'(el){ S.ui.cardTab = el.dataset.tab; R.App.render(); },
+    async 'card-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'card-page'(el){ S.ui.cardPage = Number(el.dataset.page); R.App.render(); },
     async 'nb-page'(el){ S.ui.nbPage = Number(el.dataset.page); R.App.render(); },
     async 'notebook-filter'(el){ S.ui.notebookClosed = el.dataset.value === '1'; S.ui.nbPage = 1; R.App.render(); },
@@ -358,7 +372,7 @@ R.Screens.cards = (function(){
 
   /* klavye: bosluk cevir, 1/2/3 degerlendir */
   function onKey(e){
-    if(R.S.route !== 'cards' || tab() !== 'due' || UI.isSheetOpen()) return;
+    if(R.S.route !== 'cards' || UI.isSheetOpen()) return;
     if(e.target && /input|textarea|select/i.test(e.target.tagName)) return;
     const due = C.dueCards().sort((a, b) => a.dueAt.localeCompare(b.dueAt));
     if(!due.length) return;
@@ -382,6 +396,6 @@ R.Screens.cards = (function(){
     actions(){
       return String(K.Button({ label:'Kart ekle', icon:'plus', size:'sm', act:'new-card' }));
     },
-    render, handle, change, onKey,
+    render, afterRender, handle, change, onKey,
   };
 })();

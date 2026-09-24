@@ -66,7 +66,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** T3 AYS (ekran içleri) — yerelde hazır, H'nin iki test güncellemesini bekliyor (aşağıda)
+- **Şu an:** ⏸ T oturumu kapandı (kullanıcı: limit). AYS T3 main'de; kalan iş aşağıda DEVİR'de — başka bir çalışan alabilir.
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
   T1 temel kalıplar `brand/ortak/temel.css` + `C.Kutu` (02) + `C.ModulIsareti` (165) +
@@ -93,16 +93,28 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   arıyor: Bugün en öndeki kartı gösterdiği için geçer, ama ikisi birden bekliyorsa HKM kartı
   yalnız Onaylar'dadır — `go('onaylar')` daha sağlam. Yeni kabuk eylemleri: `modul-menu`,
   `bildirim-ac`, `hafta-ac`, `hizli-ekle`.
-- **H'ye istek (T3 AYS, iki var olan test):** AYS'de ekran içi sekme kalmıyor — Analiz,
-  Rehber, Tekrar ve Rütbe'nin sekmeleri alt alta bölüm oldu (`C.SayfaBolumleri`, 019; eski
-  `*-tab` eylemi düğmede kalır ve bölüme kaydırır). Bugün üç alana indi (03); Seri, çıpa,
-  bloklar gibi kartlar yeni **Bugün › Ayrıntı** ekranında (`R.Screens.gun`, aynı işleyiciler).
-  Bu yüzden: (1) `AYS/src/tests/ux.test.js:237` «sekmeli ekranlarda tam bir sekme seçilidir»
-  AYS'de ölçecek sekme bulamıyor (0) — «ekran içi sekme yok» diye çevirmeni ya da silmeni
-  öneririm (sadelik.js zaten ölçüyor). (2) `AYS/src/tests/ekran.test.js:117` tatil sınırı testi
-  `R.Screens.today.render()` yerine `R.Screens.gun.render()` çizmeli (Seri kartı Ayrıntı'da).
-  Başka kırılan test yok (1870/1872). Hazır olunca «H: T3 testleri hazır» yaz; T3'ü o an iterim.
-- **Yarım / sıradaki:** T3 AYS itilince → AYS teslim → SPİ ve ESP kabuğa geçer (aynı `LIFEOS.KABUK`)
+- **T3 AYS (bu commit):** ekran içi sekme 0 — Analiz, Genel ayarlar, Tekrar, Rütbe alt alta bölüm
+  (`C.SayfaBolumleri` + `C.bolumeGit`, 019; eski `*-tab` eylemi düğmede kalır). Bugün üç alan (03):
+  Şimdi (tek uyarı + sıradaki blok) · Durum (Günün akışı, Özet, Günlük sayaç) · Öneri (tek kart);
+  geri kalan kartlar **Bugün › Ayrıntı** (`R.Screens.gun`, aynı işleyiciler). Uzun açıklamalar
+  `C.Ayrinti` («Neden?», D katmanı). Ekran başına en çok bir dolu düğme. Boş durum: Onaylar,
+  Kütüphanem. Düzeltme: Analiz'de «asgari çaba undefined dk.» (politikada tek değer yok) + test.
+  Denetim: runtests AYS 1897 · SPİ 1529 · ESP 1527; AYS duman, a11y, 390 px temiz; envanter AYS
+  kayıp 0; sadelik AYS: yalnız tablo sayımı kaldı (aşağıdaki bulgu).
+- **H · bulgu:** `tools/envanter.js:296` · `BLOK` `table`'ı içeriyor, tablonun çocukları
+  (`table-row-group`) BLOK değil → her tablo «30+ kelimelik tek parça yazı» sayılıyor · AYS target 2,
+  cards 2, analytics 1, guide 6 aşımın hepsi tablo · doğrulama: aşan öğelerin etiketi TABLE.
+  Düzelince AYS sadelik yeşil olur.
+- **DEVİR (sıradaki çalışan için):**
+  1. H tablo sayımını düzeltince AYS palet ve SPİ/ESP 390 px/palet koşup teslim tablosunda AYS'yi
+     ✅ yap (commit kimliğiyle) — ekranlar o an K'ye geçer.
+  2. SPİ ve ESP kabuğa geçer: AYS `app.js`'teki `NAV`/`ustCubukHtml`/`gunSeridiHtml`/`sayfaBasiHtml`/
+     `bolumCubuguHtml`/`altBantHtml`/`menuHtml` kalıbı birebir; SPİ `SECTIONS` ve ESP menüsü sekiz
+     çekmeceye (`LIFEOS.KABUK.CEKMECELER`), `index.html`'e `css/kabuk.css` ve `js/core/kabuk.js`.
+     Sonra T3: sekmeler `C.SayfaBolumleri`'ye, Bugün üç alana, onaylar tek çekmeceye.
+  3. Sonra T4 hareket · T5 ayarlar · T6 HKM yüzü (EKIP-PLANI §4.2).
+  4. Açık kullanıcı soruları (eski oturum): telefon için yerel ağ erişimi; başka hangi fotoğraf
+     okuma özellikleri.
 - **Soru / öneri:** —
 
 ## HATA (H)

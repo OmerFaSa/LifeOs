@@ -3986,6 +3986,19 @@ body.is-dragging .drop.is-over{
 .modis--esp{ background:var(--esp-ink); clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
 .modis--mer{ background:var(--mer-ink); clip-path:polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0 50%); }
 
+/* ---------- ayrıntı (D katmanı): kısa cümle + bir dokunuşla gerekçe ---------- */
+.ayrinti{ font-size:var(--fs-sm); color:var(--text-2); }
+.ayrinti__ozet{ margin:0 0 4px; }
+.ayrinti__ac summary{
+  display:inline-flex; align-items:center; gap:4px; min-height:24px;
+  color:var(--text-2); font-weight:500; cursor:pointer; list-style:none;
+  text-decoration:underline; text-decoration-style:dotted; text-underline-offset:3px;
+}
+.ayrinti__ac summary::-webkit-details-marker{ display:none; }
+.ayrinti__ac[open] summary{ color:var(--text); }
+.ayrinti__govde{ margin-top:6px; color:var(--text-2); }
+.ayrinti__govde > * + *{ margin-top:6px; }
+
 /* ==== css/kart.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/kart.css içine yazılır; burası bir sonraki
@@ -8666,7 +8679,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'ed1bbf6', at:'2026-09-24 15:49', dirty:true };
+ESP.BUILD = { id:'b51140e', at:'2026-09-24 16:00', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -33152,6 +33165,51 @@ ESP.C = (function(){
       role="img" aria-label="${m.ad}">${m.harf}</span>`;
   }
 
+  /* SAYFA BÖLÜMLERİ (katalog 19, EKIP-PLANI T3): ekranın iç sekmeleri
+     KARTLARA döner. Bütün bölümler alt alta çizilir; üstteki bölüm çubuğu
+     sekme değil sayfa içi bağlantıdır — basınca o bölüme kayar. Sekme
+     ekranın bir kısmını SAKLARDI; burada hiçbir şey saklanmaz (§1.2:
+     ekran içi sekme 0). Eski sekme eylemi (`act`) düğmede kalır ve ekranın
+     işleyicisi `bolumeGit(id)` çağırır: aynı eylem, yeni davranış. */
+  function SayfaBolumleri(o){
+    const b = (o.bolumler || []).filter(x => x && x.govde != null && String(x.govde) !== '');
+    return html`
+      ${when(b.length > 1, () => html`<nav class="bolumcubugu bolumcubugu--sayfa" data-oz="019"
+        aria-label="${o.aria || 'Bu sayfada'}">${map(b, x => html`<button class="bolumcubugu__ad"
+          ${attrs({ 'data-act':o.act, 'data-tab':x.id })}>${x.ad}${when(x.sayi != null,
+          () => html`<span class="bolumcubugu__rozet is-sessiz">${x.sayi}</span>`)}</button>`)}</nav>`)}
+      <div class="sayfabolumler">${map(b, x => html`
+        <section class="sayfabolum" id="${'bl-' + x.id}" aria-labelledby="${'bl-' + x.id + '-ad'}">
+          <h2 class="sayfabolum__ad" id="${'bl-' + x.id + '-ad'}" tabindex="-1">${x.ad}</h2>
+          ${x.govde}
+        </section>`)}</div>`;
+  }
+
+  /* AYRINTI (D katmanı, EKIP-PLANI §1.1–1.2): 30 kelimeyi aşan açıklama
+     ekranda tek parça durmaz. Kısa cümle görünür kalır; gerekçe ya da
+     ayrıntı bir dokunuşla açılır. Hiçbir metin silinmez, yalnız katmanı
+     değişir. */
+  function Ayrinti(o){
+    return html`<div class="${cls('ayrinti', o.class)}">
+      ${when(o.ozet, () => html`<p class="ayrinti__ozet">${o.ozet}</p>`)}
+      <details class="ayrinti__ac"><summary>${o.etiket || 'Neden?'}</summary>
+        <div class="ayrinti__govde">${o.govde}</div></details>
+    </div>`;
+  }
+
+  /* Bölüme kay ve odağı başlığına ver (ekran okuyucu nereye gelindiğini
+     duysun). Azaltılmış harekette kayma anlıktır. */
+  function bolumeGit(id){
+    const el = document.getElementById('bl-' + id);
+    if(!el) return false;
+    let az = true;
+    try{ az = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+    el.scrollIntoView({ block:'start', behavior:az ? 'auto' : 'smooth' });
+    const h = el.querySelector('.sayfabolum__ad');
+    if(h){ try{ h.focus({ preventScroll:true }); }catch(e){} }
+    return true;
+  }
+
   /* ---------- etiket ---------- */
 
   function Badge(o){
@@ -33496,7 +33554,7 @@ ESP.C = (function(){
   const SectionTitle = (title, right) => html`<div class="section-title"><h2>${title}</h2>${when(right, right)}</div>`;
 
   return {
-    Kutu, ModulIsareti, Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     Entry, Ledger,
     PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, Busy, NextUp, Table, Pager, paginate,

@@ -11,14 +11,16 @@ R.Screens.guide = (function(){
   const { html, raw, when, map } = R.h;
   const K = R.C;
 
+  /* Sıra: bu ekran «Ayarlar › Genel»dir; ayarlar başta, başvuru metinleri
+     sonda. Sekme yok (EKIP-PLANI §1.2): yedi bölüm alt alta. */
   const TABS = [
-    { id:'analysis',  label:'Analiz protokolü' },
-    { id:'checklist', label:'Kontrol listeleri' },
-    { id:'calendar',  label:'Resmî takvim' },
-    { id:'istisna',   label:'Takvim istisnaları' },
-    { id:'examweek',  label:'Sınav haftası' },
-    { id:'kanit',     label:'Eşiklerin dayanağı' },
     { id:'settings',  label:'Ayarlar' },
+    { id:'istisna',   label:'Takvim istisnaları' },
+    { id:'calendar',  label:'Resmî takvim' },
+    { id:'examweek',  label:'Sınav haftası' },
+    { id:'checklist', label:'Kontrol listeleri' },
+    { id:'analysis',  label:'Analiz protokolü' },
+    { id:'kanit',     label:'Eşiklerin dayanağı' },
   ];
 
   /* ---------- analiz protokolu ---------- */
@@ -223,7 +225,7 @@ R.Screens.guide = (function(){
               K.Field({ label:'Bitiş', hint:'tek günse boş bırak', input:K.Input({ id:'cal-to', type:'date' }) }),
             ])}
             ${K.Field({ label:'Not', input:K.Input({ id:'cal-note', placeholder:'ör. dönem sonu sınavları' }) })}
-            ${K.Button({ label:'Ekle', icon:'plus', tone:'primary', class:'mt-12', act:'cal-add' })}` }),
+            ${K.Button({ label:'Ekle', icon:'plus', class:'mt-12', act:'cal-add' })}` }),
 
         icsKarti(),
 
@@ -240,10 +242,12 @@ R.Screens.guide = (function(){
                 rows:weekRows.map(r => ['H' + r.n, U.fmtRange(r.from, r.to),
                   html`<span class="${r.load < 1 ? 'num is-down' : 'num is-up'}">%${Math.round(r.load * 100)}</span>`]) })
             : K.Empty({ icon:'check', text:'Önümüzdeki sekiz hafta tam yükte.' }) }),
-        K.Notice({ tone:'info', body:'Tatil günü ara günü olur: blok yok ve kaçırılmış sayılmaz. '
-          + 'Okul sınavı, yoğun gün ve ekstra çalışma ders gününün süresini yük oranında değiştirir; '
-          + 'deneme ve kapanış günleri kısalmaz. Haftalık soru hedefi güncel yüke göre ayarlanır. '
-          + 'İlerlemesi başlamış bir güne dokunulmaz.' }),
+        K.Notice({ tone:'info', body:K.Ayrinti({ etiket:'Diğer türler',
+          ozet:'Tatil günü ara günü olur: blok yok ve kaçırılmış sayılmaz.',
+          govde:html`<p>Okul sınavı, yoğun gün ve ekstra çalışma ders gününün süresini yük oranında
+            değiştirir; deneme ve kapanış günleri kısalmaz.</p>
+            <p>Haftalık soru hedefi güncel yüke göre ayarlanır. İlerlemesi başlamış bir güne
+            dokunulmaz.</p>` }) }),
         K.Button({ label:'Planı yeniden hesapla', icon:'refresh', act:'auto-replan' }),
       ])),
     ]);
@@ -289,7 +293,7 @@ R.Screens.guide = (function(){
           f('Diploma notu', 'st-diploma', { type:'number', min:0, max:100, value:p.diplomaGrade, numeric:true }),
           f('Hedef başarı sırası', 'st-rank', { type:'number', value:p.targetRank, numeric:true }),
         ])}
-        ${K.Button({ label:'Kaydet', tone:'primary', act:'save-profile', class:'mt-12' })}`,
+        ${K.Button({ label:'Kaydet', act:'save-profile', class:'mt-12' })}`,
     });
   }
 
@@ -489,7 +493,15 @@ R.Screens.guide = (function(){
     return K.Card({ title:'HKM işareti', hint:'hkm',
       sub:'İsteğe bağlı dördüncü katmana günün özeti',
       body:html`
-        ${K.Notice({ tone:'info', body:window.LIFEOS.YedekAg.kartNotu('AYS') })}
+        ${(function(){
+          /* Metin ortak (yedekag.js). Mahremiyet cümlesi (ilk ve son) görünür
+             kalır; anahtarın neyi açtığı bir dokunuşla açılır (§1.2). */
+          const c = String(window.LIFEOS.YedekAg.kartNotu('AYS')).split(/(?<=\.)\s+/);
+          const ozet = c.length > 2 ? c[0] + ' ' + c[c.length - 1] : c.join(' ');
+          return K.Notice({ tone:'info', body:c.length > 2
+            ? K.Ayrinti({ etiket:'Bu anahtar neyi açar?', ozet, govde:html`<p>${c.slice(1, -1).join(' ')}</p>` })
+            : ozet });
+        })()}
         ${when(a.baskaProfil, () => K.Notice({ tone:'warn', class:'mt-10', body:window.LIFEOS.HkmBag.not(a.baskaProfil) }))}
 
         <div class="mt-12">
@@ -542,15 +554,14 @@ R.Screens.guide = (function(){
           body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
 
         <div class="mt-12">
-          ${K.Button({ label:'Bağlan', act:'hkm-pair', tone:'primary' })}
+          ${K.Button({ label:'Bağlan', act:'hkm-pair' })}
           ${K.Button({ label:'Şimdi gönder', act:'hkm-send' })}
           ${K.Button({ label:'Geçmişi gönder (60 gün)', act:'hkm-backfill' })}
         </div>
-        <p class="tiny dim mt-8">Çapraz bulgu ve yön tahlili GEÇMİŞ ister;
-          bugünden biriken bir ambar ilk iki ay hiçbir şey söyleyemez.
-          Geçmiş gönderimi yalnızca geriye dönük HESAPLANABİLEN alanları
-          yollar: dünkü tarihle bugünkü kart borcunu yazmak, ambara sahte
-          bir ölçüm koymaktır.</p>
+        <div class="mt-8">${K.Ayrinti({ etiket:'Neden yalnız bazı alanlar?',
+          ozet:'Çapraz bulgu ve yön tahlili GEÇMİŞ ister; bugünden biriken bir ambar ilk iki ay hiçbir şey söyleyemez.',
+          govde:html`<p>Geçmiş gönderimi yalnızca geriye dönük HESAPLANABİLEN alanları yollar: dünkü
+            tarihle bugünkü kart borcunu yazmak, ambara sahte bir ölçüm koymaktır.</p>` })}</div>
         <p class="tiny dim mt-8">«Bağlan», jetonu HKM'den doğrudan alır:
           önce HKM yüzünde «Cihazları bağla» de, sonra iki dakika içinde
           buraya bas. Jetonu elle yazmak da çalışır.</p>
@@ -574,7 +585,7 @@ R.Screens.guide = (function(){
         <div class="row gap-8 mt-10">
           ${K.Input({ id:'hafiza-yeni', class:'grow', aria:'Hatırlanacak şey',
             placeholder:'Örn. Pazar günleri çalışmam' })}
-          ${K.Button({ label:'Hatırla', size:'sm', tone:'primary', act:'hafiza-ekle' })}
+          ${K.Button({ label:'Hatırla', size:'sm', act:'hafiza-ekle' })}
         </div>
         <p class="tiny dim mt-8">Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın,
           «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.</p>` });
@@ -648,8 +659,9 @@ R.Screens.guide = (function(){
       K.Card({ title:'Eşikler nereden geliyor?', hint:'evidence',
         body:html`
           ${K.Notice({ tone:'warn', title:'Bu bir pedagojik hiyerarşi değildir',
-            body:R.Ev.policy().disclaimer })}
-          <p class="small muted mt-8">${R.Ev.policy().rationale}</p>
+            body:K.Ayrinti({ govde:html`<p>${R.Ev.policy().disclaimer}</p>` }) })}
+          <div class="mt-8">${K.Ayrinti({ etiket:'Hangi kaynağa ne kadar güvenilir?',
+            govde:html`<p>${R.Ev.policy().rationale}</p>` })}</div>
           ${K.Table({ tight:true, headers:['Kaynak türü', 'AYS\'nin tanıdığı yetki',
             { label:'Eşik', num:true }],
             rows:R.EVIDENCE_SOURCES.map(src => {
@@ -707,13 +719,17 @@ R.Screens.guide = (function(){
     settings:settingsTab,
   };
 
+  function govde(t){
+    try{ return (TAB_BODY[t.id] || analysisTab)(); }
+    catch(e){
+      console.error('Rehber bölümü çizilemedi (' + t.id + '):', e);
+      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; ayarların yerinde duruyor.' });
+    }
+  }
+
   async function render(){
-    const tab = TABS.some(t => t.id === S.ui.guideTab) ? S.ui.guideTab : TABS[0].id;
-    const body = (TAB_BODY[tab] || analysisTab)();
-    return String(K.Stack([
-      K.Subtabs({ items:TABS, value:tab, act:'guide-tab', aria:'Rehber bölümleri' }),
-      html`<div id="pane-guide">${body}</div>`,
-    ]));
+    return String(html`<div id="pane-guide">${K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}</div>`);
   }
 
   const handle = {
@@ -745,7 +761,7 @@ R.Screens.guide = (function(){
       UI.toast(ok ? ad + (acik ? ' açıldı' : ' gizlendi — verisi duruyor') : (t.why || 'Değiştirilemedi'));
       R.App.render();
     },
-    async 'guide-tab'(el){ S.ui.guideTab = el.dataset.tab; R.App.render(); },
+    async 'guide-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     /* Budama. Motor kullanicinin girdigi veriyi reddeder; ekran da
        yalnizca izinli olanlari sunar. */
@@ -999,11 +1015,8 @@ R.Screens.guide = (function(){
 
   return {
     id:'guide',
-    title:'Rehber',
-    subtitle(){
-      const tab = TABS.find(t => t.id === S.ui.guideTab) || TABS[0];
-      return tab ? tab.label + ' · protokoller ve ayarlar' : 'Protokoller, kontrol listeleri ve ayarlar';
-    },
+    title:'Genel ayarlar',
+    subtitle(){ return 'Ayarlar, takvim ve protokoller — alt alta'; },
     actions(){ return ''; },
     render, handle, change,
   };

@@ -146,8 +146,8 @@ R.Screens.meeting = (function(){
               html`<li><b>${i+1}. ${r.title}</b> — ${R.MEETING_ORDER.length} uzman sırayla konuşur</li>`)}
           </ol>
           <p class="tiny dim">Toplantıyı <b>sen</b> bitirirsin; istediğin turda “Bitir ve rapor al”a bas.
-            Araya girip söz de alabilirsin. Konuşmalar sırayla akar: biri bitmeden
-            diğeri başlamaz.
+            Araya girip söz de alabilirsin.</p>
+          <p class="tiny dim">Konuşmalar sırayla akar: biri bitmeden diğeri başlamaz.
             ${when(S.ui.meetingVoice && voiceAvailable(),
               () => html`Ses açık — her ajanın kendi sesi var; sıradaki konuşma bir
                 öncekinin sesi bitmeden başlamaz.`)}

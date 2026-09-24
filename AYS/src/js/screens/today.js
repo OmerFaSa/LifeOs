@@ -476,10 +476,12 @@ R.Screens.today = (function(){
     return c.Card({ title:'Hedeflerim', badge:l.length ? c.Badge({ label:l.length + ' etkin', tone:'info' }) : null,
       actions:c.Button({ label:'Ekip sohbetinde hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
       body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
-        : html`<p class="small dim">Henüz hedefin yok. Ekip sohbetinde Patron’a «TYT matematiği 100 günde bitirmek
-          istiyorum» ya da «TYT’de 90 nete çıkmak istiyorum» gibi yazabilirsin; vaktine ve kendi
-          denemelerine göre olup olmadığını, olmuyorsa olacağı tarihi söylerim. Alışkanlık da
-          kurabilirsin: «her gün 2 saat ders çalışma alışkanlığı kazanmak istiyorum».</p>` });
+        : c.Ayrinti({ etiket:'Başka örnek',
+            ozet:'Henüz hedefin yok. Ekip sohbetinde Patron’a «TYT’de 90 nete çıkmak istiyorum» gibi yaz; '
+              + 'vaktine ve denemelerine göre olup olmadığını söylerim.',
+            govde:html`<p>«TYT matematiği 100 günde bitirmek istiyorum» da olur; olmuyorsa olacağı
+              tarihi söylerim. Alışkanlık da kurabilirsin: «her gün 2 saat ders çalışma alışkanlığı
+              kazanmak istiyorum».</p>` }) });
   }
 
   /* ---------- uyarilar ---------- */
@@ -525,30 +527,32 @@ R.Screens.today = (function(){
     const out = [];
     const untilStart = M.daysUntilStart();
     const goBtn = (label, route) => c.Button({ label, size:'sm', act:'go', data:{ 'data-route':route } });
+    /* Her uyarı tonuyla döner: Bugün yalnız EN ACİL olanı gösterir
+       (Şimdi alanı), hepsi Ayrıntı'da durur. */
+    const ekle = (tone, o) => out.push({ tone, kart:c.Notice(Object.assign({ tone }, o)) });
 
     if(untilStart > 0){
-      out.push(c.Notice({ tone:'info', title:untilStart+' gün sonra başlıyor.',
-        body:html`Program ${U.fmtDate(R.PLAN.startISO)} tarihinde başlıyor. Hafta 1 içeriği şimdiden önizleme olarak açık.` }));
+      ekle('info', { title:untilStart+' gün sonra başlıyor.',
+        body:html`Program ${U.fmtDate(R.PLAN.startISO)} tarihinde başlıyor. Hafta 1 içeriği şimdiden önizleme olarak açık.` });
     }
     M.activeProtocols().forEach(p => {
-      out.push(c.Notice({ tone:'warn',
-        body:html`<b>${p.title}</b> protokolü ${U.fmtShort(p.endsAt)} tarihine kadar aktif. ${goBtn('Adımları gör','protocols')}` }));
+      ekle('warn', { body:html`<b>${p.title}</b> protokolü ${U.fmtShort(p.endsAt)} tarihine kadar aktif. ${goBtn('Adımları gör','protocols')}` });
     });
     const triggers = C.protocolTriggers();
     if(triggers.length){
       const def = R.RECOVERY_PROTOCOLS.find(p => p.id === triggers[0].id);
-      out.push(c.Notice({ tone:'warn', title:'Telafi tetiklendi.',
-        body:html`${triggers[0].detail} <b>${def.title}</b> protokolü öneriliyor. ${goBtn('İncele','protocols')}` }));
+      ekle('warn', { title:'Telafi tetiklendi.',
+        body:html`${triggers[0].detail} <b>${def.title}</b> protokolü öneriliyor. ${goBtn('İncele','protocols')}` });
     }
     if(M.backupDue()){
       const age = M.backupAgeDays();
-      out.push(c.Notice({ tone:'info', title:'Yedekleme.',
-        body:html`${age === null ? 'Henüz hiç yedek almadın.' : 'Son yedeğin '+age+' gün önce alındı.'} Tarayıcı verisi silinirse çalışma geçmişin kaybolur. ${goBtn('Yedek al','guide')}` }));
+      ekle('info', { title:'Yedekleme.',
+        body:html`${age === null ? 'Henüz hiç yedek almadın.' : 'Son yedeğin '+age+' gün önce alındı.'} Tarayıcı verisi silinirse çalışma geçmişin kaybolur. ${goBtn('Yedek al','guide')}` });
     }
     const debt = C.analysisDebt();
     if(debt.length){
-      out.push(c.Notice({ tone:'danger', title:'Analiz borcu.',
-        body:html`${debt.length} denemenin analizi 24 saati aştı. Analiz edilmemiş deneme, analiz edilenden daha düşük değerlidir. ${goBtn('Analize git','exams')}` }));
+      ekle('danger', { title:'Analiz borcu.',
+        body:html`${debt.length} denemenin analizi 24 saati aştı. Analiz edilmemiş deneme, analiz edilenden daha düşük değerlidir. ${goBtn('Analize git','exams')}` });
     }
     return out;
   }
@@ -844,7 +848,117 @@ R.Screens.today = (function(){
     return '';
   }
 
+  /* BUGÜN — üç alan (katalog 03, EKIP-PLANI §3):
+
+       ŞİMDİ   tek canlı öğe: sıradaki blok (ya da kurulum), varsa en acil
+               tek uyarı ve günün sorusu
+       DURUM   günün akışı · özet · günlük sayaç — kutular, düğmesiz
+       ÖNERİ   en çok bir kart; fazlası «+N öneri Onaylar'da»
+
+     Geri kalan her kart «Bugün › Ayrıntı»dadır (renderAyrinti). Sadelik
+     bütçesi: sayfa boyu 1800 px, görünen düğme 14. */
+  const AGIRLIK = { danger:3, warn:2, info:1 };
+  /* Uyarılar en acilden başlayarak: ilki Bugün'de, gerisi Ayrıntı'da. */
+  function uyarilar(){
+    return Banners().sort((a, b) => (AGIRLIK[b.tone] || 0) - (AGIRLIK[a.tone] || 0));
+  }
+
+  function AkisSatiri(b, siradaki){
+    const d = b.startedAt ? 'suruyor' : b.status;
+    const sag = d === 'suruyor' ? c.Badge({ label:'Sürüyor', tone:'mod' })
+      : b.id === siradaki ? c.Badge({ label:'Sıradaki', tone:'mod' })
+      : d === 'done' ? html`<span class="akis__bitti">Bitti</span>`
+      : d === 'partial' ? html`<span class="akis__yarim">Yarım</span>`
+      : d === 'skipped' ? html`<span class="akis__atla">Atlandı</span>`
+      : html`<span class="akis__sure">${b.targetMin} dk</span>`;
+    return html`<li class="${'akis__satir' + (d === 'done' || d === 'skipped' ? ' is-gecti' : '')}">
+      <span class="akis__slot">${b.slot}</span>
+      <span class="akis__nokta" aria-hidden="true"></span>
+      <span class="akis__ad">${b.topic || b.subject || b.slot}</span>
+      <span class="akis__sag">${sag}</span>
+    </li>`;
+  }
+
+  function AkisKutusu(day){
+    const bloklar = day.blocks.filter(b => b.slot !== 'Dinlenme');
+    const bitti = bloklar.filter(b => b.status === 'done').length;
+    const sira = (bloklar.find(b => b.status === 'pending' && !b.startedAt) || {}).id;
+    return c.Kutu({ ad:'Günün akışı', yuva:bloklar.length ? bloklar.length + ' blok · ' + bitti + ' bitti' : '',
+      bitisik:true,
+      govde:bloklar.length
+        ? html`<ol class="akis" data-oz="001">${map(bloklar, b => AkisSatiri(b, sira))}</ol>`
+        : html`<p class="akis__bos small muted">${day.ara ? 'Bugün ara günü: plan boş.' : 'Bugün için blok yok.'}</p>`,
+      ayak:c.Button({ label:'Blokları ve sayaçları aç', size:'sm', tone:'ghost', act:'go',
+        data:{ 'data-route':'gun' } }) });
+  }
+
+  function OzetKutusu(day, dateISO){
+    const bloklar = day.blocks.filter(b => b.slot !== 'Dinlenme');
+    const bitti = bloklar.filter(b => b.status === 'done').length;
+    const kalan = U.diffDays(dateISO, R.PLAN.examTytISO);
+    const seri = C.behaviorStreak();
+    const due = C.dueCards().length;
+    const hucre = (ad, deger, birim, not) => html`<div class="ozet__hucre">
+      <span class="ozet__ad">${ad}</span>
+      <b class="ozet__deger">${deger}${when(birim, () => html`<small> ${birim}</small>`)}</b>
+      <span class="ozet__not">${not}</span></div>`;
+    return c.Kutu({ ad:'Özet', yuva:'bugün', bitisik:true, govde:html`<div class="ozet">
+      ${hucre('Sınava kalan', kalan, 'gün', 'TYT tarihi tahmini')}
+      ${hucre('Bugünün bloğu', bitti + '/' + bloklar.length, '', R.WEEKDAYS[day.dow].label + ' düzeni')}
+      ${hucre('Tekrar kartı', due, '', 'borç %' + C.cardDebt())}
+      ${hucre('Seri', seri.streak, 'gün', seri.streak ? 'minimum gün tutuldu' : 'minimum gün başlatır')}
+    </div>` });
+  }
+
+  function SayacKutusu(day, dateISO){
+    const minMet = C.minimumDayMet(dateISO);
+    const satir = (ad, n, hedef) => {
+      const oran = hedef ? Math.min(100, Math.round(100 * (n || 0) / hedef)) : 0;
+      return html`<div class="sayac__satir"><div class="row between"><span>${ad}</span>
+        <b class="num">${n || 0} / ${hedef || 0}</b></div>${c.Bar({ value:oran, tone:'' })}</div>`;
+    };
+    /* Plan dışı soru (Telegram «soru 40», derssiz giriş) günün toplamına
+       yazılır; burada görünmezse kayıt kaybolmuş sanılır. */
+    const serbest = Number(day.freeQ) || 0;
+    const dogru = day.freeCorrect == null ? null : Number(day.freeCorrect);
+    return c.Kutu({ ad:'Günlük sayaç', yuva:day.ara ? 'ara günü' : (minMet ? 'minimum tamam' : 'minimum açık'),
+      govde:html`${satir('Paragraf', day.paragraphActual, day.paragraphTarget)}
+        ${satir('Problem', day.problemActual, day.problemTarget)}`,
+      ayak:serbest > 0 ? 'Plan dışı: ' + serbest + ' soru' + (dogru ? ' · ' + dogru + ' doğru' : '') : null });
+  }
+
   async function render(){
+    const dateISO = U.todayISO();
+    const n = M.currentWeek();
+    await M.ensureWeek(n);
+    const day = await M.ensureDay(U.today());
+    const acil = uyarilar()[0];
+    const oneri = R.Screens.onaylar && R.Screens.onaylar.bekleyen() ? R.Screens.onaylar.oneriAlani() : '';
+
+    return html`<div class="bugun" data-oz="003">
+      <div class="bugun__sol">
+        <section class="bugun__alan" aria-label="Şimdi">
+          ${when(acil, () => acil.kart)}
+          ${R.Setup.needed() ? raw(R.Setup.card()) : NextUpCard()}
+          ${when(R.Signals && R.Signals.current(), () => SignalCard())}
+        </section>
+        <section class="bugun__alan" aria-label="Durum">${AkisKutusu(day)}</section>
+      </div>
+      <div class="bugun__sag">
+        <section class="bugun__alan" aria-label="Özet">
+          ${OzetKutusu(day, dateISO)}
+          ${SayacKutusu(day, dateISO)}
+        </section>
+        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri">${oneri}</section>`)}
+      </div>
+    </div>`;
+  }
+
+  /* GÜNÜN AYRINTISI (Bugün › Ayrıntı) — Bugün'ün üç alanına sığmayan her
+     kart burada: blokların sayacı ve alanları, çıpa sayaçları, enerji, mola,
+     ritüel, seri, telafi… Hiçbiri kalkmadı; yalnız yeri değişti (envanter
+     tabanı bunu denetler). Bugün'de duran şey burada tekrar çizilmez. */
+  async function renderAyrinti(){
     const dateISO = U.todayISO();
     const n = M.currentWeek();
     await M.ensureWeek(n);
@@ -852,34 +966,11 @@ R.Screens.today = (function(){
     const week = S.weeks[M.weekId(n)];
     const wd = R.WEEKDAYS[day.dow];
 
-    const minMet = C.minimumDayMet(dateISO);
-    const doneBlocks = day.blocks.filter(b => b.status === 'done').length;
-    const planBlocks = day.blocks.filter(b => b.slot !== 'Dinlenme').length;
-    const debt = C.cardDebt();
-    const banners = Banners();
+    const banners = uyarilar().slice(1).map(b => b.kart);
 
     return c.Grid(html`
       ${when(banners.length, () => c.Span(12, html`<div class="stack-sm">${banners}</div>`))}
-      ${c.Span(12, R.Setup.needed() ? raw(R.Setup.card()) : NextUpCard())}
-      ${when(R.Signals && R.Signals.current(), () => c.Span(12, SignalCard()))}
-      ${/* Öneri alanı: en öndeki tek kart; gerisi Onaylar'da (CEKMECE-HARITASI). */''}
-      ${when(R.Screens.onaylar && R.Screens.onaylar.bekleyen(), () => c.Span(12, R.Screens.onaylar.oneriAlani()))}
       ${c.Span(12, HkmSerit())}
-
-      ${c.Span(12, c.Cols(4, html`
-        ${c.Stat({ label:'Bugünün bloğu', value:html`${doneBlocks}<small>/${planBlocks}</small>`,
-          note:wd.label+' düzeni',
-          tone:planBlocks && doneBlocks >= planBlocks ? 'ok' : null,
-          progress:planBlocks ? (100 * doneBlocks / planBlocks) : null })}
-        ${day.ara
-          ? c.Stat({ label:'Minimum gün', value:'Ara', note:'bugün plan boş', progress:null })
-          : c.Stat({ label:'Minimum gün', value:minMet ? 'Tamam' : 'Açık', tone:minMet ? 'ok' : 'warn',
-              note:'45 dk · 15 paragraf · kart', progress:minMet ? 100 : 0 })}
-        ${c.Stat({ label:'Due kart', value:C.dueCards().length, tone:debt > 10 ? 'warn' : null,
-          note:'borç %'+debt, progress:debt })}
-        ${c.Stat({ label:'Sınava kalan', value:U.diffDays(dateISO, R.PLAN.examTytISO), unit:' gün',
-          note:'TYT tahmini', progress:M.programProgress() })}
-      `))}
 
       ${c.Span(6, c.Stack(html`
         ${AutoCard()}
@@ -1234,5 +1325,15 @@ R.Screens.today = (function(){
         ${c.Button({ label:'Deneme ekle', icon:'exam', size:'sm', act:'go', data:{ 'data-route':'exams' } })}`);
     },
     render, afterRender, handle, change,
+    /* Bugün › Ayrıntı: aynı işleyiciler, aynı sayaç; ayrı bir çizim. */
+    ayrinti:{
+      id:'gun',
+      title:'Günün ayrıntısı',
+      subtitle(){ return 'Bloklar, sayaçlar ve günün bütün kartları'; },
+      actions(){ return ''; },
+      render:renderAyrinti, afterRender, handle, change,
+    },
   };
 })();
+
+R.Screens.gun = R.Screens.today.ayrinti;

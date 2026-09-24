@@ -72,6 +72,14 @@
       expect(d.querySelectorAll('button').length).toBe(1);
     });
 
+    /* Duman testi yakaladı: Goodhart politikasında tek bir «asgari çaba»
+       yok; birleştirilen metin «undefined dk.» yazıyordu. */
+    it('Analiz bölümlerinin hiçbiri «undefined» yazmaz', async () => {
+      resetState();
+      const out = String(await R.Screens.analytics.render());
+      expect(out.indexOf('undefined') < 0).toBe(true);
+    });
+
     it('«Kütüphane» yalnız Kütüphanem\'de: test kitapları Sınama\'dan çıktı', async () => {
       resetState();
       R.S.testKitaplari = [{ id:'kitap-1', baslik:'TYT deneme kitabı', dogruluk:'kaynakli', maliyet:null,

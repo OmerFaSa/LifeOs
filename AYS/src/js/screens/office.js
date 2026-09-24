@@ -109,7 +109,7 @@ R.Screens.office = (function(){
           </div>`)}
 
         <div class="row wrap gap-6 mt-10">
-          ${K.Button({ label:'Konuş', icon:'zap', size:'sm', tone:'primary',
+          ${K.Button({ label:'Konuş', icon:'zap', size:'sm',
             act:'office-talk', data:{ 'data-agent':agent.id } })}
           ${K.Button({ label:open ? 'Kapat' : 'Raporu aç', size:'sm', tone:'ghost',
             act:'office-desk', data:{ 'data-agent':agent.id } })}
@@ -376,7 +376,7 @@ R.Screens.office = (function(){
         <div class="mt-12">
           ${K.NextUp({ icon:action.icon || 'zap', label:action.label || 'Sıradaki iş',
             title:action.title, why:action.why, hint:'next-action',
-            action:K.Button({ label:'Şimdi yap', tone:'primary', size:'sm', act:'go',
+            action:K.Button({ label:'Şimdi yap', size:'sm', act:'go',
               data:{ 'data-route':action.route || 'today' } }) })}
         </div>
 
@@ -426,7 +426,7 @@ R.Screens.office = (function(){
     if(O.mode() !== 'llm'){
       return K.Card({
         title:'Ofis modeli', sub:'Ücretsiz bir model bağlayınca ajanlar konuşmaya başlar',
-        actions:K.Button({ label:'Bağla', icon:'gear', size:'sm', tone:'primary', act:'office-settings' }),
+        actions:K.Button({ label:'Bağla', icon:'gear', size:'sm', act:'office-settings' }),
         body:html`
           ${K.Notice({ tone:'info', title:'Şu an kural motoru modundasın.',
             body:'Ajanlar veriyi okuyup bulgularını yazıyor ama cümleleri sabit. '
@@ -466,7 +466,7 @@ R.Screens.office = (function(){
       return K.Card({ title:'Son toplantı', sub:'Ekip henüz toplanmadı',
         body:K.Empty({ icon:'guide', text:'Toplantıda gündemi kural motoru seçer, uzmanlar sırayla konuşur, '
           + 'sen bitirdiğinde rapor çıkar.',
-          action:K.Button({ label:'İlk toplantıyı başlat', tone:'primary', act:'office-meet' }) }) });
+          action:K.Button({ label:'İlk toplantıyı başlat', act:'office-meet' }) }) });
     }
     return K.Card({
       title:'Son toplantı', sub:U.relativeDay(R.U.gunOf(m.at)) + ' · ' + m.topic,

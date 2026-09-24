@@ -17,6 +17,7 @@ R.App = (function(){
   const NAV = [
     { id:'bugun', label:CEK('bugun'), items:[
       { id:'today', icon:'today', label:'Bugün' },
+      { id:'gun',   icon:'list',  label:'Ayrıntı' },
     ]},
     { id:'plan', label:CEK('plan'), items:[
       { id:'week',   icon:'week',   label:'Hafta' },
@@ -256,7 +257,9 @@ R.App = (function(){
     const sec = bolumOf(route);
     const oge = ogeOf(route);
     const sc = R.Screens[route] || {};
-    const yol = sec.items.length > 1 ? [sec.label, oge ? oge.label : sc.title] : [sec.label];
+    const ad = oge ? oge.label : sc.title;
+    /* Çekmecenin adını taşıyan bölümde yol tek kattır («Bugün»). */
+    const yol = sec.items.length > 1 && ad !== sec.label ? [sec.label, ad] : [sec.label];
     if(UST[route]) yol.push(sc.title);
     return yol;
   }

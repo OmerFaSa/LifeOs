@@ -1520,3 +1520,8 @@ tbody tr:hover{ background:var(--surface-2); }
   font:inherit; font-size:var(--fs-sm); font-variant-numeric:tabular-nums; cursor:pointer; }
 .kitap-serit button.is-cevapli{ background:var(--surface-2); color:var(--text); border-color:var(--text-3); }
 .kitap-serit button.is-simdi{ background:var(--primary); border-color:var(--primary); color:var(--primary-ink); }
+
+/* Tekrar › bugünün kartları: oturum solda, takvim ve sayaç sağda
+   (T3: sekmeler bölüme döndü; eski 6/4 ızgara bölümün içine taşındı). */
+.cardsgrid{ display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:20px; align-items:start; }
+@media (max-width:900px){ .cardsgrid{ grid-template-columns:minmax(0,1fr); } }

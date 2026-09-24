@@ -213,7 +213,7 @@ R.Screens.team = (function(){
         ${when(!sesli.acik && !R.Talk.sesliCevapVar(), () => K.Notice({ tone:'info', class:'mt-10',
           body:'Bu tarayıcıda sesli cevap yok. Sıra yine geçer; cevabı okursun.' }))}
         <div class="row mt-10">
-          ${when(!sesli.acik, () => K.Button({ label:'Sesli sohbeti başlat', tone:'primary',
+          ${when(!sesli.acik, () => K.Button({ label:'Sesli sohbeti başlat',
             icon:'mic', act:'talk-start' }))}
           ${when(sesli.acik, () => html`
             ${K.Button({ label:'Bitir', act:'talk-stop' })}

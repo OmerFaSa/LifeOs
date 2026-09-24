@@ -130,3 +130,16 @@
 .modis--spi{ background:var(--spi-ink); border-radius:50%; }
 .modis--esp{ background:var(--esp-ink); clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
 .modis--mer{ background:var(--mer-ink); clip-path:polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0 50%); }
+
+/* ---------- ayrıntı (D katmanı): kısa cümle + bir dokunuşla gerekçe ---------- */
+.ayrinti{ font-size:var(--fs-sm); color:var(--text-2); }
+.ayrinti__ozet{ margin:0 0 4px; }
+.ayrinti__ac summary{
+  display:inline-flex; align-items:center; gap:4px; min-height:24px;
+  color:var(--text-2); font-weight:500; cursor:pointer; list-style:none;
+  text-decoration:underline; text-decoration-style:dotted; text-underline-offset:3px;
+}
+.ayrinti__ac summary::-webkit-details-marker{ display:none; }
+.ayrinti__ac[open] summary{ color:var(--text); }
+.ayrinti__govde{ margin-top:6px; color:var(--text-2); }
+.ayrinti__govde > * + *{ margin-top:6px; }

@@ -175,8 +175,9 @@ R.Screens.target = (function(){
               placeholder:'sıra', change:'pref-rank', data:{ 'data-i':r.no-1 } })}
           </div>`;
         })}</div>`,
-      foot:html`<p class="tiny dim">Her satırda kontrol edilir: ${R.PREFERENCE_CHECKS.join(' · ')}.
-        “Güvenli” program, adayın gitmeyeceği bölüm değildir; yerleşince kayıt yaptırmaya razı olunan programdır.</p>`,
+      foot:html`<p class="tiny dim">Her satırda kontrol edilir: ${R.PREFERENCE_CHECKS.join(' · ')}.</p>
+        <p class="tiny dim">“Güvenli” program, adayın gitmeyeceği bölüm değildir; yerleşince kayıt
+          yaptırmaya razı olunan programdır.</p>`,
     });
   }
 

@@ -478,7 +478,7 @@ R.Screens.solve = (function(){
         ${when(!rows.length, () => K.Empty({ icon:'book',
           text:'Henüz kaynak yok. Kullandığın yayınları ekle; çözdüğün soruları onlara '
              + 'bağladıkça hangisinin sana zor geldiği kendiliğinden çıkar.',
-          action:K.Button({ label:'Kaynakları yükle', size:'sm', tone:'primary', act:'q-src-seed' }) }))}
+          action:K.Button({ label:'Kaynakları yükle', size:'sm', act:'q-src-seed' }) }))}
         ${when(rows.length, () => html`<div class="stack-xs">${map(rows, r => html`
           <div class="srcrow">
             <span class="minw0">

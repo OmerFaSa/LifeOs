@@ -137,7 +137,7 @@ R.Screens.week = (function(){
         </div>
         ${reasonChips(reasons) || html`<p class="small dim">Bu hafta atlanan blok yok.</p>`}
         ${when(rev && rev.decision, () => html`<div class="mt-10">${K.Notice({ tone:'ok', title:'Düzeltme:', body:rev.decision })}</div>`)}
-        ${K.Button({ label:rev ? 'Review’u güncelle' : 'Review’u doldur', tone:'primary', block:true,
+        ${K.Button({ label:rev ? 'Review’u güncelle' : 'Review’u doldur', block:true,
           class:'mt-12', act:'open-review' })}`,
     });
   }

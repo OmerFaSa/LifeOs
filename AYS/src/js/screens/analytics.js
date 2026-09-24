@@ -29,7 +29,10 @@ R.Screens.analytics = (function(){
   function empty(text, action){
     return K.Card({ body:K.Empty({ icon:'chart', text, action }) });
   }
-  const addExam = K.Button({ label:'Deneme ekle', size:'sm', tone:'primary',
+  /* Bölümler alt alta durduğu için boş durumların eylemi dolu değildir:
+     sekiz dolu «Deneme ekle» düğmesi, ekranın tek ana eylemini boğardı
+     (sadelik bütçesi: dolu düğme en çok 1). */
+  const addExam = K.Button({ label:'Deneme ekle', size:'sm',
     act:'go', data:{ 'data-route':'exams' } });
 
   /* ---------- karşılaştırma ---------- */
@@ -242,7 +245,7 @@ R.Screens.analytics = (function(){
               ])}
               <div class="mt-12">${K.Notice({ tone:w.diff >= 15 ? 'warn' : 'ok', body:w.note })}</div>`
             : K.Empty({ icon:'clock', text:w.why,
-                action:K.Button({ label:'Süreli deneme başlat', size:'sm', tone:'primary',
+                action:K.Button({ label:'Süreli deneme başlat', size:'sm',
                   act:'go', data:{ 'data-route':'exams' } }) }) }),
       ])),
       K.Span(5, K.Stack([sessionsCard(), raw(UI.rail(['time-drift', 'net']))])),
@@ -301,12 +304,12 @@ R.Screens.analytics = (function(){
                 : html`<span class="num">${U.fmtNet(r.earned)}</span>`,
               html`<b class="num ${r.gap > 1 ? 'is-down' : ''}">${U.fmtNet(r.gap)}</b>`,
             ]) })}
-          <div class="mt-12">${K.Notice({ tone:'info',
-            body:'Potansiyel, dersin soru sayısı ile konunun frekans payından çıkar. '
-               + 'Kazanılan, kapanış durumu ve gerçek çözüm doğruluğundan gelir. '
-               + 'Aradaki fark, o konuya ayrılacak zamanın karşılığıdır. Manşetteki '
-               + 'toplam yalnız en az bir kez çalışılmış konuları sayar; hiç '
-               + 'çalışılmamış konunun boşluğu tahmindir ve toplama girmez.' })}</div>`,
+          <div class="mt-12">${K.Ayrinti({ etiket:'Nasıl hesaplanır?',
+            ozet:'Aradaki fark, o konuya ayrılacak zamanın karşılığıdır.',
+            govde:html`<p>Potansiyel, dersin soru sayısı ile konunun frekans payından çıkar.
+              Kazanılan, kapanış durumu ve gerçek çözüm doğruluğundan gelir.</p>
+              <p>Manşetteki toplam yalnız en az bir kez çalışılmış konuları sayar; hiç
+              çalışılmamış konunun boşluğu tahmindir ve toplama girmez.</p>` })}</div>`,
       })),
       K.Span(4, raw(UI.rail(['closure', 'risk', 'second-check']))),
     ]);
@@ -484,11 +487,15 @@ R.Screens.analytics = (function(){
               sistem yüksek olanın iyi olduğunu VARSAYMAZ.</p>
             ${(function(){
               const pol = R.Goodhart.policy();
-              return html`<p class="tiny dim mt-8">Pencere ${pol.windowDays} gün ·
-                çaba artışı eşiği %${Math.round(pol.effortRiseThreshold * 100)} ·
-                sonuç durgunluk eşiği %${Math.round(pol.stagnationThreshold * 100)} ·
-                asgari çaba ${pol.minEffortMinutes} dk. Bu sayılar bir bulgu
-                değil bu yazılımın ayarıdır: ${pol.rationale}</p>`;
+              return html`<div class="mt-8">${K.Ayrinti({
+                /* Asgari çaba tek sayı değildir: her çiftin kendi eşiği var
+                   (soru, dakika ya da deneme). Politikada tek bir değer yoktu
+                   ve ekranda boş kalıyordu; uydurulmaz. */
+                ozet:'Pencere ' + pol.windowDays + ' gün · çaba artışı eşiği %'
+                  + Math.round(pol.effortRiseThreshold * 100) + ' · sonuç durgunluk eşiği %'
+                  + Math.round(pol.stagnationThreshold * 100) + '.',
+                govde:html`<p>Asgari çaba her çift için ayrıdır. Bu sayılar bir bulgu değil bu
+                  yazılımın ayarıdır: ${pol.rationale}</p>` })}</div>`;
             })()}
             ${map(ayrisan, p => html`<div class="mt-12">
               ${K.Notice({ tone:'warn', body:p.note })}
@@ -505,14 +512,14 @@ R.Screens.analytics = (function(){
             ${K.Notice({ tone:'info', body:puan.note })}
             ${when(puan.bias.cert === 'measured',
               () => html`<div class="mt-8">${K.Notice({ tone:'info', body:puan.bias.note })}</div>`)}
-            <p class="tiny dim mt-10">Kendi netini önceden kestirebilmek bir
-              süs değil, sınav becerisidir: hangi testte zaman harcayacağını,
-              hangi soruyu bırakacağını ve bir denemenin kötü mü yoksa zor mu
-              olduğunu o kestirim söyler. Tahmin KÖR yazılır — net ekranda
-              dururken yazılan tahmin, tahmin değil kopyadır. Defter «kendini
-              tanımayı» ölçmez: yalnızca kayıtlı türlerde kör tahminlerinin
-              kayıtlı sayıya ne kadar yaklaştığını ölçer. Net ile dakika ayrı
-              ailelerdir, tek ortalamada toplanmazlar.</p>
+            <div class="mt-10">${K.Ayrinti({
+              ozet:'Tahmin KÖR yazılır: net ekranda dururken yazılan tahmin, tahmin değil kopyadır.',
+              govde:html`<p>Kendi netini önceden kestirebilmek bir süs değil, sınav becerisidir:
+                hangi testte zaman harcayacağını, hangi soruyu bırakacağını ve bir denemenin kötü mü
+                yoksa zor mu olduğunu o kestirim söyler.</p>
+                <p>Defter «kendini tanımayı» ölçmez: yalnızca kayıtlı türlerde kör tahminlerinin kayıtlı
+                sayıya ne kadar yaklaştığını ölçer. Net ile dakika ayrı ailelerdir, tek ortalamada
+                toplanmazlar.</p>` })}</div>
 
             <div class="mt-12">
               ${K.Field({ label:'Ne tahmin ediyorsun?',
@@ -527,7 +534,7 @@ R.Screens.analytics = (function(){
                     input:K.Input({ id:'ay-calib-guess', type:'number',
                       step:k.type === 'binary' ? '0.05' : 'any' }) })}`;
               })()}
-              ${K.Button({ label:'Tahmini kaydet', tone:'primary', act:'calib-open' })}
+              ${K.Button({ label:'Tahmini kaydet', act:'calib-open' })}
             </div>
 
             ${when(vade.length, () => html`<div class="mt-12">
@@ -599,19 +606,32 @@ R.Screens.analytics = (function(){
     speed:speedTab, value:valueTab, habits:habitsTab,
     denetim:denetimTab, durust:durustTab };
 
+  /* Sekme yok (EKIP-PLANI §1.2): sekiz okuma alt alta durur, üstteki
+     bölüm çubuğu sayfa içinde o okumaya kaydırır. Bir bölüm çizilemezse
+     yalnız o bölüm sakin bir notla düşer; öteki yedisi durur. */
+  function govde(t){
+    try{ return (BODIES[t.id] || compareTab)(); }
+    catch(e){
+      console.error('Analiz bölümü çizilemedi (' + t.id + '):', e);
+      return K.Notice({ tone:'warn', body:'Bu okuma şu an çizilemedi; verin yerinde duruyor.' });
+    }
+  }
+
   async function render(){
-    /* Kayitli sekme adi artik yoksa ilk sekmeye duser. Eskimis bir deger
-       ('overview') seritte HICBIR sekmeyi secili gostermiyor, govdede ise
-       karsilastirmayi ciziyordu: ekran nerede oldugunu yanlis soyluyordu. */
-    const tab = TABS.some(t => t.id === S.ui.analyticsTab) ? S.ui.analyticsTab : TABS[0].id;
-    return String(K.Stack([
-      K.Subtabs({ items:TABS, value:tab, act:'analytics-tab', aria:'Analiz bölümleri' }),
-      (BODIES[tab] || compareTab)(),
-    ]));
+    return String(K.SayfaBolumleri({ act:'analytics-tab', aria:'Analiz bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) }));
+  }
+
+  /* Açılışta istenen bölüm (başka ekrandan «Hata haritası»na gelmek gibi)
+     çizimden sonra görünür yapılır. */
+  function afterRender(){
+    const t = S.ui.analyticsTab;
+    S.ui.analyticsTab = null;
+    if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
   }
 
   const handle = {
-    async 'analytics-tab'(el){ S.ui.analyticsTab = el.dataset.tab; R.App.render(); },
+    async 'analytics-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     /* Tahmin KÖR açılır: gerçek değer burada hesaplanmaz. */
     async 'calib-open'(){
@@ -653,12 +673,9 @@ R.Screens.analytics = (function(){
 
   return {
     id:'analytics',
-    title:'Analiz',
-    subtitle(){
-      const tab = TABS.find(t => t.id === S.ui.analyticsTab) || TABS[0];
-      return (tab ? tab.label : 'Analiz') + ' · türetilmiş okumalar';
-    },
+    title:'Ayrıntılı analiz',
+    subtitle(){ return 'Denemelerden ve kayıtlardan türetilen okumalar'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

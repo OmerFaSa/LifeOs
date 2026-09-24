@@ -275,6 +275,9 @@
 .sayfabasi__ozet{ margin:4px 0 0; color:var(--text-2); font-size:var(--fs-base); max-width:70ch; }
 .sayfabasi__eylem{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 
+/* v4 kabuğunda ekranın üst boşluğu sayfa başından gelir. */
+.site--v4 .content{ padding-block:0 32px; }
+
 /* Bölüm çubuğu: çekmecenin bölümleri. Sekme değil gezinmedir. */
 .bolumcubugu{
   display:flex; gap:4px; overflow-x:auto; scrollbar-width:none;
@@ -301,6 +304,64 @@
   background:var(--primary-soft); color:var(--primary); font-size:11px; font-weight:600;
 }
 .bolumcubugu__rozet.is-sessiz{ background:var(--surface-2); color:var(--text-2); }
+
+/* Sayfa bölümleri (019): iç sekmelerin yerine alt alta bölümler; çubuk
+   sayfa içi bağlantıdır ve kaydırırken üst çubuğun altında yapışık kalır. */
+.bolumcubugu--sayfa{
+  position:sticky; top:var(--ust-h); z-index:calc(var(--z-nav) - 1);
+  background:var(--bg); margin-bottom:20px;
+}
+.sayfabolum{ scroll-margin-top:calc(var(--ust-h) + 52px); min-width:0; }
+.sayfabolum + .sayfabolum{ margin-top:40px; }
+.sayfabolum__ad{
+  margin:0 0 14px; font-size:var(--fs-lg); font-weight:700;
+  letter-spacing:-.015em; color:var(--text);
+}
+.sayfabolum__ad:focus-visible{ outline:none; }
+
+/* ================================================== Bugün: üç alan (03)
+   Solda ŞİMDİ ve günün akışı, sağda özet, sayaç ve tek öneri. Telefonda
+   tek sütun; sıra aynı kalır (önce şimdi). */
+.bugun{ display:grid; grid-template-columns:minmax(0,1fr) 380px; gap:20px; align-items:start; }
+.bugun__sol, .bugun__sag{ display:flex; flex-direction:column; gap:20px; min-width:0; }
+.bugun__alan{ display:flex; flex-direction:column; gap:16px; min-width:0; }
+@media (max-width:1023px){ .bugun{ grid-template-columns:minmax(0,1fr); } }
+
+/* Günün akışı (01'in liste hâli): sıra, bloğun adı, durum. */
+.akis{ list-style:none; margin:0; padding:4px 0; }
+.akis__satir{
+  display:grid; grid-template-columns:96px 10px minmax(0,1fr) auto;
+  align-items:center; gap:12px; min-height:48px; padding:0 20px;
+}
+.akis__satir + .akis__satir{ border-top:1px solid var(--border-soft); }
+.akis__slot{ color:var(--text-3); font-size:var(--fs-sm); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.akis__nokta{ width:9px; height:9px; border-radius:50%; background:var(--mod); }
+.akis__satir.is-gecti .akis__nokta{ background:transparent; box-shadow:inset 0 0 0 2px var(--mod); }
+.akis__ad{ font-weight:500; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.akis__satir.is-gecti .akis__ad{ color:var(--text-3); }
+.akis__sag{ font-size:var(--fs-sm); color:var(--text-3); white-space:nowrap; }
+.akis__bitti{ color:var(--ok-ink); font-weight:600; }
+.akis__bos{ padding:16px 20px; margin:0; }
+
+/* Özet: dört sayı, iki sütun, ince çizgiyle bölünmüş. */
+.ozet{ display:grid; grid-template-columns:1fr 1fr; }
+.ozet__hucre{ display:flex; flex-direction:column; gap:2px; padding:16px 20px; min-width:0; }
+.ozet__hucre:nth-child(2n){ border-left:1px solid var(--border); }
+.ozet__hucre:nth-child(n+3){ border-top:1px solid var(--border); }
+.ozet__ad{ color:var(--text-2); font-size:var(--fs-sm); }
+.ozet__deger{ font-size:var(--fs-hero); font-weight:700; letter-spacing:-.03em; line-height:1.15; }
+.ozet__deger small{ font-size:var(--fs-sm); color:var(--text-3); font-weight:500; letter-spacing:0; }
+.ozet__not{ color:var(--text-3); font-size:var(--fs-sm); }
+
+.sayac__satir + .sayac__satir{ margin-top:14px; }
+.sayac__satir > :last-child{ margin-top:6px; }
+
+@media (max-width:679px){
+  .akis__satir{ grid-template-columns:10px minmax(0,1fr) auto; padding:0 16px; }
+  .akis__slot{ display:none; }
+  .ozet__hucre{ padding:12px 14px; }
+  .ozet__deger{ font-size:var(--fs-xl); }
+}
 
 /* Sayfa sonu: künye yer imi — derleme damgası ve mahremiyet cümlesi. */
 .sayfasonu{
@@ -385,7 +446,8 @@ a.kmenu__satir:hover{ background:var(--surface-2); }
 .altbant, .hizliekle{ display:none; }
 
 @media (max-width:679px){
-  .ust__ic{ padding:0 12px; gap:8px; height:56px; }
+  :root{ --ust-h:56px; }
+  .ust__ic{ padding:0 12px; gap:8px; height:var(--ust-h); }
   .ust__nav, .ust__ara, .ust__bag, .ust__menu, .ust__zil{ display:none; }
   .ust__onay{ display:grid; }
   .ust__rutbe{ padding:0 10px 0 6px; gap:6px; }

@@ -79,6 +79,41 @@
       d.remove();
     });
 
+    it('oz-019 iç sekme yok: bölümler alt alta, çubuk sayfa içi bağlantı', () => {
+      const d = yerlestir(C.SayfaBolumleri({ act:'x-tab', aria:'Deneme bölümleri', bolumler:[
+        { id:'a', ad:'Karşılaştırma', govde:'bir' }, { id:'b', ad:'Hata haritası', govde:'iki', sayi:3 },
+        { id:'c', ad:'Boş', govde:'' }] }));
+      /* Hiçbir bölüm saklanmaz; boş bölüm (gövdesi yok) çizilmez. */
+      const s = d.querySelectorAll('section.sayfabolum');
+      expect(s.length).toBe(2);
+      expect(Array.from(s).map(x => x.querySelector('h2').textContent).join(',')).toBe('Karşılaştırma,Hata haritası');
+      /* Sekme değil: rol yok, sekme sınıfı yok; eski eylem düğmede kalır. */
+      expect(d.querySelectorAll('[role="tab"], .subtabs, .segmented').length).toBe(0);
+      const b = d.querySelectorAll('.bolumcubugu--sayfa button');
+      expect(b.length).toBe(2);
+      expect(b[1].getAttribute('data-act')).toBe('x-tab');
+      expect(b[1].getAttribute('data-tab')).toBe('b');
+      expect(C.bolumeGit('b')).toBe(true);
+      expect(document.activeElement.id).toBe('bl-b-ad');
+      expect(C.bolumeGit('yok')).toBe(false);
+      /* Tek bölümde çubuk çizilmez: tek seçenekli şerit gürültüdür. */
+      const t = yerlestir(C.SayfaBolumleri({ act:'x', bolumler:[{ id:'z', ad:'Tek', govde:'g' }] }));
+      expect(!!t.querySelector('nav')).toBe(false);
+      d.remove(); t.remove();
+    });
+
+    it('ayrıntı katmanı: kısa cümle görünür, gerekçe bir dokunuşla açılır', () => {
+      const d = yerlestir(C.Ayrinti({ ozet:'Kısa cümle.', govde:'Uzun gerekçe burada durur.' }));
+      expect(d.querySelector('.ayrinti__ozet').textContent).toBe('Kısa cümle.');
+      const det = d.querySelector('details');
+      expect(det.open).toBe(false);
+      expect(det.querySelector('summary').textContent).toBe('Neden?');
+      /* Kapalıyken gerekçe görünmez ama silinmemiştir. */
+      expect(det.querySelector('.ayrinti__govde').textContent).toBe('Uzun gerekçe burada durur.');
+      expect(det.querySelector('.ayrinti__govde').checkVisibility()).toBe(false);
+      d.remove();
+    });
+
     /* §8-4 (kullanıcı kararı): paletler ve beş düzen kalktı. Bir stil
        sayfası yeniden `[data-palette]`/`[data-design]` kuralı taşırsa, tek
        tasarım sessizce ikiye ayrılır; bölüm rengi (--sec) de modülün
