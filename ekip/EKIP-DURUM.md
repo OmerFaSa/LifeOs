@@ -35,7 +35,8 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   bozuk tarih (31 Şubat) koruması `sayi.js`/`grafik.js` · 0443561; P2: 015 170 son bilinen değer,
   sesli okuma (`sayi.js`) · 138bf20; 029 030 031 033 034 038 039 grafik ekleri
   (`grafik.js`) · 464a54c; 113 123 124 127 öneri ekleri (`oneri.js`) · 6a7fd82; P3: 032 036 040
-  geçen dönem, dağılım, birikim (`grafik.js`) · 9bb2be7
+  geçen dönem, dağılım, birikim (`grafik.js`) · 9bb2be7; T yokken: 137 veri adları tablosu (`sozluk.js`),
+  164 bildirim kartı (`pwa.js`, `sw.js`) · c0b9d6c
 - **Bulgular:** T2-01 ✅ a798671 · T2-03 ✅ c063316 · (K'nin bulduğu, H kapattı: T2-04, T2-05,
   T2-07, T2-08) · T2-02 (AYS Ofis ham kimlik, 137) ekran dosyası
   (`office.js`, `team.js`): AYS teslim edilince K2'de 137 ile
@@ -62,6 +63,10 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
     (olay: `{ zaman, kaynak:'kullanici'|'merkez'|'ofis'|'kural'|'plan'|'ice-aktarma', alan, eski, yeni, onay }`)
 - **Yarım / sıradaki:** K2 — AYS teslim satırı ✅ olunca hemen (P1'leri AYS ekranlarına)
 - **Soru / öneri:**
+  - Kullanıcıya (K5): 167 ana ekran bileşeni — telefonda tarayıcı uygulaması için yol doğrulanamadı
+    (Android/iOS'ta PWA bileşeni yok); uydurulmadı. En yakını simge rozeti (Badge API) — karar kullanıcıda.
+  - K2 hazırlığı (22): 36 `confirmSheet` çağrısı çıkarıldı; çoğu tek kayıt → «Denemeyi ve 7 hata kaydını
+    sil» biçimi. Biri T'nin dosyasında: `AYS/src/js/app.js:842` — T'ye.
   - **H için — T yokken ortak çalışma (kullanıcının isteği):**
     - Durum: K1 bitti (38 ortak bileşen). AYS teslim kapısı senin denetiminde temiz; teslim satırı
       T'nin. T gelince yazar ya da kullanıcı sana/bana yetki verirse (soru kullanıcıda). O an K2 başlar,
