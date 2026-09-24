@@ -1,19 +1,17 @@
-/* Günlük — sistemin ilk ve tek günlük sayfası.
+/* Bugün — sistemin günlük sayfası.
 
-   Önceden iki ayrı ekran vardı: "Bugün" (özet) ve "Günlük ölçüm" (giriş).
-   İkisi de aynı günü anlatıyordu ve kullanıcı hangisine gireceğini
-   düşünmek zorunda kalıyordu. Şimdi tek sayfa, üç sekme:
+   Önceden iki ayrı ekran vardı: "Bugün" (özet) ve "Günlük ölçüm" (giriş);
+   sonra tek sayfada üç sekme oldu (Giriş · Özet · Geçmiş). Yeni iskelette
+   (ekip/EKIP-PLANI.md §3) sekme yok:
 
-     Giriş    günün verisi buraya yazılır — sayfanın VARSAYILANI budur
-     Özet     yazılanın karşılığı: toparlanma, beslenme, asgari gün, bütçe
-     Geçmiş   son iki hafta ve kişisel taban çizgi
+     Bugün              Şimdi · Durum · Öneri — sık yazılan dört ölçüm ve
+                        öğün satırı en üstte; toparlanma, asgari gün,
+                        beslenme kutularda
+     Bugün › Ayrıntı    Giriş · Özet · Geçmiş alt alta bölüm (`gun`)
 
-   Giriş önce gelir çünkü bu sayfaya girmenin sebebi çoğu zaman okumak
-   değil YAZMAKtır. Özet, yazılanın sonucudur; sonuç girdiden önce
-   gelmez.
-
-   Hiçbir alan zorunlu değildir: eksik girdi sıfır sayılmaz, ağırlığı
-   kalan girdilere dağıtılır. */
+   Yazmak önce gelir çünkü bu sayfaya girmenin sebebi çoğu zaman okumak
+   değil YAZMAKtır. Hiçbir alan zorunlu değildir: eksik girdi sıfır
+   sayılmaz, ağırlığı kalan girdilere dağıtılır. */
 
 window.SP = window.SP || {};
 SP.Screens = SP.Screens || {};
@@ -393,7 +391,7 @@ SP.Screens.today = (function(){
       return K.Entry({
         label:'Toparlanma', hint:'readiness', meta:'ölçüm bekliyor',
         note:r.note,
-        action:K.Button({ label:'Veri gir', tone:'primary',
+        action:K.Button({ label:'Veri gir',
           act:'day-tab', data:{ 'data-tab':'giris' } }),
         body:P.empty('Bugünün ölçümü girilmedi.'),
       });
@@ -430,7 +428,7 @@ SP.Screens.today = (function(){
         label:'Beslenme', meta:'hedef yok',
         note:'Profilde ' + tg.missing.join(', ') + ' eksik. Bu üçü olmadan kalori ve '
           + 'protein hedefi tahmin edilmez.',
-        action:K.Button({ label:'Profili tamamla', tone:'primary',
+        action:K.Button({ label:'Profili tamamla',
           act:'go', data:{ 'data-route':'family' } }),
         body:P.empty('Hedef hesaplanamıyor.'),
       });
@@ -438,7 +436,7 @@ SP.Screens.today = (function(){
     if(t.empty){
       return K.Entry({
         label:'Beslenme', meta:'hedef ' + U.fmtNum(tg.kcal) + ' kcal',
-        action:K.Button({ label:'Öğün ekle', tone:'primary',
+        action:K.Button({ label:'Öğün ekle',
           act:'go', data:{ 'data-route':'meals' } }),
         body:P.empty('Bugün hiç öğün girilmedi.'),
       });
@@ -659,21 +657,6 @@ SP.Screens.today = (function(){
     });
   }
 
-  const TABS = [
-    { id:'giris',  label:'Giriş',  icon:'pulse' },
-    { id:'ozet',   label:'Özet',   icon:'today' },
-    { id:'gecmis', label:'Geçmiş', icon:'clock' },
-  ];
-
-  function tabs(){
-    const v = M.vitalsOf(shownDate());
-    const n = v ? Object.keys(v).filter(k => v[k] != null && k !== 'date').length : 0;
-    const items = TABS.map(t => Object.assign({}, t,
-      t.id === 'giris' && n ? { count:n } : {}));
-    return K.Subtabs({ items, value:S.ui.dayTab || 'giris', act:'day-tab',
-      aria:'Günlük görünümü' });
-  }
-
   /* Denetim sorusu — AYRI EKRAN DEĞİL, Bugün akışının içinde tek kart.
 
      Nöbetçi (core/goodhart.js) ve sürtünme ölçer (core/friction.js) arka
@@ -700,7 +683,7 @@ SP.Screens.today = (function(){
             ${K.Field({ label:'Kısa cevabın (isteğe bağlı)',
               input:K.Input({ id:'sig-answer', placeholder:'tek cümle yeter' }) })}
             <div class="row wrap mt-8">
-              ${K.Button({ label:'Kaydet', tone:'primary', size:'sm',
+              ${K.Button({ label:'Cevabı kaydet', size:'sm',
                 act:'signal-answer', data:{ 'data-id':sig.id } })}
               ${K.Button({ label:'Bu soru bana uymuyor', size:'sm',
                 act:'signal-dismiss', data:{ 'data-id':sig.id } })}
@@ -783,39 +766,151 @@ SP.Screens.today = (function(){
           data:{ 'data-route':'guide' } })}` })}</div>`;
   }
 
+  /* BUGÜN — üç alan (katalog 03, EKIP-PLANI §3):
+
+       ŞİMDİ   en acil tek uyarı, vakti gelen hatırlatma, günün sorusu ve
+               tek canlı öğe: günün ölçümü (sık yazılan dört alan) ile
+               öğün satırı
+       DURUM   toparlanma · asgari gün · beslenme — kutular, düğmesiz
+       ÖNERİ   en çok bir kart; fazlası «+N öneri Onaylar'da»
+
+     Geri kalan her kart «Bugün › Ayrıntı»dadır (renderAyrinti): bütün
+     alanlarıyla ölçüm formu, şikâyetler, seri, HKM şeridi, özet ve geçmiş.
+     Hiçbiri kalkmadı; yalnız yeri değişti. Sadelik bütçesi: sayfa boyu
+     1800 px, görünen düğme 14, dolu düğme 1. */
+  const AGIRLIK = { danger:3, warn:2, info:1 };
+  /* Uyarılar en acilden: ilki Bugün'de, gerisi Ayrıntı'da. */
+  function uyarilar(){
+    const out = M.openFlags().map(f => ({ tone:'danger', kart:P.flagCard(f) }));
+    const y = yedekUyarisi();
+    if(y) out.push({ tone:'info', kart:y });
+    return out.sort((a, b) => (AGIRLIK[b.tone] || 0) - (AGIRLIK[a.tone] || 0));
+  }
+
+  /* Sık yazılan dört ölçüm. Kaydetmek yalnız burada yazılanı değiştirir:
+     `save-vitals` ekranda olmayan alana dokunmaz. */
+  const HIZLI_ALAN = ['sleep', 'rhr', 'hrv', 'weight'];
+
+  function OlcumKutusu(){
+    const d = shownDate();
+    const v = M.vitalsOf(d) || M.defaultVitals(d);
+    const alanlar = FIELDS.filter(f => HIZLI_ALAN.indexOf(f.id) >= 0);
+    return K.Kutu({ ad:'Günün ölçümü', class:'kahraman',
+      yuva:raw(SP.h.esc(d === U.todayISO() ? 'bugün' : U.fmtDate(d)) + OdakRozeti(d)),
+      govde:html`<div class="grid-form">${map(alanlar, f => K.Field({
+          label:raw(window.LIFEOS.SIMGELI('olcum', f.marker, f.label)),
+          input:K.Input({ id:'v-' + f.id, type:'number', numeric:true, step:f.step,
+            min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
+        }))}</div>
+        <p class="tiny dim mt-8">Boş bıraktığın alan sıfır sayılmaz; uyku tek başına yeter.</p>
+        <div class="row wrap gap-8 mt-8">
+          ${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}
+          ${K.Button({ label:'Bütün alanlar', tone:'ghost', act:'day-tab', data:{ 'data-tab':'giris' } })}
+        </div>` });
+  }
+
+  function OgunKutusu(){
+    return K.Kutu({ ad:'Öğün ekle', yuva:'tek satır, tek Enter',
+      govde:html`<div class="quick">
+          ${K.Mic({ target:'quick-meal' })}
+          ${K.Input({ id:'quick-meal', placeholder:'1 tabak etli kuru fasulye, 1 bardak ayran',
+            aria:'Öğün metni' })}
+          ${K.Button({ label:'Öğüne ekle', act:'quick-meal' })}
+        </div>
+        <p class="tiny dim mt-8">Ev ölçüsü «tahmin», tartılmış gram «ölçüldü» olarak yazılır.</p>` });
+  }
+
+  function ToparlanmaKutusu(){
+    const r = SP.Move.readiness(shownDate());
+    if(!r.ok) return K.Kutu({ ad:'Toparlanma', yuva:'ölçüm bekliyor',
+      govde:html`<p class="small muted">${r.note || 'Bugünün ölçümü girilmedi.'}</p>` });
+    return K.Kutu({ ad:'Toparlanma', yuva:r.band.label,
+      govde:html`<div class="row wrap" style="gap:18px">
+          ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:104,
+            bands:SP.READINESS_BANDS.map(b => b.min).filter(x => x > 0) }))}
+          <p class="small grow minw0">${r.band.order}</p>
+        </div>
+        ${when(r.missing.length, () => html`<p class="tiny dim mt-8">Girilmeyen: ${r.missing.join(', ')}
+          — ağırlığı kalanlara dağıtıldı.</p>`)}` });
+  }
+
+  function AsgariKutusu(){
+    const m = SP.Calc.minimumDay();
+    return K.Kutu({ ad:'Asgari gün', yuva:m.done + ' / ' + m.total + ' · seri ' + SP.Calc.streak() + ' gün',
+      govde:html`${map(m.rows, P.minRow)}` });
+  }
+
+  function BeslenmeKutusu(){
+    const t = SP.Nutri.dayTotals(U.todayISO());
+    const tg = SP.Nutri.targets();
+    if(!tg.ok) return K.Kutu({ ad:'Beslenme', yuva:'hedef yok',
+      govde:html`<p class="small muted">Profilde ${tg.missing.join(', ')} eksik; hedef tahmin edilmez.</p>` });
+    if(t.empty) return K.Kutu({ ad:'Beslenme', yuva:'hedef ' + U.fmtNum(tg.kcal) + ' kcal',
+      govde:html`<p class="small muted">Bugün hiç öğün girilmedi.</p>` });
+    return K.Kutu({ ad:'Beslenme', yuva:t.meals + ' öğün',
+      govde:html`${K.Meter({ label:'Enerji', value:tg.kcal ? 100 * t.kcal / tg.kcal : 0,
+          text:U.fmtNum(Math.round(t.kcal)) + ' / ' + U.fmtNum(tg.kcal) + ' kcal' })}
+        <div class="mt-8">${K.Meter({ label:'Protein', value:tg.protein.min ? 100 * t.protein / tg.protein.min : 0,
+          text:U.fmtNum(Math.round(t.protein)) + ' / ' + U.fmtNum(tg.protein.min) + ' g' })}</div>` });
+  }
+
   async function render(){
-    const tab = S.ui.dayTab || 'giris';
-    const flags = M.openFlags();
+    const acil = uyarilar()[0];
+    const vakti = SP.HatirlatUI ? SP.HatirlatUI.vaktiRow() : '';
+    const soru = signalEntry();
     /* Onaylar tek çekmecede: burada yalnız en öndeki kart (screens/onaylar.js). */
     const oneri = SP.Screens.onaylar && SP.Screens.onaylar.bekleyen() ? SP.Screens.onaylar.oneriAlani() : '';
 
-    const head = html`
-      ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
-      ${yedekUyarisi()}
-      ${when(oneri, () => html`<div class="mb-16">${oneri}</div>`)}
+    return String(html`<div class="bugun" data-oz="003">
+      <div class="bugun__sol">
+        <section class="bugun__alan" aria-label="Şimdi">
+          ${when(acil, () => acil.kart)}
+          ${when(vakti, () => K.Ledger([vakti]))}
+          ${when(soru, () => K.Ledger([soru]))}
+          ${OlcumKutusu()}
+          ${OgunKutusu()}
+        </section>
+      </div>
+      <div class="bugun__sag">
+        <section class="bugun__alan" aria-label="Durum">
+          ${ToparlanmaKutusu()}
+          ${AsgariKutusu()}
+          ${BeslenmeKutusu()}
+        </section>
+        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri">${oneri}</section>`)}
+      </div>
+    </div>`);
+  }
+
+  /* GÜNÜN AYRINTISI (Bugün › Ayrıntı). Önce Günlük'ün üç sekmesiydi
+     (Giriş · Özet · Geçmiş); şimdi üçü alt alta bölümdür ve eski sekme
+     eylemi (`day-tab`) bölüm çubuğunda kalır. Bugün'de duran şey (hızlı
+     öğün, günün sorusu, en acil uyarı) burada tekrar çizilmez; ölçüm
+     formu burada bütün alanlarıyla durur. */
+  async function renderAyrinti(){
+    const banners = uyarilar().slice(1).map(u => u.kart);
+    const giris = K.Ledger([dunkuEntry(), formEntry(), symptomEntry(), statusEntry(), whyEntry()].filter(Boolean));
+    const ozet = K.Ledger([readinessEntry(), nutritionEntry(), minimumEntry(),
+      SP.HatirlatUI ? SP.HatirlatUI.ozetEntry() : null, officeEntry(), moneyEntry()].filter(Boolean));
+    const gecmis = K.Ledger([historyEntry(), baselineEntry()]);
+    return String(html`
+      ${when(banners.length, () => html`<div class="stack-sm mb-16">${banners}</div>`)}
       ${when((S.ui.hkmBildirim || []).length, () => html`<div class="mb-16">${K.Ledger([kingBildirimRow()])}</div>`)}
-      <div class="mb-16">${K.Ledger([hkmSeritRow()])}</div>
-      ${when(SP.Seri, () => html`<div class="mb-16">${K.Ledger([seriRow()])}</div>`)}
-      ${when(SP.HatirlatUI && SP.HatirlatUI.vaktiRow(), () => html`<div class="mb-16">${K.Ledger([SP.HatirlatUI.vaktiRow()])}</div>`)}
-      <div class="mb-8">${tabs()}</div>`;
+      <div class="mb-16">${K.Ledger([hkmSeritRow()].concat(SP.Seri ? [seriRow()] : []))}</div>
+      ${K.SayfaBolumleri({ act:'day-tab', aria:'Günün bölümleri', bolumler:[
+        { id:'giris', ad:'Giriş', govde:giris },
+        { id:'ozet', ad:'Özet', govde:ozet },
+        { id:'gecmis', ad:'Geçmiş', govde:gecmis },
+      ] })}
+      <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'next-action', 'minimum-day', 'certainty']))}</div>`);
+  }
 
-    if(tab === 'ozet'){
-      return String(html`${head}${K.Ledger([
-        readinessEntry(), nutritionEntry(), minimumEntry(),
-        SP.HatirlatUI ? SP.HatirlatUI.ozetEntry() : null, officeEntry(), moneyEntry(),
-      ].filter(Boolean))}
-      <div class="mt-24">${raw(UI.rail(['next-action', 'minimum-day', 'readiness', 'certainty']))}</div>`);
-    }
-
-    if(tab === 'gecmis'){
-      return String(html`${head}${K.Ledger([historyEntry(), baselineEntry()])}
-      <div class="mt-24">${raw(UI.rail(['readiness', 'certainty']))}</div>`);
-    }
-
-    return String(html`${head}${K.Ledger([
-      signalEntry(), dunkuEntry(), formEntry(), symptomEntry(), quickEntry(), statusEntry(), whyEntry(),
-    ].filter(Boolean))}
-    <div class="mt-24">${raw(UI.rail(['readiness', 'ref-range', 'certainty']))}</div>`);
+  /* Başka ekrandan istenen bölüm (Bugün'deki «Bütün alanlar» gibi)
+     çizimden sonra görünür yapılır. */
+  function afterRenderAyrinti(){
+    const t = S.ui.dayTab;
+    S.ui.dayTab = null;
+    if(t && t !== 'giris') K.bolumeGit(t);
   }
 
   /* PLAN › HEDEFLER. Hedefler Bugün'ün Özet sekmesindeydi; kural «Plan:
@@ -969,7 +1064,13 @@ SP.Screens.today = (function(){
       SP.App.render();
     },
 
-    async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; SP.App.render(); },
+    /* Eski sekme eylemi: Ayrıntı'nın bölümüne gider. Başka ekrandaysa önce
+       Ayrıntı açılır, bölüm çizimden sonra görünür yapılır. */
+    async 'day-tab'(el){
+      const t = el.dataset.tab || 'giris';
+      if(S.route !== 'gun'){ S.ui.dayTab = t; SP.App.go('gun'); return; }
+      K.bolumeGit(t);
+    },
     async 'shift-day'(el){
       const n = Number(el.dataset.value);
       S.ui.mealDate = n === 0 ? null : U.iso(U.addDays(U.parse(shownDate()), n));
@@ -1096,12 +1197,20 @@ SP.Screens.today = (function(){
     },
     actions(){
       const n = SP.Calc.nextAction();
-      return String(html`${K.Button({ label:'Veri gir', tone:'primary', size:'sm', icon:'pulse',
-        act:'day-tab', data:{ 'data-tab':'giris' } })}
-        ${when(!n.calm && n.route !== 'today', () => K.Button({ label:n.action || 'Aç',
+      /* «Bütün alanlar» ölçüm kutusunda; burada yalnız sıradaki hamle
+         (başka bir ekrana aitse). */
+      return String(html`${when(!n.calm && n.route !== 'today', () => K.Button({ label:n.action || 'Aç',
           size:'sm', act:'go', data:{ 'data-route':n.route } }))}`);
     },
     render, handle,
+    /* Bugün › Ayrıntı: aynı işleyiciler, ayrı bir çizim. */
+    ayrinti:{
+      id:'gun',
+      title:'Günün ayrıntısı',
+      subtitle(){ return 'Ölçüm formu, şikâyetler, özet ve son iki hafta'; },
+      actions(){ return ''; },
+      render:renderAyrinti, afterRender:afterRenderAyrinti, handle,
+    },
     /* Plan › Hedefler: aynı işleyiciler, ayrı bir çizim. */
     hedefler:{
       id:'hedefler',
@@ -1117,4 +1226,5 @@ SP.Screens.today = (function(){
   };
 })();
 
+SP.Screens.gun = SP.Screens.today.ayrinti;
 SP.Screens.hedefler = SP.Screens.today.hedefler;

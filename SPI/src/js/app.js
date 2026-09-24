@@ -28,6 +28,7 @@ SP.App = (function(){
   const SECTIONS = [
     { id:'bugun', label:CEK('bugun'), views:[
       { route:'today', label:'Bugün' },
+      { route:'gun',   label:'Ayrıntı' },
     ]},
     { id:'plan', label:CEK('plan'), views:[
       { route:'hedefler', label:'Hedefler' },

@@ -613,7 +613,8 @@
       if(kurduk) SP.Seri = LIFEOS.Seri.kur({ store:() => SP.Store, bugun:() => SP.U.todayISO() });
       await SP.Seri.yukle();
       SP.S.ui.tatilSec = true;
-      const out = String(await SP.Screens.today.render());
+      /* Seri satırı Bugün › Ayrıntı'da (T3: Bugün üç alan). */
+      const out = String(await SP.Screens.gun.render());
       SP.S.ui.tatilSec = false;
       if(kurduk) delete SP.Seri;
       expect(out.indexOf('id="seri-tatil-sinir"') >= 0).toBe(true);

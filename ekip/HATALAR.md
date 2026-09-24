@@ -20,7 +20,7 @@
 
 | Kod | Sahip | Durum | Özet |
 |---|---|---|---|
-| T2-13 | T → K (kullanıcı talimatı) | ✅ c6aa21b (4 → 0; negatif kontrol: gerçek kırpma hâlâ yakalanıyor) | SPİ designcheck 5a5c024'ten beri kırmızı: Rütbe merdiveninin dekor görseli (scale 1,04, `aria-hidden`) «içerik kırpılıyor» sayılıyor — yanlış alarm, araç düzeltilir |
+| T2-13 | T → K (kullanıcı talimatı) | ✅ d58720d (4 → 0; negatif kontrol: gerçek kırpma hâlâ yakalanıyor) | SPİ designcheck 5a5c024'ten beri kırmızı: Rütbe merdiveninin dekor görseli (scale 1,04, `aria-hidden`) «içerik kırpılıyor» sayılıyor — yanlış alarm, araç düzeltilir |
 | T2-12 | T | ✅ 5a5c024 | T3 AYS üretilmiş kopya `AYS/src/js/screens/rutbe.js`'i elle değiştirdi; `seviye.py --denetle` kırmızı |
 | T2-11 | K | ✅ 96037ce (önce kırmızı test; H doğrulaması yok — H'nin limiti doldu) | Bildirim kartı: uygulama kapalıyken basılan eylem (ör. «Bitti») kayboluyor, kullanıcıya söylenmiyor |
 | T2-10 | K | ✅ 96037ce (önce kırmızı test; H doğrulaması yok — H'nin limiti doldu) | Tablo hücresi (038) kesinliği verilmemiş sayıyı «hesaplandı» sayıyor: etiketsiz sayı etiketli görünür |
