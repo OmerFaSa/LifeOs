@@ -266,6 +266,15 @@ depoda YOK; nerede olduğu, sunucunun yeri (ev bilgisayarı / internet) ve «lok
 kuralının kalkıp kalkmadığı SORULDU. Cevap gelmeden ağa açılma yok.
 **Sıra:** diksiyon belgesi → haftalık PDF arşivi → HKM para kolu → HKM giriş kapısı (kitap,
 gitar, sözlük) → (cevaba göre) sunucu/telefon → Part 9.
+**İlerleme (ikinci tur):** ✅ diksiyon belgesi (41cf6c5) · ✅ haftalık PDF geçmiş haftalar (`weekly.gecmis`:
+bu hafta + kanala giden raporlar, durum giden kutusundan; her satırın PDF'i; 0cf2407) · ✅ para kolu v1
+(`core/para.py`, tablo `para`, yedeğe girer: Telegram/sohbet «market 450 TL», «maaş 30.000 geldi»,
+«dün taksiye 120 tl verdim» → hemen yazılır, «para geri al»; para olduğu BELLİ olmalı — birim ya da
+para sözcüğü; «kitap 30», «spor 45», «40 soru» para DEĞİL; aynı mesajda açık para parçası varsa
+öbür tutarlar da para; kategori koddan; kur yok, TL dışı ayrı toplanır; HKM › Para: ay özeti,
+kategori tablosu, form, silme; `GET/POST /api/para`, `POST /api/para/<id>/sil`). FİŞ FOTOĞRAFI
+YOK: HKM'nin model katmanı (`ai.ask`) görüntü taşımıyor — sonraki adım. HKM web `bugun()` UTC
+hatası düzeltildi (yerel gün). HKM 595, yüz 56 görünüm temiz.
 
 ## 5. Komutlar
 

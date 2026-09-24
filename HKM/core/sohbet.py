@@ -448,6 +448,28 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             return {"ok": True, "mode": "komut", "command": "teklif", "text": tc,
                     "agent": gorevli}
 
+    # 0a' — PARA (Y1, core/para.py): «market 450 TL». HKM'nin KENDI kaydi;
+    # kucuk aksiyon: hemen yazilir, cevap geri alma yolunu soyler. Para
+    # oldugu belli degilse (birim ya da para sozcugu yok) buraya girmez.
+    if gorevli == "king":
+        from core import para
+        pk = None
+        if re.match(r"(?i)^\s*para\s+geri\s*al\b", str(metin or "")):
+            g = para.geri_al(con, kanal)
+            pk = ("%d kayıt geri alındı." % g["adet"]) if g["ok"] else "Geri alınacak para kaydı yok."
+        else:
+            b = para.tani(metin)
+            if b:
+                pk = para.cevap(con, para.yaz(con, b, kanal, metin, date), date)
+                if b.get("anlasilmayan"):
+                    pk += " Anlamadığım kısım: «%s» — tutarı ve ne olduğunu ayrı yazarsan eklerim." % (
+                        "», «".join(b["anlasilmayan"]))
+        if pk:
+            if kayit:
+                patron.log(con, kanal, "user", metin, agent=gorevli)
+                patron.log(con, kanal, "manager", pk, agent=gorevli)
+            return {"ok": True, "mode": "komut", "command": "para", "text": pk, "agent": gorevli}
+
     # 0b' — TEK CUMLEDE BIRDEN COK IS (fikir 43): her biri ayri emir.
     coklu = is_parcalari(metin) if gorevli == "king" else None
     if coklu is not None:

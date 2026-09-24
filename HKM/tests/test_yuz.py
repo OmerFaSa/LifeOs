@@ -126,6 +126,25 @@ def t_mikrofon_yazar_gondermez():
     ok("/api/" not in govde)
 
 
+def t_bugun_yerel_gun():
+    """HKM yuzunun «bugun»u YEREL gundur: toISOString UTC'dir ve Turkiye'de
+    gece 00:00–03:00 arasi dunu verir."""
+    metin = _yuz()
+    govde = metin[metin.index("function bugun()"):]
+    govde = govde[:govde.index("}")]
+    ok("toISOString" not in govde, govde)
+    ok("getDate()" in govde)
+
+
+def t_para_sayfasi():
+    """Para kolu (Y1): gezinmede, sayfasi ve formu var; ekran sayi hesaplamaz,
+    HKM'nin cumlesini yazar."""
+    metin = _yuz()
+    ok('href="#/para" data-yol="para"' in metin)
+    ok('data-bolme="para"' in metin and "yuklePara" in metin)
+    ok("'para'" in metin[metin.index("var GORUNUMLER"):metin.index("var GORUNUMLER") + 200])
+
+
 def run():
     suite("HKM yüzü — giriş şeridi")
     test("üç adım vardır", t_giris_seridi_uc_adim)
@@ -135,3 +154,5 @@ def run():
     test("her nokta kendi adını söyler", t_her_nokta_kendi_adini_soyler)
     test("eski tek afiş kalktı", t_eski_tek_afis_kalkti)
     test("mikrofon yazar, göndermez", t_mikrofon_yazar_gondermez)
+    test("bugün yerel gündür", t_bugun_yerel_gun)
+    test("para sayfası", t_para_sayfasi)

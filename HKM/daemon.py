@@ -745,6 +745,13 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, tani.ozet(self.con, self.server.config,
                                              datetime.date.today().isoformat(),
                                              self.server.db_path))
+        if u.path == "/api/para":
+            # Para kolu (Y1, core/para.py): bir ayin kayitlari ve ozeti.
+            from core import para
+            ay_ = (q.get("ay") or [datetime.date.today().isoformat()[:7]])[0]
+            r = para.ay(self.con, ay_)
+            r["kategoriler_hepsi"] = para.KATEGORILER
+            return self._send(200 if r.get("ok") else 400, r)
         if u.path == "/api/gizlilik":
             from core import gizlilik
             return self._send(200, gizlilik.ozet(self.con, datetime.date.today().isoformat()))
@@ -1233,6 +1240,25 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "hafiza kimligi sayi olmali"})
             r = memory.forget(self.con, id_)
             return self._send(200 if r.get("ok") else 404, r)
+        # Para kolu (Y1): form ile kayit ve silme. Silinen kayit isaretlenir.
+        if u.path == "/api/para" or (u.path.startswith("/api/para/") and u.path.endswith("/sil")):
+            from core import para
+            if u.path.endswith("/sil"):
+                try:
+                    id_ = int(u.path.split("/")[3])
+                except (ValueError, IndexError):
+                    return self._send(400, {"error": "kayıt kimliği sayı olmalı"})
+                r = para.sil(self.con, id_)
+                return self._send(200 if r["ok"] else 404, r)
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                govde = json.loads(ham or b"{}")
+            except ValueError:
+                return self._send(400, {"error": "gecersiz JSON"})
+            r = para.ekle(self.con, govde, datetime.date.today().isoformat())
+            return self._send(200 if r.get("ok") else 422, r)
         if u.path == "/api/probe":
             # «Kurulu» ile «calisiyor» ayri seylerdir: anahtarin gecerliligi
             # ancak SINANARAK bilinir.

@@ -809,6 +809,17 @@ def run_extra(S):
         import io
         import zipfile
         eq(S.call("/api/disa-aktar", token=None)[0], 401)
+        # Para kolu (Y1): form, ay ozeti, silme; jetonsuz yok.
+        eq(S.call("/api/para", token=None)[0], 401)
+        eq(S.call("/api/para", body={"yon": "gider", "tutar": "abc"})[0], 422)
+        kod, pr = S.call("/api/para", body={"yon": "gider", "tutar": "450", "kategori": "Gıda",
+                                            "aciklama": "market"})
+        eq(kod, 200)
+        kod, pa = S.call("/api/para")
+        eq((kod, pa["kayitlar"][0]["tutar"], "Gıda" in pa["kategoriler_hepsi"]), (200, "450 TL", True))
+        eq(S.call("/api/para/%d/sil" % pr["id"], body={})[0], 200)
+        eq(S.call("/api/para/%d/sil" % pr["id"], body={})[0], 404)
+        eq(S.call("/api/para?ay=eylul")[0], 400)
         # Fikir 48 ve 55: durum ve gizlilik uclari calisir, jetonsuz yok.
         kod, tn = S.call("/api/tani")
         eq(kod, 200)

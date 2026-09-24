@@ -308,6 +308,23 @@ CREATE TABLE IF NOT EXISTS yarin_ozet (
 /* Modulun TATIL MODU tarihi (brand/ortak/seri.js hkmTatil). Tatildeyken
    HKM soru sormaz; donus sabahi yuk azaltma teklifi birakir. Yalniz tarih
    gelir; neden gelmez. `donus_planli`: modul donusu kendi plani ile kurdu. */
+/* Para kolu (Y1, core/para.py): HKM'nin KENDI kaydi. Tutar kurus olarak
+   tam sayi (kayan nokta yok); silinen kayit isaretlenir, kaybolmaz. */
+CREATE TABLE IF NOT EXISTS para (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  gun         TEXT NOT NULL,
+  yon         TEXT NOT NULL,               -- gider | gelir
+  kurus       INTEGER NOT NULL,
+  birim       TEXT NOT NULL DEFAULT 'TRY',
+  kategori    TEXT NOT NULL,
+  aciklama    TEXT NOT NULL DEFAULT '',
+  kaynak      TEXT NOT NULL,               -- telegram | whatsapp | local | web
+  metin       TEXT NOT NULL DEFAULT '',
+  grup        TEXT NOT NULL DEFAULT '',
+  silindi     INTEGER NOT NULL DEFAULT 0,
+  created_at  TEXT NOT NULL
+);
+
 /* Gunun dil karti (fikir 38, brand/ortak/hedefag.js `dilKarti` kancasi).
    Kartlari ESP'nin KENDI kodu secer (vadesi gelen, yoksa en zayif); HKM
    kullanicinin sectigi saatte yalniz dizer (core/schedule.py). */
@@ -742,7 +759,7 @@ def decision(con, decision_id):
 BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
                  "conversations", "attachments", "memories", "intents", "outbox", "usage",
                  "inbox_seen", "bam_isler", "bam_kayitlar", "bam_iz",
-                 "is_emirleri", "bildirimler", "hedef_ozet", "zaman_butcesi")
+                 "is_emirleri", "bildirimler", "hedef_ozet", "zaman_butcesi", "para")
 BACKUP_SCHEMA = 4
 
 

@@ -511,6 +511,7 @@ details.detay > summary:hover{ color:var(--fg); }
       <a href="#/hedefler" data-yol="hedefler">Hedefler</a>
       <a href="#/ofis" data-yol="ofis">Ofis</a>
       <a href="#/teklifler" data-yol="teklifler">Teklifler</a>
+      <a href="#/para" data-yol="para">Para</a>
     </nav>
     <div class="bosluk"></div>
     <div class="row" id="ust-araclar" hidden>
@@ -650,6 +651,16 @@ details.detay > summary:hover{ color:var(--fg); }
       <div class="card" id="profil-kademe"><p class="muted">Yükleniyor…</p></div>
       <div id="profil-rozet"></div>
       <div class="card" id="profil-muhur"></div>
+    </div>
+
+    <!-- ============================== PARA =========================== -->
+    <!-- Para kolu (Y1, core/para.py): HKM'nin KENDI kaydi. Telegram'a
+         «market 450 TL» yazmak da buraya yazar. -->
+    <div data-bolme="para" hidden>
+      <div class="gun"><h1>Para</h1></div>
+      <div class="card" id="para-ozet"><p class="muted">Yükleniyor…</p></div>
+      <div class="card" id="para-ekle"></div>
+      <div class="card" id="para-liste"></div>
     </div>
 
     <!-- =========================== SİSTEMLER ========================= -->
@@ -844,7 +855,13 @@ details.detay > summary:hover{ color:var(--fg); }
       return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c];
     });
   }
-  function bugun(){ return new Date().toISOString().slice(0, 10); }
+  /* YEREL gün. `toISOString()` UTC'dir: Türkiye'de gece 00:00–03:00 arası
+     «bugün» dün çıkıyordu (modüllerdeki `gunOf` hatasının aynısı). */
+  function bugun(){
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-'
+      + String(d.getDate()).padStart(2, '0');
+  }
 
   async function api(yol, opt){
     var o = Object.assign({ headers:{} }, opt || {});
@@ -4205,7 +4222,7 @@ details.detay > summary:hover{ color:var(--fg); }
      gorunumun verisi cekilir — her sekmede butun ambari sorgulamak,
      acilisi bekletmekten baska is yapmiyordu. */
   var GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'motto',
-                    'hedefler', 'ofis', 'teklifler', 'ayarlar'];
+                    'hedefler', 'ofis', 'teklifler', 'para', 'ayarlar'];
   var gorunum = 'bugun';
 
   function yolOku(){
@@ -4234,6 +4251,80 @@ details.detay > summary:hover{ color:var(--fg); }
     var p = (location.hash || '').replace(/^#\/?/, '').split('/');
     return SOHBET_GOREVLILERI.indexOf(p[1]) >= 0 ? p[1] : null;
   }
+
+  /* Para kolu (Y1). Sayıları ve cümleyi HKM kurar (core/para.py); bu sayfa
+     yalnız yazar, form gönderir ve siler. */
+  var PARA_AY = null;
+  async function yuklePara(){
+    var ay = PARA_AY || bugun().slice(0, 7);
+    var r = await api('/api/para?ay=' + encodeURIComponent(ay));
+    if(r.status !== 200){
+      $('para-ozet').innerHTML = '<p class="danger">Para kaydı alınamadı (' + esc(r.status) + ').</p>';
+      return;
+    }
+    var p = r.body || {};
+    var h = '<div class="row" style="justify-content:space-between;align-items:center">'
+      + '<span class="tag">Ay</span><input type="month" id="para-ay" class="alan alan--dar" value="'
+      + esc(ay) + '" aria-label="Ay"/></div>'
+      + '<p style="margin-top:8px">' + esc(p.metin) + ' <span class="muted">· ' + esc(p.kesinlik) + '</span></p>';
+    if((p.kategoriler || []).length){
+      h += '<div class="scroll"><table><thead><tr><th>Kategori</th><th class="num">Gider</th></tr></thead><tbody>'
+        + p.kategoriler.map(function(k){
+          return '<tr><td>' + esc(k.kategori) + '</td><td class="num">' + esc(k.tutar) + '</td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+    h += '<p class="muted">Kur uydurulmaz: TL dışı tutarlar kendi birimiyle ayrı toplanır.</p>';
+    $('para-ozet').innerHTML = h;
+    var kat = (p.kategoriler_hepsi || []).map(function(k){
+      return '<option value="' + esc(k) + '">' + esc(k) + '</option>'; }).join('');
+    $('para-ekle').innerHTML = '<div class="tag">Kayıt ekle</div>'
+      + '<div class="row" style="flex-wrap:wrap;gap:8px;margin-top:8px">'
+      + '<select id="para-yon" aria-label="Yön"><option value="gider">Gider</option><option value="gelir">Gelir</option></select>'
+      + '<input id="para-tutar" class="alan alan--dar" inputmode="decimal" placeholder="450 ya da 85,50" aria-label="Tutar"/>'
+      + '<select id="para-birim" aria-label="Birim"><option value="TRY">TL</option><option value="USD">USD</option><option value="EUR">EUR</option></select>'
+      + '<select id="para-kategori" aria-label="Kategori">' + kat + '</select>'
+      + '<input id="para-aciklama" class="alan" placeholder="Açıklama (isteğe bağlı)" aria-label="Açıklama"/>'
+      + '<input id="para-gun" type="date" class="alan alan--dar" value="' + esc(bugun()) + '" aria-label="Gün"/>'
+      + '<button class="primary" id="para-ekle-btn">Ekle</button></div>'
+      + '<p class="muted" id="para-not">Telegram’a ya da HKM sohbetine «market 450 TL», «maaş 30.000 geldi» '
+      + 'yazman da yeter; yanlışsa «para geri al». Fişin fotoğrafından okuma henüz yok.</p>';
+    var l = p.kayitlar || [];
+    $('para-liste').innerHTML = '<div class="tag">Kayıtlar</div>' + (l.length
+      ? '<div class="scroll"><table><thead><tr><th>Gün</th><th>Açıklama</th><th>Kategori</th>'
+        + '<th class="num">Tutar</th><th>Nereden</th><th></th></tr></thead><tbody>'
+        + l.map(function(x){
+          return '<tr><td>' + esc(x.gun) + '</td><td>' + esc(x.aciklama || '—') + '</td><td>'
+            + esc(x.kategori) + '</td><td class="num">' + (x.yon === 'gelir' ? '+' : '−') + esc(x.tutar)
+            + '</td><td>' + esc(x.kaynak) + '</td><td><button data-para-sil="' + esc(x.id)
+            + '" aria-label="Kaydı sil">Sil</button></td></tr>';
+        }).join('') + '</tbody></table></div>'
+      : '<p class="muted">Bu ay kayıt yok.</p>');
+  }
+
+  document.addEventListener('click', async function(ev){
+    var el = ev.target.closest ? ev.target.closest('#para-ekle-btn,[data-para-sil]') : null;
+    if(!el) return;
+    ev.preventDefault();
+    if(el.id === 'para-ekle-btn'){
+      var r = await api('/api/para', { method:'POST', body:JSON.stringify({
+        yon:$('para-yon').value, tutar:$('para-tutar').value.trim(), birim:$('para-birim').value,
+        kategori:$('para-kategori').value, aciklama:$('para-aciklama').value.trim(), gun:$('para-gun').value }) });
+      if(r.status !== 200){
+        $('para-not').textContent = 'Eklenmedi — ' + (((r.body || {}).errors || []).join(' · ') || r.status);
+        return;
+      }
+      PARA_AY = ($('para-gun').value || bugun()).slice(0, 7);
+      return yuklePara();
+    }
+    var s = await api('/api/para/' + encodeURIComponent(el.dataset.paraSil) + '/sil', { method:'POST', body:'{}' });
+    if(s.status === 200) yuklePara();
+  });
+  document.addEventListener('change', function(ev){
+    if(ev.target && ev.target.id === 'para-ay' && ev.target.value){
+      PARA_AY = ev.target.value;
+      yuklePara();
+    }
+  });
 
   function gorunumSec(ad, yenidenYukle){
     gorunum = GORUNUMLER.indexOf(ad) >= 0 ? ad : 'bugun';
@@ -4316,6 +4407,7 @@ details.detay > summary:hover{ color:var(--fg); }
     if(gorunum === 'hedefler') return yukleHedefler();
     if(gorunum === 'ofis') return yukleOfis(t);
     if(gorunum === 'teklifler') return yukleTeklifler();
+    if(gorunum === 'para') return yuklePara();
     if(gorunum === 'ayarlar') return yukleAyarlar();
   }
 

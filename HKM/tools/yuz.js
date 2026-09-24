@@ -27,7 +27,7 @@ const PORT = 4296;
 const TOKEN = 'yuz-denetimi-icin-gecici-jeton';
 /* Ana gorunumler ve Ayarlar'in alt sekmeleri AYRI gezilir: teknik
  * yonetim artik gunluk ekranin icinde degil, kendi sayfasinda. */
-const GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'ofis', 'teklifler'];
+const GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'ofis', 'teklifler', 'para'];
 const AYAR_SEKMELERI = ['yapayzeka', 'butce', 'web', 'kanallar', 'cihazlar',
   'esikler', 'sunucu'];
 const MIN_TAP = 24;
