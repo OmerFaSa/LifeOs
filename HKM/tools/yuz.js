@@ -28,8 +28,12 @@ const TOKEN = 'yuz-denetimi-icin-gecici-jeton';
 /* Ana gorunumler ve Ayarlar'in alt sekmeleri AYRI gezilir: teknik
  * yonetim artik gunluk ekranin icinde degil, kendi sayfasinda. */
 const GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'ofis', 'teklifler', 'para'];
-const AYAR_SEKMELERI = ['yapayzeka', 'butce', 'web', 'kanallar', 'cihazlar',
-  'esikler', 'sunucu'];
+/* K7 (ekip/EKIP-PLANI §8-9): Ayarlar'ın yedi paneli dört bölümde; bölüm
+   bütün panellerini alt alta gösterir, yani yedi panelin hepsi ölçülür. */
+const AYAR_SEKMELERI = ['yapayzeka', 'kanallar', 'esikler', 'sunucu'];
+/* K7: Profil, Motto ve Para artık bir çekmecenin BÖLÜMÜ: üstte çekmece,
+   altta bölüm çubuğu (#bolumcubugu). */
+const CEKMECE = { profil:'ayarlar', motto:'ayarlar', para:'sistemler' };
 const MIN_TAP = 24;
 const MIN_KONTRAST = 4.5;
 
@@ -205,7 +209,13 @@ async function main(){
         await page.click('#gir');
         await wait(1500);
         const duraklar = GORUNUMLER.map(g => ({ ad:g, git:async () => {
-          await page.click('#gez a[data-yol="' + g + '"]');
+          if(CEKMECE[g]){
+            await page.click('#gez a[data-yol="' + CEKMECE[g] + '"]');
+            await wait(250);
+            await page.click('#bolumcubugu a[data-yol="' + g + '"]');
+          }else{
+            await page.click('#gez a[data-yol="' + g + '"]');
+          }
         }}));
         for(const a of AYAR_SEKMELERI){
           duraklar.push({ ad:'ayarlar/' + a, git:async () => {

@@ -954,7 +954,8 @@ async function main(){
     /* W6 — Web ayarlari: kaydedilir, anahtar MASKELI doner ve geri okunmaz. */
     await yuz.click('#ayar-bag');
     await wait(400);
-    await yuz.click('[data-ayar="web"]');
+    /* K7: Web paneli «Yapay zekâ ve bütçe» bölümünde (yedi sekme → dört bölüm). */
+    await yuz.click('[data-ayar="yapayzeka"]');
     await wait(500);
     await yuz.fill('#web-sinir', '150');
     await yuz.fill('#web-k-brave', 'BSA-entegre-anahtar-9876');

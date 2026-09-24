@@ -218,6 +218,20 @@ svg.spark{ width:100%; height:30px; display:block; opacity:.85; }
   box-shadow:inset 0 0 0 1px var(--line); font-weight:600; }
 .ikon-dugme{ min-width:36px; padding:8px 10px; }
 
+/* ---- bölüm çubuğu (K7): çekmecenin bölümleri, ALT ÇİZGİ ---- */
+.bolumcubugu{ border-top:1px solid var(--line); }
+.bolumcubugu__ic{ max-width:900px; margin:0 auto; padding:0 20px;
+  display:flex; gap:2px; flex-wrap:wrap; }
+.bolumcubugu a{ text-decoration:none; color:var(--dim); padding:9px 12px 7px;
+  border-bottom:2px solid transparent; font-size:13.5px; line-height:20px;
+  min-height:24px; display:inline-block; }
+.bolumcubugu a:hover{ color:var(--fg); border-bottom-color:var(--line-strong); }
+.bolumcubugu a.on{ color:var(--fg); border-bottom-color:var(--accent); font-weight:600; }
+@media (max-width:560px){
+  .bolumcubugu__ic{ overflow-x:auto; flex-wrap:nowrap; padding:0 12px; }
+  .bolumcubugu a{ flex:none; white-space:nowrap; }
+}
+
 /* Gunluk ekran: iki sutun masaustunde, tek sutun telefonda. */
 .iki{ display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);
   gap:0 32px; align-items:start; }
@@ -515,25 +529,38 @@ details.detay > summary:hover{ color:var(--fg); }
 <header class="ust">
   <div class="ust__ic">
     <p class="marka"><img class="marka__ikon" src="/brand/favicon.png" alt="" aria-hidden="true"/>HKM</p>
-    <nav class="gez" id="gez" hidden>
+    <!-- YEDİ ÇEKMECE (K7, ekip/CEKMECE-HARITASI.md «HKM yüzü»): Bugün ·
+         Onaylar · Hedefler · Sistemler · Ofis · Sohbet · Ayarlar. Adresler
+         DEĞİŞMEDİ (#/teklifler, #/profil…): derin bağlantılar ve denetimler
+         bozulmaz, değişen yalnız gruplama. Profil ve Motto Ayarlar'ın,
+         Para Sistemler'in bölümüdür (aşağıdaki bölüm çubuğu). -->
+    <nav class="gez" id="gez" aria-label="Çekmeceler" hidden>
       <a href="#/bugun" data-yol="bugun">Bugün</a>
-      <a href="#/sohbet" data-yol="sohbet">Sohbetler</a>
-      <a href="#/sistemler" data-yol="sistemler">Sistemler</a>
-      <a href="#/profil" data-yol="profil">Profil</a>
-      <a href="#/motto" data-yol="motto">Motto</a>
+      <a href="#/teklifler" data-yol="teklifler">Onaylar</a>
       <a href="#/hedefler" data-yol="hedefler">Hedefler</a>
+      <a href="#/sistemler" data-yol="sistemler">Sistemler</a>
       <a href="#/ofis" data-yol="ofis">Ofis</a>
-      <a href="#/teklifler" data-yol="teklifler">Teklifler</a>
-      <a href="#/para" data-yol="para">Para</a>
+      <a href="#/sohbet" data-yol="sohbet">Sohbet</a>
+      <a href="#/ayarlar" data-yol="ayarlar" id="ayar-bag">Ayarlar</a>
     </nav>
     <div class="bosluk"></div>
     <div class="row" id="ust-araclar" hidden>
       <button id="tema" class="ikon-dugme" title="Tema" aria-label="Tema seç">◐</button>
-      <a href="#/ayarlar" class="gez" id="ayar-bag" style="text-decoration:none">
-        <span class="ikon-dugme" style="display:inline-block;border:1px solid var(--line-strong);border-radius:3px">Ayarlar</span>
-      </a>
     </div>
   </div>
+  <!-- Bölüm çubuğu: birden çok bölümlü çekmecede görünür (iç içelik en çok
+       iki kat: çekmece › bölüm). -->
+  <nav class="bolumcubugu" id="bolumcubugu" aria-label="Bu çekmecede" hidden>
+    <div class="bolumcubugu__ic" data-cekmece="sistemler" hidden>
+      <a href="#/sistemler" data-yol="sistemler">Modüller</a>
+      <a href="#/para" data-yol="para">Para</a>
+    </div>
+    <div class="bolumcubugu__ic" data-cekmece="ayarlar" hidden>
+      <a href="#/ayarlar" data-yol="ayarlar">Genel</a>
+      <a href="#/profil" data-yol="profil">Profil</a>
+      <a href="#/motto" data-yol="motto">Motto</a>
+    </div>
+  </nav>
 </header>
 
 <div class="wrap">
@@ -792,12 +819,13 @@ details.detay > summary:hover{ color:var(--fg); }
     <!-- ============================ AYARLAR ========================== -->
     <div data-bolme="ayarlar" hidden>
       <div class="gun"><h1>Ayarlar</h1></div>
+      <!-- Yedi sekme → dört bölüm (CEKMECE-HARITASI «HKM yüzü»). Bir bölüm
+           birden çok panel taşır ve paneller ALT ALTA durur; eski adresler
+           (#/ayarlar/butce, …/web, …/cihazlar) kendi bölümünü açar ve o
+           panele kayar. -->
       <div class="tabs" id="ayar-sekmeler">
-        <button data-ayar="yapayzeka" class="on">Yapay zekâ</button>
-        <button data-ayar="butce">Bütçe</button>
-        <button data-ayar="web">Web</button>
-        <button data-ayar="kanallar">Sohbet kanalları</button>
-        <button data-ayar="cihazlar">Cihazlar</button>
+        <button data-ayar="yapayzeka" class="on">Yapay zekâ ve bütçe</button>
+        <button data-ayar="kanallar">Kanallar ve cihazlar</button>
         <button data-ayar="esikler">Eşikler</button>
         <button data-ayar="sunucu">Sunucu</button>
       </div>
@@ -891,6 +919,7 @@ details.detay > summary:hover{ color:var(--fg); }
     $('govde').hidden = true;
     $('ust-araclar').hidden = true;
     $('gez').hidden = true;
+    if($('bolumcubugu')) $('bolumcubugu').hidden = true;
     $('giris-not').textContent = not || '';
   }
 
@@ -4249,6 +4278,14 @@ details.detay > summary:hover{ color:var(--fg); }
      sekmeden dogrusunu ARATMAK yardim degildir. */
   var AYAR_SEKMELERI = ['yapayzeka', 'butce', 'web', 'kanallar', 'cihazlar',
                         'esikler', 'sunucu'];
+  /* Yedi panel dört bölümde (K7). Anahtar panel, değer bölümün ilk paneli. */
+  var AYAR_GRUP = { yapayzeka:'yapayzeka', butce:'yapayzeka', web:'yapayzeka',
+                    kanallar:'kanallar', cihazlar:'kanallar',
+                    esikler:'esikler', sunucu:'sunucu' };
+  /* Görünüm → çekmece (üst gezinmede hangisi yanar). */
+  var CEKMECE = { bugun:'bugun', teklifler:'teklifler', hedefler:'hedefler',
+                  sistemler:'sistemler', para:'sistemler', ofis:'ofis', sohbet:'sohbet',
+                  ayarlar:'ayarlar', profil:'ayarlar', motto:'ayarlar' };
 
   function altYolOku(){
     var p = (location.hash || '').replace(/^#\/?/, '').split('/');
@@ -4437,13 +4474,30 @@ details.detay > summary:hover{ color:var(--fg); }
       document.querySelectorAll('[data-bolme]'), function(el){
         el.hidden = el.dataset.bolme !== gorunum;
       });
+    var cek = CEKMECE[gorunum] || gorunum;
     Array.prototype.forEach.call(
       document.querySelectorAll('#gez a'), function(a){
-        a.className = a.dataset.yol === gorunum ? 'on' : '';
+        var on = a.dataset.yol === cek;
+        a.className = on ? 'on' : '';
+        if(on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
       });
+    var bc = $('bolumcubugu'), grupVar = false;
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#bolumcubugu [data-cekmece]'), function(g){
+        g.hidden = g.dataset.cekmece !== cek;
+        if(!g.hidden) grupVar = true;
+      });
+    Array.prototype.forEach.call(
+      document.querySelectorAll('#bolumcubugu a'), function(a){
+        var on = a.dataset.yol === gorunum;
+        a.className = on ? 'on' : '';
+        if(on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+      });
+    if(bc) bc.hidden = !grupVar || $('gez').hidden;
     if(gorunum === 'ayarlar'){
-      var alt = altYolOku();
-      if(alt) ayarSekmesi(alt);
+      /* Alt yol yoksa son açık bölüm: bölümün bütün panelleri görünür olsun
+         (işaretlemedeki `hidden` yalnız ilk çizim içindir). */
+      ayarSekmesi(altYolOku() || ayarAktif);
     }
     if(gorunum === 'sohbet'){
       var kim = sohbetYoluOku();
@@ -4452,15 +4506,23 @@ details.detay > summary:hover{ color:var(--fg); }
     if(yenidenYukle !== false) yukle();
   }
 
+  var ayarAktif = 'yapayzeka';
   function ayarSekmesi(ad){
+    var grup = AYAR_GRUP[ad] || ad;
+    ayarAktif = grup;
     Array.prototype.forEach.call(
       document.querySelectorAll('#ayar-sekmeler button'), function(b){
-        b.className = b.dataset.ayar === ad ? 'on' : '';
+        b.className = b.dataset.ayar === grup ? 'on' : '';
       });
     Array.prototype.forEach.call(
       document.querySelectorAll('[data-ayar-bolme]'), function(el){
-        el.hidden = el.dataset.ayarBolme !== ad;
+        el.hidden = (AYAR_GRUP[el.dataset.ayarBolme] || el.dataset.ayarBolme) !== grup;
       });
+    /* Bölümün ilk paneli değilse (ör. «#/ayarlar/web») o panele kay. */
+    if(ad !== grup){
+      var p = document.querySelector('[data-ayar-bolme="' + ad + '"]');
+      if(p && p.scrollIntoView) p.scrollIntoView({ block:'start' });
+    }
   }
 
   /* ---------- tema: acik / koyu / sistem

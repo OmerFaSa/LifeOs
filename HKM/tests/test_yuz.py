@@ -158,6 +158,60 @@ def t_para_sayfasi():
     ok("'para'" in metin[metin.index("var GORUNUMLER"):metin.index("var GORUNUMLER") + 200])
 
 
+
+JETON = KOK / "brand" / "ortak" / "jeton.css"
+
+
+def _kok_degerleri(metin, bas):
+    """`bas` ile baslayan ilk blogun `--ad:deger;` ciftleri."""
+    i = metin.index(bas)
+    j = metin.index("}", i)
+    return dict(re.findall(r"--([a-z0-9-]+)\s*:\s*([^;]+);", metin[i:j]))
+
+
+def t_cekmeceler():
+    """K7 (ekip/EKIP-PLANI §8-9): yedi cekmece bu ad ve sirayla; Profil ve
+    Motto Ayarlar'in, Para Sistemler'in BOLUMU; her gorunume bir yoldan
+    ulasilir; Ayarlar'in yedi paneli dort bolumde ve eski adreslerin hepsi
+    bir bolume duser."""
+    m = _yuz()
+    gez = m[m.index('<nav class="gez" id="gez"'):]
+    gez = gez[:gez.index("</nav>")]
+    eq(re.findall(r'data-yol="([a-z]+)"', gez),
+       ["bugun", "teklifler", "hedefler", "sistemler", "ofis", "sohbet", "ayarlar"])
+    eq(re.findall(r'data-yol="[a-z]+"[^>]*>([^<]+)</a>', gez),
+       ["Bugün", "Onaylar", "Hedefler", "Sistemler", "Ofis", "Sohbet", "Ayarlar"])
+    ok('id="ayar-bag"' in gez)
+    bc = m[m.index('<nav class="bolumcubugu"'):]
+    bc = bc[:bc.index("</nav>")]
+    gruplar = dict(re.findall(r'data-cekmece="([a-z]+)"[^>]*>(.*?)</div>', bc, re.S))
+    eq(re.findall(r'data-yol="([a-z]+)"', gruplar["ayarlar"]), ["ayarlar", "profil", "motto"])
+    eq(re.findall(r'data-yol="([a-z]+)"', gruplar["sistemler"]), ["sistemler", "para"])
+    gor = re.findall(r"'([a-z]+)'", m[m.index("var GORUNUMLER"):m.index("];", m.index("var GORUNUMLER"))])
+    erisilen = set(re.findall(r'data-yol="([a-z]+)"', gez + bc))
+    eq(sorted(set(gor) - erisilen), [])
+    sek = m[m.index('<div class="tabs" id="ayar-sekmeler">'):]
+    sek = sek[:sek.index("</div>")]
+    eq(re.findall(r'data-ayar="([a-z]+)"', sek), ["yapayzeka", "kanallar", "esikler", "sunucu"])
+    eski = re.findall(r"'([a-z]+)'", m[m.index("var AYAR_SEKMELERI"):m.index("];", m.index("var AYAR_SEKMELERI"))])
+    grup = m[m.index("var AYAR_GRUP"):m.index("};", m.index("var AYAR_GRUP"))]
+    for s in eski:
+        ok(s + ":" in grup)
+
+
+def t_jetonlar_ortak():
+    """K7a: yuz tek dosya kalir ve ortak dosyayi YUKLEMEZ; ama degerleri uc
+    arayuzun v4 jetonlaridir. jeton.css'te biri degisirse burada kirilir.
+    HKM Merkez'dir: tek vurgusu Merkez moru."""
+    y = _kok_degerleri(_yuz(), ":root{")
+    j = _kok_degerleri(JETON.read_text(encoding="utf-8"), ":root{")
+    for hkm, ortak in [("bg", "bg"), ("yuzey", "surface"), ("fg", "text"), ("dim", "text-2"),
+                       ("line", "border"), ("line-strong", "border-strong"),
+                       ("ok", "ok-ink"), ("warn", "accent"), ("danger", "bad-ink"),
+                       ("accent", "mer-ink"), ("mer-t", "mer-t"), ("yuzey-2", "surface-2")]:
+        eq((hkm, y[hkm].strip().lower()), (hkm, j[ortak].strip().lower()))
+
+
 def run():
     suite("HKM yüzü — giriş şeridi")
     test("üç adım vardır", t_giris_seridi_uc_adim)
@@ -169,4 +223,6 @@ def run():
     test("mikrofon yazar, göndermez", t_mikrofon_yazar_gondermez)
     test("bugün yerel gündür", t_bugun_yerel_gun)
     test("para sayfası", t_para_sayfasi)
+    test("yedi çekmece; bölümler; ayarlar dört bölüm (K7)", t_cekmeceler)
+    test("jetonlar ortak değerlerde; vurgu Merkez moru (K7a)", t_jetonlar_ortak)
     test("fiş yükleme: önizleme, onay, küçültme", t_fis_yukleme)
