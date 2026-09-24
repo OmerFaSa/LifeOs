@@ -363,11 +363,11 @@ ESP.Screens.today = (function(){
       label:'HEDEFLERİM', meta:l.length ? l.length + ' etkin' : 'yok',
       action:K.Button({ label:'Danışma’da hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
       body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
-        : html`<p class="small dim">Henüz hedefin yok. Danışma’da «Bir yılda gitarda Kalfa’ya
-          gelmek istiyorum», «Bir ayda İngilizcede A2’ye gelmek istiyorum» ya da «bu yıl 24 kitap
-          okumak istiyorum» gibi yazabilirsin; vaktine göre olup olmadığını ve olacağı tarihi
-          söylerim. Alışkanlık da kurabilirsin: «her gün 20 dakika kitap okuma alışkanlığı
-          kazanmak istiyorum».</p>`,
+        : K.Ayrinti({ etiket:'Örnekler', ozet:'Henüz hedefin yok. Danışma’da tek cümleyle yazabilirsin.',
+          govde:html`<p>«Bir yılda gitarda Kalfa’ya gelmek istiyorum», «Bir ayda İngilizcede A2’ye
+            gelmek istiyorum» ya da «bu yıl 24 kitap okumak istiyorum» gibi yazabilirsin; vaktine
+            göre olup olmadığını ve olacağı tarihi söylerim. Alışkanlık da kurabilirsin: «her gün
+            20 dakika kitap okuma alışkanlığı kazanmak istiyorum».</p>` }),
     });
   }
 
@@ -761,29 +761,73 @@ ESP.Screens.today = (function(){
           + ' Tarayıcı verisi silinirse oturum geçmişin, kartların ve '
           + 'notların kaybolur.' })}
         <div class="row gap-8 mt-8">
-          ${K.Button({ label:'Yedek al', size:'sm', tone:'primary',
+          ${K.Button({ label:'Yedek al', size:'sm',
             act:'go', data:{ 'data-route':'profile' } })}
         </div>` });
   }
 
-  function render(){
-    const tab = S.ui.dayTab || 'giris';
-    const rows = [yedekRow()].concat(
-      tab === 'ozet' ? summaryRows()
-      : tab === 'gecmis' ? historyRows()
-      : [oneriRow(), hkmSeritRow(), seriRow(), dunkuRow(), nextCard(), signalRow(), planRow(),
-          planRowToday(), reminderRow(),
-          entryForm(), quickForm(), sessionList()])
-          .filter(Boolean);
-
-    return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'day-tab', aria:'Günlük sekmeleri',
-          items:TABS.map(t => Object.assign({}, t,
-            t.id === 'giris' ? { count:M.sessionsOf(gun()).length || null } : {})) }),
-      }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+  /* BUGÜN — üç alan (katalog 03, EKIP-PLANI §3):
+       ŞİMDİ   sıradaki tek iş, tek cümlelik hızlı kayıt, (varsa) günün sorusu
+       DURUM   özet · bugünün oturumları · planda bugün
+       ÖNERİ   en çok bir kart; fazlası «+N öneri Onaylar'da»
+     Geri kalan her satır «Bugün › Ayrıntı»dadır (renderAyrinti). Sadelik
+     bütçesi: sayfa boyu 1800 px, görünen düğme 14. */
+  function OzetKutusu(){
+    const rows = M.sessionsOf(gun());
+    const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
+    const d = ESP.SRS.deckStatus();
+    const hucre = (ad, deger, birim, not) => html`<div class="ozet__hucre">
+      <span class="ozet__ad">${ad}</span>
+      <b class="ozet__deger">${deger}${when(birim, () => html`<small> ${birim}</small>`)}</b>
+      <span class="ozet__not">${not}</span></div>`;
+    /* Girilmemiş gün sıfır değildir: oturum yoksa dakika «—». */
+    return K.Kutu({ ad:'Özet', yuva:'bugün', bitisik:true, govde:html`<div class="ozet">
+      ${hucre('Bugün', rows.length ? U.fmtNum(toplam) : '—', rows.length ? 'dk' : '', rows.length + ' oturum')}
+      ${hucre('Vadeli kart', d.due, '', 'tekrar bekliyor')}
+      ${hucre('Seri', M.streak(), 'gün', 'asgari gün tutuldu')}
+      ${hucre('Açık disiplin', ESP.Mod.active().length, '', 'Çalışma’da')}
+    </div>` });
   }
+
+  function render(){
+    const O = ESP.Screens.onaylar;
+    const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
+    return html`<div class="bugun" data-oz="003">
+      <div class="bugun__sol">
+        <section class="bugun__alan" aria-label="Şimdi">
+          ${K.Ledger(() => [nextCard(), quickForm(), signalRow()].filter(Boolean))}
+        </section>
+        <section class="bugun__alan" aria-label="Durum">
+          ${K.Ledger(() => [sessionList(), planRowToday()].filter(Boolean))}
+          <p class="small">${K.Button({ label:'Oturum gir ve bütün satırlar', size:'sm', tone:'ghost',
+            act:'go', data:{ 'data-route':'gun' } })}</p>
+        </section>
+      </div>
+      <div class="bugun__sag">
+        <section class="bugun__alan" aria-label="Özet">${OzetKutusu()}</section>
+        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri">${oneri}</section>`)}
+      </div>
+    </div>`;
+  }
+
+  /* GÜNÜN AYRINTISI (Bugün › Ayrıntı). Önce Günlük'ün üç sekmesiydi
+     (Giriş · Özet · Geçmiş); şimdi üçü alt alta bölümdür ve eski sekme
+     eylemi (`day-tab`) bölüm çubuğunda kalır. Bugün'de duran şey (sıradaki
+     iş, günün sorusu, oturumlar, planda bugün, öneri) burada tekrar
+     çizilmez. */
+  function renderAyrinti(){
+    const guvenli = f => { try{ return K.Ledger(() => [].concat(f()).filter(Boolean)); }
+      catch(e){ console.error(e); return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; kayıtların yerinde duruyor.' }); } };
+    return K.Grid(html`${K.Span(12, K.SayfaBolumleri({ act:'day-tab', aria:'Günün bölümleri', bolumler:[
+      { id:'giris', ad:'Giriş', sayi:M.sessionsOf(gun()).length || null, govde:guvenli(() => [yedekRow(), hkmSeritRow(),
+        seriRow(), dunkuRow(), planRow(), reminderRow(), entryForm()]) },
+      { id:'ozet', ad:'Özet', govde:guvenli(summaryRows) },
+      { id:'gecmis', ad:'Geçmiş', govde:guvenli(historyRows) },
+    ] }))}`);
+  }
+
+  /* Başka yerden istenen bölüm çizimden sonra görünür; istek bir kez. */
+  function afterRenderAyrinti(){ ESP.Parts.bolumIstegi('dayTab', TABS[0].id); }
 
   /* HKM teklifine verilen cevabin TEK yolu: uygulama, yerel kayit ve
      merkeze bildirim tek sirada olur. «Uygulandı ama merkeze
@@ -868,7 +912,7 @@ ESP.Screens.today = (function(){
       ESP.App.render();
     },
 
-    async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; ESP.App.render(); },
+    async 'day-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'hedef-durum'(el){
       const r = await ESP.Hedefler.durumDegistir(el.dataset.id, el.dataset.durum);
@@ -1052,5 +1096,15 @@ ESP.Screens.today = (function(){
     subtitle(){ return U.fmtDate(gun()); },
     actions(){ return ''; },
     render, handle, change,
+    /* Bugün › Ayrıntı: aynı işleyiciler, ayrı bir çizim. */
+    ayrinti:{
+      id:'gun',
+      title:'Günün ayrıntısı',
+      subtitle(){ return 'Oturum girişi, hatırlatmalar, özet ve geçmiş'; },
+      actions(){ return ''; },
+      render:renderAyrinti, afterRender:afterRenderAyrinti, handle, change,
+    },
   };
 })();
+
+ESP.Screens.gun = ESP.Screens.today.ayrinti;

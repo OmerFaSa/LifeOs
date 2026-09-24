@@ -383,11 +383,12 @@ ESP.Screens.analytics = (function(){
               değerlendirilmez: sistem yüksek olanın iyi olduğunu VARSAYMAZ.</p>
             ${(function(){
               const pol = ESP.Goodhart.policy();
-              return html`<p class="small muted mt-8">Pencere ${pol.windowDays} gün ·
-                çaba artışı eşiği %${Math.round(pol.effortRiseThreshold * 100)} ·
-                sonuç durgunluk eşiği %${Math.round(pol.stagnationThreshold * 100)} ·
-                asgari çaba ${pol.minEffortMinutes} dk. Bu sayılar bir bulgu
-                değil bu yazılımın ayarıdır: ${pol.rationale}</p>`;
+              return K.Ayrinti({ class:'small muted mt-8', etiket:'Bu sayılar nereden?',
+                ozet:'Pencere ' + pol.windowDays + ' gün · çaba artışı eşiği %'
+                  + Math.round(pol.effortRiseThreshold * 100) + ' · sonuç durgunluk eşiği %'
+                  + Math.round(pol.stagnationThreshold * 100) + ' · asgari çaba '
+                  + pol.minEffortMinutes + ' dk.',
+                govde:html`<p>Bu sayılar bir bulgu değil bu yazılımın ayarıdır: ${pol.rationale}</p>` });
             })()}`
           : K.Empty({ text:'Açık bölüm yok; nöbetçinin bakacağı çift de yok.' }),
       }),
@@ -457,22 +458,18 @@ ESP.Screens.analytics = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
-  function render(){
-    const tab = S.ui.analyticsTab || 'radar';
-    const rows = tab === 'seriler' ? seriesRows()
-      : tab === 'rapor' ? reportRows()
-      : tab === 'durust' ? honestyRows()
-      : radarRows();
+  /* Sekme yok (EKIP-PLANI §1.2): dört okuma alt alta. */
+  const GOVDE = { radar:radarRows, seriler:seriesRows, rapor:reportRows, durust:honestyRows };
 
+  function render(){
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'ana-tab', aria:'Analiz sekmeleri', items:TABS }),
-      }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, ESP.Parts.bolumler(null, { act:'ana-tab', aria:'Analiz bölümleri', tabs:TABS, govde:GOVDE }))}`);
   }
 
+  function afterRender(){ ESP.Parts.bolumIstegi('analyticsTab', TABS[0].id); }
+
   const handle = {
-    async 'ana-tab'(el){ S.ui.analyticsTab = el.dataset.tab; ESP.App.render(); },
+    async 'ana-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'gen-briefing'(){
       delete S.officeBriefings[U.todayISO()];
@@ -555,6 +552,6 @@ ESP.Screens.analytics = (function(){
     },
     subtitle(){ return 'son 14 gün'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

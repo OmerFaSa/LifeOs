@@ -189,7 +189,7 @@ ESP.Screens.lang = (function(){
             ${K.Select({ id:'vocab-lang', value:aktifDil(), change:'pick-lang',
               aria:'Kartların dili',
               options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) })}
-            ${K.Button({ label:'Çöz', tone:'primary', act:'parse-vocab' })}
+            ${K.Button({ label:'Çöz', act:'parse-vocab' })}
           </div>
           ${when(res, () => vocabPreview(res))}`,
       }),
@@ -204,7 +204,7 @@ ESP.Screens.lang = (function(){
             ${K.Field({ label:'Bağlam', hint:'isteğe bağlı',
               input:K.Input({ id:'c-ctx', placeholder:'örnek cümle' }) })}
           </div>
-          ${K.Button({ label:'Kart ekle', tone:'primary', act:'add-card', class:'mt-10' })}`,
+          ${K.Button({ label:'Kart ekle', act:'add-card', class:'mt-10' })}`,
       }),
 
       K.Entry({
@@ -377,7 +377,7 @@ ESP.Screens.lang = (function(){
           ${K.Field({ label:'Doğrusu',
             input:K.Input({ id:'er-right', aria:'Doğru hâli' }) })}
         </div>
-        ${K.Button({ label:'Karta çevir', tone:'primary', act:'add-error', class:'mt-10' })}
+        ${K.Button({ label:'Karta çevir', act:'add-error', class:'mt-10' })}
         ${K.Table({ tight:true, headers:['Tür', 'Ne olur'],
           rows:ESP.PRODUCTION_ERRORS.map(e => [e.label, e.note]) })}`,
     }));
@@ -445,7 +445,7 @@ ESP.Screens.lang = (function(){
             options:['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] })}
           ${K.Input({ id:'unite-konu', placeholder:'Konu: selamlaşma, yiyecekler…', aria:'Konu',
             size:'sm', class:'grow' })}
-          ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'unite-iste' })}
+          ${K.Button({ label:'King’e ilet', size:'sm', act:'unite-iste' })}
         </div>`,
       }),
     ];
@@ -453,28 +453,23 @@ ESP.Screens.lang = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
-  function render(){
-    const tab = S.ui.langTab || 'calis';
-    const d = ESP.SRS.deckStatus(aktifDil());
-    const rows = tab === 'kartlar' ? cardRows()
-      : tab === 'ekle' ? addRows()
-      : tab === 'ogren' ? learnRows()
-      : tab === 'gramer' ? grammarRows()
-      : tab === 'ilerleme' ? progressRows()
-      : reviewRows();
+  /* Sekme yok (EKIP-PLANI §1.2): altı bölüm alt alta, tezgâh en sonda. */
+  const GOVDE = { calis:reviewRows, kartlar:cardRows, ekle:addRows, ogren:learnRows,
+    gramer:grammarRows, ilerleme:progressRows };
 
+  function render(){
+    const d = ESP.SRS.deckStatus(aktifDil());
     return K.Grid(html`
       ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'lang-tab', aria:'Dil sekmeleri',
-          items:TABS.map(t => Object.assign({}, t,
-            t.id === 'calis' ? { count:d.due || null } : {})) }),
         actions:K.Select({ value:aktifDil(), change:'deck-lang', size:'sm',
           aria:'Çalışılan dil',
           options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('lang')]
-        .concat(rows)))}`);
+      ${K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:'Dil bölümleri', tabs:TABS,
+        govde:GOVDE, sayi:{ calis:d.due || null } }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('langTab', TABS[0].id); }
 
   const handle = {
     async 'unite-iste'(){
@@ -484,7 +479,7 @@ ESP.Screens.lang = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'lang-tab'(el){ S.ui.langTab = el.dataset.tab; ESP.App.render(); },
+    async 'lang-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     /* Beyan bir olcum degildir: prefs icinde durur, deste sayilarina
        karismaz ve hicbir kapiyi acmaz. */
@@ -643,6 +638,6 @@ ESP.Screens.lang = (function(){
     },
     subtitle(){ return (ESP.LANG_BY_ID[aktifDil()] || {}).label || aktifDil(); },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

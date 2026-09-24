@@ -256,26 +256,23 @@ ESP.Screens.ladder = (function(){
     { id:'tespit', label:'Seviye tespiti' },
   ];
 
+  /* Sekme yok (EKIP-PLANI §1.2): genel, yol ve seviye tespiti alt alta;
+     disiplin seçici yol ve tespit içindir, hep görünür. */
   function render(){
-    const tab = S.ui.ladderTab || 'ozet';
     const disc = S.ui.curDisc || 'lang';
-    const rows = tab === 'ozet' ? ozetRows()
-      : tab === 'yol' ? yolRows(disc)
-      : tespitRows();
-
     return K.Grid(html`
       ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'pick-tab', aria:'Merdiven bölümleri',
-          items:TABS.map(t => ({ id:t.id, label:t.label })) }),
-        actions:when(tab !== 'ozet', () => K.Select({ id:'lad-disc', value:disc,
-          change:'pick-disc-sel', aria:'Disiplin seç',
-          options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) })),
+        actions:K.Select({ id:'lad-disc', value:disc, change:'pick-disc-sel', aria:'Disiplin seç',
+          options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }),
       }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:'Merdiven bölümleri', tabs:TABS,
+        govde:{ ozet:ozetRows, yol:() => yolRows(disc), tespit:tespitRows } }))}`);
   }
 
+  function afterRender(){ ESP.Parts.bolumIstegi('ladderTab', TABS[0].id); }
+
   const handle = {
-    async 'pick-tab'(el){ S.ui.ladderTab = el.dataset.tab; ESP.App.render(); },
+    async 'pick-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'pick-disc'(el){
       S.ui.curDisc = el.dataset.id;
@@ -335,6 +332,6 @@ ESP.Screens.ladder = (function(){
       return ov.cert === 'missing' ? 'ölçüm yok' : ov.level.label;
     },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

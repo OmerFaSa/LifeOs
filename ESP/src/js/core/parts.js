@@ -503,7 +503,7 @@ ESP.Parts = (function(){
       return html`
         <p class="small muted">Pratik bir sınav değildir: cevabın doğrudan
           aralıklı tekrara yazılır, ayrı bir kayıt açılmaz.</p>
-        ${K.Button({ label:'Pratiğe başla', tone:'primary', act:'prac-start',
+        ${K.Button({ label:'Pratiğe başla', act:'prac-start',
           class:'mt-10', data:{ 'data-deck':deck } })}`;
     }
 
@@ -594,11 +594,13 @@ ESP.Parts = (function(){
     const ids = ((m && m.oneriIds) || []).filter(id => bek.indexOf(id) >= 0);
     if(!ids.length) return '';
     return html`<div class="row gap-8 mt-8" style="flex-wrap:wrap">${map(ids, id => html`
-      ${K.Button({ label:'Onayla', icon:'check', tone:'primary', size:'sm', act:'prop-accept',
+      ${K.Button({ label:'Onayla', icon:'check', size:'sm', act:'prop-accept',
         data:{ 'data-id':id } })}
       ${K.Button({ label:'Vazgeç', size:'sm', act:'prop-decline', data:{ 'data-id':id } })}`)}</div>`;
   }
 
+  /* Onay düğmesi dolu değildir: liste uzadıkça ekranda tek dolu düğme
+     kuralı (EKIP-PLANI §1.2) bozulurdu. */
   function proposalList(list, bos){
     if(!list.length) return K.Empty({ text:bos || 'Bekleyen teklif yok.' });
     return html`<ul class="props">${map(list, p => {
@@ -612,7 +614,7 @@ ESP.Parts = (function(){
           <span class="tiny dim">${p.source === 'istek' ? 'senin isteğin' : (a.short || a.name || p.agentId)}
             · ${SEVIYE_ADI[k.level] || ''} · ${k.note || ''}</span>
         </span>
-        ${K.Button({ label:'Onayla', tone:'primary', size:'sm', act:'prop-accept',
+        ${K.Button({ label:'Onayla', size:'sm', act:'prop-accept',
           data:{ 'data-id':p.id } })}
         ${K.Button({ label:'Reddet', size:'sm', act:'prop-decline',
           data:{ 'data-id':p.id } })}
@@ -716,31 +718,64 @@ ESP.Parts = (function(){
       body:acik
         ? html`
           ${(function(){
-            /* Denetim sekmesinde ROZET: bakim borcu varsa sekmeye girmeden
-               gorunur. Sifir bulgu rozet uretmez — "0" yazan bir rozet,
-               gereksiz bir dikkat cagrisidir. */
+            /* Sekme değil AÇILIR SATIR (D katmanı, EKIP-PLANI §1.1): yedi
+               bölümün adı hep görünür, yalnız seçilen açıktır. Kapalı satırın
+               gövdesi de çizilir (görünmez ama yerindedir: alanları ve
+               eylemleri kaybolmaz). Açık olana yeniden basmak kapatır (app.js
+               desk-tab). Denetimde ROZET: bakım borcu varsa açmadan görünür;
+               sıfır bulgu rozet üretmez. */
             const denetim = ESP.Audit ? ESP.Audit.count(discId) : 0;
-            return K.Subtabs({ value:t, act:'desk-tab', aria:'Tezgâh bölümleri',
-              items:ESP.Desk.TABS.map(x => Object.assign({ id:x.id, label:x.label },
-                x.id === 'hatirlatma' && bekleyen ? { count:bekleyen }
-                  : x.id === 'plan' && teklif ? { count:teklif }
-                  : x.id === 'denetim' && denetim ? { count:denetim } : {})) });
-          })()}
-          <div class="desk__body" data-disc="${discId}">
-            ${t === 'recete' ? deskRx(discId)
-              : t === 'harita' ? deskMap(discId)
-              : t === 'ekler' ? deskAssets(discId)
-              : t === 'hatirlatma' ? deskReminders(discId)
-              : t === 'plan' ? deskPlans(discId)
-              : t === 'denetim' ? deskAudit(discId)
-              : deskChat(discId)}
-          </div>`
+            const sayi = { hatirlatma:bekleyen, plan:teklif, denetim };
+            return html`<div class="desk__katlar">${map(ESP.Desk.TABS, x => {
+              const on = x.id === t;
+              const kim = 'desk-' + discId + '-' + x.id;
+              return html`<div class="${cls('desk__kat', on && 'is-acik')}">
+                <button class="desk__kat-bas" data-act="desk-tab" data-disc="${discId}" data-tab="${x.id}"
+                  aria-expanded="${on ? 'true' : 'false'}" aria-controls="${kim}">${x.label}${when(sayi[x.id],
+                  () => html` <span class="bolumcubugu__rozet is-sessiz">${sayi[x.id]}</span>`)}</button>
+                <div class="desk__body" id="${kim}" data-disc="${discId}" ${on ? '' : raw('hidden')}>
+                  ${x.id === 'recete' ? deskRx(discId)
+                    : x.id === 'harita' ? deskMap(discId)
+                    : x.id === 'ekler' ? deskAssets(discId)
+                    : x.id === 'hatirlatma' ? deskReminders(discId)
+                    : x.id === 'plan' ? deskPlans(discId)
+                    : x.id === 'denetim' ? deskAudit(discId)
+                    : deskChat(discId)}
+                </div>
+              </div>`;
+            })}</div>`;
+          })()}`
         : html`<p class="small muted">Tezgâh kapalı. ${a.name} ile konuşmak,
             haritayı görmek, not/belge iliştirmek ve hatırlatma kurmak için aç.</p>`,
     });
   }
 
-  return { cert, measure, avatar, discChip, radar, empty, desk, deskRx,
+  /* SEKME → BÖLÜM (EKIP-PLANI §1.2, T3): disiplin ekranının sekmeleri alt
+     alta bölüm olur, tezgâh en sonda kendi bölümüdür. Bir bölüm çizilemezse
+     yalnız o düşer. `sayi` bölüm çubuğundaki rozettir. */
+  function bolumler(discId, o){
+    const guvenli = id => {
+      try{ return K.Ledger(() => [].concat(o.govde[id]() || []).filter(Boolean)); }
+      catch(e){
+        console.error('Bölüm çizilemedi (' + discId + '/' + id + '):', e);
+        return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; kayıtların yerinde duruyor.' });
+      }
+    };
+    const b = o.tabs.map(t => ({ id:t.id, ad:t.label, sayi:(o.sayi || {})[t.id] || null, govde:guvenli(t.id) }));
+    /* discId null: tezgâhı olmayan ekran (Analiz, Rehber, Merdiven). */
+    if(discId) b.push({ id:'tezgah', ad:'Tezgâh', govde:K.Ledger(() => [desk(discId)]) });
+    return K.SayfaBolumleri({ act:o.act, aria:o.aria, bolumler:b });
+  }
+
+  /* Başka yerden bir bölüm istendiyse (S.ui.<anahtar>) çizimden sonra oraya
+     kayılır ve istek düşer («istek bir kez»); ilk bölümde kayma yok. */
+  function bolumIstegi(anahtar, ilk){
+    const t = ESP.S.ui[anahtar];
+    ESP.S.ui[anahtar] = null;
+    if(t && t !== ilk) K.bolumeGit(t);
+  }
+
+  return { bolumler, bolumIstegi, cert, measure, avatar, discChip, radar, empty, desk, deskRx,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, deskAudit,
     units, practice, proposalList, onayDugmeleri, weekPlan, rx:rxList, topics };
 

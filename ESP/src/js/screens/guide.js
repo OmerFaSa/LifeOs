@@ -276,7 +276,7 @@ ESP.Screens.guide = (function(){
         note:'Yedek dosyası şifresizdir; paylaşılan bir dizine konmaz.',
         body:html`
           <div class="row wrap">
-            ${K.Button({ label:'Yedek indir', tone:'primary', act:'export-data2' })}
+            ${K.Button({ label:'Yedek indir', act:'export-data2' })}
             ${when((ESP.Beacon && ESP.Beacon.settings().enabled), () => K.Button({ label:'HKM’deki yedekten yükle', act:'restore-hkm' }))}
             ${K.Drop({ id:'restore-drop', act:'restore-file',
               label:'Yedek dosyasını buraya bırak ya da seç' })}
@@ -415,9 +415,13 @@ ESP.Screens.guide = (function(){
            + 'ilerletebileceğini söyler.',
         wide:true,
         body:html`
-          ${K.Notice({ tone:'warn', title:'Bu bir pedagojik hiyerarşi değildir',
-            body:ESP.Ev.policy().disclaimer })}
-          <p class="small muted mt-8">${ESP.Ev.policy().rationale}</p>
+          ${(function(){
+            /* Uyarının ilk cümlesi görünür; gerekçe bir dokunuşla açılır (§1.2). */
+            const c = String(ESP.Ev.policy().disclaimer).split(/(?<=\.)\s+/);
+            return K.Notice({ tone:'warn', title:'Bu bir pedagojik hiyerarşi değildir',
+              body:K.Ayrinti({ ozet:c[0], govde:html`${when(c.length > 1, () => html`<p>${c.slice(1).join(' ')}</p>`)}
+                <p class="mt-8">${ESP.Ev.policy().rationale}</p>` }) });
+          })()}
           ${K.Table({ tight:true,
             headers:['Kaynak türü', 'Tanınan yetki', { label:'Eşik', num:true }],
             rows:ESP.EVIDENCE_SOURCES.map(src => {
@@ -478,20 +482,15 @@ ESP.Screens.guide = (function(){
      üst gezinmede «Rütbe» (screens/rutbe.js) — kademe, merdiven,
      XP kaynakları ve defter orada. */
 
-  function render(){
-    const tab = S.ui.guideTab || 'kullanim';
-    const rows = tab === 'model' ? modelRows()
-      : tab === 'veri' ? dataRows()
-      : tab === 'sinirlar' ? limitRows()
-      : tab === 'kanit' ? evidenceRows()
-      : usageRows();
+  /* Sekme yok (EKIP-PLANI §1.2): beş bölüm alt alta. */
+  const GOVDE = { kullanim:usageRows, model:modelRows, veri:dataRows, sinirlar:limitRows, kanit:evidenceRows };
 
+  function render(){
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'guide-tab', aria:'Rehber sekmeleri', items:TABS }),
-      }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, ESP.Parts.bolumler(null, { act:'guide-tab', aria:'Rehber bölümleri', tabs:TABS, govde:GOVDE }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('guideTab', TABS[0].id); }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
@@ -524,7 +523,7 @@ ESP.Screens.guide = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'guide-tab'(el){ S.ui.guideTab = el.dataset.tab; ESP.App.render(); },
+    async 'guide-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     /* Budama. Sistem kullanicinin girdigi veriyi yer acmak icin silmez;
        motor zaten reddeder ama ekran da yalnizca izinli olanlari sunar. */
@@ -634,6 +633,6 @@ ESP.Screens.guide = (function(){
     stats(){ return []; },
     subtitle(){ return 'kullanım · model · veri · sınırlar'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

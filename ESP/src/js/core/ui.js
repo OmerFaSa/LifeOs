@@ -69,7 +69,8 @@ ESP.UI = (function(){
       + '<circle cx="7.5" cy="10.5" r="1.1" fill="currentColor" stroke="none"/>'
       + '<circle cx="10.5" cy="7" r="1.1" fill="currentColor" stroke="none"/>'
       + '<circle cx="15" cy="7.8" r="1.1" fill="currentColor" stroke="none"/>',
-    sliders:'<path d="M4 7h10M18 7h2M4 12h4M12 12h8M4 17h9M17 17h3"/>'
+    sliders:'<path d="M4 7h10M18 7h2M4 12h4M12 12h8M4 17h9M17 17h3"/>',
+    bag:'<path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/>'
       + '<circle cx="16" cy="7" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="15" cy="17" r="2"/>',
   };
 

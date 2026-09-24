@@ -259,7 +259,8 @@
   .sugg__pair{ grid-template-columns:1fr auto 1fr; }
 }
 .sugg__pair p{ font-size:var(--fs-sm); line-height:1.45; }
-.sugg__op{ color:var(--text-3); text-align:center; font-size:var(--fs-lg); }
+.sugg__op{ color:var(--text-3); display:flex; justify-content:center; align-items:center; }
+.sugg__op svg{ width:20px; height:20px; }
 .sugg__meta{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
   margin-top:var(--sp-2); }
 
@@ -601,9 +602,31 @@
 
 /* ============================================================== tezgâh
 
-   Yedi bölümde aynı görünür. Sekmeler renk taşımaz: sekme bir durum değil
-   bir yer bildirir. */
-.desk__body{ margin-top:var(--sp-3); }
+   Yedi bölümde aynı görünür. Iç sekmeler acilir satira dondu (T3, 019):
+   satir basligi gercek bir dugmedir (aria-expanded), kapali govde gizli
+   ama yerinde durur. Satir renk tasimaz: bir durum degil bir yer bildirir. */
+.desk__katlar{ border-top:1px solid var(--border); }
+.desk__kat{ border-bottom:1px solid var(--border); }
+.desk__kat-bas{
+  display:flex; align-items:center; gap:var(--sp-2);
+  width:100%; min-height:40px; padding:var(--sp-2) 0;
+  background:none; border:0; cursor:pointer; text-align:left;
+  font:inherit; font-size:var(--fs-sm); font-weight:600; color:var(--text-2);
+}
+.desk__kat-bas::after{
+  content:""; margin-left:auto; width:7px; height:7px; flex:none;
+  border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor;
+  transform:rotate(45deg) translateY(-2px);
+}
+.desk__kat.is-acik > .desk__kat-bas{ color:var(--text); }
+.desk__kat.is-acik > .desk__kat-bas::after{ transform:rotate(-135deg) translateY(-2px); }
+.desk__kat-bas:hover{ color:var(--text); }
+.desk__kat-bas:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; border-radius:4px; }
+.desk__body{ margin-top:var(--sp-1); padding-bottom:var(--sp-3); }
+.desk__body[hidden]{ display:none; }
+@media (prefers-reduced-motion:no-preference){
+  .desk__kat-bas::after{ transition:transform .16s ease; }
+}
 
 .deskchat__head{
   display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-3);

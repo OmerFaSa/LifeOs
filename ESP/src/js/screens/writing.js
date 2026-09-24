@@ -48,7 +48,7 @@ ESP.Screens.writing = (function(){
         body:html`<div class="row gap-8 wrap">
           ${K2.Input({ id:'belge-yazi', placeholder:'Konu: deneme, kısa öykü…', aria:'Yazı konusu',
             size:'sm', class:'grow' })}
-          ${K2.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+          ${K2.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
             data:{ 'data-alan':'yazi' } })}
         </div>`,
       }),
@@ -274,22 +274,16 @@ ESP.Screens.writing = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
-  function render(){
-    const tab = S.ui.writeTab || 'taslaklar';
-    const rows = tab === 'olcum' ? measureRows()
-      : tab === 'araclar' ? toolRows()
-      : tab === 'ogren' ? topicRows()
-      : draftRows();
+  /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
+  const GOVDE = { taslaklar:draftRows, olcum:measureRows, araclar:toolRows, ogren:topicRows };
 
+  function render(){
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'write-tab', aria:'Yazı sekmeleri',
-          items:TABS.map(t => Object.assign({}, t,
-            t.id === 'taslaklar' ? { count:(S.drafts || []).length || null } : {})) }),
-      }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('writing')]
-        .concat(rows)))}`);
+      ${K.Span(12, ESP.Parts.bolumler('writing', { act:'write-tab', aria:'Yazı bölümleri', tabs:TABS,
+        govde:GOVDE, sayi:{ taslaklar:(S.drafts || []).length || null } }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('writeTab', TABS[0].id); }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value : ''; }
 
@@ -300,7 +294,7 @@ ESP.Screens.writing = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'write-tab'(el){ S.ui.writeTab = el.dataset.tab; ESP.App.render(); },
+    async 'write-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'new-draft'(){
       const d = await M.saveDraft(M.newDraft({ title:'', text:'' }));
@@ -408,6 +402,6 @@ ESP.Screens.writing = (function(){
     },
     subtitle(){ return (S.drafts || []).length + ' taslak'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

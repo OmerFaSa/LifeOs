@@ -195,7 +195,7 @@ ESP.Screens.symposium = (function(){
               + 'değerlendirecek ölçüt de gerekir. Ama ölçütü kim koyar?' })}
           <div class="row mt-10">
             ${K.Button({ label:'Çöz', act:'parse-arg' })}
-            ${K.Button({ label:'Olduğu gibi kaydet', tone:'primary', act:'save-arg-raw' })}
+            ${K.Button({ label:'Olduğu gibi kaydet', act:'save-arg-raw' })}
           </div>
           ${when(res, () => html`
             <div class="mt-10">
@@ -257,7 +257,7 @@ ESP.Screens.symposium = (function(){
         body:html`<div class="row gap-8 wrap">
           ${K.Input({ id:'belge-felsefe', placeholder:'Konu: Stoacılık, varoluşçuluk…', aria:'Felsefe konusu',
             size:'sm', class:'grow' })}
-          ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+          ${K.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
             data:{ 'data-alan':'felsefe' } })}
         </div>`,
       }),
@@ -272,7 +272,7 @@ ESP.Screens.symposium = (function(){
             ${K.Select({ id:'canon-pick', aria:'Kanondan eser seç',
               options:ESP.CANON.map(c => ({ value:c.id,
                 label:c.author + ' — ' + c.title })) })}
-            ${K.Button({ label:'Ekle', tone:'primary', act:'add-canon' })}
+            ${K.Button({ label:'Ekle', act:'add-canon' })}
           </div>
           <p class="small muted mt-8">Listede olmayan bir kaynağı elle de ekleyebilirsin.</p>
           <div class="cols-3 mt-10">
@@ -306,24 +306,17 @@ ESP.Screens.symposium = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
-  function render(){
-    const tab = S.ui.philoTab || 'acik';
-    const rows = tab === 'kapali' ? closedRows()
-      : tab === 'ekle' ? addRows()
-      : tab === 'metinler' ? textRows()
-      : tab === 'deneyler' ? experimentRows()
-      : tab === 'ogren' ? topicRows()
-      : openRows();
+  /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
+  const GOVDE = { acik:openRows, kapali:closedRows, ekle:addRows, metinler:textRows,
+    deneyler:experimentRows, ogren:topicRows };
 
+  function render(){
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'philo-tab', aria:'Sempozyum sekmeleri',
-          items:TABS.map(t => Object.assign({}, t,
-            t.id === 'acik' ? { count:ESP.Intellect.openArguments().length || null } : {})) }),
-      }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('philo')]
-        .concat(rows)))}`);
+      ${K.Span(12, ESP.Parts.bolumler('philo', { act:'philo-tab', aria:'Felsefe bölümleri', tabs:TABS,
+        govde:GOVDE, sayi:{ acik:ESP.Intellect.openArguments().length || null } }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('philoTab', TABS[0].id); }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
@@ -334,7 +327,7 @@ ESP.Screens.symposium = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'philo-tab'(el){ S.ui.philoTab = el.dataset.tab; ESP.App.render(); },
+    async 'philo-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'tab-ekle'(){ S.ui.philoTab = 'ekle'; ESP.App.render(); },
 
     /* Deneyi teze çevirmek: deneyin kurgusu tezin YERINE geçmez, tezi
@@ -535,6 +528,6 @@ ESP.Screens.symposium = (function(){
     },
     subtitle(){ return (S.args || []).length + ' tez'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

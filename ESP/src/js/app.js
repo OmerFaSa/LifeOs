@@ -615,10 +615,13 @@ ESP.App = (function(){
        Eylemler burada çünkü tezgâh yedi ekranda birden duruyor; her ekranda
        ayrı bir işlem yazmak, yedi kez bozulabilecek bir işlem demektir. */
     async 'desk-toggle'(el){ ESP.Desk.toggle(el.dataset.disc); render(); },
+    /* Tezgâhın açılır satırı: basılan açılır; açık olana yeniden basmak
+       kapatır (yalnız bir satır açık kalır). */
     async 'desk-tab'(el){
       const kap = el.closest('.lrow');
       const govde = kap ? kap.querySelector('.desk__body') : null;
-      ESP.Desk.setTab(govde ? govde.dataset.disc : S.ui.sessionDisc, el.dataset.tab);
+      const disc = el.dataset.disc || (govde ? govde.dataset.disc : S.ui.sessionDisc);
+      ESP.Desk.setTab(disc, ESP.Desk.tab(disc) === el.dataset.tab ? 'kapali' : el.dataset.tab);
       render();
     },
 

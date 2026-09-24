@@ -166,7 +166,7 @@ ESP.Screens.studio = (function(){
             </div>
             <div class="metro__ctrl">
               ${K.Button({ label:S.ui.metronomeOn ? 'Durdur' : 'Başlat',
-                tone:S.ui.metronomeOn ? '' : 'primary', act:'metro-toggle' })}
+                act:'metro-toggle' })}
               ${K.Select({ id:'metro-sig', value:S.ui.metroSig || '4/4', change:'metro-sig',
                 aria:'Ölçü türü',
                 options:ESP.TIME_SIGNATURES.map(t => ({ value:t.id, label:t.label })) })}
@@ -245,7 +245,7 @@ ESP.Screens.studio = (function(){
             input:K.Input({ id:'p-target', type:'number', numeric:true, min:20, max:300,
               placeholder:'120' }) })}
         </div>
-        ${K.Button({ label:'Ekle', tone:'primary', act:'add-piece', class:'mt-10' })}
+        ${K.Button({ label:'Ekle', act:'add-piece', class:'mt-10' })}
         <p class="small muted mt-10">Hazır teknikler:</p>
         <div class="row wrap mt-4">
           ${map(ESP.TECHNIQUES, t => K.Button({ label:t.label, size:'sm',
@@ -266,7 +266,7 @@ ESP.Screens.studio = (function(){
             { value:'ileri', label:'İleri' }] })}
         ${K.Input({ id:'gitar-konu', placeholder:'Konu: akor geçişleri, blues…', aria:'Konu',
           size:'sm', class:'grow' })}
-        ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'gitar-iste' })}
+        ${K.Button({ label:'King’e ilet', size:'sm', act:'gitar-iste' })}
       </div>`,
     }));
 
@@ -317,7 +317,7 @@ ESP.Screens.studio = (function(){
           <div class="row gap-8 wrap mt-10">
             ${K.Input({ id:'belge-diksiyon', placeholder:'Konu: Türkçe vurgu, r sesi, sesli okuma…',
               aria:'Diksiyon belgesi konusu', size:'sm', class:'grow' })}
-            ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+            ${K.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
               data:{ 'data-alan':'diksiyon' } })}
           </div>`,
       }),
@@ -344,7 +344,7 @@ ESP.Screens.studio = (function(){
               tone:(S.ui.errTags || []).indexOf(e.id) >= 0 ? 'primary' : '',
               act:'toggle-err', data:{ 'data-id':e.id } }))}
           </div>
-          ${K.Button({ label:'Ölçümü kaydet', tone:'primary', act:'add-recording', class:'mt-10' })}`,
+          ${K.Button({ label:'Ölçümü kaydet', act:'add-recording', class:'mt-10' })}`,
       }),
 
       K.Entry({
@@ -482,27 +482,18 @@ ESP.Screens.studio = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
+  /* Sekme yok (EKIP-PLANI §1.2): beş bölüm alt alta. Stüdyoda iki
+     disiplin var; her birinin tezgâhı kendi bölümünün başında durur (koç o
+     masanın reçetesini yazar). */
   function render(){
-    const tab = S.ui.studioTab || 'muzik';
-    const rows = tab === 'diksiyon' ? dictionRows()
-      : tab === 'kulak' ? earRows()
-      : tab === 'ogren' ? topicRows()
-      : tab === 'ilerleme' ? progressRows()
-      : musicRows();
-
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'studio-tab', aria:'Stüdyo sekmeleri', items:TABS }),
-      }))}
-      ${K.Span(12, K.Ledger(() => {
-        /* Studyoda iki disiplin var: sekme hangisindeyse koç o masanin
-           recetesini yazar. Ikisini birden gostermek, otuz dakikalik bir
-           gunu altmis dakikalik bir recete ile karsilamak olurdu. */
-        const disc = S.ui.studioTab === 'diksiyon' ? 'diction' : 'music';
-        const sessiz = S.ui.studioTab === 'ilerleme' || S.ui.studioTab === 'kulak';
-        return (sessiz ? [] : [ESP.Parts.desk(disc)]).concat(rows);
-      }))}`);
+      ${K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:'Stüdyo bölümleri', tabs:TABS, govde:{
+        muzik:() => [ESP.Parts.desk('music')].concat(musicRows()),
+        diksiyon:() => [ESP.Parts.desk('diction')].concat(dictionRows()),
+        kulak:earRows, ogren:topicRows, ilerleme:progressRows } }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('studioTab', TABS[0].id); }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
@@ -520,11 +511,8 @@ ESP.Screens.studio = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'studio-tab'(el){
-      if(S.ui.metronomeOn){ metronomeStop(); S.ui.metronomeOn = false; }
-      S.ui.studioTab = el.dataset.tab;
-      ESP.App.render();
-    },
+    /* Bölüme kayar; metronom durmaz (bölümler aynı sayfada). */
+    async 'studio-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'bpm'(el){
       const d = Number(el.dataset.d) || 0;
@@ -669,7 +657,7 @@ ESP.Screens.studio = (function(){
     },
     subtitle(){ return (S.pieces || []).length + ' parça · ' + (S.recordings || []).length + ' kayıt'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
 
     /* Ekrandan cikarken metronom susmali: gorunmeyen bir ekranin sesi
        kullanicinin kapatamayacagi bir sestir. */

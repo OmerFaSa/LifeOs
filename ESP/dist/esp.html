@@ -7057,7 +7057,8 @@ button.rutbe-rozet:focus-visible{
   .sugg__pair{ grid-template-columns:1fr auto 1fr; }
 }
 .sugg__pair p{ font-size:var(--fs-sm); line-height:1.45; }
-.sugg__op{ color:var(--text-3); text-align:center; font-size:var(--fs-lg); }
+.sugg__op{ color:var(--text-3); display:flex; justify-content:center; align-items:center; }
+.sugg__op svg{ width:20px; height:20px; }
 .sugg__meta{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
   margin-top:var(--sp-2); }
 
@@ -7399,9 +7400,31 @@ button.rutbe-rozet:focus-visible{
 
 /* ============================================================== tezgâh
 
-   Yedi bölümde aynı görünür. Sekmeler renk taşımaz: sekme bir durum değil
-   bir yer bildirir. */
-.desk__body{ margin-top:var(--sp-3); }
+   Yedi bölümde aynı görünür. Iç sekmeler acilir satira dondu (T3, 019):
+   satir basligi gercek bir dugmedir (aria-expanded), kapali govde gizli
+   ama yerinde durur. Satir renk tasimaz: bir durum degil bir yer bildirir. */
+.desk__katlar{ border-top:1px solid var(--border); }
+.desk__kat{ border-bottom:1px solid var(--border); }
+.desk__kat-bas{
+  display:flex; align-items:center; gap:var(--sp-2);
+  width:100%; min-height:40px; padding:var(--sp-2) 0;
+  background:none; border:0; cursor:pointer; text-align:left;
+  font:inherit; font-size:var(--fs-sm); font-weight:600; color:var(--text-2);
+}
+.desk__kat-bas::after{
+  content:""; margin-left:auto; width:7px; height:7px; flex:none;
+  border-right:1.5px solid currentColor; border-bottom:1.5px solid currentColor;
+  transform:rotate(45deg) translateY(-2px);
+}
+.desk__kat.is-acik > .desk__kat-bas{ color:var(--text); }
+.desk__kat.is-acik > .desk__kat-bas::after{ transform:rotate(-135deg) translateY(-2px); }
+.desk__kat-bas:hover{ color:var(--text); }
+.desk__kat-bas:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; border-radius:4px; }
+.desk__body{ margin-top:var(--sp-1); padding-bottom:var(--sp-3); }
+.desk__body[hidden]{ display:none; }
+@media (prefers-reduced-motion:no-preference){
+  .desk__kat-bas::after{ transition:transform .16s ease; }
+}
 
 .deskchat__head{
   display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-3);
@@ -9323,7 +9346,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'5115773', at:'2026-09-24 19:24', dirty:true };
+ESP.BUILD = { id:'6c92411', at:'2026-09-24 19:49', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20943,7 +20966,8 @@ ESP.SECTIONS_ALL = [
        çekmece çizilmez. `disc` artık BÖLÜMDEDİR: disiplin kapanınca yalnız
        onun bölümü düşer, Çalışma kalır. */
     { id:'bugun', icon:'pulse', label:'Bugün', note:'Günün pratiğini gir, karşılığını gör',
-      views:[{ route:'today', label:'Bugün', icon:'pulse' }] },
+      views:[{ route:'today', label:'Bugün', icon:'pulse' },
+        { route:'gun', label:'Ayrıntı', icon:'list' }] },
 
     { id:'plan', icon:'chart', label:'Plan', note:'Merdiven: her disiplinde bir sonraki basamak',
       views:[{ route:'ladder', label:'Merdiven', icon:'chart' }] },
@@ -35445,7 +35469,8 @@ ESP.UI = (function(){
       + '<circle cx="7.5" cy="10.5" r="1.1" fill="currentColor" stroke="none"/>'
       + '<circle cx="10.5" cy="7" r="1.1" fill="currentColor" stroke="none"/>'
       + '<circle cx="15" cy="7.8" r="1.1" fill="currentColor" stroke="none"/>',
-    sliders:'<path d="M4 7h10M18 7h2M4 12h4M12 12h8M4 17h9M17 17h3"/>'
+    sliders:'<path d="M4 7h10M18 7h2M4 12h4M12 12h8M4 17h9M17 17h3"/>',
+    bag:'<path d="M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4"/>'
       + '<circle cx="16" cy="7" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="15" cy="17" r="2"/>',
   };
 
@@ -37308,7 +37333,7 @@ ESP.Parts = (function(){
       return html`
         <p class="small muted">Pratik bir sınav değildir: cevabın doğrudan
           aralıklı tekrara yazılır, ayrı bir kayıt açılmaz.</p>
-        ${K.Button({ label:'Pratiğe başla', tone:'primary', act:'prac-start',
+        ${K.Button({ label:'Pratiğe başla', act:'prac-start',
           class:'mt-10', data:{ 'data-deck':deck } })}`;
     }
 
@@ -37399,11 +37424,13 @@ ESP.Parts = (function(){
     const ids = ((m && m.oneriIds) || []).filter(id => bek.indexOf(id) >= 0);
     if(!ids.length) return '';
     return html`<div class="row gap-8 mt-8" style="flex-wrap:wrap">${map(ids, id => html`
-      ${K.Button({ label:'Onayla', icon:'check', tone:'primary', size:'sm', act:'prop-accept',
+      ${K.Button({ label:'Onayla', icon:'check', size:'sm', act:'prop-accept',
         data:{ 'data-id':id } })}
       ${K.Button({ label:'Vazgeç', size:'sm', act:'prop-decline', data:{ 'data-id':id } })}`)}</div>`;
   }
 
+  /* Onay düğmesi dolu değildir: liste uzadıkça ekranda tek dolu düğme
+     kuralı (EKIP-PLANI §1.2) bozulurdu. */
   function proposalList(list, bos){
     if(!list.length) return K.Empty({ text:bos || 'Bekleyen teklif yok.' });
     return html`<ul class="props">${map(list, p => {
@@ -37417,7 +37444,7 @@ ESP.Parts = (function(){
           <span class="tiny dim">${p.source === 'istek' ? 'senin isteğin' : (a.short || a.name || p.agentId)}
             · ${SEVIYE_ADI[k.level] || ''} · ${k.note || ''}</span>
         </span>
-        ${K.Button({ label:'Onayla', tone:'primary', size:'sm', act:'prop-accept',
+        ${K.Button({ label:'Onayla', size:'sm', act:'prop-accept',
           data:{ 'data-id':p.id } })}
         ${K.Button({ label:'Reddet', size:'sm', act:'prop-decline',
           data:{ 'data-id':p.id } })}
@@ -37521,31 +37548,64 @@ ESP.Parts = (function(){
       body:acik
         ? html`
           ${(function(){
-            /* Denetim sekmesinde ROZET: bakim borcu varsa sekmeye girmeden
-               gorunur. Sifir bulgu rozet uretmez — "0" yazan bir rozet,
-               gereksiz bir dikkat cagrisidir. */
+            /* Sekme değil AÇILIR SATIR (D katmanı, EKIP-PLANI §1.1): yedi
+               bölümün adı hep görünür, yalnız seçilen açıktır. Kapalı satırın
+               gövdesi de çizilir (görünmez ama yerindedir: alanları ve
+               eylemleri kaybolmaz). Açık olana yeniden basmak kapatır (app.js
+               desk-tab). Denetimde ROZET: bakım borcu varsa açmadan görünür;
+               sıfır bulgu rozet üretmez. */
             const denetim = ESP.Audit ? ESP.Audit.count(discId) : 0;
-            return K.Subtabs({ value:t, act:'desk-tab', aria:'Tezgâh bölümleri',
-              items:ESP.Desk.TABS.map(x => Object.assign({ id:x.id, label:x.label },
-                x.id === 'hatirlatma' && bekleyen ? { count:bekleyen }
-                  : x.id === 'plan' && teklif ? { count:teklif }
-                  : x.id === 'denetim' && denetim ? { count:denetim } : {})) });
-          })()}
-          <div class="desk__body" data-disc="${discId}">
-            ${t === 'recete' ? deskRx(discId)
-              : t === 'harita' ? deskMap(discId)
-              : t === 'ekler' ? deskAssets(discId)
-              : t === 'hatirlatma' ? deskReminders(discId)
-              : t === 'plan' ? deskPlans(discId)
-              : t === 'denetim' ? deskAudit(discId)
-              : deskChat(discId)}
-          </div>`
+            const sayi = { hatirlatma:bekleyen, plan:teklif, denetim };
+            return html`<div class="desk__katlar">${map(ESP.Desk.TABS, x => {
+              const on = x.id === t;
+              const kim = 'desk-' + discId + '-' + x.id;
+              return html`<div class="${cls('desk__kat', on && 'is-acik')}">
+                <button class="desk__kat-bas" data-act="desk-tab" data-disc="${discId}" data-tab="${x.id}"
+                  aria-expanded="${on ? 'true' : 'false'}" aria-controls="${kim}">${x.label}${when(sayi[x.id],
+                  () => html` <span class="bolumcubugu__rozet is-sessiz">${sayi[x.id]}</span>`)}</button>
+                <div class="desk__body" id="${kim}" data-disc="${discId}" ${on ? '' : raw('hidden')}>
+                  ${x.id === 'recete' ? deskRx(discId)
+                    : x.id === 'harita' ? deskMap(discId)
+                    : x.id === 'ekler' ? deskAssets(discId)
+                    : x.id === 'hatirlatma' ? deskReminders(discId)
+                    : x.id === 'plan' ? deskPlans(discId)
+                    : x.id === 'denetim' ? deskAudit(discId)
+                    : deskChat(discId)}
+                </div>
+              </div>`;
+            })}</div>`;
+          })()}`
         : html`<p class="small muted">Tezgâh kapalı. ${a.name} ile konuşmak,
             haritayı görmek, not/belge iliştirmek ve hatırlatma kurmak için aç.</p>`,
     });
   }
 
-  return { cert, measure, avatar, discChip, radar, empty, desk, deskRx,
+  /* SEKME → BÖLÜM (EKIP-PLANI §1.2, T3): disiplin ekranının sekmeleri alt
+     alta bölüm olur, tezgâh en sonda kendi bölümüdür. Bir bölüm çizilemezse
+     yalnız o düşer. `sayi` bölüm çubuğundaki rozettir. */
+  function bolumler(discId, o){
+    const guvenli = id => {
+      try{ return K.Ledger(() => [].concat(o.govde[id]() || []).filter(Boolean)); }
+      catch(e){
+        console.error('Bölüm çizilemedi (' + discId + '/' + id + '):', e);
+        return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; kayıtların yerinde duruyor.' });
+      }
+    };
+    const b = o.tabs.map(t => ({ id:t.id, ad:t.label, sayi:(o.sayi || {})[t.id] || null, govde:guvenli(t.id) }));
+    /* discId null: tezgâhı olmayan ekran (Analiz, Rehber, Merdiven). */
+    if(discId) b.push({ id:'tezgah', ad:'Tezgâh', govde:K.Ledger(() => [desk(discId)]) });
+    return K.SayfaBolumleri({ act:o.act, aria:o.aria, bolumler:b });
+  }
+
+  /* Başka yerden bir bölüm istendiyse (S.ui.<anahtar>) çizimden sonra oraya
+     kayılır ve istek düşer («istek bir kez»); ilk bölümde kayma yok. */
+  function bolumIstegi(anahtar, ilk){
+    const t = ESP.S.ui[anahtar];
+    ESP.S.ui[anahtar] = null;
+    if(t && t !== ilk) K.bolumeGit(t);
+  }
+
+  return { bolumler, bolumIstegi, cert, measure, avatar, discChip, radar, empty, desk, deskRx,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, deskAudit,
     units, practice, proposalList, onayDugmeleri, weekPlan, rx:rxList, topics };
 
@@ -41022,11 +41082,11 @@ ESP.Screens.today = (function(){
       label:'HEDEFLERİM', meta:l.length ? l.length + ' etkin' : 'yok',
       action:K.Button({ label:'Danışma’da hedef koy', size:'sm', act:'go', data:{ 'data-route':'team' } }),
       body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
-        : html`<p class="small dim">Henüz hedefin yok. Danışma’da «Bir yılda gitarda Kalfa’ya
-          gelmek istiyorum», «Bir ayda İngilizcede A2’ye gelmek istiyorum» ya da «bu yıl 24 kitap
-          okumak istiyorum» gibi yazabilirsin; vaktine göre olup olmadığını ve olacağı tarihi
-          söylerim. Alışkanlık da kurabilirsin: «her gün 20 dakika kitap okuma alışkanlığı
-          kazanmak istiyorum».</p>`,
+        : K.Ayrinti({ etiket:'Örnekler', ozet:'Henüz hedefin yok. Danışma’da tek cümleyle yazabilirsin.',
+          govde:html`<p>«Bir yılda gitarda Kalfa’ya gelmek istiyorum», «Bir ayda İngilizcede A2’ye
+            gelmek istiyorum» ya da «bu yıl 24 kitap okumak istiyorum» gibi yazabilirsin; vaktine
+            göre olup olmadığını ve olacağı tarihi söylerim. Alışkanlık da kurabilirsin: «her gün
+            20 dakika kitap okuma alışkanlığı kazanmak istiyorum».</p>` }),
     });
   }
 
@@ -41420,29 +41480,73 @@ ESP.Screens.today = (function(){
           + ' Tarayıcı verisi silinirse oturum geçmişin, kartların ve '
           + 'notların kaybolur.' })}
         <div class="row gap-8 mt-8">
-          ${K.Button({ label:'Yedek al', size:'sm', tone:'primary',
+          ${K.Button({ label:'Yedek al', size:'sm',
             act:'go', data:{ 'data-route':'profile' } })}
         </div>` });
   }
 
-  function render(){
-    const tab = S.ui.dayTab || 'giris';
-    const rows = [yedekRow()].concat(
-      tab === 'ozet' ? summaryRows()
-      : tab === 'gecmis' ? historyRows()
-      : [oneriRow(), hkmSeritRow(), seriRow(), dunkuRow(), nextCard(), signalRow(), planRow(),
-          planRowToday(), reminderRow(),
-          entryForm(), quickForm(), sessionList()])
-          .filter(Boolean);
-
-    return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'day-tab', aria:'Günlük sekmeleri',
-          items:TABS.map(t => Object.assign({}, t,
-            t.id === 'giris' ? { count:M.sessionsOf(gun()).length || null } : {})) }),
-      }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+  /* BUGÜN — üç alan (katalog 03, EKIP-PLANI §3):
+       ŞİMDİ   sıradaki tek iş, tek cümlelik hızlı kayıt, (varsa) günün sorusu
+       DURUM   özet · bugünün oturumları · planda bugün
+       ÖNERİ   en çok bir kart; fazlası «+N öneri Onaylar'da»
+     Geri kalan her satır «Bugün › Ayrıntı»dadır (renderAyrinti). Sadelik
+     bütçesi: sayfa boyu 1800 px, görünen düğme 14. */
+  function OzetKutusu(){
+    const rows = M.sessionsOf(gun());
+    const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
+    const d = ESP.SRS.deckStatus();
+    const hucre = (ad, deger, birim, not) => html`<div class="ozet__hucre">
+      <span class="ozet__ad">${ad}</span>
+      <b class="ozet__deger">${deger}${when(birim, () => html`<small> ${birim}</small>`)}</b>
+      <span class="ozet__not">${not}</span></div>`;
+    /* Girilmemiş gün sıfır değildir: oturum yoksa dakika «—». */
+    return K.Kutu({ ad:'Özet', yuva:'bugün', bitisik:true, govde:html`<div class="ozet">
+      ${hucre('Bugün', rows.length ? U.fmtNum(toplam) : '—', rows.length ? 'dk' : '', rows.length + ' oturum')}
+      ${hucre('Vadeli kart', d.due, '', 'tekrar bekliyor')}
+      ${hucre('Seri', M.streak(), 'gün', 'asgari gün tutuldu')}
+      ${hucre('Açık disiplin', ESP.Mod.active().length, '', 'Çalışma’da')}
+    </div>` });
   }
+
+  function render(){
+    const O = ESP.Screens.onaylar;
+    const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
+    return html`<div class="bugun" data-oz="003">
+      <div class="bugun__sol">
+        <section class="bugun__alan" aria-label="Şimdi">
+          ${K.Ledger(() => [nextCard(), quickForm(), signalRow()].filter(Boolean))}
+        </section>
+        <section class="bugun__alan" aria-label="Durum">
+          ${K.Ledger(() => [sessionList(), planRowToday()].filter(Boolean))}
+          <p class="small">${K.Button({ label:'Oturum gir ve bütün satırlar', size:'sm', tone:'ghost',
+            act:'go', data:{ 'data-route':'gun' } })}</p>
+        </section>
+      </div>
+      <div class="bugun__sag">
+        <section class="bugun__alan" aria-label="Özet">${OzetKutusu()}</section>
+        ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri">${oneri}</section>`)}
+      </div>
+    </div>`;
+  }
+
+  /* GÜNÜN AYRINTISI (Bugün › Ayrıntı). Önce Günlük'ün üç sekmesiydi
+     (Giriş · Özet · Geçmiş); şimdi üçü alt alta bölümdür ve eski sekme
+     eylemi (`day-tab`) bölüm çubuğunda kalır. Bugün'de duran şey (sıradaki
+     iş, günün sorusu, oturumlar, planda bugün, öneri) burada tekrar
+     çizilmez. */
+  function renderAyrinti(){
+    const guvenli = f => { try{ return K.Ledger(() => [].concat(f()).filter(Boolean)); }
+      catch(e){ console.error(e); return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; kayıtların yerinde duruyor.' }); } };
+    return K.Grid(html`${K.Span(12, K.SayfaBolumleri({ act:'day-tab', aria:'Günün bölümleri', bolumler:[
+      { id:'giris', ad:'Giriş', sayi:M.sessionsOf(gun()).length || null, govde:guvenli(() => [yedekRow(), hkmSeritRow(),
+        seriRow(), dunkuRow(), planRow(), reminderRow(), entryForm()]) },
+      { id:'ozet', ad:'Özet', govde:guvenli(summaryRows) },
+      { id:'gecmis', ad:'Geçmiş', govde:guvenli(historyRows) },
+    ] }))}`);
+  }
+
+  /* Başka yerden istenen bölüm çizimden sonra görünür; istek bir kez. */
+  function afterRenderAyrinti(){ ESP.Parts.bolumIstegi('dayTab', TABS[0].id); }
 
   /* HKM teklifine verilen cevabin TEK yolu: uygulama, yerel kayit ve
      merkeze bildirim tek sirada olur. «Uygulandı ama merkeze
@@ -41527,7 +41631,7 @@ ESP.Screens.today = (function(){
       ESP.App.render();
     },
 
-    async 'day-tab'(el){ S.ui.dayTab = el.dataset.tab; ESP.App.render(); },
+    async 'day-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'hedef-durum'(el){
       const r = await ESP.Hedefler.durumDegistir(el.dataset.id, el.dataset.durum);
@@ -41711,8 +41815,18 @@ ESP.Screens.today = (function(){
     subtitle(){ return U.fmtDate(gun()); },
     actions(){ return ''; },
     render, handle, change,
+    /* Bugün › Ayrıntı: aynı işleyiciler, ayrı bir çizim. */
+    ayrinti:{
+      id:'gun',
+      title:'Günün ayrıntısı',
+      subtitle(){ return 'Oturum girişi, hatırlatmalar, özet ve geçmiş'; },
+      actions(){ return ''; },
+      render:renderAyrinti, afterRender:afterRenderAyrinti, handle, change,
+    },
   };
 })();
+
+ESP.Screens.gun = ESP.Screens.today.ayrinti;
 
 /* ==== js/screens/lang.js ==== */
 /* Dil Stüdyosu — aralıklı tekrar, deste ve üretim.
@@ -41906,7 +42020,7 @@ ESP.Screens.lang = (function(){
             ${K.Select({ id:'vocab-lang', value:aktifDil(), change:'pick-lang',
               aria:'Kartların dili',
               options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) })}
-            ${K.Button({ label:'Çöz', tone:'primary', act:'parse-vocab' })}
+            ${K.Button({ label:'Çöz', act:'parse-vocab' })}
           </div>
           ${when(res, () => vocabPreview(res))}`,
       }),
@@ -41921,7 +42035,7 @@ ESP.Screens.lang = (function(){
             ${K.Field({ label:'Bağlam', hint:'isteğe bağlı',
               input:K.Input({ id:'c-ctx', placeholder:'örnek cümle' }) })}
           </div>
-          ${K.Button({ label:'Kart ekle', tone:'primary', act:'add-card', class:'mt-10' })}`,
+          ${K.Button({ label:'Kart ekle', act:'add-card', class:'mt-10' })}`,
       }),
 
       K.Entry({
@@ -42094,7 +42208,7 @@ ESP.Screens.lang = (function(){
           ${K.Field({ label:'Doğrusu',
             input:K.Input({ id:'er-right', aria:'Doğru hâli' }) })}
         </div>
-        ${K.Button({ label:'Karta çevir', tone:'primary', act:'add-error', class:'mt-10' })}
+        ${K.Button({ label:'Karta çevir', act:'add-error', class:'mt-10' })}
         ${K.Table({ tight:true, headers:['Tür', 'Ne olur'],
           rows:ESP.PRODUCTION_ERRORS.map(e => [e.label, e.note]) })}`,
     }));
@@ -42162,7 +42276,7 @@ ESP.Screens.lang = (function(){
             options:['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] })}
           ${K.Input({ id:'unite-konu', placeholder:'Konu: selamlaşma, yiyecekler…', aria:'Konu',
             size:'sm', class:'grow' })}
-          ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'unite-iste' })}
+          ${K.Button({ label:'King’e ilet', size:'sm', act:'unite-iste' })}
         </div>`,
       }),
     ];
@@ -42170,28 +42284,23 @@ ESP.Screens.lang = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
-  function render(){
-    const tab = S.ui.langTab || 'calis';
-    const d = ESP.SRS.deckStatus(aktifDil());
-    const rows = tab === 'kartlar' ? cardRows()
-      : tab === 'ekle' ? addRows()
-      : tab === 'ogren' ? learnRows()
-      : tab === 'gramer' ? grammarRows()
-      : tab === 'ilerleme' ? progressRows()
-      : reviewRows();
+  /* Sekme yok (EKIP-PLANI §1.2): altı bölüm alt alta, tezgâh en sonda. */
+  const GOVDE = { calis:reviewRows, kartlar:cardRows, ekle:addRows, ogren:learnRows,
+    gramer:grammarRows, ilerleme:progressRows };
 
+  function render(){
+    const d = ESP.SRS.deckStatus(aktifDil());
     return K.Grid(html`
       ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'lang-tab', aria:'Dil sekmeleri',
-          items:TABS.map(t => Object.assign({}, t,
-            t.id === 'calis' ? { count:d.due || null } : {})) }),
         actions:K.Select({ value:aktifDil(), change:'deck-lang', size:'sm',
           aria:'Çalışılan dil',
           options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }),
       }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('lang')]
-        .concat(rows)))}`);
+      ${K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:'Dil bölümleri', tabs:TABS,
+        govde:GOVDE, sayi:{ calis:d.due || null } }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('langTab', TABS[0].id); }
 
   const handle = {
     async 'unite-iste'(){
@@ -42201,7 +42310,7 @@ ESP.Screens.lang = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'lang-tab'(el){ S.ui.langTab = el.dataset.tab; ESP.App.render(); },
+    async 'lang-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     /* Beyan bir olcum degildir: prefs icinde durur, deste sayilarina
        karismaz ve hicbir kapiyi acmaz. */
@@ -42360,7 +42469,7 @@ ESP.Screens.lang = (function(){
     },
     subtitle(){ return (ESP.LANG_BY_ID[aktifDil()] || {}).label || aktifDil(); },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();
 
@@ -42562,7 +42671,7 @@ ESP.Screens.symposium = (function(){
               + 'değerlendirecek ölçüt de gerekir. Ama ölçütü kim koyar?' })}
           <div class="row mt-10">
             ${K.Button({ label:'Çöz', act:'parse-arg' })}
-            ${K.Button({ label:'Olduğu gibi kaydet', tone:'primary', act:'save-arg-raw' })}
+            ${K.Button({ label:'Olduğu gibi kaydet', act:'save-arg-raw' })}
           </div>
           ${when(res, () => html`
             <div class="mt-10">
@@ -42624,7 +42733,7 @@ ESP.Screens.symposium = (function(){
         body:html`<div class="row gap-8 wrap">
           ${K.Input({ id:'belge-felsefe', placeholder:'Konu: Stoacılık, varoluşçuluk…', aria:'Felsefe konusu',
             size:'sm', class:'grow' })}
-          ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+          ${K.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
             data:{ 'data-alan':'felsefe' } })}
         </div>`,
       }),
@@ -42639,7 +42748,7 @@ ESP.Screens.symposium = (function(){
             ${K.Select({ id:'canon-pick', aria:'Kanondan eser seç',
               options:ESP.CANON.map(c => ({ value:c.id,
                 label:c.author + ' — ' + c.title })) })}
-            ${K.Button({ label:'Ekle', tone:'primary', act:'add-canon' })}
+            ${K.Button({ label:'Ekle', act:'add-canon' })}
           </div>
           <p class="small muted mt-8">Listede olmayan bir kaynağı elle de ekleyebilirsin.</p>
           <div class="cols-3 mt-10">
@@ -42673,24 +42782,17 @@ ESP.Screens.symposium = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
-  function render(){
-    const tab = S.ui.philoTab || 'acik';
-    const rows = tab === 'kapali' ? closedRows()
-      : tab === 'ekle' ? addRows()
-      : tab === 'metinler' ? textRows()
-      : tab === 'deneyler' ? experimentRows()
-      : tab === 'ogren' ? topicRows()
-      : openRows();
+  /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
+  const GOVDE = { acik:openRows, kapali:closedRows, ekle:addRows, metinler:textRows,
+    deneyler:experimentRows, ogren:topicRows };
 
+  function render(){
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'philo-tab', aria:'Sempozyum sekmeleri',
-          items:TABS.map(t => Object.assign({}, t,
-            t.id === 'acik' ? { count:ESP.Intellect.openArguments().length || null } : {})) }),
-      }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('philo')]
-        .concat(rows)))}`);
+      ${K.Span(12, ESP.Parts.bolumler('philo', { act:'philo-tab', aria:'Felsefe bölümleri', tabs:TABS,
+        govde:GOVDE, sayi:{ acik:ESP.Intellect.openArguments().length || null } }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('philoTab', TABS[0].id); }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
@@ -42701,7 +42803,7 @@ ESP.Screens.symposium = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'philo-tab'(el){ S.ui.philoTab = el.dataset.tab; ESP.App.render(); },
+    async 'philo-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'tab-ekle'(){ S.ui.philoTab = 'ekle'; ESP.App.render(); },
 
     /* Deneyi teze çevirmek: deneyin kurgusu tezin YERINE geçmez, tezi
@@ -42902,7 +43004,7 @@ ESP.Screens.symposium = (function(){
     },
     subtitle(){ return (S.args || []).length + ' tez'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();
 
@@ -43165,7 +43267,7 @@ ESP.Screens.history = (function(){
       body:html`<div class="row gap-8 wrap">
         ${K.Input({ id:'belge-tarih', placeholder:'Konu: Osmanlı’nın kuruluşu, Fransız Devrimi…',
           aria:'Tarih konusu', size:'sm', class:'grow' })}
-        ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+        ${K.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
           data:{ 'data-alan':'tarih' } })}
       </div>`,
     }));
@@ -43193,7 +43295,7 @@ ESP.Screens.history = (function(){
               options:[{ value:'', label:'(belirsiz)' }]
                 .concat(ESP.HISTORIOGRAPHY.map(h => ({ value:h.id, label:h.label }))) }) })}
         </div>
-        ${K.Button({ label:'Kaynağı ekle', tone:'primary', act:'add-source', class:'mt-10' })}`,
+        ${K.Button({ label:'Kaynağı ekle', act:'add-source', class:'mt-10' })}`,
     }));
 
     rows.push(K.Entry({
@@ -43272,7 +43374,7 @@ ESP.Screens.history = (function(){
                 label:ESP.yearLabel(e.year) + ' — ' + e.title })) })}
             ${K.Input({ id:'ch-q', placeholder:'Soru: bu neden oldu?',
               aria:'Zincirin sorusu' })}
-            ${K.Button({ label:'Zincir aç', tone:'primary', act:'add-chain' })}
+            ${K.Button({ label:'Zincir aç', act:'add-chain' })}
           </div>`
         : K.Empty({ text:'Önce bir olay ekle: zincir olaysız kurulmaz.' }),
     }));
@@ -43356,7 +43458,7 @@ ESP.Screens.history = (function(){
               text:'%' + Math.round(r.value * 100),
               tone:r.value < ESP.Planner.RETENTION_FLOOR ? 'danger' : 'ok',
               note:r.n + ' karttan hesaplandı' })}
-        ${when(due.length, () => K.Button({ label:'Tekrara başla', tone:'primary',
+        ${when(due.length, () => K.Button({ label:'Tekrara başla',
           act:'go-cards', class:'mt-10' }))}`,
     }));
 
@@ -43432,25 +43534,19 @@ ESP.Screens.history = (function(){
 
   /* ----------------------------------------------------------------- çizim */
 
-  function render(){
-    const tab = S.ui.histTab || 'serit';
-    const rows = tab === 'serit' ? seritRows()
-      : tab === 'olaylar' ? olayRows()
-      : tab === 'kaynaklar' ? kaynakRows()
-      : tab === 'zincir' ? zincirRows()
-      : tab === 'ogren' ? learnRows()
-      : calismaRows();
+  /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
+  const GOVDE = { serit:seritRows, olaylar:olayRows, kaynaklar:kaynakRows, zincir:zincirRows,
+    ogren:learnRows, calisma:calismaRows };
 
+  function render(){
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'pick-tab', aria:'Kronoloji bölümleri',
-          items:TABS.map(t => ({ id:t.id, label:t.label })) }),
-        actions:when(evs().length, () => K.Button({ label:'Tohumu yükle', size:'sm',
-          act:'seed' })),
-      }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('history')]
-        .concat(rows)))}`);
+      ${when(evs().length, () => K.Span(12, K.Toolbar({ actions:K.Button({ label:'Tohumu yükle', size:'sm',
+        act:'seed' }) })))}
+      ${K.Span(12, ESP.Parts.bolumler('history', { act:'pick-tab', aria:'Tarih bölümleri', tabs:TABS,
+        govde:GOVDE }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('histTab', TABS[0].id); }
 
   /* ----------------------------------------------------------------- eylem */
 
@@ -43461,7 +43557,7 @@ ESP.Screens.history = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'pick-tab'(el){ S.ui.histTab = el.dataset.tab; ESP.App.render(); },
+    async 'pick-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'pick-era'(el){
       S.ui.histEra = el.dataset.id === S.ui.histEra ? 'all' : el.dataset.id;
       ESP.App.render();
@@ -43653,7 +43749,7 @@ ESP.Screens.history = (function(){
         : ESP.yearLabel(st.firstYear) + ' – ' + ESP.yearLabel(st.lastYear);
     },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();
 
@@ -43916,26 +44012,23 @@ ESP.Screens.ladder = (function(){
     { id:'tespit', label:'Seviye tespiti' },
   ];
 
+  /* Sekme yok (EKIP-PLANI §1.2): genel, yol ve seviye tespiti alt alta;
+     disiplin seçici yol ve tespit içindir, hep görünür. */
   function render(){
-    const tab = S.ui.ladderTab || 'ozet';
     const disc = S.ui.curDisc || 'lang';
-    const rows = tab === 'ozet' ? ozetRows()
-      : tab === 'yol' ? yolRows(disc)
-      : tespitRows();
-
     return K.Grid(html`
       ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'pick-tab', aria:'Merdiven bölümleri',
-          items:TABS.map(t => ({ id:t.id, label:t.label })) }),
-        actions:when(tab !== 'ozet', () => K.Select({ id:'lad-disc', value:disc,
-          change:'pick-disc-sel', aria:'Disiplin seç',
-          options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) })),
+        actions:K.Select({ id:'lad-disc', value:disc, change:'pick-disc-sel', aria:'Disiplin seç',
+          options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }),
       }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:'Merdiven bölümleri', tabs:TABS,
+        govde:{ ozet:ozetRows, yol:() => yolRows(disc), tespit:tespitRows } }))}`);
   }
 
+  function afterRender(){ ESP.Parts.bolumIstegi('ladderTab', TABS[0].id); }
+
   const handle = {
-    async 'pick-tab'(el){ S.ui.ladderTab = el.dataset.tab; ESP.App.render(); },
+    async 'pick-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'pick-disc'(el){
       S.ui.curDisc = el.dataset.id;
@@ -43995,7 +44088,7 @@ ESP.Screens.ladder = (function(){
       return ov.cert === 'missing' ? 'ölçüm yok' : ov.level.label;
     },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();
 
@@ -44168,7 +44261,7 @@ ESP.Screens.studio = (function(){
             </div>
             <div class="metro__ctrl">
               ${K.Button({ label:S.ui.metronomeOn ? 'Durdur' : 'Başlat',
-                tone:S.ui.metronomeOn ? '' : 'primary', act:'metro-toggle' })}
+                act:'metro-toggle' })}
               ${K.Select({ id:'metro-sig', value:S.ui.metroSig || '4/4', change:'metro-sig',
                 aria:'Ölçü türü',
                 options:ESP.TIME_SIGNATURES.map(t => ({ value:t.id, label:t.label })) })}
@@ -44247,7 +44340,7 @@ ESP.Screens.studio = (function(){
             input:K.Input({ id:'p-target', type:'number', numeric:true, min:20, max:300,
               placeholder:'120' }) })}
         </div>
-        ${K.Button({ label:'Ekle', tone:'primary', act:'add-piece', class:'mt-10' })}
+        ${K.Button({ label:'Ekle', act:'add-piece', class:'mt-10' })}
         <p class="small muted mt-10">Hazır teknikler:</p>
         <div class="row wrap mt-4">
           ${map(ESP.TECHNIQUES, t => K.Button({ label:t.label, size:'sm',
@@ -44268,7 +44361,7 @@ ESP.Screens.studio = (function(){
             { value:'ileri', label:'İleri' }] })}
         ${K.Input({ id:'gitar-konu', placeholder:'Konu: akor geçişleri, blues…', aria:'Konu',
           size:'sm', class:'grow' })}
-        ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'gitar-iste' })}
+        ${K.Button({ label:'King’e ilet', size:'sm', act:'gitar-iste' })}
       </div>`,
     }));
 
@@ -44319,7 +44412,7 @@ ESP.Screens.studio = (function(){
           <div class="row gap-8 wrap mt-10">
             ${K.Input({ id:'belge-diksiyon', placeholder:'Konu: Türkçe vurgu, r sesi, sesli okuma…',
               aria:'Diksiyon belgesi konusu', size:'sm', class:'grow' })}
-            ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+            ${K.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
               data:{ 'data-alan':'diksiyon' } })}
           </div>`,
       }),
@@ -44346,7 +44439,7 @@ ESP.Screens.studio = (function(){
               tone:(S.ui.errTags || []).indexOf(e.id) >= 0 ? 'primary' : '',
               act:'toggle-err', data:{ 'data-id':e.id } }))}
           </div>
-          ${K.Button({ label:'Ölçümü kaydet', tone:'primary', act:'add-recording', class:'mt-10' })}`,
+          ${K.Button({ label:'Ölçümü kaydet', act:'add-recording', class:'mt-10' })}`,
       }),
 
       K.Entry({
@@ -44484,27 +44577,18 @@ ESP.Screens.studio = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
+  /* Sekme yok (EKIP-PLANI §1.2): beş bölüm alt alta. Stüdyoda iki
+     disiplin var; her birinin tezgâhı kendi bölümünün başında durur (koç o
+     masanın reçetesini yazar). */
   function render(){
-    const tab = S.ui.studioTab || 'muzik';
-    const rows = tab === 'diksiyon' ? dictionRows()
-      : tab === 'kulak' ? earRows()
-      : tab === 'ogren' ? topicRows()
-      : tab === 'ilerleme' ? progressRows()
-      : musicRows();
-
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'studio-tab', aria:'Stüdyo sekmeleri', items:TABS }),
-      }))}
-      ${K.Span(12, K.Ledger(() => {
-        /* Studyoda iki disiplin var: sekme hangisindeyse koç o masanin
-           recetesini yazar. Ikisini birden gostermek, otuz dakikalik bir
-           gunu altmis dakikalik bir recete ile karsilamak olurdu. */
-        const disc = S.ui.studioTab === 'diksiyon' ? 'diction' : 'music';
-        const sessiz = S.ui.studioTab === 'ilerleme' || S.ui.studioTab === 'kulak';
-        return (sessiz ? [] : [ESP.Parts.desk(disc)]).concat(rows);
-      }))}`);
+      ${K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:'Stüdyo bölümleri', tabs:TABS, govde:{
+        muzik:() => [ESP.Parts.desk('music')].concat(musicRows()),
+        diksiyon:() => [ESP.Parts.desk('diction')].concat(dictionRows()),
+        kulak:earRows, ogren:topicRows, ilerleme:progressRows } }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('studioTab', TABS[0].id); }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
@@ -44522,11 +44606,8 @@ ESP.Screens.studio = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'studio-tab'(el){
-      if(S.ui.metronomeOn){ metronomeStop(); S.ui.metronomeOn = false; }
-      S.ui.studioTab = el.dataset.tab;
-      ESP.App.render();
-    },
+    /* Bölüme kayar; metronom durmaz (bölümler aynı sayfada). */
+    async 'studio-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'bpm'(el){
       const d = Number(el.dataset.d) || 0;
@@ -44671,7 +44752,7 @@ ESP.Screens.studio = (function(){
     },
     subtitle(){ return (S.pieces || []).length + ' parça · ' + (S.recordings || []).length + ' kayıt'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
 
     /* Ekrandan cikarken metronom susmali: gorunmeyen bir ekranin sesi
        kullanicinin kapatamayacagi bir sestir. */
@@ -44757,7 +44838,12 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'BIRAKMA İZNİ', hint:'abandon',
         meta:'kural',
-        body:K.Notice({ tone:'info', body:ESP.ABANDON_RULE }),
+        body:(function(){
+          /* İlk cümle görünür; gerekçesi bir dokunuşla açılır (§1.2). */
+          const c = String(ESP.ABANDON_RULE).split(/(?<=\.)\s+/);
+          return K.Notice({ tone:'info', body:c.length > 1
+            ? K.Ayrinti({ ozet:c[0], govde:html`<p>${c.slice(1).join(' ')}</p>` }) : c[0] });
+        })(),
       }),
     ];
   }
@@ -44909,7 +44995,7 @@ ESP.Screens.library = (function(){
               <div class="sugg">
                 <div class="sugg__pair">
                   <p>${o.a.text}</p>
-                  <span class="sugg__op">↔</span>
+                  <span class="sugg__op" aria-hidden="true">${raw(ESP.UI.icon('bag'))}</span>
                   <p>${o.b.text}</p>
                 </div>
                 <div class="sugg__meta">
@@ -45037,7 +45123,7 @@ ESP.Screens.library = (function(){
         body:html`<div class="row gap-8 wrap">
           ${K.Input({ id:'belge-okuma', placeholder:'Konu: Stoacılık, bilim tarihi…', aria:'Okuma konusu',
             size:'sm', class:'grow' })}
-          ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+          ${K.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
             data:{ 'data-alan':'okuma' } })}
         </div>`,
       }),
@@ -45053,7 +45139,7 @@ ESP.Screens.library = (function(){
               options:[{ value:'primary', label:'Primer metin' },
                 { value:'secondary', label:'Yorum' }] }) })}
           </div>
-          ${K.Button({ label:'Ekle', tone:'primary', act:'add-book2', class:'mt-10' })}`,
+          ${K.Button({ label:'Ekle', act:'add-book2', class:'mt-10' })}`,
       }),
     ];
   }
@@ -45077,23 +45163,17 @@ ESP.Screens.library = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
-  function render(){
-    const tab = S.ui.readTab || 'notlar';
-    const rows = tab === 'matris' ? matrixRows()
-      : tab === 'kaynaklar' ? bookRows()
-      : tab === 'yontem' ? methodRows()
-      : tab === 'ogren' ? topicRows()
-      : noteRows();
+  /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
+  const GOVDE = { notlar:noteRows, matris:matrixRows, kaynaklar:bookRows, yontem:methodRows,
+    ogren:topicRows };
 
+  function render(){
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'read-tab', aria:'Kütüphane sekmeleri',
-          items:TABS.map(t => Object.assign({}, t,
-            t.id === 'notlar' ? { count:(S.notes || []).length || null } : {})) }),
-      }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('reading')]
-        .concat(rows)))}`);
+      ${K.Span(12, ESP.Parts.bolumler('reading', { act:'read-tab', aria:'Okuma bölümleri', tabs:TABS,
+        govde:GOVDE, sayi:{ notlar:(S.notes || []).length || null } }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('readTab', TABS[0].id); }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
@@ -45123,7 +45203,7 @@ ESP.Screens.library = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'read-tab'(el){ S.ui.readTab = el.dataset.tab; ESP.App.render(); },
+    async 'read-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'add-note'(){
       const t = val('note-text');
@@ -45234,7 +45314,7 @@ ESP.Screens.library = (function(){
     },
     subtitle(){ return (S.notes || []).length + ' not · ' + (S.books || []).length + ' kaynak'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();
 
@@ -45289,7 +45369,7 @@ ESP.Screens.writing = (function(){
         body:html`<div class="row gap-8 wrap">
           ${K2.Input({ id:'belge-yazi', placeholder:'Konu: deneme, kısa öykü…', aria:'Yazı konusu',
             size:'sm', class:'grow' })}
-          ${K2.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+          ${K2.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
             data:{ 'data-alan':'yazi' } })}
         </div>`,
       }),
@@ -45515,22 +45595,16 @@ ESP.Screens.writing = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
-  function render(){
-    const tab = S.ui.writeTab || 'taslaklar';
-    const rows = tab === 'olcum' ? measureRows()
-      : tab === 'araclar' ? toolRows()
-      : tab === 'ogren' ? topicRows()
-      : draftRows();
+  /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
+  const GOVDE = { taslaklar:draftRows, olcum:measureRows, araclar:toolRows, ogren:topicRows };
 
+  function render(){
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'write-tab', aria:'Yazı sekmeleri',
-          items:TABS.map(t => Object.assign({}, t,
-            t.id === 'taslaklar' ? { count:(S.drafts || []).length || null } : {})) }),
-      }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('writing')]
-        .concat(rows)))}`);
+      ${K.Span(12, ESP.Parts.bolumler('writing', { act:'write-tab', aria:'Yazı bölümleri', tabs:TABS,
+        govde:GOVDE, sayi:{ taslaklar:(S.drafts || []).length || null } }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('writeTab', TABS[0].id); }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value : ''; }
 
@@ -45541,7 +45615,7 @@ ESP.Screens.writing = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'write-tab'(el){ S.ui.writeTab = el.dataset.tab; ESP.App.render(); },
+    async 'write-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'new-draft'(){
       const d = await M.saveDraft(M.newDraft({ title:'', text:'' }));
@@ -45649,7 +45723,7 @@ ESP.Screens.writing = (function(){
     },
     subtitle(){ return (S.drafts || []).length + ' taslak'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();
 
@@ -45895,10 +45969,12 @@ ESP.Screens.team = (function(){
     const devir = ESP.Office.handoffsFor(a.id);
 
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:a.id, act:'pick-agent', aria:'Ajan seçimi',
-          items:ESP.Mod.activeAgents().map(x => ({ id:x.id, label:x.short || x.name })) }),
-      }))}
+      ${/* Ajan seçimi sekme değil SÜZGEÇ (EKIP-PLANI §1.2): hangi masayla
+            konuşulacağını seçer, ekranın bir kısmını saklamaz. Aynı eylem
+            (pick-agent) çipte kalır. */''}
+      ${K.Span(12, html`<div class="row wrap gap-6" role="group" aria-label="Ajan seçimi">${map(
+        ESP.Mod.activeAgents(), x => K.Chip({ label:x.short || x.name, act:'pick-agent', on:x.id === a.id,
+          data:{ 'data-tab':x.id, 'aria-pressed':x.id === a.id ? 'true' : 'false' } }))}</div>`)}
 
       ${K.Span(12, K.Ledger(() => [
 
@@ -46660,11 +46736,12 @@ ESP.Screens.analytics = (function(){
               değerlendirilmez: sistem yüksek olanın iyi olduğunu VARSAYMAZ.</p>
             ${(function(){
               const pol = ESP.Goodhart.policy();
-              return html`<p class="small muted mt-8">Pencere ${pol.windowDays} gün ·
-                çaba artışı eşiği %${Math.round(pol.effortRiseThreshold * 100)} ·
-                sonuç durgunluk eşiği %${Math.round(pol.stagnationThreshold * 100)} ·
-                asgari çaba ${pol.minEffortMinutes} dk. Bu sayılar bir bulgu
-                değil bu yazılımın ayarıdır: ${pol.rationale}</p>`;
+              return K.Ayrinti({ class:'small muted mt-8', etiket:'Bu sayılar nereden?',
+                ozet:'Pencere ' + pol.windowDays + ' gün · çaba artışı eşiği %'
+                  + Math.round(pol.effortRiseThreshold * 100) + ' · sonuç durgunluk eşiği %'
+                  + Math.round(pol.stagnationThreshold * 100) + ' · asgari çaba '
+                  + pol.minEffortMinutes + ' dk.',
+                govde:html`<p>Bu sayılar bir bulgu değil bu yazılımın ayarıdır: ${pol.rationale}</p>` });
             })()}`
           : K.Empty({ text:'Açık bölüm yok; nöbetçinin bakacağı çift de yok.' }),
       }),
@@ -46734,22 +46811,18 @@ ESP.Screens.analytics = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
-  function render(){
-    const tab = S.ui.analyticsTab || 'radar';
-    const rows = tab === 'seriler' ? seriesRows()
-      : tab === 'rapor' ? reportRows()
-      : tab === 'durust' ? honestyRows()
-      : radarRows();
+  /* Sekme yok (EKIP-PLANI §1.2): dört okuma alt alta. */
+  const GOVDE = { radar:radarRows, seriler:seriesRows, rapor:reportRows, durust:honestyRows };
 
+  function render(){
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'ana-tab', aria:'Analiz sekmeleri', items:TABS }),
-      }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, ESP.Parts.bolumler(null, { act:'ana-tab', aria:'Analiz bölümleri', tabs:TABS, govde:GOVDE }))}`);
   }
 
+  function afterRender(){ ESP.Parts.bolumIstegi('analyticsTab', TABS[0].id); }
+
   const handle = {
-    async 'ana-tab'(el){ S.ui.analyticsTab = el.dataset.tab; ESP.App.render(); },
+    async 'ana-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'gen-briefing'(){
       delete S.officeBriefings[U.todayISO()];
@@ -46832,7 +46905,7 @@ ESP.Screens.analytics = (function(){
     },
     subtitle(){ return 'son 14 gün'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();
 
@@ -46875,7 +46948,7 @@ ESP.Screens.profile = (function(){
         <div class="row gap-8 mt-10">
           ${K.Input({ id:'hafiza-yeni', class:'grow', aria:'Hatırlanacak şey',
             placeholder:'Örn. Sabahları daha iyi okurum' })}
-          ${K.Button({ label:'Hatırla', size:'sm', tone:'primary', act:'hafiza-ekle' })}
+          ${K.Button({ label:'Hatırla', size:'sm', act:'hafiza-ekle' })}
         </div>
         <p class="small muted mt-8">Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın,
           «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.</p>`,
@@ -47075,9 +47148,17 @@ ESP.Screens.profile = (function(){
     return K.Entry({
       label:'HKM İŞARETİ', hint:'hkm',
       meta:a.enabled ? 'açık' : 'kapalı',
-      note:window.LIFEOS.YedekAg.kartNotu('ESP'),
       wide:true,
       body:html`
+        ${(function(){
+          /* Metin ortak (yedekag.js). Mahremiyet cümlesi (ilk ve son) görünür
+             kalır; anahtarın neyi açtığı bir dokunuşla açılır (§1.2). */
+          const c = String(window.LIFEOS.YedekAg.kartNotu('ESP')).split(/(?<=\.)\s+/);
+          const ozet = c.length > 2 ? c[0] + ' ' + c[c.length - 1] : c.join(' ');
+          return c.length > 2
+            ? K.Ayrinti({ etiket:'Bu anahtar neyi açar?', ozet, govde:html`<p>${c.slice(1, -1).join(' ')}</p>` })
+            : html`<p class="small">${ozet}</p>`;
+        })()}
         ${when(a.baskaProfil, () => html`<p class="small mt-8" role="alert">${window.LIFEOS.HkmBag.not(a.baskaProfil)}</p>`)}
         ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
           checked:!!a.enabled, act:'hkm-toggle' })}
@@ -47127,7 +47208,7 @@ ESP.Screens.profile = (function(){
           body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
 
         <div class="mt-12">
-          ${K.Button({ label:'Bağlan', act:'hkm-pair', tone:'primary' })}
+          ${K.Button({ label:'Bağlan', act:'hkm-pair' })}
           ${K.Button({ label:'Şimdi gönder', act:'hkm-send' })}
           ${K.Button({ label:'Geçmişi gönder (60 gün)', act:'hkm-backfill' })}
         </div>
@@ -48474,7 +48555,7 @@ ESP.Screens.guide = (function(){
         note:'Yedek dosyası şifresizdir; paylaşılan bir dizine konmaz.',
         body:html`
           <div class="row wrap">
-            ${K.Button({ label:'Yedek indir', tone:'primary', act:'export-data2' })}
+            ${K.Button({ label:'Yedek indir', act:'export-data2' })}
             ${when((ESP.Beacon && ESP.Beacon.settings().enabled), () => K.Button({ label:'HKM’deki yedekten yükle', act:'restore-hkm' }))}
             ${K.Drop({ id:'restore-drop', act:'restore-file',
               label:'Yedek dosyasını buraya bırak ya da seç' })}
@@ -48613,9 +48694,13 @@ ESP.Screens.guide = (function(){
            + 'ilerletebileceğini söyler.',
         wide:true,
         body:html`
-          ${K.Notice({ tone:'warn', title:'Bu bir pedagojik hiyerarşi değildir',
-            body:ESP.Ev.policy().disclaimer })}
-          <p class="small muted mt-8">${ESP.Ev.policy().rationale}</p>
+          ${(function(){
+            /* Uyarının ilk cümlesi görünür; gerekçe bir dokunuşla açılır (§1.2). */
+            const c = String(ESP.Ev.policy().disclaimer).split(/(?<=\.)\s+/);
+            return K.Notice({ tone:'warn', title:'Bu bir pedagojik hiyerarşi değildir',
+              body:K.Ayrinti({ ozet:c[0], govde:html`${when(c.length > 1, () => html`<p>${c.slice(1).join(' ')}</p>`)}
+                <p class="mt-8">${ESP.Ev.policy().rationale}</p>` }) });
+          })()}
           ${K.Table({ tight:true,
             headers:['Kaynak türü', 'Tanınan yetki', { label:'Eşik', num:true }],
             rows:ESP.EVIDENCE_SOURCES.map(src => {
@@ -48676,20 +48761,15 @@ ESP.Screens.guide = (function(){
      üst gezinmede «Rütbe» (screens/rutbe.js) — kademe, merdiven,
      XP kaynakları ve defter orada. */
 
-  function render(){
-    const tab = S.ui.guideTab || 'kullanim';
-    const rows = tab === 'model' ? modelRows()
-      : tab === 'veri' ? dataRows()
-      : tab === 'sinirlar' ? limitRows()
-      : tab === 'kanit' ? evidenceRows()
-      : usageRows();
+  /* Sekme yok (EKIP-PLANI §1.2): beş bölüm alt alta. */
+  const GOVDE = { kullanim:usageRows, model:modelRows, veri:dataRows, sinirlar:limitRows, kanit:evidenceRows };
 
+  function render(){
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'guide-tab', aria:'Rehber sekmeleri', items:TABS }),
-      }))}
-      ${K.Span(12, K.Ledger(() => rows))}`);
+      ${K.Span(12, ESP.Parts.bolumler(null, { act:'guide-tab', aria:'Rehber bölümleri', tabs:TABS, govde:GOVDE }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('guideTab', TABS[0].id); }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
@@ -48722,7 +48802,7 @@ ESP.Screens.guide = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'guide-tab'(el){ S.ui.guideTab = el.dataset.tab; ESP.App.render(); },
+    async 'guide-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     /* Budama. Sistem kullanicinin girdigi veriyi yer acmak icin silmez;
        motor zaten reddeder ama ekran da yalnizca izinli olanlari sunar. */
@@ -48832,7 +48912,7 @@ ESP.Screens.guide = (function(){
     stats(){ return []; },
     subtitle(){ return 'kullanım · model · veri · sınırlar'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();
 
@@ -49836,10 +49916,13 @@ ESP.App = (function(){
        Eylemler burada çünkü tezgâh yedi ekranda birden duruyor; her ekranda
        ayrı bir işlem yazmak, yedi kez bozulabilecek bir işlem demektir. */
     async 'desk-toggle'(el){ ESP.Desk.toggle(el.dataset.disc); render(); },
+    /* Tezgâhın açılır satırı: basılan açılır; açık olana yeniden basmak
+       kapatır (yalnız bir satır açık kalır). */
     async 'desk-tab'(el){
       const kap = el.closest('.lrow');
       const govde = kap ? kap.querySelector('.desk__body') : null;
-      ESP.Desk.setTab(govde ? govde.dataset.disc : S.ui.sessionDisc, el.dataset.tab);
+      const disc = el.dataset.disc || (govde ? govde.dataset.disc : S.ui.sessionDisc);
+      ESP.Desk.setTab(disc, ESP.Desk.tab(disc) === el.dataset.tab ? 'kapali' : el.dataset.tab);
       render();
     },
 

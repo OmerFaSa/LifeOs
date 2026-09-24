@@ -75,7 +75,12 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'BIRAKMA İZNİ', hint:'abandon',
         meta:'kural',
-        body:K.Notice({ tone:'info', body:ESP.ABANDON_RULE }),
+        body:(function(){
+          /* İlk cümle görünür; gerekçesi bir dokunuşla açılır (§1.2). */
+          const c = String(ESP.ABANDON_RULE).split(/(?<=\.)\s+/);
+          return K.Notice({ tone:'info', body:c.length > 1
+            ? K.Ayrinti({ ozet:c[0], govde:html`<p>${c.slice(1).join(' ')}</p>` }) : c[0] });
+        })(),
       }),
     ];
   }
@@ -227,7 +232,7 @@ ESP.Screens.library = (function(){
               <div class="sugg">
                 <div class="sugg__pair">
                   <p>${o.a.text}</p>
-                  <span class="sugg__op">↔</span>
+                  <span class="sugg__op" aria-hidden="true">${raw(ESP.UI.icon('bag'))}</span>
                   <p>${o.b.text}</p>
                 </div>
                 <div class="sugg__meta">
@@ -355,7 +360,7 @@ ESP.Screens.library = (function(){
         body:html`<div class="row gap-8 wrap">
           ${K.Input({ id:'belge-okuma', placeholder:'Konu: Stoacılık, bilim tarihi…', aria:'Okuma konusu',
             size:'sm', class:'grow' })}
-          ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+          ${K.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
             data:{ 'data-alan':'okuma' } })}
         </div>`,
       }),
@@ -371,7 +376,7 @@ ESP.Screens.library = (function(){
               options:[{ value:'primary', label:'Primer metin' },
                 { value:'secondary', label:'Yorum' }] }) })}
           </div>
-          ${K.Button({ label:'Ekle', tone:'primary', act:'add-book2', class:'mt-10' })}`,
+          ${K.Button({ label:'Ekle', act:'add-book2', class:'mt-10' })}`,
       }),
     ];
   }
@@ -395,23 +400,17 @@ ESP.Screens.library = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
-  function render(){
-    const tab = S.ui.readTab || 'notlar';
-    const rows = tab === 'matris' ? matrixRows()
-      : tab === 'kaynaklar' ? bookRows()
-      : tab === 'yontem' ? methodRows()
-      : tab === 'ogren' ? topicRows()
-      : noteRows();
+  /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
+  const GOVDE = { notlar:noteRows, matris:matrixRows, kaynaklar:bookRows, yontem:methodRows,
+    ogren:topicRows };
 
+  function render(){
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'read-tab', aria:'Kütüphane sekmeleri',
-          items:TABS.map(t => Object.assign({}, t,
-            t.id === 'notlar' ? { count:(S.notes || []).length || null } : {})) }),
-      }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('reading')]
-        .concat(rows)))}`);
+      ${K.Span(12, ESP.Parts.bolumler('reading', { act:'read-tab', aria:'Okuma bölümleri', tabs:TABS,
+        govde:GOVDE, sayi:{ notlar:(S.notes || []).length || null } }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('readTab', TABS[0].id); }
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
@@ -441,7 +440,7 @@ ESP.Screens.library = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'read-tab'(el){ S.ui.readTab = el.dataset.tab; ESP.App.render(); },
+    async 'read-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     async 'add-note'(){
       const t = val('note-text');
@@ -552,6 +551,6 @@ ESP.Screens.library = (function(){
     },
     subtitle(){ return (S.notes || []).length + ' not · ' + (S.books || []).length + ' kaynak'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

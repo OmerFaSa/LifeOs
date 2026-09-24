@@ -52,10 +52,12 @@ ESP.Screens.team = (function(){
     const devir = ESP.Office.handoffsFor(a.id);
 
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:a.id, act:'pick-agent', aria:'Ajan seçimi',
-          items:ESP.Mod.activeAgents().map(x => ({ id:x.id, label:x.short || x.name })) }),
-      }))}
+      ${/* Ajan seçimi sekme değil SÜZGEÇ (EKIP-PLANI §1.2): hangi masayla
+            konuşulacağını seçer, ekranın bir kısmını saklamaz. Aynı eylem
+            (pick-agent) çipte kalır. */''}
+      ${K.Span(12, html`<div class="row wrap gap-6" role="group" aria-label="Ajan seçimi">${map(
+        ESP.Mod.activeAgents(), x => K.Chip({ label:x.short || x.name, act:'pick-agent', on:x.id === a.id,
+          data:{ 'data-tab':x.id, 'aria-pressed':x.id === a.id ? 'true' : 'false' } }))}</div>`)}
 
       ${K.Span(12, K.Ledger(() => [
 

@@ -256,7 +256,7 @@ ESP.Screens.history = (function(){
       body:html`<div class="row gap-8 wrap">
         ${K.Input({ id:'belge-tarih', placeholder:'Konu: Osmanlı’nın kuruluşu, Fransız Devrimi…',
           aria:'Tarih konusu', size:'sm', class:'grow' })}
-        ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+        ${K.Button({ label:'King’e ilet', size:'sm', act:'belge-iste',
           data:{ 'data-alan':'tarih' } })}
       </div>`,
     }));
@@ -284,7 +284,7 @@ ESP.Screens.history = (function(){
               options:[{ value:'', label:'(belirsiz)' }]
                 .concat(ESP.HISTORIOGRAPHY.map(h => ({ value:h.id, label:h.label }))) }) })}
         </div>
-        ${K.Button({ label:'Kaynağı ekle', tone:'primary', act:'add-source', class:'mt-10' })}`,
+        ${K.Button({ label:'Kaynağı ekle', act:'add-source', class:'mt-10' })}`,
     }));
 
     rows.push(K.Entry({
@@ -363,7 +363,7 @@ ESP.Screens.history = (function(){
                 label:ESP.yearLabel(e.year) + ' — ' + e.title })) })}
             ${K.Input({ id:'ch-q', placeholder:'Soru: bu neden oldu?',
               aria:'Zincirin sorusu' })}
-            ${K.Button({ label:'Zincir aç', tone:'primary', act:'add-chain' })}
+            ${K.Button({ label:'Zincir aç', act:'add-chain' })}
           </div>`
         : K.Empty({ text:'Önce bir olay ekle: zincir olaysız kurulmaz.' }),
     }));
@@ -447,7 +447,7 @@ ESP.Screens.history = (function(){
               text:'%' + Math.round(r.value * 100),
               tone:r.value < ESP.Planner.RETENTION_FLOOR ? 'danger' : 'ok',
               note:r.n + ' karttan hesaplandı' })}
-        ${when(due.length, () => K.Button({ label:'Tekrara başla', tone:'primary',
+        ${when(due.length, () => K.Button({ label:'Tekrara başla',
           act:'go-cards', class:'mt-10' }))}`,
     }));
 
@@ -523,25 +523,19 @@ ESP.Screens.history = (function(){
 
   /* ----------------------------------------------------------------- çizim */
 
-  function render(){
-    const tab = S.ui.histTab || 'serit';
-    const rows = tab === 'serit' ? seritRows()
-      : tab === 'olaylar' ? olayRows()
-      : tab === 'kaynaklar' ? kaynakRows()
-      : tab === 'zincir' ? zincirRows()
-      : tab === 'ogren' ? learnRows()
-      : calismaRows();
+  /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta, tezgâh en sonda. */
+  const GOVDE = { serit:seritRows, olaylar:olayRows, kaynaklar:kaynakRows, zincir:zincirRows,
+    ogren:learnRows, calisma:calismaRows };
 
+  function render(){
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        tabs:K.Subtabs({ value:tab, act:'pick-tab', aria:'Kronoloji bölümleri',
-          items:TABS.map(t => ({ id:t.id, label:t.label })) }),
-        actions:when(evs().length, () => K.Button({ label:'Tohumu yükle', size:'sm',
-          act:'seed' })),
-      }))}
-      ${K.Span(12, K.Ledger(() => [ESP.Parts.desk('history')]
-        .concat(rows)))}`);
+      ${when(evs().length, () => K.Span(12, K.Toolbar({ actions:K.Button({ label:'Tohumu yükle', size:'sm',
+        act:'seed' }) })))}
+      ${K.Span(12, ESP.Parts.bolumler('history', { act:'pick-tab', aria:'Tarih bölümleri', tabs:TABS,
+        govde:GOVDE }))}`);
   }
+
+  function afterRender(){ ESP.Parts.bolumIstegi('histTab', TABS[0].id); }
 
   /* ----------------------------------------------------------------- eylem */
 
@@ -552,7 +546,7 @@ ESP.Screens.history = (function(){
       ESP.UI.toast(r.metin);
       if(r.ok) ESP.App.render();
     },
-    async 'pick-tab'(el){ S.ui.histTab = el.dataset.tab; ESP.App.render(); },
+    async 'pick-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'pick-era'(el){
       S.ui.histEra = el.dataset.id === S.ui.histEra ? 'all' : el.dataset.id;
       ESP.App.render();
@@ -744,6 +738,6 @@ ESP.Screens.history = (function(){
         : ESP.yearLabel(st.firstYear) + ' – ' + ESP.yearLabel(st.lastYear);
     },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

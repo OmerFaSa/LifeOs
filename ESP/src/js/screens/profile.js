@@ -36,7 +36,7 @@ ESP.Screens.profile = (function(){
         <div class="row gap-8 mt-10">
           ${K.Input({ id:'hafiza-yeni', class:'grow', aria:'Hatırlanacak şey',
             placeholder:'Örn. Sabahları daha iyi okurum' })}
-          ${K.Button({ label:'Hatırla', size:'sm', tone:'primary', act:'hafiza-ekle' })}
+          ${K.Button({ label:'Hatırla', size:'sm', act:'hafiza-ekle' })}
         </div>
         <p class="small muted mt-8">Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın,
           «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.</p>`,
@@ -236,9 +236,17 @@ ESP.Screens.profile = (function(){
     return K.Entry({
       label:'HKM İŞARETİ', hint:'hkm',
       meta:a.enabled ? 'açık' : 'kapalı',
-      note:window.LIFEOS.YedekAg.kartNotu('ESP'),
       wide:true,
       body:html`
+        ${(function(){
+          /* Metin ortak (yedekag.js). Mahremiyet cümlesi (ilk ve son) görünür
+             kalır; anahtarın neyi açtığı bir dokunuşla açılır (§1.2). */
+          const c = String(window.LIFEOS.YedekAg.kartNotu('ESP')).split(/(?<=\.)\s+/);
+          const ozet = c.length > 2 ? c[0] + ' ' + c[c.length - 1] : c.join(' ');
+          return c.length > 2
+            ? K.Ayrinti({ etiket:'Bu anahtar neyi açar?', ozet, govde:html`<p>${c.slice(1, -1).join(' ')}</p>` })
+            : html`<p class="small">${ozet}</p>`;
+        })()}
         ${when(a.baskaProfil, () => html`<p class="small mt-8" role="alert">${window.LIFEOS.HkmBag.not(a.baskaProfil)}</p>`)}
         ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
           checked:!!a.enabled, act:'hkm-toggle' })}
@@ -288,7 +296,7 @@ ESP.Screens.profile = (function(){
           body:'Gövde sözleşmeyi geçmiyor: ' + on.errors[0] + '. Bu hâliyle gönderilmez.' }))}
 
         <div class="mt-12">
-          ${K.Button({ label:'Bağlan', act:'hkm-pair', tone:'primary' })}
+          ${K.Button({ label:'Bağlan', act:'hkm-pair' })}
           ${K.Button({ label:'Şimdi gönder', act:'hkm-send' })}
           ${K.Button({ label:'Geçmişi gönder (60 gün)', act:'hkm-backfill' })}
         </div>

@@ -59,7 +59,10 @@
       if(kurduk) ESP.Seri = LIFEOS.Seri.kur({ store:() => ESP.Store, bugun:() => ESP.U.todayISO() });
       await ESP.Seri.yukle();
       ESP.S.ui.tatilSec = true;
-      const out = String(await ESP.Screens.today.render());
+      /* Seri kartı tek tasarımda Bugün'den «Bugün › Ayrıntı»ya (ESP.Screens.gun)
+         taşınıyor; alan hangisindeyse orada aranır (H'nin AYS kalıbı, d7072ac). */
+      const out = String(await ESP.Screens.today.render())
+        + (ESP.Screens.gun ? String(await ESP.Screens.gun.render()) : '');
       ESP.S.ui.tatilSec = false;
       if(kurduk) delete ESP.Seri;
       expect(out.indexOf('id="seri-tatil-sinir"') >= 0).toBe(true);

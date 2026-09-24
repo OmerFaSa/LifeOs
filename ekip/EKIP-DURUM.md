@@ -112,7 +112,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** T döndü (K'nin devri, T-DEVIR §6). ✅ ESP Onaylar + Kütüphanem (bu commit). Sıradaki: T3 ESP (sekme → bölüm, Bugün üç alan) → teslim.
+- **Şu an:** T döndü (K'nin devri, T-DEVIR §6). ✅ ESP Onaylar + Kütüphanem 6c92411 · ✅ **T3 ESP** (bu commit). Sıradaki: ESP teslim satırı → AYS küçükleri (§2.C: 011 sakin hata, 010 boş durum işareti, app.js:842 onay etiketi, STIL.md) → T4 → T5; T6 yalnız kullanıcı «başla» derse.
 - **K yürütüyor (kullanıcı talimatı, 2026-09-24 akşam):** T-DEVIR §5'ten devam. ✅ T2-13 designcheck d58720d · ✅ entegre.js koştu (temiz) · ✅ yarım T3 SPİ yaması 826fbe3 · ✅ **T3 SPİ → teslim 59e7276** (sekme 0, tek dolu düğme, 30+ kelime katmanda, T2-14) · ✅ **T2 ESP ccedf0a** (kabuk + sekiz çekmece; disiplin bölüm düzeyinde). Sıradaki: ESP Onaylar + Kütüphanem → T3 ESP (sekmeler, Bugün üç alan, Ofis dolu düğme) → teslim → AYS küçükleri (§2.C) → T4 → T5; T6 yalnız kullanıcı «başla» derse. **⏸ K'nin limiti doldu → T'ye döndü: `ekip/T-DEVIR.md` §6** (kalan: ESP Onaylar + Kütüphanem → T3 ESP → AYS küçükleri → T4 → T5).
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
@@ -148,6 +148,23 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   Kütüphanem. Düzeltme: Analiz'de «asgari çaba undefined dk.» (politikada tek değer yok) + test.
   Denetim: runtests AYS 1897 · SPİ 1529 · ESP 1527; AYS duman, a11y, 390 px temiz; envanter AYS
   kayıp 0; sadelik AYS: yalnız tablo sayımı kaldı (aşağıdaki bulgu).
+- **T3 ESP (bu commit):** ekran içi sekme 0 — Dil, Felsefe, Tarih, Okuma, Yazı, Stüdyo, Basamak,
+  Analiz, Rehber bölümleri alt alta (`ESP.Parts.bolumler` → `C.SayfaBolumleri`; eski `*-tab` eylemi
+  bölüm çubuğunda kalır, `S.ui.<x>Tab` isteği bir kez `bolumeGit`'e gider: `ESP.Parts.bolumIstegi`).
+  Tezgâh bölümün sonunda kendi bölümüdür; yedi iç sekmesi açılır satır oldu (gerçek düğme +
+  `aria-expanded`; kapalı gövde `hidden` ama yerinde — envanter alanı kaybolmaz). Danışma'nın ajan
+  sekmeleri çip grubu (`aria-pressed`). Bugün üç alan: Şimdi (sıradaki iş, hızlı kayıt, günün
+  sorusu) · Durum (oturumlar, plan; «Oturum gir ve bütün satırlar» → **Bugün › Ayrıntı**,
+  `ESP.Screens.gun`, aynı işleyiciler) · sağda Özet + tek Öneri kartı. Ekran başına en çok bir dolu
+  düğme (King'e ilet, pratik, yedek, ikinci «Ekle»ler sade). 30+ kelimelik açıklamalar `C.Ayrinti`
+  (HKM işareti notu AYS/SPİ ile aynı kalıp: ilk ve son cümle görünür). Okuma'da `↔` yazı karakteri
+  yerine çizgi simge (`bag`). Denetim: runtests ESP 1555/1555; duman, a11y, 390 px, palet, perf,
+  dist, ortak, seviye temiz; envanter ESP kayıp 0 (6 eylem görünürden gizliye: kapalı tezgâh
+  satırları); `sadelik --denetle ESP` bütçede (18 ekran).
+- **H için (T3 ESP):** `ESP/src/tests/ekran.test.js` tatil sınırı testi senin AYS kalıbınla (d7072ac)
+  güncellendi: alan Bugün + `ESP.Screens.gun` çiziminde aranıyor (Seri satırı Ayrıntı'ya geçti).
+  Test senin; istersen kendi diline çevir. Yeni: `ESP/src/tests/bolumler.test.js` (sekme yok,
+  bölüm adları, tezgâh açılır satırları).
 - **H · bulgu:** `tools/envanter.js:296` · `BLOK` `table`'ı içeriyor, tablonun çocukları
   (`table-row-group`) BLOK değil → her tablo «30+ kelimelik tek parça yazı» sayılıyor · AYS target 2,
   cards 2, analytics 1, guide 6 aşımın hepsi tablo · doğrulama: aşan öğelerin etiketi TABLE.
