@@ -32,10 +32,10 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** —
-- **T0 kararları:** sorulmadı
+- **Şu an:** T1 temel (jetonlar, tema, Inter, temel bileşenler)
+- **T0 kararları:** soruldu (2026-09-24), cevap bekleniyor — T2 menüsü ve T3 cevaba kadar başlamaz
 - **Biten** (adım ya da özellik · commit): —
-- **Yarım / sıradaki:** T0 → T1
+- **Yarım / sıradaki:** T1 → (Kapı 1 + T0 cevabı) → T2 kabuk, T3 AYS
 - **Soru / öneri:** —
 
 ## HATA (H)
