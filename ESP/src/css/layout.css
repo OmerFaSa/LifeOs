@@ -605,6 +605,9 @@
   font-family:ui-monospace, 'SFMono-Regular', 'Courier New', monospace;
   font-size:11px; letter-spacing:.02em; color:var(--ink-on);
 }
+/* Derleme tarihi `.dim` (açık zemin jetonu) taşıyordu: koyu bantta 3,79
+   ölçüldü (palettecheck, gerçek öğe ölçümü). Bandın kendi ikincili. */
+.sitefoot__build .dim{ color:var(--ink-on-2); }
 /* DOKUNMA ALANI GORSEL BOYUTTAN BUYUK OLABILIR.
 
    Bu dugme kunyenin icinde bir hap kadar yer kaplamali: 50x17. Ama

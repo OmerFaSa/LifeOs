@@ -45,13 +45,45 @@ async function measure(p){
     const px = v => { cx.clearRect(0,0,1,1); cx.fillStyle='#000'; cx.fillStyle=v;
       cx.fillRect(0,0,1,1); const d=cx.getImageData(0,0,1,1).data;
       return [d[0], d[1], d[2]]; };
-    const foot = document.querySelector('.sitefoot');
-    const fb = foot ? getComputedStyle(foot).backgroundColor : 'rgb(0,0,0)';
+    /* ALT BANT GERCEK OGELERINDEN olculur. Once `.sitefoot`un zemini ile
+       `--ink-on` jetonu karsilastiriliyordu; yeni iskelette alt bant
+       `footer.sayfasonu` (acik zemin) ve `.sitefoot` hic yok — olcum
+       siyaha dusup «gecti» diyordu, bu arada derleme kimligi ve «Sınır»
+       etiketi acik zeminde beyaz yaziliydi. Artik alt bandin yazi
+       tasiyan her gorunur ogesi kendi etkin zeminine karsi olculur ve
+       en zayifi raporlanir. */
+    const pxa = v => { cx.clearRect(0,0,1,1); cx.fillStyle='rgba(0,0,0,0)'; cx.fillStyle=v;
+      cx.fillRect(0,0,1,1); return cx.getImageData(0,0,1,1).data; };
+    /* Zemini GORSEL olan yazi (rutbe muhrunun ustundeki kademe sayisi)
+       tek bir renge karsi olculemez: null doner ve sayilmaz — yanlis
+       bir «1,02» uretmek, olcmemekten kotudur. */
+    const zemin = el => {
+      for(let e = el; e; e = e.parentElement){
+        const st = getComputedStyle(e);
+        if(st.backgroundImage && st.backgroundImage !== 'none') return null;
+        const d = pxa(st.backgroundColor);
+        if(d[3] > 250) return [d[0], d[1], d[2]];
+      }
+      return px(g('--bg'));
+    };
+    const L = c => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
+      return .2126 * f(c[0]) + .7152 * f(c[1]) + .0722 * f(c[2]); };
+    const oran = (a, b) => { const x = L(a), y = L(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+    const foot = document.querySelector('footer.sayfasonu, footer.sitefoot');
+    let footMin = null, footAd = 'alt bant yok';
+    if(foot) foot.querySelectorAll('*').forEach(el => {
+      const yazi = Array.from(el.childNodes).some(n => n.nodeType === 3 && n.textContent.trim());
+      if(!yazi || !(el.offsetWidth || el.offsetHeight)) return;
+      const z = zemin(el);
+      if(!z) return;
+      const r = oran(px(getComputedStyle(el).color), z);
+      if(footMin === null || r < footMin){ footMin = r; footAd = el.tagName.toLowerCase() + '.' + (el.className || '')
+        + ' «' + el.textContent.trim().replace(/\s+/g, ' ').slice(0, 24) + '»'; }
+    });
     return { sec:px(g('--sec')), bg:px(g('--bg')), surf:px(g('--surface')),
       text:px(g('--text')), text2:px(g('--text-2')), text3:px(g('--text-3')),
       rule:px(g('--rule')),
-      footBg:px(fb),
-      footFg:px(g('--ink-on')), footFg2:px(g('--ink-on-2')),
+      footMin, footAd,
       primInk:px(g('--primary-ink')) };
   });
 }
@@ -65,8 +97,9 @@ function checksOf(m){
     ['ucuncul/yuzey', ratio(m.text3, m.surf), 4.5],
     ['bölüm rengi/zemin', ratio(m.sec, m.bg), 3.0],
     ['düğme yazısı/bölüm rengi', ratio(m.primInk, m.sec), 4.5],
-    ['alt bant yazısı', ratio(m.footFg, m.footBg), 4.5],
-    ['alt bant ikincil', ratio(m.footFg2, m.footBg), 4.5],
+    /* Alt bant yoksa olcum 0 olur ve KIRMIZIDIR: olculmeyen sey «temiz»
+       diye raporlanmaz (AGENTS.md §1.7). */
+    ['alt bant en zayıf yazı (' + m.footAd + ')', m.footMin == null ? 0 : m.footMin, 4.5],
     ['cetvel çizgisi/yüzey', ratio(m.rule, m.surf), 1.25],
     /* Metin merdiveni SIRALI kalmali: ikincil metin, ucunculden her
        zaman guclu olmali. Bir duzen jetonlari yeniden turetirken bu
