@@ -20,6 +20,7 @@
 
 | Kod | Sahip | Durum | Özet |
 |---|---|---|---|
+| T2-14 | K (bulan: K) | ✅ 59e7276 (önce kırmızı test) | SPİ Analiz › Dürüstlük «asgari çaba dk.»: politikada tek değer yok, ekranda boş sayı; AYS'deki T düzeltmesinin eşi |
 | T2-13 | T → K (kullanıcı talimatı) | ✅ d58720d (4 → 0; negatif kontrol: gerçek kırpma hâlâ yakalanıyor) | SPİ designcheck 5a5c024'ten beri kırmızı: Rütbe merdiveninin dekor görseli (scale 1,04, `aria-hidden`) «içerik kırpılıyor» sayılıyor — yanlış alarm, araç düzeltilir |
 | T2-12 | T | ✅ 5a5c024 | T3 AYS üretilmiş kopya `AYS/src/js/screens/rutbe.js`'i elle değiştirdi; `seviye.py --denetle` kırmızı |
 | T2-11 | K | ✅ 96037ce (önce kırmızı test; H doğrulaması yok — H'nin limiti doldu) | Bildirim kartı: uygulama kapalıyken basılan eylem (ör. «Bitti») kayboluyor, kullanıcıya söylenmiyor |

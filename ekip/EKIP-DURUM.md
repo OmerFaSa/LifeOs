@@ -18,7 +18,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 | Modül | İskelet (T3) | Teslim commit | K aldı |
 |---|---|---|---|
 | AYS | ✅ sekiz çekmece, iç sekme 0, Bugün üç alan (H kapısı yeşil: a861d79) | dd97f56 | ✅ K2 başladı (2026-09-24) |
-| SPİ | ⏳ | — | — |
+| SPİ | ✅ sekiz çekmece, iç sekme 0, Bugün üç alan, ekran başına tek dolu düğme (kapı: H'nin listesi K tarafından koşuldu — H'nin limiti doldu, kullanıcı talimatı; sadelik `--denetle SPI` bütçede, envanter kayıp 0) | 59e7276 | ✅ K (T ve H işini de yürüten, kullanıcı talimatı) |
 | ESP | ⏳ | — | — |
 | HKM yüzü | kullanıcı onayı bekliyor | — | — |
 
@@ -112,6 +112,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 ## TASARIM (T)
 
 - **Şu an:** ⏸ **H oturumunun limiti doldu; T işi T'ye geri** (2026-09-24 akşam). Devir: `ekip/T-DEVIR.md` **§5** (önce onu oku). main'de: 84bdb43, **b06c28d T2 SPİ** (kabuk, sekiz çekmece, Onaylar, Kütüphanem, Plan › Hedefler), e8c364c, d9d19ef. **Kırmızı:** SPİ designcheck (5a5c024'ten beri, Rütbe dekor görseli yanlış alarmı — §5). **Yarım:** T3 SPİ `ekip/yarim/t3-spi.patch` (Bugün üç alan + Ayrıntı). Sıra: designcheck → T3 SPİ kalanı → SPİ teslim → ESP → AYS küçükleri → T4 → T5.
+- **K yürütüyor (kullanıcı talimatı, 2026-09-24 akşam):** T-DEVIR §5'ten devam. ✅ T2-13 designcheck d58720d · ✅ entegre.js koştu (temiz) · ✅ yarım T3 SPİ yaması 826fbe3 · ✅ **T3 SPİ → teslim 59e7276** (sekme 0, tek dolu düğme, 30+ kelime katmanda, T2-14). Sıradaki: ESP (§2.B) → AYS küçükleri (§2.C) → T4 → T5; T6 yalnız kullanıcı «başla» derse.
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
   T1 temel kalıplar `brand/ortak/temel.css` + `C.Kutu` (02) + `C.ModulIsareti` (165) +
@@ -163,7 +164,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## HATA (H)
 
-- **Şu an:** ⚠ **main CI kırmızı — T2-12 → T:** T3 AYS üretilmiş kopya `AYS/src/js/screens/rutbe.js`'i elle değiştirdi, `seviye.py --denetle` kırmızı (koşu 230'dan beri). H4 tam koşum bunun dışında yeşil (AYS/SPİ/ESP her araç, HKM 640, yüz, entegre); `--yaz` bu yüzden belgeleri güncellemedi. K'nin ricaları: (a) ✅ ec55ed7 · (b) ✅ df4017e (T2-09, T2-10, T2-11) · (c) ✅ SPİ/ESP taraması temiz, H4 koşuldu.
+- **Şu an:** ⏸ H'nin limiti doldu; H işini de K yürütüyor (kullanıcı talimatı). T2-12 ✅ 5a5c024 · T2-13 ✅ d58720d · T2-14 ✅ 59e7276 (bulan K) · T2-09/10/11 ✅ 96037ce (K; H doğrulaması yok). SPİ teslim kapısı K tarafından H'nin listesiyle koşuldu (59e7276). Eski satır: ⚠ **main CI kırmızı — T2-12 → T:** T3 AYS üretilmiş kopya `AYS/src/js/screens/rutbe.js`'i elle değiştirdi, `seviye.py --denetle` kırmızı (koşu 230'dan beri). H4 tam koşum bunun dışında yeşil (AYS/SPİ/ESP her araç, HKM 640, yüz, entegre); `--yaz` bu yüzden belgeleri güncellemedi. K'nin ricaları: (a) ✅ ec55ed7 · (b) ✅ df4017e (T2-09, T2-10, T2-11) · (c) ✅ SPİ/ESP taraması temiz, H4 koşuldu.
 - **Biten:** H0 taban envanteri · 1600f75 — `node tools/envanter.js` her push'ta CI'da koşar
 - **Biten:** H0b tıklama taraması ilk tam koşum (T3'ten önceki kod): AYS 652 · SPİ 501 · ESP 678 düğmeye basıldı, **gerçek sorun 0**. AYS'de görülen 3 «Unexpected token '<<'» H'nin kendi rebase'inin çalışma alanında bıraktığı çakışma işaretinden (build.js) geldi; aynı ekran temiz ağaçta yeniden tarandı: 70 basış, 0 sorun. Ders: uzun koşumlar ayrı `git worktree`'de (plan §7 zaten böyle diyor).
 - **Biten:** H1 sadelik denetimi (`tools/sadelik.js`, plan §1.2 bütçesi) — CI'da envanterle aynı gezintiden; teslim tablosunda ✅ olan modülde kırmızı olur, diğerlerinde yalnız ölçer
