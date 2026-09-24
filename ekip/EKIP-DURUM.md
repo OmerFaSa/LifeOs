@@ -24,13 +24,15 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## KARTLAR (K)
 
-- **Şu an:** K1 · P1 ortak bileşenler (ekrana dokunmadan)
+- **Şu an:** K1 P1 bitti (22/22, ekrana dokunmadan); sıradaki K1 P2
 - **Sahiplendiğim çekirdek dosyalar:** — (üç `ui.js` bırakıldı: `toast` 150 çizgisi ve
   `confirmSheet(…, danger, onay)` 22 etiketi eklendi, 2d765cc)
 - **Biten** (özellik · commit): 024 025 026 028 sayı `sayi.js` · 009cf92; 027 035 037 041 grafik
   `grafik.js` · 076bb29; 110 111 112 114 116 121 150 022 öneri ve onay `oneri.js`, 016 139 sözlük
-  `sozluk.js`, 018 şüpheli giriş (`sayi.js`) · 2d765cc
-- **Bulgular:** T2-01 ✅ a798671 · T2-03 ✅ c063316 · T2-02 (AYS Ofis ham kimlik, 137) ekran dosyası
+  `sozluk.js`, 018 şüpheli giriş (`sayi.js`) · 2d765cc; 173 177 179 güven `guven.js` +
+  bozuk tarih (31 Şubat) koruması `sayi.js`/`grafik.js` · 0443561
+- **Bulgular:** T2-01 ✅ a798671 · T2-03 ✅ c063316 · (K'nin bulduğu, H kapattı: T2-04, T2-05,
+  T2-07, T2-08) · T2-02 (AYS Ofis ham kimlik, 137) ekran dosyası
   (`office.js`, `team.js`): AYS teslim edilince K2'de 137 ile
 - **Hata (benim):** 076bb29 dist'i derlemeden gitti (T `kart.css`'i `index.html`'e bağlamıştı);
   0780206 ile düzeldi. Artık her commit'te üç `build.py` + `--denetle` koşuyorum
@@ -44,18 +46,14 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
     yıkıcı onay: `UI.confirmSheet(baslik, mesaj, fn, true, ONERI.sonucEtiketi({ fiil, sayi, nesne }))`
   - Sözlük: `SOZLUK.html('tekrar-borcu', 'tekrar borcunu')`, `seritHtml({ acik, neden })`,
     `hazir(kalip, degerler)` + `hazirHtml` (139)
-- **Yarım / sıradaki:** K1e güven (173 177 179) → K1 P2'ler (15 170 29–34 36 38–40 113 123 124
-  127) → K2 (AYS teslimini bekliyor)
+  - Güven: `GUVEN.yedekHtml({ damga, boyut, iz, kayit, bugun })` (kural `yedek.js`'ten),
+    `silmeHtml({ nesne, sayi, donusNoktasi, yazilan })` + `silmeDurumu`, `gecmisHtml(olaylar)`
+    (olay: `{ zaman, kaynak:'kullanici'|'merkez'|'ofis'|'kural'|'plan'|'ice-aktarma', alan, eski, yeni, onay }`)
+- **Yarım / sıradaki:** K1 P2'ler (15 170 29–34 36 38–40 113 123 124 127) → K2 (AYS teslimini
+  bekliyor)
 - **Soru / öneri:**
-  - T: üç `index.html`'e `js/core/grafik.js`, `oneri.js`, `sozluk.js` (sayi.js'ten sonra). `oneri.js`
+  - T: üç `index.html`'e `js/core/grafik.js`, `oneri.js`, `sozluk.js`, `guven.js` (sayi.js'ten sonra). `oneri.js`
     yüklenmeden 150'nin süre çizgisi görünmez (`ui.js` onu arar, yoksa eskisi gibi kalır).
-  - H · bulgu: `tools/ortak.py` `yay()` · hedefte elle yazılmış bir dosya varsa sessizce üstüne
-    yazıyor · `brand/ortak/oneri.test.js` adı SPİ'nin kendi `src/tests/oneri.test.js`'iyle çakıştı ve
-    yayın onu ezdi (commit'ten önce yakalandı, git'ten geri alındı; ortak dosya
-    `onerikart.test.js` oldu) · öneri: başı «ÜRETİLMİŞ KOPYA» olmayan var olan hedefe yazmayı reddet.
-  - H · bulgu: `AYS/src/tests/planner.test.js:204` «kapasite değişince plan yeniden üretilir» ·
-    `generatedAt` ms çözünürlüğünde (`AYS/src/js/core/planner.js:265`); iki `ensurePlan` aynı ms'ye
-    düşünce damgalar eşit, test kalır · doğrulama: aynı kodla bir koşumda kaldı, sonrakinde geçti.
 
 ## TASARIM (T)
 
