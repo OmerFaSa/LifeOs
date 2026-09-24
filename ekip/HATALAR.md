@@ -20,8 +20,8 @@
 
 | Kod | Sahip | Durum | Özet |
 |---|---|---|---|
-| T2-08 | H | ✅ (bu commit) | AYS planner testi `generatedAt` ms damgasına bakıyordu: aynı ms'de rastgele kalıyordu (bulan: K) |
-| T2-07 | H | ✅ (bu commit) | `ortak.py`/`seviye.py --yay` hedefte aynı adlı ELLE yazılmış dosyayı sessizce eziyordu (bulan: K) |
+| T2-08 | H | ✅ e60fb1e | AYS planner testi `generatedAt` ms damgasına bakıyordu: aynı ms'de rastgele kalıyordu (bulan: K) |
+| T2-07 | H | ✅ e60fb1e | `ortak.py`/`seviye.py --yay` hedefte aynı adlı ELLE yazılmış dosyayı sessizce eziyordu (bulan: K) |
 | T2-06 | T | **açık · ACİL (main CI kırmızı)** | SPİ Rehber › Veri: HKM düğme satırı 390 px'te taşıyor (CI'da 11 px); `.lrow__act` telefonda sarmıyor |
 | T2-05 | H | ✅ b32fe7f | ESP test sayfası `audit.test.js`'i iki kez yüklüyordu (21 test iki kez koşuyordu) |
 | T2-04 | H | ✅ b32fe7f | Perde `hepsiniKapat` dinleyici ve sayaç bırakıyordu: sonraki ilk Esc yutuluyor, haberci 3 sn sonra perde açıyordu |
