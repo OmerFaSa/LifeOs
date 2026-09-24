@@ -19,7 +19,8 @@
  *
  *   her ekran   ekran ici sekme 0 · sekme grubu 0 · 30 kelimeyi asan tek
  *               parca yazi 0 · dolu (birincil) dugme en cok 1 · halka en
- *               cok 1 · resimsi simge (emoji) 0 · XP yazisi 0 (Rutbe haric)
+ *               cok 1 · resimsi simge (emoji) 0 · XP yazisi 0 (Rutbe haric) ·
+ *               kesinligi olmayan sayi 0 (`.sayi[data-etiketsiz]`, katalog 024)
  *   Bugun       sayfa boyu en cok 1800 px · gorunen dugme en cok 14
  *   kaynak      ekran ve kart dosyalarinda jeton disi ham renk 0
  *
@@ -56,6 +57,7 @@ const KURAL = [
   { ad:'halka',        olcu:'halka',        en:1, yazi:'halka grafiği' },
   { ad:'simge',        olcu:'simge',        en:0, yazi:'resimsi simge (emoji)' },
   { ad:'xp',           olcu:'xp',           en:0, yazi:'XP yazısı', haric:['rutbe'] },
+  { ad:'etiketsiz',    olcu:'etiketsiz',    en:0, yazi:'kesinliği olmayan sayı (024)' },
   { ad:'boy',          olcu:'boy',          en:1800, yazi:'sayfa boyu (px)', yalniz:['today'] },
   { ad:'dugme',        olcu:'dugme',        en:14, yazi:'görünen düğme', yalniz:['today'] },
 ];

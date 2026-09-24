@@ -320,6 +320,8 @@ function topla(arg){
       halka,
       simge: (metin.match(/\p{Extended_Pictographic}/gu) || []).length,
       xp: (metin.match(/\bXP\b/g) || []).length,
+      /* Kesinliği olmayan sayı (katalog 024; `LIFEOS.SAYI` işaretler). */
+      etiketsiz: main.querySelectorAll('.sayi[data-etiketsiz]').length,
       boy: document.documentElement.scrollHeight,
     },
   };
