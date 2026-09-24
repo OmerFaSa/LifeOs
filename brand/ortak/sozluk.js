@@ -13,6 +13,9 @@
                               üzerine gelince (dokunmatikte basılı tutunca)
                               tek cümlelik tanım ve örnek açılır. Tanım TEK
                               yerden gelir: aynı terim her ekranda aynıdır.
+     137  Ajanın baktığı veri ajanın masasındaki veri kimliği Türkçe ad ve
+                              kesinlik etiketiyle çip olur («gunun_akisi» değil
+                              «Günün akışı»). Ekrana bağlama K2'de (T2-02).
      139  Model kapalı kipi   dil modeli kapalıyken ajanlar kuraldan gelen
                               hazır cümlelerle konuşur ve bunu ETİKETLER;
                               üstte gri bir durum şeridi. Hiçbir ekran
@@ -197,6 +200,63 @@ window.LIFEOS = window.LIFEOS || {};
       + (durum.neden ? ' Neden: ' + kac(durum.neden) + '.' : '') + '</span></div>';
   }
 
+
+  /* ------------------------------------------------ 137 ajanın baktığı veri */
+
+  /* Ajanın masasındaki veri kimlikleri (`data/agents.js` `reads`) iç
+     adlardır: «gunun_akisi», «haftalar (review)». Ekrana ASCII kimlik
+     yazılmaz (AGENTS.md §1.8, ekip/HATALAR.md T2-02); ad buradan gelir.
+
+     Adlar ve kesinlik, aracın KENDİ açıklamasından (AYS `core/tools.js`
+     ve koçun `scope` alanı): «tahmini puan BANDI» → tahmin; risk, medyan,
+     oran, yüzde → hesaplandı; kayıt → ölçüldü. Enerji 1–5 adayın kendi
+     puanlamasıdır: «kullanıcının kendi kestirimi» → tahmin.
+     Tabloda olmayan kimliğe ad UYDURULMAZ (`veriBul` → null). */
+  const VERI = Object.freeze({
+    durum_ozeti:{ ad:'Durum özeti', kesinlik:'computed' },
+    konu_riski:{ ad:'Konu riski', kesinlik:'computed' },
+    puan_tahmini:{ ad:'Puan tahmini', kesinlik:'estimated' },
+    gunun_akisi:{ ad:'Günün akışı', kesinlik:'computed' },
+    konular:{ ad:'Konu durumları', kesinlik:'computed' },
+    denemeler:{ ad:'Deneme kayıtları', kesinlik:'measured' },
+    hedef_ve_net_matrisi:{ ad:'Hedef ve net karşılaştırması', kesinlik:'computed' },
+    gunler:{ ad:'Günlük çalışma kaydı', kesinlik:'measured' },
+    enerji_durumu:{ ad:'Enerji durumu', kesinlik:'estimated' },
+    mesgaleler:{ ad:'Mola ve meşgale durumu', kesinlik:'measured' },
+    haftalar:{ ad:'Haftalık plan ve değerlendirme', kesinlik:'computed' },
+    hatalar:{ ad:'Yanlış defteri', kesinlik:'measured' },
+    kartlar:{ ad:'Tekrar kartları', kesinlik:'computed' },
+    video_notlari:{ ad:'Ders notları', kesinlik:'measured' },
+    cozulen_sorular:{ ad:'Çözülen sorular', kesinlik:'measured' },
+    konu_basina_oran:{ ad:'Konu başına oran', kesinlik:'computed' },
+    kaynaklar:{ ad:'Kaynaklar', kesinlik:'measured' },
+    kaynak_zorlugu:{ ad:'Kaynak zorluğu', kesinlik:'computed' },
+  });
+  /* Paranteze yazılan ek: «konular (TYT)». `review` adın içinde zaten var. */
+  const VERI_EK = Object.freeze({ TYT:'TYT', AYT:'AYT', review:'' });
+
+  function veriBul(kimlik){
+    const m = /^\s*([a-z_]+)\s*(?:\(([^)]*)\))?\s*$/.exec(String(kimlik == null ? '' : kimlik));
+    if(!m || !Object.prototype.hasOwnProperty.call(VERI, m[1])) return null;
+    const ek = m[2] != null ? m[2].trim() : null;
+    if(ek != null && !Object.prototype.hasOwnProperty.call(VERI_EK, ek)) return null;
+    const v = VERI[m[1]];
+    const ekAd = ek != null ? VERI_EK[ek] : '';
+    return { kimlik:String(kimlik), taban:m[1], ek:ek, ad:v.ad + (ekAd ? ' (' + ekAd + ')' : ''), kesinlik:v.kesinlik };
+  }
+
+  /* Çipler: ad + kesinlik glifi (T'nin .chip'i). Tanımsız kimlik ham
+     yazılmaz; «tanımsız veri» çipi olur ve işaretlenir (denetim bulur). */
+  function veriCipleriHtml(liste){
+    const cip = (liste || []).map(k => {
+      const v = veriBul(k);
+      if(!v) return '<li class="chip vericip__c vericip__c--yok" data-veri-yok="' + kac(k) + '">tanımsız veri</li>';
+      return '<li class="chip vericip__c" data-veri="' + kac(v.kimlik) + '">'
+        + (L.KESINLIK_HTML ? L.KESINLIK_HTML(v.kesinlik) : '') + '<span class="vericip__ad">' + kac(v.ad) + '</span></li>';
+    }).join('');
+    return cip ? '<ul class="vericip" data-oz="137" aria-label="Baktığı veri">' + cip + '</ul>' : '';
+  }
+
   L.SOZLUK = {
     TERIMLER:TERIMLER,
     BASILI_MS:BASILI_MS,
@@ -207,5 +267,8 @@ window.LIFEOS = window.LIFEOS || {};
     hazir:hazir,
     hazirHtml:hazirHtml,
     seritHtml:seritHtml,
+    VERI:VERI,
+    veriBul:veriBul,
+    veriCipleriHtml:veriCipleriHtml,
   };
 })();

@@ -11,6 +11,8 @@
         kullanıcıya taşınmaz, sonuç döner.
      3. İLK AÇILIŞ DA SAKLANIR. Kabuk devreye girmeden yüklenen dosyaların
         adresi (yalnız aynı kökenden) kabuğa gönderilir.
+     4. BİLDİRİM KARTI (katalog 164) — aşağıda: kodla kurulur, izin
+        kendiliğinden istenmez, eylemi service worker uygulamaz.
 
    Manifest ayrı dosya değildir: `app.js › installManifest` onu gömülü
    üretir (tek dosya sürümüyle aynı yol). */
@@ -58,5 +60,110 @@
     }
   }
 
-  L.Pwa = { uygun, adresler, kaydet, EN_COK };
+
+  /* ------------------------------------------------ 164 bildirim kartı
+
+     Telefon bildirimi: modül, tek cümle, en çok iki eylem. Bildirimi KOD
+     kurar; eylemi service worker UYGULAMAZ, uygulamaya iletir (sw.js
+     `notificationclick` → `lifeos:bildirim` olayı) ve kararı modülün kendi
+     kodu verir (AGENTS.md §1.1, §1.4).
+
+     Platform farkı DOĞRULANDI (EKIP-PLANI Ek A 164): Chrome/Android
+     eylem düğmesi gösterir (`Notification.maxActions`); iOS Safari özel
+     eylemleri göstermez ve dokunuşu yalnız uygulamayı açmaya çevirir. Bu
+     yüzden eylem sayısı platformdan okunur; eylemsiz platformda kart yine
+     aynı cümleyi söyler, karar uygulamada verilir.
+
+     Sistem bildirimine renk verilemez: modül RENKLE değil ADIYLA söylenir
+     (başlığın başı «AYS ·»), 165'teki «renksiz de ayırt edilir» kuralı.
+     İzin hiçbir zaman kendiliğinden istenmez: `izinIste` yalnız kullanıcının
+     bastığı bir düğmeden çağrılır. */
+  const BILDIRIM_MODUL = { ays:'AYS', spi:'SPİ', esp:'ESP', mer:'Merkez' };
+  const EN_COK_EYLEM = 2;
+  const YASAK_EYLEM = /^\s*(evet|tamam|ok|okay)\b/i;
+
+  function bildirimDestegi(o){
+    o = o || {};
+    const N = o.Notification !== undefined ? o.Notification : (typeof Notification !== 'undefined' ? Notification : null);
+    if(!N) return { var:false, izin:null, eylem:0 };
+    const eylem = typeof N.maxActions === 'number' ? Math.max(0, Math.min(EN_COK_EYLEM, N.maxActions)) : 0;
+    return { var:true, izin:N.permission || 'default', eylem:eylem };
+  }
+
+  /* k = { modul, baslik, cumle, eylemler:[{ id, ad }], rota, etiket } */
+  function bildirimKarti(k, destek){
+    k = k || {};
+    destek = destek || { eylem:EN_COK_EYLEM };
+    const hata = [];
+    if(!BILDIRIM_MODUL[k.modul]) hata.push('modül bilinmiyor');
+    if(!k.baslik || !String(k.baslik).trim()) hata.push('başlık yok');
+    const c = String(k.cumle || '').trim();
+    if(!c) hata.push('cümle yok');
+    else if(!/[.!?]$/.test(c) || /[.!?]\s+\S/.test(c)) hata.push('tek cümle değil');
+    const eylemler = Array.isArray(k.eylemler) ? k.eylemler : [];
+    if(eylemler.length > EN_COK_EYLEM) hata.push('en çok iki eylem');
+    eylemler.forEach(e => {
+      if(!e || !e.id || !e.ad) hata.push('eylemin kimliği ya da adı yok');
+      else if(YASAK_EYLEM.test(e.ad)) hata.push('eylem sonucu söylemeli («' + e.ad + '» değil)');
+    });
+    if(hata.length) return { ok:false, hatalar:hata };
+    const gosterilen = eylemler.slice(0, destek.eylem || 0);
+    return {
+      ok:true,
+      baslik:BILDIRIM_MODUL[k.modul] + ' · ' + String(k.baslik).trim(),
+      secenek:{
+        body:c,
+        tag:k.etiket || (k.modul + ':' + (k.rota || 'genel')),
+        data:{ modul:k.modul, rota:k.rota || '', eylemler:eylemler.map(e => e.id) },
+        actions:gosterilen.map(e => ({ action:e.id, title:e.ad })),
+      },
+      gizlenenEylem:eylemler.length - gosterilen.length,
+    };
+  }
+
+  /* Bildirimi gösterir. İzin yoksa SORMAZ, nedeni döner. */
+  async function bildir(k, o){
+    o = o || {};
+    const d = bildirimDestegi(o);
+    if(!d.var) return { ok:false, neden:'desteklenmiyor' };
+    if(d.izin !== 'granted') return { ok:false, neden:'izin', izin:d.izin };
+    const kart = bildirimKarti(k, d);
+    if(!kart.ok) return { ok:false, neden:'kart', hatalar:kart.hatalar };
+    const nav = o.navigator || (typeof navigator !== 'undefined' ? navigator : null);
+    try{
+      const kayit = nav && nav.serviceWorker ? await nav.serviceWorker.ready : null;
+      if(!kayit || typeof kayit.showNotification !== 'function') return { ok:false, neden:'kabuk-yok' };
+      await kayit.showNotification(kart.baslik, kart.secenek);
+      return { ok:true, gizlenenEylem:kart.gizlenenEylem };
+    }catch(e){
+      return { ok:false, neden:'hata', hata:String((e && e.message) || e) };
+    }
+  }
+
+  /* Yalnız kullanıcının bastığı düğmeden. */
+  async function izinIste(o){
+    o = o || {};
+    const N = o.Notification !== undefined ? o.Notification : (typeof Notification !== 'undefined' ? Notification : null);
+    if(!N || typeof N.requestPermission !== 'function') return 'desteklenmiyor';
+    try{ return await N.requestPermission(); }catch(e){ return 'denied'; }
+  }
+
+  /* Service worker'ın ilettiği eylemi uygulamaya olay olarak verir:
+     `window` üstünde `lifeos:bildirim` { eylem, rota, modul }. Dinleyen
+     modül kendi koduyla karar verir; kimse dinlemiyorsa hiçbir şey olmaz. */
+  function bildirimDinle(o){
+    o = o || {};
+    const nav = o.navigator || (typeof navigator !== 'undefined' ? navigator : null);
+    const hedef = o.hedef || (typeof window !== 'undefined' ? window : null);
+    if(!nav || !nav.serviceWorker || typeof nav.serviceWorker.addEventListener !== 'function' || !hedef) return false;
+    nav.serviceWorker.addEventListener('message', ev => {
+      const m = ev && ev.data;
+      if(!m || m.tur !== 'bildirim') return;
+      hedef.dispatchEvent(new CustomEvent('lifeos:bildirim', { detail:{ eylem:m.eylem, rota:m.rota, modul:m.modul } }));
+    });
+    return true;
+  }
+
+  L.Pwa = { uygun, adresler, kaydet, EN_COK,
+    EN_COK_EYLEM, bildirimDestegi, bildirimKarti, bildir, izinIste, bildirimDinle };
 })();

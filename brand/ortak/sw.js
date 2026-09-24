@@ -110,3 +110,24 @@ self.addEventListener('message', e => {
   const d = e.data || {};
   if(d.tur === 'onbellek') e.waitUntil(doldur(d.adresler));
 });
+
+/* BİLDİRİM KARTI (katalog 164, brand/ortak/pwa.js). Service worker eylemi
+   UYGULAMAZ: açık bir pencere varsa ona iletir (uygulama `lifeos:bildirim`
+   olayıyla kendi koduyla karar verir), yoksa uygulamayı bildirimin rotasıyla
+   açar. iOS eylem düğmesi göstermez; orada dokunuş yalnız uygulamayı açar. */
+self.addEventListener('notificationclick', e => {
+  const n = e.notification;
+  const d = (n && n.data) || {};
+  if(n) n.close();
+  const mesaj = { tur:'bildirim', eylem:e.action || 'ac', rota:d.rota || '', modul:d.modul || '' };
+  e.waitUntil((async () => {
+    const pencereler = await self.clients.matchAll({ type:'window', includeUncontrolled:true });
+    const p = pencereler[0];
+    if(p){
+      p.postMessage(mesaj);
+      if(typeof p.focus === 'function') await p.focus();
+      return;
+    }
+    if(self.clients.openWindow) await self.clients.openWindow(self.registration.scope + (d.rota ? '#' + d.rota : ''));
+  })());
+});

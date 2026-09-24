@@ -822,3 +822,12 @@
 .birikim__fark--kotu{ stroke:var(--bad); }
 .birikim__fark--iyi{ stroke:var(--ok); }
 .birikim__fark--notr{ stroke:var(--text-3); }
+
+/* ================================================================
+   137 · AJANIN BAKTIĞI VERİ — çip (T'nin .chip'i) + kesinlik glifi
+   ================================================================ */
+
+.vericip{ display:flex; flex-wrap:wrap; gap:var(--sp-1); margin:0; padding:0; list-style:none; }
+.vericip__c{ display:inline-flex; align-items:center; gap:var(--sp-1); font-size:var(--fs-xs); }
+.vericip__c .kesinlik__ad{ position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.vericip__c--yok{ color:var(--text-3); border-style:dashed; }

@@ -132,4 +132,46 @@ describe('139 · Model kapalı kipi', () => {
   });
 });
 
+describe('137 · Ajanın baktığı veri', () => {
+
+  it('oz-137 Ajan cevabının altında hangi veriye baktığı çip olarak, her biri kesinlik etiketiyle.', () => {
+    const k = sahne(Z().veriCipleriHtml(['konular (TYT)', 'puan_tahmini', 'denemeler']));
+    try{
+      const l = k.querySelector('[data-oz="137"]');
+      const c = l.querySelectorAll('.vericip__c');
+      expect(c).toHaveLength(3);
+      expect(c[0].querySelector('.vericip__ad').textContent).toBe('Konu durumları (TYT)');
+      expect(c[0].querySelector('.kesinlik--computed')).toBeTruthy();
+      expect(c[1].querySelector('.vericip__ad').textContent).toBe('Puan tahmini');
+      expect(c[1].querySelector('.kesinlik--estimated')).toBeTruthy();   // bant bir tahmindir
+      expect(c[2].querySelector('.kesinlik--measured')).toBeTruthy();
+      expect(/_/.test(l.textContent)).toBeFalsy();
+    }finally{ k.remove(); }
+  });
+
+  it('oz-137 bu arayüzde her ajanın okuduğu verinin Türkçe adı ve kesinliği var (T2-02)', () => {
+    /* Yeni bir kimlik tabloya yazılmadan eklenirse bu test kalır: ekran
+       bir gün yine «gunun_akisi» yazmasın. */
+    const N = window.R || window.SP || window.ESP;
+    const ajanlar = Array.isArray(N.AGENTS) ? N.AGENTS : Object.keys(N.AGENTS || {}).map(k => N.AGENTS[k]);
+    const bos = [];
+    ajanlar.forEach(a => (a.reads || []).forEach(r => {
+      const v = Z().veriBul(r);
+      if(!v || !window.LIFEOS.KESINLIK_ILE(v.kesinlik) || /[_]|review/.test(v.ad)) bos.push(r);
+    }));
+    expect(bos).toEqual([]);
+  });
+
+  it('oz-137 tanımsız kimliğe ad uydurulmaz; ham kimlik ekrana yazılmaz', () => {
+    expect(Z().veriBul('uydurma_veri')).toBeNull();
+    expect(Z().veriBul('konular (LGS)')).toBeNull();
+    const h = Z().veriCipleriHtml(['uydurma_veri']);
+    expect(h).toContain('tanımsız veri');
+    expect(h).toContain('data-veri-yok="uydurma_veri"');
+    expect(h.indexOf('>uydurma_veri<') < 0).toBeTruthy();
+    expect(Z().veriCipleriHtml([])).toBe('');
+    expect(Object.isFrozen(Z().VERI)).toBeTruthy();
+  });
+});
+
 })();

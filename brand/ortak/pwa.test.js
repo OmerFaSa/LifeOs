@@ -75,4 +75,89 @@
       expect(P().adresler(yer('http://127.0.0.1:4173/'), perf(cok))).toHaveLength(P().EN_COK);
     });
   });
+
+  describe('164 · Bildirim kartı', () => {
+    const KART = { modul:'ays', baslik:'Sıradaki 20:30', cumle:'Paragraf · akşam bloğu, 30 soru.',
+      eylemler:[{ id:'basla', ad:'Başla' }, { id:'ertele', ad:'15 dk ertele' }], rota:'today' };
+    const sahteN = (izin, maxActions) => {
+      const N = { permission:izin, istendi:0, requestPermission:async () => { N.istendi++; return 'granted'; } };
+      if(maxActions !== undefined) N.maxActions = maxActions;
+      return N;
+    };
+    const sahteKayit = () => {
+      const gosterilen = [];
+      return { gosterilen, nav:{ serviceWorker:{ ready:Promise.resolve({
+        showNotification:async (b, s) => { gosterilen.push([b, s]); } }) } } };
+    };
+
+    it('oz-164 Telefon bildirimi: modül rengi, tek cümle, iki eylem.', () => {
+      const k = P().bildirimKarti(KART, { eylem:2 });
+      expect(k.ok).toBeTruthy();
+      /* Sistem bildirimine renk verilemez: modül ADIYLA söylenir. */
+      expect(k.baslik).toBe('AYS · Sıradaki 20:30');
+      expect(k.secenek.body).toBe('Paragraf · akşam bloğu, 30 soru.');
+      expect(k.secenek.actions).toEqual([{ action:'basla', title:'Başla' }, { action:'ertele', title:'15 dk ertele' }]);
+      expect(k.secenek.data).toEqual({ modul:'ays', rota:'today', eylemler:['basla', 'ertele'] });
+      expect(P().EN_COK_EYLEM).toBe(2);
+    });
+
+    it('oz-164 eylem düğmeleri platforma göre: eylemsiz platformda (iOS) düğme yok, kart yine aynı', () => {
+      expect(P().bildirimDestegi({ Notification:sahteN('granted', 2) }).eylem).toBe(2);
+      expect(P().bildirimDestegi({ Notification:sahteN('granted', 5) }).eylem).toBe(2);
+      expect(P().bildirimDestegi({ Notification:sahteN('granted') }).eylem).toBe(0);   // maxActions yok
+      expect(P().bildirimDestegi({ Notification:null }).var).toBeFalsy();
+      const k = P().bildirimKarti(KART, { eylem:0 });
+      expect(k.secenek.actions).toEqual([]);
+      expect(k.gizlenenEylem).toBe(2);
+      expect(k.secenek.body).toBe(KART.cumle);
+    });
+
+    it('oz-164 kart kodla doğrulanır: tek cümle, en çok iki eylem, sonucu söyleyen eylem adı', () => {
+      const h = o => P().bildirimKarti(Object.assign({}, KART, o), { eylem:2 }).hatalar || [];
+      expect(h({ cumle:'Bir. İki.' })).toEqual(['tek cümle değil']);
+      expect(h({ cumle:'' })).toEqual(['cümle yok']);
+      expect(h({ modul:'hkm' })).toEqual(['modül bilinmiyor']);
+      expect(h({ eylemler:[{ id:'a', ad:'A' }, { id:'b', ad:'B' }, { id:'c', ad:'C' }] })).toEqual(['en çok iki eylem']);
+      expect(h({ eylemler:[{ id:'e', ad:'Evet' }] })).toEqual(['eylem sonucu söylemeli («Evet» değil)']);
+      expect(h({ eylemler:[{ id:'t', ad:'Tamam' }] })).toEqual(['eylem sonucu söylemeli («Tamam» değil)']);
+    });
+
+    it('oz-164 izin yoksa bildirim gösterilmez ve izin KENDİLİĞİNDEN istenmez', async () => {
+      const N = sahteN('default', 2), s = sahteKayit();
+      const r = await P().bildir(KART, { Notification:N, navigator:s.nav });
+      expect(r).toEqual({ ok:false, neden:'izin', izin:'default' });
+      expect(N.istendi).toBe(0);
+      expect(s.gosterilen).toHaveLength(0);
+      /* İzin yalnız çağrıldığında (kullanıcının düğmesinden) istenir. */
+      expect(await P().izinIste({ Notification:N })).toBe('granted');
+      expect(N.istendi).toBe(1);
+      expect(await P().izinIste({ Notification:null })).toBe('desteklenmiyor');
+    });
+
+    it('oz-164 izin varsa service worker üzerinden gösterilir; bozuk kart gösterilmez', async () => {
+      const s = sahteKayit();
+      const r = await P().bildir(KART, { Notification:sahteN('granted', 2), navigator:s.nav });
+      expect(r.ok).toBeTruthy();
+      expect(s.gosterilen).toHaveLength(1);
+      expect(s.gosterilen[0][0]).toBe('AYS · Sıradaki 20:30');
+      const b = await P().bildir(Object.assign({}, KART, { cumle:'' }), { Notification:sahteN('granted', 2), navigator:s.nav });
+      expect(b.neden).toBe('kart');
+      expect(s.gosterilen).toHaveLength(1);
+      expect((await P().bildir(KART, { Notification:null })).neden).toBe('desteklenmiyor');
+    });
+
+    it('oz-164 service worker eylemi uygulamaz, uygulamaya olay olarak iletir', () => {
+      let dinleyici = null;
+      const nav = { serviceWorker:{ addEventListener:(t, f) => { if(t === 'message') dinleyici = f; } } };
+      const hedef = document.createElement('div');
+      const gelen = [];
+      hedef.addEventListener('lifeos:bildirim', e => gelen.push(e.detail));
+      expect(P().bildirimDinle({ navigator:nav, hedef:hedef })).toBeTruthy();
+      dinleyici({ data:{ tur:'onbellek' } });                       // başka mesaj yok sayılır
+      dinleyici({ data:{ tur:'bildirim', eylem:'ertele', rota:'today', modul:'ays' } });
+      expect(gelen).toEqual([{ eylem:'ertele', rota:'today', modul:'ays' }]);
+      expect(P().bildirimDinle({ navigator:{} , hedef:hedef })).toBeFalsy();
+    });
+  });
+
 })();
