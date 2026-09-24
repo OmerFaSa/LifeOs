@@ -122,7 +122,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## HATA (H)
 
-- **Şu an:** H0b tıklama taraması ilk tam koşum (AYS bitti sayılır, SPİ/ESP sürüyor); push takibi (H2) sürekli
+- **Şu an:** AYS teslim kapısı — a861d79 üzerinde (ayrı worktree): runtests 1897/1897, duman 44 ekran, a11y, 390 px, palet (tek tasarım, 132 ölçüm), çizim bütçesi (en ağır office 86,9 ms / 120), dist aynı; envanter kayıp 0; sadelik AYS bütçede. Tıklama taraması AYS'de sürüyor (yeniden yazılan her düğme). Teslim tablosuna T yazınca H4 tam koşum.
 - **Biten:** H0 taban envanteri · 1600f75 — `node tools/envanter.js` her push'ta CI'da koşar
 - **Biten:** H1 sadelik denetimi (`tools/sadelik.js`, plan §1.2 bütçesi) — CI'da envanterle aynı gezintiden; teslim tablosunda ✅ olan modülde kırmızı olur, diğerlerinde yalnız ölçer
 - **Denetlenen push'lar:** T1 23e3a7c ✅ · T1 9b12bef ⚠ → T2-06 ✅ 4656788 (üç modülde runtests, duman, a11y, 390 px, palet, dist, ortak/seviye temiz) · K 009cf92 kod okundu → T2-01 · K 076bb29 + 0780206: dist ve ortak kopyalar temiz, kod okundu → T2-03 · K 2d765cc (öneri, onay, sözlük) ve 0443561 (güven): üç modül runtests yeşil, kod okundu (sormadanMi, seviye kalıbı, silme kapısı, kayıt geçmişi doktrine uygun) — K2'de `silme-onay` işleyicisi `silmeDurumu`nu YENİDEN sınamalı, düğmenin disabled olması yetmez
