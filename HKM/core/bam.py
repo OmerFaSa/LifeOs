@@ -1188,9 +1188,32 @@ def _urun_adimi(con, cfg, j, g, transport, now):
                                         (", %d kaynak" % len(kaynaklar)) if kaynaklar else "")}
 
 
+def _gitar_adimi(con, cfg, j, g, transport, now):
+    """Gitar paketi (core/unite.py): tek uretim cagrisi; kod tempo, ton ve
+    derece bicimini suzer. Yargi yok: cevabi olan bir soru yok, tempo
+    «referans»tir ve esik kullanicinin olcumunden acilir."""
+    r = _cagri(con, cfg, "uretim", URETIM_BAS + unite.BICIM_GITAR, unite.istem_gitar(g), transport)
+    if not r.get("ok"):
+        return {"durum": "beklemede" if r.get("reason") == "budget" else "hata",
+                "not": r.get("note") or "Model cevap vermedi."}
+    sonuc, hata = unite.ayikla_gitar(_json_ayikla(r["text"]), g)
+    if hata:
+        return {"durum": "hata", "not": "Gitar paketi yazılmadı: " + hata}
+    alistirmalar, dusen = sonuc
+    govde = {"tur": "gitar", "duzey": g["duzey"], "konu": g["konu"], "baslik": unite.baslik(g),
+             "alistirmalar": alistirmalar,
+             "kalite": {"kontrol": "kod (tempo, ton, derece)", "uretilen": len(alistirmalar) + dusen,
+                        "gecen": len(alistirmalar), "bicim_dusen": dusen}}
+    k = kayit_ekle(con, "materyal", unite.baslik(g), govde, dogruluk="dogrulanmadi",
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now, **_depo_yaz(j))
+    return {"durum": "tamam", "kayit_id": k["id"], "not": unite.ozet(govde)}
+
+
 def _unite_adimi(con, cfg, j, g, transport, now):
     """ESP dil unitesi (core/unite.py): uret, bicimi ve yazi sistemini kodla
     sina, ogeleri bagimsiz yargiyla denetle. Soru YAZDIRILMAZ."""
+    if unite.gitar_mi(g):
+        return _gitar_adimi(con, cfg, j, g, transport, now)
     r = _cagri(con, cfg, "uretim", URETIM_BAS + unite.BICIM, unite.istem(g), transport)
     if not r.get("ok"):
         return {"durum": "beklemede" if r.get("reason") == "budget" else "hata",

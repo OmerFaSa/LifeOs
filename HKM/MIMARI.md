@@ -1070,6 +1070,13 @@ etiketleri). Ünite yalnız kendi dilinde listelenir; ilerleme SRS'ten okunur. �
 ve hiç tekrar edilmemiş kartları kaldırır; tekrar edilmiş kart kullanıcının emeğidir, kalır.
 Testler: `tests/test_unite.py`, `ESP/src/tests/unite.test.js`, `tools/entegre.js` §2.81.
 
+**Gitar paketi (8d-2):** aynı iş türü `{"alan": "gitar", duzey: başlangıç|orta|ileri, konu,
+oge: 3–10}`. Tek üretim çağrısı; kod tempo aralığını (30–240 BPM, başlangıç ≤ hedef), tonu ve
+derece ilerleyişini (I–VII, 7/maj7/m7/sus4) süzer. Cevabı olan bir soru olmadığı için bağımsız
+yargı yoktur. ESP paketi Stüdyo'nun `pieces` şemasına yazar (`targetRef:true`: hedef tempo
+«referans»; eşik kullanıcının temiz tekrarından açılır); var olan ad yeniden eklenmez; geri
+almada deneme kaydı olan alıştırma kalır. İstek: Stüdyo › Müzik › «Paket iste».
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

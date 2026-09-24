@@ -869,15 +869,20 @@ def _teklif_unite(con, e, kayit_id, now=None):
     """Dil unitesini ESP'ye teklif olarak birakir. ESP kaydi ceker, KENDI
     koduyla sinar, onizletir ve onayla yazar."""
     g = (bam.kayit_getir(con, kayit_id) or {}).get("govde") or {}
-    if g.get("tur") != "unite" or not g.get("uniteler"):
+    if g.get("tur") == "gitar" and g.get("alistirmalar"):
+        payload = {"kayit_id": int(kayit_id), "baslik": str(g.get("baslik") or "Gitar")[:120],
+                   "unite": 1, "oge": len(g["alistirmalar"])}
+    elif g.get("tur") == "unite" and g.get("uniteler"):
+        payload = {"kayit_id": int(kayit_id), "baslik": str(g.get("baslik") or "Ünite")[:120],
+                   "dil": g.get("dil"), "unite": len(g["uniteler"]),
+                   "oge": sum(len(u.get("ogeler") or []) for u in g["uniteler"])}
+    else:
         return " Kayıt ünite biçiminde değil; teklif bırakılmadı."
-    payload = {"kayit_id": int(kayit_id), "baslik": str(g.get("baslik") or "Ünite")[:120],
-               "dil": g.get("dil"), "unite": len(g["uniteler"]),
-               "oge": sum(len(u.get("ogeler") or []) for u in g["uniteler"])}
     n = intents.create(con, e["modul"], "unite.add", payload, None, source="bam")
     if n.get("ok"):
         bam.iz_ekle(con, "kayit", kayit_id, "niyet", n["intent"]["id"], now=now)
-        return " Ünite teklif olarak ESP’ye bırakıldı; ESP kendi koduyla sınayıp onayınla ekler."
+        return (" %s teklif olarak ESP’ye bırakıldı; ESP kendi koduyla sınayıp onayınla ekler."
+                % ("Gitar paketi" if g.get("tur") == "gitar" else "Ünite"))
     return ""
 
 

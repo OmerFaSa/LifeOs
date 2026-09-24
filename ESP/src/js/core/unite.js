@@ -16,7 +16,13 @@
         ilerleme SRS'ten okunur, «tamamlandı» bayrağı tutulmaz.
      4. GERİ ALINIR. Ünite kalkar; hiç tekrar edilmemiş kartları da kalkar.
         Tekrar edilmiş kart kullanıcının emeğidir, silinmez — ve bu söylenir.
-     5. İSTEĞE KİŞİSEL VERİ GİTMEZ: dil, düzey, konu. */
+     5. İSTEĞE KİŞİSEL VERİ GİTMEZ: dil, düzey, konu.
+
+   GİTAR PAKETİ (Part 8d-2): aynı teklif (`unite.add`, dili yok) bir alıştırma
+   listesi taşır ve Stüdyo'nun `pieces` şemasına girer (data/guitar_tabs.js).
+   Hedef tempo «referans»tır (`targetRef`); eşik kullanıcının kendi temiz
+   tekrarından açılır (core/acoustic.js). Geri almada, üzerinde deneme
+   kaydı olan alıştırma kalır: o kayıt kullanıcının ölçümüdür. */
 
 window.ESP = window.ESP || {};
 
@@ -70,6 +76,13 @@ ESP.Unite = (function(){
   }
 
   function istekTemizle(o){
+    if(o && o.alan === 'gitar'){
+      const duzey = bosluk(o.duzey).toLocaleLowerCase('tr-TR');
+      if(GITAR_DUZEY.indexOf(duzey) < 0) return { ok:false, why:'Düzey başlangıç, orta ya da ileri olmalı.' };
+      const konu = bosluk(o.konu);
+      if(konu.length < 2 || konu.length > 80) return { ok:false, why:'Konu 2–80 karakter olmalı.' };
+      return { ok:true, unite:{ alan:'gitar', duzey, konu } };
+    }
     const dil = o && o.dil;
     if(!ESP.LANG_BY_ID[dil]) return { ok:false, why:'Dil ESP’nin dillerinden biri olmalı.' };
     const duzey = bosluk(o.duzey).toUpperCase();
@@ -83,7 +96,8 @@ ESP.Unite = (function(){
     const t = istekTemizle(o);
     if(!t.ok) return { ok:false, metin:t.why };
     const r = await istek('/api/king/emir', { modul:'esp', tur:'esp.unite', konu:'',
-      neden:'ESP Dil › Öğren’den ünite istendi.', govde:{ unite:t.unite } });
+      neden:t.unite.alan === 'gitar' ? 'ESP Stüdyo’dan gitar alıştırma paketi istendi.'
+        : 'ESP Dil › Öğren’den ünite istendi.', govde:{ unite:t.unite } });
     if(!r.bagli) return { ok:false, metin:'Üniteyi HKM’deki Üretim Bürosu hazırlar ama HKM bağlı değil. '
       + 'Rehber › HKM’den bağlanınca yeniden iste.' };
     if(r.ag) return { ok:false, metin:'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden iste.' };
@@ -106,12 +120,55 @@ ESP.Unite = (function(){
 
   /* ------------------------------------------------------------ sınama (saf) */
 
+  const BPM = [30, 240];
+  const DERECE = /^b?(VII|VI|V|IV|III|II|I|vii|vi|v|iv|iii|ii|i)(°|7|maj7|m7|sus4)?$/;
+  const GITAR_DUZEY = ['başlangıç', 'orta', 'ileri'];
+
+  function bpm(x){ return typeof x === 'number' && isFinite(x) && x >= BPM[0] && x <= BPM[1] ? Math.round(x) : null; }
+
+  function gitarSina(g, kid, kayit){
+    if((ESP.S.pieces || []).some(x => (x.tags || []).indexOf('bam:' + kid) >= 0)){
+      return { ok:false, why:'Bu gitar paketi zaten eklenmiş.' };
+    }
+    const var_ = {};
+    (ESP.S.pieces || []).forEach(x => { var_[U().norm(x.name)] = 1; });
+    let dusen = 0, atlanan = 0;
+    const pieces = [];
+    (Array.isArray(g.alistirmalar) ? g.alistirmalar : []).slice(0, 20).forEach(x => {
+      const ad = bosluk(x && x.ad).slice(0, 80);
+      const kind = x && (x.tur === 'technique' || x.tur === 'piece') ? x.tur : null;
+      const bas = bpm(x && x.baslangic_bpm), hedef = bpm(x && x.hedef_bpm);
+      const il = Array.isArray(x && x.ilerleyis) ? x.ilerleyis : [];
+      const ilOk = il.length <= 16 && il.every(t => typeof t === 'string' && DERECE.test(t.trim()));
+      if(ad.length < 2 || !kind || bas == null || hedef == null || bas > hedef || !ilOk){ dusen++; return; }
+      if(var_[U().norm(ad)]){ atlanan++; return; }
+      var_[U().norm(ad)] = 1;
+      let ton = bosluk(x.ton) || '';
+      if(ton && ESP.NOTES.indexOf(ton.replace(/m$/, '')) < 0) ton = '';
+      pieces.push(ESP.Model.newPiece({ name:ad, kind, key:ton, targetBpm:hedef, targetRef:true,
+        startBpm:bas, progression:il.map(t => t.trim()), note:bosluk(x.not).slice(0, 200) || null,
+        tags:['bam', 'bam:' + kid] }));
+    });
+    if(!pieces.length) return { ok:false, why:'Paketten Stüdyo’ya eklenecek yeni alıştırma çıkmadı.' };
+    const uyari = ['Tempolar referanstır: eşik senin temiz tekrarından açılır. Kaynaksız, model bilgisi.'];
+    if(dusen) uyari.push(dusen + ' alıştırma ESP’nin denetimini geçmedi (tempo, ton ya da derece).');
+    if(atlanan) uyari.push(atlanan + ' alıştırma Stüdyo’da zaten var; yeniden eklenmeyecek.');
+    const duzey = GITAR_DUZEY.indexOf(g.duzey) >= 0 ? g.duzey : '';
+    return { ok:true, tur:'gitar', pieces, kayitId:kid,
+      onizleme:{ baslik:'Gitar ' + duzey + ' · ' + bosluk(g.konu) + ' — ' + pieces.length + ' alıştırma',
+        satirlar:pieces.map(x => x.name + ' (' + (x.kind === 'technique' ? 'teknik' : 'parça')
+          + (x.key ? ', ' + x.key : '') + ')' + (x.progression.length ? ': ' + x.progression.join('–') : '')
+          + ' · ' + x.startBpm + ' → ' + x.targetBpm + ' BPM (referans)'),
+        uyari } };
+  }
+
   function sina(kayit, p){
     const g = kayit && kayit.govde;
     const kid = Number(kayit && kayit.id);
     if(!g || !Number.isInteger(kid) || kid < 1 || kid !== Number(p && p.kayit_id)){
       return { ok:false, why:'Kayıt teklifle eşleşmiyor.' };
     }
+    if(g.tur === 'gitar') return gitarSina(g, kid, kayit);
     if(g.tur !== 'unite') return { ok:false, why:'Kayıt ünite biçiminde değil.' };
     const dil = g.dil, l = ESP.LANG_BY_ID[dil];
     if(!l) return { ok:false, why:'Ünitenin dili ESP’de yok.' };
@@ -189,6 +246,11 @@ ESP.Unite = (function(){
     if(!kayit) return { ok:false, error:'Ünite HKM’den alınamadı; HKM açıkken yeniden dene.' };
     const s = sina(kayit, p);
     if(!s.ok) return { ok:false, error:s.why };
+    if(s.tur === 'gitar'){
+      for(const x of s.pieces) await ESP.Model.savePiece(x);
+      return { ok:true, note:s.pieces.length + ' alıştırma Stüdyo › Müzik’e eklendi. Tempolar '
+        + 'referans; eşik senin temiz tekrarından açılır.', geriAl:{ kayitId:kid, gitar:true } };
+    }
     ESP.S.bamUnits = (ESP.S.bamUnits || []).concat(s.uniteler);
     await yaz();
     let eklenen = 0, atlanan = 0;
@@ -203,6 +265,16 @@ ESP.Unite = (function(){
 
   async function geriAl(g){
     const kid = g && g.kayitId;
+    if(g && g.gitar){
+      let kalan = 0, silinen = 0;
+      for(const x of (ESP.S.pieces || []).slice()){
+        if((x.tags || []).indexOf('bam:' + kid) < 0) continue;
+        if((x.attempts || []).length){ kalan++; continue; }
+        await ESP.Model.deletePiece(x.id);
+        silinen++;
+      }
+      return { ok:silinen + kalan > 0, kalan };
+    }
     const ids = (ESP.S.bamUnits || []).filter(u => u.bam && u.bam.kayitId === kid).map(u => u.id);
     if(!ids.length) return { ok:false };
     ESP.S.bamUnits = (ESP.S.bamUnits || []).filter(u => ids.indexOf(u.id) < 0);

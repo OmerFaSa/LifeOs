@@ -209,9 +209,14 @@ ESP.Screens.studio = (function(){
         meta:p.name,
         note:t.cert === 'missing'
           ? (t.why || 'Henüz temiz eşik ölçülmedi.')
-          : 'Temiz eşik ' + t.value + ' BPM' + (p.targetBpm ? ' · hedef ' + p.targetBpm : ''),
+          : 'Temiz eşik ' + t.value + ' BPM' + (p.targetBpm ? ' · hedef ' + p.targetBpm
+            + (p.targetRef ? ' (referans)' : '') : ''),
         action:K.Button({ label:'Sil', size:'sm', act:'del-piece', data:{ 'data-id':p.id } }),
         body:html`
+          ${when((p.tags || []).indexOf('bam') >= 0, () => html`<p class="small muted">
+            BAM alıştırması${p.key ? ' · ' + p.key : ''}${(p.progression || []).length
+              ? ' · ' + p.progression.join('–') : ''}${p.startBpm ? ' · başlangıç ' + p.startBpm + ' BPM' : ''}
+            — tempolar referans.${p.note ? ' ' + p.note : ''}</p>`)}
           ${t.cert === 'missing'
             ? K.Notice({ tone:'info', body:t.why || 'Bu parçada ölçülmüş temiz eşik yok. '
                 + 'Tempo girip «temiz» işaretlediğinde ölçüm başlar.' })
@@ -246,6 +251,23 @@ ESP.Screens.studio = (function(){
           ${map(ESP.TECHNIQUES, t => K.Button({ label:t.label, size:'sm',
             act:'add-technique', data:{ 'data-id':t.id } }))}
         </div>`,
+    }));
+
+    /* BAM'dan alıştırma paketi (Part 8d-2): istek King'in onay kapısından
+       geçer; paket Bugün'e teklif olarak gelir ve ESP kendi koduyla sınar. */
+    rows.push(K.Entry({
+      label:'PAKET İSTE',
+      meta:'gitar · HKM',
+      note:'Konu ve düzeyden alıştırma listesi (ton, derece ilerleyişi, başlangıç ve hedef '
+         + 'tempo). Tempolar referanstır; eşik senin temiz tekrarından açılır.',
+      body:html`<div class="row gap-8 wrap">
+        ${K.Select({ id:'gitar-duzey', value:S.ui.gitarDuzey || 'başlangıç', aria:'Düzey', size:'sm',
+          options:[{ value:'başlangıç', label:'Başlangıç' }, { value:'orta', label:'Orta' },
+            { value:'ileri', label:'İleri' }] })}
+        ${K.Input({ id:'gitar-konu', placeholder:'Konu: akor geçişleri, blues…', aria:'Konu',
+          size:'sm', class:'grow' })}
+        ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'gitar-iste' })}
+      </div>`,
     }));
 
     return rows;
@@ -461,6 +483,13 @@ ESP.Screens.studio = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'gitar-iste'(){
+      const d = document.getElementById('gitar-duzey'), k = document.getElementById('gitar-konu');
+      S.ui.gitarDuzey = d ? d.value : 'başlangıç';
+      const r = await ESP.Unite.iste({ alan:'gitar', duzey:S.ui.gitarDuzey, konu:k ? k.value : '' });
+      ESP.UI.toast(r.metin);
+      if(r.ok) ESP.App.render();
+    },
     async 'studio-tab'(el){
       if(S.ui.metronomeOn){ metronomeStop(); S.ui.metronomeOn = false; }
       S.ui.studioTab = el.dataset.tab;

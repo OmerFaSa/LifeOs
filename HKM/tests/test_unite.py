@@ -129,3 +129,54 @@ def run():
         eq(king.emir(con, e["id"])["durum"], "hata")
         eq(_niyetler(con), [])
     test("yargi hepsini dusururse kayit ve teklif yok", t_yargi_hepsini_dusurur)
+
+    # 8d-2 — gitar paketi
+    GITAR = {"alistirmalar": [
+        {"ad": "G majör akor geçişi", "tur": "teknik", "ton": "G", "ilerleyis": ["I", "V", "vi", "IV"],
+         "baslangic_bpm": 60, "hedef_bpm": 100, "not": "Geçişte boşluk kalmasın."},
+        {"ad": "Minör pentatonik koşu", "tur": "teknik", "ton": "Am", "ilerleyis": [],
+         "baslangic_bpm": 70, "hedef_bpm": 140, "not": "Pozisyon değişimi."},
+        {"ad": "12 ölçü blues", "tur": "parça", "ton": "E", "ilerleyis": ["I", "IV", "V7"],
+         "baslangic_bpm": 70, "hedef_bpm": 110},
+        {"ad": "Ters tempo", "tur": "teknik", "baslangic_bpm": 120, "hedef_bpm": 80},
+        {"ad": "Uydurma derece", "tur": "teknik", "ilerleyis": ["Q", "Z"],
+         "baslangic_bpm": 60, "hedef_bpm": 90},
+        {"ad": "Uçuk tempo", "tur": "teknik", "baslangic_bpm": 60, "hedef_bpm": 900},
+        {"ad": "g majör AKOR geçişi", "tur": "teknik", "baslangic_bpm": 60, "hedef_bpm": 90}]}
+
+    class _GitarModel(object):
+        def __init__(self):
+            self.cagri = 0
+
+        def __call__(self, provider, anahtar, model, sistem, gecmis):
+            self.cagri += 1
+            return json.dumps(GITAR, ensure_ascii=False), 60, 60
+
+    def t_gitar():
+        g, h = unite.temizle({"alan": "gitar", "duzey": "baslangic", "konu": "akor geçişleri"})
+        eq(h, [])
+        eq(g, {"alan": "gitar", "duzey": "başlangıç", "konu": "akor geçişleri", "oge": 6})
+        no(unite.temizle({"alan": "gitar", "duzey": "usta", "konu": "x y"})[1] == [])
+        no(unite.temizle({"alan": "resim", "dil": "ru", "duzey": "A1", "konu": "x y"})[1] == [])
+        (a, dusen), hata = unite.ayikla_gitar(GITAR, g)
+        eq(hata, None)
+        eq([x["ad"] for x in a], ["G majör akor geçişi", "Minör pentatonik koşu", "12 ölçü blues"])
+        eq(dusen, 3)                                    # ters, uydurma derece, ucuk tempo
+        eq((a[1]["ton"], a[2]["tur"], a[2]["ilerleyis"]), ("Am", "piece", ["I", "IV", "V7"]))
+        b = teklif.birim("esp.unite", {"unite": g}, ["kayit", "uretim"])
+        eq(b["model"], 1)
+        con = db.connect(":memory:")
+        m = _GitarModel()
+        e = onayla(con, _cfg(), king.emir_ac(con, _cfg(), "esp", "esp.unite", {"unite": g}, now=AN),
+                   now=AN)["emir"]
+        _tik(con, _cfg(), m, 4)
+        son = king.emir(con, e["id"])
+        eq((son["durum"], m.cagri), ("bitti", 1))        # yargi yok
+        k = bam.kayit_getir(con, son["sonuc"]["kayit_id"])
+        eq((k["govde"]["tur"], len(k["govde"]["alistirmalar"]), k["dogruluk"]),
+           ("gitar", 3, "dogrulanmadi"))
+        n = _niyetler(con)
+        eq([x[0] for x in n], ["unite.add"])
+        eq((n[0][1].get("dil"), n[0][1]["oge"]), (None, 3))
+        ok("Stüdyo" in db.intents_for(con, "esp", ("pending",))[0]["note"])
+    test("gitar paketi: kod suzer, tek cagri, ESP'ye unite.add", t_gitar)

@@ -275,6 +275,10 @@ def _cumle(module, kind, payload):
         return ("%s: BAM «%s» listesini çıkardı. Yer listene eklensin mi?"
                 % (ad, p.get("baslik") or p.get("ad")))
     if kind == "unite.add":
+        if not p.get("dil"):
+            return ("%s: BAM «%s» paketini hazırladı (%s alıştırma). Stüdyo’ya eklensin mi? "
+                    "Tempolar referanstır; eşik senin temiz tekrarından açılır."
+                    % (ad, p.get("baslik"), p.get("oge")))
         return ("%s: BAM «%s» ünitesini hazırladı (%s ünite, %s öğe). Eklensin mi? Kaynaksız; "
                 "yanlış bulduğun kartı sil." % (ad, p.get("baslik"), p.get("unite"), p.get("oge")))
     if kind == "measure.ask":

@@ -73,6 +73,9 @@ def birim(tur, govde, ofisler):
     elif tur in ("bam.urun",):
         m += 1
         parca.append("üretim 1 çağrı")
+    elif tur == "esp.unite" and (g.get("unite") or {}).get("alan") == "gitar":
+        m += 1
+        parca.append("üretim 1 çağrı; tempo, ton ve derece kodla süzülür")
     elif tur == "esp.unite":
         m += 2
         parca.append("üretim 1 çağrı + bağımsız yargı 1 çağrı")

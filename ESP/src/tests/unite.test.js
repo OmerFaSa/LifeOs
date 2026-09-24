@@ -68,6 +68,48 @@
     });
   });
 
+  describe('BAM gitar paketi', () => {
+    function gitar(){
+      return { id:31, tur:'materyal', baslik:'Gitar başlangıç · akor geçişleri', dogruluk:'dogrulanmadi',
+        govde:{ tur:'gitar', duzey:'başlangıç', konu:'akor geçişleri', alistirmalar:[
+          { ad:'G majör akor geçişi', tur:'technique', ton:'G', ilerleyis:['I', 'V', 'vi', 'IV'],
+            baslangic_bpm:60, hedef_bpm:100, not:'Geçişte boşluk kalmasın.' },
+          { ad:'12 ölçü blues', tur:'piece', ton:'Em', ilerleyis:['I', 'IV', 'V7'], baslangic_bpm:70, hedef_bpm:110 },
+          { ad:'Ters tempo', tur:'technique', baslangic_bpm:120, hedef_bpm:80 },
+          { ad:'Uydurma', tur:'technique', ilerleyis:['Q'], baslangic_bpm:60, hedef_bpm:90 },
+          { ad:'Dönüşümlü mızrap', tur:'technique', baslangic_bpm:60, hedef_bpm:140 } ] } };
+    }
+
+    it('Stüdyo’ya referans tempoyla girer; var olan ad yeniden eklenmez; ölçülen kalır', async () => {
+      resetState();
+      await ESP.Model.savePiece(ESP.Model.newPiece({ name:'Dönüşümlü mızrap', kind:'technique' }));
+      const s = Un().sina(gitar(), { kayit_id:31 });
+      expect(s.ok).toBe(true);
+      expect(s.pieces.map(p => p.name)).toEqual(['G majör akor geçişi', '12 ölçü blues']);
+      const g = s.pieces[0];
+      expect([g.kind, g.key, g.startBpm, g.targetBpm, g.targetRef, g.progression.join('-')])
+        .toEqual(['technique', 'G', 60, 100, true, 'I-V-vi-IV']);
+      expect(s.onizleme.uyari.join(' ')).toContain('2 alıştırma ESP’nin denetimini geçmedi');
+      expect(s.onizleme.uyari.join(' ')).toContain('1 alıştırma Stüdyo’da zaten var');
+      await withHkm({ 31:gitar() }, async cagri => {
+        const r = await Un().uygula({ kayit_id:31 });
+        expect(r.ok).toBe(true);
+        expect(ESP.S.pieces.filter(p => (p.tags || []).indexOf('bam:31') >= 0).length).toBe(2);
+        expect((await Un().uygula({ kayit_id:31 })).error).toContain('zaten');
+        /* Üzerinde deneme (ölçüm) olan alıştırma geri almada kalır. */
+        const olculen = ESP.S.pieces.find(p => p.name === '12 ölçü blues');
+        olculen.attempts = [{ date:'2026-09-24', bpm:70, clean:true }];
+        const geri = await Un().geriAl(r.geriAl);
+        expect([geri.ok, geri.kalan]).toEqual([true, 1]);
+        expect(ESP.S.pieces.filter(p => (p.tags || []).indexOf('bam:31') >= 0).map(p => p.name)).toEqual(['12 ölçü blues']);
+        const ist = await Un().iste({ alan:'gitar', duzey:'Başlangıç', konu:'akor geçişleri' });
+        expect(ist.ok).toBe(true);
+        const b = JSON.parse(cagri.find(c => /king\/emir$/.test(c.url)).opt.body);
+        expect(b.govde).toEqual({ unite:{ alan:'gitar', duzey:'başlangıç', konu:'akor geçişleri' } });
+      });
+    });
+  });
+
   describe('BAM dil ünitesi — HKM ile', () => {
     it('onayla eklenir: kendi dilinde listelenir, kartlar etiketli, pratik çalışır; geri alınır', async () => {
       resetState();
