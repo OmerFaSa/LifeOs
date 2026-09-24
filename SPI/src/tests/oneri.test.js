@@ -632,16 +632,33 @@
       expect(P.otomatikMi({ level:'kucuk', source:'model' }, 'bozuk')).toBe(false);
     });
 
-    it('kullanıcının kendi cümlesi küçükse hemen yazılır, geri alınır', async () => {
+    /* KR-1: ölçüm yazan eylem kullanıcının kendi cümlesinden gelse de
+       sormadan yazılmaz; onaydan sonra yazılır ve geri alınır. */
+    it('kullanıcının kendi ölçüm cümlesi onay bekler; onayla yazılır, geri alınır', async () => {
       resetState();
       await withTodayAsync('2026-03-01', async () => {
         const r = SP.Proposals.fromText('uyku 7,5 saat');
         const t = await SP.Proposals.talep(Object.assign({ source:'istek' }, r.oneriler[0]));
-        expect(t.otomatik).toBe(true);
+        expect(t.otomatik).toBe(false);
+        expect(t.row.status).toBe('pending');
+        const v0 = SP.Model.vitalsOf('2026-03-01');
+        expect(v0 == null || v0.sleep == null).toBeTruthy();
+        expect((await SP.Proposals.approve(t.row.id)).ok).toBe(true);
         expect(SP.Model.vitalsOf('2026-03-01').sleep).toBe(7.5);
         await SP.Proposals.undo(t.row.id);
         const v = SP.Model.vitalsOf('2026-03-01');
         expect(v == null || v.sleep == null).toBeTruthy();
+      });
+    });
+
+    it('ölçüm yazan eylem hiçbir ayarda otomatik değildir', () => {
+      const P = SP.Proposals;
+      ['vital-yaz', 'ogun-ekle', 'seans-ekle', 'olcum-gir', 'semptom-isaretle'].forEach(a => {
+        expect(P.eylem(a).olcum).toBe(true);
+        ['istek', 'hepsi', 'hicbiri', undefined].forEach(m => {
+          expect([a, m, P.otomatikMi({ level:'kucuk', source:'istek', action:a }, m)])
+            .toEqual([a, m, false]);
+        });
       });
     });
 
@@ -682,6 +699,55 @@
         params:{ field:'sleep', value:7, date:'2026-03-01' }, kaynak:'rules' };
       expect(await SP.Proposals.propose(p)).toBeTruthy();
       expect(await SP.Proposals.propose(p)).toBe(null);
+    });
+  });
+  /* ==================== olumsuzluk (HATALAR KR-1) ====================
+
+     «7 saat uyumadım» 420 dakikalık serbest antrenman, «2 bardak su
+     içmedim» 400 ml su oluyordu. Olumsuz, ileriye dönük ya da istek
+     kipindeki cümle ölçüm diye yazılmaz: nedeniyle birlikte sorulur. */
+
+  describe('Öneri — olumsuzluk ve kip (KR-1)', () => {
+    it('olumsuz ölçüm cümlesi öneri üretmez, nedeni döner', () => {
+      [['7 saat uyumadım', 'uyumadım'], ['30 dakika yürümedim', 'yürümedim'],
+        ['2 bardak su içmedim', 'içmedim'], ['uyku 7 saat değil', 'değil'],
+        ['45 dakika koşamadım', 'koşamadım']]
+        .forEach(([m, k]) => {
+          const r = SP.Proposals.fromText(m);
+          expect([m, r.oneriler.length]).toEqual([m, 0]);
+          expect(r.anlasilmayan).toHaveLength(0);
+          expect(r.engellenen).toHaveLength(1);
+          expect(r.engellenen[0].kelime).toBe(k);
+          expect(r.engellenen[0].soru).toContain('ölçüm');
+        });
+    });
+
+    it('ileriye dönük ve istek kipindeki cümle yazılmaz', () => {
+      ['yarın 30 dakika yürüyeceğim', '8 saat uyumak istiyorum', 'hedefim 2 litre su']
+        .forEach(m => {
+          const r = SP.Proposals.fromText(m);
+          expect([m, r.oneriler.length]).toEqual([m, 0]);
+        });
+    });
+
+    it('olumlu cümle eskisi gibi anlaşılır; bileşikte yalnız olumsuz parça düşer', () => {
+      expect(SP.Proposals.fromText('7 saat uyudum').oneriler).toHaveLength(1);
+      expect(SP.Proposals.fromText('bacak antrenmanı 45 dakika').engellenen).toHaveLength(0);
+      const r = SP.Proposals.fromText('7 saat uyudum ve 30 dakika yürümedim');
+      expect(r.oneriler.map(o => o.action)).toEqual(['vital-yaz']);
+      expect(r.engellenen).toHaveLength(1);
+    });
+
+    it('uçtan uca: olumsuz cümle hiçbir şey yazmaz, rozet ve XP doğmaz', async () => {
+      resetState();
+      await withTodayAsync('2026-03-01', async () => {
+        const r = SP.Proposals.fromText('7 saat uyumadım');
+        for(const o of r.oneriler) await SP.Proposals.talep(Object.assign({ source:'istek' }, o));
+        expect(SP.Proposals.all()).toHaveLength(0);
+        expect((SP.S.sessions || []).length).toBe(0);
+        const v = SP.Model.vitalsOf('2026-03-01');
+        expect(v == null || v.sleep == null).toBeTruthy();
+      });
     });
   });
 })();

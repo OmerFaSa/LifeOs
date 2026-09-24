@@ -214,6 +214,12 @@ DOSYALAR = {
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     "sw.js":          ".",
+    # OLUMSUZLUK ve KIP SUZGECI — cumle ayristiricilarinin onundeki kapi
+    # (ekip/HATALAR.md KR-1). «cozmedim» uc arayuzde de ayni sekilde
+    # olumsuzdur; biri bir gun «-emedim»i unutursa o arayuz sahte olcum
+    # yazar.
+    "olumsuz.js":      "js/core",
+    "olumsuz.test.js": "tests",
     # MODEL KATMANI — uc arayuz (2026-09-24'ten beri AYS'ninki tek kaynak).
     "llm.js":        "js/core",
     "providers.js":  "js/data",

@@ -675,10 +675,14 @@
         await M.ensureDay(TODAY);
         const p = { action:'paragraf-yaz', agent:'patron', source:'istek',
           params:{ count:10, date:TODAY } };
+        /* Ölçüm yazan eylem onay bekler (KR-1); onaylanan iki ayrı giriş
+           ikisi de yazılır. */
         const a = await P.talep(p);
+        expect(a.row.status).toBe('pending');
+        expect((await P.approve(a.row.id)).ok).toBe(true);
         const b = await P.talep(p);
-        expect(a.row.status).toBe('applied');
-        expect(b.row.status).toBe('applied');
+        expect(b.row.status).toBe('pending');
+        expect((await P.approve(b.row.id)).ok).toBe(true);
         expect(S.days[TODAY].paragraphActual).toBe(20);
       });
     });

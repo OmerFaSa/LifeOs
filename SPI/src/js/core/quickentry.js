@@ -175,8 +175,18 @@ SP.Quick = (function(){
      alanidir hem de bir gidaya benzeyebilir; gunluk once bakilir.
 
      «45 dk yuruyus» once hareket olarak denenir cunku icinde sure
-     birimi var; tahlil ve ogun ayristiricilari sure birimi tanimaz. */
+     birimi var; tahlil ve ogun ayristiricilari sure birimi tanimaz.
+
+     `parse` OLCUM olmayan cumleyi hic tanimaz: «7 saat uyumadim» 420
+     dakikalik seans, «2 bardak su icmedim» 400 ml su oluyordu
+     (ekip/HATALAR.md KR-1). `parseHam` suzgecsiz halidir; yalniz
+     engelin NEDENINI soylemek isteyen `Proposals.fromText` kullanir. */
   function parse(text){
+    const r = parseHam(text);
+    return r && !LIFEOS.Olumsuz.olcumEngeli(text) ? r : null;
+  }
+
+  function parseHam(text){
     const t = String(text || '').trim();
     if(t.length < 2) return null;
 
@@ -256,5 +266,5 @@ SP.Quick = (function(){
     return { ok:false, text:'Anlaşılmadı' };
   }
 
-  return { parse, apply, parseVital, parseMove, VITAL_FIELDS };
+  return { parse, parseHam, apply, parseVital, parseMove, VITAL_FIELDS };
 })();

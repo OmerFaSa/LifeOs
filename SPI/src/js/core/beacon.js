@@ -681,6 +681,8 @@ SP.Beacon = (function(){
         out.yazilamaz.push({ metin:x.metin, why:pv.why });
       }
     });
+    /* Olculmemis bir sey («7 saat uyumadim») yazilmaz; nedeni gosterilir. */
+    (v.engellenen || []).forEach(function(e){ out.yazilamaz.push({ metin:e.metin, why:e.soru }); });
     out.anlasilmayan = (v.anlasilmayan || []).slice();
     return out;
   }

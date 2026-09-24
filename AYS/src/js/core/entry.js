@@ -209,27 +209,40 @@ R.Entry = (function(){
   /* Serbest cümleden öneri üretir — MODEL GEREKMEZ.
 
      `anlasilmayan` kural motorunun çözemediği yan cümleleri taşır.
-     Bunlar sessizce düşmez: kullanıcıya gösterilir. */
+     Bunlar sessizce düşmez: kullanıcıya gösterilir.
+
+     `engellenen` sayısı bulunmuş ama ÖLÇÜM OLMAYAN parçalardır:
+     «40 soru çözmedim», «yarın 40 soru çözeceğim» (ekip/HATALAR.md KR-1).
+     Her biri nedenini ve kullanıcıya sorulacak cümleyi taşır; yazılmaz. */
   function fromText(text, opts){
     const o = opts || {};
     const date = o.date || U.todayISO();
     const parcalar = yanCumleler(text);
-    const oneriler = [], anlasilmayan = [];
+    const oneriler = [], anlasilmayan = [], engellenen = [];
+
+    function dene(p){
+      const a = toAction(parseOne(p), date);
+      if(!a) return null;
+      const e = LIFEOS.Olumsuz.olcumEngeli(p);
+      return e ? { engel:Object.assign({ metin:String(p).trim() }, e) } : { a };
+    }
 
     parcalar.forEach(p => {
-      const a = toAction(parseOne(p), date);
-      if(a) oneriler.push(Object.assign(a, { kaynak:'rules', metin:p }));
-      else anlasilmayan.push(p);
+      const r = dene(p);
+      if(!r) anlasilmayan.push(p);
+      else if(r.engel) engellenen.push(r.engel);
+      else oneriler.push(Object.assign(r.a, { kaynak:'rules', metin:p }));
     });
 
     /* Hiçbir parça anlaşılmadıysa cümlenin TAMAMINI bir kez dene:
        bölme yanlış yerden olmuş olabilir. */
-    if(!oneriler.length && parcalar.length > 1){
-      const a = toAction(parseOne(text), date);
-      if(a) return { oneriler:[Object.assign(a, { kaynak:'rules', metin:String(text).trim() })],
-        anlasilmayan:[] };
+    if(!oneriler.length && !engellenen.length && parcalar.length > 1){
+      const r = dene(text);
+      if(r && r.engel) return { oneriler:[], anlasilmayan:[], engellenen:[r.engel] };
+      if(r) return { oneriler:[Object.assign(r.a, { kaynak:'rules', metin:String(text).trim() })],
+        anlasilmayan:[], engellenen:[] };
     }
-    return { oneriler, anlasilmayan };
+    return { oneriler, anlasilmayan, engellenen };
   }
 
   return { fromText, parseOne, yanCumleler, dersBul, konuBul, sayi, ilkSayi,

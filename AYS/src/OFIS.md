@@ -580,6 +580,15 @@ seçiliyse her şey önce sorulur. Karar tek yerde verilir:
 `R.Proposals.otomatikMi()`; uygulama yine doğrulamadan ve geri alma
 kaydından geçer.
 
+**Ölçüm yazan eylem hiçbir ayarda sormadan uygulanmaz.** Soru, paragraf,
+problem, uyku ve süre kaydı (`data/actions.js`'te `olcum:true`) küçük
+olsa da önizleme + onay ister. Cümle ayrıştırıcısının önünde de bir kapı
+var (`core/olumsuz.js`, kaynağı `brand/ortak/`): olumsuz («40 soru
+çözmedim»), ileriye dönük («çözeceğim»), istek («lazım») ya da soru
+biçimindeki cümle ölçüm diye önerilmez; nedeniyle birlikte sorulur.
+Olumsuz bir istek de («bu hafta ara vermek istemiyorum») tersine
+çevrilmez (ekip/HATALAR.md KR-1).
+
 Dışarıdan (HKM, BAM) gelen teklif bir **anahtar** taşır: aynı anahtar
 ikinci kez kuyruğa girmez. Her öneri bir **iz** (`[{tur, id}]`) taşıyabilir:
 «bu değişiklik nereden geldi?» sorusunun cevabı.

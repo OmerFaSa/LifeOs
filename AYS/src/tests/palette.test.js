@@ -87,7 +87,19 @@
     it('tam anlaşılmış küçük istek hemen uygulanacağını söyler', function(){
       resetState();
       R.S.office = null;
-      expect(P.veriKomutu('bugün 20 paragraf çözdüm').sub).toContain('hemen');
+      expect(P.veriKomutu('bu haftanın soru hedefi 600 olsun').sub).toContain('hemen');
+    });
+
+    /* KR-1: ölçüm yazan eylem küçük olsa da hiçbir ayarda sormadan
+       yazılmaz; olumsuz cümle ise hiç kayıt önermez, sorar. */
+    it('ölçüm yazan küçük istek önizlemeyle gelir; olumsuz cümle sorulur', function(){
+      resetState();
+      R.S.office = null;
+      expect(P.veriKomutu('bugün 20 paragraf çözdüm').sub).toContain('önizleme');
+      const c = P.veriKomutu('bugün 20 paragraf çözmedim');
+      expect(c).toBeTruthy();
+      expect(c.label).toBe('Bir şey sormam gerek');
+      expect(c.sub).toContain('anlamadığım');
     });
 
     it('belirsiz komut tahmin edilmez, soru olarak gelir', function(){

@@ -385,6 +385,29 @@
         .forEach(m => expect(K().anla(m).komut).toBe(false));
     });
 
+    /* KR-1: «diksiyonu kapatma» kapat önerisi oluyordu. Olumsuz istek
+       tersine çevrilmez, sorulur; komutun kendisi olan olumsuz söz
+       («istemiyorum», «çalışmayacağım») komut olarak kalır. */
+    it('olumsuz istek tersine çevrilmez, sorulur', () => {
+      [['diksiyonu kapatma', 'kapatma'], ['diksiyon istemiyorum demedim', 'demedim'],
+        ['gitarı aç demedim', 'demedim'], ['felsefeyi kapatmayın', 'kapatmayın'],
+        ['günde 1 saat çalışacağım demedim', 'demedim'],
+        ['diksiyonu kapat demedim', 'demedim']]
+        .forEach(([m, k]) => {
+          const r = K().anla(m);
+          expect([m, r.oneriler.length]).toEqual([m, 0]);
+          expect(r.komut).toBe(true);
+          expect(r.sorular[0].soru).toContain('«' + k + '»');
+        });
+    });
+
+    it('komutun kendisi olan olumsuz söz komut olarak kalır', () => {
+      expect(K().anla('diksiyon istemiyorum').oneriler[0].payload).toEqual({ disc:'diction', on:false });
+      expect(K().anla('felsefe çalışmayacağım').oneriler[0].payload).toEqual({ disc:'philo', on:false });
+      expect(K().anla('yazmayı kapat').oneriler[0].payload).toEqual({ disc:'writing', on:false });
+      expect(K().anla('okuma bölümünü aç').oneriler[0].payload).toEqual({ disc:'reading', on:true });
+    });
+
     it('sohbet: istek → onay sorusu → «evet» → «geri al», model çağrılmadan', async () => {
       resetState();
       await withTodayAsync('2026-09-12', async () => {

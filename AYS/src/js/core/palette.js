@@ -253,10 +253,13 @@ R.Palette = (function(){
     const adlar = r.oneriler.map(o => ETIKET[o.action]
       || (R.ACTION_BY_ID[o.action] || {}).title || o.action);
     /* Küçük ve TAMAMEN anlaşılmış istek sormadan uygulanır (AGENTS.md
-       §1.9); orta seviye, soru ya da anlaşılmayan parça varsa önizleme. */
+       §1.9) — ölçüm yazan eylem hariç, onu otomatikMi() hiçbir ayarda
+       geçirmez (KR-1); orta seviye, soru ya da anlaşılmayan parça varsa
+       önizleme. */
     const hemen = r.oneriler.length && !r.sorular.length && !r.anlasilmayan.length
       && r.oneriler.every(o => R.Proposals.otomatikMi(
-        { level:(R.ACTION_BY_ID[o.action] || {}).level, source:'istek' }, R.Proposals.ayar()));
+        { level:(R.ACTION_BY_ID[o.action] || {}).level, source:'istek', action:o.action },
+        R.Proposals.ayar()));
     return {
       group:'Kayıt', icon:'zap',
       label:adlar.length ? adlar.join(' · ') : 'Bir şey sormam gerek',

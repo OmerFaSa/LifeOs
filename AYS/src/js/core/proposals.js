@@ -748,9 +748,11 @@ R.Proposals = (function(){
 
      Tek karar noktasi. Kucuk degilse asla; ayar bilinmiyorsa varsayilan
      ('istek') gibi davranir — bozuk bir ayar kendiliginden «hepsi»ne
-     donmemeli. */
+     donmemeli. Olcum yazan eylem (katalogda `olcum:true`) hicbir ayarda
+     sormadan uygulanmaz (ekip/HATALAR.md KR-1). */
   function otomatikMi(row, mod){
     if(!row || row.level !== 'kucuk') return false;
+    if((R.ACTION_BY_ID[row.action] || {}).olcum) return false;
     const m = MODLAR.indexOf(mod) >= 0 ? mod : 'istek';
     if(m === 'hicbiri') return false;
     if(m === 'hepsi') return true;

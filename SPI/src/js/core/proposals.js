@@ -7,10 +7,12 @@
                  → motor uygular → geri alınabilir
 
    SEVİYE (AGENTS.md §1.9): kullanıcının KENDİ cümlesinden kural
-   motorunun çıkardığı KÜÇÜK kayıt (tek ölçüm, bir öğün, bir seans)
-   sormadan yazılır ve geri alınabilir kalır. Tahlil değeri ve bölüm
-   gizleme ORTA'dır, her zaman sorulur; modelin yorumladığı cümle de
-   onay bekler. Sağlık verisinde yanlış bir kayıt, eksik bir kayıttan
+   motorunun çıkardığı KÜÇÜK eylem sormadan uygulanabilir ve geri
+   alınabilir kalır — ama ÖLÇÜM yazan eylem (tek ölçüm, bir öğün, bir
+   seans, şikâyet; katalogda `olcum:true`) hiçbir ayarda sormadan
+   yazılmaz: «7 saat uyumadım» 420 dakikalık seans olarak sessizce
+   yazılıyordu (ekip/HATALAR.md KR-1). Tahlil değeri ve bölüm gizleme
+   ORTA'dır, her zaman sorulur; modelin yorumladığı cümle de onay bekler. Sağlık verisinde yanlış bir kayıt, eksik bir kayıttan
    kötüdür — eksik kayıt kendini belli eder, yanlış kayıt etmez. Karar
    tek yerde verilir: otomatikMi().
 
@@ -65,6 +67,7 @@ SP.Proposals = (function(){
     /* ---------------------------------------------------- vital yaz */
     'vital-yaz':{
       level:'kucuk',
+      olcum:true,
       label:'Günlük ölçüm',
       alanlar:['field', 'value', 'date'],
       check(p){
@@ -102,6 +105,7 @@ SP.Proposals = (function(){
     /* ----------------------------------------------------- öğün ekle */
     'ogun-ekle':{
       level:'kucuk',
+      olcum:true,
       label:'Öğün',
       alanlar:['items', 'slot', 'date'],
       check(p){
@@ -135,6 +139,7 @@ SP.Proposals = (function(){
     /* ---------------------------------------------------- seans ekle */
     'seans-ekle':{
       level:'kucuk',
+      olcum:true,
       label:'Antrenman',
       alanlar:['minutes', 'exerciseId', 'date'],
       check(p){
@@ -168,6 +173,7 @@ SP.Proposals = (function(){
     /* --------------------------------------------------- ölçüm gir */
     'olcum-gir':{
       level:'orta',
+      olcum:true,
       label:'Tahlil ölçümü',
       alanlar:['rows', 'date'],
       check(p){
@@ -305,6 +311,7 @@ SP.Proposals = (function(){
     /* ----------------------------------------------- semptom işaretle */
     'semptom-isaretle':{
       level:'kucuk',
+      olcum:true,
       label:'Şikâyet',
       alanlar:['symptomId', 'severity', 'date'],
       check(p){
@@ -389,27 +396,37 @@ SP.Proposals = (function(){
     const o = opts || {};
     const date = o.date || U.todayISO();
     const parcalar = yanCumleler(text);
-    const oneriler = [], anlasilmayan = [];
+    const oneriler = [], anlasilmayan = [], engellenen = [];
+
+    /* Sayısı bulunmuş ama ÖLÇÜM OLMAYAN parça («7 saat uyumadım», «yarın
+       30 dakika yürüyeceğim») yazılmaz; nedeni ve sorulacak cümle
+       `engellenen`de döner (ekip/HATALAR.md KR-1). */
+    function dene(p){
+      let parsed = null;
+      try{ parsed = SP.Quick.parseHam(p); }catch(e){ parsed = null; }
+      const a = quickToAction(parsed, date, o.slot);
+      if(!a) return null;
+      const e = LIFEOS.Olumsuz.olcumEngeli(p);
+      return e ? { engel:Object.assign({ metin:String(p).trim() }, e) } : { a };
+    }
 
     parcalar.forEach(p => {
-      let parsed = null;
-      try{ parsed = SP.Quick.parse(p); }catch(e){ parsed = null; }
-      const a = quickToAction(parsed, date, o.slot);
-      if(a) oneriler.push(Object.assign(a, { kaynak:'rules', metin:p }));
-      else anlasilmayan.push(p);
+      const r = dene(p);
+      if(!r) anlasilmayan.push(p);
+      else if(r.engel) engellenen.push(r.engel);
+      else oneriler.push(Object.assign(r.a, { kaynak:'rules', metin:p }));
     });
 
     /* Tek parça hiç anlaşılmadıysa cümlenin TAMAMINI bir kez dene:
        bölme yanlış yerden olmuş olabilir. */
-    if(!oneriler.length && parcalar.length > 1){
-      let parsed = null;
-      try{ parsed = SP.Quick.parse(text); }catch(e){ parsed = null; }
-      const a = quickToAction(parsed, date, o.slot);
-      if(a) return { oneriler:[Object.assign(a, { kaynak:'rules', metin:String(text).trim() })],
-        anlasilmayan:[] };
+    if(!oneriler.length && !engellenen.length && parcalar.length > 1){
+      const r = dene(text);
+      if(r && r.engel) return { oneriler:[], anlasilmayan:[], engellenen:[r.engel] };
+      if(r) return { oneriler:[Object.assign(r.a, { kaynak:'rules', metin:String(text).trim() })],
+        anlasilmayan:[], engellenen:[] };
     }
 
-    return { oneriler, anlasilmayan };
+    return { oneriler, anlasilmayan, engellenen };
   }
 
   /* ==================== model kaynağı ====================
@@ -513,9 +530,12 @@ SP.Proposals = (function(){
   }
 
   /* Tek karar noktasi. Kucuk degilse asla; bilinmeyen ayar varsayilan
-     gibi davranir — bozuk bir ayar kendiliginden «hepsi»ne donmemeli. */
+     gibi davranir — bozuk bir ayar kendiliginden «hepsi»ne donmemeli.
+     Olcum yazan eylem (katalogda `olcum:true`) hicbir ayarda sormadan
+     yazilmaz (ekip/HATALAR.md KR-1). */
   function otomatikMi(row, mod){
     if(!row || row.level !== 'kucuk') return false;
+    if((eylem(row.action) || {}).olcum) return false;
     const m = MODLAR.indexOf(mod) >= 0 ? mod : 'istek';
     if(m === 'hicbiri') return false;
     if(m === 'hepsi') return true;

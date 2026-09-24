@@ -262,4 +262,127 @@
       expect(K.kisaCevap('bugün nasılım')).toBe(null);
     });
   });
+  /* ==================== olumsuzluk (HATALAR KR-1) ====================
+
+     «bugün 40 soru çözmedim» 40 soru, «bu hafta ara vermek istemiyorum»
+     ara isteği oluyordu. Olumsuz, ileriye dönük ya da istek kipindeki
+     cümle ölçüm diye yazılmaz, tersine çevrilmez: SORULUR. Ölçüm yazan
+     eylem de hiçbir ayarda sormadan uygulanmaz. */
+
+  describe('Komut — olumsuzluk ve kip (KR-1)', () => {
+    const { withTodayAsync } = R.Test;
+    function temiz(){
+      resetState();
+      R.S.istisnalar = [];
+      R.S.officeProposals = [];
+      R.S.officeProposalKeys = [];
+      R.S.office = null;
+    }
+
+    it('olumsuz ölçüm cümlesi öneri üretmez, sorulur', () => {
+      withToday(TODAY, () => {
+        [['bugün 40 soru çözmedim', 'çözmedim'], ['7 saat uyumadım', 'uyumadım'],
+          ['40 soru çözemedim', 'çözemedim'], ['bugün 20 paragraf yapmadım', 'yapmadım']]
+          .forEach(([m, k]) => {
+            const r = K.anla(m, { date:TODAY });
+            expect([m, r.oneriler.length]).toEqual([m, 0]);
+            expect(r.komut).toBe(true);
+            expect(r.sorular[0].soru).toContain('«' + k + '»');
+          });
+      });
+    });
+
+    it('ileriye dönük ve istek kipindeki ölçüm cümlesi yazılmaz', () => {
+      withToday(TODAY, () => {
+        ['yarın 40 soru çözeceğim', '8 saat uyumak istiyorum', '40 soru çözmem lazım']
+          .forEach(m => {
+            const r = K.anla(m, { date:TODAY });
+            expect([m, r.oneriler.filter(o => /-yaz$/.test(o.action)).length]).toEqual([m, 0]);
+            expect(r.sorular.length >= 1).toBeTruthy();
+          });
+      });
+    });
+
+    it('olumsuz istek tersine çevrilmez', () => {
+      withToday(TODAY, () => {
+        ['bu hafta ara vermek istemiyorum', 'günde 4 saat çalışmak istemiyorum',
+          'yarın ara vermeyeceğim', 'telafi bölümünü kapatma', 'bugün çalışmayacağım demedim']
+          .forEach(m => {
+            const r = K.anla(m, { date:TODAY });
+            expect([m, r.oneriler.length]).toEqual([m, 0]);
+            expect(r.sorular[0].soru).toContain('olumlu');
+          });
+      });
+    });
+
+    it('komutun kendisi olan olumsuz söz komut olarak kalır', () => {
+      withToday(TODAY, () => {
+        expect(tek('bugün çalışmayacağım').action).toBe('ara-ver');
+        expect(tek('yarın çalışamam').action).toBe('ara-ver');
+        const b = tek('telafi bölümünü istemiyorum');
+        expect(b.action).toBe('bolum-ac-kapa');
+        expect(b.params).toEqual({ bolum:'protocols', acik:0 });
+        expect(tek('günlük 3 değil 4 saat çalışacağım').params).toEqual({ dakika:240 });
+      });
+    });
+
+    it('bileşik cümlede yalnız olumsuz parça sorulur', () => {
+      withToday(TODAY, () => {
+        const r = K.anla('bugün 40 soru çözdüm, 7 saat uyumadım', { date:TODAY });
+        expect(r.oneriler.map(o => o.action)).toEqual(['soru-yaz']);
+        expect(r.sorular).toHaveLength(1);
+        expect(r.sorular[0].metin).toBe('7 saat uyumadım');
+      });
+    });
+
+    it('veri girişi olumsuz parçayı ayrıca bildirir', () => {
+      const v = R.Entry.fromText('7 saat uyumadım', { date:TODAY });
+      expect(v.oneriler).toHaveLength(0);
+      expect(v.anlasilmayan).toHaveLength(0);
+      expect(v.engellenen).toHaveLength(1);
+      expect(v.engellenen[0].neden).toBe('olumsuz');
+      expect(R.Entry.fromText('7 saat uyudum', { date:TODAY }).engellenen).toHaveLength(0);
+    });
+
+    it('uçtan uca: olumsuz cümle hiçbir şey yazmaz, cevap nedenini söyler', async () => {
+      await withTodayAsync(TODAY, async () => {
+        temiz();
+        await R.Model.ensureDay(TODAY);
+        const once = R.S.days[TODAY].freeQ || 0;
+        const islem = await K.isle(K.anla('bugün 40 soru çözmedim', { date:TODAY }));
+        expect(islem.yapilan).toHaveLength(0);
+        expect(islem.bekleyen).toHaveLength(0);
+        expect(R.S.days[TODAY].freeQ || 0).toBe(once);
+        expect(R.S.days[TODAY].sleepHours == null).toBeTruthy();
+        expect(K.yanit(islem)).toContain('ölçüm');
+      });
+    });
+
+    it('ölçüm yazan eylem istense de sormadan uygulanmaz', async () => {
+      await withTodayAsync(TODAY, async () => {
+        temiz();
+        await R.Model.ensureDay(TODAY);
+        const islem = await K.isle(K.anla('7 saat uyudum', { date:TODAY }));
+        expect(islem.yapilan).toHaveLength(0);
+        expect(islem.bekleyen).toHaveLength(1);
+        expect(R.S.days[TODAY].sleepHours == null).toBeTruthy();
+        const r = await K.onayla(islem.bekleyen.map(k => k.row.id));
+        expect(r.n).toBe(1);
+        expect(R.S.days[TODAY].sleepHours).toBe(7);
+      });
+    });
+
+    it('karar tablosu: ölçüm yazan eylem hiçbir ayarda otomatik değildir', () => {
+      const P = R.Proposals;
+      ['soru-yaz', 'paragraf-yaz', 'problem-yaz', 'uyku-yaz', 'sure-yaz'].forEach(a => {
+        expect(R.ACTION_BY_ID[a].olcum).toBe(true);
+        ['istek', 'hepsi', 'hicbiri', undefined].forEach(m => {
+          expect([a, m, P.otomatikMi({ level:'kucuk', source:'istek', action:a }, m)])
+            .toEqual([a, m, false]);
+        });
+      });
+      /* tercih değiştiren küçük eylem eskisi gibi */
+      expect(P.otomatikMi({ level:'kucuk', source:'istek', action:'week-target' }, 'istek')).toBe(true);
+    });
+  });
 })();

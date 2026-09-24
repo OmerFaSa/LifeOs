@@ -470,6 +470,17 @@
       expect(SP.Model.vitalsOf(DUN).sleep == null).toBe(true);
     });
 
+    /* KR-1: HKM olumsuzluğu kendisi de süzer, ama modül ona güvenmez. */
+    it('olumsuz parça yazılmaz, nedeniyle gösterilir', () => {
+      resetState();
+      const n = teklif('7 saat uyudum ve 30 dakika yürümedim');
+      n.okuma = B().kayitOku(n);
+      expect(n.okuma.yazilacak.map(y => y.action)).toEqual(['vital-yaz']);
+      expect(n.okuma.yazilamaz).toHaveLength(1);
+      expect(n.okuma.yazilamaz[0].why).toContain('«yürümedim»');
+      expect(SP.S.workouts.length).toBe(0);
+    });
+
     it('okunamayan cümleye «Kaydet» çıkmaz', async () => {
       resetState();
       const n = teklif('bugün çok güzel bir gündü');

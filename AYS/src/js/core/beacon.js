@@ -698,6 +698,8 @@ R.Beacon = (function(){
         out.yazilamaz.push({ metin:x.metin, why:pv.why });
       }
     });
+    /* Olculmemis bir sey («40 soru cozmedim») yazilmaz; nedeni gosterilir. */
+    (v.engellenen || []).forEach(function(e){ out.yazilamaz.push({ metin:e.metin, why:e.soru }); });
     out.anlasilmayan = (v.anlasilmayan || []).slice();
     return out;
   }

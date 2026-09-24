@@ -49,6 +49,10 @@ R.Komut = (function(){
     + 'ara ver|mola ver|tatildeyim|tatile (?:gidiyorum|gideceğim|çıkıyorum)|'
     + 'izinliyim|izin alıyorum|dinleneceğim|'
     + SINIR_ONCE + 'ara(?=\\s*[.!]?\\s*$))');
+  /* Ara komutunun KENDİSİ olan olumsuz sözler: «bugün çalışmayacağım» bir
+     ara isteğidir. Olumsuzluk süzgeci (LIFEOS.Olumsuz) bunları hariç tutar;
+     geri kalan olumsuzluk («ara vermek istemiyorum») isteği durdurur. */
+  const ARA_OLUMSUZ_RE = /(çalışmayacağım|çalışmayacam|çalışmıyorum|çalışamayacağım|çalışamam)/;
   const GELECEK_RE = /(çalışacağım|çalışacam|çalışıcam|çalışıcağım|çalışmak istiyorum|çalışayım|olsun|yap|ayarla|çıkar|düşür|indir)/;
   const GECMIS_RE = /(çalıştım|çalıştık|çalışmıştım|yaptım|çözdüm|çalışabildim)/;
   const GUNLUK_RE = /(günde|günlük|her gün|artık|bundan sonra|kalıcı)/;
@@ -88,6 +92,7 @@ R.Komut = (function(){
      Bir bölüm HAKKINDA konuşmak («sınamada neden düşük çıkıyorum») istek
      değildir; fiil yoksa komut sayılmaz. */
   const BOLUM_KAPAT_RE = /(kapat|kapansın|gizle|gizlensin|istemiyorum|kullanmıyorum|kullanmayacağım|kaldır)/;
+  const BOLUM_OLUMSUZ_RE = /(istemiyorum|kullanmıyorum|kullanmayacağım)/;
   const BOLUM_AC_RE = new RegExp('(' + SINIR_ONCE + 'aç' + SINIR_SONRA + '|açılsın|geri getir|göster|tekrar aç|geri aç)');
 
   function bolumBul(t){
@@ -206,10 +211,19 @@ R.Komut = (function(){
     return out;
   }
 
+  /* «X değil Y» bir düzeltmedir, olumsuzluk değil: «3 değil 4 saat». */
+  const DUZELTME_RE = new RegExp('değil(?=\\s+(?:\\d|yarım|bir|iki|üç|dört|beş|altı|yedi|sekiz|dokuz|on|'
+    + 'yirmi|otuz|kırk|elli|altmış|yetmiş|seksen|doksan|yüz)' + SINIR_SONRA + ')', 'g');
+  const HARIC = { ara:ARA_OLUMSUZ_RE, bolum:BOLUM_OLUMSUZ_RE, sure:DUZELTME_RE, hedef:DUZELTME_RE };
+
   function tekKomut(metin, tur, bugun, tasinanTarih){
     const t = kucult(metin);
     const out = { oneriler:[], sorular:[] };
     const tr = tarih(t, bugun) || tasinanTarih || null;
+
+    /* Olumsuz istek tersine çevrilmez, sorulur (ekip/HATALAR.md KR-1). */
+    const engel = LIFEOS.Olumsuz.eylemEngeli(metin, { haric:HARIC[tur] });
+    if(engel){ out.sorular.push({ metin, soru:engel.soru }); return out; }
 
     if(tur === 'bolum'){
       const idler = bolumBul(t);
@@ -288,18 +302,19 @@ R.Komut = (function(){
 
     const t = kucult(ham);
     const butun = turler(t);
-    const veri = R.Entry ? R.Entry.fromText(ham, { date:bugun }) : { oneriler:[] };
+    const veri = R.Entry ? R.Entry.fromText(ham, { date:bugun }) : { oneriler:[], engellenen:[] };
+    const engelli = (veri.engellenen || []).length > 0;
 
     /* Tek komut, veri yok: cümlenin TAMAMI tek komuttur. Bölmek, «gelecek
        hafta, günde 4 saat» gibi bir cümlenin tarihini komutundan koparırdı. */
-    if(butun.length === 1 && !veri.oneriler.length){
+    if(butun.length === 1 && !veri.oneriler.length && !engelli){
       const r = tekKomut(ham, butun[0], bugun, null);
       sonuc.oneriler = r.oneriler;
       sonuc.sorular = r.sorular;
       sonuc.komut = true;
       return sonuc;
     }
-    if(!butun.length && !veri.oneriler.length) return sonuc;
+    if(!butun.length && !veri.oneriler.length && !engelli) return sonuc;
 
     /* Birden çok komut ya da veri: yan cümlelere bölünür. Yalnız tarih
        taşıyan parça («gelecek hafta,») tarihini sonraki komuta devreder. */
@@ -315,8 +330,10 @@ R.Komut = (function(){
         return;
       }
       const v = R.Entry.fromText(parca, { date:bugun });
-      if(v.oneriler.length){
+      if(v.oneriler.length || (v.engellenen || []).length){
         v.oneriler.forEach(x => sonuc.oneriler.push({ action:x.action, params:x.params, metin:parca }));
+        /* Ölçüm olmayan veri cümlesi yazılmaz, sorulur (KR-1). */
+        (v.engellenen || []).forEach(e => sonuc.sorular.push({ metin:e.metin, soru:e.soru }));
         tasinan = null;
         return;
       }

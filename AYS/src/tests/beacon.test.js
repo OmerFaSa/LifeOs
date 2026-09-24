@@ -597,6 +597,18 @@
       expect(R.S.days[BUGUN].blocks.length).toBe(1);
     });
 
+    /* KR-1: HKM olumsuzluğu kendisi de süzer, ama modül ona güvenmez. */
+    it('olumsuz parça yazılmaz, nedeniyle gösterilir', async () => {
+      gunuKur();
+      const n = teklif('20 paragraf yaptım, 40 soru çözmedim');
+      n.okuma = await B().kayitOku(n);
+      expect(n.okuma.yazilacak.map(y => y.action)).toEqual(['paragraf-yaz']);
+      expect(n.okuma.yazilamaz).toHaveLength(1);
+      expect(n.okuma.yazilamaz[0].metin).toBe('40 soru çözmedim');
+      expect(n.okuma.yazilamaz[0].why).toContain('«çözmedim»');
+      expect(R.S.days[BUGUN].freeQ).toBe(0);
+    });
+
     it('ileri bir güne kayıt yazılmaz', async () => {
       gunuKur();
       const yarin = R.U.iso(R.U.addDays(R.U.parse(BUGUN), 1));

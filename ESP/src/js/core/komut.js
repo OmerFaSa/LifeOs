@@ -49,6 +49,11 @@ ESP.Komut = (function(){
 
   const KAPAT_RE = new RegExp('(çalışmak istemiyorum|çalışmayacağım|istemiyorum|kapat|kapansın|gizle|'
     + 'bırakıyorum|bıraktım|ilgilenmiyorum|ilgilenmeyeceğim|' + ONCE + 'kaldır' + ')');
+  /* Kapatma isteğinin KENDİSİ olan olumsuz sözler: «diksiyon istemiyorum»
+     bir kapatma isteğidir. Olumsuzluk süzgeci (LIFEOS.Olumsuz) bunları
+     hariç tutar; geri kalan olumsuzluk («diksiyonu kapatma») isteği
+     durdurur ve sorulur (ekip/HATALAR.md KR-1). */
+  const KAPAT_OLUMSUZ_RE = /(çalışmak istemiyorum|çalışmayacağım|istemiyorum|ilgilenmiyorum|ilgilenmeyeceğim)/;
   const AC_RE = new RegExp('(' + ONCE + 'aç' + SONRA + '|açılsın|açmak istiyorum|açar mısın|geri getir|'
     + 'başlamak istiyorum|çalışmak istiyorum|devam etmek istiyorum|tekrar aç)');
   const BOLUM_RE = /bölüm/;
@@ -72,6 +77,12 @@ ESP.Komut = (function(){
     const kapat = KAPAT_RE.test(t);
     const ac = !kapat && AC_RE.test(t);
     const discler = discBul(t);
+    const taban = !kapat && !ac && TABAN_RE.test(t) && GELECEK_RE.test(t);
+
+    if(kapat || ac || taban){
+      const engel = LIFEOS.Olumsuz.eylemEngeli(metin, { haric:kapat ? KAPAT_OLUMSUZ_RE : null });
+      if(engel){ out.sorular.push({ metin, soru:engel.soru }); return out; }
+    }
 
     if(kapat || ac){
       if(!discler.length){
@@ -87,7 +98,7 @@ ESP.Komut = (function(){
       return out;
     }
 
-    if(TABAN_RE.test(t) && GELECEK_RE.test(t)){
+    if(taban){
       const dk = dakika(t);
       if(dk != null) out.oneriler.push({ kind:'base', payload:{ minutes:dk }, metin });
     }

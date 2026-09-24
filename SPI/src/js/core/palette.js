@@ -88,17 +88,26 @@ SP.Palette = (function(){
     if(t.length < 3) return null;
     let r;
     try{ r = SP.Proposals.fromText(t); }catch(e){ return null; }
+    r.engellenen = r.engellenen || [];
+    /* Ölçüm olmayan cümle («7 saat uyumadım») yazılmaz ama sessizce de
+       düşmez: neden yazılmadığı söylenir (ekip/HATALAR.md KR-1). */
+    if(!r.oneriler.length && r.engellenen.length){
+      return { id:'quick:sor', kind:'Hızlı giriş', label:'Bir şey sormam gerek',
+        hint:'yazılmadı · nedenini gör', run:() => confirmQuick(r, t) };
+    }
     if(!r.oneriler.length) return null;
 
     const adlar = r.oneriler.map(o => {
       const e = SP.Proposals.eylem(o.action);
       return e ? e.label : o.action;
     });
-    /* Kucuk ve TAMAMEN anlasilmis istek sormadan yazilir (AGENTS.md
-       §1.9); orta seviye (tahlil) ya da anlasilmayan parca varsa onizleme. */
+    /* Kucuk ve TAMAMEN anlasilmis istek sormadan uygulanabilir (AGENTS.md
+       §1.9) — karar otomatikMi()'nin: olcum yazan kayit hicbir ayarda
+       sormadan yazilmaz (KR-1). Orta seviye, anlasilmayan ya da olcum
+       olmadigi icin yazilmayan parca varsa onizleme. */
     const P = SP.Proposals;
-    const hemen = !r.anlasilmayan.length && r.oneriler.every(o => P.otomatikMi(
-      { level:(P.eylem(o.action) || {}).level, source:'istek' }, P.ayar()));
+    const hemen = !r.anlasilmayan.length && !r.engellenen.length && r.oneriler.every(o => P.otomatikMi(
+      { level:(P.eylem(o.action) || {}).level, source:'istek', action:o.action }, P.ayar()));
     return {
       id:'quick:' + r.oneriler.map(o => o.action).join('+'),
       kind:'Hızlı giriş',
@@ -155,8 +164,10 @@ SP.Palette = (function(){
         </div>`;
     });
 
+    const engel = r.engellenen || [];
     SP.UI.sheet({
-      title:r.oneriler.length === 1 ? 'Bunu mu demek istedin?'
+      title:!r.oneriler.length ? 'Bir şey sormam gerek'
+        : r.oneriler.length === 1 ? 'Bunu mu demek istedin?'
         : r.oneriler.length + ' kayıt anladım',
       subtitle:metin, wide:true,
       note:'Bu satırlar yorumlandı, KAYDEDİLMEDİ. Onaylayınca yazılır ve '
@@ -167,12 +178,15 @@ SP.Palette = (function(){
           title:'Çözemediğim kısım:',
           body:'«' + r.anlasilmayan.join('», «') + '» — bu kısım kaydedilmeyecek. '
             + 'Anlaşılmayan satır atılmaz, söylenir.' })),
-        K.Field({ label:'Tarih',
-          input:K.Input({ id:'qe-date', type:'date', value:U.todayISO() }) }),
+        when(engel.length, () => K.Notice({ tone:'warn',
+          title:'Ölçüm diye yazmadığım kısım:',
+          body:engel.map(e => '«' + e.metin + '» — ' + e.soru).join(' ') })),
+        when(r.oneriler.length, () => K.Field({ label:'Tarih',
+          input:K.Input({ id:'qe-date', type:'date', value:U.todayISO() }) })),
       ])),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${K.Button({ label:r.oneriler.length === 1 ? 'Kaydet' : 'Hepsini kaydet',
-          tone:'primary', act:'quick-save' })}`),
+      footer:String(html`${K.Button({ label:r.oneriler.length ? 'Vazgeç' : 'Tamam', act:'sheet-close' })}
+        ${when(r.oneriler.length, () => K.Button({ label:r.oneriler.length === 1 ? 'Kaydet' : 'Hepsini kaydet',
+          tone:'primary', act:'quick-save' }))}`),
     });
     bekleyen = r;
   }

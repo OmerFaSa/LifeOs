@@ -200,10 +200,16 @@ R.ACTIONS = [
      Yetki Patron'dadır ve bunun bir sebebi var: konuştuğun ajan odur.
      Alt koçlar bu eylemleri öneremez — Tuna senin adına «40 soru
      çözdün» diyemez. Sayı senin cümlenden çıkar, koçun tahmininden
-     değil; önerinin gerekçesine SENİN cümlen yazılır. */
+     değil; önerinin gerekçesine SENİN cümlen yazılır.
+
+     `olcum:true` — bu eylem bir ÖLÇÜM yazar. Küçük olsa da hiçbir ayarda
+     sormadan uygulanmaz (önizleme + onay): «40 soru çözmedim» bir gün
+     yanlış anlaşılırsa sahte ölçüm deftere sessizce girmemeli
+     (ekip/HATALAR.md KR-1). */
   {
     id:'soru-yaz',
     level:'kucuk',
+    olcum:true,
     title:'Çözülen soruyu yaz',
     summary:'Söylediğin soru sayısı o günün ilgili bloğuna eklenir.',
     touches:'Gün kaydı',
@@ -217,6 +223,7 @@ R.ACTIONS = [
   {
     id:'paragraf-yaz',
     level:'kucuk',
+    olcum:true,
     title:'Paragraf sayısını yaz',
     summary:'Günün paragraf sayacına eklenir.',
     touches:'Gün kaydı',
@@ -229,6 +236,7 @@ R.ACTIONS = [
   {
     id:'problem-yaz',
     level:'kucuk',
+    olcum:true,
     title:'Problem sayısını yaz',
     summary:'Günün problem sayacına eklenir.',
     touches:'Gün kaydı',
@@ -241,6 +249,7 @@ R.ACTIONS = [
   {
     id:'uyku-yaz',
     level:'kucuk',
+    olcum:true,
     title:'Uyku süresini yaz',
     summary:'O günün uyku saati kaydedilir.',
     touches:'Gün kaydı',
@@ -253,6 +262,7 @@ R.ACTIONS = [
   {
     id:'sure-yaz',
     level:'kucuk',
+    olcum:true,
     title:'Çalışma süresini yaz',
     summary:'Söylediğin süre o dersin bugünkü bloğuna eklenir.',
     touches:'Gün kaydı',

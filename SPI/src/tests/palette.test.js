@@ -77,5 +77,29 @@
       P.quickCommand('8 saat uyudum');
       expect(JSON.stringify(SP.S.vitals || {})).toBe(once);
     });
+
+    /* KR-1: ölçüm yazan kayıt hemen yazılmaz, önizlemeyle gelir; olumsuz
+       cümle kayıt önermez ama sessizce de düşmez — neden yazılmadığı
+       söylenir. */
+    it('ölçüm önizlemeyle gelir; olumsuz cümle sorulur', function(){
+      resetState();
+      expect(P.quickCommand('8 saat uyudum').hint).toContain('önizleme');
+      const c = P.quickCommand('8 saat uyumadım');
+      expect(c).toBeTruthy();
+      expect(c.label).toBe('Bir şey sormam gerek');
+      expect(c.id).toBe('quick:sor');
+      const once = JSON.stringify(SP.S.vitals || {});
+      c.run();
+      const sayfa = document.body.innerHTML;
+      expect(sayfa).toContain('Ölçüm diye yazmadığım kısım');
+      expect(sayfa).toContain('uyumadım');
+      expect(sayfa.indexOf('data-act="quick-save"') < 0).toBe(true);
+      SP.UI.closeSheet();
+      expect(JSON.stringify(SP.S.vitals || {})).toBe(once);
+      /* karşılaştırma: ölçüm olan cümlenin önizlemesinde «Kaydet» vardır */
+      P.quickCommand('8 saat uyudum').run();
+      expect(document.body.innerHTML).toContain('data-act="quick-save"');
+      SP.UI.closeSheet();
+    });
   });
 })();
