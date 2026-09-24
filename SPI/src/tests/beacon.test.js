@@ -199,6 +199,38 @@
     });
   });
 
+  /* HATALAR Y-7: HKM profil bilmiyor; iki profil bağlanınca verileri
+     karışıyordu. Aynı anda TEK profil bağlanır; öteki profilde işaret
+     kapalı sayılır ve «HKM başka profile bağlı» denir. */
+  describe('HKM işareti — tek profil (Y-7)', () => {
+    const anahtar = () => window.LIFEOS.HkmBag.anahtar(B().MODULE);
+    it('başka profil bağlıyken işaret açılamaz, hiçbir şey gönderilmez', async () => {
+      resetState();
+      olculmusGun();
+      localStorage.setItem(anahtar(), 'baska-profil');
+      try{
+        const s = await B().save({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' });
+        expect(s.enabled).toBe(false);
+        expect(s.baskaProfil).toBe('baska-profil');
+        await withFetch(async cagri => {
+          const r = await B().send({ force:true });
+          expect(r.ok).toBe(false);
+          expect(cagri.length).toBe(0);
+        });
+      } finally { localStorage.removeItem(anahtar()); }
+    });
+
+    it('açan profil bağı alır, kapatınca bırakır', async () => {
+      resetState();
+      localStorage.removeItem(anahtar());
+      await B().save({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' });
+      expect(window.LIFEOS.HkmBag.sahip(B().MODULE)).toBe(B().profil());
+      expect(B().settings().enabled).toBe(true);
+      await B().save({ enabled:false });
+      expect(window.LIFEOS.HkmBag.sahip(B().MODULE)).toBe(null);
+    });
+  });
+
   describe('HKM işareti — eşleme', () => {
 
     it('yerel olmayan adrese eşleme yapılmaz', async () => {

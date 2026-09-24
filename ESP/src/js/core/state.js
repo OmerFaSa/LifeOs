@@ -313,6 +313,8 @@ ESP.Model = (function(){
     if(id === activeProfileId()) return { ok:false, error:'Açık olan profil silinemez.' };
     writeProfileList(profileList().filter(x => x.id !== id));
     try{ localStorage.removeItem('esp.v1.' + id); }catch(e){}
+    /* Silinen profil HKM bagini tutuyorsa birakir (HATALAR Y-7). */
+    if(window.LIFEOS && LIFEOS.HkmBag) LIFEOS.HkmBag.birak('esp', id);
     return { ok:true };
   }
 

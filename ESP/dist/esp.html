@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'34b0949', at:'2026-09-24 11:39', dirty:true };
+ESP.BUILD = { id:'582e7d0', at:'2026-09-24 11:42', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -8906,6 +8906,71 @@ LIFEOS.Olumsuz = (function(){
   }
 
   return { olcumEngeli, eylemEngeli, katla };
+})();
+
+/* ==== js/core/hkmbag.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/hkmbag.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* HKM BAĞI — bir modülde HKM'ye aynı anda TEK profil bağlanır.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/hkmbag.js`; `tools/ortak.py --yay` ile üç arayüzün
+   `src/js/core/` klasörüne birebir kopyalanır.
+
+   HKM profil bilmez: sync, hafıza, hedef ve yedek uçları yalnız modül
+   adıyla anahtarlanır. Aynı cihazda iki profil (hane üyesi) ayrı ayrı
+   bağlanınca iki kişinin uykusu aynı seriye yazılıyor, hafızası
+   «unutuldu» oluyor, hedefleri ve yedeği birbirini eziyordu
+   (ekip/HATALAR.md Y-7). Dokuz ay için en küçük doğru yol: bağı TEK
+   profile vermek.
+
+   Sözler:
+     1. BAĞIN SAHİBİ CİHAZDA DURUR, profilde değil: profil anahtarının
+        dışında, modül başına tek bir değer (`lifeos.hkm.sahip.<modül>`).
+     2. İşareti açan profil bağı alır; bağ başkasındaysa açamaz ve kime
+        ait olduğu söylenir. Kapatan (ya da silinen) profil bağı bırakır.
+     3. Sahibi olmayan profilde `Beacon.settings().enabled` false döner:
+        özet, geçmiş, yedek, hafıza, hedef, King ve BAM kanalları hep
+        oradan geçtiği için hepsi birlikte susar. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.HkmBag = (function(){
+  function anahtar(modul){ return 'lifeos.hkm.sahip.' + String(modul || ''); }
+
+  function sahip(modul){
+    try{ return localStorage.getItem(anahtar(modul)) || null; }
+    catch(e){ return null; }
+  }
+
+  function izinli(modul, profil){
+    const s = sahip(modul);
+    return !s || s === String(profil);
+  }
+
+  function al(modul, profil){
+    /* Profil bilinmiyorsa bag yazilmaz: «null» adli bir sahip, modulu
+       kendi cihazinda kilitlerdi. */
+    if(!profil) return { ok:true, sahip:null };
+    const s = sahip(modul);
+    if(s && s !== String(profil)) return { ok:false, sahip:s };
+    try{ localStorage.setItem(anahtar(modul), String(profil)); }catch(e){}
+    return { ok:true, sahip:String(profil) };
+  }
+
+  function birak(modul, profil){
+    if(sahip(modul) !== String(profil)) return false;
+    try{ localStorage.removeItem(anahtar(modul)); }catch(e){}
+    return true;
+  }
+
+  function not(s){
+    return 'HKM başka profile bağlı («' + s + '»). HKM profil ayırt etmediği için aynı '
+      + 'anda tek profil bağlanabilir; bağlamak için önce o profilde işareti kapat.';
+  }
+
+  return { anahtar, sahip, izinli, al, birak, not };
 })();
 
 /* ==== js/core/yedek.js ==== */
@@ -18467,6 +18532,8 @@ ESP.Model = (function(){
     if(id === activeProfileId()) return { ok:false, error:'Açık olan profil silinemez.' };
     writeProfileList(profileList().filter(x => x.id !== id));
     try{ localStorage.removeItem('esp.v1.' + id); }catch(e){}
+    /* Silinen profil HKM bagini tutuyorsa birakir (HATALAR Y-7). */
+    if(window.LIFEOS && LIFEOS.HkmBag) LIFEOS.HkmBag.birak('esp', id);
     return { ok:true };
   }
 
@@ -25851,11 +25918,25 @@ ESP.Beacon = (function(){
   let AYAR = null;
   let DEFTER = null;   // teklif defteri (asagida)
 
-  function settings(){ return Object.assign({}, VARSAYILAN, AYAR || {}); }
+  /* HKM'ye aynı anda TEK profil bağlanır (brand/ortak/hkmbag.js, HATALAR
+     Y-7). Bağ başka profildeyse işaret burada kapalı sayılır: özet, geçmiş,
+     yedek, hafıza, hedef ve King kanalları hep settings()'ten geçer. */
+  function profilim(){
+    try{ return localStorage.getItem('esp.activeProfile') || 'ben'; }catch(e){ return 'ben'; }
+  }
+  function settings(){
+    const s = Object.assign({}, VARSAYILAN, AYAR || {});
+    const sahip = window.LIFEOS && LIFEOS.HkmBag ? LIFEOS.HkmBag.sahip(MODULE) : null;
+    if(sahip && sahip !== profilim()){ s.enabled = false; s.baskaProfil = sahip; }
+    return s;
+  }
 
   async function load(){
     try{ AYAR = (await ESP.Store.get('hkm')) || {}; }
     catch(e){ AYAR = {}; }
+    /* Bu güncellemeden önce açılmış işaret: bağ boşsa bu profil alır;
+       doluysa (öteki profil daha önce aldı) burada kapalı sayılır. */
+    if(AYAR.enabled && LIFEOS.HkmBag && !LIFEOS.HkmBag.sahip(MODULE)) LIFEOS.HkmBag.al(MODULE, profilim());
     /* Teklif defterinin bellekteki kopyasi da tazelenir: ambar
        degistiginde (acilis, hesap degisimi) eski kopyayla devam etmek,
        cevaplanmis bir teklifi cevapsiz sanmak olurdu. */
@@ -25864,7 +25945,11 @@ ESP.Beacon = (function(){
   }
 
   async function save(patch){
-    AYAR = Object.assign({}, settings(), patch || {});
+    const p = Object.assign({}, patch || {});
+    if(p.enabled === true && !LIFEOS.HkmBag.al(MODULE, profilim()).ok) delete p.enabled;
+    AYAR = Object.assign({}, AYAR || {}, p);
+    delete AYAR.baskaProfil;
+    if(p.enabled === false) LIFEOS.HkmBag.birak(MODULE, profilim());
     await ESP.Store.set('hkm', AYAR);
     return settings();
   }
@@ -26124,7 +26209,8 @@ ESP.Beacon = (function(){
         note:(govde && govde.note) || 'Eşleme penceresi kapalı. HKM yüzünde '
            + '«Cihazları bağla» dedikten sonra iki dakika içinde dene.' };
     }
-    await save({ url:adres, token:govde.token, enabled:true });
+    const son = await save({ url:adres, token:govde.token, enabled:true });
+    if(son.baskaProfil) return { ok:false, note:LIFEOS.HkmBag.not(son.baskaProfil) };
     return { ok:true, note:'Bağlandı. İşaret açıldı; ne gönderildiği aşağıda yazıyor.' };
   }
 
@@ -26153,6 +26239,7 @@ ESP.Beacon = (function(){
   async function send(opts){
     const o = opts || {};
     const a = settings();
+    if(a.baskaProfil) return { ok:false, reason:'baska-profil', note:LIFEOS.HkmBag.not(a.baskaProfil) };
     if(!a.enabled && !o.force) return { ok:false, reason:'off', note:'HKM işareti kapalı.' };
     if(!a.token) return { ok:false, reason:'no-token', note:'Jeton girilmemiş.' };
     if(!urlOk(a.url)){
@@ -26741,7 +26828,7 @@ ESP.Beacon = (function(){
   }
 
   return { load, save, settings, collect, payload, preview, contract, metric,
-    urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
+    MODULE, profil:profilim, urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
     intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE, desteOf, kayitOku,
     kartOnizle, kartGeriAl,
     resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
@@ -43267,6 +43354,7 @@ ESP.Screens.profile = (function(){
       note:window.LIFEOS.YedekAg.kartNotu('ESP'),
       wide:true,
       body:html`
+        ${when(a.baskaProfil, () => html`<p class="small mt-8" role="alert">${window.LIFEOS.HkmBag.not(a.baskaProfil)}</p>`)}
         ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
           checked:!!a.enabled, act:'hkm-toggle' })}
 

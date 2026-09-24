@@ -254,6 +254,7 @@ ESP.Screens.profile = (function(){
       note:window.LIFEOS.YedekAg.kartNotu('ESP'),
       wide:true,
       body:html`
+        ${when(a.baskaProfil, () => html`<p class="small mt-8" role="alert">${window.LIFEOS.HkmBag.not(a.baskaProfil)}</p>`)}
         ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',
           checked:!!a.enabled, act:'hkm-toggle' })}
 

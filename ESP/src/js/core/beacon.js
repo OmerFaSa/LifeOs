@@ -55,11 +55,25 @@ ESP.Beacon = (function(){
   let AYAR = null;
   let DEFTER = null;   // teklif defteri (asagida)
 
-  function settings(){ return Object.assign({}, VARSAYILAN, AYAR || {}); }
+  /* HKM'ye aynı anda TEK profil bağlanır (brand/ortak/hkmbag.js, HATALAR
+     Y-7). Bağ başka profildeyse işaret burada kapalı sayılır: özet, geçmiş,
+     yedek, hafıza, hedef ve King kanalları hep settings()'ten geçer. */
+  function profilim(){
+    try{ return localStorage.getItem('esp.activeProfile') || 'ben'; }catch(e){ return 'ben'; }
+  }
+  function settings(){
+    const s = Object.assign({}, VARSAYILAN, AYAR || {});
+    const sahip = window.LIFEOS && LIFEOS.HkmBag ? LIFEOS.HkmBag.sahip(MODULE) : null;
+    if(sahip && sahip !== profilim()){ s.enabled = false; s.baskaProfil = sahip; }
+    return s;
+  }
 
   async function load(){
     try{ AYAR = (await ESP.Store.get('hkm')) || {}; }
     catch(e){ AYAR = {}; }
+    /* Bu güncellemeden önce açılmış işaret: bağ boşsa bu profil alır;
+       doluysa (öteki profil daha önce aldı) burada kapalı sayılır. */
+    if(AYAR.enabled && LIFEOS.HkmBag && !LIFEOS.HkmBag.sahip(MODULE)) LIFEOS.HkmBag.al(MODULE, profilim());
     /* Teklif defterinin bellekteki kopyasi da tazelenir: ambar
        degistiginde (acilis, hesap degisimi) eski kopyayla devam etmek,
        cevaplanmis bir teklifi cevapsiz sanmak olurdu. */
@@ -68,7 +82,11 @@ ESP.Beacon = (function(){
   }
 
   async function save(patch){
-    AYAR = Object.assign({}, settings(), patch || {});
+    const p = Object.assign({}, patch || {});
+    if(p.enabled === true && !LIFEOS.HkmBag.al(MODULE, profilim()).ok) delete p.enabled;
+    AYAR = Object.assign({}, AYAR || {}, p);
+    delete AYAR.baskaProfil;
+    if(p.enabled === false) LIFEOS.HkmBag.birak(MODULE, profilim());
     await ESP.Store.set('hkm', AYAR);
     return settings();
   }
@@ -328,7 +346,8 @@ ESP.Beacon = (function(){
         note:(govde && govde.note) || 'Eşleme penceresi kapalı. HKM yüzünde '
            + '«Cihazları bağla» dedikten sonra iki dakika içinde dene.' };
     }
-    await save({ url:adres, token:govde.token, enabled:true });
+    const son = await save({ url:adres, token:govde.token, enabled:true });
+    if(son.baskaProfil) return { ok:false, note:LIFEOS.HkmBag.not(son.baskaProfil) };
     return { ok:true, note:'Bağlandı. İşaret açıldı; ne gönderildiği aşağıda yazıyor.' };
   }
 
@@ -357,6 +376,7 @@ ESP.Beacon = (function(){
   async function send(opts){
     const o = opts || {};
     const a = settings();
+    if(a.baskaProfil) return { ok:false, reason:'baska-profil', note:LIFEOS.HkmBag.not(a.baskaProfil) };
     if(!a.enabled && !o.force) return { ok:false, reason:'off', note:'HKM işareti kapalı.' };
     if(!a.token) return { ok:false, reason:'no-token', note:'Jeton girilmemiş.' };
     if(!urlOk(a.url)){
@@ -945,7 +965,7 @@ ESP.Beacon = (function(){
   }
 
   return { load, save, settings, collect, payload, preview, contract, metric,
-    urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
+    MODULE, profil:profilim, urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
     intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE, desteOf, kayitOku,
     kartOnizle, kartGeriAl,
     resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,

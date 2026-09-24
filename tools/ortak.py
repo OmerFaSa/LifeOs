@@ -220,6 +220,10 @@ DOSYALAR = {
     # yazar.
     "olumsuz.js":      "js/core",
     "olumsuz.test.js": "tests",
+    # HKM BAGI — ayni anda TEK profil HKM'ye baglanir (ekip/HATALAR.md Y-7).
+    # Sahip bilgisi cihazda, modul basina tek anahtarda; uc arayuzde ayni.
+    "hkmbag.js":      "js/core",
+    "hkmbag.test.js": "tests",
     # MODEL KATMANI — uc arayuz (2026-09-24'ten beri AYS'ninki tek kaynak).
     "llm.js":        "js/core",
     "providers.js":  "js/data",

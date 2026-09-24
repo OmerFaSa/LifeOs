@@ -490,6 +490,7 @@ R.Screens.guide = (function(){
       sub:'İsteğe bağlı dördüncü katmana günün özeti',
       body:html`
         ${K.Notice({ tone:'info', body:window.LIFEOS.YedekAg.kartNotu('AYS') })}
+        ${when(a.baskaProfil, () => K.Notice({ tone:'warn', class:'mt-10', body:window.LIFEOS.HkmBag.not(a.baskaProfil) }))}
 
         <div class="mt-12">
           ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)', checked:!!a.enabled,

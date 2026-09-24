@@ -16,9 +16,9 @@ D-8, D-9, D-10, D-11, D-14, D-17, D-19.
 | Y-6 | düzeltildi | 4d79a17 |
 | Y-5 + O-4 + D-6 | düzeltildi | e68c718 |
 | Y-4 | düzeltildi | e68c718 |
-| Y-8 + B-2 + B-3 | düzeltildi | (bu commit) |
-| Y-2 (AYS) | düzeltildi | (bu commit) |
-| Y-7 (modül) | sırada | |
+| Y-8 + B-2 + B-3 | düzeltildi | 313a704 |
+| Y-2 (AYS) | düzeltildi | 313a704 |
+| Y-7 (modül) | düzeltildi | (bu commit) |
 | O-3, O-5, O-8, O-10, O-11 | sırada | |
 | D-8, D-9, D-10, D-11, D-14, D-17, D-19 | **Claude A'ya geçti** (kullanıcı kararı); B dokunmaz | |
 
@@ -246,3 +246,44 @@ AYS/SPI/ESP  node tools/smoke.js   Duman testi temiz (38 / 26 / 30 ekran, 2 hede
 python3 tools/ortak.py --denetle   kopyalar kaynakla ayni (45 dosya, 135 kopya)
 python3 build.py (üçü)        dist yeniden derlendi
 ```
+
+---
+
+## Y-7 (modül tarafı) · HKM'ye aynı anda tek profil
+
+**Ne değişti.**
+
+- Yeni tek kaynak `brand/ortak/hkmbag.js` (`LIFEOS.HkmBag`), `tools/ortak.py`
+  ile üç arayüze: bağın sahibi CİHAZDA, modül başına tek anahtarda
+  (`lifeos.hkm.sahip.<modül>`). `al`, `birak`, `sahip`, `izinli`, `not`.
+- Üç `beacon.js`: `settings()` bağ başka profildeyse `enabled:false,
+  baskaProfil:<id>` döner. Özet, geçmiş, yedek (`yedekag`), hafıza,
+  hedef ağı, King teklifi, BAM ve ürün kanalları hep `settings()`'ten
+  geçtiği için hepsi birlikte susar. `save({enabled:true})` bağı alır ya da
+  (başkasındaysa) açmaz; `save({enabled:false})` bırakır. `send({force})`
+  de başka profilde gönderim yapmaz. `pair()` bağ başkasındaysa «HKM
+  başka profile bağlı» der. Bu güncellemeden önce iki profilde de açık
+  olan işaret: ilk açılan profil bağı alır, öteki kapalı sayılır.
+- Kartlar (AYS, SPİ, ESP) bağ başkasındayken «HKM başka profile bağlı
+  («X») … önce o profilde işareti kapat» uyarısını gösterir.
+- SPİ ve ESP'de profil silinince tuttuğu bağ bırakılır (kilit asılı
+  kalmaz). AYS'de profil silme işlevi yok.
+
+**Testler.** `brand/ortak/hkmbag.test.js` (üç arayüzde) ve üç
+`tests/beacon.test.js` «tek profil (Y-7)». Eski SPİ `beacon.js` ile koşum:
+2 kırmızı (bağ başkasındayken işaret açılıyordu); yenisiyle yeşil.
+
+**Koşturulan denetimler ve çıktı.**
+
+```
+AYS  node tools/runtests.js   1718/1718 gecti
+SPI  node tools/runtests.js   1360/1360 gecti
+ESP  node tools/runtests.js   1378/1378 gecti
+AYS/SPI/ESP  node tools/smoke.js   Duman testi temiz (38 / 26 / 30 ekran, 2 hedefte)
+python3 tools/ortak.py --denetle   kopyalar kaynakla ayni (47 dosya, 141 kopya)
+python3 build.py (üçü)        dist yeniden derlendi
+```
+
+**Sınır.** Bağ aynı tarayıcı (aynı `localStorage`) içindeki profilleri
+ayırır. İki ayrı cihazdan iki kişinin aynı HKM'ye bağlanması HKM
+tarafının konusudur (profil alanını okumak); A'nın alanı.

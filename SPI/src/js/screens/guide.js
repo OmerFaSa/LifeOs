@@ -246,6 +246,7 @@ SP.Screens.guide = (function(){
         : K.Badge({ label:'kapalı', tone:'warn' }),
       body:html`
         ${K.Notice({ tone:'info', body:window.LIFEOS.YedekAg.kartNotu('SPİ') })}
+        ${when(a.baskaProfil, () => K.Notice({ tone:'warn', class:'mt-10', body:window.LIFEOS.HkmBag.not(a.baskaProfil) }))}
 
         <div class="mt-12">
           ${K.Checkbox({ label:'İşareti aç (varsayılan kapalı)',

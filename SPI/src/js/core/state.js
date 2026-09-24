@@ -268,6 +268,8 @@ SP.Model = (function(){
     if(id === activeProfileId()) return { ok:false, error:'Açık olan profil silinemez.' };
     const list = householdList().filter(x => x.id !== id);
     writeHousehold(list);
+    /* Silinen profil HKM bagini tutuyorsa birakir (HATALAR Y-7). */
+    if(window.LIFEOS && LIFEOS.HkmBag) LIFEOS.HkmBag.birak('spi', id);
     SP.S.profiles = list;
     /* Profilin kendi verisi kendi anahtarinda kalir; listeden dusmek
        veriyi silmez. Silmek acikca istenmelidir. */
