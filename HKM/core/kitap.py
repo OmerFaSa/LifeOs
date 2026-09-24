@@ -40,14 +40,14 @@ def temizle(govde):
     hata = []
     for k in govde:
         if k not in ("baslik", "bolumler", "zorluk"):
-            hata.append("kitap: bilinmeyen alan %s" % k)
+            hata.append("kitap: bilinmeyen alan «%s»" % k)
     baslik = _bosluk(govde.get("baslik"))
     if not (2 <= len(baslik) <= 120):
-        hata.append("baslik 2-120 karakter olmalı")
+        hata.append("başlık 2–120 karakter olmalı")
     ham = govde.get("bolumler")
     bolumler = []
     if not isinstance(ham, list) or not (1 <= len(ham) <= MAX_BOLUM):
-        hata.append("bolumler 1-%d ögelik bir liste olmalı" % MAX_BOLUM)
+        hata.append("bölümler 1–%d öğelik bir liste olmalı" % MAX_BOLUM)
         ham = []
     for i, b in enumerate(ham):
         if not isinstance(b, dict) or set(b) - {"ad", "konular", "adet"}:

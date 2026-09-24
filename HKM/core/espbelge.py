@@ -71,10 +71,10 @@ def temizle(govde):
     hata = []
     for k in govde:
         if k not in ("alan", "konu"):
-            hata.append("belge: bilinmeyen alan %s" % k)
+            hata.append("belge: bilinmeyen alan «%s»" % k)
     alan = govde.get("alan")
     if alan not in ALANLAR:
-        hata.append("alan tarih, felsefe, okuma, yazi, cefr ya da okuma_hizi olmalı")
+        hata.append("alan tarih, felsefe, okuma, yazı, CEFR ya da okuma hızı olmalı")
     konu = _bosluk(govde.get("konu"))
     if not (2 <= len(konu) <= MAX_KONU):
         hata.append("konu 2-%d karakter olmalı" % MAX_KONU)

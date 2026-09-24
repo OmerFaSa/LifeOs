@@ -103,7 +103,7 @@ def temizle(g):
     """{konu, hafta, haftalik_dk, gunler?, baslangic?, seviye?, ayrinti?,
     kaynakli?} -> (temiz, hatalar). Hafta ve haftalik sure ZORUNLUDUR."""
     if not isinstance(g, dict):
-        return None, ["program bir nesne olmali"]
+        return None, ["program bir nesne olmalı"]
     izinli = {"konu", "hafta", "haftalik_dk", "gunler", "baslangic", "seviye", "ayrinti",
               "kaynakli"}
     fazla = sorted(set(g) - izinli)
@@ -112,31 +112,31 @@ def temizle(g):
     hatalar = []
     konu = _bosluk(g.get("konu"))
     if not 3 <= len(konu) <= 200:
-        hatalar.append("konu 3-200 karakter olmali")
+        hatalar.append("konu 3–200 karakter olmalı")
     hafta = _tamsayi(g.get("hafta"), *HAFTA)
     if hafta is None:
-        hatalar.append("hafta 1-52 arasinda bir tam sayi olmali")
+        hatalar.append("hafta 1–52 arasında bir tam sayı olmalı")
     hdk = _tamsayi(g.get("haftalik_dk"), *HAFTALIK_DK)
     if hdk is None:
-        hatalar.append("haftalik_dk 30-2400 arasinda bir tam sayi olmali")
+        hatalar.append("haftalık süre 30–2400 dakika arasında bir tam sayı olmalı")
     gunler = g.get("gunler")
     if gunler is None:
         gunler = list(GUNLER[:5])
     if (not isinstance(gunler, list) or not gunler or any(x not in GUNLER for x in gunler)
             or len(set(gunler)) != len(gunler)):
-        hatalar.append("gunler pzt..paz kisaltmalarindan olusan bir liste olmali")
+        hatalar.append("günler pzt…paz kısaltmalarından oluşan bir liste olmalı")
         gunler = []
     bas = g.get("baslangic")
     if bas not in (None, ""):
         try:
             datetime.date.fromisoformat(str(bas))
         except ValueError:
-            hatalar.append("baslangic YYYY-AA-GG olmali")
+            hatalar.append("başlangıç YYYY-AA-GG biçiminde olmalı")
     seviye = g.get("seviye") or "baslangic"
     if seviye not in SEVIYELER:
-        hatalar.append("seviye baslangic, orta ya da ileri olmali")
+        hatalar.append("seviye başlangıç, orta ya da ileri olmalı")
     if "kaynakli" in g and not isinstance(g["kaynakli"], bool):
-        hatalar.append("kaynakli bir bool olmali")
+        hatalar.append("«kaynaklı» evet ya da hayır olmalı")
     if hatalar:
         return None, hatalar
     temiz = {"konu": konu, "hafta": hafta, "haftalik_dk": hdk,

@@ -164,26 +164,26 @@ def tani(metin):
 def temizle(govde):
     """Is emri govdesi: {tur, konu, ayrinti?, uzunluk?, kaynakli?}."""
     if not isinstance(govde, dict):
-        return None, ["urun bir nesne olmalı"]
+        return None, ["ürün isteği bir nesne olmalı"]
     hata = []
     for k in govde:
         if k not in ("tur", "konu", "ayrinti", "uzunluk", "kaynakli"):
-            hata.append("urun: bilinmeyen alan %s" % k)
+            hata.append("ürün: bilinmeyen alan %s" % k)
     tur = govde.get("tur")
     if tur not in URUNLER:
-        hata.append("urun.tur şunlardan biri olmalı: %s" % ", ".join(URUNLER))
+        hata.append("ürün türü şunlardan biri olmalı: %s" % ", ".join(URUNLER))
     konu = _bosluk(govde.get("konu"))
     if not (3 <= len(konu) <= 300):
-        hata.append("urun.konu 3–300 karakter olmalı")
+        hata.append("ürün konusu 3–300 karakter olmalı")
     ayrinti = _bosluk(govde.get("ayrinti")) if govde.get("ayrinti") is not None else ""
     if len(ayrinti) > 1000:
-        hata.append("urun.ayrinti en çok 1000 karakter olmalı")
+        hata.append("ürün ayrıntısı en çok 1000 karakter olmalı")
     uz = govde.get("uzunluk", "orta")
     if uz not in UZUNLUK:
-        hata.append("urun.uzunluk kisa, orta ya da uzun olmalı")
+        hata.append("ürün uzunluğu kısa, orta ya da uzun olmalı")
     kay = govde.get("kaynakli")
     if kay is not None and not isinstance(kay, bool):
-        hata.append("urun.kaynakli bir bool olmalı")
+        hata.append("«kaynaklı» evet ya da hayır olmalı")
     if hata:
         return None, hata
     g = {"tur": tur, "konu": konu, "uzunluk": uz}

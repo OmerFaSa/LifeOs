@@ -328,3 +328,23 @@ def run():
         y = db.export_all(con)
         eq((y["__meta"]["tables"]["is_emirleri"], y["__meta"]["tables"]["bildirimler"]), (1, 1))
     test("is emirleri ve bildirimler yedege girer", t_yedek)
+
+    def t_hata_turkce():
+        # HATA (2026-09-24): reddedilen istegin cumlesi ekrana ve sohbete
+        # gidiyor (AYS sinav profili, Telegram arastirma) ama ASCII'ydi
+        # («konu 3-200 karakter olmali»). AGENTS §1.8: ekrandaki cumle
+        # duzgun Turkcedir.
+        con = db.connect(":memory:")
+        denemeler = [
+            ("hkm", "bam.arastirma", {"arastirma": {"konu": "ab"}}),
+            ("hkm", "bam.plan", {"program": {"konu": "a", "hafta": 99}}),
+            ("ays", "yok.tur", {}),
+            ("esp", "sinav.mufredat", {"mufredat": {"sinav": "KPSS"}}),
+            ("ays", "sinav.mufredat", {"mufredat": {"sinav": "KPSS", "fazla": 1}}),
+        ]
+        for modul, tur, govde in denemeler:
+            r = king.emir_ac(con, {}, modul, tur, govde, now=AN)
+            no(r["ok"])
+            metin = " ".join(r["errors"])
+            ok(any(h in metin for h in "ıİşŞğĞüÜöÖçÇ"), "%s: %s" % (tur, metin))
+    test("reddedilen istegin cumlesi duzgun Turkce", t_hata_turkce)

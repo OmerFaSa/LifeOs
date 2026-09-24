@@ -443,7 +443,7 @@ def _govde_temizle(tur, govde):
         if hatalar:
             return None, hatalar
         return {"belge": g}, []
-    return None, ["tanimsiz tur"]
+    return None, ["tanımsız iş türü"]
 
 
 # Ayni girdi -> ayni anahtar («once depo»). Mufredatta buyuk-kucuk harf
@@ -470,12 +470,12 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
     kanal = kanal if kanal in TESLIM_KANALLARI else None
     hedef = (str(hedef).strip()[:MAX_HEDEF] or None) if (kanal and hedef) else None
     if modul not in MODULLER:
-        return {"ok": False, "errors": ["bilinmeyen modul"]}
+        return {"ok": False, "errors": ["bilinmeyen modül"]}
     t = TURLER.get(tur)
     if not t:
-        return {"ok": False, "errors": ["tanimsiz is turu: %s" % tur]}
+        return {"ok": False, "errors": ["tanımsız iş türü: %s" % tur]}
     if modul not in t["moduller"]:
-        return {"ok": False, "errors": ["%s turu %s modulunden gelemez" % (tur, modul)]}
+        return {"ok": False, "errors": ["%s türü %s modülünden istenemez" % (tur, MODUL_AD.get(modul, modul))]}
     temiz, hatalar = _govde_temizle(tur, govde)
     if hatalar:
         return {"ok": False, "errors": hatalar}

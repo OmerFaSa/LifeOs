@@ -87,17 +87,17 @@ def _kucuk(s):
 def temizle(govde):
     """Is emri govdesi: {sinav, bolum?}. (temiz, hatalar)."""
     if not isinstance(govde, dict):
-        return None, ["mufredat bir nesne olmalı"]
+        return None, ["müfredat isteği bir nesne olmalı"]
     hata = []
     for k in govde:
         if k not in ("sinav", "bolum"):
-            hata.append("mufredat: bilinmeyen alan %s" % k)
+            hata.append("müfredat: bilinmeyen alan %s" % k)
     sinav = _bosluk(govde.get("sinav"))
     if not (2 <= len(sinav) <= MAX_SINAV):
-        hata.append("sinav 2-%d karakterlik bir ad olmalı" % MAX_SINAV)
+        hata.append("sınav adı 2–%d karakter olmalı" % MAX_SINAV)
     bolum = _bosluk(govde.get("bolum")) if govde.get("bolum") is not None else ""
     if len(bolum) > MAX_BOLUM:
-        hata.append("bolum en fazla %d karakter olmalı" % MAX_BOLUM)
+        hata.append("bölüm adı en fazla %d karakter olmalı" % MAX_BOLUM)
     if hata:
         return None, hata
     g = {"sinav": sinav}

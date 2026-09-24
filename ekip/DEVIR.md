@@ -203,6 +203,11 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   Taranıp temiz bulunanlar (hata yok): King iş türü dağıtımı (9 türün hepsi temizle/anahtar/
   teklif/güncellikte), kesinlik etiketi (modüller tutarlı), SPİ/ESP beacon'da sıfır-eksik,
   sessiz saat gece yarısı, Y5 birim dönüşümleri, UTC tarih hesapları, `focus.set`/`plan.add`.
+  · **Reddedilen isteğin cümlesi ASCII'ydi** (AGENTS §1.8): AYS sınav profili/test kitabı ve
+    Telegram araştırması HKM'nin `errors` dizisini ekrana basıyor («konu 3-200 karakter
+    olmali», «sinav 2-80…», «tanimsiz is turu»). `king`, `program`, `kaynakli`, `mufredat`,
+    `kitap`, `urunler`, `espbelge` temizleyicileri düzgün Türkçe; test `test_king` (önce
+    kırmızıydı). HKM 578, `tools/entegre.js` temiz.
   Bilinçli bırakılan: haftalık soru gerçekleşmesi yalnız plan bloklarını sayar (haftanın konu
   sözleşmesi; serbest soru konuya bağlı değil) — tasarım kararı, hata değil.
 - **Sıradaki:** açık sorular (❓ 10b, 14, Y1, Y10, diksiyon) kullanıcı cevabı bekliyor; Part 9

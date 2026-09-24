@@ -283,13 +283,13 @@ def liste(d, alan, n=10, uzun=300):
 def istek_temizle(g):
     """{"konu", "ayrinti"?} -> (temiz, hatalar). Kapali girdi."""
     if not isinstance(g, dict):
-        return None, ["arastirma bir nesne olmali"]
+        return None, ["araştırma isteği bir nesne olmalı"]
     fazla = sorted(set(g) - {"konu", "ayrinti"})
     if fazla:
         return None, ["bilinmeyen alan: %s" % ", ".join(fazla)]
     konu = _bosluk(g.get("konu"))
     if not 3 <= len(konu) <= 200:
-        return None, ["konu 3-200 karakter olmali"]
+        return None, ["konu 3–200 karakter olmalı"]
     temiz = {"konu": konu}
     ayrinti = _bosluk(g.get("ayrinti"))
     if ayrinti:
