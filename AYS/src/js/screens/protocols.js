@@ -66,7 +66,7 @@ R.Screens.protocols = (function(){
       body:html`<div class="list">${map(past, p => html`
         <div class="listitem">
           <div class="grow"><b class="small">${p.title}</b>
-            <div class="tiny dim">${U.fmtShort(p.startedAt)} – ${U.fmtShort(p.closedAt ? p.closedAt.slice(0, 10) : p.endsAt)}</div>
+            <div class="tiny dim">${U.fmtShort(p.startedAt)} – ${U.fmtShort(p.closedAt ? R.U.gunOf(p.closedAt) : p.endsAt)}</div>
             ${when(p.outcome, () => html`<div class="tiny">${p.outcome}</div>`)}</div>
           ${K.Badge({ label:'kapandı', tone:'muted' })}
         </div>`)}</div>` });

@@ -576,7 +576,7 @@ R.Solver = (function(){
     const out = [];
     for(let i = n - 1; i >= 0; i--){
       const iso = U.iso(U.addDays(U.today(), -i));
-      out.push({ date:iso, adet:all().filter(r => (r.at || '').slice(0, 10) === iso).length });
+      out.push({ date:iso, adet:all().filter(r => R.U.gunOf((r.at || '')) === iso).length });
     }
     return out;
   }
@@ -588,7 +588,7 @@ R.Solver = (function(){
     const zor = list.filter(r => r.difficulty);
     return {
       toplam:list.length,
-      bugun:list.filter(r => (r.at || '').slice(0, 10) === U.todayISO()).length,
+      bugun:list.filter(r => R.U.gunOf((r.at || '')) === U.todayISO()).length,
       cozumOrani:withResult.length ? Math.round(100 * ok / withResult.length) : null,
       ortZorluk:zor.length
         ? U.round(zor.reduce((s, r) => s + r.difficulty, 0) / zor.length, 1) : null,

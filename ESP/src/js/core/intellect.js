@@ -282,7 +282,7 @@ ESP.Intellect = (function(){
     const n = days || 14;
     const today = todayISO || U.todayISO();
     return openArguments().filter(a => {
-      const at = (a.updatedAt || a.createdAt || '').slice(0, 10);
+      const at = ESP.U.gunOf((a.updatedAt || a.createdAt || ''));
       return at && U.diffDays(at, today) >= n;
     });
   }

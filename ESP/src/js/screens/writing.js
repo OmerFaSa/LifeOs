@@ -161,7 +161,7 @@ ESP.Screens.writing = (function(){
                 d.title || 'başlıksız',
                 ok.cert === 'missing' ? '—' : U.fmtNum(ok.words),
                 String(d.revisions || 0),
-                U.fmtShort((d.updatedAt || '').slice(0, 10)),
+                U.fmtShort(ESP.U.gunOf((d.updatedAt || ''))),
                 K.Button({ label:'Aç', size:'sm', act:'open-draft', data:{ 'data-id':d.id } }),
               ];
             }) })

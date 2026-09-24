@@ -809,4 +809,20 @@
     });
   });
 
+  /* HATA (2026-09-24): zaman damgasının ilk on karakteri UTC günüdür.
+     Türkiye UTC+3: gece 00:30'da çözülen soru «bugün»e değil DÜNE yazılıyordu
+     (testler İstanbul saatiyle koşar, tools/runtests.js). */
+  describe('Gece yarısından sonra', () => {
+    it('00:30’da çözülen soru bugünün sayısına girer', () => {
+      resetState();
+      const b = new Date(); b.setHours(0, 30, 0, 0);
+      R.S.solved = [Object.assign(Q.newRecord({}), { at:b.toISOString() })];
+      expect(Q.summary().bugun).toBe(1);
+      expect(Q.daily(1)[0].adet).toBe(1);
+      expect(R.U.gunOf(b.toISOString())).toBe(R.U.todayISO());
+      expect(R.U.gunOf('2026-09-24')).toBe('2026-09-24');
+      expect(R.U.gunOf('')).toBe('');
+      expect(R.U.gunOf(null)).toBe('');
+    });
+  });
 })();

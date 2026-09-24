@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'d175871', at:'2026-09-24 08:19', dirty:true };
+ESP.BUILD = { id:'c7869e1', at:'2026-09-24 08:59', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -8768,13 +8768,21 @@ LIFEOS.YEDEK_ASGARI_KAYIT = 5;
 
 /* Son yedeğin yaşı GÜN olarak; damga yoksa null («hiç yedek alınmadı»).
 
-   `damga` bir ISO tarih (YYYY-MM-DD) ya da ISO zaman damgası olabilir;
-   ikisinde de yalnız tarih kısmı kullanılır. `bugun` çağıranın YEREL
+   `damga` bir ISO tarih (YYYY-MM-DD) ya da ISO zaman damgası olabilir.
+   Zaman damgası UTC'dir ve YEREL güne çevrilir (ilk on karakteri UTC
+   günüdür; UTC+3'te gece alınan yedek düne düşerdi). `bugun` çağıranın YEREL
    bugünüdür (`U.todayISO()`); buraya elle bir tarih verilmesi testlerin
    saatten bağımsız koşabilmesi içindir. */
 LIFEOS.yedekYasi = function(damga, bugun){
   const gun = function(x){
-    const g = String(x || '').slice(0, 10);
+    let g = String(x || '').slice(0, 10);
+    if(/^\d{4}-\d{2}-\d{2}T/.test(String(x || ''))){
+      const z = new Date(String(x));
+      if(!isNaN(z.getTime())){
+        const iki = n => (n < 10 ? '0' : '') + n;
+        g = z.getFullYear() + '-' + iki(z.getMonth() + 1) + '-' + iki(z.getDate());
+      }
+    }
     if(!/^\d{4}-\d{2}-\d{2}$/.test(g)) return null;
     const t = Date.UTC(+g.slice(0, 4), +g.slice(5, 7) - 1, +g.slice(8, 10));
     /* Bozuk bir tarih (2026-02-31) sessizce kaymasın: geri çevirip
@@ -17012,6 +17020,15 @@ ESP.U = (function(){
   function pad2(n){ return String(n).padStart(2,'0'); }
 
   function iso(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+  /* Zaman damgasından YEREL gün. `new Date().toISOString()` UTC'dir; ilk on
+     karakteri UTC günüdür ve Türkiye'de (UTC+3) gece 00:00–03:00 arası
+     kayıt DÜNE düşer. Yalnız tarih («2026-09-24») olduğu gibi döner. */
+  function gunOf(ts){
+    const s = ts == null ? '' : String(ts);
+    if(/^\d{4}-\d{2}-\d{2}$/.test(s) || !/^\d{4}-\d{2}-\d{2}T/.test(s)) return s.slice(0, 10);
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? s.slice(0, 10) : iso(d);
+  }
 
   /* Bir ISO tarihi (YYYY-MM-DD) gecerli mi?
 
@@ -17200,6 +17217,7 @@ ESP.U = (function(){
   }
 
   return {
+    gunOf,
     MONTHS, MONTHS_SHORT, DAY_MS,
     pad2, iso, parse, isISO, today, todayISO, addDays, diffDays, weekdayIndex, lastDays,
     fmtDate, fmtShort, fmtRange, monthName, monthKey, relativeDay,
@@ -18312,7 +18330,7 @@ ESP.Model = (function(){
   function _kartGunleri(){
     const gunler = {};
     S.cards.forEach(c => (c.history || []).forEach(h => {
-      const d = (h.at || '').slice(0, 10);
+      const d = ESP.U.gunOf((h.at || ''));
       if(d) gunler[d] = true;
     }));
     return gunler;
@@ -21129,7 +21147,7 @@ ESP.XPSayim = (function(){
     g.forEach(x => { kart[x] = 0; });
     (S.cards || []).forEach(c => {
       (c.history || []).forEach(h => {
-        const gun = String((h && h.at) || '').slice(0, 10);
+        const gun = ESP.U.gunOf(String((h && h.at) || ''));
         if(gun in kart) kart[gun]++;
       });
     });
@@ -21192,13 +21210,13 @@ ESP.BasarimSayim = (function(){
     let kart = 0;
     (S.cards || []).forEach(function(c){
       (c.history || []).forEach(function(h){
-        if(String((h && h.at) || '').slice(0, 10) === gun) kart++;
+        if(ESP.U.gunOf(String((h && h.at) || '')) === gun) kart++;
       });
     });
     const not = (S.notes || []).filter(function(n){
-      return String((n && n.createdAt) || '').slice(0, 10) === gun; }).length;
+      return ESP.U.gunOf(String((n && n.createdAt) || '')) === gun; }).length;
     const taslak = (S.drafts || []).filter(function(t){
-      return String((t && t.createdAt) || '').slice(0, 10) === gun; }).length;
+      return ESP.U.gunOf(String((t && t.createdAt) || '')) === gun; }).length;
 
     /* Ölçülmemiş oturum sayılmaz — `minutesOf` null döner. */
     const dakika = Number(M.minutesOf(gun)) || 0;
@@ -21405,7 +21423,7 @@ ESP.SRS = (function(){
     const sonCevap = card.due && card.interval
       ? U.iso(U.addDays(U.parse(card.due), -card.interval))
       : (card.history && card.history.length
-          ? card.history[card.history.length - 1].at.slice(0, 10) : null);
+          ? ESP.U.gunOf(card.history[card.history.length - 1].at) : null);
     if(!sonCevap) return null;
     const t = Math.max(0, U.diffDays(sonCevap, today));
     return Math.exp(-t / s);
@@ -21490,7 +21508,7 @@ ESP.SRS = (function(){
     const sinir = U.iso(U.addDays(U.parse(today), -(days || 7)));
     let n = 0;
     S.cards.forEach(c => {
-      (c.history || []).forEach(h => { if(h.at.slice(0, 10) >= sinir) n++; });
+      (c.history || []).forEach(h => { if(ESP.U.gunOf(h.at) >= sinir) n++; });
     });
     return n;
   }
@@ -21789,7 +21807,7 @@ ESP.Intellect = (function(){
     const n = days || 14;
     const today = todayISO || U.todayISO();
     return openArguments().filter(a => {
-      const at = (a.updatedAt || a.createdAt || '').slice(0, 10);
+      const at = ESP.U.gunOf((a.updatedAt || a.createdAt || ''));
       return at && U.diffDays(at, today) >= n;
     });
   }
@@ -25603,7 +25621,7 @@ ESP.Beacon = (function(){
         out.synthesis_gap_days = metric(0, 'computed');
       }else{
         const yas = bagsiz.map(function(n){
-          return U.diffDays(String(n.createdAt || '').slice(0, 10), d);
+          return U.diffDays(ESP.U.gunOf(String(n.createdAt || '')), d);
         }).filter(function(x){ return isFinite(x); });
         out.synthesis_gap_days = yas.length
           ? metric(Math.max.apply(null, yas), 'computed')
@@ -32353,7 +32371,7 @@ ESP.Parts = (function(){
                   ${when(a.seconds != null, () => html`<span class="tiny dim">${
                     Math.round(a.seconds)} sn · ölçüldü</span>`)}
                 </span>
-                <span class="tiny dim">${(a.at || '').slice(0, 10)}</span>
+                <span class="tiny dim">${ESP.U.gunOf((a.at || ''))}</span>
                 ${K.Button({ label:'Sil', size:'sm', act:'desk-del-asset',
                   data:{ 'data-id':a.id } })}
               </li>`)}</ul>`
@@ -37788,11 +37806,11 @@ ESP.Screens.symposium = (function(){
     const acikItiraz = (a.objections || []).filter(o => !o.answered);
     const safsata = ESP.Intellect.checkFallacies(
       [a.thesis].concat(a.supports || []).join(' '));
-    const yas = U.diffDays((a.updatedAt || a.createdAt || '').slice(0, 10), U.todayISO());
+    const yas = U.diffDays(ESP.U.gunOf((a.updatedAt || a.createdAt || '')), U.todayISO());
 
     return K.Entry({
       label:a.status === 'open' ? 'AÇIK TEZ' : 'KAPANDI',
-      meta:U.fmtShort((a.updatedAt || a.createdAt || '').slice(0, 10))
+      meta:U.fmtShort(ESP.U.gunOf((a.updatedAt || a.createdAt || '')))
         + (yas >= 14 && a.status === 'open' ? ' · ' + yas + ' gündür sessiz' : ''),
       note:acikItiraz.length
         ? acikItiraz.length + ' itiraz cevaplanmadı; tez bu yüzden kapanamaz.'
@@ -40635,7 +40653,7 @@ ESP.Screens.writing = (function(){
                 d.title || 'başlıksız',
                 ok.cert === 'missing' ? '—' : U.fmtNum(ok.words),
                 String(d.revisions || 0),
-                U.fmtShort((d.updatedAt || '').slice(0, 10)),
+                U.fmtShort(ESP.U.gunOf((d.updatedAt || ''))),
                 K.Button({ label:'Aç', size:'sm', act:'open-draft', data:{ 'data-id':d.id } }),
               ];
             }) })
@@ -41398,7 +41416,7 @@ ESP.Screens.meeting = (function(){
     }
     return liste.slice(0, 10).map(m => K.Entry({
       label:'TUTANAK',
-      meta:U.fmtDate(m.at.slice(0, 10)) + ' · ' + m.agendaLabel,
+      meta:U.fmtDate(ESP.U.gunOf(m.at)) + ' · ' + m.agendaLabel,
       note:m.decision ? 'Karar: ' + m.decision.title : '',
       action:K.Button({ label:S.ui.meetingOpen === m.id ? 'Kapat' : 'Aç', size:'sm',
         act:'toggle-minutes', data:{ 'data-id':m.id } }),

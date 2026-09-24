@@ -54,7 +54,7 @@ ESP.XPSayim = (function(){
     g.forEach(x => { kart[x] = 0; });
     (S.cards || []).forEach(c => {
       (c.history || []).forEach(h => {
-        const gun = String((h && h.at) || '').slice(0, 10);
+        const gun = ESP.U.gunOf(String((h && h.at) || ''));
         if(gun in kart) kart[gun]++;
       });
     });

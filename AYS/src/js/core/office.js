@@ -671,7 +671,7 @@ R.Office = (function(){
       when(){ return openDecisions().length > 0; },
       text(){
         const d = openDecisions()[0];
-        const gun = U.diffDays(d.at.slice(0, 10), U.todayISO());
+        const gun = U.diffDays(R.U.gunOf(d.at), U.todayISO());
         return 'Karar ' + (gun > 0 ? gun + ' gündür ' : '') + 'açık: ' + d.title;
       } },
   ];

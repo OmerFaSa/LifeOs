@@ -1277,12 +1277,12 @@ R.App = (function(){
       const notes = R.Office.notes();
       const urgent = notes.filter(n => n.tone === 'danger');
       const open = R.Office.openDecisions();
-      const stale = open.filter(d => U.diffDays(d.at.slice(0, 10), today) >= 2);
+      const stale = open.filter(d => U.diffDays(R.U.gunOf(d.at), today) >= 2);
       if(!urgent.length && !stale.length) return false;
 
       const body = urgent.length
         ? urgent[0].name + ': ' + urgent[0].text
-        : 'Karar ' + U.diffDays(stale[0].at.slice(0, 10), today) + ' gündür açık: ' + stale[0].title;
+        : 'Karar ' + U.diffDays(R.U.gunOf(stale[0].at), today) + ' gündür açık: ' + stale[0].title;
 
       new Notification('Rota — ofisten', { body, tag:'rota-office', lang:'tr' });
       localStorage.setItem(NOTIFY_KEY, today);

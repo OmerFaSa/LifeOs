@@ -437,7 +437,7 @@ R.Screens.solve = (function(){
           </span>
           ${when(row.difficulty, () => K.Badge({ label:R.DIFFICULTY[row.difficulty].short,
             tone:row.difficulty >= 4 ? 'warn' : 'info' }))}
-          <span class="tiny dim">${U.relativeDay((row.at || '').slice(0, 10))}</span>
+          <span class="tiny dim">${U.relativeDay(R.U.gunOf((row.at || '')))}</span>
           ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Kaydı sil',
             act:'q-del', data:{ 'data-id':row.id } })}
         </div>`)}</div>`,
@@ -853,7 +853,7 @@ R.Screens.solve = (function(){
          400 karakteriydi — depo kurali "tam cozum kopyalanmaz" diyor. */
       const err = {
         id:U.uid('r'), createdAt:new Date().toISOString(), closedAt:null, repairDoneAt:null,
-        examId:null, examDate:(rec.at || '').slice(0, 10), publisher:'',
+        examId:null, examDate:R.U.gunOf((rec.at || '')), publisher:'',
         testName:rec.topicName || 'Soru çözümü', questionNo:'', status:'Yanlış',
         tag:R.ERROR_TAGS[val('q-tag')] ? val('q-tag') : 'K', seconds:rec.seconds,
         rootCause:rec.trap || '',

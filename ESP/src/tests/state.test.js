@@ -118,6 +118,19 @@
       });
     });
 
+    /* HATA (2026-09-24): kart geçmişinin damgası UTC'dir; Türkiye UTC+3.
+       Salı 00:30'da çalışılan kart PAZARTESİ'ye yazılıyor, Salı boş görünüp
+       seri kırılıyordu (testler İstanbul saatiyle koşar). */
+    it('gece yarısından sonra çalışılan kart o günün serisine girer', () => {
+      resetState();
+      const bugun = new Date(); bugun.setHours(0, 30, 0, 0);
+      const dun = new Date(bugun); dun.setDate(dun.getDate() - 1); dun.setHours(23, 0, 0, 0);
+      const kart = M.newCard({ front:'kot', back:'kedi' });
+      kart.history = [{ at:dun.toISOString(), grade:'good' }, { at:bugun.toISOString(), grade:'good' }];
+      S.cards = [kart];
+      expect(M.streak()).toBe(2);
+    });
+
     it('arada bos gun varsa seri orada durur', () => {
       withToday('2026-09-12', () => {
         resetState();

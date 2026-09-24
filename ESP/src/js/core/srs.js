@@ -180,7 +180,7 @@ ESP.SRS = (function(){
     const sonCevap = card.due && card.interval
       ? U.iso(U.addDays(U.parse(card.due), -card.interval))
       : (card.history && card.history.length
-          ? card.history[card.history.length - 1].at.slice(0, 10) : null);
+          ? ESP.U.gunOf(card.history[card.history.length - 1].at) : null);
     if(!sonCevap) return null;
     const t = Math.max(0, U.diffDays(sonCevap, today));
     return Math.exp(-t / s);
@@ -265,7 +265,7 @@ ESP.SRS = (function(){
     const sinir = U.iso(U.addDays(U.parse(today), -(days || 7)));
     let n = 0;
     S.cards.forEach(c => {
-      (c.history || []).forEach(h => { if(h.at.slice(0, 10) >= sinir) n++; });
+      (c.history || []).forEach(h => { if(ESP.U.gunOf(h.at) >= sinir) n++; });
     });
     return n;
   }

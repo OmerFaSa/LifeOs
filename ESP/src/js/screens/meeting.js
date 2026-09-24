@@ -83,7 +83,7 @@ ESP.Screens.meeting = (function(){
     }
     return liste.slice(0, 10).map(m => K.Entry({
       label:'TUTANAK',
-      meta:U.fmtDate(m.at.slice(0, 10)) + ' · ' + m.agendaLabel,
+      meta:U.fmtDate(ESP.U.gunOf(m.at)) + ' · ' + m.agendaLabel,
       note:m.decision ? 'Karar: ' + m.decision.title : '',
       action:K.Button({ label:S.ui.meetingOpen === m.id ? 'Kapat' : 'Aç', size:'sm',
         act:'toggle-minutes', data:{ 'data-id':m.id } }),

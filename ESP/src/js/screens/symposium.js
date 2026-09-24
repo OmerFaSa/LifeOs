@@ -84,11 +84,11 @@ ESP.Screens.symposium = (function(){
     const acikItiraz = (a.objections || []).filter(o => !o.answered);
     const safsata = ESP.Intellect.checkFallacies(
       [a.thesis].concat(a.supports || []).join(' '));
-    const yas = U.diffDays((a.updatedAt || a.createdAt || '').slice(0, 10), U.todayISO());
+    const yas = U.diffDays(ESP.U.gunOf((a.updatedAt || a.createdAt || '')), U.todayISO());
 
     return K.Entry({
       label:a.status === 'open' ? 'AÇIK TEZ' : 'KAPANDI',
-      meta:U.fmtShort((a.updatedAt || a.createdAt || '').slice(0, 10))
+      meta:U.fmtShort(ESP.U.gunOf((a.updatedAt || a.createdAt || '')))
         + (yas >= 14 && a.status === 'open' ? ' · ' + yas + ' gündür sessiz' : ''),
       note:acikItiraz.length
         ? acikItiraz.length + ' itiraz cevaplanmadı; tez bu yüzden kapanamaz.'

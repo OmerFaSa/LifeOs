@@ -66,13 +66,21 @@ LIFEOS.YEDEK_ASGARI_KAYIT = 5;
 
 /* Son yedeğin yaşı GÜN olarak; damga yoksa null («hiç yedek alınmadı»).
 
-   `damga` bir ISO tarih (YYYY-MM-DD) ya da ISO zaman damgası olabilir;
-   ikisinde de yalnız tarih kısmı kullanılır. `bugun` çağıranın YEREL
+   `damga` bir ISO tarih (YYYY-MM-DD) ya da ISO zaman damgası olabilir.
+   Zaman damgası UTC'dir ve YEREL güne çevrilir (ilk on karakteri UTC
+   günüdür; UTC+3'te gece alınan yedek düne düşerdi). `bugun` çağıranın YEREL
    bugünüdür (`U.todayISO()`); buraya elle bir tarih verilmesi testlerin
    saatten bağımsız koşabilmesi içindir. */
 LIFEOS.yedekYasi = function(damga, bugun){
   const gun = function(x){
-    const g = String(x || '').slice(0, 10);
+    let g = String(x || '').slice(0, 10);
+    if(/^\d{4}-\d{2}-\d{2}T/.test(String(x || ''))){
+      const z = new Date(String(x));
+      if(!isNaN(z.getTime())){
+        const iki = n => (n < 10 ? '0' : '') + n;
+        g = z.getFullYear() + '-' + iki(z.getMonth() + 1) + '-' + iki(z.getDate());
+      }
+    }
     if(!/^\d{4}-\d{2}-\d{2}$/.test(g)) return null;
     const t = Date.UTC(+g.slice(0, 4), +g.slice(5, 7) - 1, +g.slice(8, 10));
     /* Bozuk bir tarih (2026-02-31) sessizce kaymasın: geri çevirip

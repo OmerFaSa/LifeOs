@@ -66,7 +66,7 @@ R.Calc = (function(){
   function errorDistribution(sinceISO){
     const counts = { K:0, 'İ':0, Y:0, S:0, D:0 };
     S.errors.forEach(e => {
-      if(sinceISO && e.createdAt && e.createdAt.slice(0,10) < sinceISO) return;
+      if(sinceISO && e.createdAt && R.U.gunOf(e.createdAt) < sinceISO) return;
       if(counts[e.tag] !== undefined) counts[e.tag]++;
     });
     return counts;

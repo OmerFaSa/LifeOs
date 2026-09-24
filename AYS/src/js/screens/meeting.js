@@ -217,7 +217,7 @@ R.Screens.meeting = (function(){
     return K.Card({
       class:'card--primary',
       title:'Toplantı raporu',
-      sub:U.relativeDay(m.at.slice(0, 10)) + ' · ' + m.topic + ' · ' + m.rounds + ' tur',
+      sub:U.relativeDay(R.U.gunOf(m.at)) + ' · ' + m.topic + ' · ' + m.rounds + ' tur',
       actions:K.Button({ label:'Kopyala', icon:'edit', size:'sm', act:'meet-copy',
         data:{ 'data-id':m.id } }),
       body:html`
@@ -318,7 +318,7 @@ R.Screens.meeting = (function(){
           action:K.Button({ label:'Süzgeci sıfırla', size:'sm', act:'meet-search-clear' }) }))}
         <div class="stack-xs">${map(list, m => K.Collapsible({
         title:m.topic,
-        meta:U.relativeDay(m.at.slice(0, 10)) + ' · ' + (m.rounds || 1) + ' tur · '
+        meta:U.relativeDay(R.U.gunOf(m.at)) + ' · ' + (m.rounds || 1) + ' tur · '
           + (m.decision && m.decision.state === 'open' ? 'karar açık' : 'karar kapandı'),
         act:'meet-open', data:{ 'data-id':m.id },
         open:S.ui.meetingOpen === m.id,
@@ -730,7 +730,7 @@ R.Screens.meeting = (function(){
       const m = O.meetings().find(x => x.id === el.dataset.id) || closed;
       if(!m) return;
       const text = O.reportText(m);
-      const name = 'rota-toplanti-' + m.at.slice(0, 10) + '.txt';
+      const name = 'rota-toplanti-' + R.U.gunOf(m.at) + '.txt';
       try{
         const url = URL.createObjectURL(new Blob([text], { type:'text/plain;charset=utf-8' }));
         const a = document.createElement('a');
@@ -832,7 +832,7 @@ R.Screens.meeting = (function(){
           + ' · ' + session.turns.length + ' konuşma';
       }
       const last = O.lastMeeting();
-      return last ? 'Son toplantı ' + U.relativeDay(last.at.slice(0, 10)) + ' · ' + last.topic
+      return last ? 'Son toplantı ' + U.relativeDay(R.U.gunOf(last.at)) + ' · ' + last.topic
         : 'Ekip 5 kişi · gündemi kural motoru seçer, bitişi sen';
     },
     actions(){

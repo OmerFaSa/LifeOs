@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'d175871', at:'2026-09-24 08:19', dirty:true };
+R.BUILD = { id:'c7869e1', at:'2026-09-24 08:57', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -9477,13 +9477,21 @@ LIFEOS.YEDEK_ASGARI_KAYIT = 5;
 
 /* Son yedeğin yaşı GÜN olarak; damga yoksa null («hiç yedek alınmadı»).
 
-   `damga` bir ISO tarih (YYYY-MM-DD) ya da ISO zaman damgası olabilir;
-   ikisinde de yalnız tarih kısmı kullanılır. `bugun` çağıranın YEREL
+   `damga` bir ISO tarih (YYYY-MM-DD) ya da ISO zaman damgası olabilir.
+   Zaman damgası UTC'dir ve YEREL güne çevrilir (ilk on karakteri UTC
+   günüdür; UTC+3'te gece alınan yedek düne düşerdi). `bugun` çağıranın YEREL
    bugünüdür (`U.todayISO()`); buraya elle bir tarih verilmesi testlerin
    saatten bağımsız koşabilmesi içindir. */
 LIFEOS.yedekYasi = function(damga, bugun){
   const gun = function(x){
-    const g = String(x || '').slice(0, 10);
+    let g = String(x || '').slice(0, 10);
+    if(/^\d{4}-\d{2}-\d{2}T/.test(String(x || ''))){
+      const z = new Date(String(x));
+      if(!isNaN(z.getTime())){
+        const iki = n => (n < 10 ? '0' : '') + n;
+        g = z.getFullYear() + '-' + iki(z.getMonth() + 1) + '-' + iki(z.getDate());
+      }
+    }
     if(!/^\d{4}-\d{2}-\d{2}$/.test(g)) return null;
     const t = Date.UTC(+g.slice(0, 4), +g.slice(5, 7) - 1, +g.slice(8, 10));
     /* Bozuk bir tarih (2026-02-31) sessizce kaymasın: geri çevirip
@@ -15906,6 +15914,15 @@ R.U = (function(){
   function pad2(n){ return String(n).padStart(2,'0'); }
 
   function iso(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+  /* Zaman damgasından YEREL gün. `new Date().toISOString()` UTC'dir; ilk on
+     karakteri UTC günüdür ve Türkiye'de (UTC+3) gece 00:00–03:00 arası
+     kayıt DÜNE düşer. Yalnız tarih («2026-09-24») olduğu gibi döner. */
+  function gunOf(ts){
+    const s = ts == null ? '' : String(ts);
+    if(/^\d{4}-\d{2}-\d{2}$/.test(s) || !/^\d{4}-\d{2}-\d{2}T/.test(s)) return s.slice(0, 10);
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? s.slice(0, 10) : iso(d);
+  }
 
   function parse(s){
     if(s instanceof Date) return s;
@@ -16048,6 +16065,7 @@ R.U = (function(){
   }
 
   return {
+    gunOf,
     MONTHS, MONTHS_SHORT, DAY_MS,
     pad2, iso, parse, isISO, today, todayISO, addDays, diffDays, weekdayIndex,
     fmtDate, fmtShort, fmtRange, monthName, monthKey, relativeDay,
@@ -19738,7 +19756,7 @@ R.XPSayim = (function(){
       'ays.deneme':(S.exams || []).filter(e => e && e.date === gun).length,
       'ays.blok':bloklar.filter(b => b.status === 'done').length,
       'ays.kalibrasyon':(S.forecasts || []).filter(
-        f => String(f.at || '').slice(0, 10) === gun).length,
+        f => R.U.gunOf(String(f.at || '')) === gun).length,
       /* Gün kaydı: o güne dair BİR ŞEY girilmiş mi. */
       'ays.gun':(soru > 0 || bloklar.some(b => b.status !== 'pending')
         || (d && d.note)) ? 1 : 0,
@@ -21373,7 +21391,7 @@ R.Calc = (function(){
   function errorDistribution(sinceISO){
     const counts = { K:0, 'İ':0, Y:0, S:0, D:0 };
     S.errors.forEach(e => {
-      if(sinceISO && e.createdAt && e.createdAt.slice(0,10) < sinceISO) return;
+      if(sinceISO && e.createdAt && R.U.gunOf(e.createdAt) < sinceISO) return;
       if(counts[e.tag] !== undefined) counts[e.tag]++;
     });
     return counts;
@@ -27881,7 +27899,7 @@ R.Tools = (function(){
     return {
       dagilim:C.errorPareto().filter(p => p.count).map(p => ({ etiket:p.tag, ad:R.ERROR_TAGS[p.tag].name, adet:p.count, yuzde:p.pct })),
       kayitlar:list.slice(0, o.limit || 30).map(e => ({
-        tarih:(e.createdAt || '').slice(0,10),
+        tarih:R.U.gunOf((e.createdAt || '')),
         test:e.testName || null, konu:e.topic || null, etiket:e.tag, durum:e.status,
         kokNeden:e.rootCause || null, dogruIlke:e.principle || null,
         recete:e.recipe || null, kapandi:!!e.closedAt,
@@ -31694,7 +31712,7 @@ R.Office = (function(){
       when(){ return openDecisions().length > 0; },
       text(){
         const d = openDecisions()[0];
-        const gun = U.diffDays(d.at.slice(0, 10), U.todayISO());
+        const gun = U.diffDays(R.U.gunOf(d.at), U.todayISO());
         return 'Karar ' + (gun > 0 ? gun + ' gündür ' : '') + 'açık: ' + d.title;
       } },
   ];
@@ -33666,7 +33684,7 @@ R.Solver = (function(){
     const out = [];
     for(let i = n - 1; i >= 0; i--){
       const iso = U.iso(U.addDays(U.today(), -i));
-      out.push({ date:iso, adet:all().filter(r => (r.at || '').slice(0, 10) === iso).length });
+      out.push({ date:iso, adet:all().filter(r => R.U.gunOf((r.at || '')) === iso).length });
     }
     return out;
   }
@@ -33678,7 +33696,7 @@ R.Solver = (function(){
     const zor = list.filter(r => r.difficulty);
     return {
       toplam:list.length,
-      bugun:list.filter(r => (r.at || '').slice(0, 10) === U.todayISO()).length,
+      bugun:list.filter(r => R.U.gunOf((r.at || '')) === U.todayISO()).length,
       cozumOrani:withResult.length ? Math.round(100 * ok / withResult.length) : null,
       ortZorluk:zor.length
         ? U.round(zor.reduce((s, r) => s + r.difficulty, 0) / zor.length, 1) : null,
@@ -39668,11 +39686,11 @@ R.Screens.week = (function(){
       return d >= M.weekStart(n) && d <= M.weekEnd(n);
     });
     const newErrors = S.errors.filter(e => {
-      const d = (e.createdAt || '').slice(0, 10);
+      const d = R.U.gunOf((e.createdAt || ''));
       return d && d >= U.iso(M.weekStart(n)) && d <= U.iso(M.weekEnd(n));
     });
     const notes = S.videoNotes.filter(v => {
-      const d = (v.createdAt || '').slice(0, 10);
+      const d = R.U.gunOf((v.createdAt || ''));
       return d && d >= U.iso(M.weekStart(n)) && d <= U.iso(M.weekEnd(n));
     });
     const reviewed = S.cards.filter(c => c.lastReviewedAt
@@ -39911,7 +39929,7 @@ R.Screens.week = (function(){
             <p class="small">${curriculum.check}</p></div>` }),
         when(week.revisions && week.revisions.length, () => K.Card({ title:'Revizyon kaydı',
           body:html`<div class="stack-xs">${map(week.revisions, r => html`
-            <div class="small"><b>${U.fmtShort(r.at.slice(0, 10))}</b> — ${r.reason}</div>`)}</div>` })),
+            <div class="small"><b>${U.fmtShort(R.U.gunOf(r.at))}</b> — ${r.reason}</div>`)}</div>` })),
       ])),
 
       K.Span(12, raw(UI.rail(['contract', 'capacity', 'review', 'carry', 'plan-completion']))),
@@ -40941,7 +40959,7 @@ R.Screens.cards = (function(){
 
   function NotebookItem(e){
     const exam = S.exams.find(x => x.id === e.examId);
-    const base = e.createdAt ? e.createdAt.slice(0, 10) : U.todayISO();
+    const base = e.createdAt ? R.U.gunOf(e.createdAt) : U.todayISO();
     const dueDates = R.SRS_INTERVALS.map(d => U.fmtShort(U.addDays(U.parse(base), d))).join(' · ');
     const source = exam ? exam.type+' · '+U.fmtShort(e.examDate || exam.date) : (e.testName || '—');
 
@@ -40980,7 +40998,7 @@ R.Screens.cards = (function(){
           ? K.Badge({ label:'reçete yapıldı', tone:'ok' })
           : K.Button({ label:'Reçeteyi tamamla', size:'sm', act:'repair-done', data:{ 'data-id':e.id } })}
         ${e.closedAt
-          ? K.Badge({ label:'kapandı · '+U.fmtShort(e.closedAt.slice(0, 10)), tone:'ok' })
+          ? K.Badge({ label:'kapandı · '+U.fmtShort(R.U.gunOf(e.closedAt)), tone:'ok' })
           : K.Button({ label:'Kapat (çözümsüz doğru)', size:'sm', tone:'primary', act:'close-error', data:{ 'data-id':e.id } })}
       </div>` });
   }
@@ -41318,7 +41336,7 @@ R.Screens.learn = (function(){
             ${when(note.transcript, () => K.Badge({ label:'metin var', tone:'muted' }))}</div>
           <div class="tiny dim">${meta}</div>
         </div>
-        <span class="tiny dim">${U.fmtShort(note.createdAt.slice(0, 10))}</span>
+        <span class="tiny dim">${U.fmtShort(R.U.gunOf(note.createdAt))}</span>
       </div>`;
   }
 
@@ -42783,7 +42801,7 @@ R.Screens.solve = (function(){
           </span>
           ${when(row.difficulty, () => K.Badge({ label:R.DIFFICULTY[row.difficulty].short,
             tone:row.difficulty >= 4 ? 'warn' : 'info' }))}
-          <span class="tiny dim">${U.relativeDay((row.at || '').slice(0, 10))}</span>
+          <span class="tiny dim">${U.relativeDay(R.U.gunOf((row.at || '')))}</span>
           ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Kaydı sil',
             act:'q-del', data:{ 'data-id':row.id } })}
         </div>`)}</div>`,
@@ -43199,7 +43217,7 @@ R.Screens.solve = (function(){
          400 karakteriydi — depo kurali "tam cozum kopyalanmaz" diyor. */
       const err = {
         id:U.uid('r'), createdAt:new Date().toISOString(), closedAt:null, repairDoneAt:null,
-        examId:null, examDate:(rec.at || '').slice(0, 10), publisher:'',
+        examId:null, examDate:R.U.gunOf((rec.at || '')), publisher:'',
         testName:rec.topicName || 'Soru çözümü', questionNo:'', status:'Yanlış',
         tag:R.ERROR_TAGS[val('q-tag')] ? val('q-tag') : 'K', seconds:rec.seconds,
         rootCause:rec.trap || '',
@@ -45536,7 +45554,7 @@ R.Screens.protocols = (function(){
       body:html`<div class="list">${map(past, p => html`
         <div class="listitem">
           <div class="grow"><b class="small">${p.title}</b>
-            <div class="tiny dim">${U.fmtShort(p.startedAt)} – ${U.fmtShort(p.closedAt ? p.closedAt.slice(0, 10) : p.endsAt)}</div>
+            <div class="tiny dim">${U.fmtShort(p.startedAt)} – ${U.fmtShort(p.closedAt ? R.U.gunOf(p.closedAt) : p.endsAt)}</div>
             ${when(p.outcome, () => html`<div class="tiny">${p.outcome}</div>`)}</div>
           ${K.Badge({ label:'kapandı', tone:'muted' })}
         </div>`)}</div>` });
@@ -47650,7 +47668,7 @@ R.Screens.profiles = (function(){
           <div class="grow">
             <div class="row-sm wrap"><b>${p.name}</b>
               ${when(p.id === active, () => K.Badge({ label:'açık', tone:'ok' }))}</div>
-            <div class="tiny dim">${p.createdAt ? U.fmtDate(p.createdAt.slice(0, 10)) + ' tarihinde eklendi' : 'ilk profil'}</div>
+            <div class="tiny dim">${p.createdAt ? U.fmtDate(R.U.gunOf(p.createdAt)) + ' tarihinde eklendi' : 'ilk profil'}</div>
           </div>
           ${when(p.id !== active, () => K.Button({ label:'Geç', size:'sm',
             act:'prof-switch', data:{ 'data-id':p.id } }))}
@@ -47691,7 +47709,7 @@ R.Screens.profiles = (function(){
 
     const rows = ids.map(id => {
       const x = snaps[id];
-      const stale = U.diffDays(x.at.slice(0, 10), U.todayISO());
+      const stale = U.diffDays(R.U.gunOf(x.at), U.todayISO());
       return [
         html`<div><b class="small">${x.name}</b>
           <div class="tiny dim">${x.program || '—'}${id === active ? ' · açık profil' : ''}</div></div>`,
@@ -48376,7 +48394,7 @@ R.Screens.office = (function(){
         <div class="decisionrow">
           <div class="minw0">
             <b class="small">${d.title}</b>
-            <span class="tiny dim">${U.relativeDay(d.at.slice(0, 10))} · ${d.topic}</span>
+            <span class="tiny dim">${U.relativeDay(R.U.gunOf(d.at))} · ${d.topic}</span>
           </div>
           <div class="row gap-6">
             ${K.Button({ label:'Yapıldı', size:'sm', tone:'primary', act:'office-decision',
@@ -48442,7 +48460,7 @@ R.Screens.office = (function(){
           action:K.Button({ label:'İlk toplantıyı başlat', tone:'primary', act:'office-meet' }) }) });
     }
     return K.Card({
-      title:'Son toplantı', sub:U.relativeDay(m.at.slice(0, 10)) + ' · ' + m.topic,
+      title:'Son toplantı', sub:U.relativeDay(R.U.gunOf(m.at)) + ' · ' + m.topic,
       badge:K.Badge({ label:m.mode, tone:m.mode === 'llm' ? 'ok' : 'info' }),
       body:html`
         ${when(m.report, () => html`<p class="prose">${m.report.summary}</p>`)}
@@ -48515,7 +48533,7 @@ R.Screens.office = (function(){
     const live = R.LLM.cachedModels(providerId);
     if(!live) return 'Liste uygulamayla birlikte gelen katalogdan; ücretsiz model kimlikleri '
       + 'sık değişir. “Modelleri yenile” ile sağlayıcının güncel listesini çek.';
-    return live.models.length + ' model · ' + U.relativeDay(live.at.slice(0, 10)) + ' güncellendi.';
+    return live.models.length + ' model · ' + U.relativeDay(R.U.gunOf(live.at)) + ' güncellendi.';
   }
 
   /* ---------- sesler ----------
@@ -49905,7 +49923,7 @@ R.Screens.meeting = (function(){
     return K.Card({
       class:'card--primary',
       title:'Toplantı raporu',
-      sub:U.relativeDay(m.at.slice(0, 10)) + ' · ' + m.topic + ' · ' + m.rounds + ' tur',
+      sub:U.relativeDay(R.U.gunOf(m.at)) + ' · ' + m.topic + ' · ' + m.rounds + ' tur',
       actions:K.Button({ label:'Kopyala', icon:'edit', size:'sm', act:'meet-copy',
         data:{ 'data-id':m.id } }),
       body:html`
@@ -50006,7 +50024,7 @@ R.Screens.meeting = (function(){
           action:K.Button({ label:'Süzgeci sıfırla', size:'sm', act:'meet-search-clear' }) }))}
         <div class="stack-xs">${map(list, m => K.Collapsible({
         title:m.topic,
-        meta:U.relativeDay(m.at.slice(0, 10)) + ' · ' + (m.rounds || 1) + ' tur · '
+        meta:U.relativeDay(R.U.gunOf(m.at)) + ' · ' + (m.rounds || 1) + ' tur · '
           + (m.decision && m.decision.state === 'open' ? 'karar açık' : 'karar kapandı'),
         act:'meet-open', data:{ 'data-id':m.id },
         open:S.ui.meetingOpen === m.id,
@@ -50418,7 +50436,7 @@ R.Screens.meeting = (function(){
       const m = O.meetings().find(x => x.id === el.dataset.id) || closed;
       if(!m) return;
       const text = O.reportText(m);
-      const name = 'rota-toplanti-' + m.at.slice(0, 10) + '.txt';
+      const name = 'rota-toplanti-' + R.U.gunOf(m.at) + '.txt';
       try{
         const url = URL.createObjectURL(new Blob([text], { type:'text/plain;charset=utf-8' }));
         const a = document.createElement('a');
@@ -50520,7 +50538,7 @@ R.Screens.meeting = (function(){
           + ' · ' + session.turns.length + ' konuşma';
       }
       const last = O.lastMeeting();
-      return last ? 'Son toplantı ' + U.relativeDay(last.at.slice(0, 10)) + ' · ' + last.topic
+      return last ? 'Son toplantı ' + U.relativeDay(R.U.gunOf(last.at)) + ' · ' + last.topic
         : 'Ekip 5 kişi · gündemi kural motoru seçer, bitişi sen';
     },
     actions(){
@@ -51812,12 +51830,12 @@ R.App = (function(){
       const notes = R.Office.notes();
       const urgent = notes.filter(n => n.tone === 'danger');
       const open = R.Office.openDecisions();
-      const stale = open.filter(d => U.diffDays(d.at.slice(0, 10), today) >= 2);
+      const stale = open.filter(d => U.diffDays(R.U.gunOf(d.at), today) >= 2);
       if(!urgent.length && !stale.length) return false;
 
       const body = urgent.length
         ? urgent[0].name + ': ' + urgent[0].text
-        : 'Karar ' + U.diffDays(stale[0].at.slice(0, 10), today) + ' gündür açık: ' + stale[0].title;
+        : 'Karar ' + U.diffDays(R.U.gunOf(stale[0].at), today) + ' gündür açık: ' + stale[0].title;
 
       new Notification('Rota — ofisten', { body, tag:'rota-office', lang:'tr' });
       localStorage.setItem(NOTIFY_KEY, today);

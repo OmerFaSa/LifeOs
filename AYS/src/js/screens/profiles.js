@@ -61,7 +61,7 @@ R.Screens.profiles = (function(){
           <div class="grow">
             <div class="row-sm wrap"><b>${p.name}</b>
               ${when(p.id === active, () => K.Badge({ label:'açık', tone:'ok' }))}</div>
-            <div class="tiny dim">${p.createdAt ? U.fmtDate(p.createdAt.slice(0, 10)) + ' tarihinde eklendi' : 'ilk profil'}</div>
+            <div class="tiny dim">${p.createdAt ? U.fmtDate(R.U.gunOf(p.createdAt)) + ' tarihinde eklendi' : 'ilk profil'}</div>
           </div>
           ${when(p.id !== active, () => K.Button({ label:'Geç', size:'sm',
             act:'prof-switch', data:{ 'data-id':p.id } }))}
@@ -102,7 +102,7 @@ R.Screens.profiles = (function(){
 
     const rows = ids.map(id => {
       const x = snaps[id];
-      const stale = U.diffDays(x.at.slice(0, 10), U.todayISO());
+      const stale = U.diffDays(R.U.gunOf(x.at), U.todayISO());
       return [
         html`<div><b class="small">${x.name}</b>
           <div class="tiny dim">${x.program || '—'}${id === active ? ' · açık profil' : ''}</div></div>`,

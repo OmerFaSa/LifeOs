@@ -10,6 +10,15 @@ ESP.U = (function(){
   function pad2(n){ return String(n).padStart(2,'0'); }
 
   function iso(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+  /* Zaman damgasından YEREL gün. `new Date().toISOString()` UTC'dir; ilk on
+     karakteri UTC günüdür ve Türkiye'de (UTC+3) gece 00:00–03:00 arası
+     kayıt DÜNE düşer. Yalnız tarih («2026-09-24») olduğu gibi döner. */
+  function gunOf(ts){
+    const s = ts == null ? '' : String(ts);
+    if(/^\d{4}-\d{2}-\d{2}$/.test(s) || !/^\d{4}-\d{2}-\d{2}T/.test(s)) return s.slice(0, 10);
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? s.slice(0, 10) : iso(d);
+  }
 
   /* Bir ISO tarihi (YYYY-MM-DD) gecerli mi?
 
@@ -198,6 +207,7 @@ ESP.U = (function(){
   }
 
   return {
+    gunOf,
     MONTHS, MONTHS_SHORT, DAY_MS,
     pad2, iso, parse, isISO, today, todayISO, addDays, diffDays, weekdayIndex, lastDays,
     fmtDate, fmtShort, fmtRange, monthName, monthKey, relativeDay,

@@ -100,7 +100,7 @@ R.Screens.learn = (function(){
             ${when(note.transcript, () => K.Badge({ label:'metin var', tone:'muted' }))}</div>
           <div class="tiny dim">${meta}</div>
         </div>
-        <span class="tiny dim">${U.fmtShort(note.createdAt.slice(0, 10))}</span>
+        <span class="tiny dim">${U.fmtShort(R.U.gunOf(note.createdAt))}</span>
       </div>`;
   }
 

@@ -342,7 +342,7 @@ ESP.Parts = (function(){
                   ${when(a.seconds != null, () => html`<span class="tiny dim">${
                     Math.round(a.seconds)} sn · ölçüldü</span>`)}
                 </span>
-                <span class="tiny dim">${(a.at || '').slice(0, 10)}</span>
+                <span class="tiny dim">${ESP.U.gunOf((a.at || ''))}</span>
                 ${K.Button({ label:'Sil', size:'sm', act:'desk-del-asset',
                   data:{ 'data-id':a.id } })}
               </li>`)}</ul>`

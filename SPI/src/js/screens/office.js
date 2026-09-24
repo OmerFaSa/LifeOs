@@ -231,7 +231,7 @@ SP.Screens.office = (function(){
         ${when(open.length, () => html`<div class="list">${map(open, d => html`
           <div class="listitem">
             <div class="grow"><b class="small">${d.title}</b>
-              <div class="tiny dim">${U.relativeDay(d.at.slice(0, 10))} · ${d.why || ''}</div></div>
+              <div class="tiny dim">${U.relativeDay(SP.U.gunOf(d.at))} · ${d.why || ''}</div></div>
             ${K.Button({ label:'Kapat', size:'sm', act:'close-decision', data:{ 'data-id':d.id } })}
           </div>`)}</div>`)}
         ${when(closed.length, () => html`<div class="mt-12">

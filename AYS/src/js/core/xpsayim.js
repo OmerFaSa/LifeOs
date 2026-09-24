@@ -38,7 +38,7 @@ R.XPSayim = (function(){
       'ays.deneme':(S.exams || []).filter(e => e && e.date === gun).length,
       'ays.blok':bloklar.filter(b => b.status === 'done').length,
       'ays.kalibrasyon':(S.forecasts || []).filter(
-        f => String(f.at || '').slice(0, 10) === gun).length,
+        f => R.U.gunOf(String(f.at || '')) === gun).length,
       /* Gün kaydı: o güne dair BİR ŞEY girilmiş mi. */
       'ays.gun':(soru > 0 || bloklar.some(b => b.status !== 'pending')
         || (d && d.note)) ? 1 : 0,

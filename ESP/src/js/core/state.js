@@ -511,7 +511,7 @@ ESP.Model = (function(){
   function _kartGunleri(){
     const gunler = {};
     S.cards.forEach(c => (c.history || []).forEach(h => {
-      const d = (h.at || '').slice(0, 10);
+      const d = ESP.U.gunOf((h.at || ''));
       if(d) gunler[d] = true;
     }));
     return gunler;

@@ -156,11 +156,11 @@ R.Screens.week = (function(){
       return d >= M.weekStart(n) && d <= M.weekEnd(n);
     });
     const newErrors = S.errors.filter(e => {
-      const d = (e.createdAt || '').slice(0, 10);
+      const d = R.U.gunOf((e.createdAt || ''));
       return d && d >= U.iso(M.weekStart(n)) && d <= U.iso(M.weekEnd(n));
     });
     const notes = S.videoNotes.filter(v => {
-      const d = (v.createdAt || '').slice(0, 10);
+      const d = R.U.gunOf((v.createdAt || ''));
       return d && d >= U.iso(M.weekStart(n)) && d <= U.iso(M.weekEnd(n));
     });
     const reviewed = S.cards.filter(c => c.lastReviewedAt
@@ -399,7 +399,7 @@ R.Screens.week = (function(){
             <p class="small">${curriculum.check}</p></div>` }),
         when(week.revisions && week.revisions.length, () => K.Card({ title:'Revizyon kaydı',
           body:html`<div class="stack-xs">${map(week.revisions, r => html`
-            <div class="small"><b>${U.fmtShort(r.at.slice(0, 10))}</b> — ${r.reason}</div>`)}</div>` })),
+            <div class="small"><b>${U.fmtShort(R.U.gunOf(r.at))}</b> — ${r.reason}</div>`)}</div>` })),
       ])),
 
       K.Span(12, raw(UI.rail(['contract', 'capacity', 'review', 'carry', 'plan-completion']))),

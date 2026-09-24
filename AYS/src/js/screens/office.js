@@ -482,7 +482,7 @@ R.Screens.office = (function(){
         <div class="decisionrow">
           <div class="minw0">
             <b class="small">${d.title}</b>
-            <span class="tiny dim">${U.relativeDay(d.at.slice(0, 10))} · ${d.topic}</span>
+            <span class="tiny dim">${U.relativeDay(R.U.gunOf(d.at))} · ${d.topic}</span>
           </div>
           <div class="row gap-6">
             ${K.Button({ label:'Yapıldı', size:'sm', tone:'primary', act:'office-decision',
@@ -548,7 +548,7 @@ R.Screens.office = (function(){
           action:K.Button({ label:'İlk toplantıyı başlat', tone:'primary', act:'office-meet' }) }) });
     }
     return K.Card({
-      title:'Son toplantı', sub:U.relativeDay(m.at.slice(0, 10)) + ' · ' + m.topic,
+      title:'Son toplantı', sub:U.relativeDay(R.U.gunOf(m.at)) + ' · ' + m.topic,
       badge:K.Badge({ label:m.mode, tone:m.mode === 'llm' ? 'ok' : 'info' }),
       body:html`
         ${when(m.report, () => html`<p class="prose">${m.report.summary}</p>`)}
@@ -621,7 +621,7 @@ R.Screens.office = (function(){
     const live = R.LLM.cachedModels(providerId);
     if(!live) return 'Liste uygulamayla birlikte gelen katalogdan; ücretsiz model kimlikleri '
       + 'sık değişir. “Modelleri yenile” ile sağlayıcının güncel listesini çek.';
-    return live.models.length + ' model · ' + U.relativeDay(live.at.slice(0, 10)) + ' güncellendi.';
+    return live.models.length + ' model · ' + U.relativeDay(R.U.gunOf(live.at)) + ' güncellendi.';
   }
 
   /* ---------- sesler ----------

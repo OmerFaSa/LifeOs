@@ -58,13 +58,15 @@ describe('Yedek — yaş YEREL tarihten', () => {
     expect(L().yedekYasi('2026-09-08', '2026-09-08')).toBe(0);
   });
 
-  it('zaman damgasının yalnız tarih kısmını kullanır', () => {
-    /* ESP `Date.now() - new Date(at)` ile ölçüyordu: UTC+3'te gece
-       yarısından sonra alınan bir yedek, saat farkı yüzünden bir gün
-       fazla eski görünebiliyordu. Yaş bir GÜN SAYISIDIR, saat farkı
-       taşımaz. */
-    expect(L().yedekYasi('2026-09-01T23:30:00.000Z', '2026-09-02')).toBe(1);
-    expect(L().yedekYasi('2026-09-01T00:10:00.000Z', '2026-09-02')).toBe(1);
+  it('zaman damgası YEREL güne çevrilir; yaş gün sayısıdır', () => {
+    /* Yaş bir GÜN SAYISIDIR, saat farkı taşımaz. Ama damga UTC'dir: ilk on
+       karakteri almak, İstanbul'da (UTC+3) gece 00:00–03:00 arası alınan
+       yedeği DÜNE yazıyordu (2026-09-24 düzeltmesi). Testler İstanbul
+       saatiyle koşar (tools/runtests.js). */
+    const b = new Date(2026, 8, 2, 1, 30);          /* yerel 2 Eylül 01:30 */
+    expect(L().yedekYasi(b.toISOString(), '2026-09-02')).toBe(0);
+    const d = new Date(2026, 8, 1, 23, 30);         /* yerel 1 Eylül 23:30 */
+    expect(L().yedekYasi(d.toISOString(), '2026-09-02')).toBe(1);
   });
 
   it('yaz saati geçişinde kaymaz', () => {

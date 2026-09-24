@@ -208,6 +208,14 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
     olmali», «sinav 2-80…», «tanimsiz is turu»). `king`, `program`, `kaynakli`, `mufredat`,
     `kitap`, `urunler`, `espbelge` temizleyicileri düzgün Türkçe; test `test_king` (önce
     kırmızıydı). HKM 578, `tools/entegre.js` temiz.
+  · **Tarama 2 — saat dilimi (UTC+3):** `new Date().toISOString()` damgasının ilk on karakteri
+    UTC günüdür; gece 00:00–03:00 arası kayıt DÜNE düşüyordu. ESP serisi kart geçmişine bakar →
+    Salı 00:30'da çalışılan kart Pazartesi'ye yazılıp seri kırılıyordu; AYS «bugün çözülen»,
+    günlük XP sayımı, başarım sayaçları, «son yedek kaç gün önce» de kayıyordu. Üç `utils.js`'e
+    `U.gunOf(damga)` (yerel gün), 42 kullanım yeri ona çevrildi, ortak `yedek.js` düzeltildi
+    (testi hatayı kural sanıyordu). **Birim testleri artık İstanbul saatiyle koşar**
+    (`tools/runtests.js` `timezoneId`); yeni testler düzeltmesiz kırmızıydı. AYS 1670, SPİ
+    1307, ESP 1342, üç duman temiz, dist derlendi.
   Bilinçli bırakılan: haftalık soru gerçekleşmesi yalnız plan bloklarını sayar (haftanın konu
   sözleşmesi; serbest soru konuya bağlı değil) — tasarım kararı, hata değil.
 - **Sıradaki:** açık sorular (❓ 10b, 14, Y1, Y10, diksiyon) kullanıcı cevabı bekliyor; Part 9

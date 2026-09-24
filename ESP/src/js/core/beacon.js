@@ -188,7 +188,7 @@ ESP.Beacon = (function(){
         out.synthesis_gap_days = metric(0, 'computed');
       }else{
         const yas = bagsiz.map(function(n){
-          return U.diffDays(String(n.createdAt || '').slice(0, 10), d);
+          return U.diffDays(ESP.U.gunOf(String(n.createdAt || '')), d);
         }).filter(function(x){ return isFinite(x); });
         out.synthesis_gap_days = yas.length
           ? metric(Math.max.apply(null, yas), 'computed')

@@ -102,7 +102,7 @@ R.Screens.cards = (function(){
 
   function NotebookItem(e){
     const exam = S.exams.find(x => x.id === e.examId);
-    const base = e.createdAt ? e.createdAt.slice(0, 10) : U.todayISO();
+    const base = e.createdAt ? R.U.gunOf(e.createdAt) : U.todayISO();
     const dueDates = R.SRS_INTERVALS.map(d => U.fmtShort(U.addDays(U.parse(base), d))).join(' · ');
     const source = exam ? exam.type+' · '+U.fmtShort(e.examDate || exam.date) : (e.testName || '—');
 
@@ -141,7 +141,7 @@ R.Screens.cards = (function(){
           ? K.Badge({ label:'reçete yapıldı', tone:'ok' })
           : K.Button({ label:'Reçeteyi tamamla', size:'sm', act:'repair-done', data:{ 'data-id':e.id } })}
         ${e.closedAt
-          ? K.Badge({ label:'kapandı · '+U.fmtShort(e.closedAt.slice(0, 10)), tone:'ok' })
+          ? K.Badge({ label:'kapandı · '+U.fmtShort(R.U.gunOf(e.closedAt)), tone:'ok' })
           : K.Button({ label:'Kapat (çözümsüz doğru)', size:'sm', tone:'primary', act:'close-error', data:{ 'data-id':e.id } })}
       </div>` });
   }

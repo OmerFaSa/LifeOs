@@ -65,7 +65,7 @@ R.Tools = (function(){
     return {
       dagilim:C.errorPareto().filter(p => p.count).map(p => ({ etiket:p.tag, ad:R.ERROR_TAGS[p.tag].name, adet:p.count, yuzde:p.pct })),
       kayitlar:list.slice(0, o.limit || 30).map(e => ({
-        tarih:(e.createdAt || '').slice(0,10),
+        tarih:R.U.gunOf((e.createdAt || '')),
         test:e.testName || null, konu:e.topic || null, etiket:e.tag, durum:e.status,
         kokNeden:e.rootCause || null, dogruIlke:e.principle || null,
         recete:e.recipe || null, kapandi:!!e.closedAt,

@@ -54,7 +54,9 @@ function waitForServer(url, tries){
     await waitForServer('http://127.0.0.1:' + PORT + '/tests/');
     browser = await chromium.launch(process.env.CHROMIUM_PATH
       ? { executablePath:process.env.CHROMIUM_PATH } : {});
-    const page = await browser.newPage({ reducedMotion:'reduce' });
+    /* Kullanıcının saat dilimi: gece yarısından sonraki kayıt (00:00–03:00)
+       UTC'de dünün tarihine düşer; testler bunu ancak burada görür. */
+    const page = await browser.newPage({ reducedMotion:'reduce', timezoneId:'Europe/Istanbul' });
 
     const consoleErrors = [];
     page.on('pageerror', err => consoleErrors.push(String(err && err.message || err)));

@@ -605,7 +605,7 @@ SP.Office = (function(){
     const streak = SP.Calc.streak();
     if(streak >= 7) add('patron', 'win', 'Asgari gün serisi ' + streak + ' gün.');
     SP.Model.openDecisions().forEach(d => {
-      const age = U.diffDays(d.at.slice(0, 10), U.todayISO());
+      const age = U.diffDays(SP.U.gunOf(d.at), U.todayISO());
       if(age >= 2) add('patron', 'debt', 'Karar ' + age + ' gündür açık: ' + d.title);
     });
 

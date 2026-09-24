@@ -33,13 +33,13 @@ ESP.BasarimSayim = (function(){
     let kart = 0;
     (S.cards || []).forEach(function(c){
       (c.history || []).forEach(function(h){
-        if(String((h && h.at) || '').slice(0, 10) === gun) kart++;
+        if(ESP.U.gunOf(String((h && h.at) || '')) === gun) kart++;
       });
     });
     const not = (S.notes || []).filter(function(n){
-      return String((n && n.createdAt) || '').slice(0, 10) === gun; }).length;
+      return ESP.U.gunOf(String((n && n.createdAt) || '')) === gun; }).length;
     const taslak = (S.drafts || []).filter(function(t){
-      return String((t && t.createdAt) || '').slice(0, 10) === gun; }).length;
+      return ESP.U.gunOf(String((t && t.createdAt) || '')) === gun; }).length;
 
     /* Ölçülmemiş oturum sayılmaz — `minutesOf` null döner. */
     const dakika = Number(M.minutesOf(gun)) || 0;
