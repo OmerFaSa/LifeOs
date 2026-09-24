@@ -276,6 +276,38 @@ R.Screens.subjects = (function(){
     </div>`;
   }
 
+  /* Hangi sınav bana uygun? (Y11). Eğitim durumu ve hedef SORULUR; öneri
+     kural tablosundan (core/sinavoneri.js) gelir ve hiçbir şeyi değiştirmez:
+     «Müfredatını iste» yalnız ek profil ister (King teklifi). */
+  function oneriBolumu(){
+    if(!R.SinavOneri) return '';
+    const p = S.profile || {};
+    const r = R.SinavOneri.oner({ egitim:p.egitim, hedef:p.sinavHedef, etkin:'yks' });
+    const eklenen = R.SinavProfil.liste().map(x => String(x.ad || '').toLocaleLowerCase('tr'));
+    return html`<details class="mt-10" ${p.egitim ? '' : raw('open')}>
+      <summary>Hangi sınav bana uygun?</summary>
+      <div class="row wrap mt-8">
+        ${K.Field({ label:'Eğitim durumu', input:K.Select({ id:'so-egitim', value:p.egitim || '',
+          change:'so-egitim', options:[{ value:'', label:'Seç' }].concat(R.SinavOneri.EGITIM.map(x => ({ value:x.id, label:x.ad }))) }) })}
+        ${K.Field({ label:'Hedef', input:K.Select({ id:'so-hedef', value:p.sinavHedef || '',
+          change:'so-hedef', options:[{ value:'', label:'Seç' }].concat(R.SinavOneri.HEDEF.map(x => ({ value:x.id, label:x.ad }))) }) })}
+      </div>
+      ${when(!r.ok, () => html`<p class="small muted mt-8">${r.soru}</p>`)}
+      ${when(r.ok, () => html`<div class="stack-sm mt-8">${map(r.satirlar.filter(s => s.durum !== 'uygun değil'), s => html`
+        <div class="listitem">
+          <div class="grow minw0">
+            <b class="small">${s.ad}</b> <span class="tiny dim">${s.kurum} · ${s.durum}${s.etkin ? ' · şu anki sınavın' : ''}${s.hedefte ? ' · hedefinle örtüşüyor' : ''}</span>
+            <div class="tiny dim">${s.gerekce}</div>
+          </div>
+          ${when(!s.etkin && s.durum === 'uygun' && eklenen.indexOf(s.ad.toLocaleLowerCase('tr')) < 0,
+            () => K.Button({ label:'Müfredatını iste', size:'sm', act:'so-iste', data:{ 'data-ad':s.ad } }))}
+        </div>`)}</div>
+        ${when(r.not, () => html`<p class="tiny dim mt-6">${r.not}</p>`)}
+        <p class="tiny dim mt-6">Öneri kural tablosundandır, karar senindir. Ana sınavın (YKS) değişmez;
+          istenen müfredat ek profil olarak gelir.</p>`)}
+    </details>`;
+  }
+
   function profilKarti(){
     if(!R.SinavProfil) return null;
     const l = R.SinavProfil.liste();
@@ -289,6 +321,7 @@ R.Screens.subjects = (function(){
           ${K.Button({ label:'Müfredatını iste', size:'sm', tone:'primary', act:'sp-iste' })}
         </div>
         ${when(S.ui.spNot, () => html`<p class="tiny">${S.ui.spNot}</p>`)}
+        ${oneriBolumu()}
       </div>` }));
   }
 
@@ -322,6 +355,11 @@ R.Screens.subjects = (function(){
     async 'topic-filter'(el){ S.ui.topicFilter = el.dataset.value; R.App.render(); },
     async 'topic-reset'(){ S.ui.topicFilter = 'all'; S.ui.topicQuery = ''; R.App.render(); },
     async 'open-subject'(el){ S.ui.subjectOpen = el.dataset.id; R.App.render(); },
+    async 'so-iste'(el){
+      const r = await R.SinavProfil.iste(el.dataset.ad);
+      S.ui.spNot = r.metin;
+      R.App.render();
+    },
     async 'sp-iste'(){
       const inp = document.getElementById('sp-sinav');
       const r = await R.SinavProfil.iste(inp ? inp.value : '');
@@ -380,6 +418,9 @@ R.Screens.subjects = (function(){
 
   const change = {
     async 'topic-search'(el){ S.ui.topicQuery = el.value; R.App.render(); },
+    /* Tercih (küçük aksiyon): yalnız öneriyi sıralar, planı değiştirmez. */
+    async 'so-egitim'(el){ S.profile.egitim = el.value || null; await R.Model.saveProfile(); R.App.render(); },
+    async 'so-hedef'(el){ S.profile.sinavHedef = el.value || null; await R.Model.saveProfile(); R.App.render(); },
   };
 
   return {

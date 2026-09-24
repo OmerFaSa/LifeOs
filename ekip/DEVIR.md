@@ -139,8 +139,11 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   onay; tutarı kod hesaplar.
 - ⏳ Y10 Veli / koç özeti — haftada 1–2 PDF, sıklığa kod karar verir (kullanım, karar
   yoğunluğu, aciliyet, sağlık, ders kararlılığı); alıcıyı ilk adımda sor.
-- ⏳ Y11 Kariyer / proje — esnek; ilk adım akademi: LGS, YKS, KPSS, DGS, ALES, YDS
-  önerisi (`AYS/src/js/core/sinavprofil.js` üstüne), gerekçeli, karar kullanıcının.
+- ✅ Y11 Kariyer / proje — ilk adım akademi: `AYS/src/js/core/sinavoneri.js` (R.SinavOneri).
+  Eğitim durumu ve hedef SORULUR (Dersler › Sınav profilleri › «Hangi sınav bana uygun?»);
+  LGS/YKS/DGS/KPSS/ALES/YDS uygun · sonra · uygun değil, gerekçe + «şart ÖSYM/MEB
+  kılavuzunda» uyarısı; hedefle örtüşen öne gelir; «Müfredatını iste» mevcut King yolu; ana
+  sınav değişmez. AYS 1658/1658, duman/a11y/390px temiz.
 - ⏳ 10 Ana sınavı değiştirebilmek (büyük aksiyon) + üniversite müfredatı yükleme.
 - ⏳ 11 Tahmin tablolarını kaynağa bağlamak — sağlayıcı esnek, bütçe Ayarlar'dan.
 - ⏳ 14 Depo göçü (her kayıt kendi anahtarında; yedek 15 bitti) · 16 ilk kurulum testleri ·
