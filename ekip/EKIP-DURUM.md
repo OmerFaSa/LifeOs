@@ -62,7 +62,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** T2 kabuk bitti (AYS'de açık) → sıradaki §8-4 kaldırma, sonra T3 AYS (ekran içleri)
+- **Şu an:** T3 AYS (ekran içleri) — yerelde hazır, H'nin iki test güncellemesini bekliyor (aşağıda)
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
   T1 temel kalıplar `brand/ortak/temel.css` + `C.Kutu` (02) + `C.ModulIsareti` (165) +
@@ -70,8 +70,9 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   **T2 kabuk** `brand/ortak/kabuk.{js,css,test.js}` — üst çubuk: 008 modül menüsü, sekiz
   çekmece, 115 mor sayaç, 013 ara, 009 gruplu bildirim, 118 bağlantı noktası, 140 rütbe çipi;
   gün şeridi: 151 şimdi çizgisi, 001 modül şeridi, 005 hafta, 163 sabit etiket; 155 geçiş
-  rengi; telefon: 169 alt bant, 166 hızlı ekle, 160; 019 bölüm çubuğu; Menü sayfası · (bu commit)
-- **AYS iskeleti (bu commit):** menü sekiz çekmece (`R.App.NAV`, adlar `LIFEOS.KABUK.CEKMECELER`
+  rengi; telefon: 169 alt bant, 166 hızlı ekle, 160; 019 bölüm çubuğu; Menü sayfası · 7c0a728;
+  **§8-4** paletler ve beş düzen kalktı, Görünüm Açık · Koyu · Sistem · 5d4e8d2 (envanter kayıp 0)
+- **AYS iskeleti (7c0a728):** menü sekiz çekmece (`R.App.NAV`, adlar `LIFEOS.KABUK.CEKMECELER`
   'den); yol yazısı `R.App.yolOf`; yeni ekranlar **Onaylar** (`screens/onaylar.js`: King +
   HKM teklifi Bugün'den, ofis önerileri Ofis'ten buraya taşındı; Bugün yalnız en öndeki kartı
   gösterir, fazlası «+N öneri Onaylar'da») ve **Kütüphanem** (`screens/kutuphane.js`: test
@@ -88,8 +89,16 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   arıyor: Bugün en öndeki kartı gösterdiği için geçer, ama ikisi birden bekliyorsa HKM kartı
   yalnız Onaylar'dadır — `go('onaylar')` daha sağlam. Yeni kabuk eylemleri: `modul-menu`,
   `bildirim-ac`, `hafta-ac`, `hizli-ekle`.
-- **Yarım / sıradaki:** §8-4 kaldırma (H hazır dedi) → T3 AYS: ekran içi sekmeler karta, Bugün üç
-  alan (03), boş/sakin hata kalıpları → AYS teslim → SPİ ve ESP kabuğa geçer (aynı `LIFEOS.KABUK`)
+- **H'ye istek (T3 AYS, iki var olan test):** AYS'de ekran içi sekme kalmıyor — Analiz,
+  Rehber, Tekrar ve Rütbe'nin sekmeleri alt alta bölüm oldu (`C.SayfaBolumleri`, 019; eski
+  `*-tab` eylemi düğmede kalır ve bölüme kaydırır). Bugün üç alana indi (03); Seri, çıpa,
+  bloklar gibi kartlar yeni **Bugün › Ayrıntı** ekranında (`R.Screens.gun`, aynı işleyiciler).
+  Bu yüzden: (1) `AYS/src/tests/ux.test.js:237` «sekmeli ekranlarda tam bir sekme seçilidir»
+  AYS'de ölçecek sekme bulamıyor (0) — «ekran içi sekme yok» diye çevirmeni ya da silmeni
+  öneririm (sadelik.js zaten ölçüyor). (2) `AYS/src/tests/ekran.test.js:117` tatil sınırı testi
+  `R.Screens.today.render()` yerine `R.Screens.gun.render()` çizmeli (Seri kartı Ayrıntı'da).
+  Başka kırılan test yok (1870/1872). Hazır olunca «H: T3 testleri hazır» yaz; T3'ü o an iterim.
+- **Yarım / sıradaki:** T3 AYS itilince → AYS teslim → SPİ ve ESP kabuğa geçer (aynı `LIFEOS.KABUK`)
 - **Soru / öneri:** —
 
 ## HATA (H)
