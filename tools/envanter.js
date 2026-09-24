@@ -307,6 +307,49 @@ function topla(arg){
     const blokCocuk = Array.from(el.children).some(c => BOLER.test(getComputedStyle(c).display));
     if(!blokCocuk && kelimeSay(el.innerText) > 30) uzun++;
   });
+  /* MERKEZ DISI MOR (katalog 110, ilke 1: «renk sahipligi soyler»). Mor
+     yalniz Merkez'in sesidir; modul iceriginde mor bir oge Merkez'in
+     sozuymus gibi okunur. Jetonlarin (--mer, --mer-ink, --mer-t) cozulmus
+     degeri bulunur; #main icinde Merkez kabi DISINDA yazisi, zemini,
+     cercevesi, dolgusu ya da cizgisi bu degerlerden biri olan gorunen oge
+     sayilir. Merkez kabi: `.okart--merkez`, `.cakisma__cozum`,
+     `[data-kaynak="merkez"]`, `.capraz`, `.modis--mer`, `[data-merkez]`. */
+  const MERKEZ = '.okart--merkez, .cakisma__cozum, [data-kaynak="merkez"], .capraz, .modis--mer, [data-merkez]';
+  const kokStil = getComputedStyle(document.documentElement);
+  const morlar = new Set();
+  const prob = document.createElement('span');
+  document.body.appendChild(prob);
+  ['--mer', '--mer-ink', '--mer-t'].forEach(v => {
+    if(!kokStil.getPropertyValue(v).trim()) return;     // jeton yoksa olcu yok
+    prob.style.color = 'var(' + v + ')';
+    morlar.add(getComputedStyle(prob).color);
+  });
+  prob.remove();
+  let mor = 0;
+  if(morlar.size){
+    main.querySelectorAll('*').forEach(el => {
+      if(el.closest(MERKEZ) || !gorunur(el)) return;
+      const st = getComputedStyle(el);
+      if([st.color, st.backgroundColor, st.borderTopColor, st.borderLeftColor, st.fill, st.stroke]
+        .some(c => morlar.has(c))){
+        /* Yalniz rengi GERCEKTEN gorunen: kenarlik genisligi 0 olan cercevenin rengi sayilmaz. */
+        const kenar = parseFloat(st.borderTopWidth) || parseFloat(st.borderLeftWidth);
+        const gercek = morlar.has(st.color) && (el.innerText || '').trim()
+          || morlar.has(st.backgroundColor) || morlar.has(st.fill) || morlar.has(st.stroke)
+          || (kenar && (morlar.has(st.borderTopColor) || morlar.has(st.borderLeftColor)));
+        if(gercek) mor++;
+      }
+    });
+  }
+
+  /* «EVET / TAMAM» ONAY DUGMESI (katalog 022): onay dugmesi sonucu adiyla
+     soyler («14 blogu sil»); «Evet», «Tamam», «Evet, devam et» yasak.
+     Ekranda ve acik pencerede (#sheet) gorunen dugmeler sayilir. */
+  const EVET = /^(evet|tamam)(\s*[,—–-].*)?$/i;
+  let evetTamam = 0;
+  document.querySelectorAll('#main button, #main [role="button"], #sheet button, #sheet [role="button"]')
+    .forEach(el => { if(gorunur(el) && EVET.test((el.textContent || '').trim().replace(/\s+/g, ' '))) evetTamam++; });
+
   const halka = gorunenler('svg').filter(s =>
     s.querySelector('circle[stroke-dasharray], circle[style*="dasharray"]')).length;
 
@@ -328,6 +371,8 @@ function topla(arg){
       xp: (metin.match(/\bXP\b/g) || []).length,
       /* Kesinliği olmayan sayı (katalog 024; `LIFEOS.SAYI` işaretler). */
       etiketsiz: main.querySelectorAll('.sayi[data-etiketsiz]').length,
+      mor,
+      evetTamam,
       boy: document.documentElement.scrollHeight,
     },
   };

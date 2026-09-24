@@ -58,6 +58,11 @@ const KURAL = [
   { ad:'simge',        olcu:'simge',        en:0, yazi:'resimsi simge (emoji)' },
   { ad:'xp',           olcu:'xp',           en:0, yazi:'XP yazısı', haric:['rutbe'] },
   { ad:'etiketsiz',    olcu:'etiketsiz',    en:0, yazi:'kesinliği olmayan sayı (024)' },
+  /* Asagidaki iki kural simdilik OLCUMDUR (`olcum:true`): kirmizi
+     yapmaz, sayar. K2 ilerledikce sifira iner; sifir olunca `olcum`
+     kalkar ve teslim edilmis modulde zorunlu olur (K'nin istegi). */
+  { ad:'mor',          olcu:'mor',          en:0, yazi:'Merkez dışında mor (110)', olcum:true },
+  { ad:'evetTamam',    olcu:'evetTamam',    en:0, yazi:'«Evet/Tamam» onay düğmesi (022)', olcum:true },
   { ad:'boy',          olcu:'boy',          en:1800, yazi:'sayfa boyu (px)', yalniz:['today'] },
   { ad:'dugme',        olcu:'dugme',        en:14, yazi:'görünen düğme', yalniz:['today'] },
 ];
@@ -94,6 +99,50 @@ function hamRenk(ad){
   return out;
 }
 
+/* VARSAYILAN ETIKETLI ONAY (katalog 022, statik). `confirmSheet(baslik,
+   mesaj, fn, tehlikeli, onay)` besinci arguman verilmezse dugme «Evet,
+   devam et» yazar. Gezinti pencereleri acmaz; bu yuzden cagrilar kaynakta
+   sayilir: ust duzey virgulleri sayan kucuk bir tarayici (dize, sablon ve
+   yorum atlanir). */
+function varsayilanOnaylar(ad){
+  const kok = path.join(KOK, ad, 'src', 'js');
+  const out = [];
+  const gez = d => fs.readdirSync(d, { withFileTypes:true }).forEach(e => {
+    const p = path.join(d, e.name);
+    if(e.isDirectory()) return gez(p);
+    if(!/\.js$/.test(e.name)) return;
+    const t = fs.readFileSync(p, 'utf8');
+    const re = /confirmSheet\s*\(/g;
+    let m;
+    while((m = re.exec(t))){
+      const once = t.slice(Math.max(0, m.index - 12), m.index);
+      if(/function\s+$/.test(once)) continue;         // tanimin kendisi
+      let i = re.lastIndex, derin = 0, virgul = 0, bos = true;
+      for(; i < t.length; i++){
+        const c = t[i];
+        if(c === '"' || c === "'" || c === '`'){
+          const q = c; i++;
+          while(i < t.length && t[i] !== q){ if(t[i] === '\\') i++; i++; }
+          bos = false; continue;
+        }
+        if(c === '/' && t[i + 1] === '*'){ i = t.indexOf('*/', i + 2) + 1; continue; }
+        if(c === '/' && t[i + 1] === '/'){ i = t.indexOf('\n', i); continue; }
+        if('([{'.indexOf(c) >= 0){ derin++; bos = false; continue; }
+        if(')]}'.indexOf(c) >= 0){ if(derin === 0) break; derin--; continue; }
+        if(c === ',' && derin === 0) virgul++;
+        else if(!/\s/.test(c)) bos = false;
+      }
+      const arguman = bos ? 0 : virgul + 1;
+      if(arguman < 5){
+        const satir = t.slice(0, m.index).split('\n').length;
+        out.push(path.relative(path.join(KOK, ad), p) + ':' + satir);
+      }
+    }
+  });
+  gez(kok);
+  return out;
+}
+
 /* Teslim tablosunda ✅ olan moduller (T yazar). */
 function teslimEdilenler(){
   const p = path.join(KOK, 'ekip', 'EKIP-DURUM.md');
@@ -117,7 +166,7 @@ function degerlendir(ad, olcu, taban){
       const v = o[k.olcu];
       if(v == null || v <= k.en) return;
       const t = taban && taban[rota] ? taban[rota][k.olcu] : null;
-      ihlal.push({ rota, kural:k.yazi, deger:v, en:k.en, taban:t });
+      ihlal.push({ rota, kural:k.yazi, deger:v, en:k.en, taban:t, olcum:!!k.olcum });
     });
   });
   return ihlal;
@@ -148,10 +197,13 @@ async function main(){
     if(!gezinti[ad]){ console.log(ad + ': gezintide yok'); return; }
     const olcu = ((gezinti[ad].olcu || {}).dolu || {})['1440'] || {};
     const tb = taban[ad] ? ((taban[ad].olcu || {}).dolu || {})['1440'] : null;
-    const ihlal = degerlendir(ad, olcu, tb);
+    let ihlal = degerlendir(ad, olcu, tb);
     const renk = hamRenk(ad);
     const renkToplam = Object.values(renk).reduce((a, b) => a + b, 0);
     const denetlenir = zorunlu.has(ad);
+    const olcumler = ihlal.filter(x => x.olcum);
+    ihlal = ihlal.filter(x => !x.olcum);
+    const onay = varsayilanOnaylar(ad);
     const n = ihlal.length + (renkToplam ? 1 : 0);
     if(denetlenir && n) kirmizi += n;
     console.log(ad + (denetlenir ? ' (DENETLENİR — teslim edildi)' : ' (yalnız ölçüm)') + ': '
@@ -162,6 +214,14 @@ async function main(){
       console.log('   ' + (denetlenir ? '✕' : '·') + ' jeton dışı ham renk ' + renkToplam + ': '
         + Object.keys(renk).map(f => f + ' ' + renk[f]).join(', '));
     }
+    /* Olcum (kirmizi yapmaz): K2 ilerledikce sifira iner. */
+    const morT = olcumler.filter(x => /mor/.test(x.kural)).reduce((a, x) => a + x.deger, 0);
+    const evetT = olcumler.filter(x => /Evet/.test(x.kural)).reduce((a, x) => a + x.deger, 0);
+    console.log('   ölçüm · Merkez dışında mor: ' + morT
+      + (morT ? ' (' + olcumler.filter(x => /mor/.test(x.kural)).map(x => x.rota + ' ' + x.deger).join(', ') + ')' : '')
+      + ' · ekranda «Evet/Tamam» düğmesi: ' + evetT
+      + ' · varsayılan «Evet, devam et» onayı (kaynak): ' + onay.length
+      + (onay.length ? ' (' + onay.slice(0, 4).join(', ') + (onay.length > 4 ? ', …' : '') + ')' : ''));
   });
 
   if(kirmizi){
