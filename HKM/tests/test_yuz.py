@@ -212,6 +212,33 @@ def t_jetonlar_ortak():
         eq((hkm, y[hkm].strip().lower()), (hkm, j[ortak].strip().lower()))
 
 
+
+AYS_BILESEN = KOK / "AYS" / "src" / "js" / "core" / "components.js"
+
+
+def t_sakin_hata():
+    """011 (K7c): bir parca yuklenemeyince kirmizi satir degil sakin kutu —
+    «Verin yerinde; hicbir kayit silinmedi.» uc arayuzun SakinHata'siyla
+    AYNI cumle; teknik ileti silinmez, «Teknik ayrinti»ya iner; tek eylem
+    «Yeniden dene»."""
+    m = _yuz()
+    eq(re.findall(r'<p class="danger">[^<\']*alınamadı', m), [])
+    ok("function sakinHata(" in m)
+    blok = m[m.index("function sakinHata("):]
+    blok = blok[:blok.index("\n  }\n")]
+    cumle = "Verin yerinde; hiçbir kayıt silinmedi."
+    ok(cumle in blok)
+    ok(cumle in AYS_BILESEN.read_text(encoding="utf-8"))
+    ok('data-oz="011"' in blok and "Teknik ayrıntı" in blok and "Yeniden dene" in blok)
+    ok("data-yenile" in m[m.index("addEventListener('click'"):] or "[data-yenile]" in m)
+    # HKM oturum ortasinda durursa fetch FIRLATIR; api() bunu status 0'a
+    # cevirmezse cagiran «!== 200» dalina hic varmaz ve bolum sonsuza dek
+    # «Yukleniyor…» kalirdi (K7c'de bulundu: sessiz cokme).
+    api = m[m.index("async function api("):]
+    api = api[:api.index("\n  }\n")]
+    ok("catch" in api and "status:0" in api)
+
+
 def run():
     suite("HKM yüzü — giriş şeridi")
     test("üç adım vardır", t_giris_seridi_uc_adim)
@@ -225,4 +252,5 @@ def run():
     test("para sayfası", t_para_sayfasi)
     test("yedi çekmece; bölümler; ayarlar dört bölüm (K7)", t_cekmeceler)
     test("jetonlar ortak değerlerde; vurgu Merkez moru (K7a)", t_jetonlar_ortak)
+    test("sakin hata: kırmızı satır yok, ortak cümle (011)", t_sakin_hata)
     test("fiş yükleme: önizleme, onay, küçültme", t_fis_yukleme)
