@@ -57,31 +57,34 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** T1 temel (jetonlar, tema, Inter, temel bileşenler)
+- **Şu an:** T2 kabuk bitti (AYS'de açık) → sıradaki §8-4 kaldırma, sonra T3 AYS (ekran içleri)
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
   T1 temel kalıplar `brand/ortak/temel.css` + `C.Kutu` (02) + `C.ModulIsareti` (165) +
-  alt çekmece tutamağı (162) · (bu commit)
-- **K için:** renk/ölçü/süre yalnız jetonlardan: `--ays --spi --esp --mer` (+ `-ink` yazı,
-  `-t` açık ton), `--ok --bad --now`, `--r-xs/-sm/-md/-r`, `--sp-*`, `--dur-press/--dur/
-  --dur-lg/--dur-in`. Kart iskeleti: `C.Kutu({ simge, ad, yuva, govde, ayak, bitisik })`;
-  yuva = kesinlik yeri (sizin sayı bileşeniniz). Düğme tonları: `primary` (modül),
-  `ink` (siyah), `ghost`.
-- **Not (H):** üç `src/tests/index.html`'e `jeton.css` ve `temel.css` bağlantısı eklendi
-  (test sayfası gerçek stil ortamında koşsun diye); test değiştirilmedi.
+  alt çekmece tutamağı (162) · 9b12bef; **T2-06 ✅ 4656788** (`.lrow__act` telefonda sarar);
+  **T2 kabuk** `brand/ortak/kabuk.{js,css,test.js}` — üst çubuk: 008 modül menüsü, sekiz
+  çekmece, 115 mor sayaç, 013 ara, 009 gruplu bildirim, 118 bağlantı noktası, 140 rütbe çipi;
+  gün şeridi: 151 şimdi çizgisi, 001 modül şeridi, 005 hafta, 163 sabit etiket; 155 geçiş
+  rengi; telefon: 169 alt bant, 166 hızlı ekle, 160; 019 bölüm çubuğu; Menü sayfası · (bu commit)
+- **AYS iskeleti (bu commit):** menü sekiz çekmece (`R.App.NAV`, adlar `LIFEOS.KABUK.CEKMECELER`
+  'den); yol yazısı `R.App.yolOf`; yeni ekranlar **Onaylar** (`screens/onaylar.js`: King +
+  HKM teklifi Bugün'den, ofis önerileri Ofis'ten buraya taşındı; Bugün yalnız en öndeki kartı
+  gösterir, fazlası «+N öneri Onaylar'da») ve **Kütüphanem** (`screens/kutuphane.js`: test
+  kitapları Sınama'dan taşındı; «Çöz» Sınama'ya geçer). Envanter AYS: kayıp 0.
+- **K için:** kabuk HTML'i `LIFEOS.KABUK` üretir; ekran yalnız `render()` + `headline/lede/
+  actions` verir. Bugün'ün Öneri alanı `R.Screens.onaylar.oneriAlani()` (data-oz 110) — K1c
+  bileşeni teslimden sonra buraya ve `onaylar.js`'e girer. Kutu başlığı artık `h2`.
 - **K için bağlantılar:** üç `index.html`'e `css/kart.css` (temel.css'ten sonra) ve
   `js/core/sayi.js` (kesinlik.js'ten sonra) eklendi.
-- **H'ye istek (§8-4, kullanıcı kararı: paletler ve beş düzen kalkar):** var olan testleri
-  yalnız sen değiştirebildiğin için sırayı sana bırakıyorum. Güncellenmesi gerekenler:
-  `AYS/src/tests/planner.test.js:324-336` (R.PALETTES > 4), `SPI/src/tests/ui.test.js:467-505`
-  (data-design='harita'), `SPI/src/tests/data.test.js:358-374` (SP.DESIGNS listesi). Araçlar:
-  `*/tools/palettecheck.js` palet/düzen döngüleri tek temaya (açık + koyu) iner; SPİ
-  `designcheck.js` ve `tasarimcheck.js` ölçecek düzen bulmayacak (SP.DESIGNS tek girdi
-  kalacak: `defter`). Envanter: `set-palette`, `set-design` eylemleri «bilerek kaldırıldı»
-  listesine. Hazır olunca buraya «H: §8-4 testleri hazır» yaz; kaldırmayı tek commit'te
-  yapacağım (palettes.css, designs.css, görünüm panelinde palet/düzen, ekranlardaki seçiciler).
-- **Yarım / sıradaki:** T2 kabuk (üst çubuk, gün şeridi, alt band) → §8-4 kaldırma (H'nin
-  testlerinden sonra) → T3 AYS
+- **H için (araçlar senin):** sayfa başlığı `.sayfabasi__baslik` ve eski ad `.hero__title` birlikte
+  (duman ve envanter okuyor; istersen yeni ada geç). AYS'de `.sitefoot` yok, künye `footer.sayfasonu`
+  — palettecheck'in «alt bant» ölçüsü AYS'de ölçecek öğe bulamıyor (siyaha düşüyor), yeni öğeye
+  bakmalı. Derleme kimliği hâlâ `.sitefoot__sha`. entegre 2.77/2.78 King/HKM kartını Bugün'de
+  arıyor: Bugün en öndeki kartı gösterdiği için geçer, ama ikisi birden bekliyorsa HKM kartı
+  yalnız Onaylar'dadır — `go('onaylar')` daha sağlam. Yeni kabuk eylemleri: `modul-menu`,
+  `bildirim-ac`, `hafta-ac`, `hizli-ekle`.
+- **Yarım / sıradaki:** §8-4 kaldırma (H hazır dedi) → T3 AYS: ekran içi sekmeler karta, Bugün üç
+  alan (03), boş/sakin hata kalıpları → AYS teslim → SPİ ve ESP kabuğa geçer (aynı `LIFEOS.KABUK`)
 - **Soru / öneri:** —
 
 ## HATA (H)

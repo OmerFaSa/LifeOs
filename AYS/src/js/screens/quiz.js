@@ -87,7 +87,6 @@ R.Screens.quiz = (function(){
         }),
 
         when(lastSummary, () => summaryCard(lastSummary)),
-        kitapKarti(),
       ])),
 
       K.Span(5, K.Stack([
@@ -215,47 +214,6 @@ R.Screens.quiz = (function(){
      etiketi modelin beyanıdır (tahmin). Net ya da puan hesaplanmaz. */
   const TK = () => R.TestKitabi;
   const HARF = 'ABCDE';
-
-  /* Kütüphanem: BAM'ın ürettiği kitaplar, kaynağı, ölçülen maliyeti ve
-     ne kadarının çözüldüğü. Maliyet HKM'nin ölçümü (kitap eklenirken
-     alınır); kullanım AYS'nin hesabı. İkisi de etiketiyle yazılır. */
-  function maliyetYazi(m){
-    if(!m || m.etiket === 'veri_yok' || m.usd == null) return 'maliyet: veri yok';
-    const d = m.usd < 0.01 ? 4 : 2;
-    return 'maliyet ' + m.usd.toLocaleString('tr-TR', { minimumFractionDigits:d, maximumFractionDigits:d }) + ' USD'
-      + (m.cagri ? ' · ' + m.cagri + ' çağrı' : '') + (m.etiket === 'tahmin' ? ' (tahmin)' : ' (ölçüldü)');
-  }
-
-  function kitapKarti(){
-    const l = TK() ? TK().kitaplar() : [];
-    if(!l.length) return null;
-    return K.Card({ title:'Kütüphanem · test kitapları',
-      sub:'BAM üretti, her soru bağımsız çözümle denetlendi',
-      body:html`<div class="stack-sm">${map(l, k => {
-        const il = TK().ilerleme(k);
-        return html`<div>
-        <div class="row between wrap"><b class="small">${k.baslik}</b>
-          ${K.Badge({ label:k.dogruluk === 'kaynakli' ? 'kaynaklı' : 'kaynaksız · doğrulanmadı',
-            tone:k.dogruluk === 'kaynakli' ? 'ok' : 'warn' })}</div>
-        <div class="tiny dim">${il.bolum}/${il.toplamBolum} bölüm çözüldü · ${il.soru}/${il.toplamSoru}
-          soru (%${il.yuzde}, hesaplandı) · ${maliyetYazi(k.maliyet)}${k.eklenme
-          ? ' · eklendi ' + U.fmtShort(k.eklenme) : ''}</div>
-        ${map(k.bolumler, b => {
-          const s = (k.sonuclar || {})[b.no];
-          const y = TK().yarim();
-          const yarimBu = y && y.kitapId === k.id && y.no === b.no;
-          return html`<div class="row between wrap mt-6">
-            <span class="small">${b.no}. ${b.ad} · ${b.sorular.length} soru${s
-              ? ' · son: ' + s.dogru + ' doğru, ' + s.yanlis + ' yanlış, ' + s.bos + ' boş' : ''}</span>
-            <span class="row-sm wrap">${when(s, () => K.Button({ label:'Gözden geçir', size:'sm',
-              tone:'ghost', act:'kitap-ozet', data:{ 'data-id':k.id, 'data-no':String(b.no) } }))}
-            ${when(yarimBu, () => K.Button({ label:'Devam et (soru ' + (y.index + 1) + '/' + y.toplam + ')',
-              size:'sm', tone:'primary', act:'kitap-devam' }))}
-            ${K.Button({ label:yarimBu ? 'Baştan başla' : s ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'kitap-baslat',
-              data:{ 'data-id':k.id, 'data-no':String(b.no) } })}</span></div>`;
-        })}</div>`;
-      })}</div>` });
-  }
 
   /* Soru şeridi: bölümdeki her soruya tek dokunuş; cevaplılar dolu görünür.
      Doğru/yanlış GÖSTERİLMEZ: cevaplar bölüm bitince açılır. */

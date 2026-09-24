@@ -214,6 +214,11 @@ DOSYALAR = {
     "seri.test.js":   "tests",
     "temel.css":      "css",
     "temel.test.js":  "tests",
+    # KABUK (T2) — ust cubuk, gun seridi, telefon bandi: uc arayuzde ayni
+    # iskelet, ayni cekmece adlari (ekip/CEKMECE-HARITASI.md).
+    "kabuk.js":       "js/core",
+    "kabuk.css":      "css",
+    "kabuk.test.js":  "tests",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     "sw.js":          ".",

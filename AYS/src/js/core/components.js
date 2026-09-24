@@ -159,7 +159,7 @@ R.C = (function(){
     return html`<section class="${cls('kutu', o.class)}" data-oz="002" ${when(o.id, () => attrs({ id:o.id }))}>
       ${when(bas, () => html`<header class="kutu__bas">
         ${when(o.simge, () => html`<span class="kutu__simge" aria-hidden="true">${icon(o.simge)}</span>`)}
-        ${when(o.ad, () => html`<h3 class="kutu__ad">${o.ad}${when(o.ipucu, () => raw(R.UI.hint(o.ipucu)))}</h3>`)}
+        ${when(o.ad, () => html`<h2 class="kutu__ad">${o.ad}${when(o.ipucu, () => raw(R.UI.hint(o.ipucu)))}</h2>`)}
         <span class="kutu__yuva">${o.yuva == null ? '' : o.yuva}</span>
       </header>`)}
       ${when(o.govde != null, () => html`<div class="${cls('kutu__govde', o.bitisik && 'kutu__govde--bitisik')}">${o.govde}</div>`)}

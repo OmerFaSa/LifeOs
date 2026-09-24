@@ -281,85 +281,6 @@ R.Screens.office = (function(){
      Ofisin sisteme dokunabildiği TEK kapı. Ne değişeceği onaydan önce
      önce/sonra olarak gösterilir; onaysız hiçbir satır uygulanmaz. */
 
-  function diffRows(rows){
-    return html`<div class="diff">${map(rows, r => html`
-      <div class="diff__row">
-        <span class="diff__label">${r.label}</span>
-        <span class="diff__before">${r.before}</span>
-        <span class="diff__arrow" aria-hidden="true">→</span>
-        <span class="diff__after">${r.after}</span>
-      </div>`)}</div>`;
-  }
-
-  const KAYNAK_ADI = { istek:'senin isteğin', llm:'ajanın önerisi', kural:'kural motoru buldu' };
-  const SEVIYE_ADI = { kucuk:'küçük değişiklik', orta:'orta değişiklik', buyuk:'büyük değişiklik' };
-
-  function proposalRow(p){
-    const def = R.ACTION_BY_ID[p.action];
-    const agent = R.AGENT_BY_ID[p.agent];
-    return html`
-      <div class="${cls('prop', 'prop--' + p.agent)}">
-        <div class="prop__head">
-          ${Avatar(agent, 'sm')}
-          <div class="prop__who">
-            <b class="prop__title">${def.title}</b>
-            <span class="prop__by">${agent.name} · ${def.touches}
-              · ${KAYNAK_ADI[p.source] || 'kural motoru buldu'}
-              · ${SEVIYE_ADI[p.level] || SEVIYE_ADI.orta}</span>
-          </div>
-        </div>
-        <p class="prop__why">${p.reason || def.summary}</p>
-        ${diffRows(p.preview.rows)}
-        <div class="prop__acts">
-          ${K.Button({ label:'Onayla ve uygula', icon:'check', size:'sm', tone:'primary',
-            act:'office-approve', data:{ 'data-id':p.id } })}
-          ${K.Button({ label:'Reddet', size:'sm', tone:'ghost',
-            act:'office-reject', data:{ 'data-id':p.id } })}
-          ${when(def.route, () => K.Button({ label:'Yerini gör', size:'sm', tone:'ghost',
-            act:'go', data:{ 'data-route':def.route } }))}
-        </div>
-      </div>`;
-  }
-
-  function appliedRow(p){
-    const def = R.ACTION_BY_ID[p.action];
-    const agent = R.AGENT_BY_ID[p.agent];
-    return html`
-      <div class="prop prop--done">
-        <div class="prop__head">
-          ${Avatar(agent, 'sm')}
-          <div class="prop__who">
-            <b class="prop__title">${def.title}</b>
-            <span class="prop__by">${agent.name} ·
-              ${U.relativeDay(String(p.appliedAt || '').slice(0, 10))}
-              ${p.otomatik ? 'sormadan uygulandı (küçük değişiklik)' : 'uygulandı'}</span>
-          </div>
-          ${K.Button({ label:'Geri al', icon:'undo', size:'sm', tone:'ghost',
-            act:'office-undo', data:{ 'data-id':p.id } })}
-        </div>
-      </div>`;
-  }
-
-  function proposalsCard(){
-    const list = R.Proposals.actionable();
-    const done = R.Proposals.applied().slice(-3).reverse();
-    if(!list.length && !done.length) return '';
-
-    return K.Card({
-      title:'Ofisin önerileri',
-      sub:'Ajanlar değişiklik önerir; uygulanıp uygulanmayacağına sen karar verirsin',
-      badge:when(list.length, () => K.Badge({ label:String(list.length), tone:'warn' })),
-      body:html`
-        ${when(!list.length, () => K.Notice({ tone:'ok',
-          title:'Bekleyen öneri yok.',
-          body:'“Masaları tara” dersen ofis veriyi yeniden okur ve gerekiyorsa öneri bırakır.' }))}
-        ${when(list.length, () => html`<div class="props">${map(list, proposalRow)}</div>`)}
-        ${when(done.length, () => html`
-          <div class="mt-12">${K.SectionTitle('Uygulananlar')}</div>
-          <div class="props">${map(done, appliedRow)}</div>`)}`,
-    });
-  }
-
   /* Ofis panosu — girişte asılı tahta: hangi gün, kaç gün kaldı, ekip ne durumda. */
   function boardCard(){
     const n = M().currentWeek();
@@ -932,7 +853,6 @@ R.Screens.office = (function(){
       K.Span(8, K.Stack([
         boardCard(),
         floorPlan(),
-        proposalsCard(),
         briefingCard(),
         BossCard(),
         decisionsCard(),
@@ -1227,26 +1147,6 @@ R.Screens.office = (function(){
         el.disabled = false;
         R.App.render();
       }
-    },
-
-    /* Onay kapisi: uygulama YALNIZ buradan gecer. */
-    async 'office-approve'(el){
-      const res = await R.Proposals.approve(el.dataset.id);
-      if(!res) return;
-      UI.toast(res.ok ? 'Uygulandı — istersen geri alabilirsin' : res.why);
-      R.App.render();
-    },
-
-    async 'office-reject'(el){
-      await R.Proposals.reject(el.dataset.id);
-      UI.toast('Öneri reddedildi');
-      R.App.render();
-    },
-
-    async 'office-undo'(el){
-      await R.Proposals.undo(el.dataset.id);
-      UI.toast('Geri alındı');
-      R.App.render();
     },
 
     async 'office-decision'(el){

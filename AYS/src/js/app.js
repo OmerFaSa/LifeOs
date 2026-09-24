@@ -6,80 +6,80 @@ R.App = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
   const { html, raw, when, map, cls, attrs } = R.h;
 
-  /* Birincil gezinme 5 grup. Ikincil seviyeler ekran ici alt-sekme olarak durur. */
-  /* BOLUMLER — numarali ust serit.
+  /* SEKİZ ÇEKMECE (ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
 
-     Sol panel kaldirildi. Numara bir sus degil: alti bolumun SIRASI
-     anlamlidir (once gunu gir, sonra plani gor, sonra kaydi tut,
-     sonra analize bak) ve numara o sirayi gorunur kilar.
-
-     SPI ile ayni kabuk: kunye + numarali serit + hero. Iki uygulama
-     yan yana acildiginda ayni sistemden geldikleri anlasilmalidir. */
+     Üç modülde aynı ad ve sıra; adlar tek kaynaktan gelir
+     (`LIFEOS.KABUK.CEKMECELER`). İç içelik en çok iki kat: çekmece ›
+     bölüm. Bölümler üst çubukta değil, sayfa başının altındaki bölüm
+     çubuğunda durur. Onaylar ve Kütüphanem tek bölümlüdür. */
+  const K = window.LIFEOS.KABUK;
+  const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
   const NAV = [
-    { id:'gunluk', num:'01', icon:'today', label:'Günlük',
-      note:'Bugünü gir, haftayı gör', items:[
+    { id:'bugun', label:CEK('bugun'), items:[
       { id:'today', icon:'today', label:'Bugün' },
-      { id:'week',  icon:'week',  label:'Hafta' },
     ]},
-    { id:'plan', num:'02', icon:'map', label:'Plan',
-      note:'Program, dersler ve hedef', items:[
-      { id:'plan',     icon:'map',    label:'Program' },
-      { id:'subjects', icon:'book',   label:'Dersler' },
-      { id:'target',   icon:'target', label:'Hedef' },
+    { id:'plan', label:CEK('plan'), items:[
+      { id:'week',   icon:'week',   label:'Hafta' },
+      { id:'plan',   icon:'map',    label:'Program' },
+      { id:'target', icon:'target', label:'Hedefler' },
     ]},
-    { id:'kayit', num:'03', icon:'play', label:'Kayıt',
-      note:'Öğrenme, deneme, tekrar ve soru', items:[
-      { id:'learn', icon:'play',  label:'Öğrenme' },
-      { id:'exams', icon:'exam',  label:'Deneme' },
-      { id:'cards', icon:'cards', label:'Tekrar' },
-      { id:'quiz',  icon:'zap',   label:'Sınama' },
-      { id:'solve', icon:'search', label:'Soru çöz' },
+    { id:'calisma', label:CEK('calisma'), items:[
+      { id:'subjects', icon:'book',   label:'Konu çalış' },
+      { id:'learn',    icon:'play',   label:'Ders notları' },
+      { id:'solve',    icon:'search', label:'Soru çöz' },
+      { id:'exams',    icon:'exam',   label:'Deneme' },
+      { id:'cards',    icon:'cards',  label:'Tekrar' },
+      { id:'quiz',     icon:'zap',    label:'Sınama' },
     ]},
-    { id:'analiz', num:'04', icon:'chart', label:'Analiz',
-      note:'İlerleme, analiz ve telafi', items:[
+    { id:'analiz', label:CEK('analiz'), items:[
       { id:'progress',  icon:'chart',  label:'İlerleme' },
-      { id:'analytics', icon:'search', label:'Analiz' },
+      { id:'analytics', icon:'search', label:'Ayrıntı' },
       { id:'protocols', icon:'shield', label:'Telafi' },
     ]},
-    { id:'rehber', num:'05', icon:'guide', label:'Rehber',
-      note:'Kullanım ve profiller', items:[
-      { id:'guide', icon:'guide', label:'Rehber' },
-      { id:'profiles', icon:'shield', label:'Profiller' },
+    { id:'onaylar', label:CEK('onaylar'), items:[
+      { id:'onaylar', icon:'check', label:'Bekleyen' },
     ]},
-    { id:'ofis', num:'06', icon:'zap', label:'Ofis',
-      note:'Patron ve beş koç', items:[
-      { id:'office',  icon:'guide', label:'Ofis' },
-      { id:'team',    icon:'zap',   label:'Ekip sohbeti' },
+    { id:'ofis', label:CEK('ofis'), items:[
+      { id:'office',  icon:'guide', label:'Masalar' },
+      { id:'team',    icon:'zap',   label:'Danışma' },
       { id:'meeting', icon:'list',  label:'Toplantı' },
     ]},
-    /* Rütbe kendi bölümü — Rehber'in bir sekmesi değil. Seviye orada
-       bir ayar gibi duruyordu; oysa merdiven, kartlar ve «XP nereden
-       gelir» kendi başına bakılacak bir yer. */
-    { id:'rutbe', num:'07', icon:'layers', label:'Rütbe',
-      note:'Kademe, merdiven ve XP kaynakları', items:[
-      { id:'rutbe', icon:'layers', label:'Rütbe' },
+    { id:'kutuphane', label:CEK('kutuphane'), items:[
+      { id:'kutuphane', icon:'book', label:'Kitaplar' },
+    ]},
+    /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de
+       buraya açılır. XP yalnız görünürlüktür, kendi çekmecesi olmaz. */
+    { id:'ayarlar', label:CEK('ayarlar'), items:[
+      { id:'guide',    icon:'guide',  label:'Genel' },
+      { id:'profiles', icon:'shield', label:'Profil' },
+      { id:'rutbe',    icon:'layers', label:'Rütbe' },
     ]},
   ];
 
-  const MOBILE_TABS = ['today','learn','cards','quiz','progress'];
+  /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
+  const UST = { topic:'subjects' };
 
-  /* Gizlenen bolum (core/bolum.js) gezinmeden, mobil sekmelerden ve
-     yonlendirmeden kalkar. Bos kalan grup da gorunmez. */
+  /* Telefon alt bandı (karar 3): Bugün · Plan · Çalışma · Menü. */
+  const BANT = ['bugun', 'plan', 'calisma'];
+
+  /* Gizlenen bolum (core/bolum.js) gezinmeden, alt banttan ve
+     yonlendirmeden kalkar. Bos kalan cekmece de gorunmez. */
   function gizliMi(route){ return !!(R.Bolum && R.Bolum.gizli(route)); }
   function navGorunen(){
     return NAV.map(g => Object.assign({}, g, { items:g.items.filter(i => !gizliMi(i.id)) }))
       .filter(g => g.items.length);
   }
-  function mobilSekmeler(){
-    const l = MOBILE_TABS.filter(id => !gizliMi(id));
-    /* Gizlenen sekmenin yerini bir cekirdek ekran doldurur. */
-    ['week', 'exams', 'plan'].forEach(id => { if(l.length < MOBILE_TABS.length && l.indexOf(id) < 0) l.push(id); });
-    return l;
-  }
 
   function screen(){
     if(gizliMi(S.route)) S.route = 'today';
     return R.Screens[S.route] || R.Screens.today;
+  }
+
+  /* Onaylar'ın bekleyeni: King teklifi, HKM teklifi, ofis önerisi. Üçü
+     de tek çekmecede durur; sayı da üçünün toplamıdır. */
+  function onaySayisi(){
+    try{ return R.Screens.onaylar ? R.Screens.onaylar.bekleyen() : 0; }
+    catch(e){ console.error(e); return 0; }
   }
 
   function badgeFor(id){
@@ -102,7 +102,53 @@ R.App = (function(){
     return null;
   }
 
-  /* Marka satırı profilden gelir; sabit hedef ya da isim yoktur. */
+  /* Bir ekran hangi cekmecede? */
+  function bolumOf(route){
+    const r = UST[route] || route;
+    return NAV.find(g => g.items.some(i => i.id === r)) || NAV[0];
+  }
+  function ogeOf(route){
+    const r = UST[route] || route;
+    return NAV.reduce((f, g) => f || g.items.find(i => i.id === r), null);
+  }
+
+  function saatOf(iso){
+    if(!iso) return '';
+    const d = new Date(iso);
+    if(isNaN(d.getTime())) return '';
+    if(U.iso(d) === U.todayISO()) return K.saatMetni(d);
+    return d.toLocaleDateString('tr-TR', { day:'numeric', month:'short' }) + ' ' + K.saatMetni(d);
+  }
+
+  /* Bağlantı noktası (118). Çizim ağa ÇIKMAZ (beacon.js kural 1): durum
+     son gönderimin kaydından okunur. Hiç gönderilmemişse «bağlı»
+     denmez — ölçülmemiştir. */
+  function baglantiVerisi(){
+    if(!R.Beacon) return { durum:'kapali', route:'guide' };
+    const a = R.Beacon.settings();
+    if(!a.enabled) return { durum:'kapali', route:'guide' };
+    const bozuk = a.lastStatus !== null && a.lastStatus !== undefined && a.lastStatus !== 202;
+    if(bozuk) return { durum:'ulasilamadi', saat:saatOf(a.lastAt), route:'guide' };
+    if(a.lastOkAt) return { durum:'bagli', saat:saatOf(a.lastOkAt), route:'guide' };
+    return { durum:'bekliyor', route:'guide' };
+  }
+
+  /* Rütbe çipi (140). Defter yüklenmemişse çip hiç çizilmez: «0 XP»
+     çizmek, bilinmeyeni sıfır saymak olurdu. */
+  function rutbeVerisi(){
+    if(!R.XP) return null;
+    let d;
+    try{ d = R.XP.durum(); }catch(e){ return null; }
+    if(!d || !d.kademeBilgi) return null;
+    let gorsel = '';
+    try{ gorsel = new URL('img/seviye/onay-' + d.kademe + '.webp', location.href).href; }catch(e){}
+    return { ad:d.kademeBilgi.ad, etiket:d.etiket, kademe:d.kademe, oran:d.oran, tamam:d.tamam,
+      icinde:d.icinde, gereken:d.gereken,
+      icindeMetin:U.fmtNum(d.icinde), gerekenMetin:U.fmtNum(d.gereken),
+      renk:d.kademeBilgi.renk, gorsel, route:'rutbe' };
+  }
+
+  /* Profilin satırı: sabit hedef ya da isim yoktur, profilden gelir. */
   function brandLine(){
     const p = S.profile;
     if(!p) return 'kişisel çalışma sistemi';
@@ -114,218 +160,161 @@ R.App = (function(){
     return 'kişisel çalışma sistemi';
   }
 
-  /* Bir ekran hangi bolumde? */
-  function bolumOf(route){
-    return NAV.find(g => g.items.some(i => i.id === route)) || NAV[0];
+  function profilVerisi(){
+    const p = S.profile || {};
+    return { ad:p.name || '', harf:(p.name || 'Ben').trim().charAt(0) };
   }
 
-  /* Bolumun rozeti: icindeki sayfalarin rozetlerinin toplami. */
-  function bolumBadge(sec){
-    let sessiz = 0, yuksek = 0;
-    sec.items.forEach(it => {
-      const b = safe(() => badgeFor(it.id), null);
-      if(!b) return;
-      const n = Number(String(b.text).replace(/\D/g, '')) || 1;
-      if(b.quiet) sessiz += n; else yuksek += n;
-    });
-    if(yuksek) return { text:String(yuksek), quiet:false };
-    if(sessiz) return { text:String(sessiz), quiet:true };
-    return null;
+  /* Gruplu bildirimler (09): bu modülün uyarıları ve Merkez'in önerileri
+     ayrı kümede. Kaynakları rozetlerle aynıdır; iki yerde iki ayrı sayı
+     durmasın diye aynı hesaplardan okunur. */
+  function bildirimGruplari(){
+    const ays = [];
+    const kart = C.dueCards().length;
+    if(kart) ays.push({ metin:kart + ' tekrar kartı bekliyor', route:'cards', acil:C.cardDebt() > 10 });
+    const analiz = C.analysisDebt().length;
+    if(analiz) ays.push({ metin:analiz + ' denemenin analizi eksik', route:'exams', acil:true });
+    const tetik = C.protocolTriggers().length;
+    if(tetik) ays.push({ metin:tetik + ' telafi protokolü tetiklendi', route:'protocols', acil:true });
+    const w = S.weeks[M.weekId(M.currentWeek())];
+    if(w && !w.signedAt) ays.push({ metin:'Bu haftanın sözleşmesi imzalanmadı', route:'week' });
+    if(S.storeHealth && S.storeHealth.error) ays.push({ metin:'Kayıt sorunu var', act:'show-store-error', acil:true });
+    const mer = [];
+    const onay = onaySayisi();
+    if(onay) mer.push({ metin:onay + ' öneri Onaylar’da bekliyor', route:'onaylar' });
+    return [{ modul:'ays', satirlar:ays }, { modul:'mer', satirlar:mer }];
   }
 
-  /* ---------- kunye ----------
-
-     Uygulama cubugu degil KUNYE. Iki satir:
-
-       1. kimlik · tarih · araclar   — sayfayla birlikte yukari kayar
-       2. numarali bolumler          — kaydirinca ustte yapisir
-
-     Ilk satirin kaymasina izin vermek kasitlidir: okurken kimlige
-     ihtiyac yoktur, gezinmeye vardir. */
-  function mastheadHtml(){
-    const now = new Date();
-    const gun = now.toLocaleDateString('tr-TR', { weekday:'long' });
-    return html`
-      <div class="masthead">
-        <div class="wrapc masthead__in">
-          <button class="brand" data-act="go" data-route="today" aria-label="Bugün bölümüne git">
-            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
-            <span class="brand__text"><b>Rota</b><span>${brandLine()}</span></span>
-          </button>
-
-          <div class="masthead__date">
-            <span class="masthead__day">${U.fmtDate(U.todayISO())}</span>
-            <span class="masthead__wd">${gun}</span>
-          </div>
-
-          <div class="navtools">
-            ${R.C.IconButton({ icon:'search', aria:'Komut paleti (Ctrl+K)', title:'Ctrl+K', act:'open-palette' })}
-            ${R.C.IconButton({ icon:'palette', aria:'Görünüm', title:'Tema, palet ve düzen',
-              act:'open-appearance', data:{ id:'appearance-btn' } })}
-            ${R.C.IconButton({ icon:'gear', aria:'Rehber ve ayarlar', act:'go', data:{ 'data-route':'guide' } })}
-            ${R.C.IconButton({ icon:'menu', aria:'Bölümler', act:'toggle-sidebar', class:'sitenav__menu' })}
-          </div>
-        </div>
-      </div>`;
-  }
-
-  function sitenavHtml(sc){
+  function ustCubukHtml(sc){
     const aktif = bolumOf(sc.id);
-    return html`
-      <nav class="sitenav" aria-label="Bölümler">
-        <div class="wrapc navlinks">${map(navGorunen(), sec => {
-          const on = sec.id === aktif.id;
-          const b = bolumBadge(sec);
-          return html`<button class="${cls('navlink', on && 'is-active')}"
-            data-act="go" data-route="${sec.items[0].id}"
-            ${when(on, () => attrs({ 'aria-current':'page' }))}>
-            <span class="navlink__num" aria-hidden="true">${sec.num}</span>
-            <span class="navlink__label">${sec.label}</span>
-            ${when(b, () => html`<span class="${cls('navlink__badge', b.quiet && 'is-quiet')}"
-              aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
-          </button>`;
-        })}</div>
-      </nav>`;
+    const onay = onaySayisi();
+    const gruplar = safe(bildirimGruplari, []) || [];
+    const bil = gruplar.reduce((t, g) => t + g.satirlar.length, 0);
+    const acil = gruplar.some(g => g.satirlar.some(s => s.acil));
+    return K.ustCubuk({
+      modul:'ays',
+      cekmeceler:navGorunen().map(g => ({ id:g.id, ad:g.label, route:g.items[0].id,
+        on:g.id === aktif.id, sayac:g.id === 'onaylar' ? onay : 0 })),
+      onay:{ sayi:onay, route:'onaylar' },
+      bildirim:{ sayi:bil, acil },
+      baglanti:safe(baglantiVerisi, null) || { durum:'kapali' },
+      rutbe:safe(rutbeVerisi, null) || null,
+      profil:profilVerisi(),
+    });
   }
 
-  /* Hero — bolum numarasi, baslik ve ozet. Eski ust cubugun yerini
-     alir ama ondan farkli bir sey yapar: cubuk gezinmeydi, hero
-     SAYFANIN KENDISIDIR. */
-  function heroHtml(sc){
-    const sec = bolumOf(sc.id);
+  /* ---------- gün şeridi ----------
+     Bloğun saati yoktur (plan süre ve sıra taşır, saat taşımaz): bloklar
+     saate yerleştirilmez, modülün şeridinde SIRA ve SÜRE olarak durur.
+     Şimdi çizgisi ve geçmiş dilim saatin kendisidir. */
+  function blokDurumu(b){
+    if(b.startedAt || (S.timer && S.timer.blockId === b.id)) return 'suruyor';
+    return b.status === 'pending' ? 'bekliyor' : 'bitti';
+  }
+
+  function haftaVerisi(){
+    const bugun = U.todayISO();
+    const i = U.weekdayIndex(bugun);
+    const AD = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+    return AD.map((ad, k) => {
+      const iso = U.iso(U.addDays(U.today(), k - i));
+      const gelecek = iso > bugun;
+      const gun = S.days[iso];
+      const durum = gelecek ? 'gelecek'
+        : !gun ? 'bos'
+        : (C.minimumDayMet(iso) ? 'tamam' : 'eksik');
+      return { ad, gun:Number(iso.slice(8, 10)), bugun:iso === bugun, gelecek,
+        noktalar:[{ modul:'ays', durum }] };
+    });
+  }
+
+  function gunSeridiHtml(){
+    const dateISO = U.todayISO();
+    const day = S.days[dateISO];
+    const bloklar = day ? day.blocks.filter(b => b.slot !== 'Dinlenme' && (b.targetMin || 0) > 0) : [];
+    const kalan = day ? bloklar.filter(b => blokDurumu(b) !== 'bitti').length : null;
+    const bitti = bloklar.length - (kalan || 0);
+    const n = new Date();
+    const tarih = n.toLocaleDateString('tr-TR', { weekday:'short' }) + ' '
+      + n.toLocaleDateString('tr-TR', { day:'numeric', month:'short' });
+    return K.gunSeridi({
+      tarih,
+      simdi:new Date(),
+      seritler:bloklar.length ? [{ modul:'ays', ozet:bitti + '/' + bloklar.length + ' blok',
+        bloklar:bloklar.map(b => ({ ad:(b.subject || b.slot) + ' · ' + b.targetMin + ' dk', dk:b.targetMin,
+          durum:blokDurumu(b) })) }] : [],
+      kalan,
+      hafta:S.ui.haftaAcik ? haftaVerisi() : null,
+      haftaAcik:!!S.ui.haftaAcik,
+    });
+  }
+
+  /* ---------- sayfa başı ----------
+     Yol («Plan › Hafta»), başlık, tek cümle ve ekranın eylemleri. Tek
+     bölümlü çekmecede yol yazılmaz: «Onaylar › Bekleyen» bir şey söylemez. */
+  function yolOf(route){
+    const sec = bolumOf(route);
+    const oge = ogeOf(route);
+    const sc = R.Screens[route] || {};
+    const yol = sec.items.length > 1 ? [sec.label, oge ? oge.label : sc.title] : [sec.label];
+    if(UST[route]) yol.push(sc.title);
+    return yol;
+  }
+
+  function sayfaBasiHtml(sc){
     const baslik = safe(() => sc.headline ? sc.headline() : '') || sc.title;
     const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
     const eylem = safe(() => sc.actions ? sc.actions() : '');
-    const cur = M.currentWeek();
-    const kalan = R.PLAN.kalanGun();
-
-    return html`
-      <div class="hero" data-num="${sec.num}">
-        <div class="wrapc hero__in">
-          <div class="hero__main">
-            <div class="hero__eyebrow">
-              <span class="hero__num">${sec.num}</span>
-              ${raw(UI.icon(sec.icon))}
-              <span>${sec.label}</span>
-            </div>
-            <h1 class="hero__title">${baslik}</h1>
-            ${when(ozet, () => html`<p class="hero__lede">${raw(ozet)}</p>`)}
-            ${when(eylem, () => html`<div class="hero__actions">${raw(eylem)}</div>`)}
-          </div>
-          <div class="hero__side">
-            <div class="herostat">
-              <span class="herostat__value">${kalan == null ? '—' : kalan}${when(kalan != null, () => html`<small>gün</small>`)}</span>
-              <span class="herostat__label">${kalan == null ? 'TYT tarihi geçti' : 'TYT (tahmini)'}</span>
-            </div>
-            <div class="herostat">
-              <span class="herostat__value">${cur}<small>/${R.PLAN.totalWeeks}</small></span>
-              <span class="herostat__label">hafta</span>
-            </div>
-          </div>
-          <div class="hero__motif" aria-hidden="true">${raw(UI.motif(sec.id))}</div>
-        </div>
-      </div>`;
+    return K.sayfaBasi({ yol:yolOf(sc.id), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
   }
 
-  /* Bolumun sayfalari. Tek sayfaliysa cizilmez — tek sekmeli bir
-     serit secim degil gurultu olur. */
-  function pagenavHtml(sc){
+  function bolumCubuguHtml(sc){
     const sec = bolumOf(sc.id);
-    if(sec.items.length < 2) return '';
-    return html`
-      <nav class="pagenav" aria-label="${sec.label + ' sayfaları'}">
-        <div class="wrapc pagenav__in">${map(sec.items, v => {
-          const on = v.id === sc.id;
-          const b = safe(() => badgeFor(v.id), null);
-          return html`<button class="${cls('pagelink', on && 'is-active')}"
-            data-act="go" data-route="${v.id}"
-            ${when(on, () => attrs({ 'aria-current':'page' }))}>
-            ${raw(UI.icon(v.icon))}<span>${v.label}</span>
-            ${when(b, () => html`<span class="${cls('pagelink__badge', b.quiet && 'is-quiet')}">${b.text}</span>`)}
-          </button>`;
-        })}</div>
-      </nav>`;
+    const r = UST[sc.id] || sc.id;
+    return K.bolumCubugu({ cekmece:sec.label, bolumler:sec.items.filter(v => !gizliMi(v.id)).map(v => ({
+      route:v.id, ad:v.label, on:v.id === r, rozet:safe(() => badgeFor(v.id), null) || null })) });
   }
 
-  /* Dar ekranda tam bolum listesi — kunyedeki menu dugmesi acar. */
-  function navsheetHtml(sc){
-    const aktif = bolumOf(sc.id);
-    return html`
-      <div class="navsheet" role="dialog" aria-label="Bölümler">
-        <div class="navsheet__panel">
-          <div class="navsheet__head">
-            <b>Bölümler</b>
-            ${R.C.IconButton({ icon:'close', plain:true, aria:'Kapat', act:'toggle-sidebar' })}
-          </div>
-          <div class="navsheet__list">${map(navGorunen(), sec => html`
-            <div class="navsheet__sec">
-              <div class="navsheet__num">${sec.num}</div>
-              <div class="minw0">
-                <b>${sec.label}</b>
-                <span class="tiny dim">${sec.note}</span>
-                <div class="navsheet__views">${map(sec.items, v => html`
-                  <button class="${cls('navsheet__view', v.id === sc.id && 'is-active')}"
-                    data-act="go" data-route="${v.id}">${v.label}</button>`)}</div>
-              </div>
-            </div>`)}
-          </div>
-          <div class="navsheet__foot">${raw(storeHealthHtml())}</div>
-        </div>
-      </div>`;
+  function menuHtml(sc){
+    const aktif = UST[sc.id] || sc.id;
+    const onay = onaySayisi();
+    return K.menuSayfasi({
+      cekmeceler:navGorunen().map(g => ({ id:g.id, ad:g.label, sayac:g.id === 'onaylar' ? onay : 0,
+        bolumler:g.items.map(v => ({ route:v.id, ad:v.label, on:v.id === aktif })) })),
+      ayak:storeHealthHtml(),
+    });
   }
 
-  /* Alt bant — sayfayi sonlandirir ve sistemin degismez cumlesini
-     her ekranda bir kez soyler. */
-  /* Seviye rozeti — bu sistemin KENDİ kademesi (core/xp.js).
-
-     Şimdilik alt bantta duruyor: her ekranda var, hiçbir ekranı
-     kalabalıklaştırmıyor. Künyeye ya da bir ekranın içine taşımak,
-     `R.XP.rozetHtml()` çıktısını oraya koymaktan ibarettir.
-
-     Defter yüklenmemişse BOŞ döner — «0 XP» çizmek, bilinmeyeni sıfır
-     saymak olurdu. */
-  function seviyeRozeti(){
-    if(!R.XP) return '';
-    try{ return R.XP.rozetHtml(); }catch(e){ return ''; }
+  function altBantHtml(sc){
+    const aktif = bolumOf(sc.id).id;
+    const g = navGorunen();
+    const sekmeler = BANT.map(id => g.find(x => x.id === id)).filter(Boolean)
+      .map(x => ({ id:x.id, ad:x.label, route:x.items[0].id, on:x.id === aktif }));
+    sekmeler.push({ id:'menu', ad:'Menü', act:'toggle-sidebar', on:false });
+    return K.altBant({ sekmeler });
   }
 
+  /* Hızlı ekle (166): AYS'nin en sık üç kaydı; ekrana gidip o ekranın
+     kendi işleyicisini çağırır (`next-action`). */
+  const HIZLI = [
+    { ad:'Deneme ekle', act:'next-action', data:{ 'data-route':'exams', 'data-next':'new-exam' } },
+    { ad:'Tekrar kartı ekle', act:'next-action', data:{ 'data-route':'cards', 'data-next':'new-card' } },
+    { ad:'Ders notu ekle', act:'next-action', data:{ 'data-route':'learn', 'data-next':'note-new' } },
+  ];
+
+  /* Seviye rozeti — bu sistemin KENDİ kademesi (core/xp.js). Üst
+     çubuktaki rütbe çipi onu gösterir; rozetin kendisi Rütbe ekranında
+     ve Menü'nün ayağında durmaz — tek yerde görünür. */
+
+  /* Sayfa sonu: künye yer imi. Derleme damgası ve mahremiyet cümlesi. */
   function footerHtml(){
-    const progress = M.programProgress();
-    const cur = M.currentWeek();
     return html`
-      <footer class="sitefoot">
-        <div class="wrapc sitefoot__in">
-          <div class="sitefoot__brand">
-            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
-            <div>
-              <b>Rota</b>
-              <span class="sitefoot__sub">Kişisel çalışma sistemi</span>
-              ${raw(seviyeRozeti())}
-            </div>
-          </div>
-          <div class="sitefoot__notes">
-            <p><span class="sitefoot__k">Hafta</span> ${cur}/${R.PLAN.totalWeeks} · program %${progress}</p>
-            <p><span class="sitefoot__k">Mahremiyet</span> Veriler bu cihazda tutulur.
-              Ad ve şehir hiçbir modele gönderilmez.</p>
-            ${raw(buildStampHtml())}
-          </div>
+      <footer class="sayfasonu">
+        <div class="wrapc sayfasonu__ic">
+          <p>Veriler bu cihazda tutulur. Ad ve şehir hiçbir modele gönderilmez.</p>
+          ${raw(buildStampHtml())}
         </div>
       </footer>`;
-  }
-
-  function tabbarHtml(){
-    return html`<nav class="tabbar" aria-label="Hızlı gezinme">${map(mobilSekmeler(), id => {
-      const item = NAV.reduce((f, g) => f || g.items.find(i => i.id === id), null)
-        || { label:id, icon:'right' };
-      const on = S.route === id;
-      const b = safe(() => badgeFor(id), null);
-      return html`<button class="${cls('tabbtn', on && 'is-active')}" data-act="go" data-route="${id}"
-        aria-label="${item.label}" ${when(on, () => attrs({ 'aria-current':'page' }))}>
-        <span class="tabbtn__ic">${raw(UI.icon(item.icon))}</span>
-        <span class="tabbtn__t">${item.label}</span>
-        ${when(b, () => html`<span class="${cls('tabbtn__b', b.quiet && 'is-quiet')}"
-          aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}</button>`;
-    })}</nav>`;
   }
 
   /* ---------- derleme damgası ----------
@@ -371,8 +360,14 @@ R.App = (function(){
     const theme = p.theme || 'system';
     const palette = p.palette || R.DEFAULT_PALETTE;
     const design = p.design || R.DEFAULT_DESIGN;
+    const ad = (p.name || '').trim();
     return String(html`
-      <div class="appear" id="appearance" role="dialog" aria-label="Görünüm">
+      <div class="katman appear" id="appearance" role="dialog" aria-label="Profil ve görünüm">
+        <div class="appear__profil">
+          <span class="ust__profil" aria-hidden="true">${(ad || 'Ben').charAt(0).toLocaleUpperCase('tr-TR')}</span>
+          <span class="minw0"><b>${ad || 'Profil'}</b><small>${brandLine()}</small></span>
+          ${R.C.Button({ label:'Profil', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'profiles' } })}
+        </div>
         <div class="appear__label">Tema</div>
         <div class="appear__themes">${map(THEMES, t => html`
           <button class="${cls('themebtn', t.id === theme && 'is-on')}"
@@ -410,45 +405,13 @@ R.App = (function(){
       </div>`);
   }
 
-  function openAppearance(anchor){
-    closeAppearance();
-    const root = document.getElementById('overlay-root');
-    const el = document.createElement('div');
-    el.innerHTML = appearanceHtml();
-    const panel = el.firstElementChild;
-    root.appendChild(panel);
-
-    /* Çapaya göre konumla; ekranın dışına taşarsa içeri çek. */
-    const r = anchor.getBoundingClientRect();
-    const w = panel.offsetWidth;
-    let left = r.right - w;
-    left = Math.max(12, Math.min(left, window.innerWidth - w - 12));
-    let top = r.bottom + 8;
-    if(top + panel.offsetHeight > window.innerHeight - 12){
-      top = Math.max(12, r.top - panel.offsetHeight - 8);
-    }
-    panel.style.left = left + 'px';
-    panel.style.top = top + 'px';
-  }
-  function closeAppearance(){
-    const el = document.getElementById('appearance');
-    if(el) el.remove();
-  }
-  function isAppearanceOpen(){ return !!document.getElementById('appearance'); }
-
-  /* Paneli yerinde tazele: tema değişince sayfa yeniden çizilmez, yalnızca
-     kök nitelikleri ve panelin işaretli düğmesi değişir. Böylece açık panel
-     kapanmaz ve seçimin etkisi anında görülür. */
-  function refreshAppearance(){
-    const el = document.getElementById('appearance');
-    if(!el) return;
-    const left = el.style.left, top = el.style.top;
-    const wrap = document.createElement('div');
-    wrap.innerHTML = appearanceHtml();
-    const next = wrap.firstElementChild;
-    next.style.left = left; next.style.top = top;
-    el.replaceWith(next);
-  }
+  /* Panel kabuğun katman yöneticisinden açılır (LIFEOS.KABUK): dışarı
+     tıklayınca, Esc'de ve pencere boyutu değişince kapanır; telefonda
+     alttan açılır. Tema değişince yerinde tazelenir, kapanmaz. */
+  function openAppearance(anchor){ K.katmanAc('appearance', appearanceHtml(), anchor); }
+  function closeAppearance(){ if(K.katmanAcik('appearance')) K.katmanKapat(); }
+  function isAppearanceOpen(){ return K.katmanAcik('appearance'); }
+  function refreshAppearance(){ K.katmanTazele('appearance', appearanceHtml()); }
 
   function safe(fn, fallback){
     try{ return fn(); }
@@ -568,20 +531,25 @@ R.App = (function(){
         body = errorPanel(err);
       }
 
+      /* v4 iskeleti (ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
+         sayfa başı · bölüm çubuğu · ekran · sayfa sonu; telefonda alt bant
+         ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
       document.getElementById('app').innerHTML = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
-        <div class="site">
-          ${safe(mastheadHtml)}
-          ${safe(() => sitenavHtml(sc))}
-          ${safe(() => heroHtml(sc))}
-          ${safe(() => pagenavHtml(sc))}
+        <div class="site site--v4">
+          ${raw(safe(() => ustCubukHtml(sc)))}
+          ${raw(safe(gunSeridiHtml))}
           <div class="site__body">
-            <main class="wrapc content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
+            <div class="wrapc sayfa">
+              ${raw(safe(() => sayfaBasiHtml(sc)))}
+              ${raw(safe(() => bolumCubuguHtml(sc)))}
+              <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
+            </div>
           </div>
           ${safe(footerHtml)}
-          ${tabbarHtml()}
+          ${raw(safe(() => altBantHtml(sc)))}
         </div>
-        ${when(S.sidebarOpen, () => safe(() => navsheetHtml(sc)))}`);
+        ${when(S.sidebarOpen, () => raw(safe(() => menuHtml(sc))))}`);
 
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
@@ -646,6 +614,7 @@ R.App = (function(){
        icin sonuc: tikladiginda hicbir sey olmayan bir dugme. (ESP'de duman
        testi bunu "olu dugme" olarak yakaladi.) */
     if(UI.isSheetOpen && UI.isSheetOpen()) UI.closeSheet();
+    K.katmanKapat();
     /* Gizlenmis bolumun adresi (eski bir baglanti, palet gecmisi) Bugun'e
        doner: gizlenen bolum «acilmayan bos ekran» olarak gorunmemeli. */
     if(gizliMi(route)) route = 'today';
@@ -723,7 +692,22 @@ R.App = (function(){
       if(el.dataset.tab) S.ui.cardTab = el.dataset.tab;
       go(el.dataset.route);
     },
-    async 'toggle-sidebar'(){ S.sidebarOpen = !S.sidebarOpen; render(); },
+    async 'toggle-sidebar'(){ K.katmanKapat(); S.sidebarOpen = !S.sidebarOpen; render(); },
+    /* Kabuğun açılır panelleri (LIFEOS.KABUK): ikinci basış kapatır. */
+    async 'modul-menu'(el){
+      if(K.katmanAcik('kabuk-modul')){ K.katmanKapat(); return; }
+      K.katmanAc('kabuk-modul', K.modulMenusu({ modul:'ays' }), el);
+    },
+    async 'bildirim-ac'(el){
+      if(K.katmanAcik('kabuk-bildirim')){ K.katmanKapat(); return; }
+      K.katmanAc('kabuk-bildirim', K.bildirimPaneli({ gruplar:bildirimGruplari() }), el);
+    },
+    async 'hizli-ekle'(el){
+      if(K.katmanAcik('kabuk-hizli')){ K.katmanKapat(); return; }
+      K.katmanAc('kabuk-hizli', K.hizliEkle({ modul:'ays', satirlar:HIZLI }), el);
+    },
+    /* Gün şeridindeki tarih (05): yedi gün açılır ya da kapanır. */
+    async 'hafta-ac'(){ S.ui.haftaAcik = !S.ui.haftaAcik; render(); },
     async hint(el){
       if(UI.isHintOpen() && el.dataset.hint === UI._lastHint){ UI.closeHint(); UI._lastHint = null; return; }
       UI._lastHint = el.dataset.hint;
@@ -1101,7 +1085,7 @@ R.App = (function(){
       if(R.Talk && R.Talk.isActive()){ R.Talk.stop(); render(); return; }
       if(R.Palette.isOpen()){ R.Palette.close(); return; }
       if(R.Palette.isFocusOpen()){ R.Palette.closeFocus(); return; }
-      if(isAppearanceOpen()){ closeAppearance(); return; }
+      if(K.katmanAcik()){ K.katmanKapat(); return; }
       if(UI.isHintOpen()){ UI.closeHint(); return; }
       if(UI.isSheetOpen()){ UI.closeSheet(); return; }
       if(S.sidebarOpen){ S.sidebarOpen = false; render(); return; }
@@ -1119,24 +1103,15 @@ R.App = (function(){
     if(sc.onKey) sc.onKey(e);
   });
 
-  /* Yuzen panelleri disariya tiklayinca kapat: ipucu balonu ve gorunum
-     paneli. Ikisi de capaya gore konumlanir, ikisi de disari tiklamayla
-     kapanmali — biri kapanip digeri kalirsa kullanici hangisinin "acik"
-     oldugunu bilemez. */
+  /* Ipucu balonu disariya tiklayinca kapanir. Kabugun panelleri
+     (gorunum, modul menusu, bildirimler, hizli ekle) bunu LIFEOS.KABUK
+     katman yoneticisinde yapar: disari tiklama, Esc, boyut degisimi. */
   document.addEventListener('mousedown', e => {
     if(UI.isHintOpen()
       && !e.target.closest('#popover') && !e.target.closest('[data-act="hint"]')){
       UI.closeHint();
     }
-    if(isAppearanceOpen()
-      && !e.target.closest('#appearance') && !e.target.closest('[data-act="open-appearance"]')){
-      closeAppearance();
-    }
   });
-
-  /* Pencere boyutu degisince panelin capasi kayar; yeniden konumlamak
-     yerine kapatmak daha durust: kullanici nereye tikladigini bilir. */
-  window.addEventListener('resize', () => { if(isAppearanceOpen()) closeAppearance(); });
 
   /* ------------------------------------------------------- sürtünme ölçümü
 
@@ -1505,7 +1480,7 @@ R.App = (function(){
     }
   }
 
-  return { boot, render, patch, go, applyTheme, NAV, canInstall, promptInstall, installManifest,
+  return { boot, render, patch, go, applyTheme, NAV, yolOf, canInstall, promptInstall, installManifest,
     notifyState, askNotify, notifyFromOffice };
 })();
 

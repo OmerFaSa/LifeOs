@@ -28,6 +28,16 @@
 >   + şekil), düğme (`primary` modül rengi, `ink` siyah, `ghost`), çip
 >   (köşeli), rozet (hap), alt çekmece tutamağı (162).
 > - **Hap biçimi** yalnız etkin sekmede ve rozette.
+> - **Kabuk** (T2) `brand/ortak/kabuk.js` + `kabuk.css`'te; app.js yalnız
+>   veriyi verir. Sıra: üst çubuk (modül menüsü · sekiz çekmece · ara ·
+>   zil · bağlantı noktası · rütbe çipi · profil) → gün şeridi → sayfa
+>   başı (yol «Plan › Hafta», başlık, tek cümle, eylemler) → bölüm çubuğu
+>   → ekran → sayfa sonu. Telefonda alt bant (Bugün · Plan · Çalışma ·
+>   Menü) ve sağ altta +. Çekmece adları `LIFEOS.KABUK.CEKMECELER`'den
+>   gelir; ekranın yeri `R.App.NAV`'da, yolu `R.App.yolOf(rota)`'da.
+> - **Ekranın içinde sekme yok** (sadelik bütçesi): çekmecenin bölümleri
+>   bölüm çubuğunda, ekranın parçaları alt alta kutularda durur. Boş
+>   durum bir `C.Kutu` + tek eylemdir; kutu başlığı `h2`'dir.
 
 
 Tek token kaynağı: `css/tokens.css`. Bileşenler yalnız bu değişkenleri kullanır;

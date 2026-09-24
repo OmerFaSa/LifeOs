@@ -751,117 +751,6 @@ R.Screens.today = (function(){
     });
   }
 
-  /* ---------- HKM teklifleri ----------
-
-     HKM bu sisteme YAZMAZ: kuyruktan gelen her satir bir TEKLIFTIR ve
-     kullanici gormeden hicbir sey uygulanmaz. Uygulayan da HKM degil,
-     AYS'in kendi kodudur. Kuyruk bossa bu kart hic cizilmez. */
-  /* ---------- King teklifi (Part 8a-3b) ----------
-
-     Ücretli iş King'in onay kapısında bekler (HKM core/king.py). Seçenek
-     metni ve sayılar HKM'den gelir; kart yalnız yazar ve onayı iletir. */
-  function KingTeklifKart(){
-    const liste = S.ui.kingTeklifler || [];
-    if(!liste.length) return '';
-    return c.Card({ title:'King teklifi', hint:'hkm', sub:liste.length + ' iş onayını bekliyor',
-      body:html`
-        ${map(liste.filter(t => t.durum === 'ara_onay'), t => html`<div class="mt-8">
-          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
-          <div class="tiny mt-4">${t.metin}</div>
-          <div class="row wrap gap-8 mt-8">
-            ${c.Button({ label:'Devam', size:'sm', tone:'primary', act:'king-parca',
-              data:{ 'data-id':String(t.id), 'data-karar':'devam' } })}
-            ${c.Button({ label:'Dur ve bitir', size:'sm', act:'king-parca',
-              data:{ 'data-id':String(t.id), 'data-karar':'dur' } })}
-          </div>
-        </div>`)}
-        ${map(liste.filter(t => t.durum !== 'ara_onay'), t => html`<div class="mt-8">
-          <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
-          ${map(t.secenekler, (x, i) => html`<div class="tiny mt-4">${i + 1}) ${x.metin}</div>`)}
-          ${when(t.neden, () => c.Notice({ tone:'info', class:'mt-8',
-            body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri)
-              + ' — ' + t.neden + '.' }))}
-          <div class="row wrap gap-8 mt-8">
-            ${/* Düğme kısa: seçeneğin adı ve sayıları yukarıdaki satırda yazılı;
-                  uzun ad 390 pikselde satırdan taşıyordu. */''}
-            ${map(t.secenekler, (x, i) => c.Button({ label:(i + 1) + '. seçeneği onayla',
-              size:'sm', tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla',
-              data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
-            ${c.Button({ label:'İptal', size:'sm', act:'king-iptal',
-              data:{ 'data-id':String(t.id) } })}
-          </div>
-        </div>`)}
-        <p class="tiny dim mt-10">King ücretli bir işi onayın olmadan açmaz. Sınıf, maliyet
-          ve süre King’in hesabıdır (tahmin); sen onaylayınca iş BAM’da başlar ve sonucu
-          teklif olarak buraya gelir.</p>` });
-  }
-
-  function HkmTeklifKart(){
-    const liste = S.ui.hkmIntents || [];
-    const supheli = S.ui.hkmDoubts || [];
-    if(!liste.length && !supheli.length) return '';
-    return c.Card({ title:'HKM teklifi', hint:'hkm',
-      sub:liste.length ? liste.length + ' teklif bekliyor'
-        : supheli.length + ' teklifin sonucu belirsiz',
-      body:html`
-        ${/* Uygulama yarida kalmis teklif: uydurmak yerine BILMEDIGIMIZI
-              soyleriz. Ne tekrar uygulanir ne de olmus sayilir. */''}
-        ${map(supheli, d => html`<div class="mt-8">
-          ${c.Notice({ tone:'warn', body:'Bir teklif uygulanırken işlem '
-            + 'yarıda kaldı; plana yazılıp yazılmadığı bilinmiyor. Planına '
-            + 'bakıp doğrula — bu satır, olmamış bir işi olmuş göstermemek '
-            + 'için duruyor.' })}
-          <div class="row gap-8 mt-8">
-            ${c.Button({ label:'Kontrol ettim', size:'sm',
-              act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } })}
-          </div>
-        </div>`)}
-        ${when(topluKayitlar().length >= 2, () => html`<div class="row gap-8 mt-8">
-          ${c.Button({ label:'Hepsini kaydet (' + topluKayitlar().length + ')', size:'sm',
-            tone:'primary', act:'hkm-toplu' })}
-          <span class="tiny dim">Yalnız okunabilen günlük kayıtlar; her biri Ofis ekranından geri alınır.</span>
-        </div>`)}
-        ${map(liste, n => html`<div class="mt-8">
-          ${c.Notice({ tone:'info', body:n.note })}
-          ${when(n.kind === 'kayit.add', () => KayitOkuma(n))}
-          <div class="row gap-8 mt-8">
-            ${/* Uygulanamayan turde «Uygula» CIKMAZ: gorunen eylem,
-                  yapilabilen eylemle ayni olmali. */''}
-            ${when(R.Beacon.canApply(n), () => c.Button({
-              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'load.reduce':'Hafiflet' })[n.kind] || 'Uygula',
-              size:'sm', tone:'primary', act:'hkm-intent-yes',
-              data:{ 'data-id':String(n.id) } }))}
-            ${when(!R.Beacon.canApply(n), () => c.Button({ label:'Gördüm',
-              size:'sm', tone:'primary', act:'hkm-intent-seen',
-              data:{ 'data-id':String(n.id) } }))}
-            ${c.Button({ label:'İstemiyorum', size:'sm',
-              act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}
-          </div>
-        </div>`)}
-        <p class="tiny dim mt-10">Bu satırlar birer tekliftir. Onaylarsan
-          AYS kendi planına yazar; reddedersen HKM kaydı siler değil
-          «istenmedi» diye işaretler — görülmemiş bir teklifle reddedilmiş
-          bir teklif ayrı şeylerdir.</p>` });
-  }
-
-  /* Gunun kaydi: AYS cumleyi NASIL OKUDU. Onaydan once gorunur; yazilamayan
-     ve anlasilmayan parca da SEBEBIYLE yazilir — sessizce dusen bir parca,
-     kullanicinin yazildigini sandigi bir kayit olurdu. */
-  function KayitOkuma(n){
-    const o = n.okuma;
-    if(!o) return html`<p class="tiny dim mt-8">AYS bu kaydı okuyamadı.</p>`;
-    return html`<div class="mt-8">
-      <p class="tiny"><b>AYS şöyle okudu</b> (${o.gun}):</p>
-      <ul class="tiny mt-4">
-        ${map(o.yazilacak, y => html`<li>${y.baslik}: ${y.satirlar.join('; ')}</li>`)}
-        ${map(o.yazilamaz, y => html`<li class="dim">«${y.metin}» — yazılmayacak: ${y.why}</li>`)}
-        ${map(o.anlasilmayan, m => html`<li class="dim">«${m}» — anlaşılmadı, yazılmayacak.</li>`)}
-      </ul>
-      ${when(!o.yazilacak.length, () => html`<p class="tiny dim">Bu cümleden AYS'ye
-        yazılacak bir şey çıkmadı; istersen kaydı elle gir.</p>`)}
-    </div>`;
-  }
-
   /* ---------- HKM seridi: KUCUK ve HER GUN ORADA
 
      HKM ayarlari «Rehber» ekraninin icinde duruyordu: gunde bir bakilan
@@ -914,7 +803,7 @@ R.Screens.today = (function(){
           body:(a.lastNote || 'Gönderilemedi.') + ' AYS bundan etkilenmez; '
              + 'veri burada duruyor ve bir sonraki denemede gider.' }))}
         ${when(teklif > 0, () => html`<p class="tiny dim">${teklif} teklif
-          bekliyor — aşağıda.</p>`)}
+          bekliyor — Onaylar’da.</p>`)}
         <div class="row gap-8 mt-8">
           ${c.Button({ label:'Şimdi gönder', size:'sm', act:'hkm-gonder' })}
           ${c.Button({ label:'Ayarlar', size:'sm', act:'go',
@@ -973,8 +862,8 @@ R.Screens.today = (function(){
       ${when(banners.length, () => c.Span(12, html`<div class="stack-sm">${banners}</div>`))}
       ${c.Span(12, R.Setup.needed() ? raw(R.Setup.card()) : NextUpCard())}
       ${when(R.Signals && R.Signals.current(), () => c.Span(12, SignalCard()))}
-      ${when((S.ui.kingTeklifler || []).length, () => c.Span(12, KingTeklifKart()))}
-      ${when((S.ui.hkmIntents || []).length, () => c.Span(12, HkmTeklifKart()))}
+      ${/* Öneri alanı: en öndeki tek kart; gerisi Onaylar'da (CEKMECE-HARITASI). */''}
+      ${when(R.Screens.onaylar && R.Screens.onaylar.bekleyen(), () => c.Span(12, R.Screens.onaylar.oneriAlani()))}
       ${c.Span(12, HkmSerit())}
 
       ${c.Span(12, c.Cols(4, html`
@@ -1028,55 +917,10 @@ R.Screens.today = (function(){
     if(runningBlock()) startTick(); else stopTick();
   }
 
-  /* TOPLU ONAY yalniz KUCUK tekliflerde: gunluk kayit (kayit.add), AYS'nin
-     okuyabildigi ve Ofis'ten geri alinabilen. Plan, materyal, kitap gibi
-     orta aksiyonlar tek tek onaylanir (AGENTS.md §1.9). */
-  function topluKayitlar(){
-    return (S.ui.hkmIntents || []).filter(n => n.kind === 'kayit.add'
-      && n.okuma && n.okuma.yazilacak && n.okuma.yazilacak.length && R.Beacon.canApply(n));
-  }
-
-  async function hkmToplu(){
-    const l = topluKayitlar();
-    let yazilan = 0, kalan = 0;
-    for(const n of l){
-      const r = await R.Beacon.resolveIntent(n, 'apply');
-      if(r.ok){
-        yazilan++;
-        S.ui.hkmIntents = (S.ui.hkmIntents || []).filter(x => x.id !== n.id);
-      }else kalan++;
-    }
-    if(yazilan) R.UI.onayMuhru();
-    UI.toast(yazilan + ' kayıt yazıldı' + (kalan ? ', ' + kalan + ' tanesi yazılamadı (kartta duruyor)' : '')
-      + '. Yanlış olanı Ofis ekranından geri alabilirsin.');
-    R.App.render();
-  }
-
-  /* HKM teklifine verilen cevabin TEK yolu. */
-  async function hkmCevap(id, action){
-    const liste = S.ui.hkmIntents || [];
-    const n = liste.filter(x => String(x.id) === String(id))[0];
-    if(!n) return;
-    const r = await R.Beacon.resolveIntent(n, action);
-    /* MUHUR YALNIZ ONAYDA BASILIR. Reddetmek de bir cevaptir ama
-       onay degildir; ikisine ayni muhru basmak, muhru anlamsiz
-       kilardi. */
-    if(r.ok && action !== 'reject' && action !== 'dismiss') R.UI.onayMuhru();
-    if(!r.ok){ UI.toast(r.error || 'İşlenemedi'); return; }
-    S.ui.hkmIntents = liste.filter(x => x.id !== n.id);
-    const bas = r.state === 'applied' ? (r.note || 'Uygulandı')
-      : (r.state === 'acknowledged' ? 'Görüldü olarak işaretlendi'
-        : 'İstenmedi olarak işaretlendi');
-    /* Merkeze ulasilamadiysa bunu SOYLE: kayit yerelde duruyor ve bir
-       sonraki baglantida tekrar denenecek. */
-    /* Yük azaltma bir istisna yazar; «Geri al» onu kaldırır (gün temele döner). */
-    const geri = r.geriAl && R.Istisna ? { undo:async () => {
-      await R.Istisna.kaldir(r.geriAl); UI.toast('Geri alındı; gün planına döndü.'); R.App.render();
-    } } : undefined;
-    UI.toast(r.reported ? bas
-      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.', geri);
-    R.App.render();
-  }
+  /* Öneri alanındaki kartın düğmeleri Onaylar ekranının işleyicilerine
+     gider: onay TEK yoldan geçer, iki ekranda iki ayrı kod durmaz. */
+  const ONAY_EYLEMLERI = ['king-onayla', 'king-parca', 'king-iptal', 'hkm-toplu', 'hkm-intent-yes',
+    'hkm-intent-seen', 'hkm-intent-no', 'hkm-doubt-ok', 'office-approve', 'office-reject', 'office-undo'];
 
   /* ---------- eylemler ---------- */
   const handle = {
@@ -1169,36 +1013,8 @@ R.Screens.today = (function(){
       UI.toast(r.ok ? 'Plan geri alındı; hafta taslağı eski sırasına döndü.' : (r.why || 'Geri alınamadı'));
       R.App.render();
     },
-    /* King'in teklifi (brand/ortak/kingteklif.js): onay ve iptal HKM'nin
-       tek kapısına gider; cevabı HKM kurar. */
-    async 'king-onayla'(el){
-      if(!R.KingTeklif) return;
-      el.disabled = true;
-      const r = await R.KingTeklif.onayla(el.dataset.id, el.dataset.secenek);
-      UI.toast(r.metin);
-      S.ui.kingTeklifler = R.KingTeklif.liste();
-      R.App.render();
-    },
-    async 'king-parca'(el){
-      if(!R.KingTeklif) return;
-      el.disabled = true;
-      const r = await R.KingTeklif.parca(el.dataset.id, el.dataset.karar);
-      UI.toast(r.metin);
-      S.ui.kingTeklifler = R.KingTeklif.liste();
-      R.App.render();
-    },
-    async 'king-iptal'(el){
-      if(!R.KingTeklif) return;
-      const r = await R.KingTeklif.iptal(el.dataset.id);
-      UI.toast(r.metin);
-      S.ui.kingTeklifler = R.KingTeklif.liste();
-      R.App.render();
-    },
-    async 'hkm-toplu'(){ await hkmToplu(); },
+
     async 'onbes-dk'(){ S.ui.onbesDk = !S.ui.onbesDk; R.App.render(); },
-    async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'apply'); },
-    async 'hkm-intent-seen'(el){ await hkmCevap(el.dataset.id, 'seen'); },
-    async 'hkm-intent-no'(el){ await hkmCevap(el.dataset.id, 'dismiss'); },
 
     /* Elle gonderim: kullanicinin ACIKCA istedigi an. Kapaliyken de
        zorlanmaz — kapali bir seyi «bir kerelik» calistirmak, kapali
@@ -1208,15 +1024,6 @@ R.Screens.today = (function(){
       const r = await R.Beacon.send({ reason:'manual' });
       UI.toast(r.ok ? 'HKM\u2019ye gönderildi.'
         : ('Gönderilemedi — ' + (r.note || r.reason || 'sebep bilinmiyor')));
-      R.App.render();
-    },
-
-    async 'hkm-doubt-ok'(el){
-      const r = await R.Beacon.clearDoubt(el.dataset.id);
-      S.ui.hkmDoubts = (S.ui.hkmDoubts || [])
-        .filter(x => String(x.id) !== el.dataset.id);
-      UI.toast(r.reported ? 'Kapatıldı; merkeze «belirsiz» diye bildirildi.'
-        : 'Kapatıldı; merkeze şimdilik bildirilemedi.');
       R.App.render();
     },
 
@@ -1372,6 +1179,7 @@ R.Screens.today = (function(){
     },
     async 'open-review'(){ R.Screens.week.openReview(); },
   };
+  ONAY_EYLEMLERI.forEach(a => { handle[a] = el => R.Screens.onaylar.handle[a](el); });
 
   const change = {
     async 'block-subject'(el){
