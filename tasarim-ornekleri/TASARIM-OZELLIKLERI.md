@@ -1,139 +1,199 @@
-# LifeOS · Tasarım özellikleri havuzu
+# LifeOS · Tasarım kataloğu (sürüm 2)
 
-Gelecekteki tasarım çalışması için 70 fikir. Her biri tek satır: ne görünür, ne işe yarar.
-★ işaretli 12 tanesi önce yapılmalı; geri kalanı sırayla.
+96 özellik · 38 yeni · 25 P1. Canlı örnekleri `vitrin.html` içinde; bu liste o dosyadaki veriden üretildi.
 
-**Yeniden önerilmeyenler** (depoda anahtar kelime aramasıyla bulundu, ayrıntısı doğrulanmadı):
-komut paleti (⌘K), paletler, Geri al, odak modu, zamanlayıcı, iskelet yükleme,
-azaltılmış hareket, ısı haritası, mini çizgi grafik, çevrimdışı, yazdırma.
+**Öncelik:** P1 önce, P2 sonra, P3 ileride. **Emek:** az / orta / çok. **YENİ:** ilk vitrinde yoktu.
 
-**Bütün fikirlerin uyduğu üç kural**
-1. Renk yalnız sahipliği söyler: mavi AYS, yeşil SPİ, turuncu ESP, mor Merkez. Yeşil/kırmızı yalnız yön. Başka anlam yüklenmez.
-2. Her sayı etiketlidir: ölçüldü · hesaplandı · tahmin · veri yok. Eksik veri «—» olur, 0 olmaz.
-3. Sınırlar tasarımda da geçerli: SPİ teşhis/doz göstermez, ESP/AYS sertifika ve yetenek yargısı göstermez, XP hiçbir kararın yanında durmaz.
+## İlkeler
 
----
+1. **Renk sahipliği söyler.** Mavi AYS, yeşil SPİ, turuncu ESP, mor Merkez. Yeşil/kırmızı yalnız yön.
+2. **Etiketsiz sayı yok.** Ölçüldü · hesaplandı · tahmin · veri yok. Eksik veri «—», grafik sıfıra düşmez.
+3. **Kod karar verir, model anlatır.** Sayı kuraldan gelir; modelin cümlesi ekranda ayrı durur.
+4. **Sınırlar ekranda da geçerli.** SPİ teşhis/doz göstermez; ESP/AYS sertifika ve yetenek yargısı göstermez; XP hiçbir kararın yanında durmaz.
+
+## Temeller (özellik değil, kural)
+
+Renk · Tipografi (serif başlık, sans metin, mono sayı; birim küçük) · Boşluk (4-8-12-16-24-32) · Yüzey (zemin/kart/yükseltilmiş) · Köşe (6/8/10/14) · Hareket (120/200/320/700 ms; azaltılmış harekette 0)
 
 ## A · Ortak tasarım dili (12)
 
-| # | Özellik | Ne yapar |
-|---|---|---|
-| 1 ★ | **Modül şeridi** | Birden çok modülün işi aynı ekrandaysa her modül kendi yatay şeridinde durur; kategoriler karışmaz. Örnek: `ays-gece.html` |
-| 2 ★ | **Tek kutu iskeleti** | Her kutu aynı başlığı taşır: simge + ad + sağda kesinlik etiketi. Göz, kutunun ne olduğunu başlıktan okur. |
-| 3 ★ | **Üç alan düzeni** | Her «Bugün» ekranı aynı sırada: Şimdi → Durum → Öneri. Kullanıcı her modülde aynı yere bakar. |
-| 4 | **Tipografi üçlüsü** | Başlık için karakterli bir yazı, metin için sade yazı, sayı için eşit aralıklı yazı. Üçü hiç yer değiştirmez. |
-| 5 | **Tablo sayıları** | Bütün sayılar eşit genişlikte rakamla ve sağa hizalı; alt alta gelen değerler kaymaz. |
-| 6 | **Tek boşluk ölçeği** | 4 · 8 · 12 · 16 · 24 · 32 px dışında boşluk yok; tek kaynaktan dağıtılır. |
-| 7 | **Ton katmanları** | Gölge yerine üç yüzey tonu (zemin, kart, yükseltilmiş) ve tek çizgi rengi; koyu ve açık temada aynı mantık. |
-| 8 ★ | **Sayfa başı cümlesi** | Her ekranın tepesinde kural motorunun ürettiği tek cümle: «7 işin 3’ü bitti · sıradaki blok 20:30’da». |
-| 9 | **Boş durum sahnesi** | Veri yoksa küçük bir çizim + tek eylem («İlk ölçümü ekle»). Asla boş grafik ya da 0. |
-| 10 | **Kısayol rozetleri** | Ana düğmelerde küçük tuş rozeti (↵, E); klavyeyle çalışan kullanıcı ezberlemeden öğrenir. |
-| 11 | **Modül işareti** | Üst çubukta 2×2 kare: dört sistem, aktif olan kendi renginde yanar. «LifeOS / AYS» yolu yanında. |
-| 12 | **Tek canlı öğe kuralı** | Ekranda aynı anda yalnız bir şey hareket eder ya da parlar (genelde «sıradaki»). |
+_her sistemde aynı davranan parçalar_
 
-## B · Sayı ve veri gösterimi (8)
+| # | Özellik | Ne yapar | Neden | Modül | Önc. | Emek |
+|---|---|---|---|---|---|---|
+| 01 | **Modül şeridi** | Birden çok modülün işi aynı ekrandaysa her modül kendi yatay şeridinde durur. | Kategoriler aynı listede karışmaz; göz rengi ve satırı birlikte okur. | hepsi | P1 | orta |
+| 02 | **Tek kutu iskeleti** | Her kutu aynı başlığı taşır: simge, ad ve sağda kesinlik etiketi. | Kutunun ne olduğu içeriğine bakmadan anlaşılır. | hepsi | P1 | az |
+| 03 | **Üç alan düzeni** | Her «Bugün» ekranı aynı sırada: Şimdi → Durum → Öneri. | Modül değişse de göz aynı yere bakar; öğrenme bir kez olur. | hepsi | P1 | az |
+| 04 | **Sayfa başı cümlesi** | Ekranın tepesinde kural motorunun ürettiği tek cümlelik durum. | Ekranı taramadan günün özeti alınır; cümle koddan geldiği için tutarlıdır. | hepsi | P1 | az |
+| 05 | **Hafta şeridi** · YENİ | Başlığın altında yedi gün; her günde üç modülün noktası, gelecek günler boş halka. | Bugünün haftadaki yeri ve hangi günün boş kaldığı tek bakışta görülür. | hepsi | P2 | az |
+| 06 | **Günün açılışı** · YENİ | Günün ilk açılışında tek kart: iş sayısı, toplam süre ve ilk iş. | Güne planı okuyarak değil, tek kartla başlanır. | hepsi | P2 | orta |
+| 07 | **Gün kapanışı** · YENİ | Akşam «Bugün kapandı» kartı: üç sayı ve yarının ilk işi. | Gün yarım kalmış hissi bırakmaz; ertesi sabah hazır başlar. | hepsi | P2 | orta |
+| 08 | **Modül geçiş menüsü** · YENİ | «LifeOS / AYS» yolundan açılan menü: dört sistem, her biri kendi renginde ve kendi durumuyla. | Sistemler arası geçiş tek tık; hangi sistemde olduğun hiç karışmaz. | hepsi | P2 | orta |
+| 09 | **Gruplu bildirimler** · YENİ | Bildirimler modül şeritleriyle gruplanır; Merkez önerileri ayrı kümede durur. | Farklı kategorilerin uyarıları aynı listede birbirine girmez. | hepsi | P2 | orta |
+| 10 | **Boş durum sahnesi** | Veri yoksa küçük bir çizim ve tek eylem gösterilir. | Boş grafik ya da 0, «ölçüldü ve sıfır» diye yanlış okunur. | hepsi | P2 | az |
+| 11 | **Sakin hata durumu** · YENİ | Bir şey bozulursa: ne oldu, verin nerede, tek düğme. Kırmızı yok. | Kullanıcı veri kaybı olmadığını ilk cümlede öğrenir. | hepsi | P2 | az |
+| 12 | **Tek canlı öğe** | Ekranda aynı anda yalnız bir şey nabız atar: sıradaki iş. | Dikkat bölünmez; hareket görüldüğünde bir anlamı vardır. | hepsi | P2 | az |
 
-| # | Özellik | Ne yapar |
-|---|---|---|
-| 13 ★ | **Kesinlik glifleri** | Dolu nokta = ölçüldü, yarım dolu = hesaplandı, kesikli halka = tahmin, «—» = veri yok. Sayfa altında tek satır açıklama. |
-| 14 | **Tahmin alt çizgisi** | Tahmin olan sayının altı kesik çizgili; üzerine gelince kodun verdiği aralık görünür. |
-| 15 ★ | **Anlamlı fark rozeti** | «+3», «+41» küçük hap içinde. Rengi işaretten değil anlamdan gelir: net artışı yeşil, tekrar borcu artışı kırmızı. |
-| 16 | **Eşik çizgili çubuk** | Değer çubuğunun üstünde eşik işareti: «tekrar borcu %34 · eşik %10» tek bakışta okunur. |
-| 17 | **Tik sayacı** | Küçük hedeflerde yüzde çubuğu yerine adet kutucukları (15/18); kalan kutu sayılır. |
-| 18 | **Geçen dönem gölgesi** | Grafikte bu haftanın çizgisi canlı, geçen haftanınki soluk; karşılaştırma ayrı grafik istemez. |
-| 19 | **Grafiğin cümlesi** | Her grafiğin altında kural motorunun tek cümlesi («Son 6 denemede +12 net»); ekran okuyucu da bunu okur. |
-| 20 | **Küçük birim** | Sayı büyük, birim küçük ve gri: **82** net. Birim hiçbir zaman sayı boyutunda değil. |
+## B · Sayı ve veri (11)
 
-## C · AYS (10)
+_etiketsiz sayı yok, eksik veri sıfır değil_
 
-| # | Özellik | Ne yapar |
-|---|---|---|
-| 21 ★ | **Sıradaki blok kahramanı** | Ekranın en büyük öğesi tek iş; adımları süreyle orantılı çubuk (ısınma 10 · ana set 50 · analiz 10). |
-| 22 | **Geri sayım rozeti** | «6 sa 20 dk sonra»; son 15 dakikada rozet nabız atmaya başlar. |
-| 23 | **Nötr soru şeridi** | Çözerken üstte 30 bölmeli ince şerit yalnız «çözüldü/boş» gösterir; doğru/yanlış renkleri set bitince açılır, kaygı yaratmaz. |
-| 24 | **Yanlış kartı** | Yanlış notu ön/arka çevrilen kart: önde soru özeti, arkada «neden yanlış» notu. |
-| 25 | **Deneme karnesi** | Ders başına tek satır: doğru · yanlış · boş yatay yığılmış çubuk, sonda net. TYT ve AYT ayrı şerit. |
-| 26 | **Konu kapsam halkası** | Konu listesinde her konunun yanında «planlanan sorunun ne kadarı çözüldü» halkası; yetenek değil, kapsam gösterir. |
-| 27 | **40 hafta çizgisi** | Sınava kadar her hafta bir tik: geçen gri, bu hafta mavi parlar, ara haftası taralı. |
-| 28 | **Ara haftası önizlemesi** | Orta seviye aksiyon: programda etkilenecek haftalar taralı gösterilir, tek onayla uygulanır. |
-| 29 | **Taşıma gölgesi** | Program bloğu sürüklenirken etkilenen bloklar hayalet olarak kayar; bırakınca «Geri al» kalır. |
-| 30 | **Tek satır soru ekle** | Ders · konu · sonuç üç çip; açılır pencere yok, Enter ile kaydedilir. |
+| # | Özellik | Ne yapar | Neden | Modül | Önc. | Emek |
+|---|---|---|---|---|---|---|
+| 13 | **Kesinlik glifleri** | Dolu, yarım, kesikli, çizgi. Tahmin olan sayının altı kesik ve aralığıyla birlikte. | Kural 2: etiketsiz sayı hiçbir katmana girmez. | hepsi | P1 | az |
+| 14 | **Köken kartı** · YENİ | Sayının üzerine gelince nereden geldiği açılır: formül, girdiler, hesap zamanı. | Kod otoritedir; kullanıcı her sayının hesabını kendi gözüyle görebilir. | hepsi | P1 | orta |
+| 15 | **Veri tazeliği** · YENİ | Eski ölçüm soluklaşır ve yaşını yazar: «12 gün önce». | Bayat veri güncelmiş gibi görünüp kararı yanıltmaz. | hepsi | P1 | az |
+| 16 | **Eksik gün boşluğu** · YENİ | Grafikte verisi olmayan gün boşluk kalır; çizgi kesikli geçer, sıfıra düşmez. | Eksik veri sıfır değildir; düşen çizgi olmayan bir kötüleşme gösterir. | hepsi | P1 | az |
+| 17 | **Anlamlı fark rozeti** | Rozetin rengi işaretten değil anlamdan gelir: net artışı iyi, borç artışı kötü. | +41 tekrar borcu yeşil gösterilirse yanlış haber olur. | hepsi | P1 | az |
+| 18 | **Eşik çizgili çubuk** | Değer ve eşik aynı çubukta. | Eşiğin ne kadar aşıldığı hesaplanmadan görülür. | hepsi | P2 | az |
+| 19 | **Tik sayacı** | Küçük hedefte yüzde yerine adet kutucukları. | Kalan 3 kutu sayılır; %83 soyut kalır. | hepsi | P2 | az |
+| 20 | **Hedef bandı** · YENİ | Grafikte hedef aralığı yatay bant; bant dışındaki noktalar içi boş. | Tek hedef sayısı yerine kabul edilebilir aralık; her sapma alarm değildir. | SPİ, AYS | P2 | az |
+| 21 | **Geçen dönem gölgesi** | Geçen dönem soluk kesik çizgi olarak arkada durur. | Karşılaştırma için ikinci bir grafik gerekmez. | hepsi | P3 | az |
+| 22 | **Gelecek yük grafiği** · YENİ | Önümüzdeki yedi günün tekrar yükü; bugün dolu, gelecek kesikli. | Birikme olmadan görülür ve Merkez önerisinin gerekçesi olur. | AYS, ESP | P2 | orta |
+| 23 | **Grafiğin cümlesi** | Her grafiğin altında kodun ürettiği tek okuma cümlesi. | Acele eden kullanıcı da ekran okuyucu da aynı bilgiyi alır. | hepsi | P2 | az |
 
-## D · SPİ (9)
+## C · AYS (14)
 
-| # | Özellik | Ne yapar |
-|---|---|---|
-| 31 ★ | **Toparlanma halkası** | 72 değeri ortada; çevresinde uyku, hareket, beslenme ayrı dilimler, her biri kendi kesinlik etiketiyle. |
-| 32 | **Uyku bandı** | Gece 23:00–07:00 yatay şerit; uyanıklıklar kesik, haftalık ortalama ince çizgi. |
-| 33 | **Referans bandı** | Tahlil değerleri, laboratuvar aralığını gösteren gri bant içinde nokta. Aralık dışı yalnız işaretlenir; yorum yok, «hekiminle konuş» nötr notu. |
-| 34 | **Tabak görünümü** | Beslenmede halka dilimleri yerine tabak bölmeleri; kalan miktar yazılı («38 g protein kaldı»). |
-| 35 | **Tek dokunuş sayaç** | Su, öğün, ilaç alındı işareti gibi küçük kayıtlar tek dokunuş; altta «Geri al» şeridi. Doz önerisi yok. |
-| 36 | **Set kutucukları** | Antrenman hareketleri satır, setler kutucuk; biten set dolar, dinlenme süresi kutucuğun içinde akar. |
-| 37 | **Ölçüm tuş takımı** | Büyük rakam, sabit birim, son değer soluk ipucu olarak arkada; yanlış girişe karşı «dün 71,2 idi» uyarısı. |
-| 38 | **Harcama şeritleri** | Sedef’in ekranı: kategori başına ay şeridi, bütçe çizgisi; aşım yalnız çizginin rengiyle. |
-| 39 | **Sessiz sınır notu** | «SPİ teşhis koymaz» notu her kartta değil, ekran altında bir kez, ikonlu ve gri. |
+_sınav hazırlığı_
 
-## E · ESP (8)
+| # | Özellik | Ne yapar | Neden | Modül | Önc. | Emek |
+|---|---|---|---|---|---|---|
+| 24 | **Sıradaki blok kahramanı** | Ekranın en büyük öğesi tek iş; adımlar süreyle orantılı çubukta. | Bugün ekranının asıl sorusu: şimdi ne yapacağım? | AYS | P1 | orta |
+| 25 | **Geri sayım rozeti** | Uzakken sakin, son 15 dakikada canlı. | Yaklaşan iş ekrana bakmadan fark edilir. | AYS | P2 | az |
+| 26 | **Nötr soru şeridi** | Çözerken yalnız ilerleme; doğru/yanlış rengi set bitince açılır. | Set ortasında yanlış görmek kaygı yaratır ve sonraki soruyu bozar. | AYS | P2 | az |
+| 27 | **Yanlış kartı** | Önde soru, arkada «neden yanlış». Tekrarda kart çevrilir. | Yanlıştan öğrenme tekrarın içine girer. | AYS | P2 | orta |
+| 28 | **Deneme karnesi** | Ders başına tek satır; satır uzunluğu o dersin soru sayısı kadar. | Netin nerede kaybedildiği tek bakışta görülür. | AYS | P1 | orta |
+| 29 | **Hız şeridi** · YENİ | Denemede her sorunun süresi bir nokta; ortalamanın 1,5 katını geçenler öne çıkar. | Zaman kaybı yanlıştan ayrı bir sorundur ve ayrı görülmeli. | AYS | P2 | orta |
+| 30 | **Deneme karşılaştırması** · YENİ | İki deneme ders ders yan yana, fark rozetleriyle. | +3 net tek sayıya sıkışmaz; Fen’deki düşüş görünür kalır. | AYS | P2 | orta |
+| 31 | **Konu kapsam halkası** | Planlanan sorunun ne kadarı çözüldü. | Yetenek yargısı yok; yalnız ne kadar çalışıldığı. | AYS | P2 | az |
+| 32 | **Konu zinciri** · YENİ | Önkoşul sırası ve her halkanın kapsamı; eksik önkoşul kesikli çerçeveyle işaretli. | Hangi konunun önce gelmesi gerektiği görülür. | AYS | P3 | orta |
+| 33 | **40 hafta çizgisi** | Sınava kadar her hafta bir tik; ara haftaları taralı. | Uzun hazırlık somut parçalara bölünür. | AYS | P2 | az |
+| 34 | **Haftalık plan ızgarası** · YENİ | Yedi gün × saat ızgarası; bloklar modül renginde, boş saatler taralı, bugün çerçeveli. | Haftanın yükü ve boşluğu aynı anda görülür. | hepsi | P2 | çok |
+| 35 | **Ara haftası önizlemesi** | Etkilenen haftalar çizilir, tek onayla uygulanır. | Kural 9: orta seviye aksiyon önizlemesiz uygulanmaz. | AYS | P2 | orta |
+| 36 | **Taşıma gölgesi** | Taşınan blok havada, yeri hayalet çizgi; bırakınca «Geri al». | Taşımanın etkisi bırakmadan önce görülür. | AYS | P2 | orta |
+| 37 | **Tek satır soru ekle** | Ders · konu · sonuç üç çip; Enter ile kaydedilir. | Günde onlarca kayıt var; her biri iki saniyede bitmeli. | AYS | P1 | az |
 
-| # | Özellik | Ne yapar |
-|---|---|---|
-| 40 ★ | **Deste yığını** | Kalan kartlar arkada ince yığın olarak durur; yığın incelikçe bitiş görülür (797 kart). |
-| 41 | **Süreli cevap düğmeleri** | Tekrar 1 dk · Zor 6 dk · İyi 2 gün · Kolay 5 gün; her düğme bir sonraki görülme zamanını söyler. |
-| 42 | **Dakika halkası** | Günlük 20/50 dk; halka dolarken rengi değişmez, yalnız dolar. |
-| 43 | **Unutma eğrisi** | Retansiyon (%50, hesaplandı) düşen eğri üzerinde «bugün» noktası; tekrarın neden şimdi olduğunu gösterir. |
-| 44 | **Merdiven basamakları** | Merdiven içerik sırasıdır, yetenek derecesi değil: basamak adı + içindeki ders sayısı. Sertifika görünümü yok. |
-| 45 | **Kütüphane rafı** | Kitaplar sırt olarak dizili; sırt kalınlığı sayfa sayısı, alt çizgi okunan oran. |
-| 46 | **Kelime sahnesi** | Tek kelime çok büyük, anlamı orta, örnek cümle italik ve küçük; başka hiçbir şey yok. |
-| 47 | **Ajanlı ders kapağı** | Polyglot, Socrates, Maestro… her dersin başında ajan portresi + tek cümle; renk yine ESP turuncusu. |
+## D · SPİ (12)
 
-## F · Merkez / HKM (6)
+_sağlık · teşhis yok, doz yok_
 
-| # | Özellik | Ne yapar |
-|---|---|---|
-| 48 ★ | **Mor öneri kartı** | Merkez’in her önerisi mor kenarlı kart; modül içeriğiyle asla aynı görünmez. Sağ üstte seviye: küçük / orta / büyük. |
-| 49 ★ | **Seviyeye göre onay kalıbı** | Küçük: tek düğme + «Geri al». Orta: yandan açılan önizleme + tek onay. Büyük: tam ekran önce/sonra + geri dönüş noktası adı. |
-| 50 | **Önce / sonra görünümü** | Plan değişikliği iki sütun; yalnız değişen bloklar renkli, gerisi soluk. |
-| 51 | **Gerekçe çubuğu** | Öneri hangi sayıya dayanıyorsa o sayı çubukla gösterilir; modelin cümlesi altında küçük yazı. |
-| 52 ★ | **Bağlantı noktası** | Altta «Merkez bağlı · 14:08». Kapalıyken gri: «Merkez kapalı — her şey çalışıyor». Hata kırmızısı kullanılmaz. |
-| 53 | **Öneri geçmişi** | Uygulanan, geçilen, geri alınan öneriler dikey zaman çizgisinde; her biri tek satır. |
+| # | Özellik | Ne yapar | Neden | Modül | Önc. | Emek |
+|---|---|---|---|---|---|---|
+| 38 | **Toparlanma halkası** | Tek sayı ortada; üç kaynak ayrı dilim, her biri kendi kesinlik etiketiyle. | Tek sayı var ama hangi kaynağın tahmin olduğu saklanmaz. | SPİ | P1 | orta |
+| 39 | **Uyku bandı** | Gece tek şerit, uyanmalar kesik; altta haftanın gece dokusu. | Süre kadar bölünmeler de görünür. | SPİ | P2 | orta |
+| 40 | **Ham + ortalama çizgisi** · YENİ | Dalgalı ölçümlerde ham noktalar soluk, yedi günlük ortalama çizgi. | Günlük dalgalanma paniğe yol açmaz; eğilim görülür. | SPİ | P1 | az |
+| 41 | **Referans bandı** | Değer, laboratuvar aralığının içinde bir nokta. Aralık dışı yalnız işaretlenir. | Teşhis yok: yalnız aralığın neresinde olduğu. | SPİ | P2 | az |
+| 42 | **Tabak görünümü** | Halka dilimi yerine tabak bölmesi; kalan miktar yazılı. | Gram ve yüzde yerine gerçek hayattaki tabak düşünülür. | SPİ | P2 | orta |
+| 43 | **Tek dokunuş sayaç** | Küçük kayıt tek dokunuş; altta «Geri al» şeridi. | Küçük kayıt zahmetliyse hiç girilmez; eksik veri çoğalır. | SPİ | P1 | az |
+| 44 | **Enerji ölçeği** · YENİ | Günde bir kez beş noktalı ölçek; seçilen nokta büyür. | Öznel veri de ölçülür: tahmin edilmez, sorulur. | SPİ | P2 | az |
+| 45 | **Set kutucukları** | Biten set dolar; dinlenme süresi kutucuğun içinde akar. | Antrenman sırasında tek bakış yeter. | SPİ | P2 | orta |
+| 46 | **Haftalık hareket halkaları** · YENİ | Yedi küçük halka; verisi olmayan gün kesikli boş halka. | Eksik gün sıfır gibi görünmez; «yapmadım» ile «girmedim» ayrılır. | SPİ | P2 | az |
+| 47 | **Ölçüm tuş takımı** | Büyük rakam, sabit birim, dünkü değer ipucu olarak yanında. | Yanlış girişi dünkü değer yakalar. | SPİ | P2 | az |
+| 48 | **Sonraki kontrol kartı** · YENİ | «Kan tahlili · 3 hafta sonra»; hatırlatır, yorumlamaz. | SPİ takip eder; karar kullanıcının ve hekiminindir. | SPİ | P3 | az |
+| 49 | **Harcama şeritleri** | Kategori başına şerit ve bütçe çizgisi; aşım yalnız çizginin rengiyle. | Aşım bağırmaz ama gözden de kaçmaz. | SPİ | P2 | az |
 
-## G · Ofis ve ajanlar (4)
+## E · ESP (13)
 
-| # | Özellik | Ne yapar |
-|---|---|---|
-| 54 | **Masa görünümü** | Ajan portreleri yan yana; konuşan büyür ve renklenir, diğerleri soluk kalır. |
-| 55 | **Balondaki sayı çipi** | Ajan cümlesinde geçen sayı çip olarak görünür ve kaynağını taşır («sistem hesapladı»); cümle yorum, çip gerçek. |
-| 56 | **Ajan durum halkası** | Portrenin çevresinde ince halka: çalışıyor (dönen), boşta (sabit), kapalı (yok). |
-| 57 | **Hazır cevap çipleri** | Her ajan balonunun altında 2–3 kısa cevap; yazmadan konuşma sürer. |
+_gelişim · sertifika yok, yargı yok_
 
-## H · Seviye / rütbe (4)
+| # | Özellik | Ne yapar | Neden | Modül | Önc. | Emek |
+|---|---|---|---|---|---|---|
+| 50 | **Deste yığını** | Kalan kartlar arkada yığın; yığın incelikçe bitiş görülür. | Ne kadar kaldığı sayı okumadan hissedilir. | ESP | P1 | az |
+| 51 | **Süreli cevap düğmeleri** | Her düğme kartın bir sonraki görülme zamanını söyler. | Her seçimin sonucu seçmeden bilinir. | ESP | P2 | az |
+| 52 | **Dakika halkası** | Günlük hedef halkası; rengi değişmez, yalnız dolar. | Hedefe yaklaşmak renk değiştiren bir alarm değildir. | ESP | P2 | az |
+| 53 | **Unutma eğrisi** | Hatırlama düşer, tekrar yükseltir; «bugün» noktası işaretli. | Tekrarın neden bugün olduğu görülür. | ESP | P2 | orta |
+| 54 | **Merdiven basamakları** | Basamak içerik sırasıdır, derece değil. | Sıra var, yargı yok; sertifika izlenimi verilmez. | ESP | P2 | orta |
+| 55 | **Kütüphane rafı** | Kitap sırtı: kalınlık sayfa sayısı, alt çizgi okunan oran. | Okuma listesi tablo değil, raf gibi durur. | ESP | P3 | orta |
+| 56 | **Okuma ilerlemesi** · YENİ | Kitap içinde ince ilerleme çizgisi ve bölümün kalan süresi. | Kalan süre tahmindir ve tahmin olarak etiketlidir. | ESP | P2 | az |
+| 57 | **Alıntı kartı** · YENİ | Altı çizilen cümle kaynağıyla kart olur; tekrar destesine eklenebilir. | Okuma ile tekrar birbirine bağlanır. | ESP | P3 | orta |
+| 58 | **Kelime sahnesi** | Tek kelime, anlamı, örnek cümle. Başka hiçbir şey yok. | Tekrar anında dikkat tek şeye ait olmalı. | ESP | P2 | az |
+| 59 | **Bağlamda kelime** · YENİ | Metinde hedef kelime altı çizili; dokununca anlamı yerinde açılır. | Kelime ezber listesinde değil, cümle içinde öğrenilir. | ESP | P2 | orta |
+| 60 | **Konuşma dalga formu** · YENİ | Konuşma pratiğinde ses dalgası ve süre; duraksamalar boşluk olarak. | Ses kaydı bir sayı gibi okunur; yorum yapılmaz, ölçülür. | ESP | P3 | çok |
+| 61 | **Tarih şeridi** · YENİ | Yüzyıllar yatay şerit, olaylar nokta; eşlenen nokta yanar. | Yüzyıl eşlemesi görsel bir hafızaya dönüşür. | ESP | P3 | orta |
+| 62 | **Ajanlı ders kapağı** | Dersin başında ajan portresi ve tek cümle; renk yine ESP. | Ders kimin sesinden geldiğini söyler ama rengi modülündür. | ESP | P3 | az |
 
-| # | Özellik | Ne yapar |
-|---|---|---|
-| 58 | **Rütbe halkası** | Üst çubukta rütbe görseli, çevresinde XP ilerleme halkası (180/430). Tıklayınca eşikler. |
-| 59 | **Sakin seviye atlama** | 1,2 saniyelik parlama + yeni rütbe görseli; ekranı kapatmaz, işi bölmez. |
-| 60 | **Sistem başına rütbe** | Her modülün rütbesi kendi renginde çerçeveli; tanım tek kaynaktan, görünüm modülden. |
-| 61 | **Rütbe galerisi** | Kazanılan rütbeler rafta renkli, kilitliler siluet; XP yalnız burada ve üst çubukta görünür. |
+## F · Merkez · HKM (10)
 
-## I · Hareket ve mikro etkileşim (5)
+_yalnız önerir, modül uygular_
 
-| # | Özellik | Ne yapar |
-|---|---|---|
-| 62 | **Kademeli giriş** | Kartlar 40 ms arayla aşağıdan süzülür; azaltılmış harekette anında gelir. |
-| 63 | **Sayı yuvarlanması** | Değer değişince eski rakam yukarı kayar, yenisi alttan gelir; değişim fark edilir. |
-| 64 | **Geri al geri sayımı** | Mevcut «Geri al» şeridinin altında 6 saniyelik incelen çizgi; ne kadar süre kaldığı görülür. |
-| 65 | **Basma hissi** | Düğmeye basınca 1 px iniş ve hafif ton değişimi; titreşim yok, ses yok. |
-| 66 | **Şimdi çizgisi** | Zaman çizelgelerinde dakikada bir ilerleyen ince çizgi; geçmiş saatler hafif taralı. Örnek: `ays-gece.html` |
+| # | Özellik | Ne yapar | Neden | Modül | Önc. | Emek |
+|---|---|---|---|---|---|---|
+| 63 | **Mor öneri kartı** | Merkez’in her önerisi mor kenarlı kart; sağ üstte seviyesi. | Merkez’in sesi modül içeriğiyle hiçbir zaman karışmaz. | Merkez | P1 | az |
+| 64 | **Seviyeye göre onay** | Küçük: tek dokunuş + Geri al. Orta: önizleme + onay. Büyük: önce/sonra + dönüş noktası. | Kural 9: seviyeyi katalog belirler, ekran onun kalıbını giyer. | Merkez | P1 | orta |
+| 65 | **Çakışma kartı** · YENİ | İki modül aynı saati isterse ikisi yan yana görünür, Merkez bir çözüm önerir. | Kimin ne istediği karışmaz; son sözü kullanıcı söyler. | Merkez | P1 | orta |
+| 66 | **Önce / sonra görünümü** | Yalnız değişen blok renkli; gerisi soluk kalır. | Değişikliğin büyüklüğü abartılmadan görülür. | Merkez | P2 | orta |
+| 67 | **Gerekçe çubuğu** | Sayı koddan gelir ve çizilir; modelin cümlesi altında, ayrı durur. | Kural 1: sayıyı kod üretir, model yalnız cümleye çevirir. | Merkez | P1 | az |
+| 68 | **Bekleyen öneri rozeti** · YENİ | Üst çubukta mor sayaç; açılınca öneriler modüllerine göre sıralı. | Öneriler işi bölmez, sırasını bekler. | Merkez | P2 | az |
+| 69 | **Otomatik uygula ayarı** · YENİ | Küçük türlerin sormadan uygulanıp uygulanmayacağı tür tür anahtar; orta ve büyük hep sorar. | Kural 9: hangi küçük türün sormadan uygulanacağını kullanıcı seçer. | Merkez | P1 | az |
+| 70 | **Geri dönüş noktaları** · YENİ | Büyük aksiyonlardan önce alınan kayıtlar; birine tek düğmeyle dönülür. | Büyük değişiklik geri dönüşsüz olamaz. | Merkez | P2 | orta |
+| 71 | **Bağlantı noktası** | «Merkez bağlı · 14:08». Kapalıyken gri: «her şey çalışıyor». | Kural 4: Merkez kapalıyken hiçbir modül bozulmaz; ekran da panik yapmaz. | Merkez | P1 | az |
+| 72 | **Öneri geçmişi** | Uygulanan, geçilen, geri alınan öneriler; her biri tek satır. | Merkez’in ne önerdiği ve kullanıcının ne seçtiği izlenebilir. | Merkez | P3 | az |
 
-## J · Mobil ve erişilebilirlik (4)
+## G · Ofis ve ajanlar (6)
 
-| # | Özellik | Ne yapar |
-|---|---|---|
-| 67 | **Başparmak bölgesi** | Mobilde ana eylem ekranın alt üçte birinde; üst gezinme alt sekme çubuğuna iner. |
-| 68 | **Sabit etiketli kaydırma** | Dar ekranda şerit yana kayar, modül etiketleri solda sabit kalır, açılışta «şimdi»ye kaydırılır. Örnek: `ays-gece.html` |
-| 69 | **Renksiz de ayırt edilir** | Modül = renk + harf (AYS/SPİ/ESP) + şekil (daire / kare / üçgen); renk körü kullanıcı da karıştırmaz. |
-| 70 | **%200 yakınlaştırma** | İki sütun tek sütuna akar, hiçbir sayı kesilmez; 24 px dokunma hedefi korunur. |
+_cümle ajandan, sayı koddan_
 
----
+| # | Özellik | Ne yapar | Neden | Modül | Önc. | Emek |
+|---|---|---|---|---|---|---|
+| 73 | **Masa görünümü** | Konuşan ajan büyür ve renklenir; diğerleri soluk bekler. | Kimin konuştuğu ilk bakışta belli. | hepsi | P2 | az |
+| 74 | **Balondaki sayı çipi** | Ajan cümlesindeki sayı çip olarak görünür ve kaynağını taşır. | Cümle yorum, çip gerçek: ikisi karışmaz. | hepsi | P1 | az |
+| 75 | **Ajan sınır kartı** · YENİ | Ajan profili iki sütun: ne yapar, ne yapmaz. | Kural 5: sınırlar ilk bakışta belli; kullanıcı yanlış şey beklemez. | hepsi | P2 | az |
+| 76 | **Devir göstergesi** · YENİ | Bir ajan konuyu diğerine aktarınca kesik çizgiyle gösterilir. | Konuşmanın ortasında ses değişirse kullanıcı nedenini bilir. | hepsi | P3 | az |
+| 77 | **Ajan durum halkası** | Portrenin çevresinde ince halka: dönen, sabit ya da yok. | Ajanın çalışıp çalışmadığı yazı okumadan görülür. | hepsi | P3 | az |
+| 78 | **Hazır cevap çipleri** | Balonun altında iki üç kısa cevap. | Yazmadan konuşma sürer; mobilde özellikle. | hepsi | P2 | az |
 
-**Sonraki adım önerisi:** ★ işaretli 12 özellik tek bir «tasarım sistemi» sayfasında (renk, tip, kutu, kesinlik glifi, fark rozeti, öneri kartı, onay kalıpları) örnek bileşen olarak çizilir; modül ekranları ondan türetilir.
+## H · Seviye ve rütbe (6)
+
+_yalnız görünürlük, karar yok_
+
+| # | Özellik | Ne yapar | Neden | Modül | Önc. | Emek |
+|---|---|---|---|---|---|---|
+| 79 | **Rütbe halkası** | Rütbe görseli, çevresinde XP halkası. | Seviye görünür ama ekranın merkezine oturmaz. | hepsi | P2 | az |
+| 80 | **XP dökümü** · YENİ | Bugünkü XP nereden geldi: soru, blok, günü kaydetme. | Kural 6: XP görünürdür ama hiçbir karara girmez; döküm bunu açık eder. | hepsi | P3 | az |
+| 81 | **Kademe yolu** · YENİ | Altı kademe tek yolda: Bronz’dan Kutsal’a; bulunduğun yer yanar. | Bir sonraki kademe somut; ad ve renk tek kaynaktan gelir. | hepsi | P3 | az |
+| 82 | **Sakin seviye atlama** | Kısa bir parlama; ekranı kapatmaz, işi bölmez. | Seviye bir ödül anı ama işin önüne geçmemeli. | hepsi | P3 | az |
+| 83 | **Sistem başına rütbe** | Her sistemin kendi rütbesi; çerçevesi modül renginde. | Kural 6: her sistemin kendi seviyesi var; tanım ortak. | hepsi | P2 | az |
+| 84 | **Rütbe galerisi** | Kazanılan kademeler renkli, kilitliler siluet. | XP yalnız burada ve üst çubukta görünür; başka ekrana sızmaz. | hepsi | P3 | az |
+
+## I · Hareket (6)
+
+_her hareket bir anlam taşır_
+
+| # | Özellik | Ne yapar | Neden | Modül | Önc. | Emek |
+|---|---|---|---|---|---|---|
+| 85 | **Sayı yuvarlanması** | Değer değişince rakam yukarı kayar. | Değişen sayı gözden kaçmaz. | hepsi | P2 | az |
+| 86 | **Geri al geri sayımı** | «Geri al» şeridinin altında incelen çizgi. | Geri almanın ne kadar süresi kaldığı görünür olmalı. | hepsi | P1 | az |
+| 87 | **Şimdi çizgisi** | Çizelgede ilerleyen ince çizgi; geçmiş saatler taralı. | Günün neresinde olduğun saat okumadan görülür. | hepsi | P2 | az |
+| 88 | **Tik çizimi** · YENİ | İş bitince tik çizilerek belirir, satır yavaşça soluklaşır. | Bitirme anı küçük ama hissedilir. | hepsi | P2 | az |
+| 89 | **Kart açılma geçişi** · YENİ | Kart yerinde büyüyerek ayrıntıya dönüşür. | Kullanıcı nereden geldiğini unutmaz; geri dönüş doğal olur. | hepsi | P2 | orta |
+| 90 | **Küçülen başlık** · YENİ | Kaydırınca büyük başlık üst çubuğa küçülerek yerleşir. | Ekran alanı açılır ama bağlam kaybolmaz. | hepsi | P3 | az |
+
+## J · Mobil ve erişilebilirlik (6)
+
+_390 piksel ve renk körlüğü_
+
+| # | Özellik | Ne yapar | Neden | Modül | Önc. | Emek |
+|---|---|---|---|---|---|---|
+| 91 | **Başparmak bölgesi** | Mobilde ana eylem ekranın alt üçte birinde; gezinme alt sekme çubuğuna iner. | Günde onlarca kez tek elle kullanılır. | hepsi | P2 | orta |
+| 92 | **Kaydırarak işaretle** · YENİ | Satırı sağa kaydır: bitti; sola: ertele. | Mobilde en sık iki eylem tek hareket olur. | hepsi | P2 | orta |
+| 93 | **Alt çekmece** · YENİ | Mobilde ayrıntı alttan yarım ekran açılır; çekince tam ekran. | Liste kaybolmaz; çekmece tek elle kapanır. | hepsi | P2 | orta |
+| 94 | **Sabit etiketli kaydırma** | Şerit yana kayar, modül etiketi solda sabit kalır. | Dar ekranda da hangi şeridin kime ait olduğu kaybolmaz. | hepsi | P2 | az |
+| 95 | **Bildirim kartı** · YENİ | Telefon bildirimi: modül rengi, tek cümle, iki eylem. | Uygulamayı açmadan karar verilir. | hepsi | P2 | orta |
+| 96 | **Renksiz de ayırt edilir** | Modül = renk + harf + şekil: daire, kare, üçgen. | Renk körü kullanıcı da kategorileri karıştırmaz. | hepsi | P1 | az |
+
+## Elenenler (12)
+
+| İlk no | Madde | Ne oldu | Neden |
+|---|---|---|---|
+| 04 | Tipografi üçlüsü | Temellere taşindi | Özellik değil, kural. Bileşen gibi listelenince önemi yanlış okunuyordu. |
+| 05 | Tablo sayıları | Temellere taşindi | Tek satırlık yazı kuralı; tipografinin parçası. |
+| 06 | Tek boşluk ölçeği | Temellere taşindi | Kullanıcının görmediği bir değer; tasarım kuralı olarak durmalı. |
+| 07 | Ton katmanları | Temellere taşindi | Tema sisteminin parçası; ayrı özellik gibi sunmak gereksizdi. |
+| 20 | Küçük birim | Temellere taşindi | Tipografi kuralının bir satırı. |
+| 62 | Kademeli giriş | Temellere taşindi | Hareket süresi kuralı; her ekranda aynı olmalı, özellik değil. |
+| 65 | Basma hissi | Temellere taşindi | Her düğmenin zaten sahip olması gereken durum. |
+| 14 | Tahmin alt çizgisi | Bi̇rleşti̇ → kesi̇nli̇k | Aynı sorunun ikinci cevabıydı; kesinlik gliflerinin içine girdi. |
+| 11 | Modül işareti | Bi̇rleşti̇ → geçi̇ş menüsü | İşaret tek başına iş görmüyordu; geçiş menüsünün başı oldu. |
+| 10 | Kısayol rozetleri | Çikarildi | Komut paleti (⌘K) zaten var; her düğmede rozet gürültü yapıyordu. |
+| 39 | Sessiz sınır notu | Çikarildi | Sınır bir ilkedir (İlke 04); her ekranda not kalabalık yapar. |
+| 70 | %200 yakınlaştırma | Çikarildi | Zorunluluk, özellik değil; denetim araçlarının işi. |
