@@ -100,6 +100,14 @@ class _Server(object):
 
 
 def run():
+    # Sabit tarihli senaryolar o gunu «bugun» diye yasar: yalniz bugunun
+    # brifingi karar yazar (HATALAR D-3).
+    from core import saat
+    with saat.sabit(BUGUN):
+        _run()
+
+
+def _run():
     suite("daemon")
     S = _Server()
     try:

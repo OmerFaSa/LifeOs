@@ -4,7 +4,22 @@ Gun siniri kurali modullerde duzeltilmisti, HKM'de 50'den fazla yerde
 `date.today()` daginiktı (HATALAR KO-1). Yeni kod gunu buradan okur.
 """
 
+import contextlib
 import datetime
+
+# Testler «bugun»u sabitler: sabit tarihli bir senaryo o gunu yasiyormus
+# gibi kosar. Uretimde hep None.
+SABIT = None
+
+
+@contextlib.contextmanager
+def sabit(gun):
+    global SABIT
+    eski, SABIT = SABIT, gun
+    try:
+        yield
+    finally:
+        SABIT = eski
 
 
 def simdi():
@@ -14,7 +29,7 @@ def simdi():
 def bugun(now=None):
     """ISO gun. `now` bir datetime ya da ISO metin olabilir (testler icin)."""
     if now is None:
-        return simdi().date().isoformat()
+        return SABIT or simdi().date().isoformat()
     if isinstance(now, (datetime.datetime, datetime.date)):
         return now.isoformat()[:10]
     return str(now)[:10]

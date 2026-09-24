@@ -28,7 +28,7 @@ import datetime
 import re
 
 from core import certainty as C
-from core import cross, db, precedence, streak, sync_engine, twin
+from core import cross, db, precedence, saat, streak, sync_engine, twin
 
 # --- buyurgan kip denetcisi -------------------------------------------------
 # TAM KELIME aranir: «kapatmani oneririm» bir oneridir, «kapat» degil.
@@ -219,12 +219,18 @@ def _blind_line(t):
                  + ". Görülmeyen şey sıfır değildir.", "blind", items=kor)
 
 
-def brief(con, date, th=None, days=twin.WINDOW_DAYS):
+def brief(con, date, th=None, days=twin.WINDOW_DAYS, kaydet=None):
     """Gunun brifingi: VP raporlari, tek oneri, dayanak ve korluk.
 
     Oneri uretilirse AMBARA YAZILIR ve kaynak denetimleriyle baglanir.
     Ayni gun ayni cumle iki kez yazilmaz; reddedilmis bir cumle yeniden
-    onerilebilir ama eskisi silinmez."""
+    onerilebilir ama eskisi silinmez.
+
+    HATALAR D-3: yalniz BUGUNUN brifingi karar yazar (`kaydet` verilmezse
+    date == bugun). Gecmis ya da gelecek bir gunu OKUMAK ambara karar
+    acmaz; o gun icin daha once acilmis karar varsa o gosterilir."""
+    if kaydet is None:
+        kaydet = date == saat.bugun()
     audits = sync_engine.latest_audits(con, date)
     # precedence METRIK sozlugu bekler, govdenin tamamini degil: govdeyi
     # oldugu gibi gecirmek rank 2'yi sessizce olu birakirdi.
@@ -295,10 +301,11 @@ def brief(con, date, th=None, days=twin.WINDOW_DAYS):
                                     "bir yetkisi yoktur."})
             prop = None
         else:
-            karar = carry(con, date, prop, audits)
+            karar = (carry(con, date, prop, audits) if kaydet
+                     else db.open_decision(con, date, prop["proposal"]))
             lines.append(_line(prop["proposal"], "proposal",
                                rank=prop["rank"], key=prop["key"],
-                               decision_id=karar["id"]))
+                               decision_id=karar["id"] if karar else None))
     if not prop:
         lines.append(_line(
             "Bugün için bir öneri yok. Uydurulmuş bir öneri, öneri "

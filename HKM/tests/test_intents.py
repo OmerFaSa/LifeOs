@@ -74,6 +74,11 @@ def run():
         eq(ozet["applied"], 0)
         eq(ozet["pending"], 0)
         eq(alinan["new"], 1)
+        # HATALAR D-2: cevap «delivered» diyordu ama delivered_at null'di.
+        n = alinan["intents"][0]
+        eq(n["state"], "delivered")
+        ok(n["delivered_at"], n)
+        eq(n["delivered_at"], db.intent(con, n["id"])["delivered_at"])
     test("teslim edilmis niyet uygulanmis sayilmaz", t_delivered_is_not_applied)
 
     def t_open_intent_survives_refresh():

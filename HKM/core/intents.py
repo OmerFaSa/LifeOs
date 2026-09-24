@@ -354,8 +354,11 @@ def take(con, module):
     yeni = 0
     for n in acik:
         if n["state"] == "pending":
-            db.set_intent_state(con, n["id"], "delivered")
+            # HATALAR D-2: sozluk ambarin yazdigiyla guncellenir; yalniz
+            # «state» degistirmek delivered_at'i null birakiyordu.
+            g = db.set_intent_state(con, n["id"], "delivered")
             n["state"] = "delivered"
+            n["delivered_at"] = (g or {}).get("delivered_at")
             yeni += 1
     return {"ok": True, "intents": acik, "new": yeni,
             "again": len(acik) - yeni,

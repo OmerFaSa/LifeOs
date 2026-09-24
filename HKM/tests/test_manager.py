@@ -25,6 +25,14 @@ def _push(con, module, date, **metrics):
 
 
 def run():
+    # Sabit tarihli senaryolar o gunu «bugun» diye yasar: yalniz bugunun
+    # brifingi karar yazar (HATALAR D-3).
+    from core import saat
+    with saat.sabit(BUGUN):
+        _run()
+
+
+def _run():
     suite("yonetici")
 
     def t_no_model_layer():
@@ -113,6 +121,22 @@ def run():
         eq(len(db.decisions_of(con, BUGUN)), 1)
     test("ayni oneri gun icinde tekrarlanmaz", t_idempotent_same_day)
 
+    def t_gecmis_gun_okumak_yazmaz():
+        """HATALAR D-3: GET /api/briefing?date=2020-01-01 ambara karar
+        aciyordu. Gecmis gunu okumak bir karar degildir; o gun icin acilmis
+        karar varsa o gosterilir."""
+        con = _con()
+        _push(con, "spi", "2020-01-01", sleep_hours=metric(4.0))
+        b = manager.brief(con, "2020-01-01")
+        eq(b["proposal"]["rank"], 1)             # oneri hesaplanir
+        eq(b["decision"], None)                  # ama yazilmaz
+        eq(len(db.decisions_of(con, "2020-01-01")), 0)
+        # Bugunun brifingi yazar; ayni gunu sonra okumak ayni karari gosterir.
+        _push(con, "spi", BUGUN, sleep_hours=metric(4.0))
+        a = manager.brief(con, BUGUN)["decision"]["id"]
+        eq(manager.brief(con, BUGUN, kaydet=False)["decision"]["id"], a)
+    test("gecmis gunu okumak karar yazmaz (D-3)", t_gecmis_gun_okumak_yazmaz)
+
     def t_declined_is_kept_and_reoffered():
         """Reddedilen oneri silinmez; ayni gun yeniden onerilebilir."""
         con = _con()
@@ -196,7 +220,9 @@ def run():
         olmali: hiyerarsi gorunmuyorsa, karar da denetlenemez."""
         con = _con()
         _push(con, "spi", BUGUN, sleep_hours=metric(4.0), recovery=metric(30))
-        _push(con, "ays", BUGUN, questions=metric(10), study_minutes=metric(20))
+        # Deneme neti birikimli degildir: gun surerken de yargilanir (O-9).
+        _push(con, "ays", BUGUN, questions=metric(10), study_minutes=metric(20),
+              mock_net=metric(40), mock_net_baseline=metric(80))
         b = manager.brief(con, BUGUN)
         k = b["council"]
         eq(len(k["members"]), 3)
