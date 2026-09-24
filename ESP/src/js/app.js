@@ -151,10 +151,17 @@ ESP.App = (function(){
     const gruplar = safe(bildirimGruplari, []) || [];
     const bil = gruplar.reduce((t, g) => t + g.satirlar.length, 0);
     const acil = gruplar.some(g => g.satirlar.some(s => s.acil));
-    return K.ustCubuk({
+    /* v5 (LifeOS Tasarım Dili sürüm 5): kenar çubuğu + ince üst şerit; açık
+       çekmecenin bölümleri kenarda (bölüm çubuğunun yerini alır). */
+    const r = UST[sc.id] || sc.id;
+    return K.iskeletV5({
       modul:'esp',
+      yol:yolOf(sc.id),
+      baglam:safe(brandLine, ''),
       cekmeceler:sectionsGorunen().map(g => ({ id:g.id, ad:g.label, route:g.views[0].route,
-        on:g.id === aktif.id, sayac:g.id === 'onaylar' ? onay : 0 })),
+        on:g.id === aktif.id, sayac:g.id === 'onaylar' ? onay : 0,
+        bolumler:g.views.map(v => ({ route:v.route, ad:v.label, on:v.route === r,
+          rozet:safe(() => badgeFor(v.route), null) || null })) })),
       onay:{ sayi:onay, route:'onaylar' },
       bildirim:{ sayi:bil, acil },
       baglanti:safe(baglantiVerisi, null) || { durum:'kapali' },
@@ -246,7 +253,7 @@ ESP.App = (function(){
     const AY = window.LIFEOS && window.LIFEOS.AYAR;
     const eylem = (AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '')
       + (safe(() => sc.actions ? sc.actions() : '') || '');
-    return K.sayfaBasi({ yol:yolOf(sc.id), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
+    return K.sayfaBasi({ yol:[], baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
   }
 
   function bolumCubuguHtml(sc){
@@ -495,14 +502,13 @@ ESP.App = (function(){
          ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
       const markup = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
-        <div class="site site--v4">
+        <div class="site site--v5">
           ${raw(safe(() => ustCubukHtml(sc)))}
-          ${raw(safe(gunSeridiHtml))}
           <div class="site__body">
             <div class="wrapc sayfa">
               ${raw(safe(sayacHtml))}
               ${raw(safe(() => sayfaBasiHtml(sc)))}
-              ${raw(safe(() => bolumCubuguHtml(sc)))}
+              ${when(sc.id === 'today', () => raw(safe(gunSeridiHtml)))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>
           </div>

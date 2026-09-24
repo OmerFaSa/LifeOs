@@ -7428,6 +7428,139 @@ a.kmenu__satir:hover{ background:var(--surface-2); }
    duysun diye); main bir etkileşim öğesi değildir, halka çizilmez. */
 #main[tabindex="-1"]:focus-visible{ outline:none; }
 
+/* ================================================================
+   v5 · KENAR ÇUBUĞU + İNCE ÜST ŞERİT (LifeOS Tasarım Dili sürüm 5,
+   «Kabuk anatomisi»). Değerler tuvalden: kenar 240 px, çekmece 34 px,
+   bölüm 28 px, üst şerit 52 px. Gün şeridi yalnız Bugün'de.
+   ================================================================ */
+.site--v5{ display:grid; grid-template-columns:240px minmax(0,1fr);
+  grid-template-rows:auto 1fr auto; min-height:100vh; background:var(--surface); }
+.site--v5 > .kenar{ grid-column:1; grid-row:1 / -1; }
+.site--v5 > .ust{ grid-column:2; grid-row:1; }
+.site--v5 > .site__body{ grid-column:2; grid-row:2; min-width:0; }
+.site--v5 > .sayfasonu{ grid-column:2; grid-row:3; }
+
+.kenar{ position:sticky; top:0; height:100vh; box-sizing:border-box; display:flex; flex-direction:column;
+  gap:18px; padding:16px 12px 12px; background:var(--bg); border-right:1px solid var(--border);
+  overflow-y:auto; font-size:14px; line-height:1.4; }
+.kenar__marka{ display:flex; align-items:center; gap:10px; height:28px; padding:0 6px; border:0; background:none;
+  font:inherit; font-size:14px; font-weight:600; letter-spacing:-.01em; color:var(--text); cursor:pointer; text-align:left; }
+.kenar__logo{ display:grid; grid-template-columns:repeat(2, 7px); gap:2px; }
+.kenar__logo b{ width:7px; height:7px; border-radius:2px; background:var(--ays); }
+.kenar__logo b:nth-child(2){ background:var(--spi); border-radius:50%; }
+.kenar__logo b:nth-child(3){ background:var(--esp); transform:rotate(45deg) scale(.8); }
+.kenar__logo b:nth-child(4){ background:var(--mer); }
+.kenar__moduller{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:2px; padding:3px;
+  background:var(--surface-2); border-radius:10px; }
+.kenar__modul{ height:44px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  border-radius:7px; font-size:11px; font-weight:500; color:var(--text-3); text-decoration:none; }
+.kenar__modul.is-on{ background:var(--surface); color:var(--text); font-weight:600;
+  box-shadow:0 0 0 1px var(--border), 0 1px 2px rgba(17,19,24,.06); }
+a.kenar__modul:hover{ color:var(--text); }
+.kenar__modul.is-kapali{ opacity:.7; }
+.kenar__nokta{ display:inline-block; width:8px; height:8px; flex:none; }
+.kenar__nokta--ays{ background:var(--ays); border-radius:2px; }
+.kenar__nokta--spi{ background:var(--spi); border-radius:50%; }
+.kenar__nokta--esp{ background:var(--esp); transform:rotate(45deg) scale(.85); }
+.kenar__nokta--mer{ background:var(--mer); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+.kenar__baglam{ margin:-10px 0 0; font-size:12px; color:var(--text-3); padding:0 6px; }
+.kenar__nav{ display:flex; flex-direction:column; gap:2px; }
+.kenar__cekmece{ width:100%; display:flex; align-items:center; gap:10px; height:34px; padding:0 10px; border:0;
+  border-radius:7px; background:transparent; font:inherit; font-size:13.5px; font-weight:500; color:var(--text-2);
+  cursor:pointer; text-align:left; }
+.kenar__cekmece:hover{ color:var(--text); background:color-mix(in oklab, var(--surface) 60%, transparent); }
+.kenar__cekmece.is-on{ background:var(--surface); color:var(--text); font-weight:600;
+  box-shadow:0 0 0 1px var(--border), 0 1px 2px rgba(17,19,24,.05); }
+.kenar__cekmece .kbk-ic{ width:18px; height:18px; }
+.kenar__ad{ flex:1; min-width:0; }
+.kenar__sayac{ min-width:20px; height:20px; box-sizing:border-box; padding:0 6px; border-radius:10px; background:var(--mer);
+  color:var(--surface); font-size:11.5px; font-weight:600; display:flex; align-items:center; justify-content:center;
+  font-variant-numeric:tabular-nums; }
+.kenar__bolumler{ display:flex; flex-direction:column; padding:2px 0 6px 19px; }
+.kenar__bolum{ display:flex; align-items:center; gap:8px; min-height:28px; padding:0 0 0 20px; border:0;
+  border-left:1.5px solid var(--border-strong); background:none; font:inherit; font-size:13px; color:var(--text-3);
+  cursor:pointer; text-align:left; }
+.kenar__bolum:hover{ color:var(--text); }
+.kenar__bolum.is-on{ border-left-color:var(--text); color:var(--text); font-weight:600; }
+.kenar__rozet{ margin-left:auto; margin-right:6px; font-size:11px; font-weight:600; color:var(--text-2);
+  font-variant-numeric:tabular-nums; }
+.kenar__rozet:not(.is-sessiz){ color:var(--bad-ink); }
+.kenar__dip{ margin-top:auto; display:flex; flex-direction:column; gap:2px; border-top:1px solid var(--border); padding-top:10px; }
+.kenar__bag, .kenar__rutbe{ display:flex; align-items:center; gap:10px; padding:8px 10px; border:0; border-radius:7px;
+  background:none; font:inherit; color:var(--text); cursor:pointer; text-align:left; }
+.kenar__bag:hover, .kenar__rutbe:hover{ background:color-mix(in oklab, var(--surface) 60%, transparent); }
+.kenar__bag span{ display:flex; flex-direction:column; }
+.kenar__bag b{ font-size:13px; font-weight:500; }
+.kenar__bag small{ font-size:12px; color:var(--text-3); }
+.kenar__merkez{ width:14px; height:16px; flex:none; background:var(--mer);
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
+.kenar__bag--kapali .kenar__merkez, .kenar__bag--ulasilamadi .kenar__merkez{ background:var(--text-3); }
+.kenar__rutbe span{ flex:1; font-size:13px; font-weight:500; }
+.kenar__rutbe .kbk-ic{ width:16px; height:16px; color:var(--text-3); }
+.kenar__madalya{ width:14px; height:14px; border-radius:50%; flex:none; background:var(--kademe-renk, #E0A93B);
+  box-shadow:inset 0 0 0 2px color-mix(in oklab, var(--kademe-renk, #E0A93B) 70%, #000); }
+
+/* İnce üst şerit: konum · ara · bildirim · profil. */
+.ust.ust--v5{ position:sticky; top:0; z-index:var(--z-topbar); height:52px; box-sizing:border-box;
+  background:var(--surface); border-bottom:1px solid var(--border); }
+.ust.ust--v5::before{ display:none; }
+.ust--v5 .ust__ic{ height:52px; display:flex; align-items:center; gap:12px; padding:0 24px 0 32px; max-width:none; }
+.ust__yol{ display:flex; align-items:center; gap:8px; min-width:0; font-size:13px; }
+.ust__yol-modul{ color:var(--text-3); }
+.ust__yol-ayrac{ color:var(--border-strong); }
+.ust__yol-oge{ color:var(--text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ust__yol-oge.is-son{ color:var(--text); font-weight:600; }
+.ust--v5 .ust__sag{ margin-left:auto; display:flex; align-items:center; gap:8px; }
+.ust--v5 .ust__ara{ display:flex; align-items:center; gap:8px; width:280px; height:32px; box-sizing:border-box;
+  padding:0 8px 0 10px; border:1px solid var(--border); border-radius:8px; background:var(--bg); color:var(--text-3);
+  font:inherit; font-size:13px; cursor:pointer; }
+.ust--v5 .ust__ara-yazi{ flex:1; text-align:left; }
+.ust--v5 .ust__ara kbd{ font:inherit; font-size:11px; line-height:18px; padding:0 5px; border:1px solid var(--border-strong);
+  border-radius:4px; color:var(--text-3); }
+.ust--v5 .ust__zil, .ust--v5 .ust__profil{ position:relative; width:32px; height:32px; border-radius:8px; border:0;
+  display:flex; align-items:center; justify-content:center; color:var(--text-2); background:none;
+  box-shadow:inset 0 0 0 1px var(--border); cursor:pointer; font:inherit; font-size:13px; font-weight:600; }
+.ust--v5 .ust__zil-nokta{ position:absolute; top:6px; right:7px; width:7px; height:7px; border-radius:4px;
+  background:var(--text); box-shadow:0 0 0 2px var(--surface); }
+.ust--v5 .ust__menu{ display:none; }
+.ust--telefon{ display:none !important; }
+.site--v5 .sayfa{ padding:40px 48px 0; box-sizing:border-box; max-width:1180px; }
+.site--v5 .sayfasonu{ background:var(--surface); }
+
+/* Dar masaüstü: kenar çubuğu simgeye iner (öneri 04); hiçbir çekmece gizlenmez. */
+@media (max-width:1279px) and (min-width:680px){
+  .site--v5{ grid-template-columns:64px minmax(0,1fr); }
+  .kenar{ padding:16px 8px 12px; align-items:center; }
+  .kenar__marka span, .kenar__baglam, .kenar__ad, .kenar__bolumler, .kenar__bag span, .kenar__rutbe span,
+  .kenar__rutbe .kbk-ic, .kenar__modul span{ display:none; }
+  .kenar__moduller{ grid-template-columns:1fr; width:44px; }
+  .kenar__modul{ height:28px; }
+  .kenar__cekmece{ justify-content:center; padding:0; width:40px; position:relative; }
+  .kenar__sayac{ position:absolute; top:-2px; right:-4px; min-width:16px; height:16px; font-size:10px; padding:0 4px; }
+  .site--v5 .sayfa{ padding:32px 32px 0; }
+  .ust--v5 .ust__ara{ width:200px; }
+}
+
+/* Telefon: kenar yok; üstte modül ve konum, onay ve rütbe; altta bant. */
+@media (max-width:679px){
+  .site--v5{ grid-template-columns:minmax(0,1fr); }
+  .site--v5 > .kenar{ display:none; }
+  .site--v5 > .ust, .site--v5 > .site__body, .site--v5 > .sayfasonu{ grid-column:1; }
+  .ust--v5 .ust__ic{ padding:0 16px; }
+  .ust--v5 .ust__yol-modul{ color:var(--text); font-weight:700; font-size:15px; }
+  .ust--v5 .ust__yol-ayrac, .ust--v5 .ust__yol-oge:not(.is-son){ display:none; }
+  .ust--v5 .ust__yol-oge.is-son{ color:var(--text-3); font-weight:500; font-size:14px; }
+  .ust--v5 .ust__ara, .ust--v5 .ust__profil{ display:none; }
+  .ust--telefon{ display:flex !important; }
+  .ust--v5 .ust__onay{ height:32px; padding:0 12px; border:0; border-radius:16px; background:var(--mer-t); color:var(--mer-ink);
+    font:inherit; font-size:13px; font-weight:600; display:flex; align-items:center; gap:6px; }
+  .ust--v5 .ust__onay i{ width:6px; height:6px; border-radius:50%; background:var(--mer); }
+  .ust--v5 .ust__madalya{ width:32px; height:32px; border-radius:50%; border:0; background:var(--surface);
+    box-shadow:inset 0 0 0 1px var(--border); display:flex; align-items:center; justify-content:center; }
+  .ust--v5 .ust__madalya .kenar__madalya{ width:18px; height:18px; }
+  .site--v5 .sayfa{ padding:16px 16px 0; }
+}
+
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
@@ -8827,7 +8960,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'b11b860', at:'2026-09-24 22:22', dirty:true };
+SP.BUILD = { id:'5e5fa1b', at:'2026-09-24 22:26', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -11503,6 +11636,7 @@ window.LIFEOS = window.LIFEOS || {};
     menu:'<path d="M4.5 7h15M4.5 12h15M4.5 17h15"/>',
     arti:'<path d="M12 5v14M5 12h14"/>',
     asagi:'<path d="M7 10l5 5 5-5"/>',
+    ileri:'<path d="M10 7l5 5-5 5"/>',
     kapat:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
   };
 
@@ -11629,6 +11763,114 @@ window.LIFEOS = window.LIFEOS || {};
       +   '<button class="ust__menu" data-act="toggle-sidebar" aria-label="Menü">' + simge('menu') + '</button>'
       + '</div></div></header>';
   }
+
+  /* ================================================== v5 · KENAR ÇUBUĞU
+     LifeOS Tasarım Dili sürüm 5 (Kabuk anatomisi). Üst gezinme ve bölüm
+     çubuğu kenar çubuğuna taşındı: modül geçişi · bağlam satırı · sekiz
+     çekmece (açık olanın bölümleri altında) · Merkez bağlantısı · rütbe.
+     Üstte yalnız ince bir şerit kalır: konum · ara · bildirim · profil.
+     Hiçbir eylem kaybolmaz: modül menüsü markada, onay sayacı Onaylar'ın
+     rozetinde, bağlantı ve rütbe kenarın dibinde (envanter aynı eylemleri
+     görür). */
+
+  /* Dört biçimli modül geçişi (008, 155): bu modül basılı; öteki sistemin
+     adresi biliniyorsa bağlantıdır, bilinmiyorsa uydurulmaz. */
+  function modulGecisi(modul, loc){
+    return '<div class="kenar__moduller" data-oz="008 155" role="group" aria-label="Sistemler">'
+      + SIRA.map(k => {
+        const m = MODULLER[k];
+        const ic = '<i class="kenar__nokta kenar__nokta--' + k + '" aria-hidden="true"></i><span>' + kac(m.ad) + '</span>';
+        if(k === modul) return '<span class="kenar__modul is-on" aria-current="true">' + ic + '</span>';
+        const url = adres(k, loc);
+        return url ? '<a class="kenar__modul" href="' + kac(url) + '" data-modul-gecis="' + k + '">' + ic + '</a>'
+          : '<span class="kenar__modul is-kapali" title="' + kac(m.ad + ' ayrı dosyada açılır') + '">' + ic + '</span>';
+      }).join('') + '</div>';
+  }
+
+  /* o: { modul, baglam, loc,
+          cekmeceler:[{ id, ad, route, on, sayac, bolumler:[{ route, ad, on, rozet }] }],
+          baglanti:{ durum, saat, route }, rutbe } */
+  function kenarCubugu(o){
+    o = o || {};
+    const cek = (o.cekmeceler || []).map(c => {
+      const sayac = c.sayac ? '<span class="kenar__sayac" data-oz="115" aria-label="' + kac(c.sayac + ' bekleyen') + '">'
+        + kac(c.sayac) + '</span>' : '';
+      const bol = c.on && (c.bolumler || []).length > 1
+        ? '<div class="kenar__bolumler" data-oz="019" role="group" aria-label="' + kac(c.ad + ' bölümleri') + '">'
+          + c.bolumler.map(b => '<button class="kenar__bolum' + (b.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(b.route) + '"'
+            + (b.on ? ' aria-current="page"' : '') + '>' + kac(b.ad)
+            + (b.rozet ? '<span class="kenar__rozet' + (b.rozet.quiet ? ' is-sessiz' : '') + '" aria-label="' + kac(b.rozet.text + ' bekleyen') + '">'
+              + kac(b.rozet.text) + '</span>' : '')
+            + '</button>').join('')
+          + '</div>' : '';
+      return '<div class="kenar__cekmece-kap">'
+        + '<button class="kenar__cekmece' + (c.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(c.route) + '"'
+        + ' data-cekmece="' + kac(c.id) + '"' + (c.on && !(c.bolumler || []).some(b => b.on && b.route !== c.route) ? ' aria-current="page"' : '') + '>'
+        + simge(c.id) + '<span class="kenar__ad">' + kac(c.ad) + '</span>' + sayac + '</button>' + bol + '</div>';
+    }).join('');
+    const b = o.baglanti || {};
+    const d = b.durum || 'kapali';
+    const bagMetin = d === 'bagli' ? 'Merkez bağlı' : d === 'ulasilamadi' ? 'Merkeze ulaşılamadı'
+      : d === 'bekliyor' ? 'Merkez açık' : 'Merkez kapalı';
+    const bagAlt = d === 'bagli' ? (b.saat ? 'Son eşleme ' + b.saat : 'bağlı')
+      : d === 'bekliyor' ? 'henüz gönderim olmadı' : 'her şey çalışıyor';
+    const r = o.rutbe;
+    const rutbe = r && r.etiket && r.etiket !== '—'
+      ? '<button class="kenar__rutbe" data-oz="140" data-act="go" data-route="' + kac(r.route || 'rutbe') + '"'
+        + ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '">'
+        + '<i class="kenar__madalya" aria-hidden="true"' + (r.renk ? ' style="--kademe-renk:' + kac(r.renk) + '"' : '') + '></i>'
+        + '<span><b>' + kac(r.ad || '') + '</b> ' + kac(r.etiket) + '</span>' + simge('ileri') + '</button>' : '';
+    return '<aside class="kenar" data-modul="' + kac(o.modul || 'ays') + '" aria-label="Gezinme">'
+      + '<button class="kenar__marka" data-act="modul-menu" aria-haspopup="dialog" aria-label="LifeOS — sistemler arası geçiş">'
+      +   '<i class="kenar__logo" aria-hidden="true"><b></b><b></b><b></b><b></b></i><span>LifeOS</span></button>'
+      + modulGecisi(o.modul, o.loc)
+      + (o.baglam ? '<p class="kenar__baglam">' + kac(o.baglam) + '</p>' : '')
+      + '<nav class="kenar__nav" aria-label="Çekmeceler">' + cek + '</nav>'
+      + '<div class="kenar__dip">'
+      +   '<button class="kenar__bag kenar__bag--' + kac(d) + '" data-oz="118" data-act="go" data-route="' + kac(b.route || 'guide') + '">'
+      +     '<i class="kenar__merkez" aria-hidden="true"></i><span><b>' + kac(bagMetin) + '</b><small>' + kac(bagAlt) + '</small></span></button>'
+      +   rutbe
+      + '</div></aside>';
+  }
+
+  /* İnce üst şerit. o: { modul, yol:[…], bildirim:{ sayi, acil }, profil,
+     onay:{ sayi, route }, rutbe } — onay ve rütbe yalnız telefonda
+     görünür (masaüstünde kenar çubuğundadırlar). */
+  function ustSerit(o){
+    o = o || {};
+    const m = MODULLER[o.modul] || MODULLER.ays;
+    const yol = (o.yol || []).filter(Boolean);
+    const bil = o.bildirim || {};
+    const prof = o.profil || {};
+    const harf = (prof.harf || (prof.ad || '').trim().charAt(0) || '·').toLocaleUpperCase('tr-TR');
+    const onay = o.onay || {};
+    const r = o.rutbe;
+    return '<header class="ust ust--v5" data-modul="' + kac(o.modul || 'ays') + '">'
+      + '<div class="ust__ic">'
+      + '<nav class="ust__yol" aria-label="Konum"><i class="kenar__nokta kenar__nokta--' + kac(o.modul || 'ays') + '" aria-hidden="true"></i>'
+      +   '<span class="ust__yol-modul">' + kac(m.ad) + '</span>'
+      +   yol.map((y, i) => '<span class="ust__yol-ayrac" aria-hidden="true">/</span><span class="ust__yol-oge' + (i === yol.length - 1 ? ' is-son' : '') + '">' + kac(y) + '</span>').join('')
+      + '</nav>'
+      + '<div class="ust__sag">'
+      +   (onay.sayi ? '<button class="ust__onay ust--telefon" data-act="go" data-route="' + kac(onay.route || 'onaylar') + '"'
+      +     ' aria-label="' + kac(onay.sayi + ' öneri onay bekliyor') + '"><i aria-hidden="true"></i>' + kac(onay.sayi) + '</button>' : '')
+      +   '<button class="ust__ara" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)">'
+      +     simge('ara') + '<span class="ust__ara-yazi">Ara ya da yaz</span><kbd>Ctrl K</kbd></button>'
+      +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
+      +     ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
+      +     simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</button>'
+      +   (r && r.etiket && r.etiket !== '—' ? '<button class="ust__madalya ust--telefon" data-act="go" data-route="' + kac(r.route || 'rutbe') + '"'
+      +     ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '"><i class="kenar__madalya" aria-hidden="true"'
+      +     (r.renk ? ' style="--kademe-renk:' + kac(r.renk) + '"' : '') + '></i></button>' : '')
+      +   '<button class="ust__profil" data-act="open-appearance" aria-haspopup="dialog"'
+      +     ' aria-label="' + kac('Profil ve görünüm' + (prof.ad ? ' — ' + prof.ad : '')) + '">' + kac(harf) + '</button>'
+      +   '<button class="ust__menu" data-act="toggle-sidebar" aria-label="Menü">' + simge('menu') + '</button>'
+      + '</div></div></header>';
+  }
+
+  /* Modüllerin tek çağrısı: ustCubuk'a verilen nesnenin aynısı + her
+     çekmecenin bölümleri, konum ve bağlam satırı. */
+  function iskeletV5(o){ return kenarCubugu(o) + ustSerit(o); }
 
   /* ================================================== GÜN ŞERİDİ */
 
@@ -11900,7 +12142,7 @@ window.LIFEOS = window.LIFEOS || {};
      Azaltılmış harekette bekleme sıfırdır. */
   function gecis(k, url){
     const m = MODULLER[k];
-    const ust = document.querySelector('.ust');
+    const ust = document.querySelector('.kenar') || document.querySelector('.ust');
     const az = (() => { try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return true; } })();
     if(ust && m){
       ust.setAttribute('data-gecis', k);
@@ -11936,7 +12178,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.KABUK = Object.freeze({
     CEKMECELER, MODULLER, SIRA,
     simge, modulIsareti, adres, simdiOrani, saatMetni,
-    ustCubuk, gunSeridi, haftaSeridi, sayfaBasi, bolumCubugu, altBant, menuSayfasi,
+    ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, bolumCubugu, altBant, menuSayfasi,
     modulMenusu, bildirimPaneli, hizliEkle,
     katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis,
   });
@@ -48816,10 +49058,17 @@ SP.App = (function(){
     const gruplar = safe(bildirimGruplari, []) || [];
     const bil = gruplar.reduce((t, g) => t + g.satirlar.length, 0);
     const acil = gruplar.some(g => g.satirlar.some(s => s.acil));
-    return K.ustCubuk({
+    /* v5 (LifeOS Tasarım Dili sürüm 5): kenar çubuğu + ince üst şerit; açık
+       çekmecenin bölümleri kenarda (bölüm çubuğunun yerini alır). */
+    const r = UST[sc.id] || sc.id;
+    return K.iskeletV5({
       modul:'spi',
+      yol:yolOf(sc.id),
+      baglam:safe(brandLine, ''),
       cekmeceler:sectionsGorunen().map(g => ({ id:g.id, ad:g.label, route:g.views[0].route,
-        on:g.id === aktif.id, sayac:g.id === 'onaylar' ? onay : 0 })),
+        on:g.id === aktif.id, sayac:g.id === 'onaylar' ? onay : 0,
+        bolumler:g.views.map(v => ({ route:v.route, ad:v.label, on:v.route === r,
+          rozet:safe(() => badgeFor(v.route), null) || null })) })),
       onay:{ sayi:onay, route:'onaylar' },
       bildirim:{ sayi:bil, acil },
       baglanti:safe(baglantiVerisi, null) || { durum:'kapali' },
@@ -48891,7 +49140,7 @@ SP.App = (function(){
     const AY = window.LIFEOS && window.LIFEOS.AYAR;
     const eylem = (AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '')
       + (safe(() => sc.actions ? sc.actions() : '') || '');
-    return K.sayfaBasi({ yol:yolOf(sc.id), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
+    return K.sayfaBasi({ yol:[], baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
   }
 
   function bolumCubuguHtml(sc){
@@ -49174,13 +49423,12 @@ SP.App = (function(){
          ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
       const markup = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
-        <div class="site site--v4">
+        <div class="site site--v5">
           ${raw(safe(() => ustCubukHtml(sc)))}
-          ${raw(safe(gunSeridiHtml))}
           <div class="site__body">
             <div class="wrapc sayfa">
               ${raw(safe(() => sayfaBasiHtml(sc)))}
-              ${raw(safe(() => bolumCubuguHtml(sc)))}
+              ${when(sc.id === 'today', () => raw(safe(gunSeridiHtml)))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>
           </div>

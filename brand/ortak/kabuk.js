@@ -80,6 +80,7 @@ window.LIFEOS = window.LIFEOS || {};
     menu:'<path d="M4.5 7h15M4.5 12h15M4.5 17h15"/>',
     arti:'<path d="M12 5v14M5 12h14"/>',
     asagi:'<path d="M7 10l5 5 5-5"/>',
+    ileri:'<path d="M10 7l5 5-5 5"/>',
     kapat:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
   };
 
@@ -206,6 +207,114 @@ window.LIFEOS = window.LIFEOS || {};
       +   '<button class="ust__menu" data-act="toggle-sidebar" aria-label="Menü">' + simge('menu') + '</button>'
       + '</div></div></header>';
   }
+
+  /* ================================================== v5 · KENAR ÇUBUĞU
+     LifeOS Tasarım Dili sürüm 5 (Kabuk anatomisi). Üst gezinme ve bölüm
+     çubuğu kenar çubuğuna taşındı: modül geçişi · bağlam satırı · sekiz
+     çekmece (açık olanın bölümleri altında) · Merkez bağlantısı · rütbe.
+     Üstte yalnız ince bir şerit kalır: konum · ara · bildirim · profil.
+     Hiçbir eylem kaybolmaz: modül menüsü markada, onay sayacı Onaylar'ın
+     rozetinde, bağlantı ve rütbe kenarın dibinde (envanter aynı eylemleri
+     görür). */
+
+  /* Dört biçimli modül geçişi (008, 155): bu modül basılı; öteki sistemin
+     adresi biliniyorsa bağlantıdır, bilinmiyorsa uydurulmaz. */
+  function modulGecisi(modul, loc){
+    return '<div class="kenar__moduller" data-oz="008 155" role="group" aria-label="Sistemler">'
+      + SIRA.map(k => {
+        const m = MODULLER[k];
+        const ic = '<i class="kenar__nokta kenar__nokta--' + k + '" aria-hidden="true"></i><span>' + kac(m.ad) + '</span>';
+        if(k === modul) return '<span class="kenar__modul is-on" aria-current="true">' + ic + '</span>';
+        const url = adres(k, loc);
+        return url ? '<a class="kenar__modul" href="' + kac(url) + '" data-modul-gecis="' + k + '">' + ic + '</a>'
+          : '<span class="kenar__modul is-kapali" title="' + kac(m.ad + ' ayrı dosyada açılır') + '">' + ic + '</span>';
+      }).join('') + '</div>';
+  }
+
+  /* o: { modul, baglam, loc,
+          cekmeceler:[{ id, ad, route, on, sayac, bolumler:[{ route, ad, on, rozet }] }],
+          baglanti:{ durum, saat, route }, rutbe } */
+  function kenarCubugu(o){
+    o = o || {};
+    const cek = (o.cekmeceler || []).map(c => {
+      const sayac = c.sayac ? '<span class="kenar__sayac" data-oz="115" aria-label="' + kac(c.sayac + ' bekleyen') + '">'
+        + kac(c.sayac) + '</span>' : '';
+      const bol = c.on && (c.bolumler || []).length > 1
+        ? '<div class="kenar__bolumler" data-oz="019" role="group" aria-label="' + kac(c.ad + ' bölümleri') + '">'
+          + c.bolumler.map(b => '<button class="kenar__bolum' + (b.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(b.route) + '"'
+            + (b.on ? ' aria-current="page"' : '') + '>' + kac(b.ad)
+            + (b.rozet ? '<span class="kenar__rozet' + (b.rozet.quiet ? ' is-sessiz' : '') + '" aria-label="' + kac(b.rozet.text + ' bekleyen') + '">'
+              + kac(b.rozet.text) + '</span>' : '')
+            + '</button>').join('')
+          + '</div>' : '';
+      return '<div class="kenar__cekmece-kap">'
+        + '<button class="kenar__cekmece' + (c.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(c.route) + '"'
+        + ' data-cekmece="' + kac(c.id) + '"' + (c.on && !(c.bolumler || []).some(b => b.on && b.route !== c.route) ? ' aria-current="page"' : '') + '>'
+        + simge(c.id) + '<span class="kenar__ad">' + kac(c.ad) + '</span>' + sayac + '</button>' + bol + '</div>';
+    }).join('');
+    const b = o.baglanti || {};
+    const d = b.durum || 'kapali';
+    const bagMetin = d === 'bagli' ? 'Merkez bağlı' : d === 'ulasilamadi' ? 'Merkeze ulaşılamadı'
+      : d === 'bekliyor' ? 'Merkez açık' : 'Merkez kapalı';
+    const bagAlt = d === 'bagli' ? (b.saat ? 'Son eşleme ' + b.saat : 'bağlı')
+      : d === 'bekliyor' ? 'henüz gönderim olmadı' : 'her şey çalışıyor';
+    const r = o.rutbe;
+    const rutbe = r && r.etiket && r.etiket !== '—'
+      ? '<button class="kenar__rutbe" data-oz="140" data-act="go" data-route="' + kac(r.route || 'rutbe') + '"'
+        + ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '">'
+        + '<i class="kenar__madalya" aria-hidden="true"' + (r.renk ? ' style="--kademe-renk:' + kac(r.renk) + '"' : '') + '></i>'
+        + '<span><b>' + kac(r.ad || '') + '</b> ' + kac(r.etiket) + '</span>' + simge('ileri') + '</button>' : '';
+    return '<aside class="kenar" data-modul="' + kac(o.modul || 'ays') + '" aria-label="Gezinme">'
+      + '<button class="kenar__marka" data-act="modul-menu" aria-haspopup="dialog" aria-label="LifeOS — sistemler arası geçiş">'
+      +   '<i class="kenar__logo" aria-hidden="true"><b></b><b></b><b></b><b></b></i><span>LifeOS</span></button>'
+      + modulGecisi(o.modul, o.loc)
+      + (o.baglam ? '<p class="kenar__baglam">' + kac(o.baglam) + '</p>' : '')
+      + '<nav class="kenar__nav" aria-label="Çekmeceler">' + cek + '</nav>'
+      + '<div class="kenar__dip">'
+      +   '<button class="kenar__bag kenar__bag--' + kac(d) + '" data-oz="118" data-act="go" data-route="' + kac(b.route || 'guide') + '">'
+      +     '<i class="kenar__merkez" aria-hidden="true"></i><span><b>' + kac(bagMetin) + '</b><small>' + kac(bagAlt) + '</small></span></button>'
+      +   rutbe
+      + '</div></aside>';
+  }
+
+  /* İnce üst şerit. o: { modul, yol:[…], bildirim:{ sayi, acil }, profil,
+     onay:{ sayi, route }, rutbe } — onay ve rütbe yalnız telefonda
+     görünür (masaüstünde kenar çubuğundadırlar). */
+  function ustSerit(o){
+    o = o || {};
+    const m = MODULLER[o.modul] || MODULLER.ays;
+    const yol = (o.yol || []).filter(Boolean);
+    const bil = o.bildirim || {};
+    const prof = o.profil || {};
+    const harf = (prof.harf || (prof.ad || '').trim().charAt(0) || '·').toLocaleUpperCase('tr-TR');
+    const onay = o.onay || {};
+    const r = o.rutbe;
+    return '<header class="ust ust--v5" data-modul="' + kac(o.modul || 'ays') + '">'
+      + '<div class="ust__ic">'
+      + '<nav class="ust__yol" aria-label="Konum"><i class="kenar__nokta kenar__nokta--' + kac(o.modul || 'ays') + '" aria-hidden="true"></i>'
+      +   '<span class="ust__yol-modul">' + kac(m.ad) + '</span>'
+      +   yol.map((y, i) => '<span class="ust__yol-ayrac" aria-hidden="true">/</span><span class="ust__yol-oge' + (i === yol.length - 1 ? ' is-son' : '') + '">' + kac(y) + '</span>').join('')
+      + '</nav>'
+      + '<div class="ust__sag">'
+      +   (onay.sayi ? '<button class="ust__onay ust--telefon" data-act="go" data-route="' + kac(onay.route || 'onaylar') + '"'
+      +     ' aria-label="' + kac(onay.sayi + ' öneri onay bekliyor') + '"><i aria-hidden="true"></i>' + kac(onay.sayi) + '</button>' : '')
+      +   '<button class="ust__ara" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)">'
+      +     simge('ara') + '<span class="ust__ara-yazi">Ara ya da yaz</span><kbd>Ctrl K</kbd></button>'
+      +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
+      +     ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
+      +     simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</button>'
+      +   (r && r.etiket && r.etiket !== '—' ? '<button class="ust__madalya ust--telefon" data-act="go" data-route="' + kac(r.route || 'rutbe') + '"'
+      +     ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '"><i class="kenar__madalya" aria-hidden="true"'
+      +     (r.renk ? ' style="--kademe-renk:' + kac(r.renk) + '"' : '') + '></i></button>' : '')
+      +   '<button class="ust__profil" data-act="open-appearance" aria-haspopup="dialog"'
+      +     ' aria-label="' + kac('Profil ve görünüm' + (prof.ad ? ' — ' + prof.ad : '')) + '">' + kac(harf) + '</button>'
+      +   '<button class="ust__menu" data-act="toggle-sidebar" aria-label="Menü">' + simge('menu') + '</button>'
+      + '</div></div></header>';
+  }
+
+  /* Modüllerin tek çağrısı: ustCubuk'a verilen nesnenin aynısı + her
+     çekmecenin bölümleri, konum ve bağlam satırı. */
+  function iskeletV5(o){ return kenarCubugu(o) + ustSerit(o); }
 
   /* ================================================== GÜN ŞERİDİ */
 
@@ -477,7 +586,7 @@ window.LIFEOS = window.LIFEOS || {};
      Azaltılmış harekette bekleme sıfırdır. */
   function gecis(k, url){
     const m = MODULLER[k];
-    const ust = document.querySelector('.ust');
+    const ust = document.querySelector('.kenar') || document.querySelector('.ust');
     const az = (() => { try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return true; } })();
     if(ust && m){
       ust.setAttribute('data-gecis', k);
@@ -513,7 +622,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.KABUK = Object.freeze({
     CEKMECELER, MODULLER, SIRA,
     simge, modulIsareti, adres, simdiOrani, saatMetni,
-    ustCubuk, gunSeridi, haftaSeridi, sayfaBasi, bolumCubugu, altBant, menuSayfasi,
+    ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, bolumCubugu, altBant, menuSayfasi,
     modulMenusu, bildirimPaneli, hizliEkle,
     katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis,
   });
