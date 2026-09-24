@@ -65,7 +65,7 @@ ESP.Belge = (function(){
 
   function istekTemizle(o){
     const alan = o && o.alan;
-    if(['tarih', 'felsefe', 'okuma', 'yazi', 'cefr', 'okuma_hizi'].indexOf(alan) < 0) return { ok:false, why:'Alan tarih, felsefe, okuma ya da yazı olmalı.' };
+    if(['tarih', 'felsefe', 'okuma', 'yazi', 'cefr', 'okuma_hizi', 'diksiyon'].indexOf(alan) < 0) return { ok:false, why:'Alan tarih, felsefe, okuma, yazı ya da diksiyon olmalı.' };
     const konu = bosluk(o.konu);
     if(konu.length < 2 || konu.length > 80) return { ok:false, why:'Konu 2–80 karakter olmalı.' };
     return { ok:true, belge:{ alan, konu } };
@@ -76,7 +76,7 @@ ESP.Belge = (function(){
     if(!t.ok) return { ok:false, metin:t.why };
     const r = await istek('/api/king/emir', { modul:'esp', tur:'esp.belge', konu:'',
       neden:'ESP ' + ({ tarih:'Tarih', felsefe:'Sempozyum', okuma:'Okuma', yazi:'Yazı',
-        cefr:'Rehber › Dayanak', okuma_hizi:'Rehber › Dayanak' })[t.belge.alan] + ' ekranından belge istendi.',
+        cefr:'Rehber › Dayanak', okuma_hizi:'Rehber › Dayanak', diksiyon:'Stüdyo › Diksiyon' })[t.belge.alan] + ' ekranından belge istendi.',
       govde:{ belge:t.belge } });
     if(!r.bagli) return { ok:false, metin:'Belgeyi HKM’deki Araştırma Bürosu kaynaklardan çıkarır ama HKM '
       + 'bağlı değil. Rehber › HKM’den bağlanınca yeniden iste.' };
@@ -112,9 +112,10 @@ ESP.Belge = (function(){
     if(!g || !Number.isInteger(kid) || kid < 1 || kid !== Number(p && p.kayit_id)){
       return { ok:false, why:'Kayıt teklifle eşleşmiyor.' };
     }
-    if(['tarih', 'felsefe', 'okuma', 'yazi', 'cefr', 'okuma_hizi'].indexOf(g.tur) < 0) return { ok:false, why:'Kayıt ESP belgesi biçiminde değil.' };
+    if(['tarih', 'felsefe', 'okuma', 'yazi', 'cefr', 'okuma_hizi', 'diksiyon'].indexOf(g.tur) < 0) return { ok:false, why:'Kayıt ESP belgesi biçiminde değil.' };
     if(kayit.dogruluk !== 'kaynakli') return { ok:false, why:'Kaynaksız belge eklenmez: belge kaynaktır.' };
     if(g.tur === 'cefr' || g.tur === 'okuma_hizi') return dayanakSina(g, kid, kayit);
+    if(g.tur === 'diksiyon') return diksiyonSina(g, kid);
     const hepsi = [].concat(ESP.S.events || [], ESP.S.sources || [], ESP.S.books || [], ESP.S.args || []);
     if(hepsi.some(x => x && x.bam && x.bam.kayitId === kid)) return { ok:false, why:'Bu belge zaten eklenmiş.' };
     const kaynaklar = {};
@@ -209,6 +210,67 @@ ESP.Belge = (function(){
         satirlar:args.map(a => a.thesis), uyari } };
   }
 
+  /* ------------------------------------------------------------ diksiyon
+
+     Kullanıcı 2026-09-24: diksiyon belgesi «ikisi birden». Telaffuz KURALI
+     Stüdyo › Diksiyon'da kaynağıyla durur; okuma PARÇASI çalışma metinlerine
+     katılır (HKM parçayı kaynakta BİREBİR bulmuştu; burada uzunluk, kaynak
+     bağı ve tekrar yeniden sınanır). Tekerleme gibi parçanın da süresi ve
+     hatası kullanıcının ölçümüdür. */
+  const DIKSIYON_ANAHTAR = 'meta/diksiyon';
+  function diksiyon(){
+    const d = ESP.S.diksiyon;
+    if(!d || !Array.isArray(d.kurallar) || !Array.isArray(d.parcalar)) ESP.S.diksiyon = { kurallar:[], parcalar:[] };
+    return ESP.S.diksiyon;
+  }
+  async function diksiyonYukle(){
+    let d = null;
+    try{ d = await ESP.Store.get(DIKSIYON_ANAHTAR); }catch(e){ d = null; }
+    ESP.S.diksiyon = d && Array.isArray(d.kurallar) && Array.isArray(d.parcalar) ? d : { kurallar:[], parcalar:[] };
+  }
+  function kelimeSay(t){ return bosluk(t).split(' ').filter(Boolean).length; }
+
+  function diksiyonSina(g, kid){
+    const d = diksiyon();
+    if(d.kurallar.concat(d.parcalar).some(x => x.bam && x.bam.kayitId === kid)) return { ok:false, why:'Bu belge zaten eklenmiş.' };
+    const var_ = {};
+    d.kurallar.forEach(k => { var_[U().norm(k.kural)] = 1; });
+    d.parcalar.forEach(p => { var_[U().norm(p.text)] = 1; });
+    let dusen = 0, atlanan = 0;
+    const kurallar = [], parcalar = [];
+    (Array.isArray(g.kurallar) ? g.kurallar : []).slice(0, 24).forEach(x => {
+      const kural = metin(x && x.kural, 10, 300), k = kural && kaynakAdi(g, x.kaynak);
+      if(!kural || !k){ dusen++; return; }
+      if(var_[U().norm(kural)]){ atlanan++; return; }
+      var_[U().norm(kural)] = 1;
+      kurallar.push({ id:U().uid('dk'), kural, ornek:metin(x.ornek, 1, 120), kaynak:k, bam:{ kayitId:kid } });
+    });
+    (Array.isArray(g.parcalar) ? g.parcalar : []).slice(0, 12).forEach(x => {
+      const t = metin(x && x.metin, 40, 600), k = t && kaynakAdi(g, x.kaynak);
+      if(!t || !k){ dusen++; return; }
+      if(var_[U().norm(t)]){ atlanan++; return; }
+      var_[U().norm(t)] = 1;
+      parcalar.push({ id:U().uid('dp'), text:t, words:kelimeSay(t), yazar:metin(x.yazar, 2, 80),
+        kaynak:k, bam:{ kayitId:kid } });
+    });
+    if(!kurallar.length && !parcalar.length) return { ok:false, why:'Belgeden eklenecek yeni kural ya da parça çıkmadı.' };
+    const uyari = [];
+    if(dusen) uyari.push(dusen + ' satır ESP’nin denetimini geçmedi (uzunluk ya da kaynak).');
+    if(atlanan) uyari.push(atlanan + ' satır zaten var; yeniden eklenmeyecek.');
+    uyari.push('Kurallar Stüdyo › Diksiyon’da kaynağıyla durur; parçalar çalışma metinlerine katılır.');
+    return { ok:true, tur:'diksiyon', kurallar, parcalar, kayitId:kid,
+      onizleme:{ baslik:bosluk(g.konu) + ' — ' + kurallar.length + ' kural, ' + parcalar.length + ' okuma parçası (kaynaklı)',
+        satirlar:kurallar.map(k => k.kural + (k.ornek ? ' (örnek: ' + k.ornek + ')' : ''))
+          .concat(parcalar.map(p => '«' + p.text.slice(0, 80) + (p.text.length > 80 ? '…' : '') + '»')),
+        uyari } };
+  }
+
+  /* Çalışma metinleri: yerleşik tekerlemeler + kaynaklı okuma parçaları. */
+  function calismaMetinleri(){
+    return (ESP.TONGUE_TWISTERS || []).concat(diksiyon().parcalar.map(p => ({ id:p.id, level:null,
+      target:null, words:p.words, text:p.text, kaynak:p.kaynak, yazar:p.yazar })));
+  }
+
   /* ------------------------------------------------------------ dayanak (madde 11)
 
      Hedef paketlerinin TAHMİN TABLOLARI (core/hedefler.js): CEFR saatleri ve
@@ -296,6 +358,14 @@ ESP.Belge = (function(){
         + ' artık kaynaklı; dil ve okuma hedefleri bu dayanakla hesaplanır.',
         geriAl:{ kayitId:kid, dayanak:s.anahtar, onceki } };
     }
+    if(s.tur === 'diksiyon'){
+      const d = diksiyon();
+      d.kurallar = d.kurallar.concat(s.kurallar);
+      d.parcalar = d.parcalar.concat(s.parcalar);
+      await ESP.Store.set(DIKSIYON_ANAHTAR, d);
+      return { ok:true, note:s.kurallar.length + ' telaffuz kuralı ve ' + s.parcalar.length
+        + ' okuma parçası Stüdyo › Diksiyon’a eklendi (kaynaklı).', geriAl:{ kayitId:kid, diksiyon:true } };
+    }
     if(s.tur === 'tarih'){
       for(const k of s.sources){ const r = await ESP.Model.saveSource(k); if(!r.ok) return { ok:false, error:r.error }; }
       for(const e of s.events){ const r = await ESP.Model.saveEvent(e); if(!r.ok) return { ok:false, error:r.error }; }
@@ -322,6 +392,15 @@ ESP.Belge = (function(){
       await ESP.Store.set(DAYANAK_ANAHTAR, ESP.S.dayanaklar);
       return { ok:true, silinen:1, kalan:0 };
     }
+    if(g && g.diksiyon){
+      const d = diksiyon();
+      const once = d.kurallar.length + d.parcalar.length;
+      d.kurallar = d.kurallar.filter(x => !bamOf(x, kid));
+      d.parcalar = d.parcalar.filter(x => !bamOf(x, kid));
+      await ESP.Store.set(DIKSIYON_ANAHTAR, d);
+      const silinen = once - d.kurallar.length - d.parcalar.length;
+      return { ok:silinen > 0, silinen, kalan:0 };
+    }
     let kalan = 0, silinen = 0;
     const S = ESP.S;
     for(const a of (S.args || []).filter(x => bamOf(x, kid))){
@@ -344,5 +423,6 @@ ESP.Belge = (function(){
     return { ok:silinen + kalan > 0, silinen, kalan };
   }
 
-  return { istekTemizle, iste, kayitCek, sina, onizle, uygula, geriAl, yilYaz, dayanak, dayanakYukle };
+  return { istekTemizle, iste, kayitCek, sina, onizle, uygula, geriAl, yilYaz, dayanak, dayanakYukle,
+    diksiyon, diksiyonYukle, calismaMetinleri };
 })();

@@ -166,6 +166,45 @@ def run():
         eq(espbelge.satirlar(govde), govde["hizlar"])
     test("dayanak tablolari: CEFR ve okuma hizi alintida", t_dayanak_tablolari)
 
+    def t_diksiyon():
+        """Kullanici 2026-09-24: diksiyon belgesi IKISI BIRDEN — telaffuz kurali ve
+        okuma parcasi. Kuralin alintisi kaynakta olmali; ornek kaynakta gecmiyorsa
+        duser. Okuma parcasi kaynakta BIREBIR gecmeli; gecmeyen parca duser."""
+        eq(espbelge.temizle({"alan": "diksiyon", "konu": "Türkçe vurgu"})[1], [])
+        sayfa = ("Türkçede vurgu genellikle kelimenin son hecesine düşer; örneğin kalem "
+                 "kelimesinde vurgu sondadır. Yer adlarında vurgu çoğunlukla ilk hecededir, "
+                 "Ankara gibi. Bir sabah uyandım ki pencerenin önünde kar yağıyor, sokaklar "
+                 "bembeyaz ve kimse daha evinden çıkmamış.")
+        g = {"alan": "diksiyon", "konu": "Türkçe vurgu"}
+        d = {"kurallar": [
+                {"kural": "Türkçede vurgu çoğunlukla son hecededir.", "ornek": "kalem", "kaynak": 1,
+                 "alinti": "Türkçede vurgu genellikle kelimenin son hecesine düşer"},
+                {"kural": "Yer adlarında vurgu ilk hecededir.", "ornek": "İstanbul", "kaynak": 1,
+                 "alinti": "Yer adlarında vurgu çoğunlukla ilk hecededir, Ankara gibi"},
+                {"kural": "Uydurma kural burada.", "kaynak": 1, "alinti": "Bu cümle kaynakta hiç yok, uydurma."},
+                {"kural": "", "kaynak": 1, "alinti": "x"}],
+             "parcalar": [
+                {"metin": "Bir sabah uyandım ki pencerenin önünde kar yağıyor, sokaklar bembeyaz "
+                          "ve kimse daha evinden çıkmamış.", "yazar": None, "kaynak": 1},
+                {"metin": "Bu parça kaynakta yok ama uzunluğu yeterli, kırk karakteri geçiyor.",
+                 "kaynak": 1}]}
+        govde, hata = espbelge.ayikla(d, g)
+        eq((hata, len(govde["kurallar"]), len(govde["parcalar"]), govde["bicim_dusen"]), (None, 3, 2, 1))
+        etiket, hata = espbelge.dogrula(govde, {1: sayfa}, lambda a, m: a in m)
+        eq(etiket, "kaynakli")
+        eq([(k["kural"], k["ornek"]) for k in govde["kurallar"]],
+           [("Türkçede vurgu çoğunlukla son hecededir.", "kalem"),
+            ("Yer adlarında vurgu ilk hecededir.", None)])
+        eq(len(govde["parcalar"]), 1)
+        eq(len(espbelge.satirlar(govde)), 3)
+        eq(espbelge.ozet(govde), "Türkçe vurgu: 2 telaffuz kuralı, 1 okuma parçası (kaynaklı).")
+        ok("BİREBİR" in espbelge.sistem("diksiyon"))
+        yok, hata = espbelge.dogrula(espbelge.ayikla({"kurallar": [], "parcalar": [
+            {"metin": "Bu parça kaynakta yok ama uzunluğu yeterli, kırk karakteri geçiyor.",
+             "kaynak": 1}]}, g)[0], {1: sayfa}, lambda a, m: a in m)
+        eq(yok, None)
+    test("diksiyon: kural alintida, okuma parcasi kaynakta birebir", t_diksiyon)
+
     def t_web_kapali():
         con = db.connect(":memory:")
         m = _Model()

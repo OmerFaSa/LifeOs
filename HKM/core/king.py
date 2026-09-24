@@ -124,7 +124,7 @@ TURLER = {
     # ESP belgesi (core/espbelge.py, Part 8f): tarih ve felsefe icin
     # kaynakli malzeme. Web ZORUNLU; alinti ve yil/ad kodla denetlenir.
     "esp.belge": {
-        "ad": "ESP belgesi (tarih, felsefe)",
+        "ad": "ESP belgesi (tarih, felsefe, okuma, yazı, diksiyon)",
         "moduller": ("esp",),
         "ofisler": ["kayit", "arastirma"],
         "model": True,

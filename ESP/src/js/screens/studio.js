@@ -278,24 +278,48 @@ ESP.Screens.studio = (function(){
   function dictionRows(){
     const d = ESP.Acoustic.dictionStatus(30);
     const kayitlar = (S.recordings || []).slice(0, 10);
-    const secili = ESP.TWISTER_BY_ID[S.ui.twister || 'kartal'] || ESP.TONGUE_TWISTERS[0];
+    /* Çalışma metinleri: yerleşik tekerlemeler + kaynaklı okuma parçaları
+       (core/belge.js diksiyon belgesi). */
+    const metinler = ESP.Belge ? ESP.Belge.calismaMetinleri() : ESP.TONGUE_TWISTERS;
+    const secili = metinler.find(t => t.id === (S.ui.twister || 'kartal')) || metinler[0];
+    const grup = secili.target ? (ESP.PHONEME_GROUPS.find(g => g.id === secili.target) || {}) : {};
+    const dk = ESP.Belge ? ESP.Belge.diksiyon() : { kurallar:[], parcalar:[] };
 
     return [
       K.Entry({
         label:'ÇALIŞMA METNİ', hint:'articulation',
-        meta:'düzey ' + secili.level + ' · ' + (ESP.PHONEME_GROUPS.find(g => g.id === secili.target) || {}).label,
+        meta:secili.kaynak ? 'kaynaklı okuma parçası' : 'düzey ' + secili.level + ' · ' + grup.label,
         note:'Hedef hızlı söylemek değil, hangi sesin düzeldiği. Hızlı ama bozuk '
            + 'bir tekerleme çalışmanın başarısı değil başarısızlığıdır.',
         body:html`
           <div class="row wrap">
             ${K.Select({ id:'tw-pick', value:secili.id, change:'pick-twister',
               aria:'Çalışma metni',
-              options:ESP.TONGUE_TWISTERS.map(t => ({ value:t.id,
-                label:'D' + t.level + ' · ' + t.text.slice(0, 40) + '…' })) })}
+              options:metinler.map(t => ({ value:t.id,
+                label:(t.kaynak ? 'Parça' : 'D' + t.level) + ' · ' + t.text.slice(0, 40) + '…' })) })}
           </div>
           <p class="twister mt-10">${secili.text}</p>
           <p class="small muted mt-8">${secili.words} kelime ·
-            ${(ESP.PHONEME_GROUPS.find(g => g.id === secili.target) || {}).note || ''}</p>`,
+            ${secili.kaynak ? (secili.yazar ? secili.yazar + ' · ' : '') + 'kaynak: ' + secili.kaynak.baslik
+              : (grup.note || '')}</p>`,
+      }),
+
+      /* Diksiyon belgesi (kullanıcı 2026-09-24: «ikisi birden»): telaffuz
+         kuralı ve okuma parçası, BAM'ın web kaynaklarından; kural kaynağıyla. */
+      K.Entry({
+        label:'TELAFFUZ KURALLARI', meta:dk.kurallar.length ? dk.kurallar.length + ' kural · kaynaklı' : 'henüz yok',
+        note:'Kural ve okuma parçası web kaynaklarından gelir; alıntısı kaynakta bulunmayan satır eklenmez.',
+        wide:true,
+        body:html`
+          ${when(dk.kurallar.length, () => html`<ul class="setup__list">${map(dk.kurallar, k => html`
+            <li>${k.kural}${when(k.ornek, () => html` <span class="dim">(örnek: ${k.ornek})</span>`)}
+              <span class="tiny dim"> · ${k.kaynak.baslik}</span></li>`)}</ul>`)}
+          <div class="row gap-8 wrap mt-10">
+            ${K.Input({ id:'belge-diksiyon', placeholder:'Konu: Türkçe vurgu, r sesi, sesli okuma…',
+              aria:'Diksiyon belgesi konusu', size:'sm', class:'grow' })}
+            ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+              data:{ 'data-alan':'diksiyon' } })}
+          </div>`,
       }),
 
       K.Entry({
@@ -483,6 +507,12 @@ ESP.Screens.studio = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'belge-iste'(el){
+      const k = document.getElementById('belge-' + el.dataset.alan);
+      const r = await ESP.Belge.iste({ alan:el.dataset.alan, konu:k ? k.value : '' });
+      ESP.UI.toast(r.metin);
+      if(r.ok) ESP.App.render();
+    },
     async 'gitar-iste'(){
       const d = document.getElementById('gitar-duzey'), k = document.getElementById('gitar-konu');
       S.ui.gitarDuzey = d ? d.value : 'başlangıç';

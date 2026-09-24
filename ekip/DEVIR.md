@@ -20,7 +20,7 @@
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
 **Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · ✅ Grup 4 ·
-✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ✅ tam koşum (2026-09-24, 24/24) · ✅ SPİ su hatası · ✅ 8f ESP belge (tarih + felsefe) · ✅ 8f-2 (okuma, yazı) · ❓ diksiyon belgesi (soru) · ✅ Y5 · ✅ Y11 · ✅ 10a · ✅ 11 · ✅ 16 · ✅ 17 · ✅ 18 · ❓ 10b, 14, Y1, Y10, diksiyon · ⏳ cevaplı maddeler · ⏳ Part 9 (harita ONAY BEKLİYOR: `ekip/CEKMECE-HARITASI.md`)
+✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ✅ tam koşum (2026-09-24, 24/24) · ✅ SPİ su hatası · ✅ 8f ESP belge (tarih + felsefe) · ✅ 8f-2 (okuma, yazı) · ✅ diksiyon belgesi · ✅ Y5 · ✅ Y11 · ✅ 10a · ✅ 11 · ✅ 16 · ✅ 17 · ✅ 18 · ❓ 10b, 14, Y1, Y10, diksiyon · ⏳ cevaplı maddeler · ⏳ Part 9 (harita ONAY BEKLİYOR: `ekip/CEKMECE-HARITASI.md`)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
 
@@ -128,8 +128,11 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
 - ✅ **8f-2 okuma + yazı** (MIMARI §8.35): eser listesi → Okuma › Kaynaklar «başlanmadı»;
   BAM notu kitabın üstünde, kullanıcı notlarına yazılmaz. Hata düzeltildi: başlanmamış kitap
   «okunuyor» görünüyordu (`ESP.Model.bookStatus`). HKM 575, ESP 1334, duman/a11y/390px temiz.
-- ❓ **Diksiyon (ve müzik dışı ses) için «belge» ne olmalı — kullanıcıya soruldu.** Tekerleme
-  üretmek belge değil; telaffuz kuralı mı, konuşmacı/metin örneği mi? Cevap gelmeden yapılmaz.
+- ✅ **Diksiyon belgesi — «ikisi birden»** (2026-09-24): `esp.belge` alan `diksiyon`. HKM
+  `espbelge`: telaffuz KURALI (alıntı kaynakta; örnek kelime kaynakta yoksa düşer) + sesli okuma
+  PARÇASI (40–600 karakter, parçanın KENDİSİ kaynakta birebir). ESP `Belge.diksiyonSina`: yeniden
+  sınar, tekrar almaz; kurallar Stüdyo › Diksiyon › «Telaffuz kuralları»nda kaynağıyla, parçalar
+  çalışma metinlerine katılır (kayıt ölçümü aynı); geri alınır. HKM 588, ESP 1358.
 
 ### Cevabı gelen maddeler (sıra: Part 8'den sonra)
 - ✅ Y5 Sağlık verisi içe aktarma — `SPI/src/js/core/saglikice.js` (SP.SaglikIce), Ayarlar ›
@@ -251,6 +254,18 @@ kapalı; başlatmak kolay olmalı; gece kaçan iş sabah yakalanmalı; telefon �
 (ağdan bağlanma ayrı karar) · 6 Ana sınav şimdilik YKS, ileride değişebilir · 7 Veli/koç
 PDF haftada 1–2, sıklığa kod karar verir · 8 Kariyer esnek, önce sınav önerisi.
 Hâlâ açık: Y10 alıcısı · Y1'in yeri (HKM içi öneri) · telefonun ağdan bağlanması.
+
+**Cevaplar (2026-09-24, ikinci tur):** 10b ana sınav değişimi İLERİDE (müfredat eklemek bugün
+de çalışmalı — var: «Müfredatı kendin yükle» / «Müfredatını iste») · Y1 para HKM'de; ayrıca HKM
+TEK GİRİŞ KAPISI olacak: test kitabı (→AYS), gitar alıştırması ve sözlük/kelime (→ESP) HKM
+sohbetinden/Telegram'dan girilir (HKM teklif bırakır, modül uygular) · Y10 haftalık PDF
+Telegram'a gider VE HKM'de görünür (geçmiş haftalar listelenecek) · diksiyon belgesi İKİSİ
+BİRDEN (telaffuz kuralı + okuma parçası) · 14 ve telefon: kullanıcı «veri sunucuda dursun»
+ve «HKM ekranını telefondan görelim; kullanıcı/admin arayüzü yaptırdık» dedi — o arayüz bu
+depoda YOK; nerede olduğu, sunucunun yeri (ev bilgisayarı / internet) ve «lokal ağa karışma»
+kuralının kalkıp kalkmadığı SORULDU. Cevap gelmeden ağa açılma yok.
+**Sıra:** diksiyon belgesi → haftalık PDF arşivi → HKM para kolu → HKM giriş kapısı (kitap,
+gitar, sözlük) → (cevaba göre) sunucu/telefon → Part 9.
 
 ## 5. Komutlar
 

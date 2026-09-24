@@ -31,10 +31,15 @@ import re
 
 from core import spibilgi
 
-ALANLAR = ("tarih", "felsefe", "okuma", "yazi", "cefr", "okuma_hizi")
+ALANLAR = ("tarih", "felsefe", "okuma", "yazi", "cefr", "okuma_hizi", "diksiyon")
 ALAN_AD = {"tarih": "tarih belgesi", "felsefe": "felsefe belgesi", "okuma": "okuma listesi",
            "yazi": "yazı örnekleri", "cefr": "CEFR saat tablosu dayanağı",
-           "okuma_hizi": "okuma hızı dayanağı"}
+           "okuma_hizi": "okuma hızı dayanağı", "diksiyon": "diksiyon belgesi"}
+# Diksiyon (kullanici 2026-09-24: «ikisi birden»): telaffuz KURALI ve sesli
+# okuma PARCASI. Kuralin alintisi kaynakta; parcanin KENDISI kaynakta birebir.
+MAX_KURAL = 12
+MAX_PARCA = 6
+PARCA = (40, 600)
 # Madde 11: ESP hedef paketlerindeki TAHMIN TABLOLARININ kaynagi. Sayi
 # kaynaktan, sinama koddan; ESP hesabi yine kendisi yapar.
 DAYANAK_ALANLARI = ("cefr", "okuma_hizi")
@@ -74,7 +79,7 @@ def temizle(govde):
             hata.append("belge: bilinmeyen alan «%s»" % k)
     alan = govde.get("alan")
     if alan not in ALANLAR:
-        hata.append("alan tarih, felsefe, okuma, yazı, CEFR ya da okuma hızı olmalı")
+        hata.append("alan tarih, felsefe, okuma, yazı, diksiyon, CEFR ya da okuma hızı olmalı")
     konu = _bosluk(govde.get("konu"))
     if not (2 <= len(konu) <= MAX_KONU):
         hata.append("konu 2-%d karakter olmalı" % MAX_KONU)
@@ -113,6 +118,8 @@ def sorgular(g):
         return ["average silent reading speed words per minute", "ortalama okuma hızı dakikada kelime"]
     if g["alan"] == "yazi":
         return ["%s yazarları üslup" % g["konu"], "%s örnek metinler" % g["konu"]]
+    if g["alan"] == "diksiyon":
+        return ["%s telaffuz kuralları" % g["konu"], "%s sesli okuma metni" % g["konu"]]
     return [g["konu"], "%s filozoflar eserleri" % g["konu"]]
 
 
@@ -128,6 +135,9 @@ def istem(g):
     if g["alan"] == "yazi":
         return ("Konu: %s\nBu konuda üslubu örnek gösterilen yazarları ve eserlerini kaynaklardan "
                 "çıkar." % g["konu"])
+    if g["alan"] == "diksiyon":
+        return ("Konu: %s\nBu konunun telaffuz kurallarını ve sesli okuma çalışması için "
+                "kaynaklardaki örnek parçaları çıkar." % g["konu"])
     return "Konu: %s\nBu konunun düşünürlerini, eserlerini ve ana tezlerini kaynaklardan çıkar." % g["konu"]
 
 
@@ -166,6 +176,16 @@ _BICIM = {
 {"hizlar": [{"ne": "...", "kelime_dk": 238, "kaynak": 1, "alinti": "..."}]}""",
     "okuma": _ESER_BICIM % "bu eserin konu için neden temel sayıldığı",
     "yazi": _ESER_BICIM % "bu yazarın üslubunda örnek gösterilen özellik",
+    "diksiyon": """NE YAZARSIN
+- Kurallar: konunun telaffuz ve diksiyon kuralları, kaynağın söylediği gibi (tek cümle);
+  kaynakta örnek kelime varsa «ornek». Alıntı kuralı söyleyen cümle olmalı.
+- Okuma parçaları: sesli okuma çalışması için kaynaktan BİREBİR kopyalanmış 40–600
+  karakterlik parçalar (şiir, düzyazı, konuşma); yazarı kaynakta yazıyorsa «yazar».
+  Parçayı değiştirme, kısaltma, düzeltme: kod onu kaynakta aynen arayacak.
+
+ÇIKTI: Yalnız şu biçimde tek bir JSON nesnesi döndür, başka hiçbir şey yazma:
+{"kurallar": [{"kural": "...", "ornek": "...", "kaynak": 1, "alinti": "..."}],
+ "parcalar": [{"metin": "...", "yazar": null, "kaynak": 1}]}""",
     "tarih": """NE YAZARSIN
 - Konunun olayları: kısa başlık; yıl (tam sayı; Milattan önce ise EKSİ, örneğin -480);
   tür (yalnız: siyasi, ekonomik, dusunsel, toplumsal); bölge (yalnız: anadolu, avrupa,
@@ -266,6 +286,33 @@ def ayikla(d, g):
         if not satirlar:
             return None, "Kaynaklarda dakikada kelime olarak yazılmış okuma hızı çıkmadı."
         return {"tur": "okuma_hizi", "konu": g["konu"], "hizlar": satirlar, "bicim_dusen": dusen}, None
+    if g["alan"] == "diksiyon":
+        kurallar, parcalar = [], []
+        for x in (d.get("kurallar") if isinstance(d.get("kurallar"), list) else [])[:MAX_KURAL * 2]:
+            k = _metin(x.get("kural"), 10, 300) if isinstance(x, dict) else None
+            n = _kaynak_no(x) if isinstance(x, dict) else None
+            if not k or n is None:
+                dusen += 1
+                continue
+            if _kucuk(k) in gorulen or len(kurallar) >= MAX_KURAL:
+                continue
+            gorulen.add(_kucuk(k))
+            kurallar.append({"kural": k, "ornek": _metin(x.get("ornek"), 1, 120), "kaynak": n,
+                             "alinti": _bosluk(x.get("alinti"))[:400]})
+        for x in (d.get("parcalar") if isinstance(d.get("parcalar"), list) else [])[:MAX_PARCA * 2]:
+            m = _metin(x.get("metin"), PARCA[0], PARCA[1]) if isinstance(x, dict) else None
+            n = _kaynak_no(x) if isinstance(x, dict) else None
+            if not m or n is None:
+                dusen += 1
+                continue
+            if _kucuk(m) in gorulen or len(parcalar) >= MAX_PARCA:
+                continue
+            gorulen.add(_kucuk(m))
+            parcalar.append({"metin": m, "yazar": _metin(x.get("yazar"), 2, 80), "kaynak": n})
+        if not (kurallar or parcalar):
+            return None, "Kaynaklarda telaffuz kuralı ya da okuma parçası çıkmadı."
+        return {"tur": "diksiyon", "konu": g["konu"], "kurallar": kurallar, "parcalar": parcalar,
+                "bicim_dusen": dusen}, None
     if g["alan"] in ESER_ALANLARI:
         for x in (d.get("eserler") if isinstance(d.get("eserler"), list) else [])[:MAX_ESER * 2]:
             if not isinstance(x, dict):
@@ -350,6 +397,22 @@ def dogrula(govde, metinler, alinti_dogru_mu):
             return None, "Hiçbir okuma hızı kaynağındaki alıntıyla doğrulanamadı; kayıt yazılmadı."
         govde["hizlar"] = kalan
         return "kaynakli", None
+    if govde["tur"] == "diksiyon":
+        kurallar = []
+        for x in govde["kurallar"]:
+            if not kaynakta(x):
+                continue
+            if x["ornek"] and _kucuk(x["ornek"]) not in _kucuk(metinler[x["kaynak"]]):
+                x["ornek"] = None                 # ornek kaynakta yok: yazilmaz
+            kurallar.append(x)
+        # Parcanin KENDISI kaynakta birebir: alinti = parca.
+        parcalar = [x for x in govde["parcalar"]
+                    if x["kaynak"] in metinler and alinti_dogru_mu(x["metin"], metinler[x["kaynak"]])]
+        govde["dusen"] = len(govde["kurallar"]) + len(govde["parcalar"]) - len(kurallar) - len(parcalar)
+        if not (kurallar or parcalar):
+            return None, "Hiçbir kural ya da parça kaynağında doğrulanamadı; kayıt yazılmadı."
+        govde["kurallar"], govde["parcalar"] = kurallar, parcalar
+        return "kaynakli", None
     if govde["tur"] in ESER_ALANLARI:
         kalan = []
         for x in govde["eserler"]:
@@ -379,6 +442,8 @@ def dogrula(govde, metinler, alinti_dogru_mu):
 
 def satirlar(govde):
     """Kaydin satirlari — ture gore (teklif sayisi ve ozet icin)."""
+    if govde.get("tur") == "diksiyon":
+        return (govde.get("kurallar") or []) + (govde.get("parcalar") or [])
     return (govde.get("olaylar") if govde.get("tur") == "tarih"
             else govde.get("eserler") if govde.get("tur") in ESER_ALANLARI
             else govde.get("seviyeler") if govde.get("tur") == "cefr"
@@ -387,6 +452,9 @@ def satirlar(govde):
 
 
 def ozet(govde):
+    if govde["tur"] == "diksiyon":
+        return "%s: %d telaffuz kuralı, %d okuma parçası (kaynaklı)." % (
+            govde["konu"], len(govde["kurallar"]), len(govde["parcalar"]))
     if govde["tur"] == "cefr":
         return "CEFR saat tablosu: %d seviye kaynakta doğrulandı." % len(govde["seviyeler"])
     if govde["tur"] == "okuma_hizi":

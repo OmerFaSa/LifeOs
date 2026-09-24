@@ -198,4 +198,36 @@
       });
     });
   });
+
+  /* Diksiyon belgesi (kullanıcı 2026-09-24: «ikisi birden»): telaffuz kuralı
+     Diksiyon ekranına kaynağıyla; okuma parçası çalışma metinlerine eklenir.
+     Kısa ya da kaynaksız parça düşer; aynı parça ikinci kez girmez; geri alınır. */
+  describe('BAM belgesi — diksiyon', () => {
+    function diksiyon(){
+      return { id:47, tur:'arastirma', baslik:'Diksiyon belgesi: vurgu', dogruluk:'kaynakli',
+        govde:{ tur:'diksiyon', konu:'Türkçe vurgu', kaynaklar:KAYNAK,
+          kurallar:[{ kural:'Türkçede vurgu çoğunlukla son hecededir.', ornek:'kalem', kaynak:2 },
+            { kural:'Kaynaksız kural burada durur.', kaynak:9 }],
+          parcalar:[{ metin:'Bir sabah uyandım ki pencerenin önünde kar yağıyor, sokaklar bembeyaz.', yazar:null, kaynak:2 },
+            { metin:'Çok kısa.', kaynak:2 }] } };
+    }
+    it('kural ve parça sınanır, eklenir, çalışma metni olur; ikinci kez girmez; geri alınır', async () => {
+      resetState();
+      const s = Be().sina(diksiyon(), { kayit_id:47 });
+      expect(s.ok).toBe(true);
+      expect([s.kurallar.length, s.parcalar.length]).toEqual([1, 1]);
+      expect(s.onizleme.uyari[0]).toContain('2');
+      await withHkm({ 47:diksiyon() }, async () => {
+        const r = await Be().uygula({ kayit_id:47 });
+        expect(r.ok).toBe(true);
+        const d = Be().diksiyon();
+        expect(d.kurallar[0].kaynak.baslik).toBe('Stoacılık');
+        expect(d.parcalar[0].words).toBe(10);
+        expect(Be().calismaMetinleri().some(t => t.id === d.parcalar[0].id)).toBe(true);
+        expect(Be().sina(diksiyon(), { kayit_id:47 }).ok).toBe(false);
+        await Be().geriAl(r.geriAl);
+        expect([Be().diksiyon().kurallar.length, Be().diksiyon().parcalar.length]).toEqual([0, 0]);
+      });
+    });
+  });
 })();

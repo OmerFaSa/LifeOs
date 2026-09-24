@@ -1401,6 +1401,7 @@ ESP.Model = (function(){
     if(ESP.Unite) await ESP.Unite.yukle();
     /* Tahmin tablolarının kaynaklı dayanağı (core/belge.js, madde 11). */
     if(ESP.Belge) await ESP.Belge.dayanakYukle();
+    if(ESP.Belge) await ESP.Belge.diksiyonYukle();
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
     if(ESP.Hedefler) await ESP.Hedefler.yukle();
