@@ -274,6 +274,47 @@ ESP.Screens.library = (function(){
         · son ${U.fmtShort(o.sonGun)}${o.cert !== 'measured' ? ' · tahmin' : ''}</div>`;
   }
 
+  /* Öğrendiğini anlat (core/anlat.js, fikir 42): sesle ya da yazıyla;
+     kod yalnız kaynağın kavramlarından hangilerinin geçtiğini sayar. */
+  function anlatEntry(){
+    if(!ESP.Anlat) return '';
+    const uygun = (S.books || []).filter(b => ESP.Anlat.kavramlar(b.id).length >= ESP.Anlat.EN_AZ_KAVRAM);
+    const secili = uygun.find(b => b.id === S.ui.anlatKitap) || uygun[0] || null;
+    const k = S.ui.anlatSonuc;
+    const son = secili ? ESP.Anlat.son(secili.id) : null;
+    return K.Entry({
+      label:'ÖĞRENDİĞİNİ ANLAT', meta:'sesle ya da yazıyla',
+      note:'Kaynağı kendi sözünle anlat; notlarındaki kavramlardan hangilerinin geçtiği sayılır. '
+         + 'Anlatım notlanmaz ve metni kaydedilmez.',
+      wide:true,
+      body:!uygun.length
+        ? K.Empty({ text:'Notlarında en az ' + ESP.Anlat.EN_AZ_KAVRAM + ' kavram etiketi olan bir kaynak yok. '
+            + 'Notlara kavram ekledikçe burası açılır.' })
+        : html`
+          <div class="row gap-8 wrap">
+            ${K.Select({ id:'anlat-kitap', value:secili.id, aria:'Anlatılacak kaynak', change:'anlat-kitap',
+              options:uygun.map(b => ({ value:b.id, label:(b.author ? b.author + ' — ' : '') + b.title })) })}
+            <span class="tiny dim">${ESP.Anlat.kavramlar(secili.id).length} kavram</span>
+          </div>
+          <div class="row mt-10">
+            ${K.Textarea({ id:'anlat-metin', rows:4, aria:'Anlatımın', value:S.ui.anlatMetin || '',
+              placeholder:'Bu kaynaktan ne öğrendin? Kendi cümlelerinle anlat…' })}
+            ${K.Mic({ target:'anlat-metin' })}
+          </div>
+          <div class="row wrap mt-10">
+            ${K.Button({ label:'Ölç', tone:'primary', act:'anlat-olc' })}
+            ${when(k && k.ok, () => K.Button({ label:'Sonucu kaydet', act:'anlat-kaydet' }))}
+          </div>
+          ${when(k && !k.ok, () => K.Notice({ tone:'info', class:'mt-10', body:k.why }))}
+          ${when(k && k.ok, () => html`<div class="mt-10">
+            <p class="small"><b>${k.gecen.length}/${k.toplam}</b> kavram anlatımında geçti · hesaplandı</p>
+            ${when(k.gecmeyen.length, () => html`<p class="tiny dim">Geçmeyen: ${k.gecmeyen.join(', ')}</p>`)}
+          </div>`)}
+          ${when(son, () => html`<p class="tiny dim mt-6">Son anlatım ${U.fmtShort(son.gun)}:
+            ${son.gecen}/${son.toplam} kavram</p>`)}`,
+    });
+  }
+
   function bookRows(){
     const kitaplar = S.books || [];
     const notSayisi = id => (S.notes || []).filter(n => n.bookId === id).length;
@@ -303,6 +344,8 @@ ESP.Screens.library = (function(){
           : K.Empty({ text:'Kaynak listesi boş. Sempozyum → Metinler sekmesinden '
               + 'kanondan da ekleyebilirsin.' }),
       }),
+
+      anlatEntry(),
 
       K.Entry({
         label:'OKUMA LİSTESİ İSTE', hint:'primary-text',
@@ -373,6 +416,25 @@ ESP.Screens.library = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'anlat-olc'(){
+      const kitap = document.getElementById('anlat-kitap');
+      const metin = document.getElementById('anlat-metin');
+      const id = kitap ? kitap.value : null;
+      if(!id) return;
+      S.ui.anlatKitap = id;
+      /* Ölçüm metni silmez: kullanıcı eksik kavramı ekleyip yeniden ölçebilir.
+         Metin yalnız bellekte durur; depoya yazılmaz. */
+      S.ui.anlatMetin = metin ? metin.value : '';
+      S.ui.anlatSonuc = ESP.Anlat.kapsam(S.ui.anlatMetin, ESP.Anlat.kavramlar(id));
+      ESP.App.render();
+    },
+    async 'anlat-kaydet'(){
+      const r = await ESP.Anlat.kaydet(S.ui.anlatKitap, S.ui.anlatSonuc);
+      ESP.UI.toast(r.ok ? 'Kaydedildi · yalnız kavram sayısı' : r.why);
+      S.ui.anlatSonuc = null;
+      S.ui.anlatMetin = '';
+      ESP.App.render();
+    },
     async 'belge-iste'(el){
       const k = document.getElementById('belge-' + el.dataset.alan);
       const r = await ESP.Belge.iste({ alan:el.dataset.alan, konu:k ? k.value : '' });
@@ -459,6 +521,7 @@ ESP.Screens.library = (function(){
 
   const change = {
     async 'note-query'(el){ S.ui.noteQuery = el.value; ESP.App.render(); },
+    async 'anlat-kitap'(el){ S.ui.anlatKitap = el.value; S.ui.anlatSonuc = null; S.ui.anlatMetin = ''; ESP.App.render(); },
   };
 
   return {

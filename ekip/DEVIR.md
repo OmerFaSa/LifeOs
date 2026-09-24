@@ -438,6 +438,10 @@ gelmez, metin kutuya YAZILIR, gönderen kullanıcı; destek yoksa düğme görü
 cümleden çok iş (`sohbet.is_parcalari`: ayraçlardan bölünür ama konu bölünmez — birikim tek başına
 iş olunca kapanır; «AYS/SPİ/ESP için» ürünü o modüle bağlar; her iş AYRI emir ve AYRI onay;
 tanınmayan parça söylenir; tek iş olağan yoldan gider). HKM 587, yüz temiz.
+· ✅ 42 öğrendiğini anlat (ESP `core/anlat.js`: Kütüphane › Kaynaklar › «Öğrendiğini anlat»; sesle
+— mevcut dikte `K.Mic` — ya da yazıyla; model NOTLAMAZ, yetenek yargısı yok: kaynağın notlarındaki
+kavramlardan kaçı geçti, kelime başında, Türkçe ek tolere; < 3 kavram ya da çok kısa anlatım → ölçü
+yok; kaydedilen yalnız tarih ve sayı, anlatımın METNİ kaydedilmez). ESP 1355; duman, 390 px, a11y temiz.
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
 
