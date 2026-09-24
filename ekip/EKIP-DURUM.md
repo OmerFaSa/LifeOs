@@ -93,7 +93,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** ⏸ T molada (kullanıcı: limit). **AYS teslim edildi** (dd97f56; H kapısı a861d79) — AYS `screens/*.js` artık K'nin. Kalan iş aşağıda DEVİR'de.
+- **Şu an:** ⏸ T molada. **Yarım kalan işin tam listesi: `ekip/T-DEVIR.md`** — T'yi devralan oradan başlar (sıra: SPİ → ESP → T4 → T5 → T6).
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
   T1 temel kalıplar `brand/ortak/temel.css` + `C.Kutu` (02) + `C.ModulIsareti` (165) +
