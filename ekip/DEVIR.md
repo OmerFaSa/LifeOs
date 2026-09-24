@@ -152,8 +152,12 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   sınav değişmez. AYS 1658/1658, duman/a11y/390px temiz.
 - ⏳ 10 Ana sınavı değiştirebilmek (büyük aksiyon) + üniversite müfredatı yükleme.
 - ⏳ 11 Tahmin tablolarını kaynağa bağlamak — sağlayıcı esnek, bütçe Ayarlar'dan.
-- ⏳ 14 Depo göçü (her kayıt kendi anahtarında; yedek 15 bitti) · 16 ilk kurulum testleri ·
-  17 ekran sözleşmesi AYS/ESP · 18 labs.js ve AYS llm.js.
+- ❓ 14 Depo göçü (her kayıt kendi anahtarında) — NOTLAR §7.3 «yaşayan sağlık verisinde göç,
+  SORMADAN YAPMA». Ölçüm: 1000 kayıtta yazma ~0,5–4 ms, 5 yıllık yük denetimi temiz → acil
+  değil. Kullanıcıya soruldu; onaysız yapılmaz.
+- ✅ 16 İlk kurulum testleri: `setup.test.js` üçünde (gerçek alt sayfa + form; AYS takvim
+  doğrulaması, hedef sırası, plan üretimi). Kapsam AYS %13→%75, SPİ %20→%86, ESP %0→%100.
+- ⏳ 17 ekran sözleşmesi AYS/ESP · 18 labs.js ve AYS llm.js.
 
 ### Part 9 — Tek tasarım + çekmece düzeni (EN SON)
 **Kullanıcı 2026-09-24: «tasarımı en son yapacağız, benden onay isteyeceksin; onun harici
