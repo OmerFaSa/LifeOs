@@ -24,6 +24,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## KARTLAR (K)
 
+- **⏸ Limit doldu (2026-09-24 gece).** T/H işi T'ye devredildi: `ekip/T-DEVIR.md` §6. K'nin kendi sırası: K2 AYS (060 → Çalışma → Analiz → Ofis → Onaylar/Plan → 22) ve K2 SPİ (SPİ teslim 59e7276).
 - **Şu an:** K2 · AYS (teslim b3c1733; AYS `screens/*.js` artık K'nin). ✅ Bugün 004 042 024 (bu
   725fdf8). ✅ T2-09 T2-10 T2-11 (96037ce). Sıradaki: Bugün 060 (110 `oneri.js`
   bağlanınca) → Çalışma (46 55 35) → Analiz (27 37 41) → Ofis (129 139 + T2-02/137) → Onaylar/Plan
@@ -112,7 +113,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 ## TASARIM (T)
 
 - **Şu an:** ⏸ **H oturumunun limiti doldu; T işi T'ye geri** (2026-09-24 akşam). Devir: `ekip/T-DEVIR.md` **§5** (önce onu oku). main'de: 84bdb43, **b06c28d T2 SPİ** (kabuk, sekiz çekmece, Onaylar, Kütüphanem, Plan › Hedefler), e8c364c, d9d19ef. **Kırmızı:** SPİ designcheck (5a5c024'ten beri, Rütbe dekor görseli yanlış alarmı — §5). **Yarım:** T3 SPİ `ekip/yarim/t3-spi.patch` (Bugün üç alan + Ayrıntı). Sıra: designcheck → T3 SPİ kalanı → SPİ teslim → ESP → AYS küçükleri → T4 → T5.
-- **K yürütüyor (kullanıcı talimatı, 2026-09-24 akşam):** T-DEVIR §5'ten devam. ✅ T2-13 designcheck d58720d · ✅ entegre.js koştu (temiz) · ✅ yarım T3 SPİ yaması 826fbe3 · ✅ **T3 SPİ → teslim 59e7276** (sekme 0, tek dolu düğme, 30+ kelime katmanda, T2-14) · ✅ **T2 ESP ccedf0a** (kabuk + sekiz çekmece; disiplin bölüm düzeyinde). Sıradaki: ESP Onaylar + Kütüphanem → T3 ESP (sekmeler, Bugün üç alan, Ofis dolu düğme) → teslim → AYS küçükleri (§2.C) → T4 → T5; T6 yalnız kullanıcı «başla» derse.
+- **K yürütüyor (kullanıcı talimatı, 2026-09-24 akşam):** T-DEVIR §5'ten devam. ✅ T2-13 designcheck d58720d · ✅ entegre.js koştu (temiz) · ✅ yarım T3 SPİ yaması 826fbe3 · ✅ **T3 SPİ → teslim 59e7276** (sekme 0, tek dolu düğme, 30+ kelime katmanda, T2-14) · ✅ **T2 ESP ccedf0a** (kabuk + sekiz çekmece; disiplin bölüm düzeyinde). Sıradaki: ESP Onaylar + Kütüphanem → T3 ESP (sekmeler, Bugün üç alan, Ofis dolu düğme) → teslim → AYS küçükleri (§2.C) → T4 → T5; T6 yalnız kullanıcı «başla» derse. **⏸ K'nin limiti doldu → T'ye döndü: `ekip/T-DEVIR.md` §6** (kalan: ESP Onaylar + Kütüphanem → T3 ESP → AYS küçükleri → T4 → T5).
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
   T1 temel kalıplar `brand/ortak/temel.css` + `C.Kutu` (02) + `C.ModulIsareti` (165) +

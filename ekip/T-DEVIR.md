@@ -174,6 +174,80 @@ paralel koşacaksan kapı ver (`node tools/runtests.js 4288`).
 
 **Sonra:** ESP (§2.B) → AYS küçükleri (§2.C) → T4 → T5; T6 yalnız kullanıcı «başla» derse.
 
+## 6 · K'nin devri — T işinin nerede kaldığı (2026-09-24 gece)
+
+> Kullanıcı talimatıyla K, §5'ten sonra T'nin ve H'nin yarım işini yürüttü; K'nin limiti
+> doldu, iş T'ye döner. Önce bunu oku, sonra aşağıdaki «Kalan» sırasıyla devam et.
+
+**main'de (hepsi push edildi, son 5bea926 + bu devir):**
+
+| Commit | Ne | Denetim |
+|---|---|---|
+| d58720d | T2-13: SPİ designcheck dekor kırpmasını saymaz | 4 → 0; negatif kontrol: gerçek kırpma yakalanıyor |
+| 826fbe3 | §5'teki yarım T3 SPİ yaması uygulandı, yama silindi | 15 denetim + envanter + sadelik (today bütçede) |
+| 59e7276 | **T3 SPİ bitti → teslim** (satır 42ee91c): 6 ekranda sekme → bölüm, tek dolu düğme, 30+ kelime katmanda, T2-14 | SPİ 1570/1570, smoke, a11y, 390, palet, perf, design, ledger, tasarım; envanter 0; **sadelik SPI zorunlu ve bütçede** |
+| ccedf0a | **T2 ESP**: v4 kabuk + sekiz çekmece | ESP 1547/1547, smoke, a11y, 390, palet, perf; envanter 0; entegre.js temiz |
+
+**Kurulan kalıplar (ESP'de aynısını kullan):**
+- Sekme → bölüm: `C.SayfaBolumleri({ act:'<eski>-tab', bolumler })`, `govde(t)` try/catch,
+  `afterRender` içinde `S.ui.<ekran>Tab`'ı OKU, SİL, `C.bolumeGit` et («istek bir kez»); eski
+  `*-tab` işleyicisi `bolumeGit(el.dataset.tab)`. Başka yerden bölüm isteyen kod önce
+  `S.ui.xTab = …` sonra `App.go(…)` yapmalı (SPİ `core/palette.js:43` ters sıradaydı).
+- Rozet sekmeden bölüm çubuğuna: `bolumler[i].sayi`.
+- Süzgeç sekme değildir: `C.Chip({ act:<eski eylem>, on, data:{ 'data-tab', 'aria-pressed' } })`
+  satırı, `role="group"` (SPİ `labs.js` panel süzgeci, `move.js` kalıp şeridi). Eylem adı
+  aynı kalır → envanter kaybı 0.
+- Alt alta çizim aynı kartı iki kez gösterebilir (SPİ «Kalıp dengesi» üç sekmedeydi): tek
+  yerde bırak. Ayrı sekmelerde hiç birlikte çizilmemiş alanlar aynı `id`'yi taşıyabilir —
+  `SPI/src/tests/bolumler.test.js` yardımcısı `bolumlu()` bunu da sınar; ESP'ye kopyala.
+- Sekmeler kalkınca gizli sekmedeki etiketsiz alanlar a11ycheck'e görünür olur (SPİ'de 5).
+- Tek dolu düğme: ekranın asıl eylemi kalır, boş durum `P.empty(…, sade)` (SPİ `parts.js`).
+- 30+ kelime: sabit metin `C.Ayrinti({ ozet, govde })`; koddan kurulan (uzunluğu veriye
+  bağlı) metin `C.Katmanli({ metin, sinif })` (SPİ `components.js`: ilk cümle görünür,
+  gerisi «Ayrıntı»). Gizlilik cümlesi SAKLANMAZ: kısa görünür paragraflara böl.
+- `★` Chromium'da `Extended_Pictographic` sayılır (Node'da sayılmaz): çizgi simge kullan.
+- **Yer bulucu:** `CHROMIUM_PATH=/opt/pw-browsers/chromium node tools/nerede.js ESP [rota,…]`
+  — sadelik yalnız SAYAR; bu, uzun yazının ve fazla dolu düğmenin YERİNİ (bölümüyle) yazar.
+
+**ESP'nin durumu (ccedf0a):**
+- `data/sections.js`: sekiz çekmece; `disc` artık SAYFADA (Çalışma'nın bölümü). `core/nav.js`
+  kapalı disiplini bölüm düzeyinde süzer, sayfası olmayan çekmeceyi çizmez. **Onaylar ve
+  Kütüphanem `views:[]`** — ekranları gelince oraya `{ route:'onaylar', label:'Bekleyen' }`
+  ve `{ route:'kutuphane', label:… }` ekle; `app.js` `onaySayisi()` zaten
+  `ESP.Screens.onaylar.bekleyen()`'i arıyor.
+- `modules.test.js` gezinme testleri karar 4'e göre güncellendi (K, H yerine): Tarih artık
+  Çalışma › Tarih; kapanan disiplin Çalışma'dan düşer; sekiz çekmece ortak kaynaktan.
+- Gün şeridi açık disiplinlerden (seans yazılan «bitti»); açık sayaç sayfa başının üstünde
+  (`sayacHtml`, `startClock` tazeler). `data-section` kalktı (`--sec-base` okunmuyordu).
+- ESP'de designcheck yok; a11y izin listesinde 3 bilinen eksik (değişmedi).
+
+**Kalan — bu sırayla:**
+1. **ESP Onaylar + Kütüphanem** (SPİ b06c28d şablon: `screens/onaylar.js`, `kutuphane.js`,
+   `cekmece.test.js`). Bugün'deki King/HKM teklif kartı Onaylar'a taşınırsa **`tools/entegre.js`
+   ESP adımlarını güncelle** («King teklifi Bugun kartinda goruldu», BAM ünite/tarih belgesi);
+   H SPİ'de aynısını yaptı. Ünite, tarih belgesi, gitar paketi → Kütüphanem; «Okuma ›
+   Kütüphane» adı Okuma'da kalır.
+2. **T3 ESP** (sadelik ölçümü: 29 aşım · 15 ekran): sekme → bölüm lang 13, symposium 13,
+   history 13, library 12, writing 11 (iki kat sekme: Çalış · Kartlar · Ekle · Öğren ·
+   Dilbilgisi · İlerleme …), team 9 (ajan sekmeleri → ajan seçici), studio 5, guide 5,
+   analytics 4, ladder 3; tezgâh (`desk-tab`, yedi ekranda ortak) ölç. Bugün taban 2 813 px /
+   39 düğme → ≤ 1 800 / ≤ 14, üç alan (SPİ `today.js` + `bugun.test.js` kalıbı). Ofis'te 24
+   dolu düğme (`prop-accept` «Onayla» her öneride — Onaylar'a taşınınca çoğu gider). Sonra
+   envanter ESP (kayıp 0), `sadelik --denetle ESP`, teslim satırı.
+3. **AYS küçükleri (§2.C)**: 011 sakin hata, 010 boş durum işareti, `app.js:842` onay
+   etiketi (22), STIL.md eski bölümler. (Sadelik ölçümü «varsayılan Evet, devam et» AYS 9,
+   SPİ 7, ESP 9 — 22'nin işi; ekran çağrıları K'nin, `app.js`'teki T'nin.)
+4. T4 → T5; T6 yalnız kullanıcı «başla» derse.
+
+**Sahiplik:** SPİ teslim edildi (59e7276) → SPİ `screens/*.js` artık **K'nin** (K2). T'nin
+SPİ'de kalan işi yalnız T dosyaları (CSS, `app.js`, `components.js`). ESP ekranları teslime
+kadar T'nin.
+
+**Kullanıcıya açık sorular (K'den):** (a) HKM anahtar notunda «günde bir kez BÜTÜN veri
+HKM'ye yedeklenir» cümlesi AYS/SPİ'de «Bu anahtar neyi açar?» katmanında — her zaman
+görünür mü olsun? (b) AYS 042: blok adımları (ısınma · ana set · yanlış notu) için kural
+yok; çubuk ancak kural yazılınca. (c) 167 ana ekran bileşeni yerine Badge API.
+
 ## 3 · Bilinmesi gerekenler
 
 - Katalogda T'nin 37 özelliğinden kodda işaretli olan 19'u (001 002 003 005 008 009 013 019 115 118
