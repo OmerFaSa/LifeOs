@@ -14,7 +14,11 @@ body{
   font-family:var(--font-body);
   font-size:var(--fs-base);
   line-height:1.5;
+  letter-spacing:-.005em;
   -webkit-font-smoothing:antialiased;
+  /* v4: Inter tek aile; rakamlar her yerde tablo hizalı (sayı sütunları
+     kaymaz), cv11 tek katlı a, ss01 açık rakamlar. */
+  font-feature-settings:"cv11" 1, "ss01" 1, "tnum" 1;
 }
 
 @media (max-width:640px){
@@ -28,10 +32,10 @@ h1,h2,h3,h4,h5{
   text-wrap:balance;
   letter-spacing:-0.011em;
 }
-h1{ font-size:var(--fs-xl); font-weight:800; }
-h2{ font-size:var(--fs-lg); font-weight:700; }
-h3{ font-size:var(--fs-md); font-weight:700; }
-h4{ font-size:var(--fs-base); font-weight:700; }
+h1{ font-size:var(--fs-xl); font-weight:700; letter-spacing:-.025em; }
+h2{ font-size:var(--fs-lg); font-weight:600; letter-spacing:-.015em; }
+h3{ font-size:var(--fs-md); font-weight:600; }
+h4{ font-size:var(--fs-base); font-weight:600; }
 
 p{ margin:0; }
 ul,ol{ margin:0; padding-left:1.15em; }

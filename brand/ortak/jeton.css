@@ -1,0 +1,214 @@
+/* ORTAK JETONLAR — v4 görsel dili (ekip/EKIP-PLANI.md §2).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/jeton.css`; `tools/ortak.py --yay` ile üç arayüzün
+   `src/css/` klasörüne birebir kopyalanır. Kopyayı elle düzenleme.
+
+   Yükleme sırası: fonts.css → jeton.css → tokens.css (modülün kuyruğu:
+   modül rengi bağlaması, ajan ve grafik serisi renkleri) → palettes.css.
+
+   Kurallar:
+   1. Adlar KORUNUR (--bg, --surface, --text…), değerler v4'tür. Yeni ad
+      yalnız eksikse eklenir: modül renkleri (--ays --spi --esp --mer),
+      yön renkleri (--ok --bad --now), ölçek adımları.
+   2. RENK SAHİPLİĞİ SÖYLER: mavi AYS, yeşil SPİ, turuncu ESP, mor Merkez.
+      Yeşil ve kırmızı yalnız YÖN bildirir. Derse, kategoriye, süse renk yok.
+   3. HER RENGİN İKİ JETONU VAR. v4 tonu (--spi) işaret içindir: nokta,
+      çubuk, çizgi (≥ 3:1). Yazı ve dolu düğme için aynı ailenin AA
+      tonu (--spi-ink, ≥ 4.5:1) kullanılır. v4'ün SPİ yeşili 4,16, ESP
+      turuncusu 3,52, soluk grisi 2,70 ölçüldü: yazıda AA'yı geçmezler.
+   4. Yüzey TON + İNCE ÇİZGİ ile ayrılır; gölge yalnız açılır katmanda.
+   5. Koyu tema vitrinin değerleridir; sistem ayarını izler ya da elle
+      seçilir (data-theme). Azaltılmış harekette bütün süreler 0. */
+
+:root{
+  /* ---- yüzey ---- */
+  --bg:#F7F8FA;
+  --surface:#FFFFFF;
+  --surface-2:#F1F2F5;
+  --surface-3:#E8EAEE;
+  --surface-hover:color-mix(in oklab, var(--surface) 55%, var(--bg));
+  --sidebar:#FFFFFF;
+  --sidebar-active:#F1F2F5;
+
+  /* ---- metin ---- */
+  --text:#111318;
+  --text-2:#5E6572;      /* 5,9:1 beyazda */
+  --text-3:#6A7180;      /* 4,9:1 beyazda — v4'ün #979EAA'sı 2,7:1 olduğu için */
+
+  /* ---- çizgi ---- */
+  --border:#E8EAEE;
+  --border-soft:#F1F2F5;
+  --border-strong:#D3D7DE;
+  --rule:var(--border-strong);
+
+  /* ---- modül renkleri: işaret (v4) + yazı (AA) + açık ton ---- */
+  --ays:#2D5BE3;  --ays-ink:#2D5BE3;  --ays-t:#EEF2FD;
+  --spi:#0E8C79;  --spi-ink:#0A7A69;  --spi-t:#E7F4F1;
+  --esp:#C8741C;  --esp-ink:#A65B0F;  --esp-t:#FBF1E6;
+  --mer:#7453D4;  --mer-ink:#7453D4;  --mer-t:#F2EEFC;
+
+  /* ---- yön: yalnız iyi / kötü / şimdi ---- */
+  --ok:#1E8A55;   --ok-ink:#1A7A4B;
+  --bad:#D0433B;  --bad-ink:#C23A32;
+  --now:#E5484D;
+
+  /* ---- anlam renkleri (eski adlar) ----
+     --primary modülün kendi rengine bağlanır (tokens.css: --mod-*).
+     --accent «uyarı» tonudur: modül rengiyle karışmayan koyu hardal.
+     --info nötrdür: mavi AYS'nin rengidir, bilgi kutusuna verilmez. */
+  --primary:var(--mod-ink);
+  --primary-hover:color-mix(in oklab, var(--primary) 86%, #000000);
+  --primary-ink:#FFFFFF;
+  --accent:#8C6400;
+  --danger:var(--bad-ink);
+  --info:#4A5363;
+
+  --primary-soft:var(--mod-t);
+  --accent-soft:color-mix(in oklab, var(--accent) 12%, var(--surface));
+  --danger-soft:color-mix(in oklab, var(--danger) 10%, var(--surface));
+  --info-soft:color-mix(in oklab, var(--info) 8%, var(--surface));
+
+  /* ---- mürekkep: v4'ün siyah düğmesi ve koyu şerit ---- */
+  --ink:#111318;
+  --ink-2:#2A2E36;
+  --ink-on:#FFFFFF;
+  --ink-on-2:#B9BEC7;
+
+  --ring:color-mix(in srgb, var(--primary) 45%, transparent);
+
+  /* ---- gölge: kartta YOK; yalnız açılır katman ---- */
+  --shadow:none;
+  --shadow-lg:0 1px 2px rgba(17,19,24,.05), 0 20px 50px rgba(17,19,24,.12);
+  --scrim:rgba(17,19,24,.40);
+
+  /* ---- köşe: rozet 6 · düğme 8 · iç kart 10 · kart 14 ---- */
+  --r-xs:6px;
+  --r-sm:8px;
+  --r-md:10px;
+  --r:14px;
+  --r-pill:999px;
+
+  /* ---- boşluk: 4 · 8 · 12 · 16 · 24 · 32 (· 40) ---- */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --sp-6:24px; --sp-8:32px; --sp-10:40px;
+
+  /* ---- yazı: Inter tek aile; rol boyut ve ağırlıkla ayrılır ----
+     Eski üç ad (serif / display / body) korunur ve hepsi Inter'e çıkar;
+     böylece bileşenlerin hiçbiri değişmeden tek aileye geçer. Rakamlar
+     tablo hizalıdır (tnum, base.css). */
+  --font-body:'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display:var(--font-body);
+  --font-serif:var(--font-body);
+  --fs-xs:11.5px;
+  --fs-sm:12.75px;
+  --fs-base:14px;
+  --fs-md:15px;
+  --fs-lg:18px;
+  --fs-xl:22px;
+  --fs-hero:28px;      /* yalnız özet kutusundaki büyük sayı */
+  --fs-display:26px;   /* yalnız sayfa başlığı */
+
+  /* ---- hareket: basma 120 · geçiş 200 · açılma 320 · giriş 700 ---- */
+  --ease:cubic-bezier(.2,.7,.3,1);
+  --dur-press:120ms;
+  --dur:200ms;
+  --dur-lg:320ms;
+  --dur-in:700ms;
+
+  /* ---- grafik ızgarası ---- */
+  --c-grid:var(--border);
+  --c-band:var(--surface-2);
+
+  /* ---- katman ---- */
+  --z-nav:30; --z-topbar:25; --z-overlay:60; --z-toast:80;
+
+  /* ---- düzen (kabuk T2'de v4'e geçer) ---- */
+  --sidebar-w:236px;
+  --nav-h:47px;
+  --topbar-h:60px;
+  --content-max:1180px;
+  --gutter:196px;
+  --gutter-gap:52px;
+
+  /* ================= KOYU — tek tanım (vitrin) =================
+     Yalnız aşağıdaki iki eşleme bloğunda kullanılır. */
+  --d-bg:#09090B;
+  --d-surface:#111215;
+  --d-surface-2:#15171B;
+  --d-surface-3:#22252B;
+  --d-surface-hover:#181A1F;
+  --d-sidebar:#0D0E10;
+  --d-sidebar-active:#15171B;
+  --d-text:#EDEEF0;
+  --d-text-2:#A3A6AD;
+  --d-text-3:#8B8F98;    /* vitrinin #6E727B'si koyu kartta 3,9:1 */
+  --d-border:#23262C;
+  --d-border-soft:#1A1C21;
+  --d-border-strong:#2C3037;
+  --d-ays:#4F86FF;  --d-ays-t:#16203A;
+  --d-spi:#2EC4A9;  --d-spi-t:#0F2723;
+  --d-esp:#F2A93B;  --d-esp-t:#2A1F0E;
+  --d-mer:#9A86FF;  --d-mer-t:#1F1A38;
+  --d-ok:#4ADE80;
+  --d-bad:#F87171;
+  --d-now:#F87171;
+  --d-accent:#D9A441;
+  --d-info:#A3A6AD;
+  --d-ink:#050506;
+  --d-shadow-lg:0 24px 48px -24px rgba(0,0,0,.7);
+  --d-scrim:rgba(0,0,0,.62);
+}
+
+/* Koyu eşleme — iki blok, aynı liste (sistem tercihi · elle seçim). */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:var(--d-bg); --surface:var(--d-surface); --surface-2:var(--d-surface-2);
+    --surface-3:var(--d-surface-3); --surface-hover:var(--d-surface-hover);
+    --sidebar:var(--d-sidebar); --sidebar-active:var(--d-sidebar-active);
+    --text:var(--d-text); --text-2:var(--d-text-2); --text-3:var(--d-text-3);
+    --border:var(--d-border); --border-soft:var(--d-border-soft);
+    --border-strong:var(--d-border-strong);
+    --ays:var(--d-ays); --ays-ink:var(--d-ays); --ays-t:var(--d-ays-t);
+    --spi:var(--d-spi); --spi-ink:var(--d-spi); --spi-t:var(--d-spi-t);
+    --esp:var(--d-esp); --esp-ink:var(--d-esp); --esp-t:var(--d-esp-t);
+    --mer:var(--d-mer); --mer-ink:var(--d-mer); --mer-t:var(--d-mer-t);
+    --ok:var(--d-ok); --ok-ink:var(--d-ok); --bad:var(--d-bad); --bad-ink:var(--d-bad);
+    --now:var(--d-now);
+    --primary-hover:color-mix(in oklab, var(--primary) 86%, #FFFFFF);
+    --primary-ink:var(--d-ink);
+    --accent:var(--d-accent); --info:var(--d-info);
+    --ink:var(--d-ink); --ink-2:var(--d-surface-2); --ink-on:var(--d-text); --ink-on-2:var(--d-text-3);
+    --shadow-lg:var(--d-shadow-lg); --scrim:var(--d-scrim);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:var(--d-bg); --surface:var(--d-surface); --surface-2:var(--d-surface-2);
+  --surface-3:var(--d-surface-3); --surface-hover:var(--d-surface-hover);
+  --sidebar:var(--d-sidebar); --sidebar-active:var(--d-sidebar-active);
+  --text:var(--d-text); --text-2:var(--d-text-2); --text-3:var(--d-text-3);
+  --border:var(--d-border); --border-soft:var(--d-border-soft);
+  --border-strong:var(--d-border-strong);
+  --ays:var(--d-ays); --ays-ink:var(--d-ays); --ays-t:var(--d-ays-t);
+  --spi:var(--d-spi); --spi-ink:var(--d-spi); --spi-t:var(--d-spi-t);
+  --esp:var(--d-esp); --esp-ink:var(--d-esp); --esp-t:var(--d-esp-t);
+  --mer:var(--d-mer); --mer-ink:var(--d-mer); --mer-t:var(--d-mer-t);
+  --ok:var(--d-ok); --ok-ink:var(--d-ok); --bad:var(--d-bad); --bad-ink:var(--d-bad);
+  --now:var(--d-now);
+  --primary-hover:color-mix(in oklab, var(--primary) 86%, #FFFFFF);
+  --primary-ink:var(--d-ink);
+  --accent:var(--d-accent); --info:var(--d-info);
+  --ink:var(--d-ink); --ink-2:var(--d-surface-2); --ink-on:var(--d-text); --ink-on-2:var(--d-text-3);
+  --shadow-lg:var(--d-shadow-lg); --scrim:var(--d-scrim);
+}
+
+:root{ color-scheme:light; }
+:root[data-theme="dark"]{ color-scheme:dark; }
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ color-scheme:dark; }
+}
+
+/* Hareket tercihine saygı: bütün süreler sıfır. */
+@media (prefers-reduced-motion:reduce){
+  :root{ --dur-press:0ms; --dur:0ms; --dur-lg:0ms; --dur-in:0ms; }
+}

@@ -132,6 +132,7 @@ SISTEMLER = ["AYS", "SPI", "ESP"]
 # turune gore ayri bir betik yazmak, ayni sozu ("tek kaynak, uc kopya,
 # ayrisma yakalanir") iki yerde tutmak olurdu.
 DOSYALAR = {
+    "jeton.css":    "css",
     "base.css":     "css",
     "layout.css":   "css",
     "designs.css":  "css",
