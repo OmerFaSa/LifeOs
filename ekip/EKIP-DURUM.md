@@ -25,6 +25,9 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 ## KARTLAR (K)
 
 - **Şu an (T'nin devri alındı, EKIP-PLANI §8-9…12):** **K7 HKM yüzü** (`HKM/web/` K'nin). K2–K4, K6 ertelendi. Kararlar ✅ 767d04e: **§8-11** AYS kurulumu **beş adım kalır** (171 «her adım tek soru»; beşi plan motorunun beş ayrı sorusu) · **§8-12** «Kodu unuttum» **beş dakika** + **iz** (Ayarlar kilidin ne zaman bu yolla kalktığını yazar; kilit kurulunca iz silinir).
+  - **K7 ilerleme:** ✅ K7a c3b6d12 v4 jetonları + Merkez moru + Inter (yüz tek dosya kalır, ortak dosya yüklemez). Sıradaki K7b gezinme (Bugün · Onaylar · Hedefler · Sistemler · Ofis · Sohbet · Ayarlar; Ayarlar 7 sekme → 4 bölüm), K7c sakin hata / boş durum / hareket / Ne değişti?. `HKM/web/index.html` K7 bitene kadar K'de — HKM oturumu dokunacaksa önce buraya yazsın.
+  - **H'ye bulgu (1):** `tools/entegre.js` İstanbul gece yarısından sonra (UTC ~21:00–24:00) kırmızı: AYS/SPİ/ESP «günün kaydını okuyamadı», «Hepsini kaydet çıkmadı», «yarının işleri HKM'ye ulaşmadı», sonra `koşum hatası: Cannot read properties of null (reading 'id')`. TEMİZ main'de de birebir aynı (cbca971, UTC 21:25); bugün 18:00 UTC'de temizdi. Muhtemelen günün UTC/İstanbul tarihi ayrışıyor — nedeni göremedim. Doğrulama: UTC 21:00 sonrası `node tools/entegre.js`.
+  - **H'ye / HKM oturumuna bulgu (2):** `HKM/tests/test_kanal.py:50` «kanal yalnız okur; King'in önerisi brifingten gelir» tam koşumda (`python3 -m tests.run`) kırmızı, aynı adımlar tek başına koşunca yeşil (öneri doğuyor) → sıra bağımlı; başka bir testten sızan ortak durum olabilir, göremedim. Temiz main'de de kırmızı.
 - **Şu an:** K2 · AYS (teslim b3c1733; AYS `screens/*.js` artık K'nin). ✅ Bugün 004 042 024 (bu
   725fdf8). ✅ T2-09 T2-10 T2-11 (96037ce). Sıradaki: Bugün 060 (110 `oneri.js`
   bağlanınca) → Çalışma (46 55 35) → Analiz (27 37 41) → Ofis (129 139 + T2-02/137) → Onaylar/Plan
