@@ -25,6 +25,8 @@
      P2: 029 eşik çizgili çubuk · 030 tik sayacı · 031 hedef bandı
          (cizgiSvg bant) · 033 gelecek yük · 034 grafiğin cümlesi ·
          038 satır içi çubuk · 039 hız tahmini (aralık, koni)
+     P3: 032 geçen dönem gölgesi (cizgiSvg onceki) · 036 dağılım şeridi ·
+         040 birikim eğrisi (kayıtsız gün 0 eklenmez)
 
    NEDEN
 
@@ -175,7 +177,14 @@ window.LIFEOS = window.LIFEOS || {};
     /* 031 — hedef bandı: [alt, ust]. Bant ölçeğe girer (dışarıda kalmaz). */
     const bant = Array.isArray(o.bant) && sayiMi(o.bant[0]) && sayiMi(o.bant[1]) && o.bant[1] >= o.bant[0]
       ? o.bant : null;
-    const olcekler = bant ? vs.concat(bant) : vs;
+    /* 032 — geçen dönem: aynı uzunlukta bir seri, GÜN SIRASIYLA hizalanır
+       (dönemin 1. günü ↔ bu dönemin 1. günü). Fazlası kesilir; eksik gün
+       orada da boşluktur. Ölçeğe girer ki gölge grafikten taşmasın. */
+    const onceki = Array.isArray(o.onceki) ? o.onceki.slice(0, n) : null;
+    const op = onceki ? parcalar(onceki) : null;
+    const ovs = [];
+    if(op) op.parcalar.forEach(par => par.forEach(q => ovs.push(q.deger)));
+    const olcekler = (bant ? vs.concat(bant) : vs).concat(ovs);
     let min = sayiMi(o.min) ? o.min : Math.min.apply(null, olcekler);
     let max = sayiMi(o.max) ? o.max : Math.max.apply(null, olcekler);
     if(max === min){ max = max + 1; min = min - 1; }
@@ -184,6 +193,11 @@ window.LIFEOS = window.LIFEOS || {};
     const nk = q => yuvarla(x(q.i)) + ',' + yuvarla(y(q.deger));
 
     let govde = '';
+    if(op && ovs.length){
+      govde += '<g class="grafik__onceki" data-oz="032">' + op.parcalar.map(par => par.length === 1
+        ? '<circle cx="' + yuvarla(x(par[0].i)) + '" cy="' + yuvarla(y(par[0].deger)) + '" r="1.5"/>'
+        : '<polyline points="' + par.map(nk).join(' ') + '"/>').join('') + '</g>';
+    }
     if(bant){
       const y1 = yuvarla(y(bant[1])), y2 = yuvarla(y(bant[0]));
       govde += '<rect class="grafik__bant" data-oz="031" x="0" y="' + y1 + '" width="' + gen
@@ -215,7 +229,9 @@ window.LIFEOS = window.LIFEOS || {};
           + '" cy="' + yuvarla(y(q.deger)) + '" r="3" data-tarih="' + q.tarih + '"/>';
       }));
     }
+    const oort = ovs.length ? ovs.reduce((a2, v) => a2 + v, 0) / ovs.length : null;
     const etiketler = ozet + (bant ? ', ' + disarida + ' gün hedef bandının dışında' : '')
+      + (oort != null ? ', geçen dönem ortalaması ' + bicim(oort, 1) + ' (gölgede)' : '')
       + (o.cumle ? '. ' + cumle(s, o) : '');
     return '<svg class="grafik' + (bant ? ' grafik--bantli' : '') + '" data-oz="027" viewBox="0 0 ' + gen + ' ' + yuk + '"'
       + ' preserveAspectRatio="none" role="img" aria-label="' + kac(etiketler) + '">' + govde + '</svg>';
@@ -606,6 +622,144 @@ window.LIFEOS = window.LIFEOS || {};
       + '</svg><figcaption class="grafik__cumle">' + kac(r.metin) + '</figcaption></figure>';
   }
 
+
+  /* --------------------------------------------- 032 geçen dönem anahtarı */
+
+  /* Katman D: gölge grafik başındaki anahtarla açılır (EKIP-PLANI Ek A 32). */
+  function gecenDonemDugmesi(acik){
+    return '<button type="button" class="chip chip--tap' + (acik ? ' chip--on' : '') + '" data-oz="032"'
+      + ' data-act="grafik-gecen-donem" aria-pressed="' + (acik ? 'true' : 'false') + '">Geçen dönem</button>';
+  }
+
+  /* --------------------------------------------- 036 dağılım şeridi */
+
+  const DAGILIM_EN_AZ = 5;
+
+  function medyan(a){
+    const s = a.slice().sort((x, y) => x - y);
+    const m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+
+  /* d = { degerler:[sayı|null…] ya da seri(), etiket, birim, ondalik, gece:'gece' }
+     Kayıt olmayan gece NOKTA DEĞİLDİR (0'a konmaz) ve sayısı söylenir.
+     En az beş kayıt: daha azından dağılım okunmaz. */
+  function dagilim(d){
+    d = d || {};
+    const hepsi = (d.degerler || []).map(v => v && typeof v === 'object' ? v.deger : v);
+    const vs = hepsi.filter(sayiMi);
+    const birim = d.birim;
+    const b = x => (L.SAYI && L.SAYI.birimli) ? L.SAYI.birimli(bicim(x, d.ondalik == null ? 1 : d.ondalik), birim) : bicim(x, 1);
+    const gece = d.gece || 'gece';
+    if(vs.length < DAGILIM_EN_AZ){
+      return { yeterli:false, n:vs.length, toplam:hepsi.length,
+        metin:'Dağılım için ' + (DAGILIM_EN_AZ - vs.length) + ' ' + gece + ' daha gerekli' };
+    }
+    const md = medyan(vs);
+    return {
+      yeterli:true, n:vs.length, toplam:hepsi.length, eksik:hepsi.length - vs.length,
+      medyan:md, min:Math.min.apply(null, vs), max:Math.max.apply(null, vs), degerler:vs,
+      /* «14 gecenin 12'si» eki sayının okunuşuna bağlıdır; ek istemeyen biçim. */
+      metin:vs.length + '/' + hepsi.length + ' ' + gece + ' kayıtlı; medyan ' + b(md)
+        + '; en düşük ' + b(Math.min.apply(null, vs)) + ', en yüksek ' + b(Math.max.apply(null, vs)),
+    };
+  }
+
+  function dagilimSvg(d, o){
+    o = o || {};
+    const r = dagilim(d);
+    if(!r.yeterli) return '<p class="dagilim dagilim--yok" data-oz="036">' + kac(r.metin) + '</p>';
+    const gen = o.gen || 320, yuk = o.yuk || 56, pay = 8, cap = 3.5;
+    const min = r.min, max = r.max === r.min ? r.min + 1 : r.max;
+    const X = v => pay + (v - min) / (max - min) * (gen - 2 * pay);
+    /* Üst üste binen noktalar dikey yayılır: aynı yere düşen her yeni
+       nokta sırayla üste ve alta kayar (değerler sıralı, belirlenimci). */
+    const orta = yuk / 2, dolu = [];
+    const nokta = r.degerler.slice().sort((a, b2) => a - b2).map(v => {
+      const cx = X(v);
+      let k = 0;
+      while(dolu.some(p => Math.abs(p.x - cx) < cap * 2 && p.k === k)) k = k <= 0 ? -k + 1 : -k;
+      dolu.push({ x:cx, k:k });
+      return '<circle class="dagilim__n" cx="' + yuvarla(cx) + '" cy="' + yuvarla(orta + k * cap * 2) + '" r="' + cap + '"/>';
+    }).join('');
+    const mx = yuvarla(X(r.medyan));
+    return '<figure class="dagilim" data-oz="036"><svg class="dagilim__svg" viewBox="0 0 ' + gen + ' ' + yuk + '"'
+      + ' role="img" aria-label="' + kac((d.etiket ? d.etiket + ': ' : '') + r.metin) + '">'
+      + nokta + '<line class="dagilim__medyan" x1="' + mx + '" x2="' + mx + '" y1="2" y2="' + (yuk - 2) + '"/></svg>'
+      + '<figcaption class="grafik__cumle">' + kac(r.metin) + '</figcaption></figure>';
+  }
+
+  /* --------------------------------------------- 040 birikim eğrisi */
+
+  /* gunluk: [{ tarih, deger }] gerçekleşen; plan: [{ tarih, deger }] günlük
+     plan; o = { bugun, birim:'soru', etiket }. Plan bütün dönemi çizer,
+     gerçek bugüne kadar. KAYDI OLMAYAN GÜN 0 EKLENMİŞ GİBİ GÖSTERİLMEZ:
+     birikim orada kesik geçer ve toplamın adı «kayıtlı toplam»dır.
+     Bugünkü fark çizgisi yönün anlamıyla renklenir: geride kötü, önde iyi. */
+  function birikim(gunluk, plan, o){
+    o = o || {};
+    const bugun = gunISO(o.bugun) || bugunISO();
+    const G = {}, P = {};
+    (gunluk || []).forEach(g => { const t2 = gunISO(g && g.tarih); if(t2 && sayiMi(g.deger)) G[t2] = g.deger; });
+    (plan || []).forEach(g => { const t2 = gunISO(g && g.tarih); if(t2 && sayiMi(g.deger)) P[t2] = g.deger; });
+    const tar = Object.keys(G).concat(Object.keys(P)).sort();
+    if(!tar.length) return { var:false, metin:'Plan da kayıt da yok' };
+    const bas = tar[0], bit = tar[tar.length - 1] > bugun ? tar[tar.length - 1] : bugun;
+    const gun = [];
+    let g = 0, pl = 0, kayitsiz = 0;
+    for(let i = 0, n = gunFarki(bas, bit); i <= n; i++){
+      const t2 = gunEkle(bas, i);
+      if(Object.prototype.hasOwnProperty.call(P, t2)) pl += P[t2];
+      const gecmisMi = t2 <= bugun;
+      const kayit = Object.prototype.hasOwnProperty.call(G, t2);
+      if(gecmisMi && kayit) g += G[t2];
+      if(gecmisMi && !kayit) kayitsiz++;
+      gun.push({ tarih:t2, plan:pl, gercek:gecmisMi ? g : null, kayit:gecmisMi ? kayit : null });
+    }
+    const bu = gun.filter(x => x.tarih === bugun)[0];
+    const fark = bu.gercek - bu.plan;
+    const b = x => (L.SAYI && L.SAYI.birimli) ? L.SAYI.birimli(bicim(x), o.birim) : bicim(x);
+    return {
+      var:true, gunler:gun, bugun:bugun, kayitsiz:kayitsiz, gercek:bu.gercek, plan:bu.plan, fark:fark,
+      anlam:fark < 0 ? 'kotu' : fark > 0 ? 'iyi' : 'notr',
+      metin:'Kayıtlı toplam ' + b(bu.gercek) + '; plan ' + b(bu.plan) + '; '
+        + (fark === 0 ? 'planla aynı' : b(Math.abs(fark)) + (fark < 0 ? ' geride' : ' önde'))
+        + (kayitsiz ? ' (' + kayitsiz + ' gün kayıtsız)' : ''),
+    };
+  }
+
+  function birikimSvg(gunluk, plan, o){
+    o = o || {};
+    const r = birikim(gunluk, plan, o);
+    if(!r.var) return '<p class="birikim birikim--yok" data-oz="040">' + kac(r.metin) + '</p>';
+    const gen = o.gen || 320, yuk = o.yuk || 120, pay = 6;
+    const n = r.gunler.length;
+    const max = Math.max(1, Math.max.apply(null, r.gunler.map(x => Math.max(x.plan, x.gercek || 0))));
+    const X = i => n <= 1 ? gen / 2 : pay + i / (n - 1) * (gen - 2 * pay);
+    const Y = v => pay + (1 - v / max) * (yuk - 2 * pay);
+    const planP = r.gunler.map((x, i) => yuvarla(X(i)) + ',' + yuvarla(Y(x.plan))).join(' ');
+    /* Gerçek eğri: kayıtlı günler düz, kayıtsız günlere giden parça kesik. */
+    let duz = '', kesik = '', onceki = null;
+    r.gunler.forEach((x, i) => {
+      if(x.gercek == null) return;
+      const p2 = { x:yuvarla(X(i)), y:yuvarla(Y(x.gercek)) };
+      if(onceki){
+        const s = '<line x1="' + onceki.x + '" y1="' + onceki.y + '" x2="' + p2.x + '" y2="' + p2.y + '"/>';
+        if(x.kayit) duz += s; else kesik += s;
+      }
+      onceki = p2;
+    });
+    const bi = r.gunler.map(x => x.tarih).indexOf(r.bugun);
+    const fx = yuvarla(X(bi));
+    return '<figure class="birikim" data-oz="040"><svg class="grafik birikim__svg" viewBox="0 0 ' + gen + ' ' + yuk + '"'
+      + ' preserveAspectRatio="none" role="img" aria-label="' + kac((o.etiket ? o.etiket + ': ' : '') + r.metin) + '">'
+      + '<polyline class="birikim__plan" points="' + planP + '"/>'
+      + '<g class="birikim__gercek">' + duz + '</g><g class="birikim__kayitsiz">' + kesik + '</g>'
+      + '<line class="birikim__fark birikim__fark--' + r.anlam + '" x1="' + fx + '" x2="' + fx + '" y1="'
+      + yuvarla(Y(r.gercek)) + '" y2="' + yuvarla(Y(r.plan)) + '"/>'
+      + '</svg><figcaption class="grafik__cumle">' + kac(r.metin) + '</figcaption></figure>';
+  }
+
   L.GRAFIK = {
     EGILIM_EN_AZ:EGILIM_EN_AZ,
     DUZ_ORAN:DUZ_ORAN,
@@ -632,5 +786,12 @@ window.LIFEOS = window.LIFEOS || {};
     hucreHtml:hucreHtml,
     hizTahmini:hizTahmini,
     hizKoniSvg:hizKoniSvg,
+    DAGILIM_EN_AZ:DAGILIM_EN_AZ,
+    gecenDonemDugmesi:gecenDonemDugmesi,
+    medyan:medyan,
+    dagilim:dagilim,
+    dagilimSvg:dagilimSvg,
+    birikim:birikim,
+    birikimSvg:birikimSvg,
   };
 })();

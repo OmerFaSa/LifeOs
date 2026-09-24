@@ -409,4 +409,96 @@ describe('P2 · Grafik ekleri (029 030 031 033 034 038 039)', () => {
   });
 });
 
+describe('P3 · Grafik ekleri (032 036 040)', () => {
+
+  it('oz-032 Geçen dönem soluk kesik çizgi olarak arkada durur.', () => {
+    const s = G().seri(NOKTALAR);   // 20–26 Eylül, 22-23 boş
+    const once = G().seri([{ tarih:'2026-09-13', deger:6.5 }, { tarih:'2026-09-14', deger:6.6 },
+      { tarih:'2026-09-15', deger:6.4 }, { tarih:'2026-09-18', deger:6.9 }, { tarih:'2026-09-19', deger:7.0 }]);
+    const k = sahne(G().cizgiSvg(s, { onceki:once, etiket:'Uyku' }));
+    try{
+      const g = k.querySelector('.grafik__onceki');
+      expect(g.getAttribute('data-oz')).toBe('032');
+      /* Arkada: SVG'de ön çizgiden ÖNCE gelir. */
+      const svg = k.querySelector('svg');
+      expect(Array.prototype.indexOf.call(svg.children, g) < Array.prototype.indexOf.call(svg.children, svg.querySelector('.grafik__cizgi'))).toBeTruthy();
+      /* Geçen dönemin boş günleri gölgede de boştur: iki parça. */
+      expect(g.querySelectorAll('polyline')).toHaveLength(2);
+      const st = getComputedStyle(g.querySelector('polyline'));
+      expect(st.strokeDasharray === 'none').toBeFalsy();
+      expect(Number(st.opacity) < 1).toBeTruthy();
+      expect(svg.getAttribute('aria-label')).toContain('geçen dönem ortalaması 6,7 (gölgede)');
+    }finally{ k.remove(); }
+    /* Anahtar: grafik başında, aria-pressed ile. */
+    expect(G().gecenDonemDugmesi(false)).toContain('aria-pressed="false"');
+    expect(G().gecenDonemDugmesi(true)).toContain('chip--on');
+    expect(G().cizgiSvg(s, {}).indexOf('grafik__onceki') < 0).toBeTruthy();
+  });
+
+  it('oz-036 Otuz gecenin her biri bir nokta; ortadaki çizgi medyan.', () => {
+    const v = [];
+    for(let i = 0; i < 30; i++) v.push(i === 4 || i === 17 ? null : 6 + (i % 7) * 0.3);
+    const k = sahne(G().dagilimSvg({ degerler:v, birim:'saat', etiket:'Uyku' }));
+    try{
+      const f = k.querySelector('[data-oz="036"]');
+      /* Kayıt olmayan gece nokta değildir (0'a konmaz). */
+      expect(f.querySelectorAll('.dagilim__n')).toHaveLength(28);
+      const m = f.querySelector('.dagilim__medyan');
+      expect(m).toBeTruthy();
+      const r = G().dagilim({ degerler:v, birim:'saat' });
+      expect(r.medyan).toBe(G().medyan(v.filter(x => x != null)));
+      expect(f.querySelector('figcaption').textContent).toBe(r.metin);
+      expect(r.metin.indexOf('28/30 gece kayıtlı') === 0).toBeTruthy();
+      /* Medyan çizgisi noktaların arasında, uçlarda değil. */
+      const xs = Array.prototype.map.call(f.querySelectorAll('.dagilim__n'), c => Number(c.getAttribute('cx')));
+      const mx = Number(m.getAttribute('x1'));
+      expect(mx > Math.min.apply(null, xs) && mx < Math.max.apply(null, xs)).toBeTruthy();
+    }finally{ k.remove(); }
+  });
+
+  it('oz-036 beş kayıttan azıyla dağılım çizilmez; medyan tek ve çift sayıda doğru', () => {
+    expect(G().dagilim({ degerler:[7, null, 8, 6] }).metin).toBe('Dağılım için 2 gece daha gerekli');
+    expect(G().dagilimSvg({ degerler:[7, 8] })).toContain('dagilim--yok');
+    expect(G().medyan([3, 1, 2])).toBe(2);
+    expect(G().medyan([4, 1, 3, 2])).toBe(2.5);
+  });
+
+  it('oz-040 Çözülen sorunun birikimli çizgisi ve plan çizgisi; bugünkü fark kırmızı çizgiyle.', () => {
+    const gun = [], plan = [];
+    for(let i = 0; i < 10; i++){
+      plan.push({ tarih:G().gunEkle('2026-09-15', i), deger:40 });
+      if(i !== 3) gun.push({ tarih:G().gunEkle('2026-09-15', i), deger:35 });
+    }
+    const r = G().birikim(gun, plan, { bugun:'2026-09-24', birim:'soru' });
+    expect(r.gercek).toBe(315);
+    expect(r.plan).toBe(400);
+    expect(r.anlam).toBe('kotu');
+    expect(r.metin).toBe('Kayıtlı toplam 315 soru; plan 400 soru; 85 soru geride (1 gün kayıtsız)');
+    const k = sahne(G().birikimSvg(gun, plan, { bugun:'2026-09-24', birim:'soru' }));
+    try{
+      const f = k.querySelector('[data-oz="040"]');
+      const fark = f.querySelector('.birikim__fark');
+      expect(fark.classList.contains('birikim__fark--kotu')).toBeTruthy();
+      expect(getComputedStyle(fark).stroke).toBe((() => {
+        const s = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        s.style.stroke = 'var(--bad)'; f.querySelector('svg').appendChild(s);
+        const c = getComputedStyle(s).stroke; s.remove(); return c; })());
+      /* Kayıtsız güne giden parça kesik: orada 0 eklenmedi, bilinmiyor. */
+      expect(f.querySelectorAll('.birikim__kayitsiz line')).toHaveLength(1);
+      expect(getComputedStyle(f.querySelector('.birikim__kayitsiz line')).strokeDasharray === 'none').toBeFalsy();
+    }finally{ k.remove(); }
+  });
+
+  it('oz-040 önde olan fark iyi yönün rengini alır; gelecek plan çizilir, gerçek bugünde durur', () => {
+    const gun = [{ tarih:'2026-09-20', deger:60 }, { tarih:'2026-09-21', deger:60 }];
+    const plan = [{ tarih:'2026-09-20', deger:40 }, { tarih:'2026-09-21', deger:40 }, { tarih:'2026-09-22', deger:40 }];
+    const r = G().birikim(gun, plan, { bugun:'2026-09-21', birim:'soru' });
+    expect(r.anlam).toBe('iyi');
+    expect(r.metin).toBe('Kayıtlı toplam 120 soru; plan 80 soru; 40 soru önde');
+    expect(r.gunler[2].gercek).toBeNull();
+    expect(r.gunler[2].plan).toBe(120);
+    expect(G().birikimSvg([], [])).toContain('birikim--yok');
+  });
+});
+
 })();

@@ -772,3 +772,53 @@
 .kapsam__s input{ grid-row:span 2; accent-color:var(--primary); }
 .kapsam__ad{ font-weight:500; }
 .kapsam__seviye{ grid-column:2; font-size:var(--fs-xs); color:var(--text-3); }
+
+/* ================================================================
+   032 · GEÇEN DÖNEM GÖLGESİ — soluk kesik çizgi, arkada
+   ================================================================ */
+
+.grafik__onceki polyline{
+  fill:none;
+  stroke:var(--text-3);
+  stroke-width:1.5;
+  stroke-dasharray:var(--sp-1) var(--sp-1);
+  opacity:.6;
+  vector-effect:non-scaling-stroke;
+}
+.grafik__onceki circle{ fill:var(--text-3); opacity:.6; }
+
+/* ================================================================
+   036 · DAĞILIM ŞERİDİ — her gece bir nokta, ortada medyan
+   ================================================================ */
+
+.dagilim{ margin:0; }
+.dagilim--yok{ font-size:var(--fs-sm); color:var(--text-3); }
+.dagilim__svg{ display:block; width:100%; height:auto; overflow:visible; }
+.dagilim__n{ fill:var(--primary); opacity:.55; }
+.dagilim__medyan{ stroke:var(--text); stroke-width:2; }
+
+/* ================================================================
+   040 · BİRİKİM EĞRİSİ — gerçek ve plan; bugünkü fark yönün renginde
+   ================================================================ */
+
+.birikim{ margin:0; }
+.birikim--yok{ font-size:var(--fs-sm); color:var(--text-3); }
+.birikim__plan{
+  fill:none;
+  stroke:var(--text-3);
+  stroke-width:1.5;
+  vector-effect:non-scaling-stroke;
+}
+.birikim__gercek line,
+.birikim__kayitsiz line{
+  stroke:var(--primary);
+  stroke-width:2;
+  stroke-linecap:round;
+  vector-effect:non-scaling-stroke;
+}
+/* Kaydı olmayan güne giden parça KESİK: orada 0 eklenmedi, bilinmiyor. */
+.birikim__kayitsiz line{ stroke-dasharray:var(--sp-1) var(--sp-1); opacity:.7; }
+.birikim__fark{ stroke-width:2; vector-effect:non-scaling-stroke; }
+.birikim__fark--kotu{ stroke:var(--bad); }
+.birikim__fark--iyi{ stroke:var(--ok); }
+.birikim__fark--notr{ stroke:var(--text-3); }
