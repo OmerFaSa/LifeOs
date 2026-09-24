@@ -843,4 +843,24 @@
       expect(R.CERTAINTY.official).toBeFalsy();
     });
   });
+
+  /* Fikir 23 — zayıf konulardan mini test: «zayıf» ÖLÇÜMDEN gelir (açık
+     yanlışı en çok olan 3 konu); havuz o konuların kartı ve yanlışıdır. */
+  describe('Zayıf konulardan mini test', function(){
+    it('en çok açık yanlışı olan üç konu seçilir; havuz yalnız onlardan', function(){
+      resetState();
+      const y = (topic, n) => Array.from({ length:n }, (_, i) => ({ id:topic + i, topic, closedAt:null,
+        principle:'İlke ' + topic + i, tag:'K', createdAt:'2026-10-01' }));
+      S.errors = y('Türev', 3).concat(y('Limit', 2), y('Olasılık', 2), y('Paragraf', 1));
+      S.cards = [{ id:'k1', topic:'Türev', front:'Türev tanımı?', back:'Limit oranı', dueAt:'2026-10-01' },
+        { id:'k2', topic:'Paragraf', front:'Ana fikir?', back:'Metnin iddiası', dueAt:'2026-10-01' }];
+      expect(Q.zayifKonular(3).map(x => x.konu)).toEqual(['Türev', 'Limit', 'Olasılık']);
+      const p = Q.pool({ mode:'zayif' });
+      expect(p.length).toBe(8);                         /* 7 yanlış + 1 kart */
+      expect(p.some(x => String(x.prompt || x.question || '').indexOf('Ana fikir') >= 0)).toBe(false);
+      expect(Q.availability().zayif).toBe(8);
+      S.errors = [];
+      expect(Q.zayifKonular(3)).toEqual([]);
+    });
+  });
 })();

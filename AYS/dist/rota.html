@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'fa70665', at:'2026-09-24 09:30', dirty:true };
+R.BUILD = { id:'7ac7eec', at:'2026-09-24 09:33', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -21717,6 +21717,23 @@ R.Calc = (function(){
   /* ---------- siradaki hamle ----------
      Karar yorgunlugunu azaltmak icin tek bir oncelik dondurur.
      Sira sabittir: borc > gecikme > gunun rituali > olcum > blok > cipa. */
+  /* Paylaşılabilir hafta özeti (fikir 28) — metin burada kurulur; ekran
+     önizletir, kullanıcı satır siler. Ölçülmeyen «—» yazar, sıfır değil. */
+  function haftaOzetMetni(n){
+    const comp = planCompletion(n);
+    const qr = questionRealization(n);
+    const tyt = medianTrend('TYT');
+    return [
+      'Hafta ' + n + ' özeti',
+      'Plan tamamlama: ' + (comp == null ? '—' : '%' + comp),
+      'Soru: ' + (qr ? qr.solved + ' / ' + qr.target : '—'),
+      'TYT medyan (son 3): ' + (tyt.last3 == null ? '—' : U.fmtNet(tyt.last3)),
+      'Davranış serisi: ' + behaviorStreak().streak + ' gün',
+      'Analiz borcu: ' + analysisDebt().length,
+      'Konu kapanışı: %' + overallClosure().pct,
+    ].join('\n');
+  }
+
   /* «Bu hızla» (fikir 20): son 4 haftada kapanan konu (ikinci testin
      tarihi) → haftalık hız; hız × sınava kalan hafta, kalan konuya
      oranlanır. Hız ÖLÇÜLEMİYORSA (son 4 haftada < 2 kapanış) sayı
@@ -22309,7 +22326,7 @@ R.Calc = (function(){
   }
 
   return {
-    onbesDakika, buHizla,
+    onbesDakika, buHizla, haftaOzetMetni,
     fullExams, comparableNets, medianTrend, examBase, testMedian, analysisDebt, examVolumeProgress,
     errorDistribution, errorPareto, topTags, openErrors,
     dueCards, overdueCards, cardDebt,
@@ -24216,7 +24233,20 @@ R.Quiz = (function(){
     errors:   { label:'Yanlış defteri',   note:'Kapanmamış yanlışların ilkeleri' },
     notes:    { label:'Ders notları',     note:'Video notlarından geri çağırma' },
     mixed:    { label:'Karışık',          note:'Hepsinden rastgele — sınav benzeri' },
+    zayif:    { label:'Zayıf konular',    note:'Açık yanlışı en çok olan 3 konu (ölçümden)' },
   };
+
+  /* Zayıf konu ÖLÇÜMDEN gelir (fikir 23): açık yanlışı en çok olan konular.
+     Yanlış yoksa zayıf konu da yoktur — tahmin edilmez. */
+  function zayifKonular(n){
+    const say = {};
+    R.Calc.openErrors().forEach(e => {
+      const k = e.topic || null;
+      if(k) say[k] = (say[k] || 0) + 1;
+    });
+    return Object.keys(say).sort((a, b) => say[b] - say[a] || a.localeCompare(b, 'tr'))
+      .slice(0, n || 3).map(k => ({ konu:k, acikYanlis:say[k] }));
+  }
 
   const SIZES = [5, 10, 20];
 
@@ -24317,6 +24347,11 @@ R.Quiz = (function(){
         .forEach(n => n.segments.forEach((seg, i) => items.push(fromSegment(n, seg, i))));
     }else if(mode === 'errors'){
       items = C.openErrors().filter(e => e.principle || e.recipe).map(fromError);
+    }else if(mode === 'zayif'){
+      const adlar = zayifKonular(3).map(x => x.konu);
+      items = S.cards.filter(c => adlar.indexOf(c.topic) >= 0).map(fromCard)
+        .concat(C.openErrors().filter(e => adlar.indexOf(e.topic) >= 0 && (e.principle || e.recipe))
+          .map(fromError));
     }else if(mode === 'notes'){
       S.videoNotes.forEach(n => n.segments.forEach((seg, i) => items.push(fromSegment(n, seg, i))));
     }else{ // mixed
@@ -24562,12 +24597,13 @@ R.Quiz = (function(){
       errors:pool({ mode:'errors' }).length,
       notes:pool({ mode:'notes' }).length,
       mixed:pool({ mode:'mixed' }).length,
+      zayif:pool({ mode:'zayif' }).length,
     };
   }
 
   return { MODES, SIZES, FORMATS, TIMERS, pool, start, active, current, reveal, isRevealed,
     pick, pickedIndex, format, questionSeconds, questionLeft, timeout,
-    progress, answer, skip, finish, cancel, availability };
+    progress, answer, skip, finish, cancel, availability, zayifKonular };
 })();
 
 /* ==== js/core/examrun.js ==== */
@@ -39450,33 +39486,31 @@ R.Screens.today = (function(){
       await M.saveDay(day.date);
       R.App.render();
     },
+    /* Paylaşılabilir hafta özeti (fikir 28): ÖNCE önizleme — metin
+       düzenlenebilir, istemediğin satırı silersin; sonra Paylaş ya da
+       Kopyala. Kendiliğinden hiçbir yere gitmez. */
     async 'share-week'(){
-      const n = M.currentWeek();
-      const comp = C.planCompletion(n);
-      const qr = C.questionRealization(n);
-      const tyt = C.medianTrend('TYT');
-      const streak = C.behaviorStreak().streak;
-      const lines = [
-        'Hafta ' + n + ' özeti',
-        'Plan tamamlama: ' + (comp == null ? '—' : '%' + comp),
-        'Soru: ' + (qr ? qr.solved + ' / ' + qr.target : '—'),
-        'TYT medyan (son 3): ' + (tyt.last3 == null ? '—' : U.fmtNet(tyt.last3)),
-        'Davranış serisi: ' + streak + ' gün',
-        'Analiz borcu: ' + C.analysisDebt().length,
-        'Konu kapanışı: %' + C.overallClosure().pct,
-      ];
-      const text = lines.join('\n');
+      const text = C.haftaOzetMetni(M.currentWeek());
+      UI.sheet({
+        title:'Hafta özeti', subtitle:'Paylaşmadan önce istemediğin satırı sil',
+        body:String(c.Textarea({ id:'share-box', rows:9, value:text })),
+        footer:String(html`${c.Button({ label:'Kopyala', act:'share-week-copy' })}
+          ${c.Button({ label:'Paylaş', tone:'primary', act:'share-week-send' })}`),
+      });
+    },
+    async 'share-week-copy'(){
+      const el = document.getElementById('share-box');
+      try{ await navigator.clipboard.writeText(el ? el.value : ''); UI.toast('Özet kopyalandı'); }
+      catch(e){ if(el){ el.select(); } UI.toast('Kopyalanamadı; metni seçip kendin kopyala'); }
+    },
+    async 'share-week-send'(){
+      const el = document.getElementById('share-box');
+      const text = el ? el.value : '';
       try{
-        if(navigator.share){ await navigator.share({ title:'Rota — hafta özeti', text }); return; }
+        if(navigator.share){ await navigator.share({ title:'Rota — hafta özeti', text }); UI.closeSheet(); return; }
         await navigator.clipboard.writeText(text);
-        UI.toast('Özet kopyalandı — birine gönderebilirsin');
-      }catch(e){
-        UI.sheet({
-          title:'Hafta özeti', subtitle:'Kopyalayıp paylaşabilirsin',
-          body:String(c.Textarea({ id:'share-box', rows:8, value:text })),
-          footer:String(c.Button({ label:'Kapat', act:'sheet-close' })),
-        });
-      }
+        UI.toast('Paylaşım bu tarayıcıda yok; özet kopyalandı');
+      }catch(e){ /* kullanıcı paylaşımı kapattı: metin kutuda duruyor */ }
     },
     async 'energy-set'(el){
       await M.saveMood(U.todayISO(), { energy:Number(el.dataset.value) });
@@ -41050,7 +41084,14 @@ R.Screens.cards = (function(){
 
   /* ---------- yanlis defteri ---------- */
 
+  /* Fikir 26: yanlışın konusunun ders notu — aynı ders ve konu kimliği. */
+  function notOf(e){
+    if(!e.subjectId || !e.topicId) return null;
+    return (S.videoNotes || []).find(n => n.subjectId === e.subjectId && n.topicId === e.topicId) || null;
+  }
+
   function NotebookItem(e){
+    const not = notOf(e);
     const exam = S.exams.find(x => x.id === e.examId);
     const base = e.createdAt ? R.U.gunOf(e.createdAt) : U.todayISO();
     const dueDates = R.SRS_INTERVALS.map(d => U.fmtShort(U.addDays(U.parse(base), d))).join(' · ');
@@ -41074,6 +41115,8 @@ R.Screens.cards = (function(){
       </div>`)}
       ${when(e.rootCause, () => html`<div class="small"><span class="dim">Kök neden:</span> ${e.rootCause}</div>`)}
       ${when(e.principle, () => html`<div class="small"><span class="dim">Doğru ilke:</span> ${e.principle}</div>`)}
+      ${when(not, () => html`<div class="row-sm">${K.Button({ label:'Konunun notu: ' + not.title,
+        size:'sm', tone:'ghost', act:'note-goto', data:{ 'data-id':not.id } })}</div>`)}
       ${K.Row([
         K.Chip('Reçete: ' + (e.recipe || '—')),
         when(e.similar, () => K.Chip('Benzer: ' + e.similar)),
@@ -41284,6 +41327,7 @@ R.Screens.cards = (function(){
       } });
       R.App.render();
     },
+    async 'note-goto'(el){ S.ui.noteOpen = el.dataset.id; R.App.go('learn'); },
     async 'repair-done'(el){
       const err = S.errors.find(e => e.id === el.dataset.id);
       err.repairDoneAt = new Date().toISOString();
@@ -41974,7 +42018,9 @@ R.Screens.quiz = (function(){
           title:'Sınama kur', hint:'recall',
           sub:'Önce cevabı üret, sonra bak. Tanımak bilmek değildir.',
           body:html`
-            ${K.Field({ label:'Kaynak', hint:Q.MODES[mode].note,
+            ${K.Field({ label:'Kaynak', hint:mode === 'zayif' && Q.zayifKonular(3).length
+              ? 'Ölçümden: ' + Q.zayifKonular(3).map(x => x.konu + ' (' + x.acikYanlis + ' açık yanlış)').join(', ')
+              : Q.MODES[mode].note,
               input:K.Select({ id:'qz-mode', options:modeItems, value:mode, change:'quiz-mode' }) })}
             ${when(mode === 'subject' || mode === 'topic', () => K.Cols(2, [
               K.Field({ label:'Ders', input:K.Select({ id:'qz-subject', change:'quiz-subject',

@@ -525,4 +525,16 @@
       });
     });
   });
+
+  describe('Paylaşılabilir hafta özeti', () => {
+    it('ölçülmeyen «—» yazar; metin satır satır', () => {
+      withToday('2026-10-13', () => {
+        resetState();
+        const m = C.haftaOzetMetni(M.currentWeek()).split('\n');
+        expect(m[0].indexOf('Hafta') === 0).toBe(true);
+        expect(m.find(x => x.indexOf('TYT medyan') === 0)).toBe('TYT medyan (son 3): —');
+        expect(m.length).toBe(7);
+      });
+    });
+  });
 })();

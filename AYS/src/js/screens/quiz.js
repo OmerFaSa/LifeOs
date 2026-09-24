@@ -48,7 +48,9 @@ R.Screens.quiz = (function(){
           title:'Sınama kur', hint:'recall',
           sub:'Önce cevabı üret, sonra bak. Tanımak bilmek değildir.',
           body:html`
-            ${K.Field({ label:'Kaynak', hint:Q.MODES[mode].note,
+            ${K.Field({ label:'Kaynak', hint:mode === 'zayif' && Q.zayifKonular(3).length
+              ? 'Ölçümden: ' + Q.zayifKonular(3).map(x => x.konu + ' (' + x.acikYanlis + ' açık yanlış)').join(', ')
+              : Q.MODES[mode].note,
               input:K.Select({ id:'qz-mode', options:modeItems, value:mode, change:'quiz-mode' }) })}
             ${when(mode === 'subject' || mode === 'topic', () => K.Cols(2, [
               K.Field({ label:'Ders', input:K.Select({ id:'qz-subject', change:'quiz-subject',

@@ -59,6 +59,20 @@
 
     /* EKSİK (2026-09-24): «soru 40» (Telegram kısa kayıt, derssiz giriş)
        günün serbest sorusuna yazılıyor ama HİÇBİR ekranda görünmüyordu. */
+    /* Fikir 26: yanlışın yanında o konunun ders notu (aynı ders+konu). */
+    it('yanlış defterinde konunun notu bağlanır', async () => {
+      resetState();
+      R.S.errors = [{ id:'e1', topic:'Türev', subjectId:'tyt-mat', topicId:'t1', tag:'K',
+        closedAt:null, createdAt:'2026-10-01T10:00:00.000Z', recipe:'', rootCause:'' }];
+      R.S.videoNotes = [{ id:'n1', title:'Türev — giriş', subjectId:'tyt-mat', topicId:'t1',
+        segments:[], url:'' }, { id:'n2', title:'Başka konu', subjectId:'tyt-mat', topicId:'t9', segments:[] }];
+      R.S.ui.cardTab = 'notebook';
+      const out = String(await R.Screens.cards.render());
+      expect(out.indexOf('Türev — giriş') >= 0).toBe(true);
+      expect(out.indexOf('data-act="note-goto"') >= 0).toBe(true);
+      expect(out.indexOf('Başka konu') < 0).toBe(true);
+    });
+
     it('plan dışı çözülen soru Bugün ekranında görünür', async () => {
       resetState();
       await withTodayAsync('2026-10-12', async () => {

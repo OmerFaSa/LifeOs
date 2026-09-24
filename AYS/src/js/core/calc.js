@@ -392,6 +392,23 @@ R.Calc = (function(){
   /* ---------- siradaki hamle ----------
      Karar yorgunlugunu azaltmak icin tek bir oncelik dondurur.
      Sira sabittir: borc > gecikme > gunun rituali > olcum > blok > cipa. */
+  /* Paylaşılabilir hafta özeti (fikir 28) — metin burada kurulur; ekran
+     önizletir, kullanıcı satır siler. Ölçülmeyen «—» yazar, sıfır değil. */
+  function haftaOzetMetni(n){
+    const comp = planCompletion(n);
+    const qr = questionRealization(n);
+    const tyt = medianTrend('TYT');
+    return [
+      'Hafta ' + n + ' özeti',
+      'Plan tamamlama: ' + (comp == null ? '—' : '%' + comp),
+      'Soru: ' + (qr ? qr.solved + ' / ' + qr.target : '—'),
+      'TYT medyan (son 3): ' + (tyt.last3 == null ? '—' : U.fmtNet(tyt.last3)),
+      'Davranış serisi: ' + behaviorStreak().streak + ' gün',
+      'Analiz borcu: ' + analysisDebt().length,
+      'Konu kapanışı: %' + overallClosure().pct,
+    ].join('\n');
+  }
+
   /* «Bu hızla» (fikir 20): son 4 haftada kapanan konu (ikinci testin
      tarihi) → haftalık hız; hız × sınava kalan hafta, kalan konuya
      oranlanır. Hız ÖLÇÜLEMİYORSA (son 4 haftada < 2 kapanış) sayı
@@ -984,7 +1001,7 @@ R.Calc = (function(){
   }
 
   return {
-    onbesDakika, buHizla,
+    onbesDakika, buHizla, haftaOzetMetni,
     fullExams, comparableNets, medianTrend, examBase, testMedian, analysisDebt, examVolumeProgress,
     errorDistribution, errorPareto, topTags, openErrors,
     dueCards, overdueCards, cardDebt,

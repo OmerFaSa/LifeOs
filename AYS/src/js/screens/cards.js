@@ -100,7 +100,14 @@ R.Screens.cards = (function(){
 
   /* ---------- yanlis defteri ---------- */
 
+  /* Fikir 26: yanlışın konusunun ders notu — aynı ders ve konu kimliği. */
+  function notOf(e){
+    if(!e.subjectId || !e.topicId) return null;
+    return (S.videoNotes || []).find(n => n.subjectId === e.subjectId && n.topicId === e.topicId) || null;
+  }
+
   function NotebookItem(e){
+    const not = notOf(e);
     const exam = S.exams.find(x => x.id === e.examId);
     const base = e.createdAt ? R.U.gunOf(e.createdAt) : U.todayISO();
     const dueDates = R.SRS_INTERVALS.map(d => U.fmtShort(U.addDays(U.parse(base), d))).join(' · ');
@@ -124,6 +131,8 @@ R.Screens.cards = (function(){
       </div>`)}
       ${when(e.rootCause, () => html`<div class="small"><span class="dim">Kök neden:</span> ${e.rootCause}</div>`)}
       ${when(e.principle, () => html`<div class="small"><span class="dim">Doğru ilke:</span> ${e.principle}</div>`)}
+      ${when(not, () => html`<div class="row-sm">${K.Button({ label:'Konunun notu: ' + not.title,
+        size:'sm', tone:'ghost', act:'note-goto', data:{ 'data-id':not.id } })}</div>`)}
       ${K.Row([
         K.Chip('Reçete: ' + (e.recipe || '—')),
         when(e.similar, () => K.Chip('Benzer: ' + e.similar)),
@@ -334,6 +343,7 @@ R.Screens.cards = (function(){
       } });
       R.App.render();
     },
+    async 'note-goto'(el){ S.ui.noteOpen = el.dataset.id; R.App.go('learn'); },
     async 'repair-done'(el){
       const err = S.errors.find(e => e.id === el.dataset.id);
       err.repairDoneAt = new Date().toISOString();

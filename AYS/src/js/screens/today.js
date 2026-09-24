@@ -1232,33 +1232,31 @@ R.Screens.today = (function(){
       await M.saveDay(day.date);
       R.App.render();
     },
+    /* Paylaşılabilir hafta özeti (fikir 28): ÖNCE önizleme — metin
+       düzenlenebilir, istemediğin satırı silersin; sonra Paylaş ya da
+       Kopyala. Kendiliğinden hiçbir yere gitmez. */
     async 'share-week'(){
-      const n = M.currentWeek();
-      const comp = C.planCompletion(n);
-      const qr = C.questionRealization(n);
-      const tyt = C.medianTrend('TYT');
-      const streak = C.behaviorStreak().streak;
-      const lines = [
-        'Hafta ' + n + ' özeti',
-        'Plan tamamlama: ' + (comp == null ? '—' : '%' + comp),
-        'Soru: ' + (qr ? qr.solved + ' / ' + qr.target : '—'),
-        'TYT medyan (son 3): ' + (tyt.last3 == null ? '—' : U.fmtNet(tyt.last3)),
-        'Davranış serisi: ' + streak + ' gün',
-        'Analiz borcu: ' + C.analysisDebt().length,
-        'Konu kapanışı: %' + C.overallClosure().pct,
-      ];
-      const text = lines.join('\n');
+      const text = C.haftaOzetMetni(M.currentWeek());
+      UI.sheet({
+        title:'Hafta özeti', subtitle:'Paylaşmadan önce istemediğin satırı sil',
+        body:String(c.Textarea({ id:'share-box', rows:9, value:text })),
+        footer:String(html`${c.Button({ label:'Kopyala', act:'share-week-copy' })}
+          ${c.Button({ label:'Paylaş', tone:'primary', act:'share-week-send' })}`),
+      });
+    },
+    async 'share-week-copy'(){
+      const el = document.getElementById('share-box');
+      try{ await navigator.clipboard.writeText(el ? el.value : ''); UI.toast('Özet kopyalandı'); }
+      catch(e){ if(el){ el.select(); } UI.toast('Kopyalanamadı; metni seçip kendin kopyala'); }
+    },
+    async 'share-week-send'(){
+      const el = document.getElementById('share-box');
+      const text = el ? el.value : '';
       try{
-        if(navigator.share){ await navigator.share({ title:'Rota — hafta özeti', text }); return; }
+        if(navigator.share){ await navigator.share({ title:'Rota — hafta özeti', text }); UI.closeSheet(); return; }
         await navigator.clipboard.writeText(text);
-        UI.toast('Özet kopyalandı — birine gönderebilirsin');
-      }catch(e){
-        UI.sheet({
-          title:'Hafta özeti', subtitle:'Kopyalayıp paylaşabilirsin',
-          body:String(c.Textarea({ id:'share-box', rows:8, value:text })),
-          footer:String(c.Button({ label:'Kapat', act:'sheet-close' })),
-        });
-      }
+        UI.toast('Paylaşım bu tarayıcıda yok; özet kopyalandı');
+      }catch(e){ /* kullanıcı paylaşımı kapattı: metin kutuda duruyor */ }
     },
     async 'energy-set'(el){
       await M.saveMood(U.todayISO(), { energy:Number(el.dataset.value) });

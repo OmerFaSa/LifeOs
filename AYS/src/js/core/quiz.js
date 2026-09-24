@@ -28,7 +28,20 @@ R.Quiz = (function(){
     errors:   { label:'Yanlış defteri',   note:'Kapanmamış yanlışların ilkeleri' },
     notes:    { label:'Ders notları',     note:'Video notlarından geri çağırma' },
     mixed:    { label:'Karışık',          note:'Hepsinden rastgele — sınav benzeri' },
+    zayif:    { label:'Zayıf konular',    note:'Açık yanlışı en çok olan 3 konu (ölçümden)' },
   };
+
+  /* Zayıf konu ÖLÇÜMDEN gelir (fikir 23): açık yanlışı en çok olan konular.
+     Yanlış yoksa zayıf konu da yoktur — tahmin edilmez. */
+  function zayifKonular(n){
+    const say = {};
+    R.Calc.openErrors().forEach(e => {
+      const k = e.topic || null;
+      if(k) say[k] = (say[k] || 0) + 1;
+    });
+    return Object.keys(say).sort((a, b) => say[b] - say[a] || a.localeCompare(b, 'tr'))
+      .slice(0, n || 3).map(k => ({ konu:k, acikYanlis:say[k] }));
+  }
 
   const SIZES = [5, 10, 20];
 
@@ -129,6 +142,11 @@ R.Quiz = (function(){
         .forEach(n => n.segments.forEach((seg, i) => items.push(fromSegment(n, seg, i))));
     }else if(mode === 'errors'){
       items = C.openErrors().filter(e => e.principle || e.recipe).map(fromError);
+    }else if(mode === 'zayif'){
+      const adlar = zayifKonular(3).map(x => x.konu);
+      items = S.cards.filter(c => adlar.indexOf(c.topic) >= 0).map(fromCard)
+        .concat(C.openErrors().filter(e => adlar.indexOf(e.topic) >= 0 && (e.principle || e.recipe))
+          .map(fromError));
     }else if(mode === 'notes'){
       S.videoNotes.forEach(n => n.segments.forEach((seg, i) => items.push(fromSegment(n, seg, i))));
     }else{ // mixed
@@ -374,10 +392,11 @@ R.Quiz = (function(){
       errors:pool({ mode:'errors' }).length,
       notes:pool({ mode:'notes' }).length,
       mixed:pool({ mode:'mixed' }).length,
+      zayif:pool({ mode:'zayif' }).length,
     };
   }
 
   return { MODES, SIZES, FORMATS, TIMERS, pool, start, active, current, reveal, isRevealed,
     pick, pickedIndex, format, questionSeconds, questionLeft, timeout,
-    progress, answer, skip, finish, cancel, availability };
+    progress, answer, skip, finish, cancel, availability, zayifKonular };
 })();

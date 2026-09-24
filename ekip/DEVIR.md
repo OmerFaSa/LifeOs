@@ -374,6 +374,13 @@ problem eksiği > vadesi gelen kart > sıradaki bloğun ilk 15 dk; süreler «ta
 sıradaki iş kartında düğme, «Tam plan» ile döner) · ✅ 20 «bu hızla» (`calc.buHizla`: son 4
 haftanın konu kapanış hızı × kalan hafta → sınava kadar kapanacak konu yüzdesi, tahmin; son 4
 haftada < 2 kapanış → veri yok; İlerleme › Süreç göstergeleri). AYS 1672, duman temiz.
+· ✅ 23 zayıf konulardan mini test (Sınama › «Zayıf konular»: açık yanlışı en çok 3 konu ÖLÇÜMDEN,
+`Quiz.zayifKonular`; havuz o konuların kartı + yanlışı) · 25 süre analizi ZATEN VAR (Analiz ›
+Hız ve isabet: test başına sn/soru + doğruluk + profil) · ✅ 26 yanlış defterinde «Konunun notu»
+(aynı ders+konu kimliğiyle ders notu; Öğrenme'de açar) · ✅ 28 hafta özeti paylaşımı artık ÖNCE
+önizler (düzenlenebilir metin, satır silinir; Kopyala / Paylaş; `calc.haftaOzetMetni`) · 6 şablon
+gün eşdeğeri VAR (AYS takvim kayıt türleri günü ölçekler; SPİ/ESP «dünkünün aynısı»).
+AYS 1675, duman temiz. **AYS grubu bitti.**
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
 
