@@ -32,7 +32,8 @@ En sonda `python3 tools/sayilar.py --tam --yaz` (README sayıları) — yalnız 
 7. Y-7 modül tarafı: HKM'ye aynı anda TEK profil bağlanabilir (öteki profilde
    «HKM başka profile bağlı» denir)
 8. O-3 · O-5 · O-8 · O-10 · O-11
-9. D-8 · D-9 · D-10 · D-11 · D-14 · D-17 · D-19
+9. ~~D-8 · D-9 · D-10 · D-11 · D-14 · D-17 · D-19~~ → **Claude A aldı**
+   (2026-09-24, kullanıcı iletti). B bunlara dokunmaz.
 
 İlerlemeyi **`ekip/HATALAR-ILERLEME-B.md`**'ye yaz (DEVIR'e değil; A birleştirir).
 
