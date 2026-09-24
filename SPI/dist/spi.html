@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'3e56b56', at:'2026-09-24 09:45', dirty:true };
+SP.BUILD = { id:'f60aa6a', at:'2026-09-24 09:49', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -16409,6 +16409,8 @@ SP.S = {
   workouts:[],        // antrenman kayitlari
   meds:[],            // ilac ve takviye kayitlari, en yeni ustte
   hatirlat:null,      // hatirlatmalar (core/hatirlat.js) — ilac, su, hareket
+  barkodlar:{},       // barkod -> gida kimligi (core/barkod.js) — kisisel defter
+  kotuGun:{},         // YYYY-MM-DD -> { at } — kotu gun modu (core/kotugun.js)
   hedefler:[],        // hedef motoru kayitlari (core/hedefler.js)
   hekim:[],           // hekim talimatlari — en yuksek oncelikli kisit
   planlar:[],         // hedeflerin planlari (core/plan.js) — uygulanan, geri alinan
@@ -17273,6 +17275,8 @@ SP.Model = (function(){
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);
     if(SP.Hatirlat) await SP.Hatirlat.yukle();
+    if(SP.Barkod) await SP.Barkod.yukle();
+    if(SP.KotuGun) await SP.KotuGun.yukle();
 
     S.progress = (await SP.Store.get('progress')) || {};
     S.basket = Object.assign(defaultBasket(), await SP.Store.get('basket'));
@@ -23558,6 +23562,14 @@ SP.Move = (function(){
       factor = Math.min(factor, dl.factor);
       const t = dl.week + '. hafta — yük indirme haftası. ' + dl.note;
       reasons.push({ id:'deload', kind:'warn', text:t, short:t });
+    }
+
+    /* Kötü gün modu (core/kotugun.js): yalnız hafifletir, dinlenmeyi
+       dinlenme bırakır. */
+    if(SP.KotuGun && SP.KotuGun.aktif(d)){
+      factor = Math.min(factor, SP.KotuGun.CARPAN);
+      const t = 'Kötü gün modu: yük hafifletildi. Bugün asgari gün yeter.';
+      reasons.push({ id:'kotu-gun', kind:'warn', text:t, short:t });
     }
 
     const kind = factor === 0 ? 'rest' : factor <= 0.6 ? 'light' : factor < 1 ? 'reduced' : 'full';
@@ -30846,6 +30858,167 @@ SP.Hatirlat = (function(){
     bildirimVar, bildirimIzinli, bildirimAc, bildirimKapat, tik };
 })();
 
+/* ==== js/core/barkod.js ==== */
+/* BARKOD (fikir 4) — kişisel barkod defteri.
+
+   Sözler:
+     1. DIŞ VERİTABANI YOK. SPİ sıfır bağımlılıklıdır ve markete ya da bir
+        ürün veritabanına sormaz. Bir barkod ilk okutulduğunda kullanıcı onu
+        listeden bir gıdaya BAĞLAR; sonraki okutmada gıda doğrudan gelir.
+        Bilinmeyen barkod için gıda TAHMİN EDİLMEZ, sorulur (AGENTS §1.7).
+     2. KONTROL HANESİ DENETLENİR. EAN-13, EAN-8 ve UPC-A'nın son hanesi
+        öbürlerinden hesaplanır; tutmayan numara yanlış okunmuştur ve
+        kaydedilmez. UPC-A (12 hane) başına 0 eklenerek EAN-13 olur: aynı
+        ürün iki farklı anahtarla iki kez sorulmaz.
+     3. FOTOĞRAFTAN OKUMA TARAYICIYA BAĞLIDIR. `BarcodeDetector` olan
+        tarayıcıda (Chrome/Android) fotoğraftan okunur; olmayanda numara
+        elle yazılır ve bu söylenir. Fotoğrafta birden çok farklı barkod
+        varsa biri SEÇİLMEZ, yeniden çekmesi istenir. */
+
+window.SP = window.SP || {};
+
+SP.Barkod = (function(){
+  const KEY = 'barkodlar';
+
+  function liste(){
+    if(!SP.S.barkodlar || typeof SP.S.barkodlar !== 'object') SP.S.barkodlar = {};
+    return SP.S.barkodlar;
+  }
+  async function yukle(){
+    const d = await SP.Store.get(KEY);
+    SP.S.barkodlar = d && typeof d === 'object' && !Array.isArray(d) ? d : {};
+    return SP.S.barkodlar;
+  }
+
+  /* Rakam dışını at; 12 haneli UPC-A → 13 haneli EAN. */
+  function normal(kod){
+    const s = String(kod == null ? '' : kod).replace(/\D/g, '');
+    return s.length === 12 ? '0' + s : s;
+  }
+
+  function gecerli(kod){
+    const s = normal(kod);
+    if(s.length !== 8 && s.length !== 13) return false;
+    let t = 0;
+    for(let i = s.length - 2, k = 3; i >= 0; i--, k = k === 3 ? 1 : 3) t += Number(s[i]) * k;
+    return (10 - t % 10) % 10 === Number(s[s.length - 1]);
+  }
+
+  function denetle(kod){
+    const s = normal(kod);
+    if(!s) return { ok:false, why:'Barkod numarasını yaz.' };
+    if(s.length !== 8 && s.length !== 13) return { ok:false, why:'Barkod 8, 12 ya da 13 haneli olur; «' + s + '» ' + s.length + ' haneli.' };
+    if(!gecerli(s)) return { ok:false, why:'Bu numaranın kontrol hanesi tutmuyor; yanlış okunmuş olabilir. Yeniden okut ya da kontrol et.' };
+    return { ok:true, kod:s };
+  }
+
+  /* Kayıtlı ve gıdası hâlâ duran eşleşme; silinmiş gıdaya bağlıysa yok. */
+  function bul(kod){
+    const id = liste()[normal(kod)];
+    return id && SP.FOOD_BY_ID && SP.FOOD_BY_ID[id] ? id : null;
+  }
+
+  async function bagla(kod, foodId){
+    const d = denetle(kod);
+    if(!d.ok) return d;
+    if(!SP.FOOD_BY_ID || !SP.FOOD_BY_ID[foodId]) return { ok:false, why:'Gıda bulunamadı.' };
+    liste()[d.kod] = foodId;
+    await SP.Store.set(KEY, liste());
+    return { ok:true, kod:d.kod };
+  }
+
+  async function coz(kod){
+    const d = denetle(kod);
+    if(!d.ok) return d;
+    const id = bul(d.kod);
+    return { ok:true, kod:d.kod, foodId:id };
+  }
+
+  function fotoVar(){ return typeof window.BarcodeDetector === 'function'; }
+
+  async function fotodan(dosya){
+    if(!fotoVar()) return { ok:false, why:'Bu tarayıcı fotoğraftan barkod okuyamıyor; numarayı elle yaz.' };
+    let bulunan;
+    try{
+      const det = new window.BarcodeDetector({ formats:['ean_13', 'ean_8', 'upc_a'] });
+      bulunan = await det.detect(await createImageBitmap(dosya));
+    }catch(e){
+      return { ok:false, why:'Fotoğraf okunamadı; numarayı elle yaz.' };
+    }
+    const kodlar = [];
+    (bulunan || []).forEach(b => {
+      const s = normal(b && b.rawValue);
+      if(gecerli(s) && kodlar.indexOf(s) < 0) kodlar.push(s);
+    });
+    if(!kodlar.length) return { ok:false, why:'Fotoğrafta okunabilir bir barkod bulunamadı; daha yakından çek ya da numarayı elle yaz.' };
+    if(kodlar.length > 1) return { ok:false, why:'Fotoğrafta birden çok barkod var; yalnız birini çek.' };
+    return coz(kodlar[0]);
+  }
+
+  return { yukle, liste, normal, gecerli, denetle, bul, bagla, coz, fotoVar, fotodan };
+})();
+
+/* ==== js/core/kotugun.js ==== */
+/* KÖTÜ GÜN MODU (fikir 16, SPİ) — tek dokunuşla günü asgari güne indirmek.
+
+   Sözler:
+     1. YALNIZ HAFİFLETİR. Kötü gün antrenman yükünü en çok «hafif»e
+        indirir (core/move.js `prescription`); dinlenme günü dinlenme
+        kalır. Hiçbir hedefi, tahlili ya da ölçümü değiştirmez.
+     2. GÜNÜN ÖLÇÜSÜ ASGARİ GÜNDÜR. Asgari gün (protein tabanı, su,
+        15 dakika yürüyüş, 7 saat yatak) zaten «kötü günün alt sınırı»;
+        mod bunu öne çıkarır. Seriyi DONDURMAZ: asgari günü tutturan kötü
+        gün seriyi zaten korur; hasta gün için ayrı düğme var (core/seri).
+     3. KÜÇÜK AKSİYONDUR: tek gün, tek kayıt, «Geri al» ile döner
+        (AGENTS §1.9). Yalnız bugüne ve geleceğe konur; geçmiş gün
+        sonradan «kötüydü» diye yeniden yazılmaz. */
+
+window.SP = window.SP || {};
+
+SP.KotuGun = (function(){
+  const U = () => SP.U;
+  const KEY = 'kotugun';
+  const SAKLA_GUN = 60;
+  const CARPAN = 0.6;
+
+  function kayit(){
+    if(!SP.S.kotuGun || typeof SP.S.kotuGun !== 'object') SP.S.kotuGun = {};
+    return SP.S.kotuGun;
+  }
+  async function yukle(){
+    const d = await SP.Store.get(KEY);
+    SP.S.kotuGun = d && typeof d === 'object' && !Array.isArray(d) ? d : {};
+    return SP.S.kotuGun;
+  }
+  async function kaydet(){
+    const sinir = U().iso(U().addDays(U().today(), -SAKLA_GUN));
+    const k = kayit();
+    Object.keys(k).forEach(g => { if(g < sinir) delete k[g]; });
+    await SP.Store.set(KEY, k);
+  }
+
+  function aktif(gunISO){ return !!kayit()[gunISO || U().todayISO()]; }
+
+  async function ac(gunISO){
+    const g = gunISO || U().todayISO();
+    if(g < U().todayISO()) return { ok:false, why:'Geçmiş bir gün sonradan kötü gün yapılmaz.' };
+    if(aktif(g)) return { ok:false, why:'Bugün zaten kötü gün modunda.' };
+    kayit()[g] = { at:new Date().toISOString() };
+    await kaydet();
+    return { ok:true, gun:g };
+  }
+
+  async function kapat(gunISO){
+    const g = gunISO || U().todayISO();
+    if(!aktif(g)) return { ok:false, why:'Bu gün kötü gün modunda değil.' };
+    delete kayit()[g];
+    await kaydet();
+    return { ok:true, gun:g };
+  }
+
+  return { CARPAN, yukle, aktif, ac, kapat };
+})();
+
 /* ==== js/core/bilgi.js ==== */
 /* SPİ BİLGİSİ — BAM'ın besin, fiyat ve yer kayıtlarını SPİ'ye almak (Part 8c-2).
 
@@ -33233,9 +33406,21 @@ SP.Screens.today = (function(){
       <span class="tiny">Kaç gün?</span>
       ${map([3, 7, 14], n => K.Button({ label:n + ' gün', size:'sm', act:'seri-tatil-gun', data:{ 'data-gun':String(n) } }))}
       ${K.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>`;
-    return html`<div class="row wrap gap-6 mt-6">
+    return html`${kotuGunSatiri()}<div class="row wrap gap-6 mt-6">
+      ${when(SP.KotuGun && !SP.KotuGun.aktif(bugun), () => K.Button({ label:'Kötü gün', size:'sm', act:'kotu-gun' }))}
       ${K.Button({ label:'Bugün hastayım · seri donsun', size:'sm', act:'seri-hasta' })}
       ${K.Button({ label:'Tatil modu', size:'sm', act:'seri-tatil' })}</div>`;
+  }
+
+  /* Kötü gün modu (core/kotugun.js): açıksa günün ölçüsü asgari gündür. */
+  function kotuGunSatiri(){
+    if(!SP.KotuGun || !SP.KotuGun.aktif(U.todayISO())) return '';
+    const m = SP.Calc.minimumDay();
+    return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Kötü gün modu: antrenman hafif, bugün asgari gün yeter
+        (${m.done}/${m.total}${m.complete ? ', tamam' : ' · kalan: ' + m.rows.filter(r => !r.ok)
+          .map(r => ({ protein:'protein', water:'su', move:'yürüyüş', sleep:'uyku' })[r.id] || r.id).join(', ')})</span>
+      ${K.Button({ label:'Normal güne dön', size:'sm', act:'kotu-gun-kapat' })}</div>`;
   }
 
   function readinessEntry(){
@@ -33876,6 +34061,18 @@ SP.Screens.today = (function(){
   const handle = {
     async 'dunku-ogun'(el){ await dunkuEkle('ogun', el.dataset.id); },
     async 'dunku-antrenman'(el){ await dunkuEkle('antrenman', el.dataset.id); },
+    async 'kotu-gun'(){
+      const r = await SP.KotuGun.ac();
+      if(!r.ok){ UI.toast(r.why); return; }
+      UI.toast('Kötü gün modu açık: yük hafifledi, asgari gün yeter.', { undo:async () => {
+        await SP.KotuGun.kapat(r.gun); SP.App.render(); } });
+      SP.App.render();
+    },
+    async 'kotu-gun-kapat'(){
+      const r = await SP.KotuGun.kapat();
+      if(r.ok) UI.toast('Normal güne dönüldü');
+      SP.App.render();
+    },
     async 'seri-hasta'(){
       const r = await SP.Seri.dondur(U.todayISO(), null, 'hasta');
       if(!r.ok){ UI.toast(r.why); return; }
@@ -36029,8 +36226,10 @@ SP.Screens.meals = (function(){
     UI.sheet({
       title:'Besin ara', subtitle:list.length + ' gıda', wide:true,
       body:String(K.Stack([
-        K.Input({ id:'food-q', value:q, placeholder:'Ara: mercimek, somon, yoğurt…',
-          change:'food-query', data:{ 'data-debounce':'200' } }),
+        html`<div class="row gap-6">
+          ${K.Input({ id:'food-q', value:q, placeholder:'Ara: mercimek, somon, yoğurt…',
+            change:'food-query', data:{ 'data-debounce':'200' } })}
+          ${K.Button({ label:'Barkod', size:'sm', act:'barkod-ac' })}</div>`,
         K.Select({ value:cat, change:'food-cat',
           options:[{ value:'all', label:'Tüm kategoriler' }]
             .concat(SP.FOOD_CATS.map(c => ({ value:c.id, label:c.label }))) }),
@@ -36045,6 +36244,59 @@ SP.Screens.meals = (function(){
       footer:String(K.Button({ label:'Kapat', act:'sheet-close' })),
       noFocus:true,
     });
+  }
+
+  /* Barkod (core/barkod.js, fikir 4): kişisel defter. Bilinen barkod
+     doğrudan porsiyona gider; bilinmeyen için gıda SORULUR ve bağlanır. */
+  let barkodKod = null;
+
+  function barkodSheet(hata){
+    UI.sheet({
+      title:'Barkod', subtitle:'ilk okutmada bir gıdaya bağlanır, sonra doğrudan gelir',
+      body:String(K.Stack([
+        when(SP.Barkod.fotoVar(), () => K.Drop({ act:'barkod-foto', label:'Barkodun fotoğrafı',
+          icon:'file', accept:'image/*', hint:'Barkodu yakından çek ya da fotoğraf seç' })),
+        when(!SP.Barkod.fotoVar(), () => K.Notice({ tone:'info',
+          body:'Bu tarayıcı fotoğraftan barkod okuyamıyor; numarayı elle yaz.' })),
+        K.Field({ label:'Barkod numarası', hint:'8 ya da 13 hane',
+          input:K.Input({ id:'barkod-kod', numeric:true, placeholder:'8690000000000' }) }),
+        html`<div id="barkod-hata" class="small" role="alert">${hata || ''}</div>`,
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Bul', tone:'primary', act:'barkod-bul' })}`),
+      noFocus:true,
+    });
+  }
+
+  function barkodBagSheet(){
+    const q = S.ui.barkodQ || '';
+    let list = SP.FOODS;
+    if(q) list = list.filter(f => U.norm(f.name + ' ' + (f.aliases || []).join(' ')).indexOf(U.norm(q)) >= 0);
+    UI.sheet({
+      title:'Bu barkod hangi gıda?', subtitle:barkodKod + ' · henüz bir gıdaya bağlı değil', wide:true,
+      body:String(K.Stack([
+        K.Input({ id:'barkod-q', value:q, placeholder:'Ara: yoğurt, ekmek…',
+          change:'barkod-q', data:{ 'data-debounce':'200' } }),
+        html`<div class="stack-xs">${map(list.slice(0, 12), f => html`
+          <button class="foodrow" data-act="barkod-bagla" data-id="${f.id}">
+            <span class="foodrow__name">${f.name}</span>
+            <span class="foodrow__meta num">${f.kcal} kcal · P ${U.fmtNet(f.p)} g</span>
+          </button>`)}</div>`,
+        when(!list.length, () => K.Empty({ text:'Eşleşen gıda yok.' })),
+        html`<p class="tiny dim">Seçtiğin gıda bu barkoda bağlanır; sonraki okutmada doğrudan gelir.
+          Listede yoksa önce gıdayı ekle.</p>`,
+      ])),
+      footer:String(K.Button({ label:'Vazgeç', act:'sheet-close' })),
+      noFocus:true,
+    });
+  }
+
+  async function barkodSonuc(r){
+    if(!r.ok){ barkodSheet(r.why); return; }
+    barkodKod = r.kod;
+    if(r.foodId){ portionSheet(r.foodId); return; }
+    S.ui.barkodQ = '';
+    barkodBagSheet();
   }
 
   function portionSheet(foodId){
@@ -36364,6 +36616,17 @@ SP.Screens.meals = (function(){
     async 'open-search'(){ S.ui.foodPage = 1; searchSheet(); },
     async 'food-page'(el){ S.ui.foodPage = Number(el.dataset.page); searchSheet(); },
     async 'pick-food'(el){ portionSheet(el.dataset.id); },
+    async 'barkod-ac'(){ barkodSheet(); },
+    async 'barkod-bul'(){
+      const e = document.getElementById('barkod-kod');
+      await barkodSonuc(await SP.Barkod.coz(e ? e.value : ''));
+    },
+    async 'barkod-bagla'(el){
+      const r = await SP.Barkod.bagla(barkodKod, el.dataset.id);
+      if(!r.ok){ UI.toast(r.why); return; }
+      UI.toast('Barkod bağlandı');
+      portionSheet(el.dataset.id);
+    },
     async 'add-portion'(el){
       await pushItems([{ foodId:el.dataset.id, g:Number(el.dataset.g),
         cert:'estimated', portion:el.dataset.label }]);
@@ -36394,6 +36657,13 @@ SP.Screens.meals = (function(){
     async 'pick-slot'(el){ S.ui.mealSlot = el.value; },
     async 'food-query'(el){ S.ui.foodQuery = el.value; S.ui.foodPage = 1; searchSheet(); },
     async 'food-cat'(el){ S.ui.foodCat = el.value; S.ui.foodPage = 1; searchSheet(); },
+    async 'barkod-q'(el){ S.ui.barkodQ = el.value; barkodBagSheet(); },
+    async 'barkod-foto'(el){
+      const f = el.files && el.files[0];
+      if(!f) return;
+      await barkodSonuc(await UI.withBusy('Barkod okunuyor', 'fotoğraf bu cihazda okunur',
+        () => SP.Barkod.fotodan(f)));
+    },
   };
 
   return {
@@ -42810,7 +43080,8 @@ SP.App = (function(){
   }
 
   /* Enter ile hızlı giriş: metin alanında Enter, yanındaki eylemi tetikler. */
-  const ENTER_ACTIONS = { 'meal-text':'add-meal', 'quick-meal':'quick-meal', 'chat-text':'send-chat' };
+  const ENTER_ACTIONS = { 'meal-text':'add-meal', 'quick-meal':'quick-meal', 'chat-text':'send-chat',
+    'barkod-kod':'barkod-bul', 'ht-saat':'ht-kaydet' };
   document.addEventListener('keydown', async e => {
     if((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')){
       e.preventDefault();

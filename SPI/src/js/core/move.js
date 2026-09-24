@@ -331,6 +331,14 @@ SP.Move = (function(){
       reasons.push({ id:'deload', kind:'warn', text:t, short:t });
     }
 
+    /* Kötü gün modu (core/kotugun.js): yalnız hafifletir, dinlenmeyi
+       dinlenme bırakır. */
+    if(SP.KotuGun && SP.KotuGun.aktif(d)){
+      factor = Math.min(factor, SP.KotuGun.CARPAN);
+      const t = 'Kötü gün modu: yük hafifletildi. Bugün asgari gün yeter.';
+      reasons.push({ id:'kotu-gun', kind:'warn', text:t, short:t });
+    }
+
     const kind = factor === 0 ? 'rest' : factor <= 0.6 ? 'light' : factor < 1 ? 'reduced' : 'full';
     const templates = kind === 'rest' ? ['mobilite']
       : kind === 'light' ? ['mobilite', 'yuruyus-gunu']

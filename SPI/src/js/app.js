@@ -1088,7 +1088,8 @@ SP.App = (function(){
   }
 
   /* Enter ile hızlı giriş: metin alanında Enter, yanındaki eylemi tetikler. */
-  const ENTER_ACTIONS = { 'meal-text':'add-meal', 'quick-meal':'quick-meal', 'chat-text':'send-chat' };
+  const ENTER_ACTIONS = { 'meal-text':'add-meal', 'quick-meal':'quick-meal', 'chat-text':'send-chat',
+    'barkod-kod':'barkod-bul', 'ht-saat':'ht-kaydet' };
   document.addEventListener('keydown', async e => {
     if((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')){
       e.preventDefault();

@@ -330,8 +330,10 @@ SP.Screens.meals = (function(){
     UI.sheet({
       title:'Besin ara', subtitle:list.length + ' gıda', wide:true,
       body:String(K.Stack([
-        K.Input({ id:'food-q', value:q, placeholder:'Ara: mercimek, somon, yoğurt…',
-          change:'food-query', data:{ 'data-debounce':'200' } }),
+        html`<div class="row gap-6">
+          ${K.Input({ id:'food-q', value:q, placeholder:'Ara: mercimek, somon, yoğurt…',
+            change:'food-query', data:{ 'data-debounce':'200' } })}
+          ${K.Button({ label:'Barkod', size:'sm', act:'barkod-ac' })}</div>`,
         K.Select({ value:cat, change:'food-cat',
           options:[{ value:'all', label:'Tüm kategoriler' }]
             .concat(SP.FOOD_CATS.map(c => ({ value:c.id, label:c.label }))) }),
@@ -346,6 +348,59 @@ SP.Screens.meals = (function(){
       footer:String(K.Button({ label:'Kapat', act:'sheet-close' })),
       noFocus:true,
     });
+  }
+
+  /* Barkod (core/barkod.js, fikir 4): kişisel defter. Bilinen barkod
+     doğrudan porsiyona gider; bilinmeyen için gıda SORULUR ve bağlanır. */
+  let barkodKod = null;
+
+  function barkodSheet(hata){
+    UI.sheet({
+      title:'Barkod', subtitle:'ilk okutmada bir gıdaya bağlanır, sonra doğrudan gelir',
+      body:String(K.Stack([
+        when(SP.Barkod.fotoVar(), () => K.Drop({ act:'barkod-foto', label:'Barkodun fotoğrafı',
+          icon:'file', accept:'image/*', hint:'Barkodu yakından çek ya da fotoğraf seç' })),
+        when(!SP.Barkod.fotoVar(), () => K.Notice({ tone:'info',
+          body:'Bu tarayıcı fotoğraftan barkod okuyamıyor; numarayı elle yaz.' })),
+        K.Field({ label:'Barkod numarası', hint:'8 ya da 13 hane',
+          input:K.Input({ id:'barkod-kod', numeric:true, placeholder:'8690000000000' }) }),
+        html`<div id="barkod-hata" class="small" role="alert">${hata || ''}</div>`,
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Bul', tone:'primary', act:'barkod-bul' })}`),
+      noFocus:true,
+    });
+  }
+
+  function barkodBagSheet(){
+    const q = S.ui.barkodQ || '';
+    let list = SP.FOODS;
+    if(q) list = list.filter(f => U.norm(f.name + ' ' + (f.aliases || []).join(' ')).indexOf(U.norm(q)) >= 0);
+    UI.sheet({
+      title:'Bu barkod hangi gıda?', subtitle:barkodKod + ' · henüz bir gıdaya bağlı değil', wide:true,
+      body:String(K.Stack([
+        K.Input({ id:'barkod-q', value:q, placeholder:'Ara: yoğurt, ekmek…',
+          change:'barkod-q', data:{ 'data-debounce':'200' } }),
+        html`<div class="stack-xs">${map(list.slice(0, 12), f => html`
+          <button class="foodrow" data-act="barkod-bagla" data-id="${f.id}">
+            <span class="foodrow__name">${f.name}</span>
+            <span class="foodrow__meta num">${f.kcal} kcal · P ${U.fmtNet(f.p)} g</span>
+          </button>`)}</div>`,
+        when(!list.length, () => K.Empty({ text:'Eşleşen gıda yok.' })),
+        html`<p class="tiny dim">Seçtiğin gıda bu barkoda bağlanır; sonraki okutmada doğrudan gelir.
+          Listede yoksa önce gıdayı ekle.</p>`,
+      ])),
+      footer:String(K.Button({ label:'Vazgeç', act:'sheet-close' })),
+      noFocus:true,
+    });
+  }
+
+  async function barkodSonuc(r){
+    if(!r.ok){ barkodSheet(r.why); return; }
+    barkodKod = r.kod;
+    if(r.foodId){ portionSheet(r.foodId); return; }
+    S.ui.barkodQ = '';
+    barkodBagSheet();
   }
 
   function portionSheet(foodId){
@@ -665,6 +720,17 @@ SP.Screens.meals = (function(){
     async 'open-search'(){ S.ui.foodPage = 1; searchSheet(); },
     async 'food-page'(el){ S.ui.foodPage = Number(el.dataset.page); searchSheet(); },
     async 'pick-food'(el){ portionSheet(el.dataset.id); },
+    async 'barkod-ac'(){ barkodSheet(); },
+    async 'barkod-bul'(){
+      const e = document.getElementById('barkod-kod');
+      await barkodSonuc(await SP.Barkod.coz(e ? e.value : ''));
+    },
+    async 'barkod-bagla'(el){
+      const r = await SP.Barkod.bagla(barkodKod, el.dataset.id);
+      if(!r.ok){ UI.toast(r.why); return; }
+      UI.toast('Barkod bağlandı');
+      portionSheet(el.dataset.id);
+    },
     async 'add-portion'(el){
       await pushItems([{ foodId:el.dataset.id, g:Number(el.dataset.g),
         cert:'estimated', portion:el.dataset.label }]);
@@ -695,6 +761,13 @@ SP.Screens.meals = (function(){
     async 'pick-slot'(el){ S.ui.mealSlot = el.value; },
     async 'food-query'(el){ S.ui.foodQuery = el.value; S.ui.foodPage = 1; searchSheet(); },
     async 'food-cat'(el){ S.ui.foodCat = el.value; S.ui.foodPage = 1; searchSheet(); },
+    async 'barkod-q'(el){ S.ui.barkodQ = el.value; barkodBagSheet(); },
+    async 'barkod-foto'(el){
+      const f = el.files && el.files[0];
+      if(!f) return;
+      await barkodSonuc(await UI.withBusy('Barkod okunuyor', 'fotoğraf bu cihazda okunur',
+        () => SP.Barkod.fotodan(f)));
+    },
   };
 
   return {

@@ -394,6 +394,14 @@ yok; ilaç adı HKM'ye gitmediği için Telegram YOK — SPİ açıkken + izinli
 · ✅ 36 hekim özeti PDF (tarayıcının «PDF olarak kaydet» hedefi; dosya adı tarihli
 `SPI-hekim-ozeti-<gün>`; JS'te Türkçe yazı tipi gömmek bağımlılık demek, HKM PDF'i tahlil
 görmez). SPİ 1318, duman temiz.
+· ✅ 4 barkod (`core/barkod.js`: kişisel barkod defteri — dış veritabanı yok; ilk okutmada gıda
+SORULUR ve bağlanır, sonra doğrudan porsiyona gider; EAN-13/8 ve UPC-A kontrol hanesi denetlenir,
+UPC-A = 0 + EAN-13; `BarcodeDetector` olan tarayıcıda fotoğraftan, yoksa elle; fotoğrafta birden
+çok barkod → seçilmez, yeniden çekilir; Besin ara › «Barkod») · ✅ 16 kötü gün SPİ
+(`core/kotugun.js`: tek dokunuş, yalnız bugün/gelecek; `Move.prescription` yükü en çok «hafif»e
+indirir, dinlenme dinlenme kalır; Bugün › SERİ satırında «Kötü gün», asgari günün kalanı yazılır,
+«Normal güne dön»; seriyi dondurmaz). SPİ 1322; duman, erişilebilirlik, 390 px temiz.
+**SPİ grubu bitti.**
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
 

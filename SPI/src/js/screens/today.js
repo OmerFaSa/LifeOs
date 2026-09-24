@@ -357,9 +357,21 @@ SP.Screens.today = (function(){
       <span class="tiny">Kaç gün?</span>
       ${map([3, 7, 14], n => K.Button({ label:n + ' gün', size:'sm', act:'seri-tatil-gun', data:{ 'data-gun':String(n) } }))}
       ${K.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>`;
-    return html`<div class="row wrap gap-6 mt-6">
+    return html`${kotuGunSatiri()}<div class="row wrap gap-6 mt-6">
+      ${when(SP.KotuGun && !SP.KotuGun.aktif(bugun), () => K.Button({ label:'Kötü gün', size:'sm', act:'kotu-gun' }))}
       ${K.Button({ label:'Bugün hastayım · seri donsun', size:'sm', act:'seri-hasta' })}
       ${K.Button({ label:'Tatil modu', size:'sm', act:'seri-tatil' })}</div>`;
+  }
+
+  /* Kötü gün modu (core/kotugun.js): açıksa günün ölçüsü asgari gündür. */
+  function kotuGunSatiri(){
+    if(!SP.KotuGun || !SP.KotuGun.aktif(U.todayISO())) return '';
+    const m = SP.Calc.minimumDay();
+    return html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Kötü gün modu: antrenman hafif, bugün asgari gün yeter
+        (${m.done}/${m.total}${m.complete ? ', tamam' : ' · kalan: ' + m.rows.filter(r => !r.ok)
+          .map(r => ({ protein:'protein', water:'su', move:'yürüyüş', sleep:'uyku' })[r.id] || r.id).join(', ')})</span>
+      ${K.Button({ label:'Normal güne dön', size:'sm', act:'kotu-gun-kapat' })}</div>`;
   }
 
   function readinessEntry(){
@@ -1000,6 +1012,18 @@ SP.Screens.today = (function(){
   const handle = {
     async 'dunku-ogun'(el){ await dunkuEkle('ogun', el.dataset.id); },
     async 'dunku-antrenman'(el){ await dunkuEkle('antrenman', el.dataset.id); },
+    async 'kotu-gun'(){
+      const r = await SP.KotuGun.ac();
+      if(!r.ok){ UI.toast(r.why); return; }
+      UI.toast('Kötü gün modu açık: yük hafifledi, asgari gün yeter.', { undo:async () => {
+        await SP.KotuGun.kapat(r.gun); SP.App.render(); } });
+      SP.App.render();
+    },
+    async 'kotu-gun-kapat'(){
+      const r = await SP.KotuGun.kapat();
+      if(r.ok) UI.toast('Normal güne dönüldü');
+      SP.App.render();
+    },
     async 'seri-hasta'(){
       const r = await SP.Seri.dondur(U.todayISO(), null, 'hasta');
       if(!r.ok){ UI.toast(r.why); return; }

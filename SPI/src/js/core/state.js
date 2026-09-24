@@ -38,6 +38,8 @@ SP.S = {
   workouts:[],        // antrenman kayitlari
   meds:[],            // ilac ve takviye kayitlari, en yeni ustte
   hatirlat:null,      // hatirlatmalar (core/hatirlat.js) — ilac, su, hareket
+  barkodlar:{},       // barkod -> gida kimligi (core/barkod.js) — kisisel defter
+  kotuGun:{},         // YYYY-MM-DD -> { at } — kotu gun modu (core/kotugun.js)
   hedefler:[],        // hedef motoru kayitlari (core/hedefler.js)
   hekim:[],           // hekim talimatlari — en yuksek oncelikli kisit
   planlar:[],         // hedeflerin planlari (core/plan.js) — uygulanan, geri alinan
@@ -902,6 +904,8 @@ SP.Model = (function(){
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);
     if(SP.Hatirlat) await SP.Hatirlat.yukle();
+    if(SP.Barkod) await SP.Barkod.yukle();
+    if(SP.KotuGun) await SP.KotuGun.yukle();
 
     S.progress = (await SP.Store.get('progress')) || {};
     S.basket = Object.assign(defaultBasket(), await SP.Store.get('basket'));
