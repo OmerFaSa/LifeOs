@@ -132,10 +132,13 @@ def _vp_line(vp, audit):
                      vp=vp, verdict=None)
     bulgular = audit.get("findings") or []
     ozet = VERDICT_TEXT.get(audit["verdict"], audit["verdict"])
+    if audit.get("suruyor") and audit["verdict"] == "INCOMPLETE":
+        # HATALAR O-9: kismi gun «veri yok» degildir, «henuz bitmedi»dir.
+        ozet = "gün sürüyor; günlük taban gün kapanınca yargılanır"
     metin = "%s: %s." % (ad, ozet)
     if bulgular:
         ilk = bulgular[0]
-        etiket = C.LABELS.get(ilk.get("cert"), ilk.get("cert") or "veri yok")
+        etiket = C.EKRAN.get(ilk.get("cert"), ilk.get("cert") or "veri yok")
         metin += " %s (%s)" % (ilk["text"], etiket)
         if len(bulgular) > 1:
             metin += " · %d bulgu daha" % (len(bulgular) - 1)

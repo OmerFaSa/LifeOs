@@ -151,6 +151,20 @@ def run():
         eq(sorted(a), ["bio", "intellect"])
     test("gunun denetimleri VP basina toplanir", t_latest_audits)
 
+    def t_suren_gun():
+        """HATALAR O-9: ayni kayit, gun surerken «henuz yargilanmadi», gun
+        kapaninca «tabanin altinda» okunur. Ambar degismez."""
+        con = db.connect(":memory:")
+        sync_engine.ingest(con, {"module": "ays", "date": "2026-09-12",
+                                 "metrics": {"questions": metric(20)}}, "now", TH)
+        a = sync_engine.latest_audits(con, "2026-09-12", bugun="2026-09-12")
+        eq(a["academic"]["verdict"], "INCOMPLETE")
+        ok(a["academic"]["suruyor"])
+        b = sync_engine.latest_audits(con, "2026-09-12", bugun="2026-09-13")
+        eq(b["academic"]["verdict"], "ANOMALY")
+        no(b["academic"].get("suruyor"))
+    test("suren gun okunurken yargilanmaz, kapaninca yargilanir (O-9)", t_suren_gun)
+
     run_sozlesme()
 
 

@@ -25,7 +25,7 @@
 import datetime
 
 from core import certainty as C
-from core import db, thresholds
+from core import db, saat, thresholds, vp_base
 
 ASGARI = 3           # bir seri en az bu kadar OLCULEN gun
 BOSLUK = 2           # art arda bu kadar olculmemis gun seriyi kirar
@@ -73,14 +73,21 @@ def series(con, date, days=PENCERE, th=None):
     return out
 
 
-def scan(con, date, days=PENCERE, th=None):
+def scan(con, date, days=PENCERE, th=None, bugun=None):
     t = th or thresholds.load()
     seri = series(con, date, days)
     gunler = _gunler(date, days)
+    bugun = bugun or saat.bugun()
     out = []
     for kural in KURALLAR:
         esik = (t.get(kural["group"]) or {}).get(kural["field"])
         degerler = seri.get((kural["module"], kural["metric"])) or {}
+        # HATALAR O-9: suren gunun birikimli degeri tabanin altindaysa henuz
+        # «kirik gun» degildir; seriye ne eklenir ne onu bozar. Tabani gecmisse
+        # kesindir (sayim geri dusmez) ve oldugu gibi sayilir.
+        if kural["metric"] in vp_base.BIRIKIMLI and bugun in degerler \
+                and _kirik(degerler[bugun], esik, kural["dir"]):
+            degerler = {g: v for g, v in degerler.items() if g != bugun}
         out.append(_kural(kural, esik, degerler, gunler))
     return out
 

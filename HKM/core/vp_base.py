@@ -29,6 +29,46 @@ def verdict_of(findings, missing):
     return APPROVED
 
 
+# Gun icinde BIRIKEN olculer: saat 10:00'daki «20 soru» olculmustur ama
+# gunun degeri degildir (HATALAR O-9, DK-4). Gun surerken tabanin altindaki
+# birikimli deger yargi degil, ara bilgidir. Tabani gecmis birikimli deger
+# ise kesindir: sayim geri dusmez.
+BIRIKIMLI = frozenset(("questions", "study_minutes", "practice_minutes"))
+
+_KUCUK = {"I": "ı", "İ": "i"}
+
+
+def _kucult(metin):
+    if not metin:
+        return metin
+    ilk = metin[0]
+    return _KUCUK.get(ilk, ilk.lower()) + metin[1:]
+
+
+def gun_suruyor(audit):
+    """Suren gunun denetimi: birikimli dusuk bulgular yargidan cikar.
+
+    Ozgun denetime dokunmaz (ambardaki kayit ayni kalir); yeni bir sozluk
+    dondurur. Bulgusu olmayan ya da yalniz birikimli olmayan bulgusu olan
+    denetim oldugu gibi kalir."""
+    if not audit:
+        return audit
+    yeni, degisti = [], False
+    for f in audit.get("findings") or []:
+        if f.get("metric") in BIRIKIMLI and f.get("tone") in ("warn", "danger"):
+            f = dict(f, tone="info", suruyor=True,
+                     text="Şimdilik " + _kucult(f["text"]))
+            degisti = True
+        yeni.append(f)
+    if not degisti:
+        return audit
+    out = dict(audit, findings=yeni, suruyor=True)
+    if not any(f["tone"] in ("warn", "danger") for f in yeni):
+        # Kismi gun «onaylandi» da denemez: hukum icin gun henuz kapanmadi.
+        out["verdict"] = INCOMPLETE
+    return out
+
+
 def read(payload, key):
     """Etiketli metrigi okur: (deger, kesinlik). Deger yoksa (None, 'missing')."""
     m = (payload or {}).get(key)

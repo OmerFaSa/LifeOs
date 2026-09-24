@@ -17,6 +17,15 @@ LABELS = {
     "missing": "veri yok",
 }
 
+# LABELS makine anahtaridir (API ve testler onu okur). Ekrana giden cumle
+# duzgun Turkce yazilir (AGENTS.md §1.8): brifing satiri Telegram'a da gider.
+EKRAN = {
+    "measured": "ölçüldü",
+    "estimated": "tahmin",
+    "computed": "hesaplandı",
+    "missing": "veri yok",
+}
+
 VALID = set(LABELS)
 
 

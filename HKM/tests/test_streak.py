@@ -93,6 +93,34 @@ def run():
         no(s["status"] == "ended", s)
     test("tek kirik gun + bosluk seri degildir (O-2)", t_tek_gun_seri_degil)
 
+    def t_suren_gun_kirik_sayilmaz():
+        """HATALAR O-9: bugunun kismi soru sayisi «kirik gun» sayiliyordu.
+        Gun surerken tabanin altindaki birikimli deger seriye girmez; tabani
+        gecmis deger ise kesindir ve seriyi bitirir."""
+        con = _con()
+        for i, v in enumerate([20, 20, 20]):
+            sync_engine.ingest(con, {"module": "ays", "date": gun(i),
+                                     "metrics": {"questions": metric(v)}},
+                               now=gun(i) + "T10:00:00")
+
+        def bul(i, bugun):
+            return [s for s in streak.scan(con, gun(i), 45, TH, bugun=bugun)
+                    if s["id"] == "questions-low"][0]
+        eq(bul(2, gun(2))["status"], "clean")       # iki kapali gun + suren gun
+        eq(bul(2, gun(3))["status"], "running")     # ucu de kapandi
+        sync_engine.ingest(con, {"module": "ays", "date": gun(3),
+                                 "metrics": {"questions": metric(90)}},
+                           now=gun(3) + "T10:00:00")
+        eq(bul(3, gun(3))["status"], "ended")       # 90 >= 80: geri dusmez
+        # Birikimli olmayan olcu (uyku) bugun de sayilir.
+        con2 = _con()
+        _uyku(con2, [4, 4, 4])
+        s = [x for x in streak.scan(con2, gun(2), 45, TH, bugun=gun(2))
+             if x["id"] == "sleep-low"][0]
+        eq(s["status"], "running")
+    test("suren gunun kismi degeri kirik gun sayilmaz (O-9)",
+         t_suren_gun_kirik_sayilmaz)
+
     def t_threshold_comes_from_user():
         """Esik verisi kullanicinindir: kodda sabit degildir."""
         con = _con()

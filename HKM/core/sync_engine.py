@@ -12,7 +12,7 @@ import hmac
 import math
 
 from core import certainty as C
-from core import db, thresholds, vp_academic, vp_bio, vp_intellect
+from core import db, saat, thresholds, vp_academic, vp_bio, vp_intellect
 
 MODULES = {
     "ays": vp_academic,
@@ -170,8 +170,12 @@ def ingest(con, body, now=None, th=None):
             "audit": result}
 
 
-def latest_audits(con, date):
-    """Gunun her VP'si icin en son denetim."""
+def latest_audits(con, date, bugun=None):
+    """Gunun her VP'si icin en son denetim.
+
+    Okunan gun henuz suruyorsa birikimli dusuk bulgular yargidan cikar
+    (HATALAR O-9); ambardaki kayit degismez, gun kapaninca ayni kayit
+    tabanla yargilanir."""
     out = {}
     rows = con.execute(
         "SELECT a.* FROM audits a JOIN raw_events e ON e.id = a.event_id "
@@ -180,4 +184,7 @@ def latest_audits(con, date):
     for r in rows:
         out[r["vp"]] = {"id": r["id"], "vp": r["vp"], "verdict": r["verdict"],
                         "findings": json.loads(r["findings"])}
+    if date == (bugun or saat.bugun()):
+        from core import vp_base
+        out = {vp: vp_base.gun_suruyor(a) for vp, a in out.items()}
     return out

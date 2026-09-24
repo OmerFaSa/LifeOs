@@ -265,3 +265,19 @@ def run():
         eq(b["proposal"]["rank"], 2)
     test("sabit takvim sirasi uretimde de calisir",
          t_calendar_rank_reaches_production)
+
+    def t_suren_gun_brifingi():
+        """HATALAR O-9: bugunun 10:00'daki kismi degeri «tabanin altinda» diye
+        oneri olup ambara karar olarak yaziliyordu."""
+        from core import saat
+        con = _con()
+        bugun = saat.bugun()
+        _push(con, "ays", bugun, questions=metric(20), study_minutes=metric(60))
+        b = manager.brief(con, bugun)
+        eq(b["proposal"], None)
+        satir = [l for l in b["lines"] if l.get("vp") == "academic"][0]
+        ok("gün sürüyor" in satir["text"], satir["text"])
+        no("veri yok" in satir["text"], satir["text"])
+        ok("(ölçüldü)" in satir["text"], satir["text"])     # AGENTS.md §1.8
+        eq(con.execute("SELECT COUNT(*) FROM decisions").fetchone()[0], 0)
+    test("suren gunun kismi degeri karar olmaz (O-9)", t_suren_gun_brifingi)

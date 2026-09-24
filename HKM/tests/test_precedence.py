@@ -73,6 +73,57 @@ def run():
             assert not m, "emir kipi sizdi (%s): %s" % (m.group(0), p["proposal"])
     test("her oneri emir degil oneri kipinde", t_proposal_not_command)
 
+    def t_sinav_gecince_susar():
+        """HATALAR Y-2: sinav gectikten sonra «Sinava -30 gun kaldi» her gun
+        kazaniyor ve 3-5. siralari kalici olarak susturuyordu."""
+        p = precedence.resolve(bio=bio_ok, academic=ac_low, intellect=int_blocked,
+                               payloads={"ays": {"exam_days_left": metric(-30)}})
+        eq(p["rank"], 3)
+        no("-30" in p["proposal"] or "−30" in p["proposal"], p["proposal"])
+        p = precedence.resolve(payloads={"ays": {"exam_days_left": metric(-1)}})
+        eq(p, None)
+    test("gecmis sinav tarihi sabit takvim sayilmaz (Y-2)", t_sinav_gecince_susar)
+
+    def t_sinav_gunu():
+        p = precedence.resolve(payloads={"ays": {"exam_days_left": metric(0)}})
+        eq(p["rank"], 2)
+        no("0 gün" in p["proposal"], p["proposal"])
+        ok("bugün" in p["proposal"], p["proposal"])
+    test("sinav gunu «0 gun kaldi» denmez (Y-2)", t_sinav_gunu)
+
+    def t_suren_gun_yargilanmaz():
+        """HATALAR O-9: saat 10:00'daki 20 soru olculmustur ama gunun degeri
+        degildir. Suren gunun birikimli dusuk degeri anomali degil, oneri de
+        uretmez."""
+        from core import vp_base
+        a = vp_academic.audit({"questions": metric(20),
+                               "study_minutes": metric(60)}, TH)
+        eq(a["verdict"], "ANOMALY")
+        s = vp_base.gun_suruyor(a)
+        eq(s["verdict"], "INCOMPLETE")
+        ok(s["suruyor"])
+        ok(all(f["tone"] == "info" and f["suruyor"] for f in s["findings"]), s)
+        ok(s["findings"][0]["text"].startswith("Şimdilik soru"), s["findings"][0])
+        eq(precedence.resolve(academic=s), None)
+        # Esigi gecmis birikimli deger gun icinde de kesindir: geri dusmez.
+        tamam = vp_base.gun_suruyor(ac_ok)
+        eq(tamam["verdict"], ac_ok["verdict"])
+        # Birikimli olmayan olcu (deneme neti) gun surerken de yargilanir.
+        d = vp_academic.audit({"questions": metric(20),
+                               "mock_net": metric(40),
+                               "mock_net_baseline": metric(80)}, TH)
+        d = vp_base.gun_suruyor(d)
+        eq(d["verdict"], "ANOMALY")
+        eq(precedence.resolve(academic=d)["rank"], 3)
+        # ESP'nin pratik dakikasi da birikimlidir.
+        e = vp_base.gun_suruyor(vp_intellect.audit(
+            {"practice_minutes": metric(5)}, TH))
+        eq(precedence.resolve(intellect=e), None)
+        # Ozgun denetim degismez (ambardaki kayit ayni kalir).
+        eq(a["verdict"], "ANOMALY")
+    test("suren gunun kismi degeri gunluk tabanla yargilanmaz (O-9)",
+         t_suren_gun_yargilanmaz)
+
     def t_ranks_unique():
         r = [x["rank"] for x in precedence.PRECEDENCE]
         eq(r, sorted(set(r)))

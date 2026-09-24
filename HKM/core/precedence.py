@@ -41,6 +41,12 @@ def _proposal(rank, text):
             "vp": p["vp"], "proposal": text}
 
 
+def _yargi(audit):
+    """Yargi tasiyan bulgular: suren gunun ara bilgisi (O-9) oneri uretmez."""
+    return [f for f in (audit or {}).get("findings") or []
+            if not f.get("suruyor")]
+
+
 def resolve(bio=None, academic=None, intellect=None, payloads=None):
     """Uc VP raporunu tek oneriye indirger. Hicbir sey yoksa None dondurur —
     uydurulmus bir oneri, oneri olmamasindan kotudur."""
@@ -51,14 +57,19 @@ def resolve(bio=None, academic=None, intellect=None, payloads=None):
             "Fiziksel sermaye çöküş eşiğinde. Bugünkü ağır yükün yarına "
             "ertelenmesini öneririm; onaylarsan yerine hafif konu tekrarı koyarım.")
 
+    # HATALAR Y-2: gecmis sinav tarihi «dis dunyanin sabit takvimi» degildir.
+    # Negatif gun her gun ikinci sirayi kazanip 3-5'i kalici susturuyordu.
     days = vp_academic.deadline_days(payloads.get("ays"))
-    if days is not None and days <= DEADLINE_NEAR_DAYS:
+    if days is not None and 0 <= days <= DEADLINE_NEAR_DAYS:
+        if int(days) == 0:
+            return _proposal(2,
+                "Sınav bugün. Günün merkezine AYS'yi almanı öneririm.")
         return _proposal(2,
             "Sınava %d gün kaldı. Bugünün merkezine AYS'yi almanı öneririm."
             % int(days))
 
     if academic and any(f["code"] in ("questions_low", "study_low", "net_drop")
-                        for f in academic["findings"]):
+                        for f in _yargi(academic)):
         return _proposal(3,
             "AYS'nin günlük tabanı karşılanmadı. Önce oradaki açığı kapatmanı "
             "öneririm.")
@@ -69,7 +80,7 @@ def resolve(bio=None, academic=None, intellect=None, payloads=None):
             "Önce tekrar oturumunu kapatmanı öneririm.")
 
     if intellect and any(f["code"] in ("practice_low", "synthesis_gap")
-                         for f in intellect["findings"]):
+                         for f in _yargi(intellect)):
         return _proposal(5,
             "Temel açık değil; ESP'de yeni içeriğe geçebilirsin. Sentez açığını "
             "kapatmakla başlamanı öneririm.")
