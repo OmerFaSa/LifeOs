@@ -324,7 +324,13 @@ Hâlâ açık: Y10 alıcısı · Y1'in yeri (HKM içi öneri) · telefonun ağda
   - Grup 4 denetimi: HKM 562/562; üç duman testi, HKM yüzü, `tools/entegre.js` temiz;
     `ortak.py --denetle` 42 dosya/125 kopya aynı.
 
-## Kullanıcı kolaylığı fikirleri · 16 hızlı kazanç ONAYLI, gerisi ÖNERİ
+## Kullanıcı kolaylığı fikirleri · HEPSİ ONAYLI (2026-09-24: «41 fikri yap»)
+
+**Kalan 41 madde ONAYLI — sormadan yap.** Sıra: önce depoda tara (var / kısmen / yok; var
+olan yeniden yazılmaz), sonra modül gruplarıyla, küçükten büyüğe; her grup test + commit +
+push + burada ✅. Doktrin onayla değişmez (AGENTS §1): sayı kod, model yalnız okur/cümle kurar
+ve her okuma önizleme + onaydan geçer; teşhis/doz yok; HKM modüle yazmaz; eksik veri sıfır
+değil. Part 9 (tasarım) yine EN SON.
 
 Onaylı: 5, 8, 9, 11–15, 19, 22, 27, 31, 46, 49, 50, 56. Gerisini uygulamadan önce: depoda
 var mı bak, kullanıcıya bir cümleyle sor. Boy: **K** küçük · **O** orta · **B** büyük.
