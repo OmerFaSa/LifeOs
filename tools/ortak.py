@@ -232,6 +232,9 @@ DOSYALAR = {
     # Sayi bileseni: 024 kesinlik, 025 koken karti, 026 tazelik, 028 fark.
     "sayi.js":        "js/core",
     "sayi.test.js":   "tests",
+    # Grafik parcalari: 027 eksik gun, 035 aralik, 037 egilim, 041 doluluk.
+    "grafik.js":      "js/core",
+    "grafik.test.js": "tests",
     "kart.css":       "css",
     # MODEL KATMANI — uc arayuz (2026-09-24'ten beri AYS'ninki tek kaynak).
     "llm.js":        "js/core",

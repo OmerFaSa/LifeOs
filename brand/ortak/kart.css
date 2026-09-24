@@ -123,3 +123,123 @@
 .fark--kotu{ color:var(--bad-ink); }
 .fark--notr,
 .fark--yok{ color:var(--text-3); }
+
+/* ================================================================
+   027 · EKSİK GÜN BOŞLUĞU — çizgi boşlukta kesik geçer, sıfıra düşmez
+   Çizgi kalınlığı da kılçık sayılır (üstteki JETON KURALI).
+   ================================================================ */
+
+.grafik{
+  display:block;
+  width:100%;
+  height:auto;
+  overflow:visible;
+  color:var(--primary);
+}
+.grafik__cizgi{
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+  vector-effect:non-scaling-stroke;
+}
+.grafik__kopru{
+  stroke:var(--text-3);
+  stroke-width:1.5;
+  stroke-dasharray:var(--sp-1) var(--sp-1);
+  vector-effect:non-scaling-stroke;
+}
+.grafik__tek{ fill:currentColor; }
+
+/* ================================================================
+   035 · ARALIK ÇUBUĞU — tahmin aralıktır; bant kesik kenarlı
+   ================================================================ */
+
+.aralik{ display:grid; gap:var(--sp-1); min-width:0; }
+.aralik__et{ font-size:var(--fs-sm); color:var(--text-2); }
+.aralik__deger{ font-weight:600; font-variant-numeric:tabular-nums; }
+.aralik__olasi{ font-weight:400; color:var(--text-2); }
+.aralik__ray{
+  position:relative;
+  display:block;
+  height:var(--sp-2);
+  margin:var(--sp-1) 0;
+  background:var(--border-soft);
+  border-radius:var(--r-pill);
+}
+.aralik__bant{
+  position:absolute;
+  top:0;
+  bottom:0;
+  background:var(--primary-soft);
+  border:1px dashed var(--primary);
+  border-radius:var(--r-pill);
+}
+.aralik__en{
+  position:absolute;
+  top:calc(-1 * var(--sp-1));
+  bottom:calc(-1 * var(--sp-1));
+  width:2px;
+  margin-left:-1px;
+  background:var(--primary);
+  border-radius:1px;
+}
+.aralik__dayanak{ font-size:var(--fs-xs); color:var(--text-3); }
+.aralik--yok .aralik__deger{ color:var(--text-3); font-weight:500; }
+
+/* ================================================================
+   037 · GÜVENLİ EĞİLİM — ok yalnız yeterli veriyle
+   ================================================================ */
+
+.egilim{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--sp-1);
+  font-size:var(--fs-sm);
+  font-weight:500;
+  white-space:nowrap;
+}
+.egilim__ok{
+  width:1em;
+  height:1em;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.egilim--iyi{ color:var(--ok-ink); }
+.egilim--kotu{ color:var(--bad-ink); }
+.egilim--notr{ color:var(--text-2); }
+.egilim--yetersiz{ color:var(--text-3); font-weight:400; white-space:normal; }
+
+/* ================================================================
+   041 · VERİ DOLULUĞU — boş gün İÇİ BOŞ kare, 0 değil
+   Modül rengi T'nin `--ays/--spi/--esp` jetonundan.
+   ================================================================ */
+
+.doluluk{ display:grid; gap:var(--sp-2); }
+.doluluk__s{
+  --doluluk-renk:var(--text-2);
+  display:grid;
+  grid-template-columns:3.5em auto auto;
+  align-items:center;
+  justify-content:start;
+  gap:var(--sp-3);
+}
+.doluluk--ays{ --doluluk-renk:var(--ays); }
+.doluluk--spi{ --doluluk-renk:var(--spi); }
+.doluluk--esp{ --doluluk-renk:var(--esp); }
+.doluluk__ad{ font-size:var(--fs-sm); font-weight:600; color:var(--text-2); }
+.doluluk__kutular{ display:flex; gap:var(--sp-1); }
+.doluluk__k{
+  display:block;
+  width:var(--sp-3);
+  height:var(--sp-3);
+  border:1px solid var(--border-strong);
+  border-radius:calc(var(--r-sm) / 3);
+  background:transparent;
+}
+.doluluk__k--dolu{ background:var(--doluluk-renk); border-color:var(--doluluk-renk); }
+.doluluk__n{ font-size:var(--fs-xs); color:var(--text-3); font-variant-numeric:tabular-nums; }
