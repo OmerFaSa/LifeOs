@@ -20,7 +20,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 | AYS | ✅ sekiz çekmece, iç sekme 0, Bugün üç alan (H kapısı yeşil: a861d79) | dd97f56 | ✅ K2 başladı (2026-09-24) |
 | SPİ | ✅ sekiz çekmece, iç sekme 0, Bugün üç alan, ekran başına tek dolu düğme (kapı: H'nin listesi K tarafından koşuldu — H'nin limiti doldu, kullanıcı talimatı; sadelik `--denetle SPI` bütçede, envanter kayıp 0) | 59e7276 | ✅ K (T ve H işini de yürüten, kullanıcı talimatı) |
 | ESP | ✅ sekiz çekmece, iç sekme 0 (tezgâh açılır satır), Bugün üç alan, ekran başına tek dolu düğme (kapı: H'nin listesi T tarafından koşuldu — H limitte; sadelik `--denetle ESP` bütçede, envanter kayıp 0) | 2204fa3 | — |
-| HKM yüzü | kullanıcı onayı bekliyor | — | — |
+| HKM yüzü | **K'ye verildi** (kullanıcı kararı 2026-09-24, EKIP-PLANI §8-9: K7) — T yapmaz | — | K7 |
 
 ## KARTLAR (K)
 
@@ -112,7 +112,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** T döndü (K'nin devri, T-DEVIR §6). ✅ ESP Onaylar + Kütüphanem 6c92411 · ✅ **T3 ESP 2204fa3 → teslim** (tabloda). ✅ AYS küçükleri (§2.C): 011 sakin hata + 010 boş durum işareti + 022 plan onay etiketi d83d085 · STIL.md 334f4db · ✅ **T4 hareket** 852f6fd · ✅ **T5a ayarlar** e0b2385 · ✅ **T5b** (171, 176, 17 — bu commit). **T1–T5 bitti.** Sıradaki: T6 HKM yüzü — yalnız kullanıcı «başla» derse.
+- **Şu an:** T döndü (K'nin devri, T-DEVIR §6). ✅ ESP Onaylar + Kütüphanem 6c92411 · ✅ **T3 ESP 2204fa3 → teslim** (tabloda). ✅ AYS küçükleri (§2.C): 011 sakin hata + 010 boş durum işareti + 022 plan onay etiketi d83d085 · STIL.md 334f4db · ✅ **T4 hareket** 852f6fd · ✅ **T5a ayarlar** e0b2385 · ✅ **T5b** 7eddd14. **T1–T5 bitti; T'nin işi bitti.** Kullanıcı kararı (EKIP-PLANI §8-9…12): HKM yüzü K'de (K7), kartların ekranlara yerleşmesi sonraki işe kaldı, T'nin iki sorusunu K karara bağlar.
 - **K yürütüyor (kullanıcı talimatı, 2026-09-24 akşam):** T-DEVIR §5'ten devam. ✅ T2-13 designcheck d58720d · ✅ entegre.js koştu (temiz) · ✅ yarım T3 SPİ yaması 826fbe3 · ✅ **T3 SPİ → teslim 59e7276** (sekme 0, tek dolu düğme, 30+ kelime katmanda, T2-14) · ✅ **T2 ESP ccedf0a** (kabuk + sekiz çekmece; disiplin bölüm düzeyinde). Sıradaki: ESP Onaylar + Kütüphanem → T3 ESP (sekmeler, Bugün üç alan, Ofis dolu düğme) → teslim → AYS küçükleri (§2.C) → T4 → T5; T6 yalnız kullanıcı «başla» derse. **⏸ K'nin limiti doldu → T'ye döndü: `ekip/T-DEVIR.md` §6** (kalan: ESP Onaylar + Kütüphanem → T3 ESP → AYS küçükleri → T4 → T5).
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
@@ -201,7 +201,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   (üç modül), şerit + yeniden çizim + Vazgeç, varsayılana dön (60 dk), tema seçimi ve geri dönüş denendi.
   **K'nin dosyalarına dokundum:** AYS `guide.js` (tema seçici, iki alana `data-varsayilan`), SPİ
   `guide.js` ve `family.js` (`data-varsayilan`), ESP `profile.js` (tema seçici, `data-varsayilan`).
-- **T5b (bu commit):** 171 kurulum — `LIFEOS.KURULUM_HTML/KURULUM_GIT` (tanitim.js): SPİ ve ESP ilk
+- **T5b (7eddd14):** 171 kurulum — `LIFEOS.KURULUM_HTML/KURULUM_GIT` (tanitim.js): SPİ ve ESP ilk
   kurulumu üç adım, adımlar tanıtımın soruları (Ne ölçüyoruz? · Neye karar vermiyoruz? · Nasıl
   başlıyoruz?), ilerleme üstte, «Başla» yalnız son adımda, adım değişimi yeniden çizmez (yazılan kalır);
   AYS'de ilerleme çubuğu üste alındı (beş adım kaldı, aşağıdaki soru). 176 gizlilik kilidi —
@@ -214,7 +214,20 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   bütçede; envanter temiz; tarayıcıda SPİ kurulum üç adım + kayıt, «Ne değişti?» göster/kapat, kilit
   kur → yeniden aç → perde (arkada #main yok) → kodla açıl (SPİ, AYS, ESP) denendi.
   **K'nin dosyalarına dokundum:** AYS `guide.js`, SPİ `family.js`, ESP `profile.js` (kilit kutusu).
-- **Kullanıcıya soru (T5b):** (a) Katalog 171 «ilk açılış üç adım» diyor; AYS kurulumu beş veri adımı (kim,
+- **K'ye devir (kullanıcı kararı, 2026-09-24):**
+  1. **K7 — HKM yüzü** (eski T6): `HKM/web/` aynı dile geçer. Kullanılacaklar hazır: jetonlar
+     `brand/ortak/jeton.css` (renk sahipliği: Merkez = mor `--mer`), kabuk kalıbı `brand/ortak/kabuk.*`,
+     sakin hata `C.SakinHata` (011), boş durum (010), hareket `brand/ortak/hareket.*` (`data-h-*`
+     sözleşmesi, STIL.md «Hareket»), ayarlar `brand/ortak/ayar.*`, tema seçici `C.TemaSecici`, kilit
+     `brand/ortak/kilit.*`, «Ne değişti?» `brand/ortak/yenilik.*`. HKM yalnız Python standart kütüphanesi
+     + kendi web dosyaları: ortak dosyalar oraya `tools/ortak.py` ile yayılmıyor; nasıl taşınacağına K
+     karar verir. HKM'de başka bir oturum çalışıyorsa önce çakışmayı denetle (§5).
+  2. **Ertelendi:** K2–K4 ve K6 (kartların ekranlara yerleşmesi) — sonraki iş.
+  3. **K karar verir (T sordu, kullanıcı K'ye bıraktı):** (a) AYS kurulumu beş adım mı kalsın, üçe mi
+     insin (171; `AYS/src/js/core/setup.js`, H'nin `setup.test.js`'i ve `planner.test.js` «kurulum beş
+     adım» beşi bekliyor) · (b) kilitte «Kodu unuttum» süresi (176; `brand/ortak/kilit.js` `UNUTTUM_SN`,
+     bugün 60 sn, sonra kilit kalkar — «unutan kilitli kalır» veri kaybı demek).
+- **Kullanıcıya soru (T5b) — K'ye bırakıldı:** (a) Katalog 171 «ilk açılış üç adım» diyor; AYS kurulumu beş veri adımı (kim,
   hedef, takvim, kapasite, seviye — H'nin testi beşi bekliyor). Üçe birleştireyim mi, yoksa AYS beş
   kalsın mı? (b) Kilitte kodu unutan bir dakika bekleyip açabiliyor (veriden kilitlenip kalmasın diye);
   daha sıkı bir kilit istenirse bekleme uzatılabilir — ama «unutan kilitli kalır» seçeneği veri kaybı

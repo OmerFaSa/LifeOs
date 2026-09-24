@@ -162,11 +162,12 @@ sonra P2 (79), sonra P3 (35). Her dalgada modül sırası, T'nin teslim ettiği 
 | Adım | Ne | Nerede | Koşul |
 |---|---|---|---|
 | **K1** | Ortak bileşenler ve mantık. P1 önce: sayı bileşeni (24, 25, 26, 28, sonra 15, 170) · grafik parçaları (27, 35, 37, 41, sonra 29–34, 36, 38–40) · öneri kartı ve onay kalıbı (110, 111, 114, 121, sonra 112, 113, 123, 124, 127) · geri al şeridi (150) · tek sözlük (16) · sonucu söyleyen düğme (22) · güven (173, 177, 179) · şüpheli giriş (18) · model kapalı kipi (139) · otomatik uygula (116) | Yeni dosyalar: `brand/ortak/sayi.js`, `grafik.js`, `oneri.js`, `sozluk.js`, `guven.js` (+ `.test.js`) ve stil için tek dosya `brand/ortak/kart.css`. Çekirdek mantık gerekiyorsa ilgili `core/*.js` sahiplenerek (§5) | Hemen başlar. **Ekran dosyalarına dokunmaz** |
-| **K2** | P1'leri ekranlara yerleştirir: Bugün (04, 42, 60, 68, 70, 73, 110), Çalışma (46, 35, 55, 89), Analiz (27, 37, 41), Ofis (129, 139), onay ve öneri kalıbı (111, 112, 121) | Teslim alınan modülün `screens/*.js` dosyaları | Modül T'den teslim alındıktan sonra |
-| **K3** | P2 dalgası, ekran ekran: Bugün → Çalışma ve Plan → Analiz → Onaylar ve Ofis → Ayarlar | aynı | K2 bitince |
-| **K4** | P3 dalgası (Rütbe ekranı, ESP'nin P3'leri, grafik ekleri) | aynı | K3 bitince; T boşalırsa bir kısmını devralır (§6) |
+| **K2** | P1'leri ekranlara yerleştirir: Bugün (04, 42, 60, 68, 70, 73, 110), Çalışma (46, 35, 55, 89), Analiz (27, 37, 41), Ofis (129, 139), onay ve öneri kalıbı (111, 112, 121) | Teslim alınan modülün `screens/*.js` dosyaları | Modül T'den teslim alındıktan sonra. **Ertelendi (§8-10): sonraki iş** |
+| **K3** | P2 dalgası, ekran ekran: Bugün → Çalışma ve Plan → Analiz → Onaylar ve Ofis → Ayarlar | aynı | K2 bitince. **Ertelendi (§8-10)** |
+| **K4** | P3 dalgası (Rütbe ekranı, ESP'nin P3'leri, grafik ekleri) | aynı | K3 bitince; T boşalırsa bir kısmını devralır (§6). **Ertelendi (§8-10)** |
 | **K5** | Telefon: 164 bildirim kartı, 167 ana ekran bileşeni. **Tarayıcı uygulamasında ana ekran bileşeninin yolu doğrulanmadı**: önce araştır; yol yoksa kullanıcıya söyle, uydurma | `brand/ortak/pwa.js`, `sw.js` | P2/P3 sırasında |
-| **K6** | HKM yüzü kartları: 119, 120, 126 | `HKM/web/` | Yalnız kullanıcı onayıyla (§5) |
+| **K6** | HKM yüzü kartları: 119, 120, 126 | `HKM/web/` | Yalnız kullanıcı onayıyla (§5). Kart yerleştirme olduğu için **ertelendi (§8-10)** |
+| **K7** | **HKM yüzünün aynı dile geçmesi (eski T6, §8-9).** Kullanıcı onayı verildi: `HKM/web/` bu iş için K'nindir | `HKM/web/` | Şimdi. HKM'de başka bir oturum çalışıyorsa önce onunla çakışmayı denetle |
 
 **K'nin kuralları**
 
@@ -193,7 +194,7 @@ geçmesi. Hiçbir işlev kaybolmaz; H'nin taban envanteri bunu denetler.
 | **T3** | Çekmece düzeni, modül modül (AYS → SPİ → ESP): menü sekiz çekmece; iç sekmeler kartlara ve bölüm çubuğuna (19) döner; Bugün üç alan iskeleti (03) ve sayfa başı yuvası; onaylar tek çekmecede; boş durum (10) ve sakin hata (11) kalıpları; «Plan › Hafta» gibi yol yazısı. Her modül bitince **teslim** (§6) | `*/src/js/screens/*.js` + kabuk | Kapı 1 + T0 cevabı |
 | **T4** | Hareket ve odak: 12, 14, 149, 152–154, 156, 158, 159; azaltılmış harekette 0 | CSS + `components.js` | T3 (ESP) bitince |
 | **T5** | Ayarlar düzeni (21, 181, 182, 183), ilk açılış (171), gizlilik kilidi (176), «Ne değişti?» (17) | Ayarlar ekranları, `tanitim.*` | T4 bitince |
-| **T6** | HKM yüzünün aynı dile geçmesi | `HKM/web/` | Yalnız kullanıcı onayıyla (§5) |
+| **T6** | HKM yüzünün aynı dile geçmesi | `HKM/web/` | **K'ye geçti (§8-9): K7.** T'nin işi T5'te biter |
 
 **T'nin kuralları**
 
@@ -243,7 +244,7 @@ kanıtlar.
 | `ekip/CEKMECE-HARITASI.md`, `*/src/STIL.md` | **T** | |
 | `README.md`, `NOTLAR.md` | **H** | Sayılar elle yazılmaz |
 | `ekip/EKIP-PLANI.md`, `TASARIM-OZELLIKLERI.md`, `vitrin.html`, `tasarim/` | **Değişmez** | Yalnız kullanıcı kararıyla; commit mesajında «plan değişikliği» yazar |
-| `HKM/`, `ekip/DEVIR.md`, `ekip/PLAN.md`, `ekip/arsiv/` | **Bu ekibin değil** | HKM'de ayrı bir oturum çalışıyor olabilir. T6 ve K6 ancak kullanıcı «başla» deyince başlar |
+| `HKM/`, `ekip/DEVIR.md`, `ekip/PLAN.md`, `ekip/arsiv/` | **Bu ekibin değil** | HKM'de ayrı bir oturum çalışıyor olabilir. İstisna (§8-9): HKM yüzünün dili (K7) için `HKM/web/` K'nindir |
 
 ## 6. Sıra, kapılar ve teslimler
 
@@ -259,6 +260,7 @@ kanıtlar.
 | — | **Teslim ESP** | | |
 | 5 | T4 hareket · T5 ayarlar | K2: ESP P1 → K3: P2 dalgası | aynı, ESP için · H4 |
 | 6 | K'nin P3 listesinden devralır (EKIP-DURUM'da anlaşarak) · T6 (onayla) | K3 → K4 · K5 · K6 (onayla) | Dalga sonlarında H4 |
+| — | **Plan değişikliği (§8-9, §8-10):** T, T5'te biter; HKM yüzü K'de (K7); kartların ekranlara yerleşmesi (K2–K4, K6) sonraki işe kaldı | K7 | K7'yi denetler |
 
 **Teslim** (T yapar): o modülün bütün ekranları iskelette; H0 tabanındaki her eylem
 erişilebilir; runtests, duman, a11y, 390 px ve palet temiz. T, EKIP-DURUM'un teslim
@@ -334,6 +336,15 @@ Cevaplar (kullanıcı, 2026-09-24: «önerilerini uygula»): **sekizi de öneri 
 4 paletler ve beş düzen kalkar, yerine Görünüm: Açık · Koyu · Sistem · 5 Inter tek aile ·
 6 varsayılan açık, koyu sistemden ya da elle · 7 ESP'nin altı disiplini tek Çalışma
 çekmecesinde bölüm · 8 HKM yüzü de bu dile geçer, en sonda (T6, K6).
+
+**Sonraki kararlar (kullanıcı, 2026-09-24, T5 bitince):**
+
+| # | Karar | Cevap |
+|---|---|---|
+| 9 | HKM yüzünü kim yapsın (T6)? | **K yapar** (K7). Kullanıcı onayı verildi |
+| 10 | Kartlar ekranlara şimdi yerleşsin mi (K2–K4, K6)? | **Hayır, sonraki iş** — ertelendi |
+| 11 | AYS kurulumu beş adım mı kalsın, üçe mi insin (171)? | **K uygun gördüğü gibi** karar verir |
+| 12 | Kilitte «Kodu unuttum» ne kadar bekletsin (176; bugün 60 sn, sonra kilit kalkar)? | **K uygun gördüğü gibi** karar verir |
 
 ## 9. Başlatma mesajları — kullanıcı her Claude'a bir tanesini gönderir
 
