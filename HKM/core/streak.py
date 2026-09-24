@@ -107,8 +107,11 @@ def _kural(kural, esik, degerler, gunler):
         if v is None:
             bosluk += 1
             if aktif and bosluk > BOSLUK:
-                # Bosluk seriyi kirdi: kapat.
-                bitmis = bitmis or _paket(aktif, atlanan, g)
+                # Bosluk seriyi kirdi: kapat. HATALAR O-2: ASGARI'dan kisa
+                # dizi seri DEGILDIR, biten seri de degildir; ve en YENI
+                # biten seri gecerlidir (oteki dal gibi).
+                if len(aktif) >= ASGARI:
+                    bitmis = _paket(aktif, atlanan, g)
                 aktif, atlanan = [], 0
             elif aktif:
                 atlanan += 1

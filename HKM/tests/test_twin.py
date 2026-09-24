@@ -35,6 +35,19 @@ def run():
         eq(kinds, {"never_seen"})
     test("bos ambar sifir degil korluk uretir", t_empty_is_not_zero)
 
+    def t_gun_ici_gonderim_tek_nokta():
+        """HATALAR O-1: ayni gunun 4 gonderimi 4 nokta, %400 kapsama ve sahte
+        egilim uretiyordu. Gun basina tek nokta: gunun SON degeri."""
+        from core import twin
+        con = db.connect(":memory:")
+        for j, v in enumerate((10, 30, 50, 90)):
+            sync_engine.ingest(con, {"module": "ays", "date": "2026-09-20",
+                                     "metrics": {"questions": metric(v)}},
+                               now="2026-09-20T%02d:00:00" % (9 + j))
+        q = twin.snapshot(con, "2026-09-20", 1)["modules"]["ays"]["metrics"]["questions"]
+        eq((q["value"], q["points"], q["coverage"]), (90, 1, 1.0))
+    test("gun ici gonderimler tek nokta (O-1)", t_gun_ici_gonderim_tek_nokta)
+
     def t_missing_label_separate():
         """Gonderilip bos gelen alan ile hic gelmeyen alan AYNI SEY DEGIL."""
         con = _con()

@@ -86,15 +86,18 @@ def _seri(con, modul, metrik, bas, bit, cache=None):
     if cache is not None:
         gunler = cache.get((modul, metrik)) or {}
         return [v for g, v in sorted(gunler.items()) if bas <= g <= bit]
-    out = []
+    # HATALAR Y-3: gun basina TEK olcum — gunun SON gonderimi (onbellekli
+    # yolla ayni kural). Isaret gun icinde birikimli ara degerler gonderir;
+    # her birini ayri olcum saymak «en az 3 olcum» sartini tek gunle doldurur.
+    gunler = {}
     for e in db.events_between(con, bas, bit, modul):
         m = (e["payload"].get("metrics") or {}).get(metrik)
         if not isinstance(m, dict) or not C.is_valid(m.get("cert")):
             continue
         v = C.value_of(m)
         if v is not None:
-            out.append(v)
-    return out
+            gunler[e["date"]] = v
+    return [v for g, v in sorted(gunler.items())]
 
 
 def build_cache(con):

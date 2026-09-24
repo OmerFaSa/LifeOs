@@ -102,10 +102,13 @@ def snapshot(con, date, days=WINDOW_DAYS):
             v = C.value_of(m)
             son[(mod, key)] = (e["date"], v, m.get("cert"))
             if v is not None:
-                seri.setdefault((mod, key), []).append((e["date"], v))
+                # HATALAR O-1: gun basina TEK nokta — gunun SON degeri
+                # (`series` ile ayni kural). Ayni gunun dort gonderimi dort
+                # nokta, %400 kapsama ve sahte egilim uretiyordu.
+                seri.setdefault((mod, key), {})[e["date"]] = v
 
     for (mod, key), (d, v, cert) in sorted(son.items()):
-        noktalar = seri.get((mod, key), [])
+        noktalar = sorted(seri.get((mod, key), {}).items())
         modules[mod]["metrics"][key] = {
             "value": v, "cert": cert, "at": d,
             "label": C.LABELS.get(cert, cert),

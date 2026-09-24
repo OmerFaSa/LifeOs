@@ -74,6 +74,24 @@ def run():
         eq(r2["status"], "worsened")
     test("iyilesme yonu olcuye gore okunur", t_improvement_direction_respected)
 
+    def t_gun_ici_gonderimler_tek_olcum():
+        """HATALAR Y-3: isaret gunde birkac kez gonderir (birikimli ara
+        degerler). Onbelleksiz yol her gonderimi ayri olcum sayiyordu; onbellekli
+        yol gunun SON degerini aliyordu. Iki yol ayni sonucu verir: gun basina
+        tek olcum."""
+        con = _con()
+        for i, degerler in ((3, (20, 40, 90)), (12, (10, 30, 60))):
+            for j, v in enumerate(degerler):
+                sync_engine.ingest(con, {"module": "ays", "date": gun(i),
+                                         "metrics": {"questions": metric(v)}},
+                                   now=gun(i) + "T%02d:00:00" % (9 + j))
+        k = _karar(con, 9, "academic_goal")
+        a, b = impact.one(con, k), impact.one(con, k, impact.build_cache(con))
+        eq((a["status"], a.get("n_before"), a.get("n_after")),
+           (b["status"], b.get("n_before"), b.get("n_after")))
+        eq(a["status"], "missing")
+    test("gun ici gonderimler tek olcum sayilir (Y-3)", t_gun_ici_gonderimler_tek_olcum)
+
     def t_small_change_is_flat():
         con = _con()
         _seri(con, "spi", "sleep_hours", [7.0] * 10 + [7.2] * 10)

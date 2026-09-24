@@ -83,6 +83,16 @@ def run():
         ok("bitti" in s["note"])
     test("biten seri de bir bulgudur", t_ended_streak_is_also_a_finding)
 
+    def t_tek_gun_seri_degil():
+        """HATALAR O-2: tek kirik gun ve ardindan bosluk «seri bitti» diye
+        raporlaniyordu (ASGARI = 3 cignenmis). Uc gunden kisa kirik dizi seri
+        degildir; biten seri de degildir."""
+        con = _con()
+        _uyku(con, [5, None, None, None, 8])
+        s = _bul(con, 4)
+        no(s["status"] == "ended", s)
+    test("tek kirik gun + bosluk seri degildir (O-2)", t_tek_gun_seri_degil)
+
     def t_threshold_comes_from_user():
         """Esik verisi kullanicinindir: kodda sabit degildir."""
         con = _con()
