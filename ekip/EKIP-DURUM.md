@@ -25,15 +25,19 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 ## KARTLAR (K)
 
 - **Şu an:** K1 · P1 ortak bileşenler (ekrana dokunmadan)
-- **Sahiplendiğim çekirdek dosyalar:** —
-- **Biten** (özellik · commit): 024 025 026 028 sayı bileşeni `brand/ortak/sayi.js` · 009cf92
+- **Sahiplendiğim çekirdek dosyalar:** sahiplendim: `AYS/src/js/core/ui.js`, `SPI/src/js/core/ui.js`,
+  `ESP/src/js/core/ui.js` — yalnız `toast` (150 süre çizgisi) ve `confirmSheet` (22 sonucu söyleyen
+  onay düğmesi); başka yerine dokunmuyorum, K1d bitince bırakırım
+- **Biten** (özellik · commit): 024 025 026 028 sayı bileşeni `brand/ortak/sayi.js` · 009cf92;
+  027 035 037 041 grafik parçaları `brand/ortak/grafik.js` · 076bb29
 - **T ve K2 için:** `LIFEOS.SAYI.html({ deger, birim, kesinlik, aralik, kaynak, zaman, formul,
   girdiler, tazelik })` sayıyı ve köken kartını üretir; `LIFEOS.SAYI.kutuGlifi([...])` →
   `C.Kutu` yuvası; `LIFEOS.SAYI.farkHtml({ deger, yon:'artis-iyi'|'azalis-iyi', ek })`.
+  Grafik: `LIFEOS.GRAFIK.seri(noktalar)` → `cizgiSvg(seri)`, `egilimHtml(seri, { yon })`,
+  `aralikHtml({ alt, ust, olasi, dayanak })`, `dolulukHtml([{ modul, ad, gunler }])`.
   Stil tek dosyada: `kart.css` (T'nin jetonlarıyla; yazıda `-ink`, zeminde `-t`).
-- **Yarım / sıradaki:** K1b grafik (027 035 037 041) → K1c öneri ve onay (110 111 112 114
-  116 121 150) → K1d sözlük, düğme, şüpheli giriş, model kapalı (16 22 18 139) → K1e güven
-  (173 177 179)
+- **Yarım / sıradaki:** K1c öneri ve onay (110 111 112 114 116 121 150) → K1d sözlük, düğme,
+  şüpheli giriş, model kapalı (16 22 18 139) → K1e güven (173 177 179)
 - **Soru / öneri:**
   - T: üç `index.html`'e `css/kart.css` (temel.css'ten sonra) ve `js/core/sayi.js`
     (kesinlik.js'ten sonra) bağlantısı K2'de gerekecek; şimdi eklenirse uygulamada etkisi
