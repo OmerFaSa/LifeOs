@@ -263,7 +263,12 @@ def write(cfg, path=None):
     gecici = p + ".yeni"
     # Once gecici dosyaya, sonra yerine: yarim yazilmis bir yapilandirma
     # bir sonraki acilista daemon'u hic baslatmazdi.
-    with open(gecici, "w", encoding="utf-8") as f:
+    # HATALAR D-13: jetonlar tasiyan dosya yalniz sahibine acik (0600);
+    # umask'a birakilinca 0644 doguyordu.
+    fd = os.open(gecici, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
         f.write(json.dumps(cfg, indent=2, ensure_ascii=False) + "\n")
+    if os.name == "posix":
+        os.chmod(gecici, 0o600)
     os.replace(gecici, p)
     return p

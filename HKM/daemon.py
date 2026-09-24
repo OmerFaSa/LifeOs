@@ -1571,6 +1571,9 @@ def _ritim(srv, aralik=60):
 
 
 def main():
+    # HATALAR D-13: bundan sonra yazilan her dosya yalniz sahibine acik.
+    if os.name == "posix":
+        os.umask(0o077)
     cfg = load_config()
     if not cfg.get("local_token"):
         sys.stderr.write(
@@ -1582,6 +1585,11 @@ def main():
     srv.config_path = CONFIG_PATH
     srv.local = threading.local()
     srv.db_path = cfg.get("db_path") or db.DB_PATH
+    from core import izin
+    daraltilan = izin.sikilastir(CONFIG_PATH, srv.db_path)
+    if daraltilan:
+        sys.stderr.write("[hkm] %d dosyanin izni yalniz sahibine daraltildi.\n"
+                         % daraltilan)
     db.connect(srv.db_path).close()          # sema bir kez kurulur
     srv.thresholds = thresholds.load()
     srv.dur = threading.Event()
