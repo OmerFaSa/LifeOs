@@ -4875,6 +4875,15 @@ body.is-dragging .drop.is-over{
 .vericip__c .kesinlik__ad{ position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 .vericip__c--yok{ color:var(--text-3); border-style:dashed; }
 
+/* ================================================================
+   004 · SAYFA BAŞI CÜMLESİ — tarih satırının altında, koddan tek cümle
+   042 · SIRADAKİ BLOK KAHRAMANI — Şimdi alanının ilk ve en büyük öğesi
+   (ekran yerleşimi: modüllerin `screens/today.js`'i)
+   ================================================================ */
+
+.bugun-cumle{ display:block; margin-top:var(--sp-1); color:var(--text); font-weight:500; }
+.kahraman{ min-width:0; }
+
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/seviye.css içine yazılır; burası bir sonraki
@@ -10012,7 +10021,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'38becd7', at:'2026-09-24 16:42', dirty:true };
+R.BUILD = { id:'0fc16e4', at:'2026-09-24 17:09', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -41899,20 +41908,23 @@ R.Screens.today = (function(){
   }
 
   function OzetKutusu(day, dateISO){
-    const bloklar = day.blocks.filter(b => b.slot !== 'Dinlenme');
-    const bitti = bloklar.filter(b => b.status === 'done').length;
-    const kalan = U.diffDays(dateISO, R.PLAN.examTytISO);
+    const z = ozetSayilari(day, dateISO);
+    const SAYI = z.L && z.L.SAYI;
     const seri = C.behaviorStreak();
-    const due = C.dueCards().length;
-    const hucre = (ad, deger, birim, not) => html`<div class="ozet__hucre">
+    /* Sayı bileşeni yüklü değilse (eski kabuk) düz yazılır; kesinlik yine
+       notta söylenir. */
+    const sayi = s => SAYI ? raw(SAYI.html(s))
+      : html`${s.deger}${when(s.birim, () => html`<small> ${s.birim}</small>`)}`;
+    const hucre = (ad, s, not) => html`<div class="ozet__hucre">
       <span class="ozet__ad">${ad}</span>
-      <b class="ozet__deger">${deger}${when(birim, () => html`<small> ${birim}</small>`)}</b>
+      <b class="ozet__deger">${sayi(s)}</b>
       <span class="ozet__not">${not}</span></div>`;
-    return c.Kutu({ ad:'Özet', yuva:'bugün', bitisik:true, govde:html`<div class="ozet">
-      ${hucre('Sınava kalan', kalan, 'gün', 'TYT tarihi tahmini')}
-      ${hucre('Bugünün bloğu', bitti + '/' + bloklar.length, '', R.WEEKDAYS[day.dow].label + ' düzeni')}
-      ${hucre('Tekrar kartı', due, '', 'borç %' + C.cardDebt())}
-      ${hucre('Seri', seri.streak, 'gün', seri.streak ? 'minimum gün tutuldu' : 'minimum gün başlatır')}
+    const yuva = SAYI ? html`${raw(SAYI.kutuGlifi([z.kalan, z.blok, z.kart, z.seri]))}<span>bugün</span>` : 'bugün';
+    return c.Kutu({ ad:'Özet', yuva, bitisik:true, govde:html`<div class="ozet">
+      ${hucre('Sınava kalan', z.kalan, z.kalan.kesinlik === 'estimated' ? 'TYT tarihi tahmini' : 'TYT tarihine')}
+      ${hucre('Bugünün bloğu', z.blok, R.WEEKDAYS[day.dow].label + ' düzeni')}
+      ${hucre('Tekrar kartı', z.kart, 'borç %' + C.cardDebt())}
+      ${hucre('Seri', z.seri, seri.streak ? 'minimum gün tutuldu' : 'minimum gün başlatır')}
     </div>` });
   }
 
@@ -41933,6 +41945,61 @@ R.Screens.today = (function(){
       ayak:serbest > 0 ? 'Plan dışı: ' + serbest + ' soru' + (dogru ? ' · ' + dogru + ' doğru' : '') : null });
   }
 
+  /* 04 SAYFA BAŞI CÜMLESİ (ekip/EKIP-PLANI Ek A) — günün durumu TEK cümle,
+     KODDAN: bloklar, sıradaki iş ve (eşik aşıldıysa) tekrar borcu. Dil
+     modeli hiç çağrılmaz; model kapalıyken de aynı cümle çıkar. Kural
+     `C.nextAction` ile aynı eşiği kullanır (borç %10). Soru eki gerektiren
+     çekimden kaçınılır («1/3 blok bitti»). */
+  function bugunCumlesi(day, dateISO){
+    if(!day || (R.Setup && R.Setup.needed && R.Setup.needed())) return '';
+    if(day.ara) return 'Bugün ara günü; plan boş.';
+    const bloklar = (day.blocks || []).filter(b => b.slot !== 'Dinlenme');
+    if(!bloklar.length) return 'Bugün için blok yok.';
+    const n = bloklar.length;
+    const bitti = bloklar.filter(b => b.status === 'done').length;
+    const suren = bloklar.find(b => b.startedAt);
+    const sira = bloklar.find(b => b.status === 'pending' && !b.startedAt);
+    const ad = b => b.topic || b.subject || b.slot;
+    let cumle;
+    if(suren) cumle = ad(suren) + ' bloğu sürüyor; ' + bitti + '/' + n + ' blok bitti';
+    else if(!sira) cumle = 'Bugünün ' + n + ' bloğu da kapandı'
+      + (C.minimumDayMet(dateISO) ? '; minimum gün tutuldu' : '');
+    else cumle = bitti + '/' + n + ' blok bitti; sırada ' + ad(sira);
+    const borc = C.cardDebt();
+    if(borc > 10) cumle += '; tekrar borcu %' + borc;
+    return cumle + '.';
+  }
+
+  function tarihSatiri(){
+    const wd = R.WEEKDAYS[U.weekdayIndex(U.today())];
+    return wd.label + ' · ' + U.fmtDate(U.todayISO()) + ' · Hafta ' + M.currentWeek() + '/' + R.PLAN.totalWeeks;
+  }
+
+  /* Özet kutusunun sayıları (024): her sayı kesinlik etiketi ve köken kartı
+     taşır. Sınav tarihi profilde yazılı değilse planın varsayılanıdır ve
+     «tahmin — ÖSYM duyurusuyla güncellenir» (data/curriculum.js): kalan gün
+     o zaman TAHMİNDİR. */
+  function ozetSayilari(day, dateISO){
+    const L = window.LIFEOS;
+    const bloklar = day.blocks.filter(b => b.slot !== 'Dinlenme');
+    const bitti = bloklar.filter(b => b.status === 'done').length;
+    const profilTarihi = !!(S.profile && S.profile.examTytISO);
+    const seri = C.behaviorStreak();
+    return {
+      kalan:{ deger:U.diffDays(dateISO, R.PLAN.examTytISO), birim:'gün',
+        kesinlik:profilTarihi ? 'computed' : 'estimated',
+        formul:'TYT tarihi − bugün', girdiler:[{ ad:'TYT tarihi', deger:R.PLAN.examTytISO,
+          kesinlik:profilTarihi ? 'measured' : 'estimated' }],
+        kaynak:profilTarihi ? 'profildeki sınav tarihi' : 'planın varsayılan tarihi; ÖSYM duyurusuyla güncellenir' },
+      blok:{ deger:bitti + '/' + bloklar.length, kesinlik:'computed',
+        formul:'biten blok / günün bloğu', girdiler:[{ ad:'biten', deger:bitti, kesinlik:'measured' },
+          { ad:'günün bloğu', deger:bloklar.length, kesinlik:'measured' }] },
+      kart:{ deger:C.dueCards().length, kesinlik:'computed', formul:'vadesi bugün ya da geçmiş kart' },
+      seri:{ deger:seri.streak, birim:'gün', kesinlik:'computed', formul:'minimum günün tutulduğu ardışık gün' },
+      L:L,
+    };
+  }
+
   async function render(){
     const dateISO = U.todayISO();
     const n = M.currentWeek();
@@ -41945,7 +42012,7 @@ R.Screens.today = (function(){
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Şimdi">
           ${when(acil, () => acil.kart)}
-          ${R.Setup.needed() ? raw(R.Setup.card()) : NextUpCard()}
+          ${R.Setup.needed() ? raw(R.Setup.card()) : html`<div class="kahraman" data-oz="042">${NextUpCard()}</div>`}
           ${when(R.Signals && R.Signals.current(), () => SignalCard())}
         </section>
         <section class="bugun__alan" aria-label="Durum">${AkisKutusu(day)}</section>
@@ -42321,10 +42388,16 @@ R.Screens.today = (function(){
   return {
     id:'today',
     title:'Bugün',
-    subtitle(){
-      const wd = R.WEEKDAYS[U.weekdayIndex(U.today())];
-      return wd.label + ' · ' + U.fmtDate(U.todayISO()) + ' · Hafta ' + M.currentWeek() + '/' + R.PLAN.totalWeeks;
+    subtitle(){ return tarihSatiri(); },
+    /* Kabuk `lede()`'yi tarih satırının YERİNE koyar; tarih kalsın diye
+       ikisi birlikte döner, cümle kendi satırında (kart.css .bugun-cumle). */
+    lede(){
+      const day = S.days[U.todayISO()];
+      const cumle = bugunCumlesi(day, U.todayISO());
+      return U.esc(tarihSatiri()) + (cumle ? '<span class="bugun-cumle" data-oz="004">' + U.esc(cumle) + '</span>' : '');
     },
+    cumle:bugunCumlesi,
+    ozetSayilari,
     actions(){
       return String(html`
         ${c.Button({ label:'Özeti paylaş', icon:'upload', size:'sm', act:'share-week' })}

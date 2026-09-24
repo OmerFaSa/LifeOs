@@ -24,9 +24,24 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## KARTLAR (K)
 
-- **Şu an:** K2 · AYS (teslim b3c1733; AYS `screens/*.js` artık K'nin). Sıra: Bugün (04 42 60 110) →
-  Çalışma (46 55 35) → Analiz (27 37 41) → Ofis (129 139 + T2-02/137) → Onaylar/Plan (111 112 121) →
-  22 (onay etiketleri). Her ekrandan sonra envanter + sadelik + 15 denetim.
+- **Şu an:** K2 · AYS (teslim b3c1733; AYS `screens/*.js` artık K'nin). ✅ Bugün 004 042 024 (bu
+  commit). Sıradaki: **H'nin bulguları T2-09 T2-10 T2-11 (önce kırmızı test)** → Bugün 060 (110 `oneri.js`
+  bağlanınca) → Çalışma (46 55 35) → Analiz (27 37 41) → Ofis (129 139 + T2-02/137) → Onaylar/Plan
+  (111 112 121) → 22 (onay etiketleri). Her ekrandan sonra envanter + sadelik + 15 denetim.
+- **K2 AYS Bugün (bu commit):** 004 sayfa başı cümlesi `R.Screens.today.cumle(gun, iso)` → `lede()`
+  (`<span class="bugun-cumle" data-oz="004">`; kural koddan, model kapalıyken aynı) · 042 sıradaki blok
+  `.kahraman[data-oz="042"]` Şimdi alanının ilk kartı, başlığı ekrandaki her kart başlığından büyük
+  (18 > 15 px), alanın tek dolu düğmesi onda; 390 px'te ilk ekranda (ölçüldü: alt kenar 682 / 780) ·
+  024 Özet'in dört sayısı `SAYI.html` (kesinlik + formül + girdiler; sınav tarihi plan varsayılanıysa
+  kalan gün **tahmin**, kullanıcı yazdıysa **hesaplandı**), kutu yuvasında en zayıf glif. Test
+  `AYS/src/tests/k2bugun.test.js` (5). AYS 1916/1916, duman, a11y, 390 px, palet, perf temiz;
+  envanter kayıp 0; sadelik AYS bütçede.
+  - **Kullanıcıya karar (042'nin ikinci yarısı):** katalog «adımlar süreyle orantılı çubukta» diyor;
+    AYS'de bir bloğun adımları (ısınma · ana set · yanlış notu) HİÇBİR kuralda tanımlı değil — v4
+    görselindeki adımlar örnek veri. Uydurmadım. Kural yazılırsa (ör. «ana ders = 10 dk ısınma + ana
+    set + 5 dk yanlış notu») çubuk `GRAFIK.yukHtml` ile tek satır.
+  - **H'ye (layoutcheck, senin aracın):** «042 kahraman 390×780'de ilk ekranda» ölçüsü şimdilik
+    karalamada; istersen `.kahraman[data-oz="042"]` alt kenarı ≤ görünür yükseklik kuralı.
 - **Sahiplendiğim çekirdek dosyalar:** — (üç `ui.js` bırakıldı: `toast` 150 çizgisi ve
   `confirmSheet(…, danger, onay)` 22 etiketi eklendi, 2d765cc)
 - **Biten** (özellik · commit): 024 025 026 028 sayı `sayi.js` · 009cf92; 027 035 037 041 grafik
@@ -61,11 +76,12 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   - Güven: `GUVEN.yedekHtml({ damga, boyut, iz, kayit, bugun })` (kural `yedek.js`'ten),
     `silmeHtml({ nesne, sayi, donusNoktasi, yazilan })` + `silmeDurumu`, `gecmisHtml(olaylar)`
     (olay: `{ zaman, kaynak:'kullanici'|'merkez'|'ofis'|'kural'|'plan'|'ice-aktarma', alan, eski, yeni, onay }`)
-- **Yarım / sıradaki:** K2 — AYS teslim satırı ✅ olunca hemen (P1'leri AYS ekranlarına)
+- **Yarım / sıradaki:** T2-09 T2-10 T2-11 → K2 AYS Bugün 060 → Çalışma
 - **Soru / öneri:**
-  - **T için (acil değil, K2 bekler):** AYS `index.html`'e `js/core/grafik.js`, `oneri.js`, `sozluk.js`,
-    `guven.js` bağlantısı (`sayi.js`'ten sonra; SPİ/ESP'de de). Sen gelene kadar yalnız `sayi.js` isteyen
-    yerleştirmeleri yapıyorum. Ayrıca `AYS/src/js/app.js:842` `confirmSheet` etiketi (22) senin dosyan.
+  - **T'nin devrini alan H için (kullanıcı T'nin yarım işini H'ye verdi):** AYS `index.html`'e
+    `js/core/grafik.js`, `oneri.js`, `sozluk.js`, `guven.js` bağlantısı (`sayi.js`'ten sonra; SPİ/ESP'de de).
+    Bağlanana kadar yalnız `sayi.js` isteyen yerleştirmeleri yapıyorum. `AYS/src/js/app.js:842`
+    `confirmSheet` etiketi (22) T dosyası → artık sende. T2-12 (rutbe.js) de T devrinde.
   - Kullanıcıya (K5): 167 ana ekran bileşeni — telefonda tarayıcı uygulaması için yol doğrulanamadı
     (Android/iOS'ta PWA bileşeni yok); uydurulmadı. En yakını simge rozeti (Badge API) — karar kullanıcıda.
   - K2 hazırlığı (22): 36 `confirmSheet` çağrısı çıkarıldı; çoğu tek kayıt → «Denemeyi ve 7 hata kaydını
@@ -88,8 +104,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   - T ve H için: T'nin devir notunda «koşulmadı» dediği denetimler 9bb2be7 üstünde (dd97f56 + K P3)
     koştu: üç modülde runtests (AYS 1902, SPİ 1532, ESP 1534), smoke, a11ycheck, layoutcheck,
     palettecheck — 15/15 temiz. H'nin sadelik düzeltmesi de geldi (a861d79); teslim satırı T'nin.
-  - T: üç `index.html`'e `js/core/grafik.js`, `oneri.js`, `sozluk.js`, `guven.js` (sayi.js'ten sonra). `oneri.js`
-    yüklenmeden 150'nin süre çizgisi görünmez (`ui.js` onu arar, yoksa eskisi gibi kalır).
+  - `oneri.js` yüklenmeden 150'nin süre çizgisi görünmez (`ui.js` onu arar, yoksa eskisi gibi kalır).
 
 ## TASARIM (T)
 
