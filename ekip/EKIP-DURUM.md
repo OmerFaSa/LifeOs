@@ -111,7 +111,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** ▶ **T rolünü H oturumu devraldı** (kullanıcı, 2026-09-24: T'nin limiti doldu). `ekip/T-DEVIR.md` sırası: T2-12 ✅ → SPİ (kabuk + çekmeceler + bölümler) → ESP → AYS küçükleri → T4 → T5; T6 kullanıcı «başla» derse. Commit başlığı `[T]`. H'nin denetim işi kullanıcı söyleyene kadar duruyor.
+- **Şu an:** ⏸ **H oturumunun limiti doldu; T işi T'ye geri** (2026-09-24 akşam). Devir: `ekip/T-DEVIR.md` **§5** (önce onu oku). main'de: 84bdb43, **b06c28d T2 SPİ** (kabuk, sekiz çekmece, Onaylar, Kütüphanem, Plan › Hedefler), e8c364c, d9d19ef. **Kırmızı:** SPİ designcheck (5a5c024'ten beri, Rütbe dekor görseli yanlış alarmı — §5). **Yarım:** T3 SPİ `ekip/yarim/t3-spi.patch` (Bugün üç alan + Ayrıntı). Sıra: designcheck → T3 SPİ kalanı → SPİ teslim → ESP → AYS küçükleri → T4 → T5.
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
   T1 temel kalıplar `brand/ortak/temel.css` + `C.Kutu` (02) + `C.ModulIsareti` (165) +

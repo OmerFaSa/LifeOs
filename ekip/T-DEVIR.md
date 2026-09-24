@@ -115,6 +115,65 @@ Ayarlar düzeni: Profil · Görünüm · Veri ve yedek · Bildirim · Merkez · 
 Ofis · Sohbet · Ayarlar; Ayarlar'ın 7 sekmesi → 4 bölüm). Karar 8 «evet, en sonda»; plan §5
 gereği kullanıcıdan ayrıca «başla» alınır. HKM'de ayrı bir oturum çalışıyor olabilir.
 
+## 5 · T'yi devralan H'nin devri — nerede kaldı (2026-09-24 akşam)
+
+> H oturumu T işini sürdürdü; limiti dolduğu için T'ye geri veriyor. Önce bunu oku,
+> sonra §2'nin kalanına dön.
+
+**main'de (bu devirle birlikte push edildi):**
+
+| Commit | Ne | Denetim |
+|---|---|---|
+| 5a5c024 | T2-12: Rütbe sekme → bölüm tek kaynakta; SPİ/ESP `kabuk.css` | 5 denetim temiz (designcheck koşmadı → aşağıda KIRMIZI) |
+| 84bdb43 | K'nin `grafik/oneri/sozluk/guven.js` üç `index.html`'e bağlandı; SPİ/ESP `kabuk.js`; `ortak.py --denetle` yayılıp **bağlanmayan** kopyayı yakalar | 15/15 temiz |
+| b06c28d | **T2 SPİ**: kabuk + sekiz çekmece (`SP.App.SECTIONS`, `yolOf`); yeni `screens/onaylar.js` (King + HKM teklifi + Danışma'nın bekleyen kaydı + sonucu belirsiz teklif — bu sonuncusu çekiliyor ama hiç çizilmiyordu), `screens/kutuphane.js` (BAM ürünleri Ofis'ten, bilgi isteği ve yerler Mutfak'tan), Plan › Hedefler (`SP.Screens.hedefler`, hedef kartı Bugün'den); `cekmece.test.js` (8) | SPİ runtests, duman, 390, palet, ledger, tasarım, perf temiz; envanter SPİ kayıp 0 |
+| e8c364c | Sayfa sonu okunur (AYS derleme kimliği 1,06 kontrasttaydı); `palettecheck` alt bandı gerçek öğeden ölçer | 15/15 temiz |
+| d9d19ef | Kütüphanem/Onaylar kutuları h2 (a11y h1→h3) | SPİ a11y temiz |
+
+**KIRMIZI — önce bunu kapat (CI «Sisteme özel denetimler», 5a5c024'ten beri):**
+`SPI/tools/designcheck.js` → `rutbe: içerik kırpılıyor — div.rutbe-kademe (1136>1114)` (4 sorun).
+Sebep: Rütbe artık alt alta bölüm, Merdiven her zaman çiziliyor; `brand/seviye/seviye.css:937`
+`.rutbe-kademe__sahne` (dekor görsel, `alt="" aria-hidden="true"`) `transform:scale(1.04)` ile
+bilerek taşar ve `.rutbe-kademe{overflow:hidden}` onu kırpar (1114 × 1,02 = 1136). Gizlenen veri
+yok → **yanlış alarm**. Önerilen düzeltme (H aracı): `SPI/tools/designcheck.js:202-206` kırpma
+kuralı yalnız dekor OLMAYAN bir torun (`closest('[aria-hidden="true"]')` değil, `img[alt=""]`
+değil) kutunun kenarını aşıyorsa saysın. Doğrulama: `cd SPI && node tools/designcheck.js`
+4 sorun → 0. (ESP'de designcheck yok.) Ayrıca aynı dosyada `.sitefoot` zemin ölçüsü yeni
+`footer.sayfasonu`'yu görmüyor — saydam zemin olduğu için oraya bakma, yalnız not.
+
+**Koşmayan:** `node tools/entegre.js` (kökte) b06c28d sonrası koşmadı. Değişen: 2.76 ürünün
+ekranı modülden okunur (SPİ'de `kutuphane`), 2.78 ve 2.80 HKM kartını `onaylar`'da arar.
+
+**YARIM — T3 SPİ:** `ekip/yarim/t3-spi.patch` (main'e girmedi, kod değil yama).
+`git apply ekip/yarim/t3-spi.patch && (cd SPI && python3 build.py)` ile geri gelir; sonra
+yamayı sil. İçinde: Bugün üç alan (Şimdi: en acil tek uyarı · vakti gelen hatırlatma · günün
+sorusu · dört ölçüm `sleep/rhr/hrv/weight` + öğün satırı; Durum: Toparlanma · Asgari gün ·
+Beslenme kutuları; Öneri: `oneriAlani`), **Bugün › Ayrıntı** (`route gun`, Giriş · Özet ·
+Geçmiş alt alta, `day-tab` bölüm çubuğunda), `bugun.test.js` (4), `ui.test.js` tatil testi
+`SP.Screens.gun`'u çizer. Koşan: SPİ runtests 1560/1560. Koşmayan: duman, a11y, 390, palet,
+envanter, sadelik. Ölçülen (boş profil, 1440): Bugün 1006 px, 4 düğme.
+
+**T3 SPİ'nin kalanı (§2.A-3, 5, 6):**
+- Sekme → `C.SayfaBolumleri` (AYS `analytics.js` kalıbı: `govde(t)` try/catch, `afterRender`
+  ile istenen bölüme `bolumeGit`, eski `*-tab` eylemi bölüm çubuğunda):
+  `labs.js` 7 (`TABS` satır 34, `render` 1195) + **panel süzgeci** (`panelFilter`, `Subtabs`
+  → tek düğme ya da `Select`; `lab-filter` eylemi kalmalı), `move.js` 6 (+ satır 211 kuvvet
+  örüntü `Subtabs`), `basket.js` 4, `meals.js` 3, `analytics.js` 5, `guide.js` 4.
+  `S.ui.labTab` başka yerlerden de set ediliyor: `core/office.js:737,790`, `core/palette.js:48`,
+  `screens/meals.js:684` — bunlar `go('labs')` sonrası o bölüme kaymalı.
+- Ölçü notu: sadelik/envanter `.seg` (C.Segmented) sekme SAYMAZ; yalnız `.subtabs`/`role=tab`.
+  His ölçeği ve gün kaydırıcı olduğu gibi kalabilir.
+- Dolu düğme ≤ 1 (her ekranda), 30+ kelime → `C.Ayrinti`, sonra `node tools/envanter.js SPI`
+  (kayıp 0) ve `node tools/sadelik.js --denetle SPI`, sonra teslim satırı.
+
+**Çalışma notları:** SPİ alt bandın Menü'sü `toggle-menu` taşır (envanter tabanı; üst çubuk
+`toggle-sidebar`, ikisi aynı iş). Uzun koşumları `git worktree` içinde koş; `entegre.js`
+Playwright'ı `ESP/node_modules`'ten yükler (worktree'ye `ln -s` gerekir). Envanter kapıları
+4391–4393: o kapılarda başka sunucu açma. SPİ ve ESP `runtests` aynı kapıyı (4188) kullanır:
+paralel koşacaksan kapı ver (`node tools/runtests.js 4288`).
+
+**Sonra:** ESP (§2.B) → AYS küçükleri (§2.C) → T4 → T5; T6 yalnız kullanıcı «başla» derse.
+
 ## 3 · Bilinmesi gerekenler
 
 - Katalogda T'nin 37 özelliğinden kodda işaretli olan 19'u (001 002 003 005 008 009 013 019 115 118

@@ -20,7 +20,8 @@
 
 | Kod | Sahip | Durum | Özet |
 |---|---|---|---|
-| T2-12 | T | ✅ (bu commit; T'yi devralan H) | T3 AYS üretilmiş kopya `AYS/src/js/screens/rutbe.js`'i elle değiştirdi; `seviye.py --denetle` kırmızı |
+| T2-13 | T | açık (T-DEVIR §5) | SPİ designcheck 5a5c024'ten beri kırmızı: Rütbe merdiveninin dekor görseli (scale 1,04, `aria-hidden`) «içerik kırpılıyor» sayılıyor — yanlış alarm, araç düzeltilir |
+| T2-12 | T | ✅ 5a5c024 | T3 AYS üretilmiş kopya `AYS/src/js/screens/rutbe.js`'i elle değiştirdi; `seviye.py --denetle` kırmızı |
 | T2-11 | K | açık | Bildirim kartı: uygulama kapalıyken basılan eylem (ör. «Bitti») kayboluyor, kullanıcıya söylenmiyor |
 | T2-10 | K | açık | Tablo hücresi (038) kesinliği verilmemiş sayıyı «hesaplandı» sayıyor: etiketsiz sayı etiketli görünür |
 | T2-09 | K | açık | Hız tahmini (039) hedefe ulaşılmamışken GEÇMİŞ bir tarihi «en olası» diye veriyor |
