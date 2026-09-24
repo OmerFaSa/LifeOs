@@ -20,7 +20,7 @@ tek kaynak denetimleri ve uçtan uca bütünleşme yeşil. Üç arayüzde her
 ekranın her düğmesine basıldı (1 156 tıklama); tek bir sayfa hatası ya da
 ekrana sızan `undefined`/`NaN` çıkmadı.
 
-Buna rağmen **44 bulgu** var: 1 kritik, 9 yüksek, 10 orta, 19 düşük, 4
+Buna rağmen **45 bulgu** var: 1 kritik, 9 yüksek, 11 orta, 19 düşük, 4
 belge kayması, 1 koşullu. Hiçbirini mevcut denetimler yakalamıyor, çünkü
 hataların neredeyse hepsi **birimlerin arasında** ya da **zamanın
 sınırlarında** duruyor. Her birim kendi sözleşmesini tutuyor; sorun iki
@@ -114,7 +114,7 @@ her bulgunun içinde yazılı.
 | **Kesin** | | Y-2, Y-8 | | D-14 |
 | **Her gün** | KR-1 | Y-3 | O-1, O-4, O-5, O-9 | D-17 |
 | **Olağan** | | Y-4, Y-5, Y-6 | O-2 | D-6, D-8, D-12, D-15, D-16 |
-| **Koşullu** | | Y-7, Y-9 | O-6, O-8, O-10 | D-4, D-13, D-18, D-19 |
+| **Koşullu** | | Y-7, Y-9 | O-6, O-8, O-10, O-11 | D-4, D-13, D-18, D-19 |
 | **Nadir** | | Y-1 | O-3, O-7 | D-1, D-2, D-3, D-5, D-7, D-9, D-10, D-11 |
 
 ## 4. İlk sürümle eşleme
@@ -131,6 +131,7 @@ her bulgunun içinde yazılı.
 | Y-7 | Y7 (genişledi) | | O-8 | yeni | | KO-1 | K1 |
 | Y-8 | Y8 | | O-9 | yeni | | | |
 | Y-9 | yeni | | O-10 | yeni | | | |
+| | | | O-11 | yeni | | | |
 
 ---
 
@@ -183,7 +184,10 @@ AYS: `R.Komut.isle(R.Komut.anla(c, {date}), {metin:c})`; SPİ:
 rozete, Goodhart ve sürtünme ölçerlerine, haftalık gerçekleşmeye ve
 işaretle HKM'ye (VP'ler, kırmızı bayrak, seri, etki) yayılıyor. SPİ'deki
 420 dakikalık sahte seans antrenman yükünü ve toparlanma reçetesini
-etkiliyor. Kullanıcı sesle yazdığı için (DEVIR §1) olumsuz ekler günlük
+etkiliyor. Aynı tek cümle SPİ'de **8 rozet** (odak-1…odak-7, istikrar-1) ve
+110 XP kazandırıyor; «Geri al» sonrası XP doğru olarak 0'a iniyor, ama
+rozetler tasarım gereği «olay» sayıldığı için **kalıcı** kalıyor (tarayıcıda
+doğrulandı). Kullanıcı sesle yazdığı için (DEVIR §1) olumsuz ekler günlük
 kullanımda sık geçiyor. Ekranda «Geri al» kalıyor, ama kullanıcının fark
 etmesi gerekiyor. Y-6 yüzünden geri alma da güvenli değil.
 
@@ -587,6 +591,21 @@ düşüyor. `:127` `T000000Z` bitişini «gece yarısı» sayıp bir gün geri
 (LIFEOS2 §2) yanlış gün yanlış plan demek. Depo bu hata sınıfını `4b01be2`'de
 başka yerlerde kapatmıştı.
 
+#### O-11 · HKM'nin «yükü azalt» teklifi, ara günü yarım çalışma gününe çeviriyor
+
+| Önem | Olasılık | Sistem | Doğrulama |
+|---|---|---|---|
+| Orta | Koşullu (ara verilmiş güne `load.reduce`) | AYS | tarayıcı |
+
+`AYS/src/js/core/istisna.js:344-371` · `hafiflet` o güne zaten bir «ara»
+istisnası olup olmadığına bakmıyor; `ekle` ile tek günlük bir «süre»
+istisnası yazıyor ve «son eklenen kazanır» kuralı (baş yorum, madde 3)
+arayı eziyor. **Tekrar (tarayıcı):** yarına `ekle({tur:'ara'})` →
+`gunYuku` 0; `hafiflet(yarın)` → «tamam, 90 dk», `gunYuku` **0,5**.
+**Etki:** kullanıcı HKM'nin «yükü azaltılsın mı?» teklifini onaylıyor ve
+ara verdiği gün 90 dakikalık çalışma gününe dönüyor; haftalık soru hedefi
+ve plan üreteci bu yükü görüyor. **Yön:** `OZELLIK-ANALIZI.md` A14.
+
 ---
 
 ### Düşük
@@ -719,7 +738,7 @@ Risk × maliyet sırasıyla. Ayrıntı ve kabul ölçütleri
 | 7 | Y-4, O-9 | Yanlış kırmızı bayrak ve yarım gün hükmü | K–O |
 | 8 | Y-8, B-2 | Onay metni ve belgeler | O |
 | 9 | Y-2 | Ufkun sonundan önce yeter; ama tarih kesin | K |
-| 10 | O-3, O-5, O-6, O-10 | Veri tutarlılığı | K |
+| 10 | O-3, O-5, O-6, O-10, O-11 | Veri tutarlılığı | K |
 | 11 | Y-7 | Yalnız birden çok profil HKM'ye bağlanacaksa | K (tek profil) |
 | 12 | Düşükler, belgeler | Fırsat buldukça | K |
 
@@ -741,6 +760,8 @@ bir hatanın **sınıfını** yakalayacak, bugün var olmayan bir sınama türü
 | HKM `KINDS` ile üç `INTENT_KINDS` karşılaştırması | Sözleşme ayrışması | D-12 |
 | Sütunları tutmayan yedekle geri yükleme | Sessiz boşaltma | Y-1 |
 | UTC saatli `.ics` | Saat dilimi | O-10 |
+| Ara günü + yük azaltma, ara günü + geçici süre çakışması | İstisna önceliği | O-11 |
+| Uydurulmuş ölçümün kalıcı iz bırakıp bırakmadığı (rozet) | Geri alınamayan yan etki | KR-1 |
 
 ## 11. Ölçtüm, sorun çıkmadı
 
@@ -774,6 +795,16 @@ bir hatanın **sınıfını** yakalayacak, bugün var olmayan bir sınama türü
   plana ve net hesabına dokunmuyor; **hekim özeti** teşhis ve doz içermiyor;
   **aralık doğrulaması** («günde 25 saat») çalışıyor.
 - **Depo kapasitesi:** dokuz aylık tipik veri kotanın %17'si (D-17).
+- **XP projeksiyonu (tarayıcı):** kayıt geri alınınca günün XP'si yeniden
+  sayılıp 0'a iniyor; «silinen kayıt puanını bırakmaz» sözü tutuyor.
+- **ESP merdiven kapıları (okuma):** ölçüm yoksa «bilinmiyor», eşik altı
+  «geçmedi»; beyana dayalı kapı en az 5 kayıt istiyor ve «beyan edildi»
+  diye işaretleniyor.
+- **AYS plan istisnaları (okuma):** ilerlemesi başlamış güne dokunulmuyor,
+  geçmişe yazılmıyor, «bitir» geçmişi koruyor.
+- **Profil değişimi (okuma):** üç modül de sayfayı yeniden yüklüyor; depo
+  anahtarı açılışta sabitlendiği için profiller birbirine yazılmıyor (HKM
+  tarafındaki karışma ayrı bir sorun, Y-7).
 
 ## 12. Bakamadığım yerler
 
@@ -781,8 +812,8 @@ Buralarda «hata yok» demiyorum, **göremedim**:
 
 - `king.py`, `bam.py`, `teklif.py` üretim akışlarının model ve web
   gerektiren kısımları; Telegram/WhatsApp'ın gerçek ağ davranışı.
-- AYS planlayıcısı ve istisna hesabının ayrıntısı; ESP merdiven kapıları;
-  XP ve rozet motoru (testlere güvenildi, satır satır okunmadı).
+- AYS haftalık plan üretecinin (`planner.js`) ayrıntısı; rozet eşiklerinin
+  tek tek doğruluğu (testlere güvenildi, satır satır okunmadı).
 - `build.py` ile tek dosya derlemenin kendisi (duman testi sonucu geziyor).
 - Android ve iOS'ta gerçek cihaz davranışı (O-8 platform bilgisine dayanıyor).
 

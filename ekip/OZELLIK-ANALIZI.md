@@ -43,6 +43,7 @@ Bir öneri listeye girmeden önce dört denetimden geçti:
 | A11 | HKM geri yüklemede kuru çalıştırma | yeni yetenek | Y-1 | K | 1 |
 | A12 | İçe aktarmada geri alma kopyası güvencesi | yeniden tasarım | O-3 | K | 2 |
 | A13 | Hafızada «düştü» ile «unutuldu» ayrımı | yeniden tasarım | O-6 | K | 3 |
+| A14 | Yük azaltma ara gününe dokunmaz | yeniden tasarım | O-11 | K | 2 |
 | B1 | Sözleşmelerin tek kaynaktan üretimi | derleme zamanı | D-12, PLAN A2 | O | 3 |
 | B2 | Ayrıştırıcı kalite ölçümü | ölçüm | KR-1 | K | 2 |
 | B3 | HKM'nin kendi sağlık sayaçları | ölçüm | O-7, D-15 | K | 3 |
@@ -85,7 +86,8 @@ Bir öneri listeye girmeden önce dört denetimden geçti:
   (`AYS core/office.js:61`, `SPI core/office.js:31`) kullanıcının kendi
   cümlesinden gelen **küçük** eylemi sormadan uyguluyor. Küçük eylemlerin
   çoğu ölçüm yazıyor: `soru-yaz`, `uyku-yaz`, `sure-yaz`, `vital-yaz`,
-  `seans-ekle`.
+  `seans-ekle`. «Geri al» her izi silmiyor: SPİ'de tek bir yanlış anlaşılmış
+  cümle 8 kalıcı rozet bırakıyor (rozet «olay»dır, geri alınmaz).
 - **Bugün:** AGENTS.md §1.9 küçük eylemin sormadan uygulanmasına izin
   veriyor, ama bunu «hedef, bir bloğun saati» gibi **tercih** örnekleriyle
   anlatıyor. Ölçüm yazan eylemler de aynı sınıfa girmiş.
@@ -250,6 +252,17 @@ Bir öneri listeye girmeden önce dört denetimden geçti:
   yalnız kullanıcının «unut» komutuyla oluşur ve yalnız o kalıcıdır.
 - **Boy:** K.
 
+### A14 · Yük azaltma ara gününe dokunmaz
+
+- **Kanıt:** O-11. Ara verilmiş bir güne onaylanan «yükü azalt» teklifi
+  günü 90 dakikalık çalışma gününe çeviriyor (yük 0 → 0,5).
+- **Olması gereken:** `hafiflet`, günün mevcut yükü hedeflenen yükten zaten
+  düşükse (ara günü 0) hiçbir şey yazmaz ve «o gün zaten ara» der. Genel
+  kural: bir «azaltma» eylemi günün yükünü hiçbir durumda artıramaz.
+- **Kabul ölçütü:** Ara gününe `hafiflet` → `gunYuku` 0 kalır ve cevap
+  «zaten ara» olur.
+- **Boy:** K.
+
 ---
 
 ## B. Olması gereken ama olmayan yetenekler
@@ -353,7 +366,7 @@ Bir öneri listeye girmeden önce dört denetimden geçti:
 1. **Hemen (veri doğruluğu):** A2, A1, A11. Varsayılan ayarla her gün sahte
    ölçüm yazılmasını ve HKM ambarının «ok» diyerek boşalmasını durdurur.
 2. **Dokuz aylık ufkun sonuna kadar:** A3 (sınav günü ufkun sonu), A7, A9,
-   A10, A4, A5, A12.
+   A10, A4, A5, A12, A14.
 3. **Profil kullanılacaksa önce:** A6 (b), A13.
 4. **Ölçüm:** B2, B3, B4. Bu turdaki hataların hiçbirini mevcut ölçümler
    göremedi; bu üçü benzerlerini görünür kılar.
