@@ -20,8 +20,27 @@
 
 | Kod | Sahip | Durum | Özet |
 |---|---|---|---|
+| T2-03 | K | açık | Grafik parçaları zaman damgasından UTC gününü alıyor (gece 00–03 kaydı düne düşer) |
 | T2-02 | K (137) | açık | AYS Ofis ve Danışma'da ajanın okuduğu veri ham kimlikle yazılıyor |
 | T2-01 | K | açık | Fark rozeti yuvarlanıp 0 olan farkı «+0» ve iyi/kötü renkle gösteriyor |
+
+### T2-03 · Grafik parçaları zaman damgasından UTC gününü alıyor (orta, önleyici)
+
+- **Konum:** `brand/ortak/grafik.js:60-62` (`gunParca` sonu açık desen), `:95`
+  (`seri`) ve `:293` (`doluluk`): `String(t).slice(0, 10)`.
+- **Ne yanlış:** tarih yerine tam zaman damgası (`at`, `createdAt`, `toISOString()`)
+  verilirse ilk on karakter UTC günüdür. İstanbul'da 00:00–03:00 arası kayıt DÜNE
+  yazılır: 041 veri doluluğunda bugünün karesi boş, dünün karesi dolu görünür; 027
+  çizgisinde nokta bir gün kayar. Tur 1'de aynı sınıf 42 yerde düzeltilmişti
+  (`U.gunOf`, DEVIR «Tarama 2»).
+- **Tekrar:** `TZ=Europe/Istanbul`, `doluluk({ gunler:['2026-09-24T22:30:00.000Z'] },
+  { bitis:'2026-09-25', gun:2 })` → 24'ü dolu, 25'i boş (yerel gün 25).
+  `seri([{ tarih:'2026-09-24T22:30:00.000Z', deger:5 }], …)` → değer 24'te.
+- **Doğrulama:** yukarıdaki iki çağrı `TZ=Europe/Istanbul node -e …` ile.
+- **Düzeltme yönü:** saat taşıyan dizede yerel güne çevir (`sayi.js` `yerelGun`
+  gibi `new Date(s)` → yerel yıl/ay/gün) ya da yalnız `YYYY-AA-GG` kabul et ve
+  zaman damgasını reddet. Bugün çağıran yok (bileşen ekrana girmedi); ilk ekran
+  bağlanmadan kapanırsa hiç yaşanmaz. Önce bu girdiyle kırmızı test (`oz-041`).
 
 ### T2-02 · AYS Ofis'te ham veri kimlikleri ekranda (düşük)
 
