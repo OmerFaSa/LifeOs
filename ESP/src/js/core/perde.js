@@ -217,6 +217,23 @@ ESP.Perde = (function(){
       }, 420);
     }
 
+    /* DIŞARIDAN KALDIRMA (`hepsiniKapat`). Perde kapanmıyor, SİLİNİYOR:
+       dinleyiciler, sayaç ve kaydırma kilidi bırakılır ama `bitti`
+       ÇAĞRILMAZ (kutlama görülmedi, damgalanmamalı) ve sıradaki AÇILMAZ
+       (sıra da boşaltıldı). Bu olmadan DOM'dan çıkan perdenin
+       yakalayıcısı belgede kalıyor ve sonraki ilk Esc'yi yutuyordu. */
+    function birak(){
+      if(kapandi) return;
+      kapandi = true;
+      if(sayacId) clearInterval(sayacId);
+      document.removeEventListener('keydown', tusla, true);
+      document.removeEventListener('pointerdown', ilkDokunus, true);
+      try{ if(v){ v.pause(); } if(ortam){ ortam.pause(); } }catch(e){}
+      kaydirmaSerbest();
+      if(perde.parentNode) perde.parentNode.removeChild(perde);
+    }
+    perde.__birak = birak;
+
     function tusla(e){
       /* Space de geçer. Haberci penceresinde Space «beni bu ekrana hiç
          sokma» demek; perde açıldıktan sonra da aynı tuşun aynı işi
@@ -780,6 +797,17 @@ ESP.Perde = (function(){
     document.addEventListener('keydown', tusla, true);
     gec.addEventListener('click', gecildi);
 
+    /* DIŞARIDAN KALDIRMA: sayaç durur, dinleyici gider; perde AÇILMAZ ve
+       `bitti` çağrılmaz. Sayaç yaşarsa üç saniye sonra DOM'da olmayan
+       bir kutlama için perde açıyordu. */
+    kutu.__birak = function(){
+      if(bitti) return;
+      bitti = true;
+      clearInterval(sayacId);
+      document.removeEventListener('keydown', tusla, true);
+      if(kutu.parentNode) kutu.parentNode.removeChild(kutu);
+    };
+
     function tik(){
       var gecen = Date.now() - basladi;
       var kalan = Math.max(0, HABERCI_MS - gecen);
@@ -943,7 +971,8 @@ ESP.Perde = (function(){
     kuyruk.length = 0;
     var liste = document.querySelectorAll('.perde, .haberci');
     Array.prototype.forEach.call(liste, function(el){
-      if(el.parentNode) el.parentNode.removeChild(el);
+      if(typeof el.__birak === 'function') el.__birak();
+      else if(el.parentNode) el.parentNode.removeChild(el);
     });
     try{ document.documentElement.style.overflow = ''; }catch(e){}
   }

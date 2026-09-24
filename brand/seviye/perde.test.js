@@ -109,6 +109,47 @@
     });
   });
 
+  /* hepsiniKapat DOM'u temizliyordu ama perdenin belge düzeyindeki
+     `keydown`/`pointerdown` yakalayıcılarını ve sayaçlarını bırakmıyordu.
+     Bu dosyadaki her test `temiz()` ile bitiyor: her perde, DOM'dan
+     çıktıktan sonra da sonraki İLK Esc'yi (ve boşluğu) yutan bir
+     dinleyici bırakıyordu — K bunu sayi testinin Esc'inde yakaladı.
+     Haberci ise sayacıyla yaşamaya devam edip üç saniye sonra DOM'da
+     olmayan bir kutlama için perde AÇIYORDU. */
+  describe('hepsiniKapat — iz bırakmaz', () => {
+
+    it('kapatılan perde sonraki Esc\'yi yutmaz', () => {
+      temiz();
+      P.ac({ banner:banner(1), enAz:60000 });
+      P.hepsiniKapat();
+      let geldi = false;
+      const dinle = () => { geldi = true; };
+      document.body.addEventListener('keydown', dinle);
+      const ev = new KeyboardEvent('keydown', { key:'Escape', bubbles:true, cancelable:true });
+      document.body.dispatchEvent(ev);
+      document.body.removeEventListener('keydown', dinle);
+      expect(geldi).toBe(true);
+      expect(ev.defaultPrevented).toBe(false);
+      temiz();
+    });
+
+    it('kapatılan haberci sonradan perde açmaz', async () => {
+      temiz();
+      const eskiMM = window.matchMedia;
+      window.matchMedia = () => ({ matches:false, addListener(){}, removeListener(){},
+        addEventListener(){}, removeEventListener(){} });
+      try{
+        P.kutla({ kademe:3, basamak:1, etiket:'3.1', enAz:60000 });
+      }finally{
+        window.matchMedia = eskiMM;
+      }
+      P.hepsiniKapat();
+      await bekle(P.HABERCI_MS + 300);
+      expect(perdeler()).toHaveLength(0);
+      temiz();
+    });
+  });
+
   describe('aynı anda TEK perde — ikisi üst üste binmez', () => {
 
     it('ikinci perde sıraya girer, ekranda tek perde kalır', () => {

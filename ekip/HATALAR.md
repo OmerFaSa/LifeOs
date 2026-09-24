@@ -20,9 +20,36 @@
 
 | Kod | Sahip | Durum | Özet |
 |---|---|---|---|
+| T2-05 | H | ✅ (bu commit) | ESP test sayfası `audit.test.js`'i iki kez yüklüyordu (21 test iki kez koşuyordu) |
+| T2-04 | H | ✅ (bu commit) | Perde `hepsiniKapat` dinleyici ve sayaç bırakıyordu: sonraki ilk Esc yutuluyor, haberci 3 sn sonra perde açıyordu |
 | T2-03 | K | açık | Grafik parçaları zaman damgasından UTC gününü alıyor (gece 00–03 kaydı düne düşer) |
 | T2-02 | K (137) | açık | AYS Ofis ve Danışma'da ajanın okuduğu veri ham kimlikle yazılıyor |
 | T2-01 | K | açık | Fark rozeti yuvarlanıp 0 olan farkı «+0» ve iyi/kötü renkle gösteriyor |
+
+### T2-05 · ESP test sayfası aynı test dosyasını iki kez yüklüyordu (düşük) — düzeltildi
+
+- **Konum:** `ESP/src/tests/index.html:216` ve `:230` (`audit.test.js`). Bulan: K.
+- **Ne yanlış:** audit testleri iki kez koşuyordu; geçen sayısı 21 fazla görünüyordu
+  (1445 → 1424) ve ikinci tur birincinin bıraktığı durumu okuyordu.
+- **Düzeltme:** ikinci satır kalktı. Aynı sınıf bir daha gelmesin diye üç
+  `tools/runtests.js` test sayfasını açmadan önce yinelenen `<script src>` arar ve
+  varsa kırmızı çıkar (düzeltmeden önce ESP'de «audit.test.js» diye kırmızıydı).
+
+### T2-04 · Perde `hepsiniKapat` iz bırakıyordu (orta, testte) — düzeltildi
+
+- **Konum:** `brand/seviye/perde.js` `hepsiniKapat` (kopyaları üç `core/perde.js`).
+  Bulan: K (`AYS/src/js/core/perde.js:501` çevresi, sayi testinin Esc'i).
+- **Ne yanlış:** `hepsiniKapat` perdeyi ve haberciyi DOM'dan siliyor ama belge
+  düzeyindeki `keydown`/`pointerdown` yakalayıcılarını ve sayaçları bırakmıyordu.
+  Perde testlerinin her biri `temiz()` ile bitiyor: her biri sonraki İLK Esc'yi ve
+  boşluğu yutan bir dinleyici bırakıyordu (`preventDefault` + `stopPropagation`).
+  Haberci sayacı yaşamaya devam edip üç saniye sonra DOM'da olmayan kutlama için
+  perde AÇIYORDU. Uygulamada `hepsiniKapat` çağıran yok; zarar test sayfasındaydı
+  (başka dosyaların Esc testleri rastgele kalabilirdi).
+- **Düzeltme:** perde ve haberci kendi `__birak` işlevini taşır (dinleyici, sayaç,
+  kaydırma kilidi; `bitti` çağrılmaz, sıradaki açılmaz); `hepsiniKapat` onu çağırır.
+  Önce iki kırmızı test (`hepsiniKapat — iz bırakmaz`): Esc yutulmaz; kapatılan
+  haberci 3 sn sonra perde açmaz.
 
 ### T2-03 · Grafik parçaları zaman damgasından UTC gününü alıyor (orta, önleyici)
 

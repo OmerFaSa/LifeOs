@@ -24,6 +24,29 @@ const path = require('path');
 const PORT = Number(process.argv[2]) || 4178;
 const ROOT = path.resolve(__dirname, '..');
 
+/* AYNI BETIK IKI KEZ YUKLENMEZ. ESP'nin test sayfasi `audit.test.js`'i
+   iki kez yukluyordu: audit testleri iki kez kosuyor, gecen sayisi
+   sisiyordu ve ikinci tur birincinin biraktigi durumu okuyordu. Hicbir
+   test bunu goremez — ikisi de gecer. Sayfa acilmadan once denetlenir. */
+function ikizBetikler(){
+  const html = require('fs').readFileSync(path.join(ROOT, 'src', 'tests', 'index.html'), 'utf8')
+    .replace(/<!--[\s\S]*?-->/g, '');
+  const gorulen = {}, ikiz = [];
+  (html.match(/<script[^>]*\bsrc="[^"]+"/g) || []).forEach(t => {
+    const src = t.match(/src="([^"]+)"/)[1];
+    if(gorulen[src]) ikiz.push(src);
+    gorulen[src] = 1;
+  });
+  return ikiz;
+}
+{
+  const ikiz = ikizBetikler();
+  if(ikiz.length){
+    console.error('Test sayfasi ayni betigi birden cok kez yukluyor: ' + ikiz.join(', '));
+    process.exit(1);
+  }
+}
+
 let chromium;
 try{
   ({ chromium } = require('playwright'));
