@@ -56,6 +56,7 @@ async function waitForServer(url){
 
 /* Gecen bir denetim de SAYI gostermeli. */
 let BAKILAN = 0;
+let DUZEN_SAYISI = 0;
 
 (async () => {
   const server = spawn('python3', [path.join(ROOT, 'devserver.py'), String(PORT)],
@@ -113,6 +114,7 @@ let BAKILAN = 0;
     await wait(300);
 
     const designs = await page.evaluate(() => SP.DESIGNS.map(d => d.id));
+    DUZEN_SAYISI = designs.length;
     const routes = await page.evaluate(() =>
       SP.App.SECTIONS.reduce((a, s) => a.concat(s.views.map(v => v.route)), []));
 
@@ -312,5 +314,6 @@ let BAKILAN = 0;
     console.log('\n' + problems.length + ' sorun');
     process.exit(1);
   }
-  console.log('beş düzen temiz — ' + BAKILAN + ' ekran/genişlik kombinasyonu bakıldı');
+  /* Düzen sayısı uygulamadan okunur: tek tasarımda (§8-4) bir tane. */
+  console.log(DUZEN_SAYISI + ' düzen temiz — ' + BAKILAN + ' ekran/genişlik kombinasyonu bakıldı');
 })();

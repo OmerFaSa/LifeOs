@@ -293,12 +293,18 @@ function topla(arg){
      bakilan sey, blok duzeninde duran ve icinde baska blok olmayan bir
      ogenin 30 kelimeyi gecmesidir. On kisa satirli bir kart sayilmaz,
      tek bir aciklama paragrafi sayilir. */
-  const BLOK = /^(block|flex|grid|list-item|table|flow-root)$/;
+  /* TABLO PARAGRAF DEGILDIR. Ilk yazimda `table` aday bloklar arasindaydi
+     ama cocugu (`table-row-group`) blok sayilmiyordu: her tablo 30 kelimeyi
+     asan TEK PARCA yazi goruluyordu (T buldu: AYS'de 11 «asim»in hepsi
+     tabloydu). Aday yalniz akan metin kutusudur; tablo, satir ve hucre
+     duzenindeki cocuk da «icinde blok var» sayilir. */
+  const ADAY = /^(block|flex|grid|list-item|flow-root)$/;
+  const BOLER = /^(block|flex|grid|list-item|flow-root|table|table-row-group|table-row|table-header-group|table-footer-group)$/;
   let uzun = 0;
   main.querySelectorAll('*').forEach(el => {
     if(kelimeSay(el.textContent) <= 30) return;
-    if(!BLOK.test(getComputedStyle(el).display) || !gorunur(el)) return;
-    const blokCocuk = Array.from(el.children).some(c => BLOK.test(getComputedStyle(c).display));
+    if(!ADAY.test(getComputedStyle(el).display) || !gorunur(el)) return;
+    const blokCocuk = Array.from(el.children).some(c => BOLER.test(getComputedStyle(c).display));
     if(!blokCocuk && kelimeSay(el.innerText) > 30) uzun++;
   });
   const halka = gorunenler('svg').filter(s =>
