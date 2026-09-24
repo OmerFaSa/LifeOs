@@ -200,6 +200,19 @@ SP.C = (function(){
     </div>`;
   }
 
+  /* SAKİN HATA (katalog 011): bir şey bozulursa ne oldu, verin nerede, tek
+     düğme. Kırmızı yok; İLK cümle veri kaybı olmadığını söyler. Teknik ileti
+     silinmez, «Teknik ayrıntı»nın altına iner (D katmanı). */
+  function SakinHata(o){
+    o = o || {};
+    return html`<div class="sakinhata" data-oz="011" role="status">${Kutu({ ad:o.baslik || 'Bu ekran açılamadı.',
+      govde:html`<p class="sakinhata__veri">Verin yerinde; hiçbir kayıt silinmedi.</p>
+        ${when(o.not, () => html`<p class="small muted">${o.not}</p>`)}
+        ${when(o.ayrinti, () => Ayrinti({ etiket:'Teknik ayrıntı',
+          govde:html`<code class="sakinhata__kod">${o.ayrinti}</code>` }))}
+        <div class="sakinhata__eylem">${Button({ label:o.dugme || 'Yeniden yükle', size:'sm', act:'reload' })}</div>` })}</div>`;
+  }
+
   /* KATMANLI METİN: koddan kurulan (uzunluğu veriye bağlı) bir açıklama 30
      kelimeyi aşarsa İLK CÜMLE görünür kalır, gerisi «Ayrıntı» katmanına iner;
      kısaysa olduğu gibi tek paragraf. Hiçbir cümle silinmez (EKIP-PLANI §1.2). */
@@ -455,10 +468,15 @@ SP.C = (function(){
   function Empty(o){
     const sec = (SP.App && SP.App.sectionOf && SP.S)
       ? SP.App.sectionOf(SP.S.route) : null;
+    /* Motifi olmayan bölümde (yeni çekmeceler) boş bir kutu değil, ikon
+       düşer: çizimsiz boş durum 010'u karşılamaz. */
+    const motif = !o.icon && sec && SP.UI.motif ? SP.UI.motif(sec.id) : '';
     const mark = o.icon ? icon(o.icon)
-      : (sec && SP.UI.motif ? '<div class="empty__motif">' + SP.UI.motif(sec.id) + '</div>'
-         : icon('list'));
-    return html`<div class="empty">
+      : motif ? '<div class="empty__motif">' + motif + '</div>'
+      : icon('list');
+    /* Boş durum sahnesi (katalog 010): küçük çizim, tek cümle, en çok tek
+       eylem. Boş grafik ya da «0» «ölçüldü ve sıfır» diye okunur; bu okunmaz. */
+    return html`<div class="empty" data-oz="010">
       ${raw(mark)}
       <p>${o.text}</p>
       ${when(o.action, o.action)}
@@ -570,7 +588,7 @@ SP.C = (function(){
   const SectionTitle = (title, right) => html`<div class="section-title"><h2>${title}</h2>${when(right, right)}</div>`;
 
   return {
-    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, Katmanli, Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, SakinHata, Katmanli, Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     Entry, Ledger,
     PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, Busy, NextUp, Table, Pager, paginate,

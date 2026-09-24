@@ -834,7 +834,12 @@ kbd{
 .due__hint{ margin-top:8px; }
 .flashcard--sm{ min-height:120px; padding:20px; }
 
-.errorpanel__actions{ gap:var(--sp-2); margin-top:var(--sp-3); }
+/* Sakin hata (katalog 011): kirmizi yok, ilk cumle verinin yerinde oldugunu
+   soyler, tek dugme. Teknik ileti «Teknik ayrinti»nin altinda. */
+.sakinhata{ max-width:560px; }
+.sakinhata__veri{ font-weight:600; margin:0; }
+.sakinhata__kod{ display:block; font-size:var(--fs-xs); white-space:pre-wrap; overflow-wrap:anywhere; color:var(--text-2); }
+.sakinhata__eylem{ margin-top:var(--sp-3); }
 
 /* ---------- sayfalama ---------- */
 .pager{

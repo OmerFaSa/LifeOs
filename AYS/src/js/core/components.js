@@ -212,6 +212,19 @@ R.C = (function(){
     </div>`;
   }
 
+  /* SAKİN HATA (katalog 011): bir şey bozulursa ne oldu, verin nerede, tek
+     düğme. Kırmızı yok; İLK cümle veri kaybı olmadığını söyler. Teknik ileti
+     silinmez, «Teknik ayrıntı»nın altına iner (D katmanı). */
+  function SakinHata(o){
+    o = o || {};
+    return html`<div class="sakinhata" data-oz="011" role="status">${Kutu({ ad:o.baslik || 'Bu ekran açılamadı.',
+      govde:html`<p class="sakinhata__veri">Verin yerinde; hiçbir kayıt silinmedi.</p>
+        ${when(o.not, () => html`<p class="small muted">${o.not}</p>`)}
+        ${when(o.ayrinti, () => Ayrinti({ etiket:'Teknik ayrıntı',
+          govde:html`<code class="sakinhata__kod">${o.ayrinti}</code>` }))}
+        <div class="sakinhata__eylem">${Button({ label:o.dugme || 'Yeniden yükle', size:'sm', act:'reload' })}</div>` })}</div>`;
+  }
+
   /* Bölüme kay ve odağı başlığına ver (ekran okuyucu nereye gelindiğini
      duysun). Azaltılmış harekette kayma anlıktır. */
   function bolumeGit(id){
@@ -452,10 +465,15 @@ R.C = (function(){
   function Empty(o){
     const sec = (R.App && R.App.sectionOf && R.S)
       ? R.App.sectionOf(R.S.route) : null;
+    /* Motifi olmayan bölümde (yeni çekmeceler) boş bir kutu değil, ikon
+       düşer: çizimsiz boş durum 010'u karşılamaz. */
+    const motif = !o.icon && sec && R.UI.motif ? R.UI.motif(sec.id) : '';
     const mark = o.icon ? icon(o.icon)
-      : (sec && R.UI.motif ? '<div class="empty__motif">' + R.UI.motif(sec.id) + '</div>'
-         : icon('list'));
-    return html`<div class="empty">
+      : motif ? '<div class="empty__motif">' + motif + '</div>'
+      : icon('list');
+    /* Boş durum sahnesi (katalog 010): küçük çizim, tek cümle, en çok tek
+       eylem. Boş grafik ya da «0» «ölçüldü ve sıfır» diye okunur; bu okunmaz. */
+    return html`<div class="empty" data-oz="010">
       ${raw(mark)}
       <p>${o.text}</p>
       ${when(o.action, o.action)}
@@ -578,7 +596,7 @@ R.C = (function(){
   const SectionTitle = (title, right) => html`<div class="section-title"><h2>${title}</h2>${when(right, right)}</div>`;
 
   return {
-    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, Card, Box, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, SakinHata, Card, Box, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     Entry, Ledger,
     PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, Busy, NextUp, Table, Pager, paginate,

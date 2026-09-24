@@ -2243,7 +2243,12 @@ kbd{
 .due__hint{ margin-top:8px; }
 .flashcard--sm{ min-height:120px; padding:20px; }
 
-.errorpanel__actions{ gap:var(--sp-2); margin-top:var(--sp-3); }
+/* Sakin hata (katalog 011): kirmizi yok, ilk cumle verinin yerinde oldugunu
+   soyler, tek dugme. Teknik ileti «Teknik ayrinti»nin altinda. */
+.sakinhata{ max-width:560px; }
+.sakinhata__veri{ font-weight:600; margin:0; }
+.sakinhata__kod{ display:block; font-size:var(--fs-xs); white-space:pre-wrap; overflow-wrap:anywhere; color:var(--text-2); }
+.sakinhata__eylem{ margin-top:var(--sp-3); }
 
 /* ---------- sayfalama ---------- */
 .pager{
@@ -10031,7 +10036,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'b06c28d', at:'2026-09-24 17:37', dirty:true };
+R.BUILD = { id:'b1c9302', at:'2026-09-24 19:55', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -28258,6 +28263,19 @@ R.C = (function(){
     </div>`;
   }
 
+  /* SAKİN HATA (katalog 011): bir şey bozulursa ne oldu, verin nerede, tek
+     düğme. Kırmızı yok; İLK cümle veri kaybı olmadığını söyler. Teknik ileti
+     silinmez, «Teknik ayrıntı»nın altına iner (D katmanı). */
+  function SakinHata(o){
+    o = o || {};
+    return html`<div class="sakinhata" data-oz="011" role="status">${Kutu({ ad:o.baslik || 'Bu ekran açılamadı.',
+      govde:html`<p class="sakinhata__veri">Verin yerinde; hiçbir kayıt silinmedi.</p>
+        ${when(o.not, () => html`<p class="small muted">${o.not}</p>`)}
+        ${when(o.ayrinti, () => Ayrinti({ etiket:'Teknik ayrıntı',
+          govde:html`<code class="sakinhata__kod">${o.ayrinti}</code>` }))}
+        <div class="sakinhata__eylem">${Button({ label:o.dugme || 'Yeniden yükle', size:'sm', act:'reload' })}</div>` })}</div>`;
+  }
+
   /* Bölüme kay ve odağı başlığına ver (ekran okuyucu nereye gelindiğini
      duysun). Azaltılmış harekette kayma anlıktır. */
   function bolumeGit(id){
@@ -28498,10 +28516,15 @@ R.C = (function(){
   function Empty(o){
     const sec = (R.App && R.App.sectionOf && R.S)
       ? R.App.sectionOf(R.S.route) : null;
+    /* Motifi olmayan bölümde (yeni çekmeceler) boş bir kutu değil, ikon
+       düşer: çizimsiz boş durum 010'u karşılamaz. */
+    const motif = !o.icon && sec && R.UI.motif ? R.UI.motif(sec.id) : '';
     const mark = o.icon ? icon(o.icon)
-      : (sec && R.UI.motif ? '<div class="empty__motif">' + R.UI.motif(sec.id) + '</div>'
-         : icon('list'));
-    return html`<div class="empty">
+      : motif ? '<div class="empty__motif">' + motif + '</div>'
+      : icon('list');
+    /* Boş durum sahnesi (katalog 010): küçük çizim, tek cümle, en çok tek
+       eylem. Boş grafik ya da «0» «ölçüldü ve sıfır» diye okunur; bu okunmaz. */
+    return html`<div class="empty" data-oz="010">
       ${raw(mark)}
       <p>${o.text}</p>
       ${when(o.action, o.action)}
@@ -28624,7 +28647,7 @@ R.C = (function(){
   const SectionTitle = (title, right) => html`<div class="section-title"><h2>${title}</h2>${when(right, right)}</div>`;
 
   return {
-    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, Card, Box, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, SakinHata, Card, Box, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     Entry, Ledger,
     PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, Busy, NextUp, Table, Pager, paginate,
@@ -56230,16 +56253,20 @@ R.App = (function(){
     catch(e){ console.error(e); return fallback || ''; }
   }
 
+  /* Onay düğmesi sonucu söyler (022): «Evet, devam et» değil, kaç haftanın
+     yeniden dizileceği. Sayı bilinmiyorsa eylemin adı. */
+  function replanEtiketi(h){
+    const n = h && h.weeksLeft;
+    return n > 0 ? 'Kalan ' + n + ' haftayı yeniden diz' : 'Planı yeniden hesapla';
+  }
+
+  /* Ekranın kendi hatası: sakin hata (011). Menü ve öteki ekranlar çalışır. */
   function errorPanel(err){
     const msg = (err && err.message) ? err.message : String(err);
-    return String(R.C.Notice({ tone:'danger', title:'Bu ekran çizilemedi.',
-      body:R.h.html`${msg}
-        <div class="row wrap errorpanel__actions">
-          ${R.C.Button({ label:'Bugün ekranına dön', size:'sm', act:'go', data:{ 'data-route':'today' } })}
-          ${R.C.Button({ label:'Yeniden yükle', size:'sm', act:'reload' })}
-        </div>
-        <p class="tiny dim">Diğer ekranlar soldaki menüden açılmaya devam eder. Veriler silinmedi.</p>` }));
+    return String(R.C.SakinHata({ ayrinti:msg,
+      not:'Öteki ekranlar menüden açılmaya devam eder.' }));
   }
+
 
   /* Yeniden cizimde odagi ve imlec konumunu korumak icin
      aktif alani niteliklerinden turetilen kararli bir anahtarla isaretle. */
@@ -56380,9 +56407,8 @@ R.App = (function(){
     }catch(err){
       console.error('Render hatası:', err);
       document.getElementById('app').innerHTML = String(html`<div class="content">
-        ${R.C.Notice({ tone:'danger', title:'Ekran çizilirken bir hata oluştu.',
-          body:html`${err && err.message ? err.message : String(err)}
-            <div class="mt-8">${R.C.Button({ label:'Yeniden yükle', size:'sm', act:'reload' })}</div>` })}
+        ${R.C.SakinHata({ baslik:'Ekran çizilemedi.', dugme:'Yeniden yükle',
+          ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }finally{
       rendering = false;
@@ -56680,7 +56706,7 @@ R.App = (function(){
           UI.closeSheet();
           UI.toast('Plan yeniden hesaplandı');
           render();
-        });
+        }, false, replanEtiketi(h));
     },
     async 'confirm-yes'(){
       const fn = UI._confirm;
@@ -57249,14 +57275,13 @@ R.App = (function(){
     }catch(err){
       console.error('Açılış hatası:', err);
       document.getElementById('app').innerHTML = String(html`<div class="content">
-        ${R.C.Notice({ tone:'danger', title:'Uygulama başlatılamadı.',
-          body:html`${err && err.message ? err.message : String(err)}
-            <div class="mt-8">${R.C.Button({ label:'Yeniden dene', size:'sm', act:'reload' })}</div>` })}
+        ${R.C.SakinHata({ baslik:'Uygulama açılamadı.', dugme:'Yeniden dene',
+          ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }
   }
 
-  return { boot, render, patch, go, applyTheme, NAV, yolOf, canInstall, promptInstall, installManifest,
+  return { boot, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, canInstall, promptInstall, installManifest,
     notifyState, askNotify, notifyFromOffice };
 })();
 

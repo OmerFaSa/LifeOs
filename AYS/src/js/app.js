@@ -396,16 +396,20 @@ R.App = (function(){
     catch(e){ console.error(e); return fallback || ''; }
   }
 
+  /* Onay düğmesi sonucu söyler (022): «Evet, devam et» değil, kaç haftanın
+     yeniden dizileceği. Sayı bilinmiyorsa eylemin adı. */
+  function replanEtiketi(h){
+    const n = h && h.weeksLeft;
+    return n > 0 ? 'Kalan ' + n + ' haftayı yeniden diz' : 'Planı yeniden hesapla';
+  }
+
+  /* Ekranın kendi hatası: sakin hata (011). Menü ve öteki ekranlar çalışır. */
   function errorPanel(err){
     const msg = (err && err.message) ? err.message : String(err);
-    return String(R.C.Notice({ tone:'danger', title:'Bu ekran çizilemedi.',
-      body:R.h.html`${msg}
-        <div class="row wrap errorpanel__actions">
-          ${R.C.Button({ label:'Bugün ekranına dön', size:'sm', act:'go', data:{ 'data-route':'today' } })}
-          ${R.C.Button({ label:'Yeniden yükle', size:'sm', act:'reload' })}
-        </div>
-        <p class="tiny dim">Diğer ekranlar soldaki menüden açılmaya devam eder. Veriler silinmedi.</p>` }));
+    return String(R.C.SakinHata({ ayrinti:msg,
+      not:'Öteki ekranlar menüden açılmaya devam eder.' }));
   }
+
 
   /* Yeniden cizimde odagi ve imlec konumunu korumak icin
      aktif alani niteliklerinden turetilen kararli bir anahtarla isaretle. */
@@ -546,9 +550,8 @@ R.App = (function(){
     }catch(err){
       console.error('Render hatası:', err);
       document.getElementById('app').innerHTML = String(html`<div class="content">
-        ${R.C.Notice({ tone:'danger', title:'Ekran çizilirken bir hata oluştu.',
-          body:html`${err && err.message ? err.message : String(err)}
-            <div class="mt-8">${R.C.Button({ label:'Yeniden yükle', size:'sm', act:'reload' })}</div>` })}
+        ${R.C.SakinHata({ baslik:'Ekran çizilemedi.', dugme:'Yeniden yükle',
+          ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }finally{
       rendering = false;
@@ -846,7 +849,7 @@ R.App = (function(){
           UI.closeSheet();
           UI.toast('Plan yeniden hesaplandı');
           render();
-        });
+        }, false, replanEtiketi(h));
     },
     async 'confirm-yes'(){
       const fn = UI._confirm;
@@ -1415,14 +1418,13 @@ R.App = (function(){
     }catch(err){
       console.error('Açılış hatası:', err);
       document.getElementById('app').innerHTML = String(html`<div class="content">
-        ${R.C.Notice({ tone:'danger', title:'Uygulama başlatılamadı.',
-          body:html`${err && err.message ? err.message : String(err)}
-            <div class="mt-8">${R.C.Button({ label:'Yeniden dene', size:'sm', act:'reload' })}</div>` })}
+        ${R.C.SakinHata({ baslik:'Uygulama açılamadı.', dugme:'Yeniden dene',
+          ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }
   }
 
-  return { boot, render, patch, go, applyTheme, NAV, yolOf, canInstall, promptInstall, installManifest,
+  return { boot, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, canInstall, promptInstall, installManifest,
     notifyState, askNotify, notifyFromOffice };
 })();
 

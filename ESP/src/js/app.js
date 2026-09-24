@@ -360,16 +360,13 @@ ESP.App = (function(){
   function isAppearanceOpen(){ return K.katmanAcik('appearance'); }
   function refreshAppearance(){ K.katmanTazele('appearance', appearanceHtml()); }
 
+  /* Ekranın kendi hatası: sakin hata (011). Menü ve öteki ekranlar çalışır. */
   function errorPanel(err){
     const msg = (err && err.message) ? err.message : String(err);
-    return String(ESP.C.Notice({ tone:'danger', title:'Bu ekran çizilemedi.',
-      body:html`${msg}
-        <div class="row wrap mt-8">
-          ${ESP.C.Button({ label:'Bugün ekranına dön', size:'sm', act:'go', data:{ 'data-route':'today' } })}
-          ${ESP.C.Button({ label:'Yeniden yükle', size:'sm', act:'reload' })}
-        </div>
-        <p class="tiny dim">Diğer ekranlar soldaki menüden açılmaya devam eder. Veriler silinmedi.</p>` }));
+    return String(ESP.C.SakinHata({ ayrinti:msg,
+      not:'Öteki ekranlar menüden açılmaya devam eder.' }));
   }
+
 
   /* Yeniden çizimde odağı ve imleç konumunu korumak için aktif alanı
      niteliklerinden türetilen kararlı bir anahtarla işaretle. */
@@ -535,9 +532,8 @@ ESP.App = (function(){
       console.error('Render hatası:', err);
       const govde = document.getElementById('app');
       if(govde) govde.innerHTML = String(html`<div class="wrapc content">
-        ${ESP.C.Notice({ tone:'danger', title:'Ekran çizilirken bir hata oluştu.',
-          body:html`${err && err.message ? err.message : String(err)}
-            <div class="mt-8">${ESP.C.Button({ label:'Yeniden yükle', size:'sm', act:'reload' })}</div>` })}
+        ${ESP.C.SakinHata({ baslik:'Ekran çizilemedi.', dugme:'Yeniden yükle',
+          ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }finally{
       ESP.Memo.bitir();
@@ -1584,14 +1580,13 @@ ESP.App = (function(){
     }catch(err){
       console.error('Açılış hatası:', err);
       const markup = String(html`<div class="content">
-        ${ESP.C.Notice({ tone:'danger', title:'Uygulama başlatılamadı.',
-          body:html`${err && err.message ? err.message : String(err)}
-            <div class="mt-8">${ESP.C.Button({ label:'Yeniden dene', size:'sm', act:'reload' })}</div>` })}
+        ${ESP.C.SakinHata({ baslik:'Uygulama açılamadı.', dugme:'Yeniden dene',
+          ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
     }
   }
 
-  return { boot, render, go, applyTheme, SECTIONS,
+  return { boot, errorPanel, render, go, applyTheme, SECTIONS,
     sectionOf, routeOn, yolOf, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
 })();
