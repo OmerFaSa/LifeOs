@@ -108,7 +108,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** ⏸ T molada. **Yarım kalan işin tam listesi: `ekip/T-DEVIR.md`** — T'yi devralan oradan başlar (sıra: SPİ → ESP → T4 → T5 → T6).
+- **Şu an:** ▶ **T rolünü H oturumu devraldı** (kullanıcı, 2026-09-24: T'nin limiti doldu). `ekip/T-DEVIR.md` sırası: T2-12 ✅ → SPİ (kabuk + çekmeceler + bölümler) → ESP → AYS küçükleri → T4 → T5; T6 kullanıcı «başla» derse. Commit başlığı `[T]`. H'nin denetim işi kullanıcı söyleyene kadar duruyor.
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
   T1 temel kalıplar `brand/ortak/temel.css` + `C.Kutu` (02) + `C.ModulIsareti` (165) +
