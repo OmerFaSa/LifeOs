@@ -79,6 +79,12 @@ describe('027 · Eksik gün boşluğu', () => {
     expect(bos.indexOf('polyline') < 0).toBeTruthy();
   });
 
+  it('oz-027 seri zaman damgasını YEREL güne koyar (T2-03)', () => {
+    const damga = new Date(2026, 8, 25, 1, 30).toISOString();
+    const s = G().seri([{ tarih:'2026-09-24', deger:4 }, { tarih:damga, deger:5 }]);
+    expect(s.map(p => p.tarih + '=' + p.deger).join(',')).toBe('2026-09-24=4,2026-09-25=5');
+  });
+
   it('oz-027 gün ekleme yaz saati geçişinde kaymaz', () => {
     expect(G().gunEkle('2026-03-28', 1)).toBe('2026-03-29');
     expect(G().gunEkle('2026-10-24', 2)).toBe('2026-10-26');
@@ -219,6 +225,17 @@ describe('041 · Veri doluluğu', () => {
     const d = G().doluluk({ modul:'spi', gunler:['2026-09-10', 'dün', null, '2026-09-24T08:00:00'] },
       { bitis:'2026-09-24' });
     expect(d.dolu).toBe(1);
+  });
+
+  it('oz-041 zaman damgası YEREL güne yazılır: gece 01:30 kaydı o günündür (T2-03)', () => {
+    /* Yerel 25 Eylül 01:30 — İstanbul'da UTC damgası 24 Eylül 22:30. */
+    const damga = new Date(2026, 8, 25, 1, 30).toISOString();
+    const d = G().doluluk({ modul:'ays', gunler:[damga] }, { bitis:'2026-09-25', gun:2 });
+    expect(d.kutular.map(k => k.tarih + ':' + k.dolu).join(',')).toBe('2026-09-24:false,2026-09-25:true');
+    /* Bitiş de damga olarak gelebilir. */
+    const e = G().doluluk({ modul:'ays', gunler:['2026-09-25'] }, { bitis:damga, gun:1 });
+    expect(e.kutular[0].tarih).toBe('2026-09-25');
+    expect(e.dolu).toBe(1);
   });
 
   it('oz-041 bugün verilmezse yerel bugün kullanılır; ekran kırılmaz', () => {

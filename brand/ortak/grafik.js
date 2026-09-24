@@ -57,9 +57,24 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ------------------------------------------------------- tarih */
 
-  function gunParca(iso){
-    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || ''));
-    return m ? [+m[1], +m[2] - 1, +m[3]] : null;
+  /* Gün YEREL takvimden alınır (ekip/HATALAR.md T2-03). Yalnız tarih
+     («2026-09-25») olduğu gibi okunur; saat taşıyan damga
+     («…T22:30:00Z») yerel güne çevrilir — ilk on karakteri UTC günüdür
+     ve İstanbul'da 00:00–03:00 kaydını düne yazar. Tarih olmayan dize
+     («dün») reddedilir. */
+  function gunParca(z){
+    if(z instanceof Date) return isNaN(z) ? null : [z.getFullYear(), z.getMonth(), z.getDate()];
+    const s = String(z == null ? '' : z);
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if(m) return [+m[1], +m[2] - 1, +m[3]];
+    if(!/^\d{4}-\d{2}-\d{2}T/.test(s)) return null;
+    const d = new Date(s);
+    return isNaN(d) ? null : [d.getFullYear(), d.getMonth(), d.getDate()];
+  }
+  const iki = n => ('0' + n).slice(-2);
+  function gunISO(z){
+    const p = gunParca(z);
+    return p ? p[0] + '-' + iki(p[1] + 1) + '-' + iki(p[2]) : null;
   }
   /* Gün ekleme UTC'ye sabitlenerek: yaz saati geçişinde gün kaymaz. */
   function gunEkle(iso, n){
@@ -69,10 +84,7 @@ window.LIFEOS = window.LIFEOS || {};
     return d.toISOString().slice(0, 10);
   }
   /* Yerel bugün: UTC'nin bugünü gece yarısından sonra dünü gösterir. */
-  function bugunISO(){
-    const d = new Date();
-    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
-  }
+  function bugunISO(){ return gunISO(new Date()); }
   function gunFarki(a, b){
     const x = gunParca(a), y = gunParca(b);
     if(!x || !y) return null;
@@ -91,13 +103,13 @@ window.LIFEOS = window.LIFEOS || {};
     const harita = {};
     let ilk = null, son = null;
     (noktalar || []).forEach(n => {
-      if(!n || !gunParca(n.tarih)) return;
-      const t = String(n.tarih).slice(0, 10);
+      const t = n ? gunISO(n.tarih) : null;
+      if(!t) return;
       harita[t] = sayiMi(n.deger) ? n.deger : null;
       if(ilk == null || t < ilk) ilk = t;
       if(son == null || t > son) son = t;
     });
-    const bas = o.baslangic || ilk, bit = o.bitis || son;
+    const bas = gunISO(o.baslangic) || ilk, bit = gunISO(o.bitis) || son;
     if(!bas || !bit) return [];
     const n = gunFarki(bas, bit);
     if(n == null || n < 0) return [];
@@ -288,9 +300,9 @@ window.LIFEOS = window.LIFEOS || {};
   function doluluk(satir, o){
     o = o || {};
     const gun = o.gun || 7;
-    const bitis = gunParca(o.bitis) ? o.bitis : bugunISO();
+    const bitis = gunISO(o.bitis) || bugunISO();
     const var_ = {};
-    (satir && satir.gunler || []).forEach(t => { if(gunParca(t)) var_[String(t).slice(0, 10)] = 1; });
+    (satir && satir.gunler || []).forEach(t => { const g = gunISO(t); if(g) var_[g] = 1; });
     const kutular = [];
     for(let i = gun - 1; i >= 0; i--){
       const t = gunEkle(bitis, -i);
@@ -302,7 +314,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   function dolulukHtml(satirlar, o){
     o = Object.assign({}, o);
-    if(!gunParca(o.bitis)) o.bitis = bugunISO();
+    o.bitis = gunISO(o.bitis) || bugunISO();
     const gun = o.gun || 7;
     const sat = (satirlar || []).map(s => {
       const d = doluluk(s, o);
@@ -322,6 +334,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.GRAFIK = {
     EGILIM_EN_AZ:EGILIM_EN_AZ,
     DUZ_ORAN:DUZ_ORAN,
+    gunISO:gunISO,
     gunEkle:gunEkle,
     gunFarki:gunFarki,
     seri:seri,
