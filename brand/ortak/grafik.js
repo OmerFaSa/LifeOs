@@ -19,6 +19,10 @@
      041  Veri doluluğu       her modülün son yedi günü: verisi olan gün
                               dolu, olmayan İÇİ BOŞ kare — 0 değil.
 
+     P2: 029 eşik çizgili çubuk · 030 tik sayacı · 031 hedef bandı
+         (cizgiSvg bant) · 033 gelecek yük · 034 grafiğin cümlesi ·
+         038 satır içi çubuk · 039 hız tahmini (aralık, koni)
+
    NEDEN
 
    Bir grafik kütüphanesinde eksik değer çoğu zaman 0'a düşer, çünkü
@@ -165,16 +169,27 @@ window.LIFEOS = window.LIFEOS || {};
       return '<svg class="grafik grafik--bos" data-oz="027" viewBox="0 0 ' + gen + ' ' + yuk + '"'
         + ' role="img" aria-label="' + kac(etiket + ': veri yok') + '"></svg>';
     }
-    let min = sayiMi(o.min) ? o.min : Math.min.apply(null, vs);
-    let max = sayiMi(o.max) ? o.max : Math.max.apply(null, vs);
+    /* 031 — hedef bandı: [alt, ust]. Bant ölçeğe girer (dışarıda kalmaz). */
+    const bant = Array.isArray(o.bant) && sayiMi(o.bant[0]) && sayiMi(o.bant[1]) && o.bant[1] >= o.bant[0]
+      ? o.bant : null;
+    const olcekler = bant ? vs.concat(bant) : vs;
+    let min = sayiMi(o.min) ? o.min : Math.min.apply(null, olcekler);
+    let max = sayiMi(o.max) ? o.max : Math.max.apply(null, olcekler);
     if(max === min){ max = max + 1; min = min - 1; }
     const x = i => n <= 1 ? gen / 2 : pay + (i / (n - 1)) * (gen - 2 * pay);
     const y = v => pay + (1 - (v - min) / (max - min)) * (yuk - 2 * pay);
     const nk = q => yuvarla(x(q.i)) + ',' + yuvarla(y(q.deger));
 
     let govde = '';
+    if(bant){
+      const y1 = yuvarla(y(bant[1])), y2 = yuvarla(y(bant[0]));
+      govde += '<rect class="grafik__bant" data-oz="031" x="0" y="' + y1 + '" width="' + gen
+        + '" height="' + yuvarla(Math.max(0, y2 - y1)) + '"/>';
+    }
     p.parcalar.forEach(par => {
-      if(par.length === 1){
+      if(par.length === 1 && bant){
+        /* bantlı grafikte tek gün de «nokta» olarak aşağıda çizilir */
+      }else if(par.length === 1){
         govde += '<circle class="grafik__tek" cx="' + yuvarla(x(par[0].i)) + '" cy="'
           + yuvarla(y(par[0].deger)) + '" r="2.5" data-tarih="' + par[0].tarih + '"/>';
       }else{
@@ -185,8 +200,22 @@ window.LIFEOS = window.LIFEOS || {};
       govde += '<line class="grafik__kopru" x1="' + yuvarla(x(k.a.i)) + '" y1="' + yuvarla(y(k.a.deger))
         + '" x2="' + yuvarla(x(k.b.i)) + '" y2="' + yuvarla(y(k.b.deger)) + '" data-bos="' + k.bosGun + '"/>';
     });
-    return '<svg class="grafik" data-oz="027" viewBox="0 0 ' + gen + ' ' + yuk + '"'
-      + ' preserveAspectRatio="none" role="img" aria-label="' + kac(ozet) + '">' + govde + '</svg>';
+    /* Bantlı grafikte her gün bir nokta: bant İÇİNDEKİ dolu, DIŞINDAKİ
+       içi boş (031). Her sapma alarm değildir; boş nokta yalnız «bandın
+       dışında» der, renk vermez. */
+    let disarida = 0;
+    if(bant){
+      p.parcalar.forEach(par => par.forEach(q => {
+        const dis = q.deger < bant[0] || q.deger > bant[1];
+        if(dis) disarida++;
+        govde += '<circle class="grafik__nokta' + (dis ? ' grafik__nokta--dis' : '') + '" cx="' + yuvarla(x(q.i))
+          + '" cy="' + yuvarla(y(q.deger)) + '" r="3" data-tarih="' + q.tarih + '"/>';
+      }));
+    }
+    const etiketler = ozet + (bant ? ', ' + disarida + ' gün hedef bandının dışında' : '')
+      + (o.cumle ? '. ' + cumle(s, o) : '');
+    return '<svg class="grafik' + (bant ? ' grafik--bantli' : '') + '" data-oz="027" viewBox="0 0 ' + gen + ' ' + yuk + '"'
+      + ' preserveAspectRatio="none" role="img" aria-label="' + kac(etiketler) + '">' + govde + '</svg>';
   }
 
   /* --------------------------------------------- 035 aralık çubuğu */
@@ -336,6 +365,244 @@ window.LIFEOS = window.LIFEOS || {};
     return '<div class="doluluk" data-oz="041" data-gun="' + gun + '">' + sat + '</div>';
   }
 
+
+  /* --------------------------------------------- 034 grafiğin cümlesi */
+
+  /* Grafiğin altındaki TEK okuma cümlesi; kod üretir, model değil.
+       o = { etiket, birim, ondalik, yon (037), gunMetni:'son 7 günde' }
+     Veri olmayan gün ortalamaya girmez (0 sayılmaz). */
+  function cumle(s, o){
+    o = o || {};
+    const liste = s || [];
+    const vs = liste.map(p => p && typeof p === 'object' ? p.deger : p).filter(sayiMi);
+    const bas = (o.etiket ? o.etiket + ': ' : '') + (o.gunMetni || ('son ' + liste.length + ' günde'));
+    if(!vs.length) return bas + ' veri yok.';
+    const ort = vs.reduce((a, v) => a + v, 0) / vs.length;
+    const b = x => (L.SAYI && L.SAYI.birimli) ? L.SAYI.birimli(bicim(x, o.ondalik == null ? 1 : o.ondalik), o.birim)
+      : bicim(x, 1) + (o.birim ? ' ' + o.birim : '');
+    const e = egilim(liste, { yon:o.yon });
+    return bas + ' ' + vs.length + ' gün veri; ortalama ' + b(ort) + '; '
+      + (e.yeterli ? 'eğilim ' + e.metin : e.metin.charAt(0).toLocaleLowerCase('tr-TR') + e.metin.slice(1)) + '.';
+  }
+
+  function cumleHtml(s, o){
+    return '<p class="grafik__cumle" data-oz="034">' + kac(cumle(s, o)) + '</p>';
+  }
+
+  /* --------------------------------------------- 029 eşik çizgili çubuk */
+
+  /* e = { deger, esik, olcek, birim, ondalik, etiket, yon:'artis-iyi'|'azalis-iyi' }
+     Aşım payı çubukta ayrı parçadır ve yönün anlamıyla renklenir: borç
+     eşiği aşmak kötü, hedefi aşmak iyi. Yön yoksa aşım nötr. */
+  function esikCubuk(e){
+    e = e || {};
+    if(!sayiMi(e.deger) || !sayiMi(e.esik)) return { var:false };
+    const ust = sayiMi(e.olcek) && e.olcek > 0 ? e.olcek : Math.max(e.deger, e.esik) * 1.25 || 1;
+    const yuz = v => Math.max(0, Math.min(100, Math.round(v / ust * 1000) / 10));
+    const fark = e.deger - e.esik;
+    let anlam = 'notr';
+    if(fark > 0 && (e.yon === 'artis-iyi' || e.yon === 'azalis-iyi')) anlam = e.yon === 'artis-iyi' ? 'iyi' : 'kotu';
+    const b = x => (L.SAYI && L.SAYI.birimli) ? L.SAYI.birimli(bicim(x, e.ondalik), e.birim) : bicim(x, e.ondalik);
+    /* Yüzdenin farkı «puan»dır: %34 ile %10 arası 24 puan, %24 değil. */
+    const farkB = x => e.birim === '%' ? bicim(x, e.ondalik) + ' puan' : b(x);
+    return {
+      var:true, anlam:anlam,
+      dolu:yuz(Math.min(e.deger, e.esik)), asim:fark > 0 ? yuz(e.deger) - yuz(e.esik) : 0, esikYer:yuz(e.esik),
+      metin:b(e.deger) + ' · eşik ' + b(e.esik),
+      farkMetni:fark > 0 ? 'eşiğin ' + farkB(fark) + ' üstünde' : fark < 0 ? 'eşiğin ' + farkB(-fark) + ' altında' : 'eşikte',
+    };
+  }
+
+  function esikCubukHtml(e){
+    e = e || {};
+    const r = esikCubuk(e);
+    const et = e.etiket ? '<span class="esikcubuk__et">' + kac(e.etiket) + '</span>' : '';
+    if(!r.var){
+      return '<div class="esikcubuk esikcubuk--yok" data-oz="029">' + et + '<span class="esikcubuk__deger">—</span></div>';
+    }
+    const sr = (e.etiket ? e.etiket + ': ' : '') + r.metin + ', ' + r.farkMetni;
+    return '<div class="esikcubuk esikcubuk--' + r.anlam + '" data-oz="029" role="img" aria-label="' + kac(sr) + '">' + et
+      + '<span class="esikcubuk__deger" aria-hidden="true">' + kac(r.metin) + ' <span class="esikcubuk__fark">· '
+      + kac(r.farkMetni) + '</span></span>'
+      + '<span class="esikcubuk__ray" aria-hidden="true"><span class="esikcubuk__dolu" style="width:' + r.dolu + '%"></span>'
+      + (r.asim > 0 ? '<span class="esikcubuk__asim" style="left:' + r.esikYer + '%;width:' + yuvarla(r.asim) + '%"></span>' : '')
+      + '<span class="esikcubuk__esik" style="left:' + r.esikYer + '%"></span></span></div>';
+  }
+
+  /* --------------------------------------------- 030 tik sayacı */
+
+  /* Küçük hedefte yüzde yerine kutucuk: kalan 3 kutu sayılır, %83 soyut
+     kalır. Kutu sayısı TIK_EN_COK'u aşarsa kutu okunmaz; çağıran çubuk
+     kullanır (`tik` → { kutu:false }). Yapılan bilinmiyorsa (null) kutular
+     KESİK çizilir: boş kutu «0 yapıldı» demek olurdu. */
+  const TIK_EN_COK = 30;
+
+  function tik(t){
+    t = t || {};
+    if(!sayiMi(t.hedef) || t.hedef <= 0 || !Number.isInteger(t.hedef)) return { kutu:false, neden:'hedef-yok' };
+    if(t.hedef > TIK_EN_COK) return { kutu:false, neden:'buyuk-hedef' };
+    const bilinmiyor = !sayiMi(t.yapilan);
+    const y = bilinmiyor ? 0 : Math.max(0, Math.floor(t.yapilan));
+    return { kutu:true, bilinmiyor:bilinmiyor, hedef:t.hedef, yapilan:bilinmiyor ? null : y,
+      dolu:Math.min(y, t.hedef), fazla:Math.max(0, y - t.hedef), kalan:bilinmiyor ? null : Math.max(0, t.hedef - y) };
+  }
+
+  function tikHtml(t){
+    t = t || {};
+    const r = tik(t);
+    if(!r.kutu) return '';
+    const et = t.etiket ? '<span class="tik__et">' + kac(t.etiket) + '</span>' : '';
+    const sayi = r.bilinmiyor ? '— / ' + r.hedef : r.yapilan + ' / ' + r.hedef + (r.fazla ? ' (+' + r.fazla + ')' : '');
+    const sr = (t.etiket ? t.etiket + ': ' : '') + (r.bilinmiyor ? 'veri yok, hedef ' + r.hedef
+      : r.yapilan + ' / ' + r.hedef + (r.kalan ? ', ' + r.kalan + ' kaldı' : ', hedef tamam'));
+    let kutu = '';
+    for(let i = 0; i < r.hedef; i++) kutu += '<i class="tik__k' + (i < r.dolu ? ' tik__k--dolu' : '') + '"></i>';
+    return '<div class="tik' + (r.bilinmiyor ? ' tik--yok' : '') + '" data-oz="030" role="img" aria-label="' + kac(sr) + '">'
+      + et + '<span class="tik__sayi" aria-hidden="true">' + kac(sayi) + '</span>'
+      + '<span class="tik__kutular" aria-hidden="true">' + kutu + '</span></div>';
+  }
+
+  /* --------------------------------------------- 033 gelecek yük */
+
+  const GUN_KISA = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+
+  /* y = { gunler:[{ tarih, deger }], bugun, birim, etiket }
+     Bugünün sütunu DOLU, gelecek günler KESİK çerçeve: gelecek henüz
+     olmadı. Değeri null olan gün «—» (bilinmiyor); 0 gerçek sıfırdır. */
+  function yukHtml(y){
+    y = y || {};
+    const bugun = gunISO(y.bugun) || bugunISO();
+    const liste = (y.gunler || []).map(g => ({ tarih:gunISO(g.tarih), deger:g.deger })).filter(g => g.tarih);
+    const vs = liste.map(g => g.deger).filter(sayiMi);
+    const max = vs.length ? Math.max.apply(null, vs.concat([1])) : 1;
+    const top = vs.reduce((a, v) => a + v, 0);
+    const sr = (y.etiket ? y.etiket + ': ' : '') + liste.length + ' gün, toplam ' + bicim(top)
+      + (y.birim ? ' ' + y.birim : '') + (liste.length - vs.length ? ', ' + (liste.length - vs.length) + ' gün bilinmiyor' : '');
+    return '<div class="yuk" data-oz="033" role="img" aria-label="' + kac(sr) + '">' + liste.map(g => {
+      const p = gunParca(g.tarih);
+      const gd = new Date(Date.UTC(p[0], p[1], p[2])).getUTCDay();
+      const tur = g.tarih < bugun ? 'gecmis' : g.tarih === bugun ? 'bugun' : 'gelecek';
+      const var_ = sayiMi(g.deger);
+      return '<div class="yuk__g yuk__g--' + tur + (var_ ? '' : ' yuk__g--yok') + '" data-tarih="' + g.tarih + '">'
+        + '<span class="yuk__deger" aria-hidden="true">' + (var_ ? kac(bicim(g.deger)) : '—') + '</span>'
+        + '<span class="yuk__ray" aria-hidden="true"><span class="yuk__sutun" style="height:'
+        + (var_ ? yuvarla(g.deger / max * 100) : 0) + '%"></span></span>'
+        + '<span class="yuk__gun" aria-hidden="true">' + (tur === 'bugun' ? 'Bugün' : GUN_KISA[gd]) + '</span></div>';
+    }).join('') + '</div>';
+  }
+
+  /* --------------------------------------------- 038 satır içi çubuk */
+
+  /* Tablo hücresi: sayı ile boyut aynı yerde. Değer yoksa çubuk yok, «—». */
+  function hucreHtml(h){
+    h = h || {};
+    const olcek = sayiMi(h.olcek) && h.olcek > 0 ? h.olcek : 100;
+    const var_ = sayiMi(h.deger) && h.kesinlik !== 'missing';
+    const oran = var_ ? Math.max(0, Math.min(100, yuvarla(h.deger / olcek * 100))) : 0;
+    const sayi = L.SAYI ? L.SAYI.html({ deger:var_ ? h.deger : null, birim:h.birim, kesinlik:var_ ? (h.kesinlik || 'computed') : 'missing',
+      ondalik:h.ondalik }, { koken:false }) : kac(var_ ? h.deger : '—');
+    return '<span class="hucre' + (var_ ? '' : ' hucre--yok') + '" data-oz="038" style="--hucre-oran:' + oran + '%">'
+      + sayi + '</span>';
+  }
+
+  /* --------------------------------------------- 039 hız tahmini */
+
+  /* Bu hızla hedefe ne zaman varılır? noktalar: [{ tarih, deger }], hedef.
+     En küçük kareler eğimi ± iki standart hata: tahmin tek tarih değil
+     ARALIKTIR. Hızın alt sınırı hedefe yaklaşmıyorsa geç sınır YOKTUR
+     (null) ve bu söylenir; bir tarih uydurulmaz. En az EGILIM_EN_AZ veri. */
+  function hizTahmini(noktalar, hedef, o){
+    o = o || {};
+    const nk = (noktalar || []).map(n => ({ t:gunISO(n && n.tarih), v:n && n.deger }))
+      .filter(n => n.t && sayiMi(n.v)).sort((a, b) => a.t < b.t ? -1 : 1);
+    if(!sayiMi(hedef)) return { yeterli:false, neden:'hedef-yok', metin:'Hedef yazılmamış' };
+    if(nk.length < EGILIM_EN_AZ){
+      return { yeterli:false, eksik:EGILIM_EN_AZ - nk.length, metin:'Tahmin için ' + (EGILIM_EN_AZ - nk.length) + ' ölçüm daha gerekli' };
+    }
+    const t0 = nk[0].t;
+    const xs = nk.map(n => gunFarki(t0, n.t)), ys = nk.map(n => n.v);
+    const ort = a => a.reduce((s, v) => s + v, 0) / a.length;
+    const mx = ort(xs), my = ort(ys);
+    let sxx = 0, sxy = 0;
+    xs.forEach((x, i) => { sxx += (x - mx) * (x - mx); sxy += (x - mx) * (ys[i] - my); });
+    if(!sxx) return { yeterli:false, neden:'tek-gun', metin:'Ölçümler tek güne düşüyor; hız hesaplanamaz' };
+    const egim = sxy / sxx, kesen = my - egim * mx;
+    let sse = 0;
+    xs.forEach((x, i) => { const r = ys[i] - (kesen + egim * x); sse += r * r; });
+    const se = Math.sqrt(sse / Math.max(1, xs.length - 2) / sxx);
+    const son = nk[nk.length - 1];
+    const sonX = gunFarki(t0, son.t);
+    const kalan = hedef - (kesen + egim * sonX);
+    /* Yön İLK ölçümden: hedef başlangıcın üstündeyse yukarı gidilir.
+       Son ölçüme göre kurulsaydı hedefi geçmiş bir seri «ulaşılmadı»
+       görünürdü. */
+    const yukari = hedef >= nk[0].v;
+    const ulasti = yukari ? son.v >= hedef : son.v <= hedef;
+    if(ulasti) return { yeterli:true, ulasti:true, metin:'Hedefe ulaşıldı' };
+    const yaklasan = h => yukari ? h > 0 : h < 0;
+    const gunSay = h => yaklasan(h) ? Math.ceil(kalan / h) : null;
+    const eh = egim, hizli = yukari ? egim + 2 * se : egim - 2 * se, yavas = yukari ? egim - 2 * se : egim + 2 * se;
+    const olasi = gunSay(eh), erken = gunSay(hizli), gec = gunSay(yavas);
+    const tarih = g => g == null ? null : gunEkle(son.t, g);
+    return {
+      yeterli:true, ulasti:false, n:nk.length, egim:egim, se:se, son:son.t,
+      olasi:tarih(olasi), erken:tarih(erken), gec:tarih(gec),
+      yaklasmiyor:olasi == null,
+      metin:olasi == null ? 'Bu hızla hedefe yaklaşılmıyor'
+        : erken === gec
+          ? 'Bu hızla ' + tarihMetni(tarih(olasi)) + ' (tahmin, ' + nk.length + ' ölçüm)'
+          : 'Bu hızla ' + (gec != null ? aralikMetni(tarih(erken), tarih(gec)) : tarihMetni(tarih(erken)) + ' ya da daha geç')
+            + '; en olası ' + tarihMetni(tarih(olasi)) + ' (tahmin, ' + nk.length + ' ölçüm)',
+    };
+  }
+
+  const AY_KISA = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  function tarihMetni(iso, yilsiz){
+    const p = gunParca(iso);
+    return p ? p[2] + ' ' + AY_KISA[p[1]] + (!yilsiz && p[0] !== new Date().getFullYear() ? ' ' + p[0] : '') : '—';
+  }
+
+  /* «7–16 Kasım», «28 Ekim–4 Kasım», «9 Şubat–8 Mart 2027»: aynı ay ve
+     aynı yıl ikinci kez yazılmaz. */
+  function aralikMetni(a, b){
+    const x = gunParca(a), y = gunParca(b);
+    if(!x || !y) return tarihMetni(a) + '–' + tarihMetni(b);
+    if(x[0] === y[0] && x[1] === y[1]) return x[2] + '–' + tarihMetni(b);
+    if(x[0] === y[0]) return tarihMetni(a, true) + '–' + tarihMetni(b);
+    return tarihMetni(a) + '–' + tarihMetni(b);
+  }
+
+  /* Koni: geçmiş noktalar çizgi, gelecek son noktadan açılan üçgen
+     (hızlı ve yavaş eğim), hedef yatay çizgi. Gelecek KESİK kenarlıdır. */
+  function hizKoniSvg(noktalar, hedef, o){
+    o = o || {};
+    const r = hizTahmini(noktalar, hedef, o);
+    const gen = o.gen || 320, yuk = o.yuk || 120, pay = 8;
+    if(!r.yeterli || r.ulasti || r.yaklasmiyor){
+      return '<p class="hiz hiz--yok" data-oz="039">' + kac(r.metin) + '</p>';
+    }
+    const nk = (noktalar || []).map(n => ({ t:gunISO(n.tarih), v:n.deger })).filter(n => n.t && sayiMi(n.v))
+      .sort((a, b) => a.t < b.t ? -1 : 1);
+    const t0 = nk[0].t;
+    const sonX = gunFarki(t0, r.son);
+    const bitisX = gunFarki(t0, r.gec || r.olasi) * (r.gec ? 1 : 1.5);
+    const vs = nk.map(n => n.v).concat([hedef]);
+    const min = Math.min.apply(null, vs), max = Math.max.apply(null, vs);
+    const X = d => pay + d / Math.max(1, bitisX) * (gen - 2 * pay);
+    const Y = v => pay + (1 - (v - min) / ((max - min) || 1)) * (yuk - 2 * pay);
+    const son = nk[nk.length - 1];
+    const ucX = d => X(gunFarki(t0, d));
+    const hedefY = yuvarla(Y(hedef));
+    const koni = [yuvarla(X(sonX)) + ',' + yuvarla(Y(son.v)), yuvarla(ucX(r.erken)) + ',' + hedefY,
+      yuvarla(r.gec ? ucX(r.gec) : X(bitisX)) + ',' + hedefY].join(' ');
+    return '<figure class="hiz" data-oz="039"><svg class="grafik hiz__svg" viewBox="0 0 ' + gen + ' ' + yuk
+      + '" preserveAspectRatio="none" role="img" aria-label="' + kac(r.metin) + '">'
+      + '<line class="hiz__hedef" x1="0" x2="' + gen + '" y1="' + hedefY + '" y2="' + hedefY + '"/>'
+      + '<polygon class="hiz__koni" points="' + koni + '"/>'
+      + '<polyline class="grafik__cizgi" points="' + nk.map(n => yuvarla(X(gunFarki(t0, n.t))) + ',' + yuvarla(Y(n.v))).join(' ') + '"/>'
+      + '</svg><figcaption class="grafik__cumle">' + kac(r.metin) + '</figcaption></figure>';
+  }
+
   L.GRAFIK = {
     EGILIM_EN_AZ:EGILIM_EN_AZ,
     DUZ_ORAN:DUZ_ORAN,
@@ -351,5 +618,16 @@ window.LIFEOS = window.LIFEOS || {};
     egilimHtml:egilimHtml,
     doluluk:doluluk,
     dolulukHtml:dolulukHtml,
+    TIK_EN_COK:TIK_EN_COK,
+    cumle:cumle,
+    cumleHtml:cumleHtml,
+    esikCubuk:esikCubuk,
+    esikCubukHtml:esikCubukHtml,
+    tik:tik,
+    tikHtml:tikHtml,
+    yukHtml:yukHtml,
+    hucreHtml:hucreHtml,
+    hizTahmini:hizTahmini,
+    hizKoniSvg:hizKoniSvg,
   };
 })();

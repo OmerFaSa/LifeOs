@@ -254,4 +254,159 @@ describe('041 · Veri doluluğu', () => {
   });
 });
 
+describe('P2 · Grafik ekleri (029 030 031 033 034 038 039)', () => {
+
+  it('oz-029 Değer ve eşik aynı çubukta; eşiğin ne kadar aşıldığı hesaplanmadan görülür.', () => {
+    const k = sahne(G().esikCubukHtml({ etiket:'Tekrar borcu', deger:34, esik:10, olcek:50, birim:'%', yon:'azalis-iyi' }));
+    try{
+      const el = k.querySelector('[data-oz="029"]');
+      expect(el.classList.contains('esikcubuk--kotu')).toBeTruthy();
+      expect(el.querySelector('.esikcubuk__dolu').style.width).toBe('20%');
+      expect(el.querySelector('.esikcubuk__esik').style.left).toBe('20%');
+      expect(el.querySelector('.esikcubuk__asim').style.width).toBe('48%');
+      expect(el.getAttribute('aria-label')).toBe('Tekrar borcu: %34 · eşik %10, eşiğin 24 puan üstünde');
+    }finally{ k.remove(); }
+  });
+
+  it('oz-029 aşım anlamı yönden; eşiğin altı aşım çizmez; değer yoksa «—»', () => {
+    expect(G().esikCubuk({ deger:20, esik:18, yon:'artis-iyi' }).anlam).toBe('iyi');
+    expect(G().esikCubuk({ deger:20, esik:18 }).anlam).toBe('notr');
+    const alt = G().esikCubuk({ deger:5, esik:10, birim:'%' });
+    expect(alt.asim).toBe(0);
+    expect(alt.farkMetni).toBe('eşiğin 5 puan altında');
+    expect(G().esikCubuk({ deger:12, esik:10, birim:'dk' }).farkMetni).toBe('eşiğin 2 dk üstünde');
+    const yok = G().esikCubukHtml({ deger:null, esik:10 });
+    expect(yok).toContain('esikcubuk--yok');
+    expect(yok.indexOf('esikcubuk__ray') < 0).toBeTruthy();
+  });
+
+  it('oz-030 Küçük hedefte yüzde yerine adet kutucukları.', () => {
+    const k = sahne(G().tikHtml({ etiket:'Paragraf', yapilan:15, hedef:18 }));
+    try{
+      const el = k.querySelector('[data-oz="030"]');
+      expect(el.querySelectorAll('.tik__k')).toHaveLength(18);
+      expect(el.querySelectorAll('.tik__k--dolu')).toHaveLength(15);
+      expect(el.querySelector('.tik__sayi').textContent).toBe('15 / 18');
+      expect(el.getAttribute('aria-label')).toBe('Paragraf: 15 / 18, 3 kaldı');
+      expect(/%/.test(el.textContent)).toBeFalsy();
+    }finally{ k.remove(); }
+  });
+
+  it('oz-030 yapılan bilinmiyorsa kutular KESİK ve «—»: boş kutu «0 yapıldı» değildir', () => {
+    const k = sahne(G().tikHtml({ hedef:5 }) + G().tikHtml({ yapilan:0, hedef:5 }));
+    try{
+      const [a, b] = k.querySelectorAll('.tik');
+      expect(a.classList.contains('tik--yok')).toBeTruthy();
+      expect(a.querySelector('.tik__sayi').textContent).toBe('— / 5');
+      expect(getComputedStyle(a.querySelector('.tik__k')).borderTopStyle).toBe('dashed');
+      expect(getComputedStyle(b.querySelector('.tik__k')).borderTopStyle).toBe('solid');
+    }finally{ k.remove(); }
+    expect(G().tik({ yapilan:5, hedef:G().TIK_EN_COK + 1 }).kutu).toBeFalsy();   // büyük hedef kutuyla okunmaz
+    expect(G().tik({ yapilan:20, hedef:18 }).fazla).toBe(2);
+  });
+
+  it('oz-031 Grafikte hedef aralığı yatay bant; bant dışındaki noktalar içi boş.', () => {
+    const s = G().seri(NOKTALAR);   // 7,1 6,8 — — 7,4 7,0 7,2
+    const k = sahne(G().cizgiSvg(s, { bant:[7, 7.3], etiket:'Uyku' }));
+    try{
+      expect(k.querySelector('.grafik__bant').getAttribute('data-oz')).toBe('031');
+      const dis = k.querySelectorAll('.grafik__nokta--dis');
+      expect(k.querySelectorAll('.grafik__nokta')).toHaveLength(5);
+      expect(dis).toHaveLength(2);   // 6,8 ve 7,4
+      expect(Array.prototype.map.call(dis, c => c.getAttribute('data-tarih')).join(',')).toBe('2026-09-21,2026-09-24');
+      /* İçi boş: dolgu zemin rengi, dolu nokta çizgi rengi. */
+      const ic = getComputedStyle(k.querySelector('.grafik__nokta:not(.grafik__nokta--dis)')).fill;
+      expect(getComputedStyle(dis[0]).fill === ic).toBeFalsy();
+      expect(k.querySelector('svg').getAttribute('aria-label')).toContain('2 gün hedef bandının dışında');
+    }finally{ k.remove(); }
+  });
+
+  it('oz-033 Önümüzdeki yedi günün tekrar yükü; bugün dolu, gelecek kesikli.', () => {
+    const gunler = [];
+    for(let i = 0; i < 7; i++) gunler.push({ tarih:G().gunEkle('2026-09-24', i), deger:[12, 8, 0, null, 20, 5, 9][i] });
+    const k = sahne(G().yukHtml({ gunler:gunler, bugun:'2026-09-24', etiket:'Tekrar yükü', birim:'kart' }));
+    try{
+      const el = k.querySelector('[data-oz="033"]');
+      const g = el.querySelectorAll('.yuk__g');
+      expect(g).toHaveLength(7);
+      expect(g[0].classList.contains('yuk__g--bugun')).toBeTruthy();
+      expect(g[0].querySelector('.yuk__gun').textContent).toBe('Bugün');
+      expect(g[1].querySelector('.yuk__gun').textContent).toBe('Cum');
+      expect(getComputedStyle(g[0].querySelector('.yuk__sutun')).borderTopStyle).toBe('none');
+      expect(getComputedStyle(g[1].querySelector('.yuk__sutun')).borderTopStyle).toBe('dashed');
+      /* 0 gerçek sıfır, null bilinmiyor. */
+      expect(g[2].querySelector('.yuk__deger').textContent).toBe('0');
+      expect(g[3].querySelector('.yuk__deger').textContent).toBe('—');
+      expect(g[3].classList.contains('yuk__g--yok')).toBeTruthy();
+      expect(getComputedStyle(g[3].querySelector('.yuk__sutun')).display).toBe('none');   // 0 ile karışmaz
+      expect(getComputedStyle(g[2].querySelector('.yuk__sutun')).display === 'none').toBeFalsy();
+      expect(el.getAttribute('aria-label')).toBe('Tekrar yükü: 7 gün, toplam 54 kart, 1 gün bilinmiyor');
+    }finally{ k.remove(); }
+  });
+
+  it('oz-034 Her grafiğin altında kodun ürettiği tek okuma cümlesi.', () => {
+    const s = G().seri(NOKTALAR);
+    expect(G().cumle(s, { etiket:'Uyku', birim:'saat' }))
+      .toBe('Uyku: son 7 günde 5 gün veri; ortalama 7,1 saat; eğilim yatay.');
+    expect(G().cumleHtml(s, { etiket:'Uyku' })).toContain('data-oz="034"');
+    /* Veri yoksa «ortalama 0» değil «veri yok». */
+    expect(G().cumle(G().seri([], { baslangic:'2026-09-20', bitis:'2026-09-26' }), { etiket:'Uyku' }))
+      .toBe('Uyku: son 7 günde veri yok.');
+    expect(G().cumle(G().seri([{ tarih:'2026-09-20', deger:7 }, { tarih:'2026-09-22', deger:8 }]), { etiket:'Uyku' }))
+      .toBe('Uyku: son 3 günde 2 gün veri; ortalama 7,5; eğilim için 3 ölçüm daha gerekli.');
+    /* Ekran okuyucu da aynı cümleyi duyar. */
+    expect(G().cizgiSvg(s, { etiket:'Uyku', birim:'saat', cumle:true }))
+      .toContain('Uyku: son 7 günde 5 gün veri; ortalama 7,1 saat; eğilim yatay.');
+  });
+
+  it('oz-038 Tablodaki yüzde hücresinin arkasında ince çubuk; sayı ile boyut aynı yerde okunur.', () => {
+    const k = sahne(G().hucreHtml({ deger:34, birim:'%' }) + G().hucreHtml({ deger:null, birim:'%' }));
+    try{
+      const [a, b] = k.querySelectorAll('[data-oz="038"]');
+      expect(a.style.getPropertyValue('--hucre-oran')).toBe('34%');
+      expect(a.querySelector('.sayi__d').textContent).toBe('%34');
+      expect(getComputedStyle(a, '::after').width === '0px').toBeFalsy();
+      expect(b.classList.contains('hucre--yok')).toBeTruthy();
+      expect(b.querySelector('.sayi__d').textContent).toBe('—');
+      expect(getComputedStyle(b, '::after').display).toBe('none');
+    }finally{ k.remove(); }
+    expect(G().hucreHtml({ deger:150, olcek:100 })).toContain('--hucre-oran:100%');
+  });
+
+  it('oz-039 Bu hızla hedefe ne zaman varılacağı aralık olarak; gelecek, açılan bir koni.', () => {
+    const d = [];
+    for(let i = 0; i < 8; i++) d.push({ tarih:G().gunEkle('2026-08-01', i * 7), deger:60 + i * 2 + (i % 2) });
+    const r = G().hizTahmini(d, 90);
+    expect(r.yeterli).toBeTruthy();
+    expect(r.erken < r.olasi && r.olasi < r.gec).toBeTruthy();   // tek tarih değil, aralık
+    expect(r.metin).toContain('en olası');
+    expect(r.metin).toContain('(tahmin, 8 ölçüm)');
+    const k = sahne(G().hizKoniSvg(d, 90));
+    try{
+      const f = k.querySelector('[data-oz="039"]');
+      expect(f.querySelector('.hiz__koni').getAttribute('points').split(' ')).toHaveLength(3);
+      expect(f.querySelector('figcaption').textContent).toBe(r.metin);
+    }finally{ k.remove(); }
+  });
+
+  it('oz-039 yeterli veri yoksa ya da hedefe yaklaşılmıyorsa tarih UYDURULMAZ', () => {
+    const az = G().hizTahmini([{ tarih:'2026-09-01', deger:1 }, { tarih:'2026-09-08', deger:2 }], 10);
+    expect(az.yeterli).toBeFalsy();
+    expect(az.metin).toBe('Tahmin için 3 ölçüm daha gerekli');
+    const d = [];
+    for(let i = 0; i < 6; i++) d.push({ tarih:G().gunEkle('2026-08-01', i * 7), deger:70 - i });
+    const geri = G().hizTahmini(d, 90);
+    expect(geri.yaklasmiyor).toBeTruthy();
+    expect(geri.olasi).toBeNull();
+    expect(geri.metin).toBe('Bu hızla hedefe yaklaşılmıyor');
+    expect(G().hizKoniSvg(d, 90)).toContain('hiz--yok');
+    /* Yön ilk ölçümden: 70'ten inen seri 66'yı geçti → ulaşıldı. */
+    expect(G().hizTahmini(d, 66).metin).toBe('Hedefe ulaşıldı');
+    /* Hata payı sıfırsa aralık tek tarihe iner, «10–10 Ekim» yazılmaz. */
+    const tek = G().hizTahmini(d, 60);
+    expect(tek.erken).toBe(tek.gec);
+    expect(tek.metin.indexOf('–') < 0).toBeTruthy();
+  });
+});
+
 })();

@@ -4167,6 +4167,14 @@ body.is-dragging .drop.is-over{
 }
 .grafik__tek{ fill:currentColor; }
 
+/* 031 · hedef bandı: bant ton, bant dışındaki nokta İÇİ BOŞ (renk değil). */
+.grafik__bant{ fill:var(--primary-soft); }
+.grafik__nokta{ fill:currentColor; stroke:currentColor; stroke-width:1.5; vector-effect:non-scaling-stroke; }
+.grafik__nokta--dis{ fill:var(--surface); }
+
+/* 034 · grafiğin cümlesi: grafiğin altında tek okuma cümlesi. */
+.grafik__cumle{ margin:var(--sp-2) 0 0; font-size:var(--fs-sm); color:var(--text-2); }
+
 /* ================================================================
    035 · ARALIK ÇUBUĞU — tahmin aralıktır; bant kesik kenarlı
    ================================================================ */
@@ -4570,6 +4578,128 @@ body.is-dragging .drop.is-over{
 .gecmis__alan{ color:var(--text-3); }
 .gecmis__s[data-kaynak="merkez"] .gecmis__kaynak{ color:var(--mer-ink); }
 .gecmis__s[data-uyari] .gecmis__kaynak{ color:var(--bad-ink); }
+
+/* ================================================================
+   029 · EŞİK ÇİZGİLİ ÇUBUK — değer ve eşik aynı çubukta; aşım payı ayrı
+   ================================================================ */
+
+.esikcubuk{ display:grid; gap:var(--sp-1); min-width:0; }
+.esikcubuk__et{ font-size:var(--fs-sm); color:var(--text-2); }
+.esikcubuk__deger{ font-size:var(--fs-sm); font-weight:600; font-variant-numeric:tabular-nums; }
+.esikcubuk__fark{ font-weight:400; color:var(--text-2); }
+.esikcubuk--kotu .esikcubuk__fark{ color:var(--bad-ink); }
+.esikcubuk--iyi .esikcubuk__fark{ color:var(--ok-ink); }
+.esikcubuk--yok .esikcubuk__deger{ color:var(--text-3); font-weight:500; }
+.esikcubuk__ray{
+  position:relative;
+  display:block;
+  height:var(--sp-2);
+  margin:var(--sp-1) 0;
+  background:var(--border-soft);
+  border-radius:var(--r-pill);
+}
+.esikcubuk__dolu,
+.esikcubuk__asim{ position:absolute; top:0; bottom:0; left:0; border-radius:var(--r-pill); background:var(--primary); }
+.esikcubuk__asim{ background:var(--text-3); }
+.esikcubuk--kotu .esikcubuk__asim{ background:var(--bad); }
+.esikcubuk--iyi .esikcubuk__asim{ background:var(--ok); }
+.esikcubuk__esik{
+  position:absolute;
+  top:calc(-1 * var(--sp-1));
+  bottom:calc(-1 * var(--sp-1));
+  width:2px;
+  margin-left:-1px;
+  background:var(--text);
+  border-radius:1px;
+}
+
+/* ================================================================
+   030 · TİK SAYACI — küçük hedefte adet kutucuğu; veri yoksa KESİK
+   ================================================================ */
+
+.tik{ display:grid; gap:var(--sp-1); }
+.tik__et{ font-size:var(--fs-sm); color:var(--text-2); }
+.tik__sayi{ font-size:var(--fs-sm); font-weight:600; font-variant-numeric:tabular-nums; }
+.tik__kutular{ display:flex; flex-wrap:wrap; gap:var(--sp-1); }
+.tik__k{
+  display:block;
+  width:var(--sp-3);
+  height:var(--sp-3);
+  border:1px solid var(--border-strong);
+  border-radius:calc(var(--r-sm) / 3);
+}
+.tik__k--dolu{ background:var(--primary); border-color:var(--primary); }
+.tik--yok .tik__k{ border-style:dashed; }
+.tik--yok .tik__sayi{ color:var(--text-3); }
+
+/* ================================================================
+   033 · GELECEK YÜK — bugün dolu, gelecek KESİK çerçeve
+   ================================================================ */
+
+.yuk{ display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0, 1fr); gap:var(--sp-2); align-items:end; }
+.yuk__g{ display:grid; gap:var(--sp-1); justify-items:center; min-width:0; }
+.yuk__deger{ font-size:var(--fs-xs); color:var(--text-2); font-variant-numeric:tabular-nums; }
+.yuk__ray{ position:relative; display:block; width:100%; height:calc(var(--sp-10) + var(--sp-8)); }
+.yuk__sutun{
+  position:absolute;
+  left:15%;
+  right:15%;
+  bottom:0;
+  min-height:1px;
+  border-radius:var(--r-xs) var(--r-xs) 0 0;
+  background:var(--primary);
+}
+.yuk__g--gecmis .yuk__sutun{ background:var(--text-3); }
+.yuk__g--gelecek .yuk__sutun{ background:transparent; border:1px dashed var(--primary); border-bottom:0; }
+.yuk__g--yok .yuk__deger{ color:var(--text-3); }
+/* Bilinmeyen gün SÜTUNSUZ: 0'ın ince taban çizgisiyle karışmasın. */
+.yuk__g--yok .yuk__sutun{ display:none; }
+.yuk__gun{ font-size:var(--fs-xs); color:var(--text-3); }
+.yuk__g--bugun .yuk__gun{ color:var(--text); font-weight:600; }
+
+/* ================================================================
+   038 · SATIR İÇİ ÇUBUK — yüzde hücresinin arkasında ince çubuk
+   ================================================================ */
+
+.hucre{
+  position:relative;
+  display:inline-flex;
+  align-items:baseline;
+  min-width:5em;
+  padding-bottom:var(--sp-1);
+}
+.hucre::after{
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:0;
+  height:2px;
+  width:var(--hucre-oran, 0%);
+  background:var(--primary);
+  opacity:.45;
+  border-radius:1px;
+}
+.hucre--yok::after{ display:none; }
+
+/* ================================================================
+   039 · HIZ TAHMİNİ — gelecek açılan bir koni; hedef yatay çizgi
+   ================================================================ */
+
+.hiz{ margin:0; }
+.hiz--yok{ font-size:var(--fs-sm); color:var(--text-3); }
+.hiz__koni{
+  fill:var(--primary-soft);
+  stroke:var(--primary);
+  stroke-width:1;
+  stroke-dasharray:var(--sp-1) var(--sp-1);
+  vector-effect:non-scaling-stroke;
+}
+.hiz__hedef{
+  stroke:var(--text-3);
+  stroke-width:1;
+  stroke-dasharray:2 var(--sp-1);
+  vector-effect:non-scaling-stroke;
+}
 
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -8472,7 +8602,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'0616a1f', at:'2026-09-24 15:44', dirty:true };
+ESP.BUILD = { id:'5d4e8d2', at:'2026-09-24 15:45', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
