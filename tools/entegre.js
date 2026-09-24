@@ -646,7 +646,7 @@ async function main(){
           const n = (await ESP.Beacon.intents()).find(x => x.kind === 'unite.add');
           if(!n) return { yok:true };
           ESP.S.ui.hkmIntents = [n];
-          ESP.App.go('today');
+          ESP.App.go(ESP.Screens.onaylar ? 'onaylar' : 'today');
           await new Promise(r => setTimeout(r, 400));
           const kart = document.body.textContent.indexOf('ESP şunu ekleyecek') >= 0;
           const r = await ESP.Beacon.resolveIntent(n, 'apply');
@@ -684,7 +684,7 @@ async function main(){
           const n = (await ESP.Beacon.intents()).find(x => x.kind === 'belge.add');
           if(!n) return { yok:true };
           ESP.S.ui.hkmIntents = [n];
-          ESP.App.go('today');
+          ESP.App.go(ESP.Screens.onaylar ? 'onaylar' : 'today');
           await new Promise(r => setTimeout(r, 400));
           const kart = document.body.textContent.indexOf('ESP şunu ekleyecek') >= 0;
           const r = await ESP.Beacon.resolveIntent(n, 'apply');

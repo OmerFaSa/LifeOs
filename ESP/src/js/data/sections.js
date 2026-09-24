@@ -44,7 +44,8 @@ ESP.SECTIONS_ALL = [
     { id:'analiz', icon:'chart', label:'Analiz', note:'Kararın dayanağı',
       views:[{ route:'analytics', label:'Analiz', icon:'chart' }] },
 
-    { id:'onaylar', icon:'check', label:'Onaylar', note:'Bekleyen öneriler', views:[] },
+    { id:'onaylar', icon:'check', label:'Onaylar', note:'Bekleyen öneriler',
+      views:[{ route:'onaylar', label:'Bekleyen' }] },
 
     { id:'ofis', icon:'users', label:'Ofis', note:'Patron, yedi uzman ve bir koç',
       views:[
@@ -53,7 +54,8 @@ ESP.SECTIONS_ALL = [
         { route:'meeting', label:'Toplantı', icon:'list' },
       ] },
 
-    { id:'kutuphane', icon:'book', label:'Kütüphanem', note:'BAM\'ın ürettikleri', views:[] },
+    { id:'kutuphane', icon:'book', label:'Kütüphanem', note:'BAM\'ın ürettikleri',
+      views:[{ route:'kutuphane', label:'Kütüphanem' }] },
 
     /* Rütbe burada bir bölümdür (karar §8-2); `disc` taşımaz, kapatılan
        bir disiplinle birlikte kaybolmaz. */
