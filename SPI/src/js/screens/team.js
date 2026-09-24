@@ -62,7 +62,7 @@ SP.Screens.team = (function(){
           body:'Cihazda Türkçe ses bulunamadı. Cevap yabancı bir sesle okunur; '
              + 'anlaşılmazsa sesli sohbeti kapat.' }))}`,
       foot:html`
-        ${when(!sesli.acik, () => K.Button({ label:'Sesli sohbeti başlat', tone:'primary',
+        ${when(!sesli.acik, () => K.Button({ label:'Sesli sohbeti başlat',
           icon:'mic', act:'talk-start' }))}
         ${when(sesli.acik, () => html`
           ${K.Button({ label:'Bitir', act:'talk-stop' })}

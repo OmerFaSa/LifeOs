@@ -101,7 +101,7 @@ SP.Screens.guide = (function(){
           <p class="small muted mt-4">Anahtar yalnızca bu tarayıcıda, uygulama verisinden ayrı bir
             anahtarda durur. Yedeğe girmez, buluta gitmez, modele gönderilmez.</p>
         </div>`)}`,
-      foot:html`${K.Button({ label:'Kaydet', size:'sm', tone:'primary', act:'save-model' })}
+      foot:html`${K.Button({ label:'Kaydet', size:'sm', act:'save-model' })}
         ${K.Button({ label:'Bağlantıyı dene', size:'sm', act:'test-model' })}`,
     });
   }
@@ -139,7 +139,7 @@ SP.Screens.guide = (function(){
         <div class="row gap-8 mt-10">
           ${K.Input({ id:'hafiza-yeni', class:'grow', aria:'Hatırlanacak şey',
             placeholder:'Örn. Akşam 8’den sonra yemem' })}
-          ${K.Button({ label:'Hatırla', size:'sm', tone:'primary', act:'hafiza-ekle' })}
+          ${K.Button({ label:'Hatırla', size:'sm', act:'hafiza-ekle' })}
         </div>
         <p class="tiny dim mt-8">Model hafızaya yazamaz: «senin sözün»ü yalnız sen yazarsın,
           «tahmin» etiketli kayıtlar kural motorundan gelir ve silinebilir.</p>`,
@@ -245,7 +245,16 @@ SP.Screens.guide = (function(){
       badge:a.enabled ? K.Badge({ label:'açık', tone:'ok' })
         : K.Badge({ label:'kapalı', tone:'warn' }),
       body:html`
-        ${K.Notice({ tone:'info', body:window.LIFEOS.YedekAg.kartNotu('SPİ') })}
+        ${(function(){
+          /* Metin ortak (yedekag.js). AYS ile aynı katman: mahremiyet cümlesi
+             (ilk ve son) görünür kalır; anahtarın neyi açtığı bir dokunuşla
+             açılır (EKIP-PLANI §1.2). */
+          const c = String(window.LIFEOS.YedekAg.kartNotu('SPİ')).split(/(?<=\.)\s+/);
+          const ozet = c.length > 2 ? c[0] + ' ' + c[c.length - 1] : c.join(' ');
+          return K.Notice({ tone:'info', body:c.length > 2
+            ? K.Ayrinti({ etiket:'Bu anahtar neyi açar?', ozet, govde:html`<p>${c.slice(1, -1).join(' ')}</p>` })
+            : ozet });
+        })()}
         ${when(a.baskaProfil, () => K.Notice({ tone:'warn', class:'mt-10', body:window.LIFEOS.HkmBag.not(a.baskaProfil) }))}
 
         <div class="mt-12">
@@ -275,10 +284,10 @@ SP.Screens.guide = (function(){
             input:K.Select({ id:'sp-hkm-level', value:SP.Beacon.levelOf(),
               change:'hkm-level', aria:'Gönderim kapsamı',
               options:SP.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
-          <p class="tiny dim">${(SP.Beacon.LEVELS.find(l => l.id === SP.Beacon.levelOf()) || {}).note}
-            Günün özetinde, gelişmiş kapsamda bile tahlil değeri, ilaç adı ve
-            semptomun kendisi GİTMEZ — semptom yalnızca sayı olarak gider.
-            Tam yedekte ise hepsi vardır (yukarıdaki not).</p>
+          <p class="tiny dim">${(SP.Beacon.LEVELS.find(l => l.id === SP.Beacon.levelOf()) || {}).note}</p>
+          <p class="tiny dim">Günün özetinde, gelişmiş kapsamda bile tahlil değeri, ilaç adı ve
+            semptomun kendisi GİTMEZ — semptom yalnızca sayı olarak gider. Tam yedekte ise hepsi
+            vardır (yukarıdaki not).</p>
         </div>
 
         <div class="mt-12">${K.SectionTitle('Bugün ne gidiyor')}</div>
@@ -301,7 +310,7 @@ SP.Screens.guide = (function(){
           önce HKM yüzünde «Cihazları bağla» de, sonra iki dakika içinde
           buraya bas. Jetonu elle yazmak da çalışır.</p>
         <p class="tiny dim mt-10">${durum}</p>`,
-      foot:html`${K.Button({ label:'Bağlan', size:'sm', tone:'primary',
+      foot:html`${K.Button({ label:'Bağlan', size:'sm',
           act:'hkm-pair' })}
         ${K.Button({ label:'Şimdi gönder', size:'sm', act:'hkm-send' })}
         ${K.Button({ label:'Geçmişi gönder (60 gün)', size:'sm', act:'hkm-backfill' })}`,
@@ -347,11 +356,13 @@ SP.Screens.guide = (function(){
   function saglikCard(){
     return K.Card({
       title:'Telefondan sağlık verisi', hint:'backup',
-      body:html`<p class="small muted">iPhone: Sağlık › profil › «Tüm sağlık verilerini dışa
-        aktar» ile gelen export.zip. Android: Health Connect verisini dışa aktaran bir uygulamanın
-        CSV’si (tarih, ölçü, değer). Alınanlar: uyku, kilo, istirahat nabzı, tansiyon, oksijen, bel,
-        yağ oranı, su. Önce ne yazılacağını görürsün; senin girdiğin değer ezilmez.</p>`,
-      foot:K.Button({ label:'Dosya seç ve önizle', size:'sm', tone:'primary', act:'saglik-ac' }),
+      body:K.Ayrinti({ ozet:'Önce ne yazılacağını görürsün; senin girdiğin değer ezilmez.',
+        etiket:'Hangi dosya, ne alınır?',
+        govde:html`<p>iPhone: Sağlık › profil › «Tüm sağlık verilerini dışa aktar» ile gelen
+          export.zip. Android: Health Connect verisini dışa aktaran bir uygulamanın CSV’si (tarih,
+          ölçü, değer).</p><p>Alınanlar: uyku, kilo, istirahat nabzı, tansiyon, oksijen, bel, yağ
+          oranı, su.</p>` }),
+      foot:K.Button({ label:'Dosya seç ve önizle', size:'sm', act:'saglik-ac' }),
     });
   }
 
@@ -405,14 +416,13 @@ SP.Screens.guide = (function(){
       label:'Eşiklerin dayanağı', hint:'evidence',
       meta:'%' + k.pct + ' kaynaklı',
       body:html`
-        <p class="small muted">Deterministik olmak, bilimsel olarak doğru olmak
-          değildir. Bir eşik kodda ne kadar kesin yazılırsa yazılsın, eşiğin
-          kendisi yanlış seçilmişse sistem çok güvenilir görünen yanlış bir
-          sonuç üretir. Bu yüzden her eşik kendi kaynağını taşır ve kaynağının
-          derecesi, o eşiğin ne kadar güçlü konuşabileceğini belirler.</p>
+        ${K.Ayrinti({ ozet:'Her eşik kendi kaynağını taşır; kaynağın derecesi eşiğin ne kadar güçlü konuşabileceğini belirler.',
+          govde:html`<p>Deterministik olmak, bilimsel olarak doğru olmak değildir. Bir eşik kodda
+            ne kadar kesin yazılırsa yazılsın, eşiğin kendisi yanlış seçilmişse sistem çok
+            güvenilir görünen yanlış bir sonuç üretir.</p>` })}
 
         ${K.Notice({ tone:'warn', title:'Bu bir kanıt hiyerarşisi değildir',
-          body:SP.Ev.policy().disclaimer })}
+          body:K.Katmanli({ metin:SP.Ev.policy().disclaimer }) })}
 
         ${K.Table({ tight:true, headers:['Kaynak türü', 'SPİ\'nin tanıdığı yetki'],
           rows:SP.EVIDENCE_SOURCES.map(src => {
@@ -420,8 +430,8 @@ SP.Screens.guide = (function(){
             return [src.label, y.label + ' — ' + y.note];
           }) })}
 
-        <p class="tiny dim mt-8">Politika sürümü ${SP.Ev.policy().version}
-          (${SP.Ev.policy().changedAt}). ${SP.Ev.policy().rationale}</p>
+        <div class="mt-8">${K.Katmanli({ sinif:'tiny dim', metin:'Politika sürümü '
+          + SP.Ev.policy().version + ' (' + SP.Ev.policy().changedAt + '). ' + SP.Ev.policy().rationale })}</div>
 
         ${K.Table({ tight:true, headers:['Ölçüm', { label:'Sayı', num:true }], rows:[
           ['Tanımlı eşik', String(k.total)],
@@ -444,9 +454,10 @@ SP.Screens.guide = (function(){
              + 'ölçümün kendi sayfasında hangi kaynağa dayandığı yazar.' }))}
 
         ${when(k.missing.length, () => html`
-          <p class="tiny dim mt-8">Kaynağı yazılmamış eşikler:
-            ${k.missing.slice(0, 12).map(m => m.name).join(', ')}${k.missing.length > 12 ? '…' : ''}.
-            Bu eşikler yönlendirme üretmez.</p>`)}`,
+          <div class="mt-8">${K.Ayrinti({ class:'tiny dim',
+            ozet:'Kaynağı yazılmamış ' + k.missing.length + ' eşik yönlendirme üretmez.',
+            etiket:'Hangileri?',
+            govde:html`<p>${k.missing.slice(0, 12).map(m => m.name).join(', ')}${k.missing.length > 12 ? '…' : ''}.</p>` })}</div>`)}`,
     });
   }
 
@@ -521,34 +532,43 @@ SP.Screens.guide = (function(){
      üst gezinmede «Rütbe» (screens/rutbe.js) — kademe, merdiven,
      XP kaynakları ve defter orada. */
 
-  async function render(){
-    const tab = S.ui.guideTab;
-    const head = html`<div class="mb-8">${K.Subtabs({ items:TABS, value:tab,
-      act:'guide-tab', aria:'Rehber görünümü' })}</div>`;
-
-    if(tab === 'model'){
-      return String(html`${head}
-        ${K.Ledger(() => [modelCard(), bolumCard(), hafizaCard(), quotaCard()])}
-        <div class="mt-24">${raw(UI.rail(['no-model', 'grounding', 'privacy']))}</div>`);
-    }
-    if(tab === 'veri'){
-      return String(html`${head}
-        ${K.Ledger(() => [dataCard(), saglikCard(), storageHorizonCard(), storageCard(), hkmCard()])}
-        <div class="mt-24">${raw(UI.rail(['backup', 'privacy', 'profiles']))}</div>`);
-    }
-    if(tab === 'sinir'){
-      return String(html`${head}
-        ${K.Ledger(() => [clinicalCard(), redFlagCard(), evidenceCard(), privacyCard(), groundingCard()])}
-        <div class="mt-24">${raw(UI.rail(['red-flag', 'grounding', 'privacy', 'certainty']))}</div>`);
-    }
-    return String(html`${head}
-      ${K.Ledger(() => [howCard(), moduleCard(), precedenceCard(),
+  /* Sekme yok (EKIP-PLANI §1.2): dört bölüm alt alta; bölüm çubuğu kaydırır.
+     Bir bölüm çizilemezse yalnız o bölüm sakin bir notla düşer. */
+  const BODIES = {
+    kullanim:() => html`${K.Ledger(() => [howCard(), moduleCard(), precedenceCard(),
         K.Entry({ label:'Asgari gün', hint:'minimum-day', meta:'kötü günün alt sınırı',
           body:html`<ul class="bullets small muted">
             <li>${SP.MINIMUM_DAY.protein}</li><li>${SP.MINIMUM_DAY.water}</li>
             <li>${SP.MINIMUM_DAY.move}</li><li>${SP.MINIMUM_DAY.sleep}</li></ul>` }),
       ])}
-      <div class="mt-24">${raw(UI.rail(['minimum-day', 'next-action', 'certainty']))}</div>`);
+      <div class="mt-24">${raw(UI.rail(['minimum-day', 'next-action', 'certainty']))}</div>`,
+    model:() => html`${K.Ledger(() => [modelCard(), bolumCard(), hafizaCard(), quotaCard()])}
+      <div class="mt-24">${raw(UI.rail(['no-model', 'grounding', 'privacy']))}</div>`,
+    veri:() => html`${K.Ledger(() => [dataCard(), saglikCard(), storageHorizonCard(), storageCard(), hkmCard()])}
+      <div class="mt-24">${raw(UI.rail(['backup', 'privacy', 'profiles']))}</div>`,
+    sinir:() => html`${K.Ledger(() => [clinicalCard(), redFlagCard(), evidenceCard(), privacyCard(), groundingCard()])}
+      <div class="mt-24">${raw(UI.rail(['red-flag', 'grounding', 'privacy', 'certainty']))}</div>`,
+  };
+
+  function govde(t){
+    try{ return BODIES[t.id](); }
+    catch(e){
+      console.error('Rehber bölümü çizilemedi (' + t.id + '):', e);
+      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; verin yerinde duruyor.' });
+    }
+  }
+
+  async function render(){
+    return String(K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) }));
+  }
+
+  /* Başka yerden istenen bölüm (komut paletinin «Veri»si gibi) çizimden
+     sonra görünür yapılır; istek bir kez kullanılır. */
+  function afterRender(){
+    const t = S.ui.guideTab;
+    S.ui.guideTab = null;
+    if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
   }
 
   const handle = {
@@ -652,7 +672,7 @@ SP.Screens.guide = (function(){
       SP.App.render();
     },
 
-    async 'guide-tab'(el){ S.ui.guideTab = el.dataset.tab; SP.App.render(); },
+    async 'guide-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'save-model'(){
       const provider = (document.getElementById('m-provider') || {}).value;
       const model = (document.getElementById('m-model') || {}).value;
@@ -799,6 +819,6 @@ SP.Screens.guide = (function(){
         : 'Model kapalı · kural motoru çalışıyor';
     },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

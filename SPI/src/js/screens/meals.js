@@ -177,7 +177,7 @@ SP.Screens.meals = (function(){
       ] }),
       body:rows.length
         ? html`${map(sorted, mealCard)}`
-        : P.empty('Bu güne henüz öğün girilmedi.', 'Öğün ekle', 'focus-meal'),
+        : P.empty('Bu güne henüz öğün girilmedi.', 'Öğün ekle', 'focus-meal', null, true),
     });
   }
 
@@ -193,7 +193,7 @@ SP.Screens.meals = (function(){
         body:K.Notice({ tone:'warn', title:'Hesaplanamıyor.',
           body:'Profilde ' + t.missing.join(', ') + ' eksik. Bu üçü olmadan kalori '
              + 've protein hedefi tahmin edilmez.' }),
-        foot:K.Button({ label:'Profili aç', size:'sm', tone:'primary',
+        foot:K.Button({ label:'Profili aç', size:'sm',
           act:'go', data:{ 'data-route':'family' } }) });
     }
 
@@ -443,14 +443,6 @@ SP.Screens.meals = (function(){
     { id:'deger',  label:'Besin değeri', icon:'layers' },
   ];
 
-  function tabs(){
-    const rows = M.mealsOf(shownDate());
-    const items = TABS.map(t => Object.assign({}, t,
-      t.id === 'gunluk' && rows.length ? { count:rows.length } : {}));
-    return K.Subtabs({ items, value:S.ui.mealTab || 'gunluk', act:'meal-tab',
-      aria:'Besin görünümü' });
-  }
-
   /* Bazal metabolizma → hareket → hedef. Her adım ayrı yazılır ki
      çıkan sayının nereden geldiği tartışılabilir olsun. */
   function energyCard(){
@@ -461,7 +453,7 @@ SP.Screens.meals = (function(){
         body:K.Notice({ tone:'warn', title:'Hesaplanamıyor.',
           body:'Profilde ' + tg.missing.join(', ') + ' eksik. Bu üçü olmadan bazal '
              + 'metabolizma tahmin edilmez; uydurulmuş bir sayı yazılmaz.' }),
-        foot:K.Button({ label:'Profili tamamla', size:'sm', tone:'primary',
+        foot:K.Button({ label:'Profili tamamla', size:'sm',
           act:'go', data:{ 'data-route':'family' } }) });
     }
     /* Gosterilen carpan, HESAPTA kullanilan carpanin ta kendisidir.
@@ -550,7 +542,7 @@ SP.Screens.meals = (function(){
               ${K.Badge({ label:'hedef ×' + U.fmtNet(a.mult),
                 tone:a.mult > 1 ? 'warn' : 'info' })}
             </div>
-            <p class="link__why">${a.why}</p>
+            ${K.Katmanli({ metin:a.why, sinif:'link__why' })}
           </div>`;
       })}`,
     });
@@ -565,7 +557,7 @@ SP.Screens.meals = (function(){
         body:K.Notice({ tone:'info',
           body:'Öneri için en az birkaç günlük öğün kaydı gerekir. '
             + 'Kayıt yoksa eksik hesaplanamaz — sıfır sayılmaz.' }),
-        foot:K.Button({ label:'Öğün ekle', size:'sm', tone:'primary',
+        foot:K.Button({ label:'Öğün ekle', size:'sm',
           act:'meal-tab', data:{ 'data-tab':'gunluk' } }) });
     }
     const under = g.rows.filter(r => r.kind === 'under').slice(0, 4);
@@ -612,26 +604,39 @@ SP.Screens.meals = (function(){
       </section>`;
   }
 
+  /* Sekme yok (EKIP-PLANI §1.2): üç bölüm alt alta; bölüm çubuğu kaydırır,
+     günün öğün sayısı çubukta rozet. Bir bölüm çizilemezse yalnız o bölüm
+     sakin bir notla düşer. */
+  const BODIES = {
+    gunluk:() => html`${K.Ledger(() => [quickEntry(), dayCard(), targetCard()])}
+      <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`,
+    oneri:() => html`${K.Ledger(() => [energyCard(), labLinkCard(), suggestCard()])}
+      <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`,
+    deger:() => html`${K.Ledger(() => [microCard(), gapCard()])}
+      <div class="mt-24">${raw(UI.rail(['bioavailability', 'nutri-gap']))}</div>`,
+  };
+
+  function govde(t){
+    try{ return BODIES[t.id](); }
+    catch(e){
+      console.error('Öğün bölümü çizilemedi (' + t.id + '):', e);
+      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; verin yerinde duruyor.' });
+    }
+  }
+
   async function render(){
-    const tab = S.ui.mealTab || 'gunluk';
-    const head = html`<div class="mb-8">${tabs()}</div>`;
+    const n = M.mealsOf(shownDate()).length;
+    return String(K.SayfaBolumleri({ act:'meal-tab', aria:'Besin bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t),
+        sayi:t.id === 'gunluk' && n ? n : null })) }));
+  }
 
-    if(tab === 'oneri'){
-      return String(html`${head}${K.Ledger(() => [
-        energyCard(), labLinkCard(), suggestCard(),
-      ])}
-      <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`);
-    }
-
-    if(tab === 'deger'){
-      return String(html`${head}${K.Ledger(() => [microCard(), gapCard()])}
-      <div class="mt-24">${raw(UI.rail(['bioavailability', 'nutri-gap']))}</div>`);
-    }
-
-    return String(html`${head}${K.Ledger(() => [
-      quickEntry(), dayCard(), targetCard(),
-    ])}
-    <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`);
+  /* Başka yerden istenen bölüm (ofis kartının «Besin değeri tablosu» gibi)
+     çizimden sonra görünür yapılır; istek bir kez kullanılır. */
+  function afterRender(){
+    const t = S.ui.mealTab;
+    S.ui.mealTab = null;
+    if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
   }
 
   /* Metinden gelen kalemleri secili ogune yazar. */
@@ -677,7 +682,7 @@ SP.Screens.meals = (function(){
       UI.toast(items.length + ' gıda eklendi · tahmin');
       SP.App.render();
     },
-    async 'meal-tab'(el){ S.ui.mealTab = el.dataset.tab; SP.App.render(); },
+    async 'meal-tab'(el){ K.bolumeGit(el.dataset.tab); },
     /* Tahlil bagindan olcume gitmek: Testler bolumu o olcumun egilimini acar. */
     async 'open-marker-x'(el){
       S.ui.trendMarker = el.dataset.id;
@@ -813,10 +818,10 @@ SP.Screens.meals = (function(){
         + (tg.ok ? ' / ' + tg.protein.min + ' g' : '');
     },
     actions(){
-      return String(html`${K.Button({ label:'Öğün ekle', icon:'plus', size:'sm', tone:'primary',
+      return String(html`${K.Button({ label:'Öğün ekle', icon:'plus', size:'sm',
         act:'meal-tab', data:{ 'data-tab':'gunluk' } })}
         ${K.Button({ label:'Öneriyi aç', size:'sm', act:'meal-tab', data:{ 'data-tab':'oneri' } })}`);
     },
-    render, handle, change, guessSlot,
+    render, afterRender, handle, change, guessSlot,
   };
 })();

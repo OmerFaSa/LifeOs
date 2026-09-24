@@ -57,7 +57,7 @@ SP.Screens.kitchen = (function(){
     if(!res.ok){
       return K.Card({ title:'Paylaştırma',
         body:K.Notice({ tone:'warn', body:res.error }),
-        foot:K.Button({ label:'Profilleri aç', size:'sm', tone:'primary',
+        foot:K.Button({ label:'Profilleri aç', size:'sm',
           act:'go', data:{ 'data-route':'family' } }) });
     }
 

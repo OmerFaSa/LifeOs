@@ -1640,6 +1640,8 @@ button.minrow:hover{ background:var(--surface-2); }
 .pickcard.is-on .pickcard__box{
   background:var(--primary); border-color:var(--primary); color:var(--primary-ink);
 }
+/* Önerilen seansın işareti çizgi simge (emoji değil: sadelik §1.2). */
+.pickcard__box svg{ width:12px; height:12px; stroke-width:2.6; }
 .pickcard__body{ min-width:0; flex:1; }
 .pickcard__name{ display:block; font-size:var(--fs-sm); font-weight:650; line-height:1.3; }
 .pickcard__meta{ display:block; font-size:var(--fs-xs); color:var(--text-3); margin-top:2px; line-height:1.35; }

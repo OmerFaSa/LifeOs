@@ -200,6 +200,19 @@ SP.C = (function(){
     </div>`;
   }
 
+  /* KATMANLI METİN: koddan kurulan (uzunluğu veriye bağlı) bir açıklama 30
+     kelimeyi aşarsa İLK CÜMLE görünür kalır, gerisi «Ayrıntı» katmanına iner;
+     kısaysa olduğu gibi tek paragraf. Hiçbir cümle silinmez (EKIP-PLANI §1.2). */
+  const kelimeSay = s => (String(s || '').match(/[\p{L}\p{N}]+/gu) || []).length;
+  function Katmanli(o){
+    const metin = String(o.metin == null ? '' : o.metin).trim();
+    if(kelimeSay(metin) <= 30) return html`<p class="${o.sinif || ''}">${metin}</p>`;
+    const m = metin.match(/^([\s\S]+?[.!?…»])\s+(\S[\s\S]*)$/);
+    if(!m || kelimeSay(m[1]) > 30) return Ayrinti({ class:o.sinif, etiket:o.etiket || 'Ayrıntı',
+      govde:html`<p>${metin}</p>` });
+    return Ayrinti({ class:o.sinif, ozet:m[1], etiket:o.etiket || 'Ayrıntı', govde:html`<p>${m[2]}</p>` });
+  }
+
   /* Bölüme kay ve odağı başlığına ver (ekran okuyucu nereye gelindiğini
      duysun). Azaltılmış harekette kayma anlıktır. */
   function bolumeGit(id){
@@ -557,7 +570,7 @@ SP.C = (function(){
   const SectionTitle = (title, right) => html`<div class="section-title"><h2>${title}</h2>${when(right, right)}</div>`;
 
   return {
-    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, Katmanli, Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     Entry, Ledger,
     PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, Busy, NextUp, Table, Pager, paginate,

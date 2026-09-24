@@ -102,7 +102,7 @@ SP.Screens.family = (function(){
             ${when(row.id !== active, () => K.IconButton({ icon:'trash', size:'sm', plain:true,
               aria:'Listeden çıkar', act:'remove-profile', data:{ 'data-id':row.id } }))}
           </div>`)}</div>`,
-      foot:K.Button({ label:'Profil ekle', size:'sm', tone:'primary', act:'add-profile' }),
+      foot:K.Button({ label:'Profil ekle', size:'sm', act:'add-profile' }),
     });
   }
 
@@ -131,7 +131,7 @@ SP.Screens.family = (function(){
         ${K.Notice({ tone:'info', class:'mt-10',
           body:'Tema seçildiği anda uygulanır. «Kaydet» yalnız hanedeki kişi '
             + 'sayısı için. Tek tasarım: renk modülü söyler.' })}`,
-      foot:K.Button({ label:'Kaydet', size:'sm', tone:'primary', act:'save-prefs' }),
+      foot:K.Button({ label:'Kaydet', size:'sm', act:'save-prefs' }),
     });
   }
 

@@ -54,26 +54,20 @@ SP.Screens.labs = (function(){
   /* Alt sayfadaki ilaç kaydı — kaydedilene kadar depoya hiçbir şey yazılmaz. */
   let medDraft = null;
 
-  function tabs(){
-    const items = TABS.map(t => {
-      if(t.id === 'gecmis' && S.labs.length) return Object.assign({}, t, { count:S.labs.length });
-      if(t.id === 'ilac'){
-        const n = SP.Meds.activeList().length;
-        if(n) return Object.assign({}, t, { count:n });
-      }
-      if(t.id === 'kiyas' && S.labs.length >= 2){
-        /* Rozette oturum sayısı değil GERÇEK DEĞİŞİM sayısı durur:
-           sekmenin orada olması haber değil, orada iş olması haber. */
-        const b2 = S.labs[S.labs.length - 1], a2 = S.labs[S.labs.length - 2];
-        const n = compareRows(a2, b2)
-          .filter(r => r.kind === 'diff' && r.change && r.change.meaningful).length;
-        if(n) return Object.assign({}, t, { count:n });
-      }
-      const n = Object.keys(draft.values).length;
-      if(t.id === 'giris' && n) return Object.assign({}, t, { count:n });
-      return t;
-    });
-    return K.Subtabs({ items, value:S.ui.labTab, act:'lab-tab', aria:'Test görünümü' });
+  /* Bölüm çubuğundaki rozetler: sekme şeridindeki sayıların aynısı. */
+  function rozet(id){
+    if(id === 'gecmis' && S.labs.length) return S.labs.length;
+    if(id === 'ilac'){ const n = SP.Meds.activeList().length; return n || null; }
+    if(id === 'kiyas' && S.labs.length >= 2){
+      /* Rozette oturum sayısı değil GERÇEK DEĞİŞİM sayısı durur:
+         bölümün orada olması haber değil, orada iş olması haber. */
+      const b2 = S.labs[S.labs.length - 1], a2 = S.labs[S.labs.length - 2];
+      const n = compareRows(a2, b2)
+        .filter(r => r.kind === 'diff' && r.change && r.change.meaningful).length;
+      return n || null;
+    }
+    if(id === 'giris'){ const n = Object.keys(draft.values).length; return n || null; }
+    return null;
   }
 
   /* ------------------------------------------------------------ süzgeç */
@@ -91,7 +85,14 @@ SP.Screens.labs = (function(){
 
     const items = [{ id:'all', label:'Tümü', count:SP.Bio.summary().measured }]
       .concat(used.map(p => ({ id:p.id, label:p.name.replace(/\s*paneli$/i, ''), count:counts[p.id] })));
-    return K.Subtabs({ items, value:S.ui.labFilter, act:'lab-filter', aria:'Panel süzgeci' });
+    /* Süzgeç sekme DEĞİL (EKIP-PLANI §1.2): listeyi daraltan basılı/
+       basılmamış çipler; eylem aynı (`lab-filter`). */
+    const secili = S.ui.labFilter || 'all';
+    return html`<div class="row wrap gap-6" role="group" aria-label="Panel süzgeci">
+      ${map(items, x => K.Chip({ label:x.label + (x.count ? ' · ' + x.count : ''),
+        act:'lab-filter', on:x.id === secili,
+        data:{ 'data-tab':x.id, 'aria-pressed':x.id === secili ? 'true' : 'false' } }))}
+    </div>`;
   }
 
   /* ---------------------------------------------------------- sonuçlar */
@@ -139,7 +140,7 @@ SP.Screens.labs = (function(){
         label:'Sonuçlar', meta:'kayıt yok',
         note:'Elindeki hastane raporunu yapıştır ya da dosyasını bırak; '
           + 'değerler kendiliğinden şemaya oturur.',
-        action:K.Button({ label:'Rapor yapıştır', tone:'primary', act:'open-paste' }),
+        action:K.Button({ label:'Rapor yapıştır', act:'open-paste' }),
         body:P.empty('Henüz hiç test girilmedi.'),
       })]);
     }
@@ -157,7 +158,7 @@ SP.Screens.labs = (function(){
           + 'tıklayınca referans aralığı, hedef bandı ve beslenme bağı açılır.',
         action:html`${K.Input({ id:'lab-q', value:S.ui.labQuery || '',
           placeholder:'Ölçüm ara…', aria:'Ölçüm ara', change:'lab-query', debounce:200 })}
-          ${K.Button({ label:'Test gir', tone:'primary', act:'lab-tab',
+          ${K.Button({ label:'Test gir', act:'lab-tab',
             data:{ 'data-tab':'giris' } })}
           ${K.Button({ label:'Hekime götür', act:'open-doctor' })}`,
         body:html`
@@ -265,7 +266,7 @@ SP.Screens.labs = (function(){
       K.Entry({
         label:'Oturum', meta:'tarih ve laboratuvar',
         note:'Aynı tarihe ikinci kez girilen değerler o oturumun üstüne yazılır.',
-        action:K.Button({ label:'Rapor yapıştır', icon:'flask', tone:'primary',
+        action:K.Button({ label:'Rapor yapıştır', icon:'flask',
           act:'open-paste' }),
         body:html`
           <div class="pair">
@@ -301,7 +302,7 @@ SP.Screens.labs = (function(){
         note:'Elindeki rapordaki bütün değerleri tek seferde yaz. Boş bıraktığın '
           + 'satır yok sayılır — sıfır olarak kaydedilmez.',
         action:K.Input({ id:'entry-q', value:S.ui.labQuery || '',
-          placeholder:'Ölçüm ara…', change:'lab-query', debounce:200 }),
+          placeholder:'Ölçüm ara…', aria:'Test girişinde ölçüm ara', change:'lab-query', debounce:200 }),
         body:html`
           ${when(!list.length, () => K.Notice({ tone:'info',
             body:'Bu adla bir ölçüm bulunamadı.' }))}
@@ -352,7 +353,7 @@ SP.Screens.labs = (function(){
         meta:series.length + ' ölçüm',
         note:'Bir ölçüm başkasıyla değil, KENDİ geçmişiyle kıyaslanır. '
           + 'Yön en az ' + SP.Bio.MIN_POINTS + ' ölçümle söylenir.',
-        action:K.Select({ value:id, change:'pick-marker', options }),
+        action:K.Select({ value:id, change:'pick-marker', aria:'Eğilimi gösterilecek ölçüm', options }),
         body:html`
           ${when(series.length < 2, () => K.Notice({ tone:'info',
             body:'Grafik için en az iki ölçüm gerekir. Şu an ' + series.length + ' var.' }))}
@@ -715,7 +716,7 @@ SP.Screens.labs = (function(){
         label:'Paneller', meta:'kayıt yok',
         note:'Bir panelin bütünü, parçalarının toplamından fazlasını söyler. '
           + 'Test girince paneller burada bir arada okunur.',
-        action:K.Button({ label:'Rapor yapıştır', tone:'primary', act:'open-paste' }),
+        action:K.Button({ label:'Rapor yapıştır', act:'open-paste' }),
         body:P.empty('Henüz test girilmedi.'),
       })]);
     }
@@ -812,7 +813,7 @@ SP.Screens.labs = (function(){
         note:'Bir hap ölçümü değiştirir: demir takviyesi ferritini yükseltir, '
           + 'statin LDL\'yi düşürür, mide ilacı B12 emilimini bozar. Kayıt '
           + 'olmadan sistem «değişti» der ama sebebini bilemez.',
-        action:K.Button({ label:'Ekle', tone:'primary', act:'add-med' }),
+        action:K.Button({ label:'Ekle', act:'add-med' }),
         body:html`
           ${when(!etkin.length, () => P.empty('Şu an kullandığın bir şey kayıtlı değil.'))}
           ${when(etkin.length, () => html`<div class="medlist">${map(etkin, r => satir(r, true))}</div>`)}`,
@@ -861,7 +862,7 @@ SP.Screens.labs = (function(){
             placeholder:'Ör. Günlük tuz tüketimi sınırlı olmalı; öğün atlanmamalı.' })}
           <div class="row gap-8">
             ${K.Input({ id:'hk-tarih', type:'date', value:U.todayISO(), aria:'Talimat tarihi' })}
-            ${K.Button({ label:'Talimatı ekle', tone:'primary', act:'hekim-ekle' })}
+            ${K.Button({ label:'Talimatı ekle', act:'hekim-ekle' })}
           </div>
         </div>`,
     });
@@ -966,7 +967,7 @@ SP.Screens.labs = (function(){
         label:'Karşılaştır', meta:S.labs.length + ' oturum',
         note:'Karşılaştırma için en az iki test oturumu gerekir. '
           + 'Tek oturumla «ne değişti» sorusunun cevabı yoktur.',
-        action:K.Button({ label:'Rapor yapıştır', tone:'primary', act:'open-paste' }),
+        action:K.Button({ label:'Rapor yapıştır', act:'open-paste' }),
         body:P.empty('En az iki test oturumu gerekir.'),
       })]);
     }
@@ -1062,13 +1063,12 @@ SP.Screens.labs = (function(){
       K.Entry({
         label:'Nasıl okunur', meta:'eşik',
         note:'Kendi ölçümlerinin saçılması eşiktir.',
-        body:K.Notice({ tone:'info',
-          body:'Bir ölçümün en az ' + SP.Bio.BASELINE_MIN + ' kaydı varsa kendi '
-            + 'ortalaması ve saçılması hesaplanır. İki oturum arasındaki fark bu '
-            + 'saçılmadan küçükse «gürültü sayılır» yazar: laboratuvarın hata payı '
-            + 've günden güne dalgalanma o kadarını zaten üretir. Üçten az kaydı '
-            + 'olan ölçümde eşik hesaplanamaz ve «eşik yok» yazar — sistem '
-            + 'sessizce «gerçek» demez.' }),
+        body:K.Ayrinti({ ozet:'Fark kendi saçılmandan küçükse «gürültü sayılır»; '
+            + SP.Bio.BASELINE_MIN + ' kayıttan azsa «eşik yok».',
+          govde:html`<p>Bir ölçümün en az ${SP.Bio.BASELINE_MIN} kaydı varsa kendi ortalaması
+            ve saçılması hesaplanır. Laboratuvarın hata payı ve günden güne dalgalanma o
+            kadarını zaten üretir. Az kayıtlı ölçümde eşik hesaplanamaz — sistem sessizce
+            «gerçek» demez.</p>` }),
       }),
     ]);
   }
@@ -1079,7 +1079,7 @@ SP.Screens.labs = (function(){
     if(!S.labs.length){
       return K.Ledger([K.Entry({
         label:'Geçmiş', meta:'kayıt yok',
-        action:K.Button({ label:'Rapor yapıştır', tone:'primary', act:'open-paste' }),
+        action:K.Button({ label:'Rapor yapıştır', act:'open-paste' }),
         body:P.empty('Henüz test girilmedi.'),
       })]);
     }
@@ -1192,23 +1192,38 @@ SP.Screens.labs = (function(){
 
   /* --------------------------------------------------------------- ekran */
 
-  async function render(){
-    const tab = S.ui.labTab;
-    const flags = M.openFlags();
+  /* Sekme yok (EKIP-PLANI §1.2): yedi bölüm alt alta; bölüm çubuğu kaydırır.
+     Açık kırmızı bayraklar her şeyin üstünde kalır. Bir bölüm çizilemezse
+     yalnız o bölüm sakin bir notla düşer. */
+  const BODIES = {
+    sonuc:() => html`${resultsView()}<div class="mt-24">${P.clinicalNote()}</div>`,
+    giris:() => entryView(), gecmis:() => historyView(), kiyas:() => compareView(),
+    panel:() => panelView(), ilac:() => medsView(), trend:() => trendView(),
+  };
 
+  function govde(t){
+    try{ return BODIES[t.id](); }
+    catch(e){
+      console.error('Testler bölümü çizilemedi (' + t.id + '):', e);
+      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; verin yerinde duruyor.' });
+    }
+  }
+
+  async function render(){
+    const flags = M.openFlags();
     return String(html`
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
-      <div class="mb-20">${tabs()}</div>
-      ${tab === 'giris' ? entryView()
-        : tab === 'gecmis' ? historyView()
-        : tab === 'kiyas' ? compareView()
-        : tab === 'panel' ? panelView()
-        : tab === 'ilac' ? medsView()
-        : tab === 'trend' ? trendView()
-        : resultsView()}
-      ${when(tab === 'sonuc', () => html`<div class="mt-24">
-        ${P.clinicalNote()}</div>`)}
+      ${K.SayfaBolumleri({ act:'lab-tab', aria:'Test bölümleri',
+        bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t), sayi:rozet(t.id) })) })}
       <div class="mt-24">${raw(UI.rail(['ref-range', 'optimal-band', 'trend', 'red-flag', 'derived', 'lab-paste']))}</div>`);
+  }
+
+  /* Başka yerden istenen bölüm (ölçümden «Eğilimi aç», kayıttan sonra
+     «Sonuçlar») çizimden sonra görünür yapılır; istek bir kez kullanılır. */
+  function afterRender(){
+    const t = S.ui.labTab;
+    S.ui.labTab = null;
+    if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
   }
 
   const handle = {
@@ -1224,7 +1239,7 @@ SP.Screens.labs = (function(){
       UI.toast('Talimat silindi');
       SP.App.render();
     },
-    async 'lab-tab'(el){ S.ui.labTab = el.dataset.tab; S.ui.labQuery = ''; SP.App.render(); },
+    async 'lab-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'lab-filter'(el){ S.ui.labFilter = el.dataset.tab; SP.App.render(); },
     async 'toggle-empty'(){ S.ui.labShowEmpty = !S.ui.labShowEmpty; SP.App.render(); },
     async 'open-marker'(el){
@@ -1534,10 +1549,10 @@ SP.Screens.labs = (function(){
       return s.measured + ' ölçüm · ' + s.out + ' referans dışı';
     },
     actions(){
-      return String(html`${K.Button({ label:'Test gir', icon:'flask', tone:'primary', size:'sm',
+      return String(html`${K.Button({ label:'Test gir', icon:'flask', size:'sm',
         act:'lab-tab', data:{ 'data-tab':'giris' } })}
         ${K.Button({ label:'Rapor yapıştır', size:'sm', act:'open-paste' })}`);
     },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

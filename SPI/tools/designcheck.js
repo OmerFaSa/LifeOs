@@ -196,6 +196,11 @@ let DUZEN_SAYISI = 0;
                içindekiler o kabın kendi ölçüsüne kalır. */
             const dekor = e => !!(e && (e.closest('[aria-hidden="true"]') || e.closest('img[alt=""]')
               || e.closest('[role="presentation"]')));
+            /* Görsel olarak gizlenmiş ekran okuyucu metni (1×1 px kutuda bilerek
+               kırpılır: dar ekranda kesinlik adı gibi). İçerik kaybolmaz,
+               okuyucuya gider; kırpılan içerik sayılmaz. */
+            const okuyucuMetni = e => e.clientWidth <= 1 && e.clientHeight <= 1
+              && getComputedStyle(e).position === 'absolute';
             const kapIcinde = (e, kok) => {
               for(let q = e; q && q !== kok; q = q.parentElement){
                 const s = getComputedStyle(q);
@@ -237,10 +242,10 @@ let DUZEN_SAYISI = 0;
                  da ulaşamaz. `auto`/`scroll` sorun değil: kaydırılabilir. */
               const ox = cs.overflowX, oy = cs.overflowY;
               if((ox === 'hidden' || ox === 'clip') && el.scrollWidth > el.clientWidth + 2
-                 && gercekTasma(el, 'x'))
+                 && !okuyucuMetni(el) && gercekTasma(el, 'x'))
                 kirpik.push(ad(el) + ' (' + el.scrollWidth + '>' + el.clientWidth + ')');
               if((oy === 'hidden' || oy === 'clip') && el.scrollHeight > el.clientHeight + 2
-                 && cs.position !== 'fixed' && gercekTasma(el, 'y'))
+                 && cs.position !== 'fixed' && !okuyucuMetni(el) && gercekTasma(el, 'y'))
                 kirpik.push(ad(el) + ' ↕(' + el.scrollHeight + '>' + el.clientHeight + ')');
 
               if(b.right <= d.clientWidth + 2 && b.left >= -2) continue;

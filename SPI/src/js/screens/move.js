@@ -42,6 +42,18 @@ SP.Screens.move = (function(){
       .concat(SP.PATTERNS.map(p => ({ id:p.id, label:p.label, count:byId[p.id] || null })));
   }
 
+  /* Kalıp süzgeci sekme DEĞİL (EKIP-PLANI §1.2): listeyi daraltan basılı/
+     basılmamış çipler. Eylem aynı (`pick-pattern-tab`), yalnız biçimi
+     değişti; seçili olan `aria-pressed` taşır. */
+  function desenSuzgeci(){
+    const secili = S.ui.movePattern || 'all';
+    return html`<div class="row wrap gap-6 mb-8" role="group" aria-label="Hareket kalıbı">
+      ${map(patternTabs(), x => K.Chip({ label:x.label + (x.count ? ' · ' + x.count : ''),
+        act:'pick-pattern-tab', on:x.id === secili,
+        data:{ 'data-tab':x.id, 'aria-pressed':x.id === secili ? 'true' : 'false' } }))}
+    </div>`;
+  }
+
   function exercisesOfArea(areaId){
     const area = SP.AREA_BY_ID[areaId];
     if(!area || !area.kind) return [];
@@ -61,7 +73,7 @@ SP.Screens.move = (function(){
       meta:rx.factor >= 1 ? 'tam yük' : 'yükün %' + Math.round(rx.factor * 100) + '\u2019i',
       note:'Emri toparlanma belirler, istek değil. Sistem yükü kendiliğinden '
         + 'azaltabilir ama asla kendiliğinden artıramaz.',
-      action:when(!r.ok, () => K.Button({ label:'Veri gir', tone:'primary',
+      action:when(!r.ok, () => K.Button({ label:'Veri gir',
         act:'go', data:{ 'data-route':'today' } })),
       body:html`
         ${when(r.ok, () => html`<div class="row wrap" style="gap:26px">
@@ -87,7 +99,7 @@ SP.Screens.move = (function(){
       body:html`<div class="picks">${map(SP.SESSION_TEMPLATES, t => html`
         <button class="${cls('pickcard', suggested[0] === t.id && 'is-on')}"
           data-act="start-session" data-id="${t.id}">
-          <span class="pickcard__box" aria-hidden="true">${suggested[0] === t.id ? '★' : ''}</span>
+          <span class="pickcard__box" aria-hidden="true">${suggested[0] === t.id ? raw(UI.icon('check')) : ''}</span>
           <span class="pickcard__body">
             <span class="pickcard__name">${t.name}
               ${when(suggested.indexOf(t.id) >= 0, () => html`<span class="tiny dim"> · önerilen</span>`)}</span>
@@ -170,7 +182,7 @@ SP.Screens.move = (function(){
         <div class="ladderblk__foot">
           <span class="small dim">${pr.note}</span>
           <span class="row-sm">
-            ${when(pr.ready, () => K.Button({ label:'Üst basamağa geç', size:'sm', tone:'primary',
+            ${when(pr.ready, () => K.Button({ label:'Üst basamağa geç', size:'sm',
               act:'advance', data:{ 'data-id':ex.id } }))}
             ${K.Button({ label:'Basamak seç', size:'sm', act:'pick-level', data:{ 'data-id':ex.id } })}
           </span>
@@ -205,11 +217,10 @@ SP.Screens.move = (function(){
         label:area.label,
         meta:list.length + ' hareket',
         note:area.note,
-        action:K.Button({ label:'Seans ekle', icon:'plus', tone:'primary',
+        action:K.Button({ label:'Seans ekle', icon:'plus',
           act:'start-area', data:{ 'data-area':areaId } }),
         body:html`
-          ${when(areaId === 'kuvvet', () => K.Subtabs({ items:patternTabs(),
-            value:S.ui.movePattern || 'all', act:'pick-pattern-tab', aria:'Hareket kalıbı' }))}
+          ${when(areaId === 'kuvvet', () => desenSuzgeci())}
           ${when(!list.length, () => P.empty('Bu kalıpta tanımlı hareket yok.'))}
           <div class="ladders">${map(list, ladderBlock)}</div>`,
       }),
@@ -274,7 +285,7 @@ SP.Screens.move = (function(){
         meta:rx.kind === 'rest' ? 'evet' : rx.kind === 'full' ? 'hayır' : 'hafiflet',
         note:SP.AREA_BY_ID.dinlenme.note + ' Kazanç antrenmanda değil, antrenmandan '
           + 'sonraki toparlanmada oluşur.',
-        action:when(!r.ok, () => K.Button({ label:'Veri gir', tone:'primary',
+        action:when(!r.ok, () => K.Button({ label:'Veri gir',
           act:'go', data:{ 'data-route':'today' } })),
         body:html`
           ${when(r.ok, () => html`<div class="row wrap" style="gap:26px">
@@ -297,10 +308,11 @@ SP.Screens.move = (function(){
 
       K.Entry({
         label:'Son yedi gün', meta:off + ' boş gün',
-        note:'Yük eğrisi yalnız yapılan işi değil, yapılmayanı da sayar. Üst üste '
-          + 'boş geçen günler kondisyonu düşürür; hiç boş geçmeyen haftalar son '
-          + 'haftayı son aya göre şişirir. İkisi de aynı ölçüde izlenir.',
-        body:html`<div class="cols-3">
+        note:'Yük eğrisi yalnız yapılan işi değil, yapılmayanı da sayar.',
+        body:html`${K.Ayrinti({ govde:html`<p>Üst üste boş geçen günler kondisyonu düşürür;
+          hiç boş geçmeyen haftalar son haftayı son aya göre şişirir. İkisi de aynı ölçüde
+          izlenir.</p>` })}
+          <div class="cols-3">
           ${K.Stat({ label:'Boş gün', value:String(off), unit:'/ 7',
             note:off === 0 ? 'hiç boş gün yok' : off >= 5 ? 'çok az seans' : 'dengeli' })}
           ${K.Stat({ label:'Ortalama uyku',
@@ -396,49 +408,55 @@ SP.Screens.move = (function(){
 
   /* --------------------------------------------------------------- ekran */
 
-  function tabs(tab){
-    const done = M.workoutsOf(U.todayISO()).length;
-    const items = TABS.map(t => Object.assign({}, t,
-      t.id === 'bugun' && done ? { count:done } : {}));
-    return K.Subtabs({ items, value:tab, act:'move-tab', aria:'Hareket görünümü' });
-  }
-
-  async function render(){
-    const tab = S.ui.moveTab;
-    const head = html`<div class="mb-8">${tabs(tab)}</div>`;
-
-    if(SP.AREA_BY_ID[tab]){
-      return String(html`${head}
-        ${tab === 'dinlenme' ? restView() : areaView(tab)}
-        <div class="mt-24">${raw(UI.rail(tab === 'dinlenme'
-          ? ['recovery-order', 'deload', 'load']
-          : ['progression', 'load', 'deload']))}</div>`);
-    }
-
-    if(tab === 'ilerleme'){
-      return String(html`${head}${K.Ledger([
+  /* Sekme yok (EKIP-PLANI §1.2): Bugün, dört alan ve İlerleme alt alta;
+     bölüm çubuğu kaydırır, bugünkü seans sayısı çubukta rozet. «Kalıp
+     dengesi» eskiden üç sekmede ayrı ayrı çiziliyordu; alt alta durunca
+     aynı kart üç kez görünürdü — yalnız Kuvvet'te, kalıpların yanında. */
+  const BODIES = {
+    bugun:() => html`${K.Ledger([orderEntry(), pickSessionEntry(), todaySessionsEntry()])}
+      <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
+    ilerleme:() => html`${K.Ledger([
         K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
           note:'Seans yükü süre × zorluktur. Zorluk önce senin bildirdiğin algılanan '
             + 'zorluktan, yoksa hareketlerin MET ortalamasından gelir. İkisi de yoksa '
             + 'seans yük üretmez — uydurulmuş yük yazılmaz.',
           body:loadBody() }),
-        K.Entry({ label:'Kalıp dengesi', meta:'her kalıp haftada en az bir kez',
-          body:balanceBody() }),
         K.Entry({ label:'Seans geçmişi', meta:S.workouts.length + ' kayıt',
           body:historyBody() }),
       ])}
-      <div class="mt-24">${raw(UI.rail(['load', 'deload', 'recovery-order']))}</div>`);
-    }
+      <div class="mt-24">${raw(UI.rail(['load', 'deload', 'recovery-order']))}</div>`,
+  };
 
-    return String(html`${head}${K.Ledger([
-      orderEntry(), pickSessionEntry(), todaySessionsEntry(),
-      K.Entry({ label:'Kalıp dengesi', meta:'haftalık', body:balanceBody() }),
-    ])}
-    <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`);
+  function govde(t){
+    try{
+      if(BODIES[t.id]) return BODIES[t.id]();
+      return html`${t.id === 'dinlenme' ? restView() : areaView(t.id)}
+        <div class="mt-24">${raw(UI.rail(t.id === 'dinlenme'
+          ? ['recovery-order', 'deload', 'load']
+          : ['progression', 'load', 'deload']))}</div>`;
+    }catch(e){
+      console.error('Hareket bölümü çizilemedi (' + t.id + '):', e);
+      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; verin yerinde duruyor.' });
+    }
+  }
+
+  async function render(){
+    const done = M.workoutsOf(U.todayISO()).length;
+    return String(K.SayfaBolumleri({ act:'move-tab', aria:'Hareket bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t),
+        sayi:t.id === 'bugun' && done ? done : null })) }));
+  }
+
+  /* Başka yerden istenen bölüm çizimden sonra görünür yapılır; istek bir
+     kez kullanılır. */
+  function afterRender(){
+    const t = S.ui.moveTab;
+    S.ui.moveTab = null;
+    if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
   }
 
   const handle = {
-    async 'move-tab'(el){ S.ui.moveTab = el.dataset.tab; SP.App.render(); },
+    async 'move-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'pick-pattern-tab'(el){ S.ui.movePattern = el.dataset.tab; SP.App.render(); },
     async 'pick-pattern'(el){
       S.ui.moveTab = 'kuvvet';
@@ -566,6 +584,6 @@ SP.Screens.move = (function(){
       return String(K.Button({ label:'Seans ekle', icon:'plus', size:'sm', tone:'primary',
         act:'start-session', data:{ 'data-id':'' } }));
     },
-    render, handle,
+    render, afterRender, handle,
   };
 })();

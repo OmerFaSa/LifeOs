@@ -152,7 +152,7 @@ SP.Screens.analytics = (function(){
     return K.Card({
       title:'Ölçüm serisi', hint:'trend',
       sub:b ? b.name : '',
-      actions:K.Select({ value:id, change:'pick-series',
+      actions:K.Select({ value:id, change:'pick-series', aria:'Serisi gösterilecek ölçüm',
         options:(measured.length ? measured : SP.BIOMARKERS).map(x => ({ value:x.id, label:x.name })) }),
       body:html`
         ${when(series.length < 2, () => K.Notice({ tone:'info',
@@ -276,11 +276,15 @@ SP.Screens.analytics = (function(){
           sistem yüksek olanın iyi olduğunu VARSAYMAZ.</p>
         ${(function(){
           const pol = SP.Goodhart.policy();
-          return html`<p class="tiny dim mt-8">Pencere ${pol.windowDays} gün ·
-            çaba artışı eşiği %${Math.round(pol.effortRiseThreshold * 100)} ·
-            sonuç durgunluk eşiği %${Math.round(pol.stagnationThreshold * 100)} ·
-            asgari çaba ${pol.minEffortMinutes} dk. Bu sayılar bir bulgu değil
-            bu yazılımın ayarıdır: ${pol.rationale}</p>`;
+          /* T2-14: asgari çaba tek sayı değildir; her çiftin kendi eşiği var
+             (gün, dakika, ölçüm). Politikada tek bir değer yoktu ve ekranda
+             «asgari çaba dk.» boş kalıyordu; uydurulmaz. */
+          return html`<div class="mt-8">${K.Ayrinti({
+            ozet:'Pencere ' + pol.windowDays + ' gün · çaba artışı eşiği %'
+              + Math.round(pol.effortRiseThreshold * 100) + ' · sonuç durgunluk eşiği %'
+              + Math.round(pol.stagnationThreshold * 100) + '.',
+            govde:html`<p>Asgari çaba her çift için ayrıdır. Bu sayılar bir bulgu değil bu
+              yazılımın ayarıdır: ${pol.rationale}</p>` })}</div>`;
         })()}
         ${map(ayrisan, p => html`<div class="mt-12">
           ${K.Notice({ tone:'warn', body:p.note })}
@@ -295,13 +299,12 @@ SP.Screens.analytics = (function(){
       label:'KALİBRASYON', hint:'calib',
       meta:puan.cert === 'missing' ? puan.n + '/' + SP.Calib.ASGARI + ' tahmin'
         : (puan.grade || '—'),
-      note:'Her sayıyı cihazdan bekleyen biri, cihaz yokken kendini okuyamaz. '
-         + 'Tahmin KÖR yazılır: değer ekranda dururken yazılan tahmin, tahmin '
-         + 'değil kopyadır. Ölçülen şey dardır — kayıtlı türlerde tahminin '
-         + 'sayıya ne kadar yaklaştığı; «kendini tanıma» değil. Bu bir sağlık '
-         + 'yargısı da değildir.',
+      note:'Tahmin KÖR yazılır: değer ekranda dururken yazılan tahmin, tahmin değil kopyadır.',
       wide:true,
       body:html`
+        ${K.Ayrinti({ govde:html`<p>Her sayıyı cihazdan bekleyen biri, cihaz yokken kendini
+          okuyamaz. Ölçülen şey dardır — kayıtlı türlerde tahminin sayıya ne kadar yaklaştığı;
+          «kendini tanıma» değil. Bu bir sağlık yargısı da değildir.</p>` })}
         ${K.Notice({ tone:'info', body:puan.note })}
         ${when(puan.bias.cert === 'measured', () => K.Notice({ tone:'info',
           title:'Yanlılık', body:puan.bias.note }))}
@@ -379,44 +382,51 @@ SP.Screens.analytics = (function(){
     });
   }
 
-  async function render(){
-    const tab = S.ui.analyticsTab;
-    const head = html`<div class="mb-8">${K.Subtabs({ items:TABS, value:tab,
-      act:'an-tab', aria:'Analiz görünümü' })}</div>`;
+  /* Sekme yok (EKIP-PLANI §1.2): beş okuma alt alta durur, üstteki bölüm
+     çubuğu sayfa içinde o okumaya kaydırır. Bir bölüm çizilemezse yalnız o
+     bölüm sakin bir notla düşer; öteki dördü durur. */
+  const BODIES = {
+    capraz:() => html`${K.Ledger(() => [crossCard(), pairCard()])}
+      <div class="mt-24">${raw(UI.rail(['correlation', 'trend', 'certainty']))}</div>`,
+    hafta:() => html`${K.Ledger(() => [reportCard(), disciplineCard(),
+        K.Entry({ label:'Raporun mantığı', meta:'sayı nereden gelir',
+          note:'Sayılar kural motorundan gelir; Patron ajan yalnızca cümleye çevirir. '
+            + 'Çelişki varsa öncelik sırası uygulanır ve hangi kuralın kazandığı yazılır.',
+          body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
+            rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
+      ])}
+      <div class="mt-24">${raw(UI.rail(['grounding', 'decision', 'minimum-day']))}</div>`,
+    seri:() => html`${K.Ledger(() => [seriesCard()])}
+      <div class="mt-24">${raw(UI.rail(['trend', 'ref-range', 'certainty']))}</div>`,
+    denetim:() => html`${K.Ledger(() => [denetimCard()])}
+      <div class="mt-24">${raw(UI.rail(['audit', 'certainty', 'red-flag']))}</div>`,
+    durust:() => html`${K.Ledger(() => [signalLedgerCard(), frictionCard(), goodhartCard(), calibCard()])}
+      <div class="mt-24">${raw(UI.rail(['signal', 'friction', 'goodhart', 'calib']))}</div>`,
+  };
 
-    if(tab === 'hafta'){
-      return String(html`${head}
-        ${K.Ledger(() => [reportCard(), disciplineCard(),
-          K.Entry({ label:'Raporun mantığı', meta:'sayı nereden gelir',
-            note:'Sayılar kural motorundan gelir; Patron ajan yalnızca cümleye çevirir. '
-              + 'Çelişki varsa öncelik sırası uygulanır ve hangi kuralın kazandığı yazılır.',
-            body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
-              rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
-        ])}
-        <div class="mt-24">${raw(UI.rail(['grounding', 'decision', 'minimum-day']))}</div>`);
+  function govde(t){
+    try{ return BODIES[t.id](); }
+    catch(e){
+      console.error('Analiz bölümü çizilemedi (' + t.id + '):', e);
+      return K.Notice({ tone:'warn', body:'Bu okuma şu an çizilemedi; verin yerinde duruyor.' });
     }
-    if(tab === 'denetim'){
-      return String(html`${head}
-        ${K.Ledger(() => [denetimCard()])}
-        <div class="mt-24">${raw(UI.rail(['audit', 'certainty', 'red-flag']))}</div>`);
-    }
-    if(tab === 'durust'){
-      return String(html`${head}
-        ${K.Ledger(() => [signalLedgerCard(), frictionCard(), goodhartCard(), calibCard()])}
-        <div class="mt-24">${raw(UI.rail(['signal', 'friction', 'goodhart', 'calib']))}</div>`);
-    }
-    if(tab === 'seri'){
-      return String(html`${head}
-        ${K.Ledger(() => [seriesCard()])}
-        <div class="mt-24">${raw(UI.rail(['trend', 'ref-range', 'certainty']))}</div>`);
-    }
-    return String(html`${head}
-      ${K.Ledger(() => [crossCard(), pairCard()])}
-      <div class="mt-24">${raw(UI.rail(['correlation', 'trend', 'certainty']))}</div>`);
+  }
+
+  async function render(){
+    return String(K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) }));
+  }
+
+  /* Başka ekrandan istenen bölüm (ofis kartının «Çapraz bağ tablosu» gibi)
+     çizimden sonra görünür yapılır; istek bir kez kullanılır. */
+  function afterRender(){
+    const t = S.ui.analyticsTab;
+    S.ui.analyticsTab = null;
+    if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
   }
 
   const handle = {
-    async 'an-tab'(el){ S.ui.analyticsTab = el.dataset.tab; SP.App.render(); },
+    async 'an-tab'(el){ K.bolumeGit(el.dataset.tab); },
 
     /* Tahmin KÖR açılır: gerçek değer burada hesaplanmaz. */
     async 'calib-open'(){
@@ -474,6 +484,6 @@ SP.Screens.analytics = (function(){
       return rows.length ? rows.length + ' belirgin bağ bulundu' : 'Belirgin bağ yok';
     },
     actions(){ return ''; },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

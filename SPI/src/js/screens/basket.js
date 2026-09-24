@@ -23,14 +23,6 @@ SP.Screens.basket = (function(){
     { id:'fiyat', label:'Fiyat', icon:'list' },
   ];
 
-  function toolbar(tab){
-    const n = ((S.basket && S.basket.items) || []).length;
-    const items = TABS.map(t => Object.assign({}, t, t.id === 'sepet' && n ? { count:n } : {}));
-    /* Eylemler hero'da duruyor; burada tekrar etmek aynı düğmeyi iki kez
-       göstermek olurdu. */
-    return K.Subtabs({ items, value:tab, act:'basket-tab', aria:'Sepet görünümü' });
-  }
-
   /* ---------------------------------------------------------------- sepet */
 
   function totalCard(){
@@ -55,7 +47,7 @@ SP.Screens.basket = (function(){
         ${when(b.estimate.pct >= 50 && b.rows.length, () => K.Notice({ tone:'warn', class:'mt-12',
           body:'Bu hesabın %' + b.estimate.pct + '\'i başlangıç tahminiyle yapıldı. '
             + 'Uygulama market taramaz; gerçeğe yaklaşmak için kendi fişindeki fiyatı gir.' }))}`,
-      foot:html`${K.Button({ label:'Kalem ekle', size:'sm', tone:'primary', act:'open-add' })}
+      foot:html`${K.Button({ label:'Kalem ekle', size:'sm', act:'open-add' })}
         ${K.Button({ label:'Öğünlerimden liste', size:'sm', act:'open-ogun-liste' })}
         ${K.Button({ label:'Haftalık sınır', size:'sm', act:'open-limit' })}`,
     });
@@ -65,7 +57,7 @@ SP.Screens.basket = (function(){
     const b = SP.Money.basketTotal();
     if(!b.rows.length){
       return K.Card({ title:'Kalemler',
-        body:P.empty('Sepet boş.', 'Kalem ekle', 'open-add') });
+        body:P.empty('Sepet boş.', 'Kalem ekle', 'open-add', null, true) });
     }
     return K.Card({
       title:'Kalemler', sub:'Maliyete göre sıralı',
@@ -174,7 +166,7 @@ SP.Screens.basket = (function(){
     return K.Card({
       title:'Fiyat listesi', hint:'price-estimate',
       sub:'Kendi fişindeki fiyat tahmini ezer',
-      actions:K.Input({ id:'price-q', value:q, size:'sm', placeholder:'Ara…',
+      actions:K.Input({ id:'price-q', value:q, size:'sm', placeholder:'Ara…', aria:'Fiyat listesinde ara',
         change:'price-query', data:{ 'data-debounce':'200' } }),
       body:html`
         ${K.Notice({ tone:'info',
@@ -187,7 +179,7 @@ SP.Screens.basket = (function(){
               ${when(p.source === 'seed', () => html`<span class="tiny dim"> · ${p.age.label}</span>`)}</span>
             <span class="pricerow__tl num">${p.tl == null ? '—' : U.fmtNum(p.tl) + ' TL/kg'}</span>
             ${K.Input({ type:'number', numeric:true, size:'sm', step:'1', min:0,
-              placeholder:'TL/kg', change:'set-price', data:{ 'data-id':f.id } })}
+              placeholder:'TL/kg', aria:f.name + ' fiyatı, TL/kg', change:'set-price', data:{ 'data-id':f.id } })}
           </div>`;
         })}</div>
         ${K.Pager({ page:page.page, pages:page.pages, total:page.total, act:'price-page' })}`,
@@ -331,11 +323,9 @@ SP.Screens.basket = (function(){
                   rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) })}</div>` })}
 
             ${K.Card({ title:'Fiyatlar nereden geliyor?', hint:'price-estimate',
-              body:html`<p class="small muted">Fiyatlar internetten çekilmez —
-                bu uygulama çevrimdışı çalışır ve sağlık verisi dışarı çıkmaz.
-                Başlangıçta tohum fiyat listesi kullanılır ve açıkça «tahmin»
-                olarak işaretlenir. Fişten girdiğin her fiyat tohumun üstüne
-                yazılır ve «ölçüldü» olur.</p>`,
+              body:K.Ayrinti({ ozet:'Başlangıçta tohum fiyatı «tahmin»; fişten girdiğin fiyat «ölçüldü» olur.',
+                govde:html`<p>Fiyatlar internetten çekilmez — bu uygulama çevrimdışı çalışır ve
+                  sağlık verisi dışarı çıkmaz. Fişten girdiğin her fiyat tohumun üstüne yazılır.</p>` }),
               foot:K.Button({ label:'Fiyat gir', size:'sm',
                 act:'basket-tab', data:{ 'data-tab':'fiyat' } }) })}
           </div></div>
@@ -475,35 +465,46 @@ SP.Screens.basket = (function(){
 
   /* --------------------------------------------------------------- ekran */
 
+  /* Sekme yok (EKIP-PLANI §1.2): dört bölüm alt alta; bölüm çubuğu kaydırır,
+     Sepet'in kalem sayısı çubukta rozet. Bir bölüm çizilemezse yalnız o
+     bölüm sakin bir notla düşer. */
+  const BODIES = {
+    butce:() => html`${budgetView()}
+      <div class="mt-24">${raw(UI.rail(['budget-rank', 'price-estimate', 'certainty']))}</div>`,
+    sepet:() => html`${K.Ledger(() => [totalCard(), itemsCard(), coverageCard()])}
+      <div class="mt-24">${raw(UI.rail(['price-estimate', 'substitute', 'bulk', 'budget-rank']))}</div>`,
+    ikame:() => html`${K.Ledger(() => [swapCard(), bulkCard(),
+        K.Entry({ label:'Bütçenin yeri', hint:'budget-rank', meta:'öncelik sırası',
+          note:SP.PRECEDENCE[5].note,
+          body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
+            rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
+      ])}
+      <div class="mt-24">${raw(UI.rail(['substitute', 'bulk', 'budget-rank']))}</div>`,
+    fiyat:() => html`${K.Ledger(() => [priceCard()])}
+      <div class="mt-24">${raw(UI.rail(['price-estimate', 'certainty']))}</div>`,
+  };
+
+  function govde(t){
+    try{ return BODIES[t.id](); }
+    catch(e){
+      console.error('Sepet bölümü çizilemedi (' + t.id + '):', e);
+      return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; verin yerinde duruyor.' });
+    }
+  }
+
   async function render(){
-    const tab = S.ui.basketTab;
-    if(tab === 'butce'){
-      return String(html`
-        <div class="mb-8">${toolbar(tab)}</div>
-        ${budgetView()}
-        <div class="mt-24">${raw(UI.rail(['budget-rank', 'price-estimate', 'certainty']))}</div>`);
-    }
-    if(tab === 'ikame'){
-      return String(html`
-        <div class="mb-8">${toolbar(tab)}</div>
-        ${K.Ledger(() => [swapCard(), bulkCard(),
-          K.Entry({ label:'Bütçenin yeri', hint:'budget-rank', meta:'öncelik sırası',
-            note:SP.PRECEDENCE[5].note,
-            body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
-              rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
-        ])}
-        <div class="mt-24">${raw(UI.rail(['substitute', 'bulk', 'budget-rank']))}</div>`);
-    }
-    if(tab === 'fiyat'){
-      return String(html`
-        <div class="mb-8">${toolbar(tab)}</div>
-        ${K.Ledger(() => [priceCard()])}
-        <div class="mt-24">${raw(UI.rail(['price-estimate', 'certainty']))}</div>`);
-    }
-    return String(html`
-      <div class="mb-8">${toolbar(tab)}</div>
-      ${K.Ledger(() => [totalCard(), itemsCard(), coverageCard()])}
-      <div class="mt-24">${raw(UI.rail(['price-estimate', 'substitute', 'bulk', 'budget-rank']))}</div>`);
+    const n = ((S.basket && S.basket.items) || []).length;
+    return String(K.SayfaBolumleri({ act:'basket-tab', aria:'Sepet bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t),
+        sayi:t.id === 'sepet' && n ? n : null })) }));
+  }
+
+  /* Başka yerden istenen bölüm (ofis kartının «İkame tablosu» gibi) çizimden
+     sonra görünür yapılır; istek bir kez kullanılır. */
+  function afterRender(){
+    const t = S.ui.basketTab;
+    S.ui.basketTab = null;
+    if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
   }
 
   const handle = {
@@ -566,7 +567,7 @@ SP.Screens.basket = (function(){
       UI.toast('Kaydedildi');
       SP.App.render();
     },
-    async 'basket-tab'(el){ S.ui.basketTab = el.dataset.tab; S.ui.foodPage = 1; SP.App.render(); },
+    async 'basket-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'open-add'(){ S.ui.foodPage = 1; addSheet(); },
     async 'add-page'(el){ S.ui.foodPage = Number(el.dataset.page); addSheet(); },
     async 'pick-basket'(el){ kgSheet(el.dataset.id); },
@@ -675,6 +676,6 @@ SP.Screens.basket = (function(){
         ${K.Button({ label:'Fiş oku', size:'sm', icon:'camera', act:'open-receipt' })}
         ${K.Button({ label:'Sınır ve ücretler', size:'sm', act:'open-limits' })}`);
     },
-    render, handle, change,
+    render, afterRender, handle, change,
   };
 })();

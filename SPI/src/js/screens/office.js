@@ -108,7 +108,7 @@ SP.Screens.office = (function(){
           ${SP.Office.ready(agent.id) ? K.Badge({ label:'model açık', tone:'info' })
             : K.Badge({ label:'kural motoru', tone:'muted', icon:false })}
         </div>
-        <p class="desk__line">${line}</p>
+        ${K.Katmanli({ metin:line, sinif:'desk__line' })}
         ${when(notes.length, () => html`<div class="notes mt-10">
           ${map(notes.slice(0, DESK_NOTES), n => html`
             <div class="note note--${n.tone}"><span class="note__dot"></span>
@@ -123,7 +123,7 @@ SP.Screens.office = (function(){
         <div class="row wrap mt-12">
           ${K.Button({ label:open ? 'Raporu kapat' : 'Raporu aç', size:'sm',
             act:'toggle-desk', data:{ 'data-id':agent.id } })}
-          ${K.Button({ label:'Soru sor', size:'sm', tone:'primary',
+          ${K.Button({ label:'Soru sor', size:'sm',
             act:'ask-agent', data:{ 'data-agent':agent.id } })}
         </div>`,
     });

@@ -40,7 +40,7 @@ SP.Palette = (function(){
     out.push({ id:'act:meeting', kind:'Eylem', label:'Ofis toplantısı başlat',
       hint:'Ofis', run:() => SP.App.go('meeting') });
     out.push({ id:'act:backup', kind:'Eylem', label:'Yedek indir',
-      hint:'Veri', run:() => { SP.App.go('guide'); SP.S.ui.guideTab = 'veri'; } });
+      hint:'Veri', run:() => { SP.S.ui.guideTab = 'veri'; SP.App.go('guide'); } });
 
     /* olcumler — dogrudan egilim ekranina goturur */
     SP.BIOMARKERS.forEach(b => {

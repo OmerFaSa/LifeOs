@@ -601,10 +601,12 @@ SP.Screens.today = (function(){
       label:'Hedeflerim', meta:l.length ? l.length + ' etkin' : 'yok',
       action:K.Button({ label:'Danışma’da hedef koy', act:'go', data:{ 'data-route':'team' } }),
       body:l.length ? html`<div class="stack-sm">${butceSatiri()}${map(l, hedefSatir)}</div>`
-        : html`<p class="small dim">Henüz hedefin yok. Danışma’da «3 ay içinde 3 kilo vermek
-          istiyorum» ya da «VKİ’mi 24’e indirmek istiyorum» gibi yazabilirsin; gerçekçi olup
-          olmadığını ve güvenli temposunu söylerim. Alışkanlık da kurabilirsin: «haftada 3 gün
-          30 dakika düzenli spor yapmak istiyorum».</p>`,
+        : K.Ayrinti({ ozet:'Henüz hedefin yok. Danışma’da bir cümleyle yazabilirsin.',
+          etiket:'Örnekler',
+          govde:html`<p>«3 ay içinde 3 kilo vermek istiyorum» ya da «VKİ’mi 24’e indirmek
+            istiyorum» gibi yazabilirsin; gerçekçi olup olmadığını ve güvenli temposunu söylerim.
+            Alışkanlık da kurabilirsin: «haftada 3 gün 30 dakika düzenli spor yapmak
+            istiyorum».</p>` }),
     });
   }
 
