@@ -930,6 +930,43 @@ R.Screens.today = (function(){
       ayak:serbest > 0 ? 'Plan dışı: ' + serbest + ' soru' + (dogru ? ' · ' + dogru + ' doğru' : '') : null });
   }
 
+  /* v5 DURUM KARTLARI (Tasarım Dili «AYS · Bugün»): günlük sayaç, son
+     deneme, tekrar borcu yan yana. Sayı KODDAN gelir ve etiketini taşır;
+     deneme yoksa «veri yok» yazar, sıfır yazmaz. */
+  function SonDenemeKutusu(){
+    const tyt = (S.exams || []).filter(e => e.family === 'TYT' && e.kind === 'full')
+      .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    if(!tyt.length){
+      return c.Kutu({ ad:'Son deneme', yuva:'veri yok', class:'durumkart',
+        govde:html`<p class="durumkart__bos">Henüz tam TYT denemesi yok; net burada kendiliğinden çıkar.</p>`,
+        ayak:c.Button({ label:'Denemelere git', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'exams' } }) });
+    }
+    const son = tyt[tyt.length - 1];
+    const net = M.examNet(son);
+    const once = tyt.length > 1 ? M.examNet(tyt[tyt.length - 2]) : null;
+    const fark = once == null ? null : Math.round((net - once) * 100) / 100;
+    const netler = tyt.slice(-3).map(M.examNet).sort((x, y) => x - y);
+    const medyan = tyt.length >= 3 ? netler[1] : null;
+    return c.Kutu({ ad:'Son deneme', yuva:'hesaplandı', class:'durumkart',
+      govde:html`<div class="durumkart__sayi"><b>${U.fmtNet(net)}</b><small>net</small>
+          ${when(fark != null, () => html`<span class="${cls('durumkart__fark', fark > 0 && 'is-artti', fark < 0 && 'is-azaldi')}">${fark > 0 ? '↑ ' : fark < 0 ? '↓ ' : ''}${U.fmtNet(Math.abs(fark))}</span>`)}</div>
+        <p class="durumkart__not">${U.fmtDate(son.date)}${when(medyan != null, () => ' · son üçün medyanı ' + U.fmtNet(medyan))}</p>` });
+  }
+
+  function TekrarBorcuKutusu(){
+    const vadeli = C.dueCards().length;
+    const geciken = C.overdueCards ? C.overdueCards().length : null;
+    const esik = 10;
+    /* Hiç kart yoksa borç ÖLÇÜLMEMİŞTİR: «%0» değil «—» (eksik veri sıfır değildir). */
+    const kartVar = (S.cards || []).length > 0;
+    const borc = kartVar ? C.cardDebt() : null;
+    return c.Kutu({ ad:'Tekrar borcu', yuva:!kartVar ? 'veri yok' : vadeli ? 'hesaplandı' : 'vadeli kart yok', class:'durumkart',
+      govde:html`<div class="durumkart__sayi"><b>${borc == null ? '—' : '%' + borc}</b>
+          ${when(borc > esik, () => html`<span class="durumkart__fark is-azaldi">eşik üstü</span>`)}</div>
+        <p class="durumkart__not">Eşik %${esik}${when(vadeli && geciken != null, () => ' · ' + geciken + ' geciken ÷ ' + vadeli + ' vadeli kart')}</p>`,
+      ayak:vadeli ? c.Button({ label:'Tekrara git', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'cards' } }) : null });
+  }
+
   /* 04 SAYFA BAŞI CÜMLESİ (ekip/EKIP-PLANI Ek A) — günün durumu TEK cümle,
      KODDAN: bloklar, sıradaki iş ve (eşik aşıldıysa) tekrar borcu. Dil
      modeli hiç çağrılmaz; model kapalıyken de aynı cümle çıkar. Kural
@@ -1000,12 +1037,16 @@ R.Screens.today = (function(){
           ${R.Setup.needed() ? raw(R.Setup.card()) : html`<div class="kahraman" data-oz="042">${NextUpCard()}</div>`}
           ${when(R.Signals && R.Signals.current(), () => SignalCard())}
         </section>
-        <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>${AkisKutusu(day)}</section>
+        <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
+          ${SayacKutusu(day, dateISO)}
+          ${SonDenemeKutusu()}
+          ${TekrarBorcuKutusu()}
+          <div class="bugun__genis">${AkisKutusu(day)}</div>
+        </section>
       </div>
       <div class="bugun__sag">
         <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>
           ${OzetKutusu(day, dateISO)}
-          ${SayacKutusu(day, dateISO)}
         </section>
         ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
       </div>

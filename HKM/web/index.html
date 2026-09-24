@@ -588,7 +588,18 @@ input, select, textarea{ border-radius:8px; }
 .serit__ad, .onay__baslik{ font-size:13px; font-weight:600; }
 th{ font-size:12px; font-weight:500; color:var(--dim); }
 .tabs button{ font-size:14px; }
+.gun{ align-items:flex-end; }
+.gun__metin{ min-width:0; flex:1 1 420px; }
+.gun__ust{ margin:0 0 6px; font-size:13px; color:var(--dim); }
+.gun__ust .tarih{ font:inherit; letter-spacing:0; color:inherit; }
+.gun h1{ font-size:28px; font-weight:700; letter-spacing:-.02em; line-height:1.2; margin:0; }
+/* Sistem kartlari (v5): kutu, modul isareti adin yaninda, durum buyuk. */
+.serit{ gap:16px; margin:20px 0; }
+.serit__kutu{ border-radius:14px; padding:16px 18px; background:var(--yuzey); }
+.serit__ad{ font-size:13px; font-weight:600; }
+.serit__durum{ font-size:18px; font-weight:700; margin-top:6px; }
 @media (max-width:1023px){ .moduller, .baglam{ display:none; }
+  .gun h1{ font-size:22px; }
   /* Telefonda marka ve tema tek satırda, çekmeceler altında kayar. */
   .marka{ order:1; } .bosluk{ order:2; } #ust-araclar{ order:3; } .gez{ order:4; flex-basis:100%; }
   h1{ font-size:22px; font-weight:700; letter-spacing:-.02em; line-height:1.25; }
@@ -730,9 +741,13 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
 
     <!-- ============================ BUGÜN ============================ -->
     <div data-bolme="bugun">
+      <!-- v5 «Merkez · Bugün»: üst satır selam ve tarih, büyük başlık günün
+           cümlesi (KODDAN: kaç sistemden veri geldi, öneri bekliyor mu). -->
       <div class="gun">
-        <h1 id="gun-selam">Bugün</h1>
-        <span class="tarih" id="gun-tarih"></span>
+        <div class="gun__metin">
+          <p class="gun__ust"><span id="gun-selam">Bugün</span> · <span class="tarih" id="gun-tarih"></span></p>
+          <h1 id="gun-cumle">Bugün</h1>
+        </div>
         <div class="bosluk"></div>
         <input id="tarih" type="date" aria-label="Görüntülenen gün"
           class="alan alan--orta"/>
@@ -3026,6 +3041,23 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     acikMiYokla();
   }
 
+  /* GUNUN CUMLESI (v5): sayilar brifingten, cumle koddan. Model yok.
+     Merkez hicbir module yazmaz; bu cumlenin sonu bir hatirlatma degil,
+     sistemin sozudur (AGENTS §1.4). */
+  function gunCumlesi(b){
+    var u = ((b && b.council) || {}).members || [];
+    var gelen = u.filter(function(x){ return x.verdict; }).length;
+    var SAYI = ['hiçbir', 'bir', 'iki', 'üç'];
+    var bas;
+    if(!u.length || !gelen) bas = 'Bugün hiçbir sistemden veri gelmedi.';
+    else if(gelen === u.length) bas = (u.length === 3 ? 'Üç' : String(gelen)) + ' sistemden de veri geldi.';
+    else bas = SAYI[gelen].charAt(0).toLocaleUpperCase('tr-TR') + SAYI[gelen].slice(1)
+      + ' sistemden veri geldi; ' + (SAYI[u.length - gelen] || String(u.length - gelen)) + ' sistem sessiz.';
+    var d = b && b.decision;
+    var oneri = d && d.state === 'proposed' ? ' Bir öneri onayını bekliyor;' : ' Bekleyen öneri yok;';
+    return bas + oneri + ' Merkez hiçbir modüle yazmadı.';
+  }
+
   /* Onay bekleyen sey ekranda ONE CIKAR — gomulu bir satir degil. */
   function onayCiz(b){
     var kutu = $('onay');
@@ -4776,6 +4808,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       $('brifing').innerHTML = sakinHata('Bugünün özeti alınamadı.', b.status);
       return;
     }
+    $('gun-cumle').textContent = gunCumlesi(b.body);
     ozetCiz(b.body);
     seritCiz(b.body);
     onayCiz(b.body);

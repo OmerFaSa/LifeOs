@@ -5030,6 +5030,18 @@ body.is-dragging .drop.is-over{
 .site--v5 .ledger .ledger .lrow > .lrow__main{ max-height:none; overflow:visible; }
 .site--v5 .ledger .lrow__main thead th{ position:sticky; top:0; background:var(--surface); z-index:1; }
 
+/* v5 · DURUM KARTLARI: büyük sayı, küçük birim, yön rozeti, tek satır not. */
+.bugun__alan > .bugun__genis{ flex-basis:100%; min-width:0; }
+.durumkart .durumkart__sayi{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.durumkart .durumkart__sayi b{ font-size:28px; font-weight:700; letter-spacing:-.02em; line-height:1.1;
+  font-variant-numeric:tabular-nums; }
+.durumkart .durumkart__sayi small{ font-size:14px; color:var(--text-2); }
+.durumkart__fark{ font-size:12px; font-weight:600; padding:2px 7px; border-radius:6px; background:var(--surface-2);
+  color:var(--text-2); font-variant-numeric:tabular-nums; }
+.durumkart__fark.is-artti{ background:var(--ok-t); color:var(--ok-ink); }
+.durumkart__fark.is-azaldi{ background:var(--bad-t); color:var(--bad-ink); }
+.durumkart__not, .durumkart__bos{ margin:8px 0 0; font-size:13px; color:var(--text-2); }
+
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/seviye.css içine yazılır; burası bir sonraki
@@ -9981,7 +9993,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'1978c32', at:'2026-09-24 22:59', dirty:true };
+ESP.BUILD = { id:'6c3a5cf', at:'2026-09-24 23:29', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.

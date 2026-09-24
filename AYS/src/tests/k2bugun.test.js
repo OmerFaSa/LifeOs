@@ -100,6 +100,41 @@
       });
     });
 
+    it('v5 Durum: günlük sayaç, son deneme, tekrar borcu yan yana; deneme ve kart yoksa «veri yok», sıfır değil', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        R.S.exams = []; R.S.cards = [];
+        const k = dom(await R.Screens.today.render());
+        const durum = k.querySelector('.bugun__alan[aria-label="Durum"]');
+        const adlar = Array.from(durum.querySelectorAll('.kutu__ad')).map(e => e.textContent.trim());
+        expect(adlar.slice(0, 3).join(',')).toBe('Günlük sayaç,Son deneme,Tekrar borcu');
+        expect(adlar).toContain('Günün akışı');
+        const kart = ad => Array.from(durum.querySelectorAll('.durumkart'))
+          .find(x => x.querySelector('.kutu__ad').textContent.trim() === ad);
+        expect(kart('Son deneme').querySelector('.kutu__yuva').textContent.trim()).toBe('veri yok');
+        expect(kart('Tekrar borcu').querySelector('.durumkart__sayi b').textContent.trim()).toBe('—');
+        expect(kart('Tekrar borcu').querySelector('.kutu__yuva').textContent.trim()).toBe('veri yok');
+      });
+    });
+
+    it('v5 Durum: son denemenin neti ve öncekine farkı koddan, etiketi «hesaplandı»', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const e = (id, date, correct, wrong) => ({ id, family:'TYT', kind:'full', date,
+          tests:[{ correct, wrong }] });
+        R.S.exams = [e('d1', '2026-10-01', 80, 8), e('d2', '2026-10-08', 84, 6)];
+        const k = dom(await R.Screens.today.render());
+        const son = Array.from(k.querySelectorAll('.durumkart'))
+          .find(x => x.querySelector('.kutu__ad').textContent.trim() === 'Son deneme');
+        expect(son.querySelector('.durumkart__sayi b').textContent.trim()).toBe(R.U.fmtNet(82.5));
+        const fark = son.querySelector('.durumkart__fark');
+        expect(fark.classList.contains('is-artti')).toBeTruthy();
+        expect(fark.textContent.trim()).toBe('↑ ' + R.U.fmtNet(4.5));
+        expect(son.querySelector('.kutu__yuva').textContent.trim()).toBe('hesaplandı');
+        R.S.exams = [];
+      });
+    });
+
     it('oz-042 kurulum bitmemişse kahraman yerine kurulum kartı', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();

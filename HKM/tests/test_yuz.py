@@ -17,7 +17,7 @@ iki dil, iki dosya, AYNI ornekler.
 import re
 from pathlib import Path
 
-from tests.harness import eq, ok, suite, test
+from tests.harness import eq, no, ok, suite, test
 
 KOK = Path(__file__).resolve().parent.parent.parent
 YUZ = KOK / "HKM" / "web" / "index.html"
@@ -240,6 +240,23 @@ def t_sakin_hata():
 
 
 
+def t_v5_kabuk_ve_gun_cumlesi():
+    """v5 (Tasarim Dili surum 5): masaustunde sol kenar cubugu, dort sistem
+    gecisi (Merkez burasi, oteki uc kendi kapisinda) ve Bugun'un buyuk
+    basligi gunun CUMLESI — koddan: kac sistemden veri geldi, oneri
+    bekliyor mu, ve Merkez'in module yazmadigi. Model cagrilmaz."""
+    m = _yuz()
+    for s in ('class="moduller"', 'data-kapi="4173"', 'data-kapi="4183"', 'data-kapi="4193"',
+              'aria-current="true"', 'id="gun-cumle"'):
+        ok(s in m, s)
+    f = m[m.index("function gunCumlesi("):]
+    f = f[:f.index("\n  }\n")]
+    for s in ("council", "verdict", "decision", "proposed", "Merkez hiçbir modüle yazmadı"):
+        ok(s in f, s)
+    no("fetch(" in f or "api(" in f, "cumle ag istegi yapmaz")
+    ok("$('gun-cumle').textContent = gunCumlesi(" in m)
+
+
 def t_ne_degisti():
     """017 (K7c): gezinme degisti (Teklifler → Onaylar; Profil, Motto →
     Ayarlar; Para → Sistemler); guncellemeden sonraki ilk acilista tek kart
@@ -272,5 +289,6 @@ def run():
     test("yedi çekmece; bölümler; ayarlar dört bölüm (K7)", t_cekmeceler)
     test("jetonlar ortak değerlerde; vurgu Merkez moru (K7a)", t_jetonlar_ortak)
     test("sakin hata: kırmızı satır yok, ortak cümle (011)", t_sakin_hata)
+    test("v5 kabuk: kenar çubuğu, sistem geçişi, günün cümlesi", t_v5_kabuk_ve_gun_cumlesi)
     test("ne değişti: tek kart, yalnız eski kullanıcıya (017)", t_ne_degisti)
     test("fiş yükleme: önizleme, onay, küçültme", t_fis_yukleme)
