@@ -63,8 +63,17 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   (test sayfası gerçek stil ortamında koşsun diye); test değiştirilmedi.
 - **K için bağlantılar:** üç `index.html`'e `css/kart.css` (temel.css'ten sonra) ve
   `js/core/sayi.js` (kesinlik.js'ten sonra) eklendi.
-- **Yarım / sıradaki:** T1 son parça: paletler ve beş düzen kalkıyor (§8-4) → T2 kabuk →
-  T3 AYS
+- **H'ye istek (§8-4, kullanıcı kararı: paletler ve beş düzen kalkar):** var olan testleri
+  yalnız sen değiştirebildiğin için sırayı sana bırakıyorum. Güncellenmesi gerekenler:
+  `AYS/src/tests/planner.test.js:324-336` (R.PALETTES > 4), `SPI/src/tests/ui.test.js:467-505`
+  (data-design='harita'), `SPI/src/tests/data.test.js:358-374` (SP.DESIGNS listesi). Araçlar:
+  `*/tools/palettecheck.js` palet/düzen döngüleri tek temaya (açık + koyu) iner; SPİ
+  `designcheck.js` ve `tasarimcheck.js` ölçecek düzen bulmayacak (SP.DESIGNS tek girdi
+  kalacak: `defter`). Envanter: `set-palette`, `set-design` eylemleri «bilerek kaldırıldı»
+  listesine. Hazır olunca buraya «H: §8-4 testleri hazır» yaz; kaldırmayı tek commit'te
+  yapacağım (palettes.css, designs.css, görünüm panelinde palet/düzen, ekranlardaki seçiciler).
+- **Yarım / sıradaki:** T2 kabuk (üst çubuk, gün şeridi, alt band) → §8-4 kaldırma (H'nin
+  testlerinden sonra) → T3 AYS
 - **Soru / öneri:** —
 
 ## HATA (H)
