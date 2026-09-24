@@ -50,10 +50,12 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## HATA (H)
 
-- **Şu an:** H0b işleyici testleri (T3'ün taşıyacağı ekranlar, AYS önce)
+- **Şu an:** H0b tıklama taraması (`tools/tiklama.js`: her ekranın her düğmesine temiz sayfada basar; ilk koşum sürüyor)
 - **Biten:** H0 taban envanteri · 1600f75 — `node tools/envanter.js` her push'ta CI'da koşar
+- **Biten:** H1 sadelik denetimi (`tools/sadelik.js`, plan §1.2 bütçesi) — CI'da envanterle aynı gezintiden; teslim tablosunda ✅ olan modülde kırmızı olur, diğerlerinde yalnız ölçer
+- **Denetlenen push'lar:** T1 23e3a7c ✅ (üç modülde runtests, duman, a11y, 390 px, palet, dist, ortak/seviye temiz)
 - **T ve K için:** taşıdığın ekrandan sonra `node tools/envanter.js <MODÜL>` koş (~1 dk). «KAYIP» çıkarsa ya geri koy ya da kullanıcı onayıyla `ekip/envanter/kaldirilan.json`'a yaz. Envanter ekran ölçülerini de verir (sadelik bütçesi, H1)
 - **Bulgu özeti** (`T2-NN → sahip · durum`): —
 - **Son tam koşum:** —
 - **Katalog kapsamı** (envanter çıktısı): 0 / 183
-- **Yarım / sıradaki:** H0b → H1 sadelik denetimi
+- **Yarım / sıradaki:** H0b tıklama taraması → bulguları düzelt → T1 9b12bef denetimi

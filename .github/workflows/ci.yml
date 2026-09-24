@@ -226,7 +226,7 @@ jobs:
         run: node tools/entegre.js
 
   envanter:
-    name: Envanter — tek tasarıma geçerken kayıp yok
+    name: Envanter + sadelik — tek tasarıma geçerken kayıp yok
     # ekip/EKIP-PLANI.md: «hicbir sey silinmez, katmanlanir». Tabandaki
     # (ekip/envanter/taban-*.json) her eylem, isleyici ve giris alani
     # bugunku kodda da bulunmali; bilerek kaldirilan yalniz kullanici
@@ -249,7 +249,13 @@ jobs:
         run: npm ci && npx playwright install --with-deps chromium
 
       - name: Envanter
-        run: node tools/envanter.js
+        run: node tools/envanter.js --json gezinti.json
+
+      # Ayni gezintinin olculeri: plan §1.2 sadelik butcesi. Yalniz
+      # EKIP-DURUM teslim tablosunda ✅ olan modullerde kirmizi olur.
+      - name: Sadelik
+        if: always()
+        run: test -f gezinti.json && node tools/sadelik.js --gezinti gezinti.json
 
   yuk:
     name: ${{ matrix.system }} — beş yıllık yük denetimi

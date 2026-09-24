@@ -727,7 +727,11 @@ async function main(){
   return 0;
 }
 
-module.exports = { gez, karsilastir, MODUL, GENISLIK, PROFIL, sonTaban, katalogSayisi };
+const DOLDUR_KAYNAK = {};
+Object.keys(DOLDUR).forEach(ad => { DOLDUR_KAYNAK[ad] = '(' + DOLDUR[ad].toString() + ')()'; });
+
+module.exports = { gez, karsilastir, rotalariBul, DOLDUR_KAYNAK, MODUL, GENISLIK, PROFIL,
+  sonTaban, katalogSayisi };
 
 if(require.main === module){
   main().then(k => process.exit(k)).catch(e => {
