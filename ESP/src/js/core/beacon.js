@@ -464,7 +464,7 @@ ESP.Beacon = (function(){
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
   const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add', 'kayit.add',
-    'urun.add', 'unite.add', 'belge.add'];
+    'urun.add', 'unite.add', 'belge.add', 'kart.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -587,6 +587,9 @@ ESP.Beacon = (function(){
       try{ n.unite = await ESP.Unite.onizle(n); }catch(e){ n.unite = null; }
     }
     for(const n of gosterilecek){
+      if(n.kind === 'kart.add') n.kart = kartOnizle(n);
+    }
+    for(const n of gosterilecek){
       if(n.kind !== 'belge.add' || !ESP.Belge) continue;
       try{ n.belge = await ESP.Belge.onizle(n); }catch(e){ n.belge = null; }
     }
@@ -635,10 +638,43 @@ ESP.Beacon = (function(){
      ESP'de bir «oturum» ölçülmüş bir çalışmadır; ileriye dönük bir teklif
      oturum olarak yazılamaz — yazılsaydı yapılmamış bir çalışma ölçülmüş
      görünürdü. Teklif bu yüzden bir HATIRLATICI olur. */
-  const APPLIABLE = ['plan.add', 'material.add', 'kayit.add', 'urun.add', 'unite.add', 'belge.add'];
+  const APPLIABLE = ['plan.add', 'material.add', 'kayit.add', 'urun.add', 'unite.add', 'belge.add',
+    'kart.add'];
+
+  /* KELİME KARTI (kart.add) — HKM giriş kapısından («sözlüğe ekle: apple =
+     elma»). ESP kendi koduyla sınar: uzunluk, dil (verilmezse profilin ilk
+     dili), aynı destede tekrar. Onayla eklenir; kart «hkm» etiketi taşır.
+     Geri almada, tekrar edilmiş kart kullanıcının emeğidir ve silinmez. */
+  function kartOnizle(n){
+    const p = (n && n.payload) || {};
+    const on = String(p.on == null ? '' : p.on).replace(/\s+/g, ' ').trim();
+    const arka = String(p.arka == null ? '' : p.arka).replace(/\s+/g, ' ').trim();
+    if(!on || on.length > 200 || !arka || arka.length > 300) return { ok:false, why:'Kelime ya da karşılığı boş ya da çok uzun.' };
+    const dil = p.dil || (S.profile && S.profile.langs && S.profile.langs[0]) || 'en';
+    if(!(ESP.LANG_BY_ID && ESP.LANG_BY_ID[dil])) return { ok:false, why:'Bu dil ESP’de yok.' };
+    const var_ = (S.cards || []).some(c => c.lang === dil && U.norm(c.front) === U.norm(on));
+    if(var_) return { ok:false, why:'«' + on + '» bu destede zaten var.' };
+    return { ok:true, on, arka, dil, dilAd:ESP.LANG_BY_ID[dil].label || dil };
+  }
+
+  async function kartUygula(n){
+    const o = kartOnizle(n);
+    if(!o.ok) return { ok:false, error:o.why };
+    const c = await ESP.Model.saveCard(ESP.Model.newCard({ front:o.on, back:o.arka, lang:o.dil, tags:['hkm'] }));
+    return { ok:true, note:'«' + o.on + '» ' + o.dilAd + ' destesine eklendi.', geriAl:{ kartId:c.id } };
+  }
+
+  async function kartGeriAl(g){
+    const c = (S.cards || []).find(x => g && x.id === g.kartId);
+    if(!c) return { ok:false };
+    if((c.reps || 0) > 0 || (c.history || []).length) return { ok:false, kalan:1 };
+    await ESP.Model.deleteCard(c.id);
+    return { ok:true, silinen:1 };
+  }
 
   function canApply(n){
     if(!n || APPLIABLE.indexOf(n.kind) < 0) return false;
+    if(n.kind === 'kart.add') return !!(n.kart && n.kart.ok);
     if(n.kind === 'kayit.add') return !!(n.okuma && n.okuma.yazilacak.length);
     if(n.kind === 'unite.add') return !!(n.unite && n.unite.ok);
     if(n.kind === 'belge.add') return !!(n.belge && n.belge.ok);
@@ -763,6 +799,7 @@ ESP.Beacon = (function(){
 
   async function applyIntent(n){
     if(n && n.kind === 'kayit.add') return await kayitUygula(n);
+    if(n && n.kind === 'kart.add') return await kartUygula(n);
     if(n && n.kind === 'belge.add'){
       if(!ESP.Belge) return { ok:false, error:'Belge modülü yüklenmedi.' };
       return await ESP.Belge.uygula(n.payload || {});
@@ -879,6 +916,7 @@ ESP.Beacon = (function(){
   return { load, save, settings, collect, payload, preview, contract, metric,
     urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
     intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE, desteOf, kayitOku,
+    kartOnizle, kartGeriAl,
     resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
     intentDoubts, clearDoubt,
     MODULE, CONTRACT, ASGARI_ARA_DK };

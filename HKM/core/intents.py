@@ -154,6 +154,14 @@ KINDS = {
         "optional": ("alan", "adet", "why"),
         "note": "BAM'ın kaynaktan çıkardığı tarih ya da felsefe belgesini ekleme teklifi.",
     },
+    # HKM giris kapisi (core/kapi.py): «sözlüğe ekle: apple = elma». ESP kelimeyi
+    # KENDI koduyla sinar (uzunluk, dil, tekrar) ve onayla destesine ekler.
+    "kart.add": {
+        "modules": ("esp",),
+        "required": ("on", "arka"),
+        "optional": ("dil", "why"),
+        "note": "HKM'den girilen kelimeyi kart olarak ekleme teklifi.",
+    },
     "measure.ask": {
         "modules": ("spi",),
         "required": ("date", "metric"),
@@ -178,6 +186,7 @@ FIELD_RULES = {
     "metin": ("str", 3, 400), "ad": ("str", 1, 80),
     "dil": ("str", 2, 2), "unite": ("int", 1, 4), "oge": ("int", 1, 80),
     "alan": ("str", 2, 20),
+    "on": ("str", 1, 200), "arka": ("str", 1, 300),
 }
 
 
@@ -257,6 +266,8 @@ def _cumle(module, kind, payload):
         oran = p.get("ratio")
         nicelik = ("%d%% " % round(float(oran) * 100)) if oran else ""
         return "%s için %s gününün yükü %sazaltılsın mı?" % (ad, gun, nicelik)
+    if kind == "kart.add":
+        return "%s: «%s» → «%s» kartı destene eklensin mi?" % (ad, p.get("on"), p.get("arka"))
     if kind == "material.add":
         return ("%s: BAM'ın hazırladığı «%s» setinden kalite kontrolünü geçen %s madde "
                 "kart olarak eklensin mi?" % (ad, p.get("baslik") or "materyal", p.get("adet")))

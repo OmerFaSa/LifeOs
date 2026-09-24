@@ -470,6 +470,18 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                 patron.log(con, kanal, "manager", pk, agent=gorevli)
             return {"ok": True, "mode": "komut", "command": "para", "text": pk, "agent": gorevli}
 
+    # 0a'' — GIRIS KAPISI (core/kapi.py): test kitabi, gitar, dil unitesi,
+    # kelime. Modul ADINA is emri ya da teklif; eksik bilgi sorulur.
+    if gorevli == "king":
+        from core import kapi
+        kt = kapi.tani(metin)
+        if kt is not None:
+            govde = kapi.devret(con, cfg, metin, kt, kanal=kanal, hedef=hedef)
+            if kayit:
+                patron.log(con, kanal, "user", metin, agent=gorevli)
+                patron.log(con, kanal, "manager", govde, agent=gorevli)
+            return {"ok": True, "mode": "emir", "command": "kapi", "text": govde, "agent": gorevli}
+
     # 0b' — TEK CUMLEDE BIRDEN COK IS (fikir 43): her biri ayri emir.
     coklu = is_parcalari(metin) if gorevli == "king" else None
     if coklu is not None:

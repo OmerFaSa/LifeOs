@@ -747,9 +747,12 @@ ESP.Screens.today = (function(){
           ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
           ${when(n.kind === 'unite.add', () => uniteOnizleme(n.unite))}
           ${when(n.kind === 'belge.add', () => uniteOnizleme(n.belge))}
+          ${when(n.kind === 'kart.add' && n.kart, () => html`<p class="tiny ${n.kart.ok ? 'dim' : ''} mt-6">${n.kart.ok
+            ? '«' + n.kart.on + '» → «' + n.kart.arka + '» · ' + n.kart.dilAd + ' destesine'
+            : n.kart.why}</p>`)}
           <div class="row gap-8 mt-8">
             ${when(ESP.Beacon.canApply(n), () => K.Button({
-              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'unite.add':'Ekle', 'belge.add':'Ekle' })[n.kind] || 'Uygula',
+              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'unite.add':'Ekle', 'belge.add':'Ekle', 'kart.add':'Ekle' })[n.kind] || 'Uygula',
               size:'sm', tone:'primary', act:'hkm-intent-yes',
               data:{ 'data-id':String(n.id) } }))}
             ${when(!ESP.Beacon.canApply(n), () => K.Button({ label:'Gördüm',
@@ -934,7 +937,8 @@ ESP.Screens.today = (function(){
       : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.';
     /* BAM ünitesi ve belgesi geri alınır; kullanıcının üzerinde çalıştığı
        kayıt kalır (core/unite.js, core/belge.js). */
-    const geriModul = n.kind === 'belge.add' ? ESP.Belge : ESP.Unite;
+    const geriModul = n.kind === 'belge.add' ? ESP.Belge
+      : n.kind === 'kart.add' ? { geriAl:ESP.Beacon.kartGeriAl } : ESP.Unite;
     if(r.geriAl && geriModul){
       ESP.UI.toast(metin, { undo:async () => { await geriModul.geriAl(r.geriAl); ESP.App.render(); } });
     }else{

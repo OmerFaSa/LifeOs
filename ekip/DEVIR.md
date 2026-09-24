@@ -274,7 +274,14 @@ para sözcüğü; «kitap 30», «spor 45», «40 soru» para DEĞİL; aynı mes
 öbür tutarlar da para; kategori koddan; kur yok, TL dışı ayrı toplanır; HKM › Para: ay özeti,
 kategori tablosu, form, silme; `GET/POST /api/para`, `POST /api/para/<id>/sil`). FİŞ FOTOĞRAFI
 YOK: HKM'nin model katmanı (`ai.ask`) görüntü taşımıyor — sonraki adım. HKM web `bugun()` UTC
-hatası düzeltildi (yerel gün). HKM 595, yüz 56 görünüm temiz.
+hatası düzeltildi (yerel gün). HKM 595, yüz 56 görünüm temiz. · ✅ HKM giriş kapısı (`core/kapi.py`, sohbet ve
+Telegram): «türev ve integral test kitabı hazırla» → `test.kitabi` emri AYS adına (bölümler konudan);
+«gitar alıştırması: barre akorları, başlangıç» / «İspanyolca A1 selamlaşma ünitesi hazırla» →
+`esp.unite` emri ESP adına; «sözlüğe ekle: apple = elma, book = kitap» / «İngilizce kelime: run -
+koşmak» → ESP'ye yeni `kart.add` teklifi (HKM intents; ESP `kartOnizle`: uzunluk, dil — verilmezse
+profilin ilk dili —, aynı destede tekrar; onayla «hkm» etiketli kart; geri almada tekrar edilmiş kart
+kalır). Eksik bilgi SORULUR (gitar/ünite düzeyi, «=» yoksa kelime). Emirler King onayından geçer.
+HKM 597, ESP 1359, entegre temiz.
 
 ## 5. Komutlar
 

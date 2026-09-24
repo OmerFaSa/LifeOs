@@ -420,6 +420,36 @@
   /* Akşam yoklaması: «30 dakika gitar çaldım» kullanıcının YAPTIM dediği
      iştir. `plan.add`in tersine oturum olarak yazılır — ama yalnız ESP'nin
      kendi ayrıştırıcısı okuyabildiyse ve kullanıcı «Kaydet» dediyse. */
+  /* HKM giriş kapısı (HKM/core/kapi.py): «sözlüğe ekle: apple = elma» ESP'ye
+     `kart.add` teklifi olur. ESP kelimeyi KENDİ koduyla sınar: uzunluk, dil
+     (verilmezse profilin ilk dili), aynı destede tekrar. Onayla eklenir,
+     geri alınır; tekrar edilmiş kart geri almada silinmez. */
+  describe('HKM teklifi — kelime kartı (kart.add)', () => {
+    const kart = p => ({ id:77, kind:'kart.add', payload:Object.assign({ on:'apple', arka:'elma' }, p || {}) });
+    it('sınanır, eklenir, tekrar eklenmez, geri alınır', async () => {
+      resetState();
+      ESP.S.profile.langs = ['en'];
+      expect(B().INTENT_KINDS.indexOf('kart.add') >= 0).toBe(true);
+      const on = B().kartOnizle(kart());
+      expect([on.ok, on.dil]).toEqual([true, 'en']);
+      expect(B().kartOnizle(kart({ on:'' })).ok).toBe(false);
+      expect(B().kartOnizle(kart({ dil:'zz' })).ok).toBe(false);
+      const n = kart(); n.kart = on;
+      expect(B().canApply(n)).toBe(true);
+      const r = await B().applyIntent(n);
+      expect(r.ok).toBe(true);
+      const c = ESP.S.cards.find(x => x.front === 'apple');
+      expect([c.back, c.lang, c.tags.indexOf('hkm') >= 0]).toEqual(['elma', 'en', true]);
+      expect(B().kartOnizle(kart()).ok).toBe(false);              /* aynı destede var */
+      await B().kartGeriAl(r.geriAl);
+      expect(ESP.S.cards.some(x => x.front === 'apple')).toBe(false);
+      const r2 = await B().applyIntent(Object.assign(kart(), { kart:B().kartOnizle(kart()) }));
+      ESP.S.cards.find(x => x.front === 'apple').reps = 2;        /* tekrar edilmiş */
+      const g = await B().kartGeriAl(r2.geriAl);
+      expect([g.ok, ESP.S.cards.some(x => x.front === 'apple')]).toEqual([false, true]);
+    });
+  });
+
   describe('HKM teklifi — günün kaydı (akşam yoklaması)', () => {
     const teklif = (metin, patch) => Object.assign({ id:61, kind:'kayit.add', note:'not',
       payload:{ date:DUN, metin } }, patch || {});
