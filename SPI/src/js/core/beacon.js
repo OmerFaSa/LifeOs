@@ -1,7 +1,9 @@
 /* HKM işareti (beacon) — «varsa gönder», asla bekletme.
 
-   SPİ HKM'nin var olduğunu BİLMEZ. Bu dosya o kuralın tek istisnası
-   ve istisnanın sınırları burada yazılı:
+   SPİ HKM'yi BİLİR ama ona BAĞIMLI DEĞİLDİR (AGENTS.md §1.4): HKM
+   kapalıyken, yanıt vermezken ya da hata verirken SPİ bozulmaz,
+   yavaşlamaz, veri kaybetmez. HKM ile konuşan her dosya (bu dosya,
+   `kingteklif.js`, `yedekag.js`, `urun.js`) şu sınırlara uyar:
 
    1. HİÇBİR ÇİZİMDE ÇALIŞMAZ. Gönderim yalnızca kullanıcının açıkça
       istediği anda ya da gün kapanışında tetiklenir; bir ekranın açılması
@@ -467,7 +469,7 @@ SP.Beacon = (function(){
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
   const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'plan.apply', 'kayit.add',
-    'urun.add', 'besin.add', 'fiyat.add', 'yer.add'];
+    'urun.add', 'besin.add', 'fiyat.add', 'yer.add', 'measure.ask'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -629,38 +631,25 @@ SP.Beacon = (function(){
     }catch(e){ return { ok:false }; }
   }
 
-  /* SPİ'de niyet uygulanmaz — ve bu bir eksiklik değil bir SINIRDIR.
+  /* HANGİ TEKLİF UYGULANIR — kapalı liste (APPLIABLE).
 
-     Sağlık tarafında bir «teklifi uygulamak» ölçüm uydurmak ya da yük
-     değiştirmek demek olurdu; ikisi de kullanıcının kendi kararıdır.
-     Gelen teklif gösterilir, uygulaması kullanıcıya bırakılır. */
-  /* SPİ hiçbir teklifi KENDILIGINDEN uygulamaz ve bu bir eksiklik değil
-     bir SINIRDIR: sağlıkta ölçüm de yük de kullanıcının kararıdır.
+     SPİ hiçbir teklifi KENDİLİĞİNDEN uygulamaz: sağlıkta ölçüm de yük de
+     kullanıcının kararıdır. Listede olmayan teklif yalnız gösterilir ve
+     «Gördüm» ile ONAYLANIR (acknowledgeIntent); uygulanan bir şey yoktur.
+     Listedekiler kullanıcı «Ekle / Kaydet / Planına ekle» deyince SPİ'nin
+     KENDİ koduyla sınanır ve yazılır; hepsi geri alınabilir:
 
-     Ama «Gördüm» demek de bir eylemdir ve kendi yolunu tamamlamalıdır.
-     Önceki hâlde bu düğme her durumda ok:false döndüren applyIntent()
-     yoluna bağlıydı: görünür bir düğme, basıldığında hata veriyordu.
-     Ayrım artık açık — uygulanan bir şey yok, ONAYLANAN bir şey var. */
-  /* TEK İSTİSNA: `plan.apply` — Planlama Ofisi'nin haftalık programı.
-     Ölçüm de değil yük de değil: takvimdir. Kullanıcı «Planına ekle»
-     dediğinde program HKM'den çekilir, SPİ'nin KENDİ planıyla sınanır
-     (core/plan.js programSina) ve tutarsa öneri kapısından (orta seviye,
-     geri alınabilir) yazılır. Tutmazsa eklenmez ve sebebi söylenir. */
-  /* İKİNCİ İSTİSNA: `kayit.add` — kullanıcının KENDİ cümlesi («7 saat
-     uyudum»). HKM onu yalnız yönlendirir; ölçümü uyduran da yazan da HKM
-     değildir. Cümle SPİ'nin kendi ayrıştırıcısıyla okunur (core/proposals.js
-     fromText), kullanıcı neyin yazılacağını görür ve «Kaydet»e KENDİSİ
-     basar; yazım öneri kapısından geçer ve geri alınabilir kalır. Bu,
-     komut paletine aynı cümleyi yazmakla aynı yoldur. */
-  /* ÜÇÜNCÜ İSTİSNA: `urun.add` — BAM'ın ürettiği özet, rapor, pankart.
-     Ölçüm de yük de değil, okunacak bir BELGEDİR; SPİ'nin verisine
-     dokunmaz. HKM'nin Editörü SPİ için doz cümlesini zaten çıkarır; ürün
-     yine de teşhis ya da doz önerisi değildir ve «doğrulanmadı» etiketi
-     taşıyabilir. */
-  /* DÖRDÜNCÜ İSTİSNA: `besin.add` / `fiyat.add` / `yer.add` — BAM'ın
-     kaynaktan çıkardığı bilgi (core/bilgi.js). Ölçüm değildir: besin
-     kullanıcı gıdası olur, fiyat fişin ALTINDA «tahmin» durur, yer listesi
-     Mutfak'a girer. Kayıt HKM'den çekilir ve SPİ'nin kendi koduyla sınanır. */
+       plan.apply   Planlama Ofisi'nin programı: takvimdir, ölçüm değil.
+                    SPİ'nin planıyla sınanır (core/plan.js programSina),
+                    tutarsa öneri kapısından yazılır (orta seviye).
+       kayit.add    Kullanıcının KENDİ cümlesi («7 saat uyudum»). SPİ'nin
+                    ayrıştırıcısıyla okunur (proposals.js fromText), neyin
+                    yazılacağı önce gösterilir; komut paletiyle aynı yol.
+       urun.add     BAM'ın özeti, raporu: okunacak BELGE; SPİ verisine
+                    dokunmaz, teşhis ya da doz değildir.
+       besin.add    BAM'ın kaynaktan bilgisi (core/bilgi.js): besin
+       fiyat.add    kullanıcı gıdası olur, fiyat fişin ALTINDA «tahmin»
+       yer.add      durur, yer Mutfak'a girer. Ölçüm değildir. */
   const APPLIABLE = ['plan.apply', 'kayit.add', 'urun.add', 'besin.add', 'fiyat.add', 'yer.add'];
 
   function canApply(n){

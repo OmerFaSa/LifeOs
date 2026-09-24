@@ -323,8 +323,16 @@ def _hafiflet(con, date):
     azalacagina modul kendi kuraliyla karar verir (intents load.reduce)."""
     from core import hedefag
     yarin = (datetime.date.fromisoformat(date) + datetime.timedelta(days=1)).isoformat()
-    moduller = [m for m in ("ays", "spi", "esp") if m in hedefag.yarin_oku(con, yarin)] \
+    yarini = [m for m in ("ays", "spi", "esp") if m in hedefag.yarin_oku(con, yarin)] \
         or ["ays", "spi", "esp"]
+    # Teklif yalniz UYGULAYABILEN module gider (intents load.reduce: AYS).
+    hafifletir = intents.KINDS["load.reduce"]["modules"]
+    moduller = [m for m in yarini if m in hafifletir]
+    digerleri = [MODUL_AD[m] for m in yarini if m not in hafifletir]
+    if not moduller:
+        return ("Yarın (%s) için %s'de günlük yük planı yok; hafifletilecek bir plan olmadığı "
+                "için teklif bırakmadım." % (
+                    yarin, ", ".join(digerleri)))
     birakilan = []
     for m in moduller:
         r = intents.create(con, m, "load.reduce",
@@ -335,7 +343,9 @@ def _hafiflet(con, date):
     if not birakilan:
         return "Yük azaltma teklifi kurulamadı."
     return ("Yarın (%s) için yük azaltma teklifini %s’ye bıraktım. Ne kadar azalacağına "
-            "modül karar verir; sen onaylamadan hiçbir şey değişmez." % (yarin, ", ".join(birakilan)))
+            "modül karar verir; sen onaylamadan hiçbir şey değişmez.%s" % (
+                yarin, ", ".join(birakilan),
+                (" %s'de günlük yük planı yok." % ", ".join(digerleri)) if digerleri else ""))
 
 
 def _niyet_kur(con, talep, ham):

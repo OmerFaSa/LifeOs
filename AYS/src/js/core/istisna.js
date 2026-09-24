@@ -336,6 +336,40 @@ R.Istisna = (function(){
     return { ok:true, yenilenen:e.yenilenen, korunan:e.korunan };
   }
 
+  /* TEK GÜNÜ HAFİFLETMEK — HKM'nin `load.reduce` teklifi («yarın hafif»,
+     tatil dönüşü). Ne kadar azalacağına AYS karar verir: oran gelmezse
+     YARIM süre (tatil dönüşüyle aynı kural). Tek günlük «sure» istisnasıdır:
+     Rehber › İstisnalar'da görünür, kaldırılınca gün temele döner.
+     Deneme ve kapanış günü kısaltılmaz; ilerlemesi başlamış gün korunur. */
+  async function hafiflet(iso, oran, neden){
+    if(!U.isISO(String(iso || ''))) return fail('Tarih anlaşılmadı.');
+    if(iso < U.todayISO()) return fail('Geçmiş bir gün hafifletilemez.');
+    const w = (R.WEEKDAYS || [])[U.weekdayIndex(iso)] || {};
+    if(SABIT_RITUEL.indexOf(w.ritual) >= 0){
+      return fail((w.label || 'Bu gün') + ' deneme ya da kapanış günüdür; kısaltılmaz. '
+        + 'İstersen o günü Rehber › İstisnalar\'dan ara yapabilirsin.');
+    }
+    if(etki(iso, iso).korunan.length){
+      return fail('O günde girilmiş çalışma var; plan yeniden kurulmaz, girdiğin kaybolmasın.');
+    }
+    const temel = temelDakika(iso) || sablonDakikasi() || 120;
+    const r = Number(oran);
+    let dakika;
+    if(oran != null && isFinite(r) && r > 0 && r <= 1){
+      dakika = Math.round(temel * (1 - r));
+      if(dakika < DAKIKA.min){
+        return fail('Bu oran günü ' + dakika + ' dakikaya indirir; en az ' + DAKIKA.min
+          + ' dakika. O günü ara yapmak istersen Rehber › İstisnalar.');
+      }
+    }else{
+      dakika = Math.max(DAKIKA.min, Math.round(temel / 2));
+    }
+    const e = await ekle({ tur:'sure', from:iso, to:iso, dakika,
+      neden:String(neden || 'HKM: yük azaltma').slice(0, 160) });
+    if(!e.ok) return e;
+    return { ok:true, id:e.id, temel, dakika };
+  }
+
   /* Kalici sure degisince bugunden ileriye kayitli gunler yenilenir. */
   async function temeliYenile(){
     const bugun = U.todayISO();
@@ -387,7 +421,7 @@ R.Istisna = (function(){
   return {
     TURLER, DAKIKA, STORE,
     liste, yukle, dogrula, dakikaGecerli, gunIcin, aralik, olcekle, gunuBicimle,
-    dokunulmamis, etki, ekle, kaldir, bitir, temeliYenile, temelDakika, sablonDakikasi,
+    dokunulmamis, etki, ekle, kaldir, bitir, hafiflet, temeliYenile, temelDakika, sablonDakikasi,
     kapasiteSaati, haftaAraGunu, gunYuku, etkin, takvimde, tanim,
     yenile:araligiYenile,
   };

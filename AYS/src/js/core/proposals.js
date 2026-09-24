@@ -459,7 +459,7 @@ R.Proposals = (function(){
           subject, blok, day });
       },
       preview(p, ctx){
-        const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject : 'Gün toplamı';
+        const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject : 'Plan dışı (günün toplamı)';
         const once = ctx.blok ? (ctx.blok.actualQ == null ? 'girilmemiş' : String(ctx.blok.actualQ))
           : String(ctx.day.freeQ || 0);
         const sonra = ctx.blok ? String((Number(ctx.blok.actualQ) || 0) + ctx.n)

@@ -399,6 +399,16 @@
       expect(r.ok).toBe(false);
     });
 
+    /* EKSİK (2026-09-24): HKM kataloğu SPİ için `measure.ask` (eksik ölçüm
+       hatırlatması) tanımlıyor; SPİ türü tanımadığı için teklif SESSİZCE
+       süzülürdü. Hatırlatma uygulanmaz, «Gördüm» ile kapanır. HKM'nin
+       SPİ'ye bırakabildiği her tür burada tanınır. */
+    it('HKM kataloğundaki SPİ türlerinin hepsi tanınır', () => {
+      ['plan.apply', 'kayit.add', 'urun.add', 'besin.add', 'fiyat.add', 'yer.add', 'measure.ask']
+        .forEach(k => expect(k + ':' + (B().INTENT_KINDS.indexOf(k) >= 0)).toBe(k + ':true'));
+      expect(B().canApply(teklif({ kind:'measure.ask', payload:{ date:BUGUN, metric:'uyku' } }))).toBe(false);
+    });
+
     /* Kullanicinin gormedigi bir sayiyi uydurup plana yazmak, teklifi
        sessizce baska bir teklife cevirmektir. */
     it('geçersiz süre sınırlandırılmaz, reddedilir', async () => {

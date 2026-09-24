@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'68c5152', at:'2026-09-24 01:17', dirty:true };
+R.BUILD = { id:'d175871', at:'2026-09-24 08:19', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20602,6 +20602,40 @@ R.Istisna = (function(){
     return { ok:true, yenilenen:e.yenilenen, korunan:e.korunan };
   }
 
+  /* TEK GÜNÜ HAFİFLETMEK — HKM'nin `load.reduce` teklifi («yarın hafif»,
+     tatil dönüşü). Ne kadar azalacağına AYS karar verir: oran gelmezse
+     YARIM süre (tatil dönüşüyle aynı kural). Tek günlük «sure» istisnasıdır:
+     Rehber › İstisnalar'da görünür, kaldırılınca gün temele döner.
+     Deneme ve kapanış günü kısaltılmaz; ilerlemesi başlamış gün korunur. */
+  async function hafiflet(iso, oran, neden){
+    if(!U.isISO(String(iso || ''))) return fail('Tarih anlaşılmadı.');
+    if(iso < U.todayISO()) return fail('Geçmiş bir gün hafifletilemez.');
+    const w = (R.WEEKDAYS || [])[U.weekdayIndex(iso)] || {};
+    if(SABIT_RITUEL.indexOf(w.ritual) >= 0){
+      return fail((w.label || 'Bu gün') + ' deneme ya da kapanış günüdür; kısaltılmaz. '
+        + 'İstersen o günü Rehber › İstisnalar\'dan ara yapabilirsin.');
+    }
+    if(etki(iso, iso).korunan.length){
+      return fail('O günde girilmiş çalışma var; plan yeniden kurulmaz, girdiğin kaybolmasın.');
+    }
+    const temel = temelDakika(iso) || sablonDakikasi() || 120;
+    const r = Number(oran);
+    let dakika;
+    if(oran != null && isFinite(r) && r > 0 && r <= 1){
+      dakika = Math.round(temel * (1 - r));
+      if(dakika < DAKIKA.min){
+        return fail('Bu oran günü ' + dakika + ' dakikaya indirir; en az ' + DAKIKA.min
+          + ' dakika. O günü ara yapmak istersen Rehber › İstisnalar.');
+      }
+    }else{
+      dakika = Math.max(DAKIKA.min, Math.round(temel / 2));
+    }
+    const e = await ekle({ tur:'sure', from:iso, to:iso, dakika,
+      neden:String(neden || 'HKM: yük azaltma').slice(0, 160) });
+    if(!e.ok) return e;
+    return { ok:true, id:e.id, temel, dakika };
+  }
+
   /* Kalici sure degisince bugunden ileriye kayitli gunler yenilenir. */
   async function temeliYenile(){
     const bugun = U.todayISO();
@@ -20653,7 +20687,7 @@ R.Istisna = (function(){
   return {
     TURLER, DAKIKA, STORE,
     liste, yukle, dogrula, dakikaGecerli, gunIcin, aralik, olcekle, gunuBicimle,
-    dokunulmamis, etki, ekle, kaldir, bitir, temeliYenile, temelDakika, sablonDakikasi,
+    dokunulmamis, etki, ekle, kaldir, bitir, hafiflet, temeliYenile, temelDakika, sablonDakikasi,
     kapasiteSaati, haftaAraGunu, gunYuku, etkin, takvimde, tanim,
     yenile:araligiYenile,
   };
@@ -26118,8 +26152,10 @@ R.Storage = (function(){
 /* ==== js/core/beacon.js ==== */
 /* HKM işareti (beacon) — «varsa gönder», asla bekletme.
 
-   AYS HKM'nin var olduğunu BİLMEZ. Bu dosya o kuralın tek istisnası
-   ve istisnanın sınırları burada yazılı:
+   AYS HKM'yi BİLİR ama ona BAĞIMLI DEĞİLDİR (AGENTS.md §1.4): HKM
+   kapalıyken, yanıt vermezken ya da hata verirken AYS bozulmaz,
+   yavaşlamaz, veri kaybetmez. HKM ile konuşan her dosya (bu dosya,
+   `kingteklif.js`, `yedekag.js`, `urun.js`) şu sınırlara uyar:
 
    1. HİÇBİR ÇİZİMDE ÇALIŞMAZ. Gönderim yalnızca kullanıcının açıkça
       istediği anda ya da gün kapanışında tetiklenir; bir ekranın açılması
@@ -26280,9 +26316,17 @@ R.Beacon = (function(){
     const gun = (S.days || {})[d];
     const bloklar = (gun && gun.blocks) || [];
 
+    /* Günün sorusu = blokların sorusu + serbest soru («soru 40», derssiz
+       giriş) + paragraf + problem (goodhart.js aynı toplamı kullanır).
+       Serbest/paragraf/problem alanı 0 ile başlar; 0 «girilmedi»dir, ölçüm
+       değil. Hiçbir parça girilmemişse veri yok — sıfır gönderilmez. */
     const soru = bloklar.filter(function(b){ return b.actualQ != null; });
-    out.questions = soru.length
-      ? metric(soru.reduce(function(a, b){ return a + Number(b.actualQ || 0); }, 0), 'measured')
+    const serbest = gun ? ['freeQ', 'paragraphActual', 'problemActual']
+      .map(function(k){ return Number(gun[k]) || 0; })
+      .filter(function(n){ return n > 0; }) : [];
+    out.questions = (soru.length || serbest.length)
+      ? metric(soru.reduce(function(a, b){ return a + Number(b.actualQ || 0); }, 0)
+          + serbest.reduce(function(a, n){ return a + n; }, 0), 'measured')
       : metric(null, 'missing');
 
     const sure = bloklar.filter(function(b){ return b.actualMin != null; });
@@ -26764,7 +26808,7 @@ R.Beacon = (function(){
      yapiyordu: gorunur bir «Uygula» dugmesi, basildiginda «bu teklif turu
      uygulanmaz» diyordu. Gorunen eylem, yapilabilen eylemle ayni olmali. */
   const APPLIABLE = ['plan.add', 'material.add', 'mufredat.add', 'kitap.add', 'kayit.add',
-    'urun.add'];
+    'urun.add', 'load.reduce'];
 
   /* Gunun kaydi ancak AYS ondan yazilacak bir sey OKUYABILDIYSE
      uygulanabilir: okunamayan bir cumleye «Kaydet» dugmesi, basilinca
@@ -26912,6 +26956,16 @@ R.Beacon = (function(){
     const p = n.payload || {};
     if(!U.isISO(String(p.date || ''))) return { ok:false, error:'Tarih geçersiz.' };
 
+    /* Yük azaltma («yarın hafif», tatil dönüşü): ne kadar azalacağına AYS
+       karar verir — tek günlük süre istisnası (core/istisna.js hafiflet). */
+    if(n.kind === 'load.reduce'){
+      if(!R.Istisna) return { ok:false, error:'İstisna modülü yüklenmedi.' };
+      const h = await R.Istisna.hafiflet(p.date, p.ratio, p.why ? 'HKM: ' + p.why : null);
+      if(!h.ok) return { ok:false, error:h.why };
+      return { ok:true, geriAl:h.id, note:p.date + ' hafifletildi: ders günü ' + h.temel
+        + ' dk yerine ' + h.dakika + ' dk. Rehber › İstisnalar\'da durur; «Geri al» ile kalkar.' };
+    }
+
     /* Gecersiz sure SINIRLANDIRILMAZ, REDDEDILIR. Onceki hal -5 dakikayi
        10 dakikaya cekiyordu: kullanicinin gormedigi bir sayiyi uydurup
        plana yazmak, teklifi sessizce baska bir teklife cevirmektir. */
@@ -26969,6 +27023,7 @@ R.Beacon = (function(){
         : (action === 'seen' ? 'acknowledged' : 'dismissed');
       let not = '';
       let uygulandi = false;
+      let geriAl = null;
       if(action === 'apply'){
         if(onceki && (onceki.state === 'applied' || onceki.state === 'applying')){
           /* En fazla BIR KEZ: daha once uygulanmis (ya da uygulanmis
@@ -26982,6 +27037,7 @@ R.Beacon = (function(){
             return { ok:false, error:r.error };
           }
           not = r.note;
+          geriAl = r.geriAl || null;
           uygulandi = true;
         }
       }
@@ -26989,7 +27045,7 @@ R.Beacon = (function(){
       const bildirim = await answerIntent(n.id, durum);
       if(bildirim.ok) await markIntent(n.id, durum, true, not);
       return { ok:true, applied:uygulandi, state:durum,
-        reported:!!bildirim.ok, note:not };
+        reported:!!bildirim.ok, note:not, geriAl:geriAl };
     }finally{
       delete ISLEMDE[anahtar];
     }
@@ -27894,8 +27950,11 @@ R.Tools = (function(){
         tamamlanan:blocks.filter(b => b.status === 'done').length,
         toplamBlok:blocks.length,
         calisilanDakika:U.sum(blocks.map(b => b.actualMin || 0)),
-        cozulenSoru:U.sum(blocks.map(b => b.actualQ || 0)),
-        paragraf:d.paragraphActual+'/'+d.paragraphTarget,
+        /* Serbest soru («soru 40», derssiz giriş) da çözülen sorudur.
+           Paragraf 0 ile başlar: 0 «girilmedi»dir, ölçüm gibi gitmez. */
+        cozulenSoru:U.sum(blocks.map(b => b.actualQ || 0)) + (Number(d.freeQ) || 0),
+        serbestSoru:Number(d.freeQ) || 0,
+        paragraf:Number(d.paragraphActual) > 0 ? d.paragraphActual+'/'+d.paragraphTarget : null,
         uyku:d.sleepHours,
         atlamaNedenleri:blocks.filter(b => b.skipReason).map(b => b.skipReason),
         not:d.note || null,
@@ -34293,7 +34352,7 @@ R.Proposals = (function(){
           subject, blok, day });
       },
       preview(p, ctx){
-        const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject : 'Gün toplamı';
+        const nereye = ctx.blok ? ctx.blok.topic || ctx.blok.subject : 'Plan dışı (günün toplamı)';
         const once = ctx.blok ? (ctx.blok.actualQ == null ? 'girilmemiş' : String(ctx.blok.actualQ))
           : String(ctx.day.freeQ || 0);
         const sonra = ctx.blok ? String((Number(ctx.blok.actualQ) || 0) + ctx.n)
@@ -38112,10 +38171,16 @@ R.Screens.today = (function(){
       </div>` });
   }
 
+  /* Plan dışı soru: «soru 40» (Telegram, derssiz giriş) bir bloğa değil
+     günün toplamına yazılır; burada görünmezse kayıt kaybolmuş sanılır. */
   function AnchorPane(day){
-    return c.Cols(2, html`
+    const serbest = Number(day.freeQ) || 0;
+    const dogru = day.freeCorrect == null ? null : Number(day.freeCorrect);
+    return html`${c.Cols(2, html`
       ${AnchorTile({ label:'Paragraf', actual:day.paragraphActual, target:day.paragraphTarget, kind:'paragraph', hint:'günlük 15–20' })}
-      ${AnchorTile({ label:'Problem', actual:day.problemActual, target:day.problemTarget, kind:'problem', hint:'günlük 15–20' })}`);
+      ${AnchorTile({ label:'Problem', actual:day.problemActual, target:day.problemTarget, kind:'problem', hint:'günlük 15–20' })}`)}
+      ${when(serbest > 0, () => html`<p class="tiny dim mt-6">Plan dışı: ${serbest} soru${
+        dogru ? ' · ' + dogru + ' doğru' : ''} — bir derse bağlanmadan girildi, günün toplamına yazıldı.</p>`)}`;
   }
 
   function StatusBadge(status){
@@ -38853,7 +38918,7 @@ R.Screens.today = (function(){
             ${/* Uygulanamayan turde «Uygula» CIKMAZ: gorunen eylem,
                   yapilabilen eylemle ayni olmali. */''}
             ${when(R.Beacon.canApply(n), () => c.Button({
-              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle' })[n.kind] || 'Uygula',
+              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'load.reduce':'Hafiflet' })[n.kind] || 'Uygula',
               size:'sm', tone:'primary', act:'hkm-intent-yes',
               data:{ 'data-id':String(n.id) } }))}
             ${when(!R.Beacon.canApply(n), () => c.Button({ label:'Gördüm',
@@ -39094,8 +39159,12 @@ R.Screens.today = (function(){
         : 'İstenmedi olarak işaretlendi');
     /* Merkeze ulasilamadiysa bunu SOYLE: kayit yerelde duruyor ve bir
        sonraki baglantida tekrar denenecek. */
+    /* Yük azaltma bir istisna yazar; «Geri al» onu kaldırır (gün temele döner). */
+    const geri = r.geriAl && R.Istisna ? { undo:async () => {
+      await R.Istisna.kaldir(r.geriAl); UI.toast('Geri alındı; gün planına döndü.'); R.App.render();
+    } } : undefined;
     UI.toast(r.reported ? bas
-      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.');
+      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.', geri);
     R.App.render();
   }
 

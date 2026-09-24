@@ -178,6 +178,33 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   (eski SPİ/ESP listesinde emekli Gemini 2.0 Flash vardı). Dışa açık API AYS'ninki tam üst
   küme; SPİ/ESP'nin çağırdığı her işlev içinde. AYS 1665, SPİ 1306, ESP 1341; üç duman
   (src + yeniden derlenen dist) temiz; `ortak.py --denetle` 43 dosya / 129 kopya aynı. NOTLAR §19 kapandı.
+- ✅ **Tasarım öncesi tarama (2026-09-24, kullanıcı: «sistemi tara, eksikleri kapat, hataları
+  çöz»).** Tam koşum (d175871) 24/24 temiz. Kod taramasında testlerin görmediği hatalar:
+  · **AYS beacon serbest soruyu saymıyordu:** «soru 40» (Telegram kısa kayıt, derssiz giriş)
+    `freeQ`'ya yazılıyor, beacon yalnız blokları sayıyordu → HKM günü «soru: veri yok» görüp
+    sabah aynı soruyu yeniden soruyordu. Artık blok + serbest + paragraf + problem (0 =
+    girilmedi; hiçbiri yoksa veri yok). Ofis modeline giden gün özeti de aynı hatayı taşıyordu
+    (`tools.gunler`), girilmemiş paragraf «0/18» ölçüm gibi gidiyordu → null.
+  · **Serbest soru hiçbir ekranda görünmüyordu:** Bugün › paragraf/problem altında «Plan dışı:
+    N soru · M doğru»; önizleme adı da «Plan dışı (günün toplamı)».
+  · **`load.reduce` çıkmaz yoldu:** HKM «yarın hafif» ve tatil dönüşünde teklif bırakıp «ne
+    kadar azalacağına modül karar verir» diyordu; hiçbir modül uygulayamıyordu (yalnız
+    «Gördüm»), tatil dönüşünde teklif tam da uygulayamayan SPİ/ESP'ye gidiyordu. Düzeltme:
+    AYS uygular (`R.Istisna.hafiflet`: o güne yarım süre istisnası, deneme/kapanış ve
+    başlamış gün korunur, geçmişe yazılmaz, «Hafiflet» düğmesi + «Geri al»); sözleşme
+    `load.reduce` → yalnız AYS; HKM SPİ/ESP için teklif bırakmaz, «günlük yük planı yok» der.
+  · **SPİ `measure.ask`'i tanımıyordu** (HKM kataloğunda var, üretilince sessizce süzülürdü) →
+    tanınır, «Gördüm» ile kapanır.
+  · Eski yorumlar bugünün kuralına uyduruldu: `intents.py` ve üç `beacon.js` başlığı «HKM'yi
+    BİLMEZ» → «bilir ama bağımlı değil» (AGENTS §1.4); SPİ beacon'daki çelişen dört yorum
+    bloğu tek «hangi teklif uygulanır» tablosu oldu.
+  Yeni testler düzeltme olmadan KIRMIZI (AYS 1665/1669), düzeltmeyle yeşil. AYS 1669, SPİ 1307,
+  ESP 1341, HKM 577; AYS + SPİ duman, `tools/entegre.js` temiz; üç dist derlendi.
+  Taranıp temiz bulunanlar (hata yok): King iş türü dağıtımı (9 türün hepsi temizle/anahtar/
+  teklif/güncellikte), kesinlik etiketi (modüller tutarlı), SPİ/ESP beacon'da sıfır-eksik,
+  sessiz saat gece yarısı, Y5 birim dönüşümleri, UTC tarih hesapları, `focus.set`/`plan.add`.
+  Bilinçli bırakılan: haftalık soru gerçekleşmesi yalnız plan bloklarını sayar (haftanın konu
+  sözleşmesi; serbest soru konuya bağlı değil) — tasarım kararı, hata değil.
 - **Sıradaki:** açık sorular (❓ 10b, 14, Y1, Y10, diksiyon) kullanıcı cevabı bekliyor; Part 9
   harita onayı bekliyor. Cevapsız iş kalmadıysa kullanıcıya sor, kendiliğinden yeni kol açma.
 

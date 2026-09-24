@@ -56,5 +56,22 @@
         });
       }
     });
+
+    /* EKSİK (2026-09-24): «soru 40» (Telegram kısa kayıt, derssiz giriş)
+       günün serbest sorusuna yazılıyor ama HİÇBİR ekranda görünmüyordu. */
+    it('plan dışı çözülen soru Bugün ekranında görünür', async () => {
+      resetState();
+      await withTodayAsync('2026-10-12', async () => {
+        await R.Model.ensurePlan(true);
+        await R.Model.ensureWeek(R.Model.currentWeek());
+        const gun = await R.Model.ensureDay(R.U.today());
+        let out = String(await R.Screens.today.render());
+        expect(out.indexOf('Plan dışı') < 0).toBe(true);
+        gun.freeQ = 40; gun.freeCorrect = 31;
+        out = String(await R.Screens.today.render());
+        expect(out.indexOf('Plan dışı: 40 soru') >= 0).toBe(true);
+        expect(out.indexOf('31 doğru') >= 0).toBe(true);
+      });
+    });
   });
 })();

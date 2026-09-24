@@ -59,10 +59,16 @@ R.Screens.today = (function(){
       </div>` });
   }
 
+  /* Plan dışı soru: «soru 40» (Telegram, derssiz giriş) bir bloğa değil
+     günün toplamına yazılır; burada görünmezse kayıt kaybolmuş sanılır. */
   function AnchorPane(day){
-    return c.Cols(2, html`
+    const serbest = Number(day.freeQ) || 0;
+    const dogru = day.freeCorrect == null ? null : Number(day.freeCorrect);
+    return html`${c.Cols(2, html`
       ${AnchorTile({ label:'Paragraf', actual:day.paragraphActual, target:day.paragraphTarget, kind:'paragraph', hint:'günlük 15–20' })}
-      ${AnchorTile({ label:'Problem', actual:day.problemActual, target:day.problemTarget, kind:'problem', hint:'günlük 15–20' })}`);
+      ${AnchorTile({ label:'Problem', actual:day.problemActual, target:day.problemTarget, kind:'problem', hint:'günlük 15–20' })}`)}
+      ${when(serbest > 0, () => html`<p class="tiny dim mt-6">Plan dışı: ${serbest} soru${
+        dogru ? ' · ' + dogru + ' doğru' : ''} — bir derse bağlanmadan girildi, günün toplamına yazıldı.</p>`)}`;
   }
 
   function StatusBadge(status){
@@ -800,7 +806,7 @@ R.Screens.today = (function(){
             ${/* Uygulanamayan turde «Uygula» CIKMAZ: gorunen eylem,
                   yapilabilen eylemle ayni olmali. */''}
             ${when(R.Beacon.canApply(n), () => c.Button({
-              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle' })[n.kind] || 'Uygula',
+              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'load.reduce':'Hafiflet' })[n.kind] || 'Uygula',
               size:'sm', tone:'primary', act:'hkm-intent-yes',
               data:{ 'data-id':String(n.id) } }))}
             ${when(!R.Beacon.canApply(n), () => c.Button({ label:'Gördüm',
@@ -1041,8 +1047,12 @@ R.Screens.today = (function(){
         : 'İstenmedi olarak işaretlendi');
     /* Merkeze ulasilamadiysa bunu SOYLE: kayit yerelde duruyor ve bir
        sonraki baglantida tekrar denenecek. */
+    /* Yük azaltma bir istisna yazar; «Geri al» onu kaldırır (gün temele döner). */
+    const geri = r.geriAl && R.Istisna ? { undo:async () => {
+      await R.Istisna.kaldir(r.geriAl); UI.toast('Geri alındı; gün planına döndü.'); R.App.render();
+    } } : undefined;
     UI.toast(r.reported ? bas
-      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.');
+      : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.', geri);
     R.App.render();
   }
 

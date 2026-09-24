@@ -1,7 +1,9 @@
 /* HKM işareti (beacon) — «varsa gönder», asla bekletme.
 
-   ESP HKM'nin var olduğunu BİLMEZ. Bu dosya o kuralın tek istisnası
-   ve istisnanın sınırları burada yazılı:
+   ESP HKM'yi BİLİR ama ona BAĞIMLI DEĞİLDİR (AGENTS.md §1.4): HKM
+   kapalıyken, yanıt vermezken ya da hata verirken ESP bozulmaz,
+   yavaşlamaz, veri kaybetmez. HKM ile konuşan her dosya (bu dosya,
+   `kingteklif.js`, `yedekag.js`, `urun.js`) şu sınırlara uyar:
 
    1. HİÇBİR ÇİZİMDE ÇALIŞMAZ. Gönderim yalnızca kullanıcının açıkça
       istediği anda ya da gün kapanışında tetiklenir; bir ekranın açılması

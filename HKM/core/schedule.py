@@ -226,10 +226,15 @@ def donus_teklifi(con, gun):
     if not donen:
         return None
     ad = dict(YARIN_SIRA)
-    birakilan, kendi = [], []
+    hafifletir = intents.KINDS["load.reduce"]["modules"]
+    birakilan, kendi, plansiz = [], [], []
     for mod, planli in donen:
         if planli:
             kendi.append(ad.get(mod, mod))
+            continue
+        if mod not in hafifletir:
+            # Gunluk yuk plani yok: teklif orada yalniz «Gordum» olurdu.
+            plansiz.append(ad.get(mod, mod))
             continue
         for i in range(DONUS_GUN):
             g = (datetime.date.fromisoformat(gun) + datetime.timedelta(days=i)).isoformat()
@@ -242,6 +247,8 @@ def donus_teklifi(con, gun):
                  % ", ".join(birakilan))
     if kendi:
         p.append("%s dönüşü kendi planında kurdu." % ", ".join(kendi))
+    if plansiz:
+        p.append("%s'de günlük yük planı yok; ilk günlerde kendi hızında başla." % ", ".join(plansiz))
     return " ".join(p)
 
 

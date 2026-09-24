@@ -239,7 +239,7 @@ def run():
         # Her tur icin bir cumle var: hicbiri bos kalmaz.
         for tur, govde, mod in (
                 ("focus.set", {"date": BUGUN, "focus": "matematik"}, "ays"),
-                ("load.reduce", {"date": BUGUN, "ratio": 0.5}, "spi"),
+                ("load.reduce", {"date": BUGUN, "ratio": 0.5}, "ays"),
                 ("measure.ask", {"date": BUGUN, "metric": "hrv"}, "spi")):
             c = intents.create(con, mod, tur, govde, "   ")
             ok(c["ok"], tur)

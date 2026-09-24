@@ -2691,4 +2691,22 @@
       expect(R.S.officeChats.hayalet).toBeUndefined();
     });
   });
+
+  /* HATA (2026-09-24): ofis modeline giden gün özeti yalnız blokların
+     sorusunu sayıyordu; «soru 40» (serbest soru) düşüyor, model «bugün soru
+     çözmedin» diyebiliyordu. Girilmemiş paragraf «0/18» diye ölçüm gibi
+     gidiyordu; girilmediyse veri yok (null) gider. */
+  describe('Gün özeti (ofis aracı)', () => {
+    it('serbest soru sayılır; girilmemiş paragraf sıfır gitmez', () => {
+      resetState();
+      const bugun = R.U.todayISO();
+      R.S.days[bugun] = { date:bugun, dow:R.U.weekdayIndex(bugun),
+        blocks:[{ id:'b1', slot:'Sabah', actualQ:10, actualMin:30, status:'done' }],
+        freeQ:40, freeCorrect:30, paragraphActual:0, paragraphTarget:18, sleepHours:null };
+      const g = R.Tools.gunler({ gun:1 })[0];
+      expect([g.cozulenSoru, g.serbestSoru, g.paragraf]).toEqual([50, 40, null]);
+      R.S.days[bugun].paragraphActual = 12;
+      expect(R.Tools.gunler({ gun:1 })[0].paragraf).toBe('12/18');
+    });
+  });
 })();

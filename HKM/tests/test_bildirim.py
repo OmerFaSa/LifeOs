@@ -336,7 +336,7 @@ def run_yarin():
 
 def run_tatil():
     import json
-    from core import hedefag, schedule
+    from core import hedefag, schedule, sohbet
     suite("tatil modu (HKM)")
     CFGT = {"channels": {"telegram": {"enabled": True, "bot_token": "T", "allow_from": ["7"]}},
             "schedule": {"enabled": True, "morning": "08:00", "evening": "21:00", "checkin": "21:30"}}
@@ -380,10 +380,28 @@ def run_tatil():
         hedefag.tatil_yaz(con, "ays", {"bas": "2026-09-24", "bit": "2026-09-30", "donus_planli": True})
         schedule.run(con, CFGT, {"kind": "daily"}, now=datetime.datetime(2026, 10, 1, 8, 1))
         m = con.execute("SELECT text FROM outbox WHERE kind='daily'").fetchone()["text"]
-        ok("Tatilden dönüş" in m and "SPİ için yük azaltma" in m and "AYS dönüşü kendi" in m, m)
+        # HATA (2026-09-24): teklif SPİ'ye gidiyordu ama SPİ onu UYGULAYAMAZ
+        # (günlük yük planı yok; yalnız «Gördüm»). Uygulanamayan teklif
+        # bırakılmaz; kullanıcıya dürüstçe söylenir.
+        ok("Tatilden dönüş" in m and "AYS dönüşü kendi" in m, m)
+        ok("SPİ için yük azaltma" not in m and "SPİ" in m and "yük planı yok" in m, m)
+        eq(con.execute("SELECT COUNT(*) FROM intents WHERE kind='load.reduce'").fetchone()[0], 0)
+        # Donusu kendisi planlamayan AYS'ye teklif gider (iki gun, bir kez).
+        con2 = db.connect(":memory:")
+        hedefag.tatil_yaz(con2, "ays", {"bas": "2026-09-24", "bit": "2026-09-30"})
+        schedule.donus_teklifi(con2, "2026-10-01")
+        schedule.donus_teklifi(con2, "2026-10-01")
         rows = sorted((x["module"], json.loads(x["payload"])["date"]) for x in
-                      con.execute("SELECT module, payload FROM intents WHERE kind='load.reduce'"))
-        eq(rows, [("spi", "2026-10-01"), ("spi", "2026-10-02")])
-        schedule.donus_teklifi(con, "2026-10-01")
-        eq(con.execute("SELECT COUNT(*) FROM intents").fetchone()[0], 2)
-    test("donus sabahi yuk azaltma teklifi", t_return_offers)
+                      con2.execute("SELECT module, payload FROM intents WHERE kind='load.reduce'"))
+        eq(rows, [("ays", "2026-10-01"), ("ays", "2026-10-02")])
+    test("donus sabahi yuk azaltma teklifi yalniz uygulayabilen module", t_return_offers)
+
+    def t_hafif_yalniz_ays():
+        """«yarın hafif»: yarini yalniz SPİ/ESP'de olan kullaniciya teklif
+        birakilmaz; neden soylenir (uygulanamayan teklif bir cikmaz yoldur)."""
+        con = db.connect(":memory:")
+        hedefag.yarin_yaz(con, "esp", {"gun": "2026-09-24", "isler": [{"metin": "Gitar", "dk": 20}]})
+        r = sohbet.konus(con, {}, "yarın hafif", "2026-09-23")
+        eq(con.execute("SELECT COUNT(*) FROM intents").fetchone()[0], 0)
+        ok("yük planı yok" in r["text"], r["text"])
+    test("yarin hafif: uygulanamayan module teklif yok", t_hafif_yalniz_ays)

@@ -4,7 +4,7 @@
    yavasken ya da yokken oldugu gibi calisir. */
 
 (function(){
-  const { describe, it, expect, resetState } = R.Test;
+  const { describe, it, expect, resetState, withTodayAsync } = R.Test;
   const B = () => R.Beacon;
   const BUGUN = R.U.todayISO();
   const DUN = R.U.iso(R.U.addDays(R.U.parse(BUGUN), -1));
@@ -190,6 +190,27 @@
         const v = p.metrics[k].value;
         expect(v === null || typeof v === 'number').toBe(true);
       });
+    });
+
+    /* HATA (2026-09-24): «soru 40» (Telegram kısa kayıt ya da derssiz giriş)
+       günün serbest sorusuna yazılır; beacon yalnız blokları sayıyordu, HKM
+       günü «veri yok» görüp sabah aynı soruyu yeniden soruyordu. Paragraf ve
+       problem soruları da gitmiyordu. Girilmemiş gün yine «veri yok»dur. */
+    it('serbest, paragraf ve problem soruları da günün sorusudur', () => {
+      resetState();
+      R.S.days[BUGUN] = { date:BUGUN, blocks:[{ id:'b1', actualQ:null }],
+        freeQ:40, paragraphActual:0, problemActual:0 };
+      let q = B().payload(BUGUN).metrics.questions;
+      expect([q.value, q.cert]).toEqual([40, 'measured']);
+      R.S.days[BUGUN] = { date:BUGUN, blocks:[{ id:'b1', actualQ:20 }],
+        freeQ:5, paragraphActual:18, problemActual:3 };
+      q = B().payload(BUGUN).metrics.questions;
+      expect([q.value, q.cert]).toEqual([46, 'measured']);
+      /* Hiçbir şey girilmemiş gün: sıfır değil, veri yok. */
+      R.S.days[BUGUN] = { date:BUGUN, blocks:[{ id:'b1', actualQ:null }],
+        freeQ:0, paragraphActual:0, problemActual:0 };
+      q = B().payload(BUGUN).metrics.questions;
+      expect([q.value, q.cert]).toEqual([null, 'missing']);
     });
 
     it('önizleme kullanıcıya etiketiyle gösterilir', () => {
@@ -389,8 +410,39 @@
     });
 
     it('uygulanamayan tür sessizce uygulanmış sayılmaz', async () => {
-      const r = await B().applyIntent(teklif({ kind:'load.reduce' }));
+      const r = await B().applyIntent(teklif({ kind:'focus.set', payload:{ date:BUGUN, focus:'x' } }));
       expect(r.ok).toBe(false);
+    });
+
+    /* HATA (2026-09-24): HKM «yarın hafif» ve tatil dönüşünde load.reduce
+       bırakıyor ve kullanıcıya «ne kadar azalacağına modül karar verir»
+       diyordu; AYS teklifi TANIYOR ama UYGULAYAMIYORDU (yalnız «Gördüm»).
+       Artık AYS kendi kuralıyla uygular: o gün için yarım süre istisnası
+       (tatil dönüşüyle aynı kural), deneme/kapanış günü ve başlamış gün
+       korunur, geçmişe yazılmaz, geri alınır. */
+    it('yük azaltma teklifi AYS kuralıyla uygulanır ve geri alınır', async () => {
+      resetState();
+      await withTodayAsync('2026-10-12', async () => {       /* Pazartesi */
+        await R.Model.ensurePlan(true);
+        const yarin = '2026-10-13';
+        const n = { id:9, kind:'load.reduce', payload:{ date:yarin, why:'yarın hafif' } };
+        expect(B().canApply(n)).toBe(true);
+        const temel = R.Istisna.temelDakika(yarin) || R.Istisna.sablonDakikasi();
+        const r = await B().applyIntent(n);
+        expect(r.ok).toBe(true);
+        const ist = R.Istisna.liste().find(x => x.id === r.geriAl);
+        expect([ist.tur, ist.from, ist.to, ist.dakika])
+          .toEqual(['sure', yarin, yarin, Math.max(30, Math.round(temel / 2))]);
+        expect(r.note.indexOf(yarin) >= 0).toBe(true);
+        await R.Istisna.kaldir(r.geriAl);
+        expect(R.Istisna.liste().length).toBe(0);
+        /* Geçmiş gün ve deneme günü (Cumartesi) hafifletilmez. */
+        expect((await B().applyIntent({ id:10, kind:'load.reduce',
+          payload:{ date:'2026-10-11' } })).ok).toBe(false);
+        const cmt = await B().applyIntent({ id:11, kind:'load.reduce', payload:{ date:'2026-10-17' } });
+        expect(cmt.ok).toBe(false);
+        expect(cmt.error.indexOf('kısaltılmaz') >= 0).toBe(true);
+      });
     });
 
     /* Kullanicinin gormedigi bir sayiyi uydurup plana yazmak, teklifi

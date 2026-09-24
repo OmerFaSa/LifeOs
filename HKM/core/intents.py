@@ -2,9 +2,11 @@
 """Niyet kuyrugu — HKM'nin YETKI ALMADAN is baslatmasi.
 
    «Yarin iki saat matematik calismak istiyorum» istegi, HKM'nin AYS'ye
-   yazmasi demek olurdu. Bu, uc sistemin en temel kuralini kirardi:
+   yazmasi demek olurdu. Bu, uc sistemin en temel kuralini kirardi
+   (AGENTS.md §1.4):
 
-     AYS/SPI/ESP, HKM'nin var oldugunu BILMEZ ve o kapaliyken bozulmaz.
+     AYS/SPI/ESP HKM'yi BILIR ama ona BAGIMLI DEGILDIR; HKM hicbir
+     module YAZMAZ ve o kapaliyken hicbir modul bozulmaz.
 
    Cozum sahip degistirmektir: HKM bir NIYET yazar; modul acilista kuyrugu
    sorar, kullaniciya gosterir ve onaylanirsa KENDI kodu ile uygular.
@@ -52,8 +54,11 @@ KINDS = {
         "optional": ("why",),
         "note": "Gunun odagini bir alana cevirme teklifi.",
     },
+    # Yalniz GUNLUK YUK PLANI olan modul: AYS (core/istisna.js hafiflet).
+    # SPİ ve ESP'de gunun dakika plani yok; teklif orada yalniz «Gordum»
+    # olurdu — gorunen eylem yapilabilen eylemle ayni olmali (2026-09-24).
     "load.reduce": {
-        "modules": ("ays", "esp", "spi"),
+        "modules": ("ays",),
         "required": ("date",),
         "optional": ("ratio", "why"),
         "note": "Gunun yukunu azaltma teklifi (oran verilmezse modul karar verir).",

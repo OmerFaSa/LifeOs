@@ -1,7 +1,9 @@
 /* HKM işareti (beacon) — «varsa gönder», asla bekletme.
 
-   AYS HKM'nin var olduğunu BİLMEZ. Bu dosya o kuralın tek istisnası
-   ve istisnanın sınırları burada yazılı:
+   AYS HKM'yi BİLİR ama ona BAĞIMLI DEĞİLDİR (AGENTS.md §1.4): HKM
+   kapalıyken, yanıt vermezken ya da hata verirken AYS bozulmaz,
+   yavaşlamaz, veri kaybetmez. HKM ile konuşan her dosya (bu dosya,
+   `kingteklif.js`, `yedekag.js`, `urun.js`) şu sınırlara uyar:
 
    1. HİÇBİR ÇİZİMDE ÇALIŞMAZ. Gönderim yalnızca kullanıcının açıkça
       istediği anda ya da gün kapanışında tetiklenir; bir ekranın açılması
@@ -162,9 +164,17 @@ R.Beacon = (function(){
     const gun = (S.days || {})[d];
     const bloklar = (gun && gun.blocks) || [];
 
+    /* Günün sorusu = blokların sorusu + serbest soru («soru 40», derssiz
+       giriş) + paragraf + problem (goodhart.js aynı toplamı kullanır).
+       Serbest/paragraf/problem alanı 0 ile başlar; 0 «girilmedi»dir, ölçüm
+       değil. Hiçbir parça girilmemişse veri yok — sıfır gönderilmez. */
     const soru = bloklar.filter(function(b){ return b.actualQ != null; });
-    out.questions = soru.length
-      ? metric(soru.reduce(function(a, b){ return a + Number(b.actualQ || 0); }, 0), 'measured')
+    const serbest = gun ? ['freeQ', 'paragraphActual', 'problemActual']
+      .map(function(k){ return Number(gun[k]) || 0; })
+      .filter(function(n){ return n > 0; }) : [];
+    out.questions = (soru.length || serbest.length)
+      ? metric(soru.reduce(function(a, b){ return a + Number(b.actualQ || 0); }, 0)
+          + serbest.reduce(function(a, n){ return a + n; }, 0), 'measured')
       : metric(null, 'missing');
 
     const sure = bloklar.filter(function(b){ return b.actualMin != null; });
@@ -646,7 +656,7 @@ R.Beacon = (function(){
      yapiyordu: gorunur bir «Uygula» dugmesi, basildiginda «bu teklif turu
      uygulanmaz» diyordu. Gorunen eylem, yapilabilen eylemle ayni olmali. */
   const APPLIABLE = ['plan.add', 'material.add', 'mufredat.add', 'kitap.add', 'kayit.add',
-    'urun.add'];
+    'urun.add', 'load.reduce'];
 
   /* Gunun kaydi ancak AYS ondan yazilacak bir sey OKUYABILDIYSE
      uygulanabilir: okunamayan bir cumleye «Kaydet» dugmesi, basilinca
@@ -794,6 +804,16 @@ R.Beacon = (function(){
     const p = n.payload || {};
     if(!U.isISO(String(p.date || ''))) return { ok:false, error:'Tarih geçersiz.' };
 
+    /* Yük azaltma («yarın hafif», tatil dönüşü): ne kadar azalacağına AYS
+       karar verir — tek günlük süre istisnası (core/istisna.js hafiflet). */
+    if(n.kind === 'load.reduce'){
+      if(!R.Istisna) return { ok:false, error:'İstisna modülü yüklenmedi.' };
+      const h = await R.Istisna.hafiflet(p.date, p.ratio, p.why ? 'HKM: ' + p.why : null);
+      if(!h.ok) return { ok:false, error:h.why };
+      return { ok:true, geriAl:h.id, note:p.date + ' hafifletildi: ders günü ' + h.temel
+        + ' dk yerine ' + h.dakika + ' dk. Rehber › İstisnalar\'da durur; «Geri al» ile kalkar.' };
+    }
+
     /* Gecersiz sure SINIRLANDIRILMAZ, REDDEDILIR. Onceki hal -5 dakikayi
        10 dakikaya cekiyordu: kullanicinin gormedigi bir sayiyi uydurup
        plana yazmak, teklifi sessizce baska bir teklife cevirmektir. */
@@ -851,6 +871,7 @@ R.Beacon = (function(){
         : (action === 'seen' ? 'acknowledged' : 'dismissed');
       let not = '';
       let uygulandi = false;
+      let geriAl = null;
       if(action === 'apply'){
         if(onceki && (onceki.state === 'applied' || onceki.state === 'applying')){
           /* En fazla BIR KEZ: daha once uygulanmis (ya da uygulanmis
@@ -864,6 +885,7 @@ R.Beacon = (function(){
             return { ok:false, error:r.error };
           }
           not = r.note;
+          geriAl = r.geriAl || null;
           uygulandi = true;
         }
       }
@@ -871,7 +893,7 @@ R.Beacon = (function(){
       const bildirim = await answerIntent(n.id, durum);
       if(bildirim.ok) await markIntent(n.id, durum, true, not);
       return { ok:true, applied:uygulandi, state:durum,
-        reported:!!bildirim.ok, note:not };
+        reported:!!bildirim.ok, note:not, geriAl:geriAl };
     }finally{
       delete ISLEMDE[anahtar];
     }

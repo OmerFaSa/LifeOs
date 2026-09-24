@@ -1020,7 +1020,10 @@ Kullanıcının dikkati korunur, hiçbir mesaj kaybolmaz:
 - **Akşam «yarın şunlar var»** (19): modüller yarının ilk işlerini KENDİ koduyla seçip
   hedef eşitlemesiyle yollar (`brand/ortak/hedefag.js` `yarin` kancası → tablo
   `yarin_ozet`); akşam kapanışı (yoksa yoklama) en çok üç işi AYS-SPİ-ESP sırasıyla
-  dizer. «yarın hafif» → modüllere `load.reduce` teklifi (oranı modül seçer).
+  dizer. «yarın hafif» → `load.reduce` teklifi (oranı modül seçer). Teklif YALNIZ günlük
+  yük planı olan modüle gider: AYS (`core/istisna.js hafiflet`, o güne yarım süre
+  istisnası, «Geri al»). SPİ ve ESP'de günün dakika planı yok; onlara teklif bırakılmaz,
+  sohbette nedeni söylenir (2026-09-24 düzeltmesi: eskiden «Gördüm»den öteye geçmiyordu).
 - **Önce depo** (46): aynı konuda depoda kayıt varsa King'in teklifinde EN ÜSTTE «depodaki
   kayıt (2 ay önce yapıldı) · ücretsiz · hemen»; 90 günden yeniyse önerilir, seçilirse BAM'da
   iş açılmaz (`king._depodan_ver`). Güncelliği bu yolda denetlenmez ve bu söylenir.
@@ -1035,9 +1038,10 @@ Testler: `tests/test_bildirim.py`, `tests/test_teklif.py` (önce depo), `tools/e
 - **Tatil modu** (fikir 56): modül tatili `brand/ortak/seri.js` ile işaretler; hedef
   eşitlemesi yalnız TARİHİ yollar (`tatil_ozet`). Tatildeyken yoklama sorulmaz, sabah
   brifingi «Tatil modundasın» der, eksik veri sorusu ve akşam «yarın» özeti gitmez,
-  bayat teklif kapatma bekler. Dönüş sabahı (`donus_teklifi`) modüllere tek seferlik
-  `load.reduce` teklifi bırakılır; oranı modül seçer (AYS `core/tatil.js`: dönüşün ilk
-  iki günü yarım süre).
+  bayat teklif kapatma bekler. Dönüş sabahı (`donus_teklifi`) dönüşünü kendisi
+  planlamamış ve günlük yük planı olan modüle (AYS) tek seferlik `load.reduce` teklifi
+  bırakılır; oranı modül seçer (AYS `core/tatil.js` dönüşü zaten yarım süreyle kurar).
+  SPİ ve ESP için teklif yok, mesaj «günlük yük planı yok» der.
 - **Seri dondurma** (50): hasta/izin/tatil günü seriyi kırmaz, sayılmaz da; üç modülün
   seri hesabı (`calc.js` / `state.js`) donmuş günü atlar. HKM'ye neden gitmez.
 - **Neler kazandın** (49): `weekly.kazanimlar` — yalnız yönü kodda belli ölçüler (`YON`;
