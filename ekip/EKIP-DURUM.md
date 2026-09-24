@@ -24,9 +24,8 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## KARTLAR (K)
 
-- **Şu an:** K1 P3 (kullanıcı onayıyla): 32 geçen dönem gölgesi, 36 dağılım şeridi, 40 birikim eğrisi.
-  Dokunduğum yer YALNIZ `brand/ortak/grafik.js`, `grafik.test.js`, `kart.css` (+ ortak.py kopyaları,
-  dist). Ekran, `index.html`, T ve H dosyası yok. AYS teslim edilirse bırakıp K2'ye geçerim.
+- **Şu an:** K1 bitti: P1 22 + P2 13 + P3 3 = 38 ortak özellik, ekrana dokunmadan. K2'yi bekliyorum
+  (AYS teslimi). Dokunduğum yer yalnız `brand/ortak/` K dosyaları, testleri, `kart.css`, kopyalar, dist
 - **Sahiplendiğim çekirdek dosyalar:** — (üç `ui.js` bırakıldı: `toast` 150 çizgisi ve
   `confirmSheet(…, danger, onay)` 22 etiketi eklendi, 2d765cc)
 - **Biten** (özellik · commit): 024 025 026 028 sayı `sayi.js` · 009cf92; 027 035 037 041 grafik
@@ -34,7 +33,8 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   `sozluk.js`, 018 şüpheli giriş (`sayi.js`) · 2d765cc; 173 177 179 güven `guven.js` +
   bozuk tarih (31 Şubat) koruması `sayi.js`/`grafik.js` · 0443561; P2: 015 170 son bilinen değer,
   sesli okuma (`sayi.js`) · 138bf20; 029 030 031 033 034 038 039 grafik ekleri
-  (`grafik.js`) · 464a54c; 113 123 124 127 öneri ekleri (`oneri.js`) · 6a7fd82
+  (`grafik.js`) · 464a54c; 113 123 124 127 öneri ekleri (`oneri.js`) · 6a7fd82; P3: 032 036 040
+  geçen dönem, dağılım, birikim (`grafik.js`) · 9bb2be7
 - **Bulgular:** T2-01 ✅ a798671 · T2-03 ✅ c063316 · (K'nin bulduğu, H kapattı: T2-04, T2-05,
   T2-07, T2-08) · T2-02 (AYS Ofis ham kimlik, 137) ekran dosyası
   (`office.js`, `team.js`): AYS teslim edilince K2'de 137 ile
@@ -47,7 +47,8 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
     P2: `SAYI.html(s, { yenileniyor, etiket, fark })`, `SAYI.sesli(s, { etiket, fark })`
   - Grafik: `GRAFIK.seri(noktalar)` → `cizgiSvg(s, { bant, cumle })`, `egilimHtml(seri, { yon })`,
     `aralikHtml`, `dolulukHtml`, `esikCubukHtml`, `tikHtml`, `yukHtml`, `cumleHtml`, `hucreHtml`,
-    `hizKoniSvg(noktalar, hedef)`
+    `hizKoniSvg(noktalar, hedef)`; P3: `cizgiSvg(s, { onceki })` + `gecenDonemDugmesi(acik)`,
+    `dagilimSvg({ degerler })`, `birikimSvg(gunluk, plan, { bugun })`
   - Öneri: `ONERI.kartHtml(oneri, R.ACTIONS)`, `alan(liste, katalog)` (alanda tek kart),
     `cakismaHtml`, `ayarHtml(katalog, ayar)`, `sormadanMi(oneri, katalog, ayar, { kaynak })`;
     yıkıcı onay: `UI.confirmSheet(baslik, mesaj, fn, true, ONERI.sonucEtiketi({ fiil, sayi, nesne }))`
@@ -58,9 +59,11 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   - Güven: `GUVEN.yedekHtml({ damga, boyut, iz, kayit, bugun })` (kural `yedek.js`'ten),
     `silmeHtml({ nesne, sayi, donusNoktasi, yazilan })` + `silmeDurumu`, `gecmisHtml(olaylar)`
     (olay: `{ zaman, kaynak:'kullanici'|'merkez'|'ofis'|'kural'|'plan'|'ice-aktarma', alan, eski, yeni, onay }`)
-- **Yarım / sıradaki:** K2 (AYS teslimini bekliyor; gelince önce o). Arada: K1 P3 32 36 40
-  (geçen dönem gölgesi, dağılım şeridi, birikim eğrisi) — ancak kullanıcı «devam» derse
+- **Yarım / sıradaki:** K2 — AYS teslim satırı ✅ olunca hemen (P1'leri AYS ekranlarına)
 - **Soru / öneri:**
+  - T ve H için: T'nin devir notunda «koşulmadı» dediği denetimler 9bb2be7 üstünde (dd97f56 + K P3)
+    koştu: üç modülde runtests (AYS 1902, SPİ 1532, ESP 1534), smoke, a11ycheck, layoutcheck,
+    palettecheck — 15/15 temiz. H'nin sadelik düzeltmesi de geldi (a861d79); teslim satırı T'nin.
   - T: üç `index.html`'e `js/core/grafik.js`, `oneri.js`, `sozluk.js`, `guven.js` (sayi.js'ten sonra). `oneri.js`
     yüklenmeden 150'nin süre çizgisi görünmez (`ui.js` onu arar, yoksa eskisi gibi kalır).
 
