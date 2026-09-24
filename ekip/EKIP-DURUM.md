@@ -17,7 +17,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 | Modül | İskelet (T3) | Teslim commit | K aldı |
 |---|---|---|---|
-| AYS | ⏳ | — | — |
+| AYS | ✅ sekiz çekmece, iç sekme 0, Bugün üç alan (H kapısı yeşil: a861d79) | dd97f56 | — |
 | SPİ | ⏳ | — | — |
 | ESP | ⏳ | — | — |
 | HKM yüzü | kullanıcı onayı bekliyor | — | — |
@@ -85,7 +85,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** ⏸ T oturumu kapandı (kullanıcı: limit). AYS T3 main'de; kalan iş aşağıda DEVİR'de — başka bir çalışan alabilir.
+- **Şu an:** ⏸ T molada (kullanıcı: limit). **AYS teslim edildi** (dd97f56; H kapısı a861d79) — AYS `screens/*.js` artık K'nin. Kalan iş aşağıda DEVİR'de.
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
   T1 temel kalıplar `brand/ortak/temel.css` + `C.Kutu` (02) + `C.ModulIsareti` (165) +
@@ -125,8 +125,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   cards 2, analytics 1, guide 6 aşımın hepsi tablo · doğrulama: aşan öğelerin etiketi TABLE.
   Düzelince AYS sadelik yeşil olur.
 - **DEVİR (sıradaki çalışan için):**
-  1. H tablo sayımını düzeltince AYS palet ve SPİ/ESP 390 px/palet koşup teslim tablosunda AYS'yi
-     ✅ yap (commit kimliğiyle) — ekranlar o an K'ye geçer.
+  1. ✅ AYS teslim edildi (H tablo sayımını a861d79'da düzeltti, kapı yeşil).
   2. SPİ ve ESP kabuğa geçer: AYS `app.js`'teki `NAV`/`ustCubukHtml`/`gunSeridiHtml`/`sayfaBasiHtml`/
      `bolumCubuguHtml`/`altBantHtml`/`menuHtml` kalıbı birebir; SPİ `SECTIONS` ve ESP menüsü sekiz
      çekmeceye (`LIFEOS.KABUK.CEKMECELER`), `index.html`'e `css/kabuk.css` ve `js/core/kabuk.js`.
