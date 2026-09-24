@@ -10021,7 +10021,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'5a5c024', at:'2026-09-24 17:19', dirty:true };
+R.BUILD = { id:'0fc5266', at:'2026-09-24 17:24', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -10687,6 +10687,1927 @@ window.LIFEOS = window.LIFEOS || {};
     bagla:bagla,
     etiketsizler:etiketsizler,
     kac:kac,
+  };
+})();
+
+/* ==== js/core/grafik.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/grafik.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GRAFİK PARÇALARI — eksik veriyi sıfır çizmeyen tek kalıp.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/grafik.js`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   Kopyayı elle düzenleme: bir sonraki yayında kaybolur.
+   Biçimi `brand/ortak/kart.css` içindedir.
+   ==================================================================
+
+   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §B)
+
+     027  Eksik gün boşluğu   verisi olmayan gün çizgide BOŞLUK kalır;
+                              iki yanı kesik bir köprüyle bağlanır, çizgi
+                              asla sıfıra düşmez.
+     035  Aralık çubuğu       tahmin tek sayı değil aralıktır: en olası
+                              değer çizgiyle, dayanağı (kaç veri) altta.
+     037  Güvenli eğilim      ok yalnız EN AZ BEŞ veri varsa çizilir; yoksa
+                              kaç ölçüm daha gerektiği yazar.
+     041  Veri doluluğu       her modülün son yedi günü: verisi olan gün
+                              dolu, olmayan İÇİ BOŞ kare — 0 değil.
+
+     P2: 029 eşik çizgili çubuk · 030 tik sayacı · 031 hedef bandı
+         (cizgiSvg bant) · 033 gelecek yük · 034 grafiğin cümlesi ·
+         038 satır içi çubuk · 039 hız tahmini (aralık, koni)
+     P3: 032 geçen dönem gölgesi (cizgiSvg onceki) · 036 dağılım şeridi ·
+         040 birikim eğrisi (kayıtsız gün 0 eklenmez)
+
+   NEDEN
+
+   Bir grafik kütüphanesinde eksik değer çoğu zaman 0'a düşer, çünkü
+   dizi sayı ister. Burada dizi `null` taşır ve `null` hiçbir yerde
+   sayıya çevrilmez: düşen bir çizgi, olmayan bir kötüleşmeyi gösterir
+   (AGENTS.md §1.2). Bu dosyanın her işlevi o tek kuralı taşır.
+
+   Çizim SVG'dir ve dize olarak üretilir: çerçeve yok, tuval yok,
+   bağımlılık yok (AGENTS.md §1.3). Renk yazılmaz; sınıf yazılır. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+(function(){
+  'use strict';
+
+  const L = window.LIFEOS;
+
+  /* 037 — eğilim için en az veri. Bir KARARDIR: dört noktadan çizilen
+     bir eğim, tek bir sapan günle yön değiştirir; beşte bir gün hâlâ
+     yön değiştirebilir ama artık tek başına değil. */
+  const EGILIM_EN_AZ = 5;
+
+  /* 037 — bu kadarın altındaki toplam değişim «yatay» sayılır (ortalamaya
+     oranla). Yüzde beşten küçük bir kayma, ölçü gürültüsünden ayırt
+     edilemez; ona ok çizmek yön uydurmaktır. */
+  const DUZ_ORAN = 0.05;
+
+  function kac(t){
+    return String(t == null ? '' : t).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+  const sayiMi = v => typeof v === 'number' && isFinite(v);
+  const bicim = (n, od) => (L.SAYI && L.SAYI.bicim) ? L.SAYI.bicim(n, od)
+    : (sayiMi(n) ? String(n) : '—');
+  const yuvarla = n => Math.round(n * 100) / 100;
+
+  /* ------------------------------------------------------- tarih */
+
+  /* Gün YEREL takvimden alınır (ekip/HATALAR.md T2-03). Yalnız tarih
+     («2026-09-25») olduğu gibi okunur; saat taşıyan damga
+     («…T22:30:00Z») yerel güne çevrilir — ilk on karakteri UTC günüdür
+     ve İstanbul'da 00:00–03:00 kaydını düne yazar. Tarih olmayan dize
+     («dün») reddedilir. */
+  function gunParca(z){
+    if(z instanceof Date) return isNaN(z) ? null : [z.getFullYear(), z.getMonth(), z.getDate()];
+    const s = String(z == null ? '' : z);
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+    if(m){
+      /* Bozuk tarih (2026-02-31) sessizce kaymasın: geri çevirip aynı
+         günü gösterdiğini doğrula (`yedek.js` ile aynı sınama). */
+      const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+      return d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3] ? [+m[1], +m[2] - 1, +m[3]] : null;
+    }
+    if(!/^\d{4}-\d{2}-\d{2}T/.test(s)) return null;
+    const d = new Date(s);
+    return isNaN(d) ? null : [d.getFullYear(), d.getMonth(), d.getDate()];
+  }
+  const iki = n => ('0' + n).slice(-2);
+  function gunISO(z){
+    const p = gunParca(z);
+    return p ? p[0] + '-' + iki(p[1] + 1) + '-' + iki(p[2]) : null;
+  }
+  /* Gün ekleme UTC'ye sabitlenerek: yaz saati geçişinde gün kaymaz. */
+  function gunEkle(iso, n){
+    const p = gunParca(iso);
+    if(!p) return null;
+    const d = new Date(Date.UTC(p[0], p[1], p[2] + n));
+    return d.toISOString().slice(0, 10);
+  }
+  /* Yerel bugün: UTC'nin bugünü gece yarısından sonra dünü gösterir. */
+  function bugunISO(){ return gunISO(new Date()); }
+  function gunFarki(a, b){
+    const x = gunParca(a), y = gunParca(b);
+    if(!x || !y) return null;
+    return Math.round((Date.UTC(y[0], y[1], y[2]) - Date.UTC(x[0], x[1], x[2])) / 864e5);
+  }
+
+  /* ---------------------------------------------- 027 eksik gün */
+
+  /* Günlük seri: [baslangic, bitis] aralığındaki HER gün bir öğe.
+     Kaydı olmayan gün `deger:null` taşır — asla 0. Aynı güne iki kayıt
+     gelirse sonuncusu geçerlidir (düzeltme sonradan yazılır).
+
+       noktalar: [{ tarih:'2026-09-20', deger:7.2 }, …]  */
+  function seri(noktalar, o){
+    o = o || {};
+    const harita = {};
+    let ilk = null, son = null;
+    (noktalar || []).forEach(n => {
+      const t = n ? gunISO(n.tarih) : null;
+      if(!t) return;
+      harita[t] = sayiMi(n.deger) ? n.deger : null;
+      if(ilk == null || t < ilk) ilk = t;
+      if(son == null || t > son) son = t;
+    });
+    const bas = gunISO(o.baslangic) || ilk, bit = gunISO(o.bitis) || son;
+    if(!bas || !bit) return [];
+    const n = gunFarki(bas, bit);
+    if(n == null || n < 0) return [];
+    const out = [];
+    for(let i = 0; i <= n; i++){
+      const t = gunEkle(bas, i);
+      out.push({ tarih:t, deger:Object.prototype.hasOwnProperty.call(harita, t) ? harita[t] : null });
+    }
+    return out;
+  }
+
+  /* Seriyi kesintisiz parçalara böler. Köprü, bir boşluğun iki yanını
+     bağlar: çizgi orada KESİK geçer ve boşluğun kaç gün olduğu bilinir. */
+  function parcalar(s){
+    const par = [];
+    let cur = null;
+    (s || []).forEach((p, i) => {
+      if(sayiMi(p.deger)){
+        if(!cur){ cur = []; par.push(cur); }
+        cur.push({ i:i, tarih:p.tarih, deger:p.deger });
+      }else{
+        cur = null;
+      }
+    });
+    const kopruler = [];
+    for(let k = 1; k < par.length; k++){
+      const a = par[k - 1][par[k - 1].length - 1], b = par[k][0];
+      kopruler.push({ a:a, b:b, bosGun:b.i - a.i - 1 });
+    }
+    return { parcalar:par, kopruler:kopruler,
+      bosGun:(s || []).filter(p => !sayiMi(p.deger)).length };
+  }
+
+  /* Çizgi grafiği. Dönen SVG'de eksik günün x'inde HİÇBİR nokta yoktur.
+       o = { gen, yuk, min, max, etiket, birim } — min/max verilmezse
+       veriden alınır; eksik gün min/max'a da girmez. */
+  function cizgiSvg(s, o){
+    o = o || {};
+    const gen = o.gen || 320, yuk = o.yuk || 96, pay = o.pay == null ? 6 : o.pay;
+    const p = parcalar(s);
+    const vs = [];
+    p.parcalar.forEach(par => par.forEach(n => vs.push(n.deger)));
+    const n = (s || []).length;
+    const etiket = o.etiket || 'Grafik';
+    const ozet = etiket + ': ' + n + ' gün, ' + (n - p.bosGun) + ' gün veri'
+      + (p.bosGun ? ', ' + p.bosGun + ' gün veri yok' : '');
+    if(!vs.length){
+      return '<svg class="grafik grafik--bos" data-oz="027" viewBox="0 0 ' + gen + ' ' + yuk + '"'
+        + ' role="img" aria-label="' + kac(etiket + ': veri yok') + '"></svg>';
+    }
+    /* 031 — hedef bandı: [alt, ust]. Bant ölçeğe girer (dışarıda kalmaz). */
+    const bant = Array.isArray(o.bant) && sayiMi(o.bant[0]) && sayiMi(o.bant[1]) && o.bant[1] >= o.bant[0]
+      ? o.bant : null;
+    /* 032 — geçen dönem: aynı uzunlukta bir seri, GÜN SIRASIYLA hizalanır
+       (dönemin 1. günü ↔ bu dönemin 1. günü). Fazlası kesilir; eksik gün
+       orada da boşluktur. Ölçeğe girer ki gölge grafikten taşmasın. */
+    const onceki = Array.isArray(o.onceki) ? o.onceki.slice(0, n) : null;
+    const op = onceki ? parcalar(onceki) : null;
+    const ovs = [];
+    if(op) op.parcalar.forEach(par => par.forEach(q => ovs.push(q.deger)));
+    const olcekler = (bant ? vs.concat(bant) : vs).concat(ovs);
+    let min = sayiMi(o.min) ? o.min : Math.min.apply(null, olcekler);
+    let max = sayiMi(o.max) ? o.max : Math.max.apply(null, olcekler);
+    if(max === min){ max = max + 1; min = min - 1; }
+    const x = i => n <= 1 ? gen / 2 : pay + (i / (n - 1)) * (gen - 2 * pay);
+    const y = v => pay + (1 - (v - min) / (max - min)) * (yuk - 2 * pay);
+    const nk = q => yuvarla(x(q.i)) + ',' + yuvarla(y(q.deger));
+
+    let govde = '';
+    if(op && ovs.length){
+      govde += '<g class="grafik__onceki" data-oz="032">' + op.parcalar.map(par => par.length === 1
+        ? '<circle cx="' + yuvarla(x(par[0].i)) + '" cy="' + yuvarla(y(par[0].deger)) + '" r="1.5"/>'
+        : '<polyline points="' + par.map(nk).join(' ') + '"/>').join('') + '</g>';
+    }
+    if(bant){
+      const y1 = yuvarla(y(bant[1])), y2 = yuvarla(y(bant[0]));
+      govde += '<rect class="grafik__bant" data-oz="031" x="0" y="' + y1 + '" width="' + gen
+        + '" height="' + yuvarla(Math.max(0, y2 - y1)) + '"/>';
+    }
+    p.parcalar.forEach(par => {
+      if(par.length === 1 && bant){
+        /* bantlı grafikte tek gün de «nokta» olarak aşağıda çizilir */
+      }else if(par.length === 1){
+        govde += '<circle class="grafik__tek" cx="' + yuvarla(x(par[0].i)) + '" cy="'
+          + yuvarla(y(par[0].deger)) + '" r="2.5" data-tarih="' + par[0].tarih + '"/>';
+      }else{
+        govde += '<polyline class="grafik__cizgi" points="' + par.map(nk).join(' ') + '"/>';
+      }
+    });
+    p.kopruler.forEach(k => {
+      govde += '<line class="grafik__kopru" x1="' + yuvarla(x(k.a.i)) + '" y1="' + yuvarla(y(k.a.deger))
+        + '" x2="' + yuvarla(x(k.b.i)) + '" y2="' + yuvarla(y(k.b.deger)) + '" data-bos="' + k.bosGun + '"/>';
+    });
+    /* Bantlı grafikte her gün bir nokta: bant İÇİNDEKİ dolu, DIŞINDAKİ
+       içi boş (031). Her sapma alarm değildir; boş nokta yalnız «bandın
+       dışında» der, renk vermez. */
+    let disarida = 0;
+    if(bant){
+      p.parcalar.forEach(par => par.forEach(q => {
+        const dis = q.deger < bant[0] || q.deger > bant[1];
+        if(dis) disarida++;
+        govde += '<circle class="grafik__nokta' + (dis ? ' grafik__nokta--dis' : '') + '" cx="' + yuvarla(x(q.i))
+          + '" cy="' + yuvarla(y(q.deger)) + '" r="3" data-tarih="' + q.tarih + '"/>';
+      }));
+    }
+    const oort = ovs.length ? ovs.reduce((a2, v) => a2 + v, 0) / ovs.length : null;
+    const etiketler = ozet + (bant ? ', ' + disarida + ' gün hedef bandının dışında' : '')
+      + (oort != null ? ', geçen dönem ortalaması ' + bicim(oort, 1) + ' (gölgede)' : '')
+      + (o.cumle ? '. ' + cumle(s, o) : '');
+    return '<svg class="grafik' + (bant ? ' grafik--bantli' : '') + '" data-oz="027" viewBox="0 0 ' + gen + ' ' + yuk + '"'
+      + ' preserveAspectRatio="none" role="img" aria-label="' + kac(etiketler) + '">' + govde + '</svg>';
+  }
+
+  /* --------------------------------------------- 035 aralık çubuğu */
+
+  /* a = { alt, ust, olasi, min, max, dayanak, dayanakBirim:'deneme',
+           birim, ondalik, ters (küçük daha iyi: sıralama), etiket }
+
+     Aralık yoksa çubuk ÇİZİLMEZ: tek sayıyı aralık gibi göstermek
+     belirsizliği saklamaktır. Dayanak yazılmamışsa uydurulmaz. */
+  function aralik(a){
+    a = a || {};
+    if(!sayiMi(a.alt) || !sayiMi(a.ust) || a.ust < a.alt){
+      return { var:false, metin:'—', dayanak:dayanakMetni(a) };
+    }
+    const min = sayiMi(a.min) ? a.min : a.alt, max = sayiMi(a.max) ? a.max : a.ust;
+    const oran = v => max === min ? 50 : Math.max(0, Math.min(100, (v - min) / (max - min) * 100));
+    const yer = v => a.ters ? 100 - oran(v) : oran(v);
+    const sol = Math.min(yer(a.alt), yer(a.ust)), sag = Math.max(yer(a.alt), yer(a.ust));
+    const b = t => (L.SAYI && L.SAYI.birimli) ? L.SAYI.birimli(t, a.birim) : t + (a.birim ? ' ' + a.birim : '');
+    return {
+      var:true,
+      sol:yuvarla(sol),
+      gen:yuvarla(Math.max(sag - sol, 1)),
+      olasi:sayiMi(a.olasi) ? yuvarla(yer(a.olasi)) : null,
+      metin:b(bicim(a.alt, a.ondalik) + '–' + bicim(a.ust, a.ondalik)),
+      olasiMetin:sayiMi(a.olasi) ? 'en olası ' + b(bicim(a.olasi, a.ondalik)) : '',
+      dayanak:dayanakMetni(a),
+    };
+  }
+
+  function dayanakMetni(a){
+    if(!sayiMi(a.dayanak)) return 'dayanak kayıtlı değil';
+    return a.dayanak + ' ' + (a.dayanakBirim || 'veri') + ' üzerinden';
+  }
+
+  function aralikHtml(a){
+    const r = aralik(a);
+    const et = a && a.etiket ? '<span class="aralik__et">' + kac(a.etiket) + '</span>' : '';
+    if(!r.var){
+      return '<div class="aralik aralik--yok" data-oz="035">' + et
+        + '<span class="aralik__deger">—</span>'
+        + '<span class="aralik__dayanak">' + kac(r.dayanak) + '</span></div>';
+    }
+    const sr = (a.etiket ? a.etiket + ': ' : '') + 'tahmin ' + r.metin
+      + (r.olasiMetin ? ', ' + r.olasiMetin : '') + ', ' + r.dayanak;
+    return '<div class="aralik" data-oz="035" role="img" aria-label="' + kac(sr) + '">' + et
+      + '<span class="aralik__deger" aria-hidden="true">' + kac(r.metin)
+      + (r.olasiMetin ? ' <span class="aralik__olasi">· ' + kac(r.olasiMetin) + '</span>' : '') + '</span>'
+      + '<span class="aralik__ray" aria-hidden="true">'
+      + '<span class="aralik__bant" style="left:' + r.sol + '%;width:' + r.gen + '%"></span>'
+      + (r.olasi != null ? '<span class="aralik__en" style="left:' + r.olasi + '%"></span>' : '')
+      + '</span>'
+      + '<span class="aralik__dayanak" aria-hidden="true">' + kac(r.dayanak) + '</span></div>';
+  }
+
+  /* --------------------------------------------- 037 güvenli eğilim */
+
+  /* Eksik değer ATLANIR, sıfır sayılmaz. x ekseni sıra değil gündür:
+     iki ölçüm arasında üç gün boşluk varsa eğim onu bilir.
+
+       degerler: [sayı|null, …] (günlük seri) ya da seri() çıktısı
+       o = { yon:'artis-iyi'|'azalis-iyi', enAz, duzOran }  */
+  function egilim(degerler, o){
+    o = o || {};
+    const enAz = o.enAz || EGILIM_EN_AZ;
+    const nk = [];
+    (degerler || []).forEach((v, i) => {
+      const d = v && typeof v === 'object' ? v.deger : v;
+      if(sayiMi(d)) nk.push([i, d]);
+    });
+    if(nk.length < enAz){
+      const eksik = enAz - nk.length;
+      return { yeterli:false, n:nk.length, eksik:eksik,
+        metin:'Eğilim için ' + eksik + ' ölçüm daha gerekli' };
+    }
+    const ort = a => a.reduce((t, v) => t + v, 0) / a.length;
+    const mx = ort(nk.map(p => p[0])), my = ort(nk.map(p => p[1]));
+    let pay = 0, payda = 0;
+    nk.forEach(p => { pay += (p[0] - mx) * (p[1] - my); payda += (p[0] - mx) * (p[0] - mx); });
+    const egim = payda ? pay / payda : 0;
+    const toplam = egim * (nk[nk.length - 1][0] - nk[0][0]);
+    const esik = (o.duzOran == null ? DUZ_ORAN : o.duzOran) * Math.abs(my);
+    let yonu = 'duz';
+    if(Math.abs(toplam) > esik && toplam !== 0) yonu = toplam > 0 ? 'artis' : 'azalis';
+    let anlam = 'notr';
+    if(yonu !== 'duz' && (o.yon === 'artis-iyi' || o.yon === 'azalis-iyi')){
+      anlam = (o.yon === 'artis-iyi') === (yonu === 'artis') ? 'iyi' : 'kotu';
+    }
+    return { yeterli:true, n:nk.length, egim:egim, toplam:toplam, yonu:yonu, anlam:anlam,
+      metin:yonu === 'artis' ? 'artıyor' : yonu === 'azalis' ? 'azalıyor' : 'yatay' };
+  }
+
+  /* Ok: yazı tipine güvenilmez (↗ glifi her yazı tipinde yok), SVG. */
+  const OK = {
+    artis:'<path d="M3 11 L11 3 M5 3 H11 V9"/>',
+    azalis:'<path d="M3 3 L11 11 M11 5 V11 H5"/>',
+    duz:'<path d="M2 7 H12 M8 3 L12 7 L8 11"/>',
+  };
+
+  function egilimHtml(degerler, o){
+    const e = egilim(degerler, o);
+    if(!e.yeterli){
+      return '<span class="egilim egilim--yetersiz" data-oz="037">' + kac(e.metin) + '</span>';
+    }
+    return '<span class="egilim egilim--' + e.anlam + '" data-oz="037" data-yon="' + e.yonu + '">'
+      + '<svg class="egilim__ok" viewBox="0 0 14 14" aria-hidden="true">' + OK[e.yonu] + '</svg>'
+      + '<span>' + kac(e.metin) + '</span>'
+      + '<span class="sr-only"> (' + e.n + ' ölçüm)</span></span>';
+  }
+
+  /* --------------------------------------------- 041 veri doluluğu */
+
+  /* satir = { modul:'ays'|'spi'|'esp', ad:'AYS', gunler:['2026-09-20', …] }
+     `gunler` VERİSİ OLAN günlerdir; listede olmayan gün boştur — 0 değil.
+     o = { bitis:'2026-09-24' (bugün), gun:7 } */
+  function doluluk(satir, o){
+    o = o || {};
+    const gun = o.gun || 7;
+    const bitis = gunISO(o.bitis) || bugunISO();
+    const var_ = {};
+    (satir && satir.gunler || []).forEach(t => { const g = gunISO(t); if(g) var_[g] = 1; });
+    const kutular = [];
+    for(let i = gun - 1; i >= 0; i--){
+      const t = gunEkle(bitis, -i);
+      kutular.push({ tarih:t, dolu:!!var_[t] });
+    }
+    const dolu = kutular.filter(k => k.dolu).length;
+    return { modul:satir && satir.modul, ad:satir && satir.ad, kutular:kutular, dolu:dolu, gun:gun };
+  }
+
+  function dolulukHtml(satirlar, o){
+    o = Object.assign({}, o);
+    o.bitis = gunISO(o.bitis) || bugunISO();
+    const gun = o.gun || 7;
+    const sat = (satirlar || []).map(s => {
+      const d = doluluk(s, o);
+      const sr = (d.ad || d.modul) + ': son ' + d.gun + ' günde ' + d.dolu + ' gün veri var'
+        + (d.gun - d.dolu ? ', ' + (d.gun - d.dolu) + ' gün veri yok' : '');
+      return '<div class="doluluk__s doluluk--' + kac(d.modul || '') + '" role="img" aria-label="' + kac(sr) + '">'
+        + '<span class="doluluk__ad" aria-hidden="true">' + kac(d.ad || d.modul) + '</span>'
+        + '<span class="doluluk__kutular" aria-hidden="true">'
+        + d.kutular.map(k => '<i class="doluluk__k' + (k.dolu ? ' doluluk__k--dolu' : '')
+          + '" data-tarih="' + k.tarih + '"></i>').join('')
+        + '</span>'
+        + '<span class="doluluk__n" aria-hidden="true">' + d.dolu + '/' + d.gun + '</span></div>';
+    }).join('');
+    return '<div class="doluluk" data-oz="041" data-gun="' + gun + '">' + sat + '</div>';
+  }
+
+
+  /* --------------------------------------------- 034 grafiğin cümlesi */
+
+  /* Grafiğin altındaki TEK okuma cümlesi; kod üretir, model değil.
+       o = { etiket, birim, ondalik, yon (037), gunMetni:'son 7 günde' }
+     Veri olmayan gün ortalamaya girmez (0 sayılmaz). */
+  function cumle(s, o){
+    o = o || {};
+    const liste = s || [];
+    const vs = liste.map(p => p && typeof p === 'object' ? p.deger : p).filter(sayiMi);
+    const bas = (o.etiket ? o.etiket + ': ' : '') + (o.gunMetni || ('son ' + liste.length + ' günde'));
+    if(!vs.length) return bas + ' veri yok.';
+    const ort = vs.reduce((a, v) => a + v, 0) / vs.length;
+    const b = x => (L.SAYI && L.SAYI.birimli) ? L.SAYI.birimli(bicim(x, o.ondalik == null ? 1 : o.ondalik), o.birim)
+      : bicim(x, 1) + (o.birim ? ' ' + o.birim : '');
+    const e = egilim(liste, { yon:o.yon });
+    return bas + ' ' + vs.length + ' gün veri; ortalama ' + b(ort) + '; '
+      + (e.yeterli ? 'eğilim ' + e.metin : e.metin.charAt(0).toLocaleLowerCase('tr-TR') + e.metin.slice(1)) + '.';
+  }
+
+  function cumleHtml(s, o){
+    return '<p class="grafik__cumle" data-oz="034">' + kac(cumle(s, o)) + '</p>';
+  }
+
+  /* --------------------------------------------- 029 eşik çizgili çubuk */
+
+  /* e = { deger, esik, olcek, birim, ondalik, etiket, yon:'artis-iyi'|'azalis-iyi' }
+     Aşım payı çubukta ayrı parçadır ve yönün anlamıyla renklenir: borç
+     eşiği aşmak kötü, hedefi aşmak iyi. Yön yoksa aşım nötr. */
+  function esikCubuk(e){
+    e = e || {};
+    if(!sayiMi(e.deger) || !sayiMi(e.esik)) return { var:false };
+    const ust = sayiMi(e.olcek) && e.olcek > 0 ? e.olcek : Math.max(e.deger, e.esik) * 1.25 || 1;
+    const yuz = v => Math.max(0, Math.min(100, Math.round(v / ust * 1000) / 10));
+    const fark = e.deger - e.esik;
+    let anlam = 'notr';
+    if(fark > 0 && (e.yon === 'artis-iyi' || e.yon === 'azalis-iyi')) anlam = e.yon === 'artis-iyi' ? 'iyi' : 'kotu';
+    const b = x => (L.SAYI && L.SAYI.birimli) ? L.SAYI.birimli(bicim(x, e.ondalik), e.birim) : bicim(x, e.ondalik);
+    /* Yüzdenin farkı «puan»dır: %34 ile %10 arası 24 puan, %24 değil. */
+    const farkB = x => e.birim === '%' ? bicim(x, e.ondalik) + ' puan' : b(x);
+    return {
+      var:true, anlam:anlam,
+      dolu:yuz(Math.min(e.deger, e.esik)), asim:fark > 0 ? yuz(e.deger) - yuz(e.esik) : 0, esikYer:yuz(e.esik),
+      metin:b(e.deger) + ' · eşik ' + b(e.esik),
+      farkMetni:fark > 0 ? 'eşiğin ' + farkB(fark) + ' üstünde' : fark < 0 ? 'eşiğin ' + farkB(-fark) + ' altında' : 'eşikte',
+    };
+  }
+
+  function esikCubukHtml(e){
+    e = e || {};
+    const r = esikCubuk(e);
+    const et = e.etiket ? '<span class="esikcubuk__et">' + kac(e.etiket) + '</span>' : '';
+    if(!r.var){
+      return '<div class="esikcubuk esikcubuk--yok" data-oz="029">' + et + '<span class="esikcubuk__deger">—</span></div>';
+    }
+    const sr = (e.etiket ? e.etiket + ': ' : '') + r.metin + ', ' + r.farkMetni;
+    return '<div class="esikcubuk esikcubuk--' + r.anlam + '" data-oz="029" role="img" aria-label="' + kac(sr) + '">' + et
+      + '<span class="esikcubuk__deger" aria-hidden="true">' + kac(r.metin) + ' <span class="esikcubuk__fark">· '
+      + kac(r.farkMetni) + '</span></span>'
+      + '<span class="esikcubuk__ray" aria-hidden="true"><span class="esikcubuk__dolu" style="width:' + r.dolu + '%"></span>'
+      + (r.asim > 0 ? '<span class="esikcubuk__asim" style="left:' + r.esikYer + '%;width:' + yuvarla(r.asim) + '%"></span>' : '')
+      + '<span class="esikcubuk__esik" style="left:' + r.esikYer + '%"></span></span></div>';
+  }
+
+  /* --------------------------------------------- 030 tik sayacı */
+
+  /* Küçük hedefte yüzde yerine kutucuk: kalan 3 kutu sayılır, %83 soyut
+     kalır. Kutu sayısı TIK_EN_COK'u aşarsa kutu okunmaz; çağıran çubuk
+     kullanır (`tik` → { kutu:false }). Yapılan bilinmiyorsa (null) kutular
+     KESİK çizilir: boş kutu «0 yapıldı» demek olurdu. */
+  const TIK_EN_COK = 30;
+
+  function tik(t){
+    t = t || {};
+    if(!sayiMi(t.hedef) || t.hedef <= 0 || !Number.isInteger(t.hedef)) return { kutu:false, neden:'hedef-yok' };
+    if(t.hedef > TIK_EN_COK) return { kutu:false, neden:'buyuk-hedef' };
+    const bilinmiyor = !sayiMi(t.yapilan);
+    const y = bilinmiyor ? 0 : Math.max(0, Math.floor(t.yapilan));
+    return { kutu:true, bilinmiyor:bilinmiyor, hedef:t.hedef, yapilan:bilinmiyor ? null : y,
+      dolu:Math.min(y, t.hedef), fazla:Math.max(0, y - t.hedef), kalan:bilinmiyor ? null : Math.max(0, t.hedef - y) };
+  }
+
+  function tikHtml(t){
+    t = t || {};
+    const r = tik(t);
+    if(!r.kutu) return '';
+    const et = t.etiket ? '<span class="tik__et">' + kac(t.etiket) + '</span>' : '';
+    const sayi = r.bilinmiyor ? '— / ' + r.hedef : r.yapilan + ' / ' + r.hedef + (r.fazla ? ' (+' + r.fazla + ')' : '');
+    const sr = (t.etiket ? t.etiket + ': ' : '') + (r.bilinmiyor ? 'veri yok, hedef ' + r.hedef
+      : r.yapilan + ' / ' + r.hedef + (r.kalan ? ', ' + r.kalan + ' kaldı' : ', hedef tamam'));
+    let kutu = '';
+    for(let i = 0; i < r.hedef; i++) kutu += '<i class="tik__k' + (i < r.dolu ? ' tik__k--dolu' : '') + '"></i>';
+    return '<div class="tik' + (r.bilinmiyor ? ' tik--yok' : '') + '" data-oz="030" role="img" aria-label="' + kac(sr) + '">'
+      + et + '<span class="tik__sayi" aria-hidden="true">' + kac(sayi) + '</span>'
+      + '<span class="tik__kutular" aria-hidden="true">' + kutu + '</span></div>';
+  }
+
+  /* --------------------------------------------- 033 gelecek yük */
+
+  const GUN_KISA = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+
+  /* y = { gunler:[{ tarih, deger }], bugun, birim, etiket }
+     Bugünün sütunu DOLU, gelecek günler KESİK çerçeve: gelecek henüz
+     olmadı. Değeri null olan gün «—» (bilinmiyor); 0 gerçek sıfırdır. */
+  function yukHtml(y){
+    y = y || {};
+    const bugun = gunISO(y.bugun) || bugunISO();
+    const liste = (y.gunler || []).map(g => ({ tarih:gunISO(g.tarih), deger:g.deger })).filter(g => g.tarih);
+    const vs = liste.map(g => g.deger).filter(sayiMi);
+    const max = vs.length ? Math.max.apply(null, vs.concat([1])) : 1;
+    const top = vs.reduce((a, v) => a + v, 0);
+    const sr = (y.etiket ? y.etiket + ': ' : '') + liste.length + ' gün, toplam ' + bicim(top)
+      + (y.birim ? ' ' + y.birim : '') + (liste.length - vs.length ? ', ' + (liste.length - vs.length) + ' gün bilinmiyor' : '');
+    return '<div class="yuk" data-oz="033" role="img" aria-label="' + kac(sr) + '">' + liste.map(g => {
+      const p = gunParca(g.tarih);
+      const gd = new Date(Date.UTC(p[0], p[1], p[2])).getUTCDay();
+      const tur = g.tarih < bugun ? 'gecmis' : g.tarih === bugun ? 'bugun' : 'gelecek';
+      const var_ = sayiMi(g.deger);
+      return '<div class="yuk__g yuk__g--' + tur + (var_ ? '' : ' yuk__g--yok') + '" data-tarih="' + g.tarih + '">'
+        + '<span class="yuk__deger" aria-hidden="true">' + (var_ ? kac(bicim(g.deger)) : '—') + '</span>'
+        + '<span class="yuk__ray" aria-hidden="true"><span class="yuk__sutun" style="height:'
+        + (var_ ? yuvarla(g.deger / max * 100) : 0) + '%"></span></span>'
+        + '<span class="yuk__gun" aria-hidden="true">' + (tur === 'bugun' ? 'Bugün' : GUN_KISA[gd]) + '</span></div>';
+    }).join('') + '</div>';
+  }
+
+  /* --------------------------------------------- 038 satır içi çubuk */
+
+  /* Tablo hücresi: sayı ile boyut aynı yerde. Değer yoksa çubuk yok, «—». */
+  function hucreHtml(h){
+    h = h || {};
+    const olcek = sayiMi(h.olcek) && h.olcek > 0 ? h.olcek : 100;
+    const var_ = sayiMi(h.deger) && h.kesinlik !== 'missing';
+    const oran = var_ ? Math.max(0, Math.min(100, yuvarla(h.deger / olcek * 100))) : 0;
+    /* Kesinlik kaynaktan gelir, bileşen uydurmaz (T2-10): verilmemişse sayı
+       yine yazılır ama SAYI.html onu `data-etiketsiz` ile işaretler. */
+    const sayi = L.SAYI ? L.SAYI.html({ deger:var_ ? h.deger : null, birim:h.birim, kesinlik:var_ ? h.kesinlik : 'missing',
+      ondalik:h.ondalik }, { koken:false }) : kac(var_ ? h.deger : '—');
+    return '<span class="hucre' + (var_ ? '' : ' hucre--yok') + '" data-oz="038" style="--hucre-oran:' + oran + '%">'
+      + sayi + '</span>';
+  }
+
+  /* --------------------------------------------- 039 hız tahmini */
+
+  /* Bu hızla hedefe ne zaman varılır? noktalar: [{ tarih, deger }], hedef.
+     En küçük kareler eğimi ± iki standart hata: tahmin tek tarih değil
+     ARALIKTIR. Hızın alt sınırı hedefe yaklaşmıyorsa geç sınır YOKTUR
+     (null) ve bu söylenir; bir tarih uydurulmaz. En az EGILIM_EN_AZ veri. */
+  function hizTahmini(noktalar, hedef, o){
+    o = o || {};
+    const nk = (noktalar || []).map(n => ({ t:gunISO(n && n.tarih), v:n && n.deger }))
+      .filter(n => n.t && sayiMi(n.v)).sort((a, b) => a.t < b.t ? -1 : 1);
+    if(!sayiMi(hedef)) return { yeterli:false, neden:'hedef-yok', metin:'Hedef yazılmamış' };
+    if(nk.length < EGILIM_EN_AZ){
+      return { yeterli:false, eksik:EGILIM_EN_AZ - nk.length, metin:'Tahmin için ' + (EGILIM_EN_AZ - nk.length) + ' ölçüm daha gerekli' };
+    }
+    const t0 = nk[0].t;
+    const xs = nk.map(n => gunFarki(t0, n.t)), ys = nk.map(n => n.v);
+    const ort = a => a.reduce((s, v) => s + v, 0) / a.length;
+    const mx = ort(xs), my = ort(ys);
+    let sxx = 0, sxy = 0;
+    xs.forEach((x, i) => { sxx += (x - mx) * (x - mx); sxy += (x - mx) * (ys[i] - my); });
+    if(!sxx) return { yeterli:false, neden:'tek-gun', metin:'Ölçümler tek güne düşüyor; hız hesaplanamaz' };
+    const egim = sxy / sxx, kesen = my - egim * mx;
+    let sse = 0;
+    xs.forEach((x, i) => { const r = ys[i] - (kesen + egim * x); sse += r * r; });
+    const se = Math.sqrt(sse / Math.max(1, xs.length - 2) / sxx);
+    const son = nk[nk.length - 1];
+    /* Kalan mesafe son GERÇEK ölçümden (T2-09): doğrunun son noktadaki
+       değerinden ölçülseydi, son ölçüm hedefin altında ama doğru üstündeyken
+       kalan eksi çıkar, «en olası» tarih son ölçümden önceye düşerdi. */
+    const kalan = hedef - son.v;
+    /* Yön İLK ölçümden: hedef başlangıcın üstündeyse yukarı gidilir.
+       Son ölçüme göre kurulsaydı hedefi geçmiş bir seri «ulaşılmadı»
+       görünürdü. */
+    const yukari = hedef >= nk[0].v;
+    const ulasti = yukari ? son.v >= hedef : son.v <= hedef;
+    if(ulasti) return { yeterli:true, ulasti:true, metin:'Hedefe ulaşıldı' };
+    const yaklasan = h => yukari ? h > 0 : h < 0;
+    const gunSay = h => yaklasan(h) ? Math.ceil(kalan / h) : null;
+    const eh = egim, hizli = yukari ? egim + 2 * se : egim - 2 * se, yavas = yukari ? egim - 2 * se : egim + 2 * se;
+    const olasi = gunSay(eh), erken = gunSay(hizli), gec = gunSay(yavas);
+    const tarih = g => g == null ? null : gunEkle(son.t, g);
+    return {
+      yeterli:true, ulasti:false, n:nk.length, egim:egim, se:se, son:son.t,
+      olasi:tarih(olasi), erken:tarih(erken), gec:tarih(gec),
+      yaklasmiyor:olasi == null,
+      metin:olasi == null ? 'Bu hızla hedefe yaklaşılmıyor'
+        : erken === gec
+          ? 'Bu hızla ' + tarihMetni(tarih(olasi)) + ' (tahmin, ' + nk.length + ' ölçüm)'
+          : 'Bu hızla ' + (gec != null ? aralikMetni(tarih(erken), tarih(gec)) : tarihMetni(tarih(erken)) + ' ya da daha geç')
+            + '; en olası ' + tarihMetni(tarih(olasi)) + ' (tahmin, ' + nk.length + ' ölçüm)',
+    };
+  }
+
+  const AY_KISA = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  function tarihMetni(iso, yilsiz){
+    const p = gunParca(iso);
+    return p ? p[2] + ' ' + AY_KISA[p[1]] + (!yilsiz && p[0] !== new Date().getFullYear() ? ' ' + p[0] : '') : '—';
+  }
+
+  /* «7–16 Kasım», «28 Ekim–4 Kasım», «9 Şubat–8 Mart 2027»: aynı ay ve
+     aynı yıl ikinci kez yazılmaz. */
+  function aralikMetni(a, b){
+    const x = gunParca(a), y = gunParca(b);
+    if(!x || !y) return tarihMetni(a) + '–' + tarihMetni(b);
+    if(x[0] === y[0] && x[1] === y[1]) return x[2] + '–' + tarihMetni(b);
+    if(x[0] === y[0]) return tarihMetni(a, true) + '–' + tarihMetni(b);
+    return tarihMetni(a) + '–' + tarihMetni(b);
+  }
+
+  /* Koni: geçmiş noktalar çizgi, gelecek son noktadan açılan üçgen
+     (hızlı ve yavaş eğim), hedef yatay çizgi. Gelecek KESİK kenarlıdır. */
+  function hizKoniSvg(noktalar, hedef, o){
+    o = o || {};
+    const r = hizTahmini(noktalar, hedef, o);
+    const gen = o.gen || 320, yuk = o.yuk || 120, pay = 8;
+    if(!r.yeterli || r.ulasti || r.yaklasmiyor){
+      return '<p class="hiz hiz--yok" data-oz="039">' + kac(r.metin) + '</p>';
+    }
+    const nk = (noktalar || []).map(n => ({ t:gunISO(n.tarih), v:n.deger })).filter(n => n.t && sayiMi(n.v))
+      .sort((a, b) => a.t < b.t ? -1 : 1);
+    const t0 = nk[0].t;
+    const sonX = gunFarki(t0, r.son);
+    const bitisX = gunFarki(t0, r.gec || r.olasi) * (r.gec ? 1 : 1.5);
+    const vs = nk.map(n => n.v).concat([hedef]);
+    const min = Math.min.apply(null, vs), max = Math.max.apply(null, vs);
+    const X = d => pay + d / Math.max(1, bitisX) * (gen - 2 * pay);
+    const Y = v => pay + (1 - (v - min) / ((max - min) || 1)) * (yuk - 2 * pay);
+    const son = nk[nk.length - 1];
+    const ucX = d => X(gunFarki(t0, d));
+    const hedefY = yuvarla(Y(hedef));
+    const koni = [yuvarla(X(sonX)) + ',' + yuvarla(Y(son.v)), yuvarla(ucX(r.erken)) + ',' + hedefY,
+      yuvarla(r.gec ? ucX(r.gec) : X(bitisX)) + ',' + hedefY].join(' ');
+    return '<figure class="hiz" data-oz="039"><svg class="grafik hiz__svg" viewBox="0 0 ' + gen + ' ' + yuk
+      + '" preserveAspectRatio="none" role="img" aria-label="' + kac(r.metin) + '">'
+      + '<line class="hiz__hedef" x1="0" x2="' + gen + '" y1="' + hedefY + '" y2="' + hedefY + '"/>'
+      + '<polygon class="hiz__koni" points="' + koni + '"/>'
+      + '<polyline class="grafik__cizgi" points="' + nk.map(n => yuvarla(X(gunFarki(t0, n.t))) + ',' + yuvarla(Y(n.v))).join(' ') + '"/>'
+      + '</svg><figcaption class="grafik__cumle">' + kac(r.metin) + '</figcaption></figure>';
+  }
+
+
+  /* --------------------------------------------- 032 geçen dönem anahtarı */
+
+  /* Katman D: gölge grafik başındaki anahtarla açılır (EKIP-PLANI Ek A 32). */
+  function gecenDonemDugmesi(acik){
+    return '<button type="button" class="chip chip--tap' + (acik ? ' chip--on' : '') + '" data-oz="032"'
+      + ' data-act="grafik-gecen-donem" aria-pressed="' + (acik ? 'true' : 'false') + '">Geçen dönem</button>';
+  }
+
+  /* --------------------------------------------- 036 dağılım şeridi */
+
+  const DAGILIM_EN_AZ = 5;
+
+  function medyan(a){
+    const s = a.slice().sort((x, y) => x - y);
+    const m = Math.floor(s.length / 2);
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+  }
+
+  /* d = { degerler:[sayı|null…] ya da seri(), etiket, birim, ondalik, gece:'gece' }
+     Kayıt olmayan gece NOKTA DEĞİLDİR (0'a konmaz) ve sayısı söylenir.
+     En az beş kayıt: daha azından dağılım okunmaz. */
+  function dagilim(d){
+    d = d || {};
+    const hepsi = (d.degerler || []).map(v => v && typeof v === 'object' ? v.deger : v);
+    const vs = hepsi.filter(sayiMi);
+    const birim = d.birim;
+    const b = x => (L.SAYI && L.SAYI.birimli) ? L.SAYI.birimli(bicim(x, d.ondalik == null ? 1 : d.ondalik), birim) : bicim(x, 1);
+    const gece = d.gece || 'gece';
+    if(vs.length < DAGILIM_EN_AZ){
+      return { yeterli:false, n:vs.length, toplam:hepsi.length,
+        metin:'Dağılım için ' + (DAGILIM_EN_AZ - vs.length) + ' ' + gece + ' daha gerekli' };
+    }
+    const md = medyan(vs);
+    return {
+      yeterli:true, n:vs.length, toplam:hepsi.length, eksik:hepsi.length - vs.length,
+      medyan:md, min:Math.min.apply(null, vs), max:Math.max.apply(null, vs), degerler:vs,
+      /* «14 gecenin 12'si» eki sayının okunuşuna bağlıdır; ek istemeyen biçim. */
+      metin:vs.length + '/' + hepsi.length + ' ' + gece + ' kayıtlı; medyan ' + b(md)
+        + '; en düşük ' + b(Math.min.apply(null, vs)) + ', en yüksek ' + b(Math.max.apply(null, vs)),
+    };
+  }
+
+  function dagilimSvg(d, o){
+    o = o || {};
+    const r = dagilim(d);
+    if(!r.yeterli) return '<p class="dagilim dagilim--yok" data-oz="036">' + kac(r.metin) + '</p>';
+    const gen = o.gen || 320, yuk = o.yuk || 56, pay = 8, cap = 3.5;
+    const min = r.min, max = r.max === r.min ? r.min + 1 : r.max;
+    const X = v => pay + (v - min) / (max - min) * (gen - 2 * pay);
+    /* Üst üste binen noktalar dikey yayılır: aynı yere düşen her yeni
+       nokta sırayla üste ve alta kayar (değerler sıralı, belirlenimci). */
+    const orta = yuk / 2, dolu = [];
+    const nokta = r.degerler.slice().sort((a, b2) => a - b2).map(v => {
+      const cx = X(v);
+      let k = 0;
+      while(dolu.some(p => Math.abs(p.x - cx) < cap * 2 && p.k === k)) k = k <= 0 ? -k + 1 : -k;
+      dolu.push({ x:cx, k:k });
+      return '<circle class="dagilim__n" cx="' + yuvarla(cx) + '" cy="' + yuvarla(orta + k * cap * 2) + '" r="' + cap + '"/>';
+    }).join('');
+    const mx = yuvarla(X(r.medyan));
+    return '<figure class="dagilim" data-oz="036"><svg class="dagilim__svg" viewBox="0 0 ' + gen + ' ' + yuk + '"'
+      + ' role="img" aria-label="' + kac((d.etiket ? d.etiket + ': ' : '') + r.metin) + '">'
+      + nokta + '<line class="dagilim__medyan" x1="' + mx + '" x2="' + mx + '" y1="2" y2="' + (yuk - 2) + '"/></svg>'
+      + '<figcaption class="grafik__cumle">' + kac(r.metin) + '</figcaption></figure>';
+  }
+
+  /* --------------------------------------------- 040 birikim eğrisi */
+
+  /* gunluk: [{ tarih, deger }] gerçekleşen; plan: [{ tarih, deger }] günlük
+     plan; o = { bugun, birim:'soru', etiket }. Plan bütün dönemi çizer,
+     gerçek bugüne kadar. KAYDI OLMAYAN GÜN 0 EKLENMİŞ GİBİ GÖSTERİLMEZ:
+     birikim orada kesik geçer ve toplamın adı «kayıtlı toplam»dır.
+     Bugünkü fark çizgisi yönün anlamıyla renklenir: geride kötü, önde iyi. */
+  function birikim(gunluk, plan, o){
+    o = o || {};
+    const bugun = gunISO(o.bugun) || bugunISO();
+    const G = {}, P = {};
+    (gunluk || []).forEach(g => { const t2 = gunISO(g && g.tarih); if(t2 && sayiMi(g.deger)) G[t2] = g.deger; });
+    (plan || []).forEach(g => { const t2 = gunISO(g && g.tarih); if(t2 && sayiMi(g.deger)) P[t2] = g.deger; });
+    const tar = Object.keys(G).concat(Object.keys(P)).sort();
+    if(!tar.length) return { var:false, metin:'Plan da kayıt da yok' };
+    const bas = tar[0], bit = tar[tar.length - 1] > bugun ? tar[tar.length - 1] : bugun;
+    const gun = [];
+    let g = 0, pl = 0, kayitsiz = 0;
+    for(let i = 0, n = gunFarki(bas, bit); i <= n; i++){
+      const t2 = gunEkle(bas, i);
+      if(Object.prototype.hasOwnProperty.call(P, t2)) pl += P[t2];
+      const gecmisMi = t2 <= bugun;
+      const kayit = Object.prototype.hasOwnProperty.call(G, t2);
+      if(gecmisMi && kayit) g += G[t2];
+      if(gecmisMi && !kayit) kayitsiz++;
+      gun.push({ tarih:t2, plan:pl, gercek:gecmisMi ? g : null, kayit:gecmisMi ? kayit : null });
+    }
+    const bu = gun.filter(x => x.tarih === bugun)[0];
+    const fark = bu.gercek - bu.plan;
+    const b = x => (L.SAYI && L.SAYI.birimli) ? L.SAYI.birimli(bicim(x), o.birim) : bicim(x);
+    return {
+      var:true, gunler:gun, bugun:bugun, kayitsiz:kayitsiz, gercek:bu.gercek, plan:bu.plan, fark:fark,
+      anlam:fark < 0 ? 'kotu' : fark > 0 ? 'iyi' : 'notr',
+      metin:'Kayıtlı toplam ' + b(bu.gercek) + '; plan ' + b(bu.plan) + '; '
+        + (fark === 0 ? 'planla aynı' : b(Math.abs(fark)) + (fark < 0 ? ' geride' : ' önde'))
+        + (kayitsiz ? ' (' + kayitsiz + ' gün kayıtsız)' : ''),
+    };
+  }
+
+  function birikimSvg(gunluk, plan, o){
+    o = o || {};
+    const r = birikim(gunluk, plan, o);
+    if(!r.var) return '<p class="birikim birikim--yok" data-oz="040">' + kac(r.metin) + '</p>';
+    const gen = o.gen || 320, yuk = o.yuk || 120, pay = 6;
+    const n = r.gunler.length;
+    const max = Math.max(1, Math.max.apply(null, r.gunler.map(x => Math.max(x.plan, x.gercek || 0))));
+    const X = i => n <= 1 ? gen / 2 : pay + i / (n - 1) * (gen - 2 * pay);
+    const Y = v => pay + (1 - v / max) * (yuk - 2 * pay);
+    const planP = r.gunler.map((x, i) => yuvarla(X(i)) + ',' + yuvarla(Y(x.plan))).join(' ');
+    /* Gerçek eğri: kayıtlı günler düz, kayıtsız günlere giden parça kesik. */
+    let duz = '', kesik = '', onceki = null;
+    r.gunler.forEach((x, i) => {
+      if(x.gercek == null) return;
+      const p2 = { x:yuvarla(X(i)), y:yuvarla(Y(x.gercek)) };
+      if(onceki){
+        const s = '<line x1="' + onceki.x + '" y1="' + onceki.y + '" x2="' + p2.x + '" y2="' + p2.y + '"/>';
+        if(x.kayit) duz += s; else kesik += s;
+      }
+      onceki = p2;
+    });
+    const bi = r.gunler.map(x => x.tarih).indexOf(r.bugun);
+    const fx = yuvarla(X(bi));
+    return '<figure class="birikim" data-oz="040"><svg class="grafik birikim__svg" viewBox="0 0 ' + gen + ' ' + yuk + '"'
+      + ' preserveAspectRatio="none" role="img" aria-label="' + kac((o.etiket ? o.etiket + ': ' : '') + r.metin) + '">'
+      + '<polyline class="birikim__plan" points="' + planP + '"/>'
+      + '<g class="birikim__gercek">' + duz + '</g><g class="birikim__kayitsiz">' + kesik + '</g>'
+      + '<line class="birikim__fark birikim__fark--' + r.anlam + '" x1="' + fx + '" x2="' + fx + '" y1="'
+      + yuvarla(Y(r.gercek)) + '" y2="' + yuvarla(Y(r.plan)) + '"/>'
+      + '</svg><figcaption class="grafik__cumle">' + kac(r.metin) + '</figcaption></figure>';
+  }
+
+  L.GRAFIK = {
+    EGILIM_EN_AZ:EGILIM_EN_AZ,
+    DUZ_ORAN:DUZ_ORAN,
+    gunISO:gunISO,
+    gunEkle:gunEkle,
+    gunFarki:gunFarki,
+    seri:seri,
+    parcalar:parcalar,
+    cizgiSvg:cizgiSvg,
+    aralik:aralik,
+    aralikHtml:aralikHtml,
+    egilim:egilim,
+    egilimHtml:egilimHtml,
+    doluluk:doluluk,
+    dolulukHtml:dolulukHtml,
+    TIK_EN_COK:TIK_EN_COK,
+    cumle:cumle,
+    cumleHtml:cumleHtml,
+    esikCubuk:esikCubuk,
+    esikCubukHtml:esikCubukHtml,
+    tik:tik,
+    tikHtml:tikHtml,
+    yukHtml:yukHtml,
+    hucreHtml:hucreHtml,
+    hizTahmini:hizTahmini,
+    hizKoniSvg:hizKoniSvg,
+    DAGILIM_EN_AZ:DAGILIM_EN_AZ,
+    gecenDonemDugmesi:gecenDonemDugmesi,
+    medyan:medyan,
+    dagilim:dagilim,
+    dagilimSvg:dagilimSvg,
+    birikim:birikim,
+    birikimSvg:birikimSvg,
+  };
+})();
+
+/* ==== js/core/oneri.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/oneri.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* ÖNERİ KARTI VE ONAY KALIBI — Merkez'in sesi ve aksiyonun üç seviyesi.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/oneri.js`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   Kopyayı elle düzenleme: bir sonraki yayında kaybolur.
+   Biçimi `brand/ortak/kart.css` içindedir.
+   ==================================================================
+
+   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §F, §I, §L)
+
+     110  Mor öneri kartı     Merkez'den gelen her öneri mor kartta ve
+                              seviye rozetiyle. Modülün kendi önerisi
+                              NÖTR kartta: mor yalnız Merkez'indir.
+     111  Seviyeye göre onay  onay kalıbı aksiyonun KATALOGDAKİ seviyesinden
+                              seçilir; önerinin (modelin) yazdığı seviye
+                              yok sayılır.
+     112  Çakışma kartı       aynı saati isteyen iki modül yan yana;
+                              Merkez'in çözümü onaysız UYGULANMAZ.
+     114  Gerekçe çubuğu      sayı ve eşik koddan, çubukla; modelin cümlesi
+                              ayrı öğede, altta. Model kapalıyken sayı ve
+                              çubuk kalır.
+     116  Otomatik uygula     her küçük tür için «sormadan uygula» anahtarı;
+                              orta ve büyük türde anahtar kilitli.
+     121  Kural izi           her Merkez önerisi tetikleyen kuralların
+                              numarasını ve sağlanan değeri taşır.
+     150  Geri al geri sayımı «Geri al» şeridinin kalan süresi çizgiyle;
+                              süre dolunca şerit kapanır, işlem kalıcıdır.
+     022  Sonucu söyleyen     yıkıcı düğme sonucu adıyla ve sayısıyla söyler:
+          düğme               «14 bloğu sil». «Evet» ya da «Tamam» yok.
+
+     P2: 113 önce/sonra (yalnız değişen renkli) · 123 geçme nedeni (isteğe
+         bağlı çip) · 124 çapraz etki (kaynak → hedef, ok Merkez'in) ·
+         127 kapsam seçimi (süre uzadıkça seviye büyür, hiç küçülmez)
+
+   DOKTRİN (AGENTS.md §1.1, §1.4, §1.9)
+
+   Bu dosya hiçbir şeyi UYGULAMAZ. Karar verir (hangi kalıp, sormadan mı,
+   uygulanabilir mi) ve markup üretir; uygulayan her zaman modülün kendi
+   kodudur (`core/proposals.js` ve eşleri). HKM modüle yazmaz, teklif
+   yazar; teklifi bu kart gösterir. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+(function(){
+  'use strict';
+
+  const L = window.LIFEOS;
+
+  function kac(t){
+    return String(t == null ? '' : t).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+  const sayiMi = v => typeof v === 'number' && isFinite(v);
+  const birimli = (t, b) => (L.SAYI && L.SAYI.birimli) ? L.SAYI.birimli(t, b) : t + (b ? ' ' + b : '');
+  const bicim = (n, od) => (L.SAYI && L.SAYI.bicim) ? L.SAYI.bicim(n, od) : (sayiMi(n) ? String(n) : '—');
+
+  /* Düğme: T'nin `components.js` Button'ıyla AYNI işaretleme. Biçim
+     T'nindir (`components.css` .btn); burada yalnız işaret üretilir. */
+  function dugme(o){
+    const sinif = ['btn'];
+    if(o.ton) sinif.push('btn--' + o.ton);
+    if(o.boy) sinif.push('btn--' + o.boy);
+    let ek = '';
+    Object.keys(o.data || {}).forEach(k => { ek += ' data-' + k + '="' + kac(o.data[k]) + '"'; });
+    return '<button type="button" class="' + sinif.join(' ') + '"'
+      + (o.act ? ' data-act="' + kac(o.act) + '"' : '') + ek
+      + (o.devreDisi ? ' disabled' : '') + '><span class="btn__label">' + kac(o.etiket) + '</span></button>';
+  }
+
+  /* ------------------------------------------------ 022 sonuç düğmesi */
+
+  /* «Evet», «Tamam», «OK» onay anında NE olacağını söylemez. Yıkıcı bir
+     düğmede bu kelimeler yoktur; düğme sonucu adıyla ve sayısıyla söyler. */
+  const YASAK_ETIKET = /^\s*(evet|tamam|ok|okay)\b/i;
+
+  /* «14 bloğu sil». Nesne ÇEKİMLİ gelir (bloğu, kaydı, kartı): Türkçe
+     belirtme eki kökün sesine göre değişir ve kodda güvenle kurulamaz;
+     çekimi bilen, cümleyi yazan ekrandır. */
+  function sonucEtiketi(o){
+    o = o || {};
+    const parca = [];
+    if(sayiMi(o.sayi)) parca.push(bicim(o.sayi));
+    if(o.nesne) parca.push(String(o.nesne));
+    if(o.fiil) parca.push(String(o.fiil));
+    const e = parca.join(' ');
+    return e ? e.charAt(0).toLocaleUpperCase('tr-TR') + e.slice(1) : e;
+  }
+
+  /* Yıkıcı düğmenin etiketi geçerli mi: yasak kelimeyle başlamaz ve bir
+     SAYI taşır (kabul ölçütü: «adıyla ve sayısıyla»). */
+  function etiketGecerliMi(etiket){
+    const e = String(etiket == null ? '' : etiket);
+    return !!e.trim() && !YASAK_ETIKET.test(e) && /\d/.test(e);
+  }
+
+  /* Sayısı bilinmeyen yıkıcı düğme yine çizilir (işlev saklanmaz) ama
+     `data-eksik="sayi"` taşır: denetim onu bulur. */
+  function yikiciDugme(o){
+    o = o || {};
+    const etiket = sonucEtiketi(o);
+    const data = Object.assign({}, o.data || {});
+    if(!sayiMi(o.sayi)) data.eksik = 'sayi';
+    return dugme({ etiket:etiket, ton:'danger', act:o.act, data:data })
+      .replace('<button ', '<button data-oz="022" ');
+  }
+
+  /* ------------------------------------------------ 111 seviye */
+
+  /* Kimlikler modüllerin kataloğundaki dizelerdir (`data/actions.js`
+     `level`); ekrana çıkan karşılıkları Türkçedir. */
+  const SEVIYELER = ['kucuk', 'orta', 'buyuk'];
+  const SEVIYE_AD = { kucuk:'küçük', orta:'orta', buyuk:'büyük' };
+
+  /* Her seviyenin onay kalıbı (AGENTS.md §1.9):
+       kucuk  tek dokunuş + «Geri al»
+       orta   önizleme + tek onay
+       buyuk  önce/sonra + onay + dönüş noktası */
+  const KALIPLAR = Object.freeze({
+    kucuk:Object.freeze({ seviye:'kucuk', onizleme:false, onay:false, oncesonra:false, donusNoktasi:false, geriAl:true }),
+    orta:Object.freeze({ seviye:'orta', onizleme:true, onay:true, oncesonra:false, donusNoktasi:false, geriAl:true }),
+    buyuk:Object.freeze({ seviye:'buyuk', onizleme:true, onay:true, oncesonra:true, donusNoktasi:true, geriAl:true }),
+  });
+
+  /* Katalog iki biçimde gelir: dizi (`R.ACTIONS`) ya da kimlikten kayda
+     harita (`R.ACTION_BY_ID`). */
+  function katalogKaydi(katalog, id){
+    if(!katalog || id == null) return null;
+    if(Array.isArray(katalog)){
+      for(let i = 0; i < katalog.length; i++) if(katalog[i] && katalog[i].id === id) return katalog[i];
+      return null;
+    }
+    return Object.prototype.hasOwnProperty.call(katalog, id) ? katalog[id] : null;
+  }
+
+  /* 111 — onay kalıbı. Seviye YALNIZ katalogdan okunur: önerinin kendi
+     `level`/`seviye` alanı (modelin yazdığı) yok sayılır ve bu dönüşte
+     söylenir. Katalogda olmayan aksiyonun kalıbı YOKTUR (null): kapalı
+     katalog dışından gelen bir öneri kartlanmaz.
+
+     Geri alınamayan bir aksiyon küçük SAYILAMAZ (§1.9): katalog yanlışlıkla
+     `kucuk` yazsa bile en az `orta` olur. Bilinmeyen seviye en çok onayı
+     isteyen kalıba düşer — sormadan uygulamak geri dönüşü olmayan hatadır,
+     fazladan sormak değildir. */
+  function kalip(oneri, katalog){
+    const id = oneri && (oneri.eylem != null ? oneri.eylem : oneri.action);
+    const kayit = katalogKaydi(katalog, id);
+    if(!kayit) return null;
+    let sev = kayit.level != null ? kayit.level : kayit.seviye;
+    if(SEVIYELER.indexOf(sev) < 0) sev = 'buyuk';
+    if(sev === 'kucuk' && kayit.geriAlinamaz) sev = 'orta';
+    const onerilen = oneri.level != null ? oneri.level : oneri.seviye;
+    return Object.assign({}, KALIPLAR[sev], {
+      eylem:id,
+      yokSayilan:onerilen != null && onerilen !== sev ? String(onerilen) : null,
+    });
+  }
+
+  function seviyeRozeti(sev){
+    return '<span class="badge badge--muted okart__seviye" data-seviye="' + kac(sev) + '">' + kac(SEVIYE_AD[sev] || sev) + '</span>';
+  }
+
+  /* ------------------------------------------------ 116 otomatik */
+
+  /* Ayar: { mod:'istek'|'hepsi'|'hicbiri', turler:{ <eylem>:true|false } }
+     `mod`, üç arayüzde bugün var olan `otomatikUygula` ayarıdır; tür
+     anahtarı onun ÜSTÜNE yazılır. Anahtar dokunulmamışsa mod geçerlidir.
+     Eski ayar düz dize olarak gelirse mod sayılır.
+
+     Hiçbir ayarda sormadan UYGULANMAYANLAR:
+       · küçük olmayan her şey (katalog seviyesiyle — 111)
+       · ölçüm yazan aksiyon (`olcum:true`, ekip/HATALAR.md KR-1)
+       · çakışma çözümü (112: son sözü kullanıcı söyler) */
+  const MODLAR = ['istek', 'hepsi', 'hicbiri'];
+
+  function ayarOku(ayar){
+    if(typeof ayar === 'string') return { mod:ayar, turler:{} };
+    const a = ayar || {};
+    return { mod:a.mod != null ? a.mod : a.otomatikUygula, turler:a.turler || {} };
+  }
+
+  function sormadanMi(oneri, katalog, ayar, baglam){
+    baglam = baglam || {};
+    if(baglam.cakisma || (oneri && oneri.cakisma)) return false;
+    const k = kalip(oneri, katalog);
+    if(!k || k.seviye !== 'kucuk') return false;
+    const kayit = katalogKaydi(katalog, k.eylem);
+    if(kayit && kayit.olcum) return false;
+    const a = ayarOku(ayar);
+    if(Object.prototype.hasOwnProperty.call(a.turler, k.eylem)) return a.turler[k.eylem] === true;
+    const m = MODLAR.indexOf(a.mod) >= 0 ? a.mod : 'istek';
+    if(m === 'hicbiri') return false;
+    if(m === 'hepsi') return true;
+    const kaynak = baglam.kaynak != null ? baglam.kaynak : (oneri && oneri.source);
+    return kaynak === 'istek';
+  }
+
+  /* Ayarlar › Merkez listesinin satırları. Küçük olmayan ve ölçüm yazan
+     türün anahtarı KİLİTLİDİR ve nedeni yazılır. */
+  function ayarSatirlari(katalog, ayar){
+    const a = ayarOku(ayar);
+    const liste = Array.isArray(katalog) ? katalog
+      : Object.keys(katalog || {}).map(k => katalog[k]);
+    return liste.filter(x => x && x.id).map(x => {
+      const k = kalip({ eylem:x.id }, liste);
+      const sev = k.seviye;
+      let kilit = null;
+      if(sev !== 'kucuk') kilit = SEVIYE_AD[sev] + ' aksiyon: her zaman sorar';
+      else if(x.olcum) kilit = 'ölçüm yazar: her zaman sorar';
+      const acik = !kilit && sormadanMi({ eylem:x.id }, liste, a, { kaynak:'istek' })
+        && (Object.prototype.hasOwnProperty.call(a.turler, x.id) ? a.turler[x.id] === true : a.mod === 'hepsi');
+      return { id:x.id, baslik:x.title || x.baslik || x.id, seviye:sev, acik:!!acik, kilitli:!!kilit, neden:kilit };
+    });
+  }
+
+  function ayarHtml(katalog, ayar){
+    const satir = ayarSatirlari(katalog, ayar);
+    return '<ul class="otoayar" data-oz="116">' + satir.map(s => {
+      const id = 'oto-' + s.id.replace(/[^a-zA-Z0-9_-]/g, '');
+      return '<li class="otoayar__s' + (s.kilitli ? ' otoayar__s--kilitli' : '') + '">'
+        + '<label class="otoayar__et" for="' + kac(id) + '">'
+        + '<span class="otoayar__ad">' + kac(s.baslik) + '</span>'
+        + seviyeRozeti(s.seviye)
+        + (s.neden ? '<span class="otoayar__neden">' + kac(s.neden) + '</span>' : '')
+        + '</label>'
+        + '<input type="checkbox" role="switch" class="otoayar__anahtar" id="' + kac(id) + '"'
+        + ' data-act="otomatik-tur" data-eylem="' + kac(s.id) + '"'
+        + (s.acik ? ' checked' : '') + (s.kilitli ? ' disabled aria-disabled="true"' : '') + '>'
+        + '</li>';
+    }).join('') + '</ul>';
+  }
+
+  /* ------------------------------------------------ 114 gerekçe */
+
+  /* g = { etiket:'Tekrar borcu', deger:34, esik:10, birim:'%',
+           kesinlik:'computed', olcek (çubuğun üst sınırı), not:'yalnız bugün' }
+     cumle = { metin, kaynak:'model'|'kural' } — AYRI öğe, sayının altında.
+     Model kapalıyken cümle ya kuralın hazır cümlesidir ya hiç yoktur;
+     sayı ve çubuk her durumda kalır. */
+  function gerekceHtml(g, cumle){
+    g = g || {};
+    const sayi = L.SAYI ? L.SAYI.html({ deger:g.deger, birim:g.birim, kesinlik:g.kesinlik || 'computed',
+      formul:g.formul, girdiler:g.girdiler, zaman:g.zaman }) : kac(g.deger);
+    const var_ = sayiMi(g.deger);
+    let cubuk = '';
+    if(var_ && sayiMi(g.esik)){
+      const ust = sayiMi(g.olcek) && g.olcek > 0 ? g.olcek : Math.max(g.deger, g.esik) * 1.25 || 1;
+      const yuzde = v => Math.max(0, Math.min(100, Math.round(v / ust * 1000) / 10));
+      cubuk = '<span class="gerekce__cubuk" aria-hidden="true">'
+        + '<span class="gerekce__dolu" style="width:' + yuzde(g.deger) + '%"></span>'
+        + '<span class="gerekce__esik" style="left:' + yuzde(g.esik) + '%"></span></span>';
+    }
+    const esikMetni = sayiMi(g.esik) ? '<span class="gerekce__ek">eşik ' + kac(birimli(bicim(g.esik), g.birim)) + '</span>' : '';
+    const notMetni = g.not ? '<span class="gerekce__ek">' + kac(g.not) + '</span>' : '';
+    const cm = cumle && cumle.metin
+      ? '<p class="gerekce__cumle" data-kaynak="' + kac(cumle.kaynak === 'kural' ? 'kural' : 'model') + '">'
+        + kac(cumle.metin) + '</p>'
+      : '';
+    return '<div class="gerekce" data-oz="114">'
+      + '<div class="gerekce__satir">' + (g.etiket ? '<span class="gerekce__et">' + kac(g.etiket) + '</span>' : '')
+      + sayi + esikMetni + notMetni + '</div>'
+      + cubuk + cm + '</div>';
+  }
+
+  /* ------------------------------------------------ 121 kural izi */
+
+  const KARSILASTIRMA = { '>=':'≥', '<=':'≤', '>':'>', '<':'<', '=':'=' };
+
+  /* k = { no:'R-12', ad:'Tekrar borcu eşiği', deger:34, esik:10, birim:'%', kosul:'>=' } */
+  function kuralMetni(k){
+    const d = sayiMi(k.deger) ? birimli(bicim(k.deger, k.ondalik), k.birim) : '—';
+    const e = sayiMi(k.esik) ? birimli(bicim(k.esik, k.ondalik), k.birim) : null;
+    return e ? d + ' ' + (KARSILASTIRMA[k.kosul] || '≥') + ' ' + e : d;
+  }
+
+  function kuralIziHtml(kurallar){
+    const ks = (kurallar || []).filter(k => k && k.no);
+    if(!ks.length) return '';
+    return '<details class="kuralizi" data-oz="121"><summary>Neden?</summary><ol class="kuralizi__l">'
+      + ks.map(k => '<li class="kuralizi__k"><span class="kuralizi__no">' + kac(k.no) + '</span>'
+        + '<span class="kuralizi__ad">' + kac(k.ad || '') + '</span>'
+        + '<span class="kuralizi__deger">' + kac(kuralMetni(k)) + '</span></li>').join('')
+      + '</ol></details>';
+  }
+
+  /* ------------------------------------------------ 110 kart */
+
+  /* Kartın gösterilebilir olup olmadığı. Sorun listesi boşsa geçerli.
+     Merkez önerisi kural izi TAŞIMAK ZORUNDADIR (121): tetikleyen kuralı
+     olmayan bir Merkez önerisi, kodun değil modelin kararıdır. */
+  function dogrula(oneri, katalog){
+    const s = [];
+    if(!oneri) return ['öneri yok'];
+    if(!kalip(oneri, katalog)) s.push('aksiyon katalogda yok');
+    if(!oneri.baslik) s.push('başlık yok');
+    if(oneri.kaynak === 'merkez' && !(oneri.kurallar || []).some(k => k && k.no)) s.push('kural izi yok');
+    return s;
+  }
+
+  /* oneri = { id, eylem, baslik, kaynak:'merkez'|'modul',
+               gerekce:{…114}, cumle:{ metin, kaynak }, kurallar:[…121],
+               kapsam:'yalnız bugün' }
+     Geçersiz öneri BOŞ dize döner: kart çizilmez (HKM kapalıyken
+     `kingteklif.js` de aynı şeyi yapar — bilinmeyeni göstermez). */
+  function kartHtml(oneri, katalog){
+    if(dogrula(oneri, katalog).length) return '';
+    const k = kalip(oneri, katalog);
+    const merkez = oneri.kaynak === 'merkez';
+    const kid = 'oneri-' + String(oneri.id || oneri.eylem).replace(/[^a-zA-Z0-9_-]/g, '');
+    let eylem;
+    if(k.seviye === 'kucuk'){
+      eylem = dugme({ etiket:'Uygula', act:'oneri-uygula', data:{ oneri:oneri.id } })
+        + dugme({ etiket:'Geç', ton:'ghost', act:'oneri-gec', data:{ oneri:oneri.id } });
+    }else{
+      eylem = dugme({ etiket:k.seviye === 'buyuk' ? 'Önce / sonra' : 'Önizle', act:'oneri-onizle',
+        data:{ oneri:oneri.id, seviye:k.seviye } })
+        + dugme({ etiket:'Geç', ton:'ghost', act:'oneri-gec', data:{ oneri:oneri.id } });
+    }
+    const alt = [SEVIYE_AD[k.seviye] + ' aksiyon'];
+    if(oneri.kapsam) alt.push(oneri.kapsam);
+    if(k.geriAl) alt.push('geri alınabilir');
+    return '<article class="kutu okart ' + (merkez ? 'okart--merkez' : 'okart--modul') + '" data-oz="110"'
+      + ' data-seviye="' + k.seviye + '" data-oneri="' + kac(oneri.id || '') + '" aria-labelledby="' + kid + '">'
+      + '<div class="okart__bas"><span class="okart__kaynak">' + (merkez ? 'Merkez önerisi' : 'Öneri') + '</span>'
+      + seviyeRozeti(k.seviye) + '</div>'
+      + (oneri.capraz ? caprazHtml(oneri.capraz) : '')
+      + '<h3 class="okart__baslik" id="' + kid + '">' + kac(oneri.baslik) + '</h3>'
+      + '<p class="okart__alt">' + kac(alt.join(' · ')) + '</p>'
+      + (oneri.gerekce ? gerekceHtml(oneri.gerekce, oneri.cumle) : '')
+      + kuralIziHtml(oneri.kurallar)
+      + '<div class="okart__eylem">' + eylem + '</div></article>';
+  }
+
+  /* Öneri alanında en çok BİR kart durur (EKIP-PLANI Ek A · 110); fazlası
+     Onaylar'dadır. Sıra: büyük önce değil, ÖNCE GELEN önce — öncelik
+     sırasını modül verir, burada yalnız geçersizler elenir. */
+  function alan(liste, katalog){
+    const gecerli = (liste || []).filter(o => !dogrula(o, katalog).length);
+    return { kart:gecerli[0] || null, kalan:Math.max(0, gecerli.length - 1),
+      kalanMetni:gecerli.length > 1 ? (gecerli.length - 1) + ' öneri daha Onaylar’da' : '' };
+  }
+
+  /* ------------------------------------------------ 112 çakışma */
+
+  function dakika(s){
+    const m = /^(\d{1,2}):(\d{2})$/.exec(String(s || ''));
+    if(!m) return null;
+    const h = +m[1], d = +m[2];
+    return h > 24 || d > 59 ? null : h * 60 + d;
+  }
+
+  /* İki blok aynı saati istiyor mu? { modul, ad, bas:'20:30', bit:'21:40' }
+     Saati okunamayan blok ÇAKIŞMAZ sayılmaz ve çakışır da sayılmaz:
+     `null` döner — bilinmeyen, bilinmeyen olarak kalır. */
+  function cakisma(a, b){
+    const a1 = dakika(a && a.bas), a2 = dakika(a && a.bit), b1 = dakika(b && b.bas), b2 = dakika(b && b.bit);
+    if([a1, a2, b1, b2].some(v => v == null) || a2 <= a1 || b2 <= b1) return null;
+    const bas = Math.max(a1, b1), bit = Math.min(a2, b2);
+    return bit > bas ? { dakika:bit - bas, bas:bas, bit:bit } : { dakika:0 };
+  }
+
+  /* Çözüm YALNIZ açık onayla uygulanabilir. Ayar, seviye ya da kaynak
+     ne olursa olsun: son sözü kullanıcı söyler. */
+  function cozumUygulanabilirMi(onay){
+    return onay === true;
+  }
+
+  const saatMetni = d => ('0' + Math.floor(d / 60)).slice(-2) + ':' + ('0' + (d % 60)).slice(-2);
+
+  /* c = { a:{modul,ad,bas,bit}, b:{…}, cozum:{ baslik, id } } */
+  function cakismaHtml(c){
+    c = c || {};
+    const r = cakisma(c.a, c.b);
+    if(!r || !r.dakika) return '';
+    const taraf = x => '<div class="cakisma__taraf cakisma--' + kac(x.modul || '') + '">'
+      + '<span class="cakisma__modul">' + kac((x.modul || '').toLocaleUpperCase('tr-TR')) + '</span>'
+      + '<b class="cakisma__ad">' + kac(x.ad || '') + '</b>'
+      + '<span class="cakisma__saat">' + kac(x.bas + '–' + x.bit) + '</span></div>';
+    const cozum = c.cozum && c.cozum.baslik
+      ? '<div class="cakisma__cozum"><span class="okart__kaynak">Merkez önerisi</span>'
+        + '<p class="cakisma__cozum-metin">' + kac(c.cozum.baslik) + '</p>'
+        + dugme({ etiket:'Çözümü önizle', act:'cakisma-onizle', data:{ cozum:c.cozum.id || '' } })
+        + '</div>'
+      : '';
+    return '<section class="cakisma" data-oz="112" aria-label="Çakışma: '
+      + kac(saatMetni(r.bas) + '–' + saatMetni(r.bit)) + '">'
+      + '<p class="cakisma__bas">' + kac(r.dakika + ' dakika çakışıyor · ' + saatMetni(r.bas) + '–' + saatMetni(r.bit)) + '</p>'
+      + '<div class="cakisma__iki">' + taraf(c.a) + taraf(c.b) + '</div>' + cozum + '</section>';
+  }
+
+  /* ------------------------------------------------ 150 geri al */
+
+  /* Şeridin ömrü. Üç arayüzün `ui.js` toast'ı bugün 6000 ms kullanıyor;
+     aynı sayı burada durur ki çizgi ile şerit aynı anda bitsin. */
+  const GERI_AL_MS = 6000;
+
+  function kalan(baslangic, sure, simdi){
+    const s = sayiMi(sure) && sure > 0 ? sure : GERI_AL_MS;
+    const g = (simdi == null ? Date.now() : simdi) - baslangic;
+    return Math.max(0, Math.min(s, s - g));
+  }
+
+  /* Geri al denetçisi. `geriAl()` yalnız süre içinde çalışır; süre
+     dolunca `kalici()` bir kez çağrılır ve geri alma kapanır — «Geri al»
+     ekranda kalıp çalışmasaydı kullanıcıya yalan söylerdi. */
+  function geriAlBaslat(o){
+    o = o || {};
+    const sure = sayiMi(o.sure) && o.sure > 0 ? o.sure : GERI_AL_MS;
+    const bas = Date.now();
+    let durum = 'acik';
+    const bitir = () => {
+      if(durum !== 'acik') return;
+      durum = 'kalici';
+      try{ if(o.kalici) o.kalici(); }catch(e){}
+    };
+    const t = setTimeout(bitir, sure);
+    return {
+      sure:sure,
+      durum:() => durum,
+      kalan:simdi => durum === 'acik' ? kalan(bas, sure, simdi) : 0,
+      geriAl:() => {
+        if(durum !== 'acik') return false;
+        durum = 'geri-alindi';
+        clearTimeout(t);
+        try{ if(o.geriAl) o.geriAl(); }catch(e){}
+        return true;
+      },
+    };
+  }
+
+  /* Şeridin altındaki incelen çizgi (DOM). Süre VERİDİR, tasarım süresi
+     değil: çizgi şeritle aynı anda biter. Azaltılmış harekette çizgi
+     saniye saniye kısalır (kart.css) — kalan süre bilgisi kaybolmaz. */
+  function cizgi(sure){
+    const s = sayiMi(sure) && sure > 0 ? sure : GERI_AL_MS;
+    const el = document.createElement('span');
+    el.className = 'gerial__sure';
+    el.setAttribute('data-oz', '150');
+    el.setAttribute('aria-hidden', 'true');
+    el.style.animationDuration = s + 'ms';
+    el.style.setProperty('--gerial-adim', String(Math.max(1, Math.round(s / 1000))));
+    return el;
+  }
+
+
+  /* ------------------------------------------------ 127 kapsam */
+
+  /* Kural 9 (AGENTS.md §1.9): süre uzadıkça seviye büyür. Kapsam seviyeyi
+     yalnız YÜKSELTİR; kataloğu orta olan bir aksiyon «yalnız bugün»
+     seçilince küçülmez. */
+  const KAPSAMLAR = Object.freeze([
+    Object.freeze({ id:'bugun', ad:'Yalnız bugün', seviye:'kucuk' }),
+    Object.freeze({ id:'hafta', ad:'Bu hafta', seviye:'orta' }),
+    Object.freeze({ id:'kalici', ad:'Kalıcı', seviye:'buyuk' }),
+  ]);
+  const KALIP_OZET = { kucuk:'tek dokunuş, «Geri al» kalır', orta:'önizleme ve tek onay',
+    buyuk:'önce/sonra, onay ve dönüş noktası' };
+
+  function kapsamSeviyesi(oneri, katalog, kapsamId){
+    const k = kalip(oneri, katalog);
+    if(!k) return null;
+    const kp = KAPSAMLAR.filter(x => x.id === kapsamId)[0];
+    if(!kp) return k.seviye;
+    return SEVIYELER[Math.max(SEVIYELER.indexOf(k.seviye), SEVIYELER.indexOf(kp.seviye))];
+  }
+
+  function kapsamHtml(oneri, katalog, secili){
+    if(!kalip(oneri, katalog)) return '';
+    const ad = 'kapsam-' + String((oneri && (oneri.id || oneri.eylem)) || 'x').replace(/[^a-zA-Z0-9_-]/g, '');
+    return '<fieldset class="kapsam" data-oz="127"><legend class="kapsam__bas">Ne kadar süre?</legend>'
+      + KAPSAMLAR.map(kp => {
+        const sev = kapsamSeviyesi(oneri, katalog, kp.id);
+        const id = ad + '-' + kp.id;
+        return '<label class="kapsam__s" for="' + id + '"><input type="radio" name="' + ad + '" id="' + id + '"'
+          + ' value="' + kp.id + '" data-act="oneri-kapsam" data-seviye="' + sev + '"' + (secili === kp.id ? ' checked' : '') + '>'
+          + '<span class="kapsam__ad">' + kac(kp.ad) + '</span>'
+          + '<span class="kapsam__seviye">' + kac(SEVIYE_AD[sev] + ' aksiyon · ' + KALIP_OZET[sev]) + '</span></label>';
+      }).join('') + '</fieldset>';
+  }
+
+  /* ------------------------------------------------ 123 geçme nedeni */
+
+  /* «Geç» dendiğinde İSTEĞE BAĞLI neden. Önerinin neden işe yaramadığı
+     tahminle değil kullanıcının sözüyle bilinir; neden seçmemek de bir
+     cevaptır ve öyle yazılır (null). */
+  const GECME_NEDENLERI = Object.freeze([
+    Object.freeze({ id:'zaman-yok', ad:'Zamanım yok' }),
+    Object.freeze({ id:'uymuyor', ad:'Bana uymuyor' }),
+    Object.freeze({ id:'zaten-yaptim', ad:'Zaten yaptım' }),
+    Object.freeze({ id:'veri-yanlis', ad:'Veri yanlış' }),
+    Object.freeze({ id:'sonra', ad:'Sonra bakarım' }),
+  ]);
+
+  function gecmeHtml(oneri){
+    const id = oneri && oneri.id != null ? String(oneri.id) : '';
+    return '<div class="gecme" data-oz="123" role="group" aria-label="Neden geçiyorsun? (isteğe bağlı)">'
+      + '<p class="gecme__bas">Neden geçiyorsun? <span class="gecme__ek">isteğe bağlı</span></p><div class="gecme__cipler">'
+      + GECME_NEDENLERI.map(n => '<button type="button" class="chip chip--tap" data-act="oneri-gec-neden"'
+        + ' data-oneri="' + kac(id) + '" data-neden="' + n.id + '">' + kac(n.ad) + '</button>').join('')
+      + '</div>' + dugme({ etiket:'Nedensiz geç', ton:'ghost', boy:'sm', act:'oneri-gec-neden', data:{ oneri:id, neden:'' } })
+      + '</div>';
+  }
+
+  /* Geçmişe yazılacak kayıt. Tanınmayan neden UYDURULMAZ: null olur. */
+  function gecmeKaydi(oneri, nedenId, zaman){
+    const n = GECME_NEDENLERI.filter(x => x.id === nedenId)[0] || null;
+    return { oneri:oneri && oneri.id != null ? oneri.id : null, eylem:oneri ? (oneri.eylem || oneri.action || null) : null,
+      neden:n ? n.id : null, nedenAd:n ? n.ad : null, zaman:zaman || new Date().toISOString() };
+  }
+
+  /* ------------------------------------------------ 124 çapraz etki */
+
+  const MODUL_AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+
+  /* c = { kaynak:'spi', hedef:'ays', olcum:'Uyku 5,1 saat' }
+     Kaynak ve hedef AYRI renkte, ok Merkez'in: Merkez her şeyi görür
+     ama modülleri karıştırmaz. Aynı modül çapraz etki değildir. */
+  function caprazHtml(c){
+    c = c || {};
+    if(!MODUL_AD[c.kaynak] || !MODUL_AD[c.hedef] || c.kaynak === c.hedef) return '';
+    const sr = MODUL_AD[c.kaynak] + ' ölçümü ' + MODUL_AD[c.hedef] + '’ye öneri' + (c.olcum ? ': ' + c.olcum : '');
+    return '<div class="capraz" data-oz="124" role="img" aria-label="' + kac(sr) + '">'
+      + '<span class="capraz__modul capraz--' + c.kaynak + '" aria-hidden="true">' + MODUL_AD[c.kaynak] + '</span>'
+      + '<svg class="capraz__ok" viewBox="0 0 20 10" aria-hidden="true"><path d="M1 5 H17 M13 1 L17 5 L13 9"/></svg>'
+      + '<span class="capraz__modul capraz--' + c.hedef + '" aria-hidden="true">' + MODUL_AD[c.hedef] + '</span>'
+      + (c.olcum ? '<span class="capraz__olcum" aria-hidden="true">' + kac(c.olcum) + '</span>' : '')
+      + '</div>';
+  }
+
+  /* ------------------------------------------------ 113 önce / sonra */
+
+  /* Bloklar: [{ id, ad, bas:'20:30', bit:'21:40', gun }]. Kimlikle eşlenir.
+     Değişen yalnız ad ya da saat farkıdır; sıra değişikliği değişiklik
+     sayılmaz (abartılmaz). */
+  function onceSonra(once, sonra){
+    const anah = b => b && b.id != null ? String(b.id) : null;
+    const A = {}, B = {};
+    (once || []).forEach(b => { const k = anah(b); if(k) A[k] = b; });
+    (sonra || []).forEach(b => { const k = anah(b); if(k) B[k] = b; });
+    const esit = (x, y) => x.ad === y.ad && x.bas === y.bas && x.bit === y.bit && (x.gun || null) === (y.gun || null);
+    const r = { ayni:[], degisen:[], eklenen:[], silinen:[] };
+    Object.keys(A).forEach(k => {
+      if(!B[k]) r.silinen.push(A[k]);
+      else if(esit(A[k], B[k])) r.ayni.push(B[k]);
+      else r.degisen.push({ once:A[k], sonra:B[k] });
+    });
+    Object.keys(B).forEach(k => { if(!A[k]) r.eklenen.push(B[k]); });
+    const parca = [];
+    if(r.degisen.length) parca.push(r.degisen.length + ' değişti');
+    if(r.eklenen.length) parca.push(r.eklenen.length + ' eklendi');
+    if(r.silinen.length) parca.push(r.silinen.length + ' silindi');
+    parca.push(r.ayni.length + ' aynı');
+    r.ozet = (r.degisen.length + r.eklenen.length + r.silinen.length) ? parca.join(' · ') : 'Değişiklik yok';
+    return r;
+  }
+
+  function onceSonraHtml(once, sonra){
+    const r = onceSonra(once, sonra);
+    const satir = (b, tur) => '<li class="oncesonra__b oncesonra__b--' + tur + '" data-blok="' + kac(b.id) + '">'
+      + '<span class="oncesonra__saat">' + kac((b.bas || '—') + '–' + (b.bit || '—')) + '</span>'
+      + '<span class="oncesonra__ad">' + kac(b.ad || '') + '</span></li>';
+    const degisenId = {};
+    r.degisen.forEach(d => { degisenId[String(d.once.id)] = 1; });
+    const sil = {};
+    r.silinen.forEach(b => { sil[String(b.id)] = 1; });
+    const ekl = {};
+    r.eklenen.forEach(b => { ekl[String(b.id)] = 1; });
+    const sol = (once || []).filter(b => b && b.id != null).map(b =>
+      satir(b, sil[String(b.id)] ? 'silinen' : degisenId[String(b.id)] ? 'degisen' : 'ayni')).join('');
+    const sag = (sonra || []).filter(b => b && b.id != null).map(b =>
+      satir(b, ekl[String(b.id)] ? 'eklenen' : degisenId[String(b.id)] ? 'degisen' : 'ayni')).join('');
+    return '<div class="oncesonra" data-oz="113">'
+      + '<p class="oncesonra__ozet">' + kac(r.ozet) + '</p><div class="oncesonra__iki">'
+      + '<section class="oncesonra__yan"><h4 class="oncesonra__bas">Önce</h4><ol class="oncesonra__l">' + sol + '</ol></section>'
+      + '<section class="oncesonra__yan"><h4 class="oncesonra__bas">Sonra</h4><ol class="oncesonra__l">' + sag + '</ol></section>'
+      + '</div></div>';
+  }
+
+  L.ONERI = {
+    SEVIYELER:SEVIYELER,
+    SEVIYE_AD:SEVIYE_AD,
+    KALIPLAR:KALIPLAR,
+    MODLAR:MODLAR,
+    GERI_AL_MS:GERI_AL_MS,
+    katalogKaydi:katalogKaydi,
+    kalip:kalip,
+    sormadanMi:sormadanMi,
+    ayarSatirlari:ayarSatirlari,
+    ayarHtml:ayarHtml,
+    gerekceHtml:gerekceHtml,
+    kuralMetni:kuralMetni,
+    kuralIziHtml:kuralIziHtml,
+    dogrula:dogrula,
+    kartHtml:kartHtml,
+    alan:alan,
+    cakisma:cakisma,
+    cakismaHtml:cakismaHtml,
+    cozumUygulanabilirMi:cozumUygulanabilirMi,
+    kalan:kalan,
+    geriAlBaslat:geriAlBaslat,
+    cizgi:cizgi,
+    dugme:dugme,
+    YASAK_ETIKET:YASAK_ETIKET,
+    sonucEtiketi:sonucEtiketi,
+    etiketGecerliMi:etiketGecerliMi,
+    yikiciDugme:yikiciDugme,
+    KAPSAMLAR:KAPSAMLAR,
+    kapsamSeviyesi:kapsamSeviyesi,
+    kapsamHtml:kapsamHtml,
+    GECME_NEDENLERI:GECME_NEDENLERI,
+    gecmeHtml:gecmeHtml,
+    gecmeKaydi:gecmeKaydi,
+    caprazHtml:caprazHtml,
+    onceSonra:onceSonra,
+    onceSonraHtml:onceSonraHtml,
+  };
+})();
+
+/* ==== js/core/sozluk.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/sozluk.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* TEK SÖZLÜK — sistemin terimleri ve model kapalıyken konuşan hazır cümle.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/sozluk.js`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   Kopyayı elle düzenleme: bir sonraki yayında kaybolur.
+   Biçimi `brand/ortak/kart.css` içindedir.
+   ==================================================================
+
+   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §A, §G)
+
+     016  Terim ipucu         «Tekrar borcu» gibi terimlerin altı noktalı;
+                              üzerine gelince (dokunmatikte basılı tutunca)
+                              tek cümlelik tanım ve örnek açılır. Tanım TEK
+                              yerden gelir: aynı terim her ekranda aynıdır.
+     137  Ajanın baktığı veri ajanın masasındaki veri kimliği Türkçe ad ve
+                              kesinlik etiketiyle çip olur («gunun_akisi» değil
+                              «Günün akışı»). Ekrana bağlama K2'de (T2-02).
+     139  Model kapalı kipi   dil modeli kapalıyken ajanlar kuraldan gelen
+                              hazır cümlelerle konuşur ve bunu ETİKETLER;
+                              üstte gri bir durum şeridi. Hiçbir ekran
+                              kapanmaz, sayılar aynen durur.
+
+   TANIMLAR NEREDEN GELDİ
+
+   Uydurulmadı. Her tanım deponun kendi metninden: AGENTS.md §1 (aksiyon
+   seviyeleri, Merkez, XP), `AYS/src/js/data/hints.js` (net, seri,
+   minimum gün), `AYS/src/js/core/audit.js` ve `calc.js` (tekrar borcu),
+   `brand/ortak/seri.js` (dondurulmuş gün), `kesinlik.js` (dört etiket).
+   Yeni terim eklerken de kaynak yazılır (`kaynak` alanı): kaynağı
+   gösterilemeyen tanım bu dosyaya girmez.
+
+   Dört kesinlik etiketinin tanımı BURADA YAZILMAZ: `LIFEOS.KESINLIK`'ten
+   okunur. İki yerde yazılsaydı bir gün ayrışırdı. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+(function(){
+  'use strict';
+
+  const L = window.LIFEOS;
+
+  function kac(t){
+    return String(t == null ? '' : t).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+
+  /* ------------------------------------------------ 016 sözlük */
+
+  /* modul: terimin ait olduğu sistem ('ays' | 'spi' | 'esp'); yazılmamışsa
+     üç sistemde aynı anlamdadır. */
+  const TERIMLER = {
+    'tekrar-borcu':{ terim:'Tekrar borcu', modul:'ays',
+      tanim:'Vadesi gelen tekrar kartlarından gecikmiş olanların oranı.',
+      ornek:'Vadesi gelen 20 karttan 5’i gecikmişse borç %25’tir. Eşik %10; bu bir bulgu değil, sistemin seçimidir.',
+      kaynak:'AYS core/calc.js cardDebt · core/audit.js' },
+    'net':{ terim:'Net', modul:'ays',
+      tanim:'Doğru sayısından yanlışların dörtte biri çıkarılarak bulunur; testler ayrı ayrı hesaplanıp toplanır.',
+      ornek:'40 doğru, 8 yanlış: 40 − 8 ÷ 4 = 38 net.',
+      kaynak:'AYS data/hints.js net · data/evidence.js' },
+    'minimum-gun':{ terim:'Minimum gün', modul:'ays',
+      tanim:'Kötü günün alt sınırı: 45 dakika, 15 paragraf ve vadesi gelen kartlar.',
+      ornek:'Hiçbir şey yapamadığın gün bu üçünü tutturursan seri kırılmaz.',
+      kaynak:'AYS data/hints.js minimum-day' },
+    'seri':{ terim:'Seri',
+      tanim:'Günlük alt sınırı tutturduğun ardışık gün sayısı; ödül nete değil davranışa bağlıdır.',
+      ornek:'Dondurulan gün (hastalık, tatil) seriyi bozmaz ama sayılmaz da.',
+      kaynak:'AYS data/hints.js streak · brand/ortak/seri.js' },
+    'merkez':{ terim:'Merkez',
+      tanim:'HKM’nin modüllere öneri yazan katmanı; modüle yazmaz, öneriyi modül kendi koduyla ve senin onayınla uygular.',
+      ornek:'«Akşam bloğu tekrara ayrılsın» bir Merkez önerisidir; «Uygula» demeden hiçbir şey değişmez.',
+      kaynak:'AGENTS.md §1.4 · HKM/core/intents.py' },
+    'kucuk-aksiyon':{ terim:'Küçük aksiyon',
+      tanim:'Tek gün, tek kayıt değiştiren iş; istersen sormadan uygulanır, «Geri al» ekranda kalır.',
+      ornek:'Bugünkü bir bloğun saatini kaydırmak.',
+      kaynak:'AGENTS.md §1.9' },
+    'orta-aksiyon':{ terim:'Orta aksiyon',
+      tanim:'Bir hafta ya da bir dönemi etkileyen iş; önce önizleme gösterilir, tek onayla uygulanır.',
+      ornek:'Ara haftası, geçici süre değişikliği, bir bölümü kapatmak.',
+      kaynak:'AGENTS.md §1.9' },
+    'buyuk-aksiyon':{ terim:'Büyük aksiyon',
+      tanim:'Sınavı değiştirmek ya da planı baştan kurmak gibi iş; önce ve sonrası gösterilir, onaydan önce dönüş noktası alınır.',
+      ornek:'Hedef sınavı YKS’den başka bir sınava çevirmek.',
+      kaynak:'AGENTS.md §1.9' },
+    'donus-noktasi':{ terim:'Dönüş noktası',
+      tanim:'Büyük bir aksiyon uygulanmadan önce alınan önceki hâl; geri alınınca veri bu noktaya döner.',
+      kaynak:'SPİ core/plan.js uygula · AGENTS.md §1.9' },
+    'esik':{ terim:'Eşik',
+      tanim:'Bir kuralın tetiklendiği sınır değer; eşiklerin çoğu bir bulgu değil, sistemin seçimidir.',
+      ornek:'Tekrar borcu %10’u geçince uyarı çıkar.',
+      kaynak:'AYS core/audit.js · data/hints.js evidence' },
+    'kural-izi':{ terim:'Kural izi',
+      tanim:'Bir önerinin dayandığı kurallar: numarası ve sağlanan değerle.',
+      ornek:'R-12 · tekrar borcu %34 ≥ %10.',
+      kaynak:'EKIP-PLANI Ek A 121' },
+    'veri-tazeligi':{ terim:'Veri tazeliği',
+      tanim:'Ölçümün yaşı; eşiği geçen değer soluk yazılır ve kaç gün önce ölçüldüğünü söyler.',
+      kaynak:'brand/ortak/sayi.js TAZELIK' },
+    'rutbe':{ terim:'Rütbe',
+      tanim:'Kullanımın görünür izi; hiçbir plan, öneri ya da uyarı rütbeye bakmaz.',
+      kaynak:'AGENTS.md §1.6' },
+  };
+  Object.keys(TERIMLER).forEach(k => Object.freeze(TERIMLER[k]));
+  Object.freeze(TERIMLER);
+
+  /* Kesinlik etiketleri de terimdir; tanımı `kesinlik.js`'ten okunur. */
+  const KESINLIK_TERIM = { 'olculdu':'measured', 'tahmin':'estimated',
+    'hesaplandi':'computed', 'veri-yok':'missing' };
+
+  function bul(id){
+    if(id == null) return null;
+    const k = String(id);
+    if(Object.prototype.hasOwnProperty.call(TERIMLER, k)) return Object.assign({ id:k }, TERIMLER[k]);
+    if(Object.prototype.hasOwnProperty.call(KESINLIK_TERIM, k) && L.KESINLIK_ILE){
+      const e = L.KESINLIK_ILE(KESINLIK_TERIM[k]);
+      if(e) return { id:k, terim:e.ad.charAt(0).toLocaleUpperCase('tr-TR') + e.ad.slice(1),
+        tanim:e.ozet, kaynak:'brand/ortak/kesinlik.js' };
+    }
+    return null;
+  }
+
+  function hepsi(){
+    return Object.keys(TERIMLER).concat(Object.keys(KESINLIK_TERIM)).map(bul).filter(Boolean);
+  }
+
+  let sayac = 0;
+
+  /* Terimin ekrandaki hâli. `metin` verilirse o yazılır (çekim eki:
+     «tekrar borcunu»), tanım yine sözlükten gelir. Bilinmeyen terimde
+     tanım UYDURULMAZ: yazı düz kalır ve `data-terim-yok` taşır. */
+  function html(id, metin){
+    const t = bul(id);
+    const yazi = metin != null ? metin : (t ? t.terim : String(id == null ? '' : id));
+    if(!t) return '<span class="terim terim--yok" data-terim-yok="' + kac(id) + '">' + kac(yazi) + '</span>';
+    const tid = 'terim-' + (++sayac);
+    return '<span class="terim" data-oz="016" data-terim="' + kac(t.id) + '" tabindex="0" aria-describedby="' + tid + '">'
+      + kac(yazi)
+      + '<span class="terim__kart" role="tooltip" id="' + tid + '">'
+      + '<span class="terim__ad">' + kac(t.terim) + '</span>'
+      + '<span class="terim__tanim">' + kac(t.tanim) + '</span>'
+      + (t.ornek ? '<span class="terim__ornek">' + kac(t.ornek) + '</span>' : '')
+      + '</span></span>';
+  }
+
+  /* Dokunmatikte basılı tutma ve Esc: sayı bileşeninin köken kartıyla
+     AYNI davranış (sayi.js `bagla`). Tek davranış öğrenilir. */
+  const BASILI_MS = 450;
+  function bagla(kok){
+    kok = kok || document;
+    if(kok.__terimBagli) return false;
+    kok.__terimBagli = true;
+    let zaman = null;
+    const kapat = haric => {
+      kok.querySelectorAll('.terim--acik').forEach(el => { if(el !== haric) el.classList.remove('terim--acik'); });
+    };
+    kok.addEventListener('pointerdown', ev => {
+      const el = ev.target && ev.target.closest ? ev.target.closest('.terim[aria-describedby]') : null;
+      kapat(el);
+      if(!el || ev.pointerType === 'mouse') return;
+      clearTimeout(zaman);
+      zaman = setTimeout(() => el.classList.add('terim--acik'), BASILI_MS);
+    });
+    const birak = () => { clearTimeout(zaman); zaman = null; };
+    kok.addEventListener('pointerup', birak);
+    kok.addEventListener('pointercancel', birak);
+    kok.addEventListener('keydown', ev => { if(ev.key === 'Escape') kapat(null); });
+    return true;
+  }
+
+  /* ------------------------------------------------ 139 hazır cümle */
+
+  /* Model kapalıyken konuşan cümle KODDAN gelir: kalıp + değer. Değeri
+     olmayan yer «—» olur; boş bırakılmaz, uydurulmaz da. Dönen nesne
+     kaynağını taşır ve ekranda etiketlenir (`hazirHtml`). */
+  function hazir(kalip, degerler){
+    degerler = degerler || {};
+    const eksik = [];
+    const metin = String(kalip || '').replace(/\{([a-zA-Z0-9_]+)\}/g, (_, ad) => {
+      const v = degerler[ad];
+      if(v == null || v === '' || (typeof v === 'number' && !isFinite(v))){ eksik.push(ad); return '—'; }
+      return typeof v === 'number' && L.SAYI ? L.SAYI.bicim(v) : String(v);
+    });
+    return { metin:metin, kaynak:'kural', eksik:eksik };
+  }
+
+  function hazirHtml(c){
+    if(!c || !c.metin) return '';
+    return '<p class="hazir" data-oz="139" data-kaynak="kural">'
+      + '<span class="hazir__etiket">hazır cümle</span> ' + kac(c.metin) + '</p>';
+  }
+
+  /* Gri durum şeridi. `acik` true ise şerit yok. Neden yazılırsa şeritte
+     durur («kota doldu», «anahtar yok»); yazılmazsa neden uydurulmaz. */
+  function seritHtml(durum){
+    durum = durum || {};
+    if(durum.acik) return '';
+    return '<div class="modelsiz" data-oz="139" role="status">'
+      + '<b class="modelsiz__bas">Dil modeli kapalı</b>'
+      + '<span class="modelsiz__metin">Ajanlar hazır cümlelerle konuşuyor; sayılar ve kararlar aynen duruyor.'
+      + (durum.neden ? ' Neden: ' + kac(durum.neden) + '.' : '') + '</span></div>';
+  }
+
+
+  /* ------------------------------------------------ 137 ajanın baktığı veri */
+
+  /* Ajanın masasındaki veri kimlikleri (`data/agents.js` `reads`) iç
+     adlardır: «gunun_akisi», «haftalar (review)». Ekrana ASCII kimlik
+     yazılmaz (AGENTS.md §1.8, ekip/HATALAR.md T2-02); ad buradan gelir.
+
+     Adlar ve kesinlik, aracın KENDİ açıklamasından (AYS `core/tools.js`
+     ve koçun `scope` alanı): «tahmini puan BANDI» → tahmin; risk, medyan,
+     oran, yüzde → hesaplandı; kayıt → ölçüldü. Enerji 1–5 adayın kendi
+     puanlamasıdır: «kullanıcının kendi kestirimi» → tahmin.
+     Tabloda olmayan kimliğe ad UYDURULMAZ (`veriBul` → null). */
+  const VERI = Object.freeze({
+    durum_ozeti:{ ad:'Durum özeti', kesinlik:'computed' },
+    konu_riski:{ ad:'Konu riski', kesinlik:'computed' },
+    puan_tahmini:{ ad:'Puan tahmini', kesinlik:'estimated' },
+    gunun_akisi:{ ad:'Günün akışı', kesinlik:'computed' },
+    konular:{ ad:'Konu durumları', kesinlik:'computed' },
+    denemeler:{ ad:'Deneme kayıtları', kesinlik:'measured' },
+    hedef_ve_net_matrisi:{ ad:'Hedef ve net karşılaştırması', kesinlik:'computed' },
+    gunler:{ ad:'Günlük çalışma kaydı', kesinlik:'measured' },
+    enerji_durumu:{ ad:'Enerji durumu', kesinlik:'estimated' },
+    mesgaleler:{ ad:'Mola ve meşgale durumu', kesinlik:'measured' },
+    haftalar:{ ad:'Haftalık plan ve değerlendirme', kesinlik:'computed' },
+    hatalar:{ ad:'Yanlış defteri', kesinlik:'measured' },
+    kartlar:{ ad:'Tekrar kartları', kesinlik:'computed' },
+    video_notlari:{ ad:'Ders notları', kesinlik:'measured' },
+    cozulen_sorular:{ ad:'Çözülen sorular', kesinlik:'measured' },
+    konu_basina_oran:{ ad:'Konu başına oran', kesinlik:'computed' },
+    kaynaklar:{ ad:'Kaynaklar', kesinlik:'measured' },
+    kaynak_zorlugu:{ ad:'Kaynak zorluğu', kesinlik:'computed' },
+  });
+  /* Paranteze yazılan ek: «konular (TYT)». `review` adın içinde zaten var. */
+  const VERI_EK = Object.freeze({ TYT:'TYT', AYT:'AYT', review:'' });
+
+  function veriBul(kimlik){
+    const m = /^\s*([a-z_]+)\s*(?:\(([^)]*)\))?\s*$/.exec(String(kimlik == null ? '' : kimlik));
+    if(!m || !Object.prototype.hasOwnProperty.call(VERI, m[1])) return null;
+    const ek = m[2] != null ? m[2].trim() : null;
+    if(ek != null && !Object.prototype.hasOwnProperty.call(VERI_EK, ek)) return null;
+    const v = VERI[m[1]];
+    const ekAd = ek != null ? VERI_EK[ek] : '';
+    return { kimlik:String(kimlik), taban:m[1], ek:ek, ad:v.ad + (ekAd ? ' (' + ekAd + ')' : ''), kesinlik:v.kesinlik };
+  }
+
+  /* Çipler: ad + kesinlik glifi (T'nin .chip'i). Tanımsız kimlik ham
+     yazılmaz; «tanımsız veri» çipi olur ve işaretlenir (denetim bulur). */
+  function veriCipleriHtml(liste){
+    const cip = (liste || []).map(k => {
+      const v = veriBul(k);
+      if(!v) return '<li class="chip vericip__c vericip__c--yok" data-veri-yok="' + kac(k) + '">tanımsız veri</li>';
+      return '<li class="chip vericip__c" data-veri="' + kac(v.kimlik) + '">'
+        + (L.KESINLIK_HTML ? L.KESINLIK_HTML(v.kesinlik) : '') + '<span class="vericip__ad">' + kac(v.ad) + '</span></li>';
+    }).join('');
+    return cip ? '<ul class="vericip" data-oz="137" aria-label="Baktığı veri">' + cip + '</ul>' : '';
+  }
+
+  L.SOZLUK = {
+    TERIMLER:TERIMLER,
+    BASILI_MS:BASILI_MS,
+    bul:bul,
+    hepsi:hepsi,
+    html:html,
+    bagla:bagla,
+    hazir:hazir,
+    hazirHtml:hazirHtml,
+    seritHtml:seritHtml,
+    VERI:VERI,
+    veriBul:veriBul,
+    veriCipleriHtml:veriCipleriHtml,
+  };
+})();
+
+/* ==== js/core/guven.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/guven.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GÜVEN — yedek durumu, kalıcı silme kapısı, kayıt geçmişi.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/guven.js`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   Kopyayı elle düzenleme: bir sonraki yayında kaybolur.
+   Biçimi `brand/ortak/kart.css` içindedir.
+   ==================================================================
+
+   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §K)
+
+     173  Yedek durumu        son yedeğin yaşı, tarihi ve boyutu; iki
+                              haftalık yedek izi; tek düğmeyle yedek.
+                              Yedek yoksa «Henüz yedek yok» — tarih
+                              uydurulmaz. Kural `yedek.js`'tedir; bu dosya
+                              yalnız gösterir.
+     177  Kalıcı silme kapısı kalıcı silme BÜYÜK aksiyondur: önce dönüş
+                              noktası, sonra yazılı onay, düğmede silinecek
+                              sayı («1.243 kaydı kalıcı sil»).
+     179  Kayıt geçmişi       bir kaydın her değişikliği kaynağıyla: sen,
+                              Merkez önerisi (senin onayınla), plan motoru,
+                              içe aktarma. Merkez değiştirmez, önerir;
+                              uygulayan hep bellidir (AGENTS.md §1.4).
+
+   Bu dosya depoya dokunmaz ve hiçbir şeyi silmez: durumu okur, kapıyı
+   çizer, kararı (düğme açık mı) verir. Silen ve yedek alan modülün kendi
+   kodudur. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+(function(){
+  'use strict';
+
+  const L = window.LIFEOS;
+
+  function kac(t){
+    return String(t == null ? '' : t).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+  const sayiMi = v => typeof v === 'number' && isFinite(v);
+  const bicim = (n, od) => (L.SAYI && L.SAYI.bicim) ? L.SAYI.bicim(n, od) : (sayiMi(n) ? String(n) : '—');
+  const zamanMetni = (z, simdi) => (L.SAYI && L.SAYI.zamanMetni) ? L.SAYI.zamanMetni(z, simdi) : String(z || '');
+
+  /* ------------------------------------------------ 173 yedek */
+
+  /* Bayt → okunur boyut. Bilinmiyorsa null: «0 KB» yazmak, boyutu
+     ölçülmemiş bir yedeği boş gibi gösterirdi. */
+  function boyutMetni(bayt){
+    if(!sayiMi(bayt) || bayt < 0) return null;
+    if(bayt < 1024) return bicim(bayt) + ' B';
+    if(bayt < 1024 * 1024) return bicim(Math.round(bayt / 1024 * 10) / 10) + ' KB';
+    return bicim(Math.round(bayt / (1024 * 1024) * 10) / 10) + ' MB';
+  }
+
+  /* d = { damga, boyut (bayt), iz:[damga…] (isteğe bağlı), kayit, bugun:'YYYY-AA-GG' }
+     `yas` ve `gerekli` kararı `yedek.js`'ten gelir (tek kural). */
+  function yedekDurumu(d){
+    d = d || {};
+    const yasFn = L.yedekYasi, gerekFn = L.yedekGerekli;
+    const yas = d.damga && yasFn ? yasFn(d.damga, d.bugun) : null;
+    const var_ = yas !== null;
+    return {
+      var:var_,
+      yas:yas,
+      gerekli:gerekFn ? gerekFn(yas, d.kayit) : false,
+      yasMetni:var_ ? (L.SAYI ? L.SAYI.yasMetni(yas) : yas + ' gün önce') : null,
+      zaman:var_ ? zamanMetni(d.damga, d.simdi) : null,
+      boyut:var_ ? boyutMetni(d.boyut) : null,
+    };
+  }
+
+  /* Son on dört gün: yedek alınan gün dolu. İz verilmezse çizilmez —
+     kaydı tutulmayan bir geçmiş boş gün gibi gösterilmez. */
+  function yedekIzi(iz, bugun, gun){
+    if(!Array.isArray(iz) || !L.GRAFIK) return null;
+    return L.GRAFIK.doluluk({ modul:'yedek', gunler:iz }, { bitis:bugun, gun:gun || 14 });
+  }
+
+  function yedekHtml(d){
+    d = d || {};
+    const r = yedekDurumu(d);
+    let govde;
+    if(!r.var){
+      govde = '<p class="yedek__bas">Henüz yedek yok</p>';
+    }else{
+      govde = '<p class="yedek__bas">Son yedek ' + kac(r.yasMetni) + '</p>'
+        + '<p class="yedek__alt">' + kac(r.zaman) + ' · '
+        + (r.boyut ? kac(r.boyut) : 'boyut kayıtlı değil') + '</p>';
+    }
+    const iz = r.var ? yedekIzi(d.iz, d.bugun) : null;
+    const izHtml = iz ? '<div class="yedek__iz" role="img" aria-label="' + kac('Son ' + iz.gun + ' günde '
+      + iz.dolu + ' yedek günü') + '">' + iz.kutular.map(k => '<i class="doluluk__k'
+      + (k.dolu ? ' doluluk__k--dolu' : '') + '" data-tarih="' + k.tarih + '"></i>').join('') + '</div>' : '';
+    return '<div class="yedek' + (r.gerekli ? ' yedek--gerekli' : '') + '" data-oz="173">' + govde + izHtml
+      + '<button type="button" class="btn btn--sm" data-act="yedek-al"><span class="btn__label">Şimdi yedek al</span></button>'
+      + '</div>';
+  }
+
+  /* ------------------------------------------------ 177 silme */
+
+  /* Kalıcı silme her zaman büyük aksiyondur: geri alınamaz (§1.9). */
+  const SILME_SEVIYE = 'buyuk';
+
+  /* Yazılı onay: silinecek SAYI yazılır. «SİL» yazdırılmaz — «İ» her
+     klavyede yoktur ve yanlış harfle takılan kullanıcı neden
+     ilerleyemediğini anlamaz; sayı ise silinecek şeyin büyüklüğünü bir
+     kez daha okutur. Nokta, boşluk ve virgül yok sayılır (1.243 = 1243). */
+  function yazilanGecerliMi(yazilan, sayi){
+    if(!sayiMi(sayi)) return false;
+    const y = String(yazilan == null ? '' : yazilan).replace(/[\s.,]/g, '');
+    return y !== '' && y === String(sayi);
+  }
+
+  /* Kapının durumu: hangi adımda, düğme açık mı, ne eksik. */
+  function silmeDurumu(o){
+    o = o || {};
+    const eksik = [];
+    if(!sayiMi(o.sayi) || o.sayi <= 0) eksik.push('sayi');
+    if(!o.donusNoktasi) eksik.push('donus');
+    if(!yazilanGecerliMi(o.yazilan, o.sayi)) eksik.push('onay');
+    const adim = eksik.indexOf('donus') >= 0 ? 'donus' : eksik.indexOf('onay') >= 0 ? 'onay' : 'hazir';
+    return { seviye:SILME_SEVIYE, adim:eksik.indexOf('sayi') >= 0 ? 'yok' : adim, dugmeAcik:!eksik.length, eksik:eksik };
+  }
+
+  /* o = { nesne:'kaydı', sayi:1243, donusNoktasi:{ zaman } | null, yazilan, id } */
+  function silmeHtml(o){
+    o = o || {};
+    const r = silmeDurumu(o);
+    const id = 'silme-' + String(o.id || 'k').replace(/[^a-zA-Z0-9_-]/g, '');
+    const say = sayiMi(o.sayi) ? bicim(o.sayi) : '—';
+    const d1 = o.donusNoktasi
+      ? '<li class="silme__adim silme__adim--tamam">Dönüş noktası alındı'
+        + (o.donusNoktasi.zaman ? ' · ' + kac(zamanMetni(o.donusNoktasi.zaman)) : '') + '</li>'
+      : '<li class="silme__adim">Önce dönüş noktası al: silinen geri getirilemez, yalnız bu noktaya dönülebilir.'
+        + ' <button type="button" class="btn btn--sm" data-act="silme-donus"><span class="btn__label">Dönüş noktası al</span></button></li>';
+    const d2 = '<li class="silme__adim' + (r.eksik.indexOf('onay') < 0 ? ' silme__adim--tamam' : '') + '">'
+      + '<label for="' + id + '">Onaylamak için silinecek sayıyı yaz: <b>' + kac(say) + '</b></label>'
+      + '<input class="silme__giris" id="' + id + '" inputmode="numeric" autocomplete="off" data-act="silme-yaz"'
+      + (o.donusNoktasi ? '' : ' disabled') + ' value="' + kac(o.yazilan || '') + '"></li>';
+    const dugme = (L.ONERI && L.ONERI.yikiciDugme)
+      ? L.ONERI.yikiciDugme({ fiil:'kalıcı sil', sayi:o.sayi, nesne:o.nesne, act:'silme-onay' })
+      : '<button type="button" class="btn btn--danger" data-act="silme-onay">' + kac(say + ' ' + (o.nesne || '') + ' kalıcı sil') + '</button>';
+    return '<div class="silme" data-oz="177" data-seviye="buyuk" data-adim="' + r.adim + '">'
+      + '<ol class="silme__adimlar">' + d1 + d2 + '</ol>'
+      + (r.dugmeAcik ? dugme : dugme.replace('<button ', '<button disabled aria-disabled="true" '))
+      + '</div>';
+  }
+
+  /* ------------------------------------------------ 179 geçmiş */
+
+  /* Kaynaklar. Öneriyle gelen değişiklik (Merkez, ofis, kural) bir ONAY
+     taşır: ya elle onay ya da kullanıcının «sormadan uygula» ayarı (116).
+     Onayı olmayan öneri kaynaklı değişiklik gizlenmez; uyarıyla yazılır —
+     çünkü doktrine göre olmaması gereken şeydir (AGENTS.md §1.4). */
+  const KAYNAKLAR = Object.freeze({
+    kullanici:{ ad:'Sen', oneri:false },
+    merkez:{ ad:'Merkez önerisi', oneri:true },
+    ofis:{ ad:'Ofis önerisi', oneri:true },
+    kural:{ ad:'Kural motoru önerisi', oneri:true },
+    plan:{ ad:'Plan motoru', oneri:false },
+    'ice-aktarma':{ ad:'İçe aktarma', oneri:false },
+  });
+
+  /* olay = { zaman, kaynak, alan, eski, yeni, onay:{ tur:'onay'|'ayar', zaman } } */
+  function kaynakMetni(olay){
+    const k = olay && Object.prototype.hasOwnProperty.call(KAYNAKLAR, olay.kaynak) ? KAYNAKLAR[olay.kaynak] : null;
+    if(!k) return { metin:'kaynağı bilinmiyor', uyari:'bilinmiyor' };
+    if(!k.oneri) return { metin:k.ad, uyari:null };
+    const o = olay.onay;
+    if(o && o.tur === 'onay') return { metin:k.ad + ' (senin onayınla)', uyari:null };
+    if(o && o.tur === 'ayar') return { metin:k.ad + ' (senin ayarınla, sormadan)', uyari:null };
+    return { metin:k.ad + ' · onay kaydı yok', uyari:'onaysiz' };
+  }
+
+  const degerMetni = v => v == null || v === '' || (typeof v === 'number' && !isFinite(v)) ? '—'
+    : (sayiMi(v) ? bicim(v) : String(v));
+
+  function gecmis(olaylar){
+    return (olaylar || []).filter(Boolean).slice().sort((a, b) =>
+      String(b.zaman || '').localeCompare(String(a.zaman || '')));
+  }
+
+  function gecmisHtml(olaylar, o){
+    o = o || {};
+    const liste = gecmis(olaylar);
+    if(!liste.length) return '<p class="gecmis gecmis--bos" data-oz="179">Bu kaydın değişiklik geçmişi yok.</p>';
+    return '<ol class="gecmis" data-oz="179">' + liste.map(x => {
+      const k = kaynakMetni(x);
+      return '<li class="gecmis__s"' + (k.uyari ? ' data-uyari="' + k.uyari + '"' : '')
+        + ' data-kaynak="' + kac(x.kaynak || '') + '">'
+        + '<span class="gecmis__zaman">' + kac(x.zaman ? zamanMetni(x.zaman, o.simdi) : 'zaman kayıtlı değil') + '</span>'
+        + '<span class="gecmis__kaynak">' + kac(k.metin) + '</span>'
+        + '<span class="gecmis__degisim">' + (x.alan ? '<span class="gecmis__alan">' + kac(x.alan) + '</span> ' : '')
+        + kac(degerMetni(x.eski)) + ' → ' + kac(degerMetni(x.yeni)) + '</span></li>';
+    }).join('') + '</ol>';
+  }
+
+  L.GUVEN = {
+    SILME_SEVIYE:SILME_SEVIYE,
+    KAYNAKLAR:KAYNAKLAR,
+    boyutMetni:boyutMetni,
+    yedekDurumu:yedekDurumu,
+    yedekIzi:yedekIzi,
+    yedekHtml:yedekHtml,
+    yazilanGecerliMi:yazilanGecerliMi,
+    silmeDurumu:silmeDurumu,
+    silmeHtml:silmeHtml,
+    kaynakMetni:kaynakMetni,
+    gecmis:gecmis,
+    gecmisHtml:gecmisHtml,
   };
 })();
 

@@ -368,6 +368,33 @@ def yay() -> int:
     return 0
 
 
+def baglanmayan():
+    """Yayilan ama sayfaya BAGLANMAYAN kopyalar.
+
+    Kopya kaynakla ayni olabilir ve yine de hic calismaz: sayfa onu
+    yuklemiyorsa. K'nin `grafik.js`, `oneri.js`, `sozluk.js`, `guven.js`
+    dosyalari uc arayuze yayildi, testlerde kostu, ama hicbir
+    `index.html` onlari yuklemiyordu — uygulamada yoklardi ve bunu
+    hicbir denetim soylemedi. Kok dosyalar (`sw.js`) etiketle degil
+    kayitla yuklenir; onlar sayilmaz."""
+    out = []
+    for ad, klasor in DOSYALAR.items():
+        if klasor == ".":
+            continue
+        for sistem, hedef in hedefler(ad):
+            src = KOK / sistem / "src"
+            if klasor == "tests":
+                sayfa, ref = src / "tests" / "index.html", '"%s"' % ad
+            else:
+                sayfa, ref = src / "index.html", '"%s/%s"' % (klasor, ad)
+            if not sayfa.exists():
+                continue
+            if ref not in sayfa.read_text(encoding="utf-8"):
+                out.append("%s yayildi ama %s onu yuklemiyor"
+                           % (hedef.relative_to(KOK), sayfa.relative_to(KOK)))
+    return out
+
+
 def denetle() -> int:
     hatalar = []
     if not KAYNAK.is_dir():
@@ -392,6 +419,7 @@ def denetle() -> int:
                 hatalar.append("%s kaynaktan AYRISMIS — duzeltme "
                                "brand/ortak/%s icine yazilir"
                                % (hedef.relative_to(KOK), ad))
+    hatalar.extend(baglanmayan())
     if hatalar:
         print("Ortak kaynak ayrismis:\n")
         for h in hatalar:
