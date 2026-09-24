@@ -9,7 +9,7 @@
 
 | Kapı | Durum | Commit |
 |---|---|---|
-| Kapı 1 · H0 taban envanteri (`ekip/envanter/taban-2026-09-24.json`) | ✅ **açık** — T2 ve T3 başlayabilir | 04474a4 |
+| Kapı 1 · H0 taban envanteri (`ekip/envanter/taban-2026-09-24.json`) | ✅ **açık** — T2 ve T3 başlayabilir | 1600f75 |
 
 ## Teslim tablosu (T yazar)
 
@@ -41,7 +41,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 ## HATA (H)
 
 - **Şu an:** H0b işleyici testleri (T3'ün taşıyacağı ekranlar, AYS önce)
-- **Biten:** H0 taban envanteri · 04474a4 — `node tools/envanter.js` her push'ta CI'da koşar
+- **Biten:** H0 taban envanteri · 1600f75 — `node tools/envanter.js` her push'ta CI'da koşar
 - **T ve K için:** taşıdığın ekrandan sonra `node tools/envanter.js <MODÜL>` koş (~1 dk). «KAYIP» çıkarsa ya geri koy ya da kullanıcı onayıyla `ekip/envanter/kaldirilan.json`'a yaz. Envanter ekran ölçülerini de verir (sadelik bütçesi, H1)
 - **Bulgu özeti** (`T2-NN → sahip · durum`): —
 - **Son tam koşum:** —
