@@ -357,6 +357,22 @@ HKM 597, ESP 1359, entegre temiz.
 
 ### HATALAR.md turu (2026-09-24) — iki Claude, bölüşüm `ekip/IS-BOLUSUMU.md`
 
+**TUR BİTTİ: 45 bulgunun 45'i kapandı.** A: HKM payı + atanmamış O-6, D-5 + B'den
+devralınan D grubu. B: KR-1, Y-6, Y-5/O-4/D-6, Y-4, Y-8/B-2/B-3, Y-2 (AYS), Y-7 (modül),
+O-3/O-5/O-8/O-10/O-11 (ayrıntı `ekip/HATALAR-ILERLEME-B.md`). B-1'in README yarısı («312
+test») A tarafından kaldırıldı; sayılar yalnız README'nin sayılar bloğunda.
+
+**B'nin bildirdiği davranış değişiklikleri (bilinçli):**
+- Ölçüm YAZAN kayıt (soru, uyku, süre, vital, öğün, seans) hiçbir ayarda sormadan
+  yazılmaz; hep önizleme + onay (KR-1 kararı).
+- «Günün sorusu» dört ayrı tanımdan TEK tanıma indi: blok + serbest + paragraf +
+  problem (O-5). XP, rozetler ve haftalık gerçekleşme artık paragraf ve problemi de
+  sayıyor. Paragraf ayrı tutulsun istenirse tek satırlık değişiklik.
+- Listede olmayan bir hata da düzeldi: ağ hatasında geçmiş gönderimi «202» diyordu.
+
+**Kullanıcı kararı bekleyen iki sayı/tanım:** (1) yıllık tatil sınırı 42 gün
+(`brand/ortak/seri.js` `YILLIK_TATIL`); (2) günün sorusuna paragraf ve problem dahil mi.
+
 B'nin ilerlemesi `ekip/HATALAR-ILERLEME-B.md`'de. A'nın payı (yalnız `HKM/`) **bitti**;
 her madde önce kırmızı test, sonra düzeltme:
 
@@ -375,7 +391,7 @@ her madde önce kırmızı test, sonra düzeltme:
 | D-16 · D-18 | Kullanım bilgisi yoksa jeton tahmini («tahmini-jeton»); tavan en kötü durumu ve süren çağrıları sayar (`butce.ayir`) | 6134d06 |
 | D-12 | Niyet kataloğu üç `beacon.js` ile karşılaştırılır (test) | 6855002 |
 | O-6 (atanmamıştı, HKM) | Görüntüden düşen hafıza kaydı «dustu», geri gelince dirilir; «unut» dirilmez | 828a0ba |
-| D-5 (atanmamıştı, HKM) | Program kapasitesi toplamı aşmaz; bir dilim bile yetmiyorsa kritik «dilim» denetimi | (bu commit) |
+| D-5 (atanmamıştı, HKM) | Program kapasitesi toplamı aşmaz; bir dilim bile yetmiyorsa kritik «dilim» denetimi | a11fe00 |
 | KO-1 · B-4 · B-1 | Süreç açılışında saat dilimi (config `saat_dilimi` > Europe/Istanbul); KURULUM: UMask, ReadWritePaths HKM (config yazılabilsin), üç bearer'sız yol | 1ac5fd8 |
 
 **B'den devralınan D grubu** (kullanıcı iletti, 2026-09-24):
@@ -386,9 +402,9 @@ her madde önce kırmızı test, sonra düzeltme:
 | D-9 | Üç `ui.js` target/shield, ESP `hints.js` ladder çift tanımı silindi; testler kaynağı okur | 34b0949 |
 | D-10 | AYS `examOpen = examOpen` kaldırıldı, niyet yorumda (davranış aynı) | 34b0949 |
 | D-11 | ESP SRS «İyi»de ease/2.5 çarpanı (varsayılan kartta aralık aynı) | 34b0949 |
-| D-14 | Üç `build.py --denetle` (bellekte derle, dist ile karşılaştır); CI adımı | (sonraki) |
-| D-17 | `localQuota` kaynağın tamamını ölçer (`originSize`); `profile` ayrı | (sonraki) |
-| D-19 | Ay dönümünü geçen kayıt her ayın sınırına bakar; tatil yılda en çok 42 gün | (sonraki) |
+| D-14 | Üç `build.py --denetle` (bellekte derle, dist ile karşılaştır); CI adımı | 582e7d0 |
+| D-17 | `localQuota` kaynağın tamamını ölçer (`originSize`); `profile` ayrı | 582e7d0 |
+| D-19 | Ay dönümünü geçen kayıt her ayın sınırına bakar; tatil yılda en çok 42 gün | 582e7d0 |
 
 **Kullanıcıya sorulacak tek sayı:** D-19'daki yıllık tatil sınırı 42 gün (2 × tek kaydın
 en uzunu 21) bir tasarım seçimi; `brand/ortak/seri.js` `YILLIK_TATIL`.

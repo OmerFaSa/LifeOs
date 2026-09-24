@@ -19,7 +19,7 @@ D-8, D-9, D-10, D-11, D-14, D-17, D-19.
 | Y-8 + B-2 + B-3 | düzeltildi | 313a704 |
 | Y-2 (AYS) | düzeltildi | 313a704 |
 | Y-7 (modül) | düzeltildi | 8051dde |
-| O-3, O-5, O-8, O-10, O-11 | düzeltildi | (bu commit) |
+| O-3, O-5, O-8, O-10, O-11 | düzeltildi | ac598d8 |
 | D-8, D-9, D-10, D-11, D-14, D-17, D-19 | **Claude A'ya geçti** (kullanıcı kararı); B dokunmaz | |
 
 ---
