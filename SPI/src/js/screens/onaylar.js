@@ -28,8 +28,8 @@ SP.Screens.onaylar = (function(){
   function KingTeklifKart(){
     const liste = S.ui.kingTeklifler || [];
     if(!liste.length) return '';
-    return K.Card({ title:'King teklifi', hint:'hkm', sub:liste.length + ' iş onayını bekliyor',
-      body:html`
+    return K.Kutu({ ad:'King teklifi', ipucu:'hkm', yuva:liste.length + ' iş onayını bekliyor',
+      govde:html`
         ${map(liste.filter(t => t.durum === 'ara_onay'), t => html`<div class="mt-8">
           <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
           <div class="tiny mt-4">${t.metin}</div>
@@ -75,10 +75,10 @@ SP.Screens.onaylar = (function(){
     const liste = S.ui.hkmIntents || [];
     const supheli = S.ui.hkmDoubts || [];
     if(!liste.length && !supheli.length) return '';
-    return K.Card({ title:'HKM teklifi', hint:'hkm',
-      sub:liste.length ? liste.length + ' teklif bekliyor'
+    return K.Kutu({ ad:'HKM teklifi', ipucu:'hkm',
+      yuva:liste.length ? liste.length + ' teklif bekliyor'
         : supheli.length + ' teklifin sonucu belirsiz',
-      body:html`
+      govde:html`
         ${map(supheli, d => html`<div class="mt-8">
           ${K.Notice({ tone:'warn', body:'Bir teklif uygulanırken işlem yarıda kaldı; kaydına '
             + 'yazılıp yazılmadığı bilinmiyor. Kaydına bakıp doğrula.' })}
@@ -210,9 +210,9 @@ SP.Screens.onaylar = (function(){
   function BekleyenKart(){
     const liste = SP.Proposals ? SP.Proposals.pending() : [];
     if(!liste.length) return '';
-    return K.Card({ title:liste.length === 1 ? 'Bir kayıt onayını bekliyor'
-      : liste.length + ' kayıt onayını bekliyor', sub:'Onaylanana kadar hiçbiri yazılmadı',
-      body:html`<div class="bekleyen">${map(liste, o => {
+    return K.Kutu({ ad:liste.length === 1 ? 'Bir kayıt onayını bekliyor'
+      : liste.length + ' kayıt onayını bekliyor', yuva:'Onaylanana kadar hiçbiri yazılmadı',
+      govde:html`<div class="bekleyen">${map(liste, o => {
         const e = SP.Proposals.eylem(o.action);
         const pv = SP.Proposals.preview(o);
         return html`<div class="bekleyen__satir">

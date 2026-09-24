@@ -8484,7 +8484,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'b06c28d', at:'2026-09-24 17:37', dirty:true };
+SP.BUILD = { id:'e8c364c', at:'2026-09-24 17:40', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -46439,8 +46439,8 @@ SP.Screens.onaylar = (function(){
   function KingTeklifKart(){
     const liste = S.ui.kingTeklifler || [];
     if(!liste.length) return '';
-    return K.Card({ title:'King teklifi', hint:'hkm', sub:liste.length + ' iş onayını bekliyor',
-      body:html`
+    return K.Kutu({ ad:'King teklifi', ipucu:'hkm', yuva:liste.length + ' iş onayını bekliyor',
+      govde:html`
         ${map(liste.filter(t => t.durum === 'ara_onay'), t => html`<div class="mt-8">
           <div><b>${t.konu}</b> <span class="tiny dim">· iş emri #${t.id}</span></div>
           <div class="tiny mt-4">${t.metin}</div>
@@ -46486,10 +46486,10 @@ SP.Screens.onaylar = (function(){
     const liste = S.ui.hkmIntents || [];
     const supheli = S.ui.hkmDoubts || [];
     if(!liste.length && !supheli.length) return '';
-    return K.Card({ title:'HKM teklifi', hint:'hkm',
-      sub:liste.length ? liste.length + ' teklif bekliyor'
+    return K.Kutu({ ad:'HKM teklifi', ipucu:'hkm',
+      yuva:liste.length ? liste.length + ' teklif bekliyor'
         : supheli.length + ' teklifin sonucu belirsiz',
-      body:html`
+      govde:html`
         ${map(supheli, d => html`<div class="mt-8">
           ${K.Notice({ tone:'warn', body:'Bir teklif uygulanırken işlem yarıda kaldı; kaydına '
             + 'yazılıp yazılmadığı bilinmiyor. Kaydına bakıp doğrula.' })}
@@ -46621,9 +46621,9 @@ SP.Screens.onaylar = (function(){
   function BekleyenKart(){
     const liste = SP.Proposals ? SP.Proposals.pending() : [];
     if(!liste.length) return '';
-    return K.Card({ title:liste.length === 1 ? 'Bir kayıt onayını bekliyor'
-      : liste.length + ' kayıt onayını bekliyor', sub:'Onaylanana kadar hiçbiri yazılmadı',
-      body:html`<div class="bekleyen">${map(liste, o => {
+    return K.Kutu({ ad:liste.length === 1 ? 'Bir kayıt onayını bekliyor'
+      : liste.length + ' kayıt onayını bekliyor', yuva:'Onaylanana kadar hiçbiri yazılmadı',
+      govde:html`<div class="bekleyen">${map(liste, o => {
         const e = SP.Proposals.eylem(o.action);
         const pv = SP.Proposals.preview(o);
         return html`<div class="bekleyen__satir">
@@ -46775,9 +46775,9 @@ SP.Screens.kutuphane = (function(){
   /* İsteğe sağlık verisi GİTMEZ: tür, ad, semt, şehir — o kadar. */
   function bilgiKart(){
     const tur = S.ui.bilgiTur || 'besin';
-    return K.Card({
-      title:'Bilgi iste', sub:'HKM · Araştırma Bürosu',
-      body:html`
+    return K.Kutu({
+      ad:'Bilgi iste', yuva:'HKM · Araştırma Bürosu',
+      govde:html`
         ${K.Ayrinti({ ozet:'Besin değeri, market fiyatı ya da bir semtteki yerler kaynaktan araştırılır.',
           govde:'King önce maliyet ve süre teklifi yapar; sonuç Onaylar’a teklif olarak gelir ve SPİ '
             + 'kendi koduyla sınamadan hiçbir şey yazılmaz.' })}
@@ -46793,16 +46793,16 @@ SP.Screens.kutuphane = (function(){
           ${K.Field({ label:'Şehir', hint:tur === 'yer' ? 'semt ya da şehir gerekli' : 'isteğe bağlı',
             input:K.Input({ id:'bilgi-sehir' }) })}
         </div>`)}`,
-      foot:K.Button({ label:'King’e ilet', tone:'primary', act:'bilgi-iste' }),
+      ayak:K.Button({ label:'King’e ilet', tone:'primary', act:'bilgi-iste' }),
     });
   }
 
   function yerKart(){
     const liste = SP.Bilgi ? SP.Bilgi.yerler() : [];
     if(!liste.length) return '';
-    return K.Card({
-      title:'Yerler', sub:liste.length + ' liste · tahmin',
-      body:html`${map(liste, l => html`<div class="mt-10">
+    return K.Kutu({
+      ad:'Yerler', yuva:liste.length + ' liste · tahmin',
+      govde:html`${map(liste, l => html`<div class="mt-10">
         <div class="row gap-8">
           <b class="small grow minw0">${l.baslik}${l.konum ? ' · ' + l.konum : ''}</b>
           ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Listeyi sil',
@@ -46830,8 +46830,8 @@ SP.Screens.kutuphane = (function(){
   function urunKart(){
     const l = SP.Urunler ? SP.Urunler.liste() : [];
     if(!l.length) return '';
-    return K.Card({ title:'BAM ürünleri', hint:'hkm', sub:l.length + ' ürün',
-      body:html`<p class="tiny dim">Danışma’da «… hakkında özet hazırla» dersen King’e iletilir;
+    return K.Kutu({ ad:'BAM ürünleri', ipucu:'hkm', yuva:l.length + ' ürün',
+      govde:html`<p class="tiny dim">Danışma’da «… hakkında özet hazırla» dersen King’e iletilir;
           bitince teklif olarak gelir.</p>
         <div class="stack-xs mt-8">${map(l, u => html`<div class="row gap-8 wrap">
           <span class="minw0 grow"><b>${u.baslik}</b> <span class="tiny dim">· ${u.urunAd}

@@ -23,9 +23,9 @@ SP.Screens.kutuphane = (function(){
   /* İsteğe sağlık verisi GİTMEZ: tür, ad, semt, şehir — o kadar. */
   function bilgiKart(){
     const tur = S.ui.bilgiTur || 'besin';
-    return K.Card({
-      title:'Bilgi iste', sub:'HKM · Araştırma Bürosu',
-      body:html`
+    return K.Kutu({
+      ad:'Bilgi iste', yuva:'HKM · Araştırma Bürosu',
+      govde:html`
         ${K.Ayrinti({ ozet:'Besin değeri, market fiyatı ya da bir semtteki yerler kaynaktan araştırılır.',
           govde:'King önce maliyet ve süre teklifi yapar; sonuç Onaylar’a teklif olarak gelir ve SPİ '
             + 'kendi koduyla sınamadan hiçbir şey yazılmaz.' })}
@@ -41,16 +41,16 @@ SP.Screens.kutuphane = (function(){
           ${K.Field({ label:'Şehir', hint:tur === 'yer' ? 'semt ya da şehir gerekli' : 'isteğe bağlı',
             input:K.Input({ id:'bilgi-sehir' }) })}
         </div>`)}`,
-      foot:K.Button({ label:'King’e ilet', tone:'primary', act:'bilgi-iste' }),
+      ayak:K.Button({ label:'King’e ilet', tone:'primary', act:'bilgi-iste' }),
     });
   }
 
   function yerKart(){
     const liste = SP.Bilgi ? SP.Bilgi.yerler() : [];
     if(!liste.length) return '';
-    return K.Card({
-      title:'Yerler', sub:liste.length + ' liste · tahmin',
-      body:html`${map(liste, l => html`<div class="mt-10">
+    return K.Kutu({
+      ad:'Yerler', yuva:liste.length + ' liste · tahmin',
+      govde:html`${map(liste, l => html`<div class="mt-10">
         <div class="row gap-8">
           <b class="small grow minw0">${l.baslik}${l.konum ? ' · ' + l.konum : ''}</b>
           ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Listeyi sil',
@@ -78,8 +78,8 @@ SP.Screens.kutuphane = (function(){
   function urunKart(){
     const l = SP.Urunler ? SP.Urunler.liste() : [];
     if(!l.length) return '';
-    return K.Card({ title:'BAM ürünleri', hint:'hkm', sub:l.length + ' ürün',
-      body:html`<p class="tiny dim">Danışma’da «… hakkında özet hazırla» dersen King’e iletilir;
+    return K.Kutu({ ad:'BAM ürünleri', ipucu:'hkm', yuva:l.length + ' ürün',
+      govde:html`<p class="tiny dim">Danışma’da «… hakkında özet hazırla» dersen King’e iletilir;
           bitince teklif olarak gelir.</p>
         <div class="stack-xs mt-8">${map(l, u => html`<div class="row gap-8 wrap">
           <span class="minw0 grow"><b>${u.baslik}</b> <span class="tiny dim">· ${u.urunAd}
