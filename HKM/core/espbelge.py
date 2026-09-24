@@ -31,9 +31,16 @@ import re
 
 from core import spibilgi
 
-ALANLAR = ("tarih", "felsefe", "okuma", "yazi")
+ALANLAR = ("tarih", "felsefe", "okuma", "yazi", "cefr", "okuma_hizi")
 ALAN_AD = {"tarih": "tarih belgesi", "felsefe": "felsefe belgesi", "okuma": "okuma listesi",
-           "yazi": "yazı örnekleri"}
+           "yazi": "yazı örnekleri", "cefr": "CEFR saat tablosu dayanağı",
+           "okuma_hizi": "okuma hızı dayanağı"}
+# Madde 11: ESP hedef paketlerindeki TAHMIN TABLOLARININ kaynagi. Sayi
+# kaynaktan, sinama koddan; ESP hesabi yine kendisi yapar.
+DAYANAK_ALANLARI = ("cefr", "okuma_hizi")
+CEFR = ("A1", "A2", "B1", "B2", "C1", "C2")
+CEFR_SAAT = (10, 3000)
+KELIME_DK = (50, 1000)
 ESER_ALANLARI = ("okuma", "yazi")
 MAX_ESER = 10
 TURLER = ("siyasi", "ekonomik", "dusunsel", "toplumsal")
@@ -67,7 +74,7 @@ def temizle(govde):
             hata.append("belge: bilinmeyen alan %s" % k)
     alan = govde.get("alan")
     if alan not in ALANLAR:
-        hata.append("alan tarih, felsefe, okuma ya da yazi olmalı")
+        hata.append("alan tarih, felsefe, okuma, yazi, cefr ya da okuma_hizi olmalı")
     konu = _bosluk(govde.get("konu"))
     if not (2 <= len(konu) <= MAX_KONU):
         hata.append("konu 2-%d karakter olmalı" % MAX_KONU)
@@ -100,6 +107,10 @@ def sorgular(g):
         return [g["konu"], "%s tarihi olaylar" % g["konu"]]
     if g["alan"] == "okuma":
         return ["%s kitapları" % g["konu"], "%s okuma listesi" % g["konu"]]
+    if g["alan"] == "cefr":
+        return ["CEFR guided learning hours A1 A2 B1 B2 C1 C2", "CEFR seviyeleri kaç saat"]
+    if g["alan"] == "okuma_hizi":
+        return ["average silent reading speed words per minute", "ortalama okuma hızı dakikada kelime"]
     if g["alan"] == "yazi":
         return ["%s yazarları üslup" % g["konu"], "%s örnek metinler" % g["konu"]]
     return [g["konu"], "%s filozoflar eserleri" % g["konu"]]
@@ -110,6 +121,10 @@ def istem(g):
         return "Konu: %s\nBu konunun önemli olaylarını kaynaklardan çıkar." % g["konu"]
     if g["alan"] == "okuma":
         return "Konu: %s\nBu konuda okunacak temel eserleri kaynaklardan çıkar." % g["konu"]
+    if g["alan"] == "cefr":
+        return "CEFR seviyelerinin her biri için rehberli öğrenme saatini kaynaklardan çıkar."
+    if g["alan"] == "okuma_hizi":
+        return "Yetişkinlerin sessiz okuma hızını (dakikada kelime) kaynaklardan çıkar."
     if g["alan"] == "yazi":
         return ("Konu: %s\nBu konuda üslubu örnek gösterilen yazarları ve eserlerini kaynaklardan "
                 "çıkar." % g["konu"])
@@ -136,6 +151,19 @@ _ESER_BICIM = """NE YAZARSIN
   "kaynak": 1, "alinti": "..."}]}"""
 
 _BICIM = {
+    "cefr": """NE YAZARSIN
+- Her CEFR seviyesi (A1, A2, B1, B2, C1, C2) için kaynakta yazan rehberli öğrenme saati
+  aralığı: alt ve üst (tek sayı yazıyorsa ikisi aynı). Seviyeler SIFIRDAN toplam saattir.
+- Alıntı seviyeyi ve saati içermeli.
+
+ÇIKTI: Yalnız şu biçimde tek bir JSON nesnesi döndür, başka hiçbir şey yazma:
+{"seviyeler": [{"seviye": "A1", "saat_alt": 90, "saat_ust": 100, "kaynak": 1, "alinti": "..."}]}""",
+    "okuma_hizi": """NE YAZARSIN
+- Kaynakta yazan yetişkin sessiz okuma hızları (dakikada kelime); ne ölçüldüğünü kısaca yaz.
+- Alıntı sayıyı içermeli.
+
+ÇIKTI: Yalnız şu biçimde tek bir JSON nesnesi döndür, başka hiçbir şey yazma:
+{"hizlar": [{"ne": "...", "kelime_dk": 238, "kaynak": 1, "alinti": "..."}]}""",
     "okuma": _ESER_BICIM % "bu eserin konu için neden temel sayıldığı",
     "yazi": _ESER_BICIM % "bu yazarın üslubunda örnek gösterilen özellik",
     "tarih": """NE YAZARSIN
@@ -203,6 +231,41 @@ def ayikla(d, g):
         if not satirlar:
             return None, "Kaynaklarda yılı ve türüyle yazılmış olay çıkmadı."
         return {"tur": "tarih", "konu": g["konu"], "olaylar": satirlar, "bicim_dusen": dusen}, None
+    if g["alan"] == "cefr":
+        gor = {}
+        for x in (d.get("seviyeler") if isinstance(d.get("seviyeler"), list) else [])[:24]:
+            if not isinstance(x, dict):
+                dusen += 1
+                continue
+            sv = _bosluk(x.get("seviye")).upper()
+            alt, ust = x.get("saat_alt"), x.get("saat_ust")
+            n = _kaynak_no(x)
+            if sv not in CEFR or n is None or not all(isinstance(v, int) and not isinstance(v, bool)
+                                                      and CEFR_SAAT[0] <= v <= CEFR_SAAT[1] for v in (alt, ust)) \
+                    or alt > ust:
+                dusen += 1
+                continue
+            if sv in gor:
+                continue
+            gor[sv] = 1
+            satirlar.append({"seviye": sv, "saat_alt": alt, "saat_ust": ust, "kaynak": n,
+                             "alinti": _bosluk(x.get("alinti"))[:400]})
+        if not satirlar:
+            return None, "Kaynaklarda seviyesiyle birlikte yazılmış saat çıkmadı."
+        satirlar.sort(key=lambda x: CEFR.index(x["seviye"]))
+        return {"tur": "cefr", "konu": g["konu"], "seviyeler": satirlar, "bicim_dusen": dusen}, None
+    if g["alan"] == "okuma_hizi":
+        for x in (d.get("hizlar") if isinstance(d.get("hizlar"), list) else [])[:12]:
+            v = x.get("kelime_dk") if isinstance(x, dict) else None
+            n = _kaynak_no(x) if isinstance(x, dict) else None
+            if not (isinstance(v, int) and not isinstance(v, bool) and KELIME_DK[0] <= v <= KELIME_DK[1]) or n is None:
+                dusen += 1
+                continue
+            satirlar.append({"ne": _metin(x.get("ne"), 2, 120), "kelime_dk": v, "kaynak": n,
+                             "alinti": _bosluk(x.get("alinti"))[:400]})
+        if not satirlar:
+            return None, "Kaynaklarda dakikada kelime olarak yazılmış okuma hızı çıkmadı."
+        return {"tur": "okuma_hizi", "konu": g["konu"], "hizlar": satirlar, "bicim_dusen": dusen}, None
     if g["alan"] in ESER_ALANLARI:
         for x in (d.get("eserler") if isinstance(d.get("eserler"), list) else [])[:MAX_ESER * 2]:
             if not isinstance(x, dict):
@@ -272,6 +335,21 @@ def dogrula(govde, metinler, alinti_dogru_mu):
             return None, "Hiçbir olay kaynağındaki alıntıyla doğrulanamadı; kayıt yazılmadı."
         govde["olaylar"] = kalan
         return "kaynakli", None
+    if govde["tur"] == "cefr":
+        kalan = [x for x in govde["seviyeler"] if kaynakta(x) and x["seviye"] in x["alinti"].upper()
+                 and (_yil_alintida(x["saat_ust"], x["alinti"]) or _yil_alintida(x["saat_alt"], x["alinti"]))]
+        govde["dusen"] = len(govde["seviyeler"]) - len(kalan)
+        if not kalan:
+            return None, "Hiçbir seviye kaynağındaki alıntıyla doğrulanamadı; kayıt yazılmadı."
+        govde["seviyeler"] = kalan
+        return "kaynakli", None
+    if govde["tur"] == "okuma_hizi":
+        kalan = [x for x in govde["hizlar"] if kaynakta(x) and _yil_alintida(x["kelime_dk"], x["alinti"])]
+        govde["dusen"] = len(govde["hizlar"]) - len(kalan)
+        if not kalan:
+            return None, "Hiçbir okuma hızı kaynağındaki alıntıyla doğrulanamadı; kayıt yazılmadı."
+        govde["hizlar"] = kalan
+        return "kaynakli", None
     if govde["tur"] in ESER_ALANLARI:
         kalan = []
         for x in govde["eserler"]:
@@ -303,10 +381,16 @@ def satirlar(govde):
     """Kaydin satirlari — ture gore (teklif sayisi ve ozet icin)."""
     return (govde.get("olaylar") if govde.get("tur") == "tarih"
             else govde.get("eserler") if govde.get("tur") in ESER_ALANLARI
+            else govde.get("seviyeler") if govde.get("tur") == "cefr"
+            else govde.get("hizlar") if govde.get("tur") == "okuma_hizi"
             else govde.get("dusunurler")) or []
 
 
 def ozet(govde):
+    if govde["tur"] == "cefr":
+        return "CEFR saat tablosu: %d seviye kaynakta doğrulandı." % len(govde["seviyeler"])
+    if govde["tur"] == "okuma_hizi":
+        return "Okuma hızı: %d değer kaynakta doğrulandı." % len(govde["hizlar"])
     if govde["tur"] in ESER_ALANLARI:
         return "%s: %d eser (%s, kaynaklı)." % (govde["konu"], len(govde["eserler"]),
                                                 ALAN_AD[govde["tur"]])

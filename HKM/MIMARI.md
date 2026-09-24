@@ -1118,6 +1118,13 @@ notu kitabın üstünde durur, kullanıcının atomik notlarına YAZILMAZ (notla
 girer). İstek: Okuma › Kaynaklar ve Yazı › Araçlar. Yolda düzeltilen hata: başlanmamış
 kitap «okunuyor» görünüyordu (`ESP.Model.bookStatus`: bitti / okunuyor / başlanmadı).
 
+**Tahmin tablolarının dayanağı (madde 11):** `alan: cefr` (seviye başına rehberli öğrenme
+saati; seviye ve sayı alıntıda) ve `alan: okuma_hizi` (kelime/dk; sayı alıntıda). ESP bunları
+`meta/dayanaklar`'a yazar (Rehber › Dayanak › «Tahmin tabloları»): CEFR'de kaynaklı seviyeler
+varsayılanın yerine geçer (birleşik tablo seviyeyle artmıyorsa alınmaz), okuma hızı kitap
+başına süreyi hesaplar (80 bin kelime yine varsayım ve söylenir). Hesap `ESP/core/hedefler.js`'te
+kalır, karar «tahmin» kalır; dayanak `kaynakli` olur ve kaynağıyla yazılır. Geri alınır.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

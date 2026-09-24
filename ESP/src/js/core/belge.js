@@ -65,7 +65,7 @@ ESP.Belge = (function(){
 
   function istekTemizle(o){
     const alan = o && o.alan;
-    if(['tarih', 'felsefe', 'okuma', 'yazi'].indexOf(alan) < 0) return { ok:false, why:'Alan tarih, felsefe, okuma ya da yazı olmalı.' };
+    if(['tarih', 'felsefe', 'okuma', 'yazi', 'cefr', 'okuma_hizi'].indexOf(alan) < 0) return { ok:false, why:'Alan tarih, felsefe, okuma ya da yazı olmalı.' };
     const konu = bosluk(o.konu);
     if(konu.length < 2 || konu.length > 80) return { ok:false, why:'Konu 2–80 karakter olmalı.' };
     return { ok:true, belge:{ alan, konu } };
@@ -75,8 +75,8 @@ ESP.Belge = (function(){
     const t = istekTemizle(o);
     if(!t.ok) return { ok:false, metin:t.why };
     const r = await istek('/api/king/emir', { modul:'esp', tur:'esp.belge', konu:'',
-      neden:'ESP ' + ({ tarih:'Tarih', felsefe:'Sempozyum', okuma:'Okuma', yazi:'Yazı' })[t.belge.alan]
-        + ' ekranından belge istendi.',
+      neden:'ESP ' + ({ tarih:'Tarih', felsefe:'Sempozyum', okuma:'Okuma', yazi:'Yazı',
+        cefr:'Rehber › Dayanak', okuma_hizi:'Rehber › Dayanak' })[t.belge.alan] + ' ekranından belge istendi.',
       govde:{ belge:t.belge } });
     if(!r.bagli) return { ok:false, metin:'Belgeyi HKM’deki Araştırma Bürosu kaynaklardan çıkarır ama HKM '
       + 'bağlı değil. Rehber › HKM’den bağlanınca yeniden iste.' };
@@ -112,8 +112,9 @@ ESP.Belge = (function(){
     if(!g || !Number.isInteger(kid) || kid < 1 || kid !== Number(p && p.kayit_id)){
       return { ok:false, why:'Kayıt teklifle eşleşmiyor.' };
     }
-    if(['tarih', 'felsefe', 'okuma', 'yazi'].indexOf(g.tur) < 0) return { ok:false, why:'Kayıt ESP belgesi biçiminde değil.' };
+    if(['tarih', 'felsefe', 'okuma', 'yazi', 'cefr', 'okuma_hizi'].indexOf(g.tur) < 0) return { ok:false, why:'Kayıt ESP belgesi biçiminde değil.' };
     if(kayit.dogruluk !== 'kaynakli') return { ok:false, why:'Kaynaksız belge eklenmez: belge kaynaktır.' };
+    if(g.tur === 'cefr' || g.tur === 'okuma_hizi') return dayanakSina(g, kid, kayit);
     const hepsi = [].concat(ESP.S.events || [], ESP.S.sources || [], ESP.S.books || [], ESP.S.args || []);
     if(hepsi.some(x => x && x.bam && x.bam.kayitId === kid)) return { ok:false, why:'Bu belge zaten eklenmiş.' };
     const kaynaklar = {};
@@ -208,6 +209,67 @@ ESP.Belge = (function(){
         satirlar:args.map(a => a.thesis), uyari } };
   }
 
+  /* ------------------------------------------------------------ dayanak (madde 11)
+
+     Hedef paketlerinin TAHMİN TABLOLARI (core/hedefler.js): CEFR saatleri ve
+     okuma hızı. Kaynaklı değer tablonun yerine geçer; HESABI yine kod yapar
+     ve karar «tahmin» kalır — değişen, dayanağın kaynaklı olmasıdır. */
+  const CEFR_SIRA = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+  const DAYANAK_ANAHTAR = 'meta/dayanaklar';
+
+  function kaynakAdi(g, n){
+    const k = (Array.isArray(g.kaynaklar) ? g.kaynaklar : []).find(x => x && x.n === n);
+    return k ? { baslik:metin(k.baslik, 2, 160) || 'web kaynağı', url:String(k.url || '').slice(0, 400) } : null;
+  }
+
+  function dayanakSina(g, kid, kayit){
+    const at = String(kayit.created_at || '').slice(0, 10) || U().todayISO();
+    if(g.tur === 'cefr'){
+      const saat = {}, kaynak = {};
+      (Array.isArray(g.seviyeler) ? g.seviyeler : []).forEach(x => {
+        if(!x || CEFR_SIRA.indexOf(x.seviye) < 0 || saat[x.seviye]) return;
+        if(!Number.isInteger(x.saat_ust) || x.saat_ust < 10 || x.saat_ust > 3000) return;
+        const k = kaynakAdi(g, x.kaynak);
+        if(!k) return;
+        saat[x.seviye] = x.saat_ust; kaynak[x.seviye] = k;
+      });
+      const sv = CEFR_SIRA.filter(s => saat[s]);
+      if(!sv.length) return { ok:false, why:'Belgede kaynaklı CEFR saati yok.' };
+      /* Birleşik tablo (kaynaklı + varsayılan) seviye arttıkça artmalı. */
+      const tablo = Object.assign({}, ESP.Hedefler ? ESP.Hedefler.CEFR_VARSAYILAN : {}, saat);
+      for(let i = 1; i < CEFR_SIRA.length; i++){
+        if(tablo[CEFR_SIRA[i]] <= tablo[CEFR_SIRA[i - 1]]){
+          return { ok:false, why:'Kaynaklı saatler seviye sırasıyla artmıyor; tablo tutarsız, eklenmedi.' };
+        }
+      }
+      const ilk = kaynak[sv[0]];
+      return { ok:true, tur:'dayanak', anahtar:'cefr', kayitId:kid,
+        deger:{ saat, kaynak:ilk, at, kayitId:kid },
+        onizleme:{ baslik:'CEFR saat tablosu — ' + sv.length + '/6 seviye kaynaklı',
+          satirlar:sv.map(s => s + ': ' + saat[s] + ' saat (kaynağın üst ucu)'),
+          uyari:['Kaynak: ' + ilk.baslik + '. Kaynakta olmayan seviyeler varsayılan tabloda kalır. '
+            + 'Karar yine «tahmin»dir; değişen dayanaktır.'] } };
+    }
+    const hizlar = (Array.isArray(g.hizlar) ? g.hizlar : [])
+      .filter(x => x && Number.isInteger(x.kelime_dk) && x.kelime_dk >= 50 && x.kelime_dk <= 1000 && kaynakAdi(g, x.kaynak));
+    if(!hizlar.length) return { ok:false, why:'Belgede kaynaklı okuma hızı yok.' };
+    const d = U().median(hizlar.map(x => x.kelime_dk));
+    const k = kaynakAdi(g, hizlar[0].kaynak);
+    return { ok:true, tur:'dayanak', anahtar:'okumaHizi', kayitId:kid,
+      deger:{ kelimeDk:Math.round(d), kaynak:k, at, kayitId:kid },
+      onizleme:{ baslik:'Okuma hızı — dakikada ' + Math.round(d) + ' kelime (kaynaklı, ' + hizlar.length + ' değerin ortancası)',
+        satirlar:hizlar.map(x => x.kelime_dk + ' kelime/dk' + (x.ne ? ' — ' + x.ne : '')),
+        uyari:['Kitap başına süre bu hızdan hesaplanır; kitap uzunluğu (≈ 80 bin kelime) yine '
+          + 'varsayımdır. Birkaç kitap bitirince kendi ölçümün bunun yerine geçer.'] } };
+  }
+
+  async function dayanakYukle(){
+    let d = null;
+    try{ d = await ESP.Store.get(DAYANAK_ANAHTAR); }catch(e){ d = null; }
+    ESP.S.dayanaklar = d && typeof d === 'object' ? d : {};
+  }
+  function dayanak(ad){ return (ESP.S.dayanaklar || {})[ad] || null; }
+
   /* ------------------------------------------------------------ yazma */
 
   async function onizle(n){
@@ -225,6 +287,15 @@ ESP.Belge = (function(){
     if(!kayit) return { ok:false, error:'Belge HKM’den alınamadı; HKM açıkken yeniden dene.' };
     const s = sina(kayit, p);
     if(!s.ok) return { ok:false, error:s.why };
+    if(s.tur === 'dayanak'){
+      ESP.S.dayanaklar = ESP.S.dayanaklar || {};
+      const onceki = ESP.S.dayanaklar[s.anahtar] || null;
+      ESP.S.dayanaklar[s.anahtar] = s.deger;
+      await ESP.Store.set(DAYANAK_ANAHTAR, ESP.S.dayanaklar);
+      return { ok:true, note:(s.anahtar === 'cefr' ? 'CEFR saat tablosu' : 'Okuma hızı')
+        + ' artık kaynaklı; dil ve okuma hedefleri bu dayanakla hesaplanır.',
+        geriAl:{ kayitId:kid, dayanak:s.anahtar, onceki } };
+    }
     if(s.tur === 'tarih'){
       for(const k of s.sources){ const r = await ESP.Model.saveSource(k); if(!r.ok) return { ok:false, error:r.error }; }
       for(const e of s.events){ const r = await ESP.Model.saveEvent(e); if(!r.ok) return { ok:false, error:r.error }; }
@@ -245,6 +316,12 @@ ESP.Belge = (function(){
 
   async function geriAl(g){
     const kid = g && g.kayitId;
+    if(g && g.dayanak){
+      ESP.S.dayanaklar = ESP.S.dayanaklar || {};
+      if(g.onceki) ESP.S.dayanaklar[g.dayanak] = g.onceki; else delete ESP.S.dayanaklar[g.dayanak];
+      await ESP.Store.set(DAYANAK_ANAHTAR, ESP.S.dayanaklar);
+      return { ok:true, silinen:1, kalan:0 };
+    }
     let kalan = 0, silinen = 0;
     const S = ESP.S;
     for(const a of (S.args || []).filter(x => bamOf(x, kid))){
@@ -267,5 +344,5 @@ ESP.Belge = (function(){
     return { ok:silinen + kalan > 0, silinen, kalan };
   }
 
-  return { istekTemizle, iste, kayitCek, sina, onizle, uygula, geriAl, yilYaz };
+  return { istekTemizle, iste, kayitCek, sina, onizle, uygula, geriAl, yilYaz, dayanak, dayanakYukle };
 })();

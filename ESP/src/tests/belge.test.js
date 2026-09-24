@@ -102,6 +102,51 @@
     });
   });
 
+  /* Madde 11: tahmin tablolarının kaynaklı dayanağı. */
+  describe('Tahmin tablolarının dayanağı', () => {
+    function cefr(seviyeler){
+      return { id:45, tur:'arastirma', baslik:'CEFR saat tablosu dayanağı', dogruluk:'kaynakli',
+        created_at:'2026-09-24T10:00:00', govde:{ tur:'cefr', konu:'CEFR', kaynaklar:KAYNAK, seviyeler } };
+    }
+    it('CEFR: kaynaklı seviyeler tabloya girer, hesap kodda kalır; tutarsız tablo alınmaz; geri alınır', async () => {
+      resetState();
+      const H = ESP.Hedefler;
+      expect(H.cefrTablo().B1).toBe(400);
+      const bozuk = Be().sina(cefr([{ seviye:'B1', saat_alt:100, saat_ust:150, kaynak:2 }]), { kayit_id:45 });
+      expect(bozuk.why).toContain('artmıyor');                     /* A2 200 > B1 150 */
+      const k = cefr([{ seviye:'A2', saat_alt:180, saat_ust:200, kaynak:2 }, { seviye:'B1', saat_alt:350, saat_ust:420, kaynak:2 }]);
+      const s = Be().sina(k, { kayit_id:45 });
+      expect([s.ok, s.onizleme.baslik]).toEqual([true, 'CEFR saat tablosu — 2/6 seviye kaynaklı']);
+      await withHkm({ 45:k }, async () => {
+        const r = await Be().uygula({ kayit_id:45 });
+        expect(r.ok).toBe(true);
+        expect([H.cefrTablo().B1, H.cefrTablo().C1]).toEqual([420, 800]);
+        const g = H.DIL.gerekenSaat({ hedefSeviye:'B1', simdi:{ deger:'A1' } });
+        expect([g.saat, g.dayanak.durum]).toEqual([320, 'kaynakli']);
+        expect(g.dayanak.metin).toContain('Stoacılık');           /* kaynağın başlığı */
+        await Be().geriAl(r.geriAl);
+        expect(H.cefrTablo().B1).toBe(400);
+        expect(H.DIL.gerekenSaat({ hedefSeviye:'B1', simdi:{ deger:'A1' } }).dayanak.durum).toBe('kaynak_bekliyor');
+      });
+    });
+
+    it('okuma hızı: kitap başına süre kaynaklı hızdan; kendi ölçümün yoksa', async () => {
+      resetState();
+      const k = { id:46, tur:'arastirma', baslik:'Okuma hızı dayanağı', dogruluk:'kaynakli', created_at:'2026-09-24T10:00:00',
+        govde:{ tur:'okuma_hizi', konu:'okuma hızı', kaynaklar:KAYNAK, hizlar:[
+          { ne:'sessiz okuma', kelime_dk:238, kaynak:2 }, { ne:'kurmaca', kelime_dk:260, kaynak:2 }, { kelime_dk:9000, kaynak:2 }] } };
+      expect(ESP.Hedefler.kitapSaati('2026-09-24').dayanak.durum).toBe('kaynak_bekliyor');
+      await withHkm({ 46:k }, async () => {
+        const r = await Be().uygula({ kayit_id:46 });
+        expect(r.ok).toBe(true);
+        const ks = ESP.Hedefler.kitapSaati('2026-09-24');
+        /* ortanca 249 kelime/dk → 80000 / 249 / 60 ≈ 5,35 → yarım saate yuvarlanır: 5,5 */
+        expect([ks.saat, ks.etiket, ks.dayanak.durum]).toEqual([5.5, 'tahmin', 'kaynakli']);
+        await Be().geriAl(r.geriAl);
+      });
+    });
+  });
+
   /* Hata: başlanmamış kitap Okuma › Kaynaklar'da «okunuyor» görünüyordu. */
   describe('Kütüphane durumu', () => {
     it('başlanmamış kitap «başlanmadı» görünür, düğmesi «Başla»dır', async () => {

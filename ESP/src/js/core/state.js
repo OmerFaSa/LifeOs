@@ -1376,6 +1376,8 @@ ESP.Model = (function(){
     }
     /* BAM dil üniteleri (core/unite.js, Part 8d). */
     if(ESP.Unite) await ESP.Unite.yukle();
+    /* Tahmin tablolarının kaynaklı dayanağı (core/belge.js, madde 11). */
+    if(ESP.Belge) await ESP.Belge.dayanakYukle();
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
     if(ESP.Hedefler) await ESP.Hedefler.yukle();

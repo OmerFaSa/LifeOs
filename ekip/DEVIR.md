@@ -151,7 +151,10 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   kılavuzunda» uyarısı; hedefle örtüşen öne gelir; «Müfredatını iste» mevcut King yolu; ana
   sınav değişmez. AYS 1658/1658, duman/a11y/390px temiz.
 - ⏳ 10 Ana sınavı değiştirebilmek (büyük aksiyon) + üniversite müfredatı yükleme.
-- ⏳ 11 Tahmin tablolarını kaynağa bağlamak — sağlayıcı esnek, bütçe Ayarlar'dan.
+- ✅ 11 Tahmin tablolarını kaynağa bağlamak (PLAN Tur 3: «CEFR saat tablosu ve kitap tahmini»):
+  `esp.belge` + `alan: cefr | okuma_hizi` (HKM MIMARI §8.35 sonu); ESP Rehber › Dayanak ›
+  «Tahmin tabloları» ile istenir; hesap kodda, karar «tahmin», dayanak «kaynaklı». Sağlayıcı
+  HKM'nin web ayarından (esnek). HKM 576, ESP 1341, duman/a11y/390px temiz.
 - ❓ 14 Depo göçü (her kayıt kendi anahtarında) — NOTLAR §7.3 «yaşayan sağlık verisinde göç,
   SORMADAN YAPMA». Ölçüm: 1000 kayıtta yazma ~0,5–4 ms, 5 yıllık yük denetimi temiz → acil
   değil. Kullanıcıya soruldu; onaysız yapılmaz.

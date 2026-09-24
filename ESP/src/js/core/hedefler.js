@@ -43,7 +43,13 @@ ESP.Hedefler = (function(){
      ÜST ucu: A1 90–100, A2 180–200, B1 350–400, B2 500–600, C1 700–800,
      C2 1000–1200. Üst uç seçildi: iyimser bir tablo, «olur» deyip
      olmayacak bir tarihe söz vermek demekti. */
-  const CEFR_SAAT = { '0':0, A1:100, A2:200, B1:400, B2:600, C1:800, C2:1200 };
+  const CEFR_VARSAYILAN = { '0':0, A1:100, A2:200, B1:400, B2:600, C1:800, C2:1200 };
+  /* Madde 11: kaynaklı tablo (core/belge.js, Rehber › Dayanak) varsa onun
+     seviyeleri varsayılanın yerine geçer; kaynakta olmayan seviye kalır. */
+  function cefrTablo(){
+    const d = ESP.Belge && ESP.Belge.dayanak('cefr');
+    return d && d.saat ? Object.assign({}, CEFR_VARSAYILAN, d.saat) : CEFR_VARSAYILAN;
+  }
   const DILLER = [['ingilizce', 'İngilizce'], ['almanca', 'Almanca'], ['fransızca', 'Fransızca'],
     ['ispanyolca', 'İspanyolca'], ['italyanca', 'İtalyanca'], ['rusça', 'Rusça'],
     ['japonca', 'Japonca'], ['arapça', 'Arapça'], ['korece', 'Korece'], ['çince', 'Çince'],
@@ -77,7 +83,8 @@ ESP.Hedefler = (function(){
       const m = /([abc][12])/.exec(k);
       let d = m ? m[1].toUpperCase() : /(sıfır|hiç|başlamadım|yeni başlıyorum|başlangıç)/.test(k) ? '0' : null;
       if(d == null) return null;
-      if(CEFR_SAAT[d] >= CEFR_SAAT[h.hedefSeviye]){
+      const T = cefrTablo();
+      if(T[d] >= T[h.hedefSeviye]){
         return { hata:'Şu anki seviyen hedefinle aynı ya da üstünde. Daha üst bir seviye yazarak '
           + 'hedefi yeniden kurabilirsin.' };
       }
@@ -86,8 +93,15 @@ ESP.Hedefler = (function(){
     simdiHata:'Seviyeyi anlayamadım; A1, A2, B1, B2, C1, C2 ya da «sıfır» yaz.',
     gerekenSaat(h){
       if(!h.simdi || h.simdi.deger == null) return { neden:'Şu anki seviyen bilinmeden süre hesaplanamaz.' };
-      const saat = CEFR_SAAT[h.hedefSeviye] - CEFR_SAAT[h.simdi.deger];
+      const T = cefrTablo();
+      const saat = T[h.hedefSeviye] - T[h.simdi.deger];
       if(!(saat > 0)) return { neden:'Hedef seviye şu anki seviyenin üstünde olmalı.' };
+      const kd = ESP.Belge && ESP.Belge.dayanak('cefr');
+      if(kd && kd.saat){
+        return { saat, dayanak:{ durum:'kaynakli', metin:'CEFR rehberli öğrenme saatleri kaynaktan ('
+          + (kd.kaynak ? kd.kaynak.baslik : 'web kaynağı') + ', ' + kd.at + '; ' + Object.keys(kd.saat).length
+          + '/6 seviye); dile ve kişiye göre değişir' } };
+      }
       return { saat, dayanak:{ durum:'kaynak_bekliyor', metin:'CEFR seviyeleri için yaygın aktarılan '
         + 'rehberli öğrenme saati tahminleri (sıfırdan A1 ≈ 100, A2 ≈ 200, B1 ≈ 400, B2 ≈ 600, '
         + 'C1 ≈ 800, C2 ≈ 1.200 saat); dile ve kişiye göre değişir, kaynağı henüz bağlanmadı' } };
@@ -97,6 +111,7 @@ ESP.Hedefler = (function(){
   /* ============================================================== OKUMA */
 
   const KITAP_SAAT_TAHMIN = 6;
+  const KITAP_KELIME = 80000;
   const KITAP_PENCERE = 365;
 
   function bitenKitaplar(bugun){
@@ -127,6 +142,14 @@ ESP.Hedefler = (function(){
         return { saat, etiket:'hesaplandi', dayanak:{ durum:'olculdu', metin:'bitirdiğin ' + l.length
           + ' kitabın döneminde ölçülen okuma süresi: kitap başına yaklaşık ' + sayiYaz(saat) + ' saat' } };
       }
+    }
+    const hz = ESP.Belge && ESP.Belge.dayanak('okumaHizi');
+    if(hz && hz.kelimeDk){
+      const saat = Math.round(KITAP_KELIME / hz.kelimeDk / 60 * 2) / 2;
+      return { saat, etiket:'tahmin', dayanak:{ durum:'kaynakli', metin:'okuma hızı kaynaktan (dakikada '
+        + hz.kelimeDk + ' kelime; ' + (hz.kaynak ? hz.kaynak.baslik : 'web kaynağı') + ', ' + hz.at
+        + '); ortalama kitap ≈ 80 bin kelime varsayımıyla kitap başına ≈ ' + sayiYaz(saat) + ' saat. '
+        + 'Birkaç kitap bitirince kendi hızından hesaplanır' } };
     }
     return { saat:KITAP_SAAT_TAHMIN, etiket:'tahmin', dayanak:{ durum:'kaynak_bekliyor',
       metin:'ortalama bir kitap için yaklaşık 6 saat (≈ 80 bin kelime, dakikada ≈ 230 kelime '
@@ -387,7 +410,7 @@ ESP.Hedefler = (function(){
     baskaIs:m => !!(ESP.Komut && ESP.Komut.anla(m).komut) || !!(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi && LIFEOS.Ofis.bamIstegi(m)),
   }) : null;
 
-  return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, ALISKANLIK, CEFR, CEFR_SAAT, KITAP_SAAT_TAHMIN,
+  return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, ALISKANLIK, CEFR, CEFR_SAAT:CEFR_VARSAYILAN, CEFR_VARSAYILAN, cefrTablo, KITAP_SAAT_TAHMIN,
     kitapSaati, temizHiz, kademeBpm, kademeAdi, notlar, yukle, kaydet, liste, aktifler,
     durumDegistir, ozet, sohbet, ozetler, yarin, ag };
 })();

@@ -293,7 +293,8 @@ def _cumle(module, kind, payload):
     if kind == "belge.add":
         return ("%s: BAM «%s» belgesini kaynaklardan çıkardı (%s %s). Eklensin mi? %s okuduğunu "
                 "gösterecek." % (ad, p.get("baslik"), p.get("adet"),
-                                 {"tarih": "olay", "felsefe": "düşünür"}.get(p.get("alan"), "eser"), ad))
+                                 {"tarih": "olay", "felsefe": "düşünür", "cefr": "seviye",
+                                  "okuma_hizi": "değer"}.get(p.get("alan"), "eser"), ad))
     if kind == "measure.ask":
         return "%s: %s günü için «%s» ölçümünü girmeyi unutma." % (
             ad, gun, p.get("metric"))

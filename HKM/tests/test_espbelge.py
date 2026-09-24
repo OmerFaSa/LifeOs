@@ -137,6 +137,35 @@ def run():
         ok("üslubunda" in espbelge.sistem("yazi"))
     test("okuma ve yazi: eser listesi, yazar alintida", t_okuma_yazi)
 
+    def t_dayanak_tablolari():
+        """Madde 11: CEFR saatleri ve okuma hizi kaynaktan; seviye ve sayi alintida."""
+        eq(espbelge.temizle({"alan": "cefr", "konu": "CEFR saatleri"})[1], [])
+        sayfa = ("According to Cambridge, A1 requires approximately 90-100 guided learning hours "
+                 "and B2 around 500-600 hours. The average adult reads 238 words per minute.")
+        g = {"alan": "cefr", "konu": "CEFR"}
+        d = {"seviyeler": [
+            {"seviye": "A1", "saat_alt": 90, "saat_ust": 100, "kaynak": 1,
+             "alinti": "A1 requires approximately 90-100 guided learning hours"},
+            {"seviye": "B2", "saat_alt": 500, "saat_ust": 600, "kaynak": 1,
+             "alinti": "B2 around 500-600 hours"},
+            {"seviye": "C1", "saat_alt": 700, "saat_ust": 800, "kaynak": 1,
+             "alinti": "B2 around 500-600 hours"},                       # seviye alintida yok
+            {"seviye": "Z9", "saat_alt": 1, "saat_ust": 2, "kaynak": 1, "alinti": "x"}]}
+        govde, hata = espbelge.ayikla(d, g)
+        eq((hata, govde["bicim_dusen"]), (None, 1))
+        etiket, hata = espbelge.dogrula(govde, {1: sayfa}, lambda a, m: a in m)
+        eq((etiket, [x["seviye"] for x in govde["seviyeler"]]), ("kaynakli", ["A1", "B2"]))
+        g = {"alan": "okuma_hizi", "konu": "okuma hızı"}
+        govde, _ = espbelge.ayikla({"hizlar": [
+            {"ne": "sessiz okuma", "kelime_dk": 238, "kaynak": 1,
+             "alinti": "The average adult reads 238 words per minute."},
+            {"ne": "uydurma", "kelime_dk": 400, "kaynak": 1,
+             "alinti": "The average adult reads 238 words per minute."}]}, g)
+        etiket, _ = espbelge.dogrula(govde, {1: sayfa}, lambda a, m: a in m)
+        eq([x["kelime_dk"] for x in govde["hizlar"]], [238])
+        eq(espbelge.satirlar(govde), govde["hizlar"])
+    test("dayanak tablolari: CEFR ve okuma hizi alintida", t_dayanak_tablolari)
+
     def t_web_kapali():
         con = db.connect(":memory:")
         m = _Model()

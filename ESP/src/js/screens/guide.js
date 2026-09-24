@@ -372,6 +372,32 @@ ESP.Screens.guide = (function(){
      olmak anlamina gelmez. "Retansiyon >= 0,75" kodda kesindir; 0,75'in
      kendisi bu sistemin secimidir ve bunu gizlemek, bir tasarim tercihini
      bulgu gibi sunmak olurdu. */
+  /* Madde 11: hedef paketlerinin tahmin tabloları ve dayanağı. «Kaynağa
+     bağla» King'e esp.belge ister; sonuç Bugün'e teklif olarak gelir. */
+  function dayanakEntry(){
+    const c = ESP.Belge ? ESP.Belge.dayanak('cefr') : null;
+    const o = ESP.Belge ? ESP.Belge.dayanak('okumaHizi') : null;
+    const T = ESP.Hedefler.cefrTablo();
+    return K.Entry({
+      label:'TAHMİN TABLOLARI', hint:'evidence',
+      meta:(c ? 'CEFR kaynaklı' : 'CEFR kaynak bekliyor') + ' · ' + (o ? 'okuma hızı kaynaklı' : 'okuma hızı kaynak bekliyor'),
+      note:'Dil ve okuma hedeflerinin süre hesabı bu tablolara dayanır. Kaynağa bağlanınca hesap '
+         + 'yine koddadır ve karar «tahmin» kalır; değişen, dayanağın kaynaklı olmasıdır.',
+      wide:true,
+      body:html`
+        ${K.Table({ tight:true, headers:['Tablo', 'Değer', 'Dayanak'], rows:[
+          ['CEFR saatleri (sıfırdan)', ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map(s => s + ' ' + T[s]).join(' · '),
+            c ? 'kaynaklı · ' + (c.kaynak ? c.kaynak.baslik : '') + ' · ' + c.at : 'kaynak bekliyor'],
+          ['Okuma hızı', o ? o.kelimeDk + ' kelime/dk' : '≈ 230 kelime/dk (varsayım)',
+            o ? 'kaynaklı · ' + (o.kaynak ? o.kaynak.baslik : '') + ' · ' + o.at : 'kaynak bekliyor'],
+        ] })}
+        <div class="row gap-8 wrap mt-8">
+          ${K.Button({ label:'CEFR tablosunu kaynağa bağla', size:'sm', act:'dayanak-iste', data:{ 'data-alan':'cefr' } })}
+          ${K.Button({ label:'Okuma hızını kaynağa bağla', size:'sm', act:'dayanak-iste', data:{ 'data-alan':'okuma_hizi' } })}
+        </div>`,
+    });
+  }
+
   function evidenceRows(){
     const kapsam = ESP.Ev.coverage();
     const denetim = ESP.Ev.audit();
@@ -379,6 +405,7 @@ ESP.Screens.guide = (function(){
     const kurallar = ESP.EVIDENCE.map(e => ESP.Ev.resolve(e));
 
     return [
+      dayanakEntry(),
       K.Entry({
         label:'EŞİKLER NEREDEN GELİYOR?', hint:'evidence',
         meta:kapsam.total + ' kayıt',
@@ -468,6 +495,13 @@ ESP.Screens.guide = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'dayanak-iste'(el){
+      const alan = el.dataset.alan;
+      const r = await ESP.Belge.iste({ alan, konu:alan === 'cefr' ? 'CEFR rehberli öğrenme saatleri'
+        : 'yetişkin sessiz okuma hızı' });
+      ESP.UI.toast(r.metin);
+      if(r.ok) ESP.App.render();
+    },
     async 'guide-tab'(el){ S.ui.guideTab = el.dataset.tab; ESP.App.render(); },
 
     /* Budama. Sistem kullanicinin girdigi veriyi yer acmak icin silmez;

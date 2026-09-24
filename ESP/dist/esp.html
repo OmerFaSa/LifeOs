@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'a41e0ba', at:'2026-09-24 00:41', dirty:true };
+ESP.BUILD = { id:'cf8b8d5', at:'2026-09-24 01:01', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -11039,7 +11039,13 @@ ESP.Hedefler = (function(){
      ÜST ucu: A1 90–100, A2 180–200, B1 350–400, B2 500–600, C1 700–800,
      C2 1000–1200. Üst uç seçildi: iyimser bir tablo, «olur» deyip
      olmayacak bir tarihe söz vermek demekti. */
-  const CEFR_SAAT = { '0':0, A1:100, A2:200, B1:400, B2:600, C1:800, C2:1200 };
+  const CEFR_VARSAYILAN = { '0':0, A1:100, A2:200, B1:400, B2:600, C1:800, C2:1200 };
+  /* Madde 11: kaynaklı tablo (core/belge.js, Rehber › Dayanak) varsa onun
+     seviyeleri varsayılanın yerine geçer; kaynakta olmayan seviye kalır. */
+  function cefrTablo(){
+    const d = ESP.Belge && ESP.Belge.dayanak('cefr');
+    return d && d.saat ? Object.assign({}, CEFR_VARSAYILAN, d.saat) : CEFR_VARSAYILAN;
+  }
   const DILLER = [['ingilizce', 'İngilizce'], ['almanca', 'Almanca'], ['fransızca', 'Fransızca'],
     ['ispanyolca', 'İspanyolca'], ['italyanca', 'İtalyanca'], ['rusça', 'Rusça'],
     ['japonca', 'Japonca'], ['arapça', 'Arapça'], ['korece', 'Korece'], ['çince', 'Çince'],
@@ -11073,7 +11079,8 @@ ESP.Hedefler = (function(){
       const m = /([abc][12])/.exec(k);
       let d = m ? m[1].toUpperCase() : /(sıfır|hiç|başlamadım|yeni başlıyorum|başlangıç)/.test(k) ? '0' : null;
       if(d == null) return null;
-      if(CEFR_SAAT[d] >= CEFR_SAAT[h.hedefSeviye]){
+      const T = cefrTablo();
+      if(T[d] >= T[h.hedefSeviye]){
         return { hata:'Şu anki seviyen hedefinle aynı ya da üstünde. Daha üst bir seviye yazarak '
           + 'hedefi yeniden kurabilirsin.' };
       }
@@ -11082,8 +11089,15 @@ ESP.Hedefler = (function(){
     simdiHata:'Seviyeyi anlayamadım; A1, A2, B1, B2, C1, C2 ya da «sıfır» yaz.',
     gerekenSaat(h){
       if(!h.simdi || h.simdi.deger == null) return { neden:'Şu anki seviyen bilinmeden süre hesaplanamaz.' };
-      const saat = CEFR_SAAT[h.hedefSeviye] - CEFR_SAAT[h.simdi.deger];
+      const T = cefrTablo();
+      const saat = T[h.hedefSeviye] - T[h.simdi.deger];
       if(!(saat > 0)) return { neden:'Hedef seviye şu anki seviyenin üstünde olmalı.' };
+      const kd = ESP.Belge && ESP.Belge.dayanak('cefr');
+      if(kd && kd.saat){
+        return { saat, dayanak:{ durum:'kaynakli', metin:'CEFR rehberli öğrenme saatleri kaynaktan ('
+          + (kd.kaynak ? kd.kaynak.baslik : 'web kaynağı') + ', ' + kd.at + '; ' + Object.keys(kd.saat).length
+          + '/6 seviye); dile ve kişiye göre değişir' } };
+      }
       return { saat, dayanak:{ durum:'kaynak_bekliyor', metin:'CEFR seviyeleri için yaygın aktarılan '
         + 'rehberli öğrenme saati tahminleri (sıfırdan A1 ≈ 100, A2 ≈ 200, B1 ≈ 400, B2 ≈ 600, '
         + 'C1 ≈ 800, C2 ≈ 1.200 saat); dile ve kişiye göre değişir, kaynağı henüz bağlanmadı' } };
@@ -11093,6 +11107,7 @@ ESP.Hedefler = (function(){
   /* ============================================================== OKUMA */
 
   const KITAP_SAAT_TAHMIN = 6;
+  const KITAP_KELIME = 80000;
   const KITAP_PENCERE = 365;
 
   function bitenKitaplar(bugun){
@@ -11123,6 +11138,14 @@ ESP.Hedefler = (function(){
         return { saat, etiket:'hesaplandi', dayanak:{ durum:'olculdu', metin:'bitirdiğin ' + l.length
           + ' kitabın döneminde ölçülen okuma süresi: kitap başına yaklaşık ' + sayiYaz(saat) + ' saat' } };
       }
+    }
+    const hz = ESP.Belge && ESP.Belge.dayanak('okumaHizi');
+    if(hz && hz.kelimeDk){
+      const saat = Math.round(KITAP_KELIME / hz.kelimeDk / 60 * 2) / 2;
+      return { saat, etiket:'tahmin', dayanak:{ durum:'kaynakli', metin:'okuma hızı kaynaktan (dakikada '
+        + hz.kelimeDk + ' kelime; ' + (hz.kaynak ? hz.kaynak.baslik : 'web kaynağı') + ', ' + hz.at
+        + '); ortalama kitap ≈ 80 bin kelime varsayımıyla kitap başına ≈ ' + sayiYaz(saat) + ' saat. '
+        + 'Birkaç kitap bitirince kendi hızından hesaplanır' } };
     }
     return { saat:KITAP_SAAT_TAHMIN, etiket:'tahmin', dayanak:{ durum:'kaynak_bekliyor',
       metin:'ortalama bir kitap için yaklaşık 6 saat (≈ 80 bin kelime, dakikada ≈ 230 kelime '
@@ -11383,7 +11406,7 @@ ESP.Hedefler = (function(){
     baskaIs:m => !!(ESP.Komut && ESP.Komut.anla(m).komut) || !!(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.bamIstegi && LIFEOS.Ofis.bamIstegi(m)),
   }) : null;
 
-  return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, ALISKANLIK, CEFR, CEFR_SAAT, KITAP_SAAT_TAHMIN,
+  return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, ALISKANLIK, CEFR, CEFR_SAAT:CEFR_VARSAYILAN, CEFR_VARSAYILAN, cefrTablo, KITAP_SAAT_TAHMIN,
     kitapSaati, temizHiz, kademeBpm, kademeAdi, notlar, yukle, kaydet, liste, aktifler,
     durumDegistir, ozet, sohbet, ozetler, yarin, ag };
 })();
@@ -19086,6 +19109,8 @@ ESP.Model = (function(){
     }
     /* BAM dil üniteleri (core/unite.js, Part 8d). */
     if(ESP.Unite) await ESP.Unite.yukle();
+    /* Tahmin tablolarının kaynaklı dayanağı (core/belge.js, madde 11). */
+    if(ESP.Belge) await ESP.Belge.dayanakYukle();
     S.weekPlan = (await ESP.Store.get('weekplan')) || null;
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
     if(ESP.Hedefler) await ESP.Hedefler.yukle();
@@ -29589,7 +29614,7 @@ ESP.Belge = (function(){
 
   function istekTemizle(o){
     const alan = o && o.alan;
-    if(['tarih', 'felsefe', 'okuma', 'yazi'].indexOf(alan) < 0) return { ok:false, why:'Alan tarih, felsefe, okuma ya da yazı olmalı.' };
+    if(['tarih', 'felsefe', 'okuma', 'yazi', 'cefr', 'okuma_hizi'].indexOf(alan) < 0) return { ok:false, why:'Alan tarih, felsefe, okuma ya da yazı olmalı.' };
     const konu = bosluk(o.konu);
     if(konu.length < 2 || konu.length > 80) return { ok:false, why:'Konu 2–80 karakter olmalı.' };
     return { ok:true, belge:{ alan, konu } };
@@ -29599,8 +29624,8 @@ ESP.Belge = (function(){
     const t = istekTemizle(o);
     if(!t.ok) return { ok:false, metin:t.why };
     const r = await istek('/api/king/emir', { modul:'esp', tur:'esp.belge', konu:'',
-      neden:'ESP ' + ({ tarih:'Tarih', felsefe:'Sempozyum', okuma:'Okuma', yazi:'Yazı' })[t.belge.alan]
-        + ' ekranından belge istendi.',
+      neden:'ESP ' + ({ tarih:'Tarih', felsefe:'Sempozyum', okuma:'Okuma', yazi:'Yazı',
+        cefr:'Rehber › Dayanak', okuma_hizi:'Rehber › Dayanak' })[t.belge.alan] + ' ekranından belge istendi.',
       govde:{ belge:t.belge } });
     if(!r.bagli) return { ok:false, metin:'Belgeyi HKM’deki Araştırma Bürosu kaynaklardan çıkarır ama HKM '
       + 'bağlı değil. Rehber › HKM’den bağlanınca yeniden iste.' };
@@ -29636,8 +29661,9 @@ ESP.Belge = (function(){
     if(!g || !Number.isInteger(kid) || kid < 1 || kid !== Number(p && p.kayit_id)){
       return { ok:false, why:'Kayıt teklifle eşleşmiyor.' };
     }
-    if(['tarih', 'felsefe', 'okuma', 'yazi'].indexOf(g.tur) < 0) return { ok:false, why:'Kayıt ESP belgesi biçiminde değil.' };
+    if(['tarih', 'felsefe', 'okuma', 'yazi', 'cefr', 'okuma_hizi'].indexOf(g.tur) < 0) return { ok:false, why:'Kayıt ESP belgesi biçiminde değil.' };
     if(kayit.dogruluk !== 'kaynakli') return { ok:false, why:'Kaynaksız belge eklenmez: belge kaynaktır.' };
+    if(g.tur === 'cefr' || g.tur === 'okuma_hizi') return dayanakSina(g, kid, kayit);
     const hepsi = [].concat(ESP.S.events || [], ESP.S.sources || [], ESP.S.books || [], ESP.S.args || []);
     if(hepsi.some(x => x && x.bam && x.bam.kayitId === kid)) return { ok:false, why:'Bu belge zaten eklenmiş.' };
     const kaynaklar = {};
@@ -29732,6 +29758,67 @@ ESP.Belge = (function(){
         satirlar:args.map(a => a.thesis), uyari } };
   }
 
+  /* ------------------------------------------------------------ dayanak (madde 11)
+
+     Hedef paketlerinin TAHMİN TABLOLARI (core/hedefler.js): CEFR saatleri ve
+     okuma hızı. Kaynaklı değer tablonun yerine geçer; HESABI yine kod yapar
+     ve karar «tahmin» kalır — değişen, dayanağın kaynaklı olmasıdır. */
+  const CEFR_SIRA = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+  const DAYANAK_ANAHTAR = 'meta/dayanaklar';
+
+  function kaynakAdi(g, n){
+    const k = (Array.isArray(g.kaynaklar) ? g.kaynaklar : []).find(x => x && x.n === n);
+    return k ? { baslik:metin(k.baslik, 2, 160) || 'web kaynağı', url:String(k.url || '').slice(0, 400) } : null;
+  }
+
+  function dayanakSina(g, kid, kayit){
+    const at = String(kayit.created_at || '').slice(0, 10) || U().todayISO();
+    if(g.tur === 'cefr'){
+      const saat = {}, kaynak = {};
+      (Array.isArray(g.seviyeler) ? g.seviyeler : []).forEach(x => {
+        if(!x || CEFR_SIRA.indexOf(x.seviye) < 0 || saat[x.seviye]) return;
+        if(!Number.isInteger(x.saat_ust) || x.saat_ust < 10 || x.saat_ust > 3000) return;
+        const k = kaynakAdi(g, x.kaynak);
+        if(!k) return;
+        saat[x.seviye] = x.saat_ust; kaynak[x.seviye] = k;
+      });
+      const sv = CEFR_SIRA.filter(s => saat[s]);
+      if(!sv.length) return { ok:false, why:'Belgede kaynaklı CEFR saati yok.' };
+      /* Birleşik tablo (kaynaklı + varsayılan) seviye arttıkça artmalı. */
+      const tablo = Object.assign({}, ESP.Hedefler ? ESP.Hedefler.CEFR_VARSAYILAN : {}, saat);
+      for(let i = 1; i < CEFR_SIRA.length; i++){
+        if(tablo[CEFR_SIRA[i]] <= tablo[CEFR_SIRA[i - 1]]){
+          return { ok:false, why:'Kaynaklı saatler seviye sırasıyla artmıyor; tablo tutarsız, eklenmedi.' };
+        }
+      }
+      const ilk = kaynak[sv[0]];
+      return { ok:true, tur:'dayanak', anahtar:'cefr', kayitId:kid,
+        deger:{ saat, kaynak:ilk, at, kayitId:kid },
+        onizleme:{ baslik:'CEFR saat tablosu — ' + sv.length + '/6 seviye kaynaklı',
+          satirlar:sv.map(s => s + ': ' + saat[s] + ' saat (kaynağın üst ucu)'),
+          uyari:['Kaynak: ' + ilk.baslik + '. Kaynakta olmayan seviyeler varsayılan tabloda kalır. '
+            + 'Karar yine «tahmin»dir; değişen dayanaktır.'] } };
+    }
+    const hizlar = (Array.isArray(g.hizlar) ? g.hizlar : [])
+      .filter(x => x && Number.isInteger(x.kelime_dk) && x.kelime_dk >= 50 && x.kelime_dk <= 1000 && kaynakAdi(g, x.kaynak));
+    if(!hizlar.length) return { ok:false, why:'Belgede kaynaklı okuma hızı yok.' };
+    const d = U().median(hizlar.map(x => x.kelime_dk));
+    const k = kaynakAdi(g, hizlar[0].kaynak);
+    return { ok:true, tur:'dayanak', anahtar:'okumaHizi', kayitId:kid,
+      deger:{ kelimeDk:Math.round(d), kaynak:k, at, kayitId:kid },
+      onizleme:{ baslik:'Okuma hızı — dakikada ' + Math.round(d) + ' kelime (kaynaklı, ' + hizlar.length + ' değerin ortancası)',
+        satirlar:hizlar.map(x => x.kelime_dk + ' kelime/dk' + (x.ne ? ' — ' + x.ne : '')),
+        uyari:['Kitap başına süre bu hızdan hesaplanır; kitap uzunluğu (≈ 80 bin kelime) yine '
+          + 'varsayımdır. Birkaç kitap bitirince kendi ölçümün bunun yerine geçer.'] } };
+  }
+
+  async function dayanakYukle(){
+    let d = null;
+    try{ d = await ESP.Store.get(DAYANAK_ANAHTAR); }catch(e){ d = null; }
+    ESP.S.dayanaklar = d && typeof d === 'object' ? d : {};
+  }
+  function dayanak(ad){ return (ESP.S.dayanaklar || {})[ad] || null; }
+
   /* ------------------------------------------------------------ yazma */
 
   async function onizle(n){
@@ -29749,6 +29836,15 @@ ESP.Belge = (function(){
     if(!kayit) return { ok:false, error:'Belge HKM’den alınamadı; HKM açıkken yeniden dene.' };
     const s = sina(kayit, p);
     if(!s.ok) return { ok:false, error:s.why };
+    if(s.tur === 'dayanak'){
+      ESP.S.dayanaklar = ESP.S.dayanaklar || {};
+      const onceki = ESP.S.dayanaklar[s.anahtar] || null;
+      ESP.S.dayanaklar[s.anahtar] = s.deger;
+      await ESP.Store.set(DAYANAK_ANAHTAR, ESP.S.dayanaklar);
+      return { ok:true, note:(s.anahtar === 'cefr' ? 'CEFR saat tablosu' : 'Okuma hızı')
+        + ' artık kaynaklı; dil ve okuma hedefleri bu dayanakla hesaplanır.',
+        geriAl:{ kayitId:kid, dayanak:s.anahtar, onceki } };
+    }
     if(s.tur === 'tarih'){
       for(const k of s.sources){ const r = await ESP.Model.saveSource(k); if(!r.ok) return { ok:false, error:r.error }; }
       for(const e of s.events){ const r = await ESP.Model.saveEvent(e); if(!r.ok) return { ok:false, error:r.error }; }
@@ -29769,6 +29865,12 @@ ESP.Belge = (function(){
 
   async function geriAl(g){
     const kid = g && g.kayitId;
+    if(g && g.dayanak){
+      ESP.S.dayanaklar = ESP.S.dayanaklar || {};
+      if(g.onceki) ESP.S.dayanaklar[g.dayanak] = g.onceki; else delete ESP.S.dayanaklar[g.dayanak];
+      await ESP.Store.set(DAYANAK_ANAHTAR, ESP.S.dayanaklar);
+      return { ok:true, silinen:1, kalan:0 };
+    }
     let kalan = 0, silinen = 0;
     const S = ESP.S;
     for(const a of (S.args || []).filter(x => bamOf(x, kid))){
@@ -29791,7 +29893,7 @@ ESP.Belge = (function(){
     return { ok:silinen + kalan > 0, silinen, kalan };
   }
 
-  return { istekTemizle, iste, kayitCek, sina, onizle, uygula, geriAl, yilYaz };
+  return { istekTemizle, iste, kayitCek, sina, onizle, uygula, geriAl, yilYaz, dayanak, dayanakYukle };
 })();
 
 /* ==== js/core/voice.js ==== */
@@ -43086,6 +43188,32 @@ ESP.Screens.guide = (function(){
      olmak anlamina gelmez. "Retansiyon >= 0,75" kodda kesindir; 0,75'in
      kendisi bu sistemin secimidir ve bunu gizlemek, bir tasarim tercihini
      bulgu gibi sunmak olurdu. */
+  /* Madde 11: hedef paketlerinin tahmin tabloları ve dayanağı. «Kaynağa
+     bağla» King'e esp.belge ister; sonuç Bugün'e teklif olarak gelir. */
+  function dayanakEntry(){
+    const c = ESP.Belge ? ESP.Belge.dayanak('cefr') : null;
+    const o = ESP.Belge ? ESP.Belge.dayanak('okumaHizi') : null;
+    const T = ESP.Hedefler.cefrTablo();
+    return K.Entry({
+      label:'TAHMİN TABLOLARI', hint:'evidence',
+      meta:(c ? 'CEFR kaynaklı' : 'CEFR kaynak bekliyor') + ' · ' + (o ? 'okuma hızı kaynaklı' : 'okuma hızı kaynak bekliyor'),
+      note:'Dil ve okuma hedeflerinin süre hesabı bu tablolara dayanır. Kaynağa bağlanınca hesap '
+         + 'yine koddadır ve karar «tahmin» kalır; değişen, dayanağın kaynaklı olmasıdır.',
+      wide:true,
+      body:html`
+        ${K.Table({ tight:true, headers:['Tablo', 'Değer', 'Dayanak'], rows:[
+          ['CEFR saatleri (sıfırdan)', ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map(s => s + ' ' + T[s]).join(' · '),
+            c ? 'kaynaklı · ' + (c.kaynak ? c.kaynak.baslik : '') + ' · ' + c.at : 'kaynak bekliyor'],
+          ['Okuma hızı', o ? o.kelimeDk + ' kelime/dk' : '≈ 230 kelime/dk (varsayım)',
+            o ? 'kaynaklı · ' + (o.kaynak ? o.kaynak.baslik : '') + ' · ' + o.at : 'kaynak bekliyor'],
+        ] })}
+        <div class="row gap-8 wrap mt-8">
+          ${K.Button({ label:'CEFR tablosunu kaynağa bağla', size:'sm', act:'dayanak-iste', data:{ 'data-alan':'cefr' } })}
+          ${K.Button({ label:'Okuma hızını kaynağa bağla', size:'sm', act:'dayanak-iste', data:{ 'data-alan':'okuma_hizi' } })}
+        </div>`,
+    });
+  }
+
   function evidenceRows(){
     const kapsam = ESP.Ev.coverage();
     const denetim = ESP.Ev.audit();
@@ -43093,6 +43221,7 @@ ESP.Screens.guide = (function(){
     const kurallar = ESP.EVIDENCE.map(e => ESP.Ev.resolve(e));
 
     return [
+      dayanakEntry(),
       K.Entry({
         label:'EŞİKLER NEREDEN GELİYOR?', hint:'evidence',
         meta:kapsam.total + ' kayıt',
@@ -43182,6 +43311,13 @@ ESP.Screens.guide = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'dayanak-iste'(el){
+      const alan = el.dataset.alan;
+      const r = await ESP.Belge.iste({ alan, konu:alan === 'cefr' ? 'CEFR rehberli öğrenme saatleri'
+        : 'yetişkin sessiz okuma hızı' });
+      ESP.UI.toast(r.metin);
+      if(r.ok) ESP.App.render();
+    },
     async 'guide-tab'(el){ S.ui.guideTab = el.dataset.tab; ESP.App.render(); },
 
     /* Budama. Sistem kullanicinin girdigi veriyi yer acmak icin silmez;
