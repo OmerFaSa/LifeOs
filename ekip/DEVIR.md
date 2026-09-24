@@ -20,7 +20,7 @@
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
 **Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · ✅ Grup 4 ·
-✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ⏳ tam koşum · ⏳ Part 9 (en son, onaylı harita ile)
+✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ✅ tam koşum (2026-09-24, 24/24) · 🔜 SPİ su hatası · 🔜 8f ESP belge (felsefe, tarih…) · ⏳ cevaplı maddeler · ⏳ Part 9 (harita ONAY BEKLİYOR: `ekip/CEKMECE-HARITASI.md`)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
 
@@ -114,6 +114,25 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   «tazelemek önerilir»; son 30 günde uygulanmamış BAM çıktısı orta+ teklifte not olarak
   söylenir (ölçülen: teklifin cevabı). HKM 570/570, HKM yüzü, `tools/entegre.js` temiz.
 
+- 🔜 **SPİ su hatası** (tam koşum sırasında bulundu): `SPI/src/js/core/state.js`
+  `defaultVitals` suyu `0` başlatıyor. Kullanıcı o gün yalnız uyku girse bile `calc.js`
+  asgari günde su «biliniyor, 0 ml» sayılıyor ve beacon HKM'ye «su 0 ml, ölçüldü» gidiyor
+  (AGENTS §1.2). Düzeltme: varsayılan `null`, hızlı giriş `null`'dan toplar, eski kayıttaki
+  `0` → `null` (0 ml gerçek bir ölçüm olamaz; DEVIR'de söylenir). Önce test.
+- 🔜 **8f ESP belge — dil dışındaki alanlar** (kullanıcı 2026-09-24: «esp'de sadece dil
+  değil felsefe, tarih ve diğer alanlara da belge aratacağız; kimisine filozof, kimisine
+  türlü türlü şeyler»). Tasarım: King işi `esp.belge` (alan + konu), `spi.bilgi` kalıbı:
+  sorgular kuralla, web kaynağı ZORUNLU (belge = kaynak; web kapalıysa model çağrılmadan
+  «hata»), model tipli JSON yazar, alıntı kaynakta, sayı (yıl) alıntıda kodla aranır;
+  doğrulanmayan satır düşer. Alan → ESP şeması:
+  · **tarih** → olaylar `{baslik, yil, tur (EVENT_KINDS), bolge (REGIONS), neden}` → ESP
+    `newEvent` (Kronoloji) + web kaynağı `newSource` (Kaynaklar, `secondary`).
+  · **felsefe** → düşünürler `{dusunur, eser, yil?, tez, kavramlar}` → eser `newBook`
+    (primary) + tez `newArgument` (Sempozyum, açık) ; kavramlar kart değil, argümana.
+  · **okuma / yazı / diksiyon** → sonraki dilim (önce şema bak: `library.js`, `writing.js`).
+  Niyet `belge.add` → ESP `core/belge.js` kendi koduyla sınar, önizler, onayla yazar, geri
+  alır. İstek: Tarih › Kaynaklar ve Sempozyum › Metinler'den «Belge iste».
+
 ### Cevabı gelen maddeler (sıra: Part 8'den sonra)
 - ⏳ Y5 Sağlık verisi içe aktarma — iPhone `export.xml` + Android Health Connect; önizleme
   + onay (Y3 .ics yolu gibi), ölçüldü etiketi, SPİ kendi koduyla yazar.
@@ -130,6 +149,8 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   17 ekran sözleşmesi AYS/ESP · 18 labs.js ve AYS llm.js.
 
 ### Part 9 — Tek tasarım + çekmece düzeni (EN SON)
+**Harita taslağı hazır, ONAY BEKLİYOR:** `ekip/CEKMECE-HARITASI.md` (8 ortak çekmece; dört
+karar sorusu sonunda). Onaysız uygulanmaz.
 Her şey bitince. Bütün sistem (AYS, SPİ, ESP, HKM web) **modern, sade, minimalist** tek
 tasarıma geçer; bugünkü sorun iç içelik (kart içinde sekme içinde alt sekme). Çekmece
 düzeni (görsel değil, DÜZEN): üç modülde aynı iskelet ve aynı çekmece adları; iç içelik
