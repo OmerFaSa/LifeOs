@@ -1,17 +1,32 @@
 {
   "_oku": "Tabanda olup bilerek kaldirilan ya da adi degisen seyler. Her satir KULLANICI ONAYIYLA eklenir: anahtar eski ad, deger gerekce ya da yeni ad (ör. \"yeni ad: plan-open · kullanici onayi 2026-09-25\"). Burada olmayan her kayip KIRMIZIDIR.",
   "AYS": {
-    "eylem": {},
-    "isleyici": {},
+    "eylem": {
+      "set-palette": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
+      "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem"
+    },
+    "isleyici": {
+      "set-palette": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
+      "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem"
+    },
     "alan": {}
   },
   "SPI": {
-    "eylem": {},
+    "eylem": {
+      "set-palette": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
+      "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem"
+    },
     "isleyici": {},
-    "alan": {}
+    "alan": {
+      "pref-palette": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
+      "pref-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem"
+    }
   },
   "ESP": {
-    "eylem": {},
+    "eylem": {
+      "set-palette": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
+      "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem"
+    },
     "isleyici": {},
     "alan": {}
   }

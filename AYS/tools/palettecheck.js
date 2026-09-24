@@ -98,7 +98,36 @@ function checksOf(m){
     await R.App.render();
   });
 
-  const pals = ['kagit','indigo','grafit','okyanus','mor','bordo','orman'];
+  /* PALETLER VE DUZENLER UYGULAMANIN CSS'INDEN OKUNUR. Liste burada
+     sabit yaziliydi; tek tasarima gecerken (ekip/EKIP-PLANI.md §8-4)
+     paletler ve dort duzen kalkiyor ve sabit liste o gun var olmayan
+     secenekleri «olcmeye» devam ederdi — gecen ama hicbir sey olcmeyen
+     bir denetim. Kokte `data-palette` / `data-design` secicisi olan her
+     deger olculur; varsayilan palet (nitelik yazilmayan) hep listededir. */
+  const secenek = await p.evaluate(() => {
+    const palet = new Set(), duzen = new Set();
+    const gez = kurallar => {
+      for(const k of kurallar){
+        if(k.cssRules) gez(k.cssRules);
+        const s = k.selectorText || '';
+        let m;
+        const r1 = /\[data-palette="?([a-z0-9-]+)"?\]/g;
+        while((m = r1.exec(s))) palet.add(m[1]);
+        const r2 = /\[data-design="?([a-z0-9-]+)"?\]/g;
+        while((m = r2.exec(s))) duzen.add(m[1]);
+      }
+    };
+    for(const sayfa of Array.from(document.styleSheets)){
+      let kurallar = null;
+      try{ kurallar = sayfa.cssRules; }catch(e){}
+      if(kurallar) gez(kurallar);
+    }
+    return { palet:Array.from(palet).sort(), duzen:Array.from(duzen).sort() };
+  });
+  const pals = ['kagit'].concat(secenek.palet.filter(x => x !== 'kagit'));
+  const designs = secenek.duzen;
+  console.log('Ölçülen: ' + pals.length + ' palet (' + pals.join(', ') + '), '
+    + designs.length + ' ek düzen' + (designs.length ? ' (' + designs.join(', ') + ')' : '') + ', iki tema.');
   const secs = ['today','plan','learn','progress','guide','office'];
   const bad = [];
   /* GECEN BIR DENETIM DE SAYI GOSTERIR. Hicbir sey olcmeyen bir betik de
@@ -127,7 +156,7 @@ function checksOf(m){
          kagit rengini turetiyor); o yuzden kontrast varsayilan duzende
          gectigi icin diger dortte de gecmis sayilmaz. Tek temsilci ekran
          yeter: olculen sey ekranin icerigi degil, kokteki jetonlar. */
-      for(const design of ['odak', 'kraft', 'katmanli', 'harita']){
+      for(const design of designs){
         await p.evaluate(async d => {
           R.S.profile.design = d;
           await R.Model.saveProfile();

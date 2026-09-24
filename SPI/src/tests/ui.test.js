@@ -467,12 +467,9 @@
       expect(document.documentElement.getAttribute('data-design')).toBe(null);
     });
 
-    it('seçilen düzen köke yazılır', () => {
-      resetState();
-      SP.S.profile = Object.assign(SP.Model.defaultProfile(), { design:'harita' });
-      SP.App.applyTheme();
-      expect(document.documentElement.getAttribute('data-design')).toBe('harita');
-    });
+    /* «Seçilen düzen köke yazılır» testi burada duruyordu; beş düzen
+       kullanıcı kararıyla kalktı (ekip/EKIP-PLANI.md §8-4). Aşağıdaki
+       «tanınmayan düzen varsayılana düşer» eski profildeki değeri korur. */
 
     /* Ayarlar ekranındaki liste ANINDA uygulanmalı. Uygulamayınca
        kullanıcı listeden seçiyor, ekranda hiçbir şey değişmiyor ve
@@ -483,11 +480,14 @@
       expect(typeof SP.Screens.family.change['set-look']).toBe('function');
     });
 
-    it('görünüm listeleri anında uygulanmak üzere bağlanmış', async () => {
+    /* Tek tasarımda (§8-4) görünüm listesi yalnız temadır: Açık · Koyu ·
+       Sistem. Palet ve düzen listeleri kalkıyor; tema listesi kalmalı ve
+       anında uygulanmalı. */
+    it('tema listesi anında uygulanmak üzere bağlanmış', async () => {
       resetState();
       SP.S.profile = SP.Model.defaultProfile();
       const markup = String(await SP.Screens.family.render());
-      ['pref-theme', 'pref-palette', 'pref-design'].forEach(id => {
+      ['pref-theme'].forEach(id => {
         const i = markup.indexOf('id="' + id + '"');
         expect(i > 0).toBeTruthy();
         /* aynı etiketin içinde değişiklik kancası duruyor mu? */

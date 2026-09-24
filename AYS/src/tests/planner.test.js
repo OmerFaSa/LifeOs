@@ -319,25 +319,43 @@
     });
   });
 
-  describe('Palet sistemi', function(){
-    it('en az beş palet tanımlı', function(){
-      expect(R.PALETTES.length).toBeGreaterThan(4);
+  /* GÖRÜNÜM — tek tasarım (ekip/EKIP-PLANI.md §8-4, kullanıcı kararı
+     2026-09-24: paletler ve beş düzen kalkar, yerine Açık · Koyu · Sistem).
+     Burada önceden «en az beş palet» testi vardı; o özellik kullanıcı
+     kararıyla kalktığı için test de kalktı. Yerine iki kalıcı söz:
+     tema profilden uygulanır ve eski profilde kalan palet/düzen değeri
+     uygulamayı bozmaz. */
+  describe('Görünüm — tek tasarım', function(){
+    const kok = document.documentElement;
+    const NIT = ['data-theme', 'data-palette', 'data-design'];
+    function sakla(){ return NIT.map(a => kok.getAttribute(a)); }
+    function geriKoy(v){ NIT.forEach((a, i) => v[i] == null ? kok.removeAttribute(a) : kok.setAttribute(a, v[i])); }
+
+    it('tema profilden uygulanır: Açık, Koyu, Sistem', function(){
+      const eski = sakla();
+      try{
+        resetState();
+        S.profile.theme = 'dark';  R.App.applyTheme();
+        expect(kok.getAttribute('data-theme')).toBe('dark');
+        S.profile.theme = 'light'; R.App.applyTheme();
+        expect(kok.getAttribute('data-theme')).toBe('light');
+        S.profile.theme = 'system'; R.App.applyTheme();
+        expect(kok.getAttribute('data-theme')).toBe(null);
+      }finally{ geriKoy(eski); }
     });
-    it('her paletin adı, notu ve iki örnek rengi var', function(){
-      R.PALETTES.forEach(p => {
-        expect(typeof p.id).toBe('string');
-        expect(p.name.length).toBeGreaterThan(1);
-        expect(p.note.length).toBeGreaterThan(5);
-        expect(p.swatch).toHaveLength(2);
-        p.swatch.forEach(c => expect(c.indexOf('#')).toBe(0));
-      });
-    });
-    it('varsayılan palet listede vardır', function(){
-      expect(R.PALETTES.some(p => p.id === R.DEFAULT_PALETTE)).toBeTruthy();
-    });
-    it('profil varsayılan paletle başlar', function(){
-      resetState();
-      expect(S.profile.palette).toBe(R.DEFAULT_PALETTE);
+
+    it('eski profilde kalan palet ve düzen değeri uygulamayı bozmaz', function(){
+      const eski = sakla();
+      try{
+        resetState();
+        S.profile.theme = 'light';
+        S.profile.palette = 'okyanus';
+        S.profile.design = 'harita';
+        let hata = null;
+        try{ R.App.applyTheme(); }catch(e){ hata = e; }
+        expect(hata).toBe(null);
+        expect(kok.getAttribute('data-theme')).toBe('light');
+      }finally{ geriKoy(eski); }
     });
   });
 
