@@ -518,7 +518,7 @@ R.Screens.guide = (function(){
               change:'hkm-token', aria:'HKM jetonu' }) })}
           ${K.Field({ label:'En sık kaç dakikada bir',
             input:K.Input({ id:'ay-hkm-int', type:'number', min:'15', step:'5',
-              value:a.intervalMinutes, change:'hkm-interval',
+              value:a.intervalMinutes, change:'hkm-interval', data:{ 'data-varsayilan':String(R.Beacon.varsayilan().intervalMinutes), 'data-varsayilan-ad':R.Beacon.varsayilan().intervalMinutes + ' dakika' },
               aria:'Gönderim aralığı' }) })}
         </div>
 
@@ -530,7 +530,7 @@ R.Screens.guide = (function(){
           ${K.Field({ label:'Kapsam',
             hint:'ne kadarı gönderilsin',
             input:K.Select({ id:'ay-hkm-level', value:R.Beacon.levelOf(),
-              change:'hkm-level', aria:'Gönderim kapsamı',
+              change:'hkm-level', data:{ 'data-varsayilan':R.Beacon.varsayilan().level, 'data-varsayilan-ad':(R.Beacon.LEVELS.find(l => l.id === R.Beacon.varsayilan().level) || {}).label }, aria:'Gönderim kapsamı',
               options:R.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
           <p class="tiny dim">${(R.Beacon.LEVELS.find(l => l.id === R.Beacon.levelOf()) || {}).note}</p>
         </div>
@@ -619,8 +619,7 @@ R.Screens.guide = (function(){
 
         K.Card({ title:'Görünüm', sub:'Tema bu profile kaydedilir',
           body:html`
-            ${K.Segmented({ items:THEMES, value:S.profile.theme || 'system', act:'set-theme',
-              block:true, primary:true, aria:'Tema' })}
+            ${K.TemaSecici({ value:S.profile.theme || 'system', act:'set-theme' })}
             <p class="tiny dim mt-10">Tek tasarım: renk modülü söyler (mavi AYS). «Sistem»
               seçiliyken cihazın açık/koyu tercihi izlenir.</p>` }),
       ])),

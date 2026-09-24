@@ -1,0 +1,107 @@
+/* AYAR — T5. Kaynak: brand/ortak/ayar.css; `tools/ortak.py --yay` üç
+   arayüze kopyalar. Davranışı `ayar.js`. */
+
+/* ------------------------------------------------ 21 · değişen alan noktası */
+.field.is-degisti > span:first-child::after,
+.field.is-varsayilandan > span:first-child::after{
+  content:''; display:inline-block; width:6px; height:6px; margin-left:6px;
+  border-radius:50%; background:var(--primary); vertical-align:middle;
+}
+/* Kaydedilmemiş (21) dolu nokta; yalnız varsayılandan farklı (182) halka. */
+.field.is-varsayilandan:not(.is-degisti) > span:first-child::after{
+  background:transparent; box-shadow:inset 0 0 0 1.5px var(--text-3);
+}
+
+/* ------------------------------------------------ 21 · alt şerit */
+.ayar-serit{
+  position:fixed; left:50%; bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+  transform:translateX(-50%); z-index:var(--z-overlay);
+  display:flex; align-items:center; gap:var(--sp-2); flex-wrap:wrap; justify-content:center;
+  max-width:calc(100vw - 24px);
+  padding:8px 8px 8px 14px;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border); border-radius:var(--r);
+  box-shadow:var(--shadow-lg);
+  font-size:var(--fs-sm);
+  animation:ayar-serit-gir var(--dur-lg) var(--ease) both;
+}
+.ayar-serit__yazi{ font-weight:600; margin-right:var(--sp-2); }
+.ayar-serit .btn{ min-height:32px; }
+@keyframes ayar-serit-gir{ from{ opacity:0; transform:translate(-50%, 8px); } }
+/* Telefonda alt bandın üstünde durur. */
+@media (max-width:679px){
+  .ayar-serit{ bottom:calc(72px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ------------------------------------------------ 182 · varsayılana dön */
+.ayar-varsayilan{
+  margin:4px 0 0; font-size:var(--fs-xs); color:var(--text-3);
+}
+.ayar-varsayilan .linkbtn{ font-size:inherit; min-height:24px; }
+
+/* ------------------------------------------------ 183 · ayar arama */
+.ayar-ara{ position:relative; width:min(320px, 100%); }
+.ayar-ara__kutu{ width:100%; }
+.ayar-ara__sonuclar{
+  position:absolute; left:0; right:0; top:calc(100% + 6px); z-index:var(--z-overlay);
+  max-height:min(60vh, 420px); overflow:auto;
+  padding:6px; background:var(--surface);
+  border:1px solid var(--border); border-radius:var(--r-md); box-shadow:var(--shadow-lg);
+}
+.ayar-ara__sonuclar:empty{ display:none; }
+.ayar-ara__modul{
+  margin:6px 8px 4px; font-size:var(--fs-xs); font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--text-3);
+}
+.ayar-ara__sonuc{
+  display:flex; flex-direction:column; align-items:flex-start; gap:2px;
+  width:100%; min-height:40px; padding:6px 8px; text-align:left;
+  background:none; border:0; border-radius:var(--r-sm); cursor:pointer;
+  font:inherit; color:var(--text);
+}
+.ayar-ara__sonuc span{ font-size:var(--fs-xs); color:var(--text-3); }
+.ayar-ara__sonuc:hover, .ayar-ara__sonuc:focus-visible{ background:var(--surface-2); }
+.field.is-bulundu{ outline:2px solid var(--primary); outline-offset:4px; border-radius:var(--r-sm); }
+
+/* ------------------------------------------------ 181 · tema önizlemesi
+   Seçmeden önce üç seçenek yan yana, her biri KENDİ renginde küçük bir
+   ekran örneğiyle. Açık örnek `--l-*`, koyu örnek `--d-*` jetonlarından
+   çizilir: geçerli tema ne olursa olsun ikisi de doğru görünür. */
+.temasec{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--sp-2); }
+.temasec__secenek{
+  display:flex; flex-direction:column; gap:6px; align-items:stretch;
+  padding:6px; min-height:44px;
+  background:var(--surface); color:var(--text-2);
+  border:1px solid var(--border); border-radius:var(--r-md); cursor:pointer;
+  font:inherit; font-size:var(--fs-sm); text-align:left;
+}
+.temasec__secenek:hover{ border-color:var(--border-strong); }
+.temasec__secenek.is-on{ border-color:var(--primary); color:var(--text); box-shadow:inset 0 0 0 1px var(--primary); }
+.temasec__ad{ display:flex; align-items:center; gap:6px; padding:0 2px 2px; font-weight:600; }
+.temasec__ad svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.8; }
+.tema-ornek{
+  display:flex; flex-direction:column; gap:4px;
+  height:48px; padding:0 0 6px; overflow:hidden;
+  border-radius:var(--r-sm); border:1px solid;
+}
+.tema-ornek > i{ display:block; height:4px; background:var(--mod); }
+.tema-ornek > b{ display:flex; flex-direction:column; gap:4px; margin:2px 6px 0; padding:5px 6px; border-radius:4px; }
+.tema-ornek > b > i{ display:block; height:4px; border-radius:2px; }
+.tema-ornek > b > i + i{ width:60%; }
+.tema-ornek--light{ background:var(--l-bg); border-color:var(--l-border); }
+.tema-ornek--light > b{ background:var(--l-surface); }
+.tema-ornek--light > b > i{ background:var(--l-text); }
+.tema-ornek--light > b > i + i{ background:var(--l-text-3); }
+.tema-ornek--dark{ background:var(--d-bg); border-color:var(--d-border); }
+.tema-ornek--dark > b{ background:var(--d-surface); }
+.tema-ornek--dark > b > i{ background:var(--d-text); }
+.tema-ornek--dark > b > i + i{ background:var(--d-text-3); }
+.tema-ornek--system{
+  background:linear-gradient(90deg, var(--l-bg) 50%, var(--d-bg) 50%);
+  border-color:var(--border);
+}
+.tema-ornek--system > b{ background:linear-gradient(90deg, var(--l-surface) 50%, var(--d-surface) 50%); }
+.tema-ornek--system > b > i{ background:linear-gradient(90deg, var(--l-text) 50%, var(--d-text) 50%); }
+.tema-ornek--system > b > i + i{ background:linear-gradient(90deg, var(--l-text-3) 50%, var(--d-text-3) 50%); }
+
+@media (prefers-reduced-motion:reduce){ .ayar-serit{ animation:none; } }

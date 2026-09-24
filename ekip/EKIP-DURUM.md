@@ -112,7 +112,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** T döndü (K'nin devri, T-DEVIR §6). ✅ ESP Onaylar + Kütüphanem 6c92411 · ✅ **T3 ESP 2204fa3 → teslim** (tabloda). ✅ AYS küçükleri (§2.C): 011 sakin hata + 010 boş durum işareti + 022 plan onay etiketi d83d085 · STIL.md 334f4db · ✅ **T4 hareket** (bu commit). Sıradaki: T5 ayarlar (21, 181, 182, 183, 171, 176, 17); T6 yalnız kullanıcı «başla» derse.
+- **Şu an:** T döndü (K'nin devri, T-DEVIR §6). ✅ ESP Onaylar + Kütüphanem 6c92411 · ✅ **T3 ESP 2204fa3 → teslim** (tabloda). ✅ AYS küçükleri (§2.C): 011 sakin hata + 010 boş durum işareti + 022 plan onay etiketi d83d085 · STIL.md 334f4db · ✅ **T4 hareket** 852f6fd · ✅ **T5a ayarlar** (21, 181, 182, 183 — bu commit). Sıradaki: T5b (171 kurulum, 176 gizlilik kilidi, 17 Ne değişti?); T6 yalnız kullanıcı «başla» derse.
 - **K yürütüyor (kullanıcı talimatı, 2026-09-24 akşam):** T-DEVIR §5'ten devam. ✅ T2-13 designcheck d58720d · ✅ entegre.js koştu (temiz) · ✅ yarım T3 SPİ yaması 826fbe3 · ✅ **T3 SPİ → teslim 59e7276** (sekme 0, tek dolu düğme, 30+ kelime katmanda, T2-14) · ✅ **T2 ESP ccedf0a** (kabuk + sekiz çekmece; disiplin bölüm düzeyinde). Sıradaki: ESP Onaylar + Kütüphanem → T3 ESP (sekmeler, Bugün üç alan, Ofis dolu düğme) → teslim → AYS küçükleri (§2.C) → T4 → T5; T6 yalnız kullanıcı «başla» derse. **⏸ K'nin limiti doldu → T'ye döndü: `ekip/T-DEVIR.md` §6** (kalan: ESP Onaylar + Kütüphanem → T3 ESP → AYS küçükleri → T4 → T5).
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
@@ -174,7 +174,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   AYS Ekranlar ve SPİ Gezinme/Görünüm/Düzenler çekmecelere ve tek tasarıma çekildi. **Göremedim:**
   SPİ STIL.md'nin «Düzen — bir sağlık defteri», «Bölüm kimlikleri», «Filigran numara» bölümleri
   serif ve eski düzene değiniyor olabilir; T5'te okunacak.
-- **T4 hareket (bu commit):** `brand/ortak/hareket.{js,css,test.js}` → üç arayüz. Uygulama her eylemde
+- **T4 hareket (852f6fd):** `brand/ortak/hareket.{js,css,test.js}` → üç arayüz. Uygulama her eylemde
   #app'i baştan çizdiği için hareket CSS'e bırakılmadı: çizimden önce/sonra fotoğraf, yalnız DEĞİŞEN öğe
   hareket eder. 12 tek canlı öğe (sakin olmayan `C.NextUp`; ikincisi `.h-sakin`) · 14 odak kapısı (AYS odak
   modu sis katmanı + `data-oz="014"`; ESP kart tekrarı `data-h-odak`, Esc «Oturumu bitir») · 149 sayı
@@ -186,6 +186,21 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   palet, perf, SPİ designcheck, dist, ortak temiz; sadelik üçü bütçede; envanter temiz; tarayıcıda: aynı
   ekranda yeniden çizim içerik animasyonu üretmiyor, yeni ekranda üretiyor; ESP tekrarında üst çubuk .28
   sis, kart 1; Esc oturumu bitiriyor.
+- **T5a ayarlar (bu commit):** `brand/ortak/ayar.{js,css,test.js}` → üç arayüz. 21 kaydedilmemiş değişiklik
+  (Ayarlar çekmecesinde; «Kaydet»li kutudaki alan noktalanır, şerit «N değişiklik kaydedilmedi · Vazgeç ·
+  Kaydet»; yeniden çizimde/ekrandan dönüşte yazılan kaybolmaz; kaydettikten sonra eski değer geri konmaz) ·
+  182 varsayılana dön (`data-varsayilan`: HKM aralığı 60 dk ve kapsam Özet — `Beacon.varsayilan()` yeni,
+  üç modülde; SPİ tema seçimi Sistem) · 183 ayar arama (sayfa başında, dizin ayar ekranlarının kendi
+  çiziminden, sonuç tam yolla ve alana kayar) · 181 `C.TemaSecici` (üç örnek kendi renginde; görünüm
+  paneli üç modülde, AYS Genel ve ESP Profil'de; SPİ Profil'deki seçim kutusu envanter alanı olduğu için
+  kaldı, varsayılanı eklendi). **Düzelen hata:** tema seçilince ekran yeniden çizilmiyordu — ESP Ayarlar ›
+  Profil'de seçili kart eskisinde kalıyordu; üç modülün `set-theme`'i artık çiziyor. **Göremedim:** 183'ün
+  «modüllere göre gruplu» sonucu yalnız o modülün ayarlarını bulur; öteki iki modülün ayarları ayrı
+  sayfada, dizin kurulamıyor. Denetim: runtests AYS 1943 · SPİ 1591 · ESP 1576; duman, a11y, 390 px,
+  palet, perf, SPİ designcheck, dist, ortak temiz; sadelik üçü bütçede; envanter temiz; tarayıcıda arama
+  (üç modül), şerit + yeniden çizim + Vazgeç, varsayılana dön (60 dk), tema seçimi ve geri dönüş denendi.
+  **K'nin dosyalarına dokundum:** AYS `guide.js` (tema seçici, iki alana `data-varsayilan`), SPİ
+  `guide.js` ve `family.js` (`data-varsayilan`), ESP `profile.js` (tema seçici, `data-varsayilan`).
 - **K için (T4 sözleşmesi, ekranlar senin):** hareket istersen yalnız işaretle — satır listesi
   `data-h-satir="<kimlik>"` (silinen satır yerinde kapanır), bitirilen iş `data-h="<kimlik>"
   data-h-bitti="0|1"` (tik çizilir), değişen büyük sayı `data-h-sayi="<anahtar>"`, süren iş

@@ -235,10 +235,17 @@ ESP.App = (function(){
     return yol;
   }
 
+  /* Ayarlar çekmecesi (T5): ayar arama (183) sayfa başında, kaydedilmemiş
+     değişiklik (21) ve varsayılana dön (182) yalnız burada çalışır. */
+  function ayarlardaMi(route){ return !!safe(() => sectionOf(route) && sectionOf(route).id === 'ayarlar', false); }
+  function ayarRotalari(){ return safe(() => ((typeof SECTIONS === 'function' ? SECTIONS() : SECTIONS).find(s => s.id === 'ayarlar') || { views:[] }).views.map(v => ({ route:v.route, ad:v.label })), []) || []; }
+
   function sayfaBasiHtml(sc){
     const baslik = safe(() => sc.headline ? sc.headline() : '') || sc.title;
     const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
-    const eylem = safe(() => sc.actions ? sc.actions() : '');
+    const AY = window.LIFEOS && window.LIFEOS.AYAR;
+    const eylem = (AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '')
+      + (safe(() => sc.actions ? sc.actions() : '') || '');
     return K.sayfaBasi({ yol:yolOf(sc.id), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
   }
 
@@ -339,13 +346,7 @@ ESP.App = (function(){
           ${ESP.C.Button({ label:'Profil', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'profile' } })}
         </div>
         <div class="appear__label">Tema</div>
-        <div class="appear__themes">${map(THEMES, t => html`
-          <button class="${cls('themebtn', t.id === theme && 'is-on')}"
-            data-act="set-theme" data-theme="${t.id}"
-            aria-pressed="${t.id === theme ? 'true' : 'false'}">
-            ${raw(UI.icon(t.icon))}<span>${t.label}</span>
-          </button>`)}
-        </div>
+        <div class="appear__themes">${ESP.C.TemaSecici({ value:theme, act:'set-theme' })}</div>
 
         <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
           cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>
@@ -515,12 +516,14 @@ ESP.App = (function(){
       const appEl = document.getElementById('app');
       const H = window.LIFEOS && window.LIFEOS.HAREKET;
       if(H) H.once(appEl);
+      if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.once(appEl);
       await withTransition(() => { appEl.innerHTML = markup; });
 
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
       if(H) H.sonra(appEl, S.route);
+      if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.sonra(appEl, { rota:S.route, etkin:ayarlardaMi(S.route) });
       revealActiveTab();
       /* Kabuk her cizimde yeniden kuruluyor; acik bir alt sayfa varsa
          `inert` onunla birlikte silinir ve arka plan yeniden okunur
@@ -602,6 +605,13 @@ ESP.App = (function(){
 
   /* ---------------------------------------------------------- küresel eylemler */
   const globalHandle = {
+    /* Ayar aramasının sonucu (183): ekrana git, alana kay ve odakla. */
+    async 'ayar-git'(el){
+      const alan = el.dataset.alan;
+      go(el.dataset.route);
+      await render();
+      if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.alanaGit(alan);
+    },
     async go(el){
       if(window.LIFEOS && window.LIFEOS.HAREKET) window.LIFEOS.HAREKET.kaynak(el);
       go(el.dataset.route);
@@ -940,8 +950,11 @@ ESP.App = (function(){
     },
     async 'set-theme'(el){
       await M.saveProfile({ theme:el.dataset.theme });
+      /* Ekran da yeniden çizilir: Ayarlar'daki seçici (ESP Profil) seçili
+         kutuyu eskisinde bırakıyordu. */
       applyTheme();
       refreshAppearance();
+      render();
     },
     async 'cmdk-run'(el){ ESP.Palette.runById(el.dataset.id); },
     async 'quick-save'(){ await ESP.Palette.saveQuick(); },
@@ -1432,6 +1445,16 @@ ESP.App = (function(){
         let cumle = '';
         try{ cumle = hs.headline ? String(hs.headline() || '') : ''; }catch(e){}
         return { baslik:hs.title, cumle };
+      } });
+      /* Ayarlar (T5): arama dizini ayar ekranlarının kendi çiziminden kurulur. */
+      if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.kur({ dizin:async () => {
+        const ekranlar = [];
+        for(const r of ayarRotalari()){
+          const es = ESP.Screens[r.route];
+          if(!es) continue;
+          try{ ekranlar.push({ route:r.route, ad:r.ad, html:String(await es.render()) }); }catch(e){}
+        }
+        return window.LIFEOS.AYAR.dizin('ESP', ekranlar);
       } });
       /* Arayüz Türkçe: CSS büyük harfe çevirirken "i" → "İ" olsun.
          Tek dosya sürümünde <html> kabuğu dışarıdan gelir, bu yüzden burada. */

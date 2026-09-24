@@ -271,7 +271,7 @@ SP.Screens.guide = (function(){
               change:'hkm-token', aria:'HKM jetonu' }) })}
           ${K.Field({ label:'En sık kaç dakikada bir',
             input:K.Input({ id:'sp-hkm-int', type:'number', min:'15', step:'5',
-              value:a.intervalMinutes, change:'hkm-interval',
+              value:a.intervalMinutes, change:'hkm-interval', data:{ 'data-varsayilan':String(SP.Beacon.varsayilan().intervalMinutes), 'data-varsayilan-ad':SP.Beacon.varsayilan().intervalMinutes + ' dakika' },
               aria:'Gönderim aralığı' }) })}
         </div>
 
@@ -282,7 +282,7 @@ SP.Screens.guide = (function(){
         <div class="mt-12">
           ${K.Field({ label:'Kapsam', hint:'ne kadarı gönderilsin',
             input:K.Select({ id:'sp-hkm-level', value:SP.Beacon.levelOf(),
-              change:'hkm-level', aria:'Gönderim kapsamı',
+              change:'hkm-level', data:{ 'data-varsayilan':SP.Beacon.varsayilan().level, 'data-varsayilan-ad':(SP.Beacon.LEVELS.find(l => l.id === SP.Beacon.varsayilan().level) || {}).label }, aria:'Gönderim kapsamı',
               options:SP.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
           <p class="tiny dim">${(SP.Beacon.LEVELS.find(l => l.id === SP.Beacon.levelOf()) || {}).note}</p>
           <p class="tiny dim">Günün özetinde, gelişmiş kapsamda bile tahlil değeri, ilaç adı ve

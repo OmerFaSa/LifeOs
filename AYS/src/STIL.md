@@ -181,10 +181,27 @@ Günlük yolculuk tek zincirdir ve `Bugün` ekranındaki **Günün akışı** ka
 zinciri gösterir: **izle → not → soru → kart → mola**. Her adım bir ekrana bağlanır;
 tamamlananlar sönükleşir, tamamlanmayanların yanında “Git” durur.
 
+## Ayarlar
+
+Ayarlar çekmecesinin ekranları `LIFEOS.AYAR`'ı (`brand/ortak/ayar.js`, T5)
+kullanır; ekran kodu bir şey bilmek zorunda değildir:
+
+- **Kaydedilmemiş değişiklik (21):** «Kaydet» (`save-*`) düğmesi olan
+  kutudaki alan değişince yanında nokta, altta «N değişiklik kaydedilmedi
+  · Vazgeç · Kaydet». Neyin değiştiğini tarayıcı bilir (`defaultValue`);
+  anında uygulanan alan (`data-change`) sayılmaz. Yeniden çizimde ve
+  ekrandan çıkıp dönünce yazılan değer kaybolmaz.
+- **Varsayılana dön (182):** alan `data-varsayilan` (+ `data-varsayilan-ad`)
+  taşırsa ve değeri farklıysa altında «Varsayılan: … · Varsayılana dön».
+- **Ayar arama (183):** sayfa başında; dizin ayar ekranlarının kendi
+  çiziminden kurulur, sonuç tam yoluyla («AYS › Ayarlar › Genel › …»).
+- **Tema önizlemesi (181):** `C.TemaSecici` — üç seçenek kendi renginde
+  küçük örnekle; açık örnek `--l-*`, koyu örnek `--d-*` jetonlarından.
+
 ## Bileşen sözlüğü
 
 v4: `C.Kutu` `C.ModulIsareti` `C.SayfaBolumleri` (+ `C.bolumeGit`)
-`C.Ayrinti` `C.SakinHata`
+`C.Ayrinti` `C.SakinHata` `C.TemaSecici`
 
 `C.Card` `C.Collapsible` `C.Stat` `C.Bar` `C.Meter` `C.Badge` `C.Chip`
 `C.Button` `C.IconButton` `C.Segmented` `C.Subtabs` `C.Field` `C.Input`

@@ -139,13 +139,7 @@ ESP.Screens.profile = (function(){
           wide:true,
           body:html`
             ${K.SectionTitle('Tema')}
-            <div class="picks picks--disc">${map([
-                { id:'system', label:'Sistem', note:'Cihazın ayarına uyar' },
-                { id:'light', label:'Açık', note:'Her zaman açık' },
-                { id:'dark', label:'Koyu', note:'Her zaman koyu' }],
-              x => K.PickCard({ label:x.label, meta:x.note,
-                on:(p.theme || 'system') === x.id,
-                act:'set-theme', data:{ 'data-theme':x.id } }))}</div>`,
+            ${K.TemaSecici({ value:p.theme || 'system', act:'set-theme' })}`,
         }),
 
         K.Entry({
@@ -260,7 +254,7 @@ ESP.Screens.profile = (function(){
               change:'hkm-token', aria:'HKM jetonu' }) })}
           ${K.Field({ label:'En sık kaç dakikada bir',
             input:K.Input({ id:'hkm-int', type:'number', min:'15', step:'5',
-              value:a.intervalMinutes, change:'hkm-interval',
+              value:a.intervalMinutes, change:'hkm-interval', data:{ 'data-varsayilan':String(ESP.Beacon.varsayilan().intervalMinutes), 'data-varsayilan-ad':ESP.Beacon.varsayilan().intervalMinutes + ' dakika' },
               aria:'Gönderim aralığı' }) })}
         </div>
 
@@ -271,7 +265,7 @@ ESP.Screens.profile = (function(){
         <div class="mt-12">
           ${K.Field({ label:'Kapsam', hint:'ne kadarı gönderilsin',
             input:K.Select({ id:'hkm-level', value:ESP.Beacon.levelOf(),
-              change:'hkm-level', aria:'Gönderim kapsamı',
+              change:'hkm-level', data:{ 'data-varsayilan':ESP.Beacon.varsayilan().level, 'data-varsayilan-ad':(ESP.Beacon.LEVELS.find(l => l.id === ESP.Beacon.varsayilan().level) || {}).label }, aria:'Gönderim kapsamı',
               options:ESP.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
           <p class="small muted">${(ESP.Beacon.LEVELS.find(l => l.id === ESP.Beacon.levelOf()) || {}).note}</p>
         </div>

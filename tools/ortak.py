@@ -224,6 +224,11 @@ DOSYALAR = {
     "hareket.js":     "js/core",
     "hareket.css":    "css",
     "hareket.test.js": "tests",
+    # AYAR (T5) — ayar ekranlarinin ortak davranisi: kaydedilmemis
+    # degisiklik seridi, varsayilana don, ayar arama, tema onizlemesi.
+    "ayar.js":        "js/core",
+    "ayar.css":       "css",
+    "ayar.test.js":   "tests",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     "sw.js":          ".",

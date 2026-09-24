@@ -33,6 +33,7 @@ python3 tools/ortak.py --denetle   # kopyalar kaynakla aynı mı
 | `seri.*` | `js/core`, `tests` | seri dondurma ve tatil modu: kullanıcı işaretler (en çok 7 gün geri), sınırlı (21 gün; hasta/izin ayda 6), geri alınır; HKM'ye yalnız tatilin tarihi gider |
 | `olumsuz.*` | `js/core`, `tests` | cümle ayrıştırıcılarının önündeki kapı: olumsuz, ileriye dönük, istek, soru ya da belirsiz cümle ölçüm diye yazılmaz; olumsuz istek tersine çevrilmez (ekip/HATALAR.md KR-1) |
 | `hareket.*` | `js/core`, `css`, `tests` | T4 hareket ve odak: çizimden önce/sonra fotoğraf, yalnız değişen öğe hareket eder (sayı, tik, satır kapanma), tek canlı öğe, küçülen başlık, kart geçişi, odak halkası, önizleme, odak kapısı; azaltılmış harekette kapalı |
+| `ayar.*` | `js/core`, `css`, `tests` | T5 ayar ekranları: kaydedilmemiş değişiklik şeridi (21), varsayılana dön (`data-varsayilan`, 182), ayar arama ve tam yol (183), tema önizlemesi (`C.TemaSecici`, 181; açık örnek `--l-*` jetonlarından) |
 | `sw.js` | `src/` kökü | çevrimdışı kabuk (service worker): ağ önce, ağ yoksa son kopya; `build.py` `dist/` yanına da koyar |
 
 Kopyalar «ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME» başlığı taşır. Elle

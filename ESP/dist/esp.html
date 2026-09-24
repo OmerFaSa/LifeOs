@@ -219,6 +219,16 @@
   --gutter:196px;
   --gutter-gap:52px;
 
+  /* ================= AÇIK — örnek için adlı kopya =================
+     Tema önizlemesi (181) geçerli tema koyuyken de AÇIK örneği çizer;
+     koyu temada --bg artık açık değer değildir. Bu beş değer yukarıdaki
+     açık yüzey ve metinle AYNI olmak zorunda (ayar.test.js denetler). */
+  --l-bg:#F7F8FA;
+  --l-surface:#FFFFFF;
+  --l-text:#111318;
+  --l-text-3:#6A7180;
+  --l-border:#E8EAEE;
+
   /* ================= KOYU — tek tanım (vitrin) =================
      Yalnız aşağıdaki iki eşleme bloğunda kullanılır. */
   --d-bg:#09090B;
@@ -2967,7 +2977,7 @@ button.minrow:hover{ background:var(--surface-2); }
   color:var(--text-3); margin-bottom:7px;
 }
 .appear__label:not(:first-child){ margin-top:16px; }
-.appear__themes{ display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+.appear__themes{ display:block; } /* içindeki tema seçici (181) kendi ızgarasını kurar */
 .themebtn{
   display:flex; flex-direction:column; align-items:center; gap:6px;
   padding:10px 6px; border-radius:11px;
@@ -8395,6 +8405,118 @@ span.h-yuvarla, b.h-yuvarla, small.h-yuvarla{ display:inline-block; }
   .h-halka{ display:none; }
   ::view-transition-group(h-kart){ animation:none; }
 }
+
+/* ==== css/ayar.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/ayar.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* AYAR — T5. Kaynak: brand/ortak/ayar.css; `tools/ortak.py --yay` üç
+   arayüze kopyalar. Davranışı `ayar.js`. */
+
+/* ------------------------------------------------ 21 · değişen alan noktası */
+.field.is-degisti > span:first-child::after,
+.field.is-varsayilandan > span:first-child::after{
+  content:''; display:inline-block; width:6px; height:6px; margin-left:6px;
+  border-radius:50%; background:var(--primary); vertical-align:middle;
+}
+/* Kaydedilmemiş (21) dolu nokta; yalnız varsayılandan farklı (182) halka. */
+.field.is-varsayilandan:not(.is-degisti) > span:first-child::after{
+  background:transparent; box-shadow:inset 0 0 0 1.5px var(--text-3);
+}
+
+/* ------------------------------------------------ 21 · alt şerit */
+.ayar-serit{
+  position:fixed; left:50%; bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+  transform:translateX(-50%); z-index:var(--z-overlay);
+  display:flex; align-items:center; gap:var(--sp-2); flex-wrap:wrap; justify-content:center;
+  max-width:calc(100vw - 24px);
+  padding:8px 8px 8px 14px;
+  background:var(--surface); color:var(--text);
+  border:1px solid var(--border); border-radius:var(--r);
+  box-shadow:var(--shadow-lg);
+  font-size:var(--fs-sm);
+  animation:ayar-serit-gir var(--dur-lg) var(--ease) both;
+}
+.ayar-serit__yazi{ font-weight:600; margin-right:var(--sp-2); }
+.ayar-serit .btn{ min-height:32px; }
+@keyframes ayar-serit-gir{ from{ opacity:0; transform:translate(-50%, 8px); } }
+/* Telefonda alt bandın üstünde durur. */
+@media (max-width:679px){
+  .ayar-serit{ bottom:calc(72px + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ------------------------------------------------ 182 · varsayılana dön */
+.ayar-varsayilan{
+  margin:4px 0 0; font-size:var(--fs-xs); color:var(--text-3);
+}
+.ayar-varsayilan .linkbtn{ font-size:inherit; min-height:24px; }
+
+/* ------------------------------------------------ 183 · ayar arama */
+.ayar-ara{ position:relative; width:min(320px, 100%); }
+.ayar-ara__kutu{ width:100%; }
+.ayar-ara__sonuclar{
+  position:absolute; left:0; right:0; top:calc(100% + 6px); z-index:var(--z-overlay);
+  max-height:min(60vh, 420px); overflow:auto;
+  padding:6px; background:var(--surface);
+  border:1px solid var(--border); border-radius:var(--r-md); box-shadow:var(--shadow-lg);
+}
+.ayar-ara__sonuclar:empty{ display:none; }
+.ayar-ara__modul{
+  margin:6px 8px 4px; font-size:var(--fs-xs); font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--text-3);
+}
+.ayar-ara__sonuc{
+  display:flex; flex-direction:column; align-items:flex-start; gap:2px;
+  width:100%; min-height:40px; padding:6px 8px; text-align:left;
+  background:none; border:0; border-radius:var(--r-sm); cursor:pointer;
+  font:inherit; color:var(--text);
+}
+.ayar-ara__sonuc span{ font-size:var(--fs-xs); color:var(--text-3); }
+.ayar-ara__sonuc:hover, .ayar-ara__sonuc:focus-visible{ background:var(--surface-2); }
+.field.is-bulundu{ outline:2px solid var(--primary); outline-offset:4px; border-radius:var(--r-sm); }
+
+/* ------------------------------------------------ 181 · tema önizlemesi
+   Seçmeden önce üç seçenek yan yana, her biri KENDİ renginde küçük bir
+   ekran örneğiyle. Açık örnek `--l-*`, koyu örnek `--d-*` jetonlarından
+   çizilir: geçerli tema ne olursa olsun ikisi de doğru görünür. */
+.temasec{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:var(--sp-2); }
+.temasec__secenek{
+  display:flex; flex-direction:column; gap:6px; align-items:stretch;
+  padding:6px; min-height:44px;
+  background:var(--surface); color:var(--text-2);
+  border:1px solid var(--border); border-radius:var(--r-md); cursor:pointer;
+  font:inherit; font-size:var(--fs-sm); text-align:left;
+}
+.temasec__secenek:hover{ border-color:var(--border-strong); }
+.temasec__secenek.is-on{ border-color:var(--primary); color:var(--text); box-shadow:inset 0 0 0 1px var(--primary); }
+.temasec__ad{ display:flex; align-items:center; gap:6px; padding:0 2px 2px; font-weight:600; }
+.temasec__ad svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.8; }
+.tema-ornek{
+  display:flex; flex-direction:column; gap:4px;
+  height:48px; padding:0 0 6px; overflow:hidden;
+  border-radius:var(--r-sm); border:1px solid;
+}
+.tema-ornek > i{ display:block; height:4px; background:var(--mod); }
+.tema-ornek > b{ display:flex; flex-direction:column; gap:4px; margin:2px 6px 0; padding:5px 6px; border-radius:4px; }
+.tema-ornek > b > i{ display:block; height:4px; border-radius:2px; }
+.tema-ornek > b > i + i{ width:60%; }
+.tema-ornek--light{ background:var(--l-bg); border-color:var(--l-border); }
+.tema-ornek--light > b{ background:var(--l-surface); }
+.tema-ornek--light > b > i{ background:var(--l-text); }
+.tema-ornek--light > b > i + i{ background:var(--l-text-3); }
+.tema-ornek--dark{ background:var(--d-bg); border-color:var(--d-border); }
+.tema-ornek--dark > b{ background:var(--d-surface); }
+.tema-ornek--dark > b > i{ background:var(--d-text); }
+.tema-ornek--dark > b > i + i{ background:var(--d-text-3); }
+.tema-ornek--system{
+  background:linear-gradient(90deg, var(--l-bg) 50%, var(--d-bg) 50%);
+  border-color:var(--border);
+}
+.tema-ornek--system > b{ background:linear-gradient(90deg, var(--l-surface) 50%, var(--d-surface) 50%); }
+.tema-ornek--system > b > i{ background:linear-gradient(90deg, var(--l-text) 50%, var(--d-text) 50%); }
+.tema-ornek--system > b > i + i{ background:linear-gradient(90deg, var(--l-text-3) 50%, var(--d-text-3) 50%); }
+
+@media (prefers-reduced-motion:reduce){ .ayar-serit{ animation:none; } }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -9489,7 +9611,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'334f4db', at:'2026-09-24 20:16', dirty:true };
+ESP.BUILD = { id:'852f6fd', at:'2026-09-24 20:34', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -12908,6 +13030,332 @@ window.LIFEOS.HAREKET = (function(){
 
   return { once, sonra, tekCanli, baslikKopyala, kaynak, gecis, halka, onizleIcerik, odakCik, kur,
     EN_COK_KAPANAN };
+})();
+
+/* ==== js/core/ayar.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/ayar.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* AYAR — T5 (ekip/EKIP-PLANI.md §4.2): ayar ekranlarının ortak davranışı.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/ayar.js`; `tools/ortak.py --yay` ile üç arayüzün
+   `src/js/core/` klasörüne birebir kopyalanır. Biçimi `ayar.css`.
+
+     21  kaydedilmemiş değişiklik  «Kaydet» düğmesi olan kutudaki alan
+                                   değişince yanında nokta; altta «N değişiklik
+                                   kaydedilmedi · Vazgeç · Kaydet» şeridi.
+                                   Yeniden çizimde ve ekrandan çıkıp dönünce
+                                   yazılan değer KAYBOLMAZ (bellekte bekler).
+     182 varsayılana dön           `data-varsayilan` taşıyan alan varsayılandan
+                                   farklıysa noktalı; altında varsayılan değer
+                                   ve tek düğme. Anında uygulanan alan
+                                   (`data-change`) dönünce kendi olayını atar.
+     183 ayar arama                ayar ekranlarının alan adlarından dizin;
+                                   sonuç tam yoluyla: «AYS › Ayarlar › Genel ›
+                                   Tema».
+
+   Neyin «kaydedilmemiş» olduğunu tarayıcının kendisi bilir: bir alanın
+   çizildiği andaki değeri `defaultValue` / `defaultChecked` /
+   `defaultSelected`'dır. Durum ayrıca tutulmaz; ekran kodu bilmek zorunda
+   değildir. Anında uygulanan alan (`data-change`) kaydedilmemiş sayılmaz. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.AYAR = (function(){
+  const KAYDET = 'button[data-act^="save-"]';
+  const KAPSAM = '.card, .kutu, .lrow, form, .sheet';
+  const ALAN = 'input, select, textarea';
+
+  /* rota -> { alanId: değer } — ekrandan çıkınca yazılan kaybolmasın. */
+  const bekleyen = {};
+  let rota = null;
+  let etkin = false;
+  let serit = null;
+  /* «Kaydet»e basıldıysa bir sonraki çizimde bellekteki değer geri
+     konmaz: kaydeden ekran değeri biçimlendirmiş olabilir («1,50» →
+     «1,5»); eskisini geri koymak kaydedilmiş bir alanı «kaydedilmedi»
+     gösterirdi. Doğrulama reddederse ekranın eski davranışı geçerlidir. */
+  let kaydetBasildi = false;
+
+  function kac(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+
+  /* ------------------------------------------------------------ 21 */
+
+  function izlenir(e){
+    if(!e || !e.id || e.disabled) return false;
+    if(e.hasAttribute('data-change')) return false;            // anında uygulanır
+    if(/^(file|hidden|button|submit|reset|search)$/i.test(e.type || '')) return false;
+    if(e.closest('[data-ayar-disi]')) return false;
+    return true;
+  }
+  function kapsamlar(kok){
+    const k = new Set();
+    if(!kok) return [];
+    kok.querySelectorAll(KAYDET).forEach(b => {
+      const kap = b.closest(KAPSAM);
+      if(kap && kap.querySelector(ALAN)) k.add(kap);
+    });
+    return Array.from(k);
+  }
+  function alanlar(kok){
+    const a = [];
+    kapsamlar(kok).forEach(k => k.querySelectorAll(ALAN).forEach(e => { if(izlenir(e) && a.indexOf(e) < 0) a.push(e); }));
+    return a;
+  }
+  function deger(e){
+    if(e.type === 'checkbox' || e.type === 'radio') return e.checked ? '1' : '0';
+    return String(e.value);
+  }
+  function ilkDeger(e){
+    if(e.type === 'checkbox' || e.type === 'radio') return e.defaultChecked ? '1' : '0';
+    if(e.tagName === 'SELECT'){
+      const o = Array.from(e.options).find(x => x.defaultSelected) || e.options[0];
+      return o ? String(o.value) : '';
+    }
+    return String(e.defaultValue);
+  }
+  function ata(e, v){
+    if(e.type === 'checkbox' || e.type === 'radio') e.checked = v === '1';
+    else e.value = v;
+  }
+  function degistiMi(e){ return deger(e) !== ilkDeger(e); }
+  function alanKabi(e){ return e.closest('.field') || e.closest('label') || e.parentElement; }
+
+  function degisenler(kok){ return alanlar(kok).filter(degistiMi); }
+
+  /* Değişeni işaretler, şeridi günceller, belleği tazeler. Kaç değişik alan
+     olduğunu döndürür. */
+  function tara(kok){
+    kok = kok || document;
+    if(!etkin){
+      kok.querySelectorAll('.is-degisti').forEach(e => e.classList.remove('is-degisti'));
+      seritCiz([]);
+      return 0;
+    }
+    const hepsi = alanlar(kok);
+    const d = hepsi.filter(degistiMi);
+    hepsi.forEach(e => { const k = alanKabi(e); if(k) k.classList.toggle('is-degisti', d.indexOf(e) >= 0); });
+    if(rota != null){
+      const m = {};
+      d.forEach(e => { m[e.id] = deger(e); });
+      if(d.length) bekleyen[rota] = m; else delete bekleyen[rota];
+    }
+    seritCiz(d);
+    return d.length;
+  }
+
+  function seritCiz(d){
+    if(!d.length){ if(serit){ serit.remove(); serit = null; } return; }
+    if(!serit || !serit.isConnected){
+      serit = document.createElement('div');
+      serit.className = 'ayar-serit';
+      serit.setAttribute('role', 'status');
+      document.body.appendChild(serit);
+    }
+    serit.innerHTML = '<span class="ayar-serit__yazi">' + d.length + ' değişiklik kaydedilmedi</span>'
+      + '<button type="button" class="btn btn--sm" data-ayar="vazgec">Vazgeç</button>'
+      + '<button type="button" class="btn btn--sm btn--primary" data-ayar="kaydet">Kaydet</button>';
+  }
+
+  function vazgec(kok){
+    kok = kok || document;
+    degisenler(kok).forEach(e => ata(e, ilkDeger(e)));
+    if(rota != null) delete bekleyen[rota];
+    return tara(kok);
+  }
+  /* İlk değişen alanın kutusundaki «Kaydet»e basar; kaydetmek ekranın işi. */
+  function kaydet(kok){
+    kok = kok || document;
+    const d = degisenler(kok);
+    if(!d.length) return false;
+    const kap = d[0].closest(KAPSAM);
+    const b = kap && kap.querySelector(KAYDET);
+    if(!b) return false;
+    b.click();
+    return true;
+  }
+
+  /* ------------------------------------------------------------ 182 */
+
+  function varsayilanlar(kok){
+    if(!kok) return 0;
+    /* Yalnız BURADA eklenen not silinir; bileşenin kendi çizdiği not
+       (tema seçici) ekranındır. */
+    kok.querySelectorAll('.ayar-varsayilan[data-ayar-ek]').forEach(e => e.remove());
+    let n = 0;
+    kok.querySelectorAll('[data-varsayilan]').forEach(e => {
+      if(!/^(INPUT|SELECT|TEXTAREA)$/.test(e.tagName)) return;
+      const v = e.getAttribute('data-varsayilan');
+      const k = alanKabi(e);
+      const farkli = ilkDeger(e) !== v;
+      if(k) k.classList.toggle('is-varsayilandan', farkli);
+      if(!farkli || !k) return;
+      const ad = e.getAttribute('data-varsayilan-ad') || v;
+      const p = document.createElement('p');
+      p.className = 'ayar-varsayilan';
+      p.setAttribute('data-ayar-ek', '');
+      p.innerHTML = 'Varsayılan: ' + kac(ad)
+        + ' <button type="button" class="linkbtn" data-ayar="varsayilan" data-alan="' + kac(e.id) + '">Varsayılana dön</button>';
+      k.insertAdjacentElement('afterend', p);
+      n++;
+    });
+    return n;
+  }
+  function varsayilanaDon(id){
+    const e = id ? document.getElementById(id) : null;
+    if(!e || !e.hasAttribute('data-varsayilan')) return false;
+    ata(e, e.getAttribute('data-varsayilan'));
+    e.dispatchEvent(new Event('input', { bubbles:true }));
+    e.dispatchEvent(new Event('change', { bubbles:true }));
+    return true;
+  }
+
+  /* ------------------------------------------------------------ 183 */
+
+  function duz(s){
+    return String(s || '').toLocaleLowerCase('tr-TR')
+      .normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ı/g, 'i').trim();
+  }
+  /* ekranlar: [{ route, ad, html }] — ad «Genel», «Profil»… Kutu/Kart
+     başlığı bölüm, alan etiketi ayar adıdır. */
+  /* Başlığın düz adı: ipucu düğmesi («i») ve yardımcı yazı ada karışmaz. */
+  function yalinAd(el){
+    if(!el) return '';
+    const k = el.cloneNode(true);
+    k.querySelectorAll('button, .hint, .hint-text, [aria-hidden="true"], small').forEach(x => x.remove());
+    return k.textContent.replace(/\s+/g, ' ').trim();
+  }
+  function dizin(modul, ekranlar){
+    const d = [];
+    (ekranlar || []).forEach(x => {
+      const kap = document.createElement('div');
+      kap.innerHTML = String(x.html || '');
+      kap.querySelectorAll('label.field, .field').forEach(f => {
+        const ad = yalinAd(f.querySelector(':scope > span'));
+        if(!ad) return;
+        const alan = f.querySelector(ALAN);
+        const kutu = f.closest('.kutu, .card, .lrow');
+        const bolum = kutu ? yalinAd(kutu.querySelector('.kutu__ad, .card__title, .lrow__label, h2, h3')) : '';
+        d.push({ modul, route:x.route, ekran:x.ad, bolum, ad, alan:alan ? alan.id : '',
+          yol:[modul, 'Ayarlar', x.ad].concat(bolum && bolum !== x.ad ? [bolum] : []).concat([ad]).join(' › ') });
+      });
+    });
+    return d;
+  }
+  function ara(d, soru){
+    const q = duz(soru);
+    if(q.length < 2) return [];
+    return (d || []).filter(x => duz(x.ad).indexOf(q) >= 0 || duz(x.bolum).indexOf(q) >= 0);
+  }
+  function aramaSonucu(sonuc){
+    if(!sonuc.length) return '<p class="small muted">Bu adla bir ayar yok.</p>';
+    const gruplar = {};
+    sonuc.forEach(x => { (gruplar[x.modul] = gruplar[x.modul] || []).push(x); });
+    return Object.keys(gruplar).map(m => '<div class="ayar-ara__grup"><p class="ayar-ara__modul">' + kac(m) + '</p>'
+      + gruplar[m].map(x => '<button type="button" class="ayar-ara__sonuc" data-act="ayar-git"'
+        + ' data-route="' + kac(x.route) + '" data-alan="' + kac(x.alan) + '">'
+        + '<b>' + kac(x.ad) + '</b><span>' + kac(x.yol) + '</span></button>').join('')
+      + '</div>').join('');
+  }
+  /* Ayarlar çekmecesinin sayfa başında durur. `type=search` olduğu için
+     kaydedilmemiş değişiklik sayılmaz (izlenir). */
+  function aramaKutusu(){
+    return '<div class="ayar-ara" role="search">'
+      + '<input type="search" class="input ayar-ara__kutu" id="ayar-ara" data-ayar-ara'
+      + ' placeholder="Ayar ara" aria-label="Ayar ara" autocomplete="off" aria-controls="ayar-ara-sonuc">'
+      + '<div class="ayar-ara__sonuclar" id="ayar-ara-sonuc" aria-live="polite"></div></div>';
+  }
+  let dizinFn = null, dizinOnbellek = null;
+  async function dizinAl(){
+    if(dizinOnbellek) return dizinOnbellek;
+    try{ dizinOnbellek = dizinFn ? await dizinFn() : []; }catch(e){ dizinOnbellek = []; }
+    return dizinOnbellek;
+  }
+  async function aramaYaz(kutu){
+    const yer = document.getElementById('ayar-ara-sonuc');
+    if(!yer) return;
+    const q = kutu.value;
+    if(duz(q).length < 2){ yer.innerHTML = ''; return; }
+    const d = await dizinAl();
+    if(kutu.value !== q) return;               // bu arada yazılmaya devam edildi
+    yer.innerHTML = aramaSonucu(ara(d, q));
+  }
+
+  /* Sonuca basınca: ekrana git, alana kay ve odakla. */
+  function alanaGit(id){
+    const e = id ? document.getElementById(id) : null;
+    if(!e) return false;
+    let az = true;
+    try{ az = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(x){}
+    e.scrollIntoView({ block:'center', behavior:az ? 'auto' : 'smooth' });
+    try{ e.focus({ preventScroll:true }); }catch(x){}
+    const k = alanKabi(e);
+    if(k){ k.classList.add('is-bulundu'); setTimeout(() => k.classList.remove('is-bulundu'), 1600); }
+    return true;
+  }
+
+  /* ------------------------------------------------------------ bağlama */
+
+  function once(kok){ if(kok && rota != null && !kaydetBasildi) tara(kok); }
+
+  /* o: { rota, etkin } — etkin: ekran Ayarlar çekmecesinde mi. */
+  function sonra(kok, o){
+    o = o || {};
+    rota = o.rota != null ? o.rota : rota;
+    etkin = !!o.etkin;
+    if(kaydetBasildi){ kaydetBasildi = false; delete bekleyen[rota]; }
+    if(!kok) return 0;
+    /* Bellekte bekleyen değeri geri koy: yeniden çizim yazılanı silmez. */
+    const m = bekleyen[rota];
+    if(m && etkin){
+      Object.keys(m).forEach(id => {
+        const e = document.getElementById(id);
+        if(e && kok.contains(e) && izlenir(e)) ata(e, m[id]);
+      });
+    }
+    if(etkin) varsayilanlar(kok);
+    return tara(kok);
+  }
+
+  let kuruldu = false;
+  /* o.dizin: async () => dizin(...) — ayar ekranlarından arama dizini. */
+  function kur(o){
+    o = o || {};
+    if(o.dizin){ dizinFn = o.dizin; dizinOnbellek = null; }
+    if(kuruldu) return;
+    kuruldu = true;
+    document.addEventListener('input', e => {
+      if(e.target && e.target.matches && e.target.matches('[data-ayar-ara]')) aramaYaz(e.target);
+    });
+    document.addEventListener('keydown', e => {
+      if(e.key !== 'Escape' || !e.target || !e.target.matches || !e.target.matches('[data-ayar-ara]')) return;
+      e.target.value = '';
+      const yer = document.getElementById('ayar-ara-sonuc');
+      if(yer) yer.innerHTML = '';
+    });
+    const degisti = e => { if(etkin && e.target && e.target.matches && e.target.matches(ALAN)) tara(document.getElementById('app') || document); };
+    document.addEventListener('input', degisti);
+    document.addEventListener('change', degisti);
+    document.addEventListener('click', e => {
+      if(e.target.closest && e.target.closest(KAYDET)){ kaydetBasildi = true; if(rota != null) delete bekleyen[rota]; }
+    }, true);
+    document.addEventListener('click', e => {
+      const b = e.target.closest && e.target.closest('[data-ayar]');
+      if(!b) return;
+      const kok = document.getElementById('app') || document;
+      const ne = b.getAttribute('data-ayar');
+      if(ne === 'vazgec') vazgec(kok);
+      else if(ne === 'kaydet') kaydet(kok);
+      else if(ne === 'varsayilan') varsayilanaDon(b.getAttribute('data-alan'));
+    });
+  }
+
+  return { once, sonra, tara, vazgec, kaydet, degisenler, varsayilanlar, varsayilanaDon,
+    dizin, ara, aramaSonucu, aramaKutusu, alanaGit, kur, _bekleyen:bekleyen };
 })();
 
 /* ==== js/core/olumsuz.js ==== */
@@ -31168,7 +31616,10 @@ ESP.Beacon = (function(){
     }catch(e){ /* işaret, akışı asla bozmaz */ }
   }
 
-  return { load, save, settings, collect, payload, preview, contract, metric,
+  /* Ayar ekranı «Varsayılana dön» için okur (T5, 182); kopya verilir. */
+  const varsayilan = () => Object.assign({}, VARSAYILAN);
+
+  return { varsayilan, load, save, settings, collect, payload, preview, contract, metric,
     MODULE, profil:profilim, urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
     intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE, desteOf, kayitOku,
     kartOnizle, kartGeriAl,
@@ -36921,6 +37372,28 @@ ESP.C = (function(){
   /* SAKİN HATA (katalog 011): bir şey bozulursa ne oldu, verin nerede, tek
      düğme. Kırmızı yok; İLK cümle veri kaybı olmadığını söyler. Teknik ileti
      silinmez, «Teknik ayrıntı»nın altına iner (D katmanı). */
+  /* TEMA SEÇİCİ (katalog 181, 182): üç seçenek yan yana, her biri KENDİ
+     renginde küçük bir ekran örneğiyle — ayarın ne değiştirdiği denemeden
+     görülür. Seçim anında uygulanır. Varsayılan Sistem'dir; başka tema
+     seçiliyken altında varsayılan ve tek düğme durur. `data-theme` ve
+     `data-value` ikisi de yazılır: kabuğun ve ekranın işleyicisi farklı
+     adı okuyor. */
+  const TEMALAR = [{ id:'system', ad:'Sistem', simge:'monitor' },
+    { id:'light', ad:'Açık', simge:'sun' }, { id:'dark', ad:'Koyu', simge:'moon' }];
+  function TemaSecici(o){
+    o = o || {};
+    const v = o.value || 'system';
+    const act = o.act || 'set-theme';
+    return html`<div class="temasec" role="group" aria-label="Tema">
+      ${map(TEMALAR, t => html`<button type="button" class="${cls('temasec__secenek', t.id === v && 'is-on')}"
+        data-act="${act}" data-theme="${t.id}" data-value="${t.id}" aria-pressed="${t.id === v ? 'true' : 'false'}">
+        <span class="${'tema-ornek tema-ornek--' + t.id}" aria-hidden="true"><i></i><b><i></i><i></i></b></span>
+        <span class="temasec__ad">${icon(t.simge)}${t.ad}</span></button>`)}
+    </div>
+    ${when(v !== 'system', () => html`<p class="ayar-varsayilan">Varsayılan: Sistem
+      <button type="button" class="linkbtn" data-act="${act}" data-theme="system" data-value="system">Varsayılana dön</button></p>`)}`;
+  }
+
   function SakinHata(o){
     o = o || {};
     return html`<div class="sakinhata" data-oz="011" role="status">${Kutu({ ad:o.baslik || 'Bu ekran açılamadı.',
@@ -37296,7 +37769,7 @@ ESP.C = (function(){
   const SectionTitle = (title, right) => html`<div class="section-title"><h2>${title}</h2>${when(right, right)}</div>`;
 
   return {
-    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, SakinHata, Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, SakinHata, TemaSecici, Card, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     Entry, Ledger,
     PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, Busy, NextUp, Table, Pager, paginate,
@@ -47532,13 +48005,7 @@ ESP.Screens.profile = (function(){
           wide:true,
           body:html`
             ${K.SectionTitle('Tema')}
-            <div class="picks picks--disc">${map([
-                { id:'system', label:'Sistem', note:'Cihazın ayarına uyar' },
-                { id:'light', label:'Açık', note:'Her zaman açık' },
-                { id:'dark', label:'Koyu', note:'Her zaman koyu' }],
-              x => K.PickCard({ label:x.label, meta:x.note,
-                on:(p.theme || 'system') === x.id,
-                act:'set-theme', data:{ 'data-theme':x.id } }))}</div>`,
+            ${K.TemaSecici({ value:p.theme || 'system', act:'set-theme' })}`,
         }),
 
         K.Entry({
@@ -47653,7 +48120,7 @@ ESP.Screens.profile = (function(){
               change:'hkm-token', aria:'HKM jetonu' }) })}
           ${K.Field({ label:'En sık kaç dakikada bir',
             input:K.Input({ id:'hkm-int', type:'number', min:'15', step:'5',
-              value:a.intervalMinutes, change:'hkm-interval',
+              value:a.intervalMinutes, change:'hkm-interval', data:{ 'data-varsayilan':String(ESP.Beacon.varsayilan().intervalMinutes), 'data-varsayilan-ad':ESP.Beacon.varsayilan().intervalMinutes + ' dakika' },
               aria:'Gönderim aralığı' }) })}
         </div>
 
@@ -47664,7 +48131,7 @@ ESP.Screens.profile = (function(){
         <div class="mt-12">
           ${K.Field({ label:'Kapsam', hint:'ne kadarı gönderilsin',
             input:K.Select({ id:'hkm-level', value:ESP.Beacon.levelOf(),
-              change:'hkm-level', aria:'Gönderim kapsamı',
+              change:'hkm-level', data:{ 'data-varsayilan':ESP.Beacon.varsayilan().level, 'data-varsayilan-ad':(ESP.Beacon.LEVELS.find(l => l.id === ESP.Beacon.varsayilan().level) || {}).label }, aria:'Gönderim kapsamı',
               options:ESP.Beacon.LEVELS.map(l => ({ value:l.id, label:l.label })) }) })}
           <p class="small muted">${(ESP.Beacon.LEVELS.find(l => l.id === ESP.Beacon.levelOf()) || {}).note}</p>
         </div>
@@ -50017,10 +50484,17 @@ ESP.App = (function(){
     return yol;
   }
 
+  /* Ayarlar çekmecesi (T5): ayar arama (183) sayfa başında, kaydedilmemiş
+     değişiklik (21) ve varsayılana dön (182) yalnız burada çalışır. */
+  function ayarlardaMi(route){ return !!safe(() => sectionOf(route) && sectionOf(route).id === 'ayarlar', false); }
+  function ayarRotalari(){ return safe(() => ((typeof SECTIONS === 'function' ? SECTIONS() : SECTIONS).find(s => s.id === 'ayarlar') || { views:[] }).views.map(v => ({ route:v.route, ad:v.label })), []) || []; }
+
   function sayfaBasiHtml(sc){
     const baslik = safe(() => sc.headline ? sc.headline() : '') || sc.title;
     const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
-    const eylem = safe(() => sc.actions ? sc.actions() : '');
+    const AY = window.LIFEOS && window.LIFEOS.AYAR;
+    const eylem = (AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '')
+      + (safe(() => sc.actions ? sc.actions() : '') || '');
     return K.sayfaBasi({ yol:yolOf(sc.id), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
   }
 
@@ -50121,13 +50595,7 @@ ESP.App = (function(){
           ${ESP.C.Button({ label:'Profil', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'profile' } })}
         </div>
         <div class="appear__label">Tema</div>
-        <div class="appear__themes">${map(THEMES, t => html`
-          <button class="${cls('themebtn', t.id === theme && 'is-on')}"
-            data-act="set-theme" data-theme="${t.id}"
-            aria-pressed="${t.id === theme ? 'true' : 'false'}">
-            ${raw(UI.icon(t.icon))}<span>${t.label}</span>
-          </button>`)}
-        </div>
+        <div class="appear__themes">${ESP.C.TemaSecici({ value:theme, act:'set-theme' })}</div>
 
         <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
           cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>
@@ -50297,12 +50765,14 @@ ESP.App = (function(){
       const appEl = document.getElementById('app');
       const H = window.LIFEOS && window.LIFEOS.HAREKET;
       if(H) H.once(appEl);
+      if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.once(appEl);
       await withTransition(() => { appEl.innerHTML = markup; });
 
       const newMain = document.getElementById('main');
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
       if(H) H.sonra(appEl, S.route);
+      if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.sonra(appEl, { rota:S.route, etkin:ayarlardaMi(S.route) });
       revealActiveTab();
       /* Kabuk her cizimde yeniden kuruluyor; acik bir alt sayfa varsa
          `inert` onunla birlikte silinir ve arka plan yeniden okunur
@@ -50384,6 +50854,13 @@ ESP.App = (function(){
 
   /* ---------------------------------------------------------- küresel eylemler */
   const globalHandle = {
+    /* Ayar aramasının sonucu (183): ekrana git, alana kay ve odakla. */
+    async 'ayar-git'(el){
+      const alan = el.dataset.alan;
+      go(el.dataset.route);
+      await render();
+      if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.alanaGit(alan);
+    },
     async go(el){
       if(window.LIFEOS && window.LIFEOS.HAREKET) window.LIFEOS.HAREKET.kaynak(el);
       go(el.dataset.route);
@@ -50722,8 +51199,11 @@ ESP.App = (function(){
     },
     async 'set-theme'(el){
       await M.saveProfile({ theme:el.dataset.theme });
+      /* Ekran da yeniden çizilir: Ayarlar'daki seçici (ESP Profil) seçili
+         kutuyu eskisinde bırakıyordu. */
       applyTheme();
       refreshAppearance();
+      render();
     },
     async 'cmdk-run'(el){ ESP.Palette.runById(el.dataset.id); },
     async 'quick-save'(){ await ESP.Palette.saveQuick(); },
@@ -51214,6 +51694,16 @@ ESP.App = (function(){
         let cumle = '';
         try{ cumle = hs.headline ? String(hs.headline() || '') : ''; }catch(e){}
         return { baslik:hs.title, cumle };
+      } });
+      /* Ayarlar (T5): arama dizini ayar ekranlarının kendi çiziminden kurulur. */
+      if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.kur({ dizin:async () => {
+        const ekranlar = [];
+        for(const r of ayarRotalari()){
+          const es = ESP.Screens[r.route];
+          if(!es) continue;
+          try{ ekranlar.push({ route:r.route, ad:r.ad, html:String(await es.render()) }); }catch(e){}
+        }
+        return window.LIFEOS.AYAR.dizin('ESP', ekranlar);
       } });
       /* Arayüz Türkçe: CSS büyük harfe çevirirken "i" → "İ" olsun.
          Tek dosya sürümünde <html> kabuğu dışarıdan gelir, bu yüzden burada. */

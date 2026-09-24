@@ -137,6 +137,16 @@
   --gutter:196px;
   --gutter-gap:52px;
 
+  /* ================= AÇIK — örnek için adlı kopya =================
+     Tema önizlemesi (181) geçerli tema koyuyken de AÇIK örneği çizer;
+     koyu temada --bg artık açık değer değildir. Bu beş değer yukarıdaki
+     açık yüzey ve metinle AYNI olmak zorunda (ayar.test.js denetler). */
+  --l-bg:#F7F8FA;
+  --l-surface:#FFFFFF;
+  --l-text:#111318;
+  --l-text-3:#6A7180;
+  --l-border:#E8EAEE;
+
   /* ================= KOYU — tek tanım (vitrin) =================
      Yalnız aşağıdaki iki eşleme bloğunda kullanılır. */
   --d-bg:#09090B;

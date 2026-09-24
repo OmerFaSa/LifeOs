@@ -264,10 +264,17 @@ R.App = (function(){
     return yol;
   }
 
+  /* Ayarlar çekmecesi (T5): ayar arama (183) sayfa başında, kaydedilmemiş
+     değişiklik (21) ve varsayılana dön (182) yalnız burada çalışır. */
+  function ayarlardaMi(route){ return !!safe(() => bolumOf(route) && bolumOf(route).id === 'ayarlar', false); }
+  function ayarRotalari(){ return safe(() => (NAV.find(s => s.id === 'ayarlar') || { items:[] }).items.map(v => ({ route:v.id, ad:v.label })), []) || []; }
+
   function sayfaBasiHtml(sc){
     const baslik = safe(() => sc.headline ? sc.headline() : '') || sc.title;
     const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
-    const eylem = safe(() => sc.actions ? sc.actions() : '');
+    const AY = window.LIFEOS && window.LIFEOS.AYAR;
+    const eylem = (AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '')
+      + (safe(() => sc.actions ? sc.actions() : '') || '');
     return K.sayfaBasi({ yol:yolOf(sc.id), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
   }
 
@@ -370,13 +377,7 @@ R.App = (function(){
           ${R.C.Button({ label:'Profil', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'profiles' } })}
         </div>
         <div class="appear__label">Tema</div>
-        <div class="appear__themes">${map(THEMES, t => html`
-          <button class="${cls('themebtn', t.id === theme && 'is-on')}"
-            data-act="set-theme" data-theme="${t.id}"
-            aria-pressed="${t.id === theme ? 'true' : 'false'}">
-            ${raw(UI.icon(t.icon))}<span>${t.label}</span>
-          </button>`)}
-        </div>
+        <div class="appear__themes">${R.C.TemaSecici({ value:theme, act:'set-theme' })}</div>
 
         <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
           cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>
@@ -521,6 +522,7 @@ R.App = (function(){
       const appEl = document.getElementById('app');
       const H = window.LIFEOS && window.LIFEOS.HAREKET;
       if(H) H.once(appEl);
+      if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.once(appEl);
       const ciz = () => { appEl.innerHTML = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
         <div class="site site--v4">
@@ -543,6 +545,7 @@ R.App = (function(){
       if(newMain && scroll) newMain.scrollTop = scroll;
       restoreFocus(focus);
       if(H) H.sonra(appEl, S.route);
+      if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.sonra(appEl, { rota:S.route, etkin:ayarlardaMi(S.route) });
       /* Odağı ancak YÖNLENDİRMEDEN sonra taşı: sıradan bir yeniden
          çizimde taşımak, yazan kullanıcının imlecini alandan koparırdı. */
       if(rotaDegisti){ rotaDegisti = false; rotayaOdaklan(sc); }
@@ -654,6 +657,13 @@ R.App = (function(){
 
   /* ---------- kuresel eylemler ---------- */
   const globalHandle = {
+    /* Ayar aramasının sonucu (183): ekrana git, alana kay ve odakla. */
+    async 'ayar-git'(el){
+      const alan = el.dataset.alan;
+      go(el.dataset.route);
+      await render();
+      if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.alanaGit(alan);
+    },
     async go(el){
       if(el.dataset.tab) S.ui.cardTab = el.dataset.tab;
       if(window.LIFEOS && window.LIFEOS.HAREKET) window.LIFEOS.HAREKET.kaynak(el);
@@ -698,7 +708,9 @@ R.App = (function(){
     async 'set-theme'(el){
       S.profile.theme = el.dataset.theme;
       await M.saveProfile();
-      applyTheme(); refreshAppearance();
+      /* Ekran da yeniden çizilir: Ayarlar'daki seçici aynı anda açıksa
+         seçili kutu eskisinde kalıyordu. */
+      applyTheme(); refreshAppearance(); render();
     },
     /* Sert yenileme: adrese bir kerelik damga eklenir, boylece tarayici
        sayfayi ve bagli dosyalari onbellekten degil sunucudan ister.
@@ -1249,6 +1261,16 @@ R.App = (function(){
         let cumle = '';
         try{ cumle = hs.headline ? String(hs.headline() || '') : ''; }catch(e){}
         return { baslik:hs.title, cumle };
+      } });
+      /* Ayarlar (T5): arama dizini ayar ekranlarının kendi çiziminden kurulur. */
+      if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.kur({ dizin:async () => {
+        const ekranlar = [];
+        for(const r of ayarRotalari()){
+          const es = R.Screens[r.route];
+          if(!es) continue;
+          try{ ekranlar.push({ route:r.route, ad:r.ad, html:String(await es.render()) }); }catch(e){}
+        }
+        return window.LIFEOS.AYAR.dizin('AYS', ekranlar);
       } });
       // Arayuz Turkce: CSS buyuk harfe cevirirken "i" → "İ" olsun.
       // (Tek dosya surumunde <html> kabugu disaridan gelir, bu yuzden burada.)

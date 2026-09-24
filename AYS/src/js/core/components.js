@@ -220,6 +220,28 @@ R.C = (function(){
   /* SAKİN HATA (katalog 011): bir şey bozulursa ne oldu, verin nerede, tek
      düğme. Kırmızı yok; İLK cümle veri kaybı olmadığını söyler. Teknik ileti
      silinmez, «Teknik ayrıntı»nın altına iner (D katmanı). */
+  /* TEMA SEÇİCİ (katalog 181, 182): üç seçenek yan yana, her biri KENDİ
+     renginde küçük bir ekran örneğiyle — ayarın ne değiştirdiği denemeden
+     görülür. Seçim anında uygulanır. Varsayılan Sistem'dir; başka tema
+     seçiliyken altında varsayılan ve tek düğme durur. `data-theme` ve
+     `data-value` ikisi de yazılır: kabuğun ve ekranın işleyicisi farklı
+     adı okuyor. */
+  const TEMALAR = [{ id:'system', ad:'Sistem', simge:'monitor' },
+    { id:'light', ad:'Açık', simge:'sun' }, { id:'dark', ad:'Koyu', simge:'moon' }];
+  function TemaSecici(o){
+    o = o || {};
+    const v = o.value || 'system';
+    const act = o.act || 'set-theme';
+    return html`<div class="temasec" role="group" aria-label="Tema">
+      ${map(TEMALAR, t => html`<button type="button" class="${cls('temasec__secenek', t.id === v && 'is-on')}"
+        data-act="${act}" data-theme="${t.id}" data-value="${t.id}" aria-pressed="${t.id === v ? 'true' : 'false'}">
+        <span class="${'tema-ornek tema-ornek--' + t.id}" aria-hidden="true"><i></i><b><i></i><i></i></b></span>
+        <span class="temasec__ad">${icon(t.simge)}${t.ad}</span></button>`)}
+    </div>
+    ${when(v !== 'system', () => html`<p class="ayar-varsayilan">Varsayılan: Sistem
+      <button type="button" class="linkbtn" data-act="${act}" data-theme="system" data-value="system">Varsayılana dön</button></p>`)}`;
+  }
+
   function SakinHata(o){
     o = o || {};
     return html`<div class="sakinhata" data-oz="011" role="status">${Kutu({ ad:o.baslik || 'Bu ekran açılamadı.',
@@ -604,7 +626,7 @@ R.C = (function(){
   const SectionTitle = (title, right) => html`<div class="section-title"><h2>${title}</h2>${when(right, right)}</div>`;
 
   return {
-    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, SakinHata, Card, Box, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
+    Kutu, ModulIsareti, SayfaBolumleri, bolumeGit, Ayrinti, SakinHata, TemaSecici, Card, Box, Collapsible, Stat, Bar, Meter, Badge, Chip, Button, IconButton, Segmented, Subtabs,
     Entry, Ledger,
     PickCard, Toolbar,
     Field, Input, Textarea, Select, Checkbox, Notice, Empty, Skeleton, Busy, NextUp, Table, Pager, paginate,

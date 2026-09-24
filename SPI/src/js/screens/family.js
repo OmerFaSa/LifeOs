@@ -121,7 +121,8 @@ SP.Screens.family = (function(){
       body:html`
         <div class="grid-form">
           ${K.Field({ label:'Tema',
-            input:K.Select({ id:'pref-theme', change:'set-look', value:S.profile.theme, options:[
+            input:K.Select({ id:'pref-theme', change:'set-look', value:S.profile.theme || 'system',
+              data:{ 'data-varsayilan':'system', 'data-varsayilan-ad':'Sistem' }, options:[
               { value:'system', label:'Sistem' }, { value:'light', label:'Açık' },
               { value:'dark', label:'Koyu' }] }) })}
           ${K.Field({ label:'Hanedeki kişi sayısı', hint:'sepet hesabı için',

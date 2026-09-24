@@ -967,7 +967,10 @@ R.Beacon = (function(){
     }catch(e){ /* işaret, akışı asla bozmaz */ }
   }
 
-  return { load, save, settings, collect, payload, preview, contract, metric,
+  /* Ayar ekranı «Varsayılana dön» için okur (T5, 182); kopya verilir. */
+  const varsayilan = () => Object.assign({}, VARSAYILAN);
+
+  return { varsayilan, load, save, settings, collect, payload, preview, contract, metric,
     MODULE, profil:profilim, urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
     intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE,
     kayitOku, resolveIntent, intentLog, markIntent, forgetIntent, flushIntentReports,
