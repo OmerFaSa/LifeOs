@@ -132,4 +132,26 @@
         emir:{ id:3, durum:'onaylandi', tahmin:{ metin:'yaklaşık 2 dakika' }, kontrol:[] } }) });
     });
   });
+  /* Madde 10 (ilk yarı): üniversite ya da başka bir sınavın müfredatını
+     kullanıcı kendisi yükler; AYS kendi sınırlarıyla süzer, ek profil olur. */
+  describe('Sınav profili — müfredatı kendin yükle', () => {
+    it('iki biçim okunur; tekrar ve boş ders düşer; kullanıcı beyanı etiketlidir', async () => {
+      resetState();
+      const metin = 'Matematik I: Limit, Türev; İntegral\n'
+        + 'Fizik I:\n- Kinematik\n• Dinamik\n2. Enerji\n- dinamik\n'
+        + 'Boş ders:\n';
+      const r = R.SinavProfil.metindenProfil('Mühendislik 1. sınıf', metin);
+      expect(r.ok).toBe(true);
+      const p = r.profil;
+      expect([p.kaynak, p.dogruluk, p.ad]).toEqual(['kullanici', 'kullanici', 'Mühendislik 1. sınıf']);
+      expect(p.dersler.map(d => [d.ad, d.konular.map(k => k.ad)])).toEqual([
+        ['Matematik I', ['Limit', 'Türev', 'İntegral']], ['Fizik I', ['Kinematik', 'Dinamik', 'Enerji']]]);
+      expect(r.dusen >= 2).toBe(true);                          /* tekrar eden konu + boş ders */
+      await R.SinavProfil.kaydet(p);
+      expect(R.SinavProfil.liste().some(x => x.id === p.id)).toBe(true);
+      expect((await R.SinavProfil.konuIsaretle(p.id, p.dersler[0].konular[0].id)).bitti).toBe(true);
+      expect(R.SinavProfil.metindenProfil('x', metin).ok).toBe(false);      /* ad kısa */
+      expect(R.SinavProfil.metindenProfil('Boş', 'hiçbir ders yok').ok).toBe(false);
+    });
+  });
 })();

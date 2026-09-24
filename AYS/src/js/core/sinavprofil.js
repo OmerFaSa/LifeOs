@@ -57,9 +57,25 @@ R.SinavProfil = (function(){
     if(!Number.isInteger(kid) || kid < 1) return { ok:false, why:'Kayıt kimliği geçersiz.' };
     const ad = bosluk(g.sinav);
     if(ad.length < 2 || ad.length > 80) return { ok:false, why:'Raporda sınav adı yok.' };
+    const { dersler, dusen } = dersSuz(g.dersler);
+    if(!dersler.length) return { ok:false, why:'Raporun hiçbir dersi AYS’nin denetimini geçmedi.' };
+    const acik = (Array.isArray(g.acik_kalanlar) ? g.acik_kalanlar : []).map(bosluk)
+      .filter(x => x.length >= 2).map(x => x.slice(0, 300)).slice(0, 12);
+    return { ok:true, profil:{
+      id:'bam-' + kid, ad, bolum:bosluk(g.bolum).slice(0, 80) || null, kaynak:'bam', kayitId:kid,
+      dogruluk:kayit.dogruluk === 'kaynakli' ? 'kaynakli' : 'dogrulanmadi',
+      dersler, puanlama:null,
+      puanlamaNotu:bosluk(g.puanlama_notu).slice(0, 600) || null,
+      acikKalanlar:acik, bitenler:[], eklenme:R.U.todayISO(), dusen,
+    } };
+  }
+
+  /* Ders → konu süzgeci: HKM raporu da kullanıcının yüklediği metin de AYNI
+     sınırlardan geçer (SINIR). Tekrar eden ders ya da konu, boş ders düşer. */
+  function dersSuz(ham){
     const dersler = [], gorulen = new Set();
     let toplam = 0, dusen = 0;
-    (Array.isArray(g.dersler) ? g.dersler : []).slice(0, SINIR.ders * 2).forEach(d => {
+    (Array.isArray(ham) ? ham : []).slice(0, SINIR.ders * 2).forEach(d => {
       const dad = bosluk(d && d.ad);
       if(dad.length < 2 || dad.length > 80 || gorulen.has(kucuk(dad)) || dersler.length >= SINIR.ders){
         dusen++; return;
@@ -81,16 +97,38 @@ R.SinavProfil = (function(){
         konular:konular.map((t, j) => ({ id:'d' + no + '-k' + (j + 1), ad:t })) });
       toplam += konular.length;
     });
-    if(!dersler.length) return { ok:false, why:'Raporun hiçbir dersi AYS’nin denetimini geçmedi.' };
-    const acik = (Array.isArray(g.acik_kalanlar) ? g.acik_kalanlar : []).map(bosluk)
-      .filter(x => x.length >= 2).map(x => x.slice(0, 300)).slice(0, 12);
-    return { ok:true, profil:{
-      id:'bam-' + kid, ad, bolum:bosluk(g.bolum).slice(0, 80) || null, kaynak:'bam', kayitId:kid,
-      dogruluk:kayit.dogruluk === 'kaynakli' ? 'kaynakli' : 'dogrulanmadi',
-      dersler, puanlama:null,
-      puanlamaNotu:bosluk(g.puanlama_notu).slice(0, 600) || null,
-      acikKalanlar:acik, bitenler:[], eklenme:R.U.todayISO(), dusen,
-    } };
+    return { dersler, dusen };
+  }
+
+  /* MÜFREDATI KENDİN YÜKLE (madde 10'un ilk yarısı): üniversite dersleri ya
+     da başka bir sınav. İki biçim okunur:
+       «Ders: konu1, konu2; konu3»            (tek satır)
+       «Ders:» ardından «- konu» / «• konu» / «1. konu» satırları
+     Etiket «kullanıcı beyanı»dır: kaynağı sensin; AYS doğrulamaz, süzer. */
+  function metindenProfil(ad, metin){
+    const sinav = bosluk(ad);
+    if(sinav.length < 2 || sinav.length > 80) return { ok:false, why:'Profilin adı 2–80 karakter olmalı.' };
+    const ham = [];
+    let acik = null;
+    String(metin || '').split(/\r?\n/).forEach(satir => {
+      const t = satir.trim();
+      if(!t) return;
+      const madde = /^(?:[-•*·]|\d+[.)])\s*(.+)$/.exec(t);
+      if(madde && acik){ acik.konular.push(madde[1]); return; }
+      const m = /^([^:]{2,80}):\s*(.*)$/.exec(t);
+      if(m){
+        acik = { ad:m[1], konular:m[2] ? m[2].split(/[,;]/).map(x => x.trim()).filter(Boolean) : [] };
+        ham.push(acik);
+        return;
+      }
+      if(acik) acik.konular.push(t);
+    });
+    const { dersler, dusen } = dersSuz(ham);
+    if(!dersler.length) return { ok:false, why:'Metinde ders bulunamadı. «Ders adı: konu1, konu2» biçiminde yaz.' };
+    return { ok:true, dusen, profil:{
+      id:'kul-' + R.U.uid('p').slice(2), ad:sinav, bolum:null, kaynak:'kullanici', kayitId:null,
+      dogruluk:'kullanici', dersler, puanlama:null, puanlamaNotu:null, acikKalanlar:[],
+      bitenler:[], eklenme:R.U.todayISO(), dusen } };
   }
 
   /* ------------------------------------------------------------ depo */
@@ -244,6 +282,6 @@ R.SinavProfil = (function(){
     return { text:r.metin };
   }
 
-  return { YERLESIK, SINIR, liste, ekler, bul, sayilar, kayittan, yukle, kaydet, sil,
+  return { YERLESIK, SINIR, liste, ekler, bul, sayilar, kayittan, metindenProfil, yukle, kaydet, sil,
     konuIsaretle, teklifUygula, iste, sinavAdi, sohbet, istek };
 })();

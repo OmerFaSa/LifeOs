@@ -257,10 +257,10 @@ R.Screens.subjects = (function(){
     const biten = p.bitenler || [];
     return html`<div>
       <div class="row between wrap"><b class="small">${p.ad}${p.bolum ? ' · ' + p.bolum : ''}</b>
-        ${K.Badge({ label:ek ? (p.dogruluk === 'kaynakli' ? 'kaynaklı' : 'doğrulanmadı') : 'yerleşik',
-          tone:ek && p.dogruluk !== 'kaynakli' ? 'warn' : 'ok' })}</div>
-      <div class="tiny dim">${s.ders} ders · ${s.konu} konu${ek ? ' · ' + s.biten + ' konu bitti · BAM #'
-        + p.kayitId + ' · puanlama: veri yok' : ' · kapanış ölçümleri yukarıda'}</div>
+        ${K.Badge({ label:ek ? ({ kaynakli:'kaynaklı', kullanici:'senin yüklediğin' }[p.dogruluk] || 'doğrulanmadı') : 'yerleşik',
+          tone:ek && p.dogruluk === 'dogrulanmadi' ? 'warn' : 'ok' })}</div>
+      <div class="tiny dim">${s.ders} ders · ${s.konu} konu${ek ? ' · ' + s.biten + ' konu bitti · '
+        + (p.kayitId ? 'BAM #' + p.kayitId : 'kullanıcı beyanı') + ' · puanlama: veri yok' : ' · kapanış ölçümleri yukarıda'}</div>
       ${when(ek, () => html`<details class="mt-6"><summary class="tiny">Dersler ve konular</summary>
         ${map(p.dersler, d => html`<div class="mt-6">
           <div class="tiny"><b>${d.ad}</b>${d.soru ? ' · ' + d.soru + ' soru' : ''}</div>
@@ -321,6 +321,18 @@ R.Screens.subjects = (function(){
           ${K.Button({ label:'Müfredatını iste', size:'sm', tone:'primary', act:'sp-iste' })}
         </div>
         ${when(S.ui.spNot, () => html`<p class="tiny">${S.ui.spNot}</p>`)}
+        <details class="mt-10">
+          <summary>Müfredatı kendin yükle (üniversite ya da başka bir sınav)</summary>
+          <div class="stack-sm mt-8">
+            ${K.Field({ label:'Profilin adı', input:K.Input({ id:'sp-yukle-ad', placeholder:'ör. Mühendislik 1. sınıf', size:'sm' }) })}
+            <textarea id="sp-yukle-metin" class="input" rows="6" aria-label="Müfredat metni"
+              placeholder="Matematik I: Limit, Türev, İntegral&#10;Fizik I:&#10;- Kinematik&#10;- Dinamik"></textarea>
+            <p class="tiny dim">Her satır «Ders: konu, konu» ya da «Ders:» ve altında «- konu». Kaynağı sensin:
+              AYS doğrulamaz, yalnız süzer (en çok ${R.SinavProfil.SINIR.ders} ders, ders başına
+              ${R.SinavProfil.SINIR.konuDers} konu). Ana sınavın (YKS) değişmez.</p>
+            <div>${K.Button({ label:'Profili ekle', size:'sm', tone:'primary', act:'sp-yukle' })}</div>
+          </div>
+        </details>
         ${oneriBolumu()}
       </div>` }));
   }
@@ -355,6 +367,17 @@ R.Screens.subjects = (function(){
     async 'topic-filter'(el){ S.ui.topicFilter = el.dataset.value; R.App.render(); },
     async 'topic-reset'(){ S.ui.topicFilter = 'all'; S.ui.topicQuery = ''; R.App.render(); },
     async 'open-subject'(el){ S.ui.subjectOpen = el.dataset.id; R.App.render(); },
+    async 'sp-yukle'(){
+      const ad = document.getElementById('sp-yukle-ad'), m = document.getElementById('sp-yukle-metin');
+      const r = R.SinavProfil.metindenProfil(ad ? ad.value : '', m ? m.value : '');
+      if(!r.ok){ UI.toast(r.why); return; }
+      await R.SinavProfil.kaydet(r.profil);
+      const s = R.SinavProfil.sayilar(r.profil);
+      UI.toast('«' + r.profil.ad + '» eklendi: ' + s.ders + ' ders, ' + s.konu + ' konu'
+        + (r.dusen ? ' (' + r.dusen + ' satır atlandı)' : ''), { undo:async () => {
+          await R.SinavProfil.sil(r.profil.id); R.App.render(); } });
+      R.App.render();
+    },
     async 'so-iste'(el){
       const r = await R.SinavProfil.iste(el.dataset.ad);
       S.ui.spNot = r.metin;

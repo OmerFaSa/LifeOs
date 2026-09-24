@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'a97f1c6', at:'2026-09-24 00:57', dirty:true };
+R.BUILD = { id:'4a6c91e', at:'2026-09-24 01:05', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -35734,9 +35734,25 @@ R.SinavProfil = (function(){
     if(!Number.isInteger(kid) || kid < 1) return { ok:false, why:'Kayıt kimliği geçersiz.' };
     const ad = bosluk(g.sinav);
     if(ad.length < 2 || ad.length > 80) return { ok:false, why:'Raporda sınav adı yok.' };
+    const { dersler, dusen } = dersSuz(g.dersler);
+    if(!dersler.length) return { ok:false, why:'Raporun hiçbir dersi AYS’nin denetimini geçmedi.' };
+    const acik = (Array.isArray(g.acik_kalanlar) ? g.acik_kalanlar : []).map(bosluk)
+      .filter(x => x.length >= 2).map(x => x.slice(0, 300)).slice(0, 12);
+    return { ok:true, profil:{
+      id:'bam-' + kid, ad, bolum:bosluk(g.bolum).slice(0, 80) || null, kaynak:'bam', kayitId:kid,
+      dogruluk:kayit.dogruluk === 'kaynakli' ? 'kaynakli' : 'dogrulanmadi',
+      dersler, puanlama:null,
+      puanlamaNotu:bosluk(g.puanlama_notu).slice(0, 600) || null,
+      acikKalanlar:acik, bitenler:[], eklenme:R.U.todayISO(), dusen,
+    } };
+  }
+
+  /* Ders → konu süzgeci: HKM raporu da kullanıcının yüklediği metin de AYNI
+     sınırlardan geçer (SINIR). Tekrar eden ders ya da konu, boş ders düşer. */
+  function dersSuz(ham){
     const dersler = [], gorulen = new Set();
     let toplam = 0, dusen = 0;
-    (Array.isArray(g.dersler) ? g.dersler : []).slice(0, SINIR.ders * 2).forEach(d => {
+    (Array.isArray(ham) ? ham : []).slice(0, SINIR.ders * 2).forEach(d => {
       const dad = bosluk(d && d.ad);
       if(dad.length < 2 || dad.length > 80 || gorulen.has(kucuk(dad)) || dersler.length >= SINIR.ders){
         dusen++; return;
@@ -35758,16 +35774,38 @@ R.SinavProfil = (function(){
         konular:konular.map((t, j) => ({ id:'d' + no + '-k' + (j + 1), ad:t })) });
       toplam += konular.length;
     });
-    if(!dersler.length) return { ok:false, why:'Raporun hiçbir dersi AYS’nin denetimini geçmedi.' };
-    const acik = (Array.isArray(g.acik_kalanlar) ? g.acik_kalanlar : []).map(bosluk)
-      .filter(x => x.length >= 2).map(x => x.slice(0, 300)).slice(0, 12);
-    return { ok:true, profil:{
-      id:'bam-' + kid, ad, bolum:bosluk(g.bolum).slice(0, 80) || null, kaynak:'bam', kayitId:kid,
-      dogruluk:kayit.dogruluk === 'kaynakli' ? 'kaynakli' : 'dogrulanmadi',
-      dersler, puanlama:null,
-      puanlamaNotu:bosluk(g.puanlama_notu).slice(0, 600) || null,
-      acikKalanlar:acik, bitenler:[], eklenme:R.U.todayISO(), dusen,
-    } };
+    return { dersler, dusen };
+  }
+
+  /* MÜFREDATI KENDİN YÜKLE (madde 10'un ilk yarısı): üniversite dersleri ya
+     da başka bir sınav. İki biçim okunur:
+       «Ders: konu1, konu2; konu3»            (tek satır)
+       «Ders:» ardından «- konu» / «• konu» / «1. konu» satırları
+     Etiket «kullanıcı beyanı»dır: kaynağı sensin; AYS doğrulamaz, süzer. */
+  function metindenProfil(ad, metin){
+    const sinav = bosluk(ad);
+    if(sinav.length < 2 || sinav.length > 80) return { ok:false, why:'Profilin adı 2–80 karakter olmalı.' };
+    const ham = [];
+    let acik = null;
+    String(metin || '').split(/\r?\n/).forEach(satir => {
+      const t = satir.trim();
+      if(!t) return;
+      const madde = /^(?:[-•*·]|\d+[.)])\s*(.+)$/.exec(t);
+      if(madde && acik){ acik.konular.push(madde[1]); return; }
+      const m = /^([^:]{2,80}):\s*(.*)$/.exec(t);
+      if(m){
+        acik = { ad:m[1], konular:m[2] ? m[2].split(/[,;]/).map(x => x.trim()).filter(Boolean) : [] };
+        ham.push(acik);
+        return;
+      }
+      if(acik) acik.konular.push(t);
+    });
+    const { dersler, dusen } = dersSuz(ham);
+    if(!dersler.length) return { ok:false, why:'Metinde ders bulunamadı. «Ders adı: konu1, konu2» biçiminde yaz.' };
+    return { ok:true, dusen, profil:{
+      id:'kul-' + R.U.uid('p').slice(2), ad:sinav, bolum:null, kaynak:'kullanici', kayitId:null,
+      dogruluk:'kullanici', dersler, puanlama:null, puanlamaNotu:null, acikKalanlar:[],
+      bitenler:[], eklenme:R.U.todayISO(), dusen } };
   }
 
   /* ------------------------------------------------------------ depo */
@@ -35921,7 +35959,7 @@ R.SinavProfil = (function(){
     return { text:r.metin };
   }
 
-  return { YERLESIK, SINIR, liste, ekler, bul, sayilar, kayittan, yukle, kaydet, sil,
+  return { YERLESIK, SINIR, liste, ekler, bul, sayilar, kayittan, metindenProfil, yukle, kaydet, sil,
     konuIsaretle, teklifUygula, iste, sinavAdi, sohbet, istek };
 })();
 
@@ -43376,10 +43414,10 @@ R.Screens.subjects = (function(){
     const biten = p.bitenler || [];
     return html`<div>
       <div class="row between wrap"><b class="small">${p.ad}${p.bolum ? ' · ' + p.bolum : ''}</b>
-        ${K.Badge({ label:ek ? (p.dogruluk === 'kaynakli' ? 'kaynaklı' : 'doğrulanmadı') : 'yerleşik',
-          tone:ek && p.dogruluk !== 'kaynakli' ? 'warn' : 'ok' })}</div>
-      <div class="tiny dim">${s.ders} ders · ${s.konu} konu${ek ? ' · ' + s.biten + ' konu bitti · BAM #'
-        + p.kayitId + ' · puanlama: veri yok' : ' · kapanış ölçümleri yukarıda'}</div>
+        ${K.Badge({ label:ek ? ({ kaynakli:'kaynaklı', kullanici:'senin yüklediğin' }[p.dogruluk] || 'doğrulanmadı') : 'yerleşik',
+          tone:ek && p.dogruluk === 'dogrulanmadi' ? 'warn' : 'ok' })}</div>
+      <div class="tiny dim">${s.ders} ders · ${s.konu} konu${ek ? ' · ' + s.biten + ' konu bitti · '
+        + (p.kayitId ? 'BAM #' + p.kayitId : 'kullanıcı beyanı') + ' · puanlama: veri yok' : ' · kapanış ölçümleri yukarıda'}</div>
       ${when(ek, () => html`<details class="mt-6"><summary class="tiny">Dersler ve konular</summary>
         ${map(p.dersler, d => html`<div class="mt-6">
           <div class="tiny"><b>${d.ad}</b>${d.soru ? ' · ' + d.soru + ' soru' : ''}</div>
@@ -43440,6 +43478,18 @@ R.Screens.subjects = (function(){
           ${K.Button({ label:'Müfredatını iste', size:'sm', tone:'primary', act:'sp-iste' })}
         </div>
         ${when(S.ui.spNot, () => html`<p class="tiny">${S.ui.spNot}</p>`)}
+        <details class="mt-10">
+          <summary>Müfredatı kendin yükle (üniversite ya da başka bir sınav)</summary>
+          <div class="stack-sm mt-8">
+            ${K.Field({ label:'Profilin adı', input:K.Input({ id:'sp-yukle-ad', placeholder:'ör. Mühendislik 1. sınıf', size:'sm' }) })}
+            <textarea id="sp-yukle-metin" class="input" rows="6" aria-label="Müfredat metni"
+              placeholder="Matematik I: Limit, Türev, İntegral&#10;Fizik I:&#10;- Kinematik&#10;- Dinamik"></textarea>
+            <p class="tiny dim">Her satır «Ders: konu, konu» ya da «Ders:» ve altında «- konu». Kaynağı sensin:
+              AYS doğrulamaz, yalnız süzer (en çok ${R.SinavProfil.SINIR.ders} ders, ders başına
+              ${R.SinavProfil.SINIR.konuDers} konu). Ana sınavın (YKS) değişmez.</p>
+            <div>${K.Button({ label:'Profili ekle', size:'sm', tone:'primary', act:'sp-yukle' })}</div>
+          </div>
+        </details>
         ${oneriBolumu()}
       </div>` }));
   }
@@ -43474,6 +43524,17 @@ R.Screens.subjects = (function(){
     async 'topic-filter'(el){ S.ui.topicFilter = el.dataset.value; R.App.render(); },
     async 'topic-reset'(){ S.ui.topicFilter = 'all'; S.ui.topicQuery = ''; R.App.render(); },
     async 'open-subject'(el){ S.ui.subjectOpen = el.dataset.id; R.App.render(); },
+    async 'sp-yukle'(){
+      const ad = document.getElementById('sp-yukle-ad'), m = document.getElementById('sp-yukle-metin');
+      const r = R.SinavProfil.metindenProfil(ad ? ad.value : '', m ? m.value : '');
+      if(!r.ok){ UI.toast(r.why); return; }
+      await R.SinavProfil.kaydet(r.profil);
+      const s = R.SinavProfil.sayilar(r.profil);
+      UI.toast('«' + r.profil.ad + '» eklendi: ' + s.ders + ' ders, ' + s.konu + ' konu'
+        + (r.dusen ? ' (' + r.dusen + ' satır atlandı)' : ''), { undo:async () => {
+          await R.SinavProfil.sil(r.profil.id); R.App.render(); } });
+      R.App.render();
+    },
     async 'so-iste'(el){
       const r = await R.SinavProfil.iste(el.dataset.ad);
       S.ui.spNot = r.metin;

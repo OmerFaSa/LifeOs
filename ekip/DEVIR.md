@@ -150,7 +150,15 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   LGS/YKS/DGS/KPSS/ALES/YDS uygun · sonra · uygun değil, gerekçe + «şart ÖSYM/MEB
   kılavuzunda» uyarısı; hedefle örtüşen öne gelir; «Müfredatını iste» mevcut King yolu; ana
   sınav değişmez. AYS 1658/1658, duman/a11y/390px temiz.
-- ⏳ 10 Ana sınavı değiştirebilmek (büyük aksiyon) + üniversite müfredatı yükleme.
+- ✅ 10a Müfredatı kendin yükle (üniversite ya da başka sınav): Dersler › Sınav profilleri ›
+  «Müfredatı kendin yükle» — «Ders: konu, konu» ya da «Ders:» + «- konu»; `R.SinavProfil.
+  metindenProfil` HKM raporuyla AYNI süzgeçten (`dersSuz`) geçer; etiket «senin yüklediğin»;
+  konu takibi ve test kitabı isteği çalışır; «Geri al». AYS 1665, duman/a11y/390px temiz.
+- ❓ 10b Ana sınavı DEĞİŞTİRMEK — ölçüldü: AYS çekirdeğinde 21 dosyada 107 TYT/AYT bağı ve 63
+  `R.SUBJECTS` kullanımı (plan motoru, kapanış, deneme/net, puan). Kullanıcı «şimdilik YKS»
+  dedi; her gün kullanılan YKS akışını riske atan büyük yeniden yazım → kullanıcıya soruldu
+  (öneri: YKS bitince ya da ihtiyaç doğunca; tasarım: ders şeması uyarlayıcısı + büyük aksiyon
+  önizlemesi + geri dönüş noktası).
 - ✅ 11 Tahmin tablolarını kaynağa bağlamak (PLAN Tur 3: «CEFR saat tablosu ve kitap tahmini»):
   `esp.belge` + `alan: cefr | okuma_hizi` (HKM MIMARI §8.35 sonu); ESP Rehber › Dayanak ›
   «Tahmin tabloları» ile istenir; hesap kodda, karar «tahmin», dayanak «kaynaklı». Sağlayıcı
