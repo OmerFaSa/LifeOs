@@ -217,6 +217,10 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   bütçede; envanter temiz; tarayıcıda SPİ kurulum üç adım + kayıt, «Ne değişti?» göster/kapat, kilit
   kur → yeniden aç → perde (arkada #main yok) → kodla açıl (SPİ, AYS, ESP) denendi.
   **K'nin dosyalarına dokundum:** AYS `guide.js`, SPİ `family.js`, ESP `profile.js` (kilit kutusu).
+- **Meydan (fikir, sisteme bağlı DEĞİL — kullanıcı kararı 2026-09-24):** `ekip/meydan/MEYDAN.md` (tasarım ve
+  mantık) + `ekip/meydan/meydan.html` (etkileşimli örnek, örnek veri). Dört sistem için tek bileşen: kapsam
+  Hepsi · AYS · SPİ · ESP · Merkez, sadelik Sade · Dengeli · Tam. Hiçbir modül yüklemez; aşamalar M1–M4
+  belgede, başlatmak kullanıcı kararı.
 - **K'ye devir (kullanıcı kararı, 2026-09-24):**
   1. **K7 — HKM yüzü** (eski T6): `HKM/web/` aynı dile geçer. Kullanılacaklar hazır: jetonlar
      `brand/ortak/jeton.css` (renk sahipliği: Merkez = mor `--mer`), kabuk kalıbı `brand/ortak/kabuk.*`,
