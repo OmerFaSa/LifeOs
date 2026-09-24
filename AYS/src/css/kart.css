@@ -1,0 +1,128 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/kart.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KARTLAR — ortak bileşenlerin biçimi (K'nin tek stil dosyası).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/kart.css`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/css/` klasörüne BİREBİR kopyalanır.
+   Markupı `brand/ortak/{sayi,grafik,oneri,sozluk,guven}.js` üretir.
+   ==================================================================
+
+   JETON KURALI (ekip/EKIP-PLANI.md §2)
+
+   Burada ham renk, boşluk, köşe ve süre YAZILMAZ; yalnız T'nin
+   jetonları kullanılır (`brand/ortak/jeton.css`, `tokens.css`). Tek
+   istisna kılçık çizgidir (1px, 2px ve SVG çizgi kalınlığı): bir
+   çizginin kalınlığı ölçek değil, ekranın en küçük birimi.
+
+   Yön rengi yazıda `--ok-ink` / `--bad-ink`, dolguda `--ok` / `--bad`;
+   modül rengi `--ays` / `--spi` / `--esp`, Merkez `--mer` (yazıda
+   `--mer-ink`, zeminde `--mer-t`). Yeşil ve kırmızı YALNIZ yön bildirir
+   (§1.3-1); yönü bilinmeyen şey nötr kalır. */
+
+/* ================================================================
+   024 · SAYI — kesinlik yazıda görünür
+   ================================================================ */
+
+.sayi{
+  position:relative;
+  display:inline-flex;
+  align-items:baseline;
+  gap:var(--sp-1);
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.sayi[tabindex]{ cursor:help; border-radius:var(--r-sm); }
+
+.sayi__b{ font-size:.55em; font-weight:500; color:var(--text-3); letter-spacing:0; }
+
+/* Yalnız TAHMİN olanın altı kesik çizilir (§1.3-3). Ölçüldü ve
+   hesaplandı düz yazılır; farkı köken kartı söyler. */
+.sayi--estimated > .sayi__d{
+  text-decoration:underline dashed var(--text-3);
+  text-decoration-thickness:.08em;
+  text-underline-offset:.18em;
+}
+.sayi__ar{ font-size:var(--fs-xs); font-weight:500; color:var(--text-3); letter-spacing:0; }
+
+/* «Veri yok» her yerde «—» ve SÖNÜK — ama silik değil: okunmayan bir
+   etiket, olmayan bir etikettir. */
+.sayi--missing > .sayi__d{ color:var(--text-3); font-weight:500; }
+
+/* ================================================================
+   026 · VERİ TAZELİĞİ — eski ölçüm soluklaşır ve yaşını yazar
+   ================================================================ */
+
+.sayi--bayat > .sayi__d{ color:var(--text-3); }
+.sayi__yas{
+  font-size:var(--fs-xs);
+  font-weight:500;
+  color:var(--text-3);
+  letter-spacing:0;
+}
+
+/* ================================================================
+   025 · KÖKEN KARTI — üzerine gelince, odakta ya da basılı tutunca
+   Açılır katmandır; gölge YALNIZ burada (§1.2).
+   ================================================================ */
+
+.koken{
+  display:none;
+  position:absolute;
+  z-index:var(--z-overlay);
+  left:0;
+  top:calc(100% + var(--sp-1));
+  width:max-content;
+  max-width:min(22em, calc(100vw - var(--sp-8)));
+  padding:var(--sp-3);
+  background:var(--surface);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  box-shadow:var(--shadow-lg);
+  font-size:var(--fs-sm);
+  font-weight:400;
+  line-height:1.45;
+  letter-spacing:0;
+  white-space:normal;
+  text-align:left;
+  gap:var(--sp-1);
+}
+.sayi:hover > .koken,
+.sayi:focus-visible > .koken,
+.sayi--acik > .koken{ display:grid; }
+
+.koken__bas{ font-weight:600; }
+.koken__s{ display:grid; grid-template-columns:6.5em minmax(0, 1fr); gap:var(--sp-2); }
+.koken__a{ color:var(--text-3); }
+.koken__v{ color:var(--text-2); overflow-wrap:anywhere; }
+
+/* Telefonda kart sayının altında değil ekranın altında açılır: dar
+   ekranda sayının yanındaki bir kutu sağdan taşardı. */
+@media (max-width:459.98px){
+  .koken{
+    position:fixed;
+    left:var(--sp-4);
+    right:var(--sp-4);
+    top:auto;
+    bottom:var(--sp-4);
+    width:auto;
+    max-width:none;
+  }
+}
+
+/* ================================================================
+   028 · ANLAMLI FARK — renk işaretten değil anlamdan
+   ================================================================ */
+
+.fark{
+  font-size:var(--fs-sm);
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.fark--iyi{ color:var(--ok-ink); }
+.fark--kotu{ color:var(--bad-ink); }
+.fark--notr,
+.fark--yok{ color:var(--text-3); }

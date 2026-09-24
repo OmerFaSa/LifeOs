@@ -227,6 +227,12 @@ DOSYALAR = {
     # Sahip bilgisi cihazda, modul basina tek anahtarda; uc arayuzde ayni.
     "hkmbag.js":      "js/core",
     "hkmbag.test.js": "tests",
+    # KARTLAR (K) — ortak bilesenler (ekip/EKIP-PLANI.md §4.1, K1). Ekranlar
+    # bunlari K2'de kullanir; o zamana dek yalniz test sayfasinda yuklenir.
+    # Sayi bileseni: 024 kesinlik, 025 koken karti, 026 tazelik, 028 fark.
+    "sayi.js":        "js/core",
+    "sayi.test.js":   "tests",
+    "kart.css":       "css",
     # MODEL KATMANI — uc arayuz (2026-09-24'ten beri AYS'ninki tek kaynak).
     "llm.js":        "js/core",
     "providers.js":  "js/data",
