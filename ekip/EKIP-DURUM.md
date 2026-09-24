@@ -30,6 +30,10 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   onay düğmesi); başka yerine dokunmuyorum, K1d bitince bırakırım
 - **Biten** (özellik · commit): 024 025 026 028 sayı bileşeni `brand/ortak/sayi.js` · 009cf92;
   027 035 037 041 grafik parçaları `brand/ortak/grafik.js` · 076bb29
+- **Bulgular:** T2-01 ✅ a798671 · T2-02 (AYS Ofis ham kimlik, 137) ekran dosyası
+  (`office.js`, `team.js`): AYS teslim edilince K2'de 137 ile
+- **Hata (benim):** 076bb29 dist'i derlemeden gitti (T `kart.css`'i `index.html`'e bağlamıştı);
+  0780206 ile düzeldi. Artık her commit'te üç `build.py` + `--denetle` koşuyorum
 - **T ve K2 için:** `LIFEOS.SAYI.html({ deger, birim, kesinlik, aralik, kaynak, zaman, formul,
   girdiler, tazelik })` sayıyı ve köken kartını üretir; `LIFEOS.SAYI.kutuGlifi([...])` →
   `C.Kutu` yuvası; `LIFEOS.SAYI.farkHtml({ deger, yon:'artis-iyi'|'azalis-iyi', ek })`.
