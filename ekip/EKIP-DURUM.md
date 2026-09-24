@@ -17,16 +17,16 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 | Modül | İskelet (T3) | Teslim commit | K aldı |
 |---|---|---|---|
-| AYS | ✅ sekiz çekmece, iç sekme 0, Bugün üç alan (H kapısı yeşil: a861d79) | dd97f56 | — |
+| AYS | ✅ sekiz çekmece, iç sekme 0, Bugün üç alan (H kapısı yeşil: a861d79) | dd97f56 | ✅ K2 başladı (2026-09-24) |
 | SPİ | ⏳ | — | — |
 | ESP | ⏳ | — | — |
 | HKM yüzü | kullanıcı onayı bekliyor | — | — |
 
 ## KARTLAR (K)
 
-- **Şu an:** T 2-3 saat yok (kullanım süresi). Kullanıcı: bu arada K ve H birlikte ilerlesin. K kendi
-  dosyalarında: K5 (164 bildirim kartı `pwa.js`/`sw.js`, 167 araştırması), T2-02 hazırlığı (137 veri
-  adları `sozluk.js`), K2 hazırlığı (22 etiket listesi). T'nin dosyasına ve ekranlara dokunulmuyor.
+- **Şu an:** K2 · AYS (teslim b3c1733; AYS `screens/*.js` artık K'nin). Sıra: Bugün (04 42 60 110) →
+  Çalışma (46 55 35) → Analiz (27 37 41) → Ofis (129 139 + T2-02/137) → Onaylar/Plan (111 112 121) →
+  22 (onay etiketleri). Her ekrandan sonra envanter + sadelik + 15 denetim.
 - **Sahiplendiğim çekirdek dosyalar:** — (üç `ui.js` bırakıldı: `toast` 150 çizgisi ve
   `confirmSheet(…, danger, onay)` 22 etiketi eklendi, 2d765cc)
 - **Biten** (özellik · commit): 024 025 026 028 sayı `sayi.js` · 009cf92; 027 035 037 041 grafik
@@ -63,6 +63,9 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
     (olay: `{ zaman, kaynak:'kullanici'|'merkez'|'ofis'|'kural'|'plan'|'ice-aktarma', alan, eski, yeni, onay }`)
 - **Yarım / sıradaki:** K2 — AYS teslim satırı ✅ olunca hemen (P1'leri AYS ekranlarına)
 - **Soru / öneri:**
+  - **T için (acil değil, K2 bekler):** AYS `index.html`'e `js/core/grafik.js`, `oneri.js`, `sozluk.js`,
+    `guven.js` bağlantısı (`sayi.js`'ten sonra; SPİ/ESP'de de). Sen gelene kadar yalnız `sayi.js` isteyen
+    yerleştirmeleri yapıyorum. Ayrıca `AYS/src/js/app.js:842` `confirmSheet` etiketi (22) senin dosyan.
   - Kullanıcıya (K5): 167 ana ekran bileşeni — telefonda tarayıcı uygulaması için yol doğrulanamadı
     (Android/iOS'ta PWA bileşeni yok); uydurulmadı. En yakını simge rozeti (Badge API) — karar kullanıcıda.
   - K2 hazırlığı (22): 36 `confirmSheet` çağrısı çıkarıldı; çoğu tek kayıt → «Denemeyi ve 7 hata kaydını
