@@ -112,7 +112,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 
 ## TASARIM (T)
 
-- **Şu an:** T döndü (K'nin devri, T-DEVIR §6). ✅ ESP Onaylar + Kütüphanem 6c92411 · ✅ **T3 ESP 2204fa3 → teslim** (tabloda). ✅ AYS küçükleri (§2.C): 011 sakin hata + 010 boş durum işareti + 022 plan onay etiketi d83d085 · STIL.md 334f4db · ✅ **T4 hareket** 852f6fd · ✅ **T5a ayarlar** (21, 181, 182, 183 — bu commit). Sıradaki: T5b (171 kurulum, 176 gizlilik kilidi, 17 Ne değişti?); T6 yalnız kullanıcı «başla» derse.
+- **Şu an:** T döndü (K'nin devri, T-DEVIR §6). ✅ ESP Onaylar + Kütüphanem 6c92411 · ✅ **T3 ESP 2204fa3 → teslim** (tabloda). ✅ AYS küçükleri (§2.C): 011 sakin hata + 010 boş durum işareti + 022 plan onay etiketi d83d085 · STIL.md 334f4db · ✅ **T4 hareket** 852f6fd · ✅ **T5a ayarlar** e0b2385 · ✅ **T5b** (171, 176, 17 — bu commit). **T1–T5 bitti.** Sıradaki: T6 HKM yüzü — yalnız kullanıcı «başla» derse.
 - **K yürütüyor (kullanıcı talimatı, 2026-09-24 akşam):** T-DEVIR §5'ten devam. ✅ T2-13 designcheck d58720d · ✅ entegre.js koştu (temiz) · ✅ yarım T3 SPİ yaması 826fbe3 · ✅ **T3 SPİ → teslim 59e7276** (sekme 0, tek dolu düğme, 30+ kelime katmanda, T2-14) · ✅ **T2 ESP ccedf0a** (kabuk + sekiz çekmece; disiplin bölüm düzeyinde). Sıradaki: ESP Onaylar + Kütüphanem → T3 ESP (sekmeler, Bugün üç alan, Ofis dolu düğme) → teslim → AYS küçükleri (§2.C) → T4 → T5; T6 yalnız kullanıcı «başla» derse. **⏸ K'nin limiti doldu → T'ye döndü: `ekip/T-DEVIR.md` §6** (kalan: ESP Onaylar + Kütüphanem → T3 ESP → AYS küçükleri → T4 → T5).
 - **T0 kararları:** ✅ cevaplandı (2026-09-24): sekizi de öneri gibi — EKIP-PLANI §8 ve CEKMECE-HARITASI'na işlendi
 - **Biten** (adım ya da özellik · commit): T1 jetonlar `brand/ortak/jeton.css` · 23e3a7c;
@@ -186,7 +186,7 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   palet, perf, SPİ designcheck, dist, ortak temiz; sadelik üçü bütçede; envanter temiz; tarayıcıda: aynı
   ekranda yeniden çizim içerik animasyonu üretmiyor, yeni ekranda üretiyor; ESP tekrarında üst çubuk .28
   sis, kart 1; Esc oturumu bitiriyor.
-- **T5a ayarlar (bu commit):** `brand/ortak/ayar.{js,css,test.js}` → üç arayüz. 21 kaydedilmemiş değişiklik
+- **T5a ayarlar (e0b2385):** `brand/ortak/ayar.{js,css,test.js}` → üç arayüz. 21 kaydedilmemiş değişiklik
   (Ayarlar çekmecesinde; «Kaydet»li kutudaki alan noktalanır, şerit «N değişiklik kaydedilmedi · Vazgeç ·
   Kaydet»; yeniden çizimde/ekrandan dönüşte yazılan kaybolmaz; kaydettikten sonra eski değer geri konmaz) ·
   182 varsayılana dön (`data-varsayilan`: HKM aralığı 60 dk ve kapsam Özet — `Beacon.varsayilan()` yeni,
@@ -201,6 +201,24 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
   (üç modül), şerit + yeniden çizim + Vazgeç, varsayılana dön (60 dk), tema seçimi ve geri dönüş denendi.
   **K'nin dosyalarına dokundum:** AYS `guide.js` (tema seçici, iki alana `data-varsayilan`), SPİ
   `guide.js` ve `family.js` (`data-varsayilan`), ESP `profile.js` (tema seçici, `data-varsayilan`).
+- **T5b (bu commit):** 171 kurulum — `LIFEOS.KURULUM_HTML/KURULUM_GIT` (tanitim.js): SPİ ve ESP ilk
+  kurulumu üç adım, adımlar tanıtımın soruları (Ne ölçüyoruz? · Neye karar vermiyoruz? · Nasıl
+  başlıyoruz?), ilerleme üstte, «Başla» yalnız son adımda, adım değişimi yeniden çizmez (yazılan kalır);
+  AYS'de ilerleme çubuğu üste alındı (beş adım kaldı, aşağıdaki soru). 176 gizlilik kilidi —
+  `brand/ortak/kilit.*`: Ayarlar'da kur/değiştir/kaldır (iki kez yazılır), açılışta çizimden ÖNCE dört
+  haneli kod (modül işaretiyle), üç yanlışta 5 sn bekleme, kod tuzlu SHA-256 özetiyle tutulur, «Kodu
+  unuttum» bir dakika sonra kilidi kaldırır; metin «veriyi şifrelemez» der. 17 Ne değişti? —
+  `brand/ortak/yenilik.*`: yalnız başka bir sürüm görülmüşse ve kurulum bitmişse sayfanın başında tek kart
+  (Yeni · Düzeltilen · Kaldırılan), «Kapat» deyince bir daha yok. Denetim: runtests AYS 1950 · SPİ 1598 ·
+  ESP 1583; duman, a11y, 390 px, palet, perf, SPİ designcheck, dist, ortak, seviye temiz; sadelik üçü
+  bütçede; envanter temiz; tarayıcıda SPİ kurulum üç adım + kayıt, «Ne değişti?» göster/kapat, kilit
+  kur → yeniden aç → perde (arkada #main yok) → kodla açıl (SPİ, AYS, ESP) denendi.
+  **K'nin dosyalarına dokundum:** AYS `guide.js`, SPİ `family.js`, ESP `profile.js` (kilit kutusu).
+- **Kullanıcıya soru (T5b):** (a) Katalog 171 «ilk açılış üç adım» diyor; AYS kurulumu beş veri adımı (kim,
+  hedef, takvim, kapasite, seviye — H'nin testi beşi bekliyor). Üçe birleştireyim mi, yoksa AYS beş
+  kalsın mı? (b) Kilitte kodu unutan bir dakika bekleyip açabiliyor (veriden kilitlenip kalmasın diye);
+  daha sıkı bir kilit istenirse bekleme uzatılabilir — ama «unutan kilitli kalır» seçeneği veri kaybı
+  demek, önermem.
 - **K için (T4 sözleşmesi, ekranlar senin):** hareket istersen yalnız işaretle — satır listesi
   `data-h-satir="<kimlik>"` (silinen satır yerinde kapanır), bitirilen iş `data-h="<kimlik>"
   data-h-bitti="0|1"` (tik çizilir), değişen büyük sayı `data-h-sayi="<anahtar>"`, süren iş

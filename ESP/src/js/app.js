@@ -524,6 +524,9 @@ ESP.App = (function(){
       restoreFocus(focus);
       if(H) H.sonra(appEl, S.route);
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.sonra(appEl, { rota:S.route, etkin:ayarlardaMi(S.route) });
+      /* Ne değişti? (17): güncellemeden sonraki ilk açılışta sayfanın başında. */
+      if(window.LIFEOS && window.LIFEOS.YENILIK) window.LIFEOS.YENILIK.yerlestir(appEl, { modul:'esp',
+        yeniKullanici:!!safe(() => ESP.Setup.needed(), true) });
       revealActiveTab();
       /* Kabuk her cizimde yeniden kuruluyor; acik bir alt sayfa varsa
          `inert` onunla birlikte silinir ve arka plan yeniden okunur
@@ -977,6 +980,9 @@ ESP.App = (function(){
        alanları silmek olurdu — bir süsü değiştirmek için formu
        sıfırlamak. */
     'tanitim-adim'(el){ window.LIFEOS.TANITIM_ADIM(el); },
+    /* Kurulumun üç adımı (171): yeniden çizmeden, yazılan kaybolmaz. */
+    'kurulum-ileri'(el){ window.LIFEOS.KURULUM_GIT(el, 1); },
+    'kurulum-geri'(el){ window.LIFEOS.KURULUM_GIT(el, -1); },
     /* Herhangi bir ekrandan bir ajana soru sormak için. */
     async 'ask-agent'(el){
       S.ui.officeAgent = el.dataset.agent || 'patron';
@@ -1492,6 +1498,13 @@ ESP.App = (function(){
       applyTheme();
       /* Eski bölüm rengi niteliği kalmışsa silinir: renk modülü söyler. */
       document.documentElement.removeAttribute('data-section');
+      /* Gizlilik kilidi (176): açılışta, çizimden ÖNCE — arkada veri çizilmez.
+         Kilit yoksa hemen döner. */
+      if(window.LIFEOS && window.LIFEOS.KILIT){
+        window.LIFEOS.KILIT.kurDinle();
+        const isaret = safe(() => window.LIFEOS.KABUK.modulIsareti('esp', true), '');
+        await window.LIFEOS.KILIT.ac('esp', { isaret });
+      }
       await render();
       installManifest();
       /* Çevrimdışı kabuk: yalnız sunucuyla açılınca (brand/ortak/pwa.js). */

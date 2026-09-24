@@ -142,6 +142,11 @@ ESP.Screens.profile = (function(){
             ${K.TemaSecici({ value:p.theme || 'system', act:'set-theme' })}`,
         }),
 
+        /* Gizlilik kilidi (176, T5): kutu kendi içinde değişir. */
+        window.LIFEOS && window.LIFEOS.KILIT ? K.Entry({ label:'GİZLİLİK KİLİDİ', wide:true,
+          meta:window.LIFEOS.KILIT.aktifMi('esp') ? 'açık' : 'kapalı',
+          body:raw(window.LIFEOS.KILIT.ayarHtml('esp', { govde:true })) }) : '',
+
         K.Entry({
           label:'PROFİLLER',
           meta:profiller.length + ' profil',

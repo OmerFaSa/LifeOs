@@ -20,7 +20,7 @@ python3 tools/ortak.py --denetle   # kopyalar kaynakla aynı mı
 | `layout.css` | `src/css/` | kabuk ızgarası, künye, alt bant, telefon düzeni |
 | `designs.css` | `src/css/` | beş tasarım dilinin ortak gövdesi |
 | `kesinlik.*` | `js/core`, `css`, `tests` | dört kesinlik etiketi (ölçüldü / tahmin / hesaplandı / veri yok) |
-| `tanitim.*` | `js/core`, `css`, `tests` | ilk kurulumun üç adımı |
+| `tanitim.*` | `js/core`, `css`, `tests` | ilk kurulumun üç adımı; `KURULUM_HTML`/`KURULUM_GIT` (171): her adım tek soru, ilerleme üstte, yeniden çizmeden |
 | `simge.*` | `js/core`, `css`, `tests` | kimlikten görsel adına giden tek kural |
 | `medya.js` | `js/core` | **üretilmiş** künye — hangi görsel gerçekten var (`tools/marka.py --kunye`) |
 | `quota.js` | `js/core` | ücretsiz modelin istek sınırı — **kalıp** |
@@ -34,6 +34,8 @@ python3 tools/ortak.py --denetle   # kopyalar kaynakla aynı mı
 | `olumsuz.*` | `js/core`, `tests` | cümle ayrıştırıcılarının önündeki kapı: olumsuz, ileriye dönük, istek, soru ya da belirsiz cümle ölçüm diye yazılmaz; olumsuz istek tersine çevrilmez (ekip/HATALAR.md KR-1) |
 | `hareket.*` | `js/core`, `css`, `tests` | T4 hareket ve odak: çizimden önce/sonra fotoğraf, yalnız değişen öğe hareket eder (sayı, tik, satır kapanma), tek canlı öğe, küçülen başlık, kart geçişi, odak halkası, önizleme, odak kapısı; azaltılmış harekette kapalı |
 | `ayar.*` | `js/core`, `css`, `tests` | T5 ayar ekranları: kaydedilmemiş değişiklik şeridi (21), varsayılana dön (`data-varsayilan`, 182), ayar arama ve tam yol (183), tema önizlemesi (`C.TemaSecici`, 181; açık örnek `--l-*` jetonlarından) |
+| `yenilik.*` | `js/core`, `css`, `tests` | «Ne değişti?» (17): güncellemeden sonraki ilk açılışta sayfanın başında tek kart; ilk kez açana ve kurulumu bitmemişe gösterilmez. Yeni sürümde `SURUM` ve maddeler baştan yazılır |
+| `kilit.*` | `js/core`, `css`, `tests` | gizlilik kilidi (176): açılışta dört haneli kod, çizimden önce; perde, kasa değil (veriyi şifrelemez); «Kodu unuttum» bir dakika sonra kilidi kaldırır |
 | `sw.js` | `src/` kökü | çevrimdışı kabuk (service worker): ağ önce, ağ yoksa son kopya; `build.py` `dist/` yanına da koyar |
 
 Kopyalar «ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME» başlığı taşır. Elle

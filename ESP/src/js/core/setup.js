@@ -64,8 +64,9 @@ ESP.Setup = (function(){
              kapandi: butun dosya
              ayrisamadi, SPI'nin dokuz yuz testi «SP.Setup tanimsiz»
              diye dustu. -->
-        ${raw(window.LIFEOS.TANITIM_HTML('esp'))}
-
+        ${raw(window.LIFEOS.KURULUM_HTML('esp', { adimlar:[
+          /* 1/3 Ne ölçüyoruz? — ne yapar, alanlar neyi açar */
+          String(html`
         <div class="setup__hero">
           <p class="setup__kicker">İlk kurulum</p>
           <h2 class="setup__h">Üç alan yeter. Gerisi çalıştıkça dolar.</h2>
@@ -74,6 +75,20 @@ ESP.Setup = (function(){
             ve bilmediği hiçbir şeyi tahmin etmez.</p>
         </div>
 
+        <div class="setup__unlock">
+          <p class="setup__kicker">Bu alanlar neyi açar</p>
+          <ul class="setup__list">
+            <li><b>Sıradaki tek iş</b> — açık disiplinler arasında önceliği kural motoru seçer</li>
+            <li><b>Aralıklı tekrar</b> — kart eklediğinde retansiyon ölçülmeye başlar</li>
+            <li><b>Haftalık rota</b> — hiç açılmayan disiplin öne alınır</li>
+            <li><b>Dokuz ajanlı ofis</b> — her masa yalnızca kendi ölçümüne bakar</li>
+            <li><b>Merdiven</b> — her bölümde sıfırdan üstatlığa ölçülebilir kapılar</li>
+          </ul>
+        </div>
+
+`),
+          /* 2/3 Neye karar vermiyoruz? — sınır atlanamaz: «Başla» son adımda */
+          String(html`
         <div class="setup__rules">
           <div class="setup__rule">
             <b>Girilmemiş gün sıfır sayılmaz.</b>
@@ -92,6 +107,10 @@ ESP.Setup = (function(){
           </div>
         </div>
 
+        ${K.Notice({ tone:'warn', title:'Sınır:', body:ESP.PEDAGOGIC.disclaimer })}
+`),
+          /* 3/3 Nasıl başlıyoruz? — alanlar ve açık bölümler */
+          String(html`
         <div class="setup__form">
           ${K.Field({ label:'Ad', hint:'yalnızca sana seslenmek için — modele gitmez',
             input:K.Input({ id:'su-name', value:p.name || '',
@@ -123,21 +142,15 @@ ESP.Setup = (function(){
             açılır ya da kapanır.</p>
         </div>
 
-        <div class="setup__unlock">
-          <p class="setup__kicker">Bu alanlar neyi açar</p>
-          <ul class="setup__list">
-            <li><b>Sıradaki tek iş</b> — açık disiplinler arasında önceliği kural motoru seçer</li>
-            <li><b>Aralıklı tekrar</b> — kart eklediğinde retansiyon ölçülmeye başlar</li>
-            <li><b>Haftalık rota</b> — hiç açılmayan disiplin öne alınır</li>
-            <li><b>Dokuz ajanlı ofis</b> — her masa yalnızca kendi ölçümüne bakar</li>
-            <li><b>Merdiven</b> — her bölümde sıfırdan üstatlığa ölçülebilir kapılar</li>
-          </ul>
-        </div>
-
-        ${K.Notice({ tone:'warn', title:'Sınır:', body:ESP.PEDAGOGIC.disclaimer })}
+`),
+        ] }))}
       </div>`),
+      /* Üç adım (171): «Geri» ilk adımda, «Devam» son adımda, «Başla»
+         son adımdan önce gizli — LIFEOS.KURULUM_GIT görünürlüğü değiştirir. */
       footer:String(html`${K.Button({ label:'Şimdilik atla', act:'setup-skip' })}
-        ${K.Button({ label:'Başla', tone:'primary', act:'setup-save' })}`),
+        ${K.Button({ label:'Geri', act:'kurulum-geri', data:{ 'data-kurulum-degil':'1', hidden:true } })}
+        ${K.Button({ label:'Devam', tone:'primary', act:'kurulum-ileri', data:{ 'data-kurulum-degil':'3' } })}
+        ${K.Button({ label:'Başla', tone:'primary', act:'setup-save', data:{ 'data-kurulum-yalniz':'3', hidden:true } })}`),
     });
   }
 

@@ -142,3 +142,103 @@ LIFEOS.TANITIM_ADIM = function(dugme){
   if(yazi && cevaplar && cevaplar[no - 1]) yazi.textContent = cevaplar[no - 1];
   return true;
 };
+
+/* ------------------------------------------------------------------
+   KURULUM ADIMLARI (katalog 171, T5) — ilk açılış ÜÇ ADIMDIR ve üç adım
+   tanıtımın kendi üç sorusudur: her adım TEK soru, ilerleme ÜSTTE.
+
+     1/3  Ne ölçüyoruz?          → modülün anlattığı ilk bölüm
+     2/3  Neye karar vermiyoruz? → sınır (AGENTS.md §1.5) — atlanamaz
+     3/3  Nasıl başlıyoruz?      → form ve «Başla»
+
+   Adım değişimi YENİDEN ÇİZMEZ (yukarıdaki kural): yazılmış ad, boy,
+   kilo kaybolmasın diye bölümler baştan çizilir, yalnız görünürlükleri
+   değişir. Sekme değildir: noktalar yok, «Devam» ve «Geri» var; ekran
+   okuyucu ilerlemeyi `progressbar`dan duyar.
+
+   o.adimlar: [html, html, html] — üç bölümün gövdesi.
+   Pencerenin alt çubuğundaki düğmeler `data-kurulum-yalniz="3"` (yalnız
+   son adımda) ya da `data-kurulum-degil="3"` (son adımda gizli) taşır. */
+LIFEOS.KURULUM_HTML = function(mod, o){
+  o = o || {};
+  var cevaplar = LIFEOS.TANITIM_ADIMLARI(mod);
+  if(!cevaplar) return '';
+  var sorular = LIFEOS.TANITIM.sorular;
+  var kok = o.kok || 'img/marka/';
+  var adimlar = o.adimlar || [];
+  var kac = function(t){
+    return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
+      return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c];
+    });
+  };
+  var n = sorular.length;
+  var afisler = '', bolumler = '';
+  for(var i = 0; i < n; i++){
+    var no = i + 1;
+    afisler += '<img class="tanitim__afis' + (i === 0 ? ' is-acik' : '') + '" data-adim="' + no + '"'
+      + ' src="' + kac(kok + 'tanitim-' + mod + '-' + no) + '.webp" alt="" aria-hidden="true"'
+      + ' loading="lazy" onerror="this.remove()">';
+    bolumler += '<section class="kurulum__adim" data-kurulum-adim="' + no + '"' + (i === 0 ? '' : ' hidden') + '>'
+      + (adimlar[i] || '') + '</section>';
+  }
+  return '<div class="kurulum" data-kurulum data-mod="' + kac(mod) + '" data-adim="1" data-oz="171">'
+    + '<div class="kurulum__ilerleme" role="progressbar" aria-label="Kurulum adımı"'
+    +   ' aria-valuemin="1" aria-valuemax="' + n + '" aria-valuenow="1" aria-valuetext="Adım 1 / ' + n + '">'
+    +   '<span class="kurulum__sayac" data-kurulum-sayac>Adım 1 / ' + n + '</span>'
+    +   '<span class="kurulum__cubuk" aria-hidden="true"><i data-kurulum-cubuk style="width:' + Math.round(100 / n) + '%"></i></span>'
+    + '</div>'
+    + '<h2 class="kurulum__soru" data-kurulum-soru tabindex="-1">' + kac(sorular[0]) + '</h2>'
+    + '<div class="tanitim tanitim--kurulum" data-mod="' + kac(mod) + '">'
+    +   '<div class="tanitim__kare">' + afisler + '</div>'
+    +   '<p class="tanitim__yazi" data-kurulum-yazi>' + kac(cevaplar[0]) + '</p>'
+    + '</div>'
+    + bolumler
+    + '</div>';
+};
+
+/* yon: +1 ileri, -1 geri. Kök bulunamazsa false. */
+LIFEOS.KURULUM_GIT = function(dugme, yon){
+  var belge = (dugme && dugme.ownerDocument) || document;
+  var kok = (dugme && dugme.closest && dugme.closest('[data-kurulum]'))
+    || belge.querySelector('[data-kurulum]');
+  if(!kok) return false;
+  var sorular = LIFEOS.TANITIM.sorular;
+  var n = sorular.length;
+  var simdi = Number(kok.getAttribute('data-adim')) || 1;
+  var no = Math.max(1, Math.min(n, simdi + (yon || 0)));
+  kok.setAttribute('data-adim', String(no));
+
+  var bolumler = kok.querySelectorAll('[data-kurulum-adim]');
+  for(var i = 0; i < bolumler.length; i++){
+    bolumler[i].hidden = Number(bolumler[i].getAttribute('data-kurulum-adim')) !== no;
+  }
+  var afisler = kok.querySelectorAll('.tanitim__afis');
+  for(var j = 0; j < afisler.length; j++){
+    afisler[j].classList.toggle('is-acik', Number(afisler[j].getAttribute('data-adim')) === no);
+  }
+  var cevaplar = LIFEOS.TANITIM_ADIMLARI(kok.getAttribute('data-mod')) || [];
+  var soru = kok.querySelector('[data-kurulum-soru]');
+  if(soru) soru.textContent = sorular[no - 1];
+  var yazi = kok.querySelector('[data-kurulum-yazi]');
+  if(yazi) yazi.textContent = cevaplar[no - 1] || '';
+  var sayac = kok.querySelector('[data-kurulum-sayac]');
+  if(sayac) sayac.textContent = 'Adım ' + no + ' / ' + n;
+  var cubuk = kok.querySelector('[data-kurulum-cubuk]');
+  if(cubuk) cubuk.style.width = Math.round(100 * no / n) + '%';
+  var il = kok.querySelector('[role="progressbar"]');
+  if(il){ il.setAttribute('aria-valuenow', String(no)); il.setAttribute('aria-valuetext', 'Adım ' + no + ' / ' + n); }
+
+  /* Pencerenin alt çubuğu kökün DIŞINDA: aynı pencerede aranır. */
+  var pencere = kok.closest('.sheet, .overlay, [role="dialog"]') || belge;
+  var yalniz = pencere.querySelectorAll('[data-kurulum-yalniz]');
+  for(var a = 0; a < yalniz.length; a++){
+    yalniz[a].hidden = Number(yalniz[a].getAttribute('data-kurulum-yalniz')) !== no;
+  }
+  var degil = pencere.querySelectorAll('[data-kurulum-degil]');
+  for(var b = 0; b < degil.length; b++){
+    degil[b].hidden = Number(degil[b].getAttribute('data-kurulum-degil')) === no;
+  }
+  /* Odak sorunun başlığına: klavyeyle gelen yeni adımın başından okur. */
+  if(soru && yon){ try{ soru.focus({ preventScroll:false }); }catch(e){} }
+  return no;
+};

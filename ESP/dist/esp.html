@@ -6746,6 +6746,21 @@ button.rutbe-rozet:focus-visible{
   .tanitim__nokta::before{ transition:none; }
 }
 
+/* ------------------------------------------------------------------
+   KURULUM ADIMLARI (171): ilerleme üstte, her adım tek soru. */
+.kurulum{ display:grid; gap:12px; }
+.kurulum__ilerleme{ display:flex; align-items:center; gap:10px; }
+.kurulum__sayac{ flex:none; font-size:var(--fs-xs); font-weight:600; color:var(--text-3); }
+.kurulum__cubuk{ flex:1; height:4px; border-radius:2px; background:var(--surface-3); overflow:hidden; }
+.kurulum__cubuk > i{ display:block; height:100%; background:var(--primary); border-radius:inherit;
+  transition:width var(--dur-lg) var(--ease); }
+.kurulum__soru{ margin:0; font-size:var(--fs-xl); font-weight:700; line-height:1.2; }
+.kurulum__soru:focus{ outline:none; }
+.kurulum__soru:focus-visible{ outline:2px solid var(--primary); outline-offset:4px; border-radius:4px; }
+.kurulum__adim[hidden]{ display:none; }
+.tanitim--kurulum .tanitim__yazi{ margin:0; }
+@media (prefers-reduced-motion:reduce){ .kurulum__cubuk > i{ transition:none; } }
+
 /* ==== css/simge.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/simge.css içine yazılır; burası bir sonraki
@@ -8517,6 +8532,63 @@ span.h-yuvarla, b.h-yuvarla, small.h-yuvarla{ display:inline-block; }
 .tema-ornek--system > b > i + i{ background:linear-gradient(90deg, var(--l-text-3) 50%, var(--d-text-3) 50%); }
 
 @media (prefers-reduced-motion:reduce){ .ayar-serit{ animation:none; } }
+
+/* ==== css/yenilik.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/yenilik.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* NE DEĞİŞTİ? (17, T5). Kaynak: brand/ortak/yenilik.css; `tools/ortak.py
+   --yay` üç arayüze kopyalar. Sayfanın başında tek kart; gürültü değil,
+   yer değiştiren bir özelliğin haberi. */
+.yenilik{
+  margin:0 0 var(--sp-4);
+  padding:var(--sp-4);
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r);
+}
+.yenilik__bas{ display:flex; align-items:center; justify-content:space-between; gap:var(--sp-3); }
+.yenilik__ad{ margin:0; font-size:var(--fs-md); font-weight:600; }
+.yenilik__govde{
+  display:grid; gap:var(--sp-3) var(--sp-6); margin-top:var(--sp-3);
+  grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+}
+.yenilik__baslik{
+  margin:0 0 4px; font-size:var(--fs-xs); font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--text-3);
+}
+.yenilik ul{ margin:0; padding-left:1.1em; display:grid; gap:4px; font-size:var(--fs-sm); color:var(--text-2); }
+
+/* ==== css/kilit.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/kilit.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GİZLİLİK KİLİDİ (176, T5). Kaynak: brand/ortak/kilit.css; `tools/ortak.py
+   --yay` üç arayüze kopyalar. Opak perde: arkadaki veri görünmez. */
+.kilit{
+  position:fixed; inset:0; z-index:2147483600;
+  display:grid; place-items:center; padding:24px;
+  background:var(--bg); color:var(--text);
+}
+.kilit__kutu{ display:flex; flex-direction:column; align-items:center; gap:10px; width:min(320px, 100%); text-align:center; }
+.kilit__isaret{ margin-bottom:6px; }
+.kilit__isaret svg, .kilit__isaret .modis{ width:44px; height:44px; }
+.kilit__ad{ margin:0; font-size:var(--fs-xl); font-weight:700; }
+.kilit__etiket{ font-size:var(--fs-sm); color:var(--text-2); }
+.kilit__kod{
+  width:9.5ch; min-height:48px; text-align:center;
+  font-size:var(--fs-xl); letter-spacing:.5em; padding-left:.5em;
+  font-variant-numeric:tabular-nums;
+}
+.kilit__not{ min-height:1.4em; margin:0; font-size:var(--fs-sm); color:var(--text-2); }
+.kilit__unuttum{ min-height:32px; font-size:var(--fs-sm); }
+.kilit.is-yanlis .kilit__kod{ animation:kilit-salla 320ms var(--ease); border-color:var(--bad); }
+@keyframes kilit-salla{
+  20%{ transform:translateX(-6px); } 40%{ transform:translateX(6px); }
+  60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); }
+}
+.kilit-ayar__form{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:var(--sp-2) var(--sp-4); margin-top:var(--sp-2); }
+.kilit-ayar__form[hidden]{ display:none; }
+.kilit-ayar__not{ grid-column:1 / -1; margin:0; color:var(--text-2); }
+@media (prefers-reduced-motion:reduce){ .kilit.is-yanlis .kilit__kod{ animation:none; } }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -9611,7 +9683,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'852f6fd', at:'2026-09-24 20:34', dirty:true };
+ESP.BUILD = { id:'e0b2385', at:'2026-09-24 20:46', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13358,6 +13430,336 @@ window.LIFEOS.AYAR = (function(){
     dizin, ara, aramaSonucu, aramaKutusu, alanaGit, kur, _bekleyen:bekleyen };
 })();
 
+/* ==== js/core/yenilik.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/yenilik.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* NE DEĞİŞTİ? — katalog 17 (T5, ekip/EKIP-PLANI.md §4.2).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/yenilik.js`; `tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne birebir kopyalanır. Biçimi
+   `yenilik.css`.
+
+   Güncellemeden sonraki İLK açılışta sayfanın başında tek kart: yeni,
+   düzeltilen ve kaldırılan. «Kapat» deyince bir daha görünmez.
+
+   Yalnız GERÇEK bir güncellemede görünür: bu cihazda daha önce başka
+   bir sürüm görülmüşse. İlk kez açan kullanıcı «ne değişti» sorusunu
+   sormaz (hiçbir şeyi eskisinden bilmiyor); ona sürüm sessizce
+   kaydedilir. Kayıt tarayıcının `localStorage`'ındadır; yazılamazsa kart
+   hiç çıkmaz — hata vermez, veri tutmaz.
+
+   YENİ BİR SÜRÜMDE: `surum`u değiştir ve listeyi baştan yaz. Madde
+   yalnız KULLANICININ GÖRDÜĞÜ şeyi söyler; «refaktör» madde değildir.
+   `moduller` verilmezse madde üç arayüz için de doğrudur. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.YENILIK = (function(){
+  const SURUM = '2026-09-24';
+  const MADDELER = [
+    { tur:'yeni', metin:'Sekiz çekmece: Bugün, Plan, Çalışma, Analiz, Onaylar, Ofis, Kütüphanem, Ayarlar. Her ekranın yolu sayfanın başında yazar.' },
+    { tur:'yeni', metin:'Onaylar: bekleyen bütün öneriler tek yerde; Bugün yalnız en öndekini gösterir.' },
+    { tur:'yeni', metin:'Bugün üç alan: şimdi, durum ve tek öneri. Geri kalan satırlar «Ayrıntı»da.' },
+    { tur:'yeni', metin:'Ayarlarda arama, kaydedilmemiş değişiklik şeridi ve «Varsayılana dön».' },
+    { tur:'duzeltilen', metin:'Her tıklamada sayfanın baştan kayarak gelmesi: artık yalnız yeni ekranda.' },
+    { tur:'duzeltilen', metin:'Bir ekran çizilemediğinde çıkan kırmızı hata: artık sakin bir kart ve verinin yerinde olduğu.' },
+    { tur:'kaldirilan', metin:'Yedi palet ve beş düzen: tek tasarım, tema Açık · Koyu · Sistem.' },
+    { tur:'kaldirilan', metin:'Ekran içindeki sekmeler: bölümler artık alt alta, bölüm çubuğuyla gezilir.' },
+  ];
+  const BASLIK = { yeni:'Yeni', duzeltilen:'Düzeltilen', kaldirilan:'Kaldırılan' };
+
+  function anahtar(modul){ return 'lifeos.yenilik.' + String(modul || 'genel'); }
+  function oku(modul){ try{ return window.localStorage.getItem(anahtar(modul)); }catch(e){ return undefined; } }
+  function yaz(modul, v){ try{ window.localStorage.setItem(anahtar(modul), v); return true; }catch(e){ return false; } }
+  function kac(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+
+  function maddeler(modul){
+    return MADDELER.filter(m => !m.moduller || m.moduller.indexOf(modul) >= 0);
+  }
+
+  /* Gösterilmeli mi? İlk açılışta (kayıt yok) sürümü sessizce yazar.
+     o.yeniKullanici: kurulum bitmemiş — «ne değişti» ona anlamsız. */
+  function gosterilmeliMi(modul, o){
+    o = o || {};
+    const son = oku(modul);
+    if(son === undefined) return false;            // depo yok: hiç gösterme
+    if(son === null || o.yeniKullanici){ if(son !== SURUM) yaz(modul, SURUM); return false; }
+    return son !== SURUM && maddeler(modul).length > 0;
+  }
+
+  function kartHtml(modul){
+    const m = maddeler(modul);
+    const grup = Object.keys(BASLIK).map(t => {
+      const l = m.filter(x => x.tur === t);
+      if(!l.length) return '';
+      return '<div class="yenilik__grup"><h3 class="yenilik__baslik yenilik__baslik--' + t + '">' + BASLIK[t] + '</h3>'
+        + '<ul>' + l.map(x => '<li>' + kac(x.metin) + '</li>').join('') + '</ul></div>';
+    }).join('');
+    return '<section class="yenilik" data-yenilik data-oz="017" aria-labelledby="yenilik-ad">'
+      + '<header class="yenilik__bas"><h2 class="yenilik__ad" id="yenilik-ad">Ne değişti?</h2>'
+      + '<button type="button" class="btn btn--sm" data-yenilik-kapat>Kapat</button></header>'
+      + '<div class="yenilik__govde">' + grup + '</div></section>';
+  }
+
+  /* Her çizimden sonra: kapatılana kadar sayfanın başında durur. */
+  let acik = null;   // bu oturumda gösterilecek mi (ilk çağrıda karar verilir)
+  function yerlestir(kok, o){
+    o = o || {};
+    if(acik === null) acik = gosterilmeliMi(o.modul, o);
+    if(!acik || !kok) return false;
+    const main = kok.querySelector('#main');
+    if(!main || main.querySelector('[data-yenilik]')) return false;
+    main.insertAdjacentHTML('afterbegin', kartHtml(o.modul));
+    const k = main.querySelector('[data-yenilik-kapat]');
+    if(k) k.addEventListener('click', () => kapat(o.modul));
+    return true;
+  }
+  function kapat(modul){
+    yaz(modul, SURUM);
+    acik = false;
+    document.querySelectorAll('[data-yenilik]').forEach(e => e.remove());
+  }
+
+  return { SURUM, MADDELER, maddeler, gosterilmeliMi, kartHtml, yerlestir, kapat,
+    _sifirla(){ acik = null; } };
+})();
+
+/* ==== js/core/kilit.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/kilit.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GİZLİLİK KİLİDİ — katalog 176 (T5, ekip/EKIP-PLANI.md §4.2).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/kilit.js`; `tools/ortak.py --yay` ile üç arayüzün
+   `src/js/core/` klasörüne birebir kopyalanır. Biçimi `kilit.css`.
+
+   Uygulama açılırken dört haneli kod sorulur; kilit ekranında sistemin
+   simgesi de durur (hangi sistemin kilidi olduğu karışmaz).
+
+   NE OLDUĞU, NE OLMADIĞI — kullanıcıya da aynen söylenir:
+   Bu bir PERDEDİR, kasa değil. Sağlık ve para verisi yanındaki birinin
+   gözünün önünde açılmasın diye vardır. Veriyi ŞİFRELEMEZ: veri yine bu
+   tarayıcının deposunda durur. Kod düz yazılmaz; tuzlu SHA-256 özeti
+   tutulur (tarayıcı desteklemiyorsa basit bir özet — ikisi de perde için
+   yeterli, kasa için değil).
+
+   KODU UNUTAN KİLİTLİ KALMAZ: «Kodu unuttum» bir dakika bekletir, sonra
+   kilidi kaldırır ve uygulamayı açar. Verisine ulaşamayan bir kullanıcı,
+   verisini kaybetmiş bir kullanıcıdır — perde bunun bedeli olamaz. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.KILIT = (function(){
+  const UZUNLUK = 4;
+  const UNUTTUM_SN = 60;
+  const BEKLE_SN = 5;          // üç yanlıştan sonra
+  const AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+
+  function anahtar(modul){ return 'lifeos.kilit.' + String(modul || 'genel'); }
+  function oku(modul){
+    try{ const v = window.localStorage.getItem(anahtar(modul)); return v ? JSON.parse(v) : null; }
+    catch(e){ return null; }
+  }
+  function yaz(modul, v){
+    try{ window.localStorage.setItem(anahtar(modul), JSON.stringify(v)); return true; }catch(e){ return false; }
+  }
+  function kac(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+  function gecerliMi(kod){ return new RegExp('^\\d{' + UZUNLUK + '}$').test(String(kod || '')); }
+
+  async function ozetle(tuz, kod){
+    const metin = String(tuz) + ':' + String(kod);
+    try{
+      if(window.crypto && window.crypto.subtle && window.TextEncoder){
+        const b = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(metin));
+        return 'sha256:' + Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join('');
+      }
+    }catch(e){ /* güvenli bağlam yok: aşağıdaki özet */ }
+    let h = 2166136261;
+    for(let i = 0; i < metin.length; i++){ h ^= metin.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return 'fnv:' + h.toString(16);
+  }
+  function tuzUret(){
+    try{
+      const a = new Uint8Array(8); window.crypto.getRandomValues(a);
+      return Array.from(a).map(x => x.toString(16).padStart(2, '0')).join('');
+    }catch(e){ return String(Date.now()) + Math.random().toString(16).slice(2); }
+  }
+
+  function aktifMi(modul){ const v = oku(modul); return !!(v && v.ozet); }
+  async function kur(modul, kod){
+    if(!gecerliMi(kod)) return { ok:false, neden:'Kod dört rakam olmalı.' };
+    const tuz = tuzUret();
+    const ok = yaz(modul, { surum:1, tuz, ozet:await ozetle(tuz, kod) });
+    return ok ? { ok:true } : { ok:false, neden:'Bu tarayıcı kilidi saklayamıyor (site verisi kapalı).' };
+  }
+  function kaldir(modul){ try{ window.localStorage.removeItem(anahtar(modul)); }catch(e){} }
+  async function dogrula(modul, kod){
+    const v = oku(modul);
+    if(!v) return true;
+    if(!gecerliMi(kod)) return false;
+    return (await ozetle(v.tuz, kod)) === v.ozet;
+  }
+
+  /* ------------------------------------------------------------ ekran */
+
+  function ekranHtml(modul, isaret){
+    return '<div class="kilit" id="kilit" role="dialog" aria-modal="true" aria-labelledby="kilit-ad" data-oz="176">'
+      + '<div class="kilit__kutu">'
+      +   '<div class="kilit__isaret" aria-hidden="true">' + (isaret || '') + '</div>'
+      +   '<h1 class="kilit__ad" id="kilit-ad">' + kac(AD[modul] || modul) + ' kilitli</h1>'
+      +   '<label class="kilit__etiket" for="kilit-kod">Dört haneli kod</label>'
+      +   '<input class="input kilit__kod" id="kilit-kod" type="password" inputmode="numeric"'
+      +     ' autocomplete="off" maxlength="' + UZUNLUK + '" pattern="\\d*" aria-describedby="kilit-not">'
+      +   '<p class="kilit__not" id="kilit-not" role="status" aria-live="polite"></p>'
+      +   '<button type="button" class="linkbtn kilit__unuttum" data-kilit="unuttum">Kodu unuttum</button>'
+      + '</div></div>';
+  }
+
+  /* Açılışta çağrılır; kilit yoksa hemen döner. Kod doğru girilince ya da
+     «unuttum» süresi dolunca çözülür. */
+  function ac(modul, o){
+    o = o || {};
+    if(!aktifMi(modul)) return Promise.resolve('kilit-yok');
+    return new Promise(coz => {
+      const kap = document.createElement('div');
+      kap.innerHTML = ekranHtml(modul, o.isaret);
+      const el = kap.firstElementChild;
+      document.body.appendChild(el);
+      const app = document.getElementById('app');
+      if(app){ app.setAttribute('inert', ''); app.setAttribute('aria-hidden', 'true'); }
+      const kod = el.querySelector('#kilit-kod');
+      const not = el.querySelector('#kilit-not');
+      let yanlis = 0, beklemede = false, sayac = null;
+
+      const bitir = neden => {
+        clearInterval(sayac);
+        el.remove();
+        if(app){ app.removeAttribute('inert'); app.removeAttribute('aria-hidden'); }
+        coz(neden);
+      };
+      kod.addEventListener('input', async () => {
+        kod.value = kod.value.replace(/\D/g, '').slice(0, UZUNLUK);
+        if(beklemede || kod.value.length < UZUNLUK) return;
+        if(await dogrula(modul, kod.value)){ bitir('acildi'); return; }
+        yanlis++;
+        kod.value = '';
+        el.classList.remove('is-yanlis'); void el.offsetWidth; el.classList.add('is-yanlis');
+        if(yanlis >= 3){
+          beklemede = true; kod.disabled = true;
+          not.textContent = 'Üç kez yanlış. ' + BEKLE_SN + ' saniye bekle.';
+          setTimeout(() => { beklemede = false; yanlis = 0; kod.disabled = false; not.textContent = ''; kod.focus(); }, BEKLE_SN * 1000);
+        }else{
+          not.textContent = 'Kod yanlış.';
+        }
+      });
+      el.addEventListener('click', e => {
+        const b = e.target.closest && e.target.closest('[data-kilit="unuttum"]');
+        if(!b || sayac) return;
+        let kalan = UNUTTUM_SN;
+        b.disabled = true;
+        const yaz = () => { not.textContent = 'Kilit ' + kalan + ' saniye sonra kalkacak; uygulama açılacak ve kilit yeniden kurulana kadar kapalı kalacak.'; };
+        yaz();
+        sayac = setInterval(() => {
+          kalan--;
+          if(kalan <= 0){ kaldir(modul); bitir('unutuldu'); return; }
+          yaz();
+        }, 1000);
+      });
+      setTimeout(() => { try{ kod.focus(); }catch(e){} }, 30);
+    });
+  }
+
+  /* ------------------------------------------------------------ ayar */
+
+  /* Ayarlar'daki kutu. Kod kurulurken iki kez yazılır; kutu kendi içinde
+     değişir (yeniden çizim beklemez). */
+  /* o.govde: yalnız gövde — ekran kendi kutusuna (Entry, Card) koyar. */
+  function ayarHtml(modul, o){
+    o = o || {};
+    const acik = aktifMi(modul);
+    const m = kac(modul);
+    const govde = '<div class="kilit-ayar" data-kilit-ayar="' + m + '"' + (o.govde ? ' data-kilit-govde' : '') + '>'
+      + '<p class="small">Açılışta dört haneli kod sorar. Veriyi şifrelemez: yanındaki birinin gözünden korur.'
+      +   ' Şu an <b>' + (acik ? 'açık' : 'kapalı') + '</b>.</p>'
+      + '<div class="kilit-ayar__form" hidden>'
+      +   '<label class="field"><span>Yeni kod</span><input class="input" id="kilit-yeni-' + m + '" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label>'
+      +   '<label class="field"><span>Yeniden</span><input class="input" id="kilit-tekrar-' + m + '" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label>'
+      +   '<p class="small kilit-ayar__not" role="status" aria-live="polite"></p>'
+      + '</div>'
+      + '<div class="row wrap gap-8 mt-8">'
+      +   (acik
+        ? '<button type="button" class="btn btn--sm" data-kilit="degistir">Kodu değiştir</button>'
+          + '<button type="button" class="btn btn--sm" data-kilit="kaldir">Kilidi kaldır</button>'
+        : '<button type="button" class="btn btn--sm" data-kilit="kur">Kilidi kur</button>')
+      +   '<button type="button" class="btn btn--sm" data-kilit="kaydet" hidden>Kodu kaydet</button>'
+      +   '<button type="button" class="btn btn--sm" data-kilit="vazgec" hidden>Vazgeç</button>'
+      + '</div>'
+      + '<p class="tiny dim mt-8">Kodu unutursan kilit ekranındaki «Kodu unuttum» bir dakika sonra kilidi kaldırır.</p>'
+      + '</div>';
+    if(o.govde) return govde;
+    return '<section class="kutu" data-oz="176"><header class="kutu__bas"><h2 class="kutu__ad">Gizlilik kilidi</h2>'
+      + '<span class="kutu__yuva"></span></header><div class="kutu__govde">' + govde + '</div></section>';
+  }
+
+  function ayarYenile(kutu){
+    const modul = kutu.getAttribute('data-kilit-ayar');
+    const k = document.createElement('div');
+    k.innerHTML = ayarHtml(modul, { govde:true });
+    kutu.replaceWith(k.firstElementChild);
+  }
+
+  async function ayarEylem(b){
+    const kutu = b.closest('[data-kilit-ayar]');
+    if(!kutu) return false;
+    const modul = kutu.getAttribute('data-kilit-ayar');
+    const form = kutu.querySelector('.kilit-ayar__form');
+    const not = kutu.querySelector('.kilit-ayar__not');
+    const goster = acik => {
+      form.hidden = !acik;
+      kutu.querySelectorAll('[data-kilit="kaydet"], [data-kilit="vazgec"]').forEach(x => { x.hidden = !acik; });
+      kutu.querySelectorAll('[data-kilit="kur"], [data-kilit="degistir"], [data-kilit="kaldir"]').forEach(x => { x.hidden = acik; });
+      if(acik){ const i = form.querySelector('input'); if(i) i.focus(); }
+    };
+    const ne = b.getAttribute('data-kilit');
+    if(ne === 'kur' || ne === 'degistir'){ goster(true); return true; }
+    if(ne === 'vazgec'){ form.querySelectorAll('input').forEach(i => { i.value = ''; }); not.textContent = ''; goster(false); return true; }
+    if(ne === 'kaldir'){ kaldir(modul); ayarYenile(kutu); return true; }
+    if(ne === 'kaydet'){
+      const a = form.querySelectorAll('input')[0].value, t = form.querySelectorAll('input')[1].value;
+      if(!gecerliMi(a)){ not.textContent = 'Kod dört rakam olmalı.'; return false; }
+      if(a !== t){ not.textContent = 'İki kod aynı değil.'; return false; }
+      const r = await kur(modul, a);
+      if(!r.ok){ not.textContent = r.neden; return false; }
+      ayarYenile(kutu);
+      return true;
+    }
+    return false;
+  }
+
+  let kuruldu = false;
+  function kurDinle(){
+    if(kuruldu) return;
+    kuruldu = true;
+    document.addEventListener('click', e => {
+      const b = e.target.closest && e.target.closest('[data-kilit-ayar] [data-kilit]');
+      /* Kilit ekranının «unuttum»u kendi dinleyicisindedir. */
+      if(b) ayarEylem(b);
+    });
+  }
+
+  return { UZUNLUK, UNUTTUM_SN, aktifMi, kur, kaldir, dogrula, ozetle, ekranHtml, ac,
+    ayarHtml, ayarEylem, kurDinle };
+})();
+
 /* ==== js/core/olumsuz.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/olumsuz.js içine yazılır; burası bir sonraki
@@ -16884,6 +17286,106 @@ LIFEOS.TANITIM_ADIM = function(dugme){
   var cevaplar = LIFEOS.TANITIM_ADIMLARI(mod);
   if(yazi && cevaplar && cevaplar[no - 1]) yazi.textContent = cevaplar[no - 1];
   return true;
+};
+
+/* ------------------------------------------------------------------
+   KURULUM ADIMLARI (katalog 171, T5) — ilk açılış ÜÇ ADIMDIR ve üç adım
+   tanıtımın kendi üç sorusudur: her adım TEK soru, ilerleme ÜSTTE.
+
+     1/3  Ne ölçüyoruz?          → modülün anlattığı ilk bölüm
+     2/3  Neye karar vermiyoruz? → sınır (AGENTS.md §1.5) — atlanamaz
+     3/3  Nasıl başlıyoruz?      → form ve «Başla»
+
+   Adım değişimi YENİDEN ÇİZMEZ (yukarıdaki kural): yazılmış ad, boy,
+   kilo kaybolmasın diye bölümler baştan çizilir, yalnız görünürlükleri
+   değişir. Sekme değildir: noktalar yok, «Devam» ve «Geri» var; ekran
+   okuyucu ilerlemeyi `progressbar`dan duyar.
+
+   o.adimlar: [html, html, html] — üç bölümün gövdesi.
+   Pencerenin alt çubuğundaki düğmeler `data-kurulum-yalniz="3"` (yalnız
+   son adımda) ya da `data-kurulum-degil="3"` (son adımda gizli) taşır. */
+LIFEOS.KURULUM_HTML = function(mod, o){
+  o = o || {};
+  var cevaplar = LIFEOS.TANITIM_ADIMLARI(mod);
+  if(!cevaplar) return '';
+  var sorular = LIFEOS.TANITIM.sorular;
+  var kok = o.kok || 'img/marka/';
+  var adimlar = o.adimlar || [];
+  var kac = function(t){
+    return String(t == null ? '' : t).replace(/[&<>"]/g, function(c){
+      return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c];
+    });
+  };
+  var n = sorular.length;
+  var afisler = '', bolumler = '';
+  for(var i = 0; i < n; i++){
+    var no = i + 1;
+    afisler += '<img class="tanitim__afis' + (i === 0 ? ' is-acik' : '') + '" data-adim="' + no + '"'
+      + ' src="' + kac(kok + 'tanitim-' + mod + '-' + no) + '.webp" alt="" aria-hidden="true"'
+      + ' loading="lazy" onerror="this.remove()">';
+    bolumler += '<section class="kurulum__adim" data-kurulum-adim="' + no + '"' + (i === 0 ? '' : ' hidden') + '>'
+      + (adimlar[i] || '') + '</section>';
+  }
+  return '<div class="kurulum" data-kurulum data-mod="' + kac(mod) + '" data-adim="1" data-oz="171">'
+    + '<div class="kurulum__ilerleme" role="progressbar" aria-label="Kurulum adımı"'
+    +   ' aria-valuemin="1" aria-valuemax="' + n + '" aria-valuenow="1" aria-valuetext="Adım 1 / ' + n + '">'
+    +   '<span class="kurulum__sayac" data-kurulum-sayac>Adım 1 / ' + n + '</span>'
+    +   '<span class="kurulum__cubuk" aria-hidden="true"><i data-kurulum-cubuk style="width:' + Math.round(100 / n) + '%"></i></span>'
+    + '</div>'
+    + '<h2 class="kurulum__soru" data-kurulum-soru tabindex="-1">' + kac(sorular[0]) + '</h2>'
+    + '<div class="tanitim tanitim--kurulum" data-mod="' + kac(mod) + '">'
+    +   '<div class="tanitim__kare">' + afisler + '</div>'
+    +   '<p class="tanitim__yazi" data-kurulum-yazi>' + kac(cevaplar[0]) + '</p>'
+    + '</div>'
+    + bolumler
+    + '</div>';
+};
+
+/* yon: +1 ileri, -1 geri. Kök bulunamazsa false. */
+LIFEOS.KURULUM_GIT = function(dugme, yon){
+  var belge = (dugme && dugme.ownerDocument) || document;
+  var kok = (dugme && dugme.closest && dugme.closest('[data-kurulum]'))
+    || belge.querySelector('[data-kurulum]');
+  if(!kok) return false;
+  var sorular = LIFEOS.TANITIM.sorular;
+  var n = sorular.length;
+  var simdi = Number(kok.getAttribute('data-adim')) || 1;
+  var no = Math.max(1, Math.min(n, simdi + (yon || 0)));
+  kok.setAttribute('data-adim', String(no));
+
+  var bolumler = kok.querySelectorAll('[data-kurulum-adim]');
+  for(var i = 0; i < bolumler.length; i++){
+    bolumler[i].hidden = Number(bolumler[i].getAttribute('data-kurulum-adim')) !== no;
+  }
+  var afisler = kok.querySelectorAll('.tanitim__afis');
+  for(var j = 0; j < afisler.length; j++){
+    afisler[j].classList.toggle('is-acik', Number(afisler[j].getAttribute('data-adim')) === no);
+  }
+  var cevaplar = LIFEOS.TANITIM_ADIMLARI(kok.getAttribute('data-mod')) || [];
+  var soru = kok.querySelector('[data-kurulum-soru]');
+  if(soru) soru.textContent = sorular[no - 1];
+  var yazi = kok.querySelector('[data-kurulum-yazi]');
+  if(yazi) yazi.textContent = cevaplar[no - 1] || '';
+  var sayac = kok.querySelector('[data-kurulum-sayac]');
+  if(sayac) sayac.textContent = 'Adım ' + no + ' / ' + n;
+  var cubuk = kok.querySelector('[data-kurulum-cubuk]');
+  if(cubuk) cubuk.style.width = Math.round(100 * no / n) + '%';
+  var il = kok.querySelector('[role="progressbar"]');
+  if(il){ il.setAttribute('aria-valuenow', String(no)); il.setAttribute('aria-valuetext', 'Adım ' + no + ' / ' + n); }
+
+  /* Pencerenin alt çubuğu kökün DIŞINDA: aynı pencerede aranır. */
+  var pencere = kok.closest('.sheet, .overlay, [role="dialog"]') || belge;
+  var yalniz = pencere.querySelectorAll('[data-kurulum-yalniz]');
+  for(var a = 0; a < yalniz.length; a++){
+    yalniz[a].hidden = Number(yalniz[a].getAttribute('data-kurulum-yalniz')) !== no;
+  }
+  var degil = pencere.querySelectorAll('[data-kurulum-degil]');
+  for(var b = 0; b < degil.length; b++){
+    degil[b].hidden = Number(degil[b].getAttribute('data-kurulum-degil')) === no;
+  }
+  /* Odak sorunun başlığına: klavyeyle gelen yeni adımın başından okur. */
+  if(soru && yon){ try{ soru.focus({ preventScroll:false }); }catch(e){} }
+  return no;
 };
 
 /* ==== js/core/gorsel.js ==== */
@@ -41537,8 +42039,9 @@ ESP.Setup = (function(){
              kapandi: butun dosya
              ayrisamadi, SPI'nin dokuz yuz testi «SP.Setup tanimsiz»
              diye dustu. -->
-        ${raw(window.LIFEOS.TANITIM_HTML('esp'))}
-
+        ${raw(window.LIFEOS.KURULUM_HTML('esp', { adimlar:[
+          /* 1/3 Ne ölçüyoruz? — ne yapar, alanlar neyi açar */
+          String(html`
         <div class="setup__hero">
           <p class="setup__kicker">İlk kurulum</p>
           <h2 class="setup__h">Üç alan yeter. Gerisi çalıştıkça dolar.</h2>
@@ -41547,6 +42050,20 @@ ESP.Setup = (function(){
             ve bilmediği hiçbir şeyi tahmin etmez.</p>
         </div>
 
+        <div class="setup__unlock">
+          <p class="setup__kicker">Bu alanlar neyi açar</p>
+          <ul class="setup__list">
+            <li><b>Sıradaki tek iş</b> — açık disiplinler arasında önceliği kural motoru seçer</li>
+            <li><b>Aralıklı tekrar</b> — kart eklediğinde retansiyon ölçülmeye başlar</li>
+            <li><b>Haftalık rota</b> — hiç açılmayan disiplin öne alınır</li>
+            <li><b>Dokuz ajanlı ofis</b> — her masa yalnızca kendi ölçümüne bakar</li>
+            <li><b>Merdiven</b> — her bölümde sıfırdan üstatlığa ölçülebilir kapılar</li>
+          </ul>
+        </div>
+
+`),
+          /* 2/3 Neye karar vermiyoruz? — sınır atlanamaz: «Başla» son adımda */
+          String(html`
         <div class="setup__rules">
           <div class="setup__rule">
             <b>Girilmemiş gün sıfır sayılmaz.</b>
@@ -41565,6 +42082,10 @@ ESP.Setup = (function(){
           </div>
         </div>
 
+        ${K.Notice({ tone:'warn', title:'Sınır:', body:ESP.PEDAGOGIC.disclaimer })}
+`),
+          /* 3/3 Nasıl başlıyoruz? — alanlar ve açık bölümler */
+          String(html`
         <div class="setup__form">
           ${K.Field({ label:'Ad', hint:'yalnızca sana seslenmek için — modele gitmez',
             input:K.Input({ id:'su-name', value:p.name || '',
@@ -41596,21 +42117,15 @@ ESP.Setup = (function(){
             açılır ya da kapanır.</p>
         </div>
 
-        <div class="setup__unlock">
-          <p class="setup__kicker">Bu alanlar neyi açar</p>
-          <ul class="setup__list">
-            <li><b>Sıradaki tek iş</b> — açık disiplinler arasında önceliği kural motoru seçer</li>
-            <li><b>Aralıklı tekrar</b> — kart eklediğinde retansiyon ölçülmeye başlar</li>
-            <li><b>Haftalık rota</b> — hiç açılmayan disiplin öne alınır</li>
-            <li><b>Dokuz ajanlı ofis</b> — her masa yalnızca kendi ölçümüne bakar</li>
-            <li><b>Merdiven</b> — her bölümde sıfırdan üstatlığa ölçülebilir kapılar</li>
-          </ul>
-        </div>
-
-        ${K.Notice({ tone:'warn', title:'Sınır:', body:ESP.PEDAGOGIC.disclaimer })}
+`),
+        ] }))}
       </div>`),
+      /* Üç adım (171): «Geri» ilk adımda, «Devam» son adımda, «Başla»
+         son adımdan önce gizli — LIFEOS.KURULUM_GIT görünürlüğü değiştirir. */
       footer:String(html`${K.Button({ label:'Şimdilik atla', act:'setup-skip' })}
-        ${K.Button({ label:'Başla', tone:'primary', act:'setup-save' })}`),
+        ${K.Button({ label:'Geri', act:'kurulum-geri', data:{ 'data-kurulum-degil':'1', hidden:true } })}
+        ${K.Button({ label:'Devam', tone:'primary', act:'kurulum-ileri', data:{ 'data-kurulum-degil':'3' } })}
+        ${K.Button({ label:'Başla', tone:'primary', act:'setup-save', data:{ 'data-kurulum-yalniz':'3', hidden:true } })}`),
     });
   }
 
@@ -48008,6 +48523,11 @@ ESP.Screens.profile = (function(){
             ${K.TemaSecici({ value:p.theme || 'system', act:'set-theme' })}`,
         }),
 
+        /* Gizlilik kilidi (176, T5): kutu kendi içinde değişir. */
+        window.LIFEOS && window.LIFEOS.KILIT ? K.Entry({ label:'GİZLİLİK KİLİDİ', wide:true,
+          meta:window.LIFEOS.KILIT.aktifMi('esp') ? 'açık' : 'kapalı',
+          body:raw(window.LIFEOS.KILIT.ayarHtml('esp', { govde:true })) }) : '',
+
         K.Entry({
           label:'PROFİLLER',
           meta:profiller.length + ' profil',
@@ -50773,6 +51293,9 @@ ESP.App = (function(){
       restoreFocus(focus);
       if(H) H.sonra(appEl, S.route);
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.sonra(appEl, { rota:S.route, etkin:ayarlardaMi(S.route) });
+      /* Ne değişti? (17): güncellemeden sonraki ilk açılışta sayfanın başında. */
+      if(window.LIFEOS && window.LIFEOS.YENILIK) window.LIFEOS.YENILIK.yerlestir(appEl, { modul:'esp',
+        yeniKullanici:!!safe(() => ESP.Setup.needed(), true) });
       revealActiveTab();
       /* Kabuk her cizimde yeniden kuruluyor; acik bir alt sayfa varsa
          `inert` onunla birlikte silinir ve arka plan yeniden okunur
@@ -51226,6 +51749,9 @@ ESP.App = (function(){
        alanları silmek olurdu — bir süsü değiştirmek için formu
        sıfırlamak. */
     'tanitim-adim'(el){ window.LIFEOS.TANITIM_ADIM(el); },
+    /* Kurulumun üç adımı (171): yeniden çizmeden, yazılan kaybolmaz. */
+    'kurulum-ileri'(el){ window.LIFEOS.KURULUM_GIT(el, 1); },
+    'kurulum-geri'(el){ window.LIFEOS.KURULUM_GIT(el, -1); },
     /* Herhangi bir ekrandan bir ajana soru sormak için. */
     async 'ask-agent'(el){
       S.ui.officeAgent = el.dataset.agent || 'patron';
@@ -51741,6 +52267,13 @@ ESP.App = (function(){
       applyTheme();
       /* Eski bölüm rengi niteliği kalmışsa silinir: renk modülü söyler. */
       document.documentElement.removeAttribute('data-section');
+      /* Gizlilik kilidi (176): açılışta, çizimden ÖNCE — arkada veri çizilmez.
+         Kilit yoksa hemen döner. */
+      if(window.LIFEOS && window.LIFEOS.KILIT){
+        window.LIFEOS.KILIT.kurDinle();
+        const isaret = safe(() => window.LIFEOS.KABUK.modulIsareti('esp', true), '');
+        await window.LIFEOS.KILIT.ac('esp', { isaret });
+      }
       await render();
       installManifest();
       /* Çevrimdışı kabuk: yalnız sunucuyla açılınca (brand/ortak/pwa.js). */

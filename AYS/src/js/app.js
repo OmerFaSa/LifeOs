@@ -546,6 +546,9 @@ R.App = (function(){
       restoreFocus(focus);
       if(H) H.sonra(appEl, S.route);
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.sonra(appEl, { rota:S.route, etkin:ayarlardaMi(S.route) });
+      /* Ne değişti? (17): güncellemeden sonraki ilk açılışta sayfanın başında. */
+      if(window.LIFEOS && window.LIFEOS.YENILIK) window.LIFEOS.YENILIK.yerlestir(appEl, { modul:'ays',
+        yeniKullanici:!!safe(() => R.Setup.needed(), true) });
       /* Odağı ancak YÖNLENDİRMEDEN sonra taşı: sıradan bir yeniden
          çizimde taşımak, yazan kullanıcının imlecini alandan koparırdı. */
       if(rotaDegisti){ rotaDegisti = false; rotayaOdaklan(sc); }
@@ -1320,6 +1323,13 @@ R.App = (function(){
         console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
       }
       applyTheme();
+      /* Gizlilik kilidi (176): açılışta, çizimden ÖNCE — arkada veri çizilmez.
+         Kilit yoksa hemen döner. */
+      if(window.LIFEOS && window.LIFEOS.KILIT){
+        window.LIFEOS.KILIT.kurDinle();
+        const isaret = safe(() => window.LIFEOS.KABUK.modulIsareti('ays', true), '');
+        await window.LIFEOS.KILIT.ac('ays', { isaret });
+      }
       await render();
 
       // AI koc yetenegi acilisi bloklamaz; hazir olunca panelleri gostermek icin yeniden ciz.

@@ -138,7 +138,10 @@ SP.Screens.family = (function(){
 
   async function render(){
     return String(html`
-      ${K.Ledger(() => [profileCard(), targetCard(), householdCard(), prefCard()])}
+      ${K.Ledger(() => [profileCard(), targetCard(), householdCard(), prefCard(),
+        /* Gizlilik kilidi (176, T5): kutu kendi içinde değişir. */
+        window.LIFEOS && window.LIFEOS.KILIT ? K.Card({ title:'Gizlilik kilidi',
+          body:raw(window.LIFEOS.KILIT.ayarHtml('spi', { govde:true })) }) : null].filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['profiles', 'macro-target', 'lab-linked-food', 'privacy']))}</div>`);
   }
 

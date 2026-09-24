@@ -237,9 +237,17 @@ R.Setup = (function(){
 
     UI.sheet({
       title:s.title,
-      subtitle:'Adım '+(step+1)+' / '+STEPS.length+' · '+s.note,
+      subtitle:s.note,   /* adım sayısı artık ilerleme çubuğunda (171) */
       wide:true,
       body:String(K.Stack([
+        /* İlerleme ÜSTTE (171): kaçıncı adımda olunduğu tanıtımdan önce
+           görünür; ekran okuyucu `progressbar`dan duyar. */
+        html`<div class="kurulum__ilerleme" role="progressbar" aria-label="Kurulum adımı"
+          aria-valuemin="1" aria-valuemax="${STEPS.length}" aria-valuenow="${step + 1}"
+          aria-valuetext="${'Adım ' + (step + 1) + ' / ' + STEPS.length}">
+          <span class="kurulum__sayac">${'Adım ' + (step + 1) + ' / ' + STEPS.length}</span>
+          <span class="kurulum__cubuk" aria-hidden="true"><i style="${'width:' + Math.round(100 * (step + 1) / STEPS.length) + '%'}"></i></span>
+        </div>`,
         /* TANITIM AFISI — yalniz ILK kurulumun ILK adiminda. Ayarlardan
            yeniden acilan sihirbazda gosterilmez: orada kullanici zaten
            sistemin icinde ve bir tanitim afisi, bildigi seyi anlatan
@@ -248,9 +256,6 @@ R.Setup = (function(){
            `alt` bos ve `aria-hidden`: afisteki cumleler adimlarin
            icinde gercek metin olarak duruyor. */
         when(isFirstRun && first, () => raw(window.LIFEOS.TANITIM_HTML('ays'))),
-        html`<div class="wizsteps">${map(STEPS, (x, i) => html`
-          <span class="${i === step ? 'wizstep is-on' : i < step ? 'wizstep is-done' : 'wizstep'}"
-            title="${x.title}"></span>`)}</div>`,
         BODIES[s.id](),
       ])),
       footer:String(html`

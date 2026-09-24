@@ -229,6 +229,14 @@ DOSYALAR = {
     "ayar.js":        "js/core",
     "ayar.css":       "css",
     "ayar.test.js":   "tests",
+    # NE DEGISTI? (17) — guncellemeden sonraki ilk acilista tek kart.
+    "yenilik.js":     "js/core",
+    "yenilik.css":    "css",
+    "yenilik.test.js": "tests",
+    # GIZLILIK KILIDI (176) — acilista dort haneli kod; perde, kasa degil.
+    "kilit.js":       "js/core",
+    "kilit.css":      "css",
+    "kilit.test.js":  "tests",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     "sw.js":          ".",

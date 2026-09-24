@@ -136,3 +136,46 @@ describe('Tanıtım — adım değiştirme', () => {
 });
 
 })();
+
+/* Kurulum adımları (171, T5): ilk açılış üç adım, her adım tek soru,
+   ilerleme üstte; adım değişimi yeniden çizmez (yazılan kalır); sınırı
+   söyleyen ikinci adım atlanamaz — «Başla» yalnız son adımda görünür. */
+(function(){
+  const NS = window.R || window.SP || window.ESP;
+  const { describe, it, expect } = NS.Test;
+
+  describe('Kurulum adımları (171)', () => {
+    it('üç adım, tek soru, ilerleme üstte; yazılan kalır; Başla yalnız sonda', () => {
+      const d = document.createElement('div');
+      d.className = 'sheet';
+      d.innerHTML = window.LIFEOS.KURULUM_HTML('spi', { adimlar:['<p>bir</p>', '<p>iki</p>',
+        '<input id="k-ad" value="">'] })
+        + '<button data-act="kurulum-geri" data-kurulum-degil="1" hidden>Geri</button>'
+        + '<button data-act="kurulum-ileri" data-kurulum-degil="3">Devam</button>'
+        + '<button data-act="setup-save" data-kurulum-yalniz="3" hidden>Başla</button>';
+      document.body.appendChild(d);
+      try{
+        const k = d.querySelector('[data-kurulum]');
+        expect(k.getAttribute('data-oz')).toBe('171');
+        expect(k.firstElementChild.getAttribute('role')).toBe('progressbar');
+        expect(d.querySelectorAll('[role="tab"]').length).toBe(0);
+        expect(d.querySelector('[data-kurulum-soru]').textContent).toBe('Ne ölçüyoruz?');
+        const gorunen = () => Array.from(d.querySelectorAll('[data-kurulum-adim]')).filter(x => !x.hidden).length;
+        expect(gorunen()).toBe(1);
+        d.querySelector('#k-ad').value = 'Deniz';
+        const ileri = d.querySelector('[data-act="kurulum-ileri"]');
+        expect(window.LIFEOS.KURULUM_GIT(ileri, 1)).toBe(2);
+        expect(d.querySelector('[data-kurulum-soru]').textContent).toBe('Neye karar vermiyoruz?');
+        expect(d.querySelector('[data-act="setup-save"]').hidden).toBe(true);
+        expect(window.LIFEOS.KURULUM_GIT(ileri, 1)).toBe(3);
+        expect(d.querySelector('[data-kurulum-sayac]').textContent).toBe('Adım 3 / 3');
+        expect(d.querySelector('[data-act="setup-save"]').hidden).toBe(false);
+        expect(d.querySelector('[data-act="kurulum-ileri"]').hidden).toBe(true);
+        expect(d.querySelector('#k-ad').value).toBe('Deniz');
+        expect(window.LIFEOS.KURULUM_GIT(ileri, 1)).toBe(3);
+        expect(window.LIFEOS.KURULUM_GIT(ileri, -1)).toBe(2);
+        expect(window.LIFEOS.KURULUM_HTML('yok', {})).toBe('');
+      }finally{ d.remove(); }
+    });
+  });
+})();

@@ -67,8 +67,9 @@ SP.Setup = (function(){
              kapandi: butun dosya
              ayrisamadi, SPI'nin dokuz yuz testi «SP.Setup tanimsiz»
              diye dustu. -->
-        ${raw(window.LIFEOS.TANITIM_HTML('spi'))}
-
+        ${raw(window.LIFEOS.KURULUM_HTML('spi', { adimlar:[
+          /* 1/3 Ne ölçüyoruz? — ne yapar, beş alan neyi açar */
+          String(html`
         <div class="setup__hero">
           <p class="setup__kicker">İlk kurulum</p>
           <h2 class="setup__h">Beş alan yeter. Gerisi zamanla dolar.</h2>
@@ -77,6 +78,19 @@ SP.Setup = (function(){
             hiçbir şeyi tahmin etmez.</p>
         </div>
 
+        <div class="setup__unlock">
+          <p class="setup__kicker">Bu beş alan neyi açar</p>
+          <ul class="setup__list">
+            <li><b>Kalori ve protein hedefi</b> — bazal metabolizmandan hesaplanır</li>
+            <li><b>Yaşa ve cinsiyete göre referans aralıkları</b> — 58 ölçüm için</li>
+            <li><b>eGFR ve FIB-4</b> — yaş olmadan hesaplanamayan indeksler</li>
+            <li><b>Toparlanma skoru</b> — ilk günün kilosu taban çizgi olur</li>
+          </ul>
+        </div>
+
+`),
+          /* 2/3 Neye karar vermiyoruz? — sınır atlanamaz: «Başla» son adımda */
+          String(html`
         <div class="setup__rules">
           <div class="setup__rule">
             <b>Eksik veri sıfır sayılmaz.</b>
@@ -94,6 +108,10 @@ SP.Setup = (function(){
           </div>
         </div>
 
+        ${K.Notice({ tone:'warn', title:'Sınır:', body:SP.CLINICAL.disclaimer })}
+`),
+          /* 3/3 Nasıl başlıyoruz? — beş alan */
+          String(html`
         <div class="setup__form">
           ${K.Field({ label:'Ad', hint:'yalnızca sana seslenmek için — modele gitmez',
             input:K.Input({ id:'su-name', value:p.name || '',
@@ -119,20 +137,15 @@ SP.Setup = (function(){
               options:SP.GOALS.map(g => ({ value:g.id, label:g.label })) }) })}
         </div>
 
-        <div class="setup__unlock">
-          <p class="setup__kicker">Bu beş alan neyi açar</p>
-          <ul class="setup__list">
-            <li><b>Kalori ve protein hedefi</b> — bazal metabolizmandan hesaplanır</li>
-            <li><b>Yaşa ve cinsiyete göre referans aralıkları</b> — 58 ölçüm için</li>
-            <li><b>eGFR ve FIB-4</b> — yaş olmadan hesaplanamayan indeksler</li>
-            <li><b>Toparlanma skoru</b> — ilk günün kilosu taban çizgi olur</li>
-          </ul>
-        </div>
-
-        ${K.Notice({ tone:'warn', title:'Sınır:', body:SP.CLINICAL.disclaimer })}
+`),
+        ] }))}
       </div>`),
+      /* Üç adım (171): «Geri» ilk adımda, «Devam» son adımda, «Başla»
+         son adımdan önce gizli — LIFEOS.KURULUM_GIT görünürlüğü değiştirir. */
       footer:String(html`${K.Button({ label:'Şimdilik atla', act:'setup-skip' })}
-        ${K.Button({ label:'Başla', tone:'primary', act:'setup-save' })}`),
+        ${K.Button({ label:'Geri', act:'kurulum-geri', data:{ 'data-kurulum-degil':'1', hidden:true } })}
+        ${K.Button({ label:'Devam', tone:'primary', act:'kurulum-ileri', data:{ 'data-kurulum-degil':'3' } })}
+        ${K.Button({ label:'Başla', tone:'primary', act:'setup-save', data:{ 'data-kurulum-yalniz':'3', hidden:true } })}`),
     });
   }
 

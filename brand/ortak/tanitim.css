@@ -149,3 +149,18 @@
 @media (prefers-reduced-motion: reduce){
   .tanitim__nokta::before{ transition:none; }
 }
+
+/* ------------------------------------------------------------------
+   KURULUM ADIMLARI (171): ilerleme üstte, her adım tek soru. */
+.kurulum{ display:grid; gap:12px; }
+.kurulum__ilerleme{ display:flex; align-items:center; gap:10px; }
+.kurulum__sayac{ flex:none; font-size:var(--fs-xs); font-weight:600; color:var(--text-3); }
+.kurulum__cubuk{ flex:1; height:4px; border-radius:2px; background:var(--surface-3); overflow:hidden; }
+.kurulum__cubuk > i{ display:block; height:100%; background:var(--primary); border-radius:inherit;
+  transition:width var(--dur-lg) var(--ease); }
+.kurulum__soru{ margin:0; font-size:var(--fs-xl); font-weight:700; line-height:1.2; }
+.kurulum__soru:focus{ outline:none; }
+.kurulum__soru:focus-visible{ outline:2px solid var(--primary); outline-offset:4px; border-radius:4px; }
+.kurulum__adim[hidden]{ display:none; }
+.tanitim--kurulum .tanitim__yazi{ margin:0; }
+@media (prefers-reduced-motion:reduce){ .kurulum__cubuk > i{ transition:none; } }

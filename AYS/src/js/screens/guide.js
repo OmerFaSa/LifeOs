@@ -622,6 +622,10 @@ R.Screens.guide = (function(){
             ${K.TemaSecici({ value:S.profile.theme || 'system', act:'set-theme' })}
             <p class="tiny dim mt-10">Tek tasarım: renk modülü söyler (mavi AYS). «Sistem»
               seçiliyken cihazın açık/koyu tercihi izlenir.</p>` }),
+
+        /* Gizlilik kilidi (176, T5): kutu kendi içinde değişir. */
+        when(window.LIFEOS && window.LIFEOS.KILIT, () => K.Card({ title:'Gizlilik kilidi',
+          body:raw(window.LIFEOS.KILIT.ayarHtml('ays', { govde:true })) })),
       ])),
       K.Span(6, K.Stack([
         dataCard(),

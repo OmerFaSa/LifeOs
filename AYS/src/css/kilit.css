@@ -1,0 +1,31 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/kilit.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GİZLİLİK KİLİDİ (176, T5). Kaynak: brand/ortak/kilit.css; `tools/ortak.py
+   --yay` üç arayüze kopyalar. Opak perde: arkadaki veri görünmez. */
+.kilit{
+  position:fixed; inset:0; z-index:2147483600;
+  display:grid; place-items:center; padding:24px;
+  background:var(--bg); color:var(--text);
+}
+.kilit__kutu{ display:flex; flex-direction:column; align-items:center; gap:10px; width:min(320px, 100%); text-align:center; }
+.kilit__isaret{ margin-bottom:6px; }
+.kilit__isaret svg, .kilit__isaret .modis{ width:44px; height:44px; }
+.kilit__ad{ margin:0; font-size:var(--fs-xl); font-weight:700; }
+.kilit__etiket{ font-size:var(--fs-sm); color:var(--text-2); }
+.kilit__kod{
+  width:9.5ch; min-height:48px; text-align:center;
+  font-size:var(--fs-xl); letter-spacing:.5em; padding-left:.5em;
+  font-variant-numeric:tabular-nums;
+}
+.kilit__not{ min-height:1.4em; margin:0; font-size:var(--fs-sm); color:var(--text-2); }
+.kilit__unuttum{ min-height:32px; font-size:var(--fs-sm); }
+.kilit.is-yanlis .kilit__kod{ animation:kilit-salla 320ms var(--ease); border-color:var(--bad); }
+@keyframes kilit-salla{
+  20%{ transform:translateX(-6px); } 40%{ transform:translateX(6px); }
+  60%{ transform:translateX(-4px); } 80%{ transform:translateX(4px); }
+}
+.kilit-ayar__form{ display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:var(--sp-2) var(--sp-4); margin-top:var(--sp-2); }
+.kilit-ayar__form[hidden]{ display:none; }
+.kilit-ayar__not{ grid-column:1 / -1; margin:0; color:var(--text-2); }
+@media (prefers-reduced-motion:reduce){ .kilit.is-yanlis .kilit__kod{ animation:none; } }

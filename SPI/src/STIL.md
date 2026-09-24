@@ -413,6 +413,15 @@ kullanır; ekran kodu bir şey bilmek zorunda değildir:
   çiziminden kurulur, sonuç tam yoluyla («AYS › Ayarlar › Genel › …»).
 - **Tema önizlemesi (181):** `C.TemaSecici` — üç seçenek kendi renginde
   küçük örnekle; açık örnek `--l-*`, koyu örnek `--d-*` jetonlarından.
+- **İlk açılış (171):** SPİ ve ESP kurulumu üç adımdır ve adımlar tanıtımın
+  soruları: Ne ölçüyoruz? · Neye karar vermiyoruz? · Nasıl başlıyoruz?
+  («Başla» yalnız son adımda; sınır atlanamaz). AYS kurulumu beş veri
+  adımıdır; ilerleme çubuğu üstte.
+- **Gizlilik kilidi (176):** Ayarlar'da; açılışta dört haneli kod, veri
+  çizilmeden önce. Perdedir, kasa değil; «Kodu unuttum» bir dakika sonra
+  kilidi kaldırır.
+- **Ne değişti? (17):** güncellemeden sonraki ilk açılışta sayfanın başında
+  tek kart (`brand/ortak/yenilik.js`).
 
 ## Bileşen sözlüğü
 
