@@ -9323,7 +9323,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'b06c28d', at:'2026-09-24 17:37', dirty:true };
+ESP.BUILD = { id:'42ee91c', at:'2026-09-24 18:58', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20922,9 +20922,10 @@ ESP.HINTS = {
    gerekmemeli. `core/nav.js` bu listeyi kullanıcının açık bölümlerine göre
    süzer ve numaralandırır.
 
-   `disc` alanı bölümü bir disipline bağlar; disiplin kapalıysa bölüm hiç
-   çizilmez. `disc` taşımayan bölümler (Günlük, Ofis, Ayarlar) hiçbir zaman
-   kapanmaz — onlar bir alan değil sistemin kendisidir.
+   `disc` alanı bir SAYFAYI (Çalışma'nın bölümünü) bir disipline bağlar;
+   disiplin kapalıysa o sayfa hiç çizilmez, sayfası kalmayan çekmece de.
+   `disc` taşımayan sayfalar (Bugün, Ofis, Ayarlar…) hiçbir zaman kapanmaz
+   — onlar bir alan değil sistemin kendisidir.
 
    Numara burada YOKTUR: numara çizim anında verilir çünkü bir kimlik değil
    bir sıradır (bkz. core/nav.js). */
@@ -20932,61 +20933,52 @@ ESP.HINTS = {
 window.ESP = window.ESP || {};
 
 ESP.SECTIONS_ALL = [
-    { id:'gunluk', icon:'pulse', label:'Günlük',
-      note:'Günün pratiğini gir, karşılığını gör',
+    /* SEKİZ ÇEKMECE (ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
+       Üç modülde aynı ad ve sıra; adlar tek kaynaktan gelir
+       (`LIFEOS.KABUK.CEKMECELER`, core/nav.js çizim anında okur). Yedi
+       eski bölümden nereye: Günlük › Bugün → Bugün; Günlük › Merdiven →
+       Plan; Dil, Felsefe, Tarih, Ses, Okuma, Yazı → Çalışma'nın bölümleri
+       (karar 4); Ofis › Analiz → Analiz; Rütbe → Ayarlar › Rütbe; Rehber →
+       Ayarlar › Genel. Onaylar ve Kütüphanem ekranları gelene kadar boş
+       çekmece çizilmez. `disc` artık BÖLÜMDEDİR: disiplin kapanınca yalnız
+       onun bölümü düşer, Çalışma kalır. */
+    { id:'bugun', icon:'pulse', label:'Bugün', note:'Günün pratiğini gir, karşılığını gör',
+      views:[{ route:'today', label:'Bugün', icon:'pulse' }] },
+
+    { id:'plan', icon:'chart', label:'Plan', note:'Merdiven: her disiplinde bir sonraki basamak',
+      views:[{ route:'ladder', label:'Merdiven', icon:'chart' }] },
+
+    { id:'calisma', icon:'cards', label:'Çalışma', note:'Altı disiplinin tezgâhı',
       views:[
-        { route:'today',  label:'Bugün',    icon:'pulse' },
-        { route:'ladder', label:'Merdiven', icon:'chart' },
+        { route:'lang',      label:'Dil',     icon:'cards',    disc:'lang' },
+        { route:'symposium', label:'Felsefe', icon:'socratic', disc:'philo' },
+        { route:'history',   label:'Tarih',   icon:'book',     disc:'history' },
+        { route:'studio',    label:'Ses',     icon:'wave',     disc:['music', 'diction'] },
+        { route:'library',   label:'Okuma',   icon:'book',     disc:'reading' },
+        { route:'writing',   label:'Yazı',    icon:'quill',    disc:'writing' },
       ] },
 
-    { id:'dil', disc:'lang', icon:'cards', label:'Dil',
-      note:'Kelime, aralıklı tekrar ve shadowing',
-      views:[{ route:'lang', label:'Dil Stüdyosu', icon:'cards' }] },
+    { id:'analiz', icon:'chart', label:'Analiz', note:'Kararın dayanağı',
+      views:[{ route:'analytics', label:'Analiz', icon:'chart' }] },
 
-    { id:'felsefe', disc:'philo', icon:'socratic', label:'Felsefe',
-      note:'Tez, itiraz, düşünce deneyi ve safsata denetimi',
-      views:[{ route:'symposium', label:'Sempozyum', icon:'socratic' }] },
+    { id:'onaylar', icon:'check', label:'Onaylar', note:'Bekleyen öneriler', views:[] },
 
-    { id:'tarih', disc:'history', icon:'book', label:'Tarih',
-      note:'Kronoloji, neden zinciri ve kaynak eleştirisi',
-      views:[{ route:'history', label:'Kronoloji', icon:'book' }] },
-
-    { id:'ses', disc:['music', 'diction'], icon:'wave', label:'Ses',
-      note:'Gitar metronomu ve diksiyon',
-      views:[{ route:'studio', label:'Stüdyo', icon:'wave' }] },
-
-    { id:'okuma', disc:'reading', icon:'book', label:'Okuma',
-      note:'Atomik not ve sentopik matris',
-      views:[{ route:'library', label:'Kütüphane', icon:'book' }] },
-
-    { id:'yazi', disc:'writing', icon:'quill', label:'Yazı',
-      note:'Taslak, okunabilirlik ve üslup',
-      views:[{ route:'writing', label:'Yazı Laboratuvarı', icon:'quill' }] },
-
-    { id:'ofis', icon:'users', label:'Ofis',
-      note:'Patron, yedi uzman ve bir koç',
+    { id:'ofis', icon:'users', label:'Ofis', note:'Patron, yedi uzman ve bir koç',
       views:[
-        { route:'office',    label:'Masalar',  icon:'users' },
-        { route:'team',      label:'Danışma',  icon:'zap' },
-        { route:'meeting',   label:'Toplantı', icon:'list' },
-        { route:'analytics', label:'Analiz',   icon:'chart' },
+        { route:'office',  label:'Masalar',  icon:'users' },
+        { route:'team',    label:'Danışma',  icon:'zap' },
+        { route:'meeting', label:'Toplantı', icon:'list' },
       ] },
 
-    /* Rütbe kendi bölümü — Ayarlar'ın bir sekmesi değil. Seviye orada
-       bir ayar gibi duruyordu; oysa merdiven, kartlar ve «XP nereden
-       gelir» kendi başına bakılacak bir yer.
+    { id:'kutuphane', icon:'book', label:'Kütüphanem', note:'BAM\'ın ürettikleri', views:[] },
 
-       `disc` YOKTUR: rütbe bir disipline bağlı değildir, o yüzden
-       kapatılan bir disiplinle birlikte kaybolmaz. */
-    { id:'rutbe', icon:'layers', label:'Rütbe',
-      note:'Kademe, merdiven ve XP kaynakları',
-      views:[{ route:'rutbe', label:'Rütbe', icon:'layers' }] },
-
-    { id:'ayarlar', icon:'sliders', label:'Ayarlar',
-      note:'Profil, görünüm, veri ve rehber',
+    /* Rütbe burada bir bölümdür (karar §8-2); `disc` taşımaz, kapatılan
+       bir disiplinle birlikte kaybolmaz. */
+    { id:'ayarlar', icon:'sliders', label:'Ayarlar', note:'Profil, görünüm, veri ve rehber',
       views:[
         { route:'profile', label:'Profil', icon:'sliders' },
-        { route:'guide',   label:'Rehber', icon:'guide' },
+        { route:'guide',   label:'Genel',  icon:'guide' },
+        { route:'rutbe',   label:'Rütbe',  icon:'layers' },
       ] },
   ];
 
@@ -26794,25 +26786,39 @@ ESP.Mod = (function(){
 window.ESP = window.ESP || {};
 
 ESP.Nav = (function(){
-  function sectionOn(sec){
-    if(!sec.disc) return true;
-    const list = Array.isArray(sec.disc) ? sec.disc : [sec.disc];
+  function discOn(disc){
+    if(!disc) return true;
+    const list = Array.isArray(disc) ? disc : [disc];
     return list.some(id => ESP.Mod.isOn(id));
   }
 
-  function sections(){
-    let n = 0;
-    return ESP.SECTIONS_ALL.filter(sectionOn).map(sec => {
-      n++;
-      return Object.assign({}, sec, { num:(n < 10 ? '0' : '') + n });
-    });
+  /* Çekmecenin adı ortak kaynaktan (LIFEOS.KABUK.CEKMECELER); kabuk
+     yüklenmemişse (test sayfası) verideki ad. */
+  function adOf(sec){
+    const K = window.LIFEOS && window.LIFEOS.KABUK;
+    const c = K && K.CEKMECELER ? K.CEKMECELER.find(x => x.id === sec.id) : null;
+    return c ? c.ad : sec.label;
   }
 
-  /* Kapalı bölümün ekranı da kapalıdır: adresi elle yazan ya da eski bir
+  /* Bir çekmece açıktır, en az bir sayfası açıksa. */
+  function sectionOn(sec){ return sec.views.some(v => discOn(v.disc)); }
+
+  function sections(){
+    let n = 0;
+    return ESP.SECTIONS_ALL.map(sec => Object.assign({}, sec, { label:adOf(sec),
+      views:sec.views.filter(v => discOn(v.disc)) }))
+      .filter(sec => sec.views.length)
+      .map(sec => { n++; return Object.assign(sec, { num:(n < 10 ? '0' : '') + n }); });
+  }
+
+  /* Kapalı disiplinin ekranı da kapalıdır: adresi elle yazan ya da eski bir
      derin bağlantıya tıklayan kullanıcı boş bir tezgâh görmez. */
+  function viewOf(route){
+    return ESP.SECTIONS_ALL.reduce((f, s) => f || s.views.find(v => v.route === route), null);
+  }
   function routeOn(route){
-    const sec = ESP.SECTIONS_ALL.filter(x => x.views.some(v => v.route === route))[0];
-    return sec ? sectionOn(sec) : true;
+    const v = viewOf(route);
+    return v ? discOn(v.disc) : true;
   }
 
   function sectionOf(route){
@@ -26821,9 +26827,8 @@ ESP.Nav = (function(){
     return bulunan || list[0];
   }
 
-
-
-  return { sections, sectionOn, routeOn, sectionOf, all:function(){ return ESP.SECTIONS_ALL; } };
+  return { sections, sectionOn, routeOn, sectionOf, viewOf, discOn,
+    all:function(){ return ESP.SECTIONS_ALL; } };
 })();
 
 /* ==== js/core/evidence.js ==== */
@@ -49078,32 +49083,37 @@ ESP.App = (function(){
   const U = ESP.U, M = ESP.Model, UI = ESP.UI, S = ESP.S;
   const { html, raw, when, map, cls, attrs } = ESP.h;
 
-  /* Sekiz bölüm.
+  /* SEKİZ ÇEKMECE (ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
 
-     Bölüm alana göre değil kullanıcının o gün yaptığı **işe** göre ayrılır
-     ve sırası kasıtlıdır: önce günün kaydı, sonra altı disiplinin kendi
-     tezgâhı (dil → felsefe → ses → okuma → yazı), sonra danışma, en sonda
-     ayar. Disiplinlerin sırası da rastgele değil: spesifikasyondaki
-     öncelik sırası (ESP.PRECEDENCE) temel disiplinleri öne alır.
+     Üç modülde aynı ad ve sıra; adlar tek kaynaktan gelir
+     (`LIFEOS.KABUK.CEKMECELER`). İç içelik en çok iki kat: çekmece ›
+     bölüm. Bölümler üst çubukta değil, sayfa başının altındaki bölüm
+     çubuğunda durur. Tek bölümlü çekmecede o çubuk çizilmez.
 
-     Spesifikasyon «Analiz»i ayrı bir gezinme grubu sayıyor; burada Ofis'in
-     dördüncü sayfası. Sebep: analiz bir alan değil bir **iş** — kararı
-     tartışmak. Aynı işin dört sayfası tek bölümde durur; dokuz numaralı
-     bir şerit telefonda okunmaz hâle geliyordu.
-
-     `views` bir bölümün sayfalarıdır. Tek sayfalı bölümde sayfa şeridi
-     çizilmez: tek sekmelik bir sekme çubuğu gürültüden başka bir şey
-     değildir. */
-  /* Gezinme şeridi `data/sections.js` içinde bir VERİDİR ve mantığı
-     `core/nav.js` içinde yaşar. İkisi de kabuktan ayrı durur: bölüm
-     kataloğunu test edebilmek için uygulamayı açmak gerekmesin. */
+     Katalog `data/sections.js` içinde bir VERİDİR, mantığı `core/nav.js`
+     içinde yaşar: kapalı disiplinin bölümü Çalışma'dan düşer, sayfası
+     kalmayan çekmece çizilmez. Yönlendirme kimlikleri değişmedi (komut
+     paleti, testler ve derin bağlantılar bozulmaz). */
+  const K = window.LIFEOS.KABUK;
   const SECTIONS = ESP.Nav.sections;
   const routeOn = ESP.Nav.routeOn;
   const sectionOf = ESP.Nav.sectionOf;
+  const sectionsGorunen = ESP.Nav.sections;
+
+  /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
+  const UST = {};
+
+  /* Telefon alt bandı (karar 3): Bugün · Plan · Çalışma · Menü. */
+  const BANT = ['bugun', 'plan', 'calisma'];
+
+  function viewOf(route){
+    const r = UST[route] || route;
+    return SECTIONS().reduce((f, s) => f || s.views.find(v => v.route === r), null);
+  }
 
   function screen(){ return ESP.Screens[S.route] || ESP.Screens.today; }
 
-  /* Kenar çubuğundaki sayaçlar — bekleyen işi gizlemez.
+  /* Bölüm çubuğundaki sayaçlar — bekleyen işi gizlemez.
 
      Rozet yalnız **bekleyen iş** sayar, ilerleme değil. "Bugün 3 kart
      çözdün" bir rozet değildir; "9 kartın vadesi geçti" rozettir. */
@@ -49111,10 +49121,6 @@ ESP.App = (function(){
     if(id === 'lang'){
       const due = ESP.SRS.dueCards().length;
       return due ? { text:String(due), quiet:due < 20 } : null;
-    }
-    if(id === 'today'){
-      const d = S.days[U.todayISO()];
-      return (!d || !ESP.Model.dayHasEntry(d)) ? { text:'!', quiet:true } : null;
     }
     if(id === 'office'){
       const n = ESP.Office.notes().filter(x => x.tone === 'danger' || x.tone === 'warn').length;
@@ -49131,6 +49137,13 @@ ESP.App = (function(){
     return null;
   }
 
+  /* Onaylar'ın bekleyeni. Onaylar ekranı gelene kadar sayı yoktur;
+     «0» çizilmez. */
+  function onaySayisi(){
+    try{ return ESP.Screens.onaylar && ESP.Screens.onaylar.bekleyen ? ESP.Screens.onaylar.bekleyen() : 0; }
+    catch(e){ console.error(e); return 0; }
+  }
+
   /* Marka satırı profilden gelir; sabit bir slogan yoktur. */
   function brandLine(){
     const p = S.profile;
@@ -49139,208 +49152,226 @@ ESP.App = (function(){
     return p.name + (goal ? ' · ' + goal.label.toLocaleLowerCase('tr-TR') : '');
   }
 
+  function profilVerisi(){
+    const p = S.profile || {};
+    return { ad:p.name || '', harf:(p.name || 'Ben').trim().charAt(0) };
+  }
+
   function safe(fn, fallback){
     try{ return fn(); }
     catch(e){ console.error(e); return fallback || ''; }
   }
 
-  /* Bölümün rozeti: içindeki sayfaların bekleyen işlerinin toplamı.
-     Sesli olan (kırmızı) sessiz olanı yutar. */
-  function sectionBadge(sec){
-    let quiet = 0, loud = 0;
-    sec.views.forEach(v => {
-      const b = safe(() => badgeFor(v.route), null);
-      if(!b) return;
-      const n = b.text === '!' ? 1 : Number(b.text) || 1;
-      if(b.quiet) quiet += n; else loud += n;
+  function saatOf(iso){
+    if(!iso) return '';
+    const d = new Date(iso);
+    if(isNaN(d.getTime())) return '';
+    if(U.iso(d) === U.todayISO()) return K.saatMetni(d);
+    return d.toLocaleDateString('tr-TR', { day:'numeric', month:'short' }) + ' ' + K.saatMetni(d);
+  }
+
+  /* Bağlantı noktası (118). Çizim ağa ÇIKMAZ: durum son gönderimin
+     kaydından okunur. Hiç gönderilmemişse «bağlı» denmez — ölçülmemiştir. */
+  function baglantiVerisi(){
+    if(!ESP.Beacon) return { durum:'kapali', route:'profile' };
+    const a = ESP.Beacon.settings();
+    if(!a.enabled) return { durum:'kapali', route:'profile' };
+    const bozuk = a.lastStatus !== null && a.lastStatus !== undefined && a.lastStatus !== 202;
+    if(bozuk) return { durum:'ulasilamadi', saat:saatOf(a.lastAt), route:'profile' };
+    if(a.lastOkAt) return { durum:'bagli', saat:saatOf(a.lastOkAt), route:'profile' };
+    return { durum:'bekliyor', route:'profile' };
+  }
+
+  /* Rütbe çipi (140). Defter yüklenmemişse çip hiç çizilmez: «0 XP»
+     çizmek, bilinmeyeni sıfır saymak olurdu. */
+  function rutbeVerisi(){
+    if(!ESP.XP) return null;
+    let d;
+    try{ d = ESP.XP.durum(); }catch(e){ return null; }
+    if(!d || !d.kademeBilgi) return null;
+    let gorsel = '';
+    try{ gorsel = new URL('img/seviye/onay-' + d.kademe + '.webp', location.href).href; }catch(e){}
+    return { ad:d.kademeBilgi.ad, etiket:d.etiket, kademe:d.kademe, oran:d.oran, tamam:d.tamam,
+      icinde:d.icinde, gereken:d.gereken,
+      icindeMetin:U.fmtNum(d.icinde), gerekenMetin:U.fmtNum(d.gereken),
+      renk:d.kademeBilgi.renk, gorsel, route:'rutbe' };
+  }
+
+  /* Gruplu bildirimler (09): bu modülün uyarıları ve Merkez'in önerileri
+     ayrı kümede. Kaynakları rozetlerle aynıdır; iki yerde iki ayrı sayı
+     durmasın diye aynı hesaplardan okunur. */
+  function bildirimGruplari(){
+    const esp = [];
+    const d = S.days[U.todayISO()];
+    if(!d || !ESP.Model.dayHasEntry(d)) esp.push({ metin:'Bugünün pratiği girilmedi', route:'today' });
+    if(routeOn('lang')){
+      const due = safe(() => ESP.SRS.dueCards().length, 0) || 0;
+      if(due) esp.push({ metin:due + ' kartın vadesi geldi', route:'lang' });
+    }
+    if(ESP.Model.backupDue && ESP.Model.backupDue()) esp.push({ metin:'Yedek alma zamanı', route:'profile' });
+    if(S.storeHealth && S.storeHealth.error) esp.push({ metin:'Kayıt sorunu var', act:'show-store-error', acil:true });
+    const mer = [];
+    const onay = onaySayisi();
+    if(onay) mer.push({ metin:onay + ' öneri Onaylar’da bekliyor', route:'onaylar' });
+    const king = (S.ui.hkmBildirim || []).length;
+    if(king) mer.push({ metin:king + ' King bildirimi', route:'today' });
+    return [{ modul:'esp', satirlar:esp }, { modul:'mer', satirlar:mer }];
+  }
+
+  function ustCubukHtml(sc){
+    const aktif = sectionOf(sc.id);
+    const onay = onaySayisi();
+    const gruplar = safe(bildirimGruplari, []) || [];
+    const bil = gruplar.reduce((t, g) => t + g.satirlar.length, 0);
+    const acil = gruplar.some(g => g.satirlar.some(s => s.acil));
+    return K.ustCubuk({
+      modul:'esp',
+      cekmeceler:sectionsGorunen().map(g => ({ id:g.id, ad:g.label, route:g.views[0].route,
+        on:g.id === aktif.id, sayac:g.id === 'onaylar' ? onay : 0 })),
+      onay:{ sayi:onay, route:'onaylar' },
+      bildirim:{ sayi:bil, acil },
+      baglanti:safe(baglantiVerisi, null) || { durum:'kapali' },
+      rutbe:safe(rutbeVerisi, null) || null,
+      profil:profilVerisi(),
     });
-    if(loud) return { text:String(loud), quiet:false };
-    if(quiet) return { text:String(quiet), quiet:true };
-    return null;
   }
 
-  /* ---------- üst gezinme ----------
-
-     Sabit sol menü yerine ince bir site çubuğu. Yedi bölüm tek satırda
-     durur; dar ekranda menüye iner. Sağdaki üç araç her yerde aynı yerde
-     kalır: arama, görünüm, ayarlar. */
-  /* ---------- künye ----------
-
-     Uygulama çubuğu değil KÜNYE. İki satır:
-
-       1. kimlik · tarih · araçlar   — sayfayla birlikte yukarı kayar
-       2. numaralı bölümler          — kaydırınca üstte yapışır
-
-     İlk satırın kaymasına izin vermek kasıtlıdır: okurken kimliğe
-     ihtiyaç yoktur, gezinmeye vardır. Böylece sabit kalan çubuk yarı
-     yüksekliğe iner ve içerik nefes alır. */
-  function mastheadHtml(sc){
-    const now = new Date();
-    const gun = now.toLocaleDateString('tr-TR', { weekday:'long' });
-    return html`
-      <div class="masthead">
-        <div class="wrapc masthead__in">
-          <button class="brand" data-act="go" data-route="today" aria-label="Günlük bölümüne git">
-            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
-            <span class="brand__text"><b>ESP</b><span>${brandLine()}</span></span>
-          </button>
-
-          <div class="masthead__date">
-            <span class="masthead__day">${U.fmtDate(U.todayISO())}</span>
-            <span class="masthead__wd">${gun}</span>
-          </div>
-
-          ${when(ESP.Timer && ESP.Timer.active(), () => html`
-            <button class="topclock" data-act="go" data-route="today"
-              aria-label="Açık sayaç — Bugün ekranına git">
-              <span class="topclock__dot" aria-hidden="true"></span>
-              <span class="num" data-timer="1">${ESP.Timer.clock()}</span>
-              <span class="topclock__disc">${(ESP.DISCIPLINE_BY_ID[ESP.Timer.disc()]
-                || {}).short || ''}</span>
-            </button>`)}
-          <div class="navtools">
-            ${ESP.C.IconButton({ icon:'search', aria:'Komut paleti (Ctrl+K)', title:'Ctrl+K', act:'open-palette' })}
-            ${ESP.C.IconButton({ icon:'palette', aria:'Görünüm', title:'Tema: Açık · Koyu · Sistem',
-              act:'open-appearance', data:{ id:'appearance-btn' } })}
-            ${ESP.C.IconButton({ icon:'sliders', aria:'Ayarlar', act:'go', data:{ 'data-route':'profile' } })}
-            ${ESP.C.IconButton({ icon:'menu', aria:'Bölümler', act:'toggle-menu', class:'sitenav__menu' })}
-          </div>
-        </div>
-      </div>`;
+  /* ---------- gün şeridi ----------
+     ESP'nin günü saatli bloklardan değil AÇIK DİSİPLİNLERDEN oluşur: bugün
+     seansı yazılmış disiplin «bitti», yazılmamış olan «bekliyor». Girilmemiş
+     disiplin «yapılmadı» sayılmaz — ölçülmemiştir. Blok boyu seansın
+     dakikası; seans yoksa eşit pay. */
+  function gunDisiplinleri(iso){
+    const d = S.days[iso];
+    const seans = (d && d.sessions) || [];
+    return ESP.Mod.active().map(disc => {
+      const dk = seans.filter(x => x.disc === disc.id).reduce((a, x) => a + (Number(x.minutes) || 0), 0);
+      const var_ = seans.some(x => x.disc === disc.id);
+      return { ad:(disc.short || disc.label || disc.id) + (var_ ? ' · ' + dk + ' dk' : ''),
+        dk:var_ ? Math.max(dk, 1) : 15, durum:var_ ? 'bitti' : 'bekliyor' };
+    });
   }
 
-  /* Numaralı bölüm şeridi. Numara bir süs değil: yedi bölümün SIRASI
-     anlamlıdır (önce yazılan, sonra okunan) ve numara o sırayı görünür
-     kılar. */
-  function sitenavHtml(sc){
-    const active = sectionOf(sc.id);
-    return html`
-      <nav class="sitenav" aria-label="Bölümler">
-        <div class="wrapc navlinks">${map(SECTIONS(), sec => {
-          const on = sec.id === active.id;
-          const b = sectionBadge(sec);
-          return html`<button class="${cls('navlink', on && 'is-active')}"
-            data-act="go" data-route="${sec.views[0].route}"
-            ${when(on, () => attrs({ 'aria-current':'page' }))}>
-            <span class="navlink__num" aria-hidden="true">${sec.num}</span>
-            <span class="navlink__label">${sec.label}</span>
-            ${when(b, () => html`<span class="${cls('navlink__badge', b.quiet && 'is-quiet')}"
-              aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
-          </button>`;
-        })}</div>
-      </nav>`;
+  function haftaVerisi(){
+    const bugun = U.todayISO();
+    const i = U.weekdayIndex(bugun);
+    const AD = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+    return AD.map((ad, k) => {
+      const iso = U.iso(U.addDays(U.today(), k - i));
+      const gelecek = iso > bugun;
+      const d = S.days[iso];
+      const durum = gelecek ? 'gelecek' : (!d || !ESP.Model.dayHasEntry(d)) ? 'bos'
+        : (gunDisiplinleri(iso).every(x => x.durum === 'bitti') ? 'tamam' : 'eksik');
+      return { ad, gun:Number(iso.slice(8, 10)), bugun:iso === bugun, gelecek,
+        noktalar:[{ modul:'esp', durum }] };
+    });
   }
 
-  /* ---------- alt bant ----------
-
-     Her sayfa bir yerde biter. Koyu bant hem sayfayı sonlandırır hem de
-     sistemin iki değişmez cümlesini —klinik sınır ve mahremiyet— her
-     ekranda bir kez söyler. Bunları kart olarak sayfanın ortasına koymak
-     her seferinde içeriği bölüyordu. */
-  /* Seviye rozeti — bu sistemin KENDİ kademesi (core/xp.js).
-
-     Şimdilik alt bantta duruyor: her ekranda var, hiçbir ekranı
-     kalabalıklaştırmıyor. Künyeye ya da bir ekranın içine taşımak,
-     `ESP.XP.rozetHtml()` çıktısını oraya koymaktan ibarettir.
-
-     Defter yüklenmemişse BOŞ döner — «0 XP» çizmek, bilinmeyeni sıfır
-     saymak olurdu. */
-  function seviyeRozeti(){
-    if(!ESP.XP) return '';
-    try{ return ESP.XP.rozetHtml(); }catch(e){ return ''; }
+  function gunSeridiHtml(){
+    const bloklar = gunDisiplinleri(U.todayISO());
+    const biten = bloklar.filter(b => b.durum === 'bitti').length;
+    const n = new Date();
+    const tarih = n.toLocaleDateString('tr-TR', { weekday:'short' }) + ' '
+      + n.toLocaleDateString('tr-TR', { day:'numeric', month:'short' });
+    return K.gunSeridi({
+      tarih,
+      simdi:new Date(),
+      seritler:[{ modul:'esp', ozet:biten + '/' + bloklar.length + ' disiplin', bloklar }],
+      kalan:bloklar.length - biten,
+      hafta:S.ui.haftaAcik ? haftaVerisi() : null,
+      haftaAcik:!!S.ui.haftaAcik,
+    });
   }
 
+  /* Açık sayaç: kabuğun üst çubuğunda yuvası yok; sayfa başının üstünde
+     durur ve Bugün'e götürür. Saniyesini `startClock` tazeler. */
+  function sayacHtml(){
+    if(!(ESP.Timer && ESP.Timer.active())) return '';
+    return String(html`<button class="topclock" data-act="go" data-route="today"
+      aria-label="Açık sayaç — Bugün ekranına git">
+      <span class="topclock__dot" aria-hidden="true"></span>
+      <span class="num" data-timer="1">${ESP.Timer.clock()}</span>
+      <span class="topclock__disc">${(ESP.DISCIPLINE_BY_ID[ESP.Timer.disc()] || {}).short || ''}</span>
+    </button>`);
+  }
+
+  /* ---------- sayfa başı ----------
+     Yol («Çalışma › Dil»), başlık, tek cümle ve ekranın eylemleri.
+     Tek bölümlü çekmecede yol yazılmaz. */
+  function yolOf(route){
+    const sec = sectionOf(route);
+    const oge = viewOf(route);
+    const sc = ESP.Screens[route] || {};
+    const ad = oge ? oge.label : sc.title;
+    const yol = sec.views.length > 1 && ad !== sec.label ? [sec.label, ad] : [sec.label];
+    if(UST[route]) yol.push(sc.title);
+    return yol;
+  }
+
+  function sayfaBasiHtml(sc){
+    const baslik = safe(() => sc.headline ? sc.headline() : '') || sc.title;
+    const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
+    const eylem = safe(() => sc.actions ? sc.actions() : '');
+    return K.sayfaBasi({ yol:yolOf(sc.id), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '' });
+  }
+
+  function bolumCubuguHtml(sc){
+    const sec = sectionOf(sc.id);
+    const r = UST[sc.id] || sc.id;
+    return K.bolumCubugu({ cekmece:sec.label, bolumler:sec.views.map(v => ({
+      route:v.route, ad:v.label, on:v.route === r, rozet:safe(() => badgeFor(v.route), null) || null })) });
+  }
+
+  function menuHtml(sc){
+    const aktif = UST[sc.id] || sc.id;
+    const onay = onaySayisi();
+    return K.menuSayfasi({
+      cekmeceler:sectionsGorunen().map(g => ({ id:g.id, ad:g.label, sayac:g.id === 'onaylar' ? onay : 0,
+        bolumler:g.views.map(v => ({ route:v.route, ad:v.label, on:v.route === aktif })) })),
+      ayak:storeHealthHtml(),
+    });
+  }
+
+  function altBantHtml(sc){
+    const aktif = sectionOf(sc.id).id;
+    const g = sectionsGorunen();
+    const sekmeler = BANT.map(id => g.find(x => x.id === id)).filter(Boolean)
+      .map(x => ({ id:x.id, ad:x.label, route:x.views[0].route, on:x.id === aktif }));
+    /* Bandın Menü'sü ESP'nin kendi eylem adını taşır (`toggle-menu`):
+       üst çubuktaki kabuk düğmesi `toggle-sidebar` der; ikisi aynı işi
+       yapar, eski ad kaybolmaz (envanter tabanı). */
+    sekmeler.push({ id:'menu', ad:'Menü', act:'toggle-menu', on:false });
+    return K.altBant({ sekmeler });
+  }
+
+  /* Hızlı ekle (166): ESP'nin en sık kayıtları. Komut paletinin kendi
+     eylemleri çağrılır (`cmdk-run`): aynı iş iki yerde iki ayrı kodla
+     yazılmaz. */
+  function hizliSatirlar(){
+    const ids = (ESP.Palette && ESP.Palette.commands ? ESP.Palette.commands() : [])
+      .filter(c => c.kind === 'Eylem').slice(0, 4);
+    return ids.map(c => ({ ad:c.label, act:'cmdk-run', data:{ 'data-id':c.id } }));
+  }
+
+  /* Sayfa sonu: sistemin iki değişmez cümlesi —pedagojik sınır ve
+     mahremiyet— her ekranda bir kez; yanında derleme damgası. Seviye
+     rozeti burada durmaz: üst çubuktaki rütbe çipi onu gösterir. */
   function footerHtml(){
     return html`
-      <footer class="sitefoot">
-        <div class="wrapc sitefoot__in">
-          <div class="sitefoot__brand">
-            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
-            <div>
-              <b>Entelektüel Seviye Planlayıcı</b>
-              <span class="sitefoot__sub">${ESP.Mod.active().map(d => d.short.toLocaleLowerCase('tr-TR'))
-                .join(' · ')}</span>
-              ${raw(seviyeRozeti())}
-            </div>
-          </div>
-          <div class="sitefoot__notes">
-            <p><span class="sitefoot__k">Sınır</span> ${ESP.PEDAGOGIC.disclaimer}</p>
-            <p><span class="sitefoot__k">Mahremiyet</span> Veriler bu cihazda tutulur.
-              Ham ses kaydı ve tam metin taslak hiçbir modele gönderilmez.</p>
-            ${raw(buildStampHtml())}
-          </div>
+      <footer class="sayfasonu">
+        <div class="wrapc sayfasonu__ic">
+          <p><span class="sitefoot__k">Sınır</span> ${ESP.PEDAGOGIC.disclaimer}</p>
+          <p>Veriler bu cihazda tutulur. Ham ses kaydı ve tam metin taslak hiçbir modele gönderilmez.</p>
+          ${raw(buildStampHtml())}
         </div>
       </footer>`;
   }
 
-  /* ---------- telefonda alt gezinme ----------
-
-     Telefonda HER ŞEY hamburger menüden geçiyordu. Veri girişinin çoğu
-     telefonda yapılacak; en çok kullanılan yollar başparmağın altında
-     olmalı, iki dokunuş arkasında değil.
-
-     Beş yuva: dört yol + menü. Yedi bölümün hepsi buraya sığmaz ve
-     sığdırmaya çalışmak beşini de okunmaz yapardı; menü yuvası tam
-     listeyi açar.
-
-     Yalnız 860 pikselin altında çizilir. */
-  const TABBAR_ALL = [
-    { route:'today',  label:'Bugün',  icon:'pulse' },
-    { route:'lang',   label:'Dil',    icon:'cards' },
-    { route:'studio', label:'Stüdyo', icon:'wave' },
-    { route:'history', label:'Tarih', icon:'book' },
-    { route:'library', label:'Okuma', icon:'book' },
-    { route:'symposium', label:'Felsefe', icon:'socratic' },
-    { route:'writing', label:'Yazı',  icon:'quill' },
-    { route:'office', label:'Ofis',   icon:'users' },
-  ];
-
-  /* Dört yuva + menü. Hangi dördü? Bugün ve Ofis sabittir; aradaki iki yuva
-     kullanıcının AÇIK bölümlerinden, katalog sırasına göre doldurulur.
-     Kapalı bir bölümü başparmağın altında tutmak, en değerli iki yuvayı
-     boşa harcamak olurdu. */
-  function tabbar(){
-    const sabit = TABBAR_ALL.filter(t => t.route === 'today');
-    const orta = TABBAR_ALL.filter(t => t.route !== 'today' && t.route !== 'office'
-      && routeOn(t.route)).slice(0, 2);
-    return sabit.concat(orta, TABBAR_ALL.filter(t => t.route === 'office'));
-  }
-
-  function tabbarHtml(sc){
-    const aktif = sectionOf(sc.id);
-    return html`
-      <nav class="tabbar" aria-label="Hızlı gezinme">
-        ${map(tabbar(), t => {
-          const sec = sectionOf(t.route);
-          const on = sec.id === aktif.id;
-          const b = safe(() => badgeFor(t.route), null);
-          return html`<button class="${cls('tabbtn', on && 'is-active')}"
-            data-act="go" data-route="${t.route}"
-            ${when(on, () => attrs({ 'aria-current':'page' }))}>
-            <span class="tabbtn__ic" aria-hidden="true">${raw(UI.icon(t.icon))}</span>
-            <span class="tabbtn__t">${t.label}</span>
-            ${when(b, () => html`<span class="${cls('tabbtn__b', b.quiet && 'is-quiet')}"
-              aria-label="${b.text + ' bekleyen'}">${b.text}</span>`)}
-          </button>`;
-        })}
-        <button class="${cls('tabbtn', S.sidebarOpen && 'is-active')}" data-act="toggle-menu"
-          aria-label="Bütün bölümler">
-          <span class="tabbtn__ic" aria-hidden="true">${raw(UI.icon('menu'))}</span>
-          <span class="tabbtn__t">Menü</span>
-        </button>
-      </nav>`;
-  }
-
   /* ---------- derleme damgası ----------
 
-     Ekrandaki sayfanın HANGİ derleme olduğunu söyler. Küçük bir ayrıntı
-     gibi görünür ama olmadığında pahalıya patlıyor: bir hata
-     düzeltildikten sonra kullanıcı hâlâ eski davranışı görebiliyor ve
-     bunu anlamanın hiçbir yolu olmuyor. Tarayıcı eski bir js dosyasını
-     önbellekten verdiğinde arayüz aynı görünür, davranış eskidir.
-
-     Yanındaki düğme tarayıcıyı önbelleği atlamaya zorlar: adres bir
-     kerelik damgayla yeniden yüklenir. */
+     Ekrandaki sayfanın HANGİ derleme olduğunu söyler. Tarayıcı eski bir
+     js dosyasını önbellekten verdiğinde arayüz aynı görünür, davranış
+     eskidir; damga bunu görünür kılar. Yanındaki düğme önbelleği atlar. */
   function buildStampHtml(){
     const b = ESP.BUILD || {};
     if(!b.id) return '';
@@ -49354,90 +49385,6 @@ ESP.App = (function(){
       <button class="sitefoot__reload" data-act="hard-reload"
         title="Tarayıcının önbelleğini atlayarak yeniden yükler">tazele</button>
     </p>`);
-  }
-
-  /* Dar ekranda bölümler tam ekran menüye açılır. Alt sekme çubuğu bir
-     panel dilidir; site dilinde karşılığı budur. */
-  function navsheetHtml(sc){
-    const active = sectionOf(sc.id);
-    return html`
-      <div class="navsheet" role="dialog" aria-label="Bölümler">
-        <div class="navsheet__head">
-          <div class="brand">
-            <img class="brand__mark" src="img/brand/favicon.png" alt="" aria-hidden="true"/>
-            <span class="brand__text"><b>ESP</b><span>${brandLine()}</span></span>
-          </div>
-          ${ESP.C.IconButton({ icon:'close', aria:'Kapat', act:'toggle-menu' })}
-        </div>
-        <div class="navsheet__body">
-          <div class="navsheet__grid">${map(SECTIONS(), sec => html`
-            <button class="${cls('navsheet__item', sec.id === active.id && 'is-active')}"
-              data-act="go" data-route="${sec.views[0].route}" data-num="${sec.num}">
-              <b>${sec.label}</b>
-              <span>${sec.note}</span>
-            </button>`)}
-          </div>
-          ${storeHealthHtml()}
-        </div>
-      </div>`;
-  }
-
-  /* ---------- hero ----------
-
-     Her bölüm bir cümleyle açılır. Panel dilinde ekranın adı yazardı
-     ("Tahliller") ve durumu okumak için aşağı bakmak gerekirdi; burada
-     BAŞLIK durumun kendisidir, alt satır ne yapılacağını söyler.
-
-     `headline` ve `lede` ekranın kendi sözleşmesindendir; vermeyen ekran
-     için başlık ve alt başlık kullanılır. */
-  function heroHtml(sc){
-    const sec = sectionOf(sc.id);
-    const headline = safe(() => sc.headline ? sc.headline() : '') || sc.title;
-    const lede = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
-    const stats = safe(() => sc.stats ? sc.stats() : [], []) || [];
-    const actions = safe(() => sc.actions ? sc.actions() : '');
-
-    return html`
-      <div class="hero" data-num="${sec.num}">
-        <div class="wrapc hero__in">
-          <div class="hero__main">
-            <div class="hero__eyebrow">
-              <span class="hero__num">${sec.num}</span>
-              ${raw(UI.icon(sec.icon))}
-              <span>${sec.label}</span>
-            </div>
-            <h1 class="hero__title">${headline}</h1>
-            ${when(lede, () => html`<p class="hero__lede">${raw(lede)}</p>`)}
-            ${when(actions, () => html`<div class="hero__actions">${raw(actions)}</div>`)}
-          </div>
-          ${when(stats.length, () => html`<div class="hero__side">${map(stats, st => html`
-            <div class="herostat">
-              <span class="herostat__value">${st.value}${when(st.unit,
-                () => html`<small>${st.unit}</small>`)}</span>
-              <span class="herostat__label">${st.label}</span>
-            </div>`)}</div>`)}
-          <div class="hero__motif" aria-hidden="true">${raw(UI.motif(sec.id))}</div>
-        </div>
-      </div>`;
-  }
-
-  /* Bölümün sayfaları. Tek sayfalıysa çizilmez. */
-  function pagenavHtml(sc){
-    const sec = sectionOf(sc.id);
-    if(sec.views.length < 2) return '';
-    return html`
-      <nav class="pagenav" aria-label="${sec.label + ' sayfaları'}">
-        <div class="wrapc pagenav__in">${map(sec.views, v => {
-          const on = v.route === sc.id;
-          const b = safe(() => badgeFor(v.route), null);
-          return html`<button class="${cls('pagelink', on && 'is-active')}"
-            data-act="go" data-route="${v.route}"
-            ${when(on, () => attrs({ 'aria-current':'page' }))}>
-            ${raw(UI.icon(v.icon))}<span>${v.label}</span>
-            ${when(b, () => html`<span class="pagelink__count">${b.text}</span>`)}
-          </button>`;
-        })}</div>
-      </nav>`;
   }
 
   /* ------------------------------------------------------------- görünüm
@@ -49456,8 +49403,14 @@ ESP.App = (function(){
   function appearanceHtml(){
     const p = S.profile || {};
     const theme = p.theme || 'system';
+    const ad = (p.name || '').trim();
     return String(html`
-      <div class="appear" id="appearance" role="dialog" aria-label="Görünüm">
+      <div class="katman appear" id="appearance" role="dialog" aria-label="Profil ve görünüm">
+        <div class="appear__profil">
+          <span class="ust__profil" aria-hidden="true">${(ad || 'Ben').charAt(0).toLocaleUpperCase('tr-TR')}</span>
+          <span class="minw0"><b>${ad || 'Profil'}</b><small>${brandLine()}</small></span>
+          ${ESP.C.Button({ label:'Profil', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'profile' } })}
+        </div>
         <div class="appear__label">Tema</div>
         <div class="appear__themes">${map(THEMES, t => html`
           <button class="${cls('themebtn', t.id === theme && 'is-on')}"
@@ -49472,45 +49425,13 @@ ESP.App = (function(){
       </div>`);
   }
 
-  function openAppearance(anchor){
-    closeAppearance();
-    const root = document.getElementById('overlay-root');
-    const el = document.createElement('div');
-    el.innerHTML = appearanceHtml();
-    const panel = el.firstElementChild;
-    root.appendChild(panel);
-
-    /* Çapaya göre konumla; ekranın dışına taşarsa içeri çek. */
-    const r = anchor.getBoundingClientRect();
-    const w = panel.offsetWidth;
-    let left = r.right - w;
-    left = Math.max(12, Math.min(left, window.innerWidth - w - 12));
-    let top = r.bottom + 8;
-    if(top + panel.offsetHeight > window.innerHeight - 12){
-      top = Math.max(12, r.top - panel.offsetHeight - 8);
-    }
-    panel.style.left = left + 'px';
-    panel.style.top = top + 'px';
-  }
-  function closeAppearance(){
-    const el = document.getElementById('appearance');
-    if(el) el.remove();
-  }
-  function isAppearanceOpen(){ return !!document.getElementById('appearance'); }
-
-  /* Paneli yerinde tazele: tema değişince sayfa yeniden çizilmez, yalnızca
-     kök nitelikleri ve panelin işaretli düğmesi değişir. Böylece açık panel
-     kapanmaz ve seçimin etkisi anında görülür. */
-  function refreshAppearance(){
-    const el = document.getElementById('appearance');
-    if(!el) return;
-    const left = el.style.left, top = el.style.top;
-    const wrap = document.createElement('div');
-    wrap.innerHTML = appearanceHtml();
-    const next = wrap.firstElementChild;
-    next.style.left = left; next.style.top = top;
-    el.replaceWith(next);
-  }
+  /* Panel kabuğun katman yöneticisinden açılır (LIFEOS.KABUK): dışarı
+     tıklayınca, Esc'de ve pencere boyutu değişince kapanır; telefonda
+     alttan açılır. Tema değişince yerinde tazelenir, kapanmaz. */
+  function openAppearance(anchor){ K.katmanAc('appearance', appearanceHtml(), anchor); }
+  function closeAppearance(){ if(K.katmanAcik('appearance')) K.katmanKapat(); }
+  function isAppearanceOpen(){ return K.katmanAcik('appearance'); }
+  function refreshAppearance(){ K.katmanTazele('appearance', appearanceHtml()); }
 
   function errorPanel(err){
     const msg = (err && err.message) ? err.message : String(err);
@@ -49640,20 +49561,26 @@ ESP.App = (function(){
         body = errorPanel(err);
       }
 
+      /* v4 iskeleti (ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
+         sayfa başı · bölüm çubuğu · ekran · sayfa sonu; telefonda alt bant
+         ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
       const markup = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
-        <div class="site">
-          ${safe(() => mastheadHtml(sc))}
-          ${safe(() => sitenavHtml(sc))}
-          ${safe(() => heroHtml(sc))}
-          ${safe(() => pagenavHtml(sc))}
+        <div class="site site--v4">
+          ${raw(safe(() => ustCubukHtml(sc)))}
+          ${raw(safe(gunSeridiHtml))}
           <div class="site__body">
-            <main class="wrapc content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
+            <div class="wrapc sayfa">
+              ${raw(safe(sayacHtml))}
+              ${raw(safe(() => sayfaBasiHtml(sc)))}
+              ${raw(safe(() => bolumCubuguHtml(sc)))}
+              <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
+            </div>
           </div>
           ${safe(footerHtml)}
-          ${safe(() => tabbarHtml(sc))}
+          ${raw(safe(() => altBantHtml(sc)))}
         </div>
-        ${when(S.sidebarOpen, () => safe(() => navsheetHtml(sc)))}`);
+        ${when(S.sidebarOpen, () => raw(safe(() => menuHtml(sc))))}`);
 
       await withTransition(() => { document.getElementById('app').innerHTML = markup; });
 
@@ -49691,14 +49618,6 @@ ESP.App = (function(){
     }
   }
 
-  /* Bölümün rengi kökte durur: CSS `--sec` jetonunu buradan okur.
-     Yeniden çizimde değil YÖNLENDIRMEDE yazılır ki her karede DOM'a
-     dokunulmasın. */
-  function applySection(route){
-    const sec = sectionOf(route);
-    document.documentElement.setAttribute('data-section', sec.id);
-  }
-
   function go(route){
     /* Kapalı bir bölümün ekranına gidilmez: boş bir tezgâh, kullanıcının
        kapattığı şeyi geri getirmiş gibi görünür. Sessizce Bugün'e düşer ve
@@ -49728,9 +49647,9 @@ ESP.App = (function(){
     if(onceki && typeof onceki.leave === 'function'){
       try{ onceki.leave(); }catch(e){ console.error(e); }
     }
+    K.katmanKapat();
     S.route = route;
     S.sidebarOpen = false;
-    applySection(route);
     window.scrollTo(0, 0);
     render();
   }
@@ -50009,7 +49928,25 @@ ESP.App = (function(){
       UI.toast('İşlendi — gün kaydına yazıldı');
       render();
     },
-    async 'toggle-menu'(){ S.sidebarOpen = !S.sidebarOpen; render(); },
+    /* Menü (telefonda alt bandın dördüncü sekmesi). `toggle-menu` eski
+       adıdır; klavye kısayolları ve eski bağlantılar için kalır. */
+    async 'toggle-sidebar'(){ K.katmanKapat(); S.sidebarOpen = !S.sidebarOpen; render(); },
+    async 'toggle-menu'(){ K.katmanKapat(); S.sidebarOpen = !S.sidebarOpen; render(); },
+    /* Kabuğun açılır panelleri (LIFEOS.KABUK): ikinci basış kapatır. */
+    async 'modul-menu'(el){
+      if(K.katmanAcik('kabuk-modul')){ K.katmanKapat(); return; }
+      K.katmanAc('kabuk-modul', K.modulMenusu({ modul:'esp' }), el);
+    },
+    async 'bildirim-ac'(el){
+      if(K.katmanAcik('kabuk-bildirim')){ K.katmanKapat(); return; }
+      K.katmanAc('kabuk-bildirim', K.bildirimPaneli({ gruplar:bildirimGruplari() }), el);
+    },
+    async 'hizli-ekle'(el){
+      if(K.katmanAcik('kabuk-hizli')){ K.katmanKapat(); return; }
+      K.katmanAc('kabuk-hizli', K.hizliEkle({ modul:'esp', satirlar:hizliSatirlar() }), el);
+    },
+    /* Gün şeridindeki tarih (05): yedi gün açılır ya da kapanır. */
+    async 'hafta-ac'(){ S.ui.haftaAcik = !S.ui.haftaAcik; render(); },
     async hint(el){
       if(UI.isHintOpen() && el.dataset.hint === UI._lastHint){ UI.closeHint(); UI._lastHint = null; return; }
       UI._lastHint = el.dataset.hint;
@@ -50294,7 +50231,7 @@ ESP.App = (function(){
     if(e.key === 'Escape'){
       if(ESP.Talk && ESP.Talk.isActive()){ ESP.Talk.stop(); render(); return; }
       if(ESP.Palette.isOpen()){ ESP.Palette.close(); return; }
-      if(isAppearanceOpen()){ closeAppearance(); return; }
+      if(K.katmanAcik()){ K.katmanKapat(); return; }
       if(UI.isHintOpen()){ UI.closeHint(); return; }
       if(UI.isSheetOpen()){ UI.closeSheet(); return; }
       if(S.sidebarOpen){ S.sidebarOpen = false; render(); return; }
@@ -50396,21 +50333,15 @@ ESP.App = (function(){
     if(fn) await fn({ files:[file], value:'' }, e);
   });
 
-  /* Açık katmanları dışarıya tıklayınca kapat. */
+  /* İpucu balonu dışarıya tıklayınca kapanır. Kabuğun panelleri
+     (görünüm, modül menüsü, bildirimler, hızlı ekle) bunu LIFEOS.KABUK
+     katman yöneticisinde yapar: dışarı tıklama, Esc, boyut değişimi. */
   document.addEventListener('mousedown', e => {
     if(UI.isHintOpen()
       && !e.target.closest('#popover') && !e.target.closest('[data-act="hint"]')){
       UI.closeHint();
     }
-    if(isAppearanceOpen()
-      && !e.target.closest('#appearance') && !e.target.closest('[data-act="open-appearance"]')){
-      closeAppearance();
-    }
   });
-
-  /* Pencere boyutu değişince panelin çapası kayar; yeniden konumlamak
-     yerine kapatmak daha dürüst: kullanıcı nereye tıkladığını bilir. */
-  window.addEventListener('resize', () => { if(isAppearanceOpen()) closeAppearance(); });
 
   /* ------------------------------------------------------------ sürtünme ölçümü
 
@@ -50588,7 +50519,8 @@ ESP.App = (function(){
         console.error('Seviye defteri yüklenemedi; seviye gösterilmeyecek.', e);
       }
       applyTheme();
-      applySection(S.route);
+      /* Eski bölüm rengi niteliği kalmışsa silinir: renk modülü söyler. */
+      document.documentElement.removeAttribute('data-section');
       await render();
       installManifest();
       /* Çevrimdışı kabuk: yalnız sunucuyla açılınca (brand/ortak/pwa.js). */
@@ -50729,9 +50661,9 @@ ESP.App = (function(){
     }
   }
 
-  return { boot, render, go, applyTheme, applySection, SECTIONS,
-    sectionOf, routeOn, THEMES, installManifest,
-    openAppearance, closeAppearance, isAppearanceOpen };
+  return { boot, render, go, applyTheme, SECTIONS,
+    sectionOf, routeOn, yolOf, THEMES, installManifest,
+    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
 })();
 
 /* Test paketi bu dosyayı da yükler (ekran sözleşmelerini denetlemek için)

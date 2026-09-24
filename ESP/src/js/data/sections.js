@@ -5,9 +5,10 @@
    gerekmemeli. `core/nav.js` bu listeyi kullanıcının açık bölümlerine göre
    süzer ve numaralandırır.
 
-   `disc` alanı bölümü bir disipline bağlar; disiplin kapalıysa bölüm hiç
-   çizilmez. `disc` taşımayan bölümler (Günlük, Ofis, Ayarlar) hiçbir zaman
-   kapanmaz — onlar bir alan değil sistemin kendisidir.
+   `disc` alanı bir SAYFAYI (Çalışma'nın bölümünü) bir disipline bağlar;
+   disiplin kapalıysa o sayfa hiç çizilmez, sayfası kalmayan çekmece de.
+   `disc` taşımayan sayfalar (Bugün, Ofis, Ayarlar…) hiçbir zaman kapanmaz
+   — onlar bir alan değil sistemin kendisidir.
 
    Numara burada YOKTUR: numara çizim anında verilir çünkü bir kimlik değil
    bir sıradır (bkz. core/nav.js). */
@@ -15,60 +16,51 @@
 window.ESP = window.ESP || {};
 
 ESP.SECTIONS_ALL = [
-    { id:'gunluk', icon:'pulse', label:'Günlük',
-      note:'Günün pratiğini gir, karşılığını gör',
+    /* SEKİZ ÇEKMECE (ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
+       Üç modülde aynı ad ve sıra; adlar tek kaynaktan gelir
+       (`LIFEOS.KABUK.CEKMECELER`, core/nav.js çizim anında okur). Yedi
+       eski bölümden nereye: Günlük › Bugün → Bugün; Günlük › Merdiven →
+       Plan; Dil, Felsefe, Tarih, Ses, Okuma, Yazı → Çalışma'nın bölümleri
+       (karar 4); Ofis › Analiz → Analiz; Rütbe → Ayarlar › Rütbe; Rehber →
+       Ayarlar › Genel. Onaylar ve Kütüphanem ekranları gelene kadar boş
+       çekmece çizilmez. `disc` artık BÖLÜMDEDİR: disiplin kapanınca yalnız
+       onun bölümü düşer, Çalışma kalır. */
+    { id:'bugun', icon:'pulse', label:'Bugün', note:'Günün pratiğini gir, karşılığını gör',
+      views:[{ route:'today', label:'Bugün', icon:'pulse' }] },
+
+    { id:'plan', icon:'chart', label:'Plan', note:'Merdiven: her disiplinde bir sonraki basamak',
+      views:[{ route:'ladder', label:'Merdiven', icon:'chart' }] },
+
+    { id:'calisma', icon:'cards', label:'Çalışma', note:'Altı disiplinin tezgâhı',
       views:[
-        { route:'today',  label:'Bugün',    icon:'pulse' },
-        { route:'ladder', label:'Merdiven', icon:'chart' },
+        { route:'lang',      label:'Dil',     icon:'cards',    disc:'lang' },
+        { route:'symposium', label:'Felsefe', icon:'socratic', disc:'philo' },
+        { route:'history',   label:'Tarih',   icon:'book',     disc:'history' },
+        { route:'studio',    label:'Ses',     icon:'wave',     disc:['music', 'diction'] },
+        { route:'library',   label:'Okuma',   icon:'book',     disc:'reading' },
+        { route:'writing',   label:'Yazı',    icon:'quill',    disc:'writing' },
       ] },
 
-    { id:'dil', disc:'lang', icon:'cards', label:'Dil',
-      note:'Kelime, aralıklı tekrar ve shadowing',
-      views:[{ route:'lang', label:'Dil Stüdyosu', icon:'cards' }] },
+    { id:'analiz', icon:'chart', label:'Analiz', note:'Kararın dayanağı',
+      views:[{ route:'analytics', label:'Analiz', icon:'chart' }] },
 
-    { id:'felsefe', disc:'philo', icon:'socratic', label:'Felsefe',
-      note:'Tez, itiraz, düşünce deneyi ve safsata denetimi',
-      views:[{ route:'symposium', label:'Sempozyum', icon:'socratic' }] },
+    { id:'onaylar', icon:'check', label:'Onaylar', note:'Bekleyen öneriler', views:[] },
 
-    { id:'tarih', disc:'history', icon:'book', label:'Tarih',
-      note:'Kronoloji, neden zinciri ve kaynak eleştirisi',
-      views:[{ route:'history', label:'Kronoloji', icon:'book' }] },
-
-    { id:'ses', disc:['music', 'diction'], icon:'wave', label:'Ses',
-      note:'Gitar metronomu ve diksiyon',
-      views:[{ route:'studio', label:'Stüdyo', icon:'wave' }] },
-
-    { id:'okuma', disc:'reading', icon:'book', label:'Okuma',
-      note:'Atomik not ve sentopik matris',
-      views:[{ route:'library', label:'Kütüphane', icon:'book' }] },
-
-    { id:'yazi', disc:'writing', icon:'quill', label:'Yazı',
-      note:'Taslak, okunabilirlik ve üslup',
-      views:[{ route:'writing', label:'Yazı Laboratuvarı', icon:'quill' }] },
-
-    { id:'ofis', icon:'users', label:'Ofis',
-      note:'Patron, yedi uzman ve bir koç',
+    { id:'ofis', icon:'users', label:'Ofis', note:'Patron, yedi uzman ve bir koç',
       views:[
-        { route:'office',    label:'Masalar',  icon:'users' },
-        { route:'team',      label:'Danışma',  icon:'zap' },
-        { route:'meeting',   label:'Toplantı', icon:'list' },
-        { route:'analytics', label:'Analiz',   icon:'chart' },
+        { route:'office',  label:'Masalar',  icon:'users' },
+        { route:'team',    label:'Danışma',  icon:'zap' },
+        { route:'meeting', label:'Toplantı', icon:'list' },
       ] },
 
-    /* Rütbe kendi bölümü — Ayarlar'ın bir sekmesi değil. Seviye orada
-       bir ayar gibi duruyordu; oysa merdiven, kartlar ve «XP nereden
-       gelir» kendi başına bakılacak bir yer.
+    { id:'kutuphane', icon:'book', label:'Kütüphanem', note:'BAM\'ın ürettikleri', views:[] },
 
-       `disc` YOKTUR: rütbe bir disipline bağlı değildir, o yüzden
-       kapatılan bir disiplinle birlikte kaybolmaz. */
-    { id:'rutbe', icon:'layers', label:'Rütbe',
-      note:'Kademe, merdiven ve XP kaynakları',
-      views:[{ route:'rutbe', label:'Rütbe', icon:'layers' }] },
-
-    { id:'ayarlar', icon:'sliders', label:'Ayarlar',
-      note:'Profil, görünüm, veri ve rehber',
+    /* Rütbe burada bir bölümdür (karar §8-2); `disc` taşımaz, kapatılan
+       bir disiplinle birlikte kaybolmaz. */
+    { id:'ayarlar', icon:'sliders', label:'Ayarlar', note:'Profil, görünüm, veri ve rehber',
       views:[
         { route:'profile', label:'Profil', icon:'sliders' },
-        { route:'guide',   label:'Rehber', icon:'guide' },
+        { route:'guide',   label:'Genel',  icon:'guide' },
+        { route:'rutbe',   label:'Rütbe',  icon:'layers' },
       ] },
   ];

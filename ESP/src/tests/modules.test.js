@@ -164,26 +164,42 @@
       expect(nums.join(',')).toBe(beklenen.join(','));
     });
 
-    it('tarih kendi bolumudur', () => {
+    /* Karar 4 (2026-09-24): altı disiplin tek «Çalışma» çekmecesinde
+       bölümdür; Tarih artık kendi çekmecesi değil, Çalışma › Tarih. */
+    it('tarih Çalışma çekmecesinde kendi bölümüdür', () => {
       resetState();
-      const sec = ESP.Nav.sections().filter(s => s.id === 'tarih')[0];
+      const sec = ESP.Nav.sections().filter(s => s.id === 'calisma')[0];
       expect(sec != null).toBeTruthy();
-      expect(sec.views[0].route).toBe('history');
+      const v = sec.views.filter(x => x.route === 'history')[0];
+      expect(v != null).toBeTruthy();
+      expect(v.label).toBe('Tarih');
     });
 
-    it('kapali bolumun ekrani yonlendirmeden kalkar', async () => {
+    it('kapali disiplinin ekrani yonlendirmeden ve Çalışma bölümlerinden kalkar', async () => {
       resetState();
       await kapat('history');
       expect(ESP.Nav.routeOn('history')).toBeFalsy();
-      expect(ESP.Nav.sections().some(s => s.id === 'tarih')).toBeFalsy();
+      const cal = ESP.Nav.sections().filter(s => s.id === 'calisma')[0];
+      expect(cal.views.some(v => v.route === 'history')).toBeFalsy();
+      expect(cal.views.length > 0).toBeTruthy();
     });
 
-    it('gunluk, ofis ve ayarlar hicbir zaman kapanmaz', async () => {
+    it('bugun, ofis ve ayarlar hicbir zaman kapanmaz; son açık disiplinle Çalışma kalır', async () => {
       resetState();
       const hepsi = ESP.DISCIPLINES.map(d => d.id);
       for(let i = 0; i < hepsi.length - 1; i++) await kapat(hepsi[i]);
       const idler = ESP.Nav.sections().map(s => s.id);
-      ['gunluk', 'ofis', 'ayarlar'].forEach(id => expect(idler.indexOf(id) >= 0).toBeTruthy());
+      ['bugun', 'ofis', 'ayarlar'].forEach(id => expect(idler.indexOf(id) >= 0).toBeTruthy());
+      expect(idler.indexOf('calisma') >= 0).toBeTruthy();
+    });
+
+    it('sekiz çekmecenin adı ve sırası ortak kaynaktan; boş çekmece çizilmez', () => {
+      resetState();
+      const K = window.LIFEOS && window.LIFEOS.KABUK;
+      const sirali = ESP.Nav.all().map(s => s.id);
+      expect(sirali).toEqual(['bugun', 'plan', 'calisma', 'analiz', 'onaylar', 'ofis', 'kutuphane', 'ayarlar']);
+      if(K && K.CEKMECELER) expect(sirali).toEqual(K.CEKMECELER.map(c => c.id));
+      ESP.Nav.sections().forEach(s => expect(s.views.length > 0).toBeTruthy());
     });
   });
 
