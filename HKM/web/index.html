@@ -611,6 +611,7 @@ details.detay > summary:hover{ color:var(--fg); }
             <div class="yaz">
               <textarea id="bugun-mesaj" rows="2"
                 placeholder="Bugün nasıl gidiyor?" aria-label="King'e mesaj"></textarea>
+              <button id="bugun-mikrofon" hidden aria-label="Sesle yaz" aria-pressed="false">Konuş</button>
               <button class="primary" id="bugun-gonder">Gönder</button>
             </div>
             <p class="muted" style="margin-top:8px"><a href="#/sohbet">Bütün
@@ -629,6 +630,7 @@ details.detay > summary:hover{ color:var(--fg); }
         <div class="yaz">
           <textarea id="mesaj" rows="2" placeholder="Bir şey yaz…"
             aria-label="Mesaj"></textarea>
+          <button id="mikrofon" hidden aria-label="Sesle yaz" aria-pressed="false">Konuş</button>
           <button class="primary" id="gonder">Gönder</button>
         </div>
         <p class="muted" id="sohbet-not"></p>
@@ -4816,6 +4818,45 @@ details.detay > summary:hover{ color:var(--fg); }
     mesajGonder('mesaj', 'gonder'); });
   $('bugun-gonder').addEventListener('click', function(){
     mesajGonder('bugun-mesaj', 'bugun-gonder'); });
+  /* Fikir 1: sesle tek cümle («bugün 2 saat matematik çalıştım, 7 saat
+     uyudum, 30 dakika gitar çaldım» — core/dil.py `rapor` onu modül modül
+     teklife böler). Tarayıcının KENDİ konuşma tanıması: bağımlılık yok,
+     ses HKM'ye gelmez. Destek yoksa düğme hiç görünmez. Tanınan metin
+     kutuya YAZILIR, gönderilmez: kullanıcı okur, düzeltir, gönderir. */
+  function mikrofonKur(alanId, dugmeId){
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var d = $(dugmeId);
+    if(!d || !SR) return;
+    d.hidden = false;
+    var tanir = null;
+    d.addEventListener('click', function(){
+      if(tanir){ tanir.stop(); return; }
+      try{ tanir = new SR(); }catch(e){ tanir = null; return; }
+      tanir.lang = 'tr-TR';
+      tanir.interimResults = false;
+      tanir.maxAlternatives = 1;
+      d.textContent = 'Dinliyorum…';
+      d.setAttribute('aria-pressed', 'true');
+      tanir.onresult = function(e){
+        var t = (e.results && e.results[0] && e.results[0][0]) ? e.results[0][0].transcript : '';
+        var a = $(alanId);
+        if(a && t) a.value = (a.value.trim() ? a.value.trim() + ' ' : '') + t;
+      };
+      tanir.onerror = function(e){
+        var not = $(alanId === 'mesaj' ? 'sohbet-not' : 'bugun-sohbet-not');
+        if(not) not.textContent = e && e.error === 'not-allowed'
+          ? 'Mikrofon izni verilmedi.' : 'Ses anlaşılamadı; yeniden dene ya da yaz.';
+      };
+      tanir.onend = function(){
+        tanir = null;
+        d.textContent = 'Konuş';
+        d.setAttribute('aria-pressed', 'false');
+      };
+      try{ tanir.start(); }catch(e){ tanir = null; d.textContent = 'Konuş'; }
+    });
+  }
+  mikrofonKur('mesaj', 'mikrofon');
+  mikrofonKur('bugun-mesaj', 'bugun-mikrofon');
   /* Enter gonderir, Shift+Enter yeni satir: uzun bir cumleyi yazarken
      satir baslamak isteyen kullaniciyi mesaji gondermeye zorlamaz. */
   ['mesaj', 'bugun-mesaj'].forEach(function(id){

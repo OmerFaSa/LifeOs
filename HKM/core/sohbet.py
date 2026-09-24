@@ -338,6 +338,72 @@ def arastirmayi_devret(con, cfg, metin, konu, now=None, kanal=None, hedef=None):
                         "güncel mi diye denetlenecek, yoksa ajanlar web’de araştıracak.")
 
 
+# ------------------------------------------------ tek cumleden cok is (43)
+#
+# «türev özeti hazırla ve SPİ için demir emilimini araştır» iki istir; eskiden
+# yalniz ilki taninip ikincisi sessizce kayboluyordu. Cumle ayraclardan
+# bolunur ama KONU bolunmez: parcalar biriktirilir, birikim tek basina bir
+# is olunca kapanir («türev ve integral özeti hazırla» tek urundur). Her is
+# kendi emriyle, kendi onay kapisindan gecer. Anlasilmayan parca SOYLENIR.
+COKLU_AYRAC = re.compile(r"\s*(?:;|\n|\bayrıca\b|\bbir de\b|\bsonra da\b|\bve\b)\s*", re.I)
+COKLU_MODUL = re.compile(r"\b(AYS|SPİ|SPI|ESP)\s*(?:için|icin|'?(?:ye|ya|e|a))\b", re.I)
+
+
+def _is_tani(metin):
+    pl = program.tani(metin)
+    if pl is not None:
+        return {"tur": "plan", "plan": pl}
+    u = urun_istegi(metin)
+    if u is not None:
+        return {"tur": "urun", "urun": u}
+    konu = arastirma_konusu(metin)
+    if konu is not None:
+        return {"tur": "arastirma", "konu": konu}
+    return None
+
+
+def is_parcalari(metin):
+    """Iki ya da daha cok is varsa {isler, kalan}; yoksa None (olagan yol)."""
+    parcalar = [p for p in COKLU_AYRAC.split(str(metin or "")) if p and p.strip(" .,")]
+    if len(parcalar) < 2:
+        return None
+    isler, birikim = [], ""
+    for p in parcalar:
+        birikim = (birikim + " ve " + p) if birikim else p
+        t = _is_tani(birikim)
+        if t:
+            m = COKLU_MODUL.search(birikim)
+            modul = {"ays": "ays", "spi̇": "spi", "spi": "spi", "esp": "esp"}.get(
+                m.group(1).lower(), "hkm") if m else "hkm"
+            t.update({"metin": birikim.strip(" .,"), "modul": modul})
+            if t["tur"] == "urun":
+                t["urun"]["konu"] = re.sub(COKLU_MODUL, "", t["urun"]["konu"]).strip(" ,")
+            if t["tur"] == "arastirma":
+                t["konu"] = re.sub(COKLU_MODUL, "", t["konu"]).strip(" ,")
+            isler.append(t)
+            birikim = ""
+    if len(isler) < 2:
+        return None
+    return {"isler": isler, "kalan": [birikim.strip(" .,")] if birikim.strip(" .,") else []}
+
+
+def coklu_devret(con, cfg, metin, parca, now=None, kanal=None, hedef=None):
+    satir = []
+    for i, t in enumerate(parca["isler"], 1):
+        if t["tur"] == "plan":
+            cevap = plani_devret(con, cfg, t["metin"], t["plan"], now=now, kanal=kanal, hedef=hedef)
+        elif t["tur"] == "urun":
+            cevap = urunu_devret(con, cfg, t["metin"], t["urun"], now=now, kanal=kanal,
+                                 hedef=hedef, modul=t["modul"])
+        else:
+            cevap = arastirmayi_devret(con, cfg, t["metin"], t["konu"], now=now, kanal=kanal,
+                                       hedef=hedef)
+        satir.append("%d) %s" % (i, cevap))
+    bas = "Cümlende %d iş var; her biri ayrı iş emri, ayrı onay:" % len(parca["isler"])
+    son = ["«%s» kısmını anlamadım; ayrı yazarsan bakarım." % k for k in parca["kalan"]]
+    return "\n".join([bas] + satir + son)
+
+
 def _yedek_metin(r, yedek):
     """Model konusamadiginda donecek SOHBET cevabi.
 
@@ -381,6 +447,15 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                 patron.log(con, kanal, "manager", tc, agent=gorevli)
             return {"ok": True, "mode": "komut", "command": "teklif", "text": tc,
                     "agent": gorevli}
+
+    # 0b' — TEK CUMLEDE BIRDEN COK IS (fikir 43): her biri ayri emir.
+    coklu = is_parcalari(metin) if gorevli == "king" else None
+    if coklu is not None:
+        govde = coklu_devret(con, cfg, metin, coklu, kanal=kanal, hedef=hedef)
+        if kayit:
+            patron.log(con, kanal, "user", metin, agent=gorevli)
+            patron.log(con, kanal, "manager", govde, agent=gorevli)
+        return {"ok": True, "mode": "emir", "command": "coklu", "text": govde, "agent": gorevli}
 
     # 0b — PROGRAM ve ARASTIRMA ISTEGI King'in degil burolarin isidir:
     # emir acilir. «arastirip plan yap» planin kaynakli olmasidir.

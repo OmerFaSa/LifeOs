@@ -112,6 +112,20 @@ def t_eski_tek_afis_kalkti():
     ok("/img/marka/tanitim-hkm.webp" not in _yuz())
 
 
+def t_mikrofon_yazar_gondermez():
+    """Fikir 1: sesle tek cumle. Mikrofon dugmesi VARSAYILAN GIZLIDIR
+    (tarayici desteklemiyorsa hic gorunmez) ve taninan metni kutuya
+    YAZAR; gonderen kullanicidir. Tanima dili Turkce."""
+    metin = _yuz()
+    for d in ("mikrofon", "bugun-mikrofon"):
+        ok(re.search(r'<button id="%s" hidden aria-label="Sesle yaz"' % d, metin), d)
+    govde = metin[metin.index("function mikrofonKur"):]
+    govde = govde[:govde.index("mikrofonKur('mesaj'")]
+    ok("tr-TR" in govde)
+    ok("mesajGonder" not in govde)
+    ok("/api/" not in govde)
+
+
 def run():
     suite("HKM yüzü — giriş şeridi")
     test("üç adım vardır", t_giris_seridi_uc_adim)
@@ -120,3 +134,4 @@ def run():
     test("paneller okuyucuya görünmez", t_paneller_okuyucuya_gorunmez)
     test("her nokta kendi adını söyler", t_her_nokta_kendi_adini_soyler)
     test("eski tek afiş kalktı", t_eski_tek_afis_kalkti)
+    test("mikrofon yazar, göndermez", t_mikrofon_yazar_gondermez)

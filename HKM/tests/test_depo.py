@@ -209,6 +209,34 @@ def run():
             web.VARSAYILAN_TASIYICI = eski
     test("King arastirmaz: istek buroya emir olur, King web'e cikmaz", t_king_arastirmaz)
 
+    def t_coklu_is():
+        """Fikir 43: tek cumlede birden cok is. Her is AYRI emir olur ve
+        kendi onay kapisindan gecer; konusu olan «ve» bolunmez («turev ve
+        integral ozeti»); tanınmayan parca SOYLENIR."""
+        l = sohbet.is_parcalari("türev ve integral özeti hazırla ve SPİ için demir "
+                                "emilimini araştır; bir de bana moda tüyoları")
+        eq([x["tur"] for x in l["isler"]], ["urun", "arastirma"])
+        eq(l["isler"][0]["urun"]["konu"].lower().startswith("türev ve integral"), True)
+        eq(l["isler"][0]["modul"], "hkm")
+        eq(l["kalan"], ["bana moda tüyoları"])
+        eq(sohbet.is_parcalari("türev hakkında özet hazırla"), None, "tek is: olagan yol")
+        eq(sohbet.is_parcalari("AYS için türev özeti hazırla ve ESP için İspanyolca sunum hazırla")
+           ["isler"][1]["modul"], "esp")
+        con, ag = db.connect(":memory:"), _Ag()
+        eski = web.VARSAYILAN_TASIYICI
+        web.VARSAYILAN_TASIYICI = ag
+        try:
+            r = sohbet.konus(con, _cfg_web(), "internette Osmanlı kuruluşunu araştır ve "
+                             "türev hakkında özet hazırla", "2026-09-23", gorevli="king",
+                             transport=_Model(), kayit=False)
+            eq(r["command"], "coklu")
+            ok(r["text"].startswith("Cümlende 2 iş var"), r["text"])
+            eq(sorted(e["tur"] for e in king.emirler(con)), ["bam.arastirma", "bam.urun"])
+            eq(ag.cagri, [])
+        finally:
+            web.VARSAYILAN_TASIYICI = eski
+    test("tek cumleden cok is: her biri ayri emir", t_coklu_is)
+
     def t_bekci():
         con, cfg, m, ag = db.connect(":memory:"), _cfg_web(), _Model(), _Ag()
         eski = bam.web_tasiyici
