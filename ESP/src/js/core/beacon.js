@@ -462,7 +462,7 @@ ESP.Beacon = (function(){
         bu sistemde calistirilacak bir komut degildir.
      3. HKM kapali, yavas ya da yoksa hicbir sey olmaz: kuyruk bos gelir. */
   const INTENT_KINDS = ['plan.add', 'focus.set', 'load.reduce', 'material.add', 'kayit.add',
-    'urun.add', 'unite.add'];
+    'urun.add', 'unite.add', 'belge.add'];
 
   /* ---------- teklif defteri: cevabin SAHIBI bu taraftir
 
@@ -584,6 +584,10 @@ ESP.Beacon = (function(){
       if(n.kind !== 'unite.add' || !ESP.Unite) continue;
       try{ n.unite = await ESP.Unite.onizle(n); }catch(e){ n.unite = null; }
     }
+    for(const n of gosterilecek){
+      if(n.kind !== 'belge.add' || !ESP.Belge) continue;
+      try{ n.belge = await ESP.Belge.onizle(n); }catch(e){ n.belge = null; }
+    }
     flushIntentReports().catch(function(){});
     return gosterilecek;
   }
@@ -629,12 +633,13 @@ ESP.Beacon = (function(){
      ESP'de bir «oturum» ölçülmüş bir çalışmadır; ileriye dönük bir teklif
      oturum olarak yazılamaz — yazılsaydı yapılmamış bir çalışma ölçülmüş
      görünürdü. Teklif bu yüzden bir HATIRLATICI olur. */
-  const APPLIABLE = ['plan.add', 'material.add', 'kayit.add', 'urun.add', 'unite.add'];
+  const APPLIABLE = ['plan.add', 'material.add', 'kayit.add', 'urun.add', 'unite.add', 'belge.add'];
 
   function canApply(n){
     if(!n || APPLIABLE.indexOf(n.kind) < 0) return false;
     if(n.kind === 'kayit.add') return !!(n.okuma && n.okuma.yazilacak.length);
     if(n.kind === 'unite.add') return !!(n.unite && n.unite.ok);
+    if(n.kind === 'belge.add') return !!(n.belge && n.belge.ok);
     return true;
   }
 
@@ -756,6 +761,10 @@ ESP.Beacon = (function(){
 
   async function applyIntent(n){
     if(n && n.kind === 'kayit.add') return await kayitUygula(n);
+    if(n && n.kind === 'belge.add'){
+      if(!ESP.Belge) return { ok:false, error:'Belge modülü yüklenmedi.' };
+      return await ESP.Belge.uygula(n.payload || {});
+    }
     if(n && n.kind === 'unite.add'){
       if(!ESP.Unite) return { ok:false, error:'Ünite modülü yüklenmedi.' };
       return await ESP.Unite.uygula(n.payload || {});

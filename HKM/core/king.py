@@ -33,7 +33,7 @@ import json
 import re
 import statistics
 
-from core import (ai, bam, butce, depo, intents, kaynakli, kitap, mufredat, planlama, program, spibilgi, unite,
+from core import (ai, bam, butce, depo, espbelge, intents, kaynakli, kitap, mufredat, planlama, program, spibilgi, unite,
                   urunler, web)
 from core import teklif as tkl
 
@@ -120,6 +120,15 @@ TURLER = {
         "ofisler": ["kayit", "uretim"],
         "model": True,
         "not": "Üretim Bürosu üniteyi yazar; öğeler bağımsız yargıyla, yazı sistemi kodla denetlenir.",
+    },
+    # ESP belgesi (core/espbelge.py, Part 8f): tarih ve felsefe icin
+    # kaynakli malzeme. Web ZORUNLU; alinti ve yil/ad kodla denetlenir.
+    "esp.belge": {
+        "ad": "ESP belgesi (tarih, felsefe)",
+        "moduller": ("esp",),
+        "ofisler": ["kayit", "arastirma"],
+        "model": True,
+        "not": "Araştırma Bürosu kaynaktan tipli kayıt yazar; alıntı, yıl ve ad kodla denetlenir.",
     },
     "test.kitabi": {
         "ad": "Bölümlü test kitabı",
@@ -429,6 +438,11 @@ def _govde_temizle(tur, govde):
         if hatalar:
             return None, hatalar
         return {"unite": g}, []
+    if tur == "esp.belge":
+        g, hatalar = espbelge.temizle((govde or {}).get("belge"))
+        if hatalar:
+            return None, hatalar
+        return {"belge": g}, []
     return None, ["tanimsiz tur"]
 
 
@@ -437,7 +451,7 @@ def _govde_temizle(tur, govde):
 ANAHTAR = {"hedef.plan": planlama.anahtar, "sinav.mufredat": mufredat.anahtar,
            "test.kitabi": planlama.anahtar, "bam.urun": planlama.anahtar,
            "bam.plan": program.anahtar, "spi.bilgi": spibilgi.anahtar,
-           "esp.unite": unite.anahtar,
+           "esp.unite": unite.anahtar, "esp.belge": espbelge.anahtar,
            "bam.arastirma": lambda t: depo.konu_anahtari(
                "%s %s" % (t["arastirma"]["konu"], t["arastirma"].get("ayrinti") or ""))}
 
@@ -477,6 +491,8 @@ def emir_ac(con, cfg, modul, tur, govde, konu="", neden="", now=None, kanal=None
         konu = spibilgi.talep(temiz["bilgi"])
     if tur == "esp.unite" and not str(konu or "").strip():
         konu = unite.talep(temiz["unite"])
+    if tur == "esp.belge" and not str(konu or "").strip():
+        konu = espbelge.talep(temiz["belge"])
     if tur == "test.kitabi" and not str(konu or "").strip():
         konu = "«%s» — %d bölümlük test kitabı" % (temiz["kitap"]["baslik"],
                                                   len(temiz["kitap"]["bolumler"]))
@@ -890,6 +906,22 @@ def _teklif_unite(con, e, kayit_id, now=None):
     return ""
 
 
+def _teklif_espbelge(con, e, kayit_id, now=None):
+    """Tarih ya da felsefe belgesini ESP'ye teklif olarak birakir."""
+    k = bam.kayit_getir(con, kayit_id) or {}
+    g = k.get("govde") or {}
+    satir = g.get("olaylar") if g.get("tur") == "tarih" else g.get("dusunurler")
+    if g.get("tur") not in espbelge.ALANLAR or not satir:
+        return " Kayıt ESP belgesi biçiminde değil; teklif bırakılmadı."
+    payload = {"kayit_id": int(kayit_id), "baslik": str(k.get("baslik") or g.get("konu") or "Belge")[:120],
+               "alan": g["tur"], "adet": min(len(satir), 50)}
+    n = intents.create(con, e["modul"], "belge.add", payload, None, source="bam")
+    if n.get("ok"):
+        bam.iz_ekle(con, "kayit", kayit_id, "niyet", n["intent"]["id"], now=now)
+        return " Belge ESP’ye teklif olarak bırakıldı; ESP kendi koduyla sınayıp onayınla ekler."
+    return ""
+
+
 def _teklif_kitap(con, e, kayit_id, now=None):
     """Test kitabini AYS'ye teklif olarak birakir."""
     g = (bam.kayit_getir(con, kayit_id) or {}).get("govde") or {}
@@ -969,6 +1001,8 @@ def _teklif(con, e, kayit_id, now=None):
         return _teklif_spibilgi(con, e, kayit_id, now=now)
     if e["tur"] == "esp.unite":
         return _teklif_unite(con, e, kayit_id, now=now)
+    if e["tur"] == "esp.belge":
+        return _teklif_espbelge(con, e, kayit_id, now=now)
     if e["tur"] != "hedef.plan":
         return ""
     k = bam.kayit_getir(con, kayit_id) or {}
@@ -1138,6 +1172,11 @@ def bekci(con, cfg, now=None, tasiyici=None):
     if g.get("tur") in spibilgi.TURLER:
         bildir(con, "spi", None, "guncellik", "«%s» kaynakları değişti. Yeniden isteyerek "
                "güncel değeri alabilirsin." % k["baslik"], now=at)
+        bildir(con, "hkm", None, "guncellik", neden, now=at)
+        return out
+    if g.get("tur") in espbelge.ALANLAR and (g.get("olaylar") or g.get("dusunurler")):
+        bildir(con, "esp", None, "guncellik", "«%s» kaynakları değişti. Yeniden isteyerek "
+               "güncel belgeyi alabilirsin." % k["baslik"], now=at)
         bildir(con, "hkm", None, "guncellik", neden, now=at)
         return out
     konu = str(g.get("konu") or "").strip()[:MAX_KONU]

@@ -38,7 +38,7 @@ import datetime
 import json
 import re
 
-from core import (ai, butce, depo, editor, intents, kaynakli, kitap, mufredat, planlama, spibilgi, unite,
+from core import (ai, butce, depo, editor, espbelge, intents, kaynakli, kitap, mufredat, planlama, spibilgi, unite,
                   program, urunler, web)
 
 OFISLER = {
@@ -305,6 +305,8 @@ def arastirma_konusu(j):
         return spibilgi.konu(g["bilgi"])
     if g.get("unite"):
         return unite.konu(g["unite"])
+    if g.get("belge"):
+        return espbelge.konu(g["belge"])
     if g.get("arastirma"):
         a = g["arastirma"]
         return "%s %s" % (a["konu"], a.get("ayrinti") or "")
@@ -615,6 +617,38 @@ def _spibilgi_adimi(con, cfg, j, g, transport, now):
                                            else " Kaynaksız, doğrulanmadı (%s)." % t[1])}
 
 
+def _espbelge_adimi(con, cfg, j, g, transport, now):
+    """ESP belgesi (core/espbelge.py): tarih ya da felsefe. Sorgular kuralla;
+    web yoksa ya da kaynak cikmazsa MODEL CAGRILMADAN biter."""
+    ad = espbelge.ALAN_AD[g["alan"]]
+    t = _kaynak_topla(con, cfg, j, "arastirma",
+                      lambda: (espbelge.sorgular(g), [],
+                               "Sorgular kuralla kuruldu: konu + %s." % ad), transport, now)
+    if t[0] == "devam":
+        return t[1]
+    if t[0] == "yok":
+        return {"durum": "hata", "not": "%s yazılmadı: %s. Belge kaynaktır; model bilgisinden "
+                                        "yazılmaz. Web açıkken yeniden iste." % (ad.capitalize(), t[1])}
+    kaynaklar, metinler = t[1], t[2]
+    icerik = espbelge.istem(g) + "\n\nKAYNAKLAR\n" + kaynakli.blok(kaynaklar, metinler)
+    r = ai.ask(con, cfg, "bam.arastirma", "arastirma", [{"role": "user", "content": icerik}],
+               sistem=espbelge.sistem(g["alan"]), transport=transport,
+               duzeltme=False, denetim="belge")
+    if not r.get("ok"):
+        return _model_hatasi(r)
+    govde, hata = espbelge.ayikla(_json_ayikla(r["text"]), g)
+    if not hata:
+        etiket, hata = espbelge.dogrula(govde, metinler, kaynakli.alinti_dogru_mu)
+    if hata:
+        return {"durum": "hata", "not": "%s yazılmadı: %s" % (ad.capitalize(), hata)}
+    govde["kaynaklar"] = _izli_kaynakca(kaynaklar, metinler)
+    govde["konu_metni"] = arastirma_konusu(j).strip()
+    k = kayit_ekle(con, "arastirma", espbelge.baslik(g), govde, dogruluk=etiket,
+                   etiketler=j["talep"][:300], is_id=j["id"], now=now, **_depo_yaz(j))
+    return {"durum": "tamam", "kayit_id": k["id"], "kaynakli": {"asama": "bitti", "kaynak": len(kaynaklar)},
+            "not": espbelge.ozet(govde) + " %d kaynak." % len(kaynaklar)}
+
+
 def _onceki_surum(con, j):
     """Depolama «guncelle» dediyse yeni surumun oncesi."""
     d = _depo_karari(j)
@@ -781,6 +815,9 @@ def _arastirma_adimi(con, cfg, j, transport, now):
     g = (j.get("govde") or {}).get("bilgi")
     if g:
         return _spibilgi_adimi(con, cfg, j, g, transport, now)
+    g = (j.get("govde") or {}).get("belge")
+    if g:
+        return _espbelge_adimi(con, cfg, j, g, transport, now)
     t = _arastirma_kaynakli(con, cfg, j, transport, now)
     if t[0] == "devam":
         return t[1]

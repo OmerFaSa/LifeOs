@@ -246,6 +246,21 @@ ESP.Screens.history = (function(){
     const b = ESP.Chrono.sourceBalance();
     const rows = [];
 
+    /* BAM'dan belge (Part 8f): konu → olaylar ve kaynakları; yıl alıntıda
+       doğrulanır. Teklif Bugün'e gelir, ESP kendi koduyla sınamadan eklemez. */
+    rows.push(K.Entry({
+      label:'BELGE İSTE', hint:'source',
+      meta:'tarih · HKM',
+      note:'Konunun olayları web kaynaklarından çıkarılır; yıl alıntıda doğrulanır, her olay '
+         + 'kaynağıyla gelir. Web kapalıysa belge yazılmaz.',
+      body:html`<div class="row gap-8 wrap">
+        ${K.Input({ id:'belge-tarih', placeholder:'Konu: Osmanlı’nın kuruluşu, Fransız Devrimi…',
+          aria:'Tarih konusu', size:'sm', class:'grow' })}
+        ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+          data:{ 'data-alan':'tarih' } })}
+      </div>`,
+    }));
+
     rows.push(K.Entry({
       label:'KAYNAK EKLE', hint:'source',
       meta:'birincil / ikincil',
@@ -531,6 +546,12 @@ ESP.Screens.history = (function(){
   /* ----------------------------------------------------------------- eylem */
 
   const handle = {
+    async 'belge-iste'(el){
+      const k = document.getElementById('belge-' + el.dataset.alan);
+      const r = await ESP.Belge.iste({ alan:el.dataset.alan, konu:k ? k.value : '' });
+      ESP.UI.toast(r.metin);
+      if(r.ok) ESP.App.render();
+    },
     async 'pick-tab'(el){ S.ui.histTab = el.dataset.tab; ESP.App.render(); },
     async 'pick-era'(el){
       S.ui.histEra = el.dataset.id === S.ui.histEra ? 'all' : el.dataset.id;

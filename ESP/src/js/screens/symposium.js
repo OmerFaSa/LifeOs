@@ -241,10 +241,25 @@ ESP.Screens.symposium = (function(){
               rows:kitaplar.map(b => [
                 b.title, b.author,
                 b.kind === 'primary' ? 'primer' : 'yorum',
-                U.fmtShort(b.startedAt),
+                b.startedAt ? U.fmtShort(b.startedAt) : 'başlanmadı',
                 K.Button({ label:'Sil', size:'sm', act:'del-book', data:{ 'data-id':b.id } }),
               ]) })
           : K.Empty({ text:'Kaynak listesi boş.' }),
+      }),
+
+      /* BAM'dan belge (Part 8f): konu → düşünür, eser ve tez; kaynaklı.
+         Teklif Bugün'e gelir, ESP kendi koduyla sınamadan eklenmez. */
+      K.Entry({
+        label:'BELGE İSTE', hint:'primary-text',
+        meta:'felsefe · HKM',
+        note:'Konunun düşünürleri, eserleri ve ana tezleri web kaynaklarından çıkarılır; ad '
+           + 'alıntıda doğrulanır. Tezler açık tartışma olarak gelir. Web kapalıysa belge yazılmaz.',
+        body:html`<div class="row gap-8 wrap">
+          ${K.Input({ id:'belge-felsefe', placeholder:'Konu: Stoacılık, varoluşçuluk…', aria:'Felsefe konusu',
+            size:'sm', class:'grow' })}
+          ${K.Button({ label:'King’e ilet', size:'sm', tone:'primary', act:'belge-iste',
+            data:{ 'data-alan':'felsefe' } })}
+        </div>`,
       }),
 
       K.Entry({
@@ -313,6 +328,12 @@ ESP.Screens.symposium = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'belge-iste'(el){
+      const k = document.getElementById('belge-' + el.dataset.alan);
+      const r = await ESP.Belge.iste({ alan:el.dataset.alan, konu:k ? k.value : '' });
+      ESP.UI.toast(r.metin);
+      if(r.ok) ESP.App.render();
+    },
     async 'philo-tab'(el){ S.ui.philoTab = el.dataset.tab; ESP.App.render(); },
     async 'tab-ekle'(){ S.ui.philoTab = 'ekle'; ESP.App.render(); },
 

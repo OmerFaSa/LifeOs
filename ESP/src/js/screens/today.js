@@ -730,10 +730,11 @@ ESP.Screens.today = (function(){
         ${map(liste, n => html`<div class="mt-8">
           ${K.Notice({ tone:'info', body:n.note })}
           ${when(n.kind === 'kayit.add', () => kayitOkuma(n))}
-          ${when(n.kind === 'unite.add', () => uniteOnizleme(n))}
+          ${when(n.kind === 'unite.add', () => uniteOnizleme(n.unite))}
+          ${when(n.kind === 'belge.add', () => uniteOnizleme(n.belge))}
           <div class="row gap-8 mt-8">
             ${when(ESP.Beacon.canApply(n), () => K.Button({
-              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'unite.add':'Ekle' })[n.kind] || 'Uygula',
+              label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'unite.add':'Ekle', 'belge.add':'Ekle' })[n.kind] || 'Uygula',
               size:'sm', tone:'primary', act:'hkm-intent-yes',
               data:{ 'data-id':String(n.id) } }))}
             ${when(!ESP.Beacon.canApply(n), () => K.Button({ label:'Gördüm',
@@ -889,9 +890,8 @@ ESP.Screens.today = (function(){
 
   /* BAM ünitesi: ESP kaydı KENDİ koduyla sınadı; ne ekleneceği ya da neden
      eklenemeyeceği onaydan ÖNCE görünür (core/unite.js). */
-  function uniteOnizleme(n){
-    const b = n.unite;
-    if(!b) return html`<p class="tiny dim mt-8">ESP bu üniteyi sınayamadı.</p>`;
+  function uniteOnizleme(b){
+    if(!b) return html`<p class="tiny dim mt-8">ESP bu teklifi sınayamadı.</p>`;
     if(!b.ok) return html`<p class="tiny dim mt-8">Eklenmeyecek: ${b.why}</p>`;
     const o = b.onizleme;
     return html`<div class="mt-8">
@@ -917,9 +917,11 @@ ESP.Screens.today = (function(){
         : 'İstenmedi olarak işaretlendi');
     const metin = r.reported ? bas
       : bas + ' — merkeze bildirilemedi, bağlantı gelince tekrar denenecek.';
-    /* BAM ünitesi geri alınır: ünite ve hiç tekrar edilmemiş kartları kalkar. */
-    if(r.geriAl && ESP.Unite){
-      ESP.UI.toast(metin, { undo:async () => { await ESP.Unite.geriAl(r.geriAl); ESP.App.render(); } });
+    /* BAM ünitesi ve belgesi geri alınır; kullanıcının üzerinde çalıştığı
+       kayıt kalır (core/unite.js, core/belge.js). */
+    const geriModul = n.kind === 'belge.add' ? ESP.Belge : ESP.Unite;
+    if(r.geriAl && geriModul){
+      ESP.UI.toast(metin, { undo:async () => { await geriModul.geriAl(r.geriAl); ESP.App.render(); } });
     }else{
       ESP.UI.toast(metin);
     }

@@ -1092,6 +1092,25 @@ almada deneme kaydı olan alıştırma kalır. İstek: Stüdyo › Müzik › «
 
 Testler: `tests/test_teklif.py` (tazelik, kullanılmayan çıktı).
 
+## 8.35 ESP belgesi — tarih ve felsefe, `core/espbelge.py` (Part 8f)
+
+Kullanıcı: «ESP'de yalnız dil değil; felsefe, tarih ve diğer alanlara da belge aratacağız.»
+King iş türü `esp.belge` (yalnız ESP): alan (`tarih` | `felsefe`) + konu; kişisel veri yok.
+**Belge kaynaktır:** sorgular kuralla, web ZORUNLU; web kapalıysa ya da kaynak çıkmazsa
+model çağrılmadan «hata» ve nedeni söylenir. Model tipli JSON yazar; kod alıntıyı kaynakta,
+tarihte YILI (MÖ için mutlak değer), felsefede DÜŞÜNÜRÜN ADINI alıntıda arar; tutmayan satır
+düşer; tür ve bölge ESP'nin sözlüğünden (EVENT_KINDS, REGIONS), dışı düşer; alıntıda
+geçmeyen eser yılı bilinmiyor olur. Kayıt `kaynakli`, `belge.add` niyetiyle ESP'ye.
+
+**ESP tarafı (`ESP/src/js/core/belge.js`):** Tarih › Kaynaklar ve Sempozyum › Metinler'de
+«Belge iste». Teklif Bugün'de ESP'nin kendi önizlemesiyle; «Ekle» yeniden çeker, sınar
+(kaynaksız belge eklenmez) ve yazar: tarih → olay (`newEvent`, kaynağına bağlı) +
+kaynak (`newSource`; türü kod verir: ansiklopedi → üçüncül, diğerleri → ikincil); felsefe →
+eser (`newBook`, birincil, «başlanmadı») + tez (`newArgument`, AÇIK; destek ve itirazı
+kullanıcı yazar). Geri almada kullanıcının üzerinde çalıştığı kayıt (zincirli olay,
+itirazlı tez ve eseri) kalır. Testler: `tests/test_espbelge.py`, `ESP/src/tests/belge.test.js`,
+`tools/entegre.js` §2.82.
+
 ## 9. Fazlar
 
 | Faz | İçerik | Durum |

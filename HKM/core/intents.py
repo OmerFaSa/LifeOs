@@ -141,6 +141,14 @@ KINDS = {
         "optional": ("dil", "unite", "oge", "why"),
         "note": "BAM'ın hazırladığı dil ünitesini (hedef, görev, öğeler) ekleme teklifi.",
     },
+    # ESP belgesi (core/espbelge.py, Part 8f): tarih olaylari ya da
+    # dusunurler. ESP kaydi ceker, KENDI koduyla sinar ve onayla ekler.
+    "belge.add": {
+        "modules": ("esp",),
+        "required": ("kayit_id", "baslik"),
+        "optional": ("alan", "adet", "why"),
+        "note": "BAM'ın kaynaktan çıkardığı tarih ya da felsefe belgesini ekleme teklifi.",
+    },
     "measure.ask": {
         "modules": ("spi",),
         "required": ("date", "metric"),
@@ -164,6 +172,7 @@ FIELD_RULES = {
     "bolum": ("int", 1, 10), "soru": ("int", 1, 200), "urun": ("str", 1, 40),
     "metin": ("str", 3, 400), "ad": ("str", 1, 80),
     "dil": ("str", 2, 2), "unite": ("int", 1, 4), "oge": ("int", 1, 80),
+    "alan": ("str", 2, 20),
 }
 
 
@@ -281,6 +290,10 @@ def _cumle(module, kind, payload):
                     % (ad, p.get("baslik"), p.get("oge")))
         return ("%s: BAM «%s» ünitesini hazırladı (%s ünite, %s öğe). Eklensin mi? Kaynaksız; "
                 "yanlış bulduğun kartı sil." % (ad, p.get("baslik"), p.get("unite"), p.get("oge")))
+    if kind == "belge.add":
+        return ("%s: BAM «%s» belgesini kaynaklardan çıkardı (%s %s). Eklensin mi? %s okuduğunu "
+                "gösterecek." % (ad, p.get("baslik"), p.get("adet"),
+                                 "olay" if p.get("alan") == "tarih" else "düşünür", ad))
     if kind == "measure.ask":
         return "%s: %s günü için «%s» ölçümünü girmeyi unutma." % (
             ad, gun, p.get("metric"))

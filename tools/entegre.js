@@ -187,6 +187,25 @@ async function main(){
       { cwd:path.join(ROOT, 'HKM') }).toString().trim());
     }catch(e){ hatalar.push('unite kaydi yazilamadi: ' + e.message); }
 
+    /* 0.10 — ESP BELGESI (Part 8f): Arastirma Burosu'nun tarih kaydiyla ayni
+       govde (kaynakli). Sinanan: ESP olaylari kaynaklariyla Kronoloji'ye
+       koyar; kaynaksiz belgeyi almaz. */
+    let belgeKaydi = null;
+    try{
+      belgeKaydi = Number(execFileSync('python3', ['-c', [
+        'import sys',
+        'from core import db, bam',
+        'con = db.connect(sys.argv[1])',
+        'g = {"tur": "tarih", "konu": "Osmanlı Beyliği", "kaynaklar": [{"n": 1, "baslik": "Osmanlı Beyliği",',
+        '     "url": "https://tr.wikipedia.org/wiki/Osmanli", "tur": "ansiklopedi"}],',
+        '     "olaylar": [{"baslik": "Osmanlı Beyliği’nin kuruluşu", "yil": 1299, "tur": "siyasi",',
+        '     "bolge": "anadolu", "neden": "Başlangıç.", "kaynak": 1, "alinti": "1299"}]}',
+        'k = bam.kayit_ekle(con, "arastirma", "Tarih belgesi: Osmanlı Beyliği", g, dogruluk="kaynakli")',
+        'con.commit()',
+        'print(k["id"])'].join('\n'), path.join(tmp, 'hkm.db')],
+      { cwd:path.join(ROOT, 'HKM') }).toString().trim());
+    }catch(e){ hatalar.push('belge kaydi yazilamadi: ' + e.message); }
+
     for(const s of SISTEMLER){
       const srv = spawn('python3', [path.join(ROOT, s.id, 'devserver.py'), String(s.port)],
         { cwd:path.join(ROOT, s.id), stdio:'ignore' });
@@ -642,6 +661,41 @@ async function main(){
         else if(!un.istek) hatalar.push('ESP: unite istegi King’e gitmedi — ' + un.istMetin);
         else console.log('  ESP → BAM unitesi kendi koduyla sinandi, onizlendi, 7 kart desteye girdi, '
           + 'pratik ' + un.pratik + ' soru kurdu, geri alindi; unite istegi King’e gitti');
+      }
+
+      /* 2.82 — ESP BELGESI (Part 8f): `belge.add` teklifi ESP'nin KENDI
+         onizlemesiyle gorunur; «Ekle» olayi kaynagiyla Kronoloji'ye koyar;
+         «Geri al» kaldirir; felsefe istegi King'e gider. */
+      if(s.id === 'ESP' && belgeKaydi){
+        const bir = await (await hkmFetch('/api/intents/esp', { method:'POST',
+          body:JSON.stringify({ kind:'belge.add', source:'bam',
+            payload:{ kayit_id:belgeKaydi, baslik:'Tarih belgesi: Osmanlı Beyliği', alan:'tarih', adet:1 } }) })).json();
+        if(!bir.ok) hatalar.push('ESP: belge teklifi birakilamadi — ' + (bir.errors || []).join('; '));
+        const be = await page.evaluate(async () => {
+          const n = (await ESP.Beacon.intents()).find(x => x.kind === 'belge.add');
+          if(!n) return { yok:true };
+          ESP.S.ui.hkmIntents = [n];
+          ESP.App.go('today');
+          await new Promise(r => setTimeout(r, 400));
+          const kart = document.body.textContent.indexOf('ESP şunu ekleyecek') >= 0;
+          const r = await ESP.Beacon.resolveIntent(n, 'apply');
+          const ev = ESP.S.events.find(e => e.bam && e.bam.kayitId === n.payload.kayit_id);
+          const kaynakli = !!(ev && ev.sourceIds.length && ESP.S.sources.some(s => s.id === ev.sourceIds[0]));
+          if(r.geriAl) await ESP.Belge.geriAl(r.geriAl);
+          const kaldi = ESP.S.events.some(e => e.bam && e.bam.kayitId === n.payload.kayit_id);
+          const ist = await ESP.Belge.iste({ alan:'felsefe', konu:'Stoacılık' });
+          ESP.S.ui.hkmIntents = [];
+          return { onizleme:n.belge && n.belge.ok, kart, ok:r.ok, not:r.note || r.error,
+            bildirildi:r.reported, olay:!!ev, kaynakli, kaldi, istek:ist.ok, istMetin:ist.metin };
+        });
+        if(be.yok) hatalar.push('ESP: belge teklifi modulde gorunmedi');
+        else if(!be.onizleme || !be.kart) hatalar.push('ESP: belge teklifi onaydan once onizlenmedi');
+        else if(!be.ok || !be.olay || !be.kaynakli) hatalar.push('ESP: belge eklenemedi — ' + be.not);
+        else if(be.kaldi) hatalar.push('ESP: belge geri alinamadi');
+        else if(!be.bildirildi) hatalar.push('ESP: belge cevabi merkeze bildirilemedi');
+        else if(!be.istek) hatalar.push('ESP: belge istegi King’e gitmedi — ' + be.istMetin);
+        else console.log('  ESP → BAM tarih belgesi kendi koduyla sinandi, onizlendi, olay kaynagiyla '
+          + 'Kronoloji’ye girdi, geri alindi; felsefe istegi King’e gitti');
       }
 
       /* 2.8 — HEDEFTEN PLANA (ekip/PLAN.md Tur 2). Yalniz SPI: plan motoru

@@ -10,7 +10,7 @@ from tests import (harness, test_bam, test_baslat, test_bildirim, test_butce, te
                    test_cross,
                    test_daemon, test_dil, test_impact, test_intents, test_kanal, test_king,
                    test_depo, test_kaynakli, test_kitap, test_mufredat, test_pdf, test_program,
-                   test_spibilgi, test_unite,
+                   test_spibilgi, test_unite, test_espbelge,
                    test_urun,
                    test_web, test_hedefag, test_teklif, test_yedek,
                    test_manager, test_media, test_memory, test_models, test_motto,
@@ -25,7 +25,7 @@ def main():
                 test_manager, test_profil, test_ritim, test_streak, test_channels,
                 test_daemon, test_models, test_butce, test_media, test_memory,
                 test_motto, test_yoklama, test_kanal, test_bam, test_king, test_mufredat, test_kitap, test_web, test_kaynakli, test_urun, test_pdf, test_depo, test_program, test_hedefag, test_teklif, test_yedek, test_spibilgi,
-                test_unite, test_bildirim,
+                test_unite, test_espbelge, test_bildirim,
                 test_sohbet, test_baslat, test_yuz):
         mod.run()
     test_channels.run_bot()
