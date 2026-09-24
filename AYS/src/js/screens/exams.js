@@ -381,6 +381,13 @@ R.Screens.exams = (function(){
         hint:'sonuçları yazmadan önce doldur — sonra yazılan tahmin puana girmez',
         input:K.Input({ id:'ex-guess', type:'number', step:'any',
           placeholder:'ör. 62' }) }),
+      /* Fikir 7: sonuç kâğıdının fotoğrafı formu DOLDURUR, kaydetmez
+         (core/denemefoto.js). Tahmin alanının altında: önce kör tahmin. */
+      R.DenemeFoto && R.DenemeFoto.hazir()
+        ? K.Drop({ act:'ex-foto', label:'Sonuç kâğıdının fotoğrafından doldur', icon:'file',
+            accept:'image/*', hint:'Doğru/yanlış/boş okunur; kaydetmeden önce kontrol edersin' })
+        : '',
+      raw('<div id="ex-foto-not" class="small" role="status"></div>'),
       raw('<div id="ex-tests" class="stack-sm"></div>'),
       K.Notice({ tone:'info', body:'Net otomatik hesaplanır: doğru − yanlış/4. Boş bırakılan testler kaydedilmez.' }),
     ]);
@@ -701,6 +708,30 @@ R.Screens.exams = (function(){
   };
 
   const change = {
+    async 'ex-foto'(el){
+      const f = el.files && el.files[0];
+      const sel = document.getElementById('ex-tmpl');
+      const tmpl = R.EXAM_TEMPLATES.find(t => t.id === (sel && sel.value));
+      const not = document.getElementById('ex-foto-not');
+      if(!f || !tmpl) return;
+      const r = await UI.withBusy('Sonuç kâğıdı okunuyor', 'sayıları kod doğrular, kaydetmek sende',
+        () => R.DenemeFoto.oku(f, tmpl));
+      const satirlar = Array.prototype.slice.call(document.querySelectorAll('#ex-tests [data-test-row]'));
+      (r.satirlar || []).forEach(x => {
+        const row = satirlar[x.i];
+        if(!row) return;
+        const yaz = (k, v) => { const i = row.querySelector('[data-t="' + k + '"]'); if(i) i.value = v == null ? '' : String(v); };
+        yaz('c', x.c); yaz('w', x.w); yaz('b', x.b);
+      });
+      if(not){
+        const parca = [];
+        if(r.satirlar && r.satirlar.length) parca.push(r.satirlar.length + ' test fotoğraftan dolduruldu — kaydetmeden önce kontrol et.');
+        (r.atlanan || []).forEach(a => parca.push(a.ad + ': ' + a.neden + '.'));
+        if(r.eksik && r.eksik.length && r.satirlar && r.satirlar.length) parca.push('Elle yazılacak: ' + r.eksik.join(', ') + '.');
+        if(!r.ok && r.note) parca.push(r.note);
+        not.textContent = parca.join(' ');
+      }
+    },
     async 'test-num'(el){
       const exam = S.exams.find(e => e.id === S.ui.examOpen);
       exam.tests[Number(el.dataset.i)][el.dataset.field] = Number(el.value)||0;

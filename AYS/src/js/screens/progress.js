@@ -267,6 +267,7 @@ R.Screens.progress = (function(){
           K.Meter({ label:'Konu kapanışı', value:closure, text:'%'+closure }),
           /* «Bu hızla» (fikir 20): kapanış hızından sınava yetişme — tahmin. */
           html`<p class="tiny dim">${C.buHizla().metin}</p>`,
+          html`<p class="tiny dim">${C.verimliSaat().metin}</p>`,
           when(sleep != null, () => K.Meter({ label:'Uyku (7 gün ort.)',
             value:U.pct(sleep, S.profile.sleepTarget), text:sleep+' / '+S.profile.sleepTarget+' sa' })),
         ], 'sm') }),

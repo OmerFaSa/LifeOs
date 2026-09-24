@@ -440,6 +440,66 @@ R.Calc = (function(){
         + beklenen + '/' + toplam + ' konu kapanır, %' + yuzde + ' (tahmin; hız değişirse değişir).' };
   }
 
+  /* Verimli saat (fikir 21). Bir bloğun zamanlayıcı oturumlarının SAATİ
+     (`oturumlar[].bas`, today.js timer-stop yazar) ve bloğun doğru/soru
+     sayısı. Blok, dakikasının çoğunun geçtiği banda sayılır. Bant başına
+     en az VS_SORU soru ve VS_BLOK blok yoksa o bant «veri yok»; en iyi iki
+     bant arasında VS_FARK puandan az fark varsa en iyi bant SÖYLENMEZ.
+     AYS blokları saate bağlamaz (sıra var, saat yok): sonuç bir plan
+     değişikliği değil, «zor dersi şu banda koy» bilgisidir. */
+  const VS_BANT = [
+    { id:'sabah', ad:'sabah (05–12)', bas:5, bit:12 },
+    { id:'ogle', ad:'öğleden sonra (12–17)', bas:12, bit:17 },
+    { id:'aksam', ad:'akşam (17–22)', bas:17, bit:22 },
+    { id:'gece', ad:'gece (22–05)', bas:22, bit:29 },
+  ];
+  const VS_SORU = 40, VS_BLOK = 3, VS_FARK = 5, VS_GUN = 28;
+  function vsBant(saat){
+    const h = saat < 5 ? saat + 24 : saat;
+    return VS_BANT.find(b => h >= b.bas && h < b.bit) || VS_BANT[3];
+  }
+  function verimliSaat(){
+    const sinir = U.iso(U.addDays(U.today(), -VS_GUN));
+    const top = {};
+    VS_BANT.forEach(b => { top[b.id] = { soru:0, dogru:0, blok:0 }; });
+    Object.keys(S.days || {}).forEach(d => {
+      if(d < sinir) return;
+      ((S.days[d] || {}).blocks || []).forEach(b => {
+        const o = (b.oturumlar || []).filter(x => x && x.bas && x.dk > 0);
+        if(!o.length || !(b.actualQ > 0) || b.correctQ == null) return;
+        const dk = {};
+        o.forEach(x => { const t = new Date(x.bas); if(isNaN(t)) return;
+          const id = vsBant(t.getHours()).id; dk[id] = (dk[id] || 0) + x.dk; });
+        const id = Object.keys(dk).sort((a, c) => dk[c] - dk[a])[0];
+        if(!id) return;
+        top[id].soru += b.actualQ; top[id].dogru += Math.min(b.correctQ, b.actualQ); top[id].blok++;
+      });
+    });
+    const bantlar = VS_BANT.map(b => {
+      const t = top[b.id];
+      const yeter = t.soru >= VS_SORU && t.blok >= VS_BLOK;
+      return { id:b.id, ad:b.ad, soru:t.soru, blok:t.blok,
+        isabet:yeter ? Math.round(100 * t.dogru / t.soru) : null,
+        etiket:yeter ? 'hesaplandı' : 'veri yok' };
+    });
+    const olcu = bantlar.filter(b => b.isabet != null).sort((a, c) => c.isabet - a.isabet);
+    if(olcu.length < 2){
+      return { etiket:'veri yok', bantlar, enIyi:null,
+        metin:'Verimli saat için en az iki saat bandında ' + VS_BLOK + ' blok ve ' + VS_SORU
+          + ' soru gerekir (son ' + VS_GUN + ' gün). Bloğu zamanlayıcıyla çalışıp doğru sayısını '
+          + 'girdikçe ölçülür.' };
+    }
+    const fark = olcu[0].isabet - olcu[1].isabet;
+    const enIyi = fark >= VS_FARK ? olcu[0] : null;
+    return { etiket:'hesaplandı', bantlar, enIyi, fark,
+      metin:enIyi
+        ? 'En isabetli bandın ' + enIyi.ad + ': %' + enIyi.isabet + ' (' + enIyi.soru + ' soru); '
+          + olcu[1].ad + ' %' + olcu[1].isabet + '. Zor dersi bu banda koymak isabeti artırabilir '
+          + '(son ' + VS_GUN + ' gün, hesaplandı).'
+        : 'Saat bantları arasında belirgin fark yok (%' + olcu[0].isabet + ' ve %' + olcu[1].isabet
+          + '); saat seçimi isabeti değiştirmiyor görünüyor.' };
+  }
+
   /* «15 dakikam var» (fikir 18): nextAction'ın süreye SIĞAN hali. Yalnız
      `dk` dakikada bitebilecek iş önerilir; süreler kabadır ve «tahmin»dir
      (kart ~1 dk, paragraf ~3 dk, reçete ~10 dk). Öncelik: gecikmiş kart >
@@ -1001,7 +1061,7 @@ R.Calc = (function(){
   }
 
   return {
-    onbesDakika, buHizla, haftaOzetMetni,
+    onbesDakika, buHizla, haftaOzetMetni, verimliSaat,
     fullExams, comparableNets, medianTrend, examBase, testMedian, analysisDebt, examVolumeProgress,
     errorDistribution, errorPareto, topTags, openErrors,
     dueCards, overdueCards, cardDebt,

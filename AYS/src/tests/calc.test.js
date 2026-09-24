@@ -526,6 +526,45 @@
     });
   });
 
+  /* Fikir 21 — verimli saat: blokların zamanlayıcı oturumlarının SAATİ
+     (oturumlar[].bas) ve bloğun doğru/soru sayısı. Bant başına en az 40
+     soru ve 3 blok yoksa o bant «veri yok»; fark 5 puandan küçükse «fark
+     yok» — en iyi bant uydurulmaz. */
+  describe('Verimli saat', () => {
+    const blok = (bas, soru, dogru) => ({ id:R.U.uid('b'), slot:'Ana ders', status:'done', targetMin:60,
+      actualMin:60, actualQ:soru, correctQ:dogru, oturumlar:[{ bas, dk:60 }] });
+    it('az veride hüküm yok; yeterli veride en iyi bant ve fark', () => {
+      withToday('2026-10-13', () => {
+        resetState();
+        expect(C.verimliSaat().etiket).toBe('veri yok');
+        const gun = (d, bloklar) => { S.days[d] = Object.assign(M.newDay ? M.newDay(d) : { date:d }, { date:d, blocks:bloklar }); };
+        gun('2026-10-01', [blok('2026-10-01T09:10:00+03:00', 20, 17), blok('2026-10-01T20:00:00+03:00', 20, 12)]);
+        gun('2026-10-02', [blok('2026-10-02T08:30:00+03:00', 20, 18), blok('2026-10-02T21:00:00+03:00', 20, 13)]);
+        gun('2026-10-03', [blok('2026-10-03T10:00:00+03:00', 20, 16), blok('2026-10-03T19:30:00+03:00', 20, 11)]);
+        /* oturumu olmayan blok (eski kayıt) sayılmaz */
+        gun('2026-10-04', [{ id:'x', slot:'Ana ders', status:'done', actualQ:50, correctQ:50 }]);
+        const r = C.verimliSaat();
+        expect(r.etiket).toBe('hesaplandı');
+        expect(r.enIyi.id).toBe('sabah');
+        expect(r.bantlar.find(b => b.id === 'sabah').soru).toBe(60);
+        expect(r.bantlar.find(b => b.id === 'aksam').isabet).toBe(60);
+        expect(r.bantlar.find(b => b.id === 'ogle').etiket).toBe('veri yok');
+      });
+    });
+
+    it('iki bant arasında 5 puandan az fark varsa en iyi bant söylenmez', () => {
+      withToday('2026-10-13', () => {
+        resetState();
+        ['2026-10-01', '2026-10-02', '2026-10-03'].forEach(d => {
+          S.days[d] = { date:d, blocks:[blok(d + 'T09:00:00+03:00', 20, 15), blok(d + 'T20:00:00+03:00', 20, 15)] };
+        });
+        const r = C.verimliSaat();
+        expect(r.enIyi).toBe(null);
+        expect(r.metin.indexOf('fark yok') >= 0).toBe(true);
+      });
+    });
+  });
+
   describe('Paylaşılabilir hafta özeti', () => {
     it('ölçülmeyen «—» yazar; metin satır satır', () => {
       withToday('2026-10-13', () => {

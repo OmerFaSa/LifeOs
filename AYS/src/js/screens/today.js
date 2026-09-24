@@ -28,6 +28,12 @@ R.Screens.today = (function(){
     if(!block || !block.startedAt) return 0;
     return Math.max(0, Math.floor((Date.now() - new Date(block.startedAt).getTime())/1000));
   }
+  /* Verimli saat (calc.verimliSaat, fikir 21): zamanlayıcı oturumunun
+     BAŞLADIĞI saat ve süresi ölçümdür; blokta saklanır. */
+  function oturumYaz(block, dk){
+    if(!block || !block.startedAt || !(dk > 0)) return;
+    block.oturumlar = (block.oturumlar || []).concat([{ bas:block.startedAt, dk }]).slice(-12);
+  }
   function startTick(){
     stopTick();
     tickHandle = setInterval(() => {
@@ -1283,7 +1289,7 @@ R.Screens.today = (function(){
       b.status = el.dataset.value;
       if(b.status === 'done' && b.actualMin == null && !b.startedAt) b.actualMin = b.targetMin;
       if(b.status !== 'skipped') b.skipReason = null;
-      if(b.startedAt){ b.actualMin = (b.actualMin||0) + Math.round(elapsedSeconds(b)/60); b.startedAt = null; }
+      if(b.startedAt){ oturumYaz(b, Math.round(elapsedSeconds(b)/60)); b.actualMin = (b.actualMin||0) + Math.round(elapsedSeconds(b)/60); b.startedAt = null; }
       await M.saveDay(day.date);
       R.App.render();
     },
@@ -1297,7 +1303,7 @@ R.Screens.today = (function(){
     async 'timer-start'(el){
       const day = todayDoc();
       day.blocks.forEach(b => {
-        if(b.startedAt){ b.actualMin = (b.actualMin||0) + Math.round(elapsedSeconds(b)/60); b.startedAt = null; }
+        if(b.startedAt){ oturumYaz(b, Math.round(elapsedSeconds(b)/60)); b.actualMin = (b.actualMin||0) + Math.round(elapsedSeconds(b)/60); b.startedAt = null; }
       });
       const b = day.blocks.find(x => x.id === el.dataset.block);
       b.startedAt = new Date().toISOString();
@@ -1308,6 +1314,7 @@ R.Screens.today = (function(){
       const day = todayDoc();
       const b = day.blocks.find(x => x.id === el.dataset.block);
       const mins = Math.round(elapsedSeconds(b)/60);
+      oturumYaz(b, mins);
       b.actualMin = (b.actualMin||0) + mins;
       b.startedAt = null;
       if(b.status === 'pending') b.status = mins >= b.targetMin*0.8 ? 'done' : 'partial';

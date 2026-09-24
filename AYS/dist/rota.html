@@ -9302,7 +9302,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'f90cdb9', at:'2026-09-24 09:58', dirty:true };
+R.BUILD = { id:'65a7d16', at:'2026-09-24 10:08', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -21787,6 +21787,66 @@ R.Calc = (function(){
         + beklenen + '/' + toplam + ' konu kapanır, %' + yuzde + ' (tahmin; hız değişirse değişir).' };
   }
 
+  /* Verimli saat (fikir 21). Bir bloğun zamanlayıcı oturumlarının SAATİ
+     (`oturumlar[].bas`, today.js timer-stop yazar) ve bloğun doğru/soru
+     sayısı. Blok, dakikasının çoğunun geçtiği banda sayılır. Bant başına
+     en az VS_SORU soru ve VS_BLOK blok yoksa o bant «veri yok»; en iyi iki
+     bant arasında VS_FARK puandan az fark varsa en iyi bant SÖYLENMEZ.
+     AYS blokları saate bağlamaz (sıra var, saat yok): sonuç bir plan
+     değişikliği değil, «zor dersi şu banda koy» bilgisidir. */
+  const VS_BANT = [
+    { id:'sabah', ad:'sabah (05–12)', bas:5, bit:12 },
+    { id:'ogle', ad:'öğleden sonra (12–17)', bas:12, bit:17 },
+    { id:'aksam', ad:'akşam (17–22)', bas:17, bit:22 },
+    { id:'gece', ad:'gece (22–05)', bas:22, bit:29 },
+  ];
+  const VS_SORU = 40, VS_BLOK = 3, VS_FARK = 5, VS_GUN = 28;
+  function vsBant(saat){
+    const h = saat < 5 ? saat + 24 : saat;
+    return VS_BANT.find(b => h >= b.bas && h < b.bit) || VS_BANT[3];
+  }
+  function verimliSaat(){
+    const sinir = U.iso(U.addDays(U.today(), -VS_GUN));
+    const top = {};
+    VS_BANT.forEach(b => { top[b.id] = { soru:0, dogru:0, blok:0 }; });
+    Object.keys(S.days || {}).forEach(d => {
+      if(d < sinir) return;
+      ((S.days[d] || {}).blocks || []).forEach(b => {
+        const o = (b.oturumlar || []).filter(x => x && x.bas && x.dk > 0);
+        if(!o.length || !(b.actualQ > 0) || b.correctQ == null) return;
+        const dk = {};
+        o.forEach(x => { const t = new Date(x.bas); if(isNaN(t)) return;
+          const id = vsBant(t.getHours()).id; dk[id] = (dk[id] || 0) + x.dk; });
+        const id = Object.keys(dk).sort((a, c) => dk[c] - dk[a])[0];
+        if(!id) return;
+        top[id].soru += b.actualQ; top[id].dogru += Math.min(b.correctQ, b.actualQ); top[id].blok++;
+      });
+    });
+    const bantlar = VS_BANT.map(b => {
+      const t = top[b.id];
+      const yeter = t.soru >= VS_SORU && t.blok >= VS_BLOK;
+      return { id:b.id, ad:b.ad, soru:t.soru, blok:t.blok,
+        isabet:yeter ? Math.round(100 * t.dogru / t.soru) : null,
+        etiket:yeter ? 'hesaplandı' : 'veri yok' };
+    });
+    const olcu = bantlar.filter(b => b.isabet != null).sort((a, c) => c.isabet - a.isabet);
+    if(olcu.length < 2){
+      return { etiket:'veri yok', bantlar, enIyi:null,
+        metin:'Verimli saat için en az iki saat bandında ' + VS_BLOK + ' blok ve ' + VS_SORU
+          + ' soru gerekir (son ' + VS_GUN + ' gün). Bloğu zamanlayıcıyla çalışıp doğru sayısını '
+          + 'girdikçe ölçülür.' };
+    }
+    const fark = olcu[0].isabet - olcu[1].isabet;
+    const enIyi = fark >= VS_FARK ? olcu[0] : null;
+    return { etiket:'hesaplandı', bantlar, enIyi, fark,
+      metin:enIyi
+        ? 'En isabetli bandın ' + enIyi.ad + ': %' + enIyi.isabet + ' (' + enIyi.soru + ' soru); '
+          + olcu[1].ad + ' %' + olcu[1].isabet + '. Zor dersi bu banda koymak isabeti artırabilir '
+          + '(son ' + VS_GUN + ' gün, hesaplandı).'
+        : 'Saat bantları arasında belirgin fark yok (%' + olcu[0].isabet + ' ve %' + olcu[1].isabet
+          + '); saat seçimi isabeti değiştirmiyor görünüyor.' };
+  }
+
   /* «15 dakikam var» (fikir 18): nextAction'ın süreye SIĞAN hali. Yalnız
      `dk` dakikada bitebilecek iş önerilir; süreler kabadır ve «tahmin»dir
      (kart ~1 dk, paragraf ~3 dk, reçete ~10 dk). Öncelik: gecikmiş kart >
@@ -22348,7 +22408,7 @@ R.Calc = (function(){
   }
 
   return {
-    onbesDakika, buHizla, haftaOzetMetni,
+    onbesDakika, buHizla, haftaOzetMetni, verimliSaat,
     fullExams, comparableNets, medianTrend, examBase, testMedian, analysisDebt, examVolumeProgress,
     errorDistribution, errorPareto, topTags, openErrors,
     dueCards, overdueCards, cardDebt,
@@ -33861,6 +33921,111 @@ R.Solver = (function(){
   };
 })();
 
+/* ==== js/core/denemefoto.js ==== */
+/* DENEME SONUCU FOTOĞRAFTAN (fikir 7) — sonuç kâğıdının fotoğrafından
+   test başına doğru / yanlış / boş.
+
+   Sözler:
+     1. MODEL YALNIZ OKUR, KOD DOĞRULAR. Model sayıları okur; her satır
+        şablonun testiyle eşleşmeli, sayılar tam ve negatif olmamalı,
+        D + Y + B testin soru sayısını AŞMAMALI. Tutmayan satır doldurulmaz
+        ve NEDENİYLE söylenir (AGENTS §1.7: anlaşılmayan tahmin edilmez).
+     2. KAYDETMEZ, DOLDURUR. Okunan sayılar «Deneme ekle» formuna yazılır;
+        kaydetmek kullanıcının onayıdır ve form zaten önizlemedir.
+     3. NET HESAPLANMAZ. Kâğıtta net yazsa da okunmaz: net kodla hesaplanır
+        (doğru − yanlış/4). Boş okunamadıysa boş bırakılır; kayıtta soru
+        sayısından «hesaplandı» olur (state.js `blankCertainty`).
+     4. KÖR TAHMİN KORUNUR. Form doldurulduktan sonra yazılan net tahmini
+        «kör değil» sayılır (screens/exams.js). */
+
+window.R = window.R || {};
+
+R.DenemeFoto = (function(){
+  const MAX_BYTES = 8 * 1024 * 1024;
+  const PROMPT = 'Bu bir deneme sınavı sonuç kâğıdı. Her test için doğru, yanlış ve boş '
+    + 'sayısını oku. Yalnız JSON dizisi döndür: [{"test":"Türkçe","dogru":31,"yanlis":5,"bos":4}]. '
+    + 'Okuyamadığın sayıyı null yaz, tahmin etme. Net, puan, sıralama ve kişisel bilgi yazma.';
+
+  function tamSayi(x){
+    if(x == null || x === '') return null;
+    const n = Number(x);
+    return Number.isInteger(n) && n >= 0 ? n : NaN;
+  }
+
+  /* Şablonun testine eşleme: tam ad, sonra «ad içinde geçer» (Türkçe ↔
+     «Türkçe Testi»). İki teste birden uyan ad EŞLEŞMEZ. */
+  function eslestir(ad, testler){
+    const a = R.U.norm(ad).replace(/\s+/g, ' ').trim();
+    if(!a) return -1;
+    const tam = testler.findIndex(t => R.U.norm(t.name) === a);
+    if(tam >= 0) return tam;
+    const aday = testler.map((t, i) => ({ i, n:R.U.norm(t.name) }))
+      .filter(x => a.indexOf(x.n) >= 0 || x.n.indexOf(a) >= 0);
+    return aday.length === 1 ? aday[0].i : -1;
+  }
+
+  /* Saf doğrulama: ham model çıktısı + şablon → dolduralacak satırlar. */
+  function dogrula(ham, tmpl){
+    const testler = (tmpl && tmpl.tests) || [];
+    const satirlar = [], atlanan = [];
+    const dolu = {};
+    (Array.isArray(ham) ? ham : []).forEach(x => {
+      if(!x || typeof x !== 'object') return;
+      const ad = String(x.test || '').trim();
+      const i = eslestir(ad, testler);
+      if(i < 0){ if(ad) atlanan.push({ ad, neden:'bu şablonda böyle bir test yok' }); return; }
+      if(dolu[i]) return;
+      const t = testler[i];
+      const c = tamSayi(x.dogru), w = tamSayi(x.yanlis), b = tamSayi(x.bos);
+      if([c, w, b].some(v => Number.isNaN(v))){
+        atlanan.push({ ad:t.name, neden:'sayılar tam ve sıfır ya da üstü olmalı' }); return;
+      }
+      if(c == null || w == null){
+        atlanan.push({ ad:t.name, neden:'doğru ya da yanlış okunamadı' }); return;
+      }
+      if(c + w + (b || 0) > t.q){
+        atlanan.push({ ad:t.name, neden:'D + Y + B soru sayısını (' + t.q + ') aşıyor' }); return;
+      }
+      dolu[i] = true;
+      satirlar.push({ i, ad:t.name, c, w, b, q:t.q });
+    });
+    return { satirlar:satirlar.sort((a, b) => a.i - b.i), atlanan,
+      eksik:testler.filter((t, i) => !dolu[i]).map(t => t.name) };
+  }
+
+  function hazir(){ return !!(R.Solver && R.Solver.ready(true)); }
+
+  async function oku(file, tmpl){
+    if(!file) return { ok:false, note:'Fotoğraf seçilmedi.' };
+    if(!/^image\//.test(file.type || '')) return { ok:false, note:'Bu bir görüntü dosyası değil.' };
+    if(file.size > MAX_BYTES) return { ok:false, note:'Fotoğraf çok büyük (en fazla 8 MB).' };
+    if(!hazir()) return { ok:false, note:'Fotoğraf okumak için görüntü okuyabilen bir model gerekir '
+      + '(Ayarlar › Model). Sonuçları elle de yazabilirsin.' };
+    let res;
+    try{
+      const im = await R.Solver.prepareImage(file);
+      res = await R.LLM.complete(R.Solver.chainFor(true), {
+        system:'Sen bir sınav sonuç kâğıdı okuyucususun. Yalnız JSON döndürürsün.',
+        messages:[{ role:'user', text:PROMPT + ' Testler: '
+          + tmpl.tests.map(t => t.name + ' (' + t.q + ' soru)').join(', ') + '.',
+          images:[{ mime:im.mime, data:im.data }] }],
+        maxTokens:600, temperature:0,
+      });
+    }catch(e){
+      return { ok:false, note:'Model okuyamadı: ' + (R.LLM.errorText ? R.LLM.errorText(e && e.code) : 'hata') };
+    }
+    const metin = String((res && res.text) || '');
+    let ham = null;
+    try{ const m = metin.match(/\[[\s\S]*\]/); ham = m ? JSON.parse(m[0]) : null; }catch(e){ ham = null; }
+    if(!Array.isArray(ham)) return { ok:false, note:'Fotoğraftan sonuç çıkarılamadı; sonuçları elle yaz.' };
+    const d = dogrula(ham, tmpl);
+    return Object.assign({ ok:d.satirlar.length > 0,
+      note:d.satirlar.length ? '' : 'Okunan satırların hiçbiri doğrulamadan geçmedi; elle yaz.' }, d);
+  }
+
+  return { dogrula, oku, hazir, eslestir };
+})();
+
 /* ==== js/core/sources.js ==== */
 /* Kaynak (yayin) kaydi ve GERCEK zorluk olcumu.
 
@@ -38304,6 +38469,12 @@ R.Screens.today = (function(){
     if(!block || !block.startedAt) return 0;
     return Math.max(0, Math.floor((Date.now() - new Date(block.startedAt).getTime())/1000));
   }
+  /* Verimli saat (calc.verimliSaat, fikir 21): zamanlayıcı oturumunun
+     BAŞLADIĞI saat ve süresi ölçümdür; blokta saklanır. */
+  function oturumYaz(block, dk){
+    if(!block || !block.startedAt || !(dk > 0)) return;
+    block.oturumlar = (block.oturumlar || []).concat([{ bas:block.startedAt, dk }]).slice(-12);
+  }
   function startTick(){
     stopTick();
     tickHandle = setInterval(() => {
@@ -39559,7 +39730,7 @@ R.Screens.today = (function(){
       b.status = el.dataset.value;
       if(b.status === 'done' && b.actualMin == null && !b.startedAt) b.actualMin = b.targetMin;
       if(b.status !== 'skipped') b.skipReason = null;
-      if(b.startedAt){ b.actualMin = (b.actualMin||0) + Math.round(elapsedSeconds(b)/60); b.startedAt = null; }
+      if(b.startedAt){ oturumYaz(b, Math.round(elapsedSeconds(b)/60)); b.actualMin = (b.actualMin||0) + Math.round(elapsedSeconds(b)/60); b.startedAt = null; }
       await M.saveDay(day.date);
       R.App.render();
     },
@@ -39573,7 +39744,7 @@ R.Screens.today = (function(){
     async 'timer-start'(el){
       const day = todayDoc();
       day.blocks.forEach(b => {
-        if(b.startedAt){ b.actualMin = (b.actualMin||0) + Math.round(elapsedSeconds(b)/60); b.startedAt = null; }
+        if(b.startedAt){ oturumYaz(b, Math.round(elapsedSeconds(b)/60)); b.actualMin = (b.actualMin||0) + Math.round(elapsedSeconds(b)/60); b.startedAt = null; }
       });
       const b = day.blocks.find(x => x.id === el.dataset.block);
       b.startedAt = new Date().toISOString();
@@ -39584,6 +39755,7 @@ R.Screens.today = (function(){
       const day = todayDoc();
       const b = day.blocks.find(x => x.id === el.dataset.block);
       const mins = Math.round(elapsedSeconds(b)/60);
+      oturumYaz(b, mins);
       b.actualMin = (b.actualMin||0) + mins;
       b.startedAt = null;
       if(b.status === 'pending') b.status = mins >= b.targetMin*0.8 ? 'done' : 'partial';
@@ -40647,6 +40819,13 @@ R.Screens.exams = (function(){
         hint:'sonuçları yazmadan önce doldur — sonra yazılan tahmin puana girmez',
         input:K.Input({ id:'ex-guess', type:'number', step:'any',
           placeholder:'ör. 62' }) }),
+      /* Fikir 7: sonuç kâğıdının fotoğrafı formu DOLDURUR, kaydetmez
+         (core/denemefoto.js). Tahmin alanının altında: önce kör tahmin. */
+      R.DenemeFoto && R.DenemeFoto.hazir()
+        ? K.Drop({ act:'ex-foto', label:'Sonuç kâğıdının fotoğrafından doldur', icon:'file',
+            accept:'image/*', hint:'Doğru/yanlış/boş okunur; kaydetmeden önce kontrol edersin' })
+        : '',
+      raw('<div id="ex-foto-not" class="small" role="status"></div>'),
       raw('<div id="ex-tests" class="stack-sm"></div>'),
       K.Notice({ tone:'info', body:'Net otomatik hesaplanır: doğru − yanlış/4. Boş bırakılan testler kaydedilmez.' }),
     ]);
@@ -40967,6 +41146,30 @@ R.Screens.exams = (function(){
   };
 
   const change = {
+    async 'ex-foto'(el){
+      const f = el.files && el.files[0];
+      const sel = document.getElementById('ex-tmpl');
+      const tmpl = R.EXAM_TEMPLATES.find(t => t.id === (sel && sel.value));
+      const not = document.getElementById('ex-foto-not');
+      if(!f || !tmpl) return;
+      const r = await UI.withBusy('Sonuç kâğıdı okunuyor', 'sayıları kod doğrular, kaydetmek sende',
+        () => R.DenemeFoto.oku(f, tmpl));
+      const satirlar = Array.prototype.slice.call(document.querySelectorAll('#ex-tests [data-test-row]'));
+      (r.satirlar || []).forEach(x => {
+        const row = satirlar[x.i];
+        if(!row) return;
+        const yaz = (k, v) => { const i = row.querySelector('[data-t="' + k + '"]'); if(i) i.value = v == null ? '' : String(v); };
+        yaz('c', x.c); yaz('w', x.w); yaz('b', x.b);
+      });
+      if(not){
+        const parca = [];
+        if(r.satirlar && r.satirlar.length) parca.push(r.satirlar.length + ' test fotoğraftan dolduruldu — kaydetmeden önce kontrol et.');
+        (r.atlanan || []).forEach(a => parca.push(a.ad + ': ' + a.neden + '.'));
+        if(r.eksik && r.eksik.length && r.satirlar && r.satirlar.length) parca.push('Elle yazılacak: ' + r.eksik.join(', ') + '.');
+        if(!r.ok && r.note) parca.push(r.note);
+        not.textContent = parca.join(' ');
+      }
+    },
     async 'test-num'(el){
       const exam = S.exams.find(e => e.id === S.ui.examOpen);
       exam.tests[Number(el.dataset.i)][el.dataset.field] = Number(el.value)||0;
@@ -44926,6 +45129,7 @@ R.Screens.progress = (function(){
           K.Meter({ label:'Konu kapanışı', value:closure, text:'%'+closure }),
           /* «Bu hızla» (fikir 20): kapanış hızından sınava yetişme — tahmin. */
           html`<p class="tiny dim">${C.buHizla().metin}</p>`,
+          html`<p class="tiny dim">${C.verimliSaat().metin}</p>`,
           when(sleep != null, () => K.Meter({ label:'Uyku (7 gün ort.)',
             value:U.pct(sleep, S.profile.sleepTarget), text:sleep+' / '+S.profile.sleepTarget+' sa' })),
         ], 'sm') }),

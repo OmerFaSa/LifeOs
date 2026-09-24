@@ -416,6 +416,17 @@ HKM `dil_karti` tablosu, `schedule.dil_karti` saati — varsayılan KAPALI, HKM 
 mesajlar; liste 1 günden eskiyse ya da tatildeyse mesaj gitmez; Telegram'daki tekrar SRS'e
 YAZILMAZ ve bu mesajda söylenir). ESP 1351, AYS 1676, SPİ 1323, HKM 585; üç duman + yüz temiz.
 **ESP grubu bitti.**
+· Büyükler: 2 fiş fotoğrafı ve 3 etiket fotoğrafı ZATEN VAR (SPİ `Extract.fromReceipt`,
+`Extract.fromFoodLabel`; Finans › Fiş oku, Mutfak › etiket) — tarama «yok» demişti, yanlıştı. Ama
+taramada GERÇEK HATA çıktı ve düzeltildi: SPİ `extract.js` görüntüyü `{mime, b64}` yolluyordu,
+ortak `llm.js` `im.data` okuyor — dört fotoğraf yolunda modele «base64,undefined» gidiyordu (65a7d16).
+· ✅ 7 deneme sonucu fotoğraftan (AYS `core/denemefoto.js`: model yalnız D/Y/B okur, KOD doğrular —
+şablon testiyle eşleşme, tam sayı, D+Y+B ≤ soru; tutmayan satır nedeniyle söylenir; form DOLDURULUR,
+kaydetmek kullanıcıda; net okunmaz, hesaplanır; Deneme ekle › «Sonuç kâğıdının fotoğrafından
+doldur») · ✅ 21 verimli saat (AYS blokları saate bağlı DEĞİL; zamanlayıcı oturumunun başladığı saat
+artık `blok.oturumlar` olarak ölçülür; `calc.verimliSaat`: 4 bant, blok çoğunluk dakikasının bandına,
+bant başına ≥ 40 soru ve ≥ 3 blok yoksa veri yok, iki bant arası < 5 puan ise «fark yok»; İlerleme ›
+Süreç göstergeleri. Veri bu sürümden sonra birikir; plan saati değiştirilmez, bilgi verilir). AYS 1681.
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
 
