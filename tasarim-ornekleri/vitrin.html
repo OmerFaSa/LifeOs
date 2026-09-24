@@ -54,12 +54,12 @@ svg.i{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-widt
 .tus[aria-pressed="true"]{background:var(--ink);color:var(--on);border-color:transparent}
 .arac{position:sticky;top:56px;z-index:19;background:color-mix(in oklab,var(--bg) 84%,transparent);backdrop-filter:blur(16px);border-top:1px solid var(--l1);border-bottom:1px solid var(--l1)}
 .arac-i{max-width:1640px;margin:0 auto;min-height:52px;display:flex;align-items:center;gap:10px;padding:8px 40px;flex-wrap:wrap}
-.arama{height:32px;width:260px;display:flex;align-items:center;gap:8px;padding:0 10px;border:1px solid var(--l2);border-radius:8px;background:var(--s1);color:var(--ink3)}
+.arama{height:32px;width:220px;display:flex;align-items:center;gap:8px;padding:0 10px;border:1px solid var(--l2);border-radius:8px;background:var(--s1);color:var(--ink3)}
 .arama input{flex:1;min-width:0;outline:0;color:var(--ink)}
 .arama input::placeholder{color:var(--ink3)}
 .arama kbd{font:500 10px var(--mono);padding:1px 5px;border-radius:4px;background:var(--s3);color:var(--ink2)}
 .seg{display:flex;padding:2px;border-radius:9px;border:1px solid var(--l1);background:var(--s1)}
-.seg button{height:26px;padding:0 10px;border-radius:7px;color:var(--ink3);font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.seg button{height:26px;padding:0 9px;border-radius:7px;color:var(--ink3);font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .seg button i{width:6px;height:6px;border-radius:50%;background:var(--c)}
 .seg button:hover{color:var(--ink)}
 .seg button[aria-pressed="true"]{background:var(--s3);color:var(--ink)}
@@ -71,6 +71,7 @@ svg.i{width:14px;height:14px;flex:none;stroke:currentColor;fill:none;stroke-widt
 .ustyazi{font:500 11px var(--mono);letter-spacing:.08em;color:var(--ink3)}
 .giris h1{font:400 76px/.98 var(--serif);letter-spacing:-.02em;margin-top:14px}
 .giris h1 em{font-style:italic;color:var(--ink3)}
+.giris p b{color:var(--ink);font-weight:500}
 .giris p{color:var(--ink2);margin-top:18px;max-width:620px;font-size:15px;line-height:1.55}
 .olcu{display:grid;grid-template-columns:repeat(4,auto);border:1px solid var(--l1);border-radius:14px;background:var(--s1);overflow:hidden}
 .olcu div{padding:16px 22px;border-left:1px solid var(--l1)}
@@ -183,7 +184,7 @@ section.bol{margin-top:56px;scroll-margin-top:124px}
 .cek .bil{padding:26px 28px 36px}
 .cek .bil .u{display:flex;gap:6px;align-items:center}
 .cek h3{font:400 40px/1.05 var(--serif);letter-spacing:-.01em;margin-top:12px}
-.cek .ne{font-size:15px;color:var(--ink);margin-top:12px;line-height:1.55}
+.cek .bil>.ne{font-size:15px;color:var(--ink);margin-top:12px;line-height:1.55}
 .cek .neden{margin-top:18px;padding:14px 16px;border-radius:12px;background:var(--s2);border:1px solid var(--l1)}
 .cek .neden span{font:500 10px var(--mono);letter-spacing:.06em;color:var(--ink3)}
 .cek .neden p{margin-top:4px;color:var(--ink2);font-size:13.5px}
@@ -191,8 +192,8 @@ section.bol{margin-top:56px;scroll-margin-top:124px}
 .cek dl div{background:var(--s1);padding:12px 14px}
 .cek dt{font:500 9.5px var(--mono);letter-spacing:.06em;color:var(--ink3)}
 .cek dd{margin:4px 0 0;font-weight:500}
-.cek .kl{display:flex;gap:8px;margin-top:18px}
-.cek .kl .tus{flex:1;justify-content:center;height:36px}
+.cek .bil>.kl{display:flex;gap:8px;margin-top:18px}
+.cek .bil>.kl .tus{flex:1;justify-content:center;height:36px}
 
 /* ================= ORTAK MINIK PARCALAR ================= */
 .mod{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0 7px;border-radius:5px;font:500 10px var(--mono);letter-spacing:.06em;background:color-mix(in oklab,var(--c) 15%,transparent);color:var(--c);white-space:nowrap}
@@ -848,6 +849,444 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
 .x69 .uc{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid var(--c)}
 .x69 .cap{text-align:center}
 
+/* ================= SURUM 3 · KABUK ================= */
+.nasil{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:center;margin:0 0 14px;padding:12px 16px;border:1px solid var(--l1);border-radius:12px;background:var(--s1)}
+.nasil>b{font:500 10px var(--mono);letter-spacing:.06em;color:var(--ink3);margin-right:2px}
+.nasil>span{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2)}
+.nasil .emek{margin-left:0}
+.rz.yen{border:1px dashed var(--ink3);color:var(--ink);padding:1px 5px}
+.rz.var{border:1px solid var(--l2);color:var(--ink3);padding:1px 5px}
+.v .sec{position:absolute;left:12px;top:12px;z-index:3;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:color-mix(in oklab,var(--s1) 85%,transparent);border:1px solid var(--l2);color:var(--ink2);opacity:0;transition:opacity .2s,background .2s}
+.v:hover .sec,.v:focus-within .sec,.v .sec[aria-pressed="true"]{opacity:1}
+.v .sec:hover{color:var(--ink)}
+.v .sec[aria-pressed="true"]{background:var(--ink);color:var(--on);border-color:transparent}
+.v .sec svg{width:13px;height:13px}
+.v .sec[aria-pressed="true"] svg{fill:currentColor}
+.v.secili{border-color:color-mix(in oklab,var(--ink) 35%,var(--l1))}
+#fSec b{font:500 10px var(--mono);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--s3);color:var(--ink);display:inline-grid;place-items:center}
+#fSec[aria-pressed="true"] b{background:var(--on);color:var(--ink)}
+#kopyala[hidden]{display:none}
+.plan{display:none;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:56px;align-items:start;scroll-margin-top:124px}
+.plan-gor .plan{display:grid}
+.plan-gor #bolumler{display:none}
+.plan .ks{border:1px solid var(--l1);border-radius:14px;background:var(--s1);overflow:hidden}
+.plan .kb2{display:flex;align-items:baseline;gap:10px;padding:16px 18px;border-bottom:1px solid var(--l1)}
+.plan .kb2 b{font:400 30px/1 var(--serif)}
+.plan .kb2 span{color:var(--ink3);font-size:12px}
+.plan .kb2 em{margin-left:auto;font:500 10px var(--mono);color:var(--ink3);font-style:normal;white-space:nowrap}
+.plan .ds{padding:7px 18px;font:500 9.5px var(--mono);color:var(--ink3);letter-spacing:.05em;background:var(--s2);border-top:1px solid var(--l1)}
+.plan .kb2+.ds{border-top:0}
+.plan .it{display:grid;grid-template-columns:26px 1fr auto;gap:10px;align-items:center;padding:9px 18px;border-top:1px solid var(--l1);cursor:pointer}
+.plan .ds+.it{border-top:0}
+.plan .it:hover{background:var(--s2)}
+.plan .it .no{margin:0}
+.plan .it b{font-weight:500;font-size:12.5px;display:block;line-height:1.3}
+.plan .it .mk-l{margin-top:3px}
+.plan .it.secili b::after{content:" ●";color:var(--ink3);font-size:9px;vertical-align:2px}
+.plan .it .emek{margin-left:0}
+.tost{position:fixed;left:50%;bottom:24px;z-index:60;transform:translate(-50%,16px);opacity:0;padding:10px 16px;border-radius:10px;background:var(--ink);color:var(--on);font-weight:500;box-shadow:var(--golge);transition:opacity .25s,transform .25s;pointer-events:none}
+.tost.on{opacity:1;transform:translate(-50%,0)}
+.cek .bil>.ilg{margin-top:18px}
+.cek .bil>.ilg>span{font:500 10px var(--mono);letter-spacing:.06em;color:var(--ink3)}
+.cek .bil>.ilg>div{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.cek .bil>.ilg button{height:30px;padding:0 10px;border-radius:8px;border:1px solid var(--l2);font-size:12px;color:var(--ink2);display:inline-flex;gap:7px;align-items:center}
+.cek .bil>.ilg button:hover{color:var(--ink);background:var(--s2)}
+.cek .bil>.ilg button em{font:500 10px var(--mono);font-style:normal;color:var(--ink3)}
+.cek .bil>.kl+.kl{margin-top:8px}
+#cSec[aria-pressed="true"]{background:var(--ink);color:var(--on);border-color:transparent}
+#cSec[aria-pressed="true"] svg{fill:currentColor}
+
+/* ================= SURUM 3 · YENILENEN ORNEKLER ================= */
+.x03v{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px;align-items:start}
+.x03v>div{display:flex;flex-direction:column;gap:6px}
+.x03v .lb{font:500 9.5px var(--mono);color:var(--ink3);display:flex;gap:5px;letter-spacing:.05em}
+.x03v .lb em{font-style:normal;color:var(--ink4)}
+.x03v .bx{border-radius:8px;background:var(--s1);border:1px solid var(--l1);padding:8px;display:flex;flex-direction:column;gap:6px}
+.x03v .bx .ln{height:4px}
+.x03v .bx.a{min-height:108px;border-color:color-mix(in oklab,var(--ays) 35%,transparent);background:color-mix(in oklab,var(--ays) 8%,var(--s1))}
+.x03v .bx.a b{font:400 20px/1 var(--serif)}
+.x03v .bx .mod{align-self:flex-start;height:16px;font-size:8.5px;padding:0 5px}
+.x03v .bx .n{font:400 20px/1 var(--serif)}
+.x03v .bx.m{min-height:108px;border-color:color-mix(in oklab,var(--mer) 35%,transparent);background:color-mix(in oklab,var(--mer) 10%,var(--s1));color:var(--mer)}
+.x03v .bx.m svg{width:13px;height:13px}
+.x03v .bn{display:block;height:14px;width:56%;border-radius:5px;background:var(--ays);margin-top:auto}
+.x03v .bx.m .bn{background:var(--mer)}
+.x03v .c3 .lb{color:var(--mer)}
+.x09v{display:flex;flex-direction:column;align-items:center;text-align:center}
+.x09v .fr{position:relative;width:100%;height:62px;border-radius:10px;border:1px dashed var(--l2);background:var(--s1);overflow:hidden}
+.x09v .fr>svg{position:absolute;left:0;top:0;width:100%;height:100%}
+.x09v .ort2{position:absolute;inset:0;display:grid;place-items:center}
+.x09v .art{width:30px;height:30px;border-radius:50%;background:var(--s3);display:grid;place-items:center;color:var(--ink2);box-shadow:0 0 0 5px var(--s1)}
+.x09v .art svg{width:14px;height:14px}
+.x09v b{font-weight:600;margin-top:10px}
+.x09v p{font-size:11.5px;color:var(--ink3);margin-top:2px}
+.x09v .bt{margin-top:8px}
+.x19v .ch{display:grid;grid-template-columns:18px 1fr;gap:6px;height:100px;padding-bottom:14px}
+.x19v .ys{display:flex;flex-direction:column;justify-content:space-between;font:400 8.5px var(--mono);color:var(--ink4)}
+.x19v .bars{display:flex;gap:6px;border-bottom:1px solid var(--l2)}
+.x19v .bars>div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;position:relative}
+.x19v .bars i{width:100%;border-radius:3px 3px 0 0;background:var(--s4)}
+.x19v .bars .on i{background:var(--ays)}
+.x19v .bars span{position:absolute;bottom:-15px;font:400 8.5px var(--mono);color:var(--ink3)}
+.x19v .bars em{font:500 10px var(--mono);font-style:normal;margin-bottom:3px}
+.x19v p{margin-top:12px;font-size:12px;font-weight:500;display:flex;gap:8px;align-items:flex-start;line-height:1.4}
+.x22v{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.x22v .k{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px 8px;border-radius:12px;background:var(--s1);border:1px solid var(--l1)}
+.x22v .k.c-ays{border-color:color-mix(in oklab,var(--ays) 40%,transparent);animation:nabiz 2.2s infinite}
+.x22v .hk{position:relative;width:64px;height:64px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.x22v .hk svg{position:absolute;inset:0}
+.x22v .hk b{position:relative;font:500 20px/1 var(--mono)}
+.x22v .hk span{position:relative;font:400 8.5px var(--mono);color:var(--ink3);margin-top:2px}
+.x44v .st{position:relative;display:flex;align-items:flex-end;gap:5px;height:130px}
+.x44v .st>div:not(.ip){flex:1;border-radius:6px 6px 2px 2px;background:var(--s1);border:1px solid var(--l1);display:flex;flex-direction:column;align-items:center;padding-top:6px;gap:2px;font:500 10px var(--mono);color:var(--ink3)}
+.x44v .st .b{background:color-mix(in oklab,var(--esp) 18%,var(--s1))!important;color:var(--esp)!important}
+.x44v .st .b svg{width:11px;height:11px}
+.x44v .st .on{background:var(--esp)!important;color:var(--on)!important;border-color:transparent!important;box-shadow:0 0 18px -2px color-mix(in oklab,var(--esp) 60%,transparent)}
+.x44v .ip{position:absolute;left:0;top:0;padding:6px 10px;border-radius:8px;background:var(--ink);color:var(--on)}
+.x44v .ip b{display:block;font-size:11.5px;font-weight:600}
+.x44v .ip span{font:400 9.5px var(--mono);opacity:.7}
+.x45v .rf{display:flex;align-items:flex-end;gap:4px;height:106px;padding:0 8px;border-bottom:3px solid var(--s4)}
+.x45v .rf i{position:relative;width:var(--w);line-height:var(--w);writing-mode:vertical-rl;font:500 8.5px/1 var(--mono);font-style:normal;letter-spacing:.06em;color:var(--ink3);background:var(--s1);border:1px solid var(--l2);border-bottom:0;border-radius:3px 3px 0 0;padding:8px 0 14px;white-space:nowrap;overflow:hidden;text-align:start;display:flex;align-items:center}
+.x45v .rf i::after{content:"";position:absolute;left:3px;right:3px;bottom:5px;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--esp) calc(var(--p)*1%),var(--s3) 0)}
+.x45v .rf i.on{border-color:var(--esp);color:var(--ink)}
+.x45v .alt{display:flex;justify-content:space-between;margin-top:8px}
+.y34v{position:relative;height:130px}
+.y34v .kc{position:absolute;left:0;top:0;z-index:1;border-radius:10px;background:var(--s1);border:1px solid var(--l2);overflow:hidden;animation:acil 4s cubic-bezier(.2,.7,.2,1) infinite}
+.y34v .bs4{display:flex;align-items:center;gap:6px;height:26px;padding:0 8px;white-space:nowrap}
+.y34v .bs4 .mod{height:15px;font-size:8px;padding:0 5px}
+.y34v .bs4 b{font-weight:600;font-size:11.5px}
+.y34v .bs4 .cap{margin-left:auto}
+.y34v .ay2{padding:8px 10px;display:grid;gap:10px}
+.y34v .ad{display:grid;grid-template-columns:10fr 50fr 10fr;gap:3px}
+.y34v .ad i{height:4px;border-radius:2px;background:var(--s3)}
+.y34v .ad i:first-child{background:var(--ays)}
+.y34v .ay2 .bt{justify-self:start}
+.y34v .ot{position:absolute;right:0;top:0;width:44%;display:grid;gap:6px}
+.y34v .ot i{height:28px;border-radius:8px;background:var(--s1);border:1px solid var(--l1);opacity:.6}
+.y35v .fr{position:relative;height:130px;border-radius:10px;background:var(--s1);border:1px solid var(--l2);overflow:hidden}
+.y35v .bar{position:absolute;left:0;right:0;top:0;height:26px;border-bottom:1px solid var(--l1);background:var(--s2);z-index:1}
+.y35v .bs3{position:absolute;left:12px;top:36px;z-index:2;font:400 30px/1 var(--serif);transform-origin:left top;animation:kucul 4s cubic-bezier(.2,.7,.2,1) infinite alternate}
+.y35v .ic4{position:absolute;left:12px;right:12px;top:76px;display:grid;gap:4px;animation:yukari 4s cubic-bezier(.2,.7,.2,1) infinite alternate}
+.y35v .r{display:flex;gap:8px;font-size:11.5px;height:18px;align-items:center}
+.y35v .r em{font:400 9.5px var(--mono);font-style:normal;color:var(--ink3)}
+.y37v .tel{width:132px;height:160px;margin:0 auto}
+.y37v .ls{padding:10px 8px;display:grid;gap:4px}
+.y37v .ls div{display:flex;gap:6px;align-items:center;height:20px;padding:0 6px;border-radius:5px;font-size:10px}
+.y37v .ls div.on{background:var(--s3)}
+.y37v .ls em{font:400 8.5px var(--mono);font-style:normal;color:var(--ink3)}
+.y37v .ck3{position:absolute;left:0;right:0;bottom:0;height:64%;border-radius:12px 12px 0 0;background:var(--s3);box-shadow:0 -10px 20px -10px rgba(0,0,0,.5);animation:cekme 4s cubic-bezier(.2,.7,.2,1) infinite;padding:6px 10px 8px;display:flex;flex-direction:column;gap:3px}
+.y37v .ck3 i{display:block;width:26px;height:3px;border-radius:2px;background:var(--ink3);margin:0 auto 4px}
+.y37v .ck3 .mod{height:14px;font-size:7.5px;padding:0 4px;align-self:flex-start}
+.y37v .ck3 b{font:400 18px/1 var(--serif)}
+.y37v .ck3 small{font:400 8.5px var(--mono);color:var(--ink3)}
+.y37v .ck3 em{margin-top:auto;height:20px;border-radius:6px;background:var(--ays);color:#fff;font:600 10px var(--sans);font-style:normal;display:grid;place-items:center}
+.x67v{display:flex;align-items:center;justify-content:center;gap:18px}
+.x67v .tel{width:96px;height:156px}
+.x67v .ln{position:absolute;left:10px;height:5px}
+.x67v .erisim{position:absolute;inset:0;background:radial-gradient(circle at 80% 108%,color-mix(in oklab,var(--ays) 30%,transparent) 0 44%,color-mix(in oklab,var(--ays) 10%,transparent) 44% 72%,transparent 72%)}
+.x67v .ab{position:absolute;left:10px;right:10px;bottom:26px;height:16px;border-radius:6px;background:var(--ays)}
+.x67v .sk{position:absolute;left:0;right:0;bottom:0;height:18px;border-top:1px solid var(--l2);display:flex;justify-content:space-around;align-items:center;background:var(--s1)}
+.x67v .sk i{width:5px;height:5px;border-radius:50%;background:var(--ink3)}
+.x67v .sk i.on{background:var(--ays)}
+.x67v .lg3{display:grid;gap:8px}
+.x67v .lg3>span{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink2)}
+.x67v .lg3 i{width:12px;height:12px;border-radius:4px}
+
+/* ================= SURUM 3 · YENI ORNEKLER ================= */
+@keyframes imlec{50%{opacity:0}}
+.z01 .kp{border-radius:12px;background:var(--s1);border:1px solid var(--l2);box-shadow:var(--golge);overflow:hidden}
+.z01 .in{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px;border-bottom:1px solid var(--l1);font-size:12.5px}
+.z01 .in svg{color:var(--ink3)}
+.z01 .in i{width:1px;height:14px;background:var(--ink);margin-left:-6px;animation:imlec 1s steps(1) infinite}
+.z01 .in kbd{margin-left:auto;background:var(--s3);color:var(--ink3)}
+.z01 .gr{position:relative;padding:4px 6px 5px 14px}
+.z01 .gr+.gr{border-top:1px solid var(--l1)}
+.z01 .gr::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--c)}
+.z01 .gb{display:block;font:500 9px var(--mono);letter-spacing:.06em;color:var(--c);padding:2px 6px}
+.z01 .r{display:flex;align-items:center;gap:8px;height:24px;padding:0 6px;border-radius:6px;font-size:12px}
+.z01 .r.on{background:var(--s3)}
+.z01 .r span{margin-left:auto;font:500 9px var(--mono);color:var(--ink3)}
+.z02 .fr{position:relative;height:136px;border-radius:10px;background:var(--s1);border:1px solid var(--l1);overflow:hidden}
+.z02 .fr>.ln{position:absolute;left:12px;height:5px}
+.z02 .ort{position:absolute;inset:0;background:color-mix(in oklab,var(--bg) 72%,transparent);backdrop-filter:blur(2px)}
+.z02 .ok{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:74%;padding:12px 14px;border-radius:12px;background:var(--s2);border:1px solid color-mix(in oklab,var(--ays) 40%,transparent);box-shadow:0 0 0 6px color-mix(in oklab,var(--ays) 10%,transparent),var(--golge);text-align:center}
+.z02 .ok b{display:block;font:500 26px/1 var(--mono);margin:8px 0 4px}
+.z02 .ok>span:last-child{font-size:12px;color:var(--ink2)}
+.z02 .es{position:absolute;right:10px;bottom:8px}
+.z03 .kt{position:relative;overflow:hidden}
+.z03 .kt::before{content:"";position:absolute;left:0;top:0;height:2px;width:40%;background:linear-gradient(90deg,transparent,var(--spi),transparent);animation:tara 1.6s linear infinite}
+@keyframes tara{from{transform:translateX(-100%)}to{transform:translateX(260%)}}
+.z03 .u{display:flex;justify-content:space-between;align-items:center}
+.z03 .deg{display:flex;align-items:baseline;gap:10px;margin-top:8px}
+.z03 .deg b{font:400 44px/1 var(--serif)}
+.z03 .deg span{font:400 10px var(--mono);color:var(--ink3);background:var(--s3);padding:2px 6px;border-radius:5px}
+.z03 .alt{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.z04{display:flex;flex-direction:column;gap:14px}
+.z04 p{font-size:15px}
+.z04 p u{text-decoration:underline dotted var(--ink3) 1.5px;text-underline-offset:4px}
+.z04 p b{font-weight:500}
+.z04 .ip{position:relative;padding:10px 12px;border-radius:10px;background:var(--ink);color:var(--on)}
+.z04 .ip::before{content:"";position:absolute;left:30px;top:-5px;width:10px;height:10px;background:var(--ink);transform:rotate(45deg);border-radius:2px}
+.z04 .ip em{display:block;font:500 9px var(--mono);font-style:normal;opacity:.55;letter-spacing:.06em}
+.z04 .ip b{font-weight:600}
+.z04 .ip span{display:block;font-size:11.5px;opacity:.78;margin-top:2px;line-height:1.4}
+.z05 .u{display:flex;justify-content:space-between;align-items:baseline}
+.z05 .u b{font:400 22px/1 var(--serif)}
+.z05 .r{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--l1);font-size:12px}
+.z05 .r:first-of-type{margin-top:8px}
+.z05 .r .rz{min-width:72px;text-align:center}
+.z05 .alt{display:flex;justify-content:flex-end;margin-top:8px}
+.z33 .in{display:flex;align-items:baseline;gap:6px;height:44px;padding:0 12px;border-radius:10px;border:1.5px solid var(--ink2);background:var(--s1);animation:salla 3s ease-in-out infinite}
+.z33 .in b{font:500 24px/44px var(--mono)}
+.z33 .in span{color:var(--ink3)}
+@keyframes salla{0%,8%,100%{transform:none}2%{transform:translateX(-4px)}4%{transform:translateX(4px)}6%{transform:translateX(-2px)}}
+.z33 .uy{display:flex;align-items:flex-start;gap:8px;margin-top:10px;font-size:12px;color:var(--ink2);line-height:1.4}
+.z33 .uy svg{margin-top:1px;color:var(--ink)}
+.z33 .uy b{color:var(--ink)}
+.z33 .d3{display:flex;gap:6px;margin-top:10px}
+.z06 .u{display:flex;justify-content:space-between;align-items:center}
+.z06 .u>span:first-child{color:var(--ink2)}
+.z06 b.ar{display:block;font:500 22px var(--mono);margin-top:6px}
+.z06 .tr{position:relative;height:22px;margin-top:10px}
+.z06 .tr::before{content:"";position:absolute;left:0;right:0;top:10px;height:2px;background:var(--s4);border-radius:1px}
+.z06 .bd{position:absolute;top:5px;height:12px;border-radius:6px;background:color-mix(in oklab,var(--ays) 22%,transparent);border:1px dashed var(--ays)}
+.z06 .nk{position:absolute;top:3px;width:4px;height:16px;border-radius:2px;background:var(--ink);transform:translateX(-50%)}
+.z06 .ek{display:flex;justify-content:space-between;font:400 9.5px var(--mono);color:var(--ink3);margin-top:4px}
+.z06>.cap{display:block;margin-top:8px}
+.z08 .r{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;padding:10px 0;border-top:1px solid var(--l1)}
+.z08 .r:first-child{border-top:0}
+.z08 .r>b{font-weight:500}
+.z08 .ok2{display:inline-flex;align-items:center;gap:6px;font:500 11px var(--mono)}
+.z08 .ok2.i{color:var(--iyi)}
+.z08 .ok2.y{color:var(--ink3)}
+.z08 small{grid-column:1/-1;font-size:11px;color:var(--ink3);display:flex;align-items:center;gap:8px}
+.z08 .az{display:inline-flex;gap:3px}
+.z08 .az i{width:8px;height:8px;border-radius:50%;background:var(--ink2)}
+.z08 .az i.b{background:none;box-shadow:inset 0 0 0 1.5px var(--ink4)}
+.z10 .u{display:flex;justify-content:space-between;align-items:baseline}
+.z10 .u b{font:400 26px/1 var(--serif)}
+.z10 .br{display:flex;gap:2px;height:14px;margin-top:12px;border-radius:4px;overflow:hidden}
+.z10 .ls{display:grid;gap:6px;margin-top:12px}
+.z10 .ls div{display:grid;grid-template-columns:10px 1fr auto;gap:8px;align-items:center;font-size:12px}
+.z10 .ls i{width:8px;height:8px;border-radius:2px}
+.z10 .ls em{font:500 11px var(--mono);font-style:normal}
+.z11 .tr{position:relative;height:74px;margin:0 10px}
+.z11 .tr::before{content:"";position:absolute;left:0;right:0;top:36px;height:2px;background:var(--s4)}
+.z11 .tr::after{content:"";position:absolute;left:0;top:36px;height:2px;width:22%;background:var(--ink3)}
+.z11 .bu{position:absolute;left:22%;top:27px;height:20px;border-left:1.5px solid var(--ink)}
+.z11 .nk{position:absolute;top:30px;width:14px;height:14px;margin-left:-7px}
+.z11 .nk i{display:block;width:14px;height:14px;border-radius:50%;background:var(--s2);box-shadow:inset 0 0 0 2px var(--ink4)}
+.z11 .nk.g i{background:var(--ink3);box-shadow:none}
+.z11 .nk.y i{background:var(--ays);box-shadow:0 0 0 4px color-mix(in oklab,var(--ays) 25%,transparent)}
+.z11 .nk b{position:absolute;left:50%;top:-22px;transform:translateX(-50%);font:500 10px var(--mono);white-space:nowrap}
+.z11 .nk span{position:absolute;left:50%;top:22px;transform:translateX(-50%);font:400 9.5px var(--mono);color:var(--ink3);white-space:nowrap}
+.z11 .nk.y b,.z11 .nk.y span{color:var(--ays)}
+.z12 .u{display:flex;justify-content:space-between;align-items:center}
+.z12 .u b{font:500 10.5px var(--mono);letter-spacing:.04em}
+.z12 .u .sr{font:500 12px var(--mono);color:var(--ink2);display:inline-flex;gap:6px;align-items:center}
+.z12 .q{margin-top:8px;display:grid;gap:5px}
+.z12 .sk{display:grid;gap:4px;margin-top:10px}
+.z12 .sk div{display:flex;align-items:center;gap:8px;height:21px;padding:0 8px;border-radius:6px;border:1px solid var(--l1);background:var(--s1)}
+.z12 .sk div b{font:500 10px var(--mono);color:var(--ink3);width:10px}
+.z12 .sk div .ln{flex:none;height:4px}
+.z12 .sk div.on{border-color:var(--ays);background:color-mix(in oklab,var(--ays) 10%,var(--s1))}
+.z12 .sk div.on b{color:var(--ays)}
+.z13 .u{display:flex;justify-content:space-between;align-items:baseline}
+.z13 .u b{font:400 26px/1 var(--serif)}
+.z13 .ls{margin-top:8px}
+.z13 .r{display:grid;grid-template-columns:70px 1fr 66px;gap:8px;align-items:center;height:26px;font-size:12px}
+.z13 .r span{color:var(--ink2)}
+.z13 .r em{font:400 10.5px var(--mono);font-style:normal;color:var(--ink3);text-align:right}
+.z13 .r i{height:6px;border-radius:3px;background:var(--ays)}
+.z13 .alt{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.z14 b.bs,.z20 b.bs{font:400 26px/1 var(--serif);display:block}
+.z14 .uc,.z20 .uc{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:10px;border-radius:10px;overflow:hidden;border:1px solid var(--l1);background:var(--l1)}
+.z14 .uc div,.z20 .uc div{background:var(--s1);padding:7px 9px}
+.z14 .uc b,.z20 .uc b{display:block;font:500 13px var(--mono)}
+.z14 .uc span,.z20 .uc span{font-size:10.5px;color:var(--ink3)}
+.z14 .sr{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--ink2)}
+.z14 .sr b{color:var(--ink);font-weight:500}
+.z14 .sr .bt{margin-left:auto}
+.z15 .r{display:grid;grid-template-columns:48px 1fr;gap:8px;align-items:center;margin-top:8px}
+.z15 .r>span{font:500 9.5px var(--mono);color:var(--ink3)}
+.z15 .br{display:flex;gap:2px;height:22px}
+.z15 .br i{display:flex;align-items:center;justify-content:center;border-radius:3px;font:500 9px var(--mono);font-style:normal;color:#fff}
+.z15 .alt{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:12px;color:var(--ink2)}
+.z16 .ek{display:flex;justify-content:space-between;font:400 9.5px var(--mono);color:var(--ink3)}
+.z16 .tr{position:relative;height:46px;margin-top:6px;border-radius:8px;background:var(--s1);border:1px solid var(--l1)}
+.z16 .pn{position:absolute;top:0;bottom:0;background:color-mix(in oklab,var(--spi) 12%,transparent);border-left:1px dashed var(--spi);border-right:1px dashed var(--spi)}
+.z16 .og{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--spi)}
+.z16 .og.k{width:8px;height:8px;margin:-4px 0 0 -4px}
+.z16 .og.p{background:var(--s1);box-shadow:inset 0 0 0 2px var(--spi)}
+.z16 .an{position:absolute;top:-4px;bottom:-4px;border-left:1.5px solid var(--ink)}
+.z17 .u{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.z17 .u b{font:400 26px/1 var(--serif)}
+.z17 .r{display:grid;grid-template-columns:22px 1fr 40px;gap:8px;align-items:center;height:20px}
+.z17 .r span{font:500 9.5px var(--mono);color:var(--ink3)}
+.z17 .r i{height:10px;border-radius:3px;background:var(--spi)}
+.z17 .r em{font:400 10.5px var(--mono);font-style:normal;text-align:right;color:var(--ink2)}
+.z18{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.z18 .hd{font:400 9px var(--mono);color:var(--ink3);text-align:center}
+.z18 i{height:22px;border-radius:5px;background:var(--s1);border:1px solid var(--l1);display:grid;place-items:center}
+.z18 i b{display:block;border-radius:50%;background:var(--spi)}
+.z18 i.bu{border-color:var(--ink)}
+.z18 i.gl{opacity:.35}
+.z18 i.bs{visibility:hidden}
+.z19 .ch2{display:grid;grid-template-columns:18px 1fr;gap:6px;height:104px}
+.z19 .ys{display:flex;flex-direction:column;justify-content:space-between;font:400 8.5px var(--mono);color:var(--ink4)}
+.z19 .gr2{position:relative;display:flex;gap:3px;border-radius:6px;background:var(--s1);border:1px solid var(--l1);padding:0 4px}
+.z19 .gr2 .hd1{position:absolute;left:0;right:0;height:0;border-top:1px dashed var(--ink3);z-index:1;opacity:.7}
+.z19 .gr2 div{flex:1;position:relative}
+.z19 .gr2 i{position:absolute;left:0;right:0;border-radius:3px;background:color-mix(in oklab,var(--spi) 60%,transparent)}
+.z19 .gr2 div:last-of-type i{background:var(--spi)}
+.z20 .dg{display:flex;height:8px;gap:2px;margin-top:10px;border-radius:4px;overflow:hidden}
+.z20 .yr{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12px;color:var(--ink2)}
+.z21{position:relative;height:140px}
+.z21 svg{position:absolute;inset:0;width:100%;height:100%}
+.z21 .n{position:absolute;transform:translate(-50%,-50%);padding:4px 10px;border-radius:999px;background:var(--s1);border:1px solid var(--l2);font:400 14px var(--serif);white-space:nowrap}
+.z21 .n.m{padding:6px 16px;font-size:22px;background:var(--esp);color:var(--on);border-color:transparent;box-shadow:0 0 24px -4px color-mix(in oklab,var(--esp) 60%,transparent)}
+.z21 .n.z{border-style:dashed;color:var(--ink3)}
+.z21 .n small{font:500 8px var(--mono);color:var(--ink3);margin-left:5px;letter-spacing:.05em}
+.z22 .u{display:flex;justify-content:space-between;align-items:baseline}
+.z22 .u b{font:400 22px/1 var(--serif)}
+.z22 .bg{margin-top:12px;padding-top:10px;border-top:1px solid var(--l1)}
+.z22 .bg>div{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.z22 .bg>div span{height:24px;padding:0 9px;border-radius:6px;background:color-mix(in oklab,var(--esp) 13%,transparent);color:var(--esp);font-size:11.5px;display:inline-flex;align-items:center}
+.z23 .ls{display:grid;gap:4px;margin-top:10px}
+.z23 .ls div{display:grid;grid-template-columns:36px 1fr;gap:8px;align-items:center;padding:6px 8px;border-radius:8px;background:color-mix(in oklab,var(--s1) 70%,transparent);font-size:12px}
+.z23 .ls b{font:500 10px var(--mono);color:var(--c)}
+.z23 .d2{margin-top:10px;font-size:12px;color:var(--mer);font-weight:600}
+.z24 .u{font-weight:600;margin-bottom:6px}
+.z24 .r{display:grid;grid-template-columns:42px 1fr auto 14px;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--l1);font-size:12px}
+.z24 .kd{font:500 10px var(--mono);color:var(--mer);background:color-mix(in oklab,var(--mer) 14%,transparent);padding:2px 0;border-radius:5px;text-align:center}
+.z24 .r em{font:500 10.5px var(--mono);font-style:normal;color:var(--ink2)}
+.z24 .r svg{color:var(--iyi);width:13px;height:13px}
+.z24 .mm{margin-top:6px;font-size:11.5px;color:var(--ink3);display:flex;align-items:center;gap:8px}
+.z25 .ek{display:flex;justify-content:space-between;font:400 9.5px var(--mono);color:var(--ink3)}
+.z25 .tr{position:relative;height:44px;margin-top:6px;border-radius:8px;background:var(--s1);border:1px solid var(--l1);overflow:hidden}
+.z25 .ss{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(135deg,color-mix(in oklab,var(--mer) 20%,transparent) 0 4px,transparent 4px 8px)}
+.z25 .ok3{position:absolute;top:50%;height:1px;background:repeating-linear-gradient(90deg,var(--mer) 0 3px,transparent 3px 6px)}
+.z25 .on{position:absolute;top:50%;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:6px;display:grid;place-items:center;background:var(--mer);color:#fff}
+.z25 .on svg{width:11px;height:11px}
+.z25 .on.bk{background:var(--s1);box-shadow:inset 0 0 0 1.5px var(--mer);color:var(--mer)}
+.z25 .alt{display:flex;justify-content:space-between;margin-top:10px;font-size:12px;color:var(--ink2)}
+.z26 .cp{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.z26 .cp span{height:26px;padding:0 10px;border-radius:999px;border:1px solid var(--l2);font-size:11.5px;display:inline-flex;align-items:center;color:var(--ink2);background:var(--s1)}
+.z26 .cp span.on{background:var(--mer);color:#fff;border-color:transparent}
+.z26>.cap{display:block;margin-top:10px;text-align:center}
+.z27 .in{height:34px;display:flex;align-items:center;padding:0 10px;border-radius:10px;border:1px solid var(--l2);background:var(--s1);font-size:13px}
+.z27 .in i{width:1px;height:14px;background:var(--ink);margin-left:1px;animation:imlec 1s steps(1) infinite}
+.z27 .ls{margin-top:6px;border-radius:10px;background:var(--s1);border:1px solid var(--l2);padding:4px;box-shadow:var(--golge)}
+.z27 .ls>div{display:grid;grid-template-columns:26px auto 1fr auto;gap:8px;align-items:center;height:38px;padding:0 8px;border-radius:7px}
+.z27 .ls>div.on{background:var(--s3)}
+.z27 .av{width:26px;height:26px;font-size:10px}
+.z27 .ls>div>b{font-weight:600;font-size:12px}
+.z27 .ls>div>b u{text-decoration:none;color:var(--c)}
+.z27 .ls>div>span:not(.av){font-size:11px;color:var(--ink3)}
+.z27 .ls>div>em{font:500 9.5px var(--mono);font-style:normal;color:var(--c)}
+.sc{display:inline-flex;align-items:center;height:20px;padding:0 6px;border-radius:5px;background:color-mix(in oklab,var(--spi) 16%,transparent);color:var(--spi);font:500 11px var(--mono);vertical-align:1px}
+.z28 .r{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--l1)}
+.z28 .r:first-of-type{margin-top:6px;border-top:0}
+.z28 .av{width:28px;height:28px;font-size:11px}
+.z28 p{font-size:12.5px}
+.z28 p>b{font-weight:600;margin-right:4px}
+.z29 .u,.z40 .u{display:flex;justify-content:space-between;align-items:center}
+.z29 .sg,.z40 .sg{display:flex;padding:2px;border-radius:9px;border:1px solid var(--l1);background:var(--s1);margin-top:10px}
+.z29 .sg span,.z40 .sg span{flex:1;height:26px;border-radius:7px;display:grid;place-items:center;font-size:12px;color:var(--ink3);font-weight:500}
+.z29 .sg span.on,.z40 .sg span.on{background:var(--s3);color:var(--ink)}
+.z29 .bal{margin-top:10px;font-size:13px;padding:10px 12px}
+.z30{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.z30 .rz2{display:flex;flex-direction:column;align-items:center;gap:3px;padding:14px 8px;border-radius:12px;background:var(--s1);border:1px solid var(--l1);text-align:center}
+.z30 .hx{width:50px;height:54px;clip-path:polygon(50% 0,95% 25%,95% 75%,50% 100%,5% 75%,5% 25%);background:linear-gradient(160deg,var(--altin),color-mix(in oklab,var(--altin) 50%,#000));display:grid;place-items:center;color:#241703;margin-bottom:6px}
+.z30 .hx svg{width:20px;height:20px;fill:currentColor}
+.z30 .hx.kl{background:conic-gradient(var(--ink2) calc(var(--p)*1%),var(--s4) 0);color:var(--ink3)}
+.z30 .rz2 b{font-size:12px;font-weight:600}
+.z30 .rz2>span:last-child{font:400 10px var(--mono);color:var(--ink3)}
+.z31 .br{display:flex;align-items:flex-end;gap:5px;height:84px;border-bottom:1px solid var(--l2)}
+.z31 .br i{flex:1;border-radius:3px 3px 0 0;background:var(--ays)}
+.z31 .br i.yok{height:22%!important;background:none;border:1px dashed var(--ink4);border-bottom:0}
+.z31 .br i.az{background:color-mix(in oklab,var(--ays) 55%,var(--s2))}
+.z31 .ay{display:flex;gap:5px;margin-top:5px}
+.z31 .ay span{flex:1;text-align:center;font:400 8px var(--mono);color:var(--ink3)}
+.z31 .ay span:last-child{color:var(--ink)}
+.z32 .bar{height:42px;border-radius:10px 10px 0 0;background:var(--s1);border:1px solid var(--l1);border-bottom:0;display:flex;align-items:center;padding:0 12px;gap:10px}
+.z32 .ad{position:relative;height:16px;width:70px}
+.z32 .ad span{position:absolute;left:0;top:0;font:500 12px var(--mono);color:var(--c);opacity:0;animation:gec 6s infinite}
+.z32 .ad span:nth-child(2){animation-delay:2s}
+.z32 .ad span:nth-child(3){animation-delay:4s}
+@keyframes gec{0%,30%{opacity:1}34%,100%{opacity:0}}
+.z32 .bar .ln{margin-left:auto;width:40%}
+.z32 .cz{height:3px;animation:renk 6s infinite}
+@keyframes renk{0%,30%{background:var(--ays)}34%,63%{background:var(--spi)}67%,96%{background:var(--esp)}100%{background:var(--ays)}}
+.z32 .gv2{height:60px;border:1px solid var(--l1);border-top:0;border-radius:0 0 10px 10px;background:var(--s1);padding:12px;display:grid;gap:8px;align-content:start}
+.z41 .dg{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.z41 .dg span{height:36px;border-radius:8px;border:1px solid var(--l2);display:grid;place-items:center;font-weight:600;font-size:12px;background:var(--s1)}
+.z41 .hl3{position:absolute;top:-4px;left:-4px;height:44px;width:calc((100% - 20px) / 3 + 8px);border-radius:11px;box-shadow:0 0 0 2px var(--ays);animation:odak 4.5s cubic-bezier(.6,0,.2,1) infinite}
+@keyframes odak{0%,25%{transform:translateX(0)}33%,58%{transform:translateX(calc(100% + 2px))}66%,91%{transform:translateX(calc(200% + 4px))}100%{transform:translateX(0)}}
+.z41>.cap{display:block;text-align:center;margin-top:16px}
+.z34 .tel{width:150px;height:150px;margin:0 auto}
+.z34 .tel>.ln{position:absolute;left:12px;height:5px}
+.z34 .fab{position:absolute;right:12px;bottom:12px;width:34px;height:34px;border-radius:12px;background:var(--ink);color:var(--on);display:grid;place-items:center;animation:don2 4s infinite}
+.z34 .fab svg{width:15px;height:15px}
+@keyframes don2{0%,15%,90%,100%{transform:none}25%,80%{transform:rotate(45deg)}}
+.z34 .eyl{position:absolute;right:16px;display:flex;align-items:center;gap:6px;font:500 9.5px var(--mono);color:var(--c);opacity:0;animation:yelpaze 4s infinite}
+.z34 .eyl i{width:26px;height:26px;border-radius:9px;background:var(--c)}
+@keyframes yelpaze{0%,18%,88%,100%{opacity:0;transform:translateY(8px)}28%,80%{opacity:1;transform:none}}
+.z35 .tel{width:132px;height:160px;margin:0 auto;padding:10px;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:22px;gap:6px}
+.z35 .tel>i{border-radius:6px;background:var(--s3)}
+.z35 .wd{grid-column:1/-1;grid-row:span 3;border-radius:12px;background:var(--s2);border:1px solid var(--l2);padding:7px 8px;display:flex;flex-direction:column;gap:2px}
+.z35 .wd .mod{height:15px;font-size:8px;padding:0 5px;align-self:flex-start}
+.z35 .wd b{font:400 17px/1 var(--serif);margin-top:3px}
+.z35 .wd .mono{font-size:9px;color:var(--ink2)}
+.z35 .pb{height:3px;border-radius:2px;background:var(--s4);margin-top:auto}
+.z35 .pb i{display:block;height:100%;width:43%;background:var(--ays);border-radius:2px}
+.z36 .st{display:flex;align-items:flex-start;position:relative}
+.z36 .st::before{content:"";position:absolute;left:12.5%;right:12.5%;top:11px;height:2px;background:var(--s4)}
+.z36 .st::after{content:"";position:absolute;left:12.5%;top:11px;height:2px;width:25%;background:var(--ays)}
+.z36 .st>div{flex:1;position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+.z36 .st i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:500 10px var(--mono);font-style:normal;background:var(--s2);box-shadow:inset 0 0 0 1.5px var(--ink4);color:var(--ink3)}
+.z36 .st .b i{background:var(--ays);color:#fff;box-shadow:none}
+.z36 .st .on i{background:var(--s1);box-shadow:inset 0 0 0 2px var(--ays);color:var(--ays)}
+.z36 .st span{font-size:10.5px;color:var(--ink3)}
+.z36 .st .on span{color:var(--ink);font-weight:500}
+.z36 .kt{margin-top:12px}
+.z36 .kt>b{font-weight:600;font-size:12.5px}
+.z36 .gn{display:flex;gap:4px;margin-top:8px}
+.z36 .gn span{flex:1;height:26px;border-radius:7px;border:1px solid var(--l2);display:grid;place-items:center;font-size:11px;color:var(--ink3)}
+.z36 .gn span.on{background:color-mix(in oklab,var(--ays) 16%,var(--s1));border-color:color-mix(in oklab,var(--ays) 50%,transparent);color:var(--ink)}
+.z37 .bn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px 10px 0 0;background:repeating-linear-gradient(135deg,var(--s3) 0 8px,var(--s2) 8px 16px);border:1px solid var(--l2)}
+.z37 .bn b{font-weight:600;font-size:12px}
+.z37 .bn>span:last-child{font-size:11px;color:var(--ink3);margin-left:auto}
+.z37 .an2.on{background:var(--ink)}
+.z37 .an2.on::after{background:var(--on)}
+.z37 .ic3{position:relative;display:grid;gap:8px;padding:14px 12px;border:1px solid var(--l2);border-top:0;border-radius:0 0 10px 10px;background:var(--s1);overflow:hidden}
+.z37 .wm{position:absolute;right:-4px;bottom:2px;font:600 28px var(--mono);letter-spacing:.12em;color:var(--l2);transform:rotate(-8deg)}
+.z38 .u{display:flex;align-items:center;gap:10px}
+.z38 .ik{width:38px;height:38px;border-radius:11px;background:var(--s3);display:grid;place-items:center;color:var(--ink)}
+.z38 .ik svg{width:18px;height:18px}
+.z38 .u b{display:block;font-weight:600}
+.z38 .u span{font-size:11.5px;color:var(--ink3)}
+.z38 [data-tik]{height:18px;margin-top:14px;gap:4px}
+.z38 .alt{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.z39{display:grid;grid-template-columns:1fr 28px 1fr;align-items:stretch}
+.z39 .n{padding:9px 10px;border-radius:10px;background:var(--s1);border:1px solid var(--l2)}
+.z39 .n b{display:block;font-weight:600;font-size:12px}
+.z39 .n span{font-size:10.5px;color:var(--ink3);line-height:1.35;display:block;margin-top:2px}
+.z39 .n.a{display:flex;flex-direction:column;justify-content:center;border-color:var(--ink3)}
+.z39 .bg2{display:flex;flex-direction:column;justify-content:space-around}
+.z39 .bg2 i{height:1px;background:var(--ink3)}
+.z39 .bg2 i.k{background:repeating-linear-gradient(90deg,var(--mer) 0 3px,transparent 3px 6px)}
+.z39 .sag2{display:grid;gap:8px}
+.z39 .n.c{border-style:dashed;border-color:color-mix(in oklab,var(--mer) 55%,transparent)}
+.z39 .n.c b{color:var(--mer)}
+.z40 pre{margin:10px 0 0;padding:10px;border-radius:8px;background:var(--s1);border:1px solid var(--l1);font:400 10.5px/1.55 var(--mono);color:var(--ink2);white-space:pre;overflow:hidden}
+.z40 pre b{color:var(--ink);font-weight:500}
+.z40 .alt{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+
+@media (max-width:900px){
+  .plan{grid-template-columns:1fr}
+}
+
 @media (max-width:1200px){
   .ilke{grid-template-columns:repeat(2,1fr)}
   .temel{grid-template-columns:repeat(2,1fr)}
@@ -860,6 +1299,9 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
   .elen .r>:nth-child(3),.elen .r>:nth-child(4){grid-column:2}
 }
 @media (max-width:640px){
+  .ust .ad{font-size:0;gap:0}
+  .arac{position:static}
+  .ust #gor button{padding:0 8px}
   .ust-i,.arac-i{padding-left:16px;padding-right:16px}
   .ust .ad small,.dal{display:none}
   .ust-i{justify-content:space-between}
@@ -900,13 +1342,24 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
   <symbol id="zil" viewBox="0 0 16 16"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3zM6.5 14h3"/></symbol>
   <symbol id="bulut" viewBox="0 0 16 16"><path d="M4.5 12.5h7a3 3 0 0 0 .4-6A4 4 0 0 0 4.3 7a2.8 2.8 0 0 0 .2 5.5z"/><path d="M2 2l12 12"/></symbol>
   <symbol id="saat" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.2"/></symbol>
+  <symbol id="bilgi" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 7.5v3.5M8 5h.01"/></symbol>
+  <symbol id="isaret" viewBox="0 0 16 16"><path d="M4.5 2.5h7v11L8 11l-3.5 2.5z"/></symbol>
+  <symbol id="kalkan" viewBox="0 0 16 16"><path d="M8 1.8l5 2v4c0 3.2-2.2 5.3-5 6.4C5.2 13.1 3 11 3 7.8v-4z"/><path d="M5.8 8l1.6 1.6 3-3.2"/></symbol>
+  <symbol id="baglanti" viewBox="0 0 16 16"><path d="M6.5 9.5l3-3M7 4.5l1-1a2.8 2.8 0 0 1 4 4l-1 1M9 11.5l-1 1a2.8 2.8 0 0 1-4-4l1-1"/></symbol>
+  <symbol id="kopya" viewBox="0 0 16 16"><rect x="5" y="5" width="8.5" height="8.5" rx="1.5"/><path d="M3 10.5V3.5A1 1 0 0 1 4 2.5h6.5"/></symbol>
+  <symbol id="arti" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
   <symbol id="bardak" viewBox="0 0 24 30"><path d="M4 3h16l-2 24H6z"/></symbol>
 </svg>
 
 <header class="ust">
   <div class="ust-i">
-    <span class="ad"><span class="isr" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Tasarım kataloğu<small>SÜRÜM 2</small></span>
+    <span class="ad"><span class="isr" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Tasarım kataloğu<small>SÜRÜM 3</small></span>
     <nav class="dal" aria-label="Bölümler" id="dalNav"></nav>
+    <div class="seg" id="gor" role="group" aria-label="Görünüm">
+      <button aria-pressed="true" data-v="kart">Kart</button>
+      <button aria-pressed="false" data-v="liste">Liste</button>
+      <button aria-pressed="false" data-v="plan">Plan</button>
+    </div>
     <button class="tus" id="temaBtn">Açık tema</button>
   </div>
 </header>
@@ -927,28 +1380,35 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
       <button aria-pressed="false" data-v="2">P2</button>
       <button aria-pressed="false" data-v="3">P3</button>
     </div>
-    <button class="tus" id="fYeni" aria-pressed="false">Yalnız yeni</button>
+    <button class="tus" id="fDeg" aria-pressed="false">Bu sürümde</button>
+    <button class="tus" id="fSec" aria-pressed="false"><svg class="i"><use href="#isaret"/></svg>Seçtiklerim <b id="secSay">0</b></button>
+    <button class="tus" id="kopyala" hidden aria-label="Seçtiklerimi kopyala" title="Seçtiklerimi Markdown olarak kopyala"><svg class="i"><use href="#kopya"/></svg></button>
     <span class="say" id="say"></span>
-    <div class="seg" id="gor" role="group" aria-label="Görünüm">
-      <button aria-pressed="true" data-v="kart">Kart</button>
-      <button aria-pressed="false" data-v="liste">Liste</button>
-    </div>
   </div>
 </div>
 
 <main class="sayfa" id="sayfa">
   <div class="giris">
     <div>
-      <div class="ustyazi">LIFEOS · TASARIM KATALOĞU · 24 EYLÜL</div>
-      <h1><span data-say="toplam">96</span> özellik, <em>tek dil.</em></h1>
-      <p>İlk vitrin 70 fikirdi. Özellik olmayan 12’si temellere taşındı, birleşti ya da çıkarıldı; yerlerine gerçekten iş gören yeni özellikler geldi. Her kart canlı bir örnek; tıklayınca gerekçesi açılır.</p>
+      <div class="ustyazi">LIFEOS · TASARIM KATALOĞU · SÜRÜM 3 · 24 EYLÜL</div>
+      <h1><span data-say="toplam">136</span> özellik, <em>tek dil.</em></h1>
+      <p>Bu sürümde <b data-say="yeni">40</b> yeni özellik ve yeni bir dal (Kurulum ve güven) eklendi; <b data-say="yen">10</b> örnek yenilendi. Kartları işaretle, plan görünümünde önceliğe göre gör, seçtiklerini tek tuşla kopyala.</p>
     </div>
     <div class="olcu">
-      <div><b data-say="toplam">96</b><span>özellik</span></div>
-      <div><b data-say="yeni">38</b><span>yeni</span></div>
-      <div><b data-say="p1">25</b><span>P1 öncelik</span></div>
-      <div><b>12</b><span>elendi</span></div>
+      <div><b data-say="toplam">136</b><span>özellik</span></div>
+      <div><b data-say="yeni">40</b><span>yeni</span></div>
+      <div><b data-say="yen">10</b><span>yenilendi</span></div>
+      <div><b data-say="p1">32</b><span>P1 öncelik</span></div>
     </div>
+  </div>
+
+  <div class="nasil"><b>NASIL OKUNUR</b>
+    <span><span class="rz p1">P1</span>önce</span><span><span class="rz p2">P2</span>sonra</span><span><span class="rz p3">P3</span>ileride</span>
+    <span><span class="emek"><i class="d"></i><i class="d"></i><i></i></span>emek</span>
+    <span><span class="rz yeni">YENİ</span>bu sürümde eklendi</span>
+    <span><span class="rz yen">YENİLENDİ</span>örneği iyileştirildi</span>
+    <span><span class="rz var">MEVCUT</span>sistemde var, kart tasarımını öneriyor</span>
+    <span><span class="mk-l"><span class="c-ays">AYS</span><span class="c-spi">SPİ</span></span>ait olduğu modül</span>
   </div>
 
   <div class="ilke">
@@ -995,6 +1455,7 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
     </div>
   </section>
 
+  <div id="plan" class="plan" aria-label="Plan görünümü"></div>
   <div id="bolumler"></div>
   <div class="bos-sonuc" id="bosSonuc"><b>Bu süzgeçle özellik yok.</b>Aramayı ya da süzgeçleri gevşet.</div>
 
@@ -1017,6 +1478,7 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
   </section>
 </main>
 
+<div class="tost" id="tost" role="status" aria-live="polite"></div>
 <div class="perde" id="perde"></div>
 <aside class="cek" id="cek" aria-hidden="true" aria-label="Özellik ayrıntısı">
   <div class="ub"><span class="yer" id="cYer"></span><div class="sag"><button id="cOnce" aria-label="Önceki"><svg class="i"><use href="#sol"/></svg></button><button id="cSonra" aria-label="Sonraki"><svg class="i"><use href="#sag"/></svg></button><button id="cKapat" aria-label="Kapat"><svg class="i"><use href="#kapat"/></svg></button></div></div>
@@ -1028,6 +1490,9 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
       <p class="ne" id="cNe"></p>
       <div class="neden"><span>NEDEN</span><p id="cNeden"></p></div>
       <dl><div><dt>MODÜL</dt><dd id="cMod"></dd></div><div><dt>ÖNCELİK</dt><dd id="cP"></dd></div><div><dt>EMEK</dt><dd id="cE"></dd></div><div><dt>DURUM</dt><dd id="cD"></dd></div></dl>
+      <div class="neden" id="cVar" style="margin-top:10px"><span>MEVCUT</span><p>Bu özellik sistemde zaten var; kart yalnız tasarımını öneriyor.</p></div>
+      <div class="ilg" id="cIlg"><span>İLGİLİ</span><div></div></div>
+      <div class="kl"><button class="tus" id="cSec" aria-pressed="false"><svg class="i"><use href="#isaret"/></svg><span>Seçtiklerime ekle</span></button><button class="tus" id="cLink"><svg class="i"><use href="#baglanti"/></svg>Bağlantıyı kopyala</button></div>
       <div class="kl"><button class="tus" id="cOnce2"><svg class="i"><use href="#sol"/></svg>Önceki</button><button class="tus" id="cSonra2">Sonraki<svg class="i"><use href="#sag"/></svg></button></div>
     </div>
   </div>
@@ -1042,8 +1507,6 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
 <template id="t-x02"><div class="d kt x02">
   <div class="h"><span class="ki"><svg class="i"><use href="#den"/></svg></span><b>Son deneme</b><span class="et o">ÖLÇÜLDÜ</span></div>
   <div class="g"><span class="n">82 <small style="font:400 12px var(--sans);color:var(--ink3)">net</small></span><span class="ln" style="width:70%"></span></div></div></template>
-<template id="t-x03"><div class="d x03">
-  <div><span><em>1</em>Şimdi</span><i class="b"></i></div><div><span><em>2</em>Durum</span><i></i><i></i></div><div class="m"><span><em>3</em>Öneri</span><i></i></div></div></template>
 <template id="t-x08"><div class="d x08">
   <div class="cap">PERŞEMBE · 24 EYLÜL</div><div class="b">Bugün</div><p>7 işin <b>3’ü bitti</b> · sıradaki blok <b>20:30</b>’da</p><span class="et h">KURAL MOTORU ÜRETİR</span></div></template>
 <template id="t-y01"><div class="d y01">
@@ -1075,9 +1538,6 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
   <div class="gr c-ays"><div class="u"><b>AYS · 2</b><span class="cap">14:10</span></div><p>Paragraf 20:30’da · tekrar kuyruğu 432</p></div>
   <div class="gr c-spi"><div class="u"><b>SPİ · 1</b><span class="cap">13:40</span></div><p>Su 5 / 8 bardak</p></div>
   <div class="gr c-mer"><div class="u"><b>MERKEZ · 1</b><span class="cap">12:05</span></div><p>Bir öneri onayını bekliyor</p></div></div></template>
-<template id="t-x09"><div class="d x09">
-  <svg viewBox="0 0 54 54" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="27" cy="27" r="24" stroke-dasharray="4 4"/><path d="M27 19v16M19 27h16" stroke-linecap="round"/></svg>
-  <b>Henüz ölçüm yok</b><span class="bt g">İlk ölçümü ekle</span></div></template>
 <template id="t-y06"><div class="d y06">
   <span class="ik"><svg class="i"><use href="#bulut"/></svg></span>
   <b>Eşitleme durdu</b><p>Verilerin bu cihazda güvende · son kayıt 14:08</p><span class="bt g">Yeniden dene</span></div></template>
@@ -1138,16 +1598,11 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
   <div class="bars"><i class="bu" style="height:52%"></i><i style="height:58%"></i><i style="height:64%"></i><i style="height:80%"></i><i style="height:94%"></i><i style="height:86%"></i><i style="height:78%"></i></div>
   <div class="gn"><span>PE</span><span>CU</span><span>CT</span><span>PZ</span><span>PT</span><span>SA</span><span>ÇA</span></div>
   <div class="lg"><span class="et h">HESAPLANDI</span><span>pazartesi zirve · 104 kart</span></div></div></template>
-<template id="t-x19"><div class="d x19">
-  <div class="bars"><i style="height:52%"></i><i style="height:60%"></i><i style="height:58%"></i><i style="height:72%"></i><i style="height:84%"></i><i style="height:100%"></i></div>
-  <p>Son 6 denemede +12 net. <span class="et h">KOD</span></p></div></template>
 
 <template id="t-x21"><div class="d kt x21">
   <div class="u"><span class="mod c-ays">AYS</span><span class="cap">20:30 – 21:40</span></div>
   <div class="o"><h4>Paragraf</h4><span class="bt m"><svg class="i" style="width:10px;height:10px"><use href="#oyn"/></svg>Başla</span></div>
   <div class="ad"><i></i><i></i><i></i></div></div></template>
-<template id="t-x22"><div class="d x22">
-  <span class="pil"><i></i>6 sa 20 dk sonra</span><span class="pil can"><i></i>14 dk sonra</span><span class="cap">SON 15 DAKİKADA NABIZ</span></div></template>
 <template id="t-x23"><div class="d x23">
   <div><span class="cap">ÇÖZERKEN · 12 / 30</span><div data-tik="gggggggggggg.................."></div></div>
   <div><span class="cap">SET BİTİNCE · 23 D · 5 Y · 2 B</span><div data-tik="iiiikiiiiiki.iiiiikiiii.iikiii"></div></div></div></template>
@@ -1269,8 +1724,6 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
     <circle cx="214" cy="68" r="4" fill="var(--ink)"/>
     <text x="214" y="92" text-anchor="middle" fill="var(--ink3)" style="font:400 9.5px var(--mono)">bugün · %50</text>
     <text x="10" y="48" fill="var(--ink4)" style="font:400 9px var(--mono)">eşik</text></svg></div></template>
-<template id="t-x44"><div class="d x44"><div class="b" style="height:28%">1</div><div class="b" style="height:44%">2</div><div class="on" style="height:60%">3</div><div style="height:76%">4</div><div style="height:92%">5</div></div></template>
-<template id="t-x45"><div class="d x45"><div class="rf"><i style="width:22px;height:92%;--p:100"></i><i style="width:16px;height:78%;--p:100"></i><i style="width:28px;height:86%;--p:60"></i><i style="width:18px;height:70%;--p:20"></i><i style="width:24px;height:96%;--p:0"></i><i style="width:14px;height:64%;--p:0"></i><i style="width:20px;height:82%;--p:0"></i><i style="width:26px;height:74%;--p:0"></i></div></div></template>
 <template id="t-y20"><div class="d y20">
   <div class="kp"><i></i><div><b>Denemeler</b><span>Montaigne · bölüm 3 / 12</span></div></div>
   <div class="iy"><i></i></div>
@@ -1403,17 +1856,11 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
 <template id="t-y33"><div class="d y33">
   <div class="r bt2"><svg viewBox="0 0 22 22"><circle class="ci" cx="11" cy="11" r="9.5"/><path class="tk" d="M6.5 11.5l3 3 6-6.5"/></svg><span>Paragraf · ana set</span><em>21:20</em></div>
   <div class="r"><span class="bs2"></span><span>Yanlış analizi</span><em>21:30</em></div></div></template>
-<template id="t-y34"><div class="d y34"><div class="kc"><span class="ln" style="width:60%"></span><span class="ln" style="width:40%"></span><span class="ln" style="width:75%"></span></div><div class="ot"><i></i><i></i><i></i></div></div></template>
-<template id="t-y35"><div class="d y35"><div class="fr"><div class="bar"></div><div class="bs3">Bugün</div><div class="ic2"><span class="ln" style="width:80%"></span><span class="ln" style="width:60%"></span><span class="ln" style="width:70%"></span><span class="ln" style="width:50%"></span></div></div></div></template>
 
-<template id="t-x67"><div class="d x67">
-  <div class="tel"><span class="ln" style="top:14px;width:50%"></span><span class="ln" style="top:26px;width:36%"></span><span class="ln" style="top:44px;width:60%"></span><div class="bz"></div><div class="ab"></div><div class="sk"><i></i><i></i><i></i><i></i></div></div>
-  <span class="cap">ANA EYLEM<br>ALT ÜÇTE BİRDE</span></div></template>
 <template id="t-y36"><div class="d y36">
   <div class="sr"><span class="al"><svg class="i"><use href="#tik"/></svg>Bitti</span><div class="on"><em>14:30</em><b>Yabancı Dil</b><span class="mod c-esp">ESP</span></div></div>
   <div class="sr2"><em>17:30</em><span>Antrenman</span></div>
   <div class="ip"><span class="cap">SAĞA · BİTTİ</span><span class="cap">SOLA · ERTELE</span></div></div></template>
-<template id="t-y37"><div class="d y37"><div class="tel"><span class="ln" style="top:14px;width:60%"></span><span class="ln" style="top:26px;width:40%"></span><span class="ln" style="top:40px;width:70%"></span><div class="ck2"><i></i><b></b><span></span><span style="width:60%"></span><em></em></div></div></div></template>
 <template id="t-x68"><div class="d x68"><div class="tel">
   <div class="ser c-ays" style="top:8px"><span>AYS</span><div class="ak"><i style="left:20px;width:40px"></i><i style="left:250px;width:36px"></i></div></div>
   <div class="ser c-spi" style="top:40px"><span>SPİ</span><div class="ak"><i style="left:60px;width:14px"></i><i style="left:180px;width:30px"></i><i style="left:330px;width:40px"></i></div></div>
@@ -1427,127 +1874,376 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
   <div class="r gri"><div class="c-ays"><span class="dr"></span>AYS</div><div class="c-spi"><span class="kr"></span>SPİ</div><div class="c-esp"><span class="uc"></span>ESP</div></div>
   <div class="cap">RENK OLMADAN DA AYRILIR</div></div></template>
 
+<template id="t-x03"><div class="d x03v">
+  <div class="c1"><span class="lb"><em>1</em>ŞİMDİ</span><div class="bx a"><span class="mod c-ays">AYS</span><b>Paragraf</b><span class="ln" style="width:70%"></span><i class="bn"></i></div></div>
+  <div class="c2"><span class="lb"><em>2</em>DURUM</span><div class="bx"><b class="n">82</b><span class="ln" style="width:60%"></span></div><div class="bx"><b class="n">432</b><span class="ln" style="width:50%"></span></div></div>
+  <div class="c3"><span class="lb"><em>3</em>ÖNERİ</span><div class="bx m"><svg class="i"><use href="#yildiz"/></svg><span class="ln" style="width:85%"></span><span class="ln" style="width:55%"></span><i class="bn"></i></div></div></div></template>
+<template id="t-x09"><div class="d x09v">
+  <div class="fr"><svg viewBox="0 0 220 62" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="61" x2="220" y2="61" stroke="var(--l2)"/><path d="M0 46C40 38 70 50 110 34S180 26 220 18" fill="none" stroke="var(--ink4)" stroke-width="1.5" stroke-dasharray="4 5"/></svg><div class="ort2"><span class="art"><svg class="i"><use href="#arti"/></svg></span></div></div>
+  <b>Henüz ölçüm yok</b><p>İlk ölçümle çizgi başlar; boş gün 0 sayılmaz.</p><span class="bt w">İlk ölçümü ekle</span></div></template>
+<template id="t-x19"><div class="d x19v">
+  <div class="ch"><div class="ys"><span>85</span><span>60</span></div>
+  <div class="bars"><div><i style="height:40%"></i><span>D8</span></div><div><i style="height:52%"></i><span>D9</span></div><div><i style="height:48%"></i><span>D10</span></div><div><i style="height:64%"></i><span>D11</span></div><div><i style="height:76%"></i><span>D12</span></div><div class="on"><em>82</em><i style="height:88%"></i><span>D13</span></div></div></div>
+  <p><span class="et h">KOD</span>Son 6 denemede +12 net; en büyük artış Matematik’te.</p></div></template>
+<template id="t-x22"><div class="d x22v">
+  <div class="k"><span class="pil"><i></i>6 sa 20 dk</span><span class="cap">UZAKTA · SAKİN</span></div>
+  <div class="k c-ays"><div class="hk"><svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="28" fill="none" stroke="var(--s3)" stroke-width="5"/><circle cx="32" cy="32" r="28" fill="none" stroke="var(--ays)" stroke-width="5" stroke-linecap="round" stroke-dasharray="41 176" transform="rotate(-90 32 32)"/></svg><b>14</b><span>DK</span></div><span class="cap" style="color:var(--ays)">SON 15 DK · CANLI</span></div></div></template>
+<template id="t-x44"><div class="d x44v"><div class="st">
+  <div class="b" style="height:30%"><svg class="i"><use href="#tik"/></svg>1</div><div class="b" style="height:46%"><svg class="i"><use href="#tik"/></svg>2</div><div class="on" style="height:62%">3</div><div style="height:78%">4</div><div style="height:94%">5</div>
+  <div class="ip"><b>Basamak 3</b><span>12 ders · 4’ü bitti</span></div></div></div></template>
+<template id="t-x45"><div class="d x45v">
+  <div class="rf"><i class="on" style="--w:26px;--p:42;height:90%">DENEMELER</i><i style="--w:18px;--p:100;height:74%">NUTUK</i><i style="--w:22px;--p:100;height:82%">SİMYACI</i><i style="--w:28px;--p:15;height:96%">SEFİLLER</i><i style="--w:18px;--p:0;height:66%">DUNE</i><i style="--w:24px;--p:0;height:86%">SAPİENS</i><i style="--w:20px;--p:0;height:78%">KÖRLÜK</i></div>
+  <div class="alt"><span class="cap">7 KİTAP · 2 BİTTİ</span><span class="cap" style="color:var(--esp)">OKUNAN · %42</span></div></div></template>
+<template id="t-y34"><div class="d y34v">
+  <div class="kc"><div class="bs4"><span class="mod c-ays">AYS</span><b>Paragraf</b><span class="cap">20:30</span></div>
+  <div class="ay2"><div class="ad"><i></i><i></i><i></i></div><span class="ln" style="width:70%"></span><span class="bt m">Başla</span></div></div>
+  <div class="ot"><i></i><i></i><i></i></div></div></template>
+<template id="t-y35"><div class="d y35v"><div class="fr"><div class="bar"></div><div class="bs3">Bugün</div>
+  <div class="ic4"><div class="r"><em>08:00</em><span>Tarih tekrarı</span></div><div class="r"><em>09:30</em><span>TYT Matematik</span></div><div class="r"><em>14:30</em><span>Yabancı Dil</span></div><div class="r"><em>17:30</em><span>Antrenman</span></div></div></div></div></template>
+<template id="t-y37"><div class="d y37v"><div class="tel">
+  <div class="ls"><div><em>14:30</em><span>Yabancı Dil</span></div><div class="on"><em>20:30</em><span>Paragraf</span></div><div><em>23:00</em><span>Uyku</span></div></div>
+  <div class="ck3"><i></i><span class="mod c-ays">AYS</span><b>Paragraf</b><small>20:30 · 30 soru · 70 dk</small><em>Başla</em></div></div></div></template>
+<template id="t-x67"><div class="d x67v">
+  <div class="tel"><span class="ln" style="top:14px;width:50%"></span><span class="ln" style="top:26px;width:34%"></span><span class="ln" style="top:44px;width:60%"></span><div class="erisim"></div><div class="ab"></div><div class="sk"><i class="on"></i><i></i><i></i><i></i></div></div>
+  <div class="lg3"><span class="cap">BAŞPARMAK ERİŞİMİ</span><span><i style="background:color-mix(in oklab,var(--ays) 30%,transparent)"></i>kolay</span><span><i style="background:color-mix(in oklab,var(--ays) 10%,transparent)"></i>uzanarak</span><span><i style="background:var(--s3)"></i>iki el</span></div></div></template>
+
+<template id="t-z01"><div class="d z01"><div class="kp">
+  <div class="in"><svg class="i"><use href="#ara"/></svg>tekrar<i></i><kbd>ESC</kbd></div>
+  <div class="gr c-ays"><span class="gb">AYS</span><div class="r on">Tekrar kuyruğunu aç<span>↵</span></div><div class="r">Akşam bloğunu tekrara ayır<span>KÜÇÜK</span></div></div>
+  <div class="gr c-esp"><span class="gb">ESP</span><div class="r">Kelime tekrarını başlat</div></div></div></div></template>
+<template id="t-z02"><div class="d z02"><div class="fr">
+  <span class="ln" style="top:12px;width:40%"></span><span class="ln" style="top:24px;width:62%"></span><span class="ln" style="top:104px;width:50%"></span><span class="ln" style="top:116px;width:72%"></span>
+  <div class="ort"></div>
+  <div class="ok"><span class="mod c-ays">AYS · ODAK</span><b>42:18</b><span>Paragraf · ana set</span></div>
+  <span class="cap es">ESC · ÇIK</span></div></div></template>
+<template id="t-z03"><div class="d z03"><div class="kt">
+  <div class="u"><span style="font-weight:500">Toparlanma</span><span class="cap">GÜNCELLENİYOR…</span></div>
+  <div class="deg"><b>72</b><span>son bilinen · 07:40</span></div>
+  <div class="alt"><span class="et h">HESAPLANDI</span><span class="cap">İSKELET DEĞİL, SON DEĞER</span></div></div></div></template>
+<template id="t-z04"><div class="d z04">
+  <p><u>Tekrar borcu</u> <b class="mono">%34</b> · eşik %10</p>
+  <div class="ip"><em>SÖZLÜK</em><b>Tekrar borcu</b><span>Vadesi geçmiş kartların toplam karta oranı. Örnek: 147 ÷ 432.</span></div></div></template>
+<template id="t-z05"><div class="d kt z05">
+  <div class="u"><b>Ne değişti?</b><span class="cap">SÜRÜM 3 · 3 MADDE</span></div>
+  <div class="r"><span class="rz yeni">YENİ</span>Çakışma kartı</div>
+  <div class="r"><span class="rz yen">DÜZELTME</span>Tekrar borcu eşiği</div>
+  <div class="r"><span class="rz var">KALDIRILDI</span>Kısayol rozetleri</div>
+  <div class="alt"><span class="bt w">Anladım</span></div></div></template>
+<template id="t-z33"><div class="d z33">
+  <div class="in"><b>714</b><span>kg</span></div>
+  <div class="uy"><svg class="i"><use href="#bilgi"/></svg><span>Dünkü 71,2’nin on katı. <b>71,4</b> mü demek istedin?</span></div>
+  <div class="d3"><span class="bt w">71,4 yap</span><span class="bt g">714 doğru</span></div></div></template>
+
+<template id="t-z06"><div class="d z06">
+  <div class="u"><span>Sıralama tahmini</span><span class="et t">TAHMİN</span></div>
+  <b class="ar">12 400 – 18 900</b>
+  <div class="tr"><span class="bd" style="left:37%;width:32.5%"></span><span class="nk" style="left:51%"></span></div>
+  <div class="ek"><span>5 000</span><span>15 000</span><span>25 000</span></div>
+  <span class="cap">EN OLASI 15 200 · 6 DENEMEYE DAYALI</span></div></template>
+<template id="t-z07"><div class="d">
+  <svg class="gr" viewBox="0 0 260 84" data-dag="7.2,6.8,7.5,7.0,6.4,7.8,7.1,6.9,7.3,5.9,7.4,7.0,6.6,8.1,7.2,6.9,7.0,7.6,6.3,7.1,7.4,6.8,7.2,7.9,6.7,7.0,7.3,6.5,7.1,7.0" aria-hidden="true"></svg>
+  <div class="lg"><span><i style="background:var(--spi);height:6px;width:6px;border-radius:50%"></i>bir gece</span><span><i style="background:var(--ink)"></i>medyan · 30 gece</span></div></div></template>
+<template id="t-z08"><div class="d z08">
+  <div class="r"><b>Son net</b><span class="ok2 i">↗ artıyor</span><small><span class="az"><i></i><i></i><i></i><i></i><i></i><i></i></span>6 deneme · eğilim çizilebilir</small></div>
+  <div class="r"><b>Dinlenik nabız</b><span class="ok2 y">— eğilim yok</span><small><span class="az"><i></i><i></i><i class="b"></i><i class="b"></i><i class="b"></i></span>2 / 5 ölçüm · 3 ölçüm daha</small></div></div></template>
+
+<template id="t-z10"><div class="d z10">
+  <div class="u"><b>20 yanlış</b><span class="et o">BEYAN</span></div>
+  <div class="br"><i style="width:45%;background:var(--ays)"></i><i style="width:30%;background:color-mix(in oklab,var(--ays) 55%,var(--s2))"></i><i style="width:25%;background:color-mix(in oklab,var(--ays) 28%,var(--s2))"></i></div>
+  <div class="ls"><div><i style="background:var(--ays)"></i>Bilgi eksiği<em>9</em></div><div><i style="background:color-mix(in oklab,var(--ays) 55%,var(--s2))"></i>Dikkat<em>6</em></div><div><i style="background:color-mix(in oklab,var(--ays) 28%,var(--s2))"></i>Süre<em>5</em></div></div></div></template>
+<template id="t-z11"><div class="d z11"><div class="tr">
+  <span class="bu"></span>
+  <span class="nk g" style="left:8%"><b>D13</b><i></i><span>82 net</span></span>
+  <span class="nk y" style="left:36%"><b>D14</b><i></i><span>3 gün sonra</span></span>
+  <span class="nk" style="left:64%"><b>D15</b><i></i><span>2 hafta</span></span>
+  <span class="nk" style="left:92%"><b>D16</b><i></i><span>4 hafta</span></span></div>
+  <div class="lg"><span class="et h">PLANLI</span><span>çizgi · bugün</span></div></div></template>
+<template id="t-z12"><div class="d z12">
+  <div class="u"><b>SORU 14 / 30</b><span class="sr"><svg class="i" style="width:12px;height:12px"><use href="#saat"/></svg>01:12</span></div>
+  <div class="q"><span class="ln" style="width:92%"></span><span class="ln" style="width:68%"></span></div>
+  <div class="sk"><div><b>A</b><span class="ln" style="width:60%"></span></div><div><b>B</b><span class="ln" style="width:45%"></span></div><div class="on"><b>C</b><span class="ln" style="width:70%;background:color-mix(in oklab,var(--ays) 40%,var(--s3))"></span></div><div><b>D</b><span class="ln" style="width:52%"></span></div></div></div></template>
+<template id="t-z13"><div class="d z13">
+  <div class="u"><b>40 kart</b><span class="cap">BUGÜNÜN PAKETİ</span></div>
+  <div class="ls"><div class="r"><span>Paragraf</span><i style="width:100%"></i><em>18 · 6 dk</em></div><div class="r"><span>Türev</span><i style="width:66%"></i><em>12 · 4 dk</em></div><div class="r"><span>Problem</span><i style="width:55%"></i><em>10 · 4 dk</em></div></div>
+  <div class="alt"><span class="et t">~14 DK · TAHMİN</span><span class="bt m">Paketi başlat</span></div></div></template>
+<template id="t-z14"><div class="d kt z14">
+  <b class="bs">Paragraf tamam.</b>
+  <div class="uc"><div><b>30</b><span>soru</span></div><div><b>23·5·2</b><span>D · Y · B</span></div><div><b>64 dk</b><span>plan 70</span></div></div>
+  <div class="sr">Sıradaki <b>Analiz · 10 dk</b><span class="bt m">Başla</span></div></div></template>
+<template id="t-z15"><div class="d z15">
+  <span class="cap">HAFTALIK DERS DENGESİ · SAAT</span>
+  <div class="r"><span>PLAN</span><div class="br"><i style="width:30%;background:var(--ays)">T</i><i style="width:35%;background:color-mix(in oklab,var(--ays) 72%,var(--s2))">M</i><i style="width:20%;background:color-mix(in oklab,var(--ays) 46%,var(--s2))">F</i><i style="width:15%;background:color-mix(in oklab,var(--ays) 26%,var(--s2));color:var(--ink)">S</i></div></div>
+  <div class="r"><span>GERÇEK</span><div class="br"><i style="width:26%;background:var(--ays)">T</i><i style="width:44%;background:color-mix(in oklab,var(--ays) 72%,var(--s2))">M</i><i style="width:16%;background:color-mix(in oklab,var(--ays) 46%,var(--s2))">F</i><i style="width:14%;background:color-mix(in oklab,var(--ays) 26%,var(--s2));color:var(--ink)">S</i></div></div>
+  <div class="alt"><span>Matematik planın üstünde</span><span class="fk n">+9 puan</span></div></div></template>
+
+<template id="t-z16"><div class="d z16">
+  <div class="ek"><span>06</span><span>12</span><span>18</span><span>24</span></div>
+  <div class="tr"><span class="pn" style="left:16.7%;width:66.6%"></span><span class="og" style="left:17.6%"></span><span class="og" style="left:41.7%"></span><span class="og k" style="left:61.1%"></span><span class="og p" style="left:77.8%"></span><span class="an" style="left:45.4%"></span></div>
+  <div class="lg"><span class="et o">3 ÖĞÜN GİRİLDİ</span><span>yeme aralığı 12 sa · akşam planlı</span></div></div></template>
+<template id="t-z17"><div class="d z17">
+  <div class="u"><b>45 dk</b><span class="et o">ÖLÇÜLDÜ</span></div>
+  <div class="r"><span>Z1</span><i style="width:44%;opacity:.3"></i><em>8 dk</em></div>
+  <div class="r"><span>Z2</span><i style="width:100%;opacity:.5"></i><em>18 dk</em></div>
+  <div class="r"><span>Z3</span><i style="width:78%;opacity:.7"></i><em>14 dk</em></div>
+  <div class="r"><span>Z4</span><i style="width:22%;opacity:.85"></i><em>4 dk</em></div>
+  <div class="r"><span>Z5</span><i style="width:6%"></i><em>1 dk</em></div></div></template>
+<template id="t-z18"><div class="d">
+  <div class="z18" data-takvim=".,4,6,2,8,3,5,9,2,4,7,3,6,2,5,8,3,4,6,2,7,5,3,6,t4,-,-,-,-,-,-"><span class="hd">PT</span><span class="hd">SA</span><span class="hd">ÇA</span><span class="hd">PE</span><span class="hd">CU</span><span class="hd">CT</span><span class="hd">PZ</span></div>
+  <div class="lg"><span class="et o">EYLÜL</span><span>nokta büyüklüğü · o günün harcaması</span></div></div></template>
+<template id="t-z19"><div class="d z19">
+  <div class="ch2"><div class="ys"><span>22</span><span>09</span></div>
+  <div class="gr2" data-duzen="23.5-7.0,24.2-7.4,23.0-6.8,25.1-7.9,23.4-7.1,23.8-7.0,24.6-8.2,23.2-6.9,23.6-7.2,24.0-7.3,23.3-7.0,25.4-8.5,23.5-7.1,23.4-7.0"><span class="hd1" style="top:13.6%"></span><span class="hd1" style="top:81.8%"></span></div></div>
+  <div class="lg"><span class="et h">SAPMA ±35 DK</span><span>14 gece · kesik çizgi hedef</span></div></div></template>
+
+<template id="t-z20"><div class="d kt z20">
+  <b class="bs">Oturum bitti.</b>
+  <div class="uc"><div><b>45</b><span>kart</span></div><div><b>%82</b><span>iyi + kolay</span></div><div><b>9 dk</b><span>süre</span></div></div>
+  <div class="dg"><i style="width:6.7%;background:var(--ink3)"></i><i style="width:11.1%;background:color-mix(in oklab,var(--esp) 40%,var(--s2))"></i><i style="width:66.7%;background:var(--esp)"></i><i style="width:15.5%;background:color-mix(in oklab,var(--esp) 70%,var(--s2))"></i></div>
+  <div class="yr"><span class="cap">TEKRAR · ZOR · İYİ · KOLAY</span><span>yarın 38 kart</span></div></div></template>
+<template id="t-z21"><div class="d z21">
+  <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><g stroke="var(--l2)" stroke-width="1" vector-effect="non-scaling-stroke"><line x1="50" y1="50" x2="18" y2="18" vector-effect="non-scaling-stroke"/><line x1="50" y1="50" x2="82" y2="20" vector-effect="non-scaling-stroke"/><line x1="50" y1="50" x2="20" y2="84" vector-effect="non-scaling-stroke"/><line x1="50" y1="50" x2="80" y2="82" vector-effect="non-scaling-stroke" stroke-dasharray="3 3"/></g></svg>
+  <span class="n" style="left:18%;top:18%">sturdy</span><span class="n" style="left:82%;top:20%">tough</span><span class="n" style="left:20%;top:84%">adaptable</span><span class="n z" style="left:80%;top:82%">fragile<small>ZIT</small></span>
+  <span class="n m" style="left:50%;top:50%">resilient</span></div></template>
+<template id="t-z22"><div class="d kt z22">
+  <div class="u"><b>Alışkanlık</b><span class="cap">NOT · 12 EYL</span></div>
+  <span class="ln" style="width:92%;margin-top:12px"></span><span class="ln" style="width:70%;margin-top:6px"></span>
+  <div class="bg"><span class="cap">3 BAĞLI NOT</span><div><span>Denemeler</span><span>Nikomakhos’a Etik</span><span>Alıntı kartı</span></div></div></div></template>
+
+<template id="t-z23"><div class="d mk z23">
+  <div class="u"><svg class="i"><use href="#yildiz"/></svg>Hafta 2 özeti<span class="cap">PAZAR 20:00</span></div>
+  <div class="ls"><div class="c-ays"><b>AYS</b><span>Net +3 · tekrar borcu arttı</span></div><div class="c-spi"><b>SPİ</b><span>Uyku ort. 7,0 sa · 1 gece veri yok</span></div><div class="c-esp"><b>ESP</b><span>20 / 50 dk · seri 11</span></div></div>
+  <div class="d2">2 öneri bekliyor →</div></div></template>
+<template id="t-z24"><div class="d z24">
+  <div class="u">Bu öneri 2 kurala dayanıyor</div>
+  <div class="r"><span class="kd">R-12</span><span>Tekrar borcu eşiği aştı</span><em>%34 &gt; %10</em><svg class="i"><use href="#tik"/></svg></div>
+  <div class="r"><span class="kd">R-07</span><span>Akşam bloğu dolu</span><em>Paragraf</em><svg class="i"><use href="#tik"/></svg></div>
+  <div class="mm"><span class="et y">MODEL</span>yalnız cümleyi kurdu, karara katılmadı</div></div></template>
+<template id="t-z25"><div class="d z25">
+  <div class="ek"><span>12</span><span>18</span><span>00</span><span>06</span><span>12</span></div>
+  <div class="tr"><span class="ss" style="left:41.7%;width:41.6%"></span><span class="ok3" style="left:46.5%;width:36.8%"></span><span class="on bk" style="left:46.5%"><svg class="i"><use href="#yildiz"/></svg></span><span class="on" style="left:83.3%"><svg class="i"><use href="#yildiz"/></svg></span></div>
+  <div class="alt"><span>23:10’daki öneri 08:00’de gelir</span><span class="cap">SESSİZ 22–08</span></div></div></template>
+<template id="t-z26"><div class="d z26">
+  <div class="mk"><div class="u"><svg class="i"><use href="#yildiz"/></svg>Öneri geçildi<span class="cap">NEDEN?</span></div>
+  <div class="cp"><span>Zamanım yok</span><span class="on">Sayı yanlış</span><span>Sonra hatırlat</span><span>İstemiyorum</span></div></div>
+  <span class="cap">İSTEĞE BAĞLI · ÖNERİ GEÇMİŞİNE YAZILIR</span></div></template>
+
+<template id="t-z27"><div class="d z27">
+  <div class="in">@ne<i></i></div>
+  <div class="ls">
+    <div class="on c-spi"><span class="av"><b>N</b><img src="../brand/medya/ajan/ajan-kare-spi-nutri.webp" alt="" onerror="this.remove()"></span><b><u>Ne</u>srin</b><span>beslenme</span><em>SPİ</em></div>
+    <div class="c-esp"><span class="av"><b>D</b><img src="../brand/medya/ajan/ajan-kare-esp-demosthenes.webp" alt="" onerror="this.remove()"></span><b>Demosthe<u>ne</u>s</b><span>konuşma</span><em>ESP</em></div>
+  </div></div></template>
+<template id="t-z28"><div class="d z28">
+  <span class="cap">PATRON · GÜNÜN TOPLANTISI · 08:00</span>
+  <div class="r"><span class="av"><b>K</b><img src="../brand/medya/ajan/ajan-kare-spi-lab.webp" alt="" onerror="this.remove()"></span><p><b>Kerem</b>Tahlile <span class="sc">3 hafta</span> var.</p></div>
+  <div class="r"><span class="av"><b>N</b><img src="../brand/medya/ajan/ajan-kare-spi-nutri.webp" alt="" onerror="this.remove()"></span><p><b>Nesrin</b><span class="sc">38 g</span> protein kaldı.</p></div>
+  <div class="r"><span class="av"><b>B</b><img src="../brand/medya/ajan/ajan-kare-spi-move.webp" alt="" onerror="this.remove()"></span><p><b>Barış</b>Antrenman <span class="sc">17:30</span>’da.</p></div></div></template>
+<template id="t-z29"><div class="d z29">
+  <div class="u"><span class="cap">NESRİN’İN ÜSLUBU</span><span class="et">TERCİH · GERİ ALINIR</span></div>
+  <div class="sg"><span class="on">Kısa</span><span>Sıcak</span><span>Ayrıntılı</span></div>
+  <div class="bal">38 g protein kaldı. Akşam mercimek yeter.</div></div></template>
+
+<template id="t-z30"><div class="d z30">
+  <div class="rz2"><span class="hx"><svg class="i"><use href="#yildiz"/></svg></span><b>İlk 100 soru</b><span>KAZANILDI · 3 EYL</span></div>
+  <div class="rz2"><span class="hx kl" style="--p:4.2"></span><b>24 ay istikrar</b><span>1 / 24 AY</span></div></div></template>
+<template id="t-z31"><div class="d z31">
+  <div class="br"><i class="yok"></i><i class="yok"></i><i class="yok"></i><i class="yok"></i><i class="yok"></i><i class="yok"></i><i class="yok"></i><i class="yok"></i><i class="yok"></i><i class="yok"></i><i class="az" style="height:14%"></i><i style="height:70%"></i></div>
+  <div class="ay"><span>EKİ</span><span>KAS</span><span>ARA</span><span>OCA</span><span>ŞUB</span><span>MAR</span><span>NİS</span><span>MAY</span><span>HAZ</span><span>TEM</span><span>AĞU</span><span>EYL</span></div>
+  <div class="lg"><span class="et o">EYLÜL · 21 GÜN · 1 870 DK</span><span>kesik · veri yok</span></div></div></template>
+
+<template id="t-z32"><div class="d z32">
+  <div class="bar"><div class="ad"><span class="c-ays">AYS</span><span class="c-spi">SPİ</span><span class="c-esp">ESP</span></div><span class="ln"></span></div>
+  <div class="cz"></div>
+  <div class="gv2"><span class="ln" style="width:70%"></span><span class="ln" style="width:45%"></span></div></div></template>
+<template id="t-z41"><div class="d z41">
+  <div class="dg"><span>Ertele</span><span>Başla</span><span>Geç</span><i class="hl3"></i></div>
+  <span class="cap">SEKME İLE ODAK YUMUŞAK KAYAR</span></div></template>
+
+<template id="t-z34"><div class="d z34"><div class="tel">
+  <span class="ln" style="top:14px;width:50%"></span><span class="ln" style="top:26px;width:34%"></span><span class="ln" style="top:40px;width:60%"></span>
+  <span class="eyl c-esp" style="bottom:118px;animation-delay:.15s">KART<i></i></span>
+  <span class="eyl c-spi" style="bottom:86px;animation-delay:.1s">ÖLÇÜM<i></i></span>
+  <span class="eyl c-ays" style="bottom:54px;animation-delay:.05s">SORU<i></i></span>
+  <span class="fab"><svg class="i"><use href="#arti"/></svg></span></div></div></template>
+<template id="t-z35"><div class="d z35"><div class="tel">
+  <i></i><i></i><i></i><i></i>
+  <div class="wd"><span class="mod c-ays">AYS</span><b>Paragraf</b><span class="mono">20:30 · 6 sa 20 dk</span><div class="pb"><i></i></div><span class="cap" style="font-size:8px">3 / 7 İŞ</span></div>
+  <i></i><i></i><i></i><i></i></div></div></template>
+
+<template id="t-z36"><div class="d z36">
+  <div class="st"><div class="b"><i>✓</i><span>Sınav</span></div><div class="on"><i>2</i><span>Takvim</span></div><div><i>3</i><span>Hedef</span></div><div><i>4</i><span>Bitti</span></div></div>
+  <div class="kt"><b>Haftada hangi günler çalışacaksın?</b><div class="gn"><span class="on">Pt</span><span class="on">Sa</span><span class="on">Ça</span><span class="on">Pe</span><span class="on">Cu</span><span>Ct</span><span>Pz</span></div></div></div></template>
+<template id="t-z37"><div class="d z37">
+  <div class="bn"><span class="an2 on"></span><b>Örnek veri açık</b><span>gerçek verin etkilenmez</span></div>
+  <div class="ic3"><span class="wm">ÖRNEK</span><span class="ln" style="width:60%"></span><span class="ln" style="width:82%"></span><span class="ln" style="width:45%"></span><span class="ln" style="width:70%"></span></div></div></template>
+<template id="t-z38"><div class="d z38">
+  <div class="u"><span class="ik"><svg class="i"><use href="#kalkan"/></svg></span><div><b>Son yedek 2 gün önce</b><span>3,2 MB · 1 208 kayıt</span></div></div>
+  <div data-tik="g..g..g..g.g.."></div>
+  <div class="alt"><span class="cap">SON 14 GÜN · DOLU = YEDEK</span><span class="bt g">Şimdi yedekle</span></div></div></template>
+<template id="t-z39"><div class="d z39">
+  <div class="n a"><b>Bu cihaz</b><span>asıl kayıt burada</span></div>
+  <div class="bg2"><i></i><i class="k"></i></div>
+  <div class="sag2"><div class="n"><b>Yedek dosyası</b><span>senin seçtiğin yer</span></div><div class="n c"><b>Merkez</b><span>isteğe bağlı · teklif yazar, modüle yazmaz</span></div></div></div></template>
+<template id="t-z40"><div class="d z40">
+  <div class="u"><span class="cap">DIŞA AKTAR · SPİ</span><span class="et h">ETİKETLER DAHİL</span></div>
+  <div class="sg"><span class="on">JSON</span><span>CSV</span><span>Yazdır</span></div>
+  <pre>{ <b>"tarih"</b>: "2026-09-24",
+  <b>"kilo"</b>: 71.4, <b>"etiket"</b>: "ölçüldü" }</pre>
+  <div class="alt"><span class="cap">1 208 KAYIT · 412 KB</span><span class="bt w">Dışa aktar</span></div></div></template>
+
 <!-- ================= VERI: tek kaynak (TASARIM-OZELLIKLERI.md bundan uretilir) ================= -->
 <script type="application/json" id="veri">
 {
 "dallar": [
- {"id":"a","ad":"Ortak tasarım dili","kisa":"Ortak","alt":"her sistemde aynı davranan parçalar"},
- {"id":"b","ad":"Sayı ve veri","kisa":"Sayı","alt":"etiketsiz sayı yok, eksik veri sıfır değil"},
- {"id":"c","ad":"AYS","kisa":"AYS","alt":"sınav hazırlığı"},
- {"id":"d","ad":"SPİ","kisa":"SPİ","alt":"sağlık · teşhis yok, doz yok"},
- {"id":"e","ad":"ESP","kisa":"ESP","alt":"gelişim · sertifika yok, yargı yok"},
- {"id":"f","ad":"Merkez · HKM","kisa":"Merkez","alt":"yalnız önerir, modül uygular"},
- {"id":"g","ad":"Ofis ve ajanlar","kisa":"Ofis","alt":"cümle ajandan, sayı koddan"},
- {"id":"h","ad":"Seviye ve rütbe","kisa":"Rütbe","alt":"yalnız görünürlük, karar yok"},
- {"id":"i","ad":"Hareket","kisa":"Hareket","alt":"her hareket bir anlam taşır"},
- {"id":"j","ad":"Mobil ve erişilebilirlik","kisa":"Mobil","alt":"390 piksel ve renk körlüğü"}
+ {"id": "a", "ad": "Ortak tasarım dili", "kisa": "Ortak", "alt": "her sistemde aynı davranan parçalar"},
+ {"id": "b", "ad": "Sayı ve veri", "kisa": "Sayı", "alt": "etiketsiz sayı yok, eksik veri sıfır değil"},
+ {"id": "c", "ad": "AYS", "kisa": "AYS", "alt": "sınav hazırlığı"},
+ {"id": "d", "ad": "SPİ", "kisa": "SPİ", "alt": "sağlık · teşhis yok, doz yok"},
+ {"id": "e", "ad": "ESP", "kisa": "ESP", "alt": "gelişim · sertifika yok, yargı yok"},
+ {"id": "f", "ad": "Merkez · HKM", "kisa": "Merkez", "alt": "yalnız önerir, modül uygular"},
+ {"id": "g", "ad": "Ofis ve ajanlar", "kisa": "Ofis", "alt": "cümle ajandan, sayı koddan"},
+ {"id": "h", "ad": "Seviye ve rütbe", "kisa": "Rütbe", "alt": "yalnız görünürlük, karar yok"},
+ {"id": "i", "ad": "Hareket", "kisa": "Hareket", "alt": "her hareket bir anlam taşır"},
+ {"id": "j", "ad": "Mobil ve erişilebilirlik", "kisa": "Mobil", "alt": "390 piksel ve renk körlüğü"},
+ {"id": "k", "ad": "Kurulum ve güven", "kisa": "Güven", "alt": "ilk gün, yedek ve verinin yeri"}
 ],
 "ozellikler": [
- {"k":"x01","dal":"a","ad":"Modül şeridi","ne":"Birden çok modülün işi aynı ekrandaysa her modül kendi yatay şeridinde durur.","neden":"Kategoriler aynı listede karışmaz; göz rengi ve satırı birlikte okur.","mod":["hepsi"],"p":1,"e":2,"yeni":false},
- {"k":"x02","dal":"a","ad":"Tek kutu iskeleti","ne":"Her kutu aynı başlığı taşır: simge, ad ve sağda kesinlik etiketi.","neden":"Kutunun ne olduğu içeriğine bakmadan anlaşılır.","mod":["hepsi"],"p":1,"e":1,"yeni":false},
- {"k":"x03","dal":"a","ad":"Üç alan düzeni","ne":"Her «Bugün» ekranı aynı sırada: Şimdi → Durum → Öneri.","neden":"Modül değişse de göz aynı yere bakar; öğrenme bir kez olur.","mod":["hepsi"],"p":1,"e":1,"yeni":false},
- {"k":"x08","dal":"a","ad":"Sayfa başı cümlesi","ne":"Ekranın tepesinde kural motorunun ürettiği tek cümlelik durum.","neden":"Ekranı taramadan günün özeti alınır; cümle koddan geldiği için tutarlıdır.","mod":["hepsi"],"p":1,"e":1,"yeni":false},
- {"k":"y01","dal":"a","ad":"Hafta şeridi","ne":"Başlığın altında yedi gün; her günde üç modülün noktası, gelecek günler boş halka.","neden":"Bugünün haftadaki yeri ve hangi günün boş kaldığı tek bakışta görülür.","mod":["hepsi"],"p":2,"e":1,"yeni":true},
- {"k":"y02","dal":"a","ad":"Günün açılışı","ne":"Günün ilk açılışında tek kart: iş sayısı, toplam süre ve ilk iş.","neden":"Güne planı okuyarak değil, tek kartla başlanır.","mod":["hepsi"],"p":2,"e":2,"yeni":true},
- {"k":"y03","dal":"a","ad":"Gün kapanışı","ne":"Akşam «Bugün kapandı» kartı: üç sayı ve yarının ilk işi.","neden":"Gün yarım kalmış hissi bırakmaz; ertesi sabah hazır başlar.","mod":["hepsi"],"p":2,"e":2,"yeni":true},
- {"k":"y04","dal":"a","ad":"Modül geçiş menüsü","ne":"«LifeOS / AYS» yolundan açılan menü: dört sistem, her biri kendi renginde ve kendi durumuyla.","neden":"Sistemler arası geçiş tek tık; hangi sistemde olduğun hiç karışmaz.","mod":["hepsi"],"p":2,"e":2,"yeni":true},
- {"k":"y05","dal":"a","ad":"Gruplu bildirimler","ne":"Bildirimler modül şeritleriyle gruplanır; Merkez önerileri ayrı kümede durur.","neden":"Farklı kategorilerin uyarıları aynı listede birbirine girmez.","mod":["hepsi"],"p":2,"e":2,"yeni":true},
- {"k":"x09","dal":"a","ad":"Boş durum sahnesi","ne":"Veri yoksa küçük bir çizim ve tek eylem gösterilir.","neden":"Boş grafik ya da 0, «ölçüldü ve sıfır» diye yanlış okunur.","mod":["hepsi"],"p":2,"e":1,"yeni":false},
- {"k":"y06","dal":"a","ad":"Sakin hata durumu","ne":"Bir şey bozulursa: ne oldu, verin nerede, tek düğme. Kırmızı yok.","neden":"Kullanıcı veri kaybı olmadığını ilk cümlede öğrenir.","mod":["hepsi"],"p":2,"e":1,"yeni":true},
- {"k":"x12","dal":"a","ad":"Tek canlı öğe","ne":"Ekranda aynı anda yalnız bir şey nabız atar: sıradaki iş.","neden":"Dikkat bölünmez; hareket görüldüğünde bir anlamı vardır.","mod":["hepsi"],"p":2,"e":1,"yeni":false},
-
- {"k":"x13","dal":"b","ad":"Kesinlik glifleri","ne":"Dolu, yarım, kesikli, çizgi. Tahmin olan sayının altı kesik ve aralığıyla birlikte.","neden":"Kural 2: etiketsiz sayı hiçbir katmana girmez.","mod":["hepsi"],"p":1,"e":1,"yeni":false},
- {"k":"y07","dal":"b","ad":"Köken kartı","ne":"Sayının üzerine gelince nereden geldiği açılır: formül, girdiler, hesap zamanı.","neden":"Kod otoritedir; kullanıcı her sayının hesabını kendi gözüyle görebilir.","mod":["hepsi"],"p":1,"e":2,"yeni":true},
- {"k":"y08","dal":"b","ad":"Veri tazeliği","ne":"Eski ölçüm soluklaşır ve yaşını yazar: «12 gün önce».","neden":"Bayat veri güncelmiş gibi görünüp kararı yanıltmaz.","mod":["hepsi"],"p":1,"e":1,"yeni":true},
- {"k":"y09","dal":"b","ad":"Eksik gün boşluğu","ne":"Grafikte verisi olmayan gün boşluk kalır; çizgi kesikli geçer, sıfıra düşmez.","neden":"Eksik veri sıfır değildir; düşen çizgi olmayan bir kötüleşme gösterir.","mod":["hepsi"],"p":1,"e":1,"yeni":true},
- {"k":"x15","dal":"b","ad":"Anlamlı fark rozeti","ne":"Rozetin rengi işaretten değil anlamdan gelir: net artışı iyi, borç artışı kötü.","neden":"+41 tekrar borcu yeşil gösterilirse yanlış haber olur.","mod":["hepsi"],"p":1,"e":1,"yeni":false},
- {"k":"x16","dal":"b","ad":"Eşik çizgili çubuk","ne":"Değer ve eşik aynı çubukta.","neden":"Eşiğin ne kadar aşıldığı hesaplanmadan görülür.","mod":["hepsi"],"p":2,"e":1,"yeni":false},
- {"k":"x17","dal":"b","ad":"Tik sayacı","ne":"Küçük hedefte yüzde yerine adet kutucukları.","neden":"Kalan 3 kutu sayılır; %83 soyut kalır.","mod":["hepsi"],"p":2,"e":1,"yeni":false},
- {"k":"y10","dal":"b","ad":"Hedef bandı","ne":"Grafikte hedef aralığı yatay bant; bant dışındaki noktalar içi boş.","neden":"Tek hedef sayısı yerine kabul edilebilir aralık; her sapma alarm değildir.","mod":["spi","ays"],"p":2,"e":1,"yeni":true},
- {"k":"x18","dal":"b","ad":"Geçen dönem gölgesi","ne":"Geçen dönem soluk kesik çizgi olarak arkada durur.","neden":"Karşılaştırma için ikinci bir grafik gerekmez.","mod":["hepsi"],"p":3,"e":1,"yeni":false},
- {"k":"y11","dal":"b","ad":"Gelecek yük grafiği","ne":"Önümüzdeki yedi günün tekrar yükü; bugün dolu, gelecek kesikli.","neden":"Birikme olmadan görülür ve Merkez önerisinin gerekçesi olur.","mod":["ays","esp"],"p":2,"e":2,"yeni":true},
- {"k":"x19","dal":"b","ad":"Grafiğin cümlesi","ne":"Her grafiğin altında kodun ürettiği tek okuma cümlesi.","neden":"Acele eden kullanıcı da ekran okuyucu da aynı bilgiyi alır.","mod":["hepsi"],"p":2,"e":1,"yeni":false},
-
- {"k":"x21","dal":"c","ad":"Sıradaki blok kahramanı","ne":"Ekranın en büyük öğesi tek iş; adımlar süreyle orantılı çubukta.","neden":"Bugün ekranının asıl sorusu: şimdi ne yapacağım?","mod":["ays"],"p":1,"e":2,"yeni":false},
- {"k":"x22","dal":"c","ad":"Geri sayım rozeti","ne":"Uzakken sakin, son 15 dakikada canlı.","neden":"Yaklaşan iş ekrana bakmadan fark edilir.","mod":["ays"],"p":2,"e":1,"yeni":false},
- {"k":"x23","dal":"c","ad":"Nötr soru şeridi","ne":"Çözerken yalnız ilerleme; doğru/yanlış rengi set bitince açılır.","neden":"Set ortasında yanlış görmek kaygı yaratır ve sonraki soruyu bozar.","mod":["ays"],"p":2,"e":1,"yeni":false},
- {"k":"x24","dal":"c","ad":"Yanlış kartı","ne":"Önde soru, arkada «neden yanlış». Tekrarda kart çevrilir.","neden":"Yanlıştan öğrenme tekrarın içine girer.","mod":["ays"],"p":2,"e":2,"yeni":false},
- {"k":"x25","dal":"c","ad":"Deneme karnesi","ne":"Ders başına tek satır; satır uzunluğu o dersin soru sayısı kadar.","neden":"Netin nerede kaybedildiği tek bakışta görülür.","mod":["ays"],"p":1,"e":2,"yeni":false},
- {"k":"y12","dal":"c","ad":"Hız şeridi","ne":"Denemede her sorunun süresi bir nokta; ortalamanın 1,5 katını geçenler öne çıkar.","neden":"Zaman kaybı yanlıştan ayrı bir sorundur ve ayrı görülmeli.","mod":["ays"],"p":2,"e":2,"yeni":true},
- {"k":"y13","dal":"c","ad":"Deneme karşılaştırması","ne":"İki deneme ders ders yan yana, fark rozetleriyle.","neden":"+3 net tek sayıya sıkışmaz; Fen’deki düşüş görünür kalır.","mod":["ays"],"p":2,"e":2,"yeni":true},
- {"k":"x26","dal":"c","ad":"Konu kapsam halkası","ne":"Planlanan sorunun ne kadarı çözüldü.","neden":"Yetenek yargısı yok; yalnız ne kadar çalışıldığı.","mod":["ays"],"p":2,"e":1,"yeni":false},
- {"k":"y14","dal":"c","ad":"Konu zinciri","ne":"Önkoşul sırası ve her halkanın kapsamı; eksik önkoşul kesikli çerçeveyle işaretli.","neden":"Hangi konunun önce gelmesi gerektiği görülür.","mod":["ays"],"p":3,"e":2,"yeni":true},
- {"k":"x27","dal":"c","ad":"40 hafta çizgisi","ne":"Sınava kadar her hafta bir tik; ara haftaları taralı.","neden":"Uzun hazırlık somut parçalara bölünür.","mod":["ays"],"p":2,"e":1,"yeni":false},
- {"k":"y15","dal":"c","ad":"Haftalık plan ızgarası","ne":"Yedi gün × saat ızgarası; bloklar modül renginde, boş saatler taralı, bugün çerçeveli.","neden":"Haftanın yükü ve boşluğu aynı anda görülür.","mod":["hepsi"],"p":2,"e":3,"yeni":true},
- {"k":"x28","dal":"c","ad":"Ara haftası önizlemesi","ne":"Etkilenen haftalar çizilir, tek onayla uygulanır.","neden":"Kural 9: orta seviye aksiyon önizlemesiz uygulanmaz.","mod":["ays"],"p":2,"e":2,"yeni":false},
- {"k":"x29","dal":"c","ad":"Taşıma gölgesi","ne":"Taşınan blok havada, yeri hayalet çizgi; bırakınca «Geri al».","neden":"Taşımanın etkisi bırakmadan önce görülür.","mod":["ays"],"p":2,"e":2,"yeni":false},
- {"k":"x30","dal":"c","ad":"Tek satır soru ekle","ne":"Ders · konu · sonuç üç çip; Enter ile kaydedilir.","neden":"Günde onlarca kayıt var; her biri iki saniyede bitmeli.","mod":["ays"],"p":1,"e":1,"yeni":false},
-
- {"k":"x31","dal":"d","ad":"Toparlanma halkası","ne":"Tek sayı ortada; üç kaynak ayrı dilim, her biri kendi kesinlik etiketiyle.","neden":"Tek sayı var ama hangi kaynağın tahmin olduğu saklanmaz.","mod":["spi"],"p":1,"e":2,"yeni":false},
- {"k":"x32","dal":"d","ad":"Uyku bandı","ne":"Gece tek şerit, uyanmalar kesik; altta haftanın gece dokusu.","neden":"Süre kadar bölünmeler de görünür.","mod":["spi"],"p":2,"e":2,"yeni":false},
- {"k":"y16","dal":"d","ad":"Ham + ortalama çizgisi","ne":"Dalgalı ölçümlerde ham noktalar soluk, yedi günlük ortalama çizgi.","neden":"Günlük dalgalanma paniğe yol açmaz; eğilim görülür.","mod":["spi"],"p":1,"e":1,"yeni":true},
- {"k":"x33","dal":"d","ad":"Referans bandı","ne":"Değer, laboratuvar aralığının içinde bir nokta. Aralık dışı yalnız işaretlenir.","neden":"Teşhis yok: yalnız aralığın neresinde olduğu.","mod":["spi"],"p":2,"e":1,"yeni":false},
- {"k":"x34","dal":"d","ad":"Tabak görünümü","ne":"Halka dilimi yerine tabak bölmesi; kalan miktar yazılı.","neden":"Gram ve yüzde yerine gerçek hayattaki tabak düşünülür.","mod":["spi"],"p":2,"e":2,"yeni":false},
- {"k":"x35","dal":"d","ad":"Tek dokunuş sayaç","ne":"Küçük kayıt tek dokunuş; altta «Geri al» şeridi.","neden":"Küçük kayıt zahmetliyse hiç girilmez; eksik veri çoğalır.","mod":["spi"],"p":1,"e":1,"yeni":false},
- {"k":"y17","dal":"d","ad":"Enerji ölçeği","ne":"Günde bir kez beş noktalı ölçek; seçilen nokta büyür.","neden":"Öznel veri de ölçülür: tahmin edilmez, sorulur.","mod":["spi"],"p":2,"e":1,"yeni":true},
- {"k":"x36","dal":"d","ad":"Set kutucukları","ne":"Biten set dolar; dinlenme süresi kutucuğun içinde akar.","neden":"Antrenman sırasında tek bakış yeter.","mod":["spi"],"p":2,"e":2,"yeni":false},
- {"k":"y18","dal":"d","ad":"Haftalık hareket halkaları","ne":"Yedi küçük halka; verisi olmayan gün kesikli boş halka.","neden":"Eksik gün sıfır gibi görünmez; «yapmadım» ile «girmedim» ayrılır.","mod":["spi"],"p":2,"e":1,"yeni":true},
- {"k":"x37","dal":"d","ad":"Ölçüm tuş takımı","ne":"Büyük rakam, sabit birim, dünkü değer ipucu olarak yanında.","neden":"Yanlış girişi dünkü değer yakalar.","mod":["spi"],"p":2,"e":1,"yeni":false},
- {"k":"y19","dal":"d","ad":"Sonraki kontrol kartı","ne":"«Kan tahlili · 3 hafta sonra»; hatırlatır, yorumlamaz.","neden":"SPİ takip eder; karar kullanıcının ve hekiminindir.","mod":["spi"],"p":3,"e":1,"yeni":true},
- {"k":"x38","dal":"d","ad":"Harcama şeritleri","ne":"Kategori başına şerit ve bütçe çizgisi; aşım yalnız çizginin rengiyle.","neden":"Aşım bağırmaz ama gözden de kaçmaz.","mod":["spi"],"p":2,"e":1,"yeni":false},
-
- {"k":"x40","dal":"e","ad":"Deste yığını","ne":"Kalan kartlar arkada yığın; yığın incelikçe bitiş görülür.","neden":"Ne kadar kaldığı sayı okumadan hissedilir.","mod":["esp"],"p":1,"e":1,"yeni":false},
- {"k":"x41","dal":"e","ad":"Süreli cevap düğmeleri","ne":"Her düğme kartın bir sonraki görülme zamanını söyler.","neden":"Her seçimin sonucu seçmeden bilinir.","mod":["esp"],"p":2,"e":1,"yeni":false},
- {"k":"x42","dal":"e","ad":"Dakika halkası","ne":"Günlük hedef halkası; rengi değişmez, yalnız dolar.","neden":"Hedefe yaklaşmak renk değiştiren bir alarm değildir.","mod":["esp"],"p":2,"e":1,"yeni":false},
- {"k":"x43","dal":"e","ad":"Unutma eğrisi","ne":"Hatırlama düşer, tekrar yükseltir; «bugün» noktası işaretli.","neden":"Tekrarın neden bugün olduğu görülür.","mod":["esp"],"p":2,"e":2,"yeni":false},
- {"k":"x44","dal":"e","ad":"Merdiven basamakları","ne":"Basamak içerik sırasıdır, derece değil.","neden":"Sıra var, yargı yok; sertifika izlenimi verilmez.","mod":["esp"],"p":2,"e":2,"yeni":false},
- {"k":"x45","dal":"e","ad":"Kütüphane rafı","ne":"Kitap sırtı: kalınlık sayfa sayısı, alt çizgi okunan oran.","neden":"Okuma listesi tablo değil, raf gibi durur.","mod":["esp"],"p":3,"e":2,"yeni":false},
- {"k":"y20","dal":"e","ad":"Okuma ilerlemesi","ne":"Kitap içinde ince ilerleme çizgisi ve bölümün kalan süresi.","neden":"Kalan süre tahmindir ve tahmin olarak etiketlidir.","mod":["esp"],"p":2,"e":1,"yeni":true},
- {"k":"y21","dal":"e","ad":"Alıntı kartı","ne":"Altı çizilen cümle kaynağıyla kart olur; tekrar destesine eklenebilir.","neden":"Okuma ile tekrar birbirine bağlanır.","mod":["esp"],"p":3,"e":2,"yeni":true},
- {"k":"x46","dal":"e","ad":"Kelime sahnesi","ne":"Tek kelime, anlamı, örnek cümle. Başka hiçbir şey yok.","neden":"Tekrar anında dikkat tek şeye ait olmalı.","mod":["esp"],"p":2,"e":1,"yeni":false},
- {"k":"y22","dal":"e","ad":"Bağlamda kelime","ne":"Metinde hedef kelime altı çizili; dokununca anlamı yerinde açılır.","neden":"Kelime ezber listesinde değil, cümle içinde öğrenilir.","mod":["esp"],"p":2,"e":2,"yeni":true},
- {"k":"y23","dal":"e","ad":"Konuşma dalga formu","ne":"Konuşma pratiğinde ses dalgası ve süre; duraksamalar boşluk olarak.","neden":"Ses kaydı bir sayı gibi okunur; yorum yapılmaz, ölçülür.","mod":["esp"],"p":3,"e":3,"yeni":true},
- {"k":"y24","dal":"e","ad":"Tarih şeridi","ne":"Yüzyıllar yatay şerit, olaylar nokta; eşlenen nokta yanar.","neden":"Yüzyıl eşlemesi görsel bir hafızaya dönüşür.","mod":["esp"],"p":3,"e":2,"yeni":true},
- {"k":"x47","dal":"e","ad":"Ajanlı ders kapağı","ne":"Dersin başında ajan portresi ve tek cümle; renk yine ESP.","neden":"Ders kimin sesinden geldiğini söyler ama rengi modülündür.","mod":["esp"],"p":3,"e":1,"yeni":false},
-
- {"k":"x48","dal":"f","ad":"Mor öneri kartı","ne":"Merkez’in her önerisi mor kenarlı kart; sağ üstte seviyesi.","neden":"Merkez’in sesi modül içeriğiyle hiçbir zaman karışmaz.","mod":["mer"],"p":1,"e":1,"yeni":false},
- {"k":"x49","dal":"f","ad":"Seviyeye göre onay","ne":"Küçük: tek dokunuş + Geri al. Orta: önizleme + onay. Büyük: önce/sonra + dönüş noktası.","neden":"Kural 9: seviyeyi katalog belirler, ekran onun kalıbını giyer.","mod":["mer"],"p":1,"e":2,"yeni":false},
- {"k":"y25","dal":"f","ad":"Çakışma kartı","ne":"İki modül aynı saati isterse ikisi yan yana görünür, Merkez bir çözüm önerir.","neden":"Kimin ne istediği karışmaz; son sözü kullanıcı söyler.","mod":["mer"],"p":1,"e":2,"yeni":true},
- {"k":"x50","dal":"f","ad":"Önce / sonra görünümü","ne":"Yalnız değişen blok renkli; gerisi soluk kalır.","neden":"Değişikliğin büyüklüğü abartılmadan görülür.","mod":["mer"],"p":2,"e":2,"yeni":false},
- {"k":"x51","dal":"f","ad":"Gerekçe çubuğu","ne":"Sayı koddan gelir ve çizilir; modelin cümlesi altında, ayrı durur.","neden":"Kural 1: sayıyı kod üretir, model yalnız cümleye çevirir.","mod":["mer"],"p":1,"e":1,"yeni":false},
- {"k":"y26","dal":"f","ad":"Bekleyen öneri rozeti","ne":"Üst çubukta mor sayaç; açılınca öneriler modüllerine göre sıralı.","neden":"Öneriler işi bölmez, sırasını bekler.","mod":["mer"],"p":2,"e":1,"yeni":true},
- {"k":"y27","dal":"f","ad":"Otomatik uygula ayarı","ne":"Küçük türlerin sormadan uygulanıp uygulanmayacağı tür tür anahtar; orta ve büyük hep sorar.","neden":"Kural 9: hangi küçük türün sormadan uygulanacağını kullanıcı seçer.","mod":["mer"],"p":1,"e":1,"yeni":true},
- {"k":"y28","dal":"f","ad":"Geri dönüş noktaları","ne":"Büyük aksiyonlardan önce alınan kayıtlar; birine tek düğmeyle dönülür.","neden":"Büyük değişiklik geri dönüşsüz olamaz.","mod":["mer"],"p":2,"e":2,"yeni":true},
- {"k":"x52","dal":"f","ad":"Bağlantı noktası","ne":"«Merkez bağlı · 14:08». Kapalıyken gri: «her şey çalışıyor».","neden":"Kural 4: Merkez kapalıyken hiçbir modül bozulmaz; ekran da panik yapmaz.","mod":["mer"],"p":1,"e":1,"yeni":false},
- {"k":"x53","dal":"f","ad":"Öneri geçmişi","ne":"Uygulanan, geçilen, geri alınan öneriler; her biri tek satır.","neden":"Merkez’in ne önerdiği ve kullanıcının ne seçtiği izlenebilir.","mod":["mer"],"p":3,"e":1,"yeni":false},
-
- {"k":"x54","dal":"g","ad":"Masa görünümü","ne":"Konuşan ajan büyür ve renklenir; diğerleri soluk bekler.","neden":"Kimin konuştuğu ilk bakışta belli.","mod":["hepsi"],"p":2,"e":1,"yeni":false},
- {"k":"x55","dal":"g","ad":"Balondaki sayı çipi","ne":"Ajan cümlesindeki sayı çip olarak görünür ve kaynağını taşır.","neden":"Cümle yorum, çip gerçek: ikisi karışmaz.","mod":["hepsi"],"p":1,"e":1,"yeni":false},
- {"k":"y29","dal":"g","ad":"Ajan sınır kartı","ne":"Ajan profili iki sütun: ne yapar, ne yapmaz.","neden":"Kural 5: sınırlar ilk bakışta belli; kullanıcı yanlış şey beklemez.","mod":["hepsi"],"p":2,"e":1,"yeni":true},
- {"k":"y30","dal":"g","ad":"Devir göstergesi","ne":"Bir ajan konuyu diğerine aktarınca kesik çizgiyle gösterilir.","neden":"Konuşmanın ortasında ses değişirse kullanıcı nedenini bilir.","mod":["hepsi"],"p":3,"e":1,"yeni":true},
- {"k":"x56","dal":"g","ad":"Ajan durum halkası","ne":"Portrenin çevresinde ince halka: dönen, sabit ya da yok.","neden":"Ajanın çalışıp çalışmadığı yazı okumadan görülür.","mod":["hepsi"],"p":3,"e":1,"yeni":false},
- {"k":"x57","dal":"g","ad":"Hazır cevap çipleri","ne":"Balonun altında iki üç kısa cevap.","neden":"Yazmadan konuşma sürer; mobilde özellikle.","mod":["hepsi"],"p":2,"e":1,"yeni":false},
-
- {"k":"x58","dal":"h","ad":"Rütbe halkası","ne":"Rütbe görseli, çevresinde XP halkası.","neden":"Seviye görünür ama ekranın merkezine oturmaz.","mod":["hepsi"],"p":2,"e":1,"yeni":false},
- {"k":"y31","dal":"h","ad":"XP dökümü","ne":"Bugünkü XP nereden geldi: soru, blok, günü kaydetme.","neden":"Kural 6: XP görünürdür ama hiçbir karara girmez; döküm bunu açık eder.","mod":["hepsi"],"p":3,"e":1,"yeni":true},
- {"k":"y32","dal":"h","ad":"Kademe yolu","ne":"Altı kademe tek yolda: Bronz’dan Kutsal’a; bulunduğun yer yanar.","neden":"Bir sonraki kademe somut; ad ve renk tek kaynaktan gelir.","mod":["hepsi"],"p":3,"e":1,"yeni":true},
- {"k":"x59","dal":"h","ad":"Sakin seviye atlama","ne":"Kısa bir parlama; ekranı kapatmaz, işi bölmez.","neden":"Seviye bir ödül anı ama işin önüne geçmemeli.","mod":["hepsi"],"p":3,"e":1,"yeni":false},
- {"k":"x60","dal":"h","ad":"Sistem başına rütbe","ne":"Her sistemin kendi rütbesi; çerçevesi modül renginde.","neden":"Kural 6: her sistemin kendi seviyesi var; tanım ortak.","mod":["hepsi"],"p":2,"e":1,"yeni":false},
- {"k":"x61","dal":"h","ad":"Rütbe galerisi","ne":"Kazanılan kademeler renkli, kilitliler siluet.","neden":"XP yalnız burada ve üst çubukta görünür; başka ekrana sızmaz.","mod":["hepsi"],"p":3,"e":1,"yeni":false},
-
- {"k":"x63","dal":"i","ad":"Sayı yuvarlanması","ne":"Değer değişince rakam yukarı kayar.","neden":"Değişen sayı gözden kaçmaz.","mod":["hepsi"],"p":2,"e":1,"yeni":false},
- {"k":"x64","dal":"i","ad":"Geri al geri sayımı","ne":"«Geri al» şeridinin altında incelen çizgi.","neden":"Geri almanın ne kadar süresi kaldığı görünür olmalı.","mod":["hepsi"],"p":1,"e":1,"yeni":false},
- {"k":"x66","dal":"i","ad":"Şimdi çizgisi","ne":"Çizelgede ilerleyen ince çizgi; geçmiş saatler taralı.","neden":"Günün neresinde olduğun saat okumadan görülür.","mod":["hepsi"],"p":2,"e":1,"yeni":false},
- {"k":"y33","dal":"i","ad":"Tik çizimi","ne":"İş bitince tik çizilerek belirir, satır yavaşça soluklaşır.","neden":"Bitirme anı küçük ama hissedilir.","mod":["hepsi"],"p":2,"e":1,"yeni":true},
- {"k":"y34","dal":"i","ad":"Kart açılma geçişi","ne":"Kart yerinde büyüyerek ayrıntıya dönüşür.","neden":"Kullanıcı nereden geldiğini unutmaz; geri dönüş doğal olur.","mod":["hepsi"],"p":2,"e":2,"yeni":true},
- {"k":"y35","dal":"i","ad":"Küçülen başlık","ne":"Kaydırınca büyük başlık üst çubuğa küçülerek yerleşir.","neden":"Ekran alanı açılır ama bağlam kaybolmaz.","mod":["hepsi"],"p":3,"e":1,"yeni":true},
-
- {"k":"x67","dal":"j","ad":"Başparmak bölgesi","ne":"Mobilde ana eylem ekranın alt üçte birinde; gezinme alt sekme çubuğuna iner.","neden":"Günde onlarca kez tek elle kullanılır.","mod":["hepsi"],"p":2,"e":2,"yeni":false},
- {"k":"y36","dal":"j","ad":"Kaydırarak işaretle","ne":"Satırı sağa kaydır: bitti; sola: ertele.","neden":"Mobilde en sık iki eylem tek hareket olur.","mod":["hepsi"],"p":2,"e":2,"yeni":true},
- {"k":"y37","dal":"j","ad":"Alt çekmece","ne":"Mobilde ayrıntı alttan yarım ekran açılır; çekince tam ekran.","neden":"Liste kaybolmaz; çekmece tek elle kapanır.","mod":["hepsi"],"p":2,"e":2,"yeni":true},
- {"k":"x68","dal":"j","ad":"Sabit etiketli kaydırma","ne":"Şerit yana kayar, modül etiketi solda sabit kalır.","neden":"Dar ekranda da hangi şeridin kime ait olduğu kaybolmaz.","mod":["hepsi"],"p":2,"e":1,"yeni":false},
- {"k":"y38","dal":"j","ad":"Bildirim kartı","ne":"Telefon bildirimi: modül rengi, tek cümle, iki eylem.","neden":"Uygulamayı açmadan karar verilir.","mod":["hepsi"],"p":2,"e":2,"yeni":true},
- {"k":"x69","dal":"j","ad":"Renksiz de ayırt edilir","ne":"Modül = renk + harf + şekil: daire, kare, üçgen.","neden":"Renk körü kullanıcı da kategorileri karıştırmaz.","mod":["hepsi"],"p":1,"e":1,"yeni":false}
+ {"k": "x01", "dal": "a", "ad": "Modül şeridi", "ne": "Birden çok modülün işi aynı ekrandaysa her modül kendi yatay şeridinde durur.", "neden": "Kategoriler aynı listede karışmaz; göz rengi ve satırı birlikte okur.", "mod": ["hepsi"], "p": 1, "e": 2, "s": 1, "ilg": ["y15", "x68"]},
+ {"k": "x02", "dal": "a", "ad": "Tek kutu iskeleti", "ne": "Her kutu aynı başlığı taşır: simge, ad ve sağda kesinlik etiketi.", "neden": "Kutunun ne olduğu içeriğine bakmadan anlaşılır.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 1},
+ {"k": "x03", "dal": "a", "ad": "Üç alan düzeni", "ne": "Her «Bugün» ekranı aynı sırada: Şimdi → Durum → Öneri.", "neden": "Modül değişse de göz aynı yere bakar; öğrenme bir kez olur.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 1, "yen": true},
+ {"k": "x08", "dal": "a", "ad": "Sayfa başı cümlesi", "ne": "Ekranın tepesinde kural motorunun ürettiği tek cümlelik durum.", "neden": "Ekranı taramadan günün özeti alınır; cümle koddan geldiği için tutarlıdır.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 1},
+ {"k": "y01", "dal": "a", "ad": "Hafta şeridi", "ne": "Başlığın altında yedi gün; her günde üç modülün noktası, gelecek günler boş halka.", "neden": "Bugünün haftadaki yeri ve hangi günün boş kaldığı tek bakışta görülür.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 2},
+ {"k": "y02", "dal": "a", "ad": "Günün açılışı", "ne": "Günün ilk açılışında tek kart: iş sayısı, toplam süre ve ilk iş.", "neden": "Güne planı okuyarak değil, tek kartla başlanır.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 2},
+ {"k": "y03", "dal": "a", "ad": "Gün kapanışı", "ne": "Akşam «Bugün kapandı» kartı: üç sayı ve yarının ilk işi.", "neden": "Gün yarım kalmış hissi bırakmaz; ertesi sabah hazır başlar.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 2},
+ {"k": "y04", "dal": "a", "ad": "Modül geçiş menüsü", "ne": "«LifeOS / AYS» yolundan açılan menü: dört sistem, her biri kendi renginde ve kendi durumuyla.", "neden": "Sistemler arası geçiş tek tık; hangi sistemde olduğun hiç karışmaz.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 2},
+ {"k": "y05", "dal": "a", "ad": "Gruplu bildirimler", "ne": "Bildirimler modül şeritleriyle gruplanır; Merkez önerileri ayrı kümede durur.", "neden": "Farklı kategorilerin uyarıları aynı listede birbirine girmez.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 2},
+ {"k": "x09", "dal": "a", "ad": "Boş durum sahnesi", "ne": "Veri yoksa küçük bir çizim ve tek eylem gösterilir.", "neden": "Boş grafik ya da 0, «ölçüldü ve sıfır» diye yanlış okunur.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 1, "yen": true},
+ {"k": "y06", "dal": "a", "ad": "Sakin hata durumu", "ne": "Bir şey bozulursa: ne oldu, verin nerede, tek düğme. Kırmızı yok.", "neden": "Kullanıcı veri kaybı olmadığını ilk cümlede öğrenir.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 2},
+ {"k": "x12", "dal": "a", "ad": "Tek canlı öğe", "ne": "Ekranda aynı anda yalnız bir şey nabız atar: sıradaki iş.", "neden": "Dikkat bölünmez; hareket görüldüğünde bir anlamı vardır.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 1},
+ {"k": "z01", "dal": "a", "ad": "Gruplu komut sonuçları", "ne": "⌘K sonuçları modül şeritleriyle gruplanır; aksiyonun seviyesi satırın sonunda yazar.", "neden": "Aynı kelime iki modülde farklı iş yapar; grup ve seviye yanlış seçimi önler.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 3, "var": true, "ilg": ["x01", "y04", "x49"]},
+ {"k": "z02", "dal": "a", "ad": "Odak kapısı", "ne": "Odak modunda yalnız süren iş ve süresi kalır; geri kalan her şey sisle örtülür, Esc ile çıkılır.", "neden": "Çalışırken ekranda başka kategori görünmez; dikkat dağılmaz.", "mod": ["ays", "esp"], "p": 2, "e": 2, "s": 3, "var": true, "ilg": ["x12", "x21"]},
+ {"k": "z03", "dal": "a", "ad": "Son bilinen değer", "ne": "Veri yenilenirken iskelet yerine son bilinen değer ve saati durur; üstte ince bir tarama çizgisi.", "neden": "Ekran boşalıp dolmaz; kullanıcı elindeki son doğru bilgiyi kaybetmez.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 3, "ilg": ["y08", "y06"]},
+ {"k": "z04", "dal": "a", "ad": "Terim ipucu", "ne": "«Tekrar borcu» gibi terimlerin altı noktalı; üzerine gelince tek cümlelik tanım ve örnek açılır.", "neden": "Sistemin dili öğrenilir; aynı kelime her ekranda aynı anlama gelir.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 3, "ilg": ["y07", "x16"]},
+ {"k": "z05", "dal": "a", "ad": "Ne değişti?", "ne": "Güncellemeden sonra ilk açılışta tek kart: yeni, düzeltilen ve kaldırılan şeyler.", "neden": "Yeri değişen bir özellik kullanıcıyı şaşırtmaz.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 3},
+ {"k": "z33", "dal": "a", "ad": "Şüpheli giriş sorusu", "ne": "Dünkü değerden çok sapan giriş hemen kaydedilmez; kod en olası düzeltmeyi sorar.", "neden": "Kural 7: belirsiz girdi tahmin edilmez, sorulur.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 3, "ilg": ["x37", "x35"]},
+ {"k": "x13", "dal": "b", "ad": "Kesinlik glifleri", "ne": "Dolu, yarım, kesikli, çizgi. Tahmin olan sayının altı kesik ve aralığıyla birlikte.", "neden": "Kural 2: etiketsiz sayı hiçbir katmana girmez.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 1, "ilg": ["y07", "z06", "x15"]},
+ {"k": "y07", "dal": "b", "ad": "Köken kartı", "ne": "Sayının üzerine gelince nereden geldiği açılır: formül, girdiler, hesap zamanı.", "neden": "Kod otoritedir; kullanıcı her sayının hesabını kendi gözüyle görebilir.", "mod": ["hepsi"], "p": 1, "e": 2, "s": 2},
+ {"k": "y08", "dal": "b", "ad": "Veri tazeliği", "ne": "Eski ölçüm soluklaşır ve yaşını yazar: «12 gün önce».", "neden": "Bayat veri güncelmiş gibi görünüp kararı yanıltmaz.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 2},
+ {"k": "y09", "dal": "b", "ad": "Eksik gün boşluğu", "ne": "Grafikte verisi olmayan gün boşluk kalır; çizgi kesikli geçer, sıfıra düşmez.", "neden": "Eksik veri sıfır değildir; düşen çizgi olmayan bir kötüleşme gösterir.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 2, "ilg": ["z08", "z31"]},
+ {"k": "x15", "dal": "b", "ad": "Anlamlı fark rozeti", "ne": "Rozetin rengi işaretten değil anlamdan gelir: net artışı iyi, borç artışı kötü.", "neden": "+41 tekrar borcu yeşil gösterilirse yanlış haber olur.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 1},
+ {"k": "x16", "dal": "b", "ad": "Eşik çizgili çubuk", "ne": "Değer ve eşik aynı çubukta.", "neden": "Eşiğin ne kadar aşıldığı hesaplanmadan görülür.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 1},
+ {"k": "x17", "dal": "b", "ad": "Tik sayacı", "ne": "Küçük hedefte yüzde yerine adet kutucukları.", "neden": "Kalan 3 kutu sayılır; %83 soyut kalır.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 1},
+ {"k": "y10", "dal": "b", "ad": "Hedef bandı", "ne": "Grafikte hedef aralığı yatay bant; bant dışındaki noktalar içi boş.", "neden": "Tek hedef sayısı yerine kabul edilebilir aralık; her sapma alarm değildir.", "mod": ["spi", "ays"], "p": 2, "e": 1, "s": 2},
+ {"k": "x18", "dal": "b", "ad": "Geçen dönem gölgesi", "ne": "Geçen dönem soluk kesik çizgi olarak arkada durur.", "neden": "Karşılaştırma için ikinci bir grafik gerekmez.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 1},
+ {"k": "y11", "dal": "b", "ad": "Gelecek yük grafiği", "ne": "Önümüzdeki yedi günün tekrar yükü; bugün dolu, gelecek kesikli.", "neden": "Birikme olmadan görülür ve Merkez önerisinin gerekçesi olur.", "mod": ["ays", "esp"], "p": 2, "e": 2, "s": 2},
+ {"k": "x19", "dal": "b", "ad": "Grafiğin cümlesi", "ne": "Her grafiğin altında kodun ürettiği tek okuma cümlesi.", "neden": "Acele eden kullanıcı da ekran okuyucu da aynı bilgiyi alır.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 1, "yen": true},
+ {"k": "z06", "dal": "b", "ad": "Aralık çubuğu", "ne": "Tahmin tek sayı değil aralık olarak çizilir; en olası değer çizgiyle, dayanağı altta yazılı.", "neden": "Sıralama tahmini gibi belirsiz sayılar kesinmiş gibi görünmez.", "mod": ["ays"], "p": 1, "e": 1, "s": 3, "ilg": ["x13", "y07"]},
+ {"k": "z07", "dal": "b", "ad": "Dağılım şeridi", "ne": "Otuz gecenin her biri bir nokta; ortadaki çizgi medyan.", "neden": "Ortalama tek başına dalgalanmayı saklar; dağılım düzensizliği gösterir.", "mod": ["spi"], "p": 3, "e": 1, "s": 3, "ilg": ["z19", "y16"]},
+ {"k": "z08", "dal": "b", "ad": "Güvenli eğilim", "ne": "Eğilim oku yalnız yeterli veri varsa çizilir; yoksa kaç ölçüm daha gerektiği yazar.", "neden": "İki noktadan eğilim çıkarmak, anlamadığını anlamış gibi yapmaktır.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 3, "ilg": ["y09", "y16"]},
+ {"k": "x21", "dal": "c", "ad": "Sıradaki blok kahramanı", "ne": "Ekranın en büyük öğesi tek iş; adımlar süreyle orantılı çubukta.", "neden": "Bugün ekranının asıl sorusu: şimdi ne yapacağım?", "mod": ["ays"], "p": 1, "e": 2, "s": 1, "ilg": ["z14", "x22", "x12"]},
+ {"k": "x22", "dal": "c", "ad": "Geri sayım rozeti", "ne": "Uzakken sakin, son 15 dakikada canlı.", "neden": "Yaklaşan iş ekrana bakmadan fark edilir.", "mod": ["ays"], "p": 2, "e": 1, "s": 1, "yen": true},
+ {"k": "x23", "dal": "c", "ad": "Nötr soru şeridi", "ne": "Çözerken yalnız ilerleme; doğru/yanlış rengi set bitince açılır.", "neden": "Set ortasında yanlış görmek kaygı yaratır ve sonraki soruyu bozar.", "mod": ["ays"], "p": 2, "e": 1, "s": 1},
+ {"k": "x24", "dal": "c", "ad": "Yanlış kartı", "ne": "Önde soru, arkada «neden yanlış». Tekrarda kart çevrilir.", "neden": "Yanlıştan öğrenme tekrarın içine girer.", "mod": ["ays"], "p": 2, "e": 2, "s": 1},
+ {"k": "x25", "dal": "c", "ad": "Deneme karnesi", "ne": "Ders başına tek satır; satır uzunluğu o dersin soru sayısı kadar.", "neden": "Netin nerede kaybedildiği tek bakışta görülür.", "mod": ["ays"], "p": 1, "e": 2, "s": 1},
+ {"k": "y12", "dal": "c", "ad": "Hız şeridi", "ne": "Denemede her sorunun süresi bir nokta; ortalamanın 1,5 katını geçenler öne çıkar.", "neden": "Zaman kaybı yanlıştan ayrı bir sorundur ve ayrı görülmeli.", "mod": ["ays"], "p": 2, "e": 2, "s": 2},
+ {"k": "y13", "dal": "c", "ad": "Deneme karşılaştırması", "ne": "İki deneme ders ders yan yana, fark rozetleriyle.", "neden": "+3 net tek sayıya sıkışmaz; Fen’deki düşüş görünür kalır.", "mod": ["ays"], "p": 2, "e": 2, "s": 2},
+ {"k": "x26", "dal": "c", "ad": "Konu kapsam halkası", "ne": "Planlanan sorunun ne kadarı çözüldü.", "neden": "Yetenek yargısı yok; yalnız ne kadar çalışıldığı.", "mod": ["ays"], "p": 2, "e": 1, "s": 1},
+ {"k": "y14", "dal": "c", "ad": "Konu zinciri", "ne": "Önkoşul sırası ve her halkanın kapsamı; eksik önkoşul kesikli çerçeveyle işaretli.", "neden": "Hangi konunun önce gelmesi gerektiği görülür.", "mod": ["ays"], "p": 3, "e": 2, "s": 2},
+ {"k": "x27", "dal": "c", "ad": "40 hafta çizgisi", "ne": "Sınava kadar her hafta bir tik; ara haftaları taralı.", "neden": "Uzun hazırlık somut parçalara bölünür.", "mod": ["ays"], "p": 2, "e": 1, "s": 1},
+ {"k": "y15", "dal": "c", "ad": "Haftalık plan ızgarası", "ne": "Yedi gün × saat ızgarası; bloklar modül renginde, boş saatler taralı, bugün çerçeveli.", "neden": "Haftanın yükü ve boşluğu aynı anda görülür.", "mod": ["hepsi"], "p": 2, "e": 3, "s": 2},
+ {"k": "x28", "dal": "c", "ad": "Ara haftası önizlemesi", "ne": "Etkilenen haftalar çizilir, tek onayla uygulanır.", "neden": "Kural 9: orta seviye aksiyon önizlemesiz uygulanmaz.", "mod": ["ays"], "p": 2, "e": 2, "s": 1},
+ {"k": "x29", "dal": "c", "ad": "Taşıma gölgesi", "ne": "Taşınan blok havada, yeri hayalet çizgi; bırakınca «Geri al».", "neden": "Taşımanın etkisi bırakmadan önce görülür.", "mod": ["ays"], "p": 2, "e": 2, "s": 1},
+ {"k": "x30", "dal": "c", "ad": "Tek satır soru ekle", "ne": "Ders · konu · sonuç üç çip; Enter ile kaydedilir.", "neden": "Günde onlarca kayıt var; her biri iki saniyede bitmeli.", "mod": ["ays"], "p": 1, "e": 1, "s": 1},
+ {"k": "z10", "dal": "c", "ad": "Yanlış nedenleri", "ne": "Set sonunda her yanlışa tek dokunuşla neden seçilir: bilgi, dikkat, süre.", "neden": "Aynı sayıda yanlışın çaresi nedene göre değişir.", "mod": ["ays"], "p": 2, "e": 2, "s": 3, "ilg": ["x24", "y12"]},
+ {"k": "z11", "dal": "c", "ad": "Deneme takvimi", "ne": "Önümüzdeki denemeler tek çizgide; geçmiş olan netiyle, sıradaki parlayarak.", "neden": "Denemeye kaç gün kaldığı planı okumadan bilinir.", "mod": ["ays"], "p": 2, "e": 1, "s": 3, "ilg": ["y13", "x27"]},
+ {"k": "z12", "dal": "c", "ad": "Soru ekranı", "ne": "Soru numarası, süre ve şıklar; doğru ya da yanlış çözerken gösterilmez.", "neden": "Soru anında tek şeye bakılır; sonuç set bitince gelir.", "mod": ["ays"], "p": 2, "e": 2, "s": 3, "var": true, "ilg": ["x23", "z10"]},
+ {"k": "z13", "dal": "c", "ad": "Tekrar paketi", "ne": "Günün tekrarları konu konu paket olur; toplam süre tahmin olarak yazılır.", "neden": "432 kartlık kuyruk yerine bitirilebilir bir iş görülür.", "mod": ["ays"], "p": 2, "e": 2, "s": 3, "ilg": ["y11", "x16"]},
+ {"k": "z14", "dal": "c", "ad": "Blok bitiş özeti", "ne": "Blok bitince üç sayı ve sıradaki iş; tek düğmeyle devam.", "neden": "Bitiş anında ne yapıldığı ve sırada ne olduğu karışmaz.", "mod": ["ays"], "p": 1, "e": 1, "s": 3, "ilg": ["x21", "y33"]},
+ {"k": "z15", "dal": "c", "ad": "Ders dengesi", "ne": "Planlanan ve gerçekleşen ders dağılımı alt alta; fark tek rozetle.", "neden": "Hangi dersin payının kaydığı haftalar geçmeden görülür.", "mod": ["ays"], "p": 2, "e": 1, "s": 3, "ilg": ["y15", "x25"]},
+ {"k": "x31", "dal": "d", "ad": "Toparlanma halkası", "ne": "Tek sayı ortada; üç kaynak ayrı dilim, her biri kendi kesinlik etiketiyle.", "neden": "Tek sayı var ama hangi kaynağın tahmin olduğu saklanmaz.", "mod": ["spi"], "p": 1, "e": 2, "s": 1},
+ {"k": "x32", "dal": "d", "ad": "Uyku bandı", "ne": "Gece tek şerit, uyanmalar kesik; altta haftanın gece dokusu.", "neden": "Süre kadar bölünmeler de görünür.", "mod": ["spi"], "p": 2, "e": 2, "s": 1},
+ {"k": "y16", "dal": "d", "ad": "Ham + ortalama çizgisi", "ne": "Dalgalı ölçümlerde ham noktalar soluk, yedi günlük ortalama çizgi.", "neden": "Günlük dalgalanma paniğe yol açmaz; eğilim görülür.", "mod": ["spi"], "p": 1, "e": 1, "s": 2},
+ {"k": "x33", "dal": "d", "ad": "Referans bandı", "ne": "Değer, laboratuvar aralığının içinde bir nokta. Aralık dışı yalnız işaretlenir.", "neden": "Teşhis yok: yalnız aralığın neresinde olduğu.", "mod": ["spi"], "p": 2, "e": 1, "s": 1},
+ {"k": "x34", "dal": "d", "ad": "Tabak görünümü", "ne": "Halka dilimi yerine tabak bölmesi; kalan miktar yazılı.", "neden": "Gram ve yüzde yerine gerçek hayattaki tabak düşünülür.", "mod": ["spi"], "p": 2, "e": 2, "s": 1},
+ {"k": "x35", "dal": "d", "ad": "Tek dokunuş sayaç", "ne": "Küçük kayıt tek dokunuş; altta «Geri al» şeridi.", "neden": "Küçük kayıt zahmetliyse hiç girilmez; eksik veri çoğalır.", "mod": ["spi"], "p": 1, "e": 1, "s": 1},
+ {"k": "y17", "dal": "d", "ad": "Enerji ölçeği", "ne": "Günde bir kez beş noktalı ölçek; seçilen nokta büyür.", "neden": "Öznel veri de ölçülür: tahmin edilmez, sorulur.", "mod": ["spi"], "p": 2, "e": 1, "s": 2},
+ {"k": "x36", "dal": "d", "ad": "Set kutucukları", "ne": "Biten set dolar; dinlenme süresi kutucuğun içinde akar.", "neden": "Antrenman sırasında tek bakış yeter.", "mod": ["spi"], "p": 2, "e": 2, "s": 1},
+ {"k": "y18", "dal": "d", "ad": "Haftalık hareket halkaları", "ne": "Yedi küçük halka; verisi olmayan gün kesikli boş halka.", "neden": "Eksik gün sıfır gibi görünmez; «yapmadım» ile «girmedim» ayrılır.", "mod": ["spi"], "p": 2, "e": 1, "s": 2},
+ {"k": "x37", "dal": "d", "ad": "Ölçüm tuş takımı", "ne": "Büyük rakam, sabit birim, dünkü değer ipucu olarak yanında.", "neden": "Yanlış girişi dünkü değer yakalar.", "mod": ["spi"], "p": 2, "e": 1, "s": 1, "ilg": ["z33"]},
+ {"k": "y19", "dal": "d", "ad": "Sonraki kontrol kartı", "ne": "«Kan tahlili · 3 hafta sonra»; hatırlatır, yorumlamaz.", "neden": "SPİ takip eder; karar kullanıcının ve hekiminindir.", "mod": ["spi"], "p": 3, "e": 1, "s": 2},
+ {"k": "x38", "dal": "d", "ad": "Harcama şeritleri", "ne": "Kategori başına şerit ve bütçe çizgisi; aşım yalnız çizginin rengiyle.", "neden": "Aşım bağırmaz ama gözden de kaçmaz.", "mod": ["spi"], "p": 2, "e": 1, "s": 1},
+ {"k": "z16", "dal": "d", "ad": "Öğün çizelgesi", "ne": "Gün tek şeritte; öğünler nokta, yeme aralığı açık bant, planlanan öğün içi boş.", "neden": "Beslenme saatleri gram tablosundan önce okunur.", "mod": ["spi"], "p": 2, "e": 1, "s": 3, "ilg": ["x34"]},
+ {"k": "z17", "dal": "d", "ad": "Yoğunluk bölgeleri", "ne": "Antrenmanın dakikaları bölgelere göre; eşikleri kod hesaplar.", "neden": "Ne kadar zorlandığın yorum değil, ölçüm olarak görünür.", "mod": ["spi"], "p": 3, "e": 1, "s": 3, "ilg": ["x36"]},
+ {"k": "z18", "dal": "d", "ad": "Harcama takvimi", "ne": "Ay takvimi; her günün harcaması nokta büyüklüğüyle, gelecek günler soluk.", "neden": "Harcamanın hangi günlerde yoğunlaştığı tabloya bakmadan görülür.", "mod": ["spi"], "p": 3, "e": 1, "s": 3, "ilg": ["x38"]},
+ {"k": "z19", "dal": "d", "ad": "Uyku düzeni", "ne": "İki haftanın yatış ve kalkış saatleri dikey çubuk; hedef saatler kesik çizgi.", "neden": "Uyku süresi kadar saatinin kayması da görünür.", "mod": ["spi"], "p": 2, "e": 1, "s": 3, "ilg": ["x32", "z07"]},
+ {"k": "x40", "dal": "e", "ad": "Deste yığını", "ne": "Kalan kartlar arkada yığın; yığın incelikçe bitiş görülür.", "neden": "Ne kadar kaldığı sayı okumadan hissedilir.", "mod": ["esp"], "p": 1, "e": 1, "s": 1},
+ {"k": "x41", "dal": "e", "ad": "Süreli cevap düğmeleri", "ne": "Her düğme kartın bir sonraki görülme zamanını söyler.", "neden": "Her seçimin sonucu seçmeden bilinir.", "mod": ["esp"], "p": 2, "e": 1, "s": 1},
+ {"k": "x42", "dal": "e", "ad": "Dakika halkası", "ne": "Günlük hedef halkası; rengi değişmez, yalnız dolar.", "neden": "Hedefe yaklaşmak renk değiştiren bir alarm değildir.", "mod": ["esp"], "p": 2, "e": 1, "s": 1},
+ {"k": "x43", "dal": "e", "ad": "Unutma eğrisi", "ne": "Hatırlama düşer, tekrar yükseltir; «bugün» noktası işaretli.", "neden": "Tekrarın neden bugün olduğu görülür.", "mod": ["esp"], "p": 2, "e": 2, "s": 1},
+ {"k": "x44", "dal": "e", "ad": "Merdiven basamakları", "ne": "Basamak içerik sırasıdır, derece değil.", "neden": "Sıra var, yargı yok; sertifika izlenimi verilmez.", "mod": ["esp"], "p": 2, "e": 2, "s": 1, "yen": true},
+ {"k": "x45", "dal": "e", "ad": "Kütüphane rafı", "ne": "Kitap sırtı: kalınlık sayfa sayısı, alt çizgi okunan oran.", "neden": "Okuma listesi tablo değil, raf gibi durur.", "mod": ["esp"], "p": 3, "e": 2, "s": 1, "yen": true},
+ {"k": "y20", "dal": "e", "ad": "Okuma ilerlemesi", "ne": "Kitap içinde ince ilerleme çizgisi ve bölümün kalan süresi.", "neden": "Kalan süre tahmindir ve tahmin olarak etiketlidir.", "mod": ["esp"], "p": 2, "e": 1, "s": 2},
+ {"k": "y21", "dal": "e", "ad": "Alıntı kartı", "ne": "Altı çizilen cümle kaynağıyla kart olur; tekrar destesine eklenebilir.", "neden": "Okuma ile tekrar birbirine bağlanır.", "mod": ["esp"], "p": 3, "e": 2, "s": 2},
+ {"k": "x46", "dal": "e", "ad": "Kelime sahnesi", "ne": "Tek kelime, anlamı, örnek cümle. Başka hiçbir şey yok.", "neden": "Tekrar anında dikkat tek şeye ait olmalı.", "mod": ["esp"], "p": 2, "e": 1, "s": 1},
+ {"k": "y22", "dal": "e", "ad": "Bağlamda kelime", "ne": "Metinde hedef kelime altı çizili; dokununca anlamı yerinde açılır.", "neden": "Kelime ezber listesinde değil, cümle içinde öğrenilir.", "mod": ["esp"], "p": 2, "e": 2, "s": 2},
+ {"k": "y23", "dal": "e", "ad": "Konuşma dalga formu", "ne": "Konuşma pratiğinde ses dalgası ve süre; duraksamalar boşluk olarak.", "neden": "Ses kaydı bir sayı gibi okunur; yorum yapılmaz, ölçülür.", "mod": ["esp"], "p": 3, "e": 3, "s": 2},
+ {"k": "y24", "dal": "e", "ad": "Tarih şeridi", "ne": "Yüzyıllar yatay şerit, olaylar nokta; eşlenen nokta yanar.", "neden": "Yüzyıl eşlemesi görsel bir hafızaya dönüşür.", "mod": ["esp"], "p": 3, "e": 2, "s": 2},
+ {"k": "x47", "dal": "e", "ad": "Ajanlı ders kapağı", "ne": "Dersin başında ajan portresi ve tek cümle; renk yine ESP.", "neden": "Ders kimin sesinden geldiğini söyler ama rengi modülündür.", "mod": ["esp"], "p": 3, "e": 1, "s": 1},
+ {"k": "z20", "dal": "e", "ad": "Oturum sonu", "ne": "Tekrar bitince kart sayısı, iyi oranı, süre ve cevap dağılımı; yarının yükü altta.", "neden": "Oturumun nasıl geçtiği tek bakışta; yarın ne beklediği belli.", "mod": ["esp"], "p": 2, "e": 1, "s": 3, "ilg": ["x41", "y11"]},
+ {"k": "z21", "dal": "e", "ad": "Kelime ağı", "ne": "Kelime ortada; eş anlamlılar çevresinde, zıt anlamlı kesik çerçeveyle.", "neden": "Kelime tek başına değil, akrabalarıyla hatırlanır.", "mod": ["esp"], "p": 3, "e": 2, "s": 3, "ilg": ["x46", "y22"]},
+ {"k": "z22", "dal": "e", "ad": "Bağlı notlar", "ne": "Not kartının altında ona bağlanan kaynaklar ve notlar çip olarak.", "neden": "Okuma, not ve tekrar tek zincire bağlanır.", "mod": ["esp"], "p": 3, "e": 2, "s": 3, "ilg": ["y21", "y20"]},
+ {"k": "x48", "dal": "f", "ad": "Mor öneri kartı", "ne": "Merkez’in her önerisi mor kenarlı kart; sağ üstte seviyesi.", "neden": "Merkez’in sesi modül içeriğiyle hiçbir zaman karışmaz.", "mod": ["mer"], "p": 1, "e": 1, "s": 1, "ilg": ["x51", "z24", "y25"]},
+ {"k": "x49", "dal": "f", "ad": "Seviyeye göre onay", "ne": "Küçük: tek dokunuş + Geri al. Orta: önizleme + onay. Büyük: önce/sonra + dönüş noktası.", "neden": "Kural 9: seviyeyi katalog belirler, ekran onun kalıbını giyer.", "mod": ["mer"], "p": 1, "e": 2, "s": 1, "ilg": ["y27", "y28", "x28"]},
+ {"k": "y25", "dal": "f", "ad": "Çakışma kartı", "ne": "İki modül aynı saati isterse ikisi yan yana görünür, Merkez bir çözüm önerir.", "neden": "Kimin ne istediği karışmaz; son sözü kullanıcı söyler.", "mod": ["mer"], "p": 1, "e": 2, "s": 2},
+ {"k": "x50", "dal": "f", "ad": "Önce / sonra görünümü", "ne": "Yalnız değişen blok renkli; gerisi soluk kalır.", "neden": "Değişikliğin büyüklüğü abartılmadan görülür.", "mod": ["mer"], "p": 2, "e": 2, "s": 1},
+ {"k": "x51", "dal": "f", "ad": "Gerekçe çubuğu", "ne": "Sayı koddan gelir ve çizilir; modelin cümlesi altında, ayrı durur.", "neden": "Kural 1: sayıyı kod üretir, model yalnız cümleye çevirir.", "mod": ["mer"], "p": 1, "e": 1, "s": 1},
+ {"k": "y26", "dal": "f", "ad": "Bekleyen öneri rozeti", "ne": "Üst çubukta mor sayaç; açılınca öneriler modüllerine göre sıralı.", "neden": "Öneriler işi bölmez, sırasını bekler.", "mod": ["mer"], "p": 2, "e": 1, "s": 2},
+ {"k": "y27", "dal": "f", "ad": "Otomatik uygula ayarı", "ne": "Küçük türlerin sormadan uygulanıp uygulanmayacağı tür tür anahtar; orta ve büyük hep sorar.", "neden": "Kural 9: hangi küçük türün sormadan uygulanacağını kullanıcı seçer.", "mod": ["mer"], "p": 1, "e": 1, "s": 2},
+ {"k": "y28", "dal": "f", "ad": "Geri dönüş noktaları", "ne": "Büyük aksiyonlardan önce alınan kayıtlar; birine tek düğmeyle dönülür.", "neden": "Büyük değişiklik geri dönüşsüz olamaz.", "mod": ["mer"], "p": 2, "e": 2, "s": 2},
+ {"k": "x52", "dal": "f", "ad": "Bağlantı noktası", "ne": "«Merkez bağlı · 14:08». Kapalıyken gri: «her şey çalışıyor».", "neden": "Kural 4: Merkez kapalıyken hiçbir modül bozulmaz; ekran da panik yapmaz.", "mod": ["mer"], "p": 1, "e": 1, "s": 1, "ilg": ["z39", "y06"]},
+ {"k": "x53", "dal": "f", "ad": "Öneri geçmişi", "ne": "Uygulanan, geçilen, geri alınan öneriler; her biri tek satır.", "neden": "Merkez’in ne önerdiği ve kullanıcının ne seçtiği izlenebilir.", "mod": ["mer"], "p": 3, "e": 1, "s": 1},
+ {"k": "z23", "dal": "f", "ad": "Haftalık Merkez özeti", "ne": "Pazar akşamı tek kart: her modülden bir satır, bekleyen öneriler en altta.", "neden": "Hafta tek sayfadan okunur; modüller yine ayrı satırda durur.", "mod": ["mer"], "p": 2, "e": 2, "s": 3, "ilg": ["y05", "y26"]},
+ {"k": "z24", "dal": "f", "ad": "Kural izi", "ne": "Önerinin dayandığı kurallar numarasıyla; her kuralın yanında sağlandığı değer.", "neden": "Kural 1: kararı kod verir; kullanıcı hangi kuralın tetiklendiğini görür.", "mod": ["mer"], "p": 1, "e": 1, "s": 3, "ilg": ["x51", "y07"]},
+ {"k": "z25", "dal": "f", "ad": "Sessiz saatler", "ne": "Gece bandında gelen öneri bekler; sabah ilk açılışta görünür.", "neden": "Merkez işi bölmez; uyku saatinde hiç bölmez.", "mod": ["mer"], "p": 2, "e": 1, "s": 3, "ilg": ["y26"]},
+ {"k": "z26", "dal": "f", "ad": "Geçme nedeni", "ne": "«Geç» dendiğinde isteğe bağlı neden çipleri; seçilen neden geçmişe yazılır.", "neden": "Önerinin neden işe yaramadığı tahminle değil, kullanıcının sözüyle bilinir.", "mod": ["mer"], "p": 2, "e": 1, "s": 3, "ilg": ["x53"]},
+ {"k": "x54", "dal": "g", "ad": "Masa görünümü", "ne": "Konuşan ajan büyür ve renklenir; diğerleri soluk bekler.", "neden": "Kimin konuştuğu ilk bakışta belli.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 1},
+ {"k": "x55", "dal": "g", "ad": "Balondaki sayı çipi", "ne": "Ajan cümlesindeki sayı çip olarak görünür ve kaynağını taşır.", "neden": "Cümle yorum, çip gerçek: ikisi karışmaz.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 1},
+ {"k": "y29", "dal": "g", "ad": "Ajan sınır kartı", "ne": "Ajan profili iki sütun: ne yapar, ne yapmaz.", "neden": "Kural 5: sınırlar ilk bakışta belli; kullanıcı yanlış şey beklemez.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 2},
+ {"k": "y30", "dal": "g", "ad": "Devir göstergesi", "ne": "Bir ajan konuyu diğerine aktarınca kesik çizgiyle gösterilir.", "neden": "Konuşmanın ortasında ses değişirse kullanıcı nedenini bilir.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 2},
+ {"k": "x56", "dal": "g", "ad": "Ajan durum halkası", "ne": "Portrenin çevresinde ince halka: dönen, sabit ya da yok.", "neden": "Ajanın çalışıp çalışmadığı yazı okumadan görülür.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 1},
+ {"k": "x57", "dal": "g", "ad": "Hazır cevap çipleri", "ne": "Balonun altında iki üç kısa cevap.", "neden": "Yazmadan konuşma sürer; mobilde özellikle.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 1},
+ {"k": "z27", "dal": "g", "ad": "Ajan seçici", "ne": "@ yazınca ajanlar rolü ve modülüyle listelenir; eşleşen harfler vurgulanır.", "neden": "Kime sorduğun karışmaz; her ajanın alanı adının yanında.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 3, "ilg": ["y29"]},
+ {"k": "z28", "dal": "g", "ad": "Günün toplantısı", "ne": "Patron günün başında her ajandan tek cümle toplar; sayılar çip olarak.", "neden": "Beş ajanı tek tek açmadan günün durumu okunur.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 3, "ilg": ["x55", "x54"]},
+ {"k": "z29", "dal": "g", "ad": "Üslup seçimi", "ne": "Ajanın konuşma biçimi üç seçenekten biri; önizleme anında değişir.", "neden": "Tercih değiştirmek küçük bir aksiyondur ve geri alınır; sayılar değişmez.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 3, "var": true, "ilg": ["y27"]},
+ {"k": "x58", "dal": "h", "ad": "Rütbe halkası", "ne": "Rütbe görseli, çevresinde XP halkası.", "neden": "Seviye görünür ama ekranın merkezine oturmaz.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 1},
+ {"k": "y31", "dal": "h", "ad": "XP dökümü", "ne": "Bugünkü XP nereden geldi: soru, blok, günü kaydetme.", "neden": "Kural 6: XP görünürdür ama hiçbir karara girmez; döküm bunu açık eder.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 2},
+ {"k": "y32", "dal": "h", "ad": "Kademe yolu", "ne": "Altı kademe tek yolda: Bronz’dan Kutsal’a; bulunduğun yer yanar.", "neden": "Bir sonraki kademe somut; ad ve renk tek kaynaktan gelir.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 2},
+ {"k": "x59", "dal": "h", "ad": "Sakin seviye atlama", "ne": "Kısa bir parlama; ekranı kapatmaz, işi bölmez.", "neden": "Seviye bir ödül anı ama işin önüne geçmemeli.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 1},
+ {"k": "x60", "dal": "h", "ad": "Sistem başına rütbe", "ne": "Her sistemin kendi rütbesi; çerçevesi modül renginde.", "neden": "Kural 6: her sistemin kendi seviyesi var; tanım ortak.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 1},
+ {"k": "x61", "dal": "h", "ad": "Rütbe galerisi", "ne": "Kazanılan kademeler renkli, kilitliler siluet.", "neden": "XP yalnız burada ve üst çubukta görünür; başka ekrana sızmaz.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 1},
+ {"k": "z30", "dal": "h", "ad": "Başarım rozeti", "ne": "Kazanılan rozet altıgen ve renkli; kilitli olanın ilerlemesi dilim olarak.", "neden": "Uzun hedefler görünür ama hiçbir kararı etkilemez.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 3, "var": true, "ilg": ["x61"]},
+ {"k": "z31", "dal": "h", "ad": "Ay özeti şeridi", "ne": "On iki ayın çalışma günleri; kurulumdan önceki aylar «veri yok» olarak kesik.", "neden": "Eksik ay sıfır gibi görünmez; defterin ne zaman başladığı belli.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 3, "var": true, "ilg": ["y09"]},
+ {"k": "x63", "dal": "i", "ad": "Sayı yuvarlanması", "ne": "Değer değişince rakam yukarı kayar.", "neden": "Değişen sayı gözden kaçmaz.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 1},
+ {"k": "x64", "dal": "i", "ad": "Geri al geri sayımı", "ne": "«Geri al» şeridinin altında incelen çizgi.", "neden": "Geri almanın ne kadar süresi kaldığı görünür olmalı.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 1, "var": true, "ilg": ["x35", "x29"]},
+ {"k": "x66", "dal": "i", "ad": "Şimdi çizgisi", "ne": "Çizelgede ilerleyen ince çizgi; geçmiş saatler taralı.", "neden": "Günün neresinde olduğun saat okumadan görülür.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 1},
+ {"k": "y33", "dal": "i", "ad": "Tik çizimi", "ne": "İş bitince tik çizilerek belirir, satır yavaşça soluklaşır.", "neden": "Bitirme anı küçük ama hissedilir.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 2},
+ {"k": "y34", "dal": "i", "ad": "Kart açılma geçişi", "ne": "Kart yerinde büyüyerek ayrıntıya dönüşür.", "neden": "Kullanıcı nereden geldiğini unutmaz; geri dönüş doğal olur.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 2, "yen": true},
+ {"k": "y35", "dal": "i", "ad": "Küçülen başlık", "ne": "Kaydırınca büyük başlık üst çubuğa küçülerek yerleşir.", "neden": "Ekran alanı açılır ama bağlam kaybolmaz.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 2, "yen": true},
+ {"k": "z32", "dal": "i", "ad": "Modül geçiş rengi", "ne": "Sistem değişince üst çizgi yeni sistemin rengini alır, ad kısa bir geçişle değişir.", "neden": "Hangi sisteme geçtiğin gözün köşesinden bile fark edilir.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 3, "ilg": ["y04"]},
+ {"k": "z41", "dal": "i", "ad": "Odak halkası akışı", "ne": "Klavyeyle gezerken odak halkası düğmeden düğmeye kayarak geçer.", "neden": "Klavye kullanıcısı nerede olduğunu kaybetmez.", "mod": ["hepsi"], "p": 3, "e": 1, "s": 3},
+ {"k": "x67", "dal": "j", "ad": "Başparmak bölgesi", "ne": "Mobilde ana eylem ekranın alt üçte birinde; gezinme alt sekme çubuğuna iner.", "neden": "Günde onlarca kez tek elle kullanılır.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 1, "yen": true},
+ {"k": "y36", "dal": "j", "ad": "Kaydırarak işaretle", "ne": "Satırı sağa kaydır: bitti; sola: ertele.", "neden": "Mobilde en sık iki eylem tek hareket olur.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 2},
+ {"k": "y37", "dal": "j", "ad": "Alt çekmece", "ne": "Mobilde ayrıntı alttan yarım ekran açılır; çekince tam ekran.", "neden": "Liste kaybolmaz; çekmece tek elle kapanır.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 2, "yen": true},
+ {"k": "x68", "dal": "j", "ad": "Sabit etiketli kaydırma", "ne": "Şerit yana kayar, modül etiketi solda sabit kalır.", "neden": "Dar ekranda da hangi şeridin kime ait olduğu kaybolmaz.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 1},
+ {"k": "y38", "dal": "j", "ad": "Bildirim kartı", "ne": "Telefon bildirimi: modül rengi, tek cümle, iki eylem.", "neden": "Uygulamayı açmadan karar verilir.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 2},
+ {"k": "x69", "dal": "j", "ad": "Renksiz de ayırt edilir", "ne": "Modül = renk + harf + şekil: daire, kare, üçgen.", "neden": "Renk körü kullanıcı da kategorileri karıştırmaz.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 1},
+ {"k": "z34", "dal": "j", "ad": "Hızlı ekle düğmesi", "ne": "Sağ alttaki + açılınca üç modülün hızlı kaydı yelpaze gibi çıkar.", "neden": "Her modülün en sık kaydı tek yerden, rengiyle ayrılarak girilir.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 3, "ilg": ["x67"]},
+ {"k": "z35", "dal": "j", "ad": "Ana ekran bileşeni", "ne": "Telefon ana ekranında sıradaki iş, saati ve günün ilerlemesi.", "neden": "Uygulamayı açmadan sırada ne olduğu bilinir.", "mod": ["hepsi"], "p": 3, "e": 3, "s": 3, "ilg": ["y38"]},
+ {"k": "z36", "dal": "k", "ad": "Kurulum adımları", "ne": "İlk açılışta dört adım; her adım tek soru, ilerleme üstte.", "neden": "Boş bir sistemle değil, kendi takvimiyle başlanır.", "mod": ["hepsi"], "p": 2, "e": 2, "s": 3, "var": true, "ilg": ["z37"]},
+ {"k": "z37", "dal": "k", "ad": "Örnek veri kipi", "ne": "Sistemi örnek veriyle denemek; üstte şeritli uyarı, arkada «ÖRNEK» filigranı.", "neden": "Deneme verisi gerçek veriyle hiçbir zaman karışmaz.", "mod": ["hepsi"], "p": 3, "e": 2, "s": 3, "ilg": ["z36"]},
+ {"k": "z38", "dal": "k", "ad": "Yedek durumu", "ne": "Son yedeğin yaşı, boyutu ve iki haftalık yedek izi; tek düğmeyle yedek.", "neden": "Verinin güvende olduğu tahmin değil, tarih olarak görülür.", "mod": ["hepsi"], "p": 1, "e": 1, "s": 3, "var": true, "ilg": ["z39", "z40"]},
+ {"k": "z39", "dal": "k", "ad": "Veri nerede?", "ne": "Tek şema: cihaz asıl kayıt, yedek senin seçtiğin yer, Merkez isteğe bağlı.", "neden": "Kural 4: Merkez modüle yazmaz; kullanıcı bunu metinden değil şemadan okur.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 3, "ilg": ["x52", "z38"]},
+ {"k": "z40", "dal": "k", "ad": "Dışa aktar", "ne": "Biçim seçilir, ilk satırlar önizlenir; her sayı etiketiyle birlikte çıkar.", "neden": "Kural 2 dosyada da geçerli: etiketsiz sayı dışarı da çıkmaz.", "mod": ["hepsi"], "p": 2, "e": 1, "s": 3, "var": true, "ilg": ["z38"]}
 ]
 }
 </script>
@@ -1555,13 +2251,15 @@ svg.gr{width:100%;height:auto;display:block;overflow:visible}
 <script>
 (function(){
 var V = JSON.parse(document.getElementById('veri').textContent);
-var L = V.ozellikler, D = V.dallar;
+var L = V.ozellikler, D = V.dallar, KEY = {};
 var MOD = {ays:'AYS',spi:'SPİ',esp:'ESP',mer:'MERKEZ',hepsi:'HEPSİ'};
 var EMEK = ['','Az','Orta','Çok'];
+L.forEach(function(o, i){ o.i = i; KEY[o.k] = o; });
 function iki(n){ return n < 10 ? '0' + n : '' + n; }
-function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function virgul(n){ return String(n).replace('.', ','); }
 
-/* ornek uretecleri: tekrar eden desenler veriden cizilir */
+/* ---------- ornek uretecleri: tekrar eden desenler veriden cizilir ---------- */
 function doldur(root){
   root.querySelectorAll('[data-tik]').forEach(function(el){
     el.innerHTML = el.dataset.tik.split('').map(function(c){ return '<i' + (c === '.' ? '' : ' class="t-' + c + '"') + '></i>'; }).join('');
@@ -1591,35 +2289,74 @@ function doldur(root){
     });
     svg.innerHTML = s + '<path d="' + p + '" fill="none" stroke="var(--spi)" stroke-width="2.2" stroke-linejoin="round"/>';
   });
+  root.querySelectorAll('svg[data-dag]').forEach(function(svg){
+    var v = svg.dataset.dag.split(',').map(Number), s = '';
+    var x = function(a){ return 10 + (a - 5) / 4 * 240; };
+    var sirali = v.slice().sort(function(a, b){ return a - b; }), m = (sirali[14] + sirali[15]) / 2;
+    [5,6,7,8,9].forEach(function(t){ s += '<text x="' + x(t) + '" y="78" text-anchor="middle" fill="var(--ink3)" style="font:400 9px var(--mono)">' + t + ' sa</text>'; });
+    s += '<line x1="10" x2="250" y1="60" y2="60" stroke="var(--l2)"/>';
+    s += '<line x1="' + x(m) + '" x2="' + x(m) + '" y1="4" y2="60" stroke="var(--ink)" stroke-width="1.5"/>';
+    s += '<text x="' + (x(m) + 5) + '" y="11" fill="var(--ink)" style="font:500 9px var(--mono)">medyan ' + virgul(m.toFixed(1)) + '</text>';
+    v.forEach(function(a, i){ s += '<circle cx="' + x(a).toFixed(1) + '" cy="' + (20 + (i * 37) % 34) + '" r="3.2" fill="var(--spi)" opacity=".8"/>'; });
+    svg.innerHTML = s;
+  });
+  root.querySelectorAll('[data-duzen]').forEach(function(el){
+    var h = el.dataset.duzen.split(',').map(function(c){
+      var p = c.split('-').map(Number), ust = (p[0] - 22) / 11 * 100, boy = (p[1] + 24 - p[0]) / 11 * 100;
+      return '<div><i style="top:' + ust.toFixed(1) + '%;height:' + boy.toFixed(1) + '%"></i></div>';
+    }).join('');
+    el.insertAdjacentHTML('beforeend', h);
+  });
+  root.querySelectorAll('[data-takvim]').forEach(function(el){
+    var h = el.dataset.takvim.split(',').map(function(t){
+      if (t === '.') return '<i class="bs"></i>';
+      if (t === '-') return '<i class="gl"></i>';
+      var bu = t.charAt(0) === 't', n = +(bu ? t.slice(1) : t), r = (4 + n * 1.3).toFixed(1);
+      return '<i' + (bu ? ' class="bu"' : '') + '><b style="width:' + r + 'px;height:' + r + 'px"></b></i>';
+    }).join('');
+    el.insertAdjacentHTML('beforeend', h);
+  });
 }
 function ornek(k){
   var t = document.getElementById('t-' + k);
   return t ? t.content.cloneNode(true) : document.createTextNode('');
 }
-function rozet(o){ return '<span class="rz p' + o.p + '">P' + o.p + '</span>' + (o.yeni ? '<span class="rz yeni">YENİ</span>' : ''); }
+function rozet(o){
+  return '<span class="rz p' + o.p + '">P' + o.p + '</span>'
+    + (o.s === 3 ? '<span class="rz yeni">YENİ</span>' : '')
+    + (o.yen ? '<span class="rz yen">YENİLENDİ</span>' : '')
+    + (o.var ? '<span class="rz var">MEVCUT</span>' : '');
+}
 function modler(o){ return o.mod.map(function(m){ return '<span' + (m === 'hepsi' ? '' : ' class="c-' + m + '"') + '>' + MOD[m] + '</span>'; }).join(''); }
-function emek(e){ var s = ''; for (var i = 1; i <= 3; i++) s += '<i' + (i <= e ? ' class="d"' : '') + '></i>'; return s; }
+function emek(e){ var s = ''; for (var i = 1; i <= 3; i++) s += '<i' + (i <= e ? ' class="d"' : '') + '></i>'; return '<span class="emek" title="Emek: ' + EMEK[e] + '">' + s + '</span>'; }
+var ISARET = '<svg class="i"><use href="#isaret"/></svg>';
 
-/* bolumleri kur */
+/* ---------- secim: yalniz bu tarayicida tutulur ---------- */
+var SK = 'lifeos-katalog-secim', secim = [];
+try { secim = JSON.parse(localStorage.getItem(SK) || '[]').filter(function(k){ return KEY[k]; }); } catch (e) { secim = []; }
+function kaydet(){ try { localStorage.setItem(SK, JSON.stringify(secim)); } catch (e) {} }
+function secili(o){ return secim.indexOf(o.k) > -1; }
+
+/* ---------- bolumleri kur ---------- */
 var kap = document.getElementById('bolumler'), nav = document.getElementById('dalNav'), no = 0, h = '<a href="#temeller"><span>00</span>Temeller</a>';
 D.forEach(function(d){
   var ls = L.filter(function(o){ return o.dal === d.id; });
   h += '<a href="#' + d.id + '"><span>' + d.id.toUpperCase() + '</span>' + d.kisa + '</a>';
   var sec = document.createElement('section');
   sec.className = 'bol'; sec.id = d.id;
-  sec.innerHTML = '<div class="bb"><span class="h">' + d.id.toUpperCase() + '</span><h2>' + d.ad + '</h2><span class="alt">' + d.alt + '</span><span class="sy"></span></div><div class="izg"></div><div class="tablo"><div class="sat bas"><span>NO</span><span>ÖZELLİK</span><span>NE YAPAR</span><span>MODÜL</span><span>ÖNC.</span><span>EMEK</span><span></span></div></div>';
+  sec.innerHTML = '<div class="bb"><span class="h">' + d.id.toUpperCase() + '</span><h2>' + d.ad + '</h2><span class="alt">' + d.alt + '</span><span class="sy"></span></div><div class="izg"></div><div class="tablo"><div class="sat bas"><span>NO</span><span>ÖZELLİK</span><span>NE YAPAR</span><span>MODÜL</span><span>ÖNC.</span><span>EMEK</span><span>DURUM</span></div></div>';
   var izg = sec.querySelector('.izg'), tb = sec.querySelector('.tablo');
   ls.forEach(function(o){
-    no++; o.no = no; o.i = L.indexOf(o);
+    no++; o.no = no;
     var a = document.createElement('article');
     a.className = 'v'; a.tabIndex = 0; a.dataset.i = o.i;
     a.setAttribute('aria-label', o.ad + ' — ayrıntı');
-    a.innerHTML = '<span class="ac">AYRINTI →</span><div class="sh"></div><div class="ya"><div class="u"><span class="no">' + iki(no) + '</span>' + rozet(o) + '</div><b class="ad">' + esc(o.ad) + '</b><p>' + esc(o.ne) + '</p><div class="mt"><span class="mk-l">' + modler(o) + '</span><span class="emek" title="Emek: ' + EMEK[o.e] + '">' + emek(o.e) + '</span></div></div>';
+    a.innerHTML = '<button class="sec" aria-pressed="false" aria-label="Seçtiklerime ekle">' + ISARET + '</button><span class="ac">AYRINTI →</span><div class="sh"></div><div class="ya"><div class="u"><span class="no">' + iki(no) + '</span>' + rozet(o) + '</div><b class="ad">' + esc(o.ad) + '</b><p>' + esc(o.ne) + '</p><div class="mt"><span class="mk-l">' + modler(o) + '</span>' + emek(o.e) + '</div></div>';
     a.querySelector('.sh').appendChild(ornek(o.k));
     izg.appendChild(a);
     var r = document.createElement('div');
     r.className = 'sat'; r.dataset.i = o.i; r.tabIndex = 0;
-    r.innerHTML = '<span class="no">' + iki(no) + '</span><b>' + esc(o.ad) + '</b><p>' + esc(o.ne) + '</p><span class="mk-l">' + modler(o) + '</span><span class="rz p' + o.p + '">P' + o.p + '</span><span class="emek">' + emek(o.e) + '</span><span>' + (o.yeni ? '<span class="rz yeni">YENİ</span>' : '') + '</span>';
+    r.innerHTML = '<span class="no">' + iki(no) + '</span><b>' + esc(o.ad) + '</b><p>' + esc(o.ne) + '</p><span class="mk-l">' + modler(o) + '</span><span class="rz p' + o.p + '">P' + o.p + '</span>' + emek(o.e) + '<span>' + (o.s === 3 ? '<span class="rz yeni">YENİ</span>' : o.yen ? '<span class="rz yen">YENİLENDİ</span>' : o.var ? '<span class="rz var">MEVCUT</span>' : '') + '</span>';
     tb.appendChild(r);
     o.kart = a; o.satir = r;
   });
@@ -1629,32 +2366,87 @@ D.forEach(function(d){
 nav.innerHTML = h + '<a href="#elenenler"><span>—</span>Elenenler</a>';
 doldur(kap);
 
-/* sayilar veriden */
-var say = { toplam: L.length, yeni: L.filter(function(o){ return o.yeni; }).length, p1: L.filter(function(o){ return o.p === 1; }).length };
+/* ---------- plan panosu: P1 / P2 / P3 sutunlari ---------- */
+var plan = document.getElementById('plan'), SUT = {1:['Önce','şimdi yapılacaklar'], 2:['Sonra','ikinci dalga'], 3:['İleride','zaman olunca']}, kol = {};
+[1,2,3].forEach(function(p){
+  var k = document.createElement('div'); k.className = 'ks';
+  k.innerHTML = '<div class="kb2"><span class="rz p' + p + '">P' + p + '</span><b>' + SUT[p][0] + '</b><span>' + SUT[p][1] + '</span><em></em></div>';
+  plan.appendChild(k); kol[p] = { el: k, bas: k.querySelector('em'), gruplar: [], son: null };
+});
+L.forEach(function(o){
+  var c = kol[o.p];
+  if (c.son !== o.dal) {
+    var ds = document.createElement('div'); ds.className = 'ds';
+    ds.textContent = o.dal.toUpperCase() + ' · ' + D.filter(function(x){ return x.id === o.dal; })[0].ad.toLocaleUpperCase('tr');
+    c.el.appendChild(ds); c.gruplar.push({ el: ds, ls: [] }); c.son = o.dal;
+  }
+  var it = document.createElement('div'); it.className = 'it'; it.dataset.i = o.i; it.tabIndex = 0;
+  it.innerHTML = '<span class="no">' + iki(o.no) + '</span><div><b>' + esc(o.ad) + '</b><span class="mk-l">' + modler(o) + '</span></div>' + emek(o.e);
+  c.el.appendChild(it); c.gruplar[c.gruplar.length - 1].ls.push(o); o.pl = it;
+});
+
+/* ---------- sayilar veriden ---------- */
+var say = {
+  toplam: L.length,
+  yeni: L.filter(function(o){ return o.s === 3; }).length,
+  yen: L.filter(function(o){ return o.yen; }).length,
+  p1: L.filter(function(o){ return o.p === 1; }).length
+};
 document.querySelectorAll('[data-say]').forEach(function(el){ el.textContent = say[el.dataset.say]; });
 
-/* suzgec */
-var dur = { q:'', mod:'', p:'', yeni:false };
+/* ---------- bildirim ---------- */
+var tost = document.getElementById('tost'), tostT;
+function bildir(t){ tost.textContent = t; tost.classList.add('on'); clearTimeout(tostT); tostT = setTimeout(function(){ tost.classList.remove('on'); }, 1900); }
+function kopyala(metin, ok){
+  function eski(){
+    var ta = document.createElement('textarea'); ta.value = metin; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); bildir(ok); } catch (e) { bildir('Kopyalanamadı'); }
+    ta.remove();
+  }
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(metin).then(function(){ bildir(ok); }, eski);
+  else eski();
+}
+
+/* ---------- suzgec ---------- */
+var dur = { q:'', mod:'', p:'', deg:false, sec:false };
 function norm(s){ return s.toLocaleLowerCase('tr'); }
+function uyar(o){
+  var q = norm(dur.q);
+  return (!q || norm(o.ad + ' ' + o.ne + ' ' + o.neden).indexOf(q) > -1)
+    && (!dur.mod || o.mod.indexOf(dur.mod) > -1 || o.mod.indexOf('hepsi') > -1)
+    && (!dur.p || o.p === +dur.p)
+    && (!dur.deg || o.s === 3 || o.yen)
+    && (!dur.sec || secili(o));
+}
 function suz(){
-  var q = norm(dur.q), top = 0;
+  var top = 0;
+  L.forEach(function(o){
+    o.gor = uyar(o);
+    var g = o.gor ? '' : 'none';
+    o.kart.style.display = g; o.satir.style.display = g; o.pl.style.display = g;
+    o.kart.classList.toggle('secili', secili(o)); o.pl.classList.toggle('secili', secili(o));
+    o.kart.querySelector('.sec').setAttribute('aria-pressed', secili(o));
+    if (o.gor) top++;
+  });
   D.forEach(function(d){
-    var g = 0;
-    d.ls.forEach(function(o){
-      var ok = (!q || norm(o.ad + ' ' + o.ne + ' ' + o.neden).indexOf(q) > -1)
-        && (!dur.mod || o.mod.indexOf(dur.mod) > -1 || o.mod.indexOf('hepsi') > -1)
-        && (!dur.p || o.p === +dur.p)
-        && (!dur.yeni || o.yeni);
-      o.kart.style.display = ok ? '' : 'none';
-      o.satir.style.display = ok ? '' : 'none';
-      o.gor = ok; if (ok) g++;
-    });
+    var g = d.ls.filter(function(o){ return o.gor; }).length;
     d.sec.style.display = g ? '' : 'none';
     d.sec.querySelector('.sy').textContent = g + ' / ' + d.ls.length;
-    top += g;
+  });
+  [1,2,3].forEach(function(p){
+    var c = kol[p], n = 0, e = 0;
+    c.gruplar.forEach(function(g){
+      var v = g.ls.filter(function(o){ return o.gor; });
+      g.el.style.display = v.length ? '' : 'none';
+      n += v.length; v.forEach(function(o){ e += o.e; });
+    });
+    c.bas.textContent = n + ' özellik · emek ' + e;
   });
   document.getElementById('say').innerHTML = '<b>' + top + '</b> / ' + L.length + ' özellik';
   document.getElementById('bosSonuc').style.display = top ? 'none' : 'block';
+  document.getElementById('secSay').textContent = secim.length;
+  document.getElementById('kopyala').hidden = !secim.length;
 }
 function seg(id, cb){
   var el = document.getElementById(id);
@@ -1666,15 +2458,49 @@ function seg(id, cb){
 }
 seg('fMod', function(v){ dur.mod = v; suz(); });
 seg('fP', function(v){ dur.p = v; suz(); });
-seg('gor', function(v){ document.body.classList.toggle('liste', v === 'liste'); });
-var ara = document.getElementById("araKutu");
+seg('gor', function(v){
+  document.body.classList.toggle('liste', v === 'liste');
+  document.body.classList.toggle('plan-gor', v === 'plan');
+  var hedef = v === 'plan' ? plan : kap;
+  if (hedef.getBoundingClientRect().top < 0) hedef.scrollIntoView();
+});
+var ara = document.getElementById('araKutu');
 ara.addEventListener('input', function(){ dur.q = ara.value.trim(); suz(); });
-var fy = document.getElementById('fYeni');
-fy.addEventListener('click', function(){ dur.yeni = !dur.yeni; fy.setAttribute('aria-pressed', dur.yeni); suz(); });
-suz();
+function ac2(id, alan){
+  var b = document.getElementById(id);
+  b.addEventListener('click', function(){ dur[alan] = !dur[alan]; b.setAttribute('aria-pressed', dur[alan]); suz(); });
+}
+ac2('fDeg', 'deg'); ac2('fSec', 'sec');
+document.getElementById('kopyala').addEventListener('click', function(){
+  var ls = L.filter(secili);
+  var m = '# LifeOS · Seçtiklerim (' + ls.length + ')\n\n' + ls.map(function(o){
+    return '- **' + iki(o.no) + ' · ' + o.ad + '** — P' + o.p + ' · ' + o.mod.map(function(x){ return MOD[x]; }).join(', ') + ' · emek ' + EMEK[o.e].toLocaleLowerCase('tr') + '\n  ' + o.ne;
+  }).join('\n');
+  kopyala(m, ls.length + ' özellik panoya kopyalandı');
+});
+function secDegis(o){
+  var j = secim.indexOf(o.k);
+  if (j > -1) secim.splice(j, 1); else secim.push(o.k);
+  kaydet(); suz(); if (acikI === o.i) cSecYaz();
+  bildir(secili(o) ? '«' + o.ad + '» seçildi' : '«' + o.ad + '» seçimden çıktı');
+}
 
-/* ayrinti cekmecesi */
+/* ---------- ayrinti cekmecesi ---------- */
 var acikI = -1, cek = document.getElementById('cek');
+function ilgili(o){
+  var ls = (o.ilg || []).map(function(k){ return KEY[k]; }).filter(Boolean);
+  var ayni = L.filter(function(x){ return x.dal === o.dal && x !== o && ls.indexOf(x) < 0; })
+    .sort(function(a, b){ return Math.abs(a.i - o.i) - Math.abs(b.i - o.i); });
+  return ls.concat(ayni).slice(0, 4);
+}
+function cSecYaz(){
+  var o = L[acikI], b = document.getElementById('cSec');
+  b.setAttribute('aria-pressed', secili(o));
+  b.lastChild.textContent = secili(o) ? 'Seçildi' : 'Seçtiklerime ekle';
+}
+function durum(o){
+  return (o.s === 3 ? 'Sürüm 3 · yeni' : o.s === 2 ? 'Sürüm 2' : 'İlk vitrin') + (o.yen ? ' · yenilendi' : '') + (o.var ? ' · sistemde var' : '');
+}
 function ac(i){
   var o = L[i], d = D.filter(function(x){ return x.id === o.dal; })[0];
   acikI = i;
@@ -1687,14 +2513,21 @@ function ac(i){
   document.getElementById('cMod').innerHTML = '<span class="mk-l" style="font-size:11px">' + modler(o) + '</span>';
   document.getElementById('cP').textContent = 'P' + o.p + (o.p === 1 ? ' · önce' : o.p === 2 ? ' · sonra' : ' · ileride');
   document.getElementById('cE').textContent = EMEK[o.e];
-  document.getElementById('cD').textContent = o.yeni ? 'Yeni' : 'İlk vitrinden';
+  document.getElementById('cD').textContent = durum(o);
+  document.getElementById('cVar').style.display = o.var ? '' : 'none';
+  document.querySelector('#cIlg div').innerHTML = ilgili(o).map(function(x){
+    return '<button data-git="' + x.i + '"><em>' + iki(x.no) + '</em>' + esc(x.ad) + '</button>';
+  }).join('');
+  cSecYaz();
   document.body.classList.add('acik-cek'); cek.setAttribute('aria-hidden', 'false');
   cek.querySelector('.gv').scrollTop = 0;
+  try { history.replaceState(null, '', '#o-' + o.k); } catch (e) {}
   document.getElementById('cKapat').focus({ preventScroll: true });
 }
 function kapat(){
   var o = L[acikI];
   document.body.classList.remove('acik-cek'); cek.setAttribute('aria-hidden', 'true');
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
   if (o && o.kart.offsetParent) o.kart.focus({ preventScroll: true });
   acikI = -1;
 }
@@ -1702,30 +2535,45 @@ function adim(y){
   var g = L.filter(function(o){ return o.gor; }), j = g.indexOf(L[acikI]);
   if (j > -1) ac(g[(j + y + g.length) % g.length].i);
 }
-kap.addEventListener('click', function(e){ var el = e.target.closest('[data-i]'); if (el) ac(+el.dataset.i); });
-kap.addEventListener('keydown', function(e){
+function tikla(e){
+  var s = e.target.closest('.sec');
+  if (s) { e.stopPropagation(); secDegis(L[+s.closest('[data-i]').dataset.i]); return; }
+  var el = e.target.closest('[data-i]'); if (el) ac(+el.dataset.i);
+}
+function tus(e){
+  if (e.target.closest('.sec')) return;
   var el = e.target.closest('[data-i]');
   if (el && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); ac(+el.dataset.i); }
-});
+}
+[kap, plan].forEach(function(x){ x.addEventListener('click', tikla); x.addEventListener('keydown', tus); });
+document.getElementById('cIlg').addEventListener('click', function(e){ var b = e.target.closest('[data-git]'); if (b) ac(+b.dataset.git); });
 document.getElementById('perde').addEventListener('click', kapat);
 document.getElementById('cKapat').addEventListener('click', kapat);
+document.getElementById('cSec').addEventListener('click', function(){ secDegis(L[acikI]); });
+document.getElementById('cLink').addEventListener('click', function(){ kopyala(location.href, 'Bağlantı kopyalandı'); });
 ['cOnce','cOnce2'].forEach(function(id){ document.getElementById(id).addEventListener('click', function(){ adim(-1); }); });
 ['cSonra','cSonra2'].forEach(function(id){ document.getElementById(id).addEventListener('click', function(){ adim(1); }); });
 document.addEventListener('keydown', function(e){
+  var yaziyor = /INPUT|TEXTAREA/.test(document.activeElement.tagName);
   if (acikI > -1) {
     if (e.key === 'Escape') kapat();
     else if (e.key === 'ArrowRight') adim(1);
     else if (e.key === 'ArrowLeft') adim(-1);
-  } else if (e.key === '/' && document.activeElement !== ara) { e.preventDefault(); ara.focus(); }
+    else if (e.key === 's' && !yaziyor) secDegis(L[acikI]);
+  } else if (e.key === '/' && !yaziyor) { e.preventDefault(); ara.focus(); }
 });
 
-/* tema */
+/* ---------- tema ---------- */
 var tb = document.getElementById('temaBtn');
 tb.addEventListener('click', function(){
   var r = document.documentElement, acik = r.dataset.theme === 'koyu';
   r.dataset.theme = acik ? 'acik' : 'koyu';
   tb.textContent = acik ? 'Koyu tema' : 'Açık tema';
 });
+
+suz();
+var m = location.hash.match(/^#o-(\w+)$/);
+if (m && KEY[m[1]]) ac(KEY[m[1]].i);
 })();
 </script>
 </body>
