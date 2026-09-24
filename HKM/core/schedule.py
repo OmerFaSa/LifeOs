@@ -39,6 +39,8 @@ VARSAYILAN = {
     "weekly_time": "09:00",
     # Ay sonu mektubu (fikir 51): ayin ilk gunu, haftalik saatinde, onceki ay.
     "monthly": False,
+    # Gunun dil karti (fikir 38): ESP'nin o gunku kartlari, bu saatte.
+    "dil_karti": "",         # bos: kapali — ornek "12:30"
     "tolerance_minutes": 90,
     # Bakim AYRI bir anahtarla acilir: kanal ayari kapaliyken de yedek
     # alinabilmeli. «Mesaj gondermiyorum» ile «kendimi korumuyorum» ayri
@@ -89,7 +91,7 @@ def due(cfg, now):
     isler = []
 
     for tur, alan in (("daily", "morning"), ("evening", "evening"),
-                      ("checkin", "checkin")):
+                      ("checkin", "checkin"), ("dilkart", "dil_karti")):
         dk = _dakika(a.get(alan))
         if dk is None:
             continue
@@ -120,9 +122,16 @@ def run(con, cfg, job, now=None, th=None):
 
     from core import hedefag
     tatil = hedefag.tatilde(con, gun)
-    if tatil and job["kind"] == "checkin":
-        # Tatil modu (seri.js): tatildeyken soru SORULMAZ.
-        return {"ok": True, "queued": False, "kind": "checkin", "note": "tatil"}
+    if tatil and job["kind"] in ("checkin", "dilkart"):
+        # Tatil modu (seri.js): tatildeyken soru SORULMAZ, kart da gitmez.
+        return {"ok": True, "queued": False, "kind": job["kind"], "note": "tatil"}
+    if job["kind"] == "dilkart":
+        metin = dilkart_metni(con, gun)
+        if not metin:
+            # ESP kart yollamadi ya da liste eski: bos mesaj gurultudur.
+            return {"ok": True, "queued": False, "kind": "dilkart", "note": "kart yok"}
+        r = outbox.enqueue(con, kanal, "dilkart", gun, metin, now=now)
+        return {"ok": True, "queued": not r["duplicate"], "kind": "dilkart", "chars": len(metin)}
     if job["kind"] == "weekly":
         from core import weekly
         metin = weekly.message(con, gun, th=th)
@@ -177,6 +186,23 @@ def run(con, cfg, job, now=None, th=None):
                            ek={"haftalik": gun, "bicim": "pdf"})
         out["belge"] = not d["duplicate"]
     return out
+
+
+def dilkart_metni(con, gun):
+    """Gunun dil karti mesaji. Kartlar kullanicinin VERISIDIR, oneri degil:
+    buyurgan kip denetimi baslik icindir, kart icerigi icin degil."""
+    from core import hedefag
+    d = hedefag.dilkart_oku(con, gun)
+    if not d:
+        return None
+    k = d["kartlar"]
+    satir = ["ESP · günün dil kartı (%d kart, 5 dakikalık)%s" % (
+        len(k), " · dünkü liste, ESP bugün açılmadı" if d["eski"] else "")]
+    satir += ["%d. %s" % (i + 1, x["on"]) for i, x in enumerate(k)]
+    satir += ["", "Önce aklından geçir; cevaplar:"]
+    satir += ["%d. %s" % (i + 1, x["arka"]) for i, x in enumerate(k)]
+    satir += ["", "Bu tekrar SRS’e yazılmaz; ESP’de tekrar edince sayılır."]
+    return "\n".join(satir)
 
 
 YARIN_EN_COK = 3

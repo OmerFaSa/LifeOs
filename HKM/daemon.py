@@ -1075,6 +1075,10 @@ class Handler(BaseHTTPRequestHandler):
                     # Aksam «yarin sunlar var» (core/schedule.py): modulun sectigi isler.
                     r["yarin"] = hedefag.yarin_yaz(self.con, u.path.rsplit("/", 1)[-1],
                                                    body.get("yarin"))
+                if body.get("dil_karti") is not None:
+                    # Gunun dil karti (fikir 38): yalniz ESP; HKM saatinde dizer.
+                    r["dil_karti"] = hedefag.dilkart_yaz(self.con, u.path.rsplit("/", 1)[-1],
+                                                         body.get("dil_karti"))
             return self._send(200 if r.get("ok") else 422, r)
         # Modul hafizasinin anlik goruntusu (core/memory.py esitle). Modul
         # TAMAMINI yollar, HKM kendi kopyasini esitler; ayni goruntu iki

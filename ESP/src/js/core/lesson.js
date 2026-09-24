@@ -307,8 +307,11 @@ ESP.Lesson = (function(){
     const hepsi = (S.cards || []).filter(function(c){ return c.lang === deste; });
     if(hepsi.length < 1) return { ok:false, error:'Bu destede kart yok.' };
 
-    const vadesi = ESP.SRS.dueCards(bugun).filter(function(c){ return c.lang === deste; });
-    const geri = hepsi.filter(function(c){ return vadesi.indexOf(c) < 0; });
+    /* Ünite sınavı (fikir 41) kendi kart listesini verir: vade önceliği
+       yoktur, ünitenin bütün kartları karışık sorulur. */
+    const kaynak = o.kartlar ? hepsi.filter(function(c){ return o.kartlar.indexOf(c) >= 0; }) : null;
+    const vadesi = kaynak ? [] : ESP.SRS.dueCards(bugun).filter(function(c){ return c.lang === deste; });
+    const geri = (kaynak || hepsi).filter(function(c){ return vadesi.indexOf(c) < 0; });
     const sira = vadesi.concat(shuffle(geri, bugun + deste))
       .slice(0, o.length || ESP.PRACTICE_LENGTH);
 
@@ -356,7 +359,58 @@ ESP.Lesson = (function(){
     if(dogru) session.right++; else session.wrong++;
     session.pos++;
     if(session.pos >= session.questions.length) session.done = true;
+    if(session.done && session.unitId) await sinavKaydet(session);
     return { ok:true, correct:dogru, expected:q.answer, done:session.done };
+  }
+
+  /* ------------------------------------------------ ünite sonu mini sınavı
+
+     Fikir 41. Sorular YALNIZ ünitenin destedeki kartlarından kurulur
+     (kural 3: çeldirici de aynı desteden). Cevaplar SRS'e yazılır (kural
+     2); ünitenin «bitti» bayrağı TUTULMAZ (kural 1) — sınavın sonucu
+     ünitenin yanında ölçüm olarak durur: kaç soruda kaç doğru, hangi gün. */
+  const SINAV_EN_AZ = 4, SINAV_UZUNLUK = 10, SINAV_SAKLA = 10;
+  const SINAV_ANAHTAR = 'meta/uniteSinav';
+
+  function sinavlar(){
+    if(!S.uniteSinav || typeof S.uniteSinav !== 'object') S.uniteSinav = {};
+    return S.uniteSinav;
+  }
+  async function sinavYukle(){
+    const d = await ESP.Store.get(SINAV_ANAHTAR);
+    S.uniteSinav = d && typeof d === 'object' && !Array.isArray(d) ? d : {};
+  }
+
+  function uniteSinavi(unit, lang){
+    if(!unit) return { ok:false, error:'Ünite bulunamadı.' };
+    const kartlar = cardsOf(unit, lang);
+    if(kartlar.length < SINAV_EN_AZ){
+      return { ok:false, error:'Ünite sınavı için bu ünitenin destede en az ' + SINAV_EN_AZ
+        + ' kartı olmalı; şu an ' + kartlar.length + '. Önce üniteyi desteye ekle.' };
+    }
+    const deste = unit.disc === 'history' ? ESP.HISTORY_DECK : kartlar[0].lang;
+    const s = start(deste, { kartlar, length:Math.min(SINAV_UZUNLUK, kartlar.length) });
+    if(!s.ok) return s;
+    s.unitId = unit.id;
+    s.unitTitle = unit.title;
+    return s;
+  }
+
+  async function sinavKaydet(session){
+    if(session.sinavYazildi) return;
+    session.sinavYazildi = true;
+    const r = result(session);
+    if(!r || !r.asked) return;
+    const d = sinavlar();
+    d[session.unitId] = (d[session.unitId] || []).concat([{ at:new Date().toISOString(),
+      gun:session.today || U.todayISO(), dogru:r.right, soru:r.asked }]).slice(-SINAV_SAKLA);
+    await ESP.Store.set(SINAV_ANAHTAR, d);
+  }
+
+  function sonSinav(unitId){
+    const l = sinavlar()[unitId];
+    if(!l || !l.length) return null;
+    return Object.assign({ cert:'measured' }, l[l.length - 1]);
   }
 
   /* Oturumun sonucu. İsabet bir «not» değil bir ölçümdür ve öyle yazılır. */
@@ -397,5 +451,6 @@ ESP.Lesson = (function(){
 
   return { units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,
     topics, topicOf, topicMarks, topicProgress, markTopic, topicSummary,
-    start, question, answer, result, log, correct, norm, shuffle };
+    start, question, answer, result, log, correct, norm, shuffle,
+    uniteSinavi, sonSinav, sinavYukle, SINAV_EN_AZ };
 })();

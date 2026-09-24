@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'c7869e1', at:'2026-09-24 08:59', dirty:true };
+ESP.BUILD = { id:'f90cdb9', at:'2026-09-24 09:59', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -10659,7 +10659,8 @@ LIFEOS.HedefAg = (function(){
   }
 
   /* `kur({ hkm:() => Beacon, modul:'ays', ozetler:() => [ozet…], yarin?:async () => ({gun, isler}),
-           tatil?:() => ({bas, bit, donus_planli}) | null })`
+           tatil?:() => ({bas, bit, donus_planli}) | null,
+           dilKarti?:() => ({gun, kartlar:[{on, arka}]}) })`
      → { gonder(), planla(), cek(), butce() } */
   function kur(ortam){
     let zaman = null;
@@ -10715,12 +10716,33 @@ LIFEOS.HedefAg = (function(){
       }
     }
 
+    /* Günün dil kartı (fikir 38, yalnız ESP): kartları modülün KENDİ kodu
+       seçer; HKM kullanıcının saatinde Telegram'a dizer. Kanca yoksa ya da
+       bozuksa gönderilmez. */
+    async function dilKarti(){
+      if(typeof ortam.dilKarti !== 'function') return undefined;
+      try{
+        const d = await ortam.dilKarti();
+        if(!d || !/^\d{4}-\d{2}-\d{2}$/.test(String(d.gun || ''))) return undefined;
+        const kisa = x => String(x == null ? '' : x).replace(/\s+/g, ' ').trim().slice(0, 80);
+        const kartlar = (Array.isArray(d.kartlar) ? d.kartlar : [])
+          .filter(k => k && typeof k === 'object')
+          .map(k => ({ on:kisa(k.on), arka:kisa(k.arka) }))
+          .filter(k => k.on && k.arka).slice(0, 5);
+        return { gun:d.gun, kartlar };
+      }catch(e){
+        return undefined;
+      }
+    }
+
     async function gonder(){
       let l = [];
       try{ l = (ortam.ozetler() || []).slice(0, 30); }catch(e){ return { ok:false }; }
       const govde = { hedefler:l };
       const y = await yarin();
       if(y) govde.yarin = y;
+      const dk = await dilKarti();
+      if(dk) govde.dil_karti = dk;
       /* Tatil modu (seri.js): yalnız tarih. Yoksa açıkça null: HKM siler. */
       if(typeof ortam.tatil === 'function'){
         try{
@@ -11403,8 +11425,21 @@ ESP.Hedefler = (function(){
     });
     return { gun:tarih, isler };
   }
+  /* Günün dil kartı (fikir 38): vadesi gelen dil kartları, yoksa en düşük
+     kutudakiler; en çok beş. Tarih destesi dil kartı değildir; dil modülü
+     kapalıysa gönderilmez. HKM yalnız dizer, SRS'e yazmaz. */
+  function dilKarti(){
+    const bugun = U().todayISO();
+    if(ESP.Mod && !ESP.Mod.isOn('lang')) return null;
+    const dilMi = c => c && c.lang && c.lang !== ESP.HISTORY_DECK && c.front && c.back;
+    const vadeli = (ESP.SRS ? ESP.SRS.dueCards(bugun) : []).filter(dilMi);
+    const kalan = (ESP.S.cards || []).filter(c => dilMi(c) && vadeli.indexOf(c) < 0)
+      .sort((a, b) => (a.box || 1) - (b.box || 1));
+    const kartlar = vadeli.concat(kalan).slice(0, 5).map(c => ({ on:c.front, arka:c.back }));
+    return kartlar.length ? { gun:bugun, kartlar } : null;
+  }
   const ag = window.LIFEOS && LIFEOS.HedefAg
-    ? LIFEOS.HedefAg.kur({ hkm:() => ESP.Beacon, modul:'esp', ozetler, yarin,
+    ? LIFEOS.HedefAg.kur({ hkm:() => ESP.Beacon, modul:'esp', ozetler, yarin, dilKarti,
         tatil:() => ESP.Seri ? ESP.Seri.hkmTatil() : null }) : null;
 
   const sohbet = window.LIFEOS && LIFEOS.Hedef ? LIFEOS.Hedef.sohbetKur({
@@ -11416,7 +11451,7 @@ ESP.Hedefler = (function(){
 
   return { PAKETLER, PAKET_BY_ID, DIL, OKUMA, ENSTRUMAN, ALISKANLIK, CEFR, CEFR_SAAT:CEFR_VARSAYILAN, CEFR_VARSAYILAN, cefrTablo, KITAP_SAAT_TAHMIN,
     kitapSaati, temizHiz, kademeBpm, kademeAdi, notlar, yukle, kaydet, liste, aktifler,
-    durumDegistir, ozet, sohbet, ozetler, yarin, ag };
+    durumDegistir, ozet, sohbet, ozetler, yarin, dilKarti, ag };
 })();
 
 /* ==== js/core/hedefplan.js ==== */
@@ -18545,6 +18580,26 @@ ESP.Model = (function(){
     return b;
   }
 
+  /* Kitap başına okuma (fikir 39). ESP sayfayı ÖDÜLLENDİRMEZ (okuma
+     bağlantı biriktirir, sayfa değil); ama kullanıcı bir oturumu kitaba
+     bağladıysa o kitaba ne kadar ÖLÇÜLMÜŞ zaman verdiği görünür. Bağlı
+     oturum yoksa `null` — «veri yok», sıfır dakika değil. Sayfa yalnız
+     girildiyse toplanır. */
+  function kitapOkuma(bookId){
+    let dakika = 0, oturum = 0, sayfa = null, sonGun = null, hepsiOlcum = true;
+    Object.keys(S.days || {}).forEach(g => {
+      arr((S.days[g] || {}).sessions).forEach(s => {
+        if(s.disc !== 'reading' || s.ref !== bookId || s.minutes == null || s.minutesCert === 'missing') return;
+        dakika += s.minutes; oturum++;
+        if(s.minutesCert !== 'measured') hepsiOlcum = false;
+        if(s.count != null && s.countCert !== 'missing') sayfa = (sayfa || 0) + s.count;
+        if(!sonGun || g > sonGun) sonGun = g;
+      });
+    });
+    if(!oturum) return null;
+    return { dakika, cert:hepsiOlcum ? 'measured' : 'estimated', oturum, sayfa, sonGun };
+  }
+
   async function deleteBook(id){
     S.books = S.books.filter(b => b.id !== id);
     await ESP.Store.remove('books/' + id);
@@ -19156,6 +19211,8 @@ ESP.Model = (function(){
       .sort((a, b) => (b.updatedAt || '') < (a.updatedAt || '') ? -1 : 1);
     S.notes = ((await ESP.Store.list('notes')) || []).map(normNote);
     S.books = ((await ESP.Store.list('books')) || []).map(b => Object.assign(newBook(), b));
+    if(ESP.Lesson && ESP.Lesson.sinavYukle) await ESP.Lesson.sinavYukle();
+    if(ESP.KotuGun) await ESP.KotuGun.yukle();
     S.pieces = ((await ESP.Store.list('pieces')) || []).map(normPiece);
     S.recordings = ((await ESP.Store.list('recordings')) || []).map(normRecording);
     S.drafts = ((await ESP.Store.list('drafts')) || []).map(d => {
@@ -19247,7 +19304,7 @@ ESP.Model = (function(){
     newArgument, saveArgument, deleteArgument, argumentOpen,
     /* okuma */
     newNote, saveNote, deleteNote, linkNotes, unlinkNotes,
-    newBook, saveBook, deleteBook, bookStatus,
+    newBook, saveBook, deleteBook, bookStatus, kitapOkuma,
     /* muzik */
     newPiece, savePiece, deletePiece,
     /* diksiyon */
@@ -27713,8 +27770,11 @@ ESP.Lesson = (function(){
     const hepsi = (S.cards || []).filter(function(c){ return c.lang === deste; });
     if(hepsi.length < 1) return { ok:false, error:'Bu destede kart yok.' };
 
-    const vadesi = ESP.SRS.dueCards(bugun).filter(function(c){ return c.lang === deste; });
-    const geri = hepsi.filter(function(c){ return vadesi.indexOf(c) < 0; });
+    /* Ünite sınavı (fikir 41) kendi kart listesini verir: vade önceliği
+       yoktur, ünitenin bütün kartları karışık sorulur. */
+    const kaynak = o.kartlar ? hepsi.filter(function(c){ return o.kartlar.indexOf(c) >= 0; }) : null;
+    const vadesi = kaynak ? [] : ESP.SRS.dueCards(bugun).filter(function(c){ return c.lang === deste; });
+    const geri = (kaynak || hepsi).filter(function(c){ return vadesi.indexOf(c) < 0; });
     const sira = vadesi.concat(shuffle(geri, bugun + deste))
       .slice(0, o.length || ESP.PRACTICE_LENGTH);
 
@@ -27762,7 +27822,58 @@ ESP.Lesson = (function(){
     if(dogru) session.right++; else session.wrong++;
     session.pos++;
     if(session.pos >= session.questions.length) session.done = true;
+    if(session.done && session.unitId) await sinavKaydet(session);
     return { ok:true, correct:dogru, expected:q.answer, done:session.done };
+  }
+
+  /* ------------------------------------------------ ünite sonu mini sınavı
+
+     Fikir 41. Sorular YALNIZ ünitenin destedeki kartlarından kurulur
+     (kural 3: çeldirici de aynı desteden). Cevaplar SRS'e yazılır (kural
+     2); ünitenin «bitti» bayrağı TUTULMAZ (kural 1) — sınavın sonucu
+     ünitenin yanında ölçüm olarak durur: kaç soruda kaç doğru, hangi gün. */
+  const SINAV_EN_AZ = 4, SINAV_UZUNLUK = 10, SINAV_SAKLA = 10;
+  const SINAV_ANAHTAR = 'meta/uniteSinav';
+
+  function sinavlar(){
+    if(!S.uniteSinav || typeof S.uniteSinav !== 'object') S.uniteSinav = {};
+    return S.uniteSinav;
+  }
+  async function sinavYukle(){
+    const d = await ESP.Store.get(SINAV_ANAHTAR);
+    S.uniteSinav = d && typeof d === 'object' && !Array.isArray(d) ? d : {};
+  }
+
+  function uniteSinavi(unit, lang){
+    if(!unit) return { ok:false, error:'Ünite bulunamadı.' };
+    const kartlar = cardsOf(unit, lang);
+    if(kartlar.length < SINAV_EN_AZ){
+      return { ok:false, error:'Ünite sınavı için bu ünitenin destede en az ' + SINAV_EN_AZ
+        + ' kartı olmalı; şu an ' + kartlar.length + '. Önce üniteyi desteye ekle.' };
+    }
+    const deste = unit.disc === 'history' ? ESP.HISTORY_DECK : kartlar[0].lang;
+    const s = start(deste, { kartlar, length:Math.min(SINAV_UZUNLUK, kartlar.length) });
+    if(!s.ok) return s;
+    s.unitId = unit.id;
+    s.unitTitle = unit.title;
+    return s;
+  }
+
+  async function sinavKaydet(session){
+    if(session.sinavYazildi) return;
+    session.sinavYazildi = true;
+    const r = result(session);
+    if(!r || !r.asked) return;
+    const d = sinavlar();
+    d[session.unitId] = (d[session.unitId] || []).concat([{ at:new Date().toISOString(),
+      gun:session.today || U.todayISO(), dogru:r.right, soru:r.asked }]).slice(-SINAV_SAKLA);
+    await ESP.Store.set(SINAV_ANAHTAR, d);
+  }
+
+  function sonSinav(unitId){
+    const l = sinavlar()[unitId];
+    if(!l || !l.length) return null;
+    return Object.assign({ cert:'measured' }, l[l.length - 1]);
   }
 
   /* Oturumun sonucu. İsabet bir «not» değil bir ölçümdür ve öyle yazılır. */
@@ -27803,7 +27914,8 @@ ESP.Lesson = (function(){
 
   return { units, unitOf, itemsOf, cardsOf, progress, addUnit, KNOWN_BOX,
     topics, topicOf, topicMarks, topicProgress, markTopic, topicSummary,
-    start, question, answer, result, log, correct, norm, shuffle };
+    start, question, answer, result, log, correct, norm, shuffle,
+    uniteSinavi, sonSinav, sinavYukle, SINAV_EN_AZ };
 })();
 
 /* ==== js/core/plans.js ==== */
@@ -28792,6 +28904,19 @@ ESP.Planner = (function(){
       };
     }
 
+    /* Kötü gün (core/kotugun.js): ilk üç kural yerinde durur; sentez ve
+       genişleme yerine asgari gün gelir. */
+    if(ESP.KotuGun && ESP.KotuGun.aktif(today)){
+      return {
+        rank:0, id:'kotu-gun', agent:'patron', disc:null,
+        title:'Kötü gün: asgari gün yeter',
+        detail:ESP.MINIMUM_DAY.read + ' ve ' + ESP.MINIMUM_DAY.practice.toLocaleLowerCase('tr')
+          + '. ' + ESP.MINIMUM_DAY.note,
+        route:'today', tab:null,
+        why:'Kötü gün modu açık: tekrar ve tarih kuralları yerinde, genişleme bugün yok.',
+      };
+    }
+
     /* 4 — sentopik sentez */
     const sentez = ESP.Mod.isOn('reading') ? synthesisGap() : { unlinked:[], suggestions:[] };
     if(sentez.suggestions.length){
@@ -29336,6 +29461,64 @@ ESP.Dunku = (function(){
   async function geriAl(bugun, id){ await ESP.Model.deleteSession(bugun, id); return { ok:true }; }
 
   return { adaylar, kopyala, geriAl };
+})();
+
+/* ==== js/core/kotugun.js ==== */
+/* KÖTÜ GÜN MODU (fikir 16, ESP) — tek dokunuşla günü asgari güne indirmek.
+
+   Sözler:
+     1. SIRAYI KIRMAZ, KISALTIR. Öncelik sırasının ilk üçü (tıkanmış temel,
+        zamana bağlı hedef, vadesi gelen tekrar) kötü günde de geçerlidir:
+        unutma eğrisi kötü günü beklemez. Dört ve beş (sentez, genişleme)
+        yerine «asgari gün yeter» gelir (core/planner.js).
+     2. GÜNÜN ÖLÇÜSÜ ASGARİ GÜNDÜR (data/rules.js `MINIMUM_DAY`). Seriyi
+        DONDURMAZ; hasta gün için ayrı düğme var (brand/ortak/seri.js).
+     3. KÜÇÜK AKSİYONDUR: tek gün, «Geri al» ile döner (AGENTS §1.9);
+        geçmiş gün sonradan «kötüydü» diye yeniden yazılmaz. */
+
+window.ESP = window.ESP || {};
+
+ESP.KotuGun = (function(){
+  const U = () => ESP.U;
+  const KEY = 'meta/kotugun';
+  const SAKLA_GUN = 60;
+
+  function kayit(){
+    if(!ESP.S.kotuGun || typeof ESP.S.kotuGun !== 'object') ESP.S.kotuGun = {};
+    return ESP.S.kotuGun;
+  }
+  async function yukle(){
+    const d = await ESP.Store.get(KEY);
+    ESP.S.kotuGun = d && typeof d === 'object' && !Array.isArray(d) ? d : {};
+    return ESP.S.kotuGun;
+  }
+  async function kaydet(){
+    const sinir = U().iso(U().addDays(U().today(), -SAKLA_GUN));
+    const k = kayit();
+    Object.keys(k).forEach(g => { if(g < sinir) delete k[g]; });
+    await ESP.Store.set(KEY, k);
+  }
+
+  function aktif(gunISO){ return !!kayit()[gunISO || U().todayISO()]; }
+
+  async function ac(gunISO){
+    const g = gunISO || U().todayISO();
+    if(g < U().todayISO()) return { ok:false, why:'Geçmiş bir gün sonradan kötü gün yapılmaz.' };
+    if(aktif(g)) return { ok:false, why:'Bugün zaten kötü gün modunda.' };
+    kayit()[g] = { at:new Date().toISOString() };
+    await kaydet();
+    return { ok:true, gun:g };
+  }
+
+  async function kapat(gunISO){
+    const g = gunISO || U().todayISO();
+    if(!aktif(g)) return { ok:false, why:'Bu gün kötü gün modunda değil.' };
+    delete kayit()[g];
+    await kaydet();
+    return { ok:true, gun:g };
+  }
+
+  return { yukle, aktif, ac, kapat };
 })();
 
 /* ==== js/core/unite.js ==== */
@@ -32465,9 +32648,19 @@ ESP.Parts = (function(){
               ${when(p.total, () => html`
                 <ul class="unit__items">${map(ESP.Lesson.itemsOf(u, lang).slice(0, 12),
                   it => html`<li><b>${it.front}</b><span>${it.back}</span></li>`)}</ul>
-                ${K.Button({ label:p.added ? 'Eksikleri desteye ekle' : 'Desteye ekle',
-                  tone:'primary', size:'sm', act:'unit-add',
-                  data:{ 'data-id':u.id, 'data-disc':discId } })}`)}
+                <div class="row wrap gap-8">
+                  ${K.Button({ label:p.added ? 'Eksikleri desteye ekle' : 'Desteye ekle',
+                    tone:'primary', size:'sm', act:'unit-add',
+                    data:{ 'data-id':u.id, 'data-disc':discId } })}
+                  ${when(p.added >= ESP.Lesson.SINAV_EN_AZ, () => K.Button({ label:'Ünite sınavı',
+                    size:'sm', act:'unit-sinav',
+                    data:{ 'data-id':u.id, 'data-disc':discId, 'data-lang':lang || '' } }))}
+                </div>
+                ${when(ESP.Lesson.sonSinav(u.id), () => {
+                  const sn = ESP.Lesson.sonSinav(u.id);
+                  return html`<p class="tiny dim mt-6">Son ünite sınavı ${U.fmtShort(sn.gun)}:
+                    ${sn.dogru}/${sn.soru} doğru · ölçüldü</p>`;
+                })}`)}
             </div>`)}
         </div>`;
     })}</div>`;
@@ -32530,7 +32723,7 @@ ESP.Parts = (function(){
       const r = ESP.Lesson.result(s);
       return html`
         <div class="pracend">
-          ${K.NextUp({ icon:'check', calm:true, sanat:'gorev', label:'Oturum bitti',
+          ${K.NextUp({ icon:'check', calm:true, sanat:'gorev', label:s.unitId ? 'Ünite sınavı bitti' : 'Oturum bitti',
             title:r.right + '/' + r.asked + ' doğru',
             why:'İsabet bir not değil bir ölçümdür: yanlışlar destede başa döndü.' })}
           ${when(r.missed.length, () => html`
@@ -32550,6 +32743,7 @@ ESP.Parts = (function(){
     const gosterildi = ESP.S.ui.practiceShown;
     return html`
       <div class="prac">
+        ${when(s.unitId, () => html`<p class="small"><b>Ünite sınavı:</b> ${s.unitTitle}</p>`)}
         <div class="prac__top">
           <span class="tiny dim">${s.pos + 1} / ${s.questions.length}</span>
           ${K.Badge({ label:(ESP.PRACTICE_BY_ID[q.kind] || {}).label || q.kind,
@@ -35993,6 +36187,11 @@ ESP.Screens.today = (function(){
           ${K.Field({ label:'Not', hint:'isteğe bağlı',
             input:K.Input({ id:'s-note', placeholder:'ne çalıştın?' }) })}
         </div>
+        ${when(d === 'reading' && okunanlar().length, () => html`<div class="mt-10">
+          ${K.Field({ label:'Kitap', hint:'isteğe bağlı — kitaba verdiğin süre Kütüphane’de görünür',
+            input:K.Select({ id:'s-book', value:'', aria:'Okunan kitap',
+              options:[{ value:'', label:'Kitaba bağlama' }].concat(okunanlar()
+                .map(b => ({ value:b.id, label:(b.author ? b.author + ' — ' : '') + b.title }))) }) })}</div>`)}
 
         <div class="row mt-10">
           ${K.Button({ label:'Oturumu kaydet', tone:'primary', act:'add-session' })}
@@ -36002,6 +36201,11 @@ ESP.Screens.today = (function(){
 
         <p class="small muted mt-10">${disc ? disc.note : ''}</p>`,
     });
+  }
+
+  /* Okunmakta olan kitaplar (başlanmış, bitmemiş) — oturum bağı için. */
+  function okunanlar(){
+    return (S.books || []).filter(b => M.bookStatus(b).id === 'okunuyor');
   }
 
   function countLabel(discId){
@@ -36341,7 +36545,12 @@ ESP.Screens.today = (function(){
       <span class="tiny">Kaç gün?</span>
       ${map([3, 7, 14], n => K.Button({ label:n + ' gün', size:'sm', act:'seri-tatil-gun', data:{ 'data-gun':String(n) } }))}
       ${K.Button({ label:'Vazgeç', size:'sm', act:'seri-tatil-vazgec' })}</div>`;
-    return html`<div class="row wrap gap-6 mt-6">
+    const kotu = ESP.KotuGun && ESP.KotuGun.aktif(bugun);
+    return html`${when(kotu, () => html`<div class="row between wrap gap-6 mt-6">
+      <span class="tiny">Kötü gün modu: vadesi gelen tekrar yerinde, genişleme yok; bugün asgari gün yeter</span>
+      ${K.Button({ label:'Normal güne dön', size:'sm', act:'kotu-gun-kapat' })}</div>`)}
+      <div class="row wrap gap-6 mt-6">
+      ${when(ESP.KotuGun && !kotu, () => K.Button({ label:'Kötü gün', size:'sm', act:'kotu-gun' }))}
       ${K.Button({ label:'Bugün hastayım · seri donsun', size:'sm', act:'seri-hasta' })}
       ${K.Button({ label:'Tatil modu', size:'sm', act:'seri-tatil' })}</div>`;
   }
@@ -36808,6 +37017,18 @@ ESP.Screens.today = (function(){
       ESP.UI.toast(r.ad + ' bugüne eklendi', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
       ESP.App.render();
     },
+    async 'kotu-gun'(){
+      const r = await ESP.KotuGun.ac();
+      if(!r.ok){ ESP.UI.toast(r.why); return; }
+      ESP.UI.toast('Kötü gün modu açık: asgari gün yeter.', { undo:async () => {
+        await ESP.KotuGun.kapat(r.gun); ESP.App.render(); } });
+      ESP.App.render();
+    },
+    async 'kotu-gun-kapat'(){
+      const r = await ESP.KotuGun.kapat();
+      if(r.ok) ESP.UI.toast('Normal güne dönüldü');
+      ESP.App.render();
+    },
     async 'seri-hasta'(){
       const r = await ESP.Seri.dondur(U.todayISO(), null, 'hasta');
       if(!r.ok){ ESP.UI.toast(r.why); return; }
@@ -36991,6 +37212,7 @@ ESP.Screens.today = (function(){
         minutes:dakika,
         count:val('s-count'),
         note:val('s-note'),
+        ref:(S.ui.sessionDisc === 'reading' && val('s-book')) || null,
       });
       ESP.Memo.bitir();
       ESP.UI.toast('Oturum kaydedildi');
@@ -40271,6 +40493,16 @@ ESP.Screens.library = (function(){
 
   /* --------------------------------------------------------------- kaynaklar */
 
+  /* Kitap başına ÖLÇÜLMÜŞ okuma (fikir 39): yalnız kitaba bağlanmış
+     oturumlardan. Bağlı oturum yoksa «veri yok» — sıfır dakika değil. */
+  function okumaHucresi(b){
+    const o = M.kitapOkuma(b.id);
+    if(!o) return html`<span class="tiny dim">veri yok</span>`;
+    return html`<span class="num">${U.fmtMin(o.dakika)}</span>
+      <div class="tiny dim">${o.oturum} oturum${o.sayfa != null ? ' · ' + o.sayfa + ' sayfa' : ''}
+        · son ${U.fmtShort(o.sonGun)}${o.cert !== 'measured' ? ' · tahmin' : ''}</div>`;
+  }
+
   function bookRows(){
     const kitaplar = S.books || [];
     const notSayisi = id => (S.notes || []).filter(n => n.bookId === id).length;
@@ -40284,12 +40516,13 @@ ESP.Screens.library = (function(){
         wide:true,
         body:kitaplar.length
           ? K.Table({ tight:true,
-              headers:['Eser', 'Yazar', 'Tür', { label:'Not', num:true }, 'Durum', ''],
+              headers:['Eser', 'Yazar', 'Tür', { label:'Not', num:true }, 'Okuma', 'Durum', ''],
               rows:kitaplar.map(b => [
                 html`${b.title}${when(b.bam && b.bam.not, () => html`<div class="tiny dim">BAM · ${b.bam.not}</div>`)}`,
                 b.author,
                 b.kind === 'primary' ? 'primer' : 'yorum',
                 String(notSayisi(b.id)),
+                okumaHucresi(b),
                 M.bookStatus(b).label,
                 html`${K.Button({ label:M.bookStatus(b).action, size:'sm',
                     act:'toggle-book', data:{ 'data-id':b.id } })}
@@ -44967,6 +45200,21 @@ ESP.App = (function(){
       UI.toast(res.added + ' kart eklendi'
         + (res.skipped ? ', ' + res.skipped + ' tanesi zaten vardı' : ''));
       render();
+    },
+
+    /* Ünite sonu mini sınavı (fikir 41): sorular yalnız ünitenin kartları;
+       oturum PRATİK alanında açılır, sonuç ünitenin yanında durur. */
+    async 'unit-sinav'(el){
+      const u = ESP.Lesson.unitOf(el.dataset.disc, el.dataset.id);
+      if(!u) return;
+      const s = ESP.Lesson.uniteSinavi(u, el.dataset.lang || undefined);
+      if(!s.ok){ UI.toast(s.error); return; }
+      S.ui.practice = s;
+      S.ui.practiceShown = false;
+      S.ui.practiceOrder = null;
+      render();
+      const hedef = document.querySelector('.prac');
+      if(hedef && hedef.scrollIntoView) hedef.scrollIntoView({ block:'center' });
     },
 
     async 'prac-start'(el){

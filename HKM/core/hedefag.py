@@ -176,6 +176,50 @@ def yarin_oku(con, gun):
     return out
 
 
+DILKART_EN_COK = 5
+DILKART_ESKI_GUN = 1
+
+
+def dilkart_yaz(con, modul, veri, now=None):
+    """Gunun dil karti (fikir 38). Yalniz ESP yazar; kartlari ESP secer.
+    Bozuk kart atlanir, bozuk govde YAZILMAZ."""
+    if modul != "esp" or not isinstance(veri, dict):
+        return {"ok": False, "note": "Dil kartı yalnız ESP’den gelir."}
+    gun = str(veri.get("gun") or "")
+    try:
+        datetime.date.fromisoformat(gun)
+    except ValueError:
+        return {"ok": False, "note": "Dil kartının günü geçersiz."}
+    kartlar = []
+    ham = veri.get("kartlar") if isinstance(veri.get("kartlar"), list) else []
+    for x in ham:
+        if len(kartlar) >= DILKART_EN_COK:
+            break
+        if not isinstance(x, dict):
+            continue
+        on, arka = _metin(x.get("on"), 80), _metin(x.get("arka"), 80)
+        if on and arka:
+            kartlar.append({"on": on, "arka": arka})
+    con.execute("INSERT OR REPLACE INTO dil_karti(modul, gun, kartlar, guncelleme) VALUES (?,?,?,?)",
+                (modul, gun, json.dumps(kartlar, ensure_ascii=False), _simdi(now)))
+    return {"ok": True, "adet": len(kartlar)}
+
+
+def dilkart_oku(con, gun):
+    """{gun, kartlar, eski} — liste bugunun ya da dunun degilse None."""
+    r = con.execute("SELECT gun, kartlar FROM dil_karti WHERE modul='esp'").fetchone()
+    if not r:
+        return None
+    try:
+        fark = (datetime.date.fromisoformat(gun) - datetime.date.fromisoformat(r["gun"])).days
+        kartlar = json.loads(r["kartlar"])
+    except ValueError:
+        return None
+    if fark > DILKART_ESKI_GUN or not kartlar:
+        return None
+    return {"gun": r["gun"], "kartlar": kartlar, "eski": fark > 0}
+
+
 def tatil_yaz(con, modul, tatil, now=None):
     """Modulun tatil tarihi. None: silinir (tatil yok)."""
     if modul not in MODULLER:

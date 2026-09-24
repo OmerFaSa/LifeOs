@@ -852,6 +852,21 @@ ESP.App = (function(){
       render();
     },
 
+    /* Ünite sonu mini sınavı (fikir 41): sorular yalnız ünitenin kartları;
+       oturum PRATİK alanında açılır, sonuç ünitenin yanında durur. */
+    async 'unit-sinav'(el){
+      const u = ESP.Lesson.unitOf(el.dataset.disc, el.dataset.id);
+      if(!u) return;
+      const s = ESP.Lesson.uniteSinavi(u, el.dataset.lang || undefined);
+      if(!s.ok){ UI.toast(s.error); return; }
+      S.ui.practice = s;
+      S.ui.practiceShown = false;
+      S.ui.practiceOrder = null;
+      render();
+      const hedef = document.querySelector('.prac');
+      if(hedef && hedef.scrollIntoView) hedef.scrollIntoView({ block:'center' });
+    },
+
     async 'prac-start'(el){
       const s = ESP.Lesson.start(el.dataset.deck);
       if(!s.ok){ UI.toast(s.error); return; }

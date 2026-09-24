@@ -308,4 +308,38 @@
       });
     });
   });
+
+  describe('ders · ünite sonu mini sınavı (fikir 41)', () => {
+    it('ünitenin destede en az dört kartı yoksa sınav açılmaz', async () => {
+      resetState();
+      const u = L().unitOf('lang', 'temel-fiil');
+      pushCard({ front:'to be', back:'olmak', lang:'en' });
+      const s = L().uniteSinavi(u, 'en');
+      expect(s.ok).toBeFalsy();
+      expect(s.error).toContain('en az 4');
+    });
+
+    it('sorular YALNIZ o ünitenin kartlarından gelir; bitince sonuç ünitede ölçüm olarak durur', async () => {
+      await withTodayAsync('2026-09-20', async () => {
+        resetState();
+        const u = L().unitOf('lang', 'temel-fiil');
+        await L().addUnit(u, 'en');
+        pushCard({ front:'apple', back:'elma', lang:'en' });   // ünite dışı
+        const s = L().uniteSinavi(u, 'en');
+        expect(s.ok).toBeTruthy();
+        expect(s.unitId).toBe('temel-fiil');
+        const unite = L().cardsOf(u, 'en').map(c => c.id);
+        s.questions.forEach(q => expect(unite.indexOf(q.cardId) >= 0).toBeTruthy());
+        expect(L().sonSinav('temel-fiil')).toBeNull();
+        while(!s.done){
+          const q = s.questions[s.pos];
+          await L().answer(s, s.pos === 0 ? 'yanlış' : q.answer);
+        }
+        const son = L().sonSinav('temel-fiil');
+        expect([son.dogru, son.soru, son.gun, son.cert]).toEqual([s.questions.length - 1, s.questions.length, '2026-09-20', 'measured']);
+        /* sınav cevabı da SRS'e yazılır: ayrı hafıza kaydı açılmaz */
+        expect(ESP.S.cards.filter(c => (c.history || []).length > 0).length).toBe(s.questions.length);
+      });
+    });
+  });
 })();

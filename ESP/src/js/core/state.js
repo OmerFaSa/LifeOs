@@ -726,6 +726,26 @@ ESP.Model = (function(){
     return b;
   }
 
+  /* Kitap başına okuma (fikir 39). ESP sayfayı ÖDÜLLENDİRMEZ (okuma
+     bağlantı biriktirir, sayfa değil); ama kullanıcı bir oturumu kitaba
+     bağladıysa o kitaba ne kadar ÖLÇÜLMÜŞ zaman verdiği görünür. Bağlı
+     oturum yoksa `null` — «veri yok», sıfır dakika değil. Sayfa yalnız
+     girildiyse toplanır. */
+  function kitapOkuma(bookId){
+    let dakika = 0, oturum = 0, sayfa = null, sonGun = null, hepsiOlcum = true;
+    Object.keys(S.days || {}).forEach(g => {
+      arr((S.days[g] || {}).sessions).forEach(s => {
+        if(s.disc !== 'reading' || s.ref !== bookId || s.minutes == null || s.minutesCert === 'missing') return;
+        dakika += s.minutes; oturum++;
+        if(s.minutesCert !== 'measured') hepsiOlcum = false;
+        if(s.count != null && s.countCert !== 'missing') sayfa = (sayfa || 0) + s.count;
+        if(!sonGun || g > sonGun) sonGun = g;
+      });
+    });
+    if(!oturum) return null;
+    return { dakika, cert:hepsiOlcum ? 'measured' : 'estimated', oturum, sayfa, sonGun };
+  }
+
   async function deleteBook(id){
     S.books = S.books.filter(b => b.id !== id);
     await ESP.Store.remove('books/' + id);
@@ -1337,6 +1357,8 @@ ESP.Model = (function(){
       .sort((a, b) => (b.updatedAt || '') < (a.updatedAt || '') ? -1 : 1);
     S.notes = ((await ESP.Store.list('notes')) || []).map(normNote);
     S.books = ((await ESP.Store.list('books')) || []).map(b => Object.assign(newBook(), b));
+    if(ESP.Lesson && ESP.Lesson.sinavYukle) await ESP.Lesson.sinavYukle();
+    if(ESP.KotuGun) await ESP.KotuGun.yukle();
     S.pieces = ((await ESP.Store.list('pieces')) || []).map(normPiece);
     S.recordings = ((await ESP.Store.list('recordings')) || []).map(normRecording);
     S.drafts = ((await ESP.Store.list('drafts')) || []).map(d => {
@@ -1428,7 +1450,7 @@ ESP.Model = (function(){
     newArgument, saveArgument, deleteArgument, argumentOpen,
     /* okuma */
     newNote, saveNote, deleteNote, linkNotes, unlinkNotes,
-    newBook, saveBook, deleteBook, bookStatus,
+    newBook, saveBook, deleteBook, bookStatus, kitapOkuma,
     /* muzik */
     newPiece, savePiece, deletePiece,
     /* diksiyon */

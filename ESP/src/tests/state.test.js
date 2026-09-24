@@ -250,4 +250,32 @@
       });
     });
   });
+
+  describe('kitap başına okuma (fikir 39)', () => {
+    it('bağlı oturumu olmayan kitap «veri yok»tur, sıfır dakika değil', () => {
+      resetState();
+      const b = ESP.Test.pushBook('Meditasyonlar', 'Marcus Aurelius');
+      pushSession('2026-09-10', 'reading', 30);          // kitaba bağlı değil
+      expect(M.kitapOkuma(b.id)).toBeNull();
+    });
+
+    it('bağlı oturumların ölçülmüş dakikası, sayfası ve son günü toplanır', () => {
+      resetState();
+      const b = ESP.Test.pushBook('Meditasyonlar', 'Marcus Aurelius');
+      pushSession('2026-09-10', 'reading', 30, { ref:b.id, count:12, countCert:'measured' });
+      pushSession('2026-09-12', 'reading', 20, { ref:b.id });
+      pushSession('2026-09-12', 'lang', 15, { ref:b.id });  // başka disiplin sayılmaz
+      const o = M.kitapOkuma(b.id);
+      expect([o.dakika, o.cert, o.oturum, o.sayfa, o.sonGun]).toEqual([50, 'measured', 2, 12, '2026-09-12']);
+    });
+
+    it('bir oturum tahminse toplam da tahmindir; sayfa hiç girilmediyse null', () => {
+      resetState();
+      const b = ESP.Test.pushBook('Devlet', 'Platon');
+      pushSession('2026-09-10', 'reading', 30, { ref:b.id });
+      pushSession('2026-09-11', 'reading', 25, { ref:b.id, minutesCert:'estimated' });
+      const o = M.kitapOkuma(b.id);
+      expect([o.dakika, o.cert, o.sayfa]).toEqual([55, 'estimated', null]);
+    });
+  });
 })();

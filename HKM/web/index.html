@@ -1288,6 +1288,9 @@ details.detay > summary:hover{ color:var(--fg); }
       + ritimSaat('ritim-yoklama', 'Akşam yoklaması',
           '«Bugün ne yaptın?» diye sorar; cevabın ilgili modüle teklif olur',
           z.checkin, '21:30')
+      + ritimSaat('ritim-dil', 'Günün dil kartı',
+          'ESP’nin o günkü 5 kartı; cevaplar mesajın sonunda. Boş bırakırsan gönderilmez',
+          z.dil_karti, '12:30')
       + ritimSaat('ritim-hgun', 'Haftalık rapor',
           'Gün adı yaz (pazartesi, salı…). Boş bırakırsan gönderilmez',
           z.weekly_day, 'pazartesi', 'text')
@@ -1364,6 +1367,7 @@ details.detay > summary:hover{ color:var(--fg); }
       morning:$('ritim-sabah').value.trim(),
       evening:$('ritim-aksam').value.trim(),
       checkin:$('ritim-yoklama').value.trim(),
+      dil_karti:$('ritim-dil').value.trim(),
       weekly_day:$('ritim-hgun').value.trim().toLowerCase(),
       monthly:$('ritim-ay').checked,
     }, bildirim:{

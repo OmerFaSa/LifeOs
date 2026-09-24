@@ -386,6 +386,39 @@ def run():
         ok("2026-08-01 → 2026-08-31" in metin, metin)
     test("ay sonu mektubu: onceki ay, gecen ayla; varsayilan kapali", t_ay_sonu_mektubu)
 
+    def t_dil_karti():
+        """Fikir 38: ESP gunun kartlarini hedef esitlemesiyle yollar; HKM
+        kullanicinin sectigi saatte yalniz dizer. Varsayilan kapali; ESP
+        kart yollamadiysa ya da liste iki gunden eskiyse mesaj GITMEZ.
+        Yalniz ESP yazabilir; bozuk kart atlanir."""
+        from core import hedefag
+        eq(schedule.settings({})["dil_karti"], "")
+        con = _con()
+        no(hedefag.dilkart_yaz(con, "ays", {"gun": gun(0), "kartlar": []})["ok"])
+        no(hedefag.dilkart_yaz(con, "esp", {"gun": "dun", "kartlar": []})["ok"])
+        r = hedefag.dilkart_yaz(con, "esp", {"gun": gun(0), "kartlar": [
+            {"on": "to be", "arka": "olmak"}, {"on": "", "arka": "x"}, "bozuk",
+            {"on": "to go", "arka": "gitmek"}] + [{"on": "k%d" % i, "arka": "a"} for i in range(9)]})
+        eq([r["ok"], r["adet"]], [True, 5])
+        cfg = {"channels": CFG["channels"],
+               "schedule": {"enabled": True, "channel": "whatsapp", "morning": "",
+                            "dil_karti": "12:30"}}
+        eq([i["kind"] for i in schedule.due(cfg, _an(0, 12, 35))], ["dilkart"])
+        eq(schedule.due(dict(CFG, schedule=dict(cfg["schedule"], dil_karti="")), _an(0, 12, 35)), [])
+        schedule.run(con, cfg, {"kind": "dilkart"}, now=_an(0, 12, 35))
+        metin = con.execute("SELECT text FROM outbox WHERE kind='dilkart'").fetchone()["text"]
+        ok("1. to be" in metin and "1. olmak" in metin, metin)
+        ok(metin.index("to go") < metin.index("gitmek"), metin)
+        ok("SRS" in metin, metin)
+        # Iki gun sonra ayni liste eskidir: mesaj gitmez.
+        r = schedule.run(con, cfg, {"kind": "dilkart"}, now=_an(2, 12, 35))
+        eq([r["ok"], r["queued"]], [True, False])
+        eq(con.execute("SELECT COUNT(*) FROM outbox WHERE kind='dilkart'").fetchone()[0], 1)
+        from core import settings
+        no(settings.validate({"schedule": {"dil_karti": "7"}})[0])
+        ok(settings.validate({"schedule": {"dil_karti": "07:15"}})[0])
+    test("gunun dil karti: ESP yollar, HKM saatinde dizer", t_dil_karti)
+
     run_cli()
     run_kurtarma()
     run_bakim()
