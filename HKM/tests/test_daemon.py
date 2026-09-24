@@ -566,6 +566,84 @@ def run():
                 kod = e.code
             eq(kod, 400)
         test("bozuk JSON 400 ile doner", t_bad_json)
+
+        def dene(yol, data=None, method="POST"):
+            """Durum kodu ya da «KOPTU» (cevapsiz kapanan baglanti)."""
+            req = urllib.request.Request(S.url(yol), data=data, method=method)
+            req.add_header("Authorization", "Bearer " + TOKEN)
+            try:
+                with urllib.request.urlopen(req, timeout=10) as r:
+                    r.read()
+                    return r.status
+            except urllib.error.HTTPError as e:
+                json.loads(e.read() or b"{}")       # cevap JSON olmali
+                return e.code
+            except Exception as e:                  # noqa: BLE001
+                return "KOPTU: %s" % type(e).__name__
+
+        def t_bozuk_girdi_cevapsiz_kalmaz():
+            """HATALAR O-7: nesne olmayan govde, bozuk tarih, kimliksiz motto
+            istegi baglantiyi cevapsiz koparıyordu (canli denemede 102 durum).
+            Istemci bunu «HKM ulasilamiyor» diye goruyordu."""
+            kotu = []
+            yollar = ("/api/sync/ays", "/api/restore", "/api/prune", "/api/say",
+                      "/api/message", "/api/memory", "/api/motto/node",
+                      "/api/motto/edit", "/api/probe", "/api/models",
+                      "/api/web/dene", "/api/pair/open", "/api/intents/ays",
+                      "/api/chat", "/api/chat/tani", "/api/para", "/api/zaman",
+                      "/api/hedef/sync/ays", "/api/memory/sync/ays",
+                      "/api/bam/is", "/api/king/emir", "/api/king/urun",
+                      "/api/config")
+            for yol in yollar:
+                for govde in (b"[]", b"null", b"1", b'"x"'):
+                    k = dene(yol, govde)
+                    if not isinstance(k, int) or k >= 500:
+                        kotu.append((yol, govde, k))
+            for yol in ("/api/briefing", "/api/twin", "/api/series", "/api/cross",
+                        "/api/streak", "/api/weekly", "/api/weekly/belge",
+                        "/api/budget"):
+                for tarih in ("bozuk", "2026-13-45"):
+                    k = dene(yol + "?date=" + tarih, method="GET")
+                    if k != 400:
+                        kotu.append((yol, tarih, k))
+            for yol in ("/api/chat", "/api/message"):
+                k = dene(yol, json.dumps({"text": "merhaba",
+                                          "date": "2026-13-45"}).encode())
+                if k != 400:
+                    kotu.append((yol, "govde tarihi", k))
+            for uc in ("edit", "move", "archive", "link", "unlink", "accept"):
+                k = dene("/api/motto/" + uc, b"{}")
+                if not isinstance(k, int) or not 400 <= k < 500:
+                    kotu.append(("/api/motto/" + uc, "kimliksiz", k))
+            for govde in (b'{"confirm":true,"days":"abc"}',
+                          b'{"__meta":{"schema":"abc"}}'):
+                yol = "/api/prune" if b"confirm" in govde else "/api/restore"
+                k = dene(yol, govde)
+                if not isinstance(k, int) or not 400 <= k < 500:
+                    kotu.append((yol, govde, k))
+            eq(kotu, [])
+        test("bozuk girdi 4xx ile cevaplanir, baglanti kopmaz (O-7)",
+             t_bozuk_girdi_cevapsiz_kalmaz)
+
+        def t_prune_sifir_gun():
+            """HATALAR D-7: {"days":0} sessizce 180 gun oluyordu (`or 180`)."""
+            k = dene("/api/prune", b'{"confirm":true,"days":0}')
+            eq(k, 400)
+        test("prune days:0 180'e donmez (D-7)", t_prune_sifir_gun)
+
+        def t_yol_govde_uyusmazligi():
+            """HATALAR D-1: /api/sync/ays govdesinde module:spi SPI'ye
+            yaziliyordu; yol ile govde uyusmali."""
+            once = db.connect(S.db_path).execute(
+                "SELECT COUNT(*) FROM raw_events WHERE module='spi'").fetchone()[0]
+            k = dene("/api/sync/ays", json.dumps({
+                "module": "spi", "date": BUGUN,
+                "metrics": {"sleep_hours": metric(7)}}).encode())
+            eq(k, 400)
+            sonra = db.connect(S.db_path).execute(
+                "SELECT COUNT(*) FROM raw_events WHERE module='spi'").fetchone()[0]
+            eq(sonra, once)
+        test("sync yolu ile govdedeki modul uyusmali (D-1)", t_yol_govde_uyusmazligi)
     finally:
         S.close()
 

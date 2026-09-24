@@ -256,6 +256,27 @@ def _ortak_seviye_yolu(clean, kok):
 # SEVIYE:yol-bit
 
 
+def _nesne(ham):
+    """Govde bir JSON NESNESI olmali. `[]`, `null`, `1`, `"x"` gecerli JSON'dur
+    ama `.get` tasimaz: once her uc bunlarla cevap vermeden kopuyordu
+    (HATALAR O-7). ValueError, her ucun zaten yakaladigi hatadir."""
+    v = json.loads(ham or b"{}")
+    if not isinstance(v, dict):
+        raise ValueError("govde bir JSON nesnesi olmali")
+    return v
+
+
+def _gun_mu(metin):
+    try:
+        datetime.date.fromisoformat(str(metin))
+        return True
+    except ValueError:
+        return False
+
+
+_HATA_KILIDI = threading.Lock()
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "HKM/1.0"
 
@@ -325,6 +346,41 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", "0")
         self.end_headers()
 
+    def _motto(self, u, body):
+        """Motto uclari. Kimlik dogrulamasi cagiranda (TypeError/ValueError → 400)."""
+        if u.path == "/api/motto/node":
+            r = motto.ekle(self.con, body.get("title"),
+                           parent_id=body.get("parent_id"),
+                           body=body.get("body") or "",
+                           kind=body.get("kind") or "dusunce",
+                           tags=body.get("tags"))
+            return self._send(200 if r.get("ok") else 422, r)
+        if u.path == "/api/motto/edit":
+            r = motto.duzenle(self.con, body.get("id"),
+                              title=body.get("title"), body=body.get("body"),
+                              kind=body.get("kind"), tags=body.get("tags"))
+            return self._send(200 if r.get("ok") else 422, r)
+        if u.path == "/api/motto/move":
+            r = motto.tasi(self.con, body.get("id"), body.get("parent_id"))
+            return self._send(200 if r.get("ok") else 422, r)
+        if u.path == "/api/motto/archive":
+            r = motto.arsivle(self.con, body.get("id"))
+            return self._send(200 if r.get("ok") else 422, r)
+        if u.path == "/api/motto/link":
+            r = motto.bagla(self.con, body.get("a"), body.get("b"),
+                            note=body.get("note"))
+            return self._send(200 if r.get("ok") else 422, r)
+        if u.path == "/api/motto/unlink":
+            r = motto.bagi_kaldir(self.con, body.get("a"), body.get("b"))
+            return self._send(200 if r.get("ok") else 404, r)
+        if u.path == "/api/motto/accept":
+            # Eski bir hale donmek ve uretilen bir oneriyi kabul
+            # etmek AYNI YOLDAN gecer: ikisi de «su surum artik
+            # gecerli olsun» demektir.
+            r = motto.onayla(self.con, body.get("version_id"))
+            return self._send(200 if r.get("ok") else 404, r)
+        return self._send(404, {"error": "bilinmeyen motto ucu"})
+
     # --------------------------------------------------------- sinirlar
 
     def _read_body(self):
@@ -391,9 +447,9 @@ class Handler(BaseHTTPRequestHandler):
         if not channels.verify_signature(a.get("app_secret"), ham, imza):
             return self._send(401, {"error": "imza dogrulanmadi"})
         try:
-            govde = json.loads(ham or b"{}")
+            govde = _nesne(ham)
         except ValueError:
-            return self._send(400, {"error": "gecersiz JSON"})
+            return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
 
         cevaplar = []
         for m in channels.parse_whatsapp(govde):
@@ -415,9 +471,9 @@ class Handler(BaseHTTPRequestHandler):
         if hata:
             return self._send(413, {"error": hata})
         try:
-            govde = json.loads(ham or b"{}")
+            govde = _nesne(ham)
         except ValueError:
-            return self._send(400, {"error": "gecersiz JSON"})
+            return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
         cevaplar = []
         for m in channels.parse_telegram(govde):
             cevaplar.append(self._gelen_mesaj("telegram", m, cfg))
@@ -598,7 +654,43 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    # --------------------------------------------------------- guvenlik agi
+    # HATALAR O-7: beklenmeyen bir hata istegi CEVAPSIZ kapatiyordu; istemci
+    # bunu «HKM ulasilamiyor» diye goruyordu. Her istek bir cevap alir ve
+    # beklenmeyen hata sayilir (/api/tani «beklenmeyen_hata»).
+    def send_response(self, code, message=None):
+        self._yanitlandi = True
+        super().send_response(code, message)
+
     def do_GET(self):
+        self._korumali(self._get)
+
+    def do_POST(self):
+        self._korumali(self._post)
+
+    def _korumali(self, is_):
+        self._yanitlandi = False
+        try:
+            is_()
+        except (BrokenPipeError, ConnectionResetError):
+            return
+        except Exception as e:                  # noqa: BLE001
+            srv = self.server
+            with _HATA_KILIDI:
+                srv.beklenmeyen = getattr(srv, "beklenmeyen", 0) + 1
+                srv.son_beklenmeyen = {
+                    "yol": urlparse(self.path).path, "tur": type(e).__name__,
+                    "zaman": datetime.datetime.now().isoformat(timespec="seconds")}
+            sys.stderr.write("[hkm] beklenmeyen hata %s %s: %r\n"
+                             % (self.command, urlparse(self.path).path, e))
+            if not self._yanitlandi:
+                try:
+                    self._send(500, {"error": "beklenmeyen hata",
+                                     "tur": type(e).__name__})
+                except OSError:
+                    pass
+
+    def _get(self):
         u = urlparse(self.path)
         if u.path in ("/", "/index.html"):
             return self._send_page()
@@ -626,6 +718,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(401, {"error": "bearer gerekli"})
         q = parse_qs(u.query)
         date = (q.get("date") or [datetime.date.today().isoformat()])[0]
+        if not _gun_mu(date):
+            return self._send(400, {"error": "date yyyy-aa-gg olmali"})
         if u.path == "/api/briefing":
             return self._send(200, briefing(self.con, date,
                                             th=self.server.thresholds))
@@ -742,9 +836,13 @@ class Handler(BaseHTTPRequestHandler):
         # kurulmaz; modul ve tarih dogrulanmazsa dosyaya hic bakilmaz.
         if u.path == "/api/tani":
             from core import tani
-            return self._send(200, tani.ozet(self.con, self.server.config,
-                                             datetime.date.today().isoformat(),
-                                             self.server.db_path))
+            r = tani.ozet(self.con, self.server.config,
+                          datetime.date.today().isoformat(), self.server.db_path)
+            # O-7: cevapsiz kopus artik yok; beklenmeyen hata SAYILIR.
+            r["beklenmeyen_hata"] = {
+                "sayi": getattr(self.server, "beklenmeyen", 0),
+                "son": getattr(self.server, "son_beklenmeyen", None)}
+            return self._send(200, r)
         if u.path == "/api/para":
             # Para kolu (Y1, core/para.py): bir ayin kayitlari ve ozeti.
             from core import para
@@ -926,7 +1024,7 @@ class Handler(BaseHTTPRequestHandler):
                                     "current": db.current_decision(self.con, date)})
         return self._send(404, {"error": "yok"})
 
-    def do_POST(self):
+    def _post(self):
         u = urlparse(self.path)
 
         """WhatsApp webhook'u BEARER TASIYAMAZ: istegi Meta yollar. Kapisi
@@ -947,7 +1045,7 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                istek = json.loads(ham or b"{}")
+                istek = _nesne(ham)
             except ValueError:
                 istek = {}
             return self._pair_open((istek or {}).get("seconds"))
@@ -971,9 +1069,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             r = memory.add(self.con, body.get("text"), body.get("user") or "ben",
                            body.get("scope") or "all", expires=body.get("expires"))
             return self._send(200 if r.get("ok") else 422, r)
@@ -988,7 +1086,7 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
                 nid = int(u.path.strip("/").split("/")[3])
             except (ValueError, IndexError):
                 return self._send(400, {"error": "gecersiz istek"})
@@ -999,42 +1097,15 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
+            try:
+                return self._motto(u, body)
+            except (TypeError, ValueError):
+                # Kimliksiz ya da sayi olmayan kimlik: int(None) (O-7).
+                return self._send(400, {"error": "kimlik alanlari sayi olmali"})
 
-            if u.path == "/api/motto/node":
-                r = motto.ekle(self.con, body.get("title"),
-                               parent_id=body.get("parent_id"),
-                               body=body.get("body") or "",
-                               kind=body.get("kind") or "dusunce",
-                               tags=body.get("tags"))
-                return self._send(200 if r.get("ok") else 422, r)
-            if u.path == "/api/motto/edit":
-                r = motto.duzenle(self.con, body.get("id"),
-                                  title=body.get("title"), body=body.get("body"),
-                                  kind=body.get("kind"), tags=body.get("tags"))
-                return self._send(200 if r.get("ok") else 422, r)
-            if u.path == "/api/motto/move":
-                r = motto.tasi(self.con, body.get("id"), body.get("parent_id"))
-                return self._send(200 if r.get("ok") else 422, r)
-            if u.path == "/api/motto/archive":
-                r = motto.arsivle(self.con, body.get("id"))
-                return self._send(200 if r.get("ok") else 422, r)
-            if u.path == "/api/motto/link":
-                r = motto.bagla(self.con, body.get("a"), body.get("b"),
-                                note=body.get("note"))
-                return self._send(200 if r.get("ok") else 422, r)
-            if u.path == "/api/motto/unlink":
-                r = motto.bagi_kaldir(self.con, body.get("a"), body.get("b"))
-                return self._send(200 if r.get("ok") else 404, r)
-            if u.path == "/api/motto/accept":
-                # Eski bir hale donmek ve uretilen bir oneriyi kabul
-                # etmek AYNI YOLDAN gecer: ikisi de «su surum artik
-                # gecerli olsun» demektir.
-                r = motto.onayla(self.con, body.get("version_id"))
-                return self._send(200 if r.get("ok") else 404, r)
-            return self._send(404, {"error": "bilinmeyen motto ucu"})
 
         # Haftalik rapor elle: zamanlanmis isin AYNISI (metin + Telegram'a
         # PDF). Giden kutusunun kimligi (kanal, tur, gun) ayni gun ikinci
@@ -1062,9 +1133,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             if not isinstance(body, dict):
                 return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             if u.path == "/api/zaman":
@@ -1096,9 +1167,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             if not isinstance(body, dict):
                 return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             r = memory.esitle(self.con, u.path.rsplit("/", 1)[-1], body.get("items"))
@@ -1109,9 +1180,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             if not isinstance(body, dict):
                 return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             r = bam.is_ac(self.con, body.get("talep"), kaynak=body.get("kaynak") or "kullanici",
@@ -1124,9 +1195,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             r = web.ara(self.con, self.server.config, "king", (body or {}).get("sorgu"), n=5)
             return self._send(200, r)
         # Modul sohbetindeki urun istegi: taniyici HKM'dedir (core/sohbet.py
@@ -1137,9 +1208,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             if not isinstance(body, dict) or not str(body.get("metin") or "").strip():
                 return self._send(400, {"error": "metin gerekli"})
             r = sohbet.urun_modulden(self.con, self.server.config, body.get("modul"),
@@ -1150,9 +1221,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             anahtar = str((body or {}).get("anahtar") or "").strip()
             if not anahtar:
                 return self._send(422, {"ok": False, "note": "anahtar gerekli"})
@@ -1175,9 +1246,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             if not isinstance(body, dict):
                 return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             r = king.emir_ac(self.con, self.server.config, body.get("modul"), body.get("tur"),
@@ -1192,7 +1263,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(413, {"error": hata})
             try:
                 eid = int(parca[3])
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
             except (ValueError, IndexError):
                 return self._send(400, {"error": "gecersiz istek"})
             r = king.teklif_onayla(self.con, self.server.config, eid,
@@ -1254,9 +1325,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                govde = json.loads(ham or b"{}")
+                govde = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             r = para.ekle(self.con, govde, datetime.date.today().isoformat())
             return self._send(200 if r.get("ok") else 422, r)
         if u.path == "/api/probe":
@@ -1266,9 +1337,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                govde = json.loads(ham or b"{}")
+                govde = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             return self._send(200, models.probe(
                 self.server.config, (govde or {}).get("provider"),
                 key_id=(govde or {}).get("key")))
@@ -1277,9 +1348,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                yama = json.loads(ham or b"{}")
+                yama = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             ok, hatalar = settings.validate(yama)
             if not ok:
                 # Yarim yazilmis bir yapilandirma, bozuk bir yapilandirmadir.
@@ -1299,9 +1370,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                govde = json.loads(ham or b"{}")
+                govde = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             veri = govde.get("backup") or govde
             r = db.import_all(self.con, veri, replace=bool(govde.get("replace")))
             return self._send(200 if r.get("ok") else 409, r)
@@ -1310,13 +1381,18 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                govde = json.loads(ham or b"{}")
+                govde = _nesne(ham)
             except ValueError:
                 govde = {}
             if not govde.get("confirm"):
                 return self._send(400, {"error": "onay gerekli",
                                         "note": "Silme islemi confirm:true ister."})
-            res = db.prune_events(self.con, govde.get("days") or 180)
+            # HATALAR D-7: «or 180» days:0'i sessizce 180 yapiyordu. Alan
+            # yoksa varsayilan; varsa oldugu gibi dogrulanir (en az 7).
+            gun = govde.get("days", 180)
+            if isinstance(gun, bool) or not isinstance(gun, int):
+                return self._send(400, {"error": "days bir tam sayi olmali"})
+            res = db.prune_events(self.con, gun)
             return self._send(200 if res.get("ok") else 400, res)
         if (u.path.startswith("/api/intents/")
                 and not u.path.endswith("/take")):
@@ -1329,9 +1405,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                govde = json.loads(ham or b"{}")
+                govde = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             r = intents.create(self.con, mod, (govde or {}).get("kind"),
                                (govde or {}).get("payload") or {},
                                (govde or {}).get("note") or "",
@@ -1357,7 +1433,7 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                govde = json.loads(ham or b"{}")
+                govde = _nesne(ham)
             except ValueError:
                 govde = {}
             r = models.probe(self.server.config, (govde or {}).get("provider"),
@@ -1373,7 +1449,7 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                govde = json.loads(ham or b"{}")
+                govde = _nesne(ham)
             except ValueError:
                 govde = {}
             gorevli = (govde or {}).get("agent") or "king"
@@ -1392,9 +1468,9 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                govde = json.loads(ham or b"{}")
+                govde = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             metin = (govde or {}).get("text")
             if not metin or not str(metin).strip():
                 return self._send(400, {"error": "bos mesaj"})
@@ -1402,6 +1478,8 @@ class Handler(BaseHTTPRequestHandler):
             if gorevli not in sohbet.GOREVLILER:
                 return self._send(404, {"error": "bilinmeyen gorevli"})
             gun = (govde or {}).get("date") or datetime.date.today().isoformat()
+            if not _gun_mu(gun):
+                return self._send(400, {"error": "date yyyy-aa-gg olmali"})
             # Gecmis AMBARDAN gelir, istemciden degil: istemcinin
             # gonderdigi bir gecmis, modele istedigini soyletmenin en
             # kisa yoludur.
@@ -1420,9 +1498,11 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
             except ValueError:
-                return self._send(400, {"error": "gecersiz JSON"})
+                return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
+            if body.get("date") is not None and not _gun_mu(body.get("date")):
+                return self._send(400, {"error": "date yyyy-aa-gg olmali"})
             res = patron.respond(self.con, body.get("text"),
                                  date=body.get("date"),
                                  th=self.server.thresholds, channel="local")
@@ -1432,7 +1512,7 @@ class Handler(BaseHTTPRequestHandler):
             if hata:
                 return self._send(413, {"error": hata})
             try:
-                body = json.loads(ham or b"{}")
+                body = _nesne(ham)
             except ValueError:
                 body = {}
             return self._send(200, self._say(body))
@@ -1453,10 +1533,15 @@ class Handler(BaseHTTPRequestHandler):
         if hata:
             return self._send(413, {"error": hata})
         try:
-            body = json.loads(ham or b"{}")
+            body = _nesne(ham)
         except ValueError:
-            return self._send(400, {"error": "gecersiz JSON"})
-        body.setdefault("module", u.path.rsplit("/", 1)[-1])
+            return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
+        yol_modul = u.path.rsplit("/", 1)[-1]
+        # HATALAR D-1: govdedeki «module» yolu ezip kaydi baska modulun
+        # ambarina yaziyordu. Yol belirler; uyusmazlik reddedilir.
+        if body.get("module", yol_modul) != yol_modul:
+            return self._send(400, {"error": "govdedeki module yol ile uyusmuyor"})
+        body["module"] = yol_modul
         res = sync_engine.ingest(self.con, body, th=self.server.thresholds)
         return self._send(res["status"], res)
 
