@@ -768,3 +768,26 @@ def run_bakim():
         ok(r2["ok"], "kopya alinamasa da geri yukleme olmali")
         no(r2["rollback_copy"], "alinmayan kopya alinmis gibi gorunmemeli")
     test("ustune yazma kilitlenmez", t_restore_does_not_deadlock)
+
+    def t_restore_bozuk_satir_ambari_bosaltmaz():
+        """HATALAR Y-1: sutunlari tutmayan satir (liste, ambarda olmayan sutun)
+        tablo SESSIZCE atlaniyordu; replace:true tablolari once bosalttigi icin
+        ambar bos kalip «ok» deniyordu. Yazmadan ONCE denetlenir; tutmazsa
+        hicbir sey silinmez ve neden soylenir."""
+        a = db.connect(":memory:")
+        sync_engine.ingest(a, {"module": "spi", "date": gun(0),
+                               "metrics": {"sleep_hours": metric(7.0)}}, now=gun(0) + "T09:00:00")
+        once = a.execute("SELECT COUNT(*) FROM raw_events").fetchone()[0]
+        bozuk = {"__meta": {"app": "hkm", "schema": 1, "tables": {"raw_events": 1}},
+                 "raw_events": [["x"]]}
+        r = db.import_all(a, bozuk, replace=True)
+        no(r["ok"], r)
+        ok("raw_events" in r["error"], r)
+        eq(a.execute("SELECT COUNT(*) FROM raw_events").fetchone()[0], once)
+        yabanci = db.export_all(a)
+        yabanci["raw_events"][0]["eski_sutun"] = 1
+        r = db.import_all(a, yabanci, replace=True)
+        no(r["ok"], r)
+        ok("eski_sutun" in r["error"], r)
+        eq(a.execute("SELECT COUNT(*) FROM raw_events").fetchone()[0], once)
+    test("bozuk satirli yedek ambari bosaltmaz (Y-1)", t_restore_bozuk_satir_ambari_bosaltmaz)

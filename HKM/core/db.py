@@ -1060,6 +1060,30 @@ def import_all(con, veri, replace=False):
         return {"ok": False, "error": "Yedek manifestosu tutmuyor — "
                                       + "; ".join(uyusmaz)}
 
+    # Y-1 (HATALAR): yazmadan ONCE her satir denetlenir. Eskiden sutunlar
+    # yalniz ILK satirin anahtarlarindan secilip eslesmeyen tablo SESSIZCE
+    # atlaniyordu; replace:true tablolari once bosalttigi icin ambar bos
+    # kaliyor ve «ok» deniyordu. Nesne olmayan satir ya da ambarda olmayan
+    # sutun: hicbir sey silinmez, neden soylenir.
+    kotu = []
+    for t in tablolar:
+        satirlar = veri.get(t) or []
+        if not isinstance(satirlar, list):
+            kotu.append("%s: liste degil" % t)
+            continue
+        sutunlar = {r["name"] for r in con.execute("PRAGMA table_info(%s)" % t)}
+        for i, r in enumerate(satirlar):
+            if not isinstance(r, dict) or not r:
+                kotu.append("%s[%d]: satir bir nesne degil" % (t, i))
+                break
+            yabanci = sorted(set(r) - sutunlar)
+            if yabanci:
+                kotu.append("%s[%d]: ambarda olmayan sutun %s" % (t, i, ", ".join(yabanci)))
+                break
+    if kotu:
+        return {"ok": False, "error": "Yedek bu ambarla uyusmuyor; hicbir sey yazilmadi ya da "
+                                      "silinmedi — " + "; ".join(kotu[:5])}
+
     yazilan = {}
     kopya = None
     # Ustune yazmadan ONCE geri donus kopyasi: «geri alinamaz» bir islem,
@@ -1089,9 +1113,8 @@ def import_all(con, veri, replace=False):
             if not satirlar:
                 continue
             sutunlar = [r["name"] for r in con.execute("PRAGMA table_info(%s)" % t)]
-            kullanilan = [c for c in sutunlar if c in satirlar[0]]
-            if not kullanilan:
-                continue
+            # Butun satirlarin anahtarlari: ilk satirda olmayan sutun da yazilir.
+            kullanilan = [c for c in sutunlar if any(c in r for r in satirlar)]
             isaret = ",".join("?" * len(kullanilan))
             # INSERT OR REPLACE DEGIL: replace=False durumunda var olan bir
             # kaydin ustune yazmak, «ustune yazmiyorum» sozunu icten kirar.
