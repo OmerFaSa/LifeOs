@@ -355,6 +355,31 @@ HKM 597, ESP 1359, entegre temiz.
   - Grup 4 denetimi: HKM 562/562; üç duman testi, HKM yüzü, `tools/entegre.js` temiz;
     `ortak.py --denetle` 42 dosya/125 kopya aynı.
 
+### HATALAR.md turu (2026-09-24) — iki Claude, bölüşüm `ekip/IS-BOLUSUMU.md`
+
+B'nin ilerlemesi `ekip/HATALAR-ILERLEME-B.md`'de. A'nın payı (yalnız `HKM/`) **bitti**;
+her madde önce kırmızı test, sonra düzeltme:
+
+| Kod | Ne değişti | Commit |
+|---|---|---|
+| Y-1 | Bozuk satırlı yedek, ambarı boşaltmadan reddedilir (`db.import_all` önce doğrular) | e9bb50a |
+| Y-9 | Açık soru varken tek sayı soruya gider; teklif «onayla 1» ile | 01a6876 |
+| Y-3 · O-1 · O-2 | Gün içi gönderimler tek ölçüm (günün son değeri); tek günlük «seri» yok | 57f39ed |
+| Y-2 | Geçmiş sınav tarihi sıra 2'yi kazanmaz; sınav günü «Sınav bugün» | 28c303e |
+| O-9 | Süren günün birikimli düşük değeri (soru, çalışma, pratik) yargı değil «Şimdilik …»; seri de saymaz. Brifing etiketi Türkçe «(ölçüldü)» | 28c303e |
+| O-7 · D-1 · D-7 | Nesne olmayan gövde / bozuk tarih / kimliksiz motto → 400; beklenmeyen hata 500 + JSON ve sayılır (`/api/tani`); sync yolu modülü belirler; `prune days:0` 180 olmaz | 8f7a36b |
+| D-2 · D-3 | `take` cevabında `delivered_at`; yalnız bugünün brifingi karar yazar (`saat.sabit` testler için) | 857047c |
+| D-4 | Eşzamanlı yedek: klasör kilidi + tekil geçici ad | 3d5039e |
+| D-13 | config 0600, umask 077, açılışta HKM dosyaları daraltılır (`core/izin.py`) | 6bd835d |
+| D-15 | Giden satır sahiplenilir (15 dk kira); medya işleme tek | 3b27d24 |
+| D-16 · D-18 | Kullanım bilgisi yoksa jeton tahmini («tahmini-jeton»); tavan en kötü durumu ve süren çağrıları sayar (`butce.ayir`) | 6134d06 |
+| D-12 | Niyet kataloğu üç `beacon.js` ile karşılaştırılır (test) | 6855002 |
+| KO-1 · B-4 · B-1 | Süreç açılışında saat dilimi (config `saat_dilimi` > Europe/Istanbul); KURULUM: UMask, ReadWritePaths HKM (config yazılabilsin), üç bearer'sız yol | 1ac5fd8 |
+
+Denetim (A, son): HKM 626/626, `perf.py` bütçede, HKM yüzü 56 görünüm temiz,
+`tools/entegre.js` temiz. **Kalan (A):** B bitince `python3 tools/sayilar.py --tam --yaz`.
+README'deki elle yazılmış «312 test» (B-1'in README yarısı) B'nin dosyasında.
+
 ## Kullanıcı kolaylığı fikirleri · HEPSİ ONAYLI (2026-09-24: «41 fikri yap»)
 
 **Kalan 41 madde ONAYLI — sormadan yap.** Sıra: önce depoda tara (var / kısmen / yok; var
