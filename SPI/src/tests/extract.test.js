@@ -86,6 +86,33 @@
     });
   });
 
+  /* HATA (2026-09-24): görüntü `{ mime, b64 }` diye yollanıyordu, ortak
+     llm.js ise `im.data` okuyor — dört fotoğraf yolunun hepsinde modele
+     «base64,undefined» gidiyordu. Model yanıtı boş gelince ekran «okunamadı»
+     diyordu; hatanın kaynağı hiç görünmüyordu. */
+  describe('Extract — görüntü modele gerçekten gider', () => {
+    it('etiket, fiş, öğün ve tahlil fotoğrafı llm.js\'in beklediği `data` alanıyla gider', async () => {
+      resetState();
+      const eski = { chat:SP.LLM.chat, ready:SP.LLM.ready };
+      const giden = [];
+      SP.LLM.ready = () => true;
+      SP.LLM.chat = async req => { giden.push(req); return { text:'[]' }; };
+      try{
+        const dosya = () => new File([new Uint8Array([137, 80, 78, 71])], 'x.png', { type:'image/png' });
+        await SP.Extract.fromFoodLabel(dosya());
+        await SP.Extract.fromReceipt(dosya());
+        await SP.Extract.fromMealPhoto(dosya(), {});
+        await SP.Extract.fromLabFile(dosya());
+        expect(giden.length).toBe(4);
+        giden.forEach(req => {
+          const im = req.messages[0].images[0];
+          expect(im.mime).toBe('image/png');
+          expect(im.data).toBe('iVBORw==');
+        });
+      }finally{ SP.LLM.chat = eski.chat; SP.LLM.ready = eski.ready; }
+    });
+  });
+
   describe('Voice — dikte katmanı', () => {
     /* Desteklenmeyen tarayicida katman SESSIZCE yok olur; hata firlatmaz
        ve arayuz calisir kalir. */

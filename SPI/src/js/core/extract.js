@@ -61,11 +61,13 @@ SP.Extract = (function(){
     });
   }
 
-  /* data:image/png;base64,XXXX  ->  { mime, b64 } */
+  /* data:image/png;base64,XXXX  ->  { mime, data }. Alan adı ortak
+     llm.js'in okuduğudur (`im.data`); eskiden `b64` yazılıyordu ve dört
+     fotoğraf yolunda modele «base64,undefined» gidiyordu. */
   function splitDataUrl(url){
     const m = /^data:([^;,]+)(?:;base64)?,(.*)$/.exec(url || '');
     if(!m) return null;
-    return { mime:m[1], b64:m[2] };
+    return { mime:m[1], data:m[2] };
   }
 
   function modelReady(){
