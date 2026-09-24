@@ -24,6 +24,9 @@
      028  Anlamlı fark        fark rozetinin rengi İŞARETTEN değil
                               metriğin YÖN tanımından gelir: +41 tekrar
                               borcu kötü, +3 net iyidir.
+     018  Şüpheli giriş       dünkü değerden eşik kadar sapan giriş
+                              kaydedilmeden önce sorulur; kod en olası
+                              düzeltmeyi önerir. Eşik TEK YERDE: `SUPHE`.
 
    NEDEN TEK DOSYA
 
@@ -376,6 +379,74 @@ window.LIFEOS = window.LIFEOS || {};
       + '<span class="sr-only">' + kac(r.sr) + '</span></span>';
   }
 
+  /* ------------------------------------------------ 018 şüpheli giriş */
+
+  /* ŞÜPHE EŞİKLERİ — dünkü değerden oransal sapma. Bir KARARDIR:
+       varsayilan  %50: günlük bir sayının yarısı kadar oynaması olağan
+                   değil ama olur; bir basamak kayması (×10) her zaman
+                   bu eşiği aşar.
+       kilo        %5: bir günde vücut ağırlığının yirmide biri değişmez;
+                   değişmiş görünüyorsa büyük olasılıkla yazım hatasıdır.
+     Modül kendi metriği için `oran` verebilir; tablo tek yerde durur. */
+  const SUPHE = Object.freeze({ varsayilan:0.5, kilo:0.05 });
+
+  const yuvarlaKucuk = n => Math.round(n * 1e6) / 1e6;
+
+  /* Yazım hatasının olası düzeltmeleri: basamak kayması (virgül ya da
+     fazladan sıfır) ve iki-üç basamaklı tam sayıda rakamların yer
+     değiştirmesi (17 ↔ 71). Uydurma değil: eşiğin İÇİNE düşen aday
+     yoksa öneri de yoktur, yalnız soru sorulur. */
+  function adaylar(v){
+    const out = [10, 100, 1000].reduce((a, k) => a.concat([v / k, v * k]), []);
+    const s = String(Math.abs(v));
+    if(Number.isInteger(v) && s.length >= 2 && s.length <= 3){
+      const t = Number(s.split('').reverse().join(''));
+      if(t !== Math.abs(v)) out.push(v < 0 ? -t : t);
+    }
+    return out.map(yuvarlaKucuk);
+  }
+
+  /* 018 — giriş kaydedilmeden ÖNCE çağrılır.
+       yeni, dun: sayı; o = { tur:'kilo', oran, birim, ondalik }
+     Dünkü değer yoksa (ya da 0 ise) karşılaştırma YAPILMAZ: veri yok
+     sıfır değildir ve sıfıra göre her sayı sonsuz sapar. */
+  function suphe(yeni, dun, o){
+    o = o || {};
+    if(!sayiMi(yeni)) return { supheli:false, neden:'deger-yok' };
+    if(!sayiMi(dun) || dun === 0) return { supheli:false, neden:'dayanak-yok' };
+    const oran = sayiMi(o.oran) ? o.oran
+      : (o.tur && Object.prototype.hasOwnProperty.call(SUPHE, o.tur) ? SUPHE[o.tur] : SUPHE.varsayilan);
+    const sapma = Math.abs(yeni - dun) / Math.abs(dun);
+    if(sapma < oran) return { supheli:false, sapma:sapma, oran:oran };
+    let oneri = null, en = Infinity;
+    adaylar(yeni).forEach(a => {
+      const s = Math.abs(a - dun) / Math.abs(dun);
+      if(s < oran && Math.abs(a - dun) < en){ en = Math.abs(a - dun); oneri = a; }
+    });
+    const b = n => birimli(bicim(n, o.ondalik == null ? (Number.isInteger(n) ? 0 : 1) : o.ondalik), o.birim);
+    /* Soru eki («mı/mi/mu») birimin OKUNUŞUNA göre çekimlenir ve kodda
+       güvenle kurulamaz; cümle eki gerektirmeyecek biçimde yazıldı. */
+    const soru = 'Dün ' + b(dun) + ' idi; ' + b(yeni) + ' çok farklı.'
+      + (oneri != null ? ' Hangisini kaydedelim?' : ' Yine de kaydedilsin mi?');
+    return { supheli:true, sapma:sapma, oran:oran, dun:dun, yeni:yeni, oneri:oneri, soru:soru,
+      secenekler:(oneri != null ? [oneri] : []).concat([yeni]).map(v => ({ deger:v, etiket:b(v) + ' olarak kaydet' })) };
+  }
+
+  /* Soru ekranda: kaydeden düğmeler SONUCU söyler («71,4 kg olarak
+     kaydet», özellik 22); «Evet» ya da «Tamam» yok. Önerilen düzeltme
+     önce gelir; «Düzelt» girişe geri döner, hiçbir şey kaydetmez. */
+  function supheHtml(r){
+    if(!r || !r.supheli) return '';
+    return '<div class="suphe" data-oz="018" role="group" aria-label="Şüpheli giriş">'
+      + '<p class="suphe__soru">' + kac(r.soru) + '</p><div class="suphe__eylem">'
+      + r.secenekler.map((s, i) => '<button type="button" class="btn btn--sm' + (i === 0 && r.oneri != null ? '' : ' btn--ghost') + '"'
+        + ' data-act="suphe-kaydet" data-deger="' + kac(s.deger) + '"><span class="btn__label">'
+        + kac(s.etiket) + '</span></button>').join('')
+      + '<button type="button" class="btn btn--sm btn--ghost" data-act="suphe-duzelt">'
+      + '<span class="btn__label">Düzelt</span></button>'
+      + '</div></div>';
+  }
+
   /* ---------------------------------------------------------- DOM */
 
   /* Köken kartı fareyle ve klavyeyle CSS'ten açılır (`:hover`,
@@ -433,6 +504,9 @@ window.LIFEOS = window.LIFEOS || {};
     kutuGlifi:kutuGlifi,
     fark:fark,
     farkHtml:farkHtml,
+    SUPHE:SUPHE,
+    suphe:suphe,
+    supheHtml:supheHtml,
     bagla:bagla,
     etiketsizler:etiketsizler,
     kac:kac,

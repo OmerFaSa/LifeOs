@@ -741,17 +741,29 @@ ESP.UI = (function(){
     }
     root.appendChild(el);
     const life = o.life || (o.undo ? 6000 : 1500);
+    /* Katalog 150: «Geri al» şeridinin kalan süresi incelen bir çizgiyle
+       görünür (çizgi brand/ortak/oneri.js). Süre dolunca düğme kapanır:
+       işlem kalıcıdır, şerit sönerken basılan «Geri al» çalışmış gibi
+       görünmez. oneri.js yüklenmemişse şerit eskisi gibi kalır. */
+    if(o.undo){
+      const L = window.LIFEOS;
+      if(L && L.ONERI && typeof L.ONERI.cizgi === 'function') el.appendChild(L.ONERI.cizgi(life));
+      setTimeout(() => { const b = el.querySelector('.toast__undo'); if(b) b.disabled = true; }, life);
+    }
     setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .25s'; }, life);
     setTimeout(() => el.remove(), life + 300);
     return el;
   }
 
-  function confirmSheet(title, message, onConfirm, danger){
+  /* Katalog 22: onay düğmesi SONUCU söyler («14 bloğu sil»); `onay`
+     verilmezse eski etiket kalır. Çağrılar ekranlarla birlikte K2'de
+     geçer (brand/ortak/oneri.js `sonucEtiketi`). */
+  function confirmSheet(title, message, onConfirm, danger, onay){
     sheet({
       title,
       body:String(ESP.h.html`<p>${message}</p>`),
       footer:String(ESP.h.html`${ESP.C.Button({ label:'Vazgeç', act:'sheet-close' })}
-        ${ESP.C.Button({ label:'Evet, devam et', tone:danger ? 'danger' : 'primary', act:'confirm-yes' })}`),
+        ${ESP.C.Button({ label:onay || 'Evet, devam et', tone:danger ? 'danger' : 'primary', act:'confirm-yes' })}`),
       noFocus:true,
     });
     ESP.UI._confirm = onConfirm;

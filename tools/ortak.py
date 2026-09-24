@@ -235,6 +235,14 @@ DOSYALAR = {
     # Grafik parcalari: 027 eksik gun, 035 aralik, 037 egilim, 041 doluluk.
     "grafik.js":      "js/core",
     "grafik.test.js": "tests",
+    # Oneri karti ve onay kalibi: 110 111 112 114 116 121 150, 022 sonuc dugmesi.
+    "oneri.js":       "js/core",
+    # Test dosyasi `oneri.test.js` DEGIL: SPI'nin kendi src/tests/oneri.test.js'i
+    # var (oneri kutusu testleri) ve yayim onun ustune yazardi.
+    "onerikart.test.js": "tests",
+    # Tek sozluk: 016 terim ipucu, 139 model kapali kipi (hazir cumle).
+    "sozluk.js":      "js/core",
+    "sozluk.test.js": "tests",
     "kart.css":       "css",
     # MODEL KATMANI — uc arayuz (2026-09-24'ten beri AYS'ninki tek kaynak).
     "llm.js":        "js/core",

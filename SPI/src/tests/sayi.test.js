@@ -395,4 +395,56 @@ describe('028 · Anlamlı fark rozeti', () => {
   });
 });
 
+describe('018 · Şüpheli giriş sorusu', () => {
+
+  it('oz-018 Dünkü değerden eşik oranı kadar sapan giriş kaydedilmeden önce sorulur; eşik kodda tanımlı ve testli.', () => {
+    expect(Object.isFrozen(S().SUPHE)).toBeTruthy();
+    expect(S().SUPHE.varsayilan).toBe(0.5);
+    expect(S().SUPHE.kilo).toBe(0.05);
+    /* Eşiğin tam üstü sorulur, altı sorulmaz. */
+    expect(S().suphe(105, 100, { tur:'kilo' }).supheli).toBeTruthy();
+    expect(S().suphe(104.9, 100, { tur:'kilo' }).supheli).toBeFalsy();
+    expect(S().suphe(150, 100).supheli).toBeTruthy();
+    expect(S().suphe(149, 100).supheli).toBeFalsy();
+    /* Modül kendi eşiğini verebilir. */
+    expect(S().suphe(120, 100, { oran:0.1 }).supheli).toBeTruthy();
+  });
+
+  it('oz-018 kod en olası düzeltmeyi sorar: basamak kayması ve yer değiştiren rakam', () => {
+    const a = S().suphe(714, 71.4, { tur:'kilo', birim:'kg' });
+    expect(a.oneri).toBe(71.4);
+    expect(a.soru).toBe('Dün 71,4 kg idi; 714 kg çok farklı. Hangisini kaydedelim?');
+    expect(S().suphe(7.14, 71.4, { tur:'kilo' }).oneri).toBe(71.4);
+    expect(S().suphe(17, 71, { tur:'kilo' }).oneri).toBe(71);
+    expect(S().suphe(400, 40).oneri).toBe(40);
+  });
+
+  it('oz-018 eşiğe düşen aday yoksa öneri UYDURULMAZ, yalnız sorulur', () => {
+    const r = S().suphe(30, 71.4, { tur:'kilo', birim:'kg' });
+    expect(r.supheli).toBeTruthy();
+    expect(r.oneri).toBeNull();
+    expect(r.soru).toBe('Dün 71,4 kg idi; 30 kg çok farklı. Yine de kaydedilsin mi?');
+    expect(r.secenekler.map(s => s.etiket)).toEqual(['30 kg olarak kaydet']);
+  });
+
+  it('oz-018 dünkü değer yoksa ya da 0 ise karşılaştırılmaz: veri yok sıfır değildir', () => {
+    expect(S().suphe(50, null).supheli).toBeFalsy();
+    expect(S().suphe(50, null).neden).toBe('dayanak-yok');
+    expect(S().suphe(50, 0).supheli).toBeFalsy();
+    expect(S().suphe(null, 50).neden).toBe('deger-yok');
+  });
+
+  it('oz-018 düğmeler sonucu söyler; «Evet» ya da «Tamam» yok, «Düzelt» kaydetmez', () => {
+    const k = sahne(S().supheHtml(S().suphe(714, 71.4, { tur:'kilo', birim:'kg' })));
+    try{
+      expect(k.querySelector('[data-oz="018"]').getAttribute('role')).toBe('group');
+      const d = Array.prototype.map.call(k.querySelectorAll('button'), b => b.textContent + '/' + b.getAttribute('data-act'));
+      expect(d).toEqual(['71,4 kg olarak kaydet/suphe-kaydet', '714 kg olarak kaydet/suphe-kaydet', 'Düzelt/suphe-duzelt']);
+      expect(k.querySelector('button').getAttribute('data-deger')).toBe('71.4');
+      expect(/\b(Evet|Tamam)\b/.test(k.textContent)).toBeFalsy();
+    }finally{ k.remove(); }
+    expect(S().supheHtml(S().suphe(72, 71.4, { tur:'kilo' }))).toBe('');
+  });
+});
+
 })();
