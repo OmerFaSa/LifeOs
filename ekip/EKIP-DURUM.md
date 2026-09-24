@@ -34,7 +34,8 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
 - **Biten** (özellik · commit): 024 025 026 028 sayı `sayi.js` · 009cf92; 027 035 037 041 grafik
   `grafik.js` · 076bb29; 110 111 112 114 116 121 150 022 öneri ve onay `oneri.js`, 016 139 sözlük
   `sozluk.js`, 018 şüpheli giriş (`sayi.js`) · 2d765cc; 173 177 179 güven `guven.js` +
-  bozuk tarih (31 Şubat) koruması `sayi.js`/`grafik.js` · 0443561
+  bozuk tarih (31 Şubat) koruması `sayi.js`/`grafik.js` · 0443561; P2: 015 170 son bilinen değer,
+  sesli okuma (`sayi.js`) · 138bf20
 - **Bulgular:** T2-01 ✅ a798671 · T2-03 ✅ c063316 · (K'nin bulduğu, H kapattı: T2-04, T2-05,
   T2-07, T2-08) · T2-02 (AYS Ofis ham kimlik, 137) ekran dosyası
   (`office.js`, `team.js`): AYS teslim edilince K2'de 137 ile
