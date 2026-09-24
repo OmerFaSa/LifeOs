@@ -8593,7 +8593,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'01a6876', at:'2026-09-24 11:17', dirty:true };
+ESP.BUILD = { id:'4d79a17', at:'2026-09-24 11:28', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -25913,9 +25913,11 @@ ESP.Beacon = (function(){
     out.practice_minutes = dk == null ? metric(null, 'missing') : metric(dk, 'measured');
 
     /* Sentez açığı: en eski BAĞLANMAMIŞ notun yaşı. Hiç not yoksa bu bir
-       «0 gün açık» değil, ölçülmemiş bir alandır. */
+       «0 gün açık» değil, ölçülmemiş bir alandır. Bağlantı durumu BUGÜNÜN
+       durumudur; geçmiş bir gün için o günün açığı değildir ve o günden
+       sonra yazılmış not yaşı eksi çıkarıyordu (ekip/HATALAR.md Y-5). */
     const notlar = (S.notes || []);
-    if(!notlar.length){
+    if(!notlar.length || gecmisMi(d)){
       out.synthesis_gap_days = metric(null, 'missing');
     }else{
       const bagsiz = ESP.Intellect.unlinkedNotes();
@@ -26150,6 +26152,7 @@ ESP.Beacon = (function(){
     const n = Math.max(1, Math.min(Number(days) || 30, 180));
     const bugun = U.todayISO();
     let gonderilen = 0, bos = 0, hata = null;
+    const reddedilen = [];
     for(let i = n - 1; i >= 0; i--){
       const t = U.iso(U.addDays(U.parse(bugun), -i));
       const govde = payload(t);
@@ -26162,9 +26165,9 @@ ESP.Beacon = (function(){
         return govde.metrics[k].cert === 'measured';
       });
       if(!dolu || contract(govde).length){ bos++; continue; }
-      let durum = 0;
+      let durum = 0, res = null;
       try{
-        const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
+        res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
           method:'POST',
           headers:{ 'Content-Type':'application/json',
             'Authorization':'Bearer ' + a.token },
@@ -26172,16 +26175,44 @@ ESP.Beacon = (function(){
         });
         durum = res.status;
       }catch(e){ durum = 0; }
-      if(durum !== 202){ hata = durum; break; }
-      gonderilen++;
-      if(typeof onProgress === 'function') onProgress(gonderilen, n);
+      if(durum === 202){
+        gonderilen++;
+        if(typeof onProgress === 'function') onProgress(gonderilen, n);
+        continue;
+      }
+      /* Gövdeye özgü ret (400, 409, 413, 422) YALNIZ o günündür: geri kalan
+         günler gönderilmeye devam eder ve hangi günün neden reddedildiği
+         saklanır. Ağ, yetki ya da sunucu hatası bütün günler için aynıdır:
+         orada durulur (ekip/HATALAR.md D-6). */
+      if(GOVDE_RETTI.indexOf(durum) >= 0){
+        reddedilen.push({ date:t, status:durum, why:await retNedeni(res) });
+        continue;
+      }
+      hata = durum;
+      break;
     }
-    await save({ lastAt:new Date().toISOString(),
-      lastStatus:hata == null ? 202 : hata,
-      lastNote:hata == null
-        ? gonderilen + ' günlük geçmiş gönderildi (' + bos + ' gün ölçümsüz).'
-        : 'Geçmiş gönderimi ' + hata + ' ile durdu.' });
-    return { ok:hata == null, sent:gonderilen, empty:bos, status:hata || 202 };
+    const not = [];
+    not.push(gonderilen + ' günlük geçmiş gönderildi (' + bos + ' gün ölçümsüz).');
+    if(reddedilen.length){
+      not.push(reddedilen.length + ' gün reddedildi: ' + reddedilen.slice(0, 3).map(function(r){
+        return r.date + ' (' + r.status + (r.why ? ': ' + r.why : '') + ')';
+      }).join('; ') + (reddedilen.length > 3 ? '; …' : '') + '.');
+    }
+    if(hata != null) not.push('Gönderim ' + (hata || 'ağ hatası') + ' ile durdu.');
+    const durumSon = hata != null ? hata : reddedilen.length ? reddedilen[0].status : 202;
+    await save({ lastAt:new Date().toISOString(), lastStatus:durumSon, lastNote:not.join(' ') });
+    return { ok:hata == null && !reddedilen.length, sent:gonderilen, empty:bos,
+      rejected:reddedilen, status:durumSon, note:not.join(' ') };
+  }
+
+  const GOVDE_RETTI = [400, 409, 413, 422];
+
+  async function retNedeni(res){
+    try{
+      const j = res && typeof res.json === 'function' ? await res.json() : null;
+      const e = j && (j.errors || j.error);
+      return (Array.isArray(e) ? e.join('; ') : String(e || '')).slice(0, 200);
+    }catch(err){ return ''; }
   }
 
 
@@ -43270,7 +43301,7 @@ ESP.Screens.profile = (function(){
       ESP.UI.toast('Geçmiş gönderiliyor…');
       const r = await ESP.Beacon.backfill(60);
       ESP.UI.toast(r.ok ? r.sent + ' gün gönderildi (' + r.empty + ' gün ölçümsüz)'
-        : 'Gönderilemedi (' + (r.reason || r.status) + ')');
+        : r.note || 'Gönderilemedi (' + (r.reason || r.status) + ')');
       ESP.App.render();
     },
     async 'hkm-send'(){

@@ -13,14 +13,14 @@ D-8, D-9, D-10, D-11, D-14, D-17, D-19.
 | Kod | Durum | Commit |
 |---|---|---|
 | KR-1 | düzeltildi | 29cb138 |
-| Y-6 | düzeltildi | (bu commit) |
-| Y-5 + O-4 + D-6 | sırada | |
-| Y-4 | sırada | |
+| Y-6 | düzeltildi | 4d79a17 |
+| Y-5 + O-4 + D-6 | düzeltildi | (bu commit) |
+| Y-4 | düzeltildi | (bu commit) |
 | Y-8 + B-2 + B-3 | sırada | |
 | Y-2 (AYS) | sırada | |
 | Y-7 (modül) | sırada | |
 | O-3, O-5, O-8, O-10, O-11 | sırada | |
-| D-8, D-9, D-10, D-11, D-14, D-17, D-19 | sırada | |
+| D-8, D-9, D-10, D-11, D-14, D-17, D-19 | **Claude A'ya geçti** (kullanıcı kararı); B dokunmaz | |
 
 ---
 
@@ -166,3 +166,44 @@ python3 build.py (AYS, SPI)   dist yeniden derlendi
 silmişse (ör. 40 eklendi, elle 20'ye indirildi, sonra 20 daha eklendi)
 hangi sayının kime ait olduğu belirsizdir; kural «eksiye düşüyorsa
 dokunma, düşmüyorsa yalnız bu kaydın payını çıkar»dır, tahmin etmez.
+
+---
+
+## Y-5 + O-4 + D-6 · Geçmiş gönderimi · Y-4 · İnce toparlanma
+
+**Ne değişti.**
+
+- **D-6 (üç `beacon.js backfill`):** gövdeye özgü ret (400, 409, 413,
+  422) yalnız o günündür; geri kalan günler gönderilmeye devam eder,
+  reddedilen her gün `rejected:[{date, status, why}]` olarak döner ve
+  `lastNote`'a yazılır («1 gün reddedildi: 2026-09-23 (422: …)»). HKM'nin
+  `errors` listesi neden olarak okunur. Ağ, yetki ya da sunucu hatasında
+  durulur (kalan günler de aynı cevabı alırdı). Ek olarak bulunan hata: ağ
+  hatasında `status` `0 || 202` yüzünden **202** dönüyordu; artık 0.
+  Üç ekranın toast'ı bu notu gösterir.
+- **Y-5 (ESP `collect`):** geçmiş günün `synthesis_gap_days`'i «veri
+  yok»tur; bağlantı durumu bugünün durumudur.
+- **O-4 (SPİ `move.js`):** `baseline(key, days, bitis)` penceresi o güne
+  göre kurulur; `readiness(d)` HRV ve nabız puanını o günün tabanıyla
+  hesaplar. `calc.js` haftalık rapor, `goodhart.js` ve geçmiş gönderimi
+  zaten `readiness(d)` çağırdığı için birlikte düzeldi.
+- **Y-4 (SPİ `beacon.js collect`):** `readiness().thin` ise `recovery`
+  `estimated` gider. (HKM tarafının `estimated`'e nasıl davrandığı A'nın
+  alanıdır.)
+
+**Önce yazılan, kırmızı görülen testler:** üç `tests/beacon.test.js`'e
+«tek reddedilen gün geri kalanı durdurmaz» ve «ağ hatasında durur» (üçünde
+2'şer kırmızı), ESP «geçmiş günün sentez açığı veri yok», SPİ «geçmiş
+günün toparlanma tabanı o güne göre» ve «ince toparlanma tahmin olarak
+gider» (her biri kırmızı). `olculmusGun()` yardımcısı tarih alacak
+biçimde genişletildi.
+
+**Koşturulan denetimler ve çıktı.**
+
+```
+AYS  node tools/runtests.js   1711/1711 gecti
+SPI  node tools/runtests.js   1354/1354 gecti
+ESP  node tools/runtests.js   1372/1372 gecti
+AYS/SPI/ESP  node tools/smoke.js   Duman testi temiz (38 / 26 / 30 ekran, 2 hedefte)
+python3 build.py (üçü)        dist yeniden derlendi
+```

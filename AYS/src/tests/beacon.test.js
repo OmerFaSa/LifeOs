@@ -31,8 +31,9 @@
 
   /* Gecmis testleri OLCULMUS bir gun ister: bos bir ambarda hicbir gun
      gonderilmez ve test kendi kendini bosa cikarir. */
-  function olculmusGun(){
-    R.S.days[BUGUN] = Object.assign(R.S.days[BUGUN] || {}, { date:BUGUN,
+  function olculmusGun(gun){
+    const BUGUN_ = gun || BUGUN;
+    R.S.days[BUGUN_] = Object.assign(R.S.days[BUGUN_] || {}, { date:BUGUN_,
       blocks:[{ id:'b1', slot:'Ders', status:'done', actualQ:20, actualMin:45,
         correctQ:15 }], paragraphActual:10, problemActual:5 });
   }
@@ -369,6 +370,52 @@
         expect(r.ok).toBe(false);
         expect(r.status).toBe(401);
         expect(r.sent).toBe(0);
+      } finally { window.fetch = eski; }
+    });
+
+    /* HATALAR D-6: ilk 202 olmayan cevapta `break` vardı; tek bozuk gün
+       geri kalan günleri engelliyor, hangi günün neden reddedildiği
+       söylenmiyordu. Yetki ve ağ hatası ise bütün günler için aynıdır:
+       orada durulur. */
+    it('tek reddedilen gün geri kalanı durdurmaz; hangi gün, neden söylenir', async () => {
+      resetState();
+      olculmusGun(DUN);
+      olculmusGun(BUGUN);
+      await B().save({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' });
+      const eski = window.fetch;
+      let n = 0;
+      window.fetch = function(){
+        n++;
+        return Promise.resolve(n === 1
+          ? { status:422, json:() => Promise.resolve({ status:422, errors:['alan: araligin disinda'] }) }
+          : { status:202 });
+      };
+      try{
+        const r = await B().backfill(2);
+        expect(n).toBe(2);
+        expect(r.sent).toBe(1);
+        expect(r.ok).toBe(false);
+        expect(r.rejected).toHaveLength(1);
+        expect(r.rejected[0].date).toBe(DUN);
+        expect(r.rejected[0].status).toBe(422);
+        expect(r.rejected[0].why).toContain('araligin disinda');
+        expect(B().settings().lastNote).toContain('reddedildi');
+      } finally { window.fetch = eski; }
+    });
+
+    it('ağ hatasında durur; kalan günler boşuna denenmez', async () => {
+      resetState();
+      olculmusGun(DUN);
+      olculmusGun(BUGUN);
+      await B().save({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' });
+      const eski = window.fetch;
+      let n = 0;
+      window.fetch = function(){ n++; return Promise.reject(new Error('ağ yok')); };
+      try{
+        const r = await B().backfill(2);
+        expect(n).toBe(1);
+        expect(r.ok).toBe(false);
+        expect(r.status).toBe(0);
       } finally { window.fetch = eski; }
     });
 

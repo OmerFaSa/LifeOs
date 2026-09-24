@@ -170,7 +170,10 @@ SP.Beacon = (function(){
       : metric(v.sleep, 'measured');
 
     const r = SP.Move.readiness(d);
-    out.recovery = r && r.ok ? metric(r.score, 'computed') : metric(null, 'missing');
+    /* Ağırlığın yarısından azı ölçülmüşse (readiness().thin) puan bir
+       TAHMİNDİR: SPİ ince ölçüme kendi içinde yük artırma yetkisi vermez,
+       HKM'ye de tam ölçüm gibi gitmemeli (ekip/HATALAR.md Y-4). */
+    out.recovery = r && r.ok ? metric(r.score, r.thin ? 'estimated' : 'computed') : metric(null, 'missing');
 
     out.hrv = v.hrv == null ? metric(null, 'missing') : metric(v.hrv, 'measured');
 
@@ -420,6 +423,7 @@ SP.Beacon = (function(){
     const n = Math.max(1, Math.min(Number(days) || 30, 180));
     const bugun = U.todayISO();
     let gonderilen = 0, bos = 0, hata = null;
+    const reddedilen = [];
     for(let i = n - 1; i >= 0; i--){
       const t = U.iso(U.addDays(U.parse(bugun), -i));
       const govde = payload(t);
@@ -432,9 +436,9 @@ SP.Beacon = (function(){
         return govde.metrics[k].cert === 'measured';
       });
       if(!dolu || contract(govde).length){ bos++; continue; }
-      let durum = 0;
+      let durum = 0, res = null;
       try{
-        const res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
+        res = await fetch(String(a.url).replace(/\/$/, '') + '/api/sync/' + MODULE, {
           method:'POST',
           headers:{ 'Content-Type':'application/json',
             'Authorization':'Bearer ' + a.token },
@@ -442,16 +446,44 @@ SP.Beacon = (function(){
         });
         durum = res.status;
       }catch(e){ durum = 0; }
-      if(durum !== 202){ hata = durum; break; }
-      gonderilen++;
-      if(typeof onProgress === 'function') onProgress(gonderilen, n);
+      if(durum === 202){
+        gonderilen++;
+        if(typeof onProgress === 'function') onProgress(gonderilen, n);
+        continue;
+      }
+      /* Gövdeye özgü ret (400, 409, 413, 422) YALNIZ o günündür: geri kalan
+         günler gönderilmeye devam eder ve hangi günün neden reddedildiği
+         saklanır. Ağ, yetki ya da sunucu hatası bütün günler için aynıdır:
+         orada durulur (ekip/HATALAR.md D-6). */
+      if(GOVDE_RETTI.indexOf(durum) >= 0){
+        reddedilen.push({ date:t, status:durum, why:await retNedeni(res) });
+        continue;
+      }
+      hata = durum;
+      break;
     }
-    await save({ lastAt:new Date().toISOString(),
-      lastStatus:hata == null ? 202 : hata,
-      lastNote:hata == null
-        ? gonderilen + ' günlük geçmiş gönderildi (' + bos + ' gün ölçümsüz).'
-        : 'Geçmiş gönderimi ' + hata + ' ile durdu.' });
-    return { ok:hata == null, sent:gonderilen, empty:bos, status:hata || 202 };
+    const not = [];
+    not.push(gonderilen + ' günlük geçmiş gönderildi (' + bos + ' gün ölçümsüz).');
+    if(reddedilen.length){
+      not.push(reddedilen.length + ' gün reddedildi: ' + reddedilen.slice(0, 3).map(function(r){
+        return r.date + ' (' + r.status + (r.why ? ': ' + r.why : '') + ')';
+      }).join('; ') + (reddedilen.length > 3 ? '; …' : '') + '.');
+    }
+    if(hata != null) not.push('Gönderim ' + (hata || 'ağ hatası') + ' ile durdu.');
+    const durumSon = hata != null ? hata : reddedilen.length ? reddedilen[0].status : 202;
+    await save({ lastAt:new Date().toISOString(), lastStatus:durumSon, lastNote:not.join(' ') });
+    return { ok:hata == null && !reddedilen.length, sent:gonderilen, empty:bos,
+      rejected:reddedilen, status:durumSon, note:not.join(' ') };
+  }
+
+  const GOVDE_RETTI = [400, 409, 413, 422];
+
+  async function retNedeni(res){
+    try{
+      const j = res && typeof res.json === 'function' ? await res.json() : null;
+      const e = j && (j.errors || j.error);
+      return (Array.isArray(e) ? e.join('; ') : String(e || '')).slice(0, 200);
+    }catch(err){ return ''; }
   }
 
 

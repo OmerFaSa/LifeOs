@@ -347,7 +347,7 @@ ESP.Screens.profile = (function(){
       ESP.UI.toast('Geçmiş gönderiliyor…');
       const r = await ESP.Beacon.backfill(60);
       ESP.UI.toast(r.ok ? r.sent + ' gün gönderildi (' + r.empty + ' gün ölçümsüz)'
-        : 'Gönderilemedi (' + (r.reason || r.status) + ')');
+        : r.note || 'Gönderilemedi (' + (r.reason || r.status) + ')');
       ESP.App.render();
     },
     async 'hkm-send'(){

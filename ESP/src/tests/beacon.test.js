@@ -29,8 +29,9 @@
       lastStatus:null, lastNote:'' }, patch || {}));
   }
 
-  function olculmusGun(){
-    ESP.S.days[BUGUN] = Object.assign(ESP.S.days[BUGUN] || {}, { date:BUGUN,
+  function olculmusGun(gun){
+    const BUGUN_ = gun || BUGUN;
+    ESP.S.days[BUGUN_] = Object.assign(ESP.S.days[BUGUN_] || {}, { date:BUGUN_,
       sessions:[{ id:'s1', disc:'lang', minutes:45, minutesCert:'measured' }] });
   }
 
@@ -346,6 +347,66 @@
         expect(r.status).toBe(401);
         expect(r.sent).toBe(0);
       } finally { window.fetch = eski; }
+    });
+
+    /* HATALAR D-6: ilk 202 olmayan cevapta `break` vardı; tek bozuk gün
+       geri kalan günleri engelliyor, hangi günün neden reddedildiği
+       söylenmiyordu. Yetki ve ağ hatası ise bütün günler için aynıdır:
+       orada durulur. */
+    it('tek reddedilen gün geri kalanı durdurmaz; hangi gün, neden söylenir', async () => {
+      resetState();
+      olculmusGun(DUN);
+      olculmusGun(BUGUN);
+      await B().save({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' });
+      const eski = window.fetch;
+      let n = 0;
+      window.fetch = function(){
+        n++;
+        return Promise.resolve(n === 1
+          ? { status:422, json:() => Promise.resolve({ status:422, errors:['alan: araligin disinda'] }) }
+          : { status:202 });
+      };
+      try{
+        const r = await B().backfill(2);
+        expect(n).toBe(2);
+        expect(r.sent).toBe(1);
+        expect(r.ok).toBe(false);
+        expect(r.rejected).toHaveLength(1);
+        expect(r.rejected[0].date).toBe(DUN);
+        expect(r.rejected[0].status).toBe(422);
+        expect(r.rejected[0].why).toContain('araligin disinda');
+        expect(B().settings().lastNote).toContain('reddedildi');
+      } finally { window.fetch = eski; }
+    });
+
+    it('ağ hatasında durur; kalan günler boşuna denenmez', async () => {
+      resetState();
+      olculmusGun(DUN);
+      olculmusGun(BUGUN);
+      await B().save({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' });
+      const eski = window.fetch;
+      let n = 0;
+      window.fetch = function(){ n++; return Promise.reject(new Error('ağ yok')); };
+      try{
+        const r = await B().backfill(2);
+        expect(n).toBe(1);
+        expect(r.ok).toBe(false);
+        expect(r.status).toBe(0);
+      } finally { window.fetch = eski; }
+    });
+
+    /* HATALAR Y-5: geçmiş günün sentez açığı BUGÜNÜN bağlantı durumundan
+       hesaplanıyordu; o günden sonra yazılmış bağsız not yaşı eksi çıkarıyor,
+       HKM gövdeyi 422 ile reddediyordu. Geçmiş güne bugünün değeri gitmez. */
+    it('geçmiş günün sentez açığı «veri yok»tur; sözleşmeyi bozmaz', () => {
+      resetState();
+      const gecen = ESP.U.iso(ESP.U.addDays(ESP.U.parse(BUGUN), -12));
+      ESP.S.notes = [{ id:'n1', title:'not', body:'x', links:[], createdAt:new Date().toISOString() }];
+      const m = B().collect(gecen).synthesis_gap_days;
+      expect(m.cert).toBe('missing');
+      expect(m.value).toBe(null);
+      expect(B().contract(B().payload(gecen))).toHaveLength(0);
+      expect(B().collect(BUGUN).synthesis_gap_days.cert).toBe('computed');
     });
 
     it('ölçülmüş gün gerçekten gönderilir', async () => {

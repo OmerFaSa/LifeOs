@@ -16,13 +16,16 @@ SP.Move = (function(){
 
   /* ------------------------------------------------------------- taban cizgi */
 
-  /* Bir gunluk olcumun kisisel ortalamasi. Bugun haric tutulur ki
-     bugunun degeri kendi taban cizgisini kaydirmasin. */
-  function baseline(key, days){
+  /* Bir gunluk olcumun kisisel ortalamasi. Pencere `bitis` gununden
+     (varsayilan bugun) GERIYE kurulur ve o gun haric tutulur ki gunun
+     degeri kendi taban cizgisini kaydirmasin. Gecmis bir gunun puani o
+     gunden SONRAKI olcumlerle hesaplanmaz (ekip/HATALAR.md O-4). */
+  function baseline(key, days, bitis){
     const n = days || 30;
+    const son = bitis ? U.parse(bitis) : U.today();
     const vals = [];
     for(let i = 1; i <= n; i++){
-      const d = U.iso(U.addDays(U.today(), -i));
+      const d = U.iso(U.addDays(son, -i));
       const rec = SP.S.vitals[d];
       if(rec && rec[key] != null) vals.push(Number(rec[key]));
     }
@@ -43,16 +46,16 @@ SP.Move = (function(){
     return U.clamp(100 - (t[0] - hours) * 22, 0, 100);
   }
 
-  function hrvScore(value){
-    const b = baseline('hrv');
+  function hrvScore(value, gun){
+    const b = baseline('hrv', 30, gun);
     if(value == null || !b) return null;
     /* Kendi ortalamana gore yuzde sapma. -%20 ve altinda skor dibe iner. */
     const pct = 100 * (value - b.mean) / b.mean;
     return U.clamp(70 + pct * 2.2, 0, 100);
   }
 
-  function rhrScore(value){
-    const b = baseline('rhr');
+  function rhrScore(value, gun){
+    const b = baseline('rhr', 30, gun);
     if(value == null || !b) return null;
     /* Nabizda YUKSELIS kotudur: ortalamanin 8 atim ustu skoru dibe cekar. */
     const delta = value - b.mean;
@@ -75,8 +78,8 @@ SP.Move = (function(){
 
     const parts = [
       { id:'sleep',    score:sleepScore(v.sleep),        value:v.sleep },
-      { id:'hrv',      score:hrvScore(v.hrv),            value:v.hrv },
-      { id:'rhr',      score:rhrScore(v.rhr),            value:v.rhr },
+      { id:'hrv',      score:hrvScore(v.hrv, d),         value:v.hrv },
+      { id:'rhr',      score:rhrScore(v.rhr, d),         value:v.rhr },
       { id:'soreness', score:sorenessScore(v.soreness),  value:v.soreness },
     ].map(p => {
       const def = SP.READINESS_INPUTS.find(x => x.id === p.id);

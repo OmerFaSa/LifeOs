@@ -29,9 +29,10 @@
       lastStatus:null, lastNote:'' }, patch || {}));
   }
 
-  function olculmusGun(){
-    SP.S.vitals[BUGUN] = Object.assign(SP.S.vitals[BUGUN] || {},
-      { date:BUGUN, sleep:7.5, hrv:60 });
+  function olculmusGun(gun){
+    const BUGUN_ = gun || BUGUN;
+    SP.S.vitals[BUGUN_] = Object.assign(SP.S.vitals[BUGUN_] || {},
+      { date:BUGUN_, sleep:7.5, hrv:60 });
   }
 
   describe('HKM işareti — sınırlar', () => {
@@ -355,6 +356,80 @@
         expect(r.status).toBe(401);
         expect(r.sent).toBe(0);
       } finally { window.fetch = eski; }
+    });
+
+    /* HATALAR D-6: ilk 202 olmayan cevapta `break` vardı; tek bozuk gün
+       geri kalan günleri engelliyor, hangi günün neden reddedildiği
+       söylenmiyordu. Yetki ve ağ hatası ise bütün günler için aynıdır:
+       orada durulur. */
+    it('tek reddedilen gün geri kalanı durdurmaz; hangi gün, neden söylenir', async () => {
+      resetState();
+      olculmusGun(DUN);
+      olculmusGun(BUGUN);
+      await B().save({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' });
+      const eski = window.fetch;
+      let n = 0;
+      window.fetch = function(){
+        n++;
+        return Promise.resolve(n === 1
+          ? { status:422, json:() => Promise.resolve({ status:422, errors:['alan: araligin disinda'] }) }
+          : { status:202 });
+      };
+      try{
+        const r = await B().backfill(2);
+        expect(n).toBe(2);
+        expect(r.sent).toBe(1);
+        expect(r.ok).toBe(false);
+        expect(r.rejected).toHaveLength(1);
+        expect(r.rejected[0].date).toBe(DUN);
+        expect(r.rejected[0].status).toBe(422);
+        expect(r.rejected[0].why).toContain('araligin disinda');
+        expect(B().settings().lastNote).toContain('reddedildi');
+      } finally { window.fetch = eski; }
+    });
+
+    it('ağ hatasında durur; kalan günler boşuna denenmez', async () => {
+      resetState();
+      olculmusGun(DUN);
+      olculmusGun(BUGUN);
+      await B().save({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' });
+      const eski = window.fetch;
+      let n = 0;
+      window.fetch = function(){ n++; return Promise.reject(new Error('ağ yok')); };
+      try{
+        const r = await B().backfill(2);
+        expect(n).toBe(1);
+        expect(r.ok).toBe(false);
+        expect(r.status).toBe(0);
+      } finally { window.fetch = eski; }
+    });
+
+    /* HATALAR O-4: toparlanma tabanı hep BUGÜNE göre kuruluyordu; geçmiş
+       günün HRV puanı o günden SONRAKİ günlerin değerleriyle hesaplanıyordu. */
+    it('geçmiş günün toparlanma tabanı o güne göre kurulur', () => {
+      resetState();
+      const g = n => SP.U.iso(SP.U.addDays(SP.U.parse(BUGUN), n));
+      const gecen = g(-10);
+      for(let i = 1; i <= 20; i++) SP.S.vitals[g(-10 - i)] = { date:g(-10 - i), hrv:50 };
+      for(let i = 1; i <= 9; i++) SP.S.vitals[g(-10 + i)] = { date:g(-10 + i), hrv:100 };
+      SP.S.vitals[gecen] = { date:gecen, hrv:50 };
+      expect(SP.Move.baseline('hrv', 30, gecen).mean).toBe(50);
+      const hrv = SP.Move.readiness(gecen).parts.find(p => p.id === 'hrv');
+      expect(hrv.score).toBe(70);
+    });
+
+    /* HATALAR Y-4: yalnız «ağrı/enerji = 2» girilen gün (ağırlığın %15'i)
+       toparlanma 25 «hesaplandı» diye gidiyor, HKM'nin en üst kırmızı
+       bayrağını tetikliyordu. İnce ölçüm «tahmin» olarak gider. */
+    it('ince toparlanma ölçümü «tahmin» olarak gider', () => {
+      resetState();
+      SP.S.vitals[BUGUN] = { date:BUGUN, soreness:2 };
+      expect(SP.Move.readiness(BUGUN).thin).toBe(true);
+      expect(B().collect(BUGUN).recovery.cert).toBe('estimated');
+      SP.S.vitals[BUGUN] = { date:BUGUN, sleep:7.5, soreness:4 };
+      const r = SP.Move.readiness(BUGUN);
+      expect(r.thin).toBe(false);
+      expect(B().collect(BUGUN).recovery.cert).toBe('computed');
     });
 
     it('ölçülmüş gün gerçekten gönderilir', async () => {

@@ -998,7 +998,7 @@ R.Screens.guide = (function(){
       UI.toast('Geçmiş gönderiliyor…');
       const r = await R.Beacon.backfill(60);
       UI.toast(r.ok ? r.sent + ' gün gönderildi (' + r.empty + ' gün ölçümsüz)'
-        : 'Gönderilemedi (' + (r.reason || r.status) + ')');
+        : r.note || 'Gönderilemedi (' + (r.reason || r.status) + ')');
       R.App.render();
     },
     async 'hkm-send'(){
