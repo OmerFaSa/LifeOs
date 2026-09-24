@@ -20,7 +20,7 @@
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
 **Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · ✅ Grup 4 ·
-✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ✅ tam koşum (2026-09-24, 24/24) · ✅ SPİ su hatası · ✅ 8f ESP belge (tarih + felsefe) · ✅ 8f-2 (okuma, yazı) · ❓ diksiyon belgesi (soru) · ⏳ cevaplı maddeler · ⏳ Part 9 (harita ONAY BEKLİYOR: `ekip/CEKMECE-HARITASI.md`)
+✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ✅ tam koşum (2026-09-24, 24/24) · ✅ SPİ su hatası · ✅ 8f ESP belge (tarih + felsefe) · ✅ 8f-2 (okuma, yazı) · ❓ diksiyon belgesi (soru) · ✅ Y5 · ✅ Y11 · ✅ 10a · ✅ 11 · ✅ 16 · ✅ 17 · 🔜 18 (labs ✅, AYS llm.js ⏳) · ❓ 10b, 14, Y1, Y10, diksiyon · ⏳ cevaplı maddeler · ⏳ Part 9 (harita ONAY BEKLİYOR: `ekip/CEKMECE-HARITASI.md`)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
 
@@ -172,7 +172,15 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   her ekran tek bölümde, boş/dolu çizim çökmez). Test sayfaları bütün ekranları + `app.js`'i
   yükler (AYS'ye `__AYS_NO_BOOT__` bayrağı eklendi; eksik 4 dosya: build, designs, listen, talk).
   AYS 1664, ESP 1339; AYS duman temiz.
-- ⏳ 18 labs.js ve AYS llm.js.
+- 🔜 18 labs.js ve AYS llm.js — **KALDIĞIM YER (2026-09-24):**
+  · ✅ SPİ `labs.js` testi yazıldı: `SPI/src/tests/labs.test.js` (7 sekme boş/dolu, undefined/NaN
+    sızıntısı yok; işaret, hekim özeti, oturum, ilaç alt sayfaları; elle giriş «ölçüldü»,
+    yapıştırma, silme + geri al). SPİ 1306/1306. Yeni kapsam ÖLÇÜLMEDİ (önceki %23):
+    `CHROMIUM_PATH=/opt/pw-browsers/chromium node tools/kapsam.js SPI --ayrinti | grep labs.js`
+    koşup NOTLAR §19'daki satırı güncelle.
+  · ⏳ AYS `llm.js` (1337 satır) ortak kaynağa (`brand/ortak/llm.js`) çekilecek — NOTLAR §19:
+    «otuz fazla işlev; SPİ/ESP'ye model listeleme, teşhis ve görsel zinciri gelir». Büyük ve
+    riskli: önce farkı ölç (`diff` işlev listesi), sonra küçük dilimler + üç modül testi.
 
 ### Part 9 — Tek tasarım + çekmece düzeni (EN SON)
 **Kullanıcı 2026-09-24: «tasarımı en son yapacağız, benden onay isteyeceksin; onun harici
