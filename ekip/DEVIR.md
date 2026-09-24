@@ -374,9 +374,11 @@ her madde önce kırmızı test, sonra düzeltme:
 | D-15 | Giden satır sahiplenilir (15 dk kira); medya işleme tek | 3b27d24 |
 | D-16 · D-18 | Kullanım bilgisi yoksa jeton tahmini («tahmini-jeton»); tavan en kötü durumu ve süren çağrıları sayar (`butce.ayir`) | 6134d06 |
 | D-12 | Niyet kataloğu üç `beacon.js` ile karşılaştırılır (test) | 6855002 |
+| O-6 (atanmamıştı, HKM) | Görüntüden düşen hafıza kaydı «dustu», geri gelince dirilir; «unut» dirilmez | 828a0ba |
+| D-5 (atanmamıştı, HKM) | Program kapasitesi toplamı aşmaz; bir dilim bile yetmiyorsa kritik «dilim» denetimi | (bu commit) |
 | KO-1 · B-4 · B-1 | Süreç açılışında saat dilimi (config `saat_dilimi` > Europe/Istanbul); KURULUM: UMask, ReadWritePaths HKM (config yazılabilsin), üç bearer'sız yol | 1ac5fd8 |
 
-Denetim (A, son): HKM 626/626, `perf.py` bütçede, HKM yüzü 56 görünüm temiz,
+Denetim (A, son): HKM 628/628, `perf.py` bütçede, HKM yüzü 56 görünüm temiz,
 `tools/entegre.js` temiz. **Kalan (A):** B bitince `python3 tools/sayilar.py --tam --yaz`.
 README'deki elle yazılmış «312 test» (B-1'in README yarısı) B'nin dosyasında.
 
