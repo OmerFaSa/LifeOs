@@ -328,6 +328,23 @@ SP.Bilgi = (function(){
   }
 
   function yerler(){ return (SP.S.yerler || []).slice(); }
+
+  /* Yer karşılaştırması (fikir 37): aylık karşılık HESAPLANIR; yalnız
+     çevrilebilen çevrilir (yıllık/12). Günlük, seans ve tek giriş kullanım
+     sıklığı bilinmeden aylığa çevrilmez — «karşılaştırılamaz». */
+  const AYLIK_CARPAN = { 'aylık':1, 'yıllık':1 / 12 };
+  function yerKarsilastir(l){
+    const satirlar = ((l && l.yerler) || []).map(y => {
+      const c = AYLIK_CARPAN[y.donem];
+      const aylik = y.tl != null && c != null ? Math.round(y.tl * c) : null;
+      return { ad:y.ad, semt:y.semt || null, tl:y.tl, donem:y.donem || null, aylik,
+        not:y.tl == null ? 'fiyat bilinmiyor' : (aylik == null ? 'karşılaştırılamaz' : 'hesaplandı') };
+    });
+    satirlar.sort((a, b) => (a.aylik == null) - (b.aylik == null) || (a.aylik || 0) - (b.aylik || 0)
+      || (a.tl == null) - (b.tl == null));
+    const ilk = satirlar.find(x => x.aylik != null);
+    return { satirlar, enUcuz:ilk ? ilk.ad : null };
+  }
   async function yerSil(id){
     const once = (SP.S.yerler || []).length;
     SP.S.yerler = (SP.S.yerler || []).filter(y => y.id !== id);
@@ -340,6 +357,6 @@ SP.Bilgi = (function(){
     await yerYaz();
   }
 
-  return { NIYET, TUR_AD, istekTemizle, iste, kayitCek, sina, onizle, uygula, geriAl,
+  return { yerKarsilastir, NIYET, TUR_AD, istekTemizle, iste, kayitCek, sina, onizle, uygula, geriAl,
     yukle, yerler, yerSil, yerGeri };
 })();

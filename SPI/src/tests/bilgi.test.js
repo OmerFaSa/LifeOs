@@ -180,4 +180,20 @@
       });
     });
   });
+
+  /* Fikir 37 — yer karşılaştırması: aylık karşılık KODDAN; yalnız
+     çevrilebilen çevrilir (yıllık/12). Günlük ve seans kullanım sıklığı
+     bilinmeden aylığa çevrilmez: «karşılaştırılamaz». */
+  describe('Yer karşılaştırması', () => {
+    it('aylık karşılığa göre sıralı; çevrilemeyen sona, uydurulmaz', () => {
+      const r = Bi().yerKarsilastir({ yerler:[
+        { ad:'Pahalı', tl:2400, donem:'aylık' }, { ad:'Yıllık', tl:18000, donem:'yıllık' },
+        { ad:'Seanslık', tl:250, donem:'seans' }, { ad:'Fiyatsız', tl:null, donem:null } ] });
+      expect(r.satirlar.map(x => x.ad)).toEqual(['Yıllık', 'Pahalı', 'Seanslık', 'Fiyatsız']);
+      expect(r.satirlar[0].aylik).toBe(1500);
+      expect([r.satirlar[2].aylik, r.satirlar[2].not]).toEqual([null, 'karşılaştırılamaz']);
+      expect(r.satirlar[3].not).toBe('fiyat bilinmiyor');
+      expect(r.enUcuz).toBe('Yıllık');
+    });
+  });
 })();

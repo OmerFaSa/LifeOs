@@ -100,5 +100,18 @@
       expect(!!l).toBe(true);
       expect([l.values.ferritin.v, l.values.glucose.v]).toEqual([22, 91]);
     });
+
+    it('hekim özeti PDF olarak kaydedilirken dosya adı tarihli olur, sonra eski başlık döner (fikir 36)', async () => {
+      resetState();
+      const eskiBaslik = document.title, eskiPrint = window.print;
+      let baskidaki = null;
+      window.print = () => { baskidaki = document.title; };
+      try{
+        await sessiz(() => SP.Test.withTodayAsync('2026-03-10', () => L().handle['pdf-doctor']()));
+        expect(baskidaki).toBe('SPI-hekim-ozeti-2026-03-10');
+        window.dispatchEvent(new Event('afterprint'));
+        expect(document.title).toBe(eskiBaslik);
+      }finally{ window.print = eskiPrint; document.title = eskiBaslik; }
+    });
   });
 })();

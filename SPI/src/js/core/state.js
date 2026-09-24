@@ -37,6 +37,7 @@ SP.S = {
   meals:{},           // YYYY-MM-DD -> ogun dizisi
   workouts:[],        // antrenman kayitlari
   meds:[],            // ilac ve takviye kayitlari, en yeni ustte
+  hatirlat:null,      // hatirlatmalar (core/hatirlat.js) — ilac, su, hareket
   hedefler:[],        // hedef motoru kayitlari (core/hedefler.js)
   hekim:[],           // hekim talimatlari — en yuksek oncelikli kisit
   planlar:[],         // hedeflerin planlari (core/plan.js) — uygulanan, geri alinan
@@ -900,6 +901,7 @@ SP.Model = (function(){
 
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);
+    if(SP.Hatirlat) await SP.Hatirlat.yukle();
 
     S.progress = (await SP.Store.get('progress')) || {};
     S.basket = Object.assign(defaultBasket(), await SP.Store.get('basket'));

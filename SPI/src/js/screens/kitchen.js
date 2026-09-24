@@ -212,8 +212,17 @@ SP.Screens.kitchen = (function(){
           ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Listeyi sil',
             act:'yer-sil', data:{ 'data-id':l.id } })}
         </div>
-        <ul class="tiny mt-4">${map(l.yerler, y => html`<li>${y.ad}${y.semt ? ' · ' + y.semt : ''}${
-          y.tl != null ? ' · ' + U.fmtNum(y.tl) + ' TL' + (y.donem ? ' ' + y.donem : '') : ' · fiyat bilinmiyor'}</li>`)}</ul>
+        ${(() => {
+          /* Karşılaştırma (fikir 37): aylık karşılık koddan; çevrilemeyen sona. */
+          const k = SP.Bilgi.yerKarsilastir(l);
+          return html`${K.Table({ tight:true, headers:['Yer', 'Fiyat', { label:'Aylık karşılık', num:true }],
+            rows:k.satirlar.map(y => [
+              y.ad + (y.semt ? ' · ' + y.semt : ''),
+              y.tl != null ? U.fmtNum(y.tl) + ' TL' + (y.donem ? ' / ' + y.donem : '') : 'bilinmiyor',
+              y.aylik != null ? U.fmtNum(y.aylik) + ' TL' : html`<span class="dim">${y.not}</span>`]) })}
+            ${when(k.enUcuz, () => html`<p class="tiny mt-4">Aylık karşılıkta en düşük: <b>${k.enUcuz}</b>
+              (hesaplandı; yıllık fiyat 12'ye bölündü).</p>`)}`;
+        })()}
         <p class="tiny dim">BAM araştırması, ${l.at}. Fiyat ve adres değişmiş olabilir; gitmeden teyit et.</p>
       </div>`)}`,
     });

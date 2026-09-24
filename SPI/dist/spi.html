@@ -7754,7 +7754,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'c7869e1', at:'2026-09-24 08:58', dirty:true };
+SP.BUILD = { id:'3e56b56', at:'2026-09-24 09:45', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -16408,6 +16408,7 @@ SP.S = {
   meals:{},           // YYYY-MM-DD -> ogun dizisi
   workouts:[],        // antrenman kayitlari
   meds:[],            // ilac ve takviye kayitlari, en yeni ustte
+  hatirlat:null,      // hatirlatmalar (core/hatirlat.js) — ilac, su, hareket
   hedefler:[],        // hedef motoru kayitlari (core/hedefler.js)
   hekim:[],           // hekim talimatlari — en yuksek oncelikli kisit
   planlar:[],         // hedeflerin planlari (core/plan.js) — uygulanan, geri alinan
@@ -17271,6 +17272,7 @@ SP.Model = (function(){
 
     S.meds = ((await SP.Store.list('meds')) || []).map(normMed)
       .sort((a, b) => a.startDate < b.startDate ? 1 : a.startDate > b.startDate ? -1 : 0);
+    if(SP.Hatirlat) await SP.Hatirlat.yukle();
 
     S.progress = (await SP.Store.get('progress')) || {};
     S.basket = Object.assign(defaultBasket(), await SP.Store.get('basket'));
@@ -24315,9 +24317,59 @@ SP.Money = (function(){
     };
   }
 
+  /* Fikir 30: ogunlerden alisveris listesi. SPI'de ileriye donuk ogun
+     plani yok; buradaki "plan" kullanicinin SON YEDI GUNDE gercekte
+     yedigidir (olculmus ogun kayitlari). Kayitsiz gun sifir sayilmaz:
+     kayitli gunlerin ortalamasi yedi gune olceklenir ve bu TAHMINdir;
+     yedi gunun hepsi kayitliysa HESAPLANDI. Liste yalniz kullanicinin kendi
+     ogunlerinden gelir; hanenin diger uyelerinin payi eklenmez (ekran bunu
+     soyler). Sepete yazmak orta aksiyondur: onizleme + tek onay + geri al
+     (screens/basket.js). */
+  const LISTE_GUN = 7, LISTE_EN_AZ = 3;
+  function ogundenListe(){
+    const bugun = U.today();
+    const gram = {};
+    const bilinmeyen = {};
+    let kayitli = 0;
+    for(let i = 0; i < LISTE_GUN; i++){
+      const d = U.iso(U.addDays(bugun, -i));
+      const items = [].concat.apply([], ((SP.S.meals && SP.S.meals[d]) || []).map(m => m.items || []));
+      if(!items.length) continue;
+      kayitli++;
+      items.forEach(it => {
+        if(!SP.FOOD_BY_ID[it.foodId]){ bilinmeyen[it.foodId] = true; return; }
+        const g = Number(it.g) || 0;
+        if(g > 0) gram[it.foodId] = (gram[it.foodId] || 0) + g;
+      });
+    }
+    const nBilinmeyen = Object.keys(bilinmeyen).length;
+    if(kayitli < LISTE_EN_AZ){
+      return { ok:false, kayitliGun:kayitli, bilinmeyen:nBilinmeyen,
+        note:'Liste için son yedi günde en az ' + LISTE_EN_AZ + ' günlük öğün kaydı gerekir; '
+          + 'şu an ' + kayitli + ' gün var. Kaydı olmayan gün sıfır sayılmaz.' };
+    }
+    const olcek = LISTE_GUN / kayitli;
+    const sepet = {};
+    ((SP.S.basket && SP.S.basket.items) || []).forEach(x => { sepet[x.foodId] = Number(x.kg) || 0; });
+    const tum = Object.keys(gram).map(id => {
+      const kg = Math.max(0.05, U.round(gram[id] * olcek / 1000, 2));
+      const sepette = sepet[id] || 0;
+      const eksik = U.round(Math.max(0, kg - sepette), 2);
+      return { food:SP.FOOD_BY_ID[id], kg, sepette, eksik,
+        cost:eksik > 0 ? costOf(id, eksik) : 0, price:priceOf(id) };
+    });
+    const satirlar = tum.filter(r => r.eksik >= 0.05)
+      .sort((a, b) => (b.cost || 0) - (a.cost || 0));
+    return { ok:true, kayitliGun:kayitli, bilinmeyen:nBilinmeyen,
+      cert:kayitli === LISTE_GUN ? 'derived' : 'estimated',
+      satirlar, yeterli:tum.length - satirlar.length,
+      toplam:U.round(U.sum(satirlar.map(r => r.cost || 0)), 2),
+      fiyatsiz:satirlar.filter(r => r.cost == null).length };
+  }
+
   return {
     priceOf, costOf, monthsSince, ageBand, estimateShare, budget,
-    basketRows, basketTotal, basketCoverage,
+    basketRows, basketTotal, basketCoverage, ogundenListe,
     substitutesFor, swapOpportunities, costPerNutrient, bulkOpportunities,
     status,
   };
@@ -30599,6 +30651,201 @@ SP.Dunku = (function(){
   return { adaylar, ogunKopyala, antrenmanKopyala, geriAl };
 })();
 
+/* ==== js/core/hatirlat.js ==== */
+/* HATIRLATMALAR (fikir 34 + 35) — ilaç/takviye, su ve hareket.
+
+   Sözler:
+     1. YALNIZ KULLANICININ GİRDİĞİ. Hangi ilacı hangi saatte hatırlatacağını
+        kullanıcı yazar; sistem saat, sıklık ya da doz ÖNERMEZ (AGENTS §1.5).
+        Hatırlatmada yalnız ad ve saat görünür; doz notu bile gösterilmez.
+     2. İLAÇ KAYDINA BAĞLIDIR. İlaç hatırlatması `meds` kaydının kimliğini
+        taşır; kayıt bırakılınca (bitiş tarihi) hatırlatma da susar.
+     3. SPİ'DE KALIR. İlaç adı HKM'ye hiçbir seviyede gitmez (core/beacon.js
+        klinik sınır); bu yüzden hatırlatma Telegram'dan değil, SPİ açıkken
+        Bugün ekranından ve — kullanıcı izin verdiyse — tarayıcı
+        bildiriminden gelir. SPİ kapalıyken hatırlatma YOKTUR; ekran bunu
+        söyler.
+     4. «YAPILDI» BİR KAYITTIR, ÖLÇÜM DEĞİL. Su hatırlatmasına «İçtim» demek
+        mililitre yazmaz: miktar uydurulmaz, su alanı ayrıca girilir.
+        İşaretlenmemiş bir saat «alınmadı» sayılmaz — «işaretlenmedi»dir;
+        bu yüzden uyum yüzdesi HESAPLANMAZ. */
+
+window.SP = window.SP || {};
+
+SP.Hatirlat = (function(){
+  const U = () => SP.U;
+  const KEY = 'hatirlat';
+  const SAKLA_GUN = 14;
+  const EN_COK_SAAT = 8;
+  const BILDIRIM_PENCERE_DK = 15;
+
+  const TUR = {
+    ilac:{ ad:'İlaç / takviye', eylem:'Aldım' },
+    su:{ ad:'Su', eylem:'İçtim', metin:'Su' },
+    hareket:{ ad:'Hareket', eylem:'Yaptım', metin:'Hareket molası' },
+  };
+
+  function bos(){ return { liste:[], yapildi:{}, bildirim:false }; }
+  function durum(){
+    if(!SP.S.hatirlat) SP.S.hatirlat = bos();
+    return SP.S.hatirlat;
+  }
+
+  async function yukle(){
+    const d = (await SP.Store.get(KEY)) || {};
+    SP.S.hatirlat = Object.assign(bos(), d);
+    if(!Array.isArray(SP.S.hatirlat.liste)) SP.S.hatirlat.liste = [];
+    if(!SP.S.hatirlat.yapildi || typeof SP.S.hatirlat.yapildi !== 'object') SP.S.hatirlat.yapildi = {};
+    return SP.S.hatirlat;
+  }
+
+  async function kaydet(){
+    const d = durum();
+    const sinir = U().iso(U().addDays(U().today(), -SAKLA_GUN));
+    Object.keys(d.yapildi).forEach(g => { if(g < sinir) delete d.yapildi[g]; });
+    await SP.Store.set(KEY, d);
+    return d;
+  }
+
+  /* «8:00, 21.30 13:15» → ['08:00', '13:15', '21:30']. Anlaşılmayan bir
+     parça TAHMİN EDİLMEZ, sorulur (AGENTS §1.7). */
+  function saatOku(metin){
+    const parca = String(metin || '').split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+    if(!parca.length) return { ok:false, why:'En az bir saat yaz (örn. 08:00).' };
+    const out = [];
+    for(const p of parca){
+      const m = /^(\d{1,2})[:.](\d{2})$/.exec(p);
+      const s = m ? Number(m[1]) : NaN, d = m ? Number(m[2]) : NaN;
+      if(!m || s > 23 || d > 59) return { ok:false, why:'«' + p + '» bir saat değil; 08:00 biçiminde yaz.' };
+      const hhmm = String(s).padStart(2, '0') + ':' + String(d).padStart(2, '0');
+      if(out.indexOf(hhmm) < 0) out.push(hhmm);
+    }
+    if(out.length > EN_COK_SAAT) return { ok:false, why:'Bir hatırlatmaya en çok ' + EN_COK_SAAT + ' saat yazılır.' };
+    return { ok:true, saatler:out.sort() };
+  }
+
+  function ilacOf(h){ return (SP.S.meds || []).find(m => m.id === h.medId) || null; }
+
+  function adOf(h){
+    if(h.tur === 'ilac'){
+      const m = ilacOf(h);
+      return m ? (m.name || SP.Meds.kindOf(m).name) : 'Silinmiş ilaç kaydı';
+    }
+    return TUR[h.tur].metin;
+  }
+
+  /* Bugün geçerli mi: ilaç hatırlatması yalnız ilaç o gün etkinse. */
+  function gecerli(h, gun){
+    if(h.tur !== 'ilac') return true;
+    const m = ilacOf(h);
+    return !!m && SP.Meds.activeOn(m, gun);
+  }
+
+  async function ekle(g){
+    const x = g || {};
+    if(!TUR[x.tur]) return { ok:false, why:'Hatırlatma türü seçilmedi.' };
+    if(x.tur === 'ilac' && !(SP.S.meds || []).some(m => m.id === x.medId)){
+      return { ok:false, why:'Hangi ilaç ya da takviye olduğu seçilmedi.' };
+    }
+    const s = saatOku(x.saatler);
+    if(!s.ok) return s;
+    const d = durum();
+    const onceki = d.liste.find(h => h.tur === x.tur && (x.tur !== 'ilac' || h.medId === x.medId));
+    if(onceki) onceki.saatler = s.saatler;
+    else d.liste.push({ id:U().uid('ht'), tur:x.tur, medId:x.tur === 'ilac' ? x.medId : null,
+      saatler:s.saatler, at:new Date().toISOString() });
+    await kaydet();
+    return { ok:true, saatler:s.saatler };
+  }
+
+  async function sil(id){
+    const d = durum();
+    const h = d.liste.find(x => x.id === id);
+    if(!h) return { ok:false, why:'Hatırlatma bulunamadı.' };
+    d.liste = d.liste.filter(x => x.id !== id);
+    await kaydet();
+    return { ok:true, geri:h };
+  }
+
+  async function geriKoy(h){
+    const d = durum();
+    if(h && !d.liste.some(x => x.id === h.id)) d.liste.push(h);
+    await kaydet();
+  }
+
+  function dk(hhmm){ const p = String(hhmm).split(':'); return Number(p[0]) * 60 + Number(p[1]); }
+
+  /* Bugünün satırları: her hatırlatmanın her saati. `durum`:
+       yapildi   kullanıcı işaretledi
+       vakti     saati geldi, işaretlenmedi
+       sonra     saati gelmedi */
+  function bugun(simdi){
+    const now = simdi || new Date();
+    const gun = U().iso(now);
+    const n = now.getHours() * 60 + now.getMinutes();
+    const d = durum();
+    const yap = d.yapildi[gun] || {};
+    const out = [];
+    d.liste.forEach(h => {
+      if(!gecerli(h, gun)) return;
+      h.saatler.forEach(saat => {
+        const anahtar = h.id + '@' + saat;
+        out.push({ anahtar, id:h.id, tur:h.tur, saat, ad:adOf(h), eylem:TUR[h.tur].eylem,
+          durum:yap[anahtar] ? 'yapildi' : (n >= dk(saat) ? 'vakti' : 'sonra') });
+      });
+    });
+    return out.sort((a, b) => a.saat < b.saat ? -1 : a.saat > b.saat ? 1 : 0);
+  }
+
+  async function isaretle(anahtar, deger, gunISO){
+    const d = durum();
+    const gun = gunISO || U().todayISO();
+    d.yapildi[gun] = d.yapildi[gun] || {};
+    if(deger === false) delete d.yapildi[gun][anahtar];
+    else d.yapildi[gun][anahtar] = new Date().toISOString();
+    await kaydet();
+  }
+
+  /* ------------------------------------------------ tarayıcı bildirimi */
+
+  function bildirimVar(){ return typeof window.Notification === 'function'; }
+  function bildirimIzinli(){ return bildirimVar() && window.Notification.permission === 'granted'; }
+
+  async function bildirimAc(){
+    if(!bildirimVar()) return { ok:false, why:'Bu tarayıcı bildirim göstermiyor.' };
+    let izin = window.Notification.permission;
+    if(izin !== 'granted') izin = await window.Notification.requestPermission();
+    if(izin !== 'granted') return { ok:false, why:'Bildirim izni verilmedi; hatırlatmalar yalnız Bugün ekranında görünür.' };
+    durum().bildirim = true;
+    await kaydet();
+    return { ok:true };
+  }
+  async function bildirimKapat(){ durum().bildirim = false; await kaydet(); }
+
+  /* Dakikada bir çağrılır. Saati son 15 dakikada gelmiş, işaretlenmemiş
+     ve bu oturumda gösterilmemiş satır için bir bildirim. Kaçan saat
+     KOVALANMAZ: iki saat önceki hatırlatma bildirim değil gürültüdür. */
+  const gosterildi = {};
+  function tik(simdi){
+    if(!durum().bildirim || !bildirimIzinli()) return 0;
+    const now = simdi || new Date();
+    const gun = U().iso(now);
+    const n = now.getHours() * 60 + now.getMinutes();
+    let say = 0;
+    bugun(now).forEach(r => {
+      const k = gun + '|' + r.anahtar;
+      if(r.durum !== 'vakti' || gosterildi[k] || n - dk(r.saat) > BILDIRIM_PENCERE_DK) return;
+      gosterildi[k] = true;
+      try{ new window.Notification('SPİ · ' + r.saat, { body:r.ad, tag:'spi-' + r.anahtar }); say++; }
+      catch(e){ /* bildirim gösterilemedi; Bugün ekranı yine gösterir */ }
+    });
+    return say;
+  }
+
+  return { TUR, yukle, kaydet, saatOku, ekle, sil, geriKoy, bugun, isaretle, adOf, durum,
+    bildirimVar, bildirimIzinli, bildirimAc, bildirimKapat, tik };
+})();
+
 /* ==== js/core/bilgi.js ==== */
 /* SPİ BİLGİSİ — BAM'ın besin, fiyat ve yer kayıtlarını SPİ'ye almak (Part 8c-2).
 
@@ -30930,6 +31177,23 @@ SP.Bilgi = (function(){
   }
 
   function yerler(){ return (SP.S.yerler || []).slice(); }
+
+  /* Yer karşılaştırması (fikir 37): aylık karşılık HESAPLANIR; yalnız
+     çevrilebilen çevrilir (yıllık/12). Günlük, seans ve tek giriş kullanım
+     sıklığı bilinmeden aylığa çevrilmez — «karşılaştırılamaz». */
+  const AYLIK_CARPAN = { 'aylık':1, 'yıllık':1 / 12 };
+  function yerKarsilastir(l){
+    const satirlar = ((l && l.yerler) || []).map(y => {
+      const c = AYLIK_CARPAN[y.donem];
+      const aylik = y.tl != null && c != null ? Math.round(y.tl * c) : null;
+      return { ad:y.ad, semt:y.semt || null, tl:y.tl, donem:y.donem || null, aylik,
+        not:y.tl == null ? 'fiyat bilinmiyor' : (aylik == null ? 'karşılaştırılamaz' : 'hesaplandı') };
+    });
+    satirlar.sort((a, b) => (a.aylik == null) - (b.aylik == null) || (a.aylik || 0) - (b.aylik || 0)
+      || (a.tl == null) - (b.tl == null));
+    const ilk = satirlar.find(x => x.aylik != null);
+    return { satirlar, enUcuz:ilk ? ilk.ad : null };
+  }
   async function yerSil(id){
     const once = (SP.S.yerler || []).length;
     SP.S.yerler = (SP.S.yerler || []).filter(y => y.id !== id);
@@ -30942,7 +31206,7 @@ SP.Bilgi = (function(){
     await yerYaz();
   }
 
-  return { NIYET, TUR_AD, istekTemizle, iste, kayitCek, sina, onizle, uygula, geriAl,
+  return { yerKarsilastir, NIYET, TUR_AD, istekTemizle, iste, kayitCek, sina, onizle, uygula, geriAl,
     yukle, yerler, yerSil, yerGeri };
 })();
 
@@ -32468,6 +32732,147 @@ SP.Setup = (function(){
   return { needed, open, save, skip };
 })();
 
+/* ==== js/screens/hatirlatui.js ==== */
+/* Hatırlatmaların yüzü (core/hatirlat.js). Bugün ekranında vakti gelenler,
+   Özet'te günün listesi, İlaç sekmesinde «Hatırlat» düğmesi — üçü de aynı
+   düzenleme sayfasını açar. Eylemler her ekrandan çalışsın diye app.js
+   bunları genel eylemlere katar. */
+
+window.SP = window.SP || {};
+
+SP.HatirlatUI = (function(){
+  const U = SP.U, S = SP.S, UI = SP.UI;
+  const { html, when, map } = SP.h;
+  const K = SP.C;
+  const H = () => SP.Hatirlat;
+
+  function satirDugme(r){
+    return r.durum === 'yapildi'
+      ? html`<span class="tiny dim">${r.eylem.toLocaleLowerCase('tr')} ·
+          ${K.Button({ label:'Geri al', size:'sm', act:'ht-isaret',
+            data:{ 'data-k':r.anahtar, 'data-v':'0' } })}</span>`
+      : K.Button({ label:r.eylem, size:'sm', tone:r.durum === 'vakti' ? 'primary' : '',
+          act:'ht-isaret', data:{ 'data-k':r.anahtar, 'data-v':'1' } });
+  }
+
+  function satir(r){
+    return html`<div class="row between wrap gap-6 mt-6">
+      <span class="small"><b class="num">${r.saat}</b> ${r.ad}
+        ${when(r.durum === 'sonra', () => html`<span class="tiny dim"> · saati gelmedi</span>`)}</span>
+      ${satirDugme(r)}</div>`;
+  }
+
+  /* Bugün ekranının başı: yalnız VAKTİ GELMİŞ, işaretlenmemiş olanlar. */
+  function vaktiRow(){
+    if(!SP.Hatirlat) return null;
+    const l = H().bugun().filter(r => r.durum === 'vakti');
+    if(!l.length) return null;
+    return K.Entry({ label:'HATIRLATMA', meta:l.length + ' bekliyor', wide:true,
+      body:html`${map(l, satir)}` });
+  }
+
+  /* Özet sekmesi: günün bütün hatırlatmaları + düzenleme. */
+  function ozetEntry(){
+    if(!SP.Hatirlat) return null;
+    const l = H().bugun();
+    return K.Entry({ label:'Hatırlatmalar', meta:l.length ? l.length + ' saat' : 'yok',
+      note:'Yalnız senin yazdığın saatler. Sistem saat ya da doz önermez.',
+      action:K.Button({ label:l.length ? 'Düzenle' : 'Hatırlatma ekle', size:'sm', act:'ht-ac' }),
+      body:l.length ? html`${map(l, satir)}`
+        : html`<p class="small dim">İlaç ya da takviye, su ve hareket için saat koyabilirsin.</p>` });
+  }
+
+  let taslak = { tur:'su', medId:null };
+
+  function sayfa(){
+    const d = H().durum();
+    const ilaclar = SP.Meds.activeList();
+    const secenek = [{ value:'su', label:'Su' }, { value:'hareket', label:'Hareket molası' }]
+      .concat(ilaclar.map(m => ({ value:'ilac:' + m.id, label:'İlaç / takviye — ' + (m.name || SP.Meds.kindOf(m).name) })));
+    const deger = taslak.tur === 'ilac' ? 'ilac:' + taslak.medId : taslak.tur;
+    const onceki = d.liste.find(h => h.tur === taslak.tur && (taslak.tur !== 'ilac' || h.medId === taslak.medId));
+    UI.sheet({
+      title:'Hatırlatmalar', subtitle:'yalnız senin yazdığın saatler', wide:true,
+      body:String(K.Stack([
+        when(d.liste.length, () => K.Table({ tight:true, headers:['Ne', 'Saatler', ''],
+          rows:d.liste.map(h => [H().adOf(h), h.saatler.join(', '),
+            K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
+              act:'ht-sil', data:{ 'data-id':h.id } })]) })),
+        K.Field({ label:'Ne için',
+          input:K.Select({ id:'ht-tur', value:deger, change:'ht-tur', options:secenek }) }),
+        K.Field({ label:'Saatler', hint:'virgülle ayır — örn. 08:00, 21:00',
+          input:K.Input({ id:'ht-saat', value:onceki ? onceki.saatler.join(', ') : '',
+            placeholder:taslak.tur === 'su' ? '10:00, 13:00, 16:00' : '08:00' }) }),
+        html`<div id="ht-hata" class="small" role="alert"></div>`,
+        when(!ilaclar.length, () => html`<p class="tiny dim">İlaç hatırlatması için önce
+          Testler › İlaç sekmesinden kullandığın şeyi kaydet.</p>`),
+        K.Notice({ tone:'info', body:'Hatırlatma yalnız SPİ açıkken gelir: Bugün ekranında görünür, '
+          + 'izin verirsen tarayıcı bildirimi de olur. İlaç adı HKM\'ye gitmediği için Telegram\'dan '
+          + 'hatırlatılmaz. «Aldım» bir işarettir; işaretlenmeyen saat «alınmadı» sayılmaz.' }),
+        when(H().bildirimVar(), () => html`<div class="row wrap gap-6">
+          ${d.bildirim && H().bildirimIzinli()
+            ? K.Button({ label:'Tarayıcı bildirimini kapat', size:'sm', act:'ht-bildirim', data:{ 'data-v':'0' } })
+            : K.Button({ label:'Tarayıcı bildirimini aç', size:'sm', act:'ht-bildirim', data:{ 'data-v':'1' } })}</div>`),
+      ])),
+      footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'ht-kaydet' })}`),
+      noFocus:true,
+    });
+  }
+
+  function yenile(){ SP.App.render(); }
+
+  const handle = {
+    async 'ht-ac'(el){
+      taslak = el && el.dataset && el.dataset.med ? { tur:'ilac', medId:el.dataset.med } : { tur:'su', medId:null };
+      sayfa();
+    },
+    async 'ht-kaydet'(){
+      const e = document.getElementById('ht-saat');
+      const r = await H().ekle({ tur:taslak.tur, medId:taslak.medId, saatler:e ? e.value : '' });
+      if(!r.ok){
+        const h = document.getElementById('ht-hata');
+        if(h) h.textContent = r.why;
+        return;
+      }
+      UI.toast('Hatırlatma kaydedildi · ' + r.saatler.join(', '));
+      sayfa();
+      yenile();
+    },
+    async 'ht-sil'(el){
+      const r = await H().sil(el.dataset.id);
+      if(!r.ok) return;
+      sayfa();
+      yenile();
+      UI.toast('Hatırlatma silindi', { undo:async () => { await H().geriKoy(r.geri); yenile(); } });
+    },
+    async 'ht-isaret'(el){
+      await H().isaretle(el.dataset.k, el.dataset.v === '1');
+      yenile();
+    },
+    async 'ht-bildirim'(el){
+      if(el.dataset.v === '1'){
+        const r = await H().bildirimAc();
+        UI.toast(r.ok ? 'Bildirim açık · SPİ açıkken saatinde gelir' : r.why, { life:r.ok ? 2000 : 5000 });
+      }else{
+        await H().bildirimKapat();
+        UI.toast('Bildirim kapatıldı');
+      }
+      sayfa();
+    },
+  };
+
+  const change = {
+    async 'ht-tur'(el){
+      const v = String(el.value || '');
+      taslak = v.indexOf('ilac:') === 0 ? { tur:'ilac', medId:v.slice(5) } : { tur:v, medId:null };
+      sayfa();
+    },
+  };
+
+  return { vaktiRow, ozetEntry, handle, change };
+})();
+
 /* ==== js/screens/today.js ==== */
 /* Günlük — sistemin ilk ve tek günlük sayfası.
 
@@ -33383,11 +33788,13 @@ SP.Screens.today = (function(){
       ${when((S.ui.hkmBildirim || []).length, () => html`<div class="mb-16">${K.Ledger([kingBildirimRow()])}</div>`)}
       <div class="mb-16">${K.Ledger([hkmSeritRow()])}</div>
       ${when(SP.Seri, () => html`<div class="mb-16">${K.Ledger([seriRow()])}</div>`)}
+      ${when(SP.HatirlatUI && SP.HatirlatUI.vaktiRow(), () => html`<div class="mb-16">${K.Ledger([SP.HatirlatUI.vaktiRow()])}</div>`)}
       <div class="mb-8">${tabs()}</div>`;
 
     if(tab === 'ozet'){
       return String(html`${head}${K.Ledger([
-        hedefEntry(), readinessEntry(), nutritionEntry(), minimumEntry(), officeEntry(), moneyEntry(),
+        hedefEntry(), readinessEntry(), nutritionEntry(), minimumEntry(),
+        SP.HatirlatUI ? SP.HatirlatUI.ozetEntry() : null, officeEntry(), moneyEntry(),
       ].filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['next-action', 'minimum-day', 'readiness', 'certainty']))}</div>`);
     }
@@ -34542,6 +34949,8 @@ SP.Screens.labs = (function(){
           ${when(rec.note, () => html`<p class="tiny dim mt-6">${rec.note}</p>`)}
         </div>
         <div class="medrow__ey">
+          ${when(aktif && SP.HatirlatUI, () => K.Button({ label:'Hatırlat', size:'sm',
+            act:'ht-ac', data:{ 'data-med':rec.id } }))}
           ${when(aktif, () => K.Button({ label:'Bıraktım', size:'sm',
             act:'stop-med', data:{ 'data-id':rec.id } }))}
           ${K.Button({ label:'Düzelt', size:'sm', act:'edit-med', data:{ 'data-id':rec.id } })}
@@ -35041,9 +35450,24 @@ SP.Screens.labs = (function(){
         subtitle:'tek sayfa · yazdırılabilir', wide:true,
         body:doctorBody(), noFocus:true,
         footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
+          ${K.Button({ label:'PDF olarak kaydet', act:'pdf-doctor' })}
           ${K.Button({ label:'Yazdır', tone:'primary', act:'print-doctor' })}`) });
     },
     async 'print-doctor'(){ window.print(); },
+    /* Fikir 36: PDF. SPİ sıfır bağımlılıklıdır ve tarayıcı sistem yazı
+       tipine erişemez; Türkçe harfli bir PDF'i elle yazmak yazı tipi
+       gömmek demektir. Tarayıcının kendi «PDF olarak kaydet» hedefi bunu
+       zaten doğru yapar. Burada yalnız dosya adı tarihli olur (tarayıcı
+       PDF adını sayfa başlığından alır) ve kullanıcıya hedef söylenir.
+       HKM'nin PDF yazıcısı kullanılmaz: tahlil değeri HKM'ye gitmez. */
+    async 'pdf-doctor'(){
+      const eski = document.title;
+      document.title = 'SPI-hekim-ozeti-' + U.todayISO();
+      const geri = () => { document.title = eski; window.removeEventListener('afterprint', geri); };
+      window.addEventListener('afterprint', geri);
+      UI.toast('Yazdır penceresinde hedef olarak «PDF olarak kaydet»i seç.', { life:5000 });
+      window.print();
+    },
     async 'save-inline'(el){
       const alan = document.getElementById('ie-val');
       if(!alan) return;
@@ -36238,8 +36662,17 @@ SP.Screens.kitchen = (function(){
           ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Listeyi sil',
             act:'yer-sil', data:{ 'data-id':l.id } })}
         </div>
-        <ul class="tiny mt-4">${map(l.yerler, y => html`<li>${y.ad}${y.semt ? ' · ' + y.semt : ''}${
-          y.tl != null ? ' · ' + U.fmtNum(y.tl) + ' TL' + (y.donem ? ' ' + y.donem : '') : ' · fiyat bilinmiyor'}</li>`)}</ul>
+        ${(() => {
+          /* Karşılaştırma (fikir 37): aylık karşılık koddan; çevrilemeyen sona. */
+          const k = SP.Bilgi.yerKarsilastir(l);
+          return html`${K.Table({ tight:true, headers:['Yer', 'Fiyat', { label:'Aylık karşılık', num:true }],
+            rows:k.satirlar.map(y => [
+              y.ad + (y.semt ? ' · ' + y.semt : ''),
+              y.tl != null ? U.fmtNum(y.tl) + ' TL' + (y.donem ? ' / ' + y.donem : '') : 'bilinmiyor',
+              y.aylik != null ? U.fmtNum(y.aylik) + ' TL' : html`<span class="dim">${y.not}</span>`]) })}
+            ${when(k.enUcuz, () => html`<p class="tiny mt-4">Aylık karşılıkta en düşük: <b>${k.enUcuz}</b>
+              (hesaplandı; yıllık fiyat 12'ye bölündü).</p>`)}`;
+        })()}
         <p class="tiny dim">BAM araştırması, ${l.at}. Fiyat ve adres değişmiş olabilir; gitmeden teyit et.</p>
       </div>`)}`,
     });
@@ -37037,6 +37470,7 @@ SP.Screens.basket = (function(){
           body:'Bu hesabın %' + b.estimate.pct + '\'i başlangıç tahminiyle yapıldı. '
             + 'Uygulama market taramaz; gerçeğe yaklaşmak için kendi fişindeki fiyatı gir.' }))}`,
       foot:html`${K.Button({ label:'Kalem ekle', size:'sm', tone:'primary', act:'open-add' })}
+        ${K.Button({ label:'Öğünlerimden liste', size:'sm', act:'open-ogun-liste' })}
         ${K.Button({ label:'Haftalık sınır', size:'sm', act:'open-limit' })}`,
     });
   }
@@ -37405,6 +37839,54 @@ SP.Screens.basket = (function(){
     });
   }
 
+  /* Fikir 30: son yedi günün öğünlerinden eksik kalemler. Sepete yazmak
+     orta aksiyondur: önce bu önizleme, tek onay, sonra «Geri al». */
+  let listeRes = null;
+
+  function ogunListeSheet(){
+    const l = listeRes;
+    if(!l.ok){
+      UI.sheet({ title:'Öğünlerimden alışveriş listesi',
+        body:String(K.Notice({ tone:'info', body:l.note })),
+        footer:String(K.Button({ label:'Kapat', act:'sheet-close' })) });
+      return;
+    }
+    const secili = l.satirlar.filter(r => !r.skip);
+    const tl = U.sum(secili.map(r => r.cost || 0));
+    const size = (S.prefs && S.prefs.householdSize) || 1;
+    UI.sheet({
+      title:'Öğünlerimden alışveriş listesi', wide:true,
+      subtitle:'Son yedi günün ' + l.kayitliGun + ' günü kayıtlı; haftalık miktar '
+        + (l.cert === 'derived' ? 'hesaplandı' : 'kayıtlı günlerden tahmin'),
+      body:String(K.Stack([
+        when(l.satirlar.length, () => html`<div>${map(l.satirlar, (r, i) => html`
+          <div class="${r.skip ? 'pasterow pasterow--off' : 'pasterow'}">
+            ${K.Checkbox({ label:'', checked:!r.skip, act:'toggle-liste-row', data:{ 'data-i':i } })}
+            <span><b class="small">${r.food.name}</b>
+              <span class="tiny dim"> · haftada ${U.fmtNet(r.kg)} kg${r.sepette
+                ? ', sepette ' + U.fmtNet(r.sepette) + ' kg' : ''}</span></span>
+            <span class="pasterow__val num">+${U.fmtNet(r.eksik)} kg</span>
+            <span class="pasterow__src">${r.cost == null ? 'fiyat yok'
+              : U.fmtNum(Math.round(r.cost)) + ' TL · ' + SP.CERTAINTY[r.price.cert].label}</span>
+          </div>`)}</div>`),
+        when(!l.satirlar.length, () => K.Notice({ tone:'ok',
+          body:'Son günlerde yediğin her şey sepette yeterli miktarda var.' })),
+        when(l.satirlar.length, () => K.Notice({ tone:'info',
+          body:'Seçilenlerin tutarı ' + U.fmtNum(Math.round(tl)) + ' TL'
+            + (l.fiyatsiz ? ' (' + l.fiyatsiz + ' kalemin fiyatı yok, tutara girmedi)' : '') + '.' })),
+        when(l.yeterli, () => html`<p class="tiny dim">${l.yeterli} kalem sepette zaten yeterli.</p>`),
+        when(l.bilinmeyen, () => html`<p class="tiny dim">${l.bilinmeyen} öğün kalemi gıda listesinde
+          yok (silinmiş gıda); listeye girmedi.</p>`),
+        when(size > 1, () => html`<p class="tiny dim">Liste yalnız senin öğünlerinden;
+          hanenin diğer ${size - 1} kişisinin payı eklenmedi.</p>`),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Sepete ekle', tone:'primary', act:'save-ogun-liste',
+          disabled:!secili.length })}`),
+      noFocus:true,
+    });
+  }
+
   /* --------------------------------------------------------------- ekran */
 
   async function render(){
@@ -37461,6 +37943,27 @@ SP.Screens.basket = (function(){
       receiptRes = null; receiptFile = null;
       UI.closeSheet();
       UI.toast(rows.length + ' fiyat kaydedildi · ölçüldü');
+      SP.App.render();
+    },
+    async 'open-ogun-liste'(){ listeRes = SP.Money.ogundenListe(); ogunListeSheet(); },
+    async 'toggle-liste-row'(el){
+      const r = listeRes && listeRes.satirlar[Number(el.dataset.i)];
+      if(!r) return;
+      r.skip = !el.checked;
+      ogunListeSheet();
+    },
+    async 'save-ogun-liste'(){
+      if(!listeRes || !listeRes.ok) return;
+      const rows = listeRes.satirlar.filter(r => !r.skip);
+      if(!rows.length) return;
+      const onceki = ((S.basket && S.basket.items) || []).map(x => Object.assign({}, x));
+      for(const r of rows) await M.setBasketItem(r.food.id, U.round(r.sepette + r.eksik, 2));
+      listeRes = null;
+      UI.closeSheet();
+      UI.toast(rows.length + ' kalem sepete eklendi', { undo:async () => {
+        await M.saveBasket({ items:onceki });
+        SP.App.render();
+      } });
       SP.App.render();
     },
     async 'open-limits'(){ limitsSheet(); },
@@ -42167,6 +42670,12 @@ SP.App = (function(){
   };
 
   const globalChange = {};
+  /* Hatırlatmalar (screens/hatirlatui.js) Bugün'den, Özet'ten ve İlaç
+     sekmesinden açılır; eylemleri her ekranda çalışsın diye geneldir. */
+  if(SP.HatirlatUI){
+    Object.assign(globalHandle, SP.HatirlatUI.handle);
+    Object.assign(globalChange, SP.HatirlatUI.change);
+  }
 
   /* Sayımları deftere eşitle. GECİKMELİ ve SESSİZ:
 
@@ -42613,6 +43122,12 @@ SP.App = (function(){
         kingTazele();
         window.addEventListener(LIFEOS.KingTeklif.OLAY, kingTazele);
         setInterval(kingTazele, 60000);
+      }
+      /* Hatırlatma bildirimi (core/hatirlat.js): yalnız kullanıcı açtıysa ve
+         tarayıcı izin verdiyse; saati son 15 dakikada gelmiş olan için. */
+      if(SP.Hatirlat){
+        SP.Hatirlat.tik();
+        setInterval(() => { try{ SP.Hatirlat.tik(); }catch(e){} }, 60000);
       }
 
       /* Seviye kutlaması. İki yol da buraya çıkar:

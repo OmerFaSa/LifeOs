@@ -948,6 +948,12 @@ SP.App = (function(){
   };
 
   const globalChange = {};
+  /* Hatırlatmalar (screens/hatirlatui.js) Bugün'den, Özet'ten ve İlaç
+     sekmesinden açılır; eylemleri her ekranda çalışsın diye geneldir. */
+  if(SP.HatirlatUI){
+    Object.assign(globalHandle, SP.HatirlatUI.handle);
+    Object.assign(globalChange, SP.HatirlatUI.change);
+  }
 
   /* Sayımları deftere eşitle. GECİKMELİ ve SESSİZ:
 
@@ -1394,6 +1400,12 @@ SP.App = (function(){
         kingTazele();
         window.addEventListener(LIFEOS.KingTeklif.OLAY, kingTazele);
         setInterval(kingTazele, 60000);
+      }
+      /* Hatırlatma bildirimi (core/hatirlat.js): yalnız kullanıcı açtıysa ve
+         tarayıcı izin verdiyse; saati son 15 dakikada gelmiş olan için. */
+      if(SP.Hatirlat){
+        SP.Hatirlat.tik();
+        setInterval(() => { try{ SP.Hatirlat.tik(); }catch(e){} }, 60000);
       }
 
       /* Seviye kutlaması. İki yol da buraya çıkar:

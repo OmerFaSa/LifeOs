@@ -795,6 +795,8 @@ SP.Screens.labs = (function(){
           ${when(rec.note, () => html`<p class="tiny dim mt-6">${rec.note}</p>`)}
         </div>
         <div class="medrow__ey">
+          ${when(aktif && SP.HatirlatUI, () => K.Button({ label:'Hatırlat', size:'sm',
+            act:'ht-ac', data:{ 'data-med':rec.id } }))}
           ${when(aktif, () => K.Button({ label:'Bıraktım', size:'sm',
             act:'stop-med', data:{ 'data-id':rec.id } }))}
           ${K.Button({ label:'Düzelt', size:'sm', act:'edit-med', data:{ 'data-id':rec.id } })}
@@ -1294,9 +1296,24 @@ SP.Screens.labs = (function(){
         subtitle:'tek sayfa · yazdırılabilir', wide:true,
         body:doctorBody(), noFocus:true,
         footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
+          ${K.Button({ label:'PDF olarak kaydet', act:'pdf-doctor' })}
           ${K.Button({ label:'Yazdır', tone:'primary', act:'print-doctor' })}`) });
     },
     async 'print-doctor'(){ window.print(); },
+    /* Fikir 36: PDF. SPİ sıfır bağımlılıklıdır ve tarayıcı sistem yazı
+       tipine erişemez; Türkçe harfli bir PDF'i elle yazmak yazı tipi
+       gömmek demektir. Tarayıcının kendi «PDF olarak kaydet» hedefi bunu
+       zaten doğru yapar. Burada yalnız dosya adı tarihli olur (tarayıcı
+       PDF adını sayfa başlığından alır) ve kullanıcıya hedef söylenir.
+       HKM'nin PDF yazıcısı kullanılmaz: tahlil değeri HKM'ye gitmez. */
+    async 'pdf-doctor'(){
+      const eski = document.title;
+      document.title = 'SPI-hekim-ozeti-' + U.todayISO();
+      const geri = () => { document.title = eski; window.removeEventListener('afterprint', geri); };
+      window.addEventListener('afterprint', geri);
+      UI.toast('Yazdır penceresinde hedef olarak «PDF olarak kaydet»i seç.', { life:5000 });
+      window.print();
+    },
     async 'save-inline'(el){
       const alan = document.getElementById('ie-val');
       if(!alan) return;

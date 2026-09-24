@@ -912,11 +912,13 @@ SP.Screens.today = (function(){
       ${when((S.ui.hkmBildirim || []).length, () => html`<div class="mb-16">${K.Ledger([kingBildirimRow()])}</div>`)}
       <div class="mb-16">${K.Ledger([hkmSeritRow()])}</div>
       ${when(SP.Seri, () => html`<div class="mb-16">${K.Ledger([seriRow()])}</div>`)}
+      ${when(SP.HatirlatUI && SP.HatirlatUI.vaktiRow(), () => html`<div class="mb-16">${K.Ledger([SP.HatirlatUI.vaktiRow()])}</div>`)}
       <div class="mb-8">${tabs()}</div>`;
 
     if(tab === 'ozet'){
       return String(html`${head}${K.Ledger([
-        hedefEntry(), readinessEntry(), nutritionEntry(), minimumEntry(), officeEntry(), moneyEntry(),
+        hedefEntry(), readinessEntry(), nutritionEntry(), minimumEntry(),
+        SP.HatirlatUI ? SP.HatirlatUI.ozetEntry() : null, officeEntry(), moneyEntry(),
       ].filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['next-action', 'minimum-day', 'readiness', 'certainty']))}</div>`);
     }

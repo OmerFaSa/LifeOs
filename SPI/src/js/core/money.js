@@ -327,9 +327,59 @@ SP.Money = (function(){
     };
   }
 
+  /* Fikir 30: ogunlerden alisveris listesi. SPI'de ileriye donuk ogun
+     plani yok; buradaki "plan" kullanicinin SON YEDI GUNDE gercekte
+     yedigidir (olculmus ogun kayitlari). Kayitsiz gun sifir sayilmaz:
+     kayitli gunlerin ortalamasi yedi gune olceklenir ve bu TAHMINdir;
+     yedi gunun hepsi kayitliysa HESAPLANDI. Liste yalniz kullanicinin kendi
+     ogunlerinden gelir; hanenin diger uyelerinin payi eklenmez (ekran bunu
+     soyler). Sepete yazmak orta aksiyondur: onizleme + tek onay + geri al
+     (screens/basket.js). */
+  const LISTE_GUN = 7, LISTE_EN_AZ = 3;
+  function ogundenListe(){
+    const bugun = U.today();
+    const gram = {};
+    const bilinmeyen = {};
+    let kayitli = 0;
+    for(let i = 0; i < LISTE_GUN; i++){
+      const d = U.iso(U.addDays(bugun, -i));
+      const items = [].concat.apply([], ((SP.S.meals && SP.S.meals[d]) || []).map(m => m.items || []));
+      if(!items.length) continue;
+      kayitli++;
+      items.forEach(it => {
+        if(!SP.FOOD_BY_ID[it.foodId]){ bilinmeyen[it.foodId] = true; return; }
+        const g = Number(it.g) || 0;
+        if(g > 0) gram[it.foodId] = (gram[it.foodId] || 0) + g;
+      });
+    }
+    const nBilinmeyen = Object.keys(bilinmeyen).length;
+    if(kayitli < LISTE_EN_AZ){
+      return { ok:false, kayitliGun:kayitli, bilinmeyen:nBilinmeyen,
+        note:'Liste için son yedi günde en az ' + LISTE_EN_AZ + ' günlük öğün kaydı gerekir; '
+          + 'şu an ' + kayitli + ' gün var. Kaydı olmayan gün sıfır sayılmaz.' };
+    }
+    const olcek = LISTE_GUN / kayitli;
+    const sepet = {};
+    ((SP.S.basket && SP.S.basket.items) || []).forEach(x => { sepet[x.foodId] = Number(x.kg) || 0; });
+    const tum = Object.keys(gram).map(id => {
+      const kg = Math.max(0.05, U.round(gram[id] * olcek / 1000, 2));
+      const sepette = sepet[id] || 0;
+      const eksik = U.round(Math.max(0, kg - sepette), 2);
+      return { food:SP.FOOD_BY_ID[id], kg, sepette, eksik,
+        cost:eksik > 0 ? costOf(id, eksik) : 0, price:priceOf(id) };
+    });
+    const satirlar = tum.filter(r => r.eksik >= 0.05)
+      .sort((a, b) => (b.cost || 0) - (a.cost || 0));
+    return { ok:true, kayitliGun:kayitli, bilinmeyen:nBilinmeyen,
+      cert:kayitli === LISTE_GUN ? 'derived' : 'estimated',
+      satirlar, yeterli:tum.length - satirlar.length,
+      toplam:U.round(U.sum(satirlar.map(r => r.cost || 0)), 2),
+      fiyatsiz:satirlar.filter(r => r.cost == null).length };
+  }
+
   return {
     priceOf, costOf, monthsSince, ageBand, estimateShare, budget,
-    basketRows, basketTotal, basketCoverage,
+    basketRows, basketTotal, basketCoverage, ogundenListe,
     substitutesFor, swapOpportunities, costPerNutrient, bulkOpportunities,
     status,
   };

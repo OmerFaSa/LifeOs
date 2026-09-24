@@ -381,6 +381,19 @@ Hız ve isabet: test başına sn/soru + doğruluk + profil) · ✅ 26 yanlış d
 önizler (düzenlenebilir metin, satır silinir; Kopyala / Paylaş; `calc.haftaOzetMetni`) · 6 şablon
 gün eşdeğeri VAR (AYS takvim kayıt türleri günü ölçekler; SPİ/ESP «dünkünün aynısı»).
 AYS 1675, duman temiz. **AYS grubu bitti.**
+· ✅ 37 yer karşılaştırması (`Bilgi.yerKarsilastir`: aylık/yıllık fiyat aylık karşılığa çevrilir,
+hesaplandı; dönemi bilinmeyen «karşılaştırılamaz», fiyatsız «fiyat bilinmiyor»; Mutfak › yer tablosu)
+· ✅ 30 öğünlerden alışveriş listesi (SPİ'de ileri öğün planı yok: «plan» son 7 günün ÖLÇÜLMÜŞ
+öğünleri; `Money.ogundenListe`: < 3 kayıtlı gün → liste yok, kayıtlı günler 7'ye ölçeklenir
+= tahmin, 7/7 = hesaplandı; sepettekini düşer; Finans › Sepet › «Öğünlerimden liste»: önizleme,
+satır seçimi, tek onay, «Geri al»; hane payı eklenmez ve söylenir) · ✅ 34 + 35 hatırlatmalar
+(`core/hatirlat.js`, `screens/hatirlatui.js`: ilaç/takviye — kayda bağlı, ilaç bırakılınca susar —,
+su, hareket; saatleri YALNIZ kullanıcı yazar, anlaşılmayan saat sorulur; Bugün başında vakti
+gelenler, Özet'te günün listesi, Testler › İlaç'ta «Hatırlat»; «Aldım» işarettir, uyum yüzdesi
+yok; ilaç adı HKM'ye gitmediği için Telegram YOK — SPİ açıkken + izinli tarayıcı bildirimi)
+· ✅ 36 hekim özeti PDF (tarayıcının «PDF olarak kaydet» hedefi; dosya adı tarihli
+`SPI-hekim-ozeti-<gün>`; JS'te Türkçe yazı tipi gömmek bağımlılık demek, HKM PDF'i tahlil
+görmez). SPİ 1318, duman temiz.
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).
 

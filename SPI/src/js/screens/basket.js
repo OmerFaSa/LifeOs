@@ -56,6 +56,7 @@ SP.Screens.basket = (function(){
           body:'Bu hesabın %' + b.estimate.pct + '\'i başlangıç tahminiyle yapıldı. '
             + 'Uygulama market taramaz; gerçeğe yaklaşmak için kendi fişindeki fiyatı gir.' }))}`,
       foot:html`${K.Button({ label:'Kalem ekle', size:'sm', tone:'primary', act:'open-add' })}
+        ${K.Button({ label:'Öğünlerimden liste', size:'sm', act:'open-ogun-liste' })}
         ${K.Button({ label:'Haftalık sınır', size:'sm', act:'open-limit' })}`,
     });
   }
@@ -424,6 +425,54 @@ SP.Screens.basket = (function(){
     });
   }
 
+  /* Fikir 30: son yedi günün öğünlerinden eksik kalemler. Sepete yazmak
+     orta aksiyondur: önce bu önizleme, tek onay, sonra «Geri al». */
+  let listeRes = null;
+
+  function ogunListeSheet(){
+    const l = listeRes;
+    if(!l.ok){
+      UI.sheet({ title:'Öğünlerimden alışveriş listesi',
+        body:String(K.Notice({ tone:'info', body:l.note })),
+        footer:String(K.Button({ label:'Kapat', act:'sheet-close' })) });
+      return;
+    }
+    const secili = l.satirlar.filter(r => !r.skip);
+    const tl = U.sum(secili.map(r => r.cost || 0));
+    const size = (S.prefs && S.prefs.householdSize) || 1;
+    UI.sheet({
+      title:'Öğünlerimden alışveriş listesi', wide:true,
+      subtitle:'Son yedi günün ' + l.kayitliGun + ' günü kayıtlı; haftalık miktar '
+        + (l.cert === 'derived' ? 'hesaplandı' : 'kayıtlı günlerden tahmin'),
+      body:String(K.Stack([
+        when(l.satirlar.length, () => html`<div>${map(l.satirlar, (r, i) => html`
+          <div class="${r.skip ? 'pasterow pasterow--off' : 'pasterow'}">
+            ${K.Checkbox({ label:'', checked:!r.skip, act:'toggle-liste-row', data:{ 'data-i':i } })}
+            <span><b class="small">${r.food.name}</b>
+              <span class="tiny dim"> · haftada ${U.fmtNet(r.kg)} kg${r.sepette
+                ? ', sepette ' + U.fmtNet(r.sepette) + ' kg' : ''}</span></span>
+            <span class="pasterow__val num">+${U.fmtNet(r.eksik)} kg</span>
+            <span class="pasterow__src">${r.cost == null ? 'fiyat yok'
+              : U.fmtNum(Math.round(r.cost)) + ' TL · ' + SP.CERTAINTY[r.price.cert].label}</span>
+          </div>`)}</div>`),
+        when(!l.satirlar.length, () => K.Notice({ tone:'ok',
+          body:'Son günlerde yediğin her şey sepette yeterli miktarda var.' })),
+        when(l.satirlar.length, () => K.Notice({ tone:'info',
+          body:'Seçilenlerin tutarı ' + U.fmtNum(Math.round(tl)) + ' TL'
+            + (l.fiyatsiz ? ' (' + l.fiyatsiz + ' kalemin fiyatı yok, tutara girmedi)' : '') + '.' })),
+        when(l.yeterli, () => html`<p class="tiny dim">${l.yeterli} kalem sepette zaten yeterli.</p>`),
+        when(l.bilinmeyen, () => html`<p class="tiny dim">${l.bilinmeyen} öğün kalemi gıda listesinde
+          yok (silinmiş gıda); listeye girmedi.</p>`),
+        when(size > 1, () => html`<p class="tiny dim">Liste yalnız senin öğünlerinden;
+          hanenin diğer ${size - 1} kişisinin payı eklenmedi.</p>`),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Sepete ekle', tone:'primary', act:'save-ogun-liste',
+          disabled:!secili.length })}`),
+      noFocus:true,
+    });
+  }
+
   /* --------------------------------------------------------------- ekran */
 
   async function render(){
@@ -480,6 +529,27 @@ SP.Screens.basket = (function(){
       receiptRes = null; receiptFile = null;
       UI.closeSheet();
       UI.toast(rows.length + ' fiyat kaydedildi · ölçüldü');
+      SP.App.render();
+    },
+    async 'open-ogun-liste'(){ listeRes = SP.Money.ogundenListe(); ogunListeSheet(); },
+    async 'toggle-liste-row'(el){
+      const r = listeRes && listeRes.satirlar[Number(el.dataset.i)];
+      if(!r) return;
+      r.skip = !el.checked;
+      ogunListeSheet();
+    },
+    async 'save-ogun-liste'(){
+      if(!listeRes || !listeRes.ok) return;
+      const rows = listeRes.satirlar.filter(r => !r.skip);
+      if(!rows.length) return;
+      const onceki = ((S.basket && S.basket.items) || []).map(x => Object.assign({}, x));
+      for(const r of rows) await M.setBasketItem(r.food.id, U.round(r.sepette + r.eksik, 2));
+      listeRes = null;
+      UI.closeSheet();
+      UI.toast(rows.length + ' kalem sepete eklendi', { undo:async () => {
+        await M.saveBasket({ items:onceki });
+        SP.App.render();
+      } });
       SP.App.render();
     },
     async 'open-limits'(){ limitsSheet(); },

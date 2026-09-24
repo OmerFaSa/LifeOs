@@ -300,4 +300,52 @@ describe('Bütçe — koçların talebi', () => {
     if(b.total > 10) expect(b.over).toBeTruthy();
   });
 });
+
+  describe('Money — öğünlerden alışveriş listesi (fikir 30)', () => {
+    const { pushMeal } = SP.Test;
+    it('üç günden az kayıt varsa liste üretilmez; boş gün sıfır sayılmaz', () => {
+      resetState();
+      pushMeal('2026-09-20', 'ogle', [['yumurta', 100]]);
+      pushMeal('2026-09-21', 'ogle', [['yumurta', 100]]);
+      const l = withToday('2026-09-21', () => SP.Money.ogundenListe());
+      expect(l.ok).toBeFalsy();
+      expect(l.kayitliGun).toBe(2);
+    });
+
+    it('kayıtlı günlerin ortalaması yedi güne ölçeklenir ve «tahmin» olur', () => {
+      resetState();
+      ['2026-09-17', '2026-09-19', '2026-09-21', '2026-09-23'].forEach(d =>
+        pushMeal(d, 'kahvalti', [['yumurta', 100], ['olmayan-gida', 50]]));
+      const l = withToday('2026-09-23', () => SP.Money.ogundenListe());
+      expect(l.ok).toBeTruthy();
+      expect(l.kayitliGun).toBe(4);
+      expect(l.cert).toBe('estimated');
+      const y = l.satirlar.find(r => r.food.id === 'yumurta');
+      /* 4 günde 400 g → günde 100 g → haftada 0,7 kg */
+      expect(y.kg).toBe(0.7);
+      expect(y.eksik).toBe(0.7);
+      expect(l.bilinmeyen).toBe(1);
+    });
+
+    it('yedi günün hepsi kayıtlıysa «hesaplandı»; sepettekini düşer', () => {
+      resetState();
+      for(let i = 17; i <= 23; i++) pushMeal('2026-09-' + i, 'ogle', [['yumurta', 100]]);
+      SP.S.basket.items = [{ foodId:'yumurta', kg:0.5 }];
+      const l = withToday('2026-09-23', () => SP.Money.ogundenListe());
+      expect(l.cert).toBe('derived');
+      const y = l.satirlar.find(r => r.food.id === 'yumurta');
+      expect(y.sepette).toBe(0.5);
+      expect(y.eksik).toBe(0.2);
+      expect(y.cost).toBe(SP.Money.costOf('yumurta', 0.2));
+    });
+
+    it('sepette yeterince olan kalem eklenecekler arasında değildir', () => {
+      resetState();
+      for(let i = 17; i <= 23; i++) pushMeal('2026-09-' + i, 'ogle', [['yumurta', 100]]);
+      SP.S.basket.items = [{ foodId:'yumurta', kg:1 }];
+      const l = withToday('2026-09-23', () => SP.Money.ogundenListe());
+      expect(l.satirlar.filter(r => r.eksik > 0)).toHaveLength(0);
+      expect(l.yeterli).toBe(1);
+    });
+  });
 })();
