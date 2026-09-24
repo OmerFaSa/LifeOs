@@ -20,7 +20,7 @@
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
 **Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · ✅ Grup 4 ·
-✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ✅ tam koşum (2026-09-24, 24/24) · 🔜 SPİ su hatası · 🔜 8f ESP belge (felsefe, tarih…) · ⏳ cevaplı maddeler · ⏳ Part 9 (harita ONAY BEKLİYOR: `ekip/CEKMECE-HARITASI.md`)
+✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ✅ tam koşum (2026-09-24, 24/24) · ✅ SPİ su hatası · 🔜 8f ESP belge (felsefe, tarih…) · ⏳ cevaplı maddeler · ⏳ Part 9 (harita ONAY BEKLİYOR: `ekip/CEKMECE-HARITASI.md`)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
 
@@ -114,7 +114,8 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   «tazelemek önerilir»; son 30 günde uygulanmamış BAM çıktısı orta+ teklifte not olarak
   söylenir (ölçülen: teklifin cevabı). HKM 570/570, HKM yüzü, `tools/entegre.js` temiz.
 
-- 🔜 **SPİ su hatası** (tam koşum sırasında bulundu): `SPI/src/js/core/state.js`
+- ✅ **SPİ su hatası** (tam koşum sırasında bulundu; `a82f7fe`, SPİ 1296/1296, duman temiz; asgari
+  günde bilinmeyen su «girilmedi» yazar): `SPI/src/js/core/state.js`
   `defaultVitals` suyu `0` başlatıyor. Kullanıcı o gün yalnız uyku girse bile `calc.js`
   asgari günde su «biliniyor, 0 ml» sayılıyor ve beacon HKM'ye «su 0 ml, ölçüldü» gidiyor
   (AGENTS §1.2). Düzeltme: varsayılan `null`, hızlı giriş `null`'dan toplar, eski kayıttaki
@@ -149,6 +150,9 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
   17 ekran sözleşmesi AYS/ESP · 18 labs.js ve AYS llm.js.
 
 ### Part 9 — Tek tasarım + çekmece düzeni (EN SON)
+**Kullanıcı 2026-09-24: «tasarımı en son yapacağız, benden onay isteyeceksin; onun harici
+kalanları yap».** Part 9'a ancak geri kalan her şey bitince ve kullanıcı haritayı onaylayınca
+başlanır.
 **Harita taslağı hazır, ONAY BEKLİYOR:** `ekip/CEKMECE-HARITASI.md` (8 ortak çekmece; dört
 karar sorusu sonunda). Onaysız uygulanmaz.
 Her şey bitince. Bütün sistem (AYS, SPİ, ESP, HKM web) **modern, sade, minimalist** tek
