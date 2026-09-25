@@ -307,7 +307,7 @@ R.Screens.progress = (function(){
         await R.Store.remove('decisions/'+el.dataset.key);
         UI.closeSheet();
         R.App.render();
-      });
+      }, false, 'Müdahaleyi kaldır');
     },
   };
 

@@ -472,7 +472,7 @@ R.Screens.subjects = (function(){
         const r = await R.SinavProfil.sil(p.id);
         UI.toast(r.ok ? 'Profil kaldırıldı' : r.why);
         R.App.render();
-      });
+      }, false, 'Profili ve işaretleri sil');
     },
     async 'open-topic'(el){ topicSheet(el.dataset.subject, el.dataset.topic); },
     async 'topic-open'(el){

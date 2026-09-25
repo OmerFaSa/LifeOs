@@ -54,7 +54,7 @@ ESP.Screens.kutuphane = (function(){
     async 'urun-sil'(el){
       const id = el.dataset.id;
       ESP.UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
-        async () => { await ESP.Urunler.sil(id); ESP.UI.toast('Silindi'); ESP.App.render(); }, true);
+        async () => { await ESP.Urunler.sil(id); ESP.UI.toast('Silindi'); ESP.App.render(); }, true, 'Ürünü bu cihazdan sil');
     },
   };
 

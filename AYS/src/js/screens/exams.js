@@ -658,7 +658,7 @@ R.Screens.exams = (function(){
         R.ExamRun.cancel();
         UI.closeSheet();
         R.App.render();
-      }, true);
+      }, true, 'Süreleri kaydetmeden kapat');
     },
     async 'run-save'(){
       const scores = [];
@@ -743,13 +743,14 @@ R.Screens.exams = (function(){
     },
     async 'delete-exam'(el){
       const id = el.dataset.id;
+      const bagli = S.errors.filter(e => e.examId === id).length;
       UI.confirmSheet('Denemeyi sil', 'Bu deneme ve bağlı hata kayıtları silinecek. Bu işlem geri alınamaz.', async () => {
         await M.deleteExam(id);
         S.ui.examOpen = null;
         UI.closeSheet();
         UI.toast('Deneme silindi');
         R.App.render();
-      }, true);
+      }, true, bagli ? 'Denemeyi ve ' + bagli + ' hata kaydını sil' : 'Denemeyi sil');
     },
     async 'protocol-step'(el){
       const exam = S.exams.find(e => e.id === S.ui.examOpen);
@@ -766,7 +767,7 @@ R.Screens.exams = (function(){
           exam.analysisCompletedAt = new Date().toISOString();
           await M.saveExam(exam);
           UI.closeSheet(); R.App.render();
-        });
+        }, false, 'Analizi tamamlandı say');
         return;
       }
       exam.analysisCompletedAt = new Date().toISOString();

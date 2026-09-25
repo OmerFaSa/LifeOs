@@ -6,6 +6,26 @@
 
 (function(){
   const { describe, it, expect, resetState } = ESP.Test;
+
+  /* Katalog 022: onay düğmesi SONUCU söyler, sayısı biliniyorsa sayısıyla;
+     varsayılan «Evet, devam et» kalmaz (kaynak kuralı: tools/sadelik.js --onay). */
+  describe('Onay düğmesi sonucu söyler', () => {
+    it('olay silme bağlı zincir sayısını, sayaç silme dakikayı söyler', async () => {
+      resetState();
+      ESP.S.events = [{ id:'ev1', title:'Tanzimat' }, { id:'ev2', title:'Islahat' }];
+      ESP.S.chains = [{ id:'c1', eventId:'ev1' }, { id:'c2', eventId:'ev1' }, { id:'c3', eventId:'x' }];
+      const eski = { onay:ESP.UI.confirmSheet, dk:ESP.Timer.minutes }, onaylar = [];
+      ESP.UI.confirmSheet = (b, m, f, tehlikeli, etiket) => onaylar.push({ tehlikeli, etiket });
+      ESP.Timer.minutes = () => 25;
+      try{
+        await ESP.Screens.history.handle['del-event']({ dataset:{ id:'ev1' } });
+        await ESP.Screens.history.handle['del-event']({ dataset:{ id:'ev2' } });
+        await ESP.Screens.today.handle['timer-reset']();
+      }finally{ ESP.UI.confirmSheet = eski.onay; ESP.Timer.minutes = eski.dk; }
+      expect(onaylar.map(o => o.etiket)).toEqual(['Olayı ve 2 zinciri sil', 'Olayı sil', '25 dakikayı sil']);
+      onaylar.forEach(o => expect(o.tehlikeli).toBe(true));
+    });
+  });
   const ids = ['today', 'lang', 'symposium', 'history', 'ladder', 'studio', 'library', 'writing',
     'office', 'team', 'meeting', 'analytics', 'profile', 'rutbe', 'guide'];
 

@@ -466,7 +466,7 @@ R.Screens.team = (function(){
           await O.clearChat(agent.id);
           UI.closeSheet();
           R.App.render();
-        });
+        }, false, 'Sohbeti sil');
     },
   };
 

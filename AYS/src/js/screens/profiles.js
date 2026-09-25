@@ -231,7 +231,7 @@ R.Screens.profiles = (function(){
         async () => {
           writeSnapshot();
           M.switchProfile(id);
-        });
+        }, false, 'Profile geç');
     },
     async 'prof-snapshot'(){
       const ok = writeSnapshot();

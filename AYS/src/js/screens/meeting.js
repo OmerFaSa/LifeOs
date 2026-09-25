@@ -794,7 +794,7 @@ R.Screens.meeting = (function(){
           if(closed && closed.id === id) closed = null;
           UI.closeSheet();
           R.App.render();
-        }, true);
+        }, true, 'Tutanağı sil');
     },
 
     async 'meet-talk'(el){

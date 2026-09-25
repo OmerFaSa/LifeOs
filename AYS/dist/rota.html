@@ -11082,18 +11082,33 @@ a.kenar__modul:hover{ color:var(--text); }
 .site--v5 .sayfa{ padding:40px 48px 0; box-sizing:border-box; max-width:1180px; }
 .site--v5 .sayfasonu{ background:var(--surface); }
 
-/* Dar masaüstü: kenar çubuğu simgeye iner (öneri 04); hiçbir çekmece gizlenmez. */
+/* TABLET ve dar masaüstü (680–1279): kenar çubuğu daralır ama ADSIZ kalmaz.
+   Tablet dokunmatiktir; üzerine gelince çıkan ipucu yoktur, yalnız simgeyle
+   çekmece bilinmez. Simgenin altında çekmecenin adı, modül düğmesinde
+   sistemin adı durur; hedefler parmak boyunda (≥ 48 px). Açık çekmecenin
+   bölümleri kenarda yer tutmaz: sayfanın üstündeki bölüm çubuğundadır
+   (.bolumcubugu--kabuk) — masaüstünde kenarda, telefonda Menü'de. Hiçbir
+   çekmece ve bölüm gizlenmez. */
 @media (max-width:1279px) and (min-width:680px){
-  .site--v5{ grid-template-columns:64px minmax(0,1fr); }
-  .kenar{ padding:16px 8px 12px; align-items:center; }
-  .kenar__marka span, .kenar__baglam, .kenar__ad, .kenar__bolumler, .kenar__bag span, .kenar__rutbe span,
-  .kenar__rutbe .kbk-ic, .kenar__modul span{ display:none; }
-  .kenar__moduller{ grid-template-columns:1fr; width:44px; }
-  .kenar__modul{ height:28px; }
-  .kenar__cekmece{ justify-content:center; padding:0; width:40px; position:relative; }
-  .kenar__sayac{ position:absolute; top:-2px; right:-4px; min-width:16px; height:16px; font-size:10px; padding:0 4px; }
-  .site--v5 .sayfa{ padding:32px 32px 0; }
+  .site--v5{ grid-template-columns:88px minmax(0,1fr); }
+  .kenar{ padding:14px 6px 12px; align-items:center; gap:14px; }
+  .kenar__marka span, .kenar__baglam, .kenar__bolumler, .kenar__bag span, .kenar__rutbe span,
+  .kenar__rutbe .kbk-ic{ display:none; }
+  .kenar__moduller{ grid-template-columns:1fr; width:76px; }
+  .kenar__modul{ height:30px; flex-direction:row; justify-content:flex-start; gap:7px; padding:0 8px; font-size:11.5px; }
+  .kenar__modul span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .kenar__cekmece{ flex-direction:column; justify-content:center; gap:3px; width:76px; height:auto; min-height:52px;
+    padding:6px 2px; position:relative; text-align:center; }
+  .kenar__ad{ flex:none; max-width:72px; font-size:11px; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .kenar__sayac{ position:absolute; top:3px; right:12px; min-width:16px; height:16px; font-size:10px; padding:0 4px; }
+  .site--v5 .sayfa{ padding:28px 32px 0; }
   .ust--v5 .ust__ara{ width:200px; }
+}
+.bolumcubugu--kabuk{ display:none; }
+@media (max-width:1279px) and (min-width:680px){
+  .bolumcubugu--kabuk{ display:flex; position:sticky; top:var(--ust-h); z-index:calc(var(--z-nav) - 1);
+    background:var(--surface); margin:-8px 0 20px; }
+  .bolumcubugu--kabuk .bolumcubugu__ad{ height:44px; }
 }
 
 /* Telefon: kenar yok; üstte modül ve konum, onay ve rütbe; altta bant. */
@@ -12530,7 +12545,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'5b824b7', at:'2026-09-25 15:47', dirty:true };
+R.BUILD = { id:'f65dfc5', at:'2026-09-25 16:19', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -17315,14 +17330,16 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div>';
   }
 
-  /* o: { cekmece:'Plan', bolumler:[{ route, ad, on, rozet:{text, quiet} }] }
+  /* o: { cekmece:'Plan', bolumler:[{ route, ad, on, rozet:{text, quiet} }], kabuk }
      Tek bölümlü çekmecede çizilmez: tek seçenekli bir şerit seçim değil
-     gürültüdür. */
+     gürültüdür. `kabuk:true`: sayfanın üstündeki tablet çubuğu — yalnız
+     680–1279 pikselde görünür (kabuk.css), orada kenar çubuğu bölümleri
+     göstermez; masaüstünde kenarda, telefonda Menü'de dururlar. */
   function bolumCubugu(o){
     o = o || {};
     const b = o.bolumler || [];
     if(b.length < 2) return '';
-    return '<nav class="bolumcubugu" data-oz="019" aria-label="' + kac((o.cekmece || '') + ' bölümleri') + '">'
+    return '<nav class="bolumcubugu' + (o.kabuk ? ' bolumcubugu--kabuk' : '') + '" data-oz="019" aria-label="' + kac((o.cekmece || '') + ' bölümleri') + '">'
       + b.map(x => '<button class="bolumcubugu__ad' + (x.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(x.route) + '"'
         + (x.on ? ' aria-current="page"' : '') + '>' + kac(x.ad)
         + (x.rozet ? '<span class="bolumcubugu__rozet' + (x.rozet.quiet ? ' is-sessiz' : '') + '"'
@@ -50146,7 +50163,7 @@ R.Screens.today = (function(){
           const r = await R.Istisna.bitir(id);
           UI.toast(r.ok ? 'Ara bitti; bugünün planı kuruldu' : r.why);
           R.App.render();
-        });
+        }, false, 'Arayı bugün bitir');
     },
 
     /* HKM teklifleri: uygulayan AYS'in kendi kodudur. */
@@ -50227,7 +50244,7 @@ R.Screens.today = (function(){
           UI.closeSheet();
           UI.toast('Bugün minimuma indi — seri korunuyor');
           R.App.render();
-        });
+        }, false, 'Bugünü minimuma indir');
     },
     async 'bad-day-undo'(){
       await M.undoBadDay();
@@ -51056,7 +51073,7 @@ R.Screens.week = (function(){
           const r = await R.Istisna.bitir(id);
           UI.toast(r.ok ? 'Plan temel düzenine döndü' : r.why);
           R.App.render();
-        });
+        }, false, basladi ? 'İstisnayı bugün bitir' : 'İstisnayı kaldır');
     },
     async 'week-nav'(el){
       S.ui.weekView = U.clamp(Number(el.dataset.n), 1, R.PLAN.totalWeeks);
@@ -51849,7 +51866,7 @@ R.Screens.exams = (function(){
         R.ExamRun.cancel();
         UI.closeSheet();
         R.App.render();
-      }, true);
+      }, true, 'Süreleri kaydetmeden kapat');
     },
     async 'run-save'(){
       const scores = [];
@@ -51934,13 +51951,14 @@ R.Screens.exams = (function(){
     },
     async 'delete-exam'(el){
       const id = el.dataset.id;
+      const bagli = S.errors.filter(e => e.examId === id).length;
       UI.confirmSheet('Denemeyi sil', 'Bu deneme ve bağlı hata kayıtları silinecek. Bu işlem geri alınamaz.', async () => {
         await M.deleteExam(id);
         S.ui.examOpen = null;
         UI.closeSheet();
         UI.toast('Deneme silindi');
         R.App.render();
-      }, true);
+      }, true, bagli ? 'Denemeyi ve ' + bagli + ' hata kaydını sil' : 'Denemeyi sil');
     },
     async 'protocol-step'(el){
       const exam = S.exams.find(e => e.id === S.ui.examOpen);
@@ -51957,7 +51975,7 @@ R.Screens.exams = (function(){
           exam.analysisCompletedAt = new Date().toISOString();
           await M.saveExam(exam);
           UI.closeSheet(); R.App.render();
-        });
+        }, false, 'Analizi tamamlandı say');
         return;
       }
       exam.analysisCompletedAt = new Date().toISOString();
@@ -52958,13 +52976,14 @@ R.Screens.learn = (function(){
     },
     async 'note-delete'(el){
       const id = el.dataset.id;
+      const notSay = ((S.videoNotes || []).find(n => n.id === id) || { segments:[] }).segments.length;
       UI.confirmSheet('Dersi sil', 'Bu ders ve altındaki notlar silinecek. Üretilmiş tekrar kartları kalır.', async () => {
         await M.deleteVideoNote(id);
         S.ui.noteOpen = null;
         UI.closeSheet();
         UI.toast('Ders silindi');
         R.App.render();
-      }, true);
+      }, true, notSay ? 'Dersi ve ' + notSay + ' notu sil' : 'Dersi sil');
     },
     async 'note-toggle-done'(){
       const note = openNote();
@@ -53068,7 +53087,7 @@ R.Screens.learn = (function(){
           UI.closeSheet();
           UI.toast(note.segments.length+' kart oluşturuldu');
           R.App.render();
-        });
+        }, false, note.segments.length + ' kart üret');
     },
   };
 
@@ -53502,7 +53521,7 @@ R.Screens.quiz = (function(){
       const bos = m ? m.toplam - m.cevapli : 0;
       const bitir = async () => { await TK().bitir(); R.App.render(); };
       if(bos) UI.confirmSheet('Bölümü bitir', bos + ' soru boş. Yine de bitirilsin mi? Boşlar '
-        + 'boş olarak sayılır.', bitir);
+        + 'boş olarak sayılır.', bitir, false, bos + ' boşla bitir');
       else await bitir();
     },
     async 'kitap-vazgec'(){ TK().vazgec(); UI.toast('Bölüm bırakıldı; sonuç yazılmadı.'); R.App.render(); },
@@ -53542,7 +53561,7 @@ R.Screens.quiz = (function(){
           Q.cancel();
           UI.closeSheet();
           R.App.render();
-        });
+        }, false, 'Kaydetmeden bitir');
     },
   };
 
@@ -55098,7 +55117,7 @@ R.Screens.subjects = (function(){
         const r = await R.SinavProfil.sil(p.id);
         UI.toast(r.ok ? 'Profil kaldırıldı' : r.why);
         R.App.render();
-      });
+      }, false, 'Profili ve işaretleri sil');
     },
     async 'open-topic'(el){ topicSheet(el.dataset.subject, el.dataset.topic); },
     async 'topic-open'(el){
@@ -56246,7 +56265,7 @@ R.Screens.progress = (function(){
         await R.Store.remove('decisions/'+el.dataset.key);
         UI.closeSheet();
         R.App.render();
-      });
+      }, false, 'Müdahaleyi kaldır');
     },
   };
 
@@ -59146,7 +59165,7 @@ R.Screens.guide = (function(){
           }catch(e){
             UI.toast('Yükleme başarısız: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
           }
-        }, true);
+        }, true, 'Bu cihazdaki veriyi yedekle değiştir');
     },
     async 'import-data'(){
       UI.sheet({
@@ -59233,7 +59252,7 @@ R.Screens.guide = (function(){
           }catch(e){
             UI.toast('Geri alınamadı: '+(e.message || 'bilinmeyen hata'));
           }
-        }, true);
+        }, true, 'İçe aktarma öncesine dön');
     },
     async 'hkm-toggle'(){
       const a = R.Beacon.settings();
@@ -59276,7 +59295,7 @@ R.Screens.guide = (function(){
           await R.Store.clear();
           UI.closeSheet();
           location.reload();
-        }, true);
+        }, true, 'Bütün veriyi sil');
     },
   };
 
@@ -59542,7 +59561,7 @@ R.Screens.profiles = (function(){
         async () => {
           writeSnapshot();
           M.switchProfile(id);
-        });
+        }, false, 'Profile geç');
     },
     async 'prof-snapshot'(){
       const ok = writeSnapshot();
@@ -60579,7 +60598,7 @@ R.Screens.office = (function(){
     async 'urun-sil'(el){
       const id = el.dataset.id;
       UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
-        async () => { await R.Urunler.sil(id); UI.toast('Silindi'); R.App.render(); }, true);
+        async () => { await R.Urunler.sil(id); UI.toast('Silindi'); R.App.render(); }, true, 'Ürünü bu cihazdan sil');
     },
     /* Görünüm tercihi kalıcıdır: kullanıcı 3B'yi kapattıysa her açılışta
        geri gelmemeli. */
@@ -61354,7 +61373,7 @@ R.Screens.team = (function(){
           await O.clearChat(agent.id);
           UI.closeSheet();
           R.App.render();
-        });
+        }, false, 'Sohbeti sil');
     },
   };
 
@@ -62180,7 +62199,7 @@ R.Screens.meeting = (function(){
           if(closed && closed.id === id) closed = null;
           UI.closeSheet();
           R.App.render();
-        }, true);
+        }, true, 'Tutanağı sil');
     },
 
     async 'meet-talk'(el){
@@ -63083,7 +63102,7 @@ R.App = (function(){
   function bolumCubuguHtml(sc){
     const sec = bolumOf(sc.id);
     const r = UST[sc.id] || sc.id;
-    return K.bolumCubugu({ cekmece:sec.label, bolumler:sec.items.filter(v => !gizliMi(v.id)).map(v => ({
+    return K.bolumCubugu({ kabuk:true, cekmece:sec.label, bolumler:sec.items.filter(v => !gizliMi(v.id)).map(v => ({
       route:v.id, ad:v.label, on:v.id === r, rozet:safe(() => badgeFor(v.id), null) || null })) });
   }
 
@@ -63332,6 +63351,7 @@ R.App = (function(){
           <div class="site__body">
             <div class="wrapc sayfa">
               ${raw(safe(() => sayfaBasiHtml(sc)))}
+              ${raw(safe(() => bolumCubuguHtml(sc), ''))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>
           </div>

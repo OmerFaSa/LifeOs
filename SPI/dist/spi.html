@@ -9533,18 +9533,33 @@ a.kenar__modul:hover{ color:var(--text); }
 .site--v5 .sayfa{ padding:40px 48px 0; box-sizing:border-box; max-width:1180px; }
 .site--v5 .sayfasonu{ background:var(--surface); }
 
-/* Dar masaüstü: kenar çubuğu simgeye iner (öneri 04); hiçbir çekmece gizlenmez. */
+/* TABLET ve dar masaüstü (680–1279): kenar çubuğu daralır ama ADSIZ kalmaz.
+   Tablet dokunmatiktir; üzerine gelince çıkan ipucu yoktur, yalnız simgeyle
+   çekmece bilinmez. Simgenin altında çekmecenin adı, modül düğmesinde
+   sistemin adı durur; hedefler parmak boyunda (≥ 48 px). Açık çekmecenin
+   bölümleri kenarda yer tutmaz: sayfanın üstündeki bölüm çubuğundadır
+   (.bolumcubugu--kabuk) — masaüstünde kenarda, telefonda Menü'de. Hiçbir
+   çekmece ve bölüm gizlenmez. */
 @media (max-width:1279px) and (min-width:680px){
-  .site--v5{ grid-template-columns:64px minmax(0,1fr); }
-  .kenar{ padding:16px 8px 12px; align-items:center; }
-  .kenar__marka span, .kenar__baglam, .kenar__ad, .kenar__bolumler, .kenar__bag span, .kenar__rutbe span,
-  .kenar__rutbe .kbk-ic, .kenar__modul span{ display:none; }
-  .kenar__moduller{ grid-template-columns:1fr; width:44px; }
-  .kenar__modul{ height:28px; }
-  .kenar__cekmece{ justify-content:center; padding:0; width:40px; position:relative; }
-  .kenar__sayac{ position:absolute; top:-2px; right:-4px; min-width:16px; height:16px; font-size:10px; padding:0 4px; }
-  .site--v5 .sayfa{ padding:32px 32px 0; }
+  .site--v5{ grid-template-columns:88px minmax(0,1fr); }
+  .kenar{ padding:14px 6px 12px; align-items:center; gap:14px; }
+  .kenar__marka span, .kenar__baglam, .kenar__bolumler, .kenar__bag span, .kenar__rutbe span,
+  .kenar__rutbe .kbk-ic{ display:none; }
+  .kenar__moduller{ grid-template-columns:1fr; width:76px; }
+  .kenar__modul{ height:30px; flex-direction:row; justify-content:flex-start; gap:7px; padding:0 8px; font-size:11.5px; }
+  .kenar__modul span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .kenar__cekmece{ flex-direction:column; justify-content:center; gap:3px; width:76px; height:auto; min-height:52px;
+    padding:6px 2px; position:relative; text-align:center; }
+  .kenar__ad{ flex:none; max-width:72px; font-size:11px; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .kenar__sayac{ position:absolute; top:3px; right:12px; min-width:16px; height:16px; font-size:10px; padding:0 4px; }
+  .site--v5 .sayfa{ padding:28px 32px 0; }
   .ust--v5 .ust__ara{ width:200px; }
+}
+.bolumcubugu--kabuk{ display:none; }
+@media (max-width:1279px) and (min-width:680px){
+  .bolumcubugu--kabuk{ display:flex; position:sticky; top:var(--ust-h); z-index:calc(var(--z-nav) - 1);
+    background:var(--surface); margin:-8px 0 20px; }
+  .bolumcubugu--kabuk .bolumcubugu__ad{ height:44px; }
 }
 
 /* Telefon: kenar yok; üstte modül ve konum, onay ve rütbe; altta bant. */
@@ -10981,7 +10996,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'5b824b7', at:'2026-09-25 15:47', dirty:true };
+SP.BUILD = { id:'f65dfc5', at:'2026-09-25 16:19', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -15766,14 +15781,16 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div>';
   }
 
-  /* o: { cekmece:'Plan', bolumler:[{ route, ad, on, rozet:{text, quiet} }] }
+  /* o: { cekmece:'Plan', bolumler:[{ route, ad, on, rozet:{text, quiet} }], kabuk }
      Tek bölümlü çekmecede çizilmez: tek seçenekli bir şerit seçim değil
-     gürültüdür. */
+     gürültüdür. `kabuk:true`: sayfanın üstündeki tablet çubuğu — yalnız
+     680–1279 pikselde görünür (kabuk.css), orada kenar çubuğu bölümleri
+     göstermez; masaüstünde kenarda, telefonda Menü'de dururlar. */
   function bolumCubugu(o){
     o = o || {};
     const b = o.bolumler || [];
     if(b.length < 2) return '';
-    return '<nav class="bolumcubugu" data-oz="019" aria-label="' + kac((o.cekmece || '') + ' bölümleri') + '">'
+    return '<nav class="bolumcubugu' + (o.kabuk ? ' bolumcubugu--kabuk' : '') + '" data-oz="019" aria-label="' + kac((o.cekmece || '') + ' bölümleri') + '">'
       + b.map(x => '<button class="bolumcubugu__ad' + (x.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(x.route) + '"'
         + (x.on ? ' aria-current="page"' : '') + '>' + kac(x.ad)
         + (x.rozet ? '<span class="bolumcubugu__rozet' + (x.rozet.quiet ? ' is-sessiz' : '') + '"'
@@ -48398,7 +48415,7 @@ SP.Screens.move = (function(){
     async 'del-session'(el){
       const id = el.dataset.id;
       UI.confirmSheet('Seansı sil', 'Bu seans ve ürettiği yük kaydından silinir.',
-        async () => { await M.deleteWorkout(id); UI.closeSheet(); SP.App.render(); }, true);
+        async () => { await M.deleteWorkout(id); UI.closeSheet(); SP.App.render(); }, true, 'Seansı sil');
     },
     async advance(el){
       const res = await M.advanceLevel(el.dataset.id);
@@ -51101,7 +51118,7 @@ SP.Screens.family = (function(){
       const id = el.dataset.id;
       UI.confirmSheet('Profili değiştir',
         'Sayfa yeniden yüklenir ve bu profilin verileri açılır. Kaydedilmemiş bir alan varsa kaybolur.',
-        () => M.switchProfile(id));
+        () => M.switchProfile(id), false, 'Profile geç');
     },
     async 'remove-profile'(el){
       const id = el.dataset.id;
@@ -51113,7 +51130,7 @@ SP.Screens.family = (function(){
           UI.closeSheet();
           UI.toast(res.ok ? 'Listeden çıkarıldı' : res.error);
           SP.App.render();
-        });
+        }, false, 'Listeden çıkar');
     },
   };
 
@@ -52898,7 +52915,7 @@ SP.Screens.guide = (function(){
           }catch(e){
             UI.toast('Yükleme başarısız: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
           }
-        }, true);
+        }, true, 'Bu cihazdaki veriyi yedekle değiştir');
     },
     async restore(){
       const input = document.createElement('input');
@@ -52940,7 +52957,7 @@ SP.Screens.guide = (function(){
           }catch(e){
             UI.toast('Geri alınamadı: '+(e.message || 'bilinmeyen hata'));
           }
-        }, true);
+        }, true, 'İçe aktarma öncesine dön');
     },
     async wipe(){
       const G = (window.LIFEOS || {}).GUVEN;
@@ -52958,7 +52975,7 @@ SP.Screens.guide = (function(){
           await SP.Store.clear();
           UI.closeSheet();
           location.reload();
-        }, true);
+        }, true, 'Bütün veriyi sil');
     },
   };
 
@@ -53529,7 +53546,7 @@ SP.Screens.kutuphane = (function(){
     async 'urun-sil'(el){
       const id = el.dataset.id;
       UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
-        async () => { await SP.Urunler.sil(id); UI.toast('Silindi'); SP.App.render(); }, true);
+        async () => { await SP.Urunler.sil(id); UI.toast('Silindi'); SP.App.render(); }, true, 'Ürünü bu cihazdan sil');
     },
   };
 
@@ -53850,7 +53867,7 @@ SP.App = (function(){
   function bolumCubuguHtml(sc){
     const sec = sectionOf(sc.id);
     const r = UST[sc.id] || sc.id;
-    return K.bolumCubugu({ cekmece:sec.label, bolumler:sec.views.filter(v => !gizliMi(v.route)).map(v => ({
+    return K.bolumCubugu({ kabuk:true, cekmece:sec.label, bolumler:sec.views.filter(v => !gizliMi(v.route)).map(v => ({
       route:v.route, ad:v.label, on:v.route === r, rozet:safe(() => badgeFor(v.route), null) || null })) });
   }
 
@@ -54132,6 +54149,7 @@ SP.App = (function(){
           <div class="site__body">
             <div class="wrapc sayfa">
               ${raw(safe(() => sayfaBasiHtml(sc)))}
+              ${raw(safe(() => bolumCubuguHtml(sc), ''))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>
           </div>

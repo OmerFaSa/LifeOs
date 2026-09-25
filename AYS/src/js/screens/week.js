@@ -553,7 +553,7 @@ R.Screens.week = (function(){
           const r = await R.Istisna.bitir(id);
           UI.toast(r.ok ? 'Plan temel düzenine döndü' : r.why);
           R.App.render();
-        });
+        }, false, basladi ? 'İstisnayı bugün bitir' : 'İstisnayı kaldır');
     },
     async 'week-nav'(el){
       S.ui.weekView = U.clamp(Number(el.dataset.n), 1, R.PLAN.totalWeeks);

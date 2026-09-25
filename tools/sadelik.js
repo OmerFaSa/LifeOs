@@ -37,6 +37,7 @@
  *   node tools/sadelik.js --denetle AYS SPI    # bu modulleri denetle
  *   node tools/sadelik.js --gezinti g.json     # envanter.js --json ciktisini kullan
  *   node tools/sadelik.js AYS                  # tek modul
+ *   node tools/sadelik.js --onay               # yalniz 022 kaynak kurali (tarayicisiz)
  *
  * Cikis kodu: 0 butcede (ya da yalniz olcum), 1 denetlenen bir modul
  * butceyi asti, 2 kosum hatasi.
@@ -58,11 +59,11 @@ const KURAL = [
   { ad:'simge',        olcu:'simge',        en:0, yazi:'resimsi simge (emoji)' },
   { ad:'xp',           olcu:'xp',           en:0, yazi:'XP yazısı', haric:['rutbe'] },
   { ad:'etiketsiz',    olcu:'etiketsiz',    en:0, yazi:'kesinliği olmayan sayı (024)' },
-  /* Asagidaki iki kural simdilik OLCUMDUR (`olcum:true`): kirmizi
-     yapmaz, sayar. K2 ilerledikce sifira iner; sifir olunca `olcum`
-     kalkar ve teslim edilmis modulde zorunlu olur (K'nin istegi). */
-  { ad:'mor',          olcu:'mor',          en:0, yazi:'Merkez dışında mor (110)', olcum:true },
-  { ad:'evetTamam',    olcu:'evetTamam',    en:0, yazi:'«Evet/Tamam» onay düğmesi (022)', olcum:true },
+  /* Asagidaki iki kural once OLCUMDU (`olcum:true`: kirmizi yapmaz,
+     sayar). K'nin istegiyle sifira inince zorunlu oldular (2026-09-25:
+     uc modulde ikisi de 0). Yeni bir olcu once `olcum:true` ile gelir. */
+  { ad:'mor',          olcu:'mor',          en:0, yazi:'Merkez dışında mor (110)' },
+  { ad:'evetTamam',    olcu:'evetTamam',    en:0, yazi:'«Evet/Tamam» onay düğmesi (022)' },
   { ad:'boy',          olcu:'boy',          en:1800, yazi:'sayfa boyu (px)', yalniz:['today'] },
   { ad:'dugme',        olcu:'dugme',        en:14, yazi:'görünen düğme', yalniz:['today'] },
 ];
@@ -104,6 +105,36 @@ function hamRenk(ad){
    devam et» yazar. Gezinti pencereleri acmaz; bu yuzden cagrilar kaynakta
    sayilir: ust duzey virgulleri sayan kucuk bir tarayici (dize, sablon ve
    yorum atlanir). */
+/* Bir kaynak metinde besinci argumani (etiketi) olmayan confirmSheet
+   cagrilarinin satir numaralari. Tanimin kendisi sayilmaz. */
+function onaySay(t){
+  const out = [];
+  const re = /confirmSheet\s*\(/g;
+  let m;
+  while((m = re.exec(t))){
+    const once = t.slice(Math.max(0, m.index - 12), m.index);
+    if(/function\s+$/.test(once)) continue;         // tanimin kendisi
+    let i = re.lastIndex, derin = 0, virgul = 0, bos = true;
+    for(; i < t.length; i++){
+      const c = t[i];
+      if(c === '"' || c === "'" || c === '`'){
+        const q = c; i++;
+        while(i < t.length && t[i] !== q){ if(t[i] === '\\') i++; i++; }
+        bos = false; continue;
+      }
+      if(c === '/' && t[i + 1] === '*'){ i = t.indexOf('*/', i + 2) + 1; continue; }
+      if(c === '/' && t[i + 1] === '/'){ i = t.indexOf('\n', i); continue; }
+      if('([{'.indexOf(c) >= 0){ derin++; bos = false; continue; }
+      if(')]}'.indexOf(c) >= 0){ if(derin === 0) break; derin--; continue; }
+      if(c === ',' && derin === 0) virgul++;
+      else if(!/\s/.test(c)) bos = false;
+    }
+    const arguman = bos ? 0 : virgul + 1;
+    if(arguman < 5) out.push(t.slice(0, m.index).split('\n').length);
+  }
+  return out;
+}
+
 function varsayilanOnaylar(ad){
   const kok = path.join(KOK, ad, 'src', 'js');
   const out = [];
@@ -111,33 +142,8 @@ function varsayilanOnaylar(ad){
     const p = path.join(d, e.name);
     if(e.isDirectory()) return gez(p);
     if(!/\.js$/.test(e.name)) return;
-    const t = fs.readFileSync(p, 'utf8');
-    const re = /confirmSheet\s*\(/g;
-    let m;
-    while((m = re.exec(t))){
-      const once = t.slice(Math.max(0, m.index - 12), m.index);
-      if(/function\s+$/.test(once)) continue;         // tanimin kendisi
-      let i = re.lastIndex, derin = 0, virgul = 0, bos = true;
-      for(; i < t.length; i++){
-        const c = t[i];
-        if(c === '"' || c === "'" || c === '`'){
-          const q = c; i++;
-          while(i < t.length && t[i] !== q){ if(t[i] === '\\') i++; i++; }
-          bos = false; continue;
-        }
-        if(c === '/' && t[i + 1] === '*'){ i = t.indexOf('*/', i + 2) + 1; continue; }
-        if(c === '/' && t[i + 1] === '/'){ i = t.indexOf('\n', i); continue; }
-        if('([{'.indexOf(c) >= 0){ derin++; bos = false; continue; }
-        if(')]}'.indexOf(c) >= 0){ if(derin === 0) break; derin--; continue; }
-        if(c === ',' && derin === 0) virgul++;
-        else if(!/\s/.test(c)) bos = false;
-      }
-      const arguman = bos ? 0 : virgul + 1;
-      if(arguman < 5){
-        const satir = t.slice(0, m.index).split('\n').length;
-        out.push(path.relative(path.join(KOK, ad), p) + ':' + satir);
-      }
-    }
+    onaySay(fs.readFileSync(p, 'utf8'))
+      .forEach(satir => out.push(path.relative(path.join(KOK, ad), p) + ':' + satir));
   });
   gez(kok);
   return out;
@@ -214,18 +220,19 @@ async function main(){
       console.log('   ' + (denetlenir ? '✕' : '·') + ' jeton dışı ham renk ' + renkToplam + ': '
         + Object.keys(renk).map(f => f + ' ' + renk[f]).join(', '));
     }
-    /* Olcum (kirmizi yapmaz): K2 ilerledikce sifira iner. */
-    const morT = olcumler.filter(x => /mor/.test(x.kural)).reduce((a, x) => a + x.deger, 0);
-    const evetT = olcumler.filter(x => /Evet/.test(x.kural)).reduce((a, x) => a + x.deger, 0);
-    console.log('   ölçüm · Merkez dışında mor: ' + morT
-      + (morT ? ' (' + olcumler.filter(x => /mor/.test(x.kural)).map(x => x.rota + ' ' + x.deger).join(', ') + ')' : '')
-      + ' · ekranda «Evet/Tamam» düğmesi: ' + evetT
-      + ' · varsayılan «Evet, devam et» onayı (kaynak): ' + onay.length
-      + (onay.length ? ' (' + onay.slice(0, 4).join(', ') + (onay.length > 4 ? ', …' : '') + ')' : ''));
+    /* Olcum (kirmizi yapmaz): `olcum:true` tasiyan kural varsa yazilir. */
+    olcumler.forEach(x => console.log('   ölçüm · ' + x.rota + ' · ' + x.kural + ' ' + x.deger));
+    /* 022 ZORUNLU (2026-09-25): 35 cagrinin hepsi sonucu soyleyen
+       etiketi tasiyor; yeni bir varsayilan etiketli onay her modulde
+       kirmizidir (teslim beklemez: kaynak kurali, ekran olcusu degil). */
+    if(onay.length){
+      kirmizi += onay.length;
+      console.log('   ✕ varsayılan «Evet, devam et» onayı (katalog 022) ' + onay.length + ': ' + onay.join(', '));
+    }
   });
 
   if(kirmizi){
-    console.log('\n' + kirmizi + ' aşım teslim edilmiş modülde. Eşik ancak gerekçesi '
+    console.log('\n' + kirmizi + ' aşım (teslim edilmiş modülde ya da kaynak kuralında). Eşik ancak gerekçesi '
       + 'EKIP-DURUM\'a yazılıp kullanıcı onay verince değişir (plan §1.2).');
     return 1;
   }
@@ -234,7 +241,24 @@ async function main(){
   return 0;
 }
 
-main().then(k => process.exit(k)).catch(e => {
-  console.error('Koşum hatası:', e && e.stack || e);
-  process.exit(2);
-});
+/* `--onay`: yalniz kaynak kurali (tarayici acmaz; saniyenin altinda). */
+function yalnizOnay(){
+  let n = 0;
+  Object.keys(ENV.MODUL).forEach(ad => {
+    const onay = varsayilanOnaylar(ad);
+    n += onay.length;
+    console.log(ad + ': ' + (onay.length ? '✕ ' + onay.length + ' varsayılan etiketli onay: ' + onay.join(', ')
+      : 'her onay sonucu söylüyor'));
+  });
+  return n ? 1 : 0;
+}
+
+module.exports = { onaySay };
+
+if(require.main === module){
+  (process.argv.indexOf('--onay') >= 0 ? Promise.resolve(yalnizOnay()) : main())
+    .then(k => process.exit(k)).catch(e => {
+      console.error('Koşum hatası:', e && e.stack || e);
+      process.exit(2);
+    });
+}

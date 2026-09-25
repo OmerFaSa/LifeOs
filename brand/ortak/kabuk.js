@@ -398,14 +398,16 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div>';
   }
 
-  /* o: { cekmece:'Plan', bolumler:[{ route, ad, on, rozet:{text, quiet} }] }
+  /* o: { cekmece:'Plan', bolumler:[{ route, ad, on, rozet:{text, quiet} }], kabuk }
      Tek bölümlü çekmecede çizilmez: tek seçenekli bir şerit seçim değil
-     gürültüdür. */
+     gürültüdür. `kabuk:true`: sayfanın üstündeki tablet çubuğu — yalnız
+     680–1279 pikselde görünür (kabuk.css), orada kenar çubuğu bölümleri
+     göstermez; masaüstünde kenarda, telefonda Menü'de dururlar. */
   function bolumCubugu(o){
     o = o || {};
     const b = o.bolumler || [];
     if(b.length < 2) return '';
-    return '<nav class="bolumcubugu" data-oz="019" aria-label="' + kac((o.cekmece || '') + ' bölümleri') + '">'
+    return '<nav class="bolumcubugu' + (o.kabuk ? ' bolumcubugu--kabuk' : '') + '" data-oz="019" aria-label="' + kac((o.cekmece || '') + ' bölümleri') + '">'
       + b.map(x => '<button class="bolumcubugu__ad' + (x.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(x.route) + '"'
         + (x.on ? ' aria-current="page"' : '') + '>' + kac(x.ad)
         + (x.rozet ? '<span class="bolumcubugu__rozet' + (x.rozet.quiet ? ' is-sessiz' : '') + '"'

@@ -402,7 +402,7 @@ ESP.Screens.profile = (function(){
           const res = M.removeProfile(id);
           if(!res.ok){ ESP.UI.toast(res.error); return; }
           ESP.App.render();
-        }, true);
+        }, true, 'Profili ve verisini sil');
     },
 
     async 'export-data'(){

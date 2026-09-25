@@ -218,7 +218,7 @@ SP.Screens.family = (function(){
       const id = el.dataset.id;
       UI.confirmSheet('Profili değiştir',
         'Sayfa yeniden yüklenir ve bu profilin verileri açılır. Kaydedilmemiş bir alan varsa kaybolur.',
-        () => M.switchProfile(id));
+        () => M.switchProfile(id), false, 'Profile geç');
     },
     async 'remove-profile'(el){
       const id = el.dataset.id;
@@ -230,7 +230,7 @@ SP.Screens.family = (function(){
           UI.closeSheet();
           UI.toast(res.ok ? 'Listeden çıkarıldı' : res.error);
           SP.App.render();
-        });
+        }, false, 'Listeden çıkar');
     },
   };
 

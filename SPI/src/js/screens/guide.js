@@ -738,7 +738,7 @@ SP.Screens.guide = (function(){
           }catch(e){
             UI.toast('Yükleme başarısız: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
           }
-        }, true);
+        }, true, 'Bu cihazdaki veriyi yedekle değiştir');
     },
     async restore(){
       const input = document.createElement('input');
@@ -780,7 +780,7 @@ SP.Screens.guide = (function(){
           }catch(e){
             UI.toast('Geri alınamadı: '+(e.message || 'bilinmeyen hata'));
           }
-        }, true);
+        }, true, 'İçe aktarma öncesine dön');
     },
     async wipe(){
       const G = (window.LIFEOS || {}).GUVEN;
@@ -798,7 +798,7 @@ SP.Screens.guide = (function(){
           await SP.Store.clear();
           UI.closeSheet();
           location.reload();
-        }, true);
+        }, true, 'Bütün veriyi sil');
     },
   };
 

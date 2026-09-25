@@ -669,18 +669,33 @@ a.kenar__modul:hover{ color:var(--text); }
 .site--v5 .sayfa{ padding:40px 48px 0; box-sizing:border-box; max-width:1180px; }
 .site--v5 .sayfasonu{ background:var(--surface); }
 
-/* Dar masaüstü: kenar çubuğu simgeye iner (öneri 04); hiçbir çekmece gizlenmez. */
+/* TABLET ve dar masaüstü (680–1279): kenar çubuğu daralır ama ADSIZ kalmaz.
+   Tablet dokunmatiktir; üzerine gelince çıkan ipucu yoktur, yalnız simgeyle
+   çekmece bilinmez. Simgenin altında çekmecenin adı, modül düğmesinde
+   sistemin adı durur; hedefler parmak boyunda (≥ 48 px). Açık çekmecenin
+   bölümleri kenarda yer tutmaz: sayfanın üstündeki bölüm çubuğundadır
+   (.bolumcubugu--kabuk) — masaüstünde kenarda, telefonda Menü'de. Hiçbir
+   çekmece ve bölüm gizlenmez. */
 @media (max-width:1279px) and (min-width:680px){
-  .site--v5{ grid-template-columns:64px minmax(0,1fr); }
-  .kenar{ padding:16px 8px 12px; align-items:center; }
-  .kenar__marka span, .kenar__baglam, .kenar__ad, .kenar__bolumler, .kenar__bag span, .kenar__rutbe span,
-  .kenar__rutbe .kbk-ic, .kenar__modul span{ display:none; }
-  .kenar__moduller{ grid-template-columns:1fr; width:44px; }
-  .kenar__modul{ height:28px; }
-  .kenar__cekmece{ justify-content:center; padding:0; width:40px; position:relative; }
-  .kenar__sayac{ position:absolute; top:-2px; right:-4px; min-width:16px; height:16px; font-size:10px; padding:0 4px; }
-  .site--v5 .sayfa{ padding:32px 32px 0; }
+  .site--v5{ grid-template-columns:88px minmax(0,1fr); }
+  .kenar{ padding:14px 6px 12px; align-items:center; gap:14px; }
+  .kenar__marka span, .kenar__baglam, .kenar__bolumler, .kenar__bag span, .kenar__rutbe span,
+  .kenar__rutbe .kbk-ic{ display:none; }
+  .kenar__moduller{ grid-template-columns:1fr; width:76px; }
+  .kenar__modul{ height:30px; flex-direction:row; justify-content:flex-start; gap:7px; padding:0 8px; font-size:11.5px; }
+  .kenar__modul span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .kenar__cekmece{ flex-direction:column; justify-content:center; gap:3px; width:76px; height:auto; min-height:52px;
+    padding:6px 2px; position:relative; text-align:center; }
+  .kenar__ad{ flex:none; max-width:72px; font-size:11px; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .kenar__sayac{ position:absolute; top:3px; right:12px; min-width:16px; height:16px; font-size:10px; padding:0 4px; }
+  .site--v5 .sayfa{ padding:28px 32px 0; }
   .ust--v5 .ust__ara{ width:200px; }
+}
+.bolumcubugu--kabuk{ display:none; }
+@media (max-width:1279px) and (min-width:680px){
+  .bolumcubugu--kabuk{ display:flex; position:sticky; top:var(--ust-h); z-index:calc(var(--z-nav) - 1);
+    background:var(--surface); margin:-8px 0 20px; }
+  .bolumcubugu--kabuk .bolumcubugu__ad{ height:44px; }
 }
 
 /* Telefon: kenar yok; üstte modül ve konum, onay ve rütbe; altta bant. */

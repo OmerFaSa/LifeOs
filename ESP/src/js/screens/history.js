@@ -583,13 +583,14 @@ ESP.Screens.history = (function(){
     async 'del-event'(el){
       const id = el.dataset.id;
       const e = eventOf(id);
+      const zincir = chs().filter(c => c.eventId === id).length;
       ESP.UI.confirmSheet('Olay silinsin mi?',
         (e ? '«' + e.title + '» ' : '') + 've bu olaya bağlı neden zincirleri kalkar.',
         async () => {
           await M.deleteEvent(id);
           ESP.Memo.bitir();
           ESP.App.render();
-        }, true);
+        }, true, zincir ? 'Olayı ve ' + zincir + ' zinciri sil' : 'Olayı sil');
     },
 
     async 'contemp'(el){

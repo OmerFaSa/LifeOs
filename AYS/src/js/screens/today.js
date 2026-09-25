@@ -1363,7 +1363,7 @@ R.Screens.today = (function(){
           const r = await R.Istisna.bitir(id);
           UI.toast(r.ok ? 'Ara bitti; bugünün planı kuruldu' : r.why);
           R.App.render();
-        });
+        }, false, 'Arayı bugün bitir');
     },
 
     /* HKM teklifleri: uygulayan AYS'in kendi kodudur. */
@@ -1444,7 +1444,7 @@ R.Screens.today = (function(){
           UI.closeSheet();
           UI.toast('Bugün minimuma indi — seri korunuyor');
           R.App.render();
-        });
+        }, false, 'Bugünü minimuma indir');
     },
     async 'bad-day-undo'(){
       await M.undoBadDay();

@@ -523,7 +523,7 @@ ESP.Screens.guide = (function(){
           }catch(e){
             ESP.UI.toast('Yükleme başarısız: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
           }
-        }, true);
+        }, true, 'Bu cihazdaki veriyi yedekle değiştir');
     },
     async 'dayanak-iste'(el){
       const alan = el.dataset.alan;
@@ -582,7 +582,7 @@ ESP.Screens.guide = (function(){
       ESP.UI.confirmSheet('Bu profilin verisi silinsin mi?',
         'Bütün oturumlar, kartlar, tezler, notlar ve taslaklar kalkar. '
         + 'Bu işlem geri alınamaz.',
-        async () => { await ESP.Store.clear(); location.reload(); }, true);
+        async () => { await ESP.Store.clear(); location.reload(); }, true, 'Bütün veriyi sil');
     },
 
     async 'undo-import'(){
@@ -599,7 +599,7 @@ ESP.Screens.guide = (function(){
           }catch(e){
             ESP.UI.toast(e && e.message ? e.message : 'Geri alınamadı');
           }
-        }, true);
+        }, true, 'İçe aktarma öncesine dön');
     },
   };
 
@@ -637,7 +637,7 @@ ESP.Screens.guide = (function(){
           }catch(e){
             ESP.UI.toast(e && e.message ? e.message : 'Yedek yüklenemedi');
           }
-        }, true);
+        }, true, 'Veriyi yedekle değiştir');
     },
   };
 

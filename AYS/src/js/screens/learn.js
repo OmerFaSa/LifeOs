@@ -416,13 +416,14 @@ R.Screens.learn = (function(){
     },
     async 'note-delete'(el){
       const id = el.dataset.id;
+      const notSay = ((S.videoNotes || []).find(n => n.id === id) || { segments:[] }).segments.length;
       UI.confirmSheet('Dersi sil', 'Bu ders ve altındaki notlar silinecek. Üretilmiş tekrar kartları kalır.', async () => {
         await M.deleteVideoNote(id);
         S.ui.noteOpen = null;
         UI.closeSheet();
         UI.toast('Ders silindi');
         R.App.render();
-      }, true);
+      }, true, notSay ? 'Dersi ve ' + notSay + ' notu sil' : 'Dersi sil');
     },
     async 'note-toggle-done'(){
       const note = openNote();
@@ -526,7 +527,7 @@ R.Screens.learn = (function(){
           UI.closeSheet();
           UI.toast(note.segments.length+' kart oluşturuldu');
           R.App.render();
-        });
+        }, false, note.segments.length + ' kart üret');
     },
   };
 

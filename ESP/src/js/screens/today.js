@@ -1010,7 +1010,7 @@ ESP.Screens.today = (function(){
             const zorla = await ESP.Timer.stop({ force:true });
             if(zorla.ok) ESP.UI.toast(zorla.minutes + ' dk kaydedildi');
             ESP.App.render();
-          });
+          }, false, res.minutes + ' dakikayı kaydet');
         return;
       }
       if(!res.ok){ ESP.UI.toast(res.error); ESP.App.render(); return; }
@@ -1022,7 +1022,7 @@ ESP.Screens.today = (function(){
       const dk = ESP.Timer.minutes();
       ESP.UI.confirmSheet('Sayaç silinsin mi?',
         dk + ' dakika ölçülmüştü ve kaydedilmeden silinecek.',
-        async () => { await ESP.Timer.reset(); ESP.App.render(); }, true);
+        async () => { await ESP.Timer.reset(); ESP.App.render(); }, true, dk + ' dakikayı sil');
     },
 
     async 'add-session'(){

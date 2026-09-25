@@ -231,6 +231,21 @@
       d.remove();
     });
 
+    /* Tablet (680–1279 px): kenar çubuğu bölümleri göstermez; açık
+       çekmecenin bölümleri sayfanın üstündeki çubuktadır. Çubuk yalnız o
+       aralıkta görünür (kabuk.css .bolumcubugu--kabuk); masaüstünde kenarda,
+       telefonda Menü'de dururlar. Önce tablette Bugün › Ayrıntı gibi
+       bölümlere kenardan ulaşılamıyordu. */
+    it('oz-019 tablet bölüm çubuğu: kabuk sınıfı yalnız istenince', () => {
+      const b = [{ route:'today', ad:'Bugün', on:true }, { route:'gun', ad:'Ayrıntı' }];
+      const d = yerlestir(K.bolumCubugu({ kabuk:true, cekmece:'Bugün', bolumler:b }));
+      const n = d.querySelector('nav');
+      expect(n.classList.contains('bolumcubugu--kabuk')).toBe(true);
+      expect([...n.querySelectorAll('[data-route]')].map(x => x.dataset.route)).toEqual(['today', 'gun']);
+      d.remove();
+      expect(K.bolumCubugu({ cekmece:'Bugün', bolumler:b }).indexOf('bolumcubugu--kabuk')).toBe(-1);
+    });
+
     it('sayfa başı: yol «Plan › Hafta», başlık tek h1; metin kaçışlı', () => {
       const d = yerlestir(K.sayfaBasi({ yol:['Plan', 'Hafta'], baslik:'<b>Hafta</b>' }));
       expect(d.querySelector('.sayfabasi__yol').textContent).toBe('Plan › Hafta');

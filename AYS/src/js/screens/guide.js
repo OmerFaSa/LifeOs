@@ -958,7 +958,7 @@ R.Screens.guide = (function(){
           }catch(e){
             UI.toast('Yükleme başarısız: ' + (e && e.message ? e.message : 'bilinmeyen hata'));
           }
-        }, true);
+        }, true, 'Bu cihazdaki veriyi yedekle değiştir');
     },
     async 'import-data'(){
       UI.sheet({
@@ -1045,7 +1045,7 @@ R.Screens.guide = (function(){
           }catch(e){
             UI.toast('Geri alınamadı: '+(e.message || 'bilinmeyen hata'));
           }
-        }, true);
+        }, true, 'İçe aktarma öncesine dön');
     },
     async 'hkm-toggle'(){
       const a = R.Beacon.settings();
@@ -1088,7 +1088,7 @@ R.Screens.guide = (function(){
           await R.Store.clear();
           UI.closeSheet();
           location.reload();
-        }, true);
+        }, true, 'Bütün veriyi sil');
     },
   };
 

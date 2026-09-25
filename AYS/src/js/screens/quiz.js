@@ -363,7 +363,7 @@ R.Screens.quiz = (function(){
       const bos = m ? m.toplam - m.cevapli : 0;
       const bitir = async () => { await TK().bitir(); R.App.render(); };
       if(bos) UI.confirmSheet('Bölümü bitir', bos + ' soru boş. Yine de bitirilsin mi? Boşlar '
-        + 'boş olarak sayılır.', bitir);
+        + 'boş olarak sayılır.', bitir, false, bos + ' boşla bitir');
       else await bitir();
     },
     async 'kitap-vazgec'(){ TK().vazgec(); UI.toast('Bölüm bırakıldı; sonuç yazılmadı.'); R.App.render(); },
@@ -403,7 +403,7 @@ R.Screens.quiz = (function(){
           Q.cancel();
           UI.closeSheet();
           R.App.render();
-        });
+        }, false, 'Kaydetmeden bitir');
     },
   };
 

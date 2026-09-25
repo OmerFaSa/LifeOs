@@ -297,7 +297,7 @@ SP.App = (function(){
   function bolumCubuguHtml(sc){
     const sec = sectionOf(sc.id);
     const r = UST[sc.id] || sc.id;
-    return K.bolumCubugu({ cekmece:sec.label, bolumler:sec.views.filter(v => !gizliMi(v.route)).map(v => ({
+    return K.bolumCubugu({ kabuk:true, cekmece:sec.label, bolumler:sec.views.filter(v => !gizliMi(v.route)).map(v => ({
       route:v.route, ad:v.label, on:v.route === r, rozet:safe(() => badgeFor(v.route), null) || null })) });
   }
 
@@ -579,6 +579,7 @@ SP.App = (function(){
           <div class="site__body">
             <div class="wrapc sayfa">
               ${raw(safe(() => sayfaBasiHtml(sc)))}
+              ${raw(safe(() => bolumCubuguHtml(sc), ''))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>
           </div>

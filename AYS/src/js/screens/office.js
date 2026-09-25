@@ -963,7 +963,7 @@ R.Screens.office = (function(){
     async 'urun-sil'(el){
       const id = el.dataset.id;
       UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
-        async () => { await R.Urunler.sil(id); UI.toast('Silindi'); R.App.render(); }, true);
+        async () => { await R.Urunler.sil(id); UI.toast('Silindi'); R.App.render(); }, true, 'Ürünü bu cihazdan sil');
     },
     /* Görünüm tercihi kalıcıdır: kullanıcı 3B'yi kapattıysa her açılışta
        geri gelmemeli. */

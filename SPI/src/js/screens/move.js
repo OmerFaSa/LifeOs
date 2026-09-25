@@ -570,7 +570,7 @@ SP.Screens.move = (function(){
     async 'del-session'(el){
       const id = el.dataset.id;
       UI.confirmSheet('Seansı sil', 'Bu seans ve ürettiği yük kaydından silinir.',
-        async () => { await M.deleteWorkout(id); UI.closeSheet(); SP.App.render(); }, true);
+        async () => { await M.deleteWorkout(id); UI.closeSheet(); SP.App.render(); }, true, 'Seansı sil');
     },
     async advance(el){
       const res = await M.advanceLevel(el.dataset.id);

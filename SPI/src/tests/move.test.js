@@ -2,6 +2,20 @@
 
 (function(){
   const { describe, it, expect, resetState, withToday, pushVitals, pushWorkout } = SP.Test;
+
+  /* Katalog 022: onay düğmesi SONUCU söyler; varsayılan «Evet, devam et»
+     kalmaz ve etiket eklenirken tehlike işareti kaybolmaz. */
+  describe('Seans silme onayı', () => {
+    it('düğme «Seansı sil» der ve tehlikeli kalır', async () => {
+      const eski = SP.UI.confirmSheet, onaylar = [];
+      SP.UI.confirmSheet = (b, m, f, tehlikeli, etiket) => onaylar.push({ tehlikeli, etiket });
+      try{ await SP.Screens.move.handle['del-session']({ dataset:{ id:'w1' } }); }
+      finally{ SP.UI.confirmSheet = eski; }
+      expect(onaylar.length).toBe(1);
+      expect(onaylar[0].etiket).toBe('Seansı sil');
+      expect(onaylar[0].tehlikeli).toBe(true);
+    });
+  });
   const U = SP.U;
 
   /* Yuku BILINMEYEN seans: ne zorluk ne taninan hareket.

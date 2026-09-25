@@ -56,6 +56,31 @@
       });
     });
 
+    /* Katalog 022: onay düğmesi SONUCU söyler, sayısı biliniyorsa sayısıyla
+       («Denemeyi ve 2 hata kaydını sil»); varsayılan «Evet, devam et» kalmaz
+       (kaynak kuralı: tools/sadelik.js --onay). */
+    it('deneme ve ders silme onayı bağlı kayıt sayısını söyler', async () => {
+      resetState();
+      const ex = R.Test.makeExam({ tests:[{ name:'Türkçe', correct:30, wrong:10, blank:0, minutes:null }] });
+      R.S.exams = [ex];
+      R.S.errors = [{ id:'e1', examId:ex.id }, { id:'e2', examId:ex.id }, { id:'e3', examId:'baska' }];
+      R.S.videoNotes = [{ id:'n1', title:'Türev', segments:[{ id:'s1' }, { id:'s2' }, { id:'s3' }] },
+        { id:'n2', title:'Boş ders', segments:[] }];
+      const eski = R.UI.confirmSheet, onaylar = [];
+      R.UI.confirmSheet = (b, m, f, tehlikeli, etiket) => onaylar.push({ tehlikeli, etiket });
+      try{
+        await R.Screens.exams.handle['delete-exam']({ dataset:{ id:ex.id } });
+        R.S.errors = [];
+        await R.Screens.exams.handle['delete-exam']({ dataset:{ id:ex.id } });
+        await R.Screens.learn.handle['note-delete']({ dataset:{ id:'n1' } });
+        await R.Screens.learn.handle['note-delete']({ dataset:{ id:'n2' } });
+      }finally{ R.UI.confirmSheet = eski; }
+      expect(onaylar.map(o => o.etiket)).toEqual(['Denemeyi ve 2 hata kaydını sil', 'Denemeyi sil',
+        'Dersi ve 3 notu sil', 'Dersi sil']);
+      onaylar.forEach(o => expect(o.tehlikeli).toBe(true));
+      expect(window.LIFEOS.ONERI.etiketGecerliMi(onaylar[0].etiket)).toBeTruthy();
+    });
+
     it('boş ve dolu durumda hiçbir ekran çökmez', async () => {
       for(const dolu of [false, true]){
         resetState();

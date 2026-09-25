@@ -263,7 +263,7 @@ ESP.App = (function(){
   function bolumCubuguHtml(sc){
     const sec = sectionOf(sc.id);
     const r = UST[sc.id] || sc.id;
-    return K.bolumCubugu({ cekmece:sec.label, bolumler:sec.views.map(v => ({
+    return K.bolumCubugu({ kabuk:true, cekmece:sec.label, bolumler:sec.views.map(v => ({
       route:v.route, ad:v.label, on:v.route === r, rozet:safe(() => badgeFor(v.route), null) || null })) });
   }
 
@@ -512,6 +512,7 @@ ESP.App = (function(){
             <div class="wrapc sayfa">
               ${raw(safe(sayacHtml))}
               ${raw(safe(() => sayfaBasiHtml(sc)))}
+              ${raw(safe(() => bolumCubuguHtml(sc), ''))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>
           </div>
