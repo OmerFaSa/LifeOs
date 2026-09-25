@@ -40,6 +40,8 @@ sürdürüyorsun. Aşağıdaki sırayı izle; her iş ayrı commit, `[T] …`, d
    onaylayınca kalıcı (`HKM/core/memory.py`). Önce test.
 7. **Çizicisi hazır, verisi kaydedilmeyen kartlar:** SPİ 081 082 083 087 · ESP 095 099 103
    106 107 109 · 112 · 127 — yapılabilenleri bağla, yapılamayanı EKIP-DURUM'a gerekçesiyle yaz.
+   **K'nin taslağı hazır** (081 095 099 103 106 107 109, testli): `ekip/yama/K-7madde-taslak.patch`
+   — ayrıntı EKIP-DURUM «K → T» satırında. Kullan ya da sil; K bu maddeye dokunmuyor.
 8. **Son rapor (kullanıcıya):** 25 kare portrenin 20'si temiz kaynak fotoğraf istiyor; 167'nin
    sınırı; HKM ses/belge/video çözümlemesi dış bağımlılık ya da sağlayıcı ister.
 
