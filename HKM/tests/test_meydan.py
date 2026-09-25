@@ -75,7 +75,9 @@ def run():
         # Bulgu ayri gonderi DEGIL: ayni sayi iki gonderide yazilmaz.
         no(any(g["id"].startswith("bulgu-") for g in a["gonderiler"]), "bulgu ayri gonderi")
         if oz["uyari"]:
-            eq(oz["baslik"], [b["metin"] for b in oz["bulgular"] if b["ton"] == "uyari"][0])
+            # En agir bulgu basliktir ve listede ikinci kez yazilmaz.
+            no(any(b["metin"] == oz["baslik"] for b in oz["bulgular"]), "baslik listede tekrar")
+            ok("Öne çıkan bulgu" in meydan.kural_yanit(oz))
         ok(["—", "toparlanma skoru", "veri yok"] in oz["sayilar"], oz["sayilar"])
         no(any(s[0] == "0" for s in oz["sayilar"]), "eksik sifir yazildi")
         no(any("kilo" in s[1] or s[1] == "weight" for s in oz["sayilar"]), "gizli alan akista")
@@ -97,6 +99,8 @@ def run():
             a = meydan.akis(con, G, duzey=duzey, now=AN)
             ilk = a["gonderiler"][0]
             eq((ilk["id"], ilk["tur"], ilk["bekliyor"]), ("oneri-%d" % did, "teklif", True), duzey)
+            eq(ilk["baslik"], "Bugün yükü azalt.")
+            no("karar bekliyor" in ilk["baslik"].lower(), "serit baslikta tekrar")
             no(ilk.get("katli"), duzey)
             eq(a["bekleyen"], 1)
         eq(manager.respond(con, did, "declined")["status"], 200)
@@ -312,6 +316,7 @@ def run():
         _gun(con, sleep_hours=_m(7))
         b = meydan.akis(con, G, now=AN)["bugun"]
         eq((b["gelen"], b["gelmeyen"]), (["SPİ"], ["AYS", "ESP"]))
+        eq(b["sayilar"][0][:2], ["1 / 3", "kayıt geldi"])
         ok("sıfır sayılmadı" in b["cumle"], b["cumle"])
         for s_ in b["sayilar"]:
             eq(s_[2], "hesaplandı")

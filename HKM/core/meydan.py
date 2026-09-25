@@ -331,14 +331,14 @@ def _raporlar(con, gun):
                      "ton": "uyari" if f.get("tone") in ("warn", "danger") else "bilgi"}
                     for f in a.get("findings") or [] if f.get("text")]
         uyari = any(x["ton"] == "uyari" for x in bulgular)
-        cumle = "%s bugünün kaydını gönderdi: %d ölçüm" % (MODUL_AD[modul], gelen)
+        cumle = "%s bugünün kaydı: %d ölçüm" % (MODUL_AD[modul], gelen)
         cumle += ("; %d alan boş, sıfır sayılmadı." % bos) if bos else "."
         if a.get("verdict") == "APPROVED":
-            cumle += " Denetimde sorun çıkmadı."
-        elif bulgular:
-            cumle += " Denetim %d bulgu yazdı." % len(bulgular)
+            cumle += " Denetimde sorun yok."
+        # En agir bulgu BASLIKTIR; listede ikinci kez yazilmaz.
         baslik = next((x["metin"] for x in bulgular if x["ton"] == "uyari"),
                       "%s · günün raporu" % MODUL_AD[modul])
+        bulgular = [x for x in bulgular if x["metin"] != baslik]
         out.append(_gonderi("ozet-%s-%s" % (modul, gun), vp, "bulgu" if uyari else "ozet", gun,
                             cumle, baslik=baslik, sayilar=sayilar, bulgular=bulgular, uyari=uyari,
                             baglanti=_ilgili_oneri(con, gun, vp),
@@ -359,9 +359,11 @@ def _oneriler(con, gun):
         ilgili = [VP_MODUL[vp]] if vp in VP_MODUL else ["ays", "spi", "esp"]
         kural_ad = kural.get("label") or "günün önceliği"
         if d["state"] == "proposed":
+            # Serit zaten «senden karar bekliyor» der: baslik onerinin kendisidir.
             out.append(_gonderi("oneri-%d" % d["id"], "king", "teklif", d["created_at"],
-                                _metin(d["proposal"], 400), ilgili=ilgili,
-                                baslik="Senden bir karar bekliyor",
+                                "Kaynak: %s. Karar Onaylar’dakiyle aynıdır; reddedilen öneri "
+                                "silinmez." % kural_ad, ilgili=ilgili,
+                                baslik=_metin(d["proposal"], 400),
                                 bekliyor=True, seviye_aksiyon="orta", vp=vp,
                                 eylem={"tur": "oneri", "id": d["id"]},
                                 kaynak={"olay": "günün brifingi", "kural": kural_ad}))
@@ -688,7 +690,7 @@ def _gunun_ozeti(con, gun, liste, bekleyen, ds):
     if bekleyen:
         cumle += " %d gönderi senden karar bekliyor." % bekleyen
     return {"cumle": cumle,
-            "sayilar": [[sayi_yaz(len(liste)), "gönderi", "hesaplandı"],
+            "sayilar": [["%d / 3" % len(gelen), "kayıt geldi", "hesaplandı"],
                         [sayi_yaz(bekleyen), "karar bekliyor", "hesaplandı"],
                         [sayi_yaz(ds["vadeli"]), "tekrar", "hesaplandı"]],
             "gelen": gelen, "gelmeyen": gelmeyen}
@@ -850,6 +852,8 @@ def kural_yanit(g):
     k = g.get("kaynak") or {}
     parca = ["Bu gönderi %s üzerine yazıldı%s." % (
         k.get("olay") or "bir olay", (" (kural: %s)" % k["kural"]) if k.get("kural") else "")]
+    if g.get("uyari") and g.get("baslik"):
+        parca.append("Öne çıkan bulgu: %s" % g["baslik"].rstrip(".") + ".")
     bl = [b["metin"] for b in g.get("bulgular") or []]
     if bl:
         parca.append("Denetimin bulguları: " + "; ".join(_kisalt(x, 120) for x in bl[:2]) + ".")
