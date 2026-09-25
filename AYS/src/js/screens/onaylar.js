@@ -365,19 +365,24 @@ R.Screens.onaylar = (function(){
         kaynak:kendi || p.source === 'istek' ? 'kullanici' : 'ofis',
         onay:kendi ? null : p.otomatik ? { tur:'ayar' } : { tur:'onay' } };
     });
-    return c.Kutu({ ad:'Son kararlar', yuva:rows.length + ' kayıt', govde:raw(G.gecmisHtml(olay.slice(0, 40))) });
+    /* 119: öneri geçmişi; bekleyen yokken de çizilir (render). */
+    return c.Kutu({ ad:'Son kararlar', yuva:rows.length + ' kayıt',
+      govde:html`<div data-oz="119">${raw(G.gecmisHtml(olay.slice(0, 40)))}</div>` });
   }
 
   async function render(){
     const kartlar = [KingTeklifKart(), HkmTeklifKart(), ofisKarti()].filter(Boolean);
+    const gecmis = sonKararlar();
     if(!kartlar.length){
-      /* Boş durum (10): yalnız veri yokken; tek eylem. */
-      return String(c.Grid([c.Span(12, c.Kutu({ ad:'Bekleyen öneri yok', govde:html`
+      /* Boş durum (10): tek eylem. Geçmiş varsa yanında durur (119):
+         «dün neyi geçmiştim?» sorusu tam bekleyen yokken sorulur. */
+      const bos = c.Kutu({ ad:'Bekleyen öneri yok', govde:html`
         <p class="small muted">Merkez, King ve ofis bir şey önerdiğinde burada durur; sen
           onaylamadan hiçbiri uygulanmaz.</p>
-        <div class="mt-10">${c.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' })}</div>` }))]));
+        <div class="mt-10">${c.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' })}</div>` });
+      return String(gecmis ? c.Grid([c.Span(8, bos), c.Span(4, gecmis)]) : c.Grid([c.Span(12, bos)]));
     }
-    return String(c.Grid([c.Span(8, c.Stack(kartlar)), c.Span(4, sonKararlar())]));
+    return String(c.Grid([c.Span(8, c.Stack(kartlar)), c.Span(4, gecmis)]));
   }
 
   /* ---------- eylemler ---------- */

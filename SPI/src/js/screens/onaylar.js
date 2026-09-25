@@ -312,20 +312,24 @@ SP.Screens.onaylar = (function(){
         kaynak:kendi || p.source === 'istek' ? 'kullanici' : 'ofis',
         onay:kendi ? null : p.otomatik ? { tur:'ayar' } : { tur:'onay' } };
     });
-    return K.Kutu({ ad:'Son kararlar', yuva:rows.length + ' kayıt', govde:raw(G.gecmisHtml(olay.slice(0, 40))) });
+    /* 119: öneri geçmişi; bekleyen yokken de çizilir (render). */
+    return K.Kutu({ ad:'Son kararlar', yuva:rows.length + ' kayıt',
+      govde:html`<div data-oz="119">${raw(G.gecmisHtml(olay.slice(0, 40)))}</div>` });
   }
 
   async function render(){
     const kartlar = [KingTeklifKart(), HkmTeklifKart(), BekleyenKart()].filter(Boolean);
+    const gecmis = sonKararlar();
     if(!kartlar.length){
-      /* Boş durum (10): yalnız veri yokken; tek eylem. */
-      return String(K.Kutu({ ad:'Bekleyen öneri yok', govde:html`
+      /* Boş durum (10): tek eylem. Geçmiş varsa altında durur (119). */
+      const bos = K.Kutu({ ad:'Bekleyen öneri yok', govde:html`
         <p class="small muted">Merkez, King ve Danışma bir şey önerdiğinde burada durur; sen
           onaylamadan hiçbiri uygulanmaz.</p>
         <div class="mt-10">${K.Button({ label:'Danışma’ya git', size:'sm', act:'go',
-          data:{ 'data-route':'team' } })}</div>` }));
+          data:{ 'data-route':'team' } })}</div>` });
+      return String(gecmis ? html`<div class="onaylar-raf">${bos}${gecmis}</div>` : bos);
     }
-    return String(html`<div class="onaylar-raf">${K.Stack(kartlar)}${sonKararlar()}</div>`);
+    return String(html`<div class="onaylar-raf">${K.Stack(kartlar)}${gecmis}</div>`);
   }
 
   /* ---------- eylemler ---------- */

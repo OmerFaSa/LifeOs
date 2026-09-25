@@ -245,20 +245,24 @@ ESP.Screens.onaylar = (function(){
         kaynak:kendi || p.source === 'istek' ? 'kullanici' : 'ofis',
         onay:kendi ? null : p.otomatik ? { tur:'ayar' } : { tur:'onay' } };
     });
-    return K.Entry({ label:'Son kararlar', meta:rows.length + ' kayıt', body:raw(G.gecmisHtml(olay.slice(0, 40))) });
+    /* 119: öneri geçmişi; bekleyen yokken de çizilir (render). */
+    return K.Entry({ label:'Son kararlar', meta:rows.length + ' kayıt',
+      body:html`<div data-oz="119">${raw(G.gecmisHtml(olay.slice(0, 40)))}</div>` });
   }
 
   function render(){
     const kartlar = [KingTeklifKart(), HkmTeklifKart(), AjanKart()].filter(Boolean);
+    const gecmis = sonKararlar();
     if(!kartlar.length){
-      /* Boş durum (10): yalnız veri yokken; tek eylem. */
-      return K.Kutu({ ad:'Bekleyen öneri yok', govde:html`
+      /* Boş durum (10): tek eylem. Geçmiş varsa altında durur (119). */
+      const bos = K.Kutu({ ad:'Bekleyen öneri yok', govde:html`
         <p class="small muted">Merkez, King ve ajanlar bir şey önerdiğinde burada durur; sen
           onaylamadan hiçbiri uygulanmaz.</p>
         <div class="mt-10">${K.Button({ label:'Danışma’ya git', size:'sm', act:'go',
           data:{ 'data-route':'team' } })}</div>` });
+      return gecmis ? html`${bos}<div class="mt-16">${K.Ledger([gecmis])}</div>` : bos;
     }
-    return K.Ledger(() => kartlar.concat([sonKararlar()].filter(Boolean)));
+    return K.Ledger(() => kartlar.concat([gecmis].filter(Boolean)));
   }
 
   const handle = {
