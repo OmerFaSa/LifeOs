@@ -80,9 +80,15 @@ verilmez.
 
 1. Güvenli indirme, boyut sınırı ve saklama politikası.
 2. Model geçidi, bütçe koruması ve kullanım ölçümü.
-3. Fotoğraf, ses ve belge analiz işçileri.
+3. Fotoğraf, ses ve belge analiz işçileri. **✅ 2026-09-25:** fiş fotoğrafı
+   (`core/fis.py`), belge yerelde (`core/belge.py`: PDF metin katmanı, .docx,
+   .odt, metin; model yok), ses Gemini ile yazıya dökülür (`core/cozumle.py`,
+   kademe «Medya · ses/video çözümleyen», yalnız Google). Sonuç gönderene
+   yazılır, hiçbir aksiyonu tetiklemez.
 4. Onaylı hafıza ve hafıza yönetim ekranı.
-5. Video kare örnekleme ve uzun iş bildirimleri.
+5. Video kare örnekleme ve uzun iş bildirimleri. **Kısmen ✅ 2026-09-25:**
+   video yalnız başlığı isterse («anlat», «çözümle», «özetle») Gemini'ye
+   bütün olarak gider (en çok 18 MB); kare örnekleme ffmpeg ister, yok.
 
 Her aşama HKM birim testleri ve duman testi geçmeden sonraki aşamaya
 taşınmaz.

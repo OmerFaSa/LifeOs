@@ -116,6 +116,33 @@ def gorsel_dogrula(gorseller):
     return temiz, None
 
 
+# SES ve VIDEO (core/cozumle.py; kullanici karari 2026-09-25: Gemini).
+# Yalniz Google saglayicisi satir ici ses/video kabul eder; baska bir
+# saglayiciya ses gonderilmez. Gemini'nin satir ici istek siniri 20 MB.
+MEDYA_ONEK = ("audio/", "video/")
+MEDYA_EN_COK_BAYT = 18 * 1024 * 1024
+
+
+def medya_dogrula(medya):
+    """(temiz_liste, hata). Tek oge; ses ya da video; 18 MB'tan kucuk."""
+    if not isinstance(medya, list) or len(medya) != 1 or not isinstance(medya[0], dict):
+        return [], "Tek bir ses ya da video gerekli."
+    x = medya[0]
+    if not str(x.get("mime") or "").startswith(MEDYA_ONEK):
+        return [], "Yalnız ses ya da video çözümlenir."
+    try:
+        ham = base64.b64decode(str(x.get("data") or ""), validate=True)
+    except (ValueError, TypeError):
+        return [], "Medya verisi okunamadı (base64 değil)."
+    if not ham:
+        return [], "Medya boş."
+    if len(ham) > MEDYA_EN_COK_BAYT:
+        return [], "Dosya %d MB'tan büyük; Gemini'ye satır içi gönderilemez." % (
+            MEDYA_EN_COK_BAYT // (1024 * 1024))
+    return [{"mime": x["mime"], "data": str(x["data"]),
+             "jeton": int(x.get("jeton") or GORSEL_JETON)}], None
+
+
 def _openai_mesaj(m):
     g = m.get("gorseller")
     if not g:
@@ -383,7 +410,7 @@ DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
 
 def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         transport=None, now=None, duzeltme=True, denetim="olcum", veri=None,
-        gorseller=None):
+        gorseller=None, medya=None):
     """Bir kademe adina model cagirir.
 
     `denetim`: «olcum» (varsayilan) kullaniciya konusan cevaptir: dayanaksiz
@@ -415,6 +442,19 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
             return {"ok": False, "reason": "gorsel", "text": None,
                     "note": "Görsel bir kullanıcı mesajına eklenmeli."}
         mesajlar[-1] = dict(mesajlar[-1], gorseller=temiz)
+    if medya is not None:
+        if a.get("provider") != "google":
+            return {"ok": False, "reason": "medya-saglayici", "text": None,
+                    "note": "Ses ve video için bu kademe Google (Gemini) sağlayıcısına atanmalı; "
+                            "şu an %s. HKM › Modeller › «Medya · ses/video çözümleyen»."
+                            % a.get("provider_label", a.get("provider"))}
+        temiz, hata = medya_dogrula(medya)
+        if hata:
+            return {"ok": False, "reason": "medya", "text": None, "note": hata}
+        if not mesajlar or mesajlar[-1].get("role") != "user":
+            return {"ok": False, "reason": "medya", "text": None,
+                    "note": "Medya bir kullanıcı mesajına eklenmeli."}
+        mesajlar[-1] = dict(mesajlar[-1], gorseller=temiz)
     b = butce.settings(cfg)
     t0 = datetime.datetime.now()
 
@@ -425,8 +465,8 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         # ikinci cagri ayni bos payi kullanamaz.
         istem_jeton = (_jeton_tahmini(sistem_metni, *[m.get("content")
                                                        for m in gecmis])
-                       + GORSEL_JETON * sum(len(m.get("gorseller") or [])
-                                            for m in gecmis))
+                       + sum(int(x.get("jeton") or GORSEL_JETON)
+                             for m in gecmis for x in (m.get("gorseller") or [])))
         en_kotu = _fiyat(a["provider"], a["model"], istem_jeton, EN_COK_JETON)
         izin = butce.guard(con, cfg, cost_usd=en_kotu)
         if not izin["ok"]:

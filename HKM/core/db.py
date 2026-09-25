@@ -171,6 +171,7 @@ CREATE TABLE IF NOT EXISTS attachments (
   sha256      TEXT,
   downloaded_at TEXT,
   analyzed_at TEXT,
+  analysis    TEXT,
   error       TEXT,
   created_at  TEXT NOT NULL,
   UNIQUE(channel, sender, message_id, file_id)
@@ -581,6 +582,7 @@ MIGRATIONS = [
     ("attachments", "local_path", "TEXT"),
     ("attachments", "sha256", "TEXT"),
     ("attachments", "downloaded_at", "TEXT"),
+    ("attachments", "analysis", "TEXT"),
     ("attachments", "analyzed_at", "TEXT"),
     ("attachments", "error", "TEXT"),
     # Hafiza katmani (soz / sohbet / cikarim) ve modulden gelen kaydin

@@ -95,7 +95,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from core import (ai, bam, bildirim, butce, channels, cikti, cross, db, depo, gelen,  # noqa: E402
+from core import (ai, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, meydan, models, motto, outbox, patron,
                   profil, saat, schedule,
@@ -925,7 +925,8 @@ class Handler(BaseHTTPRequestHandler):
                 limit = 40
             rows = self.con.execute(
                 "SELECT id,channel,kind,mime_type,file_name,size,duration,"
-                "caption,state,error,downloaded_at,analyzed_at,created_at "
+                "caption,state,error,downloaded_at,analyzed_at,created_at,"
+                "substr(analysis,1,600) AS analysis_onizleme "
                 "FROM attachments ORDER BY id DESC LIMIT ?",
                 (limit,)).fetchall()
             return self._send(200, {"attachments": [dict(r) for r in rows]})
@@ -1742,6 +1743,8 @@ def _ritim(srv, aralik=60):
             media.process_next(con, srv.config)
             # Fis: «fiş» baslikli indirilmis fotograf → taslak cevap (tikte bir).
             fis.telegram_isle(con, srv.config)
+            # Ek cozumleme (core/cozumle.py): belge yerelde, ses/video Gemini (tikte bir).
+            cozumle.isle(con, srv.config)
             # BAM: her tikte EN FAZLA bir adim — uzun is sunucuyu kilitlemez.
             bam.ilerlet(con, srv.config)
             # King: isin durumu emre tasinir, DEGISIM bildirilir.

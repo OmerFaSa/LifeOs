@@ -175,6 +175,11 @@ _rol("para.fis", "Para · Fiş okuyan",
      "Fişin fotoğrafını okur. Tutarı kod doğrular; kullanıcı onaylamadan yazılmaz.",
      parent="king", layer="kol", capability="gorsel")
 
+_rol("medya", "Medya · ses/video çözümleyen",
+     "Telegram'dan gelen sesi yazıya döker, videoyu anlatır; yalnız Google (Gemini). "
+     "Belgeyi model değil kod okur.",
+     parent="king", layer="kol", capability="medya")
+
 for _mod, _ad in MODULLER.items():
     _ust = {"spi": "vp_bio", "ays": "vp_academic", "esp": "vp_intellect"}[_mod]
     for _yet, _not in YETENEKLER.items():
@@ -186,7 +191,7 @@ LAYER_LABEL = {
     "konsey": "HKM konseyi — üç alt patron",
     "modul": "Modül yetenekleri",
     "bam": "BAM — Bilgi ve Aksiyon Modülü",
-    "kol": "HKM kolları — para",
+    "kol": "HKM kolları — para, medya",
 }
 
 
