@@ -79,8 +79,12 @@ R.App = (function(){
   /* Onaylar'ın bekleyeni: King teklifi, HKM teklifi, ofis önerisi. Üçü
      de tek çekmecede durur; sayı da üçünün toplamıdır. */
   function onaySayisi(){
-    try{ return R.Screens.onaylar ? R.Screens.onaylar.bekleyen() : 0; }
+    let n = 0;
+    try{ n = R.Screens.onaylar ? R.Screens.onaylar.bekleyen() : 0; }
     catch(e){ console.error(e); return 0; }
+    /* 167: kurulu uygulamanın simgesinde aynı sayı (brand/ortak/pwa.js). */
+    if(window.LIFEOS && LIFEOS.Pwa && LIFEOS.Pwa.rozet) LIFEOS.Pwa.rozet(n);
+    return n;
   }
 
   function badgeFor(id){
@@ -1529,7 +1533,7 @@ R.App = (function(){
     }
   }
 
-  return { boot, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, canInstall, promptInstall, installManifest,
+  return { boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, canInstall, promptInstall, installManifest,
     notifyState, askNotify, notifyFromOffice };
 })();
 

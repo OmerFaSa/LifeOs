@@ -67,8 +67,12 @@ ESP.App = (function(){
   /* Onaylar'ın bekleyeni. Onaylar ekranı gelene kadar sayı yoktur;
      «0» çizilmez. */
   function onaySayisi(){
-    try{ return ESP.Screens.onaylar && ESP.Screens.onaylar.bekleyen ? ESP.Screens.onaylar.bekleyen() : 0; }
+    let n = 0;
+    try{ n = ESP.Screens.onaylar && ESP.Screens.onaylar.bekleyen ? ESP.Screens.onaylar.bekleyen() : 0; }
     catch(e){ console.error(e); return 0; }
+    /* 167: kurulu uygulamanın simgesinde aynı sayı (brand/ortak/pwa.js). */
+    if(window.LIFEOS && LIFEOS.Pwa && LIFEOS.Pwa.rozet) LIFEOS.Pwa.rozet(n);
+    return n;
   }
 
   /* Marka satırı profilden gelir; sabit bir slogan yoktur. */
@@ -1703,7 +1707,7 @@ ESP.App = (function(){
     }
   }
 
-  return { boot, errorPanel, render, go, applyTheme, SECTIONS,
+  return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS,
     sectionOf, routeOn, yolOf, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
 })();

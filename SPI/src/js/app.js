@@ -120,8 +120,12 @@ SP.App = (function(){
   /* Onaylar'ın bekleyeni: King teklifi, HKM teklifi, bekleyen kayıt.
      Hepsi tek çekmecede durur; sayı da onların toplamıdır. */
   function onaySayisi(){
-    try{ return SP.Screens.onaylar ? SP.Screens.onaylar.bekleyen() : 0; }
+    let n = 0;
+    try{ n = SP.Screens.onaylar ? SP.Screens.onaylar.bekleyen() : 0; }
     catch(e){ console.error(e); return 0; }
+    /* 167: kurulu uygulamanın simgesinde aynı sayı (brand/ortak/pwa.js). */
+    if(window.LIFEOS && LIFEOS.Pwa && LIFEOS.Pwa.rozet) LIFEOS.Pwa.rozet(n);
+    return n;
   }
 
   /* Marka satırı profilden gelir; sabit bir slogan yoktur. */
@@ -1515,7 +1519,7 @@ SP.App = (function(){
     }
   }
 
-  return { boot, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, THEMES, installManifest,
+  return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
 })();
 

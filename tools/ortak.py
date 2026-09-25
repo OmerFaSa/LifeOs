@@ -246,6 +246,8 @@ DOSYALAR = {
     "kilit.test.js":  "tests",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
+    # 167 ana ekran rozeti (pwa.js rozet): pwa.test.js degismesin diye ayri dosya.
+    "rozet.test.js":  "tests",
     "sw.js":          ".",
     # OLUMSUZLUK ve KIP SUZGECI — cumle ayristiricilarinin onundeki kapi
     # (ekip/HATALAR.md KR-1). «cozmedim» uc arayuzde de ayni sekilde

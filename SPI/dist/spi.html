@@ -11021,7 +11021,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'494035d', at:'2026-09-25 17:25', dirty:true };
+SP.BUILD = { id:'a9ebd5c', at:'2026-09-25 17:29', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -21519,7 +21519,30 @@ LIFEOS.Gorsel = (function(){
     return { ok:true };
   }
 
-  L.Pwa = { uygun, adresler, kaydet, EN_COK,
+  /* 167 ANA EKRAN ROZETİ. Tarayıcı uygulaması (PWA) gerçek bir ana ekran
+     bileşeni (widget) KURAMAZ; yapılabilen, kurulu uygulamanın simgesinde
+     bekleyen onay sayısıdır (Badging API). Sayı üst çubuğun mor sayacıyla
+     (115) aynıdır. Destek yoksa sessizce hiçbir şey olmaz; aynı sayı iki
+     kez yazılmaz; tarayıcının reddi yutulur (rozet bir süstür, iş değil). */
+  function rozetKur(nav){
+    let son = null;
+    return function(n){
+      const g = nav || (typeof navigator !== 'undefined' ? navigator : null);
+      if(!g || typeof g.setAppBadge !== 'function') return false;
+      n = Math.max(0, Math.floor(Number(n) || 0));
+      if(n === son) return true;
+      son = n;
+      try{
+        const p = n ? g.setAppBadge(n)
+          : (typeof g.clearAppBadge === 'function' ? g.clearAppBadge() : g.setAppBadge(0));
+        if(p && typeof p.catch === 'function') p.catch(() => {});
+      }catch(e){ return false; }
+      return true;
+    };
+  }
+  const rozet = rozetKur();
+
+  L.Pwa = { uygun, adresler, kaydet, EN_COK, rozet, rozetKur,
     bildirimAyari, bildirimAyariYaz, turAcik, sessizMi, gonderilebilir,
     EN_COK_EYLEM, bildirimDestegi, bildirimKarti, bildir, izinIste, bildirimDinle, bildirimSorusu };
 })();
@@ -54014,8 +54037,12 @@ SP.App = (function(){
   /* Onaylar'ın bekleyeni: King teklifi, HKM teklifi, bekleyen kayıt.
      Hepsi tek çekmecede durur; sayı da onların toplamıdır. */
   function onaySayisi(){
-    try{ return SP.Screens.onaylar ? SP.Screens.onaylar.bekleyen() : 0; }
+    let n = 0;
+    try{ n = SP.Screens.onaylar ? SP.Screens.onaylar.bekleyen() : 0; }
     catch(e){ console.error(e); return 0; }
+    /* 167: kurulu uygulamanın simgesinde aynı sayı (brand/ortak/pwa.js). */
+    if(window.LIFEOS && LIFEOS.Pwa && LIFEOS.Pwa.rozet) LIFEOS.Pwa.rozet(n);
+    return n;
   }
 
   /* Marka satırı profilden gelir; sabit bir slogan yoktur. */
@@ -55409,7 +55436,7 @@ SP.App = (function(){
     }
   }
 
-  return { boot, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, THEMES, installManifest,
+  return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
 })();
 

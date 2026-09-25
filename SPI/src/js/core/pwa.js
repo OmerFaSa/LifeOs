@@ -256,7 +256,30 @@
     return { ok:true };
   }
 
-  L.Pwa = { uygun, adresler, kaydet, EN_COK,
+  /* 167 ANA EKRAN ROZETİ. Tarayıcı uygulaması (PWA) gerçek bir ana ekran
+     bileşeni (widget) KURAMAZ; yapılabilen, kurulu uygulamanın simgesinde
+     bekleyen onay sayısıdır (Badging API). Sayı üst çubuğun mor sayacıyla
+     (115) aynıdır. Destek yoksa sessizce hiçbir şey olmaz; aynı sayı iki
+     kez yazılmaz; tarayıcının reddi yutulur (rozet bir süstür, iş değil). */
+  function rozetKur(nav){
+    let son = null;
+    return function(n){
+      const g = nav || (typeof navigator !== 'undefined' ? navigator : null);
+      if(!g || typeof g.setAppBadge !== 'function') return false;
+      n = Math.max(0, Math.floor(Number(n) || 0));
+      if(n === son) return true;
+      son = n;
+      try{
+        const p = n ? g.setAppBadge(n)
+          : (typeof g.clearAppBadge === 'function' ? g.clearAppBadge() : g.setAppBadge(0));
+        if(p && typeof p.catch === 'function') p.catch(() => {});
+      }catch(e){ return false; }
+      return true;
+    };
+  }
+  const rozet = rozetKur();
+
+  L.Pwa = { uygun, adresler, kaydet, EN_COK, rozet, rozetKur,
     bildirimAyari, bildirimAyariYaz, turAcik, sessizMi, gonderilebilir,
     EN_COK_EYLEM, bildirimDestegi, bildirimKarti, bildir, izinIste, bildirimDinle, bildirimSorusu };
 })();
