@@ -87,6 +87,25 @@ def run():
         no("raw_events" in sistem)
     test("serbest cumleye model cevap verir", t_model_answers_free_sentence)
 
+    def t_hafiza_adayi_sohbette():
+        # Model kalici hafiza YAZAMAZ; cevabina aday etiketi koyabilir. Etiket
+        # kullaniciya gitmez, aday bekler, kullanici «aday N kaydet» der.
+        from core import memory
+        con = _con()
+        tasiyici = _cevap("Anladım, sabah bloklarını öne alırız.\n[[HAFIZA ADAYI: Sabahları daha verimli çalışıyor.]]")
+        r = sohbet.konus(con, _cfg(), "ben sabahları daha verimliyim", BUGUN, transport=tasiyici)
+        no("HAFIZA ADAYI" in r["text"])
+        ok("aday " in r["text"] and "kaydet" in r["text"], r["text"])
+        ok("HAFIZA ADAYI" in tasiyici.gorulen["sistem"])        # model kurali biliyor
+        eq([a["text"] for a in memory.adaylar(con)], ["Sabahları daha verimli çalışıyor."])
+        eq(memory.list_active(con), [])
+        # Saglik adayi sessizce DUSER: etiket yine gitmez, aday yazilmaz.
+        t2 = _cevap("Tamam.\n[[HAFIZA ADAYI: Tansiyon ilacı kullanıyor.]]")
+        r2 = sohbet.konus(con, _cfg(), "tansiyon ilacı kullanıyorum", BUGUN, transport=t2)
+        eq(r2["text"], "Tamam.")
+        eq(len(memory.adaylar(con)), 1)
+    test("hafiza adayi: model yalniz aday birakir, etiket kullaniciya gitmez", t_hafiza_adayi_sohbette)
+
     def t_gizlilik_kaydi():
         # Fikir 55: her cagrida modele HANGI veri turunun gittigi yazilir;
         # gizlilik panosu saglik ozetinin gidip gitmedigini durustce soyler.

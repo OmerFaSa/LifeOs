@@ -5154,9 +5154,21 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   var HAFIZA_KATMAN = { soz:'Senin sözün', sohbet:'Sohbetten', cikarim:'Tahmin' };
   var HAFIZA_KAYNAK = [['', 'HKM'], ['ays', 'AYS'], ['spi', 'SPİ'], ['esp', 'ESP']];
 
-  function profilHafizaCiz(liste){
+  function profilHafizaCiz(liste, adaylar){
     var k = $('profil-hafiza');
     var h = '<div class="tag"><span lang="en">King</span> senin hakkında ne biliyor?</div>';
+    /* Hafıza adayı (core/memory.py): model önerdi, SEN onaylamadan kalıcı
+       olmaz ve King onu kullanmaz. Düğmeler sonucu söyler (022). */
+    if((adaylar || []).length){
+      h += '<p class="muted" style="margin:10px 0 4px"><b>Onay bekleyen</b> · ' + adaylar.length
+        + ' aday · modelin önerisi, sen onaylamadan kullanılmaz</p>';
+      adaylar.forEach(function(a){
+        h += '<div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;'
+          + 'padding:8px 0;border-top:1px solid var(--line)"><span style="flex:1;min-width:0">' + esc(a.text) + '</span>'
+          + '<span class="row" style="gap:6px"><button data-aday-onayla="' + esc(a.id) + '">Hafızaya al</button>'
+          + '<button data-aday-reddet="' + esc(a.id) + '">Alma, sil</button></span></div>';
+      });
+    }
     if(!liste.length){
       h += '<p class="muted">Henüz hiçbir şey. Aşağıya yazabilir ya da sohbette '
         + '«hatırla: …» diyebilirsin. AYS, SPİ ve ESP’de hafızana yazdıkların '
@@ -5192,12 +5204,17 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
         + '<p class="muted">Hafıza okunamadı.</p>';
       return;
     }
-    profilHafizaCiz(r.body.memories || []);
+    profilHafizaCiz(r.body.memories || [], r.body.adaylar || []);
   }
 
   document.addEventListener('click', async function(ev){
-    var el = ev.target.closest ? ev.target.closest('[data-hafiza-unut],#hafiza-ekle') : null;
+    var el = ev.target.closest ? ev.target.closest('[data-hafiza-unut],#hafiza-ekle,[data-aday-onayla],[data-aday-reddet]') : null;
     if(!el) return;
+    if(el.dataset.adayOnayla || el.dataset.adayReddet){
+      var yol = el.dataset.adayOnayla ? el.dataset.adayOnayla + '/onayla' : el.dataset.adayReddet + '/reddet';
+      await api('/api/memory/aday/' + yol, { method:'POST' });
+      return yukleHafiza();
+    }
     if(el.id === 'hafiza-ekle'){
       var metin = (($('hafiza-yeni') || {}).value || '').trim();
       if(!metin) return;

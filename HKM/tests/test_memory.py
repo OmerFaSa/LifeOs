@@ -21,6 +21,56 @@ def run():
            "cuma spor yapıyorum")
     test("yalniz acik komut kalici hafiza yazar", t_only_explicit_command_writes)
 
+    def t_aday():
+        con = db.connect(":memory:")
+        # Model yalniz ADAY yazar: kalici hafizaya ve baglama girmez.
+        r = memory.aday_ekle(con, "Sabahları daha verimli çalışıyor.")
+        ok(r["ok"], r)
+        eq(memory.list_active(con), [])
+        eq(memory.context(con, scope="king"), "")
+        eq([a["text"] for a in memory.adaylar(con)], ["Sabahları daha verimli çalışıyor."])
+        # Ayni aday iki kez olmaz; saglik bilgisi aday olmaz; bos/uzun olmaz.
+        no(memory.aday_ekle(con, "sabahları daha verimli çalışıyor.")["ok"])
+        eq(memory.aday_ekle(con, "Tansiyon ilacını sabah alıyor.")["reason"], "saglik")
+        no(memory.aday_ekle(con, "")["ok"])
+        no(memory.aday_ekle(con, "x" * 400)["ok"])
+        # Onay: kalici olur, etiketi onayi soyler; baglama girer.
+        o = memory.aday_onayla(con, r["id"])
+        ok(o["ok"], o)
+        a = memory.list_active(con)
+        eq(len(a), 1)
+        eq(memory.etiket(a[0]), "sohbetten · senin onayınla")
+        ok("Sabahları daha verimli" in memory.context(con, scope="king"))
+        eq(memory.adaylar(con), [])
+        no(memory.aday_onayla(con, r["id"])["ok"])          # ikinci kez onaylanmaz
+        # Ret: kalici olmaz ve AYNI metin yeniden aday olamaz.
+        k = memory.aday_ekle(con, "Akşamları kahve içmiyor.")
+        ok(memory.aday_reddet(con, k["id"])["ok"])
+        eq([x["text"] for x in memory.list_active(con)], ["Sabahları daha verimli çalışıyor."])
+        no(memory.aday_ekle(con, "Akşamları kahve içmiyor.")["ok"])
+        # Bekleyen aday tavani.
+        for i in range(memory.MAX_ADAY):
+            memory.aday_ekle(con, "tercih %d" % i)
+        eq(len(memory.adaylar(con)), memory.MAX_ADAY)
+        eq(memory.aday_ekle(con, "bir fazlası")["reason"], "dolu")
+    test("hafiza adayi: model yalniz aday yazar, kullanici onaylayinca kalici", t_aday)
+
+    def t_aday_etiketi_ayiklanir():
+        temiz, ad = memory.aday_ayikla("Tamam, not ettim.\n[[HAFIZA ADAYI: Pazar günleri çalışmıyor.]]")
+        eq(temiz, "Tamam, not ettim.")
+        eq(ad, ["Pazar günleri çalışmıyor."])
+        eq(memory.aday_ayikla("Etiket yok."), ("Etiket yok.", []))
+        # Komutla: listele, kaydet, sil.
+        con = db.connect(":memory:")
+        r = memory.aday_ekle(con, "Pazar günleri çalışmıyor.")
+        ok("Pazar günleri" in memory.command(con, "adaylar")["text"])
+        eq(memory.command(con, "aday %d kaydet" % r["id"])["result"]["ok"], True)
+        eq(len(memory.list_active(con)), 1)
+        r2 = memory.aday_ekle(con, "Öğleden sonra yürüyor.")
+        eq(memory.command(con, "aday %d sil" % r2["id"])["result"]["ok"], True)
+        eq(memory.adaylar(con), [])
+    test("hafiza adayi: model cevabindaki etiket ayiklanir; sohbetten onay/ret", t_aday_etiketi_ayiklanir)
+
     def t_scope_separates_context():
         con = db.connect(":memory:")
         memory.add(con, "genel tercih", scope="all")

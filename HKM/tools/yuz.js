@@ -88,6 +88,15 @@ async function tohum(){
     talep:'Ferritin neden düşer, demir emilimini neler etkiler? Araştır', hedef_modul:'spi' }) });
   await api('/api/bam/ilerlet', { method:'POST', body:'{}' });
   await api('/api/bam/ilerlet', { method:'POST', body:'{}' });
+  /* Hafıza adayı: onay bekleyen satır ve iki düğmesi ölçülsün. Aday
+     yalnız sohbetin model cevabından doğar; denetimde model yok, o yüzden
+     doğrudan veritabanına tek satır yazılır (yüz yalnız okur). */
+  try{
+    const { execFileSync } = require('child_process');
+    execFileSync('python3', ['-c', 'import sys; sys.path.insert(0, ".");from core import db, memory;'
+      + 'c = db.connect(sys.argv[1]); memory.aday_ekle(c, "Hafta sonları erken kalkıyor."); c.commit()', DB_YOLU],
+      { cwd:ROOT });
+  }catch(e){ /* aday yazılamazsa kart boş ölçülür; yüz yine gezilir */ }
   /* Para: 082 günlük gider takvimi ve 087 düzenli gider kartları dolu
      haliyle ölçülsün (iki geçmiş ayda kira, bu ay birkaç gider). */
   const ay = n => { const d = new Date(bugun.getFullYear(), bugun.getMonth() + n, 1);
@@ -181,9 +190,11 @@ const OLC = `(() => {
   return sonuc;
 })()`;
 
+let DB_YOLU = null;
 async function main(){
   const hatalar = [];
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hkm-yuz-'));
+  DB_YOLU = path.join(tmp, 'hkm.db');
   const cfgYol = path.join(ROOT, 'config.json');
   const vardi = fs.existsSync(cfgYol);
   const yedek = vardi ? fs.readFileSync(cfgYol, 'utf8') : null;
@@ -252,6 +263,9 @@ async function main(){
           r.kontrast.forEach(k => hatalar.push(yer + ': düşük kontrast — ' + k));
           /* Tohumlu para verisiyle 082 ve 087 dolu çizilmeli: kart görünmezse
              ölçülen şey boş bir kutu olurdu. */
+          if(durak.ad === 'profil' && !(await page.$('[data-aday-onayla]'))){
+            hatalar.push(yer + ': hafıza adayı tohumlu veriyle çizilmedi');
+          }
           if(durak.ad === 'para'){
             const oz = await page.evaluate(() => ['082', '087'].filter(n => !document.querySelector('[data-oz="' + n + '"]')));
             oz.forEach(n => hatalar.push(yer + ': katalog ' + n + ' tohumlu veriyle çizilmedi'));

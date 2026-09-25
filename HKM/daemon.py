@@ -1071,7 +1071,8 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 return self._send(400, {"error": "limit sayi olmali"})
             return self._send(200, {"memories": memory.list_active(
-                self.con, user=user, scope=scope, limit=limit)})
+                self.con, user=user, scope=scope, limit=limit),
+                "adaylar": memory.adaylar(self.con, user=user)})
 
         # ---- Hayat Mottosu: kullanicinin KENDI dusunce agi ----
         #
@@ -1473,6 +1474,15 @@ class Handler(BaseHTTPRequestHandler):
             r = (bam.iptal if parca[4] == "iptal" else bam.devam)(self.con, iid)
             king.esitle(self.con)
             return self._send(200 if r.get("ok") else 409, r)
+        # Hafiza adayi: YALNIZ kullanici onaylar ya da siler (core/memory.py).
+        if u.path.startswith("/api/memory/aday/") and (u.path.endswith("/onayla") or u.path.endswith("/reddet")):
+            parca = u.path.strip("/").split("/")
+            try:
+                id_ = int(parca[3])
+            except (ValueError, IndexError):
+                return self._send(400, {"error": "aday kimliği sayı olmalı"})
+            r = (memory.aday_onayla if parca[4] == "onayla" else memory.aday_reddet)(self.con, id_)
+            return self._send(200 if r.get("ok") else 404, r)
         if u.path.startswith("/api/memory/") and u.path.endswith("/forget"):
             parca = u.path.strip("/").split("/")
             try:

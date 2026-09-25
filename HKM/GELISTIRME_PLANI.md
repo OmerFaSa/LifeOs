@@ -35,7 +35,13 @@ birini taşır. Başarısız analiz dosyayı kaybetmez ve uydurma sonuç üretme
 
 ## 3. Yapay zekâ hafızası
 
-Durum: **açık hafıza tamamlandı; hafıza adayı sırada.**
+Durum: **açık hafıza ve hafıza adayı tamamlandı** (2026-09-25). Model sohbet
+cevabının sonuna `[[HAFIZA ADAYI: …]]` bırakabilir; `core/memory.py` etiketi
+ayıklar (kullanıcıya gitmez), sağlık bilgisini, tekrarı ve reddedilmiş metni
+eler, en çok 20 bekleyen aday tutar. Aday modelin bağlamına girmez; kullanıcı
+HKM › Profil'den («Hafızaya al» / «Alma, sil») ya da sohbetten («aday N
+kaydet» / «aday N sil») karar verir. Onaylanan satır «sohbetten · senin
+onayınla» etiketini taşır.
 
 Hafıza iki ayrı sınıftır:
 

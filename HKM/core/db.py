@@ -589,6 +589,9 @@ MIGRATIONS = [
     ("memories", "katman", "TEXT"),
     ("memories", "modul", "TEXT"),
     ("memories", "dis_id", "TEXT"),
+    # Hafiza adayi (core/memory.py): modelin onerdigi, kullanicinin
+    # onayladigi an. Bos = aday hic olmamis ya da onaylanmamis.
+    ("memories", "onaylandi_at", "TEXT"),
     # BAM'a durum profiliyle is (King'in is emri): yapilandirilmis govde
     # ve isi acan emrin kimligi. Serbest cumleyle acilan islerde bostur.
     ("bam_isler", "govde", "TEXT"),

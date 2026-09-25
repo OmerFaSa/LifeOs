@@ -754,6 +754,22 @@ def run_extra(S):
     test("modul hafizasi esitleme ucu yetki ister ve idempotenttir",
          t_memory_sync_endpoint)
 
+    def t_hafiza_adayi_ucu():
+        from core import memory
+        con = db.connect(S.db_path)
+        a = memory.aday_ekle(con, "Hafta sonu erken kalkıyor.")
+        con.commit(); con.close()
+        kod, r = S.call("/api/memory?scope=king")
+        ok(any(x["id"] == a["id"] for x in r["adaylar"]))
+        no(any(m["text"] == "Hafta sonu erken kalkıyor." for m in r["memories"]))
+        eq(S.call("/api/memory/aday/%d/onayla" % a["id"], body={}, token=None)[0], 401)
+        eq(S.call("/api/memory/aday/%d/onayla" % a["id"], body={})[0], 200)
+        eq(S.call("/api/memory/aday/%d/onayla" % a["id"], body={})[0], 404)
+        kod, r = S.call("/api/memory?scope=king")
+        ok(any(m["text"] == "Hafta sonu erken kalkıyor." and m["onaylandi_at"] for m in r["memories"]))
+        eq(S.call("/api/memory/aday/x/reddet", body={})[0], 400)
+    test("hafiza adayi ucu: listeler; onay yetki ister, bir kez olur", t_hafiza_adayi_ucu)
+
     def t_bam_endpoints():
         eq(S.call("/api/bam/is", body={"talep": "Demir emilimi araştır"}, token=None)[0], 401)
         kod, r = S.call("/api/bam/is", body={"talep": "Demir emilimi araştır",

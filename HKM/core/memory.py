@@ -74,7 +74,7 @@ def _kapsamlar(scope):
 def list_active(con, user="ben", scope=None, now=None, limit=50):
     args = [user, _simdi(now)]
     q = ("SELECT id,scope,text,source,created_at,expires_at,last_used_at,"
-         "COALESCE(katman,'soz') AS katman,modul,dis_id FROM memories "
+         "COALESCE(katman,'soz') AS katman,modul,dis_id,onaylandi_at FROM memories "
          "WHERE user=? AND state='active' AND (expires_at IS NULL OR expires_at>?)")
     kapsam = _kapsamlar(scope)
     if kapsam:
@@ -96,6 +96,8 @@ def forget(con, id_, user="ben", now=None):
 def etiket(r):
     """«senin sözün», «tahmin · AYS» gibi — satirin nereden geldigi."""
     parca = [KATMANLAR.get(r.get("katman") or "soz", "senin sözün")]
+    if r.get("onaylandi_at"):
+        parca.append("senin onayınla")
     if r.get("modul"):
         parca.append(MODUL_ADI.get(r["modul"], r["modul"]))
     return " · ".join(parca)
@@ -119,11 +121,98 @@ LISTE = ("hafızam", "hafizam", "neyi hatırlıyorsun", "neyi hatirliyorsun",
          "benim hakkımda neyi hatırlıyorsun")
 
 
+# ------------------------------------------------------------ hafiza adayi
+#
+# GELISTIRME_PLANI §3: «model konusmadan bir aday cikarabilir ama kullanici
+# onaylamadan kalici hafizaya donusmez.» Aday ayni tabloda `state='aday'`
+# satiridir; list_active/context yalniz 'active' okur, yani aday MODELIN
+# BAGLAMINA GIRMEZ. Onaylanan aday «sohbetten · senin onayınla» olur;
+# reddedilen metin yeniden aday olamaz. Saglik bilgisi aday olmaz (plan:
+# saglik verisi varsayilan olarak kalici sohbet hafizasina alinmaz).
+
+MAX_ADAY = 20             # bekleyen aday tavani
+MAX_ADAY_METIN = 200
+ADAY_ETIKET = __import__("re").compile(r"\[\[\s*HAFIZA ADAYI\s*:\s*(.+?)\s*\]\]", __import__("re").I)
+SAGLIK = ("ilaç", "ilac", "doz", "tahlil", "teşhis", "teshis", "hastalı", "hastali", "tansiyon",
+          "reçete", "recete", "depresyon", "kilo", "şeker has", "seker has", "ağrı", "agri", "ameliyat")
+
+
+def aday_ayikla(metin):
+    """Model cevabindaki [[HAFIZA ADAYI: …]] satirlarini ayiklar.
+    Doner: (kullaniciya gidecek temiz metin, aday metinleri). Etiket
+    — aday reddedilse bile — ASLA kullaniciya gitmez."""
+    ham = str(metin or "")
+    adaylar = [m.strip() for m in ADAY_ETIKET.findall(ham) if m.strip()]
+    temiz = ADAY_ETIKET.sub("", ham)
+    temiz = "\n".join(sat.rstrip() for sat in temiz.splitlines()).strip()
+    return temiz, adaylar
+
+
+def aday_ekle(con, text, user="ben", scope="all", now=None):
+    """Modelin onerdigi hafiza — YALNIZ aday olarak yazilir."""
+    metin = " ".join(str(text or "").split())
+    if not metin:
+        return {"ok": False, "reason": "empty", "note": "Aday boş."}
+    if len(metin) > MAX_ADAY_METIN:
+        return {"ok": False, "reason": "long", "note": "Aday fazla uzun."}
+    if scope not in SCOPES:
+        return {"ok": False, "reason": "scope", "note": "Bilinmeyen hafıza kapsamı."}
+    kucuk = metin.lower()
+    if any(k in kucuk for k in SAGLIK):
+        return {"ok": False, "reason": "saglik", "note": "Sağlık bilgisi hafıza adayı olmaz."}
+    ayni = con.execute("SELECT id FROM memories WHERE user=? AND lower(text)=? "
+                       "AND state IN ('active','aday','reddedildi')", (user, kucuk)).fetchone()
+    if ayni:
+        return {"ok": False, "reason": "tekrar", "note": "Bu bilgi zaten hafızada ya da daha önce reddedildi."}
+    bekleyen = con.execute("SELECT COUNT(*) FROM memories WHERE user=? AND state='aday'",
+                           (user,)).fetchone()[0]
+    if bekleyen >= MAX_ADAY:
+        return {"ok": False, "reason": "dolu", "note": "Bekleyen %d aday var; önce onlara bak." % MAX_ADAY}
+    cur = con.execute("INSERT INTO memories(user,scope,text,source,state,created_at,katman)"
+                      " VALUES (?,?,?,'model','aday',?,'sohbet')", (user, scope, metin, _simdi(now)))
+    return {"ok": True, "id": cur.lastrowid, "text": metin}
+
+
+def adaylar(con, user="ben"):
+    return [dict(r) for r in con.execute(
+        "SELECT id,scope,text,created_at FROM memories WHERE user=? AND state='aday' "
+        "ORDER BY id", (user,)).fetchall()]
+
+
+def aday_onayla(con, id_, user="ben", now=None):
+    """Kullanicinin onayi: aday kalici olur. Kaynak kullanicidir (onaylayan)."""
+    at = _simdi(now)
+    cur = con.execute("UPDATE memories SET state='active',source='kullanici',onaylandi_at=? "
+                      "WHERE id=? AND user=? AND state='aday'", (at, int(id_), user))
+    return {"ok": cur.rowcount == 1, "id": int(id_),
+            "note": "Hafızaya alındı." if cur.rowcount else "Bekleyen aday bulunamadı."}
+
+
+def aday_reddet(con, id_, user="ben", now=None):
+    cur = con.execute("UPDATE memories SET state='reddedildi',forgotten_at=? "
+                      "WHERE id=? AND user=? AND state='aday'", (_simdi(now), int(id_), user))
+    return {"ok": cur.rowcount == 1, "id": int(id_),
+            "note": "Aday silindi; bu bilgi hafızaya alınmadı." if cur.rowcount else "Bekleyen aday bulunamadı."}
+
+
+ADAY_LISTE = ("adaylar", "hafıza adayları", "hafiza adaylari")
+
+
 def command(con, text, user="ben"):
     """Yalniz acik hafiza komutlarini isler; serbest cumleyi tahmin etmez.
     Dil, modullerle aynidir (brand/ortak/hafiza.js)."""
     ham = str(text or "").strip()
     kucuk = ham.lower().replace("i̇", "i")
+    if kucuk.rstrip("?!. ") in ADAY_LISTE:
+        ad = adaylar(con, user)
+        return {"handled": True, "text": "\n".join("aday %d · %s" % (a["id"], a["text"]) for a in ad)
+                + ("\n«aday N kaydet» ya da «aday N sil» yaz." if ad else "")
+                if ad else "Bekleyen hafıza adayı yok."}
+    p = kucuk.split()
+    if len(p) == 3 and p[0] == "aday" and p[1].lstrip("#").isdigit() and p[2] in ("kaydet", "sil"):
+        n = int(p[1].lstrip("#"))
+        r = aday_onayla(con, n, user) if p[2] == "kaydet" else aday_reddet(con, n, user)
+        return {"handled": True, "text": r["note"], "result": r}
     for onek in EKLE_ONEK:
         if kucuk.startswith(onek):
             r = add(con, ham[len(onek):].strip(), user=user)

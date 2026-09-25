@@ -404,6 +404,16 @@ def coklu_devret(con, cfg, metin, parca, now=None, kanal=None, hedef=None):
     return "\n".join([bas] + satir + son)
 
 
+# Model hafizaya YAZAMAZ (AGENTS §1.1); yalniz aday birakabilir. Aday
+# kullanicinin kendi soyledigi kalici bir tercih ya da bilgidir — modelin
+# yorumu, tahmini ya da saglik bilgisi degil. Kod ayrica denetler.
+HAFIZA_ADAYI_KURALI = (
+    "\n\nHAFIZA: Kalıcı hafızaya sen yazamazsın. Kullanıcı bu mesajda KENDİSİ hakkında "
+    "kalıcı bir tercih ya da bilgi söylediyse (örneğin «sabahları çalışırım»), cevabının EN "
+    "SONUNA tek satır ekleyebilirsin: [[HAFIZA ADAYI: <tek kısa cümle>]]. Kullanıcı onaylamadan "
+    "kaydedilmez. Sağlık bilgisi, senin yorumun ve tahminin aday olmaz; emin değilsen ekleme.")
+
+
 def _yedek_metin(r, yedek):
     """Model konusamadiginda donecek SOHBET cevabi.
 
@@ -610,7 +620,7 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         bg += ("\nKullanıcı hakkında hatırlananlar (etiketiyle; «tahmin» kesin "
                "değildir, «senin sözün» kullanıcının kendi cümlesidir; hafızaya "
                "sen yazamazsın):\n" + hb)
-    sistem = sistem_metni(gorevli, bg)
+    sistem = sistem_metni(gorevli, bg) + HAFIZA_ADAYI_KURALI
     mesajlar = list(gecmis or []) + [{"role": "user", "content": metin}]
 
     r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
@@ -634,7 +644,18 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                 "text": govde, "agent": gorevli,
                 "ai": {"ok": False, "reason": r.get("reason"),
                        "note": r.get("note")}}
-    govde = r["text"]
+    # Hafiza adayi (core/memory.py): model yalniz ADAY birakir; etiket
+    # kullaniciya gitmez, aday kullanici onaylayana dek baglama girmez.
+    govde, oneriler = memory.aday_ayikla(r["text"])
+    yeni_aday = []
+    for o in oneriler[:1]:
+        a = memory.aday_ekle(con, o, user=user, scope="all")
+        if a["ok"]:
+            yeni_aday.append(a)
+    if yeni_aday:
+        a = yeni_aday[0]
+        govde += ("\n\n(Hafıza adayı: «%s». Kalıcı olsun istersen «aday %d kaydet», "
+                  "istemezsen «aday %d sil» yaz; HKM › Profil'den de onaylanır.)" % (a["text"], a["id"], a["id"]))
     if r.get("truncated"):
         # Telegram'da yan not yeri yoktur: metnin KENDISI soyler.
         # Kisaltilmis bir cevabi tam gibi sunmak, kullaniciya eksik
