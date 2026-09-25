@@ -36,6 +36,8 @@ sürdürüyorsun. Aşağıdaki sırayı izle; her iş ayrı commit, `[T] …`, d
 5. **167 ana ekran bileşeni:** tarayıcı uygulaması (PWA) için gerçek widget yolu YOK. Yapılabilen:
    `navigator.setAppBadge(n)` (bekleyen onay sayısı; destek yoksa sessiz). Kullanıcıya dürüstçe
    «widget PWA'da mümkün değil, rozet yapıldı» denecek.
+> **6 · 7 · 8 → K (kullanıcı, 2026-09-25 17:30).** T bu üçüne dokunmaz; ayrıntı EKIP-DURUM «İŞ BÖLÜMÜ DEĞİŞTİ».
+
 6. **HKM onaylı hafıza adayı:** `memories` tablosuna doğrudan yazmak yerine aday; kullanıcı
    onaylayınca kalıcı (`HKM/core/memory.py`). Önce test.
 7. **Çizicisi hazır, verisi kaydedilmeyen kartlar:** SPİ 081 082 083 087 · ESP 095 099 103
