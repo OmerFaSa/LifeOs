@@ -275,11 +275,15 @@ function topla(arg){
     return out;
   };
 
+  /* Sayfa başı (başlık + ekranın `actions()` eylemleri) #main'in kardeşidir
+     ama EKRANINDIR, kabuğun değil: oraya taşınan bir seçici (ESP Dil ve
+     Merdiven, V5 düzeni) ekranın alanı olarak sayılır. */
   const alanlar = [];
-  main.querySelectorAll('input, select, textarea').forEach(el => {
+  const alanKoku = [main].concat(Array.from(document.querySelectorAll('.sayfabasi')).filter(b => !main.contains(b)));
+  alanKoku.forEach(kok => kok.querySelectorAll('input, select, textarea').forEach(el => {
     const ad = el.id || el.name || el.dataset.key || el.dataset.field || el.dataset.change || '';
     if(ad && alanlar.indexOf(ad) < 0) alanlar.push(ad);
-  });
+  }));
 
   const oz = [];
   document.querySelectorAll('[data-oz]').forEach(el => {

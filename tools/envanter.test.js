@@ -50,7 +50,17 @@ const DURUMLAR = [
     if(!ok) kirmizi++;
     console.log((ok ? '  ✓ ' : '  ✕ ') + d.ad + (ok ? '' : ' (gelen ' + gelen + ')'));
   }
+  /* Sayfa başı #main'in kardeşidir ama ekranındır: oradaki seçici ekranın
+     alanı sayılır; kabuktaki (üst çubuk) alan sayılmaz. */
+  await p.setContent('<header class="ust"><input id="ust-ara"></header><div class="sayfa">'
+    + '<div class="sayfabasi"><select data-change="deck-lang"></select></div>'
+    + '<main id="main"><input id="govde-alan"></main></div>');
+  const a = (await p.evaluate(topla, { SEKME, SEKME_GRUBU })).alanlar;
+  const alanOk = a.indexOf('deck-lang') >= 0 && a.indexOf('govde-alan') >= 0 && a.indexOf('ust-ara') < 0;
+  if(!alanOk) kirmizi++;
+  console.log((alanOk ? '  ✓ ' : '  ✕ ') + 'sayfa başındaki seçici ekranın alanıdır; üst çubuk değildir'
+    + (alanOk ? '' : ' (gelen ' + a.join(', ') + ')'));
   await b.close();
-  console.log(kirmizi ? '\n' + kirmizi + ' durum kırmızı.' : '\nÖlçü testi temiz — ' + DURUMLAR.length + ' durum.');
+  console.log(kirmizi ? '\n' + kirmizi + ' durum kırmızı.' : '\nÖlçü testi temiz — ' + (DURUMLAR.length + 1) + ' durum.');
   process.exit(kirmizi ? 1 : 0);
 })().catch(e => { console.error('Koşum hatası:', e && e.stack || e); process.exit(2); });

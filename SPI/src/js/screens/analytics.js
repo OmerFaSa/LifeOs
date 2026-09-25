@@ -68,8 +68,8 @@ SP.Screens.analytics = (function(){
               { data:pairs.map(p => p[0]) },
               { data:pairs.map(p => p[1]), accent:true },
             ], { height:170, area:false }))}
-            ${UI.legend([{ label:seriesLabel(a), color:'var(--primary)' },
-              { label:seriesLabel(b), color:'var(--accent)' }])}`)}
+            ${raw(UI.legend([{ label:seriesLabel(a), color:'var(--primary)' },
+              { label:seriesLabel(b), color:'var(--accent)' }]))}`)}
           ${when(!c.ok, () => K.Notice({ tone:'info',
             body:'Ortak gün sayısı yetersiz (' + c.n + '/' + SP.Calc.MIN_PAIRS + '). '
               + 'İki ölçüm de aynı günlerde girilmiş olmalı.' }))}

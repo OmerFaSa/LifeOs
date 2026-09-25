@@ -12,7 +12,7 @@ R.Screens = R.Screens || {};
 
 R.Screens.today = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
-  const { html, raw, when, map } = R.h;
+  const { html, raw, when, map, cls } = R.h;
   const c = R.C;
 
   function todayDoc(){ return S.days[U.todayISO()]; }

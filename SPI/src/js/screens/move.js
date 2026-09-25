@@ -81,8 +81,10 @@ SP.Screens.move = (function(){
             bands:SP.READINESS_BANDS.map(b => b.min).filter(x => x > 0) }))}
           <p class="grow small" style="min-width:210px">${r.band.order}</p>
         </div>`)}
-        ${map(rx.reasons, x => K.Notice({ tone:x.kind === 'muted' ? 'info' : x.kind,
-          body:(r.ok && x.id === 'readiness') ? x.short : x.text }))}
+        <!-- toparlanma gerekcesi gostergenin yaninda yaziyor; ayni cumle
+             bir de uyari kutusunda tekrar edilmez -->
+        ${map(rx.reasons.filter(x => !(r.ok && x.id === 'readiness')),
+          x => K.Notice({ tone:x.kind === 'muted' ? 'info' : x.kind, body:x.text }))}
         ${when(rx.kind === 'rest', () => K.Notice({ tone:'info',
           body:'Bu bir geri adım değil, planın parçası. Asgari gün yine geçerli: '
             + SP.LOAD_RULES.minDay.minutes + ' dakika yürüyüş.' }))}`,

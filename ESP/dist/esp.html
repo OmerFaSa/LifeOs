@@ -4982,27 +4982,86 @@ body.is-dragging .drop.is-over{
 .site--v5 .nextup__body, .kahraman .nextup__body{ flex:1 1 240px; min-width:0; }
 
 /* ================================================================
-   v5 · RAF DÜZENİ. Defter satırları alt alta uzamaz: her satır bir
-   kutudur ve kutular yan yana RAF olur. Künye kutunun başlığıdır; geniş
-   içerik (tablo, grafik, uzun form, geniş satır) rafın bütün enini alır.
+   v5 · RAF DÜZENİ — DÜZENLİ RAF (kullanıcı, 2026-09-25: «kaos, düzeni
+   yok, ne olduğu anlaşılmıyor»). Önceki raf üç, dört sütuna kendiliğinden
+   akıyor, kutular kendi boyunda kalıyor (yanında delik), «dense» sırayı
+   karıştırıyor, her kutu 560 px'te içinde kayıyordu (iç içe kaydırma) ve
+   tablolar dar kutuya sıkışıp yana kayıyordu. Şimdi altı kural:
+     1. Raf en çok İKİ eşit sütundur; dar ekranda bir.
+     2. Aynı raftaki kutular AYNI boydadır: rafın üst ve alt kenarı düzdür.
+     3. Okuma sırası korunur (dense yok).
+     4. Tablo, form ızgarası, grafik, seçim kartları rafın bütün enini alır.
+     5. Kutunun içinde kaydırma yok: sayfanın tek kaydırması vardır.
+     6. Raftaki son tek kutu bütün eni alır (yanında boş delik kalmaz).
    Hiçbir satır gizlenmez; yalnız yerleşim değişir.
    ================================================================ */
-.site--v5 .ledger{ display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-  gap:16px; align-items:start; grid-auto-flow:row dense; }
-.site--v5 .ledger > .lrow, .site--v5 .ledger > .ledger__item{ min-width:0; margin:0; padding:16px 18px;
-  border:1px solid var(--border); border-radius:14px; background:var(--surface); }
-.site--v5 .ledger > .lrow:first-child{ padding-top:16px; }
-.site--v5 .ledger > .lrow:last-child{ padding-bottom:16px; }
-.site--v5 .ledger > .lrow--wide,
-.site--v5 .ledger > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ogrid, .grid, .ledger){
-  grid-column:1 / -1; }
+.site--v5 .ledger{ display:grid; grid-template-columns:minmax(0, 1fr); gap:16px; align-items:stretch; }
+@media (min-width:1100px){
+  .site--v5 .ledger{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+}
+.site--v5 .ledger > .lrow, .site--v5 .ledger > .ledger__item,
+.site--v5 .ledger > .lband > .lrow, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow{
+  min-width:0; margin:0; padding:18px 20px; border:1px solid var(--border); border-radius:14px;
+  background:var(--surface); display:flex; flex-direction:column; gap:12px; }
+.site--v5 .ledger > .lrow:first-child{ padding-top:18px; }
+.site--v5 .ledger > .lrow:last-child{ padding-bottom:18px; }
 .site--v5 .ledger > .lrow.kahraman{ grid-column:1 / -1; padding:0; border:0; background:none; }
+.site--v5 .ledger .lrow > .lrow__main{ flex:1 1 auto; min-width:0; }
+/* Künye satırı kutunun enini aşmaz: içindeki kayan şerit (SPİ gün
+   gezgini, 14 gün) künyeyi genişletip sayfayı yana kaydırıyordu (390 px). */
+.site--v5 .ledger .lrow > .lrow__side, .site--v5 .ledger .lrow > .lrow__side > .lrow__act{ max-width:100%; min-width:0; }
 .site--v5 .ledger > .lrow .lrow__main > * + *{ margin-top:12px; }
+
+/* Bant ve yığın rafta çizilmez; içlerindeki her satır rafın bir kutusudur. */
+.site--v5 .ledger > .lband, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs){ display:contents; }
+.site--v5 .ledger > .lband > :not(.lrow):not(.stack):not(.stack-sm):not(.stack-xs),
+.site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > :not(.lrow){ grid-column:1 / -1; min-width:0; }
+
+/* 4 · Geniş içerik rafın bütün enini alır. */
+.site--v5 :is(.ledger > .lrow, .ledger > .lband > .lrow, .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow):is(
+  .lrow--wide,
+  :has(table, canvas, svg.chart, .chart, .grafik, .cardsgrid, .formgrid, .grid-form, .cols-2, .cols-3, .cols-4,
+    .picks, .desks, .heatmap, .temasec, .ledger, .ogrid, .grid)){ grid-column:1 / -1; }
+
+/* 6 · Eşi olmayan yarım kutu yalnız kalmaz: iki geniş kutunun arasında ya
+   da rafın sonunda tek kalan kutu bütün eni alır. Eşleştirmeyi çizimden
+   sonra hareket.js yapar (bant ve yığınlar sıra sayımını bozduğu için CSS
+   bunu bilemez) ve kutuya .raf-tek koyar. */
+.site--v5 .ledger .raf-tek{ grid-column:1 / -1; }
+
+/* Uzun kutu (hareket.js): --raf-kes boyunda kesilir (tek kutuda 560 px,
+   çiftte eşinin boyu), alt kenarı solar, altında «Tamamını göster». İç
+   kaydırma değildir; sayfanın tek kaydırması kalır. Solma katmanı düğme
+   şeridini de örter — kesilen satır düğmenin altından sızmaz. */
+.site--v5 .ledger .raf-uzun{ position:relative; max-height:calc(var(--raf-kes, 560px) + 56px); overflow:hidden; padding-bottom:56px; }
+.site--v5 .ledger .raf-uzun::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:128px; pointer-events:none;
+  z-index:1; background:linear-gradient(to bottom, transparent, var(--surface) 72px); border-radius:0 0 13px 13px; }
+.site--v5 .ledger .raf-uzun.raf-acik{ max-height:none; overflow:visible; }
+.site--v5 .ledger .raf-uzun.raf-acik::after{ display:none; }
+.site--v5 .raf-ac{ position:absolute; z-index:2; left:20px; right:20px; bottom:12px; min-height:34px; border:1px solid var(--border);
+  border-radius:8px; background:var(--surface); color:var(--text); font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.site--v5 .raf-ac:hover{ border-color:var(--border-strong); }
+.site--v5 .raf-acik > .raf-ac{ position:static; margin-top:12px; width:100%; }
+
+/* Sayı çifti (.pair içinde .sidestat): dar kutuda dört sayı alt alta
+   ve aralıklı dizilmez; iki sütun, sıkı aralık. */
+.site--v5 .ledger .pair:has(> div > .sidestat){ grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:4px 24px; }
+
+/* Kutu etiketiyle aynı adı taşıyan bölüm başlığı (hareket.js ikizBaslik)
+   yalnız ekran okuyucuya kalır; boş kalan başlık satırı yer kaplamaz. */
+.site--v5 .ledger .section-title:has(> h2.sr-only:only-child){ display:contents; }
+
 /* İç içe defter: kutunun içindeki ikinci defter kutu çizmez, satırdır. */
 .site--v5 .ledger .ledger{ display:flex; flex-direction:column; gap:0; }
-.site--v5 .ledger .ledger > .lrow{ border:0; border-top:1px solid var(--border); border-radius:0; padding:12px 0;
-  background:none; }
+.site--v5 .ledger .ledger > .lrow{ display:block; border:0; border-top:1px solid var(--border); border-radius:0;
+  padding:12px 0; background:none; }
 .site--v5 .ledger .ledger > .lrow:first-child{ border-top:0; padding-top:0; }
+
+/* 5 · İç kaydırma yok. Çok geniş bir tablo (yalnız o) kendi kabında yana kayar. */
+.site--v5 .ledger .lrow > .lrow__main{ max-height:none; overflow:visible; }
+.site--v5 .ledger .lrow__main table{ width:100%; }
+.site--v5 .ledger .lrow__main :is(.tablewrap, .table-wrap, .tbl){ overflow-x:auto; }
+
 /* Sayfa bölümleri de rafın katıdır: aralarında 32 px, başlık 16 px. */
 .site--v5 .sayfabolum + .sayfabolum{ margin-top:32px; }
 .site--v5 .sayfabolum__ad{ font-size:16px; margin-bottom:12px; }
@@ -5013,22 +5072,6 @@ body.is-dragging .drop.is-over{
 .bolumcubugu--sayfa .bolumcubugu__ad.is-on{ color:var(--text); font-weight:600; }
 .bolumcubugu--sayfa .bolumcubugu__ad.is-on::after{ content:''; position:absolute; left:10px; right:10px; bottom:-1px;
   height:2px; border-radius:1px; background:var(--text); }
-
-/* Raf: AYS'de Grid/Span/Stack = defter/bant/yığın. Bant ve yığın rafta
-   çizilmez (display:contents); içlerindeki her satır rafın bir kutusudur. */
-.site--v5 .ledger > .lband, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs){ display:contents; }
-.site--v5 .ledger > .lrow, .site--v5 .ledger > .lband > .lrow, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow{ min-width:0; margin:0; padding:16px 18px; border:1px solid var(--border); border-radius:14px;
-  background:var(--surface); }
-.site--v5 .ledger > .lrow.lrow--wide, .site--v5 .ledger > .lband > .lrow.lrow--wide, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow.lrow--wide,
-.site--v5 .ledger > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger), .site--v5 .ledger > .lband > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger), .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger){ grid-column:1 / -1; }
-.site--v5 .ledger > .lband > :not(.lrow):not(.stack):not(.stack-sm):not(.stack-xs),
-.site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > :not(.lrow){ grid-column:1 / -1; min-width:0; }
-/* Kutu sonsuza uzamaz: uzun tablo ya da liste kutunun İÇİNDE kayar,
-   tablo başlığı yapışır. Satırların hepsi yerinde; yalnız sayfa kısalır. */
-.site--v5 .ledger .lrow:not(.kahraman) > .lrow__main{ max-height:560px; overflow:auto; overscroll-behavior:contain;
-  scrollbar-width:thin; }
-.site--v5 .ledger .ledger .lrow > .lrow__main{ max-height:none; overflow:visible; }
-.site--v5 .ledger .lrow__main thead th{ position:sticky; top:0; background:var(--surface); z-index:1; }
 
 /* v5 · DURUM KARTLARI: büyük sayı, küçük birim, yön rozeti, tek satır not. */
 .bugun__alan > .bugun__genis{ flex-basis:100%; min-width:0; }
@@ -9994,7 +10037,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'02bee8a', at:'2026-09-24 23:31', dirty:true };
+ESP.BUILD = { id:'81e45dc', at:'2026-09-25 00:48', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13300,6 +13343,7 @@ window.LIFEOS.HAREKET = (function(){
 
     tekCanli(kok);
     baslikKopyala(kok);
+    raf(kok);
     if(!az){
       const ust = kok.querySelector('.ust');
       if(ust && ilkCizim) ust.classList.add('h-ilk');
@@ -13356,6 +13400,131 @@ window.LIFEOS.HAREKET = (function(){
     requestAnimationFrame(() => requestAnimationFrame(() => { h.classList.add('is-kapali'); }));
     h.addEventListener('transitionend', e => { if(e.propertyName === 'height') bitir(); });
     setTimeout(bitir, 700);
+  }
+
+  /* ---------------------------------------------------------- raf
+     v5 raf düzeni (kart.css): iki eşit sütun. Yarım kutular sırayla
+     eşleşir; eşi olmayan (iki geniş kutunun arasında ya da sonda kalan)
+     .raf-tek alır ve bütün eni kaplar — rafta delik kalmaz. Bant ve yığın
+     `display:contents` olduğu için kutular düzleştirilerek sayılır. */
+  function rafKutulari(ledger){
+    const l = [];
+    Array.from(ledger.children).forEach(c => {
+      if(c.classList.contains('lband')){
+        Array.from(c.children).forEach(x => {
+          if(/\bstack(-sm|-xs)?\b/.test(x.className)) Array.from(x.children).forEach(y => l.push(y));
+          else l.push(x);
+        });
+      }else l.push(c);
+    });
+    return l;
+  }
+  /* UZUN KUTU: iç kaydırma yerine KISALT ve AÇ. Tek kaydırma sayfanın
+     kendisidir. Kutunun DOĞAL boyu ölçülür (eşine gerilmiş boyu değil):
+       - tek ya da geniş kutu UZUN_PX'i aşarsa KISA_PX'te kesilir;
+       - bir çiftte uzun olan, kısanın boyunda kesilir (en az KISA_PX) —
+         iki kutu aynı hizada biter, kısa kutunun içi boş kalmaz;
+       - çiftin ikisi de UZUN_PX'i aşarsa ikisi de KISA_PX'te kesilir.
+     Kesmek en az KAZANC_PX kazandırmıyorsa kesilmez (boşuna tık yok).
+     Hiçbir satır silinmez (DOM'da, alanlar yerinde); klavye odağı kesik
+     kısma girerse kutu kendiliğinden açılır. Açılan kutu bu oturum boyunca
+     açık kalır (yeniden çizimde kapanmaz). */
+  const UZUN_PX = 1000, KISA_PX = 560, DUGME_PX = 56, KAZANC_PX = 200;
+  const acikKutular = new Set();
+  function kutuAnahtari(k){
+    const ad = k.querySelector(':scope > .lrow__side .lrow__label, .kutu__ad, .card__title, h2, h3');
+    return (location.hash || '') + '|' + (ad ? ad.textContent.trim().slice(0, 60) : '');
+  }
+  function kutuSifirla(k){
+    const eski = k.querySelector(':scope > .raf-ac');
+    if(eski) eski.remove();
+    k.classList.remove('raf-uzun', 'raf-acik');
+    k.style.removeProperty('--raf-kes');
+  }
+  function kutuKes(k, kes){
+    const anahtar = kutuAnahtari(k);
+    k.classList.add('raf-uzun');
+    k.style.setProperty('--raf-kes', Math.round(kes) + 'px');
+    if(acikKutular.has(anahtar)) k.classList.add('raf-acik');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'raf-ac';
+    const yaz = acik => {
+      b.setAttribute('aria-expanded', acik ? 'true' : 'false');
+      b.textContent = acik ? 'Kısalt' : 'Tamamını göster';
+    };
+    yaz(k.classList.contains('raf-acik'));
+    b.addEventListener('click', () => {
+      const acik = !k.classList.contains('raf-acik');
+      k.classList.toggle('raf-acik', acik);
+      acik ? acikKutular.add(anahtar) : acikKutular.delete(anahtar);
+      yaz(acik);
+      if(!acik) k.scrollIntoView({ block:'nearest' });
+    });
+    k.addEventListener('focusin', e => {
+      if(e.target === b || k.classList.contains('raf-acik') || !k.classList.contains('raf-uzun')) return;
+      const r = e.target.getBoundingClientRect(), kr = k.getBoundingClientRect();
+      if(r.bottom > kr.top + kes){ k.classList.add('raf-acik'); acikKutular.add(anahtar); yaz(true); }
+    });
+    k.appendChild(b);
+  }
+  /* Kart ızgarası (masalar, seçim kartları) ve form kesilmez: ızgara
+     sayfanın kendisidir, yarısını saklamak onu bozar; formun alanı saklanmaz. */
+  const KESILMEZ = '.desks, .cardsgrid, .ogrid, .picks, form, .formgrid, .grid-form, [data-raf-tam]';
+  function kesilmez(k){ return k.matches('[data-raf-tam]') || !!k.querySelector(KESILMEZ); }
+  /* Kutunun etiketi ile içindeki bölüm başlığı aynı adı taşıyorsa başlık
+     gözden gizlenir (ekran okuyucu için kalır): aynı ad üst üste iki kez
+     yazılmaz. */
+  function ikizBaslik(k){
+    const et = k.querySelector(':scope > .lrow__side .lrow__label');
+    if(!et) return;
+    const ad = Array.from(et.childNodes).filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
+    if(!ad) return;
+    k.querySelectorAll(':scope > .lrow__main .section-title > h2').forEach(h => {
+      if(h.textContent.trim() === ad) h.classList.add('sr-only');
+    });
+  }
+  /* Kesme kararı saf bir işlev: boylar girer, kesim boyları çıkar (test edilir). */
+  function kesimler(boy, esBoy){
+    if(esBoy == null) return boy > UZUN_PX ? KISA_PX : null;
+    if(boy <= esBoy) return esBoy > UZUN_PX && boy > UZUN_PX ? KISA_PX : null;
+    if(esBoy > UZUN_PX) return KISA_PX;
+    const kes = Math.max(KISA_PX, esBoy - DUGME_PX);
+    return boy - (kes + DUGME_PX) >= KAZANC_PX ? kes : null;
+  }
+  function raf(kok){
+    const ledgerler = kok && kok.matches && kok.matches('.ledger') ? [kok] : [];
+    sec(kok, '.site--v5 .ledger').concat(ledgerler).forEach(ledger => {
+      if(ledger.parentElement && ledger.parentElement.closest('.ledger')) return;
+      const kutular = rafKutulari(ledger);
+      kutular.forEach(k => { k.classList.remove('raf-tek'); kutuSifirla(k); ikizBaslik(k); });
+      const ikiSutun = getComputedStyle(ledger).gridTemplateColumns.trim().split(/\s+/).length > 1;
+      const ciftler = [];
+      let bekleyen = null;
+      kutular.forEach(k => {
+        const cs = getComputedStyle(k);
+        if(cs.display === 'none') return;
+        const genis = cs.gridColumnEnd === '-1' || /span/.test(cs.gridColumnEnd);
+        if(genis){ if(bekleyen) bekleyen.classList.add('raf-tek'); bekleyen = null; ciftler.push([k]); return; }
+        if(bekleyen){ ciftler[ciftler.length - 1].push(k); bekleyen = null; }
+        else { bekleyen = k; ciftler.push([k]); }
+      });
+      if(bekleyen) bekleyen.classList.add('raf-tek');
+      /* doğal boy: eşine gerilmeden ölç (yaz hepsini, sonra oku — tek yerleşim) */
+      const olc = ciftler.flat().filter(k => !k.classList.contains('kahraman'));
+      olc.forEach(k => { k.style.alignSelf = 'start'; });
+      const boy = new Map(olc.map(k => [k, k.offsetHeight]));
+      olc.forEach(k => { k.style.removeProperty('align-self'); });
+      ciftler.forEach(c => {
+        const es = ikiSutun && c.length === 2;
+        c.forEach((k, i) => {
+          if(!boy.has(k) || !boy.get(k) || kesilmez(k)) return;
+          const esi = es ? c[1 - i] : null;
+          const kes = kesimler(boy.get(k), esi && boy.has(esi) ? boy.get(esi) : null);
+          if(kes != null) kutuKes(k, kes);
+        });
+      });
+    });
   }
 
   /* ---------------------------------------------------------- 12 */
@@ -13521,7 +13690,7 @@ window.LIFEOS.HAREKET = (function(){
     window.addEventListener('scroll', onizleKapat, true);
   }
 
-  return { once, sonra, tekCanli, baslikKopyala, kaynak, gecis, halka, onizleIcerik, odakCik, kur,
+  return { once, sonra, tekCanli, baslikKopyala, raf, kesimler, kaynak, gecis, halka, onizleIcerik, odakCik, kur,
     EN_COK_KAPANAN };
 })();
 
@@ -38393,6 +38562,8 @@ ESP.C = (function(){
           else btn.removeAttribute('aria-current');
         });
       }
+      /* Gizli kattaki kutular ölçülemezdi; kat açılınca raf yeniden kurulur. */
+      if(window.LIFEOS && window.LIFEOS.HAREKET && window.LIFEOS.HAREKET.raf) window.LIFEOS.HAREKET.raf(el);
     }
     let az = true;
     try{ az = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
@@ -44247,12 +44418,9 @@ ESP.Screens.lang = (function(){
 
   function render(){
     const d = ESP.SRS.deckStatus(aktifDil());
+    /* Dil seçici sayfa başında durur (actions): başlığın ve sekmelerin
+       arasında tek başına asılı bir kutu ne işe yaradığını söylemiyordu. */
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        actions:K.Select({ value:aktifDil(), change:'deck-lang', size:'sm',
-          aria:'Çalışılan dil',
-          options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }),
-      }))}
       ${K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:'Dil bölümleri', tabs:TABS,
         govde:GOVDE, sayi:{ calis:d.due || null } }))}`);
   }
@@ -44425,7 +44593,11 @@ ESP.Screens.lang = (function(){
       ];
     },
     subtitle(){ return (ESP.LANG_BY_ID[aktifDil()] || {}).label || aktifDil(); },
-    actions(){ return ''; },
+    actions(){
+      return String(K.Select({ value:aktifDil(), change:'deck-lang', size:'sm',
+        aria:'Çalışılan dil',
+        options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }));
+    },
     render, afterRender, handle, change,
   };
 })();
@@ -45973,11 +46145,8 @@ ESP.Screens.ladder = (function(){
      disiplin seçici yol ve tespit içindir, hep görünür. */
   function render(){
     const disc = S.ui.curDisc || 'lang';
+    /* disiplin seçici sayfa başındadır (actions), bölümlerin üstünde asılı durmaz */
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        actions:K.Select({ id:'lad-disc', value:disc, change:'pick-disc-sel', aria:'Disiplin seç',
-          options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }),
-      }))}
       ${K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:'Merdiven bölümleri', tabs:TABS,
         govde:{ ozet:ozetRows, yol:() => yolRows(disc), tespit:tespitRows } }))}`);
   }
@@ -46044,7 +46213,11 @@ ESP.Screens.ladder = (function(){
       const ov = C().overall();
       return ov.cert === 'missing' ? 'ölçüm yok' : ov.level.label;
     },
-    actions(){ return ''; },
+    actions(){
+      return String(K.Select({ id:'lad-disc', value:S.ui.curDisc || 'lang', change:'pick-disc-sel',
+        aria:'Disiplin seç', size:'sm',
+        options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }));
+    },
     render, afterRender, handle, change,
   };
 })();
@@ -47802,8 +47975,10 @@ ESP.Screens.office = (function(){
              + 'sahibine yönlendirir, cevap uydurmaz.',
           wide:true,
           /* Masa kartlarinin basligi h3'tur; araya bir h2 girmezse baslik
-             sirasi h1'den h3'e atlar ve ekran okuyucu bir seviye kaybeder. */
-          body:html`${K.SectionTitle('Uzman masaları')}
+             sirasi h1'den h3'e atlar ve ekran okuyucu bir seviye kaybeder.
+             h2 gozle gorunmez: kutunun etiketi zaten «Uzman masalari» der,
+             ayni ad iki kez ust uste yazilmaz. */
+          body:html`<h2 class="sr-only">Uzman masaları</h2>
             <div class="desks">${map(uzmanlar, deskCard)}</div>`,
         }),
 
@@ -51458,6 +51633,8 @@ ESP.App = (function(){
     });
   }
 
+  /* Gün şeridi sayfaya çizilmiyor (kullanıcı, 2026-09-25: «o yukarıdaki gün
+     çizgisini kaldır»). Kalan iş sayısı Bugün'ün Şimdi alanında durur. */
   function gunSeridiHtml(){
     const bloklar = gunDisiplinleri(U.todayISO());
     const biten = bloklar.filter(b => b.durum === 'bitti').length;
@@ -51765,7 +51942,6 @@ ESP.App = (function(){
             <div class="wrapc sayfa">
               ${raw(safe(sayacHtml))}
               ${raw(safe(() => sayfaBasiHtml(sc)))}
-              ${when(sc.id === 'today', () => raw(safe(gunSeridiHtml)))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>
           </div>

@@ -930,27 +930,86 @@
 .site--v5 .nextup__body, .kahraman .nextup__body{ flex:1 1 240px; min-width:0; }
 
 /* ================================================================
-   v5 · RAF DÜZENİ. Defter satırları alt alta uzamaz: her satır bir
-   kutudur ve kutular yan yana RAF olur. Künye kutunun başlığıdır; geniş
-   içerik (tablo, grafik, uzun form, geniş satır) rafın bütün enini alır.
+   v5 · RAF DÜZENİ — DÜZENLİ RAF (kullanıcı, 2026-09-25: «kaos, düzeni
+   yok, ne olduğu anlaşılmıyor»). Önceki raf üç, dört sütuna kendiliğinden
+   akıyor, kutular kendi boyunda kalıyor (yanında delik), «dense» sırayı
+   karıştırıyor, her kutu 560 px'te içinde kayıyordu (iç içe kaydırma) ve
+   tablolar dar kutuya sıkışıp yana kayıyordu. Şimdi altı kural:
+     1. Raf en çok İKİ eşit sütundur; dar ekranda bir.
+     2. Aynı raftaki kutular AYNI boydadır: rafın üst ve alt kenarı düzdür.
+     3. Okuma sırası korunur (dense yok).
+     4. Tablo, form ızgarası, grafik, seçim kartları rafın bütün enini alır.
+     5. Kutunun içinde kaydırma yok: sayfanın tek kaydırması vardır.
+     6. Raftaki son tek kutu bütün eni alır (yanında boş delik kalmaz).
    Hiçbir satır gizlenmez; yalnız yerleşim değişir.
    ================================================================ */
-.site--v5 .ledger{ display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 340px), 1fr));
-  gap:16px; align-items:start; grid-auto-flow:row dense; }
-.site--v5 .ledger > .lrow, .site--v5 .ledger > .ledger__item{ min-width:0; margin:0; padding:16px 18px;
-  border:1px solid var(--border); border-radius:14px; background:var(--surface); }
-.site--v5 .ledger > .lrow:first-child{ padding-top:16px; }
-.site--v5 .ledger > .lrow:last-child{ padding-bottom:16px; }
-.site--v5 .ledger > .lrow--wide,
-.site--v5 .ledger > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ogrid, .grid, .ledger){
-  grid-column:1 / -1; }
+.site--v5 .ledger{ display:grid; grid-template-columns:minmax(0, 1fr); gap:16px; align-items:stretch; }
+@media (min-width:1100px){
+  .site--v5 .ledger{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+}
+.site--v5 .ledger > .lrow, .site--v5 .ledger > .ledger__item,
+.site--v5 .ledger > .lband > .lrow, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow{
+  min-width:0; margin:0; padding:18px 20px; border:1px solid var(--border); border-radius:14px;
+  background:var(--surface); display:flex; flex-direction:column; gap:12px; }
+.site--v5 .ledger > .lrow:first-child{ padding-top:18px; }
+.site--v5 .ledger > .lrow:last-child{ padding-bottom:18px; }
 .site--v5 .ledger > .lrow.kahraman{ grid-column:1 / -1; padding:0; border:0; background:none; }
+.site--v5 .ledger .lrow > .lrow__main{ flex:1 1 auto; min-width:0; }
+/* Künye satırı kutunun enini aşmaz: içindeki kayan şerit (SPİ gün
+   gezgini, 14 gün) künyeyi genişletip sayfayı yana kaydırıyordu (390 px). */
+.site--v5 .ledger .lrow > .lrow__side, .site--v5 .ledger .lrow > .lrow__side > .lrow__act{ max-width:100%; min-width:0; }
 .site--v5 .ledger > .lrow .lrow__main > * + *{ margin-top:12px; }
+
+/* Bant ve yığın rafta çizilmez; içlerindeki her satır rafın bir kutusudur. */
+.site--v5 .ledger > .lband, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs){ display:contents; }
+.site--v5 .ledger > .lband > :not(.lrow):not(.stack):not(.stack-sm):not(.stack-xs),
+.site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > :not(.lrow){ grid-column:1 / -1; min-width:0; }
+
+/* 4 · Geniş içerik rafın bütün enini alır. */
+.site--v5 :is(.ledger > .lrow, .ledger > .lband > .lrow, .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow):is(
+  .lrow--wide,
+  :has(table, canvas, svg.chart, .chart, .grafik, .cardsgrid, .formgrid, .grid-form, .cols-2, .cols-3, .cols-4,
+    .picks, .desks, .heatmap, .temasec, .ledger, .ogrid, .grid)){ grid-column:1 / -1; }
+
+/* 6 · Eşi olmayan yarım kutu yalnız kalmaz: iki geniş kutunun arasında ya
+   da rafın sonunda tek kalan kutu bütün eni alır. Eşleştirmeyi çizimden
+   sonra hareket.js yapar (bant ve yığınlar sıra sayımını bozduğu için CSS
+   bunu bilemez) ve kutuya .raf-tek koyar. */
+.site--v5 .ledger .raf-tek{ grid-column:1 / -1; }
+
+/* Uzun kutu (hareket.js): --raf-kes boyunda kesilir (tek kutuda 560 px,
+   çiftte eşinin boyu), alt kenarı solar, altında «Tamamını göster». İç
+   kaydırma değildir; sayfanın tek kaydırması kalır. Solma katmanı düğme
+   şeridini de örter — kesilen satır düğmenin altından sızmaz. */
+.site--v5 .ledger .raf-uzun{ position:relative; max-height:calc(var(--raf-kes, 560px) + 56px); overflow:hidden; padding-bottom:56px; }
+.site--v5 .ledger .raf-uzun::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:128px; pointer-events:none;
+  z-index:1; background:linear-gradient(to bottom, transparent, var(--surface) 72px); border-radius:0 0 13px 13px; }
+.site--v5 .ledger .raf-uzun.raf-acik{ max-height:none; overflow:visible; }
+.site--v5 .ledger .raf-uzun.raf-acik::after{ display:none; }
+.site--v5 .raf-ac{ position:absolute; z-index:2; left:20px; right:20px; bottom:12px; min-height:34px; border:1px solid var(--border);
+  border-radius:8px; background:var(--surface); color:var(--text); font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.site--v5 .raf-ac:hover{ border-color:var(--border-strong); }
+.site--v5 .raf-acik > .raf-ac{ position:static; margin-top:12px; width:100%; }
+
+/* Sayı çifti (.pair içinde .sidestat): dar kutuda dört sayı alt alta
+   ve aralıklı dizilmez; iki sütun, sıkı aralık. */
+.site--v5 .ledger .pair:has(> div > .sidestat){ grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:4px 24px; }
+
+/* Kutu etiketiyle aynı adı taşıyan bölüm başlığı (hareket.js ikizBaslik)
+   yalnız ekran okuyucuya kalır; boş kalan başlık satırı yer kaplamaz. */
+.site--v5 .ledger .section-title:has(> h2.sr-only:only-child){ display:contents; }
+
 /* İç içe defter: kutunun içindeki ikinci defter kutu çizmez, satırdır. */
 .site--v5 .ledger .ledger{ display:flex; flex-direction:column; gap:0; }
-.site--v5 .ledger .ledger > .lrow{ border:0; border-top:1px solid var(--border); border-radius:0; padding:12px 0;
-  background:none; }
+.site--v5 .ledger .ledger > .lrow{ display:block; border:0; border-top:1px solid var(--border); border-radius:0;
+  padding:12px 0; background:none; }
 .site--v5 .ledger .ledger > .lrow:first-child{ border-top:0; padding-top:0; }
+
+/* 5 · İç kaydırma yok. Çok geniş bir tablo (yalnız o) kendi kabında yana kayar. */
+.site--v5 .ledger .lrow > .lrow__main{ max-height:none; overflow:visible; }
+.site--v5 .ledger .lrow__main table{ width:100%; }
+.site--v5 .ledger .lrow__main :is(.tablewrap, .table-wrap, .tbl){ overflow-x:auto; }
+
 /* Sayfa bölümleri de rafın katıdır: aralarında 32 px, başlık 16 px. */
 .site--v5 .sayfabolum + .sayfabolum{ margin-top:32px; }
 .site--v5 .sayfabolum__ad{ font-size:16px; margin-bottom:12px; }
@@ -961,22 +1020,6 @@
 .bolumcubugu--sayfa .bolumcubugu__ad.is-on{ color:var(--text); font-weight:600; }
 .bolumcubugu--sayfa .bolumcubugu__ad.is-on::after{ content:''; position:absolute; left:10px; right:10px; bottom:-1px;
   height:2px; border-radius:1px; background:var(--text); }
-
-/* Raf: AYS'de Grid/Span/Stack = defter/bant/yığın. Bant ve yığın rafta
-   çizilmez (display:contents); içlerindeki her satır rafın bir kutusudur. */
-.site--v5 .ledger > .lband, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs){ display:contents; }
-.site--v5 .ledger > .lrow, .site--v5 .ledger > .lband > .lrow, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow{ min-width:0; margin:0; padding:16px 18px; border:1px solid var(--border); border-radius:14px;
-  background:var(--surface); }
-.site--v5 .ledger > .lrow.lrow--wide, .site--v5 .ledger > .lband > .lrow.lrow--wide, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow.lrow--wide,
-.site--v5 .ledger > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger), .site--v5 .ledger > .lband > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger), .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow:has(canvas, .chart, .grafik, .cardsgrid, .formgrid, .ledger){ grid-column:1 / -1; }
-.site--v5 .ledger > .lband > :not(.lrow):not(.stack):not(.stack-sm):not(.stack-xs),
-.site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > :not(.lrow){ grid-column:1 / -1; min-width:0; }
-/* Kutu sonsuza uzamaz: uzun tablo ya da liste kutunun İÇİNDE kayar,
-   tablo başlığı yapışır. Satırların hepsi yerinde; yalnız sayfa kısalır. */
-.site--v5 .ledger .lrow:not(.kahraman) > .lrow__main{ max-height:560px; overflow:auto; overscroll-behavior:contain;
-  scrollbar-width:thin; }
-.site--v5 .ledger .ledger .lrow > .lrow__main{ max-height:none; overflow:visible; }
-.site--v5 .ledger .lrow__main thead th{ position:sticky; top:0; background:var(--surface); z-index:1; }
 
 /* v5 · DURUM KARTLARI: büyük sayı, küçük birim, yön rozeti, tek satır not. */
 .bugun__alan > .bugun__genis{ flex-basis:100%; min-width:0; }

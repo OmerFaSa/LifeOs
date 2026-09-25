@@ -75,6 +75,7 @@ window.LIFEOS.HAREKET = (function(){
 
     tekCanli(kok);
     baslikKopyala(kok);
+    raf(kok);
     if(!az){
       const ust = kok.querySelector('.ust');
       if(ust && ilkCizim) ust.classList.add('h-ilk');
@@ -131,6 +132,131 @@ window.LIFEOS.HAREKET = (function(){
     requestAnimationFrame(() => requestAnimationFrame(() => { h.classList.add('is-kapali'); }));
     h.addEventListener('transitionend', e => { if(e.propertyName === 'height') bitir(); });
     setTimeout(bitir, 700);
+  }
+
+  /* ---------------------------------------------------------- raf
+     v5 raf düzeni (kart.css): iki eşit sütun. Yarım kutular sırayla
+     eşleşir; eşi olmayan (iki geniş kutunun arasında ya da sonda kalan)
+     .raf-tek alır ve bütün eni kaplar — rafta delik kalmaz. Bant ve yığın
+     `display:contents` olduğu için kutular düzleştirilerek sayılır. */
+  function rafKutulari(ledger){
+    const l = [];
+    Array.from(ledger.children).forEach(c => {
+      if(c.classList.contains('lband')){
+        Array.from(c.children).forEach(x => {
+          if(/\bstack(-sm|-xs)?\b/.test(x.className)) Array.from(x.children).forEach(y => l.push(y));
+          else l.push(x);
+        });
+      }else l.push(c);
+    });
+    return l;
+  }
+  /* UZUN KUTU: iç kaydırma yerine KISALT ve AÇ. Tek kaydırma sayfanın
+     kendisidir. Kutunun DOĞAL boyu ölçülür (eşine gerilmiş boyu değil):
+       - tek ya da geniş kutu UZUN_PX'i aşarsa KISA_PX'te kesilir;
+       - bir çiftte uzun olan, kısanın boyunda kesilir (en az KISA_PX) —
+         iki kutu aynı hizada biter, kısa kutunun içi boş kalmaz;
+       - çiftin ikisi de UZUN_PX'i aşarsa ikisi de KISA_PX'te kesilir.
+     Kesmek en az KAZANC_PX kazandırmıyorsa kesilmez (boşuna tık yok).
+     Hiçbir satır silinmez (DOM'da, alanlar yerinde); klavye odağı kesik
+     kısma girerse kutu kendiliğinden açılır. Açılan kutu bu oturum boyunca
+     açık kalır (yeniden çizimde kapanmaz). */
+  const UZUN_PX = 1000, KISA_PX = 560, DUGME_PX = 56, KAZANC_PX = 200;
+  const acikKutular = new Set();
+  function kutuAnahtari(k){
+    const ad = k.querySelector(':scope > .lrow__side .lrow__label, .kutu__ad, .card__title, h2, h3');
+    return (location.hash || '') + '|' + (ad ? ad.textContent.trim().slice(0, 60) : '');
+  }
+  function kutuSifirla(k){
+    const eski = k.querySelector(':scope > .raf-ac');
+    if(eski) eski.remove();
+    k.classList.remove('raf-uzun', 'raf-acik');
+    k.style.removeProperty('--raf-kes');
+  }
+  function kutuKes(k, kes){
+    const anahtar = kutuAnahtari(k);
+    k.classList.add('raf-uzun');
+    k.style.setProperty('--raf-kes', Math.round(kes) + 'px');
+    if(acikKutular.has(anahtar)) k.classList.add('raf-acik');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'raf-ac';
+    const yaz = acik => {
+      b.setAttribute('aria-expanded', acik ? 'true' : 'false');
+      b.textContent = acik ? 'Kısalt' : 'Tamamını göster';
+    };
+    yaz(k.classList.contains('raf-acik'));
+    b.addEventListener('click', () => {
+      const acik = !k.classList.contains('raf-acik');
+      k.classList.toggle('raf-acik', acik);
+      acik ? acikKutular.add(anahtar) : acikKutular.delete(anahtar);
+      yaz(acik);
+      if(!acik) k.scrollIntoView({ block:'nearest' });
+    });
+    k.addEventListener('focusin', e => {
+      if(e.target === b || k.classList.contains('raf-acik') || !k.classList.contains('raf-uzun')) return;
+      const r = e.target.getBoundingClientRect(), kr = k.getBoundingClientRect();
+      if(r.bottom > kr.top + kes){ k.classList.add('raf-acik'); acikKutular.add(anahtar); yaz(true); }
+    });
+    k.appendChild(b);
+  }
+  /* Kart ızgarası (masalar, seçim kartları) ve form kesilmez: ızgara
+     sayfanın kendisidir, yarısını saklamak onu bozar; formun alanı saklanmaz. */
+  const KESILMEZ = '.desks, .cardsgrid, .ogrid, .picks, form, .formgrid, .grid-form, [data-raf-tam]';
+  function kesilmez(k){ return k.matches('[data-raf-tam]') || !!k.querySelector(KESILMEZ); }
+  /* Kutunun etiketi ile içindeki bölüm başlığı aynı adı taşıyorsa başlık
+     gözden gizlenir (ekran okuyucu için kalır): aynı ad üst üste iki kez
+     yazılmaz. */
+  function ikizBaslik(k){
+    const et = k.querySelector(':scope > .lrow__side .lrow__label');
+    if(!et) return;
+    const ad = Array.from(et.childNodes).filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim();
+    if(!ad) return;
+    k.querySelectorAll(':scope > .lrow__main .section-title > h2').forEach(h => {
+      if(h.textContent.trim() === ad) h.classList.add('sr-only');
+    });
+  }
+  /* Kesme kararı saf bir işlev: boylar girer, kesim boyları çıkar (test edilir). */
+  function kesimler(boy, esBoy){
+    if(esBoy == null) return boy > UZUN_PX ? KISA_PX : null;
+    if(boy <= esBoy) return esBoy > UZUN_PX && boy > UZUN_PX ? KISA_PX : null;
+    if(esBoy > UZUN_PX) return KISA_PX;
+    const kes = Math.max(KISA_PX, esBoy - DUGME_PX);
+    return boy - (kes + DUGME_PX) >= KAZANC_PX ? kes : null;
+  }
+  function raf(kok){
+    const ledgerler = kok && kok.matches && kok.matches('.ledger') ? [kok] : [];
+    sec(kok, '.site--v5 .ledger').concat(ledgerler).forEach(ledger => {
+      if(ledger.parentElement && ledger.parentElement.closest('.ledger')) return;
+      const kutular = rafKutulari(ledger);
+      kutular.forEach(k => { k.classList.remove('raf-tek'); kutuSifirla(k); ikizBaslik(k); });
+      const ikiSutun = getComputedStyle(ledger).gridTemplateColumns.trim().split(/\s+/).length > 1;
+      const ciftler = [];
+      let bekleyen = null;
+      kutular.forEach(k => {
+        const cs = getComputedStyle(k);
+        if(cs.display === 'none') return;
+        const genis = cs.gridColumnEnd === '-1' || /span/.test(cs.gridColumnEnd);
+        if(genis){ if(bekleyen) bekleyen.classList.add('raf-tek'); bekleyen = null; ciftler.push([k]); return; }
+        if(bekleyen){ ciftler[ciftler.length - 1].push(k); bekleyen = null; }
+        else { bekleyen = k; ciftler.push([k]); }
+      });
+      if(bekleyen) bekleyen.classList.add('raf-tek');
+      /* doğal boy: eşine gerilmeden ölç (yaz hepsini, sonra oku — tek yerleşim) */
+      const olc = ciftler.flat().filter(k => !k.classList.contains('kahraman'));
+      olc.forEach(k => { k.style.alignSelf = 'start'; });
+      const boy = new Map(olc.map(k => [k, k.offsetHeight]));
+      olc.forEach(k => { k.style.removeProperty('align-self'); });
+      ciftler.forEach(c => {
+        const es = ikiSutun && c.length === 2;
+        c.forEach((k, i) => {
+          if(!boy.has(k) || !boy.get(k) || kesilmez(k)) return;
+          const esi = es ? c[1 - i] : null;
+          const kes = kesimler(boy.get(k), esi && boy.has(esi) ? boy.get(esi) : null);
+          if(kes != null) kutuKes(k, kes);
+        });
+      });
+    });
   }
 
   /* ---------------------------------------------------------- 12 */
@@ -296,6 +422,6 @@ window.LIFEOS.HAREKET = (function(){
     window.addEventListener('scroll', onizleKapat, true);
   }
 
-  return { once, sonra, tekCanli, baslikKopyala, kaynak, gecis, halka, onizleIcerik, odakCik, kur,
+  return { once, sonra, tekCanli, baslikKopyala, raf, kesimler, kaynak, gecis, halka, onizleIcerik, odakCik, kur,
     EN_COK_KAPANAN };
 })();

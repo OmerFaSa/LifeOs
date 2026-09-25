@@ -462,12 +462,9 @@ ESP.Screens.lang = (function(){
 
   function render(){
     const d = ESP.SRS.deckStatus(aktifDil());
+    /* Dil seçici sayfa başında durur (actions): başlığın ve sekmelerin
+       arasında tek başına asılı bir kutu ne işe yaradığını söylemiyordu. */
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        actions:K.Select({ value:aktifDil(), change:'deck-lang', size:'sm',
-          aria:'Çalışılan dil',
-          options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }),
-      }))}
       ${K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:'Dil bölümleri', tabs:TABS,
         govde:GOVDE, sayi:{ calis:d.due || null } }))}`);
   }
@@ -640,7 +637,11 @@ ESP.Screens.lang = (function(){
       ];
     },
     subtitle(){ return (ESP.LANG_BY_ID[aktifDil()] || {}).label || aktifDil(); },
-    actions(){ return ''; },
+    actions(){
+      return String(K.Select({ value:aktifDil(), change:'deck-lang', size:'sm',
+        aria:'Çalışılan dil',
+        options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }));
+    },
     render, afterRender, handle, change,
   };
 })();

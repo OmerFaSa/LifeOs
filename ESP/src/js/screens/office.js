@@ -115,8 +115,10 @@ ESP.Screens.office = (function(){
              + 'sahibine yönlendirir, cevap uydurmaz.',
           wide:true,
           /* Masa kartlarinin basligi h3'tur; araya bir h2 girmezse baslik
-             sirasi h1'den h3'e atlar ve ekran okuyucu bir seviye kaybeder. */
-          body:html`${K.SectionTitle('Uzman masaları')}
+             sirasi h1'den h3'e atlar ve ekran okuyucu bir seviye kaybeder.
+             h2 gozle gorunmez: kutunun etiketi zaten «Uzman masalari» der,
+             ayni ad iki kez ust uste yazilmaz. */
+          body:html`<h2 class="sr-only">Uzman masaları</h2>
             <div class="desks">${map(uzmanlar, deskCard)}</div>`,
         }),
 

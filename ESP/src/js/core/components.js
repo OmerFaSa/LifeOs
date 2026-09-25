@@ -265,6 +265,8 @@ ESP.C = (function(){
           else btn.removeAttribute('aria-current');
         });
       }
+      /* Gizli kattaki kutular ölçülemezdi; kat açılınca raf yeniden kurulur. */
+      if(window.LIFEOS && window.LIFEOS.HAREKET && window.LIFEOS.HAREKET.raf) window.LIFEOS.HAREKET.raf(el);
     }
     let az = true;
     try{ az = window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}

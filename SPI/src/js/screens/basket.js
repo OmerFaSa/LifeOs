@@ -258,15 +258,9 @@ SP.Screens.basket = (function(){
 
     return html`
       <section class="sect">
-        <div class="sect__h">
-          <div class="sect__ht">
-            <div class="sect__eyebrow">Sedef</div>
-            <h2>Aylık bütçe</h2>
-            <p>Bütçe diğer koçların talebinden çıkar: Nesrin gıdayı, Kerem testi,
-              Barış ekipmanı ister. Fiyatı bilinmeyen kalem toplama katılmaz.</p>
-          </div>
-        </div>
-
+        <!-- Ikinci baslik yok: bolumun adi («Bütçe») ve sayfa basinin cumlesi
+             ayni seyi zaten soyluyor; ayni aciklama iki kez ust uste
+             yazilmaz (kullanici, 2026-09-25: «ne oldugu anlasilmiyor»). -->
         <div class="grid">
           <div class="span-7"><div class="stack">
             ${K.Card({

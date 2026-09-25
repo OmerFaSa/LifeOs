@@ -260,11 +260,8 @@ ESP.Screens.ladder = (function(){
      disiplin seçici yol ve tespit içindir, hep görünür. */
   function render(){
     const disc = S.ui.curDisc || 'lang';
+    /* disiplin seçici sayfa başındadır (actions), bölümlerin üstünde asılı durmaz */
     return K.Grid(html`
-      ${K.Span(12, K.Toolbar({
-        actions:K.Select({ id:'lad-disc', value:disc, change:'pick-disc-sel', aria:'Disiplin seç',
-          options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }),
-      }))}
       ${K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:'Merdiven bölümleri', tabs:TABS,
         govde:{ ozet:ozetRows, yol:() => yolRows(disc), tespit:tespitRows } }))}`);
   }
@@ -331,7 +328,11 @@ ESP.Screens.ladder = (function(){
       const ov = C().overall();
       return ov.cert === 'missing' ? 'ölçüm yok' : ov.level.label;
     },
-    actions(){ return ''; },
+    actions(){
+      return String(K.Select({ id:'lad-disc', value:S.ui.curDisc || 'lang', change:'pick-disc-sel',
+        aria:'Disiplin seç', size:'sm',
+        options:ESP.Mod.active().map(x => ({ value:x.id, label:x.label })) }));
+    },
     render, afterRender, handle, change,
   };
 })();

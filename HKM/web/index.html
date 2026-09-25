@@ -760,16 +760,6 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       <div class="iki">
         <div>
           <div class="card" id="brifing"><p class="muted">Yükleniyor…</p></div>
-          <!-- Konsey ACIKTA durur. Bir sure «Dayanağı göster»in
-               içindeydi ve kapali geliyordu: uc alt patron, onlari
-               arayan bir kullanicinin bile goremedigi bir yerdeydi.
-               Gunun hukmunu verenler, hukmun yanında durmali. -->
-          <div class="card" id="konsey"></div>
-          <details class="detay" id="detay-genel">
-            <summary>Dayanağı göster</summary>
-            <div id="seri"></div>
-            <div id="capraz"></div>
-          </details>
         </div>
         <div>
           <div class="card" id="bugun-sohbet">
@@ -788,6 +778,18 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
           </div>
         </div>
       </div>
+      <!-- Konsey ACIKTA durur. Bir sure «Dayanağı göster»in
+           içindeydi ve kapali geliyordu: uc alt patron, onlari
+           arayan bir kullanicinin bile goremedigi bir yerdeydi.
+           Gunun hukmunu verenler, hukmun yanında durmali.
+           Tam en: uc patron karti dar sol sutuna sigmiyor, «ESP · veri
+           yok» iki satira kiriliyordu (kullanici, 2026-09-25: duzen). -->
+      <div class="card" id="konsey"></div>
+      <details class="detay" id="detay-genel">
+        <summary>Dayanağı göster</summary>
+        <div id="seri"></div>
+        <div id="capraz"></div>
+      </details>
     </div>
 
     <!-- =========================== SOHBETLER ========================= -->
@@ -834,7 +836,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     <!-- =========================== SİSTEMLER ========================= -->
     <div data-bolme="sistemler" hidden>
       <div class="gun"><h1>Sistemler</h1></div>
-      <div class="card" id="tani"></div>
+      <div class="card" id="tani"><p class="muted">Yükleniyor…</p></div>
       <div class="card" id="sistemler"><p class="muted">Yükleniyor…</p></div>
       <details class="detay">
         <summary>Haftalık karşılaştırma</summary>
@@ -5166,19 +5168,25 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       }).join('') + '</tbody></table></div>';
   }
 
+  /* Altı istek BİRLİKTE gider ve her biri kendi kutusunu doldurur: biri
+     düşerse o kutu sakin hatayı (011) yazar. Eskiden sırayla bekleniyordu;
+     ilk istek düşünce Durum kutusu BOŞ, Sistemler «Yükleniyor…»da kalıyordu
+     (kullanıcı ekran görüntüsü, 2026-09-25). */
   async function yukleSistemler(t){
-    var tn = await api('/api/tani');
-    if(tn.status === 200) taniCiz(tn.body);
-    var ser = await api('/api/series?date=' + t + '&days=60');
-    if(ser.status === 200) sistemlerCiz(ser.body);
-    var i = await api('/api/twin?date=' + t);
-    if(i.status === 200) ikizCiz(i.body);
-    var hf = await api('/api/weekly?date=' + t);
-    if(hf.status === 200) haftaCiz(hf.body);
-    var et = await api('/api/impact');
-    if(et.status === 200) etkiCiz(et.body);
-    var g = await api('/api/decisions?date=' + t);
-    if(g.status === 200) gecmisCiz(g.body);
+    var parca = [
+      ['/api/tani', 'tani', taniCiz, 'Durum alınamadı.'],
+      ['/api/series?date=' + t + '&days=60', 'sistemler', sistemlerCiz, 'Sistemlerin ölçüleri alınamadı.'],
+      ['/api/twin?date=' + t, 'ikiz', ikizCiz, 'Ölçümler alınamadı.'],
+      ['/api/weekly?date=' + t, 'hafta', haftaCiz, 'Haftalık karşılaştırma alınamadı.'],
+      ['/api/impact', 'etki', etkiCiz, 'Etki ölçümü alınamadı.'],
+      ['/api/decisions?date=' + t, 'gecmis', gecmisCiz, 'Karar geçmişi alınamadı.'],
+    ];
+    await Promise.all(parca.map(async function(p){
+      var r = await api(p[0]);
+      if(r.status === 200){ try{ p[2](r.body); return; }catch(e){ r = { status:null }; } }
+      var el = $(p[1]);
+      if(el) el.innerHTML = sakinHata(p[3], r.status);
+    }));
   }
 
   async function yukleAyarlar(){

@@ -257,6 +257,28 @@ def t_v5_kabuk_ve_gun_cumlesi():
     ok("$('gun-cumle').textContent = gunCumlesi(" in m)
 
 
+def t_v5_duzen():
+    """V5 duzen (kullanici, 2026-09-25: «kaos icinde bir duzeni yok»).
+    Sistemler: alti bolum AYNI ANDA istenir ve her biri kendi kutusunu
+    doldurur; biri yanit vermezse ya da cizimi patlarsa yalniz o kutu
+    sakin hata der — Durum bos, oteki kutular «Yukleniyor…»da kalmaz.
+    Bugun: Konsey tam endedir, dar sol sutuna sikismaz."""
+    m = _yuz()
+    f = m[m.index("async function yukleSistemler("):]
+    f = f[:f.index("\n  }\n")]
+    ok("Promise.all(" in f, "alti istek paralel")
+    for kutu in ("'tani'", "'sistemler'", "'ikiz'", "'hafta'", "'etki'", "'gecmis'"):
+        ok(kutu in f, kutu)
+    ok("sakinHata(" in f and "catch(e)" in f, "kutu kendi hatasini soyler")
+    ok('id="tani"><p class="muted">Yükleniyor…</p>' in m, "Durum bos baslamaz")
+    iki = m[m.index('<div class="iki">'):]
+    iki = iki[:iki.index('<!-- =========================== SOHBETLER')]
+    kon = iki.index('id="konsey"')
+    # konsey .iki izgarasinin DISINDA: onundeki acik/kapanan div'ler dengede
+    once = iki[:kon]
+    ok(once.count("<div") - once.count("</div>") == 1, "konsey tam en (iki'nin disinda)")
+
+
 def t_ne_degisti():
     """017 (K7c): gezinme degisti (Teklifler → Onaylar; Profil, Motto →
     Ayarlar; Para → Sistemler); guncellemeden sonraki ilk acilista tek kart
@@ -290,5 +312,6 @@ def run():
     test("jetonlar ortak değerlerde; vurgu Merkez moru (K7a)", t_jetonlar_ortak)
     test("sakin hata: kırmızı satır yok, ortak cümle (011)", t_sakin_hata)
     test("v5 kabuk: kenar çubuğu, sistem geçişi, günün cümlesi", t_v5_kabuk_ve_gun_cumlesi)
+    test("v5 düzen: sistemler paralel, konsey tam en", t_v5_duzen)
     test("ne değişti: tek kart, yalnız eski kullanıcıya (017)", t_ne_degisti)
     test("fiş yükleme: önizleme, onay, küçültme", t_fis_yukleme)

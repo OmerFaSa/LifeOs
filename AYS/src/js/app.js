@@ -236,6 +236,8 @@ R.App = (function(){
     });
   }
 
+  /* Gün şeridi sayfaya çizilmiyor (kullanıcı, 2026-09-25: «o yukarıdaki gün
+     çizgisini kaldır»). Kalan iş sayısı Bugün'ün Şimdi alanında durur. */
   function gunSeridiHtml(){
     const dateISO = U.todayISO();
     const day = S.days[dateISO];
@@ -537,7 +539,6 @@ R.App = (function(){
           <div class="site__body">
             <div class="wrapc sayfa">
               ${raw(safe(() => sayfaBasiHtml(sc)))}
-              ${when(sc.id === 'today', () => raw(safe(gunSeridiHtml)))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>
           </div>

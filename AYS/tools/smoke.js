@@ -160,6 +160,9 @@ async function walkScreens(page, base, target, errors){
     const size = await page.$eval('#main', el => el.innerHTML.length);
     if(!title) errors.push(nerede + ': başlık yok');
     if(size < 50) errors.push(nerede + ': ekran boş çizildi');
+    /* Gün şeridi sayfaya çizilmez (kullanıcı, 2026-09-25: «o yukarıdaki
+       gün çizgisini kaldır»). */
+    if(await page.$('.gunserit, [class^="gunserit__"]')) errors.push(nerede + ': gün şeridi çizildi');
     await checkPanel(page, nerede, errors);
     await scanText(page, nerede, errors);
 

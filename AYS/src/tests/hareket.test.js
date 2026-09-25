@@ -179,4 +179,103 @@
       }finally{ k.remove(); }
     });
   });
+
+  /* V5 raf düzeni (kullanıcı, 2026-09-25: «kaos içinde bir düzeni yok»):
+     iki eşit sütun, eşi olmayan kutu bütün eni kaplar, uzun kutu iç
+     kaydırma yerine kesilir ve «Tamamını göster» alır. Ölçü uygulamanın
+     kendi CSS'iyle, 1300 px'lik gerçek bir kapta alınır. */
+  describe('Raf düzeni (V5)', () => {
+    const kutu = (ad, boy, ic) => '<section class="lrow"><div class="lrow__side"><div class="lrow__label">'
+      + ad + '</div></div><div class="lrow__main">' + (ic || '')
+      + '<div style="height:' + boy + 'px">' + ad + '</div></div></section>';
+    function raf(icerik){
+      const d = document.createElement('div');
+      d.className = 'site site--v5';
+      d.style.cssText = 'position:absolute;left:-10000px;top:0;width:1300px';
+      d.innerHTML = '<div class="ledger">' + icerik + '</div>';
+      document.body.appendChild(d);
+      H.raf(d);
+      return d;
+    }
+    const bul = (d, ad) => Array.from(d.querySelectorAll('.lrow'))
+      .find(k => k.querySelector('.lrow__label').textContent === ad);
+
+    it('kesme kararı: tek kutu 1000 px\'i aşınca 560\'ta, çiftte uzun olan kısanın boyunda kesilir', () => {
+      expect(H.kesimler(900, null)).toBe(null);
+      expect(H.kesimler(1200, null)).toBe(560);
+      /* çift: 970'e 560 → uzun olan 560'ta; kısa olana dokunulmaz */
+      expect(H.kesimler(970, 560)).toBe(560);
+      expect(H.kesimler(560, 970)).toBe(null);
+      /* kısa kutunun boyunda kesilir (düğme payı düşülerek) */
+      expect(H.kesimler(1500, 800)).toBe(744);
+      /* kazanç 200 px'ten azsa kesilmez: boşuna tık yok */
+      expect(H.kesimler(700, 600)).toBe(null);
+      /* ikisi de uzunsa ikisi de 560'ta */
+      expect(H.kesimler(1400, 1100)).toBe(560);
+      expect(H.kesimler(1100, 1400)).toBe(560);
+    });
+
+    it('eşi olmayan yarım kutu bütün eni kaplar; rafta delik kalmaz', () => {
+      const d = raf(kutu('A', 100) + kutu('B', 100) + kutu('C', 100)
+        + '<section class="lrow lrow--wide"><div class="lrow__side"><div class="lrow__label">G</div></div><div class="lrow__main">g</div></section>'
+        + kutu('D', 100) + '<section class="lrow lrow--wide"><div class="lrow__side"><div class="lrow__label">H</div></div><div class="lrow__main">h</div></section>');
+      try{
+        expect(bul(d, 'A').classList.contains('raf-tek')).toBe(false);
+        expect(bul(d, 'B').classList.contains('raf-tek')).toBe(false);
+        expect(bul(d, 'C').classList.contains('raf-tek')).toBe(true);
+        expect(bul(d, 'D').classList.contains('raf-tek')).toBe(true);
+        const a = bul(d, 'A').getBoundingClientRect(), b = bul(d, 'B').getBoundingClientRect();
+        expect(Math.abs(a.top - b.top) < 1).toBe(true);
+        expect(Math.abs(a.width - b.width) < 1).toBe(true);
+        expect(bul(d, 'C').getBoundingClientRect().width > a.width * 1.8).toBe(true);
+      }finally{ d.remove(); }
+    });
+
+    it('uzun kutu iç kaydırmaz: kesilir, «Tamamını göster» açar, açık kalır', () => {
+      const d = raf(kutu('Uzun', 1500));
+      try{
+        const k = bul(d, 'Uzun');
+        expect(k.classList.contains('raf-uzun')).toBe(true);
+        const main = k.querySelector('.lrow__main');
+        expect(getComputedStyle(main).overflowY).toBe('visible');
+        expect(k.getBoundingClientRect().height < 700).toBe(true);
+        const b = k.querySelector(':scope > .raf-ac');
+        expect(b.textContent).toBe('Tamamını göster');
+        expect(b.getAttribute('aria-expanded')).toBe('false');
+        b.click();
+        expect(k.classList.contains('raf-acik')).toBe(true);
+        expect(b.getAttribute('aria-expanded')).toBe('true');
+        expect(b.textContent).toBe('Kısalt');
+        expect(k.getBoundingClientRect().height > 1500).toBe(true);
+        /* yeniden çizim açık kutuyu kapatmaz */
+        H.raf(d);
+        expect(k.classList.contains('raf-acik')).toBe(true);
+        expect(k.querySelectorAll(':scope > .raf-ac')).toHaveLength(1);
+        k.querySelector(':scope > .raf-ac').click();
+      }finally{ d.remove(); }
+    });
+
+    it('çiftte uzun kutu kısanın boyunda biter; kısa kutu kesilmez', () => {
+      const d = raf(kutu('Kısa', 700) + kutu('Uzun çift', 1600));
+      try{
+        const kisa = bul(d, 'Kısa'), uzun = bul(d, 'Uzun çift');
+        expect(kisa.classList.contains('raf-uzun')).toBe(false);
+        expect(uzun.classList.contains('raf-uzun')).toBe(true);
+        const fark = Math.abs(kisa.getBoundingClientRect().height - uzun.getBoundingClientRect().height);
+        expect(fark < 2).toBe(true);
+      }finally{ d.remove(); }
+    });
+
+    it('kart ızgarası ve form kesilmez; kutu adıyla aynı bölüm başlığı gözden gizlenir', () => {
+      const d = raf(kutu('Uzman masaları', 1500,
+        '<div class="section-title"><h2>Uzman masaları</h2></div><div class="desks"></div>')
+        + kutu('Form', 1500, '<form></form>'));
+      try{
+        expect(bul(d, 'Uzman masaları').classList.contains('raf-uzun')).toBe(false);
+        expect(bul(d, 'Form').classList.contains('raf-uzun')).toBe(false);
+        const h = bul(d, 'Uzman masaları').querySelector('.section-title h2');
+        expect(h.classList.contains('sr-only')).toBe(true);
+      }finally{ d.remove(); }
+    });
+  });
 })();

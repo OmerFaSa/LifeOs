@@ -201,6 +201,8 @@ ESP.App = (function(){
     });
   }
 
+  /* Gün şeridi sayfaya çizilmiyor (kullanıcı, 2026-09-25: «o yukarıdaki gün
+     çizgisini kaldır»). Kalan iş sayısı Bugün'ün Şimdi alanında durur. */
   function gunSeridiHtml(){
     const bloklar = gunDisiplinleri(U.todayISO());
     const biten = bloklar.filter(b => b.durum === 'bitti').length;
@@ -508,7 +510,6 @@ ESP.App = (function(){
             <div class="wrapc sayfa">
               ${raw(safe(sayacHtml))}
               ${raw(safe(() => sayfaBasiHtml(sc)))}
-              ${when(sc.id === 'today', () => raw(safe(gunSeridiHtml)))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>
           </div>
