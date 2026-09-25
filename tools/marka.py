@@ -164,6 +164,98 @@ def delik() -> int:
     return 0
 
 
+_KOMSU = ((-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1))
+
+
+def doldur(im, esik=128, yumusat=3):
+    """Kare portrenin deliklerini (alfa < esik) disaridan ice, bilinen
+    komsularin ortalamasiyla doldurur (sogan kabugu), sonra YALNIZ
+    doldurulan pikselleri yumusatir. Bilinen piksel DEGISMEZ; delik
+    olmayan portre aynen doner. Cikti opak RGB.
+
+    Deliklerin yeri (2026-09-25 olcumu): acik duvar, beyaz tisort, kenar
+    cizgisi — yuzler saglam. Doldurma bu yuzden yuzu uydurmaz; yine de
+    bir TAHMINDIR: temiz kaynak gelince `isle` ayni adla degistirir."""
+    im = im.convert("RGBA")
+    w, h = im.size
+    px = list(im.getdata())
+    bilinen = [p[3] >= esik for p in px]
+    renk = [list(p[:3]) for p in px]
+    dolan = [not b for b in bilinen]
+    bekleyen = {i for i, b in enumerate(bilinen) if not b}
+    enaz = 3
+    while bekleyen:
+        yeni = {}
+        for i in bekleyen:
+            x, y = i % w, i // w
+            s0 = s1 = s2 = c = 0
+            for dx, dy in _KOMSU:
+                X, Y = x + dx, y + dy
+                if 0 <= X < w and 0 <= Y < h and bilinen[Y * w + X]:
+                    r = renk[Y * w + X]
+                    s0 += r[0]; s1 += r[1]; s2 += r[2]; c += 1
+            if c >= enaz:
+                yeni[i] = [s0 // c, s1 // c, s2 // c]
+        if not yeni:
+            if enaz == 1:
+                break            # hic bilinen piksel yok: doldurulacak dayanak yok
+            enaz -= 1
+            continue
+        enaz = 3
+        for i, v in yeni.items():
+            renk[i] = v
+            bilinen[i] = True
+        bekleyen -= yeni.keys()
+    for _ in range(yumusat):
+        kopya = [r[:] for r in renk]
+        for i in range(w * h):
+            if not dolan[i]:
+                continue
+            x, y = i % w, i // w
+            s0 = s1 = s2 = c = 0
+            for dy in (-2, -1, 0, 1, 2):
+                for dx in (-2, -1, 0, 1, 2):
+                    X, Y = x + dx, y + dy
+                    if 0 <= X < w and 0 <= Y < h:
+                        r = kopya[Y * w + X]
+                        s0 += r[0]; s1 += r[1]; s2 += r[2]; c += 1
+            renk[i] = [s0 // c, s1 // c, s2 // c]
+    from PIL import Image
+    out = Image.new("RGB", (w, h))
+    out.putdata([tuple(r) for r in renk])
+    return out
+
+
+def onar(dene: bool = False) -> int:
+    """`--onar`: delikli kare portreleri yerinde doldurur (bkz. doldur).
+    Temiz kaynak geldiginde `isle` ayni adla uzerine yazar."""
+    try:
+        from PIL import Image
+    except ImportError:
+        print("HATA: Pillow yok.  pip install pillow")
+        return 2
+    n = 0
+    for f in sorted((MEDYA / "ajan").glob("ajan-kare-*.webp")):
+        im = Image.open(f)
+        o = saydam_oran(im)
+        if o <= 0:
+            continue
+        n += 1
+        if dene:
+            print("  → %-30s %%%.1f delik doldurulacak" % (f.stem, 100 * o))
+            continue
+        doldur(im).save(f, "WEBP", lossless=True, quality=100, method=6)
+        print("  ✓ %-30s %%%.1f delik dolduruldu" % (f.stem, 100 * o))
+    if not n:
+        print("Kare portreler temiz; doldurulacak delik yok.")
+    elif dene:
+        print("\nDENEME: hiçbir şey yazılmadı. %d portre doldurulacak." % n)
+    else:
+        print("\n%d portre dolduruldu (tahmin; temiz kaynak gelince aynı adla değiştir). "
+              "Künyeyi tazele: python3 tools/marka.py --kunye" % n)
+    return 0
+
+
 def isle(kaynak: Path, dene: bool = False) -> int:
     if not kaynak.is_dir():
         print("HATA: %s bir klasör değil" % kaynak)
@@ -699,6 +791,8 @@ def _kunye_sayim():
 
 
 def main() -> int:
+    if "--onar" in sys.argv:
+        return onar("--dene" in sys.argv)
     if "--sina" in sys.argv:
         return sina()
 

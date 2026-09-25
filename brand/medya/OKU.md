@@ -92,6 +92,13 @@ python3 tools/marka.py --delik     # hangi kare delikli, yüzde kaç
 Temiz kaynak gelince aynı adla (`ajan-kare-<mod>-<id>`) verilir; 4:5
 kırpılır (uygulama 60×75 gösterir), mevcut karelerin boyunda (320×400).
 
+**Onarım (2026-09-25, kullanıcı kararı):** yirmi delikli kare
+`python3 tools/marka.py --onar` ile dolduruldu — delik dışarıdan içe,
+komşu piksellerin ortalamasıyla kapanır; bilinen piksele (yüzlere)
+dokunulmaz. Delikler duvarda, beyaz tişörtte ve kenar çizgisindeydi;
+doldurulan yer bir **tahmindir**. Temiz kaynak gelirse yine aynı adla
+verilir ve onarılmış olanın üstüne yazılır. Test: `tools/portreonar_test.py`.
+
 ### Neyin ne olduğu
 
 | Dosya | Nerede görünür |
