@@ -536,10 +536,12 @@ R.App = (function(){
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.once(appEl);
       const ciz = () => { appEl.innerHTML = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
+        ${when(ornekAcik(), () => raw(LIFEOS.OrnekKip.filigranHtml()))}
         <div class="site site--v5">
           ${raw(safe(() => ustCubukHtml(sc)))}
           <div class="site__body">
             <div class="wrapc sayfa">
+              ${when(ornekAcik(), () => raw(LIFEOS.OrnekKip.seritHtml()))}
               ${raw(safe(() => sayfaBasiHtml(sc)))}
               ${raw(safe(() => bolumCubuguHtml(sc), ''))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
@@ -669,7 +671,24 @@ R.App = (function(){
   }
 
   /* ---------- kuresel eylemler ---------- */
+  /* 172 Örnek veri kipi (brand/ortak/ornekkip.js): ayrı profil anahtarı. */
+  R.Ornek = window.LIFEOS && LIFEOS.OrnekKip ? LIFEOS.OrnekKip.kur({ anahtar:'rota.activeProfile',
+    varsayilan:'main', silinecek:['rota84285.v2.ornek', 'rota84285.v2.ornek.oncesi'] }) : null;
+  const ornekAcik = () => !!(R.Ornek && R.Ornek.acik());
+
   const globalHandle = {
+    /* 172: geçiş sayfa yenilenerek olur; depo profili açılışta okur. */
+    async 'ornek-gir'(){
+      if(!R.Ornek) return;
+      UI.confirmSheet('Örnek veriye geç', 'Örnek bir profil açılır. Gerçek verin ayrı anahtarda durur, '
+        + 'değişmez ve Merkez’e gitmez; çıkınca örnek kayıtlar silinir.',
+        () => { if(R.Ornek.gir()) location.reload(); }, false, 'Örnek veriye geç');
+    },
+    async 'ornek-cik'(){
+      if(!R.Ornek) return;
+      UI.confirmSheet('Örnek veriden çık', 'Örnek kayıtlar silinir ve gerçek profiline dönersin.',
+        () => { if(R.Ornek.cik()) location.reload(); }, false, 'Örnek veriden çık');
+    },
     /* Ayar aramasının sonucu (183): ekrana git, alana kay ve odakla. */
     async 'ayar-git'(el){
       const alan = el.dataset.alan;
@@ -1311,6 +1330,10 @@ R.App = (function(){
       }
       wireStoreErrors();
       await M.loadAll();
+      /* 172: örnek profilde örnek kayıtlar belleğe yazılır (core/ornekveri.js). */
+      if(ornekAcik() && R.OrnekVeri){
+        try{ R.OrnekVeri.doldur(); }catch(e){ console.error(e); }
+      }
 
       /* YARIM KALMIŞ SÜRELİ OTURUM — diskten geri alınır.
 

@@ -1338,3 +1338,12 @@
   .hozet__satir{ grid-template-columns:44px minmax(0,1fr); }
   .hozet__satir .kesinlik{ grid-column:2; justify-self:start; }
 }
+
+/* 172 ÖRNEK VERİ KİPİ (brand/ortak/ornekkip.js): şeritli uyarı + filigran. */
+.ornek-serit{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--sp-2);
+  margin:0 0 var(--sp-3); padding:var(--sp-2) var(--sp-3); border:1px solid var(--border); border-radius:var(--r-sm, 8px);
+  background:repeating-linear-gradient(135deg, var(--surface) 0 12px, var(--danger-soft) 12px 24px); }
+.ornek-serit__metin{ margin:0; min-width:0; flex:1 1 220px; font-size:var(--fs-sm); color:var(--text); }
+.ornek-filigran{ position:fixed; inset:0; pointer-events:none; z-index:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.ornek-filigran::before{ content:"ÖRNEK"; font-size:min(22vw, 200px); font-weight:800; letter-spacing:.08em;
+  color:var(--text); opacity:.05; transform:rotate(-24deg); white-space:nowrap; }

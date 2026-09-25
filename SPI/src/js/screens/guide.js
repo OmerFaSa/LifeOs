@@ -556,7 +556,9 @@ SP.Screens.guide = (function(){
       <div class="mt-24">${raw(UI.rail(['minimum-day', 'next-action', 'certainty']))}</div>`,
     model:() => html`${K.Ledger(() => [modelCard(), bolumCard(), hafizaCard(), quotaCard()])}
       <div class="mt-24">${raw(UI.rail(['no-model', 'grounding', 'privacy']))}</div>`,
-    veri:() => html`${K.Ledger(() => [dataCard(), saglikCard(), storageHorizonCard(), storageCard(), hkmCard()])}
+    veri:() => html`${K.Ledger(() => [dataCard(), saglikCard(), storageHorizonCard(), storageCard(), hkmCard(),
+      when(window.LIFEOS && window.LIFEOS.OrnekKip, () => K.Card({ title:'Örnek veriyle dene',
+        body:raw(window.LIFEOS.OrnekKip.ayarHtml(!!(SP.Ornek && SP.Ornek.acik()))) }))])}
       <div class="mt-24">${raw(UI.rail(['backup', 'privacy', 'profiles']))}</div>`,
     sinir:() => html`${K.Ledger(() => [clinicalCard(), redFlagCard(), evidenceCard(), privacyCard(), groundingCard()])}
       <div class="mt-24">${raw(UI.rail(['red-flag', 'grounding', 'privacy', 'certainty']))}</div>`,

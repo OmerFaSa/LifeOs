@@ -65,6 +65,8 @@ ESP.Beacon = (function(){
     const s = Object.assign({}, VARSAYILAN, AYAR || {});
     const sahip = window.LIFEOS && LIFEOS.HkmBag ? LIFEOS.HkmBag.sahip(MODULE) : null;
     if(sahip && sahip !== profilim()){ s.enabled = false; s.baskaProfil = sahip; }
+    /* 172: örnek profil HKM'ye hiçbir kanaldan veri göndermez. */
+    if(profilim() === 'ornek'){ s.enabled = false; s.ornek = true; }
     return s;
   }
 

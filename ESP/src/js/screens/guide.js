@@ -308,7 +308,9 @@ ESP.Screens.guide = (function(){
           <p class="small muted mt-8">Yalnızca açık profilin verisi silinir;
             diğer profiller kendi anahtarlarında kalır.</p>`,
       }),
-    ];
+      when(window.LIFEOS && window.LIFEOS.OrnekKip, () => K.Entry({ label:'Örnek veriyle dene',
+        body:raw(window.LIFEOS.OrnekKip.ayarHtml(!!(ESP.Ornek && ESP.Ornek.acik()))) })),
+    ].filter(Boolean);
   }
 
   function limitRows(){

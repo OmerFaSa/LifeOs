@@ -204,6 +204,9 @@ DOSYALAR = {
     # core/merkez.py hafta_ozeti. HKM kapaliyken kart yok.
     "haftaozet.js":      "js/core",
     "haftaozet.test.js": "tests",
+    # ORNEK VERI KIPI (172): ayri profil anahtari, serit, filigran, tek cikis.
+    "ornekkip.js":      "js/core",
+    "ornekkip.test.js": "tests",
     # GORSEL DENETIMI — tek dosya gorselsiz acildiginda bunu soylemek.
     # Uyari metni ve kosulu uc arayuzde ayni olmali.
     "gorsel.js":      "js/core",

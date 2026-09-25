@@ -506,11 +506,13 @@ ESP.App = (function(){
          ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
       const markup = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
+        ${when(ornekAcik(), () => raw(LIFEOS.OrnekKip.filigranHtml()))}
         <div class="site site--v5">
           ${raw(safe(() => ustCubukHtml(sc)))}
           <div class="site__body">
             <div class="wrapc sayfa">
               ${raw(safe(sayacHtml))}
+              ${when(ornekAcik(), () => raw(LIFEOS.OrnekKip.seritHtml()))}
               ${raw(safe(() => sayfaBasiHtml(sc)))}
               ${raw(safe(() => bolumCubuguHtml(sc), ''))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
@@ -617,7 +619,24 @@ ESP.App = (function(){
   }
 
   /* ---------------------------------------------------------- küresel eylemler */
+  /* 172 Örnek veri kipi (brand/ortak/ornekkip.js): ayrı profil anahtarı. */
+  ESP.Ornek = window.LIFEOS && LIFEOS.OrnekKip ? LIFEOS.OrnekKip.kur({ anahtar:'esp.activeProfile',
+    varsayilan:'ben', silinecek:['esp.v1.ornek', 'esp.v1.ornek.oncesi'] }) : null;
+  const ornekAcik = () => !!(ESP.Ornek && ESP.Ornek.acik());
+
   const globalHandle = {
+    /* 172: geçiş sayfa yenilenerek olur; depo profili açılışta okur. */
+    async 'ornek-gir'(){
+      if(!ESP.Ornek) return;
+      UI.confirmSheet('Örnek veriye geç', 'Örnek bir profil açılır. Gerçek verin ayrı anahtarda durur, '
+        + 'değişmez ve Merkez’e gitmez; çıkınca örnek kayıtlar silinir.',
+        () => { if(ESP.Ornek.gir()) location.reload(); }, false, 'Örnek veriye geç');
+    },
+    async 'ornek-cik'(){
+      if(!ESP.Ornek) return;
+      UI.confirmSheet('Örnek veriden çık', 'Örnek kayıtlar silinir ve gerçek profiline dönersin.',
+        () => { if(ESP.Ornek.cik()) location.reload(); }, false, 'Örnek veriden çık');
+    },
     /* Ayar aramasının sonucu (183): ekrana git, alana kay ve odakla. */
     async 'ayar-git'(el){
       const alan = el.dataset.alan;
@@ -1499,6 +1518,10 @@ ESP.App = (function(){
 
       wireStoreErrors();
       await M.loadAll();
+      /* 172: örnek profilde örnek kayıtlar belleğe yazılır (core/ornekveri.js). */
+      if(ornekAcik() && ESP.OrnekVeri){
+        try{ ESP.OrnekVeri.doldur(); }catch(e){ console.error(e); }
+      }
 
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).
 

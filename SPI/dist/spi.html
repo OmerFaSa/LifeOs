@@ -6913,6 +6913,15 @@ body.is-dragging .drop.is-over{
   .hozet__satir .kesinlik{ grid-column:2; justify-self:start; }
 }
 
+/* 172 ÖRNEK VERİ KİPİ (brand/ortak/ornekkip.js): şeritli uyarı + filigran. */
+.ornek-serit{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--sp-2);
+  margin:0 0 var(--sp-3); padding:var(--sp-2) var(--sp-3); border:1px solid var(--border); border-radius:var(--r-sm, 8px);
+  background:repeating-linear-gradient(135deg, var(--surface) 0 12px, var(--danger-soft) 12px 24px); }
+.ornek-serit__metin{ margin:0; min-width:0; flex:1 1 220px; font-size:var(--fs-sm); color:var(--text); }
+.ornek-filigran{ position:fixed; inset:0; pointer-events:none; z-index:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.ornek-filigran::before{ content:"ÖRNEK"; font-size:min(22vw, 200px); font-weight:800; letter-spacing:.08em;
+  color:var(--text); opacity:.05; transform:rotate(-24deg); white-space:nowrap; }
+
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/seviye.css içine yazılır; burası bir sonraki
@@ -11012,7 +11021,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'e9cff30', at:'2026-09-25 16:54', dirty:true };
+SP.BUILD = { id:'494035d', at:'2026-09-25 17:25', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19956,6 +19965,139 @@ LIFEOS.HaftaOzet = (function(){
   }
 
   return { kur, kartHtml, pazarAksami, ZAMAN_ASIMI, TAZE_MS };
+})();
+
+/* ==== js/core/ornekkip.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/ornekkip.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* ÖRNEK VERİ KİPİ — katalog 172.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/ornekkip.js`; `python3 tools/ortak.py --yay` ile
+   üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   ==================================================================
+
+   Sistemi örnek veriyle denemek (Ayarlar › Veri). Sözler:
+   1. GERÇEK VERİYE HİÇBİR YOLLA KARIŞMAZ. Örnek veri ayrılmış bir profil
+      anahtarında («ornek») durur; modülün çok profilli deposu onu ayrı
+      bir anahtara yazar. Gerçek profilin anahtarına dokunulmaz.
+   2. DIŞARI ÇIKMAZ. Örnek profilde HKM işareti her zaman kapalıdır
+      (üç `beacon.js` `settings()`); özet, yedek, hafıza, hedef ve King
+      kanalları oradan geçer.
+   3. GÖRÜNÜR. Üstte şeritli uyarı, arkada «ÖRNEK» filigranı; şeritte TEK
+      düğme: «Örnek veriden çık». Çıkış örnek profilin anahtarlarını siler
+      ve önceki profile döner.
+   Geçiş sayfa yenilenerek olur: depo profil anahtarını açılışta okur. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.OrnekKip = (function(){
+  const PROFIL = 'ornek';
+
+  /* o = { anahtar:'rota.activeProfile', varsayilan:'main',
+           silinecek:['rota84285.v2.ornek', ...], depo?:localStorage } */
+  function kur(o){
+    const d = o.depo || (typeof localStorage !== 'undefined' ? localStorage : null);
+    const ONCE = o.anahtar + '.ornekOncesi';
+    const oku = k => { try{ return d ? d.getItem(k) : null; }catch(e){ return null; } };
+    function aktif(){ return oku(o.anahtar) || o.varsayilan; }
+    function acik(){ return aktif() === PROFIL; }
+    function gir(){
+      if(!d || acik()) return false;
+      try{ d.setItem(ONCE, aktif()); d.setItem(o.anahtar, PROFIL); return true; }
+      catch(e){ return false; }
+    }
+    function cik(){
+      if(!d || !acik()) return false;
+      const once = oku(ONCE);
+      try{
+        (o.silinecek || []).forEach(k => d.removeItem(k));
+        d.removeItem(ONCE);
+        /* Önceki profil örnek olamaz; bilinmiyorsa varsayılana döner. */
+        d.setItem(o.anahtar, once && once !== PROFIL ? once : o.varsayilan);
+        return true;
+      }catch(e){ return false; }
+    }
+    /* Çıkıştan sonra sayfa kapanırken bekleyen kayıt örnek anahtarı geri
+       yazabilir; örnek kipte DEĞİLKEN açılışta kalıntı silinir. */
+    if(d && !acik()){ try{ (o.silinecek || []).forEach(k => d.removeItem(k)); }catch(e){ /* depo kapalı */ } }
+    return { acik, gir, cik, aktif };
+  }
+
+  function seritHtml(){
+    return '<div class="ornek-serit" role="status" data-oz="172">'
+      + '<p class="ornek-serit__metin"><b>Örnek veri.</b> Gördüğün kayıtlar gerçek değil; gerçek verin ayrı durur, '
+      + 'değişmez ve Merkez’e gitmez.</p>'
+      + '<button type="button" class="btn btn--sm" data-act="ornek-cik">Örnek veriden çık</button></div>';
+  }
+
+  function filigranHtml(){
+    return '<div class="ornek-filigran" aria-hidden="true"></div>';
+  }
+
+  /* Ayarlar › Veri satırının gövdesi; modül kendi kartına sarar. Tek
+     düğme; etiketi sonucu söyler (022). */
+  function ayarHtml(acik){
+    return '<div class="ornek-ayar" data-oz="172"><p class="small muted">' + (acik
+        ? 'Şu an örnek verideysin. Çıkınca örnek kayıtlar silinir, gerçek profiline dönersin.'
+        : 'Sistemi dolu hâliyle görmek için örnek bir profil açılır. Gerçek verin ayrı anahtarda durur; '
+          + 'örnek veri ona hiçbir yolla karışmaz ve Merkez’e gitmez.') + '</p>'
+      + '<div class="mt-10"><button type="button" class="btn btn--sm" data-act="' + (acik ? 'ornek-cik' : 'ornek-gir') + '">'
+      + (acik ? 'Örnek veriden çık' : 'Örnek veriye geç') + '</button></div></div>';
+  }
+
+  return { kur, seritHtml, filigranHtml, ayarHtml, PROFIL };
+})();
+
+/* ==== js/core/ornekveri.js ==== */
+/* ÖRNEK VERİ (katalog 172) — yalnız «ornek» profilinde, açılışta BELLEĞE
+   yazılır (brand/ortak/ornekkip.js). Kaynak: tools/envanter.js DOLDUR.SPI.
+   Aynı gün ya da kimlik varsa dokunulmaz: değişiklik ezilmez, ikilenmez. */
+window.SP = window.SP || {};
+
+SP.OrnekVeri = (function(){
+  function ekle(liste, kayit){ if(!liste.some(x => x.id === kayit.id)) liste.push(kayit); }
+
+  function doldur(){
+    const U = SP.U, S = SP.S;
+    /* Kurulum sihirbazı örnek profilde açılmasın (Setup.needed). */
+    S.profile = S.profile || {};
+    const v = { name:'Örnek', birthYear:1995, heightCm:175, weightKg:78 };
+    Object.keys(v).forEach(k => { if(!S.profile[k]) S.profile[k] = v[k]; });
+    for(let i = 0; i < 21; i++){
+      const d = U.iso(U.addDays(U.today(), -i));
+      if(!S.vitals[d]){
+        S.vitals[d] = { sleep:7 + (i % 3) * 0.5, hrv:55 + (i % 15),
+          rhr:56 + (i % 8), soreness:2 + (i % 4), weight:78 - (i % 10) * 0.1 };
+      }
+      if(!S.meals[d]){
+        S.meals[d] = [
+          { id:'ornek-m' + i + 'a', slot:'kahvalti',
+            items:[{ foodId:'yumurta', grams:100 }, { foodId:'ekmek-tam-bugday', grams:60 }] },
+          { id:'ornek-m' + i + 'b', slot:'ogle',
+            items:[{ foodId:'mercimek-corbasi', grams:300 }, { foodId:'pilav', grams:150 }] },
+        ];
+      }
+      if(i % 2 === 0){
+        ekle(S.workouts, { id:'ornek-w' + i, date:d, name:'Örnek seans ' + (i / 2 + 1),
+          kind:i % 4 ? 'strength' : 'cardio', items:[], minutes:45,
+          rpe:6 + (i % 3), note:'', createdAt:new Date().toISOString() });
+      }
+    }
+    for(let i = 0; i < 3; i++){
+      ekle(S.labs, { id:'ornek-l' + i, date:U.iso(U.addDays(U.today(), -(i * 30))),
+        lab:'Örnek laboratuvar',
+        values:{ hgb:{ v:14 + i * 0.2, cert:'measured' },
+          ferritin:{ v:50 + i * 2, cert:'measured' },
+          glucose:{ v:88 + i, cert:'measured' } } });
+    }
+    ekle(S.meds, { id:'ornek-med0', kindId:'diger', name:'Örnek kayıt', dose:'1x1',
+      startDate:U.iso(U.addDays(U.today(), -20)), endDate:null, note:'',
+      createdAt:new Date().toISOString() });
+  }
+
+  return { doldur };
 })();
 
 /* ==== js/core/hedefler.js ==== */
@@ -31707,6 +31849,8 @@ SP.Beacon = (function(){
     const s = Object.assign({}, VARSAYILAN, AYAR || {});
     const sahip = window.LIFEOS && LIFEOS.HkmBag ? LIFEOS.HkmBag.sahip(MODULE) : null;
     if(sahip && sahip !== profilim()){ s.enabled = false; s.baskaProfil = sahip; }
+    /* 172: örnek profil HKM'ye hiçbir kanaldan veri göndermez. */
+    if(profilim() === 'ornek'){ s.enabled = false; s.ornek = true; }
     return s;
   }
 
@@ -52907,7 +53051,9 @@ SP.Screens.guide = (function(){
       <div class="mt-24">${raw(UI.rail(['minimum-day', 'next-action', 'certainty']))}</div>`,
     model:() => html`${K.Ledger(() => [modelCard(), bolumCard(), hafizaCard(), quotaCard()])}
       <div class="mt-24">${raw(UI.rail(['no-model', 'grounding', 'privacy']))}</div>`,
-    veri:() => html`${K.Ledger(() => [dataCard(), saglikCard(), storageHorizonCard(), storageCard(), hkmCard()])}
+    veri:() => html`${K.Ledger(() => [dataCard(), saglikCard(), storageHorizonCard(), storageCard(), hkmCard(),
+      when(window.LIFEOS && window.LIFEOS.OrnekKip, () => K.Card({ title:'Örnek veriyle dene',
+        body:raw(window.LIFEOS.OrnekKip.ayarHtml(!!(SP.Ornek && SP.Ornek.acik()))) }))])}
       <div class="mt-24">${raw(UI.rail(['backup', 'privacy', 'profiles']))}</div>`,
     sinir:() => html`${K.Ledger(() => [clinicalCard(), redFlagCard(), evidenceCard(), privacyCard(), groundingCard()])}
       <div class="mt-24">${raw(UI.rail(['red-flag', 'grounding', 'privacy', 'certainty']))}</div>`,
@@ -54322,10 +54468,12 @@ SP.App = (function(){
          ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
       const markup = String(html`
         <a class="skiplink" href="#main">İçeriğe atla</a>
+        ${when(ornekAcik(), () => raw(LIFEOS.OrnekKip.filigranHtml()))}
         <div class="site site--v5">
           ${raw(safe(() => ustCubukHtml(sc)))}
           <div class="site__body">
             <div class="wrapc sayfa">
+              ${when(ornekAcik(), () => raw(LIFEOS.OrnekKip.seritHtml()))}
               ${raw(safe(() => sayfaBasiHtml(sc)))}
               ${raw(safe(() => bolumCubuguHtml(sc), ''))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
@@ -54456,7 +54604,24 @@ SP.App = (function(){
   }
 
   /* ---------------------------------------------------------- küresel eylemler */
+  /* 172 Örnek veri kipi (brand/ortak/ornekkip.js): ayrı profil anahtarı. */
+  SP.Ornek = window.LIFEOS && LIFEOS.OrnekKip ? LIFEOS.OrnekKip.kur({ anahtar:'spi.activeProfile',
+    varsayilan:'ben', silinecek:['spi.v1.ornek', 'spi.v1.ornek.oncesi'] }) : null;
+  const ornekAcik = () => !!(SP.Ornek && SP.Ornek.acik());
+
   const globalHandle = {
+    /* 172: geçiş sayfa yenilenerek olur; depo profili açılışta okur. */
+    async 'ornek-gir'(){
+      if(!SP.Ornek) return;
+      UI.confirmSheet('Örnek veriye geç', 'Örnek bir profil açılır. Gerçek verin ayrı anahtarda durur, '
+        + 'değişmez ve Merkez’e gitmez; çıkınca örnek kayıtlar silinir.',
+        () => { if(SP.Ornek.gir()) location.reload(); }, false, 'Örnek veriye geç');
+    },
+    async 'ornek-cik'(){
+      if(!SP.Ornek) return;
+      UI.confirmSheet('Örnek veriden çık', 'Örnek kayıtlar silinir ve gerçek profiline dönersin.',
+        () => { if(SP.Ornek.cik()) location.reload(); }, false, 'Örnek veriden çık');
+    },
     /* Ayar aramasının sonucu (183): ekrana git, alana kay ve odakla. */
     async 'ayar-git'(el){
       const alan = el.dataset.alan;
@@ -55045,6 +55210,10 @@ SP.App = (function(){
 
       wireStoreErrors();
       await M.loadAll();
+      /* 172: örnek profilde örnek kayıtlar belleğe yazılır (core/ornekveri.js). */
+      if(ornekAcik() && SP.OrnekVeri){
+        try{ SP.OrnekVeri.doldur(); }catch(e){ console.error(e); }
+      }
 
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).
 

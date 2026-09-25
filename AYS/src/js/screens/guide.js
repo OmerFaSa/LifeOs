@@ -680,6 +680,8 @@ R.Screens.guide = (function(){
       ])),
       K.Span(6, K.Stack([
         dataCard(),
+        when(window.LIFEOS && window.LIFEOS.OrnekKip, () => K.Card({ title:'Örnek veriyle dene',
+          body:raw(window.LIFEOS.OrnekKip.ayarHtml(!!(R.Ornek && R.Ornek.acik()))) })),
         donusKarti(),
         storageHorizonCard(),
         backupShapeCard(),
