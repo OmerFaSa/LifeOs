@@ -39,30 +39,30 @@ satırını buraya yazar:
 
 <!-- SAYILAR:baslangic -->
 
-_Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturur ve her aracın kendi son satırını buraya yazar. Son koşum: 2026-09-24._
+_Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturur ve her aracın kendi son satırını buraya yazar. Son koşum: 2026-09-25._
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 1729/1729 gecti | 1368/1368 gecti | 1386/1386 gecti |
-| `smoke.js` | Duman testi temiz — 2 hedefte 38 ekran, 46 sekme gezildi. | Duman testi temiz — 2 hedefte 26 ekran, 74 sekme gezildi. | Duman testi temiz — 2 hedefte 30 ekran, 192 sekme gezildi. |
+| `runtests.js` | 2100/2100 gecti | 1733/1733 gecti | 1714/1714 gecti |
+| `smoke.js` | Duman testi temiz — 2 hedefte 44 ekran, 0 sekme gezildi. | Duman testi temiz — 2 hedefte 34 ekran, 0 sekme gezildi. | Duman testi temiz — 2 hedefte 36 ekran, 0 sekme gezildi. |
 | `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
-| `palettecheck.js` | 924 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1694 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today | 1848 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.52 (asgari 4.5) — light/indigo/today |
-| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 42 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 50 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 111 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 42.5 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 20 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı office 38.6 ms (bütçe 100). |
+| `palettecheck.js` | 120 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.61 (asgari 4.5) — light/kagit/today | 140 kontrast olcumu AA gecti — en dar pay: ucuncul/zemin 4.61 (asgari 4.5) — light/kagit/today | 160 kontrast ölçümü AA geçti — en dar pay: ucuncul/zemin 4.61 (asgari 4.5) — light/kagit/today |
+| `layoutcheck.js` | Telefon düzeni temiz — 390 pikselde 22 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 17 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon düzeni temiz — 390 pikselde 18 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 49.5 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı analytics 36.2 ms (bütçe 140). | Bütün ekranlar bütçede — en ağırı office 50.8 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
-| `designcheck.js` | — | beş düzen temiz — 460 ekran/genişlik kombinasyonu bakıldı | — |
+| `designcheck.js` | — | 1 düzen temiz — 108 ekran/genişlik kombinasyonu bakıldı | — |
 | `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
 | `loadcheck.js` | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) | yuk denetimi temiz (5 yillik veri) |
 
 | Depo denetimi | Sonuç |
 |---|---|
-| `HKM tests` | 628/628 test gecti |
+| `HKM tests` | 672/672 test gecti |
 | `HKM perf` | Bütün sorgular bütçede. |
-| `HKM yuz` | HKM yüzü temiz — 56 görünümde taşma yok, bütün hedefler 24px ve üstü, etiketler yerinde, kontrast AA. |
+| `HKM yuz` | HKM yüzü temiz — 52 görünümde taşma yok, bütün hedefler 24px ve üstü, etiketler yerinde, kontrast AA. |
 | `marka.py` | marka adlandirma ve yol muhafizi temiz (25 durum) |
 | `marka kunyesi` | Medya kunyesi taze (43 gorsel, 4 aile). |
 | `seviye.py` | Seviye sistemi: uc arayuzde de kaynakla ayni. |
-| `ortak.py` | Ortak kaynak: kopyalar kaynakla ayni (47 dosya, 141 kopya). |
+| `ortak.py` | Ortak kaynak: kopyalar kaynakla ayni (78 dosya, 234 kopya). |
 | `entegre.js` | Butunlesme temiz: uc arayuz de HKM ile konustu, HKM kapaliyken hicbiri bozulmadi. |
 <!-- SAYILAR:bitis -->
 

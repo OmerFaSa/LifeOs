@@ -32,7 +32,7 @@
 | T2-05 | H | ✅ b32fe7f | ESP test sayfası `audit.test.js`'i iki kez yüklüyordu (21 test iki kez koşuyordu) |
 | T2-04 | H | ✅ b32fe7f | Perde `hepsiniKapat` dinleyici ve sayaç bırakıyordu: sonraki ilk Esc yutuluyor, haberci 3 sn sonra perde açıyordu |
 | T2-03 | K | ✅ c063316 (H doğruladı) | Grafik parçaları zaman damgasından UTC gününü alıyor (gece 00–03 kaydı düne düşer) |
-| T2-02 | K (137) | açık | AYS Ofis ve Danışma'da ajanın okuduğu veri ham kimlikle yazılıyor |
+| T2-02 | K (137) → H | ✅ Ofis K c0b9d6c · Danışma H f58fd52 (önce kırmızı test) | AYS Ofis ve Danışma'da ajanın okuduğu veri ham kimlikle yazılıyor |
 | T2-01 | K | ✅ a798671 (H doğruladı) | Fark rozeti yuvarlanıp 0 olan farkı «+0» ve iyi/kötü renkle gösteriyor |
 
 ### T2-12 · T3 AYS üretilmiş kopyayı elle değiştirdi — main CI kırmızı (yüksek)

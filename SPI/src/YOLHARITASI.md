@@ -110,7 +110,9 @@ bir bardak ayran» dendiğinde klavyeyle yazılan yolun aynısı çalışır.
 
 - ✅ Sayfanın herhangi bir yerine bırakılan dosya, ekranın tanımladığı
   bırakma alanına gidiyor. Kullanıcı küçük bir kutuya nişan almıyor.
-- ⬜ Komut paleti veri girişi kabul eder: `ferritin 26`, `45 dk yürüyüş`
+- ✅ Komut paleti veri girişi kabul eder: `ferritin 26`, `45 dk yürüyüş`
+  (`js/core/palette.js`: yazılan önizleme olur, onaysız hiçbir şey yazılmaz,
+  her kayıt geri alınır).
 
 ---
 
