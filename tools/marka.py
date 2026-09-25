@@ -114,6 +114,56 @@ def _kb(n):
     return "%6.0f KB" % (n / 1024)
 
 
+# ------------------------------------------------------------------
+# KARE PORTRE BIR FOTOGRAFTIR: DELIGI OLAMAZ
+#
+# 2026-09-25'te bulundu: yirmi bes kare portrenin yirmi ikisinde saydam
+# delik vardi — acik renkli ve kenara degen her yer (acik duvar, beyaz
+# tisort, krem kazak) silinmisti. «Beyaz zemini sil» isleminin izi:
+# portreler beyaz zeminli bir tabakadan kesilmisti. Koyu temada delik
+# SIYAH yirtik gibi gorundu; arac ise «kayipsiz» diye oldugu gibi
+# yerlestirmisti. Daire portrenin koseleri BILEREK saydamdir; karenin
+# tek bir pikseli bile saydam olamaz.
+def kare_portre_mu(ad: str) -> bool:
+    return ad.startswith("ajan-kare-")
+
+
+def saydam_oran(im) -> float:
+    """Arkasi GORUNEN (alfa < 128) piksellerin orani; alfa yoksa 0.
+
+    Esik 128: HKM karelerinin kenari bilerek yumusatilmis (alfa 250-253)
+    ve o bir delik degildir; delik, arkasindaki zeminin gorundugu yerdir."""
+    if im.mode not in ("RGBA", "LA", "P", "PA"):
+        return 0.0
+    a = im.convert("RGBA").getchannel("A")
+    return sum(a.histogram()[:128]) / float(a.width * a.height)
+
+
+def delik() -> int:
+    """`--delik`: depodaki kare portrelerden hangisi delikli, ne kadar.
+    Pillow ister; CI'da Pillow yok, bu yuzden kapi `isle`dedir (yeni
+    delikli dosya zaten yerlesemez) ve bu komut kalanlari sayar."""
+    try:
+        from PIL import Image
+    except ImportError:
+        print("HATA: Pillow yok.  pip install pillow")
+        return 2
+    kotu = []
+    dosyalar = sorted((MEDYA / "ajan").glob("ajan-kare-*.webp"))
+    for f in dosyalar:
+        o = saydam_oran(Image.open(f))
+        if o > 0:
+            kotu.append((o, f.stem))
+    for o, ad in sorted(kotu, reverse=True):
+        print("  ✕ %-30s %%%.1f delik" % (ad, 100 * o))
+    if kotu:
+        print("\n%d / %d kare portre delikli. Temiz kaynak gelince aynı adla "
+              "`python3 tools/marka.py <klasör>` ile değiştirilir." % (len(kotu), len(dosyalar)))
+        return 1
+    print("Kare portreler temiz (%d dosya, delik yok)." % len(dosyalar))
+    return 0
+
+
 def isle(kaynak: Path, dene: bool = False) -> int:
     if not kaynak.is_dir():
         print("HATA: %s bir klasör değil" % kaynak)
@@ -126,7 +176,7 @@ def isle(kaynak: Path, dene: bool = False) -> int:
             return 1
         Image = None
 
-    yazilan = atlanan = 0
+    yazilan = atlanan = reddedilen = 0
     once = sonra = 0
     for dosya in sorted(kaynak.rglob("*")):
         if not dosya.is_file():
@@ -147,6 +197,14 @@ def isle(kaynak: Path, dene: bool = False) -> int:
         hedef = klasor / (ad + (uzanti if koru else ".webp"))
 
         if dene:
+            if Image is not None and not koru and kare_portre_mu(ad):
+                o = saydam_oran(Image.open(dosya))
+                if o > 0:
+                    print("  ✕ %-36s YERLEŞTİRİLMEYECEK — kare portrenin %%%.1f'i "
+                          "delik" % (dosya.name[:36], 100 * o))
+                    atlanan += 1
+                    reddedilen += 1
+                    continue
             print("  → %-36s %s/%s" % (dosya.name[:36], aile, hedef.name))
             yazilan += 1
             continue
@@ -160,6 +218,13 @@ def isle(kaynak: Path, dene: bool = False) -> int:
             continue
 
         im = Image.open(dosya)
+        if kare_portre_mu(ad) and saydam_oran(im) > 0:
+            print("  ✕ %-36s YERLEŞTİRİLMEDİ — kare portrenin %%%.1f'i delik "
+                  "(arka planı silinmiş bir fotoğraf). Temiz kaynağı ver."
+                  % (dosya.name[:36], 100 * saydam_oran(im)))
+            atlanan += 1
+            reddedilen += 1
+            continue
         if im.mode in ("RGBA", "LA", "P"):
             im = im.convert("RGBA")
             kutu = im.getchannel("A").getbbox()
@@ -176,12 +241,12 @@ def isle(kaynak: Path, dene: bool = False) -> int:
     if dene:
         print("\nDENEME: hiçbir şey yazılmadı. %d dosya işlenecek, %d atlanacak."
               % (yazilan, atlanan))
-        return 0
+        return 1 if reddedilen else 0
     print("\n%d dosya yazıldı, %d atlandı." % (yazilan, atlanan))
     if once and sonra and once != sonra:
         print("Toplam %.1f MB → %.1f MB (%%%.0f küçüldü)."
               % (once / 1048576, sonra / 1048576, 100 * (1 - sonra / once)))
-    return 0
+    return 1 if reddedilen else 0
 
 
 def liste() -> int:
@@ -498,6 +563,41 @@ def sina() -> int:
         if kotu != "/img/seviye/kimlik-ays.webp" and marka(kotu, "/k"):
             hata.append("%r reddedilmeliydi" % kotu)
 
+    # KARE PORTRE DELIKSIZ OLMALI. Kural saf: ad + saydam oran. Pillow
+    # CI'da yok; varsa gercek bir goruntuyle de sinanir.
+    if not kare_portre_mu("ajan-kare-esp-maestro") or kare_portre_mu("ajan-esp-maestro"):
+        hata.append("kare_portre_mu adi yanlis ayirdi")
+    try:
+        from PIL import Image
+    except ImportError:
+        Image = None
+    if Image is not None:
+        dolu = Image.new("RGBA", (10, 10), (200, 190, 180, 255))
+        delikli = dolu.copy()
+        delikli.putpixel((0, 0), (255, 255, 255, 0))
+        yumusak = dolu.copy()
+        yumusak.putpixel((9, 9), (200, 190, 180, 252))
+        if saydam_oran(dolu) != 0 or not (0 < saydam_oran(delikli) < 0.02):
+            hata.append("saydam_oran yanlis olctu")
+        if saydam_oran(yumusak) != 0:
+            hata.append("yumusatilmis kenar (alfa 252) delik sayildi")
+        if saydam_oran(Image.new("RGB", (4, 4))) != 0:
+            hata.append("alfasiz goruntu saydam sayildi")
+        import tempfile
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            delikli.save(d / "ajan-kare-deneme-delik.png")
+            eski = MEDYA
+            try:
+                globals()["MEDYA"] = d / "medya"
+                import contextlib, io
+                with contextlib.redirect_stdout(io.StringIO()):
+                    kod = isle(d)
+                if kod != 1 or (d / "medya" / "ajan" / "ajan-kare-deneme-delik.webp").exists():
+                    hata.append("delikli kare portre yerlestirildi (reddedilmeliydi)")
+            finally:
+                globals()["MEDYA"] = eski
+
     if hata:
         print("MARKA SINAMASI KALDI:")
         for h in hata:
@@ -604,6 +704,9 @@ def main() -> int:
 
     if "--kunye" in sys.argv:
         return kunye("--denetle" in sys.argv)
+
+    if "--delik" in sys.argv:
+        return delik()
 
     if "--liste" in sys.argv:
         return liste()

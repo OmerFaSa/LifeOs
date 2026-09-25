@@ -73,6 +73,25 @@ betiğinde sabitlendi: yüz benzerliğini ölçen iki betik denendi, ikisi de
 aynı kişiyi birden fazla ajana verdi. «Hepsi gülümseyen, bulanık oda
 önünde duran insanlar» bir ölçüte yetecek kadar farklılaşmıyor.
 
+### Kare portre deliksizdir
+
+Kare bir FOTOĞRAFTIR; tek bir pikseli bile arkasını göstermez. Daire
+portrenin köşeleri bilerek saydamdır, karenin değil. 2026-09-25'te
+yirmi beş karenin yirmisinde delik bulundu: portreler beyaz zeminli bir
+tabakadan kesilmiş, «beyaz zemini sil» işlemi fotoğrafın kenara değen
+açık renkli yerlerini de silmişti (açık duvar, beyaz tişört, krem
+kazak). Koyu temada delik siyah yırtık gibi görünüyordu.
+
+Artık `tools/marka.py` delikli bir kareyi **yerleştirmez** ve sebebini
+yazar. Kalanları sayar:
+
+```bash
+python3 tools/marka.py --delik     # hangi kare delikli, yüzde kaç
+```
+
+Temiz kaynak gelince aynı adla (`ajan-kare-<mod>-<id>`) verilir; 4:5
+kırpılır (uygulama 60×75 gösterir), mevcut karelerin boyunda (320×400).
+
 ### Neyin ne olduğu
 
 | Dosya | Nerede görünür |
