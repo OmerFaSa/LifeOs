@@ -308,23 +308,17 @@ a{ color:inherit; }
   .cerceve{ height:100%; width:100%; border-radius:0; }
   .izle{ padding:0; }
 }
-/* Gomulu: HKM yuzunun Bugun › Meydan bolumunde, cercevenin icinde. Kendi
-   menusu yerine ustte tek sira sekme; yuzun menusu zaten solda. */
-.sekmeler{ display:none; gap:6px; padding:10px 16px; border-bottom:1px solid var(--line); position:sticky; top:0;
-  z-index:6; background:var(--bg); overflow-x:auto; scrollbar-width:none; }
-.gomulu .nav, .gomulu .ustbar, .gomulu .altnav{ display:none !important; }
-.gomulu .sekmeler{ display:flex; }
-.sekmeler .cip[aria-current="page"]{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
-.gomulu .baslik{ position:static; }
-.gomulu .app{ grid-template-columns:minmax(0,640px) 280px; min-height:0; }
-.gomulu .col{ padding-bottom:0; }
-.gomulu body, .gomulu .tost{ --alt:0px; }
-@media (max-width:960px){ .gomulu .app{ grid-template-columns:minmax(0,1fr); } }
+/* Panel: HKM yuzunde kenardan acilan cercevenin icinde (`?panel=1`). Ust
+   bar yuzun panel basligindadir; burada telefon duzeni ve alt menu kalir. */
+.panel .ustbar, .panel .nav, .panel .yan{ display:none !important; }
+.panel .app{ display:block; }
+.panel .col{ border-right:0; }
+.panel #g-akis .baslik h1{ display:none; }
 @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; scroll-behavior:auto !important; } }
 </style>
 </head>
 <body>
-<script>if(/[?&]gomulu=1/.test(location.search)) document.documentElement.classList.add('gomulu');</script>
+<script>if(/[?&]panel=1/.test(location.search)) document.documentElement.classList.add('panel');</script>
 <div class="app">
   <aside class="nav" aria-label="Menü">
     <div class="marka"><i></i><b>Meydan</b><small>HKM</small></div>
@@ -336,12 +330,6 @@ a{ color:inherit; }
   </aside>
 
   <main class="col" id="main">
-    <nav class="sekmeler" aria-label="Meydan">
-      <button class="cip" data-gorunum="akis" aria-current="page">Akış</button>
-      <button class="cip" data-gorunum="tekrar">Tekrar <em class="rozet num" data-rozet hidden></em></button>
-      <button class="cip" data-gorunum="kayit">Kaydedilenler</button>
-      <button class="cip" data-not>Not yaz</button>
-    </nav>
     <header class="ustbar"><div class="marka"><i></i><b>Meydan</b></div><a class="bos" href="/">HKM</a></header>
 
     <section id="g-akis">
@@ -576,6 +564,7 @@ a{ color:inherit; }
     $('yk-sayi').textContent = t.vadeli;
     $('yk-cumle').textContent = t.cumle;
     document.querySelectorAll('[data-rozet]').forEach(function(e){ e.textContent = t.vadeli || ''; e.hidden = !t.vadeli; });
+    yuzeSoyle({ meydan:'tekrar', vadeli:t.vadeli });
   }
   function cizTekrar(){
     var d = st.deste;
@@ -852,6 +841,38 @@ a{ color:inherit; }
   });
   $('perde').addEventListener('click', function(e){ if(e.target.id === 'perde') pencereKapat(); });
   $('izle').addEventListener('click', function(e){ if(e.target.id === 'izle') izKapat(); });
+
+  /* ---------------- panel: HKM yuzunun kenar paneli icinde.
+     Ileti yalniz ayni kaynaktan ve yalniz ust pencereyle alinip verilir. */
+  var PANEL = document.documentElement.classList.contains('panel') && window.parent !== window;
+  var taraf = /[?&]taraf=sol/.test(location.search) ? 'sol' : 'sag';
+  function yuzeSoyle(v){ if(PANEL){ try{ window.parent.postMessage(v, location.origin); }catch(e){} } }
+  window.addEventListener('message', function(e){
+    if(!PANEL || e.origin !== location.origin || e.source !== window.parent || !e.data) return;
+    if(e.data.meydan === 'tema'){
+      if(e.data.tema === 'acik' || e.data.tema === 'koyu') document.documentElement.setAttribute('data-tema', e.data.tema);
+      else document.documentElement.removeAttribute('data-tema');
+    }
+    if(e.data.meydan === 'taraf' && (e.data.taraf === 'sag' || e.data.taraf === 'sol')) taraf = e.data.taraf;
+    if(e.data.meydan === 'yenile') gorunum(st.gorunum);
+  });
+  if(PANEL){
+    /* Kenara dogru kaydirinca panel kapanir; yatay kayan seritlerde degil. */
+    var kx = null, ky = null;
+    document.addEventListener('touchstart', function(e){
+      if(e.touches.length !== 1 || e.target.closest('.hikayeler, .cipler, .slaytlar, input, textarea')) { kx = null; return; }
+      kx = e.touches[0].clientX; ky = e.touches[0].clientY;
+    }, { passive:true });
+    document.addEventListener('touchend', function(e){
+      if(kx == null || !$('izle').hidden || !$('perde').hidden) return;
+      var dx = e.changedTouches[0].clientX - kx, dy = Math.abs(e.changedTouches[0].clientY - ky);
+      kx = null;
+      if(dy < 50 && ((taraf === 'sag' && dx > 90) || (taraf === 'sol' && dx < -90))) yuzeSoyle({ meydan:'kapat' });
+    }, { passive:true });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && $('izle').hidden && $('perde').hidden) yuzeSoyle({ meydan:'kapat' });
+    });
+  }
 
   cizCipler();
   if(!token){ jetonSor(); } else { yukleAkis(); yukleDesteSessiz(); }

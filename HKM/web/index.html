@@ -684,10 +684,6 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   <!-- Bölüm çubuğu: birden çok bölümlü çekmecede görünür (iç içelik en çok
        iki kat: çekmece › bölüm). -->
   <nav class="bolumcubugu" id="bolumcubugu" aria-label="Bu çekmecede" hidden>
-    <div class="bolumcubugu__ic" data-cekmece="bugun" hidden>
-      <a href="#/bugun" data-yol="bugun">Günün özeti</a>
-      <a href="#/meydan" data-yol="meydan">Meydan</a>
-    </div>
     <div class="bolumcubugu__ic" data-cekmece="sistemler" hidden>
       <a href="#/sistemler" data-yol="sistemler">Modüller</a>
       <a href="#/para" data-yol="para">Para</a>
@@ -806,13 +802,6 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     </div>
 
     <!-- =========================== SOHBETLER ========================= -->
-    <!-- MEYDAN (kullanıcı kararı 2026-09-25, ekip/meydan/MEYDAN.md): sistemin
-         kendi akışı, Bugün çekmecesinin bölümü. Ayrı dosyadır (web/meydan.html,
-         core/meydan.py) ve aynı jetonu okur; yüz yalnız çerçeveyi açar. -->
-    <div data-bolme="meydan" hidden>
-      <iframe id="meydan-cerceve" title="Meydan"
-        style="display:block;width:100%;height:calc(100vh - 150px);min-height:560px;border:1px solid var(--line);border-radius:14px;background:var(--bg)"></iframe>
-    </div>
     <div data-bolme="sohbet" hidden>
       <div class="gun"><h1>Sohbetler</h1></div>
       <div class="card" id="gorevliler"></div>
@@ -4525,7 +4514,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
      gorunumun verisi cekilir — her sekmede butun ambari sorgulamak,
      acilisi bekletmekten baska is yapmiyordu. */
   var GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'motto',
-                    'hedefler', 'ofis', 'teklifler', 'para', 'ayarlar', 'meydan'];
+                    'hedefler', 'ofis', 'teklifler', 'para', 'ayarlar'];
   var gorunum = 'bugun';
 
   function yolOku(){
@@ -4546,7 +4535,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   /* Görünüm → çekmece (üst gezinmede hangisi yanar). */
   var CEKMECE = { bugun:'bugun', teklifler:'teklifler', hedefler:'hedefler',
                   sistemler:'sistemler', para:'sistemler', ofis:'ofis', sohbet:'sohbet',
-                  ayarlar:'ayarlar', profil:'ayarlar', motto:'ayarlar', meydan:'bugun' };
+                  ayarlar:'ayarlar', profil:'ayarlar', motto:'ayarlar' };
 
   function altYolOku(){
     var p = (location.hash || '').replace(/^#\/?/, '').split('/');
@@ -4837,14 +4826,6 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     if(gorunum === 'teklifler') return yukleTeklifler();
     if(gorunum === 'para') return yuklePara();
     if(gorunum === 'ayarlar') return yukleAyarlar();
-    if(gorunum === 'meydan') return yukleMeydan();
-  }
-
-  /* Meydan ayrı sayfadır (core/meydan.py); yüz çerçeveyi yalnız ilk açılışta
-     yükler, sonra olduğu gibi bırakır (yazılan not, açık kart kaybolmaz). */
-  function yukleMeydan(){
-    var f = $('meydan-cerceve');
-    if(f && !f.getAttribute('src')) f.setAttribute('src', '/meydan?gomulu=1');
   }
 
   async function yukleBugun(t){
@@ -5466,6 +5447,172 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     if(bizim) a.href = l.protocol + '//' + l.hostname + ':' + a.getAttribute('data-kapi') + '/';
     else a.title = 'Ayrı kapıda açılır';
   });
+})();
+</script>
+
+<!-- MEYDAN PANELİ (kullanıcı kararı 2026-09-25: «sekme gibi değil, sağdan
+     soldan başlatılan bir sosyal medya gibi»; core/meydan.py, web/meydan.html).
+     Bu blok KENDİ İÇİNDE KAPALIDIR: yüzün yönlendiricisine, çekmecelerine ve
+     CSS'ine dokunmaz, adları «meydan-» ile başlar. Silinirse yüz Meydan
+     öncesiyle birebir aynıdır. Veri /api/meydan'dan gelir, jeton yüzünkidir;
+     bu blok hiçbir sayı hesaplamaz. Tutamaç yalnız giriş yapılmışken görünür. -->
+<style>
+.meydan-tutamac{ position:fixed; z-index:40; display:flex; align-items:center; gap:8px; min-height:0;
+  border:0; border-radius:12px 0 0 12px; background:var(--accent); color:var(--on-accent);
+  font:600 13px/1 'Inter', ui-sans-serif, system-ui, sans-serif; letter-spacing:.02em;
+  box-shadow:0 6px 20px rgba(17,19,24,.18); cursor:pointer; }
+.meydan-tutamac:hover{ filter:brightness(1.08); }
+.meydan-tutamac:focus-visible{ outline:2px solid var(--fg); outline-offset:2px; }
+.meydan-logo{ width:10px; height:10px; border-radius:50%; flex:none; box-shadow:0 0 0 2px var(--on-accent);
+  background:conic-gradient(#2D5BE3 0 25%, #0A7A69 0 50%, #A65B0F 0 75%, #7453D4 0); }
+.meydan-rozet{ min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:var(--on-accent);
+  color:var(--accent); font:700 11.5px/20px ui-sans-serif, system-ui, sans-serif; text-align:center; }
+/* Masaustu: kenarda dikey tutamac, ekranin ortasinda. */
+@media (min-width:1024px){
+  .meydan-tutamac{ top:50%; transform:translateY(-50%); flex-direction:column; padding:14px 9px; }
+  .meydan-tutamac .meydan-ad{ writing-mode:vertical-rl; transform:rotate(180deg); }
+  .meydan-tutamac[data-taraf="sag"]{ right:0; border-radius:12px 0 0 12px; }
+  .meydan-tutamac[data-taraf="sol"]{ left:240px; border-radius:0 12px 12px 0; }
+}
+/* Telefon ve dar ekran: kosede yuvarlak dugme. */
+@media (max-width:1023px){
+  .meydan-tutamac{ bottom:calc(env(safe-area-inset-bottom,0px) + 18px); height:48px; padding:0 16px;
+    border-radius:24px; }
+  .meydan-tutamac[data-taraf="sag"]{ right:16px; }
+  .meydan-tutamac[data-taraf="sol"]{ left:16px; }
+}
+.meydan-perde{ position:fixed; inset:0; z-index:58; background:rgba(8,10,12,.38); opacity:0;
+  transition:opacity .24s ease; }
+.meydan-perde.acik{ opacity:1; }
+.meydan-panel{ position:fixed; top:0; bottom:0; z-index:59; width:min(480px, 100vw); display:flex;
+  flex-direction:column; background:var(--bg); box-shadow:0 0 40px rgba(8,10,12,.28);
+  transition:transform .26s cubic-bezier(.2,.8,.2,1); }
+.meydan-panel[data-taraf="sag"]{ right:0; transform:translateX(100%); border-left:1px solid var(--line); }
+.meydan-panel[data-taraf="sol"]{ left:0; transform:translateX(-100%); border-right:1px solid var(--line); }
+.meydan-panel.acik{ transform:none; }
+.meydan-ust{ display:flex; align-items:center; gap:8px; padding:10px 12px;
+  padding-top:calc(env(safe-area-inset-top,0px) + 10px); border-bottom:1px solid var(--line); background:var(--bg); }
+.meydan-ust .meydan-logo{ box-shadow:none; }
+.meydan-ust b{ display:flex; align-items:center; gap:8px; font:700 16px/1.2 'Inter', ui-sans-serif, system-ui, sans-serif; color:var(--fg); }
+.meydan-ust small{ display:block; font-size:12px; color:var(--dim); margin-top:2px; }
+.meydan-ust .meydan-bosluk{ flex:1; min-width:0; }
+.meydan-ust button, .meydan-ust a{ min-height:32px; padding:7px 10px; border-radius:8px; border:1px solid var(--line-strong);
+  background:var(--yuzey); color:var(--fg); font:600 12.5px/1 ui-sans-serif, system-ui, sans-serif;
+  text-decoration:none; white-space:nowrap; display:inline-flex; align-items:center; }
+.meydan-cerceve{ flex:1; width:100%; border:0; background:var(--bg); }
+@media (max-width:420px){ .meydan-ust .meydan-tam{ display:none; } }
+@media (prefers-reduced-motion: reduce){ .meydan-panel, .meydan-perde{ transition:none; } }
+</style>
+<button type="button" class="meydan-tutamac" id="meydan-tutamac" data-taraf="sag" hidden
+  aria-controls="meydan-panel" aria-expanded="false" aria-label="Meydan’ı aç">
+  <span class="meydan-logo" aria-hidden="true"></span><span class="meydan-ad">Meydan</span>
+  <span class="meydan-rozet" id="meydan-rozet" hidden></span>
+</button>
+<div class="meydan-perde" id="meydan-perde" hidden></div>
+<section class="meydan-panel" id="meydan-panel" data-taraf="sag" role="dialog" aria-modal="true"
+  aria-label="Meydan" hidden>
+  <div class="meydan-ust">
+    <div class="meydan-bosluk"><b><span class="meydan-logo" aria-hidden="true"></span>Meydan</b><small>Dört sistemin akışı · sayıları kod üretir</small></div>
+    <button type="button" id="meydan-taraf">Sola al</button>
+    <a class="meydan-tam" href="/meydan">Tam sayfa</a>
+    <button type="button" id="meydan-kapat">Kapat</button>
+  </div>
+  <iframe class="meydan-cerceve" id="meydan-cerceve" title="Meydan akışı"></iframe>
+</section>
+<script>
+(function(){
+  'use strict';
+  var TARAF_KEY = 'hkm.meydan.taraf', TOKEN_KEY = 'hkm.token';
+  function $(id){ return document.getElementById(id); }
+  var tut = $('meydan-tutamac'), panel = $('meydan-panel'), perde = $('meydan-perde'),
+      cer = $('meydan-cerceve'), tarafBtn = $('meydan-taraf'), rozet = $('meydan-rozet');
+  var taraf = 'sag', acik = false, sonOdak = null, zaman = null;
+  try{ if(localStorage.getItem(TARAF_KEY) === 'sol') taraf = 'sol'; }catch(e){}
+  function mesaj(veri){
+    try{ if(cer.contentWindow) cer.contentWindow.postMessage(veri, location.origin); }catch(e){}
+  }
+  function tarafUygula(){
+    tut.setAttribute('data-taraf', taraf); panel.setAttribute('data-taraf', taraf);
+    tarafBtn.textContent = taraf === 'sag' ? 'Sola al' : 'Sağa al';
+    mesaj({ meydan:'taraf', taraf:taraf });
+  }
+  function temaGonder(){ mesaj({ meydan:'tema', tema:document.documentElement.getAttribute('data-tema') || '' }); }
+  function ac(){
+    if(acik) return;
+    acik = true; clearTimeout(zaman); sonOdak = document.activeElement;
+    if(!cer.getAttribute('src')) cer.setAttribute('src', '/meydan?panel=1&taraf=' + taraf);
+    else { temaGonder(); mesaj({ meydan:'yenile' }); }
+    perde.hidden = false; panel.hidden = false;
+    void panel.offsetWidth;                     /* gecis baslangici cizilsin */
+    panel.classList.add('acik'); perde.classList.add('acik');
+    tut.setAttribute('aria-expanded', 'true');
+    document.documentElement.style.overflow = 'hidden';
+    setTimeout(function(){ $('meydan-kapat').focus(); }, 60);
+  }
+  function kapat(){
+    if(!acik) return;
+    acik = false;
+    panel.classList.remove('acik'); perde.classList.remove('acik');
+    tut.setAttribute('aria-expanded', 'false');
+    document.documentElement.style.overflow = '';
+    zaman = setTimeout(function(){ if(!acik){ panel.hidden = true; perde.hidden = true; } }, 280);
+    if(sonOdak && sonOdak.focus) sonOdak.focus();
+    rozetYukle();
+  }
+  async function rozetYukle(){
+    var token = null;
+    try{ token = localStorage.getItem(TOKEN_KEY); }catch(e){}
+    if(!token) return;
+    try{
+      var r = await fetch('/api/meydan/deste', { headers:{ 'Authorization':'Bearer ' + token } });
+      if(!r.ok) return;
+      var g = await r.json(), n = (g.ozet || {}).vadeli || 0;
+      rozet.textContent = n; rozet.hidden = !n;
+      tut.setAttribute('aria-label', n ? 'Meydan’ı aç, ' + n + ' kart tekrar bekliyor' : 'Meydan’ı aç');
+    }catch(e){}
+  }
+  tut.addEventListener('click', ac);
+  $('meydan-kapat').addEventListener('click', kapat);
+  perde.addEventListener('click', kapat);
+  tarafBtn.addEventListener('click', function(){
+    taraf = taraf === 'sag' ? 'sol' : 'sag';
+    try{ localStorage.setItem(TARAF_KEY, taraf); }catch(e){}
+    tarafUygula();
+  });
+  cer.addEventListener('load', function(){ temaGonder(); tarafUygula(); });
+  document.addEventListener('keydown', function(e){ if(acik && e.key === 'Escape') kapat(); });
+  /* Cercevedeki Meydan kapatmayi ve tekrar sayisini soyler; yalniz ayni
+     kaynaktan ve yalniz bu cerceveden gelen ileti dinlenir. */
+  window.addEventListener('message', function(e){
+    if(e.origin !== location.origin || e.source !== cer.contentWindow || !e.data) return;
+    if(e.data.meydan === 'kapat') kapat();
+    if(e.data.meydan === 'tekrar' && typeof e.data.vadeli === 'number'){
+      rozet.textContent = e.data.vadeli; rozet.hidden = !e.data.vadeli;
+    }
+  });
+  /* Dokunmatik: secilen kenardan iceri kaydirinca acilir. */
+  var x0 = null, y0 = null;
+  document.addEventListener('touchstart', function(e){
+    if(acik || tut.hidden || e.touches.length !== 1) return;
+    var x = e.touches[0].clientX;
+    var kenarda = taraf === 'sag' ? window.innerWidth - x < 22 : x < 22;
+    if(kenarda){ x0 = x; y0 = e.touches[0].clientY; } else x0 = null;
+  }, { passive:true });
+  document.addEventListener('touchmove', function(e){
+    if(x0 == null) return;
+    var dx = e.touches[0].clientX - x0, dy = Math.abs(e.touches[0].clientY - y0);
+    if(dy > 50){ x0 = null; return; }
+    if((taraf === 'sag' && dx < -60) || (taraf === 'sol' && dx > 60)){ x0 = null; ac(); }
+  }, { passive:true });
+  /* Tutamac yuzun cekmeceleriyle birlikte gorunur: giris ekraninda yoktur. */
+  var gez = $('gez');
+  function gorunurluk(){
+    var once = tut.hidden;
+    tut.hidden = !gez || gez.hidden;
+    if(once && !tut.hidden) rozetYukle();
+  }
+  if(gez && window.MutationObserver) new MutationObserver(gorunurluk).observe(gez, { attributes:true, attributeFilter:['hidden'] });
+  tarafUygula(); gorunurluk();
 })();
 </script>
 </body>
