@@ -86,15 +86,23 @@ const MODUL = {
 const SEKME = '.subtabs [data-act], .subtabs .subtab, .segmented [data-act], [role="tab"]';
 const SEKME_GRUBU = '.subtabs, .segmented, [role="tablist"]';
 
-let chromium;
-try{
-  ({ chromium } = require(path.join(KOK, 'ESP', 'node_modules', 'playwright')));
-}catch(e){
-  try{ ({ chromium } = require('playwright')); }
-  catch(e2){
-    console.error('Playwright bulunamadi. Kurulum: ESP icinde  npm ci');
-    process.exit(2);
+/* Playwright YALNIZ tarayıcı açılırken istenir. Bu dosyayı modül olarak
+   yükleyen tarayıcısız denetimler (`sadelik.js --onay`, sayaç testi) CI'ın
+   npm ci yapmayan işinde de koşar; eskiden yükleme anında 2 ile çıkıyordu
+   (eef6d60, a2d29e4 — `tools/playwrightsiz.test.js`). */
+let chromium = null;
+function tarayiciYukle(){
+  if(chromium) return chromium;
+  try{
+    ({ chromium } = require(path.join(KOK, 'ESP', 'node_modules', 'playwright')));
+  }catch(e){
+    try{ ({ chromium } = require('playwright')); }
+    catch(e2){
+      console.error('Playwright bulunamadi. Kurulum: ESP icinde  npm ci');
+      process.exit(2);
+    }
   }
+  return chromium;
 }
 
 const bekle = ms => new Promise(r => setTimeout(r, ms));
@@ -650,7 +658,7 @@ function karsilastir(ad, taban, simdi, izin){
    ANA */
 
 async function gez(moduller){
-  const tarayici = await chromium.launch(process.env.CHROMIUM_PATH
+  const tarayici = await tarayiciYukle().launch(process.env.CHROMIUM_PATH
     ? { executablePath:process.env.CHROMIUM_PATH } : {});
   const out = {};
   try{

@@ -176,9 +176,10 @@ jobs:
       # ONAY DÜĞMESİ SONUCU SÖYLER (katalog 022). `confirmSheet`'e etiket
       # verilmezse düğme «Evet, devam et» yazar ve basınca ne olacağını
       # söylemez. Kural kaynakta sayılır (tarayıcı istemez); önce sayacın
-      # kendisi denenir, sonra üç arayüz.
+      # kendisi denenir, sonra üç arayüz. Bu iş npm ci yapmaz: önce
+      # tarayıcısız denetimlerin Playwright istemediği sınanır.
       - name: Onay düğmeleri sonucu söylüyor mu
-        run: node tools/sadelik.test.js && node tools/sadelik.js --onay
+        run: node tools/playwrightsiz.test.js && node tools/sadelik.test.js && node tools/sadelik.js --onay
 
   hkm:
     name: HKM — testler, sorgu bütçesi, panonun yüzü
