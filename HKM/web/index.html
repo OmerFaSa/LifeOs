@@ -5485,6 +5485,11 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   transition:transform .32s cubic-bezier(.2,.9,.25,1.05), opacity .22s ease; }
 .meydan-pencere.acik{ opacity:1; transform:translate(-50%, -50%) scale(1); }
 .meydan-cerceve{ display:block; width:100%; height:100%; border:0; background:var(--bg); }
+/* Bilgisayarda genis pencere: Meydan uc sutuna acilir (menu ve hesaplar ·
+   akis · ozet). Dar ekranda telefon oraninda kalir. */
+@media (min-width:1024px){
+  .meydan-pencere{ width:min(1280px, calc(100vw - 64px)); height:min(920px, calc(100vh - 48px)); border-radius:24px; }
+}
 @media (max-width:640px){
   .meydan-pencere{ left:0; top:auto; bottom:0; width:100%; height:calc(100% - env(safe-area-inset-top,0px) - 10px);
     border-radius:24px 24px 0 0; opacity:1; transform:translateY(100%); transition:transform .34s cubic-bezier(.2,.9,.25,1); }
@@ -5532,6 +5537,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     acik = false;
     pencere.classList.remove('acik'); perde.classList.remove('acik');
     ac_.setAttribute('aria-expanded', 'false');
+    mesaj({ meydan:'kapandi' });                 /* calan muzik durur */
     document.documentElement.style.overflow = '';
     zaman = setTimeout(function(){ if(!acik){ pencere.hidden = true; perde.hidden = true; } }, 340);
     if(sonOdak && sonOdak.focus) sonOdak.focus();

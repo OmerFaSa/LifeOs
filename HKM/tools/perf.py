@@ -10,7 +10,7 @@ import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from core import cross, db, impact, manager, patron, twin, weekly  # noqa: E402
+from core import bam, cross, db, impact, manager, meydan, patron, twin, weekly  # noqa: E402
 
 GUN = 270
 BASE = datetime.date(2026, 1, 1)
@@ -55,8 +55,21 @@ def kur(con):
         con.execute("INSERT INTO conversations(channel, role, text, "
                     "audio_retained, created_at) VALUES (?,?,?,0,?)",
                     ("local", "manager", "HKM · " + d, d + "T20:01:01"))
+    # Meydan: bir haftalik BAM urunu (her gun iki kayit) ve dolu bir deste.
+    for i in range(GUN - 7, GUN):
+        d = (BASE + datetime.timedelta(days=i)).isoformat()
+        for j in range(2):
+            bam.kayit_ekle(con, "materyal", "Soru seti %d-%d" % (i, j), {"tur": "soru", "maddeler": [
+                {"soru": "S%d?" % k, "secenekler": ["a", "b", "c", "d", "e"], "dogru": "B"}
+                for k in range(10)]}, now=d + "T11:00:00")
+    for k in range(300):
+        meydan.kart_yap(con, "Ön %d" % k, "Arka %d" % k, now=son_an())
     con.commit()
     return n
+
+
+def son_an():
+    return (BASE + datetime.timedelta(days=GUN - 1)).isoformat() + "T12:00:00"
 
 
 def olc(ad, fn, butce_ms):
@@ -91,6 +104,8 @@ def main():
     temiz &= olc("haftalık", lambda: weekly.report(con, son), 1200)
     temiz &= olc("etki", lambda: impact.summary(con), 300)
     temiz &= olc("günün mesajı", lambda: patron.daily_message(con, son), 500)
+    temiz &= olc("meydan akışı", lambda: meydan.akis(con, son, now=son_an()), 400)
+    temiz &= olc("meydan destesi", lambda: meydan.deste(con, now=son_an()), 150)
     print("\n%s\n" % ("Bütün sorgular bütçede." if temiz
                       else "BÜTÇE AŞILDI — yukarıdaki ✕ satırlarına bak."))
     return 0 if temiz else 1

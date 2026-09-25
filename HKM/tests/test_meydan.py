@@ -69,9 +69,13 @@ def run():
         _gun(con, sleep_hours=_m(5.2), recovery=_m(None, "missing"), hrv=_m(41, "computed"),
              weight=_m(80))
         a = meydan.akis(con, G, now=AN)
-        oz = [g for g in a["gonderiler"] if g["tur"] == "ozet"][0]
-        eq(oz["hesap"], "bio")
-        eq(oz["sayilar"][0], ["5,2", "uyku (saat)", "ölçüldü"])
+        oz = [g for g in a["gonderiler"] if g["id"] == "ozet-spi-" + G][0]
+        eq((oz["hesap"], oz["tur"] in ("ozet", "bulgu")), ("bio", True))
+        eq(oz["sayilar"][0][:3], ["5,2", "uyku (saat)", "ölçüldü"])
+        # Bulgu ayri gonderi DEGIL: ayni sayi iki gonderide yazilmaz.
+        no(any(g["id"].startswith("bulgu-") for g in a["gonderiler"]), "bulgu ayri gonderi")
+        if oz["uyari"]:
+            eq(oz["baslik"], [b["metin"] for b in oz["bulgular"] if b["ton"] == "uyari"][0])
         ok(["—", "toparlanma skoru", "veri yok"] in oz["sayilar"], oz["sayilar"])
         no(any(s[0] == "0" for s in oz["sayilar"]), "eksik sifir yazildi")
         no(any("kilo" in s[1] or s[1] == "weight" for s in oz["sayilar"]), "gizli alan akista")
@@ -98,7 +102,7 @@ def run():
         eq(manager.respond(con, did, "declined")["status"], 200)
         g = [x for x in meydan.akis(con, G, now=AN)["gonderiler"] if x["id"] == "oneri-%d" % did][0]
         eq((g["tur"], g["bekliyor"]), ("karar", False))
-        ok("silinmedi" in g["cumle"], g["cumle"])
+        ok("silinmedi" in g["baslik"], g["baslik"])
         eq(_say(con, "decisions"), 1)
     test("bekleyen oneri en ustte, hicbir duzeyde katlanmaz; reddedilen silinmez", t_oneri)
 
@@ -148,7 +152,7 @@ def run():
         eq((r["dogru_mu"], meydan.deste_ozet(con, now=AN)["toplam"]), (True, 1))
         g = [x for x in meydan.akis(con, G, now=AN)["gonderiler"] if x["id"] == gid][0]
         ok(g["sinav"].get("bitti"))
-        eq(g["sayilar"], [["1", "doğru", "hesaplandı"]])
+        eq(g["sayilar"], [["1", "doğru", "hesaplandı"], ["2", "çözülen", "hesaplandı"]])
     test("sinavi kod sinar; yanlis desteye vadeli girer, ikinci cevap yok", t_sinav)
 
     def t_deste_kaynaktan():
@@ -249,11 +253,129 @@ def run():
         eq(_say(con, "meydan_not"), 1)
     test("not: bos ve uzun reddedilir; kaldirilan not silinmez", t_not)
 
+    def t_rapor():
+        con = _con()
+        for i in range(20):
+            d = (datetime.date(2026, 9, 5) + datetime.timedelta(days=i)).isoformat()
+            sync_engine.ingest(con, {"module": "spi", "date": d,
+                                     "metrics": {"sleep_hours": _m(7.5 - i * 0.1)}}, now=d + "T08:00:00")
+        _gun(con, sleep_hours=_m(5.2))
+        cur = con.execute("INSERT INTO decisions(date, rank, key, proposal, created_at) "
+                          "VALUES (?,?,?,?,?)", (G, 1, "bio_red", "Bugün yükü azalt.", G + "T07:00:00"))
+        con.commit()
+        oz = [g for g in meydan.akis(con, G, now=AN)["gonderiler"] if g["id"] == "ozet-spi-" + G][0]
+        eq(len(oz["sayilar"][0]), 4)
+        ok(oz["sayilar"][0][3].startswith("↓ %"), oz["sayilar"][0])
+        eq(oz["baglanti"]["id"], "oneri-%d" % cur.lastrowid)
+        on = [g for g in meydan.akis(con, G, now=AN)["gonderiler"] if g["id"] == "oneri-%d" % cur.lastrowid][0]
+        eq((on["baglanti"]["id"], on["baglanti"]["etiket"]), ("ozet-spi-" + G, "Dayanağı"))
+        no("vp" in on, "ic alan disari sizdi")
+        ok("Dayanağı" in meydan.kural_yanit(on))
+        ok("30" in oz["kaynak"]["egilim"])
+        # Ekranda makine anahtari yok (AGENTS §1.8): kural adi Turkce.
+        dokum = json.dumps(meydan.akis(con, G, duzey="tam", now=AN)["gonderiler"], ensure_ascii=False)
+        for anahtar in ("bio_red", "ANOMALY", "APPROVED", "INCOMPLETE"):
+            no(anahtar in dokum, anahtar)
+        ok("SPİ'nin kırmızı bayrağı" in dokum)
+    test("rapor: 30 gunluk egilim (twin kurali) ve ilgili oneri ayni gonderide", t_rapor)
+
+    def t_akor():
+        def adlar_(ton, dereceler):
+            return [meydan.akor_coz(ton, d)["ad"] for d in dereceler]
+        eq(adlar_("G", ["I", "V", "vi", "IV"]), ["G", "D", "Em", "C"])
+        eq(adlar_("Am", ["i", "iv", "V7"]), ["Am", "Dm", "E7"])
+        eq(adlar_("C", ["bVII", "ii7", "Imaj7", "Vsus4", "vii°"]), ["Bb", "Dm7", "Cmaj7", "Gsus4", "B°"])
+        eq(meydan.akor_coz("Am", "i")["hz"][0], 220.0)
+        for ton, d in (("X", "I"), ("G", "IX"), ("", "I"), ("G", "")):
+            eq(meydan.akor_coz(ton, d), None, (ton, d))
+    test("akor adi ve sesi dereceden kodla cozulur; cozulmeyen tahmin edilmez", t_akor)
+
+    def t_muzik():
+        con = _con()
+        k = bam.kayit_ekle(con, "materyal", "Gitar: açık akorlar", {
+            "tur": "gitar", "duzey": "başlangıç", "konu": "açık akorlar", "baslik": "Gitar: açık akorlar",
+            "alistirmalar": [{"ad": "Döngü", "tur": "piece", "ton": "G", "ilerleyis": ["I", "V", "vi", "IV"],
+                              "baslangic_bpm": 60, "hedef_bpm": 90, "not": "Ölü zaman"},
+                             {"ad": "Tonsuz", "tur": "technique", "ton": None, "ilerleyis": [],
+                              "baslangic_bpm": 50, "hedef_bpm": 80}]}, now=G + "T10:00:00")
+        g = [x for x in meydan.akis(con, G, now=AN)["gonderiler"] if x["id"] == "bam-%d" % k["id"]][0]
+        eq((g["tur"], g["seviye"]["metin"]), ("muzik", "başlangıç"))
+        eq([a["ad"] for a in g["alistirmalar"][0]["akorlar"]], ["G", "D", "Em", "C"])
+        eq((g["alistirmalar"][0]["bas_bpm"], g["alistirmalar"][0]["hedef_bpm"]), (60, 90))
+        eq(g["alistirmalar"][1]["akorlar"], [])
+        ok("referans" in g["cumle"])
+    test("gitar paketi calinabilir muzik gonderisi; tempo referanstir", t_muzik)
+
+    def t_gunun_ozeti():
+        con = _con()
+        ok("hiçbir sistemden" in meydan.akis(con, G, now=AN)["bugun"]["cumle"])
+        _gun(con, sleep_hours=_m(7))
+        b = meydan.akis(con, G, now=AN)["bugun"]
+        eq((b["gelen"], b["gelmeyen"]), (["SPİ"], ["AYS", "ESP"]))
+        ok("sıfır sayılmadı" in b["cumle"], b["cumle"])
+        for s_ in b["sayilar"]:
+            eq(s_[2], "hesaplandı")
+    test("gunun ozeti kaydi gelmeyen modulu adiyla soyler; sayilar hesaplandi", t_gunun_ozeti)
+
+    def t_profil_arama():
+        con = _con()
+        _gun(con, sleep_hours=_m(5.2))
+        _soru_seti(con)
+        meydan.not_yaz(con, "Paragrafta acele ettim.", "ays", now=AN)
+        a = meydan.akis(con, G, hesap="bam", now=AN)
+        eq({g["hesap"] for g in a["gonderiler"]}, {"bam"})
+        eq((a["hikayeler"], a["hesap"]), ([], "bam"))
+        ok(a["hesap_sayilari"]["bio"] >= 1)
+        eq([g["hesap"] for g in meydan.akis(con, G, q="PARAGRAF", now=AN)["gonderiler"]], ["sen"])
+        yok = meydan.akis(con, G, q="zzzz", now=AN)
+        eq(yok["gonderiler"], [])
+        ok("zzzz" in yok["son"])
+        eq(meydan.akis(con, G, hesap="kimse", now=AN)["hesap"], None)
+    test("profil yalniz o hesabi, arama yalniz eslesenleri gosterir; bulunmayan soylenir", t_profil_arama)
+
+    def t_ne_zaman():
+        eq(meydan.ne_zaman(G + "T11:59:30", AN), "şimdi")
+        eq(meydan.ne_zaman(G + "T11:50:00", AN), "10 dk önce")
+        eq(meydan.ne_zaman(G + "T08:00:00", AN), "4 sa önce")
+        eq(meydan.ne_zaman("2026-09-24T21:40:00", AN), "dün 21:40")
+        eq(meydan.ne_zaman("2026-09-20", AN), "20 Eylül")
+        eq(meydan.ne_zaman(G, AN), "bugün")
+    test("zaman kodun cumlesiyle yazilir (şimdi, dk, sa, dün, tarih)", t_ne_zaman)
+
+    def t_yanit():
+        con = _con()
+        _gun(con, sleep_hours=_m(5.2))
+        k = _soru_seti(con)
+        meydan.not_yaz(con, "Notum.", now=AN)
+        gid = "bam-%d" % k["id"]
+        eq(meydan.yanit_hazirla(con, G, gid, "  ", now=AN)["status"], 400)
+        eq(meydan.yanit_hazirla(con, G, gid, "x" * 401, now=AN)["status"], 400)
+        eq(meydan.yanit_hazirla(con, G, "yok-1", "Soru", now=AN)["status"], 404)
+        eq(meydan.yanit_hazirla(con, G, "not-1", "Soru", now=AN)["status"], 400)
+        h = meydan.yanit_hazirla(con, G, gid, "Bu konuyu neden seçtin?", now=AN)
+        eq((h["ok"], h["gorevli"], h["soru"]), (True, "king", "Bu konuyu neden seçtin?"))
+        ok("Türev" in h["baglam"] and "Bu konuyu" not in h["baglam"])
+        eq(meydan.yanit_hazirla(con, G, "ozet-spi-" + G, "Neden?", now=AN)["gorevli"], "bio")
+        r = meydan.yanit_ekle(con, gid, "king", None, "yok", now=AN)
+        eq([(y["hesap"], y["kip"]) for y in r["yanitlar"]], [("sen", ""), ("king", "yok")])
+        eq(r["yanitlar"][1]["kip_ad"], "model kapalı")
+        ok(r["yanitlar"][1]["metin"])
+        g = [x for x in meydan.akis(con, G, now=AN)["gonderiler"] if x["id"] == gid][0]
+        eq(len(g["yanitlar"]), 2)
+        # Gonderinin sayisi MESAJA girmez (yeni kayit sanilmasin); baglama girer.
+        h2 = meydan.yanit_hazirla(con, G, "ozet-spi-" + G, "Neden?", now=AN)
+        eq(h2["soru"], "Neden?")
+        ok("5,2" in h2["baglam"])
+        kr = meydan.kural_yanit(h2["gonderi"])
+        ok("modülün günlük kaydı" in kr and "5,2" in kr and "model bağlı değil" in kr, kr)
+        no("demek istedin" in kr)
+    test("yanit yazilir, gorevliye gider; cevap gelmese de yanit kaybolmaz", t_yanit)
+
     def t_yedek():
         con = _con()
         meydan.kart_yap(con, "a", "b", now=AN)
         y = db.export_all(con)
-        for t in ("meydan_deste", "meydan_isaret", "meydan_not"):
+        for t in ("meydan_deste", "meydan_isaret", "meydan_not", "meydan_yanit"):
             ok(t in y["__meta"]["tables"], t)
         eq(y["__meta"]["tables"]["meydan_deste"], 1)
     test("Meydan'in izi yedege girer", t_yedek)
@@ -317,6 +439,17 @@ def run_daemon():
                                              "gun": "dun"})[0], 400)
             st, a = s.call("/api/meydan")
             ok(any(g["hesap"] == "sen" for g in a["gonderiler"]), "not akista yok")
+            st, a = s.call("/api/meydan?hesap=sen&q=merhaba")
+            eq((st, [g["hesap"] for g in a["gonderiler"]]), (200, ["sen"]))
+            eq(s.call("/api/meydan/yanit", {"gonderi": "yok-1", "metin": "Soru"})[0], 404)
+            c2 = db.connect(s.db_path)
+            k = bam.kayit_ekle(c2, "arastirma", "Uyku ve öğrenme", {"ozet": "x", "kaynaklar": [{"url": "a"}]},
+                               dogruluk="kaynakli")
+            c2.close()
+            st, r = s.call("/api/meydan/yanit", {"gonderi": "bam-%d" % k["id"], "metin": "Kaynak ne?"})
+            eq((st, [y["hesap"] for y in r["yanitlar"]], r["yanitlar"][1]["kip"]), (200, ["sen", "king"], "kural"))
+            ok("BAM kaydı" in r["yanitlar"][1]["metin"], r["yanitlar"][1]["metin"])
+            eq(s.call("/api/meydan/yanit", {"gonderi": "x", "metin": "a", "gun": "dun"})[0], 400)
         finally:
             s.srv.shutdown()
             s.srv.server_close()

@@ -71,8 +71,8 @@ Ucnoktalar:
     POST /api/king/emir/<id>/devam|dur  parca parca uretimde ara onaya cevap
     GET  /api/health                token istemez
     GET  /meydan                    Meydan: sistemin kendi akisi (token istemez; veri /api/meydan'dan)
-    GET  /api/meydan                gunun akisi (date, kapsam, duzey); GET /api/meydan/deste, /kaydedilenler
-    POST /api/meydan/isaret|cevap|deste|not   Meydan'in KENDI tablolari; module yazmaz
+    GET  /api/meydan                gunun akisi (date, kapsam, duzey, hesap, q); GET /api/meydan/deste, /kaydedilenler
+    POST /api/meydan/isaret|cevap|deste|not|yanit   Meydan'in KENDI tablolari; module yazmaz (yanita cevabi sohbet verir)
     POST /api/meydan/deste/<id>/puan|geri|cikar, /api/meydan/not/<id>/sil
     GET  /                          tek dosyalik yerel yuz (token istemez;
                                     jetonu kullanici girer, veri yine korumali)
@@ -483,11 +483,12 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/meydan":
             return self._send(200, meydan.akis(
                 self.con, gun, kapsam=(q.get("kapsam") or ["hepsi"])[0],
-                duzey=(q.get("duzey") or ["dengeli"])[0], now=simdi))
+                duzey=(q.get("duzey") or ["dengeli"])[0], now=simdi,
+                hesap=(q.get("hesap") or [None])[0], q=(q.get("q") or [None])[0]))
         if u.path == "/api/meydan/deste":
             return self._send(200, meydan.deste(self.con, now=simdi))
         if u.path == "/api/meydan/kaydedilenler":
-            return self._send(200, meydan.kaydedilenler(self.con))
+            return self._send(200, meydan.kaydedilenler(self.con, now=simdi))
         return self._send(404, {"error": "yok"})
 
     def _meydan_post(self, u):
@@ -530,6 +531,33 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(404, {"error": "yok"})
         elif uc == "not" and len(parca) == 3:
             r = meydan.not_yaz(self.con, b.get("metin"), b.get("modul"), now=simdi)
+        elif uc == "yanit" and len(parca) == 3:
+            # Yanit Danisma'ya gider: cevabi gorevli verir (core/sohbet.py),
+            # sayisini kural motoru. Model kapaliysa bu da soylenir; yanit
+            # kaybolmaz. meydan.py modeli cagirmaz, burasi cagirir.
+            gun = str(b.get("gun") or saat.bugun())
+            if not _gun_mu(gun):
+                return self._send(400, {"error": "gun yyyy-aa-gg olmali"})
+            gid = str(b.get("gonderi") or "")
+            h = meydan.yanit_hazirla(self.con, gun, gid, b.get("metin"), now=simdi)
+            if not h.get("ok"):
+                return self._send(h.get("status") or 422, h)
+            rol = sohbet.GOREVLILER[h["gorevli"]]["role"]
+            if not ai.hazir_mi(self.server.config, rol)["ok"]:
+                # Model yoksa komut tahmini cevap degildir: gonderinin kendi
+                # verisinden kural cevabi.
+                c = {"mode": "kural", "text": meydan.kural_yanit(h["gonderi"])}
+            else:
+                try:
+                    c = sohbet.konus(self.con, self.server.config, h["soru"], gun,
+                                     gorevli=h["gorevli"], th=self.server.thresholds,
+                                     gecmis=[{"role": "user", "content": "Meydan'daki gönderini açtım."},
+                                             {"role": "assistant", "content": h["baglam"]}])
+                except Exception as e:          # noqa: BLE001 — yanit kaybolmaz
+                    sys.stderr.write("[hkm] meydan yanit: %r\n" % (e,))
+                    c = {"mode": "yok", "text": None}
+            r = meydan.yanit_ekle(self.con, gid, h["gorevli"], c.get("text") or c.get("note"),
+                                  c.get("mode"), now=simdi)
         else:
             return self._send(404, {"error": "yok"})
         return self._send(200 if r.get("ok") else (r.get("status") or 422), r)

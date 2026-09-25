@@ -528,6 +528,18 @@ CREATE TABLE IF NOT EXISTS meydan_isaret (
   PRIMARY KEY (gonderi, tur)
 );
 
+-- Gonderiye yanit ve gorevlinin cevabi (Danisma'dan; core/sohbet.py). `kip`:
+-- model | komut | memory | yok — cevabin nereden geldigi ekranda yazar.
+CREATE TABLE IF NOT EXISTS meydan_yanit (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  gonderi     TEXT NOT NULL,
+  hesap       TEXT NOT NULL,                     -- sen | king | academic | bio | intellect
+  metin       TEXT NOT NULL,
+  kip         TEXT NOT NULL DEFAULT '',
+  created_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_meydan_yanit ON meydan_yanit(gonderi, id);
+
 CREATE TABLE IF NOT EXISTS meydan_not (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   gun         TEXT NOT NULL,
@@ -817,7 +829,7 @@ BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
                  "conversations", "attachments", "memories", "intents", "outbox", "usage",
                  "inbox_seen", "bam_isler", "bam_kayitlar", "bam_iz",
                  "is_emirleri", "bildirimler", "hedef_ozet", "zaman_butcesi", "para",
-                 "meydan_deste", "meydan_isaret", "meydan_not")
+                 "meydan_deste", "meydan_isaret", "meydan_not", "meydan_yanit")
 BACKUP_SCHEMA = 4
 
 

@@ -5,6 +5,9 @@
 > `/api/meydan*`, sayfa `HKM/web/meydan.html`. HKM yüzünde sekme DEĞİL: köşedeki
 > «Meydan» düğmesiyle ortada açılan mini uygulama (telefonda alttan tam ekran);
 > içinde üst çubuk, hikâyeler, kart akışı, çevrilen kartlar, alt sekme çubuğu.
+> v2: bilgisayarda üç sütun (menü ve hesaplar · akış · özet), modül başına günlük
+> rapor (30 günlük eğilim, bulgular, öneri ↔ dayanağı), profil, arama, yanıt dizisi
+> (Danışma görevlisi; model yoksa kural cevabı), BAM gitar paketinden çalınabilir müzik.
 > Modüllere dokunulmadı (M3, M4 bekliyor). Öğretici ve tekrar edici kısım: BAM'ın
 > ders, kart ve soru kayıtları akışa girer; yanlış cevap ve eklenen kart Meydan'ın
 > kendi destesinde 1 · 3 · 7 · 14 · 30 günle döner (ESP'nin takvimi değişmez).

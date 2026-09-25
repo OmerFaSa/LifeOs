@@ -3,27 +3,31 @@
 
    Masalar (King, BAM ve uc modulun HKM gorevlisi) gunun bulgularini,
    kararlarini ve urunlerini GONDERI olarak yazar; kullanici okur, karar
-   verir, ogrendigini tekrar eder. Dili sosyal medyanin dilidir (hesap,
-   hikaye, akis, kaydet) ama meydanda baska insan yoktur, begeni sayisi
-   yoktur ve akis bir yerde biter.
+   verir, yanit yazar, ogrendigini tekrar eder. Dili sosyal medyanin dilidir
+   (hesap, hikaye, akis, profil, yanit, kaydet) ama meydanda baska insan
+   yoktur, begeni sayisi yoktur ve akis bir yerde biter.
 
    Bes kural:
 
    1. HICBIR SEY UYDURULMAZ. Her gonderi ambardaki bir OLAYDAN turer:
       modulun gunluk govdesi ve VP denetimi, Yoneticinin onerisi, King'in
-      is emri, BAM kaydi (rapor, gorsel, ders, kart, soru), ESP'nin sectigi
-      dil karti, hedef agi. Olay yoksa gonderi yoktur.
-   2. CUMLEYI VE SAYIYI KOD KURAR. Model cagrilmaz; model kapaliyken Meydan
-      aynen calisir. Her sayi dort etiketten birini tasir; eksik sayi
-      «veri yok» cipidir, sifir yazilmaz. Sayfa hicbir sey hesaplamaz.
+      is emri, BAM kaydi (rapor, gorsel, ders, kart, soru, gitar), ESP'nin
+      sectigi dil karti, hedef agi. Olay yoksa gonderi yoktur; kaydi gelmeyen
+      modul «veri yok» diye ADIYLA soylenir.
+   2. CUMLEYI VE SAYIYI KOD KURAR. Bu dosya model cagirmaz; model kapaliyken
+      Meydan aynen calisir. Her sayi dort etiketten birini tasir; eksik sayi
+      «veri yok» cipidir, sifir yazilmaz. Egilim (30 gun) core/twin.py'nin
+      ortanca kuralidir. Akor adi ve sesi dereceden KODLA cozulur. Sayfa
+      hicbir sey hesaplamaz. Yanita cevabi Danisma'nin gorevlisi verir
+      (daemon -> core/sohbet.py); burada yalniz kaydi tutulur.
    3. MODULE YAZILMAZ (AGENTS §1.4). Meydan'in durumu (tekrar destesi,
-      isaretler, notlar) HKM'nin KENDI tablolarindadir. Deste ESP'nin kart
-      takvimini degistirmez; oneri dugmesi Onaylar'in AYNI isleyicisidir
-      (manager.respond). Not bir kayit olmaz, not olarak durur.
+      isaretler, yanitlar, notlar) HKM'nin KENDI tablolarindadir. Deste
+      ESP'nin kart takvimini degistirmez; oneri dugmesi Onaylar'in AYNI
+      isleyicisidir (manager.respond). Not bir kayit olmaz, not olarak durur.
    4. TUR KATALOGU KAPALIDIR (TURLER). Yeni tur kodla eklenir; model tur,
       hesap ya da seviye uyduramaz. «Seviye» yalniz kaydin kendi alanindan
-      gelir (unite duzeyi, ESP'nin secimi, sorunun beyan edilen zorlugu)
-      ve kaynagini yazar; bir yetenek yargisi degildir (§1.5).
+      gelir (unite ve gitar duzeyi, ESP'nin secimi, sorunun beyan edilen
+      zorlugu) ve kaynagini yazar; bir yetenek yargisi degildir (§1.5).
    5. ETKILESIM KARAR VERMEZ. «Faydali» yalniz senin siranı degistirir
       (+10); okuma suresi, tiklama ve izlenme OLCULMEZ. Tekrar araliklari
       koddadir (1 · 3 · 7 · 14 · 30 gun). XP, seri, puan uretilmez (§1.6).
@@ -33,15 +37,15 @@ import datetime
 import json
 import re
 
-from core import adlar, bam, certainty, db, hedefag, king, saat, sync_engine
+from core import adlar, bam, certainty, db, hedefag, king, precedence, saat, sync_engine, twin
 
-TURLER = ("teklif", "bulgu", "karar", "ozet", "hedef", "urun", "kart", "sinav", "not")
-TUR_AD = {"teklif": "Teklif", "bulgu": "Bulgu", "karar": "Karar", "ozet": "Özet",
+TURLER = ("teklif", "bulgu", "karar", "ozet", "hedef", "urun", "kart", "sinav", "muzik", "not")
+TUR_AD = {"teklif": "Teklif", "bulgu": "Bulgu", "karar": "Karar", "ozet": "Günün raporu",
           "hedef": "Hedef", "urun": "Ürün", "kart": "Kart", "sinav": "Mini sınav",
-          "not": "Not"}
+          "muzik": "Müzik", "not": "Not"}
 # Onem sirasi (MEYDAN §5.4). Senden karar bekleyen +50, uyari +5, Faydali +10.
 ONEM = {"teklif": 100, "sinav": 80, "bulgu": 70, "karar": 60, "kart": 55, "ozet": 50,
-        "hedef": 40, "urun": 30, "not": 20}
+        "muzik": 45, "hedef": 40, "urun": 30, "not": 20}
 KAPSAMLAR = ("hepsi", "ays", "spi", "esp", "merkez")
 # Hesap basina gunluk sinir: asan KATLANIR, silinmez. Senden karar bekleyen
 # hicbir duzeyde katlanmaz ve gizlenmez.
@@ -52,19 +56,25 @@ DERECELER = ("tekrar", "zor", "iyi", "kolay")
 # Ad elle yazilir: str.capitalize() «iyi»yi «Iyi» yapar (Turkce İ).
 DERECE_AD = {"tekrar": "Tekrar", "zor": "Zor", "iyi": "İyi", "kolay": "Kolay"}
 URUN_GUN = 7          # BAM urunu bir hafta akista kalir
+EGILIM_GUN = 30
 NOT_EN_COK = 280
+YANIT_EN_COK = 400
 KART_EN_COK = 120
 
 MODUL_AD = {"ays": "AYS", "spi": "SPİ", "esp": "ESP", "merkez": "Merkez"}
 VP_MODUL = {"academic": "ays", "bio": "spi", "intellect": "esp"}
 MODUL_VP = {v: k for k, v in VP_MODUL.items()}
+# Yanita kim cevap verir: Danisma'nin gorevlisi (core/sohbet.py). BAM'in
+# ustu King'dir; «Sen» notuna yanit yazilmaz.
+YANIT_GOREVLI = {"king": "king", "bam": "king", "academic": "academic", "bio": "bio",
+                 "intellect": "intellect"}
 
 # Hesaplar HKM'de VAR OLAN gorevlilerdir (core/sohbet.py GOREVLILER, BAM).
 HESAPLAR = {
     "king": {"ad": "King", "modul": "merkez", "bas": "K",
              "rol": "Üç sistemi birlikte değerlendirir; teklif yazar, modüle yazmaz."},
     "bam": {"ad": "BAM", "modul": "merkez", "bas": "B",
-            "rol": "Araştırma ve üretim bürosu: rapor, görsel, ders, kart, soru."},
+            "rol": "Araştırma ve üretim bürosu: rapor, görsel, ders, kart, soru, gitar."},
     "academic": {"ad": "Akademik hedef", "modul": "ays", "bas": "A",
                  "rol": "AYS'nin HKM görevlisi: soru, süre, net. Sonuç garantisi vermez."},
     "bio": {"ad": "Biyolojik sermaye", "modul": "spi", "bas": "B",
@@ -74,8 +84,8 @@ HESAPLAR = {
     "sen": {"ad": "Sen", "modul": None, "bas": "S", "rol": ""},
 }
 
-# Ozet gonderisinde hangi olcumler once gelir. Listede olmayan anahtar
-# ozete girmez (adi bilinmeyen alan uydurulmus bir adla gosterilmez).
+# Rapor gonderisinde hangi olcumler once gelir. Listede olmayan anahtar
+# rapora girmez (adi bilinmeyen alan uydurulmus bir adla gosterilmez).
 OZET_SIRA = {
     "ays": ("questions", "study_minutes", "mock_net", "plan_adherence", "correct_ratio",
             "exam_days_left", "errors_open", "topics_done"),
@@ -97,7 +107,24 @@ KING_DURUM_AD = {"onaylandi": "onaylandı", "kismen_onay": "kısmen onaylandı",
                  "reddedildi": "reddedildi", "iptal": "iptal edildi", "hata": "hata verdi"}
 DIL_KODU = {"en": "en-US", "de": "de-DE", "fr": "fr-FR", "es": "es-ES", "ar": "ar-SA",
             "ru": "ru-RU", "it": "it-IT"}     # Latince icin ses motoru yok: ses sunulmaz
+DIL_AD = {"en": "İngilizce", "de": "Almanca", "fr": "Fransızca", "es": "İspanyolca",
+          "ar": "Arapça", "ru": "Rusça", "it": "İtalyanca", "la": "Latince"}
 HARFLER = "ABCDE"
+# Ekranda makine anahtari yazilmaz (AGENTS §1.8): oneri kurali oncelik
+# tablosunun KENDI Turkce adiyla, denetim hukmu Turkce karsiligiyla.
+KURAL = {x["key"]: x for x in precedence.PRECEDENCE}
+HUKUM_AD = {"APPROVED": "sorun yok", "INCOMPLETE": "eksik alan var", "ANOMALY": "eşik aşıldı"}
+AYLAR = ("Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos",
+         "Eylül", "Ekim", "Kasım", "Aralık")
+
+# Akor cozumu (gitar): ton + derece -> akor adi ve sesleri. Kural, model yok.
+NOTALAR = ("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+# Bemolle gelen derece (bVII, bIII) bemol adiyla yazilir: C’de bVII «Bb»dir, «A#» degil.
+NOTALAR_B = ("C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B")
+MAJOR = (0, 2, 4, 5, 7, 9, 11)
+MINOR = (0, 2, 3, 5, 7, 8, 10)
+ROMEN = {"i": 0, "ii": 1, "iii": 2, "iv": 3, "v": 4, "vi": 5, "vii": 6}
+_DERECE = re.compile(r"^(b?)(VII|VI|V|IV|III|II|I|vii|vi|v|iv|iii|ii|i)(°|7|maj7|m7|sus4)?$")
 
 
 # ------------------------------------------------------------ yardimcilar
@@ -122,6 +149,19 @@ def _metin(x, en_cok):
     return s[:en_cok]
 
 
+def _kisalt(x, en_cok):
+    """Cumleyi sozcuk ortasinda kesmez; kesilirse «…» ile biter."""
+    s = _metin(x, 100000)
+    if len(s) <= en_cok:
+        return s
+    kes = s[:en_cok].rsplit(" ", 1)[0].rstrip(",;:")
+    return kes + "…"
+
+
+def _tr_kucuk(s):
+    return str(s or "").translate(str.maketrans({"I": "ı", "İ": "i"})).lower()
+
+
 def sayi_yaz(v):
     """Sayiyi Turkce yazar: 7.25 -> «7,3», 12345 -> «12.345». Sayi degilse
     oldugu gibi. Deger DEGISMEZ; yalniz yazimi."""
@@ -140,11 +180,34 @@ def _kesinlik(cert):
     return certainty.EKRAN.get(cert, "veri yok")
 
 
-def _gun_farki(a, b):
+def tarih_yaz(gun):
     try:
-        return (datetime.date.fromisoformat(a) - datetime.date.fromisoformat(b)).days
-    except (TypeError, ValueError):
-        return None
+        d = datetime.date.fromisoformat(str(gun)[:10])
+    except ValueError:
+        return str(gun)
+    return "%d %s" % (d.day, AYLAR[d.month - 1])
+
+
+def ne_zaman(z, now=None):
+    """«şimdi», «12 dk önce», «3 sa önce», «dün 21:40», «24 Eylül»."""
+    an, s = _an(now), str(z or "")
+    if len(s) <= 10:
+        fark = (an.date() - datetime.date.fromisoformat(s)).days if re.match(r"^\d{4}-\d\d-\d\d$", s) else None
+        return {0: "bugün", 1: "dün"}.get(fark, tarih_yaz(s))
+    try:
+        t = datetime.datetime.fromisoformat(s)
+    except ValueError:
+        return s
+    sn = (an - t).total_seconds()
+    if 0 <= sn < 60:
+        return "şimdi"
+    if 0 <= sn < 3600:
+        return "%d dk önce" % (sn // 60)
+    if t.date() == an.date() and sn >= 0:
+        return "%d sa önce" % (sn // 3600)
+    if (an.date() - t.date()).days == 1:
+        return "dün %s" % t.strftime("%H:%M")
+    return tarih_yaz(s)
 
 
 def sonra_yaz(vade, now=None):
@@ -167,28 +230,83 @@ def sonra_yaz(vade, now=None):
     return "%d gün sonra" % g
 
 
+def akor_coz(ton, derece):
+    """Ton (C … B, minorse sonunda «m») + derece (I, vi, bVII, V7 …) ->
+    {ad, derece, hz}. Cozulmezse None: tahmin edilmez."""
+    m = _DERECE.match(str(derece or "").strip())
+    ton = str(ton or "").strip()
+    if not m or not ton:
+        return None
+    minor = len(ton) > 1 and ton.endswith("m")
+    kok = ton[:-1] if minor else ton
+    if kok not in NOTALAR:
+        return None
+    duz, romen, ek = m.group(1), m.group(2), m.group(3) or ""
+    olcek = MINOR if minor else MAJOR
+    pc = (NOTALAR.index(kok) + olcek[ROMEN[romen.lower()]] - (1 if duz else 0)) % 12
+    buyuk = romen.isupper()
+    if ek == "°":
+        araliklar, ad_ek = (0, 3, 6), "°"
+    elif ek == "sus4":
+        araliklar, ad_ek = (0, 5, 7), "sus4"
+    elif ek == "m7":
+        araliklar, ad_ek = (0, 3, 7, 10), "m7"
+    elif ek == "maj7":
+        araliklar, ad_ek = (0, 4, 7, 11), "maj7"
+    elif ek == "7":
+        araliklar, ad_ek = ((0, 4, 7, 10), "7") if buyuk else ((0, 3, 7, 10), "m7")
+    else:
+        araliklar, ad_ek = ((0, 4, 7), "") if buyuk else ((0, 3, 7), "m")
+    kok_midi = 48 + pc                                   # C3 ile B3 arasi kok
+    hz = [round(440.0 * 2 ** ((kok_midi + a - 69) / 12.0), 2) for a in araliklar]
+    return {"ad": (NOTALAR_B if duz else NOTALAR)[pc] + ad_ek, "derece": m.group(0), "hz": hz}
+
+
 def _gonderi(id_, hesap, tur, zaman, cumle, ilgili=None, **ek):
     assert tur in TURLER, tur
     g = {"id": id_, "hesap": hesap, "tur": tur, "tur_ad": TUR_AD[tur], "zaman": zaman,
-         "cumle": cumle, "ilgili": list(ilgili or [HESAPLAR[hesap]["modul"]]),
-         "sayilar": [], "konular": [], "bekliyor": False, "uyari": False}
+         "baslik": "", "cumle": cumle, "ilgili": list(ilgili or [HESAPLAR[hesap]["modul"]]),
+         "sayilar": [], "bulgular": [], "bekliyor": False, "uyari": False}
     g.update(ek)
     return g
 
 
 # ------------------------------------------------------------ olay -> gonderi
 
-def _ozetler(con, gun):
-    """Modulun gunluk govdesi + VP denetimi -> ozet ve bulgu gonderileri."""
+def _egilim(resim, modul, anahtar):
+    """30 gunluk egilim (core/twin.py ortanca kurali) ya da None."""
+    t = (((resim.get("modules") or {}).get(modul) or {}).get("metrics") or {}).get(anahtar)
+    t = (t or {}).get("trend") or {}
+    if t.get("direction") in ("rising", "falling") and t.get("change") is not None:
+        return "%s %%%d · %d gün" % ("↑" if t["direction"] == "rising" else "↓",
+                                    round(abs(t["change"]) * 100), EGILIM_GUN)
+    if t.get("direction") == "flat":
+        return "yatay · %d gün" % EGILIM_GUN
+    return None
+
+
+def _ilgili_oneri(con, gun, vp):
+    """VP'nin alanindaki gunun onerisi: bulgu ile teklif ayni yerde gorunur."""
+    for d in db.decisions_of(con, gun):
+        if (KURAL.get(d.get("key")) or {}).get("vp") == vp:
+            return {"id": "oneri-%d" % d["id"], "etiket": "İlgili öneri", "metin": _kisalt(d["proposal"], 140),
+                    "durum": {"proposed": "karar bekliyor", "accepted": "kabul edildi",
+                              "declined": "reddedildi"}.get(d["state"], d["state"])}
+    return None
+
+
+def _raporlar(con, gun):
+    """Modul basina GUNDE TEK rapor: olcumler (30 gunluk egilimle), VP'nin
+    bulgulari ve ilgili oneri ayni gonderide. Ayni sayi iki gonderide yazilmaz."""
     out = []
     govdeler = db.latest_payloads(con, gun)
     denetim = sync_engine.latest_audits(con, gun)
+    resim = twin.snapshot(con, gun, EGILIM_GUN) if govdeler else {}
     for modul in ("ays", "spi", "esp"):
-        vp = MODUL_VP[modul]
-        b = govdeler.get(modul)
-        a = denetim.get(vp)
+        vp, b = MODUL_VP[modul], govdeler.get(modul)
         if not b:
             continue
+        a = denetim.get(vp) or {}
         m = b.get("metrics") or {}
         sayilar, eksik = [], None
         for k in OZET_SIRA[modul]:
@@ -200,32 +318,34 @@ def _ozetler(con, gun):
                     eksik = ["—", adlar.METRIK.get(k, k), "veri yok"]
                 continue
             if len(sayilar) < 4:
-                sayilar.append([sayi_yaz(f["value"]), adlar.METRIK.get(k, k),
-                                _kesinlik(f.get("cert"))])
+                s = [sayi_yaz(f["value"]), adlar.METRIK.get(k, k), _kesinlik(f.get("cert"))]
+                e = _egilim(resim, modul, k)
+                if e:
+                    s.append(e)
+                sayilar.append(s)
         if eksik and len(sayilar) < 5:
             sayilar.append(eksik)
         gelen = sum(1 for f in m.values() if isinstance(f, dict) and f.get("cert") != "missing")
         bos = sum(1 for f in m.values() if isinstance(f, dict) and f.get("cert") == "missing")
+        bulgular = [{"metin": _metin(f.get("text"), 300),
+                     "ton": "uyari" if f.get("tone") in ("warn", "danger") else "bilgi"}
+                    for f in a.get("findings") or [] if f.get("text")]
+        uyari = any(x["ton"] == "uyari" for x in bulgular)
         cumle = "%s bugünün kaydını gönderdi: %d ölçüm" % (MODUL_AD[modul], gelen)
         cumle += ("; %d alan boş, sıfır sayılmadı." % bos) if bos else "."
-        if a and a.get("verdict") == "APPROVED":
+        if a.get("verdict") == "APPROVED":
             cumle += " Denetimde sorun çıkmadı."
-        out.append(_gonderi("ozet-%s-%s" % (modul, gun), vp, "ozet", gun, cumle,
-                            sayilar=sayilar, kaynak={"olay": "modülün günlük kaydı",
-                                                     "kural": "denetim: " + (a or {}).get("verdict", "yok")}))
-        for f in (a or {}).get("findings") or []:
-            if f.get("tone") not in ("warn", "danger", "info"):
-                continue
-            s = []
-            if f.get("metric") and isinstance(m.get(f["metric"]), dict):
-                mf = m[f["metric"]]
-                if f["metric"] not in GIZLI:
-                    s = [[sayi_yaz(mf.get("value")) if mf.get("value") is not None else "—",
-                          adlar.METRIK.get(f["metric"], f["metric"]), _kesinlik(mf.get("cert"))]]
-            out.append(_gonderi("bulgu-%s-%s-%s" % (vp, gun, f.get("code")), vp, "bulgu", gun,
-                                _metin(f.get("text"), 400), sayilar=s,
-                                uyari=f.get("tone") in ("warn", "danger"),
-                                kaynak={"olay": "VP denetimi", "kural": f.get("code") or ""}))
+        elif bulgular:
+            cumle += " Denetim %d bulgu yazdı." % len(bulgular)
+        baslik = next((x["metin"] for x in bulgular if x["ton"] == "uyari"),
+                      "%s · günün raporu" % MODUL_AD[modul])
+        out.append(_gonderi("ozet-%s-%s" % (modul, gun), vp, "bulgu" if uyari else "ozet", gun,
+                            cumle, baslik=baslik, sayilar=sayilar, bulgular=bulgular, uyari=uyari,
+                            baglanti=_ilgili_oneri(con, gun, vp),
+                            kaynak={"olay": "modülün günlük kaydı ve VP denetimi",
+                                    "kural": "denetim: " + HUKUM_AD.get(a.get("verdict"), "yapılmadı"),
+                                    "egilim": "son %d günün ortancası, öncekilere göre (hesaplandı)"
+                                              % EGILIM_GUN}))
     return out
 
 
@@ -234,20 +354,50 @@ def _oneriler(con, gun):
     ayni isleyicisiyle verilir; cevaplanan KARAR'dir ve silinmez."""
     out = []
     for d in db.decisions_of(con, gun):
+        kural = KURAL.get(d.get("key")) or {}
+        vp = kural.get("vp")
+        ilgili = [VP_MODUL[vp]] if vp in VP_MODUL else ["ays", "spi", "esp"]
+        kural_ad = kural.get("label") or "günün önceliği"
         if d["state"] == "proposed":
             out.append(_gonderi("oneri-%d" % d["id"], "king", "teklif", d["created_at"],
-                                _metin(d["proposal"], 400), ilgili=["ays", "spi", "esp"],
-                                bekliyor=True, seviye_aksiyon="küçük",
+                                _metin(d["proposal"], 400), ilgili=ilgili,
+                                baslik="Senden bir karar bekliyor",
+                                bekliyor=True, seviye_aksiyon="orta", vp=vp,
                                 eylem={"tur": "oneri", "id": d["id"]},
-                                kaynak={"olay": "günün brifingi", "kural": d.get("key") or ""}))
+                                kaynak={"olay": "günün brifingi", "kural": kural_ad}))
         else:
             ad = "Kabul edildi" if d["state"] == "accepted" else "Reddedildi; silinmedi"
             out.append(_gonderi("oneri-%d" % d["id"], "king", "karar",
                                 d.get("answered_at") or d["created_at"],
-                                "%s: %s" % (ad, _metin(d["proposal"], 380)),
-                                ilgili=["ays", "spi", "esp"],
-                                kaynak={"olay": "senin cevabın", "kural": d.get("key") or ""}))
+                                _metin(d["proposal"], 380), ilgili=ilgili, baslik=ad, vp=vp,
+                                kaynak={"olay": "senin cevabın", "kural": kural_ad}))
     return out
+
+
+def _teklif_sayilari(e):
+    t = e.get("teklif") or {}
+    sec = t.get("secenekler") or []
+    s = next((x for x in sec if x.get("id") == t.get("oneri")), sec[0] if sec else None)
+    if not s:
+        return [], None
+    out = []
+    ml = s.get("maliyet") or {}
+    if ml.get("metin"):
+        out.append([ml["metin"], "maliyet", _kesinlik({"hesaplandi": "computed"}.get(
+            ml.get("etiket"), "estimated"))])
+    su = s.get("sure") or {}
+    if su.get("metin"):
+        out.append([su["metin"], "süre", "tahmin"])
+    if s.get("sinif_ad"):
+        out.append([s["sinif_ad"], "sınıf", "hesaplandı"])
+    return out, _kisalt(t.get("metin"), 280) or None
+
+
+def _is_turu(tur):
+    """«test.kitabi» -> «test kitabı» gibi okunur ad; bilinmeyen bicim korunur."""
+    t = str(tur or "").replace(".", " ").replace("_", " ").strip()
+    return {"test kitabi": "test kitabı", "hedef plan": "hedef planı", "urun add": "ürün",
+            "unite": "dil ünitesi", "gitar": "gitar paketi"}.get(t, t) or "iş"
 
 
 def _emirler(con, gun):
@@ -258,16 +408,18 @@ def _emirler(con, gun):
         mod = e.get("modul") if e.get("modul") in MODUL_AD else "merkez"
         konu = _metin(e.get("konu") or e.get("tur"), 160)
         if e["durum"] == "teklif":
+            sayilar, teklif_metin = _teklif_sayilari(e)
             out.append(_gonderi("emir-%d" % e["id"], "king", "teklif", e["updated_at"],
-                                "%s için iş teklifi onayını bekliyor: %s." % (MODUL_AD[mod], konu),
-                                ilgili=[mod], bekliyor=True, seviye_aksiyon="orta",
+                                "%s için iş teklifi onayını bekliyor." % MODUL_AD[mod],
+                                baslik=konu, ilgili=[mod], bekliyor=True, seviye_aksiyon="orta",
+                                sayilar=sayilar, ek_metin=teklif_metin,
                                 eylem={"tur": "emir", "id": e["id"]},
-                                kaynak={"olay": "King iş emri", "kural": e.get("tur") or ""}))
+                                kaynak={"olay": "King iş emri", "kural": "iş türü: " + _is_turu(e.get("tur"))}))
         else:
             ad = KING_DURUM_AD.get(e["durum"], e["durum"])
             out.append(_gonderi("emir-%d" % e["id"], "king", "karar", e["updated_at"],
-                                "%s: %s — %s." % (MODUL_AD[mod], konu, ad), ilgili=[mod],
-                                kaynak={"olay": "King iş emri", "kural": e.get("tur") or ""}))
+                                "%s için iş %s." % (MODUL_AD[mod], ad), baslik=konu, ilgili=[mod],
+                                kaynak={"olay": "King iş emri", "kural": "iş türü: " + _is_turu(e.get("tur"))}))
     return out
 
 
@@ -333,8 +485,33 @@ def _cevaplar(con, gid):
     return out
 
 
+def _belge_ozeti(g):
+    """Belgenin ilk anlamli paragrafi (ozet, alt baslik ya da ilk metin)."""
+    for x in (g.get("ozet"), g.get("alt_baslik")):
+        if x:
+            return _kisalt(x, 260)
+    for b in g.get("bolumler") or []:
+        for bl in (b.get("bloklar") or []) if isinstance(b, dict) else []:
+            if isinstance(bl, dict) and bl.get("t") == "p" and bl.get("metin"):
+                return _kisalt(bl["metin"], 260)
+    return None
+
+
+def _muzik(g):
+    """Gitar paketi -> calinabilir alistirmalar. Akor adini ve sesini KOD cozer."""
+    out = []
+    for x in (g.get("alistirmalar") or [])[:4]:
+        akorlar = [a for a in (akor_coz(x.get("ton"), d) for d in x.get("ilerleyis") or []) if a]
+        out.append({"ad": _metin(x.get("ad"), 80),
+                    "tur": {"technique": "teknik", "piece": "parça"}.get(x.get("tur"), ""),
+                    "ton": x.get("ton"), "akorlar": akorlar,
+                    "bas_bpm": x.get("baslangic_bpm"), "hedef_bpm": x.get("hedef_bpm"),
+                    "not": _metin(x.get("not"), 200) or None})
+    return out
+
+
 def _urunler(con, gun):
-    """BAM kayitlari -> urun (rapor, gorsel, ders), kart ve sinav."""
+    """BAM kayitlari -> urun (rapor, gorsel, ders), kart, sinav ve muzik."""
     out = []
     for row in _bam_kayitlari(con, gun):
         k = bam.kayit_getir(con, row["id"])
@@ -342,59 +519,81 @@ def _urunler(con, gun):
         mod = _hedef_modul(con, k.get("is_id"))
         gid = "bam-%d" % k["id"]
         dog = DOGRULUK_AD.get(k.get("dogruluk"), "doğrulanmadı")
+        kaynaklar = g.get("kaynaklar") or []
         ortak = {"ilgili": [mod], "kaynak": {"olay": "BAM kaydı #%d" % k["id"],
                                              "kural": "doğruluk: " + dog},
-                 "dogruluk": dog, "kayit_id": k["id"]}
+                 "dogruluk": dog, "kayit_id": k["id"],
+                 "kaynak_sayisi": len(kaynaklar) if isinstance(kaynaklar, list) else 0}
         baslik = _metin(g.get("baslik") or k.get("baslik"), 160)
         sorular = _soru_listesi(g)
         kartlar = [x for x in _kart_listesi(g) if x[0] and x[1]] if g.get("tur") in (
             "kart", "unite", "alistirma") else []
-        if sorular:
+        if g.get("tur") == "gitar" and g.get("alistirmalar"):
+            al = _muzik(g)
+            out.append(_gonderi(gid, "bam", "muzik", k["created_at"],
+                                "%d alıştırma. Dinle, başlangıç temposunda çal; akıcılığı ESP "
+                                "Stüdyo ölçer. Tempolar referanstır, senin ölçümün değildir."
+                                % len(g["alistirmalar"]), baslik=baslik, alistirmalar=al,
+                                seviye={"metin": g.get("duzey") or "—",
+                                        "kaynak": "gitar paketinin düzeyi · ESP'nin isteği"},
+                                **ortak))
+        elif sorular:
             cev = _cevaplar(con, gid)
             sira = next((i for i in range(len(sorular)) if i not in cev), None)
             dogru = sum(1 for i, s in enumerate(sorular)
                         if i in cev and HARFLER[cev[i]] == str(s.get("dogru") or "")[:1].upper())
             sinav = {"toplam": len(sorular), "cozulen": len(cev), "dogru_sayi": dogru}
             if sira is None:
-                cumle = "%s: %d sorunun hepsini çözdün; %d doğru. Yanlışlar tekrar destende." % (
-                    baslik, len(sorular), dogru)
+                cumle = "%d sorunun hepsini çözdün; %d doğru. Yanlışlar tekrar destende." % (
+                    len(sorular), dogru)
                 sinav["bitti"] = True
             else:
                 s = sorular[sira]
-                cumle = "%s — soru %d / %d. Seç; açıklama seçince açılır." % (
-                    baslik, sira + 1, len(sorular))
+                cumle = "Soru %d / %d. Seç; açıklama seçince açılır, yanlış olursa soru destene girer." % (
+                    sira + 1, len(sorular))
                 sinav.update({"no": sira, "soru": _metin(s.get("soru"), 600),
                               "secenekler": [_metin(x, 200) for x in (s.get("secenekler") or [])[:5]]})
                 if s.get("zorluk") in ("kolay", "orta", "zor"):
                     sinav["seviye"] = {"metin": s["zorluk"], "kaynak": "sorunun beyan edilen zorluğu · tahmin"}
-            out.append(_gonderi(gid, "bam", "sinav", k["created_at"], cumle, sinav=sinav,
-                                sayilar=[[sayi_yaz(dogru), "doğru", "hesaplandı"]] if cev else [],
+            out.append(_gonderi(gid, "bam", "sinav", k["created_at"], cumle, baslik=baslik, sinav=sinav,
+                                sayilar=[[sayi_yaz(dogru), "doğru", "hesaplandı"],
+                                         [sayi_yaz(len(cev)), "çözülen", "hesaplandı"]] if cev else [],
                                 **ortak))
         elif kartlar:
             dil = kartlar[0][3]
             seviye = ({"metin": g["duzey"], "kaynak": "ünite düzeyi · ESP'nin isteği"}
                       if g.get("duzey") else None)
-            cumle = "%s: %d kart. Çevir, destene ekle; ne zaman döneceğine kod karar verir." % (
-                baslik, len(kartlar))
-            out.append(_gonderi(gid, "bam", "kart", k["created_at"], cumle, seviye=seviye,
+            cumle = "%d kart%s. Çevir, destene ekle; ne zaman döneceğine kod karar verir." % (
+                len(kartlar), (" · " + DIL_AD[dil]) if dil in DIL_AD else "")
+            out.append(_gonderi(gid, "bam", "kart", k["created_at"], cumle, baslik=baslik,
+                                seviye=seviye,
                                 kartlar=[{"on": _metin(a, KART_EN_COK), "arka": _metin(b, KART_EN_COK)}
                                          for a, b, _c, _d in kartlar[:3]],
                                 kart_sayisi=len(kartlar), ses=DIL_KODU.get(dil), **ortak))
         else:
+            ks = ortak["kaynak_sayisi"]
+            ekler = []
             if g.get("tur") == "urun" and g.get("aile") == "gorsel":
-                alt, cumle = "gorsel", "%s: görsel hazır. Yerleşim kodun; metni BAM yazdı." % baslik
+                alt, cumle = "gorsel", "Görsel hazır. Yerleşim kodun; metni BAM yazdı."
             elif g.get("tur") == "urun" and g.get("aile") == "sunum":
-                alt, cumle = "ders", "%s: %d slaytlık ders." % (baslik, len(g.get("slaytlar") or []))
+                alt, cumle = "ders", "%d slaytlık ders. Yana kaydır." % len(g.get("slaytlar") or [])
             else:
-                alt, cumle = "rapor", "%s: %s hazır." % (
-                    baslik, _metin(g.get("urun_ad") or {"arastirma": "araştırma", "plan": "plan"}.get(
-                        k.get("tur"), "belge"), 40).lower())
-            ek = {"alt": alt}
+                alt = "rapor"
+                ad = _metin(g.get("urun_ad") or {"arastirma": "Araştırma", "plan": "Plan"}.get(
+                    k.get("tur"), "Belge"), 40)
+                bl = len(g.get("bulgular") or [])
+                if ks:
+                    ekler.append("%d kaynak" % ks)
+                if bl:
+                    ekler.append("%d bulgu" % bl)
+                cumle = "%s hazır%s." % (ad, (": " + ", ".join(ekler)) if ekler else "")
+            ek = {"alt": alt, "ozet": _belge_ozeti(g) if alt == "rapor" else None}
             if alt == "ders":
                 ek["slaytlar"] = [{"baslik": _metin(s.get("baslik"), 120),
                                    "maddeler": [_metin(x, 200) for x in (s.get("maddeler") or [])[:6]]}
                                   for s in (g.get("slaytlar") or [])[:12]]
-            out.append(_gonderi(gid, "bam", "urun", k["created_at"], cumle, **dict(ortak, **ek)))
+            out.append(_gonderi(gid, "bam", "urun", k["created_at"], cumle, baslik=baslik,
+                                **dict(ortak, **ek)))
     return out
 
 
@@ -403,8 +602,8 @@ def _dil_karti(con, gun):
     if not r:
         return []
     return [_gonderi("dil-%s" % r["gun"], "intellect", "kart", r["gun"],
-                     "ESP bugünün dil kartlarını seçti: vadesi gelenler, yoksa en zayıflar. "
-                     "Destene eklersen Meydan'da da tekrar edersin; ESP'nin takvimi değişmez.",
+                     "Vadesi gelenler, yoksa en zayıflar. Destene eklersen Meydan'da da tekrar "
+                     "edersin; ESP'nin takvimi değişmez.", baslik="ESP bugünün dil kartlarını seçti",
                      ilgili=["esp"], kartlar=r["kartlar"][:3], kart_sayisi=len(r["kartlar"]),
                      seviye={"metin": "ESP'nin seçimi", "kaynak": "ESP'nin kendi kart takvimi"},
                      kaynak={"olay": "ESP dil kartı", "kural": "ESP seçer, HKM yalnız dizer"})]
@@ -417,11 +616,12 @@ def _hedefler(con, gun):
             continue
         plan = h.get("plan") or {}
         il = (plan.get("ilerleme") or {}).get("metin")
-        cumle = "%s hedefi: %s." % (MODUL_AD[h["modul"]], _metin(h.get("ozet"), 160))
-        if il:
-            cumle += " " + _metin(il, 240)
+        cumle = _metin(il, 280) if il else "Hedefin planı güncellendi."
+        if h.get("son_tarih"):
+            cumle += " Son tarih: %s." % tarih_yaz(h["son_tarih"])
         out.append(_gonderi("hedef-%s-%s" % (h["modul"], h.get("id")), MODUL_VP[h["modul"]], "hedef",
-                            h["guncelleme"], cumle, ilgili=[h["modul"]],
+                            h["guncelleme"], cumle, baslik=_metin(h.get("ozet"), 160),
+                            ilgili=[h["modul"]],
                             kaynak={"olay": "hedef ağı", "kural": "modülün kendi planı"}))
     return out
 
@@ -441,6 +641,17 @@ def _isaretler(con, tur):
         "SELECT gonderi FROM meydan_isaret WHERE tur=?", (tur,)).fetchall()}
 
 
+def _yanit_haritasi(con, gidler, now=None):
+    out = {}
+    if not gidler:
+        return out
+    isaret = ",".join("?" * len(gidler))
+    for r in con.execute("SELECT * FROM meydan_yanit WHERE gonderi IN (%s) ORDER BY id" % isaret,
+                         tuple(gidler)).fetchall():
+        out.setdefault(r["gonderi"], []).append(_yanit_satir(r, now))
+    return out
+
+
 def _hikayeler(gonderiler):
     """Hesap basina gunun ozeti: iki sayi karesi + bir cumle karesi.
     Kareler gonderilerden gelir; yeni bir sey soylemez."""
@@ -456,64 +667,119 @@ def _hikayeler(gonderiler):
         for s in sayi[:2]:
             if len(h["kareler"]) < 3:
                 h["kareler"].append({"tur": "sayi", "deger": s[0], "ad": s[1], "kesinlik": s[2],
-                                     "gonderi": g["id"]})
+                                     "egilim": s[3] if len(s) > 3 else None, "gonderi": g["id"]})
         if len(h["kareler"]) < 3:
-            h["kareler"].append({"tur": "cumle", "ust": g["tur_ad"], "metin": g["cumle"][:160],
-                                 "gonderi": g["id"]})
+            h["kareler"].append({"tur": "cumle", "ust": g["baslik"] or g["tur_ad"],
+                                 "metin": _kisalt(g["cumle"], 160), "gonderi": g["id"]})
     return [out[k] for k in sira]
 
 
-def akis(con, gun, kapsam="hepsi", duzey="dengeli", now=None):
-    """Gunun meydani. Gonderiler her istekte olaylardan yeniden turer."""
+def _gunun_ozeti(con, gun, liste, bekleyen, ds):
+    govdeler = db.latest_payloads(con, gun)
+    gelen = [MODUL_AD[m] for m in ("ays", "spi", "esp") if m in govdeler]
+    gelmeyen = [MODUL_AD[m] for m in ("ays", "spi", "esp") if m not in govdeler]
+    if gelen and not gelmeyen:
+        cumle = "Üç sistemden de bugünün kaydı geldi."
+    elif gelen:
+        cumle = "%s kaydını gönderdi; %s’den bugün kayıt yok — sıfır sayılmadı." % (
+            " ve ".join(gelen), " ve ".join(gelmeyen))
+    else:
+        cumle = "Bugün hiçbir sistemden kayıt gelmedi; sıfır sayılmadı."
+    if bekleyen:
+        cumle += " %d gönderi senden karar bekliyor." % bekleyen
+    return {"cumle": cumle,
+            "sayilar": [[sayi_yaz(len(liste)), "gönderi", "hesaplandı"],
+                        [sayi_yaz(bekleyen), "karar bekliyor", "hesaplandı"],
+                        [sayi_yaz(ds["vadeli"]), "tekrar", "hesaplandı"]],
+            "gelen": gelen, "gelmeyen": gelmeyen}
+
+
+def _uyar(g, kapsam, hesap, q):
+    if hesap and g["hesap"] != hesap:
+        return False
+    if kapsam == "merkez" and g["hesap"] not in ("king", "bam"):
+        return False
+    if kapsam in ("ays", "spi", "esp") and kapsam not in g["ilgili"]:
+        return False
+    if q:
+        metin = " ".join([g["baslik"], g["cumle"], HESAPLAR[g["hesap"]]["ad"], g["tur_ad"]]
+                         + [b["metin"] for b in g.get("bulgular") or []])
+        if _tr_kucuk(q) not in _tr_kucuk(metin):
+            return False
+    return True
+
+
+def akis(con, gun, kapsam="hepsi", duzey="dengeli", now=None, hesap=None, q=None):
+    """Gunun meydani. Gonderiler her istekte olaylardan yeniden turer.
+    `hesap` profil gorunumu, `q` arama: ikisi de yalniz suzer."""
     kapsam = kapsam if kapsam in KAPSAMLAR else "hepsi"
     duzey = duzey if duzey in DUZEYLER else "dengeli"
-    hepsi = (_oneriler(con, gun) + _emirler(con, gun) + _ozetler(con, gun) + _hedefler(con, gun)
+    hesap = hesap if hesap in HESAPLAR else None
+    q = _metin(q, 60) or None
+    hepsi = (_oneriler(con, gun) + _emirler(con, gun) + _raporlar(con, gun) + _hedefler(con, gun)
              + _dil_karti(con, gun) + _urunler(con, gun) + _notlar(con, gun))
-    faydali, kayitli = _isaretler(con, "faydali"), _isaretler(con, "kaydet")
-    faydali_tur = set()
+    # Oneri ile dayanagi birbirini gosterir: rapor «ilgili oneri»yi, oneri
+    # «dayanagi»ni (ayni VP'nin gunluk raporu).
+    raporlar = {g["hesap"]: g for g in hepsi if g["id"].startswith("ozet-")}
     for g in hepsi:
-        if g["id"] in faydali:
-            faydali_tur.add((g["hesap"], g["tur"]))
+        rp = raporlar.get(g.pop("vp", None) or "")
+        if rp and g["id"].startswith("oneri-"):
+            g["baglanti"] = {"id": rp["id"], "etiket": "Dayanağı", "metin": _kisalt(rp["baslik"], 140),
+                             "durum": MODUL_AD[HESAPLAR[rp["hesap"]]["modul"]] + " raporu"}
+    faydali, kayitli = _isaretler(con, "faydali"), _isaretler(con, "kaydet")
+    faydali_tur = {(g["hesap"], g["tur"]) for g in hepsi if g["id"] in faydali}
+    hesap_sayilari = {}
+    for g in hepsi:
+        hesap_sayilari[g["hesap"]] = hesap_sayilari.get(g["hesap"], 0) + 1
     liste = []
     for g in hepsi:
-        if kapsam == "merkez" and g["hesap"] not in ("king", "bam"):
+        if not _uyar(g, kapsam, hesap, q):
             continue
-        if kapsam in ("ays", "spi", "esp") and kapsam not in g["ilgili"]:
-            continue
-        if duzey == "sade" and g["tur"] not in SADE_TURLER and not g["bekliyor"]:
-            continue
-        if duzey == "sade" and g["tur"] == "bulgu" and not g["uyari"]:
-            continue
+        if duzey == "sade" and not hesap and not q:
+            if g["tur"] not in SADE_TURLER and not g["bekliyor"]:
+                continue
+            if g["tur"] == "bulgu" and not g["uyari"]:
+                continue
         g["onem"] = (ONEM[g["tur"]] + (50 if g["bekliyor"] else 0) + (5 if g["uyari"] else 0)
                      + (10 if (g["hesap"], g["tur"]) in faydali_tur else 0))
         g["faydali"], g["kayitli"] = g["id"] in faydali, g["id"] in kayitli
         g["gun"] = str(g["zaman"])[:10]
+        g["zaman_yazi"] = ne_zaman(g["zaman"], now)
         liste.append(g)
     liste.sort(key=lambda g: (g["gun"], g["onem"], str(g["zaman"])), reverse=True)
-    sinir, say, katli = DUZEYLER[duzey], {}, {}
+    yanitlar = _yanit_haritasi(con, [g["id"] for g in liste], now)
     for g in liste:
-        if g["bekliyor"] or g["hesap"] == "sen":
-            continue
-        say[g["hesap"]] = say.get(g["hesap"], 0) + 1
-        if say[g["hesap"]] > sinir:
-            g["katli"] = True
-            katli[g["hesap"]] = katli.get(g["hesap"], 0) + 1
+        g["yanitlar"] = yanitlar.get(g["id"], [])
+    sinir, say, katli = DUZEYLER[duzey], {}, {}
+    if not hesap and not q:
+        for g in liste:
+            if g["bekliyor"] or g["hesap"] == "sen":
+                continue
+            say[g["hesap"]] = say.get(g["hesap"], 0) + 1
+            if say[g["hesap"]] > sinir:
+                g["katli"] = True
+                katli[g["hesap"]] = katli.get(g["hesap"], 0) + 1
     ds = deste_ozet(con, now)
     bekleyen = sum(1 for g in liste if g["bekliyor"])
-    if not liste:
+    if q and not liste:
+        son = "«%s» için bugün gönderi yok." % q
+    elif not liste:
         son = ("Bugün meydana düşen bir olay yok. Modüller kayıt gönderdikçe, BAM ürettikçe "
                "burada görünür.")
     elif bekleyen:
         son = "Bugünlük bu kadar. %d gönderi senden karar bekliyor." % bekleyen
     else:
         son = "Bugünlük bu kadar."
-    return {"gun": gun, "kapsam": kapsam, "duzey": duzey,
-            "hesaplar": HESAPLAR, "turler": TUR_AD,
-            "hikayeler": _hikayeler(liste), "gonderiler": liste,
+    return {"gun": gun, "gun_yazi": tarih_yaz(gun), "kapsam": kapsam, "duzey": duzey,
+            "hesap": hesap, "q": q, "hesaplar": HESAPLAR, "turler": TUR_AD,
+            "hesap_sayilari": hesap_sayilari,
+            "hikayeler": _hikayeler(liste) if not hesap and not q else [],
+            "gonderiler": liste,
             "katlanan": [{"hesap": h, "adet": n,
                           "cumle": "%s: %d gönderi daha var; sınırı aştığı için katlandı, silinmedi."
                                    % (HESAPLAR[h]["ad"], n)} for h, n in katli.items()],
             "bekleyen": bekleyen, "tekrar": ds, "son": son,
+            "bugun": _gunun_ozeti(con, gun, [g for g in hepsi], sum(1 for g in hepsi if g["bekliyor"]), ds),
             "not": "Sayıları kod üretir; cümleleri kural motoru kurar. Model kapalıyken de aynıdır."}
 
 
@@ -522,6 +788,88 @@ def gonderi_bul(con, gun, gid):
         if g["id"] == gid:
             return g
     return None
+
+
+# ------------------------------------------------------------ yanitlar
+#
+# Yanit Danisma'ya gider: cevabi gorevli verir (core/sohbet.py), sayisini
+# kural motoru. Bu dosya modeli CAGIRMAZ; daemon once `yanit_hazirla` ile
+# kullanicinin yanitini yazar, gorevliye sorar, sonra `yanit_ekle` ile
+# cevabi kaydeder. Cevap gelmezse bu da soylenir; yanit kaybolmaz.
+#
+# Iki tuzak: (1) gorevliye giden MESAJ yalniz kullanicinin kendi sozudur;
+# gonderi onceki konusma olarak gider. Gonderinin «uyku 5,2 saat»i mesajin
+# icinde olsaydi sohbet onu yeni bir kayit sanabilirdi. (2) Model bagli
+# degilse komut tahmini («durum mu demek istedin?») cevap degildir:
+# gonderinin kendi verisinden kural cevabi yazilir (`kural_yanit`).
+
+KIP_AD = {"model": "model · yalnız üslup; sayılar kural motorundan",
+          "komut": "kural motoru", "memory": "kural motoru", "emir": "King iş emri",
+          "kural": "kural motoru · model bağlı değil", "yok": "model kapalı"}
+
+
+def _yanit_satir(r, now=None):
+    d = dict(r)
+    d["ad"] = HESAPLAR.get(d["hesap"], {}).get("ad", d["hesap"])
+    d["kip_ad"] = KIP_AD.get(d.get("kip") or "", "")
+    d["zaman_yazi"] = ne_zaman(d["created_at"], now)
+    return d
+
+
+def yanitlar(con, gid, now=None):
+    return [_yanit_satir(r, now) for r in con.execute(
+        "SELECT * FROM meydan_yanit WHERE gonderi=? ORDER BY id", (gid,)).fetchall()]
+
+
+def yanit_hazirla(con, gun, gid, metin, now=None):
+    """Kullanicinin yanitini yazar; gorevliye sorulacak metni ve gorevliyi doner."""
+    metin = _metin(metin, YANIT_EN_COK + 1)
+    if not metin:
+        return {"ok": False, "status": 400, "note": "Yanıt boş olamaz."}
+    if len(metin) > YANIT_EN_COK:
+        return {"ok": False, "status": 400, "note": "Yanıt en çok %d karakter." % YANIT_EN_COK}
+    g = gonderi_bul(con, gun, gid)
+    if not g:
+        return {"ok": False, "status": 404, "note": "Bu gönderi o günün meydanında yok."}
+    if g["hesap"] == "sen":
+        return {"ok": False, "status": 400, "note": "Kendi notuna yanıt yazılmaz; notu düzenle."}
+    con.execute("INSERT INTO meydan_yanit(gonderi, hesap, metin, kip, created_at) VALUES (?,?,?,?,?)",
+                (gid, "sen", metin, "", _iso(_an(now))))
+    con.commit()
+    gorevli = YANIT_GOREVLI[g["hesap"]]
+    baglam = "Meydan'da yazdığım gönderi (%s): %s %s" % (
+        g["tur_ad"], (g["baslik"] + ".") if g["baslik"] else "", _kisalt(g["cumle"], 400))
+    if g.get("sayilar"):
+        baglam += " Sayılar: " + "; ".join("%s %s (%s)" % (x[1], x[0], x[2]) for x in g["sayilar"][:4]) + "."
+    return {"ok": True, "gorevli": gorevli, "soru": metin, "baglam": baglam, "gonderi": g}
+
+
+def kural_yanit(g):
+    """Model bagli degilken gonderinin KENDI verisinden cevap: nereden geldi,
+    bulgular, sayilar (kesinlikleriyle), ilgili oneri. Yorum eklenmez."""
+    k = g.get("kaynak") or {}
+    parca = ["Bu gönderi %s üzerine yazıldı%s." % (
+        k.get("olay") or "bir olay", (" (kural: %s)" % k["kural"]) if k.get("kural") else "")]
+    bl = [b["metin"] for b in g.get("bulgular") or []]
+    if bl:
+        parca.append("Denetimin bulguları: " + "; ".join(_kisalt(x, 120) for x in bl[:2]) + ".")
+    sy = g.get("sayilar") or []
+    if sy:
+        parca.append("Sayılar: " + "; ".join(
+            "%s %s (%s%s)" % (x[1], x[0], x[2], (", " + x[3]) if len(x) > 3 else "") for x in sy[:3]) + ".")
+    if g.get("baglanti"):
+        parca.append("%s: %s — %s." % (g["baglanti"].get("etiket", "İlgili"), g["baglanti"]["metin"],
+                                        g["baglanti"]["durum"]))
+    parca.append("Yorum için bir model bağlı değil (Ayarlar → Yapay zekâ). Yanıtın burada duruyor.")
+    return _kisalt(" ".join(parca), 900)
+
+
+def yanit_ekle(con, gid, gorevli, cevap, kip, now=None):
+    metin = _metin(cevap, 1200) or "Şu an cevap üretilemedi; yanıtın Danışma geçmişinde duruyor."
+    con.execute("INSERT INTO meydan_yanit(gonderi, hesap, metin, kip, created_at) VALUES (?,?,?,?,?)",
+                (gid, gorevli, metin, kip if kip in KIP_AD else "yok", _iso(_an(now))))
+    con.commit()
+    return {"ok": True, "yanitlar": yanitlar(con, gid, now)}
 
 
 # ------------------------------------------------------------ isaretler
@@ -547,7 +895,7 @@ def isaretle(con, gun, gid, tur, acik, now=None):
             else "Bu hesabın bu türü sende biraz öne alınır; başka hiçbir şey değişmez."}
 
 
-def kaydedilenler(con):
+def kaydedilenler(con, now=None):
     out = []
     for r in con.execute("SELECT gonderi, deger, created_at FROM meydan_isaret WHERE tur='kaydet' "
                          "ORDER BY created_at DESC").fetchall():
@@ -556,6 +904,8 @@ def kaydedilenler(con):
         except ValueError:
             continue
         g["kayitli"], g["kaydedildi"] = True, r["created_at"]
+        g["zaman_yazi"] = ne_zaman(g.get("zaman"), now)
+        g["yanitlar"] = yanitlar(con, g["id"], now)
         g.pop("katli", None)
         out.append(g)
     return {"gonderiler": out,
