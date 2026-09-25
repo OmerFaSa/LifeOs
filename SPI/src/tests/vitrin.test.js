@@ -105,15 +105,28 @@
       try{ await fn(); } finally { A.render = r; }
     }
 
-    it('oz-068 oz-069 oz-070 oz-088 Bugün › Durum: halka, uyku bandı, kilo eğrisi, tartı hatırlatıcısı', async () => {
+    it('oz-068 oz-088 Bugün › Durum: halka ve tartı hatırlatıcısı', async () => {
       await withTodayAsync('2026-10-12', async () => {
         resetState();
         for(let i = -6; i <= 0; i++) pushVitals(gun(i), { sleep:7, weight:71 + (i % 2) * 0.4 });
         const k = dom(await SP.Screens.today.render());
         expect(k.querySelector('[data-oz="068"] text')).toBeTruthy();
+        expect(k.querySelector('[data-oz="088"]').textContent).toContain('kurulmadı');
+      });
+    });
+
+    /* Sadelik (plan §1.2, Bugün en çok 1 800 px): eğilim kartları Bugün'ü
+       uzatıyordu (2 122 px); son günlerin dokusu Bugün › Ayrıntı › Özet'te. */
+    it('oz-069 oz-070 eğilim Bugün › Ayrıntı › Özet\'te; Bugün\'de değil', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        for(let i = -6; i <= 0; i++) pushVitals(gun(i), { sleep:7, weight:71 + (i % 2) * 0.4 });
+        const bugun = dom(await SP.Screens.today.render());
+        expect(bugun.querySelector('[data-oz="069"]')).toBe(null);
+        expect(bugun.querySelector('[data-oz="070"]')).toBe(null);
+        const k = dom(await SP.Screens.gun.render());
         expect(k.querySelector('[data-oz="069"] .bn i')).toBeTruthy();
         expect(k.querySelectorAll('[data-oz="070"] circle').length).toBe(7);
-        expect(k.querySelector('[data-oz="088"]').textContent).toContain('kurulmadı');
       });
     });
 

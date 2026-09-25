@@ -6413,6 +6413,10 @@ body.is-dragging .drop.is-over{
   flex-direction:row; flex-wrap:wrap; gap:16px; align-items:flex-start; }
 .bugun__alan[aria-label="Durum"] > *, .bugun__alan[aria-label="Özet"] > *{ flex:1 1 300px; min-width:0; }
 .bugun__alan > .bugun__etiket, .bugun__alan[aria-label] > p{ flex-basis:100%; margin:0; }
+/* Şimdi'de iki küçük tek dokunuşluk giriş (SPİ su + günün hissi) geniş
+   ekranda yan yana, dar ekranda alt alta (sadelik: Bugün en çok 1 800 px). */
+.bugun__cift{ display:flex; flex-wrap:wrap; gap:16px; align-items:stretch; }
+.bugun__cift > *{ flex:1 1 280px; min-width:0; }
 .sayfabasi__ust{ margin:0 0 6px; font-size:13px; color:var(--text-2); }
 .site--v5 .sayfabasi__baslik{ font-size:28px; }
 
@@ -6864,6 +6868,9 @@ body.is-dragging .drop.is-over{
 .bloklar{ display:grid; gap:var(--sp-3, 12px); }
 .bloklar > .vk-birak{ display:none; }
 .bloklar.is-suruklen > .vk-birak{ display:block; }
+.vk:has(> .w05){ width:100%; min-width:0; max-width:100%; flex:1 1 100%; }
+.vk .w05, .vk .w05 .gn2{ min-width:0; }
+.vk .w05 .alt{ flex-wrap:wrap; gap:4px 12px; }
 
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -11831,7 +11838,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'5d438ca', at:'2026-09-25 13:36', dirty:true };
+ESP.BUILD = { id:'5b824b7', at:'2026-09-25 15:47', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -14594,6 +14601,20 @@ window.LIFEOS = window.LIFEOS || {};
      cümlesi), yapar:[], yapmaz:[], patron }], devir:{ kaynak, hedef, metin },
      act:{ ac, sor } }. Model açıkken de cümle kural motorunundur; balona
      modelin cevabı girmez. */
+  /* TEK CÜMLE (sadelik, plan §1.2: 30+ kelimelik tek parça yazı 0). Ofis
+     kartı ajanın kural metninin İLK cümlesini söyler; tam metin masanın
+     kendisinde durur. Yeni cümle kurulmaz, yalnız kısaltılır: cümle sonu
+     nokta/ünlem/soru + boşluk + büyük harf ya da rakamdır («5.2 saat»
+     bölünmez). İlk cümle de 30 kelimeyi aşarsa 28. kelimede «…» ile kesilir. */
+  function tekCumle(metin){
+    const s = String(metin || '').replace(/\s+/g, ' ').trim();
+    if(!s) return '';
+    const m = s.match(/^(.+?[.!?…])\s+(?=[A-ZÇĞİÖŞÜ0-9«"(])/);
+    const ilk = m ? m[1] : s;
+    const k = ilk.split(' ');
+    return k.length > 30 ? k.slice(0, 28).join(' ').replace(/[,;:]$/, '') + '…' : ilk;
+  }
+
   function ofis(o){
     const a = (o && o.ajanlar || []).filter(Boolean);
     if(!a.length) return {};
@@ -14606,13 +14627,13 @@ window.LIFEOS = window.LIFEOS || {};
       masa:masaGorunumu({ modul:o.modul, durum:acik ? 'raporu açık' : 'masayı yönetiyor',
         ajanlar:a.map(x => Object.assign({}, x, { konusuyor:x === konusan })) }),
       durum:durumHalkasi({ modul:o.modul, ajanlar:a.map(x => ({ ad:x.ad, harf:x.harf, gorsel:x.gorsel, durum:x.hazir ? 'bos' : 'kap' })) }),
-      balon:patron.cumle ? sayiBalonu({ modul:o.modul, metin:patron.cumle, kaynak:'kural motoru hesapladı' }) : '',
-      hazir:uzman[0] && uzman[0].cumle && ac ? hazirCevap({ modul:o.modul, soru:uzman[0].ad + ': ' + uzman[0].cumle, kaynak:'kural motoru hesapladı',
+      balon:patron.cumle ? sayiBalonu({ modul:o.modul, metin:tekCumle(patron.cumle), kaynak:'kural motoru hesapladı' }) : '',
+      hazir:uzman[0] && uzman[0].cumle && ac ? hazirCevap({ modul:o.modul, soru:uzman[0].ad + ': ' + tekCumle(uzman[0].cumle), kaynak:'kural motoru hesapladı',
         cevaplar:[{ metin:'Raporu aç', act:ac, data:{ 'data-id':uzman[0].id, 'data-agent':uzman[0].id } }].concat(sor ? [{ metin:'Soru sor', act:sor, data:{ 'data-agent':uzman[0].id } }] : []) }) : '',
       toplanti:gununToplantisi({ modul:o.modul, kaynak:'kural motoru hesapladı', baslik:'Patron · günün toplantısı',
-        satirlar:uzman.map(x => ({ ad:x.ad, harf:x.harf, gorsel:x.gorsel, cumle:x.cumle })) }),
+        satirlar:uzman.map(x => ({ ad:x.ad, harf:x.harf, gorsel:x.gorsel, cumle:tekCumle(x.cumle) })) }),
       sinir:acik ? ajanSinir(Object.assign({ modul:o.modul }, acik)) : '',
-      devir:o.devir ? devirGostergesi(Object.assign({ modul:o.modul }, o.devir)) : '',
+      devir:o.devir ? devirGostergesi(Object.assign({ modul:o.modul }, o.devir, { metin:tekCumle(o.devir.metin) })) : '',
     };
   }
   /* Kapsam cümlesini maddeye böler: «A, B ve C.» → [A, B, C]. */
@@ -14687,7 +14708,7 @@ window.LIFEOS = window.LIFEOS || {};
     return kok('174', 'z39', '<div class="n a"><b>' + kac(o.cihaz || 'Bu cihaz') + '</b><span>' + kac(o.cihazNot || 'asıl kayıt burada') + '</span></div>'
       + '<div class="bg2" aria-hidden="true"><i></i><i class="k"></i></div>'
       + '<div class="sag2"><div class="n"><b>Yedek dosyası</b><span>senin seçtiğin yer</span></div>'
-      + '<div class="n c"><b>Merkez</b><span>' + kac(o.merkezNot || 'isteğe bağlı · teklif yazar, modüle yazmaz') + '</span></div></div>',
+      + '<div class="n c" data-merkez><b>Merkez</b><span>' + kac(o.merkezNot || 'isteğe bağlı · teklif yazar, modüle yazmaz') + '</span></div></div>',
       { etiket:'Veri bu cihazda; yedek senin seçtiğin yerde; Merkez isteğe bağlı ve modüle yazmaz' });
   }
 
@@ -14831,8 +14852,15 @@ window.LIFEOS = window.LIFEOS || {};
       const s = el, yon = s.dataset.yon;
       el = null;
       s.style.removeProperty('--kaydir'); delete s.dataset.yon;
-      const b = yon && s.querySelector('[data-kaydir-yon="' + yon + '"]');
-      if(b && !b.disabled) b.click();
+      if(!yon || !s.dataset.kaydir) return;
+      /* Eylem uygulamanın OLAĞAN tıklama yolundan geçer: satıra geçici bir
+         düğme eklenir, tıklanır, kaldırılır (data-act + satırın verisi). */
+      const b = d.createElement('button');
+      b.type = 'button'; b.hidden = true;
+      b.dataset.act = s.dataset.kaydir; b.dataset.yon = yon;
+      Object.keys(s.dataset).forEach(k => { if(k !== 'kaydir' && k !== 'yon' && k !== 'act') b.dataset[k] = s.dataset[k]; });
+      s.appendChild(b);
+      try{ b.click(); }finally{ b.remove(); }
     };
     d.addEventListener('pointerup', bitir);
     d.addEventListener('pointercancel', () => { if(el){ el.style.removeProperty('--kaydir'); delete el.dataset.yon; el = null; } });
@@ -14962,7 +14990,7 @@ window.LIFEOS = window.LIFEOS || {};
     kelimeAgi, bagliNotlar, desteDurumu, cumleKurma, metinliDinleme, soruZinciri, ucMaddeOzet,
     xpDokumu, kademeYolu, sistemRutbesi, rutbeGalerisi, basarimRozeti, ayOzeti, kusursuzGunler,
     sayiCipleri, masaGorunumu, sayiBalonu, ajanSinir, devirGostergesi, durumHalkasi, hazirCevap,
-    gununToplantisi, konusmaOzeti, ofis, maddele,
+    gununToplantisi, konusmaOzeti, ofis, maddele, tekCumle,
     gunAcilisi, gunKapanisi, gunPenceresi, adimliSayi, geriDonus, veriNerede, disaAktar, iceAktarma, yedekFarki,
     suzgecCipleri, hayaletOneri, ajanSecici, uslupSecimi, sakinSeviye, sakinGoster, birakmaAlani, mentionKur, kaydirIpucu, kaydirmaKur,
     sessizSaatler, bildirimAyari, bildirimKutusu, bildirimEylem,
@@ -31403,6 +31431,36 @@ ESP.SRS = (function(){
   /* Retansiyon butun desteyi dolasir ve bir cizimde onlarca kez isteniyor
      (brifing, masa notlari, kademe kapisi, ekran basligi). Kare onbellegi
      hesabi degil YALNIZCA TEKRARI kaldirir. */
+  /* 092 UNUTMA EGRISI: destenin ortalama hatirlamasi, gun gun (`bas`..`son`,
+     bugune gore). retentionOf ile AYNI formul (R = e^(-t/S)); fark yalniz
+     hesap yolunda: kart basina son cevap ve kararlilik BIR kez bulunur,
+     gunler toplamayla kaydirilir. Onceki yol her gun x her kart icin tarih
+     ayristiriyordu (1 500 kartta ~45 bin cagri, Dil ekrani 250 ms). Gecmis
+     gunde yalniz o gune kadar cevaplanmis kart girer; hic sorulmamis ya da
+     vadesi olmayan kart girmez. Sayilar ve toplama sirasi eskisiyle ayni. */
+  function unutmaEgrisi(kartlar, todayISO, bas, son){
+    const today = todayISO || U.todayISO();
+    const hazir = [];
+    (kartlar || []).forEach(c => {
+      const s = stabilityOf(c);
+      if(s == null || !c.due || !c.interval) return;
+      const t0 = U.diffDays(U.iso(U.addDays(U.parse(c.due), -c.interval)), today);
+      if(t0 != null) hazir.push([t0, s]);
+    });
+    const out = [];
+    for(let g = bas; g <= son; g++){
+      let top = 0, n = 0;
+      for(let i = 0; i < hazir.length; i++){
+        const t = hazir[i][0] + g;
+        if(t < 0) continue;
+        top += Math.exp(-t / hazir[i][1]);
+        n++;
+      }
+      if(n) out.push({ gun:g, r:top / n });
+    }
+    return out;
+  }
+
   function retention(lang, todayISO){
     return ESP.Memo.of('srs.ret:' + (lang || '') + ':' + (todayISO || ''), function(){
       return retentionRaw(lang, todayISO);
@@ -31480,7 +31538,7 @@ ESP.SRS = (function(){
     BOXES, GRADES, GRADE_BY_ID, EASE_START, EASE_MIN, EASE_MAX,
     boxDays, schedule, answer,
     dueCards, overdueDays,
-    stabilityOf, retentionOf, retention,
+    stabilityOf, retentionOf, retention, unutmaEgrisi,
     boxCounts, activeCount, deckStatus, answeredIn,
   };
 })();
@@ -47942,20 +48000,13 @@ ESP.Screens.lang = (function(){
      kartlar girer, gelecek kesik. Hiç sorulmamış kart girmez. */
   function unutmaEgrisi(){
     if(!VT()) return '';
-    const kartlar = M.cardsOf(aktifDil()).filter(c => c.reps);
-    if(!kartlar.length) return '';
-    const bugun = U.todayISO();
-    const noktalar = [];
-    for(let g = -7; g <= 14; g++){
-      const d = U.iso(U.addDays(U.parse(bugun), g));
-      const r = kartlar.map(c => {
-        const son = c.due && c.interval ? U.iso(U.addDays(U.parse(c.due), -c.interval)) : null;
-        if(!son || son > d) return null;
-        return ESP.SRS.retentionOf(c, d);
-      }).filter(x => x != null);
-      if(r.length) noktalar.push({ gun:g, r:r.reduce((a, b) => a + b, 0) / r.length });
-    }
-    return VT().unutmaEgrisi({ noktalar, esik:ESP.Planner.RETENTION_FLOOR });
+    /* Hesap tekrar motorunda (ESP.SRS.unutmaEgrisi); kare icinde bir kez. */
+    return ESP.Memo.of('lang.unutma:' + aktifDil(), () => {
+      const kartlar = M.cardsOf(aktifDil()).filter(c => c.reps);
+      if(!kartlar.length) return '';
+      return VT().unutmaEgrisi({ noktalar:ESP.SRS.unutmaEgrisi(kartlar, U.todayISO(), -7, 14),
+        esik:ESP.Planner.RETENTION_FLOOR });
+    });
   }
 
   /* 105 DESTE DURUMU: kutu 1 yeni, 2–3 öğreniliyor, 4–5 oturmuş. */

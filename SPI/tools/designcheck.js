@@ -201,6 +201,19 @@ let DUZEN_SAYISI = 0;
                okuyucuya gider; kırpılan içerik sayılmaz. */
             const okuyucuMetni = e => e.clientWidth <= 1 && e.clientHeight <= 1
               && getComputedStyle(e).position === 'absolute';
+            /* V5-6 RAF KESMESİ (brand/ortak/hareket.js): uzun kutu bilerek
+               kısaltılır, altında «Tamamını göster» durur; içerik DOM'da ve
+               tek dokunuşla açılır. Kesmeyi açan düğme kutunun İÇİNDE ve
+               görünürse dikey kesme kırpma sayılmaz. Düğmesi olmayan ya da
+               düğmesi görünmeyen kesme yine kırpmadır (negatif kontrol:
+               düğme kaldırılınca aynı 10 yer yakalanır). */
+            const rafKesik = e => {
+              if(!e.classList.contains('raf-uzun') || e.classList.contains('raf-acik')) return false;
+              const b = e.querySelector(':scope > .raf-ac');
+              if(!b) return false;
+              const r = b.getBoundingClientRect(), k = e.getBoundingClientRect();
+              return r.width > 0 && r.height > 0 && r.top >= k.top - 2 && r.bottom <= k.bottom + 2;
+            };
             const kapIcinde = (e, kok) => {
               for(let q = e; q && q !== kok; q = q.parentElement){
                 const s = getComputedStyle(q);
@@ -245,7 +258,7 @@ let DUZEN_SAYISI = 0;
                  && !okuyucuMetni(el) && gercekTasma(el, 'x'))
                 kirpik.push(ad(el) + ' (' + el.scrollWidth + '>' + el.clientWidth + ')');
               if((oy === 'hidden' || oy === 'clip') && el.scrollHeight > el.clientHeight + 2
-                 && cs.position !== 'fixed' && !okuyucuMetni(el) && gercekTasma(el, 'y'))
+                 && cs.position !== 'fixed' && !okuyucuMetni(el) && !rafKesik(el) && gercekTasma(el, 'y'))
                 kirpik.push(ad(el) + ' ↕(' + el.scrollHeight + '>' + el.clientHeight + ')');
 
               if(b.right <= d.clientWidth + 2 && b.left >= -2) continue;

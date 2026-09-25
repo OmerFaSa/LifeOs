@@ -618,6 +618,30 @@ describe('G · Ofis kartları (ajan konuşur, kural motoru sayar)', () => {
       expect(k.querySelector('.sc').textContent).toBe('3 hafta');
     });
   });
+  /* Sadelik (plan §1.2, 30+ kelimelik tek parça yazı 0): ofis kartı
+     ajanın BÜTÜN kural metnini basıyordu (SPİ Ofis'te üç uzun balon).
+     Balon, toplantı satırı ve devir ilk cümleyi söyler; tam metin masada. */
+  it('oz-129 oz-131 oz-135 ofis balonları tek cümle, en çok 30 kelime', () => {
+    const uzun = '7 ölçüm girilmiş. 0 tanesi referans aralığının dışında, 2 tanesi hedef bandın dışında. '
+      + 'En çok dikkat isteyen ferritin.';
+    const cokUzun = Array.from({ length:45 }, (_, i) => 'kelime' + i).join(' ') + '.';
+    const B = [{ id:'patron', ad:'Patron', harf:'P', patron:true, cumle:uzun },
+      { id:'lab', ad:'Kerem', harf:'K', cumle:'Uyku 5.2 saat, taban 7.0 saat. İkinci cümle burada.' },
+      { id:'nutri', ad:'Nesrin', harf:'N', cumle:cokUzun }];
+    const o = V().ofis({ modul:'spi', ajanlar:B,
+      devir:{ kaynak:{ ad:'Kerem', harf:'K' }, hedef:{ ad:'Nesrin', harf:'N' }, metin:uzun } });
+    const kelime = s => s.trim().split(/\s+/).filter(Boolean).length;
+    icinde(o.balon, k => expect(k.querySelector('.bal').textContent).toBe('7 ölçüm girilmiş.'));
+    icinde(o.toplanti, k => {
+      const p = [...k.querySelectorAll('.r p')].map(x => x.textContent);
+      expect(p[0]).toBe('KeremUyku 5.2 saat, taban 7.0 saat.');
+      expect(kelime(p[1]) <= 30).toBe(true);
+      expect(p[1].endsWith('…')).toBe(true);
+    });
+    icinde(o.devir, k => expect(k.querySelector('.bal').textContent).toBe('Kerem: 7 ölçüm girilmiş.'));
+    expect(V().tekCumle('')).toBe('');
+    expect(V().tekCumle('Tek cümle')).toBe('Tek cümle');
+  });
   it('oz-138 konuşma özeti: karar ve açık soru; boşsa kart yok', () => {
     expect(V().konusmaOzeti({ ajan:{ ad:'Nesrin' }, kararlar:[], acik:[] })).toBe('');
     expect(V().konusmaOzeti({ ajan:{ ad:'Nesrin' }, kararlar:['Akşam öğünü 19:30'], acik:['kahvaltı saati'] })).toContain('Açık: kahvaltı saati');
@@ -689,6 +713,9 @@ describe('A · K · Gün ve güven kartları', () => {
     icinde(V().veriNerede({}), k => {
       expect(k.querySelectorAll('.n')).toHaveLength(3);
       expect(k.textContent).toContain('modüle yazmaz');
+      /* Mor yalnız Merkez'in sesidir (katalog 110): moru taşıyan düğüm
+         Merkez kabı olarak işaretlidir; doktrin ölçümü onu «dışı» saymaz. */
+      expect(k.querySelector('[data-merkez]').textContent).toContain('Merkez');
     });
   });
   it('oz-175 dışa aktar: yalnız var olan biçim; eylemsiz kart yok', () => {

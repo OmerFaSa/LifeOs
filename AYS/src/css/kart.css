@@ -864,6 +864,10 @@
   flex-direction:row; flex-wrap:wrap; gap:16px; align-items:flex-start; }
 .bugun__alan[aria-label="Durum"] > *, .bugun__alan[aria-label="Özet"] > *{ flex:1 1 300px; min-width:0; }
 .bugun__alan > .bugun__etiket, .bugun__alan[aria-label] > p{ flex-basis:100%; margin:0; }
+/* Şimdi'de iki küçük tek dokunuşluk giriş (SPİ su + günün hissi) geniş
+   ekranda yan yana, dar ekranda alt alta (sadelik: Bugün en çok 1 800 px). */
+.bugun__cift{ display:flex; flex-wrap:wrap; gap:16px; align-items:stretch; }
+.bugun__cift > *{ flex:1 1 280px; min-width:0; }
 .sayfabasi__ust{ margin:0 0 6px; font-size:13px; color:var(--text-2); }
 .site--v5 .sayfabasi__baslik{ font-size:28px; }
 

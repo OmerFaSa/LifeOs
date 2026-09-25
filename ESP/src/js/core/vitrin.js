@@ -1288,6 +1288,20 @@ window.LIFEOS = window.LIFEOS || {};
      cümlesi), yapar:[], yapmaz:[], patron }], devir:{ kaynak, hedef, metin },
      act:{ ac, sor } }. Model açıkken de cümle kural motorunundur; balona
      modelin cevabı girmez. */
+  /* TEK CÜMLE (sadelik, plan §1.2: 30+ kelimelik tek parça yazı 0). Ofis
+     kartı ajanın kural metninin İLK cümlesini söyler; tam metin masanın
+     kendisinde durur. Yeni cümle kurulmaz, yalnız kısaltılır: cümle sonu
+     nokta/ünlem/soru + boşluk + büyük harf ya da rakamdır («5.2 saat»
+     bölünmez). İlk cümle de 30 kelimeyi aşarsa 28. kelimede «…» ile kesilir. */
+  function tekCumle(metin){
+    const s = String(metin || '').replace(/\s+/g, ' ').trim();
+    if(!s) return '';
+    const m = s.match(/^(.+?[.!?…])\s+(?=[A-ZÇĞİÖŞÜ0-9«"(])/);
+    const ilk = m ? m[1] : s;
+    const k = ilk.split(' ');
+    return k.length > 30 ? k.slice(0, 28).join(' ').replace(/[,;:]$/, '') + '…' : ilk;
+  }
+
   function ofis(o){
     const a = (o && o.ajanlar || []).filter(Boolean);
     if(!a.length) return {};
@@ -1300,13 +1314,13 @@ window.LIFEOS = window.LIFEOS || {};
       masa:masaGorunumu({ modul:o.modul, durum:acik ? 'raporu açık' : 'masayı yönetiyor',
         ajanlar:a.map(x => Object.assign({}, x, { konusuyor:x === konusan })) }),
       durum:durumHalkasi({ modul:o.modul, ajanlar:a.map(x => ({ ad:x.ad, harf:x.harf, gorsel:x.gorsel, durum:x.hazir ? 'bos' : 'kap' })) }),
-      balon:patron.cumle ? sayiBalonu({ modul:o.modul, metin:patron.cumle, kaynak:'kural motoru hesapladı' }) : '',
-      hazir:uzman[0] && uzman[0].cumle && ac ? hazirCevap({ modul:o.modul, soru:uzman[0].ad + ': ' + uzman[0].cumle, kaynak:'kural motoru hesapladı',
+      balon:patron.cumle ? sayiBalonu({ modul:o.modul, metin:tekCumle(patron.cumle), kaynak:'kural motoru hesapladı' }) : '',
+      hazir:uzman[0] && uzman[0].cumle && ac ? hazirCevap({ modul:o.modul, soru:uzman[0].ad + ': ' + tekCumle(uzman[0].cumle), kaynak:'kural motoru hesapladı',
         cevaplar:[{ metin:'Raporu aç', act:ac, data:{ 'data-id':uzman[0].id, 'data-agent':uzman[0].id } }].concat(sor ? [{ metin:'Soru sor', act:sor, data:{ 'data-agent':uzman[0].id } }] : []) }) : '',
       toplanti:gununToplantisi({ modul:o.modul, kaynak:'kural motoru hesapladı', baslik:'Patron · günün toplantısı',
-        satirlar:uzman.map(x => ({ ad:x.ad, harf:x.harf, gorsel:x.gorsel, cumle:x.cumle })) }),
+        satirlar:uzman.map(x => ({ ad:x.ad, harf:x.harf, gorsel:x.gorsel, cumle:tekCumle(x.cumle) })) }),
       sinir:acik ? ajanSinir(Object.assign({ modul:o.modul }, acik)) : '',
-      devir:o.devir ? devirGostergesi(Object.assign({ modul:o.modul }, o.devir)) : '',
+      devir:o.devir ? devirGostergesi(Object.assign({ modul:o.modul }, o.devir, { metin:tekCumle(o.devir.metin) })) : '',
     };
   }
   /* Kapsam cümlesini maddeye böler: «A, B ve C.» → [A, B, C]. */
@@ -1381,7 +1395,7 @@ window.LIFEOS = window.LIFEOS || {};
     return kok('174', 'z39', '<div class="n a"><b>' + kac(o.cihaz || 'Bu cihaz') + '</b><span>' + kac(o.cihazNot || 'asıl kayıt burada') + '</span></div>'
       + '<div class="bg2" aria-hidden="true"><i></i><i class="k"></i></div>'
       + '<div class="sag2"><div class="n"><b>Yedek dosyası</b><span>senin seçtiğin yer</span></div>'
-      + '<div class="n c"><b>Merkez</b><span>' + kac(o.merkezNot || 'isteğe bağlı · teklif yazar, modüle yazmaz') + '</span></div></div>',
+      + '<div class="n c" data-merkez><b>Merkez</b><span>' + kac(o.merkezNot || 'isteğe bağlı · teklif yazar, modüle yazmaz') + '</span></div></div>',
       { etiket:'Veri bu cihazda; yedek senin seçtiğin yerde; Merkez isteğe bağlı ve modüle yazmaz' });
   }
 
@@ -1663,7 +1677,7 @@ window.LIFEOS = window.LIFEOS || {};
     kelimeAgi, bagliNotlar, desteDurumu, cumleKurma, metinliDinleme, soruZinciri, ucMaddeOzet,
     xpDokumu, kademeYolu, sistemRutbesi, rutbeGalerisi, basarimRozeti, ayOzeti, kusursuzGunler,
     sayiCipleri, masaGorunumu, sayiBalonu, ajanSinir, devirGostergesi, durumHalkasi, hazirCevap,
-    gununToplantisi, konusmaOzeti, ofis, maddele,
+    gununToplantisi, konusmaOzeti, ofis, maddele, tekCumle,
     gunAcilisi, gunKapanisi, gunPenceresi, adimliSayi, geriDonus, veriNerede, disaAktar, iceAktarma, yedekFarki,
     suzgecCipleri, hayaletOneri, ajanSecici, uslupSecimi, sakinSeviye, sakinGoster, birakmaAlani, mentionKur, kaydirIpucu, kaydirmaKur,
     sessizSaatler, bildirimAyari, bildirimKutusu, bildirimEylem,

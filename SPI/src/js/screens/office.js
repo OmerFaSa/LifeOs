@@ -297,7 +297,8 @@ SP.Screens.office = (function(){
         gorsel:'img/marka/ajan-kare-spi-' + a.id + '.webp', hazir:SP.Office.ready(a.id),
         cumle:(() => { try{ return SP.Office.ruleText(a.id, SP.Office.brief(a.id)); }catch(e){ return ''; } })(),
         yapar:V.maddele(a.scope), yapmaz:V.maddele(a.notScope) })),
-      devir:h && kisi(h.from) && kisi(h.to) ? { kaynak:kisi(h.from), hedef:kisi(h.to), metin:h.finding + ' — ' + h.toName + ': ' + h.ask } : null });
+      /* Balonda bulgu; kime ve ne sorulduğu okta ve alttaki devir satırında. */
+      devir:h && kisi(h.from) && kisi(h.to) ? { kaynak:kisi(h.from), hedef:kisi(h.to), metin:h.finding } : null });
   }
 
   async function render(){

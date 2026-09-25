@@ -199,6 +199,19 @@ def t_cekmeceler():
         ok(s + ":" in grup)
 
 
+def t_denetim_her_gorunumu_gezer():
+    """Yuz denetimi (tools/yuz.js) yuzun HER gorunumunu gezer. Motto ve
+    Hedefler K7'den beri yuzdeydi ama denetimin listesinde yoktu: tasma,
+    dokunma hedefi ve kontrast o iki gorunumde hic olculmuyordu (README'de
+    56 → 44 gorunum). Ayarlar alt sekmeleriyle ayri gezilir."""
+    m = _yuz()
+    gor = re.findall(r"'([a-z]+)'", m[m.index("var GORUNUMLER"):m.index("];", m.index("var GORUNUMLER"))])
+    d = (KOK / "HKM" / "tools" / "yuz.js").read_text(encoding="utf-8")
+    gezilen = re.findall(r"'([a-z]+)'", d[d.index("const GORUNUMLER"):d.index("];", d.index("const GORUNUMLER"))])
+    eq(sorted(set(gor) - set(gezilen) - {"ayarlar"}), [])
+    ok("const AYAR_SEKMELERI" in d)
+
+
 def t_jetonlar_ortak():
     """K7a: yuz tek dosya kalir ve ortak dosyayi YUKLEMEZ; ama degerleri uc
     arayuzun v4 jetonlaridir. jeton.css'te biri degisirse burada kirilir.
@@ -329,3 +342,4 @@ def run():
     test("çapraz etki: kaynak → hedef, bilinmeyen türde uydurma yok (124)", t_capraz_etki)
     test("ne değişti: tek kart, yalnız eski kullanıcıya (017)", t_ne_degisti)
     test("fiş yükleme: önizleme, onay, küçültme", t_fis_yukleme)
+    test("yüz denetimi yüzün her görünümünü gezer (Motto, Hedefler)", t_denetim_her_gorunumu_gezer)

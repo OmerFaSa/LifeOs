@@ -26,8 +26,11 @@ const DEPO = path.resolve(ROOT, '..');
 const PORT = 4296;
 const TOKEN = 'yuz-denetimi-icin-gecici-jeton';
 /* Ana gorunumler ve Ayarlar'in alt sekmeleri AYRI gezilir: teknik
- * yonetim artik gunluk ekranin icinde degil, kendi sayfasinda. */
-const GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'ofis', 'teklifler', 'para'];
+ * yonetim artik gunluk ekranin icinde degil, kendi sayfasinda. Liste
+ * yuzun GORUNUMLER'iyle ayni olmali (ayarlar asagida sekme sekme);
+ * Motto ve Hedefler K7'den beri yuzdeydi ama burada yoktu, hic
+ * olculmuyordu (2026-09-25; test_yuz iki listeyi karsilastirir). */
+const GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'motto', 'hedefler', 'ofis', 'teklifler', 'para'];
 /* K7 (ekip/EKIP-PLANI §8-9): Ayarlar'ın yedi paneli dört bölümde; bölüm
    bütün panellerini alt alta gösterir, yani yedi panelin hepsi ölçülür. */
 const AYAR_SEKMELERI = ['yapayzeka', 'kanallar', 'esikler', 'sunucu'];

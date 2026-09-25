@@ -134,6 +134,35 @@
       const r = SRS.retentionOf(c, '2026-12-31');
       expect(r >= 0 && r <= 1).toBe(true);
     });
+
+    /* 092 unutma egrisi: tek gecisli hesap, eski «her gun x her kart icin
+       retentionOf» yoluyla BIREBIR ayni sayiyi verir (Dil ekrani 1 500
+       kartta 250 ms suruyordu). Gecmis gunde yalniz o gune kadar
+       cevaplanmis kart girer; hic sorulmamis ve vadesi olmayan kart girmez. */
+    it('unutma egrisi eski yolla birebir ayni', () => {
+      const bugun = '2026-09-25';
+      const kartlar = [];
+      for(let i = 0; i < 60; i++){
+        kartlar.push(ESP.Model.newCard({ front:'k' + i, back:'b', reps:i % 4, box:1 + (i % 5),
+          interval:i % 7 ? 1 + (i % 30) : 0, ease:1.3 + (i % 9) * 0.2,
+          due:i % 11 ? U.iso(U.addDays(U.parse(bugun), (i % 40) - 20)) : null }));
+      }
+      const eski = [];
+      const sorulan = kartlar.filter(c => c.reps);
+      for(let g = -7; g <= 14; g++){
+        const d = U.iso(U.addDays(U.parse(bugun), g));
+        const r = sorulan.map(c => {
+          const son = c.due && c.interval ? U.iso(U.addDays(U.parse(c.due), -c.interval)) : null;
+          if(!son || son > d) return null;
+          return SRS.retentionOf(c, d);
+        }).filter(x => x != null);
+        if(r.length) eski.push({ gun:g, r:r.reduce((a, b) => a + b, 0) / r.length });
+      }
+      const yeni = SRS.unutmaEgrisi(sorulan, bugun, -7, 14);
+      expect(eski.length > 10).toBe(true);
+      expect(JSON.stringify(yeni)).toBe(JSON.stringify(eski));
+      expect(SRS.unutmaEgrisi([], bugun, -7, 14)).toEqual([]);
+    });
   });
 
   describe('cevap islemek', () => {

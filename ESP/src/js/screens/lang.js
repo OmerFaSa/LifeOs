@@ -299,20 +299,13 @@ ESP.Screens.lang = (function(){
      kartlar girer, gelecek kesik. Hiç sorulmamış kart girmez. */
   function unutmaEgrisi(){
     if(!VT()) return '';
-    const kartlar = M.cardsOf(aktifDil()).filter(c => c.reps);
-    if(!kartlar.length) return '';
-    const bugun = U.todayISO();
-    const noktalar = [];
-    for(let g = -7; g <= 14; g++){
-      const d = U.iso(U.addDays(U.parse(bugun), g));
-      const r = kartlar.map(c => {
-        const son = c.due && c.interval ? U.iso(U.addDays(U.parse(c.due), -c.interval)) : null;
-        if(!son || son > d) return null;
-        return ESP.SRS.retentionOf(c, d);
-      }).filter(x => x != null);
-      if(r.length) noktalar.push({ gun:g, r:r.reduce((a, b) => a + b, 0) / r.length });
-    }
-    return VT().unutmaEgrisi({ noktalar, esik:ESP.Planner.RETENTION_FLOOR });
+    /* Hesap tekrar motorunda (ESP.SRS.unutmaEgrisi); kare icinde bir kez. */
+    return ESP.Memo.of('lang.unutma:' + aktifDil(), () => {
+      const kartlar = M.cardsOf(aktifDil()).filter(c => c.reps);
+      if(!kartlar.length) return '';
+      return VT().unutmaEgrisi({ noktalar:ESP.SRS.unutmaEgrisi(kartlar, U.todayISO(), -7, 14),
+        esik:ESP.Planner.RETENTION_FLOOR });
+    });
   }
 
   /* 105 DESTE DURUMU: kutu 1 yeni, 2–3 öğreniliyor, 4–5 oturmuş. */

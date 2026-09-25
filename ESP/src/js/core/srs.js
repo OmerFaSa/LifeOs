@@ -201,6 +201,36 @@ ESP.SRS = (function(){
   /* Retansiyon butun desteyi dolasir ve bir cizimde onlarca kez isteniyor
      (brifing, masa notlari, kademe kapisi, ekran basligi). Kare onbellegi
      hesabi degil YALNIZCA TEKRARI kaldirir. */
+  /* 092 UNUTMA EGRISI: destenin ortalama hatirlamasi, gun gun (`bas`..`son`,
+     bugune gore). retentionOf ile AYNI formul (R = e^(-t/S)); fark yalniz
+     hesap yolunda: kart basina son cevap ve kararlilik BIR kez bulunur,
+     gunler toplamayla kaydirilir. Onceki yol her gun x her kart icin tarih
+     ayristiriyordu (1 500 kartta ~45 bin cagri, Dil ekrani 250 ms). Gecmis
+     gunde yalniz o gune kadar cevaplanmis kart girer; hic sorulmamis ya da
+     vadesi olmayan kart girmez. Sayilar ve toplama sirasi eskisiyle ayni. */
+  function unutmaEgrisi(kartlar, todayISO, bas, son){
+    const today = todayISO || U.todayISO();
+    const hazir = [];
+    (kartlar || []).forEach(c => {
+      const s = stabilityOf(c);
+      if(s == null || !c.due || !c.interval) return;
+      const t0 = U.diffDays(U.iso(U.addDays(U.parse(c.due), -c.interval)), today);
+      if(t0 != null) hazir.push([t0, s]);
+    });
+    const out = [];
+    for(let g = bas; g <= son; g++){
+      let top = 0, n = 0;
+      for(let i = 0; i < hazir.length; i++){
+        const t = hazir[i][0] + g;
+        if(t < 0) continue;
+        top += Math.exp(-t / hazir[i][1]);
+        n++;
+      }
+      if(n) out.push({ gun:g, r:top / n });
+    }
+    return out;
+  }
+
   function retention(lang, todayISO){
     return ESP.Memo.of('srs.ret:' + (lang || '') + ':' + (todayISO || ''), function(){
       return retentionRaw(lang, todayISO);
@@ -278,7 +308,7 @@ ESP.SRS = (function(){
     BOXES, GRADES, GRADE_BY_ID, EASE_START, EASE_MIN, EASE_MAX,
     boxDays, schedule, answer,
     dueCards, overdueDays,
-    stabilityOf, retentionOf, retention,
+    stabilityOf, retentionOf, retention, unutmaEgrisi,
     boxCounts, activeCount, deckStatus, answeredIn,
   };
 })();

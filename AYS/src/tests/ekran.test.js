@@ -40,6 +40,22 @@
       });
     });
 
+    /* HATALAR T2-02: Danışma'daki «Okuduğu veri» satırı ajanın okuduğu
+       verinin iç kimliğini (durum_ozeti, gunun_akisi) ekrana basıyordu;
+       Ofis'teki gibi Türkçe adlı veri çipi olur (brand/ortak/sozluk.js). */
+    it('Danışma ajanın okuduğu veriyi ham kimlikle yazmaz', async () => {
+      resetState();
+      await withTodayAsync('2026-10-12', async () => {
+        const ham = [].concat(...R.AGENTS.map(a => a.reads || [])).filter(r => /_/.test(r));
+        expect(ham.length > 0).toBe(true);
+        for(const a of R.AGENTS){
+          R.S.ui.officeAgent = a.id;
+          const metin = String(await R.Screens.team.render()).replace(/<[^>]+>/g, ' ');
+          ham.forEach(r => expect(metin.indexOf(r)).toBe(-1));
+        }
+      });
+    });
+
     it('boş ve dolu durumda hiçbir ekran çökmez', async () => {
       for(const dolu of [false, true]){
         resetState();

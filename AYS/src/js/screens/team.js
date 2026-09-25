@@ -319,7 +319,9 @@ R.Screens.team = (function(){
                 <span class="${'finding__dot finding__dot--' + (f.tone || 'muted')}"></span>
                 <span>${f.text}</span>
               </div>`)}</div>
-            <p class="tiny dim mt-10">Okuduğu veri: ${agent.reads.join(' · ')}</p>`,
+            <div class="mt-10"><span class="tiny dim">Okuduğu veri</span>
+              ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.veriCipleriHtml(agent.reads))
+                : html`<span class="tiny dim">${agent.reads.length} veri kaynağı</span>`}</div>`,
         }),
         K.Card({
           title:'Ekipteki diğerleri', sub:'Alan dışı soruyu sahibine sor',

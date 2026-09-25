@@ -846,18 +846,20 @@ SP.Screens.today = (function(){
   const gunAd = iso => GUN_AD[(new Date(iso + 'T12:00:00').getDay() + 6) % 7];
   const sonGunler = n => Array.from({ length:n }, (_, i) => U.iso(U.addDays(U.today(), i - n + 1)));
 
-  /* 070 HAM + ORTALAMA: son 14 günün tartısı; eksik gün ortalamaya girmez. */
-  function KiloKutusu(){
-    if(!VT()) return '';
-    const noktalar = sonGunler(14).map(t => ({ tarih:t, deger:S.vitals[t] && S.vitals[t].weight != null ? Number(S.vitals[t].weight) : null }));
-    return vkutu('Kilo', 'ölçüldü', VT().hamOrtalama({ noktalar, birim:'kg' }));
-  }
-
-  /* 069 UYKU BANDI: son gecenin süresi ve yedi gecenin dokusu. */
-  function UykuKutusu(){
-    if(!VT()) return '';
+  /* 069 UYKU BANDI + 070 HAM + ORTALAMA: son günlerin DOKUSU. Bugün'ün üç
+     alanı bugünü söyler; eğilim Bugün › Ayrıntı › Özet'te durur (sadelik:
+     Bugün en çok 1 800 px, plan §1.2). Uyku: son gecenin süresi ve yedi
+     gecenin dokusu. Kilo: son 14 günün tartısı; eksik gün ortalamaya girmez. */
+  function egilimEntry(){
+    if(!VT()) return null;
     const g = sonGunler(7).map(t => ({ ad:gunAd(t), saat:S.vitals[t] && S.vitals[t].sleep != null ? Number(S.vitals[t].sleep) : null }));
-    return vkutu('Uyku', 'ölçüldü', VT().uykuBandi({ geceler:g, sonAd:g[g.length - 1].saat != null ? 'bu gece' : 'son gece' }));
+    const uyku = VT().uykuBandi({ geceler:g, sonAd:g[g.length - 1].saat != null ? 'bu gece' : 'son gece' });
+    const noktalar = sonGunler(14).map(t => ({ tarih:t, deger:S.vitals[t] && S.vitals[t].weight != null ? Number(S.vitals[t].weight) : null }));
+    const kilo = VT().hamOrtalama({ noktalar, birim:'kg' });
+    if(!uyku && !kilo) return null;
+    return K.Entry({ wide:true, label:'Eğilim', meta:'uyku 7 gece · kilo 14 gün',
+      note:'Ölçülmemiş gün boş kalır; ortalamaya girmez, sıfır sayılmaz.',
+      body:html`<div class="stack-sm">${raw(uyku || '')}${raw(kilo || '')}</div>` });
   }
 
   /* 073 TEK DOKUNUŞ: su bardağı (250 ml). Asgari günün eşiği 2.000 ml =
@@ -984,8 +986,7 @@ SP.Screens.today = (function(){
           ${when(vakti, () => K.Ledger([vakti]))}
           ${when(soru, () => K.Ledger([soru]))}
           ${OlcumKutusu()}
-          ${EnerjiKutusu()}
-          ${SuKutusu()}
+          <div class="bugun__cift">${EnerjiKutusu()}${SuKutusu()}</div>
           ${OgunKutusu()}
         </section>
       </div>
@@ -994,8 +995,6 @@ SP.Screens.today = (function(){
           ${ToparlanmaKutusu()}
           ${AsgariKutusu()}
           ${BeslenmeKutusu()}
-          ${KiloKutusu()}
-          ${UykuKutusu()}
           ${raw(TartiHatirlatici())}
           ${SonOlcumlerKutusu()}
         </section>
@@ -1012,7 +1011,7 @@ SP.Screens.today = (function(){
   async function renderAyrinti(){
     const banners = uyarilar().slice(1).map(u => u.kart);
     const giris = K.Ledger([dunkuEntry(), formEntry(), tusEntry(), symptomEntry(), statusEntry(), whyEntry()].filter(Boolean));
-    const ozet = K.Ledger([readinessEntry(), nutritionEntry(), minimumEntry(),
+    const ozet = K.Ledger([egilimEntry(), readinessEntry(), nutritionEntry(), minimumEntry(),
       SP.HatirlatUI ? SP.HatirlatUI.ozetEntry() : null, officeEntry(), moneyEntry()].filter(Boolean));
     const gecmis = K.Ledger([historyEntry(), baselineEntry()]);
     return String(html`
