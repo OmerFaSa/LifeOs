@@ -373,25 +373,55 @@ window.LIFEOS = window.LIFEOS || {};
 
   const saatMetni = d => ('0' + Math.floor(d / 60)).slice(-2) + ':' + ('0' + (d % 60)).slice(-2);
 
+  /* DİLİM DÜZEYİ (kullanıcı kararı 2026-09-25): saat yoksa iki taraf
+     günün AYNI dilimini istiyorsa çakışır. Dilimi bilinmeyen taraf
+     bilinmeyen kalır (null): ne çakışır ne çakışmaz. */
+  const DILIM_ADI = { sabah:'sabah', ogle:'öğle', aksam:'akşam', gece:'gece' };
+  function dilimCakisma(a, b){
+    const x = a && DILIM_ADI[a.dilim] ? a.dilim : null;
+    const y = b && DILIM_ADI[b.dilim] ? b.dilim : null;
+    if(!x || !y) return null;
+    return { ayni:x === y, dilim:x };
+  }
+
   /* c = { a:{modul,ad,bas,bit}, b:{…}, cozum:{ baslik, id } } */
   function cakismaHtml(c){
     c = c || {};
     const r = cakisma(c.a, c.b);
-    if(!r || !r.dakika) return '';
+    let bas, etiket, zamanOf;
+    if(r && r.dakika){
+      bas = r.dakika + ' dakika çakışıyor · ' + saatMetni(r.bas) + '–' + saatMetni(r.bit);
+      etiket = saatMetni(r.bas) + '–' + saatMetni(r.bit);
+      zamanOf = x => x.bas + '–' + x.bit;
+    }else if(!r){
+      const d = dilimCakisma(c.a, c.b);
+      if(!d || !d.ayni) return '';
+      bas = 'İkisi de ' + DILIM_ADI[d.dilim] + ' dilimini istiyor';
+      etiket = DILIM_ADI[d.dilim] + ' dilimi';
+      zamanOf = x => DILIM_ADI[x.dilim] + (x.gunluk_dk > 0 ? ' · günde ' + x.gunluk_dk + ' dk' : '');
+    }else return '';
     const taraf = x => '<div class="cakisma__taraf cakisma--' + kac(x.modul || '') + '">'
       + '<span class="cakisma__modul">' + kac((x.modul || '').toLocaleUpperCase('tr-TR')) + '</span>'
       + '<b class="cakisma__ad">' + kac(x.ad || '') + '</b>'
-      + '<span class="cakisma__saat">' + kac(x.bas + '–' + x.bit) + '</span></div>';
+      + '<span class="cakisma__saat">' + kac(zamanOf(x)) + '</span></div>';
     const cozum = c.cozum && c.cozum.baslik
       ? '<div class="cakisma__cozum"><span class="okart__kaynak">Merkez önerisi</span>'
         + '<p class="cakisma__cozum-metin">' + kac(c.cozum.baslik) + '</p>'
         + dugme({ etiket:'Çözümü önizle', act:'cakisma-onizle', data:{ cozum:c.cozum.id || '' } })
         + '</div>'
       : '';
-    return '<section class="cakisma" data-oz="112" aria-label="Çakışma: '
-      + kac(saatMetni(r.bas) + '–' + saatMetni(r.bit)) + '">'
-      + '<p class="cakisma__bas">' + kac(r.dakika + ' dakika çakışıyor · ' + saatMetni(r.bas) + '–' + saatMetni(r.bit)) + '</p>'
+    return '<section class="cakisma" data-oz="112" aria-label="Çakışma: ' + kac(etiket) + '">'
+      + '<p class="cakisma__bas">' + kac(bas) + '</p>'
       + '<div class="cakisma__iki">' + taraf(c.a) + taraf(c.b) + '</div>' + cozum + '</section>';
+  }
+
+  /* Hedef ağının bütçesinden (HKM core/hedefag.py cakismalar) ilk çakışma.
+     HKM kapalıysa bütçe yoktur ve kart çizilmez (AGENTS §1.4). */
+  function butceCakismaHtml(butce){
+    const l = (butce && Array.isArray(butce.cakismalar)) ? butce.cakismalar : [];
+    if(!l.length) return '';
+    return cakismaHtml({ a:l[0].a, b:l[0].b })
+      + (l.length > 1 ? '<p class="small muted">' + kac((l.length - 1) + ' çakışma daha HKM › Hedefler’de.') + '</p>' : '');
   }
 
   /* ------------------------------------------------ 150 geri al */
@@ -652,6 +682,8 @@ window.LIFEOS = window.LIFEOS || {};
     alan:alan,
     cakisma:cakisma,
     cakismaHtml:cakismaHtml,
+    dilimCakisma:dilimCakisma,
+    butceCakismaHtml:butceCakismaHtml,
     cozumUygulanabilirMi:cozumUygulanabilirMi,
     kalan:kalan,
     geriAlBaslat:geriAlBaslat,

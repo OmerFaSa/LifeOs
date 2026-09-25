@@ -28,7 +28,8 @@ LIFEOS.HedefAg = (function(){
   function ozet(h, o){
     const x = o || {};
     const k = h.kapasite && h.kapasite.gunluk_dk > 0
-      ? { gunluk_dk:Math.round(h.kapasite.gunluk_dk), haftalik_gun:h.kapasite.haftalik_gun || 7 } : null;
+      ? Object.assign({ gunluk_dk:Math.round(h.kapasite.gunluk_dk), haftalik_gun:h.kapasite.haftalik_gun || 7 },
+        h.kapasite.dilim ? { dilim:h.kapasite.dilim } : {}) : null;
     const g = h.gerceklik && h.gerceklik.bant
       ? { bant:h.gerceklik.bant, etiket:h.gerceklik.etiket || 'tahmin' } : null;
     const il = x.ilerleme || null;

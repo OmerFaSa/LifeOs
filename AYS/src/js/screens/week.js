@@ -470,8 +470,12 @@ R.Screens.week = (function(){
     const curriculum = M.curriculumFor(n);
     const history = C.completionHistory(8).map(h => ({ label:'H'+h.n, value:h.value }));
 
+    /* 112 çakışma (dilim düzeyi): hedef ağının bütçesinden; HKM yoksa yok. */
+    const cak = (window.LIFEOS || {}).ONERI && R.Hedefler && R.Hedefler.ag
+      ? window.LIFEOS.ONERI.butceCakismaHtml(R.Hedefler.ag.butce()) : '';
     return String(K.Grid([
       weekNav(n, week, phase),
+      cak ? K.Span(12, raw(cak)) : '',
       K.Span(12, html`<div class="weekgrid">${map(M.weekDates(n), DayColumn)}</div>`),
 
       K.Span(6, K.Stack([

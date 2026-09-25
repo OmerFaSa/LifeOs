@@ -33,6 +33,11 @@ MAX_HEDEF = 30
 SIKISIK_KAT = 1.25
 DURUMLAR = ("aktif", "askida")
 BANTLAR = ("gercekci", "zorlayici", "gercekci_degil", "guvensiz")
+# 112 cakisma — dilim duzeyinde (kullanici karari 2026-09-25): saat yok,
+# hedefin vakti gunun hangi DILIMINDE. Iki FARKLI modulun etkin hedefi ayni
+# dilimi istiyorsa cakisma; cozum kullanicinin (kart yalniz gosterir).
+DILIMLER = ("sabah", "ogle", "aksam", "gece")
+DILIM_ADI = {"sabah": "sabah", "ogle": "öğle", "aksam": "akşam", "gece": "gece"}
 ETIKETLER = ("olculdu", "tahmin", "hesaplandi", "veri_yok")
 ILERLEME = ("yolunda", "onde", "geride", "veri_yok")
 ISO = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -80,6 +85,8 @@ def temizle(h):
     dk = _tam(k.get("gunluk_dk"), 1, 1440)
     out["kapasite"] = ({"gunluk_dk": dk, "haftalik_gun": _tam(k.get("haftalik_gun"), 1, 7) or 7}
                        if dk else None)
+    if dk and k.get("dilim") in DILIMLER:
+        out["kapasite"]["dilim"] = k["dilim"]
     g = h.get("gerceklik") if isinstance(h.get("gerceklik"), dict) else {}
     out["gerceklik"] = ({"bant": g["bant"], "etiket": g.get("etiket")
                          if g.get("etiket") in ETIKETLER else "tahmin"}
@@ -295,6 +302,22 @@ def _haftalik(kap):
     return kap["gunluk_dk"] * (kap.get("haftalik_gun") or 7) / 60.0
 
 
+def cakismalar(etkin):
+    """Ayni dilimi isteyen, FARKLI modullerin etkin hedef ciftleri (en cok 3).
+    Dilimi bilinmeyen hedef hic eslesmez: bilinmeyen, bilinmeyen kalir."""
+    out = []
+    dilimli = [h for h in etkin if (h.get("kapasite") or {}).get("dilim") in DILIMLER]
+    for i, a in enumerate(dilimli):
+        for b in dilimli[i + 1:]:
+            if a["modul"] == b["modul"] or a["kapasite"]["dilim"] != b["kapasite"]["dilim"]:
+                continue
+            taraf = lambda h: {"modul": h["modul"], "modul_adi": MODUL_AD[h["modul"]], "ad": h["ozet"],
+                               "dilim": h["kapasite"]["dilim"], "gunluk_dk": h["kapasite"]["gunluk_dk"]}
+            out.append({"dilim": a["kapasite"]["dilim"], "dilim_adi": DILIM_ADI[a["kapasite"]["dilim"]],
+                        "a": taraf(a), "b": taraf(b)})
+    return out[:3]
+
+
 def butce(con):
     """Zaman butcesinin kararini ve cumlesini KOD kurar."""
     etkin = [h for h in hedefler(con) if h["durum"] == "aktif"]
@@ -310,7 +333,7 @@ def butce(con):
            "modul_saat": {m: round(v, 2) for m, v in modul_saat.items()},
            "sayilan": len(sayilan), "bilinmeyen": [
                {"modul": h["modul"], "ozet": h["ozet"]} for h in bilinmeyen],
-           "askida": len(askida), "zaman": z}
+           "askida": len(askida), "zaman": z, "cakismalar": cakismalar(etkin)}
     parca = []
     dagilim = " · ".join("%s %s" % (MODUL_AD[m], _yaz(v)) for m, v in sorted(modul_saat.items()))
     if not etkin:

@@ -106,6 +106,13 @@ LIFEOS.Hedef = (function(){
 
   /* Kapasite: «günde yarım saat», «günde 45 dakika», «haftada 4 gün».
      Eşleşen parça metinden SİLİNİR ki «4 gün» süre sanılmasın. */
+  const DILIMLER = [
+    { id:'sabah', re:/(?<!\p{L})sabah(?:ları|lari|leyin)?(?!\p{L})/iu },
+    { id:'ogle', re:/(?<!\p{L})(?:öğleden sonra|ogleden sonra|öğlen|oglen|öğle|ogle)(?:leri)?(?!\p{L})/iu },
+    { id:'aksam', re:/(?<!\p{L})(?:akşam|aksam)(?:ları|lari)?(?!\p{L})/iu },
+    { id:'gece', re:/(?<!\p{L})gece(?:leri)?(?!\p{L})/iu },
+  ];
+
   function kapasiteAyikla(k, cevapMi){
     const out = {};
     let kalan = k;
@@ -121,6 +128,17 @@ LIFEOS.Hedef = (function(){
       const n = sayiOku(h[1]);
       if(n != null && n >= 1 && n <= 7) out.haftalik_gun = n;
       kalan = kalan.replace(h[0], ' ');
+    }
+    /* 112 dilim (kullanıcı kararı 2026-09-25): «akşamları», «sabah»,
+       «öğleden sonra», «gece». Günün hangi DİLİMİNDE; saat değil. İki
+       dilim yazılmışsa hiçbiri alınmaz (tahmin edilmez). Yalnız vakitle
+       birlikte anlamlıdır: vakitsiz dilim kapasite sayılmaz. */
+    if(out.gunluk_dk){
+      const bulunan = DILIMLER.filter(d => d.re.test(kalan));
+      if(bulunan.length === 1){
+        out.dilim = bulunan[0].id;
+        kalan = kalan.replace(bulunan[0].re, ' ');
+      }
     }
     return { kapasite:Object.keys(out).length ? out : null, kalan };
   }
@@ -731,7 +749,7 @@ LIFEOS.Hedef = (function(){
     return { ok:true, hedef:Object.assign({}, h, { durum:yeniDurum, guncelleme:bugun }) };
   }
 
-  return { YONLER, DURUMLAR, BANT_ADI, cumleden, yeni, eksikler, cevapla, gerceklik, dogrulaOf,
+  return { YONLER, DURUMLAR, BANT_ADI, kapasiteAyikla, cumleden, yeni, eksikler, cevapla, gerceklik, dogrulaOf,
     uyarla, uyarlamaUygula,
     senaryolar, gecis, kararMetni, sohbetKur, tarihYaz, sayiYaz, gunEkle, ayEkle, gunFarki,
     haftalikSaat, ZORLAYICI_KAT };

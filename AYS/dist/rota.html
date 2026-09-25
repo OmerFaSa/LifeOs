@@ -12570,7 +12570,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'f79c8c4', at:'2026-09-25 18:08', dirty:false };
+R.BUILD = { id:'ca7554d', at:'2026-09-25 18:27', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -16105,25 +16105,55 @@ window.LIFEOS = window.LIFEOS || {};
 
   const saatMetni = d => ('0' + Math.floor(d / 60)).slice(-2) + ':' + ('0' + (d % 60)).slice(-2);
 
+  /* DİLİM DÜZEYİ (kullanıcı kararı 2026-09-25): saat yoksa iki taraf
+     günün AYNI dilimini istiyorsa çakışır. Dilimi bilinmeyen taraf
+     bilinmeyen kalır (null): ne çakışır ne çakışmaz. */
+  const DILIM_ADI = { sabah:'sabah', ogle:'öğle', aksam:'akşam', gece:'gece' };
+  function dilimCakisma(a, b){
+    const x = a && DILIM_ADI[a.dilim] ? a.dilim : null;
+    const y = b && DILIM_ADI[b.dilim] ? b.dilim : null;
+    if(!x || !y) return null;
+    return { ayni:x === y, dilim:x };
+  }
+
   /* c = { a:{modul,ad,bas,bit}, b:{…}, cozum:{ baslik, id } } */
   function cakismaHtml(c){
     c = c || {};
     const r = cakisma(c.a, c.b);
-    if(!r || !r.dakika) return '';
+    let bas, etiket, zamanOf;
+    if(r && r.dakika){
+      bas = r.dakika + ' dakika çakışıyor · ' + saatMetni(r.bas) + '–' + saatMetni(r.bit);
+      etiket = saatMetni(r.bas) + '–' + saatMetni(r.bit);
+      zamanOf = x => x.bas + '–' + x.bit;
+    }else if(!r){
+      const d = dilimCakisma(c.a, c.b);
+      if(!d || !d.ayni) return '';
+      bas = 'İkisi de ' + DILIM_ADI[d.dilim] + ' dilimini istiyor';
+      etiket = DILIM_ADI[d.dilim] + ' dilimi';
+      zamanOf = x => DILIM_ADI[x.dilim] + (x.gunluk_dk > 0 ? ' · günde ' + x.gunluk_dk + ' dk' : '');
+    }else return '';
     const taraf = x => '<div class="cakisma__taraf cakisma--' + kac(x.modul || '') + '">'
       + '<span class="cakisma__modul">' + kac((x.modul || '').toLocaleUpperCase('tr-TR')) + '</span>'
       + '<b class="cakisma__ad">' + kac(x.ad || '') + '</b>'
-      + '<span class="cakisma__saat">' + kac(x.bas + '–' + x.bit) + '</span></div>';
+      + '<span class="cakisma__saat">' + kac(zamanOf(x)) + '</span></div>';
     const cozum = c.cozum && c.cozum.baslik
       ? '<div class="cakisma__cozum"><span class="okart__kaynak">Merkez önerisi</span>'
         + '<p class="cakisma__cozum-metin">' + kac(c.cozum.baslik) + '</p>'
         + dugme({ etiket:'Çözümü önizle', act:'cakisma-onizle', data:{ cozum:c.cozum.id || '' } })
         + '</div>'
       : '';
-    return '<section class="cakisma" data-oz="112" aria-label="Çakışma: '
-      + kac(saatMetni(r.bas) + '–' + saatMetni(r.bit)) + '">'
-      + '<p class="cakisma__bas">' + kac(r.dakika + ' dakika çakışıyor · ' + saatMetni(r.bas) + '–' + saatMetni(r.bit)) + '</p>'
+    return '<section class="cakisma" data-oz="112" aria-label="Çakışma: ' + kac(etiket) + '">'
+      + '<p class="cakisma__bas">' + kac(bas) + '</p>'
       + '<div class="cakisma__iki">' + taraf(c.a) + taraf(c.b) + '</div>' + cozum + '</section>';
+  }
+
+  /* Hedef ağının bütçesinden (HKM core/hedefag.py cakismalar) ilk çakışma.
+     HKM kapalıysa bütçe yoktur ve kart çizilmez (AGENTS §1.4). */
+  function butceCakismaHtml(butce){
+    const l = (butce && Array.isArray(butce.cakismalar)) ? butce.cakismalar : [];
+    if(!l.length) return '';
+    return cakismaHtml({ a:l[0].a, b:l[0].b })
+      + (l.length > 1 ? '<p class="small muted">' + kac((l.length - 1) + ' çakışma daha HKM › Hedefler’de.') + '</p>' : '');
   }
 
   /* ------------------------------------------------ 150 geri al */
@@ -16384,6 +16414,8 @@ window.LIFEOS = window.LIFEOS || {};
     alan:alan,
     cakisma:cakisma,
     cakismaHtml:cakismaHtml,
+    dilimCakisma:dilimCakisma,
+    butceCakismaHtml:butceCakismaHtml,
     cozumUygulanabilirMi:cozumUygulanabilirMi,
     kalan:kalan,
     geriAlBaslat:geriAlBaslat,
@@ -20017,6 +20049,13 @@ LIFEOS.Hedef = (function(){
 
   /* Kapasite: «günde yarım saat», «günde 45 dakika», «haftada 4 gün».
      Eşleşen parça metinden SİLİNİR ki «4 gün» süre sanılmasın. */
+  const DILIMLER = [
+    { id:'sabah', re:/(?<!\p{L})sabah(?:ları|lari|leyin)?(?!\p{L})/iu },
+    { id:'ogle', re:/(?<!\p{L})(?:öğleden sonra|ogleden sonra|öğlen|oglen|öğle|ogle)(?:leri)?(?!\p{L})/iu },
+    { id:'aksam', re:/(?<!\p{L})(?:akşam|aksam)(?:ları|lari)?(?!\p{L})/iu },
+    { id:'gece', re:/(?<!\p{L})gece(?:leri)?(?!\p{L})/iu },
+  ];
+
   function kapasiteAyikla(k, cevapMi){
     const out = {};
     let kalan = k;
@@ -20032,6 +20071,17 @@ LIFEOS.Hedef = (function(){
       const n = sayiOku(h[1]);
       if(n != null && n >= 1 && n <= 7) out.haftalik_gun = n;
       kalan = kalan.replace(h[0], ' ');
+    }
+    /* 112 dilim (kullanıcı kararı 2026-09-25): «akşamları», «sabah»,
+       «öğleden sonra», «gece». Günün hangi DİLİMİNDE; saat değil. İki
+       dilim yazılmışsa hiçbiri alınmaz (tahmin edilmez). Yalnız vakitle
+       birlikte anlamlıdır: vakitsiz dilim kapasite sayılmaz. */
+    if(out.gunluk_dk){
+      const bulunan = DILIMLER.filter(d => d.re.test(kalan));
+      if(bulunan.length === 1){
+        out.dilim = bulunan[0].id;
+        kalan = kalan.replace(bulunan[0].re, ' ');
+      }
     }
     return { kapasite:Object.keys(out).length ? out : null, kalan };
   }
@@ -20642,7 +20692,7 @@ LIFEOS.Hedef = (function(){
     return { ok:true, hedef:Object.assign({}, h, { durum:yeniDurum, guncelleme:bugun }) };
   }
 
-  return { YONLER, DURUMLAR, BANT_ADI, cumleden, yeni, eksikler, cevapla, gerceklik, dogrulaOf,
+  return { YONLER, DURUMLAR, BANT_ADI, kapasiteAyikla, cumleden, yeni, eksikler, cevapla, gerceklik, dogrulaOf,
     uyarla, uyarlamaUygula,
     senaryolar, gecis, kararMetni, sohbetKur, tarihYaz, sayiYaz, gunEkle, ayEkle, gunFarki,
     haftalikSaat, ZORLAYICI_KAT };
@@ -20943,7 +20993,8 @@ LIFEOS.HedefAg = (function(){
   function ozet(h, o){
     const x = o || {};
     const k = h.kapasite && h.kapasite.gunluk_dk > 0
-      ? { gunluk_dk:Math.round(h.kapasite.gunluk_dk), haftalik_gun:h.kapasite.haftalik_gun || 7 } : null;
+      ? Object.assign({ gunluk_dk:Math.round(h.kapasite.gunluk_dk), haftalik_gun:h.kapasite.haftalik_gun || 7 },
+        h.kapasite.dilim ? { dilim:h.kapasite.dilim } : {}) : null;
     const g = h.gerceklik && h.gerceklik.bant
       ? { bant:h.gerceklik.bant, etiket:h.gerceklik.etiket || 'tahmin' } : null;
     const il = x.ilerleme || null;
@@ -51338,8 +51389,12 @@ R.Screens.week = (function(){
     const curriculum = M.curriculumFor(n);
     const history = C.completionHistory(8).map(h => ({ label:'H'+h.n, value:h.value }));
 
+    /* 112 çakışma (dilim düzeyi): hedef ağının bütçesinden; HKM yoksa yok. */
+    const cak = (window.LIFEOS || {}).ONERI && R.Hedefler && R.Hedefler.ag
+      ? window.LIFEOS.ONERI.butceCakismaHtml(R.Hedefler.ag.butce()) : '';
     return String(K.Grid([
       weekNav(n, week, phase),
+      cak ? K.Span(12, raw(cak)) : '',
       K.Span(12, html`<div class="weekgrid">${map(M.weekDates(n), DayColumn)}</div>`),
 
       K.Span(6, K.Stack([

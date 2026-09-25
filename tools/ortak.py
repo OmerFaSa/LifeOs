@@ -272,6 +272,8 @@ DOSYALAR = {
     # Test dosyasi `oneri.test.js` DEGIL: SPI'nin kendi src/tests/oneri.test.js'i
     # var (oneri kutusu testleri) ve yayim onun ustune yazardi.
     "onerikart.test.js": "tests",
+    # 112 cakisma dilim duzeyi (onerikart.test.js degismesin diye ayri dosya).
+    "cakismadilim.test.js": "tests",
     # Tek sozluk: 016 terim ipucu, 139 model kapali kipi (hazir cumle).
     "sozluk.js":      "js/core",
     "sozluk.test.js": "tests",
