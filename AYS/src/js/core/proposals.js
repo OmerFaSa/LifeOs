@@ -763,6 +763,36 @@ R.Proposals = (function(){
     catch(e){ return { ok:false, why:'Önizleme üretilemedi.', rows:[] }; }
   }
 
+  /* 127 KAPSAM (kullanıcı kararı 2026-09-25: «hedef değişikliklerine
+     ekle»). Günlük süre değişikliğinin süresi seçilir: «Yalnız bugün» →
+     geçici süre bugün–bugün, «Bu hafta» → geçici süre bugünden haftanın son
+     gününe, «Kalıcı» → günlük süre. Öneri aynı kalır (kimlik, gerekçe,
+     kaynak); yalnız eylemi ve tarihleri değişir ve yeniden doğrulanır.
+     Seviye kataloğun seviyesidir (kapsam seviyeyi hiç küçültmez). */
+  const KAPSAM_EYLEM = { bugun:'gecici-sure', hafta:'gecici-sure', kalici:'gunluk-sure' };
+  function kapsamOf(p){
+    if(!p) return null;
+    if(p.action === 'gunluk-sure') return 'kalici';
+    if(p.action === 'gecici-sure') return (p.params || {}).from === (p.params || {}).to ? 'bugun' : 'hafta';
+    return null;
+  }
+  async function kapsamla(id, kapsam){
+    const p = (S.officeProposals || []).find(x => x.id === id && x.status === 'pending');
+    if(!p || !kapsamOf(p) || !KAPSAM_EYLEM[kapsam]) return fail('Bu öneride süre seçilemez.');
+    const bugun = U.todayISO();
+    const gunler = M.weekDates(M.currentWeek());
+    const son = U.iso(gunler[gunler.length - 1]);
+    const dakika = Number((p.params || {}).dakika);
+    const params = kapsam === 'kalici' ? { dakika }
+      : { from:bugun, to:kapsam === 'bugun' || son < bugun ? bugun : son, dakika };
+    const action = KAPSAM_EYLEM[kapsam];
+    const res = check(Object.assign({}, p, { action, params }));
+    if(!res.ok) return res;
+    Object.assign(p, { action, params, kapsam, level:R.ACTION_BY_ID[action].level });
+    await save();
+    return pass({ kapsam });
+  }
+
   function agentName(id){
     const a = R.AGENT_BY_ID[id];
     return a ? a.name : 'Bu ajan';
@@ -1133,6 +1163,6 @@ R.Proposals = (function(){
     propose, approve, hemen, reject, undo, clearResolved,
     talep, otomatikMi, ayar, turAyari, SEVIYELER, MODLAR,
     suggest, refresh, fromModel, catalogPrompt, splitAction, stripTrailingJson,
-    load, save, MAX,
+    load, save, MAX, kapsamOf, kapsamla,
   };
 })();

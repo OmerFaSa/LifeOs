@@ -242,7 +242,11 @@ R.Screens.onaylar = (function(){
     if(!kart) return proposalRow(p);
     const def = R.ACTION_BY_ID[p.action];
     const agent = R.AGENT_BY_ID[p.agent] || {};
+    /* 127: günlük süre önerisinde süre seçilir (bugün / bu hafta / kalıcı). */
+    const O = (window.LIFEOS || {}).ONERI;
+    const kapsam = O && O.kapsamHtml && R.Proposals.kapsamOf ? R.Proposals.kapsamOf(p) : null;
     return html`<div class="okart-sar">${raw(kart)}
+      ${when(kapsam, () => raw(O.kapsamHtml({ id:p.id, eylem:p.action }, R.ACTIONS, kapsam)))}
       <p class="okart__kim">${agent.name || 'Ofis'} · ${def.touches} · ${KAYNAK_ADI[p.source] || 'kural motoru buldu'}
         ${when(def.route, () => c.Button({ label:'Yerini gör', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':def.route } }))}</p>
     </div>`;
@@ -388,6 +392,15 @@ R.Screens.onaylar = (function(){
   /* ---------- eylemler ---------- */
   const VITRIN_EYLEM = ['oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'];
   const handle = {
+    /* 127 kapsam: seçim öneriyi dönüştürür; uygulamaz (onay yine ayrı). */
+    async 'oneri-kapsam'(el){
+      const id = String(el.name || '').replace(/^kapsam-/, '');
+      const r = await R.Proposals.kapsamla(id, el.value);
+      if(!r.ok){ UI.toast(r.why); return; }
+      UI.toast({ bugun:'Yalnız bugün için', hafta:'Bu hafta için', kalici:'Kalıcı olarak' }[el.value]
+        + ' önerildi; onaylamadan uygulanmaz.');
+      R.App.render();
+    },
     /* King'in teklifi (brand/ortak/kingteklif.js): onay ve iptal HKM'nin
        tek kapısına gider; cevabı HKM kurar. */
     async 'king-onayla'(el){
