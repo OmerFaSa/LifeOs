@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LifeOS Tasarım Yönleri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F5F7; --yuzey:#FFFFFF; --ink:#0D1117; --ink2:#4A5261; --ink3:#838C9B; --cizgi:#E4E6EA; --cizgi2:#EDEFF2;
+  --golge:0 1px 2px rgba(13,17,23,.05),0 10px 30px -16px rgba(13,17,23,.18);
+  --sinav:#2F6FEB; --saglik:#0E9888; --gelisim:#D98309; --merkez:#7A5CF0; --kotu:#C23A3A;
+  --birincil:#0D1117; --birincil-ust:#FFFFFF;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ --bg:#0B0D11; --yuzey:#14171D; --ink:#ECEEF2; --ink2:#A3AAB6; --ink3:#6C7483; --cizgi:#232730; --cizgi2:#1B1F26;
+    --golge:0 1px 0 rgba(255,255,255,.03),0 14px 34px -18px rgba(0,0,0,.7);
+    --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; --kotu:#F07A7A; --birincil:#ECEEF2; --birincil-ust:#0B0D11; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#0B0D11; --yuzey:#14171D; --ink:#ECEEF2; --ink2:#A3AAB6; --ink3:#6C7483; --cizgi:#232730; --cizgi2:#1B1F26;
+  --golge:0 1px 0 rgba(255,255,255,.03),0 14px 34px -18px rgba(0,0,0,.7);
+  --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; --kotu:#F07A7A; --birincil:#ECEEF2; --birincil-ust:#0B0D11; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased;padding-inline:28px}
+button,a{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-decoration:none}
+:focus-visible{outline:2px solid var(--sinav);outline-offset:3px;border-radius:10px}
+.kap{max-width:1240px;margin:0 auto;padding-block:40px 80px}
+
+.bas{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;color:var(--ink2)}
+.logo i{display:grid;grid-template-columns:repeat(2,7px);gap:3px}
+.logo i b{width:7px;height:7px;border-radius:2px;display:block}
+h1{margin:18px 0 0;font-size:52px;font-weight:600;letter-spacing:-.04em;line-height:1;text-wrap:balance}
+.bas p{margin:14px 0 0;color:var(--ink2);font-size:17px;max-width:56ch}
+.bas .sag{font:12px var(--mono);color:var(--ink3);text-align:right;line-height:1.8}
+
+/* analiz */
+.analiz{margin-top:44px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px}
+.pano{background:var(--yuzey);border-radius:22px;box-shadow:var(--golge);padding:24px}
+.pano h2{margin:0;font:500 12px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--ink3)}
+.olcu{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--cizgi2);border-radius:14px;overflow:hidden;margin-top:16px}
+.olcu div{background:var(--yuzey);padding:14px 16px}
+.olcu b{display:block;font-size:34px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
+.olcu span{font-size:13px;color:var(--ink3)}
+.pano .not{margin:12px 0 0;font-size:13px;color:var(--ink3)}
+.sorun{list-style:none;margin:16px 0 0;padding:0;display:flex;flex-direction:column}
+.sorun li{display:grid;grid-template-columns:22px 1fr;gap:10px;padding:10px 0;border-top:1px solid var(--cizgi2);font-size:14px;color:var(--ink2)}
+.sorun li:first-child{border-top:0}
+.sorun li b{color:var(--ink);font-weight:600}
+.sorun li::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--kotu);margin-top:7px;justify-self:center}
+.sorun code{font:12px var(--mono);color:var(--ink3)}
+.oneri{margin-top:16px;border-radius:22px;padding:22px 24px;background:var(--birincil);color:var(--birincil-ust);display:grid;grid-template-columns:auto 1fr;gap:6px 24px;align-items:baseline}
+.oneri h2{margin:0;font:500 12px var(--mono);letter-spacing:.04em;text-transform:uppercase;opacity:.6}
+.oneri p{margin:0;font-size:16px;line-height:1.6}
+.oneri a{font-weight:600;border-bottom:1px solid color-mix(in oklab,var(--birincil-ust) 35%,transparent)}
+.oneri a:hover{border-color:currentColor}
+
+/* suzgec */
+.suzgec{display:flex;gap:8px;margin-top:48px;flex-wrap:wrap;align-items:center}
+.suzgec button{height:36px;padding:0 14px;border-radius:999px;background:var(--yuzey);box-shadow:var(--golge);font-size:14px;font-weight:500;color:var(--ink2)}
+.suzgec button[aria-pressed="true"]{background:var(--birincil);color:var(--birincil-ust)}
+.suzgec span{margin-left:auto;font:13px var(--mono);color:var(--ink3)}
+
+/* izgara */
+.izgara{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 20px;margin-top:20px}
+.kart{display:flex;flex-direction:column;gap:12px;text-align:left}
+.kart[hidden]{display:none}
+.onizleme{position:relative;width:100%;aspect-ratio:16/10;border-radius:16px;overflow:hidden;background:var(--yuzey);box-shadow:var(--golge),0 0 0 1px var(--cizgi2);transition:transform .25s,box-shadow .25s}
+.onizleme iframe{position:absolute;left:0;top:0;width:1440px;height:900px;border:0;transform-origin:0 0;transform:scale(var(--s,.27));pointer-events:none}
+.onizleme .ortu{position:absolute;inset:0}
+.kart:hover .onizleme{transform:translateY(-3px);box-shadow:var(--golge),0 0 0 1px var(--cizgi),0 24px 44px -24px rgba(13,17,23,.35)}
+.kart .satir{display:flex;align-items:baseline;gap:10px}
+.kart .no{font:12px var(--mono);color:var(--ink3)}
+.kart .ad{font-weight:600;font-size:17px;letter-spacing:-.01em}
+.kart .rozet{margin-left:auto;font:500 11px var(--mono);color:var(--merkez);background:color-mix(in oklab,var(--merkez) 12%,transparent);padding:3px 8px;border-radius:999px;white-space:nowrap}
+.kart p{margin:-6px 0 0;color:var(--ink3);font-size:14px}
+.etiketler{display:flex;gap:6px;flex-wrap:wrap;margin-top:-4px}
+.etiketler span{font:11px var(--mono);color:var(--ink3);border:1px solid var(--cizgi);border-radius:999px;padding:1px 8px}
+
+.son{margin-top:64px;padding-top:18px;border-top:1px solid var(--cizgi);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink3)}
+
+/* gosterici */
+.gosterici{position:fixed;inset:0;z-index:20;background:var(--bg);display:grid;grid-template-rows:auto 1fr}
+.gosterici[hidden]{display:none}
+.g-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top,0px));border-bottom:1px solid var(--cizgi);background:var(--yuzey)}
+.g-bar .ad{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-bar .ad small{font:12px var(--mono);color:var(--ink3);margin-right:8px}
+.g-bar .ara{margin-left:auto;display:flex;gap:6px;align-items:center}
+.g-bar button,.g-bar a{height:34px;min-width:34px;padding:0 12px;border-radius:10px;background:var(--cizgi2);font-size:13px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap}
+.g-bar .cihaz{display:flex;background:var(--cizgi2);border-radius:10px;padding:2px}
+.g-bar .cihaz button{height:30px;background:none}
+.g-bar .cihaz button[aria-pressed="true"]{background:var(--yuzey);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.g-sahne{position:relative;overflow:hidden;display:flex;justify-content:center;background:var(--cizgi2)}
+.g-sahne iframe{width:100%;height:100%;border:0;background:var(--yuzey);transition:width .25s}
+.g-sahne.tel iframe{width:390px;max-width:100%;border-radius:0;box-shadow:0 0 0 1px var(--cizgi),0 30px 60px -30px rgba(0,0,0,.35)}
+
+@media (max-width:1000px){ .izgara{grid-template-columns:repeat(2,minmax(0,1fr))} .analiz{grid-template-columns:1fr} }
+@media (max-width:640px){
+  body{padding-inline:16px}
+  h1{font-size:38px}
+  .bas{grid-template-columns:1fr}
+  .bas .sag{text-align:left}
+  .izgara{grid-template-columns:1fr}
+  .olcu{grid-template-columns:1fr 1fr}
+  .oneri{grid-template-columns:1fr}
+  .g-bar .gizle{display:none}
+}
+@media (prefers-reduced-motion:reduce){ .onizleme,.g-sahne iframe{transition:none} }
+</style>
+</head>
+<body>
+<div class="kap">
+  <header class="bas">
+    <div>
+      <div class="logo"><i aria-hidden="true"><b style="background:var(--sinav)"></b><b style="background:var(--saglik)"></b><b style="background:var(--gelisim)"></b><b style="background:var(--merkez)"></b></i>LifeOS</div>
+      <h1>18 tasarım yönü</h1>
+      <p>Aynı gün, aynı sayılar, on sekiz farklı dil. Hiçbiri çalışan sistem değil; hepsi karar vermek için.</p>
+    </div>
+    <div class="sag">Perşembe 24 Eylül verisiyle<br>tek dosya · bağımlılık yok<br>açık ve koyu tema</div>
+  </header>
+
+  <section class="analiz" aria-label="Bugünkü tasarımın ölçümü">
+    <div class="pano">
+      <h2>Bugün · AYS Günlük ekranı</h2>
+      <div class="olcu">
+        <div><b>695</b><span>kelime</span></div>
+        <div><b>69</b><span>düğme</span></div>
+        <div><b>15</b><span>form alanı</span></div>
+        <div><b>8,9</b><span>telefon ekranı</span></div>
+      </div>
+      <p class="not">Dokuz aylık örnek veriyle, gerçek tarayıcıda ölçüldü. SPİ Günlük 5, ESP Günlük 4,8 telefon ekranı uzunluğunda.</p>
+    </div>
+    <div class="pano">
+      <h2>Neden yorucu</h2>
+      <ul class="sorun">
+        <li><span><b>Her şey aynı ağırlıkta.</b> Sıradaki iş, uyarı bantlarının ve açıklamaların altında kalıyor.</span></li>
+        <li><span><b>Çekmece içinde çekmece.</b> Üst menü, sekme, alt sekme: SPİ › Ofis › Analiz › Çapraz bağlar.</span></li>
+        <li><span><b>Dört sistem tek renk.</b> Logolar mavi, turkuaz, turuncu, indigo; ekranların hepsi yeşil.</span></li>
+        <li><span><b>Grafikler karışık.</b> Uyku (8) ile toparlanma (90) aynı eksende; lejant ham HTML olarak görünüyor <code>SPI/src/js/screens/analytics.js:71</code></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="oneri" aria-label="Önerim">
+    <h2>Önerim</h2>
+    <p><a href="#01-sessiz" data-ac="01-sessiz">01 Sessiz</a> temel olsun. Üstüne <a href="#05-gun-akisi" data-ac="05-gun-akisi">05</a>'in zaman ekseni, <a href="#06-tek-is" data-ac="06-tek-is">06</a>'nın odak kipi, <a href="#10-komut" data-ac="10-komut">10</a>'un komut satırı, <a href="#15-temiz-grafik" data-ac="15-temiz-grafik">15</a>'in grafik dili ve <a href="#17-cep" data-ac="17-cep">17</a>'nin telefon düzeni. <a href="#08-yorunge" data-ac="08-yorunge">08</a>'in 3B sahnesi yalnız Merkez'in vitrini. Kurallar <a href="#18-sistem" data-ac="18-sistem">18 Sistem</a>'de.</p>
+  </section>
+
+  <div class="suzgec" role="toolbar" aria-label="Süzgeç">
+    <button aria-pressed="true" data-f="">Hepsi</button>
+    <button aria-pressed="false" data-f="acik">Açık</button>
+    <button aria-pressed="false" data-f="koyu">Koyu</button>
+    <button aria-pressed="false" data-f="3b">3B</button>
+    <button aria-pressed="false" data-f="etk">Etkileşimli</button>
+    <button aria-pressed="false" data-f="mobil">Mobil öncelikli</button>
+    <span id="sayi">18 örnek</span>
+  </div>
+
+  <section class="izgara" id="izgara" aria-label="Örnekler"></section>
+
+  <footer class="son">
+    <span>Kart tıkla: tam ekran · ← → sonraki · Esc kapat</span>
+    <span>Yazı tipleri Google Fonts'tan; internet yoksa sistem yazısına düşer</span>
+  </footer>
+</div>
+
+<div class="gosterici" id="gosterici" hidden role="dialog" aria-modal="true" aria-label="Örnek">
+  <div class="g-bar">
+    <button id="g-kapat" aria-label="Kapat">✕</button>
+    <span class="ad" id="g-ad"></span>
+    <div class="ara">
+      <div class="cihaz gizle" role="group" aria-label="Genişlik"><button aria-pressed="true" data-c="masa">Masaüstü</button><button aria-pressed="false" data-c="tel">Telefon</button></div>
+      <button id="g-onceki" aria-label="Önceki">←</button>
+      <button id="g-sonraki" aria-label="Sonraki">→</button>
+      <a id="g-yeni" class="gizle" href="#" target="_blank" rel="noopener">Yeni sekme</a>
+    </div>
+  </div>
+  <div class="g-sahne" id="g-sahne"><iframe id="g-cerceve" title="Örnek"></iframe></div>
+</div>
+
+<script>
+(function(){
+  var O = [
+    ['01-sessiz','Sessiz','Tek sütun, tek birincil iş. Modül sayfaları sekmede.',['acik','koyu','etk'],'önerilen temel'],
+    ['02-gece','Gece','Liste ve ayrıntı yan yana; klavyeyle gezilir.',['koyu','etk']],
+    ['03-halkalar','Halkalar','Günün ilerlemesi üç halkada, hafta altta.',['koyu']],
+    ['04-widget','Widget','Her kutu tek iş yapar; boyut önemi söyler.',['acik','koyu']],
+    ['05-gun-akisi','Gün Akışı','Gün tek zaman ekseninde; boşluklar görünür.',['acik','koyu']],
+    ['06-tek-is','Tek İş','Ekranda yalnız sıradaki iş. «15 dakikam var» kipi.',['acik','koyu','etk','mobil']],
+    ['07-editoryal','Editoryal','Büyük serif sayılar, dergi ritmi, alıntı gibi öneri.',['acik','koyu']],
+    ['08-yorunge','Yörünge','WebGL sahne: sıvı dolu küreler, dolum = ilerleme.',['koyu','3b','etk'],'3B'],
+    ['09-izometrik','İzometrik','Rütbe merdiveni üç boyutta; XP kaynağı yanda.',['acik','koyu','3b']],
+    ['10-komut','Komut','Ana ekran bir komut satırı; anlamadığını sorar.',['acik','koyu','etk']],
+    ['11-hikaye','Hikâye','Gün beş karede, sırayla; dokun, geç.',['koyu','etk','mobil']],
+    ['12-istikrar','İstikrar','Yarım yılın ızgarası; veri yok sıfır değildir.',['acik','koyu']],
+    ['13-calisma-alani','Çalışma Alanı','Modül sayfası tek belge; özellik kaybı yok.',['acik','koyu','etk']],
+    ['14-bolumler','Bölümler','Her modül tam ekran; tek dev sayı, tek eylem.',['koyu','mobil']],
+    ['15-temiz-grafik','Temiz Grafik','Tek eksen, doğrudan etiket, tablo görünümü.',['acik','koyu','etk'],'grafik dili'],
+    ['16-seans','Seans','Blok sırasında odak ekranı; sayaç çalışır.',['koyu','etk','mobil']],
+    ['17-cep','Cep','Telefonda üç ekran, alt sekme, alttan form.',['acik','koyu','mobil']],
+    ['18-sistem','Sistem','Renk, yazı, bileşen ve üç aksiyon seviyesi.',['acik','koyu'],'kurallar']
+  ];
+  var AD = { acik:'açık', koyu:'koyu', '3b':'3B', etk:'etkileşimli', mobil:'mobil' };
+  var izgara = document.getElementById('izgara');
+  izgara.innerHTML = O.map(function(o, i){
+    return '<button class="kart" data-i="' + i + '" data-e="' + o[3].join(' ') + '" aria-label="' + o[1] + ' örneğini aç">' +
+      '<span class="onizleme"><iframe data-src="' + o[0] + '.html" title="' + o[1] + ' önizleme" tabindex="-1" aria-hidden="true"></iframe><span class="ortu"></span></span>' +
+      '<span class="satir"><span class="no">' + o[0].slice(0, 2) + '</span><span class="ad">' + o[1] + '</span>' + (o[4] ? '<span class="rozet">' + o[4] + '</span>' : '') + '</span>' +
+      '<p>' + o[2] + '</p><span class="etiketler">' + o[3].map(function(e){ return '<span>' + AD[e] + '</span>'; }).join('') + '</span></button>';
+  }).join('');
+
+  /* onizlemeler: gorunur olunca yuklenir, kart genisligine olceklenir */
+  function olcek(){ document.querySelectorAll('.onizleme').forEach(function(p){ p.style.setProperty('--s', p.clientWidth / 1440); }); }
+  olcek(); new ResizeObserver(olcek).observe(izgara);
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ var f = e.target.querySelector('iframe'); if(!f.src) f.src = f.dataset.src; io.unobserve(e.target); } });
+  }, { rootMargin:'300px' });
+  document.querySelectorAll('.onizleme').forEach(function(p){ io.observe(p); });
+
+  /* suzgec */
+  document.querySelectorAll('.suzgec button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var f = b.dataset.f, n = 0;
+      document.querySelectorAll('.suzgec button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); });
+      document.querySelectorAll('.kart').forEach(function(k){ var g = !f || k.dataset.e.split(' ').indexOf(f) >= 0; k.hidden = !g; if(g) n++; });
+      document.getElementById('sayi').textContent = n + ' örnek';
+      olcek();
+    });
+  });
+
+  /* gosterici */
+  var G = document.getElementById('gosterici'), cer = document.getElementById('g-cerceve'), sahne = document.getElementById('g-sahne'), su = 0, son;
+  function gorunur(){ return [].slice.call(document.querySelectorAll('.kart')).filter(function(k){ return !k.hidden; }).map(function(k){ return +k.dataset.i; }); }
+  function ac(i){
+    su = i; var o = O[i];
+    cer.src = o[0] + '.html';
+    document.getElementById('g-ad').innerHTML = '<small>' + o[0].slice(0, 2) + '</small>' + o[1];
+    document.getElementById('g-yeni').href = o[0] + '.html';
+    if(G.hidden){ son = document.activeElement; G.hidden = false; document.body.style.overflow = 'hidden'; document.getElementById('g-kapat').focus(); }
+  }
+  function kapat(){ G.hidden = true; cer.src = 'about:blank'; document.body.style.overflow = ''; if(son) son.focus(); }
+  function kay(d){ var g = gorunur(), j = g.indexOf(su); ac(g[(j + d + g.length) % g.length]); }
+  izgara.addEventListener('click', function(e){ var k = e.target.closest('.kart'); if(k) ac(+k.dataset.i); });
+  document.querySelectorAll('[data-ac]').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); ac(O.map(function(o){ return o[0]; }).indexOf(a.dataset.ac)); }); });
+  document.getElementById('g-kapat').onclick = kapat;
+  document.getElementById('g-onceki').onclick = function(){ kay(-1); };
+  document.getElementById('g-sonraki').onclick = function(){ kay(1); };
+  document.querySelectorAll('.cihaz button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.cihaz button').forEach(function(x){ x.setAttribute('aria-pressed', x === b); });
+      sahne.classList.toggle('tel', b.dataset.c === 'tel');
+    });
+  });
+  document.addEventListener('keydown', function(e){
+    if(G.hidden) return;
+    if(e.key === 'Escape') kapat();
+    if(e.key === 'ArrowRight') kay(1);
+    if(e.key === 'ArrowLeft') kay(-1);
+  });
+  /* #01-sessiz gibi bir baglanti dogrudan acar */
+  var h = location.hash.slice(1), hi = O.map(function(o){ return o[0]; }).indexOf(h);
+  if(hi >= 0) ac(hi);
+})();
+</script>
+</body>
+</html>
