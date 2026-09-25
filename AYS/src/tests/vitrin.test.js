@@ -164,4 +164,170 @@
     });
   });
 
+
+  /* C · AYS kartları ekranda (vitrin sürüm 4, brand/ortak/vitrin.js). */
+  describe('Vitrin · C kartları AYS ekranlarında', () => {
+    /* Küçük aksiyonlar «Geri al» şeridi açar; test sayfasında kök yoksa kurulur. */
+    if(!document.getElementById('toast-root')){
+      const t = document.createElement('div'); t.id = 'toast-root'; t.hidden = true; document.body.appendChild(t);
+    }
+    /* İşleyiciler ekranı yeniden çizer; test sayfasında kabuk yok. Çizim
+       burada ölçülmez (ayrıca render ile sınanır), yalnız kayıt. */
+    async function cizmeden(fn){
+      const A = R.App, r = A.render, p = A.patch;
+      A.render = async () => {}; A.patch = () => true;
+      try{ await fn(); } finally { A.render = r; A.patch = p; }
+    }
+    const T = (a, b) => [{ name:'Türkçe', correct:a[0], wrong:a[1], blank:a[2] }, { name:'Matematik', correct:b[0], wrong:b[1], blank:b[2] }];
+    const iki = () => {
+      R.S.exams = [{ id:'c1', family:'TYT', kind:'full', type:'D12', date:gun(-9), tests:T([30, 6, 4], [22, 6, 12]) },
+        { id:'c2', family:'TYT', kind:'full', type:'D13', date:gun(-2), tests:T([34, 4, 2], [25, 6, 9]) }];
+      R.S.ui.examOpen = 'c2';
+    };
+
+    it('oz-046 oz-048 oz-062 deneme ayrıntısı: karne, önceki denemeyle karşılaştırma, D/Y/B giriş hücreleri', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla(); iki();
+        const k = dom(await R.Screens.exams.render());
+        const net = Math.round(R.Model.examNet(R.S.exams[1]) * 100) / 100;
+        expect(k.querySelector('[data-oz="046"] .top b').textContent).toBe(window.LIFEOS.VITRIN.sayi(net, 2));
+        expect(k.querySelectorAll('[data-oz="048"] .fk').length).toBe(3);
+        expect(k.querySelectorAll('[data-oz="062"] input[data-change="test-num"]').length).toBe(6);
+        /* Önceki deneme yoksa karşılaştırma çizilmez; sıfır farkla değil. */
+        R.S.exams = [R.S.exams[1]];
+        expect(dom(await R.Screens.exams.render()).querySelector('[data-oz="048"]')).toBeNull();
+      });
+    });
+
+    it('oz-047 hız şeridi yalnız süreli oturumun ölçtüğü sürelerle çizilir', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla(); iki();
+        R.S.sessions = [];
+        expect(dom(await R.Screens.exams.render()).querySelector('[data-oz="047"]')).toBeNull();
+        R.S.sessions = [{ id:'s1', examId:'c2', marks:[60, 60, 60, 200].map((v, i) => ({ test:'Matematik', no:i + 1, spent:v })) }];
+        expect(dom(await R.Screens.exams.render()).querySelector('[data-oz="047"] circle[r="3.6"]')).toBeTruthy();
+      });
+    });
+
+    it('oz-056 yanlış nedenleri etiketten sayılır; etiketsiz hata dağılıma girmez', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla(); iki();
+        R.S.errors = [{ id:'h1', examId:'c2', tag:'K' }, { id:'h2', examId:'c2', tag:'K' }, { id:'h3', examId:'c2', tag:'D' }, { id:'h4', examId:'c2', tag:null }];
+        const z = dom(await R.Screens.exams.render()).querySelector('[data-oz="056"]');
+        expect(z.querySelector('.u b').textContent).toBe('3 hata');
+      });
+    });
+
+    it('oz-057 oz-066 deneme listesi: takvim plandan, hedefe kalan TAHMİN etiketiyle', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla(); iki(); R.S.ui.examOpen = null;
+        const k = dom(await R.Screens.exams.render());
+        const tk = k.querySelector('[data-oz="057"]');
+        expect(tk.querySelectorAll('.nk.g').length).toBe(1);
+        expect(tk.querySelectorAll('.nk.y').length).toBe(1);
+        const hk = k.querySelector('[data-oz="066"]');
+        if(hk) expect(hk.querySelector('[data-kesinlik]').getAttribute('data-kesinlik')).toBe('estimated');
+      });
+    });
+
+    it('oz-045 oz-059 oz-065 tekrar: kart çevrilir, paket konu konu, aralıklar koddan', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        R.S.cards = [{ id:'k1', front:'Ana fikir?', back:'Ayrıntı', topic:'Paragraf', source:'error', stage:2, dueAt:gun(0), history:[] },
+          { id:'k2', front:'Türev?', back:'x', topic:'Türev', stage:0, dueAt:gun(-1), history:[] }];
+        let k = dom(await R.Screens.cards.render());
+        const kart = k.querySelector('[data-oz="045"]');
+        expect(kart.getAttribute('data-act')).toBe('flip');
+        expect(kart.getAttribute('aria-pressed')).toBe('false');
+        expect(k.querySelector('[data-oz="059"] .u b').textContent).toBe('2 kart');
+        expect(k.querySelectorAll('[data-oz="065"] .nk').length).toBe(R.SRS_INTERVALS.length);
+        R.S.ui.flipped = { [kart.getAttribute('data-id')]:true };
+        k = dom(await R.Screens.cards.render());
+        expect(k.querySelector('[data-oz="045"]').getAttribute('aria-pressed')).toBe('true');
+      });
+    });
+
+    it('oz-049 oz-051 oz-052 hafta: kapsam halkası, 40 hafta çizgisi, saatsiz plan ızgarası', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const k = dom(await R.Screens.week.render());
+        expect(k.querySelector('[data-oz="051"]').textContent).toContain('/ ' + R.PLAN.totalWeeks + ' HAFTA');
+        const iz = k.querySelector('[data-oz="052"]');
+        expect(iz.querySelectorAll('.bk').length).toBeGreaterThan(0);
+        expect(/\d\d:\d\d/.test(iz.textContent)).toBeFalsy();
+        expect(k.querySelector('[data-oz="049"]')).toBeTruthy();
+      });
+    });
+
+    it('oz-061 oz-067 ders dengesi yalnız gerçekleşen dakika varsa çizilir; ders harfle ayrılır', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        expect(dom(await R.Screens.week.render()).querySelector('[data-oz="061"]')).toBeNull();
+        const gunDoc = R.S.days[R.U.todayISO()];
+        gunDoc.blocks[0].subjectId = 'tyt-matematik'; gunDoc.blocks[0].status = 'done'; gunDoc.blocks[0].actualMin = 60;
+        const k = dom(await R.Screens.week.render());
+        expect(k.querySelector('[data-oz="061"]').textContent).toContain('GERÇEK');
+        expect(k.querySelector('[data-oz="067"] .d2').textContent).toBe('M');
+      });
+    });
+
+    it('oz-050 oz-063 dersler: konu tablosu ve eksik önkoşul', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const s = R.SUBJECTS[0];
+        R.S.ui.subjectOpen = s.id;
+        const g = s.topics.filter(t => t.group === s.topics[0].group).sort((a, b) => a.order - b.order);
+        await R.Model.setTopicState(s.id, g[1].id, { state:'learning' });
+        const k = dom(await R.Screens.subjects.render());
+        expect(k.querySelector('[data-oz="063"] [data-act="topic-open"]')).toBeTruthy();
+        expect(k.querySelector('[data-oz="063"] .uy2')).toBeTruthy();
+        expect(k.querySelector('[data-oz="050"] .dg.ek')).toBeTruthy();
+      });
+    });
+
+    it('oz-055 soru çöz: tek satır kayıt konusuz kaydetmez, kaydedince geri alınır', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        R.S.solved = [];
+        const k = dom(await R.Screens.solve.render());
+        expect(k.querySelectorAll('[data-oz="055"] select').length).toBe(3);
+        const d = R.SUBJECTS[0];
+        await cizmeden(async () => {
+          await R.Screens.solve.handle['q-hizli']();
+          expect(R.S.solved.length).toBe(0);
+          await R.Screens.solve.change['qh-alan']({ dataset:{ alan:'qh-konu' }, value:d.topics[0].id, id:'qh-konu' });
+          await R.Screens.solve.handle['q-hizli']();
+        });
+        expect(R.S.solved.length).toBe(1);
+        expect(R.S.solved[0].topicId).toBe(d.topics[0].id);
+      });
+    });
+
+    it('oz-060 oz-064 oz-054 bugün: blok bitiş özeti, hedef ayarı geri alınır, blok taşınınca hayalet kalır', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const g = R.S.days[R.U.todayISO()];
+        const bl = g.blocks.filter(b => b.slot !== 'Dinlenme');
+        bl[0].status = 'done'; bl[0].actualQ = 30; bl[0].correctQ = 23; bl[0].actualMin = 64;
+        const k = dom(await R.Screens.today.render());
+        const z = k.querySelector('[data-oz="060"]');
+        expect(z.querySelectorAll('.uc > div').length).toBe(3);
+        expect(z.querySelector('[data-act="timer-start"]').getAttribute('data-block')).toBe(bl[1].id);
+        const a = dom(await R.Screens.gun.render());
+        expect(a.querySelectorAll('[data-oz="064"]').length).toBe(2);
+        const once = g.paragraphTarget;
+        await cizmeden(() => R.Screens.today.handle['hedef-ayar']({ dataset:{ kind:'paragraph', delta:'1' } }));
+        expect(g.paragraphTarget).toBe(once + 1);
+        if(bl.length >= 3){
+          const ilk = bl[1].id;
+          await cizmeden(() => R.Screens.today.handle['block-sonra']({ dataset:{ block:ilk } }));
+          const b = dom(await R.Screens.gun.render());
+          expect(b.querySelector('[data-oz="054"] .hy')).toBeTruthy();
+          await cizmeden(() => R.Screens.today.handle['block-geri']());
+          expect(g.blocks.filter(x => x.slot !== 'Dinlenme')[1].id).toBe(ilk);
+        }
+      });
+    });
+  });
+
 })();

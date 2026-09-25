@@ -169,6 +169,10 @@ jobs:
       # Üretici saf Python — bu iş node istemez.
       - name: Medya künyesi taze mi
         run: python3 tools/marka.py --kunye --denetle
+      # Vitrin kartlarının biçimi vitrinden ÜRETİLİR (tools/vitrin.py);
+      # vitrin değişip vitrin.css yeniden yazılmazsa sistem eski kartı çizer.
+      - name: Vitrin kart biçimi taze mi
+        run: python3 tools/vitrin.py --denetle
 
   hkm:
     name: HKM — testler, sorgu bütçesi, panonun yüzü

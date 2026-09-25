@@ -1218,6 +1218,7 @@ SP.Screens.today = (function(){
        bölüme aitse (tahlil, sepet) onu buraya başlık yapmak kafa
        karıştırıyordu: kullanıcı günlük sayfasını açıp tahlil cümlesi
        okuyordu. Hamle artık düğme olarak duruyor, başlık olarak değil. */
+    headlineOz:'004',
     headline(){
       const d = shownDate();
       const r = SP.Move.readiness(d);

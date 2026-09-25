@@ -199,6 +199,22 @@ R.Screens.onaylar = (function(){
   /* VİTRİN ÖNERİ KARTI (110 · 114 · 121 · 123 · 113): ofisin önerisi ortak
      kartla çizilir; uygulama yine yalnız R.Proposals.approve'dan geçer.
      Ajan, dokunduğu alan ve «Yerini gör» kartın altında kalır. */
+  /* 053 ARA HAFTASI ÖNİZLEMESİ (vitrin): «ara ver» önerisinin etkilediği
+     haftalar ve bir önce/sonrası. Onay aynı pencerenin düğmesidir; burada
+     ikinci bir onay düğmesi yok. */
+  function araOnizleme(p){
+    const V = (window.LIFEOS || {}).VITRIN;
+    const x = p.params || p.payload || p;
+    if(!V || p.action !== 'ara-ver' || !x || !x.from || !x.to) return '';
+    const h1 = R.Model.weekOf(x.from), h2 = R.Model.weekOf(x.to);
+    if(!h1 || !h2) return '';
+    const haftalar = [];
+    for(let h = Math.max(1, h1 - 1); h <= Math.min(R.PLAN.totalWeeks, h2 + 1); h++) haftalar.push({ ad:'H' + h, durum:h >= h1 && h <= h2 ? 'a' : '' });
+    const gun = U.diffDays(x.from, x.to) + 1;
+    return V.araHaftasi({ haftalar, seviye:(R.ACTION_BY_ID['ara-ver'] || {}).level || 'orta',
+      ozet:gun + ' gün · günlerin blokları boşalır' });
+  }
+
   function kopru(){
     const O = (window.LIFEOS || {}).ONERI;
     if(!O || !O.kopru) return null;
@@ -214,7 +230,7 @@ R.Screens.onaylar = (function(){
       },
       uygula:id => handle['office-approve']({ dataset:{ id } }),
       gec:async (id, kayit) => { await R.Proposals.reject(id, kayit); UI.toast('Geçildi; öneri silinmedi, «geçildi» diye yazıldı.'); R.App.render(); },
-      onizle:p => ({ govde:String(diffRows(p.preview.rows)) }),
+      onizle:p => ({ govde:araOnizleme(p) + String(diffRows(p.preview.rows)) }),
       pencere:o => UI.sheet({ title:o.baslik, body:o.govde, footer:o.ayak }),
       kapat:() => UI.closeSheet(),
     });

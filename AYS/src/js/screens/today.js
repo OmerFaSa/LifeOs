@@ -41,6 +41,8 @@ R.Screens.today = (function(){
       const el = document.getElementById('timer-clock');
       if(!b || !el){ stopTick(); return; }
       el.textContent = U.fmtClock(elapsedSeconds(b));
+      const g = document.getElementById('geri-sayim');
+      if(g && elapsedSeconds(b) % 30 === 0) g.innerHTML = geriSayimHtml(b);
     }, 1000);
   }
   function stopTick(){
@@ -124,7 +126,8 @@ R.Screens.today = (function(){
                 ${c.Button({ label:'Bitir', icon:'stop', tone:'primary', size:'sm', act:'timer-stop', data:{ 'data-block':b.id } })}
               </div>`
             : b.status === 'pending'
-              ? c.Button({ label:'Başlat', icon:'play', size:'sm', act:'timer-start', data:{ 'data-block':b.id } })
+              ? html`<div class="row-sm">${when(sonrakiBekleyen(b), () => c.Button({ label:'Sonraya al', size:'sm', tone:'ghost',
+                  act:'block-sonra', data:{ 'data-block':b.id } }))}${c.Button({ label:'Başlat', icon:'play', size:'sm', act:'timer-start', data:{ 'data-block':b.id } })}</div>`
               : StatusBadge(b.status)}
         </div>
 
@@ -157,6 +160,32 @@ R.Screens.today = (function(){
             </div>
           </div>`)}
       </article>`;
+  }
+
+  /* 054 TAŞIMA GÖLGESİ: bekleyen blok bir sonraki bekleyen bloğun
+     arkasına alınır (küçük aksiyon: tek gün, tek kayıt). Eski yeri hayalet
+     çizgiyle kalır, «Geri al» ekrandadır. */
+  let sonTasima = null;   // { date, id, eski }
+  function sonrakiBekleyen(b){
+    const day = todayDoc();
+    if(!day || b.startedAt) return null;
+    const i = day.blocks.indexOf(b);
+    return day.blocks.slice(i + 1).find(x => x.status === 'pending' && !x.startedAt && x.slot !== 'Dinlenme') || null;
+  }
+  function tasimaKutusu(day){
+    const V = VT();
+    if(!V || !sonTasima || !day || sonTasima.date !== day.date) return '';
+    const b = day.blocks.find(x => x.id === sonTasima.id);
+    if(!b) return '';
+    const ad = x => x.topic || x.subject || x.slot;
+    const liste = [];
+    day.blocks.filter(x => x.slot !== 'Dinlenme').forEach((x, i) => {
+      if(i === sonTasima.eski) liste.push({ ad:ad(b), hayalet:true });
+      if(x.id === b.id) liste.push({ ad:ad(b), not:'yeni yeri', tasinan:true });
+      else liste.push({ ad:ad(x), not:x.slot });
+    });
+    return c.Kutu({ ad:'Blok taşındı', yuva:'küçük · geri alınır', class:'vkutu',
+      govde:raw(V.tasimaGolgesi({ bloklar:liste, act:'block-geri' })) });
   }
 
   function blockTopicOptions(subjectId){
@@ -946,6 +975,57 @@ R.Screens.today = (function(){
   const sayiH = (s, o) => VL().SAYI ? raw(VL().SAYI.html(s, o))
     : html`${s.deger == null ? '—' : s.deger}${when(s.birim, () => html`<small> ${s.birim}</small>`)}`;
 
+  /* ---------- C · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  function hedefKutusu(day){
+    const p = hedefAyariHtml(day, 'paragraph'), q = hedefAyariHtml(day, 'problem');
+    if(!p && !q) return '';
+    return c.Kutu({ ad:'Günlük hedef', yuva:'küçük · geri alınır', class:'vkutu',
+      govde:html`<div class="vkutu__ikili">${raw(p)}${raw(q)}</div>` });
+  }
+  const VT = () => VL().VITRIN;
+  const bloklarOf = day => (day && day.blocks || []).filter(b => b.slot !== 'Dinlenme');
+
+  /* 043 GERİ SAYIM: süren bloğun PLANLANAN bitişine kalan dakika. Blok
+     saati yazılmadığı için başlangıca değil bitişe sayılır; sayı
+     kronometreden gelir (ölçüm), plan dakikası bloğun kaydından. */
+  function geriSayimHtml(b){
+    if(!b || !b.startedAt || !VT() || !(b.targetMin > 0)) return '';
+    const kalan = b.targetMin - elapsedSeconds(b) / 60;
+    return kalan >= 0 ? VT().geriSayim({ dakika:kalan, ad:b.topic || b.subject || b.slot }) : '';
+  }
+
+  /* 060 BLOK BİTİŞ ÖZETİ: son biten blok ve sıradaki iş. Sayılar bloğun
+     kaydından; girilmemiş sayı «—». Süren blok varken çizilmez. */
+  function blokBitisHtml(day){
+    if(!VT() || !day || runningBlock()) return '';
+    const b = bloklarOf(day);
+    let son = -1;
+    b.forEach((x, i) => { if(x.status === 'done' || x.status === 'partial') son = i; });
+    if(son < 0) return '';
+    const x = b[son];
+    const sira = b.slice(son + 1).find(y => y.status === 'pending') || b.find(y => y.status === 'pending');
+    const n = x.actualQ == null ? null : Number(x.actualQ);
+    const d = x.correctQ == null || n == null ? null : Number(x.correctQ);
+    return VT().blokBitis({ ad:x.topic || x.subject || x.slot, soru:n, dogru:d, digerleri:d == null ? null : Math.max(0, n - d),
+      dk:x.actualMin == null ? null : Number(x.actualMin), planDk:x.targetMin,
+      sonraki:sira ? { ad:sira.topic || sira.subject || sira.slot, dk:sira.targetMin, act:'timer-start',
+        data:{ 'data-block':sira.id } } : null });
+  }
+
+  /* 064 HEDEF AYARI: günün çıpa hedefi; hafta toplamı bu haftanın yedi
+     gününün hedefinden (açılmamış gün şablonun varsayılanıyla). */
+  function hedefAyariHtml(day, kind){
+    if(!VT() || !day) return '';
+    const alan = kind === 'paragraph' ? 'paragraphTarget' : 'problemTarget';
+    const toplam = M.weekDates(M.currentWeek()).reduce((a, d) => {
+      const g = S.days[U.iso(d)];
+      return a + (g ? Number(g[alan]) || 0 : 18);
+    }, 0);
+    return VT().hedefAyari({ etiket:(kind === 'paragraph' ? 'Paragraf' : 'Problem') + ' hedefi · bugün',
+      ad:(kind === 'paragraph' ? 'paragraf' : 'problem') + ' hedefi', hedef:Number(day[alan]) || 0, haftaToplam:toplam,
+      act:'hedef-ayar', data:{ 'data-kind':kind } });
+  }
+
   function SonDenemeKutusu(){
     const L = VL();
     const tyt = (S.exams || []).filter(e => e.family === 'TYT' && e.kind === 'full')
@@ -1065,6 +1145,8 @@ R.Screens.today = (function(){
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${when(acil, () => acil.kart)}
           ${R.Setup.needed() ? raw(R.Setup.card()) : html`<div class="kahraman" data-oz="042">${NextUpCard()}</div>`}
+          ${when(runningBlock(), () => html`<div id="geri-sayim" class="bugun__vitrin">${raw(geriSayimHtml(runningBlock()))}</div>`)}
+          ${when(!R.Setup.needed(), () => raw(blokBitisHtml(day)))}
           ${when(R.Signals && R.Signals.current(), () => SignalCard())}
         </section>
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
@@ -1106,6 +1188,7 @@ R.Screens.today = (function(){
         <div id="pane-flow">${FlowCard()}</div>
         ${c.SectionTitle(html`${wd.label} blokları${raw(UI.hint('block'))}`, html`${raw(OdakRozeti(day))}<span class="small dim">${U.fmtDate(dateISO)}</span>`)}
         ${IstisnaKart(day, dateISO)}
+        ${tasimaKutusu(day)}
         ${map(day.blocks, BlockCard)}
         ${c.Card({ pad:'sm', body:c.Field({ label:'Günün notu',
           input:c.Textarea({ rows:2, value:day.note, change:'day-note', placeholder:'Bugün ne engelledi, ne kolaylaştırdı?' }) }) })}
@@ -1115,6 +1198,7 @@ R.Screens.today = (function(){
         ${HedefKart()}
         ${OfficeCard()}
         <div id="pane-anchors">${AnchorPane(day)}</div>
+        <div id="pane-hedef">${hedefKutusu(day)}</div>
         <div id="pane-energy">${EnergyCard()}</div>
         <div id="pane-reward">${RewardCard()}</div>
         ${BadDayCard(day)}
@@ -1325,6 +1409,45 @@ R.Screens.today = (function(){
       if(!R.App.patch('#pane-break', BreakCard())) R.App.render();
       else R.App.patch('#pane-flow', FlowCard());
     },
+    async 'block-sonra'(el){
+      const day = todayDoc();
+      const b = day && day.blocks.find(x => x.id === el.dataset.block);
+      const hedef = b && sonrakiBekleyen(b);
+      if(!hedef) return;
+      const eskiSira = day.blocks.map(x => x.id);
+      const eski = day.blocks.filter(x => x.slot !== 'Dinlenme').indexOf(b);
+      day.blocks.splice(day.blocks.indexOf(b), 1);
+      day.blocks.splice(day.blocks.indexOf(hedef) + 1, 0, b);
+      await M.saveDay(day.date);
+      sonTasima = { date:day.date, id:b.id, eski, sira:eskiSira };
+      R.App.render();
+    },
+    async 'block-geri'(){
+      const day = todayDoc();
+      if(!day || !sonTasima || sonTasima.date !== day.date) return;
+      const sira = sonTasima.sira;
+      day.blocks.sort((a, b) => sira.indexOf(a.id) - sira.indexOf(b.id));
+      sonTasima = null;
+      await M.saveDay(day.date);
+      UI.toast('Blok eski yerine döndü.');
+      R.App.render();
+    },
+    /* 064 küçük aksiyon: sormadan uygulanır, «Geri al» kalır (AGENTS §1.9). */
+    async 'hedef-ayar'(el){
+      const day = todayDoc();
+      if(!day) return;
+      const alan = el.dataset.kind === 'paragraph' ? 'paragraphTarget' : 'problemTarget';
+      const once = Number(day[alan]) || 0;
+      const sonra = Math.max(0, once + Number(el.dataset.delta || 0));
+      if(sonra === once) return;
+      day[alan] = sonra;
+      await M.saveDay(day.date);
+      const yenile = () => { if(!R.App.patch('#pane-hedef', hedefKutusu(day))) R.App.render(); };
+      yenile();
+      UI.toast((el.dataset.kind === 'paragraph' ? 'Paragraf' : 'Problem') + ' hedefi bugün ' + sonra + ' soru.', { undo:async () => {
+        day[alan] = once; await M.saveDay(day.date); yenile();
+      } });
+    },
     async anchor(el){
       const day = todayDoc();
       const field = el.dataset.kind === 'paragraph' ? 'paragraphActual' : 'problemActual';
@@ -1448,6 +1571,7 @@ R.Screens.today = (function(){
     subtitle(){ return ''; },
     /* v5: tarih üst satırda, günün cümlesi büyük başlık (004). */
     ust(){ return U.esc(tarihSatiri()); },
+    headlineOz:'004',
     headline(){
       const d = S.days[U.todayISO()];
       return (d && bugunCumlesi(d, U.todayISO())) || 'Bugün';

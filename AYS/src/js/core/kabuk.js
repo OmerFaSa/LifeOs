@@ -394,7 +394,7 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="sayfabasi__metin">'
       + (yol.length > 1 ? '<p class="sayfabasi__yol">' + yol.map(kac).join('<span aria-hidden="true"> › </span>') + '</p>' : '')
       + (o.ust ? '<p class="sayfabasi__ust">' + o.ust + '</p>' : '')
-      + '<h1 class="sayfabasi__baslik hero__title">' + (o.baslikHtml || kac(o.baslik || '')) + '</h1>'
+      + '<h1 class="sayfabasi__baslik hero__title"' + (o.oz ? ' data-oz="' + kac(o.oz) + '"' : '') + '>' + (o.baslikHtml || kac(o.baslik || '')) + '</h1>'
       + (o.ozet ? '<p class="sayfabasi__ozet">' + o.ozet + '</p>' : '')
       + '</div>'
       + (o.eylem ? '<div class="sayfabasi__eylem">' + o.eylem + '</div>' : '')

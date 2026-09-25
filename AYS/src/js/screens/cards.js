@@ -19,6 +19,46 @@ R.Screens.cards = (function(){
 
   function stageLabel(stage){ return STAGES[stage] || 'yeni'; }
 
+  /* ---------- vitrin kartları (brand/ortak/vitrin.js) ----------
+
+     045 YANLIŞ KARTI: önde soru, arkada «neden yanlış» (hatadan gelen
+     kartta yanlış notu). Kitaplık yoksa eski düz kart çizilir. */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  function kartYuzu(card, flipped){
+    const hata = card.source === 'error';
+    if(VT()) return raw(VT().yanlisKarti({ on:card.front, arka:card.back || '—',
+      ust:(hata ? 'Yanlış' : 'Kart') + (card.topic ? ' · ' + card.topic : ''),
+      arkaAd:hata ? 'Yanlış notu' : 'Cevap', cevrik:flipped, act:'flip', data:{ 'data-id':card.id } }));
+    return html`<div class="flashcard" data-act="flip" data-id="${card.id}">
+      <span class="flashcard__side">${(flipped ? 'Arka yüz' : 'Ön yüz') + (card.topic ? ' · '+card.topic : '')}</span>
+      <span class="flashcard__text">${flipped ? (card.back || '—') : card.front}</span></div>`;
+  }
+
+  /* 065 TEKRAR TAKVİMİ ÇİZGİSİ: kartın aralıkları R.SRS_INTERVALS'tan
+     (kod), geçilen aşamalar dolu, sıradaki parlıyor. */
+  function takvimCizgisi(card){
+    if(!VT()) return '';
+    const gun = card.dueAt ? U.diffDays(U.todayISO(), card.dueAt) : null;
+    const not = gun == null ? '' : gun <= 0 ? 'sıradaki tekrar bugün' : 'sıradaki tekrar ' + gun + ' gün sonra';
+    return '<div class="mt-12">' + VT().tekrarTakvimi({ adimlar:R.SRS_INTERVALS, asama:Math.min(card.stage || 0, R.SRS_INTERVALS.length),
+      baslik:card.source === 'error' ? 'Yanlış · tekrar günleri' : 'Tekrar günleri', etiket:card.topic || '', not }) + '</div>';
+  }
+
+  /* 059 TEKRAR PAKETİ: bugünün vadeli kartları konu konu. Süre TAHMİNDİR:
+     kart başına 20 saniye (geri çağırma + değerlendirme) varsayımı. */
+  const KART_SN = 20;
+  function tekrarPaketi(due){
+    if(!VT() || !due.length) return '';
+    const grup = {};
+    due.forEach(c => { const k = c.topic || 'Konusuz'; grup[k] = (grup[k] || 0) + 1; });
+    const konular = Object.keys(grup).sort((a, b) => grup[b] - grup[a]).slice(0, 5)
+      .map(k => ({ ad:k, n:grup[k], dk:Math.max(1, Math.round(grup[k] * KART_SN / 60)) }));
+    const kalan = due.length - konular.reduce((a, x) => a + x.n, 0);
+    if(kalan > 0) konular.push({ ad:'Diğer', n:kalan, dk:Math.max(1, Math.round(kalan * KART_SN / 60)) });
+    return K.Kutu({ ad:'Tekrar paketi', yuva:'tahmin', class:'vkutu', govde:raw(VT().tekrarPaketi({ konular,
+      dakika:Math.max(1, Math.round(due.length * KART_SN / 60)), act:'paket-baslat', dugme:'Paketi başlat' })) });
+  }
+
   /* ---------- due oturumu ---------- */
 
   function dueSession(){
@@ -42,11 +82,9 @@ R.Screens.cards = (function(){
       ${K.Meter({ label:'Oturum ilerlemesi', value:U.pct(doneToday, doneToday+due.length),
         text:doneToday+' / '+(doneToday+due.length) })}
 
-      <div class="flashcard mt-14" data-act="flip" data-id="${card.id}">
-        <span class="flashcard__side">${(flipped ? 'Arka yüz' : 'Ön yüz') + (card.topic ? ' · '+card.topic : '')}</span>
-        <span class="flashcard__text">${flipped ? (card.back || '—') : card.front}</span>
-        ${when(!flipped, () => html`<span class="flashcard__hint">Dokun veya boşluk tuşuna bas</span>`)}
-      </div>
+      <div class="mt-14">${kartYuzu(card, flipped)}</div>
+      ${when(!flipped, () => html`<p class="tiny dim mt-6">Dokun veya boşluk tuşuna bas.</p>`)}
+      ${raw(takvimCizgisi(card))}
 
       ${flipped
         ? html`<div class="row mt-12 gap-8">${map(RATINGS, r => html`
@@ -246,7 +284,7 @@ R.Screens.cards = (function(){
   function bolumler(){
     return [
       { id:'due', ad:'Bugünün kartları', sayi:C.dueCards().length,
-        govde:html`${gelecekYuk()}<div class="cardsgrid">${K.Stack(dueSession())}${sidebar()}</div>` },
+        govde:html`${gelecekYuk()}<div class="cardsgrid">${K.Stack(dueSession())}<div>${K.Stack([tekrarPaketi(C.dueCards()), sidebar()])}</div></div>` },
       { id:'notebook', ad:'Yanlış defteri', sayi:C.openErrors().length, govde:notebook() },
       { id:'all', ad:'Bütün kartlar', sayi:S.cards.length, govde:K.Stack(allCards()) },
     ];
@@ -298,6 +336,8 @@ R.Screens.cards = (function(){
 
   const handle = {
     async 'card-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    /* 059: paket Sınama'nın «vadeli kartlar» kipinde açılır. */
+    async 'paket-baslat'(){ S.ui.quizMode = 'due'; R.App.go('quiz'); },
     async 'card-page'(el){ S.ui.cardPage = Number(el.dataset.page); R.App.render(); },
     async 'nb-page'(el){ S.ui.nbPage = Number(el.dataset.page); R.App.render(); },
     async 'notebook-filter'(el){ S.ui.notebookClosed = el.dataset.value === '1'; S.ui.nbPage = 1; R.App.render(); },

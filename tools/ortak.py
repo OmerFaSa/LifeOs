@@ -270,6 +270,13 @@ DOSYALAR = {
     "guven.js":       "js/core",
     "guven.test.js":  "tests",
     "kart.css":       "css",
+    # VITRIN KARTLARI — katalogun (ekip/vitrin.html) kartlari gercek veriyle.
+    # Bicim URETILIR (tools/vitrin.py: vitrin.html -> vitrin.css); cizici
+    # vitrin.js elle yazilir, isaretlemesi vitrinin sablonudur.
+    "vitrin.css":     "css",
+    "vitrin.js":      "js/core",
+    # Test adi `vitrin.test.js` DEGIL: uc arayuzun kendi vitrin.test.js'i var.
+    "vitrinkart.test.js": "tests",
     # MODEL KATMANI — uc arayuz (2026-09-24'ten beri AYS'ninki tek kaynak).
     "llm.js":        "js/core",
     "providers.js":  "js/data",

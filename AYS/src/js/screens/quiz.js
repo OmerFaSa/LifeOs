@@ -217,6 +217,10 @@ R.Screens.quiz = (function(){
 
   /* Soru şeridi: bölümdeki her soruya tek dokunuş; cevaplılar dolu görünür.
      Doğru/yanlış GÖSTERİLMEZ: cevaplar bölüm bitince açılır. */
+  /* 044 nötr şerit ve 058 soru ekranı: brand/ortak/vitrin.js. Çözerken
+     doğru/yanlış rengi YOK; bölüm bitince açılır (kitapSonucView). */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+
   function soruSeridi(m){
     return html`<nav class="kitap-serit mb-10" aria-label="Sorular">${map(m.cevaplar, (c, i) => html`<button
       class="${(c != null ? 'is-cevapli' : '') + (i === m.index ? ' is-simdi' : '')}"
@@ -232,13 +236,16 @@ R.Screens.quiz = (function(){
       sub:'Soru ' + (m.index + 1) + ' / ' + m.toplam + ' · ' + m.cevapli
         + ' cevaplı · cevaplar bölüm bitince görünür',
       body:html`
+        ${when(VT(), () => html`<div class="mb-10">${raw(VT().notrSerit({ cevaplar:m.cevaplar.map(c => c != null) }))}</div>`)}
         ${soruSeridi(m)}
+        ${VT() ? raw(VT().soruEkrani({ no:m.index + 1, toplam:m.toplam, soru:s.soru, secenekler:s.secenekler,
+            secili:m.secili, act:'kitap-sec' })) : html`
         <p class="mb-10">${s.soru}</p>
         <div class="choices">${map(s.secenekler, (x, i) => html`<button
           class="${'choice' + (m.secili === i ? ' is-picked' : '')}" data-act="kitap-sec"
           data-i="${i}" aria-pressed="${m.secili === i ? 'true' : 'false'}">
           <span class="choice__key">${HARF[i]}</span>
-          <span class="choice__text">${x}</span></button>`)}</div>
+          <span class="choice__text">${x}</span></button>`)}</div>`}
         <p class="tiny dim mt-8">Zorluk: ${s.zorluk} (modelin beyanı, tahmin). Seçili şıkka
           yeniden dokunursan boş bırakırsın.</p>
         <div class="row wrap mt-12">
@@ -270,6 +277,10 @@ R.Screens.quiz = (function(){
     const zorluklar = Object.keys(sonuc.zorluk).filter(z => sonuc.zorluk[z].toplam);
     return K.Grid([K.Span(12, K.Stack([
       K.Card({ title:bolum.ad + ' · sonuç', sub:kitap.baslik + ' · ölçüldü', body:html`
+        ${when(VT(), () => html`<div class="mb-12">${raw(VT().notrSerit({ sonuclar:bolum.sorular.map((q, i) => {
+          const c = (sonuc.cevaplar || [])[i];
+          return c == null ? null : c === q.dogru ? 'd' : 'y';
+        }) }))}</div>`)}
         ${K.Cols(3, [
           K.Stat({ label:'Doğru', value:String(sonuc.dogru) }),
           K.Stat({ label:'Yanlış', value:String(sonuc.yanlis) }),

@@ -82,6 +82,52 @@ R.Screens.exams = (function(){
         : { dayanak:C.fullExams('TYT').length, dayanakBirim:'tam deneme (en az 3 gerekir)' })) });
   }
 
+  /* ---------- C · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const kutu = (ad, yuva, ic, o) => ic ? K.Kutu(Object.assign({ ad, yuva, class:'vkutu', govde:raw(ic) }, o || {})) : '';
+  const r2 = n => Math.round(n * 100) / 100;
+
+  /* 066 HEDEFE KALAN: bugünkü net son tam TYT'nin neti; hedef tahmini
+     sıra modelinden (`C.netGapToTarget`), bu yüzden etiket TAHMİN. */
+  function hedefeKalanKutusu(){
+    if(!VT()) return '';
+    const gap = C.netGapToTarget();
+    const tyt = C.fullExams('TYT');
+    if(!gap || !tyt.length) return '';
+    const simdi = r2(M.examNet(tyt[tyt.length - 1]));
+    const hafta = Math.max(1, Math.ceil(U.diffDays(U.todayISO(), R.PLAN.examTytISO) / 7));
+    const kalan = Math.max(0, gap.netDiff);
+    return kutu('Hedefe kalan', 'tahmin', VT().hedefeKalan({ ad:'Hedef net', simdi, hedef:r2(simdi + kalan),
+      kalanHafta:hafta, haftalik:gap.reached ? null : r2(kalan / hafta), birim:'net', kesinlik:'estimated',
+      not:gap.reached ? 'Hedef bandın üstündesin; bandı koru' : '' }));
+  }
+
+  /* 057 DENEME TAKVİMİ: son deneme netiyle, sonraki üç deneme günü PLANDAN
+     (haftanın deneme ritüeli; ara günü atlanır). */
+  function denemeTakvimi(){
+    if(!VT()) return '';
+    const bugun = U.todayISO();
+    const gecmis = S.exams.filter(e => e.date <= bugun).sort((a, b) => a.date.localeCompare(b.date)).slice(-1);
+    const gun = R.WEEKDAYS.findIndex(w => w.ritual === 'exam');
+    const plan = [];
+    for(let i = 1; i <= 35 && plan.length < 3; i++){
+      const d = U.iso(U.addDays(U.today(), i));
+      if(U.weekdayIndex(d) !== gun) continue;
+      const ist = R.Istisna ? R.Istisna.gunIcin(d) : null;
+      if(ist && ist.tur === 'ara') continue;
+      plan.push(d);
+    }
+    if(!plan.length) return '';
+    const ilk = gecmis.length ? gecmis[0].date : bugun, son = plan[plan.length - 1];
+    const aralik = Math.max(1, U.diffDays(ilk, son));
+    const yer = d => 6 + 88 * U.diffDays(ilk, d) / aralik;
+    const ne = d => { const g = U.diffDays(bugun, d); return g < 7 ? g + ' gün sonra' : Math.round(g / 7) + ' hafta'; };
+    const ogeler = gecmis.map(e => ({ ad:e.type || 'Deneme', yer:yer(e.date), not:U.fmtNet(M.examNet(e)) + ' net', durum:'g' }))
+      .concat(plan.map((d, i) => ({ ad:U.fmtShort(d), yer:yer(d), not:ne(d), durum:i === 0 ? 'y' : '' })));
+    if(ogeler.length < 2) return '';
+    return kutu('Deneme takvimi', 'planlı', VT().denemeTakvimi({ ogeler, bugun:yer(bugun), kesinlik:'computed', etiketAd:'planlı' }));
+  }
+
   function listView(){
     const filter = S.ui.examFilter || 'all';
     let list = S.exams.slice().sort((a, b) => b.date.localeCompare(a.date));
@@ -105,6 +151,8 @@ R.Screens.exams = (function(){
       ])),
       K.Span(3, K.Stack([
         siralamaKutusu(),
+        hedefeKalanKutusu(),
+        denemeTakvimi(),
         K.Card({ title:'Deneme hacmi', hint:'exam-volume', sub:'Plan / gerçekleşen', body:volumeTable() }),
         K.Card({ title:'Yayın merdiveni', hint:'publisher', sub:'Zorluk kademesi',
           body:html`<div class="ladder">${map(R.PUBLISHER_LADDER, l => html`
@@ -122,7 +170,19 @@ R.Screens.exams = (function(){
       value:o.value, aria:o.aria, change:o.change, data:o.data });
   }
 
+  /* 062 DENEME GİRİŞİ: ders ders D/Y/B hücreleri; neti kod hesaplar
+     (M.testNet). Hedef bandı ve doğruluk korunur. */
   function testTable(exam){
+    if(VT()){
+      const satirlar = exam.tests.map((t, i) => {
+        const answered = t.correct + t.wrong;
+        const band = R.TEST_BANDS.find(b => b.exam === exam.family && b.testKey && t.name.indexOf(b.testKey) >= 0);
+        const acc = answered ? U.pct(t.correct, answered) : null;
+        return { i, ad:t.name, correct:t.correct, wrong:t.wrong, blank:t.blank, net:r2(M.testNet(t)),
+          not:band ? 'hedef ' + band.low + '–' + band.high : '', dogruluk:acc, dogrulukDusuk:acc != null && acc < 70 };
+      });
+      return raw(VT().denemeGirisi({ satirlar, toplam:r2(M.examNet(exam)), change:'test-num' }));
+    }
     const rows = exam.tests.map((t, i) => {
       const net = M.testNet(t);
       const answered = t.correct + t.wrong;
@@ -168,6 +228,45 @@ R.Screens.exams = (function(){
       </div>`;
   }
 
+  /* 046 DENEME KARNESİ: satır uzunluğu dersin soru sayısıyla orantılı. */
+  function karne(exam){
+    if(!VT()) return '';
+    return kutu('Karne', 'hesaplandı', VT().denemeKarnesi({ aile:exam.family,
+      satirlar:exam.tests.map(t => ({ ad:t.name, d:Number(t.correct) || 0, y:Number(t.wrong) || 0, b:Number(t.blank) || 0,
+        net:r2(M.testNet(t)) })).filter(x => x.d + x.y + x.b > 0), toplam:r2(M.examNet(exam)) }));
+  }
+
+  /* 048 DENEME KARŞILAŞTIRMASI: aynı aile ve türün bir önceki denemesiyle,
+     test adına göre eşlenir; eşi olmayan ders «—». */
+  function karsilastirma(exam){
+    if(!VT()) return '';
+    const onceki = S.exams.filter(e => e.id !== exam.id && e.family === exam.family && e.kind === exam.kind && e.date <= exam.date)
+      .sort((a, b) => b.date.localeCompare(a.date))[0];
+    if(!onceki) return '';
+    const satirlar = exam.tests.map(t => {
+      const o = onceki.tests.find(x => x.name === t.name);
+      return { ad:t.name, once:o ? r2(M.testNet(o)) : null, sonra:r2(M.testNet(t)) };
+    });
+    return kutu('Önceki denemeyle', 'hesaplandı', VT().denemeKarsilastirma({ onceAd:U.fmtShort(onceki.date), sonraAd:U.fmtShort(exam.date),
+      satirlar, toplam:{ once:r2(M.examNet(onceki)), sonra:r2(M.examNet(exam)) } }));
+  }
+
+  /* 047 HIZ ŞERİDİ: süreli oturumun soru başına süresi (ölçüldü). */
+  function hizSeridi(exam){
+    if(!VT() || !M.sessionForExam) return '';
+    const ses = M.sessionForExam(exam.id);
+    const sureler = ses && (ses.marks || []).map(m => Number(m.spent)).filter(x => x > 0);
+    return sureler && sureler.length >= 3 ? kutu('Hız şeridi', 'ölçüldü', VT().hizSeridi({ sureler })) : '';
+  }
+
+  /* 056 YANLIŞ NEDENLERİ: hata etiketlerinin dağılımı; etiketi kullanıcı
+     seçer (beyan), kod sayar. Etiketsiz hata dağılıma girmez. */
+  function nedenler(errs){
+    if(!VT()) return '';
+    return VT().yanlisNedenleri({ birim:'hata', nedenler:Object.keys(R.ERROR_TAGS).map(k => ({ ad:R.ERROR_TAGS[k].name,
+      n:errs.filter(e => e.tag === k).length })).sort((a, b) => b.n - a.n) });
+  }
+
   function detailView(id){
     const exam = S.exams.find(e => e.id === id);
     if(!exam) return K.Empty({ text:'Deneme bulunamadı.',
@@ -196,11 +295,12 @@ R.Screens.exams = (function(){
             <div class="tiny dim">toplam net</div></div>`,
           body:testTable(exam),
         }),
+        karsilastirma(exam),
         K.Card({
           title:'Hata analizi', sub:U.plural(errs.length, 'kayıt', 'kayıt'),
           actions:K.Button({ label:'Hata ekle', icon:'plus', size:'sm', tone:'primary', act:'new-error', data:{ 'data-exam':exam.id } }),
           body:html`
-            ${when(errs.length, () => html`<div class="mb-12">${raw(UI.stackBar(segs))}</div>`)}
+            ${when(errs.length, () => html`<div class="mb-12">${nedenler(errs) ? raw(nedenler(errs)) : raw(UI.stackBar(segs))}</div>`)}
             ${errs.length
               ? html`<div class="list">${map(errs, ErrorRow)}</div>`
               : K.Empty({ icon:'list',
@@ -209,6 +309,8 @@ R.Screens.exams = (function(){
       ])),
 
       K.Span(4, K.Stack([
+        karne(exam),
+        hizSeridi(exam),
         K.Card({
           title:'Analiz protokolü', hint:'analysis-protocol', sub:'24 saat içinde',
           body:html`
@@ -270,7 +372,8 @@ R.Screens.exams = (function(){
               <div class="tiny dim">${marks.length} / ${t.q} soru işaretlendi</div>
             </div>
           </div>
-          ${K.Bar({ value:U.pct(marks.length, t.q), tone:'' })}` }),
+          ${VT() && t.q <= 80 ? raw(VT().notrSerit({ cevaplar:Array.from({ length:t.q }, (_, i) => i < marks.length) }))
+            : K.Bar({ value:U.pct(marks.length, t.q), tone:'' })}` }),
 
         html`<div class="row gap-8">${map(Object.keys(R.ExamRun.MARKS), k => {
           const m = R.ExamRun.MARKS[k];

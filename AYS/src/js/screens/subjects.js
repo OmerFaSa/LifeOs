@@ -63,6 +63,67 @@ R.Screens.subjects = (function(){
       </div>`;
   }
 
+  /* ---------- C · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const AKTIF = ['learning', 'practicing', 'provisional', 'closed', 'reopened'];
+
+  /* Konunun kapsamı: ölçüm varsa ikinci (yoksa ilk) testin yüzdesi;
+     ölçüm yoksa YOK (kapalı konu da ölçümsüz kapatılmışsa «—»). */
+  function kapsamOf(st){ return st.second != null ? st.second : st.first != null ? st.first : null; }
+
+  /* Son çalışma: bitmiş blok ya da çözülen soru kaydı, konu KİMLİĞİYLE. */
+  function sonCalisma(subjectId){
+    const son = {};
+    const yaz = (tid, iso) => { if(tid && iso && (!son[tid] || iso > son[tid])) son[tid] = iso; };
+    Object.keys(S.days || {}).forEach(iso => (S.days[iso].blocks || []).forEach(b => {
+      if(b.subjectId === subjectId && (b.status === 'done' || b.status === 'partial')) yaz(b.topicId, iso);
+    }));
+    (S.solved || []).forEach(r => { if(r.subjectId === subjectId) yaz(r.topicId, R.U.gunOf(r.at || '')); });
+    return son;
+  }
+
+  /* Eksik önkoşul: aynı grupta SONRAKİ bir konuya başlanmışken kapanmamış konu. */
+  function eksikOnkosul(subject){
+    const eksik = {};
+    groupTopics(subject.topics).forEach(g => {
+      const sirali = g.items.slice().sort((a, b) => a.order - b.order);
+      sirali.forEach((t, i) => {
+        const st = M.topicState(subject.id, t.id).state;
+        if(st === 'closed') return;
+        if(sirali.slice(i + 1).some(x => AKTIF.indexOf(M.topicState(subject.id, x.id).state) >= 0)) eksik[t.id] = true;
+      });
+    });
+    return eksik;
+  }
+
+  /* 050 KONU ZİNCİRİ: ilk etkin konunun önü ve arkası, önkoşul sırasıyla. */
+  function zincir(subject){
+    if(!VT()) return '';
+    const eksik = eksikOnkosul(subject);
+    const g = groupTopics(subject.topics).find(x => x.items.some(t => ['learning', 'practicing', 'provisional'].indexOf(M.topicState(subject.id, t.id).state) >= 0));
+    if(!g) return '';
+    const sirali = g.items.slice().sort((a, b) => a.order - b.order);
+    const i = sirali.findIndex(t => ['learning', 'practicing', 'provisional'].indexOf(M.topicState(subject.id, t.id).state) >= 0);
+    const parca = sirali.slice(Math.max(0, i - 1), Math.max(0, i - 1) + 3);
+    if(parca.length < 2) return '';
+    return K.Kutu({ ad:'Konu zinciri', yuva:g.key, class:'vkutu', govde:raw(VT().konuZinciri({
+      halkalar:parca.map(t => ({ ad:t.name, p:kapsamOf(M.topicState(subject.id, t.id)), eksik:!!eksik[t.id] })) })) });
+  }
+
+  /* 063 KONU TABLOSU: bir grubun konuları; satır konu formunu açar. */
+  function konuTablosu(subject, g, son, eksik){
+    const bugun = U.todayISO();
+    return VT().konuTablosu({ act:'topic-open', ust:g.key + ' · ' + g.items.length + ' konu',
+      konular:g.items.map(t => {
+        const st = M.topicState(subject.id, t.id);
+        const durum = (STATE_BADGE[st.state] || STATE_BADGE.not_started)[0];
+        const gun = son[t.id] ? U.diffDays(son[t.id], bugun) : null;
+        const zaman = gun == null ? null : gun === 0 ? 'bugün' : gun + ' gün önce';
+        return { ad:t.name, p:kapsamOf(st), onkosul:!!eksik[t.id], son:(zaman ? zaman + ' · ' : '') + durum,
+          data:{ 'data-subject':subject.id, 'data-topic':t.id } };
+      }) });
+  }
+
   /* Konular brans grubuna gore bolunur — uzun liste okunabilir kalir. */
   function groupTopics(topics){
     const groups = [];
@@ -93,6 +154,7 @@ R.Screens.subjects = (function(){
   function subjectPanel(subject){
     const closure = C.subjectClosure(subject.id);
     const topics = filterTopics(subject);
+    const son = sonCalisma(subject.id), eksik = eksikOnkosul(subject);
     const highCount = subject.topics.filter(t => t.freq === 'high').length;
 
     return K.Stack([
@@ -109,13 +171,16 @@ R.Screens.subjects = (function(){
           <p class="small muted mt-10">${subject.insight}</p>`,
       }),
 
+      zincir(subject),
       K.Card({
         title:'Konular', hint:'source-arch', sub:'Önkoşul ve getiri sırasına göre',
         actions:K.Segmented({ items:FILTERS, value:S.ui.topicFilter || 'all', act:'topic-filter', aria:'Konu süzgeci' }),
         body:html`
           ${K.Input({ class:'mb-10', placeholder:'Konu ara…', value:S.ui.topicQuery || '',
             aria:'konu ara', change:'topic-search', data:{ 'data-debounce':220 } })}
-          ${topics.length
+          ${topics.length && VT()
+            ? html`<div class="stack-sm">${map(groupTopics(topics), g => raw(konuTablosu(subject, g, son, eksik)))}</div>`
+            : topics.length
             ? html`<div class="list">${map(groupTopics(topics), g => {
                 const closed = g.items.filter(t => M.topicState(subject.id, t.id).state === 'closed').length;
                 return html`<div class="topicgroup">

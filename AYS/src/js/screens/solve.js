@@ -542,15 +542,42 @@ R.Screens.solve = (function(){
 
   /* ---------- ekran ---------- */
 
+  /* 055 TEK SATIR SORU EKLE (vitrin): ders · konu · sonuç, Enter kaydeder.
+     Çözümü yazdırmadan çözülmüş bir soruyu konu takibine bağlar; kayıt
+     küçük aksiyondur, «Geri al» kalır. Açılır pencere yok. */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const hizli = { ders:'', konu:'', sonuc:'dogru' };
+  function hizliSatir(){
+    if(!VT()) return '';
+    const ders = R.SUBJECTS.find(x => x.id === hizli.ders) || R.SUBJECTS[0];
+    hizli.ders = ders.id;
+    if(!ders.topics.some(t => t.id === hizli.konu)) hizli.konu = '';
+    const ic = VT().tekSatirSoru({ id:'qh', act:'q-hizli', change:'qh-alan',
+      dersler:R.SUBJECTS.map(x => ({ value:x.id, label:x.name })), ders:hizli.ders,
+      konular:[{ value:'', label:'Konu seç' }].concat(ders.topics.map(t => ({ value:t.id, label:t.name }))), konu:hizli.konu,
+      sonuclar:R.SOLVE_RESULT_ORDER.map(id => ({ value:id, label:R.SOLVE_RESULTS[id].label, iyi:id === 'dogru' || id === 'zorla' })),
+      sonuc:hizli.sonuc, not:'Açılır pencere yok · Enter kaydeder' });
+    return K.Kutu({ ad:'Hızlı kayıt', yuva:'küçük · geri alınır', class:'vkutu', id:'q-hizli-kutu', govde:raw(ic) });
+  }
+
   async function render(){
     return String(K.Grid([
       K.Span(8, K.Stack([ inputCard(), resultCard() ])),
-      K.Span(4, K.Stack([ statCard(), sourceCard(), topicCard(), historyCard() ])),
+      K.Span(4, K.Stack([ hizliSatir(), statCard(), sourceCard(), topicCard(), historyCard() ])),
     ]));
   }
 
   /* Sürükle-bırak ve yapıştır: her ikisi de aynı yola çıkar. */
   function afterRender(){
+    const satir = document.querySelector('[data-hizli-satir]');
+    if(satir && !satir.dataset.bound){
+      satir.dataset.bound = '1';
+      satir.addEventListener('keydown', e => {
+        if(e.key !== 'Enter' || e.isComposing) return;
+        e.preventDefault();
+        handle['q-hizli']();
+      });
+    }
     const drop = document.getElementById('q-drop');
     if(drop && !drop.dataset.bound){
       drop.dataset.bound = '1';
@@ -610,6 +637,15 @@ R.Screens.solve = (function(){
   /* ---------- eylemler ---------- */
 
   const handle = {
+    async 'q-hizli'(){
+      const ders = R.SUBJECTS.find(x => x.id === hizli.ders);
+      const konu = ders && ders.topics.find(t => t.id === hizli.konu);
+      if(!konu){ UI.toast('Önce konuyu seç; konusuz kayıt konu takibine girmez.'); return; }
+      const rec = await Q.save({ subjectId:ders.id, topicId:konu.id, topicName:konu.name, result:hizli.sonuc, quick:true });
+      await R.App.render();
+      UI.toast(konu.name + ' · ' + R.SOLVE_RESULTS[hizli.sonuc].label.toLocaleLowerCase('tr-TR') + ' kaydedildi.',
+        { undo:async () => { await Q.remove(rec.id); await R.App.render(); } });
+    },
     async 'q-pick'(){ pickFile(); },
 
     async 'q-clear-image'(){ image = null; await R.App.render(); },
@@ -906,6 +942,17 @@ R.Screens.solve = (function(){
   }
 
   const change = {
+    async 'qh-alan'(el){
+      const alan = (el.dataset.alan || '').replace('qh-', '');
+      if(alan === 'ders'){ hizli.ders = el.value; hizli.konu = ''; }
+      else if(alan === 'konu') hizli.konu = el.value;
+      else if(alan === 'sonuc') hizli.sonuc = el.value;
+      if(alan === 'ders' || alan === 'sonuc'){
+        /* Ders değişince konu listesi, sonuç değişince çipin rengi değişir. */
+        await R.App.render();
+        const x = document.getElementById(el.id); if(x) x.focus();
+      }
+    },
     async 'q-topic-q'(el){
       topicQuery = el.value;
       /* Yazarken tüm ekranı yeniden çizmek imleci kaybettiriyordu:

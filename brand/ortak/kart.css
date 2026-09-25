@@ -1061,3 +1061,95 @@
 
 /* 116 anahtarı: 24 px dokunma tabanı (WCAG 2.2 AA). */
 .otoayar__anahtar{ width:24px; height:24px; min-height:24px; margin:0; flex:none; accent-color:var(--text); }
+
+/* ================================================================
+   VİTRİN DURUMLARI — vitrin kartlarının (brand/ortak/vitrin.css,
+   ÜRETİLMİŞ) sistemde ALDIĞI hâller. Vitrin bir davranışı döngüyle
+   gösterir; sistemde o davranış gerçek bir olayla olur. Kartın biçimi
+   burada DEĞİŞMEZ: yalnız durum (çevrilmiş, seçili), gerçek giriş
+   kutusu ve gerçek metnin uzunluğu karşılanır.
+   ================================================================ */
+.vk[role="button"]{ cursor:pointer; }
+.vk[role="button"]:focus-visible{ outline:2px solid var(--ring); outline-offset:3px; border-radius:12px; }
+.vk .hl.hl--yok{ background:none; border:1.5px dashed var(--vk-ink4); }
+.vk .hl.hl--yok::after{ display:none; }
+
+/* 043 tek durum: sistem o anki hâli çizer, ikisini yan yana değil. */
+.vk .x22v.tek{ grid-template-columns:1fr; }
+
+/* 045 çevrilen kart: yükseklik metinden gelir, yüzler üst üste. */
+.vk .x24{ height:auto; }
+.vk .x24 .kk{ display:grid; transition:transform var(--dur-lg) var(--ease); }
+.vk .x24 .yz{ position:relative; inset:auto; grid-area:1 / 1; min-height:124px; gap:8px; }
+.vk .x24 .kk.is-cevrik{ transform:rotateY(180deg); }
+
+/* 052 yuva adları saat değil sözcüktür; soluk mürekkep yazıda AA değil. */
+.vk .y15 .sa{ color:var(--vk-ink3); align-self:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.vk .y15 .bk.is-atlandi{ background:repeating-linear-gradient(135deg,var(--vk-ink4) 0 2px,transparent 2px 4px); }
+
+/* 055 çipler gerçek seçim kutusudur. */
+.vk .x30 .sat2{ flex-wrap:wrap; }
+.vk .x30 .ci{ position:relative; padding-right:4px; }
+.vk .x30 .ci select{ appearance:none; -webkit-appearance:none; background:none; border:0; font:inherit;
+  color:inherit; padding:0 16px 0 0; min-height:26px; max-width:14em; cursor:pointer; }
+.vk .x30 .ci svg{ position:absolute; right:6px; pointer-events:none; }
+.vk .x30 .ci:focus-within{ outline:2px solid var(--ring); outline-offset:1px; }
+.vk .x30 .kbd-d{ margin-left:auto; min-height:26px; min-width:34px; display:grid; place-items:center; border-radius:6px; }
+.vk .x30 .kbd-d kbd{ margin:0; }
+
+/* 057 ve 065: çizginin dolu kısmı veriden. */
+.vk .z11 .tr::after{ width:var(--bugun,22%); }
+.vk .z11 .bu{ left:var(--bugun,22%); }
+.vk .w13 .tr::after{ width:var(--ilerleme,19%); }
+
+/* 058 soru ekranı: yer tutucu çizgi yerine gerçek soru ve şık. */
+.vk .z12 .q{ display:block; font-size:14px; line-height:1.55; }
+.vk .z12 .sk .sik{ display:flex; align-items:flex-start; gap:8px; width:100%; min-height:34px; padding:7px 10px;
+  border-radius:8px; border:1px solid var(--vk-l1); background:var(--vk-s1); text-align:left; }
+.vk .z12 .sk .sik b{ font:500 10px var(--vk-mono); color:var(--vk-ink3); width:10px; padding-top:3px; }
+.vk .z12 .sk .sik.on{ border-color:var(--ays); background:color-mix(in oklab,var(--ays) 10%,var(--vk-s1)); }
+.vk .z12 .sk .sik.on b{ color:var(--ays); }
+
+/* 062 hücreler gerçek giriş kutusu; doğruluk sütunu korunur. */
+.vk .w10.genis .r{ grid-template-columns:minmax(0,1fr) 46px 46px 46px 52px 62px; height:auto; min-height:32px; }
+.vk .w10 .r i{ height:28px; }
+.vk .w10 .r i input{ width:100%; height:100%; border:0; background:none; text-align:center; font:inherit;
+  color:inherit; -moz-appearance:textfield; appearance:textfield; }
+.vk .w10 .r i input::-webkit-inner-spin-button,.vk .w10 .r i input::-webkit-outer-spin-button{ -webkit-appearance:none; margin:0; }
+.vk .w10 .r i:focus-within{ border-color:var(--ays); box-shadow:0 0 0 3px color-mix(in oklab,var(--ays) 20%,transparent); }
+.vk .w10 .r>span small{ display:block; font:400 10px var(--vk-mono); color:var(--vk-ink3); }
+.vk .w10 .r em{ font:400 11px var(--vk-mono); font-style:normal; text-align:right; color:var(--vk-ink2); }
+.vk .w10 .r em.dusuk{ color:var(--vk-ink3); }
+
+/* 063 satır düğmedir; süzgeç gerçek düğme. */
+.vk .w11 button.r{ width:100%; text-align:left; height:auto; min-height:34px; }
+.vk .w11 .sz button{ height:26px; padding:0 10px; border-radius:6px; font-size:11.5px; font-weight:500;
+  color:var(--vk-ink3); border:1px solid var(--vk-l1); }
+.vk .w11 .sz button.on{ background:var(--vk-s3); color:var(--vk-ink); }
+.vk .w11 .bos{ font-size:12px; color:var(--vk-ink3); padding:8px 0; }
+
+/* 064 ± düğmeleri çerçeveli (vitrinin .bt.g'si). */
+.vk .w12 .st2 .bt:disabled{ opacity:.4; cursor:default; }
+
+@media (prefers-reduced-motion:reduce){
+  .vk .x24 .kk{ transition:none; }
+}
+
+/* Vitrin kartını taşıyan kutu (x02 iskeleti): başlık sistemin, gövde
+   vitrinin. İkili gövde iki kartı ince çizgiyle ayırır. */
+.vkutu .kutu__govde > .vk + .vk{ margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+.vkutu__ikili{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px 20px; }
+.vkutu__ikili > .vk + .vk{ margin:0; padding:0; border:0; }
+.bugun__vitrin:empty{ display:none; }
+
+/* 054 taşınan blok gerçek listede: havadaki kart akışın içinde durur
+   (vitrinin sabit konumu tek örnek içindir). */
+.vk .x29{ height:auto; }
+.vk .x29 .ts{ position:relative; left:auto; right:auto; top:auto; margin:2px -2px 2px 18px; transform:rotate(-1.5deg); }
+.vk .x29 .ga{ position:static; align-self:flex-end; margin-top:4px; }
+.vk .x29 .hy{ color:var(--vk-ink3); }
+@media (prefers-reduced-motion:reduce){ .vk .x29 .ts{ transform:none; } }
+
+/* Vitrin grafikleri 260 birimlik bir tuvale çizilir; geniş sütunda
+   sonsuz büyümez (yazı da onunla büyüyordu). */
+.vk .y12, .vk .y09, .vk .y10, .vk .x18, .vk .y16, .vk .z07{ max-width:560px; }

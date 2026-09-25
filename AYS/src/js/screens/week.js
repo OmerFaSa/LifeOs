@@ -368,6 +368,84 @@ R.Screens.week = (function(){
     });
   }
 
+  /* ---------- C · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const kutu = (ad, yuva, ic) => ic ? K.Kutu({ ad, yuva, class:'vkutu', govde:raw(ic) }) : '';
+
+  /* Ders işareti (067): renk değil harf. Aile TYT/AYT ayrımını değil
+     dersin türünü söyler; eşleme kimlikten, ad benzerliğinden değil. */
+  const AILE = { 'tyt-turkce':'T', 'tyt-matematik':'M', 'ayt-matematik':'M', 'tyt-fen':'F',
+    'ayt-fizik':'F', 'ayt-kimya':'F', 'ayt-biyoloji':'F', 'tyt-sosyal':'S' };
+  const AILE_AD = { T:'Türkçe', M:'Matematik', F:'Fen', S:'Sosyal' };
+
+  /* 051 40 HAFTA ÇİZGİSİ: tamamı ara günü olan hafta taralı. */
+  function haftaCizgisi(n){
+    if(!VT()) return '';
+    const ara = [];
+    if(R.Istisna) for(let h = 1; h <= R.PLAN.totalWeeks; h++){
+      if(M.weekDates(h).every(d => { const x = R.Istisna.gunIcin(U.iso(d)); return x && x.tur === 'ara'; })) ara.push(h);
+    }
+    return kutu('Sınava kadar', 'planlı', VT().haftaCizgisi({ hafta:n, toplam:R.PLAN.totalWeeks, ara }));
+  }
+
+  /* 052 PLAN IZGARASI: yedi gün × günün blokları. Bloklara saat yazılmaz;
+     satır bloğun günün içindeki sırasıdır. Açılmamış gün şablondan. */
+  function planIzgarasi(n){
+    if(!VT()) return '';
+    const bugun = U.todayISO();
+    const tarihler = M.weekDates(n).map(U.iso);
+    let enCok = 0;
+    const bloklar = [];
+    tarihler.forEach((iso, g) => {
+      const day = S.days[iso];
+      const liste = day ? day.blocks : R.WEEKDAYS[U.weekdayIndex(iso)].blocks;
+      const ist = R.Istisna ? R.Istisna.gunIcin(iso) : null;
+      if((day && day.ara) || (!day && ist && ist.tur === 'ara')) return;
+      liste.forEach((b, y) => {
+        enCok = Math.max(enCok, y + 1);
+        if(b.slot === 'Dinlenme') return;
+        bloklar.push({ gun:g, yuva:y, modul:'ays', gecti:iso < bugun, durum:b.status || 'pending',
+          ad:b.slot + ' · ' + (b.topic || b.subject || '') });
+      });
+    });
+    if(!bloklar.length) return '';
+    const yuvalar = Array.from({ length:enCok }, (_, i) => (i + 1) + '. blok');
+    return kutu('Plan ızgarası', 'planlı', VT().planIzgarasi({ gunler:tarihler.map(iso => R.WEEKDAYS[U.weekdayIndex(iso)].short),
+      bugun:tarihler.indexOf(bugun) >= 0 ? tarihler.indexOf(bugun) : null, yuvalar, bloklar }));
+  }
+
+  /* 049 KONU KAPSAM HALKASI: sözleşmedeki ana konuların soru hedefine
+     karşı, haftanın bloklarında o konuda çözülen soru. */
+  function kapsam(week, n){
+    if(!VT() || !week.mainTopics || !week.mainTopics.length) return '';
+    const bl = C.weekBlocks(n, true);
+    const satirlar = week.mainTopics.filter(t => String(t.name || '').trim()).map(t => ({ ad:t.name,
+      plan:Number(t.questionTarget) || null,
+      cozulen:U.sum(bl.filter(b => U.norm(b.topic || '') === U.norm(t.name)).map(b => Number(b.actualQ) || 0)) }));
+    return kutu('Konu kapsamı', 'hesaplandı', VT().kapsamHalkasi({ satirlar }));
+  }
+
+  /* 061 DERS DENGESİ ve 067 DERS İŞARETLERİ: planlanan ve gerçekleşen
+     dakikanın ders ailelerine dağılımı; derse bağlanmamış blok girmez. */
+  function dersDengesi(n){
+    if(!VT()) return '';
+    const bl = C.weekBlocks(n, false).filter(b => AILE[b.subjectId]);
+    const harfler = ['T', 'M', 'F', 'S'];
+    const topla = f => harfler.map(h => U.sum(bl.filter(b => AILE[b.subjectId] === h).map(f)));
+    const plan = topla(b => Number(b.targetMin) || 0);
+    const gercek = topla(b => (b.status === 'done' || b.status === 'partial') ? Number(b.actualMin) || 0 : 0);
+    const pT = U.sum(plan), gT = U.sum(gercek);
+    if(!pT || !gT) return '';
+    const pay = (a, t) => harfler.map((h, i) => ({ harf:h, ad:AILE_AD[h], pay:100 * a[i] / t }));
+    const P = pay(plan, pT), G = pay(gercek, gT);
+    let en = 0;
+    harfler.forEach((h, i) => { if(Math.abs(G[i].pay - P[i].pay) > Math.abs(G[en].pay - P[en].pay)) en = i; });
+    const fark = Math.round(G[en].pay - P[en].pay);
+    const not = fark === 0 ? 'Dağılım plana uyuyor' : AILE_AD[harfler[en]] + ' planın ' + (fark > 0 ? 'üstünde' : 'altında');
+    return kutu('Ders dengesi', 'hesaplandı', VT().dersDengesi({ baslik:'Haftalık ders dengesi · dakika', plan:P, gercek:G, not, fark })
+      + VT().dersIsaretleri({ dersler:harfler.map(h => ({ harf:h, ad:AILE_AD[h] })) }));
+  }
+
   async function render(){
     const n = viewN();
     await M.ensureWeek(n);
@@ -382,11 +460,15 @@ R.Screens.week = (function(){
 
       K.Span(6, K.Stack([
         contractCard(week, n),
+        kapsam(week, n),
+        dersDengesi(n),
         K.Card({ title:'Plan tamamlama geçmişi', sub:'Hedef %85',
           body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) }),
       ])),
 
       K.Span(4, K.Stack([
+        haftaCizgisi(n),
+        planIzgarasi(n),
         istisnaCard(),
         digestCard(n),
         reviewCard(n),

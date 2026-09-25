@@ -1075,6 +1075,7 @@ ESP.Screens.today = (function(){
       const s = M.streak();
       return U.esc(U.fmtDate(gun()) + (s ? ' · ' + s + ' günlük seri' : ''));
     },
+    headlineOz:'004',
     headline(){
       const rows = M.sessionsOf(gun());
       const n = ESP.Planner.nextAction();
