@@ -5450,6 +5450,156 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
 })();
 </script>
 
+<!-- MERKEZ KAYITLARI (H, 2026-09-25; katalog 119 · 120 · 126; core/merkez.py).
+     Kullanıcı: «geri kalan tüm işleri hallet». Bu blok KENDİ İÇİNDE KAPALIDIR:
+     yüzün yönlendiricisine, çekmecelerine ve CSS'ine dokunmaz, adları «mk-» ile
+     başlar; silinirse yüz bu eklerden öncekiyle aynıdır. Yalnız yüzün sınıflarını
+     (card, detay, tag, state, scroll, muted) kullanır ve iki yere ek yapar:
+     Sistemler'in sonuna üç açılır bölüm (haftalık Merkez özeti, Merkez günlüğü,
+     öneri geçmişi) ve Bugün'de, yalnız pazar 17:00'den sonra, haftanın kartı.
+     Sayı ve cümle /api/merkez/* uçlarından gelir; blok hiçbir şey hesaplamaz. -->
+<style>
+.mk-liste{ list-style:none; margin:10px 0 0; padding:0; display:grid; gap:8px; }
+.mk-satir{ display:grid; grid-template-columns:52px minmax(0,1fr) auto; gap:4px 12px; align-items:baseline;
+  padding:10px 0; border-top:1px solid var(--line); }
+.mk-satir:first-child{ border-top:0; }
+.mk-satir b{ font-size:13px; }
+.mk-satir span{ min-width:0; overflow-wrap:anywhere; }
+.mk-alt{ margin:12px 0 0; padding-top:10px; border-top:1px solid var(--line); font-size:14px; }
+.mk-yazmadi{ margin:12px 0 0; font-size:13px; color:var(--dim); }
+.mk-yazmadi b{ color:var(--fg); }
+.mk-zaman{ white-space:nowrap; font-variant-numeric:tabular-nums; }
+.mk-durum .state{ display:inline-block; white-space:nowrap; }
+@media (max-width:640px){ .mk-satir{ grid-template-columns:44px minmax(0,1fr); }
+  .mk-satir .state{ grid-column:2; justify-self:start; } }
+</style>
+<script>
+(function(){
+  'use strict';
+  var TOKEN_KEY = 'hkm.token';
+  function $(id){ return document.getElementById(id); }
+  function esc(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]; });
+  }
+  async function al(yol){
+    var token = null;
+    try{ token = localStorage.getItem(TOKEN_KEY); }catch(e){}
+    if(!token) return null;
+    try{
+      var r = await fetch(yol, { headers:{ 'Authorization':'Bearer ' + token } });
+      return r.ok ? await r.json() : null;
+    }catch(e){ return null; }
+  }
+  function gun(){
+    var t = $('tarih');
+    if(t && /^\d{4}-\d{2}-\d{2}$/.test(t.value)) return t.value;
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function zaman(s){
+    var m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(String(s || ''));
+    return m ? m[3] + '.' + m[2] + ' ' + m[4] + ':' + m[5] : '';
+  }
+
+  function kur(){
+    var sis = document.querySelector('[data-bolme="sistemler"]');
+    if(sis && !$('mk-hafta')){
+      sis.insertAdjacentHTML('beforeend',
+        '<details class="detay" data-oz="120"><summary>Haftalık Merkez özeti</summary><div id="mk-hafta"></div></details>'
+        + '<details class="detay" data-oz="126"><summary>Merkez günlüğü</summary><div id="mk-gunluk"></div></details>'
+        + '<details class="detay" data-oz="119"><summary>Öneri geçmişi</summary><div id="mk-gecmis"></div></details>');
+    }
+    var onay = $('onay');
+    if(onay && !$('mk-pazar')){
+      onay.insertAdjacentHTML('afterend', '<div class="card" id="mk-pazar" data-oz="120" hidden></div>');
+    }
+  }
+
+  /* 120 — her modülden bir satır; bekleyen öneriler en altta. */
+  function haftaHtml(h){
+    var b = h.bekleyen || {}, m = b.moduller || {};
+    var parca = ['ays', 'spi', 'esp'].filter(function(k){ return m[k]; })
+      .map(function(k){ return ({ ays:'AYS', spi:'SPİ', esp:'ESP' })[k] + ' ' + m[k]; });
+    var alt = b.toplam
+      ? '<b>' + esc(b.toplam) + ' öneri onayını bekliyor</b>'
+        + (parca.length ? ' · modüllerde ' + esc(parca.join(' · ')) : '')
+        + (b.king ? ' · King’de ' + esc(b.king) + ' iş' : '')
+      : 'Bekleyen öneri yok.';
+    return '<div class="tag">Hafta · ' + esc(h.from) + ' → ' + esc(h.to) + '</div>'
+      + '<ul class="mk-liste">' + (h.satirlar || []).map(function(s){
+        return '<li class="mk-satir"><b>' + esc(s.modul_adi) + '</b><span>' + esc(s.cumle) + '</span>'
+          + '<span class="state">' + esc(s.kesinlik) + '</span></li>';
+      }).join('') + '</ul>'
+      + '<p class="mk-alt">' + alt + '</p>'
+      + '<p class="muted">' + esc(h.not || '') + '</p>';
+  }
+
+  /* 126 — ne okudu, ne üretti; altta «hiçbir modüle yazmadı». */
+  function gunlukHtml(g){
+    var h = '<div class="tag">Gün · ' + esc(g.gun) + '</div>';
+    if(!(g.saatler || []).length){
+      h += '<p class="muted">Bu gün Merkez bir kayıt okumadı ve bir şey üretmedi.</p>';
+    }else{
+      h += '<div class="scroll"><table><thead><tr><th>Saat</th><th>Okudu</th><th>Üretti</th></tr></thead><tbody>'
+        + g.saatler.map(function(s){
+          return '<tr><td class="mk-zaman">' + esc(s.saat) + ':00</td><td>'
+            + (s.okudu.map(function(o){ return esc(o.modul_adi) + ' ' + esc(o.n) + ' kayıt'; }).join(' · ') || '—')
+            + '</td><td>'
+            + (s.uretti.map(function(u){ return esc(u.ad) + ' ' + esc(u.n); }).join(' · ') || '—')
+            + '</td></tr>';
+        }).join('') + '</tbody></table></div>'
+        + '<p class="muted">Merkez bu gün ' + esc(g.okunan) + ' kayıt okudu, ' + esc(g.uretilen) + ' çıktı üretti.</p>';
+    }
+    return h + '<p class="mk-yazmadi"><b>Modüllere yazılan: ' + esc(g.modullere_yazilan) + '.</b> '
+      + esc(g.yazmadi) + '</p>';
+  }
+
+  /* 119 — cevaplanan her öneri tek satır. */
+  function gecmisHtml(g){
+    var s = g.satirlar || [];
+    var h = '<div class="tag">Bütün modüller · en yeni önce</div>';
+    if(!s.length) h += '<p class="muted">Henüz cevaplanmış bir öneri yok.</p>';
+    else{
+      h += '<div class="scroll"><table><thead><tr><th>Ne zaman</th><th>Nerede</th><th>Öneri</th><th>Sonuç</th></tr></thead><tbody>'
+        + s.map(function(x){
+          return '<tr><td class="mk-zaman">' + esc(zaman(x.zaman)) + '</td><td>' + esc(x.modul_adi) + '</td><td>'
+            + esc(x.cumle) + '</td><td class="mk-durum"><span class="state">' + esc(x.durum_adi) + '</span></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    }
+    return h + '<p class="muted">' + esc(g.not || '') + '</p>';
+  }
+
+  async function yukle(){
+    kur();
+    var yol = (location.hash || '').replace(/^#\/?/, '').split('/')[0] || 'bugun';
+    var g = gun();
+    if(yol === 'sistemler'){
+      var r = await Promise.all([al('/api/merkez/hafta?date=' + g), al('/api/merkez/gunluk?date=' + g),
+        al('/api/merkez/gecmis?n=40')]);
+      var hata = '<p class="muted">Alınamadı; HKM bağlantısını kontrol et.</p>';
+      if($('mk-hafta')) $('mk-hafta').innerHTML = r[0] ? haftaHtml(r[0]) : hata;
+      if($('mk-gunluk')) $('mk-gunluk').innerHTML = r[1] ? gunlukHtml(r[1]) : hata;
+      if($('mk-gecmis')) $('mk-gecmis').innerHTML = r[2] ? gecmisHtml(r[2]) : hata;
+    }
+    var kart = $('mk-pazar');
+    if(kart && yol === 'bugun'){
+      var h = await al('/api/merkez/hafta?date=' + g);
+      if(h && h.zamani){
+        kart.innerHTML = '<span class="tag">Haftalık Merkez özeti</span>' + haftaHtml(h);
+        kart.hidden = false;
+      }else kart.hidden = true;
+    }
+  }
+  window.addEventListener('hashchange', yukle);
+  document.addEventListener('change', function(e){ if(e.target && e.target.id === 'tarih') yukle(); });
+  document.addEventListener('click', function(e){ if(e.target && e.target.id === 'yenile') yukle(); });
+  /* Giriş sonrası yüz görünümü çizer; jeton yeni geldiyse bir kez daha dene. */
+  window.addEventListener('storage', function(e){ if(e.key === TOKEN_KEY) yukle(); });
+  yukle();
+  setTimeout(yukle, 1500);
+})();
+</script>
 <!-- MEYDAN (kullanıcı kararı 2026-09-25: «direkt karşımıza bir mini uygulama gibi
      açılsın»; core/meydan.py, web/meydan.html). Sekme değil: ortada açılan
      pencere, telefonda alttan tam ekran. Bu blok KENDİ İÇİNDE KAPALIDIR: yüzün

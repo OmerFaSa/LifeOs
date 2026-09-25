@@ -8,7 +8,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tests import (harness, test_bam, test_baslat, test_bildirim, test_butce, test_channels,  # noqa: E402
-                   test_cross, test_meydan,
+                   test_cross, test_merkez, test_meydan,
                    test_daemon, test_dil, test_impact, test_intents, test_kanal, test_king,
                    test_depo, test_kaynakli, test_kitap, test_mufredat, test_pdf, test_program,
                    test_spibilgi, test_tani, test_unite, test_espbelge, test_para, test_kapi, test_fis,
@@ -50,7 +50,7 @@ def main():
                 test_daemon, test_models, test_butce, test_media, test_memory,
                 test_motto, test_yoklama, test_kanal, test_bam, test_king, test_mufredat, test_kitap, test_web, test_kaynakli, test_urun, test_pdf, test_depo, test_program, test_hedefag, test_teklif, test_yedek, test_izin, test_saat, test_spibilgi, test_tani,
                 test_unite, test_espbelge, test_para, test_kapi, test_fis, test_bildirim,
-                test_sohbet, test_baslat, test_yuz, test_meydan):
+                test_sohbet, test_baslat, test_yuz, test_meydan, test_merkez):
         mod.run()
         _dilim_muhafizi(mod)
     test_channels.run_bot()
@@ -59,6 +59,7 @@ def main():
     test_bildirim.run_yarin()
     test_bildirim.run_tatil()
     test_meydan.run_daemon()
+    test_merkez.run_daemon()
 
     suite = None
     fails = 0

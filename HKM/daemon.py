@@ -71,6 +71,7 @@ Ucnoktalar:
     POST /api/king/emir/<id>/devam|dur  parca parca uretimde ara onaya cevap
     GET  /api/health                token istemez
     GET  /meydan                    Meydan: sistemin kendi akisi (token istemez; veri /api/meydan'dan)
+    GET  /api/merkez/hafta|gunluk|gecmis  katalog 120 haftalik ozet, 126 Merkez gunlugu, 119 oneri gecmisi (yalniz okur)
     GET  /api/meydan                gunun akisi (date, kapsam, duzey, hesap, q); GET /api/meydan/deste, /kaydedilenler
     POST /api/meydan/isaret|cevap|deste|not|yanit   Meydan'in KENDI tablolari; module yazmaz (yanita cevabi sohbet verir)
     POST /api/meydan/deste/<id>/puan|geri|cikar, /api/meydan/not/<id>/sil
@@ -96,7 +97,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import (ai, bam, bildirim, butce, channels, cikti, cross, db, depo, gelen,  # noqa: E402
                   fis, hedefag, impact,
-                  intents, kanal, king, manager, media, memory, meydan, models, motto, outbox, patron,
+                  intents, kanal, king, manager, media, memory, merkez, meydan, models, motto, outbox, patron,
                   profil, saat, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
                   urunler, weekly, web, yedek, yoklama)
@@ -491,6 +492,22 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, meydan.kaydedilenler(self.con, now=simdi))
         return self._send(404, {"error": "yok"})
 
+    # --- Merkez kayitlari (core/merkez.py: katalog 119, 120, 126) ----------
+    # Uc salt-okur gorunum; hicbiri bir tabloya yazmaz.
+    def _merkez_get(self, u, q, date):
+        if u.path == "/api/merkez/hafta":
+            return self._send(200, merkez.hafta_ozeti(self.con, date, now=saat.simdi(),
+                                                      th=self.server.thresholds))
+        if u.path == "/api/merkez/gunluk":
+            return self._send(200, merkez.gunluk(self.con, date))
+        if u.path == "/api/merkez/gecmis":
+            try:
+                n = int((q.get("n") or [40])[0])
+            except ValueError:
+                return self._send(400, {"error": "n bir sayi olmali"})
+            return self._send(200, merkez.oneri_gecmisi(self.con, n))
+        return self._send(404, {"error": "yok"})
+
     def _meydan_post(self, u):
         ham, hata = self._read_body()
         if hata:
@@ -859,6 +876,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(400, {"error": "date yyyy-aa-gg olmali"})
         if u.path == "/api/meydan" or u.path.startswith("/api/meydan/"):
             return self._meydan_get(u, q)
+        if u.path.startswith("/api/merkez/"):
+            return self._merkez_get(u, q, date)
         if u.path == "/api/briefing":
             return self._send(200, briefing(self.con, date,
                                             th=self.server.thresholds))

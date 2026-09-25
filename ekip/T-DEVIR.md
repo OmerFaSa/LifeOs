@@ -1,5 +1,59 @@
 # T (TASARIM) devri — yarım kalan işin tam listesi
 
+## ▶ H → T DEVRİ (2026-09-25, kullanıcı: «limitin bitiyor, güncel pushla, T'ye mesaj yaz, o devam etsin»)
+
+**T, bu bölüm senin için.** Kullanıcının emri: «geri kalan tüm işleri hallet» (+ «tablet için bir
+görünüm, telefon için bir görünüm ve düzeltmeler»). H'nin oturumu bitiyor; kalan işleri **sen**
+sürdürüyorsun. Aşağıdaki sırayı izle; her iş ayrı commit, `[T] …`, doğrudan `main`.
+
+### Biten (main'de, hepsi denetimli)
+
+| İş | Commit | Not |
+|---|---|---|
+| Tablet görünümü (680–1279 px): 88 px dokunmatik ray + yapışkan bölüm çubuğu; üç `layoutcheck.js` 390 **ve** 820 px | eef6d60 | tablette her bölüm yolunun görünür düğmesi zorunlu |
+| 35 `confirmSheet` sonucu söylüyor (katalog 022); `node tools/sadelik.js --onay` CI'da zorunlu; mor ve Evet/Tamam ölçümleri de zorunlu | eef6d60 | sayaç testi `tools/sadelik.test.js` |
+| Telefonda bildirim yığılması: en çok 3 (telefonda 2); «Geri al» düşmez | a2d29e4 | test `brand/ortak/onerikart.test.js` |
+| HKM `core/merkez.py` + `/api/merkez/{hafta,gunluk,gecmis}` + yüzde `<!-- MERKEZ KAYITLARI -->` bloğu: 120 haftalık Merkez özeti (Sistemler + pazar 17:00 sonrası Bugün kartı), 126 Merkez günlüğü, 119 öneri geçmişi | bu commit | `HKM/tests/test_merkez.py`; HKM 677/677, yuz.js temiz |
+
+### Sıradaki işler (bu sırayla)
+
+1. **119 modül tarafı.** `AYS/src/js/screens/onaylar.js` `render()`: bekleyen öneri yokken yalnız
+   boş durum dönüyor, «Son kararlar» (`sonKararlar()`, öneri geçmişi) **hiç görünmüyor**. Boş
+   durumda da geçmişi göster; kutuya `data-oz="119"`; test adı `oz-119 …`. SPİ ve ESP
+   `onaylar.js`'e de bak (aynı kalıp mı?).
+2. **120 modül tarafı.** Pazar 17:00 sonrası üç modülün Bugün'ünde «Haftalık Merkez özeti» kartı.
+   Veri HKM'den: `GET /api/merkez/hafta?date=` (Bearer = `Beacon.settings().token`, adres
+   `settings().url`). Öneri: tek kaynak `brand/ortak/haftaozet.js` (`cek(ayar)` 4 sn zaman aşımı +
+   önbellek, `kartHtml(veri)`); HKM kapalı/eşleşmemişse **kart hiç çizilmez** (kural 4). Satır
+   biçimi yüzdeki bloğun `haftaHtml`'i ile aynı (her modülden bir satır + kesinlik çipi; en altta
+   bekleyen). Test adı `oz-120 …`. Bugün 1800 px / 14 düğme bütçesi (sadelik) geçerli.
+3. **Envanter HKM testlerini saysın.** `tools/envanter.js` `testOzellikleri()` yalnız
+   `brand/ortak` ve üç `src/tests`'i okuyor; `HKM/tests/*.py` de eklenmeli ve
+   `test_merkez.py` test adlarına `oz-119/120/126` öneki konmalı → katalog 178 → 181/183.
+4. **172 örnek veri kipi** (Ayarlar › Veri, üç modül): örnek veri AYRI profil anahtarında
+   (gerçek veriye hiçbir yolla karışmaz), üstte şerit uyarı, arkada «ÖRNEK» filigranı, tek
+   düğmeyle çıkış. Envanterin `DOLDUR` verisi (`tools/envanter.js`) örnek olarak kullanılabilir.
+5. **167 ana ekran bileşeni:** tarayıcı uygulaması (PWA) için gerçek widget yolu YOK. Yapılabilen:
+   `navigator.setAppBadge(n)` (bekleyen onay sayısı; destek yoksa sessiz). Kullanıcıya dürüstçe
+   «widget PWA'da mümkün değil, rozet yapıldı» denecek.
+6. **HKM onaylı hafıza adayı:** `memories` tablosuna doğrudan yazmak yerine aday; kullanıcı
+   onaylayınca kalıcı (`HKM/core/memory.py`). Önce test.
+7. **Çizicisi hazır, verisi kaydedilmeyen kartlar:** SPİ 081 082 083 087 · ESP 095 099 103
+   106 107 109 · 112 · 127 — yapılabilenleri bağla, yapılamayanı EKIP-DURUM'a gerekçesiyle yaz.
+8. **Son rapor (kullanıcıya):** 25 kare portrenin 20'si temiz kaynak fotoğraf istiyor; 167'nin
+   sınırı; HKM ses/belge/video çözümlemesi dış bağımlılık ya da sağlayıcı ister.
+
+### Denetim (push öncesi, dokunduğun her modülde)
+
+`python3 build.py` · `node tools/runtests.js` · `node tools/smoke.js` · `node tools/a11ycheck.js` ·
+`node tools/layoutcheck.js` (artık 390 + 820) · `node tools/palettecheck.js`; kökte
+`python3 tools/ortak.py --yay && --denetle`, `node tools/sadelik.js --onay`,
+`node tools/envanter.js`; HKM'ye dokunduysan `cd HKM && python3 -m tests.run && node tools/yuz.js`.
+Ortam: `CHROMIUM_PATH=/opt/pw-browsers/chromium NODE_PATH=<modül>/node_modules`. CI'ı
+(`.github/workflows/ci.yml`) eef6d60 ve sonrası için kontrol et; kırmızıysa önce onu kapat.
+
+---
+
 > 2026-09-24. Bu belgeyi T rolünü devralan çalışan okur. Kaynak plan `ekip/EKIP-PLANI.md`
 > §4.2 (T'nin adımları), düzen `ekip/CEKMECE-HARITASI.md`, canlı durum `ekip/EKIP-DURUM.md`.
 > Hedef görünüm `ekip/tasarim/v4-*.png`.
