@@ -1341,13 +1341,15 @@ window.LIFEOS = window.LIFEOS || {};
     const g = (o && o.gunler || []);
     if(!g.length) return '';
     const ilkAcik = g.findIndex(x => !x.kilitli);
-    return kok('023', 'w05', '<div class="gn2" style="grid-template-columns:repeat(' + g.length + ',1fr)">'
-      + g.map(x => x.act && !x.kilitli
-        ? '<button type="button" class="' + (x.bugun ? 'bu' : '') + (x.secili ? ' secili' : '') + '" data-act="' + kac(x.act) + '"' + nitelik(x.data) + ' aria-label="' + kac(x.ad || x.gun) + '"'
-          + (x.secili ? ' aria-current="date"' : '') + '>' + kac(x.gun) + '</button>'
-        : '<i class="' + (x.kilitli ? 'k' : x.bugun ? 'bu' : '') + '"' + (x.kilitli ? ' title="kilitli"' : '') + '>' + kac(x.gun) + '</i>').join('') + '</div>'
+    const sinif = x => [x.bugun ? 'bu' : '', x.secili ? 'secili' : '', x.kilitli ? 'k' : '', x.dolu ? 'dl' : ''].filter(Boolean).join(' ');
+    return kok('023', 'w05', '<div class="gn2" role="group" aria-label="' + kac(o.etiket || 'Gün seç') + '" style="grid-template-columns:repeat(' + g.length + ',minmax(26px,1fr))">'
+      + g.map(x => x.act
+        ? '<button type="button" class="' + sinif(x) + '" data-act="' + kac(x.act) + '"' + nitelik(x.data) + ' aria-label="' + kac(x.ad || x.gun) + '"'
+          + (x.baslik ? ' title="' + kac(x.baslik) + '"' : '') + ' aria-pressed="' + (x.secili ? 'true' : 'false') + '">' + kac(x.gun) + '</button>'
+        : '<i class="' + sinif(x) + '"' + (x.kilitli ? ' title="kilitli"' : '') + '>' + kac(x.gun) + '</i>').join('') + '</div>'
       + (ilkAcik > 0 ? '<div class="pn2" style="margin-left:' + px(100 * ilkAcik / g.length) + '"></div>' : '')
-      + '<div class="alt"><span class="cap">' + ikon('kilit') + 'KİLİTLİ</span><span class="cap">' + kac(buyuk(o.not || ('Bugün + ' + (o.pencere || 7) + ' gün geri yazılabilir'))) + '</span></div>');
+      + '<div class="alt"><span class="cap">' + ikon('kilit') + kac(buyuk(o.kilitAd || 'kilitli')) + '</span><span class="cap">'
+      + kac(buyuk(o.not || ('Bugün + ' + (o.pencere || 7) + ' gün geri yazılabilir'))) + '</span></div>');
   }
 
   /* 168 ADIMLI SAYI GİRİŞİ — küçük sayılar için büyük artı/eksi (48 px). */
@@ -1420,6 +1422,228 @@ window.LIFEOS = window.LIFEOS || {};
       + (o.act ? dugme({ metin:o.dugme || 'Yedeği yükle', ton:'w', act:o.act }) : '') + '</div>');
   }
 
+  /* ================================================== A · J · F · SON PARTİ */
+
+  /* 020 ETKİN SÜZGEÇ ÇİPLERİ — açık süzgeçler çip; her biri tek dokunuşla
+     kalkar, sonuç sayısı altta. Süzgeç yoksa kart yok. */
+  function suzgecCipleri(o){
+    const c = (o && o.cipler || []).filter(Boolean);
+    if(!c.length) return '';
+    return kok('020', 'w02', '<div class="u"><span class="cap">ETKİN SÜZGEÇ · ' + c.length + '</span>'
+      + (o.temizle ? '<button type="button" class="tz" data-act="' + kac(o.temizle.act) + '"' + nitelik(o.temizle.data) + '>Temizle</button>' : '') + '</div>'
+      + '<div class="cp2">' + c.map(x => '<button type="button"' + (renk(x.modul) ? ' class="' + renk(x.modul) + '"' : '') + ' data-act="' + kac(x.act) + '"' + nitelik(x.data)
+        + ' aria-label="' + kac(x.ad + ' süzgecini kaldır') + '">' + kac(x.ad) + ikon('kapat') + '</button>').join('') + '</div>'
+      + '<div class="sn"><b>' + sayi(o.sonuc) + '</b>' + kac(o.birim || 'sonuç') + '</div>');
+  }
+
+  /* 125 TAKVİMDE HAYALET ÖNERİ — önerilen blok kesikli mor; onaysız
+     yerleşmez. */
+  function hayaletOneri(o){
+    const r = (o && o.satirlar || []).filter(Boolean);
+    if(!r.some(x => x.hayalet)) return '';
+    return kok('125', 'w27', '<div class="gn4">' + r.map(x => '<span class="sa">' + kac(x.saat || '') + '</span>'
+      + (x.hayalet ? '<i class="hy2">+ ' + kac(x.ad) + '</i>' : x.ad ? '<i class="bk ' + (renk(x.modul) || 'c-ays') + '">' + kac(x.ad) + '</i>' : '<i class="bos2"></i>')).join('') + '</div>'
+      + '<div class="alt"><span class="cap" style="color:var(--mer-ink, var(--mer))">ONAYSIZ YERLEŞMEZ</span>'
+      + (o.act ? dugme({ metin:'Yerleştir', ton:'p', act:o.act, data:o.data }) : '') + '</div>');
+  }
+
+  /* 134 AJAN SEÇİCİ — «@» ile; rol ve modül yanında, eşleşen harf renkli. */
+  function vurgula(ad, q){
+    const i = q ? ad.toLocaleLowerCase('tr-TR').indexOf(q.toLocaleLowerCase('tr-TR')) : -1;
+    return i < 0 ? kac(ad) : kac(ad.slice(0, i)) + '<u>' + kac(ad.slice(i, i + q.length)) + '</u>' + kac(ad.slice(i + q.length));
+  }
+  function ajanSecici(o){
+    const q = String(o && o.sorgu || '').replace(/^@/, '');
+    const liste = (o && o.ajanlar || []).filter(a => a && (!q || a.ad.toLocaleLowerCase('tr-TR').indexOf(q.toLocaleLowerCase('tr-TR')) >= 0
+      || String(a.rol || '').toLocaleLowerCase('tr-TR').indexOf(q.toLocaleLowerCase('tr-TR')) >= 0));
+    if(!liste.length) return '';
+    return kok('134', 'z27', '<div class="ls" role="listbox" aria-label="Ajan seç">' + liste.map((a, i) =>
+      '<button type="button" role="option" aria-selected="' + (i === 0 ? 'true' : 'false') + '" class="' + (i === 0 ? 'on ' : '') + (renk(a.modul) || '') + '" data-act="' + kac(o.act) + '" ' + (o.alan || 'data-value') + '="' + kac(a.id) + '">'
+      + av(a) + '<b>' + vurgula(a.ad, q) + '</b><span>' + kac(a.rol || '') + '</span><em>' + kac(buyuk(a.sistem || a.modul || '')) + '</em></button>').join('') + '</div>');
+  }
+
+  /* 136 ÜSLUP SEÇİMİ — üç seçenekten biri; önizleme anında değişir.
+     Önizleme cümlesini KOD kurar (şablon + senin sayın), model değil. */
+  function uslupSecimi(o){
+    const s = (o && o.secenekler || []).filter(Boolean);
+    if(!s.length) return '';
+    return kok('136', 'z29', '<div class="u"><span class="cap">' + kac(buyuk(o.baslik || 'Üslup')) + '</span>' + et('measured', 'tercih · geri alınır') + '</div>'
+      + '<div class="sg" role="radiogroup" aria-label="' + kac(o.baslik || 'Üslup') + '">' + s.map(x => '<button type="button" role="radio" aria-checked="' + (x.id === o.secili ? 'true' : 'false') + '"'
+        + (x.id === o.secili ? ' class="on"' : '') + ' data-act="' + kac(o.act) + '" data-value="' + kac(x.id) + '">' + kac(x.ad) + '</button>').join('') + '</div>'
+      + (o.onizleme ? '<div class="bal" aria-live="polite">' + kac(o.onizleme) + '</div>' : '')
+      + (o.not ? '<span class="cap" style="display:block;margin-top:8px">' + kac(buyuk(o.not)) + '</span>' : ''));
+  }
+
+  /* 143 SAKİN SEVİYE ATLAMA — kısa parlama; ekranı kapatmaz, işi bölmez. */
+  function sakinSeviye(o){
+    if(!o || !o.ad) return '';
+    return kok('143', 'x59v', '<div class="ts2" role="status"><span class="rn" style="--r:' + kac(RUTBE_RENK[o.renk] || RUTBE_RENK.bronz) + '"></span>'
+      + '<div><span>' + kac(buyuk(o.ust || 'Yeni rütbe')) + '</span><b>' + kac(o.ad) + '</b></div>' + (o.sistem ? '<em>' + kac(buyuk(o.sistem)) + '</em>' : '') + '</div>',
+      { dis:'vk-sakin' });
+  }
+
+  /* 157 BIRAKMA ALANI — sürüklenen öğe yaklaşınca kesikliden dolu
+     çerçeveye geçer. Kart tek bir hedef satırıdır. */
+  function birakmaAlani(o){
+    o = o || {};
+    return '<div class="vk vk-birak" data-oz="157" data-birak="' + kac(o.sira) + '"' + (o.etiket ? ' aria-label="' + kac(o.etiket) + '"' : '') + '>'
+      + '<div class="d w34"><div class="bz2"><span class="cap">' + kac(buyuk(o.metin || 'Buraya bırak')) + '</span></div></div></div>';
+  }
+
+  /* 161 KAYDIRARAK İŞARETLE — satırı sağa kaydır: bitti; sola: ertele.
+     Kaydırma bir KISAYOLDUR: aynı iki eylem gizli olmayan düğme olarak da
+     satırdadır (klavye ve ekran okuyucu). */
+  function kaydirIpucu(){
+    return kok('161', 'y36', '<div class="ip"><span class="cap">SAĞA · BİTTİ</span><span class="cap">SOLA · ERTELE</span></div>', { dis:'vk-kaydir-ip' });
+  }
+  let kaydirKurulu = false;
+  function kaydirmaKur(belge){
+    const d = belge || (typeof document !== 'undefined' ? document : null);
+    if(!d || kaydirKurulu) return false;
+    kaydirKurulu = true;
+    let el = null, x0 = 0, y0 = 0, dx = 0, yatay = null;
+    const ESIK = 72;
+    d.addEventListener('pointerdown', e => {
+      const s = e.target.closest && e.target.closest('[data-kaydir]');
+      if(!s || e.button > 0 || e.target.closest('button, a, input, select, textarea')) return;
+      el = s; x0 = e.clientX; y0 = e.clientY; dx = 0; yatay = null;
+    });
+    d.addEventListener('pointermove', e => {
+      if(!el) return;
+      const mx = e.clientX - x0, my = e.clientY - y0;
+      if(yatay === null && (Math.abs(mx) > 8 || Math.abs(my) > 8)) yatay = Math.abs(mx) > Math.abs(my);
+      if(!yatay) return;
+      dx = mx;
+      el.style.setProperty('--kaydir', Math.max(-120, Math.min(120, dx)) + 'px');
+      el.dataset.yon = dx > ESIK ? 'sag' : dx < -ESIK ? 'sol' : '';
+    });
+    const bitir = () => {
+      if(!el) return;
+      const s = el, yon = s.dataset.yon;
+      el = null;
+      s.style.removeProperty('--kaydir'); delete s.dataset.yon;
+      if(!yon || !s.dataset.kaydir) return;
+      /* Eylem uygulamanın OLAĞAN tıklama yolundan geçer: satıra geçici bir
+         düğme eklenir, tıklanır, kaldırılır (data-act + satırın verisi). */
+      const b = d.createElement('button');
+      b.type = 'button'; b.hidden = true;
+      b.dataset.act = s.dataset.kaydir; b.dataset.yon = yon;
+      Object.keys(s.dataset).forEach(k => { if(k !== 'kaydir' && k !== 'yon' && k !== 'act') b.dataset[k] = s.dataset[k]; });
+      s.appendChild(b);
+      try{ b.click(); }finally{ b.remove(); }
+    };
+    d.addEventListener('pointerup', bitir);
+    d.addEventListener('pointercancel', () => { if(el){ el.style.removeProperty('--kaydir'); delete el.dataset.yon; el = null; } });
+    return true;
+  }
+
+  /* 122 SESSİZ SAATLER — gece bandında gelen öneri bekler, sabah ilk
+     açılışta görünür. Saatler «SS:DD»; bant gece yarısını geçebilir. */
+  const dkOf = t => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(t || '')); return m ? (+m[1]) * 60 + (+m[2]) : null; };
+  function sessizSaatler(o){
+    const ss = o && o.sessiz;
+    if(!ss) return '';
+    const b = dkOf(ss.bas), s = dkOf(ss.bit);
+    if(b == null || s == null) return '';
+    /* şerit öğlenden öğlene: 12 · 18 · 00 · 06 · 12 */
+    const yer = dk => ((dk - 720 + 1440) % 1440) / 1440 * 100;
+    const genis = ((s - b + 1440) % 1440) / 1440 * 100;
+    const bek = o.bekleyen && dkOf(o.bekleyen.saat);
+    return kok('122', 'z25', '<div class="ek" aria-hidden="true"><span>12</span><span>18</span><span>00</span><span>06</span><span>12</span></div>'
+      + '<div class="tr" role="img" aria-label="' + kac('Sessiz saatler ' + ss.bas + '–' + ss.bit + (ss.acik ? '' : ' (kapalı)')) + '">'
+      + (ss.acik ? '<span class="ss" style="left:' + px(yer(b)) + ';width:' + px(genis) + '"></span>' : '')
+      + (bek != null && ss.acik ? '<span class="ok3" style="left:' + px(yer(bek)) + ';width:' + px(((s - bek + 1440) % 1440) / 1440 * 100) + '"></span>'
+        + '<span class="on bk" style="left:' + px(yer(bek)) + '">' + ikon('yildiz') + '</span><span class="on" style="left:' + px(yer(s)) + '">' + ikon('yildiz') + '</span>' : '')
+      + '</div><div class="alt"><span>' + kac(bek != null && ss.acik ? o.bekleyen.saat + '’daki bildirim ' + ss.bit + '’de gelir'
+        : ss.acik ? 'Bu saatlerde bildirim gönderilmez; sabah ilk açılışta görünür' : 'Sessiz saatler kapalı') + '</span>'
+      + '<span class="cap">SESSİZ ' + kac(ss.bas.slice(0, 2) + '–' + ss.bit.slice(0, 2)) + '</span></div>');
+  }
+
+  /* 180 MODÜL BAZINDA BİLDİRİM — her bildirim türü kendi renginde ayrı
+     anahtar; sessiz saatler en altta. Yalnız BU uygulamanın gönderdiği
+     türler çizilir: başka bir uygulamanın anahtarı burada iş görmez. */
+  function bildirimAyari(o){
+    const t = (o && o.turler || []).filter(Boolean);
+    if(!t.length) return '';
+    return kok('180', 'w44', t.map(x => '<div class="r ' + (renk(x.modul) || 'c-ays') + '"><i aria-hidden="true"></i><span>' + kac(x.ad) + '</span>'
+      + '<button type="button" class="an2' + (x.acik ? ' on' : '') + '" role="switch" aria-checked="' + (x.acik ? 'true' : 'false') + '" aria-label="' + kac(x.ad) + '"'
+      + ' data-act="' + kac(o.act) + '" data-tur="' + kac(x.id) + '"></button></div>').join('')
+      + '<div class="alt"><span class="cap">SESSİZ SAATLER</span>' + (o.sessizGiris || '<b class="mono">' + kac(o.sessiz && o.sessiz.acik ? o.sessiz.bas + ' – ' + o.sessiz.bit : 'kapalı') + '</b>') + '</div>');
+  }
+
+  /* 180 + 122 birlikte: bildirim tercih kutusu. Tercihi Pwa okur/yazar;
+     burada yalnız çizilir ve eylem çözülür (modül kendi ekranını yeniler). */
+  function bildirimKutusu(o){
+    const P = L.Pwa;
+    if(!P || !P.bildirimAyari || !o || !o.modul) return '';
+    const a = P.bildirimAyari(o.modul);
+    const ss = a.sessiz;
+    const saat = (uc, v) => '<input type="time" step="900" value="' + kac(v) + '" data-change="bildirim-saat" data-uc="' + uc + '" aria-label="'
+      + (uc === 'bas' ? 'Sessiz saat başlangıcı' : 'Sessiz saat bitişi') + '">';
+    const giris = '<span style="display:inline-flex;align-items:center;gap:6px">'
+      + '<button type="button" class="an2' + (ss.acik ? ' on' : '') + '" role="switch" aria-checked="' + (ss.acik ? 'true' : 'false') + '" aria-label="Sessiz saatler" data-act="bildirim-sessiz"></button>'
+      + saat('bas', ss.bas) + '–' + saat('bit', ss.bit) + '</span>';
+    return bildirimAyari({ act:'bildirim-tur', sessiz:ss, sessizGiris:giris,
+      turler:(o.turler || []).map(t => Object.assign({ modul:o.modul, acik:a.turler[t.id] !== false }, t)) })
+      + sessizSaatler({ sessiz:ss, bekleyen:o.bekleyen });
+  }
+  /* Eylem çözücü: { ok, metin } döner; yazma Pwa'da. */
+  function bildirimEylem(modul, ad, el){
+    const P = L.Pwa;
+    if(!P || !P.bildirimAyari) return { ok:false, metin:'Bildirim tercihi bu sürümde yok.' };
+    const a = P.bildirimAyari(modul);
+    if(ad === 'bildirim-tur'){
+      const tur = el && el.dataset.tur;
+      if(!tur) return { ok:false };
+      const acik = a.turler[tur] === false;
+      const r = P.bildirimAyariYaz(modul, { turler:{ [tur]:acik } });
+      return { ok:r.ok, metin:r.ok ? (acik ? 'Bildirim açıldı.' : 'Bildirim kapatıldı; ekranda görünmeye devam eder.') : r.why };
+    }
+    if(ad === 'bildirim-sessiz'){
+      const r = P.bildirimAyariYaz(modul, { sessiz:{ acik:!a.sessiz.acik } });
+      return { ok:r.ok, metin:r.ok ? (a.sessiz.acik ? 'Sessiz saatler kapandı.' : 'Sessiz saatler açık: ' + a.sessiz.bas + '–' + a.sessiz.bit + '.') : r.why };
+    }
+    if(ad === 'bildirim-saat'){
+      const uc = el && el.dataset.uc;
+      if(uc !== 'bas' && uc !== 'bit') return { ok:false };
+      const r = P.bildirimAyariYaz(modul, { sessiz:{ [uc]:String(el.value || '') } });
+      return { ok:r.ok, metin:r.ok ? 'Sessiz saatler: ' + r.ayar.sessiz.bas + '–' + r.ayar.sessiz.bit + '.' : r.why };
+    }
+    return { ok:false };
+  }
+
+  /* 134'ün bağı: bir yazı kutusunda «@» ile başlayınca listeyi yan kutuya
+     çizer. Ekran yeniden çizilmez; kurulum girdi kimliği başına bir kez. */
+  const mentionler = {};
+  function mentionKur(o){
+    if(!o || !o.girdi || mentionler[o.girdi] || typeof document === 'undefined') return false;
+    mentionler[o.girdi] = o;
+    document.addEventListener('input', e => {
+      const b = mentionler[e.target && e.target.id];
+      if(!b) return;
+      const kutu = document.getElementById(b.kutu);
+      const m = /^@(\S*)$/.exec(String(e.target.value || '').trim());
+      if(kutu) kutu.innerHTML = m ? ajanSecici({ sorgu:m[1], act:b.act, alan:b.alan, ajanlar:b.ajanlar() }) : '';
+    });
+    return true;
+  }
+
+  /* 143'ün gösterimi: kartı sayfaya ekler, 3 sn sonra çeker. Ekranı
+     kapatmaz, odağı çalmaz (role=status, pointer-events yok). */
+  function sakinGoster(o, belge){
+    const d = belge || (typeof document !== 'undefined' ? document : null);
+    const h = sakinSeviye(o);
+    if(!d || !d.body || !h) return false;
+    const eski = d.querySelector('.vk-sakin');
+    if(eski) eski.remove();
+    const kap = d.createElement('div');
+    kap.innerHTML = h;
+    const el = kap.firstChild;
+    d.body.appendChild(el);
+    setTimeout(() => { if(el.parentNode) el.parentNode.removeChild(el); }, (o && o.sure) || 3000);
+    return true;
+  }
+
   L.VITRIN = {
     kac, sayi, isaretli, dkMetni, et, ikon, tik, hl, fk, kok, dugme, renk, KES,
     geriSayim, notrSerit, yanlisKarti, denemeKarnesi, hizSeridi, denemeKarsilastirma,
@@ -1438,5 +1662,7 @@ window.LIFEOS = window.LIFEOS || {};
     sayiCipleri, masaGorunumu, sayiBalonu, ajanSinir, devirGostergesi, durumHalkasi, hazirCevap,
     gununToplantisi, konusmaOzeti, ofis, maddele,
     gunAcilisi, gunKapanisi, gunPenceresi, adimliSayi, geriDonus, veriNerede, disaAktar, iceAktarma, yedekFarki,
+    suzgecCipleri, hayaletOneri, ajanSecici, uslupSecimi, sakinSeviye, sakinGoster, birakmaAlani, mentionKur, kaydirIpucu, kaydirmaKur,
+    sessizSaatler, bildirimAyari, bildirimKutusu, bildirimEylem,
   };
 })();

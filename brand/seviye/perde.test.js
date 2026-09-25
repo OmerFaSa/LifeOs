@@ -554,4 +554,21 @@
       temiz();
     });
   });
+
+  describe('143 kutlama biçimi — tercih sakin ise perde açılmaz', () => {
+    it('varsayılan perde; «sakin» seçilince kutla() sessiz+sakin döner, DOM\'a perde eklenmez', () => {
+      const once = P.kutlamaTercihi();
+      try{
+        P.kutlamaYaz('perde');
+        expect(P.kutlamaTercihi()).toBe('perde');
+        P.kutlamaYaz('sakin');
+        const r = P.kutla({ kademe:2, etiket:'2.1', kademeBilgi:{ ad:'Gümüş', id:'gumus' } }, {});
+        expect(r.sessiz).toBe(true);
+        expect(r.sakin).toBe(true);
+        expect(document.querySelectorAll('.perde').length).toBe(0);
+        P.kutlamaYaz('bilinmeyen');
+        expect(P.kutlamaTercihi()).toBe('perde');
+      }finally{ P.kutlamaYaz(once); }
+    });
+  });
 })();

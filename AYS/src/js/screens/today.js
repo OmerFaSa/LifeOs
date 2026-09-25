@@ -61,9 +61,14 @@ R.Screens.today = (function(){
           <span class="stat__label">${o.label}</span>
           ${o.actual >= o.target ? c.Badge({ label:'tamam', tone:'ok' }) : html`<span class="tiny dim">${o.hint}</span>`}
         </div>
-        <span class="anchor__value num">${o.actual}<span class="dim">/${o.target}</span></span>
-        ${c.Bar({ value:pct, tone:'' })}
-        <div class="row row--tight">${step(-1)}${step(1)}${step(5)}</div>
+        ${VT() && VT().adimliSayi
+          /* 168 ADIMLI SAYI: küçük sayı için büyük artı/eksi (48 px); +5 yanında. */
+          ? html`${raw(VT().adimliSayi({ etiket:o.label + ' · bugün', ad:o.label, deger:Number(o.actual) || 0,
+              birim:'/ ' + o.target + ' soru', act:'anchor', data:{ 'data-kind':o.kind }, not:'tek dokunuş · +5 aşağıda' }))}
+            <div class="row row--tight">${step(5)}</div>`
+          : html`<span class="anchor__value num">${o.actual}<span class="dim">/${o.target}</span></span>
+            ${c.Bar({ value:pct, tone:'' })}
+            <div class="row row--tight">${step(-1)}${step(1)}${step(5)}</div>`}
       </div>` });
   }
 
@@ -900,10 +905,17 @@ R.Screens.today = (function(){
       : d === 'partial' ? html`<span class="akis__yarim">Yarım</span>`
       : d === 'skipped' ? html`<span class="akis__atla">Atlandı</span>`
       : html`<span class="akis__sure">${b.targetMin} dk</span>`;
-    return html`<li class="${'akis__satir' + (d === 'done' || d === 'skipped' ? ' is-gecti' : '')}">
+    /* 161 KAYDIRARAK İŞARETLE: bekleyen satır sağa kaydırılırsa bitti,
+       sola kaydırılırsa bir sonrakinin arkasına ertelenir. Kaydırma bir
+       KISAYOLDUR: aynı iki eylem Ayrıntı'daki blok kartında düğmedir
+       (Tamamlandı · Sonra), klavye ve ekran okuyucu oradan erişir. */
+    const kay = d === 'pending';
+    const ad = b.topic || b.subject || b.slot;
+    return html`<li class="${'akis__satir' + (d === 'done' || d === 'skipped' ? ' is-gecti' : '')}"${raw(kay
+      ? ' data-kaydir="block-kaydir" data-block="' + b.id + '"' : '')}>
       <span class="akis__slot">${b.slot}</span>
       <span class="akis__nokta" aria-hidden="true"></span>
-      <span class="akis__ad">${b.topic || b.subject || b.slot}</span>
+      <span class="akis__ad">${ad}</span>
       <span class="akis__sag">${sag}</span>
     </li>`;
   }
@@ -915,7 +927,7 @@ R.Screens.today = (function(){
     return c.Kutu({ ad:'Günün akışı', yuva:bloklar.length ? bloklar.length + ' blok · ' + bitti + ' bitti' : '',
       bitisik:true,
       govde:bloklar.length
-        ? html`<ol class="akis" data-oz="001">${map(bloklar, b => AkisSatiri(b, sira))}</ol>`
+        ? html`<ol class="akis" data-oz="001">${map(bloklar, b => AkisSatiri(b, sira))}</ol>${raw(VT() && bloklar.some(b => b.status === 'pending' && !b.startedAt) ? VT().kaydirIpucu() : '')}`
         : html`<p class="akis__bos small muted">${day.ara ? 'Bugün ara günü: plan boş.' : 'Bugün için blok yok.'}</p>`,
       ayak:c.Button({ label:'Blokları ve sayaçları aç', size:'sm', tone:'ghost', act:'go',
         data:{ 'data-route':'gun' } }) });
@@ -992,6 +1004,62 @@ R.Screens.today = (function(){
     if(!b || !b.startedAt || !VT() || !(b.targetMin > 0)) return '';
     const kalan = b.targetMin - elapsedSeconds(b) / 60;
     return kalan >= 0 ? VT().geriSayim({ dakika:kalan, ad:b.topic || b.subject || b.slot }) : '';
+  }
+
+  /* 157 BIRAKMA ALANI: blok kartı tutulup sürüklenince aralarda bırakma
+     yerleri açılır; yaklaşılan yer kesikliden dolu çerçeveye geçer.
+     Bırakmak bloğun SIRASINI değiştirir (küçük aksiyon, «Geri al» kalır:
+     «Blok taşındı» kutusu). Sürükleme olmayan cihazda «Sonra» düğmesi
+     aynı işi yapar. */
+  function surukleListesi(day){
+    const V = VT();
+    const bl = day.blocks;
+    if(!V || !V.birakmaAlani) return String(html`${map(bl, BlockCard)}`);
+    const ad = b => b.topic || b.subject || b.slot;
+    let h = '<div class="bloklar" data-suruklenebilir="">';
+    bl.forEach((b, i) => {
+      h += V.birakmaAlani({ sira:i, metin:'Buraya bırak · ' + (i + 1) + '. sıra', etiket:(i + 1) + '. sıraya bırak' });
+      const tas = b.status === 'pending' && !b.startedAt;
+      h += '<div' + (tas ? ' data-surukle="' + b.id + '" draggable="true" aria-label="' + ad(b).replace(/"/g, '&quot;') + ' — sürükleyip sırasını değiştir"' : '') + '>'
+        + String(BlockCard(b)) + '</div>';
+    });
+    h += V.birakmaAlani({ sira:bl.length, metin:'Buraya bırak · en sona', etiket:'En sona bırak' }) + '</div>';
+    return h;
+  }
+  let surukleKurulu = false;
+  function surukleKur(){
+    if(surukleKurulu) return;
+    surukleKurulu = true;
+    let tutulan = null;
+    const liste = () => document.querySelector('[data-suruklenebilir]');
+    document.addEventListener('dragstart', e => {
+      const el = e.target.closest && e.target.closest('[data-surukle]');
+      if(!el) return;
+      tutulan = el.dataset.surukle;
+      el.classList.add('is-surukleniyor');
+      try{ e.dataTransfer.setData('text/plain', tutulan); e.dataTransfer.effectAllowed = 'move'; }catch(x){}
+      const l = liste(); if(l) l.classList.add('is-suruklen');
+    });
+    document.addEventListener('dragover', e => {
+      const z = tutulan && e.target.closest && e.target.closest('[data-birak]');
+      document.querySelectorAll('.vk-birak.is-yakin').forEach(x => { if(x !== z) x.classList.remove('is-yakin'); });
+      if(!z) return;
+      e.preventDefault();
+      z.classList.add('is-yakin');
+    });
+    document.addEventListener('drop', e => {
+      const z = tutulan && e.target.closest && e.target.closest('[data-birak]');
+      if(!z) return;
+      e.preventDefault();
+      const id = tutulan; tutulan = null;
+      handle['block-sira']({ dataset:{ block:id, sira:z.dataset.birak } });
+    });
+    document.addEventListener('dragend', () => {
+      tutulan = null;
+      document.querySelectorAll('.is-surukleniyor').forEach(x => x.classList.remove('is-surukleniyor'));
+      document.querySelectorAll('.vk-birak.is-yakin').forEach(x => x.classList.remove('is-yakin'));
+      const l = liste(); if(l) l.classList.remove('is-suruklen');
+    });
   }
 
   /* 006 GÜNÜN AÇILIŞI: hiçbir blok başlamamışken iş sayısı, planlanan
@@ -1209,7 +1277,7 @@ R.Screens.today = (function(){
         ${c.SectionTitle(html`${wd.label} blokları${raw(UI.hint('block'))}`, html`${raw(OdakRozeti(day))}<span class="small dim">${U.fmtDate(dateISO)}</span>`)}
         ${IstisnaKart(day, dateISO)}
         ${tasimaKutusu(day)}
-        ${map(day.blocks, BlockCard)}
+        ${raw(surukleListesi(day))}
         ${c.Card({ pad:'sm', body:c.Field({ label:'Günün notu',
           input:c.Textarea({ rows:2, value:day.note, change:'day-note', placeholder:'Bugün ne engelledi, ne kolaylaştırdı?' }) }) })}
       `))}
@@ -1238,6 +1306,8 @@ R.Screens.today = (function(){
   }
 
   function afterRender(){
+    if(VT() && VT().kaydirmaKur) VT().kaydirmaKur();
+    surukleKur();
     if(runningBlock()) startTick(); else stopTick();
   }
 
@@ -1428,6 +1498,35 @@ R.Screens.today = (function(){
       UI.toast('Mola kaydedildi — dönünce blok seni bekliyor');
       if(!R.App.patch('#pane-break', BreakCard())) R.App.render();
       else R.App.patch('#pane-flow', FlowCard());
+    },
+    async 'block-sira'(el){
+      const day = todayDoc();
+      const b = day && day.blocks.find(x => x.id === el.dataset.block);
+      const hedef = Number(el.dataset.sira);
+      if(!b || !Number.isInteger(hedef)) return;
+      const eskiSira = day.blocks.map(x => x.id);
+      const i = day.blocks.indexOf(b);
+      if(hedef === i || hedef === i + 1) return;
+      const eski = day.blocks.filter(x => x.slot !== 'Dinlenme').indexOf(b);
+      day.blocks.splice(i, 1);
+      day.blocks.splice(hedef > i ? hedef - 1 : hedef, 0, b);
+      await M.saveDay(day.date);
+      sonTasima = { date:day.date, id:b.id, eski, sira:eskiSira };
+      R.App.render();
+    },
+    async 'block-kaydir'(el){
+      const day = todayDoc();
+      const b = day && day.blocks.find(x => x.id === el.dataset.block);
+      if(!b || b.status !== 'pending' || b.startedAt) return;
+      if(el.dataset.yon === 'sol') return handle['block-sonra'](el);
+      const once = { status:b.status, actualMin:b.actualMin };
+      b.status = 'done';
+      if(b.actualMin == null) b.actualMin = b.targetMin;
+      await M.saveDay(day.date);
+      /* Küçük aksiyon: sormadan uygulanır, «Geri al» kalır. */
+      UI.toast((b.topic || b.subject || b.slot) + ' bitti.', { undo:async () => {
+        b.status = once.status; b.actualMin = once.actualMin; await M.saveDay(day.date); R.App.render(); } });
+      R.App.render();
     },
     async 'block-sonra'(el){
       const day = todayDoc();

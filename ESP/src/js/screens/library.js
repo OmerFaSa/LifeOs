@@ -131,7 +131,7 @@ ESP.Screens.library = (function(){
           placeholder:'Not ara…', change:'note-query', size:'sm', aria:'Not ara' })}
         ${when(kavram, () => K.Button({ label:'Süzgeci kaldır', size:'sm', act:'clear-concept' }))}`,
       wide:true,
-      body:html`${map(hepsi, n => {
+      body:html`${raw(notSuzgec(hepsi.length))}${map(hepsi, n => {
         const kitap = bookOf(n.bookId);
         return html`
           <div class="noterow">
@@ -324,6 +324,14 @@ ESP.Screens.library = (function(){
 
   /* ---------- E · vitrin kartları (brand/ortak/vitrin.js) ---------- */
   const VT = () => (window.LIFEOS || {}).VITRIN;
+  /* 020 etkin süzgeç: kavram ve arama çip olur. */
+  function notSuzgec(n){
+    if(!VT()) return '';
+    const c = [];
+    if(S.ui.conceptFilter) c.push({ ad:(ESP.CONCEPT_BY_ID[S.ui.conceptFilter] || {}).label || S.ui.conceptFilter, modul:'esp', act:'clear-concept' });
+    if((S.ui.noteQuery || '').trim()) c.push({ ad:'«' + S.ui.noteQuery.trim() + '»', act:'clear-note-query' });
+    return c.length ? '<div class="mb-12">' + VT().suzgecCipleri({ cipler:c, sonuc:n, birim:'not', temizle:{ act:'clear-note-filters' } }) + '</div>' : '';
+  }
 
   /* 094 KÜTÜPHANE RAFI: sayfa sayısı tutulmadığı için sırtlar eşit kalın;
      okunan oran yalnız BİTEN kitapta bilinir (%100), okunanda çizgi yok. */
@@ -528,6 +536,8 @@ ESP.Screens.library = (function(){
       ESP.App.render();
     },
     async 'clear-concept'(){ S.ui.conceptFilter = null; ESP.App.render(); },
+    async 'clear-note-query'(){ S.ui.noteQuery = ''; ESP.App.render(); },
+    async 'clear-note-filters'(){ S.ui.noteQuery = ''; S.ui.conceptFilter = null; ESP.App.render(); },
 
     async 'add-book2'(){
       const t = val('lb-title');

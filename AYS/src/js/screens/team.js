@@ -167,6 +167,27 @@ R.Screens.team = (function(){
       <span class="chip"><span class="dim">${m.label}</span> <b>${m.value}</b></span>`), { wrap:true });
   }
 
+  /* 134 AJAN SEÇİCİ: kutuya «@» ile başlayınca ajanlar rolüyle listelenir,
+     eşleşen harf renkli; seçmek masayı değiştirir (team-agent). Yazma
+     sırasında EKRAN ÇİZİLMEZ, yalnız liste kutusu yenilenir. */
+  function mentionHtml(metin){
+    const V = (window.LIFEOS || {}).VITRIN;
+    const m = /^@(\S*)$/.exec(String(metin || '').trim());
+    if(!V || !V.ajanSecici || !m) return '';
+    return V.ajanSecici({ sorgu:m[1], act:'team-agent', ajanlar:R.AGENTS.map(a => ({ id:a.id, ad:a.name,
+      harf:a.initial, rol:a.role, modul:'ays', sistem:'AYS' })) });
+  }
+  let mentionKurulu = false;
+  function mentionKur(){
+    if(mentionKurulu) return;
+    mentionKurulu = true;
+    document.addEventListener('input', e => {
+      if(!e.target || e.target.id !== 'team-input') return;
+      const kutu = document.getElementById('team-mention');
+      if(kutu) kutu.innerHTML = mentionHtml(e.target.value);
+    });
+  }
+
   function picker(){
     return K.Segmented({
       act:'team-agent', value:current().id, block:true, aria:'Ajan seç',
@@ -275,7 +296,8 @@ R.Screens.team = (function(){
 
         K.Row(map(agent.ask, q => K.Chip({ label:q, act:'team-suggest', data:{ 'data-q':q } })), { wrap:true }),
 
-        html`<div class="composer">
+        html`<div id="team-mention" class="team-mention"></div>
+        <div class="composer">
           ${K.Textarea({ id:'team-input', rows:2, class:'composer__input',
             aria:agent.name + '’a soru yaz',
             placeholder:agent.name + '’a sor…' })}
@@ -467,6 +489,6 @@ R.Screens.team = (function(){
       return String(R.C.Button({ label:'Ofis', icon:'guide', size:'sm', act:'go',
         data:{ 'data-route':'office' } }));
     },
-    render, handle, onKey, afterRender:scrollLog,
+    render, handle, onKey, afterRender(){ mentionKur(); scrollLog(); }, mentionHtml,
   };
 })();

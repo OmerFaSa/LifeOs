@@ -30,6 +30,15 @@ R.NOTE_QUALITY = {
 };
 
 /* Koç tonu — aynı veri herkese aynı dille söylenmez. */
+/* 136 üslup önizlemesi: AYNI sayının üç üslupla söylenişi. Cümleyi KOD
+   kurar (şablon + senin tekrar borcun); model değildir, ekranda da
+   «örnek cümle» diye durur. */
+R.TONE_ORNEK = {
+  sert:b => 'Tekrar borcu %' + b + '. Bu akşam önce kartlar; mazeret yok.',
+  dengeli:b => 'Tekrar borcu %' + b + '. Akşam bloğunun bir kısmını kartlara ayırmak dengeyi getirir.',
+  destekleyici:b => 'Bu hafta blokları tutuyorsun. Tekrar borcu %' + b + '; kısa bir kart turu onu indirir.',
+};
+
 R.COACH_TONES = {
   sert: { id:'sert', name:'Sert', note:'Doğrudan, mazeret almaz',
     line:'Doğrudan konuş. Yumuşatma, mazereti kabul etme, sayıyı yüzüne söyle. Hakaret etme, küçümseme.' },

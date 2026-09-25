@@ -780,6 +780,16 @@ async function main(){
   const hepsi = new Set([...ekranOz, ...testOz]);
   console.log('\nKatalog kapsamı: ' + hepsi.size + ' / ' + katalogSayisi() + ' özellik yerinde'
     + ' (ekranda ' + ekranOz.size + ' · testte ' + testOz.size + ')');
+  if(ayrinti){
+    const no = i => String(i).padStart(3, '0');
+    const yok = [], testte = [];
+    for(let i = 1; i <= katalogSayisi(); i++){
+      if(!hepsi.has(no(i))) yok.push(no(i));
+      else if(!ekranOz.has(no(i))) testte.push(no(i));
+    }
+    console.log('  yerinde değil: ' + (yok.join(' ') || '—'));
+    console.log('  yalnız testte (gezintide çizilmedi): ' + (testte.join(' ') || '—'));
+  }
 
   if(toplamKayip){
     console.log('\n' + toplamKayip + ' kayıp. Bilerek kaldırıldıysa kullanıcı onayıyla '

@@ -64,6 +64,22 @@ SP.Screens.today = (function(){
       const dolu = !!(v && FIELDS.some(f => v[f.id] != null));
       gunler.push({ date:t, dolu, bugun:t === bugun, secili:t === d });
     }
+    /* 023 YAZILABİLİR GÜN PENCERESİ: puan (XP) bugün + 7 gün geriye yazılır
+       (brand/seviye/xp.js GERI_GUN). Daha eski gün KAYDEDİLİR — ölçüm
+       ölçümdür — ama puan almaz; o yüzden taralı ama tıklanır. */
+    const V = (window.LIFEOS || {}).VITRIN;
+    const pencere = SP.XP && SP.XP.pencere ? SP.XP.pencere() : null;
+    if(V && V.gunPenceresi && pencere){
+      const acik = new Set(pencere);
+      return html`<div class="daynav">${raw(V.gunPenceresi({ etiket:'Gün seç', pencere:pencere.length - 1,
+        kilitAd:'taralı · puan yok', not:'Bugün + ' + (pencere.length - 1) + ' gün geri puana yazılır',
+        gunler:gunler.map(g => ({ gun:String(U.parse(g.date).getDate()), bugun:g.bugun, secili:g.secili, dolu:g.dolu,
+          kilitli:!acik.has(g.date), act:'open-day', data:{ 'data-date':g.date },
+          ad:U.fmtDate(g.date) + (g.dolu ? ', veri var' : ', veri yok') + (acik.has(g.date) ? '' : ', puan yazılmaz'),
+          baslik:U.fmtDate(g.date) + (g.dolu ? ' · veri var' : ' · veri yok') })) }))}
+        ${when(d !== bugun, () => K.Button({ label:'Bugüne dön', size:'sm',
+          act:'open-day', data:{ 'data-date':bugun } }))}</div>`;
+    }
     return html`<div class="daynav">
       <div class="daynav__strip" role="group" aria-label="Gün seç">
         ${map(gunler, g => html`<button

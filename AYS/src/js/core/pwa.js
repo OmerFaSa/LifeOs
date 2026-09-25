@@ -205,6 +205,58 @@
     return ad ? 'Bildirimde «' + ad + '» dedin; şimdi uygulansın mı?' : '';
   }
 
+  /* ------------------------------------------------ 180 · 122 bildirim ayarı
+
+     Tür başına anahtar ve sessiz saatler — KULLANICININ TERCİHİ, uygulama
+     başına (her uygulama yalnız kendi gönderdiğini susturabilir; başka bir
+     uygulamanın anahtarı burada iş görmez). Kural:
+       - kapalı tür GÖNDERİLMEZ;
+       - sessiz saatte gönderilmez ve damgalanmaz: bir sonraki denemede
+         (sabah ilk açılış ya da dakikalık tarama) sıra yine gelir.
+     Tercih okunamazsa varsayılan: her tür açık, sessiz saat kapalı. */
+  const AYAR_ON = 'lifeos.bildirim.';
+  const VARSAYILAN = { turler:{}, sessiz:{ acik:false, bas:'22:00', bit:'08:00' } };
+  const SAAT = /^([01]\d|2[0-3]):[0-5]\d$/;
+  function bildirimAyari(modul){
+    let a = null;
+    try{ a = JSON.parse(localStorage.getItem(AYAR_ON + modul) || 'null'); }catch(e){ a = null; }
+    a = a && typeof a === 'object' ? a : {};
+    const ss = Object.assign({}, VARSAYILAN.sessiz, a.sessiz || {});
+    if(!SAAT.test(ss.bas)) ss.bas = VARSAYILAN.sessiz.bas;
+    if(!SAAT.test(ss.bit)) ss.bit = VARSAYILAN.sessiz.bit;
+    return { turler:Object.assign({}, a.turler || {}), sessiz:ss };
+  }
+  function bildirimAyariYaz(modul, degisen){
+    const a = bildirimAyari(modul);
+    if(degisen && degisen.turler) Object.assign(a.turler, degisen.turler);
+    if(degisen && degisen.sessiz){
+      const ss = Object.assign({}, a.sessiz, degisen.sessiz);
+      if(!SAAT.test(ss.bas) || !SAAT.test(ss.bit)) return { ok:false, why:'Saat «SS:DD» biçiminde olmalı.' };
+      a.sessiz = ss;
+    }
+    try{ localStorage.setItem(AYAR_ON + modul, JSON.stringify(a)); }
+    catch(e){ return { ok:false, why:'Tercih bu cihaza yazılamadı.' }; }
+    return { ok:true, ayar:a };
+  }
+  function turAcik(modul, tur){ return bildirimAyari(modul).turler[tur] !== false; }
+  function sessizMi(modul, tarih){
+    const ss = bildirimAyari(modul).sessiz;
+    if(!ss.acik) return false;
+    const dk = t => { const p = t.split(':'); return (+p[0]) * 60 + (+p[1]); };
+    const b = dk(ss.bas), son = dk(ss.bit);
+    if(b === son) return false;
+    const d = tarih || new Date();
+    const n = d.getHours() * 60 + d.getMinutes();
+    return b < son ? n >= b && n < son : n >= b || n < son;
+  }
+  /* Tek kapı: bu tür şu an gönderilebilir mi? */
+  function gonderilebilir(modul, tur, tarih){
+    if(!turAcik(modul, tur)) return { ok:false, neden:'kapali' };
+    if(sessizMi(modul, tarih)) return { ok:false, neden:'sessiz' };
+    return { ok:true };
+  }
+
   L.Pwa = { uygun, adresler, kaydet, EN_COK,
+    bildirimAyari, bildirimAyariYaz, turAcik, sessizMi, gonderilebilir,
     EN_COK_EYLEM, bildirimDestegi, bildirimKarti, bildir, izinIste, bildirimDinle, bildirimSorusu };
 })();

@@ -216,4 +216,29 @@
     });
   });
 
+  describe('Vitrin · SPİ son parti (023 020)', () => {
+    it('oz-023 Bugün: gün şeridi puan penceresini söyler; eski gün taralı ama açılır', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        const k = dom(await SP.Screens.gun.render());
+        const w = k.querySelector('[data-oz="023"]');
+        if(!SP.XP || !SP.XP.pencere) return;
+        expect(w).toBeTruthy();
+        expect(w.querySelectorAll('button[data-act="open-day"]').length).toBe(14);
+        expect(w.querySelectorAll('button.k').length).toBe(14 - SP.XP.pencere().length);
+      });
+    });
+    it('oz-020 Testler: arama açıkken çip olur, tek dokunuşla kalkar', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        SP.S.ui.labQuery = 'glu';
+        const k = dom(await SP.Screens.labs.render());
+        const c = k.querySelector('[data-oz="020"]');
+        if(c) expect(c.querySelector('[data-act="lab-query-clear"]')).toBeTruthy();
+        await SP.Screens.labs.handle['lab-query-clear'].call(null);
+        expect(SP.S.ui.labQuery).toBe('');
+      });
+    });
+  });
+
 })();

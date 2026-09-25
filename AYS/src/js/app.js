@@ -933,7 +933,9 @@ R.App = (function(){
     };
     const sonuc = R.Perde.rozetKutla(r, { bitti:damgala });
     if(sonuc && sonuc.sessiz){
-      UI.toast('Yeni rozet — ' + r.ad);
+      const V = (window.LIFEOS || {}).VITRIN;
+      if(!(sonuc.sakin && V && V.sakinGoster && V.sakinGoster({ ust:'Yeni rozet', ad:r.ad, sistem:'AYS' })))
+        UI.toast('Yeni rozet — ' + r.ad);
       damgala();
     }
   }
@@ -945,7 +947,12 @@ R.App = (function(){
     const sonuc = R.Perde.kutla(y, { bitti:damgala });
     if(sonuc && sonuc.sessiz){
       const ad = (y.kademeBilgi && y.kademeBilgi.ad) || ('Kademe ' + y.kademe);
-      UI.toast('Yeni rütbe — ' + ad + ' ' + y.etiket);
+      /* 143: sakin seçildiyse kısa parlama; yoksa (hareket azaltma) toast. */
+      const V = (window.LIFEOS || {}).VITRIN;
+      const renkAd = (y.kademeBilgi && y.kademeBilgi.id) || '';
+      if(!(sonuc.sakin && V && V.sakinGoster && V.sakinGoster({ ust:y.yeniKademe ? 'Yeni kademe' : 'Yeni rütbe',
+        ad:ad + ' ' + y.etiket, sistem:'AYS', renk:renkAd })))
+        UI.toast('Yeni rütbe — ' + ad + ' ' + y.etiket);
       damgala();
     }
   }
@@ -1225,6 +1232,10 @@ R.App = (function(){
 
   function notifyFromOffice(){
     if(notifyState() !== 'granted') return false;
+    /* 180/122: tür kapalıysa ya da sessiz saatteyse gönderilmez ve
+       DAMGALANMAZ — sessiz saat bitince sıradaki taramada gelir. */
+    const P = (window.LIFEOS || {}).Pwa;
+    if(P && P.gonderilebilir && !P.gonderilebilir('ays', 'ofis').ok) return false;
     try{
       const today = U.todayISO();
       if(localStorage.getItem(NOTIFY_KEY) === today) return false;

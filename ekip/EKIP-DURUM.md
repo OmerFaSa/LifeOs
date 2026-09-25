@@ -37,6 +37,18 @@ Bir modülün satırı «teslim» olunca o modülün `screens/*.js` dosyaları K
     - **Sadeleştirme:** ESP Dil ve Merdiven seçicisi sayfa başına (asılı kutu değil) · ESP Ofis «Uzman masaları» iki kez yazılmaz · SPİ Bütçe tekrarlanan ikinci başlık, SPİ Hareket üç kez yazılan toparlanma cümlesi kalktı · SPİ Testler › Dağılım dört sayı 2×2 · HKM Bugün Konsey tam en.
     - **Testler:** `hareket.test` «Raf düzeni (V5)» 5 test (üç modülde) · `SPI|ESP/src/tests/v5duzen.test.js` 3+3 · AYS `smoke` gün şeridi çizilirse kırmızı · `test_yuz` `t_v5_duzen` · `envanter.test` sayfa başı alanı (envanter artık sayfa başındaki seçiciyi ekranın alanı sayar).
     - **Koşulan:** runtests AYS 1958 · SPİ 1607 · ESP 1592 geçti · smoke/a11y/layout/palette/perf üçte temiz · envanter kayıp 0 · sadelik temiz · ortak/seviye/marka/build `--denetle` temiz · HKM tests 646/646 · perf bütçede · yuz.js 44 görünüm temiz · entegre temiz.
+  - ✅ **V5-8 · 6. dalga: kalan kartlardan on biri yerinde (kullanıcı: «eksik iş kalmasın»).**
+    - 020 etkin süzgeç çipleri: AYS Denemeler (aile), SPİ Testler (panel + arama), ESP Notlar (kavram + arama); her çip tek dokunuşla kalkar, sonuç sayısı altta.
+    - 023 gün penceresi: SPİ ölçüm şeridi. Puan (XP) bugün + 7 gün geriye yazılır (`xp.js` GERI_GUN); daha eski gün KAYDEDİLİR ama puan almaz — taralı ama tıklanır. «Kilitli» yazmıyor, çünkü veri kilitli değil.
+    - 125 hayalet öneri: AYS Hafta › «Bugüne önerilen blok»; «Yerleştir» Onaylar'ın aynı onayından geçer.
+    - 134 ajan seçici: üç ofis sohbeti; «@» ile başlayınca liste, eşleşen harf renkli.
+    - 136 üslup: AYS Ayarlar › Koç üslubu; önizleme cümlesini KOD kurar (şablon + senin tekrar borcun), «Geri al» kalır. SPİ/ESP'de üslup tercihi yok, o yüzden kart yok.
+    - 143 sakin seviye atlama: rütbe ekranında «Kademe atlayınca: tam ekran perde / sakin parlama» tercihi. Varsayılan perde (değişmedi); sakin seçilirse 3 sn'lik kart, ekranı kapatmaz.
+    - 157 bırakma alanı: AYS Bugün › Ayrıntı'da bekleyen blok sürüklenir, aralarda bırakma yeri açılır; sırayı değiştirir, «Blok taşındı» geri alır.
+    - 161 kaydırarak işaretle: AYS Günün akışı; sağa bitti (Geri al), sola ertele. Kısayoldur; aynı eylemler Ayrıntı'daki kartta düğme.
+    - 168 adımlı sayı: AYS çıpa sayaçları (paragraf/problem); +5 yanında.
+    - 180 + 122 bildirim tercihi: `brand/ortak/pwa.js` (tür anahtarı, sessiz saat, gece yarısını geçen bant). AYS ofis uyarısı ve SPİ hatırlatması bu kapıdan geçer; sessiz saatte gönderilmez, damgalanmaz. ESP bildirim göndermediği için kartı yok.
+    - Denetim: birim AYS 2098 · SPİ 1731 · ESP 1712; duman, a11y, düzen (390 px), kontrast üçünde temiz.
   - ✅ **V5-8 · 5. dalga: eski kartlar vitrin görünümüne (ilk parti, yalnız CSS).** 041 veri doluluğu (mono modül adı, satırı dolduran kareler, boş kare çerçeveli) ve 030 tik sayacı (etiket solda, «15 / 18» mono sağda, dolu kutu modül renginde, veri yoksa kesik) vitrinin w09/x17'sine çekildi; işaretleme ve testler aynı. 174/175/178/117 geniş kutuda 560 pikselde durur. Denetim: birim AYS 2076 · SPİ 1715 · ESP 1698, duman, a11y, düzen (390 px), kontrast üçünde temiz. Kalan: grafik/öneri/güven ailesinin geri kalanı ekran görüntüsüyle karşılaştırılıp gerekirse aynı yolla (yalnız CSS) çekilecek.
   - ✅ **V5-8 · 4. dalga: H (rütbe), G (ofis), A/K (gün ve güven) kartları.** Katalog kapsamı **130 → 169 / 183** (ekranda 81 · testte 168).
     - H: XP dökümü, kademe yolu, sistem rütbesi, galeri, başarım rozeti, ay özeti, kusursuz günler — `brand/seviye/rutbe.js` sekmelerinde. XP karar vermez; yalnız görünürlük.

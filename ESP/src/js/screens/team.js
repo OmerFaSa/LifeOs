@@ -113,6 +113,7 @@ ESP.Screens.team = (function(){
                 : html`<p class="small muted">Henüz konuşma yok.
                     ${hazir ? '' : 'Model bağlı değil: cevaplar kural motorundan gelir.'}</p>`}
             </div>
+            ${raw(mentionYeri())}
             <div class="composer mt-10">
               ${K.Textarea({ id:'chat-input', rows:2, class:'composer__input',
                 aria:'Ajana sorun', placeholder:'Sorunu yaz…' })}
@@ -136,6 +137,15 @@ ESP.Screens.team = (function(){
         }),
 
       ]))}`);
+  }
+
+  /* 134 AJAN SEÇİCİ: «@» ile başlayınca ajanlar rolüyle listelenir. */
+  function mentionYeri(){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.mentionKur) return '';
+    V.mentionKur({ girdi:'chat-input', kutu:'chat-mention', act:'pick-agent', alan:'data-tab',
+      ajanlar:() => ESP.AGENTS.map(a => ({ id:a.id, ad:a.name, harf:a.initial || a.name.charAt(0), rol:a.role, modul:'esp', sistem:'ESP' })) });
+    return '<div id="chat-mention" class="team-mention mt-10"></div>';
   }
 
   const handle = {

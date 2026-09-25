@@ -657,13 +657,17 @@ describe('A · K · Gün ve güven kartları', () => {
       expect(k.querySelector('.yr b').textContent).toBe('08:00 · Tarih');
     });
   });
-  it('oz-023 gün penceresi: kilitli gün düğme değildir; açık gün eyleme bağlı', () => {
+  it('oz-023 gün penceresi: eylemsiz kilitli gün düğme değildir; eylemli kilitli gün taralı ama tıklanır', () => {
     const g = [{ gun:'15', kilitli:true }, { gun:'16', act:'day-go', data:{ 'data-date':'2026-09-16' } }, { gun:'17', bugun:true, secili:true, act:'day-go', data:{ 'data-date':'2026-09-17' } }];
     icinde(V().gunPenceresi({ gunler:g, pencere:1 }), k => {
       expect(k.querySelectorAll('i.k')).toHaveLength(1);
       expect(k.querySelectorAll('button')).toHaveLength(2);
-      expect(k.querySelector('[aria-current="date"]').textContent).toBe('17');
+      expect(k.querySelector('[aria-pressed="true"]').textContent).toBe('17');
       expect(k.querySelector('.pn2')).toBeTruthy();
+    });
+    icinde(V().gunPenceresi({ gunler:[{ gun:'9', kilitli:true, dolu:true, act:'day-go' }, { gun:'17', bugun:true, act:'day-go' }], kilitAd:'taralı · puan yok' }), k => {
+      expect(k.querySelector('button.k.dl').textContent).toBe('9');
+      expect(k.querySelector('.alt .cap').textContent).toContain('TARALI · PUAN YOK');
     });
     expect(V().gunPenceresi({ gunler:[] })).toBe('');
   });
@@ -708,6 +712,74 @@ describe('A · K · Gün ve güven kartları', () => {
       expect(b[3].textContent).toBe('1');
       expect(k.querySelectorAll('.ck4')).toHaveLength(2);
       expect(k.querySelector('[data-act="import-apply"]')).toBeTruthy();
+    });
+  });
+});
+
+
+describe('Son parti · 020 125 134 136 143 157 161 122 180', () => {
+  it('oz-020 süzgeç çipi: yoksa kart yok; her çip kendi kaldırma eylemi, sonuç sayısı altta', () => {
+    expect(V().suzgecCipleri({ cipler:[] })).toBe('');
+    icinde(V().suzgecCipleri({ cipler:[{ ad:'TYT', modul:'ays', act:'exam-filter', data:{ 'data-value':'all' } }], sonuc:12, birim:'deneme', temizle:{ act:'x' } }), k => {
+      expect(k.querySelector('.cp2 [data-act="exam-filter"]').getAttribute('aria-label')).toBe('TYT süzgecini kaldır');
+      expect(k.querySelector('.sn b').textContent).toBe('12');
+      expect(k.querySelector('.tz').getAttribute('data-act')).toBe('x');
+    });
+  });
+  it('oz-125 hayalet öneri: hayalet yoksa kart yok; hayalet kesikli, «Yerleştir» onaya bağlı', () => {
+    expect(V().hayaletOneri({ satirlar:[{ saat:'1', ad:'Paragraf' }] })).toBe('');
+    icinde(V().hayaletOneri({ satirlar:[{ saat:'1', ad:'Paragraf' }, { saat:'2', ad:'Tekrar · 20 dk', hayalet:true }], act:'office-approve', data:{ 'data-id':'p1' } }), k => {
+      expect(k.querySelector('.hy2').textContent).toBe('+ Tekrar · 20 dk');
+      expect(k.querySelector('[data-act="office-approve"]').getAttribute('data-id')).toBe('p1');
+    });
+  });
+  it('oz-134 ajan seçici: sorgu ada ya da role uyar, eşleşen harf işaretli', () => {
+    const A = [{ id:'n', ad:'Nesrin', rol:'beslenme', modul:'spi' }, { id:'d', ad:'Demosthenes', rol:'konuşma', modul:'esp' }, { id:'k', ad:'Kerem', rol:'antrenman' }];
+    icinde(V().ajanSecici({ sorgu:'ne', act:'pick', alan:'data-id', ajanlar:A }), k => {
+      expect(k.querySelectorAll('[role="option"]')).toHaveLength(2);
+      expect(k.querySelector('u').textContent).toBe('Ne');
+      expect(k.querySelector('[data-act="pick"]').getAttribute('data-id')).toBe('n');
+    });
+    expect(V().ajanSecici({ sorgu:'zz', act:'x', ajanlar:A })).toBe('');
+  });
+  it('oz-136 üslup: seçili tek; önizleme cümlesi yerinde', () => {
+    icinde(V().uslupSecimi({ secenekler:[{ id:'a', ad:'Kısa' }, { id:'b', ad:'Sıcak' }], secili:'b', act:'set-tone', onizleme:'Tekrar borcu %17.' }), k => {
+      expect(k.querySelectorAll('[aria-checked="true"]')).toHaveLength(1);
+      expect(k.querySelector('.on').textContent).toBe('Sıcak');
+      expect(k.querySelector('.bal').textContent).toBe('Tekrar borcu %17.');
+    });
+  });
+  it('oz-143 sakin seviye: ekranı kapatmaz (role=status); sakinGoster 3 sn sonra çeker', () => {
+    icinde(V().sakinSeviye({ ad:'Gümüş 2.1', sistem:'esp', renk:'gumus' }), k => {
+      expect(k.querySelector('[role="status"] b').textContent).toBe('Gümüş 2.1');
+      expect(k.querySelector('em').textContent).toBe('ESP');
+    });
+    expect(V().sakinGoster({ ad:'Bronz 1.2', sure:10 })).toBe(true);
+    expect(document.querySelectorAll('.vk-sakin')).toHaveLength(1);
+    document.querySelectorAll('.vk-sakin').forEach(x => x.remove());
+  });
+  it('oz-157 bırakma alanı sırasını taşır', () => {
+    icinde(V().birakmaAlani({ sira:2, metin:'Buraya bırak' }), k => {
+      expect(k.querySelector('[data-birak]').getAttribute('data-birak')).toBe('2');
+      expect(k.querySelector('.bz2 .cap').textContent).toBe('BURAYA BIRAK');
+    });
+  });
+  it('oz-161 kaydırma ipucu iki yönü söyler', () => {
+    icinde(V().kaydirIpucu(), k => expect(k.textContent).toContain('SOLA · ERTELE'));
+  });
+  it('oz-122 sessiz saatler: bant gece yarısını geçer; bekleyen bildirim bitişte gelir', () => {
+    icinde(V().sessizSaatler({ sessiz:{ acik:true, bas:'22:00', bit:'08:00' }, bekleyen:{ saat:'23:10' } }), k => {
+      expect(k.querySelector('.alt span').textContent).toBe('23:10’daki bildirim 08:00’de gelir');
+      expect(k.querySelector('.ss').getAttribute('style')).toContain('left:41.7%');
+    });
+    icinde(V().sessizSaatler({ sessiz:{ acik:false, bas:'22:00', bit:'08:00' } }), k => expect(k.querySelector('.ss')).toBeNull());
+  });
+  it('oz-180 bildirim ayarı: her tür kendi anahtarı; sessiz saat en altta', () => {
+    icinde(V().bildirimAyari({ act:'bildirim-tur', sessiz:{ acik:true, bas:'22:00', bit:'08:00' }, turler:[{ id:'ofis', ad:'AYS · ofis', modul:'ays', acik:false }] }), k => {
+      const a = k.querySelector('[role="switch"]');
+      expect(a.getAttribute('aria-checked')).toBe('false');
+      expect(a.getAttribute('data-tur')).toBe('ofis');
+      expect(k.querySelector('.alt b').textContent).toBe('22:00 – 08:00');
     });
   });
 });

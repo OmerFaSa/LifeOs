@@ -51,6 +51,20 @@ __NS__.Perde = (function(){
     try{ localStorage.setItem(SES_ANAHTAR, deger); }catch(e){}
   }
 
+  /* 143 KUTLAMA BİÇİMİ — kullanıcının tercihi: «perde» (tam ekran,
+     varsayılan) ya da «sakin» (kısa parlama; ekranı kapatmaz, işi
+     bölmez). Sakin seçiliyse perde AÇILMAZ, `sessiz` + `sakin` döner ve
+     uygulama bilgiyi kendi sakin yoluyla söyler. */
+  var KUTLAMA_ANAHTAR = 'lifeos.perde.kutlama';
+  function kutlamaTercihi(){
+    try{ return localStorage.getItem(KUTLAMA_ANAHTAR) === 'sakin' ? 'sakin' : 'perde'; }
+    catch(e){ return 'perde'; }
+  }
+  function kutlamaYaz(deger){
+    try{ localStorage.setItem(KUTLAMA_ANAHTAR, deger === 'sakin' ? 'sakin' : 'perde'); return true; }
+    catch(e){ return false; }
+  }
+
   function az(){
     try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
     catch(e){ return false; }
@@ -839,8 +853,8 @@ __NS__.Perde = (function(){
 
        Karar çağırana bırakılır: `sessiz` işaretiyle döner, uygulama
        bilgiyi kendi sakin yoluyla (toast) söyler. */
-    if(az()){
-      return { sessiz:true, yukselme:yukselme, el:null,
+    if(az() || kutlamaTercihi() === 'sakin'){
+      return { sessiz:true, sakin:kutlamaTercihi() === 'sakin', yukselme:yukselme, el:null,
         kapat:function(){}, sirada:false };
     }
 
@@ -912,8 +926,8 @@ __NS__.Perde = (function(){
     secenekler = secenekler || {};
     var kok = secenekler.kok || 'img/seviye/';
 
-    if(az()){
-      return { sessiz:true, rozet:rozet, el:null,
+    if(az() || kutlamaTercihi() === 'sakin'){
+      return { sessiz:true, sakin:kutlamaTercihi() === 'sakin', rozet:rozet, el:null,
         kapat:function(){}, sirada:false };
     }
 
@@ -977,6 +991,7 @@ __NS__.Perde = (function(){
   return {
     ac:ac, baglan:baglan, kutla:kutla,
     sesTercihi:sesTercihi, hepsiniKapat:hepsiniKapat,
+    kutlamaTercihi:kutlamaTercihi, kutlamaYaz:kutlamaYaz,
     kendiliginenAcilsinMi:kendiliginenAcilsinMi,
     /* Saf kararlar — perde açmadan sınanabilsinler diye dışarıda. */
     kartYolu:kartYolu, kartVideoYolu:kartVideoYolu, sahneYolu:sahneYolu,

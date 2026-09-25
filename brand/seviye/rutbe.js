@@ -277,7 +277,25 @@ __NS__.Screens.rutbe = (function(){
       kademeIciKart(d),
       rozetOzetKart(),
       xpDokumuKarti() || bugunKart(),
+      kutlamaKarti(d),
     ]);
+  }
+
+  /* 143 KUTLAMA BİÇİMİ — tercih: tam ekran perde (varsayılan) ya da sakin
+     parlama. XP karar vermez; bu yalnız gösterimin biçimidir. */
+  function kutlamaKarti(d){
+    const P = __NS__.Perde;
+    if(!P || !P.kutlamaTercihi) return '';
+    const t = P.kutlamaTercihi();
+    const V = VT();
+    const k = d && d.kademeBilgi;
+    return K.Card({ title:'Kademe atlayınca', sub:'Tercih · geri alınır',
+      body:html`${K.Segmented({ act:'kutlama-sec', value:t, aria:'Kutlama biçimi',
+        items:[{ value:'perde', label:'Tam ekran perde' }, { value:'sakin', label:'Sakin parlama' }] })}
+        ${when(t === 'sakin' && V && V.sakinSeviye && k, () => html`<div class="rutbe-sakin-ornek mt-12">${raw(V.sakinSeviye({
+          ust:'Örnek', ad:k.ad + ' ' + d.etiket, sistem:'__MOD__', renk:k.id }).replace('vk vk-sakin', 'vk'))}</div>`)}
+        <p class="tiny dim mt-8">${t === 'sakin' ? 'Ekranı kapatmaz, işi bölmez; üç saniye sonra çekilir.'
+          : 'Tam ekran kutlama; «Geç» ve Esc her an kapatır. Hareket azaltma açıksa perde hiç açılmaz.'}</p>` });
   }
 
   /* BU KADEMEDE NEREDESİN — kademenin kendi basamakları, tek şeritte.
@@ -953,6 +971,15 @@ __NS__.Screens.rutbe = (function(){
 
   const handle = {
     async 'rutbe-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'kutlama-sec'(el){
+      const P = __NS__.Perde;
+      if(!P || !P.kutlamaYaz) return;
+      const once = P.kutlamaTercihi();
+      P.kutlamaYaz(el.dataset.value);
+      __NS__.UI.toast(el.dataset.value === 'sakin' ? 'Kademe atlama sakin parlamayla gösterilecek.' : 'Kademe atlama tam ekran perdeyle gösterilecek.',
+        { undo:() => { P.kutlamaYaz(once); __NS__.App.render(); } });
+      __NS__.App.render();
+    },
     /* «Git» kullanıcıyı işin YAPILDIĞI ekrana götürür. Rota katalogdan
        gelir; ekran kendi listesini tutmaz. */
     async 'rutbe-git'(el){

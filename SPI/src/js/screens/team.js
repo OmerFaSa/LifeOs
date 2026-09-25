@@ -169,7 +169,7 @@ SP.Screens.team = (function(){
       badge:SP.Office.ready(a.id) ? K.Badge({ label:'model açık', tone:'info' })
         : K.Badge({ label:'kural motoru', tone:'muted', icon:false }),
       body:chatBody(a),
-      foot:html`
+      foot:html`${raw(mentionYeri())}
         <div class="quick">
           ${K.Mic({ target:'chat-text' })}
           ${K.Input({ id:'chat-text', placeholder:'Sorunu sor ya da verini söyle — «uyku 7 saat ve 45 dk yürüdüm»', aria:'Soru' })}
@@ -432,6 +432,15 @@ SP.Screens.team = (function(){
       busy = false;
       SP.App.render();
     }
+  }
+
+  /* 134 AJAN SEÇİCİ: «@» ile başlayınca ajanlar rolüyle listelenir. */
+  function mentionYeri(){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.mentionKur) return '';
+    V.mentionKur({ girdi:'chat-text', kutu:'chat-mention', act:'pick-agent', alan:'data-id',
+      ajanlar:() => SP.AGENTS.map(a => ({ id:a.id, ad:a.name, harf:a.initial || a.name.charAt(0), rol:a.role, modul:'spi', sistem:'SPİ' })) });
+    return '<div id="chat-mention" class="team-mention"></div>';
   }
 
   const handle = {

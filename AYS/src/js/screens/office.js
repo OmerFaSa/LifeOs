@@ -512,8 +512,11 @@ R.Screens.office = (function(){
       return html`<p class="tiny dim">Bu tarayıcı bildirim desteklemiyor.</p>`;
     }
     if(state === 'granted'){
-      return K.Notice({ tone:'ok', body:'Bildirim açık. Ofis acil bir not bulduğunda '
-        + 'ya da karar iki gündür açık kaldığında günde en fazla bir kez haber verir.' });
+      const V = (window.LIFEOS || {}).VITRIN;
+      return html`${K.Notice({ tone:'ok', body:'Bildirim açık. Ofis acil bir not bulduğunda '
+        + 'ya da karar iki gündür açık kaldığında günde en fazla bir kez haber verir.' })}
+        ${when(V && V.bildirimKutusu, () => raw('<div class="mt-10">' + V.bildirimKutusu({ modul:'ays',
+          turler:[{ id:'ofis', ad:'AYS · ofis uyarısı' }] }) + '</div>'))}`;
     }
     if(state === 'denied'){
       return html`<p class="tiny dim">Bildirim izni reddedilmiş. Tarayıcı ayarlarından
@@ -1028,6 +1031,10 @@ R.Screens.office = (function(){
         R.Voice.profileFor(id, R.AGENT_IDS), {});
     },
 
+    /* 180/122 bildirim tercihi: küçük aksiyon, anında; kutu yerinde yenilenir. */
+    async 'bildirim-tur'(el){ bildirimYenile(el, 'bildirim-tur'); },
+    async 'bildirim-sessiz'(el){ bildirimYenile(el, 'bildirim-sessiz'); },
+
     async 'office-notify'(){
       await R.App.askNotify();
       const box = document.getElementById('office-notify');
@@ -1184,7 +1191,18 @@ R.Screens.office = (function(){
     },
   };
 
+  function bildirimYenile(el, ad){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.bildirimEylem) return;
+    const r = V.bildirimEylem('ays', ad, el);
+    if(r.metin) UI.toast(r.metin);
+    const box = document.getElementById('office-notify');
+    if(box) box.innerHTML = String(notifyRow());
+    else R.App.render();
+  }
+
   const change = {
+    async 'bildirim-saat'(el){ bildirimYenile(el, 'bildirim-saat'); },
     async 'office-provider'(el){
       const form = document.getElementById('llm-form');
       if(form) form.innerHTML = String(providerForm(el.value));

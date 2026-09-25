@@ -99,6 +99,21 @@ SP.Screens.labs = (function(){
 
   /* Tek düz liste. Sıra: kırmızı bayrak → referans dışı → hedef dışı →
      hedefte. İçinde arama yapılır, panele göre daraltılır. */
+  /* 020 etkin süzgeç: panel ve arama çip olur, her biri tek dokunuşla kalkar. */
+  function etkinSuzgec(n){
+    if(!VT()) return '';
+    const c = [];
+    const f = S.ui.labFilter || 'all';
+    if(f !== 'all'){
+      const p = (SP.PANELS || []).find(x => x.id === f);
+      c.push({ ad:p ? p.name.replace(/\s*paneli$/i, '') : f, modul:'spi', act:'lab-filter-kaldir' });
+    }
+    const q = (S.ui.labQuery || '').trim();
+    if(q) c.push({ ad:'«' + q + '»', act:'lab-query-clear' });
+    return c.length ? '<div class="mb-12">' + VT().suzgecCipleri({ cipler:c, sonuc:n, birim:'ölçüm',
+      temizle:{ act:'lab-suzgec-temizle' } }) + '</div>' : '';
+  }
+
   function resultRows(){
     const q = (S.ui.labQuery || '').trim().toLocaleLowerCase('tr-TR');
     const filter = S.ui.labFilter || 'all';
@@ -206,6 +221,7 @@ SP.Screens.labs = (function(){
           ${K.Button({ label:'Hekime götür', act:'open-doctor' })}`,
         body:html`
           ${when(panelFilter(), () => raw(String(panelFilter())))}
+          ${raw(etkinSuzgec(rows.length))}
           ${when(!rows.length, () => K.Notice({ tone:'info',
             body:'Bu süzgeçle eşleşen ölçüm yok.' }))}
           ${when(rows.length, () => html`<div class="reslist">${map(rows, r => {
@@ -1289,6 +1305,9 @@ SP.Screens.labs = (function(){
     },
     async 'lab-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'lab-filter'(el){ S.ui.labFilter = el.dataset.tab; SP.App.render(); },
+    async 'lab-filter-kaldir'(){ S.ui.labFilter = 'all'; SP.App.render(); },
+    async 'lab-query-clear'(){ S.ui.labQuery = ''; SP.App.render(); },
+    async 'lab-suzgec-temizle'(){ S.ui.labFilter = 'all'; S.ui.labQuery = ''; SP.App.render(); },
     async 'toggle-empty'(){ S.ui.labShowEmpty = !S.ui.labShowEmpty; SP.App.render(); },
     async 'open-marker'(el){
       const b = SP.BIO_BY_ID[el.dataset.id];

@@ -646,7 +646,11 @@ R.Screens.guide = (function(){
         hkmCard(),
         K.Card({ title:'Koç üslubu', sub:'Aynı veri herkese aynı dille söylenmez',
           body:html`
-            ${K.Segmented({ act:'set-tone', block:true, primary:true, aria:'Koç üslubu',
+            ${VT() ? raw(VT().uslupSecimi({ baslik:'Koçun üslubu', act:'set-tone', secili:S.profile.coachTone || 'dengeli',
+              secenekler:Object.keys(R.COACH_TONES).map(k => ({ id:k, ad:R.COACH_TONES[k].name })),
+              onizleme:(R.TONE_ORNEK[S.profile.coachTone || 'dengeli'] || R.TONE_ORNEK.dengeli)(C.cardDebt()),
+              not:'örnek cümle · sayı senin, cümleyi kod kurdu' }))
+            : K.Segmented({ act:'set-tone', block:true, primary:true, aria:'Koç üslubu',
               value:S.profile.coachTone || 'dengeli',
               items:Object.keys(R.COACH_TONES).map(k => ({ value:k, label:R.COACH_TONES[k].name })) })}
             <p class="tiny dim mt-8">${(R.COACH_TONES[S.profile.coachTone || 'dengeli']).note}.
@@ -876,9 +880,13 @@ R.Screens.guide = (function(){
       R.App.render();
     },
     async 'set-tone'(el){
+      if(!R.COACH_TONES[el.dataset.value]) return;
+      const once = S.profile.coachTone || 'dengeli';
       S.profile.coachTone = el.dataset.value;
       await M.saveProfile();
-      UI.toast('Koç üslubu: ' + R.COACH_TONES[el.dataset.value].name);
+      /* Küçük aksiyon: sormadan uygulanır, «Geri al» kalır (AGENTS §1.9). */
+      UI.toast('Koç üslubu: ' + R.COACH_TONES[el.dataset.value].name, { undo:async () => {
+        S.profile.coachTone = once; await M.saveProfile(); R.App.render(); } });
       R.App.render();
     },
     async 'set-theme'(el){

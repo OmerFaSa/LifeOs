@@ -178,6 +178,10 @@ SP.Hatirlat = (function(){
   function tik(simdi){
     if(!durum().bildirim || !bildirimIzinli()) return 0;
     const now = simdi || new Date();
+    /* 180/122: tür kapalıysa ya da sessiz saatteyse gösterilmez; satır
+       Bugün ekranında durur. Kaçan saat sonra kovalanmaz (yukarıdaki kural). */
+    const P = (window.LIFEOS || {}).Pwa;
+    if(P && P.gonderilebilir && !P.gonderilebilir('spi', 'hatirlatma', now).ok) return 0;
     const gun = U().iso(now);
     const n = now.getHours() * 60 + now.getMinutes();
     let say = 0;

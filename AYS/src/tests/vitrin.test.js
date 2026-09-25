@@ -375,4 +375,102 @@
     });
   });
 
+  describe('Vitrin · AYS son parti (020 125 134 136 157 161 168 180)', () => {
+    async function cizmeden(fn){
+      const A = R.App, r = A.render, p = A.patch;
+      A.render = async () => {}; A.patch = () => true;
+      try{ await fn(); } finally { A.render = r; A.patch = p; }
+    }
+    if(!document.getElementById('toast-root')){
+      const t = document.createElement('div'); t.id = 'toast-root'; t.hidden = true; document.body.appendChild(t);
+    }
+    it('oz-020 Denemeler: aile süzgeci açıkken çip ve sonuç sayısı; «Tümü»de kart yok', async () => {
+      await hazirla();
+      R.S.exams = [deneme(1, 30, 5), Object.assign(deneme(2, 32, 4), { family:'AYT' })];
+      R.S.ui.examFilter = 'all';
+      let k = dom(await R.Screens.exams.render());
+      expect(k.querySelector('[data-oz="020"]')).toBeNull();
+      R.S.ui.examFilter = 'TYT';
+      k = dom(await R.Screens.exams.render());
+      expect(k.querySelector('[data-oz="020"] .sn b').textContent).toBe('1');
+      expect(k.querySelector('[data-oz="020"] .cp2 [data-value="all"]')).toBeTruthy();
+      R.S.ui.examFilter = 'all'; R.S.exams = [];
+    });
+    it('oz-125 Hafta: bekleyen blok önerisi hayalet olarak durur, «Yerleştir» onaya gider', async () => {
+      await hazirla();
+      const s = R.SUBJECTS[0], t = s.topics[0];
+      R.S.officeProposals = [{ id:'hy1', action:'block-add', agent:'tyt', status:'pending', source:'kural', level:'kucuk',
+        params:{ subjectId:s.id, topicId:t.id, minutes:30 }, at:new Date().toISOString() }];
+      const k = dom(await R.Screens.week.render());
+      const g = k.querySelector('[data-oz="125"]');
+      expect(g).toBeTruthy();
+      expect(g.querySelector('.hy2').textContent).toContain('30 dk');
+      expect(g.querySelector('[data-act="office-approve"]').getAttribute('data-id')).toBe('hy1');
+      R.S.officeProposals = [];
+    });
+    it('oz-136 Ayarlar: üslup önizlemesi senin tekrar borcunu kod cümlesiyle söyler; değişiklik geri alınır', async () => {
+      await hazirla();
+      R.S.profile.coachTone = 'sert';
+      const k = dom(await R.Screens.guide.render());
+      const u = k.querySelector('[data-oz="136"]');
+      expect(u.querySelector('.on').textContent).toBe('Sert');
+      expect(u.querySelector('.bal').textContent).toContain('%' + R.Calc.cardDebt());
+      await cizmeden(() => R.Screens.guide.handle['set-tone']({ dataset:{ value:'destekleyici' } }));
+      expect(R.S.profile.coachTone).toBe('destekleyici');
+      await cizmeden(() => R.Screens.guide.handle['set-tone']({ dataset:{ value:'yok-boyle-bir-ton' } }));
+      expect(R.S.profile.coachTone).toBe('destekleyici');
+      R.S.profile.coachTone = 'dengeli';
+    });
+    it('oz-161 Bugün: bekleyen satır kaydırılabilir; sağa = bitti (geri alınır), sola = ertele', async () => {
+      await hazirla();
+      const day = await R.Model.ensureDay(R.U.today());
+      const bl = day.blocks.filter(b => b.slot !== 'Dinlenme');
+      if(bl.length < 2) return;
+      const k = dom(await R.Screens.today.render());
+      expect(k.querySelectorAll('[data-kaydir]').length).toBeGreaterThan(0);
+      expect(k.querySelector('[data-kaydir]').getAttribute('data-kaydir')).toBe('block-kaydir');
+      await cizmeden(() => R.Screens.today.handle['block-kaydir']({ dataset:{ block:bl[0].id, yon:'sag' } }));
+      expect(bl[0].status).toBe('done');
+      const ilk = day.blocks.filter(b => b.slot !== 'Dinlenme' && b.status === 'pending')[0];
+      await cizmeden(() => R.Screens.today.handle['block-kaydir']({ dataset:{ block:ilk.id, yon:'sol' } }));
+      expect(day.blocks.filter(b => b.slot !== 'Dinlenme' && b.status === 'pending')[0].id === ilk.id).toBe(false);
+    });
+    it('oz-157 Ayrıntı: bekleyen blok sürüklenir; bırakma yeri sırayı değiştirir ve «Blok taşındı» geri alır', async () => {
+      await hazirla();
+      const day = await R.Model.ensureDay(R.U.today());
+      if(day.blocks.length < 3) return;
+      const k = dom(await R.Screens.gun.render());
+      expect(k.querySelectorAll('[data-oz="157"]').length).toBe(day.blocks.length + 1);
+      const son = day.blocks[day.blocks.length - 1];
+      await cizmeden(() => R.Screens.today.handle['block-sira']({ dataset:{ block:son.id, sira:'0' } }));
+      expect(day.blocks[0].id).toBe(son.id);
+      await cizmeden(() => R.Screens.today.handle['block-geri']());
+      expect(day.blocks[day.blocks.length - 1].id).toBe(son.id);
+    });
+    it('oz-168 Ayrıntı: çıpa sayacı büyük artı/eksi; eksi sıfırda kapalı', async () => {
+      await hazirla();
+      const day = await R.Model.ensureDay(R.U.today());
+      day.paragraphActual = 0;
+      const k = dom(await R.Screens.gun.render());
+      const a = k.querySelector('[data-oz="168"]');
+      expect(a).toBeTruthy();
+      expect(a.querySelector('[data-delta="-1"]').disabled).toBe(true);
+      expect(a.querySelector('[data-delta="1"]').getAttribute('data-act')).toBe('anchor');
+    });
+    it('oz-134 Ofis sohbeti: «@» ile başlayınca ajan listesi, başka metinde yok', () => {
+      const h = R.Screens.team.mentionHtml('@' + R.AGENTS[0].name.slice(0, 2));
+      expect(dom(h).querySelector('[data-oz="134"] [data-act="team-agent"]').getAttribute('data-value')).toBe(R.AGENTS[0].id);
+      expect(R.Screens.team.mentionHtml('merhaba')).toBe('');
+    });
+    it('oz-180 oz-122 ofis bildirimi: tür kapalıyken gönderilmez', () => {
+      const P = window.LIFEOS.Pwa;
+      const once = P.bildirimAyari('ays');
+      try{
+        P.bildirimAyariYaz('ays', { turler:{ ofis:false } });
+        expect(P.gonderilebilir('ays', 'ofis').neden).toBe('kapali');
+        expect(R.App.notifyFromOffice()).toBe(false);
+      }finally{ P.bildirimAyariYaz('ays', { turler:{ ofis:once.turler.ofis !== false } }); }
+    });
+  });
+
 })();

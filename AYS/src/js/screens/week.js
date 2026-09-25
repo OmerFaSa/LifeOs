@@ -388,6 +388,22 @@ R.Screens.week = (function(){
     return kutu('Sınava kadar', 'planlı', VT().haftaCizgisi({ hafta:n, toplam:R.PLAN.totalWeeks, ara }));
   }
 
+  /* 125 TAKVİMDE HAYALET ÖNERİ: bugüne blok ekleyen bekleyen öneri,
+     günün blokları arasında kesikli mor durur; «Yerleştir» Onaylar'daki
+     aynı onaydan geçer (office-approve), onaysız hiçbir şey yerleşmez. */
+  function hayaletOneri(n){
+    if(!VT() || !R.Proposals || n !== M.currentWeek()) return '';
+    const p = R.Proposals.actionable().find(x => x.action === 'block-add');
+    if(!p) return '';
+    const gun = M.dayOf(U.todayISO());
+    const bloklar = ((gun && gun.blocks) || []).filter(b => b.slot !== 'Dinlenme');
+    const konu = (() => { try{ const s = R.SUBJECTS.find(x => x.id === p.params.subjectId);
+      const t = s && (s.topics || []).find(x => x.id === p.params.topicId); return t ? t.name : s ? s.name : 'Ek blok'; }catch(e){ return 'Ek blok'; } })();
+    const satirlar = bloklar.map((b, i) => ({ saat:String(i + 1), ad:b.topic || b.subject || b.slot, modul:'ays' }))
+      .concat([{ saat:String(bloklar.length + 1), ad:konu + ' · ' + (Number(p.params.minutes) || '—') + ' dk', hayalet:true }]);
+    return kutu('Bugüne önerilen blok', 'öneri', VT().hayaletOneri({ satirlar, act:'office-approve', data:{ 'data-id':p.id } }));
+  }
+
   /* 052 PLAN IZGARASI: yedi gün × günün blokları. Bloklara saat yazılmaz;
      satır bloğun günün içindeki sırasıdır. Açılmamış gün şablondan. */
   function planIzgarasi(n){
@@ -467,6 +483,7 @@ R.Screens.week = (function(){
       ])),
 
       K.Span(4, K.Stack([
+        hayaletOneri(n),
         haftaCizgisi(n),
         planIzgarasi(n),
         istisnaCard(),
@@ -489,6 +506,8 @@ R.Screens.week = (function(){
   }
 
   const handle = {
+    /* 125: onay tek yoldan geçer (Onaylar ekranının işleyicisi). */
+    async 'office-approve'(el){ return R.Screens.onaylar.handle['office-approve'](el); },
     'istisna-ac'(el){
       const tur = el.dataset.tur;
       istisnaTaslak = { tur, p:{} };

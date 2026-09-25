@@ -923,7 +923,9 @@ SP.App = (function(){
     };
     const sonuc = SP.Perde.rozetKutla(r, { bitti:damgala });
     if(sonuc && sonuc.sessiz){
-      UI.toast('Yeni rozet — ' + r.ad);
+      const V = (window.LIFEOS || {}).VITRIN;
+      if(!(sonuc.sakin && V && V.sakinGoster && V.sakinGoster({ ust:'Yeni rozet', ad:r.ad, sistem:'SPİ' })))
+        UI.toast('Yeni rozet — ' + r.ad);
       damgala();
     }
   }
@@ -935,7 +937,12 @@ SP.App = (function(){
     const sonuc = SP.Perde.kutla(y, { bitti:damgala });
     if(sonuc && sonuc.sessiz){
       const ad = (y.kademeBilgi && y.kademeBilgi.ad) || ('Kademe ' + y.kademe);
-      UI.toast('Yeni rütbe — ' + ad + ' ' + y.etiket);
+      /* 143: sakin seçildiyse kısa parlama; yoksa (hareket azaltma) toast. */
+      const V = (window.LIFEOS || {}).VITRIN;
+      const renkAd = (y.kademeBilgi && y.kademeBilgi.id) || '';
+      if(!(sonuc.sakin && V && V.sakinGoster && V.sakinGoster({ ust:y.yeniKademe ? 'Yeni kademe' : 'Yeni rütbe',
+        ad:ad + ' ' + y.etiket, sistem:'SPİ', renk:renkAd })))
+        UI.toast('Yeni rütbe — ' + ad + ' ' + y.etiket);
       damgala();
     }
   }

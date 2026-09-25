@@ -147,6 +147,8 @@ R.Screens.exams = (function(){
           K.Segmented({ items:FILTERS, value:filter, act:'exam-filter', aria:'Deneme ailesi' }),
           html`<span class="small dim">${U.plural(list.length, 'kayıt', 'kayıt')}</span>`,
         ], { between:true, wrap:true }),
+        when(filter !== 'all' && VT(), () => raw(VT().suzgecCipleri({ cipler:[{ ad:filter, modul:'ays', act:'exam-filter', data:{ 'data-value':'all' } }],
+          sonuc:list.length, birim:'deneme', temizle:{ act:'exam-filter', data:{ 'data-value':'all' } } }))),
         K.Card({ body, pad:'sm' }),
       ])),
       K.Span(3, K.Stack([

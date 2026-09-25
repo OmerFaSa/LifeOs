@@ -234,4 +234,33 @@
     });
   });
 
+  describe('180 · 122 bildirim tercihi — tür anahtarı ve sessiz saat', () => {
+    const MOD = 'test' + Math.random().toString(36).slice(2, 7);
+    const saat = (h, m) => { const d = new Date(2026, 8, 25, h, m || 0); return d; };
+    it('varsayılan: tür açık, sessiz saat kapalı; her an gönderilebilir', () => {
+      expect(P().turAcik(MOD, 'ofis')).toBe(true);
+      expect(P().sessizMi(MOD, saat(23, 30))).toBe(false);
+      expect(P().gonderilebilir(MOD, 'ofis', saat(23, 30)).ok).toBe(true);
+    });
+    it('kapalı tür gönderilmez', () => {
+      P().bildirimAyariYaz(MOD, { turler:{ ofis:false } });
+      expect(P().gonderilebilir(MOD, 'ofis', saat(12)).neden).toBe('kapali');
+      expect(P().gonderilebilir(MOD, 'baska', saat(12)).ok).toBe(true);
+      P().bildirimAyariYaz(MOD, { turler:{ ofis:true } });
+    });
+    it('gece yarısını geçen sessiz bant: 22–08 arası sessiz, 08:00 değil', () => {
+      P().bildirimAyariYaz(MOD, { sessiz:{ acik:true, bas:'22:00', bit:'08:00' } });
+      expect(P().sessizMi(MOD, saat(23, 10))).toBe(true);
+      expect(P().sessizMi(MOD, saat(3))).toBe(true);
+      expect(P().sessizMi(MOD, saat(8))).toBe(false);
+      expect(P().sessizMi(MOD, saat(21, 59))).toBe(false);
+      expect(P().gonderilebilir(MOD, 'ofis', saat(23)).neden).toBe('sessiz');
+    });
+    it('bozuk saat yazılmaz; eski tercih kalır', () => {
+      const r = P().bildirimAyariYaz(MOD, { sessiz:{ bas:'25:00' } });
+      expect(r.ok).toBe(false);
+      expect(P().bildirimAyari(MOD).sessiz.bas).toBe('22:00');
+      try{ localStorage.removeItem('lifeos.bildirim.' + MOD); }catch(e){}
+    });
+  });
 })();

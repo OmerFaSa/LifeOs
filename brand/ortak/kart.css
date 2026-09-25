@@ -1266,3 +1266,52 @@
 .vk:has(> .z39), .vk:has(> .z40), .vk:has(> .w42), .vk:has(> .y28){ max-width:560px; }
 .vk .z40 .sg{ display:inline-flex; }
 .vk .z40 .sg span:only-child{ padding:4px 12px; }
+
+/* ---- son parti: 020 023 125 134 136 143 157 161 122 180 ---- */
+.vk .w02 .cp2 button{ height:28px; padding:0 7px 0 11px; border-radius:999px; background:var(--vk-s3); display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:500; }
+.vk .w02 .cp2 button.c-ays{ background:color-mix(in oklab, var(--ays) 16%, transparent); color:var(--ays-ink, var(--ays)); }
+.vk .w02 .cp2 button.c-spi{ background:color-mix(in oklab, var(--spi) 16%, transparent); color:var(--spi-ink, var(--spi)); }
+.vk .w02 .cp2 button.c-esp{ background:color-mix(in oklab, var(--esp) 16%, transparent); color:var(--esp-ink, var(--esp)); }
+.vk .w02 .cp2 button svg{ width:11px; height:11px; opacity:.7; }
+.vk .w02 .tz{ min-height:24px; }
+.vk .w05 .gn2 button.k{ background:repeating-linear-gradient(135deg, var(--vk-s3) 0 3px, var(--vk-s1) 3px 6px); color:var(--vk-ink2); }
+.vk .w05 .gn2 button.dl{ position:relative; }
+.vk .w05 .gn2 button.dl::after{ content:""; position:absolute; bottom:5px; left:50%; width:4px; height:4px; margin-left:-2px; border-radius:50%; background:var(--mod, var(--spi)); }
+.vk .w05 .gn2 button.bu.dl::after{ background:var(--vk-on); }
+.vk .w27 .gn4{ grid-template-columns:auto 1fr; }
+.vk .w27 .hy2{ color:var(--mer-ink, var(--mer)); }
+.vk .z27 .ls > button{ display:grid; grid-template-columns:26px auto 1fr auto; gap:8px; align-items:center; width:100%; height:38px; padding:0 8px; border-radius:7px; text-align:left; }
+.vk .z27 .ls > button.on, .vk .z27 .ls > button:hover{ background:var(--vk-s3); }
+.vk .z27 .ls > button > b{ font-weight:600; font-size:12px; }
+.vk .z27 .ls > button > b u{ text-decoration:none; color:var(--c, var(--mod)); }
+.vk .z27 .ls > button > span:not(.av){ font-size:11px; color:var(--vk-ink3); }
+.vk .z27 .ls > button > em{ font:500 9.5px var(--vk-mono); font-style:normal; color:var(--c); }
+.vk .z29 .sg button{ flex:1; height:28px; border-radius:7px; display:grid; place-items:center; font-size:12px; color:var(--vk-ink3); font-weight:500; }
+.vk .z29 .sg button.on{ background:var(--vk-s3); color:var(--vk-ink); }
+.vk .z29 .bal{ border-radius:10px; background:var(--vk-s2); border:1px solid var(--vk-l1); }
+.vk-sakin{ position:fixed; left:50%; top:16px; z-index:90; transform:translateX(-50%); pointer-events:none; }
+.vk-sakin .x59v .ts2{ animation:vk-sakin-gel .32s ease-out both; }
+@keyframes vk-sakin-gel{ from{ opacity:0; transform:translateY(-8px) scale(.97); } to{ opacity:1; transform:none; } }
+@media (prefers-reduced-motion:reduce){ .vk-sakin .x59v .ts2{ animation:none; } }
+.vk-birak .w34{ height:auto; }
+.vk-birak .w34 .bz2{ position:static; height:44px; }
+.vk-birak.is-yakin .w34 .bz2{ border-style:solid; border-color:var(--mod, var(--ays)); background:color-mix(in oklab, var(--mod, var(--ays)) 8%, transparent); }
+[data-surukle]{ cursor:grab; }
+[data-surukle].is-surukleniyor{ opacity:.5; }
+[data-kaydir]{ position:relative; touch-action:pan-y; }
+[data-kaydir] > .kaydir__on{ display:contents; }
+[data-kaydir][style*="--kaydir"]{ transform:translateX(var(--kaydir)); transition:none; }
+[data-kaydir][data-yon="sag"]{ box-shadow:inset 4px 0 0 var(--ok, var(--ok-ink)); }
+[data-kaydir][data-yon="sol"]{ box-shadow:inset -4px 0 0 var(--text-3); }
+.vk-kaydir-ip{ display:none; }
+@media (pointer:coarse){ .vk-kaydir-ip{ display:block; padding:0 16px 8px; } }
+.vk .w44 .an2{ cursor:pointer; }
+.vk .w44 .alt input[type="time"]{ font:500 12px var(--vk-mono); border:1px solid var(--vk-l2); border-radius:6px; padding:2px 4px; background:var(--vk-s1); min-height:28px; }
+.vk .w05 .gn2{ overflow-x:auto; }
+.team-mention:empty{ display:none; } .team-mention{ margin-bottom:6px; max-width:420px; }
+.bloklar{ display:grid; gap:var(--sp-3, 12px); }
+.bloklar > .vk-birak{ display:none; }
+.bloklar.is-suruklen > .vk-birak{ display:block; }
+.vk:has(> .w05){ width:100%; min-width:0; max-width:100%; flex:1 1 100%; }
+.vk .w05, .vk .w05 .gn2{ min-width:0; }
+.vk .w05 .alt{ flex-wrap:wrap; gap:4px 12px; }

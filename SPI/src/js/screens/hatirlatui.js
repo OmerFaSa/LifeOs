@@ -7,7 +7,8 @@ window.SP = window.SP || {};
 
 SP.HatirlatUI = (function(){
   const U = SP.U, S = SP.S, UI = SP.UI;
-  const { html, when, map } = SP.h;
+  const { html, raw, when, map } = SP.h;
+  const VT = () => (window.LIFEOS || {}).VITRIN;
   const K = SP.C;
   const H = () => SP.Hatirlat;
 
@@ -79,6 +80,9 @@ SP.HatirlatUI = (function(){
           ${d.bildirim && H().bildirimIzinli()
             ? K.Button({ label:'Tarayıcı bildirimini kapat', size:'sm', act:'ht-bildirim', data:{ 'data-v':'0' } })
             : K.Button({ label:'Tarayıcı bildirimini aç', size:'sm', act:'ht-bildirim', data:{ 'data-v':'1' } })}</div>`),
+        /* 180/122: tür anahtarı ve sessiz saatler (brand/ortak/pwa.js). */
+        when(d.bildirim && H().bildirimIzinli() && VT() && VT().bildirimKutusu, () => raw(VT().bildirimKutusu({ modul:'spi',
+          turler:[{ id:'hatirlatma', ad:'SPİ · hatırlatma' }] }))),
       ])),
       footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
         ${K.Button({ label:'Kaydet', tone:'primary', act:'ht-kaydet' })}`),
@@ -118,6 +122,8 @@ SP.HatirlatUI = (function(){
       await H().isaretle(el.dataset.k, el.dataset.v === '1');
       yenile();
     },
+    async 'bildirim-tur'(el){ bildirimYenile(el, 'bildirim-tur'); },
+    async 'bildirim-sessiz'(el){ bildirimYenile(el, 'bildirim-sessiz'); },
     async 'ht-bildirim'(el){
       if(el.dataset.v === '1'){
         const r = await H().bildirimAc();
@@ -130,7 +136,14 @@ SP.HatirlatUI = (function(){
     },
   };
 
+  function bildirimYenile(el, ad){
+    const r = VT() && VT().bildirimEylem ? VT().bildirimEylem('spi', ad, el) : null;
+    if(r && r.metin) UI.toast(r.metin);
+    sayfa();
+  }
+
   const change = {
+    async 'bildirim-saat'(el){ bildirimYenile(el, 'bildirim-saat'); },
     async 'ht-tur'(el){
       const v = String(el.value || '');
       taslak = v.indexOf('ilac:') === 0 ? { tur:'ilac', medId:v.slice(5) } : { tur:v, medId:null };
