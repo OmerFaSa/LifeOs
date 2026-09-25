@@ -64,7 +64,7 @@ def run():
         eq([x["modul_adi"] for x in g["satirlar"]], ["Merkez", "SPİ", "ESP", "AYS"])
         ok("Geri al" in g["not"], g["not"])
         eq(len(merkez.oneri_gecmisi(con, n=2)["satirlar"]), 2)
-    test("119 cevaplanan teklif ve karar tek satır, en yeni önce; açık teklif girmez", t_gecmis)
+    test("oz-119 cevaplanan teklif ve karar tek satır, en yeni önce; açık teklif girmez", t_gecmis)
 
     def t_hafta():
         con = _con()
@@ -90,7 +90,7 @@ def run():
         eq(h["zamani"], True)
         eq(merkez.hafta_ozeti(con, G, now=G + "T16:59:00")["zamani"], False)
         eq(merkez.pazar_aksami("2026-09-26T20:00:00"), False)      # cumartesi
-    test("120 her modülden bir satır; eksik «veri yok», ölçülen «hesaplandı»; bekleyen en altta", t_hafta)
+    test("oz-120 her modülden bir satır; eksik «veri yok», ölçülen «hesaplandı»; bekleyen en altta", t_hafta)
 
     def t_gunluk():
         con = _con()
@@ -113,7 +113,7 @@ def run():
         bos = merkez.gunluk(con, "2026-01-01")
         eq((bos["saatler"], bos["okunan"]), ([], 0))
         ok("uygulanan teklif yok" in bos["yazmadi"], bos["yazmadi"])
-    test("126 okunan ve üretilen saatine düşer; modüllere yazılan 0", t_gunluk)
+    test("oz-126 okunan ve üretilen saatine düşer; modüllere yazılan 0", t_gunluk)
 
     def t_yazmaz():
         con = _con()

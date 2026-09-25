@@ -574,11 +574,14 @@ function sortObj(o){
    ozellikler ekranda isaret tasimaz, testle sayilir. */
 function testOzellikleri(){
   const out = new Set();
+  /* HKM'nin testleri de sayilir: 119/120/126'nin HKM tarafi orada
+     (HKM/tests/test_merkez.py, ad dizgesi «oz-NNN …»). */
   const klasorler = [path.join(KOK, 'brand', 'ortak')]
-    .concat(['AYS', 'SPI', 'ESP'].map(s => path.join(KOK, s, 'src', 'tests')));
+    .concat(['AYS', 'SPI', 'ESP'].map(s => path.join(KOK, s, 'src', 'tests')))
+    .concat([path.join(KOK, 'HKM', 'tests')]);
   klasorler.forEach(d => {
     if(!fs.existsSync(d)) return;
-    fs.readdirSync(d).filter(f => /\.js$/.test(f)).forEach(f => {
+    fs.readdirSync(d).filter(f => /\.(js|py)$/.test(f)).forEach(f => {
       const t = fs.readFileSync(path.join(d, f), 'utf8');
       const re = /\boz-(\d{2,3})\b/g;
       let m;
@@ -811,7 +814,7 @@ async function main(){
 const DOLDUR_KAYNAK = {};
 Object.keys(DOLDUR).forEach(ad => { DOLDUR_KAYNAK[ad] = '(' + DOLDUR[ad].toString() + ')()'; });
 
-module.exports = { gez, karsilastir, rotalariBul, DOLDUR_KAYNAK, MODUL, GENISLIK, PROFIL,
+module.exports = { testOzellikleri, gez, karsilastir, rotalariBul, DOLDUR_KAYNAK, MODUL, GENISLIK, PROFIL,
   sonTaban, katalogSayisi, topla, SEKME, SEKME_GRUBU };
 
 if(require.main === module){
