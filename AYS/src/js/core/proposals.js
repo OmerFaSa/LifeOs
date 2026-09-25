@@ -772,6 +772,9 @@ R.Proposals = (function(){
   const KAPSAM_EYLEM = { bugun:'gecici-sure', hafta:'gecici-sure', kalici:'gunluk-sure' };
   function kapsamOf(p){
     if(!p) return null;
+    /* Kullanıcının seçtiği kapsam kaydedilir: haftanın son günü «Bu hafta»
+       bugün–bugün aralığına düşer ama seçim «Bu hafta» kalır. */
+    if(p.kapsam && KAPSAM_EYLEM[p.kapsam] === p.action) return p.kapsam;
     if(p.action === 'gunluk-sure') return 'kalici';
     if(p.action === 'gecici-sure') return (p.params || {}).from === (p.params || {}).to ? 'bugun' : 'hafta';
     return null;

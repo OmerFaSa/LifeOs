@@ -12570,7 +12570,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'6aeef4d', at:'2026-09-25 22:21', dirty:true };
+R.BUILD = { id:'916f5f5', at:'2026-09-25 22:29', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -45586,6 +45586,9 @@ R.Proposals = (function(){
   const KAPSAM_EYLEM = { bugun:'gecici-sure', hafta:'gecici-sure', kalici:'gunluk-sure' };
   function kapsamOf(p){
     if(!p) return null;
+    /* Kullanıcının seçtiği kapsam kaydedilir: haftanın son günü «Bu hafta»
+       bugün–bugün aralığına düşer ama seçim «Bu hafta» kalır. */
+    if(p.kapsam && KAPSAM_EYLEM[p.kapsam] === p.action) return p.kapsam;
     if(p.action === 'gunluk-sure') return 'kalici';
     if(p.action === 'gecici-sure') return (p.params || {}).from === (p.params || {}).to ? 'bugun' : 'hafta';
     return null;

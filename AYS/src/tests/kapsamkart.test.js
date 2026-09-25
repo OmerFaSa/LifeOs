@@ -63,5 +63,20 @@
         R.S.officeProposals = [];
       });
     });
+
+    it('oz-127 haftanın son günü «Bu hafta» seçilince seçim «Bu hafta» kalır', async () => {
+      /* Canlı denemede bulundu (pazar): «Bu hafta» bugün–bugün aralığına
+         düşüyor, seçici «Yalnız bugün»e atlıyordu. Seçim kaydedilir. */
+      await hazirla();
+      const gunler = R.Model.weekDates(R.Model.currentWeek());
+      await withTodayAsync(R.U.iso(gunler[gunler.length - 1]), async () => {
+        await R.Screens.onaylar.handle['oneri-kapsam']({ name:'kapsam-k1', value:'hafta' });
+        const p = R.S.officeProposals.find(x => x.id === 'k1');
+        expect(R.Proposals.kapsamOf(p)).toBe('hafta');
+        const k = dom(await R.Screens.onaylar.render());
+        expect(k.querySelector('[data-oz="127"] input:checked').value).toBe('hafta');
+      });
+      R.S.officeProposals = [];
+    });
   });
 })();
