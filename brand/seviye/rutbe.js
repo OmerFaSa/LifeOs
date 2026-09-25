@@ -101,6 +101,85 @@ __NS__.Screens.rutbe = (function(){
       body:html`<p class="small dim">Seviye defteri henüz yüklenmedi.</p>` });
   }
 
+  /* ============================================ VİTRİN KARTLARI ====
+     (brand/ortak/vitrin.js, katalog H). XP KARAR VERMEZ: bunlar yalnız
+     görünürlüktür. Kitaplık yüklü değilse (eski kabuk) hiçbiri çizilmez;
+     ekranın kendi kartları yerinde kalır. */
+  const VT = function(){ return (L() || {}).VITRIN; };
+  const AY_KISA = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  const AY_UZUN = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  const vkutu = (ad, yuva, ic) => ic ? K.Kutu ? K.Kutu({ ad, yuva, class:'vkutu', govde:raw(ic) })
+    : K.Card({ title:ad, body:raw(ic) }) : '';
+
+  /* 142 KADEME YOLU ve 145 GALERİ: katalogdaki altı kademe. */
+  function kademeYoluKarti(d){
+    if(!VT() || !d || !d.kademeBilgi) return '';
+    return vkutu('Kademe yolu', 'görünürlük', VT().kademeYolu({ kademeler:L().KADEMELER || [], simdi:d.kademe,
+      etiket:d.kademeBilgi.ad + ' ' + d.etiket + (d.tamam ? '' : ' · ' + tr(d.icinde) + ' / ' + tr(d.gereken)) }));
+  }
+  function galeriKarti(d){
+    if(!VT() || !d || !d.kademe) return '';
+    return vkutu('Rütbe galerisi', 'görünürlük', VT().rutbeGalerisi({ kademeler:L().KADEMELER || [], simdi:d.kademe }));
+  }
+
+  /* 141 XP DÖKÜMÜ: bugünkü XP iş iş (defterin kendi satırları). */
+  function xpDokumuKarti(){
+    if(!VT()) return '';
+    const liste = XP().bugunku().filter(r => r.kazanilan > 0).sort((a, b) => b.kazanilan - a.kazanilan);
+    return vkutu('Bugünkü XP', 'görünürlük', VT().xpDokumu({ sistem:MOD_ADI, satirlar:liste.map(r => ({ ad:r.ad,
+      adet:r.adet ? r.adet + ' ' + (r.birim || '') : '', xp:r.kazanilan })) }));
+  }
+
+  /* 146 BAŞARIM ROZETİ: son kazanılan ve en yakın olan. */
+  function rozetKarti(B){
+    if(!VT() || !B) return '';
+    const kaz = B.liste().filter(r => r.kazanildi).sort((a, b) => String(b.kazanildi).localeCompare(String(a.kazanildi)))[0];
+    const yak = (B.siradaki(1) || [])[0];
+    const r = [];
+    if(kaz) r.push({ ad:kaz.ad, kazanildi:true, tarih:kaz.kazanildi });
+    if(yak) r.push({ ad:yak.ad, kazanildi:false, oran:yak.oran, ilerleme:tr(yak.deger || 0) + ' / ' + tr(yak.esik) + ' ' + (yak.birim || '') });
+    return vkutu('Başarım', 'görünürlük', VT().basarimRozeti({ rozetler:r }));
+  }
+
+  /* 147 AY ÖZETİ: son on iki ay; ilk kayıtlı aydan önceki aylar «veri yok». */
+  function ayOzetiKarti(B){
+    if(!VT() || !B || !B.aylar) return '';
+    const ay = B.aylar();
+    if(!ay) return '';
+    const anahtar = Object.keys(ay).filter(k => /^\d{4}-\d{2}$/.test(k)).sort();
+    if(!anahtar.length) return '';
+    const ilk = anahtar[0];
+    const bugun = new Date();
+    const aylar = [];
+    for(let i = 11; i >= 0; i--){
+      const t = new Date(bugun.getFullYear(), bugun.getMonth() - i, 1);
+      const k = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0');
+      const x = ay[k];
+      aylar.push({ ad:AY_KISA[t.getMonth()], uzun:AY_UZUN[t.getMonth()], yok:k < ilk, az:k === ilk && i !== 0,
+        gun:x ? x.gun || 0 : 0, dakika:x ? x.dakika : null,
+        gunSayisi:new Date(t.getFullYear(), t.getMonth() + 1, 0).getDate() });
+    }
+    return vkutu('On iki ay', 'ölçüldü', VT().ayOzeti({ aylar, modul:MOD_ADI }));
+  }
+
+  /* 148 KUSURSUZ GÜNLER: ayın sayısı ay özetinden; takvim penceredeki günler. */
+  function kusursuzKarti(B){
+    if(!VT() || !B || !B.aylar || !B.gunler) return '';
+    const ay = B.aylar(), g = B.gunler();
+    if(!ay || !g) return '';
+    const n = new Date(), k = n.getFullYear() + '-' + String(n.getMonth() + 1).padStart(2, '0');
+    const bu = ay[k] || { gun:0, kusursuz:0 };
+    const pencere = [];
+    for(let i = (B.PENCERE_GUN || 7) - 1; i >= 0; i--){
+      const t = new Date(n.getFullYear(), n.getMonth(), n.getDate() - i);
+      const iso = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+      const x = g[iso];
+      pencere.push({ ad:iso, aktif:!!(x && (x.dakika || x.gorev)), kusursuz:!!(x && x.kusursuz), bugun:i === 0 });
+    }
+    return vkutu('Kusursuz günler', 'ölçüldü', VT().kusursuzGunler({ sayi:bu.kusursuz || 0, aktif:bu.gun || 0,
+      ay:AY_UZUN[n.getMonth()], gunler:pencere, modul:MOD_ADI }));
+  }
+
   /* ================================================== ŞU AN ========= */
 
   function simdiTab(){
@@ -194,9 +273,10 @@ __NS__.Screens.rutbe = (function(){
       ]}</div>`,
 
       K.Card({ title:'İlerleme', body:ilerleme }),
+      kademeYoluKarti(d),
       kademeIciKart(d),
       rozetOzetKart(),
-      bugunKart(),
+      xpDokumuKarti() || bugunKart(),
     ]);
   }
 
@@ -344,7 +424,7 @@ __NS__.Screens.rutbe = (function(){
       k:k, satir:basamaklar.filter(b => b.kademe === k.no),
     }));
 
-    return K.Stack(kademeler.map(({ k, satir }) => {
+    return K.Stack([galeriKarti(d)].concat(kademeler.map(({ k, satir }) => {
       const gecilen = satir.filter(b => b.durum === 'gecildi').length;
       const icinde = satir.some(b => b.durum === 'simdi');
       const hal = gecilen === satir.length ? 'tamam' : (icinde || gecilen ? 'acik' : 'kilitli');
@@ -388,7 +468,7 @@ __NS__.Screens.rutbe = (function(){
             ${kademeKunyesi(k, satir, hal, d)}
           </div>
         </div>`, 'rutbe--kademe');
-    }));
+    })));
   }
 
   /* KADEME KÜNYESİ — basamak sıralarının sağındaki boşluğu DOLDURUR.
@@ -515,6 +595,9 @@ __NS__.Screens.rutbe = (function(){
 
     return renkli(kd, K.Stack([
       siradakiKart(B),
+      rozetKarti(B),
+      ayOzetiKarti(B),
+      kusursuzKarti(B),
       /* Aynı gerekçe: `K.Grid` on iki sütunludur ve span'sız çocuk bir
          sütun kaplar (bkz. `simdiTab`). */
       html`<div class="rutbe-sayaclar">${[

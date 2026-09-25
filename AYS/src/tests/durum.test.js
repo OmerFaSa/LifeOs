@@ -36,7 +36,7 @@
   });
 
   describe('Sakin hata (011)', () => {
-    it('ekran hatası: kırmızı yok, ilk cümle veri, tek düğme', () => {
+    it('oz-011 ekran hatası: kırmızı yok, ilk cümle veri, tek düğme', () => {
       const d = coz(R.App.errorPanel(new Error('x is undefined')));
       const k = d.querySelector('[data-oz="011"]');
       expect(!!k).toBe(true);
@@ -47,7 +47,7 @@
       expect(b[0].getAttribute('data-act')).toBe('reload');
     });
 
-    it('teknik ileti silinmez, kapalı ayrıntıya iner', () => {
+    it('oz-011 teknik ileti silinmez, kapalı ayrıntıya iner', () => {
       const d = coz(R.App.errorPanel(new Error('<b>x</b> is undefined')));
       const kod = d.querySelector('details .sakinhata__kod');
       expect(kod.textContent).toBe('<b>x</b> is undefined');

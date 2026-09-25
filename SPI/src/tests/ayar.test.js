@@ -37,7 +37,7 @@
   function seritYazi(){ const s = document.querySelector('.ayar-serit'); return s ? s.textContent : ''; }
 
   describe('Ayar (T5)', () => {
-    it('21 değişen alan noktalanır, şerit sayar; anında uygulanan sayılmaz; Vazgeç geri koyar', () => {
+    it('oz-021 değişen alan noktalanır, şerit sayar; anında uygulanan sayılmaz; Vazgeç geri koyar', () => {
       const d = form();
       try{
         A.sonra(d, { rota:'t-ayar', etkin:true });
@@ -54,7 +54,7 @@
       }finally{ A.sonra(d, { rota:'t-ayar', etkin:false }); d.remove(); }
     });
 
-    it('21 yeniden çizimde yazılan kaybolmaz; Ayarlar dışında çalışmaz', () => {
+    it('oz-021 yeniden çizimde yazılan kaybolmaz; Ayarlar dışında çalışmaz', () => {
       const d = form();
       try{
         A.sonra(d, { rota:'t-ayar2', etkin:true });
@@ -73,7 +73,7 @@
       }finally{ A.sonra(d, { rota:'t-ayar2', etkin:false }); d.remove(); }
     });
 
-    it('21 «Kaydet»e basınca değer bir sonraki çizimde geri konmaz', () => {
+    it('oz-021 «Kaydet»e basınca değer bir sonraki çizimde geri konmaz', () => {
       const d = form();
       try{
         A.kur();
@@ -89,7 +89,7 @@
       }finally{ A.sonra(d, { rota:'t-ayar3', etkin:false }); d.remove(); }
     });
 
-    it('182 varsayılandan farklı alanın altında varsayılan ve tek düğme; dönüş olay atar', () => {
+    it('oz-182 varsayılandan farklı alanın altında varsayılan ve tek düğme; dönüş olay atar', () => {
       const d = document.createElement('div');
       d.innerHTML = '<label class="field"><span>Aralık</span><input id="t-ara" type="number" value="30"'
         + ' data-change="x" data-varsayilan="60" data-varsayilan-ad="60 dakika"></label>'
@@ -110,7 +110,7 @@
       }finally{ d.remove(); }
     });
 
-    it('183 arama tam yolu verir, Türkçe harfe duyarsız, modüle göre gruplar, kaçışlar', () => {
+    it('oz-183 arama tam yolu verir, Türkçe harfe duyarsız, modüle göre gruplar, kaçışlar', () => {
       const html = '<section class="kutu"><header><h2 class="kutu__ad">HKM işareti<button class="hint">i</button></h2></header>'
         + '<label class="field"><span>En sık kaç dakikada bir</span><input id="x-int"></label>'
         + '<label class="field"><span>Görünüm <span class="hint-text">ipucu</span></span><select id="x-tema"></select></label></section>';
@@ -129,7 +129,7 @@
       expect(A.aramaKutusu()).toContain('type="search"');
     });
 
-    it('181 tema seçici üç örnek yan yana; varsayılan dışındayken geri dönüş', () => {
+    it('oz-181 tema seçici üç örnek yan yana; varsayılan dışındayken geri dönüş', () => {
       const d = document.createElement('div');
       d.innerHTML = String(NS.C.TemaSecici({ value:'dark', act:'set-theme' }));
       document.body.appendChild(d);
@@ -149,7 +149,7 @@
       }finally{ d.remove(); }
     });
 
-    it('181 açık örneğin jetonları gerçek açık değerlerle aynı', () => {
+    it('oz-181 açık örneğin jetonları gerçek açık değerlerle aynı', () => {
       const kok = document.documentElement;
       const eski = kok.getAttribute('data-theme');
       kok.setAttribute('data-theme', 'light');

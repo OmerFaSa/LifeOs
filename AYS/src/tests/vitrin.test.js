@@ -129,6 +129,51 @@
       expect(govde).toContain('data-oz="177"');
     });
 
+    it('oz-174 oz-175 Ayarlar › Veri: veri nerede şeması ve dışa aktar kartı', async () => {
+      await hazirla();
+      const k = dom(await R.Screens.guide.render());
+      expect(k.querySelector('[data-oz="174"]').textContent).toContain('modüle yazmaz');
+      const d = k.querySelector('[data-oz="175"]');
+      expect(d.querySelector('[data-act="export-data"]')).toBeTruthy();
+      expect(d.querySelectorAll('.sg span')).toHaveLength(1);
+      expect(k.querySelector('[data-oz="117"]')).toBeNull();
+    });
+
+    it('oz-117 geri dönüş noktaları yalnız orta/büyük uygulanmış öneriden', async () => {
+      await hazirla();
+      R.S.officeProposals = [
+        { id:'gd1', action:'block-add', agent:'tyt', status:'applied', level:'orta', source:'kural', appliedAt:'2026-09-12T09:00:00Z' },
+        { id:'gd2', action:'block-add', agent:'tyt', status:'applied', level:'kucuk', otomatik:true, source:'kural', appliedAt:'2026-09-13T09:00:00Z' }];
+      const k = dom(await R.Screens.guide.render());
+      const g = k.querySelector('[data-oz="117"]');
+      expect(g).toBeTruthy();
+      expect(g.querySelectorAll('.r')).toHaveLength(1);
+      expect(g.querySelector('[data-act="office-undo"]').getAttribute('data-id')).toBe('gd1');
+      expect(g.textContent).toContain('ORTA');
+      R.S.officeProposals = [];
+    });
+
+    it('oz-178 içe aktarma önce önizler; onaysız hiçbir şey yazılmaz', async () => {
+      await hazirla();
+      const once = JSON.stringify(R.Store.exportAll().data);
+      const yedek = R.Store.exportAll();
+      yedek.data = Object.assign({}, yedek.data, { 'errors/vt1':{ id:'vt1' } });
+      const sheet = R.UI.sheet, imp = R.Store.importAll, oku = R.Store.readBackup;
+      let govde = '', yazildi = false;
+      try{
+        R.UI.sheet = o => { govde = o.body; };
+        R.Store.readBackup = o => ({ ok:true, data:o.data, meta:o.__meta });
+        R.Store.importAll = async () => { yazildi = true; return {}; };
+        await R.Screens.guide.handle['import-run']({ dataset:{} }, { obj:yedek, name:'yedek.json', size:2048 });
+      }finally{ R.UI.sheet = sheet; R.Store.importAll = imp; R.Store.readBackup = oku; }
+      expect(yazildi).toBe(false);
+      const k = dom(govde);
+      const b = k.querySelectorAll('[data-oz="178"] .sn3 b');
+      expect(b[1].textContent).toBe('1');
+      expect(b[3].textContent).toBe('0');
+      expect(JSON.stringify(R.Store.exportAll().data)).toBe(once);
+    });
+
     it('oz-139 model kapalıyken Ofis gri şeritle açılır; oz-137 masa raporu veriyi adıyla çipler', async () => {
       await hazirla();
       const ajan = R.AGENTS.find(a => !a.lead);

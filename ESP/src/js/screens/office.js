@@ -67,7 +67,25 @@ ESP.Screens.office = (function(){
     });
   }
 
+  /* G · VİTRİN KARTLARI (brand/ortak/vitrin.js › ofis). Cümleler kural
+     motorunun (`ruleText`); model cevabı balona girmez. Açık masa yok:
+     «Danış» sohbeti açar, masa seçimi tutulmaz — konuşan Patron'dur. */
+  function vitrinOfis(){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.ofis) return {};
+    const aktif = ['patron'].concat(ESP.Mod.activeAgents().map(a => a.id).filter(id => id !== 'patron'));
+    const kisi = id => { const a = ESP.AGENT_BY_ID[id]; return a ? { ad:a.short || a.name, harf:a.initial, gorsel:'img/marka/ajan-kare-esp-' + a.id + '.webp' } : null; };
+    const h = ESP.Office.handoffs()[0];
+    return V.ofis({ modul:'esp', act:{ sor:'open-agent' },
+      ajanlar:aktif.map(id => ESP.AGENT_BY_ID[id]).filter(Boolean).map(a => ({ id:a.id, ad:a.short || a.name, harf:a.initial, rol:a.role,
+        patron:a.id === 'patron', gorsel:'img/marka/ajan-kare-esp-' + a.id + '.webp', hazir:ESP.Office.ready(a.id),
+        cumle:(() => { try{ return ESP.Office.ruleText(a.id, a.id === 'patron' ? ESP.Office.patronBrief() : ESP.Office.brief(a.id)); }catch(e){ return ''; } })(),
+        yapar:V.maddele(a.scope), yapmaz:V.maddele(a.notScope) })),
+      devir:h && kisi(h.from) && kisi(h.to) ? { kaynak:kisi(h.from), hedef:kisi(h.to), metin:h.finding + ' — ' + h.toName + '’a düşüyor.' } : null });
+  }
+
   function render(){
+    const vo = vitrinOfis();
     const patron = ESP.AGENT_BY_ID.patron;
     const uzmanlar = ESP.Mod.activeAgents().filter(a => a.id !== 'patron');
     const devir = ESP.Office.handoffs();
@@ -77,6 +95,11 @@ ESP.Screens.office = (function(){
     return K.Grid(html`
       ${K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:ESP.Office.ready('patron') })) : '')}
       ${K.Span(12, K.Ledger(() => [
+        when(vo.masa, () => K.Entry({ wide:true, label:'Masa', meta:'kim konuşuyor',
+          note:'Balondaki sayılar kural motorunun; model açık da olsa sayıyı o yazmaz.',
+          body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
+        when(vo.toplanti, () => K.Entry({ wide:true, label:'Günün toplantısı', meta:'her masadan tek cümle',
+          body:raw(vo.toplanti) })),
 
         K.Entry({
           label:'Patron', hint:'rule-engine',
@@ -99,7 +122,7 @@ ESP.Screens.office = (function(){
              + 'Ölçülmemiş bir şey devredilemez — tahmin devir üretmez.',
           wide:true,
           body:devir.length
-            ? html`${map(devir, h => html`
+            ? html`${when(vo.devir, () => html`<div class="mb-12">${raw(vo.devir)}</div>`)}${map(devir, h => html`
                 <button class="handoff" data-act="go" data-route="${h.route}">
                   <span class="handoff__from">${h.fromName}</span>
                   <span class="handoff__arrow">→</span>

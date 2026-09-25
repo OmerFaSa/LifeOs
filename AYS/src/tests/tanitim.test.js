@@ -148,7 +148,7 @@ describe('Tanıtım — adım değiştirme', () => {
   const { describe, it, expect } = NS.Test;
 
   describe('Kurulum adımları (171)', () => {
-    it('üç adım, tek soru, ilerleme üstte; yazılan kalır; Başla yalnız sonda', () => {
+    it('oz-171 üç adım, tek soru, ilerleme üstte; yazılan kalır; Başla yalnız sonda', () => {
       const d = document.createElement('div');
       d.className = 'sheet';
       d.innerHTML = window.LIFEOS.KURULUM_HTML('spi', { adimlar:['<p>bir</p>', '<p>iki</p>',

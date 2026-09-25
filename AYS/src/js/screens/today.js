@@ -994,6 +994,26 @@ R.Screens.today = (function(){
     return kalan >= 0 ? VT().geriSayim({ dakika:kalan, ad:b.topic || b.subject || b.slot }) : '';
   }
 
+  /* 006 GÜNÜN AÇILIŞI: hiçbir blok başlamamışken iş sayısı, planlanan
+     süre ve ilk iş. 007 GÜN KAPANIŞI: bekleyen blok kalmayınca üç sayı;
+     süre yalnız ÖLÇÜLMÜŞ dakikadır (girilmemişse «—»). */
+  function gunUcuHtml(day){
+    const bl = bloklarOf(day);
+    if(!VT() || !bl.length || runningBlock()) return '';
+    const bekleyen = bl.filter(b => b.status === 'pending');
+    if(bekleyen.length === bl.length && !bl.some(b => b.startedAt)){
+      const ilk = bekleyen[0];
+      return VT().gunAcilisi({ is:bl.length, dk:bl.reduce((t, b) => t + (Number(b.targetMin) || 0), 0),
+        modul:'ays', sistem:'AYS', ilk:{ ad:ilk.topic || ilk.subject || ilk.slot, not:ilk.slot },
+        act:'timer-start', data:{ 'data-block':ilk.id } });
+    }
+    if(bekleyen.length) return '';
+    const olculen = bl.filter(b => b.actualMin != null);
+    return VT().gunKapanisi({ biten:bl.filter(b => b.status === 'done' || b.status === 'partial').length, toplam:bl.length,
+      dk:olculen.length ? olculen.reduce((t, b) => t + (Number(b.actualMin) || 0), 0) : null,
+      ertelenen:bl.filter(b => b.status === 'skipped').length });
+  }
+
   /* 060 BLOK BİTİŞ ÖZETİ: son biten blok ve sıradaki iş. Sayılar bloğun
      kaydından; girilmemiş sayı «—». Süren blok varken çizilmez. */
   function blokBitisHtml(day){
@@ -1146,7 +1166,7 @@ R.Screens.today = (function(){
           ${when(acil, () => acil.kart)}
           ${R.Setup.needed() ? raw(R.Setup.card()) : html`<div class="kahraman" data-oz="042">${NextUpCard()}</div>`}
           ${when(runningBlock(), () => html`<div id="geri-sayim" class="bugun__vitrin">${raw(geriSayimHtml(runningBlock()))}</div>`)}
-          ${when(!R.Setup.needed(), () => raw(blokBitisHtml(day)))}
+          ${when(!R.Setup.needed(), () => raw(gunUcuHtml(day) + blokBitisHtml(day)))}
           ${when(R.Signals && R.Signals.current(), () => SignalCard())}
         </section>
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>

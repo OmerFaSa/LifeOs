@@ -27,7 +27,7 @@
   }
 
   describe('Hareket (T4)', () => {
-    it('12 tek canlı öğe: yalnız ilki nabız atar', () => {
+    it('oz-012 tek canlı öğe: yalnız ilki nabız atar', () => {
       const d = kok('<div class="h-canli">a</div><div class="h-canli">b</div><div class="h-canli" hidden>c</div>');
       try{
         const ilk = H.tekCanli(d);
@@ -38,7 +38,7 @@
       }finally{ d.remove(); }
     });
 
-    it('149 yalnız değişen sayı yuvarlanır; yeni ekranda hiçbiri', () => {
+    it('oz-149 yalnız değişen sayı yuvarlanır; yeni ekranda hiçbiri', () => {
       const d = kok('<b data-h-sayi="a">3</b><b data-h-sayi="b">7</b>');
       try{
         H.sonra(d, 'x', { az:false });
@@ -58,7 +58,7 @@
       }finally{ d.remove(); }
     });
 
-    it('152 tik yalnız yeni biten işte çizilir', () => {
+    it('oz-152 tik yalnız yeni biten işte çizilir', () => {
       const d = kok('<p data-h="k1" data-h-bitti="0">a</p><p data-h="k2" data-h-bitti="1">b</p>');
       try{
         H.sonra(d, 'x', { az:false });
@@ -70,7 +70,7 @@
       }finally{ d.remove(); }
     });
 
-    it('158 kaybolan satır yerinde kapanır; kopya dokunulamaz ve kimlik taşımaz', () => {
+    it('oz-158 kaybolan satır yerinde kapanır; kopya dokunulamaz ve kimlik taşımaz', () => {
       const satir = k => '<div data-h-satir="' + k + '"><button id="b-' + k + '" data-act="sil">' + k + '</button></div>';
       const d = kok('<div class="liste">' + satir('a') + satir('b') + satir('c') + '</div>');
       try{
@@ -88,7 +88,7 @@
       }finally{ d.remove(); }
     });
 
-    it('158 toplu kayıp (süzgeç) hayalet çizmez', () => {
+    it('oz-158 toplu kayıp (süzgeç) hayalet çizmez', () => {
       const satir = k => '<div data-h-satir="' + k + '">' + k + '</div>';
       const d = kok(['a', 'b', 'c', 'd', 'e', 'f'].map(satir).join(''));
       try{
@@ -112,7 +112,7 @@
       }finally{ d.remove(); }
     });
 
-    it('154 üst çubuktaki küçük başlık sayfa başlığını taşır', () => {
+    it('oz-154 üst çubuktaki küçük başlık sayfa başlığını taşır', () => {
       const d = kok('<header class="ust"><span class="ust__baslik" aria-hidden="true"></span></header>'
         + '<h1 class="sayfabasi__baslik"> Plan › Hafta </h1>');
       try{
@@ -122,14 +122,14 @@
       }finally{ d.remove(); }
     });
 
-    it('153 geçiş yoksa ya da hareket azaltılmışsa iş doğrudan yapılır', async () => {
+    it('oz-153 geçiş yoksa ya da hareket azaltılmışsa iş doğrudan yapılır', async () => {
       let n = 0;
       const sonuc = H.gecis(() => { n++; return 'tamam'; }, { az:true });
       expect(n).toBe(1);
       expect(sonuc).toBe('tamam');
     });
 
-    it('159 önizleme ekran adını ve cümlesini kaçışlayarak verir', () => {
+    it('oz-159 önizleme ekran adını ve cümlesini kaçışlayarak verir', () => {
       const ic = H.onizleIcerik('x', r => ({ baslik:'<Plan>', cumle:'3 blok & 1 deneme' }));
       expect(ic).toContain('&lt;Plan&gt;');
       expect(ic).toContain('3 blok &amp; 1 deneme');
@@ -137,7 +137,27 @@
       expect(H.onizleIcerik('x', () => { throw new Error('bozuk'); })).toBe('');
     });
 
-    it('14 odak kapısı: Esc işin çıkış düğmesine basar; açık katman varken basmaz', () => {
+    it('oz-156 odak halkası klavyeyle gelen odağın yerine kayar; fareyle gelen odakta çizilmez', () => {
+      const d = kok('<button id="hh1" style="position:absolute;left:10px;top:10px;width:80px;height:30px">A</button>');
+      try{
+        const b = d.querySelector('#hh1');
+        const az = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        b.focus({ focusVisible:true });
+        let gorunur = true;
+        try{ gorunur = b.matches(':focus-visible'); }catch(e){}
+        H.halka(b);
+        const h = document.querySelector('.h-halka');
+        if(!az && gorunur){
+          expect(!!h).toBe(true);
+          expect(h.style.width).toBe((b.getBoundingClientRect().width + 6) + 'px');
+          expect(h.getAttribute('aria-hidden')).toBe('true');
+        }else{
+          expect(!h || !h.classList.contains('is-acik')).toBe(true);
+        }
+      } finally { d.remove(); const h = document.querySelector('.h-halka'); if(h) h.remove(); }
+    });
+
+    it('oz-014 odak kapısı: Esc işin çıkış düğmesine basar; açık katman varken basmaz', () => {
       let basildi = 0;
       const d = kok('<div data-h-odak><button data-h-odak-cik="1">Oturumu bitir</button></div>');
       d.querySelector('button').addEventListener('click', () => basildi++);

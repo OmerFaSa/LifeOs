@@ -11,6 +11,8 @@ ESP.Screens.guide = (function(){
   const U = ESP.U, M = ESP.Model, S = ESP.S;
   const { html, raw, when, map } = ESP.h;
   const K = ESP.C, P = ESP.Parts;
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const sayiMi = v => typeof v === 'number' && isFinite(v);
 
   const TABS = [
     { id:'kullanim', label:'Kullanım' },
@@ -278,8 +280,12 @@ ESP.Screens.guide = (function(){
           ${when((window.LIFEOS || {}).GUVEN, () => raw(window.LIFEOS.GUVEN.yedekHtml({
             damga:(S.meta || {}).lastBackup, boyut:ayak.bytes, bugun:U.todayISO(),
             kayit:ayak.total, iz:(S.meta || {}).yedekIzi })))}
+          ${when(VT(), () => raw('<div class="mt-10">' + VT().veriNerede({
+            merkezNot:(ESP.Beacon && ESP.Beacon.settings().enabled) ? 'bağlı · teklif yazar, modüle yazmaz' : 'isteğe bağlı · şu an kapalı' })
+            + '</div><div class="mt-10">' + VT().disaAktar({ act:'export-data2', sistem:'ESP', not:'tüm kayıt · tek dosya', kayit:ayak.total,
+              kb:sayiMi(ayak.bytes) ? Math.round(ayak.bytes / 1024) : null }) + '</div>'))}
           <div class="row wrap">
-            ${K.Button({ label:'Yedek indir', act:'export-data2' })}
+            ${when(!VT(), () => K.Button({ label:'Yedek indir', act:'export-data2' }))}
             ${when((ESP.Beacon && ESP.Beacon.settings().enabled), () => K.Button({ label:'HKM’deki yedekten yükle', act:'restore-hkm' }))}
             ${K.Drop({ id:'restore-drop', act:'restore-file',
               label:'Yedek dosyasını buraya bırak ya da seç' })}

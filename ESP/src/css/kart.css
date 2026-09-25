@@ -1219,3 +1219,38 @@
 .vk .w22 .tas{ flex-wrap:wrap; }
 .vk .w22 .tas button{ height:30px; padding:0 10px; border-radius:7px; display:inline-grid; place-items:center; font:400 15px var(--vk-serif); background:var(--vk-s3); }
 .vk .w22 .tas button.uc2{ color:var(--vk-on); }
+
+/* ---- H · rütbe vitrin kartları: yol kademe renginde, şerit modül rengi ---- */
+.vk .y32 .yl::after{ width:calc((100% - 32px) * var(--ilerleme-oran, 0)); background:var(--yol-renk, var(--vk-bronz)); }
+.vk .y32 .yl .on .rn{ box-shadow:0 0 0 3px var(--vk-s2),0 0 0 4.5px var(--r, var(--vk-bronz)); }
+.vk .z31 .br i{ background:var(--c, var(--ays)); }
+.vk .z31 .br i.az{ background:color-mix(in oklab,var(--c, var(--ays)) 55%,var(--vk-s2)); }
+.vk .w33 .kg i.k{ background:var(--c, var(--ays)); }
+.vk .w33 .kg i.d, .vk .w33 .kg i.t{ background:color-mix(in oklab,var(--c, var(--ays)) 28%,var(--vk-s2)); }
+.vk .x60 > div{ display:flex; align-items:center; gap:10px; }
+
+/* ---- G · ofis vitrin kartları: halka ve çip MODÜLÜN renginde; çip yazısı
+   modülün AA tonu (--primary = --mod-ink). ---- */
+.vk .sc, .vk .x55 .sc{ background:color-mix(in oklab,var(--mod, var(--spi)) 14%,transparent); color:var(--primary, var(--spi-ink)); }
+.vk .x54 .on .av, .vk .y29 .av, .vk .y30 .av.ye{ box-shadow:0 0 0 3px var(--vk-s2),0 0 0 5px var(--mod, var(--spi)); }
+.vk .y30 .ok i{ background:repeating-linear-gradient(90deg,var(--mod, var(--spi)) 0 4px,transparent 4px 7px); }
+.vk .x56 .cal::before{ border-color:var(--mod, var(--esp)); }
+.vk .x56{ flex-wrap:wrap; gap:18px; }
+.vk .x56 > div{ display:flex; flex-direction:column; align-items:center; gap:6px; }
+.vk .x57 .cp button{ height:28px; padding:0 11px; border-radius:999px; border:1px solid var(--vk-l2); display:inline-flex; align-items:center;
+  font-size:12px; font-weight:500; color:var(--vk-ink2); background:var(--vk-s1); }
+.vk .x57 .cp button:first-child{ border-color:color-mix(in oklab,var(--mod, var(--spi)) 50%,transparent); color:var(--primary, var(--spi-ink)); }
+.vk .x54{ flex-wrap:wrap; }
+/* Ofis masası: kartlar alt alta, ince aralıkla. */
+.vofis{ display:grid; gap:14px; }
+
+/* ---- A · K vitrin kartları ---- */
+.vk .w05 .gn2 button{ height:44px; border-radius:8px; border:1px solid var(--vk-l2); background:var(--vk-s1); display:grid; place-items:center;
+  font:500 12px var(--vk-mono); }
+.vk .w05 .gn2 button.bu{ background:var(--vk-ink); color:var(--vk-on); border-color:transparent; }
+.vk .w05 .gn2 button.secili{ box-shadow:0 0 0 2px var(--mod, var(--ays)); }
+.vk .w05 .gn2 i.k{ color:var(--vk-ink3); }
+.vk .w37 .st3 .bt.w{ background:var(--primary, var(--spi-ink)); }
+.vk .w37 .st3 .bt:disabled{ opacity:.4; cursor:default; }
+.vk .z40 pre{ max-height:9em; }
+@media (max-width:520px){ .vk .z39{ grid-template-columns:1fr; } .vk .z39 .bg2{ display:none; } }

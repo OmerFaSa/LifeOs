@@ -853,15 +853,33 @@ R.Screens.office = (function(){
 
   /* ---------- ekran ---------- */
 
+  /* G · VİTRİN KARTLARI (brand/ortak/vitrin.js › ofis). Cümle kural
+     motorunun brifing başlığı; model cevabı balona girmez. AYS ajanlarının
+     «yapmaz» listesi tanımlı değil: sınır kartı çizilmez (uydurulmaz). */
+  function vitrinOfis(){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.ofis) return {};
+    return V.ofis({ modul:'ays', acik:S.ui.officeDesk, act:{ ac:'office-desk' },
+      ajanlar:R.AGENTS.map(a => ({ id:a.id, ad:a.name, harf:a.initial, rol:a.role, patron:!!a.lead,
+        gorsel:'img/marka/ajan-kare-ays-' + a.id + '.webp', hazir:O.ready(a.id),
+        cumle:(() => { try{ const b = O.brief(a.id); return b && b.headline ? String(b.headline) + '.' : ''; }catch(e){ return ''; } })(),
+        yapar:[], yapmaz:[] })) });
+  }
+
   async function render(){
     O.resetBriefs();
     const specialists = R.AGENTS.filter(a => !a.lead);
+    const vo = vitrinOfis();
 
     /* 139 model kapalı kipi: gri şerit; ajanlar hazır cümleyle konuşur. */
     return String(K.Grid([
       K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:O.mode() === 'llm' })) : ''),
       K.Span(8, K.Stack([
         boardCard(),
+        when(vo.masa, () => K.Kutu({ ad:'Masa', yuva:'kim konuşuyor', class:'vkutu',
+          govde:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
+        when(vo.toplanti, () => K.Kutu({ ad:'Günün toplantısı', yuva:'her masadan tek cümle', class:'vkutu',
+          govde:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` })),
         floorPlan(),
         briefingCard(),
         BossCard(),

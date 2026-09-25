@@ -701,6 +701,12 @@ R.Basarim = (function(){
       + '</span></span>';
   }
 
+  /* Ay özetleri ve yazılabilir penceredeki günler — ekranın kartları
+     (147 ay özeti, 148 kusursuz günler) için KOPYA; ekran defteri
+     değiştiremez. Defter yüklenmediyse null (sıfır değil). */
+  function aylar(){ return defter ? JSON.parse(JSON.stringify(defter.aylar || {})) : null; }
+  function gunler(){ return defter ? JSON.parse(JSON.stringify(defter.gunler || {})) : null; }
+
   /* HKM'ye giden özet. Üç sistem birbirini görmez; toplamı yalnız
      merkez alır (AGENTS.md §1.4) ve bu satır onun girdisidir. */
   function isaret(){
@@ -719,6 +725,7 @@ R.Basarim = (function(){
     bekleyen:bekleyen, gorundu:gorundu, dinle:dinle,
     toplamlar:toplamlar, seriAy:seriAy, olcum:olcum,
     gununOdagi:gununOdagi, odakHtml:odakHtml, siradaki:siradaki,
+    aylar:aylar, gunler:gunler,
     PENCERE_GUN:PENCERE_GUN,
   };
 })();

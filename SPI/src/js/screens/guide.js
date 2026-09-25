@@ -11,6 +11,7 @@ SP.Screens.guide = (function(){
   const U = SP.U, M = SP.Model, S = SP.S, UI = SP.UI;
   const { html, raw, when, map } = SP.h;
   const K = SP.C, P = SP.Parts;
+  const VT = () => (window.LIFEOS || {}).VITRIN;
 
   const TABS = [
     { id:'kullanim', label:'Kullanım', icon:'guide' },
@@ -340,6 +341,10 @@ SP.Screens.guide = (function(){
           ['Antrenman', String(f.workouts)],
           ['Kapladığı alan', U.fmtNum(Math.round(f.bytes / 1024)) + ' KB · %' + f.pct],
         ] })}
+        ${when(VT(), () => raw('<div class="mt-10">' + VT().veriNerede({
+          merkezNot:(SP.Beacon && SP.Beacon.settings().enabled) ? 'bağlı · teklif yazar, modüle yazmaz' : 'isteğe bağlı · şu an kapalı' })
+          + '</div><div class="mt-10">' + VT().disaAktar({ act:'backup', sistem:'SPİ', not:'tüm kayıt · tek dosya', kayit:f.total,
+            kb:Math.round(f.bytes / 1024) }) + '</div>'))}
         ${when(f.near, () => K.Notice({ tone:'warn', class:'mt-10',
           body:'Tarayıcı depolama alanının %' + f.pct + '\'i dolu. Yedek al ve eski kayıtları temizle.' }))}
         ${K.Notice({ tone:'info', class:'mt-10',
@@ -348,7 +353,7 @@ SP.Screens.guide = (function(){
           body:new Date(undo.at).toLocaleString('tr-TR')+' tarihindeki yedekten yükleme mevcut '
              + 'verinin üzerine yazdı. Yanlışsa bir önceki duruma dönebilirsin — bu imkan yalnız '
              + 'bu içe aktarma için geçerli.' }))}`,
-      foot:html`${K.Button({ label:'Yedek indir', size:'sm', tone:'primary', act:'backup' })}
+      foot:html`${when(!VT(), () => K.Button({ label:'Yedek indir', size:'sm', tone:'primary', act:'backup' }))}
         ${K.Button({ label:'Yedek yükle', size:'sm', act:'restore' })}
         ${when((SP.Beacon && SP.Beacon.settings().enabled), () => K.Button({ label:'HKM’deki yedekten yükle', size:'sm', act:'restore-hkm' }))}
         ${when(undo, () => K.Button({ label:'İçe aktarmayı geri al', size:'sm', tone:'danger', act:'undo-import' }))}

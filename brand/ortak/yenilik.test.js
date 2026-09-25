@@ -18,7 +18,7 @@
   const sil = () => { try{ localStorage.removeItem('lifeos.yenilik.' + M); }catch(e){} };
 
   describe('Ne değişti? (17)', () => {
-    it('ilk açılışta ve yeni kullanıcıya gösterilmez; güncellemede bir kez', () => {
+    it('oz-017 ilk açılışta ve yeni kullanıcıya gösterilmez; güncellemede bir kez', () => {
       sil();
       try{
         expect(Y.gosterilmeliMi(M)).toBe(false);                     // ilk kez: yazıldı

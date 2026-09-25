@@ -506,4 +506,210 @@ describe('E · ESP kartları', () => {
   });
 });
 
+
+describe('H · Rütbe kartları (XP karar vermez; yalnız görünürlük)', () => {
+  const K6 = [{ no:1, ad:'Bronz' }, { no:2, ad:'Gümüş' }, { no:3, ad:'Altın' }, { no:4, ad:'Yakut' }, { no:5, ad:'Safir' }, { no:6, ad:'Kutsal' }];
+  it('oz-141 XP dökümü: bugünkü XP iş iş ve «XP’ye bakmaz» notu', () => {
+    icinde(V().xpDokumu({ sistem:'ays', satirlar:[{ ad:'Soru çözümü', adet:'30 soru', xp:60 }, { ad:'Blok', adet:'2 blok', xp:40 }] }), k => {
+      expect(k.querySelector('.u b').textContent).toBe('+100');
+      expect(k.textContent).toContain('XP’ye bakmaz');
+    });
+    expect(V().xpDokumu({ satirlar:[] })).toBe('');
+  });
+  it('oz-142 kademe yolu: bulunduğun kademe yanar, sonrakiler kilitli', () => {
+    icinde(V().kademeYolu({ kademeler:K6, simdi:2, etiket:'Gümüş 2.1' }), k => {
+      expect(k.querySelector('.yl .on').textContent).toContain('GÜMÜŞ');
+      expect(k.querySelectorAll('.yl .kl')).toHaveLength(4);
+    });
+  });
+  it('oz-144 sistem başına rütbe: bilinmeyen sistem uydurulmaz', () => {
+    expect(V().sistemRutbesi({ sistemler:[{ ad:'AYS', modul:'ays', kademe:1 }] })).toBe('');
+    expect(V().sistemRutbesi({ sistemler:[{ ad:'AYS', modul:'ays', kademe:1 }, { ad:'ESP', modul:'esp', kademe:2 }] })).toContain('ESP');
+  });
+  it('oz-145 rütbe galerisi: kazanılan renkli, kilitli siluet', () => {
+    icinde(V().rutbeGalerisi({ kademeler:K6, simdi:2 }), k => {
+      expect(k.querySelectorAll('.kl')).toHaveLength(4);
+      expect(k.textContent).toContain('2 KAZANILDI');
+    });
+  });
+  it('oz-146 başarım rozeti: kazanılan altıgen, kilitli dilim', () => {
+    icinde(V().basarimRozeti({ rozetler:[{ ad:'İlk 100 soru', kazanildi:true, tarih:'3 Eyl' }, { ad:'24 ay', kazanildi:false, oran:0.042, ilerleme:'1 / 24 ay' }] }), k => {
+      expect(k.querySelectorAll('.hx')).toHaveLength(2);
+      expect(k.querySelector('.hx.kl').style.getPropertyValue('--p')).toBe('4.2');
+    });
+  });
+  it('oz-147 ay özeti: kayıttan önceki aylar veri yok', () => {
+    const a = Array.from({ length:12 }, (_, i) => ({ ad:'A' + i, uzun:'Ay' + i, yok:i < 10, gun:i === 11 ? 21 : 3, gunSayisi:30, dakika:i === 11 ? 1870 : null }));
+    icinde(V().ayOzeti({ aylar:a }), k => {
+      expect(k.querySelectorAll('.br i.yok')).toHaveLength(10);
+      expect(k.textContent).toContain('21 GÜN');
+    });
+  });
+  it('oz-148 kusursuz günler: sayı ay özetinden, takvim penceredeki günler', () => {
+    icinde(V().kusursuzGunler({ sayi:9, aktif:21, ay:'Eylül', gunler:[{ kusursuz:true, aktif:true }, { aktif:true }, { aktif:false }] }), k => {
+      expect(k.querySelector('.u b').textContent).toBe('9');
+      expect(k.querySelectorAll('.kg i.k')).toHaveLength(1);
+      expect(k.querySelectorAll('.kg i.y')).toHaveLength(1);
+    });
+  });
+  it('oz-141 oz-142 oz-145 oz-146 oz-147 oz-148 rütbe ekranında (defter taklidiyle)', async () => {
+    const N = window.R || window.SP || window.ESP;
+    if(!N.Screens || !N.Screens.rutbe || !N.XP || !N.Basarim) return;
+    const x = N.XP, b = N.Basarim, eski = {};
+    ['durum', 'bugunku', 'merdiven'].forEach(f => { eski['x' + f] = x[f]; });
+    ['durum', 'liste', 'siradaki', 'aylar', 'gunler'].forEach(f => { eski['b' + f] = b[f]; });
+    const bugun = new Date(), ay = bugun.getFullYear() + '-' + String(bugun.getMonth() + 1).padStart(2, '0');
+    x.durum = () => ({ kademe:2, kademeBilgi:window.LIFEOS.KADEMELER[1], etiket:'2.1', icinde:10, gereken:100, kalan:90, oran:0.1,
+      toplam:500, bugun:40, bitmisBasamak:3, tamam:false });
+    x.bugunku = () => [{ ad:'Soru', adet:5, birim:'soru', kazanilan:40, tavan:100, oran:0.4 }];
+    x.merdiven = () => [];
+    b.durum = () => ({ gun:3, saat:1, dakika:90, gorev:4, kazanilanSayisi:1, toplamRozet:30 });
+    b.liste = () => [{ kod:'r1', ad:'İlk gün', aile:'gun', kazanildi:'2026-09-01' }];
+    b.siradaki = () => [{ kod:'r2', ad:'Yedi gün', aile:'gun', deger:3, esik:7, oran:3 / 7, birim:'gün' }];
+    b.aylar = () => ({ [ay]:{ gun:3, dakika:90, gorev:4, kusursuz:1 } });
+    b.gunler = () => ({});
+    try{
+      const k = document.createElement('div');
+      k.innerHTML = String(await N.Screens.rutbe.render());
+      ['141', '142', '145', '146', '147', '148'].forEach(n => expect(!!k.querySelector('[data-oz="' + n + '"]')).toBe(true));
+    } finally {
+      ['durum', 'bugunku', 'merdiven'].forEach(f => { x[f] = eski['x' + f]; });
+      ['durum', 'liste', 'siradaki', 'aylar', 'gunler'].forEach(f => { b[f] = eski['b' + f]; });
+    }
+  });
+});
+
+
+describe('G · Ofis kartları (ajan konuşur, kural motoru sayar)', () => {
+  const A = [{ id:'patron', ad:'Patron', harf:'P', patron:true, hazir:false, cumle:'Bugün 38 g protein kaldı.' },
+    { id:'nutri', ad:'Nesrin', harf:'N', hazir:true, cumle:'Tahlile 3 hafta var.', yapar:['Öğün planlar'], yapmaz:['Doz önermez'] }];
+  it('oz-129 sayı çipi: kural motorunun sayısı çip olur ve kaynağını taşır', () => {
+    icinde(V().sayiBalonu({ metin:'Bugün 38 g protein kaldı.', kaynak:'kural motoru hesapladı' }), k => {
+      expect(k.querySelector('.sc').textContent).toBe('38 g');
+      expect(k.querySelector('.sc').getAttribute('title')).toBe('kural motoru hesapladı');
+      expect(k.querySelector('.kn').textContent).toContain('38 g');
+    });
+    expect(V().sayiCipleri('12 gündür')).toContain('>12<');
+  });
+  it('oz-128 oz-132 masa: konuşan büyür; model kapalı ajan «kapalı» halkada', () => {
+    const o = V().ofis({ modul:'spi', ajanlar:A, act:{ ac:'toggle-desk', sor:'ask-agent' } });
+    icinde(o.masa, k => expect(k.querySelector('.on > div > b').textContent).toBe('Patron'));
+    icinde(o.durum, k => {
+      expect(k.querySelectorAll('.hl2.kap')).toHaveLength(1);
+      expect(k.querySelectorAll('.hl2.bos')).toHaveLength(1);
+    });
+  });
+  it('oz-130 sınır kartı yalnız açık masada ve yalnız tanımlıysa', () => {
+    expect(V().ofis({ ajanlar:A }).sinir).toBe('');
+    expect(V().ofis({ ajanlar:A, acik:'nutri' }).sinir).toContain('Doz önermez');
+    expect(V().ajanSinir({ ad:'X', yapar:['a'], yapmaz:[] })).toBe('');
+  });
+  it('oz-131 devir göstergesi iki ajan arasında', () => {
+    const h = V().devirGostergesi({ kaynak:{ ad:'Nesrin', harf:'N' }, hedef:{ ad:'Barış', harf:'B' }, metin:'Antrenman sorusu' });
+    expect(h).toContain('devir');
+    expect(h).toContain('Nesrin:');
+  });
+  it('oz-133 hazır cevap çipleri gerçek eyleme bağlı', () => {
+    icinde(V().ofis({ ajanlar:A, act:{ ac:'toggle-desk', sor:'ask-agent' } }).hazir, k => {
+      expect(k.querySelector('[data-act="toggle-desk"]').getAttribute('data-id')).toBe('nutri');
+      expect(k.querySelector('[data-act="ask-agent"]')).toBeTruthy();
+    });
+  });
+  it('oz-135 günün toplantısı: her uzmandan tek cümle, sayılar çip', () => {
+    icinde(V().ofis({ ajanlar:A }).toplanti, k => {
+      expect(k.querySelectorAll('.r')).toHaveLength(1);
+      expect(k.querySelector('.sc').textContent).toBe('3 hafta');
+    });
+  });
+  it('oz-138 konuşma özeti: karar ve açık soru; boşsa kart yok', () => {
+    expect(V().konusmaOzeti({ ajan:{ ad:'Nesrin' }, kararlar:[], acik:[] })).toBe('');
+    expect(V().konusmaOzeti({ ajan:{ ad:'Nesrin' }, kararlar:['Akşam öğünü 19:30'], acik:['kahvaltı saati'] })).toContain('Açık: kahvaltı saati');
+  });
+  it('oz-128 oz-135 ofis ekranında', async () => {
+    const N = window.R || window.SP || window.ESP;
+    if(!N.Screens || !N.Screens.office) return;
+    const k = document.createElement('div');
+    k.innerHTML = String(await N.Screens.office.render());
+    expect(!!k.querySelector('[data-oz="128"]')).toBe(true);
+    expect(!!k.querySelector('[data-oz="132"]')).toBe(true);
+  });
+});
+
+
+describe('A · K · Gün ve güven kartları', () => {
+  it('oz-006 günün açılışı: iş yoksa kart yok; ilk iş ve «Güne başla» eylemi', () => {
+    expect(V().gunAcilisi({ is:0, dk:0 })).toBe('');
+    icinde(V().gunAcilisi({ is:7, dk:245, saat:'07:40', modul:'esp', sistem:'ESP', ilk:{ ad:'Tarih', not:'08:00' }, act:'timer-start', data:{ 'data-id':'b1' } }), k => {
+      expect(k.querySelector('.sl b').textContent).toBe('7 iş');
+      expect(k.querySelector('.sl span').textContent).toBe('4 sa 5 dk');
+      expect(k.querySelector('.mod').textContent).toBe('ESP');
+      expect(k.querySelector('[data-act="timer-start"]').getAttribute('data-id')).toBe('b1');
+      expect(k.querySelector('[data-kesinlik="computed"]')).toBeTruthy();
+    });
+  });
+  it('oz-007 gün kapanışı: sayı yoksa «—», dakika sa:dk yazılır', () => {
+    expect(V().gunKapanisi({ biten:null, toplam:5 })).toBe('');
+    icinde(V().gunKapanisi({ biten:6, toplam:7, dk:230, ertelenen:null, yarin:'08:00 · Tarih' }), k => {
+      const b = k.querySelectorAll('.uc b');
+      expect(b[0].textContent).toBe('6 / 7');
+      expect(b[1].textContent).toBe('3:50');
+      expect(b[2].textContent).toBe('—');
+      expect(k.querySelector('.yr b').textContent).toBe('08:00 · Tarih');
+    });
+  });
+  it('oz-023 gün penceresi: kilitli gün düğme değildir; açık gün eyleme bağlı', () => {
+    const g = [{ gun:'15', kilitli:true }, { gun:'16', act:'day-go', data:{ 'data-date':'2026-09-16' } }, { gun:'17', bugun:true, secili:true, act:'day-go', data:{ 'data-date':'2026-09-17' } }];
+    icinde(V().gunPenceresi({ gunler:g, pencere:1 }), k => {
+      expect(k.querySelectorAll('i.k')).toHaveLength(1);
+      expect(k.querySelectorAll('button')).toHaveLength(2);
+      expect(k.querySelector('[aria-current="date"]').textContent).toBe('17');
+      expect(k.querySelector('.pn2')).toBeTruthy();
+    });
+    expect(V().gunPenceresi({ gunler:[] })).toBe('');
+  });
+  it('oz-168 adımlı sayı: eksi alt sınırda kapalı; iki düğme aynı eylem, farklı yön', () => {
+    icinde(V().adimliSayi({ etiket:'Su · bugün', ad:'Su', deger:0, birim:'ml', act:'water-step' }), k => {
+      const d = k.querySelectorAll('button');
+      expect(d).toHaveLength(2);
+      expect(d[0].disabled).toBe(true);
+      expect(d[1].getAttribute('data-delta')).toBe('1');
+      expect(k.querySelector('b').textContent).toBe('0');
+    });
+    icinde(V().adimliSayi({ deger:null, act:'x' }), k => expect(k.querySelector('b').textContent).toBe('—'));
+  });
+  it('oz-117 geri dönüş noktaları: nokta yoksa kart yok; her satır «Dön» eylemi', () => {
+    expect(V().geriDonus({ noktalar:[] })).toBe('');
+    icinde(V().geriDonus({ noktalar:[{ ad:'Plan baştan kuruldu · öncesi', not:'12 Eylül · büyük', act:'office-undo', data:{ 'data-id':'p1' } }] }), k => {
+      expect(k.querySelector('.r span').textContent).toBe('12 EYLÜL · BÜYÜK');
+      expect(k.querySelector('[data-act="office-undo"]').getAttribute('data-id')).toBe('p1');
+    });
+  });
+  it('oz-174 veri nerede: üç düğüm, Merkez modüle yazmaz', () => {
+    icinde(V().veriNerede({}), k => {
+      expect(k.querySelectorAll('.n')).toHaveLength(3);
+      expect(k.textContent).toContain('modüle yazmaz');
+    });
+  });
+  it('oz-175 dışa aktar: yalnız var olan biçim; eylemsiz kart yok', () => {
+    expect(V().disaAktar({})).toBe('');
+    icinde(V().disaAktar({ act:'export-data', sistem:'AYS', onizleme:'{ "data": { … } }', kayit:1208 }), k => {
+      expect(k.querySelectorAll('.sg span')).toHaveLength(1);
+      expect(k.querySelector('.sg .on').textContent).toBe('JSON');
+      expect(k.querySelector('.alt .cap').textContent).toBe('1.208 KAYIT');
+      expect(k.querySelector('[data-act="export-data"]')).toBeTruthy();
+    });
+  });
+  it('oz-178 içe aktarma önizlemesi: kod aynı / yeni / değişen / silinecek sayar', () => {
+    const f = V().yedekFarki({ a:{ x:1 }, b:{ y:2 }, c:3 }, { a:{ x:1 }, b:{ y:5 }, d:4, e:5 });
+    expect(f).toEqual({ ayni:1, yeni:2, degisen:1, silinen:1 });
+    icinde(V().iceAktarma(Object.assign({ dosya:'yedek.json', act:'import-apply', vazgec:'sheet-close' }, f)), k => {
+      const b = k.querySelectorAll('.sn3 b');
+      expect(b).toHaveLength(4);
+      expect(b[3].textContent).toBe('1');
+      expect(k.querySelectorAll('.ck4')).toHaveLength(2);
+      expect(k.querySelector('[data-act="import-apply"]')).toBeTruthy();
+    });
+  });
+});
+
 })();

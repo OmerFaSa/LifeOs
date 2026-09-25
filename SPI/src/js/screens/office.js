@@ -247,6 +247,7 @@ SP.Screens.office = (function(){
   /* Devir defteri — Patron'un asil isi. Ofisin en ozgun fikri burada
      gorunur hale gelir: bes ayri rapor degil, aralarindaki TRAFIK. */
   function handoffEntry(){
+    const vd = vitrinOfis().devir;
     const rows = SP.Office.handoffs();
     const loud = rows.filter(h => h.tone === 'danger' || h.tone === 'warn').length;
     return K.Entry({
@@ -255,7 +256,7 @@ SP.Screens.office = (function(){
       note:'Bir masanın bulgusu başka bir masanın işi olabilir. Devri Patron görür, '
         + 'kararı devredilen masa verir. Satıra bas: bulgunun düştüğü yere gider.',
       body:rows.length
-        ? html`<div class="handoffs">${map(rows.slice(0, HANDOFF_MAX), handoffRow)}</div>
+        ? html`${when(vd, () => html`<div class="mb-12">${raw(vd)}</div>`)}<div class="handoffs">${map(rows.slice(0, HANDOFF_MAX), handoffRow)}</div>
             ${when(rows.length > HANDOFF_MAX, () => html`<p class="tiny dim mt-8">
               ${rows.length - HANDOFF_MAX} bağ daha — masaları aç.</p>`)}`
         : K.Empty({ text:'Masalar arasında devredilecek ölçülmüş bir bulgu yok. '
@@ -283,12 +284,34 @@ SP.Screens.office = (function(){
   /* BAM ürünleri Kütüphanem'de (screens/kutuphane.js): «Kütüphane»
      BAM'ın ürettiklerinin tek yeri. */
 
+  /* G · VİTRİN KARTLARI (brand/ortak/vitrin.js › ofis): masa, durum
+     halkası, sayı çipli balon, hazır cevap, günün toplantısı, sınır kartı,
+     devir. Cümleler kural motorunun (`ruleText`); model cevabı girmez. */
+  function vitrinOfis(){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.ofis) return {};
+    const h = SP.Office.handoffs()[0];
+    const kisi = id => { const a = SP.AGENT_BY_ID[id]; return a ? { ad:a.name, harf:a.initial, gorsel:'img/marka/ajan-kare-spi-' + a.id + '.webp' } : null; };
+    return V.ofis({ modul:'spi', acik:S.ui.officeDesk, act:{ ac:'toggle-desk', sor:'ask-agent' },
+      ajanlar:SP.AGENTS.map(a => ({ id:a.id, ad:a.name, harf:a.initial, rol:a.role, patron:a.id === 'patron',
+        gorsel:'img/marka/ajan-kare-spi-' + a.id + '.webp', hazir:SP.Office.ready(a.id),
+        cumle:(() => { try{ return SP.Office.ruleText(a.id, SP.Office.brief(a.id)); }catch(e){ return ''; } })(),
+        yapar:V.maddele(a.scope), yapmaz:V.maddele(a.notScope) })),
+      devir:h && kisi(h.from) && kisi(h.to) ? { kaynak:kisi(h.from), hedef:kisi(h.to), metin:h.finding + ' — ' + h.toName + ': ' + h.ask } : null });
+  }
+
   async function render(){
     const flags = SP.Model.openFlags();
+    const vo = vitrinOfis();
     return String(html`
       ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:SP.Office.ready('patron') })) : ''}
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
       ${K.Ledger(() => [
+        when(vo.masa, () => K.Entry({ wide:true, label:'Masa', meta:'kim konuşuyor',
+          note:'Balondaki sayılar kural motorunun; model açık da olsa sayıyı o yazmaz.',
+          body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.sinir || '')}${raw(vo.durum || '')}</div>` })),
+        when(vo.toplanti, () => K.Entry({ wide:true, label:'Günün toplantısı', meta:'her masadan tek cümle',
+          body:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` })),
         briefingCard(),
         K.Entry({ wide:true, label:'Patron masası', hint:'office', meta:'orkestrasyon',
           note:'Patron kendi hesabını yapmaz. Dört masanın raporunu okur, çelişkiyi '

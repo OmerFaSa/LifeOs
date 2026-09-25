@@ -1106,6 +1106,320 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="alt">' + et('estimated', 'model özeti · kontrol et') + (o.act ? dugme({ metin:m.length + ' kart ekle', act:o.act, data:o.data }) : '') + '</div>', { ek:'kt' });
   }
 
+
+  /* ================================================== H · RÜTBE
+     XP KARAR VERMEZ (AGENTS.md §1.6): bu kartlar yalnız görünürlüktür;
+     hiçbir plan, uyarı ya da öneri bunlara bakmaz. */
+
+  const RUTBE_RENK = ['bronz', 'gumus', 'altin', 'yakut', 'safir', 'kutsal'];
+  const rr = no => 'var(--vk-' + (RUTBE_RENK[no - 1] || 'bronz') + ')';
+
+  /* 141 XP DÖKÜMÜ — bugünkü XP nereden geldi. */
+  function xpDokumu(o){
+    const r = (o && o.satirlar || []).filter(x => x && x.xp > 0);
+    if(!r.length) return '';
+    const top = r.reduce((a, x) => a + x.xp, 0);
+    return kok('141', 'y31', '<div class="u"><b>+' + sayi(top) + '</b><span class="cap">XP · BUGÜN' + (o.sistem ? ' · ' + kac(buyuk(o.sistem)) : '') + '</span></div>'
+      + '<div class="ls">' + r.map(x => '<div class="r"><span>' + kac(x.ad) + '</span><em>' + kac(x.adet || '') + '</em><b>+' + sayi(x.xp) + '</b></div>').join('') + '</div>'
+      + '<div class="nt">Hiçbir plan ya da uyarı XP’ye bakmaz.</div>');
+  }
+
+  /* 142 KADEME YOLU — altı kademe tek yolda; bulunduğun yer yanar. */
+  function kademeYolu(o){
+    const k = (o && o.kademeler || []);
+    if(!k.length || !sayiMi(o.simdi)) return '';
+    const ilerleme = k.length > 1 ? 100 * (o.simdi - 1) / (k.length - 1) : 0;
+    return kok('142', 'y32', '<div class="yl" style="--ilerleme-oran:' + (ilerleme / 100).toFixed(3) + ';--yol-renk:' + rr(o.simdi) + '">'
+      + k.map(x => '<div class="' + (x.no === o.simdi ? 'on' : x.no > o.simdi ? 'kl' : '') + '" style="--r:' + rr(x.no) + '"><span class="rn" aria-hidden="true"></span><span>' + kac(buyuk(x.ad)) + '</span></div>').join('')
+      + '</div>' + (o.etiket ? '<div class="bs"><span class="pil">' + kac(o.etiket) + '</span></div>' : ''),
+      { etiket:'Kademe ' + o.simdi + ' / ' + k.length + (o.etiket ? ': ' + o.etiket : '') });
+  }
+
+  /* 144 SİSTEM BAŞINA RÜTBE — her sistemin kendi rütbesi. Bilinmeyen
+     sistem çizilmez (başka sistemin rütbesi uydurulmaz). */
+  function sistemRutbesi(o){
+    const s = (o && o.sistemler || []).filter(x => x && sayiMi(x.kademe));
+    if(s.length < 2) return '';
+    return kok('144', 'x60', s.map(x => '<div class="' + renk(x.modul) + '"><span class="rn" style="--r:' + rr(x.kademe) + '" aria-hidden="true"></span><span><b>'
+      + kac(x.ad) + '</b>' + kac(x.etiket || '') + '</span></div>').join(''));
+  }
+
+  /* 145 RÜTBE GALERİSİ — kazanılan kademeler renkli, kilitliler siluet. */
+  function rutbeGalerisi(o){
+    const k = (o && o.kademeler || []);
+    if(!k.length || !sayiMi(o.simdi)) return '';
+    const kaz = k.filter(x => x.no <= o.simdi).length;
+    return kok('145', 'x61', '<div class="rf">' + k.map(x => '<div' + (x.no > o.simdi ? ' class="kl"' : '') + '><span class="rn" style="--r:' + rr(x.no) + '" aria-hidden="true"></span><span>'
+      + kac(buyuk(x.ad)) + '</span></div>').join('') + '</div><div class="cap"><span>' + kaz + ' KAZANILDI</span><span>' + (k.length - kaz) + ' KİLİTLİ</span></div>',
+      { etiket:kaz + ' kademe kazanıldı, ' + (k.length - kaz) + ' kilitli' });
+  }
+
+  /* 146 BAŞARIM ROZETİ — kazanılan altıgen ve renkli; kilitli olanın
+     ilerlemesi dilim olarak. */
+  function basarimRozeti(o){
+    const r = (o && o.rozetler || []).filter(Boolean).slice(0, 2);
+    if(!r.length) return '';
+    return kok('146', 'z30', r.map(x => '<div class="rz2">' + (x.kazanildi
+      ? '<span class="hx" aria-hidden="true">' + ikon('yildiz') + '</span><b>' + kac(x.ad) + '</b><span>KAZANILDI' + (x.tarih ? ' · ' + kac(buyuk(x.tarih)) : '') + '</span>'
+      : '<span class="hx kl" style="--p:' + (sayiMi(x.oran) ? (100 * x.oran).toFixed(1) : 0) + '" aria-hidden="true"></span><b>' + kac(x.ad) + '</b><span>' + kac(buyuk(x.ilerleme || '')) + '</span>')
+      + '</div>').join(''));
+  }
+
+  /* 147 AY ÖZETİ ŞERİDİ — on iki ayın çalışma günleri; kayıt başlamadan
+     önceki aylar «veri yok» olarak kesik. */
+  function ayOzeti(o){
+    const a = (o && o.aylar || []);
+    if(a.length !== 12 || !a.some(x => !x.yok)) return '';
+    const son = a[11];
+    return kok('147', 'z31', '<div class="br" role="img" aria-label="' + kac(a.filter(x => !x.yok).map(x => x.ad + ' ' + x.gun + ' gün').join(', ')) + '">'
+      + a.map(x => x.yok ? '<i class="yok"></i>' : '<i' + (x.az ? ' class="az"' : '') + ' style="height:' + px(Math.max(2, 100 * Math.min(1, x.gun / (x.gunSayisi || 30)))) + '"></i>').join('') + '</div>'
+      + '<div class="ay">' + a.map(x => '<span>' + kac(buyuk(x.ad)) + '</span>').join('') + '</div>'
+      + '<div class="lg">' + et('measured', son.uzun + ' · ' + son.gun + ' gün' + (sayiMi(son.dakika) ? ' · ' + sayi(son.dakika) + ' dk' : '')) + '<span>kesik · veri yok</span></div>',
+      { ek:renk(o.modul) });
+  }
+
+  /* 148 KUSURSUZ GÜNLER — ayın sayısı ay özetinden; günlük takvim yalnız
+     günlük kaydın tutulduğu pencere kadardır (eskisi özete işlenmiştir). */
+  function kusursuzGunler(o){
+    if(!o || !sayiMi(o.sayi)) return '';
+    const g = (o.gunler || []);
+    return kok('148', 'w33', '<div class="u"><b>' + o.sayi + '</b><span>kusursuz gün · ' + kac(o.ay || '') + (sayiMi(o.aktif) ? ' · ' + o.aktif + ' aktif gün' : '') + '</span></div>'
+      + (g.length ? '<div class="kg" aria-hidden="true">' + g.map(x => '<i class="' + (x.bos ? 'bs' : x.kusursuz ? 'k' : x.aktif ? (x.bugun ? 't' : 'd') : 'y') + '" title="' + kac(x.ad || '') + '"></i>').join('') + '</div>' : '')
+      + '<div class="lg">' + et('measured', 'ay özetinden') + '<span>★ kusursuz · kesik = boş gün' + (g.length ? ' · son ' + g.filter(x => !x.bos).length + ' gün' : '') + '</span></div>',
+      { ek:renk(o.modul) });
+  }
+
+
+  /* ================================================== G · OFİS
+     Ajan KONUŞUR, kural motoru SAYAR (AGENTS.md §1.1): ajanın cümlesindeki
+     sayı yalnız kural motorunun cümlesinden geliyorsa çip olur ve
+     kaynağını taşır; modelin yazdığı sayı çip yapılmaz. */
+
+  /* Birim uzundan kısaya: «38 gün» «38 g» diye kesilmez; birimden sonra
+     harf gelirse birim değildir. */
+  const SAYI_RE = /(%\s?\d+(?:[.,]\d+)?|\d+(?:[.,]\d+)?(?:\s?(?:dakika|oturum|hafta|saat|kcal|soru|kart|blok|puan|gün|net|kg|ml|dk|sa|ay|TL|XP|g|%|₺)(?![A-Za-zÇĞİÖŞÜçğıöşü]))?)/g;
+  function sayiCipleri(metin, kaynak){
+    const k = kac(metin);
+    return k.replace(SAYI_RE, m => /\d/.test(m) ? '<span class="sc" title="' + kac(kaynak || 'sistem hesapladı') + '">' + m + '</span>' : m);
+  }
+  function av(a, sinif){
+    if(!a) return '';
+    return '<span class="av' + (sinif ? ' ' + sinif : '') + '" aria-hidden="true"><b>' + kac(a.harf || (a.ad || '?').charAt(0)) + '</b>'
+      + (a.gorsel ? '<img src="' + kac(a.gorsel) + '" alt="" loading="lazy" onerror="this.remove()">' : '') + '</span>';
+  }
+
+  /* 128 MASA GÖRÜNÜMÜ — konuşan ajan büyür; diğerleri soluk bekler. */
+  function masaGorunumu(o){
+    const a = (o && o.ajanlar || []).filter(Boolean);
+    if(!a.length) return '';
+    const on = a.find(x => x.konusuyor) || a[0];
+    return kok('128', 'x54', '<div class="on">' + av(on) + '<div><b>' + kac(on.ad) + '</b><span>' + kac(o.durum || 'konuşuyor') + '</span></div></div>'
+      + a.filter(x => x !== on).map(x => av(x)).join(''), { ek:renk(o.modul), etiket:on.ad + ' ' + (o.durum || 'konuşuyor') + '; masada ' + a.length + ' ajan' });
+  }
+
+  /* 129 BALONDAKİ SAYI ÇİPİ — kural motorunun cümlesi; sayılar çip. */
+  function sayiBalonu(o){
+    if(!o || !o.metin) return '';
+    const ilk = (String(o.metin).match(SAYI_RE) || []).find(m => /\d/.test(m));
+    return kok('129', 'x55', '<div class="bal">' + sayiCipleri(o.metin, o.kaynak) + '</div>'
+      + (ilk ? '<div class="kn"><span>' + kac(ilk + ' · ' + (o.kaynak || 'sistem hesapladı')) + '</span></div>' : ''), { ek:renk(o.modul) });
+  }
+
+  /* 130 AJAN SINIR KARTI — ne yapar, ne yapmaz (ajanın kendi tanımından). */
+  function ajanSinir(o){
+    if(!o || !o.ad || !(o.yapar || []).length || !(o.yapmaz || []).length) return '';
+    return kok('130', 'y29', '<div class="u">' + av(o) + '<div><b>' + kac(o.ad) + '</b><span>' + kac(o.rol || '') + '</span></div></div>'
+      + '<div class="ik"><div class="ev"><span class="cap">YAPAR</span>' + o.yapar.slice(0, 3).map(x => '<p>' + ikon('tik') + kac(x) + '</p>').join('') + '</div>'
+      + '<div class="hy"><span class="cap">YAPMAZ</span>' + o.yapmaz.slice(0, 3).map(x => '<p>' + ikon('eksi') + kac(x) + '</p>').join('') + '</div></div>', { ek:renk(o.modul) });
+  }
+
+  /* 131 DEVİR GÖSTERGESİ — bir ajan konuyu diğerine aktarınca. */
+  function devirGostergesi(o){
+    if(!o || !o.kaynak || !o.hedef) return '';
+    return kok('131', 'y30', '<div class="dv">' + av(o.kaynak, 'es') + '<span class="ok"><i></i>devir<i></i></span>' + av(o.hedef, 'ye') + '</div>'
+      + '<div class="bal"><b>' + kac(o.kaynak.ad) + ':</b> ' + kac(o.metin || '') + '</div>',
+      { ek:renk(o.modul), etiket:o.kaynak.ad + ' konuyu ' + o.hedef.ad + '’a aktardı' });
+  }
+
+  /* 132 AJAN DURUM HALKASI — çalışıyor (kesik, döner), boşta (sabit),
+     kapalı (soluk). «Kapalı» modelin kapalı olmasıdır; ajan kural
+     motorunun cümlesini yine söyler. */
+  function durumHalkasi(o){
+    const a = (o && o.ajanlar || []).filter(Boolean);
+    if(!a.length) return '';
+    const AD = { cal:'ÇALIŞIYOR', bos:'BOŞTA', kap:'KAPALI' };
+    return kok('132', 'x56', a.map(x => '<div><span class="hl2 ' + (AD[x.durum] ? x.durum : 'kap') + '">' + av(x) + '</span><span class="cap">'
+      + kac(x.ad) + ' · ' + (AD[x.durum] || 'KAPALI') + '</span></div>').join(''), { ek:renk(o.modul),
+      etiket:a.map(x => x.ad + ' ' + (AD[x.durum] || 'kapalı').toLocaleLowerCase('tr-TR')).join(', ') });
+  }
+
+  /* 133 HAZIR CEVAP ÇİPLERİ — balonun altında iki üç kısa cevap. */
+  function hazirCevap(o){
+    const c = (o && o.cevaplar || []).filter(Boolean).slice(0, 3);
+    if(!o || !o.soru || !c.length) return '';
+    return kok('133', 'x57', '<div class="bal" style="font-size:13px">' + sayiCipleri(o.soru, o.kaynak) + '</div>'
+      + '<div class="cp">' + c.map(x => '<button type="button" data-act="' + kac(x.act) + '"' + nitelik(x.data) + '>' + kac(x.metin) + '</button>').join('') + '</div>', { ek:renk(o.modul) });
+  }
+
+  /* 135 GÜNÜN TOPLANTISI — Patron her ajandan tek cümle toplar; cümle
+     kural motorunun, sayılar çip. */
+  function gununToplantisi(o){
+    const r = (o && o.satirlar || []).filter(x => x && x.cumle);
+    if(!r.length) return '';
+    return kok('135', 'z28', '<span class="cap">' + kac(buyuk(o.baslik || 'Patron · günün toplantısı')) + '</span>'
+      + r.map(x => '<div class="r">' + av(x) + '<p><b>' + kac(x.ad) + '</b>' + sayiCipleri(x.cumle, o.kaynak) + '</p></div>').join(''), { ek:renk(o.modul) });
+  }
+
+  /* 138 KONUŞMA ÖZETİ — kararlar ve açık sorular; konuşma baştan okunmaz. */
+  function konusmaOzeti(o){
+    if(!o || !o.ajan || !((o.kararlar || []).length + (o.acik || []).length)) return '';
+    return kok('138', 'w31', '<div class="u">' + av(o.ajan) + '<div><b>' + kac(o.baslik || 'Dünkü konuşma') + '</b><span>' + kac(o.ajan.ad + (sayiMi(o.mesaj) ? ' · ' + o.mesaj + ' mesaj' : '')) + '</span></div></div>'
+      + (o.kararlar || []).map(x => '<div class="r">' + ikon('tik') + kac(x) + '</div>').join('')
+      + (o.acik || []).map(x => '<div class="r ac3">' + ikon('bilgi') + 'Açık: ' + kac(x) + '</div>').join(''), { ek:'kt ' + renk(o.modul) });
+  }
+
+
+  /* OFİS BİRLEŞTİRİCİSİ — üç modülün ofis ekranı aynı kartları aynı
+     kuralla kurar. o = { modul, acik (açık masanın kimliği), ajanlar:[{ id,
+     ad, harf, rol, gorsel, hazir (model açık mı), cumle (KURAL MOTORUNUN
+     cümlesi), yapar:[], yapmaz:[], patron }], devir:{ kaynak, hedef, metin },
+     act:{ ac, sor } }. Model açıkken de cümle kural motorunundur; balona
+     modelin cevabı girmez. */
+  function ofis(o){
+    const a = (o && o.ajanlar || []).filter(Boolean);
+    if(!a.length) return {};
+    const patron = a.find(x => x.patron) || a[0];
+    const uzman = a.filter(x => x !== patron);
+    const acik = a.find(x => x.id === o.acik);
+    const konusan = acik || patron;
+    const ac = (o.act || {}).ac, sor = (o.act || {}).sor;
+    return {
+      masa:masaGorunumu({ modul:o.modul, durum:acik ? 'raporu açık' : 'masayı yönetiyor',
+        ajanlar:a.map(x => Object.assign({}, x, { konusuyor:x === konusan })) }),
+      durum:durumHalkasi({ modul:o.modul, ajanlar:a.map(x => ({ ad:x.ad, harf:x.harf, gorsel:x.gorsel, durum:x.hazir ? 'bos' : 'kap' })) }),
+      balon:patron.cumle ? sayiBalonu({ modul:o.modul, metin:patron.cumle, kaynak:'kural motoru hesapladı' }) : '',
+      hazir:uzman[0] && uzman[0].cumle && ac ? hazirCevap({ modul:o.modul, soru:uzman[0].ad + ': ' + uzman[0].cumle, kaynak:'kural motoru hesapladı',
+        cevaplar:[{ metin:'Raporu aç', act:ac, data:{ 'data-id':uzman[0].id, 'data-agent':uzman[0].id } }].concat(sor ? [{ metin:'Soru sor', act:sor, data:{ 'data-agent':uzman[0].id } }] : []) }) : '',
+      toplanti:gununToplantisi({ modul:o.modul, kaynak:'kural motoru hesapladı', baslik:'Patron · günün toplantısı',
+        satirlar:uzman.map(x => ({ ad:x.ad, harf:x.harf, gorsel:x.gorsel, cumle:x.cumle })) }),
+      sinir:acik ? ajanSinir(Object.assign({ modul:o.modul }, acik)) : '',
+      devir:o.devir ? devirGostergesi(Object.assign({ modul:o.modul }, o.devir)) : '',
+    };
+  }
+  /* Kapsam cümlesini maddeye böler: «A, B ve C.» → [A, B, C]. */
+  function maddele(metin){
+    return String(metin || '').replace(/\.\s*$/, '').split(/,\s*|\s+ve\s+/).map(x => x.trim()).filter(Boolean)
+      .map(x => x.charAt(0).toLocaleUpperCase('tr-TR') + x.slice(1));
+  }
+
+
+  /* ================================================== A · GÜN, K · GÜVEN */
+
+  /* 006 GÜNÜN AÇILIŞI — günün ilk açılışında: iş sayısı, toplam süre,
+     ilk iş. Cümleyi kod kurar. */
+  function gunAcilisi(o){
+    if(!o || !sayiMi(o.is) || o.is < 1) return '';
+    return kok('006', 'y02', '<div class="cap">GÜNÜN AÇILIŞI' + (o.saat ? ' · ' + kac(o.saat) : '') + '</div>'
+      + '<div class="sl"><b>' + o.is + ' iş</b><span>' + kac(dkMetni(o.dk) + (o.not ? ' · ' + o.not : '')) + '</span></div>'
+      + (o.ilk ? '<div class="il"><span class="mod ' + (renk(o.modul) || 'c-ays') + '">' + kac(buyuk(o.sistem || o.modul || '')) + '</span><span>' + kac(o.ilk.ad) + '</span>'
+        + (o.ilk.not ? '<span class="cap">' + kac(o.ilk.not) + '</span>' : '') + '</div>' : '')
+      + '<div class="alt">' + et('computed', 'kod üretir') + (o.act ? dugme({ metin:'Güne başla', ton:'w', act:o.act, data:o.data }) : '') + '</div>', { ek:'kt' });
+  }
+
+  /* 007 GÜN KAPANIŞI — üç sayı ve yarının ilk işi. */
+  function gunKapanisi(o){
+    if(!o || !sayiMi(o.biten) || !sayiMi(o.toplam)) return '';
+    const sa = sayiMi(o.dk) ? Math.floor(o.dk / 60) + ':' + String(Math.round(o.dk % 60)).padStart(2, '0') : '—';
+    return kok('007', 'y03', '<b class="bs">Bugün kapandı.</b><div class="uc"><div><b>' + o.biten + ' / ' + o.toplam + '</b><span>iş</span></div>'
+      + '<div><b>' + sa + '</b><span>sa çalışma</span></div><div><b>' + (sayiMi(o.ertelenen) ? o.ertelenen : '—') + '</b><span>ertelendi</span></div></div>'
+      + (o.yarin ? '<div class="yr">' + ikon('ok') + 'Yarın ilk iş <b>' + kac(o.yarin) + '</b></div>' : ''), { ek:'kt' });
+  }
+
+  /* 023 YAZILABİLİR GÜN PENCERESİ — bugün ve N gün geri açık; daha eskisi
+     kilitli ve taralı. Pencere kodun kuralı (XP ve rozet defterleri). */
+  function gunPenceresi(o){
+    const g = (o && o.gunler || []);
+    if(!g.length) return '';
+    const ilkAcik = g.findIndex(x => !x.kilitli);
+    return kok('023', 'w05', '<div class="gn2" style="grid-template-columns:repeat(' + g.length + ',1fr)">'
+      + g.map(x => x.act && !x.kilitli
+        ? '<button type="button" class="' + (x.bugun ? 'bu' : '') + (x.secili ? ' secili' : '') + '" data-act="' + kac(x.act) + '"' + nitelik(x.data) + ' aria-label="' + kac(x.ad || x.gun) + '"'
+          + (x.secili ? ' aria-current="date"' : '') + '>' + kac(x.gun) + '</button>'
+        : '<i class="' + (x.kilitli ? 'k' : x.bugun ? 'bu' : '') + '"' + (x.kilitli ? ' title="kilitli"' : '') + '>' + kac(x.gun) + '</i>').join('') + '</div>'
+      + (ilkAcik > 0 ? '<div class="pn2" style="margin-left:' + px(100 * ilkAcik / g.length) + '"></div>' : '')
+      + '<div class="alt"><span class="cap">' + ikon('kilit') + 'KİLİTLİ</span><span class="cap">' + kac(buyuk(o.not || ('Bugün + ' + (o.pencere || 7) + ' gün geri yazılabilir'))) + '</span></div>');
+  }
+
+  /* 168 ADIMLI SAYI GİRİŞİ — küçük sayılar için büyük artı/eksi (48 px). */
+  function adimliSayi(o){
+    if(!o) return '';
+    return kok('168', 'w37', '<span class="cap">' + kac(buyuk(o.etiket || '')) + '</span><div class="st3">'
+      + dugme({ metin:'−', act:o.act, data:Object.assign({ 'data-delta':'-1' }, o.data || {}), aria:(o.ad || '') + ' azalt', pasif:!sayiMi(o.deger) || o.deger <= (o.min || 0) })
+      + '<div><b aria-live="polite">' + (sayiMi(o.deger) ? sayi(o.deger) : '—') + '</b><span>' + kac(o.birim || '') + '</span></div>'
+      + dugme({ metin:'+', ton:'w', act:o.act, data:Object.assign({ 'data-delta':'1' }, o.data || {}), aria:(o.ad || '') + ' artır' }) + '</div>'
+      + '<span class="cap">' + kac(buyuk(o.not || '48 piksel düğme · tek el')) + '</span>');
+  }
+
+  /* 117 GERİ DÖNÜŞ NOKTALARI — büyük ve orta aksiyonlardan önceki hâl;
+     birine tek düğmeyle dönülür. */
+  function geriDonus(o){
+    const r = (o && o.noktalar || []).filter(Boolean);
+    if(!r.length) return '';
+    return kok('117', 'y28', r.map(x => '<div class="r"><div><b>' + kac(x.ad) + '</b><span>' + kac(buyuk(x.not || '')) + '</span></div>'
+      + (x.act ? dugme({ metin:'Dön', act:x.act, data:x.data, aria:x.ad + ' — geri dön' }) : '') + '</div>').join(''));
+  }
+
+  /* 174 VERİ NEREDE? — tek şema: cihaz asıl kayıt, yedek senin seçtiğin
+     yer, Merkez isteğe bağlı (teklif yazar, modüle yazmaz — §1.4). */
+  function veriNerede(o){
+    o = o || {};
+    return kok('174', 'z39', '<div class="n a"><b>' + kac(o.cihaz || 'Bu cihaz') + '</b><span>' + kac(o.cihazNot || 'asıl kayıt burada') + '</span></div>'
+      + '<div class="bg2" aria-hidden="true"><i></i><i class="k"></i></div>'
+      + '<div class="sag2"><div class="n"><b>Yedek dosyası</b><span>senin seçtiğin yer</span></div>'
+      + '<div class="n c"><b>Merkez</b><span>' + kac(o.merkezNot || 'isteğe bağlı · teklif yazar, modüle yazmaz') + '</span></div></div>',
+      { etiket:'Veri bu cihazda; yedek senin seçtiğin yerde; Merkez isteğe bağlı ve modüle yazmaz' });
+  }
+
+  /* 175 DIŞA AKTAR — biçim ve ilk satırların önizlemesi. Yalnız VAR OLAN
+     biçim çizilir; olmayan seçenek gösterilmez. */
+  function disaAktar(o){
+    if(!o || !o.act) return '';
+    return kok('175', 'z40', '<div class="u"><span class="cap">DIŞA AKTAR' + (o.sistem ? ' · ' + kac(buyuk(o.sistem)) : '') + '</span>'
+      + (o.etiketli ? et('computed', 'etiketler dahil') : '<span class="cap">' + kac(buyuk(o.not || 'ham kayıt')) + '</span>') + '</div>'
+      + '<div class="sg">' + (o.bicimler || ['JSON']).map((b, i) => '<span' + (i === 0 ? ' class="on"' : '') + '>' + kac(b) + '</span>').join('') + '</div>'
+      + (o.onizleme ? '<pre>' + kac(o.onizleme) + '</pre>' : '')
+      + '<div class="alt"><span class="cap">' + (sayiMi(o.kayit) ? sayi(o.kayit) + ' KAYIT' : '') + (sayiMi(o.kb) ? ' · ' + sayi(o.kb) + ' KB' : '') + '</span>'
+      + dugme({ metin:'Dışa aktar', ton:'w', act:o.act }) + '</div>');
+  }
+
+  /* 178'in modeli: yedek mevcut verinin TAMAMINI değiştirir; kod dört
+     sayıyı sayar. Karşılaştırma kaydın JSON'u üzerinden (anahtar sırası
+     korunarak yazıldığı için aynı kayıt aynı metni verir). */
+  function yedekFarki(mevcut, gelen){
+    mevcut = mevcut || {}; gelen = gelen || {};
+    const r = { ayni:0, yeni:0, degisen:0, silinen:0 };
+    const metin = v => { try{ return JSON.stringify(v); }catch(e){ return String(v); } };
+    Object.keys(gelen).forEach(k => {
+      if(!Object.prototype.hasOwnProperty.call(mevcut, k)) r.yeni++;
+      else if(metin(mevcut[k]) === metin(gelen[k])) r.ayni++;
+      else r.degisen++;
+    });
+    Object.keys(mevcut).forEach(k => { if(!Object.prototype.hasOwnProperty.call(gelen, k)) r.silinen++; });
+    return r;
+  }
+
+  /* 178 İÇE AKTARMA ÖNİZLEMESİ — içe aktarmadan önce aynı, yeni, değişen
+     ve (yedek her şeyi değiştirdiği için) silinecek kayıt sayıları. */
+  function iceAktarma(o){
+    if(!o || !o.dosya) return '';
+    const h = (b, s, c) => '<div' + (c ? ' class="' + c + '"' : '') + '><b>' + sayi(b) + '</b><span>' + kac(s) + '</span></div>';
+    return kok('178', 'w42', '<div class="fl"><span class="ik3" aria-hidden="true">{ }</span><div><b>' + kac(o.dosya) + '</b><span>' + kac(o.alt || '') + '</span></div></div>'
+      + '<div class="sn3" style="grid-template-columns:repeat(4,1fr)">' + h(o.ayni, 'aynı') + h(o.yeni, 'yeni') + h(o.degisen, 'değişen', o.degisen ? 'ck4' : '')
+      + h(o.silinen, 'silinecek', o.silinen ? 'ck4' : '') + '</div>'
+      + '<div class="alt">' + (o.vazgec ? dugme({ metin:'Vazgeç', act:o.vazgec }) : '<span></span>')
+      + (o.act ? dugme({ metin:o.dugme || 'Yedeği yükle', ton:'w', act:o.act }) : '') + '</div>');
+  }
+
   L.VITRIN = {
     kac, sayi, isaretli, dkMetni, et, ikon, tik, hl, fk, kok, dugme, renk, KES,
     geriSayim, notrSerit, yanlisKarti, denemeKarnesi, hizSeridi, denemeKarsilastirma,
@@ -1120,5 +1434,9 @@ window.LIFEOS = window.LIFEOS || {};
     desteYigini, sureliCevap, dakikaHalkasi, unutmaEgrisi, merdiven, kutuphaneRafi, okumaIlerlemesi,
     alintiKarti, kelimeSahnesi, baglamdaKelime, dalgaFormu, tarihSeridi, dersKapagi, oturumSonu,
     kelimeAgi, bagliNotlar, desteDurumu, cumleKurma, metinliDinleme, soruZinciri, ucMaddeOzet,
+    xpDokumu, kademeYolu, sistemRutbesi, rutbeGalerisi, basarimRozeti, ayOzeti, kusursuzGunler,
+    sayiCipleri, masaGorunumu, sayiBalonu, ajanSinir, devirGostergesi, durumHalkasi, hazirCevap,
+    gununToplantisi, konusmaOzeti, ofis, maddele,
+    gunAcilisi, gunKapanisi, gunPenceresi, adimliSayi, geriDonus, veriNerede, disaAktar, iceAktarma, yedekFarki,
   };
 })();

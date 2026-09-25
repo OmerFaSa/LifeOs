@@ -10,6 +10,9 @@ R.Screens.guide = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
   const { html, raw, when, map } = R.h;
   const K = R.C;
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  /* 178: onizlemesi gosterilen, onay bekleyen yedek (tek yuva). */
+  let bekleyenYedek = null;
 
   /* Sıra: bu ekran «Ayarlar › Genel»dir; ayarlar başta, başvuru metinleri
      sonda. Sekme yok (EKIP-PLANI §1.2): yedi bölüm alt alta. */
@@ -321,6 +324,7 @@ R.Screens.guide = (function(){
     const sizeKb = Math.max(1, Math.round(q.bytes/1024));
     const store = R.Store.mode === 'cloud' ? 'Hesabına bağlı (cihazlar arası) + yerel kopya' : 'Bu tarayıcıda yerel';
     const undo = R.Store.importUndoInfo();
+    const V = VT();
 
     return K.Card({
       title:'Veri', sub:store,
@@ -332,6 +336,10 @@ R.Screens.guide = (function(){
           damga:(S.meta || {}).lastBackupAt, boyut:q.bytes, bugun:U.todayISO(),
           kayit:counts.reduce((a, c) => a + c[1], 0), iz:(S.meta || {}).yedekIzi })))}
         ${K.Cols(4, map(counts, c => K.Stat({ label:c[0], value:U.fmtNum(c[1]) })))}
+        ${when(V, () => raw('<div class="mt-12">' + V.veriNerede({
+          cihazNot:R.Store.mode === 'cloud' ? 'yerel kopya · hesabına eşlenir' : 'asıl kayıt burada',
+          merkezNot:(R.Beacon && R.Beacon.settings().enabled) ? 'bağlı · teklif yazar, modüle yazmaz'
+            : 'isteğe bağlı · şu an kapalı' }) + '</div>'))}
         ${when(due, () => html`<div class="mt-12">${K.Notice({ tone:'warn',
           body:'Son yedekten bu yana '+(age === null ? 'hiç yedek alınmadı' : age+' gün geçti')
              + '. Tarayıcı verisi silinirse çalışma geçmişin kaybolur — şimdi bir yedek al.' })}</div>`)}
@@ -345,8 +353,10 @@ R.Screens.guide = (function(){
              + 'verinin üzerine yazdı. Yanlışsa bir önceki duruma dönebilirsin — bu imkan yalnız '
              + 'bu içe aktarma için geçerli.' })}</div>
           <div class="mt-8">${K.Button({ label:'Bu içe aktarmayı geri al', icon:'undo', tone:'danger', act:'undo-import' })}</div>`)}
+        ${when(V, () => raw('<div class="mt-12">' + V.disaAktar({ act:'export-data', sistem:'AYS',
+          not:'tüm kayıt · tek dosya', kayit:counts.reduce((a, c) => a + c[1], 0), onizleme:disaOnizleme() }) + '</div>'))}
         ${K.Row([
-          K.Button({ label:'Yedek al (JSON)', icon:'download', tone:due ? 'primary' : null, act:'export-data' }),
+          V ? '' : K.Button({ label:'Yedek al (JSON)', icon:'download', tone:due ? 'primary' : null, act:'export-data' }),
           K.Button({ label:'Yedekten yükle', icon:'upload', act:'import-data' }),
           (R.Beacon && R.Beacon.settings().enabled) ? K.Button({ label:'HKM’deki yedekten yükle', icon:'upload', act:'restore-hkm' }) : '',
           K.Button({ label:'Tümünü sıfırla', icon:'trash', tone:'danger', act:'reset-data' }),
@@ -354,6 +364,40 @@ R.Screens.guide = (function(){
         <p class="tiny dim mt-10">Uygulama çevrimdışı çalışır: her kayıt önce cihaza yazılır,
           bağlantı varsa hesabına eşlenir. Yerel kullanım: ${sizeKb} KB (%${q.pct}) · şema sürümü ${R.SCHEMA_VERSION}.</p>`,
     });
+  }
+
+  /* 175'in onizlemesi: dosyanin ilk satirlari. Butun depo okunmaz;
+     bicim BACKUP_SHAPE'teki sozlesmedir, ornek anahtar gercek bir gundur. */
+  function disaOnizleme(){
+    const gunler = Object.keys(S.days || {}).sort();
+    const son = gunler[gunler.length - 1];
+    return '{ "__meta": { "app": "rota-84285", "schemaVersion": ' + R.SCHEMA_VERSION + ', … },\n'
+      + '  "data": { ' + (son ? '"days/' + son + '": { … }, ' : '') + '… } }';
+  }
+
+  /* 117 geri donus noktalari: orta ve buyuk aksiyonlardan onceki hal.
+     Kaynak iki: uygulanmis (kucuk olmayan) oneriler ve son ice aktarma.
+     Kucuk aksiyonun geri almasi ekranin kendisinde kalir (AGENTS §1.9). */
+  const SEVIYE = { orta:'orta', buyuk:'büyük' };
+  function donusNoktalari(){
+    const tarih = t => { const d = new Date(t); return isNaN(d) ? '' : d.toLocaleDateString('tr-TR', { day:'numeric', month:'long' }); };
+    const r = [];
+    const undo = R.Store.importUndoInfo();
+    if(undo) r.push({ at:undo.at, ad:'İçe aktarma · öncesi', not:tarih(undo.at) + ' · büyük', act:'undo-import' });
+    (R.Proposals ? R.Proposals.applied() : []).filter(p => SEVIYE[p.level] && !p.otomatik).forEach(p => {
+      const def = R.ACTION_BY_ID[p.action];
+      if(!def) return;
+      r.push({ at:p.appliedAt, ad:def.title + ' · öncesi', not:tarih(p.appliedAt) + ' · ' + SEVIYE[p.level],
+        act:'office-undo', data:{ 'data-id':p.id } });
+    });
+    return r.sort((a, b) => String(b.at || '').localeCompare(String(a.at || ''))).slice(0, 5);
+  }
+  function donusKarti(){
+    const V = VT();
+    const n = V ? donusNoktalari() : [];
+    if(!n.length) return '';
+    return K.Card({ title:'Geri dönüş noktaları', sub:'Orta ve büyük değişikliklerden önceki hâl',
+      body:raw(V.geriDonus({ noktalar:n })) });
   }
 
   /* Yedek dosyasinin yapisi — disariya acik tek bicim.
@@ -632,6 +676,7 @@ R.Screens.guide = (function(){
       ])),
       K.Span(6, K.Stack([
         dataCard(),
+        donusKarti(),
         storageHorizonCard(),
         backupShapeCard(),
         installCard(),
@@ -918,12 +963,19 @@ R.Screens.guide = (function(){
           ${K.Button({ label:'Yükle', tone:'primary', act:'import-run' })}`),
       });
     },
-    async 'import-run'(){
+    async 'import-apply'(){
+      const y = bekleyenYedek;
+      if(!y){ UI.toast('Önce bir yedek dosyası seç'); return; }
+      bekleyenYedek = null;
+      await handle['import-run']({ dataset:{ onay:'1' } }, { obj:y.obj, name:y.ad, size:y.boyut });
+    },
+    async 'office-undo'(el){ await R.Screens.onaylar.handle['office-undo'](el); },
+    async 'import-run'(el, hazir){
       const input = document.getElementById('imp-file');
-      const file = input && input.files[0];
+      const file = hazir || (input && input.files[0]);
       if(!file){ UI.toast('Önce bir yedek dosyası seç'); return; }
-      let obj;
-      try{
+      let obj = hazir ? hazir.obj : null;
+      if(!obj) try{
         obj = JSON.parse(await file.text());
       }catch(e){
         UI.toast('Dosya geçerli bir JSON değil');
@@ -931,6 +983,26 @@ R.Screens.guide = (function(){
       }
       const check = R.Store.readBackup(obj);
       if(!check.ok){ UI.toast(check.error); return; }
+      /* 178: yazmadan once ne olacagi sayilir; kullanici gorur, onaylar. */
+      const V = VT();
+      if(V && !(el && el.dataset && el.dataset.onay)){
+        bekleyenYedek = { obj, ad:file.name, boyut:file.size };
+        const gelen = Object.assign({}, check.data);
+        delete gelen.hkm;   /* cihaza ait; yedekle gelmez, burada kalir (store.js CIHAZA_AIT) */
+        const f = V.yedekFarki(R.Store.exportAll().data, gelen);
+        UI.sheet({
+          title:'Yedek yüklensin mi?',
+          body:V.iceAktarma(Object.assign({ dosya:file.name,
+            alt:(window.LIFEOS.GUVEN && window.LIFEOS.GUVEN.boyutMetni && file.size ? window.LIFEOS.GUVEN.boyutMetni(file.size) + ' · ' : '') + 'AYS'
+              + (check.meta && check.meta.legacy ? ' · eski sürüm' : '') }, f))
+            + '<p class="tiny dim mt-10">Yedek bu cihazdaki verinin TAMAMINI değiştirir; «silinecek» kayıtlar yedekte olmayanlardır. '
+            + 'Yanlışsa «İçe aktarmayı geri al» ile bir önceki duruma dönebilirsin.</p>',
+          footer:String(html`
+            ${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+            ${K.Button({ label:'Yedeği yükle', tone:'primary', act:'import-apply' })}`),
+        });
+        return;
+      }
       try{
         const meta = await R.Store.importAll(obj);
         UI.closeSheet();
