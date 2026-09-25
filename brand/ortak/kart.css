@@ -250,30 +250,35 @@
    Modül rengi T'nin `--ays/--spi/--esp` jetonundan.
    ================================================================ */
 
-.doluluk{ display:grid; gap:var(--sp-2); }
+.doluluk{ display:grid; gap:4px; }
+/* Vitrin 041 (w09): modül adı mono ve modül renginde, kareler satırı
+   doldurur; boş kare İÇİ BOŞ çizilir (veri yok, 0 değil). */
 .doluluk__s{
   --doluluk-renk:var(--text-2);
   display:grid;
-  grid-template-columns:3.5em auto auto;
-  align-items:center;
+  grid-template-columns:34px minmax(0, 360px) 30px;
   justify-content:start;
-  gap:var(--sp-3);
+  align-items:center;
+  gap:8px;
+  min-height:28px;
 }
 .doluluk--ays{ --doluluk-renk:var(--ays); }
 .doluluk--spi{ --doluluk-renk:var(--spi); }
 .doluluk--esp{ --doluluk-renk:var(--esp); }
-.doluluk__ad{ font-size:var(--fs-sm); font-weight:600; color:var(--text-2); }
-.doluluk__kutular{ display:flex; gap:var(--sp-1); }
+.doluluk__ad{ font:500 10px ui-monospace, 'SF Mono', Menlo, Consolas, monospace; color:var(--doluluk-renk); }
+.doluluk--esp .doluluk__ad{ color:var(--esp-ink, var(--esp)); }
+.doluluk__kutular{ display:flex; gap:4px; }
 .doluluk__k{
   display:block;
-  width:var(--sp-3);
-  height:var(--sp-3);
-  border:1px solid var(--border-strong);
-  border-radius:calc(var(--r-sm) / 3);
+  flex:1 1 0;
+  min-width:8px;
+  height:16px;
+  border-radius:2px;
   background:transparent;
+  border:1.5px solid color-mix(in oklab, var(--text-3) 45%, var(--surface));
 }
 .doluluk__k--dolu{ background:var(--doluluk-renk); border-color:var(--doluluk-renk); }
-.doluluk__n{ font-size:var(--fs-xs); color:var(--text-3); font-variant-numeric:tabular-nums; }
+.doluluk__n{ font:500 10.5px ui-monospace, 'SF Mono', Menlo, Consolas, monospace; color:var(--text-2); text-align:right; font-variant-numeric:tabular-nums; }
 
 /* ================================================================
    110 · ÖNERİ KARTI — T'nin `.kutu`'su üstünde; mor YALNIZ Merkez'de
@@ -626,19 +631,24 @@
    030 · TİK SAYACI — küçük hedefte adet kutucuğu; veri yoksa KESİK
    ================================================================ */
 
-.tik{ display:grid; gap:var(--sp-1); }
-.tik__et{ font-size:var(--fs-sm); color:var(--text-2); }
-.tik__sayi{ font-size:var(--fs-sm); font-weight:600; font-variant-numeric:tabular-nums; }
-.tik__kutular{ display:flex; flex-wrap:wrap; gap:var(--sp-1); }
+/* Vitrin 030 (x17): etiket solda, «15 / 18» mono sağda; kutucuklar
+   satırı doldurur, dolu kutu modül renginde, veri yoksa TARALI. */
+.tik{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:baseline; gap:6px 10px; }
+.tik__et{ font-size:var(--fs-sm); font-weight:500; color:var(--text); }
+.tik__sayi{ font:500 12px ui-monospace, 'SF Mono', Menlo, Consolas, monospace; color:var(--text-2); font-variant-numeric:tabular-nums; }
+.tik__sayi:first-child{ grid-column:2; }
+.tik__kutular{ grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:3px; }
 .tik__k{
   display:block;
-  width:var(--sp-3);
-  height:var(--sp-3);
-  border:1px solid var(--border-strong);
-  border-radius:calc(var(--r-sm) / 3);
+  flex:1 1 0;
+  min-width:6px;
+  height:14px;
+  border-radius:2px;
+  border:1px solid var(--border);
+  background:var(--surface-3);
 }
 .tik__k--dolu{ background:var(--primary); border-color:var(--primary); }
-.tik--yok .tik__k{ border-style:dashed; }
+.tik--yok .tik__k{ background:transparent; border:1px dashed var(--text-3); }
 .tik--yok .tik__sayi{ color:var(--text-3); }
 
 /* ================================================================
@@ -1251,3 +1261,8 @@
 .vk .w37 .st3 .bt:disabled{ opacity:.4; cursor:default; }
 .vk .z40 pre{ max-height:9em; }
 @media (max-width:520px){ .vk .z39{ grid-template-columns:1fr; } .vk .z39 .bg2{ display:none; } }
+/* Vitrin kartı 320 piksellik tasarlandı; geniş kutuda şema ve dışa
+   aktarma satırı gerilmesin. Tek biçim düğme değil etikettir. */
+.vk:has(> .z39), .vk:has(> .z40), .vk:has(> .w42), .vk:has(> .y28){ max-width:560px; }
+.vk .z40 .sg{ display:inline-flex; }
+.vk .z40 .sg span:only-child{ padding:4px 12px; }
