@@ -740,6 +740,13 @@ ESP.UI = (function(){
       });
       el.appendChild(btn);
     }
+    /* Yigilma siniri: ayni anda gelen bes bildirim (rutbe + rozetler)
+       telefonda ekranin yarisini kapatiyordu. En cok uc (telefonda iki)
+       bildirim gorunur; fazlasi EN ESKI duz bildirimden duser. «Geri al»
+       tasiyan bildirim dusmez: icindeki eylem baska bir yerde yok. */
+    const enCok = window.innerWidth < 680 ? 2 : 3;
+    const duz = Array.from(root.children).filter(x => !x.classList.contains('toast--undo'));
+    for(let k = 0, fazla = root.children.length + 1 - enCok; fazla > 0 && k < duz.length; k++, fazla--) duz[k].remove();
     root.appendChild(el);
     const life = o.life || (o.undo ? 6000 : 1500);
     /* Katalog 150: «Geri al» şeridinin kalan süresi incelen bir çizgiyle

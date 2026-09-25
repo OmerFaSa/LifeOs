@@ -415,6 +415,31 @@ describe('150 · Geri al şeridi (ui.js toast)', () => {
       await bekle(400);
     }finally{ if(kurdum) kok.remove(); }
   });
+
+  /* Telefonda görüldü (2026-09-25): aynı anda gelen beş bildirim (rütbe +
+     üç rozet + «Atlandı») üst üste yığılıp ekranın yarısını kapatıyordu.
+     En çok üç (telefonda iki) bildirim görünür; fazlası en eski DÜZ
+     bildirimden düşer. «Geri al» taşıyan bildirim düşmez: içindeki eylem
+     başka bir yerde yok. */
+  it('aynı anda gelen bildirimler yığılmaz; «Geri al» şeridi düşmez', async () => {
+    let kok = document.getElementById('toast-root'), kurdum = false;
+    if(!kok){ kok = document.createElement('div'); kok.id = 'toast-root'; document.body.appendChild(kok); kurdum = true; }
+    const onceki = Array.from(kok.children);
+    onceki.forEach(x => x.remove());
+    try{
+      const geri = UI().toast('Blok silindi', { undo:() => {}, life:300 });
+      const son = ['Yeni rütbe', 'Yeni rozet 1', 'Yeni rozet 2', 'Yeni rozet 3', 'Atlandı']
+        .map(m => UI().toast(m, { life:300 })).pop();
+      const enCok = window.innerWidth < 680 ? 2 : 3;
+      expect(kok.children.length <= enCok).toBeTruthy();
+      expect(geri.parentNode).toBe(kok);
+      expect(son.parentNode).toBe(kok);
+      await bekle(700);
+    }finally{
+      Array.from(kok.children).forEach(x => x.remove());
+      if(kurdum) kok.remove();
+    }
+  });
 });
 
 describe('P2 · Öneri ekleri (113 123 124 127)', () => {
