@@ -265,22 +265,22 @@ def run():
         no("http://" in s or "https://" in s, "sayfa dis kaynak yukluyor")
         ok("'hkm.token'" in s and "'hkm.token'" in yuz, "jeton anahtari yuzle ayni degil")
         ok("'hkm.tema'" in s and "'hkm.tema'" in yuz, "tema anahtari yuzle ayni degil")
-        # HKM'nin icinde ama SEKME DEGIL (kullanici karari 2026-09-25): kenardan
-        # acilan panel. Yuzun yonlendiricisine ve cekmecelerine girmez; tek,
-        # kendi icinde kapali blok olarak durur.
-        ok('id="meydan-tutamac"' in yuz and 'id="meydan-panel"' in yuz, "yuzde Meydan paneli yok")
-        ok("'/meydan?panel=1" in yuz, "panel Meydan'i yuklemiyor")
+        # HKM'nin icinde ama SEKME DEGIL (kullanici karari 2026-09-25): ortada
+        # acilan mini uygulama. Yuzun yonlendiricisine ve cekmecelerine girmez;
+        # tek, kendi icinde kapali blok olarak durur.
+        ok('id="meydan-ac"' in yuz and 'id="meydan-pencere"' in yuz, "yuzde Meydan penceresi yok")
+        ok("'/meydan?uygulama=1'" in yuz, "pencere Meydan'i yuklemiyor")
         no('data-yol="meydan"' in yuz, "Meydan yine sekme/bolum olmus")
         gor = yuz[yuz.index("var GORUNUMLER"):yuz.index("];", yuz.index("var GORUNUMLER"))]
         no("meydan" in gor, "Meydan yuzun gorunumlerine girmis")
-        blok = yuz[yuz.index("<!-- MEYDAN PANEL"):]
+        blok = yuz[yuz.index("<!-- MEYDAN (kullan"):]
         ok(blok.count("<script>") == 1 and "e.origin !== location.origin" in blok,
            "panel iletisi kaynak denetimsiz")
         ok("e.origin !== location.origin" in s and "e.source !== window.parent" in s,
            "sayfa iletisi kaynak denetimsiz")
         for yasak in (">Evet<", ">Tamam<", "Evet,"):
             no(yasak in s, "onay dugmesi etiketsiz: %s" % yasak)
-    test("sayfa sifir bagimli, yuzun jetonu ve temasi; yuzde kenar paneli, sekme degil; «Evet/Tamam» yok", t_sayfa)
+    test("sayfa sifir bagimli, yuzun jetonu ve temasi; yuzde mini uygulama, sekme degil; «Evet/Tamam» yok", t_sayfa)
 
 
 def run_daemon():

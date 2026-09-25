@@ -5450,169 +5450,122 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
 })();
 </script>
 
-<!-- MEYDAN PANELİ (kullanıcı kararı 2026-09-25: «sekme gibi değil, sağdan
-     soldan başlatılan bir sosyal medya gibi»; core/meydan.py, web/meydan.html).
-     Bu blok KENDİ İÇİNDE KAPALIDIR: yüzün yönlendiricisine, çekmecelerine ve
-     CSS'ine dokunmaz, adları «meydan-» ile başlar. Silinirse yüz Meydan
-     öncesiyle birebir aynıdır. Veri /api/meydan'dan gelir, jeton yüzünkidir;
-     bu blok hiçbir sayı hesaplamaz. Tutamaç yalnız giriş yapılmışken görünür. -->
+<!-- MEYDAN (kullanıcı kararı 2026-09-25: «direkt karşımıza bir mini uygulama gibi
+     açılsın»; core/meydan.py, web/meydan.html). Sekme değil: ortada açılan
+     pencere, telefonda alttan tam ekran. Bu blok KENDİ İÇİNDE KAPALIDIR: yüzün
+     yönlendiricisine, çekmecelerine ve CSS'ine dokunmaz, adları «meydan-» ile
+     başlar; silinirse yüz Meydan öncesiyle aynıdır. Veri /api/meydan'dan gelir,
+     jeton yüzünkidir; blok hiçbir sayı hesaplamaz. Düğme yalnız giriş yapılmışken
+     görünür. -->
 <style>
-.meydan-tutamac{ position:fixed; z-index:40; display:flex; align-items:center; gap:8px; min-height:0;
-  border:0; border-radius:12px 0 0 12px; background:var(--accent); color:var(--on-accent);
-  font:600 13px/1 'Inter', ui-sans-serif, system-ui, sans-serif; letter-spacing:.02em;
-  box-shadow:0 6px 20px rgba(17,19,24,.18); cursor:pointer; }
-.meydan-tutamac:hover{ filter:brightness(1.08); }
-.meydan-tutamac:focus-visible{ outline:2px solid var(--fg); outline-offset:2px; }
-.meydan-logo{ width:10px; height:10px; border-radius:50%; flex:none; box-shadow:0 0 0 2px var(--on-accent);
-  background:conic-gradient(#2D5BE3 0 25%, #0A7A69 0 50%, #A65B0F 0 75%, #7453D4 0); }
-.meydan-rozet{ min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:var(--on-accent);
-  color:var(--accent); font:700 11.5px/20px ui-sans-serif, system-ui, sans-serif; text-align:center; }
-/* Masaustu: kenarda dikey tutamac, ekranin ortasinda. */
-@media (min-width:1024px){
-  .meydan-tutamac{ top:50%; transform:translateY(-50%); flex-direction:column; padding:14px 9px; }
-  .meydan-tutamac .meydan-ad{ writing-mode:vertical-rl; transform:rotate(180deg); }
-  .meydan-tutamac[data-taraf="sag"]{ right:0; border-radius:12px 0 0 12px; }
-  .meydan-tutamac[data-taraf="sol"]{ left:240px; border-radius:0 12px 12px 0; }
-}
-/* Telefon ve dar ekran: kosede yuvarlak dugme. */
-@media (max-width:1023px){
-  .meydan-tutamac{ bottom:calc(env(safe-area-inset-bottom,0px) + 18px); height:48px; padding:0 16px;
-    border-radius:24px; }
-  .meydan-tutamac[data-taraf="sag"]{ right:16px; }
-  .meydan-tutamac[data-taraf="sol"]{ left:16px; }
-}
-.meydan-perde{ position:fixed; inset:0; z-index:58; background:rgba(8,10,12,.38); opacity:0;
-  transition:opacity .24s ease; }
+.meydan-ac{ position:fixed; z-index:40; right:24px; bottom:calc(env(safe-area-inset-bottom,0px) + 24px);
+  display:flex; align-items:center; gap:10px; min-height:0; padding:7px 16px 7px 7px; border:0; border-radius:18px;
+  background:var(--yuzey); color:var(--fg); box-shadow:0 10px 30px rgba(17,19,24,.16), 0 2px 6px rgba(17,19,24,.08), 0 0 0 1px var(--line);
+  font:600 14px/1.1 'Inter', ui-sans-serif, system-ui, sans-serif; text-align:left; cursor:pointer;
+  transition:transform .16s ease, box-shadow .16s ease; }
+.meydan-ac:hover{ transform:translateY(-2px); border-color:transparent;
+  box-shadow:0 16px 36px rgba(17,19,24,.2), 0 2px 6px rgba(17,19,24,.08), 0 0 0 1px var(--line); }
+.meydan-ac:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+.meydan-ac small{ display:block; margin-top:2px; font-size:12px; font-weight:500; color:var(--dim); }
+.meydan-simge{ position:relative; width:38px; height:38px; flex:none; border-radius:12px; display:grid; grid-template-columns:1fr 1fr;
+  gap:3px; padding:9px; background:linear-gradient(145deg, #1B1C22, #2E3039); box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
+.meydan-simge i{ border-radius:2px; }
+.meydan-simge i:nth-child(1){ background:#4F86FF; } .meydan-simge i:nth-child(2){ background:#2EC4A9; border-radius:50%; }
+.meydan-simge i:nth-child(3){ background:#F2A93B; transform:rotate(45deg) scale(.82); } .meydan-simge i:nth-child(4){ background:#9A86FF; border-radius:50%; }
+.meydan-rozet{ position:absolute; top:-6px; right:-6px; min-width:20px; height:20px; padding:0 6px; border-radius:10px;
+  background:var(--accent); color:var(--on-accent); font:700 11px/20px ui-sans-serif, system-ui, sans-serif; text-align:center;
+  box-shadow:0 0 0 2px var(--yuzey); }
+@media (max-width:1023px){ .meydan-ac{ right:16px; bottom:calc(env(safe-area-inset-bottom,0px) + 16px); } .meydan-ac small{ display:none; } }
+.meydan-perde{ position:fixed; inset:0; z-index:58; background:rgba(9,9,11,.46); opacity:0;
+  -webkit-backdrop-filter:blur(8px) saturate(120%); backdrop-filter:blur(8px) saturate(120%); transition:opacity .24s ease; }
 .meydan-perde.acik{ opacity:1; }
-.meydan-panel{ position:fixed; top:0; bottom:0; z-index:59; width:min(480px, 100vw); display:flex;
-  flex-direction:column; background:var(--bg); box-shadow:0 0 40px rgba(8,10,12,.28);
-  transition:transform .26s cubic-bezier(.2,.8,.2,1); }
-.meydan-panel[data-taraf="sag"]{ right:0; transform:translateX(100%); border-left:1px solid var(--line); }
-.meydan-panel[data-taraf="sol"]{ left:0; transform:translateX(-100%); border-right:1px solid var(--line); }
-.meydan-panel.acik{ transform:none; }
-.meydan-ust{ display:flex; align-items:center; gap:8px; padding:10px 12px;
-  padding-top:calc(env(safe-area-inset-top,0px) + 10px); border-bottom:1px solid var(--line); background:var(--bg); }
-.meydan-ust .meydan-logo{ box-shadow:none; }
-.meydan-ust b{ display:flex; align-items:center; gap:8px; font:700 16px/1.2 'Inter', ui-sans-serif, system-ui, sans-serif; color:var(--fg); }
-.meydan-ust small{ display:block; font-size:12px; color:var(--dim); margin-top:2px; }
-.meydan-ust .meydan-bosluk{ flex:1; min-width:0; }
-.meydan-ust button, .meydan-ust a{ min-height:32px; padding:7px 10px; border-radius:8px; border:1px solid var(--line-strong);
-  background:var(--yuzey); color:var(--fg); font:600 12.5px/1 ui-sans-serif, system-ui, sans-serif;
-  text-decoration:none; white-space:nowrap; display:inline-flex; align-items:center; }
-.meydan-cerceve{ flex:1; width:100%; border:0; background:var(--bg); }
-@media (max-width:420px){ .meydan-ust .meydan-tam{ display:none; } }
-@media (prefers-reduced-motion: reduce){ .meydan-panel, .meydan-perde{ transition:none; } }
+.meydan-pencere{ position:fixed; z-index:59; left:50%; top:50%; width:min(440px, calc(100vw - 32px)); height:min(880px, calc(100vh - 48px));
+  border-radius:28px; overflow:hidden; background:var(--bg); opacity:0; transform:translate(-50%, -47%) scale(.94);
+  box-shadow:0 40px 120px rgba(0,0,0,.38), 0 0 0 1px rgba(255,255,255,.06);
+  transition:transform .32s cubic-bezier(.2,.9,.25,1.05), opacity .22s ease; }
+.meydan-pencere.acik{ opacity:1; transform:translate(-50%, -50%) scale(1); }
+.meydan-cerceve{ display:block; width:100%; height:100%; border:0; background:var(--bg); }
+@media (max-width:640px){
+  .meydan-pencere{ left:0; top:auto; bottom:0; width:100%; height:calc(100% - env(safe-area-inset-top,0px) - 10px);
+    border-radius:24px 24px 0 0; opacity:1; transform:translateY(100%); transition:transform .34s cubic-bezier(.2,.9,.25,1); }
+  .meydan-pencere.acik{ transform:none; }
+}
+@media (prefers-reduced-motion: reduce){ .meydan-ac, .meydan-perde, .meydan-pencere{ transition:none; } }
 </style>
-<button type="button" class="meydan-tutamac" id="meydan-tutamac" data-taraf="sag" hidden
-  aria-controls="meydan-panel" aria-expanded="false" aria-label="Meydan’ı aç">
-  <span class="meydan-logo" aria-hidden="true"></span><span class="meydan-ad">Meydan</span>
-  <span class="meydan-rozet" id="meydan-rozet" hidden></span>
+<button type="button" class="meydan-ac" id="meydan-ac" hidden aria-controls="meydan-pencere" aria-expanded="false" aria-label="Meydan’ı aç">
+  <span class="meydan-simge" aria-hidden="true"><i></i><i></i><i></i><i></i><span class="meydan-rozet" id="meydan-rozet" hidden></span></span>
+  <span>Meydan<small id="meydan-alt">Dört sistemin akışı</small></span>
 </button>
 <div class="meydan-perde" id="meydan-perde" hidden></div>
-<section class="meydan-panel" id="meydan-panel" data-taraf="sag" role="dialog" aria-modal="true"
-  aria-label="Meydan" hidden>
-  <div class="meydan-ust">
-    <div class="meydan-bosluk"><b><span class="meydan-logo" aria-hidden="true"></span>Meydan</b><small>Dört sistemin akışı · sayıları kod üretir</small></div>
-    <button type="button" id="meydan-taraf">Sola al</button>
-    <a class="meydan-tam" href="/meydan">Tam sayfa</a>
-    <button type="button" id="meydan-kapat">Kapat</button>
-  </div>
-  <iframe class="meydan-cerceve" id="meydan-cerceve" title="Meydan akışı"></iframe>
+<section class="meydan-pencere" id="meydan-pencere" role="dialog" aria-modal="true" aria-label="Meydan" hidden>
+  <iframe class="meydan-cerceve" id="meydan-cerceve" title="Meydan"></iframe>
 </section>
 <script>
 (function(){
   'use strict';
-  var TARAF_KEY = 'hkm.meydan.taraf', TOKEN_KEY = 'hkm.token';
+  var TOKEN_KEY = 'hkm.token';
   function $(id){ return document.getElementById(id); }
-  var tut = $('meydan-tutamac'), panel = $('meydan-panel'), perde = $('meydan-perde'),
-      cer = $('meydan-cerceve'), tarafBtn = $('meydan-taraf'), rozet = $('meydan-rozet');
-  var taraf = 'sag', acik = false, sonOdak = null, zaman = null;
-  try{ if(localStorage.getItem(TARAF_KEY) === 'sol') taraf = 'sol'; }catch(e){}
-  function mesaj(veri){
-    try{ if(cer.contentWindow) cer.contentWindow.postMessage(veri, location.origin); }catch(e){}
-  }
-  function tarafUygula(){
-    tut.setAttribute('data-taraf', taraf); panel.setAttribute('data-taraf', taraf);
-    tarafBtn.textContent = taraf === 'sag' ? 'Sola al' : 'Sağa al';
-    mesaj({ meydan:'taraf', taraf:taraf });
-  }
+  var ac_ = $('meydan-ac'), pencere = $('meydan-pencere'), perde = $('meydan-perde'), cer = $('meydan-cerceve'),
+      rozet = $('meydan-rozet'), alt = $('meydan-alt');
+  var acik = false, sonOdak = null, zaman = null;
+  function mesaj(veri){ try{ if(cer.contentWindow) cer.contentWindow.postMessage(veri, location.origin); }catch(e){} }
   function temaGonder(){ mesaj({ meydan:'tema', tema:document.documentElement.getAttribute('data-tema') || '' }); }
+  function sayiYaz(n){
+    rozet.textContent = n; rozet.hidden = !n;
+    alt.textContent = n ? n + ' kart tekrar bekliyor' : 'Dört sistemin akışı';
+    ac_.setAttribute('aria-label', n ? 'Meydan’ı aç, ' + n + ' kart tekrar bekliyor' : 'Meydan’ı aç');
+  }
   function ac(){
     if(acik) return;
     acik = true; clearTimeout(zaman); sonOdak = document.activeElement;
-    if(!cer.getAttribute('src')) cer.setAttribute('src', '/meydan?panel=1&taraf=' + taraf);
+    if(!cer.getAttribute('src')) cer.setAttribute('src', '/meydan?uygulama=1');
     else { temaGonder(); mesaj({ meydan:'yenile' }); }
-    perde.hidden = false; panel.hidden = false;
-    void panel.offsetWidth;                     /* gecis baslangici cizilsin */
-    panel.classList.add('acik'); perde.classList.add('acik');
-    tut.setAttribute('aria-expanded', 'true');
+    perde.hidden = false; pencere.hidden = false;
+    void pencere.offsetWidth;                   /* gecis baslangici cizilsin */
+    pencere.classList.add('acik'); perde.classList.add('acik');
+    ac_.setAttribute('aria-expanded', 'true');
     document.documentElement.style.overflow = 'hidden';
-    setTimeout(function(){ $('meydan-kapat').focus(); }, 60);
+    setTimeout(function(){ try{ cer.focus(); }catch(e){} }, 80);
   }
   function kapat(){
     if(!acik) return;
     acik = false;
-    panel.classList.remove('acik'); perde.classList.remove('acik');
-    tut.setAttribute('aria-expanded', 'false');
+    pencere.classList.remove('acik'); perde.classList.remove('acik');
+    ac_.setAttribute('aria-expanded', 'false');
     document.documentElement.style.overflow = '';
-    zaman = setTimeout(function(){ if(!acik){ panel.hidden = true; perde.hidden = true; } }, 280);
+    zaman = setTimeout(function(){ if(!acik){ pencere.hidden = true; perde.hidden = true; } }, 340);
     if(sonOdak && sonOdak.focus) sonOdak.focus();
-    rozetYukle();
+    sayiYukle();
   }
-  async function rozetYukle(){
+  async function sayiYukle(){
     var token = null;
     try{ token = localStorage.getItem(TOKEN_KEY); }catch(e){}
     if(!token) return;
     try{
       var r = await fetch('/api/meydan/deste', { headers:{ 'Authorization':'Bearer ' + token } });
-      if(!r.ok) return;
-      var g = await r.json(), n = (g.ozet || {}).vadeli || 0;
-      rozet.textContent = n; rozet.hidden = !n;
-      tut.setAttribute('aria-label', n ? 'Meydan’ı aç, ' + n + ' kart tekrar bekliyor' : 'Meydan’ı aç');
+      if(r.ok){ var g = await r.json(); sayiYaz((g.ozet || {}).vadeli || 0); }
     }catch(e){}
   }
-  tut.addEventListener('click', ac);
-  $('meydan-kapat').addEventListener('click', kapat);
+  ac_.addEventListener('click', ac);
   perde.addEventListener('click', kapat);
-  tarafBtn.addEventListener('click', function(){
-    taraf = taraf === 'sag' ? 'sol' : 'sag';
-    try{ localStorage.setItem(TARAF_KEY, taraf); }catch(e){}
-    tarafUygula();
-  });
-  cer.addEventListener('load', function(){ temaGonder(); tarafUygula(); });
+  cer.addEventListener('load', temaGonder);
   document.addEventListener('keydown', function(e){ if(acik && e.key === 'Escape') kapat(); });
   /* Cercevedeki Meydan kapatmayi ve tekrar sayisini soyler; yalniz ayni
      kaynaktan ve yalniz bu cerceveden gelen ileti dinlenir. */
   window.addEventListener('message', function(e){
     if(e.origin !== location.origin || e.source !== cer.contentWindow || !e.data) return;
     if(e.data.meydan === 'kapat') kapat();
-    if(e.data.meydan === 'tekrar' && typeof e.data.vadeli === 'number'){
-      rozet.textContent = e.data.vadeli; rozet.hidden = !e.data.vadeli;
-    }
+    if(e.data.meydan === 'tekrar' && typeof e.data.vadeli === 'number') sayiYaz(e.data.vadeli);
   });
-  /* Dokunmatik: secilen kenardan iceri kaydirinca acilir. */
-  var x0 = null, y0 = null;
-  document.addEventListener('touchstart', function(e){
-    if(acik || tut.hidden || e.touches.length !== 1) return;
-    var x = e.touches[0].clientX;
-    var kenarda = taraf === 'sag' ? window.innerWidth - x < 22 : x < 22;
-    if(kenarda){ x0 = x; y0 = e.touches[0].clientY; } else x0 = null;
-  }, { passive:true });
-  document.addEventListener('touchmove', function(e){
-    if(x0 == null) return;
-    var dx = e.touches[0].clientX - x0, dy = Math.abs(e.touches[0].clientY - y0);
-    if(dy > 50){ x0 = null; return; }
-    if((taraf === 'sag' && dx < -60) || (taraf === 'sol' && dx > 60)){ x0 = null; ac(); }
-  }, { passive:true });
-  /* Tutamac yuzun cekmeceleriyle birlikte gorunur: giris ekraninda yoktur. */
+  /* Dugme yuzun cekmeceleriyle birlikte gorunur: giris ekraninda yoktur. */
   var gez = $('gez');
   function gorunurluk(){
-    var once = tut.hidden;
-    tut.hidden = !gez || gez.hidden;
-    if(once && !tut.hidden) rozetYukle();
+    var once = ac_.hidden;
+    ac_.hidden = !gez || gez.hidden;
+    if(once && !ac_.hidden) sayiYukle();
   }
   if(gez && window.MutationObserver) new MutationObserver(gorunurluk).observe(gez, { attributes:true, attributeFilter:['hidden'] });
-  tarafUygula(); gorunurluk();
+  gorunurluk();
 })();
 </script>
 </body>
