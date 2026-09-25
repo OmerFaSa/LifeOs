@@ -675,6 +675,10 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   <!-- Bölüm çubuğu: birden çok bölümlü çekmecede görünür (iç içelik en çok
        iki kat: çekmece › bölüm). -->
   <nav class="bolumcubugu" id="bolumcubugu" aria-label="Bu çekmecede" hidden>
+    <div class="bolumcubugu__ic" data-cekmece="bugun" hidden>
+      <a href="#/bugun" data-yol="bugun">Günün özeti</a>
+      <a href="#/meydan" data-yol="meydan">Meydan</a>
+    </div>
     <div class="bolumcubugu__ic" data-cekmece="sistemler" hidden>
       <a href="#/sistemler" data-yol="sistemler">Modüller</a>
       <a href="#/para" data-yol="para">Para</a>
@@ -793,6 +797,13 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     </div>
 
     <!-- =========================== SOHBETLER ========================= -->
+    <!-- MEYDAN (kullanıcı kararı 2026-09-25, ekip/meydan/MEYDAN.md): sistemin
+         kendi akışı, Bugün çekmecesinin bölümü. Ayrı dosyadır (web/meydan.html,
+         core/meydan.py) ve aynı jetonu okur; yüz yalnız çerçeveyi açar. -->
+    <div data-bolme="meydan" hidden>
+      <iframe id="meydan-cerceve" title="Meydan"
+        style="display:block;width:100%;height:calc(100vh - 150px);min-height:560px;border:1px solid var(--line);border-radius:14px;background:var(--bg)"></iframe>
+    </div>
     <div data-bolme="sohbet" hidden>
       <div class="gun"><h1>Sohbetler</h1></div>
       <div class="card" id="gorevliler"></div>
@@ -4487,7 +4498,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
      gorunumun verisi cekilir — her sekmede butun ambari sorgulamak,
      acilisi bekletmekten baska is yapmiyordu. */
   var GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'motto',
-                    'hedefler', 'ofis', 'teklifler', 'para', 'ayarlar'];
+                    'hedefler', 'ofis', 'teklifler', 'para', 'ayarlar', 'meydan'];
   var gorunum = 'bugun';
 
   function yolOku(){
@@ -4508,7 +4519,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   /* Görünüm → çekmece (üst gezinmede hangisi yanar). */
   var CEKMECE = { bugun:'bugun', teklifler:'teklifler', hedefler:'hedefler',
                   sistemler:'sistemler', para:'sistemler', ofis:'ofis', sohbet:'sohbet',
-                  ayarlar:'ayarlar', profil:'ayarlar', motto:'ayarlar' };
+                  ayarlar:'ayarlar', profil:'ayarlar', motto:'ayarlar', meydan:'bugun' };
 
   function altYolOku(){
     var p = (location.hash || '').replace(/^#\/?/, '').split('/');
@@ -4799,6 +4810,14 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     if(gorunum === 'teklifler') return yukleTeklifler();
     if(gorunum === 'para') return yuklePara();
     if(gorunum === 'ayarlar') return yukleAyarlar();
+    if(gorunum === 'meydan') return yukleMeydan();
+  }
+
+  /* Meydan ayrı sayfadır (core/meydan.py); yüz çerçeveyi yalnız ilk açılışta
+     yükler, sonra olduğu gibi bırakır (yazılan not, açık kart kaybolmaz). */
+  function yukleMeydan(){
+    var f = $('meydan-cerceve');
+    if(f && !f.getAttribute('src')) f.setAttribute('src', '/meydan?gomulu=1');
   }
 
   async function yukleBugun(t){

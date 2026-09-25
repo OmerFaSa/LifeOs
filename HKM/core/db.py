@@ -493,6 +493,49 @@ CREATE TABLE IF NOT EXISTS motto_tags (
   UNIQUE(node_id, tag)
 );
 CREATE INDEX IF NOT EXISTS ix_motto_tag ON motto_tags(tag);
+
+/* MEYDAN (core/meydan.py): HKM'nin KENDI durumu. Gonderiler ambardaki
+   olaylardan her istekte yeniden turer ve SAKLANMAZ; saklanan yalniz
+   kullanicinin izidir: tekrar destesi, isaretler (Faydali, Kaydet, sinav
+   cevabi) ve «Sen» notlari. Hicbiri bir module yazilmaz; deste ESP'nin
+   kart takvimini degistirmez. Silinen kart ve not isaretlenir, kaybolmaz. */
+CREATE TABLE IF NOT EXISTS meydan_deste (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  anahtar     TEXT NOT NULL UNIQUE,              -- kaynak:kimlik (ayni kart iki kez girmez)
+  kaynak      TEXT NOT NULL,                     -- bam | esp | sinav | sen
+  hesap       TEXT NOT NULL,
+  modul       TEXT,                              -- ays | spi | esp | merkez | NULL
+  on_yuz      TEXT NOT NULL,
+  arka_yuz    TEXT NOT NULL,
+  aciklama    TEXT NOT NULL DEFAULT '',
+  dil         TEXT,                              -- telaffuz icin unite dili; yoksa NULL
+  adim        INTEGER NOT NULL DEFAULT 0,        -- meydan.ARALIK sirasi
+  vade        TEXT NOT NULL,                     -- ISO an
+  tekrar      INTEGER NOT NULL DEFAULT 0,        -- kac kez puanlandi
+  son_puan    TEXT,
+  onceki      TEXT,                              -- JSON: «Geri al» icin son hal
+  silindi     INTEGER NOT NULL DEFAULT 0,
+  created_at  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS ix_meydan_deste_vade ON meydan_deste(silindi, vade);
+
+CREATE TABLE IF NOT EXISTS meydan_isaret (
+  gonderi     TEXT NOT NULL,
+  tur         TEXT NOT NULL,                     -- faydali | kaydet | cevap:<n>
+  deger       TEXT NOT NULL DEFAULT '',          -- kaydet: gonderinin o anki hali (JSON)
+  created_at  TEXT NOT NULL,
+  PRIMARY KEY (gonderi, tur)
+);
+
+CREATE TABLE IF NOT EXISTS meydan_not (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  gun         TEXT NOT NULL,
+  modul       TEXT,
+  metin       TEXT NOT NULL,
+  silindi     INTEGER NOT NULL DEFAULT 0,
+  created_at  TEXT NOT NULL
+);
 """
 
 
@@ -773,7 +816,8 @@ def decision(con, decision_id):
 BACKUP_TABLES = ("raw_events", "audits", "decisions", "decision_sources",
                  "conversations", "attachments", "memories", "intents", "outbox", "usage",
                  "inbox_seen", "bam_isler", "bam_kayitlar", "bam_iz",
-                 "is_emirleri", "bildirimler", "hedef_ozet", "zaman_butcesi", "para")
+                 "is_emirleri", "bildirimler", "hedef_ozet", "zaman_butcesi", "para",
+                 "meydan_deste", "meydan_isaret", "meydan_not")
 BACKUP_SCHEMA = 4
 
 

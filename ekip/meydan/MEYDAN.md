@@ -1,7 +1,12 @@
 # Meydan — tasarım ve mantık (v3 önerisi)
 
-> **Durum: fikir.** Sisteme bağlı değildir; hiçbir modül bu dosyaları yüklemez
-> (kullanıcı kararı, 2026-09-24: «şimdi sisteme entegre etmeyelim»).
+> **Durum (2026-09-25): M1 + M2 HKM'de.** Kullanıcı kararı: «bu sistemi HKM'ye
+> ekler misin», «HKM'nin içinde olacak». Kod `HKM/core/meydan.py`, uçlar
+> `/api/meydan*`, sayfa `HKM/web/meydan.html`; HKM yüzünde **Bugün › Meydan**.
+> Modüllere dokunulmadı (M3, M4 bekliyor). Öğretici ve tekrar edici kısım: BAM'ın
+> ders, kart ve soru kayıtları akışa girer; yanlış cevap ve eklenen kart Meydan'ın
+> kendi destesinde 1 · 3 · 7 · 14 · 30 günle döner (ESP'nin takvimi değişmez).
+> Önceki durum: fikir (kullanıcı kararı, 2026-09-24: «şimdi sisteme entegre etmeyelim»).
 > Kaynak: kullanıcının `meydan-v2` örneği. Etkileşimli örnek: `meydan.html`
 > (örnek veri; tarayıcıda açılır, yaptığın seçimler yalnız o tarayıcıda kalır).
 

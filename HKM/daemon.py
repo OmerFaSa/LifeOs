@@ -70,6 +70,10 @@ Ucnoktalar:
     GET  /api/king/teklifler/<modul> modulun onay bekleyen teklifleri (teklif karti)
     POST /api/king/emir/<id>/devam|dur  parca parca uretimde ara onaya cevap
     GET  /api/health                token istemez
+    GET  /meydan                    Meydan: sistemin kendi akisi (token istemez; veri /api/meydan'dan)
+    GET  /api/meydan                gunun akisi (date, kapsam, duzey); GET /api/meydan/deste, /kaydedilenler
+    POST /api/meydan/isaret|cevap|deste|not   Meydan'in KENDI tablolari; module yazmaz
+    POST /api/meydan/deste/<id>/puan|geri|cikar, /api/meydan/not/<id>/sil
     GET  /                          tek dosyalik yerel yuz (token istemez;
                                     jetonu kullanici girer, veri yine korumali)
 
@@ -92,8 +96,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from core import (ai, bam, bildirim, butce, channels, cikti, cross, db, depo, gelen,  # noqa: E402
                   fis, hedefag, impact,
-                  intents, kanal, king, manager, media, memory, models, motto, outbox, patron,
-                  profil, schedule,
+                  intents, kanal, king, manager, media, memory, meydan, models, motto, outbox, patron,
+                  profil, saat, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
                   urunler, weekly, web, yedek, yoklama)
 
@@ -467,6 +471,69 @@ class Handler(BaseHTTPRequestHandler):
         given = head[7:] if head.startswith("Bearer ") else ""
         return sync_engine.check_token(given, self.server.config.get("local_token"))
 
+    # --- Meydan (core/meydan.py) ------------------------------------------
+    # Akis her istekte olaylardan yeniden turer; yazma uclari yalniz
+    # Meydan'in KENDI tablolarina yazar (deste, isaret, not). Hicbiri bir
+    # module yazmaz; oneri karari Onaylar'in ucundan (/api/decision) gecer.
+    def _meydan_get(self, u, q):
+        simdi = saat.simdi()
+        gun = (q.get("date") or [saat.bugun()])[0]
+        if not _gun_mu(gun):
+            return self._send(400, {"error": "date yyyy-aa-gg olmali"})
+        if u.path == "/api/meydan":
+            return self._send(200, meydan.akis(
+                self.con, gun, kapsam=(q.get("kapsam") or ["hepsi"])[0],
+                duzey=(q.get("duzey") or ["dengeli"])[0], now=simdi))
+        if u.path == "/api/meydan/deste":
+            return self._send(200, meydan.deste(self.con, now=simdi))
+        if u.path == "/api/meydan/kaydedilenler":
+            return self._send(200, meydan.kaydedilenler(self.con))
+        return self._send(404, {"error": "yok"})
+
+    def _meydan_post(self, u):
+        ham, hata = self._read_body()
+        if hata:
+            return self._send(413, {"error": hata})
+        try:
+            b = _nesne(ham) if ham else {}
+        except ValueError:
+            return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
+        simdi = saat.simdi()
+        parca = u.path.strip("/").split("/")          # api meydan <uc> [id] [eylem]
+        uc = parca[2] if len(parca) > 2 else ""
+        if uc == "isaret" and len(parca) == 3:
+            gun = str(b.get("gun") or saat.bugun())
+            if not _gun_mu(gun):
+                return self._send(400, {"error": "gun yyyy-aa-gg olmali"})
+            r = meydan.isaretle(self.con, gun, str(b.get("gonderi") or ""), b.get("tur"),
+                                bool(b.get("acik")), now=simdi)
+        elif uc == "cevap" and len(parca) == 3:
+            r = meydan.cevapla(self.con, b.get("gonderi"), b.get("no"), b.get("secim"), now=simdi)
+        elif uc == "deste" and len(parca) == 3:
+            r = (meydan.desteye_ekle(self.con, b.get("gonderi"), now=simdi) if b.get("gonderi")
+                 else meydan.kart_yap(self.con, b.get("on"), b.get("arka"), b.get("modul"), now=simdi))
+        elif uc in ("deste", "not") and len(parca) == 5:
+            try:
+                kid = int(parca[3])
+            except ValueError:
+                return self._send(400, {"error": "kimlik sayi olmali"})
+            eylem = parca[4]
+            if uc == "deste" and eylem == "puan":
+                r = meydan.puanla(self.con, kid, b.get("derece"), now=simdi)
+            elif uc == "deste" and eylem == "geri":
+                r = meydan.geri_al(self.con, kid, now=simdi)
+            elif uc == "deste" and eylem == "cikar":
+                r = meydan.karti_cikar(self.con, kid, now=simdi)
+            elif uc == "not" and eylem == "sil":
+                r = meydan.not_sil(self.con, kid)
+            else:
+                return self._send(404, {"error": "yok"})
+        elif uc == "not" and len(parca) == 3:
+            r = meydan.not_yaz(self.con, b.get("metin"), b.get("modul"), now=simdi)
+        else:
+            return self._send(404, {"error": "yok"})
+        return self._send(200 if r.get("ok") else (r.get("status") or 422), r)
+
     def log_message(self, fmt, *args):
         sys.stderr.write("[hkm] " + (fmt % args) + "\n")
 
@@ -619,13 +686,15 @@ class Handler(BaseHTTPRequestHandler):
         return self._send(200, {"token": self.server.config.get("local_token"),
                                 "note": "Bu jeton yalnız bu cihazda saklanır."})
 
-    def _send_page(self):
+    def _send_page(self, ad="index.html"):
         """Yerel yuz — tek dosya, sifir bagimlilik.
 
         Sayfanin KENDISI jeton istemez cunku icinde veri yoktur: butun
         veri /api/* uzerinden gelir ve orasi bearer ister. Kullanici jetonu
-        sayfaya girer, sayfa da kendi tarayicisinda saklar."""
-        yol = os.path.join(ROOT, "web", "index.html")
+        sayfaya girer, sayfa da kendi tarayicisinda saklar. Meydan
+        (`web/meydan.html`) ayri bir sayfadir ve ayni jetonu okur; ad
+        sabit iki degerden gelir, istekten gelmez."""
+        yol = os.path.join(ROOT, "web", ad if ad in ("index.html", "meydan.html") else "index.html")
         if not os.path.exists(yol):
             return self._send(404, {"error": "yuz kurulu degil"})
         with open(yol, "rb") as f:
@@ -732,6 +801,8 @@ class Handler(BaseHTTPRequestHandler):
         u = urlparse(self.path)
         if u.path in ("/", "/index.html"):
             return self._send_page()
+        if u.path in ("/meydan", "/meydan.html"):
+            return self._send_page("meydan.html")
         if u.path.startswith("/img/seviye/") or u.path.startswith("/img/marka/"):
             return self._send_seviye(u.path)
         if u.path.startswith("/brand/"):
@@ -758,6 +829,8 @@ class Handler(BaseHTTPRequestHandler):
         date = (q.get("date") or [datetime.date.today().isoformat()])[0]
         if not _gun_mu(date):
             return self._send(400, {"error": "date yyyy-aa-gg olmali"})
+        if u.path == "/api/meydan" or u.path.startswith("/api/meydan/"):
+            return self._meydan_get(u, q)
         if u.path == "/api/briefing":
             return self._send(200, briefing(self.con, date,
                                             th=self.server.thresholds))
@@ -1086,6 +1159,8 @@ class Handler(BaseHTTPRequestHandler):
 
         if not self._authorized():
             return self._send(401, {"error": "bearer gerekli"})
+        if u.path.startswith("/api/meydan/"):
+            return self._meydan_post(u)
         if u.path == "/api/pair/open":
             ham, hata = self._read_body()
             if hata:
