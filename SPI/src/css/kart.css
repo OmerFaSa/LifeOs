@@ -1322,3 +1322,19 @@
 .vk:has(> .w05){ width:100%; min-width:0; max-width:100%; flex:1 1 100%; }
 .vk .w05, .vk .w05 .gn2{ min-width:0; }
 .vk .w05 .alt{ flex-wrap:wrap; gap:4px 12px; }
+
+/* 120 HAFTALIK MERKEZ ÖZETİ (brand/ortak/haftaozet.js): pazar akşamı
+   Bugün'de; her modülden bir satır + kesinlik çipi, en altta bekleyen. */
+.hozet__liste{ list-style:none; margin:0; padding:0; }
+.hozet__satir{ display:grid; grid-template-columns:44px minmax(0,1fr) auto; gap:var(--sp-1) var(--sp-2);
+  align-items:baseline; padding:var(--sp-2) 0; border-top:1px solid var(--border); }
+.hozet__satir:first-child{ border-top:0; padding-top:0; }
+.hozet__modul{ font-size:var(--fs-sm); color:var(--text); }
+.hozet__cumle{ min-width:0; overflow-wrap:anywhere; font-size:var(--fs-sm); color:var(--text-2); }
+.hozet__alt{ margin:var(--sp-2) 0 0; padding-top:var(--sp-2); border-top:1px solid var(--border);
+  font-size:var(--fs-sm); color:var(--text); }
+.hozet__not{ margin:var(--sp-1) 0 0; font-size:var(--fs-xs); color:var(--text-3); }
+@media (max-width:640px){
+  .hozet__satir{ grid-template-columns:44px minmax(0,1fr); }
+  .hozet__satir .kesinlik{ grid-column:2; justify-self:start; }
+}

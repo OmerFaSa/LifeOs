@@ -200,6 +200,10 @@ DOSYALAR = {
     # King'in onay kapisi (HKM core/king.py): modulun teklif karti (Part 8a-3b).
     "kingteklif.js":      "js/core",
     "kingteklif.test.js": "tests",
+    # HAFTALIK MERKEZ OZETI (120): pazar aksami Bugun karti, veri HKM
+    # core/merkez.py hafta_ozeti. HKM kapaliyken kart yok.
+    "haftaozet.js":      "js/core",
+    "haftaozet.test.js": "tests",
     # GORSEL DENETIMI — tek dosya gorselsiz acildiginda bunu soylemek.
     # Uyari metni ve kosulu uc arayuzde ayni olmali.
     "gorsel.js":      "js/core",

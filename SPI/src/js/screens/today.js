@@ -997,6 +997,7 @@ SP.Screens.today = (function(){
           ${BeslenmeKutusu()}
           ${raw(TartiHatirlatici())}
           ${SonOlcumlerKutusu()}
+          ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
         </section>
         ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
       </div>

@@ -1386,6 +1386,18 @@ R.App = (function(){
         window.addEventListener(LIFEOS.KingTeklif.OLAY, kingTazele);
         setInterval(kingTazele, 60000);
       }
+      /* 120 Haftalık Merkez özeti (brand/ortak/haftaozet.js): pazar 17:00
+         sonrası Bugün'de tek kart. HKM kapalıysa ya da eşleşmemişse kart yok. */
+      if(window.LIFEOS && LIFEOS.HaftaOzet){
+        R.HaftaOzet = LIFEOS.HaftaOzet.kur({ hkm:() => R.Beacon });
+        const haftaTazele = () => R.HaftaOzet.cek().then(v => {
+          const once = S.ui.haftaOzet || null;
+          S.ui.haftaOzet = v;
+          if(once !== v) render();
+        }).catch(() => {});
+        haftaTazele();
+        setInterval(haftaTazele, 5 * 60000);
+      }
 
       /* Seviye kutlaması. İki yol da buraya çıkar:
 

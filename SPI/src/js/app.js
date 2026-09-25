@@ -1358,6 +1358,18 @@ SP.App = (function(){
         window.addEventListener(LIFEOS.KingTeklif.OLAY, kingTazele);
         setInterval(kingTazele, 60000);
       }
+      /* 120 Haftalık Merkez özeti (brand/ortak/haftaozet.js): pazar 17:00
+         sonrası Bugün'de tek kart. HKM kapalıysa ya da eşleşmemişse kart yok. */
+      if(window.LIFEOS && LIFEOS.HaftaOzet){
+        SP.HaftaOzet = LIFEOS.HaftaOzet.kur({ hkm:() => SP.Beacon });
+        const haftaTazele = () => SP.HaftaOzet.cek().then(v => {
+          const once = S.ui.haftaOzet || null;
+          S.ui.haftaOzet = v;
+          if(once !== v) render();
+        }).catch(() => {});
+        haftaTazele();
+        setInterval(haftaTazele, 5 * 60000);
+      }
       /* Hatırlatma bildirimi (core/hatirlat.js): yalnız kullanıcı açtıysa ve
          tarayıcı izin verdiyse; saati son 15 dakikada gelmiş olan için. */
       if(SP.Hatirlat){
