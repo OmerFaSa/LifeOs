@@ -548,6 +548,17 @@ CREATE TABLE IF NOT EXISTS meydan_not (
   silindi     INTEGER NOT NULL DEFAULT 0,
   created_at  TEXT NOT NULL
 );
+
+-- Hikaye ritmi (meydan.hikayeler): hangi hesap hangi gun hikaye atti.
+-- Yalniz RITIM tutulur, icerik degil (kareler her istekte olaylardan
+-- turer). Turetilmistir: yedege girmez, 14 gunden eskisi silinir.
+CREATE TABLE IF NOT EXISTS meydan_hikaye (
+  hesap       TEXT NOT NULL,
+  gun         TEXT NOT NULL,
+  neden       TEXT NOT NULL,                     -- onemli | ritim
+  created_at  TEXT NOT NULL,
+  PRIMARY KEY (hesap, gun)
+);
 """
 
 

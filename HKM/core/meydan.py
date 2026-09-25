@@ -654,26 +654,195 @@ def _yanit_haritasi(con, gidler, now=None):
     return out
 
 
-def _hikayeler(gonderiler):
-    """Hesap basina gunun ozeti: iki sayi karesi + bir cumle karesi.
-    Kareler gonderilerden gelir; yeni bir sey soylemez."""
-    out, sira = {}, []
-    for g in gonderiler:
-        if g["hesap"] == "sen" or g.get("katli"):
+# ------------------------------------------------------------ hikayeler
+#
+# Hikaye gunun VITRINIDIR; yeni bir sey soylemez. Kareleri o gunun
+# gonderilerinden turer ve her karenin bir gonderisi vardir.
+#
+# RITIM kodun kuralidir, modelin degil:
+#   * onemli gun (karar bekleyen, uyari, bugun gelen BAM urunu) -> atar
+#   * sakin gun: dun attiysa bugun dinlenir, atmadiysa atar
+# Boylece her hesap gunde en cok BIR, sakin donemde IKI GUNDE BIR hikaye
+# atar; atilan hikaye gun boyu durur (meydan_hikaye). Hikaye yalniz BUGUN
+# vardir, gun bitince kalkar; gonderi ve kayit yerinde durur.
+#
+# ETKILESIM KUCUK VE UCUZDUR: hikaye basina tek kare, model cagrilmaz,
+# yeni uc yoktur (cevap, deste ve isaret uclari aynidir). Secim sirasi:
+# karar > soru > kart > muzik > yon > tepki. Izlenme OLCULMEZ: «gordum»
+# halkasi sayfanin yerel isidir, sunucuya gitmez.
+
+HIKAYE_SIRA = ("king", "bam", "academic", "bio", "intellect")
+HIKAYE_SAKLA = 14
+YONLER = ("Yükseliyor", "Yatay", "Düşüyor")
+
+
+def _bas_harf(s):
+    s = str(s or "")
+    return s[:1].translate(str.maketrans({"i": "İ", "ı": "I"})).upper() + s[1:]
+
+
+def _bugun_mu(gun, now=None):
+    return gun in (saat.bugun(_an(now)), saat.bugun())
+
+
+def _onem_nedeni(posts, gun):
+    if any(g["bekliyor"] for g in posts):
+        return "Senden karar bekliyor"
+    if any(g["uyari"] for g in posts):
+        return "Bugün bir uyarı var"
+    if any(g["hesap"] == "bam" and str(g["zaman"])[:10] == gun for g in posts):
+        return "Bugün yeni ürün"
+    return None
+
+
+def _ritim(con, hesap, gun, onemli, now=None):
+    """Bugun hikaye atar mi? Karar tabloya yazilir: gun boyu ayni kalir."""
+    if con.execute("SELECT 1 FROM meydan_hikaye WHERE hesap=? AND gun=?", (hesap, gun)).fetchone():
+        return True
+    dun = (datetime.date.fromisoformat(gun) - datetime.timedelta(days=1)).isoformat()
+    if not onemli and con.execute("SELECT 1 FROM meydan_hikaye WHERE hesap=? AND gun=?",
+                                  (hesap, dun)).fetchone():
+        return False
+    con.execute("INSERT OR IGNORE INTO meydan_hikaye(hesap, gun, neden, created_at) VALUES (?,?,?,?)",
+                (hesap, gun, "onemli" if onemli else "ritim", _iso(_an(now))))
+    return True
+
+
+def _yon(s):
+    """Egilim cipinden yon sirasi (YONLER) ya da None."""
+    e = s[3] if len(s) > 3 else ""
+    return 0 if e.startswith("↑") else 2 if e.startswith("↓") else 1 if e.startswith("yatay") else None
+
+
+def _destede(con, gid):
+    return bool(con.execute("SELECT 1 FROM meydan_deste WHERE silindi=0 AND anahtar LIKE ?",
+                            ("%%:%s:%%" % gid,)).fetchone())
+
+
+def _kare_kapak(h, posts, gun):
+    g = posts[0]
+    # Sakin raporun basligi «SPİ · günün raporu»dur; kapakta cumlesi durur.
+    genel = g["tur"] == "ozet" or not g["baslik"]
+    uyari = sum(1 for x in posts if x["uyari"])
+    if h == "bam":
+        alt = "Son %d günde %d ürün" % (URUN_GUN, len(posts))
+    else:
+        alt = "Bugün %d gönderi" % len(posts) + (" · %d uyarı" % uyari if uyari else "")
+    return {"tur": "kapak", "ust": "%s · %s" % (MODUL_AD[HESAPLAR[h]["modul"]], tarih_yaz(gun)),
+            "baslik": _kisalt(g["cumle"] if genel else g["baslik"], 160),
+            "metin": None if genel else _kisalt(g["cumle"], 180), "alt": alt, "gonderi": g["id"]}
+
+
+def _kare_sayi(posts, gizle=None):
+    for g in posts:
+        dolu = [s for s in g.get("sayilar") or [] if s[2] != "veri yok"]
+        if not dolu:
             continue
-        h = out.get(g["hesap"])
-        if h is None:
-            h = out[g["hesap"]] = {"hesap": g["hesap"], "kareler": []}
-            sira.append(g["hesap"])
-        sayi = [s for s in g.get("sayilar") or [] if s[2] != "veri yok"]
-        for s in sayi[:2]:
-            if len(h["kareler"]) < 3:
-                h["kareler"].append({"tur": "sayi", "deger": s[0], "ad": s[1], "kesinlik": s[2],
-                                     "egilim": s[3] if len(s) > 3 else None, "gonderi": g["id"]})
-        if len(h["kareler"]) < 3:
-            h["kareler"].append({"tur": "cumle", "ust": g["baslik"] or g["tur_ad"],
-                                 "metin": _kisalt(g["cumle"], 160), "gonderi": g["id"]})
-    return [out[k] for k in sira]
+        b = dolu[0]
+        eksik = next((s[1] for s in g["sayilar"] if s[2] == "veri yok"), None)
+        return {"tur": "sayi", "deger": b[0], "ad": b[1], "kesinlik": b[2],
+                "egilim": b[3] if len(b) > 3 and b[1] != gizle else None,
+                "yan": [s[:3] for s in dolu[1:3]],
+                "eksik": ("%s: veri yok, sıfır sayılmadı." % _bas_harf(eksik)) if eksik else None,
+                "gonderi": g["id"]}
+    return None
+
+
+def _kare_bilgi(posts, kapak):
+    adaylar = []
+    for g in posts:
+        adaylar += [("Bulgu", b["metin"], None, g["id"]) for b in g.get("bulgular") or []]
+        if g.get("baglanti"):
+            bg = g["baglanti"]
+            adaylar.append((bg.get("etiket") or "İlgili", bg["metin"], bg.get("durum"), bg["id"]))
+        if g.get("ozet"):
+            ks = g.get("kaynak_sayisi")
+            adaylar.append(("Özet", g["ozet"], ("%d kaynak · " % ks if ks else "") + g.get("dogruluk", ""),
+                            g["id"]))
+        if g.get("ek_metin"):
+            adaylar.append(("Teklif", g["ek_metin"], None, g["id"]))
+    adaylar += [(g["tur_ad"], g["baslik"] or g["cumle"], _kisalt(g["cumle"], 140) if g["baslik"] else None,
+                 g["id"]) for g in posts[1:]]
+    for ust, metin, alt, gid in adaylar:
+        if metin and metin not in (kapak["baslik"], kapak["metin"]):
+            return {"tur": "bilgi", "ust": ust, "metin": _kisalt(metin, 220), "alt": alt or None,
+                    "gonderi": gid}
+    return None
+
+
+def _kare_etkilesim(con, posts, faydali):
+    for g in posts:
+        if g["bekliyor"]:
+            return {"tur": "karar", "gonderi": g["id"], "metin": _kisalt(g["baslik"] or g["cumle"], 200),
+                    "alt": "Karar gönderide verilir: önizleme ve tek onay, Onaylar’dakiyle aynı."}
+    for g in posts:
+        s = g.get("sinav") or {}
+        if s.get("secenekler") and not s.get("bitti"):
+            return {"tur": "soru", "gonderi": g["id"], "no": s["no"], "baslik": g["baslik"],
+                    "sira": "Soru %d / %d" % (s["no"] + 1, s["toplam"]), "soru": s["soru"],
+                    "secenekler": s["secenekler"]}
+    for g in posts:
+        if g.get("kartlar"):
+            k = g["kartlar"][0]
+            return {"tur": "kart", "gonderi": g["id"], "on": k["on"], "arka": k["arka"],
+                    "ses": g.get("ses"), "adet": g.get("kart_sayisi") or len(g["kartlar"]),
+                    "destede": _destede(con, g["id"])}
+    for g in posts:
+        for i, a in enumerate(g.get("alistirmalar") or []):
+            if a.get("akorlar"):
+                return {"tur": "muzik", "gonderi": g["id"], "anahtar": "%s:%d" % (g["id"], i),
+                        "alistirma": a}
+    for g in posts:
+        for s in g.get("sayilar") or []:
+            yon = _yon(s)
+            if yon is not None:
+                return {"tur": "yon", "gonderi": g["id"],
+                        "soru": "%s son %d günde hangi yönde?" % (_bas_harf(s[1]), EGILIM_GUN),
+                        "secenekler": list(YONLER), "dogru": yon, "deger": s[0], "ad": s[1],
+                        "kesinlik": s[2], "cevap": s[3],
+                        "kural": "Son %d günün ortancası, öncekilere göre; hesaplandı." % EGILIM_GUN}
+    g = posts[0]
+    return {"tur": "tepki", "gonderi": g["id"], "soru": "Bu özet işine yaradı mı?",
+            "faydali": g["id"] in faydali,
+            "alt": "Faydalı yalnız bu hesabın bu türünü sende biraz öne alır."}
+
+
+def hikayeler(con, gun, hepsi, faydali=(), kapsam="hepsi", now=None):
+    """Bugunun hikayeleri: hesap basina kapak + sayi + bilgi + tek etkilesim.
+    Ritim butun hesaplar icin kurulur; `kapsam` yalniz gosterileni suzer."""
+    if not _bugun_mu(gun, now):
+        return []
+    gruplar = {}
+    for g in hepsi:
+        if g["hesap"] in HIKAYE_SIRA:
+            gruplar.setdefault(g["hesap"], []).append(g)
+    out = []
+    for h in HIKAYE_SIRA:
+        if not gruplar.get(h):
+            continue
+        posts = sorted(gruplar[h], reverse=True, key=lambda g: (
+            g["bekliyor"], g["uyari"], str(g["zaman"])[:10] == gun, ONEM[g["tur"]], str(g["zaman"])))
+        neden = _onem_nedeni(posts, gun)
+        if not _ritim(con, h, gun, bool(neden), now):
+            continue
+        etk = _kare_etkilesim(con, posts, faydali)
+        kapak = _kare_kapak(h, posts, gun)
+        kareler = [kapak, _kare_sayi(posts, etk.get("ad") if etk["tur"] == "yon" else None),
+                   _kare_bilgi(posts, kapak), etk]
+        saatli = [str(g["zaman"]) for g in posts if len(str(g["zaman"])) > 10 and str(g["zaman"])[:10] == gun]
+        zaman = max(saatli) if saatli else gun
+        out.append({"id": "hk-%s-%s" % (h, gun), "hesap": h, "onemli": bool(neden),
+                    "neden_yazi": neden or "Kısa özet", "zaman": zaman,
+                    "zaman_yazi": ne_zaman(zaman, now), "kareler": [k for k in kareler if k]})
+    sinir = (datetime.date.fromisoformat(gun) - datetime.timedelta(days=HIKAYE_SAKLA)).isoformat()
+    con.execute("DELETE FROM meydan_hikaye WHERE gun < ?", (sinir,))
+    con.commit()
+    out.sort(key=lambda x: not x["onemli"])
+    if kapsam in ("ays", "spi", "esp"):
+        out = [x for x in out if HESAPLAR[x["hesap"]]["modul"] == kapsam]
+    elif kapsam == "merkez":
+        out = [x for x in out if x["hesap"] in ("king", "bam")]
+    return out
 
 
 def _gunun_ozeti(con, gun, liste, bekleyen, ds):
@@ -775,7 +944,7 @@ def akis(con, gun, kapsam="hepsi", duzey="dengeli", now=None, hesap=None, q=None
     return {"gun": gun, "gun_yazi": tarih_yaz(gun), "kapsam": kapsam, "duzey": duzey,
             "hesap": hesap, "q": q, "hesaplar": HESAPLAR, "turler": TUR_AD,
             "hesap_sayilari": hesap_sayilari,
-            "hikayeler": _hikayeler(liste) if not hesap and not q else [],
+            "hikayeler": hikayeler(con, gun, hepsi, faydali, kapsam, now) if not hesap and not q else [],
             "gonderiler": liste,
             "katlanan": [{"hesap": h, "adet": n,
                           "cumle": "%s: %d gönderi daha var; sınırı aştığı için katlandı, silinmedi."

@@ -8,6 +8,8 @@
 > v2: bilgisayarda üç sütun (menü ve hesaplar · akış · özet), modül başına günlük
 > rapor (30 günlük eğilim, bulgular, öneri ↔ dayanağı), profil, arama, yanıt dizisi
 > (Danışma görevlisi; model yoksa kural cevabı), BAM gitar paketinden çalınabilir müzik.
+> Hikâyeler (§5.7): günde bir, sakin dönemde iki günde bir; kapak · sayı · bilgi · tek
+> küçük etkileşim; model çağrılmaz.
 > Modüllere dokunulmadı (M3, M4 bekliyor). Öğretici ve tekrar edici kısım: BAM'ın
 > ders, kart ve soru kayıtları akışa girer; yanlış cevap ve eklenen kart Meydan'ın
 > kendi destesinde 1 · 3 · 7 · 14 · 30 günle döner (ESP'nin takvimi değişmez).
@@ -153,6 +155,24 @@ konular:[#etiket], kaynak
 | 6 XP karar vermez | Faydalı yalnız sırayı değiştirir; puan, seri ya da rütbe üretmez |
 | 7 Anlamadığını anlamış gibi yapma | Belirsiz not sorulur; uydurma yüzde yok |
 | 9 Aksiyon seviyeleri | Teklifte küçük / orta / büyük rozeti ve ona göre akış |
+
+### 5.7 Hikâyeler (kullanıcı kararı 2026-09-25: «günde bir, bazen iki günde bir; küçük etkileşim; masraf çıkarmasın»)
+
+- **Ritim kodundur.** Önemli günde (senden karar bekleyen, uyarı, bugün gelen
+  BAM ürünü) hesap hikâye atar; sakin günde dün attıysa bugün dinlenir, atmadıysa
+  atar. Böylece günde en çok bir, sakin dönemde iki günde bir. Atılan hikâye gün
+  boyu durur (`meydan_hikaye`: yalnız ritim, içerik değil; türetilmiştir, yedeğe
+  girmez, 14 günden eskisi silinir). Hikâye yalnız bugün vardır.
+- **Kareler gönderilerden gelir,** yeni bir şey söylemez: kapak (başlık, sayım) →
+  günün sayısı (etiketiyle; boş alan «veri yok, sıfır sayılmadı») → bir bilgi
+  (bulgu, ilgili öneri, özet) → **tek** küçük etkileşim. Her karede «Gönderiyi aç».
+- **Etkileşim kataloğu (sıra koddadır):** karar (gönderide önizleme + tek onay) >
+  BAM sorusu (kodla sınanır, yanlış destene girer) > kart (çevir, dinle, destene
+  ekle) > müzik (dinle) > yön sorusu («uyku son 30 günde hangi yönde?», cevabı
+  kural motorunun eğilimi) > «Faydalı».
+- **Masrafsız:** model çağrılmaz, yeni uç yoktur (cevap, deste, işaret uçları
+  aynen), hikâye kendiliğinden ilerlemez. «Gördüm» halkası yalnız o tarayıcıdadır;
+  izlenme ölçülmez ve hiçbir şey ona bakmaz.
 
 ## 6. İleride — aşamalar (şimdi yapılmıyor)
 

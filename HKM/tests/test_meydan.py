@@ -17,7 +17,10 @@
         Meydan'in yazmalariyla degismez. Model cagrilmaz.
      6. Kaydedilen gonderi, olayi akistan ciktiktan sonra da durur.
      7. Uclar: sayfa jetonsuz, veri bearer ister; bozuk girdi reddedilir.
-     8. Sayfa sifir bagimlidir ve yuzun jetonunu okur."""
+     8. Sayfa sifir bagimlidir ve yuzun jetonunu okur.
+     9. Hikaye ritmi kodundur: onemli gunde her gun, sakin gunde iki gunde
+        bir; yalniz bugun. Kareler gonderilerden gelir, etkilesim var olan
+        uclari kullanir; izlenme olculmez."""
 import datetime
 import json
 import os
@@ -385,6 +388,113 @@ def run():
         eq(y["__meta"]["tables"]["meydan_deste"], 1)
     test("Meydan'in izi yedege girer", t_yedek)
 
+    def _hk(a, hesap):
+        return next((h for h in a["hikayeler"] if h["hesap"] == hesap), None)
+
+    def t_hikaye_ritim():
+        # Sakin gun: dun atan bugun dinlenir. Onemli gun ritmi beklemez.
+        con = _con()
+        durum = []
+        for d, uyku in ((20, 7.5), (21, 7.5), (22, 7.5), (23, 7.5), (24, 7.5), (25, 5.0)):
+            gn = "2026-09-%02d" % d
+            sync_engine.ingest(con, {"module": "spi", "date": gn, "metrics": {"sleep_hours": _m(uyku)}},
+                               now=gn + "T08:00:00")
+            a = meydan.akis(con, gn, now=gn + "T12:00:00")
+            h = _hk(a, "bio")
+            durum.append(h and h["neden_yazi"])
+            # Ayni gun ikinci istek ayni karari verir; kapsam yalniz gosterileni suzer.
+            eq(bool(_hk(meydan.akis(con, gn, now=gn + "T20:00:00"), "bio")), bool(h), gn)
+            eq(meydan.akis(con, gn, kapsam="ays", now=gn + "T12:00:00")["hikayeler"], [], gn)
+        eq(durum, ["Kısa özet", None, "Kısa özet", None, "Kısa özet", "Bugün bir uyarı var"])
+        # Hikaye yalniz BUGUN vardir; gecmis gune bakmak ritim yazmaz.
+        c2 = _con()
+        sync_engine.ingest(c2, {"module": "spi", "date": "2026-09-01", "metrics": {"sleep_hours": _m(7)}},
+                           now="2026-09-01T08:00:00")
+        eq(meydan.akis(c2, "2026-09-01", now=AN)["hikayeler"], [])
+        eq(_say(c2, "meydan_hikaye"), 0)
+        # Ritim turetilmistir: 14 gunden eskisi silinir, yedege girmez.
+        con.execute("INSERT INTO meydan_hikaye VALUES ('bio', '2026-09-01', 'ritim', '2026-09-01T09:00:00')")
+        meydan.akis(con, G, now=AN)
+        eq(con.execute("SELECT COUNT(*) FROM meydan_hikaye WHERE gun < '2026-09-11'").fetchone()[0], 0)
+        no("meydan_hikaye" in db.BACKUP_TABLES, "turetilmis ritim yedekte")
+    test("hikaye ritmi: onemli gunde her gun, sakin gunde iki gunde bir; yalniz bugun", t_hikaye_ritim)
+
+    def t_hikaye_kareler():
+        con = _con()
+        con.execute("INSERT INTO decisions(date, rank, key, proposal, created_at) VALUES (?,?,?,?,?)",
+                    (G, 1, "bio_red", "Bugün yükü azalt.", G + "T07:00:00"))
+        con.commit()
+        _gun(con, sleep_hours=_m(5.2), recovery=_m(None, "missing"), hrv=_m(41, "computed"))
+        k = _soru_seti(con)
+        hedefag.dilkart_yaz(con, "esp", {"gun": G, "kartlar": [{"on": "resilient", "arka": "dayanıklı"}]})
+        a = meydan.akis(con, G, now=AN)
+        tam = meydan.akis(con, G, duzey="tam", now=AN)["gonderiler"]
+        idler = {g["id"] for g in tam}
+        degerler = {s[0] for g in tam for s in g["sayilar"]}
+        etk = ("karar", "soru", "kart", "muzik", "yon", "tepki")
+        eq([h["hesap"] for h in a["hikayeler"]][:3], ["king", "bam", "bio"])   # onemli once
+        for h in a["hikayeler"]:
+            ks = h["kareler"]
+            ok(2 <= len(ks) <= 4 and ks[0]["tur"] == "kapak", h["id"])
+            eq([x["tur"] in etk for x in ks].count(True), 1, h["id"])
+            ok(ks[-1]["tur"] in etk, h["id"])
+            for x in ks:
+                ok(x["gonderi"] in idler, (h["id"], x["tur"], x["gonderi"]))
+                if x["tur"] == "sayi":
+                    # Hikaye yeni sayi soylemez: her deger bir gonderide yazili.
+                    ok({x["deger"]} | {y[0] for y in x["yan"]} <= degerler, x)
+                    no(x["deger"] == "0", "eksik sifir yazildi")
+        eq((_hk(a, "king")["kareler"][-1]["tur"], _hk(a, "king")["neden_yazi"]), ("karar", "Senden karar bekliyor"))
+        soru = _hk(a, "bam")["kareler"][-1]
+        eq((soru["tur"], soru["gonderi"], soru["sira"]), ("soru", "bam-%d" % k["id"], "Soru 1 / 2"))
+        eq(set(soru), {"tur", "gonderi", "no", "baslik", "sira", "soru", "secenekler"})   # cevap anahtari yok
+        bio = _hk(a, "bio")["kareler"]
+        sy = [x for x in bio if x["tur"] == "sayi"][0]
+        eq((sy["deger"], sy["eksik"]), ("5,2", "Toparlanma skoru: veri yok, sıfır sayılmadı."))
+        kart = _hk(a, "intellect")["kareler"][-1]
+        eq((kart["tur"], kart["on"], kart["destede"]), ("kart", "resilient", False))
+        for h in a["hikayeler"]:
+            for x in h["kareler"]:
+                for v in x.values():
+                    no(isinstance(v, str) and ("bio_red" in v or "ANOMALY" in v), (h["id"], v))
+    test("hikaye kareleri: kapak once, tek etkilesim sonda; sayi gonderiden, cevap anahtari yok", t_hikaye_kareler)
+
+    def t_hikaye_etkilesim():
+        con = _con()
+        k = _soru_seti(con)
+        gid = "bam-%d" % k["id"]
+        hedefag.dilkart_yaz(con, "esp", {"gun": G, "kartlar": [{"on": "resilient", "arka": "dayanıklı"}]})
+        eq(meydan.cevapla(con, gid, 0, 1, now=AN)["dogru_mu"], True)
+        eq(_hk(meydan.akis(con, G, now=AN), "bam")["kareler"][-1]["sira"], "Soru 2 / 2")
+        meydan.cevapla(con, gid, 1, 0, now=AN)
+        son = _hk(meydan.akis(con, G, now=AN), "bam")["kareler"][-1]
+        eq((son["tur"], son["faydali"]), ("tepki", False))
+        meydan.isaretle(con, G, gid, "faydali", True, now=AN)
+        eq(_hk(meydan.akis(con, G, now=AN), "bam")["kareler"][-1]["faydali"], True)
+        meydan.desteye_ekle(con, "dil-" + G, now=AN)
+        eq(_hk(meydan.akis(con, G, now=AN), "intellect")["kareler"][-1]["destede"], True)
+        # Yon sorusu: cevabi kural motorunun egilimidir; sayi karesi onu ele vermez.
+        c2 = _con()
+        bas = datetime.date.fromisoformat(G)
+        for i in range(30, -1, -1):
+            gn = (bas - datetime.timedelta(days=i)).isoformat()
+            sync_engine.ingest(c2, {"module": "spi", "date": gn,
+                                    "metrics": {"sleep_hours": _m(8.0 if i > 12 else 6.5)}}, now=gn + "T08:00:00")
+        bio = _hk(meydan.akis(c2, G, now=AN), "bio")["kareler"]
+        yon = bio[-1]
+        eq((yon["tur"], yon["secenekler"][yon["dogru"]]), ("yon", "Düşüyor"))
+        ok(yon["cevap"].startswith("↓") and yon["cevap"] in json.dumps(meydan.akis(c2, G, now=AN), ensure_ascii=False))
+        eq([x.get("egilim") for x in bio if x["tur"] == "sayi"], [None])
+        # Muzik karesi: yalniz gitar paketi varsa; akoru KOD cozer.
+        c3 = _con()
+        bam.kayit_ekle(c3, "materyal", "Gitar", {"tur": "gitar", "duzey": "başlangıç", "alistirmalar": [
+            {"ad": "Döngü", "tur": "piece", "ton": "G", "ilerleyis": ["I", "V", "vi", "IV"],
+             "baslangic_bpm": 70, "hedef_bpm": 100}]}, now=G + "T09:00:00")
+        mz = _hk(meydan.akis(c3, G, now=AN), "bam")["kareler"][-1]
+        eq((mz["tur"], [c["ad"] for c in mz["alistirma"]["akorlar"]]), ("muzik", ["G", "D", "Em", "C"]))
+        ok(mz["anahtar"].endswith(":0") and mz["anahtar"].startswith(mz["gonderi"]), mz["anahtar"])
+    test("hikaye etkilesimi var olan uclarla: cevap, deste, faydali; yon sorusu egilimden", t_hikaye_etkilesim)
+
     def t_sayfa():
         kok = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         s = open(os.path.join(kok, "web", "meydan.html"), encoding="utf-8").read()
@@ -407,6 +517,10 @@ def run():
            "sayfa iletisi kaynak denetimsiz")
         for yasak in (">Evet<", ">Tamam<", "Evet,"):
             no(yasak in s, "onay dugmesi etiketsiz: %s" % yasak)
+        # Hikaye kendiliginden ilerlemez; «gordum» yereldir, sunucuya gitmez.
+        iz = s[s.index("function izAc("):s.index("async function izEtkilesim(")]
+        no("setTimeout" in iz or "setInterval" in iz, "hikaye kendiliginden ilerliyor")
+        no("/api/meydan/hikaye" in s or "goruldu" in s, "izlenme sunucuya gidiyor")
     test("sayfa sifir bagimli, yuzun jetonu ve temasi; yuzde mini uygulama, sekme degil; «Evet/Tamam» yok", t_sayfa)
 
 
