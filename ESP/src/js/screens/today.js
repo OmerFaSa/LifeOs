@@ -790,6 +790,19 @@ ESP.Screens.today = (function(){
     </div>` });
   }
 
+  /* 091 DAKİKA HALKASI (vitrin): günün ölçütü profildeki dakika; halka
+     rengi değişmez, yalnız dolar. Dokunulmamış disiplin «—», 0 dk değil. */
+  function DakikaKutusu(){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V) return '';
+    const rows = M.sessionsOf(gun());
+    const hedef = (S.profile && S.profile.dailyMinutes) || null;
+    const ic = V.dakikaHalkasi({ hedef, toplam:rows.reduce((a, s) => a + (s.minutes || 0), 0),
+      satirlar:ESP.Mod.active().slice(0, 4).map(d => ({ ad:(ESP.DISCIPLINE_BY_ID[d.id || d] || {}).short || (d.id || d),
+        dk:M.minutesOf(gun(), d.id || d) })) });
+    return ic ? K.Kutu({ ad:'Günün dakikası', yuva:'ölçüt ' + hedef + ' dk', class:'vkutu', govde:raw(ic) }) : '';
+  }
+
   function render(){
     const O = ESP.Screens.onaylar;
     const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
@@ -805,7 +818,7 @@ ESP.Screens.today = (function(){
         </section>
       </div>
       <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>${OzetKutusu()}</section>
+        <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>${OzetKutusu()}${DakikaKutusu()}</section>
         ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
       </div>
     </div>`;

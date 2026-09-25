@@ -4074,1203 +4074,6 @@ body.is-dragging .drop.is-over{
 /* Tablo satırları: ince çizgi, tablo hizalı rakam. */
 .table td, .table th{ border-bottom:1px solid var(--border); }
 
-/* ==== css/kart.css ==== */
-/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
-   Düzeltme brand/ortak/kart.css içine yazılır; burası bir sonraki
-   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* KARTLAR — ortak bileşenlerin biçimi (K'nin tek stil dosyası).
-
-   ===================== BU DOSYA TEK KAYNAKTIR =====================
-   Kaynağı `brand/ortak/kart.css`; `python3 tools/ortak.py --yay`
-   ile üç arayüzün `src/css/` klasörüne BİREBİR kopyalanır.
-   Markupı `brand/ortak/{sayi,grafik,oneri,sozluk,guven}.js` üretir.
-   ==================================================================
-
-   JETON KURALI (ekip/EKIP-PLANI.md §2)
-
-   Burada ham renk, boşluk, köşe ve süre YAZILMAZ; yalnız T'nin
-   jetonları kullanılır (`brand/ortak/jeton.css`, `tokens.css`). Tek
-   istisna kılçık çizgidir (1px, 2px ve SVG çizgi kalınlığı): bir
-   çizginin kalınlığı ölçek değil, ekranın en küçük birimi.
-
-   Yön rengi yazıda `--ok-ink` / `--bad-ink`, dolguda `--ok` / `--bad`;
-   modül rengi `--ays` / `--spi` / `--esp`, Merkez `--mer` (yazıda
-   `--mer-ink`, zeminde `--mer-t`). Yeşil ve kırmızı YALNIZ yön bildirir
-   (§1.3-1); yönü bilinmeyen şey nötr kalır. */
-
-/* ================================================================
-   024 · SAYI — kesinlik yazıda görünür
-   ================================================================ */
-
-.sayi{
-  position:relative;
-  display:inline-flex;
-  align-items:baseline;
-  gap:var(--sp-1);
-  white-space:nowrap;
-  font-variant-numeric:tabular-nums;
-}
-.sayi[tabindex]{ cursor:help; border-radius:var(--r-sm); }
-
-.sayi__b{ font-size:.55em; font-weight:500; color:var(--text-3); letter-spacing:0; }
-
-/* Yalnız TAHMİN olanın altı kesik çizilir (§1.3-3). Ölçüldü ve
-   hesaplandı düz yazılır; farkı köken kartı söyler. */
-.sayi--estimated > .sayi__d{
-  text-decoration:underline dashed var(--text-3);
-  text-decoration-thickness:.08em;
-  text-underline-offset:.18em;
-}
-.sayi__ar{ font-size:var(--fs-xs); font-weight:500; color:var(--text-3); letter-spacing:0; }
-
-/* «Veri yok» her yerde «—» ve SÖNÜK — ama silik değil: okunmayan bir
-   etiket, olmayan bir etikettir. */
-.sayi--missing > .sayi__d{ color:var(--text-3); font-weight:500; }
-
-/* ================================================================
-   026 · VERİ TAZELİĞİ — eski ölçüm soluklaşır ve yaşını yazar
-   ================================================================ */
-
-.sayi--bayat > .sayi__d{ color:var(--text-3); }
-.sayi__yas{
-  font-size:var(--fs-xs);
-  font-weight:500;
-  color:var(--text-3);
-  letter-spacing:0;
-}
-
-/* ================================================================
-   015 · SON BİLİNEN DEĞER — yenilenirken değer ve saati durur
-   Tarama çizgisi HAREKETSİZ: tek canlı öğe sıradaki iştir (§1.2).
-   ================================================================ */
-
-.sayi__tarama{
-  position:absolute;
-  left:0;
-  right:0;
-  top:calc(-1 * var(--sp-1));
-  height:2px;
-  background:var(--primary);
-  opacity:.35;
-  border-radius:1px;
-}
-.sayi--yenileniyor > .sayi__d{ color:var(--text-2); }
-
-/* ================================================================
-   025 · KÖKEN KARTI — üzerine gelince, odakta ya da basılı tutunca
-   016 · TERİM İPUCU aynı açılır kalıbı kullanır: tek davranış öğrenilir.
-   Açılır katmandır; gölge YALNIZ burada (§1.2).
-   ================================================================ */
-
-.koken,
-.terim__kart{
-  display:none;
-  position:absolute;
-  z-index:var(--z-overlay);
-  left:0;
-  top:calc(100% + var(--sp-1));
-  width:max-content;
-  max-width:min(22em, calc(100vw - var(--sp-8)));
-  padding:var(--sp-3);
-  background:var(--surface);
-  color:var(--text);
-  border:1px solid var(--border);
-  border-radius:var(--r-sm);
-  box-shadow:var(--shadow-lg);
-  font-size:var(--fs-sm);
-  font-weight:400;
-  line-height:1.45;
-  letter-spacing:0;
-  white-space:normal;
-  text-align:left;
-  gap:var(--sp-1);
-}
-.sayi:hover > .koken,
-.sayi:focus-visible > .koken,
-.sayi--acik > .koken,
-.terim:hover > .terim__kart,
-.terim:focus-visible > .terim__kart,
-.terim--acik > .terim__kart{ display:grid; }
-
-.koken__bas{ font-weight:600; }
-.koken__s{ display:grid; grid-template-columns:6.5em minmax(0, 1fr); gap:var(--sp-2); }
-.koken__a{ color:var(--text-3); }
-.koken__v{ color:var(--text-2); overflow-wrap:anywhere; }
-
-/* Telefonda kart sayının altında değil ekranın altında açılır: dar
-   ekranda sayının yanındaki bir kutu sağdan taşardı. */
-@media (max-width:459.98px){
-  .koken,
-  .terim__kart{
-    position:fixed;
-    left:var(--sp-4);
-    right:var(--sp-4);
-    top:auto;
-    bottom:var(--sp-4);
-    width:auto;
-    max-width:none;
-  }
-}
-
-/* ================================================================
-   028 · ANLAMLI FARK — renk işaretten değil anlamdan
-   ================================================================ */
-
-.fark{
-  font-size:var(--fs-sm);
-  font-weight:500;
-  font-variant-numeric:tabular-nums;
-  white-space:nowrap;
-}
-.fark--iyi{ color:var(--ok-ink); }
-.fark--kotu{ color:var(--bad-ink); }
-.fark--notr,
-.fark--yok{ color:var(--text-3); }
-
-/* ================================================================
-   027 · EKSİK GÜN BOŞLUĞU — çizgi boşlukta kesik geçer, sıfıra düşmez
-   Çizgi kalınlığı da kılçık sayılır (üstteki JETON KURALI).
-   ================================================================ */
-
-.grafik{
-  display:block;
-  width:100%;
-  height:auto;
-  overflow:visible;
-  color:var(--primary);
-}
-.grafik__cizgi{
-  fill:none;
-  stroke:currentColor;
-  stroke-width:2;
-  stroke-linejoin:round;
-  stroke-linecap:round;
-  vector-effect:non-scaling-stroke;
-}
-.grafik__kopru{
-  stroke:var(--text-3);
-  stroke-width:1.5;
-  stroke-dasharray:var(--sp-1) var(--sp-1);
-  vector-effect:non-scaling-stroke;
-}
-.grafik__tek{ fill:currentColor; }
-
-/* 031 · hedef bandı: bant ton, bant dışındaki nokta İÇİ BOŞ (renk değil). */
-.grafik__bant{ fill:var(--primary-soft); }
-.grafik__nokta{ fill:currentColor; stroke:currentColor; stroke-width:1.5; vector-effect:non-scaling-stroke; }
-.grafik__nokta--dis{ fill:var(--surface); }
-
-/* 034 · grafiğin cümlesi: grafiğin altında tek okuma cümlesi. */
-.grafik__cumle{ margin:var(--sp-2) 0 0; font-size:var(--fs-sm); color:var(--text-2); }
-
-/* ================================================================
-   035 · ARALIK ÇUBUĞU — tahmin aralıktır; bant kesik kenarlı
-   ================================================================ */
-
-.aralik{ display:grid; gap:var(--sp-1); min-width:0; }
-.aralik__et{ font-size:var(--fs-sm); color:var(--text-2); }
-.aralik__deger{ font-weight:600; font-variant-numeric:tabular-nums; }
-.aralik__olasi{ font-weight:400; color:var(--text-2); }
-.aralik__ray{
-  position:relative;
-  display:block;
-  height:var(--sp-2);
-  margin:var(--sp-1) 0;
-  background:var(--border-soft);
-  border-radius:var(--r-pill);
-}
-.aralik__bant{
-  position:absolute;
-  top:0;
-  bottom:0;
-  background:var(--primary-soft);
-  border:1px dashed var(--primary);
-  border-radius:var(--r-pill);
-}
-.aralik__en{
-  position:absolute;
-  top:calc(-1 * var(--sp-1));
-  bottom:calc(-1 * var(--sp-1));
-  width:2px;
-  margin-left:-1px;
-  background:var(--primary);
-  border-radius:1px;
-}
-.aralik__dayanak{ font-size:var(--fs-xs); color:var(--text-3); }
-.aralik--yok .aralik__deger{ color:var(--text-3); font-weight:500; }
-
-/* ================================================================
-   037 · GÜVENLİ EĞİLİM — ok yalnız yeterli veriyle
-   ================================================================ */
-
-.egilim{
-  display:inline-flex;
-  align-items:center;
-  gap:var(--sp-1);
-  font-size:var(--fs-sm);
-  font-weight:500;
-  white-space:nowrap;
-}
-.egilim__ok{
-  width:1em;
-  height:1em;
-  fill:none;
-  stroke:currentColor;
-  stroke-width:1.8;
-  stroke-linecap:round;
-  stroke-linejoin:round;
-}
-.egilim--iyi{ color:var(--ok-ink); }
-.egilim--kotu{ color:var(--bad-ink); }
-.egilim--notr{ color:var(--text-2); }
-.egilim--yetersiz{ color:var(--text-3); font-weight:400; white-space:normal; }
-
-/* ================================================================
-   041 · VERİ DOLULUĞU — boş gün İÇİ BOŞ kare, 0 değil
-   Modül rengi T'nin `--ays/--spi/--esp` jetonundan.
-   ================================================================ */
-
-.doluluk{ display:grid; gap:var(--sp-2); }
-.doluluk__s{
-  --doluluk-renk:var(--text-2);
-  display:grid;
-  grid-template-columns:3.5em auto auto;
-  align-items:center;
-  justify-content:start;
-  gap:var(--sp-3);
-}
-.doluluk--ays{ --doluluk-renk:var(--ays); }
-.doluluk--spi{ --doluluk-renk:var(--spi); }
-.doluluk--esp{ --doluluk-renk:var(--esp); }
-.doluluk__ad{ font-size:var(--fs-sm); font-weight:600; color:var(--text-2); }
-.doluluk__kutular{ display:flex; gap:var(--sp-1); }
-.doluluk__k{
-  display:block;
-  width:var(--sp-3);
-  height:var(--sp-3);
-  border:1px solid var(--border-strong);
-  border-radius:calc(var(--r-sm) / 3);
-  background:transparent;
-}
-.doluluk__k--dolu{ background:var(--doluluk-renk); border-color:var(--doluluk-renk); }
-.doluluk__n{ font-size:var(--fs-xs); color:var(--text-3); font-variant-numeric:tabular-nums; }
-
-/* ================================================================
-   110 · ÖNERİ KARTI — T'nin `.kutu`'su üstünde; mor YALNIZ Merkez'de
-   ================================================================ */
-
-.okart{
-  display:grid;
-  align-content:start;   /* yan kartın boyuna gerilince satırlar dağılmaz */
-  gap:var(--sp-2);
-  padding:var(--sp-4) calc(var(--sp-4) + var(--sp-1));
-}
-.okart--merkez{ border-color:color-mix(in oklab, var(--mer) 38%, var(--border)); }
-.okart__bas{ display:flex; align-items:center; gap:var(--sp-2); }
-.okart__kaynak{
-  display:inline-flex;
-  align-items:center;
-  gap:var(--sp-2);
-  font-size:var(--fs-sm);
-  font-weight:600;
-  color:var(--text-2);
-}
-.okart--merkez .okart__kaynak,
-.cakisma__cozum .okart__kaynak{ color:var(--mer-ink); }
-.okart--merkez .okart__kaynak::before,
-.cakisma__cozum .okart__kaynak::before{
-  content:"";
-  width:.5em;
-  height:.5em;
-  border-radius:50%;
-  background:var(--mer);
-}
-.okart__seviye{ margin-left:auto; }
-.okart--merkez .okart__seviye{ background:var(--mer-t); color:var(--mer-ink); }
-.okart__baslik{ margin:0; font-size:var(--fs-md); font-weight:600; letter-spacing:-.01em; }
-.okart__alt{ margin:0; font-size:var(--fs-sm); color:var(--text-2); }
-.okart__eylem{ display:flex; flex-wrap:wrap; gap:var(--sp-2); margin-top:var(--sp-1); }
-
-/* ================================================================
-   114 · GEREKÇE ÇUBUĞU — sayı ve eşik koddan; modelin cümlesi ayrı
-   ================================================================ */
-
-.gerekce{ display:grid; gap:var(--sp-2); }
-.gerekce__satir{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:baseline;
-  gap:var(--sp-1) var(--sp-2);
-  font-size:var(--fs-sm);
-  color:var(--text-2);
-}
-.gerekce__satir .sayi{ font-weight:600; color:var(--text); }
-.gerekce__satir .sayi__b{ font-size:inherit; font-weight:400; color:var(--text-2); }
-.gerekce__ek::before{ content:"·"; margin-right:var(--sp-2); color:var(--text-3); }
-.gerekce__cubuk{
-  position:relative;
-  display:block;
-  height:var(--sp-1);
-  background:var(--border-soft);
-  border-radius:var(--r-pill);
-}
-.gerekce__dolu{
-  position:absolute;
-  left:0;
-  top:0;
-  bottom:0;
-  background:var(--text-3);
-  border-radius:var(--r-pill);
-}
-.gerekce__esik{
-  position:absolute;
-  top:calc(-1 * var(--sp-1));
-  bottom:calc(-1 * var(--sp-1));
-  width:2px;
-  margin-left:-1px;
-  background:var(--text);
-  border-radius:1px;
-}
-/* Modelin cümlesi sayının ALTINDA ve AYRI: ince bir çizgiyle kodun
-   ürettiğinden ayrılır. Kaynağı öğenin üstünde yazılı (`data-kaynak`). */
-.gerekce__cumle{
-  margin:0;
-  padding-left:var(--sp-3);
-  border-left:2px solid var(--border);
-  font-size:var(--fs-sm);
-  color:var(--text-2);
-}
-
-/* ================================================================
-   121 · KURAL İZİ — «Neden?» açılınca kural numarası ve sağlanan değer
-   ================================================================ */
-
-.kuralizi{ font-size:var(--fs-sm); }
-.kuralizi > summary{
-  width:max-content;
-  cursor:pointer;
-  color:var(--text-2);
-  font-weight:500;
-}
-.kuralizi__l{ display:grid; gap:var(--sp-1); margin:var(--sp-2) 0 0; padding:0; list-style:none; }
-.kuralizi__k{
-  display:grid;
-  grid-template-columns:auto minmax(0, 1fr) auto;
-  align-items:baseline;
-  gap:var(--sp-2);
-}
-.kuralizi__no{ font-weight:600; color:var(--text-3); font-variant-numeric:tabular-nums; }
-.kuralizi__ad{ color:var(--text-2); }
-.kuralizi__deger{ font-weight:500; color:var(--text); font-variant-numeric:tabular-nums; white-space:nowrap; }
-
-/* ================================================================
-   112 · ÇAKIŞMA KARTI — iki modül yan yana, çözüm Merkez'in
-   ================================================================ */
-
-.cakisma{
-  display:grid;
-  gap:var(--sp-3);
-  padding:var(--sp-4);
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--r);
-}
-.cakisma__bas{ margin:0; font-size:var(--fs-sm); font-weight:600; font-variant-numeric:tabular-nums; }
-.cakisma__iki{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-2); }
-.cakisma__taraf{
-  --cakisma-renk:var(--text-2);
-  --cakisma-zemin:var(--surface-2);
-  display:grid;
-  gap:var(--sp-1);
-  min-width:0;
-  padding:var(--sp-3);
-  background:var(--cakisma-zemin);
-  border-radius:var(--r-md);
-}
-.cakisma--ays{ --cakisma-renk:var(--ays-ink); --cakisma-zemin:var(--ays-t); }
-.cakisma--spi{ --cakisma-renk:var(--spi-ink); --cakisma-zemin:var(--spi-t); }
-.cakisma--esp{ --cakisma-renk:var(--esp-ink); --cakisma-zemin:var(--esp-t); }
-.cakisma__modul{ font-size:var(--fs-xs); font-weight:600; color:var(--cakisma-renk); }
-.cakisma__ad{ font-weight:600; overflow-wrap:anywhere; }
-.cakisma__saat{ font-size:var(--fs-sm); color:var(--text-2); font-variant-numeric:tabular-nums; }
-.cakisma__cozum{ display:grid; gap:var(--sp-2); padding-top:var(--sp-3); border-top:1px solid var(--border); }
-.cakisma__cozum-metin{ margin:0; font-weight:500; }
-.cakisma__cozum .btn{ justify-self:start; }
-
-/* ================================================================
-   116 · OTOMATİK UYGULA — küçük tür anahtarlı, orta/büyük kilitli
-   ================================================================ */
-
-.otoayar{ display:grid; margin:0; padding:0; list-style:none; }
-.otoayar__s{
-  display:flex;
-  align-items:center;
-  gap:var(--sp-3);
-  padding:var(--sp-3) 0;
-  border-top:1px solid var(--border-soft);
-}
-.otoayar__s:first-child{ border-top:0; }
-.otoayar__et{
-  flex:1;
-  min-width:0;
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:var(--sp-1) var(--sp-2);
-  cursor:pointer;
-}
-.otoayar__ad{ font-weight:500; }
-.otoayar__neden{ flex-basis:100%; font-size:var(--fs-xs); color:var(--text-3); }
-.otoayar__s--kilitli .otoayar__et{ cursor:default; }
-.otoayar__anahtar{ accent-color:var(--primary); }
-
-/* ================================================================
-   150 · GERİ AL GERİ SAYIMI — şeridin altında incelen çizgi
-   Süre VERİDİR (şeridin ömrü); JS yazar. Azaltılmış harekette çizgi
-   saniye saniye kısalır: kalan süre bilgisi kaybolmaz.
-   ================================================================ */
-
-.toast--undo:has(> .gerial__sure){ position:relative; overflow:hidden; }
-.gerial__sure{
-  position:absolute;
-  left:var(--sp-4);
-  right:var(--sp-4);
-  bottom:0;
-  height:2px;
-  background:currentColor;
-  opacity:.55;
-  transform-origin:left center;
-  animation-name:gerial-sure;
-  animation-timing-function:linear;
-  animation-fill-mode:forwards;
-}
-@keyframes gerial-sure{
-  from{ transform:scaleX(1); }
-  to{ transform:scaleX(0); }
-}
-@media (prefers-reduced-motion:reduce){
-  .gerial__sure{ animation-timing-function:steps(var(--gerial-adim, 6), end); }
-}
-
-/* ================================================================
-   016 · TERİM İPUCU — altı NOKTALI (tahminin KESİK çizgisinden ayrı)
-   Kartın kendisi yukarıda, köken kartıyla birlikte.
-   ================================================================ */
-
-.terim{
-  position:relative;
-  cursor:help;
-  text-decoration:underline dotted var(--text-3);
-  text-decoration-thickness:.08em;
-  text-underline-offset:.2em;
-  border-radius:var(--r-xs);
-}
-.terim--yok{ cursor:auto; text-decoration:none; }
-.terim__ad{ font-weight:600; color:var(--text); }
-.terim__tanim{ color:var(--text-2); }
-.terim__ornek{ font-size:var(--fs-xs); color:var(--text-3); }
-
-/* ================================================================
-   139 · MODEL KAPALI KİPİ — gri durum şeridi ve etiketli hazır cümle
-   ================================================================ */
-
-.modelsiz{
-  display:flex;
-  flex-wrap:wrap;
-  align-items:baseline;
-  gap:var(--sp-1) var(--sp-2);
-  padding:var(--sp-2) var(--sp-4);
-  background:var(--surface-2);
-  border-bottom:1px solid var(--border);
-  color:var(--text-2);
-  font-size:var(--fs-sm);
-}
-.modelsiz__bas{ color:var(--text); font-weight:600; }
-.hazir{ margin:0; }
-.hazir__etiket{
-  display:inline-block;
-  margin-right:var(--sp-1);
-  padding:0 var(--sp-1);
-  background:var(--surface-2);
-  border-radius:var(--r-xs);
-  color:var(--text-3);
-  font-size:var(--fs-xs);
-  font-weight:600;
-}
-
-/* ================================================================
-   018 · ŞÜPHELİ GİRİŞ — kaydetmeden önce tek soru
-   ================================================================ */
-
-.suphe{
-  display:grid;
-  gap:var(--sp-2);
-  padding:var(--sp-3);
-  background:var(--surface-2);
-  border-radius:var(--r-md);
-}
-.suphe__soru{ margin:0; font-size:var(--fs-sm); font-weight:500; }
-.suphe__eylem{ display:flex; flex-wrap:wrap; gap:var(--sp-2); }
-
-/* ================================================================
-   173 · YEDEK DURUMU — tarih, boyut, iki haftalık iz, tek düğme
-   İzin kareleri 041'in karesidir (.doluluk__k); tek biçim.
-   ================================================================ */
-
-.yedek{ display:grid; gap:var(--sp-2); justify-items:start; }
-.yedek__bas{ margin:0; font-weight:600; }
-.yedek__alt{ margin:0; font-size:var(--fs-sm); color:var(--text-2); font-variant-numeric:tabular-nums; }
-.yedek--gerekli .yedek__bas{ color:var(--bad-ink); }
-.yedek__iz{ display:flex; flex-wrap:wrap; gap:var(--sp-1); --doluluk-renk:var(--primary); }
-
-/* ================================================================
-   177 · KALICI SİLME KAPISI — dönüş noktası → yazılı onay → sayılı düğme
-   ================================================================ */
-
-.silme{ display:grid; gap:var(--sp-3); justify-items:start; }
-.silme__adimlar{ display:grid; gap:var(--sp-3); margin:0; padding-left:var(--sp-6); }
-.silme__adim{ font-size:var(--fs-sm); color:var(--text-2); }
-.silme__adim .btn{ margin-top:var(--sp-2); }
-.silme__adim--tamam{ color:var(--text-3); }
-.silme__adim label{ display:block; margin-bottom:var(--sp-1); }
-.silme__giris{
-  width:12em;
-  max-width:100%;
-  padding:var(--sp-2) var(--sp-3);
-  font:inherit;
-  font-variant-numeric:tabular-nums;
-  color:var(--text);
-  background:var(--surface);
-  border:1px solid var(--border-strong);
-  border-radius:var(--r-sm);
-}
-.silme__giris:disabled{ background:var(--surface-2); color:var(--text-3); }
-
-/* ================================================================
-   179 · KAYIT GEÇMİŞİ — her değişiklik kaynağıyla; onaysız öneri uyarılı
-   ================================================================ */
-
-.gecmis{ display:grid; margin:0; padding:0; list-style:none; }
-.gecmis--bos{ color:var(--text-3); font-size:var(--fs-sm); }
-.gecmis__s{
-  display:grid;
-  grid-template-columns:minmax(0, 9em) minmax(0, 1fr);
-  gap:var(--sp-1) var(--sp-3);
-  padding:var(--sp-2) 0;
-  border-top:1px solid var(--border-soft);
-  font-size:var(--fs-sm);
-}
-.gecmis__s:first-child{ border-top:0; }
-.gecmis__zaman{ color:var(--text-3); font-variant-numeric:tabular-nums; }
-.gecmis__kaynak{ font-weight:500; }
-.gecmis__degisim{ grid-column:2; color:var(--text-2); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
-.gecmis__alan{ color:var(--text-3); }
-.gecmis__s[data-kaynak="merkez"] .gecmis__kaynak{ color:var(--mer-ink); }
-.gecmis__s[data-uyari] .gecmis__kaynak{ color:var(--bad-ink); }
-
-/* ================================================================
-   029 · EŞİK ÇİZGİLİ ÇUBUK — değer ve eşik aynı çubukta; aşım payı ayrı
-   ================================================================ */
-
-.esikcubuk{ display:grid; gap:var(--sp-1); min-width:0; }
-.esikcubuk__et{ font-size:var(--fs-sm); color:var(--text-2); }
-.esikcubuk__deger{ font-size:var(--fs-sm); font-weight:600; font-variant-numeric:tabular-nums; }
-.esikcubuk__fark{ font-weight:400; color:var(--text-2); }
-.esikcubuk--kotu .esikcubuk__fark{ color:var(--bad-ink); }
-.esikcubuk--iyi .esikcubuk__fark{ color:var(--ok-ink); }
-.esikcubuk--yok .esikcubuk__deger{ color:var(--text-3); font-weight:500; }
-.esikcubuk__ray{
-  position:relative;
-  display:block;
-  height:var(--sp-2);
-  margin:var(--sp-1) 0;
-  background:var(--border-soft);
-  border-radius:var(--r-pill);
-}
-.esikcubuk__dolu,
-.esikcubuk__asim{ position:absolute; top:0; bottom:0; left:0; border-radius:var(--r-pill); background:var(--primary); }
-.esikcubuk__asim{ background:var(--text-3); }
-.esikcubuk--kotu .esikcubuk__asim{ background:var(--bad); }
-.esikcubuk--iyi .esikcubuk__asim{ background:var(--ok); }
-.esikcubuk__esik{
-  position:absolute;
-  top:calc(-1 * var(--sp-1));
-  bottom:calc(-1 * var(--sp-1));
-  width:2px;
-  margin-left:-1px;
-  background:var(--text);
-  border-radius:1px;
-}
-
-/* ================================================================
-   030 · TİK SAYACI — küçük hedefte adet kutucuğu; veri yoksa KESİK
-   ================================================================ */
-
-.tik{ display:grid; gap:var(--sp-1); }
-.tik__et{ font-size:var(--fs-sm); color:var(--text-2); }
-.tik__sayi{ font-size:var(--fs-sm); font-weight:600; font-variant-numeric:tabular-nums; }
-.tik__kutular{ display:flex; flex-wrap:wrap; gap:var(--sp-1); }
-.tik__k{
-  display:block;
-  width:var(--sp-3);
-  height:var(--sp-3);
-  border:1px solid var(--border-strong);
-  border-radius:calc(var(--r-sm) / 3);
-}
-.tik__k--dolu{ background:var(--primary); border-color:var(--primary); }
-.tik--yok .tik__k{ border-style:dashed; }
-.tik--yok .tik__sayi{ color:var(--text-3); }
-
-/* ================================================================
-   033 · GELECEK YÜK — bugün dolu, gelecek KESİK çerçeve
-   ================================================================ */
-
-.yuk{ display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0, 1fr); gap:var(--sp-2); align-items:end; }
-.yuk__g{ display:grid; gap:var(--sp-1); justify-items:center; min-width:0; }
-.yuk__deger{ font-size:var(--fs-xs); color:var(--text-2); font-variant-numeric:tabular-nums; }
-.yuk__ray{ position:relative; display:block; width:100%; height:calc(var(--sp-10) + var(--sp-8)); }
-.yuk__sutun{
-  position:absolute;
-  left:15%;
-  right:15%;
-  bottom:0;
-  min-height:1px;
-  border-radius:var(--r-xs) var(--r-xs) 0 0;
-  background:var(--primary);
-}
-.yuk__g--gecmis .yuk__sutun{ background:var(--text-3); }
-.yuk__g--gelecek .yuk__sutun{ background:transparent; border:1px dashed var(--primary); border-bottom:0; }
-.yuk__g--yok .yuk__deger{ color:var(--text-3); }
-/* Bilinmeyen gün SÜTUNSUZ: 0'ın ince taban çizgisiyle karışmasın. */
-.yuk__g--yok .yuk__sutun{ display:none; }
-.yuk__gun{ font-size:var(--fs-xs); color:var(--text-3); }
-.yuk__g--bugun .yuk__gun{ color:var(--text); font-weight:600; }
-
-/* ================================================================
-   038 · SATIR İÇİ ÇUBUK — yüzde hücresinin arkasında ince çubuk
-   ================================================================ */
-
-.hucre{
-  position:relative;
-  display:inline-flex;
-  align-items:baseline;
-  min-width:5em;
-  padding-bottom:var(--sp-1);
-}
-.hucre::after{
-  content:"";
-  position:absolute;
-  left:0;
-  bottom:0;
-  height:2px;
-  width:var(--hucre-oran, 0%);
-  background:var(--primary);
-  opacity:.45;
-  border-radius:1px;
-}
-.hucre--yok::after{ display:none; }
-
-/* ================================================================
-   039 · HIZ TAHMİNİ — gelecek açılan bir koni; hedef yatay çizgi
-   ================================================================ */
-
-.hiz{ margin:0; }
-.hiz--yok{ font-size:var(--fs-sm); color:var(--text-3); }
-.hiz__koni{
-  fill:var(--primary-soft);
-  stroke:var(--primary);
-  stroke-width:1;
-  stroke-dasharray:var(--sp-1) var(--sp-1);
-  vector-effect:non-scaling-stroke;
-}
-.hiz__hedef{
-  stroke:var(--text-3);
-  stroke-width:1;
-  stroke-dasharray:2 var(--sp-1);
-  vector-effect:non-scaling-stroke;
-}
-
-/* ================================================================
-   113 · ÖNCE / SONRA — yalnız değişen renkli, gerisi soluk
-   ================================================================ */
-
-.oncesonra{ display:grid; gap:var(--sp-2); }
-.oncesonra__ozet{ margin:0; font-size:var(--fs-sm); font-weight:600; }
-.oncesonra__iki{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3); }
-.oncesonra__bas{ margin:0 0 var(--sp-1); font-size:var(--fs-xs); font-weight:600; color:var(--text-3); }
-.oncesonra__l{ display:grid; gap:var(--sp-1); margin:0; padding:0; list-style:none; }
-.oncesonra__b{
-  display:grid;
-  padding:var(--sp-1) var(--sp-2);
-  border-radius:var(--r-xs);
-  font-size:var(--fs-sm);
-}
-/* Saat üstte, ad altta tam genişlikte: yan yana iki dar sütunda ad
-   kelime ortasından bölünüyordu. */
-.oncesonra__saat{ font-size:var(--fs-xs); font-variant-numeric:tabular-nums; color:var(--text-2); }
-.oncesonra__ad{ min-width:0; overflow-wrap:break-word; }
-.oncesonra__b--ayni{ color:var(--text-3); }
-.oncesonra__b--ayni .oncesonra__saat{ color:var(--text-3); }
-.oncesonra__b--degisen,
-.oncesonra__b--eklenen{ background:var(--primary-soft); color:var(--text); font-weight:500; }
-.oncesonra__b--silinen{ color:var(--text-3); text-decoration:line-through; }
-
-/* ================================================================
-   123 · GEÇME NEDENİ — isteğe bağlı çipler (T'nin .chip'i)
-   ================================================================ */
-
-.gecme{ display:grid; gap:var(--sp-2); justify-items:start; }
-.gecme__bas{ margin:0; font-size:var(--fs-sm); font-weight:500; }
-.gecme__ek{ color:var(--text-3); font-weight:400; }
-.gecme__cipler{ display:flex; flex-wrap:wrap; gap:var(--sp-2); }
-
-/* ================================================================
-   124 · ÇAPRAZ ETKİ — kaynak ve hedef ayrı renkte, ok Merkez'in
-   ================================================================ */
-
-.capraz{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2); font-size:var(--fs-xs); }
-.capraz__modul{ font-weight:600; padding:0 var(--sp-1); border-radius:var(--r-xs); }
-.capraz--ays{ color:var(--ays-ink); background:var(--ays-t); }
-.capraz--spi{ color:var(--spi-ink); background:var(--spi-t); }
-.capraz--esp{ color:var(--esp-ink); background:var(--esp-t); }
-.capraz__ok{ width:1.6em; height:.8em; fill:none; stroke:var(--mer); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
-.capraz__olcum{ color:var(--text-2); font-variant-numeric:tabular-nums; }
-
-/* ================================================================
-   127 · KAPSAM SEÇİMİ — süre uzadıkça seviye büyür
-   ================================================================ */
-
-.kapsam{ display:grid; gap:var(--sp-2); margin:0; padding:0; border:0; min-width:0; }
-.kapsam__bas{ padding:0; margin-bottom:var(--sp-1); font-size:var(--fs-sm); font-weight:600; }
-.kapsam__s{
-  display:grid;
-  grid-template-columns:auto minmax(0, 1fr);
-  column-gap:var(--sp-2);
-  align-items:baseline;
-  cursor:pointer;
-}
-.kapsam__s input{ grid-row:span 2; accent-color:var(--primary); }
-.kapsam__ad{ font-weight:500; }
-.kapsam__seviye{ grid-column:2; font-size:var(--fs-xs); color:var(--text-3); }
-
-/* ================================================================
-   032 · GEÇEN DÖNEM GÖLGESİ — soluk kesik çizgi, arkada
-   ================================================================ */
-
-.grafik__onceki polyline{
-  fill:none;
-  stroke:var(--text-3);
-  stroke-width:1.5;
-  stroke-dasharray:var(--sp-1) var(--sp-1);
-  opacity:.6;
-  vector-effect:non-scaling-stroke;
-}
-.grafik__onceki circle{ fill:var(--text-3); opacity:.6; }
-
-/* ================================================================
-   036 · DAĞILIM ŞERİDİ — her gece bir nokta, ortada medyan
-   ================================================================ */
-
-.dagilim{ margin:0; }
-.dagilim--yok{ font-size:var(--fs-sm); color:var(--text-3); }
-.dagilim__svg{ display:block; width:100%; height:auto; overflow:visible; }
-.dagilim__n{ fill:var(--primary); opacity:.55; }
-.dagilim__medyan{ stroke:var(--text); stroke-width:2; }
-
-/* ================================================================
-   040 · BİRİKİM EĞRİSİ — gerçek ve plan; bugünkü fark yönün renginde
-   ================================================================ */
-
-.birikim{ margin:0; }
-.birikim--yok{ font-size:var(--fs-sm); color:var(--text-3); }
-.birikim__plan{
-  fill:none;
-  stroke:var(--text-3);
-  stroke-width:1.5;
-  vector-effect:non-scaling-stroke;
-}
-.birikim__gercek line,
-.birikim__kayitsiz line{
-  stroke:var(--primary);
-  stroke-width:2;
-  stroke-linecap:round;
-  vector-effect:non-scaling-stroke;
-}
-/* Kaydı olmayan güne giden parça KESİK: orada 0 eklenmedi, bilinmiyor. */
-.birikim__kayitsiz line{ stroke-dasharray:var(--sp-1) var(--sp-1); opacity:.7; }
-.birikim__fark{ stroke-width:2; vector-effect:non-scaling-stroke; }
-.birikim__fark--kotu{ stroke:var(--bad); }
-.birikim__fark--iyi{ stroke:var(--ok); }
-.birikim__fark--notr{ stroke:var(--text-3); }
-
-/* ================================================================
-   137 · AJANIN BAKTIĞI VERİ — çip (T'nin .chip'i) + kesinlik glifi
-   ================================================================ */
-
-.vericip{ display:flex; flex-wrap:wrap; gap:var(--sp-1); margin:0; padding:0; list-style:none; }
-.vericip__c{ display:inline-flex; align-items:center; gap:var(--sp-1); font-size:var(--fs-xs); }
-.vericip__c .kesinlik__ad{ position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
-.vericip__c--yok{ color:var(--text-3); border-style:dashed; }
-
-/* ================================================================
-   004 · SAYFA BAŞI CÜMLESİ — tarih satırının altında, koddan tek cümle
-   042 · SIRADAKİ BLOK KAHRAMANI — Şimdi alanının ilk ve en büyük öğesi
-   (ekran yerleşimi: modüllerin `screens/today.js`'i)
-   ================================================================ */
-
-.bugun-cumle{ display:block; margin-top:var(--sp-1); color:var(--text); font-weight:500; }
-.kahraman{ min-width:0; }
-
-
-/* ================================================================
-   v5 · BUGÜN (LifeOS Tasarım Dili sürüm 5, «AYS · Bugün»)
-   Şimdi · Durum · Özet · Öneri alt alta; Durum/Özet kartları yan yana.
-   ================================================================ */
-.bugun__etiket{ margin:0 0 -4px; font-size:13px; font-weight:600; color:var(--text-2); letter-spacing:0; }
-.bugun__alan[aria-label="Durum"], .bugun__alan[aria-label="Özet"]{
-  flex-direction:row; flex-wrap:wrap; gap:16px; align-items:flex-start; }
-.bugun__alan[aria-label="Durum"] > *, .bugun__alan[aria-label="Özet"] > *{ flex:1 1 300px; min-width:0; }
-.bugun__alan > .bugun__etiket, .bugun__alan[aria-label] > p{ flex-basis:100%; margin:0; }
-.sayfabasi__ust{ margin:0 0 6px; font-size:13px; color:var(--text-2); }
-.site--v5 .sayfabasi__baslik{ font-size:28px; }
-
-/* Sıradaki blok kahramanı: modül zemini, simgesiz, büyük başlık. */
-.site--v5 .nextup, .kahraman .nextup{ background:var(--mod-t, var(--primary-soft)); border:0; border-radius:14px; padding:24px;
-  box-shadow:none; gap:20px; align-items:center; }
-.site--v5 .nextup__icon, .kahraman .nextup__icon{ display:none; }
-.site--v5 .nextup__label, .kahraman .nextup__label{ font-size:13px; font-weight:500; color:var(--text-2); text-transform:none; letter-spacing:0; }
-.site--v5 .nextup__label::before, .kahraman .nextup__label::before{ content:''; display:inline-block; width:8px; height:8px; margin-right:8px;
-  border-radius:2px; background:var(--primary); vertical-align:1px; }
-.kahraman .nextup__title{ font-size:26px; font-weight:700; letter-spacing:-.02em; line-height:1.2; margin-top:4px; }
-.site--v5 .nextup__why, .kahraman .nextup__why{ font-size:13px; color:var(--text-2); margin-top:4px; }
-@media (max-width:679px){ .kahraman .nextup{ padding:18px; } .kahraman .nextup__title{ font-size:22px; }
-  .site--v5 .sayfabasi__baslik{ font-size:22px; line-height:1.25; } .site--v5 .bugun{ gap:20px; } }
-
-/* v5 · DEFTER SATIRI: künye sütunu kalkar, künye içeriğin üstünde tek
-   satırdır (tasarım dili: alan etiketi + kutu). Üç modülün her ekranı. */
-.site--v5 .lrow{ grid-template-columns:minmax(0,1fr); gap:12px; padding-block:24px; }
-.site--v5 .ledger > .lrow:first-child{ padding-top:4px; }
-.site--v5 .lrow__side{ position:static; display:flex; align-items:baseline; gap:6px 12px; flex-wrap:wrap; }
-.site--v5 .lrow__label{ font-size:12px; letter-spacing:.06em; color:var(--text-2); }
-.site--v5 .lrow__meta{ margin-top:0; font-size:13px; }
-.site--v5 .lrow__note{ flex-basis:100%; margin:0; max-width:70ch; font-size:13px; }
-.site--v5 .lrow__act{ margin:0 0 0 auto; flex-direction:row; flex-wrap:wrap; }
-.site--v5 .lrow__act .btn{ width:auto; }
-.site--v5 .lrow.kahraman{ border-top:0; }
-
-/* v5 · ÖNERİ ALANI: Merkez'in sesi mor çerçevede durur (teklif, karar değil). */
-.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{
-  border:1px solid color-mix(in srgb, var(--mer) 40%, var(--border)); border-radius:14px;
-  padding:18px 20px; background:var(--surface); }
-.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + * .lrow{ padding-block:0; border:0; }
-
-/* v5 · SAYFA RİTMİ: başlık ile içerik arası 24 px (tasarım: 40 üst, 24 ara). */
-.site--v5 .sayfabasi{ padding-top:0; padding-bottom:24px; align-items:flex-end; }
-.site--v5 .content{ padding-block:0 56px; }
-.site--v5 .sayfabasi__baslik{ font-weight:700; letter-spacing:-.02em; }
-
-/* v5 · ETİKETLER: büyük harf ve harf aralığı kalkar; etiket 12-13 px,
-   ikinci metin rengi (tasarım dili «Yazı» panosu: etiket cümle düzeninde). */
-.site--v5 :is(.appear__label, .argcol__h, .asrow__kind, .ayar-ara__modul, .block__slot, .board__label,
-  .chain__kind, .chain__label, .cmdk__group, .desknote__label, .flashcard__side, .focusmode__slot,
-  .gauge__label, .haberci__ust, .hero__eyebrow, .herostat__label, .kmenu__bas, .lrow__label,
-  .masthead__wd, .mono-label, .nextup__label, .perde__ustyazi, .printdoc__h, .prop__kind, .qmsg__who,
-  .quizcard__src, .rail__label, .room3d__board-label, .rutbe-kart__ust, .rutbe-kunye__ust, .rx__kind,
-  .setup__kicker, .seviye-isler__tablo th, .seviye-rozet__ad, .sidestat__k, .sitefoot__k, .srsrow__day,
-  .stat__label, .symgrp__h, .topicgroup__head, .yenilik__baslik, th){
-  text-transform:none; letter-spacing:0; }
-.site--v5 :is(.lrow__label, .stat__label, .herostat__label, .sidestat__k, .rail__label, .board__label,
-  .topicgroup__head, .symgrp__h, .argcol__h, .gauge__label){ font-size:13px; font-weight:600; color:var(--text-2); }
-.site--v5 th{ font-size:12px; font-weight:500; color:var(--text-3); }
-
-.site--v5 .nextup{ padding:18px 20px; }
-.site--v5 .nextup__title{ font-size:18px; font-weight:700; letter-spacing:-.01em; }
-.site--v5 .kahraman .nextup{ padding:24px; }
-.site--v5 .kahraman .nextup__title{ font-size:26px; }
-
-/* v5 · SAYFA İÇİ BÖLÜM ÇUBUĞU: sayfa zemini beyazdır; üst şerit 52 px. */
-.site--v5{ --ust-h:52px; }
-.site--v5 .bolumcubugu--sayfa{ background:var(--surface); }
-.site--v5 .bolumcubugu__ad{ height:40px; font-size:14px; }
-.site--v5 .bolumcubugu__ad.is-on::after{ background:var(--text); }
-.site--v5 .sayfabolum__ad{ font-size:18px; font-weight:700; }
-
-@media (max-width:679px){
-  .site--v5 .kahraman .nextup{ padding:18px; }
-  .site--v5 .kahraman .nextup__title{ font-size:20px; }
-  .site--v5 .nextup__title{ font-size:16px; }
-}
-
-/* Kahraman dar kapta SARAR: düğmeler satıra sığmazsa metnin altına iner
-   (390 px'lik kapta gövde sıfır genişliğe sıkışıyordu — k2bugun oz-042). */
-.site--v5 .nextup, .kahraman .nextup{ flex-wrap:wrap; }
-.site--v5 .nextup__body, .kahraman .nextup__body{ flex:1 1 240px; min-width:0; }
-
-/* ================================================================
-   v5 · RAF DÜZENİ — DÜZENLİ RAF (kullanıcı, 2026-09-25: «kaos, düzeni
-   yok, ne olduğu anlaşılmıyor»). Önceki raf üç, dört sütuna kendiliğinden
-   akıyor, kutular kendi boyunda kalıyor (yanında delik), «dense» sırayı
-   karıştırıyor, her kutu 560 px'te içinde kayıyordu (iç içe kaydırma) ve
-   tablolar dar kutuya sıkışıp yana kayıyordu. Şimdi altı kural:
-     1. Raf en çok İKİ eşit sütundur; dar ekranda bir.
-     2. Aynı raftaki kutular AYNI boydadır: rafın üst ve alt kenarı düzdür.
-     3. Okuma sırası korunur (dense yok).
-     4. Tablo, form ızgarası, grafik, seçim kartları rafın bütün enini alır.
-     5. Kutunun içinde kaydırma yok: sayfanın tek kaydırması vardır.
-     6. Raftaki son tek kutu bütün eni alır (yanında boş delik kalmaz).
-   Hiçbir satır gizlenmez; yalnız yerleşim değişir.
-   ================================================================ */
-.site--v5 .ledger{ display:grid; grid-template-columns:minmax(0, 1fr); gap:16px; align-items:stretch; }
-@media (min-width:1100px){
-  .site--v5 .ledger{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
-}
-.site--v5 .ledger > .lrow, .site--v5 .ledger > .ledger__item,
-.site--v5 .ledger > .lband > .lrow, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow{
-  min-width:0; margin:0; padding:18px 20px; border:1px solid var(--border); border-radius:14px;
-  background:var(--surface); display:flex; flex-direction:column; gap:12px; }
-.site--v5 .ledger > .lrow:first-child{ padding-top:18px; }
-.site--v5 .ledger > .lrow:last-child{ padding-bottom:18px; }
-.site--v5 .ledger > .lrow.kahraman{ grid-column:1 / -1; padding:0; border:0; background:none; }
-.site--v5 .ledger .lrow > .lrow__main{ flex:1 1 auto; min-width:0; }
-/* Künye satırı kutunun enini aşmaz: içindeki kayan şerit (SPİ gün
-   gezgini, 14 gün) künyeyi genişletip sayfayı yana kaydırıyordu (390 px). */
-.site--v5 .ledger .lrow > .lrow__side, .site--v5 .ledger .lrow > .lrow__side > .lrow__act{ max-width:100%; min-width:0; }
-.site--v5 .ledger > .lrow .lrow__main > * + *{ margin-top:12px; }
-
-/* Bant ve yığın rafta çizilmez; içlerindeki her satır rafın bir kutusudur. */
-.site--v5 .ledger > .lband, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs){ display:contents; }
-.site--v5 .ledger > .lband > :not(.lrow):not(.stack):not(.stack-sm):not(.stack-xs),
-.site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > :not(.lrow){ grid-column:1 / -1; min-width:0; }
-
-/* 4 · Geniş içerik rafın bütün enini alır. */
-.site--v5 :is(.ledger > .lrow, .ledger > .lband > .lrow, .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow):is(
-  .lrow--wide,
-  :has(table, canvas, svg.chart, .chart, .grafik, .cardsgrid, .formgrid, .grid-form, .cols-2, .cols-3, .cols-4,
-    .picks, .desks, .heatmap, .temasec, .ledger, .ogrid, .grid)){ grid-column:1 / -1; }
-
-/* 6 · Eşi olmayan yarım kutu yalnız kalmaz: iki geniş kutunun arasında ya
-   da rafın sonunda tek kalan kutu bütün eni alır. Eşleştirmeyi çizimden
-   sonra hareket.js yapar (bant ve yığınlar sıra sayımını bozduğu için CSS
-   bunu bilemez) ve kutuya .raf-tek koyar. */
-.site--v5 .ledger .raf-tek{ grid-column:1 / -1; }
-
-/* Uzun kutu (hareket.js): --raf-kes boyunda kesilir (tek kutuda 560 px,
-   çiftte eşinin boyu), alt kenarı solar, altında «Tamamını göster». İç
-   kaydırma değildir; sayfanın tek kaydırması kalır. Solma katmanı düğme
-   şeridini de örter — kesilen satır düğmenin altından sızmaz. */
-.site--v5 .ledger .raf-uzun{ position:relative; max-height:calc(var(--raf-kes, 560px) + 56px); overflow:hidden; padding-bottom:56px; }
-.site--v5 .ledger .raf-uzun::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:128px; pointer-events:none;
-  z-index:1; background:linear-gradient(to bottom, transparent, var(--surface) 72px); border-radius:0 0 13px 13px; }
-.site--v5 .ledger .raf-uzun.raf-acik{ max-height:none; overflow:visible; }
-.site--v5 .ledger .raf-uzun.raf-acik::after{ display:none; }
-.site--v5 .raf-ac{ position:absolute; z-index:2; left:20px; right:20px; bottom:12px; min-height:34px; border:1px solid var(--border);
-  border-radius:8px; background:var(--surface); color:var(--text); font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
-.site--v5 .raf-ac:hover{ border-color:var(--border-strong); }
-.site--v5 .raf-acik > .raf-ac{ position:static; margin-top:12px; width:100%; }
-
-/* Sayı çifti (.pair içinde .sidestat): dar kutuda dört sayı alt alta
-   ve aralıklı dizilmez; iki sütun, sıkı aralık. */
-.site--v5 .ledger .pair:has(> div > .sidestat){ grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:4px 24px; }
-
-/* Kutu etiketiyle aynı adı taşıyan bölüm başlığı (hareket.js ikizBaslik)
-   yalnız ekran okuyucuya kalır; boş kalan başlık satırı yer kaplamaz. */
-.site--v5 .ledger .section-title:has(> h2.sr-only:only-child){ display:contents; }
-
-/* İç içe defter: kutunun içindeki ikinci defter kutu çizmez, satırdır. */
-.site--v5 .ledger .ledger{ display:flex; flex-direction:column; gap:0; }
-.site--v5 .ledger .ledger > .lrow{ display:block; border:0; border-top:1px solid var(--border); border-radius:0;
-  padding:12px 0; background:none; }
-.site--v5 .ledger .ledger > .lrow:first-child{ border-top:0; padding-top:0; }
-
-/* 5 · İç kaydırma yok. Çok geniş bir tablo (yalnız o) kendi kabında yana kayar. */
-.site--v5 .ledger .lrow > .lrow__main{ max-height:none; overflow:visible; }
-.site--v5 .ledger .lrow__main table{ width:100%; }
-.site--v5 .ledger .lrow__main :is(.tablewrap, .table-wrap, .tbl){ overflow-x:auto; }
-
-/* Sayfa bölümleri de rafın katıdır: aralarında 32 px, başlık 16 px. */
-.site--v5 .sayfabolum + .sayfabolum{ margin-top:32px; }
-.site--v5 .sayfabolum__ad{ font-size:16px; margin-bottom:12px; }
-
-/* Kat düzeni: çubuklu sayfada yalnız seçili bölüm görünür (019). */
-.sayfabolumler--kat > .sayfabolum:not(.is-on){ display:none; }
-.sayfabolumler--kat > .sayfabolum + .sayfabolum{ margin-top:0; }
-.bolumcubugu--sayfa .bolumcubugu__ad.is-on{ color:var(--text); font-weight:600; }
-.bolumcubugu--sayfa .bolumcubugu__ad.is-on::after{ content:''; position:absolute; left:10px; right:10px; bottom:-1px;
-  height:2px; border-radius:1px; background:var(--text); }
-
-/* v5 · DURUM KARTLARI: büyük sayı, küçük birim, yön rozeti, tek satır not. */
-.bugun__alan > .bugun__genis{ flex-basis:100%; min-width:0; }
-.durumkart .durumkart__sayi{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
-.durumkart .durumkart__sayi b{ font-size:28px; font-weight:700; letter-spacing:-.02em; line-height:1.1;
-  font-variant-numeric:tabular-nums; }
-.durumkart .durumkart__sayi small{ font-size:14px; color:var(--text-2); }
-.durumkart__fark{ font-size:12px; font-weight:600; padding:2px 7px; border-radius:6px; background:var(--surface-2);
-  color:var(--text-2); font-variant-numeric:tabular-nums; }
-.durumkart__fark.is-artti{ background:var(--ok-t); color:var(--ok-ink); }
-.durumkart__fark.is-azaldi{ background:var(--bad-t); color:var(--bad-ink); }
-.durumkart__not, .durumkart__bos{ margin:8px 0 0; font-size:13px; color:var(--text-2); }
-.site--v5 .gunserit{ margin-bottom:28px; }
-
-/* Vitrin kartları Durum kutusunda: sayı + fark yan yana, eğri sağda. */
-.durumkart__ust{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-.durumkart__egri svg{ display:block; width:132px; height:36px; }
-.durumkart .durumkart__sayi .sayi{ font-size:28px; font-weight:700; letter-spacing:-.02em; }
-.durumkart .esik-cubuk, .durumkart [data-oz="029"]{ margin-top:10px; }
-.sayac__satir + .sayac__satir{ margin-top:10px; }
-
-/* Vitrin grafik kartları ekranlarda: analiz başı iki kutu yan yana; sıra
-   başlığında aralık + eğilim; hız konisi bir dokunuşla açılır (D). */
-.analizbasi{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap:16px; margin-bottom:24px; align-items:start; }
-.sira-bas{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:8px; }
-.sira-bas > [data-oz="035"]{ flex:1 1 280px; }
-.hiz-ac > summary{ cursor:pointer; font-size:13px; color:var(--text-2); min-height:24px; display:flex; align-items:center; }
-
-/* Onaylar rafı (pano 36): bekleyenler solda, «Son kararlar» sağda. */
-.onaylar-raf{ display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
-@media (min-width:1100px){ .onaylar-raf{ grid-template-columns:minmax(0,1fr) 340px; } }
-.okart-sar{ display:flex; flex-direction:column; gap:6px; }
-.okart__kim{ margin:0; font-size:12.5px; color:var(--text-2); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-
-/* Son ölçümler (015 · 026): ad solda, değer ve yaşı sağda. */
-.sonolcum{ list-style:none; margin:0; padding:0; }
-.sonolcum__s{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:8px 0;
-  border-top:1px solid var(--border); font-size:14px; }
-.sonolcum__s:first-child{ border-top:0; padding-top:0; }
-.sonolcum__ad{ color:var(--text-2); }
-.sonolcum__d{ text-align:right; font-variant-numeric:tabular-nums; }
-
-/* 116 anahtarı: 24 px dokunma tabanı (WCAG 2.2 AA). */
-.otoayar__anahtar{ width:24px; height:24px; min-height:24px; margin:0; flex:none; accent-color:var(--text); }
-
-/* ================================================================
-   VİTRİN DURUMLARI — vitrin kartlarının (brand/ortak/vitrin.css,
-   ÜRETİLMİŞ) sistemde ALDIĞI hâller. Vitrin bir davranışı döngüyle
-   gösterir; sistemde o davranış gerçek bir olayla olur. Kartın biçimi
-   burada DEĞİŞMEZ: yalnız durum (çevrilmiş, seçili), gerçek giriş
-   kutusu ve gerçek metnin uzunluğu karşılanır.
-   ================================================================ */
-.vk[role="button"]{ cursor:pointer; }
-.vk[role="button"]:focus-visible{ outline:2px solid var(--ring); outline-offset:3px; border-radius:12px; }
-.vk .hl.hl--yok{ background:none; border:1.5px dashed var(--vk-ink4); }
-.vk .hl.hl--yok::after{ display:none; }
-
-/* 043 tek durum: sistem o anki hâli çizer, ikisini yan yana değil. */
-.vk .x22v.tek{ grid-template-columns:1fr; }
-
-/* 045 çevrilen kart: yükseklik metinden gelir, yüzler üst üste. */
-.vk .x24{ height:auto; }
-.vk .x24 .kk{ display:grid; transition:transform var(--dur-lg) var(--ease); }
-.vk .x24 .yz{ position:relative; inset:auto; grid-area:1 / 1; min-height:124px; gap:8px; }
-.vk .x24 .kk.is-cevrik{ transform:rotateY(180deg); }
-
-/* 052 yuva adları saat değil sözcüktür; soluk mürekkep yazıda AA değil. */
-.vk .y15 .sa{ color:var(--vk-ink3); align-self:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.vk .y15 .bk.is-atlandi{ background:repeating-linear-gradient(135deg,var(--vk-ink4) 0 2px,transparent 2px 4px); }
-
-/* 055 çipler gerçek seçim kutusudur. */
-.vk .x30 .sat2{ flex-wrap:wrap; }
-.vk .x30 .ci{ position:relative; padding-right:4px; }
-.vk .x30 .ci select{ appearance:none; -webkit-appearance:none; background:none; border:0; font:inherit;
-  color:inherit; padding:0 16px 0 0; min-height:26px; max-width:14em; cursor:pointer; }
-.vk .x30 .ci svg{ position:absolute; right:6px; pointer-events:none; }
-.vk .x30 .ci:focus-within{ outline:2px solid var(--ring); outline-offset:1px; }
-.vk .x30 .kbd-d{ margin-left:auto; min-height:26px; min-width:34px; display:grid; place-items:center; border-radius:6px; }
-.vk .x30 .kbd-d kbd{ margin:0; }
-
-/* 057 ve 065: çizginin dolu kısmı veriden. */
-.vk .z11 .tr::after{ width:var(--bugun,22%); }
-.vk .z11 .bu{ left:var(--bugun,22%); }
-.vk .w13 .tr::after{ width:var(--ilerleme,19%); }
-
-/* 058 soru ekranı: yer tutucu çizgi yerine gerçek soru ve şık. */
-.vk .z12 .q{ display:block; font-size:14px; line-height:1.55; }
-.vk .z12 .sk .sik{ display:flex; align-items:flex-start; gap:8px; width:100%; min-height:34px; padding:7px 10px;
-  border-radius:8px; border:1px solid var(--vk-l1); background:var(--vk-s1); text-align:left; }
-.vk .z12 .sk .sik b{ font:500 10px var(--vk-mono); color:var(--vk-ink3); width:10px; padding-top:3px; }
-.vk .z12 .sk .sik.on{ border-color:var(--ays); background:color-mix(in oklab,var(--ays) 10%,var(--vk-s1)); }
-.vk .z12 .sk .sik.on b{ color:var(--ays); }
-
-/* 062 hücreler gerçek giriş kutusu; doğruluk sütunu korunur. */
-.vk .w10.genis .r{ grid-template-columns:minmax(0,1fr) 46px 46px 46px 52px 62px; height:auto; min-height:32px; }
-.vk .w10 .r i{ height:28px; }
-.vk .w10 .r i input{ width:100%; height:100%; border:0; background:none; text-align:center; font:inherit;
-  color:inherit; -moz-appearance:textfield; appearance:textfield; }
-.vk .w10 .r i input::-webkit-inner-spin-button,.vk .w10 .r i input::-webkit-outer-spin-button{ -webkit-appearance:none; margin:0; }
-.vk .w10 .r i:focus-within{ border-color:var(--ays); box-shadow:0 0 0 3px color-mix(in oklab,var(--ays) 20%,transparent); }
-.vk .w10 .r>span small{ display:block; font:400 10px var(--vk-mono); color:var(--vk-ink3); }
-.vk .w10 .r em{ font:400 11px var(--vk-mono); font-style:normal; text-align:right; color:var(--vk-ink2); }
-.vk .w10 .r em.dusuk{ color:var(--vk-ink3); }
-
-/* 063 satır düğmedir; süzgeç gerçek düğme. */
-.vk .w11 button.r{ width:100%; text-align:left; height:auto; min-height:34px; }
-.vk .w11 .sz button{ height:26px; padding:0 10px; border-radius:6px; font-size:11.5px; font-weight:500;
-  color:var(--vk-ink3); border:1px solid var(--vk-l1); }
-.vk .w11 .sz button.on{ background:var(--vk-s3); color:var(--vk-ink); }
-.vk .w11 .bos{ font-size:12px; color:var(--vk-ink3); padding:8px 0; }
-
-/* 064 ± düğmeleri çerçeveli (vitrinin .bt.g'si). */
-.vk .w12 .st2 .bt:disabled{ opacity:.4; cursor:default; }
-
-@media (prefers-reduced-motion:reduce){
-  .vk .x24 .kk{ transition:none; }
-}
-
-/* Vitrin kartını taşıyan kutu (x02 iskeleti): başlık sistemin, gövde
-   vitrinin. İkili gövde iki kartı ince çizgiyle ayırır. */
-.vkutu .kutu__govde > .vk + .vk{ margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
-.vkutu__ikili{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px 20px; }
-.vkutu__ikili > .vk + .vk{ margin:0; padding:0; border:0; }
-.bugun__vitrin:empty{ display:none; }
-
-/* 054 taşınan blok gerçek listede: havadaki kart akışın içinde durur
-   (vitrinin sabit konumu tek örnek içindir). */
-.vk .x29{ height:auto; }
-.vk .x29 .ts{ position:relative; left:auto; right:auto; top:auto; margin:2px -2px 2px 18px; transform:rotate(-1.5deg); }
-.vk .x29 .ga{ position:static; align-self:flex-end; margin-top:4px; }
-.vk .x29 .hy{ color:var(--vk-ink3); }
-@media (prefers-reduced-motion:reduce){ .vk .x29 .ts{ transform:none; } }
-
-/* Vitrin grafikleri 260 birimlik bir tuvale çizilir; geniş sütunda
-   sonsuz büyümez (yazı da onunla büyüyordu). */
-.vk .y12, .vk .y09, .vk .y10, .vk .x18, .vk .y16, .vk .z07{ max-width:560px; }
-
-/* ---- D · SPİ vitrin kartlarının sistem hâlleri ---- */
-/* 069 veri yok gecesi kesik; 072 tabak bölmeleri veriden. */
-.vk .x32 .gc i.yok{ background:none; border:1.5px dashed var(--vk-ink4); }
-.vk .x34 .tb[style*="--tabak"]::before{ background:var(--tabak); }
-.vk .x34 .tb::after{ display:none; }
-/* 073 bardak dizisi tek düğme; hedef aşılırsa sarar. */
-.vk .x35 .bd{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:0 auto; padding:6px 8px; border-radius:10px; }
-.vk .x35 .sy{ text-align:center; margin-top:10px; font:400 11px var(--vk-mono); color:var(--vk-ink3); }
-/* 074 beş nokta gerçek düğme; dolu noktada yazı AA tonunda. */
-.vk .y17 .ol button{ width:30px; height:30px; border-radius:50%; border:1.5px solid var(--vk-l2); display:grid; place-items:center;
-  font:500 11px var(--vk-mono); color:var(--vk-ink3); }
-.vk .y17 .ol button.on{ width:44px; height:44px; background:var(--spi-ink, var(--spi)); color:var(--vk-on); border-color:transparent; font-size:15px; }
-/* 075 set kutucuğu düğme. */
-.vk .x36 .st{ flex-wrap:wrap; }
-.vk .x36 .st button{ width:34px; height:26px; border-radius:5px; border:1px solid var(--vk-l2); display:grid; place-items:center;
-  font:400 10px var(--vk-mono); color:var(--vk-ink3); }
-.vk .x36 .st button.d{ background:var(--spi-ink, var(--spi)); border-color:transparent; color:var(--vk-on); }
-.vk .x36 .r{ height:auto; min-height:36px; padding:4px 0; }
-/* 077 tuş takımı: sil tuşu var, ✓ tam genişlik. */
-.vk .x37 .tt button{ height:28px; border-radius:5px; background:var(--vk-s1); border:1px solid var(--vk-l1); display:grid; place-items:center;
-  font:400 11px var(--vk-mono); color:var(--vk-ink2); }
-.vk .x37 .tt button.on{ background:var(--spi-ink, var(--spi)); color:var(--vk-on); border-color:transparent; }
-.vk .x37 .tt .tt-kaydet{ grid-column:1 / -1; }
-.vk .x37{ grid-template-columns:1fr 132px; }
-/* 085 şablon satırı düğme. */
-.vk .w17 .ls2 button{ display:grid; grid-template-columns:60px 1fr 26px; gap:8px; align-items:center; min-height:36px; width:100%;
-  padding:0 6px 0 10px; border-radius:9px; background:var(--vk-s1); border:1px solid var(--vk-l1); text-align:left; }
-.vk .w17 .ls2 button.on{ border-color:color-mix(in oklab,var(--spi) 45%,transparent); }
-.vk .w17 .ls2 button.on em{ background:var(--spi-ink, var(--spi)); color:var(--vk-on); }
-/* 088 anahtar 24 px dokunma hedefi. */
-.vk .w20 .an2{ width:40px; height:24px; border-radius:12px; }
-.vk .w20 .an2::after{ width:20px; height:20px; }
-.vk .w20 .an2.on::after{ left:18px; }
-/* 078: vitrinin h5'i sayfanın başlık sırasını atlatıyordu (h2 → h5);
-   ad düz metindir, biçimi aynı. */
-.vk .y19 b.ad{ display:block; font-size:14px; font-weight:600; }
-
 /* ==== css/vitrin.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/vitrin.css içine yazılır; burası bir sonraki
@@ -6767,6 +5570,1229 @@ body.is-dragging .drop.is-over{
 @media not (prefers-color-scheme:dark){
 :root:not([data-theme="dark"]) .vk .x64 .toast .bt{color:#8FB0FF}
 }
+
+/* ==== css/kart.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/kart.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KARTLAR — ortak bileşenlerin biçimi (K'nin tek stil dosyası).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/kart.css`; `python3 tools/ortak.py --yay`
+   ile üç arayüzün `src/css/` klasörüne BİREBİR kopyalanır.
+   Markupı `brand/ortak/{sayi,grafik,oneri,sozluk,guven}.js` üretir.
+   ==================================================================
+
+   JETON KURALI (ekip/EKIP-PLANI.md §2)
+
+   Burada ham renk, boşluk, köşe ve süre YAZILMAZ; yalnız T'nin
+   jetonları kullanılır (`brand/ortak/jeton.css`, `tokens.css`). Tek
+   istisna kılçık çizgidir (1px, 2px ve SVG çizgi kalınlığı): bir
+   çizginin kalınlığı ölçek değil, ekranın en küçük birimi.
+
+   Yön rengi yazıda `--ok-ink` / `--bad-ink`, dolguda `--ok` / `--bad`;
+   modül rengi `--ays` / `--spi` / `--esp`, Merkez `--mer` (yazıda
+   `--mer-ink`, zeminde `--mer-t`). Yeşil ve kırmızı YALNIZ yön bildirir
+   (§1.3-1); yönü bilinmeyen şey nötr kalır. */
+
+/* ================================================================
+   024 · SAYI — kesinlik yazıda görünür
+   ================================================================ */
+
+.sayi{
+  position:relative;
+  display:inline-flex;
+  align-items:baseline;
+  gap:var(--sp-1);
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.sayi[tabindex]{ cursor:help; border-radius:var(--r-sm); }
+
+.sayi__b{ font-size:.55em; font-weight:500; color:var(--text-3); letter-spacing:0; }
+
+/* Yalnız TAHMİN olanın altı kesik çizilir (§1.3-3). Ölçüldü ve
+   hesaplandı düz yazılır; farkı köken kartı söyler. */
+.sayi--estimated > .sayi__d{
+  text-decoration:underline dashed var(--text-3);
+  text-decoration-thickness:.08em;
+  text-underline-offset:.18em;
+}
+.sayi__ar{ font-size:var(--fs-xs); font-weight:500; color:var(--text-3); letter-spacing:0; }
+
+/* «Veri yok» her yerde «—» ve SÖNÜK — ama silik değil: okunmayan bir
+   etiket, olmayan bir etikettir. */
+.sayi--missing > .sayi__d{ color:var(--text-3); font-weight:500; }
+
+/* ================================================================
+   026 · VERİ TAZELİĞİ — eski ölçüm soluklaşır ve yaşını yazar
+   ================================================================ */
+
+.sayi--bayat > .sayi__d{ color:var(--text-3); }
+.sayi__yas{
+  font-size:var(--fs-xs);
+  font-weight:500;
+  color:var(--text-3);
+  letter-spacing:0;
+}
+
+/* ================================================================
+   015 · SON BİLİNEN DEĞER — yenilenirken değer ve saati durur
+   Tarama çizgisi HAREKETSİZ: tek canlı öğe sıradaki iştir (§1.2).
+   ================================================================ */
+
+.sayi__tarama{
+  position:absolute;
+  left:0;
+  right:0;
+  top:calc(-1 * var(--sp-1));
+  height:2px;
+  background:var(--primary);
+  opacity:.35;
+  border-radius:1px;
+}
+.sayi--yenileniyor > .sayi__d{ color:var(--text-2); }
+
+/* ================================================================
+   025 · KÖKEN KARTI — üzerine gelince, odakta ya da basılı tutunca
+   016 · TERİM İPUCU aynı açılır kalıbı kullanır: tek davranış öğrenilir.
+   Açılır katmandır; gölge YALNIZ burada (§1.2).
+   ================================================================ */
+
+.koken,
+.terim__kart{
+  display:none;
+  position:absolute;
+  z-index:var(--z-overlay);
+  left:0;
+  top:calc(100% + var(--sp-1));
+  width:max-content;
+  max-width:min(22em, calc(100vw - var(--sp-8)));
+  padding:var(--sp-3);
+  background:var(--surface);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  box-shadow:var(--shadow-lg);
+  font-size:var(--fs-sm);
+  font-weight:400;
+  line-height:1.45;
+  letter-spacing:0;
+  white-space:normal;
+  text-align:left;
+  gap:var(--sp-1);
+}
+.sayi:hover > .koken,
+.sayi:focus-visible > .koken,
+.sayi--acik > .koken,
+.terim:hover > .terim__kart,
+.terim:focus-visible > .terim__kart,
+.terim--acik > .terim__kart{ display:grid; }
+
+.koken__bas{ font-weight:600; }
+.koken__s{ display:grid; grid-template-columns:6.5em minmax(0, 1fr); gap:var(--sp-2); }
+.koken__a{ color:var(--text-3); }
+.koken__v{ color:var(--text-2); overflow-wrap:anywhere; }
+
+/* Telefonda kart sayının altında değil ekranın altında açılır: dar
+   ekranda sayının yanındaki bir kutu sağdan taşardı. */
+@media (max-width:459.98px){
+  .koken,
+  .terim__kart{
+    position:fixed;
+    left:var(--sp-4);
+    right:var(--sp-4);
+    top:auto;
+    bottom:var(--sp-4);
+    width:auto;
+    max-width:none;
+  }
+}
+
+/* ================================================================
+   028 · ANLAMLI FARK — renk işaretten değil anlamdan
+   ================================================================ */
+
+.fark{
+  font-size:var(--fs-sm);
+  font-weight:500;
+  font-variant-numeric:tabular-nums;
+  white-space:nowrap;
+}
+.fark--iyi{ color:var(--ok-ink); }
+.fark--kotu{ color:var(--bad-ink); }
+.fark--notr,
+.fark--yok{ color:var(--text-3); }
+
+/* ================================================================
+   027 · EKSİK GÜN BOŞLUĞU — çizgi boşlukta kesik geçer, sıfıra düşmez
+   Çizgi kalınlığı da kılçık sayılır (üstteki JETON KURALI).
+   ================================================================ */
+
+.grafik{
+  display:block;
+  width:100%;
+  height:auto;
+  overflow:visible;
+  color:var(--primary);
+}
+.grafik__cizgi{
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+  vector-effect:non-scaling-stroke;
+}
+.grafik__kopru{
+  stroke:var(--text-3);
+  stroke-width:1.5;
+  stroke-dasharray:var(--sp-1) var(--sp-1);
+  vector-effect:non-scaling-stroke;
+}
+.grafik__tek{ fill:currentColor; }
+
+/* 031 · hedef bandı: bant ton, bant dışındaki nokta İÇİ BOŞ (renk değil). */
+.grafik__bant{ fill:var(--primary-soft); }
+.grafik__nokta{ fill:currentColor; stroke:currentColor; stroke-width:1.5; vector-effect:non-scaling-stroke; }
+.grafik__nokta--dis{ fill:var(--surface); }
+
+/* 034 · grafiğin cümlesi: grafiğin altında tek okuma cümlesi. */
+.grafik__cumle{ margin:var(--sp-2) 0 0; font-size:var(--fs-sm); color:var(--text-2); }
+
+/* ================================================================
+   035 · ARALIK ÇUBUĞU — tahmin aralıktır; bant kesik kenarlı
+   ================================================================ */
+
+.aralik{ display:grid; gap:var(--sp-1); min-width:0; }
+.aralik__et{ font-size:var(--fs-sm); color:var(--text-2); }
+.aralik__deger{ font-weight:600; font-variant-numeric:tabular-nums; }
+.aralik__olasi{ font-weight:400; color:var(--text-2); }
+.aralik__ray{
+  position:relative;
+  display:block;
+  height:var(--sp-2);
+  margin:var(--sp-1) 0;
+  background:var(--border-soft);
+  border-radius:var(--r-pill);
+}
+.aralik__bant{
+  position:absolute;
+  top:0;
+  bottom:0;
+  background:var(--primary-soft);
+  border:1px dashed var(--primary);
+  border-radius:var(--r-pill);
+}
+.aralik__en{
+  position:absolute;
+  top:calc(-1 * var(--sp-1));
+  bottom:calc(-1 * var(--sp-1));
+  width:2px;
+  margin-left:-1px;
+  background:var(--primary);
+  border-radius:1px;
+}
+.aralik__dayanak{ font-size:var(--fs-xs); color:var(--text-3); }
+.aralik--yok .aralik__deger{ color:var(--text-3); font-weight:500; }
+
+/* ================================================================
+   037 · GÜVENLİ EĞİLİM — ok yalnız yeterli veriyle
+   ================================================================ */
+
+.egilim{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--sp-1);
+  font-size:var(--fs-sm);
+  font-weight:500;
+  white-space:nowrap;
+}
+.egilim__ok{
+  width:1em;
+  height:1em;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.egilim--iyi{ color:var(--ok-ink); }
+.egilim--kotu{ color:var(--bad-ink); }
+.egilim--notr{ color:var(--text-2); }
+.egilim--yetersiz{ color:var(--text-3); font-weight:400; white-space:normal; }
+
+/* ================================================================
+   041 · VERİ DOLULUĞU — boş gün İÇİ BOŞ kare, 0 değil
+   Modül rengi T'nin `--ays/--spi/--esp` jetonundan.
+   ================================================================ */
+
+.doluluk{ display:grid; gap:var(--sp-2); }
+.doluluk__s{
+  --doluluk-renk:var(--text-2);
+  display:grid;
+  grid-template-columns:3.5em auto auto;
+  align-items:center;
+  justify-content:start;
+  gap:var(--sp-3);
+}
+.doluluk--ays{ --doluluk-renk:var(--ays); }
+.doluluk--spi{ --doluluk-renk:var(--spi); }
+.doluluk--esp{ --doluluk-renk:var(--esp); }
+.doluluk__ad{ font-size:var(--fs-sm); font-weight:600; color:var(--text-2); }
+.doluluk__kutular{ display:flex; gap:var(--sp-1); }
+.doluluk__k{
+  display:block;
+  width:var(--sp-3);
+  height:var(--sp-3);
+  border:1px solid var(--border-strong);
+  border-radius:calc(var(--r-sm) / 3);
+  background:transparent;
+}
+.doluluk__k--dolu{ background:var(--doluluk-renk); border-color:var(--doluluk-renk); }
+.doluluk__n{ font-size:var(--fs-xs); color:var(--text-3); font-variant-numeric:tabular-nums; }
+
+/* ================================================================
+   110 · ÖNERİ KARTI — T'nin `.kutu`'su üstünde; mor YALNIZ Merkez'de
+   ================================================================ */
+
+.okart{
+  display:grid;
+  align-content:start;   /* yan kartın boyuna gerilince satırlar dağılmaz */
+  gap:var(--sp-2);
+  padding:var(--sp-4) calc(var(--sp-4) + var(--sp-1));
+}
+.okart--merkez{ border-color:color-mix(in oklab, var(--mer) 38%, var(--border)); }
+.okart__bas{ display:flex; align-items:center; gap:var(--sp-2); }
+.okart__kaynak{
+  display:inline-flex;
+  align-items:center;
+  gap:var(--sp-2);
+  font-size:var(--fs-sm);
+  font-weight:600;
+  color:var(--text-2);
+}
+.okart--merkez .okart__kaynak,
+.cakisma__cozum .okart__kaynak{ color:var(--mer-ink); }
+.okart--merkez .okart__kaynak::before,
+.cakisma__cozum .okart__kaynak::before{
+  content:"";
+  width:.5em;
+  height:.5em;
+  border-radius:50%;
+  background:var(--mer);
+}
+.okart__seviye{ margin-left:auto; }
+.okart--merkez .okart__seviye{ background:var(--mer-t); color:var(--mer-ink); }
+.okart__baslik{ margin:0; font-size:var(--fs-md); font-weight:600; letter-spacing:-.01em; }
+.okart__alt{ margin:0; font-size:var(--fs-sm); color:var(--text-2); }
+.okart__eylem{ display:flex; flex-wrap:wrap; gap:var(--sp-2); margin-top:var(--sp-1); }
+
+/* ================================================================
+   114 · GEREKÇE ÇUBUĞU — sayı ve eşik koddan; modelin cümlesi ayrı
+   ================================================================ */
+
+.gerekce{ display:grid; gap:var(--sp-2); }
+.gerekce__satir{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:var(--sp-1) var(--sp-2);
+  font-size:var(--fs-sm);
+  color:var(--text-2);
+}
+.gerekce__satir .sayi{ font-weight:600; color:var(--text); }
+.gerekce__satir .sayi__b{ font-size:inherit; font-weight:400; color:var(--text-2); }
+.gerekce__ek::before{ content:"·"; margin-right:var(--sp-2); color:var(--text-3); }
+.gerekce__cubuk{
+  position:relative;
+  display:block;
+  height:var(--sp-1);
+  background:var(--border-soft);
+  border-radius:var(--r-pill);
+}
+.gerekce__dolu{
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  background:var(--text-3);
+  border-radius:var(--r-pill);
+}
+.gerekce__esik{
+  position:absolute;
+  top:calc(-1 * var(--sp-1));
+  bottom:calc(-1 * var(--sp-1));
+  width:2px;
+  margin-left:-1px;
+  background:var(--text);
+  border-radius:1px;
+}
+/* Modelin cümlesi sayının ALTINDA ve AYRI: ince bir çizgiyle kodun
+   ürettiğinden ayrılır. Kaynağı öğenin üstünde yazılı (`data-kaynak`). */
+.gerekce__cumle{
+  margin:0;
+  padding-left:var(--sp-3);
+  border-left:2px solid var(--border);
+  font-size:var(--fs-sm);
+  color:var(--text-2);
+}
+
+/* ================================================================
+   121 · KURAL İZİ — «Neden?» açılınca kural numarası ve sağlanan değer
+   ================================================================ */
+
+.kuralizi{ font-size:var(--fs-sm); }
+.kuralizi > summary{
+  width:max-content;
+  cursor:pointer;
+  color:var(--text-2);
+  font-weight:500;
+}
+.kuralizi__l{ display:grid; gap:var(--sp-1); margin:var(--sp-2) 0 0; padding:0; list-style:none; }
+.kuralizi__k{
+  display:grid;
+  grid-template-columns:auto minmax(0, 1fr) auto;
+  align-items:baseline;
+  gap:var(--sp-2);
+}
+.kuralizi__no{ font-weight:600; color:var(--text-3); font-variant-numeric:tabular-nums; }
+.kuralizi__ad{ color:var(--text-2); }
+.kuralizi__deger{ font-weight:500; color:var(--text); font-variant-numeric:tabular-nums; white-space:nowrap; }
+
+/* ================================================================
+   112 · ÇAKIŞMA KARTI — iki modül yan yana, çözüm Merkez'in
+   ================================================================ */
+
+.cakisma{
+  display:grid;
+  gap:var(--sp-3);
+  padding:var(--sp-4);
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+}
+.cakisma__bas{ margin:0; font-size:var(--fs-sm); font-weight:600; font-variant-numeric:tabular-nums; }
+.cakisma__iki{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-2); }
+.cakisma__taraf{
+  --cakisma-renk:var(--text-2);
+  --cakisma-zemin:var(--surface-2);
+  display:grid;
+  gap:var(--sp-1);
+  min-width:0;
+  padding:var(--sp-3);
+  background:var(--cakisma-zemin);
+  border-radius:var(--r-md);
+}
+.cakisma--ays{ --cakisma-renk:var(--ays-ink); --cakisma-zemin:var(--ays-t); }
+.cakisma--spi{ --cakisma-renk:var(--spi-ink); --cakisma-zemin:var(--spi-t); }
+.cakisma--esp{ --cakisma-renk:var(--esp-ink); --cakisma-zemin:var(--esp-t); }
+.cakisma__modul{ font-size:var(--fs-xs); font-weight:600; color:var(--cakisma-renk); }
+.cakisma__ad{ font-weight:600; overflow-wrap:anywhere; }
+.cakisma__saat{ font-size:var(--fs-sm); color:var(--text-2); font-variant-numeric:tabular-nums; }
+.cakisma__cozum{ display:grid; gap:var(--sp-2); padding-top:var(--sp-3); border-top:1px solid var(--border); }
+.cakisma__cozum-metin{ margin:0; font-weight:500; }
+.cakisma__cozum .btn{ justify-self:start; }
+
+/* ================================================================
+   116 · OTOMATİK UYGULA — küçük tür anahtarlı, orta/büyük kilitli
+   ================================================================ */
+
+.otoayar{ display:grid; margin:0; padding:0; list-style:none; }
+.otoayar__s{
+  display:flex;
+  align-items:center;
+  gap:var(--sp-3);
+  padding:var(--sp-3) 0;
+  border-top:1px solid var(--border-soft);
+}
+.otoayar__s:first-child{ border-top:0; }
+.otoayar__et{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:var(--sp-1) var(--sp-2);
+  cursor:pointer;
+}
+.otoayar__ad{ font-weight:500; }
+.otoayar__neden{ flex-basis:100%; font-size:var(--fs-xs); color:var(--text-3); }
+.otoayar__s--kilitli .otoayar__et{ cursor:default; }
+.otoayar__anahtar{ accent-color:var(--primary); }
+
+/* ================================================================
+   150 · GERİ AL GERİ SAYIMI — şeridin altında incelen çizgi
+   Süre VERİDİR (şeridin ömrü); JS yazar. Azaltılmış harekette çizgi
+   saniye saniye kısalır: kalan süre bilgisi kaybolmaz.
+   ================================================================ */
+
+.toast--undo:has(> .gerial__sure){ position:relative; overflow:hidden; }
+.gerial__sure{
+  position:absolute;
+  left:var(--sp-4);
+  right:var(--sp-4);
+  bottom:0;
+  height:2px;
+  background:currentColor;
+  opacity:.55;
+  transform-origin:left center;
+  animation-name:gerial-sure;
+  animation-timing-function:linear;
+  animation-fill-mode:forwards;
+}
+@keyframes gerial-sure{
+  from{ transform:scaleX(1); }
+  to{ transform:scaleX(0); }
+}
+@media (prefers-reduced-motion:reduce){
+  .gerial__sure{ animation-timing-function:steps(var(--gerial-adim, 6), end); }
+}
+
+/* ================================================================
+   016 · TERİM İPUCU — altı NOKTALI (tahminin KESİK çizgisinden ayrı)
+   Kartın kendisi yukarıda, köken kartıyla birlikte.
+   ================================================================ */
+
+.terim{
+  position:relative;
+  cursor:help;
+  text-decoration:underline dotted var(--text-3);
+  text-decoration-thickness:.08em;
+  text-underline-offset:.2em;
+  border-radius:var(--r-xs);
+}
+.terim--yok{ cursor:auto; text-decoration:none; }
+.terim__ad{ font-weight:600; color:var(--text); }
+.terim__tanim{ color:var(--text-2); }
+.terim__ornek{ font-size:var(--fs-xs); color:var(--text-3); }
+
+/* ================================================================
+   139 · MODEL KAPALI KİPİ — gri durum şeridi ve etiketli hazır cümle
+   ================================================================ */
+
+.modelsiz{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:baseline;
+  gap:var(--sp-1) var(--sp-2);
+  padding:var(--sp-2) var(--sp-4);
+  background:var(--surface-2);
+  border-bottom:1px solid var(--border);
+  color:var(--text-2);
+  font-size:var(--fs-sm);
+}
+.modelsiz__bas{ color:var(--text); font-weight:600; }
+.hazir{ margin:0; }
+.hazir__etiket{
+  display:inline-block;
+  margin-right:var(--sp-1);
+  padding:0 var(--sp-1);
+  background:var(--surface-2);
+  border-radius:var(--r-xs);
+  color:var(--text-3);
+  font-size:var(--fs-xs);
+  font-weight:600;
+}
+
+/* ================================================================
+   018 · ŞÜPHELİ GİRİŞ — kaydetmeden önce tek soru
+   ================================================================ */
+
+.suphe{
+  display:grid;
+  gap:var(--sp-2);
+  padding:var(--sp-3);
+  background:var(--surface-2);
+  border-radius:var(--r-md);
+}
+.suphe__soru{ margin:0; font-size:var(--fs-sm); font-weight:500; }
+.suphe__eylem{ display:flex; flex-wrap:wrap; gap:var(--sp-2); }
+
+/* ================================================================
+   173 · YEDEK DURUMU — tarih, boyut, iki haftalık iz, tek düğme
+   İzin kareleri 041'in karesidir (.doluluk__k); tek biçim.
+   ================================================================ */
+
+.yedek{ display:grid; gap:var(--sp-2); justify-items:start; }
+.yedek__bas{ margin:0; font-weight:600; }
+.yedek__alt{ margin:0; font-size:var(--fs-sm); color:var(--text-2); font-variant-numeric:tabular-nums; }
+.yedek--gerekli .yedek__bas{ color:var(--bad-ink); }
+.yedek__iz{ display:flex; flex-wrap:wrap; gap:var(--sp-1); --doluluk-renk:var(--primary); }
+
+/* ================================================================
+   177 · KALICI SİLME KAPISI — dönüş noktası → yazılı onay → sayılı düğme
+   ================================================================ */
+
+.silme{ display:grid; gap:var(--sp-3); justify-items:start; }
+.silme__adimlar{ display:grid; gap:var(--sp-3); margin:0; padding-left:var(--sp-6); }
+.silme__adim{ font-size:var(--fs-sm); color:var(--text-2); }
+.silme__adim .btn{ margin-top:var(--sp-2); }
+.silme__adim--tamam{ color:var(--text-3); }
+.silme__adim label{ display:block; margin-bottom:var(--sp-1); }
+.silme__giris{
+  width:12em;
+  max-width:100%;
+  padding:var(--sp-2) var(--sp-3);
+  font:inherit;
+  font-variant-numeric:tabular-nums;
+  color:var(--text);
+  background:var(--surface);
+  border:1px solid var(--border-strong);
+  border-radius:var(--r-sm);
+}
+.silme__giris:disabled{ background:var(--surface-2); color:var(--text-3); }
+
+/* ================================================================
+   179 · KAYIT GEÇMİŞİ — her değişiklik kaynağıyla; onaysız öneri uyarılı
+   ================================================================ */
+
+.gecmis{ display:grid; margin:0; padding:0; list-style:none; }
+.gecmis--bos{ color:var(--text-3); font-size:var(--fs-sm); }
+.gecmis__s{
+  display:grid;
+  grid-template-columns:minmax(0, 9em) minmax(0, 1fr);
+  gap:var(--sp-1) var(--sp-3);
+  padding:var(--sp-2) 0;
+  border-top:1px solid var(--border-soft);
+  font-size:var(--fs-sm);
+}
+.gecmis__s:first-child{ border-top:0; }
+.gecmis__zaman{ color:var(--text-3); font-variant-numeric:tabular-nums; }
+.gecmis__kaynak{ font-weight:500; }
+.gecmis__degisim{ grid-column:2; color:var(--text-2); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.gecmis__alan{ color:var(--text-3); }
+.gecmis__s[data-kaynak="merkez"] .gecmis__kaynak{ color:var(--mer-ink); }
+.gecmis__s[data-uyari] .gecmis__kaynak{ color:var(--bad-ink); }
+
+/* ================================================================
+   029 · EŞİK ÇİZGİLİ ÇUBUK — değer ve eşik aynı çubukta; aşım payı ayrı
+   ================================================================ */
+
+.esikcubuk{ display:grid; gap:var(--sp-1); min-width:0; }
+.esikcubuk__et{ font-size:var(--fs-sm); color:var(--text-2); }
+.esikcubuk__deger{ font-size:var(--fs-sm); font-weight:600; font-variant-numeric:tabular-nums; }
+.esikcubuk__fark{ font-weight:400; color:var(--text-2); }
+.esikcubuk--kotu .esikcubuk__fark{ color:var(--bad-ink); }
+.esikcubuk--iyi .esikcubuk__fark{ color:var(--ok-ink); }
+.esikcubuk--yok .esikcubuk__deger{ color:var(--text-3); font-weight:500; }
+.esikcubuk__ray{
+  position:relative;
+  display:block;
+  height:var(--sp-2);
+  margin:var(--sp-1) 0;
+  background:var(--border-soft);
+  border-radius:var(--r-pill);
+}
+.esikcubuk__dolu,
+.esikcubuk__asim{ position:absolute; top:0; bottom:0; left:0; border-radius:var(--r-pill); background:var(--primary); }
+.esikcubuk__asim{ background:var(--text-3); }
+.esikcubuk--kotu .esikcubuk__asim{ background:var(--bad); }
+.esikcubuk--iyi .esikcubuk__asim{ background:var(--ok); }
+.esikcubuk__esik{
+  position:absolute;
+  top:calc(-1 * var(--sp-1));
+  bottom:calc(-1 * var(--sp-1));
+  width:2px;
+  margin-left:-1px;
+  background:var(--text);
+  border-radius:1px;
+}
+
+/* ================================================================
+   030 · TİK SAYACI — küçük hedefte adet kutucuğu; veri yoksa KESİK
+   ================================================================ */
+
+.tik{ display:grid; gap:var(--sp-1); }
+.tik__et{ font-size:var(--fs-sm); color:var(--text-2); }
+.tik__sayi{ font-size:var(--fs-sm); font-weight:600; font-variant-numeric:tabular-nums; }
+.tik__kutular{ display:flex; flex-wrap:wrap; gap:var(--sp-1); }
+.tik__k{
+  display:block;
+  width:var(--sp-3);
+  height:var(--sp-3);
+  border:1px solid var(--border-strong);
+  border-radius:calc(var(--r-sm) / 3);
+}
+.tik__k--dolu{ background:var(--primary); border-color:var(--primary); }
+.tik--yok .tik__k{ border-style:dashed; }
+.tik--yok .tik__sayi{ color:var(--text-3); }
+
+/* ================================================================
+   033 · GELECEK YÜK — bugün dolu, gelecek KESİK çerçeve
+   ================================================================ */
+
+.yuk{ display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0, 1fr); gap:var(--sp-2); align-items:end; }
+.yuk__g{ display:grid; gap:var(--sp-1); justify-items:center; min-width:0; }
+.yuk__deger{ font-size:var(--fs-xs); color:var(--text-2); font-variant-numeric:tabular-nums; }
+.yuk__ray{ position:relative; display:block; width:100%; height:calc(var(--sp-10) + var(--sp-8)); }
+.yuk__sutun{
+  position:absolute;
+  left:15%;
+  right:15%;
+  bottom:0;
+  min-height:1px;
+  border-radius:var(--r-xs) var(--r-xs) 0 0;
+  background:var(--primary);
+}
+.yuk__g--gecmis .yuk__sutun{ background:var(--text-3); }
+.yuk__g--gelecek .yuk__sutun{ background:transparent; border:1px dashed var(--primary); border-bottom:0; }
+.yuk__g--yok .yuk__deger{ color:var(--text-3); }
+/* Bilinmeyen gün SÜTUNSUZ: 0'ın ince taban çizgisiyle karışmasın. */
+.yuk__g--yok .yuk__sutun{ display:none; }
+.yuk__gun{ font-size:var(--fs-xs); color:var(--text-3); }
+.yuk__g--bugun .yuk__gun{ color:var(--text); font-weight:600; }
+
+/* ================================================================
+   038 · SATIR İÇİ ÇUBUK — yüzde hücresinin arkasında ince çubuk
+   ================================================================ */
+
+.hucre{
+  position:relative;
+  display:inline-flex;
+  align-items:baseline;
+  min-width:5em;
+  padding-bottom:var(--sp-1);
+}
+.hucre::after{
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:0;
+  height:2px;
+  width:var(--hucre-oran, 0%);
+  background:var(--primary);
+  opacity:.45;
+  border-radius:1px;
+}
+.hucre--yok::after{ display:none; }
+
+/* ================================================================
+   039 · HIZ TAHMİNİ — gelecek açılan bir koni; hedef yatay çizgi
+   ================================================================ */
+
+.hiz{ margin:0; }
+.hiz--yok{ font-size:var(--fs-sm); color:var(--text-3); }
+.hiz__koni{
+  fill:var(--primary-soft);
+  stroke:var(--primary);
+  stroke-width:1;
+  stroke-dasharray:var(--sp-1) var(--sp-1);
+  vector-effect:non-scaling-stroke;
+}
+.hiz__hedef{
+  stroke:var(--text-3);
+  stroke-width:1;
+  stroke-dasharray:2 var(--sp-1);
+  vector-effect:non-scaling-stroke;
+}
+
+/* ================================================================
+   113 · ÖNCE / SONRA — yalnız değişen renkli, gerisi soluk
+   ================================================================ */
+
+.oncesonra{ display:grid; gap:var(--sp-2); }
+.oncesonra__ozet{ margin:0; font-size:var(--fs-sm); font-weight:600; }
+.oncesonra__iki{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3); }
+.oncesonra__bas{ margin:0 0 var(--sp-1); font-size:var(--fs-xs); font-weight:600; color:var(--text-3); }
+.oncesonra__l{ display:grid; gap:var(--sp-1); margin:0; padding:0; list-style:none; }
+.oncesonra__b{
+  display:grid;
+  padding:var(--sp-1) var(--sp-2);
+  border-radius:var(--r-xs);
+  font-size:var(--fs-sm);
+}
+/* Saat üstte, ad altta tam genişlikte: yan yana iki dar sütunda ad
+   kelime ortasından bölünüyordu. */
+.oncesonra__saat{ font-size:var(--fs-xs); font-variant-numeric:tabular-nums; color:var(--text-2); }
+.oncesonra__ad{ min-width:0; overflow-wrap:break-word; }
+.oncesonra__b--ayni{ color:var(--text-3); }
+.oncesonra__b--ayni .oncesonra__saat{ color:var(--text-3); }
+.oncesonra__b--degisen,
+.oncesonra__b--eklenen{ background:var(--primary-soft); color:var(--text); font-weight:500; }
+.oncesonra__b--silinen{ color:var(--text-3); text-decoration:line-through; }
+
+/* ================================================================
+   123 · GEÇME NEDENİ — isteğe bağlı çipler (T'nin .chip'i)
+   ================================================================ */
+
+.gecme{ display:grid; gap:var(--sp-2); justify-items:start; }
+.gecme__bas{ margin:0; font-size:var(--fs-sm); font-weight:500; }
+.gecme__ek{ color:var(--text-3); font-weight:400; }
+.gecme__cipler{ display:flex; flex-wrap:wrap; gap:var(--sp-2); }
+
+/* ================================================================
+   124 · ÇAPRAZ ETKİ — kaynak ve hedef ayrı renkte, ok Merkez'in
+   ================================================================ */
+
+.capraz{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2); font-size:var(--fs-xs); }
+.capraz__modul{ font-weight:600; padding:0 var(--sp-1); border-radius:var(--r-xs); }
+.capraz--ays{ color:var(--ays-ink); background:var(--ays-t); }
+.capraz--spi{ color:var(--spi-ink); background:var(--spi-t); }
+.capraz--esp{ color:var(--esp-ink); background:var(--esp-t); }
+.capraz__ok{ width:1.6em; height:.8em; fill:none; stroke:var(--mer); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.capraz__olcum{ color:var(--text-2); font-variant-numeric:tabular-nums; }
+
+/* ================================================================
+   127 · KAPSAM SEÇİMİ — süre uzadıkça seviye büyür
+   ================================================================ */
+
+.kapsam{ display:grid; gap:var(--sp-2); margin:0; padding:0; border:0; min-width:0; }
+.kapsam__bas{ padding:0; margin-bottom:var(--sp-1); font-size:var(--fs-sm); font-weight:600; }
+.kapsam__s{
+  display:grid;
+  grid-template-columns:auto minmax(0, 1fr);
+  column-gap:var(--sp-2);
+  align-items:baseline;
+  cursor:pointer;
+}
+.kapsam__s input{ grid-row:span 2; accent-color:var(--primary); }
+.kapsam__ad{ font-weight:500; }
+.kapsam__seviye{ grid-column:2; font-size:var(--fs-xs); color:var(--text-3); }
+
+/* ================================================================
+   032 · GEÇEN DÖNEM GÖLGESİ — soluk kesik çizgi, arkada
+   ================================================================ */
+
+.grafik__onceki polyline{
+  fill:none;
+  stroke:var(--text-3);
+  stroke-width:1.5;
+  stroke-dasharray:var(--sp-1) var(--sp-1);
+  opacity:.6;
+  vector-effect:non-scaling-stroke;
+}
+.grafik__onceki circle{ fill:var(--text-3); opacity:.6; }
+
+/* ================================================================
+   036 · DAĞILIM ŞERİDİ — her gece bir nokta, ortada medyan
+   ================================================================ */
+
+.dagilim{ margin:0; }
+.dagilim--yok{ font-size:var(--fs-sm); color:var(--text-3); }
+.dagilim__svg{ display:block; width:100%; height:auto; overflow:visible; }
+.dagilim__n{ fill:var(--primary); opacity:.55; }
+.dagilim__medyan{ stroke:var(--text); stroke-width:2; }
+
+/* ================================================================
+   040 · BİRİKİM EĞRİSİ — gerçek ve plan; bugünkü fark yönün renginde
+   ================================================================ */
+
+.birikim{ margin:0; }
+.birikim--yok{ font-size:var(--fs-sm); color:var(--text-3); }
+.birikim__plan{
+  fill:none;
+  stroke:var(--text-3);
+  stroke-width:1.5;
+  vector-effect:non-scaling-stroke;
+}
+.birikim__gercek line,
+.birikim__kayitsiz line{
+  stroke:var(--primary);
+  stroke-width:2;
+  stroke-linecap:round;
+  vector-effect:non-scaling-stroke;
+}
+/* Kaydı olmayan güne giden parça KESİK: orada 0 eklenmedi, bilinmiyor. */
+.birikim__kayitsiz line{ stroke-dasharray:var(--sp-1) var(--sp-1); opacity:.7; }
+.birikim__fark{ stroke-width:2; vector-effect:non-scaling-stroke; }
+.birikim__fark--kotu{ stroke:var(--bad); }
+.birikim__fark--iyi{ stroke:var(--ok); }
+.birikim__fark--notr{ stroke:var(--text-3); }
+
+/* ================================================================
+   137 · AJANIN BAKTIĞI VERİ — çip (T'nin .chip'i) + kesinlik glifi
+   ================================================================ */
+
+.vericip{ display:flex; flex-wrap:wrap; gap:var(--sp-1); margin:0; padding:0; list-style:none; }
+.vericip__c{ display:inline-flex; align-items:center; gap:var(--sp-1); font-size:var(--fs-xs); }
+.vericip__c .kesinlik__ad{ position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.vericip__c--yok{ color:var(--text-3); border-style:dashed; }
+
+/* ================================================================
+   004 · SAYFA BAŞI CÜMLESİ — tarih satırının altında, koddan tek cümle
+   042 · SIRADAKİ BLOK KAHRAMANI — Şimdi alanının ilk ve en büyük öğesi
+   (ekran yerleşimi: modüllerin `screens/today.js`'i)
+   ================================================================ */
+
+.bugun-cumle{ display:block; margin-top:var(--sp-1); color:var(--text); font-weight:500; }
+.kahraman{ min-width:0; }
+
+
+/* ================================================================
+   v5 · BUGÜN (LifeOS Tasarım Dili sürüm 5, «AYS · Bugün»)
+   Şimdi · Durum · Özet · Öneri alt alta; Durum/Özet kartları yan yana.
+   ================================================================ */
+.bugun__etiket{ margin:0 0 -4px; font-size:13px; font-weight:600; color:var(--text-2); letter-spacing:0; }
+.bugun__alan[aria-label="Durum"], .bugun__alan[aria-label="Özet"]{
+  flex-direction:row; flex-wrap:wrap; gap:16px; align-items:flex-start; }
+.bugun__alan[aria-label="Durum"] > *, .bugun__alan[aria-label="Özet"] > *{ flex:1 1 300px; min-width:0; }
+.bugun__alan > .bugun__etiket, .bugun__alan[aria-label] > p{ flex-basis:100%; margin:0; }
+.sayfabasi__ust{ margin:0 0 6px; font-size:13px; color:var(--text-2); }
+.site--v5 .sayfabasi__baslik{ font-size:28px; }
+
+/* Sıradaki blok kahramanı: modül zemini, simgesiz, büyük başlık. */
+.site--v5 .nextup, .kahraman .nextup{ background:var(--mod-t, var(--primary-soft)); border:0; border-radius:14px; padding:24px;
+  box-shadow:none; gap:20px; align-items:center; }
+.site--v5 .nextup__icon, .kahraman .nextup__icon{ display:none; }
+.site--v5 .nextup__label, .kahraman .nextup__label{ font-size:13px; font-weight:500; color:var(--text-2); text-transform:none; letter-spacing:0; }
+.site--v5 .nextup__label::before, .kahraman .nextup__label::before{ content:''; display:inline-block; width:8px; height:8px; margin-right:8px;
+  border-radius:2px; background:var(--primary); vertical-align:1px; }
+.kahraman .nextup__title{ font-size:26px; font-weight:700; letter-spacing:-.02em; line-height:1.2; margin-top:4px; }
+.site--v5 .nextup__why, .kahraman .nextup__why{ font-size:13px; color:var(--text-2); margin-top:4px; }
+@media (max-width:679px){ .kahraman .nextup{ padding:18px; } .kahraman .nextup__title{ font-size:22px; }
+  .site--v5 .sayfabasi__baslik{ font-size:22px; line-height:1.25; } .site--v5 .bugun{ gap:20px; } }
+
+/* v5 · DEFTER SATIRI: künye sütunu kalkar, künye içeriğin üstünde tek
+   satırdır (tasarım dili: alan etiketi + kutu). Üç modülün her ekranı. */
+.site--v5 .lrow{ grid-template-columns:minmax(0,1fr); gap:12px; padding-block:24px; }
+.site--v5 .ledger > .lrow:first-child{ padding-top:4px; }
+.site--v5 .lrow__side{ position:static; display:flex; align-items:baseline; gap:6px 12px; flex-wrap:wrap; }
+.site--v5 .lrow__label{ font-size:12px; letter-spacing:.06em; color:var(--text-2); }
+.site--v5 .lrow__meta{ margin-top:0; font-size:13px; }
+.site--v5 .lrow__note{ flex-basis:100%; margin:0; max-width:70ch; font-size:13px; }
+.site--v5 .lrow__act{ margin:0 0 0 auto; flex-direction:row; flex-wrap:wrap; }
+.site--v5 .lrow__act .btn{ width:auto; }
+.site--v5 .lrow.kahraman{ border-top:0; }
+
+/* v5 · ÖNERİ ALANI: Merkez'in sesi mor çerçevede durur (teklif, karar değil). */
+.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{
+  border:1px solid color-mix(in srgb, var(--mer) 40%, var(--border)); border-radius:14px;
+  padding:18px 20px; background:var(--surface); }
+.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + * .lrow{ padding-block:0; border:0; }
+
+/* v5 · SAYFA RİTMİ: başlık ile içerik arası 24 px (tasarım: 40 üst, 24 ara). */
+.site--v5 .sayfabasi{ padding-top:0; padding-bottom:24px; align-items:flex-end; }
+.site--v5 .content{ padding-block:0 56px; }
+.site--v5 .sayfabasi__baslik{ font-weight:700; letter-spacing:-.02em; }
+
+/* v5 · ETİKETLER: büyük harf ve harf aralığı kalkar; etiket 12-13 px,
+   ikinci metin rengi (tasarım dili «Yazı» panosu: etiket cümle düzeninde). */
+.site--v5 :is(.appear__label, .argcol__h, .asrow__kind, .ayar-ara__modul, .block__slot, .board__label,
+  .chain__kind, .chain__label, .cmdk__group, .desknote__label, .flashcard__side, .focusmode__slot,
+  .gauge__label, .haberci__ust, .hero__eyebrow, .herostat__label, .kmenu__bas, .lrow__label,
+  .masthead__wd, .mono-label, .nextup__label, .perde__ustyazi, .printdoc__h, .prop__kind, .qmsg__who,
+  .quizcard__src, .rail__label, .room3d__board-label, .rutbe-kart__ust, .rutbe-kunye__ust, .rx__kind,
+  .setup__kicker, .seviye-isler__tablo th, .seviye-rozet__ad, .sidestat__k, .sitefoot__k, .srsrow__day,
+  .stat__label, .symgrp__h, .topicgroup__head, .yenilik__baslik, th){
+  text-transform:none; letter-spacing:0; }
+.site--v5 :is(.lrow__label, .stat__label, .herostat__label, .sidestat__k, .rail__label, .board__label,
+  .topicgroup__head, .symgrp__h, .argcol__h, .gauge__label){ font-size:13px; font-weight:600; color:var(--text-2); }
+.site--v5 th{ font-size:12px; font-weight:500; color:var(--text-3); }
+
+.site--v5 .nextup{ padding:18px 20px; }
+.site--v5 .nextup__title{ font-size:18px; font-weight:700; letter-spacing:-.01em; }
+.site--v5 .kahraman .nextup{ padding:24px; }
+.site--v5 .kahraman .nextup__title{ font-size:26px; }
+
+/* v5 · SAYFA İÇİ BÖLÜM ÇUBUĞU: sayfa zemini beyazdır; üst şerit 52 px. */
+.site--v5{ --ust-h:52px; }
+.site--v5 .bolumcubugu--sayfa{ background:var(--surface); }
+.site--v5 .bolumcubugu__ad{ height:40px; font-size:14px; }
+.site--v5 .bolumcubugu__ad.is-on::after{ background:var(--text); }
+.site--v5 .sayfabolum__ad{ font-size:18px; font-weight:700; }
+
+@media (max-width:679px){
+  .site--v5 .kahraman .nextup{ padding:18px; }
+  .site--v5 .kahraman .nextup__title{ font-size:20px; }
+  .site--v5 .nextup__title{ font-size:16px; }
+}
+
+/* Kahraman dar kapta SARAR: düğmeler satıra sığmazsa metnin altına iner
+   (390 px'lik kapta gövde sıfır genişliğe sıkışıyordu — k2bugun oz-042). */
+.site--v5 .nextup, .kahraman .nextup{ flex-wrap:wrap; }
+.site--v5 .nextup__body, .kahraman .nextup__body{ flex:1 1 240px; min-width:0; }
+
+/* ================================================================
+   v5 · RAF DÜZENİ — DÜZENLİ RAF (kullanıcı, 2026-09-25: «kaos, düzeni
+   yok, ne olduğu anlaşılmıyor»). Önceki raf üç, dört sütuna kendiliğinden
+   akıyor, kutular kendi boyunda kalıyor (yanında delik), «dense» sırayı
+   karıştırıyor, her kutu 560 px'te içinde kayıyordu (iç içe kaydırma) ve
+   tablolar dar kutuya sıkışıp yana kayıyordu. Şimdi altı kural:
+     1. Raf en çok İKİ eşit sütundur; dar ekranda bir.
+     2. Aynı raftaki kutular AYNI boydadır: rafın üst ve alt kenarı düzdür.
+     3. Okuma sırası korunur (dense yok).
+     4. Tablo, form ızgarası, grafik, seçim kartları rafın bütün enini alır.
+     5. Kutunun içinde kaydırma yok: sayfanın tek kaydırması vardır.
+     6. Raftaki son tek kutu bütün eni alır (yanında boş delik kalmaz).
+   Hiçbir satır gizlenmez; yalnız yerleşim değişir.
+   ================================================================ */
+.site--v5 .ledger{ display:grid; grid-template-columns:minmax(0, 1fr); gap:16px; align-items:stretch; }
+@media (min-width:1100px){
+  .site--v5 .ledger{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+}
+.site--v5 .ledger > .lrow, .site--v5 .ledger > .ledger__item,
+.site--v5 .ledger > .lband > .lrow, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow{
+  min-width:0; margin:0; padding:18px 20px; border:1px solid var(--border); border-radius:14px;
+  background:var(--surface); display:flex; flex-direction:column; gap:12px; }
+.site--v5 .ledger > .lrow:first-child{ padding-top:18px; }
+.site--v5 .ledger > .lrow:last-child{ padding-bottom:18px; }
+.site--v5 .ledger > .lrow.kahraman{ grid-column:1 / -1; padding:0; border:0; background:none; }
+.site--v5 .ledger .lrow > .lrow__main{ flex:1 1 auto; min-width:0; }
+/* Künye satırı kutunun enini aşmaz: içindeki kayan şerit (SPİ gün
+   gezgini, 14 gün) künyeyi genişletip sayfayı yana kaydırıyordu (390 px). */
+.site--v5 .ledger .lrow > .lrow__side, .site--v5 .ledger .lrow > .lrow__side > .lrow__act{ max-width:100%; min-width:0; }
+.site--v5 .ledger > .lrow .lrow__main > * + *{ margin-top:12px; }
+
+/* Bant ve yığın rafta çizilmez; içlerindeki her satır rafın bir kutusudur. */
+.site--v5 .ledger > .lband, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs){ display:contents; }
+.site--v5 .ledger > .lband > :not(.lrow):not(.stack):not(.stack-sm):not(.stack-xs),
+.site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > :not(.lrow){ grid-column:1 / -1; min-width:0; }
+
+/* 4 · Geniş içerik rafın bütün enini alır. */
+.site--v5 :is(.ledger > .lrow, .ledger > .lband > .lrow, .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow):is(
+  .lrow--wide,
+  :has(table, canvas, svg.chart, .chart, .grafik, .cardsgrid, .formgrid, .grid-form, .cols-2, .cols-3, .cols-4,
+    .picks, .desks, .heatmap, .temasec, .ledger, .ogrid, .grid)){ grid-column:1 / -1; }
+
+/* 6 · Eşi olmayan yarım kutu yalnız kalmaz: iki geniş kutunun arasında ya
+   da rafın sonunda tek kalan kutu bütün eni alır. Eşleştirmeyi çizimden
+   sonra hareket.js yapar (bant ve yığınlar sıra sayımını bozduğu için CSS
+   bunu bilemez) ve kutuya .raf-tek koyar. */
+.site--v5 .ledger .raf-tek{ grid-column:1 / -1; }
+
+/* Uzun kutu (hareket.js): --raf-kes boyunda kesilir (tek kutuda 560 px,
+   çiftte eşinin boyu), alt kenarı solar, altında «Tamamını göster». İç
+   kaydırma değildir; sayfanın tek kaydırması kalır. Solma katmanı düğme
+   şeridini de örter — kesilen satır düğmenin altından sızmaz. */
+.site--v5 .ledger .raf-uzun{ position:relative; max-height:calc(var(--raf-kes, 560px) + 56px); overflow:hidden; padding-bottom:56px; }
+.site--v5 .ledger .raf-uzun::after{ content:''; position:absolute; left:0; right:0; bottom:0; height:128px; pointer-events:none;
+  z-index:1; background:linear-gradient(to bottom, transparent, var(--surface) 72px); border-radius:0 0 13px 13px; }
+.site--v5 .ledger .raf-uzun.raf-acik{ max-height:none; overflow:visible; }
+.site--v5 .ledger .raf-uzun.raf-acik::after{ display:none; }
+.site--v5 .raf-ac{ position:absolute; z-index:2; left:20px; right:20px; bottom:12px; min-height:34px; border:1px solid var(--border);
+  border-radius:8px; background:var(--surface); color:var(--text); font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.site--v5 .raf-ac:hover{ border-color:var(--border-strong); }
+.site--v5 .raf-acik > .raf-ac{ position:static; margin-top:12px; width:100%; }
+
+/* Sayı çifti (.pair içinde .sidestat): dar kutuda dört sayı alt alta
+   ve aralıklı dizilmez; iki sütun, sıkı aralık. */
+.site--v5 .ledger .pair:has(> div > .sidestat){ grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:4px 24px; }
+
+/* Kutu etiketiyle aynı adı taşıyan bölüm başlığı (hareket.js ikizBaslik)
+   yalnız ekran okuyucuya kalır; boş kalan başlık satırı yer kaplamaz. */
+.site--v5 .ledger .section-title:has(> h2.sr-only:only-child){ display:contents; }
+
+/* İç içe defter: kutunun içindeki ikinci defter kutu çizmez, satırdır. */
+.site--v5 .ledger .ledger{ display:flex; flex-direction:column; gap:0; }
+.site--v5 .ledger .ledger > .lrow{ display:block; border:0; border-top:1px solid var(--border); border-radius:0;
+  padding:12px 0; background:none; }
+.site--v5 .ledger .ledger > .lrow:first-child{ border-top:0; padding-top:0; }
+
+/* 5 · İç kaydırma yok. Çok geniş bir tablo (yalnız o) kendi kabında yana kayar. */
+.site--v5 .ledger .lrow > .lrow__main{ max-height:none; overflow:visible; }
+.site--v5 .ledger .lrow__main table{ width:100%; }
+.site--v5 .ledger .lrow__main :is(.tablewrap, .table-wrap, .tbl){ overflow-x:auto; }
+
+/* Sayfa bölümleri de rafın katıdır: aralarında 32 px, başlık 16 px. */
+.site--v5 .sayfabolum + .sayfabolum{ margin-top:32px; }
+.site--v5 .sayfabolum__ad{ font-size:16px; margin-bottom:12px; }
+
+/* Kat düzeni: çubuklu sayfada yalnız seçili bölüm görünür (019). */
+.sayfabolumler--kat > .sayfabolum:not(.is-on){ display:none; }
+.sayfabolumler--kat > .sayfabolum + .sayfabolum{ margin-top:0; }
+.bolumcubugu--sayfa .bolumcubugu__ad.is-on{ color:var(--text); font-weight:600; }
+.bolumcubugu--sayfa .bolumcubugu__ad.is-on::after{ content:''; position:absolute; left:10px; right:10px; bottom:-1px;
+  height:2px; border-radius:1px; background:var(--text); }
+
+/* v5 · DURUM KARTLARI: büyük sayı, küçük birim, yön rozeti, tek satır not. */
+.bugun__alan > .bugun__genis{ flex-basis:100%; min-width:0; }
+.durumkart .durumkart__sayi{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.durumkart .durumkart__sayi b{ font-size:28px; font-weight:700; letter-spacing:-.02em; line-height:1.1;
+  font-variant-numeric:tabular-nums; }
+.durumkart .durumkart__sayi small{ font-size:14px; color:var(--text-2); }
+.durumkart__fark{ font-size:12px; font-weight:600; padding:2px 7px; border-radius:6px; background:var(--surface-2);
+  color:var(--text-2); font-variant-numeric:tabular-nums; }
+.durumkart__fark.is-artti{ background:var(--ok-t); color:var(--ok-ink); }
+.durumkart__fark.is-azaldi{ background:var(--bad-t); color:var(--bad-ink); }
+.durumkart__not, .durumkart__bos{ margin:8px 0 0; font-size:13px; color:var(--text-2); }
+.site--v5 .gunserit{ margin-bottom:28px; }
+
+/* Vitrin kartları Durum kutusunda: sayı + fark yan yana, eğri sağda. */
+.durumkart__ust{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.durumkart__egri svg{ display:block; width:132px; height:36px; }
+.durumkart .durumkart__sayi .sayi{ font-size:28px; font-weight:700; letter-spacing:-.02em; }
+.durumkart .esik-cubuk, .durumkart [data-oz="029"]{ margin-top:10px; }
+.sayac__satir + .sayac__satir{ margin-top:10px; }
+
+/* Vitrin grafik kartları ekranlarda: analiz başı iki kutu yan yana; sıra
+   başlığında aralık + eğilim; hız konisi bir dokunuşla açılır (D). */
+.analizbasi{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap:16px; margin-bottom:24px; align-items:start; }
+.sira-bas{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:8px; }
+.sira-bas > [data-oz="035"]{ flex:1 1 280px; }
+.hiz-ac > summary{ cursor:pointer; font-size:13px; color:var(--text-2); min-height:24px; display:flex; align-items:center; }
+
+/* Onaylar rafı (pano 36): bekleyenler solda, «Son kararlar» sağda. */
+.onaylar-raf{ display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
+@media (min-width:1100px){ .onaylar-raf{ grid-template-columns:minmax(0,1fr) 340px; } }
+.okart-sar{ display:flex; flex-direction:column; gap:6px; }
+.okart__kim{ margin:0; font-size:12.5px; color:var(--text-2); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+/* Son ölçümler (015 · 026): ad solda, değer ve yaşı sağda. */
+.sonolcum{ list-style:none; margin:0; padding:0; }
+.sonolcum__s{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:8px 0;
+  border-top:1px solid var(--border); font-size:14px; }
+.sonolcum__s:first-child{ border-top:0; padding-top:0; }
+.sonolcum__ad{ color:var(--text-2); }
+.sonolcum__d{ text-align:right; font-variant-numeric:tabular-nums; }
+
+/* 116 anahtarı: 24 px dokunma tabanı (WCAG 2.2 AA). */
+.otoayar__anahtar{ width:24px; height:24px; min-height:24px; margin:0; flex:none; accent-color:var(--text); }
+
+/* ================================================================
+   VİTRİN DURUMLARI — vitrin kartlarının (brand/ortak/vitrin.css,
+   ÜRETİLMİŞ) sistemde ALDIĞI hâller. vitrin.css bu dosyadan ÖNCE
+   yüklenir (index.html): eşit özgüllükte buradaki durum kazanır.
+   Vitrin bir davranışı döngüyle
+   gösterir; sistemde o davranış gerçek bir olayla olur. Kartın biçimi
+   burada DEĞİŞMEZ: yalnız durum (çevrilmiş, seçili), gerçek giriş
+   kutusu ve gerçek metnin uzunluğu karşılanır.
+   ================================================================ */
+.vk[role="button"]{ cursor:pointer; }
+.vk[role="button"]:focus-visible{ outline:2px solid var(--ring); outline-offset:3px; border-radius:12px; }
+.vk .hl.hl--yok{ background:none; border:1.5px dashed var(--vk-ink4); }
+.vk .hl.hl--yok::after{ display:none; }
+
+/* 043 tek durum: sistem o anki hâli çizer, ikisini yan yana değil. */
+.vk .x22v.tek{ grid-template-columns:1fr; }
+
+/* 045 çevrilen kart: yükseklik metinden gelir, yüzler üst üste. */
+.vk .x24{ height:auto; }
+.vk .x24 .kk{ display:grid; transition:transform var(--dur-lg) var(--ease); }
+.vk .x24 .yz{ position:relative; inset:auto; grid-area:1 / 1; min-height:124px; gap:8px; }
+.vk .x24 .kk.is-cevrik{ transform:rotateY(180deg); }
+
+/* 052 yuva adları saat değil sözcüktür; soluk mürekkep yazıda AA değil. */
+.vk .y15 .sa{ color:var(--vk-ink3); align-self:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.vk .y15 .bk.is-atlandi{ background:repeating-linear-gradient(135deg,var(--vk-ink4) 0 2px,transparent 2px 4px); }
+
+/* 055 çipler gerçek seçim kutusudur. */
+.vk .x30 .sat2{ flex-wrap:wrap; }
+.vk .x30 .ci{ position:relative; padding-right:4px; }
+.vk .x30 .ci select{ appearance:none; -webkit-appearance:none; background:none; border:0; font:inherit;
+  color:inherit; padding:0 16px 0 0; min-height:26px; max-width:14em; cursor:pointer; }
+.vk .x30 .ci svg{ position:absolute; right:6px; pointer-events:none; }
+.vk .x30 .ci:focus-within{ outline:2px solid var(--ring); outline-offset:1px; }
+.vk .x30 .kbd-d{ margin-left:auto; min-height:26px; min-width:34px; display:grid; place-items:center; border-radius:6px; }
+.vk .x30 .kbd-d kbd{ margin:0; }
+
+/* 057 ve 065: çizginin dolu kısmı veriden. */
+.vk .z11 .tr::after{ width:var(--bugun,22%); }
+.vk .z11 .bu{ left:var(--bugun,22%); }
+.vk .w13 .tr::after{ width:var(--ilerleme,19%); }
+
+/* 058 soru ekranı: yer tutucu çizgi yerine gerçek soru ve şık. */
+.vk .z12 .q{ display:block; font-size:14px; line-height:1.55; }
+.vk .z12 .sk .sik{ display:flex; align-items:flex-start; gap:8px; width:100%; min-height:34px; padding:7px 10px;
+  border-radius:8px; border:1px solid var(--vk-l1); background:var(--vk-s1); text-align:left; }
+.vk .z12 .sk .sik b{ font:500 10px var(--vk-mono); color:var(--vk-ink3); width:10px; padding-top:3px; }
+.vk .z12 .sk .sik.on{ border-color:var(--ays); background:color-mix(in oklab,var(--ays) 10%,var(--vk-s1)); }
+.vk .z12 .sk .sik.on b{ color:var(--ays); }
+
+/* 062 hücreler gerçek giriş kutusu; doğruluk sütunu korunur. */
+.vk .w10.genis .r{ grid-template-columns:minmax(0,1fr) 46px 46px 46px 52px 62px; height:auto; min-height:32px; }
+.vk .w10 .r i{ height:28px; }
+.vk .w10 .r i input{ width:100%; height:100%; border:0; background:none; text-align:center; font:inherit;
+  color:inherit; -moz-appearance:textfield; appearance:textfield; }
+.vk .w10 .r i input::-webkit-inner-spin-button,.vk .w10 .r i input::-webkit-outer-spin-button{ -webkit-appearance:none; margin:0; }
+.vk .w10 .r i:focus-within{ border-color:var(--ays); box-shadow:0 0 0 3px color-mix(in oklab,var(--ays) 20%,transparent); }
+.vk .w10 .r>span small{ display:block; font:400 10px var(--vk-mono); color:var(--vk-ink3); }
+.vk .w10 .r em{ font:400 11px var(--vk-mono); font-style:normal; text-align:right; color:var(--vk-ink2); }
+.vk .w10 .r em.dusuk{ color:var(--vk-ink3); }
+
+/* 063 satır düğmedir; süzgeç gerçek düğme. */
+.vk .w11 button.r{ width:100%; text-align:left; height:auto; min-height:34px; }
+.vk .w11 .sz button{ height:26px; padding:0 10px; border-radius:6px; font-size:11.5px; font-weight:500;
+  color:var(--vk-ink3); border:1px solid var(--vk-l1); }
+.vk .w11 .sz button.on{ background:var(--vk-s3); color:var(--vk-ink); }
+.vk .w11 .bos{ font-size:12px; color:var(--vk-ink3); padding:8px 0; }
+
+/* 064 ± düğmeleri çerçeveli (vitrinin .bt.g'si). */
+.vk .w12 .st2 .bt:disabled{ opacity:.4; cursor:default; }
+
+@media (prefers-reduced-motion:reduce){
+  .vk .x24 .kk{ transition:none; }
+}
+
+/* Vitrin kartını taşıyan kutu (x02 iskeleti): başlık sistemin, gövde
+   vitrinin. İkili gövde iki kartı ince çizgiyle ayırır. */
+.vkutu .kutu__govde > .vk + .vk{ margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+.vkutu__ikili{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px 20px; }
+.vkutu__ikili > .vk + .vk{ margin:0; padding:0; border:0; }
+.bugun__vitrin:empty{ display:none; }
+
+/* 054 taşınan blok gerçek listede: havadaki kart akışın içinde durur
+   (vitrinin sabit konumu tek örnek içindir). */
+.vk .x29{ height:auto; }
+.vk .x29 .ts{ position:relative; left:auto; right:auto; top:auto; margin:2px -2px 2px 18px; transform:rotate(-1.5deg); }
+.vk .x29 .ga{ position:static; align-self:flex-end; margin-top:4px; }
+.vk .x29 .hy{ color:var(--vk-ink3); }
+@media (prefers-reduced-motion:reduce){ .vk .x29 .ts{ transform:none; } }
+
+/* Vitrin grafikleri 260 birimlik bir tuvale çizilir; geniş sütunda
+   sonsuz büyümez (yazı da onunla büyüyordu). */
+.vk .y12, .vk .y09, .vk .y10, .vk .x18, .vk .y16, .vk .z07{ max-width:560px; }
+
+/* ---- D · SPİ vitrin kartlarının sistem hâlleri ---- */
+/* 069 veri yok gecesi kesik; 072 tabak bölmeleri veriden. */
+.vk .x32 .gc i.yok{ background:none; border:1.5px dashed var(--vk-ink4); }
+.vk .x34 .tb[style*="--tabak"]::before{ background:var(--tabak); }
+.vk .x34 .tb::after{ display:none; }
+/* 073 bardak dizisi tek düğme; hedef aşılırsa sarar. */
+.vk .x35 .bd{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:0 auto; padding:6px 8px; border-radius:10px; }
+.vk .x35 .sy{ text-align:center; margin-top:10px; font:400 11px var(--vk-mono); color:var(--vk-ink3); }
+/* 074 beş nokta gerçek düğme; dolu noktada yazı AA tonunda. */
+.vk .y17 .ol button{ width:30px; height:30px; border-radius:50%; border:1.5px solid var(--vk-l2); display:grid; place-items:center;
+  font:500 11px var(--vk-mono); color:var(--vk-ink3); }
+.vk .y17 .ol button.on{ width:44px; height:44px; background:var(--spi-ink, var(--spi)); color:var(--vk-on); border-color:transparent; font-size:15px; }
+/* 075 set kutucuğu düğme. */
+.vk .x36 .st{ flex-wrap:wrap; }
+.vk .x36 .st button{ width:34px; height:26px; border-radius:5px; border:1px solid var(--vk-l2); display:grid; place-items:center;
+  font:400 10px var(--vk-mono); color:var(--vk-ink3); }
+.vk .x36 .st button.d{ background:var(--spi-ink, var(--spi)); border-color:transparent; color:var(--vk-on); }
+.vk .x36 .r{ height:auto; min-height:36px; padding:4px 0; }
+/* 077 tuş takımı: sil tuşu var, ✓ tam genişlik. */
+.vk .x37 .tt button{ height:28px; border-radius:5px; background:var(--vk-s1); border:1px solid var(--vk-l1); display:grid; place-items:center;
+  font:400 11px var(--vk-mono); color:var(--vk-ink2); }
+.vk .x37 .tt button.on{ background:var(--spi-ink, var(--spi)); color:var(--vk-on); border-color:transparent; }
+.vk .x37 .tt .tt-kaydet{ grid-column:1 / -1; }
+.vk .x37{ grid-template-columns:1fr 132px; }
+/* 085 şablon satırı düğme. */
+.vk .w17 .ls2 button{ display:grid; grid-template-columns:60px 1fr 26px; gap:8px; align-items:center; min-height:36px; width:100%;
+  padding:0 6px 0 10px; border-radius:9px; background:var(--vk-s1); border:1px solid var(--vk-l1); text-align:left; }
+.vk .w17 .ls2 button.on{ border-color:color-mix(in oklab,var(--spi) 45%,transparent); }
+.vk .w17 .ls2 button.on em{ background:var(--spi-ink, var(--spi)); color:var(--vk-on); }
+/* 088 anahtar 24 px dokunma hedefi. */
+.vk .w20 .an2{ width:40px; height:24px; border-radius:12px; }
+.vk .w20 .an2::after{ width:20px; height:20px; }
+.vk .w20 .an2.on::after{ left:18px; }
+/* 078: vitrinin h5'i sayfanın başlık sırasını atlatıyordu (h2 → h5);
+   ad düz metindir, biçimi aynı. */
+.vk .y19 b.ad{ display:block; font-size:14px; font-weight:600; }
+
+/* ---- E · ESP vitrin kartlarının sistem hâlleri ----
+   ESP turuncusu (--esp) yazıda AA'yı geçmez (3,5:1): yazı ve üzerinde beyaz
+   yazı taşıyan zemin --esp-ink'e bağlanır; nokta ve çubuk --esp kalır. */
+.vk .y22 p u{ color:var(--esp-ink, var(--esp)); }
+.vk .y24 .ip b, .vk .z22 .bg>div span, .vk .x44v .st .b{ color:var(--esp-ink, var(--esp)) !important; }
+.vk .x41 button.on, .vk .x44v .st .on, .vk .z21 .n.m, .vk .w23 .oy, .vk .w22 .tas .uc2{ background:var(--esp-ink, var(--esp)) !important; }
+/* 089 üst kart düğme. */
+.vk .x40 button.kr{ position:relative; width:190px; height:106px; border-radius:12px; background:var(--vk-s1); border:1px solid var(--vk-l2); }
+/* 090 cevap düğmeleri. */
+.vk .x41 button{ height:52px; border-radius:12px; background:var(--vk-s1); border:1px solid var(--vk-l1); display:flex; flex-direction:column;
+  align-items:center; justify-content:center; font-weight:600; }
+.vk .x41 button span{ font:400 10px var(--vk-mono); color:var(--vk-ink3); }
+.vk .x41 button.on{ color:var(--vk-on); border-color:transparent; }
+.vk .x41 button.on span{ color:color-mix(in oklab,var(--vk-on) 80%,transparent); }
+@media (min-width:640px){ .vk .x41{ grid-template-columns:repeat(4,1fr); } }
+/* 094 okunan oranı bilinmeyen kitapta alt çizgi yok. */
+.vk .x45v .rf i.oransiz::after{ display:none; }
+/* 104 notun metni. */
+.vk .z22 .nt3{ margin-top:10px; font-size:13px; color:var(--vk-ink2); }
+/* 106 taşlar düğme. */
+.vk .w22 .tas{ flex-wrap:wrap; }
+.vk .w22 .tas button{ height:30px; padding:0 10px; border-radius:7px; display:inline-grid; place-items:center; font:400 15px var(--vk-serif); background:var(--vk-s3); }
+.vk .w22 .tas button.uc2{ color:var(--vk-on); }
 
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -10837,7 +10863,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'66f6cf3', at:'2026-09-25 12:29', dirty:true };
+SP.BUILD = { id:'9f46a80', at:'2026-09-25 12:41', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13188,6 +13214,239 @@ window.LIFEOS = window.LIFEOS || {};
       + '<span class="cap">ÖLÇÜLMEZSE BOŞ KALIR · TAHMİN EDİLMEZ</span>', { ek:'kt' });
   }
 
+
+  /* ================================================== E · ESP */
+
+  /* 089 DESTE YIĞINI — kalan kartlar arkada yığın; yığın incelikçe bitiş
+     görülür. Üstteki kart düğmedir (dokun · çevir). */
+  function desteYigini(o){
+    if(!o || !o.on || !sayiMi(o.kalan)) return '';
+    const arka = Math.max(0, Math.min(3, o.kalan - 1));
+    const kr = [];
+    for(let i = 3 - arka; i < 3; i++) kr.push('<span class="kr" style="transform:translate(' + (4 * (3 - i)) + 'px,' + (4 * (3 - i)) + 'px);opacity:' + (0.35 + 0.22 * i).toFixed(2) + '" aria-hidden="true"></span>');
+    return kok('089', 'x40', kr.join('') + '<button type="button" class="kr ust-k" data-act="' + kac(o.act) + '" aria-label="' + kac(o.on + ' — karşılığı göster') + '"><b>' + kac(o.on) + '</b>'
+      + '<span class="cap">DOKUN · ÇEVİR</span></button><span class="mod c-esp sy">' + o.kalan + ' KART</span>');
+  }
+
+  /* 090 SÜRELİ CEVAP DÜĞMELERİ — her düğme kartın bir sonraki görülme
+     zamanını söyler; zamanı tekrar motoru hesaplar. */
+  function sureliCevap(o){
+    const d = (o && o.dugmeler || []).filter(Boolean);
+    if(!d.length) return '';
+    return kok('090', 'x41', d.map(x => '<button type="button" class="' + (x.on ? 'on' : '') + '" data-act="' + kac(o.act) + '"' + nitelik(x.data)
+      + (x.not ? ' title="' + kac(x.not) + '"' : '') + '>' + kac(x.ad) + '<span>' + kac(x.sure) + '</span></button>').join(''),
+      { etiket:'Cevap düğmeleri' });
+  }
+
+  /* 091 DAKİKA HALKASI — günlük ölçüt halkası; rengi değişmez, yalnız dolar.
+     Dokunulmamış disiplin «—», 0 dk değil. */
+  function dakikaHalkasi(o){
+    if(!o || !sayiMi(o.hedef) || o.hedef <= 0) return '';
+    const top = sayiMi(o.toplam) ? o.toplam : 0;
+    const C = 276.5;
+    return kok('091', 'x42v', '<div class="hk"><svg viewBox="0 0 104 104" aria-hidden="true"><circle cx="52" cy="52" r="44" fill="none" stroke="var(--vk-s3)" stroke-width="9"/>'
+      + (top > 0 ? '<circle cx="52" cy="52" r="44" fill="none" stroke="var(--esp)" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + (C * Math.min(1, top / o.hedef)).toFixed(1) + ' ' + C + '" transform="rotate(-90 52 52)"/>' : '')
+      + '</svg><div><b>' + sayi(Math.round(top)) + '</b><span class="cap">/ ' + sayi(o.hedef) + ' DK</span></div></div>'
+      + '<div class="ls">' + (o.satirlar || []).map(x => '<div><i' + (sayiMi(x.dk) ? '' : ' class="b"') + '></i>' + kac(x.ad) + '<em>' + (sayiMi(x.dk) ? sayi(Math.round(x.dk)) + ' dk' : '—') + '</em></div>').join('')
+      + '<div class="top"><span></span>Kalan<em>' + sayi(Math.max(0, Math.round(o.hedef - top))) + ' dk</em></div></div>',
+      { etiket:'Bugün ' + Math.round(top) + ' / ' + o.hedef + ' dakika' });
+  }
+
+  /* 092 UNUTMA EĞRİSİ — hatırlama düşer, tekrar yükseltir; «bugün» noktası
+     işaretli. Eğri tekrar motorunun modelidir (R = e^(−t/S)); geleceği
+     kesik çizilir, çünkü henüz olmadı. `noktalar`: [{ gun (bugüne göre), r (0-1) }]. */
+  function unutmaEgrisi(o){
+    const n = (o && o.noktalar || []).filter(x => x && sayiMi(x.gun) && sayiMi(x.r));
+    if(n.length < 3) return '';
+    const g0 = Math.min.apply(null, n.map(x => x.gun)), g1 = Math.max.apply(null, n.map(x => x.gun));
+    const x = g => 6 + 248 * (g - g0) / Math.max(1, g1 - g0), y = r => 14 + (1 - r) * 80;
+    const gecmis = n.filter(p => p.gun <= 0), gelecek = n.filter(p => p.gun >= 0);
+    const yol = l => l.map((p, i) => (i ? 'L' : 'M') + x(p.gun).toFixed(1) + ' ' + y(p.r).toFixed(1)).join('');
+    const bugun = n.find(p => p.gun === 0);
+    const esik = sayiMi(o.esik) ? o.esik : 0.5;
+    return kok('092', 'x43', '<svg class="gr" viewBox="0 0 260 110" role="img" aria-label="' + kac('Hatırlama bugün %' + (bugun ? Math.round(bugun.r * 100) : '—')) + '">'
+      + (gecmis.length > 1 ? '<path d="' + yol(gecmis) + '" fill="none" stroke="var(--esp)" stroke-width="2"/>' : '')
+      + (gelecek.length > 1 ? '<path d="' + yol(gelecek) + '" fill="none" stroke="var(--esp)" stroke-width="2" stroke-dasharray="3 3" opacity=".6"/>' : '')
+      + '<line x1="6" y1="' + y(esik).toFixed(1) + '" x2="254" y2="' + y(esik).toFixed(1) + '" stroke="var(--vk-ink4)" stroke-dasharray="2 4"/>'
+      + '<text x="10" y="' + (y(esik) - 6).toFixed(1) + '" fill="var(--vk-ink3)" style="font:400 9px var(--vk-mono)">eşik %' + Math.round(esik * 100) + '</text>'
+      + (bugun ? '<circle cx="' + x(0).toFixed(1) + '" cy="' + y(bugun.r).toFixed(1) + '" r="4" fill="var(--vk-ink)"/><text x="' + x(0).toFixed(1) + '" y="106" text-anchor="middle" fill="var(--vk-ink3)" style="font:400 9.5px var(--vk-mono)">bugün · %' + Math.round(bugun.r * 100) + '</text>' : '')
+      + '</svg><div class="lg">' + et('computed', 'model · R = e^(−t/S)') + '<span>kesik = gelecek</span></div>');
+  }
+
+  /* 093 MERDİVEN BASAMAKLARI — basamak içerik sırasıdır, derece değil. */
+  function merdiven(o){
+    const b = (o && o.basamaklar || []).filter(Boolean);
+    if(!b.length) return '';
+    const on = b.find(x => x.durum === 'current');
+    return kok('093', 'x44v', '<div class="st">' + b.map((x, i) => '<div class="' + (x.durum === 'done' ? 'b' : x.durum === 'current' ? 'on' : '') + '" style="height:'
+      + px(30 + 64 * i / Math.max(1, b.length - 1)) + '" title="' + kac(x.ad) + '">' + (x.durum === 'done' ? ikon('tik') : '') + x.no + '</div>').join('')
+      + (on ? '<div class="ip"><b>Basamak ' + on.no + '</b><span>' + kac(on.not || on.ad) + '</span></div>' : '') + '</div>',
+      { etiket:b.map(x => x.no + '. ' + x.ad + (x.durum === 'done' ? ' (geçildi)' : x.durum === 'current' ? ' (şimdi)' : '')).join(', ') });
+  }
+
+  /* 094 KÜTÜPHANE RAFI — kitap sırtı; kalınlık sayfa sayısı (tutulmuyorsa
+     eşit), alt çizgi okunan oran (bilinmiyorsa çizgi yok). */
+  function kutuphaneRafi(o){
+    const k = (o && o.kitaplar || []).filter(Boolean);
+    if(!k.length) return '';
+    return kok('094', 'x45v', '<div class="rf">' + k.map((x, i) => '<i class="' + (x.on ? 'on' : '') + (sayiMi(x.oran) ? '' : ' oransiz') + '" style="--w:' + (sayiMi(x.kalinlik) ? x.kalinlik : 22) + 'px;--p:'
+      + (sayiMi(x.oran) ? Math.round(x.oran) : 0) + ';height:' + (66 + (i * 37) % 30) + '%" title="' + kac(x.ad + (x.durum ? ' · ' + x.durum : '')) + '">' + kac(buyuk(x.ad).slice(0, 14)) + '</i>').join('') + '</div>'
+      + '<div class="alt"><span class="cap">' + k.length + ' KİTAP · ' + k.filter(x => x.oran === 100).length + ' BİTTİ</span>'
+      + (o.not ? '<span class="cap">' + kac(buyuk(o.not)) + '</span>' : '') + '</div>',
+      { etiket:k.map(x => x.ad + (x.durum ? ' (' + x.durum + ')' : '')).join(', ') });
+  }
+
+  /* 095 OKUMA İLERLEMESİ — kitap içinde ince çizgi ve bölümün kalan süresi. */
+  function okumaIlerlemesi(o){
+    if(!o || !o.ad || !sayiMi(o.oran)) return '';
+    return kok('095', 'y20', '<div class="kp"><i aria-hidden="true"></i><div><b>' + kac(o.ad) + '</b><span>' + kac(o.alt || '') + '</span></div></div>'
+      + '<div class="iy" role="img" aria-label="' + kac('%' + Math.round(o.oran) + ' okundu') + '"><i style="width:' + px(o.oran) + '"></i></div>'
+      + '<div class="alt"><span class="cap">%' + Math.round(o.oran) + '</span>' + (sayiMi(o.kalanDk) ? et('estimated', 'bu bölüm ~' + dkMetni(o.kalanDk) + ' · tahmin') : '') + '</div>');
+  }
+
+  /* 096 ALINTI KARTI — altı çizilen cümle kaynağıyla. */
+  function alintiKarti(o){
+    if(!o || !o.metin) return '';
+    return kok('096', 'y21', '<q>' + kac(o.metin) + '</q><div class="alt"><span>— ' + kac(o.kaynak || 'kaynak yok') + '</span>'
+      + (o.act ? dugme({ metin:o.dugme || 'Desteye ekle', act:o.act, data:o.data }) : '') + '</div>');
+  }
+
+  /* 097 KELİME SAHNESİ — tek kelime, anlamı, örnek cümle. Başka hiçbir şey. */
+  function kelimeSahnesi(o){
+    if(!o || !o.kelime) return '';
+    return kok('097', 'x46', '<b lang="' + kac(o.dil || 'en') + '">' + kac(o.kelime) + '</b><p>' + kac(o.anlam || '—') + '</p>'
+      + (o.ornek ? '<em lang="' + kac(o.dil || 'en') + '">“' + kac(o.ornek) + '”</em>' : ''));
+  }
+
+  /* 098 BAĞLAMDA KELİME — metinde hedef kelime altı çizili; anlamı yerinde. */
+  function baglamdaKelime(o){
+    if(!o || !o.cumle || !o.kelime) return '';
+    const i = o.cumle.toLocaleLowerCase('tr-TR').indexOf(o.kelime.toLocaleLowerCase('tr-TR'));
+    if(i < 0) return '';
+    const c = o.cumle;
+    return kok('098', 'y22', '<p lang="' + kac(o.dil || 'en') + '">' + kac(c.slice(0, i)) + '<u>' + kac(c.slice(i, i + o.kelime.length)) + '</u>' + kac(c.slice(i + o.kelime.length)) + '</p>'
+      + '<div class="ip"><b>' + kac(o.anlam || '—') + '</b><span>' + kac(o.not || 'kartta var') + '</span></div>');
+  }
+
+  /* 099 KONUŞMA DALGA FORMU — ses dalgası ve süre; duraksama boşluk.
+     Dalga kaydın kendisinden gelir; yoksa kart yok. */
+  function dalgaFormu(o){
+    const d = (o && o.genlik || []).filter(sayiMi);
+    if(d.length < 8) return '';
+    const dur = d.reduce((a, v, i) => a + (v === 0 && d[i - 1] !== 0 ? 1 : 0), 0);
+    return kok('099', 'y23', '<div class="dl" aria-hidden="true">' + d.map(v => v === 0 ? '<i class="bos"></i>' : '<i style="height:' + Math.min(100, v * 6) + '%"></i>').join('') + '</div>'
+      + '<div class="alt"><span class="kyt"><i></i>' + kac(o.sure || '') + '</span><span class="cap">' + dur + ' DURAKSAMA · ÖLÇÜLDÜ</span></div>');
+  }
+
+  /* 100 TARİH ŞERİDİ — yüzyıllar yatay şerit, olaylar nokta; seçili olay yanar. */
+  function tarihSeridi(o){
+    const e = (o && o.olaylar || []).filter(x => x && sayiMi(x.yil));
+    if(!e.length) return '';
+    const y0 = Math.floor(Math.min.apply(null, e.map(x => x.yil)) / 100) * 100;
+    const y1 = Math.ceil((Math.max.apply(null, e.map(x => x.yil)) + 1) / 100) * 100;
+    const yer = y => 2 + 96 * (y - y0) / Math.max(100, y1 - y0);
+    const ROMA = n => { const r = [[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]; let s = ''; r.forEach(([v, h]) => { while(n >= v){ s += h; n -= v; } }); return s; };
+    const yz = [];
+    for(let y = y0; y < y1; y += 100) yz.push('<span style="left:' + px(yer(y + 50)) + '">' + (y >= 0 ? ROMA(y / 100 + 1) : 'MÖ') + '</span>');
+    const sec = e.find(x => x.on) || e[e.length - 1];
+    return kok('100', 'y24', '<div class="ek">' + (yz.length <= 12 ? yz.join('') : '') + e.map(x => '<i class="' + (x === sec ? 'on' : '') + '" style="left:' + px(yer(x.yil)) + '" title="'
+      + kac(x.yil + ' · ' + x.ad) + '"></i>').join('') + '</div><span class="ip"><b>' + sec.yil + '</b>' + kac(sec.ad) + (sec.yil >= 0 ? ' · ' + ROMA(Math.floor(sec.yil / 100) + 1) + '. yüzyıl' : '') + '</span>',
+      { etiket:e.length + ' olay, ' + e[0].yil + '–' + e[e.length - 1].yil });
+  }
+
+  /* 101 AJANLI DERS KAPAĞI — dersin başında ajan portresi ve tek cümle.
+     Cümle KURALDAN gelir; model kapalıyken de aynı. */
+  function dersKapagi(o){
+    if(!o || !o.ad) return '';
+    return kok('101', 'x47', '<span class="av" aria-hidden="true"><b>' + kac(o.harf || o.ad.charAt(0)) + '</b>'
+      + (o.gorsel ? '<img src="' + kac(o.gorsel) + '" alt="" loading="lazy" onerror="this.remove()">' : '') + '</span>'
+      + '<div><span class="mod c-esp">' + kac(buyuk(o.alan || '')) + '</span><b>' + kac(o.ad) + '</b><p>' + kac(o.cumle || '') + '</p></div>');
+  }
+
+  /* 102 OTURUM SONU — kart sayısı, iyi oranı, süre, cevap dağılımı; yarının
+     yükü altta. Sayılar oturumun kaydından. */
+  function oturumSonu(o){
+    if(!o || !sayiMi(o.kart)) return '';
+    const d = o.dagilim || {};
+    const top = ['again', 'hard', 'good', 'easy'].reduce((a, k) => a + (d[k] || 0), 0);
+    const renkler = { again:'var(--vk-ink3)', hard:'color-mix(in oklab,var(--esp) 40%,var(--vk-s2))', good:'var(--esp)', easy:'color-mix(in oklab,var(--esp) 70%,var(--vk-s2))' };
+    const iyi = top ? Math.round(100 * ((d.good || 0) + (d.easy || 0)) / top) : null;
+    return kok('102', 'z20', '<b class="bs">Oturum bitti.</b><div class="uc"><div><b>' + o.kart + '</b><span>kart</span></div><div><b>' + (iyi == null ? '—' : '%' + iyi) + '</b><span>iyi + kolay</span></div>'
+      + '<div><b>' + (sayiMi(o.dk) ? dkMetni(o.dk) : '—') + '</b><span>süre</span></div></div>'
+      + (top ? '<div class="dg" role="img" aria-label="' + kac('Tekrar ' + (d.again || 0) + ', zor ' + (d.hard || 0) + ', iyi ' + (d.good || 0) + ', kolay ' + (d.easy || 0)) + '">'
+        + ['again', 'hard', 'good', 'easy'].map(k => d[k] ? '<i style="width:' + px(100 * d[k] / top) + ';background:' + renkler[k] + '"></i>' : '').join('') + '</div>' : '')
+      + '<div class="yr"><span class="cap">TEKRAR · ZOR · İYİ · KOLAY</span><span>' + (sayiMi(o.yarin) ? 'yarın ' + o.yarin + ' kart' : '') + '</span></div>', { ek:'kt' });
+  }
+
+  /* 103 KELİME AĞI — kelime ortada; eş anlamlılar çevresinde, zıt anlamlı
+     kesik çerçeveyle. Bağ kaydı yoksa kart yok. */
+  function kelimeAgi(o){
+    const es = (o && o.es || []).filter(Boolean), zit = (o && o.zit || []).filter(Boolean);
+    if(!o || !o.kelime || es.length + zit.length < 2) return '';
+    const hepsi = es.map(k => ({ k, z:false })).concat(zit.map(k => ({ k, z:true }))).slice(0, 6);
+    const YER = [[18, 18], [82, 20], [20, 84], [80, 82], [50, 12], [50, 90]];
+    return kok('103', 'z21', '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><g stroke="var(--vk-l2)" stroke-width="1">'
+      + hepsi.map((h, i) => '<line x1="50" y1="50" x2="' + YER[i][0] + '" y2="' + YER[i][1] + '" vector-effect="non-scaling-stroke"' + (h.z ? ' stroke-dasharray="3 3"' : '') + '/>').join('') + '</g></svg>'
+      + hepsi.map((h, i) => '<span class="n' + (h.z ? ' z' : '') + '" style="left:' + YER[i][0] + '%;top:' + YER[i][1] + '%">' + kac(h.k) + (h.z ? '<small>ZIT</small>' : '') + '</span>').join('')
+      + '<span class="n m" style="left:50%;top:50%">' + kac(o.kelime) + '</span>', { etiket:o.kelime + ': eş ' + es.join(', ') + (zit.length ? '; zıt ' + zit.join(', ') : '') });
+  }
+
+  /* 104 BAĞLI NOTLAR — not kartının altında ona bağlanan notlar ve kaynak. */
+  function bagliNotlar(o){
+    if(!o || !o.baslik) return '';
+    const b = (o.baglar || []).filter(Boolean);
+    return kok('104', 'z22', '<div class="u"><b>' + kac(o.baslik) + '</b><span class="cap">' + kac(buyuk(o.ust || 'not')) + '</span></div>'
+      + (o.metin ? '<p class="nt3">' + kac(o.metin) + '</p>' : '')
+      + '<div class="bg"><span class="cap">' + (b.length ? b.length + ' BAĞLI NOT' : 'BAĞ YOK') + '</span><div>' + b.map(x => '<span>' + kac(x) + '</span>').join('') + '</div></div>', { ek:'kt' });
+  }
+
+  /* 105 DESTE DURUMU — kartlar üç durumda: yeni, öğreniliyor, oturmuş. */
+  function desteDurumu(o){
+    if(!o || !sayiMi(o.toplam) || o.toplam < 1) return '';
+    const s = [['Yeni', o.yeni, 'color-mix(in oklab,var(--esp) 35%,var(--vk-s2))'], ['Öğreniliyor', o.ogreniliyor, 'color-mix(in oklab,var(--esp) 65%,var(--vk-s2))'], ['Oturmuş', o.oturmus, 'var(--esp)']];
+    return kok('105', 'w21', '<div class="u"><b>' + o.toplam + ' kart</b>' + et('computed') + '</div>'
+      + '<div class="br" role="img" aria-label="' + kac(s.map(x => x[0] + ' ' + (x[1] || 0)).join(', ')) + '">' + s.map(x => x[1] ? '<i style="width:' + px(100 * x[1] / o.toplam) + ';background:' + x[2] + '"></i>' : '').join('') + '</div>'
+      + '<div class="ls">' + s.map(x => '<div><i style="background:' + x[2] + '"></i>' + x[0] + '<em>' + (x[1] || 0) + '</em></div>').join('') + '</div>');
+  }
+
+  /* 106 CÜMLE KURMA — kelime taşları boş yerlere konur; yerleşen taş renk
+     alır. Dokunmak taşı sıradaki boş yere koyar (sürükleme gerekmez). */
+  function cumleKurma(o){
+    if(!o || !(o.yerlesen || []).length && !(o.taslar || []).length) return '';
+    return kok('106', 'w22', '<div class="sl2" aria-live="polite">' + (o.yerlesen || []).map(k => '<span class="ok5">' + kac(k) + '</span>').join('')
+      + Array.from({ length:(o.bos || 0) }, () => '<span class="bs5" aria-hidden="true"></span>').join('') + '</div>'
+      + '<div class="tas">' + (o.taslar || []).map((k, i) => '<button type="button" class="' + (i === 0 ? 'uc2' : '') + '" data-act="' + kac(o.act) + '" data-k="' + kac(k) + '">' + kac(k) + '</button>').join('') + '</div>'
+      + '<span class="cap">' + kac(buyuk(o.not || 'Kelimeye dokun · cümleyi kur')) + '</span>');
+  }
+
+  /* 107 METİNLİ DİNLEME — oynatıcı ve metin; okunan cümle büyür. */
+  function metinliDinleme(o){
+    const c = (o && o.cumleler || []).filter(Boolean);
+    if(!c.length) return '';
+    const i = sayiMi(o.simdi) ? o.simdi : 0;
+    return kok('107', 'w23', '<div class="pl"><button type="button" class="oy" data-act="' + kac(o.act) + '" aria-label="' + (o.caliyor ? 'Durdur' : 'Oynat') + '">' + ikon('oyn') + '</button>'
+      + '<div class="il2"><i style="width:' + px(100 * (i + (o.caliyor ? 0.5 : 0)) / c.length) + '"></i></div><span class="mono">' + (i + 1) + ' / ' + c.length + '</span></div>'
+      + '<div class="mt2" lang="' + kac(o.dil || 'en') + '">' + c.map((x, k) => '<p' + (k === i ? ' class="on"' : '') + '>' + kac(x) + '</p>').join('') + '</div>');
+  }
+
+  /* 108 SORU ZİNCİRİ — sokratik konuşma zincir; her «neden?» bir halka. */
+  function soruZinciri(o){
+    const h = (o && o.halkalar || []).filter(x => x && x.metin);
+    if(!h.length) return '';
+    return kok('108', 'w24', h.map(x => x.soru
+      ? '<div class="r"><span class="av" aria-hidden="true"><b>' + kac(o.harf || '?') + '</b>' + (o.gorsel ? '<img src="' + kac(o.gorsel) + '" alt="" loading="lazy" onerror="this.remove()">' : '') + '</span><p>' + kac(x.metin) + '</p></div>'
+      : '<div class="r b"><p>' + kac(x.metin) + '</p></div>').join(''), { etiket:'Soru zinciri, ' + h.filter(x => x.soru).length + ' soru' });
+  }
+
+  /* 109 ÜÇ MADDE ÖZETİ — özet MODELİNDİR ve öyle etiketlenir. */
+  function ucMaddeOzet(o){
+    const m = (o && o.maddeler || []).filter(Boolean).slice(0, 3);
+    if(!m.length) return '';
+    return kok('109', 'w25', '<div class="u"><b>' + kac(o.baslik || 'Özet') + '</b><span class="cap">' + kac(buyuk(o.kaynak || '')) + '</span></div>'
+      + '<ol>' + m.map(x => '<li>' + kac(x) + '</li>').join('') + '</ol>'
+      + '<div class="alt">' + et('estimated', 'model özeti · kontrol et') + (o.act ? dugme({ metin:m.length + ' kart ekle', act:o.act, data:o.data }) : '') + '</div>', { ek:'kt' });
+  }
+
   L.VITRIN = {
     kac, sayi, isaretli, dkMetni, et, ikon, tik, hl, fk, kok, dugme, renk, KES,
     geriSayim, notrSerit, yanlisKarti, denemeKarnesi, hizSeridi, denemeKarsilastirma,
@@ -13199,6 +13458,9 @@ window.LIFEOS = window.LIFEOS || {};
     setKutucuklari, haftaHalkalari, tusTakimi, sonrakiKontrol, harcamaSeritleri, ogunCizelgesi,
     yogunlukBolgeleri, harcamaTakvimi, uykuDuzeni, tahlilKarsilastirma, ogunSablonlari,
     antrenmanHaftasi, duzenliGiderler, olcumHatirlatici,
+    desteYigini, sureliCevap, dakikaHalkasi, unutmaEgrisi, merdiven, kutuphaneRafi, okumaIlerlemesi,
+    alintiKarti, kelimeSahnesi, baglamdaKelime, dalgaFormu, tarihSeridi, dersKapagi, oturumSonu,
+    kelimeAgi, bagliNotlar, desteDurumu, cumleKurma, metinliDinleme, soruZinciri, ucMaddeOzet,
   };
 })();
 

@@ -44,9 +44,32 @@ ESP.Screens.lang = (function(){
      vadesi ileri gider ve kuyruk canlı hesaplansaydı kart ortadan kaybolur,
      kullanıcı ilerlemeyi göremezdi. */
 
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+
   function queueStart(){
     const due = ESP.SRS.dueCards().filter(c => c.lang === aktifDil());
-    return { ids:due.map(c => c.id), pos:0, shown:false, correct:0, again:0 };
+    return { ids:due.map(c => c.id), pos:0, shown:false, correct:0, again:0,
+      dagilim:{ again:0, hard:0, good:0, easy:0 }, basladi:Date.now() };
+  }
+
+  /* 101 AJANLI DERS KAPAĞI: dersin ajanı ve tek cümle; cümle KURALDAN
+     (vadeli ve hiç sorulmamış kart sayısı), model kapalıyken de aynı. */
+  function dersKapagi(d){
+    if(!VT()) return '';
+    const disc = ESP.DISCIPLINE_BY_ID.lang, a = disc && ESP.AGENT_BY_ID[disc.agent];
+    if(!a) return '';
+    const yeni = ESP.SRS.dueCards().filter(c => c.lang === aktifDil() && !c.reps).length;
+    return VT().dersKapagi({ ad:a.name, harf:a.initial, alan:disc.short, gorsel:'img/marka/ajan-kare-esp-' + a.id + '.webp',
+      cumle:'Bugün ' + d.due + ' kart vadeli' + (yeni ? '; ' + yeni + '\'i hiç sorulmadı.' : '.') });
+  }
+
+  /* 098 BAĞLAMDA KELİME: örnek cümlesinde geçen kart, cümlenin içinde. */
+  function baglamda(){
+    if(!VT()) return '';
+    const k = M.cardsOf(aktifDil()).filter(c => c.context && c.front
+      && c.context.toLocaleLowerCase('tr-TR').indexOf(c.front.toLocaleLowerCase('tr-TR')) >= 0).slice(0, 2);
+    return k.map(c => VT().baglamdaKelime({ cumle:c.context, kelime:c.front, anlam:c.back, dil:c.lang,
+      not:'kutu ' + c.box + ' · kartta var' })).join('');
   }
 
   function reviewRows(){
@@ -80,6 +103,7 @@ ESP.Screens.lang = (function(){
           ? 'En çok geciken kart ' + d.maxOverdueDays + ' gündür bekliyor.'
           : 'Bugün sırası gelenler.',
         body:html`
+          ${when(dersKapagi(d), () => html`<div class="mb-12">${raw(dersKapagi(d))}</div>`)}
           ${K.Button({ label:d.due + ' kartı çalış', tone:'primary', act:'start-review' })}
           <p class="small muted mt-10">Oturum başladığında liste dondurulur:
             çalışırken cevapladığın kartın vadesi ileri gitse de kuyruktan düşmez,
@@ -102,14 +126,25 @@ ESP.Screens.lang = (function(){
       /* Odak kapısı (014, hareket.css): oturum sürerken sayfanın geri kalanı
          sisle örtülür; Esc «Oturumu bitir»e basar. */
       body:html`<div data-h-odak>
+        ${VT() ? raw(q.shown
+            /* 097 KELİME SAHNESİ: tek kelime, anlamı, örnek cümle. */
+            ? VT().kelimeSahnesi({ kelime:kart.front, anlam:kart.back, ornek:kart.context, dil:kart.lang })
+            /* 089 DESTE YIĞINI: kalan kartlar arkada; üstteki kart çevrilir. */
+            : VT().desteYigini({ on:kart.front, kalan:q.ids.length - q.pos, act:'reveal-card' })) : html`
         <div class="srscard">
           <div class="srscard__front">${kart.front}</div>
           ${when(kart.context, () => html`<p class="srscard__ctx">${kart.context}</p>`)}
           ${q.shown
             ? html`<div class="srscard__back">${kart.back}</div>`
             : html`<button class="srscard__reveal" data-act="reveal-card">Karşılığı göster</button>`}
-        </div>
+        </div>`}
         ${when(q.shown, () => html`
+          ${VT() ? html`<div class="mt-12">${raw(VT().sureliCevap({ act:'grade-card',
+            /* 090 SÜRELİ CEVAP: her düğme kartın sonraki görülme zamanını
+               söyler; zamanı tekrar motoru hesaplar (ESP.SRS.schedule). */
+            dugmeler:ESP.SRS.GRADES.map(g => { const next = ESP.SRS.schedule(kart, g.id);
+              return { ad:g.label, sure:next.interval ? next.interval + ' gün' : 'bugün', on:g.id === 'good', not:g.note,
+                data:{ 'data-grade':g.id } }; }) }))}</div>` : html`
           <div class="row wrap mt-12">
             ${map(ESP.SRS.GRADES, g => {
               const next = ESP.SRS.schedule(kart, g.id);
@@ -120,12 +155,22 @@ ESP.Screens.lang = (function(){
                 title:g.note,
               });
             })}
-          </div>
+          </div>`}
           <p class="small muted mt-8">Kutu ${kart.box} · kolaylık
             ${U.fmtNum(Math.round(kart.ease * 100) / 100)} · ${kart.reps} tekrar,
             ${kart.lapses} unutma</p>`)}
       </div>`,
     })];
+  }
+
+  /* 102 OTURUM SONU (vitrin): kart sayısı, iyi + kolay oranı, süre ve
+     cevap dağılımı oturumun KAYDINDAN; yarının yükü tekrar motorundan. */
+  function oturumSonu(q){
+    if(!VT()) return '';
+    const yarin = U.iso(U.addDays(U.today(), 1));
+    const dk = q.basladi ? (Date.now() - q.basladi) / 60000 : null;
+    return VT().oturumSonu({ kart:q.ids.length, dagilim:q.dagilim || {}, dk:dk != null && dk >= 1 ? dk : null,
+      yarin:ESP.SRS.dueCards(yarin).filter(c => c.lang === aktifDil()).length });
   }
 
   function finishRow(q){
@@ -134,7 +179,7 @@ ESP.Screens.lang = (function(){
       meta:q.ids.length + ' kart',
       note:'Cevapladığın her kart yeni vadesine taşındı.',
       body:html`
-        ${K.Notice({ tone:'ok', title:'Tamamlandı',
+        ${VT() ? raw(oturumSonu(q)) : K.Notice({ tone:'ok', title:'Tamamlandı',
           body:q.correct + ' kart hatırlandı, ' + q.again + ' kart başa döndü.' })}
         <div class="row mt-10">
           ${K.Button({ label:'Kapat', tone:'primary', act:'end-review' })}
@@ -152,7 +197,9 @@ ESP.Screens.lang = (function(){
       .filter(c => !q || U.norm(c.front + ' ' + c.back).indexOf(q) >= 0)
       .sort((a, b) => (a.due || '').localeCompare(b.due || ''));
 
-    return [K.Entry({
+    const bag = baglamda();
+    return [when(bag, () => K.Entry({ label:'Bağlamda', meta:'örnek cümlede',
+      note:'Kelime kendi cümlesinin içinde; anlamı yerinde.', body:raw(bag) })), K.Entry({
       label:'Deste',
       meta:hepsi.length + ' kart',
       note:'Vadesi yakın olan üstte. «Aktif» işareti kartın üretimde '
@@ -247,6 +294,34 @@ ESP.Screens.lang = (function(){
 
   /* -------------------------------------------------------------- ilerleme */
 
+  /* 092 UNUTMA EĞRİSİ: destenin ortalama hatırlaması, tekrar motorunun
+     modeliyle (R = e^(−t/S)); geçmiş günde yalnız o güne kadar cevaplanmış
+     kartlar girer, gelecek kesik. Hiç sorulmamış kart girmez. */
+  function unutmaEgrisi(){
+    if(!VT()) return '';
+    const kartlar = M.cardsOf(aktifDil()).filter(c => c.reps);
+    if(!kartlar.length) return '';
+    const bugun = U.todayISO();
+    const noktalar = [];
+    for(let g = -7; g <= 14; g++){
+      const d = U.iso(U.addDays(U.parse(bugun), g));
+      const r = kartlar.map(c => {
+        const son = c.due && c.interval ? U.iso(U.addDays(U.parse(c.due), -c.interval)) : null;
+        if(!son || son > d) return null;
+        return ESP.SRS.retentionOf(c, d);
+      }).filter(x => x != null);
+      if(r.length) noktalar.push({ gun:g, r:r.reduce((a, b) => a + b, 0) / r.length });
+    }
+    return VT().unutmaEgrisi({ noktalar, esik:ESP.Planner.RETENTION_FLOOR });
+  }
+
+  /* 105 DESTE DURUMU: kutu 1 yeni, 2–3 öğreniliyor, 4–5 oturmuş. */
+  function desteDurumu(d){
+    if(!VT() || !d.total) return '';
+    const n = b => (d.boxes.find(x => x.box === b) || {}).count || 0;
+    return VT().desteDurumu({ toplam:d.total, yeni:n(1), ogreniliyor:n(2) + n(3), oturmus:n(4) + n(5) });
+  }
+
   function progressRows(){
     const d = ESP.SRS.deckStatus(aktifDil());
     const bant = ESP.cefrOf(d.active, d.retention.value);
@@ -267,7 +342,8 @@ ESP.Screens.lang = (function(){
               text:'%' + Math.round(d.retention.value * 100),
               tone:d.retention.value < ESP.Planner.RETENTION_FLOOR ? 'danger' : '' })}
             <p class="small muted mt-8">Taban %${Math.round(ESP.Planner.RETENTION_FLOOR * 100)}:
-              altına inerse yeni kart eklemek önceliği kaybeder.</p>`,
+              altına inerse yeni kart eklemek önceliği kaybeder.</p>
+            ${when(unutmaEgrisi(), () => html`<div class="mt-12">${raw(unutmaEgrisi())}</div>`)}`,
       }),
 
       K.Entry({
@@ -276,7 +352,7 @@ ESP.Screens.lang = (function(){
         note:'Kutu kaba sınıftır: bir kart doğru cevaplandıkça yukarı çıkar, '
            + 'unutulduğunda başa döner.',
         body:d.total
-          ? html`${map(d.boxes, b => K.Meter({
+          ? html`${when(desteDurumu(d), () => html`<div class="mb-12">${raw(desteDurumu(d))}</div>`)}${map(d.boxes, b => K.Meter({
               label:'Kutu ' + b.box + ' · ' + b.label,
               value:d.total ? b.count / d.total * 100 : 0,
               text:String(b.count) }))}`
@@ -538,6 +614,8 @@ ESP.Screens.lang = (function(){
       const res = await ESP.SRS.answer(q.ids[q.pos], el.dataset.grade);
       if(!res.ok){ ESP.UI.toast(res.error); return; }
       if(el.dataset.grade === 'again') q.again++; else q.correct++;
+      q.dagilim = q.dagilim || {};
+      q.dagilim[el.dataset.grade] = (q.dagilim[el.dataset.grade] || 0) + 1;
       q.pos++; q.shown = false;
       ESP.Memo.bitir();
       ESP.App.render();

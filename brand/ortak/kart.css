@@ -1064,7 +1064,9 @@
 
 /* ================================================================
    VİTRİN DURUMLARI — vitrin kartlarının (brand/ortak/vitrin.css,
-   ÜRETİLMİŞ) sistemde ALDIĞI hâller. Vitrin bir davranışı döngüyle
+   ÜRETİLMİŞ) sistemde ALDIĞI hâller. vitrin.css bu dosyadan ÖNCE
+   yüklenir (index.html): eşit özgüllükte buradaki durum kazanır.
+   Vitrin bir davranışı döngüyle
    gösterir; sistemde o davranış gerçek bir olayla olur. Kartın biçimi
    burada DEĞİŞMEZ: yalnız durum (çevrilmiş, seçili), gerçek giriş
    kutusu ve gerçek metnin uzunluğu karşılanır.
@@ -1190,3 +1192,27 @@
 /* 078: vitrinin h5'i sayfanın başlık sırasını atlatıyordu (h2 → h5);
    ad düz metindir, biçimi aynı. */
 .vk .y19 b.ad{ display:block; font-size:14px; font-weight:600; }
+
+/* ---- E · ESP vitrin kartlarının sistem hâlleri ----
+   ESP turuncusu (--esp) yazıda AA'yı geçmez (3,5:1): yazı ve üzerinde beyaz
+   yazı taşıyan zemin --esp-ink'e bağlanır; nokta ve çubuk --esp kalır. */
+.vk .y22 p u{ color:var(--esp-ink, var(--esp)); }
+.vk .y24 .ip b, .vk .z22 .bg>div span, .vk .x44v .st .b{ color:var(--esp-ink, var(--esp)) !important; }
+.vk .x41 button.on, .vk .x44v .st .on, .vk .z21 .n.m, .vk .w23 .oy, .vk .w22 .tas .uc2{ background:var(--esp-ink, var(--esp)) !important; }
+/* 089 üst kart düğme. */
+.vk .x40 button.kr{ position:relative; width:190px; height:106px; border-radius:12px; background:var(--vk-s1); border:1px solid var(--vk-l2); }
+/* 090 cevap düğmeleri. */
+.vk .x41 button{ height:52px; border-radius:12px; background:var(--vk-s1); border:1px solid var(--vk-l1); display:flex; flex-direction:column;
+  align-items:center; justify-content:center; font-weight:600; }
+.vk .x41 button span{ font:400 10px var(--vk-mono); color:var(--vk-ink3); }
+.vk .x41 button.on{ color:var(--vk-on); border-color:transparent; }
+.vk .x41 button.on span{ color:color-mix(in oklab,var(--vk-on) 80%,transparent); }
+@media (min-width:640px){ .vk .x41{ grid-template-columns:repeat(4,1fr); } }
+/* 094 okunan oranı bilinmeyen kitapta alt çizgi yok. */
+.vk .x45v .rf i.oransiz::after{ display:none; }
+/* 104 notun metni. */
+.vk .z22 .nt3{ margin-top:10px; font-size:13px; color:var(--vk-ink2); }
+/* 106 taşlar düğme. */
+.vk .w22 .tas{ flex-wrap:wrap; }
+.vk .w22 .tas button{ height:30px; padding:0 10px; border-radius:7px; display:inline-grid; place-items:center; font:400 15px var(--vk-serif); background:var(--vk-s3); }
+.vk .w22 .tas button.uc2{ color:var(--vk-on); }

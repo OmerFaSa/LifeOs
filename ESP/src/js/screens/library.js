@@ -122,6 +122,8 @@ ESP.Screens.library = (function(){
       return rows;
     }
 
+    const bagHtml = bagli();
+    if(bagHtml) rows.push(K.Entry({ label:'Bağlı notlar', meta:'en çok bağı olan', body:raw(bagHtml) }));
     rows.push(K.Entry({
       label:'Notlar',
       meta:hepsi.length + ' not' + (kavram ? ' · ' + (ESP.CONCEPT_BY_ID[kavram] || {}).label : ''),
@@ -320,11 +322,47 @@ ESP.Screens.library = (function(){
     });
   }
 
+  /* ---------- E · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+
+  /* 094 KÜTÜPHANE RAFI: sayfa sayısı tutulmadığı için sırtlar eşit kalın;
+     okunan oran yalnız BİTEN kitapta bilinir (%100), okunanda çizgi yok. */
+  function raf(kitaplar){
+    if(!VT() || !kitaplar.length) return '';
+    return VT().kutuphaneRafi({ not:'kalınlık tutulmuyor', kitaplar:kitaplar.slice(0, 12).map(b => {
+      const st = M.bookStatus(b);
+      return { ad:b.title, durum:st.label, on:st.id === 'okunuyor', oran:st.id === 'bitti' ? 100 : null };
+    }) });
+  }
+
+  /* 096 ALINTI KARTI ve 104 BAĞLI NOTLAR: kaynağa bağlı en yeni not ve
+     en çok bağı olan not. Not metni kullanıcının; bağ sayısı kayıttan. */
+  function alinti(){
+    if(!VT()) return '';
+    const n = (S.notes || []).filter(x => x.bookId && bookOf(x.bookId)).slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0];
+    if(!n) return '';
+    const b = bookOf(n.bookId);
+    return VT().alintiKarti({ metin:n.text, kaynak:b.title + (b.author ? ' · ' + b.author : '') });
+  }
+  function bagli(){
+    if(!VT()) return '';
+    const n = (S.notes || []).filter(x => (x.links || []).length).slice().sort((a, b) => (b.links || []).length - (a.links || []).length)[0];
+    if(!n) return '';
+    const baslik = (n.concepts || []).map(c => (ESP.CONCEPT_BY_ID[c] || {}).label).filter(Boolean)[0] || 'Not';
+    const baglar = (n.links || []).map(l => { const x = (S.notes || []).find(y => y.id === l.to); return x ? String(x.text).slice(0, 40) : null; }).filter(Boolean);
+    const kitap = bookOf(n.bookId);
+    if(kitap) baglar.unshift(kitap.title);
+    return VT().bagliNotlar({ baslik, ust:'not · ' + U.fmtShort(ESP.U.gunOf(n.createdAt || '')), metin:n.text, baglar });
+  }
+
   function bookRows(){
     const kitaplar = S.books || [];
     const notSayisi = id => (S.notes || []).filter(n => n.bookId === id).length;
+    const rafHtml = raf(kitaplar), alintiHtml = alinti();
 
     return [
+      when(rafHtml, () => K.Entry({ label:'Raf', meta:kitaplar.length + ' kitap', body:raw(rafHtml) })),
+      when(alintiHtml, () => K.Entry({ label:'Alıntı', meta:'son not', body:raw(alintiHtml) })),
       K.Entry({
         label:'Kaynaklar', hint:'primary-text',
         meta:kitaplar.length + ' kayıt',

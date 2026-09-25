@@ -400,4 +400,110 @@ describe('D · SPİ kartları', () => {
   });
 });
 
+
+describe('E · ESP kartları', () => {
+  it('oz-089 deste yığını: kalan kart sayısı ve çevrilecek üst kart', () => {
+    icinde(V().desteYigini({ on:'resilient', kalan:3, act:'reveal-card' }), k => {
+      expect(k.querySelector('[data-act="reveal-card"] b').textContent).toBe('resilient');
+      expect(k.querySelectorAll('.kr:not(button)')).toHaveLength(2);
+      expect(k.textContent).toContain('3 KART');
+    });
+  });
+  it('oz-090 süreli cevap: her düğme sonraki görülme zamanını söyler', () => {
+    icinde(V().sureliCevap({ act:'grade-card', dugmeler:[{ ad:'Yine', sure:'bugün', data:{ 'data-grade':'again' } }, { ad:'İyi', sure:'3 gün', on:true, data:{ 'data-grade':'good' } }] }), k => {
+      expect(k.querySelectorAll('button')).toHaveLength(2);
+      expect(k.querySelector('.on').textContent).toContain('3 gün');
+      expect(k.querySelector('[data-grade="again"]')).toBeTruthy();
+    });
+  });
+  it('oz-091 dakika halkası: dokunulmamış disiplin «—»', () => {
+    icinde(V().dakikaHalkasi({ hedef:50, toplam:20, satirlar:[{ ad:'Dil', dk:20 }, { ad:'Okuma', dk:null }] }), k => {
+      expect(k.querySelector('.hk b').textContent).toBe('20');
+      expect(k.textContent).toContain('—');
+      expect(k.textContent).toContain('30 dk');
+    });
+  });
+  it('oz-092 unutma eğrisi: geçmiş düz, gelecek kesik, bugün işaretli', () => {
+    icinde(V().unutmaEgrisi({ noktalar:[{ gun:-2, r:0.9 }, { gun:-1, r:0.8 }, { gun:0, r:0.7 }, { gun:1, r:0.6 }, { gun:2, r:0.5 }] }), k => {
+      expect(k.querySelectorAll('path')).toHaveLength(2);
+      expect(k.querySelector('path[stroke-dasharray]')).toBeTruthy();
+      expect(k.textContent).toContain('bugün · %70');
+    });
+  });
+  it('oz-093 merdiven: geçilen tikli, şimdiki vurgulu', () => {
+    icinde(V().merdiven({ basamaklar:[{ no:1, ad:'A', durum:'done' }, { no:2, ad:'B', durum:'current', not:'2 kapının 1’i geçti' }, { no:3, ad:'C', durum:'ahead' }] }), k => {
+      expect(k.querySelectorAll('.b')).toHaveLength(1);
+      expect(k.querySelector('.on').textContent).toContain('2');
+      expect(k.querySelector('.ip').textContent).toContain('Basamak 2');
+    });
+  });
+  it('oz-094 raf: okunan oranı bilinmeyen kitapta çizgi yok', () => {
+    icinde(V().kutuphaneRafi({ kitaplar:[{ ad:'Denemeler', oran:null, on:true }, { ad:'Nutuk', oran:100 }] }), k => {
+      expect(k.querySelectorAll('i.oransiz')).toHaveLength(1);
+      expect(k.textContent).toContain('2 KİTAP · 1 BİTTİ');
+    });
+  });
+  it('oz-095 oz-099 oz-103 oz-106 oz-107 oz-109 veri yoksa kart yok', () => {
+    expect(V().okumaIlerlemesi({ ad:'X', oran:null })).toBe('');
+    expect(V().dalgaFormu({ genlik:[] })).toBe('');
+    expect(V().kelimeAgi({ kelime:'resilient', es:[], zit:[] })).toBe('');
+    expect(V().cumleKurma({})).toBe('');
+    expect(V().metinliDinleme({ cumleler:[] })).toBe('');
+    expect(V().ucMaddeOzet({ maddeler:[] })).toBe('');
+    expect(V().ucMaddeOzet({ maddeler:['a', 'b', 'c'] })).toContain('data-kesinlik="estimated"');
+    expect(V().okumaIlerlemesi({ ad:'Denemeler', oran:42, kalanDk:12 })).toContain('TAHMİN');
+  });
+  it('oz-096 alıntı kartı kaynağıyla', () => {
+    expect(V().alintiKarti({ metin:'Alışkanlık ikinci bir doğadır.', kaynak:'Denemeler' })).toContain('— Denemeler');
+  });
+  it('oz-097 kelime sahnesi: kelime, anlam, örnek; başka bir şey yok', () => {
+    icinde(V().kelimeSahnesi({ kelime:'resilient', anlam:'dayanıklı', ornek:'Children are resilient.' }), k => {
+      expect(k.querySelector('b').textContent).toBe('resilient');
+      expect(k.querySelectorAll('button')).toHaveLength(0);
+    });
+  });
+  it('oz-098 bağlamda kelime: hedef kelime altı çizili', () => {
+    icinde(V().baglamdaKelime({ cumle:'Children are often remarkably resilient.', kelime:'resilient', anlam:'dayanıklı' }), k => {
+      expect(k.querySelector('u').textContent).toBe('resilient');
+    });
+    expect(V().baglamdaKelime({ cumle:'Başka cümle', kelime:'resilient' })).toBe('');
+  });
+  it('oz-100 tarih şeridi: seçili olay yanar ve yüzyılı yazar', () => {
+    icinde(V().tarihSeridi({ olaylar:[{ yil:1453, ad:'İstanbul’un fethi', on:true }, { yil:1789, ad:'Fransız Devrimi' }] }), k => {
+      expect(k.querySelectorAll('.ek i')).toHaveLength(2);
+      expect(k.querySelector('.ip').textContent).toContain('XV. yüzyıl');
+    });
+  });
+  it('oz-101 ajanlı ders kapağı: ajan ve tek cümle', () => {
+    const h = V().dersKapagi({ ad:'Polyglot', alan:'Dil', cumle:'Bugün 12 kart vadeli.' });
+    expect(h).toContain('Polyglot');
+    expect(h).toContain('DİL');
+  });
+  it('oz-102 oturum sonu: iyi + kolay oranı dağılımdan', () => {
+    icinde(V().oturumSonu({ kart:10, dagilim:{ again:1, hard:1, good:6, easy:2 }, dk:9, yarin:38 }), k => {
+      expect(k.textContent).toContain('%80');
+      expect(k.textContent).toContain('yarın 38 kart');
+      expect(k.querySelectorAll('.dg i')).toHaveLength(4);
+    });
+  });
+  it('oz-104 bağlı notlar çip olarak', () => {
+    icinde(V().bagliNotlar({ baslik:'Alışkanlık', baglar:['Denemeler', 'Etik'] }), k => {
+      expect(k.querySelectorAll('.bg > div span')).toHaveLength(2);
+      expect(k.textContent).toContain('2 BAĞLI NOT');
+    });
+  });
+  it('oz-105 deste durumu: yeni, öğreniliyor, oturmuş', () => {
+    icinde(V().desteDurumu({ toplam:10, yeni:2, ogreniliyor:3, oturmus:5 }), k => {
+      expect(k.querySelector('.u b').textContent).toBe('10 kart');
+      expect(k.querySelectorAll('.br i')).toHaveLength(3);
+    });
+  });
+  it('oz-108 soru zinciri: soru ve cevap halkaları', () => {
+    icinde(V().soruZinciri({ halkalar:[{ metin:'Tez', soru:false }, { metin:'Neden?', soru:true }] }), k => {
+      expect(k.querySelectorAll('.r')).toHaveLength(2);
+      expect(k.querySelectorAll('.r.b')).toHaveLength(1);
+    });
+  });
+});
+
 })();

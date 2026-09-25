@@ -64,6 +64,14 @@ ESP.Screens.history = (function(){
       return rows;
     }
 
+    /* 100 TARİH ŞERİDİ (vitrin): yüzyıllar yatay, olaylar nokta; en son
+       eklenen olay yanar. Yıl kaydın kendisinden; yılsız olay çizilmez. */
+    const V = (window.LIFEOS || {}).VITRIN;
+    const seritHtml = V ? V.tarihSeridi({ olaylar:evs().filter(e => typeof e.year === 'number').slice()
+      .sort((a, b) => a.year - b.year).map(e => ({ yil:e.year, ad:e.title,
+        on:e === evs().slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0] })) }) : '';
+    if(seritHtml) rows.push(K.Entry({ label:'Şerit', meta:evs().length + ' olay', wide:true, body:raw(seritHtml) }));
+
     /* Dönem şeridi — her dönem kendi olay sayısıyla. */
     const donem = ESP.Chrono.spread('era');
     rows.push(K.Entry({

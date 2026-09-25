@@ -876,6 +876,239 @@ window.LIFEOS = window.LIFEOS || {};
       + '<span class="cap">ÖLÇÜLMEZSE BOŞ KALIR · TAHMİN EDİLMEZ</span>', { ek:'kt' });
   }
 
+
+  /* ================================================== E · ESP */
+
+  /* 089 DESTE YIĞINI — kalan kartlar arkada yığın; yığın incelikçe bitiş
+     görülür. Üstteki kart düğmedir (dokun · çevir). */
+  function desteYigini(o){
+    if(!o || !o.on || !sayiMi(o.kalan)) return '';
+    const arka = Math.max(0, Math.min(3, o.kalan - 1));
+    const kr = [];
+    for(let i = 3 - arka; i < 3; i++) kr.push('<span class="kr" style="transform:translate(' + (4 * (3 - i)) + 'px,' + (4 * (3 - i)) + 'px);opacity:' + (0.35 + 0.22 * i).toFixed(2) + '" aria-hidden="true"></span>');
+    return kok('089', 'x40', kr.join('') + '<button type="button" class="kr ust-k" data-act="' + kac(o.act) + '" aria-label="' + kac(o.on + ' — karşılığı göster') + '"><b>' + kac(o.on) + '</b>'
+      + '<span class="cap">DOKUN · ÇEVİR</span></button><span class="mod c-esp sy">' + o.kalan + ' KART</span>');
+  }
+
+  /* 090 SÜRELİ CEVAP DÜĞMELERİ — her düğme kartın bir sonraki görülme
+     zamanını söyler; zamanı tekrar motoru hesaplar. */
+  function sureliCevap(o){
+    const d = (o && o.dugmeler || []).filter(Boolean);
+    if(!d.length) return '';
+    return kok('090', 'x41', d.map(x => '<button type="button" class="' + (x.on ? 'on' : '') + '" data-act="' + kac(o.act) + '"' + nitelik(x.data)
+      + (x.not ? ' title="' + kac(x.not) + '"' : '') + '>' + kac(x.ad) + '<span>' + kac(x.sure) + '</span></button>').join(''),
+      { etiket:'Cevap düğmeleri' });
+  }
+
+  /* 091 DAKİKA HALKASI — günlük ölçüt halkası; rengi değişmez, yalnız dolar.
+     Dokunulmamış disiplin «—», 0 dk değil. */
+  function dakikaHalkasi(o){
+    if(!o || !sayiMi(o.hedef) || o.hedef <= 0) return '';
+    const top = sayiMi(o.toplam) ? o.toplam : 0;
+    const C = 276.5;
+    return kok('091', 'x42v', '<div class="hk"><svg viewBox="0 0 104 104" aria-hidden="true"><circle cx="52" cy="52" r="44" fill="none" stroke="var(--vk-s3)" stroke-width="9"/>'
+      + (top > 0 ? '<circle cx="52" cy="52" r="44" fill="none" stroke="var(--esp)" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + (C * Math.min(1, top / o.hedef)).toFixed(1) + ' ' + C + '" transform="rotate(-90 52 52)"/>' : '')
+      + '</svg><div><b>' + sayi(Math.round(top)) + '</b><span class="cap">/ ' + sayi(o.hedef) + ' DK</span></div></div>'
+      + '<div class="ls">' + (o.satirlar || []).map(x => '<div><i' + (sayiMi(x.dk) ? '' : ' class="b"') + '></i>' + kac(x.ad) + '<em>' + (sayiMi(x.dk) ? sayi(Math.round(x.dk)) + ' dk' : '—') + '</em></div>').join('')
+      + '<div class="top"><span></span>Kalan<em>' + sayi(Math.max(0, Math.round(o.hedef - top))) + ' dk</em></div></div>',
+      { etiket:'Bugün ' + Math.round(top) + ' / ' + o.hedef + ' dakika' });
+  }
+
+  /* 092 UNUTMA EĞRİSİ — hatırlama düşer, tekrar yükseltir; «bugün» noktası
+     işaretli. Eğri tekrar motorunun modelidir (R = e^(−t/S)); geleceği
+     kesik çizilir, çünkü henüz olmadı. `noktalar`: [{ gun (bugüne göre), r (0-1) }]. */
+  function unutmaEgrisi(o){
+    const n = (o && o.noktalar || []).filter(x => x && sayiMi(x.gun) && sayiMi(x.r));
+    if(n.length < 3) return '';
+    const g0 = Math.min.apply(null, n.map(x => x.gun)), g1 = Math.max.apply(null, n.map(x => x.gun));
+    const x = g => 6 + 248 * (g - g0) / Math.max(1, g1 - g0), y = r => 14 + (1 - r) * 80;
+    const gecmis = n.filter(p => p.gun <= 0), gelecek = n.filter(p => p.gun >= 0);
+    const yol = l => l.map((p, i) => (i ? 'L' : 'M') + x(p.gun).toFixed(1) + ' ' + y(p.r).toFixed(1)).join('');
+    const bugun = n.find(p => p.gun === 0);
+    const esik = sayiMi(o.esik) ? o.esik : 0.5;
+    return kok('092', 'x43', '<svg class="gr" viewBox="0 0 260 110" role="img" aria-label="' + kac('Hatırlama bugün %' + (bugun ? Math.round(bugun.r * 100) : '—')) + '">'
+      + (gecmis.length > 1 ? '<path d="' + yol(gecmis) + '" fill="none" stroke="var(--esp)" stroke-width="2"/>' : '')
+      + (gelecek.length > 1 ? '<path d="' + yol(gelecek) + '" fill="none" stroke="var(--esp)" stroke-width="2" stroke-dasharray="3 3" opacity=".6"/>' : '')
+      + '<line x1="6" y1="' + y(esik).toFixed(1) + '" x2="254" y2="' + y(esik).toFixed(1) + '" stroke="var(--vk-ink4)" stroke-dasharray="2 4"/>'
+      + '<text x="10" y="' + (y(esik) - 6).toFixed(1) + '" fill="var(--vk-ink3)" style="font:400 9px var(--vk-mono)">eşik %' + Math.round(esik * 100) + '</text>'
+      + (bugun ? '<circle cx="' + x(0).toFixed(1) + '" cy="' + y(bugun.r).toFixed(1) + '" r="4" fill="var(--vk-ink)"/><text x="' + x(0).toFixed(1) + '" y="106" text-anchor="middle" fill="var(--vk-ink3)" style="font:400 9.5px var(--vk-mono)">bugün · %' + Math.round(bugun.r * 100) + '</text>' : '')
+      + '</svg><div class="lg">' + et('computed', 'model · R = e^(−t/S)') + '<span>kesik = gelecek</span></div>');
+  }
+
+  /* 093 MERDİVEN BASAMAKLARI — basamak içerik sırasıdır, derece değil. */
+  function merdiven(o){
+    const b = (o && o.basamaklar || []).filter(Boolean);
+    if(!b.length) return '';
+    const on = b.find(x => x.durum === 'current');
+    return kok('093', 'x44v', '<div class="st">' + b.map((x, i) => '<div class="' + (x.durum === 'done' ? 'b' : x.durum === 'current' ? 'on' : '') + '" style="height:'
+      + px(30 + 64 * i / Math.max(1, b.length - 1)) + '" title="' + kac(x.ad) + '">' + (x.durum === 'done' ? ikon('tik') : '') + x.no + '</div>').join('')
+      + (on ? '<div class="ip"><b>Basamak ' + on.no + '</b><span>' + kac(on.not || on.ad) + '</span></div>' : '') + '</div>',
+      { etiket:b.map(x => x.no + '. ' + x.ad + (x.durum === 'done' ? ' (geçildi)' : x.durum === 'current' ? ' (şimdi)' : '')).join(', ') });
+  }
+
+  /* 094 KÜTÜPHANE RAFI — kitap sırtı; kalınlık sayfa sayısı (tutulmuyorsa
+     eşit), alt çizgi okunan oran (bilinmiyorsa çizgi yok). */
+  function kutuphaneRafi(o){
+    const k = (o && o.kitaplar || []).filter(Boolean);
+    if(!k.length) return '';
+    return kok('094', 'x45v', '<div class="rf">' + k.map((x, i) => '<i class="' + (x.on ? 'on' : '') + (sayiMi(x.oran) ? '' : ' oransiz') + '" style="--w:' + (sayiMi(x.kalinlik) ? x.kalinlik : 22) + 'px;--p:'
+      + (sayiMi(x.oran) ? Math.round(x.oran) : 0) + ';height:' + (66 + (i * 37) % 30) + '%" title="' + kac(x.ad + (x.durum ? ' · ' + x.durum : '')) + '">' + kac(buyuk(x.ad).slice(0, 14)) + '</i>').join('') + '</div>'
+      + '<div class="alt"><span class="cap">' + k.length + ' KİTAP · ' + k.filter(x => x.oran === 100).length + ' BİTTİ</span>'
+      + (o.not ? '<span class="cap">' + kac(buyuk(o.not)) + '</span>' : '') + '</div>',
+      { etiket:k.map(x => x.ad + (x.durum ? ' (' + x.durum + ')' : '')).join(', ') });
+  }
+
+  /* 095 OKUMA İLERLEMESİ — kitap içinde ince çizgi ve bölümün kalan süresi. */
+  function okumaIlerlemesi(o){
+    if(!o || !o.ad || !sayiMi(o.oran)) return '';
+    return kok('095', 'y20', '<div class="kp"><i aria-hidden="true"></i><div><b>' + kac(o.ad) + '</b><span>' + kac(o.alt || '') + '</span></div></div>'
+      + '<div class="iy" role="img" aria-label="' + kac('%' + Math.round(o.oran) + ' okundu') + '"><i style="width:' + px(o.oran) + '"></i></div>'
+      + '<div class="alt"><span class="cap">%' + Math.round(o.oran) + '</span>' + (sayiMi(o.kalanDk) ? et('estimated', 'bu bölüm ~' + dkMetni(o.kalanDk) + ' · tahmin') : '') + '</div>');
+  }
+
+  /* 096 ALINTI KARTI — altı çizilen cümle kaynağıyla. */
+  function alintiKarti(o){
+    if(!o || !o.metin) return '';
+    return kok('096', 'y21', '<q>' + kac(o.metin) + '</q><div class="alt"><span>— ' + kac(o.kaynak || 'kaynak yok') + '</span>'
+      + (o.act ? dugme({ metin:o.dugme || 'Desteye ekle', act:o.act, data:o.data }) : '') + '</div>');
+  }
+
+  /* 097 KELİME SAHNESİ — tek kelime, anlamı, örnek cümle. Başka hiçbir şey. */
+  function kelimeSahnesi(o){
+    if(!o || !o.kelime) return '';
+    return kok('097', 'x46', '<b lang="' + kac(o.dil || 'en') + '">' + kac(o.kelime) + '</b><p>' + kac(o.anlam || '—') + '</p>'
+      + (o.ornek ? '<em lang="' + kac(o.dil || 'en') + '">“' + kac(o.ornek) + '”</em>' : ''));
+  }
+
+  /* 098 BAĞLAMDA KELİME — metinde hedef kelime altı çizili; anlamı yerinde. */
+  function baglamdaKelime(o){
+    if(!o || !o.cumle || !o.kelime) return '';
+    const i = o.cumle.toLocaleLowerCase('tr-TR').indexOf(o.kelime.toLocaleLowerCase('tr-TR'));
+    if(i < 0) return '';
+    const c = o.cumle;
+    return kok('098', 'y22', '<p lang="' + kac(o.dil || 'en') + '">' + kac(c.slice(0, i)) + '<u>' + kac(c.slice(i, i + o.kelime.length)) + '</u>' + kac(c.slice(i + o.kelime.length)) + '</p>'
+      + '<div class="ip"><b>' + kac(o.anlam || '—') + '</b><span>' + kac(o.not || 'kartta var') + '</span></div>');
+  }
+
+  /* 099 KONUŞMA DALGA FORMU — ses dalgası ve süre; duraksama boşluk.
+     Dalga kaydın kendisinden gelir; yoksa kart yok. */
+  function dalgaFormu(o){
+    const d = (o && o.genlik || []).filter(sayiMi);
+    if(d.length < 8) return '';
+    const dur = d.reduce((a, v, i) => a + (v === 0 && d[i - 1] !== 0 ? 1 : 0), 0);
+    return kok('099', 'y23', '<div class="dl" aria-hidden="true">' + d.map(v => v === 0 ? '<i class="bos"></i>' : '<i style="height:' + Math.min(100, v * 6) + '%"></i>').join('') + '</div>'
+      + '<div class="alt"><span class="kyt"><i></i>' + kac(o.sure || '') + '</span><span class="cap">' + dur + ' DURAKSAMA · ÖLÇÜLDÜ</span></div>');
+  }
+
+  /* 100 TARİH ŞERİDİ — yüzyıllar yatay şerit, olaylar nokta; seçili olay yanar. */
+  function tarihSeridi(o){
+    const e = (o && o.olaylar || []).filter(x => x && sayiMi(x.yil));
+    if(!e.length) return '';
+    const y0 = Math.floor(Math.min.apply(null, e.map(x => x.yil)) / 100) * 100;
+    const y1 = Math.ceil((Math.max.apply(null, e.map(x => x.yil)) + 1) / 100) * 100;
+    const yer = y => 2 + 96 * (y - y0) / Math.max(100, y1 - y0);
+    const ROMA = n => { const r = [[10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']]; let s = ''; r.forEach(([v, h]) => { while(n >= v){ s += h; n -= v; } }); return s; };
+    const yz = [];
+    for(let y = y0; y < y1; y += 100) yz.push('<span style="left:' + px(yer(y + 50)) + '">' + (y >= 0 ? ROMA(y / 100 + 1) : 'MÖ') + '</span>');
+    const sec = e.find(x => x.on) || e[e.length - 1];
+    return kok('100', 'y24', '<div class="ek">' + (yz.length <= 12 ? yz.join('') : '') + e.map(x => '<i class="' + (x === sec ? 'on' : '') + '" style="left:' + px(yer(x.yil)) + '" title="'
+      + kac(x.yil + ' · ' + x.ad) + '"></i>').join('') + '</div><span class="ip"><b>' + sec.yil + '</b>' + kac(sec.ad) + (sec.yil >= 0 ? ' · ' + ROMA(Math.floor(sec.yil / 100) + 1) + '. yüzyıl' : '') + '</span>',
+      { etiket:e.length + ' olay, ' + e[0].yil + '–' + e[e.length - 1].yil });
+  }
+
+  /* 101 AJANLI DERS KAPAĞI — dersin başında ajan portresi ve tek cümle.
+     Cümle KURALDAN gelir; model kapalıyken de aynı. */
+  function dersKapagi(o){
+    if(!o || !o.ad) return '';
+    return kok('101', 'x47', '<span class="av" aria-hidden="true"><b>' + kac(o.harf || o.ad.charAt(0)) + '</b>'
+      + (o.gorsel ? '<img src="' + kac(o.gorsel) + '" alt="" loading="lazy" onerror="this.remove()">' : '') + '</span>'
+      + '<div><span class="mod c-esp">' + kac(buyuk(o.alan || '')) + '</span><b>' + kac(o.ad) + '</b><p>' + kac(o.cumle || '') + '</p></div>');
+  }
+
+  /* 102 OTURUM SONU — kart sayısı, iyi oranı, süre, cevap dağılımı; yarının
+     yükü altta. Sayılar oturumun kaydından. */
+  function oturumSonu(o){
+    if(!o || !sayiMi(o.kart)) return '';
+    const d = o.dagilim || {};
+    const top = ['again', 'hard', 'good', 'easy'].reduce((a, k) => a + (d[k] || 0), 0);
+    const renkler = { again:'var(--vk-ink3)', hard:'color-mix(in oklab,var(--esp) 40%,var(--vk-s2))', good:'var(--esp)', easy:'color-mix(in oklab,var(--esp) 70%,var(--vk-s2))' };
+    const iyi = top ? Math.round(100 * ((d.good || 0) + (d.easy || 0)) / top) : null;
+    return kok('102', 'z20', '<b class="bs">Oturum bitti.</b><div class="uc"><div><b>' + o.kart + '</b><span>kart</span></div><div><b>' + (iyi == null ? '—' : '%' + iyi) + '</b><span>iyi + kolay</span></div>'
+      + '<div><b>' + (sayiMi(o.dk) ? dkMetni(o.dk) : '—') + '</b><span>süre</span></div></div>'
+      + (top ? '<div class="dg" role="img" aria-label="' + kac('Tekrar ' + (d.again || 0) + ', zor ' + (d.hard || 0) + ', iyi ' + (d.good || 0) + ', kolay ' + (d.easy || 0)) + '">'
+        + ['again', 'hard', 'good', 'easy'].map(k => d[k] ? '<i style="width:' + px(100 * d[k] / top) + ';background:' + renkler[k] + '"></i>' : '').join('') + '</div>' : '')
+      + '<div class="yr"><span class="cap">TEKRAR · ZOR · İYİ · KOLAY</span><span>' + (sayiMi(o.yarin) ? 'yarın ' + o.yarin + ' kart' : '') + '</span></div>', { ek:'kt' });
+  }
+
+  /* 103 KELİME AĞI — kelime ortada; eş anlamlılar çevresinde, zıt anlamlı
+     kesik çerçeveyle. Bağ kaydı yoksa kart yok. */
+  function kelimeAgi(o){
+    const es = (o && o.es || []).filter(Boolean), zit = (o && o.zit || []).filter(Boolean);
+    if(!o || !o.kelime || es.length + zit.length < 2) return '';
+    const hepsi = es.map(k => ({ k, z:false })).concat(zit.map(k => ({ k, z:true }))).slice(0, 6);
+    const YER = [[18, 18], [82, 20], [20, 84], [80, 82], [50, 12], [50, 90]];
+    return kok('103', 'z21', '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><g stroke="var(--vk-l2)" stroke-width="1">'
+      + hepsi.map((h, i) => '<line x1="50" y1="50" x2="' + YER[i][0] + '" y2="' + YER[i][1] + '" vector-effect="non-scaling-stroke"' + (h.z ? ' stroke-dasharray="3 3"' : '') + '/>').join('') + '</g></svg>'
+      + hepsi.map((h, i) => '<span class="n' + (h.z ? ' z' : '') + '" style="left:' + YER[i][0] + '%;top:' + YER[i][1] + '%">' + kac(h.k) + (h.z ? '<small>ZIT</small>' : '') + '</span>').join('')
+      + '<span class="n m" style="left:50%;top:50%">' + kac(o.kelime) + '</span>', { etiket:o.kelime + ': eş ' + es.join(', ') + (zit.length ? '; zıt ' + zit.join(', ') : '') });
+  }
+
+  /* 104 BAĞLI NOTLAR — not kartının altında ona bağlanan notlar ve kaynak. */
+  function bagliNotlar(o){
+    if(!o || !o.baslik) return '';
+    const b = (o.baglar || []).filter(Boolean);
+    return kok('104', 'z22', '<div class="u"><b>' + kac(o.baslik) + '</b><span class="cap">' + kac(buyuk(o.ust || 'not')) + '</span></div>'
+      + (o.metin ? '<p class="nt3">' + kac(o.metin) + '</p>' : '')
+      + '<div class="bg"><span class="cap">' + (b.length ? b.length + ' BAĞLI NOT' : 'BAĞ YOK') + '</span><div>' + b.map(x => '<span>' + kac(x) + '</span>').join('') + '</div></div>', { ek:'kt' });
+  }
+
+  /* 105 DESTE DURUMU — kartlar üç durumda: yeni, öğreniliyor, oturmuş. */
+  function desteDurumu(o){
+    if(!o || !sayiMi(o.toplam) || o.toplam < 1) return '';
+    const s = [['Yeni', o.yeni, 'color-mix(in oklab,var(--esp) 35%,var(--vk-s2))'], ['Öğreniliyor', o.ogreniliyor, 'color-mix(in oklab,var(--esp) 65%,var(--vk-s2))'], ['Oturmuş', o.oturmus, 'var(--esp)']];
+    return kok('105', 'w21', '<div class="u"><b>' + o.toplam + ' kart</b>' + et('computed') + '</div>'
+      + '<div class="br" role="img" aria-label="' + kac(s.map(x => x[0] + ' ' + (x[1] || 0)).join(', ')) + '">' + s.map(x => x[1] ? '<i style="width:' + px(100 * x[1] / o.toplam) + ';background:' + x[2] + '"></i>' : '').join('') + '</div>'
+      + '<div class="ls">' + s.map(x => '<div><i style="background:' + x[2] + '"></i>' + x[0] + '<em>' + (x[1] || 0) + '</em></div>').join('') + '</div>');
+  }
+
+  /* 106 CÜMLE KURMA — kelime taşları boş yerlere konur; yerleşen taş renk
+     alır. Dokunmak taşı sıradaki boş yere koyar (sürükleme gerekmez). */
+  function cumleKurma(o){
+    if(!o || !(o.yerlesen || []).length && !(o.taslar || []).length) return '';
+    return kok('106', 'w22', '<div class="sl2" aria-live="polite">' + (o.yerlesen || []).map(k => '<span class="ok5">' + kac(k) + '</span>').join('')
+      + Array.from({ length:(o.bos || 0) }, () => '<span class="bs5" aria-hidden="true"></span>').join('') + '</div>'
+      + '<div class="tas">' + (o.taslar || []).map((k, i) => '<button type="button" class="' + (i === 0 ? 'uc2' : '') + '" data-act="' + kac(o.act) + '" data-k="' + kac(k) + '">' + kac(k) + '</button>').join('') + '</div>'
+      + '<span class="cap">' + kac(buyuk(o.not || 'Kelimeye dokun · cümleyi kur')) + '</span>');
+  }
+
+  /* 107 METİNLİ DİNLEME — oynatıcı ve metin; okunan cümle büyür. */
+  function metinliDinleme(o){
+    const c = (o && o.cumleler || []).filter(Boolean);
+    if(!c.length) return '';
+    const i = sayiMi(o.simdi) ? o.simdi : 0;
+    return kok('107', 'w23', '<div class="pl"><button type="button" class="oy" data-act="' + kac(o.act) + '" aria-label="' + (o.caliyor ? 'Durdur' : 'Oynat') + '">' + ikon('oyn') + '</button>'
+      + '<div class="il2"><i style="width:' + px(100 * (i + (o.caliyor ? 0.5 : 0)) / c.length) + '"></i></div><span class="mono">' + (i + 1) + ' / ' + c.length + '</span></div>'
+      + '<div class="mt2" lang="' + kac(o.dil || 'en') + '">' + c.map((x, k) => '<p' + (k === i ? ' class="on"' : '') + '>' + kac(x) + '</p>').join('') + '</div>');
+  }
+
+  /* 108 SORU ZİNCİRİ — sokratik konuşma zincir; her «neden?» bir halka. */
+  function soruZinciri(o){
+    const h = (o && o.halkalar || []).filter(x => x && x.metin);
+    if(!h.length) return '';
+    return kok('108', 'w24', h.map(x => x.soru
+      ? '<div class="r"><span class="av" aria-hidden="true"><b>' + kac(o.harf || '?') + '</b>' + (o.gorsel ? '<img src="' + kac(o.gorsel) + '" alt="" loading="lazy" onerror="this.remove()">' : '') + '</span><p>' + kac(x.metin) + '</p></div>'
+      : '<div class="r b"><p>' + kac(x.metin) + '</p></div>').join(''), { etiket:'Soru zinciri, ' + h.filter(x => x.soru).length + ' soru' });
+  }
+
+  /* 109 ÜÇ MADDE ÖZETİ — özet MODELİNDİR ve öyle etiketlenir. */
+  function ucMaddeOzet(o){
+    const m = (o && o.maddeler || []).filter(Boolean).slice(0, 3);
+    if(!m.length) return '';
+    return kok('109', 'w25', '<div class="u"><b>' + kac(o.baslik || 'Özet') + '</b><span class="cap">' + kac(buyuk(o.kaynak || '')) + '</span></div>'
+      + '<ol>' + m.map(x => '<li>' + kac(x) + '</li>').join('') + '</ol>'
+      + '<div class="alt">' + et('estimated', 'model özeti · kontrol et') + (o.act ? dugme({ metin:m.length + ' kart ekle', act:o.act, data:o.data }) : '') + '</div>', { ek:'kt' });
+  }
+
   L.VITRIN = {
     kac, sayi, isaretli, dkMetni, et, ikon, tik, hl, fk, kok, dugme, renk, KES,
     geriSayim, notrSerit, yanlisKarti, denemeKarnesi, hizSeridi, denemeKarsilastirma,
@@ -887,5 +1120,8 @@ window.LIFEOS = window.LIFEOS || {};
     setKutucuklari, haftaHalkalari, tusTakimi, sonrakiKontrol, harcamaSeritleri, ogunCizelgesi,
     yogunlukBolgeleri, harcamaTakvimi, uykuDuzeni, tahlilKarsilastirma, ogunSablonlari,
     antrenmanHaftasi, duzenliGiderler, olcumHatirlatici,
+    desteYigini, sureliCevap, dakikaHalkasi, unutmaEgrisi, merdiven, kutuphaneRafi, okumaIlerlemesi,
+    alintiKarti, kelimeSahnesi, baglamdaKelime, dalgaFormu, tarihSeridi, dersKapagi, oturumSonu,
+    kelimeAgi, bagliNotlar, desteDurumu, cumleKurma, metinliDinleme, soruZinciri, ucMaddeOzet,
   };
 })();

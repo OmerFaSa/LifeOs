@@ -80,6 +80,16 @@ ESP.Screens.symposium = (function(){
 
   /* ---------------------------------------------------------------- tez kartı */
 
+  /* 108 SORU ZİNCİRİ (vitrin): tez, her itiraz bir «neden?» halkası ve
+     cevabı. Metin kullanıcının; sıra kaydın sırası. */
+  function zincirHtml(a){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !(a.objections || []).length) return '';
+    const h = [{ metin:a.thesis, soru:false }];
+    (a.objections || []).forEach(o => { h.push({ metin:o.text, soru:true }); if(o.answered && o.answer) h.push({ metin:o.answer, soru:false }); });
+    return V.soruZinciri({ halkalar:h, harf:'?' });
+  }
+
   function argRow(a){
     const acikItiraz = (a.objections || []).filter(o => !o.answered);
     const safsata = ESP.Intellect.checkFallacies(
@@ -100,6 +110,7 @@ ESP.Screens.symposium = (function(){
       wide:true,
       body:html`
         <p class="thesis">${a.thesis}</p>
+        ${when(zincirHtml(a), () => html`<div class="mt-10">${raw(zincirHtml(a))}</div>`)}
 
         ${when((a.concepts || []).length, () => html`<div class="row wrap mt-8">
           ${map(a.concepts, c => K.Chip({ label:(ESP.CONCEPT_BY_ID[c] || {}).label || c }))}

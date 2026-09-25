@@ -125,6 +125,17 @@ ESP.Screens.ladder = (function(){
 
   /* ------------------------------------------------------- tek disiplin yolu */
 
+  /* 093 MERDİVEN BASAMAKLARI (vitrin): basamak içerik sırasıdır, derece
+     değil. Şimdiki basamağın notu geçilen kapı sayısı (kayıttan). */
+  function merdivenHtml(yol){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !yol || !(yol.steps || []).length) return '';
+    return V.merdiven({ basamaklar:yol.steps.map(st => {
+      const g = st.gates || [], gecen = g.filter(x => x.status === 'pass').length;
+      return { no:st.rank, ad:st.title, durum:st.state, not:st.title + ' · ' + g.length + ' kapının ' + gecen + '’i geçti' };
+    }) });
+  }
+
   function yolRows(discId){
     const d = discOf(discId);
     const yol = C().roadmap(discId);
@@ -143,6 +154,7 @@ ESP.Screens.ladder = (function(){
         data:{ 'data-route':d.route } }),
       body:html`
         ${K.Meter({ label:'Merdiven', value:lv.mastery, text:'%' + lv.mastery })}
+        ${when(merdivenHtml(yol), () => html`<div class="mt-12">${raw(merdivenHtml(yol))}</div>`)}
         <p class="rulesay mt-10">${C().sentence(discId)}</p>
         ${when(lv.declared, () => K.Notice({ tone:'warn', title:'Beyana dayalı kademe',
           body:lv.declaredWhy }))}

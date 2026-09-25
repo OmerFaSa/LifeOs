@@ -66,4 +66,82 @@
     });
   });
 
+
+  /* E · ESP kartları ekranda (vitrin sürüm 4, brand/ortak/vitrin.js). */
+  describe('Vitrin · E kartları ESP ekranlarında', () => {
+    const dom2 = h => { const k = document.createElement('div'); k.innerHTML = String(h); return k; };
+    const kart = (i, patch) => ESP.Model.newCard(Object.assign({ id:'vk' + i, front:'word' + i, back:'kelime' + i, lang:'en',
+      context:'This word' + i + ' is here.', due:ESP.U.todayISO() }, patch || {}));
+
+    it('oz-089 oz-090 oz-097 oz-101 oz-102 Dil › Çalış: kapak, yığın, sahne, süreli düğmeler, oturum sonu', async () => {
+      ESP.Test.resetState();
+      ESP.S.cards = [kart(1), kart(2, { reps:2, box:3, interval:3, due:ESP.U.todayISO() })];
+      ESP.S.ui.reviewQueue = null;
+      let k = dom2(await ESP.Screens.lang.render());
+      expect(k.querySelector('[data-oz="101"]').textContent).toContain('vadeli');
+      ESP.S.ui.reviewQueue = { ids:['vk1', 'vk2'], pos:0, shown:false, correct:0, again:0, dagilim:{}, basladi:Date.now() };
+      k = dom2(await ESP.Screens.lang.render());
+      expect(k.querySelector('[data-oz="089"] [data-act="reveal-card"]')).toBeTruthy();
+      ESP.S.ui.reviewQueue.shown = true;
+      k = dom2(await ESP.Screens.lang.render());
+      expect(k.querySelector('[data-oz="097"] b').textContent).toBe('word1');
+      expect(k.querySelectorAll('[data-oz="090"] [data-act="grade-card"]').length).toBe(ESP.SRS.GRADES.length);
+      ESP.S.ui.reviewQueue = { ids:['yok'], pos:0, shown:false, correct:1, again:0, dagilim:{ good:1 }, basladi:Date.now() };
+      k = dom2(await ESP.Screens.lang.render());
+      expect(k.querySelector('[data-oz="102"]').textContent).toContain('%100');
+      ESP.S.ui.reviewQueue = null;
+    });
+
+    it('oz-092 oz-098 oz-105 Dil: unutma eğrisi, bağlamda kelime, deste durumu', async () => {
+      ESP.Test.resetState();
+      ESP.S.cards = [kart(1, { front:'resilient', context:'Children are resilient.', reps:3, box:4, interval:7,
+        due:ESP.U.iso(ESP.U.addDays(ESP.U.today(), 3)) }), kart(2)];
+      const k = dom2(await ESP.Screens.lang.render());
+      expect(k.querySelector('[data-oz="092"] path')).toBeTruthy();
+      expect(k.querySelector('[data-oz="098"] u').textContent).toBe('resilient');
+      expect(k.querySelector('[data-oz="105"] .u b').textContent).toBe('2 kart');
+    });
+
+    it('oz-091 Bugün: dakika halkası; dokunulmamış disiplin «—»', async () => {
+      ESP.Test.resetState();
+      const k = dom2(await ESP.Screens.today.render());
+      const h = k.querySelector('[data-oz="091"]');
+      expect(h).toBeTruthy();
+      expect(h.textContent).toContain('—');
+    });
+
+    it('oz-094 oz-096 oz-104 Okuma: raf, alıntı, bağlı notlar', async () => {
+      ESP.Test.resetState();
+      ESP.S.books = [ESP.Model.newBook({ id:'b1', title:'Denemeler', author:'Montaigne' })];
+      ESP.S.notes = [ESP.Model.newNote({ id:'n1', text:'Alışkanlık ikinci bir doğadır.', bookId:'b1' }),
+        ESP.Model.newNote({ id:'n2', text:'Tekrar alışkanlığın malzemesidir.', links:[{ to:'n1', why:'' }] })];
+      const k = dom2(await ESP.Screens.library.render());
+      expect(k.querySelector('[data-oz="094"] .rf i')).toBeTruthy();
+      expect(k.querySelector('[data-oz="096"] q').textContent).toContain('Alışkanlık');
+      expect(k.querySelector('[data-oz="104"]').textContent).toContain('1 BAĞLI NOT');
+    });
+
+    it('oz-100 Tarih: yıllı olaylar şeritte', async () => {
+      ESP.Test.resetState();
+      ESP.S.events = [ESP.Model.newEvent({ id:'e1', title:'İstanbul’un fethi', year:1453 }), ESP.Model.newEvent({ id:'e2', title:'Devrim', year:1789 })];
+      const k = dom2(await ESP.Screens.history.render());
+      expect(k.querySelectorAll('[data-oz="100"] .ek i').length).toBe(2);
+    });
+
+    it('oz-108 Felsefe: itirazlı tez soru zinciri olur', async () => {
+      ESP.Test.resetState();
+      ESP.S.args = [{ id:'a1', thesis:'Alışkanlık ikinci doğadır.', supports:[], status:'open', concepts:[],
+        objections:[{ id:'o1', text:'Neden?', answered:true, answer:'Düşünmeden yapılır.' }], createdAt:new Date().toISOString() }];
+      const k = dom2(await ESP.Screens.symposium.render());
+      expect(k.querySelectorAll('[data-oz="108"] .r').length).toBe(3);
+    });
+
+    it('oz-093 Merdiven: basamaklar içerik sırası', async () => {
+      ESP.Test.resetState();
+      const k = dom2(await ESP.Screens.ladder.render());
+      const m = k.querySelector('[data-oz="093"]');
+      if(m) expect(m.querySelectorAll('.st > div:not(.ip)').length).toBeGreaterThan(1);
+    });
+  });
+
 })();
