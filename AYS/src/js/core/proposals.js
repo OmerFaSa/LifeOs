@@ -788,7 +788,12 @@ R.Proposals = (function(){
     const action = KAPSAM_EYLEM[kapsam];
     const res = check(Object.assign({}, p, { action, params }));
     if(!res.ok) return res;
-    Object.assign(p, { action, params, kapsam, level:R.ACTION_BY_ID[action].level });
+    /* Seviye seçilen kapsamın seviyesi (paylaşılan kural: kalıcı = büyük);
+       kart ve seçici aynı seviyeyi söyler. */
+    const O = (window.LIFEOS || {}).ONERI;
+    const level = (O && O.kapsamSeviyesi && O.kapsamSeviyesi({ eylem:action }, R.ACTIONS, kapsam))
+      || R.ACTION_BY_ID[action].level;
+    Object.assign(p, { action, params, kapsam, level });
     await save();
     return pass({ kapsam });
   }

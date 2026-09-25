@@ -35,6 +35,25 @@
       }
     });
 
+    it('oz-172 örnek profil HKM bağını alamaz (çıkışta gerçek profilin bağı kopmasın)', async () => {
+      /* Canlı denemede bulundu: örnek kipte eşleşme yapılsaydı cihazdaki bağ
+         «ornek»e geçerdi; çıkınca gerçek profil HKM'ye bağlanamazdı. */
+      const M_ = 'spi';
+      const eskiP = localStorage.getItem('spi.activeProfile'), eskiB = window.LIFEOS.HkmBag.sahip(M_);
+      try{
+        window.LIFEOS.HkmBag.birak(M_, eskiB || 'x');
+        localStorage.setItem('spi.activeProfile', 'ornek');
+        await SP.Beacon.save({ enabled:true, token:'t', url:'http://127.0.0.1:4200' });
+        expect(window.LIFEOS.HkmBag.sahip(M_)).toBe(null);
+        expect(SP.Beacon.settings().enabled).toBe(false);
+      }finally{
+        if(eskiP === null) localStorage.removeItem('spi.activeProfile'); else localStorage.setItem('spi.activeProfile', eskiP);
+        window.LIFEOS.HkmBag.birak(M_, 'ornek');
+        if(eskiB) window.LIFEOS.HkmBag.al(M_, eskiB);
+        await SP.Beacon.save({ enabled:false });
+      }
+    });
+
     it('oz-172 Ayarlar › Veri\'de «Örnek veriye geç» satırı', async () => {
       resetState();
       /* Test deposunda health() yok; Veri bölümü onu ister (gerçek depoda var). */

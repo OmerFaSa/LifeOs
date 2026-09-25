@@ -75,7 +75,7 @@ SP.Beacon = (function(){
     catch(e){ AYAR = {}; }
     /* Bu güncellemeden önce açılmış işaret: bağ boşsa bu profil alır;
        doluysa (öteki profil daha önce aldı) burada kapalı sayılır. */
-    if(AYAR.enabled && LIFEOS.HkmBag && !LIFEOS.HkmBag.sahip(MODULE)) LIFEOS.HkmBag.al(MODULE, profilim());
+    if(AYAR.enabled && profilim() !== 'ornek' && LIFEOS.HkmBag && !LIFEOS.HkmBag.sahip(MODULE)) LIFEOS.HkmBag.al(MODULE, profilim());
     /* Teklif defterinin bellekteki kopyasi da tazelenir: ambar
        degistiginde (acilis, hesap degisimi) eski kopyayla devam etmek,
        cevaplanmis bir teklifi cevapsiz sanmak olurdu. */
@@ -85,7 +85,9 @@ SP.Beacon = (function(){
 
   async function save(patch){
     const p = Object.assign({}, patch || {});
-    if(p.enabled === true && !LIFEOS.HkmBag.al(MODULE, profilim()).ok) delete p.enabled;
+    /* 172: örnek profil HKM bağını hiç almaz; alsaydı çıkışta gerçek
+       profilin bağı «ornek»te kalır, HKM'ye bağlanamazdı. */
+    if(p.enabled === true && (profilim() === 'ornek' || !LIFEOS.HkmBag.al(MODULE, profilim()).ok)) delete p.enabled;
     AYAR = Object.assign({}, AYAR || {}, p);
     delete AYAR.baskaProfil;
     if(p.enabled === false) LIFEOS.HkmBag.birak(MODULE, profilim());

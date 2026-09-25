@@ -30,6 +30,9 @@
         expect(f.length).toBe(1);
         expect(f[0].querySelector('input:checked').value).toBe('kalici');
         expect(f[0].querySelector('input:checked').getAttribute('name')).toBe('kapsam-k1');
+        /* Canlı denemede bulundu: kart «orta», seçili «Kalıcı» «büyük» diyordu.
+           Kartın seviyesi seçili kapsamın seviyesidir. */
+        expect(k.querySelector('[data-oneri="k1"]').getAttribute('data-seviye')).toBe('buyuk');
         R.S.officeProposals = [];
       });
     });
@@ -44,6 +47,7 @@
         expect([p().action, p().params.from, p().params.to, p().params.dakika])
           .toEqual(['gecici-sure', '2026-10-14', '2026-10-14', dk]);
         expect(R.Proposals.kapsamOf(p())).toBe('bugun');
+        expect(p().level).toBe('orta');
         await h({ name:'kapsam-k1', value:'hafta' });
         const gunler = R.Model.weekDates(R.Model.currentWeek());
         expect([p().action, p().params.from, p().params.to])
@@ -51,6 +55,7 @@
         expect(R.Proposals.preview(p()).ok).toBe(true);
         await h({ name:'kapsam-k1', value:'kalici' });
         expect([p().action, p().params]).toEqual(['gunluk-sure', { dakika:dk }]);
+        expect(p().level).toBe('buyuk');
         expect(p().status).toBe('pending');
         expect(R.Istisna.temelDakika() || R.Istisna.sablonDakikasi()).toBe(temel);
         const blok = await R.Proposals.kapsamla('k2', 'bugun');

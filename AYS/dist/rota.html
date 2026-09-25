@@ -12570,7 +12570,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'25975a8', at:'2026-09-25 18:37', dirty:true };
+R.BUILD = { id:'6aeef4d', at:'2026-09-25 22:21', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -15884,6 +15884,10 @@ window.LIFEOS = window.LIFEOS || {};
     let sev = kayit.level != null ? kayit.level : kayit.seviye;
     if(SEVIYELER.indexOf(sev) < 0) sev = 'buyuk';
     if(sev === 'kucuk' && kayit.geriAlinamaz) sev = 'orta';
+    /* 127: seçili kapsam seviyeyi YÜKSELTİR (kodun kuralı, model değil);
+       kart ile kapsam seçicisi aynı seviyeyi söyler. */
+    const kp = oneri.kapsamId ? KAPSAMLAR.filter(x => x.id === oneri.kapsamId)[0] : null;
+    if(kp && SEVIYELER.indexOf(kp.seviye) > SEVIYELER.indexOf(sev)) sev = kp.seviye;
     const onerilen = oneri.level != null ? oneri.level : oneri.seviye;
     return Object.assign({}, KALIPLAR[sev], {
       eylem:id,
@@ -36982,7 +36986,7 @@ R.Beacon = (function(){
     catch(e){ AYAR = {}; }
     /* Bu güncellemeden önce açılmış işaret: bağ boşsa bu profil alır;
        doluysa (öteki profil daha önce aldı) burada kapalı sayılır. */
-    if(AYAR.enabled && LIFEOS.HkmBag && !LIFEOS.HkmBag.sahip(MODULE)) LIFEOS.HkmBag.al(MODULE, profilim());
+    if(AYAR.enabled && profilim() !== 'ornek' && LIFEOS.HkmBag && !LIFEOS.HkmBag.sahip(MODULE)) LIFEOS.HkmBag.al(MODULE, profilim());
     /* Teklif defterinin bellekteki kopyasi da tazelenir: ambar
        degistiginde (acilis, hesap degisimi) eski kopyayla devam etmek,
        cevaplanmis bir teklifi cevapsiz sanmak olurdu. */
@@ -36992,7 +36996,9 @@ R.Beacon = (function(){
 
   async function save(patch){
     const p = Object.assign({}, patch || {});
-    if(p.enabled === true && !LIFEOS.HkmBag.al(MODULE, profilim()).ok) delete p.enabled;
+    /* 172: örnek profil HKM bağını hiç almaz; alsaydı çıkışta gerçek
+       profilin bağı «ornek»te kalır, HKM'ye bağlanamazdı. */
+    if(p.enabled === true && (profilim() === 'ornek' || !LIFEOS.HkmBag.al(MODULE, profilim()).ok)) delete p.enabled;
     AYAR = Object.assign({}, AYAR || {}, p);
     delete AYAR.baskaProfil;
     if(p.enabled === false) LIFEOS.HkmBag.birak(MODULE, profilim());
@@ -45596,7 +45602,12 @@ R.Proposals = (function(){
     const action = KAPSAM_EYLEM[kapsam];
     const res = check(Object.assign({}, p, { action, params }));
     if(!res.ok) return res;
-    Object.assign(p, { action, params, kapsam, level:R.ACTION_BY_ID[action].level });
+    /* Seviye seçilen kapsamın seviyesi (paylaşılan kural: kalıcı = büyük);
+       kart ve seçici aynı seviyeyi söyler. */
+    const O = (window.LIFEOS || {}).ONERI;
+    const level = (O && O.kapsamSeviyesi && O.kapsamSeviyesi({ eylem:action }, R.ACTIONS, kapsam))
+      || R.ACTION_BY_ID[action].level;
+    Object.assign(p, { action, params, kapsam, level });
     await save();
     return pass({ kapsam });
   }
@@ -62910,7 +62921,9 @@ R.Screens.onaylar = (function(){
       satirlar:() => R.Proposals.actionable(),
       nesne:p => {
         const def = R.ACTION_BY_ID[p.action] || {};
-        return { id:p.id, eylem:p.action, level:p.level, baslik:def.title, kaynak:'modul',
+        /* 127: süresi seçilebilen öneride kart seçili kapsamın seviyesini söyler. */
+        const kp = R.Proposals.kapsamOf ? R.Proposals.kapsamOf(p) : null;
+        return { id:p.id, eylem:p.action, level:p.level, kapsamId:kp, baslik:def.title, kaynak:'modul',
           kapsam:def.level === 'kucuk' ? 'yalnız bugün' : null,
           cumle:p.reason ? { metin:p.reason, kaynak:p.source === 'llm' ? 'model' : 'kural' } : null,
           gerekce:p.gerekce || null, kurallar:p.kurallar || [] };

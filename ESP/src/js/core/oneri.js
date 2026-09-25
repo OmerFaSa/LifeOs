@@ -152,6 +152,10 @@ window.LIFEOS = window.LIFEOS || {};
     let sev = kayit.level != null ? kayit.level : kayit.seviye;
     if(SEVIYELER.indexOf(sev) < 0) sev = 'buyuk';
     if(sev === 'kucuk' && kayit.geriAlinamaz) sev = 'orta';
+    /* 127: seçili kapsam seviyeyi YÜKSELTİR (kodun kuralı, model değil);
+       kart ile kapsam seçicisi aynı seviyeyi söyler. */
+    const kp = oneri.kapsamId ? KAPSAMLAR.filter(x => x.id === oneri.kapsamId)[0] : null;
+    if(kp && SEVIYELER.indexOf(kp.seviye) > SEVIYELER.indexOf(sev)) sev = kp.seviye;
     const onerilen = oneri.level != null ? oneri.level : oneri.seviye;
     return Object.assign({}, KALIPLAR[sev], {
       eylem:id,

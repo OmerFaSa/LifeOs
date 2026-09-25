@@ -223,7 +223,9 @@ R.Screens.onaylar = (function(){
       satirlar:() => R.Proposals.actionable(),
       nesne:p => {
         const def = R.ACTION_BY_ID[p.action] || {};
-        return { id:p.id, eylem:p.action, level:p.level, baslik:def.title, kaynak:'modul',
+        /* 127: süresi seçilebilen öneride kart seçili kapsamın seviyesini söyler. */
+        const kp = R.Proposals.kapsamOf ? R.Proposals.kapsamOf(p) : null;
+        return { id:p.id, eylem:p.action, level:p.level, kapsamId:kp, baslik:def.title, kaynak:'modul',
           kapsam:def.level === 'kucuk' ? 'yalnız bugün' : null,
           cumle:p.reason ? { metin:p.reason, kaynak:p.source === 'llm' ? 'model' : 'kural' } : null,
           gerekce:p.gerekce || null, kurallar:p.kurallar || [] };
