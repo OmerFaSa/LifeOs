@@ -55,7 +55,9 @@
       const on = String(await SP.Screens.onaylar.render());
       expect(on.indexOf('data-act="king-onayla"') >= 0).toBe(true);
       expect(on.indexOf('data-act="hkm-intent-') >= 0).toBe(true);
-      expect(on.indexOf('data-act="bekleyen-onay"') >= 0).toBe(true);
+      /* Bekleyen kayıt vitrin öneri kartıyla (110) çizilir; onay aynı kapıya gider. */
+      expect(on.indexOf('data-act="oneri-uygula"') >= 0).toBe(true);
+      expect(on.indexOf('data-oz="110"') >= 0).toBe(true);
       expect(SP.Screens.onaylar.bekleyen()).toBe(3);
 
       const alan = String(SP.Screens.onaylar.oneriAlani());
@@ -67,8 +69,9 @@
       const bugun = String(await SP.Screens.today.render());
       expect(bugun.indexOf('data-act="hkm-intent-') < 0).toBe(true);
       expect(bugun.indexOf('data-act="bekleyen-onay"') < 0).toBe(true);
+      expect(bugun.indexOf('data-act="oneri-uygula"') < 0).toBe(true);
       /* Bugün'deki düğme Onaylar'ın işleyicisine gider: tek yol. */
-      ['king-onayla', 'hkm-intent-apply', 'bekleyen-onay'].forEach(a => {
+      ['king-onayla', 'hkm-intent-apply', 'bekleyen-onay', 'oneri-uygula', 'oneri-gec-neden'].forEach(a => {
         expect(typeof SP.Screens.today.handle[a]).toBe('function');
         expect(typeof SP.Screens.onaylar.handle[a]).toBe('function');
       });

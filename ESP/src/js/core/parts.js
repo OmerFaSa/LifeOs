@@ -601,8 +601,43 @@ ESP.Parts = (function(){
 
   /* Onay düğmesi dolu değildir: liste uzadıkça ekranda tek dolu düğme
      kuralı (EKIP-PLANI §1.2) bozulurdu. */
+  /* VİTRİN ÖNERİ KARTI (110 · 123): ajan teklifi ortak kartla çizilir;
+     uygulayan yine yalnız ESP.Plans.accept'tir (geri alınabilir). Ajan ve
+     türün notu kartın altında kalır. Kitaplık yoksa eski satır. */
+  function kopru(){
+    const O = (window.LIFEOS || {}).ONERI;
+    if(!O || !O.kopru || !ESP.Plans) return null;
+    return O.kopru({
+      katalog:ESP.Plans.KINDS.map(k => Object.assign({ title:k.label }, k)),
+      satirlar:() => ESP.Plans.all(),
+      nesne:p => ({ id:p.id, eylem:p.kind, baslik:p.title, kaynak:'modul', hSeviye:2,
+        cumle:p.why ? { metin:p.why, kaynak:p.source === 'llm' ? 'model' : 'kural' } : null }),
+      uygula:async id => {
+        const res = await ESP.Plans.accept(id);
+        if(!res.ok){ ESP.UI.toast(res.error); return; }
+        ESP.UI.toast('Onaylandı — kural motoru uyguladı', { undo:async () => {
+          const g = await ESP.Plans.geriAl(id); ESP.UI.toast(g.ok ? 'Geri alındı' : g.error); ESP.App.render(); } });
+        ESP.App.render();
+      },
+      gec:async (id, kayit) => { const r = await ESP.Plans.decline(id, kayit);
+        ESP.UI.toast(r && r.ok === false ? r.error : 'Geçildi — bu teklif tekrar sorulmaz'); ESP.App.render(); },
+      pencere:o => ESP.UI.sheet({ title:o.baslik, body:o.govde, footer:o.ayak }),
+      kapat:() => ESP.UI.closeSheet(),
+    });
+  }
+
   function proposalList(list, bos){
     if(!list.length) return K.Empty({ text:bos || 'Bekleyen teklif yok.' });
+    const kk = kopru();
+    const kartlar = kk ? list.map(p => {
+      const kart = kk.kart(p);
+      if(!kart) return null;
+      const k = ESP.Plans.KIND_BY_ID[p.kind] || {};
+      const a = ESP.AGENT_BY_ID[p.agentId] || {};
+      return html`<div class="okart-sar">${raw(kart)}<p class="okart__kim">${p.source === 'istek' ? 'senin isteğin'
+        : (a.short || a.name || p.agentId)} · ${k.note || ''}</p></div>`;
+    }) : [];
+    if(kk && kartlar.every(Boolean)) return html`<div class="stack-sm">${kartlar}</div>`;
     return html`<ul class="props">${map(list, p => {
       const k = ESP.Plans.KIND_BY_ID[p.kind] || {};
       const a = ESP.AGENT_BY_ID[p.agentId] || {};
@@ -775,7 +810,7 @@ ESP.Parts = (function(){
     if(t && t !== ilk) K.bolumeGit(t);
   }
 
-  return { bolumler, bolumIstegi, cert, measure, avatar, discChip, radar, empty, desk, deskRx,
+  return { kopru, bolumler, bolumIstegi, cert, measure, avatar, discChip, radar, empty, desk, deskRx,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, deskAudit,
     units, practice, proposalList, onayDugmeleri, weekPlan, rx:rxList, topics };
 

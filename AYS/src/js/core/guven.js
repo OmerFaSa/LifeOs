@@ -198,7 +198,57 @@ window.LIFEOS = window.LIFEOS || {};
     }).join('') + '</ol>';
   }
 
+  /* KAPIYI AÇ (177, ekranda): modülün penceresinde silme kapısını kurar.
+     o = { baslik, nesne, sayi, sheet(opts), yedekAl() → Promise, sil() → Promise }
+     Dönüş noktası alınmadan ve silinecek sayı yazılmadan düğme açılmaz;
+     karar burada değil `silmeDurumu`ndadır — ekran yalnız onu uygular.
+     Kapının tıklamaları kabuğa sızmaz (stopPropagation): «silme-onay» başka
+     bir işleyiciye düşüp kapıyı atlayamaz. */
+  function kapiAc(o){
+    o = o || {};
+    const d = { donusNoktasi:null, yazilan:'' };
+    const durum = () => silmeDurumu({ sayi:o.sayi, donusNoktasi:d.donusNoktasi, yazilan:d.yazilan });
+    const ciz = () => silmeHtml({ nesne:o.nesne, sayi:o.sayi, donusNoktasi:d.donusNoktasi, yazilan:d.yazilan, id:'kapi' });
+    o.sheet({ title:o.baslik || 'Kalıcı sil', body:'<div class="silme-kap" id="silme-kap">' + ciz() + '</div>' });
+    const kap = typeof document !== 'undefined' ? document.getElementById('silme-kap') : null;
+    if(!kap) return null;
+    kap.addEventListener('click', async e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-act]') : null;
+      if(!b || !kap.contains(b)) return;
+      const act = b.getAttribute('data-act');
+      if(act !== 'silme-donus' && act !== 'silme-onay' && act !== 'silme-yaz') return;
+      e.stopPropagation();
+      if(act === 'silme-donus'){
+        const r = o.yedekAl ? await o.yedekAl() : false;
+        if(r === false) return;
+        d.donusNoktasi = { zaman:new Date().toISOString() };
+        kap.innerHTML = ciz();
+        const g = kap.querySelector('[data-act="silme-yaz"]');
+        if(g) g.focus();
+      }else if(act === 'silme-onay'){
+        if(durum().dugmeAcik && o.sil) await o.sil();
+      }
+    });
+    kap.addEventListener('input', e => {
+      if(!e.target || e.target.getAttribute('data-act') !== 'silme-yaz') return;
+      d.yazilan = e.target.value;
+      const btn = kap.querySelector('[data-act="silme-onay"]');
+      const acik = durum().dugmeAcik;
+      if(btn){ btn.disabled = !acik; if(acik) btn.removeAttribute('aria-disabled'); else btn.setAttribute('aria-disabled', 'true'); }
+    });
+    return { durum:durum, kap:kap };
+  }
+
+  /* Yedek izi (173): alınan her yedeğin GÜNÜ; son 60 gün. Tekrar eden gün bir kez. */
+  function izEkle(iz, gun){
+    const liste = (Array.isArray(iz) ? iz : []).filter(x => typeof x === 'string');
+    if(gun && liste.indexOf(gun) < 0) liste.push(gun);
+    return liste.sort().slice(-60);
+  }
+
   L.GUVEN = {
+    kapiAc:kapiAc,
+    izEkle:izEkle,
     SILME_SEVIYE:SILME_SEVIYE,
     KAYNAKLAR:KAYNAKLAR,
     boyutMetni:boyutMetni,

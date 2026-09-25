@@ -180,6 +180,16 @@ R.Screens.analytics = (function(){
           sub:'Her noktada son 3 denemenin medyanı — tek fotoğraf değil film',
           badge:raw(UI.provenance('estimate')),
           body:html`
+            ${when((window.LIFEOS || {}).GRAFIK, () => {
+              const G = window.LIFEOS.GRAFIK;
+              const netler = C.fullExams('TYT').map(M.examNet);
+              return html`<div class="sira-bas">
+                ${raw(G.aralikHtml({ etiket:'Son tahmin', alt:last.rankBest, ust:last.rankWorst, olasi:last.rank,
+                  min:1, max:Math.round(Math.max(first.rankWorst || 0, last.rankWorst || 0, target) * 1.15), ters:true,
+                  dayanak:hist.length + 2, dayanakBirim:'tam deneme' }))}
+                ${raw(G.egilimHtml(netler, { yon:'artis-iyi', birim:'net' }))}</div>
+                ${raw(G.cumleHtml(series.map(v => ({ deger:v })), { etiket:'Tahmini puan', gunMetni:'son ' + series.length + ' tahminde', birim:'puan' }))}`;
+            })}
             ${raw(UI.lineChart([{ data:series }], { labels, height:210 }))}
             ${K.Cols(3, [
               K.Stat({ label:'İlk tahmin', value:U.fmtNum(first.rank), note:U.fmtShort(first.date) }),
@@ -196,7 +206,9 @@ R.Screens.analytics = (function(){
               { label:'Kötümser sıra', num:true }],
             rows:hist.slice().reverse().map(h => [
               U.fmtShort(h.date),
-              html`<span class="num">${U.fmtNet(h.score)}</span>`,
+              (window.LIFEOS || {}).GRAFIK
+                ? raw(window.LIFEOS.GRAFIK.hucreHtml({ deger:h.score, olcek:560, birim:'puan', kesinlik:'estimated', ondalik:1 }))
+                : html`<span class="num">${U.fmtNet(h.score)}</span>`,
               html`<span class="num">${U.fmtNum(h.rankBest)}</span>`,
               html`<span class="num dim">${U.fmtNum(h.rankWorst)}</span>`,
             ]) }) }),
@@ -617,9 +629,33 @@ R.Screens.analytics = (function(){
     }
   }
 
+  /* ANALİZ BAŞI (vitrin 041 veri doluluğu, 040 birikim eğrisi): önce
+     «neye dayanıyor», sonra ne gösteriyor. Kaydı olmayan gün sıfır değildir. */
+  function analizBasi(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G) return '';
+    const kayitli = Object.keys(S.days || {}).filter(t => {
+      const d = S.days[t];
+      return d && (C.gunSorusu(d) > 0 || (d.blocks || []).some(b => b.status && b.status !== 'pending'));
+    });
+    const hafta = M.weekDates(M.currentWeek()).map(d => U.iso(d));
+    const gunluk = [], plan = [];
+    hafta.forEach(t => {
+      const d = S.days[t];
+      if(!d) return;
+      const hedef = U.sum((d.blocks || []).map(b => Number(b.targetQ) || 0));
+      if(hedef) plan.push({ tarih:t, deger:hedef });
+      if(kayitli.indexOf(t) >= 0) gunluk.push({ tarih:t, deger:C.gunSorusu(d) });
+    });
+    return K.Grid([K.Span(12, html`<div class="analizbasi">
+      ${K.Kutu({ ad:'Veri doluluğu', yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'ays', ad:'AYS', gunler:kayitli }], { gun:7 })) })}
+      ${K.Kutu({ ad:'Bu haftanın birikimi', yuva:'soru', govde:raw(G.birikimSvg(gunluk, plan, { bugun:U.todayISO(), birim:'soru', etiket:'Haftalık soru' })) })}
+    </div>`)]);
+  }
+
   async function render(){
-    return String(K.SayfaBolumleri({ act:'analytics-tab', aria:'Analiz bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) }));
+    return String(html`${analizBasi()}${K.SayfaBolumleri({ act:'analytics-tab', aria:'Analiz bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}`);
   }
 
   /* Açılışta istenen bölüm (başka ekrandan «Hata haritası»na gelmek gibi)

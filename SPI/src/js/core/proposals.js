@@ -578,10 +578,22 @@ SP.Proposals = (function(){
   function otomatikMi(row, mod){
     if(!row || row.level !== 'kucuk') return false;
     if((eylem(row.action) || {}).olcum) return false;
+    /* Vitrin 116 — TÜR AYARI moddan önce gelir: kullanıcı bir küçük türü
+       açık ya da kapalı işaretlediyse o geçerlidir (AGENTS §1.9: «hangi
+       küçük türlerin sormadan uygulanacağını kullanıcı ayarlar»). */
+    const tur = turAyari()[row.action || row.kind];
+    if(tur === true || tur === false) return tur;
     const m = MODLAR.indexOf(mod) >= 0 ? mod : 'istek';
     if(m === 'hicbiri') return false;
     if(m === 'hepsi') return true;
     return row.source === 'istek';
+  }
+
+  function turAyari(){
+    try{
+      const st = SP.Office && typeof SP.Office.settings === 'function' ? SP.Office.settings() : null;
+      return (st && st.otomatikTurler && typeof st.otomatikTurler === 'object') ? st.otomatikTurler : {};
+    }catch(e){ return {}; }
   }
 
   function ayar(){
@@ -630,10 +642,12 @@ SP.Proposals = (function(){
     }
   }
 
-  async function reject(id){
+  /* `gecme`: vitrin 123 — kullanıcının söylediği neden (isteğe bağlı). */
+  async function reject(id, gecme){
     const p = liste().find(x => x.id === id);
     if(!p) return { ok:false };
     p.status = 'rejected';
+    if(gecme) p.gecme = gecme;
     await save();
     return { ok:true };
   }
@@ -672,7 +686,7 @@ SP.Proposals = (function(){
     check, preview,
     fromText, fromModel, yanCumleler, quickToAction,
     propose, approve, reject, undo, clearResolved,
-    talep, otomatikMi, ayar, SEVIYELER, MODLAR,
+    talep, otomatikMi, ayar, turAyari, SEVIYELER, MODLAR,
     pending, all, load, save, MAX,
   };
 })();

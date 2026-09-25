@@ -461,8 +461,31 @@ ESP.Screens.analytics = (function(){
   /* Sekme yok (EKIP-PLANI §1.2): dört okuma alt alta. */
   const GOVDE = { radar:radarRows, seriler:seriesRows, rapor:reportRows, durust:honestyRows };
 
+  /* ANALİZ BAŞI (vitrin): 041 veri doluluğu, günlük dakika çizgisi (027,
+     girilmemiş gün boşluk), 037 güvenli eğilim, 034 grafiğin cümlesi. */
+  function analizBasi(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G) return '';
+    const bugun = U.todayISO();
+    const kayitli = Object.keys(S.days || {}).filter(t => ESP.Model.sessionsOf(t).length > 0);
+    const son = [];
+    for(let i = 27; i >= 0; i--){
+      const t = G.gunEkle(bugun, -i);
+      const r = ESP.Model.sessionsOf(t);
+      son.push({ tarih:t, deger:r.length ? r.reduce((a, s) => a + (s.minutes || 0), 0) : null });
+    }
+    return html`<div class="analizbasi">
+      ${K.Kutu({ ad:'Veri doluluğu', yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'esp', ad:'ESP', gunler:kayitli }], { gun:7 })) })}
+      ${K.Kutu({ ad:'Günlük pratik', yuva:'son 28 gün', govde:html`
+        <div class="sira-bas">${raw(G.egilimHtml(son.map(x => x.deger), { yon:'artis-iyi', birim:'dk' }))}</div>
+        ${raw(G.cizgiSvg(son, { gen:560, yuk:120, etiket:'Günlük pratik', birim:'dk' }))}
+        ${raw(G.cumleHtml(son, { etiket:'Günlük pratik', birim:'dk', ondalik:0 }))}` })}
+    </div>`;
+  }
+
   function render(){
     return K.Grid(html`
+      ${K.Span(12, analizBasi())}
       ${K.Span(12, ESP.Parts.bolumler(null, { act:'ana-tab', aria:'Analiz bölümleri', tabs:TABS, govde:GOVDE }))}`);
   }
 

@@ -805,6 +805,7 @@ SP.Screens.today = (function(){
             min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
         }))}</div>
         <p class="tiny dim mt-8">Boş bıraktığın alan sıfır sayılmaz; uyku tek başına yeter.</p>
+        <div id="suphe-yuva" aria-live="polite"></div>
         <div class="row wrap gap-8 mt-8">
           ${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}
           ${K.Button({ label:'Bütün alanlar', tone:'ghost', act:'day-tab', data:{ 'data-tab':'giris' } })}
@@ -856,6 +857,26 @@ SP.Screens.today = (function(){
           text:U.fmtNum(Math.round(t.protein)) + ' / ' + U.fmtNum(tg.protein.min) + ' g' })}</div>` });
   }
 
+  /* 015 SON BİLİNEN DEĞER · 026 VERİ TAZELİĞİ (vitrin, pano «SPİ · Bugün»):
+     her ölçümün son değeri, ne zaman ölçüldüğüyle. Eski ölçüm soluklaşır ve
+     yaşını yazar; hiç ölçülmemişse «—». Bugünün değeri sayılmaz, yazılır. */
+  function SonOlcumlerKutusu(){
+    const SAYI = (window.LIFEOS || {}).SAYI;
+    if(!SAYI) return '';
+    const gunler = Object.keys(S.vitals || {}).sort().reverse();
+    const son = alan => { const t = gunler.find(x => S.vitals[x] && S.vitals[x][alan] != null);
+      return t ? { deger:Number(S.vitals[t][alan]), zaman:t } : null; };
+    const satirlar = [['Uyku', 'sleep', 'saat'], ['Kilo', 'weight', 'kg'], ['İstirahat nabzı', 'rhr', 'atım/dk'], ['HRV', 'hrv', 'ms']]
+      .map(([ad, alan, birim]) => {
+        const s = son(alan);
+        return html`<li class="sonolcum__s"><span class="sonolcum__ad">${ad}</span>
+          <span class="sonolcum__d">${raw(SAYI.html(s ? { deger:s.deger, birim, kesinlik:'measured', zaman:s.zaman,
+            kaynak:'günlük ölçüm', tazelik:'gunluk' } : { deger:null, birim, kesinlik:'missing' }))}</span></li>`;
+      });
+    return K.Kutu({ ad:'Son ölçümler', yuva:'ölçüldü', govde:html`<ul class="sonolcum">${satirlar}</ul>
+      <p class="tiny dim mt-8">Eski ölçüm soluklaşır ve yaşını yazar; ölçülmemiş değer sıfır sayılmaz.</p>` });
+  }
+
   async function render(){
     const acil = uyarilar()[0];
     const vakti = SP.HatirlatUI ? SP.HatirlatUI.vaktiRow() : '';
@@ -878,6 +899,7 @@ SP.Screens.today = (function(){
           ${ToparlanmaKutusu()}
           ${AsgariKutusu()}
           ${BeslenmeKutusu()}
+          ${SonOlcumlerKutusu()}
         </section>
         ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
       </div>
@@ -936,8 +958,12 @@ SP.Screens.today = (function(){
   /* Öneri alanındaki kartın düğmeleri Onaylar ekranının işleyicilerine
      gider: onay TEK yoldan geçer, iki ekranda iki ayrı kod durmaz. */
   const ONAY_EYLEMLERI = ['king-onayla', 'king-parca', 'king-iptal', 'hkm-toplu', 'hkm-intent-yes',
-    'hkm-intent-apply', 'hkm-intent-no', 'hkm-doubt-ok', 'bekleyen-onay', 'bekleyen-ret'];
+    'hkm-intent-apply', 'hkm-intent-no', 'hkm-doubt-ok', 'bekleyen-onay', 'bekleyen-ret',
+    'oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'];
   const onayIsleyici = a => el => SP.Screens.onaylar.handle[a](el);
+
+  /* 018 şüpheli giriş durumu: hangi alan soruldu, soru geçildi mi. */
+  let supheGecti = false, supheAlan = null;
 
   const handle = {
     async 'dunku-ogun'(el){ await dunkuEkle('ogun', el.dataset.id); },
@@ -1116,6 +1142,24 @@ SP.Screens.today = (function(){
         const raw = el.value.trim();
         patch[f.id] = raw === '' ? null : Number(raw.replace(',', '.'));
       });
+      /* 018 ŞÜPHELİ GİRİŞ: önceki ölçümden çok sapan sayı kaydedilmeden
+         önce sorulur («714 kg» → «71,4 kg olarak kaydet»). Önceki değer
+         yoksa soru yok: veri yok sıfır değildir. Seçim bir kez geçerlidir. */
+      const SAYI = (window.LIFEOS || {}).SAYI;
+      const yuva = document.getElementById('suphe-yuva');
+      if(SAYI && yuva && !supheGecti){
+        const d = shownDate();
+        const once = Object.keys(S.vitals || {}).filter(t => t < d).sort().reverse();
+        /* Eşik: kilo katalogdaki %5; uyku ve nabız gün gün doğal olarak
+           oynar, yalnız yazım hatası boyundaki sapma (×2) sorulur. */
+        for(const [alan, tur, birim, oran] of [['weight', 'kilo', 'kg', null], ['sleep', 'uyku', 'saat', 1], ['rhr', 'nabiz', 'atım', 1]]){
+          if(patch[alan] == null) continue;
+          const t = once.find(x => S.vitals[x] && S.vitals[x][alan] != null);
+          const r = SAYI.suphe(patch[alan], t ? Number(S.vitals[t][alan]) : null, oran ? { tur, birim, oran } : { tur, birim });
+          if(r.supheli){ supheAlan = alan; yuva.innerHTML = SAYI.supheHtml(r); return; }
+        }
+      }
+      supheGecti = false; supheAlan = null;
       const note = document.getElementById('v-note');
       if(note) patch.note = note.value.trim();
       await M.saveVitals(shownDate(), patch);
@@ -1124,6 +1168,20 @@ SP.Screens.today = (function(){
       SP.App.render();
     },
   
+    /* 018: seçilen değer alana yazılır ve kayıt SORUSUZ bir kez daha denenir. */
+    async 'suphe-kaydet'(el){
+      const g = supheAlan && document.getElementById('v-' + supheAlan);
+      if(g) g.value = el.dataset.deger;
+      supheGecti = true;
+      await handle['save-vitals']();
+    },
+    async 'suphe-duzelt'(){
+      const y = document.getElementById('suphe-yuva');
+      if(y) y.innerHTML = '';
+      const g = supheAlan && document.getElementById('v-' + supheAlan);
+      if(g){ g.focus(); g.select && g.select(); }
+    },
+
     async 'flag-ack'(el){
       await M.ackFlag(el.dataset.id);
       UI.toast('İşaretlendi — kayıt geçmişte duruyor');

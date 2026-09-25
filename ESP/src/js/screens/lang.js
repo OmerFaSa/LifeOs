@@ -460,11 +460,28 @@ ESP.Screens.lang = (function(){
   const GOVDE = { calis:reviewRows, kartlar:cardRows, ekle:addRows, ogren:learnRows,
     gramer:grammarRows, ilerleme:progressRows };
 
+  /* 033 GELECEK YÜK (vitrin): seçili dilin önümüzdeki yedi günlük vadesi.
+     Bugünün sütunu gecikenleri de taşır; kart yoksa hiç çizilmez. */
+  function gelecekYuk(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    const kartlar = M.cardsOf ? M.cardsOf(aktifDil()) : [];
+    if(!G || !kartlar.length) return '';
+    const bugun = U.todayISO();
+    const gunler = [];
+    for(let i = 0; i < 7; i++){
+      const t = G.gunEkle(bugun, i);
+      gunler.push({ tarih:t, deger:kartlar.filter(c => i === 0 ? (c.due || bugun) <= t : c.due === t).length });
+    }
+    return K.Kutu({ ad:'Gelecek yük', yuva:'hesaplandı',
+      govde:raw(G.yukHtml({ gunler, bugun, birim:'kart', etiket:'Önümüzdeki 7 günün vadesi' })) });
+  }
+
   function render(){
     const d = ESP.SRS.deckStatus(aktifDil());
     /* Dil seçici sayfa başında durur (actions): başlığın ve sekmelerin
        arasında tek başına asılı bir kutu ne işe yaradığını söylemiyordu. */
     return K.Grid(html`
+      ${K.Span(12, gelecekYuk())}
       ${K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:'Dil bölümleri', tabs:TABS,
         govde:GOVDE, sayi:{ calis:d.due || null } }))}`);
   }

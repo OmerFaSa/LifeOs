@@ -645,6 +645,7 @@ R.Model = (function(){
     R.S.meta.lastBackupAt = new Date().toISOString();
     // UTC damgasi yerel tarihten farkli gune dusebilir; yasi yerel tarihten hesapla.
     R.S.meta.lastBackupDate = U.todayISO();
+    if(window.LIFEOS && LIFEOS.GUVEN) R.S.meta.yedekIzi = LIFEOS.GUVEN.izEkle(R.S.meta.yedekIzi, U.todayISO());
     R.S.meta.schemaVersion = R.SCHEMA_VERSION;
     await R.Store.set('meta/backup', R.S.meta);
   }

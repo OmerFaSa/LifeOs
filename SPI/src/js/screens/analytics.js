@@ -412,9 +412,39 @@ SP.Screens.analytics = (function(){
     }
   }
 
+  /* ANALİZ BAŞI (vitrin): 041 veri doluluğu · uyku kartı: 027 kopuk çizgi,
+     031 hedef bandı (yalnız profilde hedef yazılıysa; uydurulmaz), 032
+     geçen dönem (bir dokunuşla), 036 dağılım, 037 güvenli eğilim, 034
+     grafiğin cümlesi. SPİ teşhis koymaz: bant bir hedef, sınır değil. */
+  function analizBasi(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G) return '';
+    const bugun = U.todayISO();
+    const gunler = n => { const out = []; for(let i = n - 1; i >= 0; i--) out.push(G.gunEkle(bugun, -i)); return out; };
+    const olcumlu = Object.keys(S.vitals || {}).filter(t => {
+      const v = S.vitals[t];
+      return v && ['sleep', 'weight', 'rhr', 'hrv', 'energy'].some(k => v[k] != null);
+    });
+    const uyku = t => { const v = S.vitals[t]; return v && v.sleep != null ? Number(v.sleep) : null; };
+    const son = gunler(28).map(t => ({ tarih:t, deger:uyku(t) }));
+    const once = gunler(56).slice(0, 28).map(t => ({ tarih:t, deger:uyku(t) }));
+    const hedef = S.profile && Number(S.profile.sleepGoal);
+    const bant = hedef ? [Math.max(0, hedef - 0.5), hedef + 0.5] : null;
+    const cizgi = o => raw(G.cizgiSvg(son, Object.assign({ gen:560, yuk:120, etiket:'Uyku', birim:'saat' }, o)));
+    return K.Grid([K.Span(12, html`<div class="analizbasi">
+      ${K.Kutu({ ad:'Veri doluluğu', yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'spi', ad:'SPİ', gunler:olcumlu }], { gun:7 })) })}
+      ${K.Kutu({ ad:'Uyku', yuva:'son 28 gün', govde:html`
+        <div class="sira-bas">${raw(G.egilimHtml(son.map(x => x.deger), { yon:'artis-iyi', birim:'saat' }))}</div>
+        ${cizgi(bant ? { bant } : {})}
+        ${raw(G.cumleHtml(son, { etiket:'Uyku', birim:'saat' }))}
+        <details class="hiz-ac"><summary>Geçen dönemle karşılaştır</summary>${cizgi({ onceki:once, bant })}</details>
+        <details class="hiz-ac"><summary>Dağılım</summary>${raw(G.dagilimSvg({ degerler:son.map(x => x.deger), birim:'saat', etiket:'Uyku' }))}</details>` })}
+    </div>`)]);
+  }
+
   async function render(){
-    return String(K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) }));
+    return String(html`${analizBasi()}${K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}`);
   }
 
   /* Başka ekrandan istenen bölüm (ofis kartının «Çapraz bağ tablosu» gibi)

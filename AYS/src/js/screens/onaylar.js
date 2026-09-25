@@ -196,6 +196,42 @@ R.Screens.onaylar = (function(){
   const KAYNAK_ADI = { istek:'senin isteğin', llm:'ajanın önerisi', kural:'kural motoru buldu' };
   const SEVIYE_ADI = { kucuk:'küçük değişiklik', orta:'orta değişiklik', buyuk:'büyük değişiklik' };
 
+  /* VİTRİN ÖNERİ KARTI (110 · 114 · 121 · 123 · 113): ofisin önerisi ortak
+     kartla çizilir; uygulama yine yalnız R.Proposals.approve'dan geçer.
+     Ajan, dokunduğu alan ve «Yerini gör» kartın altında kalır. */
+  function kopru(){
+    const O = (window.LIFEOS || {}).ONERI;
+    if(!O || !O.kopru) return null;
+    return O.kopru({
+      katalog:R.ACTIONS,
+      satirlar:() => R.Proposals.actionable(),
+      nesne:p => {
+        const def = R.ACTION_BY_ID[p.action] || {};
+        return { id:p.id, eylem:p.action, level:p.level, baslik:def.title, kaynak:'modul',
+          kapsam:def.level === 'kucuk' ? 'yalnız bugün' : null,
+          cumle:p.reason ? { metin:p.reason, kaynak:p.source === 'llm' ? 'model' : 'kural' } : null,
+          gerekce:p.gerekce || null, kurallar:p.kurallar || [] };
+      },
+      uygula:id => handle['office-approve']({ dataset:{ id } }),
+      gec:async (id, kayit) => { await R.Proposals.reject(id, kayit); UI.toast('Geçildi; öneri silinmedi, «geçildi» diye yazıldı.'); R.App.render(); },
+      onizle:p => ({ govde:String(diffRows(p.preview.rows)) }),
+      pencere:o => UI.sheet({ title:o.baslik, body:o.govde, footer:o.ayak }),
+      kapat:() => UI.closeSheet(),
+    });
+  }
+
+  function oneriKarti(p){
+    const k = kopru();
+    const kart = k ? k.kart(p) : '';
+    if(!kart) return proposalRow(p);
+    const def = R.ACTION_BY_ID[p.action];
+    const agent = R.AGENT_BY_ID[p.agent] || {};
+    return html`<div class="okart-sar">${raw(kart)}
+      <p class="okart__kim">${agent.name || 'Ofis'} · ${def.touches} · ${KAYNAK_ADI[p.source] || 'kural motoru buldu'}
+        ${when(def.route, () => c.Button({ label:'Yerini gör', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':def.route } }))}</p>
+    </div>`;
+  }
+
   function proposalRow(p){
     const def = R.ACTION_BY_ID[p.action];
     const agent = R.AGENT_BY_ID[p.agent];
@@ -252,7 +288,7 @@ R.Screens.onaylar = (function(){
       sub:'Ajanlar değişiklik önerir; uygulanıp uygulanmayacağına sen karar verirsin',
       badge:when(list.length, () => c.Badge({ label:String(list.length), tone:'warn' })),
       body:html`
-        ${when(list.length, () => html`<div class="props">${map(list, proposalRow)}</div>`)}
+        ${when(list.length, () => html`<div class="props">${map(list, oneriKarti)}</div>`)}
         ${when(done.length, () => html`
           <div class="mt-12">${c.SectionTitle('Uygulananlar')}</div>
           <div class="props">${map(done, appliedRow)}</div>`)}`,
@@ -283,7 +319,7 @@ R.Screens.onaylar = (function(){
     if(!kart){
       const l = R.Proposals ? R.Proposals.actionable() : [];
       if(l.length){
-        kart = c.Card({ title:'Ofisin önerisi', body:html`<div class="props">${proposalRow(l[0])}</div>` });
+        kart = oneriKarti(l[0]);
         gosterilen = 1;
       }
     }
@@ -297,6 +333,25 @@ R.Screens.onaylar = (function(){
 
   /* ---------- ekran ---------- */
 
+  /* 179 KAYIT GEÇMİŞİ «Son kararlar» (vitrin, pano «Onaylar › Bekleyen»):
+     kararın kaynağı ayrılır — sen, öneri (senin onayınla), ayar (sormadan).
+     Onay kaydı olmayan öneri değişikliği GİZLENMEZ, uyarıyla yazılır. */
+  function sonKararlar(){
+    const G = (window.LIFEOS || {}).GUVEN;
+    const DURUM = { applied:'uygulandı', accepted:'uygulandı', rejected:'geçildi', declined:'geçildi', undone:'geri alındı' };
+    const rows = (S.officeProposals || []).filter(p => DURUM[p.status]);
+    if(!G || !rows.length) return '';
+    const olay = rows.map(p => {
+      const def = R.ACTION_BY_ID[p.action] || {};
+      const kendi = p.status === 'rejected' || p.status === 'undone';
+      return { zaman:p.undoneAt || p.appliedAt || p.at, alan:def.title || p.action, eski:null,
+        yeni:DURUM[p.status] + (p.gecme && p.gecme.nedenAd ? ' · ' + p.gecme.nedenAd : ''),
+        kaynak:kendi || p.source === 'istek' ? 'kullanici' : 'ofis',
+        onay:kendi ? null : p.otomatik ? { tur:'ayar' } : { tur:'onay' } };
+    });
+    return c.Kutu({ ad:'Son kararlar', yuva:rows.length + ' kayıt', govde:raw(G.gecmisHtml(olay.slice(0, 40))) });
+  }
+
   async function render(){
     const kartlar = [KingTeklifKart(), HkmTeklifKart(), ofisKarti()].filter(Boolean);
     if(!kartlar.length){
@@ -306,10 +361,11 @@ R.Screens.onaylar = (function(){
           onaylamadan hiçbiri uygulanmaz.</p>
         <div class="mt-10">${c.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' })}</div>` }))]));
     }
-    return String(c.Grid([c.Span(12, c.Stack(kartlar))]));
+    return String(c.Grid([c.Span(8, c.Stack(kartlar)), c.Span(4, sonKararlar())]));
   }
 
   /* ---------- eylemler ---------- */
+  const VITRIN_EYLEM = ['oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'];
   const handle = {
     /* King'in teklifi (brand/ortak/kingteklif.js): onay ve iptal HKM'nin
        tek kapısına gider; cevabı HKM kurar. */
@@ -371,6 +427,7 @@ R.Screens.onaylar = (function(){
     /* Kural motoru masaları yeniden okur; model gerekmez, kota harcanmaz. */
     async 'office-scan'(el){ await R.Screens.office.handle['office-scan'](el); },
   };
+  VITRIN_EYLEM.forEach(a => { handle[a] = el => { const k = kopru(); return k ? k.handle[a](el) : null; }; });
 
   return {
     id:'onaylar',

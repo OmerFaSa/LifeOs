@@ -324,7 +324,10 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="okart__bas"><span class="okart__kaynak">' + (merkez ? 'Merkez önerisi' : 'Öneri') + '</span>'
       + seviyeRozeti(k.seviye) + '</div>'
       + (oneri.capraz ? caprazHtml(oneri.capraz) : '')
-      + '<h3 class="okart__baslik" id="' + kid + '">' + kac(oneri.baslik) + '</h3>'
+      /* Başlık seviyesi kartın durduğu yere göre: kutu içinde h3 (kutunun
+         adı h2), doğrudan sayfada h2 (h1 → h3 atlaması erişilebilirlik hatası). */
+      + (oneri.hSeviye === 2 ? '<h2' : '<h3') + ' class="okart__baslik" id="' + kid + '">' + kac(oneri.baslik)
+      + (oneri.hSeviye === 2 ? '</h2>' : '</h3>')
       + '<p class="okart__alt">' + kac(alt.join(' · ')) + '</p>'
       + (oneri.gerekce ? gerekceHtml(oneri.gerekce, oneri.cumle) : '')
       + kuralIziHtml(oneri.kurallar)
@@ -576,7 +579,58 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div></div>';
   }
 
+  /* ------------------------------------------------ modül köprüsü (110 ailesi)
+
+     Modül kendi öneri satırını vitrin kartına çevirir; kartın düğmeleri
+     modülün KENDİ kapısına gider. Köprü karar vermez ve uygulamaz:
+       a = { katalog, satirlar() → [satır], nesne(satır) → öneri,
+             uygula(id), gec(id, gecmeKaydi), onizle(satır) → { once, sonra, govde },
+             pencere({ baslik, govde, ayak }), kapat() }
+     «Geç» önce 123'ü (isteğe bağlı neden) açar; neden seçilmezse de geçer.
+     Önizle orta/büyük aksiyonun önizlemesidir (büyükte önce / sonra, 113). */
+  function kopru(a){
+    a = a || {};
+    const nesne = s => (s && a.nesne) ? a.nesne(s) : null;
+    const bul = id => ((a.satirlar && a.satirlar()) || []).filter(s => s && String(s.id) === String(id))[0] || null;
+    function kart(s){ const o = nesne(s); return o ? kartHtml(o, a.katalog) : ''; }
+    function onizleHtml(s){
+      const o = nesne(s);
+      if(!o || !kalip(o, a.katalog)) return '';
+      const on = a.onizle ? a.onizle(s) : null;
+      return (on && on.once && on.sonra ? onceSonraHtml(on.once, on.sonra) : '')
+        + (on && on.govde ? String(on.govde) : '')
+        + (o.gerekce ? gerekceHtml(o.gerekce, o.cumle) : '') + kuralIziHtml(o.kurallar);
+    }
+    const handle = {
+      async 'oneri-uygula'(el){
+        if(a.kapat) a.kapat();
+        if(a.uygula) await a.uygula(el.dataset.oneri);
+      },
+      'oneri-gec'(el){
+        const k = el.closest('[data-oz="110"]');
+        const e = k && k.querySelector('.okart__eylem');
+        if(e) e.innerHTML = gecmeHtml({ id:el.dataset.oneri });
+        const ilk = e && e.querySelector('button');
+        if(ilk) ilk.focus();
+      },
+      async 'oneri-gec-neden'(el){
+        const s = bul(el.dataset.oneri);
+        if(a.gec) await a.gec(el.dataset.oneri, gecmeKaydi(nesne(s), el.dataset.neden || null));
+      },
+      'oneri-onizle'(el){
+        const s = bul(el.dataset.oneri);
+        const o = nesne(s);
+        if(!o || !a.pencere) return;
+        a.pencere({ baslik:o.baslik, govde:onizleHtml(s),
+          ayak:dugme({ etiket:'Onayla ve uygula', ton:'primary', act:'oneri-uygula', data:{ oneri:o.id } })
+            + dugme({ etiket:'Vazgeç', ton:'ghost', act:'sheet-close' }) });
+      },
+    };
+    return { kart:kart, onizleHtml:onizleHtml, bul:bul, handle:handle, EYLEMLER:Object.keys(handle) };
+  }
+
   L.ONERI = {
+    kopru:kopru,
     SEVIYELER:SEVIYELER,
     SEVIYE_AD:SEVIYE_AD,
     KALIPLAR:KALIPLAR,

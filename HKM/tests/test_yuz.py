@@ -279,6 +279,19 @@ def t_v5_duzen():
     ok(once.count("<div") - once.count("</div>") == 1, "konsey tam en (iki'nin disinda)")
 
 
+def t_capraz_etki():
+    """124 (vitrin): Merkez'in onerisi bir modulun olcumunden baska bir
+    modulun isine gidiyorsa kartta iki modul ve ok yazilir. Bilinmeyen
+    oneri turunde capraz UYDURULMAZ (tablo disinda hicbir sey cizilmez)."""
+    m = _yuz()
+    f = m[m.index("function caprazHtml("):]
+    f = f[:f.index("\n  }\n")]
+    ok('data-oz="124"' in f)
+    ok("if(!c) return '';" in f, "bilinmeyen tur bos doner")
+    ok("var CAPRAZ = { bio_red:{ kaynak:'spi', hedef:'ays' } };" in m)
+    ok("caprazHtml(b)" in m[m.index("function onayCiz("):])
+
+
 def t_ne_degisti():
     """017 (K7c): gezinme degisti (Teklifler → Onaylar; Profil, Motto →
     Ayarlar; Para → Sistemler); guncellemeden sonraki ilk acilista tek kart
@@ -313,5 +326,6 @@ def run():
     test("sakin hata: kırmızı satır yok, ortak cümle (011)", t_sakin_hata)
     test("v5 kabuk: kenar çubuğu, sistem geçişi, günün cümlesi", t_v5_kabuk_ve_gun_cumlesi)
     test("v5 düzen: sistemler paralel, konsey tam en", t_v5_duzen)
+    test("çapraz etki: kaynak → hedef, bilinmeyen türde uydurma yok (124)", t_capraz_etki)
     test("ne değişti: tek kart, yalnız eski kullanıcıya (017)", t_ne_degisti)
     test("fiş yükleme: önizleme, onay, küçültme", t_fis_yukleme)

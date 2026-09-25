@@ -17,7 +17,7 @@ ESP.Screens = ESP.Screens || {};
 
 ESP.Screens.onaylar = (function(){
   const S = ESP.S;
-  const { html, when, map } = ESP.h;
+  const { html, raw, when, map } = ESP.h;
   const K = ESP.C;
 
   /* ---------- King teklifi (Part 8a-3b) ----------
@@ -229,6 +229,25 @@ ESP.Screens.onaylar = (function(){
         tone:'ghost', act:'go', data:{ 'data-route':'onaylar' } }))}</div>`;
   }
 
+  /* 179 KAYIT GEÇMİŞİ «Son kararlar» (vitrin, pano «Onaylar › Bekleyen»):
+     kararın kaynağı ayrılır — sen, öneri (senin onayınla), ayar (sormadan).
+     Onay kaydı olmayan öneri değişikliği GİZLENMEZ, uyarıyla yazılır. */
+  function sonKararlar(){
+    const G = (window.LIFEOS || {}).GUVEN;
+    const DURUM = { applied:'uygulandı', accepted:'uygulandı', rejected:'geçildi', declined:'geçildi', undone:'geri alındı' };
+    const rows = (S.proposals || []).filter(p => DURUM[p.state]);
+    if(!G || !rows.length) return '';
+    const olay = rows.map(p => {
+      const k = (ESP.Plans.KIND_BY_ID || {})[p.kind] || {};
+      const kendi = p.state === 'declined' || p.state === 'undone';
+      return { zaman:p.undoneAt || p.decidedAt || p.at, alan:p.title || k.label || p.kind, eski:null,
+        yeni:DURUM[p.state] + (p.gecme && p.gecme.nedenAd ? ' · ' + p.gecme.nedenAd : ''),
+        kaynak:kendi || p.source === 'istek' ? 'kullanici' : 'ofis',
+        onay:kendi ? null : p.otomatik ? { tur:'ayar' } : { tur:'onay' } };
+    });
+    return K.Entry({ label:'Son kararlar', meta:rows.length + ' kayıt', body:raw(G.gecmisHtml(olay.slice(0, 40))) });
+  }
+
   function render(){
     const kartlar = [KingTeklifKart(), HkmTeklifKart(), AjanKart()].filter(Boolean);
     if(!kartlar.length){
@@ -239,7 +258,7 @@ ESP.Screens.onaylar = (function(){
         <div class="mt-10">${K.Button({ label:'Danışma’ya git', size:'sm', act:'go',
           data:{ 'data-route':'team' } })}</div>` });
     }
-    return K.Ledger(() => kartlar);
+    return K.Ledger(() => kartlar.concat([sonKararlar()].filter(Boolean)));
   }
 
   const handle = {
@@ -283,6 +302,9 @@ ESP.Screens.onaylar = (function(){
     },
 
   };
+  /* Vitrin öneri kartının eylemleri (parts.js köprüsü). */
+  ['oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'].forEach(a => {
+    handle[a] = el => { const k = ESP.Parts.kopru(); return k ? k.handle[a](el) : null; }; });
 
   return {
     id:'onaylar',

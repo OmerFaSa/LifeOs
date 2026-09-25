@@ -864,10 +864,22 @@ R.Proposals = (function(){
   function otomatikMi(row, mod){
     if(!row || row.level !== 'kucuk') return false;
     if((R.ACTION_BY_ID[row.action] || {}).olcum) return false;
+    /* Vitrin 116 — TÜR AYARI moddan önce gelir: kullanıcı bir küçük türü
+       açık ya da kapalı işaretlediyse o geçerlidir (AGENTS §1.9: «hangi
+       küçük türlerin sormadan uygulanacağını kullanıcı ayarlar»). */
+    const tur = turAyari()[row.action || row.kind];
+    if(tur === true || tur === false) return tur;
     const m = MODLAR.indexOf(mod) >= 0 ? mod : 'istek';
     if(m === 'hicbiri') return false;
     if(m === 'hepsi') return true;
     return row.source === 'istek';
+  }
+
+  function turAyari(){
+    try{
+      const st = R.Office && typeof R.Office.settings === 'function' ? R.Office.settings() : null;
+      return (st && st.otomatikTurler && typeof st.otomatikTurler === 'object') ? st.otomatikTurler : {};
+    }catch(e){ return {}; }
   }
 
   function ayar(){
@@ -941,10 +953,12 @@ R.Proposals = (function(){
     return r && r.ok ? { ok:true, row:r.row } : { ok:false, why:(r && r.why) || 'Uygulanamadı.' };
   }
 
-  async function reject(id){
+  /* `gecme`: vitrin 123 — kullanıcının söylediği neden (isteğe bağlı; yoksa null). */
+  async function reject(id, gecme){
     const row = (S.officeProposals || []).find(p => p.id === id);
     if(!row || row.status !== 'pending') return null;
     row.status = 'rejected';
+    if(gecme) row.gecme = gecme;
     await save();
     return row;
   }
@@ -1117,7 +1131,7 @@ R.Proposals = (function(){
   return {
     all, pending, applied, actionable, check, preview,
     propose, approve, hemen, reject, undo, clearResolved,
-    talep, otomatikMi, ayar, SEVIYELER, MODLAR,
+    talep, otomatikMi, ayar, turAyari, SEVIYELER, MODLAR,
     suggest, refresh, fromModel, catalogPrompt, splitAction, stripTrailingJson,
     load, save, MAX,
   };

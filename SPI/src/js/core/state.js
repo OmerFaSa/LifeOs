@@ -807,6 +807,7 @@ SP.Model = (function(){
 
   async function markBackup(){
     SP.S.meta = Object.assign({}, SP.S.meta, { lastBackupAt:new Date().toISOString() });
+    if(window.LIFEOS && LIFEOS.GUVEN) SP.S.meta.yedekIzi = LIFEOS.GUVEN.izEkle(SP.S.meta.yedekIzi, U.todayISO());
     await SP.Store.set('meta', SP.S.meta);
   }
 

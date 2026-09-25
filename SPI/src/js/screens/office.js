@@ -286,6 +286,7 @@ SP.Screens.office = (function(){
   async function render(){
     const flags = SP.Model.openFlags();
     return String(html`
+      ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:SP.Office.ready('patron') })) : ''}
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
       ${K.Ledger(() => [
         briefingCard(),

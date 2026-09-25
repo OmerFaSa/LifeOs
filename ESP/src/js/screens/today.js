@@ -844,7 +844,8 @@ ESP.Screens.today = (function(){
   /* Öneri kartının düğmeleri Onaylar'ın işleyicilerine gider: onay TEK
      yoldan geçer, iki ekranda iki ayrı kod durmaz. */
   const ONAY_EYLEMLERI = ['king-onayla', 'king-parca', 'king-iptal', 'hkm-toplu',
-    'hkm-intent-yes', 'hkm-intent-seen', 'hkm-intent-no', 'hkm-doubt-ok'];
+    'hkm-intent-yes', 'hkm-intent-seen', 'hkm-intent-no', 'hkm-doubt-ok',
+    'oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'];
 
   const handle = {
     async 'dunku-oturum'(el){

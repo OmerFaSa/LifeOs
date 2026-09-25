@@ -5108,6 +5108,37 @@ body.is-dragging .drop.is-over{
 .durumkart__not, .durumkart__bos{ margin:8px 0 0; font-size:13px; color:var(--text-2); }
 .site--v5 .gunserit{ margin-bottom:28px; }
 
+/* Vitrin kartları Durum kutusunda: sayı + fark yan yana, eğri sağda. */
+.durumkart__ust{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.durumkart__egri svg{ display:block; width:132px; height:36px; }
+.durumkart .durumkart__sayi .sayi{ font-size:28px; font-weight:700; letter-spacing:-.02em; }
+.durumkart .esik-cubuk, .durumkart [data-oz="029"]{ margin-top:10px; }
+.sayac__satir + .sayac__satir{ margin-top:10px; }
+
+/* Vitrin grafik kartları ekranlarda: analiz başı iki kutu yan yana; sıra
+   başlığında aralık + eğilim; hız konisi bir dokunuşla açılır (D). */
+.analizbasi{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap:16px; margin-bottom:24px; align-items:start; }
+.sira-bas{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:8px; }
+.sira-bas > [data-oz="035"]{ flex:1 1 280px; }
+.hiz-ac > summary{ cursor:pointer; font-size:13px; color:var(--text-2); min-height:24px; display:flex; align-items:center; }
+
+/* Onaylar rafı (pano 36): bekleyenler solda, «Son kararlar» sağda. */
+.onaylar-raf{ display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
+@media (min-width:1100px){ .onaylar-raf{ grid-template-columns:minmax(0,1fr) 340px; } }
+.okart-sar{ display:flex; flex-direction:column; gap:6px; }
+.okart__kim{ margin:0; font-size:12.5px; color:var(--text-2); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+/* Son ölçümler (015 · 026): ad solda, değer ve yaşı sağda. */
+.sonolcum{ list-style:none; margin:0; padding:0; }
+.sonolcum__s{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:8px 0;
+  border-top:1px solid var(--border); font-size:14px; }
+.sonolcum__s:first-child{ border-top:0; padding-top:0; }
+.sonolcum__ad{ color:var(--text-2); }
+.sonolcum__d{ text-align:right; font-variant-numeric:tabular-nums; }
+
+/* 116 anahtarı: 24 px dokunma tabanı (WCAG 2.2 AA). */
+.otoayar__anahtar{ width:24px; height:24px; min-height:24px; margin:0; flex:none; accent-color:var(--text); }
+
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/seviye.css içine yazılır; burası bir sonraki
@@ -9177,7 +9208,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'81e45dc', at:'2026-09-25 00:48', dirty:true };
+SP.BUILD = { id:'74c8132', at:'2026-09-25 07:53', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -10979,7 +11010,10 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="okart__bas"><span class="okart__kaynak">' + (merkez ? 'Merkez önerisi' : 'Öneri') + '</span>'
       + seviyeRozeti(k.seviye) + '</div>'
       + (oneri.capraz ? caprazHtml(oneri.capraz) : '')
-      + '<h3 class="okart__baslik" id="' + kid + '">' + kac(oneri.baslik) + '</h3>'
+      /* Başlık seviyesi kartın durduğu yere göre: kutu içinde h3 (kutunun
+         adı h2), doğrudan sayfada h2 (h1 → h3 atlaması erişilebilirlik hatası). */
+      + (oneri.hSeviye === 2 ? '<h2' : '<h3') + ' class="okart__baslik" id="' + kid + '">' + kac(oneri.baslik)
+      + (oneri.hSeviye === 2 ? '</h2>' : '</h3>')
       + '<p class="okart__alt">' + kac(alt.join(' · ')) + '</p>'
       + (oneri.gerekce ? gerekceHtml(oneri.gerekce, oneri.cumle) : '')
       + kuralIziHtml(oneri.kurallar)
@@ -11231,7 +11265,58 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div></div>';
   }
 
+  /* ------------------------------------------------ modül köprüsü (110 ailesi)
+
+     Modül kendi öneri satırını vitrin kartına çevirir; kartın düğmeleri
+     modülün KENDİ kapısına gider. Köprü karar vermez ve uygulamaz:
+       a = { katalog, satirlar() → [satır], nesne(satır) → öneri,
+             uygula(id), gec(id, gecmeKaydi), onizle(satır) → { once, sonra, govde },
+             pencere({ baslik, govde, ayak }), kapat() }
+     «Geç» önce 123'ü (isteğe bağlı neden) açar; neden seçilmezse de geçer.
+     Önizle orta/büyük aksiyonun önizlemesidir (büyükte önce / sonra, 113). */
+  function kopru(a){
+    a = a || {};
+    const nesne = s => (s && a.nesne) ? a.nesne(s) : null;
+    const bul = id => ((a.satirlar && a.satirlar()) || []).filter(s => s && String(s.id) === String(id))[0] || null;
+    function kart(s){ const o = nesne(s); return o ? kartHtml(o, a.katalog) : ''; }
+    function onizleHtml(s){
+      const o = nesne(s);
+      if(!o || !kalip(o, a.katalog)) return '';
+      const on = a.onizle ? a.onizle(s) : null;
+      return (on && on.once && on.sonra ? onceSonraHtml(on.once, on.sonra) : '')
+        + (on && on.govde ? String(on.govde) : '')
+        + (o.gerekce ? gerekceHtml(o.gerekce, o.cumle) : '') + kuralIziHtml(o.kurallar);
+    }
+    const handle = {
+      async 'oneri-uygula'(el){
+        if(a.kapat) a.kapat();
+        if(a.uygula) await a.uygula(el.dataset.oneri);
+      },
+      'oneri-gec'(el){
+        const k = el.closest('[data-oz="110"]');
+        const e = k && k.querySelector('.okart__eylem');
+        if(e) e.innerHTML = gecmeHtml({ id:el.dataset.oneri });
+        const ilk = e && e.querySelector('button');
+        if(ilk) ilk.focus();
+      },
+      async 'oneri-gec-neden'(el){
+        const s = bul(el.dataset.oneri);
+        if(a.gec) await a.gec(el.dataset.oneri, gecmeKaydi(nesne(s), el.dataset.neden || null));
+      },
+      'oneri-onizle'(el){
+        const s = bul(el.dataset.oneri);
+        const o = nesne(s);
+        if(!o || !a.pencere) return;
+        a.pencere({ baslik:o.baslik, govde:onizleHtml(s),
+          ayak:dugme({ etiket:'Onayla ve uygula', ton:'primary', act:'oneri-uygula', data:{ oneri:o.id } })
+            + dugme({ etiket:'Vazgeç', ton:'ghost', act:'sheet-close' }) });
+      },
+    };
+    return { kart:kart, onizleHtml:onizleHtml, bul:bul, handle:handle, EYLEMLER:Object.keys(handle) };
+  }
+
   L.ONERI = {
+    kopru:kopru,
     SEVIYELER:SEVIYELER,
     SEVIYE_AD:SEVIYE_AD,
     KALIPLAR:KALIPLAR,
@@ -11751,7 +11836,57 @@ window.LIFEOS = window.LIFEOS || {};
     }).join('') + '</ol>';
   }
 
+  /* KAPIYI AÇ (177, ekranda): modülün penceresinde silme kapısını kurar.
+     o = { baslik, nesne, sayi, sheet(opts), yedekAl() → Promise, sil() → Promise }
+     Dönüş noktası alınmadan ve silinecek sayı yazılmadan düğme açılmaz;
+     karar burada değil `silmeDurumu`ndadır — ekran yalnız onu uygular.
+     Kapının tıklamaları kabuğa sızmaz (stopPropagation): «silme-onay» başka
+     bir işleyiciye düşüp kapıyı atlayamaz. */
+  function kapiAc(o){
+    o = o || {};
+    const d = { donusNoktasi:null, yazilan:'' };
+    const durum = () => silmeDurumu({ sayi:o.sayi, donusNoktasi:d.donusNoktasi, yazilan:d.yazilan });
+    const ciz = () => silmeHtml({ nesne:o.nesne, sayi:o.sayi, donusNoktasi:d.donusNoktasi, yazilan:d.yazilan, id:'kapi' });
+    o.sheet({ title:o.baslik || 'Kalıcı sil', body:'<div class="silme-kap" id="silme-kap">' + ciz() + '</div>' });
+    const kap = typeof document !== 'undefined' ? document.getElementById('silme-kap') : null;
+    if(!kap) return null;
+    kap.addEventListener('click', async e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-act]') : null;
+      if(!b || !kap.contains(b)) return;
+      const act = b.getAttribute('data-act');
+      if(act !== 'silme-donus' && act !== 'silme-onay' && act !== 'silme-yaz') return;
+      e.stopPropagation();
+      if(act === 'silme-donus'){
+        const r = o.yedekAl ? await o.yedekAl() : false;
+        if(r === false) return;
+        d.donusNoktasi = { zaman:new Date().toISOString() };
+        kap.innerHTML = ciz();
+        const g = kap.querySelector('[data-act="silme-yaz"]');
+        if(g) g.focus();
+      }else if(act === 'silme-onay'){
+        if(durum().dugmeAcik && o.sil) await o.sil();
+      }
+    });
+    kap.addEventListener('input', e => {
+      if(!e.target || e.target.getAttribute('data-act') !== 'silme-yaz') return;
+      d.yazilan = e.target.value;
+      const btn = kap.querySelector('[data-act="silme-onay"]');
+      const acik = durum().dugmeAcik;
+      if(btn){ btn.disabled = !acik; if(acik) btn.removeAttribute('aria-disabled'); else btn.setAttribute('aria-disabled', 'true'); }
+    });
+    return { durum:durum, kap:kap };
+  }
+
+  /* Yedek izi (173): alınan her yedeğin GÜNÜ; son 60 gün. Tekrar eden gün bir kez. */
+  function izEkle(iz, gun){
+    const liste = (Array.isArray(iz) ? iz : []).filter(x => typeof x === 'string');
+    if(gun && liste.indexOf(gun) < 0) liste.push(gun);
+    return liste.sort().slice(-60);
+  }
+
   L.GUVEN = {
+    kapiAc:kapiAc,
+    izEkle:izEkle,
     SILME_SEVIYE:SILME_SEVIYE,
     KAYNAKLAR:KAYNAKLAR,
     boyutMetni:boyutMetni,
@@ -23481,6 +23616,7 @@ SP.Model = (function(){
 
   async function markBackup(){
     SP.S.meta = Object.assign({}, SP.S.meta, { lastBackupAt:new Date().toISOString() });
+    if(window.LIFEOS && LIFEOS.GUVEN) SP.S.meta.yedekIzi = LIFEOS.GUVEN.izEkle(SP.S.meta.yedekIzi, U.todayISO());
     await SP.Store.set('meta', SP.S.meta);
   }
 
@@ -39057,10 +39193,22 @@ SP.Proposals = (function(){
   function otomatikMi(row, mod){
     if(!row || row.level !== 'kucuk') return false;
     if((eylem(row.action) || {}).olcum) return false;
+    /* Vitrin 116 — TÜR AYARI moddan önce gelir: kullanıcı bir küçük türü
+       açık ya da kapalı işaretlediyse o geçerlidir (AGENTS §1.9: «hangi
+       küçük türlerin sormadan uygulanacağını kullanıcı ayarlar»). */
+    const tur = turAyari()[row.action || row.kind];
+    if(tur === true || tur === false) return tur;
     const m = MODLAR.indexOf(mod) >= 0 ? mod : 'istek';
     if(m === 'hicbiri') return false;
     if(m === 'hepsi') return true;
     return row.source === 'istek';
+  }
+
+  function turAyari(){
+    try{
+      const st = SP.Office && typeof SP.Office.settings === 'function' ? SP.Office.settings() : null;
+      return (st && st.otomatikTurler && typeof st.otomatikTurler === 'object') ? st.otomatikTurler : {};
+    }catch(e){ return {}; }
   }
 
   function ayar(){
@@ -39109,10 +39257,12 @@ SP.Proposals = (function(){
     }
   }
 
-  async function reject(id){
+  /* `gecme`: vitrin 123 — kullanıcının söylediği neden (isteğe bağlı). */
+  async function reject(id, gecme){
     const p = liste().find(x => x.id === id);
     if(!p) return { ok:false };
     p.status = 'rejected';
+    if(gecme) p.gecme = gecme;
     await save();
     return { ok:true };
   }
@@ -39151,7 +39301,7 @@ SP.Proposals = (function(){
     check, preview,
     fromText, fromModel, yanCumleler, quickToAction,
     propose, approve, reject, undo, clearResolved,
-    talep, otomatikMi, ayar, SEVIYELER, MODLAR,
+    talep, otomatikMi, ayar, turAyari, SEVIYELER, MODLAR,
     pending, all, load, save, MAX,
   };
 })();
@@ -40629,6 +40779,7 @@ SP.Screens.today = (function(){
             min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
         }))}</div>
         <p class="tiny dim mt-8">Boş bıraktığın alan sıfır sayılmaz; uyku tek başına yeter.</p>
+        <div id="suphe-yuva" aria-live="polite"></div>
         <div class="row wrap gap-8 mt-8">
           ${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}
           ${K.Button({ label:'Bütün alanlar', tone:'ghost', act:'day-tab', data:{ 'data-tab':'giris' } })}
@@ -40680,6 +40831,26 @@ SP.Screens.today = (function(){
           text:U.fmtNum(Math.round(t.protein)) + ' / ' + U.fmtNum(tg.protein.min) + ' g' })}</div>` });
   }
 
+  /* 015 SON BİLİNEN DEĞER · 026 VERİ TAZELİĞİ (vitrin, pano «SPİ · Bugün»):
+     her ölçümün son değeri, ne zaman ölçüldüğüyle. Eski ölçüm soluklaşır ve
+     yaşını yazar; hiç ölçülmemişse «—». Bugünün değeri sayılmaz, yazılır. */
+  function SonOlcumlerKutusu(){
+    const SAYI = (window.LIFEOS || {}).SAYI;
+    if(!SAYI) return '';
+    const gunler = Object.keys(S.vitals || {}).sort().reverse();
+    const son = alan => { const t = gunler.find(x => S.vitals[x] && S.vitals[x][alan] != null);
+      return t ? { deger:Number(S.vitals[t][alan]), zaman:t } : null; };
+    const satirlar = [['Uyku', 'sleep', 'saat'], ['Kilo', 'weight', 'kg'], ['İstirahat nabzı', 'rhr', 'atım/dk'], ['HRV', 'hrv', 'ms']]
+      .map(([ad, alan, birim]) => {
+        const s = son(alan);
+        return html`<li class="sonolcum__s"><span class="sonolcum__ad">${ad}</span>
+          <span class="sonolcum__d">${raw(SAYI.html(s ? { deger:s.deger, birim, kesinlik:'measured', zaman:s.zaman,
+            kaynak:'günlük ölçüm', tazelik:'gunluk' } : { deger:null, birim, kesinlik:'missing' }))}</span></li>`;
+      });
+    return K.Kutu({ ad:'Son ölçümler', yuva:'ölçüldü', govde:html`<ul class="sonolcum">${satirlar}</ul>
+      <p class="tiny dim mt-8">Eski ölçüm soluklaşır ve yaşını yazar; ölçülmemiş değer sıfır sayılmaz.</p>` });
+  }
+
   async function render(){
     const acil = uyarilar()[0];
     const vakti = SP.HatirlatUI ? SP.HatirlatUI.vaktiRow() : '';
@@ -40702,6 +40873,7 @@ SP.Screens.today = (function(){
           ${ToparlanmaKutusu()}
           ${AsgariKutusu()}
           ${BeslenmeKutusu()}
+          ${SonOlcumlerKutusu()}
         </section>
         ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
       </div>
@@ -40760,8 +40932,12 @@ SP.Screens.today = (function(){
   /* Öneri alanındaki kartın düğmeleri Onaylar ekranının işleyicilerine
      gider: onay TEK yoldan geçer, iki ekranda iki ayrı kod durmaz. */
   const ONAY_EYLEMLERI = ['king-onayla', 'king-parca', 'king-iptal', 'hkm-toplu', 'hkm-intent-yes',
-    'hkm-intent-apply', 'hkm-intent-no', 'hkm-doubt-ok', 'bekleyen-onay', 'bekleyen-ret'];
+    'hkm-intent-apply', 'hkm-intent-no', 'hkm-doubt-ok', 'bekleyen-onay', 'bekleyen-ret',
+    'oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'];
   const onayIsleyici = a => el => SP.Screens.onaylar.handle[a](el);
+
+  /* 018 şüpheli giriş durumu: hangi alan soruldu, soru geçildi mi. */
+  let supheGecti = false, supheAlan = null;
 
   const handle = {
     async 'dunku-ogun'(el){ await dunkuEkle('ogun', el.dataset.id); },
@@ -40940,6 +41116,24 @@ SP.Screens.today = (function(){
         const raw = el.value.trim();
         patch[f.id] = raw === '' ? null : Number(raw.replace(',', '.'));
       });
+      /* 018 ŞÜPHELİ GİRİŞ: önceki ölçümden çok sapan sayı kaydedilmeden
+         önce sorulur («714 kg» → «71,4 kg olarak kaydet»). Önceki değer
+         yoksa soru yok: veri yok sıfır değildir. Seçim bir kez geçerlidir. */
+      const SAYI = (window.LIFEOS || {}).SAYI;
+      const yuva = document.getElementById('suphe-yuva');
+      if(SAYI && yuva && !supheGecti){
+        const d = shownDate();
+        const once = Object.keys(S.vitals || {}).filter(t => t < d).sort().reverse();
+        /* Eşik: kilo katalogdaki %5; uyku ve nabız gün gün doğal olarak
+           oynar, yalnız yazım hatası boyundaki sapma (×2) sorulur. */
+        for(const [alan, tur, birim, oran] of [['weight', 'kilo', 'kg', null], ['sleep', 'uyku', 'saat', 1], ['rhr', 'nabiz', 'atım', 1]]){
+          if(patch[alan] == null) continue;
+          const t = once.find(x => S.vitals[x] && S.vitals[x][alan] != null);
+          const r = SAYI.suphe(patch[alan], t ? Number(S.vitals[t][alan]) : null, oran ? { tur, birim, oran } : { tur, birim });
+          if(r.supheli){ supheAlan = alan; yuva.innerHTML = SAYI.supheHtml(r); return; }
+        }
+      }
+      supheGecti = false; supheAlan = null;
       const note = document.getElementById('v-note');
       if(note) patch.note = note.value.trim();
       await M.saveVitals(shownDate(), patch);
@@ -40948,6 +41142,20 @@ SP.Screens.today = (function(){
       SP.App.render();
     },
   
+    /* 018: seçilen değer alana yazılır ve kayıt SORUSUZ bir kez daha denenir. */
+    async 'suphe-kaydet'(el){
+      const g = supheAlan && document.getElementById('v-' + supheAlan);
+      if(g) g.value = el.dataset.deger;
+      supheGecti = true;
+      await handle['save-vitals']();
+    },
+    async 'suphe-duzelt'(){
+      const y = document.getElementById('suphe-yuva');
+      if(y) y.innerHTML = '';
+      const g = supheAlan && document.getElementById('v-' + supheAlan);
+      if(g){ g.focus(); g.select && g.select(); }
+    },
+
     async 'flag-ack'(el){
       await M.ackFlag(el.dataset.id);
       UI.toast('İşaretlendi — kayıt geçmişte duruyor');
@@ -45496,9 +45704,39 @@ SP.Screens.analytics = (function(){
     }
   }
 
+  /* ANALİZ BAŞI (vitrin): 041 veri doluluğu · uyku kartı: 027 kopuk çizgi,
+     031 hedef bandı (yalnız profilde hedef yazılıysa; uydurulmaz), 032
+     geçen dönem (bir dokunuşla), 036 dağılım, 037 güvenli eğilim, 034
+     grafiğin cümlesi. SPİ teşhis koymaz: bant bir hedef, sınır değil. */
+  function analizBasi(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G) return '';
+    const bugun = U.todayISO();
+    const gunler = n => { const out = []; for(let i = n - 1; i >= 0; i--) out.push(G.gunEkle(bugun, -i)); return out; };
+    const olcumlu = Object.keys(S.vitals || {}).filter(t => {
+      const v = S.vitals[t];
+      return v && ['sleep', 'weight', 'rhr', 'hrv', 'energy'].some(k => v[k] != null);
+    });
+    const uyku = t => { const v = S.vitals[t]; return v && v.sleep != null ? Number(v.sleep) : null; };
+    const son = gunler(28).map(t => ({ tarih:t, deger:uyku(t) }));
+    const once = gunler(56).slice(0, 28).map(t => ({ tarih:t, deger:uyku(t) }));
+    const hedef = S.profile && Number(S.profile.sleepGoal);
+    const bant = hedef ? [Math.max(0, hedef - 0.5), hedef + 0.5] : null;
+    const cizgi = o => raw(G.cizgiSvg(son, Object.assign({ gen:560, yuk:120, etiket:'Uyku', birim:'saat' }, o)));
+    return K.Grid([K.Span(12, html`<div class="analizbasi">
+      ${K.Kutu({ ad:'Veri doluluğu', yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'spi', ad:'SPİ', gunler:olcumlu }], { gun:7 })) })}
+      ${K.Kutu({ ad:'Uyku', yuva:'son 28 gün', govde:html`
+        <div class="sira-bas">${raw(G.egilimHtml(son.map(x => x.deger), { yon:'artis-iyi', birim:'saat' }))}</div>
+        ${cizgi(bant ? { bant } : {})}
+        ${raw(G.cumleHtml(son, { etiket:'Uyku', birim:'saat' }))}
+        <details class="hiz-ac"><summary>Geçen dönemle karşılaştır</summary>${cizgi({ onceki:once, bant })}</details>
+        <details class="hiz-ac"><summary>Dağılım</summary>${raw(G.dagilimSvg({ degerler:son.map(x => x.deger), birim:'saat', etiket:'Uyku' }))}</details>` })}
+    </div>`)]);
+  }
+
   async function render(){
-    return String(K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) }));
+    return String(html`${analizBasi()}${K.SayfaBolumleri({ act:'an-tab', aria:'Analiz bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}`);
   }
 
   /* Başka ekrandan istenen bölüm (ofis kartının «Çapraz bağ tablosu» gibi)
@@ -45861,6 +46099,7 @@ SP.Screens.office = (function(){
   async function render(){
     const flags = SP.Model.openFlags();
     return String(html`
+      ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:SP.Office.ready('patron') })) : ''}
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
       ${K.Ledger(() => [
         briefingCard(),
@@ -47999,6 +48238,10 @@ SP.Screens.guide = (function(){
               { value:'hepsi', label:'Modelin okuduğu küçük kayıtlar da' },
               { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
             ] }) })}</div>
+        ${when((window.LIFEOS || {}).ONERI, () => html`<div class="mt-12">
+          <p class="small muted">Tür tür: açtığın küçük tür sormadan uygulanır, kapattığın her zaman sorar.
+            Orta ve büyük türler kilitlidir.</p>
+          ${raw(window.LIFEOS.ONERI.ayarHtml(SP.Proposals.katalogIdleri().map(id => Object.assign({ id, title:(SP.Proposals.eylem(id) || {}).label }, SP.Proposals.eylem(id))), { mod:s.otomatikUygula || 'istek', turler:s.otomatikTurler || {} }))}</div>`)}
         ${when(provider && provider.needsKey, () => html`<div class="mt-12">
           ${K.Field({ label:'API anahtarı', hint:provider.keyHint || '',
             input:K.Input({ id:'m-key', type:'password',
@@ -48232,6 +48475,9 @@ SP.Screens.guide = (function(){
       badge:M.backupDue() ? K.Badge({ label:'yedek gerekiyor', tone:'warn' })
         : K.Badge({ label:'yedek güncel', tone:'ok' }),
       body:html`
+        ${when((window.LIFEOS || {}).GUVEN, () => raw(window.LIFEOS.GUVEN.yedekHtml({
+          damga:(SP.S.meta || {}).lastBackupAt, boyut:f.bytes, bugun:U.todayISO(),
+          kayit:f.total, iz:(SP.S.meta || {}).yedekIzi })))}
         ${K.Table({ tight:true, headers:['Kayıt', { label:'Adet', num:true }], rows:[
           ['Tahlil oturumu', String(f.labs)],
           ['Ölçüm günü', String(f.vitalDays)],
@@ -48599,6 +48845,8 @@ SP.Screens.guide = (function(){
       }
       SP.App.render();
     },
+    /* 173 yedek kartının düğmesi: aynı dışa aktarma. */
+    async 'yedek-al'(){ await handle.backup(); },
     async backup(){
       const data = SP.Store.exportAll();
       const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
@@ -48675,6 +48923,14 @@ SP.Screens.guide = (function(){
         }, true);
     },
     async wipe(){
+      const G = (window.LIFEOS || {}).GUVEN;
+      if(G && G.kapiAc){
+        const yedek = SP.Store.exportAll();
+        G.kapiAc({ baslik:'Bütün veriyi sil', nesne:'kaydı', sayi:Object.keys(yedek.data || yedek || {}).length,
+          sheet:o => UI.sheet(o), yedekAl:() => handle.backup(),
+          sil:async () => { await SP.Store.clear(); UI.closeSheet(); location.reload(); } });
+        return;
+      }
       UI.confirmSheet('Bütün veriyi sil',
         'Bu profildeki tahliller, ölçümler, öğünler ve antrenmanlar silinir. '
         + 'Geri alınamaz. Önce yedek al.',
@@ -48699,6 +48955,11 @@ SP.Screens.guide = (function(){
       await SP.Beacon.save({ intervalMinutes:n });
     },
     async 'hkm-level'(el){ await SP.Beacon.save({ level:el.value }); SP.App.render(); },
+    async 'otomatik-tur'(el){
+      const turler = Object.assign({}, SP.Office.settings().otomatikTurler || {}, { [el.dataset.eylem]:!!el.checked });
+      await SP.Office.saveSettings({ otomatikTurler:turler });
+      SP.UI.toast(el.checked ? 'Bu tür sormadan yazılacak; geri alınabilir' : 'Bu tür her zaman önce sorulacak');
+    },
     async 'pick-otomatik'(el){
       const v = SP.Proposals.MODLAR.indexOf(el.value) >= 0 ? el.value : 'istek';
       await SP.Office.saveSettings({ otomatikUygula:v });
@@ -48750,7 +49011,7 @@ SP.Screens = SP.Screens || {};
 
 SP.Screens.onaylar = (function(){
   const S = SP.S, UI = SP.UI;
-  const { html, when, map } = SP.h;
+  const { html, raw, when, map } = SP.h;
   const K = SP.C;
 
   /* ---------- King teklifi (Part 8a-3b) ----------
@@ -48939,9 +49200,42 @@ SP.Screens.onaylar = (function(){
      geçilirse GÖRÜNMEZ olur ve kullanıcı kaydettiğini sanıyor olabilir:
      onaylanmamış bir kayıt, unutulmuş bir kayıttır. Burada bekler; sayısı
      üst çubuğun mor sayacındadır. */
+  /* VİTRİN ÖNERİ KARTI (110 · 123 · 113): bekleyen kayıt ortak kartla
+     çizilir; yazan yine yalnız SP.Proposals.approve'dur. Önizleme satırları
+     (alan → sonra) kartın altında kalır: neyin yazılacağı onaydan önce görünür. */
+  function kopru(){
+    const O = (window.LIFEOS || {}).ONERI;
+    if(!O || !O.kopru || !SP.Proposals) return null;
+    const kat = SP.Proposals.katalogIdleri().map(id => Object.assign({ id, title:(SP.Proposals.eylem(id) || {}).label },
+      SP.Proposals.eylem(id)));
+    return O.kopru({
+      katalog:kat,
+      satirlar:() => SP.Proposals.pending(),
+      nesne:o => { const e = SP.Proposals.eylem(o.action) || {};
+        return { id:o.id, eylem:o.action, level:o.level, baslik:e.label || o.action, kaynak:'modul',
+          kapsam:e.level === 'kucuk' ? 'yalnız bugün' : null,
+          cumle:o.reason ? { metin:o.reason, kaynak:o.source === 'llm' ? 'model' : 'kural' } : null }; },
+      uygula:id => handle['bekleyen-onay']({ dataset:{ id } }),
+      gec:async (id, kayit) => { await SP.Proposals.reject(id, kayit); UI.toast('Geçildi; kayıt yazılmadı.'); SP.App.render(); },
+      onizle:o => { const pv = SP.Proposals.preview(o);
+        return { govde:pv.ok && pv.rows.length ? '<p class="small">' + pv.rows.map(r => SP.U.esc(r.alan + ' → ' + r.sonra)).join(' · ') + '</p>' : '' }; },
+      pencere:o => UI.sheet({ title:o.baslik, body:o.govde, footer:o.ayak }),
+      kapat:() => UI.closeSheet(),
+    });
+  }
+
   function BekleyenKart(){
     const liste = SP.Proposals ? SP.Proposals.pending() : [];
     if(!liste.length) return '';
+    const k = kopru();
+    const kartlar = k ? liste.map(o => {
+      const kart = k.kart(o);
+      if(!kart) return null;
+      const pv = SP.Proposals.preview(o);
+      return html`<div class="okart-sar">${raw(kart)}${when(pv.ok && pv.rows.length, () => html`
+        <p class="okart__kim">${pv.rows.map(r => r.alan + ' → ' + r.sonra).join(' · ')}</p>`)}</div>`;
+    }) : [];
+    if(k && kartlar.every(Boolean)) return html`<div class="stack-sm">${kartlar}</div>`;
     return K.Kutu({ ad:liste.length === 1 ? 'Bir kayıt onayını bekliyor'
       : liste.length + ' kayıt onayını bekliyor', yuva:'Onaylanana kadar hiçbiri yazılmadı',
       govde:html`<div class="bekleyen">${map(liste, o => {
@@ -48995,6 +49289,25 @@ SP.Screens.onaylar = (function(){
 
   /* ---------- ekran ---------- */
 
+  /* 179 KAYIT GEÇMİŞİ «Son kararlar» (vitrin, pano «Onaylar › Bekleyen»):
+     kararın kaynağı ayrılır — sen, öneri (senin onayınla), ayar (sormadan).
+     Onay kaydı olmayan öneri değişikliği GİZLENMEZ, uyarıyla yazılır. */
+  function sonKararlar(){
+    const G = (window.LIFEOS || {}).GUVEN;
+    const DURUM = { applied:'uygulandı', accepted:'uygulandı', rejected:'geçildi', declined:'geçildi', undone:'geri alındı' };
+    const rows = (SP.Proposals ? SP.Proposals.all() : []).filter(p => DURUM[p.status]);
+    if(!G || !rows.length) return '';
+    const olay = rows.map(p => {
+      const e = SP.Proposals.eylem(p.action) || {};
+      const kendi = p.status === 'rejected' || p.status === 'undone';
+      return { zaman:p.undoneAt || p.appliedAt || p.at, alan:e.label || p.action, eski:null,
+        yeni:DURUM[p.status] + (p.gecme && p.gecme.nedenAd ? ' · ' + p.gecme.nedenAd : ''),
+        kaynak:kendi || p.source === 'istek' ? 'kullanici' : 'ofis',
+        onay:kendi ? null : p.otomatik ? { tur:'ayar' } : { tur:'onay' } };
+    });
+    return K.Kutu({ ad:'Son kararlar', yuva:rows.length + ' kayıt', govde:raw(G.gecmisHtml(olay.slice(0, 40))) });
+  }
+
   async function render(){
     const kartlar = [KingTeklifKart(), HkmTeklifKart(), BekleyenKart()].filter(Boolean);
     if(!kartlar.length){
@@ -49005,7 +49318,7 @@ SP.Screens.onaylar = (function(){
         <div class="mt-10">${K.Button({ label:'Danışma’ya git', size:'sm', act:'go',
           data:{ 'data-route':'team' } })}</div>` }));
     }
-    return String(K.Stack(kartlar));
+    return String(html`<div class="onaylar-raf">${K.Stack(kartlar)}${sonKararlar()}</div>`);
   }
 
   /* ---------- eylemler ---------- */
@@ -49056,6 +49369,8 @@ SP.Screens.onaylar = (function(){
       SP.App.render();
     },
   };
+  ['oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'].forEach(a => {
+    handle[a] = el => { const k = kopru(); return k ? k.handle[a](el) : null; }; });
 
   return {
     id:'onaylar',

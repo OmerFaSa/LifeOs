@@ -168,3 +168,45 @@ describe('179 · Kayıt geçmişi', () => {
 });
 
 })();
+
+/* Kapı ekranda (177) ve yedek izi (173): modülün penceresinde kurulur. */
+(function(){
+  const { describe, it, expect } = (window.R || window.SP || window.ESP).Test;
+  const V = () => window.LIFEOS.GUVEN;
+  describe('Kalıcı silme kapısı ekranda (177) · yedek izi (173)', () => {
+    it('oz-177 dönüş noktası alınmadan ve sayı yazılmadan silinmez; sayı doğruysa bir kez silinir', async () => {
+      const kap = document.createElement('div');
+      document.body.appendChild(kap);
+      const iz = { yedek:0, sil:0 };
+      try{
+        V().kapiAc({ baslik:'Sil', nesne:'kaydı', sayi:12, sheet:o => { kap.innerHTML = o.body; },
+          yedekAl:async () => { iz.yedek++; }, sil:async () => { iz.sil++; } });
+        const onay = () => kap.querySelector('[data-act="silme-onay"]');
+        expect(onay().disabled).toBe(true);
+        onay().removeAttribute('disabled');
+        onay().click();
+        await new Promise(r => setTimeout(r, 0));
+        expect(iz.sil).toBe(0);
+        kap.querySelector('[data-act="silme-donus"]').click();
+        await new Promise(r => setTimeout(r, 0));
+        expect(iz.yedek).toBe(1);
+        const g = kap.querySelector('[data-act="silme-yaz"]');
+        g.value = '11'; g.dispatchEvent(new Event('input', { bubbles:true }));
+        expect(onay().disabled).toBe(true);
+        g.value = '12'; g.dispatchEvent(new Event('input', { bubbles:true }));
+        expect(onay().disabled).toBe(false);
+        onay().click();
+        await new Promise(r => setTimeout(r, 0));
+        expect(iz.sil).toBe(1);
+      }finally{ kap.remove(); }
+    });
+
+    it('oz-173 yedek izi günü bir kez tutar, sıralı ve en çok 60 gün', () => {
+      expect(V().izEkle(['2026-09-20'], '2026-09-20').length).toBe(1);
+      expect(V().izEkle(['2026-09-22', '2026-09-20'], '2026-09-21').join(',')).toBe('2026-09-20,2026-09-21,2026-09-22');
+      const uzun = Array.from({ length:70 }, (_, i) => '2026-07-' + String(i % 31 + 1).padStart(2, '0') + '-' + i);
+      expect(V().izEkle(uzun, null).length).toBe(60);
+      expect(V().izEkle(null, '2026-09-24').join(',')).toBe('2026-09-24');
+    });
+  });
+})();

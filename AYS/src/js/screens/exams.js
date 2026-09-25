@@ -69,6 +69,19 @@ R.Screens.exams = (function(){
     })}</div>`;
   }
 
+  /* 035 ARALIK ÇUBUĞU (vitrin): sıralama tahmini tek sayı değil banttır;
+     dayanak (kaç tam deneme) yanında yazar. Yeterli deneme yoksa «—». */
+  function siralamaKutusu(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G) return '';
+    const est = C.estimateScore();
+    return K.Kutu({ ad:'Sıralama', yuva:est.ok ? 'tahmin' : 'veri yok',
+      govde:raw(G.aralikHtml(est.ok ? { alt:est.rankBest, ust:est.rankWorst, olasi:est.rank, min:1,
+          max:Math.round(Math.max(est.rankWorst, est.targetRank) * 1.15), ters:true,
+          dayanak:est.samples, dayanakBirim:'tam deneme' }
+        : { dayanak:C.fullExams('TYT').length, dayanakBirim:'tam deneme (en az 3 gerekir)' })) });
+  }
+
   function listView(){
     const filter = S.ui.examFilter || 'all';
     let list = S.exams.slice().sort((a, b) => b.date.localeCompare(a.date));
@@ -91,6 +104,7 @@ R.Screens.exams = (function(){
         K.Card({ body, pad:'sm' }),
       ])),
       K.Span(3, K.Stack([
+        siralamaKutusu(),
         K.Card({ title:'Deneme hacmi', hint:'exam-volume', sub:'Plan / gerçekleşen', body:volumeTable() }),
         K.Card({ title:'Yayın merdiveni', hint:'publisher', sub:'Zorluk kademesi',
           body:html`<div class="ladder">${map(R.PUBLISHER_LADDER, l => html`

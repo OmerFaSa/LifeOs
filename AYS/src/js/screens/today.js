@@ -916,15 +916,20 @@ R.Screens.today = (function(){
   function SayacKutusu(day, dateISO){
     const minMet = C.minimumDayMet(dateISO);
     const satir = (ad, n, hedef) => {
+      /* 030 tik sayacı: hedef küçükse kutucuklar; büyükse (ya da kitaplık
+         yoksa) eski çubuk. Girilmemiş sayı «—», sıfır değil. */
+      const G = VL().GRAFIK;
+      const tik = G && Number.isInteger(hedef) ? G.tikHtml({ etiket:ad, yapilan:n == null ? null : n, hedef }) : '';
+      if(tik) return html`<div class="sayac__satir">${raw(tik)}</div>`;
       const oran = hedef ? Math.min(100, Math.round(100 * (n || 0) / hedef)) : 0;
       return html`<div class="sayac__satir"><div class="row between"><span>${ad}</span>
-        <b class="num">${n || 0} / ${hedef || 0}</b></div>${c.Bar({ value:oran, tone:'' })}</div>`;
+        <b class="num">${n == null ? '—' : n} / ${hedef || 0}</b></div>${c.Bar({ value:oran, tone:'' })}</div>`;
     };
     /* Plan dışı soru (Telegram «soru 40», derssiz giriş) günün toplamına
        yazılır; burada görünmezse kayıt kaybolmuş sanılır. */
     const serbest = Number(day.freeQ) || 0;
     const dogru = day.freeCorrect == null ? null : Number(day.freeCorrect);
-    return c.Kutu({ ad:'Günlük sayaç', yuva:day.ara ? 'ara günü' : (minMet ? 'minimum tamam' : 'minimum açık'),
+    return c.Kutu({ ad:'Günlük sayaç', yuva:day.ara ? 'ara günü' : html`${terim('minimum-gun', 'minimum')} ${minMet ? 'tamam' : 'açık'}`,
       govde:html`${satir('Paragraf', day.paragraphActual, day.paragraphTarget)}
         ${satir('Problem', day.problemActual, day.problemTarget)}`,
       ayak:serbest > 0 ? 'Plan dışı: ' + serbest + ' soru' + (dogru ? ' · ' + dogru + ' doğru' : '') : null });
@@ -933,12 +938,21 @@ R.Screens.today = (function(){
   /* v5 DURUM KARTLARI (Tasarım Dili «AYS · Bugün»): günlük sayaç, son
      deneme, tekrar borcu yan yana. Sayı KODDAN gelir ve etiketini taşır;
      deneme yoksa «veri yok» yazar, sıfır yazmaz. */
+  /* Vitrin kartları (brand/ortak): sayı 024/025/015, fark 028, çizgi 027,
+     eşik çubuğu 029, tik sayacı 030, terim ipucu 016. Kitaplık yüklü
+     değilse (eski kabuk) aynı bilgi düz yazılır; hiçbiri sayı uydurmaz. */
+  const VL = () => window.LIFEOS || {};
+  const terim = (id, metin) => VL().SOZLUK ? raw(VL().SOZLUK.html(id, metin)) : (metin || id);
+  const sayiH = (s, o) => VL().SAYI ? raw(VL().SAYI.html(s, o))
+    : html`${s.deger == null ? '—' : s.deger}${when(s.birim, () => html`<small> ${s.birim}</small>`)}`;
+
   function SonDenemeKutusu(){
+    const L = VL();
     const tyt = (S.exams || []).filter(e => e.family === 'TYT' && e.kind === 'full')
       .sort((a, b) => String(a.date).localeCompare(String(b.date)));
     if(!tyt.length){
       return c.Kutu({ ad:'Son deneme', yuva:'veri yok', class:'durumkart',
-        govde:html`<p class="durumkart__bos">Henüz tam TYT denemesi yok; net burada kendiliğinden çıkar.</p>`,
+        govde:html`<p class="durumkart__bos">Henüz tam TYT denemesi yok; ${terim('net', 'net')} burada kendiliğinden çıkar.</p>`,
         ayak:c.Button({ label:'Denemelere git', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'exams' } }) });
     }
     const son = tyt[tyt.length - 1];
@@ -947,23 +961,39 @@ R.Screens.today = (function(){
     const fark = once == null ? null : Math.round((net - once) * 100) / 100;
     const netler = tyt.slice(-3).map(M.examNet).sort((x, y) => x - y);
     const medyan = tyt.length >= 3 ? netler[1] : null;
+    const d = (son.tests || []).reduce((a, x) => a + Number(x.correct || 0), 0);
+    const y = (son.tests || []).reduce((a, x) => a + Number(x.wrong || 0), 0);
+    const farkH = fark == null ? '' : L.SAYI
+      ? raw(L.SAYI.farkHtml({ deger:fark, yon:L.SAYI.YON.ARTIS_IYI, ondalik:2, ek:'önceki denemeden' }))
+      : html`<span class="durumkart__fark">${fark > 0 ? '+' : ''}${U.fmtNet(fark)}</span>`;
+    const egri = L.GRAFIK && tyt.length > 1
+      ? raw(L.GRAFIK.cizgiSvg(tyt.slice(-8).map(e => ({ tarih:e.date, deger:M.examNet(e) })),
+        { gen:132, yuk:36, pay:4, etiket:'Son denemelerin TYT neti', birim:'net' })) : '';
     return c.Kutu({ ad:'Son deneme', yuva:'hesaplandı', class:'durumkart',
-      govde:html`<div class="durumkart__sayi"><b>${U.fmtNet(net)}</b><small>net</small>
-          ${when(fark != null, () => html`<span class="${cls('durumkart__fark', fark > 0 && 'is-artti', fark < 0 && 'is-azaldi')}">${fark > 0 ? '↑ ' : fark < 0 ? '↓ ' : ''}${U.fmtNet(Math.abs(fark))}</span>`)}</div>
+      govde:html`<div class="durumkart__ust"><div class="durumkart__sayi">${sayiH({ deger:Math.round(net * 100) / 100,
+          birim:'net', ondalik:2, kesinlik:'computed', formul:'doğru − yanlış ÷ 4',
+          girdiler:[{ ad:'doğru', deger:d, kesinlik:'measured' }, { ad:'yanlış', deger:y, kesinlik:'measured' }],
+          zaman:son.date })}${farkH}</div>${when(egri, () => html`<div class="durumkart__egri">${egri}</div>`)}</div>
         <p class="durumkart__not">${U.fmtDate(son.date)}${when(medyan != null, () => ' · son üçün medyanı ' + U.fmtNet(medyan))}</p>` });
   }
 
   function TekrarBorcuKutusu(){
+    const L = VL();
     const vadeli = C.dueCards().length;
     const geciken = C.overdueCards ? C.overdueCards().length : null;
     const esik = 10;
     /* Hiç kart yoksa borç ÖLÇÜLMEMİŞTİR: «%0» değil «—» (eksik veri sıfır değildir). */
     const kartVar = (S.cards || []).length > 0;
     const borc = kartVar ? C.cardDebt() : null;
-    return c.Kutu({ ad:'Tekrar borcu', yuva:!kartVar ? 'veri yok' : vadeli ? 'hesaplandı' : 'vadeli kart yok', class:'durumkart',
-      govde:html`<div class="durumkart__sayi"><b>${borc == null ? '—' : '%' + borc}</b>
-          ${when(borc > esik, () => html`<span class="durumkart__fark is-azaldi">eşik üstü</span>`)}</div>
-        <p class="durumkart__not">Eşik %${esik}${when(vadeli && geciken != null, () => ' · ' + geciken + ' geciken ÷ ' + vadeli + ' vadeli kart')}</p>`,
+    const cubuk = borc != null && L.GRAFIK
+      ? raw(L.GRAFIK.esikCubukHtml({ etiket:'Tekrar borcu', deger:borc, esik, olcek:Math.max(50, borc), birim:'%', yon:'azalis-iyi' })) : '';
+    return c.Kutu({ ad:terim('tekrar-borcu', 'Tekrar borcu'), yuva:!kartVar ? 'veri yok' : vadeli ? 'hesaplandı' : 'vadeli kart yok', class:'durumkart',
+      govde:html`<div class="durumkart__sayi">${sayiH({ deger:borc, birim:'%', kesinlik:kartVar ? 'computed' : 'missing',
+          formul:'geciken kart ÷ vadeli kart', girdiler:kartVar ? [{ ad:'geciken', deger:geciken, kesinlik:'measured' },
+            { ad:'vadeli', deger:vadeli, kesinlik:'measured' }] : [] })}
+          ${when(borc != null && borc > esik, () => html`<span class="durumkart__fark is-azaldi">eşik üstü</span>`)}</div>
+        ${cubuk}
+        <p class="durumkart__not">${terim('esik', 'Eşik')} %${esik}${when(vadeli && geciken != null, () => ' · ' + geciken + ' geciken ÷ ' + vadeli + ' vadeli kart')}</p>`,
       ayak:vadeli ? c.Button({ label:'Tekrara git', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'cards' } }) : null });
   }
 
@@ -1110,7 +1140,8 @@ R.Screens.today = (function(){
   /* Öneri alanındaki kartın düğmeleri Onaylar ekranının işleyicilerine
      gider: onay TEK yoldan geçer, iki ekranda iki ayrı kod durmaz. */
   const ONAY_EYLEMLERI = ['king-onayla', 'king-parca', 'king-iptal', 'hkm-toplu', 'hkm-intent-yes',
-    'hkm-intent-seen', 'hkm-intent-no', 'hkm-doubt-ok', 'office-approve', 'office-reject', 'office-undo'];
+    'hkm-intent-seen', 'hkm-intent-no', 'hkm-doubt-ok', 'office-approve', 'office-reject', 'office-undo',
+    'oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'];
 
   /* ---------- eylemler ---------- */
   const handle = {

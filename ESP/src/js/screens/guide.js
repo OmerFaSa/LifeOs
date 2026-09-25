@@ -275,6 +275,9 @@ ESP.Screens.guide = (function(){
         meta:(function(){ const n = M.backupAgeDays(); return n == null ? 'hiç' : n + ' gün önce'; })(),
         note:'Yedek dosyası şifresizdir; paylaşılan bir dizine konmaz.',
         body:html`
+          ${when((window.LIFEOS || {}).GUVEN, () => raw(window.LIFEOS.GUVEN.yedekHtml({
+            damga:(S.meta || {}).lastBackup, boyut:ayak.bytes, bugun:U.todayISO(),
+            kayit:ayak.total, iz:(S.meta || {}).yedekIzi })))}
           <div class="row wrap">
             ${K.Button({ label:'Yedek indir', act:'export-data2' })}
             ${when((ESP.Beacon && ESP.Beacon.settings().enabled), () => K.Button({ label:'HKM’deki yedekten yükle', act:'restore-hkm' }))}
@@ -546,6 +549,8 @@ ESP.Screens.guide = (function(){
       ESP.App.render();
     },
 
+    /* 173 yedek kartının düğmesi: aynı dışa aktarma. */
+    async 'yedek-al'(){ await handle['export-data2'](); },
     async 'export-data2'(){
       const veri = await ESP.Store.exportAll();
       const blob = new Blob([JSON.stringify(veri, null, 2)], { type:'application/json' });
@@ -560,6 +565,14 @@ ESP.Screens.guide = (function(){
     },
 
     async 'wipe-data'(){
+      const G = (window.LIFEOS || {}).GUVEN;
+      if(G && G.kapiAc){
+        const yedek = await ESP.Store.exportAll();
+        G.kapiAc({ baslik:'Bu profilin verisini sil', nesne:'kaydı', sayi:Object.keys(yedek.data || yedek || {}).length,
+          sheet:o => ESP.UI.sheet(o), yedekAl:() => handle['export-data2'](),
+          sil:async () => { await ESP.Store.clear(); location.reload(); } });
+        return;
+      }
       ESP.UI.confirmSheet('Bu profilin verisi silinsin mi?',
         'Bütün oturumlar, kartlar, tezler, notlar ve taslaklar kalkar. '
         + 'Bu işlem geri alınamaz.',

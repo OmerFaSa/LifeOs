@@ -57,6 +57,20 @@ R.Screens.target = (function(){
       { label:'Son 4 medyan', num:true }, '', 'Durum'] });
   }
 
+  /* 039 HIZ TAHMİNİ (vitrin, «Hedefe kalan» satırından açılır — D katmanı):
+     TYT netlerinin seyri ve hedef net; koni yavaş/hızlı eğimdir, tahmindir. */
+  function hizKonisi(gap){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G || !gap || gap.reached) return '';
+    const tyt = C.fullExams('TYT');
+    if(!tyt.length) return '';
+    const netler = tyt.map(e => ({ tarih:e.date, deger:M.examNet(e) }));
+    const son = netler[netler.length - 1].deger;
+    const hedef = Math.round((son + gap.netDiff) * 10) / 10;
+    return html`<details class="hiz-ac mt-10"><summary>Hedefe kalan: ${U.fmtNet(gap.netDiff)} net · hız tahmini</summary>
+      ${raw(G.hizKoniSvg(netler, hedef, { birim:'net', etiket:'TYT neti' }))}</details>`;
+  }
+
   /* ---------- tahmini puan ve sıra ---------- */
 
   function estimateCard(){
@@ -89,12 +103,13 @@ R.Screens.target = (function(){
           ${K.Badge({ label:est.meta.label, tone })}
         </div>
 
-        <div class="estimate__scale">
-          ${K.Bar({ value:pos(est.rank), tone:tone === 'ok' ? '' : 'warn' })}
-          <div class="row between mt-4">
-            <span class="tiny dim">geniş sıra</span>
-            <span class="tiny dim num">hedef ${U.fmtNum(est.targetRank)}</span>
-          </div>
+        ${(window.LIFEOS || {}).GRAFIK ? raw(window.LIFEOS.GRAFIK.aralikHtml({ etiket:'Tahmini sıra (tahmin)',
+            alt:est.rankBest, ust:est.rankWorst, olasi:est.rank, min:1, max:Math.round(scaleMax), ters:true,
+            dayanak:est.samples, dayanakBirim:'tam deneme' })) : html`<div class="estimate__scale">
+          ${K.Bar({ value:pos(est.rank), tone:tone === 'ok' ? '' : 'warn' })}</div>`}
+        <div class="row between mt-4">
+          <span class="tiny dim">geniş sıra</span>
+          <span class="tiny dim num">hedef ${U.fmtNum(est.targetRank)}</span>
         </div>
 
         <div class="mt-12">${K.Notice({ tone:tone === 'ok' ? 'ok' : 'info', body:est.meta.note })}</div>
@@ -107,6 +122,7 @@ R.Screens.target = (function(){
           K.Stat({ label:'OBP katkısı', value:'+'+U.fmtNet(est.obp), tone:'ok' }),
         ])}
 
+        ${hizKonisi(gap)}
         ${when(gap && !gap.reached, () => html`<p class="small muted mt-10">
           Hedef bandı tutmak için tahmini <b>${U.fmtNet(gap.netDiff)} net</b> daha gerekiyor
           (${U.fmtNet(gap.scoreDiff)} puan). Bu sayı bir hedef değil, mesafe göstergesidir.</p>`)}

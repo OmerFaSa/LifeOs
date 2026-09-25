@@ -75,6 +75,7 @@ ESP.Screens.office = (function(){
     const next = brf.next;
 
     return K.Grid(html`
+      ${K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:ESP.Office.ready('patron') })) : '')}
       ${K.Span(12, K.Ledger(() => [
 
         K.Entry({

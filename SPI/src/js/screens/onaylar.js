@@ -18,7 +18,7 @@ SP.Screens = SP.Screens || {};
 
 SP.Screens.onaylar = (function(){
   const S = SP.S, UI = SP.UI;
-  const { html, when, map } = SP.h;
+  const { html, raw, when, map } = SP.h;
   const K = SP.C;
 
   /* ---------- King teklifi (Part 8a-3b) ----------
@@ -207,9 +207,42 @@ SP.Screens.onaylar = (function(){
      geçilirse GÖRÜNMEZ olur ve kullanıcı kaydettiğini sanıyor olabilir:
      onaylanmamış bir kayıt, unutulmuş bir kayıttır. Burada bekler; sayısı
      üst çubuğun mor sayacındadır. */
+  /* VİTRİN ÖNERİ KARTI (110 · 123 · 113): bekleyen kayıt ortak kartla
+     çizilir; yazan yine yalnız SP.Proposals.approve'dur. Önizleme satırları
+     (alan → sonra) kartın altında kalır: neyin yazılacağı onaydan önce görünür. */
+  function kopru(){
+    const O = (window.LIFEOS || {}).ONERI;
+    if(!O || !O.kopru || !SP.Proposals) return null;
+    const kat = SP.Proposals.katalogIdleri().map(id => Object.assign({ id, title:(SP.Proposals.eylem(id) || {}).label },
+      SP.Proposals.eylem(id)));
+    return O.kopru({
+      katalog:kat,
+      satirlar:() => SP.Proposals.pending(),
+      nesne:o => { const e = SP.Proposals.eylem(o.action) || {};
+        return { id:o.id, eylem:o.action, level:o.level, baslik:e.label || o.action, kaynak:'modul',
+          kapsam:e.level === 'kucuk' ? 'yalnız bugün' : null,
+          cumle:o.reason ? { metin:o.reason, kaynak:o.source === 'llm' ? 'model' : 'kural' } : null }; },
+      uygula:id => handle['bekleyen-onay']({ dataset:{ id } }),
+      gec:async (id, kayit) => { await SP.Proposals.reject(id, kayit); UI.toast('Geçildi; kayıt yazılmadı.'); SP.App.render(); },
+      onizle:o => { const pv = SP.Proposals.preview(o);
+        return { govde:pv.ok && pv.rows.length ? '<p class="small">' + pv.rows.map(r => SP.U.esc(r.alan + ' → ' + r.sonra)).join(' · ') + '</p>' : '' }; },
+      pencere:o => UI.sheet({ title:o.baslik, body:o.govde, footer:o.ayak }),
+      kapat:() => UI.closeSheet(),
+    });
+  }
+
   function BekleyenKart(){
     const liste = SP.Proposals ? SP.Proposals.pending() : [];
     if(!liste.length) return '';
+    const k = kopru();
+    const kartlar = k ? liste.map(o => {
+      const kart = k.kart(o);
+      if(!kart) return null;
+      const pv = SP.Proposals.preview(o);
+      return html`<div class="okart-sar">${raw(kart)}${when(pv.ok && pv.rows.length, () => html`
+        <p class="okart__kim">${pv.rows.map(r => r.alan + ' → ' + r.sonra).join(' · ')}</p>`)}</div>`;
+    }) : [];
+    if(k && kartlar.every(Boolean)) return html`<div class="stack-sm">${kartlar}</div>`;
     return K.Kutu({ ad:liste.length === 1 ? 'Bir kayıt onayını bekliyor'
       : liste.length + ' kayıt onayını bekliyor', yuva:'Onaylanana kadar hiçbiri yazılmadı',
       govde:html`<div class="bekleyen">${map(liste, o => {
@@ -263,6 +296,25 @@ SP.Screens.onaylar = (function(){
 
   /* ---------- ekran ---------- */
 
+  /* 179 KAYIT GEÇMİŞİ «Son kararlar» (vitrin, pano «Onaylar › Bekleyen»):
+     kararın kaynağı ayrılır — sen, öneri (senin onayınla), ayar (sormadan).
+     Onay kaydı olmayan öneri değişikliği GİZLENMEZ, uyarıyla yazılır. */
+  function sonKararlar(){
+    const G = (window.LIFEOS || {}).GUVEN;
+    const DURUM = { applied:'uygulandı', accepted:'uygulandı', rejected:'geçildi', declined:'geçildi', undone:'geri alındı' };
+    const rows = (SP.Proposals ? SP.Proposals.all() : []).filter(p => DURUM[p.status]);
+    if(!G || !rows.length) return '';
+    const olay = rows.map(p => {
+      const e = SP.Proposals.eylem(p.action) || {};
+      const kendi = p.status === 'rejected' || p.status === 'undone';
+      return { zaman:p.undoneAt || p.appliedAt || p.at, alan:e.label || p.action, eski:null,
+        yeni:DURUM[p.status] + (p.gecme && p.gecme.nedenAd ? ' · ' + p.gecme.nedenAd : ''),
+        kaynak:kendi || p.source === 'istek' ? 'kullanici' : 'ofis',
+        onay:kendi ? null : p.otomatik ? { tur:'ayar' } : { tur:'onay' } };
+    });
+    return K.Kutu({ ad:'Son kararlar', yuva:rows.length + ' kayıt', govde:raw(G.gecmisHtml(olay.slice(0, 40))) });
+  }
+
   async function render(){
     const kartlar = [KingTeklifKart(), HkmTeklifKart(), BekleyenKart()].filter(Boolean);
     if(!kartlar.length){
@@ -273,7 +325,7 @@ SP.Screens.onaylar = (function(){
         <div class="mt-10">${K.Button({ label:'Danışma’ya git', size:'sm', act:'go',
           data:{ 'data-route':'team' } })}</div>` }));
     }
-    return String(K.Stack(kartlar));
+    return String(html`<div class="onaylar-raf">${K.Stack(kartlar)}${sonKararlar()}</div>`);
   }
 
   /* ---------- eylemler ---------- */
@@ -324,6 +376,8 @@ SP.Screens.onaylar = (function(){
       SP.App.render();
     },
   };
+  ['oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'].forEach(a => {
+    handle[a] = el => { const k = kopru(); return k ? k.handle[a](el) : null; }; });
 
   return {
     id:'onaylar',

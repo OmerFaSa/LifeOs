@@ -377,7 +377,7 @@ R.Screens.solve = (function(){
           options:R.SOLVE_RESULT_ORDER.map(id => ({ value:id, label:R.SOLVE_RESULTS[id].label })) }) }),
       K.Cols(2, [
         K.Field({ label:'Süre (sn)', hint:'isteğe bağlı',
-          input:K.Input({ id:'q-secs', type:'number', numeric:true, min:0 }) }),
+          input:html`${K.Input({ id:'q-secs', type:'number', numeric:true, min:0 })}<div id="q-suphe" aria-live="polite"></div>` }),
         K.Field({ label:'Cevap', input:K.Input({ id:'q-answer', value:m.answer || '' }) }),
       ]),
       /* Kaynak: zorluğu ETİKETİNDEN değil, senin bu kaynaktaki oranından
@@ -721,6 +721,18 @@ R.Screens.solve = (function(){
     },
 
     async 'q-save'(){ await saveRecord(false); },
+    async 'suphe-kaydet'(el){
+      const g = document.getElementById('q-secs');
+      if(g) g.value = el.dataset.deger;
+      supheGecti = true;
+      await saveRecord(supheKayit);
+    },
+    async 'suphe-duzelt'(){
+      const y = document.getElementById('q-suphe');
+      if(y) y.innerHTML = '';
+      const g = document.getElementById('q-secs');
+      if(g) g.focus();
+    },
     async 'q-save-error'(){ await saveRecord(true); },
 
     /* Konu seçici: yazarak ara, listeden seç. */
@@ -784,6 +796,18 @@ R.Screens.solve = (function(){
 
   /* Kaydı kurar. Konu ve zorluk formdan okunur: model bir öneri verir,
      son sözü kullanıcı söyler. */
+  /* 018: yeni süre son kaydın süresinden basamak kayması boyunda saparsa
+     soru döner. Sorudan soruya süre üç katına çıkabilir; ×4 ve üstü sorulur. */
+  function sureSuphesi(sn){
+    const SAYI = (window.LIFEOS || {}).SAYI;
+    if(!SAYI) return null;
+    const son = (S.solved || []).find(x => Number(x.seconds) > 0);
+    return SAYI.suphe(sn, son ? Number(son.seconds) : null, { tur:'sure', birim:'sn', oran:3 });
+  }
+
+  /* 018 şüpheli giriş: soru geçildi mi, hangi kayıt türü bekliyor. */
+  let supheGecti = false, supheKayit = false;
+
   async function saveRecord(alsoError){
     if(!result) return;
     const val = id => { const e = document.getElementById(id); return e ? String(e.value).trim() : ''; };
@@ -817,6 +841,16 @@ R.Screens.solve = (function(){
     const subject = subjectId ? R.SUBJECTS.find(s => s.id === subjectId) : null;
     const topic = subject ? subject.topics.find(t => t.id === topicId) : null;
     const m = result.meta || {};
+
+    /* 018 ŞÜPHELİ GİRİŞ: süre son kayıttan çok saparsa kaydetmeden önce
+       sorulur (900 sn → «90 sn olarak kaydet»). Önceki süre yoksa soru yok. */
+    const sn = Number(val('q-secs')) || null;
+    const yuva = document.getElementById('q-suphe');
+    if(sn && yuva && !supheGecti){
+      const r = sureSuphesi(sn);
+      if(r && r.supheli){ supheKayit = alsoError; yuva.innerHTML = window.LIFEOS.SAYI.supheHtml(r); return; }
+    }
+    supheGecti = false;
 
     const rec = await Q.save({
       question:questionText(),
@@ -889,6 +923,7 @@ R.Screens.solve = (function(){
 
   return {
     id:'solve',
+    sureSuphesi,
     title:'Soru çöz',
     subtitle(){
       const s = Q.summary();

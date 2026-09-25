@@ -5086,6 +5086,37 @@ body.is-dragging .drop.is-over{
 .durumkart__not, .durumkart__bos{ margin:8px 0 0; font-size:13px; color:var(--text-2); }
 .site--v5 .gunserit{ margin-bottom:28px; }
 
+/* Vitrin kartları Durum kutusunda: sayı + fark yan yana, eğri sağda. */
+.durumkart__ust{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.durumkart__egri svg{ display:block; width:132px; height:36px; }
+.durumkart .durumkart__sayi .sayi{ font-size:28px; font-weight:700; letter-spacing:-.02em; }
+.durumkart .esik-cubuk, .durumkart [data-oz="029"]{ margin-top:10px; }
+.sayac__satir + .sayac__satir{ margin-top:10px; }
+
+/* Vitrin grafik kartları ekranlarda: analiz başı iki kutu yan yana; sıra
+   başlığında aralık + eğilim; hız konisi bir dokunuşla açılır (D). */
+.analizbasi{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap:16px; margin-bottom:24px; align-items:start; }
+.sira-bas{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:8px; }
+.sira-bas > [data-oz="035"]{ flex:1 1 280px; }
+.hiz-ac > summary{ cursor:pointer; font-size:13px; color:var(--text-2); min-height:24px; display:flex; align-items:center; }
+
+/* Onaylar rafı (pano 36): bekleyenler solda, «Son kararlar» sağda. */
+.onaylar-raf{ display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
+@media (min-width:1100px){ .onaylar-raf{ grid-template-columns:minmax(0,1fr) 340px; } }
+.okart-sar{ display:flex; flex-direction:column; gap:6px; }
+.okart__kim{ margin:0; font-size:12.5px; color:var(--text-2); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+/* Son ölçümler (015 · 026): ad solda, değer ve yaşı sağda. */
+.sonolcum{ list-style:none; margin:0; padding:0; }
+.sonolcum__s{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:8px 0;
+  border-top:1px solid var(--border); font-size:14px; }
+.sonolcum__s:first-child{ border-top:0; padding-top:0; }
+.sonolcum__ad{ color:var(--text-2); }
+.sonolcum__d{ text-align:right; font-variant-numeric:tabular-nums; }
+
+/* 116 anahtarı: 24 px dokunma tabanı (WCAG 2.2 AA). */
+.otoayar__anahtar{ width:24px; height:24px; min-height:24px; margin:0; flex:none; accent-color:var(--text); }
+
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/seviye.css içine yazılır; burası bir sonraki
@@ -10037,7 +10068,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'81e45dc', at:'2026-09-25 00:48', dirty:true };
+ESP.BUILD = { id:'74c8132', at:'2026-09-25 07:53', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -11839,7 +11870,10 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="okart__bas"><span class="okart__kaynak">' + (merkez ? 'Merkez önerisi' : 'Öneri') + '</span>'
       + seviyeRozeti(k.seviye) + '</div>'
       + (oneri.capraz ? caprazHtml(oneri.capraz) : '')
-      + '<h3 class="okart__baslik" id="' + kid + '">' + kac(oneri.baslik) + '</h3>'
+      /* Başlık seviyesi kartın durduğu yere göre: kutu içinde h3 (kutunun
+         adı h2), doğrudan sayfada h2 (h1 → h3 atlaması erişilebilirlik hatası). */
+      + (oneri.hSeviye === 2 ? '<h2' : '<h3') + ' class="okart__baslik" id="' + kid + '">' + kac(oneri.baslik)
+      + (oneri.hSeviye === 2 ? '</h2>' : '</h3>')
       + '<p class="okart__alt">' + kac(alt.join(' · ')) + '</p>'
       + (oneri.gerekce ? gerekceHtml(oneri.gerekce, oneri.cumle) : '')
       + kuralIziHtml(oneri.kurallar)
@@ -12091,7 +12125,58 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div></div>';
   }
 
+  /* ------------------------------------------------ modül köprüsü (110 ailesi)
+
+     Modül kendi öneri satırını vitrin kartına çevirir; kartın düğmeleri
+     modülün KENDİ kapısına gider. Köprü karar vermez ve uygulamaz:
+       a = { katalog, satirlar() → [satır], nesne(satır) → öneri,
+             uygula(id), gec(id, gecmeKaydi), onizle(satır) → { once, sonra, govde },
+             pencere({ baslik, govde, ayak }), kapat() }
+     «Geç» önce 123'ü (isteğe bağlı neden) açar; neden seçilmezse de geçer.
+     Önizle orta/büyük aksiyonun önizlemesidir (büyükte önce / sonra, 113). */
+  function kopru(a){
+    a = a || {};
+    const nesne = s => (s && a.nesne) ? a.nesne(s) : null;
+    const bul = id => ((a.satirlar && a.satirlar()) || []).filter(s => s && String(s.id) === String(id))[0] || null;
+    function kart(s){ const o = nesne(s); return o ? kartHtml(o, a.katalog) : ''; }
+    function onizleHtml(s){
+      const o = nesne(s);
+      if(!o || !kalip(o, a.katalog)) return '';
+      const on = a.onizle ? a.onizle(s) : null;
+      return (on && on.once && on.sonra ? onceSonraHtml(on.once, on.sonra) : '')
+        + (on && on.govde ? String(on.govde) : '')
+        + (o.gerekce ? gerekceHtml(o.gerekce, o.cumle) : '') + kuralIziHtml(o.kurallar);
+    }
+    const handle = {
+      async 'oneri-uygula'(el){
+        if(a.kapat) a.kapat();
+        if(a.uygula) await a.uygula(el.dataset.oneri);
+      },
+      'oneri-gec'(el){
+        const k = el.closest('[data-oz="110"]');
+        const e = k && k.querySelector('.okart__eylem');
+        if(e) e.innerHTML = gecmeHtml({ id:el.dataset.oneri });
+        const ilk = e && e.querySelector('button');
+        if(ilk) ilk.focus();
+      },
+      async 'oneri-gec-neden'(el){
+        const s = bul(el.dataset.oneri);
+        if(a.gec) await a.gec(el.dataset.oneri, gecmeKaydi(nesne(s), el.dataset.neden || null));
+      },
+      'oneri-onizle'(el){
+        const s = bul(el.dataset.oneri);
+        const o = nesne(s);
+        if(!o || !a.pencere) return;
+        a.pencere({ baslik:o.baslik, govde:onizleHtml(s),
+          ayak:dugme({ etiket:'Onayla ve uygula', ton:'primary', act:'oneri-uygula', data:{ oneri:o.id } })
+            + dugme({ etiket:'Vazgeç', ton:'ghost', act:'sheet-close' }) });
+      },
+    };
+    return { kart:kart, onizleHtml:onizleHtml, bul:bul, handle:handle, EYLEMLER:Object.keys(handle) };
+  }
+
   L.ONERI = {
+    kopru:kopru,
     SEVIYELER:SEVIYELER,
     SEVIYE_AD:SEVIYE_AD,
     KALIPLAR:KALIPLAR,
@@ -12611,7 +12696,57 @@ window.LIFEOS = window.LIFEOS || {};
     }).join('') + '</ol>';
   }
 
+  /* KAPIYI AÇ (177, ekranda): modülün penceresinde silme kapısını kurar.
+     o = { baslik, nesne, sayi, sheet(opts), yedekAl() → Promise, sil() → Promise }
+     Dönüş noktası alınmadan ve silinecek sayı yazılmadan düğme açılmaz;
+     karar burada değil `silmeDurumu`ndadır — ekran yalnız onu uygular.
+     Kapının tıklamaları kabuğa sızmaz (stopPropagation): «silme-onay» başka
+     bir işleyiciye düşüp kapıyı atlayamaz. */
+  function kapiAc(o){
+    o = o || {};
+    const d = { donusNoktasi:null, yazilan:'' };
+    const durum = () => silmeDurumu({ sayi:o.sayi, donusNoktasi:d.donusNoktasi, yazilan:d.yazilan });
+    const ciz = () => silmeHtml({ nesne:o.nesne, sayi:o.sayi, donusNoktasi:d.donusNoktasi, yazilan:d.yazilan, id:'kapi' });
+    o.sheet({ title:o.baslik || 'Kalıcı sil', body:'<div class="silme-kap" id="silme-kap">' + ciz() + '</div>' });
+    const kap = typeof document !== 'undefined' ? document.getElementById('silme-kap') : null;
+    if(!kap) return null;
+    kap.addEventListener('click', async e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-act]') : null;
+      if(!b || !kap.contains(b)) return;
+      const act = b.getAttribute('data-act');
+      if(act !== 'silme-donus' && act !== 'silme-onay' && act !== 'silme-yaz') return;
+      e.stopPropagation();
+      if(act === 'silme-donus'){
+        const r = o.yedekAl ? await o.yedekAl() : false;
+        if(r === false) return;
+        d.donusNoktasi = { zaman:new Date().toISOString() };
+        kap.innerHTML = ciz();
+        const g = kap.querySelector('[data-act="silme-yaz"]');
+        if(g) g.focus();
+      }else if(act === 'silme-onay'){
+        if(durum().dugmeAcik && o.sil) await o.sil();
+      }
+    });
+    kap.addEventListener('input', e => {
+      if(!e.target || e.target.getAttribute('data-act') !== 'silme-yaz') return;
+      d.yazilan = e.target.value;
+      const btn = kap.querySelector('[data-act="silme-onay"]');
+      const acik = durum().dugmeAcik;
+      if(btn){ btn.disabled = !acik; if(acik) btn.removeAttribute('aria-disabled'); else btn.setAttribute('aria-disabled', 'true'); }
+    });
+    return { durum:durum, kap:kap };
+  }
+
+  /* Yedek izi (173): alınan her yedeğin GÜNÜ; son 60 gün. Tekrar eden gün bir kez. */
+  function izEkle(iz, gun){
+    const liste = (Array.isArray(iz) ? iz : []).filter(x => typeof x === 'string');
+    if(gun && liste.indexOf(gun) < 0) liste.push(gun);
+    return liste.sort().slice(-60);
+  }
+
   L.GUVEN = {
+    kapiAc:kapiAc,
+    izEkle:izEkle,
     SILME_SEVIYE:SILME_SEVIYE,
     KAYNAKLAR:KAYNAKLAR,
     boyutMetni:boyutMetni,
@@ -25392,6 +25527,7 @@ ESP.Model = (function(){
   async function markBackup(){
     S.meta = Object.assign({ schemaVersion:ESP.SCHEMA_VERSION }, S.meta,
       { lastBackup:new Date().toISOString() });
+    if(window.LIFEOS && LIFEOS.GUVEN) S.meta.yedekIzi = LIFEOS.GUVEN.izEkle(S.meta.yedekIzi, U.todayISO());
     await ESP.Store.set('meta', S.meta);
   }
 
@@ -34727,10 +34863,22 @@ ESP.Plans = (function(){
 
   function otomatikMi(row, mod){
     if(!row || row.level !== 'kucuk') return false;
+    /* Vitrin 116 — TÜR AYARI moddan önce gelir: kullanıcı bir küçük türü
+       açık ya da kapalı işaretlediyse o geçerlidir (AGENTS §1.9: «hangi
+       küçük türlerin sormadan uygulanacağını kullanıcı ayarlar»). */
+    const tur = turAyari()[row.action || row.kind];
+    if(tur === true || tur === false) return tur;
     const m = MODLAR.indexOf(mod) >= 0 ? mod : 'istek';
     if(m === 'hicbiri') return false;
     if(m === 'hepsi') return true;
     return row.source === 'istek';
+  }
+
+  function turAyari(){
+    try{
+      const st = ESP.Office && typeof ESP.Office.settings === 'function' ? ESP.Office.settings() : null;
+      return (st && st.otomatikTurler && typeof st.otomatikTurler === 'object') ? st.otomatikTurler : {};
+    }catch(e){ return {}; }
   }
 
   function ayar(){
@@ -34776,11 +34924,12 @@ ESP.Plans = (function(){
       return p.source === 'istek' && p.state === 'proposed'; });
   }
 
-  async function decline(prop){
+  /* `gecme`: vitrin 123 — kullanıcının söylediği neden (isteğe bağlı). */
+  async function decline(prop, gecme){
     const p = typeof prop === 'string' ? (record(prop) || bul(prop)) : prop;
     if(!p) return { ok:false, error:'Teklif bulunamadı.' };
     await write(Object.assign({}, p, { state:'declined',
-      decidedAt:new Date().toISOString() }));
+      decidedAt:new Date().toISOString() }, gecme ? { gecme } : {}));
     return { ok:true };
   }
 
@@ -34850,7 +34999,7 @@ ESP.Plans = (function(){
 
   return { KINDS, KIND_BY_ID, allowed, discOf, stillApplied,
     proposalsFor, all, open:open_, record, accept, decline,
-    dogrula, geriAl, talep, istekler, otomatikMi, ayar, MODLAR,
+    dogrula, geriAl, talep, istekler, otomatikMi, ayar, turAyari, MODLAR,
     weekPlan, savePlan, plan, clearPlan, today };
 })();
 
@@ -39538,8 +39687,43 @@ ESP.Parts = (function(){
 
   /* Onay düğmesi dolu değildir: liste uzadıkça ekranda tek dolu düğme
      kuralı (EKIP-PLANI §1.2) bozulurdu. */
+  /* VİTRİN ÖNERİ KARTI (110 · 123): ajan teklifi ortak kartla çizilir;
+     uygulayan yine yalnız ESP.Plans.accept'tir (geri alınabilir). Ajan ve
+     türün notu kartın altında kalır. Kitaplık yoksa eski satır. */
+  function kopru(){
+    const O = (window.LIFEOS || {}).ONERI;
+    if(!O || !O.kopru || !ESP.Plans) return null;
+    return O.kopru({
+      katalog:ESP.Plans.KINDS.map(k => Object.assign({ title:k.label }, k)),
+      satirlar:() => ESP.Plans.all(),
+      nesne:p => ({ id:p.id, eylem:p.kind, baslik:p.title, kaynak:'modul', hSeviye:2,
+        cumle:p.why ? { metin:p.why, kaynak:p.source === 'llm' ? 'model' : 'kural' } : null }),
+      uygula:async id => {
+        const res = await ESP.Plans.accept(id);
+        if(!res.ok){ ESP.UI.toast(res.error); return; }
+        ESP.UI.toast('Onaylandı — kural motoru uyguladı', { undo:async () => {
+          const g = await ESP.Plans.geriAl(id); ESP.UI.toast(g.ok ? 'Geri alındı' : g.error); ESP.App.render(); } });
+        ESP.App.render();
+      },
+      gec:async (id, kayit) => { const r = await ESP.Plans.decline(id, kayit);
+        ESP.UI.toast(r && r.ok === false ? r.error : 'Geçildi — bu teklif tekrar sorulmaz'); ESP.App.render(); },
+      pencere:o => ESP.UI.sheet({ title:o.baslik, body:o.govde, footer:o.ayak }),
+      kapat:() => ESP.UI.closeSheet(),
+    });
+  }
+
   function proposalList(list, bos){
     if(!list.length) return K.Empty({ text:bos || 'Bekleyen teklif yok.' });
+    const kk = kopru();
+    const kartlar = kk ? list.map(p => {
+      const kart = kk.kart(p);
+      if(!kart) return null;
+      const k = ESP.Plans.KIND_BY_ID[p.kind] || {};
+      const a = ESP.AGENT_BY_ID[p.agentId] || {};
+      return html`<div class="okart-sar">${raw(kart)}<p class="okart__kim">${p.source === 'istek' ? 'senin isteğin'
+        : (a.short || a.name || p.agentId)} · ${k.note || ''}</p></div>`;
+    }) : [];
+    if(kk && kartlar.every(Boolean)) return html`<div class="stack-sm">${kartlar}</div>`;
     return html`<ul class="props">${map(list, p => {
       const k = ESP.Plans.KIND_BY_ID[p.kind] || {};
       const a = ESP.AGENT_BY_ID[p.agentId] || {};
@@ -39712,7 +39896,7 @@ ESP.Parts = (function(){
     if(t && t !== ilk) K.bolumeGit(t);
   }
 
-  return { bolumler, bolumIstegi, cert, measure, avatar, discChip, radar, empty, desk, deskRx,
+  return { kopru, bolumler, bolumIstegi, cert, measure, avatar, discChip, radar, empty, desk, deskRx,
     deskChat, deskMap, deskAssets, deskReminders, deskPlans, deskAudit,
     units, practice, proposalList, onayDugmeleri, weekPlan, rx:rxList, topics };
 
@@ -43683,7 +43867,8 @@ ESP.Screens.today = (function(){
   /* Öneri kartının düğmeleri Onaylar'ın işleyicilerine gider: onay TEK
      yoldan geçer, iki ekranda iki ayrı kod durmaz. */
   const ONAY_EYLEMLERI = ['king-onayla', 'king-parca', 'king-iptal', 'hkm-toplu',
-    'hkm-intent-yes', 'hkm-intent-seen', 'hkm-intent-no', 'hkm-doubt-ok'];
+    'hkm-intent-yes', 'hkm-intent-seen', 'hkm-intent-no', 'hkm-doubt-ok',
+    'oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'];
 
   const handle = {
     async 'dunku-oturum'(el){
@@ -44416,11 +44601,28 @@ ESP.Screens.lang = (function(){
   const GOVDE = { calis:reviewRows, kartlar:cardRows, ekle:addRows, ogren:learnRows,
     gramer:grammarRows, ilerleme:progressRows };
 
+  /* 033 GELECEK YÜK (vitrin): seçili dilin önümüzdeki yedi günlük vadesi.
+     Bugünün sütunu gecikenleri de taşır; kart yoksa hiç çizilmez. */
+  function gelecekYuk(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    const kartlar = M.cardsOf ? M.cardsOf(aktifDil()) : [];
+    if(!G || !kartlar.length) return '';
+    const bugun = U.todayISO();
+    const gunler = [];
+    for(let i = 0; i < 7; i++){
+      const t = G.gunEkle(bugun, i);
+      gunler.push({ tarih:t, deger:kartlar.filter(c => i === 0 ? (c.due || bugun) <= t : c.due === t).length });
+    }
+    return K.Kutu({ ad:'Gelecek yük', yuva:'hesaplandı',
+      govde:raw(G.yukHtml({ gunler, bugun, birim:'kart', etiket:'Önümüzdeki 7 günün vadesi' })) });
+  }
+
   function render(){
     const d = ESP.SRS.deckStatus(aktifDil());
     /* Dil seçici sayfa başında durur (actions): başlığın ve sekmelerin
        arasında tek başına asılı bir kutu ne işe yaradığını söylemiyordu. */
     return K.Grid(html`
+      ${K.Span(12, gelecekYuk())}
       ${K.Span(12, ESP.Parts.bolumler('lang', { act:'lang-tab', aria:'Dil bölümleri', tabs:TABS,
         govde:GOVDE, sayi:{ calis:d.due || null } }))}`);
   }
@@ -47935,6 +48137,7 @@ ESP.Screens.office = (function(){
     const next = brf.next;
 
     return K.Grid(html`
+      ${K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:ESP.Office.ready('patron') })) : '')}
       ${K.Span(12, K.Ledger(() => [
 
         K.Entry({
@@ -48946,8 +49149,31 @@ ESP.Screens.analytics = (function(){
   /* Sekme yok (EKIP-PLANI §1.2): dört okuma alt alta. */
   const GOVDE = { radar:radarRows, seriler:seriesRows, rapor:reportRows, durust:honestyRows };
 
+  /* ANALİZ BAŞI (vitrin): 041 veri doluluğu, günlük dakika çizgisi (027,
+     girilmemiş gün boşluk), 037 güvenli eğilim, 034 grafiğin cümlesi. */
+  function analizBasi(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G) return '';
+    const bugun = U.todayISO();
+    const kayitli = Object.keys(S.days || {}).filter(t => ESP.Model.sessionsOf(t).length > 0);
+    const son = [];
+    for(let i = 27; i >= 0; i--){
+      const t = G.gunEkle(bugun, -i);
+      const r = ESP.Model.sessionsOf(t);
+      son.push({ tarih:t, deger:r.length ? r.reduce((a, s) => a + (s.minutes || 0), 0) : null });
+    }
+    return html`<div class="analizbasi">
+      ${K.Kutu({ ad:'Veri doluluğu', yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'esp', ad:'ESP', gunler:kayitli }], { gun:7 })) })}
+      ${K.Kutu({ ad:'Günlük pratik', yuva:'son 28 gün', govde:html`
+        <div class="sira-bas">${raw(G.egilimHtml(son.map(x => x.deger), { yon:'artis-iyi', birim:'dk' }))}</div>
+        ${raw(G.cizgiSvg(son, { gen:560, yuk:120, etiket:'Günlük pratik', birim:'dk' }))}
+        ${raw(G.cumleHtml(son, { etiket:'Günlük pratik', birim:'dk', ondalik:0 }))}` })}
+    </div>`;
+  }
+
   function render(){
     return K.Grid(html`
+      ${K.Span(12, analizBasi())}
       ${K.Span(12, ESP.Parts.bolumler(null, { act:'ana-tab', aria:'Analiz bölümleri', tabs:TABS, govde:GOVDE }))}`);
   }
 
@@ -49155,7 +49381,12 @@ ESP.Screens.profile = (function(){
                 change:'pick-otomatik', options:[
                   { value:'istek', label:'Yalnız benim istediklerim (önerilir)' },
                   { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
-                ] }) })}</div>`,
+                ] }) })}</div>
+            ${when((window.LIFEOS || {}).ONERI, () => html`<div class="mt-12">
+              <p class="small muted">Tür tür: açtığın küçük tür sormadan uygulanır, kapattığın her zaman sorar.
+                Orta ve büyük türler kilitlidir.</p>
+              ${raw(window.LIFEOS.ONERI.ayarHtml(ESP.Plans.KINDS.map(k => Object.assign({ title:k.label }, k)),
+                { mod:ESP.Office.settings().otomatikUygula || 'istek', turler:ESP.Office.settings().otomatikTurler || {} }))}</div>`)}`,
         }),
 
         hafizaEntry(),
@@ -49357,6 +49588,12 @@ ESP.Screens.profile = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    /* Vitrin 116: tek bir küçük türün sormadan uygulanıp uygulanmayacağı. */
+    async 'otomatik-tur'(el){
+      const turler = Object.assign({}, ESP.Office.settings().otomatikTurler || {}, { [el.dataset.eylem]:!!el.checked });
+      await ESP.Office.saveSettings({ otomatikTurler:turler });
+      ESP.UI.toast(el.checked ? 'Bu tür sormadan uygulanacak; geri alınabilir' : 'Bu tür her zaman önce sorulacak');
+    },
     async 'hafiza-ekle'(){
       const el = document.getElementById('hafiza-yeni');
       const r = await ESP.Hafizam.ekle(el ? el.value : '', { katman:'soz', kaynak:'kullanici' });
@@ -50685,6 +50922,9 @@ ESP.Screens.guide = (function(){
         meta:(function(){ const n = M.backupAgeDays(); return n == null ? 'hiç' : n + ' gün önce'; })(),
         note:'Yedek dosyası şifresizdir; paylaşılan bir dizine konmaz.',
         body:html`
+          ${when((window.LIFEOS || {}).GUVEN, () => raw(window.LIFEOS.GUVEN.yedekHtml({
+            damga:(S.meta || {}).lastBackup, boyut:ayak.bytes, bugun:U.todayISO(),
+            kayit:ayak.total, iz:(S.meta || {}).yedekIzi })))}
           <div class="row wrap">
             ${K.Button({ label:'Yedek indir', act:'export-data2' })}
             ${when((ESP.Beacon && ESP.Beacon.settings().enabled), () => K.Button({ label:'HKM’deki yedekten yükle', act:'restore-hkm' }))}
@@ -50956,6 +51196,8 @@ ESP.Screens.guide = (function(){
       ESP.App.render();
     },
 
+    /* 173 yedek kartının düğmesi: aynı dışa aktarma. */
+    async 'yedek-al'(){ await handle['export-data2'](); },
     async 'export-data2'(){
       const veri = await ESP.Store.exportAll();
       const blob = new Blob([JSON.stringify(veri, null, 2)], { type:'application/json' });
@@ -50970,6 +51212,14 @@ ESP.Screens.guide = (function(){
     },
 
     async 'wipe-data'(){
+      const G = (window.LIFEOS || {}).GUVEN;
+      if(G && G.kapiAc){
+        const yedek = await ESP.Store.exportAll();
+        G.kapiAc({ baslik:'Bu profilin verisini sil', nesne:'kaydı', sayi:Object.keys(yedek.data || yedek || {}).length,
+          sheet:o => ESP.UI.sheet(o), yedekAl:() => handle['export-data2'](),
+          sil:async () => { await ESP.Store.clear(); location.reload(); } });
+        return;
+      }
       ESP.UI.confirmSheet('Bu profilin verisi silinsin mi?',
         'Bütün oturumlar, kartlar, tezler, notlar ve taslaklar kalkar. '
         + 'Bu işlem geri alınamaz.',
@@ -51067,7 +51317,7 @@ ESP.Screens = ESP.Screens || {};
 
 ESP.Screens.onaylar = (function(){
   const S = ESP.S;
-  const { html, when, map } = ESP.h;
+  const { html, raw, when, map } = ESP.h;
   const K = ESP.C;
 
   /* ---------- King teklifi (Part 8a-3b) ----------
@@ -51279,6 +51529,25 @@ ESP.Screens.onaylar = (function(){
         tone:'ghost', act:'go', data:{ 'data-route':'onaylar' } }))}</div>`;
   }
 
+  /* 179 KAYIT GEÇMİŞİ «Son kararlar» (vitrin, pano «Onaylar › Bekleyen»):
+     kararın kaynağı ayrılır — sen, öneri (senin onayınla), ayar (sormadan).
+     Onay kaydı olmayan öneri değişikliği GİZLENMEZ, uyarıyla yazılır. */
+  function sonKararlar(){
+    const G = (window.LIFEOS || {}).GUVEN;
+    const DURUM = { applied:'uygulandı', accepted:'uygulandı', rejected:'geçildi', declined:'geçildi', undone:'geri alındı' };
+    const rows = (S.proposals || []).filter(p => DURUM[p.state]);
+    if(!G || !rows.length) return '';
+    const olay = rows.map(p => {
+      const k = (ESP.Plans.KIND_BY_ID || {})[p.kind] || {};
+      const kendi = p.state === 'declined' || p.state === 'undone';
+      return { zaman:p.undoneAt || p.decidedAt || p.at, alan:p.title || k.label || p.kind, eski:null,
+        yeni:DURUM[p.state] + (p.gecme && p.gecme.nedenAd ? ' · ' + p.gecme.nedenAd : ''),
+        kaynak:kendi || p.source === 'istek' ? 'kullanici' : 'ofis',
+        onay:kendi ? null : p.otomatik ? { tur:'ayar' } : { tur:'onay' } };
+    });
+    return K.Entry({ label:'Son kararlar', meta:rows.length + ' kayıt', body:raw(G.gecmisHtml(olay.slice(0, 40))) });
+  }
+
   function render(){
     const kartlar = [KingTeklifKart(), HkmTeklifKart(), AjanKart()].filter(Boolean);
     if(!kartlar.length){
@@ -51289,7 +51558,7 @@ ESP.Screens.onaylar = (function(){
         <div class="mt-10">${K.Button({ label:'Danışma’ya git', size:'sm', act:'go',
           data:{ 'data-route':'team' } })}</div>` });
     }
-    return K.Ledger(() => kartlar);
+    return K.Ledger(() => kartlar.concat([sonKararlar()].filter(Boolean)));
   }
 
   const handle = {
@@ -51333,6 +51602,9 @@ ESP.Screens.onaylar = (function(){
     },
 
   };
+  /* Vitrin öneri kartının eylemleri (parts.js köprüsü). */
+  ['oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'].forEach(a => {
+    handle[a] = el => { const k = ESP.Parts.kopru(); return k ? k.handle[a](el) : null; }; });
 
   return {
     id:'onaylar',
@@ -52287,6 +52559,13 @@ ESP.App = (function(){
       } });
       render();
     },
+
+    /* Vitrin öneri kartı (parts.js köprüsü) her ekranda aynı kapıya gider:
+       Onaylar, Bugün, ofis masası ve toplantı. */
+    'oneri-uygula'(el){ const k = ESP.Parts.kopru(); return k ? k.handle['oneri-uygula'](el) : null; },
+    'oneri-gec'(el){ const k = ESP.Parts.kopru(); return k ? k.handle['oneri-gec'](el) : null; },
+    'oneri-gec-neden'(el){ const k = ESP.Parts.kopru(); return k ? k.handle['oneri-gec-neden'](el) : null; },
+    'oneri-onizle'(el){ const k = ESP.Parts.kopru(); return k ? k.handle['oneri-onizle'](el) : null; },
 
     async 'prop-decline'(el){
       const res = await ESP.Plans.decline(el.dataset.id);

@@ -5124,6 +5124,37 @@ body.is-dragging .drop.is-over{
 .durumkart__not, .durumkart__bos{ margin:8px 0 0; font-size:13px; color:var(--text-2); }
 .site--v5 .gunserit{ margin-bottom:28px; }
 
+/* Vitrin kartları Durum kutusunda: sayı + fark yan yana, eğri sağda. */
+.durumkart__ust{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.durumkart__egri svg{ display:block; width:132px; height:36px; }
+.durumkart .durumkart__sayi .sayi{ font-size:28px; font-weight:700; letter-spacing:-.02em; }
+.durumkart .esik-cubuk, .durumkart [data-oz="029"]{ margin-top:10px; }
+.sayac__satir + .sayac__satir{ margin-top:10px; }
+
+/* Vitrin grafik kartları ekranlarda: analiz başı iki kutu yan yana; sıra
+   başlığında aralık + eğilim; hız konisi bir dokunuşla açılır (D). */
+.analizbasi{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap:16px; margin-bottom:24px; align-items:start; }
+.sira-bas{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:8px; }
+.sira-bas > [data-oz="035"]{ flex:1 1 280px; }
+.hiz-ac > summary{ cursor:pointer; font-size:13px; color:var(--text-2); min-height:24px; display:flex; align-items:center; }
+
+/* Onaylar rafı (pano 36): bekleyenler solda, «Son kararlar» sağda. */
+.onaylar-raf{ display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
+@media (min-width:1100px){ .onaylar-raf{ grid-template-columns:minmax(0,1fr) 340px; } }
+.okart-sar{ display:flex; flex-direction:column; gap:6px; }
+.okart__kim{ margin:0; font-size:12.5px; color:var(--text-2); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+/* Son ölçümler (015 · 026): ad solda, değer ve yaşı sağda. */
+.sonolcum{ list-style:none; margin:0; padding:0; }
+.sonolcum__s{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:8px 0;
+  border-top:1px solid var(--border); font-size:14px; }
+.sonolcum__s:first-child{ border-top:0; padding-top:0; }
+.sonolcum__ad{ color:var(--text-2); }
+.sonolcum__d{ text-align:right; font-variant-numeric:tabular-nums; }
+
+/* 116 anahtarı: 24 px dokunma tabanı (WCAG 2.2 AA). */
+.otoayar__anahtar{ width:24px; height:24px; min-height:24px; margin:0; flex:none; accent-color:var(--text); }
+
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/seviye.css içine yazılır; burası bir sonraki
@@ -10729,7 +10760,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'81e45dc', at:'2026-09-25 00:48', dirty:true };
+R.BUILD = { id:'74c8132', at:'2026-09-25 07:53', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -12531,7 +12562,10 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="okart__bas"><span class="okart__kaynak">' + (merkez ? 'Merkez önerisi' : 'Öneri') + '</span>'
       + seviyeRozeti(k.seviye) + '</div>'
       + (oneri.capraz ? caprazHtml(oneri.capraz) : '')
-      + '<h3 class="okart__baslik" id="' + kid + '">' + kac(oneri.baslik) + '</h3>'
+      /* Başlık seviyesi kartın durduğu yere göre: kutu içinde h3 (kutunun
+         adı h2), doğrudan sayfada h2 (h1 → h3 atlaması erişilebilirlik hatası). */
+      + (oneri.hSeviye === 2 ? '<h2' : '<h3') + ' class="okart__baslik" id="' + kid + '">' + kac(oneri.baslik)
+      + (oneri.hSeviye === 2 ? '</h2>' : '</h3>')
       + '<p class="okart__alt">' + kac(alt.join(' · ')) + '</p>'
       + (oneri.gerekce ? gerekceHtml(oneri.gerekce, oneri.cumle) : '')
       + kuralIziHtml(oneri.kurallar)
@@ -12783,7 +12817,58 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div></div>';
   }
 
+  /* ------------------------------------------------ modül köprüsü (110 ailesi)
+
+     Modül kendi öneri satırını vitrin kartına çevirir; kartın düğmeleri
+     modülün KENDİ kapısına gider. Köprü karar vermez ve uygulamaz:
+       a = { katalog, satirlar() → [satır], nesne(satır) → öneri,
+             uygula(id), gec(id, gecmeKaydi), onizle(satır) → { once, sonra, govde },
+             pencere({ baslik, govde, ayak }), kapat() }
+     «Geç» önce 123'ü (isteğe bağlı neden) açar; neden seçilmezse de geçer.
+     Önizle orta/büyük aksiyonun önizlemesidir (büyükte önce / sonra, 113). */
+  function kopru(a){
+    a = a || {};
+    const nesne = s => (s && a.nesne) ? a.nesne(s) : null;
+    const bul = id => ((a.satirlar && a.satirlar()) || []).filter(s => s && String(s.id) === String(id))[0] || null;
+    function kart(s){ const o = nesne(s); return o ? kartHtml(o, a.katalog) : ''; }
+    function onizleHtml(s){
+      const o = nesne(s);
+      if(!o || !kalip(o, a.katalog)) return '';
+      const on = a.onizle ? a.onizle(s) : null;
+      return (on && on.once && on.sonra ? onceSonraHtml(on.once, on.sonra) : '')
+        + (on && on.govde ? String(on.govde) : '')
+        + (o.gerekce ? gerekceHtml(o.gerekce, o.cumle) : '') + kuralIziHtml(o.kurallar);
+    }
+    const handle = {
+      async 'oneri-uygula'(el){
+        if(a.kapat) a.kapat();
+        if(a.uygula) await a.uygula(el.dataset.oneri);
+      },
+      'oneri-gec'(el){
+        const k = el.closest('[data-oz="110"]');
+        const e = k && k.querySelector('.okart__eylem');
+        if(e) e.innerHTML = gecmeHtml({ id:el.dataset.oneri });
+        const ilk = e && e.querySelector('button');
+        if(ilk) ilk.focus();
+      },
+      async 'oneri-gec-neden'(el){
+        const s = bul(el.dataset.oneri);
+        if(a.gec) await a.gec(el.dataset.oneri, gecmeKaydi(nesne(s), el.dataset.neden || null));
+      },
+      'oneri-onizle'(el){
+        const s = bul(el.dataset.oneri);
+        const o = nesne(s);
+        if(!o || !a.pencere) return;
+        a.pencere({ baslik:o.baslik, govde:onizleHtml(s),
+          ayak:dugme({ etiket:'Onayla ve uygula', ton:'primary', act:'oneri-uygula', data:{ oneri:o.id } })
+            + dugme({ etiket:'Vazgeç', ton:'ghost', act:'sheet-close' }) });
+      },
+    };
+    return { kart:kart, onizleHtml:onizleHtml, bul:bul, handle:handle, EYLEMLER:Object.keys(handle) };
+  }
+
   L.ONERI = {
+    kopru:kopru,
     SEVIYELER:SEVIYELER,
     SEVIYE_AD:SEVIYE_AD,
     KALIPLAR:KALIPLAR,
@@ -13303,7 +13388,57 @@ window.LIFEOS = window.LIFEOS || {};
     }).join('') + '</ol>';
   }
 
+  /* KAPIYI AÇ (177, ekranda): modülün penceresinde silme kapısını kurar.
+     o = { baslik, nesne, sayi, sheet(opts), yedekAl() → Promise, sil() → Promise }
+     Dönüş noktası alınmadan ve silinecek sayı yazılmadan düğme açılmaz;
+     karar burada değil `silmeDurumu`ndadır — ekran yalnız onu uygular.
+     Kapının tıklamaları kabuğa sızmaz (stopPropagation): «silme-onay» başka
+     bir işleyiciye düşüp kapıyı atlayamaz. */
+  function kapiAc(o){
+    o = o || {};
+    const d = { donusNoktasi:null, yazilan:'' };
+    const durum = () => silmeDurumu({ sayi:o.sayi, donusNoktasi:d.donusNoktasi, yazilan:d.yazilan });
+    const ciz = () => silmeHtml({ nesne:o.nesne, sayi:o.sayi, donusNoktasi:d.donusNoktasi, yazilan:d.yazilan, id:'kapi' });
+    o.sheet({ title:o.baslik || 'Kalıcı sil', body:'<div class="silme-kap" id="silme-kap">' + ciz() + '</div>' });
+    const kap = typeof document !== 'undefined' ? document.getElementById('silme-kap') : null;
+    if(!kap) return null;
+    kap.addEventListener('click', async e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-act]') : null;
+      if(!b || !kap.contains(b)) return;
+      const act = b.getAttribute('data-act');
+      if(act !== 'silme-donus' && act !== 'silme-onay' && act !== 'silme-yaz') return;
+      e.stopPropagation();
+      if(act === 'silme-donus'){
+        const r = o.yedekAl ? await o.yedekAl() : false;
+        if(r === false) return;
+        d.donusNoktasi = { zaman:new Date().toISOString() };
+        kap.innerHTML = ciz();
+        const g = kap.querySelector('[data-act="silme-yaz"]');
+        if(g) g.focus();
+      }else if(act === 'silme-onay'){
+        if(durum().dugmeAcik && o.sil) await o.sil();
+      }
+    });
+    kap.addEventListener('input', e => {
+      if(!e.target || e.target.getAttribute('data-act') !== 'silme-yaz') return;
+      d.yazilan = e.target.value;
+      const btn = kap.querySelector('[data-act="silme-onay"]');
+      const acik = durum().dugmeAcik;
+      if(btn){ btn.disabled = !acik; if(acik) btn.removeAttribute('aria-disabled'); else btn.setAttribute('aria-disabled', 'true'); }
+    });
+    return { durum:durum, kap:kap };
+  }
+
+  /* Yedek izi (173): alınan her yedeğin GÜNÜ; son 60 gün. Tekrar eden gün bir kez. */
+  function izEkle(iz, gun){
+    const liste = (Array.isArray(iz) ? iz : []).filter(x => typeof x === 'string');
+    if(gun && liste.indexOf(gun) < 0) liste.push(gun);
+    return liste.sort().slice(-60);
+  }
+
   L.GUVEN = {
+    kapiAc:kapiAc,
+    izEkle:izEkle,
     SILME_SEVIYE:SILME_SEVIYE,
     KAYNAKLAR:KAYNAKLAR,
     boyutMetni:boyutMetni,
@@ -23546,6 +23681,7 @@ R.Model = (function(){
     R.S.meta.lastBackupAt = new Date().toISOString();
     // UTC damgasi yerel tarihten farkli gune dusebilir; yasi yerel tarihten hesapla.
     R.S.meta.lastBackupDate = U.todayISO();
+    if(window.LIFEOS && LIFEOS.GUVEN) R.S.meta.yedekIzi = LIFEOS.GUVEN.izEkle(R.S.meta.yedekIzi, U.todayISO());
     R.S.meta.schemaVersion = R.SCHEMA_VERSION;
     await R.Store.set('meta/backup', R.S.meta);
   }
@@ -41596,10 +41732,22 @@ R.Proposals = (function(){
   function otomatikMi(row, mod){
     if(!row || row.level !== 'kucuk') return false;
     if((R.ACTION_BY_ID[row.action] || {}).olcum) return false;
+    /* Vitrin 116 — TÜR AYARI moddan önce gelir: kullanıcı bir küçük türü
+       açık ya da kapalı işaretlediyse o geçerlidir (AGENTS §1.9: «hangi
+       küçük türlerin sormadan uygulanacağını kullanıcı ayarlar»). */
+    const tur = turAyari()[row.action || row.kind];
+    if(tur === true || tur === false) return tur;
     const m = MODLAR.indexOf(mod) >= 0 ? mod : 'istek';
     if(m === 'hicbiri') return false;
     if(m === 'hepsi') return true;
     return row.source === 'istek';
+  }
+
+  function turAyari(){
+    try{
+      const st = R.Office && typeof R.Office.settings === 'function' ? R.Office.settings() : null;
+      return (st && st.otomatikTurler && typeof st.otomatikTurler === 'object') ? st.otomatikTurler : {};
+    }catch(e){ return {}; }
   }
 
   function ayar(){
@@ -41673,10 +41821,12 @@ R.Proposals = (function(){
     return r && r.ok ? { ok:true, row:r.row } : { ok:false, why:(r && r.why) || 'Uygulanamadı.' };
   }
 
-  async function reject(id){
+  /* `gecme`: vitrin 123 — kullanıcının söylediği neden (isteğe bağlı; yoksa null). */
+  async function reject(id, gecme){
     const row = (S.officeProposals || []).find(p => p.id === id);
     if(!row || row.status !== 'pending') return null;
     row.status = 'rejected';
+    if(gecme) row.gecme = gecme;
     await save();
     return row;
   }
@@ -41849,7 +41999,7 @@ R.Proposals = (function(){
   return {
     all, pending, applied, actionable, check, preview,
     propose, approve, hemen, reject, undo, clearResolved,
-    talep, otomatikMi, ayar, SEVIYELER, MODLAR,
+    talep, otomatikMi, ayar, turAyari, SEVIYELER, MODLAR,
     suggest, refresh, fromModel, catalogPrompt, splitAction, stripTrailingJson,
     load, save, MAX,
   };
@@ -46024,15 +46174,20 @@ R.Screens.today = (function(){
   function SayacKutusu(day, dateISO){
     const minMet = C.minimumDayMet(dateISO);
     const satir = (ad, n, hedef) => {
+      /* 030 tik sayacı: hedef küçükse kutucuklar; büyükse (ya da kitaplık
+         yoksa) eski çubuk. Girilmemiş sayı «—», sıfır değil. */
+      const G = VL().GRAFIK;
+      const tik = G && Number.isInteger(hedef) ? G.tikHtml({ etiket:ad, yapilan:n == null ? null : n, hedef }) : '';
+      if(tik) return html`<div class="sayac__satir">${raw(tik)}</div>`;
       const oran = hedef ? Math.min(100, Math.round(100 * (n || 0) / hedef)) : 0;
       return html`<div class="sayac__satir"><div class="row between"><span>${ad}</span>
-        <b class="num">${n || 0} / ${hedef || 0}</b></div>${c.Bar({ value:oran, tone:'' })}</div>`;
+        <b class="num">${n == null ? '—' : n} / ${hedef || 0}</b></div>${c.Bar({ value:oran, tone:'' })}</div>`;
     };
     /* Plan dışı soru (Telegram «soru 40», derssiz giriş) günün toplamına
        yazılır; burada görünmezse kayıt kaybolmuş sanılır. */
     const serbest = Number(day.freeQ) || 0;
     const dogru = day.freeCorrect == null ? null : Number(day.freeCorrect);
-    return c.Kutu({ ad:'Günlük sayaç', yuva:day.ara ? 'ara günü' : (minMet ? 'minimum tamam' : 'minimum açık'),
+    return c.Kutu({ ad:'Günlük sayaç', yuva:day.ara ? 'ara günü' : html`${terim('minimum-gun', 'minimum')} ${minMet ? 'tamam' : 'açık'}`,
       govde:html`${satir('Paragraf', day.paragraphActual, day.paragraphTarget)}
         ${satir('Problem', day.problemActual, day.problemTarget)}`,
       ayak:serbest > 0 ? 'Plan dışı: ' + serbest + ' soru' + (dogru ? ' · ' + dogru + ' doğru' : '') : null });
@@ -46041,12 +46196,21 @@ R.Screens.today = (function(){
   /* v5 DURUM KARTLARI (Tasarım Dili «AYS · Bugün»): günlük sayaç, son
      deneme, tekrar borcu yan yana. Sayı KODDAN gelir ve etiketini taşır;
      deneme yoksa «veri yok» yazar, sıfır yazmaz. */
+  /* Vitrin kartları (brand/ortak): sayı 024/025/015, fark 028, çizgi 027,
+     eşik çubuğu 029, tik sayacı 030, terim ipucu 016. Kitaplık yüklü
+     değilse (eski kabuk) aynı bilgi düz yazılır; hiçbiri sayı uydurmaz. */
+  const VL = () => window.LIFEOS || {};
+  const terim = (id, metin) => VL().SOZLUK ? raw(VL().SOZLUK.html(id, metin)) : (metin || id);
+  const sayiH = (s, o) => VL().SAYI ? raw(VL().SAYI.html(s, o))
+    : html`${s.deger == null ? '—' : s.deger}${when(s.birim, () => html`<small> ${s.birim}</small>`)}`;
+
   function SonDenemeKutusu(){
+    const L = VL();
     const tyt = (S.exams || []).filter(e => e.family === 'TYT' && e.kind === 'full')
       .sort((a, b) => String(a.date).localeCompare(String(b.date)));
     if(!tyt.length){
       return c.Kutu({ ad:'Son deneme', yuva:'veri yok', class:'durumkart',
-        govde:html`<p class="durumkart__bos">Henüz tam TYT denemesi yok; net burada kendiliğinden çıkar.</p>`,
+        govde:html`<p class="durumkart__bos">Henüz tam TYT denemesi yok; ${terim('net', 'net')} burada kendiliğinden çıkar.</p>`,
         ayak:c.Button({ label:'Denemelere git', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'exams' } }) });
     }
     const son = tyt[tyt.length - 1];
@@ -46055,23 +46219,39 @@ R.Screens.today = (function(){
     const fark = once == null ? null : Math.round((net - once) * 100) / 100;
     const netler = tyt.slice(-3).map(M.examNet).sort((x, y) => x - y);
     const medyan = tyt.length >= 3 ? netler[1] : null;
+    const d = (son.tests || []).reduce((a, x) => a + Number(x.correct || 0), 0);
+    const y = (son.tests || []).reduce((a, x) => a + Number(x.wrong || 0), 0);
+    const farkH = fark == null ? '' : L.SAYI
+      ? raw(L.SAYI.farkHtml({ deger:fark, yon:L.SAYI.YON.ARTIS_IYI, ondalik:2, ek:'önceki denemeden' }))
+      : html`<span class="durumkart__fark">${fark > 0 ? '+' : ''}${U.fmtNet(fark)}</span>`;
+    const egri = L.GRAFIK && tyt.length > 1
+      ? raw(L.GRAFIK.cizgiSvg(tyt.slice(-8).map(e => ({ tarih:e.date, deger:M.examNet(e) })),
+        { gen:132, yuk:36, pay:4, etiket:'Son denemelerin TYT neti', birim:'net' })) : '';
     return c.Kutu({ ad:'Son deneme', yuva:'hesaplandı', class:'durumkart',
-      govde:html`<div class="durumkart__sayi"><b>${U.fmtNet(net)}</b><small>net</small>
-          ${when(fark != null, () => html`<span class="${cls('durumkart__fark', fark > 0 && 'is-artti', fark < 0 && 'is-azaldi')}">${fark > 0 ? '↑ ' : fark < 0 ? '↓ ' : ''}${U.fmtNet(Math.abs(fark))}</span>`)}</div>
+      govde:html`<div class="durumkart__ust"><div class="durumkart__sayi">${sayiH({ deger:Math.round(net * 100) / 100,
+          birim:'net', ondalik:2, kesinlik:'computed', formul:'doğru − yanlış ÷ 4',
+          girdiler:[{ ad:'doğru', deger:d, kesinlik:'measured' }, { ad:'yanlış', deger:y, kesinlik:'measured' }],
+          zaman:son.date })}${farkH}</div>${when(egri, () => html`<div class="durumkart__egri">${egri}</div>`)}</div>
         <p class="durumkart__not">${U.fmtDate(son.date)}${when(medyan != null, () => ' · son üçün medyanı ' + U.fmtNet(medyan))}</p>` });
   }
 
   function TekrarBorcuKutusu(){
+    const L = VL();
     const vadeli = C.dueCards().length;
     const geciken = C.overdueCards ? C.overdueCards().length : null;
     const esik = 10;
     /* Hiç kart yoksa borç ÖLÇÜLMEMİŞTİR: «%0» değil «—» (eksik veri sıfır değildir). */
     const kartVar = (S.cards || []).length > 0;
     const borc = kartVar ? C.cardDebt() : null;
-    return c.Kutu({ ad:'Tekrar borcu', yuva:!kartVar ? 'veri yok' : vadeli ? 'hesaplandı' : 'vadeli kart yok', class:'durumkart',
-      govde:html`<div class="durumkart__sayi"><b>${borc == null ? '—' : '%' + borc}</b>
-          ${when(borc > esik, () => html`<span class="durumkart__fark is-azaldi">eşik üstü</span>`)}</div>
-        <p class="durumkart__not">Eşik %${esik}${when(vadeli && geciken != null, () => ' · ' + geciken + ' geciken ÷ ' + vadeli + ' vadeli kart')}</p>`,
+    const cubuk = borc != null && L.GRAFIK
+      ? raw(L.GRAFIK.esikCubukHtml({ etiket:'Tekrar borcu', deger:borc, esik, olcek:Math.max(50, borc), birim:'%', yon:'azalis-iyi' })) : '';
+    return c.Kutu({ ad:terim('tekrar-borcu', 'Tekrar borcu'), yuva:!kartVar ? 'veri yok' : vadeli ? 'hesaplandı' : 'vadeli kart yok', class:'durumkart',
+      govde:html`<div class="durumkart__sayi">${sayiH({ deger:borc, birim:'%', kesinlik:kartVar ? 'computed' : 'missing',
+          formul:'geciken kart ÷ vadeli kart', girdiler:kartVar ? [{ ad:'geciken', deger:geciken, kesinlik:'measured' },
+            { ad:'vadeli', deger:vadeli, kesinlik:'measured' }] : [] })}
+          ${when(borc != null && borc > esik, () => html`<span class="durumkart__fark is-azaldi">eşik üstü</span>`)}</div>
+        ${cubuk}
+        <p class="durumkart__not">${terim('esik', 'Eşik')} %${esik}${when(vadeli && geciken != null, () => ' · ' + geciken + ' geciken ÷ ' + vadeli + ' vadeli kart')}</p>`,
       ayak:vadeli ? c.Button({ label:'Tekrara git', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'cards' } }) : null });
   }
 
@@ -46218,7 +46398,8 @@ R.Screens.today = (function(){
   /* Öneri alanındaki kartın düğmeleri Onaylar ekranının işleyicilerine
      gider: onay TEK yoldan geçer, iki ekranda iki ayrı kod durmaz. */
   const ONAY_EYLEMLERI = ['king-onayla', 'king-parca', 'king-iptal', 'hkm-toplu', 'hkm-intent-yes',
-    'hkm-intent-seen', 'hkm-intent-no', 'hkm-doubt-ok', 'office-approve', 'office-reject', 'office-undo'];
+    'hkm-intent-seen', 'hkm-intent-no', 'hkm-doubt-ok', 'office-approve', 'office-reject', 'office-undo',
+    'oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'];
 
   /* ---------- eylemler ---------- */
   const handle = {
@@ -47210,6 +47391,19 @@ R.Screens.exams = (function(){
     })}</div>`;
   }
 
+  /* 035 ARALIK ÇUBUĞU (vitrin): sıralama tahmini tek sayı değil banttır;
+     dayanak (kaç tam deneme) yanında yazar. Yeterli deneme yoksa «—». */
+  function siralamaKutusu(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G) return '';
+    const est = C.estimateScore();
+    return K.Kutu({ ad:'Sıralama', yuva:est.ok ? 'tahmin' : 'veri yok',
+      govde:raw(G.aralikHtml(est.ok ? { alt:est.rankBest, ust:est.rankWorst, olasi:est.rank, min:1,
+          max:Math.round(Math.max(est.rankWorst, est.targetRank) * 1.15), ters:true,
+          dayanak:est.samples, dayanakBirim:'tam deneme' }
+        : { dayanak:C.fullExams('TYT').length, dayanakBirim:'tam deneme (en az 3 gerekir)' })) });
+  }
+
   function listView(){
     const filter = S.ui.examFilter || 'all';
     let list = S.exams.slice().sort((a, b) => b.date.localeCompare(a.date));
@@ -47232,6 +47426,7 @@ R.Screens.exams = (function(){
         K.Card({ body, pad:'sm' }),
       ])),
       K.Span(3, K.Stack([
+        siralamaKutusu(),
         K.Card({ title:'Deneme hacmi', hint:'exam-volume', sub:'Plan / gerçekleşen', body:volumeTable() }),
         K.Card({ title:'Yayın merdiveni', hint:'publisher', sub:'Zorluk kademesi',
           body:html`<div class="ladder">${map(R.PUBLISHER_LADDER, l => html`
@@ -48141,10 +48336,26 @@ R.Screens.cards = (function(){
 
   /* Üç görünüm (bugünün kartları, yanlış defteri, bütün kartlar) sekme
      değil, alt alta bölümdür (§1.2); bölüm çubuğu sayfa içinde kaydırır. */
+  /* 033 GELECEK YÜK (vitrin, brand/ortak/grafik.js): önümüzdeki yedi günün
+     vadesi. Bugünün sütunu geciken kartları da taşır; gelecek günler kesik
+     çerçevedir, çünkü henüz olmadılar. */
+  function gelecekYuk(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G || !S.cards.length) return '';
+    const bugun = U.todayISO();
+    const gunler = [];
+    for(let i = 0; i < 7; i++){
+      const t = G.gunEkle(bugun, i);
+      gunler.push({ tarih:t, deger:S.cards.filter(c => i === 0 ? c.dueAt <= t : c.dueAt === t).length });
+    }
+    return K.Kutu({ ad:'Gelecek yük', yuva:'hesaplandı',
+      govde:raw(G.yukHtml({ gunler, bugun, birim:'kart', etiket:'Önümüzdeki 7 günün vadesi' })) });
+  }
+
   function bolumler(){
     return [
       { id:'due', ad:'Bugünün kartları', sayi:C.dueCards().length,
-        govde:html`<div class="cardsgrid">${K.Stack(dueSession())}${sidebar()}</div>` },
+        govde:html`${gelecekYuk()}<div class="cardsgrid">${K.Stack(dueSession())}${sidebar()}</div>` },
       { id:'notebook', ad:'Yanlış defteri', sayi:C.openErrors().length, govde:notebook() },
       { id:'all', ad:'Bütün kartlar', sayi:S.cards.length, govde:K.Stack(allCards()) },
     ];
@@ -49782,7 +49993,7 @@ R.Screens.solve = (function(){
           options:R.SOLVE_RESULT_ORDER.map(id => ({ value:id, label:R.SOLVE_RESULTS[id].label })) }) }),
       K.Cols(2, [
         K.Field({ label:'Süre (sn)', hint:'isteğe bağlı',
-          input:K.Input({ id:'q-secs', type:'number', numeric:true, min:0 }) }),
+          input:html`${K.Input({ id:'q-secs', type:'number', numeric:true, min:0 })}<div id="q-suphe" aria-live="polite"></div>` }),
         K.Field({ label:'Cevap', input:K.Input({ id:'q-answer', value:m.answer || '' }) }),
       ]),
       /* Kaynak: zorluğu ETİKETİNDEN değil, senin bu kaynaktaki oranından
@@ -50126,6 +50337,18 @@ R.Screens.solve = (function(){
     },
 
     async 'q-save'(){ await saveRecord(false); },
+    async 'suphe-kaydet'(el){
+      const g = document.getElementById('q-secs');
+      if(g) g.value = el.dataset.deger;
+      supheGecti = true;
+      await saveRecord(supheKayit);
+    },
+    async 'suphe-duzelt'(){
+      const y = document.getElementById('q-suphe');
+      if(y) y.innerHTML = '';
+      const g = document.getElementById('q-secs');
+      if(g) g.focus();
+    },
     async 'q-save-error'(){ await saveRecord(true); },
 
     /* Konu seçici: yazarak ara, listeden seç. */
@@ -50189,6 +50412,18 @@ R.Screens.solve = (function(){
 
   /* Kaydı kurar. Konu ve zorluk formdan okunur: model bir öneri verir,
      son sözü kullanıcı söyler. */
+  /* 018: yeni süre son kaydın süresinden basamak kayması boyunda saparsa
+     soru döner. Sorudan soruya süre üç katına çıkabilir; ×4 ve üstü sorulur. */
+  function sureSuphesi(sn){
+    const SAYI = (window.LIFEOS || {}).SAYI;
+    if(!SAYI) return null;
+    const son = (S.solved || []).find(x => Number(x.seconds) > 0);
+    return SAYI.suphe(sn, son ? Number(son.seconds) : null, { tur:'sure', birim:'sn', oran:3 });
+  }
+
+  /* 018 şüpheli giriş: soru geçildi mi, hangi kayıt türü bekliyor. */
+  let supheGecti = false, supheKayit = false;
+
   async function saveRecord(alsoError){
     if(!result) return;
     const val = id => { const e = document.getElementById(id); return e ? String(e.value).trim() : ''; };
@@ -50222,6 +50457,16 @@ R.Screens.solve = (function(){
     const subject = subjectId ? R.SUBJECTS.find(s => s.id === subjectId) : null;
     const topic = subject ? subject.topics.find(t => t.id === topicId) : null;
     const m = result.meta || {};
+
+    /* 018 ŞÜPHELİ GİRİŞ: süre son kayıttan çok saparsa kaydetmeden önce
+       sorulur (900 sn → «90 sn olarak kaydet»). Önceki süre yoksa soru yok. */
+    const sn = Number(val('q-secs')) || null;
+    const yuva = document.getElementById('q-suphe');
+    if(sn && yuva && !supheGecti){
+      const r = sureSuphesi(sn);
+      if(r && r.supheli){ supheKayit = alsoError; yuva.innerHTML = window.LIFEOS.SAYI.supheHtml(r); return; }
+    }
+    supheGecti = false;
 
     const rec = await Q.save({
       question:questionText(),
@@ -50294,6 +50539,7 @@ R.Screens.solve = (function(){
 
   return {
     id:'solve',
+    sureSuphesi,
     title:'Soru çöz',
     subtitle(){
       const s = Q.summary();
@@ -51314,6 +51560,20 @@ R.Screens.target = (function(){
       { label:'Son 4 medyan', num:true }, '', 'Durum'] });
   }
 
+  /* 039 HIZ TAHMİNİ (vitrin, «Hedefe kalan» satırından açılır — D katmanı):
+     TYT netlerinin seyri ve hedef net; koni yavaş/hızlı eğimdir, tahmindir. */
+  function hizKonisi(gap){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G || !gap || gap.reached) return '';
+    const tyt = C.fullExams('TYT');
+    if(!tyt.length) return '';
+    const netler = tyt.map(e => ({ tarih:e.date, deger:M.examNet(e) }));
+    const son = netler[netler.length - 1].deger;
+    const hedef = Math.round((son + gap.netDiff) * 10) / 10;
+    return html`<details class="hiz-ac mt-10"><summary>Hedefe kalan: ${U.fmtNet(gap.netDiff)} net · hız tahmini</summary>
+      ${raw(G.hizKoniSvg(netler, hedef, { birim:'net', etiket:'TYT neti' }))}</details>`;
+  }
+
   /* ---------- tahmini puan ve sıra ---------- */
 
   function estimateCard(){
@@ -51346,12 +51606,13 @@ R.Screens.target = (function(){
           ${K.Badge({ label:est.meta.label, tone })}
         </div>
 
-        <div class="estimate__scale">
-          ${K.Bar({ value:pos(est.rank), tone:tone === 'ok' ? '' : 'warn' })}
-          <div class="row between mt-4">
-            <span class="tiny dim">geniş sıra</span>
-            <span class="tiny dim num">hedef ${U.fmtNum(est.targetRank)}</span>
-          </div>
+        ${(window.LIFEOS || {}).GRAFIK ? raw(window.LIFEOS.GRAFIK.aralikHtml({ etiket:'Tahmini sıra (tahmin)',
+            alt:est.rankBest, ust:est.rankWorst, olasi:est.rank, min:1, max:Math.round(scaleMax), ters:true,
+            dayanak:est.samples, dayanakBirim:'tam deneme' })) : html`<div class="estimate__scale">
+          ${K.Bar({ value:pos(est.rank), tone:tone === 'ok' ? '' : 'warn' })}</div>`}
+        <div class="row between mt-4">
+          <span class="tiny dim">geniş sıra</span>
+          <span class="tiny dim num">hedef ${U.fmtNum(est.targetRank)}</span>
         </div>
 
         <div class="mt-12">${K.Notice({ tone:tone === 'ok' ? 'ok' : 'info', body:est.meta.note })}</div>
@@ -51364,6 +51625,7 @@ R.Screens.target = (function(){
           K.Stat({ label:'OBP katkısı', value:'+'+U.fmtNet(est.obp), tone:'ok' }),
         ])}
 
+        ${hizKonisi(gap)}
         ${when(gap && !gap.reached, () => html`<p class="small muted mt-10">
           Hedef bandı tutmak için tahmini <b>${U.fmtNet(gap.netDiff)} net</b> daha gerekiyor
           (${U.fmtNet(gap.scoreDiff)} puan). Bu sayı bir hedef değil, mesafe göstergesidir.</p>`)}
@@ -52047,6 +52309,16 @@ R.Screens.analytics = (function(){
           sub:'Her noktada son 3 denemenin medyanı — tek fotoğraf değil film',
           badge:raw(UI.provenance('estimate')),
           body:html`
+            ${when((window.LIFEOS || {}).GRAFIK, () => {
+              const G = window.LIFEOS.GRAFIK;
+              const netler = C.fullExams('TYT').map(M.examNet);
+              return html`<div class="sira-bas">
+                ${raw(G.aralikHtml({ etiket:'Son tahmin', alt:last.rankBest, ust:last.rankWorst, olasi:last.rank,
+                  min:1, max:Math.round(Math.max(first.rankWorst || 0, last.rankWorst || 0, target) * 1.15), ters:true,
+                  dayanak:hist.length + 2, dayanakBirim:'tam deneme' }))}
+                ${raw(G.egilimHtml(netler, { yon:'artis-iyi', birim:'net' }))}</div>
+                ${raw(G.cumleHtml(series.map(v => ({ deger:v })), { etiket:'Tahmini puan', gunMetni:'son ' + series.length + ' tahminde', birim:'puan' }))}`;
+            })}
             ${raw(UI.lineChart([{ data:series }], { labels, height:210 }))}
             ${K.Cols(3, [
               K.Stat({ label:'İlk tahmin', value:U.fmtNum(first.rank), note:U.fmtShort(first.date) }),
@@ -52063,7 +52335,9 @@ R.Screens.analytics = (function(){
               { label:'Kötümser sıra', num:true }],
             rows:hist.slice().reverse().map(h => [
               U.fmtShort(h.date),
-              html`<span class="num">${U.fmtNet(h.score)}</span>`,
+              (window.LIFEOS || {}).GRAFIK
+                ? raw(window.LIFEOS.GRAFIK.hucreHtml({ deger:h.score, olcek:560, birim:'puan', kesinlik:'estimated', ondalik:1 }))
+                : html`<span class="num">${U.fmtNet(h.score)}</span>`,
               html`<span class="num">${U.fmtNum(h.rankBest)}</span>`,
               html`<span class="num dim">${U.fmtNum(h.rankWorst)}</span>`,
             ]) }) }),
@@ -52484,9 +52758,33 @@ R.Screens.analytics = (function(){
     }
   }
 
+  /* ANALİZ BAŞI (vitrin 041 veri doluluğu, 040 birikim eğrisi): önce
+     «neye dayanıyor», sonra ne gösteriyor. Kaydı olmayan gün sıfır değildir. */
+  function analizBasi(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G) return '';
+    const kayitli = Object.keys(S.days || {}).filter(t => {
+      const d = S.days[t];
+      return d && (C.gunSorusu(d) > 0 || (d.blocks || []).some(b => b.status && b.status !== 'pending'));
+    });
+    const hafta = M.weekDates(M.currentWeek()).map(d => U.iso(d));
+    const gunluk = [], plan = [];
+    hafta.forEach(t => {
+      const d = S.days[t];
+      if(!d) return;
+      const hedef = U.sum((d.blocks || []).map(b => Number(b.targetQ) || 0));
+      if(hedef) plan.push({ tarih:t, deger:hedef });
+      if(kayitli.indexOf(t) >= 0) gunluk.push({ tarih:t, deger:C.gunSorusu(d) });
+    });
+    return K.Grid([K.Span(12, html`<div class="analizbasi">
+      ${K.Kutu({ ad:'Veri doluluğu', yuva:'son 7 gün', govde:raw(G.dolulukHtml([{ modul:'ays', ad:'AYS', gunler:kayitli }], { gun:7 })) })}
+      ${K.Kutu({ ad:'Bu haftanın birikimi', yuva:'soru', govde:raw(G.birikimSvg(gunluk, plan, { bugun:U.todayISO(), birim:'soru', etiket:'Haftalık soru' })) })}
+    </div>`)]);
+  }
+
   async function render(){
-    return String(K.SayfaBolumleri({ act:'analytics-tab', aria:'Analiz bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) }));
+    return String(html`${analizBasi()}${K.SayfaBolumleri({ act:'analytics-tab', aria:'Analiz bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}`);
   }
 
   /* Açılışta istenen bölüm (başka ekrandan «Hata haritası»na gelmek gibi)
@@ -53971,6 +54269,9 @@ R.Screens.guide = (function(){
         : age >= 7 ? K.Badge({ label:age+' gün önce yedeklendi', tone:'warn' })
         : K.Badge({ label:'yedek güncel', tone:'ok' }),
       body:html`
+        ${when((window.LIFEOS || {}).GUVEN, () => raw(window.LIFEOS.GUVEN.yedekHtml({
+          damga:(S.meta || {}).lastBackupAt, boyut:q.bytes, bugun:U.todayISO(),
+          kayit:counts.reduce((a, c) => a + c[1], 0), iz:(S.meta || {}).yedekIzi })))}
         ${K.Cols(4, map(counts, c => K.Stat({ label:c[0], value:U.fmtNum(c[1]) })))}
         ${when(due, () => html`<div class="mt-12">${K.Notice({ tone:'warn',
           body:'Son yedekten bu yana '+(age === null ? 'hiç yedek alınmadı' : age+' gün geçti')
@@ -54495,6 +54796,8 @@ R.Screens.guide = (function(){
       UI.toast('Profil kaydedildi');
       R.App.render();
     },
+    /* 173 yedek kartının düğmesi: aynı dışa aktarma. */
+    async 'yedek-al'(){ await handle['export-data'](); },
     async 'export-data'(){
       const payload = R.Store.exportAll();
       const json = JSON.stringify(payload, null, 2);
@@ -54630,6 +54933,16 @@ R.Screens.guide = (function(){
       R.App.render();
     },
     async 'reset-data'(){
+      /* 177 kalıcı silme kapısı: önce dönüş noktası (yedek), sonra silinecek
+         kayıt sayısını yaz; düğme sayıyı söyler. Kitaplık yoksa eski onay. */
+      const G = (window.LIFEOS || {}).GUVEN;
+      if(G && G.kapiAc){
+        const yedek = R.Store.exportAll();
+        G.kapiAc({ baslik:'Tüm veriyi sıfırla', nesne:'kaydı', sayi:Object.keys(yedek.data || {}).length,
+          sheet:o => UI.sheet(o), yedekAl:() => handle['export-data'](),
+          sil:async () => { await R.Store.clear(); UI.closeSheet(); location.reload(); } });
+        return;
+      }
       UI.confirmSheet('Tüm veriyi sıfırla',
         'Tüm haftalar, günler, denemeler, hatalar ve kartlar silinecek. Bu işlem geri alınamaz — önce yedek al.',
         async () => {
@@ -55052,7 +55365,9 @@ R.Screens.office = (function(){
           <span class="deskstate__dot"></span>${st.text}
         </div>
 
-        <p class="desk__line">${b.headline}</p>
+        ${O.mode() === 'kural' && (window.LIFEOS || {}).SOZLUK
+          ? raw(window.LIFEOS.SOZLUK.hazirHtml({ metin:b.headline, kaynak:'kural' }))
+          : html`<p class="desk__line">${b.headline}</p>`}
         ${deskMetrics(b)}
 
         ${when(notes.length, () => html`<div class="notes mt-10">${map(notes, n => html`
@@ -55081,7 +55396,9 @@ R.Screens.office = (function(){
               Alanına düşen ${trust.toplam} karardan ${trust.kapanan} tanesi kapandı;
               ${trust.yuzde == null ? 'henüz oran çıkmadı' : 'uygulanma oranı %' + trust.yuzde}.</p>`)}
 
-            <p class="tiny dim mt-8">Masasındaki veri: ${agent.reads.join(' · ')}</p>
+            <div class="mt-8"><span class="tiny dim">Masasındaki veri</span>
+              ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.veriCipleriHtml(agent.reads))
+                : html`<span class="tiny dim">${agent.reads.join(' · ')}</span>`}</div>
           </div>`)}
 
         <div class="row wrap gap-6 mt-10">
@@ -55688,6 +56005,10 @@ R.Screens.office = (function(){
               { value:'hepsi', label:'Ajanların kendi bulduğu küçük öneriler de' },
               { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
             ] }) }),
+        html`${when((window.LIFEOS || {}).ONERI, () => html`<div class="mt-12">
+          <p class="small muted">Tür tür: açtığın küçük tür sormadan uygulanır, kapattığın her zaman sorar.
+            Orta ve büyük türler kilitlidir.</p>
+          ${raw(window.LIFEOS.ONERI.ayarHtml(R.ACTIONS, { mod:st.otomatikUygula || 'istek', turler:st.otomatikTurler || {} }))}</div>`)}`,
         html`<div id="office-notify">${notifyRow()}</div>`,
       ], 'sm'),
 
@@ -55825,7 +56146,9 @@ R.Screens.office = (function(){
     O.resetBriefs();
     const specialists = R.AGENTS.filter(a => !a.lead);
 
+    /* 139 model kapalı kipi: gri şerit; ajanlar hazır cümleyle konuşur. */
     return String(K.Grid([
+      K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:O.mode() === 'llm' })) : ''),
       K.Span(8, K.Stack([
         boardCard(),
         floorPlan(),
@@ -56143,6 +56466,12 @@ R.Screens.office = (function(){
       const warn = keyWarning(sel ? sel.value : '', el.value.trim());
       const box = document.getElementById('llm-key-warn');
       if(box) box.innerHTML = warn ? String(warn) : '';
+    },
+    /* Vitrin 116: tek bir küçük türün sormadan uygulanıp uygulanmayacağı. */
+    async 'otomatik-tur'(el){
+      const turler = Object.assign({}, O.settings().otomatikTurler || {}, { [el.dataset.eylem]:!!el.checked });
+      await O.saveSettings({ otomatikTurler:turler });
+      UI.toast(el.checked ? 'Bu tür sormadan uygulanacak; geri alınabilir' : 'Bu tür her zaman önce sorulacak');
     },
     async 'office-otomatik'(el){
       const v = R.Proposals.MODLAR.indexOf(el.value) >= 0 ? el.value : 'istek';
@@ -57713,6 +58042,42 @@ R.Screens.onaylar = (function(){
   const KAYNAK_ADI = { istek:'senin isteğin', llm:'ajanın önerisi', kural:'kural motoru buldu' };
   const SEVIYE_ADI = { kucuk:'küçük değişiklik', orta:'orta değişiklik', buyuk:'büyük değişiklik' };
 
+  /* VİTRİN ÖNERİ KARTI (110 · 114 · 121 · 123 · 113): ofisin önerisi ortak
+     kartla çizilir; uygulama yine yalnız R.Proposals.approve'dan geçer.
+     Ajan, dokunduğu alan ve «Yerini gör» kartın altında kalır. */
+  function kopru(){
+    const O = (window.LIFEOS || {}).ONERI;
+    if(!O || !O.kopru) return null;
+    return O.kopru({
+      katalog:R.ACTIONS,
+      satirlar:() => R.Proposals.actionable(),
+      nesne:p => {
+        const def = R.ACTION_BY_ID[p.action] || {};
+        return { id:p.id, eylem:p.action, level:p.level, baslik:def.title, kaynak:'modul',
+          kapsam:def.level === 'kucuk' ? 'yalnız bugün' : null,
+          cumle:p.reason ? { metin:p.reason, kaynak:p.source === 'llm' ? 'model' : 'kural' } : null,
+          gerekce:p.gerekce || null, kurallar:p.kurallar || [] };
+      },
+      uygula:id => handle['office-approve']({ dataset:{ id } }),
+      gec:async (id, kayit) => { await R.Proposals.reject(id, kayit); UI.toast('Geçildi; öneri silinmedi, «geçildi» diye yazıldı.'); R.App.render(); },
+      onizle:p => ({ govde:String(diffRows(p.preview.rows)) }),
+      pencere:o => UI.sheet({ title:o.baslik, body:o.govde, footer:o.ayak }),
+      kapat:() => UI.closeSheet(),
+    });
+  }
+
+  function oneriKarti(p){
+    const k = kopru();
+    const kart = k ? k.kart(p) : '';
+    if(!kart) return proposalRow(p);
+    const def = R.ACTION_BY_ID[p.action];
+    const agent = R.AGENT_BY_ID[p.agent] || {};
+    return html`<div class="okart-sar">${raw(kart)}
+      <p class="okart__kim">${agent.name || 'Ofis'} · ${def.touches} · ${KAYNAK_ADI[p.source] || 'kural motoru buldu'}
+        ${when(def.route, () => c.Button({ label:'Yerini gör', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':def.route } }))}</p>
+    </div>`;
+  }
+
   function proposalRow(p){
     const def = R.ACTION_BY_ID[p.action];
     const agent = R.AGENT_BY_ID[p.agent];
@@ -57769,7 +58134,7 @@ R.Screens.onaylar = (function(){
       sub:'Ajanlar değişiklik önerir; uygulanıp uygulanmayacağına sen karar verirsin',
       badge:when(list.length, () => c.Badge({ label:String(list.length), tone:'warn' })),
       body:html`
-        ${when(list.length, () => html`<div class="props">${map(list, proposalRow)}</div>`)}
+        ${when(list.length, () => html`<div class="props">${map(list, oneriKarti)}</div>`)}
         ${when(done.length, () => html`
           <div class="mt-12">${c.SectionTitle('Uygulananlar')}</div>
           <div class="props">${map(done, appliedRow)}</div>`)}`,
@@ -57800,7 +58165,7 @@ R.Screens.onaylar = (function(){
     if(!kart){
       const l = R.Proposals ? R.Proposals.actionable() : [];
       if(l.length){
-        kart = c.Card({ title:'Ofisin önerisi', body:html`<div class="props">${proposalRow(l[0])}</div>` });
+        kart = oneriKarti(l[0]);
         gosterilen = 1;
       }
     }
@@ -57814,6 +58179,25 @@ R.Screens.onaylar = (function(){
 
   /* ---------- ekran ---------- */
 
+  /* 179 KAYIT GEÇMİŞİ «Son kararlar» (vitrin, pano «Onaylar › Bekleyen»):
+     kararın kaynağı ayrılır — sen, öneri (senin onayınla), ayar (sormadan).
+     Onay kaydı olmayan öneri değişikliği GİZLENMEZ, uyarıyla yazılır. */
+  function sonKararlar(){
+    const G = (window.LIFEOS || {}).GUVEN;
+    const DURUM = { applied:'uygulandı', accepted:'uygulandı', rejected:'geçildi', declined:'geçildi', undone:'geri alındı' };
+    const rows = (S.officeProposals || []).filter(p => DURUM[p.status]);
+    if(!G || !rows.length) return '';
+    const olay = rows.map(p => {
+      const def = R.ACTION_BY_ID[p.action] || {};
+      const kendi = p.status === 'rejected' || p.status === 'undone';
+      return { zaman:p.undoneAt || p.appliedAt || p.at, alan:def.title || p.action, eski:null,
+        yeni:DURUM[p.status] + (p.gecme && p.gecme.nedenAd ? ' · ' + p.gecme.nedenAd : ''),
+        kaynak:kendi || p.source === 'istek' ? 'kullanici' : 'ofis',
+        onay:kendi ? null : p.otomatik ? { tur:'ayar' } : { tur:'onay' } };
+    });
+    return c.Kutu({ ad:'Son kararlar', yuva:rows.length + ' kayıt', govde:raw(G.gecmisHtml(olay.slice(0, 40))) });
+  }
+
   async function render(){
     const kartlar = [KingTeklifKart(), HkmTeklifKart(), ofisKarti()].filter(Boolean);
     if(!kartlar.length){
@@ -57823,10 +58207,11 @@ R.Screens.onaylar = (function(){
           onaylamadan hiçbiri uygulanmaz.</p>
         <div class="mt-10">${c.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' })}</div>` }))]));
     }
-    return String(c.Grid([c.Span(12, c.Stack(kartlar))]));
+    return String(c.Grid([c.Span(8, c.Stack(kartlar)), c.Span(4, sonKararlar())]));
   }
 
   /* ---------- eylemler ---------- */
+  const VITRIN_EYLEM = ['oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'];
   const handle = {
     /* King'in teklifi (brand/ortak/kingteklif.js): onay ve iptal HKM'nin
        tek kapısına gider; cevabı HKM kurar. */
@@ -57888,6 +58273,7 @@ R.Screens.onaylar = (function(){
     /* Kural motoru masaları yeniden okur; model gerekmez, kota harcanmaz. */
     async 'office-scan'(el){ await R.Screens.office.handle['office-scan'](el); },
   };
+  VITRIN_EYLEM.forEach(a => { handle[a] = el => { const k = kopru(); return k ? k.handle[a](el) : null; }; });
 
   return {
     id:'onaylar',

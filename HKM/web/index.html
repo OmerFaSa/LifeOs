@@ -598,6 +598,15 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
 .serit__kutu{ border-radius:14px; padding:16px 18px; background:var(--yuzey); }
 .serit__ad{ font-size:13px; font-weight:600; }
 .serit__durum{ font-size:18px; font-weight:700; margin-top:6px; }
+.capraz{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:8px 0; font-size:13px; }
+.capraz__m{ display:inline-flex; align-items:center; gap:6px; font-weight:600; padding:2px 8px; border-radius:6px;
+  background:var(--yuzey-2); }
+.capraz__m--ays::before, .capraz__m--spi::before, .capraz__m--esp::before{ content:''; width:8px; height:8px; }
+.capraz__m--ays::before{ background:var(--ays); border-radius:2px; }
+.capraz__m--spi::before{ background:var(--spi); border-radius:50%; }
+.capraz__m--esp::before{ background:var(--esp); transform:rotate(45deg) scale(.85); }
+.capraz__ok{ color:var(--accent); font-weight:700; }
+.capraz__olcum{ color:var(--dim); flex-basis:100%; }
 @media (max-width:1023px){ .moduller, .baglam{ display:none; }
   .gun h1{ font-size:22px; }
   /* Telefonda marka ve tema tek satırda, çekmeceler altında kayar. */
@@ -3071,6 +3080,24 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     return bas + oneri + ' Merkez hiçbir modüle yazmadı.';
   }
 
+  /* 124 CAPRAZ ETKI (vitrin): Merkez'in onerisi bir modulun OLCUMUNDEN
+     baska bir modulun ISINE gidiyorsa iki modul adi ve aradaki ok yazilir.
+     Kaynak ve hedef ayri renkte; ok Merkez'in. Bilinmeyen oneri turunde
+     capraz uydurulmaz: hicbir sey cizilmez. */
+  var CAPRAZ = { bio_red:{ kaynak:'spi', hedef:'ays' } };
+  var MODUL_AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+  function caprazHtml(b){
+    var p = b && b.proposal, c = p && CAPRAZ[p.key];
+    if(!c) return '';
+    var olcum = ((((b.council || {}).members) || []).filter(function(u){
+      return u.module === c.kaynak && u.verdict; })[0] || {}).first || '';
+    return '<div class="capraz" data-oz="124" role="note">'
+      + '<span class="capraz__m capraz__m--' + c.kaynak + '">' + MODUL_AD[c.kaynak] + '</span>'
+      + '<span class="capraz__ok" aria-label="etkiler">→</span>'
+      + '<span class="capraz__m capraz__m--' + c.hedef + '">' + MODUL_AD[c.hedef] + '</span>'
+      + (olcum ? '<span class="capraz__olcum">' + esc(olcum) + '</span>' : '') + '</div>';
+  }
+
   /* Onay bekleyen sey ekranda ONE CIKAR — gomulu bir satir degil. */
   function onayCiz(b){
     var kutu = $('onay');
@@ -3090,7 +3117,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       return;
     }
     kutu.innerHTML = '<div class="onay"><div class="onay__baslik">'
-      + 'Onayını bekliyor</div><div style="font-size:16px">'
+      + 'Onayını bekliyor</div>' + caprazHtml(b) + '<div style="font-size:16px">'
       + esc(d.proposal) + '</div>'
       + '<p class="muted" style="margin:10px 0 12px">Sen onaylamadan hiçbir '
       + 'şey değişmez. İstemezsen kayıt silinmez, «istenmedi» diye '

@@ -1264,6 +1264,7 @@ ESP.Model = (function(){
   async function markBackup(){
     S.meta = Object.assign({ schemaVersion:ESP.SCHEMA_VERSION }, S.meta,
       { lastBackup:new Date().toISOString() });
+    if(window.LIFEOS && LIFEOS.GUVEN) S.meta.yedekIzi = LIFEOS.GUVEN.izEkle(S.meta.yedekIzi, U.todayISO());
     await ESP.Store.set('meta', S.meta);
   }
 

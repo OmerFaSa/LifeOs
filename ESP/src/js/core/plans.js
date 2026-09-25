@@ -419,10 +419,22 @@ ESP.Plans = (function(){
 
   function otomatikMi(row, mod){
     if(!row || row.level !== 'kucuk') return false;
+    /* Vitrin 116 — TÜR AYARI moddan önce gelir: kullanıcı bir küçük türü
+       açık ya da kapalı işaretlediyse o geçerlidir (AGENTS §1.9: «hangi
+       küçük türlerin sormadan uygulanacağını kullanıcı ayarlar»). */
+    const tur = turAyari()[row.action || row.kind];
+    if(tur === true || tur === false) return tur;
     const m = MODLAR.indexOf(mod) >= 0 ? mod : 'istek';
     if(m === 'hicbiri') return false;
     if(m === 'hepsi') return true;
     return row.source === 'istek';
+  }
+
+  function turAyari(){
+    try{
+      const st = ESP.Office && typeof ESP.Office.settings === 'function' ? ESP.Office.settings() : null;
+      return (st && st.otomatikTurler && typeof st.otomatikTurler === 'object') ? st.otomatikTurler : {};
+    }catch(e){ return {}; }
   }
 
   function ayar(){
@@ -468,11 +480,12 @@ ESP.Plans = (function(){
       return p.source === 'istek' && p.state === 'proposed'; });
   }
 
-  async function decline(prop){
+  /* `gecme`: vitrin 123 — kullanıcının söylediği neden (isteğe bağlı). */
+  async function decline(prop, gecme){
     const p = typeof prop === 'string' ? (record(prop) || bul(prop)) : prop;
     if(!p) return { ok:false, error:'Teklif bulunamadı.' };
     await write(Object.assign({}, p, { state:'declined',
-      decidedAt:new Date().toISOString() }));
+      decidedAt:new Date().toISOString() }, gecme ? { gecme } : {}));
     return { ok:true };
   }
 
@@ -542,6 +555,6 @@ ESP.Plans = (function(){
 
   return { KINDS, KIND_BY_ID, allowed, discOf, stillApplied,
     proposalsFor, all, open:open_, record, accept, decline,
-    dogrula, geriAl, talep, istekler, otomatikMi, ayar, MODLAR,
+    dogrula, geriAl, talep, istekler, otomatikMi, ayar, turAyari, MODLAR,
     weekPlan, savePlan, plan, clearPlan, today };
 })();

@@ -227,10 +227,26 @@ R.Screens.cards = (function(){
 
   /* Üç görünüm (bugünün kartları, yanlış defteri, bütün kartlar) sekme
      değil, alt alta bölümdür (§1.2); bölüm çubuğu sayfa içinde kaydırır. */
+  /* 033 GELECEK YÜK (vitrin, brand/ortak/grafik.js): önümüzdeki yedi günün
+     vadesi. Bugünün sütunu geciken kartları da taşır; gelecek günler kesik
+     çerçevedir, çünkü henüz olmadılar. */
+  function gelecekYuk(){
+    const G = (window.LIFEOS || {}).GRAFIK;
+    if(!G || !S.cards.length) return '';
+    const bugun = U.todayISO();
+    const gunler = [];
+    for(let i = 0; i < 7; i++){
+      const t = G.gunEkle(bugun, i);
+      gunler.push({ tarih:t, deger:S.cards.filter(c => i === 0 ? c.dueAt <= t : c.dueAt === t).length });
+    }
+    return K.Kutu({ ad:'Gelecek yük', yuva:'hesaplandı',
+      govde:raw(G.yukHtml({ gunler, bugun, birim:'kart', etiket:'Önümüzdeki 7 günün vadesi' })) });
+  }
+
   function bolumler(){
     return [
       { id:'due', ad:'Bugünün kartları', sayi:C.dueCards().length,
-        govde:html`<div class="cardsgrid">${K.Stack(dueSession())}${sidebar()}</div>` },
+        govde:html`${gelecekYuk()}<div class="cardsgrid">${K.Stack(dueSession())}${sidebar()}</div>` },
       { id:'notebook', ad:'Yanlış defteri', sayi:C.openErrors().length, govde:notebook() },
       { id:'all', ad:'Bütün kartlar', sayi:S.cards.length, govde:K.Stack(allCards()) },
     ];

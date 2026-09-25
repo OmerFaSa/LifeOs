@@ -856,6 +856,13 @@ ESP.App = (function(){
       render();
     },
 
+    /* Vitrin öneri kartı (parts.js köprüsü) her ekranda aynı kapıya gider:
+       Onaylar, Bugün, ofis masası ve toplantı. */
+    'oneri-uygula'(el){ const k = ESP.Parts.kopru(); return k ? k.handle['oneri-uygula'](el) : null; },
+    'oneri-gec'(el){ const k = ESP.Parts.kopru(); return k ? k.handle['oneri-gec'](el) : null; },
+    'oneri-gec-neden'(el){ const k = ESP.Parts.kopru(); return k ? k.handle['oneri-gec-neden'](el) : null; },
+    'oneri-onizle'(el){ const k = ESP.Parts.kopru(); return k ? k.handle['oneri-onizle'](el) : null; },
+
     async 'prop-decline'(el){
       const res = await ESP.Plans.decline(el.dataset.id);
       if(!res.ok){ UI.toast(res.error); return; }

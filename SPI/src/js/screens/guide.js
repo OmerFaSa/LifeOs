@@ -93,6 +93,10 @@ SP.Screens.guide = (function(){
               { value:'hepsi', label:'Modelin okuduğu küçük kayıtlar da' },
               { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
             ] }) })}</div>
+        ${when((window.LIFEOS || {}).ONERI, () => html`<div class="mt-12">
+          <p class="small muted">Tür tür: açtığın küçük tür sormadan uygulanır, kapattığın her zaman sorar.
+            Orta ve büyük türler kilitlidir.</p>
+          ${raw(window.LIFEOS.ONERI.ayarHtml(SP.Proposals.katalogIdleri().map(id => Object.assign({ id, title:(SP.Proposals.eylem(id) || {}).label }, SP.Proposals.eylem(id))), { mod:s.otomatikUygula || 'istek', turler:s.otomatikTurler || {} }))}</div>`)}
         ${when(provider && provider.needsKey, () => html`<div class="mt-12">
           ${K.Field({ label:'API anahtarı', hint:provider.keyHint || '',
             input:K.Input({ id:'m-key', type:'password',
@@ -326,6 +330,9 @@ SP.Screens.guide = (function(){
       badge:M.backupDue() ? K.Badge({ label:'yedek gerekiyor', tone:'warn' })
         : K.Badge({ label:'yedek güncel', tone:'ok' }),
       body:html`
+        ${when((window.LIFEOS || {}).GUVEN, () => raw(window.LIFEOS.GUVEN.yedekHtml({
+          damga:(SP.S.meta || {}).lastBackupAt, boyut:f.bytes, bugun:U.todayISO(),
+          kayit:f.total, iz:(SP.S.meta || {}).yedekIzi })))}
         ${K.Table({ tight:true, headers:['Kayıt', { label:'Adet', num:true }], rows:[
           ['Tahlil oturumu', String(f.labs)],
           ['Ölçüm günü', String(f.vitalDays)],
@@ -693,6 +700,8 @@ SP.Screens.guide = (function(){
       }
       SP.App.render();
     },
+    /* 173 yedek kartının düğmesi: aynı dışa aktarma. */
+    async 'yedek-al'(){ await handle.backup(); },
     async backup(){
       const data = SP.Store.exportAll();
       const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
@@ -769,6 +778,14 @@ SP.Screens.guide = (function(){
         }, true);
     },
     async wipe(){
+      const G = (window.LIFEOS || {}).GUVEN;
+      if(G && G.kapiAc){
+        const yedek = SP.Store.exportAll();
+        G.kapiAc({ baslik:'Bütün veriyi sil', nesne:'kaydı', sayi:Object.keys(yedek.data || yedek || {}).length,
+          sheet:o => UI.sheet(o), yedekAl:() => handle.backup(),
+          sil:async () => { await SP.Store.clear(); UI.closeSheet(); location.reload(); } });
+        return;
+      }
       UI.confirmSheet('Bütün veriyi sil',
         'Bu profildeki tahliller, ölçümler, öğünler ve antrenmanlar silinir. '
         + 'Geri alınamaz. Önce yedek al.',
@@ -793,6 +810,11 @@ SP.Screens.guide = (function(){
       await SP.Beacon.save({ intervalMinutes:n });
     },
     async 'hkm-level'(el){ await SP.Beacon.save({ level:el.value }); SP.App.render(); },
+    async 'otomatik-tur'(el){
+      const turler = Object.assign({}, SP.Office.settings().otomatikTurler || {}, { [el.dataset.eylem]:!!el.checked });
+      await SP.Office.saveSettings({ otomatikTurler:turler });
+      SP.UI.toast(el.checked ? 'Bu tür sormadan yazılacak; geri alınabilir' : 'Bu tür her zaman önce sorulacak');
+    },
     async 'pick-otomatik'(el){
       const v = SP.Proposals.MODLAR.indexOf(el.value) >= 0 ? el.value : 'istek';
       await SP.Office.saveSettings({ otomatikUygula:v });

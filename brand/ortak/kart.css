@@ -1030,3 +1030,34 @@
 .durumkart__fark.is-azaldi{ background:var(--bad-t); color:var(--bad-ink); }
 .durumkart__not, .durumkart__bos{ margin:8px 0 0; font-size:13px; color:var(--text-2); }
 .site--v5 .gunserit{ margin-bottom:28px; }
+
+/* Vitrin kartları Durum kutusunda: sayı + fark yan yana, eğri sağda. */
+.durumkart__ust{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.durumkart__egri svg{ display:block; width:132px; height:36px; }
+.durumkart .durumkart__sayi .sayi{ font-size:28px; font-weight:700; letter-spacing:-.02em; }
+.durumkart .esik-cubuk, .durumkart [data-oz="029"]{ margin-top:10px; }
+.sayac__satir + .sayac__satir{ margin-top:10px; }
+
+/* Vitrin grafik kartları ekranlarda: analiz başı iki kutu yan yana; sıra
+   başlığında aralık + eğilim; hız konisi bir dokunuşla açılır (D). */
+.analizbasi{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap:16px; margin-bottom:24px; align-items:start; }
+.sira-bas{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:8px; }
+.sira-bas > [data-oz="035"]{ flex:1 1 280px; }
+.hiz-ac > summary{ cursor:pointer; font-size:13px; color:var(--text-2); min-height:24px; display:flex; align-items:center; }
+
+/* Onaylar rafı (pano 36): bekleyenler solda, «Son kararlar» sağda. */
+.onaylar-raf{ display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
+@media (min-width:1100px){ .onaylar-raf{ grid-template-columns:minmax(0,1fr) 340px; } }
+.okart-sar{ display:flex; flex-direction:column; gap:6px; }
+.okart__kim{ margin:0; font-size:12.5px; color:var(--text-2); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+
+/* Son ölçümler (015 · 026): ad solda, değer ve yaşı sağda. */
+.sonolcum{ list-style:none; margin:0; padding:0; }
+.sonolcum__s{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:8px 0;
+  border-top:1px solid var(--border); font-size:14px; }
+.sonolcum__s:first-child{ border-top:0; padding-top:0; }
+.sonolcum__ad{ color:var(--text-2); }
+.sonolcum__d{ text-align:right; font-variant-numeric:tabular-nums; }
+
+/* 116 anahtarı: 24 px dokunma tabanı (WCAG 2.2 AA). */
+.otoayar__anahtar{ width:24px; height:24px; min-height:24px; margin:0; flex:none; accent-color:var(--text); }

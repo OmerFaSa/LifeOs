@@ -328,6 +328,9 @@ R.Screens.guide = (function(){
         : age >= 7 ? K.Badge({ label:age+' gün önce yedeklendi', tone:'warn' })
         : K.Badge({ label:'yedek güncel', tone:'ok' }),
       body:html`
+        ${when((window.LIFEOS || {}).GUVEN, () => raw(window.LIFEOS.GUVEN.yedekHtml({
+          damga:(S.meta || {}).lastBackupAt, boyut:q.bytes, bugun:U.todayISO(),
+          kayit:counts.reduce((a, c) => a + c[1], 0), iz:(S.meta || {}).yedekIzi })))}
         ${K.Cols(4, map(counts, c => K.Stat({ label:c[0], value:U.fmtNum(c[1]) })))}
         ${when(due, () => html`<div class="mt-12">${K.Notice({ tone:'warn',
           body:'Son yedekten bu yana '+(age === null ? 'hiç yedek alınmadı' : age+' gün geçti')
@@ -852,6 +855,8 @@ R.Screens.guide = (function(){
       UI.toast('Profil kaydedildi');
       R.App.render();
     },
+    /* 173 yedek kartının düğmesi: aynı dışa aktarma. */
+    async 'yedek-al'(){ await handle['export-data'](); },
     async 'export-data'(){
       const payload = R.Store.exportAll();
       const json = JSON.stringify(payload, null, 2);
@@ -987,6 +992,16 @@ R.Screens.guide = (function(){
       R.App.render();
     },
     async 'reset-data'(){
+      /* 177 kalıcı silme kapısı: önce dönüş noktası (yedek), sonra silinecek
+         kayıt sayısını yaz; düğme sayıyı söyler. Kitaplık yoksa eski onay. */
+      const G = (window.LIFEOS || {}).GUVEN;
+      if(G && G.kapiAc){
+        const yedek = R.Store.exportAll();
+        G.kapiAc({ baslik:'Tüm veriyi sıfırla', nesne:'kaydı', sayi:Object.keys(yedek.data || {}).length,
+          sheet:o => UI.sheet(o), yedekAl:() => handle['export-data'](),
+          sil:async () => { await R.Store.clear(); UI.closeSheet(); location.reload(); } });
+        return;
+      }
       UI.confirmSheet('Tüm veriyi sıfırla',
         'Tüm haftalar, günler, denemeler, hatalar ve kartlar silinecek. Bu işlem geri alınamaz — önce yedek al.',
         async () => {

@@ -111,7 +111,12 @@ ESP.Screens.profile = (function(){
                 change:'pick-otomatik', options:[
                   { value:'istek', label:'Yalnız benim istediklerim (önerilir)' },
                   { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
-                ] }) })}</div>`,
+                ] }) })}</div>
+            ${when((window.LIFEOS || {}).ONERI, () => html`<div class="mt-12">
+              <p class="small muted">Tür tür: açtığın küçük tür sormadan uygulanır, kapattığın her zaman sorar.
+                Orta ve büyük türler kilitlidir.</p>
+              ${raw(window.LIFEOS.ONERI.ayarHtml(ESP.Plans.KINDS.map(k => Object.assign({ title:k.label }, k)),
+                { mod:ESP.Office.settings().otomatikUygula || 'istek', turler:ESP.Office.settings().otomatikTurler || {} }))}</div>`)}`,
         }),
 
         hafizaEntry(),
@@ -313,6 +318,12 @@ ESP.Screens.profile = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    /* Vitrin 116: tek bir küçük türün sormadan uygulanıp uygulanmayacağı. */
+    async 'otomatik-tur'(el){
+      const turler = Object.assign({}, ESP.Office.settings().otomatikTurler || {}, { [el.dataset.eylem]:!!el.checked });
+      await ESP.Office.saveSettings({ otomatikTurler:turler });
+      ESP.UI.toast(el.checked ? 'Bu tür sormadan uygulanacak; geri alınabilir' : 'Bu tür her zaman önce sorulacak');
+    },
     async 'hafiza-ekle'(){
       const el = document.getElementById('hafiza-yeni');
       const r = await ESP.Hafizam.ekle(el ? el.value : '', { katman:'soz', kaynak:'kullanici' });

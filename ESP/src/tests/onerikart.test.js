@@ -515,4 +515,70 @@ describe('P2 · Öneri ekleri (113 123 124 127)', () => {
   });
 });
 
+/* MODÜL KÖPRÜSÜ: modülün satırı kart olur; düğmeler modülün kapısına gider. */
+describe('Öneri köprüsü (110 ailesi → modül kapısı)', () => {
+  function sahte(){
+    const iz = { uygula:[], gec:[], pencere:[], kapat:0 };
+    const satirlar = [{ id:'p1', action:'block-add', title:'Bugüne blok ekle' },
+      { id:'p2', action:'plan-reset', title:'Planı baştan kur' }];
+    const k = O().kopru({
+      katalog:KATALOG,
+      satirlar:() => satirlar,
+      nesne:s => ({ id:s.id, eylem:s.action, baslik:s.title, kaynak:'modul' }),
+      uygula:id => { iz.uygula.push(id); },
+      gec:(id, kayit) => { iz.gec.push([id, kayit]); },
+      onizle:s => s.action === 'plan-reset'
+        ? { once:[{ id:1, ad:'Paragraf', bas:'08:00', bit:'09:00' }], sonra:[{ id:2, ad:'Problem', bas:'08:00', bit:'09:00' }] } : null,
+      pencere:o => { iz.pencere.push(o); },
+      kapat:() => { iz.kapat++; },
+    });
+    return { k, iz, satirlar };
+  }
+
+  it('oz-110 köprü modülün satırını ortak karta çevirir; katalogda olmayan eylem kart olmaz', () => {
+    const { k, satirlar } = sahte();
+    const kk = sahne(k.kart(satirlar[0]));
+    try{
+      const kart = kk.querySelector('[data-oz="110"]');
+      expect(kart.getAttribute('data-oneri')).toBe('p1');
+      expect(kart.querySelector('[data-act="oneri-uygula"]')).toBeTruthy();
+    }finally{ kk.remove(); }
+    expect(k.kart({ id:'p3', action:'uydurma', title:'x' })).toBe('');
+    expect(k.EYLEMLER.join(',')).toBe('oneri-uygula,oneri-gec,oneri-gec-neden,oneri-onizle');
+  });
+
+  it('oz-123 «Geç» önce isteğe bağlı nedeni açar; seçilen neden modüle kayıtla gider', async () => {
+    const { k, iz, satirlar } = sahte();
+    const kk = sahne(k.kart(satirlar[0]));
+    try{
+      k.handle['oneri-gec'](kk.querySelector('[data-act="oneri-gec"]'));
+      const g = kk.querySelector('[data-oz="123"]');
+      expect(g).toBeTruthy();
+      await k.handle['oneri-gec-neden'](g.querySelector('[data-neden="zaman-yok"]'));
+      expect(iz.gec.length).toBe(1);
+      expect(iz.gec[0][0]).toBe('p1');
+      expect(iz.gec[0][1].neden).toBe('zaman-yok');
+      await k.handle['oneri-gec-neden'](g.querySelector('[data-act="oneri-gec-neden"][data-neden=""]'));
+      expect(iz.gec[1][1].neden).toBe(null);
+    }finally{ kk.remove(); }
+  });
+
+  it('oz-113 büyük aksiyonun önizlemesi önce / sonra taşır; «Onayla ve uygula» pencereyi kapatıp modüle gider', async () => {
+    const { k, iz, satirlar } = sahte();
+    const kk = sahne(k.kart(satirlar[1]));
+    try{
+      const on = kk.querySelector('[data-act="oneri-onizle"]');
+      expect(on).toBeTruthy();
+      k.handle['oneri-onizle'](on);
+      expect(iz.pencere.length).toBe(1);
+      expect(iz.pencere[0].govde).toContain('data-oz="113"');
+      expect(iz.pencere[0].ayak).toContain('Onayla ve uygula');
+      const d = sahne(iz.pencere[0].ayak);
+      try{ await k.handle['oneri-uygula'](d.querySelector('[data-act="oneri-uygula"]')); }finally{ d.remove(); }
+      expect(iz.kapat).toBe(1);
+      expect(iz.uygula.join(',')).toBe('p2');
+    }finally{ kk.remove(); }
+  });
+});
+
 })();

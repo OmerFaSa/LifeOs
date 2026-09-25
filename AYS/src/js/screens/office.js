@@ -76,7 +76,9 @@ R.Screens.office = (function(){
           <span class="deskstate__dot"></span>${st.text}
         </div>
 
-        <p class="desk__line">${b.headline}</p>
+        ${O.mode() === 'kural' && (window.LIFEOS || {}).SOZLUK
+          ? raw(window.LIFEOS.SOZLUK.hazirHtml({ metin:b.headline, kaynak:'kural' }))
+          : html`<p class="desk__line">${b.headline}</p>`}
         ${deskMetrics(b)}
 
         ${when(notes.length, () => html`<div class="notes mt-10">${map(notes, n => html`
@@ -105,7 +107,9 @@ R.Screens.office = (function(){
               Alanına düşen ${trust.toplam} karardan ${trust.kapanan} tanesi kapandı;
               ${trust.yuzde == null ? 'henüz oran çıkmadı' : 'uygulanma oranı %' + trust.yuzde}.</p>`)}
 
-            <p class="tiny dim mt-8">Masasındaki veri: ${agent.reads.join(' · ')}</p>
+            <div class="mt-8"><span class="tiny dim">Masasındaki veri</span>
+              ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.veriCipleriHtml(agent.reads))
+                : html`<span class="tiny dim">${agent.reads.join(' · ')}</span>`}</div>
           </div>`)}
 
         <div class="row wrap gap-6 mt-10">
@@ -712,6 +716,10 @@ R.Screens.office = (function(){
               { value:'hepsi', label:'Ajanların kendi bulduğu küçük öneriler de' },
               { value:'hicbiri', label:'Hiçbiri — her şeyi önce sor' },
             ] }) }),
+        html`${when((window.LIFEOS || {}).ONERI, () => html`<div class="mt-12">
+          <p class="small muted">Tür tür: açtığın küçük tür sormadan uygulanır, kapattığın her zaman sorar.
+            Orta ve büyük türler kilitlidir.</p>
+          ${raw(window.LIFEOS.ONERI.ayarHtml(R.ACTIONS, { mod:st.otomatikUygula || 'istek', turler:st.otomatikTurler || {} }))}</div>`)}`,
         html`<div id="office-notify">${notifyRow()}</div>`,
       ], 'sm'),
 
@@ -849,7 +857,9 @@ R.Screens.office = (function(){
     O.resetBriefs();
     const specialists = R.AGENTS.filter(a => !a.lead);
 
+    /* 139 model kapalı kipi: gri şerit; ajanlar hazır cümleyle konuşur. */
     return String(K.Grid([
+      K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:O.mode() === 'llm' })) : ''),
       K.Span(8, K.Stack([
         boardCard(),
         floorPlan(),
@@ -1167,6 +1177,12 @@ R.Screens.office = (function(){
       const warn = keyWarning(sel ? sel.value : '', el.value.trim());
       const box = document.getElementById('llm-key-warn');
       if(box) box.innerHTML = warn ? String(warn) : '';
+    },
+    /* Vitrin 116: tek bir küçük türün sormadan uygulanıp uygulanmayacağı. */
+    async 'otomatik-tur'(el){
+      const turler = Object.assign({}, O.settings().otomatikTurler || {}, { [el.dataset.eylem]:!!el.checked });
+      await O.saveSettings({ otomatikTurler:turler });
+      UI.toast(el.checked ? 'Bu tür sormadan uygulanacak; geri alınabilir' : 'Bu tür her zaman önce sorulacak');
     },
     async 'office-otomatik'(el){
       const v = R.Proposals.MODLAR.indexOf(el.value) >= 0 ? el.value : 'istek';
