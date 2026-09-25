@@ -252,6 +252,17 @@ SP.Screens.basket = (function(){
      toplanır (SP.Money.budget). Fiyatı bilinmeyen kalem sıfır sayılmaz —
      "veri yok" olarak durur ve toplamın dışında kalır. */
 
+  /* 079 HARCAMA ŞERİTLERİ (vitrin): talep tablosunun kalemleri aylık
+     sınıra karşı; çizgi = sınır, aşım yalnız çizginin rengiyle. Tutarı
+     bilinmeyen kalem «—» (toplama da girmez). Sınır yoksa kart yok. */
+  function seritKarti(b){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || b.limit == null) return '';
+    const ic = V.harcamaSeritleri({ limit:b.limit, satirlar:b.rows.map(r => ({ ad:r.label, tutar:r.monthly })),
+      not:'Çizgi = aylık sınır · aşım yalnız çizgide' });
+    return ic ? K.Kutu({ ad:'Harcama şeritleri', yuva:'aylık', class:'vkutu', govde:raw(ic) }) : '';
+  }
+
   function budgetView(){
     const b = SP.Money.budget();
     const st = SP.Money.status();
@@ -263,6 +274,7 @@ SP.Screens.basket = (function(){
              yazilmaz (kullanici, 2026-09-25: «ne oldugu anlasilmiyor»). -->
         <div class="grid">
           <div class="span-7"><div class="stack">
+            ${seritKarti(b)}
             ${K.Card({
               title:'Talep tablosu', hint:'budget-rank',
               badge:K.Badge({ label:U.fmtNum(b.total) + ' TL / ay',

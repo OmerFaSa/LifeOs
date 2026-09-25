@@ -52,7 +52,7 @@ SP.HatirlatUI = (function(){
   function sayfa(){
     const d = H().durum();
     const ilaclar = SP.Meds.activeList();
-    const secenek = [{ value:'su', label:'Su' }, { value:'hareket', label:'Hareket molası' }]
+    const secenek = [{ value:'su', label:'Su' }, { value:'hareket', label:'Hareket molası' }, { value:'olcum', label:'Sabah tartısı' }]
       .concat(ilaclar.map(m => ({ value:'ilac:' + m.id, label:'İlaç / takviye — ' + (m.name || SP.Meds.kindOf(m).name) })));
     const deger = taslak.tur === 'ilac' ? 'ilac:' + taslak.medId : taslak.tur;
     const onceki = d.liste.find(h => h.tur === taslak.tur && (taslak.tur !== 'ilac' || h.medId === taslak.medId));
@@ -67,7 +67,7 @@ SP.HatirlatUI = (function(){
           input:K.Select({ id:'ht-tur', value:deger, change:'ht-tur', options:secenek }) }),
         K.Field({ label:'Saatler', hint:'virgülle ayır — örn. 08:00, 21:00',
           input:K.Input({ id:'ht-saat', value:onceki ? onceki.saatler.join(', ') : '',
-            placeholder:taslak.tur === 'su' ? '10:00, 13:00, 16:00' : '08:00' }) }),
+            placeholder:taslak.tur === 'su' ? '10:00, 13:00, 16:00' : taslak.tur === 'olcum' ? '07:30' : '08:00' }) }),
         html`<div id="ht-hata" class="small" role="alert"></div>`,
         when(!ilaclar.length, () => html`<p class="tiny dim">İlaç hatırlatması için önce
           Testler › İlaç sekmesinden kullandığın şeyi kaydet.</p>`),
@@ -90,7 +90,9 @@ SP.HatirlatUI = (function(){
 
   const handle = {
     async 'ht-ac'(el){
-      taslak = el && el.dataset && el.dataset.med ? { tur:'ilac', medId:el.dataset.med } : { tur:'su', medId:null };
+      const tur = el && el.dataset && el.dataset.tur;
+      taslak = el && el.dataset && el.dataset.med ? { tur:'ilac', medId:el.dataset.med }
+        : { tur:tur && H().TUR[tur] ? tur : 'su', medId:null };
       sayfa();
     },
     async 'ht-kaydet'(){

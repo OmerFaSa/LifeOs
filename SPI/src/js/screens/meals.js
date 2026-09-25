@@ -181,6 +181,65 @@ SP.Screens.meals = (function(){
     });
   }
 
+  /* ---------- D · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const vkutu = (ad, yuva, ic) => ic ? K.Kutu({ ad, yuva, class:'vkutu', govde:raw(ic) }) : '';
+
+  /* 072 TABAK: bölmeler hedefin enerji payı; ortada proteinden kalan gram.
+     Öğün girilmemişse kalan «—» (yenmedi değil, girilmedi). */
+  function tabakKutusu(){
+    if(!VT()) return '';
+    const t = SP.Nutri.targets();
+    if(!t.ok) return '';
+    const tot = SP.Nutri.dayTotals(shownDate());
+    const k = (hedef, yenen) => tot.empty ? null : hedef - yenen;
+    return vkutu('Tabak', tot.empty ? 'girilmedi' : 'kalan', VT().tabak({ bolmeler:[
+      { ad:'Protein', pay:t.protein.min * 4, kalan:k(t.protein.min, tot.protein) },
+      { ad:'Karbonhidrat', pay:t.carb.min * 4, kalan:k(t.carb.min, tot.carb) },
+      { ad:'Yağ', pay:t.fat.min * 9, kalan:k(t.fat.min, tot.fat) } ] }));
+  }
+
+  /* 080 ÖĞÜN ÇİZELGESİ: öğünün girildiği saat (kayıt anı). */
+  function cizelgeKutusu(){
+    if(!VT()) return '';
+    const d = shownDate();
+    const og = M.mealsOf(d).filter(m => m.at && U.iso(new Date(m.at)) === d).map(m => {
+      const t = new Date(m.at);
+      const sl = SP.MEAL_SLOTS.find(x => x.id === m.slot);
+      return { saat:t.getHours() + t.getMinutes() / 60, ad:(sl ? sl.label : m.slot) + ' · ' + U.pad2(t.getHours()) + ':' + U.pad2(t.getMinutes()),
+        kucuk:/^ara/.test(m.slot) };
+    });
+    const n = new Date();
+    return vkutu('Öğün çizelgesi', 'girildiği saat', VT().ogunCizelgesi({ ogunler:og,
+      simdi:d === U.todayISO() ? n.getHours() + n.getMinutes() / 60 : null }));
+  }
+
+  /* 085 ÖĞÜN ŞABLONLARI: son 30 günde en az iki kez aynı içerikle girilen
+     öğün tek dokunuşla eklenir (küçük aksiyon, «Geri al»). */
+  function sablonlar(){
+    const say = {};
+    for(let i = 0; i < 30; i++){
+      const d = U.iso(U.addDays(U.today(), -i));
+      M.mealsOf(d).forEach(m => {
+        const ids = (m.items || []).map(x => x.foodId).filter(id => SP.FOOD_BY_ID[id]);
+        if(!ids.length) return;
+        const anahtar = ids.slice().sort().join('+');
+        const x = say[anahtar] || (say[anahtar] = { anahtar, n:0, ornek:{ date:d, id:m.id }, slot:m.slot, ids });
+        x.n++;
+      });
+    }
+    return Object.keys(say).map(k => say[k]).filter(x => x.n >= 2).sort((a, b) => b.n - a.n).slice(0, 3);
+  }
+  function sablonKutusu(){
+    if(!VT()) return '';
+    const bugun = M.mealsOf(shownDate()).map(m => (m.items || []).map(x => x.foodId).sort().join('+'));
+    return vkutu('Sık öğünler', 'tek dokunuş', VT().ogunSablonlari({ act:'sablon-ekle', sablonlar:sablonlar().map(x => {
+      const sl = SP.MEAL_SLOTS.find(y => y.id === x.slot);
+      return { ad:sl ? sl.label : x.slot, icerik:x.ids.map(id => SP.FOOD_BY_ID[id].name.toLocaleLowerCase('tr-TR')).join(' · '),
+        on:bugun.indexOf(x.anahtar) >= 0, data:{ 'data-date':x.ornek.date, 'data-id':x.ornek.id } };
+    }) }));
+  }
+
   /* ---------------------------------------------------------- hedefler */
 
   function targetCard(){
@@ -608,7 +667,7 @@ SP.Screens.meals = (function(){
      günün öğün sayısı çubukta rozet. Bir bölüm çizilemezse yalnız o bölüm
      sakin bir notla düşer. */
   const BODIES = {
-    gunluk:() => html`${K.Ledger(() => [quickEntry(), dayCard(), targetCard()])}
+    gunluk:() => html`${K.Ledger(() => [quickEntry(), sablonKutusu(), dayCard(), cizelgeKutusu(), targetCard(), tabakKutusu()])}
       <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`,
     oneri:() => html`${K.Ledger(() => [energyCard(), labLinkCard(), suggestCard()])}
       <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`,
@@ -709,6 +768,16 @@ SP.Screens.meals = (function(){
       el.value = '';
       UI.toast(parsed.note);
       SP.App.render();
+    },
+    async 'sablon-ekle'(el){
+      const kaynak = M.mealsOf(el.dataset.date).find(m => m.id === el.dataset.id);
+      if(!kaynak) return;
+      const yeni = M.newMeal(guessSlot());
+      yeni.items = (kaynak.items || []).map(x => Object.assign({}, x));
+      const d = shownDate();
+      await M.addMeal(d, yeni);
+      SP.App.render();
+      UI.toast('Öğün eklendi', { undo:async () => { await M.deleteMeal(d, yeni.id); SP.App.render(); } });
     },
     async 'del-meal'(el){
       await M.deleteMeal(shownDate(), el.dataset.id);

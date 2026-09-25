@@ -93,4 +93,127 @@
     });
   });
 
+
+  /* D · SPİ kartları ekranda (vitrin sürüm 4, brand/ortak/vitrin.js). */
+  describe('Vitrin · D kartları SPİ ekranlarında', () => {
+    const gun = n => SP.U.iso(SP.U.addDays(SP.U.parse('2026-10-12'), n));
+    if(!document.getElementById('toast-root')){
+      const t = document.createElement('div'); t.id = 'toast-root'; t.hidden = true; document.body.appendChild(t);
+    }
+    async function cizmeden(fn){
+      const A = SP.App, r = A.render; A.render = async () => {};
+      try{ await fn(); } finally { A.render = r; }
+    }
+
+    it('oz-068 oz-069 oz-070 oz-088 Bugün › Durum: halka, uyku bandı, kilo eğrisi, tartı hatırlatıcısı', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        for(let i = -6; i <= 0; i++) pushVitals(gun(i), { sleep:7, weight:71 + (i % 2) * 0.4 });
+        const k = dom(await SP.Screens.today.render());
+        expect(k.querySelector('[data-oz="068"] text')).toBeTruthy();
+        expect(k.querySelector('[data-oz="069"] .bn i')).toBeTruthy();
+        expect(k.querySelectorAll('[data-oz="070"] circle').length).toBe(7);
+        expect(k.querySelector('[data-oz="088"]').textContent).toContain('kurulmadı');
+      });
+    });
+
+    it('oz-073 su tek dokunuşla eklenir ve geri alınır; girilmemiş gün sıfır yazmaz', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        let k = dom(await SP.Screens.today.render());
+        expect(k.querySelector('[data-oz="073"]').textContent).toContain('Girilmedi');
+        await cizmeden(() => SP.Screens.today.handle['su-ekle']());
+        expect(SP.S.vitals['2026-10-12'].water).toBe(250);
+        k = dom(await SP.Screens.today.render());
+        expect(k.querySelectorAll('[data-oz="073"] path[fill="var(--spi)"]').length).toBe(1);
+      });
+    });
+
+    it('oz-074 günün hissi beş noktalı ölçekle, beyan', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        pushVitals('2026-10-12', { soreness:4 });
+        const k = dom(await SP.Screens.today.render());
+        expect(k.querySelector('[data-oz="074"] .on').textContent).toBe('4');
+      });
+    });
+
+    it('oz-077 Ayrıntı › Giriş: tartı tuş takımı dünkü değeri ipucu olarak yazar', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        pushVitals(gun(-1), { weight:71.2 });
+        const k = dom(await SP.Screens.gun.render());
+        expect(k.querySelector('[data-oz="077"]').textContent).toContain('dün 71,2');
+      });
+    });
+
+    it('oz-071 oz-078 oz-084 Testler: referans bandı, sonraki kontrol, yan yana karşılaştırma', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        const b = SP.BIOMARKERS.find(x => x.panel !== 'vital' && x.panel !== 'body' && Array.isArray(x.ref));
+        SP.S.labs = [{ id:'l1', date:gun(-200), values:{ [b.id]:{ v:b.ref[0] - 1, cert:'measured' } }, fasting:'unknown', source:'manual' },
+          { id:'l2', date:gun(-20), values:{ [b.id]:{ v:(b.ref[0] + b.ref[1]) / 2, cert:'measured' } }, fasting:'unknown', source:'manual' }];
+        const k = dom(await SP.Screens.labs.render());
+        expect(k.querySelector('[data-oz="071"] .nk')).toBeTruthy();
+        expect(k.querySelector('[data-oz="078"]').textContent).toContain('yorumlamaz');
+        expect(k.querySelector('[data-oz="084"] .ds2')).toBeTruthy();
+      });
+    });
+
+    it('oz-072 oz-080 oz-085 Öğünler: tabak, çizelge ve sık öğün şablonu', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        const f = Object.keys(SP.FOOD_BY_ID)[0];
+        [gun(-3), gun(-2)].forEach(d => SP.Test.pushMeal(d, 'ogle', [[f, 150]]));
+        const m = SP.Test.pushMeal('2026-10-12', 'kahvalti', [[f, 100]]);
+        m.at = '2026-10-12T08:15:00';
+        const k = dom(await SP.Screens.meals.render());
+        expect(k.querySelector('[data-oz="085"] [data-act="sablon-ekle"]')).toBeTruthy();
+        expect(k.querySelector('[data-oz="080"] .og')).toBeTruthy();
+        if(SP.Nutri.targets().ok) expect(k.querySelector('[data-oz="072"] .tb b')).toBeTruthy();
+      });
+    });
+
+    /* HATA (V5-8'de görüldü): öğün kartının simgesi boyutsuz SVG'ydi ve
+       raf düzeninde kartın genişliğine büyüyordu (dev güneş). */
+    it('öğün kartının simgesi satır boyunda kalır', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        SP.Test.pushMeal('2026-10-12', 'kahvalti', [[Object.keys(SP.FOOD_BY_ID)[0], 100]]);
+        const k = document.createElement('div');
+        k.style.cssText = 'position:absolute;left:-9999px;top:0;width:900px';
+        k.innerHTML = String(await SP.Screens.meals.render());
+        document.body.appendChild(k);
+        try{
+          const svg = k.querySelector('.mealcard__head svg');
+          expect(svg.getBoundingClientRect().width <= 24).toBeTruthy();
+        } finally { k.remove(); }
+      });
+    });
+
+    it('oz-075 oz-076 oz-086 Hareket: set kutucuğu dolar; kaydı olmayan gün veri yok', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        const w = SP.Model.newWorkout('2026-10-12', SP.SESSION_TEMPLATES[0].id);
+        SP.S.workouts = [w];
+        let k = dom(await SP.Screens.move.render());
+        expect(k.querySelectorAll('[data-oz="075"] .st button').length).toBeGreaterThan(0);
+        expect(k.querySelectorAll('[data-oz="076"] .hl').length).toBe(7);
+        expect(k.querySelector('[data-oz="086"] i.d')).toBeTruthy();
+        await cizmeden(() => SP.Screens.move.handle['set-bitti']({ dataset:{ w:w.id, i:'0', set:'1' } }));
+        expect(w.items[0].setsDone).toBe(1);
+      });
+    });
+
+    it('oz-079 Sepet: harcama şeritleri yalnız aylık sınır varsa', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        SP.S.basket = Object.assign(SP.Model.defaultBasket(), { monthlyLimit:null });
+        expect(dom(await SP.Screens.basket.render()).querySelector('[data-oz="079"]')).toBeNull();
+        SP.S.basket.monthlyLimit = 3000;
+        expect(dom(await SP.Screens.basket.render()).querySelector('[data-oz="079"] .r')).toBeTruthy();
+      });
+    });
+  });
+
 })();

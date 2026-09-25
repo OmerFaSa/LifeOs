@@ -119,6 +119,49 @@ SP.Screens.labs = (function(){
         || a.marker.name.localeCompare(b.marker.name, 'tr'));
   }
 
+  /* ---------- D · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const refDizi = r => r && Array.isArray(r.ref) && r.ref.length === 2 ? r.ref : null;
+
+  /* 071 REFERANS BANDI: son değer laboratuvar aralığında bir nokta; önce
+     aralık dışı olanlar. Yalnız işaretler; yorum ve teşhis yok. */
+  function referansEntry(rows){
+    if(!VT()) return null;
+    const satirlar = rows.filter(r => refDizi(r.ref)).slice(0, 6)
+      .map(r => ({ ad:r.marker.name, deger:Number(r.value), ref:refDizi(r.ref), birim:r.marker.unit }));
+    const ic = VT().referansBandi({ satirlar });
+    return ic ? K.Entry({ label:'Referans bandı', meta:satirlar.length + ' ölçüm',
+      note:'Nokta son değer, bant laboratuvarın aralığı. Aralık dışı yalnız işaretlenir.', body:raw(ic) }) : null;
+  }
+
+  /* 078 SONRAKİ KONTROL: panelin en yeni ölçümü + 180 gün (Bio.overdue ile
+     aynı kural). Hatırlatır, yorumlamaz. */
+  const PANEL_GUN = 180;
+  function sonrakiKontrolEntry(){
+    if(!VT()) return null;
+    const bugun = U.todayISO();
+    const adaylar = SP.PANELS.filter(p => p.id !== 'vital' && p.id !== 'body').map(p => {
+      const t = SP.BIOMARKERS.filter(b => b.panel === p.id).map(b => M.latestOf(b.id)).filter(Boolean).map(x => x.date).sort().pop();
+      return t ? { panel:p, tarih:U.iso(U.addDays(new Date(t + 'T12:00:00'), PANEL_GUN)) } : null;
+    }).filter(Boolean).sort((a, b) => a.tarih.localeCompare(b.tarih));
+    const x = adaylar[0];
+    if(!x) return null;
+    const g = U.diffDays(bugun, x.tarih);
+    const ne = g < 0 ? (-g) + ' gün gecikti · hatırlatma' : g === 0 ? 'bugün · hatırlatma'
+      : g < 14 ? g + ' gün sonra · hatırlatma' : Math.round(g / 7) + ' hafta sonra · hatırlatma';
+    return K.Entry({ label:'Sonraki kontrol', meta:x.panel.name,
+      body:raw(VT().sonrakiKontrol({ tarih:x.tarih, ad:x.panel.name, ne })) });
+  }
+
+  /* 084 TAHLİL KARŞILAŞTIRMASI: iki oturum yan yana, aralıkla; aralık
+     dışı yalnız çerçeve. */
+  function yanYanaEntry(recA, recB, rows){
+    if(!VT()) return null;
+    const ic = VT().tahlilKarsilastirma({ onceAd:U.fmtShort(recA.date), sonraAd:U.fmtShort(recB.date),
+      satirlar:rows.slice(0, 10).map(r => ({ ad:r.marker.name, once:r.from, sonra:r.to, ref:refDizi(SP.Bio.refFor(r.marker.id)) })) });
+    return ic ? K.Entry({ label:'Yan yana', meta:Math.min(10, rows.length) + ' ölçüm', note:'Çerçeve aralık dışını gösterir; yorum yapılmaz.', body:raw(ic) }) : null;
+  }
+
   function resultsView(){
     const rows = resultRows();
     /* Sabitlenenler listenin BAŞINDA durur. 58 ölçümde her seferinde
@@ -195,6 +238,9 @@ SP.Screens.labs = (function(){
               </button>`;
           })}</div>`)}`,
       }),
+
+      referansEntry(rows),
+      sonrakiKontrolEntry(),
 
       /* BİRLİKTE OKUMA. Tek ölçüm yanıltır, örüntü yanıltmaz. Bu blok
          hiçbir yeni sayı üretmez: var olan değerleri yan yana koyup ne
@@ -1059,6 +1105,8 @@ SP.Screens.labs = (function(){
             </button>`;
           })}</div>`)}`,
       }),
+
+      yanYanaEntry(recA, recB, rows),
 
       K.Entry({
         label:'Nasıl okunur', meta:'eşik',

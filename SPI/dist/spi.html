@@ -2823,6 +2823,9 @@ button.listitem.is-on{ background:var(--primary-soft); }
   background:var(--surface); padding:var(--sp-4); margin-bottom:var(--sp-3);
 }
 .mealcard__head{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+/* Öğünün simgesi boyutsuz SVG'dir; boyu verilmezse raf düzeninde kartın
+   genişliğine büyüyordu. */
+.mealcard__head > svg{ width:18px; height:18px; flex:none; color:var(--text-3); }
 .mealcard__slot{ font-weight:700; font-size:var(--fs-base); }
 .mealcard__kcal{
   margin-left:auto; font-family:var(--font-display); font-weight:800;
@@ -5230,6 +5233,43 @@ body.is-dragging .drop.is-over{
 /* Vitrin grafikleri 260 birimlik bir tuvale çizilir; geniş sütunda
    sonsuz büyümez (yazı da onunla büyüyordu). */
 .vk .y12, .vk .y09, .vk .y10, .vk .x18, .vk .y16, .vk .z07{ max-width:560px; }
+
+/* ---- D · SPİ vitrin kartlarının sistem hâlleri ---- */
+/* 069 veri yok gecesi kesik; 072 tabak bölmeleri veriden. */
+.vk .x32 .gc i.yok{ background:none; border:1.5px dashed var(--vk-ink4); }
+.vk .x34 .tb[style*="--tabak"]::before{ background:var(--tabak); }
+.vk .x34 .tb::after{ display:none; }
+/* 073 bardak dizisi tek düğme; hedef aşılırsa sarar. */
+.vk .x35 .bd{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:0 auto; padding:6px 8px; border-radius:10px; }
+.vk .x35 .sy{ text-align:center; margin-top:10px; font:400 11px var(--vk-mono); color:var(--vk-ink3); }
+/* 074 beş nokta gerçek düğme; dolu noktada yazı AA tonunda. */
+.vk .y17 .ol button{ width:30px; height:30px; border-radius:50%; border:1.5px solid var(--vk-l2); display:grid; place-items:center;
+  font:500 11px var(--vk-mono); color:var(--vk-ink3); }
+.vk .y17 .ol button.on{ width:44px; height:44px; background:var(--spi-ink, var(--spi)); color:var(--vk-on); border-color:transparent; font-size:15px; }
+/* 075 set kutucuğu düğme. */
+.vk .x36 .st{ flex-wrap:wrap; }
+.vk .x36 .st button{ width:34px; height:26px; border-radius:5px; border:1px solid var(--vk-l2); display:grid; place-items:center;
+  font:400 10px var(--vk-mono); color:var(--vk-ink3); }
+.vk .x36 .st button.d{ background:var(--spi-ink, var(--spi)); border-color:transparent; color:var(--vk-on); }
+.vk .x36 .r{ height:auto; min-height:36px; padding:4px 0; }
+/* 077 tuş takımı: sil tuşu var, ✓ tam genişlik. */
+.vk .x37 .tt button{ height:28px; border-radius:5px; background:var(--vk-s1); border:1px solid var(--vk-l1); display:grid; place-items:center;
+  font:400 11px var(--vk-mono); color:var(--vk-ink2); }
+.vk .x37 .tt button.on{ background:var(--spi-ink, var(--spi)); color:var(--vk-on); border-color:transparent; }
+.vk .x37 .tt .tt-kaydet{ grid-column:1 / -1; }
+.vk .x37{ grid-template-columns:1fr 132px; }
+/* 085 şablon satırı düğme. */
+.vk .w17 .ls2 button{ display:grid; grid-template-columns:60px 1fr 26px; gap:8px; align-items:center; min-height:36px; width:100%;
+  padding:0 6px 0 10px; border-radius:9px; background:var(--vk-s1); border:1px solid var(--vk-l1); text-align:left; }
+.vk .w17 .ls2 button.on{ border-color:color-mix(in oklab,var(--spi) 45%,transparent); }
+.vk .w17 .ls2 button.on em{ background:var(--spi-ink, var(--spi)); color:var(--vk-on); }
+/* 088 anahtar 24 px dokunma hedefi. */
+.vk .w20 .an2{ width:40px; height:24px; border-radius:12px; }
+.vk .w20 .an2::after{ width:20px; height:20px; }
+.vk .w20 .an2.on::after{ left:18px; }
+/* 078: vitrinin h5'i sayfanın başlık sırasını atlatıyordu (h2 → h5);
+   ad düz metindir, biçimi aynı. */
+.vk .y19 b.ad{ display:block; font-size:14px; font-weight:600; }
 
 /* ==== css/vitrin.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -10797,7 +10837,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'2a91d29', at:'2026-09-25 12:16', dirty:true };
+SP.BUILD = { id:'66f6cf3', at:'2026-09-25 12:29', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -12827,6 +12867,327 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div><span class="cap">DERS RENGİ YOK · RENK YALNIZ MODÜLÜN</span>');
   }
 
+
+  /* ================================================== D · SPİ */
+
+  /* 068 TOPARLANMA HALKASI — tek sayı ortada; her kaynak ayrı dilim,
+     kendi kesinlik etiketiyle. Dilimin boyu kaynağın AĞIRLIĞI (kural
+     motorunun), girilmemiş kaynak halkada boş kalır ve «veri yok» der. */
+  function toparlanmaHalkasi(o){
+    if(!o || !sayiMi(o.deger) || !(o.dilimler || []).length) return '';
+    const C = 301.6, bosluk = 6;
+    const top = o.dilimler.reduce((a, d) => a + (d.agirlik || 0), 0) || 1;
+    const TON = [100, 65, 42, 26];
+    let bas = 0, yay = '';
+    o.dilimler.forEach((d, i) => {
+      const uz = Math.max(0, C * (d.agirlik || 0) / top - bosluk);
+      if(d.kesinlik !== 'missing'){
+        yay += '<circle cx="60" cy="60" r="48" fill="none" stroke="' + (i ? 'color-mix(in oklab,var(--spi) ' + TON[Math.min(i, 3)] + '%,transparent)' : 'var(--spi)')
+          + '" stroke-width="10" stroke-dasharray="' + uz.toFixed(1) + ' ' + C + '" stroke-dashoffset="' + (-bas).toFixed(1)
+          + '" stroke-linecap="round" transform="rotate(-90 60 60)"/>';
+      }
+      bas += uz + bosluk;
+    });
+    return kok('068', 'x31', '<svg viewBox="0 0 120 120" role="img" aria-label="' + kac('Toparlanma ' + o.deger + (o.bant ? ', ' + o.bant : '')) + '">'
+      + '<circle cx="60" cy="60" r="48" fill="none" stroke="var(--vk-s3)" stroke-width="10"/>' + yay
+      + '<text x="60" y="68" text-anchor="middle" fill="var(--vk-ink)" style="font:400 30px var(--vk-serif)">' + Math.round(o.deger) + '</text></svg>'
+      + '<div class="lg2">' + o.dilimler.map((d, i) => '<div><i style="opacity:' + (d.kesinlik === 'missing' ? '.15' : (TON[Math.min(i, 3)] / 100)) + '"></i>'
+        + kac(d.ad) + et(d.kesinlik) + '</div>').join('') + '</div>');
+  }
+
+  /* 069 UYKU BANDI — son gece tek şerit, altta haftanın gece dokusu.
+     Yatış saati tutulmadığı için şerit SAAT değil SÜRE eksenindedir
+     (0–12 sa); uyanma kaydı yoksa uyanma çizilmez. */
+  function uykuBandi(o){
+    const g = (o && o.geceler || []);
+    const son = g.length ? g[g.length - 1] : null;
+    if(!son || !sayiMi(son.saat)) return '';
+    const EN = 12;
+    return kok('069', 'x32', '<div class="ek"><span>0</span><span>3</span><span>6</span><span>9</span><span>12 sa</span></div>'
+      + '<div class="bn" role="img" aria-label="' + kac('Son gece ' + sayi(son.saat, 1) + ' saat') + '"><i class="d" style="left:0;width:' + px(100 * Math.min(son.saat, EN) / EN) + '"></i></div>'
+      + '<div class="gc" aria-hidden="true">' + g.slice(-7).map(x => sayiMi(x.saat)
+        ? '<i style="--o:' + Math.round(100 * Math.min(x.saat, 9) / 9) + '" title="' + kac(x.ad + ' · ' + sayi(x.saat, 1) + ' sa') + '"></i>'
+        : '<i class="yok" style="--o:0" title="' + kac(x.ad + ' · veri yok') + '"></i>').join('') + '</div>'
+      + '<div class="cap" style="margin-top:8px">' + kac(buyuk((o.sonAd || 'dün') + ' ' + sayi(son.saat, 1) + ' sa · son ' + Math.min(7, g.length) + ' gece')) + '</div>');
+  }
+
+  /* 070 HAM + ORTALAMA ÇİZGİSİ — dalgalı ölçümde ham noktalar soluk,
+     yedi günlük ortalama çizgi. Eksik gün ne noktaya ne ortalamaya girer. */
+  function hamOrtalama(o){
+    const v = (o && o.noktalar || []);
+    const dolu = v.filter(x => sayiMi(x.deger));
+    if(dolu.length < 3) return '';
+    const mn = Math.min.apply(null, dolu.map(x => x.deger)), mx = Math.max.apply(null, dolu.map(x => x.deger));
+    const pay = (mx - mn) * 0.15 || 0.5, lo = mn - pay, hi = mx + pay;
+    const x = i => 8 + i * (244 / Math.max(1, v.length - 1)), y = a => 72 - (a - lo) / (hi - lo) * 64;
+    let s = '', yol = '', ilk = true, sonOrt = null;
+    v.forEach((a, i) => {
+      if(!sayiMi(a.deger)) return;
+      s += '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(a.deger).toFixed(1) + '" r="2.8" fill="var(--vk-ink4)"/>';
+      const dilim = v.slice(Math.max(0, i - 6), i + 1).filter(z => sayiMi(z.deger));
+      const ort = dilim.reduce((q, z) => q + z.deger, 0) / dilim.length;
+      sonOrt = ort;
+      yol += (ilk ? 'M' : 'L') + x(i).toFixed(1) + ' ' + y(ort).toFixed(1); ilk = false;
+    });
+    const son = dolu[dolu.length - 1];
+    const od = o.ondalik == null ? 1 : o.ondalik;
+    return kok('070', 'y16', '<div class="u"><b>' + sayi(son.deger, od) + '<small>' + kac(o.birim || '') + '</small></b>'
+      + et('computed', '7 gün ort. ' + sayi(Math.round(sonOrt * 10) / 10, od)) + '</div>'
+      + '<svg class="gr" viewBox="0 0 260 80" role="img" aria-label="' + kac(dolu.length + ' ölçüm; yedi günlük ortalama ' + sayi(Math.round(sonOrt * 10) / 10, od) + ' ' + (o.birim || '')) + '">'
+      + s + '<path d="' + yol + '" fill="none" stroke="var(--spi)" stroke-width="2.2" stroke-linejoin="round"/></svg>'
+      + '<div class="lg"><span><i style="background:var(--vk-ink4);height:6px;width:6px;border-radius:50%"></i>günlük ölçüm</span>'
+      + '<span><i style="background:var(--spi)"></i>7 günlük ortalama</span></div>');
+  }
+
+  /* 071 REFERANS BANDI — değer laboratuvar aralığının içinde bir nokta.
+     Aralık dışı YALNIZ işaretlenir; yorum yapılmaz, teşhis konmaz. */
+  function referansBandi(o){
+    const r = (o && o.satirlar || []).filter(x => x && sayiMi(x.deger) && x.ref && sayiMi(x.ref[0]) && sayiMi(x.ref[1]));
+    if(!r.length) return '';
+    let dis = false;
+    const ic = r.map(x => {
+      const [a, b] = x.ref, w = (b - a) || 1;
+      const lo = Math.min(a - w * 0.45, x.deger - w * 0.1), hi = Math.max(b + w * 0.45, x.deger + w * 0.1);
+      const yer = v => 100 * (v - lo) / (hi - lo);
+      const disinda = x.deger < a || x.deger > b;
+      if(disinda) dis = true;
+      return '<div class="r"><span>' + kac(x.ad) + '</span><div class="tr" role="img" aria-label="' + kac(x.ad + ' ' + sayi(x.deger) + ' ' + (x.birim || '')
+        + '; aralık ' + sayi(a) + '–' + sayi(b) + (disinda ? '; aralık dışı' : '')) + '"><span class="bd" style="left:' + px(yer(a)) + ';width:' + px(yer(b) - yer(a)) + '"></span>'
+        + '<span class="nk' + (disinda ? ' dis' : '') + '" style="left:' + px(yer(x.deger)) + '"></span></div></div>';
+    }).join('');
+    return kok('071', 'x33', ic + (dis ? '<div class="nt"><i></i>Aralık dışı · hekiminle konuş</div>' : ''));
+  }
+
+  /* 072 TABAK GÖRÜNÜMÜ — halka dilimi yerine tabak bölmesi; kalan
+     miktar yazılı. Bölmeler hedefin enerji payı (kural motoru). */
+  function tabak(o){
+    if(!o || !(o.bolmeler || []).length) return '';
+    const b = o.bolmeler, top = b.reduce((a, x) => a + (x.pay || 0), 0) || 1;
+    const TON = [100, 55, 30];
+    let bas = 0;
+    const dil = b.map((x, i) => {
+      const uz = 100 * x.pay / top;
+      const r = (i ? 'color-mix(in oklab,var(--spi) ' + TON[Math.min(i, 2)] + '%,transparent)' : 'var(--spi)') + ' ' + bas.toFixed(1) + '% ' + (bas + uz - 3).toFixed(1) + '%,transparent ' + (bas + uz - 3).toFixed(1) + '% ' + (bas + uz).toFixed(1) + '%';
+      bas += uz; return r;
+    }).join(',');
+    const ana = b[0];
+    return kok('072', 'x34', '<div class="tb" style="--tabak:conic-gradient(' + dil + ')" role="img" aria-label="' + kac(ana.ad + ': ' + (sayiMi(ana.kalan) ? sayi(Math.round(ana.kalan)) + ' g kaldı' : 'veri yok')) + '"><b>'
+      + (sayiMi(ana.kalan) ? sayi(Math.max(0, Math.round(ana.kalan))) : '—') + '</b></div>'
+      + '<div class="lg2">' + b.map((x, i) => '<div><i style="background:' + (i ? 'color-mix(in oklab,var(--spi) ' + TON[Math.min(i, 2)] + '%,transparent)' : 'var(--spi)') + '"></i>'
+        + (i === 0 && sayiMi(x.kalan) ? '<span><b>' + sayi(Math.max(0, Math.round(x.kalan))) + ' g</b> ' + kac(x.ad.toLocaleLowerCase('tr-TR')) + ' kaldı</span>'
+          : '<span>' + kac(x.ad) + (sayiMi(x.kalan) ? ' · ' + sayi(Math.max(0, Math.round(x.kalan))) + ' g kaldı' : '') + '</span>') + '</div>').join('') + '</div>');
+  }
+
+  /* 073 TEK DOKUNUŞ SAYAÇ — küçük kayıt tek dokunuş; «Geri al» şeridi
+     sistemin ortak şerididir (toast). Girilmemiş gün boş bardaklardır
+     ama «girilmedi» yazar: 0 bardak ölçülmüş değildir. */
+  function tekDokunus(o){
+    if(!o || !sayiMi(o.hedef) || o.hedef < 1) return '';
+    const n = sayiMi(o.adet) ? Math.max(0, Math.floor(o.adet)) : 0;
+    const bardak = dolu => '<svg viewBox="0 0 24 30" aria-hidden="true"><path d="M4 3h16l-2 24H6z" fill="' + (dolu ? 'var(--spi)' : 'none')
+      + '" stroke="' + (dolu ? 'var(--spi)' : 'var(--vk-ink4)') + '" stroke-width="1.5"/></svg>';
+    const b = [];
+    for(let i = 0; i < Math.max(o.hedef, n); i++) b.push(bardak(i < n));
+    return kok('073', 'x35', '<button type="button" class="bd" data-act="' + kac(o.act) + '" aria-label="' + kac((o.ad || 'Bardak') + ' ekle') + '">' + b.join('') + '</button>'
+      + '<div class="sy">' + (sayiMi(o.adet) ? kac(o.metin || (n + ' / ' + o.hedef)) : 'Girilmedi · dokun, bir bardak ekle') + '</div>');
+  }
+
+  /* 074 ENERJİ ÖLÇEĞİ — günde bir kez beş noktalı ölçek; seçilen nokta
+     büyür. Değer kullanıcının BEYANIDIR (ölçüldü · beyan). */
+  function enerjiOlcegi(o){
+    if(!o) return '';
+    const n = o.adim || 5;
+    const ic = [];
+    for(let i = 1; i <= n; i++){
+      ic.push('<button type="button" class="' + (o.deger === i ? 'on' : '') + '" data-act="' + kac(o.act) + '" data-value="' + i + '"'
+        + ' aria-pressed="' + (o.deger === i ? 'true' : 'false') + '" aria-label="' + kac(i + ' · ' + ((o.adlar || [])[i - 1] || '')) + '">' + i + '</button>');
+    }
+    return kok('074', 'y17', '<span class="cap">' + kac(buyuk(o.soru || 'Bugün enerjin?')) + '</span><div class="ol" role="group" aria-label="' + kac(o.soru || 'Bugün enerjin?') + '">' + ic.join('') + '</div>'
+      + '<div class="uc"><span class="cap">' + kac(buyuk(o.alt || 'düşük')) + '</span>' + (o.deger != null ? et('measured', 'ölçüldü · beyan') : et('missing'))
+      + '<span class="cap">' + kac(buyuk(o.ust || 'yüksek')) + '</span></div>');
+  }
+
+  /* 075 SET KUTUCUKLARI — biten set dolar. Kutucuk düğmedir; dokunmak
+     o hareketin bir setini bitirir (tekrar dokunmak geri alır). */
+  function setKutucuklari(o){
+    const h = (o && o.hareketler || []).filter(x => x && x.set > 0);
+    if(!h.length) return '';
+    return kok('075', 'x36', h.map(x => {
+      const b = [];
+      for(let i = 0; i < x.set; i++){
+        b.push('<button type="button" class="' + (i < (x.biten || 0) ? 'd' : '') + '" data-act="' + kac(o.act) + '"' + nitelik(Object.assign({ 'data-i':String(x.i), 'data-set':String(i + 1) }, o.data || {}))
+          + ' aria-label="' + kac(x.ad + ' ' + (i + 1) + '. set' + (i < (x.biten || 0) ? ', bitti' : '')) + '">' + kac(x.etiket || (i + 1)) + '</button>');
+      }
+      return '<div class="r"><span>' + kac(x.ad) + '</span><div class="st">' + b.join('') + '</div></div>';
+    }).join(''));
+  }
+
+  /* 076 HAFTALIK HAREKET HALKALARI — yedi küçük halka; verisi olmayan gün
+     kesikli boş halka. p: günün hareket dakikasının asgari güne oranı. */
+  function haftaHalkalari(o){
+    const g = (o && o.gunler || []);
+    if(g.length !== 7) return '';
+    const yok = g.filter(x => x.yok).map(x => x.ad);
+    return kok('076', 'y18', g.map(x => '<div>' + (x.yok ? '<span class="hl yok" aria-hidden="true"></span>' : hl(x.gelecek ? 0 : x.p))
+      + '<span' + (x.bugun ? ' class="bu"' : '') + '>' + kac(buyuk(x.ad)) + '</span></div>').join('')
+      + '<div class="alt">' + et('measured') + (yok.length ? et('missing', yok.join(' · ') + ' · veri yok') : '') + '</div>',
+      { ek:'c-spi', etiket:g.filter(x => !x.yok && !x.gelecek).map(x => x.ad + ' %' + Math.round(x.p || 0)).join(', ') });
+  }
+
+  /* 077 ÖLÇÜM TUŞ TAKIMI — büyük rakam, sabit birim, dünkü değer ipucu
+     olarak yanında. ✓ kaydeder; kayıt modülün kendi kapısından geçer
+     (şüpheli giriş 018 dahil). */
+  function tusTakimi(o){
+    if(!o) return '';
+    const tus = ['1', '2', '3', '4', '5', '6', '7', '8', '9', ',', '0', '⌫'];
+    const fark = sayiMi(o.dun) && sayiMi(o.deger) ? Math.round((o.deger - o.dun) * 10) / 10 : null;
+    return kok('077', 'x37', '<div><b aria-live="polite">' + kac(o.metin != null && o.metin !== '' ? o.metin : '—') + '<small>' + kac(o.birim || '') + '</small></b>'
+      + '<div class="dn">' + (sayiMi(o.dun) ? 'dün ' + sayi(o.dun, 1) + (fark != null ? ' · fark ' + isaretli(fark, 1) : '') : 'dünkü değer yok') + '</div>'
+      + '<span style="display:inline-flex;margin-top:10px">' + et(o.metin ? 'measured' : 'missing') + '</span></div>'
+      + '<div class="tt" role="group" aria-label="Tuş takımı">' + tus.map(t => '<button type="button" data-act="' + kac(o.act) + '" data-k="' + kac(t) + '"'
+        + ' aria-label="' + (t === '⌫' ? 'Sil' : t === ',' ? 'Virgül' : t) + '">' + t + '</button>').join('')
+      + '<button type="button" class="on tt-kaydet" data-act="' + kac(o.kaydet) + '" aria-label="Kaydet">✓</button></div>');
+  }
+
+  /* 078 SONRAKİ KONTROL KARTI — hatırlatır, yorumlamaz. */
+  function sonrakiKontrol(o){
+    if(!o || !o.tarih) return '';
+    const AY = ['OCA', 'ŞUB', 'MAR', 'NİS', 'MAY', 'HAZ', 'TEM', 'AĞU', 'EYL', 'EKİ', 'KAS', 'ARA'];
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(o.tarih);
+    if(!m) return '';
+    return kok('078', 'y19', '<div class="tk" aria-hidden="true"><span>' + AY[+m[2] - 1] + '</span><b>' + (+m[3]) + '</b></div>'
+      + '<div><b class="ad">' + kac(o.ad) + '</b><p>' + kac(o.ne || '') + '</p><small>' + kac(o.not || 'Sonuçları sen girersin; SPİ yorumlamaz.') + '</small></div>');
+  }
+
+  /* 079 HARCAMA ŞERİTLERİ — kalem başına şerit ve bütçe çizgisi; aşım
+     yalnız çizginin rengiyle. Tutarı bilinmeyen kalem «—», sıfır değil. */
+  function harcamaSeritleri(o){
+    const r = (o && o.satirlar || []).filter(Boolean);
+    if(!r.length || !sayiMi(o.limit) || o.limit <= 0) return '';
+    const olcek = Math.max(o.limit, ...r.map(x => sayiMi(x.tutar) ? x.tutar : 0)) * 1.1;
+    return kok('079', 'x38', r.map(x => {
+      const bilinir = sayiMi(x.tutar), as = bilinir && x.tutar > o.limit;
+      return '<div class="r' + (as ? ' as' : '') + '"><span>' + kac(x.ad) + '</span><div class="tr" role="img" aria-label="' + kac(x.ad + ': ' + (bilinir ? sayi(Math.round(x.tutar)) + ' TL, bütçenin %' + Math.round(100 * x.tutar / o.limit) : 'veri yok')) + '">'
+        + (bilinir ? '<i style="width:' + px(100 * x.tutar / olcek) + '"></i>' : '') + '<em style="left:' + px(100 * o.limit / olcek) + '"></em></div><em>'
+        + (bilinir ? '%' + Math.round(100 * x.tutar / o.limit) : '—') + '</em></div>';
+    }).join('') + '<div class="cap" style="margin-top:6px">' + kac(buyuk(o.not || 'Çizgi = bütçe · aşım yalnız çizgide')) + '</div>');
+  }
+
+  /* 080 ÖĞÜN ÇİZELGESİ — gün tek şeritte; öğünler nokta (girildiği saat),
+     yeme aralığı açık bant. Saat kaydın zamanıdır: ölçüldü. */
+  function ogunCizelgesi(o){
+    const g = (o && o.ogunler || []).filter(x => x && sayiMi(x.saat));
+    if(!g.length) return '';
+    const yer = h => 100 * Math.max(0, Math.min(18, h - 6)) / 18;
+    const ilk = Math.min.apply(null, g.map(x => x.saat)), son = Math.max.apply(null, g.map(x => x.saat));
+    return kok('080', 'z16', '<div class="ek"><span>06</span><span>12</span><span>18</span><span>24</span></div>'
+      + '<div class="tr" role="img" aria-label="' + kac(g.length + ' öğün; yeme aralığı ' + sayi(Math.round((son - ilk) * 10) / 10, 1) + ' saat') + '">'
+      + (g.length > 1 ? '<span class="pn" style="left:' + px(yer(ilk)) + ';width:' + px(yer(son) - yer(ilk)) + '"></span>' : '')
+      + g.map(x => '<span class="og' + (x.kucuk ? ' k' : '') + '" style="left:' + px(yer(x.saat)) + '" title="' + kac(x.ad) + '"></span>').join('')
+      + (sayiMi(o.simdi) ? '<span class="an" style="left:' + px(yer(o.simdi)) + '"></span>' : '') + '</div>'
+      + '<div class="lg">' + et('measured', g.length + ' öğün girildi') + '<span>' + (g.length > 1 ? 'yeme aralığı ' + sayi(Math.round((son - ilk) * 10) / 10, 1) + ' sa' : 'tek öğün') + '</span></div>');
+  }
+
+  /* 081 YOĞUNLUK BÖLGELERİ — antrenman dakikası bölgelere göre; eşikleri
+     kod hesaplar. Nabız bölgesi ölçülmemişse kart yoktur. */
+  function yogunlukBolgeleri(o){
+    const b = (o && o.bolgeler || []).filter(x => x && sayiMi(x.dk));
+    if(!b.length) return '';
+    const en = Math.max.apply(null, b.map(x => x.dk)) || 1, top = b.reduce((a, x) => a + x.dk, 0);
+    return kok('081', 'z17', '<div class="u"><b>' + sayi(top) + ' dk</b>' + et('measured') + '</div>'
+      + b.map((x, i) => '<div class="r"><span>' + kac(x.ad) + '</span><i style="width:' + px(100 * x.dk / en) + ';opacity:' + (0.3 + 0.7 * i / Math.max(1, b.length - 1)).toFixed(2) + '"></i><em>' + sayi(x.dk) + ' dk</em></div>').join(''));
+  }
+
+  /* 082 HARCAMA TAKVİMİ — ay takvimi; her günün harcaması nokta
+     büyüklüğüyle, gelecek günler soluk. Kaydı olmayan gün noktasızdır. */
+  function harcamaTakvimi(o){
+    const g = (o && o.gunler || []);
+    if(!g.length) return '';
+    const en = Math.max.apply(null, g.map(x => sayiMi(x.tutar) ? x.tutar : 0)) || 1;
+    const bos = [];
+    for(let i = 0; i < (o.ilkGun || 0); i++) bos.push('<i class="bs"></i>');
+    return kok('082', 'z18', ['PT', 'SA', 'ÇA', 'PE', 'CU', 'CT', 'PZ'].map(h => '<span class="hd">' + h + '</span>').join('') + bos.join('')
+      + g.map(x => x.gelecek ? '<i class="gl"></i>' : '<i' + (x.bugun ? ' class="bu"' : '') + ' title="' + kac(x.ad + ' · ' + (sayiMi(x.tutar) ? sayi(x.tutar) + ' TL' : 'kayıt yok')) + '">'
+        + (sayiMi(x.tutar) && x.tutar > 0 ? '<b style="width:' + (4 + 12 * x.tutar / en).toFixed(1) + 'px;height:' + (4 + 12 * x.tutar / en).toFixed(1) + 'px"></b>' : '') + '</i>').join(''));
+  }
+
+  /* 083 UYKU DÜZENİ — yatış ve kalkış saatleri dikey çubuk; hedef kesik
+     çizgi. Saat ölçülmemişse kart yoktur (süreden saat uydurulmaz). */
+  function uykuDuzeni(o){
+    const g = (o && o.geceler || []).filter(x => x && sayiMi(x.yatis) && sayiMi(x.kalkis));
+    if(g.length < 3) return '';
+    const yer = h => 100 * (h - 20) / 14;       // 20:00 → ertesi 10:00
+    return kok('083', 'z19', '<div class="ch2"><div class="ys"><span>20</span><span>10</span></div><div class="gr2">'
+      + (sayiMi(o.hedefYatis) ? '<span class="hd1" style="top:' + px(yer(o.hedefYatis)) + '"></span>' : '')
+      + (sayiMi(o.hedefKalkis) ? '<span class="hd1" style="top:' + px(yer(o.hedefKalkis)) + '"></span>' : '')
+      + g.map(x => '<div><i style="top:' + px(yer(x.yatis)) + ';height:' + px(yer(x.kalkis) - yer(x.yatis)) + '"></i></div>').join('') + '</div></div>'
+      + '<div class="lg">' + et('measured') + '<span>' + g.length + ' gece · kesik çizgi hedef</span></div>');
+  }
+
+  /* 084 TAHLİL KARŞILAŞTIRMASI — iki tarihin değeri yan yana, aralıkla;
+     aralık dışı yalnız çerçeveyle. Yorum yok. */
+  function tahlilKarsilastirma(o){
+    const r = (o && o.satirlar || []).filter(Boolean);
+    if(!r.length) return '';
+    const hucre = (v, ref) => {
+      if(!sayiMi(v)) return '<em title="ölçülmedi">—</em>';
+      const dis = ref && sayiMi(ref[0]) && sayiMi(ref[1]) && (v < ref[0] || v > ref[1]);
+      return '<em' + (dis ? ' class="ds2" title="aralık dışı"' : '') + '>' + sayi(v) + '</em>';
+    };
+    const disVar = r.some(x => x.ref && [x.once, x.sonra].some(v => sayiMi(v) && (v < x.ref[0] || v > x.ref[1])));
+    return kok('084', 'w16', '<div class="r bs"><span>TEST</span><span>' + kac(buyuk(o.onceAd)) + '</span><span>' + kac(buyuk(o.sonraAd)) + '</span><span>ARALIK</span></div>'
+      + r.map(x => '<div class="r"><span>' + kac(x.ad) + '</span>' + hucre(x.once, x.ref) + hucre(x.sonra, x.ref)
+        + '<small>' + (x.ref ? sayi(x.ref[0]) + '–' + sayi(x.ref[1]) : '—') + '</small></div>').join('')
+      + (disVar ? '<div class="nt"><i></i>çerçeve = aralık dışı · yorum yok</div>' : ''));
+  }
+
+  /* 085 ÖĞÜN ŞABLONLARI — sık yenen öğünler tek dokunuşluk şablon; bugün
+     eklenen işaretli. Şablon kullanıcının KENDİ kaydından çıkar. */
+  function ogunSablonlari(o){
+    const s = (o && o.sablonlar || []).filter(Boolean);
+    if(!s.length) return '';
+    return kok('085', 'w17', '<span class="cap">' + kac(buyuk(o.baslik || 'Sık öğünler · tek dokunuş')) + '</span><div class="ls2">'
+      + s.map(x => '<button type="button" class="' + (x.on ? 'on' : '') + '" data-act="' + kac(o.act) + '"' + nitelik(x.data)
+        + ' aria-label="' + kac(x.ad + ': ' + x.icerik + (x.on ? ' — bugün eklendi' : ' — ekle')) + '"><b>' + kac(x.ad) + '</b><span>' + kac(x.icerik) + '</span><em aria-hidden="true">'
+        + (x.on ? '✓' : '+') + '</em></button>').join('') + '</div>');
+  }
+
+  /* 086 ANTRENMAN HAFTASI — yedi gün dikey şerit: yapılan dolu, kaydı
+     olmayan geçmiş gün taralı («kayıt yok», dinlenme sayılmaz), gelecek
+     boş; bugün çerçeveli. Plan tutulmadığı için «planlı» uydurulmaz. */
+  function antrenmanHaftasi(o){
+    const g = (o && o.gunler || []);
+    if(g.length !== 7) return '';
+    return kok('086', 'w18', g.map(x => '<div' + (x.bugun ? ' class="bu"' : '') + '><span class="g">' + kac(buyuk(x.ad)) + '</span>'
+      + '<i class="' + (x.yapilan ? 'd' : x.gecti ? 'bos' : '') + '">' + kac(x.yapilan || (x.gecti ? 'Kayıt yok' : '')) + '</i></div>').join(''),
+      { etiket:g.map(x => x.ad + ': ' + (x.yapilan || (x.gecti ? 'kayıt yok' : 'henüz değil'))).join(', ') });
+  }
+
+  /* 087 DÜZENLİ GİDERLER — ayın hangi günü hangi gider; en yakını vurgulu. */
+  function duzenliGiderler(o){
+    const r = (o && o.giderler || []).filter(x => x && sayiMi(x.gun));
+    if(!r.length) return '';
+    const bugun = o.bugun || 1;
+    const kalan = x => x.gun >= bugun ? x.gun - bugun : null;
+    const yakin = r.filter(x => kalan(x) != null).sort((a, b) => a.gun - b.gun)[0];
+    const top = r.reduce((a, x) => a + (sayiMi(x.tutar) ? x.tutar : 0), 0);
+    return kok('087', 'w19', r.slice().sort((a, b) => a.gun - b.gun).map(x => '<div class="r' + (x === yakin ? ' on' : '') + '"><span class="tr2">' + x.gun + '</span><b>'
+      + kac(x.ad) + (x === yakin ? '<small>' + (kalan(x) === 0 ? 'BUGÜN' : kalan(x) + ' GÜN SONRA') + '</small>' : '') + '</b><em>' + (sayiMi(x.tutar) ? sayi(x.tutar) + ' ₺' : '—') + '</em></div>').join('')
+      + '<div class="alt"><span class="cap">AYLIK TOPLAM</span><b class="mono">' + sayi(top) + ' ₺</b></div>');
+  }
+
+  /* 088 ÖLÇÜM HATIRLATICISI — saatli hatırlatma; bugün ölçüldüyse saati
+     yazar. Ölçülmezse boş kalır: tahmin edilmez. */
+  function olcumHatirlatici(o){
+    if(!o) return '';
+    return kok('088', 'w20', '<div class="u"><span class="ik2">' + ikon('zil') + '</span><div><b>' + kac(o.ad || 'Sabah tartısı') + '</b><span>'
+      + kac(o.saatler && o.saatler.length ? 'her gün · ' + o.saatler.join(', ') : 'hatırlatma kurulmadı') + '</span></div>'
+      + '<button type="button" class="an2' + (o.acik ? ' on' : '') + '" role="switch" aria-checked="' + (o.acik ? 'true' : 'false') + '" data-act="' + kac(o.act) + '"'
+      + nitelik(o.data) + ' aria-label="' + kac((o.ad || 'Sabah tartısı') + ' hatırlatması') + '"></button></div>'
+      + '<div class="sn2">' + (o.olculdu ? ikon('tik') + kac(o.olculdu) : kac(o.bekliyor || 'Bugün henüz ölçülmedi')) + '</div>'
+      + '<span class="cap">ÖLÇÜLMEZSE BOŞ KALIR · TAHMİN EDİLMEZ</span>', { ek:'kt' });
+  }
+
   L.VITRIN = {
     kac, sayi, isaretli, dkMetni, et, ikon, tik, hl, fk, kok, dugme, renk, KES,
     geriSayim, notrSerit, yanlisKarti, denemeKarnesi, hizSeridi, denemeKarsilastirma,
@@ -12834,6 +13195,10 @@ window.LIFEOS = window.LIFEOS || {};
     tekSatirSoru, yanlisNedenleri, denemeTakvimi, soruEkrani, tekrarPaketi, blokBitis,
     dersDengesi, denemeGirisi, konuTablosu, hedefAyari, tekrarTakvimi, hedefeKalan,
     dersIsaretleri,
+    toparlanmaHalkasi, uykuBandi, hamOrtalama, referansBandi, tabak, tekDokunus, enerjiOlcegi,
+    setKutucuklari, haftaHalkalari, tusTakimi, sonrakiKontrol, harcamaSeritleri, ogunCizelgesi,
+    yogunlukBolgeleri, harcamaTakvimi, uykuDuzeni, tahlilKarsilastirma, ogunSablonlari,
+    antrenmanHaftasi, duzenliGiderler, olcumHatirlatici,
   };
 })();
 
@@ -39538,6 +39903,9 @@ SP.Hatirlat = (function(){
     ilac:{ ad:'İlaç / takviye', eylem:'Aldım' },
     su:{ ad:'Su', eylem:'İçtim', metin:'Su' },
     hareket:{ ad:'Hareket', eylem:'Yaptım', metin:'Hareket molası' },
+    /* 088 ÖLÇÜM HATIRLATICISI: sabah tartısı. «Ölçtüm» bir işarettir;
+       tartının kendisi ölçüm formundan girilir, işaret kilo yazmaz. */
+    olcum:{ ad:'Sabah ölçümü', eylem:'Ölçtüm', metin:'Sabah tartısı' },
   };
 
   function bos(){ return { liste:[], yapildi:{}, bildirim:false }; }
@@ -42041,7 +42409,7 @@ SP.HatirlatUI = (function(){
   function sayfa(){
     const d = H().durum();
     const ilaclar = SP.Meds.activeList();
-    const secenek = [{ value:'su', label:'Su' }, { value:'hareket', label:'Hareket molası' }]
+    const secenek = [{ value:'su', label:'Su' }, { value:'hareket', label:'Hareket molası' }, { value:'olcum', label:'Sabah tartısı' }]
       .concat(ilaclar.map(m => ({ value:'ilac:' + m.id, label:'İlaç / takviye — ' + (m.name || SP.Meds.kindOf(m).name) })));
     const deger = taslak.tur === 'ilac' ? 'ilac:' + taslak.medId : taslak.tur;
     const onceki = d.liste.find(h => h.tur === taslak.tur && (taslak.tur !== 'ilac' || h.medId === taslak.medId));
@@ -42056,7 +42424,7 @@ SP.HatirlatUI = (function(){
           input:K.Select({ id:'ht-tur', value:deger, change:'ht-tur', options:secenek }) }),
         K.Field({ label:'Saatler', hint:'virgülle ayır — örn. 08:00, 21:00',
           input:K.Input({ id:'ht-saat', value:onceki ? onceki.saatler.join(', ') : '',
-            placeholder:taslak.tur === 'su' ? '10:00, 13:00, 16:00' : '08:00' }) }),
+            placeholder:taslak.tur === 'su' ? '10:00, 13:00, 16:00' : taslak.tur === 'olcum' ? '07:30' : '08:00' }) }),
         html`<div id="ht-hata" class="small" role="alert"></div>`,
         when(!ilaclar.length, () => html`<p class="tiny dim">İlaç hatırlatması için önce
           Testler › İlaç sekmesinden kullandığın şeyi kaydet.</p>`),
@@ -42079,7 +42447,9 @@ SP.HatirlatUI = (function(){
 
   const handle = {
     async 'ht-ac'(el){
-      taslak = el && el.dataset && el.dataset.med ? { tur:'ilac', medId:el.dataset.med } : { tur:'su', medId:null };
+      const tur = el && el.dataset && el.dataset.tur;
+      taslak = el && el.dataset && el.dataset.med ? { tur:'ilac', medId:el.dataset.med }
+        : { tur:tur && H().TUR[tur] ? tur : 'su', medId:null };
       sayfa();
     },
     async 'ht-kaydet'(){
@@ -42954,16 +43324,93 @@ SP.Screens.today = (function(){
         <p class="tiny dim mt-8">Ev ölçüsü «tahmin», tartılmış gram «ölçüldü» olarak yazılır.</p>` });
   }
 
+  /* ---------- D · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const vkutu = (ad, yuva, ic, o) => ic ? K.Kutu(Object.assign({ ad, yuva, class:'vkutu', govde:raw(ic) }, o || {})) : '';
+  const GUN_AD = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  const gunAd = iso => GUN_AD[(new Date(iso + 'T12:00:00').getDay() + 6) % 7];
+  const sonGunler = n => Array.from({ length:n }, (_, i) => U.iso(U.addDays(U.today(), i - n + 1)));
+
+  /* 070 HAM + ORTALAMA: son 14 günün tartısı; eksik gün ortalamaya girmez. */
+  function KiloKutusu(){
+    if(!VT()) return '';
+    const noktalar = sonGunler(14).map(t => ({ tarih:t, deger:S.vitals[t] && S.vitals[t].weight != null ? Number(S.vitals[t].weight) : null }));
+    return vkutu('Kilo', 'ölçüldü', VT().hamOrtalama({ noktalar, birim:'kg' }));
+  }
+
+  /* 069 UYKU BANDI: son gecenin süresi ve yedi gecenin dokusu. */
+  function UykuKutusu(){
+    if(!VT()) return '';
+    const g = sonGunler(7).map(t => ({ ad:gunAd(t), saat:S.vitals[t] && S.vitals[t].sleep != null ? Number(S.vitals[t].sleep) : null }));
+    return vkutu('Uyku', 'ölçüldü', VT().uykuBandi({ geceler:g, sonAd:g[g.length - 1].saat != null ? 'bu gece' : 'son gece' }));
+  }
+
+  /* 073 TEK DOKUNUŞ: su bardağı (250 ml). Asgari günün eşiği 2.000 ml =
+     8 bardak (core/calc.js). Küçük aksiyon: sormadan yazar, «Geri al». */
+  const BARDAK_ML = 250, SU_ESIK = 2000;
+  function SuKutusu(){
+    if(!VT()) return '';
+    const v = M.vitalsOf(U.todayISO());
+    const ml = v && v.water != null ? Number(v.water) : null;
+    return vkutu('Su', ml == null ? 'girilmedi' : U.fmtNum(ml) + ' ml', VT().tekDokunus({ hedef:SU_ESIK / BARDAK_ML,
+      adet:ml == null ? null : Math.floor(ml / BARDAK_ML), act:'su-ekle', ad:'Bir bardak su (250 ml)',
+      metin:ml == null ? null : Math.floor(ml / BARDAK_ML) + ' / ' + (SU_ESIK / BARDAK_ML) + ' bardak · ' + U.fmtNum(ml) + ' ml' }));
+  }
+
+  /* 074 ENERJİ ÖLÇEĞİ: «Bugün nasıl hissediyorsun?» — günün hissi, beyan. */
+  function EnerjiKutusu(){
+    if(!VT()) return '';
+    const v = M.vitalsOf(shownDate());
+    return vkutu('Günün hissi', v && v.soreness != null ? 'beyan' : 'girilmedi', VT().enerjiOlcegi({ act:'set-soreness',
+      deger:v && v.soreness != null ? Number(v.soreness) : null, soru:'Bugün nasıl hissediyorsun?',
+      adlar:SORENESS.map(x => x.label.replace(/^\d · /, '')), alt:'bitkin', ust:'zinde' }));
+  }
+
+  /* 088 ÖLÇÜM HATIRLATICISI: sabah tartısı hatırlatması (core/hatirlat.js
+     «olcum» türü) ve bugünün tartı saati (kayıt anı; tahmin edilmez). */
+  function TartiHatirlatici(){
+    if(!VT() || !SP.Hatirlat) return '';
+    const h = (SP.Hatirlat.durum().liste || []).find(x => x.tur === 'olcum');
+    const v = M.vitalsOf(U.todayISO());
+    const at = v && v.weight != null && v.weightAt ? new Date(v.weightAt) : null;
+    return VT().olcumHatirlatici({ ad:'Sabah tartısı', saatler:h ? h.saatler : [], acik:!!h, act:'ht-ac', data:{ 'data-tur':'olcum' },
+      olculdu:at ? 'Bugün ' + U.pad2(at.getHours()) + ':' + U.pad2(at.getMinutes()) + '’te ölçüldü'
+        : (v && v.weight != null ? 'Bugün ölçüldü (saati kayıtlı değil)' : null) });
+  }
+
+  /* 077 ÖLÇÜM TUŞ TAKIMI: büyük rakam, dünkü değer yanında. ✓ ölçüm
+     formunun kaydına gider (018 şüpheli giriş dahil). */
+  let tusTampon = '';
+  function tusHtml(){
+    if(!VT()) return '';
+    const d = shownDate();
+    const once = Object.keys(S.vitals || {}).filter(t => t < d && S.vitals[t].weight != null).sort().reverse()[0];
+    const v = M.vitalsOf(d);
+    const metin = tusTampon || (v && v.weight != null ? String(v.weight).replace('.', ',') : '');
+    return VT().tusTakimi({ metin, birim:'kg', dun:once ? Number(S.vitals[once].weight) : null,
+      deger:metin ? Number(metin.replace(',', '.')) : null, act:'tus', kaydet:'tus-kaydet' });
+  }
+  function tusEntry(){
+    const ic = tusHtml();
+    if(!ic) return null;
+    return K.Entry({ label:'Tartı', meta:'tuş takımı', note:'Büyük rakam, sabit birim; ✓ ölçüm formuyla aynı kayda gider.',
+      body:html`<div id="tus-yuva">${raw(ic)}</div>` });
+  }
+
   function ToparlanmaKutusu(){
     const r = SP.Move.readiness(shownDate());
     if(!r.ok) return K.Kutu({ ad:'Toparlanma', yuva:'ölçüm bekliyor',
       govde:html`<p class="small muted">${r.note || 'Bugünün ölçümü girilmedi.'}</p>` });
+    /* 068 TOPARLANMA HALKASI (vitrin): dilim kaynağın ağırlığı, etiket
+       kaynağın kesinliği; girilmemiş kaynak halkada boş. */
+    const halka = VT() ? VT().toparlanmaHalkasi({ deger:r.score, bant:r.band.label,
+      dilimler:r.parts.map(p => ({ ad:p.label, agirlik:p.weight, kesinlik:p.score == null ? 'missing' : 'measured' })) }) : '';
     return K.Kutu({ ad:'Toparlanma', yuva:r.band.label,
-      govde:html`<div class="row wrap" style="gap:18px">
+      govde:html`${halka ? html`${raw(halka)}<p class="small mt-10">${r.band.order}</p>` : html`<div class="row wrap" style="gap:18px">
           ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:104,
             bands:SP.READINESS_BANDS.map(b => b.min).filter(x => x > 0) }))}
           <p class="small grow minw0">${r.band.order}</p>
-        </div>
+        </div>`}
         ${when(r.missing.length, () => html`<p class="tiny dim mt-8">Girilmeyen: ${r.missing.join(', ')}
           — ağırlığı kalanlara dağıtıldı.</p>`)}` });
   }
@@ -43022,6 +43469,8 @@ SP.Screens.today = (function(){
           ${when(vakti, () => K.Ledger([vakti]))}
           ${when(soru, () => K.Ledger([soru]))}
           ${OlcumKutusu()}
+          ${EnerjiKutusu()}
+          ${SuKutusu()}
           ${OgunKutusu()}
         </section>
       </div>
@@ -43030,6 +43479,9 @@ SP.Screens.today = (function(){
           ${ToparlanmaKutusu()}
           ${AsgariKutusu()}
           ${BeslenmeKutusu()}
+          ${KiloKutusu()}
+          ${UykuKutusu()}
+          ${raw(TartiHatirlatici())}
           ${SonOlcumlerKutusu()}
         </section>
         ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
@@ -43044,7 +43496,7 @@ SP.Screens.today = (function(){
      formu burada bütün alanlarıyla durur. */
   async function renderAyrinti(){
     const banners = uyarilar().slice(1).map(u => u.kart);
-    const giris = K.Ledger([dunkuEntry(), formEntry(), symptomEntry(), statusEntry(), whyEntry()].filter(Boolean));
+    const giris = K.Ledger([dunkuEntry(), formEntry(), tusEntry(), symptomEntry(), statusEntry(), whyEntry()].filter(Boolean));
     const ozet = K.Ledger([readinessEntry(), nutritionEntry(), minimumEntry(),
       SP.HatirlatUI ? SP.HatirlatUI.ozetEntry() : null, officeEntry(), moneyEntry()].filter(Boolean));
     const gecmis = K.Ledger([historyEntry(), baselineEntry()]);
@@ -43261,6 +43713,33 @@ SP.Screens.today = (function(){
       S.ui.mealDate = el.dataset.date === U.todayISO() ? null : el.dataset.date;
       SP.App.render();
     },
+    async 'su-ekle'(){
+      const d = U.todayISO();
+      const v = M.vitalsOf(d);
+      const once = v && v.water != null ? Number(v.water) : null;
+      const sonra = (once || 0) + BARDAK_ML;
+      await M.saveVitals(d, { water:sonra });
+      SP.App.render();
+      UI.toast('Su eklendi · ' + Math.floor(sonra / BARDAK_ML) + ' / ' + (SU_ESIK / BARDAK_ML) + ' bardak',
+        { undo:async () => { await M.saveVitals(d, { water:once }); SP.App.render(); } });
+    },
+    async tus(el){
+      const k = el.dataset.k;
+      if(k === '⌫') tusTampon = tusTampon.slice(0, -1);
+      else if(k === ','){ if(tusTampon.indexOf(',') < 0) tusTampon = (tusTampon || '0') + ','; }
+      else if(tusTampon.replace(',', '').length < 5) tusTampon += k;
+      const y = document.getElementById('tus-yuva');
+      if(y) y.innerHTML = tusHtml(); else SP.App.render();
+    },
+    async 'tus-kaydet'(){
+      const n = Number(String(tusTampon).replace(',', '.'));
+      if(!tusTampon || !isFinite(n)){ UI.toast('Önce değeri yaz.'); return; }
+      const g = document.getElementById('v-weight');
+      if(g){ g.value = String(n); await handle['save-vitals'](); return; }
+      await M.saveVitals(shownDate(), { weight:n, weightAt:shownDate() === U.todayISO() ? new Date().toISOString() : undefined });
+      tusTampon = '';
+      SP.App.render();
+    },
     async 'set-soreness'(el){
       await M.saveVitals(shownDate(), { soreness:Number(el.dataset.value) });
       SP.App.render();
@@ -43293,6 +43772,10 @@ SP.Screens.today = (function(){
       supheGecti = false; supheAlan = null;
       const note = document.getElementById('v-note');
       if(note) patch.note = note.value.trim();
+      /* 088: tartının KAYIT ANI (yalnız bugün girilen ve değişen tartı). */
+      const eski = M.vitalsOf(shownDate());
+      if(patch.weight != null && shownDate() === U.todayISO() && (!eski || eski.weight !== patch.weight)) patch.weightAt = new Date().toISOString();
+      tusTampon = '';
       await M.saveVitals(shownDate(), patch);
       const flags = M.openFlags().filter(f => !f.ack);
       UI.toast(flags.length ? 'Kaydedildi — ' + flags.length + ' kırmızı bayrak açık' : 'Kaydedildi');
@@ -43545,6 +44028,49 @@ SP.Screens.labs = (function(){
         || a.marker.name.localeCompare(b.marker.name, 'tr'));
   }
 
+  /* ---------- D · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const refDizi = r => r && Array.isArray(r.ref) && r.ref.length === 2 ? r.ref : null;
+
+  /* 071 REFERANS BANDI: son değer laboratuvar aralığında bir nokta; önce
+     aralık dışı olanlar. Yalnız işaretler; yorum ve teşhis yok. */
+  function referansEntry(rows){
+    if(!VT()) return null;
+    const satirlar = rows.filter(r => refDizi(r.ref)).slice(0, 6)
+      .map(r => ({ ad:r.marker.name, deger:Number(r.value), ref:refDizi(r.ref), birim:r.marker.unit }));
+    const ic = VT().referansBandi({ satirlar });
+    return ic ? K.Entry({ label:'Referans bandı', meta:satirlar.length + ' ölçüm',
+      note:'Nokta son değer, bant laboratuvarın aralığı. Aralık dışı yalnız işaretlenir.', body:raw(ic) }) : null;
+  }
+
+  /* 078 SONRAKİ KONTROL: panelin en yeni ölçümü + 180 gün (Bio.overdue ile
+     aynı kural). Hatırlatır, yorumlamaz. */
+  const PANEL_GUN = 180;
+  function sonrakiKontrolEntry(){
+    if(!VT()) return null;
+    const bugun = U.todayISO();
+    const adaylar = SP.PANELS.filter(p => p.id !== 'vital' && p.id !== 'body').map(p => {
+      const t = SP.BIOMARKERS.filter(b => b.panel === p.id).map(b => M.latestOf(b.id)).filter(Boolean).map(x => x.date).sort().pop();
+      return t ? { panel:p, tarih:U.iso(U.addDays(new Date(t + 'T12:00:00'), PANEL_GUN)) } : null;
+    }).filter(Boolean).sort((a, b) => a.tarih.localeCompare(b.tarih));
+    const x = adaylar[0];
+    if(!x) return null;
+    const g = U.diffDays(bugun, x.tarih);
+    const ne = g < 0 ? (-g) + ' gün gecikti · hatırlatma' : g === 0 ? 'bugün · hatırlatma'
+      : g < 14 ? g + ' gün sonra · hatırlatma' : Math.round(g / 7) + ' hafta sonra · hatırlatma';
+    return K.Entry({ label:'Sonraki kontrol', meta:x.panel.name,
+      body:raw(VT().sonrakiKontrol({ tarih:x.tarih, ad:x.panel.name, ne })) });
+  }
+
+  /* 084 TAHLİL KARŞILAŞTIRMASI: iki oturum yan yana, aralıkla; aralık
+     dışı yalnız çerçeve. */
+  function yanYanaEntry(recA, recB, rows){
+    if(!VT()) return null;
+    const ic = VT().tahlilKarsilastirma({ onceAd:U.fmtShort(recA.date), sonraAd:U.fmtShort(recB.date),
+      satirlar:rows.slice(0, 10).map(r => ({ ad:r.marker.name, once:r.from, sonra:r.to, ref:refDizi(SP.Bio.refFor(r.marker.id)) })) });
+    return ic ? K.Entry({ label:'Yan yana', meta:Math.min(10, rows.length) + ' ölçüm', note:'Çerçeve aralık dışını gösterir; yorum yapılmaz.', body:raw(ic) }) : null;
+  }
+
   function resultsView(){
     const rows = resultRows();
     /* Sabitlenenler listenin BAŞINDA durur. 58 ölçümde her seferinde
@@ -43621,6 +44147,9 @@ SP.Screens.labs = (function(){
               </button>`;
           })}</div>`)}`,
       }),
+
+      referansEntry(rows),
+      sonrakiKontrolEntry(),
 
       /* BİRLİKTE OKUMA. Tek ölçüm yanıltır, örüntü yanıltmaz. Bu blok
          hiçbir yeni sayı üretmez: var olan değerleri yan yana koyup ne
@@ -44486,6 +45015,8 @@ SP.Screens.labs = (function(){
           })}</div>`)}`,
       }),
 
+      yanYanaEntry(recA, recB, rows),
+
       K.Entry({
         label:'Nasıl okunur', meta:'eşik',
         note:'Kendi ölçümlerinin saçılması eşiktir.',
@@ -45167,6 +45698,65 @@ SP.Screens.meals = (function(){
     });
   }
 
+  /* ---------- D · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const vkutu = (ad, yuva, ic) => ic ? K.Kutu({ ad, yuva, class:'vkutu', govde:raw(ic) }) : '';
+
+  /* 072 TABAK: bölmeler hedefin enerji payı; ortada proteinden kalan gram.
+     Öğün girilmemişse kalan «—» (yenmedi değil, girilmedi). */
+  function tabakKutusu(){
+    if(!VT()) return '';
+    const t = SP.Nutri.targets();
+    if(!t.ok) return '';
+    const tot = SP.Nutri.dayTotals(shownDate());
+    const k = (hedef, yenen) => tot.empty ? null : hedef - yenen;
+    return vkutu('Tabak', tot.empty ? 'girilmedi' : 'kalan', VT().tabak({ bolmeler:[
+      { ad:'Protein', pay:t.protein.min * 4, kalan:k(t.protein.min, tot.protein) },
+      { ad:'Karbonhidrat', pay:t.carb.min * 4, kalan:k(t.carb.min, tot.carb) },
+      { ad:'Yağ', pay:t.fat.min * 9, kalan:k(t.fat.min, tot.fat) } ] }));
+  }
+
+  /* 080 ÖĞÜN ÇİZELGESİ: öğünün girildiği saat (kayıt anı). */
+  function cizelgeKutusu(){
+    if(!VT()) return '';
+    const d = shownDate();
+    const og = M.mealsOf(d).filter(m => m.at && U.iso(new Date(m.at)) === d).map(m => {
+      const t = new Date(m.at);
+      const sl = SP.MEAL_SLOTS.find(x => x.id === m.slot);
+      return { saat:t.getHours() + t.getMinutes() / 60, ad:(sl ? sl.label : m.slot) + ' · ' + U.pad2(t.getHours()) + ':' + U.pad2(t.getMinutes()),
+        kucuk:/^ara/.test(m.slot) };
+    });
+    const n = new Date();
+    return vkutu('Öğün çizelgesi', 'girildiği saat', VT().ogunCizelgesi({ ogunler:og,
+      simdi:d === U.todayISO() ? n.getHours() + n.getMinutes() / 60 : null }));
+  }
+
+  /* 085 ÖĞÜN ŞABLONLARI: son 30 günde en az iki kez aynı içerikle girilen
+     öğün tek dokunuşla eklenir (küçük aksiyon, «Geri al»). */
+  function sablonlar(){
+    const say = {};
+    for(let i = 0; i < 30; i++){
+      const d = U.iso(U.addDays(U.today(), -i));
+      M.mealsOf(d).forEach(m => {
+        const ids = (m.items || []).map(x => x.foodId).filter(id => SP.FOOD_BY_ID[id]);
+        if(!ids.length) return;
+        const anahtar = ids.slice().sort().join('+');
+        const x = say[anahtar] || (say[anahtar] = { anahtar, n:0, ornek:{ date:d, id:m.id }, slot:m.slot, ids });
+        x.n++;
+      });
+    }
+    return Object.keys(say).map(k => say[k]).filter(x => x.n >= 2).sort((a, b) => b.n - a.n).slice(0, 3);
+  }
+  function sablonKutusu(){
+    if(!VT()) return '';
+    const bugun = M.mealsOf(shownDate()).map(m => (m.items || []).map(x => x.foodId).sort().join('+'));
+    return vkutu('Sık öğünler', 'tek dokunuş', VT().ogunSablonlari({ act:'sablon-ekle', sablonlar:sablonlar().map(x => {
+      const sl = SP.MEAL_SLOTS.find(y => y.id === x.slot);
+      return { ad:sl ? sl.label : x.slot, icerik:x.ids.map(id => SP.FOOD_BY_ID[id].name.toLocaleLowerCase('tr-TR')).join(' · '),
+        on:bugun.indexOf(x.anahtar) >= 0, data:{ 'data-date':x.ornek.date, 'data-id':x.ornek.id } };
+    }) }));
+  }
+
   /* ---------------------------------------------------------- hedefler */
 
   function targetCard(){
@@ -45594,7 +46184,7 @@ SP.Screens.meals = (function(){
      günün öğün sayısı çubukta rozet. Bir bölüm çizilemezse yalnız o bölüm
      sakin bir notla düşer. */
   const BODIES = {
-    gunluk:() => html`${K.Ledger(() => [quickEntry(), dayCard(), targetCard()])}
+    gunluk:() => html`${K.Ledger(() => [quickEntry(), sablonKutusu(), dayCard(), cizelgeKutusu(), targetCard(), tabakKutusu()])}
       <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`,
     oneri:() => html`${K.Ledger(() => [energyCard(), labLinkCard(), suggestCard()])}
       <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`,
@@ -45695,6 +46285,16 @@ SP.Screens.meals = (function(){
       el.value = '';
       UI.toast(parsed.note);
       SP.App.render();
+    },
+    async 'sablon-ekle'(el){
+      const kaynak = M.mealsOf(el.dataset.date).find(m => m.id === el.dataset.id);
+      if(!kaynak) return;
+      const yeni = M.newMeal(guessSlot());
+      yeni.items = (kaynak.items || []).map(x => Object.assign({}, x));
+      const d = shownDate();
+      await M.addMeal(d, yeni);
+      SP.App.render();
+      UI.toast('Öğün eklendi', { undo:async () => { await M.deleteMeal(d, yeni.id); SP.App.render(); } });
     },
     async 'del-meal'(el){
       await M.deleteMeal(shownDate(), el.dataset.id);
@@ -46588,6 +47188,51 @@ SP.Screens.move = (function(){
     });
   }
 
+  /* ---------- D · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const vkutu = (ad, yuva, ic) => ic ? K.Kutu({ ad, yuva, class:'vkutu', govde:raw(ic) }) : '';
+  const GUN_AD = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  function haftaGunleri(){
+    const b = U.today(), i = (b.getDay() + 6) % 7;
+    return Array.from({ length:7 }, (_, k) => U.iso(U.addDays(b, k - i)));
+  }
+  const exAd = id => { const e = (SP.EXERCISES || []).find(x => x.id === id); return e ? e.name : id; };
+
+  /* 075 SET KUTUCUKLARI: bugünün son seansının hareketleri; biten set
+     dolar (dokunuş = bir set bitti, dolu kutuya dokunmak geri alır). */
+  function setKutusu(){
+    if(!VT()) return '';
+    const w = M.workoutsOf(U.todayISO()).slice(-1)[0];
+    if(!w || !(w.items || []).length) return '';
+    return vkutu('Setler · ' + w.name, 'ölçüldü', VT().setKutucuklari({ act:'set-bitti', data:{ 'data-w':w.id },
+      hareketler:w.items.map((it, i) => ({ i, ad:exAd(it.exId), set:Number(it.sets) || 0, biten:Number(it.setsDone) || 0,
+        etiket:it.reps ? String(it.reps) : it.minutes ? it.minutes + 'dk' : null })) }));
+  }
+
+  /* 076 HAFTALIK HAREKET HALKALARI: günün hareket dakikası ÷ asgari gün
+     dakikası. O gün hiçbir kaydı olmayan geçmiş gün «veri yok». */
+  function halkaKutusu(){
+    if(!VT()) return '';
+    const bugun = U.todayISO(), esik = SP.LOAD_RULES.minDay.minutes;
+    const gunler = haftaGunleri().map((d, k) => {
+      const dk = U.sum(M.workoutsOf(d).map(w => w.minutes || 0));
+      const kayit = M.workoutsOf(d).length || S.vitals[d] || M.mealsOf(d).length;
+      return { ad:GUN_AD[k], bugun:d === bugun, gelecek:d > bugun, yok:d < bugun && !kayit, p:esik ? 100 * dk / esik : null };
+    });
+    return vkutu('Bu hafta hareket', 'asgari gün ' + esik + ' dk', VT().haftaHalkalari({ gunler }));
+  }
+
+  /* 086 ANTRENMAN HAFTASI: yapılan seans dolu; kaydı olmayan geçmiş gün
+     «kayıt yok» (dinlenme sayılmaz); plan tutulmadığı için gelecek boş. */
+  function haftaKutusu(){
+    if(!VT()) return '';
+    const bugun = U.todayISO();
+    return vkutu('Antrenman haftası', 'ölçüldü', VT().antrenmanHaftasi({ gunler:haftaGunleri().map((d, k) => {
+      const w = M.workoutsOf(d);
+      return { ad:GUN_AD[k], bugun:d === bugun, gecti:d < bugun, yapilan:w.length ? w.map(x => x.name).join(' + ') : null };
+    }) }));
+  }
+
   /* --------------------------------------------------------------- ekran */
 
   /* Sekme yok (EKIP-PLANI §1.2): Bugün, dört alan ve İlerleme alt alta;
@@ -46595,7 +47240,7 @@ SP.Screens.move = (function(){
      dengesi» eskiden üç sekmede ayrı ayrı çiziliyordu; alt alta durunca
      aynı kart üç kez görünürdü — yalnız Kuvvet'te, kalıpların yanında. */
   const BODIES = {
-    bugun:() => html`${K.Ledger([orderEntry(), pickSessionEntry(), todaySessionsEntry()])}
+    bugun:() => html`${K.Ledger([orderEntry(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), halkaKutusu(), haftaKutusu()])}
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
     ilerleme:() => html`${K.Ledger([
         K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
@@ -46639,6 +47284,15 @@ SP.Screens.move = (function(){
 
   const handle = {
     async 'move-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'set-bitti'(el){
+      const w = S.workouts.find(x => x.id === el.dataset.w);
+      const it = w && w.items[Number(el.dataset.i)];
+      if(!it) return;
+      const n = Number(el.dataset.set);
+      it.setsDone = (Number(it.setsDone) || 0) >= n ? n - 1 : n;
+      await M.saveWorkout(w);
+      SP.App.render();
+    },
     async 'pick-pattern-tab'(el){ S.ui.movePattern = el.dataset.tab; SP.App.render(); },
     async 'pick-pattern'(el){
       S.ui.moveTab = 'kuvvet';
@@ -47025,6 +47679,17 @@ SP.Screens.basket = (function(){
      toplanır (SP.Money.budget). Fiyatı bilinmeyen kalem sıfır sayılmaz —
      "veri yok" olarak durur ve toplamın dışında kalır. */
 
+  /* 079 HARCAMA ŞERİTLERİ (vitrin): talep tablosunun kalemleri aylık
+     sınıra karşı; çizgi = sınır, aşım yalnız çizginin rengiyle. Tutarı
+     bilinmeyen kalem «—» (toplama da girmez). Sınır yoksa kart yok. */
+  function seritKarti(b){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || b.limit == null) return '';
+    const ic = V.harcamaSeritleri({ limit:b.limit, satirlar:b.rows.map(r => ({ ad:r.label, tutar:r.monthly })),
+      not:'Çizgi = aylık sınır · aşım yalnız çizgide' });
+    return ic ? K.Kutu({ ad:'Harcama şeritleri', yuva:'aylık', class:'vkutu', govde:raw(ic) }) : '';
+  }
+
   function budgetView(){
     const b = SP.Money.budget();
     const st = SP.Money.status();
@@ -47036,6 +47701,7 @@ SP.Screens.basket = (function(){
              yazilmaz (kullanici, 2026-09-25: «ne oldugu anlasilmiyor»). -->
         <div class="grid">
           <div class="span-7"><div class="stack">
+            ${seritKarti(b)}
             ${K.Card({
               title:'Talep tablosu', hint:'budget-rank',
               badge:K.Badge({ label:U.fmtNum(b.total) + ' TL / ay',

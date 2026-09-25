@@ -1153,3 +1153,40 @@
 /* Vitrin grafikleri 260 birimlik bir tuvale çizilir; geniş sütunda
    sonsuz büyümez (yazı da onunla büyüyordu). */
 .vk .y12, .vk .y09, .vk .y10, .vk .x18, .vk .y16, .vk .z07{ max-width:560px; }
+
+/* ---- D · SPİ vitrin kartlarının sistem hâlleri ---- */
+/* 069 veri yok gecesi kesik; 072 tabak bölmeleri veriden. */
+.vk .x32 .gc i.yok{ background:none; border:1.5px dashed var(--vk-ink4); }
+.vk .x34 .tb[style*="--tabak"]::before{ background:var(--tabak); }
+.vk .x34 .tb::after{ display:none; }
+/* 073 bardak dizisi tek düğme; hedef aşılırsa sarar. */
+.vk .x35 .bd{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:0 auto; padding:6px 8px; border-radius:10px; }
+.vk .x35 .sy{ text-align:center; margin-top:10px; font:400 11px var(--vk-mono); color:var(--vk-ink3); }
+/* 074 beş nokta gerçek düğme; dolu noktada yazı AA tonunda. */
+.vk .y17 .ol button{ width:30px; height:30px; border-radius:50%; border:1.5px solid var(--vk-l2); display:grid; place-items:center;
+  font:500 11px var(--vk-mono); color:var(--vk-ink3); }
+.vk .y17 .ol button.on{ width:44px; height:44px; background:var(--spi-ink, var(--spi)); color:var(--vk-on); border-color:transparent; font-size:15px; }
+/* 075 set kutucuğu düğme. */
+.vk .x36 .st{ flex-wrap:wrap; }
+.vk .x36 .st button{ width:34px; height:26px; border-radius:5px; border:1px solid var(--vk-l2); display:grid; place-items:center;
+  font:400 10px var(--vk-mono); color:var(--vk-ink3); }
+.vk .x36 .st button.d{ background:var(--spi-ink, var(--spi)); border-color:transparent; color:var(--vk-on); }
+.vk .x36 .r{ height:auto; min-height:36px; padding:4px 0; }
+/* 077 tuş takımı: sil tuşu var, ✓ tam genişlik. */
+.vk .x37 .tt button{ height:28px; border-radius:5px; background:var(--vk-s1); border:1px solid var(--vk-l1); display:grid; place-items:center;
+  font:400 11px var(--vk-mono); color:var(--vk-ink2); }
+.vk .x37 .tt button.on{ background:var(--spi-ink, var(--spi)); color:var(--vk-on); border-color:transparent; }
+.vk .x37 .tt .tt-kaydet{ grid-column:1 / -1; }
+.vk .x37{ grid-template-columns:1fr 132px; }
+/* 085 şablon satırı düğme. */
+.vk .w17 .ls2 button{ display:grid; grid-template-columns:60px 1fr 26px; gap:8px; align-items:center; min-height:36px; width:100%;
+  padding:0 6px 0 10px; border-radius:9px; background:var(--vk-s1); border:1px solid var(--vk-l1); text-align:left; }
+.vk .w17 .ls2 button.on{ border-color:color-mix(in oklab,var(--spi) 45%,transparent); }
+.vk .w17 .ls2 button.on em{ background:var(--spi-ink, var(--spi)); color:var(--vk-on); }
+/* 088 anahtar 24 px dokunma hedefi. */
+.vk .w20 .an2{ width:40px; height:24px; border-radius:12px; }
+.vk .w20 .an2::after{ width:20px; height:20px; }
+.vk .w20 .an2.on::after{ left:18px; }
+/* 078: vitrinin h5'i sayfanın başlık sırasını atlatıyordu (h2 → h5);
+   ad düz metindir, biçimi aynı. */
+.vk .y19 b.ad{ display:block; font-size:14px; font-weight:600; }

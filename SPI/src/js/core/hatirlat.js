@@ -29,6 +29,9 @@ SP.Hatirlat = (function(){
     ilac:{ ad:'İlaç / takviye', eylem:'Aldım' },
     su:{ ad:'Su', eylem:'İçtim', metin:'Su' },
     hareket:{ ad:'Hareket', eylem:'Yaptım', metin:'Hareket molası' },
+    /* 088 ÖLÇÜM HATIRLATICISI: sabah tartısı. «Ölçtüm» bir işarettir;
+       tartının kendisi ölçüm formundan girilir, işaret kilo yazmaz. */
+    olcum:{ ad:'Sabah ölçümü', eylem:'Ölçtüm', metin:'Sabah tartısı' },
   };
 
   function bos(){ return { liste:[], yapildi:{}, bildirim:false }; }

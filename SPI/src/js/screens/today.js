@@ -823,16 +823,93 @@ SP.Screens.today = (function(){
         <p class="tiny dim mt-8">Ev ölçüsü «tahmin», tartılmış gram «ölçüldü» olarak yazılır.</p>` });
   }
 
+  /* ---------- D · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const vkutu = (ad, yuva, ic, o) => ic ? K.Kutu(Object.assign({ ad, yuva, class:'vkutu', govde:raw(ic) }, o || {})) : '';
+  const GUN_AD = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  const gunAd = iso => GUN_AD[(new Date(iso + 'T12:00:00').getDay() + 6) % 7];
+  const sonGunler = n => Array.from({ length:n }, (_, i) => U.iso(U.addDays(U.today(), i - n + 1)));
+
+  /* 070 HAM + ORTALAMA: son 14 günün tartısı; eksik gün ortalamaya girmez. */
+  function KiloKutusu(){
+    if(!VT()) return '';
+    const noktalar = sonGunler(14).map(t => ({ tarih:t, deger:S.vitals[t] && S.vitals[t].weight != null ? Number(S.vitals[t].weight) : null }));
+    return vkutu('Kilo', 'ölçüldü', VT().hamOrtalama({ noktalar, birim:'kg' }));
+  }
+
+  /* 069 UYKU BANDI: son gecenin süresi ve yedi gecenin dokusu. */
+  function UykuKutusu(){
+    if(!VT()) return '';
+    const g = sonGunler(7).map(t => ({ ad:gunAd(t), saat:S.vitals[t] && S.vitals[t].sleep != null ? Number(S.vitals[t].sleep) : null }));
+    return vkutu('Uyku', 'ölçüldü', VT().uykuBandi({ geceler:g, sonAd:g[g.length - 1].saat != null ? 'bu gece' : 'son gece' }));
+  }
+
+  /* 073 TEK DOKUNUŞ: su bardağı (250 ml). Asgari günün eşiği 2.000 ml =
+     8 bardak (core/calc.js). Küçük aksiyon: sormadan yazar, «Geri al». */
+  const BARDAK_ML = 250, SU_ESIK = 2000;
+  function SuKutusu(){
+    if(!VT()) return '';
+    const v = M.vitalsOf(U.todayISO());
+    const ml = v && v.water != null ? Number(v.water) : null;
+    return vkutu('Su', ml == null ? 'girilmedi' : U.fmtNum(ml) + ' ml', VT().tekDokunus({ hedef:SU_ESIK / BARDAK_ML,
+      adet:ml == null ? null : Math.floor(ml / BARDAK_ML), act:'su-ekle', ad:'Bir bardak su (250 ml)',
+      metin:ml == null ? null : Math.floor(ml / BARDAK_ML) + ' / ' + (SU_ESIK / BARDAK_ML) + ' bardak · ' + U.fmtNum(ml) + ' ml' }));
+  }
+
+  /* 074 ENERJİ ÖLÇEĞİ: «Bugün nasıl hissediyorsun?» — günün hissi, beyan. */
+  function EnerjiKutusu(){
+    if(!VT()) return '';
+    const v = M.vitalsOf(shownDate());
+    return vkutu('Günün hissi', v && v.soreness != null ? 'beyan' : 'girilmedi', VT().enerjiOlcegi({ act:'set-soreness',
+      deger:v && v.soreness != null ? Number(v.soreness) : null, soru:'Bugün nasıl hissediyorsun?',
+      adlar:SORENESS.map(x => x.label.replace(/^\d · /, '')), alt:'bitkin', ust:'zinde' }));
+  }
+
+  /* 088 ÖLÇÜM HATIRLATICISI: sabah tartısı hatırlatması (core/hatirlat.js
+     «olcum» türü) ve bugünün tartı saati (kayıt anı; tahmin edilmez). */
+  function TartiHatirlatici(){
+    if(!VT() || !SP.Hatirlat) return '';
+    const h = (SP.Hatirlat.durum().liste || []).find(x => x.tur === 'olcum');
+    const v = M.vitalsOf(U.todayISO());
+    const at = v && v.weight != null && v.weightAt ? new Date(v.weightAt) : null;
+    return VT().olcumHatirlatici({ ad:'Sabah tartısı', saatler:h ? h.saatler : [], acik:!!h, act:'ht-ac', data:{ 'data-tur':'olcum' },
+      olculdu:at ? 'Bugün ' + U.pad2(at.getHours()) + ':' + U.pad2(at.getMinutes()) + '’te ölçüldü'
+        : (v && v.weight != null ? 'Bugün ölçüldü (saati kayıtlı değil)' : null) });
+  }
+
+  /* 077 ÖLÇÜM TUŞ TAKIMI: büyük rakam, dünkü değer yanında. ✓ ölçüm
+     formunun kaydına gider (018 şüpheli giriş dahil). */
+  let tusTampon = '';
+  function tusHtml(){
+    if(!VT()) return '';
+    const d = shownDate();
+    const once = Object.keys(S.vitals || {}).filter(t => t < d && S.vitals[t].weight != null).sort().reverse()[0];
+    const v = M.vitalsOf(d);
+    const metin = tusTampon || (v && v.weight != null ? String(v.weight).replace('.', ',') : '');
+    return VT().tusTakimi({ metin, birim:'kg', dun:once ? Number(S.vitals[once].weight) : null,
+      deger:metin ? Number(metin.replace(',', '.')) : null, act:'tus', kaydet:'tus-kaydet' });
+  }
+  function tusEntry(){
+    const ic = tusHtml();
+    if(!ic) return null;
+    return K.Entry({ label:'Tartı', meta:'tuş takımı', note:'Büyük rakam, sabit birim; ✓ ölçüm formuyla aynı kayda gider.',
+      body:html`<div id="tus-yuva">${raw(ic)}</div>` });
+  }
+
   function ToparlanmaKutusu(){
     const r = SP.Move.readiness(shownDate());
     if(!r.ok) return K.Kutu({ ad:'Toparlanma', yuva:'ölçüm bekliyor',
       govde:html`<p class="small muted">${r.note || 'Bugünün ölçümü girilmedi.'}</p>` });
+    /* 068 TOPARLANMA HALKASI (vitrin): dilim kaynağın ağırlığı, etiket
+       kaynağın kesinliği; girilmemiş kaynak halkada boş. */
+    const halka = VT() ? VT().toparlanmaHalkasi({ deger:r.score, bant:r.band.label,
+      dilimler:r.parts.map(p => ({ ad:p.label, agirlik:p.weight, kesinlik:p.score == null ? 'missing' : 'measured' })) }) : '';
     return K.Kutu({ ad:'Toparlanma', yuva:r.band.label,
-      govde:html`<div class="row wrap" style="gap:18px">
+      govde:html`${halka ? html`${raw(halka)}<p class="small mt-10">${r.band.order}</p>` : html`<div class="row wrap" style="gap:18px">
           ${raw(UI.gauge(r.score, { tone:r.band.tone, label:r.band.label, size:104,
             bands:SP.READINESS_BANDS.map(b => b.min).filter(x => x > 0) }))}
           <p class="small grow minw0">${r.band.order}</p>
-        </div>
+        </div>`}
         ${when(r.missing.length, () => html`<p class="tiny dim mt-8">Girilmeyen: ${r.missing.join(', ')}
           — ağırlığı kalanlara dağıtıldı.</p>`)}` });
   }
@@ -891,6 +968,8 @@ SP.Screens.today = (function(){
           ${when(vakti, () => K.Ledger([vakti]))}
           ${when(soru, () => K.Ledger([soru]))}
           ${OlcumKutusu()}
+          ${EnerjiKutusu()}
+          ${SuKutusu()}
           ${OgunKutusu()}
         </section>
       </div>
@@ -899,6 +978,9 @@ SP.Screens.today = (function(){
           ${ToparlanmaKutusu()}
           ${AsgariKutusu()}
           ${BeslenmeKutusu()}
+          ${KiloKutusu()}
+          ${UykuKutusu()}
+          ${raw(TartiHatirlatici())}
           ${SonOlcumlerKutusu()}
         </section>
         ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
@@ -913,7 +995,7 @@ SP.Screens.today = (function(){
      formu burada bütün alanlarıyla durur. */
   async function renderAyrinti(){
     const banners = uyarilar().slice(1).map(u => u.kart);
-    const giris = K.Ledger([dunkuEntry(), formEntry(), symptomEntry(), statusEntry(), whyEntry()].filter(Boolean));
+    const giris = K.Ledger([dunkuEntry(), formEntry(), tusEntry(), symptomEntry(), statusEntry(), whyEntry()].filter(Boolean));
     const ozet = K.Ledger([readinessEntry(), nutritionEntry(), minimumEntry(),
       SP.HatirlatUI ? SP.HatirlatUI.ozetEntry() : null, officeEntry(), moneyEntry()].filter(Boolean));
     const gecmis = K.Ledger([historyEntry(), baselineEntry()]);
@@ -1130,6 +1212,33 @@ SP.Screens.today = (function(){
       S.ui.mealDate = el.dataset.date === U.todayISO() ? null : el.dataset.date;
       SP.App.render();
     },
+    async 'su-ekle'(){
+      const d = U.todayISO();
+      const v = M.vitalsOf(d);
+      const once = v && v.water != null ? Number(v.water) : null;
+      const sonra = (once || 0) + BARDAK_ML;
+      await M.saveVitals(d, { water:sonra });
+      SP.App.render();
+      UI.toast('Su eklendi · ' + Math.floor(sonra / BARDAK_ML) + ' / ' + (SU_ESIK / BARDAK_ML) + ' bardak',
+        { undo:async () => { await M.saveVitals(d, { water:once }); SP.App.render(); } });
+    },
+    async tus(el){
+      const k = el.dataset.k;
+      if(k === '⌫') tusTampon = tusTampon.slice(0, -1);
+      else if(k === ','){ if(tusTampon.indexOf(',') < 0) tusTampon = (tusTampon || '0') + ','; }
+      else if(tusTampon.replace(',', '').length < 5) tusTampon += k;
+      const y = document.getElementById('tus-yuva');
+      if(y) y.innerHTML = tusHtml(); else SP.App.render();
+    },
+    async 'tus-kaydet'(){
+      const n = Number(String(tusTampon).replace(',', '.'));
+      if(!tusTampon || !isFinite(n)){ UI.toast('Önce değeri yaz.'); return; }
+      const g = document.getElementById('v-weight');
+      if(g){ g.value = String(n); await handle['save-vitals'](); return; }
+      await M.saveVitals(shownDate(), { weight:n, weightAt:shownDate() === U.todayISO() ? new Date().toISOString() : undefined });
+      tusTampon = '';
+      SP.App.render();
+    },
     async 'set-soreness'(el){
       await M.saveVitals(shownDate(), { soreness:Number(el.dataset.value) });
       SP.App.render();
@@ -1162,6 +1271,10 @@ SP.Screens.today = (function(){
       supheGecti = false; supheAlan = null;
       const note = document.getElementById('v-note');
       if(note) patch.note = note.value.trim();
+      /* 088: tartının KAYIT ANI (yalnız bugün girilen ve değişen tartı). */
+      const eski = M.vitalsOf(shownDate());
+      if(patch.weight != null && shownDate() === U.todayISO() && (!eski || eski.weight !== patch.weight)) patch.weightAt = new Date().toISOString();
+      tusTampon = '';
       await M.saveVitals(shownDate(), patch);
       const flags = M.openFlags().filter(f => !f.ack);
       UI.toast(flags.length ? 'Kaydedildi — ' + flags.length + ' kırmızı bayrak açık' : 'Kaydedildi');

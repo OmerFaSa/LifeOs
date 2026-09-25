@@ -277,4 +277,124 @@ describe('C · AYS kartları', () => {
   });
 });
 
+
+describe('D · SPİ kartları', () => {
+  it('oz-068 toparlanma halkası: tek sayı ortada, her kaynak kendi etiketiyle; girilmeyen kaynak veri yok', () => {
+    icinde(V().toparlanmaHalkasi({ deger:72, dilimler:[{ ad:'Uyku', agirlik:0.4, kesinlik:'measured' },
+      { ad:'HRV', agirlik:0.3, kesinlik:'missing' }, { ad:'Nabız', agirlik:0.3, kesinlik:'measured' }] }), k => {
+      expect(k.querySelector('text').textContent).toBe('72');
+      expect(k.querySelectorAll('circle').length).toBe(3);    // iz + iki ölçülen dilim
+      expect(k.querySelector('[data-kesinlik="missing"]')).toBeTruthy();
+    });
+    expect(V().toparlanmaHalkasi({ deger:null, dilimler:[] })).toBe('');
+  });
+  it('oz-069 uyku bandı saat uydurmaz; veri olmayan gece kesik', () => {
+    icinde(V().uykuBandi({ geceler:[{ ad:'Pzt', saat:null }, { ad:'Sal', saat:7 }] }), k => {
+      expect(k.querySelector('.bn i').style.width).toBe(Math.round(7 / 12 * 1000) / 10 + '%');
+      expect(k.querySelectorAll('.gc i.yok')).toHaveLength(1);
+      expect(/\d\d:\d\d/.test(k.textContent)).toBeFalsy();
+    });
+  });
+  it('oz-070 ham noktalar ve yedi günlük ortalama; eksik gün ne nokta ne ortalama', () => {
+    icinde(V().hamOrtalama({ birim:'kg', noktalar:[{ deger:71 }, { deger:null }, { deger:72 }, { deger:71.5 }] }), k => {
+      expect(k.querySelectorAll('circle')).toHaveLength(3);
+      expect(k.textContent).toContain('7 GÜN ORT. 71,5');
+    });
+    expect(V().hamOrtalama({ noktalar:[{ deger:71 }] })).toBe('');
+  });
+  it('oz-071 referans bandı: aralık dışı yalnız işaretlenir, yorum yok', () => {
+    icinde(V().referansBandi({ satirlar:[{ ad:'D vitamini', deger:18, ref:[30, 100] }, { ad:'B12', deger:450, ref:[200, 900] }] }), k => {
+      expect(k.querySelectorAll('.nk.dis')).toHaveLength(1);
+      expect(k.textContent).toContain('hekiminle konuş');
+    });
+  });
+  it('oz-072 tabak: kalan protein ortada; girilmemişse «—»', () => {
+    expect(V().tabak({ bolmeler:[{ ad:'Protein', pay:400, kalan:38 }, { ad:'Yağ', pay:500, kalan:20 }] })).toContain('<b>38</b>');
+    expect(V().tabak({ bolmeler:[{ ad:'Protein', pay:400, kalan:null }] })).toContain('<b>—</b>');
+  });
+  it('oz-073 tek dokunuş sayaç: bardaklar dolar; girilmemiş gün sıfır yazmaz', () => {
+    icinde(V().tekDokunus({ hedef:8, adet:5, act:'su-ekle' }), k => {
+      expect(k.querySelectorAll('path[fill="var(--spi)"]')).toHaveLength(5);
+      expect(k.querySelector('[data-act="su-ekle"]')).toBeTruthy();
+    });
+    expect(V().tekDokunus({ hedef:8, adet:null, act:'x' })).toContain('Girilmedi');
+  });
+  it('oz-074 enerji ölçeği beş nokta; seçilen işaretli ve beyan', () => {
+    icinde(V().enerjiOlcegi({ deger:4, act:'set-soreness' }), k => {
+      expect(k.querySelectorAll('.ol button')).toHaveLength(5);
+      expect(k.querySelector('.ol .on').textContent).toBe('4');
+      expect(k.textContent).toContain('BEYAN');
+    });
+  });
+  it('oz-075 set kutucukları: biten set dolu', () => {
+    icinde(V().setKutucuklari({ act:'set-bitti', hareketler:[{ i:0, ad:'Şınav', set:3, biten:2 }] }), k => {
+      expect(k.querySelectorAll('.st button')).toHaveLength(3);
+      expect(k.querySelectorAll('.st button.d')).toHaveLength(2);
+    });
+  });
+  it('oz-076 haftalık halkalar: verisi olmayan gün kesik boş halka', () => {
+    const g = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map((ad, i) => ({ ad, p:50, yok:i === 2, gelecek:i > 3, bugun:i === 3 }));
+    icinde(V().haftaHalkalari({ gunler:g }), k => {
+      expect(k.querySelectorAll('.hl.yok')).toHaveLength(1);
+      expect(k.textContent).toContain('ÇAR · VERİ YOK');
+    });
+  });
+  it('oz-077 tuş takımı: büyük rakam, dünkü değer ve fark', () => {
+    icinde(V().tusTakimi({ metin:'71,4', deger:71.4, dun:71.2, birim:'kg', act:'tus', kaydet:'tus-kaydet' }), k => {
+      expect(k.querySelector('b').textContent).toContain('71,4');
+      expect(k.textContent).toContain('dün 71,2 · fark +0,2');
+      expect(k.querySelector('[data-act="tus-kaydet"]')).toBeTruthy();
+    });
+  });
+  it('oz-078 sonraki kontrol hatırlatır, yorumlamaz', () => {
+    const h = V().sonrakiKontrol({ tarih:'2026-10-15', ad:'Kan tahlili', ne:'3 hafta sonra' });
+    expect(h).toContain('EKİ');
+    expect(h).toContain('SPİ yorumlamaz');
+  });
+  it('oz-079 harcama şeritleri: aşım yalnız çizgide; bilinmeyen tutar «—»', () => {
+    icinde(V().harcamaSeritleri({ limit:1000, satirlar:[{ ad:'Gıda', tutar:1300 }, { ad:'Ekipman', tutar:null }] }), k => {
+      expect(k.querySelectorAll('.r.as')).toHaveLength(1);
+      expect(k.querySelectorAll('.r')[1].textContent).toContain('—');
+    });
+  });
+  it('oz-080 öğün çizelgesi: öğün noktası ve yeme aralığı', () => {
+    icinde(V().ogunCizelgesi({ ogunler:[{ saat:8, ad:'Kahvaltı' }, { saat:20, ad:'Akşam' }] }), k => {
+      expect(k.querySelectorAll('.og')).toHaveLength(2);
+      expect(k.textContent).toContain('yeme aralığı 12 sa');
+    });
+  });
+  it('oz-081 oz-082 oz-083 oz-087 veri yoksa kart yok (bölge, harcama günü, yatış saati, düzenli gider)', () => {
+    expect(V().yogunlukBolgeleri({ bolgeler:[] })).toBe('');
+    expect(V().harcamaTakvimi({ gunler:[] })).toBe('');
+    expect(V().uykuDuzeni({ geceler:[{ yatis:23 }] })).toBe('');
+    expect(V().duzenliGiderler({ giderler:[] })).toBe('');
+    expect(V().yogunlukBolgeleri({ bolgeler:[{ ad:'Z1', dk:8 }, { ad:'Z2', dk:18 }] })).toContain('26 dk');
+    expect(V().duzenliGiderler({ bugun:24, giderler:[{ gun:1, ad:'Kira', tutar:100 }, { gun:28, ad:'Salon', tutar:50 }] })).toContain('4 GÜN SONRA');
+  });
+  it('oz-084 tahlil karşılaştırması: aralık dışı yalnız çerçeve; ölçülmeyen «—»', () => {
+    icinde(V().tahlilKarsilastirma({ onceAd:'Mar', sonraAd:'Eyl', satirlar:[{ ad:'D vitamini', once:18, sonra:null, ref:[30, 100] }] }), k => {
+      expect(k.querySelectorAll('.ds2')).toHaveLength(1);
+      expect(k.querySelector('em[title="ölçülmedi"]')).toBeTruthy();
+    });
+  });
+  it('oz-085 öğün şablonları tek dokunuş; bugün eklenen işaretli', () => {
+    icinde(V().ogunSablonlari({ act:'sablon-ekle', sablonlar:[{ ad:'Öğle', icerik:'tavuk · pilav', on:true }, { ad:'Ara', icerik:'yoğurt' }] }), k => {
+      expect(k.querySelectorAll('[data-act="sablon-ekle"]')).toHaveLength(2);
+      expect(k.querySelector('.on em').textContent).toBe('✓');
+    });
+  });
+  it('oz-086 antrenman haftası: kaydı olmayan geçmiş gün dinlenme sayılmaz', () => {
+    const g = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map((ad, i) => ({ ad, gecti:i < 3, yapilan:i === 0 ? 'Üst gövde' : null, bugun:i === 3 }));
+    icinde(V().antrenmanHaftasi({ gunler:g }), k => {
+      expect(k.querySelectorAll('i.d')).toHaveLength(1);
+      expect(k.querySelectorAll('i.bos')).toHaveLength(2);
+      expect(k.textContent.indexOf('Dinlen') < 0).toBeTruthy();
+    });
+  });
+  it('oz-088 ölçüm hatırlatıcısı: ölçülmezse boş kalır', () => {
+    expect(V().olcumHatirlatici({ saatler:['07:30'], acik:true, act:'ht-ac', olculdu:'Bugün 07:34’te ölçüldü' })).toContain('07:34');
+    expect(V().olcumHatirlatici({ saatler:[], acik:false, act:'ht-ac' })).toContain('Bugün henüz ölçülmedi');
+  });
+});
+
 })();

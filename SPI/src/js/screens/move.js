@@ -408,6 +408,51 @@ SP.Screens.move = (function(){
     });
   }
 
+  /* ---------- D · vitrin kartları (brand/ortak/vitrin.js) ---------- */
+  const VT = () => (window.LIFEOS || {}).VITRIN;
+  const vkutu = (ad, yuva, ic) => ic ? K.Kutu({ ad, yuva, class:'vkutu', govde:raw(ic) }) : '';
+  const GUN_AD = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  function haftaGunleri(){
+    const b = U.today(), i = (b.getDay() + 6) % 7;
+    return Array.from({ length:7 }, (_, k) => U.iso(U.addDays(b, k - i)));
+  }
+  const exAd = id => { const e = (SP.EXERCISES || []).find(x => x.id === id); return e ? e.name : id; };
+
+  /* 075 SET KUTUCUKLARI: bugünün son seansının hareketleri; biten set
+     dolar (dokunuş = bir set bitti, dolu kutuya dokunmak geri alır). */
+  function setKutusu(){
+    if(!VT()) return '';
+    const w = M.workoutsOf(U.todayISO()).slice(-1)[0];
+    if(!w || !(w.items || []).length) return '';
+    return vkutu('Setler · ' + w.name, 'ölçüldü', VT().setKutucuklari({ act:'set-bitti', data:{ 'data-w':w.id },
+      hareketler:w.items.map((it, i) => ({ i, ad:exAd(it.exId), set:Number(it.sets) || 0, biten:Number(it.setsDone) || 0,
+        etiket:it.reps ? String(it.reps) : it.minutes ? it.minutes + 'dk' : null })) }));
+  }
+
+  /* 076 HAFTALIK HAREKET HALKALARI: günün hareket dakikası ÷ asgari gün
+     dakikası. O gün hiçbir kaydı olmayan geçmiş gün «veri yok». */
+  function halkaKutusu(){
+    if(!VT()) return '';
+    const bugun = U.todayISO(), esik = SP.LOAD_RULES.minDay.minutes;
+    const gunler = haftaGunleri().map((d, k) => {
+      const dk = U.sum(M.workoutsOf(d).map(w => w.minutes || 0));
+      const kayit = M.workoutsOf(d).length || S.vitals[d] || M.mealsOf(d).length;
+      return { ad:GUN_AD[k], bugun:d === bugun, gelecek:d > bugun, yok:d < bugun && !kayit, p:esik ? 100 * dk / esik : null };
+    });
+    return vkutu('Bu hafta hareket', 'asgari gün ' + esik + ' dk', VT().haftaHalkalari({ gunler }));
+  }
+
+  /* 086 ANTRENMAN HAFTASI: yapılan seans dolu; kaydı olmayan geçmiş gün
+     «kayıt yok» (dinlenme sayılmaz); plan tutulmadığı için gelecek boş. */
+  function haftaKutusu(){
+    if(!VT()) return '';
+    const bugun = U.todayISO();
+    return vkutu('Antrenman haftası', 'ölçüldü', VT().antrenmanHaftasi({ gunler:haftaGunleri().map((d, k) => {
+      const w = M.workoutsOf(d);
+      return { ad:GUN_AD[k], bugun:d === bugun, gecti:d < bugun, yapilan:w.length ? w.map(x => x.name).join(' + ') : null };
+    }) }));
+  }
+
   /* --------------------------------------------------------------- ekran */
 
   /* Sekme yok (EKIP-PLANI §1.2): Bugün, dört alan ve İlerleme alt alta;
@@ -415,7 +460,7 @@ SP.Screens.move = (function(){
      dengesi» eskiden üç sekmede ayrı ayrı çiziliyordu; alt alta durunca
      aynı kart üç kez görünürdü — yalnız Kuvvet'te, kalıpların yanında. */
   const BODIES = {
-    bugun:() => html`${K.Ledger([orderEntry(), pickSessionEntry(), todaySessionsEntry()])}
+    bugun:() => html`${K.Ledger([orderEntry(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), halkaKutusu(), haftaKutusu()])}
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
     ilerleme:() => html`${K.Ledger([
         K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
@@ -459,6 +504,15 @@ SP.Screens.move = (function(){
 
   const handle = {
     async 'move-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'set-bitti'(el){
+      const w = S.workouts.find(x => x.id === el.dataset.w);
+      const it = w && w.items[Number(el.dataset.i)];
+      if(!it) return;
+      const n = Number(el.dataset.set);
+      it.setsDone = (Number(it.setsDone) || 0) >= n ? n - 1 : n;
+      await M.saveWorkout(w);
+      SP.App.render();
+    },
     async 'pick-pattern-tab'(el){ S.ui.movePattern = el.dataset.tab; SP.App.render(); },
     async 'pick-pattern'(el){
       S.ui.moveTab = 'kuvvet';

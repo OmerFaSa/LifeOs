@@ -1422,6 +1422,9 @@ button.listitem.is-on{ background:var(--primary-soft); }
   background:var(--surface); padding:var(--sp-4); margin-bottom:var(--sp-3);
 }
 .mealcard__head{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+/* Öğünün simgesi boyutsuz SVG'dir; boyu verilmezse raf düzeninde kartın
+   genişliğine büyüyordu. */
+.mealcard__head > svg{ width:18px; height:18px; flex:none; color:var(--text-3); }
 .mealcard__slot{ font-weight:700; font-size:var(--fs-base); }
 .mealcard__kcal{
   margin-left:auto; font-family:var(--font-display); font-weight:800;
