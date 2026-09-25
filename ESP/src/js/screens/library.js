@@ -276,6 +276,10 @@ ESP.Screens.library = (function(){
   function okumaHucresi(b){
     const o = M.kitapOkuma(b.id);
     if(!o) return html`<span class="tiny dim">veri yok</span>`;
+    /* 095: sayfa sayısı yazılı ve okunan sayfa ölçülmüşse ince ilerleme. */
+    const il = M.okumaIlerlemesi && M.okumaIlerlemesi(b);
+    if(il && VT()) return raw(VT().okumaIlerlemesi({ ad:b.title, alt:il.okunan + ' / ' + il.toplam + ' sayfa · ' + U.fmtMin(o.dakika),
+      oran:il.oran, kalanDk:il.kalanDk, kalanAd:'kalan' }));
     return html`<span class="num">${U.fmtMin(o.dakika)}</span>
       <div class="tiny dim">${o.oturum} oturum${o.sayfa != null ? ' · ' + o.sayfa + ' sayfa' : ''}
         · son ${U.fmtShort(o.sonGun)}${o.cert !== 'measured' ? ' · tahmin' : ''}</div>`;
@@ -363,13 +367,39 @@ ESP.Screens.library = (function(){
     return VT().bagliNotlar({ baslik, ust:'not · ' + U.fmtShort(ESP.U.gunOf(n.createdAt || '')), metin:n.text, baglar });
   }
 
+  /* 109 ÜÇ MADDE ÖZETİ: model açıkken, bir kaynağın EN AZ ÜÇ notundan.
+     Model yalnız senin notlarını üç cümleye indirir; notlarda olmayan bir
+     sayı yazarsa özet atılır (sayıyı model üretmez, AGENTS §1.1). Etiketi
+     «model özeti · kontrol et»: tahmindir. Desteye eklenmez — ESP destesi
+     dil destesidir; not defteri de özet kabul etmez (tek fikir, tek cümle). */
+  const OZET_AJAN = 'aristoteles';
+  function ozetHazir(){ return !!(ESP.Office && ESP.Office.ready && ESP.Office.ready(OZET_AJAN)); }
+  function ozetDogrula(metin, notlar){
+    let o;
+    try{ o = JSON.parse(String(metin || '').replace(/^[^{]*/, '').replace(/[^}]*$/, '')); }catch(e){ return null; }
+    const m = (o && Array.isArray(o.maddeler) ? o.maddeler : []).map(x => String(x || '').trim()).filter(Boolean);
+    if(m.length < 1 || m.length > 3 || m.some(x => x.length > 200)) return null;
+    const kaynak = notlar.join(' ');
+    const sayilar = m.join(' ').match(/\d+(?:[.,]\d+)?/g) || [];
+    if(sayilar.some(n => kaynak.indexOf(n) < 0)) return null;
+    return m;
+  }
+  function ozetKarti(){
+    const o = S.ui.ozet;
+    const b = o && bookOf(o.bookId);
+    if(!b || !VT() || !(o.maddeler || []).length) return '';
+    return VT().ucMaddeOzet({ baslik:b.title, kaynak:o.notSayisi + ' notundan', maddeler:o.maddeler });
+  }
+
   function bookRows(){
     const kitaplar = S.books || [];
     const notSayisi = id => (S.notes || []).filter(n => n.bookId === id).length;
     const rafHtml = raf(kitaplar), alintiHtml = alinti();
+    const ozetHtml = ozetKarti(), model = ozetHazir();
 
     return [
       when(rafHtml, () => K.Entry({ label:'Raf', meta:kitaplar.length + ' kitap', body:raw(rafHtml) })),
+      when(ozetHtml, () => K.Entry({ label:'Özet', meta:'model · tahmin', body:raw(ozetHtml) })),
       when(alintiHtml, () => K.Entry({ label:'Alıntı', meta:'son not', body:raw(alintiHtml) })),
       K.Entry({
         label:'Kaynaklar', hint:'primary-text',
@@ -387,7 +417,9 @@ ESP.Screens.library = (function(){
                 String(notSayisi(b.id)),
                 okumaHucresi(b),
                 M.bookStatus(b).label,
-                html`${K.Button({ label:M.bookStatus(b).action, size:'sm',
+                html`${when(model && notSayisi(b.id) >= 3, () => K.Button({ label:'Notlarını özetle', size:'sm',
+                    act:'ozet-iste', data:{ 'data-id':b.id } }))}
+                  ${K.Button({ label:M.bookStatus(b).action, size:'sm',
                     act:'toggle-book', data:{ 'data-id':b.id } })}
                   ${K.Button({ label:'Sil', size:'sm', act:'del-book2',
                     data:{ 'data-id':b.id } })}`,
@@ -418,6 +450,7 @@ ESP.Screens.library = (function(){
           <div class="cols-3">
             ${K.Field({ label:'Eser', input:K.Input({ id:'lb-title', placeholder:'Başlık' }) })}
             ${K.Field({ label:'Yazar', input:K.Input({ id:'lb-author', placeholder:'Yazar' }) })}
+            ${K.Field({ label:'Sayfa', hint:'isteğe bağlı', input:K.Input({ id:'lb-pages', type:'number', numeric:true, min:1, placeholder:'320' }) })}
             ${K.Field({ label:'Tür', input:K.Select({ id:'lb-kind', value:'primary',
               options:[{ value:'primary', label:'Primer metin' },
                 { value:'secondary', label:'Yorum' }] }) })}
@@ -539,11 +572,33 @@ ESP.Screens.library = (function(){
     async 'clear-note-query'(){ S.ui.noteQuery = ''; ESP.App.render(); },
     async 'clear-note-filters'(){ S.ui.noteQuery = ''; S.ui.conceptFilter = null; ESP.App.render(); },
 
+    async 'ozet-iste'(el){
+      const b = bookOf(el.dataset.id);
+      const notlar = (S.notes || []).filter(n => n.bookId === (b && b.id)).map(n => String(n.text || ''));
+      if(!b || notlar.length < 3){ ESP.UI.toast('Özet için bu kaynağın en az üç notu gerekir.'); return; }
+      if(!ozetHazir()){ ESP.UI.toast('Model bağlı değil; özet yalnız model açıkken çıkarılır.'); return; }
+      ESP.UI.toast('Notların özetleniyor…');
+      try{
+        const r = await ESP.LLM.chat(ESP.Office.cfgFor(OZET_AJAN), {
+          system:'Kullanıcının bir kaynaktan aldığı notları üç maddeye indir. Yalnız notlarda geçen bilgiyi kullan; '
+            + 'yorum, dış bilgi ve yeni sayı ekleme. Türkçe, her madde tek cümle. '
+            + 'ÇIKTI yalnız JSON: {"maddeler":["…","…","…"]}',
+          messages:[{ role:'user', text:'Kaynak: ' + b.title + '\nNotlar:\n- ' + notlar.slice(0, 40).join('\n- ') }],
+          temperature:0.2, maxTokens:400 });
+        const m = ozetDogrula(r && r.text, notlar);
+        if(!m){ ESP.UI.toast('Model çıktısı denetimden geçmedi; özet yazılmadı.'); return; }
+        S.ui.ozet = { bookId:b.id, maddeler:m, notSayisi:notlar.length };
+        ESP.App.render();
+      }catch(e){
+        ESP.UI.toast('Özet alınamadı: ' + (ESP.LLM.errorText ? ESP.LLM.errorText(e) : 'bağlantı hatası'));
+      }
+    },
     async 'add-book2'(){
       const t = val('lb-title');
       if(!t){ ESP.UI.toast('Eser adı gerekir'); return; }
+      const sayfa = Math.round(Number(val('lb-pages')));
       await M.saveBook(M.newBook({ title:t, author:val('lb-author'),
-        kind:val('lb-kind') || 'primary' }));
+        kind:val('lb-kind') || 'primary', pages:sayfa > 0 && sayfa < 20000 ? sayfa : null }));
       ESP.Memo.bitir();
       ESP.App.render();
     },
@@ -599,6 +654,6 @@ ESP.Screens.library = (function(){
     },
     subtitle(){ return (S.notes || []).length + ' not · ' + (S.books || []).length + ' kaynak'; },
     actions(){ return ''; },
-    render, afterRender, handle, change,
+    ozetDogrula, render, afterRender, handle, change,
   };
 })();

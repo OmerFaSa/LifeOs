@@ -453,6 +453,33 @@ SP.Screens.move = (function(){
     }) }));
   }
 
+  /* 081 YOĞUNLUK BÖLGELERİ: son 28 günün seans dakikası, SENİN yazdığın
+     zorluğa (1–10) göre dört bantta. Nabız ölçülmediği için bant nabız
+     değil zorluk bandıdır; eşikleri kod koyar. Zorluğu yazılmamış seans
+     banda girmez, altta ayrıca sayılır — «hafif» sayılmaz. */
+  const BANT = [{ ad:'Hafif · 1–3', en:3 }, { ad:'Orta · 4–6', en:6 }, { ad:'Zor · 7–8', en:8 }, { ad:'En zor · 9–10', en:10 }];
+  function yogunlukBantlari(gun, bitis){
+    const son = bitis || U.todayISO();
+    const bas = U.iso(U.addDays(U.parse(son), -(gun || 28) + 1));
+    const dk = BANT.map(() => 0);
+    let zorluksuz = 0;
+    (S.workouts || []).filter(w => w.date >= bas && w.date <= son).forEach(w => {
+      const m = Number(w.minutes) || 0;
+      if(!(m > 0)) return;
+      const r = Number(w.rpe);
+      if(!(r >= 1 && r <= 10)){ zorluksuz++; return; }
+      dk[BANT.findIndex(b => r <= b.en)] += m;
+    });
+    return { bantlar:BANT.map((b, i) => ({ ad:b.ad, dk:dk[i] })), zorluksuz, toplam:dk.reduce((a, x) => a + x, 0) };
+  }
+  function yogunlukKutusu(){
+    if(!VT()) return '';
+    const y = yogunlukBantlari(28);
+    if(!y.toplam) return '';
+    return vkutu('Yoğunluk · son 28 gün', 'senin zorluk beyanın', VT().yogunlukBolgeleri({ bolgeler:y.bantlar })
+      + (y.zorluksuz ? '<p class="tiny dim mt-6">' + y.zorluksuz + ' seansın zorluğu yazılmadı; banda girmedi.</p>' : ''));
+  }
+
   /* --------------------------------------------------------------- ekran */
 
   /* Sekme yok (EKIP-PLANI §1.2): Bugün, dört alan ve İlerleme alt alta;
@@ -468,6 +495,7 @@ SP.Screens.move = (function(){
             + 'zorluktan, yoksa hareketlerin MET ortalamasından gelir. İkisi de yoksa '
             + 'seans yük üretmez — uydurulmuş yük yazılmaz.',
           body:loadBody() }),
+        yogunlukKutusu(),
         K.Entry({ label:'Seans geçmişi', meta:S.workouts.length + ' kayıt',
           body:historyBody() }),
       ])}
@@ -640,6 +668,6 @@ SP.Screens.move = (function(){
       return String(K.Button({ label:'Seans ekle', icon:'plus', size:'sm', tone:'primary',
         act:'start-session', data:{ 'data-id':'' } }));
     },
-    render, afterRender, handle,
+    yogunlukBantlari, render, afterRender, handle,
   };
 })();

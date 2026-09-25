@@ -32,10 +32,14 @@ window.SP = window.SP || {};
 SP.SaglikIce = (function(){
   const U = () => SP.U;
   const ANAHTAR = 'meta/saglikIceAktarim';
+  /* 083 uyku düzeni: yatış ve kalkış saati, uyanılan günün ÖNCEKİ gece
+     yarısından saat olarak (23:40 → 23,67 · ertesi 07:10 → 31,17). Yalnız
+     telefonun uyku kaydından gelir; süreden saat uydurulmaz. */
   const ARALIK = { sleep:[0.5, 16], rhr:[30, 140], sbp:[60, 250], dbp:[30, 160], spo2:[70, 100],
-    weight:[20, 250], waist:[40, 200], bodyfat:[3, 60], water:[1, 8000] };
+    weight:[20, 250], waist:[40, 200], bodyfat:[3, 60], water:[1, 8000], yatis:[16, 32], kalkis:[24, 40] };
   const AD = { sleep:'Uyku (saat)', rhr:'İstirahat nabzı', sbp:'Büyük tansiyon', dbp:'Küçük tansiyon',
-    spo2:'Oksijen (%)', weight:'Kilo (kg)', waist:'Bel (cm)', bodyfat:'Yağ oranı (%)', water:'Su (ml)' };
+    spo2:'Oksijen (%)', weight:'Kilo (kg)', waist:'Bel (cm)', bodyfat:'Yağ oranı (%)', water:'Su (ml)',
+    yatis:'Yatış saati', kalkis:'Kalkış saati' };
   /* Günlük özetin kuralı: toplam (su), son (kilo, bel, yağ), ortanca (diğerleri). */
   const OZET = { water:'toplam', weight:'son', waist:'son', bodyfat:'son' };
 
@@ -74,7 +78,7 @@ SP.SaglikIce = (function(){
   /* ------------------------------------------------------------ toplayıcı */
 
   function yeniToplayici(o){
-    return { alt:(o && o.alt) || null, deger:{}, uyku:{}, alinmayan:{}, aralikDisi:0, satir:0 };
+    return { alt:(o && o.alt) || null, deger:{}, uyku:{}, saat:{}, alinmayan:{}, aralikDisi:0, satir:0 };
   }
 
   function ekle(t, alan, gun, v){
@@ -98,6 +102,9 @@ SP.SaglikIce = (function(){
       const kay = attr(tag, 'sourceName') || '?';
       const k = gun + '|' + kay;
       t.uyku[k] = (t.uyku[k] || 0) + (bit - bas) / 3600000;
+      const s = t.saat[k] = t.saat[k] || { bas:bas, bit:bit };
+      if(bas < s.bas) s.bas = bas;
+      if(bit > s.bit) s.bit = bit;
       return;
     }
     const d = APPLE[tur];
@@ -149,18 +156,27 @@ SP.SaglikIce = (function(){
         : OZET[alan] === 'son' ? l[l.length - 1] : ortanca(l);
       out.push({ alan, gun, v });
     });
-    const gece = {};
+    const gece = {}, secilen = {};
     Object.keys(t.uyku).forEach(k => {
       const gun = k.split('|')[0];
-      gece[gun] = Math.max(gece[gun] || 0, t.uyku[k]);
+      if(!(gece[gun] >= t.uyku[k])){ gece[gun] = t.uyku[k]; secilen[gun] = k; }
     });
-    Object.keys(gece).forEach(gun => out.push({ alan:'sleep', gun, v:gece[gun] }));
+    Object.keys(gece).forEach(gun => {
+      out.push({ alan:'sleep', gun, v:gece[gun] });
+      /* Saat, süresi alınan AYNI kaynaktan: iki cihazın saatleri karışmaz. */
+      const s = t.saat[secilen[gun]];
+      if(!s) return;
+      const gy = Date.UTC(+gun.slice(0, 4), +gun.slice(5, 7) - 1, +gun.slice(8, 10)) - 86400000;
+      out.push({ alan:'yatis', gun, v:(s.bas - gy) / 3600000 });
+      out.push({ alan:'kalkis', gun, v:(s.bit - gy) / 3600000 });
+    });
     return out;
   }
 
   function yuvarla(alan, v){
     if(alan === 'water') return Math.round(v);
     if(alan === 'sleep') return Math.round(v * 4) / 4;
+    if(alan === 'yatis' || alan === 'kalkis') return Math.round(v * 12) / 12;
     return Math.round(v * 10) / 10;
   }
 

@@ -144,4 +144,95 @@
     });
   });
 
+  describe('Vitrin · ESP son parti (020 095 099 103 106 107 109)', () => {
+    const { pushBook, pushNote } = ESP.Test;
+    if(!document.getElementById('toast-root')){
+      const t = document.createElement('div'); t.id = 'toast-root'; t.hidden = true; document.body.appendChild(t);
+    }
+    it('oz-099 konuşma ölçümü: sessizlik ölçü değildir; uzun duraksama sayılır, kısa sayılmaz', () => {
+      const O = ESP.Voice.konusmaOlc;
+      expect(O([0, 0, 0], 100)).toBeNull();
+      const ses = n => Array(n).fill(0.1), sus = n => Array(n).fill(0);
+      const r = O(sus(5).concat(ses(20), sus(3), ses(20), sus(8), ses(20), sus(5)), 100);
+      expect(r.duraksama).toBe(1);
+      expect(r.sureSn).toBe(7);
+      expect(r.genlik.some(v => v === 0)).toBe(true);
+    });
+    it('oz-106 cümle kurma: sırayla dokunulan taş yerleşir, yanlış taş yerinde kalır', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        ESP.S.ui.langTab = 'ogren'; ESP.S.ui.cumle = null;
+        pushCard({ front:'grasp', back:'kavramak', lang:'en', context:'I grasp the idea now' });
+        const k = dom(ESP.Screens.lang.render());
+        const c = k.querySelector('[data-oz="106"]');
+        expect(c).toBeTruthy();
+        expect(c.querySelectorAll('.tas button').length).toBe(5);
+        const A = ESP.App, r = A.render; A.render = () => {};
+        try{
+          await ESP.Screens.lang.handle['cumle-tas']({ dataset:{ k:'idea' } });
+          expect(ESP.S.ui.cumle.yerlesen.length).toBe(0);
+          for(const w of ['I', 'grasp']) await ESP.Screens.lang.handle['cumle-tas']({ dataset:{ k:w } });
+          expect(ESP.S.ui.cumle.yerlesen).toEqual(['I', 'grasp']);
+        }finally{ A.render = r; ESP.S.ui.cumle = null; ESP.S.ui.langTab = null; }
+      });
+    });
+    it('oz-107 dinle ve oku: tarayıcı sesi varsa en az iki bağlam cümlesiyle çizilir', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        ESP.S.ui.langTab = 'ogren';
+        pushCard({ front:'a', back:'a', lang:'en', context:'First sentence here.' });
+        pushCard({ front:'b', back:'b', lang:'en', context:'Second one follows.' });
+        const k = dom(ESP.Screens.lang.render());
+        if(ESP.Speak.supported()) expect(k.querySelectorAll('[data-oz="107"] .mt2 p').length).toBe(2);
+        else expect(k.querySelector('[data-oz="107"]')).toBeNull();
+        ESP.S.ui.langTab = null;
+      });
+    });
+    it('oz-103 kelime ağı: kartta en az iki eş/zıt anlam varsa Kartlar\'da çizilir', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        ESP.S.ui.langTab = 'kartlar';
+        pushCard({ front:'nevertheless', back:'yine de', lang:'en', es:['however', 'still'], zit:['therefore'] });
+        const k = dom(ESP.Screens.lang.render());
+        expect(k.querySelector('[data-oz="103"]')).toBeTruthy();
+        expect(k.querySelector('[data-oz="103"]').textContent).toContain('however');
+        ESP.S.ui.langTab = null;
+      });
+    });
+    it('oz-095 okuma ilerlemesi: sayfa sayısı ve okunan sayfa yoksa ilerleme yok; varsa oran ve tahmini kalan', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        const b = pushBook('Devlet', 'Platon');
+        expect(ESP.Model.okumaIlerlemesi(b)).toBeNull();
+        pushSession('2026-10-11', 'reading', 40, { ref:b.id, count:20, countCert:'measured' });
+        expect(ESP.Model.okumaIlerlemesi(b)).toBeNull();
+        b.pages = 200;
+        const il = ESP.Model.okumaIlerlemesi(b);
+        expect(Math.round(il.oran)).toBe(10);
+        expect(il.kalanDk).toBe(360);
+      });
+    });
+    it('oz-109 üç madde özeti: notlarda olmayan sayı yazan model özeti atılır', () => {
+      const D = ESP.Screens.library.ozetDogrula;
+      const notlar = ['Adalet ruhun uyumudur.', 'Devlet üç sınıftan oluşur.'];
+      expect(D('{"maddeler":["Adalet uyumdur.","Devlet üç sınıflıdır."]}', notlar)).toEqual(['Adalet uyumdur.', 'Devlet üç sınıflıdır.']);
+      expect(D('{"maddeler":["Devlet 5 sınıftır."]}', notlar)).toBeNull();
+      expect(D('düz metin', notlar)).toBeNull();
+      expect(D('{"maddeler":["a","b","c","d"]}', notlar)).toBeNull();
+    });
+    it('oz-020 Notlar: kavram süzgeci çip olur ve tek dokunuşla kalkar', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        const c = Object.keys(ESP.CONCEPT_BY_ID)[0];
+        pushNote('Tek fikir.', null, [c]);
+        ESP.S.ui.conceptFilter = c; ESP.S.ui.readTab = 'notlar';
+        const k = dom(ESP.Screens.library.render());
+        const f = k.querySelector('[data-oz="020"]');
+        expect(f).toBeTruthy();
+        expect(f.querySelector('[data-act="clear-concept"]')).toBeTruthy();
+        ESP.S.ui.conceptFilter = null;
+      });
+    });
+  });
+
 })();

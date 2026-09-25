@@ -1009,6 +1009,8 @@ class Handler(BaseHTTPRequestHandler):
             ay_ = (q.get("ay") or [datetime.date.today().isoformat()[:7]])[0]
             r = para.ay(self.con, ay_)
             r["kategoriler_hepsi"] = para.KATEGORILER
+            # 087: duzenli giderler bugune gore (kod hesaplar, «hesaplandı»).
+            r["duzenli"] = para.duzenli(self.con, datetime.date.today().isoformat())
             # Yarim kalan fis taslaklari (web): sayfa yenilense de kaybolmaz.
             from core import fis
             r["taslaklar"] = [dict(fis.taslak(self.con, x["id"])["govde"], id=x["id"])

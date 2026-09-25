@@ -557,6 +557,8 @@ ESP.Model = (function(){
     const c = obj(doc);
     const k = Object.assign(newCard(), c, {
       tags:arr(c.tags), history:arr(c.history).filter(h => h && h.at),
+      /* 103 kelime ağı: kullanıcının yazdığı eş ve zıt anlamlılar. */
+      es:arr(c.es).map(String).filter(Boolean), zit:arr(c.zit).map(String).filter(Boolean),
     });
     /* SRS alanlari sayidir; degilse varsayilana doner. Bozuk bir kutu
        degeri butun desteyi yanlis hesaplatir. */
@@ -733,6 +735,20 @@ ESP.Model = (function(){
      bağladıysa o kitaba ne kadar ÖLÇÜLMÜŞ zaman verdiği görünür. Bağlı
      oturum yoksa `null` — «veri yok», sıfır dakika değil. Sayfa yalnız
      girildiyse toplanır. */
+  /* 095 OKUMA İLERLEMESİ: okunan sayfa (oturumların sayfa sayısı, ölçüm)
+     / kitabın sayfa sayısı (kullanıcı yazdı). Kalan süre TAHMİNDİR: bu
+     kitapta ölçülen dakika/sayfa hızıyla. Sayfa sayısı ya da okunan
+     sayfa yoksa ilerleme YOK — sıfır değil. */
+  function okumaIlerlemesi(book){
+    const toplam = Number(book && book.pages);
+    const o = book ? kitapOkuma(book.id) : null;
+    if(!(toplam > 0) || !o || o.sayfa == null) return null;
+    const okunan = Math.min(toplam, o.sayfa);
+    const hiz = o.sayfa > 0 && o.dakika > 0 ? o.dakika / o.sayfa : null;
+    return { toplam, okunan, oran:100 * okunan / toplam,
+      kalanDk:hiz != null ? Math.round((toplam - okunan) * hiz) : null };
+  }
+
   function kitapOkuma(bookId){
     let dakika = 0, oturum = 0, sayfa = null, sonGun = null, hepsiOlcum = true;
     Object.keys(S.days || {}).forEach(g => {
@@ -1455,7 +1471,7 @@ ESP.Model = (function(){
     newArgument, saveArgument, deleteArgument, argumentOpen,
     /* okuma */
     newNote, saveNote, deleteNote, linkNotes, unlinkNotes,
-    newBook, saveBook, deleteBook, bookStatus, kitapOkuma,
+    newBook, saveBook, deleteBook, bookStatus, kitapOkuma, okumaIlerlemesi,
     /* muzik */
     newPiece, savePiece, deletePiece,
     /* diksiyon */

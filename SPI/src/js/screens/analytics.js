@@ -438,8 +438,21 @@ SP.Screens.analytics = (function(){
         ${cizgi(bant ? { bant } : {})}
         ${raw(G.cumleHtml(son, { etiket:'Uyku', birim:'saat' }))}
         <details class="hiz-ac"><summary>Geçen dönemle karşılaştır</summary>${cizgi({ onceki:once, bant })}</details>
-        <details class="hiz-ac"><summary>Dağılım</summary>${raw(G.dagilimSvg({ degerler:son.map(x => x.deger), birim:'saat', etiket:'Uyku' }))}</details>` })}
+        <details class="hiz-ac"><summary>Dağılım</summary>${raw(G.dagilimSvg({ degerler:son.map(x => x.deger), birim:'saat', etiket:'Uyku' }))}</details>
+        ${raw(uykuDuzeniHtml(gunler(14)))}` })}
     </div>`)]);
+  }
+
+  /* 083 UYKU DÜZENİ: iki haftanın yatış ve kalkış saati. Saat YALNIZ
+     telefonun uyku kaydından gelir (core/saglikice.js); elle girilen süre
+     saate çevrilmez. Üç geceden azsa kart yok. */
+  function uykuDuzeniHtml(gunler){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.uykuDuzeni) return '';
+    const geceler = gunler.map(t => { const v = S.vitals[t] || {};
+      return { ad:t, yatis:v.yatis != null ? Number(v.yatis) : null, kalkis:v.kalkis != null ? Number(v.kalkis) : null }; });
+    const h = V.uykuDuzeni({ geceler });
+    return h ? '<details class="hiz-ac"><summary>Yatış ve kalkış saatleri</summary>' + h + '</details>' : '';
   }
 
   async function render(){

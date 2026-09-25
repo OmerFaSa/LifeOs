@@ -54,6 +54,32 @@ def run():
         no(para.ay(con, "eylül")["ok"])
     test("yaz, ay ozeti (birim basina, kur yok), geri al", t_yaz_ay_geri_al)
 
+    def t_takvim_duzenli():
+        con = db.connect(":memory:")
+        e = lambda gun, tutar, kat, ac="": para.ekle(con, {"gun": gun, "yon": "gider", "tutar": tutar,
+                                                            "kategori": kat, "aciklama": ac}, gun)
+        # 082: gunluk TL gideri; gelir ve TL disi birim girmez; kaydi olmayan gun yok.
+        e("2026-09-03", "450", "Gıda"); e("2026-09-03", "50", "Gıda"); e("2026-09-10", "120", "Ulaşım")
+        para.ekle(con, {"gun": "2026-09-10", "yon": "gelir", "tutar": "30000", "kategori": "Maaş"}, "2026-09-10")
+        para.ekle(con, {"gun": "2026-09-11", "yon": "gider", "tutar": "20", "birim": "USD", "kategori": "Diğer"}, "2026-09-11")
+        a = para.ay(con, "2026-09")
+        eq(a["gunler"], [{"gun": "2026-09-03", "kurus": 50000}, {"gun": "2026-09-10", "kurus": 12000}])
+        # 087: iki ay ust uste ayni gunlerde (±5) ve benzer tutarda (±%25) gelen gider duzenlidir.
+        e("2026-07-05", "12.000", "Konut", "kira"); e("2026-08-04", "12.000", "Konut", "kira")
+        e("2026-09-06", "12.500", "Konut", "kira")
+        e("2026-07-20", "300", "Fatura", "internet"); e("2026-08-21", "310", "Fatura", "internet")
+        e("2026-08-15", "900", "Giyim")                         # tek sefer: duzenli degil
+        e("2026-07-02", "100", "Eğlence", "sinema"); e("2026-08-25", "100", "Eğlence", "sinema")  # gun tutmuyor
+        d = para.duzenli(con, "2026-09-18")
+        adlar = [x["ad"] for x in d["giderler"]]
+        eq(adlar, ["internet", "kira"])                         # en yakin once
+        i = d["giderler"][0]
+        eq((i["gun"], i["kalan"], i["kesinlik"]), (20, 2, "hesaplandı"))
+        k = d["giderler"][1]
+        eq((k["gun"], k["kalan"]), (5, 17))                     # bu ay geldi: sonraki ay 5'i
+        eq(para.duzenli(db.connect(":memory:"), "2026-09-18")["giderler"], [])
+    test("oz-082 oz-087 gunluk gider takvimi ve duzenli giderler (kod hesaplar)", t_takvim_duzenli)
+
     def t_form():
         con = db.connect(":memory:")
         eq(para.ekle(con, {"yon": "gider", "tutar": "1.250,50", "kategori": "Fatura"}, BUGUN)["ok"], True)

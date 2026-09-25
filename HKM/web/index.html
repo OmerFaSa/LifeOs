@@ -838,6 +838,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     <div data-bolme="para" hidden>
       <div class="gun"><h1>Para</h1></div>
       <div class="card" id="para-ozet"><p class="muted">Yükleniyor…</p></div>
+      <div class="card" id="para-vitrin" hidden></div>
       <div class="card" id="para-ekle"></div>
       <div class="card" id="para-liste"></div>
     </div>
@@ -4575,6 +4576,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     }
     h += '<p class="muted">Kur uydurulmaz: TL dışı tutarlar kendi birimiyle ayrı toplanır.</p>';
     $('para-ozet').innerHTML = h;
+    paraVitrin(p, ay);
     var kat = (p.kategoriler_hepsi || []).map(function(k){
       return '<option value="' + esc(k) + '">' + esc(k) + '</option>'; }).join('');
     $('para-ekle').innerHTML = '<div class="tag">Kayıt ekle</div>'
@@ -4607,6 +4609,52 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
             + '" aria-label="Kaydı sil">Sil</button></td></tr>';
         }).join('') + '</tbody></table></div>'
       : '<p class="muted">Bu ay kayıt yok.</p>');
+  }
+
+  /* 082 HARCAMA TAKVİMİ + 087 DÜZENLİ GİDERLER (vitrin kartları). Sayılar
+     HKM'den (core/para.py: günün TL gideri; düzenli giderin kuralı); bu
+     sayfa yalnız çizer. Kaydı olmayan gün noktasızdır (sıfır değil),
+     gelecek gün soluk. Düzenli gider bir ÇIKARIMDIR: «hesaplandı». */
+  function paraVitrin(p, ay){
+    var kutu = $('para-vitrin');
+    if(!kutu) return;
+    var gunler = {}; (p.gunler || []).forEach(function(g){ gunler[g.gun] = g.kurus; });
+    var h = '';
+    if((p.gunler || []).length){
+      var ilk = new Date(ay + '-01T12:00:00');
+      var ayGun = new Date(ilk.getFullYear(), ilk.getMonth() + 1, 0).getDate();
+      var bos = (ilk.getDay() + 6) % 7, bu = bugun();
+      var en = Math.max.apply(null, (p.gunler || []).map(function(g){ return g.kurus; })) || 1;
+      var hucre = [];
+      ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz'].forEach(function(a){ hucre.push('<span class="pv-hd">' + a + '</span>'); });
+      for(var i = 0; i < bos; i++) hucre.push('<i class="pv-bs" aria-hidden="true"></i>');
+      for(var d = 1; d <= ayGun; d++){
+        var t = ay + '-' + String(d).padStart(2, '0'), k = gunler[t];
+        var cap = k ? (4 + 12 * k / en).toFixed(1) : 0;
+        hucre.push('<i class="' + (t > bu ? 'pv-gl' : t === bu ? 'pv-bu' : '') + '" title="' + esc(d + ' · ' + (k ? tlYaz(k) : 'kayıt yok')) + '">'
+          + (k ? '<b style="width:' + cap + 'px;height:' + cap + 'px"></b>' : '') + '</i>');
+      }
+      h += '<div class="tag">Günlük gider · ' + esc(ay) + '</div>'
+        + '<div class="pv-tk" data-oz="082" role="img" aria-label="' + esc((p.gunler || []).length + ' günde gider kaydı; nokta büyüklüğü günün TL gideri') + '">'
+        + hucre.join('') + '</div><p class="muted">Nokta büyüklüğü günün TL gideri · boş gün: kayıt yok, sıfır değil.</p>';
+    }
+    var dz = (p.duzenli && p.duzenli.giderler) || [];
+    if(dz.length){
+      var top = dz.reduce(function(a, x){ return a + x.kurus; }, 0);
+      h += '<div class="tag" style="margin-top:14px">Düzenli giderler</div><div class="pv-dz" data-oz="087">'
+        + dz.map(function(x, i){
+          var ne = x.kalan === 0 ? 'bugün' : x.kalan > 0 ? x.kalan + ' gün sonra' : (-x.kalan) + ' gün geçti · kayıt yok';
+          return '<div class="pv-r' + (i === 0 ? ' pv-on' : '') + '"><span class="pv-g">' + esc(x.gun) + '</span><b>' + esc(x.ad)
+            + '<small>' + esc(ne) + '</small></b><em>' + esc(x.tutar) + '</em></div>';
+        }).join('')
+        + '<div class="pv-alt"><span class="tag">Aylık toplam</span><b>' + esc(tlYaz(top)) + '</b></div></div>'
+        + '<p class="muted">Hesaplandı: ' + esc(p.duzenli.kural) + '. Sen yazmadın; kayıtlarından çıkarıldı.</p>';
+    }
+    kutu.innerHTML = h;
+    kutu.hidden = !h;
+  }
+  function tlYaz(kurus){
+    return (kurus / 100).toLocaleString('tr-TR', { minimumFractionDigits:kurus % 100 ? 2 : 0, maximumFractionDigits:2 }) + ' TL';
   }
 
   /* Fiş okuma (core/fis.py): fotoğraf KÜÇÜLTÜLÜR (en uzun kenar 1600 px,
@@ -5449,6 +5497,27 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   });
 })();
 </script>
+
+<!-- PARA VİTRİNİ (K, 2026-09-25; katalog 082 · 087; core/para.py). Yalnız
+     #para-vitrin kutusunun biçimi; adları «pv-» ile başlar. -->
+<style>
+.pv-tk{ display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:4px; margin-top:8px; max-width:420px; }
+.pv-hd{ font:400 10px var(--mono); color:var(--dim); text-align:center; }
+.pv-tk i{ height:26px; border-radius:6px; border:1px solid var(--line); display:grid; place-items:center; }
+.pv-tk i b{ display:block; border-radius:50%; background:var(--accent); }
+.pv-tk i.pv-bu{ border-color:var(--fg); }
+.pv-tk i.pv-gl{ opacity:.35; }
+.pv-tk i.pv-bs{ visibility:hidden; }
+.pv-dz{ max-width:520px; }
+.pv-r{ display:grid; grid-template-columns:32px minmax(0, 1fr) auto; gap:10px; align-items:center; min-height:40px; border-top:1px solid var(--line); }
+.pv-r:first-child{ border-top:0; }
+.pv-g{ width:30px; height:30px; border-radius:8px; border:1px solid var(--line); display:grid; place-items:center; font:500 12px var(--mono); }
+.pv-r b{ font-weight:500; font-size:14px; min-width:0; overflow-wrap:anywhere; }
+.pv-r b small{ display:block; font:500 11px var(--mono); color:var(--dim); }
+.pv-r em{ font:500 13px var(--mono); font-style:normal; white-space:nowrap; }
+.pv-r.pv-on .pv-g{ background:var(--accent); color:var(--on-accent, #fff); border-color:transparent; }
+.pv-alt{ display:flex; justify-content:space-between; align-items:center; margin-top:4px; padding-top:8px; border-top:1px solid var(--line); }
+</style>
 
 <!-- MERKEZ KAYITLARI (H, 2026-09-25; katalog 119 · 120 · 126; core/merkez.py).
      Kullanıcı: «geri kalan tüm işleri hallet». Bu blok KENDİ İÇİNDE KAPALIDIR:

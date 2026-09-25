@@ -12570,7 +12570,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'a9ebd5c', at:'2026-09-25 17:29', dirty:true };
+R.BUILD = { id:'f429745', at:'2026-09-25 17:41', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -15008,7 +15008,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(!o || !o.ad || !sayiMi(o.oran)) return '';
     return kok('095', 'y20', '<div class="kp"><i aria-hidden="true"></i><div><b>' + kac(o.ad) + '</b><span>' + kac(o.alt || '') + '</span></div></div>'
       + '<div class="iy" role="img" aria-label="' + kac('%' + Math.round(o.oran) + ' okundu') + '"><i style="width:' + px(o.oran) + '"></i></div>'
-      + '<div class="alt"><span class="cap">%' + Math.round(o.oran) + '</span>' + (sayiMi(o.kalanDk) ? et('estimated', 'bu bölüm ~' + dkMetni(o.kalanDk) + ' · tahmin') : '') + '</div>');
+      + '<div class="alt"><span class="cap">%' + Math.round(o.oran) + '</span>' + (sayiMi(o.kalanDk) ? et('estimated', (o.kalanAd || 'bu bölüm') + ' ~' + dkMetni(o.kalanDk) + ' · tahmin') : '') + '</div>');
   }
 
   /* 096 ALINTI KARTI — altı çizilen cümle kaynağıyla. */

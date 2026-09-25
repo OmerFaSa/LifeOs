@@ -254,4 +254,39 @@
     });
   });
 
+  describe('Vitrin · SPİ 7. madde (081 083)', () => {
+    it('oz-083 telefon uyku kaydı yatış ve kalkış saatini de getirir; süreden saat uydurulmaz', () => {
+      const kayit = (bas, bit) => '<Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Saat" value="HKCategoryValueSleepAnalysisAsleepCore" startDate="' + bas + ' +0300" endDate="' + bit + ' +0300"/>';
+      const xml = '<HealthData>' + kayit('2026-10-10 23:40:00', '2026-10-11 03:00:00') + kayit('2026-10-11 03:10:00', '2026-10-11 07:10:00') + '</HealthData>';
+      const r = SP.SaglikIce.metindenOku(xml);
+      const al = a => r.yaz.find(x => x.alan === a && x.gun === '2026-10-11');
+      expect(al('sleep').v).toBe(7.25);
+      expect(Math.round(al('yatis').v * 60)).toBe(23 * 60 + 40);
+      expect(Math.round(al('kalkis').v * 60)).toBe(24 * 60 + 7 * 60 + 10);
+      const csv = SP.SaglikIce.metindenOku('tarih,ölçü,değer\n2026-10-11,uyku,7');
+      expect(csv.yaz.some(x => x.alan === 'yatis')).toBe(false);
+    });
+    it('oz-083 Analiz: üç gecenin saati varsa uyku düzeni; yoksa yok', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        let k = dom(await SP.Screens.analytics.render());
+        expect(k.querySelector('[data-oz="083"]')).toBeNull();
+        ['2026-10-09', '2026-10-10', '2026-10-11'].forEach(g => pushVitals(g, { sleep:7, yatis:23.5, kalkis:30.75 }));
+        k = dom(await SP.Screens.analytics.render());
+        expect(k.querySelectorAll('[data-oz="083"] .gr2 > div').length).toBe(3);
+      });
+    });
+    it('oz-081 Hareket: dakika senin zorluk beyanına göre banda girer; zorluksuz seans ayrı sayılır', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        resetState();
+        const w = (g, dk, rpe) => SP.S.workouts.push(Object.assign(SP.Model.newWorkout(g, null), { date:g, minutes:dk, rpe }));
+        w('2026-10-10', 40, 3); w('2026-10-11', 30, 8); w('2026-10-12', 20, null); w('2026-08-01', 60, 5);
+        const y = SP.Screens.move.yogunlukBantlari(28, '2026-10-12');
+        expect(y.bantlar.map(b => b.dk)).toEqual([40, 0, 30, 0]);
+        expect(y.zorluksuz).toBe(1);
+        expect(y.toplam).toBe(70);
+      });
+    });
+  });
+
 })();

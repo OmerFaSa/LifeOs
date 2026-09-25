@@ -198,8 +198,13 @@ ESP.Screens.lang = (function(){
       .sort((a, b) => (a.due || '').localeCompare(b.due || ''));
 
     const bag = baglamda();
+    /* 103 KELİME AĞI: senin yazdığın eş/zıt anlamlılarla; en az iki bağ. */
+    const agli = VT() && M.cardsOf(aktifDil()).find(c => (c.es || []).length + (c.zit || []).length >= 2);
+    const ag = agli ? VT().kelimeAgi({ kelime:agli.front, es:agli.es, zit:agli.zit, dil:agli.lang }) : '';
     return [when(bag, () => K.Entry({ label:'Bağlamda', meta:'örnek cümlede',
-      note:'Kelime kendi cümlesinin içinde; anlamı yerinde.', body:raw(bag) })), K.Entry({
+      note:'Kelime kendi cümlesinin içinde; anlamı yerinde.', body:raw(bag) })),
+    when(ag, () => K.Entry({ label:'Kelime ağı', meta:agli.front,
+      note:'Eş anlamlılar çevresinde, zıt anlamlı kesik çerçeveyle; bağları kartı eklerken sen yazdın.', body:raw(ag) })), K.Entry({
       label:'Deste',
       meta:hepsi.length + ' kart',
       note:'Vadesi yakın olan üstte. «Aktif» işareti kartın üretimde '
@@ -253,6 +258,12 @@ ESP.Screens.lang = (function(){
             ${K.Field({ label:'Karşılık', input:K.Input({ id:'c-back', placeholder:'yine de' }) })}
             ${K.Field({ label:'Bağlam', hint:'isteğe bağlı',
               input:K.Input({ id:'c-ctx', placeholder:'örnek cümle' }) })}
+          </div>
+          <div class="cols-2 mt-8">
+            ${K.Field({ label:'Eş anlamlılar', hint:'isteğe bağlı · virgülle',
+              input:K.Input({ id:'c-es', placeholder:'however, still' }) })}
+            ${K.Field({ label:'Zıt anlamlı', hint:'isteğe bağlı',
+              input:K.Input({ id:'c-zit', placeholder:'therefore' }) })}
           </div>
           ${K.Button({ label:'Kart ekle', act:'add-card', class:'mt-10' })}`,
       }),
@@ -463,13 +474,76 @@ ESP.Screens.lang = (function(){
      Ünite bu boşluğu doldurur: konu, ölçülebilir hedef ve kartlaşacak somut
      öğeler. Ünite bir DERS değildir — ESP öğretmen değil — bir BAŞLANGIÇ
      MALZEMESİDİR ve geldiği yer «tohum» etiketiyle kartta durur. */
+  /* 106 CÜMLE KURMA: bağlam cümlesi (3–12 kelime) karıştırılır; sırayla
+     dokunulan taş yerleşir. Karışım kart kimliğinden: çizim kararlı. */
+  const kelimeler = t => String(t || '').trim().split(/\s+/).filter(Boolean);
+  function kurulacak(){
+    return M.cardsOf(aktifDil()).filter(c => { const n = kelimeler(c.context).length; return n >= 3 && n <= 12; });
+  }
+  function karistir(dizi, tohum){
+    const a = dizi.slice();
+    let h = 0; for(const ch of String(tohum)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    for(let i = a.length - 1; i > 0; i--){ h = (h * 1103515245 + 12345) >>> 0; const j = h % (i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+    if(a.length > 1 && a.every((x, i) => x === dizi[i])) a.push(a.shift());
+    return a;
+  }
+  function cumleDurumu(){
+    const aday = kurulacak();
+    if(!aday.length) return null;
+    let d = S.ui.cumle;
+    if(!d || !aday.some(c => c.id === d.id)){
+      const c = aday[0];
+      d = S.ui.cumle = { id:c.id, hedef:kelimeler(c.context), yerlesen:[], taslar:karistir(kelimeler(c.context), c.id) };
+    }
+    return d;
+  }
+  function cumleKur(){
+    const d = VT() && cumleDurumu();
+    if(!d) return '';
+    const bitti = d.yerlesen.length === d.hedef.length;
+    return VT().cumleKurma({ yerlesen:d.yerlesen, taslar:d.taslar, bos:d.hedef.length - d.yerlesen.length, act:'cumle-tas',
+      not:bitti ? 'Cümle tamam' : 'Kelimeye dokun · cümleyi kur' })
+      + (bitti || kurulacak().length > 1 ? '<div class="mt-8">' + String(K.Button({ label:bitti ? 'Sıradaki cümle' : 'Başka cümle', size:'sm', act:'cumle-yeni' })) + '</div>' : '');
+  }
+
+  /* 107 METİNLİ DİNLEME: en çok altı bağlam cümlesi; tarayıcı sesi yoksa kart yok. */
+  function dinlenecek(){
+    return M.cardsOf(aktifDil()).map(c => String(c.context || '').trim()).filter(Boolean).slice(0, 6);
+  }
+  function dinleVeOku(){
+    if(!VT() || !ESP.Speak || !ESP.Speak.supported()) return '';
+    const c = dinlenecek();
+    if(c.length < 2) return '';
+    const d = S.ui.dinle || { simdi:0, caliyor:false };
+    return '<div id="dinle-kutu">' + VT().metinliDinleme({ cumleler:c, simdi:Math.min(d.simdi, c.length - 1), caliyor:d.caliyor,
+      act:'dinle-oynat', dil:aktifDil() }) + '</div>';
+  }
+
   function learnRows(){
     const dil = aktifDil();
     const l = ESP.LANG_BY_ID[dil] || {};
     const malzemesiz = ESP.Lesson.units('lang', dil)
       .filter(u => !ESP.Lesson.itemsOf(u, dil).length).length;
 
+    const kur = cumleKur(), dinle = dinleVeOku();
+    const V = ESP.Voice;
+    const konus = VT() && V && V.kayitVar && V.kayitVar();
     return [
+      when(konus, () => K.Entry({ label:'Konuşma pratiği', meta:V.kayitSuruyor() ? 'dinliyor' : 'en çok 90 sn',
+        note:'Mikrofonun yalnız ses YÜKSEKLİĞİ okunur; ses kaydedilmez, gönderilmez. Süre ve 0,6 sn\'den uzun duraksamalar ölçülür.',
+        body:html`${when(S.ui.konusma, () => raw(VT().dalgaFormu({ genlik:S.ui.konusma.genlik,
+            sure:Math.floor(S.ui.konusma.sureSn / 60) + ':' + String(S.ui.konusma.sureSn % 60).padStart(2, '0') })))}
+          ${when(S.ui.konusma === null, () => html`<p class="small muted">Ses algılanmadı; ölçü yok.</p>`)}
+          <div class="mt-8">${V.kayitSuruyor()
+            ? K.Button({ label:'Bitir ve ölç', tone:'primary', act:'konusma-bitir' })
+            : K.Button({ label:'Konuşmaya başla', act:'konusma-basla' })}</div>`,
+      })),
+      when(kur, () => K.Entry({ label:'Cümle kur', meta:'bağlam cümlesinden',
+        note:'Kelimeye sırayla dokun; yerleşen taş renk alır. Sıra yanlışsa taş yerinde kalır, puan yazılmaz.',
+        body:raw(kur) })),
+      when(dinle, () => K.Entry({ label:'Dinle ve oku', meta:'tarayıcının sesiyle',
+        note:'Bağlam cümlelerin sırayla okunur; okunan cümle büyür. Ses cihazda kalır, kaydedilmez.',
+        body:raw(dinle) })),
       K.Entry({
         label:'Pratik', hint:'practice',
         meta:S.ui.practice && S.ui.practice.deck === dil ? 'oturum açık'
@@ -653,11 +727,51 @@ ESP.Screens.lang = (function(){
 
     async 'clear-vocab'(){ S.ui.vocabParsed = null; ESP.App.render(); },
 
+    async 'konusma-basla'(){
+      const r = await ESP.Voice.kayitBaslat(sonuc => { S.ui.konusma = sonuc; ESP.App.render(); });
+      if(!r.ok){ ESP.UI.toast(r.why); return; }
+      ESP.App.render();
+    },
+    async 'konusma-bitir'(){ ESP.Voice.kayitBitir(); },
+    async 'cumle-tas'(el){
+      const d = cumleDurumu();
+      if(!d) return;
+      const k = el.dataset.k;
+      if(k !== d.hedef[d.yerlesen.length]){ ESP.UI.toast('Bu kelimenin sırası henüz değil.'); return; }
+      d.yerlesen.push(k);
+      d.taslar.splice(d.taslar.indexOf(k), 1);
+      if(d.yerlesen.length === d.hedef.length) ESP.UI.toast('Cümle tamam.');
+      ESP.App.render();
+    },
+    async 'cumle-yeni'(){
+      const aday = kurulacak();
+      const d = S.ui.cumle;
+      const i = d ? aday.findIndex(c => c.id === d.id) : -1;
+      const c = aday[(i + 1) % aday.length];
+      if(c) S.ui.cumle = { id:c.id, hedef:kelimeler(c.context), yerlesen:[], taslar:karistir(kelimeler(c.context), c.id) };
+      ESP.App.render();
+    },
+    async 'dinle-oynat'(){
+      const d = S.ui.dinle = S.ui.dinle || { simdi:0, caliyor:false };
+      const tazele = () => { const k = document.getElementById('dinle-kutu'); if(k) k.outerHTML = dinleVeOku(); };
+      if(d.caliyor){ d.caliyor = false; ESP.Speak.stop(); tazele(); return; }
+      const c = dinlenecek();
+      if(d.simdi >= c.length - 1) d.simdi = 0;
+      d.caliyor = true; tazele();
+      const dil = (ESP.LANG_BY_ID[aktifDil()] || {}).bcp || aktifDil();
+      for(let i = d.simdi; i < c.length && d.caliyor; i++){
+        d.simdi = i; tazele();
+        const r = await ESP.Speak.say(c[i], { lang:dil });
+        if(!r || r.ok === false) break;
+      }
+      d.caliyor = false; tazele();
+    },
     async 'add-card'(){
       const v = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
       const front = v('c-front'), back = v('c-back');
       if(!front || !back){ ESP.UI.toast('Ön yüz ve karşılık gerekir'); return; }
-      await M.saveCard(M.newCard({ front, back, context:v('c-ctx'), lang:aktifDil() }));
+      const liste = t => t.split(',').map(x => x.trim()).filter(Boolean).slice(0, 8);
+      await M.saveCard(M.newCard({ front, back, context:v('c-ctx'), lang:aktifDil(), es:liste(v('c-es')), zit:liste(v('c-zit')) }));
       ESP.Memo.bitir();
       ESP.UI.toast('Kart eklendi');
       ESP.App.render();

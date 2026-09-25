@@ -240,10 +240,80 @@ def ay(con, ay_):
                    for k, v in sorted(kat.items(), key=lambda kv: -kv[1])]
     for x in satir:
         x["tutar"] = tl(x["kurus"], x["birim"])
-    return {"ok": True, "ay": ay_, "kayitlar": satir, "ozet": ozet, "kategoriler": kategoriler,
+    # 082 harcama takvimi: gunun TL gideri (gelir ve TL disi birim girmez;
+    # kaydi olmayan gun listede yoktur — sifir degil, «kayit yok»).
+    gunluk = {}
+    for x in satir:
+        if x["yon"] == "gider" and x["birim"] == "TRY":
+            gunluk[x["gun"]] = gunluk.get(x["gun"], 0) + x["kurus"]
+    gunler = [{"gun": g, "kurus": k} for g, k in sorted(gunluk.items())]
+    return {"ok": True, "ay": ay_, "kayitlar": satir, "ozet": ozet, "kategoriler": kategoriler, "gunler": gunler,
             "kesinlik": "ölçüldü" if satir else "veri yok",
             "metin": ("Bu ay kayıt yok." if not satir else
                       " · ".join(o["metin"] for o in ozet))}
+
+
+def _ay_ekle(ay_, n):
+    y, m = int(ay_[:4]), int(ay_[5:7]) + n
+    while m < 1:
+        y, m = y - 1, m + 12
+    while m > 12:
+        y, m = y + 1, m - 12
+    return "%04d-%02d" % (y, m)
+
+
+def _gun_tarihi(ay_, gun):
+    """Ayin gunu; ay kisaysa ayin son gunu (31 → 30 Eylul)."""
+    ilk = datetime.date.fromisoformat(ay_ + "-01")
+    son = (datetime.date.fromisoformat(_ay_ekle(ay_, 1) + "-01") - datetime.timedelta(days=1)).day
+    return ilk.replace(day=min(gun, son))
+
+
+DUZENLI_GUN_ARALIK = 5      # ayin gunu en cok ±5 gun oynar
+DUZENLI_TUTAR_PAY = 0.25    # tutar ortancanin ±%25'i icinde
+
+
+def duzenli(con, bugun):
+    """087 DUZENLI GIDERLER — kod hesaplar, kullanici yazmaz.
+
+    Bir gider (aciklamasi, yoksa kategorisi) son uc tamamlanmis ayin EN AZ
+    IKISINDE, ayin yakin gunlerinde (±5) ve yakin tutarda (±%25) gelmisse
+    duzenlidir. Beklenen gun o gunlerin ortancasidir; bu ay geldiyse
+    sonraki ay beklenir. Kesinlik «hesaplandı»: bir cikarimdir, ölçüm
+    degil. Yalniz TL giderleri."""
+    bugun_d = datetime.date.fromisoformat(bugun)
+    bu_ay = bugun[:7]
+    bas = _ay_ekle(bu_ay, -3) + "-01"
+    satir = con.execute(
+        "SELECT gun, kurus, kategori, aciklama FROM para WHERE silindi=0 AND yon='gider' "
+        "AND birim='TRY' AND gun>=? AND gun<=? ORDER BY gun", (bas, bugun)).fetchall()
+    grup = {}
+    for r in satir:
+        ad = (r["aciklama"] or "").strip() or r["kategori"]
+        grup.setdefault(ad.lower(), {"ad": ad, "kayit": []})["kayit"].append(
+            (r["gun"][:7], int(r["gun"][8:10]), r["kurus"]))
+    out = []
+    for g in grup.values():
+        gecmis_aylar = {a for a, _, _ in g["kayit"] if a < bu_ay}
+        if len(gecmis_aylar) < 2:
+            continue
+        gunler = sorted(d for _, d, _ in g["kayit"])
+        if gunler[-1] - gunler[0] > DUZENLI_GUN_ARALIK * 2:
+            continue
+        tutarlar = sorted(k for _, _, k in g["kayit"])
+        orta = tutarlar[(len(tutarlar) - 1) // 2]
+        if any(abs(k - orta) > orta * DUZENLI_TUTAR_PAY for k in tutarlar):
+            continue
+        gun = gunler[(len(gunler) - 1) // 2]
+        bu_ay_geldi = any(a == bu_ay for a, _, _ in g["kayit"])
+        beklenen = _gun_tarihi(_ay_ekle(bu_ay, 1) if bu_ay_geldi else bu_ay, gun)
+        out.append({"ad": g["ad"], "gun": gun, "kurus": orta, "tutar": tl(orta),
+                    "beklenen": beklenen.isoformat(), "kalan": (beklenen - bugun_d).days,
+                    "ay_sayisi": len(gecmis_aylar), "kesinlik": "hesaplandı"})
+    out.sort(key=lambda x: (x["kalan"], x["ad"]))
+    return {"ok": True, "giderler": out, "kesinlik": "hesaplandı" if out else "veri yok",
+            "kural": "son üç ayın en az ikisinde, ayın yakın gününde (±%d) ve yakın tutarda (±%%%d)"
+                     % (DUZENLI_GUN_ARALIK, int(DUZENLI_TUTAR_PAY * 100))}
 
 
 def cevap(con, r, bugun):

@@ -88,7 +88,17 @@ async function tohum(){
     talep:'Ferritin neden düşer, demir emilimini neler etkiler? Araştır', hedef_modul:'spi' }) });
   await api('/api/bam/ilerlet', { method:'POST', body:'{}' });
   await api('/api/bam/ilerlet', { method:'POST', body:'{}' });
-  await api('/api/briefing?date=' + bugun.toISOString().slice(0, 10));
+  /* Para: 082 günlük gider takvimi ve 087 düzenli gider kartları dolu
+     haliyle ölçülsün (iki geçmiş ayda kira, bu ay birkaç gider). */
+  const ay = n => { const d = new Date(bugun.getFullYear(), bugun.getMonth() + n, 1);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
+  const gun = new Date().toISOString().slice(0, 10);
+  for(const [g, tutar, kategori, aciklama] of [[ay(-2) + '-05', '12.000', 'Konut', 'kira'],
+    [ay(-1) + '-04', '12.000', 'Konut', 'kira'], [ay(-2) + '-20', '300', 'Fatura', 'internet'],
+    [ay(-1) + '-21', '310', 'Fatura', 'internet'], [ay(0) + '-01', '450', 'Gıda', 'market'],
+    [gun, '85,50', 'Dışarıda yemek', 'kahve']]){
+    await api('/api/para', { method:'POST', body:JSON.stringify({ gun:g, yon:'gider', tutar, kategori, aciklama }) });
+  }
 }
 
 /* Kontrast: WCAG bagil parlaklik. Ayristirmak yerine tarayicinin cozdugu
@@ -240,6 +250,12 @@ async function main(){
           r.kucuk.forEach(k => hatalar.push(yer + ': küçük dokunma hedefi — ' + k));
           r.etiketsiz.forEach(k => hatalar.push(yer + ': etiketsiz öge — ' + k));
           r.kontrast.forEach(k => hatalar.push(yer + ': düşük kontrast — ' + k));
+          /* Tohumlu para verisiyle 082 ve 087 dolu çizilmeli: kart görünmezse
+             ölçülen şey boş bir kutu olurdu. */
+          if(durak.ad === 'para'){
+            const oz = await page.evaluate(() => ['082', '087'].filter(n => !document.querySelector('[data-oz="' + n + '"]')));
+            oz.forEach(n => hatalar.push(yer + ': katalog ' + n + ' tohumlu veriyle çizilmedi'));
+          }
         }
         if(konsol.length) hatalar.push(ad + '/' + tema + ': sayfa hatası — ' + konsol[0]);
         await page.close();

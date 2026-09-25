@@ -125,5 +125,83 @@ ESP.Voice = (function(){
   };
   function message(code){ return MESSAGES[code] || 'Ses tanıma çalışmadı.'; }
 
-  return { supported, start, stop, isActive, activeTarget, dictateInto, message };
+  /* ------------------------------------------------ 099 konuşma ölçümü
+
+     Konuşma pratiğinde mikrofonun GENLİĞİ okunur: her 100 ms'de bir RMS
+     değeri. Ses KAYDEDİLMEZ, gönderilmez, saklanmaz; elde kalan yalnız
+     sayılardır (süre, duraksama, çubuk yükseklikleri). Duraksama: sesin
+     eşiğin altında en az 600 ms kalması — konuşmanın ilk ve son sesli
+     anı arasında. Hiç ses yoksa ölçü YOK (null), «0 duraksama» değil. */
+  function konusmaOlc(ornekler, adimMs, opts){
+    const o = opts || {};
+    const esik = o.esik != null ? o.esik : 0.02;
+    const enAz = Math.max(1, Math.ceil((o.sessizMs || 600) / adimMs));
+    const dizi = (ornekler || []).map(Number).filter(v => isFinite(v) && v >= 0);
+    const sesli = dizi.map(v => v >= esik);
+    const ilk = sesli.indexOf(true), son = sesli.lastIndexOf(true);
+    if(ilk < 0) return null;
+    const k = dizi.slice(ilk, son + 1), sk = sesli.slice(ilk, son + 1);
+    const durak = k.map(() => false);
+    let say = 0;
+    for(let i = 0; i < k.length;){
+      if(sk[i]){ i++; continue; }
+      let j = i; while(j < k.length && !sk[j]) j++;
+      if(j - i >= enAz){ for(let x = i; x < j; x++) durak[x] = true; say++; }
+      i = j;
+    }
+    const N = Math.min(o.cubuk || 48, k.length);
+    const tavan = o.tavan || 0.25;
+    const genlik = [];
+    for(let b = 0; b < N; b++){
+      const a = Math.floor(b * k.length / N), z = Math.max(a + 1, Math.floor((b + 1) * k.length / N));
+      const dil = k.slice(a, z);
+      const ort = dil.reduce((t, v) => t + v, 0) / dil.length;
+      genlik.push(durak.slice(a, z).every(Boolean) ? 0 : Math.max(1, Math.round(16 * Math.min(1, ort / tavan))));
+    }
+    return { genlik, sureSn:Math.round(k.length * adimMs / 1000), duraksama:say };
+  }
+
+  let kayit = null;
+  const KAYIT_EN_COK_MS = 90000;
+  function kayitVar(){
+    return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && (window.AudioContext || window.webkitAudioContext));
+  }
+  async function kayitBaslat(onBitti){
+    if(!kayitVar()) return { ok:false, why:'Bu tarayıcı mikrofonun sesini ölçemiyor.' };
+    if(kayit) return { ok:true };
+    try{
+      const akis = await navigator.mediaDevices.getUserMedia({ audio:true });
+      const AC = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AC();
+      const an = ctx.createAnalyser();
+      an.fftSize = 1024;
+      ctx.createMediaStreamSource(akis).connect(an);
+      const buf = new Float32Array(an.fftSize);
+      const ornek = [];
+      const t = setInterval(() => {
+        an.getFloatTimeDomainData(buf);
+        let s = 0; for(let i = 0; i < buf.length; i++) s += buf[i] * buf[i];
+        ornek.push(Math.sqrt(s / buf.length));
+        if(ornek.length * 100 >= KAYIT_EN_COK_MS) kayitBitir();
+      }, 100);
+      kayit = { akis, ctx, t, ornek, onBitti };
+      return { ok:true };
+    }catch(e){
+      return { ok:false, why:'Mikrofon açılamadı ya da izin verilmedi.' };
+    }
+  }
+  function kayitBitir(){
+    if(!kayit) return null;
+    const k = kayit; kayit = null;
+    clearInterval(k.t);
+    try{ k.akis.getTracks().forEach(x => x.stop()); }catch(e){}
+    try{ k.ctx.close(); }catch(e){}
+    const r = konusmaOlc(k.ornek, 100);
+    if(k.onBitti) k.onBitti(r);
+    return r;
+  }
+  function kayitSuruyor(){ return !!kayit; }
+
+  return { supported, start, stop, isActive, activeTarget, dictateInto, message,
+    konusmaOlc, kayitVar, kayitBaslat, kayitBitir, kayitSuruyor };
 })();
