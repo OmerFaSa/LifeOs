@@ -41,7 +41,8 @@ def _tasiyici(*cevaplar):
     kayit = []
 
     def t(provider, anahtar, model, sistem, mesajlar, ayar=None):
-        kayit.append({"model": model, "sistem": sistem, "ayar": ayar or {}})
+        kayit.append({"model": model, "sistem": sistem, "ayar": ayar or {},
+                      "mesaj_sayisi": len(mesajlar)})
         c = cevaplar[min(len(kayit) - 1, len(cevaplar) - 1)]
         if isinstance(c, Exception):
             raise c
@@ -387,3 +388,47 @@ def run():
         no(k["ulasilabilir"])
         ok("buluta" in k["not"])                              # hibritte is durmaz
     test("sunucu motorun durumunu bilir", t_node_status)
+
+    # ------------------------------------ baglam: ihtiyaci kadar veri
+
+    def _dolu_sohbet(cfg, metin):
+        """12 mesajlik gecmis + 12 hafiza kaydi; modele gideni yakalar."""
+        from core import memory, sohbet
+        con = db.connect(":memory:")
+        konular = ["Sabahları koşarım", "Kahveyi sütlü içerim", "Kedim var", "Gitar çalıyorum",
+                   "Kardeşim üniversitede", "Matematikte türev zorlanıyorum", "Yüzmeyi severim",
+                   "Akşam 23'te yatarım", "Fizik öğretmenim yeni", "Bisiklete binerim",
+                   "Hafta sonu çalışmam", "Kitap kulübüne gidiyorum"]
+        for k in konular:
+            memory.add(con, k)
+        gecmis = []
+        for i in range(6):
+            gecmis += [{"role": "user", "content": "önceki soru %d" % i},
+                       {"role": "assistant", "content": "önceki cevap %d" % i}]
+        t = _tasiyici("Tamam.")
+        r = sohbet.konus(con, cfg, metin, BUGUN, gecmis=gecmis, transport=t)
+        ok(r["ok"], r)
+        return t.kayit[0]
+
+    def t_low_level_sends_only_what_is_needed():
+        """Alt seviye: son 4 mesaj, yalniz mesajla ilgili hafiza, kisa
+        kurallar. Olcum yine tam gider ve uydurma yasagi kisa kuralda da
+        vardir. Paketsiz kurulum eskisi gibi hepsini gonderir."""
+        alt = _dolu_sohbet(_cfg("S"), "bugün türev çalıştım biraz")
+        from core import sohbet
+        eski = _dolu_sohbet(_cfg(None, king={"provider": "openrouter", "model": "x/y"}),
+                            "bugün türev çalıştım biraz")
+        eq(alt["mesaj_sayisi"], 5)
+        eq(eski["mesaj_sayisi"], ai.EN_COK_MESAJ)
+        ok("türev" in alt["sistem"])
+        no("Gitar" in alt["sistem"])
+        ok("Gitar" in eski["sistem"])
+        ok("ÖLÇÜM UYDURMA" in alt["sistem"] or "uydurma" in alt["sistem"].lower())
+        ok(len(alt["sistem"]) < len(eski["sistem"]) * 0.7, (len(alt["sistem"]), len(eski["sistem"])))
+    test("alt seviye yalniz gerekeni gonderir", t_low_level_sends_only_what_is_needed)
+
+    def t_high_level_keeps_full_context():
+        ust = _dolu_sohbet(_cfg("S"), "Fizik mi kimya mı, hangisini seçmeliyim?")
+        eq(ust["mesaj_sayisi"], ai.EN_COK_MESAJ)
+        ok("Gitar" in ust["sistem"] and "Kitap kulübü" in ust["sistem"])
+    test("ust seviye tam baglamla calisir", t_high_level_keeps_full_context)
