@@ -37,6 +37,19 @@ GIRIS = "http://127.0.0.1:4180"
 BEKLE_SANIYE = 15.0
 
 
+def cocuk_ortami():
+    """Cocuk surecin ortami: ciktisini UTF-8 yazsin.
+
+    Cocugun ciktisi gunluk DOSYASINA gider. Python dosyaya yazarken
+    sistemin kod sayfasini kullanir; Turkce Windows'ta bu cp1254'tur ve
+    «✓» orada yoktur: sunucu ilk satirda UnicodeEncodeError ile oluyordu.
+    Gunluk zaten UTF-8 acilir; cocuga da ayni dili konusmasi soylenir."""
+    ortam = dict(os.environ)
+    ortam["PYTHONIOENCODING"] = "utf-8"
+    ortam["PYTHONUTF8"] = "1"
+    return ortam
+
+
 def _yaz(durum, metin, not_=""):
     print("  %s %s%s" % ({"ok": "✓", "yok": "•", "hata": "✕"}.get(durum, "•"),
                          metin, ("  — " + not_) if not_ else ""))
@@ -56,7 +69,8 @@ def hkm_baslat():
     try:
         p = subprocess.run([sys.executable, os.path.join(HKM, "baslat.py"),
                             "--tarayicisiz"], cwd=HKM, capture_output=True,
-                           text=True, timeout=90)
+                           text=True, encoding="utf-8", errors="replace",
+                           env=cocuk_ortami(), timeout=90)
     except Exception as e:
         return False, str(e)
     if _cevap_veriyor("http://127.0.0.1:4200/api/health"):
@@ -70,7 +84,8 @@ def sistemler_baslat():
     gunluge yazilir."""
     gunluk_yolu = os.path.join(KOK, "sunucu.log")
     gunluk = open(gunluk_yolu, "a", encoding="utf-8")
-    kwargs = {"cwd": KOK, "stdout": gunluk, "stderr": subprocess.STDOUT}
+    kwargs = {"cwd": KOK, "stdout": gunluk, "stderr": subprocess.STDOUT,
+              "env": cocuk_ortami()}
     if os.name == "posix":
         kwargs["start_new_session"] = True
     p = subprocess.Popen([sys.executable, os.path.join(KOK, "sunucu.py")],
@@ -108,7 +123,27 @@ def sistemler_dur():
     return 1
 
 
+def _cikti_utf8():
+    """Cikti dosyaya ya da boruya gidiyorsa UTF-8 yazilir.
+
+    Python dosyaya yazarken sistemin kod sayfasini kullanir; Turkce
+    Windows'ta bu cp1254'tur ve «✓» orada yoktur. Baslatici cocuga UTF-8
+    soyler, ama surec elle ve ciktisi yonlendirilerek de acilabilir: o
+    zaman da ilk satirda olmemeli. Konsolda kodlamaya dokunulmaz, yalniz
+    yazilamayan karakter yerine «?» konur."""
+    for ad in ("stdout", "stderr"):
+        akis = getattr(sys, ad, None)
+        try:
+            if akis.isatty():
+                akis.reconfigure(errors="replace")
+            else:
+                akis.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            pass
+
+
 def main():
+    _cikti_utf8()
     if "--dur" in sys.argv:
         print("")
         kod_sistem = sistemler_dur()

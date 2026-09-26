@@ -44,6 +44,19 @@ ESLEME_SANIYE = 20           # yuz icin acilan pencere — kisa tutulur
 import kur  # noqa: E402  (ROOT yoluna eklendikten sonra)
 
 
+def cocuk_ortami():
+    """Cocuk surecin ortami: ciktisini UTF-8 yazsin.
+
+    Cocugun ciktisi gunluk DOSYASINA gider. Python dosyaya yazarken
+    sistemin kod sayfasini kullanir; Turkce Windows'ta bu cp1254'tur ve
+    «✓» orada yoktur: sunucu ilk satirda UnicodeEncodeError ile oluyordu.
+    Gunluk zaten UTF-8 acilir; cocuga da ayni dili konusmasi soylenir."""
+    ortam = dict(os.environ)
+    ortam["PYTHONIOENCODING"] = "utf-8"
+    ortam["PYTHONUTF8"] = "1"
+    return ortam
+
+
 def _yaz(durum, metin, not_=""):
     print("  %s %s%s" % ({"ok": "✓", "yok": "•", "hata": "✕"}.get(durum, "•"),
                          metin, ("  — " + not_) if not_ else ""))
@@ -102,7 +115,8 @@ def daemon_baslat(cfg):
     os.makedirs(os.path.dirname(gunluk_yolu), exist_ok=True)
     _gunluk_donusu(gunluk_yolu)
     gunluk = open(gunluk_yolu, "a", encoding="utf-8")
-    kwargs = {"cwd": ROOT, "stdout": gunluk, "stderr": subprocess.STDOUT}
+    kwargs = {"cwd": ROOT, "stdout": gunluk, "stderr": subprocess.STDOUT,
+              "env": cocuk_ortami()}
     if os.name == "posix":
         kwargs["start_new_session"] = True      # terminal kapanınca olmesin
     subprocess.Popen([sys.executable, os.path.join(ROOT, "daemon.py")], **kwargs)
@@ -154,7 +168,27 @@ def durdur(cfg):
     return 1
 
 
+def _cikti_utf8():
+    """Cikti dosyaya ya da boruya gidiyorsa UTF-8 yazilir.
+
+    Python dosyaya yazarken sistemin kod sayfasini kullanir; Turkce
+    Windows'ta bu cp1254'tur ve «✓» orada yoktur. Baslatici cocuga UTF-8
+    soyler, ama surec elle ve ciktisi yonlendirilerek de acilabilir: o
+    zaman da ilk satirda olmemeli. Konsolda kodlamaya dokunulmaz, yalniz
+    yazilamayan karakter yerine «?» konur."""
+    for ad in ("stdout", "stderr"):
+        akis = getattr(sys, ad, None)
+        try:
+            if akis.isatty():
+                akis.reconfigure(errors="replace")
+            else:
+                akis.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            pass
+
+
 def main():
+    _cikti_utf8()
     sessiz = "--tarayicisiz" in sys.argv
     if "--dur" in sys.argv:
         print("")
