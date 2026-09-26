@@ -1580,6 +1580,10 @@ SP.Screens.labs = (function(){
 
   return {
     id:'labs',
+    /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
+       bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
+       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
+    kucukVarsayilan:['nasıl-okunur', 'paneller', 'hiç-ölçülmemiş-paneller'],
     title:'Testler',
 
     /* Başlık durumun kendisidir: ekranın adı zaten üstte yazıyor. */

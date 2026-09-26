@@ -289,6 +289,10 @@ R.Screens.target = (function(){
 
   return {
     id:'target',
+    /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
+       bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
+       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
+    kucukVarsayilan:['sıra-referansları', 'yerleşen-profilleri'],
     title:'Hedef',
     subtitle(){ return R.PROGRAM.program+' · 2026 sırası '+U.fmtNum(R.PROGRAM.refRank); },
     actions(){ return ''; },

@@ -255,6 +255,10 @@ R.Screens.plan = (function(){
 
   return {
     id:'plan',
+    /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
+       bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
+       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
+    kucukVarsayilan:['bu-plan-sana-göre-üretildi'],
     title:'Program',
     subtitle(){
       return 'Hafta '+M.currentWeek()+' / '+R.PLAN.totalWeeks+' · '

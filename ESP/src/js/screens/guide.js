@@ -645,6 +645,10 @@ ESP.Screens.guide = (function(){
 
   return {
     id:'guide',
+    /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
+       bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
+       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
+    kucukVarsayilan:['eşikler-nereden-geliyor', 'yayımlanmış-çerçeve', 'öğrenme-araştırması', 'kendi-ölçümün', 'sistem-ayarı', 'denetim', 'tahmin-tabloları', 'kardeş-projeler', 'doktrin'],
     title:'Rehber',
     headline(){ return 'Sistem ne yapar — ve ne yapmaz.'; },
     lede(){

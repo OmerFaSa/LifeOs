@@ -499,6 +499,10 @@ ESP.Screens.profile = (function(){
 
   return {
     id:'profile',
+    /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
+       bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
+       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
+    kucukVarsayilan:['bölümler', 'hkm-işareti', 'model'],
     title:'Profil',
     headline(){
       const p = S.profile || {};

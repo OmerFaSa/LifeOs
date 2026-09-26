@@ -630,6 +630,10 @@ ESP.Screens.studio = (function(){
 
   return {
     id:'studio',
+    /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
+       bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
+       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
+    kucukVarsayilan:['kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları'],
     title:'Stüdyo',
     headline(){
       const plato = ESP.Acoustic.plateaus();

@@ -586,7 +586,7 @@ R.App = (function(){
         try{
           LIFEOS.Gizle.uygula({ kok:document.getElementById('main'), modul:'ays',
             profil:(R.Ornek && R.Ornek.aktif && R.Ornek.aktif()) || 'main', ekran:sc.id,
-            varsayilan:sc.gizliVarsayilan || [] });
+            varsayilan:sc.gizliVarsayilan || [], kucukVarsayilan:sc.kucukVarsayilan || [] });
         }catch(e){ console.error('Gizle:', e); }
       }
     }catch(err){

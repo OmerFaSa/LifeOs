@@ -558,7 +558,7 @@ ESP.App = (function(){
         try{
           LIFEOS.Gizle.uygula({ kok:document.getElementById('main'), modul:'esp',
             profil:(ESP.Ornek && ESP.Ornek.aktif && ESP.Ornek.aktif()) || 'main', ekran:sc.id,
-            varsayilan:sc.gizliVarsayilan || [] });
+            varsayilan:sc.gizliVarsayilan || [], kucukVarsayilan:sc.kucukVarsayilan || [] });
         }catch(e){ console.error('Gizle:', e); }
       }
     }catch(err){

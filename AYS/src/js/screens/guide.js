@@ -1139,6 +1139,10 @@ R.Screens.guide = (function(){
 
   return {
     id:'guide',
+    /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
+       bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
+       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
+    kucukVarsayilan:['bu-uygulama-ne-değildir', 'kritik-işlemler', 'sınav-haftası-ve-sınav-günü', 'taper-haftası-planı', 'kaygı-azaltma', 'deneme-analizi-protokolü', 'hata-etiketleri-ve-reçeteler', 'yanlış-defteri-tasarımı', 'aralıklı-tekrar', 'hesap-verebilirlik', 'eşikler-nereden-geliyor', 'sınav-kaynağı', 'öğrenme-araştırması', 'kendi-verin', 'sistem-ayarı', 'denetim', 'yedek-dosyası-neyi-içerir', 'klavye-kısayolları'],
     title:'Genel ayarlar',
     subtitle(){ return 'Ayarlar, takvim ve protokoller — alt alta'; },
     actions(){ return ''; },

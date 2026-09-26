@@ -1708,6 +1708,10 @@ R.Screens.today = (function(){
     /* Bugün › Ayrıntı: aynı işleyiciler, aynı sayaç; ayrı bir çizim. */
     ayrinti:{
       id:'gun',
+      /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
+         bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
+         «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
+      kucukVarsayilan:['hafta-bağlamı', 'bugünün-ödülü'],
       title:'Günün ayrıntısı',
       subtitle(){ return 'Bloklar, sayaçlar ve günün bütün kartları'; },
       actions(){ return ''; },

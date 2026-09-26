@@ -183,6 +183,10 @@ ESP.Screens.office = (function(){
 
   return {
     id:'office',
+    /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
+       bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
+       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
+    kucukVarsayilan:['masalar-arası-devir', 'öncelik-sırası'],
     title:'Masalar',
     headline(){
       const n = ESP.Office.notes().filter(x => x.tone === 'danger').length;

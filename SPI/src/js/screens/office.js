@@ -401,6 +401,10 @@ SP.Screens.office = (function(){
 
   return {
     id:'office',
+    /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
+       bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
+       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
+    kucukVarsayilan:['masalar-arası-devir', 'yetki-ayrımı'],
     title:'Ofis',
     headline(){
       const notes = SP.Office.notes();

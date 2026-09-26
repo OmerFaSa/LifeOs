@@ -22,12 +22,14 @@
         adları atılır: «Pazar blokları» ile «Pazartesi blokları» aynı
         bölümdür).
      5. VARSAYILAN SADELİK. Bir ekran bazı bölümleri baştan gizli
-        önerebilir (`varsayilan`); kullanıcı geri getirirse o seçim kalır.
+        (`varsayilan`) ya da baştan küçük (`kucukVarsayilan`) önerebilir;
+        kullanıcı geri getirir ya da açarsa o seçim kalır.
      6. KÜÇÜLTMEK DE KALICIDIR. Küçültülen bölümün yalnız başlığı görünür
         ve kullanıcı açana dek öyle kalır. Üzerine gelince (ya da klavyeyle
         odaklanınca) küçük bir pencerede ÖNİZLEMESİ belirir; önizleme
         salt bakmak içindir (`inert`): içindeki düğme bir şey uygulamaz.
         Gizlenenlerin önizlemesi de paneldeki satırın üzerinde açılır.
+        Telefonda küçük bölüme basılı tutmak önizlemeyi açar.
 
    Bölüm sayılanlar: başlığı olan `section.lrow` (defter satırı),
    `section.kutu` ve `.card`. İç içe olanlardan yalnız en dıştaki. */
@@ -53,14 +55,16 @@ LIFEOS.Gizle = (function(){
   function anahtar(baslik){
     let s = String(baslik || '').toLocaleLowerCase('tr-TR').replace(/[0-9]+/g, ' ');
     GUNLER.slice().sort((a, b) => b.length - a.length).forEach(g => { s = s.split(g).join(' '); });
-    return s.replace(/[^a-zçğıöşü]+/g, ' ').trim().replace(/\s+/g, '-');
+    return s.replace(/[^a-zçğıöşüâîû]+/g, ' ').trim().replace(/\s+/g, '-');
   }
 
   function baslikOf(el){
     const b = el.querySelector(':scope > .lrow__side .lrow__label, :scope > .kutu__bas .kutu__ad, :scope > .card__head h3');
     if(!b) return '';
     const kopya = b.cloneNode(true);
-    kopya.querySelectorAll('.hint, button, svg, .sr-only').forEach(x => x.remove());
+    /* İpucu ve sözlük balonları (role=tooltip, .terim__kart) başlığın
+       parçası değildir: yoksa anahtar balonun metnini de taşır. */
+    kopya.querySelectorAll('.hint, button, svg, .sr-only, [role="tooltip"], .terim__kart, [hidden]').forEach(x => x.remove());
     return kopya.textContent.replace(/\s+/g, ' ').trim();
   }
 
@@ -68,12 +72,18 @@ LIFEOS.Gizle = (function(){
   function oku(o){
     try{
       const d = JSON.parse(localStorage.getItem(depoAdi(o)) || 'null');
-      if(d && typeof d === 'object') return { gizli:d.gizli || {}, acik:d.acik || {}, ad:d.ad || {}, kucuk:d.kucuk || {} };
+      if(d && typeof d === 'object') return { gizli:d.gizli || {}, acik:d.acik || {}, ad:d.ad || {},
+        kucuk:d.kucuk || {}, acikK:d.acikK || {} };
     }catch(e){}
-    return { gizli:{}, acik:{}, ad:{}, kucuk:{} };
+    return { gizli:{}, acik:{}, ad:{}, kucuk:{}, acikK:{} };
   }
   function yaz(o, d){
     try{ localStorage.setItem(depoAdi(o), JSON.stringify(d)); }catch(e){ /* depo kapalı: bu oturumda geçerli */ }
+  }
+
+  function kucukMu(d, a, varsayilan){
+    if(d.kucuk[a]) return true;
+    return (varsayilan || []).indexOf(a) >= 0 && !d.acikK[a];
   }
 
   function gizliMi(d, a, varsayilan){
@@ -108,7 +118,7 @@ LIFEOS.Gizle = (function(){
     const liste = bolumler(o.kok);
     liste.forEach(b => {
       const g = gizliMi(d, b.anahtar, o.varsayilan);
-      const k = !g && !!d.kucuk[b.anahtar];
+      const k = !g && kucukMu(d, b.anahtar, o.kucukVarsayilan);
       b.el.hidden = g;
       b.el.classList.toggle('gizle-bolum', duzen);
       b.el.classList.toggle('gizle-kucuk', k);
@@ -152,7 +162,8 @@ LIFEOS.Gizle = (function(){
   function kucult(a, v){
     if(!son) return;
     const d = oku(son);
-    if(v === false) delete d.kucuk[a]; else d.kucuk[a] = true;
+    if(v === false){ delete d.kucuk[a]; d.acikK[a] = true; }
+    else { d.kucuk[a] = true; delete d.acikK[a]; }
     yaz(son, d);
     onizlemeKapat();
     uygula(son);
@@ -351,6 +362,32 @@ LIFEOS.Gizle = (function(){
       const ic = e.relatedTarget && h.yakin.contains(e.relatedTarget);
       if(!ic) onizlemeKapat();
     };
+    /* Dokunmatik ekranda «üzerine gelmek» yoktur: küçültülmüş bölüme
+       BASILI TUTMAK (~0,45 sn) önizlemeyi açar; parmak kayarsa iptal,
+       sonraki dokunuş kapatır. Uzun basışın bağlam menüsü o an bastırılır. */
+    let basili = null, basiliAcildi = false;
+    document.addEventListener('pointerdown', e => {
+      if(onizleme && basiliAcildi){ onizlemeKapat(); basiliAcildi = false; }
+      if(e.pointerType !== 'touch') return;
+      const k = e.target && e.target.closest && e.target.closest('[data-gizle-kucuk]');
+      if(!k || e.target.closest('button, a, input, select, textarea')) return;
+      const x = e.clientX, y = e.clientY;
+      clearTimeout(basili);
+      basili = setTimeout(() => { onizlemeAc(k, k); basiliAcildi = true; }, 450);
+      const iptal = ev => {
+        if(ev.type === 'pointermove' && Math.hypot(ev.clientX - x, ev.clientY - y) < 10) return;
+        clearTimeout(basili);
+        document.removeEventListener('pointermove', iptal, true);
+        document.removeEventListener('pointerup', iptal, true);
+        document.removeEventListener('pointercancel', iptal, true);
+      };
+      document.addEventListener('pointermove', iptal, true);
+      document.addEventListener('pointerup', iptal, true);
+      document.addEventListener('pointercancel', iptal, true);
+    }, true);
+    document.addEventListener('contextmenu', e => {
+      if(basiliAcildi && e.target && e.target.closest && e.target.closest('[data-gizle-kucuk]')) e.preventDefault();
+    });
     document.addEventListener('mouseover', gir);
     document.addEventListener('mouseout', cik);
     document.addEventListener('focusin', gir);

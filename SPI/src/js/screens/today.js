@@ -1399,6 +1399,10 @@ SP.Screens.today = (function(){
     /* Bugün › Ayrıntı: aynı işleyiciler, ayrı bir çizim. */
     ayrinti:{
       id:'gun',
+      /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
+         bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
+         «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
+      kucukVarsayilan:['neden-bunlar', 'taban-çizgin', 'son-iki-hafta'],
       title:'Günün ayrıntısı',
       subtitle(){ return 'Ölçüm formu, şikâyetler, özet ve son iki hafta'; },
       actions(){ return ''; },

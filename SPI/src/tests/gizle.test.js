@@ -122,6 +122,51 @@
       }finally{ temizle(kok); }
     });
 
+    it('başlık balonları anahtara karışmaz; â/î/û korunur', () => {
+      const kok = document.createElement('div');
+      kok.innerHTML = '<section class="kutu"><header class="kutu__bas"><h2 class="kutu__ad">'
+        + '<span class="terim" tabindex="0">Tekrar borcu<span class="terim__kart" role="tooltip">Tekrar borcu: vadesi gelen kartların oranı</span></span>'
+        + '</h2></header><div class="kutu__govde">x</div></section>';
+      document.body.appendChild(kok);
+      try{
+        expect(G().bolumler(kok)[0].anahtar).toBe('tekrar-borcu');
+        expect(G().anahtar('Tezgâh')).toBe('tezgâh');
+      }finally{ kok.remove(); }
+    });
+
+    it('varsayılan küçük bölüm açılırsa açık kalır; kullanıcı yine küçültebilir', () => {
+      const a = G().anahtar('Günün akışı');
+      let kok = sayfa(); G()._sifirla();
+      G().uygula({ kok, modul:MOD, profil:'p', ekran:'rehber', kucukVarsayilan:[a] });
+      try{
+        expect(G().bolumler(kok)[0].el.classList.contains('gizle-kucuk')).toBe(true);
+        G().kucult(a, false);
+        kok.remove(); kok = sayfa();
+        G().uygula({ kok, modul:MOD, profil:'p', ekran:'rehber', kucukVarsayilan:[a] });
+        expect(G().bolumler(kok)[0].el.classList.contains('gizle-kucuk')).toBe(false);
+        G().kucult(a, true);
+        expect(G().bolumler(kok)[0].el.classList.contains('gizle-kucuk')).toBe(true);
+      }finally{ temizle(kok); }
+    });
+
+    it('telefonda küçük bölüme basılı tutmak önizlemeyi açar; kısa dokunuş açmaz', async () => {
+      const kok = kur();
+      const bekle = ms => new Promise(r => setTimeout(r, ms));
+      const bas = (el, tur) => el.dispatchEvent(new PointerEvent(tur, { bubbles:true, pointerType:'touch', clientX:5, clientY:5 }));
+      try{
+        const b = G().bolumler(kok)[0];
+        G().kucult(b.anahtar, true);
+        const el = G().bolumler(kok)[0].el.querySelector('.lrow__side');
+        bas(el, 'pointerdown'); await bekle(100); bas(el, 'pointerup'); await bekle(500);
+        expect(G().onizlemeVar()).toBe(false);                 // kısa dokunuş
+        bas(el, 'pointerdown'); await bekle(600);
+        expect(G().onizlemeVar()).toBe(true);                  // basılı tutma
+        bas(el, 'pointerup');
+        bas(document.body, 'pointerdown');
+        expect(G().onizlemeVar()).toBe(false);                 // sonraki dokunuş kapatır
+      }finally{ temizle(kok); }
+    });
+
     it('varsayılan gizli bölüm geri getirilirse o seçim kalır', () => {
       let kok = kur('ofis', [G().anahtar('Sistem önerileri')]);
       try{
