@@ -41,6 +41,19 @@ LIFEOS.Gizle = (function(){
   const GUNLER = ['pazartesi', 'salı', 'çarşamba', 'perşembe', 'cuma', 'cumartesi', 'pazar'];
   const SECICI = 'section.lrow, section.kutu, .card';
 
+  /* Küçük tek renk simgeler (currentColor): düğmeler yazısız kalır ama
+     aria-label ve title ne yaptıklarını söyler. */
+  const SIMGE = {
+    kucult:'<path d="M5 12h14"/>',
+    gizle:'<path d="M3 3l18 18"/><path d="M10.6 5.2A9.8 9.8 0 0 1 12 5c5 0 8.5 4.5 9.5 7a13 13 0 0 1-2.6 3.6M6.4 6.6C4.4 8 3 10 2.5 12c1 2.5 4.5 7 9.5 7 1.7 0 3.2-.5 4.5-1.2"/><path d="M9.9 10a3 3 0 0 0 4.1 4.1"/>',
+    goz:'<path d="M2.5 12C3.5 9.5 7 5 12 5s8.5 4.5 9.5 7c-1 2.5-4.5 7-9.5 7s-8.5-4.5-9.5-7z"/><circle cx="12" cy="12" r="3"/>',
+    ac:'<path d="M9 6l6 6-6 6"/>',
+  };
+  function svg(ad){
+    return '<svg class="gizle-sim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"'
+      + ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + SIMGE[ad] + '</svg>';
+  }
+
   let son = null;          // { kok, modul, profil, ekran, varsayilan }
   let duzen = false;       // «Bu sayfayı düzenle» açık mı
   let panel = null;
@@ -129,18 +142,19 @@ LIFEOS.Gizle = (function(){
       if(!g && (duzen || k)){
         const arac = document.createElement('div');
         arac.className = 'gizle-araclar';
-        const dugme = (ne, yazi, etiket) => {
+        const dugme = (ne, simge, etiket, ipucu) => {
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = 'gizle-dugme';
+          btn.className = 'gizle-dugme gizle-dugme--' + simge;
           btn.setAttribute(ne, b.anahtar);
           btn.setAttribute('aria-label', etiket);
-          btn.textContent = yazi;
+          btn.title = ipucu;
+          btn.innerHTML = svg(simge);
           arac.appendChild(btn);
         };
-        if(k) dugme('data-ac', 'Aç', '«' + b.baslik + '» bölümünü aç');
-        else dugme('data-kucult', 'Küçült', '«' + b.baslik + '» bölümünü küçült');
-        if(duzen) dugme('data-gizle', 'Gizle', '«' + b.baslik + '» bölümünü gizle');
+        if(k) dugme('data-ac', 'ac', '«' + b.baslik + '» bölümünü aç', 'Aç');
+        else dugme('data-kucult', 'kucult', '«' + b.baslik + '» bölümünü küçült', 'Küçült');
+        if(duzen) dugme('data-gizle', 'gizle', '«' + b.baslik + '» bölümünü gizle', 'Gizle');
         b.el.insertBefore(arac, b.el.firstChild);
       }
     });
@@ -197,7 +211,14 @@ LIFEOS.Gizle = (function(){
       kap.appendChild(ic);
       ic = kap;
     }
-    onizleme.appendChild(ic);
+    const bas = document.createElement('div');
+    bas.className = 'gizle-onizleme__bas';
+    bas.innerHTML = '<span>Önizleme</span><b>' + kac(baslikOf(kaynak)) + '</b>';
+    onizleme.appendChild(bas);
+    const govde = document.createElement('div');
+    govde.className = 'gizle-onizleme__govde';
+    govde.appendChild(ic);
+    onizleme.appendChild(govde);
     (document.querySelector('.site') || document.body).appendChild(onizleme);
     const r = yakin.getBoundingClientRect();
     const g = onizleme.offsetWidth, y = onizleme.offsetHeight;
@@ -262,7 +283,7 @@ LIFEOS.Gizle = (function(){
       c.id = 'gizle-bitir';
       c.className = 'gizle-bitir';
       c.setAttribute('role', 'status');
-      c.innerHTML = '<span>Sayfayı düzenliyorsun: bölümleri küçült ya da gizle.</span>'
+      c.innerHTML = '<span><b>Düzen kipi</b><i> · bölümleri küçült ya da gizle</i></span>'
         + '<button type="button" data-duzen-bitir>Bitti</button>';
       document.body.appendChild(c);
     }
@@ -278,17 +299,28 @@ LIFEOS.Gizle = (function(){
     });
   }
 
+  function kucukListe(){
+    if(!son) return [];
+    return bolumler(son.kok).filter(b => b.el.classList.contains('gizle-kucuk'))
+      .map(b => ({ anahtar:b.anahtar, baslik:b.baslik }));
+  }
+
   function panelCiz(){
-    const l = gizliListe();
-    const govde = l.length
-      ? '<ul class="gizle-liste">' + l.map(b => '<li data-onizle="' + kac(b.anahtar) + '" tabindex="0"><span>' + kac(b.baslik) + '</span>'
-          + '<button type="button" data-goster="' + kac(b.anahtar) + '">Geri getir</button></li>').join('') + '</ul>'
-      : '<p class="kmenu__bos">Bu sayfada gizlenen bölüm yok.</p>';
-    panel.innerHTML = '<p class="kmenu__bas">Gizlenen bölümler</p>' + govde
+    const l = gizliListe(), k = kucukListe();
+    const satir = (b, veri, yazi) => '<li data-onizle="' + kac(b.anahtar) + '" tabindex="0">'
+      + '<span class="gizle-liste__ad">' + kac(b.baslik) + '</span>'
+      + '<button type="button" ' + veri + '="' + kac(b.anahtar) + '">' + yazi + '</button></li>';
+    const grup = (ad, liste, veri, yazi, simge) => liste.length
+      ? '<p class="gizle-grup">' + svg(simge) + '<span>' + ad + '</span><b>' + liste.length + '</b></p>'
+        + '<ul class="gizle-liste">' + liste.map(b => satir(b, veri, yazi)).join('') + '</ul>' : '';
+    const govde = (l.length || k.length)
+      ? grup('Gizlenenler', l, 'data-goster', 'Geri getir', 'gizle') + grup('Küçültülenler', k, 'data-ac', 'Aç', 'kucult')
+      : '<p class="gizle-bos">Bu sayfa olduğu gibi. Kalabalık gelen bölümleri<br>«Bu sayfayı düzenle» ile küçültebilir ya da gizleyebilirsin.</p>';
+    panel.innerHTML = '<p class="kmenu__bas">Sayfa düzeni</p>' + govde
       + '<div class="gizle-alt">'
       + '<button type="button" data-duzen aria-pressed="' + (duzen ? 'true' : 'false') + '">'
       + (duzen ? 'Düzenlemeyi bitir' : 'Bu sayfayı düzenle') + '</button>'
-      + (l.length ? '<button type="button" data-hepsi>Hepsini göster</button>' : '')
+      + (l.length ? '<button type="button" data-hepsi>' + svg('goz') + 'Hepsini göster</button>' : '')
       + '</div><p class="gizle-not">Gizlemek veriyi silmez; bölüm yalnız bu sayfada gösterilmez.</p>';
   }
 
@@ -301,8 +333,11 @@ LIFEOS.Gizle = (function(){
     panelCiz();
     document.body.appendChild(panel);
     const r = dugme.getBoundingClientRect();
+    /* Sağ kenarı düğmeye hizalı, ama dar ekranda da ekranın içinde. */
+    const w = panel.offsetWidth, W = document.documentElement.clientWidth || window.innerWidth;
     panel.style.top = Math.round(r.bottom + 6) + 'px';
-    panel.style.right = Math.max(8, Math.round(window.innerWidth - r.right)) + 'px';
+    panel.style.left = Math.round(Math.max(8, Math.min(r.right - w, W - w - 8))) + 'px';
+    panel.style.right = 'auto';
     dugme.setAttribute('aria-expanded', 'true');
     const ilk = panel.querySelector('button');
     if(ilk) ilk.focus();
@@ -329,11 +364,17 @@ LIFEOS.Gizle = (function(){
       if(gz){ e.preventDefault(); e.stopPropagation(); onizlemeKapat(); gizle(gz.getAttribute('data-gizle')); return; }
       const kc = t.closest('[data-kucult]');
       if(kc){ e.preventDefault(); e.stopPropagation(); kucult(kc.getAttribute('data-kucult'), true); return; }
+      const serit = t.closest('[data-gizle-kucuk]');
+      if(serit && !duzen && !t.closest('a, input, select, textarea, [data-act], .hint, .terim') && !t.closest('[data-kucult],[data-gizle]')){
+        e.preventDefault(); e.stopPropagation(); kucult(serit.getAttribute('data-gizle-kucuk'), false); return;
+      }
       const ac2 = t.closest('[data-ac]');
       if(ac2){ e.preventDefault(); e.stopPropagation(); kucult(ac2.getAttribute('data-ac'), false); return; }
       if(panel && panel.contains(t)){
         const g = t.closest('[data-goster]');
         if(g){ goster(g.getAttribute('data-goster')); return; }
+        const pa = t.closest('[data-ac]');
+        if(pa){ kucult(pa.getAttribute('data-ac'), false); return; }
         if(t.closest('[data-duzen]')){ duzenle(); return; }
         if(t.closest('[data-hepsi]')){ hepsiniGoster(); return; }
         return;
@@ -355,7 +396,13 @@ LIFEOS.Gizle = (function(){
       if(p && panel && panel.contains(p)) return { kaynak:kaynakBul(p.getAttribute('data-onizle')), yakin:p };
       return null;
     };
-    const gir = e => { const h = hedefOf(e.target); if(h && h.kaynak) onizlemeZamanla(h.kaynak, h.yakin); };
+    /* Odakla açılma yalnız klavye odağında: panel açılınca ilk düğmeye
+       giden programatik odak (dokunuş/fare) önizlemeyi panelin üstüne açmaz. */
+    const klavyeOdagi = el => { try{ return el.matches(':focus-visible'); }catch(x){ return true; } };
+    const gir = e => {
+      if(e.type === 'focusin' && !klavyeOdagi(e.target)) return;
+      const h = hedefOf(e.target); if(h && h.kaynak) onizlemeZamanla(h.kaynak, h.yakin);
+    };
     const cik = e => {
       const h = hedefOf(e.target);
       if(!h) return;

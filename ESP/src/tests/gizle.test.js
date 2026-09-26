@@ -106,6 +106,55 @@
       }finally{ temizle(kok); }
     });
 
+    it('küçük şeride tıklamak açar; içindeki bağlantı ve aksiyonlar açmaz; düzen kipinde açmaz', () => {
+      let kok = kur();
+      try{
+        const b = G().bolumler(kok)[0];
+        G().kucult(b.anahtar, true);
+        const tikla = el => el.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
+        tikla(G().bolumler(kok)[0].el.querySelector('[data-act]'));
+        expect(G().bolumler(kok)[0].el.classList.contains('gizle-kucuk')).toBe(true);
+        G().duzenle(true);
+        tikla(G().bolumler(kok)[0].el.querySelector('.lrow__label'));
+        expect(G().bolumler(kok)[0].el.classList.contains('gizle-kucuk')).toBe(true);
+        G().duzenle(false);
+        tikla(G().bolumler(kok)[0].el.querySelector('.lrow__label'));
+        expect(G().bolumler(kok)[0].el.classList.contains('gizle-kucuk')).toBe(false);
+        expect(!!G().bolumler(kok)[0].el.querySelector('[data-ac]')).toBe(false);
+      }finally{ G().duzenle(false); temizle(kok); }
+    });
+
+    it('küçük şeridin «Aç» düğmesi klavyeyle erişilir ve adıyla etiketlidir', () => {
+      const kok = kur();
+      try{
+        const b = G().bolumler(kok)[0];
+        G().kucult(b.anahtar, true);
+        const d = G().bolumler(kok)[0].el.querySelector('[data-ac]');
+        expect(d.tagName).toBe('BUTTON');
+        expect(d.getAttribute('aria-label').includes('Günün akışı')).toBe(true);
+      }finally{ temizle(kok); }
+    });
+
+    it('panel dar ekranda da ekranın içinde kalır; açılışta önizleme kendiliğinden açılmaz', () => {
+      const kok = kur();
+      const d = document.createElement('button');
+      d.className = 'ust__gizli';
+      d.style.cssText = 'position:fixed;left:4px;top:4px;width:30px;height:30px';
+      document.body.appendChild(d);
+      try{
+        G().kucult(G().bolumler(kok)[0].anahtar, true);
+        d.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
+        const p = document.querySelector('.kmenu--gizle');
+        expect(!!p).toBe(true);
+        const r = p.getBoundingClientRect();
+        expect(r.left >= 0).toBe(true);
+        expect(r.right <= window.innerWidth).toBe(true);
+        expect(G().onizlemeVar()).toBe(false);
+        d.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
+        expect(document.querySelector('.kmenu--gizle')).toBe(null);
+      }finally{ d.remove(); temizle(kok); }
+    });
+
     it('önizleme kartın kendisini gösterir ve salt bakmak içindir', () => {
       const kok = kur();
       try{

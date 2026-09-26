@@ -25,71 +25,106 @@
 .ust__gizli.is-dolu .ust__gizli-sayi{ display:block; }
 
 /* ---------- panel ---------- */
-.kmenu--gizle{ width:min(340px, calc(100vw - 24px)); }
-.gizle-liste{ list-style:none; margin:0; padding:0 4px; }
+.kmenu--gizle{ width:min(360px, calc(100vw - 24px)); padding:10px; }
+.gizle-sim{ width:14px; height:14px; flex:none; }
+.gizle-grup{
+  display:flex; align-items:center; gap:6px; margin:10px 8px 4px;
+  font-size:11px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--text-3);
+}
+.gizle-grup b{
+  margin-left:auto; min-width:18px; height:18px; padding:0 5px; border-radius:9px;
+  background:var(--surface-2); color:var(--text-2); font-size:10px; line-height:18px; text-align:center;
+}
+.gizle-liste{ list-style:none; margin:0; padding:0; }
 .gizle-liste li{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
-  padding:8px 6px; border-radius:8px; font-size:var(--fs-sm, 13px); color:var(--text);
+  padding:7px 8px; border-radius:8px; font-size:13px; color:var(--text);
+  transition:background var(--dur, .15s) var(--ease, ease);
 }
 .gizle-liste li:hover, .gizle-liste li:focus-visible{ background:var(--surface-2); outline:none; }
-.gizle-liste li > span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gizle-liste__ad{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .gizle-liste button, .gizle-alt button{
-  flex:none; min-height:28px; padding:0 10px; border-radius:7px; border:1px solid var(--border);
+  display:inline-flex; align-items:center; gap:6px; flex:none;
+  min-height:28px; padding:0 11px; border-radius:7px; border:1px solid var(--border);
   background:var(--surface); color:var(--text); font:inherit; font-size:12px; font-weight:600; cursor:pointer;
+  transition:border-color var(--dur, .15s) var(--ease, ease), background var(--dur, .15s) var(--ease, ease);
 }
-.gizle-liste button:hover, .gizle-alt button:hover{ border-color:var(--border-strong); }
-.gizle-alt{ display:flex; flex-wrap:wrap; gap:6px; padding:8px 6px 4px; border-top:1px solid var(--border); margin-top:6px; }
+.gizle-liste button:hover, .gizle-alt button:hover{ border-color:var(--border-strong); background:var(--surface-2); }
+.gizle-alt{ display:flex; flex-wrap:wrap; gap:6px; padding:10px 4px 2px; border-top:1px solid var(--border); margin-top:10px; }
 .gizle-alt [aria-pressed="true"]{ background:var(--text); color:var(--surface); border-color:var(--text); }
-.gizle-not{ margin:6px 8px 4px; font-size:11px; color:var(--text-3); }
+.gizle-bos{ margin:6px 8px 4px; font-size:12.5px; line-height:1.55; color:var(--text-2); }
+.gizle-not{ margin:8px 6px 2px; font-size:11px; color:var(--text-3); }
 
 /* ---------- düzen kipi ---------- */
-.gizle-bolum{ position:relative; }
+.gizle-bolum{ position:relative; transition:box-shadow var(--dur, .15s) var(--ease, ease); }
 .gizle-duzen .gizle-bolum{
-  outline:1px dashed var(--border-strong); outline-offset:4px; border-radius:var(--r-md, 10px);
+  border-radius:var(--r-md, 10px);
+  box-shadow:0 0 0 1px var(--border-strong), 0 0 0 5px color-mix(in srgb, var(--surface-2) 70%, transparent);
 }
+.gizle-duzen .gizle-bolum:hover{ box-shadow:0 0 0 1.5px var(--text-2), 0 0 0 6px color-mix(in srgb, var(--surface-2) 80%, transparent); }
 .gizle-araclar{
-  position:absolute; top:6px; right:6px; z-index:2;
-  display:flex; gap:4px;
+  position:absolute; top:8px; right:8px; z-index:2;
+  display:flex; gap:2px; padding:2px; border-radius:9px;
+  background:var(--surface); box-shadow:0 0 0 1px var(--border), 0 2px 8px rgba(0,0,0,.08);
 }
 .gizle-dugme{
-  min-height:24px; min-width:24px; padding:0 9px; border-radius:6px;
-  border:1px solid var(--border); background:var(--surface); color:var(--text-2);
-  font:inherit; font-size:11px; font-weight:600; cursor:pointer;
-  box-shadow:0 1px 2px rgba(0,0,0,.06);
+  display:inline-flex; align-items:center; justify-content:center;
+  width:28px; height:28px; padding:0; border-radius:7px; border:0;
+  background:none; color:var(--text-2); cursor:pointer;
+  transition:background var(--dur, .15s) var(--ease, ease), color var(--dur, .15s) var(--ease, ease);
 }
-.gizle-dugme:hover{ color:var(--text); border-color:var(--border-strong); }
+.gizle-dugme .gizle-sim{ width:15px; height:15px; }
+.gizle-dugme:hover{ background:var(--surface-2); color:var(--text); }
+.gizle-dugme:focus-visible{ outline:2px solid var(--primary, var(--text)); outline-offset:1px; }
 
-/* ---------- küçültülmüş bölüm ---------- */
-.gizle-kucuk{ position:relative; align-self:start; min-height:0 !important; height:auto !important; }
+/* ---------- küçültülmüş bölüm: ince şerit ---------- */
+.gizle-kucuk{
+  position:relative; align-self:start; min-height:0 !important; height:auto !important;
+  cursor:pointer; border-radius:var(--r-md, 10px);
+  transition:background var(--dur, .15s) var(--ease, ease);
+}
+.gizle-kucuk:hover{ background:var(--surface-2); }
 .gizle-kucuk > .lrow__main,
 .gizle-kucuk > .lrow__side > .lrow__note,
 .gizle-kucuk > .lrow__side > .lrow__act,
+.gizle-kucuk > .lrow__side > .lrow__meta,
 .gizle-kucuk > .kutu__govde,
 .gizle-kucuk > .kutu__ayak,
 .card.gizle-kucuk > :not(.card__head):not(.gizle-araclar){ display:none !important; }
-section.lrow.gizle-kucuk{ grid-template-columns:1fr !important; padding-top:10px; padding-bottom:10px; min-height:0; }
-.gizle-kucuk .lrow__side{ padding-right:120px; }
-.gizle-kucuk .kutu__bas{ padding-right:80px; }
-.gizle-kucuk{ cursor:default; opacity:.92; }
-.gizle-kucuk:hover{ opacity:1; }
+section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important; padding-bottom:12px !important; }
+.gizle-kucuk .lrow__side, .gizle-kucuk .kutu__bas, .gizle-kucuk .card__head{ padding-right:48px; }
+.gizle-kucuk .lrow__label, .gizle-kucuk .kutu__ad, .gizle-kucuk .card__head h3{ color:var(--text-2); }
+.gizle-kucuk .lrow__label::before, .gizle-kucuk .kutu__ad::before, .gizle-kucuk .card__head h3::before{
+  content:''; display:inline-block; width:6px; height:6px; margin-right:9px; vertical-align:middle;
+  border-right:1.6px solid currentColor; border-bottom:1.6px solid currentColor; transform:rotate(-45deg) translateY(-1px);
+  opacity:.7;
+}
+.gizle-kucuk .gizle-araclar{ top:50%; transform:translateY(-50%); box-shadow:none; background:none; }
 
 /* ---------- önizleme penceresi ---------- */
 .gizle-onizleme{
   position:fixed; z-index:calc(var(--z-overlay, 60) + 1);
-  width:min(440px, calc(100vw - 16px)); max-height:min(360px, 60vh); overflow:hidden;
-  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md, 10px);
-  box-shadow:var(--shadow-lg, 0 12px 32px rgba(0,0,0,.18)); padding:10px 14px;
+  width:min(460px, calc(100vw - 16px)); max-height:min(380px, 62vh); overflow:hidden;
+  background:var(--surface); border:1px solid var(--border); border-radius:12px;
+  box-shadow:0 18px 48px rgba(0,0,0,.22), 0 2px 6px rgba(0,0,0,.08);
   pointer-events:none;
   animation:gizle-onizle var(--dur, .16s) var(--ease, ease) both;
 }
+.gizle-onizleme__bas{
+  display:flex; align-items:baseline; gap:8px; padding:9px 14px;
+  border-bottom:1px solid var(--border); background:var(--surface-2); font-size:12px;
+}
+.gizle-onizleme__bas span{ font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); }
+.gizle-onizleme__bas b{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); font-weight:600; }
+.gizle-onizleme__govde{ padding:12px 14px; zoom:.9; }
 .gizle-onizleme__kap{ display:block !important; margin:0 !important; padding:0 !important; border:0 !important;
   width:auto !important; max-width:none !important; min-height:0 !important; grid-template-columns:1fr !important; }
 .gizle-onizleme section.lrow, .gizle-onizleme section.kutu, .gizle-onizleme .card{ margin:0 !important; border-top:0 !important; }
 .gizle-onizleme::after{
-  content:''; position:absolute; left:0; right:0; bottom:0; height:48px;
+  content:''; position:absolute; left:0; right:0; bottom:0; height:56px;
   background:linear-gradient(to bottom, transparent, var(--surface));
 }
-@keyframes gizle-onizle{ from{ opacity:0; transform:translateY(-3px) scale(.985); } to{ opacity:1; transform:none; } }
+@keyframes gizle-onizle{ from{ opacity:0; transform:translateY(-4px) scale(.98); } to{ opacity:1; transform:none; } }
 @media (prefers-reduced-motion: reduce){ .gizle-onizleme{ animation:none; } }
 
 /* ---------- düzen kipi: alttaki «Bitti» çubuğu ---------- */
@@ -98,13 +133,17 @@ section.lrow.gizle-kucuk{ grid-template-columns:1fr !important; padding-top:10px
   z-index:var(--z-overlay, 60); display:flex; align-items:center; gap:12px;
   max-width:calc(100vw - 24px); padding:8px 8px 8px 16px; border-radius:999px;
   background:var(--text); color:var(--surface); box-shadow:var(--shadow-lg, 0 12px 32px rgba(0,0,0,.25));
-  font-size:13px;
+  font-size:13px; white-space:nowrap;
 }
+.gizle-bitir i{ font-style:normal; opacity:.72; }
 .gizle-bitir button{
   min-height:30px; padding:0 14px; border-radius:999px; border:0; cursor:pointer;
   background:var(--surface); color:var(--text); font:inherit; font-weight:700;
 }
 .gizle-bolum{ scroll-margin-top:80px; }
 @media (max-width:480px){
-  .gizle-bitir{ bottom:calc(var(--altbant-h, 64px) + 12px + env(safe-area-inset-bottom, 0px)); font-size:12px; }
+  /* Telefonda sağdaki «+» düğmesine çarpmasın: sola yaslı, kısa metin. */
+  .gizle-bitir{ left:16px; transform:none; max-width:calc(100vw - 104px);
+    bottom:calc(var(--altbant-h, 64px) + 12px + env(safe-area-inset-bottom, 0px)); font-size:12.5px; }
+  .gizle-bitir i{ display:none; }
 }
