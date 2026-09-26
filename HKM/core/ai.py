@@ -175,7 +175,7 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
     tanim = models.PROVIDERS[provider]
     if provider in ("openrouter", "openai", "yerel"):
         url, baslik, govde = _openai_bicimi(
-            tanim["base"], anahtar or "", model, sistem,
+            ayar.get("adres") or tanim["base"], anahtar or "", model, sistem,
             [_openai_mesaj(m) for m in mesajlar],
             {"HTTP-Referer": "http://127.0.0.1:4200", "X-Title": "HKM"}
             if provider == "openrouter" else None)
@@ -483,6 +483,11 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
     Bu fonksiyon merdivenin TEK basamagidir (`a`: o basamagin atamasi);
     basamaklari `ask` yurutur (core/motor.py)."""
     ayar = {k: v for k, v in (ayar or {}).items() if v}
+    if a.get("provider") == "yerel":
+        # Motor servisi baska bir makinedeyse adresi ayardan gelir.
+        adres = models.yerel_uclari(cfg)[0]
+        if adres != models.PROVIDERS["yerel"]["base"]:
+            ayar["adres"] = adres
     tavan_jeton = int(ayar.get("jeton") or EN_COK_JETON)
 
     anahtar = models.key_value(cfg, a["provider"], a.get("key_id"))

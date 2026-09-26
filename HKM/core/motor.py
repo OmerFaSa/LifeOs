@@ -157,17 +157,48 @@ def merdiven(con, cfg, rol, seviye=None):
     bas, tavan, efor = PAKET_POLITIKASI[paket][pseviye]
     bas, tavan, ekonomi = _ekonomi(con, cfg, bas, tavan)
     tur = "ses" if pseviye == "ses" else ("gorsel" if pseviye == "gorsel" else "metin")
+    yer = models.yer_of(cfg)
+    yerel = models.yerel_of(cfg) if tur == "metin" else {}
+    jeton = CEVAP_JETON.get(pseviye, 1200)
+    siniflar = list(SINIFLAR[SINIFLAR.index(bas):SINIFLAR.index(tavan) + 1])
+    ortak = {"paket": paket, "seviye": pseviye, "ekonomi": ekonomi, "elle": False, "yer": yer,
+             "yer_notu": None}
+
+    def yerel_basamak(s):
+        return {"sinif": s, "atama": {
+            "role": rol, "from": None, "inherited": False, "provider": "yerel",
+            "provider_label": models.PROVIDERS["yerel"]["label"], "model": yerel[s], "efor": "",
+            "key_id": "", "key_label": "", "key_user": models.VARSAYILAN_SAHIP,
+            "key_missing": False, "key_set": True, "chain": [rol]},
+            # Yerel model efor bilmez; bedeli sifirdir.
+            "ayar": {"jeton": jeton}}
+
+    if yer == "yerel":
+        if tur != "metin":
+            return dict(ortak, ok=False, reason="no-model", basamaklar=[],
+                        note="Yerel modda görsel ve ses okunmaz; bunlar için hibrit ya da bulut seç.")
+        if not yerel:
+            return dict(ortak, ok=False, reason="no-model", basamaklar=[],
+                        note="Yerel modda çalışmak için bir yerel model adı gir (Ayarlar → Yapay zekâ).")
+        secili = [yerel_basamak(s) for s in siniflar if s in yerel]
+        if not secili:
+            # Istenen sinif yerelde yok: en ust yerel model kullanilir ve SOYLENIR.
+            ust = [s for s in models.YEREL_SINIFLAR if s in yerel][-1]
+            secili = [yerel_basamak(ust)]
+            ortak["yer_notu"] = ("Yerel modda en üst sınıf %s; bu istek normalde %s sınıfla "
+                                 "başlardı." % (SINIF_ADI[ust], SINIF_ADI[bas]))
+        return dict(ortak, ok=True, basamaklar=secili)
+
     saglayici = "google" if tur == "ses" else "openrouter"
     liste = models.key_list(cfg, saglayici)
-    if not liste:
-        return {"ok": False, "reason": "no-key", "basamaklar": [], "paket": paket,
-                "seviye": pseviye, "ekonomi": ekonomi,
-                "note": ("Ses ve video yalnız Google (Gemini) anahtarıyla çalışır; "
-                         "«Sağlayıcılar» bölümüne bir Google anahtarı ekle.") if tur == "ses"
-                else "%s paketi OpenRouter anahtarıyla çalışır; «Sağlayıcılar» bölümüne ekle." % paket}
-    e = liste[0]
     basamaklar = []
-    for s in SINIFLAR[SINIFLAR.index(bas):SINIFLAR.index(tavan) + 1]:
+    for s in siniflar:
+        if yer == "hibrit" and s in yerel:
+            basamaklar.append(yerel_basamak(s))
+            continue
+        if not liste:
+            continue
+        e = liste[0]
         m = SINIF_MODELI[tur][s]
         atama = {"role": rol, "from": None, "inherited": False, "provider": saglayici,
                  "provider_label": models.PROVIDERS[saglayici]["label"], "model": m,
@@ -175,9 +206,13 @@ def merdiven(con, cfg, rol, seviye=None):
                  "key_user": e.get("user") or models.VARSAYILAN_SAHIP, "key_missing": False,
                  "key_set": bool(e.get("key")), "chain": [rol]}
         basamaklar.append({"sinif": s, "atama": atama, "ayar": {
-            "efor": efor, "jeton": CEVAP_JETON.get(pseviye, 1200) + DUSUNME_PAYI.get(efor, 0)}})
-    return {"ok": True, "basamaklar": basamaklar, "paket": paket, "seviye": pseviye,
-            "ekonomi": ekonomi, "elle": False}
+            "efor": efor, "jeton": jeton + DUSUNME_PAYI.get(efor, 0)}})
+    if not basamaklar:
+        return dict(ortak, ok=False, reason="no-key", basamaklar=[],
+                    note=("Ses ve video yalnız Google (Gemini) anahtarıyla çalışır; "
+                          "«Sağlayıcılar» bölümüne bir Google anahtarı ekle.") if tur == "ses"
+                    else "%s paketi OpenRouter anahtarıyla çalışır; «Sağlayıcılar» bölümüne ekle." % paket)
+    return dict(ortak, ok=True, basamaklar=basamaklar)
 
 
 # Anahtar reddi (401/403) ve bakiye yok (402) HESABIN sorunudur: ayni
@@ -232,11 +267,19 @@ def _olculen(con, bugun):
     return toplam, (yuk / n if n else 0.0)
 
 
+def _yerel_mi(yer, yerel, tur, sinif):
+    """True: bu basamak yerelde; False: bulutta; None: bu yerde calismaz."""
+    if tur == "metin" and yer in ("yerel", "hibrit") and sinif in yerel:
+        return True
+    return None if yer == "yerel" else False
+
+
 def onizleme(cfg, con=None, bugun=None):
     """Dort paketin onizlemesi ve aylik tahmin. Hicbir sey yazmaz."""
     from core import ai, tarife
     kullanim, yukselme = _olculen(con, bugun)
     aktif = models.paket_of(cfg)
+    yer, yerel = models.yer_of(cfg), models.yerel_of(cfg)
     or_var = bool(models.key_list(cfg, "openrouter"))
     google_var = bool(models.key_list(cfg, "google"))
     out = []
@@ -247,6 +290,13 @@ def onizleme(cfg, con=None, bugun=None):
             tur = "ses" if ps == "ses" else ("gorsel" if ps == "gorsel" else "metin")
             basamak = []
             for sn in SINIFLAR[SINIFLAR.index(bas):SINIFLAR.index(tavan) + 1]:
+                yerde = _yerel_mi(yer, yerel, tur, sn)
+                if yerde is None:
+                    continue                     # yerel modda bulut basamagi yok
+                if yerde:
+                    basamak.append({"sinif": sn, "sinif_adi": SINIF_ADI[sn], "model": yerel[sn],
+                                    "fiyat": [0.0, 0.0], "fiyat_kaynagi": "yerel", "yerel": True})
+                    continue
                 m = SINIF_MODELI[tur][sn]
                 b = tarife.bilgi(models.saglayici_of(m), m)
                 basamak.append({"sinif": sn, "sinif_adi": SINIF_ADI[sn], "model": m,
@@ -261,6 +311,8 @@ def onizleme(cfg, con=None, bugun=None):
                 i0 = SINIFLAR.index(bas)
                 i1 = min(i0 + 1, SINIFLAR.index(tavan))
                 for i, pay in ((i0, 1.0 - yukselme), (i1, yukselme)):
+                    if _yerel_mi(yer, yerel, tur, SINIFLAR[i]) is not False:
+                        continue                 # yerelde calisan basamagin bedeli sifir
                     m = SINIF_MODELI[tur][SINIFLAR[i]]
                     fg, fc = ai.tarife_of(models.saglayici_of(m), m) or ai.BILINMEYEN_FIYAT
                     usd += pay * (g / 1e6 * fg + c / 1e6 * fc)
@@ -272,6 +324,41 @@ def onizleme(cfg, con=None, bugun=None):
     if not google_var:
         eksik.append("Ses ve video yalnız Google (Gemini) anahtarıyla çalışır.")
     return {"paketler": out, "aktif": aktif, "tarife": tarife.durum(), "eksik": eksik,
+            "yer": yer, "yerel": yerel, "yerel_adres": models.yerel_kok(cfg),
             "yukselme_orani": None if yukselme is None else round(yukselme, 3),
             "olcum_notu": "" if kullanim else
             "Son 30 günde ölçülmüş kullanım yok; aylık tahmin ilk kullanımdan sonra hesaplanır."}
+
+
+# ------------------------------------------------------- motor servisi
+
+SINIF_YERI = {"ayni_makine": "aynı makine (localhost; veri makineden çıkmaz)",
+              "yerel_ag": "yerel ağ", "internet": "internet (https)"}
+
+
+def dugum_durumu(cfg, transport=None):
+    """Sunucu motor servisinden HABERDAR olur: ulasilabilir mi, gecikme,
+    modeller, ayni makine mi. Cagri yapmaz, para harcamaz (model listesi)."""
+    import time
+    kok = models.yerel_kok(cfg)
+    _, _, sinif = models.adres_denetle(kok)
+    t0 = time.monotonic()
+    r = models.probe(cfg, "yerel", transport=transport, timeout=5)
+    gecikme = round((time.monotonic() - t0) * 1000)
+    yer = models.yer_of(cfg)
+    yerel = models.yerel_of(cfg)
+    liste = r.get("models") or []
+    if r.get("ok"):
+        eksik = [ad for ad in yerel.values() if liste and ad not in liste]
+        not_ = ("Motor servisi cevap verdi." if not eksik else
+                "Motor cevap verdi ama şu model sunucuda yok: %s" % ", ".join(eksik))
+    else:
+        # Genel sinama cumlesi («internet baglantisini kontrol et») yerel
+        # motor icin yaniltir: sorun cogu zaman servisin kapali olmasidir.
+        not_ = ("Motor servisine ulaşılamadı (%s): servis çalışıyor mu, adres doğru mu? " % kok
+                + ("Hibritte işler buluta geçer." if yer == "hibrit" else
+                   "Yerel modda model çağrıları yapılamaz; sistem kural motoruyla sürer."
+                   if yer == "yerel" else ""))
+    return {"adres": kok, "sinif": sinif, "sinif_adi": SINIF_YERI.get(sinif, ""),
+            "ulasilabilir": bool(r.get("ok")), "gecikme_ms": gecikme, "modeller": liste,
+            "yerel_model_var": bool(yerel), "yer": yer, "not": not_.strip()}

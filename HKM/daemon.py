@@ -14,7 +14,8 @@ Ucnoktalar:
     POST /api/config                ayar yamasi (dogrulanir; jetona dokunmaz)
     POST /api/probe                 saglayici anahtarini SINAR (mesaj uretmez)
     POST /api/models                saglayicinin anahtara ACIK model listesi
-    GET  /api/models/paketler       butce paketleri A · A+ · S · S+ (onizleme)
+    GET  /api/models/paketler       guc paketleri A · A+ · S · S+ (onizleme)
+    GET  /api/ai/dugum              motor servisinin durumu (adres, gecikme, modeller)
     POST /api/models/tarife         guncel model tarifesini okur (OpenRouter)
     POST /api/telegram/yoklama      webhook'u siler ve bir yoklama turu dener
     GET  /api/backup                butun ambar tek JSON
@@ -1147,6 +1148,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"agents": out})
         if u.path == "/api/config":
             return self._send(200, settings.read(self.server.config))
+        if u.path == "/api/ai/dugum":
+            # Motor servisinin durumu: sunucu motordan haberdardir (adres,
+            # ayni makine mi, gecikme, modeller). Para harcamaz.
+            return self._send(200, motor.dugum_durumu(self.server.config))
         if u.path == "/api/models/paketler":
             # Butce paketleri (A · A+ · S · S+): onizleme, hicbir sey yazmaz.
             # Aylik tahmin defterdeki OLCUMDEN hesaplanir.

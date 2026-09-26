@@ -251,3 +251,139 @@ def run():
         eq(len(kayit), 1)
         ok("401" in r["note"])
     test("anahtar ve bakiye hatasinda merdiven cikilmaz", t_account_errors_do_not_climb)
+
+    # ------------------------------------------------ nerede calissin
+
+    def _yer_cfg(yer, paket="S", yerel=None, bulut=True):
+        cfg = {"local_token": "x", "budget": {"ceiling_currency": "usd", "monthly_usd": 20.0}}
+        if bulut:
+            cfg = models.apply(cfg, {"keys": {"openrouter": "sk-or-test"}})
+        cfg = models.apply(cfg, {"paket": paket, "yer": yer,
+                                 "yerel": yerel if yerel is not None else {"ekonomik": "qwen-kucuk"}})
+        return cfg
+
+    def t_place_is_validated():
+        for y in ("yerel", "hibrit", "bulut", "", None):
+            ok(models.validate({"yer": y})[0], y)
+        no(models.validate({"yer": "uzay"})[0])
+        no(models.validate({"yerel": {"guclu": "x"}})[0])        # yerel yalniz alt siniflar
+        ok(models.validate({"yerel": {"ekonomik": "a", "standart": "b"}})[0])
+        eq(models.yer_of({"local_token": "x"}), "bulut")        # varsayilan: bugunku hal
+    test("calisma yeri dogrulanir; varsayilan bulut", t_place_is_validated)
+
+    def t_hybrid_simple_local_hard_cloud():
+        """Hibrit: basit is yerelde, zorlanirsa bulutta guclu model."""
+        m = motor.merdiven(None, _yer_cfg("hibrit"), "seviye.alt")
+        eq([(b["atama"]["provider"], b["sinif"]) for b in m["basamaklar"]],
+           [("yerel", "ekonomik"), ("openrouter", "standart")])
+        eq(m["basamaklar"][0]["atama"]["model"], "qwen-kucuk")
+        u = motor.merdiven(None, _yer_cfg("hibrit"), "king", seviye="ust")
+        eq([b["atama"]["provider"] for b in u["basamaklar"]], ["openrouter", "openrouter"])
+    test("hibrit: basit yerelde, zor bulutta", t_hybrid_simple_local_hard_cloud)
+
+    def t_hybrid_falls_to_cloud_when_local_is_down():
+        con = db.connect(":memory:")
+        kayit = []
+        def tas(provider, anahtar, model, sistem, mesajlar, ayar=None):
+            kayit.append(provider)
+            if provider == "yerel":
+                raise ConnectionRefusedError("yerel sunucu kapali")
+            return "Merhaba!", 10, 5
+        r = ai.ask(con, _yer_cfg("hibrit"), "seviye.alt", "sohbet", _mesaj(), baglam="",
+                   sistem="s", transport=tas, seviye="alt")
+        ok(r["ok"])
+        eq(kayit, ["yerel", "openrouter"])
+    test("hibritte yerel kapaliysa bulut devralir", t_hybrid_falls_to_cloud_when_local_is_down)
+
+    def t_local_only_never_touches_cloud():
+        """Yerel: bulut anahtari olsa da buluta cikilmaz; ust seviye icin
+        en ust yerel model kullanilir ve bu soylenir. Bedel sifirdir."""
+        cfg = _yer_cfg("yerel", yerel={"ekonomik": "qwen-kucuk", "standart": "qwen-orta"})
+        m = motor.merdiven(None, cfg, "king", seviye="ust")
+        eq([(b["atama"]["provider"], b["atama"]["model"]) for b in m["basamaklar"]],
+           [("yerel", "qwen-orta")])
+        ok(m["yer_notu"])
+        a = motor.merdiven(None, cfg, "seviye.alt")
+        eq([b["atama"]["model"] for b in a["basamaklar"]], ["qwen-kucuk", "qwen-orta"])
+        con = db.connect(":memory:")
+        t = _tasiyici("Tamam.")
+        r = ai.ask(con, _yer_cfg("yerel", bulut=False), "seviye.alt", "sohbet", _mesaj(),
+                   baglam="", sistem="s", transport=t, seviye="alt")
+        ok(r["ok"])
+        eq(con.execute("SELECT usd FROM usage").fetchone()["usd"], 0.0)
+    test("yerel: bulut kullanilmaz, bedel sifir", t_local_only_never_touches_cloud)
+
+    def t_local_without_model_says_so():
+        m = motor.merdiven(None, _yer_cfg("yerel", yerel={}), "seviye.alt")
+        no(m["ok"])
+        ok("yerel model" in m["note"])
+        # Hibritte yerel model yoksa bulut devam eder.
+        h = motor.merdiven(None, _yer_cfg("hibrit", yerel={}), "seviye.alt")
+        eq([b["atama"]["provider"] for b in h["basamaklar"]], ["openrouter", "openrouter"])
+    test("yerel model yoksa soylenir; hibrit bulutla surer", t_local_without_model_says_so)
+
+    def t_preview_shows_local_rungs_free():
+        cfg = _yer_cfg("hibrit")
+        con = db.connect(":memory:")
+        butce.record(con, role="king", task="sohbet", provider="yerel", model="qwen-kucuk",
+                     in_tok=1_000_000, out_tok=1_000_000, note="seviye=alt",
+                     now=datetime.datetime(2026, 9, 20, 12, 0))
+        o = motor.onizleme(cfg, con=con, bugun="2026-09-26")
+        eq(o["yer"], "hibrit")
+        a = [p for p in o["paketler"] if p["id"] == "A"][0]
+        alt = [x for x in a["satirlar"] if x["seviye"] == "alt"][0]
+        ok(alt["basamaklar"][0]["yerel"])
+        eq(alt["basamaklar"][0]["fiyat"], [0.0, 0.0])
+        eq(a["aylik"], 0.0)                 # A'da alt ekonomik'ten baslar: yerel, bedava
+    test("onizleme yerel basamaklari bedava gosterir", t_preview_shows_local_rungs_free)
+
+    # ---------------------------------------- motor servisi (AI dugumu)
+
+    def t_node_address_safety():
+        """Sunucu merkezdir; AI degistirilebilir bir motor servisidir ve
+        adresi ayarlanir. Ayni makine ve yerel ag http olabilir; internetteki
+        bir motor YALNIZ https ile kabul edilir: ham veri sifresiz
+        internete tasinmaz."""
+        for adres, sinif in (("http://127.0.0.1:11434", "ayni_makine"),
+                             ("http://localhost:1234", "ayni_makine"),
+                             ("http://192.168.1.20:11434", "yerel_ag"),
+                             ("http://10.0.0.5:8080", "yerel_ag"),
+                             ("http://masaustu.local:11434", "yerel_ag"),
+                             ("http://100.101.5.9:11434", "yerel_ag"),      # Tailscale
+                             ("https://ai.ornek.com", "internet")):
+            ok_, hata, sn = models.adres_denetle(adres)
+            ok(ok_, (adres, hata))
+            eq(sn, sinif, adres)
+        for kotu in ("http://ai.ornek.com", "http://8.8.8.8:11434", "ftp://127.0.0.1",
+                     "127.0.0.1:11434", "https://", "http://127.0.0.1:11434/v1?x=1"):
+            no(models.adres_denetle(kotu)[0], kotu)
+        no(models.validate({"yerel_adres": "http://ai.ornek.com"})[0])
+        ok(models.validate({"yerel_adres": "http://192.168.1.20:11434"})[0])
+    test("motor adresi: yerel ag http, internet yalniz https", t_node_address_safety)
+
+    def t_node_address_reaches_the_call():
+        cfg = models.apply(_yer_cfg("yerel", bulut=False), {"yerel_adres": "http://192.168.1.20:11434"})
+        eq(models.yerel_uclari(cfg), ("http://192.168.1.20:11434/v1/chat/completions",
+                                     "http://192.168.1.20:11434/v1/models"))
+        eq(models.yerel_uclari({"local_token": "x"})[0], models.PROVIDERS["yerel"]["base"])
+        con = db.connect(":memory:")
+        t = _tasiyici("Tamam.")
+        ai.ask(con, cfg, "seviye.alt", "sohbet", _mesaj(), baglam="", sistem="s",
+               transport=t, seviye="alt")
+        eq(t.kayit[0]["ayar"].get("adres"), "http://192.168.1.20:11434/v1/chat/completions")
+    test("motor adresi cagriya gider", t_node_address_reaches_the_call)
+
+    def t_node_status():
+        """Sunucu motorun durumundan HABERDARDIR: ulasilabilir mi, ne kadar
+        gecikmeli, hangi modeller, ayni makine mi yerel ag mi internet mi."""
+        cfg = models.apply(_yer_cfg("hibrit"), {"yerel_adres": "http://192.168.1.20:11434"})
+        d = motor.dugum_durumu(cfg, transport=lambda p, t, k: {"ok": True, "models": ["qwen-kucuk"], "note": ""})
+        ok(d["ulasilabilir"])
+        eq(d["sinif"], "yerel_ag")
+        eq(d["modeller"], ["qwen-kucuk"])
+        ok(d["gecikme_ms"] >= 0)
+        ok(d["yerel_model_var"])
+        k = motor.dugum_durumu(cfg, transport=lambda p, t, k: {"ok": False, "note": "bağlantı reddedildi"})
+        no(k["ulasilabilir"])
+        ok("buluta" in k["not"])                              # hibritte is durmaz
+    test("sunucu motorun durumunu bilir", t_node_status)

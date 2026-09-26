@@ -2664,7 +2664,8 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     if(!yer) return;
     var r = await api('/api/models/paketler');
     if(r.status !== 200){ yer.innerHTML = '<p class="muted">Paketler okunamadı.</p>'; return; }
-    var o = r.body, h = '<div class="tag">Bütçe paketi · gereken zekâ, gereken yerde</div>';
+    var o = r.body, h = yerKismi(o);
+    h += '<div class="tag">Güç paketi · gereken zekâ, gereken yerde</div>';
     h += '<p class="muted">Sistem en düşük uygun sınıfla dener; model zorlanırsa bir üst sınıfa '
       + 'çıkar. Bütçenin %80 ve %95 eşiklerinde yönlendirme kendiliğinden ekonomikleşir ve '
       + 'bu söylenir. Bir kademeye elle model atadıysan o geçerlidir.</p>';
@@ -2699,6 +2700,65 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     if($('paket-geri')) $('paket-geri').addEventListener('click', function(){
       var p = PAKET_ONCEKI; PAKET_ONCEKI = undefined; paketYaz(p || '', 'Önceki seçime dönüldü.'); });
     $('tarife-guncelle').addEventListener('click', tarifeGuncelle);
+    Array.prototype.forEach.call(yer.querySelectorAll('[data-yer]'), function(b){
+      b.addEventListener('click', function(){ yerYaz(b.dataset.yer); }); });
+    $('yerel-kaydet').addEventListener('click', function(){ yerYaz(null); });
+    $('yerel-sina').addEventListener('click', yerelSina);
+  }
+
+  /* NEREDE ÇALIŞSIN. Yerel: her şey bilgisayarında, bulut hiç kullanılmaz,
+     bedel sıfır. Hibrit: merdivenin alt basamakları yerelde; model
+     zorlanınca (ya da yerel sunucu kapalıysa) buluttaki güçlü modele
+     çıkılır. Bulut: her şey OpenRouter'da. */
+  var YER_ADI = { yerel:'Yerel', hibrit:'Hibrit', bulut:'Bulut' };
+  var YER_NOT = { yerel:'Her şey bilgisayarında; bedel sıfır, en üst sınıf yerel modelin.',
+    hibrit:'Basit işler bilgisayarında, zor işler bulutta. Önerilen.',
+    bulut:'Her şey bulutta; kurulum yok, her çağrı ücretli.' };
+  function yerKismi(o){
+    var yer = o.yer || 'bulut', yl = o.yerel || {};
+    var h = '<div class="tag">Nerede çalışsın</div><div class="row">';
+    ['yerel', 'hibrit', 'bulut'].forEach(function(y){
+      h += '<button data-yer="' + y + '"' + (y === yer ? ' class="primary" aria-pressed="true"' : '')
+        + '>' + YER_ADI[y] + '</button>';
+    });
+    h += '</div><p class="muted" style="font-size:12px">' + esc(YER_NOT[yer]) + '</p>';
+    h += '<details class="detay"' + (yer !== 'bulut' && !yl.ekonomik ? ' open' : '')
+      + '><summary>Motor servisi ve yerel modeller (Ollama, LM Studio…)</summary>'
+      + '<datalist id="yerel-liste"></datalist>'
+      + '<label style="display:block;font-size:12px;margin:6px 0">Motor adresi '
+      + '<input id="yerel-adres" placeholder="http://127.0.0.1:11434" value="' + esc(o.yerel_adres || '') + '"></label>'
+      + '<p class="muted" style="font-size:11px;margin:0">Aynı makine ya da ev ağı http olabilir; '
+      + 'internetteki bir motor yalnız https ile bağlanır.</p>'
+      + '<label style="display:block;font-size:12px;margin:6px 0">Ekonomik sınıf '
+      + '<input id="yerel-ekonomik" list="yerel-liste" value="' + esc(yl.ekonomik || '') + '"></label>'
+      + '<label style="display:block;font-size:12px;margin:6px 0">Standart sınıf (isteğe bağlı) '
+      + '<input id="yerel-standart" list="yerel-liste" value="' + esc(yl.standart || '') + '"></label>'
+      + '<div class="row"><button id="yerel-sina" style="font-size:12px">Yerel sunucuyu sına</button>'
+      + '<button id="yerel-kaydet" style="font-size:12px">Yerel modelleri kaydet</button></div>'
+      + '<p class="muted" id="yerel-not" style="font-size:12px">Güçlü ve Uzman sınıf her zaman buluttadır.</p>'
+      + '</details>';
+    return h;
+  }
+  async function yerYaz(yer){
+    var yama = { models:{ yerel:{ ekonomik:($('yerel-ekonomik').value || '').trim(),
+      standart:($('yerel-standart').value || '').trim() },
+      yerel_adres:($('yerel-adres').value || '').trim() } };
+    if(yer) yama.models.yer = yer;
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
+    if(r.status === 200){ ayarlariCiz(r.body.config); }
+    else if($('yerel-not')){ $('yerel-not').textContent = 'Kaydedilmedi — '
+      + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status); }
+  }
+  /* Sunucu motor servisinden HABERDARDIR: adres, aynı makine mi, gecikme,
+     modeller. Kaydedilmemiş adres önce kaydedilir ki sınanan o olsun. */
+  async function yerelSina(){
+    var d = await api('/api/ai/dugum');
+    var b = d.body || {}, liste = b.modeller || [];
+    $('yerel-liste').innerHTML = liste.map(function(ad){
+      return '<option value="' + esc(ad) + '"></option>'; }).join('');
+    $('yerel-not').textContent = (b.ulasilabilir
+      ? esc(b.adres) + ' · ' + b.sinif_adi + ' · ' + b.gecikme_ms + ' ms · ' + liste.length + ' model. '
+      : esc(b.adres || '') + ' · ') + (b.not || '');
   }
   async function paketYaz(id, mesaj){
     var r = await api('/api/config', { method:'POST', body:JSON.stringify({ models:{ paket:id } }) });
