@@ -28,6 +28,9 @@
    ELLE SECIM KAZANIR: bir kademenin KENDI atamasi varsa merdiven kurulmaz.
    Paket secilmemisse sistem eskisi gibi atama/mirasla calisir."""
 
+import contextlib
+import threading
+
 from core import butce, models
 
 SINIFLAR = ("ekonomik", "standart", "guclu", "uzman")
@@ -71,6 +74,41 @@ PAKET_ADI = {"A": "Az bütçe · verim", "A+": "Orta bütçe · verim, bir tık 
 CEVAP_JETON = {"alt": 500, "orta": 1000, "ust": 1800, "gorsel": 1200,
                "arastirma": 2000, "ses": 1200}
 DUSUNME_PAYI = {None: 0, "low": 1000, "medium": 2500, "high": 5000}
+
+# BAM EFORU — is basina secilir. «yuksek» paketin kendi merdivenidir;
+# «dusuk» ucuzlatir, «en_yuksek» Guclu→Uzman'a cikar. Yalniz BAM
+# kademelerini etkiler (sohbet paketin merdiveninde kalir) ve yalniz
+# adimin kendi seviyesi olmayan cagrilarda (sorgu kurmak gibi basit adim
+# alt seviyede kalir). Butce bantlari yine uygulanir.
+BAM_EFORLARI = ("dusuk", "yuksek", "en_yuksek")
+BAM_EFOR_ADI = {"dusuk": "Düşük", "yuksek": "Yüksek", "en_yuksek": "En yüksek"}
+BAM_EFOR_POLITIKASI = {
+    "dusuk": {"arastirma": ("ekonomik", "standart", "low"), "ust": ("standart", "guclu", "low"),
+              "orta": ("ekonomik", "standart", "low")},
+    "en_yuksek": {"arastirma": ("guclu", "uzman", "high"), "ust": ("guclu", "uzman", "high"),
+                  "orta": ("standart", "guclu", "medium")},
+}
+_BAGLAM = threading.local()
+
+
+@contextlib.contextmanager
+def efor_baglami(efor):
+    """BAM adiminin cagrilari bu eforla yurur (bam.py, is_baglami gibi)."""
+    onceki = getattr(_BAGLAM, "efor", None)
+    _BAGLAM.efor = efor if efor in BAM_EFORLARI else None
+    try:
+        yield
+    finally:
+        _BAGLAM.efor = onceki
+
+
+def _politika(paket, pseviye, rol, seviye):
+    bas, tavan, efor = PAKET_POLITIKASI[paket][pseviye]
+    e = getattr(_BAGLAM, "efor", None)
+    if rol.startswith("bam") and seviye is None and e in BAM_EFOR_POLITIKASI:
+        bas, tavan, efor = BAM_EFOR_POLITIKASI[e].get(pseviye, (bas, tavan, efor))
+    return bas, tavan, efor
+
 
 YUKSELT = "[[YUKSELT]]"
 YUKSELT_KURALI = ("\n\nBu istek senin için fazla karmaşıksa (derin analiz, çok adımlı plan, "
@@ -154,7 +192,7 @@ def merdiven(con, cfg, rol, seviye=None):
             ayar = {"efor": a["efor"], "jeton": 1200 + DUSUNME_PAYI.get(a["efor"], 0)}
         return {"ok": True, "basamaklar": [{"sinif": None, "atama": a, "ayar": ayar}],
                 "paket": paket, "seviye": pseviye, "ekonomi": None, "elle": kendi}
-    bas, tavan, efor = PAKET_POLITIKASI[paket][pseviye]
+    bas, tavan, efor = _politika(paket, pseviye, rol, seviye)
     bas, tavan, ekonomi = _ekonomi(con, cfg, bas, tavan)
     tur = "ses" if pseviye == "ses" else ("gorsel" if pseviye == "gorsel" else "metin")
     yer = models.yer_of(cfg)
@@ -383,3 +421,75 @@ def dugum_durumu(cfg, transport=None):
     return {"adres": kok, "sinif": sinif, "sinif_adi": SINIF_YERI.get(sinif, ""),
             "ulasilabilir": bool(r.get("ok")), "gecikme_ms": gecikme, "modeller": liste,
             "yerel_model_var": bool(yerel), "yer": yer, "not": not_.strip()}
+
+
+# ------------------------------------------------ BAM: maliyet onizlemesi
+
+# Gecmis BAM isi yoksa is basina VARSAYILAN jeton profili (TAHMIN):
+# sorgu kurma kucuk, kaynak okuyup yazma buyuk. Ilk olculen isten sonra
+# yerini olcum alir.
+BAM_PROFIL = {"alt": (3000, 500), "arastirma": (25000, 4000)}
+
+
+def _bam_profili(con):
+    """Is basina ortalama (seviye -> [giris, cikis]) ve olculen is sayisi."""
+    if con is None:
+        return None, 0
+    isler = {}
+    for r in con.execute("SELECT is_id, role, note, (in_tok + image_tok) g, (out_tok + reason_tok) c"
+                         " FROM usage WHERE is_id IS NOT NULL AND role LIKE 'bam%'"):
+        sv = "alt" if "seviye=alt" in str(r["note"] or "") else politika_seviyesi(r["role"])
+        if not sv:
+            continue
+        t = isler.setdefault(r["is_id"], {}).setdefault(sv, [0, 0])
+        t[0] += r["g"] or 0
+        t[1] += r["c"] or 0
+    if not isler:
+        return None, 0
+    ort = {}
+    for d in isler.values():
+        for sv, (g, c) in d.items():
+            o = ort.setdefault(sv, [0, 0])
+            o[0] += g / len(isler)
+            o[1] += c / len(isler)
+    return ort, len(isler)
+
+
+def bam_tahmin(cfg, con=None, rol="bam.arastirma"):
+    """Her BAM eforu icin is basina ortalama maliyet — is BASLAMADAN.
+    Olculen isler varsa «hesaplandi», yoksa «tahmin»."""
+    from core import ai
+    profil, n = _bam_profili(con)
+    etiket = "hesaplandi" if profil else "tahmin"
+    profil = profil or {k: list(v) for k, v in BAM_PROFIL.items()}
+    paket = models.paket_of(cfg)
+    _, yukselme = _olculen(con, None) if con is not None else (None, None)
+    yukselme = yukselme or 0.0
+    yer, yerel = models.yer_of(cfg), models.yerel_of(cfg)
+    out = []
+    for e in BAM_EFORLARI:
+        usd = 0.0
+        siniflar = {}
+        with efor_baglami(e):
+            for sv, (g, c) in profil.items():
+                if paket:
+                    bas, tavan, _ = _politika(paket, sv, rol, "alt" if sv == "alt" else None)
+                    i0 = SINIFLAR.index(bas)
+                    i1 = min(i0 + 1, SINIFLAR.index(tavan))
+                    siniflar[sv] = SINIF_ADI[bas]
+                    for i, pay in ((i0, 1.0 - yukselme), (i1, yukselme)):
+                        if _yerel_mi(yer, yerel, "metin", SINIFLAR[i]) is not False:
+                            continue
+                        m = SINIF_MODELI["metin"][SINIFLAR[i]]
+                        fg, fc = ai.tarife_of(models.saglayici_of(m), m) or ai.BILINMEYEN_FIYAT
+                        usd += pay * (g / 1e6 * fg + c / 1e6 * fc)
+                else:
+                    a = models.resolve(cfg, rol) or {}
+                    fg, fc = (ai.tarife_of(a.get("provider"), a.get("model") or "")
+                              or ai.BILINMEYEN_FIYAT) if a.get("provider") != "yerel" else (0, 0)
+                    usd += g / 1e6 * fg + c / 1e6 * fc
+        out.append({"efor": e, "ad": BAM_EFOR_ADI[e], "usd": round(usd, 4), "etiket": etiket,
+                    "siniflar": siniflar})
+    return {"secenekler": out, "is_sayisi": n, "paket": paket,
+            "not": "" if paket else "Efor, bir güç paketi seçiliyken merdiveni değiştirir; "
+                                    "şu an bütün seçenekler aynı modelle çalışır."}

@@ -3701,9 +3701,38 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '<select id="bam-hedef" aria-label="Hangi sistem için"><option value="">Genel</option>'
       + '<option value="ays">AYS</option><option value="spi">SPİ</option>'
       + '<option value="esp">ESP</option></select>'
+      + '<select id="bam-efor" aria-label="Efor"><option value="dusuk">Düşük efor</option>'
+      + '<option value="yuksek" selected>Yüksek efor</option>'
+      + '<option value="en_yuksek">En yüksek efor</option></select>'
       + '<button id="bam-gonder">İşi aç</button></div>'
+      + '<p class="muted" id="bam-maliyet" style="font-size:12px"></p>'
       + '<p class="muted" id="bam-not">BAM Patronu talebi kuralla yönlendirir; '
       + 'anlamazsa sorar.</p>';
+    bamTahmin();
+  }
+
+  /* Is BASLAMADAN maliyet: her efor icin is basina ortalama. Kucuk tek
+     satir; secilen efor kalin. Olculen is yoksa «tahmin» diye soylenir. */
+  var BAM_TAHMIN = null;
+  async function bamTahmin(){
+    var r = await api('/api/bam/tahmin');
+    if(r.status !== 200) return;
+    BAM_TAHMIN = r.body;
+    bamMaliyetYaz();
+    if($('bam-efor')) $('bam-efor').addEventListener('change', bamMaliyetYaz);
+  }
+  function bamMaliyetYaz(){
+    var t = BAM_TAHMIN, yer = $('bam-maliyet');
+    if(!t || !yer) return;
+    var sec = ($('bam-efor') || {}).value || 'yuksek';
+    yer.innerHTML = 'Bir iş ortalama: ' + t.secenekler.map(function(x){
+      var m = x.ad.toLowerCase() + ' ≈ $' + (x.usd < 0.01 ? x.usd.toFixed(4) : x.usd.toFixed(2));
+      return x.efor === sec ? '<b>' + esc(m) + '</b>' : esc(m);
+    }).join(' · ') + ' <span title="' + esc(t.secenekler[0].etiket === 'tahmin'
+      ? 'Henüz ölçülmüş BAM işi yok; varsayılan profilden tahmin.'
+      : t.is_sayisi + ' ölçülmüş işin ortalaması.') + '">('
+      + (t.secenekler[0].etiket === 'tahmin' ? 'tahmin' : t.is_sayisi + ' işten') + ')</span>'
+      + (t.not ? ' · ' + esc(t.not) : '');
   }
 
   function ofisIslerCiz(o){
@@ -4244,7 +4273,8 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       var talep = (($('bam-talep') || {}).value || '').trim();
       if(!talep) return;
       var r = await api('/api/bam/is', { method:'POST', body:JSON.stringify({
-        talep:talep, hedef_modul:$('bam-hedef').value || null }) });
+        talep:talep, hedef_modul:$('bam-hedef').value || null,
+        efor:($('bam-efor') || {}).value || null }) });
       if(r.status === 200){
         $('bam-talep').value = '';
         $('bam-not').textContent = r.body.yeni

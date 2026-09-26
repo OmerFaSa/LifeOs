@@ -171,7 +171,7 @@ def is_listesi(con, limit=30):
 
 
 def is_ac(con, talep, kaynak="kullanici", hedef_modul=None, now=None,
-          ofisler=None, govde=None, emir_id=None):
+          ofisler=None, govde=None, emir_id=None, efor=None):
     """Is acar. `ofisler` verilirse yonlendirme KURALLA degil, King'in
     is turu katalogundan gelir (core/king.py); `govde` o isin
     yapilandirilmis girdisidir (durum profili dahil, en az veriyle)."""
@@ -184,6 +184,9 @@ def is_ac(con, talep, kaynak="kullanici", hedef_modul=None, now=None,
         return {"ok": False, "note": "Bilinmeyen kaynak."}
     if hedef_modul not in (None, "") and hedef_modul not in MODULLER:
         return {"ok": False, "note": "Hedef modül AYS, SPİ ya da ESP olmalı."}
+    from core import motor
+    if efor not in (None, "") and efor not in motor.BAM_EFORLARI:
+        return {"ok": False, "note": "Efor düşük, yüksek ya da en yüksek olmalı."}
     if ofisler is not None:
         if (not ofisler or ofisler[0] != "kayit"
                 or any(o not in OFISLER for o in ofisler)):
@@ -204,12 +207,12 @@ def is_ac(con, talep, kaynak="kullanici", hedef_modul=None, now=None,
     at = _simdi(now)
     adimlar = [{"ofis": o, "durum": "bekliyor"} for o in y["ofisler"]]
     cur = con.execute("INSERT INTO bam_isler(talep,kaynak,hedef_modul,ofisler,adimlar,"
-                      "durum,created_at,updated_at,govde,emir_id) "
-                      "VALUES (?,?,?,?,?, 'bekliyor',?,?,?,?)",
+                      "durum,created_at,updated_at,govde,emir_id,efor) "
+                      "VALUES (?,?,?,?,?, 'bekliyor',?,?,?,?,?)",
                       (metin, kaynak, hedef_modul or None, json.dumps(y["ofisler"]),
                        json.dumps(adimlar, ensure_ascii=False), at, at,
                        json.dumps(govde, ensure_ascii=False) if govde else None,
-                       int(emir_id) if emir_id else None))
+                       int(emir_id) if emir_id else None, efor or None))
     return {"ok": True, "id": cur.lastrowid, "yeni": True, "ofisler": y["ofisler"]}
 
 
@@ -281,7 +284,9 @@ def ilerlet(con, cfg, transport=None, now=None):
     try:
         # Adimin model cagrilari bu ise yazilir (butce.is_baglami):
         # isin gercek maliyeti defterden olculur.
-        with butce.is_baglami(j["id"]):
+        # Isin eforu (dusuk/yuksek/en yuksek) merdiveni belirler (core/motor.py).
+        from core import motor
+        with butce.is_baglami(j["id"]), motor.efor_baglami(j.get("efor")):
             sonuc = ADIM[adim["ofis"]](con, cfg, j, transport, now)
     except Exception as e:                      # noqa: BLE001
         sonuc = {"durum": "hata", "not": "%s: %s" % (type(e).__name__, e)}
@@ -683,10 +688,12 @@ def _arastirma_kaynakli(con, cfg, j, transport, now):
         if og.get("sorgular"):
             return (og["sorgular"][:kaynakli.MAX_SORGU], og.get("alt_sorular") or [],
                     "Güncelleme: önceki sürümün sorguları yeniden kullanıldı (model çağrılmadı).")
+        # Sorgu kurmak BASIT istir: paketin alt seviyesinden (ucuz) baslar;
+        # kaynak okuyup yazan adim arastirma merdiveninde kalir.
         r = ai.ask(con, cfg, "bam.arastirma", "arastirma",
                    [{"role": "user", "content": "Araştırma talebi: " + j["talep"]}],
                    sistem=kaynakli.PLAN_SISTEM, transport=transport, duzeltme=False,
-                   denetim="belge")
+                   denetim="belge", seviye="alt")
         if not r.get("ok"):
             return _model_hatasi(r), []
         d = _json_ayikla(r["text"]) or {}

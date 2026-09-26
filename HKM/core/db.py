@@ -588,6 +588,8 @@ MIGRATIONS = [
     # Onbellekten okunan giris jetonu (core/ai.py, OpenRouter): onbellegin
     # kazanci tahminle degil bu sayiyla olculur.
     ("usage", "cached_tok", "INTEGER"),
+    # BAM isinin eforu (dusuk|yuksek|en_yuksek; bos = paketin kendisi).
+    ("bam_isler", "efor", "TEXT"),
     ("decisions", "key", "TEXT"),          # oncelik kurali kimligi
     ("decisions", "answered_at", "TEXT"),  # kabul/ret ne zaman verildi
     # Hangi gorevliyle konusuldugu: king, bio, academic, intellect.

@@ -16,6 +16,7 @@ Ucnoktalar:
     POST /api/models                saglayicinin anahtara ACIK model listesi
     GET  /api/models/paketler       guc paketleri A · A+ · S · S+ (onizleme)
     GET  /api/ai/dugum              motor servisinin durumu (adres, gecikme, modeller)
+    GET  /api/bam/tahmin            BAM isi basina ortalama maliyet, efor efor
     POST /api/models/tarife         guncel model tarifesini okur (OpenRouter)
     POST /api/telegram/yoklama      webhook'u siler ve bir yoklama turu dener
     GET  /api/backup                butun ambar tek JSON
@@ -1148,6 +1149,9 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"agents": out})
         if u.path == "/api/config":
             return self._send(200, settings.read(self.server.config))
+        if u.path == "/api/bam/tahmin":
+            # BAM isi baslamadan her efor icin is basina ortalama maliyet.
+            return self._send(200, motor.bam_tahmin(self.server.config, con=self.con))
         if u.path == "/api/ai/dugum":
             # Motor servisinin durumu: sunucu motordan haberdardir (adres,
             # ayni makine mi, gecikme, modeller). Para harcamaz.
@@ -1370,7 +1374,8 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(body, dict):
                 return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             r = bam.is_ac(self.con, body.get("talep"), kaynak=body.get("kaynak") or "kullanici",
-                          hedef_modul=body.get("hedef_modul") or None)
+                          hedef_modul=body.get("hedef_modul") or None,
+                          efor=body.get("efor") or None)
             return self._send(200 if r.get("ok") else 422, r)
         # Web aramasini King adina DENER: Ayarlar ekranindaki «dene» dugmesi.
         # Rol sunucuda sabittir; istemci rol secemez.

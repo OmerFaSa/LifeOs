@@ -509,3 +509,62 @@ def run():
            (2, 700, 1, 0.03, 0.01))
         eq(motor.onizleme(_cfg("S"), con=db.connect(":memory:"))["olcum"], None)
     test("olcum ozeti: onbellek, yukselme, olculen bedel", t_measurement_summary)
+
+    # ------------------------------------------------ BAM: efor ve maliyet
+
+    def t_bam_effort_changes_ladder():
+        """BAM isi dusuk / yuksek / en yuksek eforla calisir. Yuksek paketin
+        kendi merdivenidir; dusuk ucuzlar, en yuksek Guclu→Uzman'a cikar."""
+        cfg = _cfg("S")
+        def sinif(efor, rol="bam.arastirma"):
+            with motor.efor_baglami(efor):
+                return [b["sinif"] for b in motor.merdiven(None, cfg, rol)["basamaklar"]]
+        eq(sinif("yuksek"), ["standart", "guclu", "uzman"])            # S paketi arastirma
+        eq(sinif("dusuk"), ["ekonomik", "standart"])
+        eq(sinif("en_yuksek"), ["guclu", "uzman"])
+        eq(sinif(None), sinif("yuksek"))
+        # Efor yalniz BAM'i etkiler; sohbet paketin merdiveninde kalir.
+        with motor.efor_baglami("en_yuksek"):
+            eq([b["sinif"] for b in motor.merdiven(None, cfg, "seviye.alt")["basamaklar"]],
+               ["ekonomik", "standart"])
+    test("BAM eforu merdiveni degistirir", t_bam_effort_changes_ladder)
+
+    def t_bam_query_step_is_cheap():
+        """Arama sorgusu kurmak basit istir: arastirma kademesinde bile alt
+        seviyeden (ekonomik) baslar."""
+        m = motor.merdiven(None, _cfg("S+"), "bam.arastirma", seviye="alt")
+        eq(m["basamaklar"][0]["sinif"], "standart")          # S+ alt baslangici
+        m = motor.merdiven(None, _cfg("S"), "bam.arastirma", seviye="alt")
+        eq(m["basamaklar"][0]["sinif"], "ekonomik")
+    test("BAM sorgu adimi ucuzdan baslar", t_bam_query_step_is_cheap)
+
+    def t_bam_effort_is_stored_on_the_job():
+        from core import bam
+        con = db.connect(":memory:")
+        r = bam.is_ac(con, "Kuantum bilgisayarlar hakkında kaynaklı bir araştırma yap", efor="dusuk")
+        ok(r["ok"], r)
+        eq(bam.is_getir(con, r["id"])["efor"], "dusuk")
+        no(bam.is_ac(con, "başka bir araştırma yap", efor="uc")["ok"])
+    test("BAM eforu iste saklanir", t_bam_effort_is_stored_on_the_job)
+
+    def t_bam_cost_estimate_before_start():
+        """Is baslamadan once her efor icin ortalama maliyet soylenir.
+        Gecmis BAM isi varsa olculen jetondan HESAPLANIR, yoksa varsayilan
+        profilden TAHMIN edilir ve oyle etiketlenir."""
+        cfg = _cfg("S")
+        con = db.connect(":memory:")
+        t = motor.bam_tahmin(cfg, con)
+        eq([x["efor"] for x in t["secenekler"]], ["dusuk", "yuksek", "en_yuksek"])
+        for x in t["secenekler"]:
+            eq(x["etiket"], "tahmin")
+        u = [x["usd"] for x in t["secenekler"]]
+        ok(u[0] < u[1] < u[2], u)
+        with butce.is_baglami(7):
+            butce.record(con, role="bam.arastirma", task="arastirma", provider="openrouter",
+                         model="x", in_tok=10_000, out_tok=2_000, note="seviye=alt")
+            butce.record(con, role="bam.arastirma", task="arastirma", provider="openrouter",
+                         model="x", in_tok=40_000, out_tok=6_000)
+        t = motor.bam_tahmin(cfg, con)
+        eq(t["secenekler"][0]["etiket"], "hesaplandi")
+        eq(t["is_sayisi"], 1)
+    test("BAM maliyeti is baslamadan soylenir", t_bam_cost_estimate_before_start)
