@@ -388,12 +388,14 @@ SP.Screens.rutbe = (function(){
       actions:K.Button({ label:'Hepsi', size:'sm', act:'rutbe-tab',
         data:{ 'data-tab':'rozet' } }),
       body:K.Stack([
-        K.Grid([
+        /* Aynı gerekçe (bkz. `simdiTab`): `K.Grid` on iki sütunludur; burada
+           da 390 pikselde üç kutu 32 px'e sıkışıp üst üste biniyordu. */
+        html`<div class="rutbe-sayaclar">${[
           K.Stat({ label:'Kazanılan', value:d.kazanilanSayisi,
             unit:'/ ' + d.toplamRozet }),
           K.Stat({ label:'Toplam saat', value:tr(d.saat), unit:'saat' }),
           K.Stat({ label:'Kesintisiz', value:tr(d.seriAy), unit:'ay' }),
-        ]),
+        ]}</div>`,
         when(son, () => html`<p class="small dim">Son kazanılan:
           <b>${son.ad}</b> · ${son.kazanildi}</p>`),
         when(sirada, () => html`<p class="small dim">Sıradaki:

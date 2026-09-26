@@ -9049,6 +9049,12 @@ tbody tr:hover{ background:var(--surface-2); }
   gap:8px;
 }
 
+/* Satır içerik kadardır (max-content), esnek değil: telefonda günler alt
+   alta dizilince «Tamamını göster» rafı (hareket.js, raf-uzun) ızgaraya
+   tavan koyar ve esnek satırlar o tavana sığmak için ezilir — kart
+   satırından uzun kalır, alt satırı («2/2 tamam») bir sonraki günün
+   üstüne biner. Sabit satır ezilmez; tavanın altında kalanı raf keser. */
+.weekgrid{ grid-auto-rows:max-content; }
 @media (max-width:480px){ .weekgrid{ grid-template-columns:1fr; } }
 
 /* Haftanın günü SEÇİLEBİLİR: dokununca o günün defteri açılır. Kutu
@@ -12570,7 +12576,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'14a4a48', at:'2026-09-26 16:41', dirty:true };
+R.BUILD = { id:'4c902ea', at:'2026-09-26 16:49', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -58336,12 +58342,14 @@ R.Screens.rutbe = (function(){
       actions:K.Button({ label:'Hepsi', size:'sm', act:'rutbe-tab',
         data:{ 'data-tab':'rozet' } }),
       body:K.Stack([
-        K.Grid([
+        /* Aynı gerekçe (bkz. `simdiTab`): `K.Grid` on iki sütunludur; burada
+           da 390 pikselde üç kutu 32 px'e sıkışıp üst üste biniyordu. */
+        html`<div class="rutbe-sayaclar">${[
           K.Stat({ label:'Kazanılan', value:d.kazanilanSayisi,
             unit:'/ ' + d.toplamRozet }),
           K.Stat({ label:'Toplam saat', value:tr(d.saat), unit:'saat' }),
           K.Stat({ label:'Kesintisiz', value:tr(d.seriAy), unit:'ay' }),
-        ]),
+        ]}</div>`,
         when(son, () => html`<p class="small dim">Son kazanılan:
           <b>${son.ad}</b> · ${son.kazanildi}</p>`),
         when(sirada, () => html`<p class="small dim">Sıradaki:

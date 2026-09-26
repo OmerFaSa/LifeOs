@@ -150,6 +150,12 @@ tbody tr:hover{ background:var(--surface-2); }
   gap:8px;
 }
 
+/* Satır içerik kadardır (max-content), esnek değil: telefonda günler alt
+   alta dizilince «Tamamını göster» rafı (hareket.js, raf-uzun) ızgaraya
+   tavan koyar ve esnek satırlar o tavana sığmak için ezilir — kart
+   satırından uzun kalır, alt satırı («2/2 tamam») bir sonraki günün
+   üstüne biner. Sabit satır ezilmez; tavanın altında kalanı raf keser. */
+.weekgrid{ grid-auto-rows:max-content; }
 @media (max-width:480px){ .weekgrid{ grid-template-columns:1fr; } }
 
 /* Haftanın günü SEÇİLEBİLİR: dokununca o günün defteri açılır. Kutu

@@ -184,7 +184,46 @@ function waitForServer(url, tries){
                 + ' ' + Math.round(r.right) + 'px';
               if(yapisik.indexOf(ad) < 0) yapisik.push(ad);
             });
-            return { tasma, sucluler:sucluler.slice(0, 4), kucuk:kucuk.slice(0, 4), yapisik:yapisik.slice(0, 4) };
+            /* KUTUDAN DİKEY TAŞMA: kenarlığı olan bir kutunun içeriği kutudan
+               uzunsa ve kutu kırpmıyorsa (overflow: visible) taşan satır
+               komşusunun ÜSTÜNE biner. Yatay taşmayı arayan denetim bunu
+               görmez: Hafta'da telefonda «Tamamını göster» rafı ızgaraya tavan
+               koyuyor, satırlar 120 px'e iniyor, «2/2 tamam» bir sonraki günün
+               adıyla çakışıyordu. */
+            const dikey = [];
+            document.querySelectorAll('#main *').forEach(el => {
+              if(!el.firstElementChild) return;          // kutu, yaprak değil
+              const st = getComputedStyle(el);
+              if(st.overflowY !== 'visible' || !(parseFloat(st.borderTopWidth) > 0 && parseFloat(st.borderBottomWidth) > 0)) return;
+              const fark = el.scrollHeight - el.clientHeight;
+              if(fark <= 2 || !el.clientHeight) return;
+              const ad = el.tagName.toLowerCase()
+                + (el.className ? '.' + String(el.className).split(' ').filter(Boolean).slice(0, 2).join('.') : '')
+                + ' ' + fark + 'px';
+              if(dikey.indexOf(ad) < 0) dikey.push(ad);
+            });
+            /* KARDEŞ KUTULAR ÜST ÜSTE: kutu kendi içeriğine sığsa da ızgara
+               satırı ondan kısa kalırsa bir sonraki kutu onun üstüne çizilir.
+               Kenarlıklı, aynı ebeveynli ve konumlanmamış kutular karşılaştırılır. */
+            const kutu = el => { const st = getComputedStyle(el);
+              return st.position === 'static' && parseFloat(st.borderTopWidth) > 0 && el.getClientRects().length; };
+            document.querySelectorAll('#main *').forEach(ata => {
+              const kutular = [...ata.children].filter(kutu);
+              if(kutular.length < 2) return;
+              const r = kutular.map(k => k.getBoundingClientRect());
+              for(let i = 0; i < r.length; i++) for(let j = i + 1; j < r.length; j++){
+                const x = Math.min(r[i].right, r[j].right) - Math.max(r[i].left, r[j].left);
+                const y = Math.min(r[i].bottom, r[j].bottom) - Math.max(r[i].top, r[j].top);
+                if(x > 2 && y > 2){
+                  const ad = kutular[i].tagName.toLowerCase()
+                    + (kutular[i].className ? '.' + String(kutular[i].className).split(' ').filter(Boolean).slice(0, 2).join('.') : '')
+                    + ' ↔ komşusu ' + Math.round(y) + 'px';
+                  if(dikey.indexOf(ad) < 0) dikey.push(ad);
+                }
+              }
+            });
+            return { tasma, sucluler:sucluler.slice(0, 4), kucuk:kucuk.slice(0, 4), yapisik:yapisik.slice(0, 4),
+              dikey:dikey.slice(0, 4) };
           }, { minTap:MIN_TAP, allow:TAP_ALLOW });
 
           const yer = (G.ad === 'tablet' ? 'tablet ' : '') + r + (t ? '/' + t : '');
@@ -194,6 +233,7 @@ function waitForServer(url, tries){
               + (sonuc.sucluler.length ? ' — ' + sonuc.sucluler.join(', ') : ''));
           }
           sonuc.kucuk.forEach(k => errors.push(yer + ': küçük dokunma hedefi — ' + k));
+          sonuc.dikey.forEach(k => errors.push(yer + ': içerik kutusundan taşıp komşusuna biniyor — ' + k));
           if(sonuc.tasma <= 1){
             sonuc.yapisik.forEach(k => errors.push(yer + ': pencere kenarına yapışık (başka tarayıcıda taşar) — ' + k));
           }
