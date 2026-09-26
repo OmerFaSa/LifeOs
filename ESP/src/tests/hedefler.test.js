@@ -14,7 +14,7 @@
         ve kullanıcının sonraki seçimini ezmez. */
 
 (function(){
-  const { describe, it, expect, resetState, pushSession, pushBook, pushPiece, withTodayAsync } = ESP.Test;
+  const { describe, it, expect, resetState, pushSession, pushBook, pushPiece, withToday, withTodayAsync } = ESP.Test;
   const HD = () => ESP.Hedefler;
   const HP = () => ESP.HedefPlan;
   const H = () => window.LIFEOS.Hedef;
@@ -85,7 +85,9 @@
       const il = HD().ALISKANLIK.ilerleme(h, BUGUN);
       expect([il.bu, il.durum]).toEqual([1, 'yolunda']);
       expect(HD().ozet(h)).toBe('Alışkanlık: Okuma · haftada 3 gün × 20 dk');
-      const o = HD().ozetler().find(x => x.id === h.id);
+      /* Özet bugünü kendi okur: tarih sabitlenmezse test takvime bağlanır
+         (2026-09-26'da «geride» döndü). */
+      const o = withToday(BUGUN, () => HD().ozetler()).find(x => x.id === h.id);
       expect(o.plan.ilerleme.durum).toBe('yolunda');
     });
   });
