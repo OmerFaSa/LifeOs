@@ -12631,7 +12631,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'dbda46a', at:'2026-09-26 17:38', dirty:true };
+R.BUILD = { id:'c389b67', at:'2026-09-26 19:29', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -44204,10 +44204,12 @@ R.Office = (function(){
         Dosya yoksa, WebGL yoksa ya da yukleme hata verirse ekran bugunku
         CSS odasina doner ve bunu soyler. Uygulamanin hicbir parcasi bu
         katmana bagli degildir.
-     2. GERCEK OLAY GERCEK, TEMSILI TEMSILI. Sahnede dolasan belge bir AYS
-        olayina karsilik gelir: «Masalari tara»da gelen oneri, uzmanin
-        masasindaki not, dolan model hakki. Olaysiz dolasma («Canli ofis»,
-        elle verilen gorev) ekranda «Temsili:» diye yazilir.
+     2. GERCEK OLAY GERCEK, TEMSILI TEMSILI. Ofis kendi kendine yasar ama
+        her hareketin AYS'de bir karsiligi vardir ve nedeni olay satirinda
+        yazar (tablo: «canli ekosistem» bolumu — not, oneri, onay, deneme,
+        brifing, HKM esitlemesi, plan/ara/ogle molasi, pazar kapanisi).
+        Olaysiz dolasma («Canli ofis», elle verilen gorev) ekranda
+        «Temsili:» diye yazilir.
      3. KALICI KOK. AYS her cizimde #app'i yeniden yazar; WebGL baglami bunu
         kaldiramaz. Sahnenin koku bir kez kurulur ve her cizimden sonra
         yuvasina TASINIR. Ekran degisince cizim dongusu kendiliginden durur.
@@ -44224,7 +44226,8 @@ R.Ofis3B = (function(){
   const SIRA = ['tyt', 'ayt', 'rehber', 'analist', 'patron', 'koc'];
 
   const durum = { kok:null, api:null, yukleniyor:null, hata:null, istendi:false,
-    kuyruk:[], gorulen:{}, gun:null, sayac:null, toplantiyaGit:null, bekliyor:false };
+    kuyruk:[], gorulen:{}, gun:null, sayac:null, toplantiyaGit:null, bekliyor:false,
+    tik:0, telefonIste:false, hkmDk:null, kapanista:false, toplantidaydi:false };
 
   /* Dosya koku: dist/ ve src/ icin «ofis3d/», test sayfasi «../ofis3d/». */
   let KOK = 'ofis3d/';
@@ -44305,6 +44308,7 @@ R.Ofis3B = (function(){
       <p class="small ofis3b__olay" data-olay aria-live="polite"></p>
       <p class="tiny dim ofis3b__durum" data-status aria-live="polite">Ekip masasında.</p>
       <button type="button" hidden data-meeting>Toplantıyı başlat</button>
+      <input type="checkbox" hidden data-call aria-hidden="true" tabindex="-1"/>
       <details class="ofis3b__detay">
         <summary class="small">Sahne ayarları</summary>
         <div class="row wrap gap-6 mt-8">
@@ -44317,7 +44321,7 @@ R.Ofis3B = (function(){
         <div class="row wrap gap-10 mt-8">
           <label class="check"><input type="checkbox" data-walls checked/><span>Duvarları göster</span></label>
           <label class="check"><input type="checkbox" data-follow/><span>Yürüyeni takip et</span></label>
-          <label class="check"><input type="checkbox" data-call/><span>Telefon görüşmesi</span></label>
+          
           <label class="check"><input type="checkbox" data-auto/><span>Canlı ofis (temsili görevler)</span></label>
         </div>
         <p class="tiny dim mt-8">Temsili görev bir AYS olayına karşılık gelmez; ekranda «Temsili:» diye yazılır.</p>
@@ -44343,6 +44347,28 @@ R.Ofis3B = (function(){
     if(el) el.textContent = metin || '';
   }
 
+  /* GECE/GUNDUZ saate uyar (20:00-06:59 gece) ve sahne acikken de gecis
+     yapar. Kullanici «Gece/Gunduz gorunumu»ne basarsa o gun onun secimi
+     kalir; ertesi gun yine saat belirler. */
+  const GECE_DEPO = 'rota.ofis3b.gece';
+  function geceMi(t){ const h = (t || new Date()).getHours(); return h >= 20 || h < 7; }
+  function gunAnahtari(t){ const d = t || new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function hedefGece(t){
+    let e = null;
+    try{ e = JSON.parse(localStorage.getItem(GECE_DEPO) || 'null'); }catch(x){ e = null; }
+    if(e && e.gun === gunAnahtari(t) && typeof e.gece === 'boolean') return e.gece;
+    return geceMi(t);
+  }
+  function elleGece(gece, t){
+    try{ localStorage.setItem(GECE_DEPO, JSON.stringify({ gun:gunAnahtari(t), gece:!!gece })); }catch(x){}
+  }
+  function geceyiUygula(){
+    const api = durum.api;
+    if(!api) return;
+    const g = hedefGece();
+    if(api.durum().gece !== g) api.gece(g);
+  }
+
   function kur(){
     if(durum.api || durum.hata) return;
     const kok = document.createElement('div');
@@ -44350,11 +44376,10 @@ R.Ofis3B = (function(){
     kok.innerHTML = kokHtml();
     durum.kok = kok;
     const kayit = okuDepo();
-    const saat = new Date().getHours();
     const api = window.RotaOfis3B.kur(kok, {
       adlar:adlar(),
       durum:kayit,
-      gece:saat >= 20 || saat < 7,
+      gece:hedefGece(),
       kaydet:v => yazDepo(v),
       secildi:i => {
         const a = ajan(i);
@@ -44371,6 +44396,10 @@ R.Ofis3B = (function(){
     }
     durum.api = api;
     api.koyu(koyuMu());
+    /* Elle basis o gunun secimidir (sahne dugmeyi kendisi degistirir). */
+    const d = kok.querySelector('[data-night]');
+    if(d) d.addEventListener('click', () => elleGece(api.durum().gece));
+    geceyiUygula();
   }
 
   function koyuMu(){
@@ -44383,7 +44412,7 @@ R.Ofis3B = (function(){
 
   function bugun(){ return R.U.todayISO(); }
   function gunuYenile(){
-    if(durum.gun !== bugun()){ durum.gun = bugun(); durum.gorulen = {}; }
+    if(durum.gun !== bugun()){ durum.gun = bugun(); durum.gorulen = gorulenYukle(); }
   }
 
   /* {tur:'deliver'|'break'|'archive', kim, kime, metin} — tekrarlar ve
@@ -44394,7 +44423,7 @@ R.Ofis3B = (function(){
     if(o.anahtar && durum.gorulen[o.anahtar]) return false;
     if(durum.kuyruk.length >= KUYRUK_EN_COK) return false;
     if(o.kim < 0 || (o.tur === 'deliver' && (o.kime < 0 || o.kime === o.kim))) return false;
-    if(o.anahtar) durum.gorulen[o.anahtar] = true;
+    if(o.anahtar){ durum.gorulen[o.anahtar] = true; gorulenYaz(); }
     durum.kuyruk.push(o);
     return true;
   }
@@ -44402,7 +44431,21 @@ R.Ofis3B = (function(){
   function isle(){
     const api = durum.api;
     if(!api || !durum.kok || !durum.kok.isConnected){ durdur(); return; }
-    if(api.mesgul() || !durum.kuyruk.length) return;
+    geceyiUygula();
+    if(++durum.tik % 7 === 0) tara();
+    /* Gercek toplanti ekranindan donuldu: ekip masasina yurur. Yalniz
+       o zaman — pazar kapanisi oturumu bir yeniden cizimle bitmemeli. */
+    if(durum.toplantidaydi && api.durum().toplanti === 'seated'){
+      durum.toplantidaydi = false;
+      api.toplanti(false);
+      olayYaz('Toplantı bitti; ekip masalarına dönüyor.');
+      return;
+    }
+    if(api.mesgul()) return;
+    if(durum.telefonIste !== api.durum().telefonda && api.telefon(durum.telefonIste) && durum.telefonIste){
+      olayYaz(ajan(3).name + ' HKM ile görüşüyor: son eşitleme ' + (durum.hkmDk ? durum.hkmDk + ' dakika önce.' : 'az önce.'));
+    }
+    if(!durum.kuyruk.length) return;
     const o = durum.kuyruk.shift();
     if(api.gorev(o.tur, o.kim, o.kime)) olayYaz(o.metin);
     else durum.kuyruk.unshift(o);
@@ -44422,35 +44465,142 @@ R.Ofis3B = (function(){
       git();
       return;
     }
+    if(b.tur === 'toplanti' && b.durum === 'seated' && durum.kapanista){
+      durum.kapanista = false;
+      setTimeout(() => {
+        if(durum.api && durum.api.durum().toplanti === 'seated'){
+          durum.api.toplanti(false);
+          olayYaz('Kapanış bitti; ekip masalarına dönüyor.');
+        }
+      }, 90000);
+      return;
+    }
     if(!durum.kuyruk.length && !(b && b.temsili)) setTimeout(() => {
       if(durum.api && !durum.api.mesgul() && !durum.kuyruk.length) olayYaz('');
     }, 4000);
   }
 
-  /* Masalardaki notlar: her not gunde bir kez, uzman -> Patron. */
-  function notlariTara(){
-    const O = R.Office;
-    if(!O || !O.notes) return 0;
-    let n = 0;
-    for(const not of O.notes()){
-      if(not.agent === 'patron') continue;
-      const i = sira(not.agent);
-      if(ekle({ tur:'deliver', kim:i, kime:sira('patron'), anahtar:'not:' + not.id,
-        metin:not.name + ' masasındaki notu Patron’a götürüyor: ' + kisalt(not.text) })) n++;
+  /* ---------- canli ekosistem ----------
+     Sahnedeki her hareket AYS'nin GERCEK durumundan dogar ve nedeni olay
+     satirinda yazar. Iki parca:
+       anlik(simdi)  AYS'nin durumunu okur (yan etkisiz),
+       olaylar(s)    o durumdan hangi hareketlerin dogacagini secer (SAF;
+                     test edilen yer burasi).
+     Hareketin karsiligi:
+       uzman -> Patron   masadaki not · yeni oneri · brifingde uyari bulgusu
+       Patron -> uzman   bugun onayladigin oneri sahibine doner
+       arsiv             bugun kaydedilen deneme: analist eskilerini getirir
+       telefon           HKM ile son 15 dakikada basarili esitleme
+       mola              model hakki doldu · plan bitti · ara gunu · ogle
+       toplanti          «Toplanti baslat» · pazar 18-21 haftalik kapanis
+     Ritim molalari (plan/ara/ogle) gece (22-07) cikmaz ve kuyruk bosken
+     eklenir: gercek olaylarin onune gecmez. */
+  const UYARI = { danger:true, warn:true };
+
+  function anlik(simdi){
+    simdi = simdi || new Date();
+    const O = R.Office, U = R.U, S = R.S;
+    const bugunIso = U.todayISO();
+    const dene = (f, yedek) => { try{ const v = f(); return v == null ? yedek : v; }catch(e){ return yedek; } };
+    const gunu = t => dene(() => U.gunOf(t), String(t || '').slice(0, 10));
+    const s = { saat:simdi.getHours(), haftaGunu:simdi.getDay(), notlar:[], oneriler:[], onaylar:[],
+      denemeler:[], brifing:false, bulgular:[], hakDolu:[], hkm:null, plan:null, ara:false };
+    s.notlar = dene(() => O.notes().map(n => ({ id:n.id, agent:n.agent, text:n.text })), []);
+    s.oneriler = dene(() => R.Proposals.pending().map(p => ({ id:p.id, agent:p.agent })), []);
+    s.onaylar = dene(() => R.Proposals.applied().filter(p => p.appliedAt && gunu(p.appliedAt) === bugunIso)
+      .map(p => ({ id:p.id, agent:p.agent })), []);
+    s.denemeler = dene(() => (S.exams || []).filter(e => e.createdAt && gunu(e.createdAt) === bugunIso)
+      .map(e => ({ id:e.id })), []);
+    s.brifing = !!dene(() => O.briefingOf(), null);
+    if(s.brifing){
+      s.bulgular = dene(() => R.AGENTS.filter(a => !a.lead).map(a => {
+        const f = (O.brief(a.id).findings || []).find(x => UYARI[x.tone]);
+        return f ? { agent:a.id, text:f.text } : null;
+      }).filter(Boolean), []);
     }
-    return n;
+    if(dene(() => O.mode(), '') === 'llm'){
+      s.hakDolu = dene(() => R.AGENTS.filter(a => !a.lead && (O.agentQuota(a.id) || {}).full).map(a => a.id), []);
+    }
+    const b = dene(() => R.Beacon.settings(), null);
+    if(b && b.enabled && b.lastOkAt){
+      const dk = (simdi - new Date(b.lastOkAt)) / 60000;
+      if(isFinite(dk) && dk >= 0) s.hkm = { dk:Math.round(dk) };
+    }
+    const gun = S.days && S.days[bugunIso];
+    if(gun && Array.isArray(gun.blocks)){
+      const bl = gun.blocks;
+      s.plan = { toplam:bl.length, bitti:bl.filter(x => x.status === 'done').length,
+        bekleyen:bl.filter(x => x.status === 'pending').length };
+    }
+    s.ara = dene(() => { const x = R.Istisna.gunIcin(bugunIso); return !!x && x.tur === 'ara'; }, false);
+    return s;
   }
 
-  /* Gunluk model hakki dolan uzman dinlenme salonuna gider (gunde bir kez). */
-  function hakTara(){
-    const O = R.Office;
-    if(!O || O.mode() !== 'llm' || !O.agentQuota) return;
-    for(const a of R.AGENTS){
-      if(a.lead) continue;
-      const q = O.agentQuota(a.id);
-      if(q && q.full) ekle({ tur:'break', kim:sira(a.id), anahtar:'hak:' + a.id,
-        metin:a.name + ' bugünkü model hakkını doldurdu; yarına kadar kural motoruyla çalışıyor.' });
+  function olaylar(s){
+    const P = sira('patron');
+    const ad = id => (R.AGENT_BY_ID[id] || {}).name || id;
+    const uzmanlar = R.AGENTS.filter(a => !a.lead).map(a => a.id);
+    const g = [];
+    const teslim = (kimden, kime, anahtar, metin) => {
+      const i = sira(kimden), j = sira(kime);
+      if(i >= 0 && j >= 0 && i !== j) g.push({ tur:'deliver', kim:i, kime:j, anahtar, metin });
+    };
+    for(const n of s.notlar || []) if(n.agent !== 'patron')
+      teslim(n.agent, 'patron', 'not:' + n.id, ad(n.agent) + ' masasındaki notu Patron’a götürüyor: ' + kisalt(n.text));
+    for(const p of s.oneriler || []) if(p.agent !== 'patron')
+      teslim(p.agent, 'patron', 'oneri:' + p.id, ad(p.agent) + ' önerisini Patron’a götürüyor; onayın Ofis’te bekliyor.');
+    for(const p of s.onaylar || []) if(p.agent !== 'patron')
+      teslim('patron', p.agent, 'onay:' + p.id, 'Patron onayladığın kararı ' + ad(p.agent) + '’a götürüyor.');
+    for(const e of s.denemeler || []) g.push({ tur:'archive', kim:sira('analist'), anahtar:'deneme:' + e.id,
+      metin:ad('analist') + ' bugünkü denemeyi eskileriyle karşılaştırmak için arşivden dosyaları alıyor.' });
+    if(s.brifing) for(const f of s.bulgular || [])
+      teslim(f.agent, 'patron', 'brif:' + f.agent, ad(f.agent) + ' sabah brifingi için bulgusunu Patron’a iletiyor: ' + kisalt(f.text));
+    for(const id of s.hakDolu || []) g.push({ tur:'break', kim:sira(id), anahtar:'hak:' + id,
+      metin:ad(id) + ' bugünkü model hakkını doldurdu; yarına kadar kural motoruyla çalışıyor.' });
+    const gunduz = s.saat >= 7 && s.saat < 22;
+    const ritim = (onek, metin) => uzmanlar.forEach(id => g.push({ tur:'break', kim:sira(id), ritim:true,
+      anahtar:onek + ':' + id, metin:metin(ad(id)) }));
+    if(gunduz){
+      const p = s.plan;
+      if(p && p.toplam > 0 && p.bekleyen === 0 && p.bitti > 0) ritim('plan', a => a + ' mola veriyor: bugünün planı tamamlandı.');
+      else if(s.ara) ritim('ara', a => 'Bugün ara günü; ' + a + ' dinlenme salonunda.');
+      else if(s.saat >= 12 && s.saat < 14) ritim('ogle', a => 'Öğle arası: ' + a + ' mola veriyor.');
     }
+    return { gorevler:g,
+      telefon:!!(s.hkm && s.hkm.dk <= 15), hkmDk:s.hkm ? s.hkm.dk : null,
+      kapanis:s.haftaGunu === 0 && s.saat >= 18 && s.saat < 21 };
+  }
+
+  /* Gorulen olaylar gun boyu hatirlanir (sayfa yenilense de ayni not
+     ikinci kez yurumez); ertesi gun sifirlanir. */
+  const GORULEN_DEPO = 'rota.ofis3b.gorulen';
+  function gorulenYukle(){
+    try{
+      const d = JSON.parse(localStorage.getItem(GORULEN_DEPO) || 'null');
+      if(d && d.gun === bugun() && d.anahtar) return d.anahtar;
+    }catch(e){}
+    return {};
+  }
+  function gorulenYaz(){
+    try{ localStorage.setItem(GORULEN_DEPO, JSON.stringify({ gun:durum.gun, anahtar:durum.gorulen })); }catch(e){}
+  }
+
+  function tara(simdi){
+    const api = durum.api;
+    const o = olaylar(anlik(simdi));
+    for(const x of o.gorevler){
+      if(x.ritim && durum.kuyruk.length) break;
+      ekle(x);
+    }
+    durum.telefonIste = o.telefon;
+    durum.hkmDk = o.hkmDk;
+    if(api && o.kapanis && !durum.gorulen.kapanis && !api.mesgul() && !durum.kuyruk.length
+        && !durum.toplantiyaGit && api.toplanti(true)){
+      durum.gorulen.kapanis = true; gorulenYaz();
+      durum.kapanista = true;
+      olayYaz('Haftanın kapanışı (pazar): ekip toplantı odasında haftayı değerlendiriyor.');
+    }
+    return o;
   }
 
   function kisalt(t){
@@ -44484,7 +44634,7 @@ R.Ofis3B = (function(){
     if(!api.toplanti(true)){ git(); return false; }
     olayYaz('Ekip toplantı odasına geçiyor…');
     let gitti = false;
-    const bir = () => { if(gitti) return; gitti = true; durum.toplantiyaGit = null; api.hiz(1); git(); };
+    const bir = () => { if(gitti) return; gitti = true; durum.toplantiyaGit = null; durum.toplantidaydi = true; api.hiz(1); git(); };
     durum.toplantiyaGit = bir;
     setTimeout(bir, 9000);
     return true;
@@ -44514,19 +44664,17 @@ R.Ofis3B = (function(){
     yuva.replaceChildren(durum.kok);
     durum.api.koyu(koyuMu());
     durum.api.surdur();
-    /* Toplantidan donuldu: ekip masasina yurur. */
-    if(durum.api.durum().toplanti === 'seated') durum.api.toplanti(false);
-    notlariTara();
-    hakTara();
+    geceyiUygula();
+    tara();
     baslat();
   }
 
   function ac(){ durum.istendi = true; durum.hata = null; }
 
-  return { kullanilir, destek, yukle, yerlestir, oneriler, toplantiyaGotur, ac,
+  return { anlik, olaylar, geceMi, hedefGece, elleGece, kullanilir, destek, yukle, yerlestir, oneriler, toplantiyaGotur, ac,
     hata:() => durum.hata, SIRA,
     /* test kancalari */
-    _durum:durum, _kok:k => { KOK = k; }, _ekle:ekle, _isle:isle };
+    _durum:durum, _kok:k => { KOK = k; }, _ekle:ekle, _isle:isle, _durdur:durdur };
 })();
 
 /* ==== js/core/solver.js ==== */

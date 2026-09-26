@@ -62,6 +62,23 @@
     });
   });
 
+  describe('3B ofis — gece ve gündüz', () => {
+    it('saate uyar: 20:00–06:59 gece, öteki saatler gündüz', () => {
+      const g = Z().geceMi;
+      expect([g(new Date(2026, 8, 26, 19, 59)), g(new Date(2026, 8, 26, 20, 0)),
+        g(new Date(2026, 8, 27, 6, 59)), g(new Date(2026, 8, 27, 7, 0))]).toEqual([false, true, true, false]);
+    });
+
+    it('elle seçim yalnız o gün geçerli; ertesi gün yine saat', () => {
+      try{ localStorage.removeItem('rota.ofis3b.gece'); }catch(e){}
+      expect(Z().hedefGece(new Date(2026, 8, 26, 21, 0))).toBe(true);
+      Z().elleGece(false, new Date(2026, 8, 26, 21, 0));
+      expect(Z().hedefGece(new Date(2026, 8, 26, 23, 0))).toBe(false);   // o gün senin seçimin
+      expect(Z().hedefGece(new Date(2026, 8, 27, 21, 0))).toBe(true);    // ertesi gün saat
+      try{ localStorage.removeItem('rota.ofis3b.gece'); }catch(e){}
+    });
+  });
+
   describe('3B ofis — olay kuyruğu', () => {
     it('aynı olay günde bir kez; kuyruk en çok üç; kendine teslim yok', () => {
       sifirla();
@@ -90,6 +107,116 @@
       let gitti = 0;
       const r = Z().toplantiyaGotur(() => { gitti++; });
       expect([r, gitti]).toEqual([false, 1]);
+    });
+  });
+
+  describe('3B ofis — canlı ekosistem: hangi hareket neden', () => {
+    const P = () => Z().SIRA.indexOf('patron');
+    const i = id => Z().SIRA.indexOf(id);
+    function bos(ek){
+      return Object.assign({ saat:10, haftaGunu:3, notlar:[], oneriler:[], onaylar:[], denemeler:[],
+        brifing:false, bulgular:[], hakDolu:[], hkm:null, plan:null, ara:false }, ek || {});
+    }
+    const ozet = o => o.gorevler.map(g => [g.tur, g.kim, g.tur === 'deliver' ? g.kime : null, g.anahtar]);
+
+    it('veri yoksa ofis sessiz: hareket yok, telefon yok, toplantı yok', () => {
+      const o = Z().olaylar(bos());
+      expect([o.gorevler.length, o.telefon, o.kapanis]).toEqual([0, false, false]);
+    });
+
+    it('not, öneri ve brifing bulgusu uzmanı Patron’a; onay Patron’u uzmana yürütür', () => {
+      const o = Z().olaylar(bos({
+        notlar:[{ id:'tekrar-borcu', agent:'analist', text:'Tekrar borcu %75' }, { id:'karar', agent:'patron', text:'x' }],
+        oneriler:[{ id:'p1', agent:'tyt' }],
+        onaylar:[{ id:'p0', agent:'koc' }],
+        brifing:true, bulgular:[{ agent:'ayt', text:'AYT düşüşte' }] }));
+      expect(ozet(o)).toEqual([
+        ['deliver', i('analist'), P(), 'not:tekrar-borcu'],
+        ['deliver', i('tyt'), P(), 'oneri:p1'],
+        ['deliver', P(), i('koc'), 'onay:p0'],
+        ['deliver', i('ayt'), P(), 'brif:ayt'],
+      ]);
+      expect(o.gorevler[0].metin.includes('Tekrar borcu %75')).toBe(true);
+      expect(o.gorevler[2].metin.includes('Kerem')).toBe(true);
+      expect(Z().olaylar(bos({ bulgular:[{ agent:'ayt', text:'x' }] })).gorevler.length).toBe(0);  // brifing yoksa yok
+    });
+
+    it('bugün kaydedilen deneme analisti arşive götürür', () => {
+      const o = Z().olaylar(bos({ denemeler:[{ id:'e1' }] }));
+      expect(ozet(o)).toEqual([['archive', i('analist'), null, 'deneme:e1']]);
+    });
+
+    it('mola gerçek bir nedene bağlı: hak doldu, plan bitti, ara günü, öğle arası', () => {
+      expect(ozet(Z().olaylar(bos({ hakDolu:['koc'] })))).toEqual([['break', i('koc'), null, 'hak:koc']]);
+      const plan = Z().olaylar(bos({ plan:{ toplam:4, bitti:4, bekleyen:0 } }));
+      expect(plan.gorevler.length).toBe(5);
+      expect(plan.gorevler.every(g => g.tur === 'break' && g.ritim && g.kim !== P())).toBe(true);
+      expect(plan.gorevler[0].metin.includes('planı tamamlandı')).toBe(true);
+      expect(Z().olaylar(bos({ plan:{ toplam:4, bitti:3, bekleyen:1 } })).gorevler.length).toBe(0);
+      expect(Z().olaylar(bos({ plan:{ toplam:0, bitti:0, bekleyen:0 } })).gorevler.length).toBe(0);
+      expect(Z().olaylar(bos({ ara:true })).gorevler[0].metin.includes('ara günü')).toBe(true);
+      expect(Z().olaylar(bos({ saat:12 })).gorevler[0].metin.includes('Öğle arası')).toBe(true);
+      expect(Z().olaylar(bos({ saat:14 })).gorevler.length).toBe(0);
+    });
+
+    it('gece ritim molası yok; gerçek olaylar gece de işler', () => {
+      expect(Z().olaylar(bos({ saat:23, ara:true, plan:{ toplam:2, bitti:2, bekleyen:0 } })).gorevler.length).toBe(0);
+      expect(Z().olaylar(bos({ saat:23, oneriler:[{ id:'p', agent:'tyt' }] })).gorevler.length).toBe(1);
+    });
+
+    it('telefon: HKM ile son 15 dakikada eşitleme; kapanış: pazar 18–21', () => {
+      expect(Z().olaylar(bos({ hkm:{ dk:3 } })).telefon).toBe(true);
+      expect(Z().olaylar(bos({ hkm:{ dk:40 } })).telefon).toBe(false);
+      expect(Z().olaylar(bos({ haftaGunu:0, saat:19 })).kapanis).toBe(true);
+      expect(Z().olaylar(bos({ haftaGunu:0, saat:12 })).kapanis).toBe(false);
+      expect(Z().olaylar(bos({ haftaGunu:6, saat:19 })).kapanis).toBe(false);
+    });
+
+    it('anlık görüntü AYS durumundan okunur (plan, deneme, öneri)', () => {
+      sifirla();
+      const bugun = R.U.todayISO();
+      R.S.days[bugun] = { id:bugun, blocks:[{ status:'done' }, { status:'pending' }] };
+      R.S.exams = [{ id:'e-bugun', createdAt:new Date().toISOString() },
+        { id:'e-eski', createdAt:'2020-01-01T10:00:00.000Z' }];
+      const s = Z().anlik(new Date());
+      expect(s.plan).toEqual({ toplam:2, bitti:1, bekleyen:1 });
+      expect(s.denemeler.map(e => e.id)).toEqual(['e-bugun']);
+      expect(Array.isArray(s.oneriler) && Array.isArray(s.notlar)).toBe(true);
+    });
+  });
+
+  describe('3B ofis — toplantı dönüşü', () => {
+    function sahteSahne(){
+      const c = { kapat:0, telefon:[] };
+      return { c, api:{
+        durum:() => ({ toplanti:'seated', gece:false, telefonda:false, calisiyor:true }),
+        toplanti:v => { if(v === false) c.kapat++; return true; },
+        mesgul:() => true, koyu(){}, surdur(){}, gece(){}, hiz(){},
+        telefon:v => { c.telefon.push(v); return true; }, gorev:() => false } };
+    }
+
+    it('yeniden çizim pazar kapanışını bitirmez; gerçek toplantıdan dönüş ekibi masaya yürütür', async () => {
+      sifirla();
+      const d = Z()._durum, eski = { api:d.api, kok:d.kok, t:d.toplantidaydi };
+      const { c, api } = sahteSahne();
+      const kok = document.createElement('div'); kok.innerHTML = '<p data-olay></p>';
+      const yuva = document.createElement('div'); document.body.appendChild(yuva);
+      const sahteKoydum = !window.RotaOfis3B;
+      if(sahteKoydum) window.RotaOfis3B = { kur:() => ({ ok:false }) };
+      d.api = api; d.kok = kok; d.toplantidaydi = false;
+      try{
+        await cizmeden(async () => { Z().yerlestir(yuva); Z().yerlestir(yuva); Z()._isle(); });
+        expect(c.kapat).toBe(0);
+        d.toplantidaydi = true;
+        Z()._isle();
+        expect(c.kapat).toBe(1);
+        expect(d.toplantidaydi).toBe(false);
+      }finally{
+        Z()._durdur();
+        yuva.remove();
+        d.api = eski.api; d.kok = eski.kok; d.toplantidaydi = eski.t;
+        if(sahteKoydum) delete window.RotaOfis3B;       // sonraki test gerçeğini yüklesin
+      }
     });
   });
 

@@ -281,9 +281,10 @@ return {ok:true,
   gece(v){setNight(!!v);save();},
   koyu(v){hostDark=!!v;},
   hiz(n){if([1,2,4].includes(n)){speed=n;speedSelect.value=String(n);}},
+  telefon(v){if(mission||meetingState!=='idle')return false;onCall=!!v;callPose();return true;},
   mesgul(){return !!mission||meetingState!=='idle';},
   konum(i){const k=staff[i];if(!k)return null;const v=k.person.localToWorld(new T.Vector3(0,1.1,1.0)).project(camera);return {x:(v.x+1)/2*stage.clientWidth,y:(1-v.y)/2*stage.clientHeight};},
-  durum(){return {gorev:mission?{tur:mission.type,kim:mission.actor.index,kime:mission.target,temsili:!!mission.temsili}:null,toplanti:meetingState,gece:nightMode,hareket:moving,calisiyor};},
+  durum(){return {gorev:mission?{tur:mission.type,kim:mission.actor.index,kime:mission.target,temsili:!!mission.temsili}:null,toplanti:meetingState,gece:nightMode,hareket:moving,calisiyor,telefonda:staff[3].person.parent===phoneAnchor};},
   surdur};
 }
 window.RotaOfis3B={kur,SURUM:'0.160.1'};
