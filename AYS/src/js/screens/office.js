@@ -161,10 +161,10 @@ R.Screens.office = (function(){
      bir zeminin üstünde durur, Patron'un masası dipte karşıdadır, uzmanlar
      iki sıra hâlinde önünde oturur. Kamera döndürülebilir.
 
-     Neden kütüphanesiz: uygulamanın hiçbir bağımlılığı yok ve tek dosyalık
-     bir HTML olarak yayımlanıyor. WebGL bunun için hem ağır hem gereksiz —
-     beş masalık bir oda CSS'in kendi 3B dönüşümleriyle çizilir ve düşük
-     donanımda da akıcı kalır.
+     Bu CSS odası kütüphanesizdir ve HER ZAMAN çalışır. Canlı sahne
+     (WebGL, js/core/ofis3b.js — AGENTS.md §1.3'ün tek istisnası) varsa onun
+     yerine gelir; hafif görünüm seçilirse, WebGL yoksa ya da tek dosya
+     yanında ofis3d/ klasörü olmadan açılırsa oda yine budur.
 
      Erişilebilirlik: her masa hâlâ bir <button>'dur, klavyeyle gezilir ve
      ad etiketleri kameraya karşı DÖNDÜRÜLÜR (ters dönüşüm), böylece oda
@@ -246,10 +246,25 @@ R.Screens.office = (function(){
       <p class="tiny dim mt-8">Odayı sürükleyerek çevirebilirsin; masaya dokununca raporu açılır.</p>`;
   }
 
+  /* Canli sahnede masalara klavye ve ekran okuyucuyla da ulasilir: tuval
+     bir resimdir, dugme degildir. Karaktere dokunmak ayni masayi acar. */
+  function masaDugmeleri(){
+    return html`<div class="ofis3b-masalar" role="group" aria-label="Masalar">${map(R.AGENTS, a => {
+      const n = O.notes(a.id).length;
+      const acik = S.ui.officeDesk === a.id;
+      return K.Button({ label:a.name + (n ? ' · ' + n + ' not' : ''), size:'sm',
+        tone:acik ? 'primary' : null, act:'office-desk',
+        data:{ 'data-agent':a.id, 'aria-expanded':acik ? 'true' : 'false' } });
+    })}</div>`;
+  }
+
   function floorPlan(){
     const specialists = R.AGENTS.filter(a => !a.lead);
     const waiting = R.Proposals.actionable().length;
     const three = O.settings().room3d !== false;
+    const Z = R.Ofis3B;
+    const canli = three && !!Z && Z.kullanilir();
+    const canliOlur = three && !canli && !!Z && Z.destek() && !Z.hata();
 
     return html`
       <div class="${cls('floor', three && 'floor--room')}">
@@ -262,18 +277,22 @@ R.Screens.office = (function(){
           </div>
           <div class="row wrap gap-6">
             ${when(waiting, () => K.Badge({ label:waiting + ' öneri bekliyor', tone:'warn' }))}
-            ${when(three, () => html`<span class="room3d__turn">
+            ${when(three && !canli, () => html`<span class="room3d__turn">
               ${K.IconButton({ icon:'left', size:'sm', aria:'Odayı sola çevir',
                 title:'Odayı sola çevir', act:'office-turn', data:{ 'data-dir':'-1' } })}
               ${K.IconButton({ icon:'right', size:'sm', aria:'Odayı sağa çevir',
                 title:'Odayı sağa çevir', act:'office-turn', data:{ 'data-dir':'1' } })}
             </span>`)}
+            ${when(canliOlur, () => K.Button({ label:'Canlı 3B ofis', icon:'cube', size:'sm',
+              act:'office-sahne', data:{ 'data-mod':'canli' } }))}
             ${K.Button({ label:three ? 'Kat planı' : '3B görünüm', icon:three ? 'grid' : 'cube',
               size:'sm', act:'office-view' })}
             ${K.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' })}
           </div>
         </div>
-        ${when(three, room3d)}
+        ${when(canli, () => html`<div class="ofis3b-yuva" id="ofis3b-yuva"></div>${masaDugmeleri()}`)}
+        ${when(three && !canli && Z && Z.hata(), () => html`<p class="tiny dim ofis3b-not">${Z.hata()}</p>`)}
+        ${when(three && !canli, room3d)}
         ${when(!three, () => html`<div class="floor__room">
           <div class="floor__lead">${seat(R.AGENT_BY_ID.patron)}</div>
           ${map(specialists, seat)}
@@ -945,7 +964,10 @@ R.Screens.office = (function(){
     }, true);
   }
 
-  function afterRender(){ bindDrag(); }
+  function afterRender(){
+    bindDrag();
+    if(R.Ofis3B) R.Ofis3B.yerlestir(document.getElementById('ofis3b-yuva'));
+  }
 
   /* ---------- eylemler ---------- */
 
@@ -972,6 +994,14 @@ R.Screens.office = (function(){
       R.App.render();
     },
 
+    /* Canli sahne (WebGL) ile hafif CSS odasi arasinda gecis; tercih kalicidir. */
+    async 'office-sahne'(el){
+      const mod = el.dataset.mod === 'hafif' ? 'hafif' : 'canli';
+      if(mod === 'canli' && R.Ofis3B) R.Ofis3B.ac();
+      await O.saveSettings({ sahne3b:mod });
+      R.App.render();
+    },
+
     async 'office-turn'(el){
       applyTurn(roomTurn + Number(el.dataset.dir || 1) * 30);
     },
@@ -987,9 +1017,12 @@ R.Screens.office = (function(){
       R.App.go('team');
     },
 
+    /* Canli sahnede ekip once toplanti odasina yurur, oturunca gercek
+       toplanti ekrani acilir (ofis3b.js); sahne yoksa dogrudan gidilir. */
     async 'office-meet'(){
-      S.ui.meetingAuto = true;
-      R.App.go('meeting');
+      const git = () => { S.ui.meetingAuto = true; R.App.go('meeting'); };
+      if(R.Ofis3B && document.getElementById('ofis3b-yuva')) R.Ofis3B.toplantiyaGotur(git);
+      else git();
     },
 
     async 'office-settings'(el){
@@ -1175,6 +1208,7 @@ R.Screens.office = (function(){
       el.disabled = true;
       try{
         const added = await R.Proposals.refresh();
+        if(R.Ofis3B) R.Ofis3B.oneriler(added);
         UI.toast(added.length
           ? added.length + ' yeni öneri masaya bırakıldı'
           : 'Ofis her şeyi yerinde buldu');

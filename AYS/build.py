@@ -176,6 +176,43 @@ def copy_service_worker() -> None:
         shutil.copy2(kaynak, DIST / "sw.js")
 
 
+# 3B ofis (js/core/ofis3b.js) tek dosyaya GOMULMEZ: Three.js 670 KB'tir ve
+# yalniz Ofis'te 3B acilinca gerekir. dist/ofis3d/ yaninda durur; tek dosya
+# yalniz basina acildiginda ofis hafif (CSS) odaya doner. Klasor kaynagin
+# AYNASIDIR: kaynakta olmayan dosya hedefte de kalmaz.
+OFIS3D = "ofis3d"
+
+
+def ofis3d_farki() -> list:
+    kaynak, hedef = SRC / OFIS3D, DIST / OFIS3D
+    if not kaynak.is_dir():
+        return []
+    fark = []
+    adlar = {f.name for f in kaynak.iterdir() if f.is_file()}
+    for ad in sorted(adlar):
+        h = hedef / ad
+        if not h.is_file() or h.read_bytes() != (kaynak / ad).read_bytes():
+            fark.append(ad)
+    if hedef.is_dir():
+        fark += sorted(f.name + " (fazla)" for f in hedef.iterdir() if f.is_file() and f.name not in adlar)
+    return fark
+
+
+def copy_ofis3d() -> None:
+    kaynak, hedef = SRC / OFIS3D, DIST / OFIS3D
+    if not kaynak.is_dir():
+        return
+    hedef.mkdir(parents=True, exist_ok=True)
+    adlar = set()
+    for f in kaynak.iterdir():
+        if f.is_file():
+            shutil.copy2(f, hedef / f.name)
+            adlar.add(f.name)
+    for eski in hedef.iterdir():
+        if eski.is_file() and eski.name not in adlar:
+            eski.unlink()
+
+
 def copy_brand_assets() -> None:
     """Marka gorselleri/videosu METNE gomulmez — HTML'e kopyalanirsa dosya
     boyutu megabaytlarca sisiyor (video ~1.8MB). Bunun yerine dist/ yaninda
@@ -358,6 +395,7 @@ def build(minify: bool = False, denetle: bool = False):
     copy_brand_assets()
     copy_level_assets()
     copy_service_worker()
+    copy_ofis3d()
 
     size_kb = len(output.encode("utf-8")) / 1024
     mode = "minify" if minify else "okunabilir"
@@ -374,6 +412,10 @@ def denetle_dist(out_path, output: str) -> int:
         mevcut = out_path.read_text(encoding="utf-8")
     except FileNotFoundError:
         print(f"KIRMIZI  {out_path} yok; python3 build.py kos.")
+        return 1
+    fark = ofis3d_farki()
+    if mevcut == output and fark:
+        print(f"KIRMIZI  dist/{OFIS3D}/ kaynakla ayni degil: {', '.join(fark)}. python3 build.py kos.")
         return 1
     if mevcut == output:
         print(f"OK   {out_path.name} kaynaktan derlenmis haliyle ayni")

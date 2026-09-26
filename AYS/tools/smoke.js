@@ -259,6 +259,44 @@ async function walkFlows(page, base, errors){
    kuyruğu boşaltan başka hiçbir yol kalmaz, yani sınanan şey gerçekten
    AÇILIŞ davranışıdır. Bu tarayıcı `reducedMotion:'reduce'` ile açılır,
    yani perde değil sessiz yol koşar — kuyruk anında boşalmalı. */
+/* 3B OFİS (js/core/ofis3b.js). Otomasyonda sahne kendiliğinden açılmaz
+   (yazılım WebGL'i öteki ölçümleri bozar); burada AÇIKÇA açılır ve tek
+   dosyanın yanındaki ofis3d/ klasöründen gerçekten yüklendiği ölçülür:
+   tuval çizilir, masa düğmesi masayı açar, karaktere dokunmak aynı masayı
+   açar, yeniden çizimde sahne kaybolmaz, ekran değişince çizim durur. */
+async function ofis3b(page, base, errors){
+  const hata = m => errors.push('3B ofis: ' + m);
+  await page.goto(base + '/dist/rota.html', { waitUntil:'load' });
+  await page.waitForSelector('.site', { timeout:15000 });
+  await wait(600);
+  await page.evaluate(() => { if(R.UI.closeSheet) R.UI.closeSheet(); R.App.go('office'); });
+  await wait(400);
+  if(await page.$('#ofis3b-yuva')) hata('otomasyonda kendiliğinden açıldı');
+  const dugme = await page.$('[data-act="office-sahne"][data-mod="canli"]');
+  if(!dugme){ hata('«Canlı 3B ofis» düğmesi yok'); return; }
+  await dugme.click();
+  for(let i = 0; i < 60 && !(await page.$('#ofis3b-yuva canvas')); i++) await wait(250);
+  if(!(await page.$('#ofis3b-yuva canvas'))){
+    hata('sahne çizilmedi — ' + (await page.evaluate(() => R.Ofis3B.hata())));
+    return;
+  }
+  const tuval = await page.evaluate(() => R.Ofis3B._durum.kok.querySelector('canvas'));
+  await page.evaluate(() => R.App.render()); await wait(400);
+  const ayni = await page.evaluate(() => document.querySelector('#ofis3b-yuva canvas') === R.Ofis3B._durum.kok.querySelector('canvas'));
+  if(!ayni) hata('yeniden çizimde sahne kayboldu');
+  await page.click('.ofis3b-masalar [data-agent="tyt"]'); await wait(300);
+  if((await page.evaluate(() => R.S.ui.officeDesk)) !== 'tyt') hata('masa düğmesi masayı açmadı');
+  await page.evaluate(() => { R.S.ui.officeDesk = null; document.querySelector('.office-view').scrollIntoView({ block:'center' }); });
+  await wait(2500);
+  const k = await page.evaluate(() => { const r = document.querySelector('.office-view').getBoundingClientRect();
+    const c = R.Ofis3B._durum.api.konum(4); return { x:r.left + c.x, y:r.top + c.y }; });
+  await page.mouse.click(k.x, k.y); await wait(600);
+  if((await page.evaluate(() => R.S.ui.officeDesk)) !== 'patron') hata('karaktere dokunmak masayı açmadı');
+  await page.evaluate(() => R.App.go('today')); await wait(600);
+  if(await page.evaluate(() => R.Ofis3B._durum.api.durum().calisiyor)) hata('ekran değişince çizim durmadı');
+  SAYAC.ekran++;
+}
+
 async function rozetKuyrugu(page, base, errors){
   await page.goto(base + '/index.html', { waitUntil:'load' });
   await page.waitForSelector('.site', { timeout:15000 });
@@ -456,6 +494,7 @@ async function cevrimdisi(browser, base, hedefler, durdur, errors){
     await walkFlows(page, base, errors);
     await rozetKuyrugu(page, base, errors);
     await rutbeSayilari(page, base, errors);
+    await ofis3b(page, base, errors);
     /* Gezinti sayfasi, sunucu BILEREK durdurulmadan once kapanir. Acik
        kalirsa sonradan yaptigi her istek (baslikta yeniden cizilen marka
        gorseli gibi) «istek basarisiz» sayiliyordu: uygulama hatasi degil,

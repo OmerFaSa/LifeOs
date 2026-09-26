@@ -30,6 +30,13 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
 3. **Sıfır çalışma zamanı bağımlılığı.** Üç arayüzde çerçeve, paket,
    derleyici yok; HKM'de yalnız Python standart kütüphanesi. Playwright
    yalnız denetim betikleri için.
+   **Tek istisna (depo sahibinin kararı, 2026-09-26):** AYS'nin canlı 3B
+   ofisi (`AYS/src/ofis3d/`) Three.js 0.160.1'i kullanır. Sınırları:
+   depoda sabit sürümle durur (ağdan yüklenmez, lisansı yanında);
+   `rota.html`'e gömülmez, yalnız Ofis'te 3B açılınca yüklenir; yalnız
+   görseldir — karar vermez, veri okumaz, hiçbir ekran ona bağlı değildir;
+   yüklenemezse ya da WebGL yoksa ofis CSS odasına döner. Bu istisna başka
+   bir kütüphaneye ya da başka bir sisteme emsal değildir.
 4. **Modüller HKM'yi bilir ama ona bağımlı değildir.** AYS/SPİ/ESP,
    HKM'nin üst patron (King) olduğunu bilir ve onunla konuşabilir; ama HKM
    kapalıyken, yanıt vermezken ya da hata verirken hiçbiri bozulmaz,

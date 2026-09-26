@@ -1,0 +1,53 @@
+/* 3B OFIS — canli sahnenin kabugu (js/core/ofis3b.js, ofis3d/sahne.js).
+
+   Sahne kendi isigini ve rengini kodla uretir; burada yalniz yerlesim,
+   kontrol satirlari ve dar ekran var. Sahnenin kutusu SABIT ORANDADIR:
+   tuval icerige gore uzamaz, sayfanin geri kalani kaymaz. Ofis genis bir
+   kat; kare bir kutuda (telefonda 340 px) altta ve ustte bos kaliyordu,
+   bu yuzden kutu yukseklikle degil oranla (16:9, telefonda 4:3) boyutlanir.
+
+   Dokunma: yatay surukleme odayi dondurur, dikey surukleme SAYFAYI kaydirir
+   (touch-action: pan-y). Telefonda 340 piksellik kaydirilamaz bir alan
+   birakmak, sayfayi o kutunun ustunde kilitlemek olurdu. Iki parmak
+   yakinlastirir. */
+
+.ofis3b{ display:block; }
+
+.ofis3b__arac{
+  display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px;
+  margin-bottom:8px;
+}
+
+.ofis3b__sahne{
+  position:relative; width:100%; aspect-ratio:16 / 9; max-height:560px;
+  border-radius:var(--r-md); overflow:hidden;
+  background:var(--surface-2);
+  touch-action:pan-y; cursor:grab;
+}
+.ofis3b__sahne:active{ cursor:grabbing; }
+.ofis3b__sahne canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
+
+.ofis3b__olay{ margin:8px 0 0; }
+.ofis3b__olay:empty{ display:none; }
+.ofis3b__durum{ margin:4px 0 0; }
+
+.ofis3b__detay{ margin-top:10px; }
+.ofis3b__detay > summary{ cursor:pointer; min-height:24px; }
+
+.ofis3b__gorev{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
+  gap:8px; align-items:end;
+}
+.ofis3b__gorev label{ display:flex; flex-direction:column; gap:4px; }
+
+.ofis3b__bekle{
+  aspect-ratio:16 / 9; max-height:560px; display:grid; place-items:center; margin:0;
+  border-radius:var(--r-md); background:var(--surface-2);
+}
+
+.ofis3b-masalar{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.ofis3b-not{ margin:0 0 8px; }
+
+@media (max-width:480px){
+  .ofis3b__sahne, .ofis3b__bekle{ aspect-ratio:4 / 3; }
+}

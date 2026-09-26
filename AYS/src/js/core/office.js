@@ -50,6 +50,7 @@ R.Office = (function(){
       fallback:true,          // ilk model dusunce sirayi dene
       autoBriefing:true,      // sabah gunun brifingini kendiliginden uret
       room3d:true,            // ofis ekrani: 3B oda mi, duz kat plani mi
+      sahne3b:'canli',        // 3B'de: 'canli' WebGL sahnesi (ofis3b.js) | 'hafif' CSS odasi
       meetingPace:'normal',   // toplanti akis hizi: hizli | normal | yavas
       meetingVoice:false,     // toplantiyi sesli dinle (tercih kalicidir)
       voices:{},              // agentId -> voiceURI (kullanicinin ses eslestirmesi)
