@@ -132,3 +132,30 @@ bir bulgudur. Emin değilsen **«göremedim»** yaz, «yok» yazma: bu depoda
    yazılmaz, `tools/sayilar.py` üretir.
 3. **On yıllık mimari.** Ufuk **dokuz aydır**: her gün kullanılacak bir
    sistem için ne kırılır, o konuşulur.
+
+## 6. Jev — yalnız Claude Code'un çalışma aracı
+
+Jev (`.claude/skills/jev-agent`) tipli karar veren dış bir servistir:
+seçim, puan, evet/hayır olasılığı. Bu depoda **yalnız ajanın kendi
+kodlama işinde** kullanılır; AYS/SPİ/ESP/HKM'nin koduna, CI'ya ya da
+`tools/` altına **girmez** (§1.1, §1.3, §1.4). Kullanıcı verisi —
+özellikle SPİ'nin sağlık verisi — Jev'e gönderilmez; yalnız işin özeti
+gider.
+
+Claude Code Jev'e şu üç yerde danışır:
+
+1. **«Bitti» demeden önce** — yapılan / yapılmayan listesiyle
+   `choice`: `complete / verify_more / incomplete`. `verify_more` ya da
+   `incomplete` gelirse eksik adım yapılır ya da kullanıcıya açıkça
+   söylenir.
+2. **Geri alınamayan bir komuttan önce** (force-push, dosya/dal silme,
+   geçmiş yeniden yazma) — `noul` ile risk sinyali. Sinyal onayın
+   yerine geçmez; onay yine kullanıcıdan gelir.
+3. **İncelemede** — bir gözlemin §4 anlamında bulgu olup olmadığı
+   (`noul`: «belirli bir girdide yanlış çıktı gösteriyor mu?»).
+
+Jev'in cevabı **ikinci görüştür, karar değildir**: son söz ajanın ve
+kullanıcının. Anahtar (`JEV_API_KEY`) ortamdan okunur; depoya, günlüğe,
+çıktıya yazılmaz. Anahtar yoksa ya da servis cevap vermiyorsa iş
+durmaz, Jev'siz sürer ve bu söylenir. Önemsiz işlerde (tek satırlık
+düzeltme, soru cevabı) çağrılmaz — her çağrı kredi harcar.
