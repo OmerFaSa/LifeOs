@@ -2735,7 +2735,8 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '<label style="display:block;font-size:12px;margin:6px 0">Motor adresi '
       + '<input id="yerel-adres" placeholder="http://127.0.0.1:11434" value="' + esc(o.yerel_adres || '') + '"></label>'
       + '<p class="muted" style="font-size:11px;margin:0">Aynı makine ya da ev ağı http olabilir; '
-      + 'internetteki bir motor yalnız https ile bağlanır.</p>'
+      + 'internetteki bir motor yalnız https ile bağlanır. Motor jeton istiyorsa jetonu '
+      + 'Sağlayıcılar → Yerel sunucu bölümüne gir.</p>'
       + '<label style="display:block;font-size:12px;margin:6px 0">Ekonomik sınıf '
       + '<input id="yerel-ekonomik" list="yerel-liste" value="' + esc(yl.ekonomik || '') + '"></label>'
       + '<label style="display:block;font-size:12px;margin:6px 0">Standart sınıf (isteğe bağlı) '
@@ -2746,10 +2747,13 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '</details>';
     return h;
   }
-  async function yerYaz(yer){
-    var yama = { models:{ yerel:{ ekonomik:($('yerel-ekonomik').value || '').trim(),
+  function yerelYama(){
+    return { models:{ yerel:{ ekonomik:($('yerel-ekonomik').value || '').trim(),
       standart:($('yerel-standart').value || '').trim() },
       yerel_adres:($('yerel-adres').value || '').trim() } };
+  }
+  async function yerYaz(yer){
+    var yama = yerelYama();
     if(yer) yama.models.yer = yer;
     var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
     if(r.status === 200){ ayarlariCiz(r.body.config); }
@@ -2759,13 +2763,19 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   /* Sunucu motor servisinden HABERDARDIR: adres, aynı makine mi, gecikme,
      modeller. Kaydedilmemiş adres önce kaydedilir ki sınanan o olsun. */
   async function yerelSina(){
+    var k = await api('/api/config', { method:'POST', body:JSON.stringify(yerelYama()) });
+    if(k.status !== 200){
+      $('yerel-not').textContent = 'Kaydedilmedi — '
+        + ((k.body && k.body.errors) ? k.body.errors.join(' · ') : k.status);
+      return;
+    }
     var d = await api('/api/ai/dugum');
     var b = d.body || {}, liste = b.modeller || [];
     $('yerel-liste').innerHTML = liste.map(function(ad){
       return '<option value="' + esc(ad) + '"></option>'; }).join('');
     $('yerel-not').textContent = (b.ulasilabilir
       ? esc(b.adres) + ' · ' + b.sinif_adi + ' · ' + b.gecikme_ms + ' ms · ' + liste.length + ' model. '
-      : esc(b.adres || '') + ' · ') + (b.not || '');
+      : esc(b.adres || '') + ' · ') + (b.not || '') + (b.uyari ? ' ' + b.uyari : '');
   }
   async function paketYaz(id, mesaj){
     var r = await api('/api/config', { method:'POST', body:JSON.stringify({ models:{ paket:id } }) });

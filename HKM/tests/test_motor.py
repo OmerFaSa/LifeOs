@@ -389,6 +389,171 @@ def run():
         ok("buluta" in k["not"])                              # hibritte is durmaz
     test("sunucu motorun durumunu bilir", t_node_status)
 
+    def t_remote_node_waits_longer():
+        """Baska makinedeki motor (cogu zaman islemcide) yavas cevap verir:
+        cagri suresi uzar. Ayni makinede ve bulutta eski sure kalir."""
+        con = db.connect(":memory:")
+        uzak = models.apply(_yer_cfg("yerel", bulut=False), {"yerel_adres": "http://192.168.1.20:11434"})
+        t = _tasiyici("Tamam.")
+        ai.ask(con, uzak, "seviye.alt", "sohbet", _mesaj(), baglam="", sistem="s",
+               transport=t, seviye="alt")
+        eq(t.kayit[0]["ayar"].get("sure"), ai.UZAK_ZAMAN_ASIMI)
+        ok(ai.UZAK_ZAMAN_ASIMI > ai.ZAMAN_ASIMI)
+        ayni = _tasiyici("Tamam.")
+        ai.ask(con, _yer_cfg("yerel", bulut=False), "seviye.alt", "sohbet", _mesaj(),
+               baglam="", sistem="s", transport=ayni, seviye="alt")
+        no(ayni.kayit[0]["ayar"].get("sure"))
+        bulut = _tasiyici("Tamam.")
+        ai.ask(con, _yer_cfg("bulut"), "seviye.alt", "sohbet", _mesaj(), baglam="",
+               sistem="s", transport=bulut, seviye="alt")
+        no(bulut.kayit[0]["ayar"].get("sure"))
+    test("uzak motor icin cagri suresi uzar", t_remote_node_waits_longer)
+
+    def t_remote_timeout_reaches_urlopen():
+        """`sure` gercekten istege gider (tasiyicisiz yol)."""
+        gorulen = []
+        eski = ai._istek
+        try:
+            ai._istek = lambda url, baslik, govde, timeout=ai.ZAMAN_ASIMI: (
+                gorulen.append(timeout) or {"choices": [{"message": {"content": "x"}}],
+                                            "usage": {"prompt_tokens": 1, "completion_tokens": 1}})
+            ai._cagir("yerel", "", "qwen", "s", _mesaj(), ayar={"sure": 120})
+            ai._cagir("yerel", "", "qwen", "s", _mesaj(), ayar={"jeton": 100})
+        finally:
+            ai._istek = eski
+        eq(gorulen, [120, ai.ZAMAN_ASIMI])
+    test("uzak motor suresi istege gider", t_remote_timeout_reaches_urlopen)
+
+    def _soguk_cfg(yer):
+        return models.apply(_yer_cfg(yer, bulut=(yer == "hibrit"),
+                                     yerel={"ekonomik": "qwen-kucuk", "standart": "qwen-orta"}),
+                            {"yerel_adres": "http://192.168.1.20:11434"})
+
+    def t_cold_start_hybrid_goes_to_cloud_once():
+        """Motor ayakta ama cevap zamaninda gelmedi (model bellege
+        yukleniyor): ikinci yerel modeli de beklemek kullaniciyi iki kez
+        bekletir. Hibritte dogrudan buluta gecilir."""
+        con = db.connect(":memory:")
+        kayit = []
+        def tas(provider, anahtar, model, sistem, mesajlar, ayar=None):
+            kayit.append((provider, model))
+            if provider == "yerel":
+                raise TimeoutError("timed out")
+            return "Merhaba!", 10, 5
+        cfg = models.apply(_soguk_cfg("hibrit"), {"paket": "A"})
+        r = ai.ask(con, cfg, "seviye.alt", "sohbet", _mesaj(), baglam="", sistem="s",
+                   transport=tas, seviye="alt")
+        ok(r["ok"])
+        eq([p for p, _ in kayit], ["yerel", "openrouter"])
+        not_ = con.execute("SELECT note FROM usage WHERE provider='yerel'").fetchone()["note"]
+        ok(ai.YEREL_GEC in not_, not_)
+    test("soguk baslangic: hibrit bir kez buluta gecer", t_cold_start_hybrid_goes_to_cloud_once)
+
+    def t_cold_start_local_says_so():
+        con = db.connect(":memory:")
+        kayit = []
+        def tas(provider, anahtar, model, sistem, mesajlar, ayar=None):
+            kayit.append(model)
+            raise TimeoutError("timed out")
+        r = ai.ask(con, _soguk_cfg("yerel"), "seviye.alt", "sohbet", _mesaj(), baglam="",
+                   sistem="s", transport=tas, seviye="alt")
+        no(r["ok"])
+        eq(kayit, ["qwen-kucuk"])                  # ikinci yerel model beklenmez
+        ok("belleğe yükleniyor" in r["note"], r["note"])
+        # Kapali servis soguk baslangic sayilmaz.
+        con2 = db.connect(":memory:")
+        def kapali(provider, anahtar, model, sistem, mesajlar, ayar=None):
+            raise ConnectionRefusedError("reddedildi")
+        k = ai.ask(con2, _soguk_cfg("yerel"), "seviye.alt", "sohbet", _mesaj(), baglam="",
+                   sistem="s", transport=kapali, seviye="alt")
+        no("belleğe yükleniyor" in (k["note"] or ""))
+    test("soguk baslangic: yerel modda soylenir", t_cold_start_local_says_so)
+
+    def t_node_status_tells_cold_start():
+        """Model listesi donuyor ama son yerel cagri zaman asimina ugradiysa
+        not «ulasilamadi» degil, «bellege yukleniyor olabilir»dir."""
+        cfg = _soguk_cfg("hibrit")
+        con = db.connect(":memory:")
+        simdi = datetime.datetime.now()
+        butce.record(con, role="king", task="sohbet", provider="yerel", model="qwen-kucuk",
+                     ok=False, note="TimeoutError: timed out," + ai.YEREL_GEC,
+                     now=simdi - datetime.timedelta(minutes=2))
+        acik = lambda p, t, k: {"ok": True, "models": ["qwen-kucuk", "qwen-orta"], "note": ""}
+        d = motor.dugum_durumu(cfg, transport=acik, con=con)
+        ok(d["ulasilabilir"])
+        ok(d["soguk"])
+        ok("belleğe yükleniyor" in d["not"], d["not"])
+        # Sonra basarili bir yerel cagri geldiyse soguk degildir.
+        butce.record(con, role="king", task="sohbet", provider="yerel", model="qwen-kucuk",
+                     now=simdi - datetime.timedelta(minutes=1))
+        no(motor.dugum_durumu(cfg, transport=acik, con=con)["soguk"])
+        # Eski (15 dk'dan once) zaman asimi bugunu anlatmaz.
+        con3 = db.connect(":memory:")
+        butce.record(con3, role="king", task="sohbet", provider="yerel", model="qwen-kucuk",
+                     ok=False, note=ai.YEREL_GEC, now=simdi - datetime.timedelta(hours=1))
+        no(motor.dugum_durumu(cfg, transport=acik, con=con3)["soguk"])
+        # Kapaliysa soguk degil, ulasilamadi.
+        k = motor.dugum_durumu(cfg, transport=lambda p, t, k: {"ok": False, "note": "x"}, con=con)
+        no(k["soguk"])
+        ok("ulaşılamadı" in k["not"])
+    test("motor durumu soguk baslangici ayirir", t_node_status_tells_cold_start)
+
+    def t_internet_node_without_token_warns():
+        """Internetteki motor jetonsuzsa sinama bunu SOYLER: https veriyi
+        sifreler ama kapiyi kilitlemez. Yerel agda jeton istenmez."""
+        acik = lambda p, t, k: {"ok": True, "models": ["qwen-kucuk"], "note": ""}
+        cfg = models.apply(_yer_cfg("hibrit"), {"yerel_adres": "https://motor.ornek.com"})
+        d = motor.dugum_durumu(cfg, transport=acik)
+        no(d["jeton_var"])
+        ok("jeton" in d["uyari"], d["uyari"])
+        jetonlu = models.apply(cfg, {"keys": {"yerel": "gizli-jeton"}})
+        j = motor.dugum_durumu(jetonlu, transport=acik)
+        ok(j["jeton_var"])
+        eq(j["uyari"], "")
+        lan = models.apply(_yer_cfg("hibrit"), {"yerel_adres": "http://192.168.1.20:11434"})
+        eq(motor.dugum_durumu(lan, transport=acik)["uyari"], "")
+        # Jeton cagriya gider (Bearer): «yerel» saglayicinin ilk anahtari.
+        eq(models.key_value(jetonlu, "yerel"), "gizli-jeton")
+    test("internetteki motor jetonsuzsa uyarilir", t_internet_node_without_token_warns)
+
+    def t_node_check_script():
+        """tools/motor_sina.py: iki makine arasinda tek komutla sinama."""
+        import importlib.util
+        import os
+        yol = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           "tools", "motor_sina.py")
+        spec = importlib.util.spec_from_file_location("motor_sina", yol)
+        ms = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(ms)
+        liste = lambda url, jeton, t: {"data": [{"id": "qwen2.5:7b"}]}
+        sureler = []
+        def cevap(url, jeton, govde, t):
+            sureler.append(t)
+            return {"choices": [{"message": {"content": "Merhaba"}}]}
+        g, s = ms.sina("http://192.168.1.20:11434", get=liste, post=cevap)
+        ok(g, s)
+        eq(sureler, [ai.UZAK_ZAMAN_ASIMI])
+        ok("Motor hazır" in s[-1])
+        # Kotu adres, kapali servis, eksik model, soguk baslangic: her biri
+        # kaldi ve NEDENINI soyler.
+        no(ms.sina("http://8.8.8.8:11434", get=liste, post=cevap)[0])
+        def kapali(url, jeton, t):
+            raise ConnectionRefusedError("reddedildi")
+        g, s = ms.sina("http://192.168.1.20:11434", get=kapali, post=cevap)
+        no(g)
+        ok("OLLAMA_HOST" in s[-1])
+        g, s = ms.sina("http://192.168.1.20:11434", model="llama3", get=liste, post=cevap)
+        no(g)
+        ok("qwen2.5:7b" in s[-1])
+        def gec(url, jeton, govde, t):
+            raise TimeoutError("timed out")
+        g, s = ms.sina("http://192.168.1.20:11434", get=liste, post=gec)
+        no(g)
+        ok("belleğe yükleniyor" in s[-1])
+        g, s = ms.sina("https://motor.ornek.com", get=liste, post=cevap)
+        ok(any("jetonsuz" in x for x in s))
+    test("motor sinama betigi", t_node_check_script)
+
     # ------------------------------------ baglam: ihtiyaci kadar veri
 
     def _dolu_sohbet(cfg, metin):

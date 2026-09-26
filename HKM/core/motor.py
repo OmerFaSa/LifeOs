@@ -229,13 +229,8 @@ def merdiven(con, cfg, rol, seviye=None):
 
     saglayici = "google" if tur == "ses" else "openrouter"
     liste = models.key_list(cfg, saglayici)
-    basamaklar = []
-    for s in siniflar:
-        if yer == "hibrit" and s in yerel:
-            basamaklar.append(yerel_basamak(s))
-            continue
-        if not liste:
-            continue
+
+    def bulut_basamak(s):
         e = liste[0]
         m = SINIF_MODELI[tur][s]
         atama = {"role": rol, "from": None, "inherited": False, "provider": saglayici,
@@ -243,8 +238,22 @@ def merdiven(con, cfg, rol, seviye=None):
                  "efor": efor or "", "key_id": e["id"], "key_label": e.get("label", ""),
                  "key_user": e.get("user") or models.VARSAYILAN_SAHIP, "key_missing": False,
                  "key_set": bool(e.get("key")), "chain": [rol]}
-        basamaklar.append({"sinif": s, "atama": atama, "ayar": {
-            "efor": efor, "jeton": jeton + DUSUNME_PAYI.get(efor, 0)}})
+        return {"sinif": s, "atama": atama, "ayar": {
+            "efor": efor, "jeton": jeton + DUSUNME_PAYI.get(efor, 0)}}
+
+    basamaklar = []
+    for s in siniflar:
+        if yer == "hibrit" and s in yerel:
+            b = yerel_basamak(s)
+            if liste:
+                # Soguk baslangicta (yerel motor ayakta, cevap gec) ayni
+                # sinifin bulut karsiligi devralir (core/ai.py ask).
+                b["bulut_yedek"] = bulut_basamak(s)
+            basamaklar.append(b)
+            continue
+        if not liste:
+            continue
+        basamaklar.append(bulut_basamak(s))
     if not basamaklar:
         return dict(ortak, ok=False, reason="no-key", basamaklar=[],
                     note=("Ses ve video yalnız Google (Gemini) anahtarıyla çalışır; "
@@ -395,9 +404,34 @@ SINIF_YERI = {"ayni_makine": "aynı makine (localhost; veri makineden çıkmaz)"
               "yerel_ag": "yerel ağ", "internet": "internet (https)"}
 
 
-def dugum_durumu(cfg, transport=None):
+# Son yerel cagri bu kadar yeni bir zaman asimiysa motor «soguk» sayilir.
+SOGUK_PENCERE_DK = 15
+
+
+def _soguk_mu(con):
+    """Defterdeki SON yerel cagri, son SOGUK_PENCERE_DK dakikada zaman
+    asimina ugradiysa True. Sonra basarili bir cagri geldiyse soguk degil."""
+    if con is None:
+        return False
+    import datetime as _dt
+    from core import ai
+    r = con.execute("SELECT created_at, note FROM usage WHERE provider='yerel' "
+                    "ORDER BY created_at DESC, id DESC LIMIT 1").fetchone()
+    if not r or ai.YEREL_GEC not in (r["note"] or ""):
+        return False
+    try:
+        zaman = _dt.datetime.fromisoformat(str(r["created_at"]))
+    except ValueError:
+        return False
+    simdi = _dt.datetime.now(zaman.tzinfo) if zaman.tzinfo else _dt.datetime.now()
+    return simdi - zaman <= _dt.timedelta(minutes=SOGUK_PENCERE_DK)
+
+
+def dugum_durumu(cfg, transport=None, con=None):
     """Sunucu motor servisinden HABERDAR olur: ulasilabilir mi, gecikme,
-    modeller, ayni makine mi. Cagri yapmaz, para harcamaz (model listesi)."""
+    modeller, ayni makine mi. Cagri yapmaz, para harcamaz (model listesi).
+    `con` verilirse defterden soguk baslangic (model bellege yukleniyor)
+    «kapali»dan ayrilir."""
     import time
     kok = models.yerel_kok(cfg)
     _, _, sinif = models.adres_denetle(kok)
@@ -407,7 +441,11 @@ def dugum_durumu(cfg, transport=None):
     yer = models.yer_of(cfg)
     yerel = models.yerel_of(cfg)
     liste = r.get("models") or []
-    if r.get("ok"):
+    soguk = bool(r.get("ok")) and _soguk_mu(con)
+    if soguk:
+        not_ = ("Motor ayakta ama son çağrı zamanında dönmedi: model belleğe yükleniyor "
+                "olabilir. İlk cevap uzun sürebilir; birazdan yeniden dene.")
+    elif r.get("ok"):
         eksik = [ad for ad in yerel.values() if liste and ad not in liste]
         not_ = ("Motor servisi cevap verdi." if not eksik else
                 "Motor cevap verdi ama şu model sunucuda yok: %s" % ", ".join(eksik))
@@ -418,8 +456,15 @@ def dugum_durumu(cfg, transport=None):
                 + ("Hibritte işler buluta geçer." if yer == "hibrit" else
                    "Yerel modda model çağrıları yapılamaz; sistem kural motoruyla sürer."
                    if yer == "yerel" else ""))
+    # https veriyi sifreler ama kapiyi kilitlemez: internetteki bir motor
+    # jetonsuzsa adresini bilen herkes modeli kullanabilir.
+    jeton_var = bool(models.key_value(cfg, "yerel"))
+    uyari = ("İnternetteki motor jetonsuz: adresi bilen herkes modelini kullanabilir. "
+             "Motorun önüne jeton isteyen bir vekil koy ve jetonu Sağlayıcılar → "
+             "Yerel sunucu bölümüne gir." if sinif == "internet" and not jeton_var else "")
     return {"adres": kok, "sinif": sinif, "sinif_adi": SINIF_YERI.get(sinif, ""),
-            "ulasilabilir": bool(r.get("ok")), "gecikme_ms": gecikme, "modeller": liste,
+            "jeton_var": jeton_var, "uyari": uyari,
+            "ulasilabilir": bool(r.get("ok")), "soguk": soguk, "gecikme_ms": gecikme, "modeller": liste,
             "yerel_model_var": bool(yerel), "yer": yer, "not": not_.strip()}
 
 

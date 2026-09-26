@@ -1155,7 +1155,7 @@ class Handler(BaseHTTPRequestHandler):
         if u.path == "/api/ai/dugum":
             # Motor servisinin durumu: sunucu motordan haberdardir (adres,
             # ayni makine mi, gecikme, modeller). Para harcamaz.
-            return self._send(200, motor.dugum_durumu(self.server.config))
+            return self._send(200, motor.dugum_durumu(self.server.config, con=self.con))
         if u.path == "/api/models/paketler":
             # Butce paketleri (A · A+ · S · S+): onizleme, hicbir sey yazmaz.
             # Aylik tahmin defterdeki OLCUMDEN hesaplanir.

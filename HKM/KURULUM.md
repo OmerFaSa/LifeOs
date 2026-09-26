@@ -255,6 +255,65 @@ Kayıtlı bir anahtarın değeri ekrana **hiçbir zaman geri gelmez**, maske
 görünür. Değer alanını boş bırakıp kaydedersen sır **korunur** (yalnız adı
 ve sahibi güncellenir); silmek için satırı «Sil» ile kaldırıp kaydet.
 
+## 5.1 Modeli başka bilgisayarda çalıştır (Ollama)
+
+Sunucu merkezdir: veri, hafıza ve senkron burada kalır. Model ayrı bir
+**motor servisi**dir; aynı bilgisayarda da, evdeki başka bir bilgisayarda
+da çalışabilir. Hibritte motor kapalıysa iş buluta geçer; yerel modda
+sistem kural motoruyla sürer — hiçbir şey kapanmaz.
+
+**Model bilgisayarında:**
+
+1. Ollama'yı kur (<https://ollama.com/download>) ve RAM'e göre bir model
+   indir: 8 GB → `ollama pull qwen2.5:3b` · 16 GB → `ollama pull qwen2.5:7b`
+   · 32 GB+ → `ollama pull qwen2.5:14b`.
+2. **Ollama'yı ağa aç** — varsayılanda yalnız kendi makinesini dinler.
+   Windows: Başlat → «Sistem ortam değişkenlerini düzenle» → Ortam
+   Değişkenleri → Yeni: `OLLAMA_HOST` = `0.0.0.0:11434`. Ollama'yı görev
+   çubuğundan kapatıp yeniden aç.
+3. **Güvenlik duvarında 11434'ü yalnız ev ağına aç** (PowerShell,
+   yönetici):
+   ```powershell
+   New-NetFirewallRule -DisplayName "Ollama LAN" -Direction Inbound -Protocol TCP -LocalPort 11434 -RemoteAddress LocalSubnet -Action Allow
+   ```
+4. `ipconfig` → «IPv4 Address» (ör. `192.168.1.20`).
+
+**Bağlantının yolu:**
+
+| Durum | Yol | Motor adresi |
+|---|---|---|
+| Aynı ev, aynı modem | doğrudan ev ağı | `http://192.168.1.20:11434` |
+| Farklı yerler | **Tailscale** (iki makineye kur, aynı hesap) | `http://100.x.y.z:11434` |
+| Tailscale yoksa | https veren bir vekil + jeton | `https://motor.alanadin.com` |
+
+> **11434'ü modemden internete açma.** Ollama'da parola yoktur; açık kapı
+> modelini herkese açar. İnternetteki bir motoru HKM zaten yalnız `https`
+> ile kabul eder; jetonu Sağlayıcılar → **Yerel sunucu** satırına gir
+> (jetonsuzsa sınama uyarır).
+
+**Sunucu bilgisayarında:**
+
+1. Tek komutla sına — adres kuralı, model listesi, tek kısa sohbet:
+   ```bash
+   python tools/motor_sina.py http://192.168.1.20:11434 --model qwen2.5:7b
+   ```
+   Her adım ✓/✗ ile ve kaldıysa nedeniyle yazılır («OLLAMA_HOST ayarlı
+   mı?», «model motorda yok», «belleğe yükleniyor olabilir»).
+2. Ayarlar → Yapay zekâ → **Nerede çalışsın**: **Hibrit** (önerilen) ya da
+   **Yerel**; motor adresini ve Ekonomik/Standart için model adını
+   (`ollama list`'te göründüğü gibi) yaz, **«Yerel sunucuyu sına»**.
+3. Sohbette «merhaba» yaz: cevabın altında sınıf ve `$0` görünür.
+
+**Bilinmesi gereken iki şey:**
+
+- Başka makinedeki motor için bir cevap **120 saniyeye** kadar beklenir
+  (işlemcide çalışan model yavaştır); aynı makinede ve bulutta 60 saniye.
+- İlk çağrıda model belleğe yüklenir. Motor ayakta ama cevap zamanında
+  gelmediyse bu «ulaşılamadı» sayılmaz: hibritte o istek **bir kez**
+  buluta geçer (ikinci yerel model beklenmez), yerel modda «model belleğe
+  yükleniyor olabilir» denir. «Yerel sunucuyu sına» 15 dakika boyunca bunu
+  söyler.
+
 ## 6. Açmadan önce okunacak beş satır
 
 1. **İzin listesi boşsa kimse yok.** Boş liste «herkes» demek değildir;

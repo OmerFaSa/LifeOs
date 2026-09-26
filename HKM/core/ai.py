@@ -47,6 +47,14 @@ import urllib.request
 from core import butce, manager, models
 
 ZAMAN_ASIMI = 60
+# Baska makinedeki motor servisi (cogu zaman islemcide calisan bir model)
+# ilk cevapta yavastir: yerel ag ve internet sinifinda cagri daha uzun
+# beklenir. Sinama (model listesi) kisa kalir.
+UZAK_ZAMAN_ASIMI = 120
+# Yerel motor ayakta ama cevap zamaninda gelmedi: model bellege yukleniyor
+# olabilir (soguk baslangic). Deftere bu isaretle yazilir; motor durumu
+# ve merdiven bunu «kapali»dan ayirir.
+YEREL_GEC = "yerel-gec"
 EN_COK_MESAJ = 12          # gecmisin tamami her turda gonderilmez
 EN_COK_JETON = 1200        # cevap uzunlugu sinirlari
 
@@ -61,6 +69,14 @@ def _openai_bicimi(url, anahtar, model, sistem, mesajlar, ek_baslik=None):
               "Authorization": "Bearer " + anahtar}
     baslik.update(ek_baslik or {})
     return url, baslik, govde
+
+
+def _zaman_asimi_mi(e):
+    import socket
+    if isinstance(e, (TimeoutError, socket.timeout)):
+        return True
+    return isinstance(e, urllib.error.URLError) and isinstance(
+        getattr(e, "reason", None), (TimeoutError, socket.timeout))
 
 
 def _istek(url, baslik, govde, timeout=ZAMAN_ASIMI):
@@ -172,6 +188,7 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
     Doner: (metin, giris_jeton, cikis_jeton, kesildi_mi)."""
     ayar = ayar or {}
     jeton = int(ayar.get("jeton") or EN_COK_JETON)
+    timeout = ayar.get("sure") or timeout
     tanim = models.PROVIDERS[provider]
     if provider in ("openrouter", "openai", "yerel"):
         url, baslik, govde = _openai_bicimi(
@@ -461,7 +478,7 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
     if not plan["ok"]:
         return {"ok": False, "reason": plan.get("reason"), "text": None,
                 "note": plan.get("note")}
-    basamaklar = plan["basamaklar"]
+    basamaklar = list(plan["basamaklar"])      # soguk baslangicta yeniden dizilir
     r = None
     for i, b in enumerate(basamaklar):
         ust_var = i < len(basamaklar) - 1
@@ -477,6 +494,18 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         r["motor"] = {"paket": plan.get("paket"), "seviye": plan.get("seviye"),
                       "sinif": b["sinif"], "basamak": i, "yukseldi": i > 0,
                       "ekonomi": plan.get("ekonomi")}
+        if r.get("yerel_gec"):
+            # Soguk baslangic: ikinci yerel model de bellege yuklenecekti;
+            # kullanici iki kez beklemesin. Kalan yerel basamaklar atlanir;
+            # hibritte bulut devralir (bulut basamagi yoksa ayni sinifin
+            # bulut karsiligi); yerel modda not kullaniciya gider.
+            kalan = [x for x in basamaklar[i + 1:] if x["atama"].get("provider") != "yerel"]
+            if not kalan and b.get("bulut_yedek"):
+                kalan = [b["bulut_yedek"]]
+            if not kalan:
+                break
+            basamaklar[i + 1:] = kalan
+            continue
         if not (ust_var and motor.zorlandi(r)):
             break
     if r.get("ok") and r.get("text"):
@@ -511,6 +540,8 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
         adres = models.yerel_uclari(cfg)[0]
         if adres != models.PROVIDERS["yerel"]["base"]:
             ayar["adres"] = adres
+        if models.adres_denetle(models.yerel_kok(cfg))[2] in ("yerel_ag", "internet"):
+            ayar["sure"] = UZAK_ZAMAN_ASIMI
     tavan_jeton = int(ayar.get("jeton") or EN_COK_JETON)
 
     anahtar = models.key_value(cfg, a["provider"], a.get("key_id"))
@@ -567,6 +598,7 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
         kesildi = False
         jeton_tahmini = False
         ek = {}
+        gec = False
         try:
             cagir = transport if transport is not None else _cagir
             # Ayar (efor, cevap siniri) yalniz VARSA gecer: eski tasiyicilar
@@ -586,6 +618,8 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
             hata = _saglayici_hatasi(e)
         except Exception as e:                  # noqa: BLE001
             hata = "%s: %s" % (type(e).__name__, e)
+            if a.get("provider") == "yerel" and _zaman_asimi_mi(e):
+                gec = True
         if hata is None and (gir is None or cik is None):
             # HATALAR D-16: saglayici kullanim bilgisi dondurmedi. 0 yazmak
             # «0 USD, olculdu» demekti ve tavan hic dolmazdi. Metinden
@@ -611,15 +645,20 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
                      ok=(hata is None), escalated=escalated,
                      cached=bool((ek or {}).get("cached")), cached_tok=int((ek or {}).get("cached") or 0),
                      reason_tok=int((ek or {}).get("reasoning") or 0),
-                     note=hata or ",".join(
+                     note=(hata or ",".join(
                          n for n, var in (("tahmini-fiyat", tahmini),
                                           ("tahmini-jeton", jeton_tahmini),
                                           ("olculen-bedel", olculen is not None),
-                                          (not_ek, bool(not_ek))) if var),
+                                          (not_ek, bool(not_ek))) if var))
+                     + ("," + YEREL_GEC if gec else ""),
                      now=now,
                      # Gizlilik panosu (fikir 55): modele giden veri TURU.
                      # BAM istemi konu metni ve web kaynagidir (kitap.py kural 5).
                      veri=veri or (["bam_istegi"] if str(role).startswith("bam.") else None))
+        if gec:
+            return {"ok": False, "reason": "provider", "text": None, "yerel_gec": True,
+                    "note": ("Yerel motor ayakta ama cevap zamanında gelmedi: model belleğe "
+                             "yükleniyor olabilir. Birazdan yeniden dene.")}
         if hata:
             return {"ok": False, "reason": "provider", "text": None,
                     "note": "Model çağrısı başarısız: %s" % hata}
