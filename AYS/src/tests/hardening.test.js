@@ -4,6 +4,30 @@
   const { describe, it, expect, resetState } = R.Test;
   const U = R.U, C = R.Calc, S = R.S;
 
+  describe('Çizim ekran yokken', function(){
+    /* Geç gelen bir iş (HKM teklifi, zamanlanmış kayıt) render() çağırdığında
+       sayfada #app yoksa çizim patlıyor, yakalama bloğu da #app'e yazmaya
+       çalışıp İKİNCİ kez patlıyordu (app.js:581, rastgele sayfa hatası).
+       Çizilecek ekran yoksa çizim sessizce vazgeçer ve söz (promise) kapanır. */
+    it('#app yoksa render hata atmaz ve biter', async function(){
+      expect(document.getElementById('app')).toBe(null);
+      const hatalar = [];
+      const yakala = e => { hatalar.push(String((e.reason && e.reason.message) || e.message || e)); e.preventDefault(); };
+      window.addEventListener('unhandledrejection', yakala);
+      window.addEventListener('error', yakala);
+      try{
+        const bitti = await Promise.race([
+          R.App.render().then(() => true),
+          new Promise(r => setTimeout(() => r(false), 1500))]);
+        expect(bitti).toBe(true);
+        expect(hatalar).toEqual([]);
+      }finally{
+        window.removeEventListener('unhandledrejection', yakala);
+        window.removeEventListener('error', yakala);
+      }
+    });
+  });
+
   describe('Güvenli varsayılanlar', function(){
     it('NaN net ekrana tire olarak düşer', function(){
       expect(U.fmtNet(NaN)).toBe('—');

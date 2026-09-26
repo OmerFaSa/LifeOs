@@ -515,6 +515,10 @@ R.App = (function(){
 
   async function doRender(){
     if(rendering) return;
+    /* Cizilecek ekran yoksa (test sayfasi, kapanan sekme) gec gelen bir
+       isin render() cagrisi sessizce vazgecer: yoksa cizim patlar, yakalama
+       blogu da #app'e yazmaya calisip ikinci kez patlardi (app.js:581). */
+    if(!document.getElementById('app')) return;
     rendering = true;
     try{
       const sc = screen();
@@ -578,7 +582,8 @@ R.App = (function(){
       if(sc.afterRender) sc.afterRender();
     }catch(err){
       console.error('Render hatası:', err);
-      document.getElementById('app').innerHTML = String(html`<div class="content">
+      const kutu = document.getElementById('app');
+      if(kutu) kutu.innerHTML = String(html`<div class="content">
         ${R.C.SakinHata({ baslik:'Ekran çizilemedi.', dugme:'Yeniden yükle',
           ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
@@ -1526,7 +1531,8 @@ R.App = (function(){
       if(R.Setup.needed()) setTimeout(() => R.Setup.open(), 400);
     }catch(err){
       console.error('Açılış hatası:', err);
-      document.getElementById('app').innerHTML = String(html`<div class="content">
+      const kutu = document.getElementById('app');
+      if(kutu) kutu.innerHTML = String(html`<div class="content">
         ${R.C.SakinHata({ baslik:'Uygulama açılamadı.', dugme:'Yeniden dene',
           ayrinti:err && err.message ? err.message : String(err) })}
       </div>`);
