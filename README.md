@@ -51,9 +51,9 @@ doğrular — ve HKM kapalıyken hiçbir arayüzün bozulmadığını. Bu deneti
 yazıldığı gün, iki tarafın da kendi testlerinde geçip birbiriyle
 konuşamadığı bir boşluğu buldu (tarayıcının CORS ön-isteği).
 
-> **Sırada ne var:** [`GELISTIRME_RAPORU.md`](GELISTIRME_RAPORU.md) —
+> **Sırada ne var:** [`belgeler/GELISTIRME_RAPORU.md`](belgeler/GELISTIRME_RAPORU.md) —
 > ölçülmüş bulgular, öncelik sırası ve bilinçli olarak yapılmayacaklar.
-> Açık teknik borçlar `NOTLAR.md` §19'da.
+> Açık teknik borçlar `belgeler/NOTLAR.md` §19'da.
 
 ## Üçü neyi paylaşır
 
@@ -169,6 +169,15 @@ başka bir kökende kalıp «silinmiş» görünürdü, ve üç sistem tek
 localStorage kotasını (~5 MB) paylaşırdı. `python3 baslat.py --hkmsiz`
 HKM'yi hiç açmaz; üç sistem bundan etkilenmez.
 
+**Güncelleme** (`main` dalından): giriş sayfasındaki «Güncelle» düğmesi,
+ya da `GUNCELLE.bat` (çift tık: indirir ve sistemi yeniden başlatır),
+ya da `python3 guncelle.py` (`--kontrol` yalnız bakar). Yalnız ileri
+sarar: elle değiştirilmiş bir dosya varsa, başka bir daldaysan ya da
+yerel kayıt `main`'den ayrışmışsa hiçbir şeye dokunmaz ve nedenini
+söyler. Veri (tarayıcı ve `HKM/db`) git'in dışındadır; güncelleme ona
+dokunmaz. Sunucu günlüğü kök klasörde değil, sistemin geçici
+klasöründe durur (`lifeos-sunucu.log`).
+
 ## Telefonda kullanım
 
 **Seçilen yol: tek dosya + elle yedek.** Telefon burada İKİNCİL cihazdır:
@@ -246,7 +255,7 @@ ekranındaki «Bu içe aktarmayı geri al».
 (`sunucu.py`). Dışarı açmak verinin şifresiz servis edilmesi ve yerel ağ
 güvenliğinin kullanıcıya geçmesi demektir; «ara sıra bakıyorum» bu bedeli
 karşılamaz. Telefon birincil cihaz hâline gelirse doğru cevap bu bölüm
-değil, `baslat.py --ag` bayrağıdır (GELISTIRME_RAPORU.md İP-4, Seçenek A).
+değil, `baslat.py --ag` bayrağıdır (belgeler/GELISTIRME_RAPORU.md İP-4, Seçenek A).
 
 Tek tek çalıştırmak da mümkün — her proje kendi klasöründen:
 

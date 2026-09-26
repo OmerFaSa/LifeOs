@@ -242,7 +242,7 @@ kanıtlar.
 | `ekip/EKIP-DURUM.md` | Herkes yalnız **kendi bölümüne** yazar | Teslim tablosuna T, bulgu özetine H yazar |
 | `ekip/HATALAR.md` | **H** (Tur 2 bulguları en üste, `T2-` koduyla) | Tur 1 kapalı; kodda ona bağlantı var, silinmez |
 | `ekip/CEKMECE-HARITASI.md`, `*/src/STIL.md` | **T** | |
-| `README.md`, `NOTLAR.md` | **H** | Sayılar elle yazılmaz |
+| `README.md`, `belgeler/NOTLAR.md` | **H** | Sayılar elle yazılmaz |
 | `ekip/EKIP-PLANI.md`, `TASARIM-OZELLIKLERI.md`, `vitrin.html`, `tasarim/` | **Değişmez** | Yalnız kullanıcı kararıyla; commit mesajında «plan değişikliği» yazar |
 | `HKM/`, `ekip/DEVIR.md`, `ekip/PLAN.md`, `ekip/arsiv/` | **Bu ekibin değil** | HKM'de ayrı bir oturum çalışıyor olabilir. İstisna (§8-9): HKM yüzünün dili (K7) için `HKM/web/` K'nindir |
 

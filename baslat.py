@@ -27,6 +27,7 @@
 import os
 import subprocess
 import sys
+import tempfile
 import time
 import urllib.request
 import webbrowser
@@ -47,6 +48,8 @@ def cocuk_ortami():
     ortam = dict(os.environ)
     ortam["PYTHONIOENCODING"] = "utf-8"
     ortam["PYTHONUTF8"] = "1"
+    # Kok klasorde __pycache__ birikmesin (klasor sade kalsin).
+    ortam["PYTHONDONTWRITEBYTECODE"] = "1"
     return ortam
 
 
@@ -82,7 +85,9 @@ def hkm_baslat():
 def sistemler_baslat():
     """Uc sistemin sunucusu AYRI bir surecte kosar: cikti yutulmaz,
     gunluge yazilir."""
-    gunluk_yolu = os.path.join(KOK, "sunucu.log")
+    # Gunluk kok klasorde durmaz: her acilista biriken bir dosya klasoru
+    # kalabaliklastiriyordu. Yolu acilamazsa ekrana yazilir.
+    gunluk_yolu = os.path.join(tempfile.gettempdir(), "lifeos-sunucu.log")
     gunluk = open(gunluk_yolu, "a", encoding="utf-8")
     kwargs = {"cwd": KOK, "stdout": gunluk, "stderr": subprocess.STDOUT,
               "env": cocuk_ortami()}

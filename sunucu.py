@@ -41,13 +41,19 @@
       bir karardir; bu betik o karari kullanici yerine vermez.
 """
 
+import json
 import os
 import sys
 import threading
+import time
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 KOK = os.path.dirname(os.path.abspath(__file__))
+sys.dont_write_bytecode = True      # kok klasorde __pycache__ birikmesin
+sys.path.insert(0, KOK)
+import guncelle  # noqa: E402
+
 HOST = "127.0.0.1"
 GIRIS_PORT = 4180
 HKM_PORT = 4200
@@ -242,15 +248,34 @@ a.kart:hover .ad{ text-decoration:underline; }
 .nokta.acik{ background:var(--accent); }
 .not{ color:var(--dim); font-size:13px; margin-top:28px; max-width:60ch; }
 .not code{ font:12px/1.4 var(--mono); }
+.guncel{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  margin:0 0 28px; padding:12px 14px; border:1px solid var(--line);
+  border-radius:10px; background:var(--yuzey); font-size:13.5px; }
+.guncel .metin{ flex:1; min-width:200px; color:var(--dim); }
+.guncel .metin b{ color:var(--fg); font-weight:600; }
+.guncel ul{ margin:6px 0 0; padding-left:18px; font-size:12.5px; }
+.guncel button{ font:inherit; font-size:13px; font-weight:600; cursor:pointer;
+  min-height:32px; padding:0 14px; border-radius:8px; border:1px solid var(--fg);
+  background:var(--fg); color:var(--bg); }
+.guncel button.ikincil{ background:none; color:var(--fg); border-color:var(--line-strong); }
+.guncel button:disabled{ opacity:.55; cursor:progress; }
+.guncel .nokta.var{ background:#c7832b; }
 </style></head><body>
 <div class="wrap">
   <h1><img class="marka" src="/marka/logo.png" alt="" aria-hidden="true"/>LifeOS <span>tek sunucu</span></h1>
+  <div class="guncel" id="guncel" aria-live="polite">
+    <span class="nokta"></span>
+    <div class="metin" id="guncel-metin">Güncelleme kontrol ediliyor…</div>
+    <button type="button" id="guncel-dugme" hidden>Güncelle</button>
+    <button type="button" class="ikincil" id="guncel-yenile" hidden>Sayfayı yenile</button>
+  </div>
   __KARTLAR__
   <p class="not">Üç sistem birbirini bilmez ve birbirini bozamaz; ayrı
     kapılarda durmalarının sebebi budur. HKM de üçünün üstünde değil
     <b>yanındadır</b>: kapalıyken üçü de olduğu gibi çalışır.</p>
-  <p class="not">Durdurmak için bu betiği çalıştırdığın terminalde
-    <code>Ctrl+C</code>.</p>
+  <p class="not">Durdurmak için: <code>python baslat.py --dur</code>.
+    Güncellemek için yukarıdaki düğme ya da klasördeki
+    <code>GUNCELLE.bat</code>.</p>
 </div>
 <script>
 /* Nokta, o kapinin GERCEKTEN cevap verdigini soyler. Denenmeden yakilan
@@ -260,6 +285,51 @@ document.querySelectorAll('[data-yokla]').forEach(function(el){
     .then(function(){ el.querySelector('.nokta').classList.add('acik'); })
     .catch(function(){});
 });
+
+/* Guncelleme: main dalindan ileri sarma (guncelle.py). Karar sunucuda
+   verilir; sayfa yalniz ne oldugunu soyler. */
+(function(){
+  var kutu = document.getElementById('guncel');
+  var metin = document.getElementById('guncel-metin');
+  var dugme = document.getElementById('guncel-dugme');
+  var yenile = document.getElementById('guncel-yenile');
+  var nokta = kutu.querySelector('.nokta');
+  function kac(t){ return String(t).replace(/[&<>"]/g, function(c){
+    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
+  function liste(y){ return y && y.length ? '<ul>' + y.slice(0, 6).map(function(s){
+    return '<li>' + kac(s) + '</li>'; }).join('') + '</ul>' : ''; }
+  function ciz(d){
+    dugme.hidden = true; nokta.className = 'nokta';
+    if(d.durum !== 'ok'){ metin.textContent = d.mesaj || 'Güncelleme durumu okunamadı.'; return; }
+    if(d.geride > 0){
+      nokta.className = 'nokta var';
+      metin.innerHTML = '<b>' + d.geride + ' yenilik var.</b>' + liste(d.yeni);
+      dugme.hidden = false; dugme.disabled = false; dugme.textContent = 'Güncelle';
+    } else {
+      nokta.className = 'nokta acik';
+      metin.innerHTML = '<b>Sistem güncel.</b>' + (d.ag ? '' : ' (Sunucuya ulaşılamadı; son bilinen duruma göre.)');
+    }
+  }
+  fetch('/api/guncelleme').then(function(r){ return r.json(); }).then(ciz)
+    .catch(function(){ metin.textContent = 'Güncelleme durumu okunamadı.'; });
+  dugme.addEventListener('click', function(){
+    dugme.disabled = true; dugme.textContent = 'İndiriliyor…';
+    fetch('/api/guncelle', { method:'POST', headers:{ 'X-LifeOS':'guncelle' } })
+      .then(function(r){ return r.json(); })
+      .then(function(s){
+        dugme.hidden = true;
+        var tamam = s.durum === 'guncellendi' || s.durum === 'guncel';
+        nokta.className = 'nokta' + (tamam ? ' acik' : ' var');
+        metin.innerHTML = '<b>' + kac(s.mesaj || '') + '</b>'
+          + (s.durum === 'guncellendi' && s.yeniden_baslat
+             ? ' LifeOS klasöründe <code>GUNCELLE.bat</code> dosyasını çift tıkla; sistem yeniden başlar.' : '');
+        if(s.durum === 'guncellendi') yenile.hidden = false;
+      })
+      .catch(function(){ dugme.disabled = false; dugme.textContent = 'Güncelle';
+        metin.textContent = 'Güncelleme isteği gönderilemedi.'; });
+  });
+  yenile.addEventListener('click', function(){ location.reload(); });
+})();
 </script>
 </body></html>
 """
@@ -283,9 +353,62 @@ def giris_html():
     return GIRIS_SAYFASI.replace("__KARTLAR__", "\n  ".join(kartlar))
 
 
+# Guncelleme durumu: her sayfa acilisinda aga cikmamak icin kisa sure
+# saklanir. Uygulamadan sonra silinir.
+_GUNCEL = {"zaman": 0.0, "veri": None}
+_GUNCEL_KILIT = threading.Lock()
+GUNCEL_SAKLA_SN = 300
+
+
+def guncelleme_durumu(taze=False, durum=None):
+    durum = durum or guncelle.durum
+    with _GUNCEL_KILIT:
+        if (not taze and _GUNCEL["veri"] is not None
+                and time.time() - _GUNCEL["zaman"] < GUNCEL_SAKLA_SN):
+            return _GUNCEL["veri"]
+        veri = durum()
+        _GUNCEL.update(zaman=time.time(), veri=veri)
+        return veri
+
+
+def guncelleme_izinli(basliklar):
+    """POST /api/guncelle yalniz giris sayfasinin kendisinden gelir.
+
+    Herhangi bir web sitesi tarayicidan 127.0.0.1'e POST gonderebilir.
+    Ozel baslik (X-LifeOS) tarayiciyi on-kontrole zorlar ve bu sunucu
+    on-kontrole izin vermez; Origin de varsa giris kapisi olmalidir."""
+    if basliklar.get("X-LifeOS") != "guncelle":
+        return False
+    koken = basliklar.get("Origin")
+    return koken in (None, "http://%s:%d" % (HOST, GIRIS_PORT),
+                     "http://localhost:%d" % GIRIS_PORT)
+
+
 class Giris(SimpleHTTPRequestHandler):
+    def _json(self, kod, veri):
+        govde = json.dumps(veri, ensure_ascii=False).encode("utf-8")
+        self.send_response(kod)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(govde)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(govde)
+
+    def do_POST(self):
+        yol = self.path.split("?", 1)[0]
+        if yol != "/api/guncelle":
+            return self.send_error(404)
+        if not guncelleme_izinli(self.headers):
+            return self._json(403, {"durum": "engel", "mesaj": "İzin yok."})
+        with _GUNCEL_KILIT:
+            sonuc = guncelle.uygula()
+            _GUNCEL.update(zaman=0.0, veri=None)
+        return self._json(200, sonuc)
+
     def do_GET(self):
         yol = self.path.split("?", 1)[0]
+        if yol == "/api/guncelleme":
+            return self._json(200, guncelleme_durumu(taze="taze=1" in self.path))
         if yol.startswith("/marka/"):
             return self._marka(yol[len("/marka/"):])
         govde = giris_html().encode("utf-8")

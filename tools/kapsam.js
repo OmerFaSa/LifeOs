@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------
  * NEDEN BU ARAÇ VAR
  *
- * `NOTLAR.md` §13.3 bir kapsam tablosu taşıyor ve o tablo ELLE
+ * `belgeler/NOTLAR.md` §13.3 bir kapsam tablosu taşıyor ve o tablo ELLE
  * yazılmıştı: «office.js %59», «state.js %73». Sayılar bir kez
  * ölçülmüş, sonra kod değişmeye devam etmişti. Bu deponun kendi
  * kuralı ise açık — sayılar elle yazılmaz, bir araç üretir

@@ -102,7 +102,7 @@ işletim sistemi seviyesinde böyle bir yetkisi yoktur ve olmamalıdır.
 ## 6. Şema — ve spec'teki üç düzeltme
 
 `core/db.py` içindeki şema spesifikasyondan üç yerde ayrılır. Üçü de devir
-notunda (`NOTLAR.md` §18.5) gerekçelendirilmişti:
+notunda (`belgeler/NOTLAR.md` §18.5) gerekçelendirilmişti:
 
 1. **`date DATE UNIQUE` kalktı.** Her karar bir öneridir ve kullanıcı
    reddedebilir; günde tek satır varken `proposed → declined → yeni öneri`

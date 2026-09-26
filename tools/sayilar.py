@@ -196,7 +196,7 @@ def main():
             print('yazilmadi: ' + ', '.join(s + '/' + a for s, a in kalan)
                   + ' gecmedi; belgeler eski (dogru) olcumu korur.')
             return 1
-        for d in ['README.md', 'NOTLAR.md']:
+        for d in ['README.md', os.path.join('belgeler', 'NOTLAR.md')]:
             yaz(d, metin)
     else:
         print()

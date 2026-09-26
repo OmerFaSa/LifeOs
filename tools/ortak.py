@@ -17,7 +17,7 @@
    yazildigi icin fark edilmedi — ama biri yanlis yazilsaydi hicbir
    denetim soylemeyecekti.
 
-   `NOTLAR.md` §19 bunu zaten borc sayiyor ve cozumunu de yaziyor:
+   `belgeler/NOTLAR.md` §19 bunu zaten borc sayiyor ve cozumunu de yaziyor:
    "LifeOs/ortak/ + derleme zamani birlestirme". Bu betik o borcu
    kapatir.
 
