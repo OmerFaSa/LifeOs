@@ -53,10 +53,8 @@ ESP.Screens.profile = (function(){
     return K.Entry({
       label:'Belirli günler için farklı süre',
       meta:liste.length ? liste.length + ' kayıt' : 'yok',
-      note:'Yoğun bir gün ya da vakitsiz bir hafta için tabanı yalnız o tarihlerde değiştirir. '
-         + 'Temel (' + U.fmtMin(p.dailyMinutes || 60) + ') değişmez; tarih geçince kendiliğinden geri gelir. '
-         + 'Tek gün hemen uygulanır ve geri alınabilir; birden çok gün önce onay ister. '
-         + 'Mola günü için Bugün’deki hasta/izin/tatil düğmelerini kullan.',
+      note:'Yoğun ya da vakitsiz günler için. Temel (' + U.fmtMin(p.dailyMinutes || 60)
+         + ') değişmez; tarih geçince geri gelir.',
       wide:true,
       body:html`
         <div class="cols-3">

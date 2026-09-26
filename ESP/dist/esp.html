@@ -11990,7 +11990,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'91aeeb4', at:'2026-09-26 21:39', dirty:true };
+ESP.BUILD = { id:'4a70e1c', at:'2026-09-26 22:54', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -54368,10 +54368,8 @@ ESP.Screens.profile = (function(){
     return K.Entry({
       label:'Belirli günler için farklı süre',
       meta:liste.length ? liste.length + ' kayıt' : 'yok',
-      note:'Yoğun bir gün ya da vakitsiz bir hafta için tabanı yalnız o tarihlerde değiştirir. '
-         + 'Temel (' + U.fmtMin(p.dailyMinutes || 60) + ') değişmez; tarih geçince kendiliğinden geri gelir. '
-         + 'Tek gün hemen uygulanır ve geri alınabilir; birden çok gün önce onay ister. '
-         + 'Mola günü için Bugün’deki hasta/izin/tatil düğmelerini kullan.',
+      note:'Yoğun ya da vakitsiz günler için. Temel (' + U.fmtMin(p.dailyMinutes || 60)
+         + ') değişmez; tarih geçince geri gelir.',
       wide:true,
       body:html`
         <div class="cols-3">
