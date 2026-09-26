@@ -29,6 +29,8 @@ ESP.Coach = (function(){
   const SHAPE = function(){ return ESP.PRESCRIPTION_SHAPE || []; };
 
   function dailyBase(){
+    /* Tarihli istisna (core/gunsure.js) varsa bugunun tabani odur. */
+    if(ESP.GunSure) return ESP.GunSure.taban(U.todayISO()).dakika;
     const n = (S.profile && S.profile.dailyMinutes) || 60;
     return (typeof n === 'number' && isFinite(n) && n > 0) ? n : 60;
   }

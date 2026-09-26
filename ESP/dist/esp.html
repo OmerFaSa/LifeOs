@@ -11878,7 +11878,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'4c902ea', at:'2026-09-26 16:49', dirty:true };
+ESP.BUILD = { id:'a6354ba', at:'2026-09-26 16:55', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -29564,6 +29564,7 @@ ESP.Model = (function(){
     S.books = ((await ESP.Store.list('books')) || []).map(b => Object.assign(newBook(), b));
     if(ESP.Lesson && ESP.Lesson.sinavYukle) await ESP.Lesson.sinavYukle();
     if(ESP.KotuGun) await ESP.KotuGun.yukle();
+    if(ESP.GunSure) await ESP.GunSure.yukle();
     if(ESP.Anlat) await ESP.Anlat.yukle();
     S.pieces = ((await ESP.Store.list('pieces')) || []).map(normPiece);
     S.recordings = ((await ESP.Store.list('recordings')) || []).map(normRecording);
@@ -37518,6 +37519,8 @@ ESP.Coach = (function(){
   const SHAPE = function(){ return ESP.PRESCRIPTION_SHAPE || []; };
 
   function dailyBase(){
+    /* Tarihli istisna (core/gunsure.js) varsa bugunun tabani odur. */
+    if(ESP.GunSure) return ESP.GunSure.taban(U.todayISO()).dakika;
     const n = (S.profile && S.profile.dailyMinutes) || 60;
     return (typeof n === 'number' && isFinite(n) && n > 0) ? n : 60;
   }
@@ -40046,6 +40049,127 @@ ESP.KotuGun = (function(){
   }
 
   return { yukle, aktif, ac, kapat };
+})();
+
+/* ==== js/core/gunsure.js ==== */
+/* TARIHLI GUNLUK SURE — temel taban + tarihli istisna (AYS istisna.js'in
+   ESP karsiligi).
+
+   «Carsamba 2 saat calisacagim» ya da «bu hafta gunde 20 dakika» denince
+   TEMEL (profile.dailyMinutes) degismez. Degisiklik bitis tarihi olan bir
+   kayit olarak durur; tarihi gecince taban kendiliginden temele doner.
+   Temeli ezmek, «bir haftaligina» denen seyi kalici yapardi.
+
+   Mola gunu burada DEGILDIR: hasta/izin/tatil gunleri seriyi dondurur
+   (brand/ortak/seri.js); kotu gun bugunu asgari gune indirir (kotugun.js).
+   Bu modul yalniz tabanin DAKIKASINI tarihle degistirir.
+
+   Degismezler:
+     1. GECMISE YAZILMAZ. Kayit bugunden once baslayamaz: gecmis bir gunun
+        olcutunu sonradan degistirmek, o gunun «taban doluluğu»nu geriye
+        donuk yeniden yazmak olurdu.
+     2. SON EKLENEN KAZANIR. Ayni gune iki kayit dusuyorsa sonraki gecerlidir.
+     3. AKSIYON SEVIYESI (AGENTS §1.9): tek gun KUCUK (sormadan, «Geri al»),
+        birden cok gun ORTA (onizleme + onay). Seviyeyi bu modul soyler. */
+
+window.ESP = window.ESP || {};
+
+ESP.GunSure = (function(){
+  const U = () => ESP.U;
+  const KEY = 'meta/gunSure';
+  const DAKIKA = { min:10, max:720 };
+  const EN_UZUN = 42;
+  const MAX = 60;
+  const ISO = /^\d{4}-\d{2}-\d{2}$/;
+
+  function kayitlar(){
+    if(!Array.isArray(ESP.S.gunSure)) ESP.S.gunSure = [];
+    return ESP.S.gunSure;
+  }
+  function temel(){
+    const n = ESP.S.profile && ESP.S.profile.dailyMinutes;
+    return (typeof n === 'number' && isFinite(n) && n > 0) ? n : 60;
+  }
+  function gunFarki(a, b){ return Math.round((U().parse(b) - U().parse(a)) / 86400000); }
+
+  async function yukle(){
+    const d = await ESP.Store.get(KEY);
+    ESP.S.gunSure = Array.isArray(d) ? d.filter(x => x && ISO.test(x.bas) && ISO.test(x.bit)) : [];
+    return ESP.S.gunSure;
+  }
+  async function kaydet(){
+    /* Bitmis kayitlar bir sure tutulur (gecmisin olcutu okunabilsin), sonra
+       en eskiden atilir. */
+    const liste = kayitlar();
+    if(liste.length > MAX) liste.splice(0, liste.length - MAX);
+    await ESP.Store.set(KEY, liste);
+  }
+
+  /* {dakika, kaynak:'istisna'|'profil', kayit} — o gunun tabani. */
+  function taban(gunISO){
+    const g = gunISO || U().todayISO();
+    const liste = kayitlar();
+    for(let i = liste.length - 1; i >= 0; i--){
+      const k = liste[i];
+      if(k.bas <= g && g <= k.bit) return { dakika:k.dakika, kaynak:'istisna', kayit:k };
+    }
+    return { dakika:temel(), kaynak:'profil', kayit:null };
+  }
+
+  function seviye(bas, bit){ return bas === (bit || bas) ? 'kucuk' : 'orta'; }
+
+  /* Ekrana gidecek sozlesme: kullanici ne olacagini onaydan ONCE gorur. */
+  function onizleme(bas, bit, dakika){
+    bit = bit || bas;
+    const gun = gunFarki(bas, bit) + 1;
+    const ne = gun === 1 ? U().fmtDate(bas) : U().fmtRange(bas, bit) + ' (' + gun + ' gün)';
+    return { gun, seviye:seviye(bas, bit),
+      metin:ne + ': günlük taban ' + U().fmtMin(Math.round(Number(dakika))) + ' (temel '
+        + U().fmtMin(temel()) + '). Tarihi geçince temel kendiliğinden geri gelir.' };
+  }
+
+  function denetle(bas, bit, dakika){
+    bit = bit || bas;
+    if(!ISO.test(String(bas)) || !ISO.test(String(bit))) return 'Tarih geçersiz.';
+    if(bas > bit) return 'Bitiş tarihi başlangıçtan önce olamaz.';
+    if(bas < U().todayISO()) return 'Geçmiş bir günün süresi sonradan değiştirilmez.';
+    if(gunFarki(bas, bit) + 1 > EN_UZUN) return 'Tek seferde en çok ' + EN_UZUN + ' gün.';
+    const dk = Number(dakika);
+    if(!isFinite(dk) || dk < DAKIKA.min || dk > DAKIKA.max) {
+      return 'Süre ' + DAKIKA.min + '–' + DAKIKA.max + ' dakika arasında olmalı.';
+    }
+    return null;
+  }
+
+  async function ekle(bas, bit, dakika){
+    bit = bit || bas;
+    const hata = denetle(bas, bit, dakika);
+    if(hata) return { ok:false, why:hata };
+    const kayit = { id:'gs-' + bas + '-' + Math.random().toString(36).slice(2, 7),
+      bas, bit, dakika:Math.round(Number(dakika)), at:new Date().toISOString() };
+    kayitlar().push(kayit);
+    await kaydet();
+    return { ok:true, kayit, seviye:seviye(bas, bit) };
+  }
+
+  async function kaldir(id){
+    const liste = kayitlar();
+    const i = liste.findIndex(k => k.id === id);
+    if(i < 0) return { ok:false, why:'Kayıt bulunamadı.' };
+    const [k] = liste.splice(i, 1);
+    await kaydet();
+    return { ok:true, kayit:k };
+  }
+
+  /* Bugun ve sonrasini etkileyen kayitlar (ekranda listelenir). */
+  function gecerliListe(){
+    const bugun = U().todayISO();
+    return kayitlar().filter(k => k.bit >= bugun);
+  }
+  function liste(){ return kayitlar().slice(); }
+
+  return { yukle, taban, seviye, onizleme, denetle, ekle, kaldir, gecerliListe, liste,
+    DAKIKA, EN_UZUN };
 })();
 
 /* ==== js/core/anlat.js ==== */
@@ -47464,7 +47588,8 @@ ESP.Screens.today = (function(){
     const bugun = gun();
     const rows = M.sessionsOf(bugun);
     const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
-    const taban = (S.profile && S.profile.dailyMinutes) || 60;
+    const tb = ESP.GunSure ? ESP.GunSure.taban(bugun) : { dakika:(S.profile && S.profile.dailyMinutes) || 60, kaynak:'profil' };
+    const taban = tb.dakika;
     const ehs = ESP.Intellect.ehs(14);
     const denge = ESP.Planner.balance(7);
 
@@ -47473,7 +47598,8 @@ ESP.Screens.today = (function(){
       K.Entry({
         label:'Günün toplamı',
         meta:rows.length ? U.fmtMin(toplam) : 'veri yok',
-        note:'Taban ' + U.fmtMin(taban) + '. Taban bir hedef değil bir ölçüttür: '
+        note:'Taban ' + U.fmtMin(taban) + (tb.kaynak === 'istisna' ? ' (bugüne özel)' : '')
+           + '. Taban bir hedef değil bir ölçüttür: '
            + 'altında kalmak başarısızlık değil, rotayı daraltan bir olgudur.',
         body:rows.length
           ? K.Meter({ label:'Taban doluluğu', value:Math.min(100, toplam / taban * 100),
@@ -47884,7 +48010,7 @@ ESP.Screens.today = (function(){
     const V = (window.LIFEOS || {}).VITRIN;
     if(!V) return '';
     const rows = M.sessionsOf(gun());
-    const hedef = (S.profile && S.profile.dailyMinutes) || null;
+    const hedef = ESP.GunSure ? ESP.GunSure.taban(gun()).dakika : ((S.profile && S.profile.dailyMinutes) || null);
     const ic = V.dakikaHalkasi({ hedef, toplam:rows.reduce((a, s) => a + (s.minutes || 0), 0),
       satirlar:ESP.Mod.active().slice(0, 4).map(d => ({ ad:(ESP.DISCIPLINE_BY_ID[d.id || d] || {}).short || (d.id || d),
         dk:M.minutesOf(gun(), d.id || d) })) });
@@ -53745,6 +53871,38 @@ ESP.Screens.profile = (function(){
     });
   }
 
+  /* Tarihli günlük süre (core/gunsure.js): yoğun gün ya da az vakitli
+     günler. Temel taban değişmez; tarihi geçince kendiliğinden döner. */
+  function gunSureEntry(p){
+    const G = ESP.GunSure;
+    if(!G) return '';
+    const bugun = U.todayISO();
+    const liste = G.gecerliListe();
+    return K.Entry({
+      label:'Belirli günler için farklı süre',
+      meta:liste.length ? liste.length + ' kayıt' : 'yok',
+      note:'Yoğun bir gün ya da vakitsiz bir hafta için tabanı yalnız o tarihlerde değiştirir. '
+         + 'Temel (' + U.fmtMin(p.dailyMinutes || 60) + ') değişmez; tarih geçince kendiliğinden geri gelir. '
+         + 'Tek gün hemen uygulanır ve geri alınabilir; birden çok gün önce onay ister. '
+         + 'Mola günü için Bugün’deki hasta/izin/tatil düğmelerini kullan.',
+      wide:true,
+      body:html`
+        <div class="cols-3">
+          ${K.Field({ label:'Başlangıç', input:K.Input({ id:'gs-bas', type:'date', value:bugun, min:bugun }) })}
+          ${K.Field({ label:'Bitiş', hint:'tek gün için boş bırak',
+            input:K.Input({ id:'gs-bit', type:'date', min:bugun }) })}
+          ${K.Field({ label:'Günlük süre (dakika)',
+            input:K.Input({ id:'gs-dk', type:'number', numeric:true, min:G.DAKIKA.min, max:G.DAKIKA.max,
+              placeholder:String(p.dailyMinutes || 60) }) })}
+        </div>
+        ${K.Button({ label:'Ekle', act:'gunsure-ekle', class:'mt-10' })}
+        ${liste.length ? html`<ul class="stack-xs mt-10">${liste.map(k => html`<li class="row between">
+          <span class="small">${k.bas === k.bit ? U.fmtDate(k.bas) : U.fmtRange(k.bas, k.bit)} · ${U.fmtMin(k.dakika)}</span>
+          ${K.Button({ label:'Kaldır', size:'sm', act:'gunsure-sil', data:{ 'data-id':k.id } })}
+        </li>`)}</ul>` : ''}`,
+    });
+  }
+
   function render(){
     const p = S.profile || {};
     const ayak = M.dataFootprint();
@@ -53781,6 +53939,8 @@ ESP.Screens.profile = (function(){
             <p class="small muted mt-10">
               ${(ESP.FOCUS.find(f => f.id === (p.focus || 'balanced')) || {}).note || ''}</p>`,
         }),
+
+        gunSureEntry(p),
 
         K.Entry({
           label:'Bölümler', hint:'modules',
@@ -54058,6 +54218,29 @@ ESP.Screens.profile = (function(){
     async 'hkm-send'(){
       const r = await ESP.Beacon.send({ force:true });
       ESP.UI.toast(r.ok ? 'Gönderildi' : (r.note || 'Gönderilemedi'));
+      ESP.App.render();
+    },
+    async 'gunsure-ekle'(){
+      const G = ESP.GunSure;
+      const bas = val('gs-bas'), bit = val('gs-bit') || bas, dk = Number(val('gs-dk'));
+      const hata = G.denetle(bas, bit, dk);
+      if(hata){ ESP.UI.toast(hata); return; }
+      const uygula = async () => {
+        const r = await G.ekle(bas, bit, dk);
+        if(!r.ok){ ESP.UI.toast(r.why); return; }
+        ESP.UI.toast('Günlük süre ' + (r.seviye === 'kucuk' ? 'o gün için ' : 'bu tarihlerde ')
+          + U.fmtMin(r.kayit.dakika), { undo:async () => { await G.kaldir(r.kayit.id); ESP.App.render(); } });
+        ESP.App.render();
+      };
+      /* AGENTS §1.9: tek gün küçük (sormadan, «Geri al»); çok gün orta
+         (önizleme + tek onay). */
+      if(G.seviye(bas, bit) === 'kucuk') return uygula();
+      ESP.UI.confirmSheet('Bu tarihlerde günlük süre değişsin mi?', G.onizleme(bas, bit, dk).metin,
+        uygula, false, 'Uygula');
+    },
+    async 'gunsure-sil'(el){
+      const r = await ESP.GunSure.kaldir(el.dataset.id);
+      ESP.UI.toast(r.ok ? 'Kaldırıldı; o günler temel süreye döndü' : r.why);
       ESP.App.render();
     },
     async 'save-profile'(){

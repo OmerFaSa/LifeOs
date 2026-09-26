@@ -1378,6 +1378,7 @@ ESP.Model = (function(){
     S.books = ((await ESP.Store.list('books')) || []).map(b => Object.assign(newBook(), b));
     if(ESP.Lesson && ESP.Lesson.sinavYukle) await ESP.Lesson.sinavYukle();
     if(ESP.KotuGun) await ESP.KotuGun.yukle();
+    if(ESP.GunSure) await ESP.GunSure.yukle();
     if(ESP.Anlat) await ESP.Anlat.yukle();
     S.pieces = ((await ESP.Store.list('pieces')) || []).map(normPiece);
     S.recordings = ((await ESP.Store.list('recordings')) || []).map(normRecording);

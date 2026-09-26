@@ -43,6 +43,38 @@ ESP.Screens.profile = (function(){
     });
   }
 
+  /* Tarihli günlük süre (core/gunsure.js): yoğun gün ya da az vakitli
+     günler. Temel taban değişmez; tarihi geçince kendiliğinden döner. */
+  function gunSureEntry(p){
+    const G = ESP.GunSure;
+    if(!G) return '';
+    const bugun = U.todayISO();
+    const liste = G.gecerliListe();
+    return K.Entry({
+      label:'Belirli günler için farklı süre',
+      meta:liste.length ? liste.length + ' kayıt' : 'yok',
+      note:'Yoğun bir gün ya da vakitsiz bir hafta için tabanı yalnız o tarihlerde değiştirir. '
+         + 'Temel (' + U.fmtMin(p.dailyMinutes || 60) + ') değişmez; tarih geçince kendiliğinden geri gelir. '
+         + 'Tek gün hemen uygulanır ve geri alınabilir; birden çok gün önce onay ister. '
+         + 'Mola günü için Bugün’deki hasta/izin/tatil düğmelerini kullan.',
+      wide:true,
+      body:html`
+        <div class="cols-3">
+          ${K.Field({ label:'Başlangıç', input:K.Input({ id:'gs-bas', type:'date', value:bugun, min:bugun }) })}
+          ${K.Field({ label:'Bitiş', hint:'tek gün için boş bırak',
+            input:K.Input({ id:'gs-bit', type:'date', min:bugun }) })}
+          ${K.Field({ label:'Günlük süre (dakika)',
+            input:K.Input({ id:'gs-dk', type:'number', numeric:true, min:G.DAKIKA.min, max:G.DAKIKA.max,
+              placeholder:String(p.dailyMinutes || 60) }) })}
+        </div>
+        ${K.Button({ label:'Ekle', act:'gunsure-ekle', class:'mt-10' })}
+        ${liste.length ? html`<ul class="stack-xs mt-10">${liste.map(k => html`<li class="row between">
+          <span class="small">${k.bas === k.bit ? U.fmtDate(k.bas) : U.fmtRange(k.bas, k.bit)} · ${U.fmtMin(k.dakika)}</span>
+          ${K.Button({ label:'Kaldır', size:'sm', act:'gunsure-sil', data:{ 'data-id':k.id } })}
+        </li>`)}</ul>` : ''}`,
+    });
+  }
+
   function render(){
     const p = S.profile || {};
     const ayak = M.dataFootprint();
@@ -79,6 +111,8 @@ ESP.Screens.profile = (function(){
             <p class="small muted mt-10">
               ${(ESP.FOCUS.find(f => f.id === (p.focus || 'balanced')) || {}).note || ''}</p>`,
         }),
+
+        gunSureEntry(p),
 
         K.Entry({
           label:'Bölümler', hint:'modules',
@@ -356,6 +390,29 @@ ESP.Screens.profile = (function(){
     async 'hkm-send'(){
       const r = await ESP.Beacon.send({ force:true });
       ESP.UI.toast(r.ok ? 'Gönderildi' : (r.note || 'Gönderilemedi'));
+      ESP.App.render();
+    },
+    async 'gunsure-ekle'(){
+      const G = ESP.GunSure;
+      const bas = val('gs-bas'), bit = val('gs-bit') || bas, dk = Number(val('gs-dk'));
+      const hata = G.denetle(bas, bit, dk);
+      if(hata){ ESP.UI.toast(hata); return; }
+      const uygula = async () => {
+        const r = await G.ekle(bas, bit, dk);
+        if(!r.ok){ ESP.UI.toast(r.why); return; }
+        ESP.UI.toast('Günlük süre ' + (r.seviye === 'kucuk' ? 'o gün için ' : 'bu tarihlerde ')
+          + U.fmtMin(r.kayit.dakika), { undo:async () => { await G.kaldir(r.kayit.id); ESP.App.render(); } });
+        ESP.App.render();
+      };
+      /* AGENTS §1.9: tek gün küçük (sormadan, «Geri al»); çok gün orta
+         (önizleme + tek onay). */
+      if(G.seviye(bas, bit) === 'kucuk') return uygula();
+      ESP.UI.confirmSheet('Bu tarihlerde günlük süre değişsin mi?', G.onizleme(bas, bit, dk).metin,
+        uygula, false, 'Uygula');
+    },
+    async 'gunsure-sil'(el){
+      const r = await ESP.GunSure.kaldir(el.dataset.id);
+      ESP.UI.toast(r.ok ? 'Kaldırıldı; o günler temel süreye döndü' : r.why);
       ESP.App.render();
     },
     async 'save-profile'(){

@@ -376,7 +376,8 @@ ESP.Screens.today = (function(){
     const bugun = gun();
     const rows = M.sessionsOf(bugun);
     const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
-    const taban = (S.profile && S.profile.dailyMinutes) || 60;
+    const tb = ESP.GunSure ? ESP.GunSure.taban(bugun) : { dakika:(S.profile && S.profile.dailyMinutes) || 60, kaynak:'profil' };
+    const taban = tb.dakika;
     const ehs = ESP.Intellect.ehs(14);
     const denge = ESP.Planner.balance(7);
 
@@ -385,7 +386,8 @@ ESP.Screens.today = (function(){
       K.Entry({
         label:'Günün toplamı',
         meta:rows.length ? U.fmtMin(toplam) : 'veri yok',
-        note:'Taban ' + U.fmtMin(taban) + '. Taban bir hedef değil bir ölçüttür: '
+        note:'Taban ' + U.fmtMin(taban) + (tb.kaynak === 'istisna' ? ' (bugüne özel)' : '')
+           + '. Taban bir hedef değil bir ölçüttür: '
            + 'altında kalmak başarısızlık değil, rotayı daraltan bir olgudur.',
         body:rows.length
           ? K.Meter({ label:'Taban doluluğu', value:Math.min(100, toplam / taban * 100),
@@ -796,7 +798,7 @@ ESP.Screens.today = (function(){
     const V = (window.LIFEOS || {}).VITRIN;
     if(!V) return '';
     const rows = M.sessionsOf(gun());
-    const hedef = (S.profile && S.profile.dailyMinutes) || null;
+    const hedef = ESP.GunSure ? ESP.GunSure.taban(gun()).dakika : ((S.profile && S.profile.dailyMinutes) || null);
     const ic = V.dakikaHalkasi({ hedef, toplam:rows.reduce((a, s) => a + (s.minutes || 0), 0),
       satirlar:ESP.Mod.active().slice(0, 4).map(d => ({ ad:(ESP.DISCIPLINE_BY_ID[d.id || d] || {}).short || (d.id || d),
         dk:M.minutesOf(gun(), d.id || d) })) });
