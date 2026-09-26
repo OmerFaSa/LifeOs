@@ -425,7 +425,11 @@
       await hazirla();
       const day = await R.Model.ensureDay(R.U.today());
       const bl = day.blocks.filter(b => b.slot !== 'Dinlenme');
-      if(bl.length < 2) return;
+      if(bl.length < 3) return;
+      /* Test gercek bugunun gununu kullanir; blok durumlari gun icinde
+         degisebilir (2026-09-26 21:16'da ikinci bekleyen kalmadigi icin
+         «sola = ertele» yer degistiremiyordu). Blokler bilinen duruma alinir. */
+      bl.forEach(b => { b.status = 'pending'; b.startedAt = null; });
       const k = dom(await R.Screens.today.render());
       expect(k.querySelectorAll('[data-kaydir]').length).toBeGreaterThan(0);
       expect(k.querySelector('[data-kaydir]').getAttribute('data-kaydir')).toBe('block-kaydir');

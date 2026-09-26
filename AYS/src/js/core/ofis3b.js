@@ -116,6 +116,7 @@ R.Ofis3B = (function(){
       <details class="ofis3b__detay">
         <summary class="small">Sahne ayarları</summary>
         <div class="row wrap gap-6 mt-8">
+          ${b(ad[0] + '’nın masası', { 'data-designer':'', 'aria-pressed':'false' })}
           ${b('Patron’un odası', { 'data-boss':'', 'aria-pressed':'false' })}
           ${b('Arşiv odası', { 'data-area':'archive', 'aria-pressed':'false' })}
           ${b('Dinlenme salonu', { 'data-area':'phone', 'aria-pressed':'false' })}
@@ -139,6 +140,7 @@ R.Ofis3B = (function(){
           <label class="small">Hız<select class="select input--sm" data-speed>
             <option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
           ${b('Temsili görevi başlat', { 'data-run':'' })}
+          ${b('Belge teslimini izle (temsili)', { 'data-demo':'' })}
         </div>
         <div class="row wrap gap-6 mt-10">
           ${K.Button({ label:'Hafif görünüme geç', size:'sm', tone:'ghost', act:'office-sahne', data:{ 'data-mod':'hafif' } })}

@@ -288,10 +288,18 @@ async function ofis3b(page, base, errors){
   if((await page.evaluate(() => R.S.ui.officeDesk)) !== 'tyt') hata('masa düğmesi masayı açmadı');
   await page.evaluate(() => { R.S.ui.officeDesk = null; document.querySelector('.office-view').scrollIntoView({ block:'center' }); });
   await wait(2500);
+  /* Kamera açısı sürüme göre değişir (Atelier yakından açılır): o an
+     kadrajda görünen bir karakter seçilir. */
   const k = await page.evaluate(() => { const r = document.querySelector('.office-view').getBoundingClientRect();
-    const c = R.Ofis3B._durum.api.konum(4); return { x:r.left + c.x, y:r.top + c.y }; });
+    for(let i = 0; i < 6; i++){
+      const c = R.Ofis3B._durum.api.konum(i);
+      if(c && c.x > 20 && c.y > 20 && c.x < r.width - 20 && c.y < r.height - 20)
+        return { x:r.left + c.x, y:r.top + c.y, ajan:R.Ofis3B.SIRA[i] };
+    }
+    return null; });
+  if(!k){ hata('kadrajda karakter yok'); return; }
   await page.mouse.click(k.x, k.y); await wait(600);
-  if((await page.evaluate(() => R.S.ui.officeDesk)) !== 'patron') hata('karaktere dokunmak masayı açmadı');
+  if((await page.evaluate(() => R.S.ui.officeDesk)) !== k.ajan) hata('karaktere dokunmak masayı açmadı (' + k.ajan + ')');
   await page.evaluate(() => R.App.go('today')); await wait(600);
   if(await page.evaluate(() => R.Ofis3B._durum.api.durum().calisiyor)) hata('ekran değişince çizim durmadı');
   SAYAC.ekran++;

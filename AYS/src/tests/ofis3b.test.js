@@ -235,7 +235,7 @@
         + '<input type="checkbox" data-auto><input type="checkbox" data-follow>'
         + '<select data-actor><option value="0">a</option></select><select data-job><option value="deliver">d</option></select>'
         + '<select data-recipient><option value="1">b</option></select><select data-speed><option value="1">1</option></select>'
-        + '<button data-run></button>';
+        + '<button data-run></button><button data-designer></button><button data-demo></button>';
       document.body.appendChild(kok);
       try{
         const api = window.RotaOfis3B.kur(kok, { adlar:['Tuna', 'Yaman', 'Rana', 'Deniz', 'Patron', 'Kerem'] });
