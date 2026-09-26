@@ -2688,6 +2688,13 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
         + (etkin ? '' : '<button data-paket="' + esc(p.id) + '">Seç</button>') + '</div></div>';
     });
     (o.eksik || []).forEach(function(e){ h += '<p class="muted">' + esc(e) + '</p>'; });
+    if(o.olcum){
+      /* Maliyet GOZE BATMADAN: tek satir, kucuk yazi. */
+      h += '<p class="muted" style="font-size:12px">Son 30 gün: ' + o.olcum.cagri + ' çağrı · '
+        + dolar(o.olcum.usd) + ' (' + dolar(o.olcum.olculen_usd) + '’ı sağlayıcının ölçtüğü bedel) · '
+        + o.olcum.yukselen + ' kez üst sınıfa çıkıldı · önbellekten '
+        + o.olcum.onbellek_jeton + ' jeton okundu.</p>';
+    }
     h += '<p class="muted" style="font-size:12px"><span id="tarife-satiri">' + tarifeSatiri(o.tarife)
       + '</span> <button id="tarife-guncelle" style="font-size:12px">Fiyatları güncelle</button>'
       + (o.aktif ? ' <button id="paket-kapat" style="font-size:12px">Paketi kapat</button>' : '')

@@ -180,23 +180,41 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
             {"HTTP-Referer": "http://127.0.0.1:4200", "X-Title": "HKM"}
             if provider == "openrouter" else None)
         govde["max_tokens"] = jeton
-        if provider == "openrouter" and ayar.get("efor"):
-            # Birlesik dusunme ayari; desteklemeyen model yok sayar.
-            # `exclude`: dusunme metni geri gelmez (bedeli yine olculur).
-            govde["reasoning"] = {"effort": ayar["efor"], "exclude": True}
+        if provider == "openrouter":
+            if ayar.get("efor"):
+                # Birlesik dusunme ayari; desteklemeyen model yok sayar.
+                # `exclude`: dusunme metni geri gelmez (bedeli yine olculur).
+                govde["reasoning"] = {"effort": ayar["efor"], "exclude": True}
+            # GERCEK BEDEL: OpenRouter cagrinin bedelini (onbellek indirimi ve
+            # dusunme jetonlari dahil) cevapla doner — tarifeyle hesaplanan
+            # tahminin yerine OLCUM yazilir.
+            govde["usage"] = {"include": True}
+            # ONBELLEK: Claude ve Gemini acik isaret ister; OpenAI ve DeepSeek
+            # ayni oneki kendiliginden onbellekler. Saglayici kisa oneki
+            # (~1024 jetonun alti) onbelleklemez; kazanc defterde olculur.
+            if sistem and model.startswith(("anthropic/", "google/")) and govde["messages"] \
+                    and govde["messages"][0].get("role") == "system":
+                govde["messages"][0]["content"] = [{"type": "text", "text": sistem,
+                                                    "cache_control": {"type": "ephemeral"}}]
         y = _istek(url, baslik, govde, timeout)
         secim = (y.get("choices") or [{}])[0]
         metin = (secim.get("message") or {}).get("content") or ""
         k = y.get("usage") or {}
+        ek = {"usd": k.get("cost") if isinstance(k.get("cost"), (int, float)) else None,
+              "cached": ((k.get("prompt_tokens_details") or {}).get("cached_tokens") or 0),
+              "reasoning": ((k.get("completion_tokens_details") or {}).get("reasoning_tokens") or 0)}
         # Kullanim bilgisi yoksa None: olculmeyen sifir degildir (D-16).
         return (metin, k.get("prompt_tokens"), k.get("completion_tokens"),
-                secim.get("finish_reason") in KESILDI)
+                secim.get("finish_reason") in KESILDI, ek)
 
     if provider == "anthropic":
         govde = {"model": model, "max_tokens": jeton,
                  "messages": [_anthropic_mesaj(m) for m in mesajlar]}
         if sistem:
-            govde["system"] = sistem
+            # Onbellek isareti: ayni sistem metni sonraki turlarda indirimli
+            # okunur (kisa onek onbelleklenmez; kazanc defterde olculur).
+            govde["system"] = [{"type": "text", "text": sistem,
+                                "cache_control": {"type": "ephemeral"}}]
         y = _istek(tanim["base"], {"Content-Type": "application/json",
                                    "x-api-key": anahtar or "",
                                    "anthropic-version": "2023-06-01"},
@@ -204,9 +222,14 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
         parca = [p.get("text", "") for p in (y.get("content") or [])
                  if p.get("type") == "text"]
         k = y.get("usage") or {}
-        return ("\n".join(parca), k.get("input_tokens"),
-                k.get("output_tokens"),
-                y.get("stop_reason") in KESILDI)
+        okunan = k.get("cache_read_input_tokens") or 0
+        # Anthropic giris sayisina onbellekten okunani katmaz; toplam giris
+        # ikisinin toplamidir (tarife hesabi ustten, yani ihtiyatli kalir).
+        gir = k.get("input_tokens")
+        if gir is not None:
+            gir = gir + okunan + (k.get("cache_creation_input_tokens") or 0)
+        return ("\n".join(parca), gir, k.get("output_tokens"),
+                y.get("stop_reason") in KESILDI, {"usd": None, "cached": okunan, "reasoning": 0})
 
     if provider == "google":
         url = "%s/%s:generateContent" % (tanim["base"], model)
@@ -543,6 +566,7 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
         gir = cik = 0
         kesildi = False
         jeton_tahmini = False
+        ek = {}
         try:
             cagir = transport if transport is not None else _cagir
             # Ayar (efor, cevap siniri) yalniz VARSA gecer: eski tasiyicilar
@@ -551,7 +575,10 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
                      if ayar else cagir(a["provider"], anahtar, a["model"], sistem_metni, gecmis))
             # Tasiyici kesilme isareti vermeyebilir: vermeyen icin «kesilmedi»
             # varsayilir, cunku bilinmeyeni «kesildi» saymak da uydurmaktir.
-            if len(sonuc) == 4:
+            if len(sonuc) == 5:
+                metin, gir, cik, kesildi, ek = sonuc
+                ek = ek or {}
+            elif len(sonuc) == 4:
                 metin, gir, cik, kesildi = sonuc
             else:
                 metin, gir, cik = sonuc
@@ -570,18 +597,24 @@ def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben"
 
         # HER CAGRI DEFTERE YAZILIR — basarisiz olan da.
         usd = _fiyat(a["provider"], a["model"], gir, cik)
+        olculen = (ek or {}).get("usd") if hata is None else None
+        if olculen is not None:
+            usd = float(olculen)            # saglayicinin bildirdigi bedel: OLCUM
         # Tarifesi bilinmeyen model icin TAHMINI bir taban kullanilir ve
         # bu ISARETLENIR. Tahmin, olcumun yerine sessizce gecmemeli:
         # yuksek bir tahmin tavani erken doldurur ve kullanici sohbetin
         # neden durdugunu anlamaz.
-        tahmini = not fiyat_bilinir(a["provider"], a["model"])
+        tahmini = olculen is None and not fiyat_bilinir(a["provider"], a["model"])
         butce.record(con, role=role, task=task, provider=a["provider"],
                      model=a["model"], user=user, in_tok=gir, out_tok=cik,
                      usd=usd, rate=float(b.get("usd_try") or 0),
                      ok=(hata is None), escalated=escalated,
+                     cached=bool((ek or {}).get("cached")), cached_tok=int((ek or {}).get("cached") or 0),
+                     reason_tok=int((ek or {}).get("reasoning") or 0),
                      note=hata or ",".join(
                          n for n, var in (("tahmini-fiyat", tahmini),
                                           ("tahmini-jeton", jeton_tahmini),
+                                          ("olculen-bedel", olculen is not None),
                                           (not_ek, bool(not_ek))) if var),
                      now=now,
                      # Gizlilik panosu (fikir 55): modele giden veri TURU.

@@ -267,6 +267,25 @@ def _olculen(con, bugun):
     return toplam, (yuk / n if n else 0.0)
 
 
+def _olcum_ozeti(con, bugun):
+    """Son 30 gun: onbellekten okunan jeton, yukselen cagri, harcamanin ne
+    kadari saglayicinin OLCTUGU bedel (tahmin degil)."""
+    if con is None:
+        return None
+    import datetime as _dt
+    son = _dt.date.fromisoformat(bugun) if bugun else _dt.date.today()
+    bas = (son - _dt.timedelta(days=29)).isoformat()
+    r = con.execute(
+        "SELECT COUNT(*) n, COALESCE(SUM(cached_tok),0) onb, COALESCE(SUM(escalated),0) yuk,"
+        " COALESCE(SUM(usd),0) usd,"
+        " COALESCE(SUM(CASE WHEN note LIKE '%olculen-bedel%' THEN usd ELSE 0 END),0) olculen"
+        " FROM usage WHERE day >= ? AND day <= ?", (bas, son.isoformat())).fetchone()
+    if not r["n"]:
+        return None
+    return {"cagri": r["n"], "onbellek_jeton": int(r["onb"]), "yukselen": int(r["yuk"]),
+            "usd": round(r["usd"], 4), "olculen_usd": round(r["olculen"], 4)}
+
+
 def _yerel_mi(yer, yerel, tur, sinif):
     """True: bu basamak yerelde; False: bulutta; None: bu yerde calismaz."""
     if tur == "metin" and yer in ("yerel", "hibrit") and sinif in yerel:
@@ -323,7 +342,9 @@ def onizleme(cfg, con=None, bugun=None):
         eksik.append("Paketler OpenRouter anahtarıyla çalışır; «Sağlayıcılar» bölümüne ekle.")
     if not google_var:
         eksik.append("Ses ve video yalnız Google (Gemini) anahtarıyla çalışır.")
+    olcum = _olcum_ozeti(con, bugun)
     return {"paketler": out, "aktif": aktif, "tarife": tarife.durum(), "eksik": eksik,
+            "olcum": olcum,
             "yer": yer, "yerel": yerel, "yerel_adres": models.yerel_kok(cfg),
             "yukselme_orani": None if yukselme is None else round(yukselme, 3),
             "olcum_notu": "" if kullanim else

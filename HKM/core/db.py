@@ -585,6 +585,9 @@ MIGRATIONS = [
     # Gizlilik panosu (fikir 55): cagrida modele giden veri TURLERI (icerik
     # degil), virgulle: mesaj, bio, academic, intellect, ilkeler, hafiza...
     ("usage", "veri", "TEXT"),
+    # Onbellekten okunan giris jetonu (core/ai.py, OpenRouter): onbellegin
+    # kazanci tahminle degil bu sayiyla olculur.
+    ("usage", "cached_tok", "INTEGER"),
     ("decisions", "key", "TEXT"),          # oncelik kurali kimligi
     ("decisions", "answered_at", "TEXT"),  # kabul/ret ne zaman verildi
     # Hangi gorevliyle konusuldugu: king, bio, academic, intellect.

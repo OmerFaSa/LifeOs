@@ -432,3 +432,80 @@ def run():
         eq(ust["mesaj_sayisi"], ai.EN_COK_MESAJ)
         ok("Gitar" in ust["sistem"] and "Kitap kulübü" in ust["sistem"])
     test("ust seviye tam baglamla calisir", t_high_level_keeps_full_context)
+
+    # ------------------------------------ gercek bedel ve onbellek
+
+    def t_openrouter_request_asks_cost_and_marks_cache():
+        """OpenRouter'a gercek bedel sorulur (usage.include); Claude ve
+        Gemini modellerinde sistem metni onbellek isaretiyle gider."""
+        giden = []
+        eski = ai._istek
+        try:
+            def sahte(url, baslik, govde, timeout=0):
+                giden.append(govde)
+                return {"choices": [{"message": {"content": "Tamam."}, "finish_reason": "stop"}],
+                        "usage": {"prompt_tokens": 2000, "completion_tokens": 40, "cost": 0.0123,
+                                  "prompt_tokens_details": {"cached_tokens": 1500},
+                                  "completion_tokens_details": {"reasoning_tokens": 12}}}
+            ai._istek = sahte
+            r = ai._cagir("openrouter", "k", "anthropic/claude-sonnet-5", "SISTEM",
+                          [{"role": "user", "content": "x"}], ayar={"jeton": 500})
+            g = giden[0]
+            eq(g["usage"], {"include": True})
+            eq(g["messages"][0]["content"][0]["cache_control"], {"type": "ephemeral"})
+            eq(g["messages"][0]["content"][0]["text"], "SISTEM")
+            eq(r[4], {"usd": 0.0123, "cached": 1500, "reasoning": 12})
+            ai._cagir("openrouter", "k", "openai/gpt-5-mini", "SISTEM",
+                      [{"role": "user", "content": "x"}], ayar={"jeton": 500})
+            eq(giden[1]["messages"][0]["content"], "SISTEM")     # OpenAI kendiliginden onbellekler
+        finally:
+            ai._istek = eski
+    test("OpenRouter'a gercek bedel sorulur, onbellek isaretlenir",
+         t_openrouter_request_asks_cost_and_marks_cache)
+
+    def t_measured_cost_is_recorded():
+        """Saglayicinin bildirdigi bedel OLCUMDUR ve tarifeyle hesaplananin
+        yerine yazilir; onbellek ve dusunme jetonlari deftere girer."""
+        con = db.connect(":memory:")
+        def tas(provider, anahtar, model, sistem, mesajlar, ayar=None):
+            return "Tamam.", 2000, 40, False, {"usd": 0.0123, "cached": 1500, "reasoning": 12}
+        r = ai.ask(con, _cfg("S"), "seviye.alt", "sohbet", _mesaj(), baglam="", sistem="s",
+                   transport=tas, seviye="alt")
+        ok(r["ok"])
+        eq(r["usd"], 0.0123)
+        u = con.execute("SELECT usd, cached, cached_tok, reason_tok, note FROM usage").fetchone()
+        eq((u["usd"], u["cached"], u["cached_tok"], u["reason_tok"]), (0.0123, 1, 1500, 12))
+        ok("olculen-bedel" in u["note"])
+    test("olculen bedel deftere yazilir", t_measured_cost_is_recorded)
+
+    def t_anthropic_direct_marks_cache_and_counts_it():
+        giden = []
+        eski = ai._istek
+        try:
+            def sahte(url, baslik, govde, timeout=0):
+                giden.append(govde)
+                return {"content": [{"type": "text", "text": "Tamam."}], "stop_reason": "end_turn",
+                        "usage": {"input_tokens": 100, "output_tokens": 5,
+                                  "cache_read_input_tokens": 900}}
+            ai._istek = sahte
+            r = ai._cagir("anthropic", "k", "claude-sonnet-5", "SISTEM",
+                          [{"role": "user", "content": "x"}])
+            eq(giden[0]["system"][0]["cache_control"], {"type": "ephemeral"})
+            eq(r[1], 1000)                    # onbellekten okunan da giristir
+            eq(r[4]["cached"], 900)
+        finally:
+            ai._istek = eski
+    test("Anthropic dogrudan: onbellek isareti ve olcumu", t_anthropic_direct_marks_cache_and_counts_it)
+
+    def t_measurement_summary():
+        con = db.connect(":memory:")
+        now = datetime.datetime(2026, 9, 20, 12, 0)
+        butce.record(con, role="king", task="sohbet", provider="openrouter", model="x", usd=0.01,
+                     cached_tok=700, cached=True, note="olculen-bedel,seviye=alt", now=now)
+        butce.record(con, role="king", task="sohbet", provider="openrouter", model="x", usd=0.02,
+                     escalated=True, note="seviye=ust", now=now)
+        o = motor.onizleme(_cfg("S"), con=con, bugun="2026-09-26")["olcum"]
+        eq((o["cagri"], o["onbellek_jeton"], o["yukselen"], o["usd"], o["olculen_usd"]),
+           (2, 700, 1, 0.03, 0.01))
+        eq(motor.onizleme(_cfg("S"), con=db.connect(":memory:"))["olcum"], None)
+    test("olcum ozeti: onbellek, yukselme, olculen bedel", t_measurement_summary)
