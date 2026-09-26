@@ -195,6 +195,128 @@ LAYER_LABEL = {
 }
 
 
+# ------------------------------------------------------- onerilen dagilim
+#
+# «Onemli is icin hangi model, dusuk oncelikli is icin hangisi?» sorusunun
+# KODDAKI cevabi. Her kademe bir ONERI KADEMESINE duser; her oneri
+# kademesinin kabul edilebilir modelleri (kalite tabani) burada yazilidir
+# ve aralarindan, anahtari GIRILMIS saglayicilarda, EN UCUZ olan secilir.
+#
+# Uc sinir:
+#   1. HESAPLANIR, YAZILMAZ. Oneri bir onizlemedir; uygulamak kullanicinin
+#      «Uygula»sidir (kural 2: varsayilan kapali kalir).
+#   2. Yalniz TARIFESI BILINEN model (ai.FIYAT). Tarifesiz model tahmini
+#      tabanla yazilir; «ucuzluk sirasi» o zaman bir uydurma olurdu.
+#   3. Ses yalniz Google ile calisir (ai.py): baska anahtarla ses satiri
+#      yazilmaz, EKSIK diye soylenir.
+ONERI_KADEMELERI = [
+    {"id": "dusuk", "ad": "Düşük öncelik",
+     "isler": "Sohbet: kısa cevap, çok çağrı — ucuz ve hızlı olmalı",
+     "adaylar": ["deepseek/deepseek-chat", "google/gemini-2.5-flash-lite",
+                 "gemini-2.5-flash-lite", "openai/gpt-5-mini", "gpt-5-mini",
+                 "anthropic/claude-haiku-4.5", "claude-haiku-4-5-20251001"]},
+    {"id": "orta", "ad": "Orta",
+     "isler": "Konsey (VP) ve analiz: sayıyı cümleye çevirir — dikkatli olmalı",
+     "adaylar": ["google/gemini-2.5-flash", "gemini-2.5-flash", "openai/gpt-5-mini",
+                 "gpt-5-mini", "anthropic/claude-haiku-4.5", "claude-haiku-4-5-20251001"]},
+    {"id": "gorsel", "ad": "Görsel",
+     "isler": "Ekran görüntüsü, tahlil, fiş okuma — görsel okuyabilmeli",
+     "adaylar": ["google/gemini-2.5-flash", "gemini-2.5-flash", "openai/gpt-5-mini",
+                 "gpt-5-mini", "anthropic/claude-haiku-4.5", "claude-haiku-4-5-20251001"]},
+    {"id": "ses", "ad": "Ses ve video",
+     "isler": "Telegram sesini yazıya döker, videoyu anlatır — yalnız Google",
+     "adaylar": ["gemini-2.5-flash", "gemini-2.5-pro"]},
+    {"id": "arastirma", "ad": "Araştırma",
+     "isler": "BAM araştırması: uzun kaynak okur, alıntı kodla doğrulanır",
+     "adaylar": ["gemini-2.5-pro", "gpt-5", "anthropic/claude-sonnet-5", "claude-sonnet-5"]},
+    {"id": "onemli", "ad": "Önemli",
+     "isler": "King, planlar, BAM planlama ve üretim — en dikkatli iş",
+     "adaylar": ["gemini-2.5-pro", "gpt-5", "anthropic/claude-sonnet-5", "claude-sonnet-5"]},
+]
+ONERI_BY_ID = {k["id"]: k for k in ONERI_KADEMELERI}
+
+
+def saglayici_of(model):
+    """Aday adindan saglayici: «a/b» OpenRouter'dir, gerisi adindan."""
+    if "/" in model:
+        return "openrouter"
+    if model.startswith("gemini"):
+        return "google"
+    if model.startswith("gpt"):
+        return "openai"
+    if model.startswith("claude"):
+        return "anthropic"
+    return None
+
+
+def birim_maliyet(model):
+    """Karsilastirma olcusu: 1M jetonun ortalama bedeli, giris 3 : cikis 1
+    (bu sistemin cagrilari baglam agirliklidir). Sirala, fatura degil."""
+    from core import ai          # ai models'i ice aktarir; dongu burada kirilir
+    g, c = ai.FIYAT[model]
+    return (3 * g + c) / 4.0
+
+
+def oneri_kademesi(rol):
+    if rol == "medya":
+        return "ses"
+    if rol == "para.fis" or rol.endswith(".gorsel"):
+        return "gorsel"
+    if rol == "bam.arastirma":
+        return "arastirma"
+    if rol == "bam.kayit":
+        return None                  # Depolama burosu model gerektirmez
+    if rol == "king" or rol.endswith(".plan") or rol in ("bam.planlama", "bam.uretim"):
+        return "onemli"
+    if rol.endswith(".sohbet"):
+        return "dusuk"
+    return "orta"                    # vp_*, *.analiz, bam patronu
+
+
+def onerilen(cfg):
+    """Anahtari girilmis saglayicilarla kademe kademe EN UCUZ uygun model.
+    Hicbir sey yazmaz; donen `yama` kullanici onaylarsa kaydedilir."""
+    from core import ai
+    anahtarli = {ad for ad in PROVIDERS if key_list(cfg, ad)}
+    if not anahtarli:
+        return {"satirlar": [], "kademeler": [], "eksik": [], "yama": {},
+                "not": "Önce «Sağlayıcılar» bölümüne bir anahtar gir; öneri "
+                       "yalnız anahtarı olan sağlayıcılardan kurulur."}
+    secim = {}
+    for k in ONERI_KADEMELERI:
+        uygun = [m for m in k["adaylar"] if saglayici_of(m) in anahtarli
+                 and (k["id"] != "ses" or saglayici_of(m) == "google")]
+        secim[k["id"]] = min(uygun, key=birim_maliyet) if uygun else None
+    kademeler = []
+    for k in ONERI_KADEMELERI:
+        m = secim[k["id"]]
+        kademeler.append({"id": k["id"], "ad": k["ad"], "isler": k["isler"], "model": m,
+                          "provider": saglayici_of(m) if m else None,
+                          "fiyat": list(ai.FIYAT[m]) if m else None})
+    kademeler.sort(key=lambda x: (x["model"] is None,
+                                  birim_maliyet(x["model"]) if x["model"] else 0))
+    satirlar, yama = [], {}
+    for rol, tanim in ROLES.items():
+        kid = oneri_kademesi(rol)
+        m = secim.get(kid) if kid else None
+        if not m:
+            continue
+        satirlar.append({"role": rol, "label": tanim["label"], "kademe": kid,
+                         "kademe_adi": ONERI_BY_ID[kid]["ad"],
+                         "provider": saglayici_of(m), "model": m,
+                         "simdi": (lambda a: {"provider": a["provider"], "model": a["model"],
+                                              "inherited": a["inherited"]})(resolve(cfg, rol))})
+        yama[rol] = {"provider": saglayici_of(m), "model": m, "key": ""}
+    eksik = [{"id": k["id"], "ad": k["ad"],
+              "neden": ("Ses ve video yalnız Google (Gemini) anahtarıyla çalışır."
+                        if k["id"] == "ses" else
+                        "Anahtarı olan sağlayıcılarda bu işe uygun, tarifesi bilinen model yok.")}
+             for k in kademeler if not k["model"]]
+    return {"satirlar": satirlar, "kademeler": kademeler, "eksik": eksik, "yama": yama,
+            "not": "Her kademede, anahtarın olan sağlayıcılardaki uygun modellerin EN "
+                   "UCUZU seçildi. Uygulamadan önce «Sohbeti dene» ile sına."}
+
+
 def layers():
     """Ekranin cizecegi sira: ustten alta, her kademe kendi grubunda."""
     out = []
@@ -325,6 +447,9 @@ def resolve(cfg, role):
                     "label", saglayici),
                 "model": a.get("model") or "",
                 "key_id": secili["id"] if secili else secilen,
+                # Kullanicinin SECTIGI deger (bos = «ilk anahtar»): geri alma
+                # onu birebir geri koyar, cozulmus kimligi sabitlemez.
+                "key_chosen": secilen,
                 "key_label": secili["label"] if secili else "",
                 "key_user": (secili or {}).get("user") or "",
                 "key_missing": eksik,
@@ -369,6 +494,7 @@ def read(cfg):
         "layers": layers(),
         "capabilities": YETENEKLER,
         "assignments": {r: resolve(cfg, r) for r in ROLES},
+        "oneri": onerilen(cfg),
         "note": "Kural motoru otoritedir: buradaki hiçbir ayar bir eşiği, "
                 "bir hükmü ya da bir önceliği değiştirmez. Model yalnız "
                 "cümle kurar. Bütün anahtarlar boş olsa sistem aynen çalışır.",

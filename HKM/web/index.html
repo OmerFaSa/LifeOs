@@ -2572,6 +2572,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       });
       h += '</datalist>';
     });
+    h += oneriKarti(m);
     h += '<div class="tag">Görev dağılımı · kademe kademe</div>'
       + '<p class="muted">Atama yoksa <b>üstüne</b> bakılır; en üstte de '
       + 'yoksa «atanmamış» denir. Uydurulmuş bir varsayılan, senin '
@@ -2604,6 +2605,9 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '</div><p class="muted" id="gorev-not"></p>'
       + '<div id="sohbet-tani"></div>';
     $('gorevler').innerHTML = h;
+    ONERI = (m.oneri || {}).yama || null;
+    if($('oneri-uygula')) $('oneri-uygula').addEventListener('click', oneriUygula);
+    if($('oneri-geri')) $('oneri-geri').addEventListener('click', oneriGeriAl);
     $('gorev-kaydet').addEventListener('click', gorevKaydet);
     $('sohbet-dene').addEventListener('click', sohbetDene);
   }
@@ -2638,6 +2642,80 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     }else{
       $('anahtar-not').textContent = 'Kaydedilmedi — '
         + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
+    }
+  }
+
+  /* ONERILEN DAGILIM (core/models.py onerilen). Kademe kademe, anahtarın
+     olan sağlayıcılarda uygun modellerin EN UCUZU; tablo ucuzdan pahalıya
+     sıralı gelir. Hesap sunucuda yapılır, burada yalnız gösterilir. Uygulamak
+     bir onaydır ve önceki dağılım «Geri al» için saklanır. */
+  var ONERI = null, ONCEKI_ATAMA = null;
+  function oneriKarti(m){
+    var o = m.oneri || {};
+    var h = '<div class="tag">Önerilen dağılım · ucuzdan pahalıya</div>';
+    if(!(o.satirlar || []).length){
+      return h + '<p class="muted">' + esc(o.not || 'Öneri için bir anahtar gerekir.') + '</p>';
+    }
+    /* Uc sutun: fiyat modelin ALTINDA durur; dort sutunda telefonda fiyat
+       ekranin disina, yatay kaydirmaya dusuyordu — tablonun asil bilgisi. */
+    h += '<div class="scroll"><table><thead><tr><th>Kademe</th><th>Hangi işler</th>'
+      + '<th>Model · 1M jeton (giriş / çıkış)</th></tr></thead><tbody>';
+    (o.kademeler || []).forEach(function(k){
+      h += '<tr><td><b>' + esc(k.ad) + '</b></td><td class="muted">' + esc(k.isler) + '</td>'
+        + '<td>' + (k.model ? esc(k.model) + '<div class="muted">$' + k.fiyat[0].toFixed(2)
+          + ' / $' + k.fiyat[1].toFixed(2) + '</div>' : '<span class="warn">yok</span>')
+        + '</td></tr>';
+    });
+    h += '</tbody></table></div>';
+    (o.eksik || []).forEach(function(e){
+      h += '<p class="muted"><b>' + esc(e.ad) + ':</b> ' + esc(e.neden) + '</p>';
+    });
+    var degisen = (o.satirlar || []).filter(function(r){
+      return !(r.simdi && !r.simdi.inherited && r.simdi.provider === r.provider
+        && r.simdi.model === r.model); }).length;
+    h += '<p class="muted">' + esc(o.not || '') + ' Uygularsan <b>' + degisen
+      + '</b> kademenin ataması değişir; istediğin satırı sonra elle değiştirebilirsin.</p>'
+      + '<div class="row"><button class="primary" id="oneri-uygula"' + (degisen ? '' : ' disabled')
+      + '>Önerilen dağılımı uygula</button>'
+      + (ONCEKI_ATAMA ? '<button id="oneri-geri">Önceki dağılıma dön</button>' : '')
+      + '</div><p class="muted" id="oneri-not"></p>';
+    return h;
+  }
+
+  async function oneriUygula(){
+    if(!ONERI) return;
+    if(!window.confirm('Önerilen dağılım kaydedilsin mi? Kademelerin modeli tablodaki gibi '
+      + 'değişir; önceki dağılıma «Önceki dağılıma dön» ile dönebilirsin.')) return;
+    /* Onceki KENDI atamalari saklanir: miras alan kademe bos (null) doner. */
+    var once = {};
+    var atamalar = ((AYAR || {}).models || {}).assignments || {};
+    Object.keys(ONERI).forEach(function(rol){
+      var a = atamalar[rol];
+      once[rol] = (a && a.provider && a.from === rol)
+        ? { provider:a.provider, model:a.model || '', key:a.key_chosen || '' } : null;
+    });
+    var r = await api('/api/config', { method:'POST',
+      body:JSON.stringify({ models:{ assignments:ONERI } }) });
+    if(r.status === 200){
+      ONCEKI_ATAMA = once;
+      ayarlariCiz(r.body.config);
+      $('oneri-not').textContent = 'Önerilen dağılım kaydedildi.';
+    }else{
+      $('oneri-not').textContent = 'Kaydedilmedi — '
+        + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
+    }
+  }
+
+  async function oneriGeriAl(){
+    if(!ONCEKI_ATAMA) return;
+    var r = await api('/api/config', { method:'POST',
+      body:JSON.stringify({ models:{ assignments:ONCEKI_ATAMA } }) });
+    if(r.status === 200){
+      ONCEKI_ATAMA = null;
+      ayarlariCiz(r.body.config);
+      $('oneri-not').textContent = 'Önceki dağılıma dönüldü.';
+    }else{
+      $('oneri-not').textContent = 'Geri alınamadı — ' + r.status;
     }
   }
 

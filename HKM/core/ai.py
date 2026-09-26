@@ -589,9 +589,11 @@ FIYAT = {
     "deepseek/deepseek-chat": (0.06, 0.18),
     "anthropic/claude-haiku-4.5": (1.00, 5.00),
     "claude-haiku-4-5-20251001": (1.00, 5.00),
-    "anthropic/claude-sonnet-5": (3.00, 15.00),
-    "claude-sonnet-5": (3.00, 15.00),
-    "claude-opus-5": (15.00, 75.00),
+    # Anthropic tarifesi (1M jeton, USD). Sonnet 5 ve Opus 5 eskiden 3/15 ve
+    # 15/75 yaziliydi: harcama 1,5–3 kat fazla sayiliyor, butce erken doluyordu.
+    "anthropic/claude-sonnet-5": (2.00, 10.00),
+    "claude-sonnet-5": (2.00, 10.00),
+    "claude-opus-5": (5.00, 25.00),
     "openai/gpt-5-mini": (0.25, 2.00),
     "gpt-5-mini": (0.25, 2.00),
     "gpt-5": (1.25, 10.00),

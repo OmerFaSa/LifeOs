@@ -388,3 +388,122 @@ def run():
         ok(r["ok"])
         eq(r["models"], ["gemini-3.6-flash"])
     test("sinama model listesini de dondurur", t_probe_returns_the_list)
+
+    # ------------------------------------------------ fiyat ve oneri dagilimi
+
+    def t_anthropic_prices_are_current():
+        """Sonnet 5 ve Opus 5 tarifesi eskiydi (3/15 ve 15/75): harcama
+        1,5–3 kat fazla yaziliyor, butce tavani o kadar erken doluyordu.
+        Kaynak: Anthropic fiyat tablosu (1M jeton basina USD)."""
+        from core import ai
+        eq(ai.FIYAT["claude-sonnet-5"], (2.00, 10.00))
+        eq(ai.FIYAT["anthropic/claude-sonnet-5"], (2.00, 10.00))
+        eq(ai.FIYAT["claude-opus-5"], (5.00, 25.00))
+        eq(ai.FIYAT["claude-haiku-4-5-20251001"], (1.00, 5.00))
+    test("Anthropic tarifesi guncel", t_anthropic_prices_are_current)
+
+    def t_every_suggested_model_has_a_price():
+        """Oneri yalniz TARIFESI BILINEN modeli secer: tarifesiz model
+        tahmini tabanla yazilir ve «ucuzluk sirasi» bir uydurma olurdu."""
+        from core import ai
+        for k in models.ONERI_KADEMELERI:
+            for ad in k["adaylar"]:
+                ok(ad in ai.FIYAT, "%s: %s tarifesiz" % (k["id"], ad))
+                ok(models.saglayici_of(ad) in models.PROVIDERS, ad)
+    test("onerinin her adayinin tarifesi var", t_every_suggested_model_has_a_price)
+
+    def t_every_role_has_a_tier_or_is_modelless():
+        """Her kademe bir oneri kademesine duser; yalniz modeli olmayan
+        Depolama burosu disarida kalir (model gerektirmez)."""
+        for rol in models.ROLES:
+            if rol == "bam.kayit":
+                eq(models.oneri_kademesi(rol), None)
+            else:
+                ok(models.oneri_kademesi(rol), rol)
+    test("her kademe bir oneri kademesine duser", t_every_role_has_a_tier_or_is_modelless)
+
+    def t_suggestion_needs_a_key_and_writes_nothing():
+        """Anahtar yoksa oneri yok; oneri HESAPLANIR, yazilmaz: varsayilan
+        kapali kalir (kural 2)."""
+        cfg = {"local_token": "x"}
+        o = models.onerilen(cfg)
+        eq(o["satirlar"], [])
+        ok(o["not"])
+        cfg = models.apply(cfg, {"keys": {"openrouter": "sk-or-1234"}})
+        o = models.onerilen(cfg)
+        ok(o["satirlar"])
+        for rol in models.ROLES:
+            eq(models.resolve(cfg, rol)["provider"], None)
+    test("oneri anahtar ister ve hicbir sey yazmaz",
+         t_suggestion_needs_a_key_and_writes_nothing)
+
+    def t_openrouter_only_cheapest_per_tier():
+        """Yalniz OpenRouter anahtari: her kademe o anahtarla; kademe
+        icinde EN UCUZ uygun model secilir. Ses yalniz Google ile
+        calisir (ai.py): OpenRouter'la ses satiri yazilmaz, eksik diye
+        SOYLENIR."""
+        cfg = models.apply({"local_token": "x"}, {"keys": {"openrouter": "sk-or-1234"}})
+        o = models.onerilen(cfg)
+        rol = {s["role"]: s for s in o["satirlar"]}
+        for s in o["satirlar"]:
+            eq(s["provider"], "openrouter")
+        eq(rol["ays.sohbet"]["model"], "deepseek/deepseek-chat")
+        eq(rol["king"]["model"], "anthropic/claude-sonnet-5")
+        no("medya" in rol)
+        ok(any(e["id"] == "ses" for e in o["eksik"]))
+    test("yalniz OpenRouter: kademe basina en ucuz uygun model",
+         t_openrouter_only_cheapest_per_tier)
+
+    def t_google_key_covers_voice():
+        cfg = models.apply({"local_token": "x"}, {"keys": {"google": "AIza-1234"}})
+        rol = {s["role"]: s for s in models.onerilen(cfg)["satirlar"]}
+        eq(rol["medya"]["provider"], "google")
+        eq(rol["ays.sohbet"]["model"], "gemini-2.5-flash-lite")
+    test("Google anahtari sesi de kapsar", t_google_key_covers_voice)
+
+    def t_tiers_are_ordered_by_price():
+        """Kademeler ucuzdan pahaliya siralanir; onemli is dusuk oncelikli
+        isten ucuz bir modele verilmez."""
+        from core import ai
+        cfg = models.apply({"local_token": "x"}, {"keys": {
+            "openrouter": "sk-or-1234", "google": "AIza-1234"}})
+        o = models.onerilen(cfg)
+        fiyat = {k["id"]: models.birim_maliyet(k["model"]) for k in o["kademeler"] if k.get("model")}
+        ok(fiyat["dusuk"] <= fiyat["orta"] <= fiyat["onemli"])
+        maliyetler = [models.birim_maliyet(k["model"]) for k in o["kademeler"] if k.get("model")]
+        eq(maliyetler, sorted(maliyetler))
+        for k in o["kademeler"]:
+            if k.get("model"):
+                eq(k["fiyat"], list(ai.FIYAT[k["model"]]))
+    test("kademeler ucuzdan pahaliya", t_tiers_are_ordered_by_price)
+
+    def t_suggestion_is_a_valid_patch():
+        """Oneri dogrudan kaydedilebilir bir yamadir: dogrulamadan gecer
+        ve uygulaninca her kademe onerilen modeli kullanir."""
+        cfg = models.apply({"local_token": "x"}, {"keys": {"openrouter": "sk-or-1234"}})
+        o = models.onerilen(cfg)
+        ok_, hata = models.validate({"assignments": o["yama"]})
+        ok(ok_, hata)
+        yeni = models.apply(cfg, {"assignments": o["yama"]})
+        for s in o["satirlar"]:
+            a = models.resolve(yeni, s["role"])
+            eq((a["provider"], a["model"], a["inherited"]), (s["provider"], s["model"], False))
+    test("oneri gecerli bir yamadir", t_suggestion_is_a_valid_patch)
+
+    def t_read_carries_the_suggestion():
+        cfg = models.apply({"local_token": "x"}, {"keys": {"openrouter": "sk-or-1234"}})
+        r = models.read(cfg)
+        ok(r["oneri"]["satirlar"])
+        no("sk-or-1234" in json.dumps(r))
+    test("okunan hal oneriyi tasir, sir sizmaz", t_read_carries_the_suggestion)
+
+    def t_chosen_key_is_reported_raw():
+        """Geri alma icin: «ilk anahtar» secimi bos doner, cozulmus kimlik
+        sabitlenmez (sabitlenirse o anahtar silinince baskasina gecilmez)."""
+        cfg = models.apply({"local_token": "x"}, {
+            "keys": {"openrouter": [{"label": "a", "key": "sk-or-1111"}]},
+            "assignments": {"king": {"provider": "openrouter", "model": "deepseek/deepseek-chat"}}})
+        k = models.resolve(cfg, "king")
+        eq(k["key_chosen"], "")
+        ok(k["key_id"])
+    test("secilen anahtar ham haliyle doner", t_chosen_key_is_reported_raw)
