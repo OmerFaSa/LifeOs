@@ -244,6 +244,10 @@ DOSYALAR = {
     "kilit.js":       "js/core",
     "kilit.css":      "css",
     "kilit.test.js":  "tests",
+    # GIZLENEN VE KUCULTULEN BOLUMLER — her sayfada kisisellestirilebilir sadelik.
+    "gizle.js":       "js/core",
+    "gizle.css":      "css",
+    "gizle.test.js":  "tests",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     # 167 ana ekran rozeti (pwa.js rozet): pwa.test.js degismesin diye ayri dosya.

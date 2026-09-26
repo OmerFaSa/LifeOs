@@ -1,0 +1,110 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/gizle.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GİZLENEN VE KÜÇÜLTÜLEN BÖLÜMLER — brand/ortak/gizle.js
+   (TEK KAYNAK; `tools/ortak.py --yay` üç arayüzün src/css/ klasörüne yazar).
+
+   Sade kalmak için: normal görünümde bölümlerin üstünde düğme yoktur.
+   Düzen kipinde bölümler ince bir çerçeve alır ve köşede «Küçült / Gizle»
+   çıkar. Küçültülmüş bölüm tek satırlık bir başlığa iner; üzerine gelince
+   önizlemesi küçük bir pencerede açılır. */
+
+/* ---------- üst çubuk düğmesi ---------- */
+.ust--v5 .ust__gizli{
+  position:relative; width:32px; height:32px; border-radius:8px; border:0;
+  display:flex; align-items:center; justify-content:center; color:var(--text-2); background:none;
+  box-shadow:inset 0 0 0 1px var(--border); cursor:pointer;
+}
+.ust--v5 .ust__gizli:hover{ background:var(--surface-2); color:var(--text); }
+.ust--v5 .ust__gizli .kbk-ic{ width:18px; height:18px; }
+.ust__gizli-sayi{
+  position:absolute; top:-5px; right:-6px; min-width:16px; height:16px; padding:0 4px;
+  border-radius:8px; font-style:normal; font-size:10px; font-weight:700; line-height:16px;
+  background:var(--text); color:var(--surface); display:none;
+}
+.ust__gizli.is-dolu .ust__gizli-sayi{ display:block; }
+
+/* ---------- panel ---------- */
+.kmenu--gizle{ width:min(340px, calc(100vw - 24px)); }
+.gizle-liste{ list-style:none; margin:0; padding:0 4px; }
+.gizle-liste li{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:8px 6px; border-radius:8px; font-size:var(--fs-sm, 13px); color:var(--text);
+}
+.gizle-liste li:hover, .gizle-liste li:focus-visible{ background:var(--surface-2); outline:none; }
+.gizle-liste li > span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gizle-liste button, .gizle-alt button{
+  flex:none; min-height:28px; padding:0 10px; border-radius:7px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text); font:inherit; font-size:12px; font-weight:600; cursor:pointer;
+}
+.gizle-liste button:hover, .gizle-alt button:hover{ border-color:var(--border-strong); }
+.gizle-alt{ display:flex; flex-wrap:wrap; gap:6px; padding:8px 6px 4px; border-top:1px solid var(--border); margin-top:6px; }
+.gizle-alt [aria-pressed="true"]{ background:var(--text); color:var(--surface); border-color:var(--text); }
+.gizle-not{ margin:6px 8px 4px; font-size:11px; color:var(--text-3); }
+
+/* ---------- düzen kipi ---------- */
+.gizle-bolum{ position:relative; }
+.gizle-duzen .gizle-bolum{
+  outline:1px dashed var(--border-strong); outline-offset:4px; border-radius:var(--r-md, 10px);
+}
+.gizle-araclar{
+  position:absolute; top:6px; right:6px; z-index:2;
+  display:flex; gap:4px;
+}
+.gizle-dugme{
+  min-height:24px; min-width:24px; padding:0 9px; border-radius:6px;
+  border:1px solid var(--border); background:var(--surface); color:var(--text-2);
+  font:inherit; font-size:11px; font-weight:600; cursor:pointer;
+  box-shadow:0 1px 2px rgba(0,0,0,.06);
+}
+.gizle-dugme:hover{ color:var(--text); border-color:var(--border-strong); }
+
+/* ---------- küçültülmüş bölüm ---------- */
+.gizle-kucuk{ position:relative; align-self:start; min-height:0 !important; height:auto !important; }
+.gizle-kucuk > .lrow__main,
+.gizle-kucuk > .lrow__side > .lrow__note,
+.gizle-kucuk > .lrow__side > .lrow__act,
+.gizle-kucuk > .kutu__govde,
+.gizle-kucuk > .kutu__ayak,
+.card.gizle-kucuk > :not(.card__head):not(.gizle-araclar){ display:none !important; }
+section.lrow.gizle-kucuk{ grid-template-columns:1fr !important; padding-top:10px; padding-bottom:10px; min-height:0; }
+.gizle-kucuk .lrow__side{ padding-right:120px; }
+.gizle-kucuk .kutu__bas{ padding-right:80px; }
+.gizle-kucuk{ cursor:default; opacity:.92; }
+.gizle-kucuk:hover{ opacity:1; }
+
+/* ---------- önizleme penceresi ---------- */
+.gizle-onizleme{
+  position:fixed; z-index:calc(var(--z-overlay, 60) + 1);
+  width:min(440px, calc(100vw - 16px)); max-height:min(360px, 60vh); overflow:hidden;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md, 10px);
+  box-shadow:var(--shadow-lg, 0 12px 32px rgba(0,0,0,.18)); padding:10px 14px;
+  pointer-events:none;
+  animation:gizle-onizle var(--dur, .16s) var(--ease, ease) both;
+}
+.gizle-onizleme__kap{ display:block !important; margin:0 !important; padding:0 !important; border:0 !important;
+  width:auto !important; max-width:none !important; min-height:0 !important; grid-template-columns:1fr !important; }
+.gizle-onizleme section.lrow, .gizle-onizleme section.kutu, .gizle-onizleme .card{ margin:0 !important; border-top:0 !important; }
+.gizle-onizleme::after{
+  content:''; position:absolute; left:0; right:0; bottom:0; height:48px;
+  background:linear-gradient(to bottom, transparent, var(--surface));
+}
+@keyframes gizle-onizle{ from{ opacity:0; transform:translateY(-3px) scale(.985); } to{ opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce){ .gizle-onizleme{ animation:none; } }
+
+/* ---------- düzen kipi: alttaki «Bitti» çubuğu ---------- */
+.gizle-bitir{
+  position:fixed; left:50%; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%);
+  z-index:var(--z-overlay, 60); display:flex; align-items:center; gap:12px;
+  max-width:calc(100vw - 24px); padding:8px 8px 8px 16px; border-radius:999px;
+  background:var(--text); color:var(--surface); box-shadow:var(--shadow-lg, 0 12px 32px rgba(0,0,0,.25));
+  font-size:13px;
+}
+.gizle-bitir button{
+  min-height:30px; padding:0 14px; border-radius:999px; border:0; cursor:pointer;
+  background:var(--surface); color:var(--text); font:inherit; font-weight:700;
+}
+.gizle-bolum{ scroll-margin-top:80px; }
+@media (max-width:480px){
+  .gizle-bitir{ bottom:calc(var(--altbant-h, 64px) + 12px + env(safe-area-inset-bottom, 0px)); font-size:12px; }
+}

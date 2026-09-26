@@ -896,13 +896,17 @@ R.Screens.office = (function(){
     /* 139 model kapalı kipi: gri şerit; ajanlar hazır cümleyle konuşur. */
     return String(K.Grid([
       K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:O.mode() === 'llm' })) : ''),
+      /* Ofis ekranının ilk gördüğü şey ofisin kendisidir: canlı 3B sahne
+         en üstte ve tam genişlikte (depo sahibi, 2026-09-26). Kartlar
+         altında; ikincil olanlar baştan gizli (gizliVarsayilan) ve üst
+         çubuktaki «Gizlenen bölümler»den geri gelir. */
+      K.Span(12, floorPlan()),
       K.Span(8, K.Stack([
         boardCard(),
         when(vo.masa, () => K.Kutu({ ad:'Masa', yuva:'kim konuşuyor', class:'vkutu',
           govde:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
         when(vo.toplanti, () => K.Kutu({ ad:'Günün toplantısı', yuva:'her masadan tek cümle', class:'vkutu',
           govde:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` })),
-        floorPlan(),
         briefingCard(),
         BossCard(),
         decisionsCard(),
@@ -1300,5 +1304,8 @@ R.Screens.office = (function(){
       return String(K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }));
     },
     render, afterRender, handle, change, openSettings,
+    /* Sadelik: 3B sahne masaları zaten gösterir; teknik model kartı ve son
+       toplantı ikincildir. Baştan gizli, üst çubuktan geri gelir (gizle.js). */
+    gizliVarsayilan:['masa', 'ofis-modeli', 'son-toplantı'],
   };
 })();

@@ -622,6 +622,15 @@ SP.App = (function(){
         if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
       }
       if(sc.afterRender) sc.afterRender();
+      /* Gizlenen ve kucultulen bolumler (brand/ortak/gizle.js): her cizimden
+         sonra uygulanir; tercih modul + profil + ekran icin ayri saklanir. */
+      if(window.LIFEOS && LIFEOS.Gizle){
+        try{
+          LIFEOS.Gizle.uygula({ kok:document.getElementById('main'), modul:'spi',
+            profil:(SP.Ornek && SP.Ornek.aktif && SP.Ornek.aktif()) || 'main', ekran:sc.id,
+            varsayilan:sc.gizliVarsayilan || [] });
+        }catch(e){ console.error('Gizle:', e); }
+      }
     }catch(err){
       /* Kabuğun kendisi çizilemedi. Ekranın kendi hatası bir üstteki
          yakalayıcıda ele alınır; buraya düşmek künye, hero ya da alt

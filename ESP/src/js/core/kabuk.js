@@ -80,6 +80,7 @@ window.LIFEOS = window.LIFEOS || {};
     ayarlar:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
     ara:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
     zil:'<path d="M6.5 16v-4.5a5.5 5.5 0 0 1 11 0V16l1.5 2h-14z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
+    gizli:'<rect x="4" y="4.5" width="16" height="5" rx="1.5"/><rect x="4" y="12.5" width="16" height="3" rx="1"/><path d="M4 19.5h7"/>',
     menu:'<path d="M4.5 7h15M4.5 12h15M4.5 17h15"/>',
     arti:'<path d="M12 5v14M5 12h14"/>',
     asagi:'<path d="M7 10l5 5 5-5"/>',
@@ -303,6 +304,11 @@ window.LIFEOS = window.LIFEOS || {};
       +     ' aria-label="' + kac(onay.sayi + ' öneri onay bekliyor') + '"><i aria-hidden="true"></i>' + kac(onay.sayi) + '</button>' : '')
       +   '<button class="ust__ara" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)">'
       +     simge('ara') + '<span class="ust__ara-yazi">Ara ya da yaz</span><kbd>Ctrl K</kbd></button>'
+      /* Gizlenen/küçültülen bölümler (brand/ortak/gizle.js): düğme burada,
+         sayısını ve panelini gizle.js yönetir. */
+      +   '<button class="ust__gizli" type="button" aria-haspopup="dialog" aria-expanded="false"'
+      +     ' aria-label="Gizlenen bölümler" title="Gizlenen bölümler · sayfayı düzenle">'
+      +     simge('gizli') + '<i class="ust__gizli-sayi" aria-hidden="true"></i></button>'
       +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
       +     ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
       +     simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</button>'

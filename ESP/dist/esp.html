@@ -10769,6 +10769,118 @@ span.h-yuvarla, b.h-yuvarla, small.h-yuvarla{ display:inline-block; }
 .kilit-ayar__form[hidden]{ display:none; }
 .kilit-ayar__not{ grid-column:1 / -1; margin:0; color:var(--text-2); }
 @media (prefers-reduced-motion:reduce){ .kilit.is-yanlis .kilit__kod{ animation:none; } }
+
+/* ==== css/gizle.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/gizle.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GİZLENEN VE KÜÇÜLTÜLEN BÖLÜMLER — brand/ortak/gizle.js
+   (TEK KAYNAK; `tools/ortak.py --yay` üç arayüzün src/css/ klasörüne yazar).
+
+   Sade kalmak için: normal görünümde bölümlerin üstünde düğme yoktur.
+   Düzen kipinde bölümler ince bir çerçeve alır ve köşede «Küçült / Gizle»
+   çıkar. Küçültülmüş bölüm tek satırlık bir başlığa iner; üzerine gelince
+   önizlemesi küçük bir pencerede açılır. */
+
+/* ---------- üst çubuk düğmesi ---------- */
+.ust--v5 .ust__gizli{
+  position:relative; width:32px; height:32px; border-radius:8px; border:0;
+  display:flex; align-items:center; justify-content:center; color:var(--text-2); background:none;
+  box-shadow:inset 0 0 0 1px var(--border); cursor:pointer;
+}
+.ust--v5 .ust__gizli:hover{ background:var(--surface-2); color:var(--text); }
+.ust--v5 .ust__gizli .kbk-ic{ width:18px; height:18px; }
+.ust__gizli-sayi{
+  position:absolute; top:-5px; right:-6px; min-width:16px; height:16px; padding:0 4px;
+  border-radius:8px; font-style:normal; font-size:10px; font-weight:700; line-height:16px;
+  background:var(--text); color:var(--surface); display:none;
+}
+.ust__gizli.is-dolu .ust__gizli-sayi{ display:block; }
+
+/* ---------- panel ---------- */
+.kmenu--gizle{ width:min(340px, calc(100vw - 24px)); }
+.gizle-liste{ list-style:none; margin:0; padding:0 4px; }
+.gizle-liste li{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:8px 6px; border-radius:8px; font-size:var(--fs-sm, 13px); color:var(--text);
+}
+.gizle-liste li:hover, .gizle-liste li:focus-visible{ background:var(--surface-2); outline:none; }
+.gizle-liste li > span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.gizle-liste button, .gizle-alt button{
+  flex:none; min-height:28px; padding:0 10px; border-radius:7px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text); font:inherit; font-size:12px; font-weight:600; cursor:pointer;
+}
+.gizle-liste button:hover, .gizle-alt button:hover{ border-color:var(--border-strong); }
+.gizle-alt{ display:flex; flex-wrap:wrap; gap:6px; padding:8px 6px 4px; border-top:1px solid var(--border); margin-top:6px; }
+.gizle-alt [aria-pressed="true"]{ background:var(--text); color:var(--surface); border-color:var(--text); }
+.gizle-not{ margin:6px 8px 4px; font-size:11px; color:var(--text-3); }
+
+/* ---------- düzen kipi ---------- */
+.gizle-bolum{ position:relative; }
+.gizle-duzen .gizle-bolum{
+  outline:1px dashed var(--border-strong); outline-offset:4px; border-radius:var(--r-md, 10px);
+}
+.gizle-araclar{
+  position:absolute; top:6px; right:6px; z-index:2;
+  display:flex; gap:4px;
+}
+.gizle-dugme{
+  min-height:24px; min-width:24px; padding:0 9px; border-radius:6px;
+  border:1px solid var(--border); background:var(--surface); color:var(--text-2);
+  font:inherit; font-size:11px; font-weight:600; cursor:pointer;
+  box-shadow:0 1px 2px rgba(0,0,0,.06);
+}
+.gizle-dugme:hover{ color:var(--text); border-color:var(--border-strong); }
+
+/* ---------- küçültülmüş bölüm ---------- */
+.gizle-kucuk{ position:relative; align-self:start; min-height:0 !important; height:auto !important; }
+.gizle-kucuk > .lrow__main,
+.gizle-kucuk > .lrow__side > .lrow__note,
+.gizle-kucuk > .lrow__side > .lrow__act,
+.gizle-kucuk > .kutu__govde,
+.gizle-kucuk > .kutu__ayak,
+.card.gizle-kucuk > :not(.card__head):not(.gizle-araclar){ display:none !important; }
+section.lrow.gizle-kucuk{ grid-template-columns:1fr !important; padding-top:10px; padding-bottom:10px; min-height:0; }
+.gizle-kucuk .lrow__side{ padding-right:120px; }
+.gizle-kucuk .kutu__bas{ padding-right:80px; }
+.gizle-kucuk{ cursor:default; opacity:.92; }
+.gizle-kucuk:hover{ opacity:1; }
+
+/* ---------- önizleme penceresi ---------- */
+.gizle-onizleme{
+  position:fixed; z-index:calc(var(--z-overlay, 60) + 1);
+  width:min(440px, calc(100vw - 16px)); max-height:min(360px, 60vh); overflow:hidden;
+  background:var(--surface); border:1px solid var(--border); border-radius:var(--r-md, 10px);
+  box-shadow:var(--shadow-lg, 0 12px 32px rgba(0,0,0,.18)); padding:10px 14px;
+  pointer-events:none;
+  animation:gizle-onizle var(--dur, .16s) var(--ease, ease) both;
+}
+.gizle-onizleme__kap{ display:block !important; margin:0 !important; padding:0 !important; border:0 !important;
+  width:auto !important; max-width:none !important; min-height:0 !important; grid-template-columns:1fr !important; }
+.gizle-onizleme section.lrow, .gizle-onizleme section.kutu, .gizle-onizleme .card{ margin:0 !important; border-top:0 !important; }
+.gizle-onizleme::after{
+  content:''; position:absolute; left:0; right:0; bottom:0; height:48px;
+  background:linear-gradient(to bottom, transparent, var(--surface));
+}
+@keyframes gizle-onizle{ from{ opacity:0; transform:translateY(-3px) scale(.985); } to{ opacity:1; transform:none; } }
+@media (prefers-reduced-motion: reduce){ .gizle-onizleme{ animation:none; } }
+
+/* ---------- düzen kipi: alttaki «Bitti» çubuğu ---------- */
+.gizle-bitir{
+  position:fixed; left:50%; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%);
+  z-index:var(--z-overlay, 60); display:flex; align-items:center; gap:12px;
+  max-width:calc(100vw - 24px); padding:8px 8px 8px 16px; border-radius:999px;
+  background:var(--text); color:var(--surface); box-shadow:var(--shadow-lg, 0 12px 32px rgba(0,0,0,.25));
+  font-size:13px;
+}
+.gizle-bitir button{
+  min-height:30px; padding:0 14px; border-radius:999px; border:0; cursor:pointer;
+  background:var(--surface); color:var(--text); font:inherit; font-weight:700;
+}
+.gizle-bolum{ scroll-margin-top:80px; }
+@media (max-width:480px){
+  .gizle-bitir{ bottom:calc(var(--altbant-h, 64px) + 12px + env(safe-area-inset-bottom, 0px)); font-size:12px; }
+}
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -11878,7 +11990,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'a6354ba', at:'2026-09-26 16:55', dirty:true };
+ESP.BUILD = { id:'91aeeb4', at:'2026-09-26 21:39', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -16378,6 +16490,7 @@ window.LIFEOS = window.LIFEOS || {};
     ayarlar:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
     ara:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
     zil:'<path d="M6.5 16v-4.5a5.5 5.5 0 0 1 11 0V16l1.5 2h-14z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
+    gizli:'<rect x="4" y="4.5" width="16" height="5" rx="1.5"/><rect x="4" y="12.5" width="16" height="3" rx="1"/><path d="M4 19.5h7"/>',
     menu:'<path d="M4.5 7h15M4.5 12h15M4.5 17h15"/>',
     arti:'<path d="M12 5v14M5 12h14"/>',
     asagi:'<path d="M7 10l5 5 5-5"/>',
@@ -16601,6 +16714,11 @@ window.LIFEOS = window.LIFEOS || {};
       +     ' aria-label="' + kac(onay.sayi + ' öneri onay bekliyor') + '"><i aria-hidden="true"></i>' + kac(onay.sayi) + '</button>' : '')
       +   '<button class="ust__ara" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)">'
       +     simge('ara') + '<span class="ust__ara-yazi">Ara ya da yaz</span><kbd>Ctrl K</kbd></button>'
+      /* Gizlenen/küçültülen bölümler (brand/ortak/gizle.js): düğme burada,
+         sayısını ve panelini gizle.js yönetir. */
+      +   '<button class="ust__gizli" type="button" aria-haspopup="dialog" aria-expanded="false"'
+      +     ' aria-label="Gizlenen bölümler" title="Gizlenen bölümler · sayfayı düzenle">'
+      +     simge('gizli') + '<i class="ust__gizli-sayi" aria-hidden="true"></i></button>'
       +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
       +     ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
       +     simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</button>'
@@ -18059,6 +18177,375 @@ window.LIFEOS.KILIT = (function(){
 
   return { UZUNLUK, UNUTTUM_SN, aktifMi, kur, kaldir, dogrula, ozetle, ekranHtml, ac,
     ayarHtml, ayarEylem, kurDinle, unutuldu, izOku, izSil, sureMetni };
+})();
+
+/* ==== js/core/gizle.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/gizle.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GİZLENEN BÖLÜMLER — her sayfada kişiselleştirilebilir sadelik.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/gizle.js`; `tools/ortak.py --yay` ile üç arayüzün
+   `src/js/core/` klasörüne birebir kopyalanır.
+
+   Depo sahibinin isteği (2026-09-26): sayfalar kalabalık; kullanıcı
+   istemediği kartı/bölümü gizleyebilmeli, gizlenenler üst çubuktaki
+   «Gizlenen bölümler» düğmesinde durmalı ve oradan geri gelmeli. Her
+   sayfada, üç sistemde.
+
+   Sözler:
+     1. YALNIZ GÖRÜNÜM. Gizlemek veriyi silmez, hesabı değiştirmez, hiçbir
+        uyarıyı susturmaz; bölüm çizilir ve yalnız gösterilmez. Bir karar
+        ya da ölçüm gizlendiği için «yok» sayılmaz (AGENTS §1.2, §1.7).
+     2. HER ŞEY GERİ GELİR. Gizlenen her bölüm üst çubuktaki panelde adıyla
+        durur; «Geri getir» ve «Hepsini göster» tek dokunuştur.
+     3. SAYFA SADE KALIR. Normal görünümde bölümlerin üstünde düğme yoktur;
+        gizleme düğmeleri yalnız «Bu sayfayı düzenle» açıkken görünür.
+     4. SAYFA BAŞINA, SİSTEM BAŞINA. Tercih modül + profil + ekran için
+        ayrı saklanır. Bölüm başlığından anahtar üretilir (sayılar ve gün
+        adları atılır: «Pazar blokları» ile «Pazartesi blokları» aynı
+        bölümdür).
+     5. VARSAYILAN SADELİK. Bir ekran bazı bölümleri baştan gizli
+        önerebilir (`varsayilan`); kullanıcı geri getirirse o seçim kalır.
+     6. KÜÇÜLTMEK DE KALICIDIR. Küçültülen bölümün yalnız başlığı görünür
+        ve kullanıcı açana dek öyle kalır. Üzerine gelince (ya da klavyeyle
+        odaklanınca) küçük bir pencerede ÖNİZLEMESİ belirir; önizleme
+        salt bakmak içindir (`inert`): içindeki düğme bir şey uygulamaz.
+        Gizlenenlerin önizlemesi de paneldeki satırın üzerinde açılır.
+
+   Bölüm sayılanlar: başlığı olan `section.lrow` (defter satırı),
+   `section.kutu` ve `.card`. İç içe olanlardan yalnız en dıştaki. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.Gizle = (function(){
+  const ONEK = 'lifeos.gizli.';
+  const GUNLER = ['pazartesi', 'salı', 'çarşamba', 'perşembe', 'cuma', 'cumartesi', 'pazar'];
+  const SECICI = 'section.lrow, section.kutu, .card';
+
+  let son = null;          // { kok, modul, profil, ekran, varsayilan }
+  let duzen = false;       // «Bu sayfayı düzenle» açık mı
+  let panel = null;
+  let bagli = false;
+
+  function kac(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+
+  /* Başlıktan kalıcı anahtar: küçük harf, sayılar ve gün adları atılır. */
+  function anahtar(baslik){
+    let s = String(baslik || '').toLocaleLowerCase('tr-TR').replace(/[0-9]+/g, ' ');
+    GUNLER.slice().sort((a, b) => b.length - a.length).forEach(g => { s = s.split(g).join(' '); });
+    return s.replace(/[^a-zçğıöşü]+/g, ' ').trim().replace(/\s+/g, '-');
+  }
+
+  function baslikOf(el){
+    const b = el.querySelector(':scope > .lrow__side .lrow__label, :scope > .kutu__bas .kutu__ad, :scope > .card__head h3');
+    if(!b) return '';
+    const kopya = b.cloneNode(true);
+    kopya.querySelectorAll('.hint, button, svg, .sr-only').forEach(x => x.remove());
+    return kopya.textContent.replace(/\s+/g, ' ').trim();
+  }
+
+  function depoAdi(o){ return ONEK + (o.modul || 'x') + '.' + (o.profil || 'main') + '.' + (o.ekran || 'x'); }
+  function oku(o){
+    try{
+      const d = JSON.parse(localStorage.getItem(depoAdi(o)) || 'null');
+      if(d && typeof d === 'object') return { gizli:d.gizli || {}, acik:d.acik || {}, ad:d.ad || {}, kucuk:d.kucuk || {} };
+    }catch(e){}
+    return { gizli:{}, acik:{}, ad:{}, kucuk:{} };
+  }
+  function yaz(o, d){
+    try{ localStorage.setItem(depoAdi(o), JSON.stringify(d)); }catch(e){ /* depo kapalı: bu oturumda geçerli */ }
+  }
+
+  function gizliMi(d, a, varsayilan){
+    if(d.gizli[a]) return true;
+    return (varsayilan || []).indexOf(a) >= 0 && !d.acik[a];
+  }
+
+  /* Sayfadaki gizlenebilir bölümler: [{ el, anahtar, baslik }] */
+  function bolumler(kok){
+    if(!kok) return [];
+    const hepsi = Array.from(kok.querySelectorAll(SECICI));
+    const out = [];
+    const gorulen = {};
+    hepsi.forEach(el => {
+      if(el.parentElement && el.parentElement.closest(SECICI)) return;   // iç içe: yalnız en dıştaki
+      if(el.closest('[data-gizlenmez]')) return;
+      const baslik = baslikOf(el);
+      const a = anahtar(baslik);
+      if(!a || gorulen[a]) return;
+      gorulen[a] = true;
+      out.push({ el, anahtar:a, baslik });
+    });
+    return out;
+  }
+
+  /* Her çizimden sonra: gizlileri sakla, düzen kipinde düğmeleri koy,
+     üst çubuktaki sayacı güncelle. o: { kok, modul, profil, ekran, varsayilan } */
+  function uygula(o){
+    son = o;
+    const d = oku(o);
+    let degisti = false;
+    const liste = bolumler(o.kok);
+    liste.forEach(b => {
+      const g = gizliMi(d, b.anahtar, o.varsayilan);
+      const k = !g && !!d.kucuk[b.anahtar];
+      b.el.hidden = g;
+      b.el.classList.toggle('gizle-bolum', duzen);
+      b.el.classList.toggle('gizle-kucuk', k);
+      if(k) b.el.setAttribute('data-gizle-kucuk', b.anahtar); else b.el.removeAttribute('data-gizle-kucuk');
+      if(g && d.ad[b.anahtar] !== b.baslik){ d.ad[b.anahtar] = b.baslik; degisti = true; }
+      const eski = b.el.querySelector(':scope > .gizle-araclar');
+      if(eski) eski.remove();
+      if(!g && (duzen || k)){
+        const arac = document.createElement('div');
+        arac.className = 'gizle-araclar';
+        const dugme = (ne, yazi, etiket) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'gizle-dugme';
+          btn.setAttribute(ne, b.anahtar);
+          btn.setAttribute('aria-label', etiket);
+          btn.textContent = yazi;
+          arac.appendChild(btn);
+        };
+        if(k) dugme('data-ac', 'Aç', '«' + b.baslik + '» bölümünü aç');
+        else dugme('data-kucult', 'Küçült', '«' + b.baslik + '» bölümünü küçült');
+        if(duzen) dugme('data-gizle', 'Gizle', '«' + b.baslik + '» bölümünü gizle');
+        b.el.insertBefore(arac, b.el.firstChild);
+      }
+    });
+    if(degisti) yaz(o, d);
+    if(o.kok) o.kok.classList.toggle('gizle-duzen', duzen);
+    sayacYaz(gizliListe().length);
+    if(panel) panelCiz();
+    bagla();
+    return liste.length;
+  }
+
+  function gizliListe(){
+    if(!son) return [];
+    const d = oku(son);
+    return bolumler(son.kok).filter(b => gizliMi(d, b.anahtar, son.varsayilan))
+      .map(b => ({ anahtar:b.anahtar, baslik:b.baslik }));
+  }
+
+  function kucult(a, v){
+    if(!son) return;
+    const d = oku(son);
+    if(v === false) delete d.kucuk[a]; else d.kucuk[a] = true;
+    yaz(son, d);
+    onizlemeKapat();
+    uygula(son);
+  }
+
+  /* ---------- önizleme: küçük pencerede kartın kendisi ---------- */
+  let onizleme = null, onizSayac = null;
+  function onizlemeAc(kaynak, yakin){
+    onizlemeKapat();
+    if(!kaynak) return;
+    const kopya = kaynak.cloneNode(true);
+    kopya.hidden = false;
+    kopya.classList.remove('gizle-kucuk', 'gizle-bolum');
+    kopya.removeAttribute('id');
+    kopya.querySelectorAll('[id]').forEach(x => x.removeAttribute('id'));
+    kopya.querySelectorAll('.gizle-araclar').forEach(x => x.remove());
+    onizleme = document.createElement('div');
+    onizleme.className = 'gizle-onizleme';
+    onizleme.setAttribute('role', 'tooltip');
+    onizleme.setAttribute('inert', '');
+    /* Ekranın stilleri çoğu zaman atalara bağlıdır (.site--v5 .ledger
+       .lrow): kopya, kaynağın iki atasının sınıflarını taşıyan kaplara
+       konur ve önizleme sitenin içine eklenir; böylece kart kendi
+       görünümüyle çizilir. */
+    let ic = kopya;
+    let ata = kaynak.parentElement;
+    for(let i = 0; i < 2 && ata && ata.id !== 'main'; i++, ata = ata.parentElement){
+      const kap = document.createElement('div');
+      kap.className = ata.className;
+      kap.classList.add('gizle-onizleme__kap');
+      kap.appendChild(ic);
+      ic = kap;
+    }
+    onizleme.appendChild(ic);
+    (document.querySelector('.site') || document.body).appendChild(onizleme);
+    const r = yakin.getBoundingClientRect();
+    const g = onizleme.offsetWidth, y = onizleme.offsetHeight;
+    let sol = Math.min(Math.max(8, r.left), window.innerWidth - g - 8);
+    let ust = r.bottom + 6;
+    /* Paneldeki satırdan açıldıysa panelin YANINA konur: altına konsa
+       paneldeki öteki satırları örterdi. Yer yoksa (telefon) panelin altı. */
+    const pk = panel && panel.contains(yakin) ? panel.getBoundingClientRect() : null;
+    if(pk && pk.left - g - 8 >= 8){ sol = pk.left - g - 8; ust = r.top; }
+    else if(pk){ ust = pk.bottom + 6; }
+    if(ust + y > window.innerHeight - 8) ust = Math.max(8, (pk ? window.innerHeight - y - 8 : r.top - y - 6));
+    onizleme.style.left = Math.round(sol) + 'px';
+    onizleme.style.top = Math.round(ust) + 'px';
+  }
+  function onizlemeKapat(){
+    clearTimeout(onizSayac);
+    if(onizleme){ onizleme.remove(); onizleme = null; }
+  }
+  function onizlemeZamanla(kaynak, yakin){
+    clearTimeout(onizSayac);
+    onizSayac = setTimeout(() => onizlemeAc(kaynak, yakin), 250);
+  }
+  function kaynakBul(a){
+    const b = son && bolumler(son.kok).find(x => x.anahtar === a);
+    return b ? b.el : null;
+  }
+
+  function gizle(a){
+    if(!son) return;
+    const d = oku(son);
+    d.gizli[a] = true; delete d.acik[a];
+    yaz(son, d);
+    uygula(son);
+  }
+  function goster(a){
+    if(!son) return;
+    const d = oku(son);
+    delete d.gizli[a]; d.acik[a] = true;
+    yaz(son, d);
+    uygula(son);
+  }
+  function hepsiniGoster(){
+    if(!son) return;
+    const d = oku(son);
+    gizliListe().forEach(b => { delete d.gizli[b.anahtar]; d.acik[b.anahtar] = true; });
+    yaz(son, d);
+    uygula(son);
+  }
+  /* Düzenleme başlayınca panel kapanır (kartların köşesindeki düğmeleri
+     örtmesin); ekranın altında «Bitti» çubuğu kalır. */
+  function duzenle(v){
+    duzen = v == null ? !duzen : !!v;
+    if(duzen) panelKapat();
+    if(son) uygula(son);
+    bitirCubugu();
+  }
+  function bitirCubugu(){
+    let c = document.getElementById('gizle-bitir');
+    if(!duzen){ if(c) c.remove(); return; }
+    if(!c){
+      c = document.createElement('div');
+      c.id = 'gizle-bitir';
+      c.className = 'gizle-bitir';
+      c.setAttribute('role', 'status');
+      c.innerHTML = '<span>Sayfayı düzenliyorsun: bölümleri küçült ya da gizle.</span>'
+        + '<button type="button" data-duzen-bitir>Bitti</button>';
+      document.body.appendChild(c);
+    }
+  }
+
+  /* Üst çubuk düğmesi `kabuk.js` ustSerit'te çizilir; sayı burada yazılır. */
+  function sayacYaz(n){
+    document.querySelectorAll('.ust__gizli').forEach(b => {
+      const s = b.querySelector('.ust__gizli-sayi');
+      if(s) s.textContent = n ? String(n) : '';
+      b.classList.toggle('is-dolu', !!n);
+      b.setAttribute('aria-label', n ? 'Gizlenen bölümler, ' + n + ' tane' : 'Gizlenen bölümler, yok');
+    });
+  }
+
+  function panelCiz(){
+    const l = gizliListe();
+    const govde = l.length
+      ? '<ul class="gizle-liste">' + l.map(b => '<li data-onizle="' + kac(b.anahtar) + '" tabindex="0"><span>' + kac(b.baslik) + '</span>'
+          + '<button type="button" data-goster="' + kac(b.anahtar) + '">Geri getir</button></li>').join('') + '</ul>'
+      : '<p class="kmenu__bos">Bu sayfada gizlenen bölüm yok.</p>';
+    panel.innerHTML = '<p class="kmenu__bas">Gizlenen bölümler</p>' + govde
+      + '<div class="gizle-alt">'
+      + '<button type="button" data-duzen aria-pressed="' + (duzen ? 'true' : 'false') + '">'
+      + (duzen ? 'Düzenlemeyi bitir' : 'Bu sayfayı düzenle') + '</button>'
+      + (l.length ? '<button type="button" data-hepsi>Hepsini göster</button>' : '')
+      + '</div><p class="gizle-not">Gizlemek veriyi silmez; bölüm yalnız bu sayfada gösterilmez.</p>';
+  }
+
+  function panelAc(dugme){
+    if(panel){ panelKapat(); return; }
+    panel = document.createElement('div');
+    panel.className = 'katman kmenu kmenu--gizle';
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-label', 'Gizlenen bölümler');
+    panelCiz();
+    document.body.appendChild(panel);
+    const r = dugme.getBoundingClientRect();
+    panel.style.top = Math.round(r.bottom + 6) + 'px';
+    panel.style.right = Math.max(8, Math.round(window.innerWidth - r.right)) + 'px';
+    dugme.setAttribute('aria-expanded', 'true');
+    const ilk = panel.querySelector('button');
+    if(ilk) ilk.focus();
+  }
+  function panelKapat(){
+    onizlemeKapat();
+    if(!panel) return;
+    panel.remove(); panel = null;
+    document.querySelectorAll('.ust__gizli').forEach(b => b.setAttribute('aria-expanded', 'false'));
+  }
+
+  /* Olaylar belge düzeyinde bir kez bağlanır: modüllerin data-act
+     işleyicilerine dokunulmaz. */
+  function bagla(){
+    if(bagli) return;
+    bagli = true;
+    document.addEventListener('click', e => {
+      const t = e.target && e.target.closest ? e.target : null;
+      if(!t) return;
+      const ac = t.closest('.ust__gizli');
+      if(ac){ e.preventDefault(); panelAc(ac); return; }
+      if(t.closest('[data-duzen-bitir]')){ e.preventDefault(); duzenle(false); return; }
+      const gz = t.closest('[data-gizle]');
+      if(gz){ e.preventDefault(); e.stopPropagation(); onizlemeKapat(); gizle(gz.getAttribute('data-gizle')); return; }
+      const kc = t.closest('[data-kucult]');
+      if(kc){ e.preventDefault(); e.stopPropagation(); kucult(kc.getAttribute('data-kucult'), true); return; }
+      const ac2 = t.closest('[data-ac]');
+      if(ac2){ e.preventDefault(); e.stopPropagation(); kucult(ac2.getAttribute('data-ac'), false); return; }
+      if(panel && panel.contains(t)){
+        const g = t.closest('[data-goster]');
+        if(g){ goster(g.getAttribute('data-goster')); return; }
+        if(t.closest('[data-duzen]')){ duzenle(); return; }
+        if(t.closest('[data-hepsi]')){ hepsiniGoster(); return; }
+        return;
+      }
+      if(panel) panelKapat();
+    }, true);
+    document.addEventListener('keydown', e => {
+      if(e.key !== 'Escape') return;
+      if(onizleme) onizlemeKapat();
+      else if(panel) panelKapat();
+    });
+    /* Önizleme: küçültülmüş bölümün ya da paneldeki gizli satırın üzerine
+       gelince (fare) ya da odaklanınca (klavye) açılır, çıkınca kapanır. */
+    const hedefOf = t => {
+      if(!t || !t.closest) return null;
+      const k = t.closest('[data-gizle-kucuk]');
+      if(k) return { kaynak:k, yakin:k };
+      const p = t.closest('[data-onizle]');
+      if(p && panel && panel.contains(p)) return { kaynak:kaynakBul(p.getAttribute('data-onizle')), yakin:p };
+      return null;
+    };
+    const gir = e => { const h = hedefOf(e.target); if(h && h.kaynak) onizlemeZamanla(h.kaynak, h.yakin); };
+    const cik = e => {
+      const h = hedefOf(e.target);
+      if(!h) return;
+      const ic = e.relatedTarget && h.yakin.contains(e.relatedTarget);
+      if(!ic) onizlemeKapat();
+    };
+    document.addEventListener('mouseover', gir);
+    document.addEventListener('mouseout', cik);
+    document.addEventListener('focusin', gir);
+    document.addEventListener('focusout', cik);
+  }
+
+  return { uygula, anahtar, bolumler, gizliListe, gizle, goster, hepsiniGoster, duzenle, kucult,
+    duzenMi:() => duzen, panelAc, panelKapat, onizlemeAc, onizlemeKapat,
+    onizlemeVar:() => !!onizleme,
+    _sifirla(){ son = null; duzen = false; panelKapat(); onizlemeKapat(); bitirCubugu(); } };
 })();
 
 /* ==== js/core/olumsuz.js ==== */
@@ -56995,6 +57482,15 @@ ESP.App = (function(){
         if(kabuk){ kabuk.setAttribute('inert', ''); kabuk.setAttribute('aria-hidden', 'true'); }
       }
       if(sc.afterRender) sc.afterRender();
+      /* Gizlenen ve kucultulen bolumler (brand/ortak/gizle.js): her cizimden
+         sonra uygulanir; tercih modul + profil + ekran icin ayri saklanir. */
+      if(window.LIFEOS && LIFEOS.Gizle){
+        try{
+          LIFEOS.Gizle.uygula({ kok:document.getElementById('main'), modul:'esp',
+            profil:(ESP.Ornek && ESP.Ornek.aktif && ESP.Ornek.aktif()) || 'main', ekran:sc.id,
+            varsayilan:sc.gizliVarsayilan || [] });
+        }catch(e){ console.error('Gizle:', e); }
+      }
     }catch(err){
       /* Kabuğun kendisi çizilemedi. Ekranın kendi hatası bir üstteki
          yakalayıcıda ele alınır; buraya düşmek künye, hero ya da alt
