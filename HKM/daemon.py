@@ -14,6 +14,8 @@ Ucnoktalar:
     POST /api/config                ayar yamasi (dogrulanir; jetona dokunmaz)
     POST /api/probe                 saglayici anahtarini SINAR (mesaj uretmez)
     POST /api/models                saglayicinin anahtara ACIK model listesi
+    GET  /api/models/paketler       butce paketleri A · A+ · S · S+ (onizleme)
+    POST /api/models/tarife         guncel model tarifesini okur (OpenRouter)
     POST /api/telegram/yoklama      webhook'u siler ve bir yoklama turu dener
     GET  /api/backup                butun ambar tek JSON
     POST /api/prune                 eski ham olaylari siler (kararlar kalir)
@@ -95,6 +97,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from core import motor, tarife  # noqa: E402
 from core import (ai, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, meydan, models, motto, outbox, patron,
@@ -1144,6 +1147,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"agents": out})
         if u.path == "/api/config":
             return self._send(200, settings.read(self.server.config))
+        if u.path == "/api/models/paketler":
+            # Butce paketleri (A · A+ · S · S+): onizleme, hicbir sey yazmaz.
+            # Aylik tahmin defterdeki OLCUMDEN hesaplanir.
+            return self._send(200, motor.onizleme(self.server.config, con=self.con))
         if u.path == "/api/budget":
             # Harcama OLCUMDUR: defterdeki satirlardan gelir, tahminden degil.
             return self._send(200, {
@@ -1610,6 +1617,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "niyet kimligi sayi olmali"})
             r = intents.answer(self.con, nid, parca[3])
             return self._send(200 if r.get("ok") else 409, r)
+        if u.path == "/api/models/tarife":
+            # Guncel tarifeyi OpenRouter'in acik listesinden okur (anahtar
+            # istemez) ve tarihiyle yazar; hata eski tarifeyi silmez.
+            return self._send(200, tarife.guncelle(self.con))
         if u.path == "/api/models":
             # Model adlarini SAGLAYICIYA sorar. Koda gomulu bir liste
             # zamanla eskir ve bunu kullanici 404 ile ogrenir.
@@ -1803,7 +1814,11 @@ def main():
     if daraltilan:
         sys.stderr.write("[hkm] %d dosyanin izni yalniz sahibine daraltildi.\n"
                          % daraltilan)
-    db.connect(srv.db_path).close()          # sema bir kez kurulur
+    _c = db.connect(srv.db_path)             # sema bir kez kurulur
+    # Son okunan model tarifesi (core/tarife.py) fiyat hesabina yuklenir;
+    # tablo bossa yedek tablo (ai.FIYAT) gecerlidir.
+    tarife.yukle(_c)
+    _c.close()
     srv.thresholds = thresholds.load()
     srv.dur = threading.Event()
     ritim = threading.Thread(target=_ritim, args=(srv,), daemon=True)

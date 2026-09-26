@@ -388,6 +388,18 @@ CREATE TABLE IF NOT EXISTS zaman_butcesi (
       satirin maliyeti, o gunku fiyatla hesaplanmis haliyle DURUR.
    3. TOKEN TURLERI AYRI SAYILIR. Gorsel ve dusunme token'lari faturada
       gorunur ama cevapta gorunmez: ayri sutun, ayri gercek. */
+-- Model tarifesi (core/tarife.py): OpenRouter'in acik listesinden, TARIHLI.
+-- Fiyat sonradan degisir; satir hangi gun hangi kaynaktan okundugunu tasir.
+CREATE TABLE IF NOT EXISTS model_tarife (
+  model     TEXT PRIMARY KEY,
+  giris     REAL NOT NULL,
+  cikis     REAL NOT NULL,
+  baglam    INTEGER,
+  girdiler  TEXT,
+  kaynak    TEXT NOT NULL,
+  tarih     TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS usage (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at  TEXT NOT NULL,

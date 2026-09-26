@@ -1,0 +1,277 @@
+# -*- coding: utf-8 -*-
+"""Motor — gereken zekayi, gereken yerde, en dusuk maliyetle.
+
+   Amac en guclu modeli sonuna kadar kullanmak DEGIL. Dort model sinifi
+   vardir; paket her seviye icin nereden baslanacagini ve en fazla nereye
+   cikilacagini soyler. Sistem baslangic sinifiyla dener; model ZORLANIRSA
+   bir ust sinifa cikar. Guclu modeller surekli calisan bir motor degil,
+   gerektiginde cagrilan uzmanlardir.
+
+     ekonomik  < standart < guclu < uzman
+
+   Paketler (butce): A verim · A+ verim, bir tik kalite · S kalite, verimle ·
+   S+ kalite. Paket yukseldikce hicbir seviyenin baslangici ya da tavani
+   dusmez (testle sabit).
+
+   ZORLANMA (koddan olculur, modelin sozune birakilmaz):
+     - cevap dusuruldu (uydurma sayi, buyurgan kip — ai._temizle),
+     - saglayici hata verdi,
+     - kisaltma istendigi halde cevap yine kesildi,
+     - alt basamaktaki model «[[YUKSELT]]» dedi: bu bir KARAR degil, «bu
+       bana fazla» isaretidir; cikisi yine kod yapar ve tavani paket koyar.
+   Butce engelinde YUKSELINMEZ: ust basamak daha pahalidir.
+
+   BUTCE BANTLARI: ayin harcamasi tavanin uyari bantlarini (varsayilan %80
+   ve %95) gecince yonlendirme ekonomiklesir ve bu cevapla birlikte
+   SOYLENIR — kullanici neden daha basit bir cevap aldigini bilir.
+
+   ELLE SECIM KAZANIR: bir kademenin KENDI atamasi varsa merdiven kurulmaz.
+   Paket secilmemisse sistem eskisi gibi atama/mirasla calisir."""
+
+from core import butce, models
+
+SINIFLAR = ("ekonomik", "standart", "guclu", "uzman")
+SINIF_ADI = {"ekonomik": "Ekonomik", "standart": "Standart", "guclu": "Güçlü", "uzman": "Uzman"}
+
+# Sinif -> model. Metin ve gorsel OpenRouter'dan (tek anahtar); ses yalniz
+# Google'dan (ai.py medya kurali). Siniflama saglayicinin kendi urun
+# siralamasidir (lite < mini < ana model < en ust), kalite olcumu degil.
+SINIF_MODELI = {
+    "metin": {"ekonomik": "google/gemini-2.5-flash-lite", "standart": "openai/gpt-5-mini",
+              "guclu": "anthropic/claude-sonnet-5", "uzman": "anthropic/claude-opus-5.5"},
+    "gorsel": {"ekonomik": "google/gemini-2.5-flash-lite", "standart": "google/gemini-2.5-flash",
+               "guclu": "anthropic/claude-sonnet-5", "uzman": "anthropic/claude-opus-5.5"},
+    "ses": {"ekonomik": "gemini-3.6-flash", "standart": "gemini-3.6-flash",
+            "guclu": "gemini-2.5-pro", "uzman": "gemini-2.5-pro"},
+}
+
+POLITIKA_SEVIYELERI = ("alt", "orta", "ust", "gorsel", "arastirma", "ses")
+# (baslangic, tavan, efor). Efor OpenRouter'in birlesik `reasoning.effort`
+# degeridir; desteklemeyen model yok sayar.
+PAKET_POLITIKASI = {
+    "A": {"alt": ("ekonomik", "standart", "low"), "orta": ("ekonomik", "standart", "low"),
+          "ust": ("standart", "guclu", "medium"), "gorsel": ("ekonomik", "standart", None),
+          "arastirma": ("ekonomik", "standart", "low"), "ses": ("ekonomik", "standart", None)},
+    "A+": {"alt": ("ekonomik", "standart", "low"), "orta": ("standart", "guclu", "low"),
+           "ust": ("standart", "guclu", "medium"), "gorsel": ("ekonomik", "standart", None),
+           "arastirma": ("standart", "guclu", "medium"), "ses": ("ekonomik", "standart", None)},
+    "S": {"alt": ("ekonomik", "standart", "low"), "orta": ("standart", "guclu", "medium"),
+          "ust": ("guclu", "uzman", "high"), "gorsel": ("standart", "guclu", None),
+          "arastirma": ("standart", "uzman", "high"), "ses": ("standart", "guclu", None)},
+    "S+": {"alt": ("standart", "guclu", "low"), "orta": ("guclu", "uzman", "medium"),
+           "ust": ("uzman", "uzman", "high"), "gorsel": ("guclu", "uzman", None),
+           "arastirma": ("guclu", "uzman", "high"), "ses": ("guclu", "guclu", None)},
+}
+PAKET_ADI = {"A": "Az bütçe · verim", "A+": "Orta bütçe · verim, bir tık kalite",
+             "S": "Yüksek bütçe · kalite, verimle", "S+": "En yüksek bütçe · kalite"}
+
+# Cevap uzunlugu seviyeye gore (jeton); efor secildiyse dusunme payi eklenir
+# — OpenRouter'da dusunme jetonlari cevap sinirina dahildir, pay verilmezse
+# dusunen model cevabi yazamadan kesilir.
+CEVAP_JETON = {"alt": 500, "orta": 1000, "ust": 1800, "gorsel": 1200,
+               "arastirma": 2000, "ses": 1200}
+DUSUNME_PAYI = {None: 0, "low": 1000, "medium": 2500, "high": 5000}
+
+YUKSELT = "[[YUKSELT]]"
+YUKSELT_KURALI = ("\n\nBu istek senin için fazla karmaşıksa (derin analiz, çok adımlı plan, "
+                  "emin olamadığın bir karar) cevap yazma; yalnızca " + YUKSELT + " yaz. "
+                  "Basit bir istekse kendin cevapla.")
+
+
+def _gorsel_rol(rol):
+    return rol == "para.fis" or rol.endswith(".gorsel")
+
+
+def politika_seviyesi(rol, seviye=None):
+    """Kademenin politika satiri. Sohbette mesajin seviyesi (alt/orta/ust)
+    kazanir; gorsel ve ses her zaman kendi satirindadir."""
+    if rol == "medya":
+        return "ses"
+    if _gorsel_rol(rol):
+        return "gorsel"
+    if seviye in ("alt", "orta", "ust"):
+        return seviye
+    return models.oneri_kademesi(rol)
+
+
+def _hazir_denetimi(a):
+    if not a or not a.get("provider"):
+        return {"ok": False, "reason": "no-model",
+                "note": "Bu kademeye bir model atanmamış. Ayarlar → Yapay zekâ → Görev dağılımı "
+                        "ya da bir bütçe paketi seç."}
+    if not a.get("model"):
+        return {"ok": False, "reason": "no-model-name", "note": "Sağlayıcı seçilmiş ama model adı yazılmamış."}
+    if a.get("key_missing"):
+        return {"ok": False, "reason": "key-missing",
+                "note": "Bu kademeye seçilen anahtar artık yok. Ayarlar → Yapay zekâ'dan yeniden seç."}
+    if not a.get("key_set"):
+        return {"ok": False, "reason": "no-key", "note": "%s için anahtar girilmemiş." % a["provider_label"]}
+    return None
+
+
+def _ekonomi(con, cfg, bas, tavan):
+    """Butce bandina gore (bas, tavan, not)."""
+    if con is None:
+        return bas, tavan, None
+    d = butce.month(con, cfg)
+    tavan_para = d.get("ceiling")
+    if not tavan_para:
+        return bas, tavan, None
+    oran = 100.0 * float(d.get("spent") or 0) / float(tavan_para)
+    bantlar = list(butce.settings(cfg).get("warn_pct") or [50, 80, 95])
+    ikinci, ucuncu = (bantlar + [80, 95])[1], (bantlar + [80, 95, 95])[2]
+    i = SINIFLAR.index
+    if oran >= ucuncu:
+        yeni_tavan = SINIFLAR[min(i(tavan), i("standart"))]
+        return "ekonomik", yeni_tavan, {
+            "bant": ucuncu, "oran": round(oran),
+            "not": "Aylık bütçenin %%%d'i kullanıldı (%%%d eşiği): yanıtlar ekonomik modelden "
+                   "başlıyor, en fazla Standart sınıfa çıkılıyor." % (round(oran), ucuncu)}
+    if oran >= ikinci:
+        yeni_tavan = SINIFLAR[max(i(bas), i(tavan) - 1)]
+        return bas, yeni_tavan, {
+            "bant": ikinci, "oran": round(oran),
+            "not": "Aylık bütçenin %%%d'i kullanıldı (%%%d eşiği): en üst sınıf bu ay için "
+                   "kısıtlandı." % (round(oran), ikinci)}
+    return bas, tavan, None
+
+
+def merdiven(con, cfg, rol, seviye=None):
+    """Denenecek basamaklar: [{sinif, atama, ayar}]. Cagri yapmaz."""
+    a = models.resolve(cfg, rol)
+    paket = models.paket_of(cfg)
+    pseviye = politika_seviyesi(rol, seviye) if rol in models.ROLES else None
+    kendi = bool(a and a.get("provider") and a.get("from") == rol)
+    if kendi or not paket or not pseviye:
+        # Elle secim ya da paketsiz kurulum: TEK basamak, eski davranis.
+        h = _hazir_denetimi(a)
+        if h:
+            return dict(h, basamaklar=[], paket=paket, seviye=pseviye, ekonomi=None)
+        # Paketsiz yol ESKI davranistir: cevap siniri degismez; yalniz atamada
+        # efor secildiyse o gider (dusunme payiyla).
+        ayar = {}
+        if a.get("efor"):
+            ayar = {"efor": a["efor"], "jeton": 1200 + DUSUNME_PAYI.get(a["efor"], 0)}
+        return {"ok": True, "basamaklar": [{"sinif": None, "atama": a, "ayar": ayar}],
+                "paket": paket, "seviye": pseviye, "ekonomi": None, "elle": kendi}
+    bas, tavan, efor = PAKET_POLITIKASI[paket][pseviye]
+    bas, tavan, ekonomi = _ekonomi(con, cfg, bas, tavan)
+    tur = "ses" if pseviye == "ses" else ("gorsel" if pseviye == "gorsel" else "metin")
+    saglayici = "google" if tur == "ses" else "openrouter"
+    liste = models.key_list(cfg, saglayici)
+    if not liste:
+        return {"ok": False, "reason": "no-key", "basamaklar": [], "paket": paket,
+                "seviye": pseviye, "ekonomi": ekonomi,
+                "note": ("Ses ve video yalnız Google (Gemini) anahtarıyla çalışır; "
+                         "«Sağlayıcılar» bölümüne bir Google anahtarı ekle.") if tur == "ses"
+                else "%s paketi OpenRouter anahtarıyla çalışır; «Sağlayıcılar» bölümüne ekle." % paket}
+    e = liste[0]
+    basamaklar = []
+    for s in SINIFLAR[SINIFLAR.index(bas):SINIFLAR.index(tavan) + 1]:
+        m = SINIF_MODELI[tur][s]
+        atama = {"role": rol, "from": None, "inherited": False, "provider": saglayici,
+                 "provider_label": models.PROVIDERS[saglayici]["label"], "model": m,
+                 "efor": efor or "", "key_id": e["id"], "key_label": e.get("label", ""),
+                 "key_user": e.get("user") or models.VARSAYILAN_SAHIP, "key_missing": False,
+                 "key_set": bool(e.get("key")), "chain": [rol]}
+        basamaklar.append({"sinif": s, "atama": atama, "ayar": {
+            "efor": efor, "jeton": CEVAP_JETON.get(pseviye, 1200) + DUSUNME_PAYI.get(efor, 0)}})
+    return {"ok": True, "basamaklar": basamaklar, "paket": paket, "seviye": pseviye,
+            "ekonomi": ekonomi, "elle": False}
+
+
+# Anahtar reddi (401/403) ve bakiye yok (402) HESABIN sorunudur: ayni
+# anahtarla ust basamak ayni hatayi alir, merdiven bosuna cikilmaz.
+HESAP_HATASI = ("HTTP 401", "HTTP 402", "HTTP 403")
+
+
+def zorlandi(r):
+    """Bu basamak zorlandi mi — bir ust sinifa cikilmali mi."""
+    if not r.get("ok"):
+        if r.get("reason") == "provider" and any(h in (r.get("note") or "") for h in HESAP_HATASI):
+            return False
+        return r.get("reason") in ("dropped", "provider")
+    return bool(r.get("truncated")) or YUKSELT in (r.get("text") or "")
+
+
+def isaretsiz(metin):
+    return (metin or "").replace(YUKSELT, "").strip()
+
+
+# ------------------------------------------------------------ onizleme
+
+def _olculen(con, bugun):
+    """Son 30 gunun defteri: politika seviyesi basina [giris, cikis] jeton
+    ve yukselme orani. Sohbet satirlari seviyesini notunda tasir."""
+    if con is None:
+        return None, None
+    import datetime as _dt
+    son = _dt.date.fromisoformat(bugun) if bugun else _dt.date.today()
+    bas = (son - _dt.timedelta(days=29)).isoformat()
+    toplam, n, yuk = {}, 0, 0
+    for r in con.execute(
+            "SELECT role, note, escalated, (in_tok + image_tok) AS g, (out_tok + reason_tok) AS c"
+            " FROM usage WHERE day >= ? AND day <= ?", (bas, son.isoformat())):
+        if r["role"] not in models.ROLES:
+            continue
+        not_ = str(r["note"] or "")
+        sv = None
+        for parca in not_.split(","):
+            if parca.startswith("seviye="):
+                sv = parca.split("=", 1)[1]
+        ps = politika_seviyesi(r["role"], sv)
+        if not ps:
+            continue
+        t = toplam.setdefault(ps, [0, 0])
+        t[0] += r["g"] or 0
+        t[1] += r["c"] or 0
+        n += 1
+        yuk += 1 if r["escalated"] else 0
+    if not toplam:
+        return None, None
+    return toplam, (yuk / n if n else 0.0)
+
+
+def onizleme(cfg, con=None, bugun=None):
+    """Dort paketin onizlemesi ve aylik tahmin. Hicbir sey yazmaz."""
+    from core import ai, tarife
+    kullanim, yukselme = _olculen(con, bugun)
+    aktif = models.paket_of(cfg)
+    or_var = bool(models.key_list(cfg, "openrouter"))
+    google_var = bool(models.key_list(cfg, "google"))
+    out = []
+    for pid in models.PAKET_KIMLIKLERI:
+        satirlar = []
+        for ps in POLITIKA_SEVIYELERI:
+            bas, tavan, efor = PAKET_POLITIKASI[pid][ps]
+            tur = "ses" if ps == "ses" else ("gorsel" if ps == "gorsel" else "metin")
+            basamak = []
+            for sn in SINIFLAR[SINIFLAR.index(bas):SINIFLAR.index(tavan) + 1]:
+                m = SINIF_MODELI[tur][sn]
+                b = tarife.bilgi(models.saglayici_of(m), m)
+                basamak.append({"sinif": sn, "sinif_adi": SINIF_ADI[sn], "model": m,
+                                "fiyat": b["fiyat"], "fiyat_kaynagi": b["kaynak"]})
+            satirlar.append({"seviye": ps, "efor": efor, "basamaklar": basamak})
+        aylik = None
+        if kullanim:
+            usd = 0.0
+            for ps, (g, c) in kullanim.items():
+                bas, tavan, efor = PAKET_POLITIKASI[pid][ps]
+                tur = "ses" if ps == "ses" else ("gorsel" if ps == "gorsel" else "metin")
+                i0 = SINIFLAR.index(bas)
+                i1 = min(i0 + 1, SINIFLAR.index(tavan))
+                for i, pay in ((i0, 1.0 - yukselme), (i1, yukselme)):
+                    m = SINIF_MODELI[tur][SINIFLAR[i]]
+                    fg, fc = ai.tarife_of(models.saglayici_of(m), m) or ai.BILINMEYEN_FIYAT
+                    usd += pay * (g / 1e6 * fg + c / 1e6 * fc)
+            aylik = round(usd, 2)
+        out.append({"id": pid, "ad": PAKET_ADI[pid], "satirlar": satirlar, "aylik": aylik})
+    eksik = []
+    if not or_var:
+        eksik.append("Paketler OpenRouter anahtarıyla çalışır; «Sağlayıcılar» bölümüne ekle.")
+    if not google_var:
+        eksik.append("Ses ve video yalnız Google (Gemini) anahtarıyla çalışır.")
+    return {"paketler": out, "aktif": aktif, "tarife": tarife.durum(), "eksik": eksik,
+            "yukselme_orani": None if yukselme is None else round(yukselme, 3),
+            "olcum_notu": "" if kullanim else
+            "Son 30 günde ölçülmüş kullanım yok; aylık tahmin ilk kullanımdan sonra hesaplanır."}

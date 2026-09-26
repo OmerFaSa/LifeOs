@@ -2572,7 +2572,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       });
       h += '</datalist>';
     });
-    h += oneriKarti(m);
+    h += '<div id="paket-karti"><div class="tag">Bütçe paketi</div><p class="muted">Yükleniyor…</p></div>';
     h += '<div class="tag">Görev dağılımı · kademe kademe</div>'
       + '<p class="muted">Atama yoksa <b>üstüne</b> bakılır; en üstte de '
       + 'yoksa «atanmamış» denir. Uydurulmuş bir varsayılan, senin '
@@ -2605,9 +2605,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '</div><p class="muted" id="gorev-not"></p>'
       + '<div id="sohbet-tani"></div>';
     $('gorevler').innerHTML = h;
-    ONERI = (m.oneri || {}).yama || null;
-    if($('oneri-uygula')) $('oneri-uygula').addEventListener('click', oneriUygula);
-    if($('oneri-geri')) $('oneri-geri').addEventListener('click', oneriGeriAl);
+    paketCiz();
     $('gorev-kaydet').addEventListener('click', gorevKaydet);
     $('sohbet-dene').addEventListener('click', sohbetDene);
   }
@@ -2645,78 +2643,81 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     }
   }
 
-  /* ONERILEN DAGILIM (core/models.py onerilen). Kademe kademe, anahtarın
-     olan sağlayıcılarda uygun modellerin EN UCUZU; tablo ucuzdan pahalıya
-     sıralı gelir. Hesap sunucuda yapılır, burada yalnız gösterilir. Uygulamak
-     bir onaydır ve önceki dağılım «Geri al» için saklanır. */
-  var ONERI = null, ONCEKI_ATAMA = null;
-  function oneriKarti(m){
-    var o = m.oneri || {};
-    var h = '<div class="tag">Önerilen dağılım · ucuzdan pahalıya</div>';
-    if(!(o.satirlar || []).length){
-      return h + '<p class="muted">' + esc(o.not || 'Öneri için bir anahtar gerekir.') + '</p>';
-    }
-    /* Uc sutun: fiyat modelin ALTINDA durur; dort sutunda telefonda fiyat
-       ekranin disina, yatay kaydirmaya dusuyordu — tablonun asil bilgisi. */
-    h += '<div class="scroll"><table><thead><tr><th>Kademe</th><th>Hangi işler</th>'
-      + '<th>Model · 1M jeton (giriş / çıkış)</th></tr></thead><tbody>';
-    (o.kademeler || []).forEach(function(k){
-      h += '<tr><td><b>' + esc(k.ad) + '</b></td><td class="muted">' + esc(k.isler) + '</td>'
-        + '<td>' + (k.model ? esc(k.model) + '<div class="muted">$' + k.fiyat[0].toFixed(2)
-          + ' / $' + k.fiyat[1].toFixed(2) + '</div>' : '<span class="warn">yok</span>')
-        + '</td></tr>';
-    });
-    h += '</tbody></table></div>';
-    (o.eksik || []).forEach(function(e){
-      h += '<p class="muted"><b>' + esc(e.ad) + ':</b> ' + esc(e.neden) + '</p>';
-    });
-    var degisen = (o.satirlar || []).filter(function(r){
-      return !(r.simdi && !r.simdi.inherited && r.simdi.provider === r.provider
-        && r.simdi.model === r.model); }).length;
-    h += '<p class="muted">' + esc(o.not || '') + ' Uygularsan <b>' + degisen
-      + '</b> kademenin ataması değişir; istediğin satırı sonra elle değiştirebilirsin.</p>'
-      + '<div class="row"><button class="primary" id="oneri-uygula"' + (degisen ? '' : ' disabled')
-      + '>Önerilen dağılımı uygula</button>'
-      + (ONCEKI_ATAMA ? '<button id="oneri-geri">Önceki dağılıma dön</button>' : '')
-      + '</div><p class="muted" id="oneri-not"></p>';
-    return h;
+  /* BUTCE PAKETI (core/motor.py). Paket modelleri tek tek yazmaz; her
+     seviye icin «hangi siniftan basla, en fazla nereye cik» der. Sistem en
+     dusuk uygun sinifla dener, model zorlanirsa bir ust sinifa cikar.
+     Maliyet GOZE BATMADAN durur: pakette aylik tahmin, ayrintilar katli.
+     Kademenin KENDI atamasi paketin onune gecer. */
+  var PAKET_ONCEKI = undefined;
+  var EFOR_ADI = { low:'düşük efor', medium:'orta efor', high:'yüksek efor' };
+  var SEVIYE_ADI = { alt:'Alt · düz sohbet', orta:'Orta · öneri ve analiz',
+    ust:'Üst · karar ve yol haritası', gorsel:'Görsel', arastirma:'Araştırma (BAM)',
+    ses:'Ses ve video' };
+  function dolar(x){ return x == null ? '—' : '$' + (x < 1 ? x.toFixed(2) : x.toFixed(1)); }
+  function tarifeSatiri(t){
+    if(!t || !t.tarih) return 'Fiyatlar: yedek tablo (26.09.2026, OpenRouter listesinden).';
+    return 'Fiyatlar: OpenRouter listesi · ' + esc(String(t.tarih).replace('T', ' ').slice(0, 16))
+      + ' · ' + t.sayi + ' model.';
   }
-
-  async function oneriUygula(){
-    if(!ONERI) return;
-    if(!window.confirm('Önerilen dağılım kaydedilsin mi? Kademelerin modeli tablodaki gibi '
-      + 'değişir; önceki dağılıma «Önceki dağılıma dön» ile dönebilirsin.')) return;
-    /* Onceki KENDI atamalari saklanir: miras alan kademe bos (null) doner. */
-    var once = {};
-    var atamalar = ((AYAR || {}).models || {}).assignments || {};
-    Object.keys(ONERI).forEach(function(rol){
-      var a = atamalar[rol];
-      once[rol] = (a && a.provider && a.from === rol)
-        ? { provider:a.provider, model:a.model || '', key:a.key_chosen || '' } : null;
+  async function paketCiz(){
+    var yer = $('paket-karti');
+    if(!yer) return;
+    var r = await api('/api/models/paketler');
+    if(r.status !== 200){ yer.innerHTML = '<p class="muted">Paketler okunamadı.</p>'; return; }
+    var o = r.body, h = '<div class="tag">Bütçe paketi · gereken zekâ, gereken yerde</div>';
+    h += '<p class="muted">Sistem en düşük uygun sınıfla dener; model zorlanırsa bir üst sınıfa '
+      + 'çıkar. Bütçenin %80 ve %95 eşiklerinde yönlendirme kendiliğinden ekonomikleşir ve '
+      + 'bu söylenir. Bir kademeye elle model atadıysan o geçerlidir.</p>';
+    (o.paketler || []).forEach(function(p){
+      var etkin = o.aktif === p.id;
+      h += '<div class="metric"><div class="metric__name"><b>' + esc(p.id) + '</b> · ' + esc(p.ad)
+        + (etkin ? ' <span class="ok">etkin</span>' : '')
+        + '<div class="muted" style="font-size:12px">' + (p.aylik == null ? 'aylık tahmin için ölçüm yok'
+          : 'son 30 günün kullanımıyla ≈ ' + dolar(p.aylik) + ' / ay') + '</div>'
+        + '<details class="detay"><summary>Seviyeler ve modeller</summary>';
+      (p.satirlar || []).forEach(function(s){
+        h += '<div style="font-size:12px;margin:6px 0"><b>' + esc(SEVIYE_ADI[s.seviye] || s.seviye) + '</b>'
+          + (s.efor ? ' <span class="muted">· ' + esc(EFOR_ADI[s.efor]) + '</span>' : '') + '<br>'
+          + s.basamaklar.map(function(b){
+              return esc(b.sinif_adi) + ' <span class="muted">(' + esc(b.model)
+                + (b.fiyat ? ' · ' + dolar(b.fiyat[0]) + '/' + dolar(b.fiyat[1]) : '') + ')</span>';
+            }).join(' → ') + '</div>';
+      });
+      h += '</details></div><div class="metric__val">'
+        + (etkin ? '' : '<button data-paket="' + esc(p.id) + '">Seç</button>') + '</div></div>';
     });
-    var r = await api('/api/config', { method:'POST',
-      body:JSON.stringify({ models:{ assignments:ONERI } }) });
-    if(r.status === 200){
-      ONCEKI_ATAMA = once;
-      ayarlariCiz(r.body.config);
-      $('oneri-not').textContent = 'Önerilen dağılım kaydedildi.';
-    }else{
-      $('oneri-not').textContent = 'Kaydedilmedi — '
-        + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
-    }
+    (o.eksik || []).forEach(function(e){ h += '<p class="muted">' + esc(e) + '</p>'; });
+    h += '<p class="muted" style="font-size:12px"><span id="tarife-satiri">' + tarifeSatiri(o.tarife)
+      + '</span> <button id="tarife-guncelle" style="font-size:12px">Fiyatları güncelle</button>'
+      + (o.aktif ? ' <button id="paket-kapat" style="font-size:12px">Paketi kapat</button>' : '')
+      + (PAKET_ONCEKI !== undefined ? ' <button id="paket-geri" style="font-size:12px">Önceki seçime dön</button>' : '')
+      + '</p><p class="muted" id="paket-not"></p>';
+    yer.innerHTML = h;
+    Array.prototype.forEach.call(yer.querySelectorAll('[data-paket]'), function(b){
+      b.addEventListener('click', function(){ paketSec(b.dataset.paket, o.aktif); }); });
+    if($('paket-kapat')) $('paket-kapat').addEventListener('click', function(){ paketSec('', o.aktif); });
+    if($('paket-geri')) $('paket-geri').addEventListener('click', function(){
+      var p = PAKET_ONCEKI; PAKET_ONCEKI = undefined; paketYaz(p || '', 'Önceki seçime dönüldü.'); });
+    $('tarife-guncelle').addEventListener('click', tarifeGuncelle);
   }
-
-  async function oneriGeriAl(){
-    if(!ONCEKI_ATAMA) return;
-    var r = await api('/api/config', { method:'POST',
-      body:JSON.stringify({ models:{ assignments:ONCEKI_ATAMA } }) });
-    if(r.status === 200){
-      ONCEKI_ATAMA = null;
-      ayarlariCiz(r.body.config);
-      $('oneri-not').textContent = 'Önceki dağılıma dönüldü.';
-    }else{
-      $('oneri-not').textContent = 'Geri alınamadı — ' + r.status;
-    }
+  async function paketYaz(id, mesaj){
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify({ models:{ paket:id } }) });
+    if(r.status === 200){ ayarlariCiz(r.body.config); $('paket-not') && ($('paket-not').textContent = mesaj); }
+    else if($('paket-not')){ $('paket-not').textContent = 'Kaydedilmedi — '
+      + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status); }
+  }
+  async function paketSec(id, once){
+    if(!window.confirm(id ? id + ' paketi seçilsin mi? Model seçimi bu paketin merdivenine göre '
+        + 'yapılır; elle atadığın kademeler olduğu gibi kalır.'
+        : 'Paket kapatılsın mı? Sistem görev dağılımındaki atamalarla çalışır.')) return;
+    PAKET_ONCEKI = once || '';
+    await paketYaz(id, id ? id + ' paketi etkin.' : 'Paket kapatıldı.');
+  }
+  async function tarifeGuncelle(){
+    $('tarife-guncelle').disabled = true;
+    var r = await api('/api/models/tarife', { method:'POST', body:'{}' });
+    $('paket-not').textContent = (r.body && r.body.not) || String(r.status);
+    await paketCiz();
   }
 
   async function gorevKaydet(){
@@ -5403,10 +5404,20 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
         /* Modelin konusmadigi hal SOYLENIR: sessizce komut cevabi vermek,
            kullaniciya neden oyle cevap aldigini arattirir. */
         if(g.mode === 'model'){
+          /* Motor (core/motor.py) GOZE BATMADAN soylenir: seviye, sinif,
+             yukseldiyse nereye, maliyet. Butce esiginde ekonomik moddaysa
+             nedeni ayni satirda. */
+          var mo = g.motor || {};
+          var SINIF = { ekonomik:'Ekonomik', standart:'Standart', guclu:'Güçlü', uzman:'Uzman' };
           not.textContent = g.model + ' · ' + g.seconds + ' sn · '
             + (g.context_lines || 0) + ' satır ölçüme dayandı'
+            + (mo.sinif ? ' · ' + (mo.seviye || '') + ' seviye, ' + SINIF[mo.sinif]
+                + (mo.yukseldi ? ' (zorlanınca yükseldi)' : '') : '')
+            + (typeof g.usd === 'number' ? ' · $' + g.usd.toFixed(4) : '')
             + (g.price_estimated ? ' · fiyatı bilinmiyor, harcama '
-                + 'tahmini yazıldı' : '');
+                + 'tahmini yazıldı' : '')
+            + (mo.ekonomi && mo.ekonomi.not ? ' · ' + mo.ekonomi.not : '');
+          if(mo.neden) not.title = 'Seviye nedeni: ' + mo.neden;
         }else if(g.mode === 'yok'){
           /* Hiçbir şey olmamış gibi durmak, en kötü cevaptır: kullanıcı
              yazdı ve ekran sustu. Eksik olan şey ile yapılacak iş aynı

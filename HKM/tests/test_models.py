@@ -402,100 +402,75 @@ def run():
         eq(ai.FIYAT["claude-haiku-4-5-20251001"], (1.00, 5.00))
     test("Anthropic tarifesi guncel", t_anthropic_prices_are_current)
 
-    def t_every_suggested_model_has_a_price():
-        """Oneri yalniz TARIFESI BILINEN modeli secer: tarifesiz model
-        tahmini tabanla yazilir ve «ucuzluk sirasi» bir uydurma olurdu."""
+    # --------------------------------------------- tarife ve butce paketleri
+
+    def t_baseline_prices_match_openrouter():
+        """Yedek tarife 2026-09-26'da OpenRouter listesinden okundu.
+        deepseek-chat 0.06/0.18 yaziyordu; gercegi 0.32/0.89 — bes kat
+        ucuz gorunuyor, «ucuzluk sirasi»ni o bozuk sayi belirliyordu."""
         from core import ai
-        for k in models.ONERI_KADEMELERI:
-            for ad in k["adaylar"]:
-                ok(ad in ai.FIYAT, "%s: %s tarifesiz" % (k["id"], ad))
-                ok(models.saglayici_of(ad) in models.PROVIDERS, ad)
-    test("onerinin her adayinin tarifesi var", t_every_suggested_model_has_a_price)
+        eq(ai.FIYAT["deepseek/deepseek-chat"], (0.32, 0.89))
+        eq(ai.FIYAT["google/gemini-3.6-flash"], (0.75, 3.75))
+        eq(ai.FIYAT["gemini-3.6-flash"], (0.75, 3.75))
+        eq(ai.FIYAT["anthropic/claude-opus-5.5"], (4.00, 20.00))
+    test("yedek tarife OpenRouter ile ayni", t_baseline_prices_match_openrouter)
+
+    def t_openrouter_id_mapping():
+        from core import tarife
+        for (sag, ad), beklenen in {
+                ("anthropic", "claude-sonnet-5"): "anthropic/claude-sonnet-5",
+                ("anthropic", "claude-haiku-4-5-20251001"): "anthropic/claude-haiku-4.5",
+                ("anthropic", "claude-opus-5-5"): "anthropic/claude-opus-5.5",
+                ("google", "gemini-2.5-pro"): "google/gemini-2.5-pro",
+                ("openai", "gpt-5-mini"): "openai/gpt-5-mini",
+                ("openrouter", "deepseek/deepseek-chat"): "deepseek/deepseek-chat",
+                ("yerel", "llama3"): None}.items():
+            eq(tarife.or_kimligi(sag, ad), beklenen, ad)
+    test("dogrudan model adi OpenRouter kimligine cevrilir", t_openrouter_id_mapping)
+
+    def _sahte_liste(fiyatlar):
+        veri = [{"id": k, "context_length": 1000,
+                 "architecture": {"input_modalities": ["text"]},
+                 "pricing": {"prompt": str(g / 1e6), "completion": str(c / 1e6)}}
+                for k, (g, c) in fiyatlar.items()]
+        return lambda url, timeout=20: {"data": veri}
+
+    def t_live_tariff_wins_and_survives_failure():
+        """Canli tarife kaynagiyla ve tarihiyle yazilir, yedegin ONUNE
+        gecer. Kaynak cevap vermezse eski tarife SILINMEZ."""
+        from core import ai, db, tarife
+        con = db.connect(":memory:")
+        try:
+            r = tarife.guncelle(con, transport=_sahte_liste({
+                "anthropic/claude-sonnet-5": (1.5, 7.5), "bozuk/model": (-1, 2)}),
+                simdi="2026-09-26T10:00:00")
+            ok(r["ok"])
+            eq(r["sayi"], 1)                       # negatif fiyat alinmaz
+            tarife.yukle(con)
+            eq(ai._fiyat("anthropic", "claude-sonnet-5", 1_000_000, 0), 1.5)
+            eq(tarife.bilgi("openrouter", "anthropic/claude-sonnet-5")["kaynak"], "canli")
+            eq(tarife.bilgi("openrouter", "anthropic/claude-sonnet-5")["tarih"], "2026-09-26T10:00:00")
+            def cokuk(url, timeout=20):
+                raise OSError("ag yok")
+            r2 = tarife.guncelle(con, transport=cokuk)
+            no(r2["ok"])
+            tarife.yukle(con)
+            eq(ai._fiyat("anthropic", "claude-sonnet-5", 1_000_000, 0), 1.5)
+            # Canli listede olmayan model yedekten okunur.
+            eq(tarife.bilgi("openrouter", "openai/gpt-5-mini")["kaynak"], "yedek")
+        finally:
+            ai.CANLI_FIYAT.clear()
+            con.close()
+    test("canli tarife yedegi gecer, hata onu silmez",
+         t_live_tariff_wins_and_survives_failure)
 
     def t_every_role_has_a_tier_or_is_modelless():
-        """Her kademe bir oneri kademesine duser; yalniz modeli olmayan
-        Depolama burosu disarida kalir (model gerektirmez)."""
         for rol in models.ROLES:
             if rol == "bam.kayit":
                 eq(models.oneri_kademesi(rol), None)
             else:
                 ok(models.oneri_kademesi(rol), rol)
-    test("her kademe bir oneri kademesine duser", t_every_role_has_a_tier_or_is_modelless)
-
-    def t_suggestion_needs_a_key_and_writes_nothing():
-        """Anahtar yoksa oneri yok; oneri HESAPLANIR, yazilmaz: varsayilan
-        kapali kalir (kural 2)."""
-        cfg = {"local_token": "x"}
-        o = models.onerilen(cfg)
-        eq(o["satirlar"], [])
-        ok(o["not"])
-        cfg = models.apply(cfg, {"keys": {"openrouter": "sk-or-1234"}})
-        o = models.onerilen(cfg)
-        ok(o["satirlar"])
-        for rol in models.ROLES:
-            eq(models.resolve(cfg, rol)["provider"], None)
-    test("oneri anahtar ister ve hicbir sey yazmaz",
-         t_suggestion_needs_a_key_and_writes_nothing)
-
-    def t_openrouter_only_cheapest_per_tier():
-        """Yalniz OpenRouter anahtari: her kademe o anahtarla; kademe
-        icinde EN UCUZ uygun model secilir. Ses yalniz Google ile
-        calisir (ai.py): OpenRouter'la ses satiri yazilmaz, eksik diye
-        SOYLENIR."""
-        cfg = models.apply({"local_token": "x"}, {"keys": {"openrouter": "sk-or-1234"}})
-        o = models.onerilen(cfg)
-        rol = {s["role"]: s for s in o["satirlar"]}
-        for s in o["satirlar"]:
-            eq(s["provider"], "openrouter")
-        eq(rol["ays.sohbet"]["model"], "deepseek/deepseek-chat")
-        eq(rol["king"]["model"], "anthropic/claude-sonnet-5")
-        no("medya" in rol)
-        ok(any(e["id"] == "ses" for e in o["eksik"]))
-    test("yalniz OpenRouter: kademe basina en ucuz uygun model",
-         t_openrouter_only_cheapest_per_tier)
-
-    def t_google_key_covers_voice():
-        cfg = models.apply({"local_token": "x"}, {"keys": {"google": "AIza-1234"}})
-        rol = {s["role"]: s for s in models.onerilen(cfg)["satirlar"]}
-        eq(rol["medya"]["provider"], "google")
-        eq(rol["ays.sohbet"]["model"], "gemini-2.5-flash-lite")
-    test("Google anahtari sesi de kapsar", t_google_key_covers_voice)
-
-    def t_tiers_are_ordered_by_price():
-        """Kademeler ucuzdan pahaliya siralanir; onemli is dusuk oncelikli
-        isten ucuz bir modele verilmez."""
-        from core import ai
-        cfg = models.apply({"local_token": "x"}, {"keys": {
-            "openrouter": "sk-or-1234", "google": "AIza-1234"}})
-        o = models.onerilen(cfg)
-        fiyat = {k["id"]: models.birim_maliyet(k["model"]) for k in o["kademeler"] if k.get("model")}
-        ok(fiyat["dusuk"] <= fiyat["orta"] <= fiyat["onemli"])
-        maliyetler = [models.birim_maliyet(k["model"]) for k in o["kademeler"] if k.get("model")]
-        eq(maliyetler, sorted(maliyetler))
-        for k in o["kademeler"]:
-            if k.get("model"):
-                eq(k["fiyat"], list(ai.FIYAT[k["model"]]))
-    test("kademeler ucuzdan pahaliya", t_tiers_are_ordered_by_price)
-
-    def t_suggestion_is_a_valid_patch():
-        """Oneri dogrudan kaydedilebilir bir yamadir: dogrulamadan gecer
-        ve uygulaninca her kademe onerilen modeli kullanir."""
-        cfg = models.apply({"local_token": "x"}, {"keys": {"openrouter": "sk-or-1234"}})
-        o = models.onerilen(cfg)
-        ok_, hata = models.validate({"assignments": o["yama"]})
-        ok(ok_, hata)
-        yeni = models.apply(cfg, {"assignments": o["yama"]})
-        for s in o["satirlar"]:
-            a = models.resolve(yeni, s["role"])
-            eq((a["provider"], a["model"], a["inherited"]), (s["provider"], s["model"], False))
-    test("oneri gecerli bir yamadir", t_suggestion_is_a_valid_patch)
-
-    def t_read_carries_the_suggestion():
-        cfg = models.apply({"local_token": "x"}, {"keys": {"openrouter": "sk-or-1234"}})
-        r = models.read(cfg)
-        ok(r["oneri"]["satirlar"])
-        no("sk-or-1234" in json.dumps(r))
-    test("okunan hal oneriyi tasir, sir sizmaz", t_read_carries_the_suggestion)
+    test("her kademe bir paket kademesine duser", t_every_role_has_a_tier_or_is_modelless)
 
     def t_chosen_key_is_reported_raw():
         """Geri alma icin: «ilk anahtar» secimi bos doner, cozulmus kimlik
@@ -507,3 +482,24 @@ def run():
         eq(k["key_chosen"], "")
         ok(k["key_id"])
     test("secilen anahtar ham haliyle doner", t_chosen_key_is_reported_raw)
+
+    def t_effort_is_validated():
+        ok_, hata = models.validate({"assignments": {"king": {
+            "provider": "openrouter", "model": "x/y", "efor": "cok"}}})
+        no(ok_)
+        ok(any("efor" in h for h in hata))
+        cfg = models.apply({"local_token": "x"}, {"keys": {"openrouter": "sk-or-1"},
+            "assignments": {"king": {"provider": "openrouter", "model": "x/y", "efor": "high"}}})
+        eq(models.resolve(cfg, "king")["efor"], "high")
+        eq(models.resolve(cfg, "vp_bio")["efor"], "high")          # miras
+    test("efor dogrulanir ve miras kalir", t_effort_is_validated)
+
+    def t_level_roles_exist_and_do_not_inherit_into_chat_silently():
+        """Seviye kademeleri King'in altindadir. Paket kurulmadiysa sohbet
+        seviye kademesini KULLANMAZ (sohbet.py yalniz KENDI atamasi olan
+        seviyeye gider) — bu test kademelerin varligini sabitler."""
+        for sv in ("alt", "orta", "ust"):
+            ok("seviye." + sv in models.ROLES)
+            eq(models.ROLES["seviye." + sv]["parent"], "king")
+        ok(any(k["layer"] == "seviye" for k in models.layers()))
+    test("seviye kademeleri var", t_level_roles_exist_and_do_not_inherit_into_chat_silently)

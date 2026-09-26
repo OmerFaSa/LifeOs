@@ -158,6 +158,18 @@ for _vp, _ad, _mod, _alan in (
          "HKM konseyi — %s. Hükmü kural motoru verir; model yalnız cümleyi kurar."
          % _alan, parent="king", layer="konsey", module=_mod)
 
+# KONUSMA SEVIYELERI (core/seviye.py). Sohbette mesajin NITELIGI modeli
+# secer: duz sohbet alt'a, oneri/analiz orta'ya, karar/yol haritasi ust'e.
+# Bir seviyeye atama YOKSA sohbet eskisi gibi gorevlinin kendi kademesiyle
+# konusur (miras degil, geri dusus): paketi kurmayan kullanicinin sohbeti
+# degismez.
+for _sv, _ad, _not in (
+        ("alt", "Alt — düz sohbet", "Karar ya da öneri içermeyen konuşma. Ucuz ve hızlı model, kısa bağlam."),
+        ("orta", "Orta — öneri ve analiz", "Ufuk genişletme, öneri, «beni analiz et». Dengeli model."),
+        ("ust", "Üst — karar ve yol haritası",
+         "Karar, plan, strateji, sistemin tamamını değerlendirme. En dikkatli model.")):
+    _rol("seviye.%s" % _sv, "Seviye · %s" % _ad, _not, parent="king", layer="seviye")
+
 # BAM — Bilgi ve Aksiyon Modulu (core/bam.py). King'in altinda ayri bir
 # kol: Patronu ve dort ofisi. Atama yoksa King'den miras alir.
 _rol("bam", "BAM Patronu",
@@ -188,6 +200,7 @@ for _mod, _ad in MODULLER.items():
 
 LAYER_LABEL = {
     "king": "En üst — King",
+    "seviye": "Konuşma seviyeleri — mesajın niteliğine göre",
     "konsey": "HKM konseyi — üç alt patron",
     "modul": "Modül yetenekleri",
     "bam": "BAM — Bilgi ve Aksiyon Modülü",
@@ -195,49 +208,12 @@ LAYER_LABEL = {
 }
 
 
-# ------------------------------------------------------- onerilen dagilim
-#
-# «Onemli is icin hangi model, dusuk oncelikli is icin hangisi?» sorusunun
-# KODDAKI cevabi. Her kademe bir ONERI KADEMESINE duser; her oneri
-# kademesinin kabul edilebilir modelleri (kalite tabani) burada yazilidir
-# ve aralarindan, anahtari GIRILMIS saglayicilarda, EN UCUZ olan secilir.
-#
-# Uc sinir:
-#   1. HESAPLANIR, YAZILMAZ. Oneri bir onizlemedir; uygulamak kullanicinin
-#      «Uygula»sidir (kural 2: varsayilan kapali kalir).
-#   2. Yalniz TARIFESI BILINEN model (ai.FIYAT). Tarifesiz model tahmini
-#      tabanla yazilir; «ucuzluk sirasi» o zaman bir uydurma olurdu.
-#   3. Ses yalniz Google ile calisir (ai.py): baska anahtarla ses satiri
-#      yazilmaz, EKSIK diye soylenir.
-ONERI_KADEMELERI = [
-    {"id": "dusuk", "ad": "Düşük öncelik",
-     "isler": "Sohbet: kısa cevap, çok çağrı — ucuz ve hızlı olmalı",
-     "adaylar": ["deepseek/deepseek-chat", "google/gemini-2.5-flash-lite",
-                 "gemini-2.5-flash-lite", "openai/gpt-5-mini", "gpt-5-mini",
-                 "anthropic/claude-haiku-4.5", "claude-haiku-4-5-20251001"]},
-    {"id": "orta", "ad": "Orta",
-     "isler": "Konsey (VP) ve analiz: sayıyı cümleye çevirir — dikkatli olmalı",
-     "adaylar": ["google/gemini-2.5-flash", "gemini-2.5-flash", "openai/gpt-5-mini",
-                 "gpt-5-mini", "anthropic/claude-haiku-4.5", "claude-haiku-4-5-20251001"]},
-    {"id": "gorsel", "ad": "Görsel",
-     "isler": "Ekran görüntüsü, tahlil, fiş okuma — görsel okuyabilmeli",
-     "adaylar": ["google/gemini-2.5-flash", "gemini-2.5-flash", "openai/gpt-5-mini",
-                 "gpt-5-mini", "anthropic/claude-haiku-4.5", "claude-haiku-4-5-20251001"]},
-    {"id": "ses", "ad": "Ses ve video",
-     "isler": "Telegram sesini yazıya döker, videoyu anlatır — yalnız Google",
-     "adaylar": ["gemini-2.5-flash", "gemini-2.5-pro"]},
-    {"id": "arastirma", "ad": "Araştırma",
-     "isler": "BAM araştırması: uzun kaynak okur, alıntı kodla doğrulanır",
-     "adaylar": ["gemini-2.5-pro", "gpt-5", "anthropic/claude-sonnet-5", "claude-sonnet-5"]},
-    {"id": "onemli", "ad": "Önemli",
-     "isler": "King, planlar, BAM planlama ve üretim — en dikkatli iş",
-     "adaylar": ["gemini-2.5-pro", "gpt-5", "anthropic/claude-sonnet-5", "claude-sonnet-5"]},
-]
-ONERI_BY_ID = {k["id"]: k for k in ONERI_KADEMELERI}
+# Butce paketlerinin POLITIKASI (siniflar, merdiven, efor) core/motor.py'dedir;
+# burada yalniz secilen paketin kimligi saklanir (paket_of).
 
 
 def saglayici_of(model):
-    """Aday adindan saglayici: «a/b» OpenRouter'dir, gerisi adindan."""
+    """Model adindan saglayici: «a/b» OpenRouter'dir, gerisi adindan."""
     if "/" in model:
         return "openrouter"
     if model.startswith("gemini"):
@@ -253,11 +229,17 @@ def birim_maliyet(model):
     """Karsilastirma olcusu: 1M jetonun ortalama bedeli, giris 3 : cikis 1
     (bu sistemin cagrilari baglam agirliklidir). Sirala, fatura degil."""
     from core import ai          # ai models'i ice aktarir; dongu burada kirilir
-    g, c = ai.FIYAT[model]
+    g, c = ai.tarife_of(saglayici_of(model), model)
     return (3 * g + c) / 4.0
 
 
 def oneri_kademesi(rol):
+    """Bir kademenin paket kademesi. Sohbet seviyeleri kendileridir; King
+    ve konsey ORTA'dir — sohbet seviye kademesine gider, King'in kendi
+    kademesi yalniz seviyesi olmayan islerde (tani, BAM yonlendirmesi)
+    kullanilir."""
+    if rol.startswith("seviye."):
+        return rol.split(".", 1)[1]
     if rol == "medya":
         return "ses"
     if rol == "para.fis" or rol.endswith(".gorsel"):
@@ -266,61 +248,18 @@ def oneri_kademesi(rol):
         return "arastirma"
     if rol == "bam.kayit":
         return None                  # Depolama burosu model gerektirmez
-    if rol == "king" or rol.endswith(".plan") or rol in ("bam.planlama", "bam.uretim"):
-        return "onemli"
+    if rol.endswith(".plan") or rol in ("bam.planlama", "bam.uretim"):
+        return "ust"
     if rol.endswith(".sohbet"):
-        return "dusuk"
-    return "orta"                    # vp_*, *.analiz, bam patronu
+        return "alt"
+    return "orta"                    # king, vp_*, *.analiz, bam patronu
 
-
-def onerilen(cfg):
-    """Anahtari girilmis saglayicilarla kademe kademe EN UCUZ uygun model.
-    Hicbir sey yazmaz; donen `yama` kullanici onaylarsa kaydedilir."""
-    from core import ai
-    anahtarli = {ad for ad in PROVIDERS if key_list(cfg, ad)}
-    if not anahtarli:
-        return {"satirlar": [], "kademeler": [], "eksik": [], "yama": {},
-                "not": "Önce «Sağlayıcılar» bölümüne bir anahtar gir; öneri "
-                       "yalnız anahtarı olan sağlayıcılardan kurulur."}
-    secim = {}
-    for k in ONERI_KADEMELERI:
-        uygun = [m for m in k["adaylar"] if saglayici_of(m) in anahtarli
-                 and (k["id"] != "ses" or saglayici_of(m) == "google")]
-        secim[k["id"]] = min(uygun, key=birim_maliyet) if uygun else None
-    kademeler = []
-    for k in ONERI_KADEMELERI:
-        m = secim[k["id"]]
-        kademeler.append({"id": k["id"], "ad": k["ad"], "isler": k["isler"], "model": m,
-                          "provider": saglayici_of(m) if m else None,
-                          "fiyat": list(ai.FIYAT[m]) if m else None})
-    kademeler.sort(key=lambda x: (x["model"] is None,
-                                  birim_maliyet(x["model"]) if x["model"] else 0))
-    satirlar, yama = [], {}
-    for rol, tanim in ROLES.items():
-        kid = oneri_kademesi(rol)
-        m = secim.get(kid) if kid else None
-        if not m:
-            continue
-        satirlar.append({"role": rol, "label": tanim["label"], "kademe": kid,
-                         "kademe_adi": ONERI_BY_ID[kid]["ad"],
-                         "provider": saglayici_of(m), "model": m,
-                         "simdi": (lambda a: {"provider": a["provider"], "model": a["model"],
-                                              "inherited": a["inherited"]})(resolve(cfg, rol))})
-        yama[rol] = {"provider": saglayici_of(m), "model": m, "key": ""}
-    eksik = [{"id": k["id"], "ad": k["ad"],
-              "neden": ("Ses ve video yalnız Google (Gemini) anahtarıyla çalışır."
-                        if k["id"] == "ses" else
-                        "Anahtarı olan sağlayıcılarda bu işe uygun, tarifesi bilinen model yok.")}
-             for k in kademeler if not k["model"]]
-    return {"satirlar": satirlar, "kademeler": kademeler, "eksik": eksik, "yama": yama,
-            "not": "Her kademede, anahtarın olan sağlayıcılardaki uygun modellerin EN "
-                   "UCUZU seçildi. Uygulamadan önce «Sohbeti dene» ile sına."}
 
 
 def layers():
     """Ekranin cizecegi sira: ustten alta, her kademe kendi grubunda."""
     out = []
-    for kat in ("king", "konsey", "modul", "bam", "kol"):
+    for kat in ("king", "seviye", "konsey", "modul", "bam", "kol"):
         uyeler = [r for r in ROLES.values() if r["layer"] == kat]
         uyeler.sort(key=lambda r: r["key"])
         out.append({"layer": kat, "label": LAYER_LABEL[kat], "roles": uyeler})
@@ -406,6 +345,18 @@ def keys(cfg):
     return out
 
 
+# Butce paketleri (core/motor.py). Secilmezse sistem eskisi gibi atama ve
+# mirasla calisir.
+PAKET_KIMLIKLERI = ("A", "A+", "S", "S+")
+# OpenRouter'in birlesik `reasoning.effort` degerleri (elle atamada da secilir).
+EFORLAR = ("low", "medium", "high")
+
+
+def paket_of(cfg):
+    p = _bolum(cfg).get("paket")
+    return p if p in PAKET_KIMLIKLERI else None
+
+
 def assignments(cfg):
     a = _bolum(cfg).get("assignments")
     return a if isinstance(a, dict) else {}
@@ -446,6 +397,8 @@ def resolve(cfg, role):
                 "provider_label": (PROVIDERS.get(saglayici) or {}).get(
                     "label", saglayici),
                 "model": a.get("model") or "",
+                # Dusunme eforu (OpenRouter `reasoning.effort`); bos = saglayici varsayilani.
+                "efor": a.get("efor") or "",
                 "key_id": secili["id"] if secili else secilen,
                 # Kullanicinin SECTIGI deger (bos = «ilk anahtar»): geri alma
                 # onu birebir geri koyar, cozulmus kimligi sabitlemez.
@@ -458,7 +411,7 @@ def resolve(cfg, role):
             }
         imlec = ROLES[imlec]["parent"]
     return {"role": role, "from": None, "inherited": False, "provider": None,
-            "provider_label": "", "model": "", "key_id": "", "key_label": "",
+            "provider_label": "", "model": "", "efor": "", "key_id": "", "key_label": "",
             "key_user": "", "key_missing": False, "key_set": False,
             "chain": zincir}
 
@@ -494,7 +447,6 @@ def read(cfg):
         "layers": layers(),
         "capabilities": YETENEKLER,
         "assignments": {r: resolve(cfg, r) for r in ROLES},
-        "oneri": onerilen(cfg),
         "note": "Kural motoru otoritedir: buradaki hiçbir ayar bir eşiği, "
                 "bir hükmü ya da bir önceliği değiştirmez. Model yalnız "
                 "cümle kurar. Bütün anahtarlar boş olsa sistem aynen çalışır.",
@@ -508,8 +460,10 @@ def validate(patch):
     if not isinstance(patch, dict):
         return False, ["models bir nesne olmalı"]
     for k in patch:
-        if k not in ("keys", "assignments"):
+        if k not in ("keys", "assignments", "paket"):
             hata.append("bilinmeyen models alanı: %s" % k)
+    if patch.get("paket") not in (None, "") and patch.get("paket") not in PAKET_KIMLIKLERI:
+        hata.append("paket şunlardan biri olmalı: %s" % ", ".join(PAKET_KIMLIKLERI))
 
     for ad, deger in (patch.get("keys") or {}).items():
         if ad not in PROVIDERS:
@@ -562,8 +516,10 @@ def validate(patch):
             hata.append("%s ataması bir nesne olmalı" % rol)
             continue
         for k in deger:
-            if k not in ("provider", "model", "key"):
+            if k not in ("provider", "model", "key", "efor"):
                 hata.append("%s içinde bilinmeyen alan: %s" % (rol, k))
+        if deger.get("efor") not in (None, "") and deger.get("efor") not in EFORLAR:
+            hata.append("%s.efor şunlardan biri olmalı: %s" % (rol, ", ".join(EFORLAR)))
         if deger.get("key") is not None and not isinstance(deger["key"], str):
             hata.append("%s.key bir dize olmalı" % rol)
         saglayici = deger.get("provider")
@@ -664,8 +620,15 @@ def apply(cfg, patch):
             atamalar[rol] = {"provider": deger.get("provider"),
                              "model": deger.get("model") or "",
                              "key": deger.get("key") or ""}
+            if deger.get("efor"):
+                atamalar[rol]["efor"] = deger["efor"]
     bolum["keys"] = anahtarlar
     bolum["assignments"] = atamalar
+    if "paket" in patch:
+        if patch["paket"]:
+            bolum["paket"] = patch["paket"]
+        else:
+            bolum.pop("paket", None)
     if sayaclar:
         bolum["key_seq"] = sayaclar
     yeni = dict(cfg or {})

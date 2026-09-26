@@ -26,7 +26,7 @@
 import re
 
 from core import (ai, butce, cross, dil, manager, memory, models, motto, patron, program,
-                  streak, urunler)
+                  seviye, streak, urunler)
 
 # Kademeler: kullanici kiminle konusuyor.
 GOREVLILER = {
@@ -598,7 +598,10 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                 "text": r["text"], "agent": gorevli}
 
     rol = GOREVLILER[gorevli]["role"]
-    hazir = ai.hazir_mi(cfg, rol)
+    # Mesajin NITELIGI modeli secer (core/seviye.py): duz sohbet alt,
+    # oneri/analiz orta, karar/yol haritasi ust. Paket yoksa etkisizdir.
+    sv = seviye.sinifla(metin)
+    hazir = ai.hazir_mi(cfg, rol, seviye=sv["seviye"])
     if not hazir["ok"]:
         # 4 — MODEL YOKSA SISTEM CALISIR. «Yapay zeka yok» ile «sistem
         # bozuk» ayri seylerdir ve ayri yazilir.
@@ -624,7 +627,8 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
     mesajlar = list(gecmis or []) + [{"role": "user", "content": metin}]
 
     r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
-               user=user, transport=transport, veri=veri)
+               user=user, transport=transport, veri=veri, seviye=sv["seviye"])
+    motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"])
     if not r["ok"]:
         # Model konusamadiysa kural motoru devrede kalir: sohbet
         # bozulabilir, sistem bozulmaz.
@@ -669,7 +673,10 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             "truncated": bool(r.get("truncated")),
             "model": r["model"], "usd": r["usd"], "seconds": r["seconds"],
             "price_estimated": r.get("price_estimated", False),
-            "context_lines": len(bg.splitlines())}
+            "context_lines": len(bg.splitlines()),
+            # Hangi seviye, hangi sinif, neden; butce bandinda ekonomik
+            # moddaysa onun notu. Yuz bunu kucuk bir satirda gosterir.
+            "motor": motor_bilgi}
 
 def tani(con, cfg, date, gorevli="king", th=None, transport=None):
     """Sohbet zincirini BASTAN SONA dener ve nerede koptugunu soyler.
