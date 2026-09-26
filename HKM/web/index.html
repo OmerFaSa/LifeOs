@@ -2572,6 +2572,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       });
       h += '</datalist>';
     });
+    h += '<div id="paket-karti"><div class="tag">Bütçe paketi</div><p class="muted">Yükleniyor…</p></div>';
     h += '<div class="tag">Görev dağılımı · kademe kademe</div>'
       + '<p class="muted">Atama yoksa <b>üstüne</b> bakılır; en üstte de '
       + 'yoksa «atanmamış» denir. Uydurulmuş bir varsayılan, senin '
@@ -2604,6 +2605,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '</div><p class="muted" id="gorev-not"></p>'
       + '<div id="sohbet-tani"></div>';
     $('gorevler').innerHTML = h;
+    paketCiz();
     $('gorev-kaydet').addEventListener('click', gorevKaydet);
     $('sohbet-dene').addEventListener('click', sohbetDene);
   }
@@ -2639,6 +2641,150 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       $('anahtar-not').textContent = 'Kaydedilmedi — '
         + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
     }
+  }
+
+  /* BUTCE PAKETI (core/motor.py). Paket modelleri tek tek yazmaz; her
+     seviye icin «hangi siniftan basla, en fazla nereye cik» der. Sistem en
+     dusuk uygun sinifla dener, model zorlanirsa bir ust sinifa cikar.
+     Maliyet GOZE BATMADAN durur: pakette aylik tahmin, ayrintilar katli.
+     Kademenin KENDI atamasi paketin onune gecer. */
+  var PAKET_ONCEKI = undefined;
+  var EFOR_ADI = { low:'düşük efor', medium:'orta efor', high:'yüksek efor' };
+  var SEVIYE_ADI = { alt:'Alt · düz sohbet', orta:'Orta · öneri ve analiz',
+    ust:'Üst · karar ve yol haritası', gorsel:'Görsel', arastirma:'Araştırma (BAM)',
+    ses:'Ses ve video' };
+  function dolar(x){ return x == null ? '—' : '$' + (x < 1 ? x.toFixed(2) : x.toFixed(1)); }
+  function tarifeSatiri(t){
+    if(!t || !t.tarih) return 'Fiyatlar: yedek tablo (26.09.2026, OpenRouter listesinden).';
+    return 'Fiyatlar: OpenRouter listesi · ' + esc(String(t.tarih).replace('T', ' ').slice(0, 16))
+      + ' · ' + t.sayi + ' model.';
+  }
+  async function paketCiz(){
+    var yer = $('paket-karti');
+    if(!yer) return;
+    var r = await api('/api/models/paketler');
+    if(r.status !== 200){ yer.innerHTML = '<p class="muted">Paketler okunamadı.</p>'; return; }
+    var o = r.body, h = yerKismi(o);
+    h += '<div class="tag">Güç paketi · gereken zekâ, gereken yerde</div>';
+    h += '<p class="muted">Sistem en düşük uygun sınıfla dener; model zorlanırsa bir üst sınıfa '
+      + 'çıkar. Bütçenin %80 ve %95 eşiklerinde yönlendirme kendiliğinden ekonomikleşir ve '
+      + 'bu söylenir. Bir kademeye elle model atadıysan o geçerlidir.</p>';
+    (o.paketler || []).forEach(function(p){
+      var etkin = o.aktif === p.id;
+      h += '<div class="metric"><div class="metric__name"><b>' + esc(p.id) + '</b> · ' + esc(p.ad)
+        + (etkin ? ' <span class="ok">etkin</span>' : '')
+        + '<div class="muted" style="font-size:12px">' + (p.aylik == null ? 'aylık tahmin için ölçüm yok'
+          : 'son 30 günün kullanımıyla ≈ ' + dolar(p.aylik) + ' / ay') + '</div>'
+        + '<details class="detay"><summary>Seviyeler ve modeller</summary>';
+      (p.satirlar || []).forEach(function(s){
+        h += '<div style="font-size:12px;margin:6px 0"><b>' + esc(SEVIYE_ADI[s.seviye] || s.seviye) + '</b>'
+          + (s.efor ? ' <span class="muted">· ' + esc(EFOR_ADI[s.efor]) + '</span>' : '') + '<br>'
+          + s.basamaklar.map(function(b){
+              return esc(b.sinif_adi) + ' <span class="muted">(' + esc(b.model)
+                + (b.fiyat ? ' · ' + dolar(b.fiyat[0]) + '/' + dolar(b.fiyat[1]) : '') + ')</span>';
+            }).join(' → ') + '</div>';
+      });
+      h += '</details></div><div class="metric__val">'
+        + (etkin ? '' : '<button data-paket="' + esc(p.id) + '">Seç</button>') + '</div></div>';
+    });
+    (o.eksik || []).forEach(function(e){ h += '<p class="muted">' + esc(e) + '</p>'; });
+    if(o.olcum){
+      /* Maliyet GOZE BATMADAN: tek satir, kucuk yazi. */
+      h += '<p class="muted" style="font-size:12px">Son 30 gün: ' + o.olcum.cagri + ' çağrı · '
+        + dolar(o.olcum.usd) + ' (' + dolar(o.olcum.olculen_usd) + '’ı sağlayıcının ölçtüğü bedel) · '
+        + o.olcum.yukselen + ' kez üst sınıfa çıkıldı · önbellekten '
+        + o.olcum.onbellek_jeton + ' jeton okundu.</p>';
+    }
+    h += '<p class="muted" style="font-size:12px"><span id="tarife-satiri">' + tarifeSatiri(o.tarife)
+      + '</span> <button id="tarife-guncelle" style="font-size:12px">Fiyatları güncelle</button>'
+      + (o.aktif ? ' <button id="paket-kapat" style="font-size:12px">Paketi kapat</button>' : '')
+      + (PAKET_ONCEKI !== undefined ? ' <button id="paket-geri" style="font-size:12px">Önceki seçime dön</button>' : '')
+      + '</p><p class="muted" id="paket-not"></p>';
+    yer.innerHTML = h;
+    Array.prototype.forEach.call(yer.querySelectorAll('[data-paket]'), function(b){
+      b.addEventListener('click', function(){ paketSec(b.dataset.paket, o.aktif); }); });
+    if($('paket-kapat')) $('paket-kapat').addEventListener('click', function(){ paketSec('', o.aktif); });
+    if($('paket-geri')) $('paket-geri').addEventListener('click', function(){
+      var p = PAKET_ONCEKI; PAKET_ONCEKI = undefined; paketYaz(p || '', 'Önceki seçime dönüldü.'); });
+    $('tarife-guncelle').addEventListener('click', tarifeGuncelle);
+    Array.prototype.forEach.call(yer.querySelectorAll('[data-yer]'), function(b){
+      b.addEventListener('click', function(){ yerYaz(b.dataset.yer); }); });
+    $('yerel-kaydet').addEventListener('click', function(){ yerYaz(null); });
+    $('yerel-sina').addEventListener('click', yerelSina);
+  }
+
+  /* NEREDE ÇALIŞSIN. Yerel: her şey bilgisayarında, bulut hiç kullanılmaz,
+     bedel sıfır. Hibrit: merdivenin alt basamakları yerelde; model
+     zorlanınca (ya da yerel sunucu kapalıysa) buluttaki güçlü modele
+     çıkılır. Bulut: her şey OpenRouter'da. */
+  var YER_ADI = { yerel:'Yerel', hibrit:'Hibrit', bulut:'Bulut' };
+  var YER_NOT = { yerel:'Her şey bilgisayarında; bedel sıfır, en üst sınıf yerel modelin.',
+    hibrit:'Basit işler bilgisayarında, zor işler bulutta. Önerilen.',
+    bulut:'Her şey bulutta; kurulum yok, her çağrı ücretli.' };
+  function yerKismi(o){
+    var yer = o.yer || 'bulut', yl = o.yerel || {};
+    var h = '<div class="tag">Nerede çalışsın</div><div class="row">';
+    ['yerel', 'hibrit', 'bulut'].forEach(function(y){
+      h += '<button data-yer="' + y + '"' + (y === yer ? ' class="primary" aria-pressed="true"' : '')
+        + '>' + YER_ADI[y] + '</button>';
+    });
+    h += '</div><p class="muted" style="font-size:12px">' + esc(YER_NOT[yer]) + '</p>';
+    h += '<details class="detay"' + (yer !== 'bulut' && !yl.ekonomik ? ' open' : '')
+      + '><summary>Motor servisi ve yerel modeller (Ollama, LM Studio…)</summary>'
+      + '<datalist id="yerel-liste"></datalist>'
+      + '<label style="display:block;font-size:12px;margin:6px 0">Motor adresi '
+      + '<input id="yerel-adres" placeholder="http://127.0.0.1:11434" value="' + esc(o.yerel_adres || '') + '"></label>'
+      + '<p class="muted" style="font-size:11px;margin:0">Aynı makine ya da ev ağı http olabilir; '
+      + 'internetteki bir motor yalnız https ile bağlanır.</p>'
+      + '<label style="display:block;font-size:12px;margin:6px 0">Ekonomik sınıf '
+      + '<input id="yerel-ekonomik" list="yerel-liste" value="' + esc(yl.ekonomik || '') + '"></label>'
+      + '<label style="display:block;font-size:12px;margin:6px 0">Standart sınıf (isteğe bağlı) '
+      + '<input id="yerel-standart" list="yerel-liste" value="' + esc(yl.standart || '') + '"></label>'
+      + '<div class="row"><button id="yerel-sina" style="font-size:12px">Yerel sunucuyu sına</button>'
+      + '<button id="yerel-kaydet" style="font-size:12px">Yerel modelleri kaydet</button></div>'
+      + '<p class="muted" id="yerel-not" style="font-size:12px">Güçlü ve Uzman sınıf her zaman buluttadır.</p>'
+      + '</details>';
+    return h;
+  }
+  async function yerYaz(yer){
+    var yama = { models:{ yerel:{ ekonomik:($('yerel-ekonomik').value || '').trim(),
+      standart:($('yerel-standart').value || '').trim() },
+      yerel_adres:($('yerel-adres').value || '').trim() } };
+    if(yer) yama.models.yer = yer;
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
+    if(r.status === 200){ ayarlariCiz(r.body.config); }
+    else if($('yerel-not')){ $('yerel-not').textContent = 'Kaydedilmedi — '
+      + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status); }
+  }
+  /* Sunucu motor servisinden HABERDARDIR: adres, aynı makine mi, gecikme,
+     modeller. Kaydedilmemiş adres önce kaydedilir ki sınanan o olsun. */
+  async function yerelSina(){
+    var d = await api('/api/ai/dugum');
+    var b = d.body || {}, liste = b.modeller || [];
+    $('yerel-liste').innerHTML = liste.map(function(ad){
+      return '<option value="' + esc(ad) + '"></option>'; }).join('');
+    $('yerel-not').textContent = (b.ulasilabilir
+      ? esc(b.adres) + ' · ' + b.sinif_adi + ' · ' + b.gecikme_ms + ' ms · ' + liste.length + ' model. '
+      : esc(b.adres || '') + ' · ') + (b.not || '');
+  }
+  async function paketYaz(id, mesaj){
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify({ models:{ paket:id } }) });
+    if(r.status === 200){ ayarlariCiz(r.body.config); $('paket-not') && ($('paket-not').textContent = mesaj); }
+    else if($('paket-not')){ $('paket-not').textContent = 'Kaydedilmedi — '
+      + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status); }
+  }
+  async function paketSec(id, once){
+    if(!window.confirm(id ? id + ' paketi seçilsin mi? Model seçimi bu paketin merdivenine göre '
+        + 'yapılır; elle atadığın kademeler olduğu gibi kalır.'
+        : 'Paket kapatılsın mı? Sistem görev dağılımındaki atamalarla çalışır.')) return;
+    PAKET_ONCEKI = once || '';
+    await paketYaz(id, id ? id + ' paketi etkin.' : 'Paket kapatıldı.');
+  }
+  async function tarifeGuncelle(){
+    $('tarife-guncelle').disabled = true;
+    var r = await api('/api/models/tarife', { method:'POST', body:'{}' });
+    $('paket-not').textContent = (r.body && r.body.not) || String(r.status);
+    await paketCiz();
   }
 
   async function gorevKaydet(){
@@ -3555,9 +3701,38 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       + '<select id="bam-hedef" aria-label="Hangi sistem için"><option value="">Genel</option>'
       + '<option value="ays">AYS</option><option value="spi">SPİ</option>'
       + '<option value="esp">ESP</option></select>'
+      + '<select id="bam-efor" aria-label="Efor"><option value="dusuk">Düşük efor</option>'
+      + '<option value="yuksek" selected>Yüksek efor</option>'
+      + '<option value="en_yuksek">En yüksek efor</option></select>'
       + '<button id="bam-gonder">İşi aç</button></div>'
+      + '<p class="muted" id="bam-maliyet" style="font-size:12px"></p>'
       + '<p class="muted" id="bam-not">BAM Patronu talebi kuralla yönlendirir; '
       + 'anlamazsa sorar.</p>';
+    bamTahmin();
+  }
+
+  /* Is BASLAMADAN maliyet: her efor icin is basina ortalama. Kucuk tek
+     satir; secilen efor kalin. Olculen is yoksa «tahmin» diye soylenir. */
+  var BAM_TAHMIN = null;
+  async function bamTahmin(){
+    var r = await api('/api/bam/tahmin');
+    if(r.status !== 200) return;
+    BAM_TAHMIN = r.body;
+    bamMaliyetYaz();
+    if($('bam-efor')) $('bam-efor').addEventListener('change', bamMaliyetYaz);
+  }
+  function bamMaliyetYaz(){
+    var t = BAM_TAHMIN, yer = $('bam-maliyet');
+    if(!t || !yer) return;
+    var sec = ($('bam-efor') || {}).value || 'yuksek';
+    yer.innerHTML = 'Bir iş ortalama: ' + t.secenekler.map(function(x){
+      var m = x.ad.toLowerCase() + ' ≈ $' + (x.usd < 0.01 ? x.usd.toFixed(4) : x.usd.toFixed(2));
+      return x.efor === sec ? '<b>' + esc(m) + '</b>' : esc(m);
+    }).join(' · ') + ' <span title="' + esc(t.secenekler[0].etiket === 'tahmin'
+      ? 'Henüz ölçülmüş BAM işi yok; varsayılan profilden tahmin.'
+      : t.is_sayisi + ' ölçülmüş işin ortalaması.') + '">('
+      + (t.secenekler[0].etiket === 'tahmin' ? 'tahmin' : t.is_sayisi + ' işten') + ')</span>'
+      + (t.not ? ' · ' + esc(t.not) : '');
   }
 
   function ofisIslerCiz(o){
@@ -4098,7 +4273,8 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       var talep = (($('bam-talep') || {}).value || '').trim();
       if(!talep) return;
       var r = await api('/api/bam/is', { method:'POST', body:JSON.stringify({
-        talep:talep, hedef_modul:$('bam-hedef').value || null }) });
+        talep:talep, hedef_modul:$('bam-hedef').value || null,
+        efor:($('bam-efor') || {}).value || null }) });
       if(r.status === 200){
         $('bam-talep').value = '';
         $('bam-not').textContent = r.body.yeni
@@ -5325,10 +5501,20 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
         /* Modelin konusmadigi hal SOYLENIR: sessizce komut cevabi vermek,
            kullaniciya neden oyle cevap aldigini arattirir. */
         if(g.mode === 'model'){
+          /* Motor (core/motor.py) GOZE BATMADAN soylenir: seviye, sinif,
+             yukseldiyse nereye, maliyet. Butce esiginde ekonomik moddaysa
+             nedeni ayni satirda. */
+          var mo = g.motor || {};
+          var SINIF = { ekonomik:'Ekonomik', standart:'Standart', guclu:'Güçlü', uzman:'Uzman' };
           not.textContent = g.model + ' · ' + g.seconds + ' sn · '
             + (g.context_lines || 0) + ' satır ölçüme dayandı'
+            + (mo.sinif ? ' · ' + (mo.seviye || '') + ' seviye, ' + SINIF[mo.sinif]
+                + (mo.yukseldi ? ' (zorlanınca yükseldi)' : '') : '')
+            + (typeof g.usd === 'number' ? ' · $' + g.usd.toFixed(4) : '')
             + (g.price_estimated ? ' · fiyatı bilinmiyor, harcama '
-                + 'tahmini yazıldı' : '');
+                + 'tahmini yazıldı' : '')
+            + (mo.ekonomi && mo.ekonomi.not ? ' · ' + mo.ekonomi.not : '');
+          if(mo.neden) not.title = 'Seviye nedeni: ' + mo.neden;
         }else if(g.mode === 'yok'){
           /* Hiçbir şey olmamış gibi durmak, en kötü cevaptır: kullanıcı
              yazdı ve ekran sustu. Eksik olan şey ile yapılacak iş aynı

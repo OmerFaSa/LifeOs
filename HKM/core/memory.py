@@ -103,8 +103,29 @@ def etiket(r):
     return " · ".join(parca)
 
 
-def context(con, user="ben", scope="king", limit=12):
-    rows = list_active(con, user, scope, limit=limit)
+def _kokler(metin):
+    """Kaba kok: 4+ harfli kelimelerin ilk 5 harfi (Turkce kucultmeyle).
+    «türev», «türevde», «türevler» ayni koke duser."""
+    import re as _re
+    k = str(metin or "").replace("İ", "i").replace("I", "ı").lower()
+    return {w[:5] for w in _re.findall(r"\w+", k) if len(w) >= 4}
+
+
+def context(con, user="ben", scope="king", limit=12, ilgili=None, sozler=False):
+    """Modelin baglamina girecek hafiza satirlari.
+
+    `ilgili` verilirse (mesaj metni) yalniz o mesajla KOK paylasan kayitlar
+    gider — ihtiyaci kadar veri (core/motor.py, alt/orta seviye).
+    `sozler`: ilgili olmasa da kullanicinin KENDI sozleri (katman «soz»)
+    eklenir; orta seviye bunu kullanir."""
+    rows = list_active(con, user, scope, limit=50 if ilgili is not None else limit)
+    if ilgili is not None:
+        kok = _kokler(ilgili)
+        puanli = [(len(kok & _kokler(r["text"])), r) for r in rows]
+        secili = [r for p, r in sorted(puanli, key=lambda x: -x[0]) if p > 0]
+        if sozler:
+            secili += [r for r in rows if r["katman"] == "soz" and r not in secili]
+        rows = secili[:limit]
     if not rows:
         return ""
     ids = [r["id"] for r in rows]

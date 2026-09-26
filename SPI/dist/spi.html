@@ -11021,7 +11021,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'6aeef4d', at:'2026-09-25 22:21', dirty:true };
+SP.BUILD = { id:'7ea10f3', at:'2026-09-26 10:37', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -18796,7 +18796,7 @@ LIFEOS.Hedef = (function(){
     const kendi = h.kapasite && h.kapasite.gunluk_dk;
     if(kendi && dkler.indexOf(kendi) < 0) dkler.push(kendi);
     dkler.sort((a, b) => a - b);
-    return dkler.map(dk => {
+    const out = dkler.map(dk => {
       const haftalik = yuvarla(dk * gunler / 60, 2);
       const etkili = haftalik - (ek ? ek.saat : 0);
       if(!(etkili > 1e-9)) return null;          // bu vakit sabit işe bile yetmiyor
@@ -18805,7 +18805,24 @@ LIFEOS.Hedef = (function(){
       return { ad, hiz:haftalik, birim:'saat/hafta', kapasite:{ gunluk_dk:dk },
         son_tarih:gunEkle(bugun, Math.ceil(g.saat / etkili - 1e-9) * 7) };
     }).filter(Boolean);
+    /* TARİHİNİ KORU: «bu sürede olmaz» yalnız tarihi ötelemeyi önermez;
+       kullanıcının KENDİ tarihine yetecek günlük vakit de bir seçenektir
+       (5 dakikaya yuvarlanır, yukarı). Vakti zaten yetiyorsa gereksiz;
+       günde 12 saati aşıyorsa gerçekçi bir seçenek değil — yazılmaz. */
+    const gun = h.son_tarih ? gunFarki(bugun, h.son_tarih) : 0;
+    if(gun > 0){
+      const gerekliHaftalik = g.saat / (gun / 7) + (ek ? ek.saat : 0);
+      const dk = Math.ceil(gerekliHaftalik * 60 / gunler / 5 - 1e-9) * 5;
+      if(dk <= TARIH_KORU_UST_DK && !(kendi && dk <= kendi) && !out.some(x => x.kapasite.gunluk_dk === dk)){
+        out.push({ ad:'Tarihini koru: günde ' + (dk % 60 === 0 ? (dk / 60) + ' saat' : dk + ' dakika')
+            + (gunler < 7 ? ', haftada ' + gunler + ' gün' : ''),
+          hiz:yuvarla(dk * gunler / 60, 2), birim:'saat/hafta', kapasite:{ gunluk_dk:dk },
+          son_tarih:h.son_tarih, tarihKoru:true });
+      }
+    }
+    return out;
   }
+  const TARIH_KORU_UST_DK = 720;
 
   /* Olamayacak hedef (alanın kendi sınırı: TYT'de 120 netten fazlası,
      bütün konuları zaten kapanmış bir ders) bir BANT değil bir HATADIR. */

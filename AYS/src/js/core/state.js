@@ -242,7 +242,10 @@ R.Model = (function(){
       || force
       || cur.meta.total !== total
       || cur.meta.capacityHoursPerWeek !== (Number(R.S.profile.capacityHoursPerWeek) || 21)
-      || cur.meta.level !== R.Planner.level(R.S.profile.level).id;
+      || cur.meta.level !== R.Planner.level(R.S.profile.level).id
+      /* Tavanı olmayan eski plan varsayılan tavanla üretilmişti: alan
+         eksik diye herkesin planı ilk açılışta sıfırlanmaz. */
+      || (cur.meta.tavan || R.Planner.TAVAN.varsayilan) !== R.Planner.tavan(R.S.profile);
     if(!fresh) return cur;
 
     const plan = R.Planner.generate(R.S.profile, total);
@@ -297,12 +300,22 @@ R.Model = (function(){
 
   function defaultWeek(n){
     const c = curriculumFor(n);
-    const perTopic = Math.round(c.q / Math.max(1, Math.min(3, c.topics.length)) / 10) * 10;
+    /* Uretilmis planin BUTUN konulari sozlesmeye girer (plan haftaya
+       kapasite ve kullanicinin tavanina gore 1–10 konu yazar); eskiden
+       ilk uc alinip gerisi sessizce dusuyordu. Sabit mufredat 3'te kalir. */
+    const planli = c.items && c.items.length;
+    /* Kapanmis konu (yogun bir gunde one alinip bitmis olabilir) kendi
+       haftasinda tekrar yazilmaz. Hepsi kapanmissa liste oldugu gibi kalir:
+       bos sozlesme «konu yok» degil «tekrar haftasi» olmali. */
+    const acik = planli ? c.items.filter(t => topicState(t.subjectId, t.topicId).state !== 'closed') : [];
+    const konular = acik.length ? acik : (c.items || []);
+    const perTopic = Math.round(c.q / Math.max(1, planli ? konular.length
+      : Math.min(3, c.topics.length)) / 10) * 10;
     return {
       n,
       title:c.title,
-      mainTopics: (c.items && c.items.length
-        ? c.items.slice(0,3).map(t => ({
+      mainTopics: (planli
+        ? konular.map(t => ({
             name:t.name, questionTarget:perTopic, accuracy:70,
             subjectId:t.subjectId, topicId:t.topicId,
           }))
@@ -341,23 +354,47 @@ R.Model = (function(){
   }
 
   /* ---------- gun ---------- */
+
+  /* Hafta gunun blok sayisindan FAZLA konu tasiyorsa konular ders
+     gunlerine (ritueli olmayan gunler) SIRAYLA dagilir: her gun ayni ilk
+     uc konu yazilsaydi 4. ve sonraki konular hicbir gune dusmezdi. Konu
+     sayisi blok sayisini asmiyorsa, ya da gun ritueliyse, null: eski
+     yerlesim aynen kalir. defaultDay ve Auto.syncDayBlocks AYNI sirayi
+     buradan okur; ikisi ayri hesaplasaydi gun acilisinda baglama
+     dagilimi geri bozardi. */
+  function blokKonusu(dow, i, konuSayisi, blokSayisi){
+    if(!(konuSayisi > blokSayisi)) return null;
+    const gunler = [];
+    R.WEEKDAYS.forEach((w, d) => { if(!w.ritual) gunler.push(d); });
+    const sira = gunler.indexOf(dow);
+    return sira < 0 ? null : (sira * blokSayisi + i) % konuSayisi;
+  }
+
   function defaultDay(dateObj, week){
     const dow = U.weekdayIndex(dateObj);
     const tmpl = R.WEEKDAYS[dow];
-    const blocks = tmpl.blocks.map((b, i) => ({
-      id:'b'+i,
-      slot:b.slot,
-      subject:b.subject,
-      topic: tmpl.ritual ? b.subject : ((week.mainTopics[i] && week.mainTopics[i].name) || b.subject),
-      targetMin:b.min,
-      targetQ: tmpl.ritual ? 0 : Math.round(week.questionTarget / 6 / 2),
-      status:'pending',
-      subjectId:(week.mainTopics[i] && week.mainTopics[i].subjectId) || null,
-      topicId:(week.mainTopics[i] && week.mainTopics[i].topicId) || null,
-      actualMin:null, actualQ:null, correctQ:null,
-      skipReason:null,
-      startedAt:null,
-    }));
+    const blokSayisi = tmpl.blocks.filter(b => b.slot !== 'Dinlenme').length;
+    let calisma = -1;
+    const blocks = tmpl.blocks.map((b, i) => {
+      if(b.slot !== 'Dinlenme') calisma++;
+      const r = b.slot === 'Dinlenme' ? null
+        : blokKonusu(dow, calisma, week.mainTopics.length, blokSayisi);
+      const t = week.mainTopics[r == null ? i : r];
+      return {
+        id:'b'+i,
+        slot:b.slot,
+        subject:b.subject,
+        topic: tmpl.ritual ? b.subject : ((t && t.name) || b.subject),
+        targetMin:b.min,
+        targetQ: tmpl.ritual ? 0 : Math.round(week.questionTarget / 6 / 2),
+        status:'pending',
+        subjectId:(t && t.subjectId) || null,
+        topicId:(t && t.topicId) || null,
+        actualMin:null, actualQ:null, correctQ:null,
+        skipReason:null,
+        startedAt:null,
+      };
+    });
     return {
       date:U.iso(dateObj),
       dow,
@@ -1274,7 +1311,7 @@ R.Model = (function(){
   return {
     weekStart, weekEnd, weekId, weekDates, weekOf, currentWeek, daysUntilStart, programProgress, phaseOf, curriculumFor,
     defaultWeek, ensureWeek, saveWeek,
-    defaultDay, ensureDay, saveDay, dayOf,
+    defaultDay, blokKonusu, ensureDay, saveDay, dayOf,
     ensureTopics, topicState, setTopicState,
     examNet, testNet, saveExam, deleteExam, blankCertainty, blankKnown,
     saveError, deleteError,

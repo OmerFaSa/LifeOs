@@ -26,7 +26,7 @@
 import re
 
 from core import (ai, butce, cross, dil, manager, memory, models, motto, patron, program,
-                  streak, urunler)
+                  seviye, streak, urunler)
 
 # Kademeler: kullanici kiminle konusuyor.
 GOREVLILER = {
@@ -86,8 +86,35 @@ Bugünün ölçümleri:
 %(baglam)s"""
 
 
-def sistem_metni(gorevli, bg):
+# Alt seviye (duz sohbet) icin KISA kurallar: ayni sinirlar (olcum
+# uydurma, emir kipi, uygulayamazsin), daha az soz. Paket secilmediyse
+# kullanilmaz.
+SISTEM_KISA = """Sen HKM'nin %(ad)s görevlisisin; kullanıcıyla kısa ve doğal sohbet ediyorsun.
+Kesin kurallar: ÖLÇÜM UYDURMA — ölçülen bir şeyden sayı söyleyeceksen aşağıdaki
+listede geçmeli, yoksa «bu ölçülmedi» de. Emir kipi kullanma. En fazla 3 cümle,
+Türkçe. Bir şey uygulayamazsın; değişiklik isteğini teklif olarak bırakacağını söyle.
+
+Bugünün ölçümleri:
+%(baglam)s"""
+
+HAFIZA_ADAYI_KISA = ("\n\nKullanıcı kendisi hakkında kalıcı bir tercih söylediyse cevabın sonuna "
+                     "[[HAFIZA ADAYI: <kısa cümle>]] ekleyebilirsin; sağlık bilgisi aday olmaz.")
+
+# Seviyeye gore modele giden baglam (yalniz paket seciliyken): ihtiyaci
+# kadar veri. Olcumler her seviyede TAM gider — «uykum nasil?» alt
+# seviyededir ama olcume ihtiyac duyar ve cevaptaki sayilar onunla
+# denetlenir.
+BAGLAM_SINIRI = {
+    "alt": {"gecmis": 4, "hafiza": 3, "ilgili": True, "sozler": False, "kisa": True},
+    "orta": {"gecmis": 8, "hafiza": 6, "ilgili": True, "sozler": True, "kisa": False},
+    "ust": {"gecmis": 12, "hafiza": 12, "ilgili": False, "sozler": False, "kisa": False},
+}
+
+
+def sistem_metni(gorevli, bg, kisa=False):
     g = GOREVLILER[gorevli]
+    if kisa:
+        return SISTEM_KISA % {"ad": g["ad"], "baglam": bg}
     return SISTEM_METNI % {"ad": g["ad"], "is": g["is"], "konum": KONUM[gorevli],
                            "baglam": bg}
 
@@ -598,7 +625,10 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                 "text": r["text"], "agent": gorevli}
 
     rol = GOREVLILER[gorevli]["role"]
-    hazir = ai.hazir_mi(cfg, rol)
+    # Mesajin NITELIGI modeli secer (core/seviye.py): duz sohbet alt,
+    # oneri/analiz orta, karar/yol haritasi ust. Paket yoksa etkisizdir.
+    sv = seviye.sinifla(metin)
+    hazir = ai.hazir_mi(cfg, rol, seviye=sv["seviye"])
     if not hazir["ok"]:
         # 4 — MODEL YOKSA SISTEM CALISIR. «Yapay zeka yok» ile «sistem
         # bozuk» ayri seylerdir ve ayri yazilir.
@@ -614,17 +644,29 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
 
     veri = {"mesaj"}
     bg = baglam(con, date, gorevli, th=th, veri=veri)
-    hb = memory.context(con, user=user, scope=gorevli)
+    sinir = BAGLAM_SINIRI.get(sv["seviye"]) if models.paket_of(cfg) else None
+    if sinir:
+        hb = memory.context(con, user=user, scope=gorevli, limit=sinir["hafiza"],
+                            ilgili=metin if sinir["ilgili"] else None, sozler=sinir["sozler"])
+    else:
+        hb = memory.context(con, user=user, scope=gorevli)
     if hb:
         veri.add("hafiza")
         bg += ("\nKullanıcı hakkında hatırlananlar (etiketiyle; «tahmin» kesin "
                "değildir, «senin sözün» kullanıcının kendi cümlesidir; hafızaya "
                "sen yazamazsın):\n" + hb)
-    sistem = sistem_metni(gorevli, bg) + HAFIZA_ADAYI_KURALI
-    mesajlar = list(gecmis or []) + [{"role": "user", "content": metin}]
+    kisa = bool(sinir and sinir["kisa"])
+    sistem = sistem_metni(gorevli, bg, kisa=kisa) + (HAFIZA_ADAYI_KISA if kisa else HAFIZA_ADAYI_KURALI)
+    onceki = list(gecmis or [])
+    if sinir:
+        onceki = onceki[-sinir["gecmis"]:] if sinir["gecmis"] else []
+    mesajlar = onceki + [{"role": "user", "content": metin}]
 
     r = ai.ask(con, cfg, rol, "sohbet", mesajlar, baglam=bg, sistem=sistem,
-               user=user, transport=transport, veri=veri)
+               user=user, transport=transport, veri=veri, seviye=sv["seviye"])
+    motor_bilgi = dict(r.get("motor") or {}, neden=sv["neden"],
+                       baglam={"gecmis": len(onceki), "hafiza": len(hb.splitlines()) if hb else 0,
+                               "sistem_harf": len(sistem)})
     if not r["ok"]:
         # Model konusamadiysa kural motoru devrede kalir: sohbet
         # bozulabilir, sistem bozulmaz.
@@ -669,7 +711,10 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             "truncated": bool(r.get("truncated")),
             "model": r["model"], "usd": r["usd"], "seconds": r["seconds"],
             "price_estimated": r.get("price_estimated", False),
-            "context_lines": len(bg.splitlines())}
+            "context_lines": len(bg.splitlines()),
+            # Hangi seviye, hangi sinif, neden; butce bandinda ekonomik
+            # moddaysa onun notu. Yuz bunu kucuk bir satirda gosterir.
+            "motor": motor_bilgi}
 
 def tani(con, cfg, date, gorevli="king", th=None, transport=None):
     """Sohbet zincirini BASTAN SONA dener ve nerede koptugunu soyler.

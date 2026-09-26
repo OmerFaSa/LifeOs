@@ -81,6 +81,46 @@ R.Screens.plan = (function(){
       </div>`;
   }
 
+  /* Konu düştüyse: «konuları çıkar» yerine «daha çok çalış» seçeneği,
+     SAYIYLA. Satırlar R.Planner.sureSecenekleri'nden gelir: yalnız konu
+     geri getiren en küçük günlük süreler, gunluk-sure aksiyonunun
+     uygulayacağı kapasiteyle hesaplanmış. «Uygula» önizleme + onaydan
+     geçer (orta seviye); sormadan hiçbir şey değişmez. Süre yetmiyorsa
+     neden yetmediği söylenir: kullanıcının tavanı mı, takvim mi. */
+  function sureTeklifi(m){
+    const I = R.Istisna;
+    if(!I) return '';
+    const simdi = I.temelDakika() || I.sablonDakikasi();
+    const sec = R.Planner.sureSecenekleri(S.profile, m.total,
+      { simdiDk:simdi, kapasite:I.kapasiteSaati, maxDk:I.DAKIKA.max });
+    if(!sec) return '';
+    const T = R.Planner.TAVAN;
+    let rows = sec.satirlar;
+    if(rows.length > 3) rows = rows.slice(0, 2).concat([rows[rows.length - 1]]);
+    const enIyi = rows.length ? rows[rows.length - 1].perWeek : sec.perWeek;
+    const tavanSiniri = !sec.tam && sec.tavan < T.max && enIyi >= sec.tavan;
+    return html`<div class="stack-xs mt-10">
+      <div class="small"><b>Konuları çıkarmak yerine daha çok çalışabilirsin.</b>
+        Şu an ders günü ${U.fmtMin(simdi)}.</div>
+      ${map(rows, r => html`<div class="row gap-8" style="justify-content:space-between;align-items:center">
+        <span class="small">Günde <b>${U.fmtMin(r.dakika)}</b> → ${r.dusen
+          ? r.geriGelen + ' konu geri gelir' : 'bütün konular sığar, ' + r.geriGelen + ' konu geri gelir'}
+          <span class="dim">· haftada ${r.perWeek} konu</span></span>
+        ${K.Button({ label:'Uygula', size:'sm', tone:'ghost', act:'sure-oner', data:{ 'data-dakika':r.dakika } })}
+      </div>`)}
+      ${when(!rows.length, () => html`<p class="small dim">Günlük süreyi artırmak bu planda konu getirmez.</p>`)}
+      ${when(tavanSiniri, () => html`<div class="row gap-8" style="justify-content:space-between;align-items:center">
+        <span class="small">Süre artışı haftada ${sec.tavan} konuda durur: haftada en fazla ${sec.tavan} konu
+          seçmişsin.${sec.engel === 'tavan' ? ' Hepsi için haftada ' + sec.gerekenKonu + ' konu gerekir.' : ''}</span>
+        ${K.Button({ label:'Tavanı değiştir', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'guide' } })}
+      </div>`)}
+      ${when(sec.engel === 'takvim', () => html`<p class="small">Takvim dar: ${m.total} haftada hepsi için haftada
+        ${sec.gerekenKonu} konu gerekirdi; en yüksek tavanla (${T.max}) bile sığmaz.</p>`)}
+      ${when(!sec.tam && !sec.engel && !tavanSiniri && rows.length, () => html`<p class="small dim">Günde
+        ${U.fmtMin(sec.maxDk)} ile bile hepsi sığmaz.</p>`)}
+    </div>`;
+  }
+
   function planCard(){
     const plan = M.activePlan();
     if(!plan) return K.Card({ title:'Program', sub:'Sabit müfredat kullanılıyor',
@@ -115,7 +155,7 @@ R.Screens.plan = (function(){
                      takvim gerçekten dar, hedefi gözden geçir.`
               : html`<b>yüksek frekanslı hiçbir konu düşmedi</b>.`} Bu konular silinmedi — Dersler ekranında
             öncelik sırasına göre duruyor, boşluk buldukça çalışırsın.
-            Tam kapsama için haftalık kapasite ~${m.capacityForFull} saat olmalıydı.` }))}
+            ${sureTeklifi(m)}` }))}
 
         ${when(!dropped.length, () => K.Notice({ tone:'ok',
           body:'Takvimin tüm konulara yetiyor; plan müfredatın tamamını kapsıyor.' }))}
@@ -193,6 +233,12 @@ R.Screens.plan = (function(){
   }
 
   const handle = {
+    /* Süre teklifi: kalıcı günlük süre önizlemesi dakikası dolu açılır.
+       Pencerenin «Önizle»/«Uygula» düğmeleri açık ekranın işleyicisine
+       gelir; aynı işi yapan Hafta işleyicisine devredilir. */
+    'sure-oner'(el){ R.Screens.week.sureOner(el.dataset.dakika); },
+    'istisna-onizle'(el){ return R.Screens.week.handle['istisna-onizle'](el); },
+    async 'istisna-uygula'(el){ return R.Screens.week.handle['istisna-uygula'](el); },
     async 'toggle-dropped'(){ S.ui.droppedOpen = !S.ui.droppedOpen; R.App.render(); },
     async 'open-dropped'(el){
       S.ui.subjectOpen = el.dataset.subject;

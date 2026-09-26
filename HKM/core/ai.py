@@ -166,30 +166,55 @@ def _google_parcalar(m):
             for x in (m.get("gorseller") or [])] + [{"text": m["content"]}]
 
 
-def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
-    """Saglayiciya gider.
+def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar=None):
+    """Saglayiciya gider. `ayar`: {jeton: cevap siniri, efor: low|medium|high}.
 
     Doner: (metin, giris_jeton, cikis_jeton, kesildi_mi)."""
+    ayar = ayar or {}
+    jeton = int(ayar.get("jeton") or EN_COK_JETON)
     tanim = models.PROVIDERS[provider]
     if provider in ("openrouter", "openai", "yerel"):
         url, baslik, govde = _openai_bicimi(
-            tanim["base"], anahtar or "", model, sistem,
+            ayar.get("adres") or tanim["base"], anahtar or "", model, sistem,
             [_openai_mesaj(m) for m in mesajlar],
             {"HTTP-Referer": "http://127.0.0.1:4200", "X-Title": "HKM"}
             if provider == "openrouter" else None)
+        govde["max_tokens"] = jeton
+        if provider == "openrouter":
+            if ayar.get("efor"):
+                # Birlesik dusunme ayari; desteklemeyen model yok sayar.
+                # `exclude`: dusunme metni geri gelmez (bedeli yine olculur).
+                govde["reasoning"] = {"effort": ayar["efor"], "exclude": True}
+            # GERCEK BEDEL: OpenRouter cagrinin bedelini (onbellek indirimi ve
+            # dusunme jetonlari dahil) cevapla doner — tarifeyle hesaplanan
+            # tahminin yerine OLCUM yazilir.
+            govde["usage"] = {"include": True}
+            # ONBELLEK: Claude ve Gemini acik isaret ister; OpenAI ve DeepSeek
+            # ayni oneki kendiliginden onbellekler. Saglayici kisa oneki
+            # (~1024 jetonun alti) onbelleklemez; kazanc defterde olculur.
+            if sistem and model.startswith(("anthropic/", "google/")) and govde["messages"] \
+                    and govde["messages"][0].get("role") == "system":
+                govde["messages"][0]["content"] = [{"type": "text", "text": sistem,
+                                                    "cache_control": {"type": "ephemeral"}}]
         y = _istek(url, baslik, govde, timeout)
         secim = (y.get("choices") or [{}])[0]
         metin = (secim.get("message") or {}).get("content") or ""
         k = y.get("usage") or {}
+        ek = {"usd": k.get("cost") if isinstance(k.get("cost"), (int, float)) else None,
+              "cached": ((k.get("prompt_tokens_details") or {}).get("cached_tokens") or 0),
+              "reasoning": ((k.get("completion_tokens_details") or {}).get("reasoning_tokens") or 0)}
         # Kullanim bilgisi yoksa None: olculmeyen sifir degildir (D-16).
         return (metin, k.get("prompt_tokens"), k.get("completion_tokens"),
-                secim.get("finish_reason") in KESILDI)
+                secim.get("finish_reason") in KESILDI, ek)
 
     if provider == "anthropic":
-        govde = {"model": model, "max_tokens": EN_COK_JETON,
+        govde = {"model": model, "max_tokens": jeton,
                  "messages": [_anthropic_mesaj(m) for m in mesajlar]}
         if sistem:
-            govde["system"] = sistem
+            # Onbellek isareti: ayni sistem metni sonraki turlarda indirimli
+            # okunur (kisa onek onbelleklenmez; kazanc defterde olculur).
+            govde["system"] = [{"type": "text", "text": sistem,
+                                "cache_control": {"type": "ephemeral"}}]
         y = _istek(tanim["base"], {"Content-Type": "application/json",
                                    "x-api-key": anahtar or "",
                                    "anthropic-version": "2023-06-01"},
@@ -197,16 +222,21 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI):
         parca = [p.get("text", "") for p in (y.get("content") or [])
                  if p.get("type") == "text"]
         k = y.get("usage") or {}
-        return ("\n".join(parca), k.get("input_tokens"),
-                k.get("output_tokens"),
-                y.get("stop_reason") in KESILDI)
+        okunan = k.get("cache_read_input_tokens") or 0
+        # Anthropic giris sayisina onbellekten okunani katmaz; toplam giris
+        # ikisinin toplamidir (tarife hesabi ustten, yani ihtiyatli kalir).
+        gir = k.get("input_tokens")
+        if gir is not None:
+            gir = gir + okunan + (k.get("cache_creation_input_tokens") or 0)
+        return ("\n".join(parca), gir, k.get("output_tokens"),
+                y.get("stop_reason") in KESILDI, {"usd": None, "cached": okunan, "reasoning": 0})
 
     if provider == "google":
         url = "%s/%s:generateContent" % (tanim["base"], model)
         icerik = [{"role": ("user" if m["role"] == "user" else "model"),
                    "parts": _google_parcalar(m)} for m in mesajlar]
         govde = {"contents": icerik,
-                 "generationConfig": {"maxOutputTokens": EN_COK_JETON}}
+                 "generationConfig": {"maxOutputTokens": jeton}}
         if sistem:
             govde["systemInstruction"] = {"parts": [{"text": sistem}]}
         y = _istek(url, {"Content-Type": "application/json",
@@ -330,8 +360,15 @@ def _temizle(cevap, baglam):
 
 # ------------------------------------------------------------------ cagri
 
-def hazir_mi(cfg, role):
-    """Bu kademe cagri yapabilir mi — ve yapamazsa NEDEN."""
+def hazir_mi(cfg, role, seviye=None):
+    """Bu kademe cagri yapabilir mi — ve yapamazsa NEDEN. Paket seciliyse
+    merdivenin ilk basamagi (core/motor.py) sorulur."""
+    from core import motor
+    m = motor.merdiven(None, cfg, role, seviye=seviye)
+    if m.get("basamaklar") or m.get("paket"):
+        if not m["ok"]:
+            return {"ok": False, "reason": m.get("reason"), "note": m.get("note")}
+        return {"ok": True, "assignment": m["basamaklar"][0]["atama"]}
     a = models.resolve(cfg, role)
     if not a or not a.get("provider"):
         return {"ok": False, "reason": "no-model",
@@ -410,7 +447,49 @@ DUZELTME = ("Önceki cevabın şu sebeple kullanılamadı: %s\n"
 
 def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         transport=None, now=None, duzeltme=True, denetim="olcum", veri=None,
-        gorseller=None, medya=None):
+        gorseller=None, medya=None, seviye=None):
+    """Bir kademe adina model cagirir — MERDIVENLE (core/motor.py).
+
+    Paket seciliyse basamaklar ucuzdan pahaliya denenir; bir basamak
+    ZORLANIRSA (cevap dusuruldu, saglayici hatasi, kesildi, «[[YUKSELT]]»)
+    bir ust sinifa cikilir. Butce engelinde cikilmaz. Paket yoksa ya da
+    kademenin kendi atamasi varsa tek basamak: eski davranis.
+
+    `seviye`: sohbette mesajin seviyesi (core/seviye.py): alt/orta/ust."""
+    from core import motor
+    plan = motor.merdiven(con, cfg, role, seviye=seviye)
+    if not plan["ok"]:
+        return {"ok": False, "reason": plan.get("reason"), "text": None,
+                "note": plan.get("note")}
+    basamaklar = plan["basamaklar"]
+    r = None
+    for i, b in enumerate(basamaklar):
+        ust_var = i < len(basamaklar) - 1
+        not_ek = ",".join(x for x in (
+            "paket=%s" % plan["paket"] if plan.get("paket") and b["sinif"] else "",
+            "sinif=%s" % b["sinif"] if b["sinif"] else "",
+            "seviye=%s" % plan["seviye"] if plan.get("seviye") else "") if x)
+        r = _ask_bir(con, cfg, role, task, mesajlar, b["atama"], baglam=baglam,
+                     sistem=sistem + (motor.YUKSELT_KURALI if ust_var else ""),
+                     user=user, transport=transport, now=now, duzeltme=duzeltme,
+                     denetim=denetim, veri=veri, gorseller=gorseller, medya=medya,
+                     ayar=b["ayar"], escalated=i > 0, not_ek=not_ek)
+        r["motor"] = {"paket": plan.get("paket"), "seviye": plan.get("seviye"),
+                      "sinif": b["sinif"], "basamak": i, "yukseldi": i > 0,
+                      "ekonomi": plan.get("ekonomi")}
+        if not (ust_var and motor.zorlandi(r)):
+            break
+    if r.get("ok") and r.get("text"):
+        r["text"] = motor.isaretsiz(r["text"])
+        if not r["text"]:
+            return dict(r, ok=False, reason="dropped", text=None,
+                        note="Model yalnızca yükseltme istedi; üst basamak kalmadı.")
+    return r
+
+
+def _ask_bir(con, cfg, role, task, mesajlar, a, baglam="", sistem="", user="ben",
+             transport=None, now=None, duzeltme=True, denetim="olcum", veri=None,
+             gorseller=None, medya=None, ayar=None, escalated=False, not_ek=""):
     """Bir kademe adina model cagirir.
 
     `denetim`: «olcum» (varsayilan) kullaniciya konusan cevaptir: dayanaksiz
@@ -422,11 +501,17 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
     `baglam`: kural motorunun urettigi olculer. Modelin gorecegi TEK
     gercek budur ve cevaptaki sayilar bununla denetlenir.
 
-    `duzeltme`: cevap sinirdan dondugunde BIR KEZ duzeltme istenir."""
-    hazir = hazir_mi(cfg, role)
-    if not hazir["ok"]:
-        return dict(hazir, text=None)
-    a = hazir["assignment"]
+    `duzeltme`: cevap sinirdan dondugunde BIR KEZ duzeltme istenir.
+
+    Bu fonksiyon merdivenin TEK basamagidir (`a`: o basamagin atamasi);
+    basamaklari `ask` yurutur (core/motor.py)."""
+    ayar = {k: v for k, v in (ayar or {}).items() if v}
+    if a.get("provider") == "yerel":
+        # Motor servisi baska bir makinedeyse adresi ayardan gelir.
+        adres = models.yerel_uclari(cfg)[0]
+        if adres != models.PROVIDERS["yerel"]["base"]:
+            ayar["adres"] = adres
+    tavan_jeton = int(ayar.get("jeton") or EN_COK_JETON)
 
     anahtar = models.key_value(cfg, a["provider"], a.get("key_id"))
     # Harcama, anahtarin SAHIBININ defterine yazilir: iki kisi ayni
@@ -467,7 +552,7 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
                                                        for m in gecmis])
                        + sum(int(x.get("jeton") or GORSEL_JETON)
                              for m in gecmis for x in (m.get("gorseller") or [])))
-        en_kotu = _fiyat(a["provider"], a["model"], istem_jeton, EN_COK_JETON)
+        en_kotu = _fiyat(a["provider"], a["model"], istem_jeton, tavan_jeton)
         izin = butce.guard(con, cfg, cost_usd=en_kotu)
         if not izin["ok"]:
             return {"ok": False, "reason": "budget", "text": None,
@@ -481,13 +566,19 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
         gir = cik = 0
         kesildi = False
         jeton_tahmini = False
+        ek = {}
         try:
             cagir = transport if transport is not None else _cagir
-            sonuc = cagir(a["provider"], anahtar, a["model"], sistem_metni,
-                          gecmis)
+            # Ayar (efor, cevap siniri) yalniz VARSA gecer: eski tasiyicilar
+            # bu parametreyi bilmez.
+            sonuc = (cagir(a["provider"], anahtar, a["model"], sistem_metni, gecmis, ayar=ayar)
+                     if ayar else cagir(a["provider"], anahtar, a["model"], sistem_metni, gecmis))
             # Tasiyici kesilme isareti vermeyebilir: vermeyen icin «kesilmedi»
             # varsayilir, cunku bilinmeyeni «kesildi» saymak da uydurmaktir.
-            if len(sonuc) == 4:
+            if len(sonuc) == 5:
+                metin, gir, cik, kesildi, ek = sonuc
+                ek = ek or {}
+            elif len(sonuc) == 4:
                 metin, gir, cik, kesildi = sonuc
             else:
                 metin, gir, cik = sonuc
@@ -506,18 +597,25 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
 
         # HER CAGRI DEFTERE YAZILIR — basarisiz olan da.
         usd = _fiyat(a["provider"], a["model"], gir, cik)
+        olculen = (ek or {}).get("usd") if hata is None else None
+        if olculen is not None:
+            usd = float(olculen)            # saglayicinin bildirdigi bedel: OLCUM
         # Tarifesi bilinmeyen model icin TAHMINI bir taban kullanilir ve
         # bu ISARETLENIR. Tahmin, olcumun yerine sessizce gecmemeli:
         # yuksek bir tahmin tavani erken doldurur ve kullanici sohbetin
         # neden durdugunu anlamaz.
-        tahmini = not fiyat_bilinir(a["provider"], a["model"])
+        tahmini = olculen is None and not fiyat_bilinir(a["provider"], a["model"])
         butce.record(con, role=role, task=task, provider=a["provider"],
                      model=a["model"], user=user, in_tok=gir, out_tok=cik,
                      usd=usd, rate=float(b.get("usd_try") or 0),
-                     ok=(hata is None),
+                     ok=(hata is None), escalated=escalated,
+                     cached=bool((ek or {}).get("cached")), cached_tok=int((ek or {}).get("cached") or 0),
+                     reason_tok=int((ek or {}).get("reasoning") or 0),
                      note=hata or ",".join(
                          n for n, var in (("tahmini-fiyat", tahmini),
-                                          ("tahmini-jeton", jeton_tahmini)) if var),
+                                          ("tahmini-jeton", jeton_tahmini),
+                                          ("olculen-bedel", olculen is not None),
+                                          (not_ek, bool(not_ek))) if var),
                      now=now,
                      # Gizlilik panosu (fikir 55): modele giden veri TURU.
                      # BAM istemi konu metni ve web kaynagidir (kitap.py kural 5).
@@ -580,22 +678,45 @@ def ask(con, cfg, role, task, mesajlar, baglam="", sistem="", user="ben",
 # Fiyatlar: 1M jeton basina USD (giris, cikis). Bilinmeyen model icin
 # 0 YAZILMAZ — «bedava» demek olurdu; tahmini bir taban kullanilir ve
 # bu ayrica isaretlenir.
+#
+# Bu tablo YEDEKTIR. Guncel tarife core/tarife.py ile OpenRouter'in acik
+# model listesinden okunur, tarihiyle `model_tarife` tablosuna yazilir ve
+# CANLI_FIYAT uzerinden bunun ONUNE gecer. Yedek 2026-09-26'da ayni
+# listeden okundu; eskiden deepseek-chat 0.06/0.18, Sonnet 5 3/15, Opus 5
+# 15/75 yaziyordu — «ucuzluk sirasi» bozuk sayilarla kuruluyordu.
 FIYAT = {
+    "deepseek/deepseek-chat": (0.32, 0.89),
     "google/gemini-2.5-flash-lite": (0.10, 0.40),
+    "gemini-2.5-flash-lite": (0.10, 0.40),
     "google/gemini-2.5-flash": (0.30, 2.50),
     "gemini-2.5-flash": (0.30, 2.50),
-    "gemini-2.5-flash-lite": (0.10, 0.40),
+    "google/gemini-3.6-flash": (0.75, 3.75),
+    "gemini-3.6-flash": (0.75, 3.75),
+    "google/gemini-2.5-pro": (1.25, 10.00),
     "gemini-2.5-pro": (1.25, 10.00),
-    "deepseek/deepseek-chat": (0.06, 0.18),
-    "anthropic/claude-haiku-4.5": (1.00, 5.00),
-    "claude-haiku-4-5-20251001": (1.00, 5.00),
-    "anthropic/claude-sonnet-5": (3.00, 15.00),
-    "claude-sonnet-5": (3.00, 15.00),
-    "claude-opus-5": (15.00, 75.00),
+    "openai/gpt-5-nano": (0.05, 0.40),
+    "gpt-5-nano": (0.05, 0.40),
     "openai/gpt-5-mini": (0.25, 2.00),
     "gpt-5-mini": (0.25, 2.00),
+    "openai/gpt-5": (1.25, 10.00),
     "gpt-5": (1.25, 10.00),
+    "openai/gpt-4.1": (2.00, 8.00),
+    "gpt-4.1": (2.00, 8.00),
+    "qwen/qwen2.5-vl-72b-instruct": (0.80, 1.00),
+    "anthropic/claude-haiku-4.5": (1.00, 5.00),
+    "claude-haiku-4-5-20251001": (1.00, 5.00),
+    "claude-haiku-4-5": (1.00, 5.00),
+    # Anthropic tarifesi (1M jeton, USD). Sonnet 5 ve Opus 5 eskiden 3/15 ve
+    # 15/75 yaziliydi: harcama 1,5–3 kat fazla sayiliyor, butce erken doluyordu.
+    "anthropic/claude-sonnet-5": (2.00, 10.00),
+    "claude-sonnet-5": (2.00, 10.00),
+    "anthropic/claude-opus-5": (5.00, 25.00),
+    "claude-opus-5": (5.00, 25.00),
+    "anthropic/claude-opus-5.5": (4.00, 20.00),
+    "claude-opus-5-5": (4.00, 20.00),
 }
+# core/tarife.yukle doldurur: OpenRouter kimligi -> (giris, cikis).
+CANLI_FIYAT = {}
 BILINMEYEN_FIYAT = (1.00, 5.00)     # tahmini taban — bedava DEGIL
 
 
@@ -609,13 +730,23 @@ def _jeton_tahmini(*metinler):
     return (n + KARAKTER_BASINA_JETON - 1) // KARAKTER_BASINA_JETON
 
 
+def tarife_of(provider, model):
+    """(giris, cikis) ya da None. Once canli tarife (OpenRouter listesi),
+    yoksa yedek tablo."""
+    from core import tarife         # tarife ai'yi ice aktarir; dongu burada kirilir
+    k = tarife.or_kimligi(provider, model)
+    if k and k in CANLI_FIYAT:
+        return CANLI_FIYAT[k]
+    return FIYAT.get(model) or (FIYAT.get(k) if k else None)
+
+
 def fiyat_bilinir(provider, model):
     """Bu modelin TARIFESI elimizde mi."""
-    return provider == "yerel" or model in FIYAT
+    return provider == "yerel" or tarife_of(provider, model) is not None
 
 
 def _fiyat(provider, model, gir, cik):
     if provider == "yerel":
         return 0.0                  # kendi makinende kosan model bedava
-    g, c = FIYAT.get(model, BILINMEYEN_FIYAT)
+    g, c = tarife_of(provider, model) or BILINMEYEN_FIYAT
     return (gir / 1e6) * g + (cik / 1e6) * c

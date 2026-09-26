@@ -343,12 +343,36 @@
       expect(H().senaryolar(h, az, {}, BUGUN).map(x => x.kapasite.gunluk_dk)).toEqual([60]);
     });
 
-    it('senaryolar günde 30 dk, 1 saat ve kullanıcının kendi vaktidir', () => {
+    it('senaryolar günde 30 dk, 1 saat, kullanıcının kendi vakti ve tarihini koruyan vakittir', () => {
       const h = dilHedefi('Bir ayda İngilizcede A2\'ye gelmek istiyorum, günde 45 dakika', 'A1');
       const s = H().senaryolar(h, DIL, {}, BUGUN);
-      expect(s.map(x => x.kapasite.gunluk_dk)).toEqual([30, 45, 60]);
+      expect(s.slice(0, 3).map(x => x.kapasite.gunluk_dk)).toEqual([30, 45, 60]);
       expect(s[1].ad).toContain('senin vaktin');
       expect(s[2].son_tarih < s[0].son_tarih).toBe(true);
+      /* «Bu sürede olmaz» yalnız tarihi ötelemeyi önermez: tarihi KORUYAN
+         günlük vakit de bir seçenektir (AYS'deki «konu düşünce daha çok
+         çalış» ile aynı soru). */
+      const koru = s[s.length - 1];
+      expect(koru.tarihKoru).toBe(true);
+      expect(koru.son_tarih).toBe(h.son_tarih);
+      expect(koru.ad).toContain('Tarihini koru');
+      expect(koru.kapasite.gunluk_dk % 5).toBe(0);
+    });
+
+    it('tarihi koruyan vakit gerçekten yeter, 5 dakika azı yetmez', () => {
+      const h = dilHedefi('Bir ayda İngilizcede A2\'ye gelmek istiyorum, günde 45 dakika', 'A1');
+      const koru = H().senaryolar(h, DIL, {}, BUGUN).filter(x => x.tarihKoru)[0];
+      const ile = dk => H().gerceklik(Object.assign({}, h, { kapasite:{ gunluk_dk:dk } }), DIL, {}, BUGUN).bant;
+      expect(ile(koru.kapasite.gunluk_dk)).toBe('gercekci');
+      expect(ile(koru.kapasite.gunluk_dk - 5) === 'gercekci').toBe(false);
+    });
+
+    it('vakit zaten yetiyorsa ya da günde 12 saati aşıyorsa tarihi koruyan seçenek yok', () => {
+      const bol = dilHedefi('Bir yılda İngilizcede A2\'ye gelmek istiyorum, günde 1 saat', 'A1');
+      expect(H().senaryolar(bol, DIL, {}, BUGUN).some(x => x.tarihKoru)).toBe(false);
+      const dar = Object.assign({}, DIL, { gerekenSaat:() => ({ saat:2000 }) });
+      const h = dilHedefi('Bir ayda İngilizcede A2\'ye gelmek istiyorum, günde 1 saat', 'A1');
+      expect(H().senaryolar(h, dar, {}, BUGUN).some(x => x.tarihKoru)).toBe(false);
     });
 
     it('vakit ya da şu anki değer yoksa karar verilmez ve bu söylenir', () => {

@@ -410,16 +410,25 @@ R.Proposals = (function(){
       check(p){
         const v = R.Istisna.dogrula({ tur:'sure', from:p.from, to:p.to, dakika:p.dakika });
         if(!v.ok) return v;
-        return pass({ gun:v.gun, dk:Math.round(Number(p.dakika)), etki:R.Istisna.etki(p.from, p.to) });
+        return pass({ gun:v.gun, dk:Math.round(Number(p.dakika)), etki:R.Istisna.etki(p.from, p.to),
+          oneAlinan:R.Istisna.oneAlinacaklar(p.from, p.to, p.dakika) });
       },
       preview(p, ctx){
         const temel = R.Istisna.temelDakika(p.from) || R.Istisna.sablonDakikasi();
         const rows = [
           { label:'Ders günü süresi', before:temel + ' dk', after:ctx.dk + ' dk' },
           { label:'Tarih', before:'—', after:tarihAraligi(p.from, p.to) + ' · ' + ctx.gun + ' gün' },
-          { label:'Deneme ve kapanış günleri', before:'olduğu gibi', after:'değişmez' },
-          { label:'Tarih bitince', before:'—', after:'temel plana döner' },
         ];
+        /* Yogun gun: fazla sure plandaki siradaki konuya blok olur. Hangi
+           konunun one alindigi onaydan ONCE adiyla soylenir. */
+        if(ctx.oneAlinan && ctx.oneAlinan.length){
+          const adlar = ctx.oneAlinan.map(x => x.konu.name);
+          rows.push({ label:'Öne alınan konu', before:'—',
+            after:adlar.slice(0, 3).join(', ') + (adlar.length > 3 ? ' ve ' + (adlar.length - 3) + ' konu daha' : '') });
+        }
+        rows.push(
+          { label:'Deneme ve kapanış günleri', before:'olduğu gibi', after:'değişmez' },
+          { label:'Tarih bitince', before:'—', after:'temel plana döner' });
         if(ctx.etki.korunan.length){
           rows.push({ label:'İlerlemesi başlamış gün', before:'—',
             after:ctx.etki.korunan.length + ' gün, dokunulmaz' });
@@ -443,16 +452,29 @@ R.Proposals = (function(){
         }
         const simdi = R.Istisna.temelDakika() || R.Istisna.sablonDakikasi();
         if(simdi === dk) return fail('Günlük süre zaten ' + dk + ' dakika.');
-        return pass({ dk, simdi, eskiKapasite:S.profile.capacityHoursPerWeek,
-          yeniKapasite:R.Istisna.kapasiteSaati(dk) });
+        const yeniKapasite = R.Istisna.kapasiteSaati(dk);
+        /* Plana girmeyen konu sayisi once/sonra: yeniden planlama ayni
+           ureteci ayni kapasiteyle calistirir (Planner.replan → generate),
+           onizlemede yazan sayi onaydan sonra olanla aynidir. */
+        const plan = M.activePlan();
+        const dusen = plan ? { once:(plan.meta.dropped || []).length,
+          sonra:R.Planner.generate(Object.assign({}, S.profile,
+            { capacityHoursPerWeek:yeniKapasite }), plan.meta.total).meta.dropped.length } : null;
+        return pass({ dk, simdi, eskiKapasite:S.profile.capacityHoursPerWeek, yeniKapasite, dusen });
       },
       preview(p, ctx){
-        return [
+        const rows = [
           { label:'Ders günü süresi', before:ctx.simdi + ' dk', after:ctx.dk + ' dk' },
           { label:'Haftalık kapasite', before:ctx.eskiKapasite + ' sa', after:ctx.yeniKapasite + ' sa' },
+        ];
+        if(ctx.dusen && (ctx.dusen.once || ctx.dusen.sonra)){
+          rows.push({ label:'Plana girmeyen konu', before:ctx.dusen.once + ' konu',
+            after:ctx.dusen.sonra + ' konu' });
+        }
+        return rows.concat([
           { label:'Plan', before:'eski kapasiteye göre', after:'bu haftadan itibaren yeniden dağıtılır' },
           { label:'Geçmiş haftalar', before:'—', after:'değişmez' },
-        ];
+        ]);
       },
       async apply(p, ctx){
         const pr = S.profile;

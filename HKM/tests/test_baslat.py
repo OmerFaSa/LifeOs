@@ -87,3 +87,72 @@ def run():
         no(baslat.ayakta_mi({"host": "127.0.0.1", "port": 4279}, timeout=0.5))
     test("cevap vermeyen daemon ayakta sayilmaz",
          t_dead_daemon_is_not_reported_alive)
+
+    def t_child_output_survives_windows_codepage():
+        """Turkce Windows'ta cocuk surecin ciktisi GUNLUK DOSYASINA gider ve
+        Python dosyaya yazarken sistemin kod sayfasini (cp1254) kullanir;
+        o sayfada «✓» yoktur. Sunucu ilk print'te UnicodeEncodeError ile
+        oluyordu. Iki baslatici da cocuga UTF-8 yazmasini SOYLER; gunluk
+        zaten UTF-8 acilir. Burada gercek bir cocuk surecle olculur."""
+        import importlib.util
+        import subprocess
+        import sys
+        yol = os.path.join(os.path.dirname(baslat.ROOT), "baslat.py")
+        spec = importlib.util.spec_from_file_location("kok_baslat", yol)
+        kok = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(kok)
+        kod = "print('\\u2713 hazir')"
+        eski = os.environ.get("PYTHONIOENCODING")
+        os.environ["PYTHONIOENCODING"] = "cp1254"      # Windows'u taklit et
+        try:
+            for ad, ortam in (("HKM", baslat.cocuk_ortami()),
+                              ("kok", kok.cocuk_ortami())):
+                with tempfile.TemporaryDirectory() as d:
+                    g = os.path.join(d, "gunluk.log")
+                    with open(g, "a", encoding="utf-8") as f:
+                        # Ortamsiz cocuk gercekten olur: test hatayi gorur.
+                        cplak = subprocess.run([sys.executable, "-c", kod],
+                                               stdout=f, stderr=subprocess.STDOUT)
+                        cfix = subprocess.run([sys.executable, "-c", kod],
+                                              stdout=f, stderr=subprocess.STDOUT,
+                                              env=ortam)
+                    with open(g, encoding="utf-8") as f:
+                        metin = f.read()
+                    ok(cplak.returncode != 0, ad + ": taklit hatayi uretmedi")
+                    eq(cfix.returncode, 0, ad + ": cocuk yine oldu")
+                    ok("\u2713 hazir" in metin, ad + ": gunlukte ✓ yok")
+        finally:
+            if eski is None:
+                os.environ.pop("PYTHONIOENCODING", None)
+            else:
+                os.environ["PYTHONIOENCODING"] = eski
+    test("cocuk surec Windows kod sayfasinda olmez",
+         t_child_output_survives_windows_codepage)
+
+    def t_servers_guard_their_own_output():
+        """Sunucu ELLE ve ciktisi yonlendirilerek acilsa da (baslatici
+        cocuk ortamini kurmadan) ilk satirda olmez: iki baslatici, sunucu.py
+        ve daemon.py acilista ciktilarini kendileri UTF-8'e alir."""
+        import subprocess
+        import sys
+        kok = os.path.dirname(baslat.ROOT)
+        ortam = dict(os.environ, PYTHONIOENCODING="cp1254")
+        ortam.pop("PYTHONUTF8", None)
+        for ad, klasor, modul in (("sunucu", kok, "sunucu"),
+                                  ("daemon", baslat.ROOT, "daemon"),
+                                  ("kok baslat", kok, "baslat"),
+                                  ("HKM baslat", baslat.ROOT, "baslat")):
+            kod = ("import sys; sys.path.insert(0, %r); import %s as m; "
+                   "m._cikti_utf8(); print('\\u2713 hazir')" % (klasor, modul))
+            with tempfile.TemporaryDirectory() as d:
+                g = os.path.join(d, "gunluk.log")
+                with open(g, "a", encoding="utf-8") as f:
+                    c = subprocess.run([sys.executable, "-c", kod], cwd=klasor,
+                                       stdout=f, stderr=subprocess.STDOUT,
+                                       env=ortam, timeout=60)
+                with open(g, encoding="utf-8") as f:
+                    metin = f.read()
+                eq(c.returncode, 0, ad + ": " + metin[-300:])
+                ok("\u2713 hazir" in metin, ad + ": gunlukte ✓ yok")
+    test("baslatici ve sunucular ciktisini kendisi korur",
+         t_servers_guard_their_own_output)

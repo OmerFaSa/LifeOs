@@ -12570,7 +12570,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'916f5f5', at:'2026-09-25 22:29', dirty:true };
+R.BUILD = { id:'7ea10f3', at:'2026-09-26 10:36', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20345,7 +20345,7 @@ LIFEOS.Hedef = (function(){
     const kendi = h.kapasite && h.kapasite.gunluk_dk;
     if(kendi && dkler.indexOf(kendi) < 0) dkler.push(kendi);
     dkler.sort((a, b) => a - b);
-    return dkler.map(dk => {
+    const out = dkler.map(dk => {
       const haftalik = yuvarla(dk * gunler / 60, 2);
       const etkili = haftalik - (ek ? ek.saat : 0);
       if(!(etkili > 1e-9)) return null;          // bu vakit sabit işe bile yetmiyor
@@ -20354,7 +20354,24 @@ LIFEOS.Hedef = (function(){
       return { ad, hiz:haftalik, birim:'saat/hafta', kapasite:{ gunluk_dk:dk },
         son_tarih:gunEkle(bugun, Math.ceil(g.saat / etkili - 1e-9) * 7) };
     }).filter(Boolean);
+    /* TARİHİNİ KORU: «bu sürede olmaz» yalnız tarihi ötelemeyi önermez;
+       kullanıcının KENDİ tarihine yetecek günlük vakit de bir seçenektir
+       (5 dakikaya yuvarlanır, yukarı). Vakti zaten yetiyorsa gereksiz;
+       günde 12 saati aşıyorsa gerçekçi bir seçenek değil — yazılmaz. */
+    const gun = h.son_tarih ? gunFarki(bugun, h.son_tarih) : 0;
+    if(gun > 0){
+      const gerekliHaftalik = g.saat / (gun / 7) + (ek ? ek.saat : 0);
+      const dk = Math.ceil(gerekliHaftalik * 60 / gunler / 5 - 1e-9) * 5;
+      if(dk <= TARIH_KORU_UST_DK && !(kendi && dk <= kendi) && !out.some(x => x.kapasite.gunluk_dk === dk)){
+        out.push({ ad:'Tarihini koru: günde ' + (dk % 60 === 0 ? (dk / 60) + ' saat' : dk + ' dakika')
+            + (gunler < 7 ? ', haftada ' + gunler + ' gün' : ''),
+          hiz:yuvarla(dk * gunler / 60, 2), birim:'saat/hafta', kapasite:{ gunluk_dk:dk },
+          son_tarih:h.son_tarih, tarihKoru:true });
+      }
+    }
+    return out;
   }
+  const TARIH_KORU_UST_DK = 720;
 
   /* Olamayacak hedef (alanın kendi sınırı: TYT'de 120 netten fazlası,
      bütün konuları zaten kapanmış bir ders) bir BANT değil bir HATADIR. */
@@ -24627,7 +24644,7 @@ R.HINTS = {
   'minimum-day':{ t:'Minimum gün', b:'Kötü günün alt sınırı: 45 dakika + 15 paragraf + due kartlar.',
     more:'Motivasyon çalışmanın önkoşulu değil, düzenin yan ürünüdür. Hiçbir şey yapamadığın gün bile bu üçünü tutturursan seri kırılmaz.' },
   'block':{ t:'Çalışma bloğu', b:'Gün üç bloğa bölünür: 75 dk ana ders, 65 dk ikinci ders, 40 dk rutin.',
-    more:'Bloklar arası 10–15 dakika ara verilir. Blok konusu haftanın üç ana konusundan seçilir; serbestçe değiştirilebilir.' },
+    more:'Bloklar arası 10–15 dakika ara verilir. Blok konusu haftanın ana konularından seçilir; konu sayısı bloktan fazlaysa konular günlere sırayla dağılır. Serbestçe değiştirilebilir.' },
   'timer':{ t:'Odak zamanlayıcı', b:'Başlat’a basınca süre kendi işler, bitirince blok otomatik işaretlenir.',
     more:'Gerçekleşen süre elle girilmez; ölçülen süre plan tamamlama ve süre sapması KPI’larını besler.' },
   'skip-reason':{ t:'Atlama nedeni', b:'Atlanan blok suç değil veri: neden seçilir, pazar review’unda kümelenir.',
@@ -24640,7 +24657,7 @@ R.HINTS = {
     more:'Son dört haftada kalkış saati sınav sabahına göre kademeli ayarlanır. Haziranda gece çalışmasıyla borç kapatılmaz.' },
 
   /* --- hafta --- */
-  'contract':{ t:'Haftalık sözleşme', b:'En fazla üç ana konu; hedef çıktı temelli yazılır.',
+  'contract':{ t:'Haftalık sözleşme', b:'Ana konular plandan gelir; en fazla kaç konu olacağını Ayarlar › Profil’deki tavan belirler. Hedef çıktı temelli yazılır.',
     more:'“Matematik çalış” değil, “rasyonel sayılardan 120 soru, en az %70 doğruluk”. Geçen haftanın verisi görülmeden yeni hedef yazılmaz.' },
   'capacity':{ t:'Kapasite', b:'Planlanan yük kapasitenin %110’unu aşarsa hafta imzalanamaz.',
     more:'Kapasite haftada 21 saat (3–4 saat × 6 gün) varsayılır. Gerçekçi olmayan plan, tamamlama oranını da anlamsız kılar.' },
@@ -27206,7 +27223,10 @@ R.Model = (function(){
       || force
       || cur.meta.total !== total
       || cur.meta.capacityHoursPerWeek !== (Number(R.S.profile.capacityHoursPerWeek) || 21)
-      || cur.meta.level !== R.Planner.level(R.S.profile.level).id;
+      || cur.meta.level !== R.Planner.level(R.S.profile.level).id
+      /* Tavanı olmayan eski plan varsayılan tavanla üretilmişti: alan
+         eksik diye herkesin planı ilk açılışta sıfırlanmaz. */
+      || (cur.meta.tavan || R.Planner.TAVAN.varsayilan) !== R.Planner.tavan(R.S.profile);
     if(!fresh) return cur;
 
     const plan = R.Planner.generate(R.S.profile, total);
@@ -27261,12 +27281,22 @@ R.Model = (function(){
 
   function defaultWeek(n){
     const c = curriculumFor(n);
-    const perTopic = Math.round(c.q / Math.max(1, Math.min(3, c.topics.length)) / 10) * 10;
+    /* Uretilmis planin BUTUN konulari sozlesmeye girer (plan haftaya
+       kapasite ve kullanicinin tavanina gore 1–10 konu yazar); eskiden
+       ilk uc alinip gerisi sessizce dusuyordu. Sabit mufredat 3'te kalir. */
+    const planli = c.items && c.items.length;
+    /* Kapanmis konu (yogun bir gunde one alinip bitmis olabilir) kendi
+       haftasinda tekrar yazilmaz. Hepsi kapanmissa liste oldugu gibi kalir:
+       bos sozlesme «konu yok» degil «tekrar haftasi» olmali. */
+    const acik = planli ? c.items.filter(t => topicState(t.subjectId, t.topicId).state !== 'closed') : [];
+    const konular = acik.length ? acik : (c.items || []);
+    const perTopic = Math.round(c.q / Math.max(1, planli ? konular.length
+      : Math.min(3, c.topics.length)) / 10) * 10;
     return {
       n,
       title:c.title,
-      mainTopics: (c.items && c.items.length
-        ? c.items.slice(0,3).map(t => ({
+      mainTopics: (planli
+        ? konular.map(t => ({
             name:t.name, questionTarget:perTopic, accuracy:70,
             subjectId:t.subjectId, topicId:t.topicId,
           }))
@@ -27305,23 +27335,47 @@ R.Model = (function(){
   }
 
   /* ---------- gun ---------- */
+
+  /* Hafta gunun blok sayisindan FAZLA konu tasiyorsa konular ders
+     gunlerine (ritueli olmayan gunler) SIRAYLA dagilir: her gun ayni ilk
+     uc konu yazilsaydi 4. ve sonraki konular hicbir gune dusmezdi. Konu
+     sayisi blok sayisini asmiyorsa, ya da gun ritueliyse, null: eski
+     yerlesim aynen kalir. defaultDay ve Auto.syncDayBlocks AYNI sirayi
+     buradan okur; ikisi ayri hesaplasaydi gun acilisinda baglama
+     dagilimi geri bozardi. */
+  function blokKonusu(dow, i, konuSayisi, blokSayisi){
+    if(!(konuSayisi > blokSayisi)) return null;
+    const gunler = [];
+    R.WEEKDAYS.forEach((w, d) => { if(!w.ritual) gunler.push(d); });
+    const sira = gunler.indexOf(dow);
+    return sira < 0 ? null : (sira * blokSayisi + i) % konuSayisi;
+  }
+
   function defaultDay(dateObj, week){
     const dow = U.weekdayIndex(dateObj);
     const tmpl = R.WEEKDAYS[dow];
-    const blocks = tmpl.blocks.map((b, i) => ({
-      id:'b'+i,
-      slot:b.slot,
-      subject:b.subject,
-      topic: tmpl.ritual ? b.subject : ((week.mainTopics[i] && week.mainTopics[i].name) || b.subject),
-      targetMin:b.min,
-      targetQ: tmpl.ritual ? 0 : Math.round(week.questionTarget / 6 / 2),
-      status:'pending',
-      subjectId:(week.mainTopics[i] && week.mainTopics[i].subjectId) || null,
-      topicId:(week.mainTopics[i] && week.mainTopics[i].topicId) || null,
-      actualMin:null, actualQ:null, correctQ:null,
-      skipReason:null,
-      startedAt:null,
-    }));
+    const blokSayisi = tmpl.blocks.filter(b => b.slot !== 'Dinlenme').length;
+    let calisma = -1;
+    const blocks = tmpl.blocks.map((b, i) => {
+      if(b.slot !== 'Dinlenme') calisma++;
+      const r = b.slot === 'Dinlenme' ? null
+        : blokKonusu(dow, calisma, week.mainTopics.length, blokSayisi);
+      const t = week.mainTopics[r == null ? i : r];
+      return {
+        id:'b'+i,
+        slot:b.slot,
+        subject:b.subject,
+        topic: tmpl.ritual ? b.subject : ((t && t.name) || b.subject),
+        targetMin:b.min,
+        targetQ: tmpl.ritual ? 0 : Math.round(week.questionTarget / 6 / 2),
+        status:'pending',
+        subjectId:(t && t.subjectId) || null,
+        topicId:(t && t.topicId) || null,
+        actualMin:null, actualQ:null, correctQ:null,
+        skipReason:null,
+        startedAt:null,
+      };
+    });
     return {
       date:U.iso(dateObj),
       dow,
@@ -28238,7 +28292,7 @@ R.Model = (function(){
   return {
     weekStart, weekEnd, weekId, weekDates, weekOf, currentWeek, daysUntilStart, programProgress, phaseOf, curriculumFor,
     defaultWeek, ensureWeek, saveWeek,
-    defaultDay, ensureDay, saveDay, dayOf,
+    defaultDay, blokKonusu, ensureDay, saveDay, dayOf,
     ensureTopics, topicState, setTopicState,
     examNet, testNet, saveExam, deleteExam, blankCertainty, blankKnown,
     saveError, deleteError,
@@ -30314,12 +30368,37 @@ R.Planner = (function(){
     return Math.round(cap * perHour * phase.qFactor * lv.qScale * load / 10) * 10;
   }
 
-  /* Bir haftaya kaç konu sığar? Kapasite ve seviyeye göre 1–3. */
+  /* Haftalık konu TAVANI — kullanıcının TERCİHİDİR (profil.haftalikKonuTavani).
+     Kapasite kaç konuya yetse de haftaya bundan fazlası yazılmaz; tavan
+     kapasiteyi de aşamaz: günde 3 saatle 8 konu yazılmaz. Varsayılan 5,
+     tavan ayarı gelmeden önceki sabit sınırdır — ayara dokunmayanın planı
+     değişmez. */
+  const TAVAN = { min:1, max:10, varsayilan:5 };
+  function tavan(profile){
+    const v = profile && profile.haftalikKonuTavani;
+    const n = Number(v);
+    return (v != null && v !== '' && Number.isInteger(n) && n >= TAVAN.min && n <= TAVAN.max)
+      ? n : TAVAN.varsayilan;
+  }
+
+  /* Bir haftaya kaç konu sığar? Kapasite ve seviyeye göre, en fazla tavan. */
   function topicsPerWeek(profile){
     const cap = Number(profile.capacityHoursPerWeek) || 21;
     const lv = level(profile.level);
     const budget = (cap / 3.5) / lv.pace;          // kabaca "kaç gün konu işlenebilir"
-    return U.clamp(Math.round(budget / 2.2), 1, 5);
+    return U.clamp(Math.round(budget / 2.2), 1, tavan(profile));
+  }
+
+  /* Haftaya en az k konu yazdıran en küçük kapasite (yarım saat adımıyla).
+     Tavan k'dan küçükse hiçbir kapasite yetmez: null. */
+  function kapasiteFor(profile, k){
+    if(k > tavan(profile)) return null;
+    const ile = cap => topicsPerWeek(Object.assign({}, profile, { capacityHoursPerWeek:cap }));
+    let cap = Math.max(0.5, Math.ceil((k - 0.5) * 3.5 * level(profile.level).pace * 2.2 * 2) / 2);
+    let guard = 0;
+    while(ile(cap) < k && guard++ < 400) cap += 0.5;
+    while(cap > 0.5 && ile(cap - 0.5) >= k) cap -= 0.5;
+    return cap;
   }
 
   /* Karar kapısı haftaları — takvimin yüzdesine oturur. */
@@ -30472,16 +30551,68 @@ R.Planner = (function(){
           topicId:t.topicId, name:t.name, freq:t.freq,
         })),
         coverage:U.pct(placed, rawQueue.length),
-        /* Tam kapsama için gereken haftalık saat — dürüst kapasite tavsiyesi. */
-        capacityForFull:(function(){
-          const need = productive ? Math.ceil(rawQueue.length / productive) : perWeek;
-          const cap = Number(p.capacityHoursPerWeek) || 21;
-          return need <= perWeek ? cap : Math.ceil(cap * need / Math.max(1, perWeek));
-        })(),
+        tavan:tavan(p),
+        /* Tam kapsama için gereken haftalık saat — HESAPLANMIŞ, tahmin değil:
+           aynı üreteç bu kapasiteyle hiçbir konuyu düşürmez. Eskiden
+           kapasiteyle birlikte büyüyor ve tavanı bilmiyordu (20.5 sa → 41,
+           25.5 sa → 51; 12 haftada «130 saat»). Hiçbir kapasite yetmiyorsa
+           sayı UYDURULMAZ: null + engel. */
+        ...kapsama(p, fitted.dropped.length, productive ? Math.ceil(rawQueue.length / productive) : perWeek),
         generatedAt:new Date().toISOString(),
         version:1,
       },
     };
+  }
+
+  /* Tam kapsama için ne gerekir? engel: null | 'tavan' (kullanıcının tavanı
+     yetmiyor; yükseltilirse süre yetebilir) | 'takvim' (en yüksek tavan
+     bile yetmiyor; takvim dar). gerekenKonu: haftada kaç konu gerekirdi. */
+  function kapsama(profile, dusen, gerekenKonu){
+    const cap = Number(profile.capacityHoursPerWeek) || 21;
+    if(!dusen) return { capacityForFull:cap, kapsamaEngeli:null, gerekenKonu };
+    if(gerekenKonu > TAVAN.max) return { capacityForFull:null, kapsamaEngeli:'takvim', gerekenKonu };
+    if(gerekenKonu > tavan(profile)) return { capacityForFull:null, kapsamaEngeli:'tavan', gerekenKonu };
+    return { capacityForFull:kapasiteFor(profile, gerekenKonu), kapsamaEngeli:null, gerekenKonu };
+  }
+
+  /* Konu düştüyse günlük süre artınca kaç konu geri gelir? «Konuları
+     çıkar» ile «daha çok çalış» arasındaki seçimi SAYIYLA sunar.
+
+     Satırlar tahmin değil: her biri aynı üreteçle (generate) HESAPLANIR ve
+     kapasiteyi gunluk-sure aksiyonunun uygulayacağı formülle alır
+     (o.kapasite = R.Istisna.kapasiteSaati) — ekranda görünen ile onaydan
+     sonra olan aynıdır. Süre basamak basamak işe yarar (haftadaki konu
+     sayısı tam sayıdır): yalnız bir öncekinden AZ konu düşüren en küçük
+     günlük dakikalar satır olur; «+30 dk» gibi hiçbir şey getirmeyen
+     teklif yazılmaz. Konu düşmüyorsa null. */
+  let sureOnbellek = null;
+  function sureSecenekleri(profile, total, o){
+    const p = profile || {};
+    const adim = o.adim || 15;
+    const anahtar = JSON.stringify([p.capacityHoursPerWeek, p.level, p.weakSubjects,
+      tavan(p), total, o.simdiDk, o.maxDk, adim]);
+    if(sureOnbellek && sureOnbellek.anahtar === anahtar) return sureOnbellek.deger;
+    const base = generate(p, total).meta;
+    let deger = null;
+    if(base.dropped.length){
+      const satirlar = [];
+      let son = base.dropped.length;
+      for(let dk = (Math.floor(o.simdiDk / adim) + 1) * adim; dk <= o.maxDk && son > 0; dk += adim){
+        const cap = o.kapasite(dk);
+        const m = generate(Object.assign({}, p, { capacityHoursPerWeek:cap }), total).meta;
+        if(m.dropped.length < son){
+          son = m.dropped.length;
+          satirlar.push({ dakika:dk, kapasite:cap, perWeek:m.perWeek, dusen:son,
+            geriGelen:base.dropped.length - son });
+        }
+      }
+      deger = { dusen:base.dropped.length, simdiDk:o.simdiDk, perWeek:base.perWeek,
+        satirlar, tam:satirlar.find(r => r.dusen === 0) || null,
+        engel:base.kapsamaEngeli, gerekenKonu:base.gerekenKonu, tavan:base.tavan,
+        maxDk:o.maxDk };
+    }
+    sureOnbellek = { anahtar, deger };
+    return deger;
   }
 
   /* Planın gerçeklikle uyumu — otomasyon bunu okuyup yeniden planlar. */
@@ -30645,8 +30776,9 @@ R.Planner = (function(){
     };
   }
 
-  return { LEVELS, PHASES, levels, level, phaseAt, topicDays, pool,
-    weeklyQuestions, topicsPerWeek, gateWeeks, generate, health, replan,
+  return { LEVELS, PHASES, TAVAN, levels, level, tavan, phaseAt, topicDays, pool,
+    weeklyQuestions, topicsPerWeek, kapasiteFor, gateWeeks, generate, sureSecenekleri,
+    health, replan,
     scenarios, checkPrerequisites, energyByWeekday };
 })();
 
@@ -30707,6 +30839,9 @@ R.Istisna = (function(){
   /* Olceklenmeyen gun turleri — curriculum.js R.WEEKDAYS `ritual`. */
   const SABIT_RITUEL = ['exam', 'review'];
   const MIN_BLOK = 10;
+  /* Yogun gun: temelin bu kadar ustundeki sure YENI blok olur (siradaki
+     konu one alinir); daha azi yeni bir konuya yetmez, bloklar uzar. */
+  const ONE_ALMA_MIN = 30;
   const YENILEME_UFKU = 60;   // kalici sure degisince kac gun ileriye bakilir
 
   function fail(why){ return { ok:false, why }; }
@@ -30864,6 +30999,77 @@ R.Istisna = (function(){
     return out;
   }
 
+  function calismaToplami(blocks){
+    return (blocks || []).filter(b => b.slot !== 'Dinlenme')
+      .reduce((a, b) => a + (Number(b.targetMin) || 0), 0);
+  }
+
+  /* YOGUN GUN — «Carsamba 5 saat calisacagim». Temelin ustundeki sure ayni
+     bloklari uzatmaz; planda SIRADAKI konuya blok olur ve plan ileri kayar.
+     Siradaki konu: gunun haftasindan SONRAKI plan haftalarinda, o haftanin
+     sozlesmesinde olmayan, kapanmamis, baska bir gune zaten one alinmamis
+     ilk konu. Plan yoksa (sabit mufredat) null: bloklar eskisi gibi uzar.
+     `haric`: onizlemenin art arda gunler icin sectikleri. */
+  function siradakiKonu(iso, haric){
+    const M = R.Model;
+    const plan = M && M.activePlan ? M.activePlan() : null;
+    if(!plan) return null;
+    const n = M.weekOf(iso);
+    const dolu = Object.assign({}, haric || {});
+    const hafta = R.S.weeks && R.S.weeks[M.weekId(n)];
+    const buHafta = hafta && hafta.mainTopics && hafta.mainTopics.length
+      ? hafta.mainTopics : (M.curriculumFor(n).items || []);
+    buHafta.forEach(t => { if(t.topicId) dolu[t.subjectId + ':' + t.topicId] = true; });
+    Object.keys(R.S.days || {}).forEach(d => {
+      if(d === iso) return;
+      ((R.S.days[d] && R.S.days[d].blocks) || []).forEach(b => {
+        if(b.oneAlindi && b.topicId) dolu[b.subjectId + ':' + b.topicId] = true;
+      });
+    });
+    for(const w of plan.weeks){
+      if(w.n <= n) continue;
+      for(const it of (w.items || [])){
+        const k = it.subjectId + ':' + it.topicId;
+        if(dolu[k] || M.topicState(it.subjectId, it.topicId).state === 'closed') continue;
+        return it;
+      }
+    }
+    return null;
+  }
+
+  function oneAlinanBlok(day, konu, dk){
+    const ders = (R.SUBJECTS || []).find(x => x.id === konu.subjectId);
+    const ilk = day.blocks.find(b => b.slot !== 'Dinlenme' && Number(b.targetMin) > 0);
+    const soru = ilk && Number(ilk.targetQ) > 0
+      ? Math.round(Number(ilk.targetQ) * dk / Number(ilk.targetMin) / 5) * 5 : 0;
+    return {
+      id:'b' + day.blocks.length, slot:'Öne alınan',
+      subject:ders ? ders.name : (konu.subjectName || ''), topic:konu.name,
+      targetMin:dk, targetQ:soru, status:'pending',
+      subjectId:konu.subjectId, topicId:konu.topicId, oneAlindi:true,
+      actualMin:null, actualQ:null, correctQ:null, skipReason:null, startedAt:null,
+    };
+  }
+
+  /* Onizleme icin: araliktaki hangi gun hangi konuyu one alacak. Hicbir
+     sey yazmaz; gunuBicimle ile ayni kurali ayni sirayla uygular. */
+  function oneAlinacaklar(from, to, dakika){
+    const out = [], haric = {};
+    const bugun = U.todayISO();
+    for(const iso of aralik(from < bugun ? bugun : from, to)){
+      const tmpl = (R.WEEKDAYS || [])[U.weekdayIndex(iso)];
+      if(!tmpl || SABIT_RITUEL.indexOf(tmpl.ritual) >= 0) continue;
+      if(R.S.days[iso] && !dokunulmamis(R.S.days[iso])) continue;      // korunan gun
+      const taban = temelDakika(iso) || calismaToplami(tmpl.blocks.map(b => ({ slot:b.slot, targetMin:b.min })));
+      if(Number(dakika) - taban < ONE_ALMA_MIN) continue;
+      const k = siradakiKonu(iso, haric);
+      if(!k) break;
+      haric[k.subjectId + ':' + k.topicId] = true;
+      out.push({ iso, konu:k });
+    }
+    return out;
+  }
+
   /* Yeni kurulmus (ya da yeniden kurulan) bir gune gecerli istisnayi ve
      temel sureyi uygular. Gunu yerinde degistirir ve dondurur. */
   function gunuBicimle(day, iso){
@@ -30885,7 +31091,17 @@ R.Istisna = (function(){
     if(sabit) return day;
     const hedef = (ist && ist.tur === 'sure') ? Number(ist.dakika) : temelDakika(tarih);
     if(hedef){
-      day.blocks = olcekle(day.blocks, hedef);
+      day.blocks = (day.blocks || []).filter(b => !b.oneAlindi);
+      const temel = temelDakika(tarih);
+      const tabanBloklar = temel ? olcekle(day.blocks, temel) : day.blocks;
+      const fazla = hedef - calismaToplami(tabanBloklar);
+      const konu = (ist && ist.tur === 'sure' && fazla >= ONE_ALMA_MIN) ? siradakiKonu(tarih) : null;
+      if(konu){
+        day.blocks = tabanBloklar;
+        day.blocks.push(oneAlinanBlok(day, konu, fazla));
+      }else{
+        day.blocks = olcekle(day.blocks, hedef);
+      }
       if(ist) day.istisnaId = ist.id;
     }
     return day;
@@ -31080,7 +31296,9 @@ R.Istisna = (function(){
 
   return {
     TURLER, DAKIKA, STORE,
+    ONE_ALMA_MIN,
     liste, yukle, dogrula, dakikaGecerli, gunIcin, aralik, olcekle, gunuBicimle,
+    siradakiKonu, oneAlinacaklar,
     dokunulmamis, etki, ekle, kaldir, bitir, hafiflet, temeliYenile, temelDakika, sablonDakikasi,
     kapasiteSaati, haftaAraGunu, gunYuku, etkin, takvimde, tanim,
     yenile:araligiYenile,
@@ -38347,7 +38565,13 @@ R.Auto = (function(){
     if(week.signedAt) return { ok:false, reason:'Hafta imzalı; önce revize et.' };
 
     const plan = M.curriculumFor(n);
-    const items = (plan.items || []).slice(0, 3);
+    /* Plan haftaya 3'ten fazla konu yazdiysa (kapasite + kullanicinin
+       tavani) taslak hepsini alir; eskiden 3'te kesiliyordu. */
+    /* Kapanmis konu (ornegin yogun bir gunde one alinip bitmis) kendi
+       haftasinda tekrar yazilmaz; hafta o kadar hafifler. */
+    const acik = (plan.items || []).filter(it => M.topicState(it.subjectId, it.topicId).state !== 'closed');
+    const sinir = Math.max(3, acik.length);
+    const items = acik.slice(0, sinir);
     const risky = C.riskRanking(6);
     const carry = week.carryIn || [];
 
@@ -38356,7 +38580,7 @@ R.Auto = (function(){
     const seen = {};
     const push = (name, subjectId, topicId, why) => {
       const key = (subjectId || '') + ':' + (topicId || '') + ':' + name;
-      if(seen[key] || picked.length >= 3) return;
+      if(seen[key] || picked.length >= sinir) return;
       seen[key] = true;
       picked.push({ name, subjectId:subjectId || null, topicId:topicId || null, why });
     };
@@ -38371,7 +38595,7 @@ R.Auto = (function(){
     }
     items.forEach(it => push(it.name, it.subjectId, it.topicId, 'plandaki sıra'));
     risky.forEach(r => {
-      if(picked.length >= 3) return;
+      if(picked.length >= sinir) return;
       push(r.topicName, r.subjectId, r.topicId, 'risk ' + r.score + ' — ' + r.label.toLowerCase());
     });
 
@@ -38434,10 +38658,14 @@ R.Auto = (function(){
     if(!week || !week.mainTopics.length) return 0;
 
     let changed = 0;
-    const work = day.blocks.filter(b => b.slot !== 'Dinlenme');
+    /* One alinan blok (yogun gun, core/istisna.js) haftanin konusuna
+       baglanmaz: o gunun fazla suresi SONRAKI bir konuya ayrildi. */
+    const work = day.blocks.filter(b => b.slot !== 'Dinlenme' && !b.oneAlindi);
     work.forEach((b, i) => {
       if(b.status !== 'pending') return;          // başlanmış bloğa dokunma
-      const t = week.mainTopics[i % week.mainTopics.length];
+      /* Gunu kuran defaultDay ile AYNI sira (M.blokKonusu). */
+      const r = M.blokKonusu(day.dow, i, week.mainTopics.length, work.length);
+      const t = week.mainTopics[r == null ? i % week.mainTopics.length : r];
       if(!t) return;
       if(b.topic !== t.name || b.subjectId !== (t.subjectId || null)){
         b.topic = t.name;
@@ -45224,16 +45452,25 @@ R.Proposals = (function(){
       check(p){
         const v = R.Istisna.dogrula({ tur:'sure', from:p.from, to:p.to, dakika:p.dakika });
         if(!v.ok) return v;
-        return pass({ gun:v.gun, dk:Math.round(Number(p.dakika)), etki:R.Istisna.etki(p.from, p.to) });
+        return pass({ gun:v.gun, dk:Math.round(Number(p.dakika)), etki:R.Istisna.etki(p.from, p.to),
+          oneAlinan:R.Istisna.oneAlinacaklar(p.from, p.to, p.dakika) });
       },
       preview(p, ctx){
         const temel = R.Istisna.temelDakika(p.from) || R.Istisna.sablonDakikasi();
         const rows = [
           { label:'Ders günü süresi', before:temel + ' dk', after:ctx.dk + ' dk' },
           { label:'Tarih', before:'—', after:tarihAraligi(p.from, p.to) + ' · ' + ctx.gun + ' gün' },
-          { label:'Deneme ve kapanış günleri', before:'olduğu gibi', after:'değişmez' },
-          { label:'Tarih bitince', before:'—', after:'temel plana döner' },
         ];
+        /* Yogun gun: fazla sure plandaki siradaki konuya blok olur. Hangi
+           konunun one alindigi onaydan ONCE adiyla soylenir. */
+        if(ctx.oneAlinan && ctx.oneAlinan.length){
+          const adlar = ctx.oneAlinan.map(x => x.konu.name);
+          rows.push({ label:'Öne alınan konu', before:'—',
+            after:adlar.slice(0, 3).join(', ') + (adlar.length > 3 ? ' ve ' + (adlar.length - 3) + ' konu daha' : '') });
+        }
+        rows.push(
+          { label:'Deneme ve kapanış günleri', before:'olduğu gibi', after:'değişmez' },
+          { label:'Tarih bitince', before:'—', after:'temel plana döner' });
         if(ctx.etki.korunan.length){
           rows.push({ label:'İlerlemesi başlamış gün', before:'—',
             after:ctx.etki.korunan.length + ' gün, dokunulmaz' });
@@ -45257,16 +45494,29 @@ R.Proposals = (function(){
         }
         const simdi = R.Istisna.temelDakika() || R.Istisna.sablonDakikasi();
         if(simdi === dk) return fail('Günlük süre zaten ' + dk + ' dakika.');
-        return pass({ dk, simdi, eskiKapasite:S.profile.capacityHoursPerWeek,
-          yeniKapasite:R.Istisna.kapasiteSaati(dk) });
+        const yeniKapasite = R.Istisna.kapasiteSaati(dk);
+        /* Plana girmeyen konu sayisi once/sonra: yeniden planlama ayni
+           ureteci ayni kapasiteyle calistirir (Planner.replan → generate),
+           onizlemede yazan sayi onaydan sonra olanla aynidir. */
+        const plan = M.activePlan();
+        const dusen = plan ? { once:(plan.meta.dropped || []).length,
+          sonra:R.Planner.generate(Object.assign({}, S.profile,
+            { capacityHoursPerWeek:yeniKapasite }), plan.meta.total).meta.dropped.length } : null;
+        return pass({ dk, simdi, eskiKapasite:S.profile.capacityHoursPerWeek, yeniKapasite, dusen });
       },
       preview(p, ctx){
-        return [
+        const rows = [
           { label:'Ders günü süresi', before:ctx.simdi + ' dk', after:ctx.dk + ' dk' },
           { label:'Haftalık kapasite', before:ctx.eskiKapasite + ' sa', after:ctx.yeniKapasite + ' sa' },
+        ];
+        if(ctx.dusen && (ctx.dusen.once || ctx.dusen.sonra)){
+          rows.push({ label:'Plana girmeyen konu', before:ctx.dusen.once + ' konu',
+            after:ctx.dusen.sonra + ' konu' });
+        }
+        return rows.concat([
           { label:'Plan', before:'eski kapasiteye göre', after:'bu haftadan itibaren yeniden dağıtılır' },
           { label:'Geçmiş haftalar', before:'—', after:'değişmez' },
-        ];
+        ]);
       },
       async apply(p, ctx){
         const pr = S.profile;
@@ -50980,6 +51230,9 @@ R.Screens.week = (function(){
 
   function viewN(){ return S.ui.weekView || M.currentWeek(); }
   function weekOf(n){ return S.weeks[M.weekId(n)]; }
+  /* Sozlesmeye elle en fazla kac konu eklenir: eskisi gibi 3, kullanicinin
+     haftalik konu tavani daha yuksekse o (core/planner.js TAVAN). */
+  function konuSiniri(){ return Math.max(3, R.Planner.tavan(S.profile)); }
 
   /* ---------- 7 gunluk izgara ---------- */
 
@@ -51043,11 +51296,11 @@ R.Screens.week = (function(){
     const curriculum = M.curriculumFor(n);
 
     return K.Card({
-      title:'Haftalık sözleşme', hint:'contract', sub:'En fazla üç ana konu, çıktı temelli hedef',
+      title:'Haftalık sözleşme', hint:'contract', sub:'En fazla ' + konuSiniri() + ' ana konu, çıktı temelli hedef',
       badge:signed ? K.Badge({ label:'İmzalandı', tone:'ok' }) : K.Badge({ label:'İmza bekliyor', tone:'warn' }),
       body:html`
         ${K.Stack(map(week.mainTopics, (t, i) => TopicRow(t, i, signed, week.mainTopics.length)), 'sm')}
-        ${when(!signed && week.mainTopics.length < 3, () => K.Button({ label:'Konu ekle', icon:'plus',
+        ${when(!signed && week.mainTopics.length < konuSiniri(), () => K.Button({ label:'Konu ekle', icon:'plus',
           size:'sm', class:'mt-8', act:'topic-add' }))}
 
         <div class="cols-3 mt-16">
@@ -51289,6 +51542,15 @@ R.Screens.week = (function(){
 
   const ISTISNA_EYLEM = { ara:'ara-ver', sure:'gecici-sure', gunluk:'gunluk-sure' };
   let istisnaTaslak = null;
+
+  /* Baska ekrandan (Program › «konu düşünce süre teklifi») kalici gunluk
+     sure onizlemesini dakikasi dolu acar. Onay yine ayni yoldan gecer:
+     onizleme + «Uygula» (orta seviye, AGENTS.md §1.9). */
+  function sureOner(dakika){
+    const p = { dakika:Number(dakika) };
+    istisnaTaslak = { tur:'gunluk', p };
+    istisnaSheet('gunluk', p, R.Proposals.preview({ action:'gunluk-sure', agent:'patron', params:p }));
+  }
 
   function istisnaParams(tur){
     const v = id => { const el = document.getElementById(id); return el ? el.value : ''; };
@@ -51561,7 +51823,7 @@ R.Screens.week = (function(){
     async 'topic-add'(){
       const n = viewN();
       const week = weekOf(n);
-      if(week.mainTopics.length >= 3) return;
+      if(week.mainTopics.length >= konuSiniri()) return;
       week.mainTopics.push({ name:'', questionTarget:100, accuracy:70, subjectId:null, topicId:null });
       await M.saveWeek(n);
       R.App.render();
@@ -51648,7 +51910,7 @@ R.Screens.week = (function(){
     actions(){
       return String(K.Button({ label:'Weekly review', icon:'check', size:'sm', act:'open-review' }));
     },
-    render, handle, change, openReview,
+    render, handle, change, openReview, sureOner,
   };
 })();
 
@@ -55963,6 +56225,46 @@ R.Screens.plan = (function(){
       </div>`;
   }
 
+  /* Konu düştüyse: «konuları çıkar» yerine «daha çok çalış» seçeneği,
+     SAYIYLA. Satırlar R.Planner.sureSecenekleri'nden gelir: yalnız konu
+     geri getiren en küçük günlük süreler, gunluk-sure aksiyonunun
+     uygulayacağı kapasiteyle hesaplanmış. «Uygula» önizleme + onaydan
+     geçer (orta seviye); sormadan hiçbir şey değişmez. Süre yetmiyorsa
+     neden yetmediği söylenir: kullanıcının tavanı mı, takvim mi. */
+  function sureTeklifi(m){
+    const I = R.Istisna;
+    if(!I) return '';
+    const simdi = I.temelDakika() || I.sablonDakikasi();
+    const sec = R.Planner.sureSecenekleri(S.profile, m.total,
+      { simdiDk:simdi, kapasite:I.kapasiteSaati, maxDk:I.DAKIKA.max });
+    if(!sec) return '';
+    const T = R.Planner.TAVAN;
+    let rows = sec.satirlar;
+    if(rows.length > 3) rows = rows.slice(0, 2).concat([rows[rows.length - 1]]);
+    const enIyi = rows.length ? rows[rows.length - 1].perWeek : sec.perWeek;
+    const tavanSiniri = !sec.tam && sec.tavan < T.max && enIyi >= sec.tavan;
+    return html`<div class="stack-xs mt-10">
+      <div class="small"><b>Konuları çıkarmak yerine daha çok çalışabilirsin.</b>
+        Şu an ders günü ${U.fmtMin(simdi)}.</div>
+      ${map(rows, r => html`<div class="row gap-8" style="justify-content:space-between;align-items:center">
+        <span class="small">Günde <b>${U.fmtMin(r.dakika)}</b> → ${r.dusen
+          ? r.geriGelen + ' konu geri gelir' : 'bütün konular sığar, ' + r.geriGelen + ' konu geri gelir'}
+          <span class="dim">· haftada ${r.perWeek} konu</span></span>
+        ${K.Button({ label:'Uygula', size:'sm', tone:'ghost', act:'sure-oner', data:{ 'data-dakika':r.dakika } })}
+      </div>`)}
+      ${when(!rows.length, () => html`<p class="small dim">Günlük süreyi artırmak bu planda konu getirmez.</p>`)}
+      ${when(tavanSiniri, () => html`<div class="row gap-8" style="justify-content:space-between;align-items:center">
+        <span class="small">Süre artışı haftada ${sec.tavan} konuda durur: haftada en fazla ${sec.tavan} konu
+          seçmişsin.${sec.engel === 'tavan' ? ' Hepsi için haftada ' + sec.gerekenKonu + ' konu gerekir.' : ''}</span>
+        ${K.Button({ label:'Tavanı değiştir', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'guide' } })}
+      </div>`)}
+      ${when(sec.engel === 'takvim', () => html`<p class="small">Takvim dar: ${m.total} haftada hepsi için haftada
+        ${sec.gerekenKonu} konu gerekirdi; en yüksek tavanla (${T.max}) bile sığmaz.</p>`)}
+      ${when(!sec.tam && !sec.engel && !tavanSiniri && rows.length, () => html`<p class="small dim">Günde
+        ${U.fmtMin(sec.maxDk)} ile bile hepsi sığmaz.</p>`)}
+    </div>`;
+  }
+
   function planCard(){
     const plan = M.activePlan();
     if(!plan) return K.Card({ title:'Program', sub:'Sabit müfredat kullanılıyor',
@@ -55997,7 +56299,7 @@ R.Screens.plan = (function(){
                      takvim gerçekten dar, hedefi gözden geçir.`
               : html`<b>yüksek frekanslı hiçbir konu düşmedi</b>.`} Bu konular silinmedi — Dersler ekranında
             öncelik sırasına göre duruyor, boşluk buldukça çalışırsın.
-            Tam kapsama için haftalık kapasite ~${m.capacityForFull} saat olmalıydı.` }))}
+            ${sureTeklifi(m)}` }))}
 
         ${when(!dropped.length, () => K.Notice({ tone:'ok',
           body:'Takvimin tüm konulara yetiyor; plan müfredatın tamamını kapsıyor.' }))}
@@ -56075,6 +56377,12 @@ R.Screens.plan = (function(){
   }
 
   const handle = {
+    /* Süre teklifi: kalıcı günlük süre önizlemesi dakikası dolu açılır.
+       Pencerenin «Önizle»/«Uygula» düğmeleri açık ekranın işleyicisine
+       gelir; aynı işi yapan Hafta işleyicisine devredilir. */
+    'sure-oner'(el){ R.Screens.week.sureOner(el.dataset.dakika); },
+    'istisna-onizle'(el){ return R.Screens.week.handle['istisna-onizle'](el); },
+    async 'istisna-uygula'(el){ return R.Screens.week.handle['istisna-uygula'](el); },
     async 'toggle-dropped'(){ S.ui.droppedOpen = !S.ui.droppedOpen; R.App.render(); },
     async 'open-dropped'(el){
       S.ui.subjectOpen = el.dataset.subject;
@@ -58935,6 +59243,8 @@ R.Screens.guide = (function(){
 
   const THEMES = [{ value:'system', label:'Sistem' }, { value:'light', label:'Açık' }, { value:'dark', label:'Koyu' }];
 
+  const TAVAN = R.Planner.TAVAN;
+
   function profileCard(){
     const p = S.profile;
     const f = (label, id, o) => K.Field({ label, input:K.Input(Object.assign({ id }, o)) });
@@ -58944,12 +59254,17 @@ R.Screens.guide = (function(){
         ${K.Cols(2, [f('Ad', 'st-name', { value:p.name }), f('Şehir', 'st-city', { value:p.city })])}
         ${K.Cols(2, [
           f('Haftalık kapasite (saat)', 'st-cap', { type:'number', step:0.5, value:p.capacityHoursPerWeek, numeric:true }),
-          f('Uyku hedefi (saat)', 'st-sleep', { type:'number', step:0.5, value:p.sleepTarget, numeric:true }),
+          /* Tavan kullanicinin tercihidir; plan kaydedince ona gore kurulur. */
+          K.Field({ label:'Haftada en fazla konu', hint:TAVAN.min + '–' + TAVAN.max
+              + ' · süren yetmezse Plan ekranı söyler',
+            input:K.Input({ id:'st-tavan', type:'number', min:TAVAN.min, max:TAVAN.max, step:1,
+              value:R.Planner.tavan(p), numeric:true }) }),
         ])}
         ${K.Cols(2, [
+          f('Uyku hedefi (saat)', 'st-sleep', { type:'number', step:0.5, value:p.sleepTarget, numeric:true }),
           f('Diploma notu', 'st-diploma', { type:'number', min:0, max:100, value:p.diplomaGrade, numeric:true }),
-          f('Hedef başarı sırası', 'st-rank', { type:'number', value:p.targetRank, numeric:true }),
         ])}
+        ${f('Hedef başarı sırası', 'st-rank', { type:'number', value:p.targetRank, numeric:true })}
         ${K.Button({ label:'Kaydet', act:'save-profile', class:'mt-12' })}`,
     });
   }
@@ -59554,6 +59869,16 @@ R.Screens.guide = (function(){
     async 'save-profile'(){
       const p = S.profile;
       const v = id => document.getElementById(id).value;
+      /* Tavan once dogrulanir: gecersizse HICBIR alan yazilmaz, yarim
+         kalmis bir kayit olmaz. Bos birakmak varsayilana doner. */
+      const tv = String(v('st-tavan') == null ? '' : v('st-tavan')).trim();
+      const tvSayi = Number(tv);
+      if(tv !== '' && R.Planner.tavan({ haftalikKonuTavani:tvSayi }) !== tvSayi){
+        UI.toast('Haftada en fazla konu ' + TAVAN.min + '–' + TAVAN.max + ' arasında bir tam sayı olmalı.');
+        return;
+      }
+      const eskiTavan = R.Planner.tavan(p);
+      if(tv === '') delete p.haftalikKonuTavani; else p.haftalikKonuTavani = tvSayi;
       p.name = v('st-name');
       p.city = v('st-city');
       p.capacityHoursPerWeek = Number(v('st-cap')) || p.capacityHoursPerWeek;
@@ -59561,7 +59886,14 @@ R.Screens.guide = (function(){
       p.diplomaGrade = U.clamp(Number(v('st-diploma')) || 0, 0, 100);
       p.targetRank = Number(v('st-rank')) || p.targetRank;
       await M.saveProfile();
-      UI.toast('Profil kaydedildi');
+      /* Kapasite ya da tavan degistiyse plan simdi kurulur; kullanici
+         degisikligin etkisini bir sonraki acilista degil hemen gorur. */
+      const once = S.plan;
+      if(p.setupDone) await M.ensurePlan();
+      const yeni = S.plan !== once;
+      UI.toast(yeni && R.Planner.tavan(p) !== eskiTavan
+        ? 'Profil kaydedildi · plan haftada en fazla ' + R.Planner.tavan(p) + ' konuyla yeniden kuruldu'
+        : yeni ? 'Profil kaydedildi · plan yeniden kuruldu' : 'Profil kaydedildi');
       R.App.render();
     },
     /* 173 yedek kartının düğmesi: aynı dışa aktarma. */

@@ -158,6 +158,18 @@ for _vp, _ad, _mod, _alan in (
          "HKM konseyi — %s. Hükmü kural motoru verir; model yalnız cümleyi kurar."
          % _alan, parent="king", layer="konsey", module=_mod)
 
+# KONUSMA SEVIYELERI (core/seviye.py). Sohbette mesajin NITELIGI modeli
+# secer: duz sohbet alt'a, oneri/analiz orta'ya, karar/yol haritasi ust'e.
+# Bir seviyeye atama YOKSA sohbet eskisi gibi gorevlinin kendi kademesiyle
+# konusur (miras degil, geri dusus): paketi kurmayan kullanicinin sohbeti
+# degismez.
+for _sv, _ad, _not in (
+        ("alt", "Alt — düz sohbet", "Karar ya da öneri içermeyen konuşma. Ucuz ve hızlı model, kısa bağlam."),
+        ("orta", "Orta — öneri ve analiz", "Ufuk genişletme, öneri, «beni analiz et». Dengeli model."),
+        ("ust", "Üst — karar ve yol haritası",
+         "Karar, plan, strateji, sistemin tamamını değerlendirme. En dikkatli model.")):
+    _rol("seviye.%s" % _sv, "Seviye · %s" % _ad, _not, parent="king", layer="seviye")
+
 # BAM — Bilgi ve Aksiyon Modulu (core/bam.py). King'in altinda ayri bir
 # kol: Patronu ve dort ofisi. Atama yoksa King'den miras alir.
 _rol("bam", "BAM Patronu",
@@ -188,6 +200,7 @@ for _mod, _ad in MODULLER.items():
 
 LAYER_LABEL = {
     "king": "En üst — King",
+    "seviye": "Konuşma seviyeleri — mesajın niteliğine göre",
     "konsey": "HKM konseyi — üç alt patron",
     "modul": "Modül yetenekleri",
     "bam": "BAM — Bilgi ve Aksiyon Modülü",
@@ -195,10 +208,58 @@ LAYER_LABEL = {
 }
 
 
+# Butce paketlerinin POLITIKASI (siniflar, merdiven, efor) core/motor.py'dedir;
+# burada yalniz secilen paketin kimligi saklanir (paket_of).
+
+
+def saglayici_of(model):
+    """Model adindan saglayici: «a/b» OpenRouter'dir, gerisi adindan."""
+    if "/" in model:
+        return "openrouter"
+    if model.startswith("gemini"):
+        return "google"
+    if model.startswith("gpt"):
+        return "openai"
+    if model.startswith("claude"):
+        return "anthropic"
+    return None
+
+
+def birim_maliyet(model):
+    """Karsilastirma olcusu: 1M jetonun ortalama bedeli, giris 3 : cikis 1
+    (bu sistemin cagrilari baglam agirliklidir). Sirala, fatura degil."""
+    from core import ai          # ai models'i ice aktarir; dongu burada kirilir
+    g, c = ai.tarife_of(saglayici_of(model), model)
+    return (3 * g + c) / 4.0
+
+
+def oneri_kademesi(rol):
+    """Bir kademenin paket kademesi. Sohbet seviyeleri kendileridir; King
+    ve konsey ORTA'dir — sohbet seviye kademesine gider, King'in kendi
+    kademesi yalniz seviyesi olmayan islerde (tani, BAM yonlendirmesi)
+    kullanilir."""
+    if rol.startswith("seviye."):
+        return rol.split(".", 1)[1]
+    if rol == "medya":
+        return "ses"
+    if rol == "para.fis" or rol.endswith(".gorsel"):
+        return "gorsel"
+    if rol == "bam.arastirma":
+        return "arastirma"
+    if rol == "bam.kayit":
+        return None                  # Depolama burosu model gerektirmez
+    if rol.endswith(".plan") or rol in ("bam.planlama", "bam.uretim"):
+        return "ust"
+    if rol.endswith(".sohbet"):
+        return "alt"
+    return "orta"                    # king, vp_*, *.analiz, bam patronu
+
+
+
 def layers():
     """Ekranin cizecegi sira: ustten alta, her kademe kendi grubunda."""
     out = []
-    for kat in ("king", "konsey", "modul", "bam", "kol"):
+    for kat in ("king", "seviye", "konsey", "modul", "bam", "kol"):
         uyeler = [r for r in ROLES.values() if r["layer"] == kat]
         uyeler.sort(key=lambda r: r["key"])
         out.append({"layer": kat, "label": LAYER_LABEL[kat], "roles": uyeler})
@@ -284,6 +345,89 @@ def keys(cfg):
     return out
 
 
+# Butce paketleri (core/motor.py). Secilmezse sistem eskisi gibi atama ve
+# mirasla calisir.
+PAKET_KIMLIKLERI = ("A", "A+", "S", "S+")
+# OpenRouter'in birlesik `reasoning.effort` degerleri (elle atamada da secilir).
+EFORLAR = ("low", "medium", "high")
+
+
+# NEREDE CALISSIN (core/motor.py): «bulut» (bugunku hal, varsayilan),
+# «yerel» (her sey bilgisayarda; bulut hic kullanilmaz, bedel sifir),
+# «hibrit» (alt siniflar yerelde, zorlaninca bulut). Yerel model yalniz alt
+# siniflara yazilir: guclu/uzman is bulutun isidir.
+YERLER = ("yerel", "hibrit", "bulut")
+YEREL_SINIFLAR = ("ekonomik", "standart")
+
+
+# MOTOR SERVISI (AI dugumu). Sunucu merkezdir; model ayri, degistirilebilir
+# bir servistir (Ollama, LM Studio, vLLM… — OpenAI uyumlu uc). Ayni
+# makinedeyse localhost uzerinden konusulur, veri makineden cikmaz. Baska
+# bir makinedeyse adres yazilir ve TEK KURAL gecerlidir: ayni makine ve
+# yerel ag (ozel adres, .local, Tailscale 100.64/10) http olabilir;
+# internetteki bir motor YALNIZ https ile kabul edilir — ham veri sifresiz
+# internete tasinmaz. Uzak motor jetonu «yerel» saglayicinin anahtaridir.
+YEREL_VARSAYILAN = "http://127.0.0.1:11434"
+
+
+def adres_denetle(adres):
+    """(ok, hata, sinif): sinif ayni_makine | yerel_ag | internet."""
+    import ipaddress
+    import urllib.parse
+    a = str(adres or "").strip().rstrip("/")
+    u = urllib.parse.urlparse(a)
+    if u.scheme not in ("http", "https") or not u.hostname:
+        return False, "Motor adresi http:// ya da https:// ile başlamalı ve bir makine adı taşımalı.", None
+    if u.query or u.fragment or (u.path not in ("", "/")):
+        return False, "Motor adresi yalnız makine ve kapı olmalı (ör. http://192.168.1.20:11434).", None
+    host = u.hostname.lower()
+    sinif = "internet"
+    if host == "localhost":
+        sinif = "ayni_makine"
+    elif host.endswith(".local"):
+        sinif = "yerel_ag"
+    else:
+        try:
+            ip = ipaddress.ip_address(host)
+            if ip.is_loopback:
+                sinif = "ayni_makine"
+            elif ip.is_private or ip in ipaddress.ip_network("100.64.0.0/10"):
+                sinif = "yerel_ag"
+        except ValueError:
+            pass
+    if sinif == "internet" and u.scheme != "https":
+        return False, ("İnternetteki bir motor yalnız https ile bağlanır: ham veri şifresiz "
+                       "internete taşınmaz."), sinif
+    return True, "", sinif
+
+
+def yerel_kok(cfg):
+    return _bolum(cfg).get("yerel_adres") or YEREL_VARSAYILAN
+
+
+def yerel_uclari(cfg):
+    """(sohbet ucu, model listesi ucu)."""
+    kok = yerel_kok(cfg)
+    if kok == YEREL_VARSAYILAN:
+        return PROVIDERS["yerel"]["base"], PROVIDERS["yerel"]["probe"]
+    return kok + "/v1/chat/completions", kok + "/v1/models"
+
+
+def yer_of(cfg):
+    y = _bolum(cfg).get("yer")
+    return y if y in YERLER else "bulut"
+
+
+def yerel_of(cfg):
+    y = _bolum(cfg).get("yerel")
+    return {k: v for k, v in (y or {}).items() if k in YEREL_SINIFLAR and v} if isinstance(y, dict) else {}
+
+
+def paket_of(cfg):
+    p = _bolum(cfg).get("paket")
+    return p if p in PAKET_KIMLIKLERI else None
+
+
 def assignments(cfg):
     a = _bolum(cfg).get("assignments")
     return a if isinstance(a, dict) else {}
@@ -324,7 +468,12 @@ def resolve(cfg, role):
                 "provider_label": (PROVIDERS.get(saglayici) or {}).get(
                     "label", saglayici),
                 "model": a.get("model") or "",
+                # Dusunme eforu (OpenRouter `reasoning.effort`); bos = saglayici varsayilani.
+                "efor": a.get("efor") or "",
                 "key_id": secili["id"] if secili else secilen,
+                # Kullanicinin SECTIGI deger (bos = «ilk anahtar»): geri alma
+                # onu birebir geri koyar, cozulmus kimligi sabitlemez.
+                "key_chosen": secilen,
                 "key_label": secili["label"] if secili else "",
                 "key_user": (secili or {}).get("user") or "",
                 "key_missing": eksik,
@@ -333,7 +482,7 @@ def resolve(cfg, role):
             }
         imlec = ROLES[imlec]["parent"]
     return {"role": role, "from": None, "inherited": False, "provider": None,
-            "provider_label": "", "model": "", "key_id": "", "key_label": "",
+            "provider_label": "", "model": "", "efor": "", "key_id": "", "key_label": "",
             "key_user": "", "key_missing": False, "key_set": False,
             "chain": zincir}
 
@@ -382,8 +531,26 @@ def validate(patch):
     if not isinstance(patch, dict):
         return False, ["models bir nesne olmalı"]
     for k in patch:
-        if k not in ("keys", "assignments"):
+        if k not in ("keys", "assignments", "paket", "yer", "yerel", "yerel_adres"):
             hata.append("bilinmeyen models alanı: %s" % k)
+    if patch.get("yerel_adres") not in (None, ""):
+        ok_, h, _ = adres_denetle(patch["yerel_adres"])
+        if not ok_:
+            hata.append(h)
+    if patch.get("yer") not in (None, "") and patch.get("yer") not in YERLER:
+        hata.append("yer şunlardan biri olmalı: %s" % ", ".join(YERLER))
+    yr = patch.get("yerel")
+    if yr is not None:
+        if not isinstance(yr, dict):
+            hata.append("yerel bir nesne olmalı")
+        else:
+            for sn, ad in yr.items():
+                if sn not in YEREL_SINIFLAR:
+                    hata.append("yerel model yalnız şu sınıflar için yazılır: %s" % ", ".join(YEREL_SINIFLAR))
+                elif ad is not None and (not isinstance(ad, str) or len(ad) > 120):
+                    hata.append("yerel.%s bir model adı olmalı (en çok 120 harf)" % sn)
+    if patch.get("paket") not in (None, "") and patch.get("paket") not in PAKET_KIMLIKLERI:
+        hata.append("paket şunlardan biri olmalı: %s" % ", ".join(PAKET_KIMLIKLERI))
 
     for ad, deger in (patch.get("keys") or {}).items():
         if ad not in PROVIDERS:
@@ -436,8 +603,10 @@ def validate(patch):
             hata.append("%s ataması bir nesne olmalı" % rol)
             continue
         for k in deger:
-            if k not in ("provider", "model", "key"):
+            if k not in ("provider", "model", "key", "efor"):
                 hata.append("%s içinde bilinmeyen alan: %s" % (rol, k))
+        if deger.get("efor") not in (None, "") and deger.get("efor") not in EFORLAR:
+            hata.append("%s.efor şunlardan biri olmalı: %s" % (rol, ", ".join(EFORLAR)))
         if deger.get("key") is not None and not isinstance(deger["key"], str):
             hata.append("%s.key bir dize olmalı" % rol)
         saglayici = deger.get("provider")
@@ -538,8 +707,32 @@ def apply(cfg, patch):
             atamalar[rol] = {"provider": deger.get("provider"),
                              "model": deger.get("model") or "",
                              "key": deger.get("key") or ""}
+            if deger.get("efor"):
+                atamalar[rol]["efor"] = deger["efor"]
     bolum["keys"] = anahtarlar
     bolum["assignments"] = atamalar
+    if "yerel_adres" in patch:
+        if patch["yerel_adres"]:
+            bolum["yerel_adres"] = str(patch["yerel_adres"]).strip().rstrip("/")
+        else:
+            bolum.pop("yerel_adres", None)
+    if "yer" in patch:
+        if patch["yer"]:
+            bolum["yer"] = patch["yer"]
+        else:
+            bolum.pop("yer", None)
+    if "yerel" in patch:
+        yeni_yerel = {k: v.strip() for k, v in (patch["yerel"] or {}).items()
+                      if isinstance(v, str) and v.strip()}
+        if yeni_yerel:
+            bolum["yerel"] = yeni_yerel
+        else:
+            bolum.pop("yerel", None)
+    if "paket" in patch:
+        if patch["paket"]:
+            bolum["paket"] = patch["paket"]
+        else:
+            bolum.pop("paket", None)
     if sayaclar:
         bolum["key_seq"] = sayaclar
     yeni = dict(cfg or {})
@@ -587,6 +780,8 @@ def probe(cfg, provider, transport=None, timeout=10, key_id=None):
         baslik["anthropic-version"] = "2023-06-01"
 
     url = tanim.get("probe") or tanim["base"]
+    if provider == "yerel":
+        url = yerel_uclari(cfg)[1]            # motor servisi ayarlanabilir
     istek = urllib.request.Request(url, headers=baslik, method="GET")
     try:
         with urllib.request.urlopen(istek, timeout=timeout) as r:

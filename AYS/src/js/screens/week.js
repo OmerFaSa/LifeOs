@@ -17,6 +17,9 @@ R.Screens.week = (function(){
 
   function viewN(){ return S.ui.weekView || M.currentWeek(); }
   function weekOf(n){ return S.weeks[M.weekId(n)]; }
+  /* Sozlesmeye elle en fazla kac konu eklenir: eskisi gibi 3, kullanicinin
+     haftalik konu tavani daha yuksekse o (core/planner.js TAVAN). */
+  function konuSiniri(){ return Math.max(3, R.Planner.tavan(S.profile)); }
 
   /* ---------- 7 gunluk izgara ---------- */
 
@@ -80,11 +83,11 @@ R.Screens.week = (function(){
     const curriculum = M.curriculumFor(n);
 
     return K.Card({
-      title:'Haftalık sözleşme', hint:'contract', sub:'En fazla üç ana konu, çıktı temelli hedef',
+      title:'Haftalık sözleşme', hint:'contract', sub:'En fazla ' + konuSiniri() + ' ana konu, çıktı temelli hedef',
       badge:signed ? K.Badge({ label:'İmzalandı', tone:'ok' }) : K.Badge({ label:'İmza bekliyor', tone:'warn' }),
       body:html`
         ${K.Stack(map(week.mainTopics, (t, i) => TopicRow(t, i, signed, week.mainTopics.length)), 'sm')}
-        ${when(!signed && week.mainTopics.length < 3, () => K.Button({ label:'Konu ekle', icon:'plus',
+        ${when(!signed && week.mainTopics.length < konuSiniri(), () => K.Button({ label:'Konu ekle', icon:'plus',
           size:'sm', class:'mt-8', act:'topic-add' }))}
 
         <div class="cols-3 mt-16">
@@ -326,6 +329,15 @@ R.Screens.week = (function(){
 
   const ISTISNA_EYLEM = { ara:'ara-ver', sure:'gecici-sure', gunluk:'gunluk-sure' };
   let istisnaTaslak = null;
+
+  /* Baska ekrandan (Program › «konu düşünce süre teklifi») kalici gunluk
+     sure onizlemesini dakikasi dolu acar. Onay yine ayni yoldan gecer:
+     onizleme + «Uygula» (orta seviye, AGENTS.md §1.9). */
+  function sureOner(dakika){
+    const p = { dakika:Number(dakika) };
+    istisnaTaslak = { tur:'gunluk', p };
+    istisnaSheet('gunluk', p, R.Proposals.preview({ action:'gunluk-sure', agent:'patron', params:p }));
+  }
 
   function istisnaParams(tur){
     const v = id => { const el = document.getElementById(id); return el ? el.value : ''; };
@@ -598,7 +610,7 @@ R.Screens.week = (function(){
     async 'topic-add'(){
       const n = viewN();
       const week = weekOf(n);
-      if(week.mainTopics.length >= 3) return;
+      if(week.mainTopics.length >= konuSiniri()) return;
       week.mainTopics.push({ name:'', questionTarget:100, accuracy:70, subjectId:null, topicId:null });
       await M.saveWeek(n);
       R.App.render();
@@ -685,6 +697,6 @@ R.Screens.week = (function(){
     actions(){
       return String(K.Button({ label:'Weekly review', icon:'check', size:'sm', act:'open-review' }));
     },
-    render, handle, change, openReview,
+    render, handle, change, openReview, sureOner,
   };
 })();

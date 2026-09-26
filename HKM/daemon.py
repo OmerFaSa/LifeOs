@@ -14,6 +14,10 @@ Ucnoktalar:
     POST /api/config                ayar yamasi (dogrulanir; jetona dokunmaz)
     POST /api/probe                 saglayici anahtarini SINAR (mesaj uretmez)
     POST /api/models                saglayicinin anahtara ACIK model listesi
+    GET  /api/models/paketler       guc paketleri A · A+ · S · S+ (onizleme)
+    GET  /api/ai/dugum              motor servisinin durumu (adres, gecikme, modeller)
+    GET  /api/bam/tahmin            BAM isi basina ortalama maliyet, efor efor
+    POST /api/models/tarife         guncel model tarifesini okur (OpenRouter)
     POST /api/telegram/yoklama      webhook'u siler ve bir yoklama turu dener
     GET  /api/backup                butun ambar tek JSON
     POST /api/prune                 eski ham olaylari siler (kararlar kalir)
@@ -95,6 +99,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from core import motor, tarife  # noqa: E402
 from core import (ai, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, meydan, models, motto, outbox, patron,
@@ -1144,6 +1149,17 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, {"agents": out})
         if u.path == "/api/config":
             return self._send(200, settings.read(self.server.config))
+        if u.path == "/api/bam/tahmin":
+            # BAM isi baslamadan her efor icin is basina ortalama maliyet.
+            return self._send(200, motor.bam_tahmin(self.server.config, con=self.con))
+        if u.path == "/api/ai/dugum":
+            # Motor servisinin durumu: sunucu motordan haberdardir (adres,
+            # ayni makine mi, gecikme, modeller). Para harcamaz.
+            return self._send(200, motor.dugum_durumu(self.server.config))
+        if u.path == "/api/models/paketler":
+            # Butce paketleri (A · A+ · S · S+): onizleme, hicbir sey yazmaz.
+            # Aylik tahmin defterdeki OLCUMDEN hesaplanir.
+            return self._send(200, motor.onizleme(self.server.config, con=self.con))
         if u.path == "/api/budget":
             # Harcama OLCUMDUR: defterdeki satirlardan gelir, tahminden degil.
             return self._send(200, {
@@ -1358,7 +1374,8 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(body, dict):
                 return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             r = bam.is_ac(self.con, body.get("talep"), kaynak=body.get("kaynak") or "kullanici",
-                          hedef_modul=body.get("hedef_modul") or None)
+                          hedef_modul=body.get("hedef_modul") or None,
+                          efor=body.get("efor") or None)
             return self._send(200 if r.get("ok") else 422, r)
         # Web aramasini King adina DENER: Ayarlar ekranindaki «dene» dugmesi.
         # Rol sunucuda sabittir; istemci rol secemez.
@@ -1610,6 +1627,10 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "niyet kimligi sayi olmali"})
             r = intents.answer(self.con, nid, parca[3])
             return self._send(200 if r.get("ok") else 409, r)
+        if u.path == "/api/models/tarife":
+            # Guncel tarifeyi OpenRouter'in acik listesinden okur (anahtar
+            # istemez) ve tarihiyle yazar; hata eski tarifeyi silmez.
+            return self._send(200, tarife.guncelle(self.con))
         if u.path == "/api/models":
             # Model adlarini SAGLAYICIYA sorar. Koda gomulu bir liste
             # zamanla eskir ve bunu kullanici 404 ile ogrenir.
@@ -1758,7 +1779,28 @@ def _ritim(srv, aralik=60):
         srv.dur.wait(aralik)
 
 
+
+def _cikti_utf8():
+    """Cikti dosyaya ya da boruya gidiyorsa UTF-8 yazilir.
+
+    Python dosyaya yazarken sistemin kod sayfasini kullanir; Turkce
+    Windows'ta bu cp1254'tur ve «✓» orada yoktur. Baslatici cocuga UTF-8
+    soyler, ama surec elle ve ciktisi yonlendirilerek de acilabilir: o
+    zaman da ilk satirda olmemeli. Konsolda kodlamaya dokunulmaz, yalniz
+    yazilamayan karakter yerine «?» konur."""
+    for ad in ("stdout", "stderr"):
+        akis = getattr(sys, ad, None)
+        try:
+            if akis.isatty():
+                akis.reconfigure(errors="replace")
+            else:
+                akis.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError, OSError):
+            pass
+
+
 def main():
+    _cikti_utf8()
     # HATALAR D-13: bundan sonra yazilan her dosya yalniz sahibine acik.
     if os.name == "posix":
         os.umask(0o077)
@@ -1782,7 +1824,11 @@ def main():
     if daraltilan:
         sys.stderr.write("[hkm] %d dosyanin izni yalniz sahibine daraltildi.\n"
                          % daraltilan)
-    db.connect(srv.db_path).close()          # sema bir kez kurulur
+    _c = db.connect(srv.db_path)             # sema bir kez kurulur
+    # Son okunan model tarifesi (core/tarife.py) fiyat hesabina yuklenir;
+    # tablo bossa yedek tablo (ai.FIYAT) gecerlidir.
+    tarife.yukle(_c)
+    _c.close()
     srv.thresholds = thresholds.load()
     srv.dur = threading.Event()
     ritim = threading.Thread(target=_ritim, args=(srv,), daemon=True)

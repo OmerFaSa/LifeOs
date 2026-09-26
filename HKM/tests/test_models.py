@@ -388,3 +388,118 @@ def run():
         ok(r["ok"])
         eq(r["models"], ["gemini-3.6-flash"])
     test("sinama model listesini de dondurur", t_probe_returns_the_list)
+
+    # ------------------------------------------------ fiyat ve oneri dagilimi
+
+    def t_anthropic_prices_are_current():
+        """Sonnet 5 ve Opus 5 tarifesi eskiydi (3/15 ve 15/75): harcama
+        1,5–3 kat fazla yaziliyor, butce tavani o kadar erken doluyordu.
+        Kaynak: Anthropic fiyat tablosu (1M jeton basina USD)."""
+        from core import ai
+        eq(ai.FIYAT["claude-sonnet-5"], (2.00, 10.00))
+        eq(ai.FIYAT["anthropic/claude-sonnet-5"], (2.00, 10.00))
+        eq(ai.FIYAT["claude-opus-5"], (5.00, 25.00))
+        eq(ai.FIYAT["claude-haiku-4-5-20251001"], (1.00, 5.00))
+    test("Anthropic tarifesi guncel", t_anthropic_prices_are_current)
+
+    # --------------------------------------------- tarife ve butce paketleri
+
+    def t_baseline_prices_match_openrouter():
+        """Yedek tarife 2026-09-26'da OpenRouter listesinden okundu.
+        deepseek-chat 0.06/0.18 yaziyordu; gercegi 0.32/0.89 — bes kat
+        ucuz gorunuyor, «ucuzluk sirasi»ni o bozuk sayi belirliyordu."""
+        from core import ai
+        eq(ai.FIYAT["deepseek/deepseek-chat"], (0.32, 0.89))
+        eq(ai.FIYAT["google/gemini-3.6-flash"], (0.75, 3.75))
+        eq(ai.FIYAT["gemini-3.6-flash"], (0.75, 3.75))
+        eq(ai.FIYAT["anthropic/claude-opus-5.5"], (4.00, 20.00))
+    test("yedek tarife OpenRouter ile ayni", t_baseline_prices_match_openrouter)
+
+    def t_openrouter_id_mapping():
+        from core import tarife
+        for (sag, ad), beklenen in {
+                ("anthropic", "claude-sonnet-5"): "anthropic/claude-sonnet-5",
+                ("anthropic", "claude-haiku-4-5-20251001"): "anthropic/claude-haiku-4.5",
+                ("anthropic", "claude-opus-5-5"): "anthropic/claude-opus-5.5",
+                ("google", "gemini-2.5-pro"): "google/gemini-2.5-pro",
+                ("openai", "gpt-5-mini"): "openai/gpt-5-mini",
+                ("openrouter", "deepseek/deepseek-chat"): "deepseek/deepseek-chat",
+                ("yerel", "llama3"): None}.items():
+            eq(tarife.or_kimligi(sag, ad), beklenen, ad)
+    test("dogrudan model adi OpenRouter kimligine cevrilir", t_openrouter_id_mapping)
+
+    def _sahte_liste(fiyatlar):
+        veri = [{"id": k, "context_length": 1000,
+                 "architecture": {"input_modalities": ["text"]},
+                 "pricing": {"prompt": str(g / 1e6), "completion": str(c / 1e6)}}
+                for k, (g, c) in fiyatlar.items()]
+        return lambda url, timeout=20: {"data": veri}
+
+    def t_live_tariff_wins_and_survives_failure():
+        """Canli tarife kaynagiyla ve tarihiyle yazilir, yedegin ONUNE
+        gecer. Kaynak cevap vermezse eski tarife SILINMEZ."""
+        from core import ai, db, tarife
+        con = db.connect(":memory:")
+        try:
+            r = tarife.guncelle(con, transport=_sahte_liste({
+                "anthropic/claude-sonnet-5": (1.5, 7.5), "bozuk/model": (-1, 2)}),
+                simdi="2026-09-26T10:00:00")
+            ok(r["ok"])
+            eq(r["sayi"], 1)                       # negatif fiyat alinmaz
+            tarife.yukle(con)
+            eq(ai._fiyat("anthropic", "claude-sonnet-5", 1_000_000, 0), 1.5)
+            eq(tarife.bilgi("openrouter", "anthropic/claude-sonnet-5")["kaynak"], "canli")
+            eq(tarife.bilgi("openrouter", "anthropic/claude-sonnet-5")["tarih"], "2026-09-26T10:00:00")
+            def cokuk(url, timeout=20):
+                raise OSError("ag yok")
+            r2 = tarife.guncelle(con, transport=cokuk)
+            no(r2["ok"])
+            tarife.yukle(con)
+            eq(ai._fiyat("anthropic", "claude-sonnet-5", 1_000_000, 0), 1.5)
+            # Canli listede olmayan model yedekten okunur.
+            eq(tarife.bilgi("openrouter", "openai/gpt-5-mini")["kaynak"], "yedek")
+        finally:
+            ai.CANLI_FIYAT.clear()
+            con.close()
+    test("canli tarife yedegi gecer, hata onu silmez",
+         t_live_tariff_wins_and_survives_failure)
+
+    def t_every_role_has_a_tier_or_is_modelless():
+        for rol in models.ROLES:
+            if rol == "bam.kayit":
+                eq(models.oneri_kademesi(rol), None)
+            else:
+                ok(models.oneri_kademesi(rol), rol)
+    test("her kademe bir paket kademesine duser", t_every_role_has_a_tier_or_is_modelless)
+
+    def t_chosen_key_is_reported_raw():
+        """Geri alma icin: «ilk anahtar» secimi bos doner, cozulmus kimlik
+        sabitlenmez (sabitlenirse o anahtar silinince baskasina gecilmez)."""
+        cfg = models.apply({"local_token": "x"}, {
+            "keys": {"openrouter": [{"label": "a", "key": "sk-or-1111"}]},
+            "assignments": {"king": {"provider": "openrouter", "model": "deepseek/deepseek-chat"}}})
+        k = models.resolve(cfg, "king")
+        eq(k["key_chosen"], "")
+        ok(k["key_id"])
+    test("secilen anahtar ham haliyle doner", t_chosen_key_is_reported_raw)
+
+    def t_effort_is_validated():
+        ok_, hata = models.validate({"assignments": {"king": {
+            "provider": "openrouter", "model": "x/y", "efor": "cok"}}})
+        no(ok_)
+        ok(any("efor" in h for h in hata))
+        cfg = models.apply({"local_token": "x"}, {"keys": {"openrouter": "sk-or-1"},
+            "assignments": {"king": {"provider": "openrouter", "model": "x/y", "efor": "high"}}})
+        eq(models.resolve(cfg, "king")["efor"], "high")
+        eq(models.resolve(cfg, "vp_bio")["efor"], "high")          # miras
+    test("efor dogrulanir ve miras kalir", t_effort_is_validated)
+
+    def t_level_roles_exist_and_do_not_inherit_into_chat_silently():
+        """Seviye kademeleri King'in altindadir. Paket kurulmadiysa sohbet
+        seviye kademesini KULLANMAZ (sohbet.py yalniz KENDI atamasi olan
+        seviyeye gider) — bu test kademelerin varligini sabitler."""
+        for sv in ("alt", "orta", "ust"):
+            ok("seviye." + sv in models.ROLES)
+            eq(models.ROLES["seviye." + sv]["parent"], "king")
+        ok(any(k["layer"] == "seviye" for k in models.layers()))
+    test("seviye kademeleri var", t_level_roles_exist_and_do_not_inherit_into_chat_silently)

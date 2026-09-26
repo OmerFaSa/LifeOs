@@ -54,6 +54,9 @@ R.Istisna = (function(){
   /* Olceklenmeyen gun turleri — curriculum.js R.WEEKDAYS `ritual`. */
   const SABIT_RITUEL = ['exam', 'review'];
   const MIN_BLOK = 10;
+  /* Yogun gun: temelin bu kadar ustundeki sure YENI blok olur (siradaki
+     konu one alinir); daha azi yeni bir konuya yetmez, bloklar uzar. */
+  const ONE_ALMA_MIN = 30;
   const YENILEME_UFKU = 60;   // kalici sure degisince kac gun ileriye bakilir
 
   function fail(why){ return { ok:false, why }; }
@@ -211,6 +214,77 @@ R.Istisna = (function(){
     return out;
   }
 
+  function calismaToplami(blocks){
+    return (blocks || []).filter(b => b.slot !== 'Dinlenme')
+      .reduce((a, b) => a + (Number(b.targetMin) || 0), 0);
+  }
+
+  /* YOGUN GUN — «Carsamba 5 saat calisacagim». Temelin ustundeki sure ayni
+     bloklari uzatmaz; planda SIRADAKI konuya blok olur ve plan ileri kayar.
+     Siradaki konu: gunun haftasindan SONRAKI plan haftalarinda, o haftanin
+     sozlesmesinde olmayan, kapanmamis, baska bir gune zaten one alinmamis
+     ilk konu. Plan yoksa (sabit mufredat) null: bloklar eskisi gibi uzar.
+     `haric`: onizlemenin art arda gunler icin sectikleri. */
+  function siradakiKonu(iso, haric){
+    const M = R.Model;
+    const plan = M && M.activePlan ? M.activePlan() : null;
+    if(!plan) return null;
+    const n = M.weekOf(iso);
+    const dolu = Object.assign({}, haric || {});
+    const hafta = R.S.weeks && R.S.weeks[M.weekId(n)];
+    const buHafta = hafta && hafta.mainTopics && hafta.mainTopics.length
+      ? hafta.mainTopics : (M.curriculumFor(n).items || []);
+    buHafta.forEach(t => { if(t.topicId) dolu[t.subjectId + ':' + t.topicId] = true; });
+    Object.keys(R.S.days || {}).forEach(d => {
+      if(d === iso) return;
+      ((R.S.days[d] && R.S.days[d].blocks) || []).forEach(b => {
+        if(b.oneAlindi && b.topicId) dolu[b.subjectId + ':' + b.topicId] = true;
+      });
+    });
+    for(const w of plan.weeks){
+      if(w.n <= n) continue;
+      for(const it of (w.items || [])){
+        const k = it.subjectId + ':' + it.topicId;
+        if(dolu[k] || M.topicState(it.subjectId, it.topicId).state === 'closed') continue;
+        return it;
+      }
+    }
+    return null;
+  }
+
+  function oneAlinanBlok(day, konu, dk){
+    const ders = (R.SUBJECTS || []).find(x => x.id === konu.subjectId);
+    const ilk = day.blocks.find(b => b.slot !== 'Dinlenme' && Number(b.targetMin) > 0);
+    const soru = ilk && Number(ilk.targetQ) > 0
+      ? Math.round(Number(ilk.targetQ) * dk / Number(ilk.targetMin) / 5) * 5 : 0;
+    return {
+      id:'b' + day.blocks.length, slot:'Öne alınan',
+      subject:ders ? ders.name : (konu.subjectName || ''), topic:konu.name,
+      targetMin:dk, targetQ:soru, status:'pending',
+      subjectId:konu.subjectId, topicId:konu.topicId, oneAlindi:true,
+      actualMin:null, actualQ:null, correctQ:null, skipReason:null, startedAt:null,
+    };
+  }
+
+  /* Onizleme icin: araliktaki hangi gun hangi konuyu one alacak. Hicbir
+     sey yazmaz; gunuBicimle ile ayni kurali ayni sirayla uygular. */
+  function oneAlinacaklar(from, to, dakika){
+    const out = [], haric = {};
+    const bugun = U.todayISO();
+    for(const iso of aralik(from < bugun ? bugun : from, to)){
+      const tmpl = (R.WEEKDAYS || [])[U.weekdayIndex(iso)];
+      if(!tmpl || SABIT_RITUEL.indexOf(tmpl.ritual) >= 0) continue;
+      if(R.S.days[iso] && !dokunulmamis(R.S.days[iso])) continue;      // korunan gun
+      const taban = temelDakika(iso) || calismaToplami(tmpl.blocks.map(b => ({ slot:b.slot, targetMin:b.min })));
+      if(Number(dakika) - taban < ONE_ALMA_MIN) continue;
+      const k = siradakiKonu(iso, haric);
+      if(!k) break;
+      haric[k.subjectId + ':' + k.topicId] = true;
+      out.push({ iso, konu:k });
+    }
+    return out;
+  }
+
   /* Yeni kurulmus (ya da yeniden kurulan) bir gune gecerli istisnayi ve
      temel sureyi uygular. Gunu yerinde degistirir ve dondurur. */
   function gunuBicimle(day, iso){
@@ -232,7 +306,17 @@ R.Istisna = (function(){
     if(sabit) return day;
     const hedef = (ist && ist.tur === 'sure') ? Number(ist.dakika) : temelDakika(tarih);
     if(hedef){
-      day.blocks = olcekle(day.blocks, hedef);
+      day.blocks = (day.blocks || []).filter(b => !b.oneAlindi);
+      const temel = temelDakika(tarih);
+      const tabanBloklar = temel ? olcekle(day.blocks, temel) : day.blocks;
+      const fazla = hedef - calismaToplami(tabanBloklar);
+      const konu = (ist && ist.tur === 'sure' && fazla >= ONE_ALMA_MIN) ? siradakiKonu(tarih) : null;
+      if(konu){
+        day.blocks = tabanBloklar;
+        day.blocks.push(oneAlinanBlok(day, konu, fazla));
+      }else{
+        day.blocks = olcekle(day.blocks, hedef);
+      }
       if(ist) day.istisnaId = ist.id;
     }
     return day;
@@ -427,7 +511,9 @@ R.Istisna = (function(){
 
   return {
     TURLER, DAKIKA, STORE,
+    ONE_ALMA_MIN,
     liste, yukle, dogrula, dakikaGecerli, gunIcin, aralik, olcekle, gunuBicimle,
+    siradakiKonu, oneAlinacaklar,
     dokunulmamis, etki, ekle, kaldir, bitir, hafiflet, temeliYenile, temelDakika, sablonDakikasi,
     kapasiteSaati, haftaAraGunu, gunYuku, etkin, takvimde, tanim,
     yenile:araligiYenile,

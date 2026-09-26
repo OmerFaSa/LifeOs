@@ -98,12 +98,37 @@ R.Planner = (function(){
     return Math.round(cap * perHour * phase.qFactor * lv.qScale * load / 10) * 10;
   }
 
-  /* Bir haftaya kaç konu sığar? Kapasite ve seviyeye göre 1–3. */
+  /* Haftalık konu TAVANI — kullanıcının TERCİHİDİR (profil.haftalikKonuTavani).
+     Kapasite kaç konuya yetse de haftaya bundan fazlası yazılmaz; tavan
+     kapasiteyi de aşamaz: günde 3 saatle 8 konu yazılmaz. Varsayılan 5,
+     tavan ayarı gelmeden önceki sabit sınırdır — ayara dokunmayanın planı
+     değişmez. */
+  const TAVAN = { min:1, max:10, varsayilan:5 };
+  function tavan(profile){
+    const v = profile && profile.haftalikKonuTavani;
+    const n = Number(v);
+    return (v != null && v !== '' && Number.isInteger(n) && n >= TAVAN.min && n <= TAVAN.max)
+      ? n : TAVAN.varsayilan;
+  }
+
+  /* Bir haftaya kaç konu sığar? Kapasite ve seviyeye göre, en fazla tavan. */
   function topicsPerWeek(profile){
     const cap = Number(profile.capacityHoursPerWeek) || 21;
     const lv = level(profile.level);
     const budget = (cap / 3.5) / lv.pace;          // kabaca "kaç gün konu işlenebilir"
-    return U.clamp(Math.round(budget / 2.2), 1, 5);
+    return U.clamp(Math.round(budget / 2.2), 1, tavan(profile));
+  }
+
+  /* Haftaya en az k konu yazdıran en küçük kapasite (yarım saat adımıyla).
+     Tavan k'dan küçükse hiçbir kapasite yetmez: null. */
+  function kapasiteFor(profile, k){
+    if(k > tavan(profile)) return null;
+    const ile = cap => topicsPerWeek(Object.assign({}, profile, { capacityHoursPerWeek:cap }));
+    let cap = Math.max(0.5, Math.ceil((k - 0.5) * 3.5 * level(profile.level).pace * 2.2 * 2) / 2);
+    let guard = 0;
+    while(ile(cap) < k && guard++ < 400) cap += 0.5;
+    while(cap > 0.5 && ile(cap - 0.5) >= k) cap -= 0.5;
+    return cap;
   }
 
   /* Karar kapısı haftaları — takvimin yüzdesine oturur. */
@@ -256,16 +281,68 @@ R.Planner = (function(){
           topicId:t.topicId, name:t.name, freq:t.freq,
         })),
         coverage:U.pct(placed, rawQueue.length),
-        /* Tam kapsama için gereken haftalık saat — dürüst kapasite tavsiyesi. */
-        capacityForFull:(function(){
-          const need = productive ? Math.ceil(rawQueue.length / productive) : perWeek;
-          const cap = Number(p.capacityHoursPerWeek) || 21;
-          return need <= perWeek ? cap : Math.ceil(cap * need / Math.max(1, perWeek));
-        })(),
+        tavan:tavan(p),
+        /* Tam kapsama için gereken haftalık saat — HESAPLANMIŞ, tahmin değil:
+           aynı üreteç bu kapasiteyle hiçbir konuyu düşürmez. Eskiden
+           kapasiteyle birlikte büyüyor ve tavanı bilmiyordu (20.5 sa → 41,
+           25.5 sa → 51; 12 haftada «130 saat»). Hiçbir kapasite yetmiyorsa
+           sayı UYDURULMAZ: null + engel. */
+        ...kapsama(p, fitted.dropped.length, productive ? Math.ceil(rawQueue.length / productive) : perWeek),
         generatedAt:new Date().toISOString(),
         version:1,
       },
     };
+  }
+
+  /* Tam kapsama için ne gerekir? engel: null | 'tavan' (kullanıcının tavanı
+     yetmiyor; yükseltilirse süre yetebilir) | 'takvim' (en yüksek tavan
+     bile yetmiyor; takvim dar). gerekenKonu: haftada kaç konu gerekirdi. */
+  function kapsama(profile, dusen, gerekenKonu){
+    const cap = Number(profile.capacityHoursPerWeek) || 21;
+    if(!dusen) return { capacityForFull:cap, kapsamaEngeli:null, gerekenKonu };
+    if(gerekenKonu > TAVAN.max) return { capacityForFull:null, kapsamaEngeli:'takvim', gerekenKonu };
+    if(gerekenKonu > tavan(profile)) return { capacityForFull:null, kapsamaEngeli:'tavan', gerekenKonu };
+    return { capacityForFull:kapasiteFor(profile, gerekenKonu), kapsamaEngeli:null, gerekenKonu };
+  }
+
+  /* Konu düştüyse günlük süre artınca kaç konu geri gelir? «Konuları
+     çıkar» ile «daha çok çalış» arasındaki seçimi SAYIYLA sunar.
+
+     Satırlar tahmin değil: her biri aynı üreteçle (generate) HESAPLANIR ve
+     kapasiteyi gunluk-sure aksiyonunun uygulayacağı formülle alır
+     (o.kapasite = R.Istisna.kapasiteSaati) — ekranda görünen ile onaydan
+     sonra olan aynıdır. Süre basamak basamak işe yarar (haftadaki konu
+     sayısı tam sayıdır): yalnız bir öncekinden AZ konu düşüren en küçük
+     günlük dakikalar satır olur; «+30 dk» gibi hiçbir şey getirmeyen
+     teklif yazılmaz. Konu düşmüyorsa null. */
+  let sureOnbellek = null;
+  function sureSecenekleri(profile, total, o){
+    const p = profile || {};
+    const adim = o.adim || 15;
+    const anahtar = JSON.stringify([p.capacityHoursPerWeek, p.level, p.weakSubjects,
+      tavan(p), total, o.simdiDk, o.maxDk, adim]);
+    if(sureOnbellek && sureOnbellek.anahtar === anahtar) return sureOnbellek.deger;
+    const base = generate(p, total).meta;
+    let deger = null;
+    if(base.dropped.length){
+      const satirlar = [];
+      let son = base.dropped.length;
+      for(let dk = (Math.floor(o.simdiDk / adim) + 1) * adim; dk <= o.maxDk && son > 0; dk += adim){
+        const cap = o.kapasite(dk);
+        const m = generate(Object.assign({}, p, { capacityHoursPerWeek:cap }), total).meta;
+        if(m.dropped.length < son){
+          son = m.dropped.length;
+          satirlar.push({ dakika:dk, kapasite:cap, perWeek:m.perWeek, dusen:son,
+            geriGelen:base.dropped.length - son });
+        }
+      }
+      deger = { dusen:base.dropped.length, simdiDk:o.simdiDk, perWeek:base.perWeek,
+        satirlar, tam:satirlar.find(r => r.dusen === 0) || null,
+        engel:base.kapsamaEngeli, gerekenKonu:base.gerekenKonu, tavan:base.tavan,
+        maxDk:o.maxDk };
+    }
+    sureOnbellek = { anahtar, deger };
+    return deger;
   }
 
   /* Planın gerçeklikle uyumu — otomasyon bunu okuyup yeniden planlar. */
@@ -429,7 +506,8 @@ R.Planner = (function(){
     };
   }
 
-  return { LEVELS, PHASES, levels, level, phaseAt, topicDays, pool,
-    weeklyQuestions, topicsPerWeek, gateWeeks, generate, health, replan,
+  return { LEVELS, PHASES, TAVAN, levels, level, tavan, phaseAt, topicDays, pool,
+    weeklyQuestions, topicsPerWeek, kapasiteFor, gateWeeks, generate, sureSecenekleri,
+    health, replan,
     scenarios, checkPrerequisites, energyByWeekday };
 })();

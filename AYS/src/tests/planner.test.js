@@ -4,6 +4,15 @@
   const { describe, it, expect, resetState, withTodayAsync } = R.Test;
   const P = R.Planner, M = R.Model, U = R.U, S = R.S;
 
+  /* Isleyiciler is bitince R.App.render cagirir; test sayfasinda ekran
+     kabi yoktur ve gecikmeli cizim «Sayfa hatasi» birakir (vitrin.test.js
+     ile ayni desen). */
+  async function cizmeden(fn){
+    const A = R.App, r = A.render, pt = A.patch;
+    A.render = async () => {}; A.patch = () => true;
+    try{ return await fn(); }finally{ A.render = r; A.patch = pt; }
+  }
+
   function profile(patch){
     return Object.assign({
       capacityHoursPerWeek:21, studyDaysPerWeek:6, level:'orta', weakSubjects:[],
@@ -126,12 +135,334 @@
       });
     });
     it('tam kapsama için gereken kapasite hesaplanır', function(){
-      const m = P.generate(profile({ capacityHoursPerWeek:14 }), 20).meta;
+      /* 20 haftada hiçbir kapasite tüm konuları sığdıramaz (haftada 11
+         konu gerekirdi); sayı ancak ulaşılabilir bir takvimde yazılır. */
+      const m = P.generate(profile({ capacityHoursPerWeek:14, haftalikKonuTavani:8 }), 40).meta;
       expect(m.capacityForFull).toBeGreaterThan(14);
     });
     it('bol takvimde hiçbir konu düşmez', function(){
       const m = P.generate(profile({ capacityHoursPerWeek:45, level:'ileri' }), 40).meta;
       expect(m.coverage).toBeGreaterThan(90);
+    });
+  });
+
+  describe('Kapsama hesabı ve haftalık konu tavanı', function(){
+    /* Eskiden «tam kapsama için ~X saat» kapasiteyle birlikte büyüyordu
+       (20.5 sa → 41, 25.5 sa → 51) ve haftada 5 konu tavanını hiç
+       bilmiyordu: 12 haftalık takvimde «130 saat olmalıydı» yazıyordu —
+       hiçbir süreyle ulaşılamayan bir sayı. */
+    it('tam kapsama kapasitesiyle üretilen planda konu düşmez', function(){
+      let olculen = 0;
+      [[14, 40, 8], [20.5, 40, 8], [10, 30, 8], [25, 36, 6], [14, 40, 10]].forEach(([cap, tot, tv]) => {
+        const pr = profile({ capacityHoursPerWeek:cap, haftalikKonuTavani:tv });
+        const m = P.generate(pr, tot).meta;
+        expect(m.capacityForFull).toBeGreaterThan(cap);
+        const tam = P.generate(Object.assign({}, pr, { capacityHoursPerWeek:m.capacityForFull }), tot).meta;
+        expect(tam.dropped).toHaveLength(0);
+        /* Yarım saat eksiğiyle yine konu düşer: sayı şişirilmemiş. */
+        const eksik = P.generate(Object.assign({}, pr, { capacityHoursPerWeek:m.capacityForFull - 0.5 }), tot).meta;
+        expect(eksik.dropped.length).toBeGreaterThan(0);
+        olculen++;
+      });
+      expect(olculen).toBe(5);
+    });
+    it('kapasite artınca tam kapsama hedefi değişmez', function(){
+      const a = P.generate(profile({ capacityHoursPerWeek:20.5, haftalikKonuTavani:8 }), 40).meta;
+      const b = P.generate(profile({ capacityHoursPerWeek:25.5, haftalikKonuTavani:8 }), 40).meta;
+      expect(a.capacityForFull).toBeGreaterThan(25.5);
+      expect(a.dropped.length).toBeGreaterThan(0);
+      expect(b.capacityForFull).toBe(a.capacityForFull);
+    });
+    it('hiçbir süreyle ulaşılamayan kapsama için sayı uydurulmaz', function(){
+      /* 40 hafta haftada 6 konu ister; varsayılan tavan 5: süre ne olursa
+         olsun sığmaz. Engel KULLANICININ tavanıdır, yükseltilebilir. */
+      const m = P.generate(profile({ capacityHoursPerWeek:20.5 }), 40).meta;
+      expect(m.dropped.length).toBeGreaterThan(0);
+      expect(m.gerekenKonu).toBe(6);
+      expect(m.capacityForFull).toBeNull();
+      expect(m.kapsamaEngeli).toBe('tavan');
+      /* 12 hafta haftada 19 konu ister: en yüksek tavan bile yetmez,
+         engel takvimdir. */
+      [5, P.TAVAN.max].forEach(tv => {
+        const t = P.generate(profile({ capacityHoursPerWeek:20.5, haftalikKonuTavani:tv }), 12).meta;
+        expect(t.capacityForFull).toBeNull();
+        expect(t.kapsamaEngeli).toBe('takvim');
+      });
+    });
+    it('konu düşmüyorsa tam kapsama mevcut kapasitedir', function(){
+      const m = P.generate(profile({ capacityHoursPerWeek:45, level:'ileri' }), 40).meta;
+      if(!m.dropped.length){
+        expect(m.capacityForFull).toBe(45);
+        expect(m.kapsamaEngeli).toBeNull();
+      }
+    });
+    it('tavan varsayılanı 5: bugünkü plan değişmez', function(){
+      expect(P.TAVAN.varsayilan).toBe(5);
+      expect(P.tavan({})).toBe(5);
+      expect(P.topicsPerWeek(profile({ capacityHoursPerWeek:65.5 }))).toBe(5);
+      expect(P.generate(profile(), 40).meta.tavan).toBe(5);
+    });
+    it('kullanıcının tavanı haftadaki konu sayısını sınırlar ve açar', function(){
+      expect(P.topicsPerWeek(profile({ capacityHoursPerWeek:65.5, haftalikKonuTavani:3 }))).toBe(3);
+      expect(P.topicsPerWeek(profile({ capacityHoursPerWeek:65.5, haftalikKonuTavani:8 }))).toBe(8);
+      /* Tavan kapasiteyi aşamaz: 3 saat günlük süreyle 8 konu yazılmaz. */
+      expect(P.topicsPerWeek(profile({ capacityHoursPerWeek:20.5, haftalikKonuTavani:8 }))).toBe(3);
+      const m = P.generate(profile({ capacityHoursPerWeek:65.5, haftalikKonuTavani:8 }), 40).meta;
+      expect(m.perWeek).toBe(8);
+      expect(m.tavan).toBe(8);
+    });
+    it('geçersiz tavan varsayılana düşer', function(){
+      [0, -2, P.TAVAN.max + 1, 'sekiz', null, NaN].forEach(v => {
+        expect(P.tavan({ haftalikKonuTavani:v })).toBe(5);
+      });
+    });
+    /* Ayar ekranı (Rehber › Ayarlar › Profil): tavan kullanıcının
+       tercihidir, kaydedilince plan HEMEN yeni tavanla kurulur. */
+    function profilFormu(tavan){
+      const d = document.createElement('div');
+      const alan = (id, v) => '<input id="' + id + '" value="' + v + '">';
+      d.innerHTML = alan('st-name', '') + alan('st-city', '') + alan('st-cap', '65.5')
+        + alan('st-sleep', '7.5') + alan('st-diploma', '80') + alan('st-rank', '10000')
+        + alan('st-tavan', tavan);
+      document.body.appendChild(d);
+      return d;
+    }
+    it('ayardan girilen tavan kaydedilir ve plan hemen ona uyar', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        resetState();
+        S.profile.setupDone = true;
+        await M.ensurePlan(true);
+        const d = profilFormu('8');
+        try{ await cizmeden(() => R.Screens.guide.handle['save-profile']()); }finally{ d.remove(); }
+        expect(S.profile.haftalikKonuTavani).toBe(8);
+        expect(S.plan.meta.tavan).toBe(8);
+        expect(S.plan.meta.perWeek).toBe(8);
+      });
+    });
+    it('geçersiz tavan kaydedilmez, profil değişmez', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        resetState();
+        S.profile.setupDone = true;
+        S.profile.haftalikKonuTavani = 4;
+        const eskiKap = S.profile.capacityHoursPerWeek;
+        for(const v of ['11', '0', '2.5', 'çok']){
+          const d = profilFormu(v);
+          try{ await cizmeden(() => R.Screens.guide.handle['save-profile']()); }finally{ d.remove(); }
+          expect(S.profile.haftalikKonuTavani).toBe(4);
+          expect(S.profile.capacityHoursPerWeek).toBe(eskiKap);
+        }
+      });
+    });
+    it('boş bırakılan tavan varsayılana döner', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        resetState();
+        S.profile.setupDone = true;
+        S.profile.haftalikKonuTavani = 4;
+        const d = profilFormu('');
+        try{ await cizmeden(() => R.Screens.guide.handle['save-profile']()); }finally{ d.remove(); }
+        expect(S.profile.haftalikKonuTavani).toBeUndefined();
+        expect(P.tavan(S.profile)).toBe(5);
+      });
+    });
+    it('tavan değişince plan yeniden üretilir; eski plan boşuna üretilmez', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        resetState();
+        S.profile.setupDone = true;
+        const a = await M.ensurePlan(true);
+        /* Tavan alanı olmayan eski plan, tavanı varsayılan olan profille
+           yeniden üretilmez: ilk açılışta herkesin planı sıfırlanmamalı. */
+        delete a.meta.tavan;
+        expect(await M.ensurePlan()).toBe(a);
+        S.profile.haftalikKonuTavani = 3;
+        const b = await M.ensurePlan();
+        expect(b === a).toBeFalsy();
+        expect(b.meta.tavan).toBe(3);
+      });
+    });
+  });
+
+  describe('Haftanın bütün konuları güne ulaşır', function(){
+    /* Hafta sözleşmesi eskiden en fazla 3 konu tutuyordu (defaultWeek
+       slice(0,3), taslak 3, «Konu ekle» 3) ve gün blokları hep ilk üç
+       konuyu alıyordu. Plan haftaya 4–5 konu yazınca 4. ve 5. konu
+       hiçbir güne düşmüyordu: plan «yazıldı» diyor, kullanıcı görmüyordu. */
+    async function kur(cap, tavan){
+      resetState();
+      S.profile.setupDone = true;
+      S.profile.capacityHoursPerWeek = cap;
+      if(tavan) S.profile.haftalikKonuTavani = tavan;
+      const plan = await M.ensurePlan(true);
+      const w = await M.ensureWeek(1);
+      const gunler = [];
+      for(const d of M.weekDates(1)) gunler.push(await M.ensureDay(d));
+      return { plan, w, gunler, planli:plan.weeks[0].items };
+    }
+    function sayim(gunler){
+      const c = {};
+      gunler.filter(g => !R.WEEKDAYS[g.dow].ritual).forEach(g => {
+        const bu = {};
+        g.blocks.forEach(b => { if(b.topicId) bu[b.topicId] = true; });
+        Object.keys(bu).forEach(k => { c[k] = (c[k] || 0) + 1; });
+      });
+      return c;
+    }
+    it('plan haftaya 5 konu yazınca sözleşme 5 konuyu taşır', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        const { w, planli } = await kur(45.5);
+        expect(planli.length).toBe(5);
+        expect(w.mainTopics.map(t => t.topicId)).toEqual(planli.map(t => t.topicId));
+      });
+    });
+    it('5 konulu haftada her konu en az iki ders gününe düşer', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        const { gunler, planli } = await kur(45.5);
+        const c = sayim(gunler);
+        planli.forEach(t => expect((c[t.topicId] || 0) >= 2).toBeTruthy());
+      });
+    });
+    it('tavan 8 iken sekiz konunun her biri en az bir güne düşer', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        const { gunler, planli } = await kur(65.5, 8);
+        expect(planli.length).toBe(8);
+        const c = sayim(gunler);
+        planli.forEach(t => expect((c[t.topicId] || 0) >= 1).toBeTruthy());
+      });
+    });
+    it('3 konuluk haftada günler eskisi gibi kurulur', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        const { w, gunler } = await kur(20.5);
+        expect(w.mainTopics.length).toBe(3);
+        gunler.filter(g => !R.WEEKDAYS[g.dow].ritual).forEach(g => {
+          g.blocks.forEach((b, i) => expect(b.topicId).toBe(w.mainTopics[i].topicId));
+        });
+      });
+    });
+    it('gün açılışındaki blok bağlama dağılımı geri bozmaz', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        const { gunler } = await kur(45.5);
+        for(const g of gunler){
+          if(R.WEEKDAYS[g.dow].ritual) continue;
+          const once = g.blocks.map(b => b.topicId);
+          expect(await R.Auto.syncDayBlocks(g.date)).toBe(0);
+          expect(S.days[g.date].blocks.map(b => b.topicId)).toEqual(once);
+        }
+      });
+    });
+    it('hafta taslağı planın bütün konularını alır', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        const { w, planli } = await kur(45.5);
+        w.mainTopics = [];
+        const d = R.Auto.draftWeek(1);
+        expect(d.ok).toBeTruthy();
+        const ids = d.topics.map(t => t.topicId);
+        planli.forEach(t => expect(ids).toContain(t.topicId));
+      });
+    });
+  });
+
+  describe('Konu düşünce süre teklifi', function(){
+    /* «Konuları çıkar» ile «daha çok çalış» arasındaki seçim sayıyla
+       sunulur. Satırlar gunluk-sure aksiyonunun UYGULAYACAĞI kapasiteyle
+       (R.Istisna.kapasiteSaati) aynı üreteçten hesaplanır: gösterilen
+       sayı ile onaydan sonra olan aynıdır. */
+    const I = () => R.Istisna;
+    const secenek = (pr, tot, dk) => P.sureSecenekleri(pr, tot,
+      { simdiDk:dk, kapasite:I().kapasiteSaati, maxDk:I().DAKIKA.max });
+    it('yalnız konu geri getiren en küçük eşikler gösterilir', function(){
+      const pr = profile({ capacityHoursPerWeek:I().kapasiteSaati(180), haftalikKonuTavani:8 });
+      const sec = secenek(pr, 40, 180);
+      expect(sec.satirlar.length).toBeGreaterThan(0);
+      let once = sec.dusen;
+      sec.satirlar.forEach(r => {
+        expect(r.dakika > 180).toBeTruthy();
+        expect(r.dusen < once).toBeTruthy();
+        expect(r.geriGelen).toBe(sec.dusen - r.dusen);
+        expect(r.kapasite).toBe(I().kapasiteSaati(r.dakika));
+        const gercek = P.generate(Object.assign({}, pr, { capacityHoursPerWeek:r.kapasite }), 40).meta;
+        expect(gercek.dropped.length).toBe(r.dusen);
+        /* Eşik en küçüktür: 15 dk azı aynı kazancı vermez. */
+        const az = P.generate(Object.assign({}, pr,
+          { capacityHoursPerWeek:I().kapasiteSaati(r.dakika - 15) }), 40).meta;
+        expect(az.dropped.length > r.dusen).toBeTruthy();
+        once = r.dusen;
+      });
+      expect(sec.tam.dusen).toBe(0);
+    });
+    it('tavan engelinde tam satırı yok, engel ve gereken konu söylenir', function(){
+      const pr = profile({ capacityHoursPerWeek:I().kapasiteSaati(180) });
+      const sec = secenek(pr, 40, 180);
+      expect(sec.tam).toBeNull();
+      expect(sec.engel).toBe('tavan');
+      expect(sec.gerekenKonu).toBe(6);
+      expect(sec.tavan).toBe(5);
+      /* Kısmi kazanç yine gösterilir: 3 → 5 konu/hafta. */
+      expect(sec.satirlar.length).toBeGreaterThan(0);
+    });
+    it('konu düşmüyorsa teklif yok', function(){
+      const pr = profile({ capacityHoursPerWeek:I().kapasiteSaati(480), haftalikKonuTavani:8 });
+      expect(P.generate(pr, 40).meta.dropped).toHaveLength(0);
+      expect(secenek(pr, 40, 480)).toBeNull();
+    });
+    it('süre artırmak konu getirmiyorsa satır uydurulmaz', function(){
+      /* Tavan 3 ve kapasite zaten 3 konuya yetiyor: hiçbir süre getirmez. */
+      const pr = profile({ capacityHoursPerWeek:I().kapasiteSaati(180), haftalikKonuTavani:3 });
+      const sec = secenek(pr, 40, 180);
+      expect(sec.satirlar).toHaveLength(0);
+      expect(sec.tam).toBeNull();
+    });
+
+    const dom = h => { const k = document.createElement('div'); k.innerHTML = String(h); return k; };
+    async function planli(cap, tavan){
+      resetState();
+      S.profile.setupDone = true;
+      S.profile.capacityHoursPerWeek = cap;
+      if(tavan) S.profile.haftalikKonuTavani = tavan;
+      await M.ensurePlan(true);
+    }
+    it('plan kartı eşikleri ve uygulama düğmesini gösterir; boş sayı yazmaz', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        await planli(I().kapasiteSaati(180), 8);
+        const k = dom(await R.Screens.plan.render());
+        const dugmeler = k.querySelectorAll('[data-act="sure-oner"]');
+        expect(dugmeler.length).toBeGreaterThan(0);
+        dugmeler.forEach(b => expect(Number(b.getAttribute('data-dakika')) > 180).toBeTruthy());
+        expect(k.textContent).toContain('konu geri gelir');
+        expect(k.textContent.indexOf('~ saat') < 0).toBeTruthy();
+        expect(k.textContent.indexOf('null') < 0).toBeTruthy();
+      });
+    });
+    it('tavan engelinde plan kartı tavanı söyler ve ayara götürür', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        await planli(I().kapasiteSaati(180));
+        const k = dom(await R.Screens.plan.render());
+        expect(k.textContent).toContain('haftada en fazla 5 konu');
+        expect(k.querySelector('[data-act="go"][data-route="guide"]')).toBeTruthy();
+      });
+    });
+    it('düğme günlük süre önizlemesini açar; önizleme kaç konunun döneceğini yazar', async function(){
+      await withTodayAsync('2026-09-15', async () => {
+        await planli(I().kapasiteSaati(180), 8);
+        const sec = secenek(S.profile, S.plan.meta.total, 180);
+        const r = sec.satirlar[0];
+        const sheet = R.UI.sheet;
+        let acilan = null;
+        try{
+          R.UI.sheet = o => { acilan = o; };
+          await cizmeden(() => R.Screens.plan.handle['sure-oner']({ dataset:{ dakika:String(r.dakika) } }));
+        }finally{ R.UI.sheet = sheet; }
+        expect(acilan).toBeTruthy();
+        const g = dom(acilan.body).textContent;
+        expect(g).toContain('Plana girmeyen konu');
+        expect(g).toContain(String(sec.dusen));
+        expect(g).toContain(String(r.dusen));
+        expect(String(acilan.footer)).toContain('istisna-uygula');
+        /* Pencere PLAN ekranından açıldı: «Uygula» burada da çalışmalı
+           (düğmeler açık ekranın işleyicisine gider). Onaydan sonra plan
+           önizlemenin söylediği kadar konuyu geri alır. */
+        await cizmeden(() => R.Screens.plan.handle['istisna-uygula']());
+        expect(S.profile.gunlukDakika).toBe(r.dakika);
+        expect(S.plan.meta.dropped.length).toBe(r.dusen);
+      });
     });
   });
 
