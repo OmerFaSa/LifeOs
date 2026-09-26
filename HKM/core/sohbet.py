@@ -455,6 +455,14 @@ def _yedek_metin(r, yedek):
                            "Şu an serbest cümleyle cevap veremiyorum.")
 
 
+def _ilk_duyuru(con, anahtar):
+    """Bu duyuru ilk kez mi yapiliyor? Ilkse kaydeder ve True doner."""
+    import datetime as _dt
+    cur = con.execute("INSERT OR IGNORE INTO duyurular(anahtar, zaman) VALUES (?, ?)",
+                      (anahtar, _dt.datetime.now().isoformat(timespec="seconds")))
+    return cur.rowcount == 1
+
+
 def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
           user="ben", transport=None, kayit=True, kanal="local", hedef=None):
     """Bir mesaja cevap. Once komut, sonra model, sonra durust bir «yok».
@@ -704,6 +712,13 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
         # oldugunu fark ettirmeden eksik bilgi vermektir.
         govde += "\n\n(Cevap uzunluk sınırına takıldı, son tam cümlede "
         govde += "kesildi. Daha dar bir soru sorarsan tamamını yazabilirim.)"
+    ekonomi = motor_bilgi.get("ekonomi")
+    if ekonomi and kanal != "local" and _ilk_duyuru(con, "ekonomi:%s:%s" % (
+            str(date)[:7], ekonomi.get("bant"))):
+        # Metin kanalinda yan not yeri yoktur: butce bandi METNE eklenir,
+        # ama ayda her esik icin BIR kez — her cevabin altinda tekrar eden
+        # uyari okunmaz olur. Web'de not ayri satirda gider (motor).
+        govde += "\n\n(" + ekonomi["not"] + ")"
     if kayit:
         patron.log(con, kanal, "user", metin, agent=gorevli)
         patron.log(con, kanal, "manager", govde, agent=gorevli)

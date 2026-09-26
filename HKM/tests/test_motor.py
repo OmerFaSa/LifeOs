@@ -177,6 +177,32 @@ def run():
         eq(motor.merdiven(db.connect(":memory:"), cfg, "king", seviye="ust")["ekonomi"], None)
     test("butce bantlarinda yonlendirme ekonomiklesir", t_economy_mode_at_budget_bands)
 
+    def t_economy_note_reaches_text_channels_once():
+        """Telegram'da yan not yeri yoktur: ekonomik mod notu cevabin
+        METNINE eklenir — ama her mesajda degil, ayda her esik icin BIR
+        kez. Web'de not ayri satirda gider, metne eklenmez."""
+        from core import sohbet
+        cfg = _cfg("S", tavan=10.0)
+        con = db.connect(":memory:")
+        butce.record(con, role="king", task="sohbet", provider="openrouter", model="x", usd=8.1)
+        t = _tasiyici("Tamam, bakalım.")
+        a = sohbet.konus(con, cfg, "bugün nasıl gitti sence", BUGUN, transport=t, kanal="telegram")
+        ok("%80" in a["text"], a["text"])
+        b = sohbet.konus(con, cfg, "peki yarın ne yapalım", BUGUN, transport=t, kanal="telegram")
+        no("%80" in b["text"], b["text"])                 # ayni esik, ayni ay: tekrar yok
+        butce.record(con, role="king", task="sohbet", provider="openrouter", model="x", usd=1.5)
+        c = sohbet.konus(con, cfg, "hafta nasıl geçti", BUGUN, transport=t, kanal="telegram")
+        ok("%95" in c["text"], c["text"])                 # yeni esik: bir kez daha
+        w = sohbet.konus(db.connect(":memory:"), cfg, "selam", BUGUN, transport=t)
+        no("bütçe" in w["text"].lower())
+        # Web: metin temiz, not motor satirinda.
+        con2 = db.connect(":memory:")
+        butce.record(con2, role="king", task="sohbet", provider="openrouter", model="x", usd=8.1)
+        y = sohbet.konus(con2, cfg, "bugün nasıl gitti sence", BUGUN, transport=t)
+        no("%80" in y["text"])
+        ok("%80" in y["motor"]["ekonomi"]["not"])
+    test("ekonomik mod notu metin kanalina ayda bir kez", t_economy_note_reaches_text_channels_once)
+
     def t_voice_needs_google():
         m = motor.merdiven(None, _cfg("S"), "medya")
         no(m["ok"])

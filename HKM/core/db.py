@@ -299,6 +299,11 @@ CREATE INDEX IF NOT EXISTS ix_bildirimler_modul ON bildirimler(modul, okundu_at,
 /* Modulun YARIN icin ilk isleri (brand/ortak/hedefag.js `yarin` kancasi).
    Isleri modulun KENDI kodu secer; HKM aksam «yarin sunlar var» mesajinda
    yalniz dizer (core/schedule.py). Anlik goruntudur: modul basina tek satir. */
+CREATE TABLE IF NOT EXISTS duyurular (
+  anahtar     TEXT PRIMARY KEY,           -- ör. ekonomi:2026-09:80
+  zaman       TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS yarin_ozet (
   modul       TEXT PRIMARY KEY,
   gun         TEXT NOT NULL,
