@@ -146,6 +146,34 @@ def esleme_ac(cfg):
         return False, 0
 
 
+def adiyla_durdur(hedef, calistir=subprocess.run, isletim=None):
+    """Komut satirinda `hedef` (betigin tam yolu) gecen surecleri kapatir.
+    Doner: (ok, not). Surec ADIYLA bulunur: port dinleyen her seyi
+    oldurmek baska bir programi kapatmak olabilirdi.
+
+    POSIX'te pkill; Windows'ta pkill yoktur — surecler PowerShell'le
+    (Win32_Process.CommandLine) bulunur ve yalniz o PID'ler taskkill'le
+    kapatilir. HKM'deki kopyasi ayni (kok baslatici HKM'siz calismali)."""
+    if (isletim or os.name) != "nt":
+        try:
+            calistir(["pkill", "-f", hedef], capture_output=True)
+        except FileNotFoundError:
+            return False, "pkill bulunamadı; elle durdurulmalı: " + hedef
+        return True, ""
+    sorgu = ("Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -and "
+             "$_.CommandLine.Contains('%s') } | ForEach-Object { $_.ProcessId }"
+             % hedef.replace("'", "''"))
+    try:
+        r = calistir(["powershell", "-NoProfile", "-NonInteractive", "-Command", sorgu],
+                     capture_output=True, text=True)
+    except FileNotFoundError:
+        return False, "PowerShell bulunamadı; Görev Yöneticisi'nden kapat: " + hedef
+    for pid in (r.stdout or "").split():
+        if pid.isdigit() and int(pid) != os.getpid():
+            calistir(["taskkill", "/PID", pid, "/T", "/F"], capture_output=True)
+    return True, ""
+
+
 def durdur(cfg):
     """Daemon'u durdurur. Islemi ADIYLA bulur: port dinleyen her seyi
     oldurmek, baska bir programi kapatmak olabilirdi."""
@@ -153,10 +181,9 @@ def durdur(cfg):
         _yaz("yok", "Daemon zaten çalışmıyor")
         return 0
     hedef = os.path.join(ROOT, "daemon.py")
-    try:
-        p = subprocess.run(["pkill", "-f", hedef], capture_output=True)
-    except FileNotFoundError:
-        _yaz("hata", "pkill bulunamadı", "elle durdurulmalı: " + hedef)
+    ok_, not_ = adiyla_durdur(hedef)
+    if not ok_:
+        _yaz("hata", "Daemon durdurulamadı", not_)
         return 1
     son = time.time() + 5
     while time.time() < son:
@@ -164,7 +191,7 @@ def durdur(cfg):
             _yaz("ok", "Daemon durduruldu")
             return 0
         time.sleep(0.3)
-    _yaz("hata", "Daemon durmadı", "çıkış kodu %s" % p.returncode)
+    _yaz("hata", "Daemon durmadı", "elle kapat: " + hedef)
     return 1
 
 

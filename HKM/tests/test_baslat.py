@@ -156,3 +156,76 @@ def run():
                 ok("\u2713 hazir" in metin, ad + ": gunlukte ✓ yok")
     test("baslatici ve sunucular ciktisini kendisi korur",
          t_servers_guard_their_own_output)
+
+    def _kok():
+        import importlib.util
+        yol = os.path.join(os.path.dirname(baslat.ROOT), "baslat.py")
+        spec = importlib.util.spec_from_file_location("kok_baslat", yol)
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        return m
+
+    def t_stop_by_name_on_windows():
+        """Windows'ta pkill yoktur: --dur «pkill bulunamadi» deyip
+        duruyordu. Surec yine ADIYLA bulunur (komut satirinda betigin tam
+        yolu), yalniz o PID'ler kapatilir — porttaki her seyi oldurmek
+        baska bir programi kapatmak olabilirdi."""
+        hedef = r"C:\Users\ASUS\Desktop\LifeOs\HKM\daemon.py"
+        for ad, m in (("HKM", baslat), ("kok", _kok())):
+            komutlar = []
+
+            class Sonuc:
+                def __init__(self, cikti="", kod=0):
+                    self.stdout, self.returncode = cikti, kod
+
+            def calistir(args, **kw):
+                komutlar.append(args)
+                if args[0] == "powershell":
+                    return Sonuc("4120\r\n5332\r\n")
+                return Sonuc()
+            ok_, _ = m.adiyla_durdur(hedef, calistir=calistir, isletim="nt")
+            ok(ok_, ad)
+            sorgu = komutlar[0]
+            eq(sorgu[0], "powershell", ad)
+            ok("Win32_Process" in sorgu[-1] and "daemon.py" in sorgu[-1], ad)
+            eq(komutlar[1], ["taskkill", "/PID", "4120", "/T", "/F"], ad)
+            eq(komutlar[2], ["taskkill", "/PID", "5332", "/T", "/F"], ad)
+            # Tek tirnak PowerShell'de ikilenir: yoldaki ' komutu bozmaz.
+            del komutlar[:]
+            m.adiyla_durdur("C:\\O'Brien\\daemon.py", calistir=calistir, isletim="nt")
+            ok("O''Brien" in komutlar[0][-1], ad)
+            # Surec bulunmazsa kapatilacak bir sey yok; bu hata degil.
+            bos = []
+            ok_, not_ = m.adiyla_durdur(hedef, isletim="nt",
+                                        calistir=lambda a, **k: bos.append(a) or Sonuc(""))
+            ok(ok_, ad)
+            eq(len(bos), 1, ad)
+    test("--dur Windows'ta pkill olmadan surecin adiyla calisir", t_stop_by_name_on_windows)
+
+    def t_stop_by_name_posix_real():
+        """POSIX'te gercek bir surecle: adiyla bulunur ve kapanir; adi
+        tutmayan surece dokunulmaz."""
+        import subprocess
+        import sys
+        import time
+        if os.name != "posix":
+            return
+        with tempfile.TemporaryDirectory() as d:
+            hedef = os.path.join(d, "sahte_daemon.py")
+            baska = os.path.join(d, "baska.py")
+            for y in (hedef, baska):
+                with open(y, "w", encoding="utf-8") as f:
+                    f.write("import time\ntime.sleep(60)\n")
+            p = subprocess.Popen([sys.executable, hedef])
+            q = subprocess.Popen([sys.executable, baska])
+            try:
+                time.sleep(0.3)
+                ok(baslat.adiyla_durdur(hedef)[0])
+                p.wait(timeout=5)
+                ok(p.poll() is not None)
+                eq(q.poll(), None)                    # baskasina dokunulmadi
+            finally:
+                for x in (p, q):
+                    if x.poll() is None:
+                        x.kill()
+    test("--dur POSIX'te yalniz adi tutan sureci kapatir", t_stop_by_name_posix_real)

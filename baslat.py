@@ -100,6 +100,34 @@ def sistemler_baslat():
     return False, p, gunluk_yolu
 
 
+def adiyla_durdur(hedef, calistir=subprocess.run, isletim=None):
+    """Komut satirinda `hedef` (betigin tam yolu) gecen surecleri kapatir.
+    Doner: (ok, not). Surec ADIYLA bulunur: port dinleyen her seyi
+    oldurmek baska bir programi kapatmak olabilirdi.
+
+    POSIX'te pkill; Windows'ta pkill yoktur — surecler PowerShell'le
+    (Win32_Process.CommandLine) bulunur ve yalniz o PID'ler taskkill'le
+    kapatilir. HKM'deki kopyasi ayni (kok baslatici HKM'siz calismali)."""
+    if (isletim or os.name) != "nt":
+        try:
+            calistir(["pkill", "-f", hedef], capture_output=True)
+        except FileNotFoundError:
+            return False, "pkill bulunamadı; elle durdurulmalı: " + hedef
+        return True, ""
+    sorgu = ("Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -and "
+             "$_.CommandLine.Contains('%s') } | ForEach-Object { $_.ProcessId }"
+             % hedef.replace("'", "''"))
+    try:
+        r = calistir(["powershell", "-NoProfile", "-NonInteractive", "-Command", sorgu],
+                     capture_output=True, text=True)
+    except FileNotFoundError:
+        return False, "PowerShell bulunamadı; Görev Yöneticisi'nden kapat: " + hedef
+    for pid in (r.stdout or "").split():
+        if pid.isdigit() and int(pid) != os.getpid():
+            calistir(["taskkill", "/PID", pid, "/T", "/F"], capture_output=True)
+    return True, ""
+
+
 def sistemler_dur():
     """Uc sistemin sunucusunu ADIYLA durdurur — HKM'nin kendi durdur()'uyla
     AYNI desen: port dinleyen her seyi oldurmek, baska bir programi
@@ -108,10 +136,9 @@ def sistemler_dur():
         _yaz("yok", "Sistem sunucusu zaten çalışmıyor")
         return 0
     hedef = os.path.join(KOK, "sunucu.py")
-    try:
-        subprocess.run(["pkill", "-f", hedef], capture_output=True)
-    except FileNotFoundError:
-        _yaz("hata", "pkill bulunamadı", "elle durdurulmalı: " + hedef)
+    ok_, not_ = adiyla_durdur(hedef)
+    if not ok_:
+        _yaz("hata", "Sistem sunucusu durdurulamadı", not_)
         return 1
     son = time.time() + 5
     while time.time() < son:
@@ -119,7 +146,7 @@ def sistemler_dur():
             _yaz("ok", "Sistem sunucusu durduruldu")
             return 0
         time.sleep(0.3)
-    _yaz("hata", "Sistem sunucusu durmadı", "elle: pkill -f " + hedef)
+    _yaz("hata", "Sistem sunucusu durmadı", "elle kapat: " + hedef)
     return 1
 
 
