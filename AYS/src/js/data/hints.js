@@ -31,7 +31,7 @@ R.HINTS = {
   'minimum-day':{ t:'Minimum gün', b:'Kötü günün alt sınırı: 45 dakika + 15 paragraf + due kartlar.',
     more:'Motivasyon çalışmanın önkoşulu değil, düzenin yan ürünüdür. Hiçbir şey yapamadığın gün bile bu üçünü tutturursan seri kırılmaz.' },
   'block':{ t:'Çalışma bloğu', b:'Gün üç bloğa bölünür: 75 dk ana ders, 65 dk ikinci ders, 40 dk rutin.',
-    more:'Bloklar arası 10–15 dakika ara verilir. Blok konusu haftanın üç ana konusundan seçilir; serbestçe değiştirilebilir.' },
+    more:'Bloklar arası 10–15 dakika ara verilir. Blok konusu haftanın ana konularından seçilir; konu sayısı bloktan fazlaysa konular günlere sırayla dağılır. Serbestçe değiştirilebilir.' },
   'timer':{ t:'Odak zamanlayıcı', b:'Başlat’a basınca süre kendi işler, bitirince blok otomatik işaretlenir.',
     more:'Gerçekleşen süre elle girilmez; ölçülen süre plan tamamlama ve süre sapması KPI’larını besler.' },
   'skip-reason':{ t:'Atlama nedeni', b:'Atlanan blok suç değil veri: neden seçilir, pazar review’unda kümelenir.',
@@ -44,7 +44,7 @@ R.HINTS = {
     more:'Son dört haftada kalkış saati sınav sabahına göre kademeli ayarlanır. Haziranda gece çalışmasıyla borç kapatılmaz.' },
 
   /* --- hafta --- */
-  'contract':{ t:'Haftalık sözleşme', b:'En fazla üç ana konu; hedef çıktı temelli yazılır.',
+  'contract':{ t:'Haftalık sözleşme', b:'Ana konular plandan gelir; en fazla kaç konu olacağını Ayarlar › Profil’deki tavan belirler. Hedef çıktı temelli yazılır.',
     more:'“Matematik çalış” değil, “rasyonel sayılardan 120 soru, en az %70 doğruluk”. Geçen haftanın verisi görülmeden yeni hedef yazılmaz.' },
   'capacity':{ t:'Kapasite', b:'Planlanan yük kapasitenin %110’unu aşarsa hafta imzalanamaz.',
     more:'Kapasite haftada 21 saat (3–4 saat × 6 gün) varsayılır. Gerçekçi olmayan plan, tamamlama oranını da anlamsız kılar.' },

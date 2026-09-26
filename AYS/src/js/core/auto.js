@@ -21,7 +21,13 @@ R.Auto = (function(){
     if(week.signedAt) return { ok:false, reason:'Hafta imzalı; önce revize et.' };
 
     const plan = M.curriculumFor(n);
-    const items = (plan.items || []).slice(0, 3);
+    /* Plan haftaya 3'ten fazla konu yazdiysa (kapasite + kullanicinin
+       tavani) taslak hepsini alir; eskiden 3'te kesiliyordu. */
+    /* Kapanmis konu (ornegin yogun bir gunde one alinip bitmis) kendi
+       haftasinda tekrar yazilmaz; hafta o kadar hafifler. */
+    const acik = (plan.items || []).filter(it => M.topicState(it.subjectId, it.topicId).state !== 'closed');
+    const sinir = Math.max(3, acik.length);
+    const items = acik.slice(0, sinir);
     const risky = C.riskRanking(6);
     const carry = week.carryIn || [];
 
@@ -30,7 +36,7 @@ R.Auto = (function(){
     const seen = {};
     const push = (name, subjectId, topicId, why) => {
       const key = (subjectId || '') + ':' + (topicId || '') + ':' + name;
-      if(seen[key] || picked.length >= 3) return;
+      if(seen[key] || picked.length >= sinir) return;
       seen[key] = true;
       picked.push({ name, subjectId:subjectId || null, topicId:topicId || null, why });
     };
@@ -45,7 +51,7 @@ R.Auto = (function(){
     }
     items.forEach(it => push(it.name, it.subjectId, it.topicId, 'plandaki sıra'));
     risky.forEach(r => {
-      if(picked.length >= 3) return;
+      if(picked.length >= sinir) return;
       push(r.topicName, r.subjectId, r.topicId, 'risk ' + r.score + ' — ' + r.label.toLowerCase());
     });
 
@@ -108,10 +114,14 @@ R.Auto = (function(){
     if(!week || !week.mainTopics.length) return 0;
 
     let changed = 0;
-    const work = day.blocks.filter(b => b.slot !== 'Dinlenme');
+    /* One alinan blok (yogun gun, core/istisna.js) haftanin konusuna
+       baglanmaz: o gunun fazla suresi SONRAKI bir konuya ayrildi. */
+    const work = day.blocks.filter(b => b.slot !== 'Dinlenme' && !b.oneAlindi);
     work.forEach((b, i) => {
       if(b.status !== 'pending') return;          // başlanmış bloğa dokunma
-      const t = week.mainTopics[i % week.mainTopics.length];
+      /* Gunu kuran defaultDay ile AYNI sira (M.blokKonusu). */
+      const r = M.blokKonusu(day.dow, i, week.mainTopics.length, work.length);
+      const t = week.mainTopics[r == null ? i % week.mainTopics.length : r];
       if(!t) return;
       if(b.topic !== t.name || b.subjectId !== (t.subjectId || null)){
         b.topic = t.name;

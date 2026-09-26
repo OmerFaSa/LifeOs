@@ -281,6 +281,8 @@ R.Screens.guide = (function(){
 
   const THEMES = [{ value:'system', label:'Sistem' }, { value:'light', label:'Açık' }, { value:'dark', label:'Koyu' }];
 
+  const TAVAN = R.Planner.TAVAN;
+
   function profileCard(){
     const p = S.profile;
     const f = (label, id, o) => K.Field({ label, input:K.Input(Object.assign({ id }, o)) });
@@ -290,12 +292,17 @@ R.Screens.guide = (function(){
         ${K.Cols(2, [f('Ad', 'st-name', { value:p.name }), f('Şehir', 'st-city', { value:p.city })])}
         ${K.Cols(2, [
           f('Haftalık kapasite (saat)', 'st-cap', { type:'number', step:0.5, value:p.capacityHoursPerWeek, numeric:true }),
-          f('Uyku hedefi (saat)', 'st-sleep', { type:'number', step:0.5, value:p.sleepTarget, numeric:true }),
+          /* Tavan kullanicinin tercihidir; plan kaydedince ona gore kurulur. */
+          K.Field({ label:'Haftada en fazla konu', hint:TAVAN.min + '–' + TAVAN.max
+              + ' · süren yetmezse Plan ekranı söyler',
+            input:K.Input({ id:'st-tavan', type:'number', min:TAVAN.min, max:TAVAN.max, step:1,
+              value:R.Planner.tavan(p), numeric:true }) }),
         ])}
         ${K.Cols(2, [
+          f('Uyku hedefi (saat)', 'st-sleep', { type:'number', step:0.5, value:p.sleepTarget, numeric:true }),
           f('Diploma notu', 'st-diploma', { type:'number', min:0, max:100, value:p.diplomaGrade, numeric:true }),
-          f('Hedef başarı sırası', 'st-rank', { type:'number', value:p.targetRank, numeric:true }),
         ])}
+        ${f('Hedef başarı sırası', 'st-rank', { type:'number', value:p.targetRank, numeric:true })}
         ${K.Button({ label:'Kaydet', act:'save-profile', class:'mt-12' })}`,
     });
   }
@@ -900,6 +907,16 @@ R.Screens.guide = (function(){
     async 'save-profile'(){
       const p = S.profile;
       const v = id => document.getElementById(id).value;
+      /* Tavan once dogrulanir: gecersizse HICBIR alan yazilmaz, yarim
+         kalmis bir kayit olmaz. Bos birakmak varsayilana doner. */
+      const tv = String(v('st-tavan') == null ? '' : v('st-tavan')).trim();
+      const tvSayi = Number(tv);
+      if(tv !== '' && R.Planner.tavan({ haftalikKonuTavani:tvSayi }) !== tvSayi){
+        UI.toast('Haftada en fazla konu ' + TAVAN.min + '–' + TAVAN.max + ' arasında bir tam sayı olmalı.');
+        return;
+      }
+      const eskiTavan = R.Planner.tavan(p);
+      if(tv === '') delete p.haftalikKonuTavani; else p.haftalikKonuTavani = tvSayi;
       p.name = v('st-name');
       p.city = v('st-city');
       p.capacityHoursPerWeek = Number(v('st-cap')) || p.capacityHoursPerWeek;
@@ -907,7 +924,14 @@ R.Screens.guide = (function(){
       p.diplomaGrade = U.clamp(Number(v('st-diploma')) || 0, 0, 100);
       p.targetRank = Number(v('st-rank')) || p.targetRank;
       await M.saveProfile();
-      UI.toast('Profil kaydedildi');
+      /* Kapasite ya da tavan degistiyse plan simdi kurulur; kullanici
+         degisikligin etkisini bir sonraki acilista degil hemen gorur. */
+      const once = S.plan;
+      if(p.setupDone) await M.ensurePlan();
+      const yeni = S.plan !== once;
+      UI.toast(yeni && R.Planner.tavan(p) !== eskiTavan
+        ? 'Profil kaydedildi · plan haftada en fazla ' + R.Planner.tavan(p) + ' konuyla yeniden kuruldu'
+        : yeni ? 'Profil kaydedildi · plan yeniden kuruldu' : 'Profil kaydedildi');
       R.App.render();
     },
     /* 173 yedek kartının düğmesi: aynı dışa aktarma. */

@@ -302,6 +302,144 @@
     });
   });
 
+  /* YOĞUN GÜN: «Çarşamba 5 saat çalışacağım». Eskiden fazla süre aynı
+     blokları uzatıyordu; plana yeni konu girmiyordu. Artık taban bloklar
+     olduğu gibi kalır, FAZLA süre plandaki sıradaki konuya blok olur:
+     plan ileri kayar, konu kapanırsa kendi haftasında tekrar yazılmaz. */
+  describe('İstisna — yoğun gün sıradaki konuyu öne alır', () => {
+    async function planli(){
+      reset();
+      S.profile.setupDone = true;
+      await M.ensurePlan(true);
+    }
+    /* Beklenen konu testte BAĞIMSIZ hesaplanır: günün haftasından sonraki
+       plan haftalarında, o haftanın sözleşmesinde olmayan, kapanmamış ilk
+       konu. */
+    async function siradaki(iso, haric){
+      const n = M.weekOf(iso);
+      const hafta = await M.ensureWeek(n);
+      const bu = {};
+      hafta.mainTopics.forEach(t => { bu[t.subjectId + ':' + t.topicId] = true; });
+      (haric || []).forEach(k => { bu[k] = true; });
+      for(const w of S.plan.weeks.filter(x => x.n > n)){
+        for(const it of (w.items || [])){
+          const k = it.subjectId + ':' + it.topicId;
+          if(bu[k] || M.topicState(it.subjectId, it.topicId).state === 'closed') continue;
+          return it;
+        }
+      }
+      return null;
+    }
+    const oneAlinan = d => d.blocks.filter(b => b.oneAlindi);
+    const taban = d => d.blocks.filter(b => !b.oneAlindi);
+
+    it('fazla süre sıradaki konuya blok olur; taban bloklar değişmez', async () => {
+      await withTodayAsync(TODAY, async () => {
+        await planli();
+        const once = (await taze(CAR)).blocks.map(b => b.targetMin);
+        const beklenen = await siradaki(CAR);
+        await I.ekle({ tur:'sure', from:CAR, to:CAR, dakika:300 });
+        const d = await taze(CAR);
+        expect(taban(d).map(b => b.targetMin)).toEqual(once);
+        const ek = oneAlinan(d);
+        expect(ek).toHaveLength(1);
+        expect(ek[0].topicId).toBe(beklenen.topicId);
+        expect(ek[0].subjectId).toBe(beklenen.subjectId);
+        expect(ek[0].targetMin).toBe(120);
+        expect(calismaDakikasi(d)).toBe(300);
+        /* Gün açılışındaki blok bağlama öne alınan bloğu haftanın
+           konusuna geri çekmez. */
+        await R.Auto.syncDayBlocks(CAR);
+        expect(oneAlinan(S.days[CAR])[0].topicId).toBe(beklenen.topicId);
+      });
+    });
+
+    it('art arda yoğun günler farklı konuları öne alır', async () => {
+      await withTodayAsync(TODAY, async () => {
+        await planli();
+        await I.ekle({ tur:'sure', from:CAR, to:PER, dakika:300 });
+        const a = oneAlinan(await taze(CAR))[0], b = oneAlinan(await taze(PER))[0];
+        expect(a && b).toBeTruthy();
+        expect(a.topicId === b.topicId && a.subjectId === b.subjectId).toBeFalsy();
+      });
+    });
+
+    it('kapanmış konu öne alınmaz', async () => {
+      await withTodayAsync(TODAY, async () => {
+        await planli();
+        const ilk = await siradaki(CAR);
+        await M.setTopicState(ilk.subjectId, ilk.topicId, { state:'closed' });
+        const beklenen = await siradaki(CAR);
+        await I.ekle({ tur:'sure', from:CAR, to:CAR, dakika:300 });
+        expect(oneAlinan(await taze(CAR))[0].topicId).toBe(beklenen.topicId);
+      });
+    });
+
+    it('30 dakikadan az fazla ya da azaltma eskisi gibi ölçeklenir', async () => {
+      await withTodayAsync(TODAY, async () => {
+        await planli();
+        await I.ekle({ tur:'sure', from:CAR, to:CAR, dakika:200 });
+        await I.ekle({ tur:'sure', from:PER, to:PER, dakika:120 });
+        const car = await taze(CAR), per = await taze(PER);
+        expect(oneAlinan(car)).toHaveLength(0);
+        expect(oneAlinan(per)).toHaveLength(0);
+        expect(calismaDakikasi(car)).toBe(200);
+        expect(calismaDakikasi(per)).toBe(120);
+      });
+    });
+
+    it('plan yoksa fazla süre blokları uzatır', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        S.plan = null;
+        await I.ekle({ tur:'sure', from:CAR, to:CAR, dakika:300 });
+        const d = await taze(CAR);
+        expect(oneAlinan(d)).toHaveLength(0);
+        expect(calismaDakikasi(d)).toBe(300);
+      });
+    });
+
+    it('deneme gününe konu eklenmez', async () => {
+      await withTodayAsync(TODAY, async () => {
+        await planli();
+        const once = calismaDakikasi(await taze(CMT));
+        await I.ekle({ tur:'sure', from:CMT, to:CMT, dakika:400 });
+        const d = await taze(CMT);
+        expect(oneAlinan(d)).toHaveLength(0);
+        expect(calismaDakikasi(d)).toBe(once);
+      });
+    });
+
+    it('önizleme öne alınacak konuyu adıyla söyler', async () => {
+      await withTodayAsync(TODAY, async () => {
+        await planli();
+        const a = await siradaki(CAR);
+        const b = await siradaki(PER, [a.subjectId + ':' + a.topicId]);
+        const pv = P.preview({ action:'gecici-sure', agent:'patron',
+          params:{ from:CAR, to:PER, dakika:300 } });
+        expect(pv.ok).toBeTruthy();
+        const satir = pv.rows.find(r => r.label === 'Öne alınan konu');
+        expect(satir).toBeTruthy();
+        expect(satir.after).toContain(a.name);
+        expect(satir.after).toContain(b.name);
+      });
+    });
+
+    it('öne alınıp kapanan konu kendi haftasında tekrar yazılmaz', async () => {
+      await withTodayAsync(TODAY, async () => {
+        await planli();
+        await I.ekle({ tur:'sure', from:CAR, to:CAR, dakika:300 });
+        const ek = oneAlinan(await taze(CAR))[0];
+        await M.setTopicState(ek.subjectId, ek.topicId, { state:'closed' });
+        const kendiHaftasi = S.plan.weeks.find(w => (w.items || [])
+          .some(it => it.subjectId === ek.subjectId && it.topicId === ek.topicId)).n;
+        const w = await M.ensureWeek(kendiHaftasi);
+        expect(w.mainTopics.some(t => t.subjectId === ek.subjectId && t.topicId === ek.topicId)).toBeFalsy();
+        expect(w.mainTopics.length).toBeGreaterThan(0);
+      });
+    });
+  });
+
   /* Rehber › İstisnalar'daki takvim kayıtları (tatil, okul sınavı, yoğun
      gün, ekstra) eskiden yalnız haftanın «yük» sayısını değiştiriyordu:
      ekran «plan yükü güncellendi» diyordu ama tatil gününde bloklar
