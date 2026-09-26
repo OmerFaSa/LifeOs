@@ -71,4 +71,55 @@ def run():
         r = seviye.sinifla("yol haritası çıkar")
         eq(r["seviye"], "ust")
         ok("yol harita" in r["neden"])
+        # Neden kullanicinin yazdigi haliyle, duzgun Turkce gorunur.
+        ok("«Öncelik" in seviye.sinifla("Öncelik sırası ne olmalı")["neden"])
     test("seviyenin nedeni soylenir", t_reason_is_reported)
+
+    def t_ascii_typing_is_understood():
+        """Telefonda Turkce harfsiz yazilir: «ne yapmaliyim» «ne
+        yapmalıyım» ile aynidir. Once hicbir kalip tutmuyor, karar isteyen
+        mesaj ucuz modele gidiyordu."""
+        for m, s in (("ne yapmaliyim", "ust"), ("hangisini secmeliyim", "ust"),
+                     ("oncelik sirasi ne olmali", "ust"), ("bir oneri ver", "orta"),
+                     ("nasil gelistirebilirim", "orta"), ("tesekkurler", "alt")):
+            eq(seviye.sinifla(m)["seviye"], s, m)
+    test("Turkce harfsiz yazi da anlasilir", t_ascii_typing_is_understood)
+
+    def t_common_forms():
+        """Gunluk dilde karar ve oneri isteyen yaygin kaliplar."""
+        for m, s in (("ne yapayım bu hafta", "ust"), ("ne yapsam", "ust"),
+                     ("plan yap bana", "ust"), ("haftalık plan çıkar", "ust"),
+                     ("hangisi daha mantıklı", "ust"), ("sence nasıl gidiyorum", "orta"),
+                     ("ne dersin buna", "orta"), ("selam naber", "alt"),
+                     ("bugün yoruldum", "alt")):
+            eq(seviye.sinifla(m)["seviye"], s, m)
+    test("yaygin karar ve oneri kaliplari", t_common_forms)
+
+    def t_statement_is_not_a_request():
+        """Karar BILDIRMEK karar ISTEMEK degildir; «neden olmasin» bir soru
+        degildir. Pahali model bosuna cagrilmaz."""
+        eq(seviye.sinifla("karar verdim, yarın başlıyorum")["seviye"], "alt")
+        eq(seviye.sinifla("neden olmasın :)")["seviye"], "alt")
+        # Ayni cumlede gercek bir istek varsa istek kazanir.
+        eq(seviye.sinifla("karar verdim ama hangisini seçmeliyim bilemedim")["seviye"], "ust")
+    test("bildirim istek sayilmaz", t_statement_is_not_a_request)
+
+    def t_review_tool():
+        """tools/seviye_gozden.py: son kullanici mesajlari, bugunku kurallarla
+        seviyesi ve nedeni. Yonetici cevaplari listelenmez."""
+        import importlib.util
+        import os
+        from core import db, patron
+        yol = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           "tools", "seviye_gozden.py")
+        spec = importlib.util.spec_from_file_location("seviye_gozden", yol)
+        g = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(g)
+        con = db.connect(":memory:")
+        patron.log(con, "local", "user", "selam")
+        patron.log(con, "local", "manager", "Selam! Nasıl yardımcı olayım?")
+        patron.log(con, "telegram", "user", "ne yapmaliyim bu hafta")
+        liste = g.gozden(con, 10)
+        eq([(s, m) for s, _, m in liste], [("ust", "ne yapmaliyim bu hafta"), ("alt", "selam")])
+        ok(all(n for _, n, _ in liste))
+    test("seviye gozden gecirme araci", t_review_tool)

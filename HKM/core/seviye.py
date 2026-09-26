@@ -27,45 +27,69 @@ import re
 ALT, ORTA, UST = "alt", "orta", "ust"
 SEVIYELER = (ALT, ORTA, UST)
 
-# Kok ya da kalip; kucultulmus Turkce metinde aranir. Kelime sonu serbest
+# Kok ya da kalip; kucultulmus ve ASCII'ye katlanmis metinde aranir
+# (telefonda «ne yapmaliyim» diye yazilir). Kalipler okunur olsun diye
+# Turkce yazilir, yuklenirken ayni katlamadan gecer. Kelime sonu serbest
 # birakilir: «planla», «planlar mısın», «planımı» ayni kokten gelir.
 UST_SINYAL = [
-    r"yol harita", r"\bkarar\b", r"karar ver", r"hangisini seç", r"hangisi daha iyi",
-    r"ne yapmalıyım", r"neye öncelik", r"öncelik(?:lendir|im|ler)", r"strateji",
-    r"\bplanla", r"planımı", r"baştan planla", r"yeniden planla", r"program(?:ımı|ı) (?:kur|çıkar|yap)",
+    r"yol harita", r"\bkarar\b", r"karar ver", r"hangisini seç", r"hangisi daha",
+    r"ne yapmalıyım", r"ne yapay[ıi]m", r"ne yapsam", r"neye öncelik", r"öncelik",
+    r"strateji", r"\bplanla", r"planımı", r"\bplan (?:yap|çıkar|kur|hazırla)",
+    r"(?:haftalık|aylık|günlük) plan", r"program(?:ımı|ı) (?:kur|çıkar|yap)",
     r"bütün sistem", r"tüm sistem", r"sistemin tamam", r"genel değerlendirme",
     r"derinlemesine", r"uzun vadeli", r"önümüzdeki (?:hafta|ay|üç|iki|altı)",
     r"hedef(?:im|imi|lerimi) (?:kur|belirle|gözden geçir)",
 ]
 ORTA_SINYAL = [
     r"öner", r"tavsiye", r"fikir", r"analiz", r"değerlendir", r"yorumla", r"yorum yap",
-    r"karşılaştır", r"neden\b", r"niye", r"nasıl geliştir", r"nasıl iyileştir",
-    r"ne düşünüyorsun", r"gidişat", r"eğilim", r"ufk", r"geride kal", r"zayıf yan",
-    r"güçlü yan", r"ipucu",
+    r"karşılaştır", r"neden\b", r"niye", r"geliştir", r"iyileştir",
+    r"ne düşünüyorsun", r"ne dersin", r"\bsence\b", r"gidişat", r"eğilim", r"ufk",
+    r"geride kal", r"zayıf yan", r"güçlü yan", r"ipucu",
 ]
+# Istek olmayan kaliplar: karar BILDIRMEK karar istemek degildir. Eslesmeden
+# once metinden cikarilir; ayni cumlede gercek bir istek varsa o yine tutar.
+BILDIRIM = [r"karar verdim", r"karar aldım", r"neden olmasın"]
 UZUN_KELIME = 25
+
+_ASCII = str.maketrans("çğıöşüâîû", "cgiosuaiu")
 
 
 def kucult(metin):
-    """Turkce kucultme: «İ» → «i», «I» → «ı» (str.lower bunu bilmez)."""
-    return str(metin or "").replace("İ", "i").replace("I", "ı").lower()
+    """Turkce kucultme («İ» → «i», «I» → «ı»; str.lower bunu bilmez), sonra
+    ASCII'ye katlama: «yapmalıyım» ile «yapmaliyim» ayni metin olur."""
+    k = str(metin or "").replace("İ", "i").replace("I", "ı").lower()
+    return k.translate(_ASCII)
 
 
-def _ilk(desenler, metin):
+def _katla(desenler):
+    return [re.compile(kucult(d)) for d in desenler]
+
+
+_UST, _ORTA, _BILDIRIM = _katla(UST_SINYAL), _katla(ORTA_SINYAL), _katla(BILDIRIM)
+
+
+def _ilk(desenler, metin, asil):
+    """Ilk eslesen kalip — nedende kullanicinin KENDI yazdigi haliyle
+    (katlama harf harf yapildigi icin konumlar asil metinle aynidir)."""
     for d in desenler:
-        m = re.search(d, metin)
+        m = d.search(metin)
         if m:
-            return m.group(0).strip()
+            return asil[m.start():m.end()].strip()
     return None
 
 
 def sinifla(metin):
     """{seviye, neden}. Model cagirmaz."""
-    k = kucult(metin)
-    s = _ilk(UST_SINYAL, k)
+    asil = str(metin or "")
+    k = kucult(asil)
+    if len(k) != len(asil):                 # beklenmedik harf: konumlar kayar
+        asil = k
+    for d in _BILDIRIM:
+        k = d.sub(lambda m: " " * len(m.group(0)), k)
+    s = _ilk(_UST, k, asil)
     if s:
         return {"seviye": UST, "neden": "karar/yol haritası sinyali: «%s»" % s}
-    s = _ilk(ORTA_SINYAL, k)
+    s = _ilk(_ORTA, k, asil)
     if s:
         return {"seviye": ORTA, "neden": "öneri/analiz sinyali: «%s»" % s}
     if len(k.split()) > UZUN_KELIME:
