@@ -134,6 +134,37 @@ def run():
             ok(parca in s, parca)
     test("kisa sistem metni kimligi ve modulleri tasir", t_short_prompt_carries_identity)
 
+    def t_short_context_is_compact():
+        """HATA (sahada, 2026-09-27): kucuk yerel model «nasılsın»a «Bugün
+        veri gelmedi, bu brifing bir şey ölçmüyor» diyordu; bes modelde de
+        ayni: baglamin cogu ayni «veri gelmedi» cumlesinin bes bicimiydi
+        (modul satiri, kapsam, kor nokta, uc kurul uyesi) ve capraz/seri
+        satirlari IKI kez giriyordu. Kisa baglam: veri yoksa tek satir,
+        olcum satirlari aynen ve bir kez."""
+        import sys as _s, os as _o
+        _s.path.insert(0, _o.path.join(_o.path.dirname(_o.path.dirname(_o.path.abspath(__file__))), "tools"))
+        import perf
+        from core import db as _db
+        bos = sohbet.baglam(_db.connect(":memory:"), "2026-09-27", "king", kisa=True)
+        satir = bos.splitlines()
+        ok(len(satir) <= 3, bos)
+        ok("ölçülmedi" in bos and "SPİ" in bos and "AYS" in bos and "ESP" in bos, bos)
+        no("brifing" in bos, bos)
+        con = _db.connect(":memory:"); perf.kur(con); gun = perf.son_an()[:10]
+        tam = sohbet.baglam(con, gun, "king")
+        kis = sohbet.baglam(con, gun, "king", kisa=True)
+        ok(len(kis) < len(tam) * 0.7, (len(kis), len(tam)))
+        ks = kis.splitlines()
+        eq(len(ks), len(set(ks)))                               # tekrar yok
+        for parca in ("%21 yukarıda", "%19 yukarıda", "44 gündür", "EŞLEŞMEDİR"):
+            eq(kis.count(parca), 1 if parca != "EŞLEŞMEDİR" else kis.count(parca), parca)
+            ok(parca in kis, parca)                             # olcum kaybolmaz
+        # Tam baglam (buyuk model) degismedi.
+        ok("brifing" in sohbet.baglam(_db.connect(":memory:"), "2026-09-27", "king"))
+        # Kisa sistem metni «sen» hitabini soyler.
+        ok("«sen»" in sohbet.sistem_metni("king", bos, kisa=True))
+    test("kisa baglam sikisik: veri yoksa tek satir, olcum bir kez", t_short_context_is_compact)
+
     def t_model_answers_free_sentence():
         con = _con()
         tasiyici = _cevap("Uyku ölçümün bugün düşük görünüyor; istersen "

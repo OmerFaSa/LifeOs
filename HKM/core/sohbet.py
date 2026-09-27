@@ -98,7 +98,7 @@ SISTEM_KISA = """Adın %(ad)s. LifeOS'un merkezi HKM'de (Hayat Kontrol Merkezi) 
 LifeOS'ta üç modül var: AYS (sınav hazırlığı), SPİ (sağlık: uyku, beslenme, hareket), ESP (kişisel gelişim). Onların günlük özetini aşağıdaki listeden görürsün; listede olmayanı bilemezsin.
 Kesin kurallar: ÖLÇÜM UYDURMA — ölçülen bir şeyden sayı söyleyeceksen aşağıdaki
 listede geçmeli, yoksa «bu ölçülmedi» de. Emir kipi kullanma. En fazla 3 cümle,
-Türkçe. Bir şey uygulayamazsın; değişiklik isteğini teklif olarak bırakacağını söyle.
+Türkçe; kullanıcıya «sen» diye hitap et. Bir şey uygulayamazsın; değişiklik isteğini teklif olarak bırakacağını söyle.
 
 Bugünün ölçümleri:
 %(baglam)s"""
@@ -125,7 +125,7 @@ def sistem_metni(gorevli, bg, kisa=False):
                            "baglam": bg}
 
 
-def baglam(con, date, gorevli="king", th=None, veri=None):
+def baglam(con, date, gorevli="king", th=None, veri=None, kisa=False):
     """Modelin gorecegi TEK gercek: kural motorunun urettigi olculer.
 
     Ham veri gonderilmez, ozet gonderilir — ve her satir zaten kural
@@ -133,6 +133,8 @@ def baglam(con, date, gorevli="king", th=None, veri=None):
     TURLERI oraya yazilir (gizlilik panosu, core/gizlilik.py)."""
     veri = veri if veri is not None else set()
     b = manager.brief(con, date, th=th)
+    if kisa:
+        return _kisa_baglam(con, date, gorevli, b, veri)
     satir = ["Tarih: %s" % date]
     alan = ALAN.get(gorevli)
     for l in b["lines"]:
@@ -165,6 +167,59 @@ def baglam(con, date, gorevli="king", th=None, veri=None):
             veri.add("ilkeler")
             satir.append("Kullanıcının kendi ilkeleri (senin sözün; dikkate al, "
                          "değiştirme, kırmızı çizgiyi çiğneyen öneri yapma):")
+            satir.append(hm)
+    return "\n".join(satir)
+
+
+MODUL_ETIKET = {"bio": "SPİ", "academic": "AYS", "intellect": "ESP"}
+
+
+def _kisa_baglam(con, date, gorevli, b, veri):
+    """Kucuk model icin SIKISIK baglam. Ayni «veri gelmedi» bilgisi tam
+    baglamda bes bicimde (modul satiri, kapsam, kor nokta, kurul uyeleri)
+    geciyor, capraz ve seri satirlari iki kez giriyordu; 1B-4B modeller
+    her soruya «bu brifing bir şey ölçmüyor» diye cevap veriyordu
+    (sahada, 2026-09-27). Burada: veri gelmeyenler TEK satir, olcum
+    satirlari (seri, capraz, modul hukmu, oneri) aynen ve bir kez."""
+    satir = ["Tarih: %s" % date]
+    alan = ALAN.get(gorevli)
+    sessiz, olcum = [], []
+    for l in b["lines"]:
+        if alan and l.get("vp") and l["vp"] != alan:
+            continue
+        k = l["kind"]
+        if k == "vp" and l.get("silent") and not l.get("vp"):
+            sessiz += [MODUL_ETIKET.get(m, m) for m in l["silent"] if not alan or m == alan]
+        elif k == "vp" or k in ("streak", "cross"):
+            olcum.append("- " + l["text"])
+            veri.add(l.get("vp") or ("capraz" if k in ("cross", "streak") else "genel"))
+        elif k == "proposal" and b.get("decision"):
+            olcum.append("- " + l["text"])
+            veri.add("genel")
+    if gorevli == "king":
+        for u in ((b.get("council") or {}).get("members") or []):
+            if u.get("findings") or u.get("heard"):
+                veri.add(u.get("vp") or "genel")
+                olcum.append("- %s (%s): %s, %d bulgu" % (u["title"], u["module_label"],
+                                                         u["verdict_text"], u["findings"]))
+    if sessiz and not olcum:
+        satir.append("- Hiçbir modülden ölçüm yok (%s): ölçümle ilgili her soruya "
+                     "«bu ölçülmedi» de." % ", ".join(sessiz))
+    elif sessiz:
+        satir.append("- Bugün veri gelmeyen modüller (ölçülmedi): %s." % ", ".join(sessiz))
+    gorulen = set()
+    for x in olcum:
+        if x not in gorulen:
+            gorulen.add(x)
+            satir.append(x)
+    if b.get("decision"):
+        satir.append("- Bugünün önerisi «%s» ve durumu: %s"
+                     % (b["decision"]["proposal"], b["decision"]["state"]))
+    if gorevli == "king":
+        hm = motto.king_baglami(con)
+        if hm:
+            veri.add("ilkeler")
+            satir.append("Kullanıcının kendi ilkeleri (dikkate al, değiştirme):")
             satir.append(hm)
     return "\n".join(satir)
 
@@ -708,8 +763,8 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
                 "note": hazir["note"]}
 
     veri = {"mesaj"}
-    bg = baglam(con, date, gorevli, th=th, veri=veri)
     sinir = BAGLAM_SINIRI.get(sv["seviye"]) if models.etkin_paket(cfg) else None
+    bg = baglam(con, date, gorevli, th=th, veri=veri, kisa=bool(sinir and sinir["kisa"]))
     if sinir:
         hb = memory.context(con, user=user, scope=gorevli, limit=sinir["hafiza"],
                             ilgili=metin if sinir["ilgili"] else None, sozler=sinir["sozler"])
