@@ -42,6 +42,12 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    görseldir — karar vermez, veri okumaz, hiçbir ekran ona bağlı değildir;
    yüklenemezse ya da WebGL yoksa ofis CSS odasına döner. Bu istisna başka
    bir kütüphaneye ya da başka bir sisteme emsal değildir.
+   **SPİ için ayrıca istenen istisna (2026-09-27):** Aynı etkileşimli ofisin
+   sağlık/spor mimarisiyle SPİ içine alınması isteği kapsamında
+   `SPI/src/ofis3d/` de aynı sabit Three.js sürümünü ve lisansını taşır.
+   `spi.html` içine gömülmez; yalnız 3B kampüs açıldığında yerelden yüklenir.
+   Sahne sağlık verisi okumaz, karar üretmez; yükleme/WebGL hatasında hafif
+   ofis kullanılmaya devam eder. Başka modül veya kütüphanelere genişlemez.
 4. **Modüller HKM'yi bilir ama ona bağımlı değildir.** AYS/SPİ/ESP,
    HKM'nin üst patron (King) olduğunu bilir ve onunla konuşabilir; ama HKM
    kapalıyken, yanıt vermezken ya da hata verirken hiçbiri bozulmaz,
