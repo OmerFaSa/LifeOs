@@ -653,6 +653,7 @@ SP.App = (function(){
   }
 
   function go(route){
+    if(route !== 'office' && SP.Ofis3B) SP.Ofis3B.ayril();
     /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
        acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
     if(SP.Talk && SP.Talk.isActive()) SP.Talk.stop();
