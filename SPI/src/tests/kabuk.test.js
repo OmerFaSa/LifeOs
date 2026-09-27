@@ -47,6 +47,33 @@
   const kok = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
   describe('Kabuk (T2)', () => {
+    it('kenar çubuğu açılıp kapanır: üst şeritte düğme, seçim kalıcı, kapalıyken ince simge şeridi', () => {
+      const eski = document.documentElement.classList.contains('kenar-dar');
+      try{
+        K.kenarDar(false);
+        const d = yerlestir(K.ustSerit({ modul:'ays', yol:['Bugün'] }));
+        const btn = d.querySelector('.ust__kenar');
+        expect(!!btn).toBe(true);
+        expect(btn.getAttribute('aria-expanded')).toBe('true');
+        btn.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
+        expect(document.documentElement.classList.contains('kenar-dar')).toBe(true);
+        expect(K.kenarDarMi()).toBe(true);
+        expect(btn.getAttribute('aria-expanded')).toBe('false');
+        let kayit = null; try{ kayit = localStorage.getItem('lifeos.kenar'); }catch(e){}
+        expect(kayit).toBe('dar');
+        /* Dar şeritte çekmece adı GÖRSEL olarak saklanır ama erişilebilir ad kalır. */
+        const site = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays',
+          cekmeceler:[{ id:'bugun', ad:'Bugün', route:'today', on:true }] }) + '</div>');
+        const cek = site.querySelector('.kenar__cekmece');
+        expect(cek.getAttribute('title')).toBe('Bugün');
+        expect(getComputedStyle(site.querySelector('.kenar__ad')).display === 'none').toBe(false);
+        if(window.innerWidth >= 680){
+          expect(getComputedStyle(site.firstElementChild).gridTemplateColumns.split(' ')[0]).toBe('64px');
+        }
+        site.remove(); d.remove();
+      }finally{ K.kenarDar(eski); try{ localStorage.removeItem('lifeos.kenar'); }catch(e){} }
+    });
+
     it('sekiz çekmece: ad ve sıra kullanıcı kararıyla aynı', () => {
       expect(K.CEKMECELER.map(c => c.ad).join(' · '))
         .toBe('Bugün · Plan · Çalışma · Analiz · Onaylar · Ofis · Kütüphanem · Ayarlar');

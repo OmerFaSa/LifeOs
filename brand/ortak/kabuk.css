@@ -717,3 +717,49 @@ a.kenar__modul:hover{ color:var(--text); }
   .ust--v5 .ust__madalya .kenar__madalya{ width:18px; height:18px; }
   .site--v5 .sayfa{ padding:16px 16px 0; }
 }
+
+
+/* ============================================================
+   KENAR ÇUBUĞU AÇILIR/KAPANIR · GENİŞ SAYFA (2026-09-27)
+   Depo sahibinin isteği: kenar çubuğu hep durup yer kaplamasın; sayfa
+   yatayda daha geniş kullanılsın, Bugün geniş ekranda iki sütun olsun. */
+.ust--v5 .ust__kenar{ flex:none; width:32px; height:32px; margin-left:-10px; border:0; border-radius:8px; background:none;
+  display:flex; align-items:center; justify-content:center; color:var(--text-3); cursor:pointer; }
+.ust--v5 .ust__kenar:hover{ background:var(--surface-2); color:var(--text); }
+.ust--v5 .ust__kenar .kbk-ic{ width:18px; height:18px; }
+@media (max-width:679px){ .ust--v5 .ust__kenar{ display:none; } }
+
+/* Daha sade kenar: açıklama satırı ve etkin çekmecenin gölgesi yok. */
+.kenar__baglam{ display:none; }
+.kenar__cekmece.is-on{ box-shadow:none; background:var(--surface-2); }
+.kenar{ transition:padding .18s ease; }
+
+/* Dar şerit: yalnız simgeler. Adlar GÖRSEL olarak saklanır (erişilebilir
+   ad kalır); üzerine gelince title söyler. */
+@media (min-width:680px){
+  html.kenar-dar .site--v5{ grid-template-columns:64px minmax(0,1fr); }
+  html.kenar-dar .kenar{ padding:14px 8px 12px; align-items:center; gap:14px; }
+  html.kenar-dar .kenar__marka{ padding:0; justify-content:center; width:40px; }
+  html.kenar-dar .kenar__marka span, html.kenar-dar .kenar__bolumler, html.kenar-dar .kenar__bag span,
+  html.kenar-dar .kenar__rutbe span, html.kenar-dar .kenar__rutbe .kbk-ic{ display:none; }
+  html.kenar-dar .kenar__moduller{ grid-template-columns:1fr; width:44px; padding:3px; }
+  html.kenar-dar .kenar__modul{ height:30px; }
+  html.kenar-dar .kenar__modul span, html.kenar-dar .kenar__ad{ position:absolute; width:1px; height:1px; overflow:hidden;
+    clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
+  html.kenar-dar .kenar__cekmece-kap{ display:flex; justify-content:center; }
+  html.kenar-dar .kenar__cekmece{ width:44px; height:40px; justify-content:center; padding:0; position:relative; }
+  html.kenar-dar .kenar__sayac{ position:absolute; top:2px; right:2px; min-width:16px; height:16px; font-size:10px; padding:0 4px; }
+  html.kenar-dar .kenar__bag, html.kenar-dar .kenar__rutbe{ justify-content:center; padding:10px; }
+  html.kenar-dar .kenar__dip{ align-items:center; }
+  html.kenar-dar .bolumcubugu--kabuk{ display:flex; position:sticky; top:var(--ust-h); z-index:calc(var(--z-nav) - 1);
+    background:var(--surface); margin:-8px 0 20px; }
+}
+
+/* Geniş sayfa: içerik yatayda daha çok yer kullanır. */
+.site--v5 .sayfa{ max-width:1480px; }
+/* Bugün geniş ekranda iki sütun: solda ŞİMDİ, sağda DURUM ve özet. */
+@media (min-width:1400px){
+  .bugun{ display:grid; grid-template-columns:minmax(0, 1.25fr) minmax(0, 1fr); align-items:start; column-gap:28px; }
+  .bugun__sol, .bugun__sag{ display:flex; flex-direction:column; gap:28px; min-width:0; }
+  .bugun__sol:empty, .bugun__sag:empty{ display:none; }
+}

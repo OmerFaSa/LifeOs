@@ -514,6 +514,56 @@
       }finally{ bitir(kok); }
     });
 
+    it('alanlar arası taşıma: kart aynı türdeki komşu alana geçer (sürükle ve ↑/↓), yeniden çizimde orada kalır', () => {
+      const alan = (ad, kartlar) => '<section class="bugun__alan" aria-label="' + ad + '">' + kartlar.map(k =>
+        '<section class="kutu"><header class="kutu__bas"><h2 class="kutu__ad">' + k + '</h2></header></section>').join('') + '</section>';
+      const ciz = () => { const k = document.createElement('div');
+        k.innerHTML = '<div class="bugun"><div class="bugun__sol">' + alan('Şimdi', ['Ölçüm', 'Öğün'])
+          + '</div><div class="bugun__sag">' + alan('Durum', ['Toparlanma', 'Beslenme'])
+          + '</div><div class="form">' + '<div class="bugun__alan"><p>form</p></div>' + '</div></div>';
+        document.body.appendChild(k); return k; };
+      let kok = ciz(); G()._sifirla();
+      const o = { kok, modul:MOD, profil:'p', ekran:'alan' };
+      G().uygula(o);
+      const alanOf = ad => G().bolumler(kok).find(b => b.baslik === ad).el.closest('.bugun__alan').getAttribute('aria-label');
+      try{
+        expect(G().birak(G().anahtar('Toparlanma'), G().anahtar('Ölçüm'), true)).toBe(true);      // Durum -> Şimdi
+        expect(alanOf('Toparlanma')).toBe('Şimdi');
+        expect(G().bolumler(kok).map(b => b.baslik)).toEqual(['Toparlanma', 'Ölçüm', 'Öğün', 'Beslenme']);
+        kok.remove(); kok = ciz(); G().uygula(Object.assign({}, o, { kok }));                   // yeniden çizim
+        expect(alanOf('Toparlanma')).toBe('Şimdi');
+        expect(G().bolumler(kok).map(b => b.baslik)).toEqual(['Toparlanma', 'Ölçüm', 'Öğün', 'Beslenme']);
+        expect(G().tasi(G().anahtar('Öğün'), 1)).toBe(true);                                     // alanın sonunda ↓: komşu alana
+        expect(alanOf('Öğün')).toBe('Durum');
+        expect(G().bolumler(kok).map(b => b.baslik)).toEqual(['Toparlanma', 'Ölçüm', 'Öğün', 'Beslenme']);
+        expect(G().tasi(G().anahtar('Beslenme'), 1)).toBe(false);                                // son alanın sonu (bölümsüz alan sayılmaz)
+        expect(G().sayfalar().find(x => x.ekran === 'alan').sira).toBe(true);
+        G().varsayilanaDon();                                                                    // yerine döner
+        expect(alanOf('Toparlanma')).toBe('Durum');
+        expect(alanOf('Öğün')).toBe('Şimdi');
+      }finally{ bitir(kok); }
+    });
+
+    it('sürükleme sırası, arada bölüm olmayan bir kap (ikili kart sarmalayıcısı) olsa da yeniden çizimde aynen kalır', () => {
+      const k1 = ad => '<section class="kutu"><header class="kutu__bas"><h2 class="kutu__ad">' + ad + '</h2></header></section>';
+      const ciz = () => { const k = document.createElement('div');
+        k.innerHTML = '<section class="alan">' + k1('Ölçüm') + '<div class="cift">' + k1('His') + k1('Su') + '</div>' + k1('Öğün') + '</section>';
+        document.body.appendChild(k); return k; };
+      let kok = ciz(); G()._sifirla();
+      const o = { kok, modul:MOD, profil:'p', ekran:'blok' };
+      G().uygula(o);
+      const adlar = () => G().bolumler(kok).map(b => b.baslik);
+      try{
+        /* Kullanıcı Öğün'ü ikilinin ÖNÜNE sürükledi: DOM sırası Ölçüm, Öğün, [His, Su]. */
+        const alan = kok.querySelector('.alan');
+        alan.insertBefore(G().bolumler(kok).find(b => b.baslik === 'Öğün').el, alan.querySelector('.cift'));
+        G().sayfadaBirakildi(G().anahtar('Öğün'));
+        expect(adlar()).toEqual(['Ölçüm', 'Öğün', 'His', 'Su']);
+        kok.remove(); kok = ciz(); G().uygula(Object.assign({}, o, { kok }));
+        expect(adlar()).toEqual(['Ölçüm', 'Öğün', 'His', 'Su']);
+      }finally{ bitir(kok); }
+    });
+
     it('arama: uzun sayfada panel bölüm adına göre süzülür', () => {
       const adlar = ['Uyku', 'Beslenme', 'Hareket', 'Toparlanma', 'Tahlil', 'Bütçe', 'Sepet', 'Ofis', 'Rehber'];
       const kok = sayfa3('Arama', adlar); G()._sifirla();

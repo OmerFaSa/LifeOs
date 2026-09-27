@@ -112,9 +112,10 @@ LIFEOS.Gizle = (function(){
     try{
       const d = JSON.parse(localStorage.getItem(depoAdi(o)) || 'null');
       if(d && typeof d === 'object') return { gizli:d.gizli || {}, acik:d.acik || {}, ad:d.ad || {},
-        kucuk:d.kucuk || {}, acikK:d.acikK || {}, sira:Array.isArray(d.sira) ? d.sira : [] };
+        kucuk:d.kucuk || {}, acikK:d.acikK || {}, sira:Array.isArray(d.sira) ? d.sira : [],
+        yer:(d.yer && typeof d.yer === 'object') ? d.yer : {} };
     }catch(e){}
-    return { gizli:{}, acik:{}, ad:{}, kucuk:{}, acikK:{}, sira:[] };
+    return { gizli:{}, acik:{}, ad:{}, kucuk:{}, acikK:{}, sira:[], yer:{} };
   }
   /* «Tüm sayfalar» listesinde sayfanın adı: ekranın başlığı (h1). */
   function sayfaAdi(o){
@@ -177,8 +178,12 @@ LIFEOS.Gizle = (function(){
     const d = oku(o);
     let degisti = false;
     const ilkListe = bolumler(o.kok);
-    ilkListe.forEach(b => { if(!ILK.has(b.el)) ILK.set(b.el, ilkSayac++); });
-    siraUygula(ilkListe, d.sira);
+    ilkListe.forEach(b => {
+      if(!ILK.has(b.el)) ILK.set(b.el, ilkSayac++);
+      if(!DOGAL_KAP.has(b.el)){ const k = kapOf(b); DOGAL_KAP.set(b.el, k); KAPLAR.add(k); }
+    });
+    yerUygula(ilkListe, d.yer);
+    siraUygula(bolumler(o.kok), d.sira);
     const liste = bolumler(o.kok);
     const grup = gruplar(liste);
     let gizliUyari = 0;
@@ -227,7 +232,8 @@ LIFEOS.Gizle = (function(){
         if(duzen){
           const g = grup.get(kapOf(b)) || [];
           const i = g.indexOf(b);
-          if(g.length > 1){
+          const ks = uyumluKaplar(kapOf(b)), ki = ks.indexOf(kapOf(b));
+          if(g.length > 1 || ks.length > 1){
             /* Sürükleme tutamağı: fareyle/parmakla. Klavyede ↑/↓ düğmeleri. */
             const tut = document.createElement('span');
             tut.className = 'gizle-tut';
@@ -238,8 +244,8 @@ LIFEOS.Gizle = (function(){
             dugme('data-tasi-yukari', 'yukari', '«' + b.baslik + '» bölümünü yukarı taşı', 'Yukarı taşı');
             dugme('data-tasi-asagi', 'asagi', '«' + b.baslik + '» bölümünü aşağı taşı', 'Aşağı taşı');
             const bt = arac.querySelectorAll('button');
-            bt[bt.length - 2].disabled = i <= 0;
-            bt[bt.length - 1].disabled = i >= g.length - 1;
+            bt[bt.length - 2].disabled = i <= 0 && ki <= 0;
+            bt[bt.length - 1].disabled = i >= g.length - 1 && ki >= ks.length - 1;
           }
         }
         if(k) dugme('data-ac', 'ac', '«' + b.baslik + '» bölümünü aç', 'Aç');
@@ -334,7 +340,7 @@ LIFEOS.Gizle = (function(){
   }
   function degismisMi(d){
     return !!(Object.keys(d.gizli).length || Object.keys(d.acik).length || Object.keys(d.kucuk).length
-      || Object.keys(d.acikK).length || d.sira.length);
+      || Object.keys(d.acikK).length || d.sira.length || Object.keys(d.yer || {}).length);
   }
   function hazirHali(){
     if(!son) return null;
@@ -364,7 +370,7 @@ LIFEOS.Gizle = (function(){
       try{ d = JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){}
       if(!d || typeof d !== 'object') return;
       const x = { ekran:k.slice(on.length), gizli:say(d.gizli), kucuk:say(d.kucuk),
-        acildi:say(d.acik) + say(d.acikK), sira:Array.isArray(d.sira) && d.sira.length > 0 };
+        acildi:say(d.acik) + say(d.acikK), sira:(Array.isArray(d.sira) && d.sira.length > 0) || say(d.yer) > 0 };
       if(!x.gizli && !x.kucuk && !x.acildi && !x.sira) return;
       x.ad = d.sayfa || x.ekran;
       x.bu = x.ekran === son.ekran;
@@ -398,11 +404,13 @@ LIFEOS.Gizle = (function(){
     if(!son || a === h) return false;
     const liste = bolumler(son.kok);
     const b = liste.find(x => x.anahtar === a), t = liste.find(x => x.anahtar === h);
-    if(!b || !t || kapOf(b) !== kapOf(t)) return false;
-    const k = (gruplar(liste).get(kapOf(b)) || []).map(x => x.anahtar).filter(x => x !== a);
+    if(!b || !t) return false;
+    const kb = kapOf(b), kt = kapOf(t);
+    if(kb !== kt && uyumluKaplar(kb).indexOf(kt) < 0) return false;
+    const k = (gruplar(liste).get(kt) || []).map(x => x.anahtar).filter(x => x !== a);
     const i = k.indexOf(h);
     k.splice(once ? i : i + 1, 0, a);
-    siraYaz(k);
+    siraYaz(k, kb !== kt || DOGAL_KAP.get(b.el) !== kt ? { anahtar:a, kap:kt } : null);
     return true;
   }
 
@@ -412,8 +420,54 @@ LIFEOS.Gizle = (function(){
   function tasiyici(el){
     let t = el;
     const kok = son && son.kok;
-    while(t.parentElement && t.parentElement !== kok && t.parentElement.children.length === 1) t = t.parentElement;
+    while(t.parentElement && t.parentElement !== kok && t.parentElement.children.length === 1
+      && !KAPLAR.has(t.parentElement)) t = t.parentElement;
     return t;
+  }
+  /* ALANLAR ARASI TAŞIMA (depo sahibinin isteği, 2026-09-27: «taşınabilir
+     olmalı»). Bir bölüm yalnız kendi kabında değil, AYNI TÜRDEKİ komşu
+     kaplarda da (ör. Bugün'ün «Şimdi» ve «Durum» alanları: ikisi de
+     section.bugun__alan) yer alabilir. Tür = etiket + sınıflar. Hedef kap
+     yalnız sayfanın bölümlerinin DOĞAL kaplarından seçilir: bir formun ya
+     da kartın içindeki rastgele bir kaba bölüm düşmez. Yer kalıcıdır
+     (d.yer: anahtar -> «tür#sıra»); «Varsayılana dön» doğal kabına döndürür. */
+  const DOGAL_KAP = new WeakMap();
+  const KAPLAR = new WeakSet();
+  function imzaTur(kap){
+    return kap.tagName.toLowerCase() + '.' + Array.from(kap.classList).filter(c => c.indexOf('gizle') !== 0).sort().join('.');
+  }
+  function kapImza(kap){
+    const tur = imzaTur(kap);
+    const hepsi = Array.from(son.kok.querySelectorAll(kap.tagName)).filter(k => imzaTur(k) === tur);
+    return tur + '#' + hepsi.indexOf(kap);
+  }
+  function kapBul(imza){
+    const i = String(imza).lastIndexOf('#');
+    if(i < 0 || !son) return null;
+    const tur = imza.slice(0, i), n = Number(imza.slice(i + 1));
+    const hepsi = Array.from(son.kok.querySelectorAll(tur.split('.')[0])).filter(k => imzaTur(k) === tur);
+    return hepsi[n] || null;
+  }
+  function uyumluKaplar(kap){
+    if(!son || !kap) return kap ? [kap] : [];
+    const tur = imzaTur(kap);
+    const set = new Set([kap]);
+    bolumler(son.kok).forEach(b => {
+      const dk = DOGAL_KAP.get(b.el);
+      if(dk && dk.isConnected) set.add(dk);
+      set.add(kapOf(b));
+    });
+    return Array.from(set).filter(k => k && imzaTur(k) === tur && son.kok.contains(k))
+      .sort((a, b) => (a.compareDocumentPosition(b) & 4) ? -1 : 1);
+  }
+  /* Kayıtlı yer uygulanır; kaydı olmayan ama doğal kabının dışında duran
+     bölüm (varsayılana dön) doğal kabına döner. */
+  function yerUygula(liste, yer){
+    liste.forEach(b => {
+      const hedef = (yer && yer[b.anahtar]) ? kapBul(yer[b.anahtar]) : DOGAL_KAP.get(b.el);
+      if(!hedef || !hedef.isConnected || b.el.contains(hedef)) return;
+      if(kapOf(b) !== hedef) hedef.appendChild(tasiyici(b.el));
+    });
   }
   function kapOf(b){ return tasiyici(b.el).parentElement; }
   /* Aynı kaptaki bölümler bir grup: taşıma yalnız grup içinde. */
@@ -435,35 +489,67 @@ LIFEOS.Gizle = (function(){
      başka öğeler kıpırdamaz. */
   const ILK = new WeakMap();
   let ilkSayac = 0;
+  /* Kapta bölüm OLMAYAN ama içinde bölüm taşıyan bir çocuk (ör. iki kartın
+     yan yana durduğu «ikili» sarmalayıcı) da sıranın parçasıdır: anahtarı
+     «blok:<içindeki ilk bölüm>». Yoksa sürüklenen kart yeniden çizimde
+     o sarmalayıcıya göre yer değiştirirdi. */
+  function kapUyeleri(kap, g, liste){
+    const uyeT = new Set(g.map(b => tasiyici(b.el)));
+    const out = g.map(b => ({ anahtar:b.anahtar, el:b.el, t:tasiyici(b.el) }));
+    Array.from(kap.children).forEach(ch => {
+      if(uyeT.has(ch)) return;
+      const ic = liste.find(b => ch.contains(b.el));
+      if(ic) out.push({ anahtar:'blok:' + ic.anahtar, el:ic.el, t:ch });
+    });
+    return out;
+  }
   function siraUygula(liste, sira){
     sira = sira || [];
     let oynadi = false;
-    gruplar(liste).forEach(g => {
-      if(g.length < 2) return;
-      const dogal = g.slice().sort((x, y) => ILK.get(x.el) - ILK.get(y.el));
+    gruplar(liste).forEach((g, kap) => {
+      const tum = kapUyeleri(kap, g, liste);
+      if(tum.length < 2) return;
+      const simdi = tum.slice().sort((a, b) => (a.t.compareDocumentPosition(b.t) & 4) ? -1 : 1);
+      const dogal = tum.slice().sort((x, y) => ILK.get(x.el) - ILK.get(y.el));
       const bilinenYer = [], bilinen = [];
       dogal.forEach((b, i) => { if(sira.indexOf(b.anahtar) >= 0){ bilinenYer.push(i); bilinen.push(b); } });
       bilinen.sort((x, y) => sira.indexOf(x.anahtar) - sira.indexOf(y.anahtar));
       const hedef = dogal.slice();
       bilinenYer.forEach((yerI, k) => { hedef[yerI] = bilinen[k]; });
-      if(hedef.every((b, i) => b === g[i])) return;
-      const yer = g.map(b => {
+      if(hedef.every((b, i) => b === simdi[i])) return;
+      const yer = simdi.map(b => {
         const c = document.createComment('gizle-sira');
-        const t = tasiyici(b.el);
-        t.parentNode.insertBefore(c, t);
+        b.t.parentNode.insertBefore(c, b.t);
         return c;
       });
-      const tasinan = hedef.map(b => tasiyici(b.el));
-      tasinan.forEach((t, i) => yer[i].parentNode.insertBefore(t, yer[i]));
+      hedef.forEach((b, i) => yer[i].parentNode.insertBefore(b.t, yer[i]));
       yer.forEach(c => c.remove());
       oynadi = true;
     });
     return oynadi;
   }
+  /* Sayfada sürükle-bırak bitince: bölümün ŞU ANKİ kabındaki sıra (ikili
+     sarmalayıcılar dahil) olduğu gibi kaydedilir; kap değiştiyse yeri de. */
+  function sayfadaBirakildi(a){
+    if(!son) return false;
+    const liste = bolumler(son.kok);
+    const b = liste.find(x => x.anahtar === a);
+    if(!b) return false;
+    const kap = kapOf(b);
+    const g = gruplar(liste).get(kap) || [];
+    const sira = kapUyeleri(kap, g, liste).sort((x, y) => (x.t.compareDocumentPosition(y.t) & 4) ? -1 : 1).map(x => x.anahtar);
+    siraYaz(sira, { anahtar:a, kap });
+    return true;
+  }
   /* Bir grubun yeni sırasını kaydeder (anahtar listesi). */
-  function siraYaz(anahtarlar){
+  function siraYaz(anahtarlar, yer){
     if(!son) return;
     const d = oku(son);
+    if(yer){
+      const b = bolumler(son.kok).find(x => x.anahtar === yer.anahtar);
+      const dk = b && DOGAL_KAP.get(b.el);
+      if(!dk || yer.kap === dk) delete d.yer[yer.anahtar]; else d.yer[yer.anahtar] = kapImza(yer.kap);
+    }
     d.sira = d.sira.filter(k => anahtarlar.indexOf(k) < 0).concat(anahtarlar);
     const els = bolumler(son.kok).map(b => tasiyici(b.el));
     const satir = satirKonum();
@@ -477,7 +563,16 @@ LIFEOS.Gizle = (function(){
     if(!b) return false;
     const g = gruplar(liste).get(kapOf(b)) || [];
     const i = g.indexOf(b), j = i + (yon < 0 ? -1 : 1);
-    if(i < 0 || j < 0 || j >= g.length) return false;
+    if(i < 0) return false;
+    if(j < 0 || j >= g.length){
+      const ks = uyumluKaplar(kapOf(b));
+      const hedef = ks[ks.indexOf(kapOf(b)) + (yon < 0 ? -1 : 1)];
+      if(!hedef) return false;
+      const hk = (gruplar(liste).get(hedef) || []).map(x => x.anahtar);
+      if(yon < 0) hk.push(a); else hk.unshift(a);
+      siraYaz(hk, { anahtar:a, kap:hedef });
+      return true;
+    }
     const k = g.map(x => x.anahtar);
     k[i] = g[j].anahtar; k[j] = a;
     siraYaz(k);
@@ -719,7 +814,9 @@ LIFEOS.Gizle = (function(){
         const kap = g.get(kp) || [b];
         const yeniGrup = kp !== onceki && gi >= 0;
         if(kp !== onceki){ onceki = kp; gi++; }
-        const i = kap.indexOf(b), tek = kap.length < 2;
+        const ks = uyumluKaplar(kp), ki = ks.indexOf(kp);
+        const i = kap.indexOf(b), tek = kap.length < 2 && ks.length < 2;
+        const ustYok = i <= 0 && ki <= 0, altYok = i >= kap.length - 1 && ki >= ks.length - 1;
         const ad = kac(b.baslik);
         const uy = h !== 'acik' && uyariVar(b.el);
         const sec = (v, simge, yazi) => '<button type="button" data-hal-sec="' + v + '" aria-pressed="' + (h === v) + '"'
@@ -730,8 +827,8 @@ LIFEOS.Gizle = (function(){
           + '<span class="gd-ad">' + ad + '</span>'
           + (uy ? '<span class="gd-uyari" title="Bu bölümde bir uyarı var">' + svg('uyari') + 'uyarı</span>' : '')
           + '<span class="gd-tasi">'
-          +   '<button type="button" data-yukari' + (tek || i <= 0 ? ' disabled' : '') + ' title="Yukarı taşı (Alt+↑)" aria-label="«' + ad + '» yukarı taşı">' + svg('yukari') + '</button>'
-          +   '<button type="button" data-asagi' + (tek || i >= kap.length - 1 ? ' disabled' : '') + ' title="Aşağı taşı (Alt+↓)" aria-label="«' + ad + '» aşağı taşı">' + svg('asagi') + '</button>'
+          +   '<button type="button" data-yukari' + (tek || ustYok ? ' disabled' : '') + ' title="Yukarı taşı (Alt+↑)" aria-label="«' + ad + '» yukarı taşı">' + svg('yukari') + '</button>'
+          +   '<button type="button" data-asagi' + (tek || altYok ? ' disabled' : '') + ' title="Aşağı taşı (Alt+↓)" aria-label="«' + ad + '» aşağı taşı">' + svg('asagi') + '</button>'
           + '</span>'
           + '<span class="gd-hal" role="group" aria-label="«' + ad + '» görünümü">'
           +   sec('acik', 'goz', 'Açık') + sec('kucuk', 'kucult', 'Küçük') + sec('gizli', 'gizle', 'Gizli')
@@ -866,10 +963,12 @@ LIFEOS.Gizle = (function(){
       const liste = bolumler(son.kok);
       const b = liste.find(x => x.el === bolum);
       if(!b) return;
-      const g = gruplar(liste).get(kapOf(b)) || [];
+      /* Adaylar: kendi kabı VE aynı türdeki komşu kaplar (alanlar arası). */
+      const ks = uyumluKaplar(kapOf(b));
+      const g = liste.filter(x => ks.indexOf(kapOf(x)) >= 0);
       if(g.length < 2) return;
       e.preventDefault();
-      s = { b, g, kap:kapOf(b), t:tasiyici(b.el) };
+      s = { b, g, t:tasiyici(b.el) };
       s.t.classList.add('gizle-tasinan');
       document.documentElement.classList.add('gizle-surukluyor');
       onizlemeKapat();
@@ -889,18 +988,17 @@ LIFEOS.Gizle = (function(){
         const yatay = Math.abs(r.top - bizim.top) < 6;
         const once = yatay ? e.clientX < r.left + r.width / 2 : e.clientY < r.top + r.height / 2;
         if(once ? t.previousElementSibling === s.t : t.nextElementSibling === s.t) break;
-        flip(s.g.map(y => tasiyici(y.el)), () => s.kap.insertBefore(s.t, once ? t : t.nextSibling));
+        flip(s.g.map(y => tasiyici(y.el)), () => t.parentNode.insertBefore(s.t, once ? t : t.nextSibling));
         break;
       }
     }, true);
     const bitir = () => {
       if(!s) return;
-      const kap = s.kap;
+      const b = s.b;
       s.t.classList.remove('gizle-tasinan');
       document.documentElement.classList.remove('gizle-surukluyor');
       s = null;
-      const g = gruplar(bolumler(son.kok)).get(kap) || [];
-      if(g.length) siraYaz(g.map(x => x.anahtar));
+      sayfadaBirakildi(b.anahtar);
     };
     document.addEventListener('pointerup', bitir, true);
     document.addEventListener('pointercancel', bitir, true);
@@ -1096,7 +1194,7 @@ LIFEOS.Gizle = (function(){
   }
 
   return { uygula, anahtar, bolumler, gizliListe, gizle, goster, hepsiniGoster, duzenle, kucult,
-    tasi, durumu, durumAyarla, varsayilanaDon, hazir, hazirHali, sayfalar, sayfaSifirla, hepsiniSifirla, birak,
+    tasi, durumu, durumAyarla, varsayilanaDon, sayfadaBirakildi, hazir, hazirHali, sayfalar, sayfaSifirla, hepsiniSifirla, birak,
     duzenMi:() => duzen, panelAc, panelKapat, onizlemeAc, onizlemeKapat,
     onizlemeVar:() => !!onizleme,
     _sifirla(){ son = null; duzen = false; panelKapat(); onizlemeKapat(); bitirCubugu();

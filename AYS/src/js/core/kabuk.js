@@ -80,6 +80,7 @@ window.LIFEOS = window.LIFEOS || {};
     ayarlar:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
     ara:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
     zil:'<path d="M6.5 16v-4.5a5.5 5.5 0 0 1 11 0V16l1.5 2h-14z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
+    kenar:'<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/>',
     gizli:'<rect x="4" y="4.5" width="16" height="5" rx="1.5"/><rect x="4" y="12.5" width="16" height="3" rx="1"/><path d="M4 19.5h7"/>',
     menu:'<path d="M4.5 7h15M4.5 12h15M4.5 17h15"/>',
     arti:'<path d="M12 5v14M5 12h14"/>',
@@ -253,7 +254,7 @@ window.LIFEOS = window.LIFEOS || {};
           + '</div>' : '';
       return '<div class="kenar__cekmece-kap">'
         + '<button class="kenar__cekmece' + (c.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(c.route) + '"'
-        + ' data-cekmece="' + kac(c.id) + '"' + (c.on && !(c.bolumler || []).some(b => b.on && b.route !== c.route) ? ' aria-current="page"' : '') + '>'
+        + ' data-cekmece="' + kac(c.id) + '" title="' + kac(c.ad) + '"' + (c.on && !(c.bolumler || []).some(b => b.on && b.route !== c.route) ? ' aria-current="page"' : '') + '>'
         + simge(c.id) + '<span class="kenar__ad">' + kac(c.ad) + '</span>' + sayac + '</button>' + bol + '</div>';
     }).join('');
     const b = o.baglanti || {};
@@ -268,7 +269,7 @@ window.LIFEOS = window.LIFEOS || {};
         + ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '">'
         + '<i class="kenar__madalya" aria-hidden="true"' + (r.renk ? ' style="--kademe-renk:' + kac(r.renk) + '"' : '') + '></i>'
         + '<span><b>' + kac(r.ad || '') + '</b> ' + kac(r.etiket) + '</span>' + simge('ileri') + '</button>' : '';
-    return '<aside class="kenar" data-modul="' + kac(o.modul || 'ays') + '" aria-label="Gezinme">'
+    return '<aside class="kenar" id="kenar" data-modul="' + kac(o.modul || 'ays') + '" aria-label="Gezinme">'
       + '<button class="kenar__marka" data-act="modul-menu" aria-haspopup="dialog" aria-label="LifeOS — sistemler arası geçiş">'
       +   '<i class="kenar__logo" aria-hidden="true"><b></b><b></b><b></b><b></b></i><span>LifeOS</span></button>'
       + modulGecisi(o.modul, o.loc)
@@ -295,6 +296,8 @@ window.LIFEOS = window.LIFEOS || {};
     const r = o.rutbe;
     return '<header class="ust ust--v5" data-modul="' + kac(o.modul || 'ays') + '">'
       + '<div class="ust__ic">'
+      + '<button class="ust__kenar" type="button" data-kenar-ac aria-controls="kenar" aria-expanded="' + (kenarDarMi() ? 'false' : 'true') + '"'
+      +   ' aria-label="Kenar çubuğunu ' + (kenarDarMi() ? 'aç' : 'daralt') + '" title="Kenar çubuğu">' + simge('kenar') + '</button>'
       + '<nav class="ust__yol" aria-label="Konum"><i class="kenar__nokta kenar__nokta--' + kac(o.modul || 'ays') + '" aria-hidden="true"></i>'
       +   '<span class="ust__yol-modul">' + kac(m.ad) + '</span>'
       +   yol.map((y, i) => '<span class="ust__yol-ayrac" aria-hidden="true">/</span><span class="ust__yol-oge' + (i === yol.length - 1 ? ' is-son' : '') + '">' + kac(y) + '</span>').join('')
@@ -609,6 +612,29 @@ window.LIFEOS = window.LIFEOS || {};
     if(az) git(); else setTimeout(git, 320);
   }
 
+  /* KENAR ÇUBUĞU AÇILIR/KAPANIR (depo sahibinin isteği, 2026-09-27: «hep
+     durup yer kaplamasın»). Kapalıyken yalnız simgelerin durduğu ince bir
+     şerit kalır; seçim bu cihazda hatırlanır. Telefonda kenar çubuğu zaten
+     yoktur (alt bant), düğme orada görünmez. */
+  const KENAR_ANAHTAR = 'lifeos.kenar';
+  function kenarDarMi(){
+    return typeof document !== 'undefined' && document.documentElement.classList.contains('kenar-dar');
+  }
+  function kenarDar(v){
+    if(typeof document === 'undefined') return;
+    const dar = v == null ? !kenarDarMi() : !!v;
+    document.documentElement.classList.toggle('kenar-dar', dar);
+    try{ if(dar) localStorage.setItem(KENAR_ANAHTAR, 'dar'); else localStorage.removeItem(KENAR_ANAHTAR); }catch(e){}
+    document.querySelectorAll('[data-kenar-ac]').forEach(b => {
+      b.setAttribute('aria-expanded', dar ? 'false' : 'true');
+      b.setAttribute('aria-label', 'Kenar çubuğunu ' + (dar ? 'aç' : 'daralt'));
+    });
+    return dar;
+  }
+  if(typeof document !== 'undefined'){
+    try{ if(localStorage.getItem(KENAR_ANAHTAR) === 'dar') document.documentElement.classList.add('kenar-dar'); }catch(e){}
+  }
+
   let kuruldu = false;
   function kur(){
     if(kuruldu || typeof document === 'undefined') return;
@@ -621,6 +647,8 @@ window.LIFEOS = window.LIFEOS || {};
       katmanKapat();
     });
     document.addEventListener('click', e => {
+      const k = e.target.closest && e.target.closest('[data-kenar-ac]');
+      if(k){ e.preventDefault(); kenarDar(); return; }
       const a = e.target.closest && e.target.closest('a[data-modul-gecis]');
       if(!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
       e.preventDefault();
@@ -636,6 +664,6 @@ window.LIFEOS = window.LIFEOS || {};
     simge, modulIsareti, adres, simdiOrani, saatMetni,
     ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, bolumCubugu, altBant, menuSayfasi,
     modulMenusu, bildirimPaneli, hizliEkle,
-    katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis,
+    katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis, kenarDar, kenarDarMi,
   });
 })();
