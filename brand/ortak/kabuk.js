@@ -304,7 +304,7 @@ window.LIFEOS = window.LIFEOS || {};
       /* Gizlenen/küçültülen bölümler (brand/ortak/gizle.js): düğme burada,
          sayısını ve panelini gizle.js yönetir. */
       +   '<button class="ust__gizli" type="button" aria-haspopup="dialog" aria-expanded="false"'
-      +     ' aria-label="Gizlenen bölümler" title="Gizlenen bölümler · sayfayı düzenle">'
+      +     ' aria-label="Sayfa düzeni" title="Sayfa düzeni: sırala, küçült, gizle">'
       +     simge('gizli') + '<i class="ust__gizli-sayi" aria-hidden="true"></i></button>'
       +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
       +     ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
