@@ -88,8 +88,14 @@ Bugünün ölçümleri:
 
 # Alt seviye (duz sohbet) icin KISA kurallar: ayni sinirlar (olcum
 # uydurma, emir kipi, uygulayamazsin), daha az soz. Paket secilmediyse
-# kullanilmaz.
-SISTEM_KISA = """Sen HKM'nin %(ad)s görevlisisin; kullanıcıyla kısa ve doğal sohbet ediyorsun.
+# ve yerel model de yoksa kullanilmaz.
+#
+# KIMLIK ILK CUMLEDE ve «Adın X.» bicimindedir: «Sen HKM'nin King
+# görevlisisin» ile baslayan metinde 1B model «sen kimsin» sorusuna
+# «Benim adım Sen HKM.» diyordu (sahada, gemma3:1b). Modullerin ne oldugu
+# da yazilir; yoksa «sistemi görüyor musun» sorusu havada kalir.
+SISTEM_KISA = """Adın %(ad)s. LifeOS'un merkezi HKM'de (Hayat Kontrol Merkezi) görevlisin; kullanıcıyla kısa ve doğal Türkçe sohbet ediyorsun. %(is)s
+LifeOS'ta üç modül var: AYS (sınav hazırlığı), SPİ (sağlık: uyku, beslenme, hareket), ESP (kişisel gelişim). Onların günlük özetini aşağıdaki listeden görürsün; listede olmayanı bilemezsin.
 Kesin kurallar: ÖLÇÜM UYDURMA — ölçülen bir şeyden sayı söyleyeceksen aşağıdaki
 listede geçmeli, yoksa «bu ölçülmedi» de. Emir kipi kullanma. En fazla 3 cümle,
 Türkçe. Bir şey uygulayamazsın; değişiklik isteğini teklif olarak bırakacağını söyle.
@@ -114,7 +120,7 @@ BAGLAM_SINIRI = {
 def sistem_metni(gorevli, bg, kisa=False):
     g = GOREVLILER[gorevli]
     if kisa:
-        return SISTEM_KISA % {"ad": g["ad"], "baglam": bg}
+        return SISTEM_KISA % {"ad": g["ad"], "is": g["is"], "baglam": bg}
     return SISTEM_METNI % {"ad": g["ad"], "is": g["is"], "konum": KONUM[gorevli],
                            "baglam": bg}
 
@@ -455,6 +461,47 @@ def _yedek_metin(r, yedek):
                            "Şu an serbest cümleyle cevap veremiyorum.")
 
 
+# YALNIZ SELAM: mesajin TAMAMI selam kelimeleri (+ istege bagli hitap)
+# ise kural cevaplar, model cagrilmaz. Sahada (2026-09-27) yerel 1B model
+# «merhaba»ya «Şu anda durumun özetini açıklıyor olabilirsiniz.» diyordu;
+# model kapaliyken de «Anlamadım» geliyordu. Bu kume patron.COMMANDS'a
+# KONMAZ (core/patron.py): orada ilk kelime yeterdi ve «merhaba, uykum
+# nasıl» anlasilmis sayilirdi. Burada tek kelime fazlasi modele gider.
+SELAM_KELIMELERI = {
+    "merhaba": "Merhaba!", "merhabalar": "Merhaba!", "mrb": "Merhaba!",
+    "selam": "Merhaba!", "selamlar": "Merhaba!", "slm": "Merhaba!",
+    "sa": "Aleykümselam!", "selamünaleyküm": "Aleykümselam!",
+    "selamunaleykum": "Aleykümselam!", "hey": "Merhaba!", "hi": "Merhaba!",
+    "hello": "Merhaba!", "günaydın": "Günaydın!", "gunaydin": "Günaydın!",
+    "iyi akşamlar": "İyi akşamlar!", "iyi aksamlar": "İyi akşamlar!",
+    "tünaydın": "Tünaydın!", "iyi günler": "İyi günler!", "iyi gunler": "İyi günler!",
+}
+SELAM_HITAP = ("king", "hkm", "bio", "academic", "intellect", "kanka", "dostum")
+
+
+def selam_mi(metin, gorevli="king"):
+    """Mesaj yalniz selamsa karsilik gelen acilis kelimesi, degilse None."""
+    t = str(metin or "").replace("İ", "i").replace("I", "ı").lower()
+    t = " ".join(re.sub(r"[^\w\s]", " ", t).split())
+    # Noktasiz i ayrimi karsilastirmada silinir: «KING» -> «kıng» da hitaptir.
+    def n(x):
+        return x.replace("ı", "i")
+    hitap = {n(h) for h in SELAM_HITAP} | {n(GOREVLILER.get(gorevli, {}).get("ad", "").lower())}
+    parca = [n(w) for w in t.split() if n(w) not in hitap]
+    if not parca:
+        return None
+    return {n(k): v for k, v in SELAM_KELIMELERI.items()}.get(" ".join(parca))
+
+
+def selam_cevabi(acilis, gorevli):
+    g = GOREVLILER[gorevli]
+    kim = ("HKM'nin baş görevlisi; AYS, SPİ ve ESP'nin günlük özetini tek yerde tutarım."
+           if gorevli == "king" else "HKM'deki görevlilerden biriyim. " + g["is"])
+    return ("%s Ben %s — %s\n«durum» yazarsan günün özetini, «hafta» yazarsan "
+            "haftayı veririm; «yardım» bütün komutları gösterir. Aklındakini "
+            "serbestçe de sorabilirsin." % (acilis, g["ad"], kim))
+
+
 def _ilk_duyuru(con, anahtar):
     """Bu duyuru ilk kez mi yapiliyor? Ilkse kaydeder ve True doner."""
     import datetime as _dt
@@ -480,6 +527,16 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
             patron.log(con, kanal, "manager", hafiza_komutu["text"], agent=gorevli)
         return {"ok": True, "mode": "memory", "command": "memory",
                 "text": hafiza_komutu["text"], "agent": gorevli}
+
+    # 0 — YALNIZ SELAM: kural cevaplar (bkz. SELAM_KELIMELERI).
+    acilis = selam_mi(metin, gorevli)
+    if acilis:
+        sc = selam_cevabi(acilis, gorevli)
+        if kayit:
+            patron.log(con, kanal, "user", metin, agent=gorevli)
+            patron.log(con, kanal, "manager", sc, agent=gorevli)
+        return {"ok": True, "mode": "komut", "command": "selam", "text": sc,
+                "agent": gorevli}
 
     # 0a — TEKLIFE CEVAP (core/king.py teklif_cevap): «1», «2», «iptal».
     # Acik teklif yoksa None doner ve kelime olagan sohbete gecer.

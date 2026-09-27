@@ -84,12 +84,55 @@ def run():
         gecmis = [{"role": "user" if i % 2 == 0 else "assistant", "content": "x%d" % i} for i in range(10)]
         ortuk = _m.apply({"local_token": "x"}, {"yer": "hibrit", "yerel": {"ekonomik": "gemma3:1b"}})
         paketli = _m.apply({"local_token": "x"}, {"paket": "A", "yer": "hibrit", "yerel": {"ekonomik": "gemma3:1b"}})
-        sohbet.konus(con, ortuk, "merhaba", "2026-09-27", gecmis=gecmis, transport=tas, kayit=False)
+        sohbet.konus(con, ortuk, "bugün nasıl gidiyor", "2026-09-27", gecmis=gecmis, transport=tas, kayit=False)
         o = dict(olcu)
-        sohbet.konus(con, paketli, "merhaba", "2026-09-27", gecmis=gecmis, transport=tas, kayit=False)
+        sohbet.konus(con, paketli, "bugün nasıl gidiyor", "2026-09-27", gecmis=gecmis, transport=tas, kayit=False)
         eq(o, olcu)                                   # paket secilmis gibi: ayni kisa baglam
         ok(o["mesaj"] <= 5, o)                        # gecmis 4 + yeni mesaj
     test("paketsiz hibritte yerel model kisa baglam alir", t_local_hybrid_gets_short_context)
+
+    def t_pure_greeting_is_answered_by_rule():
+        """HATA (sahada, 2026-09-27): «merhaba» yerel kucuk modele
+        (gemma3:1b) gidiyor ve «Şu anda durumun özetini açıklıyor
+        olabilirsiniz.» gibi alakasiz cevap donuyordu; model kapaliyken de
+        «Anlamadım» geliyordu. YALNIZ selamdan olusan mesaj kuralla,
+        modelsiz cevaplanir; selamla baslayan bir SORU modele gider."""
+        from core import db as _db, models as _m
+        cagri = []
+        def tas(provider, anahtar, model, sistem, mesajlar, ayar=None):
+            cagri.append(mesajlar[-1]["content"])
+            return "Tamam.", 10, 3
+        cfg = _m.apply({"local_token": "x"}, {"yer": "hibrit", "yerel": {"ekonomik": "gemma3:1b"}})
+        for m, ilk in (("merhaba", "Merhaba!"), ("Selam!", "Merhaba!"), ("MERHABA KING", "Merhaba!"),
+                       ("günaydın", "Günaydın!"), ("İyi akşamlar :)", "İyi akşamlar!"),
+                       ("slm", "Merhaba!"), ("selamlar hkm", "Merhaba!")):
+            r = sohbet.konus(_db.connect(":memory:"), cfg, m, "2026-09-27", transport=tas, kayit=False)
+            eq(r["command"], "selam", m)
+            ok(r["text"].startswith(ilk), (m, r["text"]))
+            ok("King" in r["text"] and "«durum»" in r["text"], r["text"])
+        eq(cagri, [])                                   # hicbiri modele gitmedi
+        for m in ("merhaba, uykum nasıl", "selam naber", "günaydın bugün ne çalışayım"):
+            r = sohbet.konus(_db.connect(":memory:"), cfg, m, "2026-09-27", transport=tas, kayit=False)
+            ok(r.get("command") != "selam", m)
+        eq(len(cagri), 3)                               # selamla baslayan soru modele gider
+        # Model hic yokken de selam «Anlamadım» degil, karsilamadir.
+        r = sohbet.konus(_db.connect(":memory:"), {}, "merhaba", "2026-09-27", kayit=False)
+        eq(r["command"], "selam")
+        no("Anlamadım" in r["text"])
+        # Gorevli kendi adiyla selamlar.
+        r = sohbet.konus(_db.connect(":memory:"), {}, "selam", "2026-09-27", gorevli="bio", kayit=False)
+        ok(sohbet.GOREVLILER["bio"]["ad"] in r["text"], r["text"])
+    test("yalniz selam kuralla modelsiz cevaplanir", t_pure_greeting_is_answered_by_rule)
+
+    def t_short_prompt_carries_identity():
+        """HATA (sahada, 2026-09-27): kisa sistem metni «Sen HKM'nin King
+        görevlisisin» ile basliyordu; 1B model «sen kimsin» sorusuna
+        «Benim adım Sen HKM.» diyordu ve modulleri bilmiyordu."""
+        s = sohbet.sistem_metni("king", "- (liste)", kisa=True)
+        ok(s.startswith("Adın King."), s[:60])
+        for parca in ("AYS", "SPİ", "ESP", "Hayat Kontrol Merkezi", "ÖLÇÜM UYDURMA", "- (liste)"):
+            ok(parca in s, parca)
+    test("kisa sistem metni kimligi ve modulleri tasir", t_short_prompt_carries_identity)
 
     def t_model_answers_free_sentence():
         con = _con()
