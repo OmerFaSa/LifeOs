@@ -180,6 +180,16 @@ def merdiven(con, cfg, rol, seviye=None):
     paket = models.paket_of(cfg)
     pseviye = politika_seviyesi(rol, seviye) if rol in models.ROLES else None
     kendi = bool(a and a.get("provider") and a.get("from") == rol)
+    # PAKETSIZ YEREL/HIBRIT (hata, 2026-09-27, sahada): paket secilmemisken
+    # «Hibrit» ve «Yerel» hicbir sey yapmiyordu — merdiven eski tek-atama
+    # yoluna dusup «model atanmamis» diyordu; ekran «basit isler
+    # bilgisayarinda» yazarken sohbet kural motorunun yedegine dusuyordu.
+    # Calisma yeri yerel/hibrit ve bir yerel model yazilmissa, en ekonomik
+    # paketin (A) merdiveni ORTUK olarak kullanilir. Bulut (varsayilan)
+    # secimi ve elle atama bundan etkilenmez.
+    ortuk = False
+    if not kendi and not paket and pseviye and models.yer_of(cfg) != "bulut" and models.yerel_of(cfg):
+        paket, ortuk = "A", True
     if kendi or not paket or not pseviye:
         # Elle secim ya da paketsiz kurulum: TEK basamak, eski davranis.
         h = _hazir_denetimi(a)
@@ -199,8 +209,8 @@ def merdiven(con, cfg, rol, seviye=None):
     yerel = models.yerel_of(cfg) if tur == "metin" else {}
     jeton = CEVAP_JETON.get(pseviye, 1200)
     siniflar = list(SINIFLAR[SINIFLAR.index(bas):SINIFLAR.index(tavan) + 1])
-    ortak = {"paket": paket, "seviye": pseviye, "ekonomi": ekonomi, "elle": False, "yer": yer,
-             "yer_notu": None}
+    ortak = {"paket": None if ortuk else paket, "seviye": pseviye, "ekonomi": ekonomi, "elle": False,
+             "yer": yer, "yer_notu": None}
 
     def yerel_basamak(s):
         return {"sinif": s, "atama": {
@@ -254,6 +264,10 @@ def merdiven(con, cfg, rol, seviye=None):
         if not liste:
             continue
         basamaklar.append(bulut_basamak(s))
+    if not basamaklar and ortuk:
+        return dict(ortak, ok=False, reason="no-key", basamaklar=[],
+                    note=("Bu istek bulutta çalışır ama OpenRouter anahtarı yok: «Sağlayıcılar» "
+                          "bölümüne ekle ya da Standart sınıf için de bir yerel model yaz."))
     if not basamaklar:
         return dict(ortak, ok=False, reason="no-key", basamaklar=[],
                     note=("Ses ve video yalnız Google (Gemini) anahtarıyla çalışır; "

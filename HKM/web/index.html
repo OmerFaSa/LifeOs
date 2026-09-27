@@ -2729,7 +2729,9 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
         + '>' + YER_ADI[y] + '</button>';
     });
     h += '</div><p class="muted" style="font-size:12px">' + esc(YER_NOT[yer]) + '</p>';
-    h += '<details class="detay"' + (yer !== 'bulut' && !yl.ekonomik ? ' open' : '')
+    /* Yerel/hibritte ACIK kalir: kaydedince katlanmasi «ayar kayboldu»
+       sanılıyordu (sahada, 2026-09-27). */
+    h += '<details class="detay"' + (yer !== 'bulut' ? ' open' : '')
       + '><summary>Motor servisi ve yerel modeller (Ollama, LM Studio…)</summary>'
       + '<datalist id="yerel-liste"></datalist>'
       + '<label style="display:block;font-size:12px;margin:6px 0">Motor adresi '
@@ -2756,7 +2758,11 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     var yama = yerelYama();
     if(yer) yama.models.yer = yer;
     var r = await api('/api/config', { method:'POST', body:JSON.stringify(yama) });
-    if(r.status === 200){ ayarlariCiz(r.body.config); }
+    if(r.status === 200){
+      ayarlariCiz(r.body.config);
+      if($('yerel-not')) $('yerel-not').textContent = 'Kaydedildi.'
+        + (yer ? ' Çalışma yeri: ' + (YER_ADI[yer] || yer) + '.' : '');
+    }
     else if($('yerel-not')){ $('yerel-not').textContent = 'Kaydedilmedi — '
       + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status); }
   }

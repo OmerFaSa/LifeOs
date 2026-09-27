@@ -349,6 +349,33 @@ def run():
         eq([b["atama"]["provider"] for b in h["basamaklar"]], ["openrouter", "openrouter"])
     test("yerel model yoksa soylenir; hibrit bulutla surer", t_local_without_model_says_so)
 
+    def t_hybrid_without_package_uses_local():
+        """HATA (2026-09-27, sahada): paket SECILMEMISKEN «Hibrit» ve «Yerel»
+        hicbir sey yapmiyordu — merdiven eski tek-atama yoluna dusuyor,
+        «model atanmamis» diyordu; ekranda «basit isler bilgisayarinda»
+        yazarken sohbet kural motorunun yedek cumlesine dusuyordu."""
+        cfg = {"local_token": "x"}
+        cfg = models.apply(cfg, {"yer": "hibrit", "yerel": {"ekonomik": "gemma3:1b"}})
+        eq(models.paket_of(cfg), None)
+        m = motor.merdiven(None, cfg, "king", seviye="alt")
+        ok(m["ok"], m.get("note"))
+        eq(m["basamaklar"][0]["atama"]["provider"], "yerel")
+        eq(m["basamaklar"][0]["atama"]["model"], "gemma3:1b")
+        ok(ai.hazir_mi(cfg, "king", seviye="alt")["ok"])
+        # Bulut anahtari yokken zor is: durust not, paket adindan soz etmeden.
+        u = motor.merdiven(None, cfg, "king", seviye="ust")
+        if not u["ok"]:
+            ok("OpenRouter" in u["note"] and "paketi" not in u["note"], u["note"])
+        # Yerel mod da paketsiz calisir.
+        y = models.apply({"local_token": "x"}, {"yer": "yerel", "yerel": {"ekonomik": "gemma3:1b"}})
+        my = motor.merdiven(None, y, "king", seviye="ust")
+        ok(my["ok"])
+        eq([b["atama"]["provider"] for b in my["basamaklar"]], ["yerel"])
+        # Bulut seciliyken (varsayilan) davranis degismez.
+        bu = models.apply({"local_token": "x"}, {"yerel": {"ekonomik": "gemma3:1b"}})
+        no(motor.merdiven(None, bu, "king", seviye="alt")["ok"])
+    test("paket secilmeden de hibrit/yerel yerel modeli kullanir", t_hybrid_without_package_uses_local)
+
     def t_preview_shows_local_rungs_free():
         cfg = _yer_cfg("hibrit")
         con = db.connect(":memory:")
