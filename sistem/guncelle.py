@@ -36,6 +36,15 @@ SISTEM = os.path.dirname(os.path.abspath(__file__))
 KOK = os.path.dirname(SISTEM)          # deponun koku (sistem/ bir alt klasor)
 UZAK = "origin"
 DAL = "main"
+# Zip ile indirilmis bir klasor bu adrese baglanir (depo herkese acik).
+DEPO_URL = "https://github.com/OmerFaSa/LifeOs.git"
+
+# Eski surumlerin kokte biraktigi, yeni duzende BASKA YERDE duran dosya ve
+# klasorler. Zip klasoru baglanirken yalniz bunlar ve yalniz yeni surumde
+# yoklarsa kaldirilir. Liste kapalidir: bilinmeyen bir dosyaya dokunulmaz.
+ESKI_KOK = ("baslat.py", "sunucu.py", "guncelle.py", "baslat.sh",
+            "BASLAT.command", "GELISTIRME_RAPORU.md", "NOTLAR.md",
+            "LIFEOS2.md", "skills-lock.json", "ekip")
 
 
 def _git(args, kok=KOK, calistir=subprocess.run, timeout=60):
@@ -62,12 +71,13 @@ def durum(kok=KOK, calistir=subprocess.run, getir=True):
         return {"durum": "git-yok",
                 "mesaj": "Bu bilgisayarda git kurulu değil. git-scm.com'dan "
                          "kurduktan sonra güncelleme buradan yapılabilir."}
-    kod, cikti = _git(["rev-parse", "--is-inside-work-tree"], kok, calistir)
-    if kod != 0 or cikti.strip() != "true":
-        return {"durum": "git-degil",
-                "mesaj": "Bu klasör git ile indirilmemiş (zip olabilir); "
-                         "buradan güncellenemez. Depoyu «git clone» ile "
-                         "yeniden indirmek gerekir."}
+    kod, cikti = _git(["rev-parse", "--show-toplevel"], kok, calistir)
+    # Ust klasorlerden birinin deposu bu klasorun deposu DEGILDIR.
+    if kod != 0 or os.path.realpath(cikti.strip()) != os.path.realpath(kok):
+        return {"durum": "git-degil", "baglanabilir": True,
+                "mesaj": "Bu klasör zip ile indirilmiş. «Güncelle» onu "
+                         "GitHub'daki sürüme bağlar ve en yeni sürümü kurar; "
+                         "verin (tarayıcı ve HKM/db) korunur."}
     _, dal = _git(["rev-parse", "--abbrev-ref", "HEAD"], kok, calistir)
     ag = True
     if getir:
@@ -109,12 +119,78 @@ def artiklari_temizle(kok=KOK):
             pass        # acik bir surec tutuyor olabilir; bir dahaki sefere
 
 
-def uygula(kok=KOK, calistir=subprocess.run):
+def baglan(kok=KOK, calistir=subprocess.run, uzak_url=None):
+    """Zip ile indirilmis klasoru uzaga baglar ve en yeni surumu kurar.
+
+    Izlenen dosyalar en yeni surumle degisir; git disi dosyalar (veri,
+    yapilandirma, kullanicinin kendi dosyalari) YERINDE KALIR. Uzaga
+    ulasilamazsa klasor eski haline doner (yarim .git birakilmaz)."""
+    import shutil
+    git_klasor = os.path.join(kok, ".git")
+    if os.path.exists(git_klasor):
+        return {"durum": "engel", "mesaj": "Klasörde yarım bir git kaydı var (.git); "
+                                           "elle bakılmalı."}
+
+    def geri(mesaj):
+        shutil.rmtree(git_klasor, ignore_errors=True)
+        return {"durum": "engel", "mesaj": mesaj}
+
+    for adim in (["init", "--quiet"],
+                 ["remote", "add", UZAK, uzak_url or DEPO_URL]):
+        kod, cikti = _git(adim, kok, calistir)
+        if kod != 0:
+            return geri("git hazırlanamadı: " + (cikti.splitlines() or ["?"])[-1])
+    # Tek kayit derinliginde: yuzlerce megabaytlik gecmis indirilmez.
+    kod, _ = _git(["fetch", "--quiet", "--depth", "1", UZAK, DAL], kok, calistir,
+                  timeout=900)
+    if kod != 0:
+        return geri("GitHub'a ulaşılamadı; internet bağlantısını kontrol edip "
+                    "yeniden dene. Klasörde hiçbir şey değişmedi.")
+    hedef = UZAK + "/" + DAL
+    for adim in (["reset", "--quiet", "--hard", hedef],
+                 ["branch", "-M", DAL],
+                 ["branch", "--quiet", "--set-upstream-to=" + hedef]):
+        kod, cikti = _git(adim, kok, calistir, timeout=300)
+        if kod != 0 and adim[0] == "reset":
+            return geri("Sürüm kurulamadı: " + (cikti.splitlines() or ["?"])[-1])
+    for ad in ESKI_KOK:
+        kod, _ = _git(["ls-files", "--error-unmatch", ad], kok, calistir)
+        if kod == 0:
+            continue                                  # yeni surumde de var
+        yol = os.path.join(kok, ad)
+        try:
+            if os.path.isdir(yol):
+                shutil.rmtree(yol)
+            elif os.path.isfile(yol):
+                os.remove(yol)
+        except OSError:
+            pass
+    artiklari_temizle(kok)
+    _, yeni = _git(["log", "-1", "--format=%s"], kok, calistir)
+    return {"durum": "guncellendi", "yeniden_baslat": True, "degisen": None,
+            "yeni": [yeni.strip()] if yeni.strip() else [],
+            "mesaj": "Klasör GitHub'a bağlandı ve en yeni sürüm kuruldu. "
+                     "Sistemi yeniden başlat."}
+
+
+def surum(kok=KOK, calistir=subprocess.run):
+    """Kurulu surum: {"kisa", "tarih", "baslik"} ya da None (zip)."""
+    kod, c = _git(["log", "-1", "--format=%h|%cd|%s", "--date=format:%d.%m.%Y"],
+                  kok, calistir, timeout=10)
+    if kod != 0 or not c or "|" not in c:
+        return None
+    k, t, b = (c.split("|", 2) + ["", ""])[:3]
+    return {"kisa": k, "tarih": t, "baslik": b}
+
+
+def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None):
     """Guncellemeyi indirir — yalniz guvenliyse.
 
     Doner: {"durum": "guncellendi" | "guncel" | "engel" | "git-yok" |
     "git-degil" | "hata", "mesaj": ..., ...}"""
     d = durum(kok, calistir, getir=True)
+    if d["durum"] == "git-degil" and d.get("baglanabilir"):
+        return baglan(kok, calistir, uzak_url)
     if d["durum"] != "ok":
         return d
     if not d["ag"]:

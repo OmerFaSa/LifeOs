@@ -4,6 +4,7 @@
 
      python3 sistem/baslat.py     # uc sistem + HKM + giris sayfasi
      python3 sistem/baslat.py --dur # uc sistemi VE HKM daemon'unu durdurur
+     python3 sistem/baslat.py --yeniden  # durdurur ve yeniden acar
      python3 sistem/baslat.py --hkmsiz # yalniz uc sistem (HKM hic acilmaz)
 
    Ne yapar:
@@ -187,6 +188,19 @@ def main():
                                    os.path.join(HKM, "baslat.py"), "--dur"],
                                   cwd=HKM)
         return kod_sistem or kod_hkm
+
+    if "--yeniden" in sys.argv:
+        # Giris sayfasindaki «Yeniden başlat»: once her sey durur, sonra
+        # olagan acilis. Kisa bekleme: istegi yapan sunucu cevabini
+        # gondermeyi bitirsin.
+        time.sleep(1.5)
+        print("")
+        sistemler_dur()
+        subprocess.call([sys.executable, os.path.join(HKM, "baslat.py"), "--dur"],
+                        cwd=HKM, env=cocuk_ortami())
+        son = time.time() + 10
+        while _cevap_veriyor(GIRIS, timeout=0.5) and time.time() < son:
+            time.sleep(0.3)
 
     print("\nLifeOS başlatılıyor\n")
 

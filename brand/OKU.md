@@ -7,7 +7,7 @@ geçer.
 
 | Sistem | Kaynak | Kullanılan yerler |
 |---|---|---|
-| LifeOS (kök) | `brand/life/` | Bu depo README'sinin başlığı |
+| LifeOS (kök) | `brand/life/` | Eski ortak logo; README ve kontrol paneli artık dört sistemin kendi logosunu gösterir |
 | AYS | `AYS/src/img/brand/` | Açılış videosu, favicon, PWA ikonu, `dist/img/brand/` (build.py kopyalar) |
 | SPİ | `SPI/src/img/brand/` | Açılış videosu, favicon, PWA ikonu, `dist/img/brand/` (build.py kopyalar) |
 | ESP | `ESP/src/img/brand/` | Açılış videosu, favicon, PWA ikonu, `dist/img/brand/` (build.py kopyalar) |
@@ -41,7 +41,7 @@ markasının yerine sistemin kendi icadını koymaktı.
 | Açılış (yükleniyor) ekranı | `img/brand/favicon.png` |
 | Açılış videosu | `img/brand/intro.mp4` |
 | HKM panosu — sekme ikonu ve künye | `HKM/brand/favicon.png` |
-| LifeOS giriş sayfası (`sistem/sunucu.py`) | `brand/life/logo.png`, `favicon.png` |
+| LifeOS kontrol paneli (`sistem/sunucu.py`) | her sistemin kendi `favicon.png`'si (`LOGOLAR`); sekme ikonu dört renkli işaret (gömülü SVG) |
 | Rütbe kartı (gösterim) | `brand/seviye/medya/rutbe-5-2.webp` |
 | Kademe sahnesi (gösterimin arka planı) | `brand/seviye/medya/sahne-5.webp` |
 | Künyedeki küçük rozet | `brand/seviye/medya/rozet-5.png` (yok — numaraya düşüyor) |

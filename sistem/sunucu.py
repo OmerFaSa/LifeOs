@@ -43,9 +43,11 @@
 
 import json
 import os
+import subprocess
 import sys
 import threading
 import time
+import urllib.request
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
@@ -213,145 +215,331 @@ class Sunucu(SimpleHTTPRequestHandler):
         super().log_message(fmt, *args)
 
 
+# Giris sayfasinin gorselleri: HER SISTEMIN KENDI GUNCEL LOGOSU (uygulama
+# acilisinda gorunenle ayni dosya). Kapali bir liste: URL'den yol kurulmaz.
+LOGOLAR = {
+    "ays": ("AYS", "src", "img", "brand", "favicon.png"),
+    "spi": ("SPI", "src", "img", "brand", "favicon.png"),
+    "esp": ("ESP", "src", "img", "brand", "favicon.png"),
+    "hkm": ("HKM", "brand", "favicon.png"),
+}
+
+# (anahtar, kisa ad, tam ad, aciklama, port)
+KARTLAR = [
+    ("ays", "AYS", "Akademik Yol Sistemi", "Sınav hazırlığı: plan, deneme, kalibrasyon", 4173),
+    ("spi", "SPİ", "Sağlık Performans İzleyicisi", "Uyku, beslenme, hareket, toparlanma", 4183),
+    ("esp", "ESP", "Entelektüel Seviye Planlayıcı", "Dil, felsefe, müzik, diksiyon, okuma", 4193),
+    ("hkm", "HKM", "Hayat Kontrol Merkezi", "İsteğe bağlı merkez: günün özeti, çapraz bulgu", HKM_PORT),
+]
+
+# Sekme ikonu: kenar cubugundaki dort renkli isaretin aynisi (SVG, gomulu).
+_IKON = ("data:image/svg+xml,"
+         "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
+         "%3Crect x='3' y='3' width='12' height='12' rx='3' fill='%234F86FF'/%3E"
+         "%3Ccircle cx='23' cy='9' r='6' fill='%232EC4A9'/%3E"
+         "%3Crect x='5' y='19' width='9' height='9' rx='2' fill='%23F2A93B' transform='rotate(45 9.5 23.5)'/%3E"
+         "%3Crect x='17' y='17' width='12' height='12' rx='3' fill='%239A86FF'/%3E%3C/svg%3E")
+
 GIRIS_SAYFASI = """<!doctype html>
 <html lang="tr"><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>LifeOS</title>
-<link rel="icon" type="image/png" href="/marka/favicon.png"/>
+<title>LifeOS — Kontrol paneli</title>
+<link rel="icon" href="__IKON__"/>
 <style>
-:root{ --bg:#f7f7f5; --yuzey:#fff; --fg:#17181a; --dim:#63666b; --line:#e3e3df;
-  --line-strong:#cfd0cb; --accent:#22456f;
+:root{ color-scheme:light dark;
+  --bg:#f5f6f8; --yuzey:#ffffff; --yuzey-2:#f0f1f4; --fg:#15171a; --fg-2:#4a4f57; --fg-3:#6b717b;
+  --cizgi:#e4e6ea; --cizgi-2:#d3d6dc; --golge:0 1px 2px rgba(16,24,40,.05), 0 4px 16px rgba(16,24,40,.06);
+  --ok:#1a7f5a; --ok-t:#e5f4ee; --uyari:#a4620f; --uyari-t:#fcf1e2; --kapali:#8a9099;
+  --ays:#2D5BE3; --spi:#0E8C79; --esp:#C8741C; --hkm:#7453D4;
+  --ays-t:#EEF2FD; --spi-t:#E7F4F1; --esp-t:#FBF2E7; --hkm-t:#F1EEFB;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
-@media (prefers-color-scheme:dark){ :root{ --bg:#0f1113; --yuzey:#15181b;
-  --fg:#e9eaec; --dim:#9aa0a6; --line:#24282c; --line-strong:#333940;
-  --accent:#9dbdf0; } }
+@media (prefers-color-scheme:dark){ :root{
+  --bg:#0d0f12; --yuzey:#15181c; --yuzey-2:#1c2026; --fg:#eceef1; --fg-2:#b3b8c0; --fg-3:#8c929c;
+  --cizgi:#252a31; --cizgi-2:#323841; --golge:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+  --ok:#4cc38a; --ok-t:#122a20; --uyari:#f2a93b; --uyari-t:#2a1f0f; --kapali:#6b717b;
+  --ays:#4F86FF; --spi:#2EC4A9; --esp:#F2A93B; --hkm:#9A86FF;
+  --ays-t:#121A2C; --spi-t:#0E211E; --esp-t:#241A0D; --hkm-t:#1B1730; } }
 *{ box-sizing:border-box; }
+[hidden]{ display:none !important; }
 body{ margin:0; background:var(--bg); color:var(--fg);
-  font:15px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
-.wrap{ max-width:720px; margin:0 auto; padding:56px 20px 72px; }
-h1{ font:600 13px/1 var(--mono); letter-spacing:.16em; text-transform:uppercase;
-  margin:0 0 28px; }
-h1 span{ color:var(--dim); font-weight:400; letter-spacing:.08em; }
-/* Marka gorseli brand/life/logo.png. Dosya degisirse logo degisir;
-   burada hicbir sey degismez. Yuklenemezse yalniz yazi kalir. */
-h1 .marka{ width:22px; height:22px; border-radius:5px; object-fit:cover;
-  vertical-align:-6px; margin-right:11px; }
-a.kart{ display:block; text-decoration:none; color:inherit;
-  border-top:1px solid var(--line); padding:18px 0; }
-a.kart:last-of-type{ border-bottom:1px solid var(--line); }
-a.kart:hover .ad{ text-decoration:underline; }
-.ad{ font-size:17px; font-weight:600; }
-.aciklama{ color:var(--dim); font-size:13.5px; margin-top:2px; }
-.adres{ font:11px/1 var(--mono); color:var(--dim); letter-spacing:.06em;
-  margin-top:8px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-.nokta{ width:8px; height:8px; border-radius:99px; background:var(--line-strong);
-  display:inline-block; }
-.nokta.acik{ background:var(--accent); }
-.not{ color:var(--dim); font-size:13px; margin-top:28px; max-width:60ch; }
-.not code{ font:12px/1.4 var(--mono); }
-.guncel{ display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-  margin:0 0 28px; padding:12px 14px; border:1px solid var(--line);
-  border-radius:10px; background:var(--yuzey); font-size:13.5px; }
-.guncel .metin{ flex:1; min-width:200px; color:var(--dim); }
-.guncel .metin b{ color:var(--fg); font-weight:600; }
-.guncel ul{ margin:6px 0 0; padding-left:18px; font-size:12.5px; }
-.guncel button{ font:inherit; font-size:13px; font-weight:600; cursor:pointer;
-  min-height:32px; padding:0 14px; border-radius:8px; border:1px solid var(--fg);
-  background:var(--fg); color:var(--bg); }
-.guncel button.ikincil{ background:none; color:var(--fg); border-color:var(--line-strong); }
-.guncel button:disabled{ opacity:.55; cursor:progress; }
-.guncel .nokta.var{ background:#c7832b; }
+  font:15px/1.55 "Segoe UI Variable Text","Segoe UI",ui-sans-serif,system-ui,-apple-system,Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased; }
+.sarmal{ max-width:980px; margin:0 auto; padding:40px 20px 56px; }
+button{ font:inherit; }
+/* ---- ust ---- */
+.ust{ display:flex; align-items:center; gap:14px; margin-bottom:28px; }
+.isaret{ display:grid; grid-template-columns:repeat(2,11px); gap:3px; flex:none; }
+.isaret b{ width:11px; height:11px; border-radius:3px; background:var(--ays); }
+.isaret b:nth-child(2){ background:var(--spi); border-radius:50%; }
+.isaret b:nth-child(3){ background:var(--esp); transform:rotate(45deg) scale(.8); }
+.isaret b:nth-child(4){ background:var(--hkm); }
+.ust h1{ margin:0; font-size:20px; font-weight:650; letter-spacing:-.01em; }
+.ust h1 span{ color:var(--fg-3); font-weight:450; margin-left:6px; }
+.surum{ margin-left:auto; font:12px/1 var(--mono); color:var(--fg-3); padding:7px 10px;
+  border:1px solid var(--cizgi); border-radius:999px; background:var(--yuzey); white-space:nowrap; }
+/* ---- guncelleme ---- */
+.guncel{ display:flex; gap:16px; align-items:flex-start; padding:18px 20px; margin-bottom:32px;
+  background:var(--yuzey); border:1px solid var(--cizgi); border-radius:14px; box-shadow:var(--golge); }
+.guncel__ikon{ flex:none; width:40px; height:40px; border-radius:10px; display:grid; place-items:center;
+  background:var(--yuzey-2); color:var(--fg-3); }
+.guncel__ikon svg{ width:20px; height:20px; }
+.guncel[data-hal="ok"] .guncel__ikon{ background:var(--ok-t); color:var(--ok); }
+.guncel[data-hal="var"] .guncel__ikon, .guncel[data-hal="uyari"] .guncel__ikon{ background:var(--uyari-t); color:var(--uyari); }
+.guncel__govde{ flex:1; min-width:0; }
+.guncel__baslik{ font-weight:650; font-size:15.5px; }
+.guncel__alt{ color:var(--fg-2); font-size:13.5px; margin-top:2px; }
+.guncel ul{ margin:8px 0 0; padding:0; list-style:none; font-size:13px; color:var(--fg-2); }
+.guncel li{ padding:3px 0 3px 14px; position:relative; }
+.guncel li::before{ content:''; position:absolute; left:2px; top:11px; width:5px; height:5px; border-radius:50%; background:var(--cizgi-2); }
+.guncel__eylem{ display:flex; gap:8px; flex:none; align-self:center; flex-wrap:wrap; justify-content:flex-end; }
+.dugme{ display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:36px; padding:0 16px;
+  border-radius:9px; border:1px solid var(--cizgi-2); background:var(--yuzey); color:var(--fg);
+  font-size:13.5px; font-weight:600; cursor:pointer; text-decoration:none; white-space:nowrap;
+  transition:background .15s, border-color .15s, transform .05s; }
+.dugme:hover{ background:var(--yuzey-2); }
+.dugme:active{ transform:translateY(1px); }
+.dugme--ana{ background:var(--fg); color:var(--bg); border-color:var(--fg); }
+.dugme--ana:hover{ background:var(--fg); opacity:.9; }
+.dugme:disabled{ opacity:.6; cursor:progress; }
+.dugme:focus-visible, a.kart:focus-visible{ outline:2px solid var(--ays); outline-offset:2px; }
+/* ---- sistemler ---- */
+.bolum{ font-size:12px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:var(--fg-3); margin:0 0 12px 2px; }
+.izgara{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; }
+.kart{ display:flex; flex-direction:column; gap:14px; padding:18px; border-radius:14px; background:var(--yuzey);
+  border:1px solid var(--cizgi); box-shadow:var(--golge); color:inherit; text-decoration:none;
+  transition:border-color .15s, transform .15s; position:relative; overflow:hidden; }
+.kart::before{ content:''; position:absolute; left:0; top:0; right:0; height:3px; background:var(--renk); opacity:.9; }
+.kart:hover{ border-color:var(--cizgi-2); transform:translateY(-1px); }
+.kart__ust{ display:flex; gap:14px; align-items:center; }
+.logo{ flex:none; width:52px; height:52px; border-radius:13px; background:var(--renk-t); display:grid; place-items:center; }
+.logo img{ width:40px; height:40px; object-fit:contain; }
+.kart__ad{ font-size:16px; font-weight:650; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.kart__ad small{ font-size:12.5px; font-weight:500; color:var(--fg-3); }
+.kart__acik{ color:var(--fg-2); font-size:13.5px; margin-top:2px; }
+.kart__alt{ display:flex; align-items:center; gap:10px; margin-top:auto; padding-top:12px; border-top:1px solid var(--cizgi); }
+.durum{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--fg-3); }
+.durum i{ width:8px; height:8px; border-radius:50%; background:var(--kapali); }
+.durum[data-hal="acik"]{ color:var(--ok); } .durum[data-hal="acik"] i{ background:var(--ok); box-shadow:0 0 0 3px var(--ok-t); }
+.port{ font:12px/1 var(--mono); color:var(--fg-3); }
+.kart__alt .dugme{ margin-left:auto; min-height:32px; padding:0 13px; font-size:13px; }
+/* ---- alt ---- */
+.dip{ margin-top:32px; display:flex; flex-wrap:wrap; gap:8px 24px; font-size:12.5px; color:var(--fg-3); }
+.dip code{ font:12px var(--mono); color:var(--fg-2); background:var(--yuzey-2); padding:2px 6px; border-radius:5px; }
+@media (max-width:640px){
+  .sarmal{ padding:24px 16px 40px; }
+  .izgara{ grid-template-columns:1fr; }
+  .guncel{ flex-wrap:wrap; }
+  .guncel__eylem{ width:100%; justify-content:flex-start; }
+  .surum{ display:none; }
+}
+@media (prefers-reduced-motion:reduce){ *{ transition:none !important; } }
 </style></head><body>
-<div class="wrap">
-  <h1><img class="marka" src="/marka/logo.png" alt="" aria-hidden="true"/>LifeOS <span>tek sunucu</span></h1>
-  <div class="guncel" id="guncel" aria-live="polite">
-    <span class="nokta"></span>
-    <div class="metin" id="guncel-metin">Güncelleme kontrol ediliyor…</div>
-    <button type="button" id="guncel-dugme" hidden>Güncelle</button>
-    <button type="button" class="ikincil" id="guncel-yenile" hidden>Sayfayı yenile</button>
-  </div>
-  __KARTLAR__
-  <p class="not">Üç sistem birbirini bilmez ve birbirini bozamaz; ayrı
-    kapılarda durmalarının sebebi budur. HKM de üçünün üstünde değil
-    <b>yanındadır</b>: kapalıyken üçü de olduğu gibi çalışır.</p>
-  <p class="not">Durdurmak için: <code>python sistem/baslat.py --dur</code>.
-    Güncellemek için yukarıdaki düğme ya da klasördeki
-    <code>GUNCELLE.bat</code>.</p>
-</div>
-<script>
-/* Nokta, o kapinin GERCEKTEN cevap verdigini soyler. Denenmeden yakilan
-   bir isik, yalan soyleyen bir arayuzdur. */
-document.querySelectorAll('[data-yokla]').forEach(function(el){
-  fetch(el.dataset.yokla, { mode:'no-cors' })
-    .then(function(){ el.querySelector('.nokta').classList.add('acik'); })
-    .catch(function(){});
-});
+<main class="sarmal">
+  <header class="ust">
+    <span class="isaret" aria-hidden="true"><b></b><b></b><b></b><b></b></span>
+    <h1>LifeOS<span>Kontrol paneli</span></h1>
+    <span class="surum" id="surum">__SURUM__</span>
+  </header>
 
-/* Guncelleme: main dalindan ileri sarma (guncelle.py). Karar sunucuda
-   verilir; sayfa yalniz ne oldugunu soyler. */
+  <section class="guncel" id="guncel" data-hal="bekle" aria-live="polite" aria-label="Güncelleme">
+    <div class="guncel__ikon" id="guncel-ikon"></div>
+    <div class="guncel__govde">
+      <div class="guncel__baslik" id="guncel-baslik">Güncelleme kontrol ediliyor…</div>
+      <div class="guncel__alt" id="guncel-alt"></div>
+      <ul id="guncel-liste" hidden></ul>
+    </div>
+    <div class="guncel__eylem">
+      <button type="button" class="dugme" id="guncel-bak" hidden>Yeniden kontrol et</button>
+      <button type="button" class="dugme dugme--ana" id="guncel-dugme" hidden>Güncelle</button>
+    </div>
+  </section>
+
+  <h2 class="bolum">Sistemler</h2>
+  <div class="izgara">
+  __KARTLAR__
+  </div>
+
+  <footer class="dip">
+    <span>Verin bu bilgisayarda kalır; güncelleme ona dokunmaz.</span>
+    <span>Durdurmak: <code>python sistem/baslat.py --dur</code></span>
+  </footer>
+</main>
+<script>
 (function(){
-  var kutu = document.getElementById('guncel');
-  var metin = document.getElementById('guncel-metin');
-  var dugme = document.getElementById('guncel-dugme');
-  var yenile = document.getElementById('guncel-yenile');
-  var nokta = kutu.querySelector('.nokta');
-  function kac(t){ return String(t).replace(/[&<>"]/g, function(c){
-    return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
-  function liste(y){ return y && y.length ? '<ul>' + y.slice(0, 6).map(function(s){
-    return '<li>' + kac(s) + '</li>'; }).join('') + '</ul>' : ''; }
-  function ciz(d){
-    dugme.hidden = true; nokta.className = 'nokta';
-    if(d.durum !== 'ok'){ metin.textContent = d.mesaj || 'Güncelleme durumu okunamadı.'; return; }
-    if(d.geride > 0){
-      nokta.className = 'nokta var';
-      metin.innerHTML = '<b>' + d.geride + ' yenilik var.</b>' + liste(d.yeni);
-      dugme.hidden = false; dugme.disabled = false; dugme.textContent = 'Güncelle';
-    } else {
-      nokta.className = 'nokta acik';
-      metin.innerHTML = '<b>Sistem güncel.</b>' + (d.ag ? '' : ' (Sunucuya ulaşılamadı; son bilinen duruma göre.)');
-    }
+  var IKON = {
+    bekle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>',
+    ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    var:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>',
+    uyari:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 8v5"/><path d="M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg>'
+  };
+  var $ = function(id){ return document.getElementById(id); };
+  var kutu = $('guncel'), baslik = $('guncel-baslik'), alt = $('guncel-alt'), liste = $('guncel-liste'),
+      dugme = $('guncel-dugme'), bak = $('guncel-bak');
+  var sonraki = null;     // ana dugmenin yapacagi is
+  function post(yol){
+    return fetch(yol, { method:'POST', headers:{ 'X-LifeOS':'guncelle' } })
+      .then(function(r){ return r.json(); });
   }
-  fetch('/api/guncelleme').then(function(r){ return r.json(); }).then(ciz)
-    .catch(function(){ metin.textContent = 'Güncelleme durumu okunamadı.'; });
-  dugme.addEventListener('click', function(){
-    dugme.disabled = true; dugme.textContent = 'İndiriliyor…';
-    fetch('/api/guncelle', { method:'POST', headers:{ 'X-LifeOS':'guncelle' } })
-      .then(function(r){ return r.json(); })
-      .then(function(s){
-        dugme.hidden = true;
-        var tamam = s.durum === 'guncellendi' || s.durum === 'guncel';
-        nokta.className = 'nokta' + (tamam ? ' acik' : ' var');
-        metin.innerHTML = '<b>' + kac(s.mesaj || '') + '</b>'
-          + (s.durum === 'guncellendi' && s.yeniden_baslat
-             ? ' LifeOS klasöründe <code>GUNCELLE.bat</code> dosyasını çift tıkla; sistem yeniden başlar.' : '');
-        if(s.durum === 'guncellendi') yenile.hidden = false;
-      })
-      .catch(function(){ dugme.disabled = false; dugme.textContent = 'Güncelle';
-        metin.textContent = 'Güncelleme isteği gönderilemedi.'; });
+  function hal(h, b, a, satirlar){
+    kutu.setAttribute('data-hal', h); $('guncel-ikon').innerHTML = IKON[h] || IKON.bekle;
+    baslik.textContent = b; alt.textContent = a || '';
+    liste.innerHTML = ''; liste.hidden = !(satirlar && satirlar.length);
+    (satirlar || []).slice(0, 5).forEach(function(s){ var li = document.createElement('li'); li.textContent = s; liste.appendChild(li); });
+  }
+  function ana(etiket, is){ sonraki = is; dugme.textContent = etiket; dugme.hidden = !is; dugme.disabled = false; }
+  function ciz(d){
+    bak.hidden = false;
+    if(d.durum === 'git-yok'){ hal('uyari', 'Güncelleme için git gerekli', d.mesaj); return ana('', null); }
+    if(d.durum === 'git-degil'){
+      hal('var', 'Bu klasör zip ile indirilmiş', 'Güncelle, klasörü GitHub\\'daki sürüme bağlar ve en yenisini kurar. Verin korunur.');
+      return ana('Bağla ve güncelle', guncelle);
+    }
+    if(d.durum !== 'ok'){ hal('uyari', 'Güncelleme durumu okunamadı', d.mesaj || ''); return ana('', null); }
+    if(d.geride > 0){
+      hal('var', d.geride + ' yenilik var', 'İndirmek bir dakikadan kısa sürer; verin korunur.', d.yeni);
+      return ana('Güncelle', guncelle);
+    }
+    hal('ok', 'Sistem güncel', d.ag ? 'En yeni sürümü kullanıyorsun.' : 'GitHub\\'a ulaşılamadı; son bilinen duruma göre.');
+    ana('', null);
+  }
+  function kontrol(taze){
+    hal('bekle', 'Güncelleme kontrol ediliyor…', ''); bak.hidden = true; ana('', null);
+    fetch('/api/guncelleme' + (taze ? '?taze=1' : '')).then(function(r){ return r.json(); }).then(ciz)
+      .catch(function(){ hal('uyari', 'Güncelleme durumu okunamadı', ''); bak.hidden = false; });
+  }
+  function guncelle(){
+    dugme.disabled = true; dugme.textContent = 'İndiriliyor…'; bak.hidden = true;
+    post('/api/guncelle').then(function(s){
+      if(s.durum === 'guncellendi'){
+        hal('ok', s.mesaj || 'Güncellendi', s.yeniden_baslat ? 'Yeni sürümün tamamı için sistemi yeniden başlat.' : 'Açık sayfaları yenile.', s.yeni);
+        return s.yeniden_baslat ? ana('Yeniden başlat', yeniden) : ana('Sayfayı yenile', function(){ location.reload(); });
+      }
+      if(s.durum === 'guncel'){ hal('ok', 'Sistem güncel', ''); return ana('', null); }
+      hal('uyari', 'Güncelleme yapılmadı', s.mesaj || ''); bak.hidden = false; ana('', null);
+    }).catch(function(){ hal('uyari', 'Güncelleme isteği gönderilemedi', ''); ana('Yeniden dene', guncelle); });
+  }
+  function yeniden(){
+    dugme.disabled = true; dugme.textContent = 'Yeniden başlatılıyor…';
+    post('/api/yeniden').then(function(){
+      var bitis = Date.now() + 60000;
+      (function bekle(){
+        setTimeout(function(){
+          fetch('/api/durum', { cache:'no-store' }).then(function(r){ if(r.ok) location.reload(); else throw 0; })
+            .catch(function(){ if(Date.now() < bitis) bekle(); else hal('uyari', 'Sistem geri gelmedi', 'Klasördeki BASLAT.bat dosyasını çift tıkla.'); });
+        }, 2500);
+      })();
+    }).catch(function(){ hal('uyari', 'Yeniden başlatılamadı', 'Klasördeki GUNCELLE.bat dosyasını çift tıkla.'); });
+  }
+  dugme.addEventListener('click', function(){ if(sonraki) sonraki(); });
+  bak.addEventListener('click', function(){ kontrol(true); });
+  kontrol(false);
+
+  /* Durum isigi: kapi GERCEKTEN cevap verdiginde yanar. Uc sistem ayni
+     surecte oldugu icin dogrudan yoklanir; HKM'yi sunucu yoklar. */
+  function yak(kart, acik){
+    var d = kart.querySelector('.durum');
+    d.setAttribute('data-hal', acik ? 'acik' : 'kapali');
+    d.lastChild.textContent = acik ? 'Çalışıyor' : 'Kapalı';
+  }
+  document.querySelectorAll('.kart[data-yokla]').forEach(function(k){
+    fetch(k.getAttribute('data-yokla'), { mode:'no-cors' }).then(function(){ yak(k, true); }).catch(function(){ yak(k, false); });
   });
-  yenile.addEventListener('click', function(){ location.reload(); });
+  var hkm = document.querySelector('.kart[data-hkm]');
+  var hkmDugme = hkm.querySelector('.dugme');
+  function hkmCiz(acik){
+    yak(hkm, acik);
+    hkmDugme.textContent = acik ? 'Aç' : 'Başlat';
+    hkmDugme.disabled = false;
+  }
+  fetch('/api/durum').then(function(r){ return r.json(); }).then(function(d){ hkmCiz(!!d.hkm); }).catch(function(){ hkmCiz(false); });
+  hkm.addEventListener('click', function(e){
+    e.preventDefault();
+    if(hkmDugme.disabled) return;
+    /* Sekme tiklamayla ayni anda acilir (acilir pencere engeline takilmaz);
+       HKM hazir olunca adrese gider. Eslesme penceresi acildigi icin
+       anahtar sorulmaz. */
+    var sekme = window.open('', '_blank');
+    hkmDugme.disabled = true; hkmDugme.textContent = 'Açılıyor…';
+    post('/api/hkm').then(function(s){
+      hkmCiz(!!s.ok);
+      if(s.ok){ if(sekme) sekme.location = s.adres; else location.href = s.adres; }
+      else { if(sekme) sekme.close(); hkm.querySelector('.kart__acik').textContent = s.mesaj || 'HKM açılamadı.'; }
+    }).catch(function(){ if(sekme) sekme.close(); hkmCiz(false); });
+  });
 })();
 </script>
 </body></html>
 """
 
 
+def _kac(t):
+    return (str(t).replace("&", "&amp;").replace("<", "&lt;")
+            .replace(">", "&gt;").replace('"', "&quot;"))
+
+
 def giris_html():
     kartlar = []
-    for _, ad, port, _, aciklama in SISTEMLER:
+    for anahtar, kisa, ad, aciklama, port in KARTLAR:
         adres = "http://%s:%d/" % (HOST, port)
+        hkm = anahtar == "hkm"
         kartlar.append(
-            '<a class="kart" href="%s" data-yokla="%s"><div class="ad">%s</div>'
-            '<div class="aciklama">%s</div><div class="adres">'
-            '<span class="nokta"></span>%s</div></a>' % (adres, adres, ad,
-                                                         aciklama, adres))
-    hkm = "http://%s:%d/" % (HOST, HKM_PORT)
-    kartlar.append(
-        '<a class="kart" href="%s" data-yokla="%s"><div class="ad">'
-        'HKM — Hayat Kontrol Merkezi</div><div class="aciklama">üçünün özeti; '
-        'ayrı çalışır, kapalıyken hiçbiri bozulmaz</div><div class="adres">'
-        '<span class="nokta"></span>%s</div></a>' % (hkm, hkm, hkm))
-    return GIRIS_SAYFASI.replace("__KARTLAR__", "\n  ".join(kartlar))
+            '<a class="kart" href="%s" style="--renk:var(--%s);--renk-t:var(--%s-t)" %s>'
+            '<div class="kart__ust"><span class="logo"><img src="/logo/%s.png" alt="" width="40" height="40"/></span>'
+            '<div><div class="kart__ad">%s <small>%s</small></div>'
+            '<div class="kart__acik">%s</div></div></div>'
+            '<div class="kart__alt"><span class="durum" data-hal="bekle"><i></i><span>Bakılıyor…</span></span>'
+            '<span class="port">:%d</span>'
+            '<span class="dugme">%s</span></div></a>'
+            % (adres, anahtar, anahtar,
+               'data-hkm="1"' if hkm else 'data-yokla="%s"' % adres,
+               anahtar, _kac(kisa), _kac(ad), _kac(aciklama), port,
+               "Başlat" if hkm else "Aç"))
+    s = guncelle.surum()
+    surum = ("sürüm %s · %s" % (s["kisa"], s["tarih"])) if s else "zip sürümü"
+    return (GIRIS_SAYFASI.replace("__KARTLAR__", "\n  ".join(kartlar))
+            .replace("__SURUM__", _kac(surum)).replace("__IKON__", _IKON))
+
+
+def hkm_ayakta(timeout=1.0):
+    try:
+        with urllib.request.urlopen("http://%s:%d/api/health" % (HOST, HKM_PORT),
+                                    timeout=timeout) as r:
+            return r.status < 500
+    except Exception:
+        return False
+
+
+def hkm_ac(calistir=subprocess.run):
+    """HKM'yi baslatir (kapaliysa) ve yuz icin kisa bir esleme penceresi
+    acar — HKM'nin KENDI baslaticisiyla: iki yerde iki baslatma mantigi
+    olsaydi bir gun ayrisirdi. Acik olsa da cagrilir: pencere yeniden
+    acilir, yuz anahtar sormadan baglanir."""
+    betik = os.path.join(KOK, "HKM", "baslat.py")
+    if not os.path.exists(betik):
+        return {"ok": False, "mesaj": "HKM klasörü bulunamadı."}
+    try:
+        calistir([sys.executable, betik, "--tarayicisiz"], cwd=os.path.dirname(betik),
+                 capture_output=True, timeout=120,
+                 env=dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1",
+                          PYTHONDONTWRITEBYTECODE="1"))
+    except Exception as e:
+        return {"ok": False, "mesaj": "HKM başlatılamadı: %s" % e}
+    if hkm_ayakta(timeout=2.0):
+        return {"ok": True, "adres": "http://%s:%d/" % (HOST, HKM_PORT)}
+    return {"ok": False, "mesaj": "HKM açılamadı. Ayrıntı: HKM klasöründeki günlük."}
+
+
+def yeniden_baslat_zamanla(popen=subprocess.Popen, isletim=None):
+    """Sistemi (bu sunucu dahil) yeniden baslatir. Is AYRI bir surece
+    verilir: bu surec kendini kapatamaz. Windows'ta `start` araciligiyla
+    acilir ki yeni surec bu surecin agacinda olmasin; --dur sunucuyu
+    agaciyla (/T) kapatirken yeniden baslaticiyi da oldurmesin."""
+    arg = [sys.executable, os.path.join(SISTEM, "baslat.py"), "--yeniden", "--tarayicisiz"]
+    if (isletim or os.name) == "nt":
+        return popen(["cmd", "/c", "start", "", "/b"] + arg, cwd=KOK,
+                     creationflags=0x08000000)          # CREATE_NO_WINDOW
+    return popen(arg, cwd=KOK, start_new_session=True,
+                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
 # Guncelleme durumu: her sayfa acilisinda aga cikmamak icin kisa sure
@@ -397,10 +585,15 @@ class Giris(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         yol = self.path.split("?", 1)[0]
-        if yol != "/api/guncelle":
+        if yol not in ("/api/guncelle", "/api/hkm", "/api/yeniden"):
             return self.send_error(404)
         if not guncelleme_izinli(self.headers):
             return self._json(403, {"durum": "engel", "mesaj": "İzin yok."})
+        if yol == "/api/hkm":
+            return self._json(200, hkm_ac())
+        if yol == "/api/yeniden":
+            yeniden_baslat_zamanla()
+            return self._json(200, {"ok": True})
         with _GUNCEL_KILIT:
             sonuc = guncelle.uygula()
             _GUNCEL.update(zaman=0.0, veri=None)
@@ -410,6 +603,10 @@ class Giris(SimpleHTTPRequestHandler):
         yol = self.path.split("?", 1)[0]
         if yol == "/api/guncelleme":
             return self._json(200, guncelleme_durumu(taze="taze=1" in self.path))
+        if yol == "/api/durum":
+            return self._json(200, {"hkm": hkm_ayakta()})
+        if yol.startswith("/logo/"):
+            return self._logo(yol[len("/logo/"):])
         if yol.startswith("/marka/"):
             return self._marka(yol[len("/marka/"):])
         govde = giris_html().encode("utf-8")
@@ -417,6 +614,21 @@ class Giris(SimpleHTTPRequestHandler):
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(govde)))
         self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(govde)
+
+    def _logo(self, ad):
+        """/logo/<sistem>.png — kapali listeden (LOGOLAR); URL'den yol kurulmaz."""
+        parca = LOGOLAR.get(ad[:-4]) if ad.endswith(".png") else None
+        tam = os.path.join(KOK, *parca) if parca else None
+        if not tam or not os.path.exists(tam):
+            return self.send_error(404)
+        with open(tam, "rb") as f:
+            govde = f.read()
+        self.send_response(200)
+        self.send_header("Content-Type", "image/png")
+        self.send_header("Content-Length", str(len(govde)))
+        self.send_header("Cache-Control", "max-age=3600")
         self.end_headers()
         self.wfile.write(govde)
 

@@ -143,6 +143,58 @@ def run():
             shutil.rmtree(d, ignore_errors=True)
     test("zip ile indirilmis klasorde ne oldugunu soyler", t_git_degil)
 
+    def t_zip_baglanir():
+        """Kullanicinin klasoru zip'ten: .git yok. «Güncelle» onu uzaga
+        baglar ve en yeni surumu kurar. Veri (git disi, .gitignore'da)
+        korunur; eski surumun kokte biraktigi bilinen dosyalar kalkar;
+        bilinmeyen bir dosyaya DOKUNULMAZ."""
+        with _Depo() as r:
+            _yaz(r.gel, ".gitignore", "db/\n")
+            os.makedirs(os.path.join(r.gel, "sistem"))
+            _yaz(r.gel, "sistem/baslat.py", "yeni\n")
+            _g(r.gel, "add", "-A"); _g(r.gel, "commit", "-m", "yeni duzen")
+            _g(r.gel, "push", "origin", "main")
+            z = os.path.join(r.kok, "zip")
+            os.makedirs(os.path.join(z, "db"))
+            _yaz(z, "OKU.md", "eski\n")                   # eski surum
+            _yaz(z, "baslat.py", "eski kok\n")            # eski duzenin kok dosyasi
+            os.makedirs(os.path.join(z, "ekip"))
+            _yaz(z, "ekip/PLAN.md", "eski\n")
+            _yaz(z, "db/veri.db", "KULLANICI VERISI\n")   # veri
+            _yaz(z, "benim-notum.txt", "kisisel\n")       # bilinmeyen dosya
+            d = guncelle.durum(z)
+            eq(d["durum"], "git-degil")
+            eq(d.get("baglanabilir"), True)
+            s = guncelle.uygula(z, uzak_url=r.uzak)
+            eq(s["durum"], "guncellendi")
+            eq(s["yeniden_baslat"], True)
+            eq(_oku(z, "OKU.md"), "bir\n")                # en yeni surum
+            eq(_oku(z, "sistem/baslat.py"), "yeni\n")
+            eq(_oku(z, "db/veri.db"), "KULLANICI VERISI\n")
+            eq(_oku(z, "benim-notum.txt"), "kisisel\n")
+            eq(os.path.exists(os.path.join(z, "baslat.py")), False)
+            eq(os.path.exists(os.path.join(z, "ekip")), False)
+            # artik git: sonraki guncelleme normal yoldan
+            eq(guncelle.durum(z)["durum"], "ok")
+            r.yeni("OKU.md", "uc\n", "sonraki")
+            eq(guncelle.uygula(z)["durum"], "guncellendi")
+            eq(_oku(z, "OKU.md"), "uc\n")
+    test("zip klasoru GitHub'a baglanir: en yeni surum kurulur, veri korunur", t_zip_baglanir)
+
+    def t_zip_ag_yok():
+        """Uzaga ulasilamazsa klasor ESKI HALINE doner: yarim kalmis bir
+        .git birakmak, bir sonraki denemeyi bozar."""
+        z = tempfile.mkdtemp(prefix="lifeos-zip-")
+        try:
+            _yaz(z, "OKU.md", "eski\n")
+            s = guncelle.uygula(z, uzak_url=os.path.join(z, "yok.git"))
+            eq(s["durum"], "engel")
+            eq(os.path.exists(os.path.join(z, ".git")), False)
+            eq(_oku(z, "OKU.md"), "eski\n")
+        finally:
+            shutil.rmtree(z, ignore_errors=True)
+    test("zip klasoru: ag yoksa hicbir sey degismez", t_zip_ag_yok)
+
     def t_git_yok():
         def yok(*a, **k):
             raise FileNotFoundError("git")
@@ -207,3 +259,61 @@ def run():
             srv.shutdown(); srv.server_close()
             sunucu.guncelle.uygula = eski
     test("giris sayfasi: izinsiz POST 403, izinli POST guncellemeyi cagirir", t_http)
+
+    def t_sayfa():
+        """Giris sayfasi: dort sistemin KENDI logosu, surum, guncelleme kutusu."""
+        h = sunucu.giris_html()
+        for a in ("ays", "spi", "esp", "hkm"):
+            ok('src="/logo/%s.png"' % a in h)
+        ok('id="guncel"' in h and 'id="surum"' in h)
+        for y in ("__KARTLAR__", "__SURUM__", "__IKON__"):
+            ok(y not in h)                              # yer tutucu kalmadi
+        ok('data-hkm="1"' in h)
+    test("giris sayfasi dort logoyu, surumu ve guncelleme kutusunu tasir", t_sayfa)
+
+    def t_uclar():
+        srv = _Srv(("127.0.0.1", 0), sunucu.Giris)
+        _th.Thread(target=srv.serve_forever, daemon=True).start()
+        kok_ = "http://127.0.0.1:%d" % srv.server_address[1]
+        eski_hkm, eski_yeni = sunucu.hkm_ac, sunucu.yeniden_baslat_zamanla
+        cagri = []
+        sunucu.hkm_ac = lambda: cagri.append("hkm") or {"ok": True, "adres": "x"}
+        sunucu.yeniden_baslat_zamanla = lambda: cagri.append("yeniden")
+        try:
+            r = _ur.urlopen(kok_ + "/logo/ays.png", timeout=5)
+            eq(r.headers.get("Content-Type"), "image/png")
+            for kotu in ("/logo/../README.md", "/logo/x.png", "/logo/ays.svg"):
+                try:
+                    _ur.urlopen(kok_ + kotu, timeout=5); ok(False)
+                except _ue.HTTPError as e:
+                    eq(e.code, 404)
+            for yol in ("/api/hkm", "/api/yeniden"):
+                try:
+                    _ur.urlopen(_ur.Request(kok_ + yol, data=b"", method="POST"), timeout=5); ok(False)
+                except _ue.HTTPError as e:
+                    eq(e.code, 403)
+            eq(cagri, [])                               # izinsiz istek hicbir sey baslatmaz
+            for yol in ("/api/hkm", "/api/yeniden"):
+                _ur.urlopen(_ur.Request(kok_ + yol, data=b"", method="POST",
+                                        headers={"X-LifeOS": "guncelle"}), timeout=5)
+            eq(cagri, ["hkm", "yeniden"])
+            d = _json.loads(_ur.urlopen(kok_ + "/api/durum", timeout=5).read().decode("utf-8"))
+            ok("hkm" in d)
+        finally:
+            srv.shutdown(); srv.server_close()
+            sunucu.hkm_ac, sunucu.yeniden_baslat_zamanla = eski_hkm, eski_yeni
+    test("logo yalniz kapali listeden; HKM ve yeniden baslat izinsiz 403", t_uclar)
+
+    def t_yeniden_windows():
+        """Windows'ta yeniden baslatici `start` ile acilir: sunucunun agacinda
+        olursa --dur (taskkill /T) onu da oldururdu."""
+        g = []
+        sunucu.yeniden_baslat_zamanla(popen=lambda a, **k: g.append((a, k)), isletim="nt")
+        a, k = g[0]
+        eq(a[:5], ["cmd", "/c", "start", "", "/b"])
+        ok(a[-2:] == ["--yeniden", "--tarayicisiz"])
+        ok(a[-3].endswith(os.path.join("sistem", "baslat.py")))
+        g.clear()
+        sunucu.yeniden_baslat_zamanla(popen=lambda a, **k: g.append((a, k)), isletim="posix")
+        eq(g[0][1].get("start_new_session"), True)
+    test("yeniden baslatici sunucunun surec agacinin disinda acilir", t_yeniden_windows)

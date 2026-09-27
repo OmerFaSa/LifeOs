@@ -1,4 +1,9 @@
-<p align="center"><img src="brand/life/logo.png" alt="LifeOS" width="132"/></p>
+<p align="center">
+  <img src="AYS/src/img/brand/favicon.png" alt="AYS" width="64"/>&nbsp;&nbsp;
+  <img src="SPI/src/img/brand/favicon.png" alt="SPİ" width="64"/>&nbsp;&nbsp;
+  <img src="ESP/src/img/brand/favicon.png" alt="ESP" width="64"/>&nbsp;&nbsp;
+  <img src="HKM/brand/favicon.png" alt="HKM" width="64"/>
+</p>
 
 <h1 align="center">LifeOS</h1>
 
@@ -13,15 +18,17 @@
 
 | | Ne yapılır |
 |---|---|
-| **Aç** | `BASLAT.bat` dosyasına çift tıkla. Tarayıcıda giriş sayfası açılır: <http://127.0.0.1:4180> |
-| **Güncelle** | Giriş sayfasındaki **Güncelle** düğmesi ya da `GUNCELLE.bat` |
+| **Aç** | `BASLAT.bat` dosyasına çift tıkla. Tarayıcıda **kontrol paneli** açılır: <http://127.0.0.1:4180> |
+| **Güncelle** | Kontrol panelindeki **Güncelle** düğmesi ya da `GUNCELLE.bat` |
+| **HKM** | Kontrol panelinde HKM kartındaki **Başlat**; anahtar sorulmadan bağlanır |
 | **Durdur** | `python sistem/baslat.py --dur` |
 
 Gereken tek şey [Python 3](https://www.python.org/downloads/). macOS ve
 Linux'ta: `sistem/BASLAT.command` · `sistem/baslat.sh`.
 
 Güncelleme yalnız ileri sarar: elle değiştirilmiş bir dosya varsa hiçbir
-şeye dokunmaz ve nedenini söyler. Verin git'in dışındadır; güncelleme ona
+şeye dokunmaz ve nedenini söyler. Zip ile indirilmiş bir klasörü ilk
+güncellemede GitHub'a bağlar. Verin git'in dışındadır; güncelleme ona
 dokunmaz.
 
 ## Dört parça
