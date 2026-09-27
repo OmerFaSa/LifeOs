@@ -186,3 +186,32 @@ Günde tek model çağrısı. Sonuç güne yazılır; aynı gün tekrar çağrı
 Bugün ekranındaki «Ofisten» kartı ve masa notları bunu gösterir.
 
 Model kapalıysa brifing yine üretilir — kural motorunun cümlesiyle.
+
+## Sağlık ve performans kampüsü (isteğe bağlı 3B)
+
+Ofis ekranındaki **3B kampüsü aç** düğmesi yerel sahneyi yükler. Kadro
+`SP.AGENTS` ile aynıdır: Kerem, Nesrin, Barış, Sedef ve Patron. U planlı
+kampüste laboratuvar, beslenme mutfağı, spor stüdyosu, arşiv, bağımsız
+dinlenme alanı, açık avlu ve beş kişilik yuvarlak toplantı pavyonu bulunur.
+Kamera döner/yakınlaşır; gündüz/gece, üstten görünüm ve bölge kısayolları vardır.
+
+Masaya veya isim düğmesine dokunmak aynı agentın mevcut raporunu açar.
+`SP.Office.handoffs()` çıktısından yalnız devir kimliği ve iki agent kimliği
+görselleştirilir. Animasyon hiçbir devri tamamlamaz, karar veya ölçüm yazmaz.
+Kuyruk üç görselleştirmeyle sınırlıdır; aynı devir oturumda tekrarlanmaz
+(son 128 kimlik). Azaltılmış harekette otomatik devirler oynatılmaz.
+Elle başlatılan belge, arşiv, mola ve toplantı hareketleri temsilidir.
+Ekranın Toplantı düğmesi ekibi toplar, ardından mevcut toplantı ekranını açar;
+sahne meşgulse veya azaltılmış hareket açıksa doğrudan o ekrana gider.
+
+`js/core/ofis3b.js` uygulama köprüsüdür. `ofis3d/sahne.js` yalnız geometri,
+kamera ve animasyondur. Three.js 0.160.1 ve MIT lisansı aynı yerel klasördedir.
+3B kapalıyken yüklenmez; WebGL/yükleme hatasında hafif ofis geri gelir.
+Sahne kökü yeniden çizimlerde korunur; ofisten ayrılınca kare döngüsü ve
+devir kuyruğu durur. Görünüm tercihleri yerel `spi-campus-view` anahtarındadır.
+
+Dağıtım: `python3 build.py`, sonra `python3 build.py --denetle`.
+`dist/spi.html` ile **yanındaki `dist/ofis3d/` klasörü birlikte taşınır**.
+Yalnız HTML taşınırsa 3B açılmaz; diğer SPI işlevleri kullanılabilir.
+`node tools/ofis3bcheck.js` gerçek tarayıcıda kaynak/dağıtım, seçim, gece,
+yükleme hatası, mobil düzen ve bütün animasyon rotalarını denetler.

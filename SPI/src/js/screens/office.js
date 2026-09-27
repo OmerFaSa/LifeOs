@@ -307,8 +307,9 @@ SP.Screens.office = (function(){
     return String(html`
       ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:SP.Office.ready('patron') })) : ''}
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
+      ${SP.Ofis3B.panel()}
       ${K.Ledger(() => [
-        when(vo.masa, () => K.Entry({ wide:true, label:'Masa', meta:'kim konuşuyor',
+        when(vo.masa && !SP.Ofis3B.aktif(), () => K.Entry({ wide:true, label:'Masa', meta:'kim konuşuyor',
           note:'Balondaki sayılar kural motorunun; model açık da olsa sayıyı o yazmaz.',
           body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.sinir || '')}${raw(vo.durum || '')}</div>` })),
         when(vo.toplanti, () => K.Entry({ wide:true, label:'Günün toplantısı', meta:'her masadan tek cümle',
@@ -332,6 +333,8 @@ SP.Screens.office = (function(){
   }
 
   const handle = {
+    'office-3d'(){ SP.Ofis3B.acKapat(); },
+    'office-3d-meeting'(){ SP.Ofis3B.toplanti(); },
     /* Devri tamamlayan hareket: bulgunun DUSTUGU ekrani, dogru sekmesi
        ve dogru satiri acik halde ac. Yoksa devir bir cumleden ibaret
        kalir. */
@@ -444,8 +447,9 @@ SP.Screens.office = (function(){
     },
     actions(){
       return String(K.Button({ label:'Toplantı', size:'sm', icon:'users', class:'btn--screen',
-        act:'go', data:{ 'data-route':'meeting' } }));
+        act:'office-3d-meeting' }));
     },
     render, handle,
+    afterRender(){ SP.Ofis3B.yerlestir(document.getElementById('spi-campus-mount')); },
   };
 })();
