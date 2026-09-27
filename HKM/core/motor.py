@@ -188,8 +188,8 @@ def merdiven(con, cfg, rol, seviye=None):
     # paketin (A) merdiveni ORTUK olarak kullanilir. Bulut (varsayilan)
     # secimi ve elle atama bundan etkilenmez.
     ortuk = False
-    if not kendi and not paket and pseviye and models.yer_of(cfg) != "bulut" and models.yerel_of(cfg):
-        paket, ortuk = "A", True
+    if not kendi and not paket and pseviye and models.etkin_paket(cfg):
+        paket, ortuk = models.etkin_paket(cfg), True
     if kendi or not paket or not pseviye:
         # Elle secim ya da paketsiz kurulum: TEK basamak, eski davranis.
         h = _hazir_denetimi(a)

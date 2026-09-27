@@ -423,6 +423,18 @@ def yerel_of(cfg):
     return {k: v for k, v in (y or {}).items() if k in YEREL_SINIFLAR and v} if isinstance(y, dict) else {}
 
 
+def etkin_paket(cfg):
+    """Yonlendirmede ETKIN paket: secilmis paket; yoksa calisma yeri
+    yerel/hibrit ve bir yerel model yazilmissa ORTUK «A» (en ekonomik).
+    Merdiven (core/motor.py) ve sohbetin baglam siniri (core/sohbet.py)
+    AYNI karari buradan okur — iki yerde iki karar ayrisiyordu (hata,
+    2026-09-27: kucuk yerel modele uzun baglam gidiyordu)."""
+    p = paket_of(cfg)
+    if p:
+        return p
+    return "A" if yer_of(cfg) != "bulut" and yerel_of(cfg) else None
+
+
 def paket_of(cfg):
     p = _bolum(cfg).get("paket")
     return p if p in PAKET_KIMLIKLERI else None

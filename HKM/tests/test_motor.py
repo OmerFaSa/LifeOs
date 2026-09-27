@@ -376,6 +376,25 @@ def run():
         no(motor.merdiven(None, bu, "king", seviye="alt")["ok"])
     test("paket secilmeden de hibrit/yerel yerel modeli kullanir", t_hybrid_without_package_uses_local)
 
+    def t_local_call_is_calmer():
+        """Kucuk yerel model varsayilan sicaklikta (gemma3: 1.0) anlamsiz
+        Turkce uretiyordu (sahada, 2026-09-27). Yerel cagri sakin gider;
+        bulut cagrisina dokunulmaz."""
+        giden = []
+        eski = ai._istek
+        ai._istek = lambda url, baslik, govde, timeout: giden.append(govde) or {
+            "choices": [{"message": {"content": "Tamam."}, "finish_reason": "stop"}],
+            "usage": {"prompt_tokens": 1, "completion_tokens": 1}}
+        try:
+            ai._cagir("yerel", "", "gemma3:1b", "s", [{"role": "user", "content": "merhaba"}])
+            ai._cagir("openrouter", "k", "x/y", "s", [{"role": "user", "content": "merhaba"}])
+        finally:
+            ai._istek = eski
+        eq(giden[0].get("temperature"), ai.YEREL_SICAKLIK)
+        ok(ai.YEREL_SICAKLIK <= 0.5)
+        eq(giden[1].get("temperature"), None)
+    test("yerel model sakin sicaklikla cagrilir", t_local_call_is_calmer)
+
     def t_preview_shows_local_rungs_free():
         cfg = _yer_cfg("hibrit")
         con = db.connect(":memory:")

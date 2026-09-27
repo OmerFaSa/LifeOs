@@ -652,7 +652,7 @@ def konus(con, cfg, metin, date, gorevli="king", gecmis=None, th=None,
 
     veri = {"mesaj"}
     bg = baglam(con, date, gorevli, th=th, veri=veri)
-    sinir = BAGLAM_SINIRI.get(sv["seviye"]) if models.paket_of(cfg) else None
+    sinir = BAGLAM_SINIRI.get(sv["seviye"]) if models.etkin_paket(cfg) else None
     if sinir:
         hb = memory.context(con, user=user, scope=gorevli, limit=sinir["hafiza"],
                             ilgili=metin if sinir["ilgili"] else None, sozler=sinir["sozler"])

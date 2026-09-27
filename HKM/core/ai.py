@@ -182,6 +182,12 @@ def _google_parcalar(m):
             for x in (m.get("gorseller") or [])] + [{"text": m["content"]}]
 
 
+# Yerel (kucuk) modelin sicakligi. gemma3 gibi modellerin varsayilani 1.0;
+# 1B boyutta bu, anlamsiz Turkce uretiyordu (sahada, 2026-09-27). Bulut
+# cagrisinda saglayicinin varsayilani kalir.
+YEREL_SICAKLIK = 0.4
+
+
 def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar=None):
     """Saglayiciya gider. `ayar`: {jeton: cevap siniri, efor: low|medium|high}.
 
@@ -197,6 +203,8 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
             {"HTTP-Referer": "http://127.0.0.1:4200", "X-Title": "HKM"}
             if provider == "openrouter" else None)
         govde["max_tokens"] = jeton
+        if provider == "yerel":
+            govde["temperature"] = YEREL_SICAKLIK
         if provider == "openrouter":
             if ayar.get("efor"):
                 # Birlesik dusunme ayari; desteklemeyen model yok sayar.

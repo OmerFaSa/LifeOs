@@ -70,6 +70,27 @@ def run():
         ok("Ayarlar" in r["ai"]["note"])  # ne yapilacagi yazili
     test("model yoksa sistem calismaya devam eder", t_no_model_still_answers)
 
+    def t_local_hybrid_gets_short_context():
+        """HATA (sahada, 2026-09-27): paketsiz hibritte yerel kucuk model
+        (gemma3:1b) UZUN sistem metni ve kisaltilmamis gecmis aliyordu —
+        «kisa baglam» siniri yalniz paket seciliyken devreye giriyordu;
+        cevaplar anlamsiz Turkceye donuyordu. Ortuk paket de sinirlanir."""
+        from core import db as _db, models as _m
+        con = _db.connect(":memory:")
+        olcu = {}
+        def tas(provider, anahtar, model, sistem, mesajlar, ayar=None):
+            olcu["sistem"], olcu["mesaj"] = len(sistem), len(mesajlar)
+            return "Tamam.", 10, 3
+        gecmis = [{"role": "user" if i % 2 == 0 else "assistant", "content": "x%d" % i} for i in range(10)]
+        ortuk = _m.apply({"local_token": "x"}, {"yer": "hibrit", "yerel": {"ekonomik": "gemma3:1b"}})
+        paketli = _m.apply({"local_token": "x"}, {"paket": "A", "yer": "hibrit", "yerel": {"ekonomik": "gemma3:1b"}})
+        sohbet.konus(con, ortuk, "merhaba", "2026-09-27", gecmis=gecmis, transport=tas, kayit=False)
+        o = dict(olcu)
+        sohbet.konus(con, paketli, "merhaba", "2026-09-27", gecmis=gecmis, transport=tas, kayit=False)
+        eq(o, olcu)                                   # paket secilmis gibi: ayni kisa baglam
+        ok(o["mesaj"] <= 5, o)                        # gecmis 4 + yeni mesaj
+    test("paketsiz hibritte yerel model kisa baglam alir", t_local_hybrid_gets_short_context)
+
     def t_model_answers_free_sentence():
         con = _con()
         tasiyici = _cevap("Uyku ölçümün bugün düşük görünüyor; istersen "
