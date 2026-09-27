@@ -1,0 +1,25 @@
+# LifeOS · HKM — gemma3:4b, yalniz metin (goruntu parcasi yok), 4 GB RAM icin.
+# Kurulum (HKM/KURULUM.md §5.1): bu dosya ile gemma-3-4b-it-Q4_K_M.gguf ayni klasorde:
+#   ollama create gemma3-4b-metin -f gemma3-4b-metin.Modelfile
+# Olculen bellek: ~3.2 GB (Q4_K_M, baglam 4096). Resmi gemma3:4b goruntu
+# parcasiyla ~0.8 GB daha fazla ister.
+FROM ./gemma-3-4b-it-Q4_K_M.gguf
+TEMPLATE """{{- $systemPromptAdded := false }}
+{{- range $i, $_ := .Messages }}
+{{- $last := eq (len (slice $.Messages $i)) 1 }}
+{{- if eq .Role "user" }}<start_of_turn>user
+{{- if (and (not $systemPromptAdded) $.System) }}
+{{- $systemPromptAdded = true }}
+{{ $.System }}
+{{ end }}
+{{ .Content }}<end_of_turn>
+{{ if $last }}<start_of_turn>model
+{{ end }}
+{{- else if eq .Role "assistant" }}<start_of_turn>model
+{{ .Content }}{{ if not $last }}<end_of_turn>
+{{ end }}
+{{- end }}
+{{- end }}"""
+PARAMETER stop "<end_of_turn>"
+PARAMETER stop "<eos>"
+PARAMETER num_ctx 4096

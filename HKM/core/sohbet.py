@@ -93,8 +93,10 @@ Bugünün ölçümleri:
 # KIMLIK ILK CUMLEDE ve «Adın X.» bicimindedir: «Sen HKM'nin King
 # görevlisisin» ile baslayan metinde 1B model «sen kimsin» sorusuna
 # «Benim adım Sen HKM.» diyordu (sahada, gemma3:1b). Modullerin ne oldugu
-# da yazilir; yoksa «sistemi görüyor musun» sorusu havada kalir.
-SISTEM_KISA = """Adın %(ad)s. LifeOS'un merkezi HKM'de (Hayat Kontrol Merkezi) görevlisin; kullanıcıyla kısa ve doğal Türkçe sohbet ediyorsun. %(is)s
+# da yazilir; yoksa «sistemi görüyor musun» sorusu havada kalir. Gorev
+# tanimi («günün tek cümlesini taşır») KONMAZ: 4B model onu her cevaba
+# «Günün tek cümlesi: …» diye ekliyordu.
+SISTEM_KISA = """Adın %(ad)s. LifeOS'un merkezi HKM'de (Hayat Kontrol Merkezi) görevlisin; kullanıcıyla kısa ve doğal Türkçe sohbet ediyorsun.
 LifeOS'ta üç modül var: AYS (sınav hazırlığı), SPİ (sağlık: uyku, beslenme, hareket), ESP (kişisel gelişim). Onların günlük özetini aşağıdaki listeden görürsün; listede olmayanı bilemezsin.
 Kesin kurallar: ÖLÇÜM UYDURMA — ölçülen bir şeyden sayı söyleyeceksen aşağıdaki
 listede geçmeli, yoksa «bu ölçülmedi» de. Emir kipi kullanma. En fazla 3 cümle,
@@ -120,7 +122,7 @@ BAGLAM_SINIRI = {
 def sistem_metni(gorevli, bg, kisa=False):
     g = GOREVLILER[gorevli]
     if kisa:
-        return SISTEM_KISA % {"ad": g["ad"], "is": g["is"], "baglam": bg}
+        return SISTEM_KISA % {"ad": g["ad"], "baglam": bg}
     return SISTEM_METNI % {"ad": g["ad"], "is": g["is"], "konum": KONUM[gorevli],
                            "baglam": bg}
 
@@ -203,8 +205,8 @@ def _kisa_baglam(con, date, gorevli, b, veri):
                 olcum.append("- %s (%s): %s, %d bulgu" % (u["title"], u["module_label"],
                                                          u["verdict_text"], u["findings"]))
     if sessiz and not olcum:
-        satir.append("- Hiçbir modülden ölçüm yok (%s): ölçümle ilgili her soruya "
-                     "«bu ölçülmedi» de." % ", ".join(sessiz))
+        satir.append("- Hiçbir modülden ölçüm yok (%s). Ölçüm sorulursa «bu ölçülmedi» de; "
+                     "sorulmadıkça bundan söz etme." % ", ".join(sessiz))
     elif sessiz:
         satir.append("- Bugün veri gelmeyen modüller (ölçülmedi): %s." % ", ".join(sessiz))
     gorulen = set()

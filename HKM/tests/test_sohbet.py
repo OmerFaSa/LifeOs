@@ -163,6 +163,9 @@ def run():
         ok("brifing" in sohbet.baglam(_db.connect(":memory:"), "2026-09-27", "king"))
         # Kisa sistem metni «sen» hitabini soyler.
         ok("«sen»" in sohbet.sistem_metni("king", bos, kisa=True))
+        # Gorev tanimi kisa metne girmez (4B model «Günün tek cümlesi:» diye tekrarliyordu).
+        no("tek cümlesini" in sohbet.sistem_metni("king", bos, kisa=True))
+        ok("sorulmadıkça" in bos, bos)
     test("kisa baglam sikisik: veri yoksa tek satir, olcum bir kez", t_short_context_is_compact)
 
     def t_model_answers_free_sentence():

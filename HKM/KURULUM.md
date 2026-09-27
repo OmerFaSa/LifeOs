@@ -267,6 +267,20 @@ sistem kural motoruyla sürer — hiçbir şey kapanmaz.
 1. Ollama'yı kur (<https://ollama.com/download>) ve RAM'e göre bir model
    indir: 8 GB → `ollama pull qwen2.5:3b` · 16 GB → `ollama pull qwen2.5:7b`
    · 32 GB+ → `ollama pull qwen2.5:14b`.
+   **4 GB'lık makine** (ör. eski bir dizüstü, Ubuntu): 1B modeller Türkçe
+   sohbette dağılır (2026-09-27 ölçümü: llama3.2:1b, qwen2.5:1.5b,
+   qwen3:1.7b, gemma3:1b). Sığan en iyi seçenek **gemma3:4b'nin yalnız
+   metin sürümü**. Görüntü parçası çıkarıldığı için resmi `gemma3:4b`'den
+   ~0,8 GB az yer tutar; ölçülen bellek ~3,2 GB:
+   ```bash
+   mkdir -p ~/gemma && cd ~/gemma
+   wget -c https://huggingface.co/unsloth/gemma-3-4b-it-GGUF/resolve/main/gemma-3-4b-it-Q4_K_M.gguf
+   wget https://raw.githubusercontent.com/omerfasa/lifeos/main/HKM/motor/gemma3-4b-metin.Modelfile
+   ollama create gemma3-4b-metin -f gemma3-4b-metin.Modelfile
+   ```
+   HKM'de yerel model adı: `gemma3-4b-metin`. `free -h` toplamı 3,5 GB'ın
+   altındaysa model çalışır ama yavaşlar (disk takası); Q3 sürümü daha
+   küçüktür ama sohbette bozuluyor, önerilmez.
 2. **Ollama'yı ağa aç** — varsayılanda yalnız kendi makinesini dinler.
    Windows: Başlat → «Sistem ortam değişkenlerini düzenle» → Ortam
    Değişkenleri → Yeni: `OLLAMA_HOST` = `0.0.0.0:11434`. Ollama'yı görev
