@@ -368,4 +368,163 @@
       }finally{ temizle(kok); }
     });
   });
+
+  /* ---------- Sayfa düzeni 3: hazır görünüm, uyarı, sayfa notu, sayfada taşıma, tüm sayfalar, arama ---------- */
+  describe('Sayfa düzeni — hazır görünüm, uyarı, tüm sayfalar', () => {
+    function sayfa3(baslik, adlar, uyarili){
+      const kok = document.createElement('div');
+      kok.innerHTML = '<h1>' + baslik + '</h1><div class="liste">' + adlar.map(ad =>
+        '<section class="kutu"><header class="kutu__bas"><h2 class="kutu__ad">' + ad + '</h2></header>'
+        + '<div class="kutu__govde">' + (ad === uyarili ? '<span class="badge badge--danger">Kırmızı bayrak</span>' : 'gövde') + '</div></section>').join('') + '</div>';
+      document.body.appendChild(kok);
+      return kok;
+    }
+    const AD = ['Bir', 'İki', 'Üç', 'Dört'];
+    function ust(){ const d = document.createElement('button'); d.className = 'ust__gizli';
+      d.innerHTML = '<i class="ust__gizli-sayi"></i>'; document.body.appendChild(d); return d; }
+    function bitir(kok, d){
+      G().panelKapat(); if(d) d.remove(); temizle(kok);
+      document.querySelectorAll('.gizle-geri').forEach(x => x.remove());
+    }
+
+    it('hazır görünüm: Başlıklar hepsini küçültür, Tümü açık hepsini açar, Önerilen varsayılana döner; hangisinde olduğu bilinir', () => {
+      const kok = sayfa3('Hazır', AD); G()._sifirla();
+      const kv = [G().anahtar('Dört')];
+      G().uygula({ kok, modul:MOD, profil:'p', ekran:'hazir', kucukVarsayilan:kv });
+      try{
+        expect(G().hazirHali()).toBe('onerilen');
+        G().durumAyarla(G().anahtar('Bir'), 'gizli');
+        expect(G().hazirHali()).toBe('ozel');
+        G().hazir('basliklar');
+        expect(AD.map(a => G().durumu(G().anahtar(a)))).toEqual(['gizli', 'kucuk', 'kucuk', 'kucuk']);   // gizli gizli kalır
+        expect(G().hazirHali()).toBe('basliklar');
+        expect(!!document.querySelector('.gizle-geri [data-geri-al]')).toBe(true);
+        G().hazir('acik');
+        expect(AD.map(a => G().durumu(G().anahtar(a)))).toEqual(['acik', 'acik', 'acik', 'acik']);
+        expect(G().hazirHali()).toBe('acik');
+        G().hazir('onerilen');
+        expect(G().durumu(G().anahtar('Dört'))).toBe('kucuk');
+        expect(G().hazirHali()).toBe('onerilen');
+      }finally{ bitir(kok); }
+    });
+
+    it('uyarı susturulmaz: küçük şeritte «uyarı» rozeti; gizliyse üst düğme ve sayfa notu uyarır; anahtar değişmez', () => {
+      const kok = sayfa3('Uyarı', AD, 'İki'); G()._sifirla();
+      const d = ust();
+      G().uygula({ kok, modul:MOD, profil:'p', ekran:'uyari' });
+      try{
+        const a = G().anahtar('İki');
+        G().durumAyarla(a, 'kucuk');
+        const el = () => G().bolumler(kok).find(b => b.anahtar === a);
+        expect(!!el()).toBe(true);                                        // anahtar rozetten etkilenmez
+        expect(!!el().el.querySelector('.gizle-uyari-rozet')).toBe(true);
+        G().durumAyarla(a, 'gizli');
+        expect(d.classList.contains('is-uyari')).toBe(true);
+        const dip = kok.querySelector('.gizle-dip');
+        expect(!!dip && dip.classList.contains('gizle-dip--uyari')).toBe(true);
+        expect(dip.textContent.includes('uyarı')).toBe(true);
+        G().panelAc(d);
+        const satir = document.querySelector('.kmenu--gizle [data-satir="' + a + '"]');
+        expect(satir.hasAttribute('data-uyari')).toBe(true);
+        G().panelKapat();
+        G().durumAyarla(a, 'acik');
+        expect(d.classList.contains('is-uyari')).toBe(false);
+        expect(!!el().el.querySelector('.gizle-uyari-rozet')).toBe(false);   // açıkken rozet yok
+      }finally{ bitir(kok, d); }
+    });
+
+    it('sayfa notu: gizli bölüm yoksa yok; varsa adıyla sayfanın sonunda; «Göster» paneli açar', () => {
+      const kok = sayfa3('Not', AD); G()._sifirla();
+      const d = ust();
+      G().uygula({ kok, modul:MOD, profil:'p', ekran:'not' });
+      try{
+        expect(kok.querySelector('.gizle-dip')).toBe(null);
+        G().durumAyarla(G().anahtar('Üç'), 'gizli');
+        const dip = kok.querySelector('.gizle-dip');
+        expect(dip.textContent.includes('Üç')).toBe(true);
+        expect(kok.lastElementChild).toBe(dip);
+        dip.querySelector('[data-gizle-dip]').click();
+        expect(!!document.querySelector('.kmenu--gizle')).toBe(true);
+        G().durumAyarla(G().anahtar('Bir'), 'gizli');
+        expect(kok.querySelector('.gizle-dip').textContent.includes('2 bölüm')).toBe(true);
+      }finally{ bitir(kok, d); }
+    });
+
+    it('sayfada bırakma: bölüm başka bir bölümün önüne/arkasına konur; başka kaba geçmez', () => {
+      const kok = sayfa3('Taşı', AD); G()._sifirla();
+      G().uygula({ kok, modul:MOD, profil:'p', ekran:'birak' });
+      const adlar = () => G().bolumler(kok).map(b => b.baslik);
+      try{
+        expect(G().birak(G().anahtar('Dört'), G().anahtar('Bir'), true)).toBe(true);
+        expect(adlar()).toEqual(['Dört', 'Bir', 'İki', 'Üç']);
+        expect(G().birak(G().anahtar('Dört'), G().anahtar('Üç'), false)).toBe(true);
+        expect(adlar()).toEqual(['Bir', 'İki', 'Üç', 'Dört']);
+        const yabanci = document.createElement('section');
+        yabanci.className = 'kutu'; yabanci.innerHTML = '<header class="kutu__bas"><h2 class="kutu__ad">Dışarıda</h2></header>';
+        kok.appendChild(yabanci);
+        G().uygula({ kok, modul:MOD, profil:'p', ekran:'birak' });
+        expect(G().birak(G().anahtar('Bir'), G().anahtar('Dışarıda'), true)).toBe(false);
+      }finally{ bitir(kok); }
+    });
+
+    it('tüm sayfalar: değişen sayfalar adıyla listelenir; biri ya da hepsi sıfırlanır ve geri alınır', () => {
+      const kok1 = sayfa3('Birinci sayfa', AD); G()._sifirla();
+      G().uygula({ kok:kok1, modul:MOD, profil:'p', ekran:'s1' });
+      G().durumAyarla(G().anahtar('Bir'), 'gizli');
+      kok1.remove();
+      const kok = sayfa3('İkinci sayfa', AD);
+      const d = ust();
+      G().uygula({ kok, modul:MOD, profil:'p', ekran:'s2' });
+      G().durumAyarla(G().anahtar('İki'), 'kucuk');
+      try{
+        const l = G().sayfalar();
+        expect(l.map(x => x.ad).sort()).toEqual(['Birinci sayfa', 'İkinci sayfa']);
+        expect(l.find(x => x.ekran === 's2').bu).toBe(true);
+        G().panelAc(d);
+        document.querySelector('.kmenu--gizle [data-sekme="hepsi"]').click();
+        expect(document.querySelectorAll('.kmenu--gizle [data-sayfa]').length).toBe(2);
+        document.querySelector('.kmenu--gizle [data-sayfa-sifirla="s1"]').click();
+        expect(G().sayfalar().map(x => x.ekran)).toEqual(['s2']);
+        document.querySelector('.gizle-geri [data-geri-al]').click();
+        expect(G().sayfalar().length).toBe(2);
+        G().hepsiniSifirla();
+        expect(G().sayfalar().length).toBe(0);
+        expect(G().durumu(G().anahtar('İki'))).toBe('acik');              // açık sayfa da yenilendi
+        document.querySelector('.gizle-geri [data-geri-al]').click();
+        expect(G().sayfalar().length).toBe(2);
+        expect(G().durumu(G().anahtar('İki'))).toBe('kucuk');
+      }finally{ bitir(kok, d); }
+    });
+
+    it('kayıt yalnız varsayılandan sapmayı tutar: küçültmek «açıldı» sayılmaz', () => {
+      const kok = sayfa3('Sapma', AD); G()._sifirla();
+      G().uygula({ kok, modul:MOD, profil:'p', ekran:'sapma', varsayilan:[G().anahtar('Dört')] });
+      try{
+        G().durumAyarla(G().anahtar('Bir'), 'kucuk');
+        G().durumAyarla(G().anahtar('İki'), 'gizli');
+        G().durumAyarla(G().anahtar('İki'), 'acik');
+        let x = G().sayfalar().find(y => y.ekran === 'sapma');
+        expect([x.kucuk, x.gizli, x.acildi]).toEqual([1, 0, 0]);
+        G().durumAyarla(G().anahtar('Dört'), 'acik');                   // varsayılan gizliyi açmak sapmadır
+        x = G().sayfalar().find(y => y.ekran === 'sapma');
+        expect(x.acildi).toBe(1);
+      }finally{ bitir(kok); }
+    });
+
+    it('arama: uzun sayfada panel bölüm adına göre süzülür', () => {
+      const adlar = ['Uyku', 'Beslenme', 'Hareket', 'Toparlanma', 'Tahlil', 'Bütçe', 'Sepet', 'Ofis', 'Rehber'];
+      const kok = sayfa3('Arama', adlar); G()._sifirla();
+      const d = ust();
+      G().uygula({ kok, modul:MOD, profil:'p', ekran:'ara' });
+      try{
+        G().panelAc(d);
+        const ara = document.querySelector('.kmenu--gizle .gd-ara');
+        expect(!!ara).toBe(true);
+        ara.value = 'BES';
+        ara.dispatchEvent(new Event('input', { bubbles:true }));
+        const gorunen = Array.from(document.querySelectorAll('.kmenu--gizle [data-satir]')).filter(x => !x.hidden);
+        expect(gorunen.map(x => x.querySelector('.gd-ad').textContent)).toEqual(['Beslenme']);
+      }finally{ bitir(kok, d); }
+    });
+  });
 })();
