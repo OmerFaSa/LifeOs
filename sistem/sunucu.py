@@ -49,9 +49,10 @@ import time
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
-KOK = os.path.dirname(os.path.abspath(__file__))
-sys.dont_write_bytecode = True      # kok klasorde __pycache__ birikmesin
-sys.path.insert(0, KOK)
+SISTEM = os.path.dirname(os.path.abspath(__file__))
+KOK = os.path.dirname(SISTEM)          # deponun koku (sistem/ bir alt klasor)
+sys.dont_write_bytecode = True      # __pycache__ birikmesin
+sys.path.insert(0, SISTEM)
 import guncelle  # noqa: E402
 
 HOST = "127.0.0.1"
@@ -273,7 +274,7 @@ a.kart:hover .ad{ text-decoration:underline; }
   <p class="not">Üç sistem birbirini bilmez ve birbirini bozamaz; ayrı
     kapılarda durmalarının sebebi budur. HKM de üçünün üstünde değil
     <b>yanındadır</b>: kapalıyken üçü de olduğu gibi çalışır.</p>
-  <p class="not">Durdurmak için: <code>python baslat.py --dur</code>.
+  <p class="not">Durdurmak için: <code>python sistem/baslat.py --dur</code>.
     Güncellemek için yukarıdaki düğme ya da klasördeki
     <code>GUNCELLE.bat</code>.</p>
 </div>

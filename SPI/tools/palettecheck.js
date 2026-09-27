@@ -128,7 +128,7 @@ function checksOf(m){
   });
 
   /* PALETLER VE DUZENLER UYGULAMANIN CSS'INDEN OKUNUR. Liste burada
-     sabit yaziliydi; tek tasarima gecerken (ekip/EKIP-PLANI.md §8-4)
+     sabit yaziliydi; tek tasarima gecerken (belgeler/ekip/EKIP-PLANI.md §8-4)
      paletler ve dort duzen kalkiyor ve sabit liste o gun var olmayan
      secenekleri «olcmeye» devam ederdi — gecen ama hicbir sey olcmeyen
      bir denetim. Kokte `data-palette` / `data-design` secicisi olan her

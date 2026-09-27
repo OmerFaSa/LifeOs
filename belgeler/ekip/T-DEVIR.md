@@ -42,7 +42,7 @@ sürdürüyorsun. Aşağıdaki sırayı izle; her iş ayrı commit, `[T] …`, d
    onaylayınca kalıcı (`HKM/core/memory.py`). Önce test.
 7. **Çizicisi hazır, verisi kaydedilmeyen kartlar:** SPİ 081 082 083 087 · ESP 095 099 103
    106 107 109 · 112 · 127 — yapılabilenleri bağla, yapılamayanı EKIP-DURUM'a gerekçesiyle yaz.
-   **K'nin taslağı hazır** (081 095 099 103 106 107 109, testli): `ekip/yama/K-7madde-taslak.patch`
+   **K'nin taslağı hazır** (081 095 099 103 106 107 109, testli): `belgeler/ekip/yama/K-7madde-taslak.patch`
    — ayrıntı EKIP-DURUM «K → T» satırında. Kullan ya da sil; K bu maddeye dokunmuyor.
 8. **Son rapor (kullanıcıya):** 25 kare portrenin 20'si temiz kaynak fotoğraf istiyor; 167'nin
    sınırı; HKM ses/belge/video çözümlemesi dış bağımlılık ya da sağlayıcı ister.
@@ -58,14 +58,14 @@ Ortam: `CHROMIUM_PATH=/opt/pw-browsers/chromium NODE_PATH=<modül>/node_modules`
 
 ---
 
-> 2026-09-24. Bu belgeyi T rolünü devralan çalışan okur. Kaynak plan `ekip/EKIP-PLANI.md`
-> §4.2 (T'nin adımları), düzen `ekip/CEKMECE-HARITASI.md`, canlı durum `ekip/EKIP-DURUM.md`.
-> Hedef görünüm `ekip/tasarim/v4-*.png`.
+> 2026-09-24. Bu belgeyi T rolünü devralan çalışan okur. Kaynak plan `belgeler/ekip/EKIP-PLANI.md`
+> §4.2 (T'nin adımları), düzen `belgeler/ekip/CEKMECE-HARITASI.md`, canlı durum `belgeler/ekip/EKIP-DURUM.md`.
+> Hedef görünüm `belgeler/ekip/tasarim/v4-*.png`.
 
 ## 0 · Başlarken
 
-1. `git fetch origin main && git rebase origin/main`; sırayla oku: `AGENTS.md`, `ekip/EKIP-PLANI.md`
-   (§1, §3, §4.2, §5, §6, §7), `ekip/CEKMECE-HARITASI.md`, `ekip/EKIP-DURUM.md` (TASARIM bölümü).
+1. `git fetch origin main && git rebase origin/main`; sırayla oku: `AGENTS.md`, `belgeler/ekip/EKIP-PLANI.md`
+   (§1, §3, §4.2, §5, §6, §7), `belgeler/ekip/CEKMECE-HARITASI.md`, `belgeler/ekip/EKIP-DURUM.md` (TASARIM bölümü).
 2. Doğrudan `main`'de çalışılır; her iş ayrı commit, `[T] …` başlığıyla. Push öncesi
    `git fetch && git rebase origin/main`, sonra `git push origin HEAD:main`. **Force-push yok, PR yok.**
    dist/build.js çakışırsa: `git checkout --ours`, `python3 build.py`, testler, `git add`, devam.
@@ -202,8 +202,8 @@ değil) kutunun kenarını aşıyorsa saysın. Doğrulama: `cd SPI && node tools
 **Koşmayan:** `node tools/entegre.js` (kökte) b06c28d sonrası koşmadı. Değişen: 2.76 ürünün
 ekranı modülden okunur (SPİ'de `kutuphane`), 2.78 ve 2.80 HKM kartını `onaylar`'da arar.
 
-**YARIM — T3 SPİ:** `ekip/yarim/t3-spi.patch` (main'e girmedi, kod değil yama).
-`git apply ekip/yarim/t3-spi.patch && (cd SPI && python3 build.py)` ile geri gelir; sonra
+**YARIM — T3 SPİ:** `belgeler/ekip/yarim/t3-spi.patch` (main'e girmedi, kod değil yama).
+`git apply belgeler/ekip/yarim/t3-spi.patch && (cd SPI && python3 build.py)` ile geri gelir; sonra
 yamayı sil. İçinde: Bugün üç alan (Şimdi: en acil tek uyarı · vakti gelen hatırlatma · günün
 sorusu · dört ölçüm `sleep/rhr/hrv/weight` + öğün satırı; Durum: Toparlanma · Asgari gün ·
 Beslenme kutuları; Öneri: `oneriAlani`), **Bugün › Ayrıntı** (`route gun`, Giriş · Özet ·

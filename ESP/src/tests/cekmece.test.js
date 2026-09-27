@@ -1,4 +1,4 @@
-/* Çekmece düzeni — ESP (ekip/EKIP-PLANI.md T2–T3, ekip/CEKMECE-HARITASI.md).
+/* Çekmece düzeni — ESP (belgeler/ekip/EKIP-PLANI.md T2–T3, belgeler/ekip/CEKMECE-HARITASI.md).
 
    Kanıtladığı sözler: onaylar tek çekmecededir — King ve HKM teklifi Bugün'ün
    başından, ajan teklifleri Ofis'ten Onaylar'a taşındı; Bugün yalnız en öndeki

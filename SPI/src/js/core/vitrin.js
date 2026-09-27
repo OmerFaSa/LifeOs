@@ -1,7 +1,7 @@
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/vitrin.js içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* VİTRİN KARTLARI — kataloğun (ekip/vitrin.html) kartlarını GERÇEK
+/* VİTRİN KARTLARI — kataloğun (belgeler/ekip/vitrin.html) kartlarını GERÇEK
    veriyle çizen tek kalıp.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================

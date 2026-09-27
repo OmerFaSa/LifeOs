@@ -16,7 +16,7 @@
 window.ESP = window.ESP || {};
 
 ESP.SECTIONS_ALL = [
-    /* SEKİZ ÇEKMECE (ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
+    /* SEKİZ ÇEKMECE (belgeler/ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
        Üç modülde aynı ad ve sıra; adlar tek kaynaktan gelir
        (`LIFEOS.KABUK.CEKMECELER`, core/nav.js çizim anında okur). Yedi
        eski bölümden nereye: Günlük › Bugün → Bugün; Günlük › Merdiven →

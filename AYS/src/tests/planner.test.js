@@ -540,7 +540,7 @@
         /* Yeniden üretimin kanıtı kapasitenin kendisidir. Önceden
            `generatedAt` damgalarının farklı olması da isteniyordu; damga
            milisaniye çözünürlükte ve iki üretim aynı milisaniyeye düşünce
-           test rastgele kalıyordu (ekip/HATALAR.md T2-08). */
+           test rastgele kalıyordu (belgeler/ekip/HATALAR.md T2-08). */
         expect(a.meta.capacityHoursPerWeek === 35).toBeFalsy();
         S.profile.capacityHoursPerWeek = 35;
         const b = await M.ensurePlan();
@@ -655,7 +655,7 @@
     });
   });
 
-  /* GÖRÜNÜM — tek tasarım (ekip/EKIP-PLANI.md §8-4, kullanıcı kararı
+  /* GÖRÜNÜM — tek tasarım (belgeler/ekip/EKIP-PLANI.md §8-4, kullanıcı kararı
      2026-09-24: paletler ve beş düzen kalkar, yerine Açık · Koyu · Sistem).
      Burada önceden «en az beş palet» testi vardı; o özellik kullanıcı
      kararıyla kalktığı için test de kalktı. Yerine iki kalıcı söz:

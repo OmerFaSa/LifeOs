@@ -1,4 +1,4 @@
-/* Ayar — T5 (ekip/EKIP-PLANI.md §4.2).
+/* Ayar — T5 (belgeler/ekip/EKIP-PLANI.md §4.2).
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/ayar.test.js`; `tools/ortak.py --yay` ile üç

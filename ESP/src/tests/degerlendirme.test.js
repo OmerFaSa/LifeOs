@@ -1,4 +1,4 @@
-/* DEĞERLENDİRME SETİ — ESP (ekip/PLAN.md §3.J, §6).
+/* DEĞERLENDİRME SETİ — ESP (belgeler/ekip/PLAN.md §3.J, §6).
 
    Örnek hedef cümleleri ve BEKLENEN kararları; her cümle ayrı bir test.
    Kural değişince hangi kararın değiştiği ADIYLA görünür.

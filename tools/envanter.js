@@ -4,7 +4,7 @@
  * ------------------------------------------------------------------
  * NEDEN BU ARAC VAR
  *
- * `ekip/EKIP-PLANI.md` bugunku uc arayuzu yeni iskelete tasiyor:
+ * `belgeler/ekip/EKIP-PLANI.md` bugunku uc arayuzu yeni iskelete tasiyor:
  * menuler sekiz cekmeceye iner, ekran ici sekmeler karta doner, ayni
  * sey iki yerde durmaz. Kullanicinin tek sarti var: «hicbir ozellik
  * kaybolmasin». Bu soz ancak OLCULURSE tutulur. Bir dugmenin tasinirken
@@ -17,7 +17,7 @@
  *      ve her ekran ici sekme gezilir; ekrandaki her eylem (`data-act`),
  *      her giris alani, her ekranin isleyici adlari ve kaynakta yazili
  *      her eylem adi kaydedilir. Taban BIR KEZ uretilir ve kayit olarak
- *      durur (`ekip/envanter/taban-<tarih>.json`): uretilmis bir belge
+ *      durur (`belgeler/ekip/envanter/taban-<tarih>.json`): uretilmis bir belge
  *      degil, bir andan alinmis olcumdur, yeniden uretilmez.
  *
  *   2. KARSILASTIRMA (varsayilan) — ayni gezinti bugunku kodla yapilir
@@ -25,10 +25,10 @@
  *      (herhangi bir ekranda, herhangi bir katmanda) ya da kaynaktaki
  *      bir sablonda (acilir pencere, alt cekmece) durmali; her isleyici
  *      hala bir ekranin isleyicisi olmali; her giris alani hala bir
- *      ekranda bulunmali. Bulunmayan ve `ekip/envanter/kaldirilan.json`
+ *      ekranda bulunmali. Bulunmayan ve `belgeler/ekip/envanter/kaldirilan.json`
  *      icinde kullanici onayiyla yazilmamis her sey KAYIPTIR: cikis 1.
  *
- * Ayrica katalog kapsamini sayar: `ekip/TASARIM-OZELLIKLERI.md`
+ * Ayrica katalog kapsamini sayar: `belgeler/ekip/TASARIM-OZELLIKLERI.md`
  * 183 ozellik tanimliyor; ekrandaki `data-oz="042"` isaretleri ve
  * testlerdeki `oz-042` adlari «183'ten N'i yerinde» sayisini verir.
  *
@@ -68,7 +68,7 @@ const path = require('path');
 const fs = require('fs');
 
 const KOK = path.resolve(__dirname, '..');
-const ENV_KLASOR = path.join(KOK, 'ekip', 'envanter');
+const ENV_KLASOR = path.join(KOK, 'belgeler', 'ekip', 'envanter');
 const KALDIRILAN = path.join(ENV_KLASOR, 'kaldirilan.json');
 const GENISLIK = [1440, 390];
 const PROFIL = ['bos', 'dolu'];
@@ -592,7 +592,7 @@ function testOzellikleri(){
 }
 
 function katalogSayisi(){
-  const p = path.join(KOK, 'ekip', 'TASARIM-OZELLIKLERI.md');
+  const p = path.join(KOK, 'belgeler', 'ekip', 'TASARIM-OZELLIKLERI.md');
   if(!fs.existsSync(p)) return 0;
   const t = fs.readFileSync(p, 'utf8');
   return (t.match(/^\| \d{2,3} \| \*\*/gm) || []).length;
@@ -734,7 +734,7 @@ async function main(){
       surum:1,
       tarih:bugun(),
       commit:commitKimligi(),
-      aciklama:'Tek tasarima gecmeden onceki uygulamanin kaydi (ekip/EKIP-PLANI.md, H0). '
+      aciklama:'Tek tasarima gecmeden onceki uygulamanin kaydi (belgeler/ekip/EKIP-PLANI.md, H0). '
         + 'Bir kez alinir, elle degistirilmez. Karsilastirma: node tools/envanter.js',
       genislik:GENISLIK,
       profil:PROFIL,
@@ -804,7 +804,7 @@ async function main(){
 
   if(toplamKayip){
     console.log('\n' + toplamKayip + ' kayıp. Bilerek kaldırıldıysa kullanıcı onayıyla '
-      + 'ekip/envanter/kaldirilan.json dosyasına yazılır.');
+      + 'belgeler/ekip/envanter/kaldirilan.json dosyasına yazılır.');
     return 1;
   }
   console.log('\nEnvanter temiz: tabandaki her eylem, işleyici ve alan yerinde.');

@@ -170,7 +170,7 @@ function waitForServer(url, tries){
                giren bir düğme sığmıyor demektir ve başka bir tarayıcının
                yazı çizimiyle birkaç piksel genişleyince taşar. Nitekim SPİ
                Rehber › Veri'deki düğme satırı yerelde 387 px'te bitip
-               geçiyor, CI'da 11 px taşıyordu (ekip/HATALAR.md T2-06).
+               geçiyor, CI'da 11 px taşıyordu (belgeler/ekip/HATALAR.md T2-06).
                Yalnız yapraklar ve düğmeler sayılır; kasıtlı kaydırma kabı
                sayılmaz. */
             const yapisik = [];

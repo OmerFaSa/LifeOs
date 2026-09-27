@@ -1,6 +1,6 @@
 # Rota — Stil Rehberi
 
-> ## v4 — geçerli görsel dil (2026-09-24, ekip/EKIP-PLANI.md §2)
+> ## v4 — geçerli görsel dil (2026-09-24, belgeler/ekip/EKIP-PLANI.md §2)
 >
 > Özet budur; ayrıntı aşağıdaki **Renk, Tipografi, Ölçü** bölümlerindedir
 > (T3 sonrası yeniden yazıldı). Çelişkide jetonun kendisi (`jeton.css`) geçer.
@@ -158,7 +158,7 @@ konuşmakta olan ajanın nabzı) ve iş bitince durur.
 Sekiz çekmece (`LIFEOS.KABUK.CEKMECELER`: Bugün · Plan · Çalışma · Analiz ·
 Onaylar · Ofis · Kütüphanem · Ayarlar); hangi ekranın hangi çekmecede
 durduğu `R.App.NAV`'da, yolu `R.App.yolOf(rota)`'da, gerekçesi
-`ekip/CEKMECE-HARITASI.md`'de. Liste burada tekrar yazılmaz: kopya bir gün
+`belgeler/ekip/CEKMECE-HARITASI.md`'de. Liste burada tekrar yazılmaz: kopya bir gün
 kaynağından ayrışır.
 
 Ekranın içinde sekme yoktur (T3): parçalar alt alta bölümdür

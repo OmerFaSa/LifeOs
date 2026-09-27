@@ -11,7 +11,7 @@
 
    Motor örneklere göre değil, söylenebilecek HER hedef için kurulur.
    Alanı bilmez: alanı modülün PAKETİ bilir. Paket eklemek motoru
-   değiştirmez. (ekip/PLAN.md §3.0)
+   değiştirmez. (belgeler/ekip/PLAN.md §3.0)
 
    PAKET — modülün verdiği nesne:
      id, ad, olcut:{ ad, birim }, anahtar:RegExp, yonler:[…]
@@ -715,7 +715,7 @@ LIFEOS.Hedef = (function(){
 
   /* ------------------------------------------------------------ uyarlama
 
-     UYARLAMA DÖNGÜSÜ (ekip/PLAN.md §2 adım 9). Plan kontrolde geride
+     UYARLAMA DÖNGÜSÜ (belgeler/ekip/PLAN.md §2 adım 9). Plan kontrolde geride
      kalınca hedef BUGÜNÜN verisiyle yeniden değerlendirilir: paket şu
      anki değeri kendisi ölçebiliyorsa (tartı, deneme neti, kapanan konu)
      saklanan eski değer yerine o kullanılır. Karar yine koddur; «bu

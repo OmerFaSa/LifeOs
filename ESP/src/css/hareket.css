@@ -1,7 +1,7 @@
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* HAREKET — T4 (ekip/EKIP-PLANI.md §4.2). Kaynak: brand/ortak/hareket.css;
+/* HAREKET — T4 (belgeler/ekip/EKIP-PLANI.md §4.2). Kaynak: brand/ortak/hareket.css;
    `tools/ortak.py --yay` üç arayüze kopyalar. Sınıfları `hareket.js` koyar:
    yalnız DEĞİŞEN öğe hareket eder, yeniden çizim animasyonu tekrarlatmaz.
    Azaltılmış harekette hepsi kapanır (en altta). */

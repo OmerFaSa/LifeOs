@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* Envanter HKM testlerini de sayar (ekip/T-DEVIR.md «H → T DEVRİ» 3).
+/* Envanter HKM testlerini de sayar (belgeler/ekip/T-DEVIR.md «H → T DEVRİ» 3).
  *
  * 119 · 120 · 126'nin HKM tarafi HKM/tests/test_merkez.py'de sinanir;
  * envanter yalniz brand/ortak ve uc src/tests'i okuyordu, bu yuzden o

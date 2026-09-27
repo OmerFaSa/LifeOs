@@ -492,7 +492,7 @@ R.Beacon = (function(){
       /* Gövdeye özgü ret (400, 409, 413, 422) YALNIZ o günündür: geri kalan
          günler gönderilmeye devam eder ve hangi günün neden reddedildiği
          saklanır. Ağ, yetki ya da sunucu hatası bütün günler için aynıdır:
-         orada durulur (ekip/HATALAR.md D-6). */
+         orada durulur (belgeler/ekip/HATALAR.md D-6). */
       if(GOVDE_RETTI.indexOf(durum) >= 0){
         reddedilen.push({ date:t, status:durum, why:await retNedeni(res) });
         continue;

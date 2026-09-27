@@ -1,5 +1,5 @@
 /* TEST KİTABI — BAM'ın bölümlü kitabını AYS'de sınav biçiminde çözmek
-   (ekip/PLAN.md §3.E ve §3.L; Tur 4).
+   (belgeler/ekip/PLAN.md §3.E ve §3.L; Tur 4).
 
    Yol: Dersler › Sınav profilleri'nden «Test kitabı iste» → King'e
    `test.kitabi` iş emri → BAM Üretim Ofisi bölüm bölüm üretir, her soruyu

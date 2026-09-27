@@ -234,7 +234,7 @@
        karşılaştırma çiziliyordu — ekran nerede olduğunu yanlış söylüyordu.
        Bu test adı tek tek bilmez; sekme ŞERİDİ olan her ekranda TAM BİR
        sekmenin seçili olmasını ister, böylece aynı hata başka ekranda da
-       yakalanır. Tek tasarımda (ekip/EKIP-PLANI.md §1.2) ekran içi sekme
+       yakalanır. Tek tasarımda (belgeler/ekip/EKIP-PLANI.md §1.2) ekran içi sekme
        kalmıyor: şeridi olmayan ekran bu sözün dışındadır; «sekme yok»
        kuralını tools/sadelik.js ölçer. Şerit varsa söz aynen geçerlidir. */
     it('sekme şeridi olan ekranda tam bir sekme seçilidir', async function(){

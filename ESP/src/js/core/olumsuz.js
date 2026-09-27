@@ -9,7 +9,7 @@
 
    Üç arayüzün cümle ayrıştırıcısı sayıyı ve anahtar kelimeyi bulup eylem
    kuruyordu; «bugün 40 soru çözmedim» 40 soru, «7 saat uyumadım» 7 saatlik
-   uyku, «diksiyonu kapatma» bölümü kapat oluyordu (ekip/HATALAR.md KR-1).
+   uyku, «diksiyonu kapatma» bölümü kapat oluyordu (belgeler/ekip/HATALAR.md KR-1).
    HKM bunu `core/dil.py olumsuz()` ile çözmüştü; modüller çözmemişti.
 
    Sözler:

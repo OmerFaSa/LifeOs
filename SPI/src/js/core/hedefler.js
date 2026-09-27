@@ -18,7 +18,7 @@
                     planın hekimle kurulacağı SÖYLENİR. SPİ teşhis koymaz,
                     doz önermez (AGENTS.md §1.5).
      HEKİM TALİMATI kullanıcının getirdiği talimat en yüksek öncelikli
-                    kısıttır (ekip/PLAN.md §3.0); plan ona uyar. */
+                    kısıttır (belgeler/ekip/PLAN.md §3.0); plan ona uyar. */
 
 window.SP = window.SP || {};
 

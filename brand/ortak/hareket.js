@@ -1,4 +1,4 @@
-/* HAREKET — T4 (ekip/EKIP-PLANI.md §4.2): hareket ve odak, üç arayüzde aynı.
+/* HAREKET — T4 (belgeler/ekip/EKIP-PLANI.md §4.2): hareket ve odak, üç arayüzde aynı.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/hareket.js`; `tools/ortak.py --yay` ile üç

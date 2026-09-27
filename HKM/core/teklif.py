@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """King'in teklifi — isin buyuklugu, bedeli ve suresi ONCEDEN.
-   (ekip/DEVIR.md Part 8a)
+   (belgeler/ekip/DEVIR.md Part 8a)
 
    Kullanici ne isterse istesin King, is BAM'da acilmadan once uc seyi
    soyler: isin yogunluk sinifi, tahmini maliyeti ve tahmini suresi. Sonra

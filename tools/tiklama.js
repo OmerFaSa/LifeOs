@@ -10,7 +10,7 @@
  * sekmeleri gezer ama dugmelere BASMAZ. Yani «bu dugmeye basinca bir
  * sey patliyor mu» sorusunu bugun hicbir denetim sormuyor.
  *
- * Tek tasarima gecis (ekip/EKIP-PLANI.md, T3) tam bu dosyalari yeniden
+ * Tek tasarima gecis (belgeler/ekip/EKIP-PLANI.md, T3) tam bu dosyalari yeniden
  * yaziyor: sekmeler karta doner, bolumler tasinir. Bir isleyici
  * `el.closest('.blok')` gibi bir yapiya bagliysa ve yapi degisirse,
  * dugme cizilir ama basinca hata verir. Bu arac o sinifi yakalar:

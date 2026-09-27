@@ -184,7 +184,7 @@ DOSYALAR = {
     # King'i bilmezse o arayuzun Patron'u modulun ustunu bilmez.
     "ofis.js":        "js/core",
     "ofis.test.js":   "tests",
-    # HEDEF MOTORU — herhangi bir hedefi alan genel cerceve (ekip/PLAN.md).
+    # HEDEF MOTORU — herhangi bir hedefi alan genel cerceve (belgeler/ekip/PLAN.md).
     # Alan paketleri her modulun kendisindedir; motor ortak.
     "hedef.js":       "js/core",
     "hedef.test.js":  "tests",
@@ -221,7 +221,7 @@ DOSYALAR = {
     "temel.css":      "css",
     "temel.test.js":  "tests",
     # KABUK (T2) — ust cubuk, gun seridi, telefon bandi: uc arayuzde ayni
-    # iskelet, ayni cekmece adlari (ekip/CEKMECE-HARITASI.md).
+    # iskelet, ayni cekmece adlari (belgeler/ekip/CEKMECE-HARITASI.md).
     "kabuk.js":       "js/core",
     "kabuk.css":      "css",
     "kabuk.test.js":  "tests",
@@ -254,16 +254,16 @@ DOSYALAR = {
     "rozet.test.js":  "tests",
     "sw.js":          ".",
     # OLUMSUZLUK ve KIP SUZGECI — cumle ayristiricilarinin onundeki kapi
-    # (ekip/HATALAR.md KR-1). «cozmedim» uc arayuzde de ayni sekilde
+    # (belgeler/ekip/HATALAR.md KR-1). «cozmedim» uc arayuzde de ayni sekilde
     # olumsuzdur; biri bir gun «-emedim»i unutursa o arayuz sahte olcum
     # yazar.
     "olumsuz.js":      "js/core",
     "olumsuz.test.js": "tests",
-    # HKM BAGI — ayni anda TEK profil HKM'ye baglanir (ekip/HATALAR.md Y-7).
+    # HKM BAGI — ayni anda TEK profil HKM'ye baglanir (belgeler/ekip/HATALAR.md Y-7).
     # Sahip bilgisi cihazda, modul basina tek anahtarda; uc arayuzde ayni.
     "hkmbag.js":      "js/core",
     "hkmbag.test.js": "tests",
-    # KARTLAR (K) — ortak bilesenler (ekip/EKIP-PLANI.md §4.1, K1). Ekranlar
+    # KARTLAR (K) — ortak bilesenler (belgeler/ekip/EKIP-PLANI.md §4.1, K1). Ekranlar
     # bunlari K2'de kullanir; o zamana dek yalniz test sayfasinda yuklenir.
     # Sayi bileseni: 024 kesinlik, 025 koken karti, 026 tazelik, 028 fark.
     "sayi.js":        "js/core",
@@ -285,7 +285,7 @@ DOSYALAR = {
     "guven.js":       "js/core",
     "guven.test.js":  "tests",
     "kart.css":       "css",
-    # VITRIN KARTLARI — katalogun (ekip/vitrin.html) kartlari gercek veriyle.
+    # VITRIN KARTLARI — katalogun (belgeler/ekip/vitrin.html) kartlari gercek veriyle.
     # Bicim URETILIR (tools/vitrin.py: vitrin.html -> vitrin.css); cizici
     # vitrin.js elle yazilir, isaretlemesi vitrinin sablonudur.
     "vitrin.css":     "css",
@@ -366,7 +366,7 @@ def elle_yazilmis(hedef: Path) -> bool:
     yazar. Isaretsiz bir hedef, arayuzun KENDI dosyasidir ve ortak
     kaynakla ayni adi tasiyordur: `brand/ortak/oneri.test.js` eklenince
     yayim SPI'nin kendi `src/tests/oneri.test.js`'ini sessizce ezdi
-    (K yakaladi, ekip/HATALAR.md T2-07)."""
+    (K yakaladi, belgeler/ekip/HATALAR.md T2-07)."""
     if not hedef.exists():
         return False
     with open(hedef, encoding="utf-8") as f:

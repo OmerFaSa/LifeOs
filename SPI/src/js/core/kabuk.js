@@ -1,7 +1,7 @@
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/kabuk.js içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* KABUK — üç arayüzün aynı iskeleti (ekip/EKIP-PLANI.md §3, T2).
+/* KABUK — üç arayüzün aynı iskeleti (belgeler/ekip/EKIP-PLANI.md §3, T2).
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/kabuk.js`; `python3 tools/ortak.py --yay` ile üç
@@ -9,7 +9,7 @@
    düzenleme. Biçimi `brand/ortak/kabuk.css` içindedir.
    ==================================================================
 
-   NE ÇİZER (katalog, ekip/TASARIM-OZELLIKLERI.md)
+   NE ÇİZER (katalog, belgeler/ekip/TASARIM-OZELLIKLERI.md)
 
      ÜST ÇUBUK   modül geçiş menüsü (08) · sekiz çekmece · Onaylar'ın mor
                  sayacı (115) · ara ⌘K (13) · zil (09) · bağlantı noktası

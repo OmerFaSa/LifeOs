@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """LifeOS — HEPSI, TEK KOMUT.
 
-     python3 baslat.py            # uc sistem + HKM + giris sayfasi
-     python3 baslat.py --dur      # uc sistemi VE HKM daemon'unu durdurur
-     python3 baslat.py --hkmsiz   # yalniz uc sistem (HKM hic acilmaz)
+     python3 sistem/baslat.py     # uc sistem + HKM + giris sayfasi
+     python3 sistem/baslat.py --dur # uc sistemi VE HKM daemon'unu durdurur
+     python3 sistem/baslat.py --hkmsiz # yalniz uc sistem (HKM hic acilmaz)
 
    Ne yapar:
 
@@ -32,7 +32,8 @@ import time
 import urllib.request
 import webbrowser
 
-KOK = os.path.dirname(os.path.abspath(__file__))
+SISTEM = os.path.dirname(os.path.abspath(__file__))
+KOK = os.path.dirname(SISTEM)          # deponun koku (sistem/ bir alt klasor)
 HKM = os.path.join(KOK, "HKM")
 GIRIS = "http://127.0.0.1:4180"
 BEKLE_SANIYE = 15.0
@@ -93,7 +94,7 @@ def sistemler_baslat():
               "env": cocuk_ortami()}
     if os.name == "posix":
         kwargs["start_new_session"] = True
-    p = subprocess.Popen([sys.executable, os.path.join(KOK, "sunucu.py")],
+    p = subprocess.Popen([sys.executable, os.path.join(SISTEM, "sunucu.py")],
                          **kwargs)
     son = time.time() + BEKLE_SANIYE
     while time.time() < son:
@@ -140,8 +141,11 @@ def sistemler_dur():
     if not _cevap_veriyor(GIRIS):
         _yaz("yok", "Sistem sunucusu zaten çalışmıyor")
         return 0
-    hedef = os.path.join(KOK, "sunucu.py")
+    hedef = os.path.join(SISTEM, "sunucu.py")
     ok_, not_ = adiyla_durdur(hedef)
+    # Eski duzende sunucu kok klasordeydi; guncellemeden once acilmis
+    # bir sunucu o adla calisiyor olabilir. Onu da ayni yolla kapat.
+    adiyla_durdur(os.path.join(KOK, "sunucu.py"))
     if not ok_:
         _yaz("hata", "Sistem sunucusu durdurulamadı", not_)
         return 1
@@ -195,7 +199,7 @@ def main():
             _yaz("ok", "AYS · SPİ · ESP açıldı", GIRIS)
         else:
             _yaz("hata", "Sistem sunucusu açılamadı", "günlük: " + gunluk)
-            print("\n  Ne olduğunu görmek için:  python3 sunucu.py\n")
+            print("\n  Ne olduğunu görmek için:  python3 sistem/sunucu.py\n")
             return 1
 
     # 2 — HKM. ISTEGE BAGLI: acilmazsa uc sistem yine calisir.
@@ -227,7 +231,7 @@ def main():
 
   Sunucular ARKA PLANDA çalışır; bu pencereyi kapatmak onları durdurmaz.
   Durdurmak için:
-      python3 baslat.py --dur          (üç sistem + HKM, hepsi)
+      python3 sistem/baslat.py --dur   (üç sistem + HKM, hepsi)
 """ % GIRIS)
     return 0
 

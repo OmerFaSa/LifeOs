@@ -71,7 +71,7 @@ const SAYAC = { hedef:0, ekran:0, sekme:0 };
 /* TELEFON ETIKETLERI — tek dosya surumunde de durmali.
 
    Tek dosya surumu telefona kopyalanip «Ana ekrana ekle» ile kurulmak
-   icin var (README, «Telefonda kullanim»). `build.py` uzun sure <head>'i
+   icin var (belgeler/TEKNIK.md, «Telefonda kullanim»). `build.py` uzun sure <head>'i
    sifirdan yaziyordu ve su bes satir sessizce dusuyordu: manifest
    dugumu, ikon, tema rengi ve iki apple etiketi. Sonucu: `installManifest()`
    dugumu bulamayip sessizce donuyor, iOS'ta uygulama tam ekran acilmiyor,

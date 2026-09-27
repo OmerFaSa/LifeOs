@@ -10,7 +10,7 @@ ESP.App = (function(){
   const U = ESP.U, M = ESP.Model, UI = ESP.UI, S = ESP.S;
   const { html, raw, when, map, cls, attrs } = ESP.h;
 
-  /* SEKİZ ÇEKMECE (ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
+  /* SEKİZ ÇEKMECE (belgeler/ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
 
      Üç modülde aynı ad ve sıra; adlar tek kaynaktan gelir
      (`LIFEOS.KABUK.CEKMECELER`). İç içelik en çok iki kat: çekmece ›
@@ -505,7 +505,7 @@ ESP.App = (function(){
         body = errorPanel(err);
       }
 
-      /* v4 iskeleti (ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
+      /* v4 iskeleti (belgeler/ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
          sayfa başı · bölüm çubuğu · ekran · sayfa sonu; telefonda alt bant
          ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
       const markup = String(html`

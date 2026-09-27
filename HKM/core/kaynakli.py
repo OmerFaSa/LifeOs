@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Kaynakli arastirma — Arastirma Burosu v2 (ekip/PLAN.md §3.C).
+"""Kaynakli arastirma — Arastirma Burosu v2 (belgeler/ekip/PLAN.md §3.C).
 
    Buro yalniz kendi bilgisiyle yazmaz. Is, ritim tiklerine bolunmus
    asamalardan gecer (core/bam.py); her asamanin ajani adima iz birakir:

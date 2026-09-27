@@ -468,7 +468,7 @@
     });
 
     /* «Seçilen düzen köke yazılır» testi burada duruyordu; beş düzen
-       kullanıcı kararıyla kalktı (ekip/EKIP-PLANI.md §8-4). Aşağıdaki
+       kullanıcı kararıyla kalktı (belgeler/ekip/EKIP-PLANI.md §8-4). Aşağıdaki
        «tanınmayan düzen varsayılana düşer» eski profildeki değeri korur. */
 
     /* Ayarlar ekranındaki liste ANINDA uygulanmalı. Uygulamayınca

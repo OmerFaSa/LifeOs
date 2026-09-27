@@ -1,5 +1,5 @@
 /* VİTRİN KARTLARI — ÜRETİLMİŞ DOSYA, ELLE DÜZENLEME.
-   Kaynak `ekip/vitrin.html` (kart kuralları); `python3 tools/vitrin.py`
+   Kaynak `belgeler/ekip/vitrin.html` (kart kuralları); `python3 tools/vitrin.py`
    yazar, `tools/ortak.py --yay` üç arayüze dağıtır. Kural: kartın
    biçimi vitrinde değişir, burada değil. Ayrıntı: tools/vitrin.py. */
 .vk{

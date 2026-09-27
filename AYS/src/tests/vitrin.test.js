@@ -1,4 +1,4 @@
-/* VİTRİN KARTLARI EKRANDA (ekip/vitrin.html → brand/ortak çizicileri).
+/* VİTRİN KARTLARI EKRANDA (belgeler/ekip/vitrin.html → brand/ortak çizicileri).
    Her kart DOM'da kendi katalog numarasını (data-oz) taşır; envanter onu
    «ekranda» sayar. Veri yokken kart sıfır değil «—» / «veri yok» der. */
 (function(){

@@ -4,7 +4,7 @@
    Kardeşi `SPI/tools/loadcheck.js` bir gerçek olaydan doğdu: ofis
    ekranının bir çizimi beş yıllık veriyle 996 ms sürüyordu, boş veriyle
    60 ms. Diğer bütün koşumlar dokuz aylık hacimle ölçtüğü için o
-   yavaşlamayı hiçbiri göremedi. `README.md` şunu vaat ediyor: «Bir
+   yavaşlamayı hiçbiri göremedi. `belgeler/TEKNIK.md` şunu vaat ediyor: «Bir
    denetim bir sistemde bir hata bulduysa, aynı denetim ötekilere de
    taşınır.» Bu dosya o sözün ESP'deki karşılığıdır.
 

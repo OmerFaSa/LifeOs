@@ -1,11 +1,11 @@
 # Talimat raporu — sıradaki Claude için
 
 > Son güncelleme: 2026-09-23 gece · yalnız «şimdi + sıradaki». Bitmiş işlerin ayrıntısı,
-> eski sorular ve eski özetler: `ekip/arsiv/DEVIR-2026-09.md` (tam metin).
+> eski sorular ve eski özetler: `belgeler/ekip/arsiv/DEVIR-2026-09.md` (tam metin).
 > Her madde bitince bu dosya güncellenir; limit ortada biterse sonraki oturum buradan sürer.
 >
 > **2026-09-24 · Part 9 (tek tasarım + 183 katalog özelliği) artık üç rollü ekiple yürür:**
-> `ekip/EKIP-PLANI.md` (KARTLAR · TASARIM · HATA) ve canlı pano `ekip/EKIP-DURUM.md`.
+> `belgeler/ekip/EKIP-PLANI.md` (KARTLAR · TASARIM · HATA) ve canlı pano `belgeler/ekip/EKIP-DURUM.md`.
 > Bu dosyadaki diğer açık işler (HKM tarafı) o ekibin kapsamında değildir.
 
 ## ⚡ HIZ KURALLARI (2026-09-23, kullanıcı: «sürenin kısalması için tüm koşulları uygula»)
@@ -24,7 +24,7 @@
 5. **GEREKSİZ İŞ YOK:** keşif betikleri scratchpad'de; belgeye yalnız yapılanın özeti.
 
 **Durum:** ✅ 2a arşiv · ✅ 2b tarama · ✅ Grup 1 · ✅ Grup 2 · ✅ Grup 3 · ✅ Grup 4 ·
-✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ✅ tam koşum (2026-09-24, 24/24) · ✅ SPİ su hatası · ✅ 8f ESP belge (tarih + felsefe) · ✅ 8f-2 (okuma, yazı) · ✅ diksiyon belgesi · ✅ Y5 · ✅ Y11 · ✅ 10a · ✅ 11 · ✅ 16 · ✅ 17 · ✅ 18 · ❓ 10b, 14, Y1, Y10, diksiyon · ⏳ cevaplı maddeler · ⏳ Part 9 (harita ONAY BEKLİYOR: `ekip/CEKMECE-HARITASI.md`)
+✅ 8c-2 · ✅ 8c-3 · ✅ 8d dil + gitar · ✅ 8e · ✅ tam koşum (2026-09-24, 24/24) · ✅ SPİ su hatası · ✅ 8f ESP belge (tarih + felsefe) · ✅ 8f-2 (okuma, yazı) · ✅ diksiyon belgesi · ✅ Y5 · ✅ Y11 · ✅ 10a · ✅ 11 · ✅ 16 · ✅ 17 · ✅ 18 · ❓ 10b, 14, Y1, Y10, diksiyon · ⏳ cevaplı maddeler · ⏳ Part 9 (harita ONAY BEKLİYOR: `belgeler/ekip/CEKMECE-HARITASI.md`)
 
 ### 2b tarama sonucu (2026-09-23) — var olan yeniden yazılmaz
 
@@ -52,7 +52,7 @@
 1. `AGENTS.md` — doktrin: sayıyı ve kararı KOD verir, model yalnız cümle kurar; eksik
    veri sıfır değildir (ölçüldü / tahmin / hesaplandı / veri yok); sıfır bağımlılık; HKM
    hiçbir modüle yazmaz, teklif bırakır; aksiyonların üç seviyesi; ekranda düzgün Türkçe.
-2. Bu dosya (sıra yukarıda). 3. `ekip/PLAN.md` — büyük plan.
+2. Bu dosya (sıra yukarıda). 3. `belgeler/ekip/PLAN.md` — büyük plan.
 
 ## 1. Kullanıcının kuralları
 
@@ -239,7 +239,7 @@ listesi tek yerde genişler. Tam plan: arşiv § Part 8.
 **Kullanıcı 2026-09-24: «tasarımı en son yapacağız, benden onay isteyeceksin; onun harici
 kalanları yap».** Part 9'a ancak geri kalan her şey bitince ve kullanıcı haritayı onaylayınca
 başlanır.
-**Harita taslağı hazır, ONAY BEKLİYOR:** `ekip/CEKMECE-HARITASI.md` (8 ortak çekmece; dört
+**Harita taslağı hazır, ONAY BEKLİYOR:** `belgeler/ekip/CEKMECE-HARITASI.md` (8 ortak çekmece; dört
 karar sorusu sonunda). Onaysız uygulanmaz.
 Her şey bitince. Bütün sistem (AYS, SPİ, ESP, HKM web) **modern, sade, minimalist** tek
 tasarıma geçer; bugünkü sorun iç içelik (kart içinde sekme içinde alt sekme). Çekmece
@@ -359,11 +359,11 @@ HKM 597, ESP 1359, entegre temiz.
   - Grup 4 denetimi: HKM 562/562; üç duman testi, HKM yüzü, `tools/entegre.js` temiz;
     `ortak.py --denetle` 42 dosya/125 kopya aynı.
 
-### HATALAR.md turu (2026-09-24) — iki Claude, bölüşüm `ekip/IS-BOLUSUMU.md`
+### HATALAR.md turu (2026-09-24) — iki Claude, bölüşüm `belgeler/ekip/IS-BOLUSUMU.md`
 
 **TUR BİTTİ: 45 bulgunun 45'i kapandı.** A: HKM payı + atanmamış O-6, D-5 + B'den
 devralınan D grubu. B: KR-1, Y-6, Y-5/O-4/D-6, Y-4, Y-8/B-2/B-3, Y-2 (AYS), Y-7 (modül),
-O-3/O-5/O-8/O-10/O-11 (ayrıntı `ekip/HATALAR-ILERLEME-B.md`). B-1'in README yarısı («312
+O-3/O-5/O-8/O-10/O-11 (ayrıntı `belgeler/ekip/HATALAR-ILERLEME-B.md`). B-1'in README yarısı («312
 test») A tarafından kaldırıldı; sayılar yalnız README'nin sayılar bloğunda.
 
 **B'nin bildirdiği davranış değişiklikleri (bilinçli):**
@@ -387,7 +387,7 @@ düzenlenebilir önizleme, Telegram'da «fiş» başlıklı fotoğraf → taslak
 **Açık soru:** telefonun ev ağından HKM'ye bağlanması için HKM'yi ev ağına açmak gerekiyor
 (şu an yalnız 127.0.0.1); «lokal ağa karışma» kuralı gereği kullanıcı onayı bekleniyor.
 
-B'nin ilerlemesi `ekip/HATALAR-ILERLEME-B.md`'de. A'nın payı (yalnız `HKM/`) **bitti**;
+B'nin ilerlemesi `belgeler/ekip/HATALAR-ILERLEME-B.md`'de. A'nın payı (yalnız `HKM/`) **bitti**;
 her madde önce kırmızı test, sonra düzeltme:
 
 | Kod | Ne değişti | Commit |
@@ -551,7 +551,7 @@ okuma denetimi → tarihli onay → mevcut içe aktarma + «İçe aktarmayı ger
 taşıma adımları TEK metin `yedek.TASIMA_ADIMLARI`: zip BENİOKU'su ve HKM › Sistemler › Modül
 yedekleri aynı metni gösterir — HKM kalıyorsa / HKM de taşınıyorsa `python3 hkm.py geri
 hkm/hkm-ambar.json` / HKM yoksa dosyadan). AYS 1683, SPİ 1332, ESP 1357, HKM 587; üç duman + yüz temiz.
-**41 FİKİR BİTTİ.** Yalnız Part 9 (tek tasarım + çekmece) kaldı; harita `ekip/CEKMECE-HARITASI.md`
+**41 FİKİR BİTTİ.** Yalnız Part 9 (tek tasarım + çekmece) kaldı; harita `belgeler/ekip/CEKMECE-HARITASI.md`
 kullanıcı onayı bekliyor. Açık sorular: 10b, 14, Y1, Y10, diksiyon.
 **Sıra:** HKM küçükler (47, 51, 53, 55, 44, 48) → AYS (18, 20, 23, 25, 26, 28, 6) → SPİ (30, 34,
 35, 36, 37, 4, 16) → ESP (38, 41, 39, 16) → büyükler (1, 2, 3, 7, 21, 29, 42, 43, 54).

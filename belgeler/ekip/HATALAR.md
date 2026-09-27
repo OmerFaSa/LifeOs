@@ -11,7 +11,7 @@
 
 ---
 
-## Tur 2 — tek tasarım (ekip/EKIP-PLANI.md) · H yazar
+## Tur 2 — tek tasarım (belgeler/ekip/EKIP-PLANI.md) · H yazar
 
 > Tur 1 (aşağıda) kapalıdır; kodda ona bağlantı var, silinmez. Tur 2 bulguları
 > buraya, en yenisi üstte, `T2-NN` koduyla yazılır. Biçim AGENTS §4:

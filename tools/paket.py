@@ -119,7 +119,7 @@ def yuzeyler():
 
 def doktrin():
     """Belgelerden kural başlıklarını toplar — özet değil ALINTI."""
-    kaynaklar = [("README.md", 0), ("HKM/MIMARI.md", 0), ("ESP/src/MIMARI.md", 0),
+    kaynaklar = [("README.md", 0), ("belgeler/TEKNIK.md", 0), ("HKM/MIMARI.md", 0), ("ESP/src/MIMARI.md", 0),
                  ("SPI/src/MIMARI.md", 0), ("AYS/src/OFIS.md", 0)]
     satir = ["## 3. Doktrin — bu depoda neyin YAPILMADIĞI", "",
              "Aşağıdakiler belgelerin kendi başlıklarıdır; öneri getirirken",

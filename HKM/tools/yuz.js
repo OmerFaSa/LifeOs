@@ -31,7 +31,7 @@ const TOKEN = 'yuz-denetimi-icin-gecici-jeton';
  * Motto ve Hedefler K7'den beri yuzdeydi ama burada yoktu, hic
  * olculmuyordu (2026-09-25; test_yuz iki listeyi karsilastirir). */
 const GORUNUMLER = ['bugun', 'sohbet', 'sistemler', 'profil', 'motto', 'hedefler', 'ofis', 'teklifler', 'para'];
-/* K7 (ekip/EKIP-PLANI §8-9): Ayarlar'ın yedi paneli dört bölümde; bölüm
+/* K7 (belgeler/ekip/EKIP-PLANI §8-9): Ayarlar'ın yedi paneli dört bölümde; bölüm
    bütün panellerini alt alta gösterir, yani yedi panelin hepsi ölçülür. */
 const AYAR_SEKMELERI = ['yapayzeka', 'kanallar', 'esikler', 'sunucu'];
 /* K7: Profil, Motto ve Para artık bir çekmecenin BÖLÜMÜ: üstte çekmece,

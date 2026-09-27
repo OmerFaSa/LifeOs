@@ -1,6 +1,6 @@
 # ESP — Stil Rehberi
 
-> ## v4 — geçerli görsel dil (2026-09-24, ekip/EKIP-PLANI.md §2)
+> ## v4 — geçerli görsel dil (2026-09-24, belgeler/ekip/EKIP-PLANI.md §2)
 >
 > Özet budur; Renk, Tipografi ve Ölçü'nün ayrıntısı üç modülde aynıdır ve
 > `AYS/src/STIL.md`'de durur (jetonlar ortak). Çelişkide `jeton.css` geçer.

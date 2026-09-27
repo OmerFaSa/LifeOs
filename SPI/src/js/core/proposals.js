@@ -11,7 +11,7 @@
    alınabilir kalır — ama ÖLÇÜM yazan eylem (tek ölçüm, bir öğün, bir
    seans, şikâyet; katalogda `olcum:true`) hiçbir ayarda sormadan
    yazılmaz: «7 saat uyumadım» 420 dakikalık seans olarak sessizce
-   yazılıyordu (ekip/HATALAR.md KR-1). Tahlil değeri ve bölüm gizleme
+   yazılıyordu (belgeler/ekip/HATALAR.md KR-1). Tahlil değeri ve bölüm gizleme
    ORTA'dır, her zaman sorulur; modelin yorumladığı cümle de onay bekler. Sağlık verisinde yanlış bir kayıt, eksik bir kayıttan
    kötüdür — eksik kayıt kendini belli eder, yanlış kayıt etmez. Karar
    tek yerde verilir: otomatikMi().
@@ -65,7 +65,7 @@ SP.Proposals = (function(){
   /* ==================== geri alma sırası ====================
 
      «uyku 7» sonra «uyku 7,5» girilip ilki geri alınınca uyku boşalıyordu:
-     geri alma eski değeri MUTLAK yazıyordu (ekip/HATALAR.md Y-6). Kural:
+     geri alma eski değeri MUTLAK yazıyordu (belgeler/ekip/HATALAR.md Y-6). Kural:
      aynı alana sonra yazan bir kayıt varsa değer onundur, dokunulmaz ve
      onun anlık görüntüsü bu kayıt hiç olmamış gibi düzeltilir; yoksa alan
      hâlâ bu kaydın değerindeyse eski hâline döner, elle değiştirilmişse
@@ -442,7 +442,7 @@ SP.Proposals = (function(){
 
     /* Sayısı bulunmuş ama ÖLÇÜM OLMAYAN parça («7 saat uyumadım», «yarın
        30 dakika yürüyeceğim») yazılmaz; nedeni ve sorulacak cümle
-       `engellenen`de döner (ekip/HATALAR.md KR-1). */
+       `engellenen`de döner (belgeler/ekip/HATALAR.md KR-1). */
     function dene(p){
       let parsed = null;
       try{ parsed = SP.Quick.parseHam(p); }catch(e){ parsed = null; }
@@ -574,7 +574,7 @@ SP.Proposals = (function(){
   /* Tek karar noktasi. Kucuk degilse asla; bilinmeyen ayar varsayilan
      gibi davranir — bozuk bir ayar kendiliginden «hepsi»ne donmemeli.
      Olcum yazan eylem (katalogda `olcum:true`) hicbir ayarda sormadan
-     yazilmaz (ekip/HATALAR.md KR-1). */
+     yazilmaz (belgeler/ekip/HATALAR.md KR-1). */
   function otomatikMi(row, mod){
     if(!row || row.level !== 'kucuk') return false;
     if((eylem(row.action) || {}).olcum) return false;

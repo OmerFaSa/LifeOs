@@ -1,7 +1,7 @@
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/ayar.js içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* AYAR — T5 (ekip/EKIP-PLANI.md §4.2): ayar ekranlarının ortak davranışı.
+/* AYAR — T5 (belgeler/ekip/EKIP-PLANI.md §4.2): ayar ekranlarının ortak davranışı.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/ayar.js`; `tools/ortak.py --yay` ile üç arayüzün

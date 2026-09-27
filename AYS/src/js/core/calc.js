@@ -119,7 +119,7 @@ R.Calc = (function(){
     const score = blocks.reduce((s,b) => s + (b.status === 'done' ? 1 : b.status === 'partial' ? 0.5 : 0), 0);
     return U.pct(score, blocks.length);
   }
-  /* GUNUN SORUSU — tek tanim (ekip/HATALAR.md O-5): bloklara yazilan
+  /* GUNUN SORUSU — tek tanim (belgeler/ekip/HATALAR.md O-5): bloklara yazilan
      soru + derse baglanmayan serbest soru («soru 40») + paragraf +
      problem. Paragraf ve problem de YKS sorusudur; HKM isareti onlari
      bilerek sayar (yalniz paragraf cozulen gun «veri yok» gorunmesin).

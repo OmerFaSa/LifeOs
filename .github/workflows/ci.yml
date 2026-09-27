@@ -238,10 +238,10 @@ jobs:
 
   envanter:
     name: Envanter + sadelik — tek tasarıma geçerken kayıp yok
-    # ekip/EKIP-PLANI.md: «hicbir sey silinmez, katmanlanir». Tabandaki
-    # (ekip/envanter/taban-*.json) her eylem, isleyici ve giris alani
+    # belgeler/ekip/EKIP-PLANI.md: «hicbir sey silinmez, katmanlanir». Tabandaki
+    # (belgeler/ekip/envanter/taban-*.json) her eylem, isleyici ve giris alani
     # bugunku kodda da bulunmali; bilerek kaldirilan yalniz kullanici
-    # onayiyla ekip/envanter/kaldirilan.json'a yazilir. Uc arayuzu iki
+    # onayiyla belgeler/ekip/envanter/kaldirilan.json'a yazilir. Uc arayuzu iki
     # profil ve iki genislikte gezer (~4 dk).
     runs-on: ubuntu-latest
     steps:

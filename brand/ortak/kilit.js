@@ -1,4 +1,4 @@
-/* GİZLİLİK KİLİDİ — katalog 176 (T5, ekip/EKIP-PLANI.md §4.2).
+/* GİZLİLİK KİLİDİ — katalog 176 (T5, belgeler/ekip/EKIP-PLANI.md §4.2).
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/kilit.js`; `tools/ortak.py --yay` ile üç arayüzün

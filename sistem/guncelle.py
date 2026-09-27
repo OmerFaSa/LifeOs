@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 """LifeOS — GUNCELLEME (main dalindan).
 
-     python3 guncelle.py              # varsa guncellemeyi indirir
-     python3 guncelle.py --kontrol    # yalniz bakar, hicbir seyi degistirmez
-     python3 guncelle.py --yeniden    # indirir, sonra sistemi yeniden baslatir
+     python3 sistem/guncelle.py       # varsa guncellemeyi indirir
+     python3 sistem/guncelle.py --kontrol # yalniz bakar, hicbir seyi degistirmez
+     python3 sistem/guncelle.py --yeniden # indirir, sonra sistemi yeniden baslatir
                                       # (GUNCELLE.bat bunu cagirir)
 
    Giris sayfasindaki «Güncelle» dugmesi de AYNI iki islevi cagirir
@@ -32,7 +32,8 @@ import sys
 
 sys.dont_write_bytecode = True
 
-KOK = os.path.dirname(os.path.abspath(__file__))
+SISTEM = os.path.dirname(os.path.abspath(__file__))
+KOK = os.path.dirname(SISTEM)          # deponun koku (sistem/ bir alt klasor)
 UZAK = "origin"
 DAL = "main"
 
@@ -92,7 +93,7 @@ def durum(kok=KOK, calistir=subprocess.run, getir=True):
 
 # Eski surumlerin kok klasorde biraktigi, git disi URETILMIS artiklar.
 # Liste kapalidir: kullanici verisi (HKM/db, config) burada hic gecmez.
-ARTIKLAR = ("sunucu.log", "__pycache__")
+ARTIKLAR = ("sunucu.log", "__pycache__", os.path.join("sistem", "__pycache__"))
 
 
 def artiklari_temizle(kok=KOK):
@@ -191,7 +192,7 @@ def main(argv=None):
     # dosyasini degistirmis olabilir ve onu ancak yeniden baslatma yukler.
     if "--yeniden" in argv:
         print("\n  Sistem yeniden başlatılıyor…")
-        baslat = os.path.join(KOK, "baslat.py")
+        baslat = os.path.join(SISTEM, "baslat.py")
         subprocess.call([sys.executable, baslat, "--dur"], cwd=KOK)
         return subprocess.call([sys.executable, baslat], cwd=KOK)
     return 0

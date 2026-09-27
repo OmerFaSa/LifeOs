@@ -202,7 +202,7 @@ ESP.Beacon = (function(){
     /* Sentez açığı: en eski BAĞLANMAMIŞ notun yaşı. Hiç not yoksa bu bir
        «0 gün açık» değil, ölçülmemiş bir alandır. Bağlantı durumu BUGÜNÜN
        durumudur; geçmiş bir gün için o günün açığı değildir ve o günden
-       sonra yazılmış not yaşı eksi çıkarıyordu (ekip/HATALAR.md Y-5). */
+       sonra yazılmış not yaşı eksi çıkarıyordu (belgeler/ekip/HATALAR.md Y-5). */
     const notlar = (S.notes || []);
     if(!notlar.length || gecmisMi(d)){
       out.synthesis_gap_days = metric(null, 'missing');
@@ -472,7 +472,7 @@ ESP.Beacon = (function(){
       /* Gövdeye özgü ret (400, 409, 413, 422) YALNIZ o günündür: geri kalan
          günler gönderilmeye devam eder ve hangi günün neden reddedildiği
          saklanır. Ağ, yetki ya da sunucu hatası bütün günler için aynıdır:
-         orada durulur (ekip/HATALAR.md D-6). */
+         orada durulur (belgeler/ekip/HATALAR.md D-6). */
       if(GOVDE_RETTI.indexOf(durum) >= 0){
         reddedilen.push({ date:t, status:durum, why:await retNedeni(res) });
         continue;

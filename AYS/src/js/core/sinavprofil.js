@@ -1,5 +1,5 @@
 /* SINAV PROFİLLERİ — AYS'nin tek bir sınava bağlı kalmaması
-   (ekip/PLAN.md §3.L; Tur 4).
+   (belgeler/ekip/PLAN.md §3.L; Tur 4).
 
    Yerleşik profil YKS SAY'dır (data/subjects.js). Başka bir sınavın (KPSS,
    DGS, ALES, YDS…) müfredatı UYDURULMAZ: King'e iş emri gider, BAM

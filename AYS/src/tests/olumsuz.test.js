@@ -7,7 +7,7 @@
    Kaynağı `brand/ortak/olumsuz.test.js`; `tools/ortak.py --yay` ile üç
    arayüzün `src/tests/` klasörüne birebir kopyalanır.
 
-   Kanıtladığı sözler (ekip/HATALAR.md KR-1): olumsuz, ileriye dönük,
+   Kanıtladığı sözler (belgeler/ekip/HATALAR.md KR-1): olumsuz, ileriye dönük,
    istek, soru ya da belirsiz bir cümle ölçüm diye yazılmaz; olumsuz bir
    istek tersine çevrilmez; komutun KENDİSİ olan olumsuz söz («bugün
    çalışmayacağım») komut olarak kalır; «bacak», «komedi», «tamam» gibi

@@ -1,4 +1,4 @@
-/* DEĞERLENDİRME SETİ — SPİ (ekip/PLAN.md §3.J, §6).
+/* DEĞERLENDİRME SETİ — SPİ (belgeler/ekip/PLAN.md §3.J, §6).
 
    Örnek hedef cümleleri ve BEKLENEN kararları. Kural değişince hangi
    kararın değiştiği burada ADIYLA görünür: her cümle ayrı bir testtir.

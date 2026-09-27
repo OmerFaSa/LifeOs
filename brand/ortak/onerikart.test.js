@@ -4,7 +4,7 @@
    Kaynağı `brand/ortak/onerikart.test.js`; `tools/ortak.py --yay` ile üç
    arayüzün `src/tests/` klasörüne birebir kopyalanır.
 
-   Kural (ekip/EKIP-PLANI.md §4.1): P1 kartının kabul ölçütü testin İLK
+   Kural (belgeler/ekip/EKIP-PLANI.md §4.1): P1 kartının kabul ölçütü testin İLK
    satırıdır ve test adında özelliğin numarası geçer (`oz-110 …`). */
 
 (function(){

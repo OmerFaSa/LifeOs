@@ -1,4 +1,4 @@
-/* Kütüphanem — BAM'ın SPİ için ürettikleri TEK yerde (ekip/CEKMECE-HARITASI.md).
+/* Kütüphanem — BAM'ın SPİ için ürettikleri TEK yerde (belgeler/ekip/CEKMECE-HARITASI.md).
 
    «Kütüphane» adı yalnız burada. Üç şey:
      Bilgi iste    besin değeri, market fiyatı ya da yer listesi HKM'nin

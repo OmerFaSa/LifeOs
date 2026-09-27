@@ -149,7 +149,7 @@ LIFEOS.YedekAg = (function(){
   /* ONAY KARTININ SÖZÜ — üç arayüzün HKM kartı bu cümleyi gösterir.
      Kart «HKM'nin var olduğunu bilmez, işaret tek yönlüdür, tahlil GİTMEZ»
      diyordu; oysa aynı anahtar günde bir kez modülün BÜTÜN verisini
-     yedek olarak HKM'ye yolluyor (ekip/HATALAR.md Y-8, B-2). Anahtarın
+     yedek olarak HKM'ye yolluyor (belgeler/ekip/HATALAR.md Y-8, B-2). Anahtarın
      neyi açtığı, açılmadan önce eksiksiz söylenir. */
   function kartNotu(ad){
     const a = String(ad || 'Bu modül');

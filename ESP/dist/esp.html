@@ -3880,7 +3880,7 @@ body.is-dragging .drop.is-over{
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/temel.css içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* TEMEL BİLEŞENLER — v4 (ekip/EKIP-PLANI.md T1).
+/* TEMEL BİLEŞENLER — v4 (belgeler/ekip/EKIP-PLANI.md T1).
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/temel.css`; `tools/ortak.py --yay` ile üç arayüzün
@@ -4054,7 +4054,7 @@ body.is-dragging .drop.is-over{
    Düzeltme brand/ortak/vitrin.css içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
 /* VİTRİN KARTLARI — ÜRETİLMİŞ DOSYA, ELLE DÜZENLEME.
-   Kaynak `ekip/vitrin.html` (kart kuralları); `python3 tools/vitrin.py`
+   Kaynak `belgeler/ekip/vitrin.html` (kart kuralları); `python3 tools/vitrin.py`
    yazar, `tools/ortak.py --yay` üç arayüze dağıtır. Kural: kartın
    biçimi vitrinde değişir, burada değil. Ayrıntı: tools/vitrin.py. */
 .vk{
@@ -5558,7 +5558,7 @@ body.is-dragging .drop.is-over{
    Markupı `brand/ortak/{sayi,grafik,oneri,sozluk,guven}.js` üretir.
    ==================================================================
 
-   JETON KURALI (ekip/EKIP-PLANI.md §2)
+   JETON KURALI (belgeler/ekip/EKIP-PLANI.md §2)
 
    Burada ham renk, boşluk, köşe ve süre YAZILMAZ; yalnız T'nin
    jetonları kullanılır (`brand/ortak/jeton.css`, `tokens.css`). Tek
@@ -9753,7 +9753,7 @@ button.rutbe-rozet:focus-visible{
    Kaynağı `brand/ortak/kabuk.css`; `tools/ortak.py --yay` ile üç arayüzün
    `src/css/` klasörüne birebir kopyalanır. Çizimi `kabuk.js` yapar.
 
-   Kurallar (ekip/EKIP-PLANI.md §1.3, §2):
+   Kurallar (belgeler/ekip/EKIP-PLANI.md §1.3, §2):
    · ham renk yok — yalnız jeton.css;
    · gölge yalnız açılır katmanda (katman, hızlı ekle);
    · etkin sekme ton + ince çizgiyle ayrılır, dolu renk yalnız sayaçta;
@@ -10471,7 +10471,7 @@ a.kenar__modul:hover{ color:var(--text); }
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* HAREKET — T4 (ekip/EKIP-PLANI.md §4.2). Kaynak: brand/ortak/hareket.css;
+/* HAREKET — T4 (belgeler/ekip/EKIP-PLANI.md §4.2). Kaynak: brand/ortak/hareket.css;
    `tools/ortak.py --yay` üç arayüze kopyalar. Sınıfları `hareket.js` koyar:
    yalnız DEĞİŞEN öğe hareket eder, yeniden çizim animasyonu tekrarlatmaz.
    Azaltılmış harekette hepsi kapanır (en altta). */
@@ -12029,7 +12029,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'6c9ef36', at:'2026-09-26 23:21', dirty:true };
+ESP.BUILD = { id:'b4d904f', at:'2026-09-27 00:00', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -12145,7 +12145,7 @@ LIFEOS.KESINLIK_HTML = function(id, secenekler){
    Biçimi `brand/ortak/kart.css` içindedir.
    ==================================================================
 
-   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §B)
+   NE YAPAR (katalog, belgeler/ekip/TASARIM-OZELLIKLERI.md §B)
 
      024  Kesinlik glifleri   sayı dört etiketten birini TAŞIR; yalnız
                               «tahmin» olanın altı kesik çizilir, «veri
@@ -12530,7 +12530,7 @@ window.LIFEOS = window.LIFEOS || {};
       return { anlam:'yok', sinif:'fark fark--yok', metin:'—',
         sr:(f.ek ? f.ek + ' ' : '') + 'karşılaştırılacak değer yok' };
     }
-    /* Karar GÖSTERİLEN değerden verilir (ekip/HATALAR.md T2-01): ham 0,3
+    /* Karar GÖSTERİLEN değerden verilir (belgeler/ekip/HATALAR.md T2-01): ham 0,3
        ekrana «0» yazılırken «+0, iyi yönde» denmez. Hassasiyet `bicim`'in
        varsayılanıyla aynı; yuvarlama yarımda sıfırdan uzağa, iki yönde eşit. */
     const od = f.ondalik == null ? (Number.isInteger(f.deger) ? 0 : 1) : f.ondalik;
@@ -12711,7 +12711,7 @@ window.LIFEOS = window.LIFEOS || {};
    Biçimi `brand/ortak/kart.css` içindedir.
    ==================================================================
 
-   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §B)
+   NE YAPAR (katalog, belgeler/ekip/TASARIM-OZELLIKLERI.md §B)
 
      027  Eksik gün boşluğu   verisi olmayan gün çizgide BOŞLUK kalır;
                               iki yanı kesik bir köprüyle bağlanır, çizgi
@@ -12767,7 +12767,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ------------------------------------------------------- tarih */
 
-  /* Gün YEREL takvimden alınır (ekip/HATALAR.md T2-03). Yalnız tarih
+  /* Gün YEREL takvimden alınır (belgeler/ekip/HATALAR.md T2-03). Yalnız tarih
      («2026-09-25») olduğu gibi okunur; saat taşıyan damga
      («…T22:30:00Z») yerel güne çevrilir — ilk on karakteri UTC günüdür
      ve İstanbul'da 00:00–03:00 kaydını düne yazar. Tarih olmayan dize
@@ -13505,7 +13505,7 @@ window.LIFEOS = window.LIFEOS || {};
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/vitrin.js içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* VİTRİN KARTLARI — kataloğun (ekip/vitrin.html) kartlarını GERÇEK
+/* VİTRİN KARTLARI — kataloğun (belgeler/ekip/vitrin.html) kartlarını GERÇEK
    veriyle çizen tek kalıp.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
@@ -15201,7 +15201,7 @@ window.LIFEOS = window.LIFEOS || {};
    Biçimi `brand/ortak/kart.css` içindedir.
    ==================================================================
 
-   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §F, §I, §L)
+   NE YAPAR (katalog, belgeler/ekip/TASARIM-OZELLIKLERI.md §F, §I, §L)
 
      110  Mor öneri kartı     Merkez'den gelen her öneri mor kartta ve
                               seviye rozetiyle. Modülün kendi önerisi
@@ -15367,7 +15367,7 @@ window.LIFEOS = window.LIFEOS || {};
 
      Hiçbir ayarda sormadan UYGULANMAYANLAR:
        · küçük olmayan her şey (katalog seviyesiyle — 111)
-       · ölçüm yazan aksiyon (`olcum:true`, ekip/HATALAR.md KR-1)
+       · ölçüm yazan aksiyon (`olcum:true`, belgeler/ekip/HATALAR.md KR-1)
        · çakışma çözümü (112: son sözü kullanıcı söyler) */
   const MODLAR = ['istek', 'hepsi', 'hicbiri'];
 
@@ -15913,7 +15913,7 @@ window.LIFEOS = window.LIFEOS || {};
    Biçimi `brand/ortak/kart.css` içindedir.
    ==================================================================
 
-   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §A, §G)
+   NE YAPAR (katalog, belgeler/ekip/TASARIM-OZELLIKLERI.md §A, §G)
 
      016  Terim ipucu         «Tekrar borcu» gibi terimlerin altı noktalı;
                               üzerine gelince (dokunmatikte basılı tutunca)
@@ -16111,7 +16111,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* Ajanın masasındaki veri kimlikleri (`data/agents.js` `reads`) iç
      adlardır: «gunun_akisi», «haftalar (review)». Ekrana ASCII kimlik
-     yazılmaz (AGENTS.md §1.8, ekip/HATALAR.md T2-02); ad buradan gelir.
+     yazılmaz (AGENTS.md §1.8, belgeler/ekip/HATALAR.md T2-02); ad buradan gelir.
 
      Adlar ve kesinlik, aracın KENDİ açıklamasından (AYS `core/tools.js`
      ve koçun `scope` alanı): «tahmini puan BANDI» → tahmin; risk, medyan,
@@ -16192,7 +16192,7 @@ window.LIFEOS = window.LIFEOS || {};
    Biçimi `brand/ortak/kart.css` içindedir.
    ==================================================================
 
-   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §K)
+   NE YAPAR (katalog, belgeler/ekip/TASARIM-OZELLIKLERI.md §K)
 
      173  Yedek durumu        son yedeğin yaşı, tarihi ve boyutu; iki
                               haftalık yedek izi; tek düğmeyle yedek.
@@ -16450,7 +16450,7 @@ window.LIFEOS = window.LIFEOS || {};
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/kabuk.js içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* KABUK — üç arayüzün aynı iskeleti (ekip/EKIP-PLANI.md §3, T2).
+/* KABUK — üç arayüzün aynı iskeleti (belgeler/ekip/EKIP-PLANI.md §3, T2).
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/kabuk.js`; `python3 tools/ortak.py --yay` ile üç
@@ -16458,7 +16458,7 @@ window.LIFEOS = window.LIFEOS || {};
    düzenleme. Biçimi `brand/ortak/kabuk.css` içindedir.
    ==================================================================
 
-   NE ÇİZER (katalog, ekip/TASARIM-OZELLIKLERI.md)
+   NE ÇİZER (katalog, belgeler/ekip/TASARIM-OZELLIKLERI.md)
 
      ÜST ÇUBUK   modül geçiş menüsü (08) · sekiz çekmece · Onaylar'ın mor
                  sayacı (115) · ara ⌘K (13) · zil (09) · bağlantı noktası
@@ -17093,7 +17093,7 @@ window.LIFEOS = window.LIFEOS || {};
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.js içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* HAREKET — T4 (ekip/EKIP-PLANI.md §4.2): hareket ve odak, üç arayüzde aynı.
+/* HAREKET — T4 (belgeler/ekip/EKIP-PLANI.md §4.2): hareket ve odak, üç arayüzde aynı.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/hareket.js`; `tools/ortak.py --yay` ile üç
@@ -17525,7 +17525,7 @@ window.LIFEOS.HAREKET = (function(){
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/ayar.js içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* AYAR — T5 (ekip/EKIP-PLANI.md §4.2): ayar ekranlarının ortak davranışı.
+/* AYAR — T5 (belgeler/ekip/EKIP-PLANI.md §4.2): ayar ekranlarının ortak davranışı.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/ayar.js`; `tools/ortak.py --yay` ile üç arayüzün
@@ -17851,7 +17851,7 @@ window.LIFEOS.AYAR = (function(){
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/yenilik.js içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* NE DEĞİŞTİ? — katalog 17 (T5, ekip/EKIP-PLANI.md §4.2).
+/* NE DEĞİŞTİ? — katalog 17 (T5, belgeler/ekip/EKIP-PLANI.md §4.2).
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/yenilik.js`; `tools/ortak.py --yay` ile üç
@@ -17950,7 +17950,7 @@ window.LIFEOS.YENILIK = (function(){
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/kilit.js içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* GİZLİLİK KİLİDİ — katalog 176 (T5, ekip/EKIP-PLANI.md §4.2).
+/* GİZLİLİK KİLİDİ — katalog 176 (T5, belgeler/ekip/EKIP-PLANI.md §4.2).
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/kilit.js`; `tools/ortak.py --yay` ile üç arayüzün
@@ -18683,7 +18683,7 @@ LIFEOS.Gizle = (function(){
 
    Üç arayüzün cümle ayrıştırıcısı sayıyı ve anahtar kelimeyi bulup eylem
    kuruyordu; «bugün 40 soru çözmedim» 40 soru, «7 saat uyumadım» 7 saatlik
-   uyku, «diksiyonu kapatma» bölümü kapat oluyordu (ekip/HATALAR.md KR-1).
+   uyku, «diksiyonu kapatma» bölümü kapat oluyordu (belgeler/ekip/HATALAR.md KR-1).
    HKM bunu `core/dil.py olumsuz()` ile çözmüştü; modüller çözmemişti.
 
    Sözler:
@@ -18897,7 +18897,7 @@ LIFEOS.Olumsuz = (function(){
    adıyla anahtarlanır. Aynı cihazda iki profil (hane üyesi) ayrı ayrı
    bağlanınca iki kişinin uykusu aynı seriye yazılıyor, hafızası
    «unutuldu» oluyor, hedefleri ve yedeği birbirini eziyordu
-   (ekip/HATALAR.md Y-7). Dokuz ay için en küçük doğru yol: bağı TEK
+   (belgeler/ekip/HATALAR.md Y-7). Dokuz ay için en küçük doğru yol: bağı TEK
    profile vermek.
 
    Sözler:
@@ -19876,7 +19876,7 @@ LIFEOS.Urun = (function(){
 
    Motor örneklere göre değil, söylenebilecek HER hedef için kurulur.
    Alanı bilmez: alanı modülün PAKETİ bilir. Paket eklemek motoru
-   değiştirmez. (ekip/PLAN.md §3.0)
+   değiştirmez. (belgeler/ekip/PLAN.md §3.0)
 
    PAKET — modülün verdiği nesne:
      id, ad, olcut:{ ad, birim }, anahtar:RegExp, yonler:[…]
@@ -20580,7 +20580,7 @@ LIFEOS.Hedef = (function(){
 
   /* ------------------------------------------------------------ uyarlama
 
-     UYARLAMA DÖNGÜSÜ (ekip/PLAN.md §2 adım 9). Plan kontrolde geride
+     UYARLAMA DÖNGÜSÜ (belgeler/ekip/PLAN.md §2 adım 9). Plan kontrolde geride
      kalınca hedef BUGÜNÜN verisiyle yeniden değerlendirilir: paket şu
      anki değeri kendisi ölçebiliyorsa (tartı, deneme neti, kapanan konu)
      saklanan eski değer yerine o kullanılır. Karar yine koddur; «bu
@@ -21215,7 +21215,7 @@ LIFEOS.YedekAg = (function(){
   /* ONAY KARTININ SÖZÜ — üç arayüzün HKM kartı bu cümleyi gösterir.
      Kart «HKM'nin var olduğunu bilmez, işaret tek yönlüdür, tahlil GİTMEZ»
      diyordu; oysa aynı anahtar günde bir kez modülün BÜTÜN verisini
-     yedek olarak HKM'ye yolluyor (ekip/HATALAR.md Y-8, B-2). Anahtarın
+     yedek olarak HKM'ye yolluyor (belgeler/ekip/HATALAR.md Y-8, B-2). Anahtarın
      neyi açtığı, açılmadan önce eksiksiz söylenir. */
   function kartNotu(ad){
     const a = String(ad || 'Bu modül');
@@ -22066,7 +22066,7 @@ ESP.Hedefler = (function(){
 
 /* ==== js/core/hedefplan.js ==== */
 /* ESP HEDEF PLANI — aktif bir hedefi günlük düzene çevirir.
-   (ekip/PLAN.md §3.D; Tur 3)
+   (belgeler/ekip/PLAN.md §3.D; Tur 3)
 
    Plan KODDUR; model yok. ESP'nin kendi araçlarını kullanır, yenisini
    icat etmez:
@@ -27657,7 +27657,7 @@ ESP.HINTS = {
 window.ESP = window.ESP || {};
 
 ESP.SECTIONS_ALL = [
-    /* SEKİZ ÇEKMECE (ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
+    /* SEKİZ ÇEKMECE (belgeler/ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
        Üç modülde aynı ad ve sıra; adlar tek kaynaktan gelir
        (`LIFEOS.KABUK.CEKMECELER`, core/nav.js çizim anında okur). Yedi
        eski bölümden nereye: Günlük › Bugün → Bugün; Günlük › Merdiven →
@@ -28635,7 +28635,7 @@ ESP.Store = (function(){
        hic import edememekten daha az kotudur. */
     /* Kopya yazilamazsa ONCEKI ice aktarmanin kopyasi da silinir: kalsaydi
        «geri al» haftalar onceki duruma donup aradaki butun kaydi silerdi
-       (ekip/HATALAR.md O-3). Sonuc bu ice aktarmanin geri alinamayacagini
+       (belgeler/ekip/HATALAR.md O-3). Sonuc bu ice aktarmanin geri alinamayacagini
        soyler. */
     let geriAlinamaz = false;
     try{
@@ -36710,7 +36710,7 @@ ESP.Beacon = (function(){
     /* Sentez açığı: en eski BAĞLANMAMIŞ notun yaşı. Hiç not yoksa bu bir
        «0 gün açık» değil, ölçülmemiş bir alandır. Bağlantı durumu BUGÜNÜN
        durumudur; geçmiş bir gün için o günün açığı değildir ve o günden
-       sonra yazılmış not yaşı eksi çıkarıyordu (ekip/HATALAR.md Y-5). */
+       sonra yazılmış not yaşı eksi çıkarıyordu (belgeler/ekip/HATALAR.md Y-5). */
     const notlar = (S.notes || []);
     if(!notlar.length || gecmisMi(d)){
       out.synthesis_gap_days = metric(null, 'missing');
@@ -36980,7 +36980,7 @@ ESP.Beacon = (function(){
       /* Gövdeye özgü ret (400, 409, 413, 422) YALNIZ o günündür: geri kalan
          günler gönderilmeye devam eder ve hangi günün neden reddedildiği
          saklanır. Ağ, yetki ya da sunucu hatası bütün günler için aynıdır:
-         orada durulur (ekip/HATALAR.md D-6). */
+         orada durulur (belgeler/ekip/HATALAR.md D-6). */
       if(GOVDE_RETTI.indexOf(durum) >= 0){
         reddedilen.push({ date:t, status:durum, why:await retNedeni(res) });
         continue;
@@ -39651,7 +39651,7 @@ ESP.Komut = (function(){
   /* Kapatma isteğinin KENDİSİ olan olumsuz sözler: «diksiyon istemiyorum»
      bir kapatma isteğidir. Olumsuzluk süzgeci (LIFEOS.Olumsuz) bunları
      hariç tutar; geri kalan olumsuzluk («diksiyonu kapatma») isteği
-     durdurur ve sorulur (ekip/HATALAR.md KR-1). */
+     durdurur ve sorulur (belgeler/ekip/HATALAR.md KR-1). */
   const KAPAT_OLUMSUZ_RE = /(çalışmak istemiyorum|çalışmayacağım|istemiyorum|ilgilenmiyorum|ilgilenmeyeceğim)/;
   const AC_RE = new RegExp('(' + ONCE + 'aç' + SONRA + '|açılsın|açmak istiyorum|açar mısın|geri getir|'
     + 'başlamak istiyorum|çalışmak istiyorum|devam etmek istiyorum|tekrar aç)');
@@ -56657,7 +56657,7 @@ ESP.Screens.guide = (function(){
 })();
 
 /* ==== js/screens/onaylar.js ==== */
-/* Onaylar — bekleyen her öneri TEK çekmecede (ekip/CEKMECE-HARITASI.md).
+/* Onaylar — bekleyen her öneri TEK çekmecede (belgeler/ekip/CEKMECE-HARITASI.md).
 
    Dört kaynak, tek yer:
      King teklifi     ücretli iş King'in onay kapısında (HKM core/king.py)
@@ -57077,7 +57077,7 @@ ESP.App = (function(){
   const U = ESP.U, M = ESP.Model, UI = ESP.UI, S = ESP.S;
   const { html, raw, when, map, cls, attrs } = ESP.h;
 
-  /* SEKİZ ÇEKMECE (ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
+  /* SEKİZ ÇEKMECE (belgeler/ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
 
      Üç modülde aynı ad ve sıra; adlar tek kaynaktan gelir
      (`LIFEOS.KABUK.CEKMECELER`). İç içelik en çok iki kat: çekmece ›
@@ -57572,7 +57572,7 @@ ESP.App = (function(){
         body = errorPanel(err);
       }
 
-      /* v4 iskeleti (ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
+      /* v4 iskeleti (belgeler/ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
          sayfa başı · bölüm çubuğu · ekran · sayfa sonu; telefonda alt bant
          ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
       const markup = String(html`

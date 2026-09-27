@@ -1,4 +1,4 @@
-/* Çekmece düzeni — AYS (ekip/EKIP-PLANI.md T2–T3, ekip/CEKMECE-HARITASI.md).
+/* Çekmece düzeni — AYS (belgeler/ekip/EKIP-PLANI.md T2–T3, belgeler/ekip/CEKMECE-HARITASI.md).
 
    Kanıtladığı sözler: menü sekiz çekmecedir ve adları ortak kaynaktan gelir;
    iç içelik en çok iki kattır (çekmece › bölüm); her ekran yolunu söyler

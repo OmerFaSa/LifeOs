@@ -1,6 +1,6 @@
 # SPİ — Stil Rehberi
 
-> ## v4 — geçerli görsel dil (2026-09-24, ekip/EKIP-PLANI.md §2)
+> ## v4 — geçerli görsel dil (2026-09-24, belgeler/ekip/EKIP-PLANI.md §2)
 >
 > Özet budur; ayrıntı aşağıdaki **Renk, Tipografi, Ölçü** bölümlerindedir
 > (T3 sonrası yeniden yazıldı). Çelişkide jetonun kendisi (`jeton.css`) geçer.
@@ -348,7 +348,7 @@ hedef 80–250 · 400 ng/mL» yazmak satırı okunmaz hâle getiriyordu.
 Sekiz çekmece (`LIFEOS.KABUK.CEKMECELER`: Bugün · Plan · Çalışma · Analiz ·
 Onaylar · Ofis · Kütüphanem · Ayarlar); hangi ekranın hangi çekmecede
 durduğu `SP.App.SECTIONS`'ta, yolu `SP.App.yolOf(rota)`'da, gerekçesi
-`ekip/CEKMECE-HARITASI.md`'de. Liste burada tekrar yazılmaz: kopya bir gün
+`belgeler/ekip/CEKMECE-HARITASI.md`'de. Liste burada tekrar yazılmaz: kopya bir gün
 kaynağından ayrışır. Kabuk (üst çubuk, gün şeridi, sayfa başı, bölüm
 çubuğu, telefonda alt bant) `brand/ortak/kabuk.js`'tedir.
 

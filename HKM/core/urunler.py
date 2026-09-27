@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Urun katalogu — Uretim Burosu'nun yapabildigi her sey (ekip/PLAN.md §3.E).
+"""Urun katalogu — Uretim Burosu'nun yapabildigi her sey (belgeler/ekip/PLAN.md §3.E).
 
    Test kitabi yalniz bir ornekti. Ofis «ne istenirse» uretecek sekilde
    KATALOGLA calisir: her urun turu bir kayittir, motor ayni kalir.

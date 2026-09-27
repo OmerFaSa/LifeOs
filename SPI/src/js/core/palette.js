@@ -90,7 +90,7 @@ SP.Palette = (function(){
     try{ r = SP.Proposals.fromText(t); }catch(e){ return null; }
     r.engellenen = r.engellenen || [];
     /* Ölçüm olmayan cümle («7 saat uyumadım») yazılmaz ama sessizce de
-       düşmez: neden yazılmadığı söylenir (ekip/HATALAR.md KR-1). */
+       düşmez: neden yazılmadığı söylenir (belgeler/ekip/HATALAR.md KR-1). */
     if(!r.oneriler.length && r.engellenen.length){
       return { id:'quick:sor', kind:'Hızlı giriş', label:'Bir şey sormam gerek',
         hint:'yazılmadı · nedenini gör', run:() => confirmQuick(r, t) };

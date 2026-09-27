@@ -317,7 +317,7 @@ ESP.Store = (function(){
        hic import edememekten daha az kotudur. */
     /* Kopya yazilamazsa ONCEKI ice aktarmanin kopyasi da silinir: kalsaydi
        «geri al» haftalar onceki duruma donup aradaki butun kaydi silerdi
-       (ekip/HATALAR.md O-3). Sonuc bu ice aktarmanin geri alinamayacagini
+       (belgeler/ekip/HATALAR.md O-3). Sonuc bu ice aktarmanin geri alinamayacagini
        soyler. */
     let geriAlinamaz = false;
     try{

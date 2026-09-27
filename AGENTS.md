@@ -10,9 +10,14 @@
 Dört bağımsız sistem: **AYS** (sınav), **SPİ** (sağlık), **ESP** (gelişim)
 tarayıcıda çalışan sıfır bağımlılıklı tek sayfa uygulamalarıdır; **HKM**
 onların yanında duran isteğe bağlı bir Python servisidir. Ayrıntı:
-`README.md` ve her sistemin `MIMARI.md`'si. Dış inceleme için hazır özet
+`README.md` (kısa), `belgeler/TEKNIK.md` (ayrıntı) ve her sistemin `MIMARI.md`'si. Dış inceleme için hazır özet
 `python3 tools/paket.py` ile ÜRETİLİR (`PAKET.md`); depoda durmaz, çünkü
 üretilmiş bir dosya bir gün kaynağıyla ayrışır.
+
+**Kök klasör sade kalır** (depo sahibinin isteği): kökte yalnız
+`BASLAT.bat`, `GUNCELLE.bat`, `README.md`, `AGENTS.md` ve klasörler
+durur. Başlatıcı, sunucu, güncelleyici `sistem/`; belge, rapor, ekip
+notu `belgeler/`. Köke yeni dosya eklenmez.
 
 ## 1. Değişmeyen kurallar
 
@@ -76,7 +81,7 @@ python3 tools/ortak.py --denetle     # kopyalar kaynakla ayni mi (CI de kosar)
 python3 tools/marka.py --kunye       # brand/medya/ -> brand/ortak/medya.js
 python3 tools/marka.py --kunye --denetle   # kunye taze mi (CI de kosar)
 python3 tools/marka.py --sina        # ad kurali ve yol muhafizi (CI de kosar)
-python3 tools/vitrin.py              # ekip/vitrin.html -> brand/ortak/vitrin.css (kart bicimi)
+python3 tools/vitrin.py              # belgeler/ekip/vitrin.html -> brand/ortak/vitrin.css (kart bicimi)
 python3 tools/vitrin.py --denetle    # vitrin.css vitrinle ayni mi (CI de kosar)
 python3 tools/rutbe.py <klasor>      # rutbe gorsellerini medya/'ya isler (kayipsiz)
 python3 tools/rutbe.py --liste       # medya/ altinda ne var

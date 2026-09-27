@@ -1,4 +1,4 @@
-/* 119 ÖNERİ GEÇMİŞİ — modül tarafı (ekip/T-DEVIR.md «H → T DEVRİ» 1).
+/* 119 ÖNERİ GEÇMİŞİ — modül tarafı (belgeler/ekip/T-DEVIR.md «H → T DEVRİ» 1).
 
    Hata: bekleyen öneri yokken Onaylar yalnız boş durumu çiziyordu; «Son
    kararlar» (geçilen, geri alınan teklifler) o anda hiç görünmüyordu.

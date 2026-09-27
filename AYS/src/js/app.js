@@ -6,7 +6,7 @@ R.App = (function(){
   const U = R.U, M = R.Model, C = R.Calc, UI = R.UI, S = R.S;
   const { html, raw, when, map, cls, attrs } = R.h;
 
-  /* SEKİZ ÇEKMECE (ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
+  /* SEKİZ ÇEKMECE (belgeler/ekip/CEKMECE-HARITASI.md, kullanıcı kararı 2026-09-24).
 
      Üç modülde aynı ad ve sıra; adlar tek kaynaktan gelir
      (`LIFEOS.KABUK.CEKMECELER`). İç içelik en çok iki kat: çekmece ›
@@ -533,7 +533,7 @@ R.App = (function(){
         body = errorPanel(err);
       }
 
-      /* v4 iskeleti (ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
+      /* v4 iskeleti (belgeler/ekip/EKIP-PLANI.md §3): üst çubuk · gün şeridi ·
          sayfa başı · bölüm çubuğu · ekran · sayfa sonu; telefonda alt bant
          ve hızlı ekle. Parçalardan biri çizilemezse yalnız o parça düşer. */
       /* Hareket (T4): çizimden önce fotoğraf, sonra karşılaştırma — yalnız

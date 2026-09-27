@@ -1,7 +1,7 @@
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/ayar.test.js içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* Ayar — T5 (ekip/EKIP-PLANI.md §4.2).
+/* Ayar — T5 (belgeler/ekip/EKIP-PLANI.md §4.2).
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/ayar.test.js`; `tools/ortak.py --yay` ile üç

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Meydan — sistemin kendi akisi (ekip/meydan/MEYDAN.md, M1 + M2).
+"""Meydan — sistemin kendi akisi (belgeler/ekip/meydan/MEYDAN.md, M1 + M2).
 
    Masalar (King, BAM ve uc modulun HKM gorevlisi) gunun bulgularini,
    kararlarini ve urunlerini GONDERI olarak yazar; kullanici okur, karar

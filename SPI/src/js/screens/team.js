@@ -402,7 +402,7 @@ SP.Screens.team = (function(){
 
         /* Kullanicinin KENDI cumlesi, kural motoru cozdu: kaynak 'istek'.
            Olcum yazan kayit (tek olcum, ogun, seans) otomatikMi() geregi
-           onay bekler (ekip/HATALAR.md KR-1); tahlil gibi orta kayit da. */
+           onay bekler (belgeler/ekip/HATALAR.md KR-1); tahlil gibi orta kayit da. */
         let yazilan = 0, bekleyen = 0, dusen = 0;
         for(const o of r.oneriler){
           const t = await SP.Proposals.talep(Object.assign({ source:'istek' }, o));
@@ -418,7 +418,7 @@ SP.Screens.team = (function(){
           + ' hazırladım, onayına bakıyor.');
         if(dusen) parca.push(dusen + ' kaydı uygulayamadım.');
         if(r.anlasilmayan.length) parca.push('Şunu çözemedim: «' + r.anlasilmayan.join('», «') + '».');
-        /* Ölçüm olmayan cümle yazılmaz, nedeni söylenir (ekip/HATALAR.md KR-1). */
+        /* Ölçüm olmayan cümle yazılmaz, nedeni söylenir (belgeler/ekip/HATALAR.md KR-1). */
         engel.forEach(e => parca.push(e.soru));
         list.push({ role:'agent', source:'rules', at:new Date().toISOString(),
           text:parca.join(' ') });

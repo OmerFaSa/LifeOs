@@ -1,5 +1,5 @@
 /* ESP HEDEF PLANI — aktif bir hedefi günlük düzene çevirir.
-   (ekip/PLAN.md §3.D; Tur 3)
+   (belgeler/ekip/PLAN.md §3.D; Tur 3)
 
    Plan KODDUR; model yok. ESP'nin kendi araçlarını kullanır, yenisini
    icat etmez:

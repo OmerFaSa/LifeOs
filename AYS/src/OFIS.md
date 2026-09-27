@@ -587,7 +587,7 @@ var (`core/olumsuz.js`, kaynağı `brand/ortak/`): olumsuz («40 soru
 çözmedim»), ileriye dönük («çözeceğim»), istek («lazım») ya da soru
 biçimindeki cümle ölçüm diye önerilmez; nedeniyle birlikte sorulur.
 Olumsuz bir istek de («bu hafta ara vermek istemiyorum») tersine
-çevrilmez (ekip/HATALAR.md KR-1).
+çevrilmez (belgeler/ekip/HATALAR.md KR-1).
 
 Dışarıdan (HKM, BAM) gelen teklif bir **anahtar** taşır: aynı anahtar
 ikinci kez kuyruğa girmez. Her öneri bir **iz** (`[{tur, id}]`) taşıyabilir:

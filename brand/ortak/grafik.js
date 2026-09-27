@@ -7,7 +7,7 @@
    Biçimi `brand/ortak/kart.css` içindedir.
    ==================================================================
 
-   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §B)
+   NE YAPAR (katalog, belgeler/ekip/TASARIM-OZELLIKLERI.md §B)
 
      027  Eksik gün boşluğu   verisi olmayan gün çizgide BOŞLUK kalır;
                               iki yanı kesik bir köprüyle bağlanır, çizgi
@@ -63,7 +63,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ------------------------------------------------------- tarih */
 
-  /* Gün YEREL takvimden alınır (ekip/HATALAR.md T2-03). Yalnız tarih
+  /* Gün YEREL takvimden alınır (belgeler/ekip/HATALAR.md T2-03). Yalnız tarih
      («2026-09-25») olduğu gibi okunur; saat taşıyan damga
      («…T22:30:00Z») yerel güne çevrilir — ilk on karakteri UTC günüdür
      ve İstanbul'da 00:00–03:00 kaydını düne yazar. Tarih olmayan dize

@@ -1,4 +1,4 @@
-/* Onaylar — bekleyen her öneri TEK çekmecede (ekip/CEKMECE-HARITASI.md).
+/* Onaylar — bekleyen her öneri TEK çekmecede (belgeler/ekip/CEKMECE-HARITASI.md).
 
    Üç kaynak, tek yer:
      King teklifi   ücretli iş King'in onay kapısında (HKM core/king.py)

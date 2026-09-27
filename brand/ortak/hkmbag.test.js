@@ -4,7 +4,7 @@
    Kaynağı `brand/ortak/hkmbag.test.js`; `tools/ortak.py --yay` ile üç
    arayüzün `src/tests/` klasörüne birebir kopyalanır.
 
-   Kanıtladığı söz (ekip/HATALAR.md Y-7): HKM profil bilmez; aynı cihazda
+   Kanıtladığı söz (belgeler/ekip/HATALAR.md Y-7): HKM profil bilmez; aynı cihazda
    iki profil bağlanınca ölçümleri, hafızası, hedefleri ve yedeği karışır.
    Bu yüzden bir modülde HKM'ye aynı anda TEK profil bağlanabilir. */
 

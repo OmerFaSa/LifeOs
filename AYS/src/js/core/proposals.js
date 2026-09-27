@@ -76,7 +76,7 @@ R.Proposals = (function(){
      «Geri al» eski degeri MUTLAK yaziyordu: ayni gun iki kayit girilip
      ilki geri alininca ikincisi de siliniyor, sonra ikincisi geri alininca
      geri alinmis ilki diriliyordu; blok «tamamlandi» kaliyordu
-     (ekip/HATALAR.md Y-6). Kural: geri alma yalniz O KAYDIN yaptigini geri
+     (belgeler/ekip/HATALAR.md Y-6). Kural: geri alma yalniz O KAYDIN yaptigini geri
      cevirir.
 
        toplamali alan  bu kaydin ekledigi cikarilir; geriye yalniz bu kaydin
@@ -920,7 +920,7 @@ R.Proposals = (function(){
      Tek karar noktasi. Kucuk degilse asla; ayar bilinmiyorsa varsayilan
      ('istek') gibi davranir — bozuk bir ayar kendiliginden «hepsi»ne
      donmemeli. Olcum yazan eylem (katalogda `olcum:true`) hicbir ayarda
-     sormadan uygulanmaz (ekip/HATALAR.md KR-1). */
+     sormadan uygulanmaz (belgeler/ekip/HATALAR.md KR-1). */
   function otomatikMi(row, mod){
     if(!row || row.level !== 'kucuk') return false;
     if((R.ACTION_BY_ID[row.action] || {}).olcum) return false;

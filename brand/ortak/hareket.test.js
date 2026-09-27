@@ -1,4 +1,4 @@
-/* Hareket — T4 (ekip/EKIP-PLANI.md §4.2).
+/* Hareket — T4 (belgeler/ekip/EKIP-PLANI.md §4.2).
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/hareket.test.js`; `tools/ortak.py --yay` ile üç

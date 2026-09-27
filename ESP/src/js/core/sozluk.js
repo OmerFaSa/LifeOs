@@ -10,7 +10,7 @@
    Biçimi `brand/ortak/kart.css` içindedir.
    ==================================================================
 
-   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §A, §G)
+   NE YAPAR (katalog, belgeler/ekip/TASARIM-OZELLIKLERI.md §A, §G)
 
      016  Terim ipucu         «Tekrar borcu» gibi terimlerin altı noktalı;
                               üzerine gelince (dokunmatikte basılı tutunca)
@@ -208,7 +208,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* Ajanın masasındaki veri kimlikleri (`data/agents.js` `reads`) iç
      adlardır: «gunun_akisi», «haftalar (review)». Ekrana ASCII kimlik
-     yazılmaz (AGENTS.md §1.8, ekip/HATALAR.md T2-02); ad buradan gelir.
+     yazılmaz (AGENTS.md §1.8, belgeler/ekip/HATALAR.md T2-02); ad buradan gelir.
 
      Adlar ve kesinlik, aracın KENDİ açıklamasından (AYS `core/tools.js`
      ve koçun `scope` alanı): «tahmini puan BANDI» → tahmin; risk, medyan,

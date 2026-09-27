@@ -170,7 +170,7 @@ def _kok_degerleri(metin, bas):
 
 
 def t_cekmeceler():
-    """K7 (ekip/EKIP-PLANI §8-9): yedi cekmece bu ad ve sirayla; Profil ve
+    """K7 (belgeler/ekip/EKIP-PLANI §8-9): yedi cekmece bu ad ve sirayla; Profil ve
     Motto Ayarlar'in, Para Sistemler'in BOLUMU; her gorunume bir yoldan
     ulasilir; Ayarlar'in yedi paneli dort bolumde ve eski adreslerin hepsi
     bir bolume duser."""

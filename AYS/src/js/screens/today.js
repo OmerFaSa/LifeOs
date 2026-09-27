@@ -628,7 +628,9 @@ R.Screens.today = (function(){
             <div class="small strong">${s.title}</div>
             <div class="tiny dim">${s.why}</div>
           </div>
-          ${c.Button({ label:'Uygula', size:'sm', tone:s.tone || null, act:s.act, data:s.data || {} })}
+          ${/* Oneri dugmesi dolu olmaz: ekranin tek dolu dugmesi ritueldir
+               (sadelik butcesi). Onerinin onemi sirasinda ve ikonunda. */
+            c.Button({ label:'Uygula', size:'sm', act:s.act, data:s.data || {} })}
         </div>`)}</div>` });
   }
 
@@ -1165,7 +1167,7 @@ R.Screens.today = (function(){
       ayak:vadeli ? c.Button({ label:'Tekrara git', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'cards' } }) : null });
   }
 
-  /* 04 SAYFA BAŞI CÜMLESİ (ekip/EKIP-PLANI Ek A) — günün durumu TEK cümle,
+  /* 04 SAYFA BAŞI CÜMLESİ (belgeler/ekip/EKIP-PLANI Ek A) — günün durumu TEK cümle,
      KODDAN: bloklar, sıradaki iş ve (eşik aşıldıysa) tekrar borcu. Dil
      modeli hiç çağrılmaz; model kapalıyken de aynı cümle çıkar. Kural
      `C.nextAction` ile aynı eşiği kullanır (borç %10). Soru eki gerektiren

@@ -41,7 +41,7 @@ markasının yerine sistemin kendi icadını koymaktı.
 | Açılış (yükleniyor) ekranı | `img/brand/favicon.png` |
 | Açılış videosu | `img/brand/intro.mp4` |
 | HKM panosu — sekme ikonu ve künye | `HKM/brand/favicon.png` |
-| LifeOS giriş sayfası (`sunucu.py`) | `brand/life/logo.png`, `favicon.png` |
+| LifeOS giriş sayfası (`sistem/sunucu.py`) | `brand/life/logo.png`, `favicon.png` |
 | Rütbe kartı (gösterim) | `brand/seviye/medya/rutbe-5-2.webp` |
 | Kademe sahnesi (gösterimin arka planı) | `brand/seviye/medya/sahne-5.webp` |
 | Künyedeki küçük rozet | `brand/seviye/medya/rozet-5.png` (yok — numaraya düşüyor) |

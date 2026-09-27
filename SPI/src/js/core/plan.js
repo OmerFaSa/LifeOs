@@ -1,5 +1,5 @@
 /* SPİ PLAN MOTORU — aktif bir hedefi uygulanabilir bir plana çevirir.
-   (ekip/PLAN.md §3.D; Tur 2)
+   (belgeler/ekip/PLAN.md §3.D; Tur 2)
 
    Plan KODDUR; model yok. Girdiler SPİ'nin kendi verisidir: son tartı,
    profil (boy, yaş, cinsiyet, aktivite), bazal metabolizma ve günlük

@@ -1,6 +1,6 @@
 /* K2 · AYS Bugün — 004 sayfa başı cümlesi, 042 kahraman, 024 Özet sayıları.
 
-   Kural (ekip/EKIP-PLANI.md §4.1): P1 kartının kabul ölçütü testin İLK
+   Kural (belgeler/ekip/EKIP-PLANI.md §4.1): P1 kartının kabul ölçütü testin İLK
    satırıdır ve test adında özelliğin numarası geçer (`oz-004 …`). */
 
 (function(){
@@ -97,6 +97,27 @@
           expect(r.width <= 390).toBeTruthy();
           expect(r.height < 390).toBeTruthy();
         }finally{ kap.remove(); }
+      });
+    });
+
+    it('Günün ayrıntısında en çok bir dolu düğme: sistem önerisi «Uygula»sı ritüel düğmesiyle yarışmaz', async () => {
+      /* Pazar: «Haftayı kapat» önerisi tone:'primary' taşır; ritüel kartının
+         kendi dolu düğmesi de vardır. Sadelik bütçesi (tools/sadelik.js)
+         ekranda en çok bir dolu düğme ister — Pazar günü iki çıkıyordu. */
+      await withTodayAsync('2026-10-11', async () => {
+        await hazirla();
+        const eski = R.Auto.suggestions;
+        R.Auto.suggestions = () => [
+          { id:'close-week', icon:'check', title:'Haftayı kapat', why:'x', act:'auto-close-week', tone:'primary' },
+          { id:'drift', icon:'warn', title:'Plan sapması', why:'y', act:'go', data:{ 'data-route':'protocols' }, tone:'primary' },
+        ];
+        try{
+          const k = dom(await R.Screens.gun.render());
+          const oneri = Array.from(k.querySelectorAll('[data-act="auto-close-week"], .autorow [data-route="protocols"]'));
+          expect(oneri).toHaveLength(2);
+          oneri.forEach(b => expect(b.classList.contains('btn--primary')).toBe(false));
+          expect(k.querySelectorAll('.btn--primary').length <= 1).toBe(true);
+        }finally{ R.Auto.suggestions = eski; }
       });
     });
 

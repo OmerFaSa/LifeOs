@@ -715,7 +715,7 @@ async function main(){
           + 'Kronoloji’ye girdi, geri alindi; felsefe istegi King’e gitti');
       }
 
-      /* 2.8 — HEDEFTEN PLANA (ekip/PLAN.md Tur 2). Yalniz SPI: plan motoru
+      /* 2.8 — HEDEFTEN PLANA (belgeler/ekip/PLAN.md Tur 2). Yalniz SPI: plan motoru
          orada. Zincir: SPI plani KENDI koduyla uygular -> King'e is emri ->
          King imkan kontrolu -> BAM Kayit + Planlama -> program kaydi ->
          King SPI'ye plan.apply teklifi birakir -> SPI programi HKM'den

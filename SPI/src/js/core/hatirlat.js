@@ -197,7 +197,7 @@ SP.Hatirlat = (function(){
   /* Android Chrome sayfa içinden `new Notification` kurmaya izin vermez
      («Illegal constructor»); orada hizmet çalışanının showNotification'ı
      gerekir. Hata yutuluyor, izin verilmiş görünürken hiçbir hatırlatma
-     gelmiyordu (ekip/HATALAR.md O-8). İkisi de olmazsa bu SÖYLENİR. */
+     gelmiyordu (belgeler/ekip/HATALAR.md O-8). İkisi de olmazsa bu SÖYLENİR. */
   let sorun = null;
   const SORUN = 'Bu tarayıcı bildirimi gösteremedi (Android Chrome gibi). Hatırlatmalar '
     + 'yalnız Bugün ekranında görünür.';

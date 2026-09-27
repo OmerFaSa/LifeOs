@@ -1,4 +1,4 @@
-/* Kabuk — v4 üst çubuk, gün şeridi, telefon bandı (ekip/EKIP-PLANI.md T2).
+/* Kabuk — v4 üst çubuk, gün şeridi, telefon bandı (belgeler/ekip/EKIP-PLANI.md T2).
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/kabuk.test.js`; `tools/ortak.py --yay` ile üç

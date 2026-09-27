@@ -97,7 +97,7 @@ def run():
         import importlib.util
         import subprocess
         import sys
-        yol = os.path.join(os.path.dirname(baslat.ROOT), "baslat.py")
+        yol = os.path.join(os.path.dirname(baslat.ROOT), "sistem", "baslat.py")
         spec = importlib.util.spec_from_file_location("kok_baslat", yol)
         kok = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(kok)
@@ -135,7 +135,7 @@ def run():
         ve daemon.py acilista ciktilarini kendileri UTF-8'e alir."""
         import subprocess
         import sys
-        kok = os.path.dirname(baslat.ROOT)
+        kok = os.path.join(os.path.dirname(baslat.ROOT), "sistem")
         ortam = dict(os.environ, PYTHONIOENCODING="cp1254")
         ortam.pop("PYTHONUTF8", None)
         for ad, klasor, modul in (("sunucu", kok, "sunucu"),
@@ -159,7 +159,7 @@ def run():
 
     def _kok():
         import importlib.util
-        yol = os.path.join(os.path.dirname(baslat.ROOT), "baslat.py")
+        yol = os.path.join(os.path.dirname(baslat.ROOT), "sistem", "baslat.py")
         spec = importlib.util.spec_from_file_location("kok_baslat", yol)
         m = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(m)

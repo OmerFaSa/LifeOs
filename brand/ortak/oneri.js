@@ -7,7 +7,7 @@
    Biçimi `brand/ortak/kart.css` içindedir.
    ==================================================================
 
-   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §F, §I, §L)
+   NE YAPAR (katalog, belgeler/ekip/TASARIM-OZELLIKLERI.md §F, §I, §L)
 
      110  Mor öneri kartı     Merkez'den gelen her öneri mor kartta ve
                               seviye rozetiyle. Modülün kendi önerisi
@@ -173,7 +173,7 @@ window.LIFEOS = window.LIFEOS || {};
 
      Hiçbir ayarda sormadan UYGULANMAYANLAR:
        · küçük olmayan her şey (katalog seviyesiyle — 111)
-       · ölçüm yazan aksiyon (`olcum:true`, ekip/HATALAR.md KR-1)
+       · ölçüm yazan aksiyon (`olcum:true`, belgeler/ekip/HATALAR.md KR-1)
        · çakışma çözümü (112: son sözü kullanıcı söyler) */
   const MODLAR = ['istek', 'hepsi', 'hicbiri'];
 

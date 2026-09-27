@@ -212,7 +212,7 @@ R.Entry = (function(){
      Bunlar sessizce düşmez: kullanıcıya gösterilir.
 
      `engellenen` sayısı bulunmuş ama ÖLÇÜM OLMAYAN parçalardır:
-     «40 soru çözmedim», «yarın 40 soru çözeceğim» (ekip/HATALAR.md KR-1).
+     «40 soru çözmedim», «yarın 40 soru çözeceğim» (belgeler/ekip/HATALAR.md KR-1).
      Her biri nedenini ve kullanıcıya sorulacak cümleyi taşır; yazılmaz. */
   function fromText(text, opts){
     const o = opts || {};

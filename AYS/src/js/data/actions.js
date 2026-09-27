@@ -205,7 +205,7 @@ R.ACTIONS = [
      `olcum:true` — bu eylem bir ÖLÇÜM yazar. Küçük olsa da hiçbir ayarda
      sormadan uygulanmaz (önizleme + onay): «40 soru çözmedim» bir gün
      yanlış anlaşılırsa sahte ölçüm deftere sessizce girmemeli
-     (ekip/HATALAR.md KR-1). */
+     (belgeler/ekip/HATALAR.md KR-1). */
   {
     id:'soru-yaz',
     level:'kucuk',

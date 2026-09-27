@@ -52,7 +52,7 @@ ESP.Komut = (function(){
   /* Kapatma isteğinin KENDİSİ olan olumsuz sözler: «diksiyon istemiyorum»
      bir kapatma isteğidir. Olumsuzluk süzgeci (LIFEOS.Olumsuz) bunları
      hariç tutar; geri kalan olumsuzluk («diksiyonu kapatma») isteği
-     durdurur ve sorulur (ekip/HATALAR.md KR-1). */
+     durdurur ve sorulur (belgeler/ekip/HATALAR.md KR-1). */
   const KAPAT_OLUMSUZ_RE = /(çalışmak istemiyorum|çalışmayacağım|istemiyorum|ilgilenmiyorum|ilgilenmeyeceğim)/;
   const AC_RE = new RegExp('(' + ONCE + 'aç' + SONRA + '|açılsın|açmak istiyorum|açar mısın|geri getir|'
     + 'başlamak istiyorum|çalışmak istiyorum|devam etmek istiyorum|tekrar aç)');

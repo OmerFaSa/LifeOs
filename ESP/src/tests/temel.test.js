@@ -1,7 +1,7 @@
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/temel.test.js içine yazılır; burası bir sonraki
    `python3 tools/ortak.py --yay` ile yeniden üretilir. */
-/* Temel bileşenler — v4 (ekip/EKIP-PLANI.md T1; katalog 02, 162, 165).
+/* Temel bileşenler — v4 (belgeler/ekip/EKIP-PLANI.md T1; katalog 02, 162, 165).
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/temel.test.js`; `tools/ortak.py --yay` ile üç

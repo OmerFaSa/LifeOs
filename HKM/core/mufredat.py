@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Mufredat raporu — sinav profilinin iskeleti (ekip/PLAN.md §3.L; Tur 4).
+"""Mufredat raporu — sinav profilinin iskeleti (belgeler/ekip/PLAN.md §3.L; Tur 4).
 
    AYS «KPSS genel kultur» gibi bir sinavin mufredatini ister. Is King'in
    onayindan gecer, BAM Arastirma Burosu mufredati DERS -> KONU agaci olarak

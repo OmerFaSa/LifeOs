@@ -2,7 +2,7 @@
 
    Önceden iki ayrı ekran vardı: "Bugün" (özet) ve "Günlük ölçüm" (giriş);
    sonra tek sayfada üç sekme oldu (Giriş · Özet · Geçmiş). Yeni iskelette
-   (ekip/EKIP-PLANI.md §3) sekme yok:
+   (belgeler/ekip/EKIP-PLANI.md §3) sekme yok:
 
      Bugün              Şimdi · Durum · Öneri — sık yazılan dört ölçüm ve
                         öğün satırı en üstte; toparlanma, asgari gün,

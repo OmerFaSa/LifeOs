@@ -7,7 +7,7 @@
    Kaynağı `brand/ortak/vitrinkart.test.js`; `tools/ortak.py --yay` ile üç
    arayüzün `src/tests/` klasörüne birebir kopyalanır.
 
-   Kural (ekip/EKIP-PLANI.md §4.1): test adında özelliğin numarası geçer
+   Kural (belgeler/ekip/EKIP-PLANI.md §4.1): test adında özelliğin numarası geçer
    (`oz-046 …`). Her kart için iki yön sınanır: veri varken vitrinin
    işaretlemesi çıkar; veri yokken kart ya hiç çizilmez ya «—» yazar,
    hiçbir zaman 0 uydurmaz. */

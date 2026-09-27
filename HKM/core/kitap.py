@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Bolumlu test kitabi (ekip/PLAN.md §3.E ve §3.L; Tur 4).
+"""Bolumlu test kitabi (belgeler/ekip/PLAN.md §3.E ve §3.L; Tur 4).
 
    AYS bir sinav profilinden (ders -> konu) test kitabi ister. Is King'in
    onayindan gecer; BAM Uretim Burosu her ritim tikinde BIR bolum uretir ve

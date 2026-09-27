@@ -1,4 +1,4 @@
-/* NE DEĞİŞTİ? — katalog 17 (T5, ekip/EKIP-PLANI.md §4.2).
+/* NE DEĞİŞTİ? — katalog 17 (T5, belgeler/ekip/EKIP-PLANI.md §4.2).
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/yenilik.js`; `tools/ortak.py --yay` ile üç

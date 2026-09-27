@@ -221,7 +221,7 @@ R.Komut = (function(){
     const out = { oneriler:[], sorular:[] };
     const tr = tarih(t, bugun) || tasinanTarih || null;
 
-    /* Olumsuz istek tersine çevrilmez, sorulur (ekip/HATALAR.md KR-1). */
+    /* Olumsuz istek tersine çevrilmez, sorulur (belgeler/ekip/HATALAR.md KR-1). */
     const engel = LIFEOS.Olumsuz.eylemEngeli(metin, { haric:HARIC[tur] });
     if(engel){ out.sorular.push({ metin, soru:engel.soru }); return out; }
 

@@ -1,9 +1,9 @@
 # Ekip hareket planı — tek tasarım + 183 özellik (Part 9)
 
 > 2026-09-24 · Üç Claude, tek `main`. Bu dosya **sabittir**: yalnız kullanıcı kararıyla
-> değişir. Canlı durum `ekip/EKIP-DURUM.md`'dedir. DEVIR Part 9 bu planla yürür.
+> değişir. Canlı durum `belgeler/ekip/EKIP-DURUM.md`'dedir. DEVIR Part 9 bu planla yürür.
 >
-> Kaynaklar (hepsi `ekip/` altında):
+> Kaynaklar (hepsi `belgeler/ekip/` altında):
 > `TASARIM-OZELLIKLERI.md` (katalog v4: 183 özellik, P1'lerin kabul ölçütleriyle) ·
 > `vitrin.html` (her özelliğin canlı örneği, tarayıcıda aç) ·
 > `tasarim/v4-*.png` + `tasarim/v4-ornek.css` (kullanıcının seçtiği görünüm) ·
@@ -211,7 +211,7 @@ kanıtlar.
 
 | Adım | Ne | Nerede | Koşul |
 |---|---|---|---|
-| **H0** | **Taban envanteri** (`tools/envanter.js`): üç modülü açar, her ekranı ve iç sekmeyi gezer; her eylemi (`data-act`), ayar anahtarını ve ekran adını kaydeder. Taban bir kez üretilir ve kayıt olarak durur: `ekip/envanter/taban-2026-09-24.json`. Sonraki koşumlar tabanla karşılaştırır: tabandaki her eylem erişilebilir mi, hangi katmanda? Kullanıcının onayladığı «bilerek kaldırıldı» listesi dışında kayıp **0** olmalıdır | `tools/` | **İlk iş.** T2 ve T3 bunu bekler (Kapı 1) |
+| **H0** | **Taban envanteri** (`tools/envanter.js`): üç modülü açar, her ekranı ve iç sekmeyi gezer; her eylemi (`data-act`), ayar anahtarını ve ekran adını kaydeder. Taban bir kez üretilir ve kayıt olarak durur: `belgeler/ekip/envanter/taban-2026-09-24.json`. Sonraki koşumlar tabanla karşılaştırır: tabandaki her eylem erişilebilir mi, hangi katmanda? Kullanıcının onayladığı «bilerek kaldırıldı» listesi dışında kayıp **0** olmalıdır | `tools/` | **İlk iş.** T2 ve T3 bunu bekler (Kapı 1) |
 | **H0b** | T3'ün yeniden yazacağı ekranlara **işleyici testleri**. DEVIR'deki ölçüme göre en düşük kapsam burada: AYS learn/guide/exams %6–8, ESP studio/symposium/history %6–7. Taşımadan önce düğmelerin ne yaptığı testle sabitlenir | `*/src/tests/` | H0'dan hemen sonra; T3 hangi modüldeyse önce o |
 | **H1** | **Sadelik denetimi** (`tools/sadelik.js`): §1.2'deki eşikler, 1440 ve 390 px genişlikte, açık ve koyu temada. **Katalog kapsamı**: `data-oz` ve `oz-NNN` sayımı, «183'ten N'i yerinde» | `tools/` | H0'dan sonra; CI'a eklenir (`.github/`) |
 | **H2** | **Push takibi:** K ve T'nin her push'unda, dokunulan sistemin testleri, duman, a11y, 390 px, palet, envanter ve sadelik denetimleri koşar. Kırmızı çıkarsa bulguyu sahibine yazar (§7) | — | Sürekli |
@@ -239,12 +239,12 @@ kanıtlar.
 | `tools/*`, `*/tools/*`, `.github/*` | **H** | Yeni denetim isteği H'ye yazılır |
 | `*/src/tests/*` | Yeni dosyayı yazan; var olan dosyada sona ekleme serbest | Var olan testi değiştirmek ya da silmek yalnız H yapar, gerekçesiyle |
 | `*/dist/*`, `*/src/js/data/build.js` | Herkes kendi commit'inde üretir | Çakışma kuralı §7 |
-| `ekip/EKIP-DURUM.md` | Herkes yalnız **kendi bölümüne** yazar | Teslim tablosuna T, bulgu özetine H yazar |
-| `ekip/HATALAR.md` | **H** (Tur 2 bulguları en üste, `T2-` koduyla) | Tur 1 kapalı; kodda ona bağlantı var, silinmez |
-| `ekip/CEKMECE-HARITASI.md`, `*/src/STIL.md` | **T** | |
+| `belgeler/ekip/EKIP-DURUM.md` | Herkes yalnız **kendi bölümüne** yazar | Teslim tablosuna T, bulgu özetine H yazar |
+| `belgeler/ekip/HATALAR.md` | **H** (Tur 2 bulguları en üste, `T2-` koduyla) | Tur 1 kapalı; kodda ona bağlantı var, silinmez |
+| `belgeler/ekip/CEKMECE-HARITASI.md`, `*/src/STIL.md` | **T** | |
 | `README.md`, `belgeler/NOTLAR.md` | **H** | Sayılar elle yazılmaz |
-| `ekip/EKIP-PLANI.md`, `TASARIM-OZELLIKLERI.md`, `vitrin.html`, `tasarim/` | **Değişmez** | Yalnız kullanıcı kararıyla; commit mesajında «plan değişikliği» yazar |
-| `HKM/`, `ekip/DEVIR.md`, `ekip/PLAN.md`, `ekip/arsiv/` | **Bu ekibin değil** | HKM'de ayrı bir oturum çalışıyor olabilir. İstisna (§8-9): HKM yüzünün dili (K7) için `HKM/web/` K'nindir |
+| `belgeler/ekip/EKIP-PLANI.md`, `TASARIM-OZELLIKLERI.md`, `vitrin.html`, `tasarim/` | **Değişmez** | Yalnız kullanıcı kararıyla; commit mesajında «plan değişikliği» yazar |
+| `HKM/`, `belgeler/ekip/DEVIR.md`, `belgeler/ekip/PLAN.md`, `belgeler/ekip/arsiv/` | **Bu ekibin değil** | HKM'de ayrı bir oturum çalışıyor olabilir. İstisna (§8-9): HKM yüzünün dili (K7) için `HKM/web/` K'nindir |
 
 ## 6. Sıra, kapılar ve teslimler
 
@@ -303,7 +303,7 @@ bütçesi yeşildir; bütün CI işleri yeşildir; H4 tam koşumu temizdir.
    sıfır değildir; sıfır çalışma zamanı bağımlılığı vardır; HKM modüle yazmaz, teklif
    bırakır; XP karar vermez; aksiyonların üç seviyesi vardır; ekrandaki metin düzgün
    Türkçedir.
-8. **Bulgu yazmak:** H `ekip/HATALAR.md`'ye yazar ve EKIP-DURUM'daki bulgu özetine
+8. **Bulgu yazmak:** H `belgeler/ekip/HATALAR.md`'ye yazar ve EKIP-DURUM'daki bulgu özetine
    `T2-NN → K` gibi bir satır ekler. Sahip düzeltince kendi bölümüne `T2-NN ✅ <commit>`
    yazar.
 9. **Kullanıcıya soru** yalnız karar gerektiğinde sorulur ve tek mesajda toplanır. Cevap
@@ -352,9 +352,9 @@ Cevaplar (kullanıcı, 2026-09-24: «önerilerini uygula»): **sekizi de öneri 
 
 > LifeOS deposunda üç Claude'luk bir ekip kuruldu; sen **KARTLAR (K)** rolündesin. Diğer
 > ikisi TASARIM (T) ve HATA (H). `git fetch origin main` ile main'i al ve sırayla oku:
-> `AGENTS.md`, `ekip/EKIP-PLANI.md` (tamamı; senin bölümün §4.1, özellik listen Ek A'da
-> sahibi K olanlar), `ekip/TASARIM-OZELLIKLERI.md`, `ekip/EKIP-DURUM.md`.
-> `ekip/vitrin.html`'i tarayıcıda açıp kartların canlı örneklerine, `ekip/tasarim/`
+> `AGENTS.md`, `belgeler/ekip/EKIP-PLANI.md` (tamamı; senin bölümün §4.1, özellik listen Ek A'da
+> sahibi K olanlar), `belgeler/ekip/TASARIM-OZELLIKLERI.md`, `belgeler/ekip/EKIP-DURUM.md`.
+> `belgeler/ekip/vitrin.html`'i tarayıcıda açıp kartların canlı örneklerine, `belgeler/ekip/tasarim/`
 > görsellerine bak. K1 ile başla: ekran dosyalarına dokunmadan P1 ortak bileşenler.
 > §5'teki dosya sahipliğinin dışına çıkma. Her teslimden sonra EKIP-DURUM'daki kendi
 > bölümünü güncelle ve main'e push et.
@@ -363,9 +363,9 @@ Cevaplar (kullanıcı, 2026-09-24: «önerilerini uygula»): **sekizi de öneri 
 
 > LifeOS deposunda üç Claude'luk bir ekip kuruldu; sen **TASARIM (T)** rolündesin. Diğer
 > ikisi KARTLAR (K) ve HATA (H). `git fetch origin main` ile main'i al ve sırayla oku:
-> `AGENTS.md`, `ekip/EKIP-PLANI.md` (tamamı; senin bölümün §4.2), `ekip/CEKMECE-HARITASI.md`,
-> `ekip/EKIP-DURUM.md`. Hedef görünüm `ekip/tasarim/v4-*.png` ve `v4-ornek.css`'tedir;
-> `ekip/vitrin.html` kartların örnekleridir. İlk iş T0: §8'deki kararları bana tek mesajda
+> `AGENTS.md`, `belgeler/ekip/EKIP-PLANI.md` (tamamı; senin bölümün §4.2), `belgeler/ekip/CEKMECE-HARITASI.md`,
+> `belgeler/ekip/EKIP-DURUM.md`. Hedef görünüm `belgeler/ekip/tasarim/v4-*.png` ve `v4-ornek.css`'tedir;
+> `belgeler/ekip/vitrin.html` kartların örnekleridir. İlk iş T0: §8'deki kararları bana tek mesajda
 > sor. Cevabı beklerken T1 temeli kur. T2 ve T3 için H'nin taban envanterini bekle
 > (Kapı 1). Her modül bitince EKIP-DURUM'daki teslim tablosuna yaz ve main'e push et.
 
@@ -373,8 +373,8 @@ Cevaplar (kullanıcı, 2026-09-24: «önerilerini uygula»): **sekizi de öneri 
 
 > LifeOS deposunda üç Claude'luk bir ekip kuruldu; sen **HATA (H)** rolündesin. Diğer ikisi
 > KARTLAR (K) ve TASARIM (T). `git fetch origin main` ile main'i al ve sırayla oku:
-> `AGENTS.md`, `ekip/EKIP-PLANI.md` (tamamı; senin bölümün §4.3), `ekip/EKIP-DURUM.md`,
-> `ekip/HATALAR.md` (Tur 1 kapalı, biçim için). İlk iş **H0 taban envanteri**: T'nin menü
+> `AGENTS.md`, `belgeler/ekip/EKIP-PLANI.md` (tamamı; senin bölümün §4.3), `belgeler/ekip/EKIP-DURUM.md`,
+> `belgeler/ekip/HATALAR.md` (Tur 1 kapalı, biçim için). İlk iş **H0 taban envanteri**: T'nin menü
 > değişikliği onu bekliyor. Sonra H0b işleyici testleri ve H1 sadelik denetimi. Ardından
 > K ve T'nin her push'unu denetle; kırmızıyı sahibine yaz, sahipsiz hatayı kendin düzelt.
 > Tam koşumu yalnız sen koşarsın.

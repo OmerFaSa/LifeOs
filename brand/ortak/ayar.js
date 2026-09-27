@@ -1,4 +1,4 @@
-/* AYAR — T5 (ekip/EKIP-PLANI.md §4.2): ayar ekranlarının ortak davranışı.
+/* AYAR — T5 (belgeler/ekip/EKIP-PLANI.md §4.2): ayar ekranlarının ortak davranışı.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/ayar.js`; `tools/ortak.py --yay` ile üç arayüzün

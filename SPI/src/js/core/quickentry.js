@@ -179,7 +179,7 @@ SP.Quick = (function(){
 
      `parse` OLCUM olmayan cumleyi hic tanimaz: «7 saat uyumadim» 420
      dakikalik seans, «2 bardak su icmedim» 400 ml su oluyordu
-     (ekip/HATALAR.md KR-1). `parseHam` suzgecsiz halidir; yalniz
+     (belgeler/ekip/HATALAR.md KR-1). `parseHam` suzgecsiz halidir; yalniz
      engelin NEDENINI soylemek isteyen `Proposals.fromText` kullanir. */
   function parse(text){
     const r = parseHam(text);

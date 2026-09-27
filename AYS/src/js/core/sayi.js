@@ -10,7 +10,7 @@
    Biçimi `brand/ortak/kart.css` içindedir.
    ==================================================================
 
-   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §B)
+   NE YAPAR (katalog, belgeler/ekip/TASARIM-OZELLIKLERI.md §B)
 
      024  Kesinlik glifleri   sayı dört etiketten birini TAŞIR; yalnız
                               «tahmin» olanın altı kesik çizilir, «veri
@@ -395,7 +395,7 @@ window.LIFEOS = window.LIFEOS || {};
       return { anlam:'yok', sinif:'fark fark--yok', metin:'—',
         sr:(f.ek ? f.ek + ' ' : '') + 'karşılaştırılacak değer yok' };
     }
-    /* Karar GÖSTERİLEN değerden verilir (ekip/HATALAR.md T2-01): ham 0,3
+    /* Karar GÖSTERİLEN değerden verilir (belgeler/ekip/HATALAR.md T2-01): ham 0,3
        ekrana «0» yazılırken «+0, iyi yönde» denmez. Hassasiyet `bicim`'in
        varsayılanıyla aynı; yuvarlama yarımda sıfırdan uzağa, iki yönde eşit. */
     const od = f.ondalik == null ? (Number.isInteger(f.deger) ? 0 : 1) : f.ondalik;

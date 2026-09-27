@@ -410,13 +410,13 @@ uca çalıştırır.
 
 | | Sahip olduğu iş kolları | Dokunduğu yer |
 |---|---|---|
-| **Opus-1 (bu oturum, koordinatör)** | sözleşmeler, A (HKM tarafı), B, D, F, doktrin, birleştirme | `HKM/core/` çekirdek (bam, hedef, gercekcilik, planlama, bildirim), `daemon.py` rotaları, `ekip/` |
+| **Opus-1 (bu oturum, koordinatör)** | sözleşmeler, A (HKM tarafı), B, D, F, doktrin, birleştirme | `HKM/core/` çekirdek (bam, hedef, gercekcilik, planlama, bildirim), `daemon.py` rotaları, `belgeler/ekip/` |
 | **Opus-2** | C, E, I | `HKM/core/` araştırma, depo, web, üretim dosyaları + testleri |
 | **Opus-3** | A (modül tarafı), G, H | `brand/ortak/` yeni ortak dosyalar, `AYS/`, `SPI/`, `ESP/`, `HKM/web/` |
 
 J (kalite ve güvenlik) herkesin işidir; K, L ve M sonraki turlarda dağıtılır.
 Ayrıntılı sınırlar, dal düzeni, rapor biçimi ve iletişim kuralı
-`ekip/KOORDINASYON.md`'de olacak (plan onaylanınca yazılır).
+`belgeler/ekip/KOORDINASYON.md`'de olacak (plan onaylanınca yazılır).
 
 ## 6. Başarı ölçütleri (ölçülür, elle yazılmaz)
 
@@ -437,11 +437,11 @@ Ayrıntılı sınırlar, dal düzeni, rapor biçimi ve iletişim kuralı
 
 **2026-09-23:** Kullanıcı 29 maddelik öneri listesini (sistem içi 18 düzeltme, 11 yeni
 kol; zaman bütçesi ve değerlendirme seti dahil) ONAYLADI. Parçalara bölünmüş yol
-haritası ve açık sorular `ekip/DEVIR.md` §3–§4'te. Soru 2 ve 4 hâlâ açık.
+haritası ve açık sorular `belgeler/ekip/DEVIR.md` §3–§4'te. Soru 2 ve 4 hâlâ açık.
 
 **2026-09-23 (cevaplar):** Web araması esnek (her sağlayıcı, Ayarlar'dan); sağlık
 eşikleri kaynaklı araştırma + kişinin kendi geçmişi, ikisi birden. Bütün cevaplar ve
-sonuçları `ekip/DEVIR.md` §4'te; altyapı bitince tek, sade bir tasarıma geçilecek
+sonuçları `belgeler/ekip/DEVIR.md` §4'te; altyapı bitince tek, sade bir tasarıma geçilecek
 (DEVIR Part 9). Önce akıllı iş sistemi: istek → yoğunluk sınıfı → King'in maliyet/süre
 teklifi → onay → modüle monte edilen tipli çıktı (DEVIR Part 8).
 

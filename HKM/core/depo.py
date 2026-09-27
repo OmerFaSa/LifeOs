@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Depolama Burosu — BAM'in hafizasi ve kapisi (ekip/PLAN.md §3.C).
+"""Depolama Burosu — BAM'in hafizasi ve kapisi (belgeler/ekip/PLAN.md §3.C).
 
    Her is ONCE buradan gecer. Buro var olan bilgiyi denetler, duzenler ve
    bir konu arastirilmak istendiginde once depoya bakar:
@@ -354,7 +354,7 @@ def denetim(con, now=None):
 
 # ------------------------------------------------------------ tarayici
 #
-# Bilgi Deposu tarayicisi (ekip/PLAN.md §3.H, DEVIR Y9): raporlar,
+# Bilgi Deposu tarayicisi (belgeler/ekip/PLAN.md §3.H, DEVIR Y9): raporlar,
 # kaynaklar, tazelik, surumler TEK listede. Her durum ve her sayi KODDAN
 # gelir; yuz yalniz yazar. Model cagrilmaz, aga cikilmaz, kayit silinmez.
 

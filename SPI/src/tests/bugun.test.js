@@ -1,4 +1,4 @@
-/* Bugün — üç alan (katalog 03, ekip/EKIP-PLANI.md §3; T-DEVIR §2.A-4).
+/* Bugün — üç alan (katalog 03, belgeler/ekip/EKIP-PLANI.md §3; T-DEVIR §2.A-4).
 
    Kanıtladığı sözler: Bugün sekme taşımaz; Şimdi · Durum · (Öneri)
    alanlarından oluşur ve görünen düğme 14'ü aşmaz; sıkça yazılan dört

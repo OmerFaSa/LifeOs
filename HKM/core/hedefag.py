@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Hedef agi — uc modulun etkin hedefleri tek resimde ve ZAMAN BUTCESI.
-   (ekip/PLAN.md §3.A «Zaman butcesi», §3.H «Hedefler panosu»)
+   (belgeler/ekip/PLAN.md §3.A «Zaman butcesi», §3.H «Hedefler panosu»)
 
    Uc modul kendi hedefini kendi kuraliyla kurar ve birbirini gormez
    (AGENTS.md §1.4). Ama uc hedef AYNI GUNU paylasir: AYS konu bitirme

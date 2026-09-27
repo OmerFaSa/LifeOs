@@ -11,7 +11,7 @@
    adıyla anahtarlanır. Aynı cihazda iki profil (hane üyesi) ayrı ayrı
    bağlanınca iki kişinin uykusu aynı seriye yazılıyor, hafızası
    «unutuldu» oluyor, hedefleri ve yedeği birbirini eziyordu
-   (ekip/HATALAR.md Y-7). Dokuz ay için en küçük doğru yol: bağı TEK
+   (belgeler/ekip/HATALAR.md Y-7). Dokuz ay için en küçük doğru yol: bağı TEK
    profile vermek.
 
    Sözler:

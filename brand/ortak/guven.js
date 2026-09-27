@@ -7,7 +7,7 @@
    Biçimi `brand/ortak/kart.css` içindedir.
    ==================================================================
 
-   NE YAPAR (katalog, ekip/TASARIM-OZELLIKLERI.md §K)
+   NE YAPAR (katalog, belgeler/ekip/TASARIM-OZELLIKLERI.md §K)
 
      173  Yedek durumu        son yedeğin yaşı, tarihi ve boyutu; iki
                               haftalık yedek izi; tek düğmeyle yedek.

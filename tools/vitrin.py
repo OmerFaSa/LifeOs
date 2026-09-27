@@ -4,7 +4,7 @@
 
    NE İŞE YARAR
 
-   `ekip/vitrin.html` 183 kartın onaylanmış görünümüdür (katalog). Kartın
+   `belgeler/ekip/vitrin.html` 183 kartın onaylanmış görünümüdür (katalog). Kartın
    biçimi orada bir kez yazılır; sistem aynı biçimi ikinci kez elle
    yazarsa iki kopya bir gün ayrışır. Bu araç vitrinin kart kurallarını
    çıkarır ve `brand/ortak/vitrin.css`'e yazar; oradan `tools/ortak.py
@@ -36,7 +36,7 @@ import sys
 from pathlib import Path
 
 KOK = Path(__file__).resolve().parent.parent
-KAYNAK = KOK / "ekip" / "vitrin.html"
+KAYNAK = KOK / "belgeler" / "ekip" / "vitrin.html"
 HEDEF = KOK / "brand" / "ortak" / "vitrin.css"
 
 # Vitrinin kendi jetonları; `.vk` içinde sistemin jetonuna bağlanır.
@@ -72,7 +72,7 @@ BAGLAR = """.vk{
 """
 
 BASLIK = """/* VİTRİN KARTLARI — ÜRETİLMİŞ DOSYA, ELLE DÜZENLEME.
-   Kaynak `ekip/vitrin.html` (kart kuralları); `python3 tools/vitrin.py`
+   Kaynak `belgeler/ekip/vitrin.html` (kart kuralları); `python3 tools/vitrin.py`
    yazar, `tools/ortak.py --yay` üç arayüze dağıtır. Kural: kartın
    biçimi vitrinde değişir, burada değil. Ayrıntı: tools/vitrin.py. */
 """

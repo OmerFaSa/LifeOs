@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Guncelleme (kokteki guncelle.py) — main'den ileri sarma.
+"""Guncelleme (sistem/guncelle.py) — main'den ileri sarma.
 
 Korunan sozler: yalniz ileri sarar; elle degistirilmis dosyanin ustune
 yazmaz; baska daldayken ya da ayrismisken dokunmaz; git yoksa ya da
@@ -14,8 +14,8 @@ import sys
 import tempfile
 
 KOK = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-if KOK not in sys.path:
-    sys.path.append(KOK)   # sona: HKM/baslat.py kokteki baslat.py ile ezilmesin
+if os.path.join(KOK, "sistem") not in sys.path:
+    sys.path.append(os.path.join(KOK, "sistem"))   # sona: HKM/baslat.py sistem/baslat.py ile ezilmesin
 sys.dont_write_bytecode = True
 
 import guncelle  # noqa: E402
@@ -151,7 +151,7 @@ def run():
         ok("git" in s["mesaj"])
     test("git kurulu degilse ne yapilacagini soyler", t_git_yok)
 
-    # ---- giris sayfasi (kokteki sunucu.py) ----
+    # ---- giris sayfasi (sistem/sunucu.py) ----
     import json as _json
     import threading as _th
     import urllib.request as _ur

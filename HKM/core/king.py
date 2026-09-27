@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """King onay zinciri — is emri, imkan kontrolu, tahmini sure, bildirim.
-   (ekip/PLAN.md §3.F; Tur 2)
+   (belgeler/ekip/PLAN.md §3.F; Tur 2)
 
    ZINCIR — katlar atlanmaz (PLAN §1.3):
 

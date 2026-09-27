@@ -98,7 +98,7 @@ YOL_BIT = "# SEVIYE:yol-bit"
 # muhafizin ikinci bir kopyasini yazmak, iki kopyanin bir gun ayrismasi
 # demekti — bu ozellikte tam olarak bunu onlemek icin --denetle var.
 YOL_HEDEFLER = ["AYS/devserver.py", "SPI/devserver.py", "ESP/devserver.py",
-                "sunucu.py", "HKM/daemon.py"]
+                "sistem/sunucu.py", "HKM/daemon.py"]
 
 # Tek dosya surumune medya kopyalayan blok — uc build.py'de ayni.
 DIST_BAS = "# SEVIYE:dist-bas"
@@ -251,7 +251,7 @@ def _bloklar():
 def elle_yazilmis(hedef) -> bool:
     """Hedef var ve basinda uretilmis kopya isareti yoksa elle yazilmistir;
     yayim onun ustune yazmaz (ayni sinifin `ortak.py` ornegi: ortak bir
-    dosya arayuzun kendi ayni adli testini ezdi, ekip/HATALAR.md T2-07)."""
+    dosya arayuzun kendi ayni adli testini ezdi, belgeler/ekip/HATALAR.md T2-07)."""
     if not hedef.exists():
         return False
     with open(hedef, encoding="utf-8") as f:

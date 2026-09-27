@@ -43,7 +43,7 @@ R.PLAN = {
   get compressed(){ return R.PLAN.totalWeeks < R.PROGRAM.totalWeeks; },
   /* TYT'ye kalan gun. Sinav gunu 0; sinavdan SONRA «kalan gun» yoktur ve
      null doner — eksi sayi baslikta «−12 gun», HKM'de her gun «Sinava −N
-     gun kaldi» oluyordu (ekip/HATALAR.md Y-2). */
+     gun kaldi» oluyordu (belgeler/ekip/HATALAR.md Y-2). */
   kalanGun(gun){
     const k = R.U.diffDays(gun || R.U.todayISO(), R.PLAN.examTytISO);
     return isFinite(k) && k >= 0 ? k : null;

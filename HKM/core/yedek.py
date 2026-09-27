@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Otomatik yedek — uc modulun verisi her gun HKM'nin klasorune.
-   (ekip/DEVIR.md Part 4, madde 15)
+   (belgeler/ekip/DEVIR.md Part 4, madde 15)
 
    Uc arayuzun verisi tarayicinin deposunda durur. Tarayici verisi
    silinirse (site verisini temizle, profil sifirlama, yeni cihaz) geri

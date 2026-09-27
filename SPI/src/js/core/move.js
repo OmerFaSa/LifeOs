@@ -19,7 +19,7 @@ SP.Move = (function(){
   /* Bir gunluk olcumun kisisel ortalamasi. Pencere `bitis` gununden
      (varsayilan bugun) GERIYE kurulur ve o gun haric tutulur ki gunun
      degeri kendi taban cizgisini kaydirmasin. Gecmis bir gunun puani o
-     gunden SONRAKI olcumlerle hesaplanmaz (ekip/HATALAR.md O-4). */
+     gunden SONRAKI olcumlerle hesaplanmaz (belgeler/ekip/HATALAR.md O-4). */
   function baseline(key, days, bitis){
     const n = days || 30;
     const son = bitis ? U.parse(bitis) : U.today();

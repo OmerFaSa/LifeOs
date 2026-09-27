@@ -6,7 +6,7 @@
  *
  * Kullanicinin tek tasarimdan istedigi iki sey var: hicbir ozellik
  * kaybolmasin (`envanter.js` olcer) ve ekran sade, anlasilir olsun.
- * Ikincisi «bence sade oldu» ile kanitlanamaz. `ekip/EKIP-PLANI.md`
+ * Ikincisi «bence sade oldu» ile kanitlanamaz. `belgeler/ekip/EKIP-PLANI.md`
  * §1.2 bir SADELIK BUTCESI yaziyor; bu arac o butceyi her ekranda
  * olcer ve asani soyler.
  *
@@ -29,7 +29,7 @@
  *
  * Bugunku uygulama butcenin cok ustunde (Bugun 4 482 px, 52 dugme);
  * butce ancak bir modul yeni iskelete gecince anlam kazanir. Bu yuzden
- * arac bir modulu yalniz TESLIM EDILMISSE denetler: `ekip/EKIP-DURUM.md`
+ * arac bir modulu yalniz TESLIM EDILMISSE denetler: `belgeler/ekip/EKIP-DURUM.md`
  * teslim tablosunda o modulun satiri ✅ ise. Digerleri icin olcer ve
  * yazar, cikis kodunu etkilemez. `--denetle AYS` ile elle de istenir.
  *
@@ -151,7 +151,7 @@ function varsayilanOnaylar(ad){
 
 /* Teslim tablosunda ✅ olan moduller (T yazar). */
 function teslimEdilenler(){
-  const p = path.join(KOK, 'ekip', 'EKIP-DURUM.md');
+  const p = path.join(KOK, 'belgeler', 'ekip', 'EKIP-DURUM.md');
   if(!fs.existsSync(p)) return [];
   const t = fs.readFileSync(p, 'utf8');
   const out = [];
