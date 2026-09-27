@@ -47,90 +47,28 @@ describe('Tanıtım — katalog', () => {
   });
 });
 
-describe('Tanıtım — işaretleme', () => {
+describe('Tanıtım — sade şerit (afişsiz)', () => {
   const L = () => window.LIFEOS;
 
-  it('üç panel, üç nokta ve İLKİ açık gelir', () => {
+  it('üç cümle AYNI ANDA görünür; sınır cümlesi atlanamaz', () => {
+    /* Afiş gezdiricisi kaldırıldı: ikinci cümle (sınır) bir noktaya
+       basmadan görünmüyordu. Sade şeritte üçü de gerçek metindir. */
     const h = L().TANITIM_HTML('spi');
-    expect((h.match(/tanitim__afis/g) || []).length).toBe(3);
-    /* `tanitim__noktalar` (kapsayıcı) da bu deseni içeriyor; sayılan
-       şey noktanın KENDİSİ olsun diye eyleme bakılıyor. */
-    expect((h.match(/data-act="tanitim-adim"/g) || []).length).toBe(3);
-    expect((h.match(/aria-selected="true"/g) || []).length).toBe(1);
-    expect(h.indexOf('tanitim-spi-1.webp') >= 0).toBeTruthy();
-    expect(h.indexOf('tanitim-spi-3.webp') >= 0).toBeTruthy();
+    const d = document.createElement('div'); d.innerHTML = h;
+    const maddeler = d.querySelectorAll('.tanitim__madde');
+    expect(maddeler.length).toBe(3);
+    L().TANITIM_ADIMLARI('spi').forEach((c, i) => expect(maddeler[i].textContent.includes(c)).toBe(true));
+    expect(maddeler[1].textContent.includes('Neye karar vermiyoruz')).toBe(true);
   });
 
-  it('şerit kendi sistemini TAŞIR', () => {
-    /* Adım değişince alttaki cümleyi bu okur; modülü çağıranın
-       hatırlamasına bırakmak iki yerde iki ayrı doğru demekti. */
-    expect(L().TANITIM_HTML('esp').indexOf('data-mod="esp"') >= 0).toBeTruthy();
+  it('görsel dosyaya bağlı değildir (afiş, img yok) ve sistemini taşır', () => {
+    const h = L().TANITIM_HTML('esp');
+    expect(h.indexOf('<img') < 0).toBe(true);
+    expect(h.indexOf('.webp') < 0).toBe(true);
+    expect(h.indexOf('data-mod="esp"') >= 0).toBe(true);
   });
 
-  it('paneller ekran okuyucuya GÖRÜNMEZ, cümle GÖRÜNÜR', () => {
-    /* Panellerin üzerinde yazı var ve o yazı okunamaz. Adımın cümlesi
-       altta gerçek metin olarak durur. */
-    const h = L().TANITIM_HTML('ays');
-    expect((h.match(/aria-hidden="true"/g) || []).length).toBe(3);
-    expect(h.indexOf('Bilgiyi görür, gelişimi ölçeriz.') >= 0).toBeTruthy();
-  });
-
-  it('her nokta KAÇINCI adım olduğunu ve sorusunu söyler', () => {
-    const h = L().TANITIM_HTML('ays');
-    expect(h.indexOf('aria-label="2/3 — Neye karar vermiyoruz?"') >= 0).toBeTruthy();
-  });
-
-  it('panel yoksa YALNIZ O PANEL kalkar', () => {
-    /* Şerit çalışmaya devam eder; kalan iki panel ve noktalar durur. */
-    expect((L().TANITIM_HTML('spi').match(/onerror="this\.remove\(\)"/g) || []).length)
-      .toBe(3);
-  });
-
-  it('kök değiştirilebilir — tek dosya sürümü için', () => {
-    expect(L().TANITIM_HTML('spi', { kok:'medya/' })
-      .indexOf('medya/tanitim-spi-2.webp') >= 0).toBeTruthy();
-  });
-});
-
-describe('Tanıtım — adım değiştirme', () => {
-  const L = () => window.LIFEOS;
-
-  function serit(mod){
-    const d = document.createElement('div');
-    d.innerHTML = L().TANITIM_HTML(mod || 'spi');
-    document.body.appendChild(d);
-    return d;
-  }
-
-  it('nokta panelin, noktanın ve CÜMLENİN üçünü birden değiştirir', () => {
-    /* Cümleyi değiştirmemek, resmi değiştirip anlamı sabit bırakmak
-       olurdu: ekran okuyucu için hiçbir şey olmamış demektir. */
-    const d = serit('spi');
-    const nokta2 = d.querySelector('.tanitim__nokta[data-adim="2"]');
-    expect(L().TANITIM_ADIM(nokta2)).toBe(true);
-
-    expect(d.querySelector('.tanitim__afis[data-adim="2"]')
-      .classList.contains('is-acik')).toBe(true);
-    expect(d.querySelector('.tanitim__afis[data-adim="1"]')
-      .classList.contains('is-acik')).toBe(false);
-    expect(nokta2.getAttribute('aria-selected')).toBe('true');
-    expect(d.querySelector('[data-tanitim-yazi]').textContent)
-      .toBe(L().TANITIM_ADIMLARI('spi')[1]);
-
-    d.remove();
-  });
-
-  it('AYNI ANDA TEK adım açıktır', () => {
-    const d = serit('esp');
-    L().TANITIM_ADIM(d.querySelector('.tanitim__nokta[data-adim="3"]'));
-    expect(d.querySelectorAll('.tanitim__afis.is-acik').length).toBe(1);
-    expect(d.querySelectorAll('.tanitim__nokta[aria-selected="true"]').length).toBe(1);
-    d.remove();
-  });
-
-  it('şeridin dışındaki bir düğme hiçbir şey yapmaz', () => {
-    /* Sayfada başka bir `data-act` ile karışırsa sessizce yanlış bir
-       şerit oynatmasın. */
+  it('eski nokta düğmesi yetim kalırsa hiçbir şey yapmaz', () => {
     const yetim = document.createElement('button');
     yetim.setAttribute('data-adim', '2');
     expect(L().TANITIM_ADIM(yetim)).toBe(false);
@@ -178,6 +116,39 @@ describe('Tanıtım — adım değiştirme', () => {
         expect(window.LIFEOS.KURULUM_GIT(ileri, 1)).toBe(3);
         expect(window.LIFEOS.KURULUM_GIT(ileri, -1)).toBe(2);
         expect(window.LIFEOS.KURULUM_HTML('yok', {})).toBe('');
+      }finally{ d.remove(); }
+    });
+
+    it('kurulum sade: afiş yok; üç adımlık adım çizgisi hangi adımda olduğunu söyler', () => {
+      const d = document.createElement('div');
+      d.innerHTML = window.LIFEOS.KURULUM_HTML('spi', { adimlar:['<p>1</p>', '<p>2</p>', '<p>3</p>'] });
+      document.body.appendChild(d);
+      try{
+        expect(d.querySelector('img')).toBe(null);
+        const li = () => Array.from(d.querySelectorAll('.kurulum__adimlar li'));
+        expect(li().length).toBe(3);
+        expect(li().map(x => x.getAttribute('data-hal'))).toEqual(['simdi', 'sira', 'sira']);
+        expect(li()[1].textContent.includes('Neye karar vermiyoruz')).toBe(true);
+        window.LIFEOS.KURULUM_GIT(d.querySelector('[data-kurulum]'), 1);
+        expect(li().map(x => x.getAttribute('data-hal'))).toEqual(['bitti', 'simdi', 'sira']);
+        expect(li()[1].getAttribute('aria-current')).toBe('step');
+        expect(d.querySelector('[data-kurulum-yazi]').textContent).toBe(window.LIFEOS.TANITIM_ADIMLARI('spi')[1]);
+      }finally{ d.remove(); }
+    });
+
+    it('hata: «Başla» ve «Geri» 1. adımda görünüyordu — .btn görünümü [hidden]ı eziyordu', () => {
+      const d = document.createElement('div');
+      d.className = 'sheet';
+      d.innerHTML = window.LIFEOS.KURULUM_HTML('spi', { adimlar:['<p>1</p>', '<p>2</p>', '<p>3</p>'] })
+        + '<button class="btn" style="display:inline-flex" data-kurulum-degil="1" hidden>Geri</button>'
+        + '<button class="btn" style="display:inline-flex" data-kurulum-yalniz="3" hidden>Başla</button>';
+      document.body.appendChild(d);
+      try{
+        const gor = s => getComputedStyle(d.querySelector(s)).display !== 'none';
+        expect(gor('[data-kurulum-yalniz]')).toBe(false);
+        expect(gor('[data-kurulum-degil]')).toBe(false);
+        window.LIFEOS.KURULUM_GIT(d.querySelector('[data-kurulum]'), 1);
+        expect(gor('[data-kurulum-degil]')).toBe(true);
       }finally{ d.remove(); }
     });
   });

@@ -8830,6 +8830,53 @@ button.rutbe-rozet:focus-visible{
 .tanitim--kurulum .tanitim__yazi{ margin:0; }
 @media (prefers-reduced-motion:reduce){ .kurulum__cubuk > i{ transition:none; } }
 
+
+/* ================================================================
+   SADE ŞERİT ve SADE KURULUM (2026-09-27)
+   Afiş gezdiricisi kalktı; karşılama kartı yazıyla, ince bir adım
+   çizgisiyle ve bol boşlukla konuşur. */
+.tanitim--sade{ margin:0 0 8px; }
+.tanitim__maddeler{ list-style:none; margin:0; padding:0; display:grid; gap:1px;
+  grid-template-columns:repeat(3, minmax(0, 1fr)); border-radius:12px; overflow:hidden;
+  background:var(--border); border:1px solid var(--border); }
+.tanitim__madde{ display:flex; gap:10px; padding:14px 16px; background:var(--surface); }
+.tanitim__no{ flex:none; width:22px; height:22px; border-radius:50%; display:grid; place-items:center;
+  font-size:11.5px; font-weight:700; color:var(--text-2); background:var(--surface-2); }
+.tanitim__madde--sinir .tanitim__no{ color:var(--surface); background:var(--text); }
+.tanitim__metin{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+.tanitim__metin b{ font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); }
+.tanitim__metin span{ font-size:13.5px; line-height:1.45; color:var(--text); }
+@media (max-width:680px){ .tanitim__maddeler{ grid-template-columns:1fr; } }
+
+.kurulum--sade{ gap:18px; }
+.kurulum--sade .kurulum__ilerleme{ display:flex; align-items:center; gap:14px; }
+.kurulum__adimlar{ list-style:none; margin:0; padding:0; display:flex; flex:1; min-width:0; gap:8px; }
+.kurulum__adimlar li{ flex:1; min-width:0; display:flex; align-items:center; gap:8px; padding-top:10px;
+  border-top:2px solid var(--border); color:var(--text-3); font-size:12.5px; font-weight:600;
+  transition:border-color .2s, color .2s; }
+.kurulum__adimlar li[data-hal="bitti"]{ border-top-color:var(--text-2); color:var(--text-2); }
+.kurulum__adimlar li[data-hal="simdi"]{ border-top-color:var(--primary, var(--text)); color:var(--text); }
+.kurulum__no{ flex:none; width:20px; height:20px; border-radius:50%; display:grid; place-items:center;
+  font-size:11px; font-weight:700; background:var(--surface-2); color:var(--text-2); }
+.kurulum__adimlar li[data-hal="simdi"] .kurulum__no{ background:var(--primary, var(--text)); color:#fff; }
+.kurulum__adimlar li[data-hal="bitti"] .kurulum__no{ background:var(--text-2); color:var(--surface); }
+.kurulum__ad{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.kurulum--sade .kurulum__sayac{ flex:none; font-size:11.5px; color:var(--text-3); font-variant-numeric:tabular-nums; }
+.kurulum__bas{ display:flex; flex-direction:column; gap:6px; }
+.kurulum--sade .kurulum__soru{ font-size:22px; font-weight:650; letter-spacing:-.01em; }
+.kurulum__yazi{ margin:0; font-size:14.5px; line-height:1.5; color:var(--text-2); max-width:62ch; }
+/* Adımın içindeki eski «kahraman» başlığı sade kartta ikinci bir büyük
+   başlık olmasın: aynı bilgi, sakin boyda. */
+.kurulum--sade .setup__kicker{ display:none; }
+.kurulum--sade .setup__h{ font-size:16px; line-height:1.35; margin:0 0 6px; }
+.kurulum--sade .setup__hero{ padding:0; background:none; border:0; }
+@media (max-width:560px){ .kurulum__ad{ display:none; } .kurulum__adimlar li{ justify-content:center; } }
+
+/* HATA (önceden vardı): pencerenin alt çubuğundaki «Başla» ve «Geri»
+   `.btn{display:inline-flex}` yüzünden [hidden] olsa da görünüyordu —
+   sınırı söyleyen 2. adım atlanabiliyordu. */
+[data-kurulum-yalniz][hidden], [data-kurulum-degil][hidden]{ display:none !important; }
+
 /* ==== css/simge.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/simge.css içine yazılır; burası bir sonraki
@@ -12923,7 +12970,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'69d25f1', at:'2026-09-27 10:10', dirty:true };
+R.BUILD = { id:'b6ecd3d', at:'2026-09-27 10:31', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -23272,9 +23319,12 @@ LIFEOS.TANITIM_ADIMLARI = function(mod){
   return LIFEOS.TANITIM[mod] || null;
 };
 
-LIFEOS.TANITIM_HTML = function(mod, secenekler){
-  secenekler = secenekler || {};
-  var kok = secenekler.kok || 'img/marka/';
+/* SADE ŞERİT (depo sahibinin isteği, 2026-09-27: «karşılayan kart çok
+   daha minimalist ve profesyonel olsun»). Afiş gezdiricisi kalktı:
+   ikinci cümle — sistemin SINIRI — bir noktaya basmadan görünmüyordu.
+   Şimdi üç soru ve cevabı aynı anda, gerçek metin olarak durur; hiçbir
+   görsel dosyaya bağlı değildir. */
+LIFEOS.TANITIM_HTML = function(mod){
   var cevaplar = LIFEOS.TANITIM_ADIMLARI(mod);
   /* Bilinmeyen modül için UYDURMA bir şerit çizilmez; hiç çizilmez. */
   if(!cevaplar) return '';
@@ -23284,34 +23334,15 @@ LIFEOS.TANITIM_HTML = function(mod, secenekler){
       return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c];
     });
   };
-
-  var afisler = '', noktalar = '';
+  var maddeler = '';
   for(var i = 0; i < cevaplar.length; i++){
-    var no = i + 1;
-    var acik = i === 0;
-    afisler += '<img class="tanitim__afis' + (acik ? ' is-acik' : '') + '"'
-      + ' data-adim="' + no + '"'
-      + ' src="' + kac(kok + 'tanitim-' + mod + '-' + no) + '.webp"'
-      + ' alt="" aria-hidden="true" loading="lazy"'
-      /* Panel yoksa YALNIZ O PANEL kalkar: kalan ikisi ve noktalar
-         durur, şerit çalışmaya devam eder. */
-      + ' onerror="this.remove()">';
-    noktalar += '<button type="button" class="tanitim__nokta" role="tab"'
-      + ' aria-selected="' + (acik ? 'true' : 'false') + '"'
-      + ' aria-label="' + no + '/' + cevaplar.length + ' — ' + kac(sorular[i]) + '"'
-      + ' data-act="tanitim-adim" data-adim="' + no + '"></button>';
+    maddeler += '<li class="tanitim__madde' + (i === 1 ? ' tanitim__madde--sinir' : '') + '">'
+      + '<span class="tanitim__no" aria-hidden="true">' + (i + 1) + '</span>'
+      + '<span class="tanitim__metin"><b>' + kac(sorular[i].replace(/\?$/, '')) + '</b>'
+      + '<span>' + kac(cevaplar[i]) + '</span></span></li>';
   }
-
-  /* `data-mod` ŞERİDİN ÜZERİNDE durur: adım değişince alttaki cümleyi
-     bu okur. Modülü çağıranın hatırlamasına bırakmak, iki yerde iki
-     ayrı doğru demekti. */
-  return '<div class="tanitim" data-tanitim data-mod="' + kac(mod) + '">'
-    + '<div class="tanitim__kare">' + afisler + '</div>'
-    + '<div class="tanitim__alt">'
-    +   '<p class="tanitim__yazi" data-tanitim-yazi>' + kac(cevaplar[0]) + '</p>'
-    +   '<div class="tanitim__noktalar" role="tablist"'
-    +     ' aria-label="Tanıtım adımı">' + noktalar + '</div>'
-    + '</div></div>';
+  return '<div class="tanitim tanitim--sade" data-tanitim data-mod="' + kac(mod) + '">'
+    + '<ol class="tanitim__maddeler">' + maddeler + '</ol></div>';
 };
 
 /* Noktaya basınca: panel değişir, nokta işaretlenir, ALTTAKİ CÜMLE de
@@ -23320,7 +23351,7 @@ LIFEOS.TANITIM_HTML = function(mod, secenekler){
 LIFEOS.TANITIM_ADIM = function(dugme){
   if(!dugme) return false;
   var kutu = dugme.closest ? dugme.closest('[data-tanitim]') : null;
-  if(!kutu) return false;
+  if(!kutu || !kutu.querySelector('.tanitim__nokta')) return false;
   var no = Number(dugme.getAttribute('data-adim')) || 1;
 
   var afisler = kutu.querySelectorAll('.tanitim__afis');
@@ -23371,25 +23402,26 @@ LIFEOS.KURULUM_HTML = function(mod, o){
     });
   };
   var n = sorular.length;
-  var afisler = '', bolumler = '';
+  var bolumler = '', adimlar_ = '';
   for(var i = 0; i < n; i++){
     var no = i + 1;
-    afisler += '<img class="tanitim__afis' + (i === 0 ? ' is-acik' : '') + '" data-adim="' + no + '"'
-      + ' src="' + kac(kok + 'tanitim-' + mod + '-' + no) + '.webp" alt="" aria-hidden="true"'
-      + ' loading="lazy" onerror="this.remove()">';
     bolumler += '<section class="kurulum__adim" data-kurulum-adim="' + no + '"' + (i === 0 ? '' : ' hidden') + '>'
       + (adimlar[i] || '') + '</section>';
+    adimlar_ += '<li data-hal="' + (i === 0 ? 'simdi' : 'sira') + '"' + (i === 0 ? ' aria-current="step"' : '') + '>'
+      + '<span class="kurulum__no" aria-hidden="true">' + no + '</span>'
+      + '<span class="kurulum__ad">' + kac(sorular[i].replace(/\?$/, '')) + '</span></li>';
   }
-  return '<div class="kurulum" data-kurulum data-mod="' + kac(mod) + '" data-adim="1" data-oz="171">'
+  /* Afiş yok (sade şerit): üstte üç adımlık ince bir çizgi, altında
+     adımın sorusu ve bir cümlelik cevabı, sonra adımın gövdesi. */
+  return '<div class="kurulum kurulum--sade" data-kurulum data-mod="' + kac(mod) + '" data-adim="1" data-oz="171">'
     + '<div class="kurulum__ilerleme" role="progressbar" aria-label="Kurulum adımı"'
     +   ' aria-valuemin="1" aria-valuemax="' + n + '" aria-valuenow="1" aria-valuetext="Adım 1 / ' + n + '">'
+    +   '<ol class="kurulum__adimlar">' + adimlar_ + '</ol>'
     +   '<span class="kurulum__sayac" data-kurulum-sayac>Adım 1 / ' + n + '</span>'
-    +   '<span class="kurulum__cubuk" aria-hidden="true"><i data-kurulum-cubuk style="width:' + Math.round(100 / n) + '%"></i></span>'
     + '</div>'
-    + '<h2 class="kurulum__soru" data-kurulum-soru tabindex="-1">' + kac(sorular[0]) + '</h2>'
-    + '<div class="tanitim tanitim--kurulum" data-mod="' + kac(mod) + '">'
-    +   '<div class="tanitim__kare">' + afisler + '</div>'
-    +   '<p class="tanitim__yazi" data-kurulum-yazi>' + kac(cevaplar[0]) + '</p>'
+    + '<div class="kurulum__bas">'
+    +   '<h2 class="kurulum__soru" data-kurulum-soru tabindex="-1">' + kac(sorular[0]) + '</h2>'
+    +   '<p class="kurulum__yazi" data-kurulum-yazi>' + kac(cevaplar[0]) + '</p>'
     + '</div>'
     + bolumler
     + '</div>';
@@ -23411,9 +23443,11 @@ LIFEOS.KURULUM_GIT = function(dugme, yon){
   for(var i = 0; i < bolumler.length; i++){
     bolumler[i].hidden = Number(bolumler[i].getAttribute('data-kurulum-adim')) !== no;
   }
-  var afisler = kok.querySelectorAll('.tanitim__afis');
-  for(var j = 0; j < afisler.length; j++){
-    afisler[j].classList.toggle('is-acik', Number(afisler[j].getAttribute('data-adim')) === no);
+  var cizgi = kok.querySelectorAll('.kurulum__adimlar li');
+  for(var j = 0; j < cizgi.length; j++){
+    var hal = j + 1 < no ? 'bitti' : j + 1 === no ? 'simdi' : 'sira';
+    cizgi[j].setAttribute('data-hal', hal);
+    if(hal === 'simdi') cizgi[j].setAttribute('aria-current', 'step'); else cizgi[j].removeAttribute('aria-current');
   }
   var cevaplar = LIFEOS.TANITIM_ADIMLARI(kok.getAttribute('data-mod')) || [];
   var soru = kok.querySelector('[data-kurulum-soru]');
