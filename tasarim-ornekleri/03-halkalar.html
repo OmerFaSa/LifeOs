@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>03 · Halkalar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Martian+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Tek dunya: gece. Halkalar koyu zeminde okunur. */
+:root{
+  --bg:#06070A; --yuzey:#101217; --yuzey2:#161920; --cizgi:#1E222B;
+  --ink:#F1F2F5; --ink2:#A2A8B4; --ink3:#666D7B;
+  --sinav:#5B8FF7; --sinav2:#8DB2FF; --saglik:#22B89E; --saglik2:#5FE3C8; --gelisim:#D9962E; --gelisim2:#FFC468; --merkez:#8A72EE;
+  --sans:"Onest",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Martian Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased;padding-inline:24px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--sinav2);outline-offset:3px;border-radius:10px}
+.kap{max-width:1040px;margin:0 auto;padding-block:28px 64px}
+
+.ust{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.ust .ad{font-weight:600;letter-spacing:-.01em}
+.ust .tarih{font:400 11px var(--mono);color:var(--ink3);letter-spacing:.04em;text-transform:uppercase}
+
+/* sahne */
+.sahne{display:grid;grid-template-columns:minmax(0,440px) 1fr;gap:56px;align-items:center;margin-top:48px}
+.halka{position:relative;width:100%;max-width:440px;aspect-ratio:1}
+.halka svg{width:100%;height:100%;display:block;transform:rotate(-90deg)}
+.halka .iz{fill:none;stroke-width:26}
+.halka .yay{fill:none;stroke-width:26;stroke-linecap:round;animation:cek 1.1s cubic-bezier(.2,.7,.2,1) backwards}
+.halka .yay:nth-of-type(2){animation-delay:.08s}.halka .yay:nth-of-type(3){animation-delay:.16s}
+@keyframes cek{from{stroke-dashoffset:var(--tam)}}
+.merkez{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.merkez b{font-size:64px;font-weight:600;letter-spacing:-.04em;line-height:1}
+.merkez span{font:400 11px var(--mono);color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;margin-top:8px}
+
+.efsane{display:flex;flex-direction:column;gap:28px}
+.efsane .sat{display:grid;grid-template-columns:4px 1fr auto;gap:18px;align-items:center}
+.efsane .sat>i{height:100%;min-height:52px;border-radius:2px;background:linear-gradient(var(--r2),var(--r))}
+.efsane .ad{font-size:15px;color:var(--ink2)}
+.efsane .buyuk{font-size:36px;font-weight:600;letter-spacing:-.03em;line-height:1.1}
+.efsane .buyuk small{font-size:18px;color:var(--ink3);font-weight:500;margin-left:4px}
+.efsane .yan{font:400 11px var(--mono);color:var(--ink3);text-align:right;line-height:1.9}
+.pm{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:5px;color:var(--ink3);vertical-align:middle}
+.pm.o{background:currentColor}.pm.h{background:linear-gradient(90deg,currentColor 50%,transparent 50%);box-shadow:inset 0 0 0 1px currentColor}.pm.t{box-shadow:inset 0 0 0 1.2px currentColor}
+
+/* siradaki */
+.sira{margin-top:56px;display:flex;align-items:center;gap:20px;padding:16px 16px 16px 22px;border-radius:22px;background:var(--yuzey);flex-wrap:wrap}
+.sira .zaman{font:500 13px var(--mono);color:var(--gelisim2)}
+.sira .is{font-size:18px;font-weight:600;letter-spacing:-.01em}
+.sira .is small{color:var(--ink3);font-weight:400;font-size:15px;margin-left:8px}
+.sira .dugme{margin-left:auto;height:48px;padding:0 26px;border-radius:14px;background:var(--ink);color:var(--bg);font-weight:600}
+
+/* hafta */
+.hafta{margin-top:48px}
+.hafta h3,.alt h3{font:400 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin:0 0 18px;font-weight:400}
+.gunler{display:grid;grid-template-columns:repeat(7,1fr);gap:12px}
+.gun{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 0;border-radius:18px}
+.gun.bugun{background:var(--yuzey)}
+.gun svg{width:100%;max-width:72px;aspect-ratio:1;transform:rotate(-90deg)}
+.gun span{font-size:13px;color:var(--ink2)}
+.gun.gelecek span{color:var(--ink3)}
+
+.alt{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:48px}
+.kutu{background:var(--yuzey);border-radius:22px;padding:22px}
+.kutu b{display:block;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.kutu p{margin:6px 0 16px;font:400 11px/1.7 var(--mono);color:var(--ink3)}
+.kutu .d{display:flex;gap:8px}
+.kutu .d button{height:40px;padding:0 18px;border-radius:12px;font-weight:600;background:var(--yuzey2)}
+.kutu .d button.birincil{background:var(--merkez);color:#fff}
+.uyarilar{display:flex;flex-direction:column;gap:12px}
+.uyarilar div{display:flex;align-items:center;gap:12px}
+.uyarilar i{width:8px;height:8px;border-radius:50%;background:#E2A34A}
+
+@media (max-width:820px){
+  .sahne{grid-template-columns:1fr;gap:36px;justify-items:center}
+  .efsane{width:100%}
+  .alt{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  body{padding-inline:16px}
+  .merkez b{font-size:52px}
+  .efsane .buyuk{font-size:30px}
+  .gunler{gap:4px}
+  .gun{padding:10px 0}
+  .sira .dugme{width:100%;margin-left:0}
+}
+@media (prefers-reduced-motion:reduce){.halka .yay{animation:none}}
+</style>
+</head>
+<body>
+<div class="kap">
+  <header class="ust"><span class="ad">LifeOS</span><span class="tarih">Perşembe · 24 Eylül</span></header>
+
+  <section class="sahne" aria-label="Günün halkaları">
+    <div class="halka">
+      <svg viewBox="0 0 300 300" id="buyuk" role="img" aria-label="Sınav yüzde 50, Sağlık yüzde 50, Gelişim yüzde 40"></svg>
+      <div class="merkez"><b>%47</b><span>gün tamam</span></div>
+    </div>
+    <div class="efsane">
+      <div class="sat" style="--r:var(--sinav);--r2:var(--sinav2)"><i></i>
+        <div><div class="ad">Sınav</div><div class="buyuk">1<small>/ 2 blok</small></div></div>
+        <div class="yan">268 gün<i class="pm t" title="tahmin"></i><br>seri 11</div></div>
+      <div class="sat" style="--r:var(--saglik);--r2:var(--saglik2)"><i></i>
+        <div><div class="ad">Sağlık</div><div class="buyuk">2<small>/ 4 asgari</small></div></div>
+        <div class="yan">toparlanma 72<i class="pm h" title="hesaplandı"></i><br>uyku 7,0 sa<i class="pm o" title="ölçüldü"></i></div></div>
+      <div class="sat" style="--r:var(--gelisim);--r2:var(--gelisim2)"><i></i>
+        <div><div class="ad">Gelişim</div><div class="buyuk">20<small>/ 50 dk</small></div></div>
+        <div class="yan">retansiyon %50<i class="pm h" title="hesaplandı"></i><br>797 kart</div></div>
+    </div>
+  </section>
+
+  <section class="sira" aria-label="Sıradaki">
+    <span class="zaman">14:30</span>
+    <span class="is">Yabancı Dil<small>30 dk · Gelişim</small></span>
+    <button class="dugme">Başla</button>
+  </section>
+
+  <section class="hafta" aria-label="Bu hafta">
+    <h3>Bu hafta</h3>
+    <div class="gunler" id="gunler"></div>
+  </section>
+
+  <section class="alt">
+    <div class="kutu">
+      <b>Akşam bloğu tekrara ayrılsın</b>
+      <p>Merkez · tekrar borcu %34 · eşik %10</p>
+      <div class="d"><button class="birincil">Uygula</button><button>Geç</button></div>
+    </div>
+    <div class="kutu uyarilar">
+      <div><i></i>Yedek hiç alınmadı</div>
+      <div><i></i>11 deneme analiz bekliyor</div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var NS = 'http://www.w3.org/2000/svg';
+  function halka(svg, oran, kalinlik, veriler, anim){
+    var c = 150, h = '';
+    h += '<defs>';
+    veriler.forEach(function(v, i){ h += '<linearGradient id="g'+svg.id+i+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+v[2]+'"/><stop offset="1" stop-color="'+v[1]+'"/></linearGradient>'; });
+    h += '</defs>';
+    veriler.forEach(function(v, i){
+      var r = oran[i], L = 2 * Math.PI * r;
+      h += '<circle class="iz" cx="'+c+'" cy="'+c+'" r="'+r+'" stroke="'+v[1]+'" stroke-opacity=".16" stroke-width="'+kalinlik+'" fill="none"/>';
+    });
+    veriler.forEach(function(v, i){
+      var r = oran[i], L = 2 * Math.PI * r, p = v[0];
+      if(p <= 0) return;
+      h += '<circle class="'+(anim?'yay':'')+'" cx="'+c+'" cy="'+c+'" r="'+r+'" stroke="url(#g'+svg.id+i+')" stroke-width="'+kalinlik+'" stroke-linecap="round" fill="none" stroke-dasharray="'+L+'" stroke-dashoffset="'+(L*(1-p))+'" style="--tam:'+L+'"/>';
+    });
+    svg.innerHTML = h;
+  }
+  var R = getComputedStyle(document.documentElement);
+  var renk = function(n){ return R.getPropertyValue(n).trim(); };
+  var S = [renk('--sinav'), renk('--sinav2')], H = [renk('--saglik'), renk('--saglik2')], G = [renk('--gelisim'), renk('--gelisim2')];
+  halka(document.getElementById('buyuk'), [126, 96, 66], 26, [[.5, S[0], S[1]], [.5, H[0], H[1]], [.4, G[0], G[1]]], true);
+
+  var gun = [['Pzt',[1,.75,1]],['Sal',[.5,1,.8]],['Çar',[1,.5,.6]],['Per',[.5,.5,.4]],['Cum',[0,0,0]],['Cmt',[0,0,0]],['Paz',[0,0,0]]];
+  var kap = document.getElementById('gunler');
+  gun.forEach(function(g, i){
+    var d = document.createElement('div');
+    d.className = 'gun' + (i === 3 ? ' bugun' : '') + (i > 3 ? ' gelecek' : '');
+    var s = document.createElementNS(NS, 'svg'); s.setAttribute('viewBox', '0 0 300 300'); s.id = 'h' + i;
+    s.setAttribute('role','img'); s.setAttribute('aria-label', g[0] + (i > 3 ? ': henüz gelmedi' : ': ' + g[1].map(function(x){ return Math.round(x*100); }).join(', ')));
+    d.appendChild(s);
+    var e = document.createElement('span'); e.textContent = g[0]; d.appendChild(e);
+    kap.appendChild(d);
+    halka(s, [120, 82, 44], 34, [[g[1][0], S[0], S[1]], [g[1][1], H[0], H[1]], [g[1][2], G[0], G[1]]], false);
+  });
+})();
+</script>
+</body>
+</html>

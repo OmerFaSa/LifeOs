@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>08 · Yörünge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Tek dunya: uzay. Sahne WebGL ile cizilir; kutuphane yok. */
+:root{
+  --bg:#05060B; --ink:#F2F3F8; --ink2:#AEB3C6; --ink3:#6F7590;
+  --cam:rgba(14,16,28,.58); --cam-cizgi:rgba(255,255,255,.09);
+  --sinav:#5B8FF7; --saglik:#22B89E; --gelisim:#E39A2E; --merkez:#8F78F4;
+  --disp:"Syne",ui-sans-serif,system-ui,sans-serif;
+  --sans:"Manrope",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--sans);-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:12px}
+canvas#sahne{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:grab;touch-action:none}
+canvas#sahne.tut{cursor:grabbing}
+
+.ust{position:fixed;left:0;right:0;top:0;padding:calc(20px + env(safe-area-inset-top,0px)) 28px 0;display:flex;align-items:center;gap:20px;pointer-events:none}
+.ust>*{pointer-events:auto}
+.logo{font:600 16px var(--disp);letter-spacing:.01em}
+.tarih{font-size:13px;color:var(--ink3)}
+.sekme{margin-left:auto;display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--cam);border:1px solid var(--cam-cizgi);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.sekme button{height:32px;padding:0 14px;border-radius:999px;font-size:13px;font-weight:600;color:var(--ink2);display:inline-flex;align-items:center;gap:8px}
+.sekme button i{width:7px;height:7px;border-radius:50%;background:var(--r)}
+.sekme button[aria-pressed="true"]{background:rgba(255,255,255,.1);color:var(--ink)}
+
+.etiket{position:fixed;left:0;top:0;text-align:center;pointer-events:none;white-space:nowrap;transition:opacity .3s}
+.etiket b{display:block;font:600 13px var(--sans);color:var(--ink)}
+.etiket span{font:600 12px var(--disp);color:var(--ink3);letter-spacing:.02em}
+.etiket.sec b{color:#fff}
+.etiket.sec span{color:var(--r)}
+
+.panel{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);width:min(620px,calc(100% - 32px));
+  background:var(--cam);border:1px solid var(--cam-cizgi);border-radius:26px;padding:22px 24px;backdrop-filter:blur(22px) saturate(1.2);-webkit-backdrop-filter:blur(22px) saturate(1.2);
+  display:grid;grid-template-columns:auto 1fr auto;gap:8px 24px;align-items:center}
+.panel .ad{grid-column:1/-1;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink2)}
+.panel .ad i{width:8px;height:8px;border-radius:50%;background:var(--r)}
+.panel .buyuk{font:600 54px/1 var(--disp);letter-spacing:-.03em;white-space:nowrap}
+.panel .buyuk small{font:500 18px var(--sans);color:var(--ink3);margin-left:4px;letter-spacing:0}
+.panel ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--ink2)}
+.panel ul b{color:var(--ink);font-weight:600}
+.panel .eylem{height:48px;padding:0 22px;border-radius:14px;background:#fff;color:#0A0B12;font-weight:700;white-space:nowrap}
+.panel .alt{grid-column:1/-1;display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink3);border-top:1px solid var(--cam-cizgi);padding-top:12px;margin-top:6px}
+.panel .alt span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#E2A34A;margin-right:8px;transform:translateY(-1px)}
+.ipucu{position:fixed;right:28px;bottom:calc(32px + env(safe-area-inset-bottom,0px));font-size:12px;color:var(--ink3);pointer-events:none}
+.yedek{position:fixed;inset:0;display:none;place-items:center;color:var(--ink3)}
+.pm{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:5px;vertical-align:middle;color:var(--ink3)}
+.pm.o{background:currentColor}.pm.h{background:linear-gradient(90deg,currentColor 50%,transparent 50%);box-shadow:inset 0 0 0 1px currentColor}.pm.t{box-shadow:inset 0 0 0 1.2px currentColor}
+
+@media (max-width:760px){
+  .ust{padding-inline:16px;flex-wrap:wrap;gap:10px 14px}
+  .sekme{margin-left:0;width:100%;justify-content:space-between}
+  .sekme button{padding:0 10px}
+  .panel{grid-template-columns:1fr auto;padding:18px}
+  .panel ul{grid-column:1/-1;grid-row:3}
+  .panel .buyuk{font-size:40px}
+  .panel .buyuk small{font-size:15px}
+  .panel .eylem{padding:0 16px}
+  .ipucu{display:none}
+}
+</style>
+</head>
+<body>
+<canvas id="sahne" aria-label="Dört küre: ortada Merkez, çevresinde Sınav, Sağlık ve Gelişim. Kürelerin dolma oranı günün ilerlemesidir." role="img"></canvas>
+<div class="yedek" id="yedek">Bu tarayıcı WebGL çizemiyor.</div>
+
+<header class="ust">
+  <span class="logo">LifeOS</span><span class="tarih">Perşembe · 24 Eylül · 14:10</span>
+  <nav class="sekme" aria-label="Küre seç">
+    <button data-k="0" aria-pressed="true" style="--r:var(--merkez)"><i></i>Bugün</button>
+    <button data-k="1" aria-pressed="false" style="--r:var(--sinav)"><i></i>Sınav</button>
+    <button data-k="2" aria-pressed="false" style="--r:var(--saglik)"><i></i>Sağlık</button>
+    <button data-k="3" aria-pressed="false" style="--r:var(--gelisim)"><i></i>Gelişim</button>
+  </nav>
+</header>
+
+<div class="etiket" id="e1" style="--r:var(--sinav)"><b>Sınav</b><span>%50</span></div>
+<div class="etiket" id="e2" style="--r:var(--saglik)"><b>Sağlık</b><span>%50</span></div>
+<div class="etiket" id="e3" style="--r:var(--gelisim)"><b>Gelişim</b><span>%40</span></div>
+
+<section class="panel" id="panel" aria-live="polite"></section>
+<div class="ipucu">sürükle · döndür &nbsp;·&nbsp; küreye dokun · seç</div>
+
+<script id="vs" type="x-shader/x-vertex">
+attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }
+</script>
+<script id="fs" type="x-shader/x-fragment">
+precision highp float;
+uniform vec2 uRes; uniform float uTime; uniform float uFov;
+uniform vec3 uRo; uniform vec3 uTa;
+uniform vec3 uC[4]; uniform float uRad[4]; uniform float uLev[4]; uniform vec3 uCol[4];
+uniform float uSel; uniform float uRing; uniform vec3 uU; uniform vec3 uV;
+
+float hash(vec3 p){ return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
+
+vec3 bg(vec3 rd){
+  float g = clamp(rd.y * 0.5 + 0.5, 0.0, 1.0);
+  vec3 c = mix(vec3(0.012, 0.014, 0.030), vec3(0.040, 0.044, 0.090), g);
+  c += vec3(0.30, 0.22, 0.70) * 0.06 * exp(-5.0 * length(rd.xy - vec2(0.35, 0.30)));
+  c += vec3(0.10, 0.40, 0.55) * 0.04 * exp(-6.0 * length(rd.xy - vec2(-0.55, -0.10)));
+  vec3 q = rd * 260.0; vec3 id = floor(q); vec3 f = fract(q) - 0.5;
+  float h = hash(id);
+  float s = step(0.9972, h) * smoothstep(0.22, 0.0, length(f)) * (0.5 + 0.5 * sin(uTime * 1.3 + h * 60.0));
+  c += vec3(0.85, 0.88, 1.0) * s;
+  return c;
+}
+
+vec4 kure(vec3 ro, vec3 rd, vec3 c, float r, float lev, vec3 col, float sel, out float tHit){
+  tHit = 1e9;
+  vec3 oc = ro - c; float b = dot(oc, rd); float cc = dot(oc, oc) - r * r; float h = b * b - cc;
+  if(h < 0.0) return vec4(0.0);
+  h = sqrt(h); float t0 = -b - h; float t1 = -b + h;
+  if(t0 < 0.0) return vec4(0.0);
+  tHit = t0;
+  vec3 p0 = ro + rd * t0; vec3 n = (p0 - c) / r;
+  vec3 L = normalize(vec3(-0.45, 0.85, 0.40));
+  float yl = c.y - r + 2.0 * r * lev + 0.035 * r * sin(uTime * 1.5 + c.x * 1.7);
+  vec3 ic;
+  if(lev < 0.001){
+    ic = bg(rd) * 0.8 + col * 0.05;
+  } else if(p0.y < yl){
+    float dif = max(dot(n, L), 0.0);
+    float derin = clamp((yl - p0.y) / (2.0 * r), 0.0, 1.0);
+    ic = col * (0.50 + 0.60 * dif) * (1.0 - 0.45 * derin) + col * col * 0.20;
+    ic += col * 0.35 * pow(1.0 - abs(dot(-rd, n)), 2.0);
+  } else {
+    float tp = rd.y < 0.0 ? (yl - ro.y) / rd.y : 1e9;
+    if(tp > t0 && tp < t1){
+      vec3 ps = ro + rd * tp;
+      float disk = sqrt(max(r * r - (yl - c.y) * (yl - c.y), 1e-4));
+      float e = clamp(length(ps - vec3(c.x, yl, c.z)) / disk, 0.0, 1.0);
+      ic = mix(col * 1.30 + 0.06, col * 0.85, e * e);
+      ic += col * 0.55 * smoothstep(0.82, 1.0, e);
+    } else {
+      ic = bg(rd) * 0.7 + col * 0.07;
+    }
+  }
+  float fr = pow(1.0 - max(dot(-rd, n), 0.0), 3.0);
+  vec3 yans = bg(reflect(rd, n)) + col * 0.18;
+  vec3 H = normalize(L - rd);
+  float sp = pow(max(dot(n, H), 0.0), 110.0) * 1.3 + pow(max(dot(n, H), 0.0), 14.0) * 0.07;
+  vec3 o = mix(ic, yans, fr * 0.8) + vec3(sp);
+  o += col * fr * (0.30 + 0.55 * sel);
+  return vec4(o, 1.0);
+}
+
+void main(){
+  vec2 uv = (gl_FragCoord.xy - 0.5 * uRes) / (0.5 * uRes.y);
+  vec3 ro = uRo;
+  vec3 f = normalize(uTa - ro); vec3 r = normalize(cross(f, vec3(0.0, 1.0, 0.0))); vec3 u = cross(r, f);
+  float foc = 1.0 / tan(radians(uFov * 0.5));
+  vec3 rd = normalize(f * foc + uv.x * r + uv.y * u);
+  vec3 col = bg(rd);
+  for(int i = 0; i < 4; i++){
+    vec3 oc = uC[i] - ro; float tc = dot(oc, rd);
+    if(tc > 0.0){
+      float d = length(oc - rd * tc); float g = max(d - uRad[i], 0.0);
+      float s = float(i) == uSel ? 1.0 : 0.0;
+      col += uCol[i] * exp(-g * 3.0) * (0.09 + 0.16 * s);
+    }
+  }
+  float tBest = 1e9; vec4 sc = vec4(0.0);
+  for(int i = 0; i < 4; i++){
+    float th;
+    vec4 c4 = kure(ro, rd, uC[i], uRad[i], uLev[i], uCol[i], float(i) == uSel ? 1.0 : 0.0, th);
+    if(c4.a > 0.0 && th < tBest){ tBest = th; sc = c4; }
+  }
+  vec3 nrm = normalize(cross(uU, uV));
+  float dn = dot(rd, nrm); float ra = 0.0;
+  if(abs(dn) > 1e-4){
+    float tp = -dot(ro, nrm) / dn;
+    if(tp > 0.0){
+      vec3 q = ro + rd * tp; vec2 pl = vec2(dot(q, uU), dot(q, uV));
+      float d = abs(length(pl) - uRing);
+      float w = 0.0024 * tp;
+      ra = smoothstep(w, 0.0, d) * 0.5;
+      float d2 = abs(length(pl) - uRing * 0.55);
+      ra += smoothstep(w, 0.0, d2) * 0.18;
+      if(tp > tBest) ra *= 0.2;
+    }
+  }
+  if(sc.a > 0.0) col = sc.rgb;
+  col = mix(col, vec3(0.62, 0.66, 0.95), ra);
+  col *= 1.0 - 0.22 * dot(uv * 0.6, uv * 0.6);
+  col = col / (1.0 + col * 0.12);
+  gl_FragColor = vec4(col, 1.0);
+}
+</script>
+
+<script>
+(function(){
+  var MOD = [
+    { ad:'Bugün', renk:[0.56,0.47,0.96], lev:.47, r:1.25 },
+    { ad:'Sınav', renk:[0.33,0.55,0.97], lev:.50, r:.62 },
+    { ad:'Sağlık', renk:[0.12,0.74,0.62], lev:.50, r:.62 },
+    { ad:'Gelişim', renk:[0.95,0.62,0.20], lev:.40, r:.62 }
+  ];
+  var PANEL = [
+    { r:'--merkez', ad:'Bugün · dört modül', b:'%47', s:'gün tamam', li:['<b>4 iş</b> kaldı','Sıradaki <b>14:30</b> Yabancı Dil','Öneri: akşam bloğu tekrara'], e:'Öneriyi uygula' },
+    { r:'--sinav', ad:'Sınav · TYT', b:'268', s:'gün <i class="pm t" title="tahmin"></i>', li:['<b>1/2</b> blok','Son net <b>82</b> <i class="pm h" title="hesaplandı"></i>','Seri <b>11</b> gün'], e:'Paragraf · 20:30' },
+    { r:'--saglik', ad:'Sağlık · toparlanma', b:'72', s:'/100 <i class="pm h" title="hesaplandı"></i>', li:['Asgari gün <b>2/4</b>','Uyku <b>7,0 sa</b> <i class="pm o" title="ölçüldü"></i>','Kalori <b>—</b> veri yok'], e:'Ölçüm gir' },
+    { r:'--gelisim', ad:'Gelişim · reçete', b:'20', s:'/50 dk', li:['Retansiyon <b>%50</b> <i class="pm h" title="hesaplandı"></i>','Vadeli <b>797</b> kart','Seri <b>23</b> gün'], e:'Yabancı Dil · 14:30' }
+  ];
+  var sec = 0;
+  var panel = document.getElementById('panel');
+  function panelCiz(){
+    var p = PANEL[sec];
+    panel.style.setProperty('--r', 'var(' + p.r + ')');
+    panel.innerHTML = '<div class="ad"><i></i>' + p.ad + '</div><div class="buyuk">' + p.b + '<small>' + p.s + '</small></div>' +
+      '<ul>' + p.li.map(function(x){ return '<li>' + x + '</li>'; }).join('') + '</ul><button class="eylem">' + p.e + '</button>' +
+      (sec === 0 ? '<div class="alt"><span>Yedek hiç alınmadı</span><span>11 deneme analiz bekliyor</span></div>' : '');
+    document.querySelectorAll('.sekme button').forEach(function(b){ b.setAttribute('aria-pressed', +b.dataset.k === sec); });
+    [1,2,3].forEach(function(i){ document.getElementById('e' + i).classList.toggle('sec', i === sec); });
+  }
+  document.querySelectorAll('.sekme button').forEach(function(b){ b.addEventListener('click', function(){ sec = +b.dataset.k; panelCiz(); }); });
+  panelCiz();
+
+  var cv = document.getElementById('sahne');
+  var gl = cv.getContext('webgl', { antialias:false, premultipliedAlpha:false });
+  if(!gl){ document.getElementById('yedek').style.display = 'grid'; return; }
+  function derle(tip, kaynak){
+    var s = gl.createShader(tip); gl.shaderSource(s, kaynak); gl.compileShader(s);
+    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    return s;
+  }
+  var pr = gl.createProgram();
+  gl.attachShader(pr, derle(gl.VERTEX_SHADER, document.getElementById('vs').textContent));
+  gl.attachShader(pr, derle(gl.FRAGMENT_SHADER, document.getElementById('fs').textContent));
+  gl.linkProgram(pr); gl.useProgram(pr);
+  var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
+  var loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  var U = {}; ['uRes','uTime','uFov','uRo','uTa','uC','uRad','uLev','uCol','uSel','uRing','uU','uV'].forEach(function(n){ U[n] = gl.getUniformLocation(pr, n); });
+
+  var W, H, dpr, dar;
+  function boyut(){
+    dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    W = cv.clientWidth; H = cv.clientHeight; dar = W / H < 0.9;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    gl.viewport(0, 0, cv.width, cv.height);
+  }
+  window.addEventListener('resize', boyut); boyut();
+
+  var v3 = {
+    sub:function(a,b){ return [a[0]-b[0],a[1]-b[1],a[2]-b[2]]; },
+    add:function(a,b){ return [a[0]+b[0],a[1]+b[1],a[2]+b[2]]; },
+    mul:function(a,s){ return [a[0]*s,a[1]*s,a[2]*s]; },
+    dot:function(a,b){ return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; },
+    cross:function(a,b){ return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; },
+    norm:function(a){ var l = Math.hypot(a[0],a[1],a[2]); return [a[0]/l,a[1]/l,a[2]/l]; }
+  };
+  var UU = [1,0,0], VV = v3.norm([0,-0.35,1]);
+  var faz = 0.6, hiz = 0.11, surukle = null, fare = [0,0], hedefFare = [0,0];
+  var az = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function kamera(){
+    var fov = dar ? 54 : 46, R = dar ? 3.1 : 3.5;
+    var tanH = Math.tan(fov * Math.PI / 360);
+    var d = Math.max(10.5, (R + 1.2) / ((W / H) * tanH));
+    var ro = [fare[0] * 0.9, d * 0.285 + fare[1] * 0.5, d];
+    var ta = [0, -d * (dar ? 0.15 : 0.13), 0];
+    return { fov:fov, R:R, ro:ro, ta:ta, rMod:dar ? 0.82 : 0.62, rMer:dar ? 1.4 : 1.25 };
+  }
+  function eksen(k){
+    var f = v3.norm(v3.sub(k.ta, k.ro)), r = v3.norm(v3.cross(f, [0,1,0])), u = v3.cross(r, f);
+    return { f:f, r:r, u:u, foc:1 / Math.tan(k.fov * Math.PI / 360) };
+  }
+  function merkezler(k){
+    var c = [[0,0,0]];
+    for(var i = 0; i < 3; i++){
+      var a = faz + i * Math.PI * 2 / 3;
+      c.push(v3.add(v3.mul(UU, Math.cos(a) * k.R), v3.mul(VV, Math.sin(a) * k.R)));
+    }
+    return c;
+  }
+  function yansit(P, k, e){
+    var d = v3.sub(P, k.ro), z = v3.dot(d, e.f);
+    return [W / 2 + v3.dot(d, e.r) / z * e.foc * (H / 2), H / 2 - v3.dot(d, e.u) / z * e.foc * (H / 2), z];
+  }
+  function isin(px, py, k, e){
+    var x = (px - W / 2) / (H / 2), y = -(py - H / 2) / (H / 2);
+    return v3.norm(v3.add(v3.add(v3.mul(e.f, e.foc), v3.mul(e.r, x)), v3.mul(e.u, y)));
+  }
+
+  var t0 = performance.now(), onceki = t0, sonK, sonE, sonC;
+  function kare(now){
+    var dt = Math.min((now - onceki) / 1000, 0.05); onceki = now;
+    if(!surukle && !az) faz += hiz * dt;
+    fare[0] += (hedefFare[0] - fare[0]) * 0.06; fare[1] += (hedefFare[1] - fare[1]) * 0.06;
+    var k = kamera(), e = eksen(k), c = merkezler(k);
+    sonK = k; sonE = e; sonC = c;
+    gl.uniform2f(U.uRes, cv.width, cv.height);
+    gl.uniform1f(U.uTime, az ? 2.0 : (now - t0) / 1000);
+    gl.uniform1f(U.uFov, k.fov);
+    gl.uniform3fv(U.uRo, k.ro); gl.uniform3fv(U.uTa, k.ta);
+    gl.uniform3fv(U.uC, [].concat(c[0], c[1], c[2], c[3]));
+    gl.uniform1fv(U.uRad, [k.rMer, k.rMod, k.rMod, k.rMod]);
+    gl.uniform1fv(U.uLev, MOD.map(function(m){ return m.lev; }));
+    gl.uniform3fv(U.uCol, [].concat(MOD[0].renk, MOD[1].renk, MOD[2].renk, MOD[3].renk));
+    gl.uniform1f(U.uSel, sec);
+    gl.uniform1f(U.uRing, k.R);
+    gl.uniform3fv(U.uU, UU); gl.uniform3fv(U.uV, VV);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    var pm = yansit(c[0], k, e), rm = k.rMer / pm[2] * e.foc * (H / 2);
+    for(var i = 1; i < 4; i++){
+      var pc = yansit(c[i], k, e), rs = k.rMod / pc[2] * e.foc * (H / 2);
+      var el = document.getElementById('e' + i);
+      /* Arkadaki kurenin etiketi ustte durur; Merkez'in ortusune dusmesin. */
+      var arka = pc[2] > pm[2];
+      var p = [pc[0], arka ? pc[1] - rs - el.offsetHeight - 8 : pc[1] + rs + 10];
+      var gizli = Math.hypot(p[0] - pm[0], p[1] + el.offsetHeight / 2 - pm[1]) < rm + 4;
+      el.style.opacity = gizli ? 0 : 1;
+      el.style.transform = 'translate(' + p[0] + 'px,' + p[1] + 'px) translateX(-50%)';
+    }
+    requestAnimationFrame(kare);
+  }
+  requestAnimationFrame(kare);
+
+  cv.addEventListener('pointerdown', function(ev){ surukle = { x:ev.clientX, f:faz, hareket:0 }; cv.classList.add('tut'); cv.setPointerCapture(ev.pointerId); });
+  cv.addEventListener('pointermove', function(ev){
+    hedefFare = [(ev.clientX / W - 0.5) * 2, (ev.clientY / H - 0.5) * 2];
+    if(!surukle) return;
+    var dx = ev.clientX - surukle.x; surukle.hareket = Math.max(surukle.hareket, Math.abs(dx));
+    faz = surukle.f + dx * 0.006;
+  });
+  cv.addEventListener('pointerup', function(ev){
+    cv.classList.remove('tut');
+    if(surukle && surukle.hareket < 5 && sonK){
+      var rd = isin(ev.clientX, ev.clientY, sonK, sonE), en = 1e9, hangi = -1;
+      sonC.forEach(function(c, i){
+        var rr = i === 0 ? sonK.rMer : sonK.rMod, oc = v3.sub(sonK.ro, c), b = v3.dot(oc, rd), h = b * b - (v3.dot(oc, oc) - rr * rr * 1.3);
+        if(h > 0){ var t = -b - Math.sqrt(h); if(t > 0 && t < en){ en = t; hangi = i; } }
+      });
+      if(hangi >= 0){ sec = hangi; panelCiz(); }
+    }
+    surukle = null;
+  });
+})();
+</script>
+</body>
+</html>

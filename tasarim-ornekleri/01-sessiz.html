@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>01 · Sessiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F6F8; --yuzey:#FFFFFF; --ink:#0D1117; --ink2:#4A5261; --ink3:#838C9B;
+  --cizgi:#E5E7EB; --cizgi2:#EEF0F3; --golge:0 1px 2px rgba(13,17,23,.04),0 8px 24px -12px rgba(13,17,23,.12);
+  --sinav:#2F6FEB; --saglik:#0E9888; --gelisim:#D98309; --merkez:#7A5CF0;
+  --iyi:#1F8A5B; --uyari:#B26A00; --kotu:#C23A3A;
+  --birincil:#0D1117; --birincil-ust:#FFFFFF;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C0E12; --yuzey:#14171D; --ink:#ECEEF2; --ink2:#A3AAB6; --ink3:#6C7483;
+    --cizgi:#232730; --cizgi2:#1B1F26; --golge:0 1px 0 rgba(255,255,255,.03),0 12px 32px -16px rgba(0,0,0,.6);
+    --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE;
+    --iyi:#4CC38A; --uyari:#E2A34A; --kotu:#F07A7A;
+    --birincil:#ECEEF2; --birincil-ust:#0C0E12; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C0E12; --yuzey:#14171D; --ink:#ECEEF2; --ink2:#A3AAB6; --ink3:#6C7483;
+  --cizgi:#232730; --cizgi2:#1B1F26; --golge:0 1px 0 rgba(255,255,255,.03),0 12px 32px -16px rgba(0,0,0,.6);
+  --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE;
+  --iyi:#4CC38A; --uyari:#E2A34A; --kotu:#F07A7A;
+  --birincil:#ECEEF2; --birincil-ust:#0C0E12; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans);-webkit-font-smoothing:antialiased;padding-inline:20px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--sinav);outline-offset:2px;border-radius:8px}
+.kap{max-width:680px;margin:0 auto;padding-block:20px 96px}
+
+/* ust cubuk */
+.ust{display:flex;align-items:center;gap:16px;height:56px;position:sticky;top:0;z-index:5;background:var(--bg);
+  margin-inline:-20px;padding-inline:20px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:-.01em}
+.logo i{display:grid;grid-template-columns:repeat(2,6px);gap:3px}
+.logo i b{width:6px;height:6px;border-radius:2px;display:block}
+.nav{display:flex;gap:2px;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav button{padding:7px 12px;border-radius:999px;color:var(--ink3);font-weight:500;font-size:14px;white-space:nowrap}
+.nav button:hover{color:var(--ink)}
+.nav button[aria-current="page"]{color:var(--ink);background:var(--yuzey);box-shadow:var(--golge)}
+.tema{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--ink3);flex:none}
+.tema:hover{color:var(--ink);background:var(--yuzey)}
+
+/* baslik */
+.tarih{font:500 13px/1 var(--mono);color:var(--ink3);letter-spacing:.02em;margin-top:40px}
+h1{font-size:44px;line-height:1.05;letter-spacing:-.035em;font-weight:600;margin:12px 0 0;text-wrap:balance}
+h1 span{color:var(--ink3)}
+
+/* siradaki */
+.sira{margin-top:32px;background:var(--yuzey);border-radius:20px;box-shadow:var(--golge);padding:24px}
+.sira-ust{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink3)}
+.etk{display:inline-flex;align-items:center;gap:6px;font-weight:500;color:var(--ink2)}
+.etk::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--r,var(--ink3))}
+.sira h2{font-size:26px;letter-spacing:-.025em;font-weight:600;margin:10px 0 0}
+.sira .meta{color:var(--ink3);font:500 14px var(--mono);margin-top:4px}
+.adim{display:flex;gap:4px;margin-top:20px}
+.adim div{flex:var(--f);min-width:0}
+.adim i{display:block;height:6px;border-radius:3px;background:color-mix(in oklab,var(--gelisim) 22%,transparent)}
+.adim span{display:block;font-size:12px;color:var(--ink3);margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dugmeler{display:flex;gap:8px;margin-top:22px}
+.btn{height:44px;padding:0 20px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center;gap:8px}
+.btn-1{background:var(--birincil);color:var(--birincil-ust)}
+.btn-1:hover{opacity:.88}
+.btn-2{color:var(--ink2)}
+.btn-2:hover{background:var(--cizgi2);color:var(--ink)}
+
+/* bolum */
+.bolum{margin-top:48px}
+.bolum>h3{font-size:13px;font-weight:500;color:var(--ink3);margin:0 0 8px;display:flex;justify-content:space-between}
+.bolum>h3 em{font-style:normal;font-family:var(--mono)}
+
+/* modul satirlari */
+.mod{display:grid;grid-template-columns:1fr auto;gap:2px 16px;align-items:center;padding:16px 0;border-bottom:1px solid var(--cizgi);width:100%;text-align:left}
+.mod:last-child{border-bottom:0}
+.mod:hover .ad{color:var(--r)}
+.mod .ad{font-weight:600;font-size:17px;letter-spacing:-.01em;transition:color .15s}
+.mod .alt{grid-column:1;font-size:13px;color:var(--ink3)}
+.mod .deger{grid-row:1/3;grid-column:2;text-align:right;min-width:120px}
+.mod .deger b{font-size:22px;font-weight:600;letter-spacing:-.02em}
+.mod .deger small{color:var(--ink3);font-size:14px;margin-left:2px}
+.cubuk{display:block;height:4px;border-radius:2px;background:var(--cizgi);margin-top:8px;overflow:hidden}
+.cubuk i{display:block;height:100%;width:var(--p);background:var(--r);border-radius:2px}
+
+/* akis */
+.akis{list-style:none;margin:0;padding:0}
+.akis li{display:grid;grid-template-columns:52px 14px 1fr auto;align-items:center;gap:12px;padding:11px 0}
+.akis time{font:500 13px var(--mono);color:var(--ink3)}
+.akis .n{width:8px;height:8px;border-radius:50%;background:var(--r);justify-self:center}
+.akis .b{font-weight:500}
+.akis .s{font:13px var(--mono);color:var(--ink3)}
+.akis li.bitti .b{color:var(--ink3);text-decoration:line-through;text-decoration-color:var(--cizgi)}
+.akis li.bitti .n{background:transparent;box-shadow:inset 0 0 0 1.5px var(--r)}
+.akis li.simdi{background:var(--yuzey);border-radius:12px;box-shadow:var(--golge);margin-inline:-12px;padding-inline:12px;grid-template-columns:52px 14px 1fr auto}
+.akis li.simdi time{color:var(--ink)}
+.akis li.cizgi-simdi{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;font:500 12px var(--mono);color:var(--kotu);padding:2px 0}
+.akis li.cizgi-simdi i{height:1px;background:var(--kotu);opacity:.6}
+
+/* oneri */
+.oneri{display:flex;gap:16px;align-items:flex-start;padding:20px;border-radius:16px;background:color-mix(in oklab,var(--merkez) 7%,var(--yuzey));border:1px solid color-mix(in oklab,var(--merkez) 18%,transparent)}
+.oneri .ic{flex:1;min-width:0}
+.oneri b{display:block;font-weight:600;font-size:16px}
+.oneri .neden{font:13px var(--mono);color:var(--ink3);margin-top:4px}
+.oneri .dugmeler{margin-top:14px}
+.oneri .btn{height:38px;padding:0 16px;border-radius:10px;font-size:14px}
+.oneri .btn-1{background:var(--merkez);color:#fff}
+.m-rozet{width:32px;height:32px;border-radius:10px;background:var(--merkez);display:grid;place-items:center;flex:none;color:#fff}
+
+/* dikkat */
+.dikkat{display:flex;gap:8px;flex-wrap:wrap}
+.dikkat button{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;border-radius:999px;background:var(--yuzey);box-shadow:var(--golge);font-size:14px;color:var(--ink2)}
+.dikkat button:hover{color:var(--ink)}
+.dikkat i{width:6px;height:6px;border-radius:50%;background:var(--uyari)}
+
+/* kesinlik isaretleri: olculdu / hesaplandi / tahmin */
+.pm{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:5px;vertical-align:.45em;color:var(--ink3)}
+.pm.o{background:currentColor}
+.pm.h{background:linear-gradient(90deg,currentColor 50%,transparent 50%);box-shadow:inset 0 0 0 1px currentColor}
+.pm.t{box-shadow:inset 0 0 0 1.2px currentColor}
+.yok{color:var(--ink3);font-weight:500}
+.lejant{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--ink3);margin-top:56px;padding-top:20px;border-top:1px solid var(--cizgi)}
+.lejant .pm{vertical-align:.1em;margin:0 6px 0 0}
+
+/* modul gorunumleri */
+.gorunum[hidden]{display:none}
+.buyuk{font-size:72px;font-weight:600;letter-spacing:-.05em;line-height:1;margin-top:16px}
+.buyuk small{font-size:24px;color:var(--ink3);letter-spacing:-.02em;margin-left:6px;font-weight:500}
+.alt-baslik{color:var(--ink3);margin-top:8px}
+.ist{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--cizgi);border-radius:16px;overflow:hidden;margin-top:32px}
+.ist div{background:var(--yuzey);padding:16px}
+.ist span{display:block;font-size:12px;color:var(--ink3)}
+.ist b{font-size:20px;font-weight:600;letter-spacing:-.02em}
+.blok{display:grid;grid-template-columns:1fr auto;gap:4px 16px;align-items:center;padding:18px 0;border-bottom:1px solid var(--cizgi)}
+.blok:last-child{border-bottom:0}
+.blok .b{font-weight:600;font-size:17px}
+.blok .s{font:13px var(--mono);color:var(--ink3);grid-column:1}
+.blok .sag{grid-row:1/3;grid-column:2}
+.ok{display:inline-flex;align-items:center;gap:6px;color:var(--iyi);font-weight:500;font-size:14px}
+.btn-k{height:36px;padding:0 14px;border-radius:10px;background:var(--birincil);color:var(--birincil-ust);font-weight:600;font-size:14px}
+.spark{width:100%;height:120px;display:block;margin-top:8px}
+.tahlil{display:grid;grid-template-columns:110px 1fr 90px;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--cizgi2)}
+.tahlil:last-child{border-bottom:0}
+.tahlil .ad2{font-weight:500}
+.tahlil .v{text-align:right;font-weight:600}
+.tahlil .v small{color:var(--ink3);font-weight:400;font-size:12px;margin-left:3px}
+.aralik{position:relative;height:8px}
+.aralik .band{position:absolute;inset:2px 0;border-radius:2px;background:var(--cizgi)}
+.aralik .ref{position:absolute;top:2px;bottom:2px;border-radius:2px;background:color-mix(in oklab,var(--iyi) 28%,transparent)}
+.aralik .nokta{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);background:var(--ink);box-shadow:0 0 0 2px var(--yuzey)}
+.aralik .nokta.dis{background:var(--kotu)}
+.disiplin{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px 0;border-bottom:1px solid var(--cizgi2);align-items:center}
+.disiplin:last-child{border-bottom:0}
+.basamak{display:flex;gap:3px}
+.basamak i{width:18px;height:6px;border-radius:2px;background:var(--cizgi)}
+.basamak i.on{background:var(--gelisim)}
+.kademe{font:12px var(--mono);color:var(--ink3);min-width:52px;text-align:right}
+
+/* bildirim */
+.tost{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  background:var(--birincil);color:var(--birincil-ust);border-radius:14px;padding:12px 12px 12px 18px;display:flex;align-items:center;gap:16px;font-size:14px;transition:.25s;box-shadow:0 12px 32px -8px rgba(0,0,0,.35);max-width:calc(100% - 32px)}
+.tost.acik{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.tost button{font-weight:600;padding:6px 12px;border-radius:8px;background:color-mix(in oklab,var(--birincil-ust) 14%,transparent)}
+
+@media (max-width:640px){
+  body{padding-inline:16px}
+  .ust{margin-inline:-16px;padding-inline:16px;flex-wrap:wrap;height:auto;padding-block:10px;gap:8px 12px}
+  .nav{order:3;width:100%;margin-left:0}
+  .tema{margin-left:auto}
+  h1{font-size:36px}
+  .tarih{margin-top:24px}
+  .ist{grid-template-columns:repeat(2,1fr)}
+  .tahlil{grid-template-columns:90px 1fr 80px;gap:10px}
+  .buyuk{font-size:60px}
+  .akis li{grid-template-columns:44px 12px 1fr auto;gap:10px}
+  .akis li.cizgi-simdi{grid-template-columns:44px 1fr;gap:10px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-oynat" viewBox="0 0 16 16"><path d="M5 3.5v9l7-4.5z" fill="currentColor"/></symbol>
+  <symbol id="i-tik" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-ay" viewBox="0 0 16 16"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+  <symbol id="i-yildiz" viewBox="0 0 16 16"><path d="M8 2l1.6 4.4L14 8l-4.4 1.6L8 14l-1.6-4.4L2 8l4.4-1.6z" fill="currentColor"/></symbol>
+</svg>
+
+<div class="kap">
+  <header class="ust">
+    <div class="logo"><i aria-hidden="true"><b style="background:var(--sinav)"></b><b style="background:var(--saglik)"></b><b style="background:var(--gelisim)"></b><b style="background:var(--merkez)"></b></i>LifeOS</div>
+    <nav class="nav" aria-label="Bölümler">
+      <button aria-current="page" data-git="bugun">Bugün</button>
+      <button data-git="sinav">Sınav</button>
+      <button data-git="saglik">Sağlık</button>
+      <button data-git="gelisim">Gelişim</button>
+    </nav>
+    <button class="tema" id="tema" aria-label="Temayı değiştir"><svg width="16" height="16"><use href="#i-ay"/></svg></button>
+  </header>
+
+  <!-- BUGUN -->
+  <main class="gorunum" id="g-bugun">
+    <div class="tarih">PERŞEMBE · 24 EYLÜL</div>
+    <h1>4 iş kaldı. <span>Sıradaki 14:30'da.</span></h1>
+
+    <section class="sira" aria-label="Sıradaki iş">
+      <div class="sira-ust"><span class="etk" style="--r:var(--gelisim)">Gelişim</span><span>·</span><span>Yabancı Dil</span></div>
+      <h2>Kelime tekrarı</h2>
+      <div class="meta">14:30 — 15:00 · 30 dk</div>
+      <div class="adim">
+        <div style="--f:5"><i></i><span>Isınma 5</span></div>
+        <div style="--f:15"><i></i><span>Vadesi gelen tekrar 15</span></div>
+        <div style="--f:10"><i></i><span>Yeni kart 10</span></div>
+      </div>
+      <div class="dugmeler">
+        <button class="btn btn-1"><svg width="14" height="14"><use href="#i-oynat"/></svg>Başla</button>
+        <button class="btn btn-2">Sonraya al</button>
+      </div>
+    </section>
+
+    <section class="bolum" aria-label="Modüller">
+      <h3>Bugün</h3>
+      <button class="mod" style="--r:var(--sinav)" data-git="sinav">
+        <span class="ad">Sınav</span>
+        <span class="alt">Sınava 268 gün<i class="pm t" title="tahmin"></i> · seri 11</span>
+        <span class="deger"><b>1</b><small>/ 2 blok</small><span class="cubuk"><i style="--p:50%"></i></span></span>
+      </button>
+      <button class="mod" style="--r:var(--saglik)" data-git="saglik">
+        <span class="ad">Sağlık</span>
+        <span class="alt">Toparlanma 72<i class="pm h" title="hesaplandı"></i> · uyku 7,0 sa<i class="pm o" title="ölçüldü"></i></span>
+        <span class="deger"><b>2</b><small>/ 4 asgari</small><span class="cubuk"><i style="--p:50%"></i></span></span>
+      </button>
+      <button class="mod" style="--r:var(--gelisim)" data-git="gelisim">
+        <span class="ad">Gelişim</span>
+        <span class="alt">Retansiyon %50<i class="pm h" title="hesaplandı"></i> · 797 kart</span>
+        <span class="deger"><b>20</b><small>/ 50 dk</small><span class="cubuk"><i style="--p:40%"></i></span></span>
+      </button>
+    </section>
+
+    <section class="bolum" aria-label="Günün akışı">
+      <h3>Akış <em>7 iş · 3 bitti</em></h3>
+      <ol class="akis">
+        <li class="bitti" style="--r:var(--gelisim)"><time>08:00</time><i class="n"></i><span class="b">Tarih — yüzyıl eşlemesi</span><span class="s">20 dk</span></li>
+        <li class="bitti" style="--r:var(--saglik)"><time>08:40</time><i class="n"></i><span class="b">Sabah ölçümü</span><span class="s">uyku 7,0</span></li>
+        <li class="bitti" style="--r:var(--sinav)"><time>09:30</time><i class="n"></i><span class="b">TYT Matematik</span><span class="s">24 soru · 18 D</span></li>
+        <li class="cizgi-simdi" aria-label="Şu an 14:10"><span>14:10</span><i></i></li>
+        <li class="simdi" style="--r:var(--gelisim)"><time>14:30</time><i class="n"></i><span class="b">Yabancı Dil</span><span class="s">30 dk</span></li>
+        <li style="--r:var(--saglik)"><time>17:30</time><i class="n"></i><span class="b">Antrenman — üst gövde</span><span class="s">45 dk</span></li>
+        <li style="--r:var(--sinav)"><time>20:30</time><i class="n"></i><span class="b">Paragraf</span><span class="s">30 soru</span></li>
+        <li style="--r:var(--saglik)"><time>23:00</time><i class="n"></i><span class="b">Uyku</span><span class="s">hedef 7,5 sa</span></li>
+      </ol>
+    </section>
+
+    <section class="bolum" aria-label="Merkezin önerisi">
+      <h3>Öneri</h3>
+      <div class="oneri" id="oneri">
+        <span class="m-rozet" aria-hidden="true"><svg width="14" height="14"><use href="#i-yildiz"/></svg></span>
+        <div class="ic">
+          <b>Akşam bloğu tekrara ayrılsın</b>
+          <div class="neden">tekrar borcu %34 · eşik %10</div>
+          <div class="dugmeler">
+            <button class="btn btn-1" id="uygula">Uygula</button>
+            <button class="btn btn-2">Geç</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bolum" aria-label="Dikkat">
+      <h3>Dikkat</h3>
+      <div class="dikkat">
+        <button><i></i>Yedek hiç alınmadı</button>
+        <button><i></i>11 deneme analiz bekliyor</button>
+      </div>
+    </section>
+
+    <div class="lejant" aria-label="Sayıların kaynağı">
+      <span><i class="pm o"></i>ölçüldü</span><span><i class="pm h"></i>hesaplandı</span><span><i class="pm t"></i>tahmin</span><span><span class="yok">—</span>&nbsp; veri yok</span>
+    </div>
+  </main>
+
+  <!-- SINAV -->
+  <main class="gorunum" id="g-sinav" hidden>
+    <div class="tarih">SINAV · TYT · HAFTA 2/40</div>
+    <div class="buyuk">268<small>gün</small><i class="pm t" title="tahmin"></i></div>
+    <p class="alt-baslik">Sınav tarihi tahmini; resmî takvim gelince kesinleşir.</p>
+
+    <div class="ist">
+      <div><span>Son net</span><b>82</b><i class="pm h" title="hesaplandı"></i></div>
+      <div><span>Tekrar</span><b>432</b> <small class="yok">kart</small></div>
+      <div><span>Paragraf</span><b>15</b><small class="yok">/18</small></div>
+      <div><span>Seri</span><b>11</b> <small class="yok">gün</small></div>
+    </div>
+
+    <section class="bolum">
+      <h3>Bloklar <em>1 / 2</em></h3>
+      <div class="blok"><span class="b">Sabah · TYT Matematik</span><span class="s">70 dk · 24 soru · 18 doğru</span><span class="sag ok"><svg width="14" height="14"><use href="#i-tik"/></svg>Bitti</span></div>
+      <div class="blok"><span class="b">Akşam · Paragraf</span><span class="s">20:30 · 70 dk · 30 soru</span><span class="sag"><button class="btn-k">Başla</button></span></div>
+    </section>
+
+    <section class="bolum">
+      <h3>TYT net · son 8 deneme <em>+14</em></h3>
+      <div style="position:relative"><svg class="spark" id="net" viewBox="0 0 640 120" preserveAspectRatio="none" role="img" aria-label="TYT net 68'den 82'ye çıktı"></svg></div>
+    </section>
+  </main>
+
+  <!-- SAGLIK -->
+  <main class="gorunum" id="g-saglik" hidden>
+    <div class="tarih">SAĞLIK · TOPARLANMA</div>
+    <div class="buyuk">72<small>/ 100</small><i class="pm h" title="hesaplandı"></i></div>
+    <p class="alt-baslik">Planlanan yük uygun.</p>
+
+    <div class="ist">
+      <div><span>Uyku</span><b>7,0</b> <small class="yok">sa</small><i class="pm o" title="ölçüldü"></i></div>
+      <div><span>Asgari gün</span><b>2</b><small class="yok">/4</small></div>
+      <div><span>Kalori</span><b class="yok">—</b> <small class="yok">hedef 2.285</small></div>
+      <div><span>Seri</span><b>4</b> <small class="yok">gün</small></div>
+    </div>
+
+    <section class="bolum">
+      <h3>Tahliller <em>12 Eylül</em></h3>
+      <div id="tahlil"></div>
+    </section>
+  </main>
+
+  <!-- GELISIM -->
+  <main class="gorunum" id="g-gelisim" hidden>
+    <div class="tarih">GELİŞİM · GÜNÜN REÇETESİ</div>
+    <div class="buyuk">20<small>/ 50 dk</small></div>
+    <p class="alt-baslik">Kalan: Yabancı Dil, 30 dk.</p>
+
+    <div class="ist">
+      <div><span>Retansiyon</span><b>%50</b><i class="pm h" title="hesaplandı"></i></div>
+      <div><span>Taban</span><b>%60</b></div>
+      <div><span>Vadeli kart</span><b>797</b></div>
+      <div><span>Seri</span><b>23</b> <small class="yok">gün</small></div>
+    </div>
+
+    <section class="bolum">
+      <h3>Reçete</h3>
+      <div class="blok"><span class="b">Tarih · yüzyıl eşlemesi</span><span class="s">08:00 · 20 dk</span><span class="sag ok"><svg width="14" height="14"><use href="#i-tik"/></svg>Bitti</span></div>
+      <div class="blok"><span class="b">Yabancı Dil · kelime tekrarı</span><span class="s">14:30 · 30 dk</span><span class="sag"><button class="btn-k">Başla</button></span></div>
+    </section>
+
+    <section class="bolum">
+      <h3>Merdiven <em>7 disiplin</em></h3>
+      <div id="merdiven"></div>
+    </section>
+  </main>
+</div>
+
+<div class="tost" id="tost" role="status" aria-live="polite"><span>Akşam bloğu: tekrar</span><button id="geri">Geri al</button></div>
+
+<script>
+(function(){
+  // gezinme
+  var views = ['bugun','sinav','saglik','gelisim'];
+  function git(ad){
+    views.forEach(function(v){ document.getElementById('g-'+v).hidden = v !== ad; });
+    document.querySelectorAll('.nav button').forEach(function(b){
+      if(b.dataset.git === ad) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+    });
+    window.scrollTo(0,0);
+  }
+  document.querySelectorAll('[data-git]').forEach(function(b){ b.addEventListener('click', function(){ git(b.dataset.git); }); });
+
+  // tema
+  var kok = document.documentElement;
+  document.getElementById('tema').addEventListener('click', function(){
+    var koyu = kok.dataset.theme ? kok.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    kok.dataset.theme = koyu ? 'light' : 'dark';
+  });
+
+  // kucuk aksiyon: sormadan uygulanir, geri alinabilir
+  var tost = document.getElementById('tost'), oneri = document.getElementById('oneri'), zaman;
+  document.getElementById('uygula').addEventListener('click', function(){
+    oneri.style.opacity = .45; tost.classList.add('acik');
+    clearTimeout(zaman); zaman = setTimeout(function(){ tost.classList.remove('acik'); }, 6000);
+  });
+  document.getElementById('geri').addEventListener('click', function(){ oneri.style.opacity = 1; tost.classList.remove('acik'); });
+
+  // TYT net cizgisi — tek seri, uca etiket, hedef cizgisi
+  var net = [68,71,70,74,73,77,79,82], W = 640, H = 120, lo = 60, hi = 100, padR = 40;
+  var x = function(i){ return 6 + i * (W - padR - 12) / (net.length - 1); };
+  var y = function(v){ return 8 + (hi - v) / (hi - lo) * (H - 20); };
+  var s = document.getElementById('net'), d = net.map(function(v,i){ return (i?'L':'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); }).join(' ');
+  s.innerHTML =
+    '<line x1="0" x2="'+W+'" y1="'+y(95)+'" y2="'+y(95)+'" stroke="var(--cizgi)" stroke-width="1" vector-effect="non-scaling-stroke"/>' +
+    '<path d="'+d+' L'+x(7)+' '+H+' L'+x(0)+' '+H+'Z" fill="var(--sinav)" opacity=".08"/>' +
+    '<path d="'+d+'" fill="none" stroke="var(--sinav)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>';
+  // uc noktasi ve etiket HTML'de (preserveAspectRatio=none yazıyı bozmasın)
+  var kap = s.parentNode; kap.style.position = 'relative';
+  var uc = document.createElement('div');
+  uc.style.cssText = 'position:absolute;right:0;transform:translateY(-50%);font-weight:600;font-size:15px;top:calc(' + (y(82)/H*120 + 8) + 'px)';
+  uc.innerHTML = '82<i class="pm h" title="hesaplandı"></i>';
+  kap.appendChild(uc);
+  var hedef = document.createElement('div');
+  hedef.style.cssText = 'position:absolute;right:0;font:12px var(--mono);color:var(--ink3);top:calc(' + (y(95)/H*120 - 10) + 'px)';
+  hedef.textContent = 'hedef 95';
+  kap.appendChild(hedef);
+  var nokta = document.createElement('i');
+  nokta.style.cssText = 'position:absolute;width:10px;height:10px;border-radius:50%;background:var(--sinav);box-shadow:0 0 0 2px var(--bg);transform:translate(-50%,-50%);left:' + (x(7)/W*100) + '%;top:calc(' + (y(82)/H*120 + 8) + 'px)';
+  kap.appendChild(nokta);
+
+  // tahliller — aralik cubugu: gri tum olcek, yesil referans, nokta deger
+  var T = [
+    ['Ferritin', 26, 'ng/mL', 0, 200, 30, 150, true],
+    ['B12', 288, 'pg/mL', 100, 900, 400, 900, true],
+    ['HDL', 44, 'mg/dL', 20, 90, 50, 90, true],
+    ['LDL', 128, 'mg/dL', 40, 200, 40, 100, true],
+    ['TSH', 2.6, 'mIU/L', 0, 6, 0.4, 4, false]
+  ];
+  document.getElementById('tahlil').innerHTML = T.map(function(t){
+    var p = function(v){ return ((v - t[3]) / (t[4] - t[3]) * 100).toFixed(1) + '%'; };
+    var val = String(t[1]).replace('.', ',');
+    return '<div class="tahlil"><span class="ad2">'+t[0]+'</span><span class="aralik"><span class="band"></span>' +
+      '<span class="ref" style="left:'+p(t[5])+';width:calc('+p(t[6])+' - '+p(t[5])+')"></span>' +
+      '<span class="nokta'+(t[7]?' dis':'')+'" style="left:'+p(t[1])+'" title="'+val+' '+t[2]+'"></span></span>' +
+      '<span class="v">'+val+'<small>'+t[2]+'</small></span></div>';
+  }).join('');
+
+  // merdiven — alti kademe, bes basamak cubugu
+  var K = ['Temas','Acemi','Çırak','Kalfa','Usta','Üstat'];
+  var D = [['Yabancı Dil',2],['Okuma',2],['Felsefe',1],['Müzik',1],['Yazı',1],['Tarih',1],['Diksiyon',0]];
+  document.getElementById('merdiven').innerHTML = D.map(function(d){
+    var b = ''; for(var i=1;i<=5;i++) b += '<i class="'+(i<=d[1]?'on':'')+'"></i>';
+    return '<div class="disiplin"><span>'+d[0]+'</span><span style="display:flex;gap:12px;align-items:center"><span class="basamak">'+b+'</span><span class="kademe">'+K[d[1]]+'</span></span></div>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

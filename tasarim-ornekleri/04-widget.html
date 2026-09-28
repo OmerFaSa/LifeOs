@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>04 · Widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E8EBF0; --duvar1:#DDE3EC; --duvar2:#EEE9F2;
+  --w:#FFFFFF; --ink:#101318; --ink2:#4B5260; --ink3:#8B93A1; --cizgi:#EDEFF3;
+  --sinav:#2F6FEB; --saglik:#0E9888; --gelisim:#D98309; --merkez:#7A5CF0;
+  --kotu:#D23F3F; --iyi:#1F8A5B;
+  --golge:0 1px 1px rgba(16,19,24,.04),0 10px 30px -14px rgba(16,19,24,.22);
+  --sans:"Figtree",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B0D11; --duvar1:#10141C; --duvar2:#15111C;
+    --w:#171A21; --ink:#EEF0F4; --ink2:#AAB0BC; --ink3:#6F7785; --cizgi:#232730;
+    --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; --kotu:#F07A7A; --iyi:#4CC38A;
+    --golge:0 1px 0 rgba(255,255,255,.03),0 16px 36px -18px rgba(0,0,0,.8); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B0D11; --duvar1:#10141C; --duvar2:#15111C;
+  --w:#171A21; --ink:#EEF0F4; --ink2:#AAB0BC; --ink3:#6F7785; --cizgi:#232730;
+  --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; --kotu:#F07A7A; --iyi:#4CC38A;
+  --golge:0 1px 0 rgba(255,255,255,.03),0 16px 36px -18px rgba(0,0,0,.8); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:radial-gradient(1200px 700px at 10% 0%,var(--duvar1),transparent 60%),radial-gradient(900px 600px at 100% 100%,var(--duvar2),transparent 60%),var(--bg);
+  background-color:var(--bg);color:var(--ink);font:15px/1.4 var(--sans);-webkit-font-smoothing:antialiased;padding-inline:24px;min-height:100vh}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--sinav);outline-offset:3px;border-radius:12px}
+.kap{max-width:820px;margin:0 auto;padding-block:36px 64px}
+.saat{text-align:center;margin-bottom:36px}
+.saat b{display:block;font-size:84px;font-weight:700;letter-spacing:-.045em;line-height:1}
+.saat span{font-size:17px;font-weight:600;color:var(--ink2)}
+
+.izgara{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(170px,auto);gap:20px;
+  grid-template-areas:"sira sira sinav topar" "akis akis gel uyku" "akis akis mrk mrk" "rutbe dikkat tahlil tahlil"}
+.w{background:var(--w);border-radius:28px;padding:18px;box-shadow:var(--golge);display:flex;flex-direction:column;min-width:0;position:relative;overflow:hidden}
+.bas{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--r,var(--ink2))}
+.bas i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.alt{font-size:13px;color:var(--ink3);font-weight:500}
+.dolu{color:#fff}
+.dolu .bas,.dolu .alt{color:rgba(255,255,255,.78)}
+
+/* siradaki */
+.w-sira{grid-area:sira;background:linear-gradient(140deg,#F0A21F,#D26A06);justify-content:space-between}
+.w-sira .zaman{font-size:15px;font-weight:700;opacity:.85}
+.w-sira h2{margin:4px 0 0;font-size:30px;font-weight:800;letter-spacing:-.025em;line-height:1.05}
+.w-sira .satir{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.oynat{width:52px;height:52px;border-radius:50%;background:#fff;color:#C86406;display:grid;place-items:center;flex:none;box-shadow:0 6px 16px -6px rgba(0,0,0,.35)}
+.adim{display:flex;gap:4px;margin-top:10px}
+.adim i{height:5px;border-radius:3px;background:rgba(255,255,255,.35)}
+
+/* sinav geri sayim */
+.w-sinav{grid-area:sinav;background:linear-gradient(160deg,#3A7BF5,#1F55C8);justify-content:space-between}
+.w-sinav .say{font-size:56px;font-weight:800;letter-spacing:-.05em;line-height:.95}
+.w-sinav .say small{display:block;font-size:15px;font-weight:600;letter-spacing:0;opacity:.8;margin-top:6px}
+
+/* toparlanma: yarim kadran */
+.w-topar{grid-area:topar;justify-content:space-between;--r:var(--saglik)}
+.kadran{position:relative;width:100%;aspect-ratio:2/1.15;margin-top:10px}
+.kadran svg{width:100%;height:100%;overflow:visible}
+.kadran b{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1}
+
+/* akis */
+.w-akis{grid-area:akis;gap:4px}
+.w-akis ol{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column}
+.w-akis li{display:grid;grid-template-columns:46px 4px 1fr auto;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--cizgi)}
+.w-akis li:last-child{border:0}
+.w-akis time{font-size:13px;font-weight:600;color:var(--ink3);font-variant-numeric:tabular-nums}
+.w-akis li>i{height:28px;border-radius:2px;background:var(--r)}
+.w-akis .t{font-weight:600}
+.w-akis .s{font-size:13px;color:var(--ink3)}
+.w-akis li.bitti .t{color:var(--ink3);text-decoration:line-through;text-decoration-color:color-mix(in oklab,var(--ink3) 50%,transparent)}
+.w-akis li.bitti>i{opacity:.35}
+.w-akis li.simdi{background:color-mix(in oklab,var(--gelisim) 10%,transparent);border-radius:12px;margin-inline:-10px;padding-inline:10px;border-color:transparent}
+
+/* gelisim halkasi */
+.w-gel{grid-area:gel;--r:var(--gelisim);justify-content:space-between}
+.w-gel .ic{display:flex;align-items:center;gap:12px}
+.w-gel svg{width:74px;height:74px;transform:rotate(-90deg);flex:none}
+.w-gel b{font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.w-gel b small{font-size:14px;color:var(--ink3);font-weight:600;margin-left:2px}
+
+/* uyku */
+.w-uyku{grid-area:uyku;background:#141A2C;justify-content:space-between}
+.w-uyku b{font-size:34px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.w-uyku b small{font-size:15px;font-weight:600;opacity:.6;margin-left:3px}
+.cubuklar{display:flex;align-items:flex-end;gap:5px;height:52px;position:relative}
+.cubuklar i{flex:1;background:#7F9CF5;border-radius:4px 4px 1px 1px;opacity:.55}
+.cubuklar i:last-child{opacity:1;background:#A9BDFF}
+.cubuklar .hedef{position:absolute;left:0;right:0;border-top:1px solid rgba(255,255,255,.35)}
+
+/* merkez */
+.w-mrk{grid-area:mrk;background:linear-gradient(150deg,#8467F4,#5B40D6);justify-content:space-between}
+.w-mrk h3{margin:6px 0 0;font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.w-mrk .d{display:flex;gap:8px;align-items:center}
+.w-mrk button{height:40px;padding:0 18px;border-radius:999px;font-weight:700;font-size:14px}
+.w-mrk .evet{background:#fff;color:#4B30C6}
+.w-mrk .hayir{color:rgba(255,255,255,.85)}
+
+/* rutbe */
+.w-rutbe{grid-area:rutbe;justify-content:space-between}
+.madalya{display:flex;flex-direction:column;gap:8px}
+.madalya div{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px}
+.madalya span{margin-left:auto;font-size:12px;color:var(--ink3);font-weight:600}
+.madalya i{width:22px;height:22px;border-radius:50%;flex:none}
+
+/* dikkat */
+.w-dikkat{grid-area:dikkat;justify-content:space-between}
+.w-dikkat b{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.w-dikkat ul{list-style:none;margin:0;padding:0;font-size:13px;font-weight:600;color:var(--ink2);display:flex;flex-direction:column;gap:6px}
+.w-dikkat li{display:flex;gap:8px;align-items:center}
+.w-dikkat li::before{content:"";width:6px;height:6px;border-radius:50%;background:#E0A030;flex:none}
+
+/* tahlil */
+.w-tahlil{grid-area:tahlil;--r:var(--saglik);justify-content:space-between}
+.tahlil-ust{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.tahlil-ust b{font-size:40px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.tahlil-ust b small{font-size:15px;color:var(--ink3);font-weight:600;letter-spacing:0;margin-left:4px}
+.rozet{font-size:12px;font-weight:700;color:var(--kotu);background:color-mix(in oklab,var(--kotu) 12%,transparent);padding:5px 10px;border-radius:999px;white-space:nowrap}
+.olcek{position:relative;height:10px;border-radius:5px;background:var(--cizgi)}
+.olcek .ref{position:absolute;top:0;bottom:0;border-radius:5px;background:color-mix(in oklab,var(--iyi) 30%,transparent)}
+.olcek .nok{position:absolute;top:50%;width:16px;height:16px;border-radius:50%;background:var(--kotu);transform:translate(-50%,-50%);box-shadow:0 0 0 3px var(--w)}
+.olcek-et{display:flex;justify-content:space-between;font-size:12px;color:var(--ink3);font-weight:600;margin-top:8px}
+.digerleri{display:flex;gap:14px;font-size:13px;font-weight:600;color:var(--ink2);flex-wrap:wrap}
+.digerleri span{white-space:nowrap}
+.digerleri em{font-style:normal;color:var(--ink3);font-weight:500}
+
+.pm{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:4px;vertical-align:middle;color:currentColor;opacity:.7}
+.pm.o{background:currentColor}.pm.h{background:linear-gradient(90deg,currentColor 50%,transparent 50%);box-shadow:inset 0 0 0 1px currentColor}.pm.t{box-shadow:inset 0 0 0 1.2px currentColor}
+
+@media (max-width:720px){
+  body{padding-inline:16px}
+  .saat b{font-size:64px}
+  .izgara{grid-template-columns:repeat(2,1fr);gap:14px;grid-auto-rows:minmax(150px,auto);
+    grid-template-areas:"sira sira" "sinav topar" "akis akis" "akis akis" "gel uyku" "mrk mrk" "rutbe dikkat" "tahlil tahlil"}
+  .w{border-radius:24px;padding:16px}
+  .w-sinav .say{font-size:48px}
+}
+</style>
+</head>
+<body>
+<div class="kap">
+  <div class="saat"><b>14:10</b><span>Perşembe, 24 Eylül</span></div>
+
+  <div class="izgara">
+    <section class="w w-sira dolu" aria-label="Sıradaki">
+      <div class="bas"><i></i>Sıradaki · Gelişim</div>
+      <div class="satir">
+        <div>
+          <div class="zaman">14:30 · 30 dk</div>
+          <h2>Yabancı Dil</h2>
+          <div class="adim" aria-hidden="true"><i style="flex:5"></i><i style="flex:15"></i><i style="flex:10"></i></div>
+        </div>
+        <button class="oynat" aria-label="Başla"><svg width="18" height="18" viewBox="0 0 16 16"><path d="M5 3v10l8-5z" fill="currentColor"/></svg></button>
+      </div>
+    </section>
+
+    <section class="w w-sinav dolu" aria-label="Sınava kalan">
+      <div class="bas"><i></i>Sınav</div>
+      <div class="say">268<small>gün kaldı<i class="pm t" title="tahmin"></i></small></div>
+    </section>
+
+    <section class="w w-topar" aria-label="Toparlanma">
+      <div class="bas"><i></i>Toparlanma</div>
+      <div class="kadran"><svg viewBox="0 0 120 66" id="kadran"></svg><b>72<i class="pm h" title="hesaplandı" style="color:var(--ink3)"></i></b></div>
+    </section>
+
+    <section class="w w-akis" aria-label="Günün akışı">
+      <div class="bas" style="--r:var(--ink2)"><i></i>Bugün · 7 iş</div>
+      <ol>
+        <li class="bitti" style="--r:var(--gelisim)"><time>08:00</time><i></i><span class="t">Tarih</span><span class="s">20 dk</span></li>
+        <li class="bitti" style="--r:var(--saglik)"><time>08:40</time><i></i><span class="t">Sabah ölçümü</span><span class="s">2 dk</span></li>
+        <li class="bitti" style="--r:var(--sinav)"><time>09:30</time><i></i><span class="t">TYT Matematik</span><span class="s">24 soru</span></li>
+        <li class="simdi" style="--r:var(--gelisim)"><time>14:30</time><i></i><span class="t">Yabancı Dil</span><span class="s">30 dk</span></li>
+        <li style="--r:var(--saglik)"><time>17:30</time><i></i><span class="t">Antrenman</span><span class="s">45 dk</span></li>
+        <li style="--r:var(--sinav)"><time>20:30</time><i></i><span class="t">Paragraf</span><span class="s">30 soru</span></li>
+        <li style="--r:var(--saglik)"><time>23:00</time><i></i><span class="t">Uyku</span><span class="s">7,5 sa</span></li>
+      </ol>
+    </section>
+
+    <section class="w w-gel" aria-label="Gelişim">
+      <div class="bas"><i></i>Gelişim</div>
+      <div class="ic">
+        <svg viewBox="0 0 80 80" aria-hidden="true"><circle cx="40" cy="40" r="32" fill="none" stroke="var(--gelisim)" stroke-opacity=".18" stroke-width="12"/><circle cx="40" cy="40" r="32" fill="none" stroke="var(--gelisim)" stroke-width="12" stroke-linecap="round" stroke-dasharray="201.06" stroke-dashoffset="120.64"/></svg>
+        <b>20<small>/50</small></b>
+      </div>
+      <div class="alt">dakika · 797 kart</div>
+    </section>
+
+    <section class="w w-uyku dolu" aria-label="Uyku">
+      <div class="bas"><i></i>Uyku</div>
+      <b>7,0<small>sa</small><i class="pm o" title="ölçüldü"></i></b>
+      <div class="cubuklar" id="uyku" aria-label="Son 7 gece; hedef 7,5 saat"></div>
+    </section>
+
+    <section class="w w-mrk dolu" aria-label="Merkez önerisi">
+      <div class="bas"><i></i>Merkez önerisi</div>
+      <div>
+        <h3>Akşam bloğu tekrara ayrılsın</h3>
+        <div class="alt" style="margin-top:6px">Tekrar borcu %34 · eşik %10</div>
+      </div>
+      <div class="d"><button class="evet">Uygula</button><button class="hayir">Geç</button></div>
+    </section>
+
+    <section class="w w-rutbe" aria-label="Rütbe">
+      <div class="bas" style="--r:var(--ink2)"><i></i>Rütbe</div>
+      <div class="madalya">
+        <div><i style="background:radial-gradient(circle at 35% 30%,#E9A86A,#B87333 70%)"></i>Sınav<span>Bronz 1.1</span></div>
+        <div><i style="background:radial-gradient(circle at 35% 30%,#E9A86A,#B87333 70%)"></i>Sağlık<span>Bronz 1.1</span></div>
+        <div><i style="background:radial-gradient(circle at 35% 30%,#F2F5F8,#9DA3AC 75%)"></i>Gelişim<span>Gümüş 2.1</span></div>
+      </div>
+    </section>
+
+    <section class="w w-dikkat" aria-label="Dikkat">
+      <div class="bas" style="--r:#B97A10"><i></i>Dikkat</div>
+      <b>2</b>
+      <ul><li>Yedek yok</li><li>11 deneme analizsiz</li></ul>
+    </section>
+
+    <section class="w w-tahlil" aria-label="Tahlil">
+      <div class="bas"><i></i>Tahlil · 12 Eylül</div>
+      <div class="tahlil-ust">
+        <div><div class="alt">Ferritin</div><b>26<small>ng/mL</small><i class="pm o" title="ölçüldü" style="color:var(--ink3)"></i></b></div>
+        <span class="rozet">Referans altı</span>
+      </div>
+      <div>
+        <div class="olcek"><span class="ref" style="left:15%;width:60%"></span><span class="nok" style="left:13%"></span></div>
+        <div class="olcek-et"><span>0</span><span>30 — 150</span><span>200</span></div>
+      </div>
+      <div class="digerleri"><span>B12 288 <em>hedef altı</em></span><span>LDL 128 <em>hedef üstü</em></span><span>TSH 2,6 <em>hedefte</em></span></div>
+    </section>
+  </div>
+</div>
+<script>
+(function(){
+  // yarim kadran: 0-100, deger 72
+  var k = document.getElementById('kadran'), cx = 60, cy = 60, r = 48;
+  function yay(a0, a1){
+    var p = function(a){ return [cx + r * Math.cos(Math.PI * (1 - a)), cy - r * Math.sin(Math.PI * (1 - a))]; };
+    var s = p(a0), e = p(a1);
+    return 'M' + s[0] + ' ' + s[1] + ' A' + r + ' ' + r + ' 0 0 1 ' + e[0] + ' ' + e[1];
+  }
+  k.innerHTML = '<path d="' + yay(0, 1) + '" fill="none" stroke="var(--saglik)" stroke-opacity=".16" stroke-width="12" stroke-linecap="round"/>' +
+    '<path d="' + yay(0, .72) + '" fill="none" stroke="var(--saglik)" stroke-width="12" stroke-linecap="round"/>';
+  // uyku: 7 gece, 5-9 sa olcegi, hedef 7,5
+  var u = [6.8, 7.4, 6.2, 7.8, 7.1, 6.9, 7.0], lo = 5, hi = 9, box = document.getElementById('uyku');
+  box.innerHTML = u.map(function(v){ return '<i style="height:' + ((v - lo) / (hi - lo) * 100) + '%" title="' + String(v).replace('.', ',') + ' sa"></i>'; }).join('') +
+    '<span class="hedef" style="bottom:' + ((7.5 - lo) / (hi - lo) * 100) + '%"></span>';
+})();
+</script>
+</body>
+</html>

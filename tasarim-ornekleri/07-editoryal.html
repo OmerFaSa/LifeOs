@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>07 · Editoryal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Schibsted+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFFFF; --ink:#111111; --ink2:#55565B; --ink3:#9A9BA1; --cizgi:#E9E9EC;
+  --sinav:#2F6FEB; --saglik:#0E9888; --gelisim:#D98309; --merkez:#7A5CF0;
+  --serif:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --sans:"Schibsted Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ --bg:#0E0E10; --ink:#F3F3F1; --ink2:#AAABB0; --ink3:#6E6F75; --cizgi:#232327;
+    --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#0E0E10; --ink:#F3F3F1; --ink2:#AAABB0; --ink3:#6E6F75; --cizgi:#232327;
+  --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 var(--sans);-webkit-font-smoothing:antialiased;padding-inline:40px}
+button,a{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-decoration:none}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.kap{max-width:1180px;margin:0 auto;padding-block:28px 80px}
+
+.kunye{display:flex;justify-content:space-between;align-items:baseline;gap:24px;font-size:14px;border-bottom:1px solid var(--ink);padding-bottom:14px}
+.kunye b{font-weight:600}
+.kunye nav{display:flex;gap:28px}
+.kunye nav a{color:var(--ink3)}
+.kunye nav a[aria-current]{color:var(--ink)}
+.kunye nav a:hover{color:var(--ink)}
+
+.acilis{display:grid;grid-template-columns:repeat(12,1fr);gap:24px;margin-top:72px}
+.acilis .tarih{grid-column:1/4;font-size:14px;color:var(--ink3);padding-top:22px}
+.acilis h1{grid-column:4/13;font:400 132px/0.92 var(--serif);letter-spacing:-.025em;margin:0;text-wrap:balance}
+.acilis h1 em{font-style:italic;color:var(--ink3)}
+.sira{grid-column:4/13;display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-top:28px;font-size:19px}
+.sira .nokta{width:10px;height:10px;border-radius:50%;background:var(--gelisim);display:inline-block;transform:translateY(-2px)}
+.sira a{font-weight:600;border-bottom:2px solid var(--ink);padding-bottom:2px}
+.sira a:hover{color:var(--gelisim);border-color:var(--gelisim)}
+
+.moduller{margin-top:104px}
+.mod{display:grid;grid-template-columns:repeat(12,1fr);gap:24px;align-items:end;padding:36px 0;border-top:1px solid var(--cizgi)}
+.mod:last-child{border-bottom:1px solid var(--cizgi)}
+.mod .ad{grid-column:1/4;align-self:start;display:flex;flex-direction:column;gap:6px;padding-top:14px}
+.mod .ad b{font-weight:600;font-size:15px;display:flex;align-items:center;gap:10px}
+.mod .ad b::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--r)}
+.mod .ad span{font-size:14px;color:var(--ink3)}
+.mod .sayi{grid-column:4/8;font:400 150px/0.8 var(--serif);letter-spacing:-.03em}
+.mod .sayi small{font-size:40px;color:var(--ink3);letter-spacing:0;margin-left:10px}
+.mod .bilgi{grid-column:8/13;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding-bottom:10px}
+.mod .bilgi div{display:flex;flex-direction:column;gap:2px}
+.mod .bilgi b{font:400 30px/1 var(--serif)}
+.mod .bilgi span{font-size:13px;color:var(--ink3)}
+
+.gun{margin-top:104px;display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
+.gun h2,.alinti-bas{grid-column:1/4;font-size:14px;color:var(--ink3);font-weight:400;margin:0}
+.serit{grid-column:4/13;position:relative;padding-top:8px}
+.serit .hat{position:absolute;left:0;right:0;top:15px;height:1px;background:var(--cizgi)}
+.serit .ilerleme{position:absolute;left:0;top:15px;height:1px;background:var(--ink)}
+.serit ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,1fr);position:relative}
+.serit li{display:flex;flex-direction:column;gap:10px;font-size:14px;padding-right:8px}
+.serit li i{width:15px;height:15px;border-radius:50%;background:var(--bg);box-shadow:inset 0 0 0 1.5px var(--r)}
+.serit li.bitti i{background:var(--r);box-shadow:none}
+.serit li.simdi i{box-shadow:inset 0 0 0 1.5px var(--r),0 0 0 5px color-mix(in oklab,var(--r) 20%,transparent)}
+.serit time{font-variant-numeric:tabular-nums;color:var(--ink3);font-size:13px}
+.serit li.bitti b{color:var(--ink3);font-weight:400}
+.serit b{font-weight:500}
+
+.alinti{margin-top:104px;display:grid;grid-template-columns:repeat(12,1fr);gap:24px}
+.alinti blockquote{grid-column:4/12;margin:0;font:italic 400 64px/1.02 var(--serif);letter-spacing:-.015em;text-wrap:balance}
+.alinti blockquote::before{content:"“";color:var(--merkez)}
+.alinti blockquote::after{content:"”";color:var(--merkez)}
+.alinti .kaynak{grid-column:4/12;display:flex;gap:28px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--ink3);margin-top:22px}
+.alinti .kaynak button{font-weight:600;color:var(--ink);border-bottom:2px solid var(--merkez);padding:0 0 2px}
+.alinti .kaynak button.ikincil{border-color:var(--cizgi);color:var(--ink2)}
+
+.son{margin-top:104px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;font-size:13px;color:var(--ink3);border-top:1px solid var(--ink);padding-top:14px}
+.son .uyari{display:flex;gap:24px;flex-wrap:wrap;color:var(--ink2)}
+.son .uyari span::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#C98A1B;margin-right:8px;transform:translateY(-2px)}
+.pm{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:6px;vertical-align:.9em;color:var(--ink3)}
+.mod .sayi .pm{vertical-align:text-top;margin-top:.12em}
+.pm.o{background:currentColor}.pm.h{background:linear-gradient(90deg,currentColor 50%,transparent 50%);box-shadow:inset 0 0 0 1px currentColor}.pm.t{box-shadow:inset 0 0 0 1.2px currentColor}
+
+@media (max-width:980px){
+  body{padding-inline:24px}
+  .acilis .tarih{grid-column:1/-1;padding-top:0}
+  .acilis h1,.sira{grid-column:1/-1}
+  .acilis h1{font-size:96px}
+  .mod .ad{grid-column:1/-1;flex-direction:row;justify-content:space-between;padding-top:0}
+  .mod .sayi{grid-column:1/7;font-size:110px}
+  .mod .bilgi{grid-column:7/13}
+  .gun h2,.alinti-bas{grid-column:1/-1}
+  .serit,.alinti blockquote,.alinti .kaynak{grid-column:1/-1}
+}
+@media (max-width:620px){
+  body{padding-inline:16px}
+  .kunye nav{gap:14px}
+  .kunye>b{display:none}
+  .acilis{margin-top:40px}
+  .acilis h1{font-size:68px}
+  .moduller,.gun,.alinti,.son{margin-top:64px}
+  .mod{padding:28px 0}
+  .mod .sayi{grid-column:1/-1;font-size:96px}
+  .mod .bilgi{grid-column:1/-1}
+  .serit .hat,.serit .ilerleme{display:none}
+  .serit ol{grid-template-columns:1fr;gap:14px}
+  .serit li{flex-direction:row;align-items:center;gap:14px}
+  .serit time{width:44px}
+  .alinti blockquote{font-size:42px}
+}
+</style>
+</head>
+<body>
+<div class="kap">
+  <header class="kunye">
+    <b>LifeOS</b>
+    <nav aria-label="Bölümler"><a href="#" aria-current="page">Bugün</a><a href="#">Sınav</a><a href="#">Sağlık</a><a href="#">Gelişim</a></nav>
+  </header>
+
+  <section class="acilis">
+    <div class="tarih">Perşembe<br>24 Eylül 2026</div>
+    <h1>Dört iş kaldı, <em>biri yarım saat sonra.</em></h1>
+    <p class="sira"><span class="nokta" aria-hidden="true"></span>14:30 · Yabancı Dil, 30 dakika <a href="#">Başla</a></p>
+  </section>
+
+  <section class="moduller" aria-label="Modüller">
+    <article class="mod" style="--r:var(--sinav)">
+      <div class="ad"><b>Sınav</b><span>TYT · hafta 2/40</span></div>
+      <div class="sayi">268<small>gün</small><i class="pm t" title="tahmin"></i></div>
+      <div class="bilgi"><div><b>1/2</b><span>blok</span></div><div><b>82</b><span>son net</span></div><div><b>11</b><span>gün seri</span></div></div>
+    </article>
+    <article class="mod" style="--r:var(--saglik)">
+      <div class="ad"><b>Sağlık</b><span>toparlanma</span></div>
+      <div class="sayi">72<small>/100</small><i class="pm h" title="hesaplandı"></i></div>
+      <div class="bilgi"><div><b>2/4</b><span>asgari gün</span></div><div><b>7,0</b><span>saat uyku</span></div><div><b style="color:var(--ink3)">—</b><span>kalori, veri yok</span></div></div>
+    </article>
+    <article class="mod" style="--r:var(--gelisim)">
+      <div class="ad"><b>Gelişim</b><span>günün reçetesi</span></div>
+      <div class="sayi">20<small>/50 dk</small></div>
+      <div class="bilgi"><div><b>%50</b><span>retansiyon</span></div><div><b>797</b><span>vadeli kart</span></div><div><b>23</b><span>gün seri</span></div></div>
+    </article>
+  </section>
+
+  <section class="gun" aria-label="Günün akışı">
+    <h2>Günün akışı</h2>
+    <div class="serit">
+      <span class="hat"></span><span class="ilerleme" style="width:50%"></span>
+      <ol>
+        <li class="bitti" style="--r:var(--gelisim)"><i></i><time>08:00</time><b>Tarih</b></li>
+        <li class="bitti" style="--r:var(--saglik)"><i></i><time>08:40</time><b>Ölçüm</b></li>
+        <li class="bitti" style="--r:var(--sinav)"><i></i><time>09:30</time><b>Matematik</b></li>
+        <li class="simdi" style="--r:var(--gelisim)"><i></i><time>14:30</time><b>Yabancı Dil</b></li>
+        <li style="--r:var(--saglik)"><i></i><time>17:30</time><b>Antrenman</b></li>
+        <li style="--r:var(--sinav)"><i></i><time>20:30</time><b>Paragraf</b></li>
+        <li style="--r:var(--saglik)"><i></i><time>23:00</time><b>Uyku</b></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="alinti" aria-label="Merkez önerisi">
+    <h2 class="alinti-bas">Merkez önerisi</h2>
+    <blockquote>Akşam bloğunu tekrara ayır; borç eşiğin üç katı.</blockquote>
+    <div class="kaynak"><span>tekrar borcu %34 · eşik %10</span><button>Uygula</button><button class="ikincil">Geç</button></div>
+  </section>
+
+  <footer class="son">
+    <div class="uyari"><span>Yedek hiç alınmadı</span><span>11 deneme analiz bekliyor</span></div>
+    <div>Rütbe · Sınav Bronz 1.1 · Sağlık Bronz 1.1 · Gelişim Gümüş 2.1</div>
+  </footer>
+</div>
+</body>
+</html>

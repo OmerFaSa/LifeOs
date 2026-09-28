@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>14 · Bölümler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;700;800&family=Epilogue:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Tek dunya: her bolum kendi rengini tasir; zemin bilerek koyu. */
+:root{
+  --bg:#0B0C10; --ink:#FFFFFF; --ink2:rgba(255,255,255,.76); --ink3:rgba(255,255,255,.52);
+  --disp:"Unbounded",ui-sans-serif,system-ui,sans-serif;
+  --sans:"Epilogue",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-snap-type:y mandatory;scroll-behavior:smooth}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 var(--sans);-webkit-font-smoothing:antialiased}
+button,a{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-decoration:none}
+:focus-visible{outline:2px solid #fff;outline-offset:3px;border-radius:12px}
+.bol{min-height:100svh;scroll-snap-align:start;position:relative;overflow:hidden;display:grid;grid-template-rows:auto 1fr auto;padding:28px 40px 36px;background:var(--z)}
+.bol::after{content:"";position:absolute;inset:auto -20% -40% auto;width:80vmax;aspect-ratio:1;border-radius:50%;background:radial-gradient(closest-side,var(--isik),transparent);opacity:.35;pointer-events:none}
+.bol>*{position:relative;z-index:1}
+.ust{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink2)}
+.ust b{font:600 14px var(--disp);color:var(--ink);letter-spacing:.02em}
+.orta{align-self:center;display:flex;flex-direction:column;gap:18px;max-width:1200px}
+.etk{font-weight:600;color:var(--ink2);display:flex;align-items:center;gap:10px;font-size:18px}
+.etk i{width:10px;height:10px;border-radius:50%;background:#fff}
+.dev{font:800 clamp(120px,24vw,340px)/.82 var(--disp);letter-spacing:-.06em;transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.dev small{font:500 clamp(22px,3vw,40px) var(--disp);letter-spacing:-.02em;color:var(--ink2);margin-left:.3em}
+.bol:not(.gorundu) .dev{transform:translateY(28px)}
+.baslik{font:700 clamp(44px,7vw,104px)/.98 var(--disp);letter-spacing:-.045em;max-width:14ch;text-wrap:balance}
+.alt{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+.olgu{display:flex;gap:48px;flex-wrap:wrap}
+.olgu div{display:flex;flex-direction:column;gap:2px}
+.olgu b{font:700 30px var(--disp);letter-spacing:-.03em}
+.olgu span{font-size:14px;color:var(--ink3)}
+.eylem{display:flex;gap:10px}
+.eylem button{height:58px;padding:0 28px;border-radius:999px;background:#fff;color:#0B0C10;font-weight:700;font-size:16px}
+.eylem button.ikincil{background:rgba(255,255,255,.14);color:#fff}
+.noktalar{position:fixed;right:22px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:14px;z-index:5}
+.noktalar a{display:flex;align-items:center;justify-content:flex-end;gap:10px;font-size:12px;color:transparent;transition:color .2s}
+.noktalar a i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.35);transition:.25s}
+.noktalar a:hover{color:rgba(255,255,255,.8)}
+.noktalar a[aria-current="true"] i{background:#fff;height:22px;border-radius:4px}
+.asagi{font-size:13px;color:var(--ink3);display:flex;align-items:center;gap:8px}
+.pm{display:inline-block;width:12px;height:12px;border-radius:50%;margin-left:12px;vertical-align:middle;color:rgba(255,255,255,.7)}
+.pm.o{background:currentColor}.pm.h{background:linear-gradient(90deg,currentColor 50%,transparent 50%);box-shadow:inset 0 0 0 2px currentColor}.pm.t{box-shadow:inset 0 0 0 2px currentColor}
+
+@media (max-width:640px){
+  .bol{padding:20px 16px 24px}
+  .noktalar{right:8px}
+  .olgu{gap:24px}
+  .olgu b{font-size:24px}
+  .eylem{width:100%}
+  .eylem button{flex:1;height:54px}
+}
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} .dev{transition:none} .bol:not(.gorundu) .dev{transform:none} }
+</style>
+</head>
+<body>
+<nav class="noktalar" aria-label="Bölümler" id="noktalar">
+  <a href="#bugun" aria-current="true">Bugün<i></i></a>
+  <a href="#sinav">Sınav<i></i></a>
+  <a href="#saglik">Sağlık<i></i></a>
+  <a href="#gelisim">Gelişim<i></i></a>
+  <a href="#merkez">Öneri<i></i></a>
+</nav>
+
+<section class="bol gorundu" id="bugun" style="--z:linear-gradient(170deg,#15171F,#0B0C10);--isik:#5563D8">
+  <div class="ust"><b>LifeOS</b><span>Perşembe · 24 Eylül</span></div>
+  <div class="orta">
+    <span class="etk"><i></i>Sıradaki · Gelişim</span>
+    <div class="dev">14:30</div>
+    <div class="baslik" style="font-size:clamp(28px,4vw,52px);max-width:none">Yabancı Dil · 30 dk</div>
+  </div>
+  <div class="alt">
+    <div class="olgu"><div><b>4</b><span>iş kaldı</span></div><div><b>3</b><span>bitti</span></div><div><b>%47</b><span>gün</span></div></div>
+    <div class="eylem"><button>Başla</button></div>
+  </div>
+</section>
+
+<section class="bol" id="sinav" style="--z:linear-gradient(170deg,#1F55C8,#0B2466);--isik:#8DB2FF">
+  <div class="ust"><b>Sınav</b><span>TYT · hafta 2/40</span></div>
+  <div class="orta"><span class="etk"><i></i>Sınava kalan</span><div class="dev">268<small>gün<i class="pm t" title="tahmin"></i></small></div></div>
+  <div class="alt">
+    <div class="olgu"><div><b>1/2</b><span>blok</span></div><div><b>82</b><span>son net</span></div><div><b>432</b><span>tekrar kartı</span></div><div><b>11</b><span>gün seri</span></div></div>
+    <div class="eylem"><button>Paragraf · 20:30</button></div>
+  </div>
+</section>
+
+<section class="bol" id="saglik" style="--z:linear-gradient(170deg,#0C8C7B,#053F38);--isik:#6FF0D6">
+  <div class="ust"><b>Sağlık</b><span>toparlanma</span></div>
+  <div class="orta"><span class="etk"><i></i>Bugün plan uygun</span><div class="dev">72<small>/100<i class="pm h" title="hesaplandı"></i></small></div></div>
+  <div class="alt">
+    <div class="olgu"><div><b>2/4</b><span>asgari gün</span></div><div><b>7,0</b><span>saat uyku</span></div><div><b>—</b><span>kalori, veri yok</span></div><div><b>26</b><span>ferritin · ref. altı</span></div></div>
+    <div class="eylem"><button>Ölçüm gir</button></div>
+  </div>
+</section>
+
+<section class="bol" id="gelisim" style="--z:linear-gradient(170deg,#C9780C,#5E3303);--isik:#FFD48A">
+  <div class="ust"><b>Gelişim</b><span>günün reçetesi</span></div>
+  <div class="orta"><span class="etk"><i></i>Reçete</span><div class="dev">20<small>/ 50 dk</small></div></div>
+  <div class="alt">
+    <div class="olgu"><div><b>%50</b><span>retansiyon</span></div><div><b>797</b><span>vadeli kart</span></div><div><b>23</b><span>gün seri</span></div></div>
+    <div class="eylem"><button>Yabancı Dil · 14:30</button></div>
+  </div>
+</section>
+
+<section class="bol" id="merkez" style="--z:linear-gradient(170deg,#6A4DE6,#2A1882);--isik:#C3B4FF">
+  <div class="ust"><b>Merkez</b><span>tek öneri</span></div>
+  <div class="orta"><span class="etk"><i></i>Tekrar borcu %34 · eşik %10</span><div class="baslik">Akşam bloğu tekrara ayrılsın.</div></div>
+  <div class="alt">
+    <div class="olgu"><div><b>1</b><span>gün etkiler</span></div><div><b>geri</b><span>alınabilir</span></div></div>
+    <div class="eylem"><button>Uygula</button><button class="ikincil">Geç</button></div>
+  </div>
+</section>
+<script>
+(function(){
+  var linkler = document.querySelectorAll('#noktalar a');
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting && e.intersectionRatio > 0.55){
+        e.target.classList.add('gorundu');
+        linkler.forEach(function(a){ a.setAttribute('aria-current', a.getAttribute('href') === '#' + e.target.id); });
+      }
+    });
+  }, { threshold:[0.55] });
+  document.querySelectorAll('.bol').forEach(function(b){ io.observe(b); });
+})();
+</script>
+</body>
+</html>

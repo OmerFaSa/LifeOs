@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sade Yorum</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+:root{--ink:#16171A;--ink2:#5E6169;--ink3:#9A9DA4;--hat:#ECECEE;--hat2:#F3F3F4;--yz:#F7F7F8;--r:#2B59E8;--rt:rgba(43,89,232,.08);--kirmizi:#E5484D;--mor:#6E56E6}
+body{background:#fff;color:var(--ink);font:15px/1.5 "Geist",system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-feature-settings:"ss01"}
+.tab{font-variant-numeric:tabular-nums}
+.ekran{width:1440px;height:900px;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.an{animation:gel .6s cubic-bezier(.2,.8,.2,1) both}
+@keyframes gel{from{opacity:0;transform:translateY(8px)}}
+
+/* ust */
+.ust{height:64px;border-bottom:1px solid var(--hat);display:flex;align-items:stretch;padding:0 80px;flex:none}
+.marka{display:flex;align-items:center;gap:10px;padding-right:28px;margin-right:28px;border-right:1px solid var(--hat)}
+.marka img{width:26px;height:26px;border-radius:7px}
+.marka b{font-weight:600;font-size:15px;letter-spacing:-.01em}
+.nav{display:flex;gap:28px}
+.nav span{display:flex;align-items:center;font-size:14px;font-weight:500;color:var(--ink3);position:relative}
+.nav span.on{color:var(--ink)}
+.nav span.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--r);border-radius:2px 2px 0 0}
+.sag{margin-left:auto;display:flex;align-items:center;gap:20px}
+.ara{display:flex;align-items:center;gap:8px;height:32px;width:220px;padding:0 10px;border-radius:8px;border:1px solid var(--hat);color:var(--ink3);font-size:13px}
+.ara kbd{margin-left:auto;font:500 11px "Geist",sans-serif;color:var(--ink3);border:1px solid var(--hat);border-radius:4px;padding:0 5px}
+.rk{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500}
+.rk i{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--k1),var(--k2) 75%);box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.rk .xp{width:44px;height:3px;border-radius:2px;background:var(--hat2);overflow:hidden}
+.rk .xp s{display:block;height:100%;background:var(--r);text-decoration:none}
+.rk small{color:var(--ink3);font-size:12px}
+
+.govde{padding:0 80px;flex:1;display:flex;flex-direction:column}
+/* Kesinlik tipografisi: sayinin bicimi kaynagini soyler */
+.olc{}
+.hes{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:.18em;text-decoration-color:#C9CBD0}
+.tah{color:var(--ink2);font-weight:500!important;text-decoration:underline dotted;text-decoration-thickness:2px;text-underline-offset:.2em;text-decoration-color:#B9BBC1}
+.lejant{display:flex;gap:18px;align-items:center;font-size:12px;color:var(--ink3)}
+.lejant b{color:var(--ink2);font-weight:500}
+/* Gun seridi: uc sistemin tek gunu */
+.serit{height:44px;border-bottom:1px solid var(--hat);padding:0 80px;display:flex;align-items:center;gap:20px;flex:none;font-size:12px;color:var(--ink3)}
+.serit .iz{position:relative;flex:1;height:14px}
+.serit .iz::before{content:"";position:absolute;left:0;right:0;top:6px;height:2px;border-radius:1px;background:var(--hat2)}
+.serit .p{position:absolute;top:4px;height:6px;border-radius:3px;background:#D5D6DA}
+.serit .p.bu{background:var(--r)}
+.serit .p.bitti{opacity:.4}
+.serit .su{position:absolute;top:-3px;width:2px;height:20px;border-radius:1px;background:var(--kirmizi)}
+.serit .su::after{content:"";position:absolute;left:-3px;top:-4px;width:8px;height:8px;border-radius:50%;background:var(--kirmizi);box-shadow:0 0 0 3px rgba(229,72,77,.18)}
+.serit b{color:var(--ink);font-weight:500}
+.etk{font-size:13px;color:var(--ink3);font-weight:500}
+.sor{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;border:1px solid #DADBDE;color:var(--ink3);font:600 10px "Geist",sans-serif;vertical-align:1px;margin-left:6px}
+.btn{height:40px;padding:0 18px;border-radius:10px;font-weight:500;font-size:14px;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn.a{background:var(--ink);color:#fff}
+.btn.r{background:var(--r);color:#fff}
+.btn.b{border:1px solid var(--hat);color:var(--ink)}
+.btn.c{color:var(--ink2)}
+.btn kbd{font:500 11px "Geist",sans-serif;opacity:.55;border:1px solid rgba(255,255,255,.35);border-radius:4px;padding:0 5px}
+.btn.b kbd{border-color:var(--hat);opacity:1;color:var(--ink3)}
+
+/* AYS */
+.hero{display:grid;grid-template-columns:7fr 5fr;gap:80px;padding-top:88px;align-items:end}
+.hero h1{font-size:52px;font-weight:600;letter-spacing:-.032em;line-height:1.05;margin-top:12px}
+.hero h1 span{color:var(--ink3);font-weight:500}
+.hero .meta{font-size:16px;color:var(--ink2);margin-top:14px}
+.hero .eyl{display:flex;gap:8px;margin-top:32px}
+.ilerleme .sayi{display:flex;align-items:baseline;gap:8px}
+.ilerleme .sayi b{font-size:52px;font-weight:600;letter-spacing:-.035em;line-height:1}
+.ilerleme .sayi span{color:var(--ink3);font-size:16px}
+.parca{display:flex;gap:4px;margin-top:20px}
+.parca i{flex:1;height:4px;border-radius:2px;background:var(--hat2)}
+.parca i.on{background:var(--r)}
+.bloklar{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:13px}
+.bloklar div{display:flex;flex-direction:column}
+.bloklar b{font-weight:500}
+.bloklar span{color:var(--ink3)}
+
+.cetvel{margin-top:72px;position:relative;height:96px}
+.cetvel .hat{position:absolute;left:0;right:0;top:56px;height:1px;background:var(--hat)}
+.cetvel .saat{position:absolute;top:66px;font-size:11px;color:var(--ink3);transform:translateX(-50%)}
+.cetvel .ct{position:absolute;top:52px;width:1px;height:9px;background:var(--hat)}
+.cetvel .blok{position:absolute;top:50px;height:12px;border-radius:6px;background:var(--c)}
+.cetvel .blok.bitti{background:color-mix(in oklab,var(--c) 28%,#fff)}
+.cetvel .blok em{position:absolute;bottom:18px;left:0;font-style:normal;font-size:12px;font-weight:500;white-space:nowrap;color:var(--ink2)}
+.cetvel .blok.bitti em{color:var(--ink3)}
+.cetvel .simdi{position:absolute;top:24px;bottom:18px;width:1px;background:var(--kirmizi)}
+.cetvel .simdi span{position:absolute;top:-4px;right:6px;font-size:11px;font-weight:600;color:var(--kirmizi)}
+.olcu{margin-top:96px;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--hat)}
+.olcu div{padding:20px 24px 0;border-left:1px solid var(--hat)}
+.olcu div:first-child{border-left:0;padding-left:0}
+.olcu b{display:block;font-size:28px;font-weight:600;letter-spacing:-.025em;margin-top:6px}
+.olcu b small{font-size:14px;color:var(--ink3);font-weight:500;margin-left:4px;letter-spacing:0}
+.olcu em{font-style:normal;font-size:12px;color:var(--ink3)}
+.olcu em.i{color:#1A8452}.olcu em.k{color:var(--kirmizi)}
+.oneri{margin-top:auto;border-top:1px solid var(--hat);height:72px;display:flex;align-items:center;gap:14px;font-size:14px;color:var(--ink2)}
+.oneri i{width:8px;height:8px;border-radius:50%;background:var(--mor);box-shadow:0 0 0 3px rgba(110,86,230,.14)}
+.oneri b{color:var(--ink);font-weight:600}
+.oneri .btn{height:34px;font-size:13px}
+.oneri .ilk{margin-left:auto}
+
+/* SPI */
+.spi{--r:#0F8F7E;--rt:rgba(15,143,126,.09)}
+.ofis{flex:1;display:grid;grid-template-columns:300px 1fr;min-height:0}
+.ekip{border-right:1px solid var(--hat);padding:28px 20px 0 80px;margin-left:-80px;width:380px;box-sizing:border-box}
+.ekip .etk{padding:0 12px 10px}
+.kisi{display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:10px 12px;border-radius:10px}
+.kisi img{width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:50% 18%}
+.kisi b{display:block;font-weight:500;font-size:14px}
+.kisi span{font-size:12px;color:var(--ink3)}
+.kisi.on{background:var(--yz)}
+.kisi .n{width:6px;height:6px;border-radius:50%;background:#D5D6DA}
+.kisi .n.y{background:#22B573}.kisi .n.a{background:#E0A030}
+.sohbet{display:flex;flex-direction:column;padding:0 0 28px 56px;max-width:880px}
+.sb{height:76px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--hat)}
+.sb img{width:40px;height:40px;border-radius:50%;object-fit:cover;object-position:50% 18%}
+.sb b{display:block;font-weight:600}
+.sb span{font-size:13px;color:var(--ink3)}
+.sb .sa{margin-left:auto;font-size:13px;color:var(--ink3)}
+.mesajlar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:24px;padding:28px 0 24px}
+.m-ben{align-self:flex-end;background:var(--rt);padding:12px 16px;border-radius:14px 14px 4px 14px;font-size:15px;max-width:70%}
+.m-o{display:grid;grid-template-columns:28px 1fr;gap:14px}
+.m-o img{width:28px;height:28px;border-radius:50%;object-fit:cover;object-position:50% 18%;margin-top:2px}
+.m-o p{font-size:17px;line-height:1.6;color:var(--ink)}
+.m-o p b{font-weight:600;color:var(--r)}
+.m-o .kay{font-size:12px;color:var(--ink3);margin-top:8px;display:flex;align-items:center}
+.gun-ay{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--ink3)}
+.gun-ay::before,.gun-ay::after{content:"";flex:1;height:1px;background:var(--hat)}
+.teklif{margin-left:42px;border:1px solid var(--hat);border-radius:14px;padding:16px 16px 16px 20px;display:flex;align-items:center;gap:16px}
+.teklif .etk{font-size:12px}
+.teklif b{display:block;font-weight:600;font-size:15px;margin-top:2px}
+.teklif .d{margin-left:auto;display:flex;gap:6px}
+.giris{height:52px;border:1px solid var(--hat);border-radius:12px;display:flex;align-items:center;gap:10px;padding:0 8px 0 16px;color:var(--ink3);font-size:15px}
+.giris .ik{margin-left:auto;color:var(--ink3);display:grid;place-items:center;width:36px;height:36px}
+.giris .gn{width:36px;height:36px;border-radius:9px;background:var(--r);color:#fff;display:grid;place-items:center}
+
+/* ESP */
+.esp{--r:#C97400;--rt:rgba(201,116,0,.09)}
+.ust-ilerle{display:flex;align-items:center;gap:16px;padding-top:28px;font-size:13px;color:var(--ink3)}
+.ust-ilerle .bar{flex:1;height:3px;border-radius:2px;background:var(--hat2);overflow:hidden}
+.ust-ilerle .bar i{display:block;height:100%;width:27%;background:var(--r)}
+.ust-ilerle b{color:var(--ink);font-weight:500}
+.kart{width:760px;margin:40px auto 0;border:1px solid var(--hat);border-radius:24px;height:388px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.kart .ust-b{position:absolute;top:20px;left:24px;right:24px;display:flex;justify-content:space-between;font-size:12px;color:var(--ink3)}
+.kart .k{font-size:76px;font-weight:600;letter-spacing:-.035em;line-height:1}
+.kart .ipa{font-size:15px;color:var(--ink3);margin-top:12px;letter-spacing:.01em}
+.kart .ayr{width:32px;height:1px;background:var(--hat);margin:28px 0}
+.kart .an2{font-size:22px;font-weight:500;letter-spacing:-.01em}
+.kart .orn{font-size:15px;color:var(--ink3);margin-top:8px}
+.kart .orn i{font-style:normal;color:var(--ink2)}
+.notlar{width:760px;margin:20px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.notlar div{height:60px;border-radius:14px;border:1px solid var(--hat);display:flex;flex-direction:column;justify-content:center;padding:0 16px;position:relative}
+.notlar b{font-weight:600;font-size:15px}
+.notlar span{font-size:12px;color:var(--ink3)}
+.notlar kbd{position:absolute;top:10px;right:12px;font:500 11px "Geist",sans-serif;color:var(--ink3);border:1px solid var(--hat);border-radius:4px;padding:0 5px}
+.notlar div.on{background:var(--r);border-color:var(--r);color:#fff}
+.notlar div.on span{color:rgba(255,255,255,.78)}
+.notlar div.on kbd{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.35)}
+.ozet-alt{margin-top:auto;height:64px;border-top:1px solid var(--hat);display:flex;align-items:center;gap:40px;font-size:14px;color:var(--ink3)}
+.ozet-alt b{color:var(--ink);font-weight:600;margin-right:4px}
+.ozet-alt .bitir{margin-left:auto;color:var(--ink);font-weight:500;border:1px solid var(--hat);border-radius:10px;height:36px;padding:0 14px;display:inline-flex;align-items:center}
+.ipucu{text-align:center;font-size:12px;color:var(--ink3);margin-top:18px}
+</style>
+</head>
+<body>
+
+<!-- AYS -->
+<section class="ekran ays" id="ays">
+  <header class="ust">
+    <div class="marka"><img src="../AYS/src/img/brand/favicon.png" alt=""><b>AYS</b></div>
+    <nav class="nav"><span class="on">Bugün</span><span>Program</span><span>Soru çöz</span><span>Denemeler</span><span>Tekrar</span><span>Ofis</span></nav>
+    <div class="sag"><span class="ara"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Ara<kbd>⌘K</kbd></span>
+      <span class="rk" style="--k1:#E9A86A;--k2:#B87333"><i></i>Bronz 1.1<span class="xp"><s style="width:42%"></s></span></span></div>
+  </header>
+  <div class="serit" data-m="ays"><span>Gün</span><div class="iz"></div><span><b>4 iş</b> kaldı</span></div>
+  <div class="govde">
+    <div class="hero an">
+      <div>
+        <div class="etk">Perşembe, 24 Eylül</div>
+        <h1>Sıradaki: Paragraf <span>20:30</span></h1>
+        <p class="meta">Akşam bloğu · 30 soru · 70 dakika</p>
+        <div class="eyl"><span class="btn a">Başla <kbd>↵</kbd></span><span class="btn b">Ertele</span></div>
+      </div>
+      <div class="ilerleme">
+        <div class="etk">Bugünün blokları</div>
+        <div class="sayi" style="margin-top:12px"><b class="tab">1</b><span>/ 2 tamamlandı</span></div>
+        <div class="parca"><i class="on"></i><i></i></div>
+        <div class="bloklar"><div><b>Sabah · Matematik</b><span class="tab">24 soru · 18 doğru</span></div><div><b>Akşam · Paragraf</b><span class="tab">20:30</span></div></div>
+      </div>
+    </div>
+
+
+    <div class="olcu an" style="animation-delay:.14s">
+      <div><span class="etk">Sınava kalan</span><b class="tab"><span class="tah">268</span><small>gün</small></b><em>resmî takvim bekleniyor</em></div>
+      <div><span class="etk">Son net</span><b class="tab"><span class="hes">82</span></b><em class="i">+3 önceki denemeye göre</em></div>
+      <div><span class="etk">Tekrar kartı</span><b class="tab"><span class="hes">432</span></b><em class="k">+41 dünden</em></div>
+      <div><span class="etk">Seri</span><b class="tab"><span class="hes">11</span><small>gün</small></b><em>en uzun 14</em></div>
+    </div>
+
+    <div class="lejant an" style="margin-top:28px;animation-delay:.18s"><span>Sayının biçimi kaynağını söyler:</span><span><b>24</b> düz · ölçüldü</span><span><b class="hes">82</b> çizgili · hesaplandı</span><span><b class="tah">268</b> noktalı · tahmin</span></div>
+    <div class="oneri an" style="animation-delay:.2s"><i></i><b>Merkez</b><span>Akşam bloğu tekrara ayrılsın — tekrar borcu %34, eşik %10.</span><span class="btn b ilk">Uygula</span><span class="btn c">Geç</span></div>
+  </div>
+</section>
+
+<!-- SPI -->
+<section class="ekran spi" id="spi">
+  <header class="ust">
+    <div class="marka"><img src="../SPI/src/img/brand/favicon.png" alt=""><b>SPİ</b></div>
+    <nav class="nav"><span>Bugün</span><span>Tahliller</span><span>Beslenme</span><span>Hareket</span><span>Harcama</span><span class="on">Ofis</span></nav>
+    <div class="sag"><span class="ara"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Ara<kbd>⌘K</kbd></span>
+      <span class="rk" style="--k1:#E9A86A;--k2:#B87333"><i></i>Bronz 1.1<span class="xp"><s style="width:37%"></s></span></span></div>
+  </header>
+  <div class="serit" data-m="spi"><span>Gün</span><div class="iz"></div><span><b>4 iş</b> kaldı</span></div>
+  <div class="govde" style="padding-right:80px">
+    <div class="ofis">
+      <aside class="ekip an">
+        <div class="etk">Ekip · 5</div>
+        <div class="kisi on"><img src="../brand/medya/ajan/ajan-kare-spi-nutri.webp" alt=""><div><b>Nesrin</b><span>Beslenme</span></div><i class="n y"></i></div>
+        <div class="kisi"><img src="../brand/medya/ajan/ajan-kare-spi-patron.webp" alt=""><div><b>Patron</b><span>Baş danışman</span></div><i class="n y"></i></div>
+        <div class="kisi"><img src="../brand/medya/ajan/ajan-kare-spi-lab.webp" alt=""><div><b>Kerem</b><span>Laboratuvar</span></div><i class="n a"></i></div>
+        <div class="kisi"><img src="../brand/medya/ajan/ajan-kare-spi-move.webp" alt=""><div><b>Barış</b><span>Hareket</span></div><i class="n"></i></div>
+        <div class="kisi"><img src="../brand/medya/ajan/ajan-kare-spi-money.webp" alt=""><div><b>Sedef</b><span>Sağlık ekonomisi</span></div><i class="n"></i></div>
+      </aside>
+      <div class="sohbet">
+        <div class="sb an"><img src="../brand/medya/ajan/ajan-kare-spi-nutri.webp" alt=""><div><b>Nesrin</b><span>Beslenme koçu · çevrimiçi</span></div><span class="sa">Bugün 14:06</span></div>
+        <div class="mesajlar">
+          <div class="gun-ay"><span>Bugün</span></div>
+          <div class="m-o an"><img src="../brand/medya/ajan/ajan-kare-spi-nutri.webp" alt=""><div><p>Günaydın. Kahvaltı ve ara öğün kayıtlı; öğle öğünü henüz yok.</p><div class="kay">09:12</div></div></div>
+          <div class="m-ben an" style="animation-delay:.06s">Akşam ne yesem? Protein eksik kaldı.</div>
+          <div class="m-o an" style="animation-delay:.12s"><img src="../brand/medya/ajan/ajan-kare-spi-nutri.webp" alt=""><div>
+            <p>Bugün <b class="hes">38 gram</b> protein kaldı. Akşam bir kâse mercimek çorbası ve 200 gram yoğurt bu açığı kapatır; toplam <span class="tah">yaklaşık 520</span> kilokalori.</p>
+            <div class="kay">çizgili sayı hesaplandı, noktalı sayı tahmin · 2 öğün kayıtlı</div></div></div>
+          <div class="teklif an" style="animation-delay:.18s"><div><div class="etk">Öneri · yalnız bugün · geri alınabilir</div><b>Akşam öğünü: mercimek çorbası ve yoğurt</b></div><div class="d"><span class="btn r">Uygula</span><span class="btn b">Başka öner</span></div></div>
+        </div>
+        <div class="giris an" style="animation-delay:.22s">Nesrin’e yaz…<span class="ik"><svg width="18" height="18" viewBox="0 0 16 16"><rect x="5.5" y="2" width="5" height="8" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M3.5 8a4.5 4.5 0 0 0 9 0M8 12.5V14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><span class="gn"><svg width="15" height="15" viewBox="0 0 16 16"><path d="M3 8h9M8.5 4.5L12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ESP -->
+<section class="ekran esp" id="esp">
+  <header class="ust">
+    <div class="marka"><img src="../ESP/src/img/brand/favicon.png" alt=""><b>ESP</b></div>
+    <nav class="nav"><span>Bugün</span><span>Merdiven</span><span class="on">Dil</span><span>Kütüphane</span><span>Yazı</span><span>Ofis</span></nav>
+    <div class="sag"><span class="ara"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Ara<kbd>⌘K</kbd></span>
+      <span class="rk" style="--k1:#FFFFFF;--k2:#A9AFB8"><i></i>Gümüş 2.1<span class="xp"><s style="width:29%"></s></span></span></div>
+  </header>
+  <div class="serit" data-m="esp"><span>Gün</span><div class="iz"></div><span><b>4 iş</b> kaldı</span></div>
+  <div class="govde">
+    <div class="ust-ilerle an"><b class="tab">12 / 45</b><span>vadeli kart</span><div class="bar"><i></i></div><span class="tab">09:40</span><span>Retansiyon <b class="hes">%50</b></span></div>
+    <div class="kart an" style="animation-delay:.06s">
+      <div class="ust-b"><span>İngilizce · B2 · 3. görüş</span><span>Boşluk ile çevir</span></div>
+      <div class="k">resilient</div>
+      <div class="ipa">/rɪˈzɪl.i.ənt/</div>
+      <div class="ayr"></div>
+      <div class="an2">dayanıklı, çabuk toparlanan</div>
+      <div class="orn"><i>Children are often remarkably resilient.</i></div>
+    </div>
+    <div class="notlar an" style="animation-delay:.12s">
+      <div><kbd>1</kbd><b>Tekrar</b><span class="tab">1 dakika</span></div>
+      <div><kbd>2</kbd><b>Zor</b><span class="tab">6 dakika</span></div>
+      <div class="on"><kbd>3</kbd><b>İyi</b><span class="tab">2 gün</span></div>
+      <div><kbd>4</kbd><b>Kolay</b><span class="tab">5 gün</span></div>
+    </div>
+    <p class="ipucu">Aralık, bu kartın hatırlama geçmişinden hesaplanır.</p>
+    <div class="ozet-alt an" style="animation-delay:.18s"><span>Bu oturum</span><span><b class="tab">9</b> hatırlanan</span><span><b class="tab">3</b> unutulan</span><span><b class="tab">4 / 10</b> yeni kart</span><span><b class="tab">%78</b> isabet</span><span class="bitir">Oturumu bitir</span></div>
+  </div>
+</section>
+
+<script>
+(function(){
+  var c = document.getElementById('cetvel'), BAS = 8, SON = 24, W = 1280; if(!c){ }
+  var x = function(h, m){ return ((h + (m || 0) / 60) - BAS) / (SON - BAS) * W; };
+  var h = '<span class="hat"></span>';
+  for(var s = BAS; s <= SON; s += 2){ h += '<span class="ct" style="left:' + x(s) + 'px"></span><span class="saat tab" style="left:' + x(s) + 'px">' + String(s % 24).padStart(2, '0') + ':00</span>'; }
+  [[8,0,8,20,'#C97400','Tarih',1],[9,30,10,40,'#2B59E8','Matematik',1],[14,30,15,0,'#C97400','Yabancı Dil',0],[17,30,18,15,'#0F8F7E','Antrenman',0],[20,30,21,40,'#2B59E8','Paragraf',0],[23,0,24,0,'#0F8F7E','Uyku',0]].forEach(function(b){
+    h += '<span class="blok' + (b[6] ? ' bitti' : '') + '" style="--c:' + b[4] + ';left:' + x(b[0], b[1]) + 'px;width:' + Math.max(10, x(b[2], b[3]) - x(b[0], b[1])) + 'px"><em>' + b[5] + '</em></span>';
+  });
+  h += '<span class="simdi" style="left:' + x(14, 10) + 'px"><span class="tab">14:10</span></span>';
+  if(c) c.innerHTML = h;
+  var B = [[8,0,8,20,'esp',1],[8,40,8,50,'spi',1],[9,30,10,40,'ays',1],[14,30,15,0,'esp',0],[17,30,18,15,'spi',0],[20,30,21,40,'ays',0],[23,0,24,0,'spi',0]];
+  document.querySelectorAll('.serit').forEach(function(sr){
+    var m = sr.dataset.m, iz = sr.querySelector('.iz'), p = function(hh, mm){ return ((hh + mm / 60) - 7) / 17 * 100; }, o = '';
+    B.forEach(function(b){ o += '<i class="p' + (b[4] === m ? ' bu' : '') + (b[5] ? ' bitti' : '') + '" style="left:' + p(b[0], b[1]) + '%;width:' + Math.max(.6, p(b[2], b[3]) - p(b[0], b[1])) + '%"></i>'; });
+    o += '<i class="su" style="left:' + p(14, 10) + '%"></i>';
+    iz.innerHTML = o;
+  });
+})();
+</script>
+</body>
+</html>

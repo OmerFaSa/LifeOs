@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>13 · Çalışma Alanı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFFFF; --ray:#F7F7F5; --hover:#EFEFEC; --ink:#191919; --ink2:#5A5A57; --ink3:#9A9A95; --cizgi:#EDEDEA; --alan:#F4F4F1;
+  --sinav:#2F6FEB; --saglik:#0E9888; --gelisim:#D98309; --merkez:#7A5CF0; --iyi:#1F8A5B;
+  --sans:"Host Grotesk",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ --bg:#191919; --ray:#202020; --hover:#2A2A2A; --ink:#EDEDEB; --ink2:#AFAFAB; --ink3:#72726E; --cizgi:#2C2C2B; --alan:#252525;
+    --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; --iyi:#4CC38A; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --bg:#191919; --ray:#202020; --hover:#2A2A2A; --ink:#EDEDEB; --ink2:#AFAFAB; --ink3:#72726E; --cizgi:#2C2C2B; --alan:#252525;
+  --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; --iyi:#4CC38A; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer;text-align:left}
+:focus-visible{outline:2px solid var(--sinav);outline-offset:1px;border-radius:6px}
+.duzen{display:grid;grid-template-columns:252px 1fr;min-height:100%;background:linear-gradient(90deg,var(--ray) 252px,var(--bg) 252px)}
+
+.ray{background:var(--ray);padding:12px 8px;display:flex;flex-direction:column;gap:1px;position:sticky;top:0;height:100vh;overflow:auto}
+.kim{display:flex;align-items:center;gap:10px;padding:6px 10px 14px;font-weight:600;font-size:14px}
+.kim .m{display:grid;grid-template-columns:repeat(2,7px);gap:2px}
+.kim .m i{width:7px;height:7px;border-radius:2px;display:block}
+.sayfa{display:flex;align-items:center;gap:10px;height:30px;padding:0 10px;border-radius:6px;color:var(--ink2);font-size:14px;width:100%}
+.sayfa:hover{background:var(--hover)}
+.sayfa[aria-current="page"]{background:var(--hover);color:var(--ink);font-weight:500}
+.sayfa .s{margin-left:auto;font:12px var(--mono);color:var(--ink3)}
+.ray h4{margin:16px 10px 4px;font-size:12px;font-weight:500;color:var(--ink3);display:flex;align-items:center;gap:8px}
+.ray h4 i{width:7px;height:7px;border-radius:50%;background:var(--r)}
+
+.sayfa-ic{max-width:760px;margin:0 auto;padding:40px 48px 96px}
+.iz{font-size:13px;color:var(--ink3);display:flex;gap:6px;align-items:center}
+.iz i{width:7px;height:7px;border-radius:50%;background:var(--r)}
+h1{font-size:40px;font-weight:700;letter-spacing:-.025em;margin:18px 0 10px;line-height:1.1}
+.ozellik{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
+.ozellik span{height:28px;padding:0 10px;border-radius:6px;background:var(--alan);font-size:13px;display:inline-flex;align-items:center;gap:6px;color:var(--ink2)}
+.ozellik b{color:var(--ink);font-weight:600}
+h2{font-size:13px;font-weight:600;color:var(--ink3);margin:34px 0 6px;letter-spacing:.01em}
+.gorev{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:8px 6px;border-radius:6px;margin-inline:-6px}
+.gorev:hover{background:var(--ray)}
+.kutu{width:18px;height:18px;margin-top:3px;border-radius:5px;box-shadow:inset 0 0 0 1.5px var(--ink3);display:grid;place-items:center;cursor:pointer}
+.kutu.tam{background:var(--r,var(--ink));box-shadow:none;color:#fff}
+.gorev .b{font-weight:500}
+.gorev.tamam .b{color:var(--ink3);text-decoration:line-through}
+.gorev .alt{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.cip{height:24px;padding:0 8px;border-radius:5px;background:var(--alan);font:12px var(--mono);color:var(--ink2);display:inline-flex;align-items:center;gap:6px;cursor:text}
+.cip input{width:3.2ch;border:0;background:none;outline:none;font:600 12px var(--mono);color:var(--ink);padding:0;text-align:right}
+.cip:focus-within{box-shadow:inset 0 0 0 1.5px var(--r,var(--ink3))}
+.gorev .zaman{font:12px var(--mono);color:var(--ink3);padding-top:3px}
+.dugme{height:30px;padding:0 12px;border-radius:7px;background:var(--ink);color:var(--bg);font-weight:600;font-size:13px}
+.sayac{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--cizgi)}
+.sayac:last-child{border:0}
+.sayac .d{display:flex;align-items:center;gap:2px;background:var(--alan);border-radius:8px;padding:2px}
+.sayac .d button{width:30px;height:28px;border-radius:6px;display:grid;place-items:center;font-weight:600;color:var(--ink2)}
+.sayac .d button:hover{background:var(--bg);color:var(--ink)}
+.sayac .d output{min-width:56px;text-align:center;font:600 13px var(--mono)}
+.sayac .d output small{color:var(--ink3);font-weight:400}
+.olcek{display:flex;gap:4px}
+.olcek button{flex:1;height:34px;border-radius:7px;background:var(--alan);font-weight:600;color:var(--ink2);font-size:14px;text-align:center}
+.olcek button[aria-pressed="true"]{background:var(--r,var(--ink));color:#fff}
+.bag{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--cizgi)}
+.bag:last-child{border:0}
+.bag span{color:var(--ink2)}
+.bag b{font-weight:600;color:var(--ink)}
+.bag a{font-size:13px;color:var(--ink3);text-decoration:none}
+.bag a:hover{color:var(--ink)}
+.diger{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink3);margin-top:44px;padding-top:16px;border-top:1px solid var(--cizgi)}
+.diger a{color:var(--ink3);text-decoration:none}
+.diger a:hover{color:var(--ink)}
+.oneri{margin-top:12px;display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:10px;background:color-mix(in oklab,var(--merkez) 8%,var(--bg));box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--merkez) 22%,transparent)}
+.oneri i{width:8px;height:8px;border-radius:50%;background:var(--merkez);margin-top:8px;flex:none}
+.oneri div{flex:1}
+.oneri b{font-weight:600}
+.oneri p{margin:2px 0 0;font:12px var(--mono);color:var(--ink3)}
+.oneri button{height:30px;padding:0 12px;border-radius:7px;background:var(--merkez);color:#fff;font-weight:600;font-size:13px;flex:none}
+.konus{display:flex;gap:8px;margin-top:6px}
+.konus input{flex:1;min-width:0;height:38px;border-radius:8px;border:1px solid var(--cizgi);background:var(--bg);padding:0 12px;outline:none}
+.konus input:focus{border-color:var(--ink3)}
+.merdiven{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.merdiven div{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink2)}
+.merdiven .c{display:flex;flex-direction:column-reverse;gap:2px}
+.merdiven .c i{height:6px;border-radius:2px;background:var(--cizgi)}
+.merdiven .c i.on{background:var(--gelisim)}
+.merdiven small{color:var(--ink3);font:11px var(--mono)}
+.pm{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:3px;vertical-align:middle;color:var(--ink3)}
+.pm.o{background:currentColor}.pm.h{background:linear-gradient(90deg,currentColor 50%,transparent 50%);box-shadow:inset 0 0 0 1px currentColor}.pm.t{box-shadow:inset 0 0 0 1.2px currentColor}
+.sf[hidden]{display:none}
+
+@media (max-width:820px){
+  .duzen{grid-template-columns:1fr;background:var(--bg)}
+  .ray{position:static;height:auto;flex-direction:row;overflow-x:auto;align-items:center;gap:4px;padding:8px 12px;scrollbar-width:none;border-bottom:1px solid var(--cizgi)}
+  .ray h4,.ray .gizle{display:none}
+  .kim{padding:0 8px 0 0}
+  .sayfa{width:auto;flex:none}
+  .sayfa-ic{padding:24px 16px 72px}
+  h1{font-size:32px}
+  .merdiven{grid-template-columns:repeat(4,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="duzen">
+  <nav class="ray" aria-label="Sayfalar">
+    <div class="kim"><span class="m" aria-hidden="true"><i style="background:var(--sinav)"></i><i style="background:var(--saglik)"></i><i style="background:var(--gelisim)"></i><i style="background:var(--merkez)"></i></span>LifeOS</div>
+    <h4 style="--r:var(--sinav)"><i></i>Sınav</h4>
+    <button class="sayfa" data-s="sinav" aria-current="page">Bugün<span class="s">1/2</span></button>
+    <button class="sayfa gizle">Program</button>
+    <button class="sayfa gizle">Denemeler<span class="s">11</span></button>
+    <button class="sayfa gizle">Tekrar<span class="s">432</span></button>
+    <h4 style="--r:var(--saglik)"><i></i>Sağlık</h4>
+    <button class="sayfa" data-s="saglik">Bugün<span class="s">2/4</span></button>
+    <button class="sayfa gizle">Tahliller<span class="s">1</span></button>
+    <button class="sayfa gizle">Beslenme</button>
+    <button class="sayfa gizle">Hareket</button>
+    <h4 style="--r:var(--gelisim)"><i></i>Gelişim</h4>
+    <button class="sayfa" data-s="gelisim">Reçete<span class="s">20/50</span></button>
+    <button class="sayfa gizle">Merdiven</button>
+    <button class="sayfa gizle">Kütüphane</button>
+    <h4 style="--r:var(--merkez)"><i></i>Merkez</h4>
+    <button class="sayfa gizle">Öneriler<span class="s">1</span></button>
+    <button class="sayfa gizle">Rütbe</button>
+  </nav>
+
+  <main>
+    <!-- SINAV -->
+    <article class="sayfa-ic sf" id="s-sinav" style="--r:var(--sinav)">
+      <div class="iz"><i></i>Sınav / Bugün</div>
+      <h1>Perşembe, 24 Eylül</h1>
+      <div class="ozellik"><span>Sınava <b>268 gün</b><i class="pm t" title="tahmin"></i></span><span>Hafta <b>2/40</b></span><span>Seri <b>11</b></span><span>Tekrar <b>432</b></span></div>
+
+      <h2>Bloklar</h2>
+      <div class="gorev tamam"><span class="kutu tam" role="checkbox" aria-checked="true" tabindex="0"><svg width="11" height="11" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><div class="b">Sabah · TYT Matematik</div><div class="alt"><label class="cip">dk <input id="s1-dk" value="70"></label><label class="cip">soru <input id="s1-soru" value="24"></label><label class="cip">doğru <input id="s1-dogru" value="18"></label></div></div><span class="zaman">09:30</span></div>
+      <div class="gorev"><span class="kutu" role="checkbox" aria-checked="false" tabindex="0"></span>
+        <div><div class="b">Akşam · Paragraf</div><div class="alt"><span class="cip">70 dk</span><span class="cip">30 soru</span></div></div><button class="dugme">Başla</button></div>
+
+      <h2>Günlük sayaç</h2>
+      <div class="sayac"><span>Paragraf</span><span class="d"><button aria-label="Azalt">−</button><output id="c1">15<small>/18</small></output><button aria-label="Artır">+</button></span></div>
+      <div class="sayac"><span>Problem</span><span class="d"><button aria-label="Azalt">−</button><output id="c2">16<small>/18</small></output><button aria-label="Artır">+</button></span></div>
+
+      <h2>Enerji</h2>
+      <div class="olcek" role="group" aria-label="Enerji"><button aria-pressed="false">1</button><button aria-pressed="false">2</button><button aria-pressed="true">3</button><button aria-pressed="false">4</button><button aria-pressed="false">5</button></div>
+
+      <h2>Bekleyenler</h2>
+      <div class="bag"><span><b>432</b> tekrar kartı</span><a href="#">Tekrara başla →</a></div>
+      <div class="bag"><span><b>11</b> deneme analizsiz</span><a href="#">Analiz et →</a></div>
+      <div class="bag"><span><b>6</b> konu tamir kuyruğunda</span><a href="#">Yanlış defteri →</a></div>
+      <div class="oneri"><i></i><div><b>Akşam bloğu tekrara ayrılsın</b><p>Merkez · tekrar borcu %34 · eşik %10</p></div><button>Uygula</button></div>
+
+      <div class="diger"><span>Ayrıca:</span><a href="#">Mola</a><a href="#">Bölünme</a><a href="#">Uyku</a><a href="#">Davranış serisi</a><a href="#">Haftalık öz-eleştiri</a><a href="#">Bugünün ödülü</a></div>
+    </article>
+
+    <!-- SAGLIK -->
+    <article class="sayfa-ic sf" id="s-saglik" style="--r:var(--saglik)" hidden>
+      <div class="iz"><i></i>Sağlık / Bugün</div>
+      <h1>Perşembe, 24 Eylül</h1>
+      <div class="ozellik"><span>Toparlanma <b>72</b><i class="pm h" title="hesaplandı"></i></span><span>Asgari <b>2/4</b></span><span>Seri <b>4</b></span></div>
+
+      <h2>Asgari gün</h2>
+      <div class="gorev tamam"><span class="kutu tam"><svg width="11" height="11" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div class="b">Uyku</div><div class="alt"><span class="cip">7,0 sa <i class="pm o" title="ölçüldü"></i></span></div></div><span class="zaman">08:40</span></div>
+      <div class="gorev tamam"><span class="kutu tam"><svg width="11" height="11" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div class="b">Hareket</div><div class="alt"><span class="cip">8.400 adım</span></div></div><span class="zaman">13:00</span></div>
+      <div class="gorev"><span class="kutu"></span><div><div class="b">Protein</div><div class="alt"><span class="cip">kalan 38 g</span><span class="cip">hedef 1,2 g/kg</span></div></div><span class="zaman">gün içinde</span></div>
+      <div class="gorev"><span class="kutu"></span><div><div class="b">Su</div><div class="alt"><span class="cip">0,8 / 2 L</span></div></div><button class="dugme">+ 0,25 L</button></div>
+
+      <h2>Öğünler</h2>
+      <div class="bag"><span>Kahvaltı</span><b>540 kcal</b></div>
+      <div class="bag"><span>Öğle</span><span style="color:var(--ink3)">— veri yok</span></div>
+      <div class="bag"><span>Akşam</span><span style="color:var(--ink3)">— veri yok</span></div>
+
+      <h2>Sırada</h2>
+      <div class="bag"><span><b>17:30</b> Antrenman · üst gövde · 45 dk</span><a href="#">Aç →</a></div>
+      <div class="bag"><span><b>Ferritin 26</b> ng/mL · referans altı</span><a href="#">Tahliller →</a></div>
+      <div class="diger"><span>Ayrıca:</span><a href="#">Mutfak</a><a href="#">Sepet</a><a href="#">Aile</a><a href="#">Sağlık ekonomisi</a></div>
+    </article>
+
+    <!-- GELISIM -->
+    <article class="sayfa-ic sf" id="s-gelisim" style="--r:var(--gelisim)" hidden>
+      <div class="iz"><i></i>Gelişim / Reçete</div>
+      <h1>Perşembe, 24 Eylül</h1>
+      <div class="ozellik"><span><b>20/50</b> dk</span><span>Retansiyon <b>%50</b><i class="pm h" title="hesaplandı"></i></span><span>Vadeli <b>797</b></span><span>Seri <b>23</b></span></div>
+
+      <h2>Reçete</h2>
+      <div class="gorev tamam"><span class="kutu tam"><svg width="11" height="11" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div class="b">Tarih · yüzyıl eşlemesi</div><div class="alt"><span class="cip">20 dk</span></div></div><span class="zaman">08:00</span></div>
+      <div class="gorev"><span class="kutu"></span><div><div class="b">Yabancı Dil · kelime tekrarı</div><div class="alt"><span class="cip">ısınma 5</span><span class="cip">tekrar 15</span><span class="cip">yeni kart 10</span></div></div><button class="dugme">Başla</button></div>
+
+      <h2>Hızlı kayıt</h2>
+      <div class="konus"><input id="konus" aria-label="Konuşarak gir" placeholder="45 dk gitar, 20 dakika kelime"><button class="dugme" style="height:38px">Çöz</button></div>
+
+      <h2>Merdiven</h2>
+      <div class="merdiven" id="merdiven"></div>
+      <div class="diger"><span>Ayrıca:</span><a href="#">Kütüphane</a><a href="#">Yazı</a><a href="#">Sempozyum</a><a href="#">Stüdyo</a><a href="#">Geçmiş</a></div>
+    </article>
+  </main>
+</div>
+<script>
+(function(){
+  document.querySelectorAll('.sayfa[data-s]').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.sf').forEach(function(s){ s.hidden = s.id !== 's-' + b.dataset.s; });
+      document.querySelectorAll('.sayfa').forEach(function(o){ o.removeAttribute('aria-current'); });
+      b.setAttribute('aria-current', 'page');
+    });
+  });
+  document.querySelectorAll('.sayac').forEach(function(s){
+    var o = s.querySelector('output'), bt = s.querySelectorAll('button');
+    function set(d){ var v = Math.max(0, parseInt(o.textContent, 10) + d); o.innerHTML = v + '<small>/18</small>'; }
+    bt[0].onclick = function(){ set(-1); }; bt[1].onclick = function(){ set(1); };
+  });
+  document.querySelectorAll('.olcek button').forEach(function(b, i, all){
+    b.onclick = function(){ all.forEach(function(x){ x.setAttribute('aria-pressed', x === b); }); };
+  });
+  document.querySelectorAll('.kutu').forEach(function(k){
+    k.addEventListener('click', function(){
+      var g = k.closest('.gorev'), on = !k.classList.contains('tam');
+      k.classList.toggle('tam', on); g.classList.toggle('tamam', on);
+      k.innerHTML = on ? '<svg width="11" height="11" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '';
+    });
+  });
+  var K = ['Temas','Acemi','Çırak','Kalfa','Usta','Üstat'];
+  var D = [['Dil',2],['Okuma',2],['Felsefe',1],['Müzik',1],['Yazı',1],['Tarih',1],['Diksiyon',0]];
+  document.getElementById('merdiven').innerHTML = D.map(function(d){
+    var c = ''; for(var i = 1; i <= 5; i++) c += '<i class="' + (i <= d[1] ? 'on' : '') + '"></i>';
+    return '<div><span class="c">' + c + '</span>' + d[0] + '<small>' + K[d[1]] + '</small></div>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

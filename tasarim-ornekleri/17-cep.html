@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>17 · Cep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sahne:#E6E9EE; --govde:#101216; --ekran:#F2F3F6; --kart:#FFFFFF; --ink:#0F1115; --ink2:#50566A; --ink3:#8E94A3; --cizgi:#E9EBEF;
+  --sinav:#2F6FEB; --saglik:#0E9888; --gelisim:#D98309; --merkez:#7A5CF0; --kotu:#D23F3F; --uyari:#A36200; --iyi:#1F8A5B;
+  --sans:"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ --sahne:#0B0C0F; --govde:#24262C; --ekran:#000000; --kart:#1A1C21; --ink:#F2F3F6; --ink2:#AAB0BC; --ink3:#6F7584; --cizgi:#272A31;
+    --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; --kotu:#F07A7A; --uyari:#E2A34A; --iyi:#4CC38A; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --sahne:#0B0C0F; --govde:#24262C; --ekran:#000000; --kart:#1A1C21; --ink:#F2F3F6; --ink2:#AAB0BC; --ink3:#6F7584; --cizgi:#272A31;
+  --sinav:#4F86F2; --saglik:#1A9E8B; --gelisim:#C0832A; --merkez:#8A72EE; --kotu:#F07A7A; --uyari:#E2A34A; --iyi:#4CC38A; color-scheme:dark; }
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--sahne);color:var(--ink);font:14px/1.4 var(--sans);-webkit-font-smoothing:antialiased;padding-inline:24px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:left}
+.kap{max-width:1240px;margin:0 auto;padding-block:40px 56px}
+.bas{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:32px}
+.bas h1{margin:0;font-size:30px;font-weight:800;letter-spacing:-.03em}
+.bas span{color:var(--ink3)}
+.telefonlar{display:flex;gap:40px;justify-content:center;overflow-x:auto;scroll-snap-type:x mandatory;padding:8px 4px 20px;scrollbar-width:none}
+.telefonlar::-webkit-scrollbar{display:none}
+figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:16px;scroll-snap-align:center;flex:none}
+figcaption{font-size:14px;font-weight:600;color:var(--ink2)}
+figcaption small{display:block;text-align:center;font-weight:400;color:var(--ink3);font-size:12px}
+.tel{width:340px;height:720px;border-radius:54px;background:var(--govde);padding:11px;box-shadow:0 40px 80px -40px rgba(0,0,0,.45),inset 0 0 0 1.5px rgba(255,255,255,.08)}
+.ek{position:relative;width:100%;height:100%;border-radius:44px;background:var(--ekran);overflow:hidden;display:flex;flex-direction:column}
+.durum{height:48px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 34px;font-size:14px;font-weight:700}
+.ada{position:absolute;left:50%;top:11px;transform:translateX(-50%);width:104px;height:30px;border-radius:20px;background:#000}
+.simgeler{display:flex;gap:5px;align-items:center}
+.icerik{flex:1;overflow:hidden;padding:4px 18px 0;display:flex;flex-direction:column;gap:14px}
+.buyuk{font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin:6px 2px 0}
+.buyuk small{display:block;font-size:13px;font-weight:600;color:var(--ink3);letter-spacing:0;margin-bottom:2px}
+.kart{background:var(--kart);border-radius:20px;padding:14px 16px}
+.sira{background:linear-gradient(145deg,#EFA120,#D26A06);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sira small{display:block;font-size:12px;font-weight:600;opacity:.85}
+.sira b{font-size:19px;font-weight:800;letter-spacing:-.02em}
+.oynat{width:42px;height:42px;border-radius:50%;background:#fff;color:#C86406;display:grid;place-items:center;flex:none}
+.mod{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--cizgi)}
+.mod:last-child{border:0}
+.mod>i{width:34px;height:34px;border-radius:10px;background:color-mix(in oklab,var(--r) 14%,transparent);display:grid;place-items:center}
+.mod>i::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--r)}
+.mod b{font-weight:700;display:block}
+.mod span{font-size:12px;color:var(--ink3)}
+.mod em{font-style:normal;font-weight:800;font-size:17px}
+.mod em small{font-size:12px;color:var(--ink3);font-weight:600}
+.akis{display:flex;flex-direction:column;gap:2px}
+.akis div{display:grid;grid-template-columns:42px 3px 1fr auto;gap:10px;align-items:center;font-size:13px;padding:6px 0}
+.akis time{color:var(--ink3);font-weight:600;font-variant-numeric:tabular-nums}
+.akis i{height:18px;border-radius:2px;background:var(--r)}
+.akis .b{color:var(--ink3);text-decoration:line-through}
+.akis span:last-child{color:var(--ink3)}
+.bolum-b{font-size:13px;font-weight:700;color:var(--ink3);margin:0 4px -6px}
+.sekme{flex:none;height:84px;background:color-mix(in oklab,var(--kart) 88%,transparent);backdrop-filter:blur(20px);border-top:1px solid var(--cizgi);display:grid;grid-template-columns:repeat(5,1fr);padding:8px 6px 0}
+.sekme button{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--ink3);text-align:center}
+.sekme button[aria-current="page"]{color:var(--ink)}
+.sekme svg{width:24px;height:24px}
+.cipler{display:flex;gap:6px;flex-wrap:wrap}
+.cip{height:28px;padding:0 10px;border-radius:999px;background:var(--kart);font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px;color:var(--ink2)}
+.cip b{color:var(--ink)}
+.blok{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.blok b{display:block;font-weight:700}
+.blok span{font-size:12px;color:var(--ink3)}
+.tamam{font-size:12px;font-weight:700;color:var(--iyi)}
+.kucuk-btn{height:32px;padding:0 14px;border-radius:999px;background:var(--ink);color:var(--kart);font-size:12px;font-weight:700}
+.karart{position:absolute;inset:0;background:rgba(0,0,0,.28)}
+.sayfa{position:absolute;left:0;right:0;bottom:0;background:var(--kart);border-radius:28px 28px 44px 44px;padding:10px 20px 24px;box-shadow:0 -10px 40px -10px rgba(0,0,0,.3)}
+.tutamak{width:40px;height:5px;border-radius:3px;background:var(--cizgi);margin:0 auto 14px}
+.sayfa h3{margin:0;font-size:19px;font-weight:800;letter-spacing:-.02em}
+.sayfa p{margin:2px 0 14px;font-size:12px;color:var(--ink3)}
+.adimci{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--cizgi)}
+.adimci:last-of-type{border:0}
+.adimci span{font-weight:600}
+.adimci .k{display:flex;align-items:center;gap:6px}
+.adimci .k button{width:36px;height:36px;border-radius:12px;background:var(--ekran);font-size:18px;display:grid;place-items:center;font-weight:600}
+.adimci .k output{min-width:46px;text-align:center;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+.kaydet{margin-top:14px;width:100%;height:52px;border-radius:16px;background:var(--sinav);color:#fff;font-weight:800;font-size:16px;text-align:center}
+.hero{display:flex;align-items:center;gap:16px}
+.hero svg{width:92px;height:92px;transform:rotate(-90deg);flex:none}
+.hero b{font-size:44px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.hero span{font-size:12px;color:var(--ink3);display:block}
+.tah{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--cizgi);font-size:13px}
+.tah:last-child{border:0}
+.tah b{font-weight:700;font-variant-numeric:tabular-nums}
+.tah em{font-style:normal;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px}
+.tah em.kotu{color:var(--kotu);background:color-mix(in oklab,var(--kotu) 12%,transparent)}
+.tah em.uyari{color:var(--uyari);background:color-mix(in oklab,var(--uyari) 12%,transparent)}
+.tah em.iyi{color:var(--iyi);background:color-mix(in oklab,var(--iyi) 12%,transparent)}
+.fab{position:absolute;right:18px;bottom:100px;height:48px;padding:0 18px;border-radius:999px;background:var(--saglik);color:#fff;font-weight:800;display:flex;align-items:center;gap:8px;box-shadow:0 12px 24px -10px color-mix(in oklab,var(--saglik) 80%,transparent)}
+.pm{display:inline-block;width:6px;height:6px;border-radius:50%;margin-left:3px;vertical-align:middle;color:var(--ink3)}
+.pm.o{background:currentColor}.pm.h{background:linear-gradient(90deg,currentColor 50%,transparent 50%);box-shadow:inset 0 0 0 1px currentColor}.pm.t{box-shadow:inset 0 0 0 1.2px currentColor}
+@media (max-width:1180px){ .telefonlar{justify-content:flex-start} }
+@media (max-width:560px){ body{padding-inline:16px} .telefonlar{gap:20px;margin-inline:-16px;padding-inline:16px} }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="t-bugun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="t-sinav" viewBox="0 0 24 24"><path d="M4 6.5C6.5 5 9.5 5 12 6.5c2.5-1.5 5.5-1.5 8 0V18c-2.5-1.5-5.5-1.5-8 0-2.5-1.5-5.5-1.5-8 0z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 6.5V18" stroke="currentColor" stroke-width="1.8"/></symbol>
+  <symbol id="t-saglik" viewBox="0 0 24 24"><path d="M12 19s-7-4.4-7-9.5A3.9 3.9 0 0 1 12 7a3.9 3.9 0 0 1 7 2.5C19 14.6 12 19 12 19z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+  <symbol id="t-gelisim" viewBox="0 0 24 24"><path d="M4 18h4v-4h4v-4h4V6h4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="t-merkez" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-dasharray="3 3"/></symbol>
+  <symbol id="t-oynat" viewBox="0 0 16 16"><path d="M5 3v10l8-5z" fill="currentColor"/></symbol>
+  <symbol id="t-sinyal" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="currentColor"/><rect x="5" y="5" width="3" height="7" rx="1" fill="currentColor"/><rect x="10" y="2.5" width="3" height="9.5" rx="1" fill="currentColor"/><rect x="15" y="0" width="3" height="12" rx="1" fill="currentColor"/></symbol>
+  <symbol id="t-pil" viewBox="0 0 27 12"><rect x=".5" y=".5" width="23" height="11" rx="3.5" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor"/><rect x="24.5" y="4" width="2" height="4" rx="1" fill="currentColor" opacity=".4"/></symbol>
+</svg>
+
+<div class="kap">
+  <header class="bas"><h1>Cepte</h1><span>Üç ekran · alt sekme · her ekranda tek birincil eylem</span></header>
+  <div class="telefonlar">
+
+    <!-- 1 BUGUN -->
+    <figure>
+      <div class="tel"><div class="ek">
+        <div class="ada"></div>
+        <div class="durum"><span>14:10</span><span class="simgeler"><svg width="18" height="12"><use href="#t-sinyal"/></svg><svg width="27" height="12"><use href="#t-pil"/></svg></span></div>
+        <div class="icerik">
+          <div class="buyuk"><small>PERŞEMBE 24 EYLÜL</small>Bugün</div>
+          <div class="kart sira"><div><small>Sıradaki · 14:30 · 30 dk</small><b>Yabancı Dil</b></div><button class="oynat" aria-label="Başla"><svg width="16" height="16"><use href="#t-oynat"/></svg></button></div>
+          <div class="kart" style="padding-block:4px">
+            <div class="mod" style="--r:var(--sinav)"><i></i><div><b>Sınav</b><span>268 gün<i class="pm t"></i> · seri 11</span></div><em>1<small>/2</small></em></div>
+            <div class="mod" style="--r:var(--saglik)"><i></i><div><b>Sağlık</b><span>toparlanma 72<i class="pm h"></i></span></div><em>2<small>/4</small></em></div>
+            <div class="mod" style="--r:var(--gelisim)"><i></i><div><b>Gelişim</b><span>retansiyon %50<i class="pm h"></i></span></div><em>20<small>/50</small></em></div>
+          </div>
+          <div class="bolum-b">Akış</div>
+          <div class="kart akis">
+            <div style="--r:var(--sinav)"><time>09:30</time><i></i><span class="b">TYT Matematik</span><span>24 soru</span></div>
+            <div style="--r:var(--gelisim)"><time>14:30</time><i></i><span>Yabancı Dil</span><span>30 dk</span></div>
+            <div style="--r:var(--saglik)"><time>17:30</time><i></i><span>Antrenman</span><span>45 dk</span></div>
+            <div style="--r:var(--sinav)"><time>20:30</time><i></i><span>Paragraf</span><span>30 soru</span></div>
+          </div>
+        </div>
+        <nav class="sekme" aria-label="Sekmeler">
+          <button aria-current="page"><svg><use href="#t-bugun"/></svg>Bugün</button>
+          <button><svg><use href="#t-sinav"/></svg>Sınav</button>
+          <button><svg><use href="#t-saglik"/></svg>Sağlık</button>
+          <button><svg><use href="#t-gelisim"/></svg>Gelişim</button>
+          <button><svg><use href="#t-merkez"/></svg>Merkez</button>
+        </nav>
+      </div></div>
+      <figcaption>Bugün<small>tek bakışta gün</small></figcaption>
+    </figure>
+
+    <!-- 2 SINAV + ALT SAYFA -->
+    <figure>
+      <div class="tel"><div class="ek">
+        <div class="ada"></div>
+        <div class="durum"><span>21:42</span><span class="simgeler"><svg width="18" height="12"><use href="#t-sinyal"/></svg><svg width="27" height="12"><use href="#t-pil"/></svg></span></div>
+        <div class="icerik">
+          <div class="buyuk"><small>TYT · HAFTA 2/40</small>Sınav</div>
+          <div class="cipler"><span class="cip">Sınava <b>268 gün</b></span><span class="cip">Tekrar <b>432</b></span><span class="cip">Seri <b>11</b></span></div>
+          <div class="kart blok"><div><b>Sabah · Matematik</b><span>24 soru · 18 doğru</span></div><span class="tamam">Bitti</span></div>
+          <div class="kart blok"><div><b>Akşam · Paragraf</b><span>70 dk · 30 soru</span></div><button class="kucuk-btn">Kaydet</button></div>
+        </div>
+        <nav class="sekme" aria-label="Sekmeler">
+          <button><svg><use href="#t-bugun"/></svg>Bugün</button>
+          <button aria-current="page"><svg><use href="#t-sinav"/></svg>Sınav</button>
+          <button><svg><use href="#t-saglik"/></svg>Sağlık</button>
+          <button><svg><use href="#t-gelisim"/></svg>Gelişim</button>
+          <button><svg><use href="#t-merkez"/></svg>Merkez</button>
+        </nav>
+        <div class="karart"></div>
+        <div class="sayfa" role="dialog" aria-label="Blok kaydı">
+          <div class="tutamak"></div>
+          <h3>Akşam · Paragraf</h3>
+          <p>Yalnız üç sayı. Ders ve konu bloktan gelir.</p>
+          <div class="adimci"><span>Soru</span><span class="k"><button>−</button><output>30</output><button>+</button></span></div>
+          <div class="adimci"><span>Doğru</span><span class="k"><button>−</button><output>25</output><button>+</button></span></div>
+          <div class="adimci"><span>Süre</span><span class="k"><button>−</button><output>70</output><button>+</button></span></div>
+          <button class="kaydet">Kaydet</button>
+        </div>
+      </div></div>
+      <figcaption>Kayıt<small>form yalnız gerektiğinde, alttan</small></figcaption>
+    </figure>
+
+    <!-- 3 SAGLIK -->
+    <figure>
+      <div class="tel"><div class="ek">
+        <div class="ada"></div>
+        <div class="durum"><span>14:10</span><span class="simgeler"><svg width="18" height="12"><use href="#t-sinyal"/></svg><svg width="27" height="12"><use href="#t-pil"/></svg></span></div>
+        <div class="icerik">
+          <div class="buyuk"><small>TOPARLANMA</small>Sağlık</div>
+          <div class="kart hero">
+            <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="40" fill="none" stroke="var(--saglik)" stroke-opacity=".16" stroke-width="12"/><circle cx="50" cy="50" r="40" fill="none" stroke="var(--saglik)" stroke-width="12" stroke-linecap="round" stroke-dasharray="251.3" stroke-dashoffset="70.4"/></svg>
+            <div><b>72</b><span>plan uygun · hesaplandı</span><span style="margin-top:6px;white-space:nowrap">asgari <b style="font-size:13px;color:var(--ink)">2/4</b> · uyku <b style="font-size:13px;color:var(--ink)">7,0</b></span></div>
+          </div>
+          <div class="bolum-b">Tahliller · 12 Eylül</div>
+          <div class="kart" style="padding-block:4px">
+            <div class="tah"><span>Ferritin</span><b>26</b><em class="kotu">ref. altı</em></div>
+            <div class="tah"><span>B12</span><b>288</b><em class="uyari">hedef altı</em></div>
+            <div class="tah"><span>LDL</span><b>128</b><em class="uyari">hedef üstü</em></div>
+            <div class="tah"><span>TSH</span><b>2,6</b><em class="iyi">hedefte</em></div>
+          </div>
+        </div>
+        <button class="fab">+ 0,25 L su</button>
+        <nav class="sekme" aria-label="Sekmeler">
+          <button><svg><use href="#t-bugun"/></svg>Bugün</button>
+          <button><svg><use href="#t-sinav"/></svg>Sınav</button>
+          <button aria-current="page"><svg><use href="#t-saglik"/></svg>Sağlık</button>
+          <button><svg><use href="#t-gelisim"/></svg>Gelişim</button>
+          <button><svg><use href="#t-merkez"/></svg>Merkez</button>
+        </nav>
+      </div></div>
+      <figcaption>Sağlık<small>durum, sayı, tek hızlı eylem</small></figcaption>
+    </figure>
+  </div>
+</div>
+</body>
+</html>
