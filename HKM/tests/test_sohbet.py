@@ -156,7 +156,7 @@ def run():
         ok(len(kis) < len(tam) * 0.7, (len(kis), len(tam)))
         ks = kis.splitlines()
         eq(len(ks), len(set(ks)))                               # tekrar yok
-        for parca in ("%21 yukarıda", "%19 yukarıda", "44 gündür", "EŞLEŞMEDİR"):
+        for parca in ("%21 yukarıda", "%19 yukarıda", "45 gündür", "EŞLEŞMEDİR"):
             eq(kis.count(parca), 1 if parca != "EŞLEŞMEDİR" else kis.count(parca), parca)
             ok(parca in kis, parca)                             # olcum kaybolmaz
         # Tam baglam (buyuk model) degismedi.
