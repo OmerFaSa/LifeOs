@@ -161,10 +161,12 @@ R.Screens.office = (function(){
      bir zeminin üstünde durur, Patron'un masası dipte karşıdadır, uzmanlar
      iki sıra hâlinde önünde oturur. Kamera döndürülebilir.
 
-     Bu CSS odası kütüphanesizdir ve HER ZAMAN çalışır. Canlı sahne
-     (WebGL, js/core/ofis3b.js — AGENTS.md §1.3'ün tek istisnası) varsa onun
-     yerine gelir; hafif görünüm seçilirse, WebGL yoksa ya da tek dosya
-     yanında ofis3d/ klasörü olmadan açılırsa oda yine budur.
+     Bu CSS odası kütüphanesizdir ve HER ZAMAN çalışır. Canlı WebGL sahnesi
+     (Three.js, `ofis3d/`) AGENTS.md §1.3'teki istisnayla AYS'ye eklenmiş,
+     2026-09-28'de aynı kararla kalıcı olarak kaldırılmıştı; `js/core/ofis3b.js`
+     köprüsü geriye dönük uyumluluk için kaldı ve sahne dosyaları yokken
+     zaten bu odaya dönüyordu — davranış değişmedi, yalnız artık HER ZAMAN
+     bu yoldan geçiliyor.
 
      Erişilebilirlik: her masa hâlâ bir <button>'dur, klavyeyle gezilir ve
      ad etiketleri kameraya karşı DÖNDÜRÜLÜR (ters dönüşüm), böylece oda

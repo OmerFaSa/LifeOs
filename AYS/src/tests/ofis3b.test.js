@@ -1,9 +1,10 @@
-/* 3B ofis (js/core/ofis3b.js + ofis3d/sahne.js). Kanitladigi sozler:
+/* 3B ofis koprusu (js/core/ofis3b.js). ofis3d/ (Three.js + sahne.js) 2026-09-28'de
+   depodan kalici olarak kaldirildi (AGENTS.md §1.3 istisnasi geri alindi);
+   bu dosya yalniz koprunun kendi mantigini — hic dosya olmadan da — sinar:
    istege baglidir (hafif gorunum, WebGL yok, dosya yok -> CSS odasi);
    otomasyonda kendiliginden acilmaz; olay kuyrugu tekrar etmez, tasmaz,
    kendine teslim etmez; gercek olay (oneri) uzmani Patron'a yurutur;
-   sahne yoksa toplanti beklemeden acilir; sahne gercekten yuklenir,
-   gorev kabul eder ve mesgulken ikinciyi reddeder. */
+   sahne yoksa toplanti beklemeden acilir. */
 
 (function(){
   const { describe, it, expect, resetState } = R.Test;
@@ -216,38 +217,6 @@
         yuva.remove();
         d.api = eski.api; d.kok = eski.kok; d.toplantidaydi = eski.t;
         if(sahteKoydum) delete window.RotaOfis3B;       // sonraki test gerçeğini yüklesin
-      }
-    });
-  });
-
-  describe('3B ofis — gerçek sahne', () => {
-    it('yüklenir, AYS adlarıyla kurulur, görevi kabul eder, meşgulken reddeder', async () => {
-      sifirla();
-      Z()._kok('../ofis3d/');
-      await Z().yukle();
-      expect(typeof window.RotaOfis3B.kur).toBe('function');
-      const kok = document.createElement('div');
-      kok.innerHTML = '<div class="office-view" style="width:320px;height:200px"></div>'
-        + '<p data-status></p><button data-meeting></button><button data-night></button>'
-        + '<button data-view="angle"></button><button data-view="top"></button><button data-boss></button>'
-        + '<button data-area="archive"></button><button data-area="phone"></button><button data-area="meeting"></button>'
-        + '<button data-motion></button><input type="checkbox" data-call><input type="checkbox" data-walls>'
-        + '<input type="checkbox" data-auto><input type="checkbox" data-follow>'
-        + '<select data-actor><option value="0">a</option></select><select data-job><option value="deliver">d</option></select>'
-        + '<select data-recipient><option value="1">b</option></select><select data-speed><option value="1">1</option></select>'
-        + '<button data-run></button><button data-designer></button><button data-demo></button>';
-      document.body.appendChild(kok);
-      try{
-        const api = window.RotaOfis3B.kur(kok, { adlar:['Tuna', 'Yaman', 'Rana', 'Deniz', 'Patron', 'Kerem'] });
-        expect(api.ok).toBe(true);
-        expect(api.gorev('deliver', 0, 4)).toBe(true);
-        expect(api.mesgul()).toBe(true);
-        expect(api.gorev('break', 1, 0)).toBe(false);
-        expect(api.durum().gorev.temsili).toBe(false);
-        expect(api.gorev('deliver', 2, 2)).toBe(false);
-        expect(api.toplanti(true)).toBe(false);          // görev sürerken toplantı yok
-      }finally{
-        kok.remove();                                    // döngü kendiliğinden durur
       }
     });
   });

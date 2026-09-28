@@ -67,9 +67,9 @@ konuşamadığı bir boşluğu buldu (tarayıcının CORS ön-isteği).
 - **Tasarım dili.** Aynı jetonlar, aynı kart/düğme/tablo dili, aynı altı palet
   ve iki tema.
 - **Bağımlılıksızlık.** Ne çerçeve, ne derleyici, ne paket. Tarayıcıda düz
-  JavaScript. Test betikleri için yalnızca Playwright. Tek istisna AYS'nin
-  isteğe bağlı canlı 3B ofisidir (Three.js, depoda sabit sürüm, yalnız
-  açılınca yüklenir; bkz. `AGENTS.md` §1.3).
+  JavaScript. Test betikleri için yalnızca Playwright. İstisna yok — AYS ve
+  SPİ'nin canlı 3B ofisi (Three.js) için 2026-09-26/27'de tanımlanan istisna
+  2026-09-28'de geri alındı (bkz. `AGENTS.md` §1.3).
 - **Seviye sistemi.** Altı kademe (Bronz → Kutsal), her kademede üç basamak.
   Ortak olan TANIMDIR — ad, renk, eşik: "Altın" üçünde de aynı şeydir. Her
   sistemin **kendi seviyesi** vardır ve kendi işleriyle dolar: ESP'de pratik

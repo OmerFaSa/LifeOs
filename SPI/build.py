@@ -352,21 +352,12 @@ def build(minify: bool = False, denetle: bool = False):
 
     out_path = DIST / "spi.html"
     if denetle:
-        for name in ("sahne.js", "three-0.160.1.min.js", "LICENSE-THREE.txt"):
-            target = DIST / "ofis3d" / name
-            if not target.exists() or target.read_bytes() != (SRC / "ofis3d" / name).read_bytes():
-                print(f"KIRMIZI  ofis3d/{name} kaynakla ayni degil")
-                return 1
         return denetle_dist(out_path, output)
     DIST.mkdir(exist_ok=True)
     out_path.write_text(output, encoding="utf-8")
     copy_brand_assets()
     copy_level_assets()
     copy_service_worker()
-    # Optional scene stays outside spi.html and is loaded only on request.
-    (DIST / "ofis3d").mkdir(exist_ok=True)
-    for name in ("sahne.js", "three-0.160.1.min.js", "LICENSE-THREE.txt"):
-        shutil.copy2(SRC / "ofis3d" / name, DIST / "ofis3d" / name)
 
     size_kb = len(output.encode("utf-8")) / 1024
     mode = "minify" if minify else "okunabilir"
