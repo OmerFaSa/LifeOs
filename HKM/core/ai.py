@@ -257,6 +257,11 @@ def _cagir(provider, anahtar, model, sistem, mesajlar, timeout=ZAMAN_ASIMI, ayar
                 y.get("stop_reason") in KESILDI, {"usd": None, "cached": okunan, "reasoning": 0})
 
     if provider == "google":
+        # Ayarlara gorunen ad yazilabiliyor («Gemini 2.5 Flash»); Google kimlik
+        # bekler («gemini-2.5-flash»). Bosluklu ad adrese girince istek kurulamaz.
+        model = "-".join(str(model).strip().lower().split())
+        if model.startswith("models/"):
+            model = model[len("models/"):]
         url = "%s/%s:generateContent" % (tanim["base"], model)
         icerik = [{"role": ("user" if m["role"] == "user" else "model"),
                    "parts": _google_parcalar(m)} for m in mesajlar]
