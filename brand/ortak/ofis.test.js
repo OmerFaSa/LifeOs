@@ -87,6 +87,38 @@
   /* Patronlar arası kanal: HKM /api/kanal/<modül>. Bellekte durur, bugüne
      ait değilse kullanılmaz; HKM kapalıyken kanal yoktur ve hiçbir şey
      fırlatmaz (AGENTS.md §1.4). */
+  describe('Ofis — selam ve sayı havuzu', () => {
+    it('kısa selam tanınır; uzun ya da veri soran mesaj selam değildir', () => {
+      expect(O().selamMi('merhaba')).toBe(true);
+      expect(O().selamMi('Nasılsın?')).toBe(true);
+      expect(O().selamMi('bugün kaç kartım var')).toBe(false);
+      expect(O().selamMi('merhaba ' + 'a'.repeat(80))).toBe(false);
+      expect(O().selamMi('')).toBe(false);
+    });
+
+    it('selamda istem brifing taşımaz, rapor okuma der; model adı yazılır', () => {
+      const s = O().istem({ modul:'esp', ajan:UZMAN, kimlik:'Sen Tuna.', selam:true,
+        model:'gemma3:4b', brifing:'{"cards":{"total":0}}' });
+      expect(s.indexOf('BRİFİNG') < 0).toBe(true);
+      expect(s).toContain('Rapor okuma');
+      expect(s).toContain('gemma3:4b');
+    });
+
+    it('istemi geri yazan cevap yankı sayılır; düz cümle sayılmaz', () => {
+      expect(O().yankiMi('BRİFİNG: {"agent":"polyglot"}')).toBe(true);
+      expect(O().yankiMi('Sonuç {"cards":{"total":0}}')).toBe(true);
+      expect(O().yankiMi('Selam, ben Polyglot. Bugün ne konuşalım?')).toBe(false);
+    });
+
+    it('sayı havuzu yapı sayılarını (kutu sırası, pencere) almaz', () => {
+      const h = O().sayiHavuzu({ cards:{ total:0 }, practice:{ minutes:37, windowDays:14 },
+        boxes:[{ box:5, label:'Sağlam', count:0 }] });
+      expect(h.indexOf(37) >= 0).toBe(true);
+      expect(h.indexOf(14) < 0).toBe(true);
+      expect(h.indexOf(5) < 0).toBe(true);
+    });
+  });
+
   describe('Ofis — patronlar arası kanal', () => {
     const BUGUN = '2026-09-23';
     const CEVAP = { ok:true, date:BUGUN, modul:'ays',

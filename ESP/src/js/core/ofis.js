@@ -67,7 +67,46 @@ LIFEOS.Ofis = (function(){
       + '«hatırla: …» diye kendisi yazar.',
     'Kararı kullanıcı verir. Gerekçeyi ve seçeneği açık söylersin; baskı kurmazsın, suçlamazsın, '
       + 'kötü haberi iyi haberin arkasına saklamazsın.',
+    'Kendi adınla ve rolünle konuşursun; kendini «yapay zekâ», «dil modeli» ya da «asistan» diye '
+      + 'tanıtmaz, duygun olup olmadığını tartışmazsın. Kullanıcıya «sen» diye hitap edersin; '
+      + '«Kullanıcı» demezsin.',
   ];
+
+  /* SELAMLASMA — kisa sosyal mesaj. Selama RAPOR GONDERILMEZ: brifing
+     modelin onundeyse model onu okur («merhaba» → «aktif kelime sayin 0»).
+     AYS'nin CHAT_KINDS.selam kalibiyla ayni; yalniz kisa mesajda gecerli. */
+  const SELAM_RE = /^\s*(selam|merhaba|meraba|mrb|slm|sa[,.! ]|sa$|aleyküm|günaydın|iyi akşamlar|iyi geceler|iyi günler|naber|ne haber|nasılsın|nasilsin|napıyorsun|hey|hi[,.! ]|hello|kanka|hocam|müsait misin|orada mısın|teşekkür|sağol|sağ ol|tşk|tsk|eyvallah|görüşürüz|hoşça kal|hoşçakal|tamam|peki|süper|harika|kimsin|sen kimsin|ne iş yaparsın)/i;
+  function selamMi(text){
+    const q = String(text || '').trim().toLocaleLowerCase('tr');
+    return !!q && q.length <= 64 && SELAM_RE.test(q);
+  }
+
+  /* SAYI HAVUZU — ajanin yazabilecegi sayilar brifingin DEGERLERIDIR.
+     Anahtar adlari ve YAPI sayilari (kutu sirasi, pencere uzunlugu, surum)
+     olcum degildir: gemma3:4b «box:5»i «5 kart», «windowDays:14»u
+     «shadowing suresi 14 gun» diye okudu ve metin icinde arama bunu
+     yakalamadi. Yapi anahtarinin altindaki sayi havuza girmez. */
+  /* YANKI — kucuk model istemi geri kusabilir: brifing JSON'unu ya da
+     bolum basligini («BRİFİNG:», «KURALLAR») oldugu gibi yazar. Bu bir
+     cevap degildir; kural motorunun cumlesi gecer. */
+  const YANKI_RE = /(BRİFİNG|KURALLAR|ORTAK İLKELER|NASIL ÇALIŞIRSIN|KİMLİK:|KONUMUN:|"cert"\s*:|\{\s*"[a-zA-Z_]+"\s*:)/;
+  function yankiMi(text){ return YANKI_RE.test(String(text || '')); }
+
+  const YAPI_ANAHTARI = { box:1, windowDays:1, rank:1, version:1, index:1, order:1 };
+  function sayiHavuzu(brief){
+    const out = [];
+    const sayilar = s => (String(s).match(/\d+(?:[.,]\d+)?/g) || [])
+      .map(x => Number(x.replace(',', '.'))).filter(Number.isFinite);
+    const walk = (v, anahtar) => {
+      if(v == null || YAPI_ANAHTARI[anahtar]) return;
+      if(typeof v === 'number'){ if(Number.isFinite(v)) out.push(v); return; }
+      if(typeof v === 'string'){ sayilar(v).forEach(n => out.push(n)); return; }
+      if(Array.isArray(v)){ v.forEach(x => walk(x, anahtar)); return; }
+      if(typeof v === 'object') Object.keys(v).forEach(k => walk(v[k], k));
+    };
+    walk(brief, '');
+    return out;
+  }
 
   function katOf(ajan){
     return ajan && (ajan.lead || ajan.id === 'patron') ? 'patron' : 'uzman';
@@ -123,11 +162,20 @@ LIFEOS.Ofis = (function(){
     };
     bolum('KİMLİK', o.kimlik);
     bolum('KONUMUN', liste(konum(o.modul, o.ajan, o), false));
-    bolum('NASIL ÇALIŞIRSIN', liste(o.yontem, true));
+    /* Selamda yontem ve kurallar gitmez: kucuk model onlari kopyaliyordu
+       («son 30 günlük üretimin…»). Ortak ilkeler kalir. */
+    bolum('NASIL ÇALIŞIRSIN', o.selam ? '' : liste(o.yontem, true));
     bolum('ORTAK İLKELER (tartışılmaz)', liste(ILKELER, true));
-    bolum(o.kurallarAdi || 'KURALLAR', liste(o.kurallar, true));
+    bolum(o.kurallarAdi || 'KURALLAR', o.selam ? '' : liste(o.kurallar, true));
     bolum('ÜSLUP', o.uslup);
+    if(o.model) bolum('ARKADAKİ MODEL', 'Cümlelerini ' + o.model + ' dil modeli kuruyor. '
+      + 'Hangi modelle çalıştığın sorulursa bunu dürüstçe söylersin.');
     if(o.hafiza && String(o.hafiza).trim()) b.push(String(o.hafiza).trim());
+    if(o.selam){
+      bolum('BU MESAJ', 'Kısa bir selamlaşma ya da sohbet. Rapor okuma, sayı söyleme. Adınla, '
+        + 'sıcak ve kısa karşılık ver (en fazla iki cümle); istersen ne konuşmak istediğini sor.');
+      return b.join('\n\n');
+    }
     bolum('BRİFİNG (kural motorundan; tek veri kaynağın)', o.brifing);
     return b.join('\n\n');
   }
@@ -335,5 +383,5 @@ LIFEOS.Ofis = (function(){
     return { ilet };
   }
 
-  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, kanalKur, bamIstegi, bamKur, bamMadde };
+  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, selamMi, sayiHavuzu, yankiMi, kanalKur, bamIstegi, bamKur, bamMadde };
 })();

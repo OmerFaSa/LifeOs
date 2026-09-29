@@ -479,10 +479,11 @@ ESP.Office = (function(){
   /* Istem iskeleti LIFEOS.Ofis.istem'dedir (brand/ortak/ofis.js):
      kimlik -> konum (King > Patron > uzman) -> yontem -> ortak ilkeler ->
      ESP kurallari -> uslup -> hafiza -> brifing. */
-  function systemPrompt(agentId, b){
+  function systemPrompt(agentId, b, ek){
+    const e = ek || {};
     const a = ESP.AGENT_BY_ID[agentId] || ESP.AGENT_BY_ID.patron;
     return LIFEOS.Ofis.istem({
-      modul:'esp', ajan:a, yontem:a.yontem,
+      modul:'esp', ajan:a, yontem:a.yontem, selam:!!e.selam, model:e.model || '',
       kimlik:'Sen ' + a.name + ' adında bir entelektüel pratik ajanısın. Rolün: ' + a.role + '.\n'
         + 'Alanın: ' + a.scope + '\n'
         + 'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
@@ -553,7 +554,10 @@ ESP.Office = (function(){
        olcum iddiasi degil dilin kendisidir. */
     const unsupported = [];
     if(o.brief){
-      const havuz = JSON.stringify(o.brief);
+      /* Metin icinde arama («"5" JSON'da bir yerde geciyor mu») kutu sirasini
+         ve pencere uzunlugunu da kabul ediyordu. Artik yalniz DEGERLER. */
+      const havuz = (window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.sayiHavuzu)
+        ? LIFEOS.Ofis.sayiHavuzu(o.brief) : [];
       const sayilar = s.match(/\d+(?:[.,]\d+)?/g) || [];
       const gorulen = {};
       sayilar.forEach(n => {
@@ -563,9 +567,9 @@ ESP.Office = (function(){
         gorulen[n] = true;
         /* Yuvarlanmis hali de kabul edilir: brifingde 0.384 varsa metinde
            "%38" yazmasi uydurma degildir. */
-        const yakin = [n, String(Math.round(sayi)), String(Math.round(sayi * 100) / 100),
-          String(sayi / 100)];
-        if(!yakin.some(v => havuz.indexOf(v) >= 0)){
+        const yakin = h => Math.abs(h - sayi) < 0.051 || Math.round(h) === sayi
+          || Math.abs(h * 100 - sayi) < 0.51;
+        if(!havuz.some(yakin)){
           unsupported.push(n);
         }
       });
@@ -608,15 +612,23 @@ ESP.Office = (function(){
     /* Gecmis acikca kapatilabilir: toplantida her ajan gundeme TEK basina
        cevap verir, sohbet gecmisi oraya karismaz. */
     const gecmis = o.history === false ? [] : historyFor(agentId, o.history);
+    const selam = !!(question && window.LIFEOS && LIFEOS.Ofis.selamMi && LIFEOS.Ofis.selamMi(question));
 
     try{
       const res = await ESP.LLM.chat(cfg, {
-        system:systemPrompt(agentId, b),
+        system:systemPrompt(agentId, b, { selam, model:cfg.model }),
         messages:gecmis.concat([{ role:'user', text:question || 'Durumu özetle.' }]),
         temperature:settings().temperature,
         maxTokens:o.maxTokens || 600,
       });
-      const check = validate(res.text, { agentId, brief:b });
+      /* Selamda brifing gonderilmedi: sayi da ona gore denetlenir. */
+      if(LIFEOS.Ofis.yankiMi && LIFEOS.Ofis.yankiMi(res.text)){
+        return { text:fallback.text, source:'rules', brief:b,
+          note:'Model istemi geri yazdı; kural motorunun cümlesi gösterildi.' };
+      }
+      /* Model adindaki rakam («gemma3:4b») uydurma sayi degildir. */
+      const havuzEk = { model:String(cfg.model || '') };
+      const check = validate(res.text, { agentId, brief:selam ? havuzEk : Object.assign({}, b, havuzEk) });
       if(!check.ok){
         return { text:fallback.text, source:'rules', brief:b,
           blocked:check, note:'Model çıktısı ev kurallarına takıldı: ' + check.note };

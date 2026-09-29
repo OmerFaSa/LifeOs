@@ -11,6 +11,13 @@ window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
 
 ESP.Screens.team = (function(){
+  /* Mesaj saati. m.at ISO tarih metnidir; fmtClock SANIYE bekler ve
+     «NaN:NaN» basiyordu. Gecersiz tarih bos kalir. */
+  function saatOf(at){
+    const d = new Date(at);
+    if(isNaN(d.getTime())) return '';
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
   const U = ESP.U, S = ESP.S;
   const { html, raw, when, map, cls } = ESP.h;
   const K = ESP.C;
@@ -39,7 +46,7 @@ ESP.Screens.team = (function(){
           ${when(kaynak, () => K.Badge({ label:kaynak.label, tone:kaynak.tone, icon:false }))}
           ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
           ${when(m.error, () => K.Badge({ label:'hata', tone:'danger' }))}
-          <span class="tiny dim">${U.fmtClock ? U.fmtClock(m.at) : ''}</span>
+          <span class="tiny dim">${saatOf(m.at)}</span>
         </div>
       </div>`;
   }

@@ -365,6 +365,7 @@ SP.Office = (function(){
      labBrief, ...}) — o yüzden nesnenin tamamı taranır, tek bir alt alan
      değil. */
   function supportedNumbers(brief){
+    if(window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.sayiHavuzu) return LIFEOS.Ofis.sayiHavuzu(brief);
     const set = [];
     const walk = v => {
       if(v == null) return;
@@ -452,10 +453,11 @@ SP.Office = (function(){
   /* Istem iskeleti LIFEOS.Ofis.istem'dedir (brand/ortak/ofis.js):
      kimlik -> konum (King > Patron > uzman) -> yontem -> ortak ilkeler ->
      SPI kurallari -> uslup -> hafiza -> brifing. */
-  function systemPrompt(agentId, b){
+  function systemPrompt(agentId, b, ek){
+    const e = ek || {};
     const a = SP.AGENT_BY_ID[agentId] || SP.AGENT_BY_ID.patron;
     return LIFEOS.Ofis.istem({
-      modul:'spi', ajan:a, yontem:a.yontem,
+      modul:'spi', ajan:a, yontem:a.yontem, selam:!!e.selam, model:e.model || '',
       kimlik:'Sen ' + a.name + ' adında bir sağlık asistanı ajanısın. Rolün: ' + a.role + '.\n'
         + 'Alanın: ' + a.scope + '\n'
         + 'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
@@ -512,15 +514,23 @@ SP.Office = (function(){
     /* Gecmis acikca kapatilabilir: toplantida her ajan gundeme TEK
        basina cevap verir, sohbet gecmisi oraya karismaz. */
     const gecmis = o.history === false ? [] : historyFor(agentId, o.history);
+    const selam = !!(question && window.LIFEOS && LIFEOS.Ofis.selamMi && LIFEOS.Ofis.selamMi(question));
 
     try{
       const res = await SP.LLM.chat(cfg, {
-        system:systemPrompt(agentId, b),
+        system:systemPrompt(agentId, b, { selam, model:cfg.model }),
         messages:gecmis.concat([{ role:'user', text:question || 'Durumu özetle.' }]),
         temperature:settings().temperature,
         maxTokens:o.maxTokens || 600,
       });
-      const check = validate(res.text, { agentId, brief:b });
+      /* Selamda brifing gonderilmedi: sayi da ona gore denetlenir. */
+      if(LIFEOS.Ofis.yankiMi && LIFEOS.Ofis.yankiMi(res.text)){
+        return { text:fallback.text, source:'rules', brief:b,
+          note:'Model istemi geri yazdı; kural motorunun cümlesi gösterildi.' };
+      }
+      /* Model adindaki rakam («gemma3:4b») uydurma sayi degildir. */
+      const havuzEk = { model:String(cfg.model || '') };
+      const check = validate(res.text, { agentId, brief:selam ? havuzEk : Object.assign({}, b, havuzEk) });
       if(!check.ok){
         return { text:fallback.text, source:'rules', brief:b,
           blocked:check, note:'Model çıktısı ev kurallarına takıldı: ' + check.note };
