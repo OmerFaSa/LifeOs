@@ -1611,6 +1611,9 @@ ESP.App = (function(){
 
       wireStoreErrors();
       await M.loadAll();
+      /* «Üç sistemi bağla» (HKM yüzü): gizli çerçevede yalnız eşle ve dön;
+         ekran çizilmez (core/beacon.js hkmBagla). */
+      if(ESP.Beacon && ESP.Beacon.bagCagrisiMi()){ await ESP.Beacon.hkmBagla(); return; }
       /* 172: örnek profilde örnek kayıtlar belleğe yazılır (core/ornekveri.js). */
       if(ornekAcik() && ESP.OrnekVeri){
         try{ ESP.OrnekVeri.doldur(); }catch(e){ console.error(e); }

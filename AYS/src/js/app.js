@@ -1427,6 +1427,9 @@ R.App = (function(){
       }
       wireStoreErrors();
       await M.loadAll();
+      /* «Üç sistemi bağla» (HKM yüzü): gizli çerçevede yalnız eşle ve dön;
+         ekran çizilmez (core/beacon.js hkmBagla). */
+      if(R.Beacon && R.Beacon.bagCagrisiMi()){ await R.Beacon.hkmBagla(); return; }
       /* 172: örnek profilde örnek kayıtlar belleğe yazılır (core/ornekveri.js). */
       if(ornekAcik() && R.OrnekVeri){
         try{ R.OrnekVeri.doldur(); }catch(e){ console.error(e); }

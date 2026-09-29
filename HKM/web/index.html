@@ -997,11 +997,15 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
             üçünü tek pencerede bağlayabilirsin. Böylece anahtarı hiçbir yere yapıştırman
             gerekmez — bir sırrı kopyalamak, onu panoya ve tarayıcı
             geçmişine de yazmaktır.</p>
+          <p class="muted"><b>Üç sistemi bağla</b> bunu senin yerine yapar:
+            AYS, SPİ ve ESP'yi sırayla arka planda açar, her birinde işareti
+            açıp bağlar ve bir kez gönderir. Sonucu aşağıda yazar.</p>
           <p class="muted">Pencere yalnız <b>bu bilgisayardan</b> ve yalnız
             birkaç saniye açıktır; kapandıktan sonra hiçbir şey verilmez.
             Bir sistemi bir kez bağlaman yeter — bu, her girişte
             tekrarlanan bir iş değildir.</p>
           <div class="row">
+            <button id="ucbag">Üç sistemi bağla</button>
             <button id="esle">Cihazları bağla</button>
             <button id="cikis">Anahtarı bu tarayıcıdan sil</button>
           </div>
@@ -1761,6 +1765,85 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       eslemeCiz(d.body.seconds_left, d.body);
     }, 1000);
     eslemeCiz(r.body.seconds);
+  }
+
+  /* ÜÇ SİSTEMİ BAĞLA — tek tık.
+
+     Her modül için sırayla: eşleme penceresini aç (bearer), modülü GİZLİ
+     bir çerçevede `#hkm-bagla` işaretiyle yükle; modül eşleşip bir kez
+     gönderir ve sonucu postMessage ile bildirir (core/beacon.js
+     hkmBagla). Mesaj yalnız o modülün kendi kökeninden kabul edilir.
+     Modül 127.0.0.1'de açılır: verisi o kökende durur. */
+  var UC_SIRA = [['ays', 'AYS'], ['spi', 'SPİ'], ['esp', 'ESP']];
+  var ucCalisiyor = false;
+
+  function ucCiz(satirlar, bitti){
+    var k = $('esleme');
+    k.hidden = false;
+    k.innerHTML = '<div class="tag">Üç sistemi bağla</div>'
+      + satirlar.map(function(x){
+          return '<p><b>' + esc(x.ad) + '</b> ' + esc(x.isaret) + (x.not ? ' — <span class="muted">' + esc(x.not) + '</span>' : '') + '</p>';
+        }).join('')
+      + (bitti ? '' : '<p class="muted">Çalışıyor…</p>');
+  }
+
+  function birModul(kod){
+    return new Promise(function(coz){
+      var adres = SISTEM_ADRES[kod];
+      var koken = adres.replace(/\/$/, '');
+      var cerceve = document.createElement('iframe');
+      cerceve.hidden = true;
+      cerceve.setAttribute('aria-hidden', 'true');
+      cerceve.tabIndex = -1;
+      var bitti = false;
+      function son(sonuc){
+        if(bitti) return;
+        bitti = true;
+        window.removeEventListener('message', dinle);
+        clearTimeout(zaman);
+        cerceve.remove();
+        coz(sonuc);
+      }
+      function dinle(e){
+        if(e.origin !== koken || e.source !== cerceve.contentWindow) return;
+        var d = e.data || {};
+        if(d.tur !== 'hkm-bagla' || d.modul !== kod) return;
+        son(d);
+      }
+      var zaman = setTimeout(function(){
+        son({ ok:false, note:'Yanıt gelmedi. Sistem açık mı? (Panelden başlat.)' });
+      }, 25000);
+      window.addEventListener('message', dinle);
+      cerceve.src = adres + '#hkm-bagla';
+      document.body.appendChild(cerceve);
+    });
+  }
+
+  async function ucunuBagla(){
+    if(ucCalisiyor) return;
+    ucCalisiyor = true;
+    $('ucbag').disabled = true;
+    if(esleSayac){ clearInterval(esleSayac); esleSayac = null; }
+    var satirlar = UC_SIRA.map(function(x){ return { ad:x[1], isaret:'…', not:'' }; });
+    ucCiz(satirlar, false);
+    try{
+      for(var i = 0; i < UC_SIRA.length; i++){
+        var r = await api('/api/pair/open', { method:'POST', body:JSON.stringify({ seconds:30 }) });
+        if(r.status !== 200){
+          satirlar[i].isaret = '✗'; satirlar[i].not = 'HKM eşleme penceresini açamadı.';
+          ucCiz(satirlar, false);
+          continue;
+        }
+        var d = await birModul(UC_SIRA[i][0]);
+        satirlar[i].isaret = d.ok ? '✓' : '✗';
+        satirlar[i].not = d.ok ? (d.gonderim ? 'Bağlandı, ilk özet gönderildi.' : 'Bağlandı.') : (d.note || 'Bağlanamadı.');
+        ucCiz(satirlar, false);
+      }
+    }finally{
+      ucCalisiyor = false;
+      $('ucbag').disabled = false;
+      ucCiz(satirlar, true);
+    }
   }
 
   /* ------------------------------------------------------- sistem verisi
@@ -5651,6 +5734,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   window.addEventListener('hashchange', function(){ gorunumSec(yolOku()); });
   $('tema').addEventListener('click', temaDegistir);
   $('esle').addEventListener('click', eslemeAc);
+  $('ucbag').addEventListener('click', ucunuBagla);
   $('gonder').addEventListener('click', function(){
     mesajGonder('mesaj', 'gonder'); });
   $('bugun-gonder').addEventListener('click', function(){

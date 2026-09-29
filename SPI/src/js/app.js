@@ -1431,6 +1431,9 @@ SP.App = (function(){
          kareler ilk çizimde hazır olsun. Açılamazsa kareler çizilmez. */
       const fotoHazir = SP.Foto ? SP.Foto.hazirla() : null;
       await M.loadAll();
+      /* «Üç sistemi bağla» (HKM yüzü): gizli çerçevede yalnız eşle ve dön;
+         ekran çizilmez (core/beacon.js hkmBagla). */
+      if(SP.Beacon && SP.Beacon.bagCagrisiMi()){ await SP.Beacon.hkmBagla(); return; }
       /* 172: örnek profilde örnek kayıtlar belleğe yazılır (core/ornekveri.js). */
       if(ornekAcik() && SP.OrnekVeri){
         try{ SP.OrnekVeri.doldur(); }catch(e){ console.error(e); }

@@ -355,6 +355,37 @@ ESP.Beacon = (function(){
     return { ok:true, note:'Bağlandı. İşaret açıldı; ne gönderildiği aşağıda yazıyor.' };
   }
 
+  /* TEK TIKLA BAĞLAMA — HKM yüzündeki «Üç sistemi bağla» düğmesi.
+
+     HKM yüzü eşleme penceresini açar ve bu modülü GİZLİ bir çerçevede
+     `#hkm-bagla` işaretiyle yükler. Burada: eşle (işaret böylece açılır),
+     bir kez gönder, sonucu üst pencereye bildir. Kural değişmez: işaret
+     yine kullanıcının bastığı bir düğmeyle açılır; pencere bearer ister
+     ve tek kullanımlıktır. Mesaj jeton TAŞIMAZ; yalnız yerel kökene gider. */
+  function bagCagrisiMi(){
+    try{ return window.location.hash === '#hkm-bagla' && window.parent !== window; }
+    catch(e){ return false; }
+  }
+  async function hkmBagla(){
+    let ust = '';
+    try{ ust = new URL(document.referrer).origin; }catch(e){ ust = ''; }
+    if(!/^http:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(ust)) return { ok:false, note:'Yerel olmayan çağrı.' };
+    let sonuc;
+    if(profilim() === 'ornek'){
+      sonuc = { ok:false, neden:'ornek', note:'Örnek profil açık; örnek profil HKM\'ye bağlanamaz.' };
+    }else{
+      const r = await pair(ust);
+      sonuc = { ok:!!r.ok, note:r.note };
+      if(r.ok){
+        const g = await send({ force:true });
+        sonuc.gonderim = !!(g && g.ok);
+      }
+    }
+    sonuc.tur = 'hkm-bagla'; sonuc.modul = MODULE;
+    try{ window.parent.postMessage(sonuc, ust); }catch(e){}
+    return sonuc;
+  }
+
   /* ------------------------------------------------------------- gönderim */
 
   function urlOk(url){
@@ -971,7 +1002,7 @@ ESP.Beacon = (function(){
   /* Ayar ekranı «Varsayılana dön» için okur (T5, 182); kopya verilir. */
   const varsayilan = () => Object.assign({}, VARSAYILAN);
 
-  return { varsayilan, load, save, settings, collect, payload, preview, contract, metric,
+  return { varsayilan, bagCagrisiMi, hkmBagla, load, save, settings, collect, payload, preview, contract, metric,
     MODULE, profil:profilim, urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
     intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE, desteOf, kayitOku,
     kartOnizle, kartGeriAl,

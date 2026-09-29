@@ -25,7 +25,11 @@ saklar.
 Durdurmak: `python3 baslat.py --dur`. Pencereyi kapatmak yetmez; daemon
 arka planda çalışır.
 
-Üç sistemi bağlamak da jeton kopyalamadan olur:
+Üç sistemi bağlamak da jeton kopyalamadan olur. En kolayı: yüzde
+**Yönetim → Cihazlar → Üç sistemi bağla**. Üçünü sırayla arka planda açar,
+işareti açıp bağlar ve sonucu yazar (sistemlerin açık olması gerekir).
+
+Elle yapmak istersen:
 
 1. Yüzde **Yönetim → Cihazları bağla** — iki dakikalık bir pencere açılır
 2. AYS, SPİ ve ESP'nin her birinde → Ayarlar → HKM işareti → **Bağlan**
