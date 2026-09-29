@@ -21,6 +21,7 @@
 window.ESP = window.ESP || {};
 
 ESP.Office = (function(){
+  const CUMLE_TAVANI = 3;   // uslup istemindeki «En fazla 3 cümle»
   const U = ESP.U;
   const S = ESP.S;
 
@@ -52,7 +53,15 @@ ESP.Office = (function(){
   function cfgFor(agentId){
     const s = settings();
     const own = s.perAgent && s.perAgent[agentId];
-    return own && own.provider ? own : { provider:s.provider, model:s.model };
+    /* Yerel saglayici (Ollama, LM Studio) adres ister: adres tasinmazsa
+       LLM.ready() hep false doner ve ofis kural motorunda kalirdi. Adres
+       ayarda yoksa saglayicinin kendi varsayilani kullanilir. */
+    const cfg = own && own.provider ? Object.assign({}, own) : { provider:s.provider, model:s.model, endpoint:s.endpoint };
+    if(!cfg.endpoint){
+      const p = ESP.PROVIDERS && ESP.PROVIDERS[cfg.provider];
+      cfg.endpoint = (p && p.endpoint) || '';
+    }
+    return cfg;
   }
 
   function ready(agentId){
@@ -612,7 +621,9 @@ ESP.Office = (function(){
         return { text:fallback.text, source:'rules', brief:b,
           blocked:check, note:'Model çıktısı ev kurallarına takıldı: ' + check.note };
       }
-      return { text:res.text.trim(), source:'model', brief:b, model:cfg.model };
+      /* Istemdeki tavan («En fazla 3 cümle») kodda da uygulanir. */
+      const kisa = ESP.LLM.capSentences ? ESP.LLM.capSentences(res.text, o.sentences || CUMLE_TAVANI) : res.text.trim();
+      return { text:kisa, source:'model', brief:b, model:cfg.model };
     }catch(e){
       return Object.assign({}, fallback, {
         error:ESP.LLM.errorText ? ESP.LLM.errorText(e) : String(e && e.message || e) });

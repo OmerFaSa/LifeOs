@@ -63,6 +63,28 @@ R.LLM = (function(){
     return head.length >= s.length * 0.4 ? head : s;
   }
 
+  /* Cumle tavani KODDA uygulanir. Istem «en fazla 4 cumle» der ama
+     kucuk yerel modeller (gemma3:4b) bunu sik dinlemez: on bes cumlelik
+     bir ders anlatip sonuna «bir uzmana danisin» ekler. Tavan asilirsa
+     ilk n tam cumle kalir. Sayi icindeki nokta (1.500) ve kisaltma
+     sonrasi bosluk olmayan nokta cumle sonu sayilmaz. n gecersizse
+     metne dokunulmaz. */
+  function capSentences(text, n){
+    const s = String(text || '').trim();
+    const k = Math.floor(Number(n));
+    if(!s || !(k > 0)) return s;
+    const re = /[.!?…]+["'»”)]*(?=\s|$)/g;
+    let m, count = 0;
+    while((m = re.exec(s))){
+      count++;
+      if(count === k){
+        const end = m.index + m[0].length;
+        return end < s.length ? s.slice(0, end).trim() : s;
+      }
+    }
+    return s;
+  }
+
   /* Kesilen metnin son kelimesi yarim kalmis olabilir ("kaybı" degil
      "kayb"). Devam istemeden once o kelime atilir ve modelden kaldigi
      noktadan sonrasi istenir: boylece birlestirme ne kelime boler ne de
@@ -1341,7 +1363,7 @@ R.LLM = (function(){
     chat, complete, test, ready, diagnose,
     listModels, modelsFor, cachedModels, clearCatalog, MODEL_STORE,
     errorText, retryable, resumable, offline, onceOnline, inSandbox, KEY_STORE,
-    truncated, trimToSentence, joinContinuation, dropLastWord, stripThinking,
+    truncated, trimToSentence, capSentences, joinContinuation, dropLastWord, stripThinking,
     endpointFor, normalizeOpenAI, normalizeGemini, classify,
     hasImages, supportsVision, visionChain,
     DEFAULT_MAX_TOKENS,

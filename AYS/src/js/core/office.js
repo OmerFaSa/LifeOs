@@ -1213,6 +1213,7 @@ R.Office = (function(){
       if(o.checkNumbers !== false){
         try{ ownBrief = brief(agentId); }catch(e){}
       }
+      if(o.sentences) said = R.LLM.capSentences(said, o.sentences);
       const checked = validate(said, { agentId, brief:ownBrief });
       return { agent:agentId, name:agent.name, role:agent.role, text:checked.text,
         warnings:checked.warnings, mode:'llm', model:res.model, provider:res.provider,

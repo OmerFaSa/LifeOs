@@ -15,6 +15,7 @@
 window.SP = window.SP || {};
 
 SP.Office = (function(){
+  const CUMLE_TAVANI = 4;   // uslup istemindeki «En fazla 4 cümle»
   const U = SP.U;
 
   /* --------------------------------------------------------------- ayarlar */
@@ -46,7 +47,15 @@ SP.Office = (function(){
   function cfgFor(agentId){
     const s = settings();
     const own = s.perAgent && s.perAgent[agentId];
-    return own && own.provider ? own : { provider:s.provider, model:s.model };
+    /* Yerel saglayici (Ollama, LM Studio) adres ister: adres tasinmazsa
+       LLM.ready() hep false doner ve ofis kural motorunda kalirdi. Adres
+       ayarda yoksa saglayicinin kendi varsayilani kullanilir. */
+    const cfg = own && own.provider ? Object.assign({}, own) : { provider:s.provider, model:s.model, endpoint:s.endpoint };
+    if(!cfg.endpoint){
+      const p = SP.PROVIDERS && SP.PROVIDERS[cfg.provider];
+      cfg.endpoint = (p && p.endpoint) || '';
+    }
+    return cfg;
   }
 
   function ready(agentId){
@@ -516,7 +525,9 @@ SP.Office = (function(){
         return { text:fallback.text, source:'rules', brief:b,
           blocked:check, note:'Model çıktısı ev kurallarına takıldı: ' + check.note };
       }
-      return { text:res.text.trim(), source:'model', brief:b, model:cfg.model };
+      /* Istemdeki tavan («En fazla 4 cümle») kodda da uygulanir. */
+      const kisa = SP.LLM.capSentences ? SP.LLM.capSentences(res.text, o.sentences || CUMLE_TAVANI) : res.text.trim();
+      return { text:kisa, source:'model', brief:b, model:cfg.model };
     }catch(e){
       return Object.assign({}, fallback, {
         error:SP.LLM.errorText ? SP.LLM.errorText(e) : String(e && e.message || e) });

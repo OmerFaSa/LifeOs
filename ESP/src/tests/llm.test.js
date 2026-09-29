@@ -169,6 +169,21 @@
       expect(L.trimToSentence(uzun)).toBe(uzun.trim());
     });
 
+    it('cümle tavanı: fazlası kesilir, ilk n tam cümle kalır', function(){
+      const t = L.capSentences('Bir. İki! Üç? Dört. Beş.', 3);
+      expect(t).toBe('Bir. İki! Üç?');
+    });
+
+    it('cümle tavanı: sayı içindeki nokta cümle saymaz', function(){
+      const t = L.capSentences('Gider 1.500 lira. İkinci cümle. Üçüncü.', 2);
+      expect(t).toBe('Gider 1.500 lira. İkinci cümle.');
+    });
+
+    it('cümle tavanı: tavanın altındaki metne ve geçersiz n’ye dokunulmaz', function(){
+      expect(L.capSentences('Tek cümle.', 4)).toBe('Tek cümle.');
+      expect(L.capSentences('Bir. İki.', 0)).toBe('Bir. İki.');
+    });
+
     it('hiç tam cümle yoksa metne dokunulmaz', function(){
       expect(L.trimToSentence('hiç noktalama yok')).toBe('hiç noktalama yok');
     });

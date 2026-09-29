@@ -374,6 +374,15 @@
     });
   });
 
+  describe('ofis · yerel model', () => {
+    it('yerel sağlayıcı (Ollama) adres girilmeden de hazır sayılır', async () => {
+      resetState();
+      await ESP.Office.saveSettings({ provider:'ollama', model:'gemma3:4b', perAgent:{} });
+      expect(ESP.Office.cfgFor('x').endpoint).toContain('11434');
+      expect(ESP.Office.ready('x')).toBe(true);
+    });
+  });
+
   describe('komut · konuşarak', () => {
     const K = () => ESP.Komut;
 

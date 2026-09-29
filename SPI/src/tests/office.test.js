@@ -446,6 +446,13 @@
   });
 
   describe('Ofis — ayarlar', () => {
+    it('yerel sağlayıcı (Ollama) adres girilmeden de hazır sayılır', async () => {
+      resetState();
+      await SP.Office.saveSettings({ provider:'ollama', model:'gemma3:4b', perAgent:{} });
+      expect(SP.Office.cfgFor('x').endpoint).toContain('11434');
+      expect(SP.Office.ready('x')).toBe(true);
+    });
+
     it('varsayılan sağlayıcı yerleşik yetenektir', () => {
       resetState();
       SP.S.office = null;
