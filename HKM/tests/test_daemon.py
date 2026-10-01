@@ -260,12 +260,54 @@ def _run():
             kod, r = S.call("/api/pair", body={}, token=None)
             eq(kod, 200)
             eq(r["token"], TOKEN)
-            # TEK KULLANIMLIK: ikinci istek kapali kapi bulur.
+            # TEK KULLANIMLIK (koken basina): ayni koken ikinci kez alamaz.
             eq(S.call("/api/pair", body={}, token=None)[0], 403)
             kod, d = S.call("/api/pair/status")
-            eq(d["open"], False)
             eq(d["used"], True)
+            eq(d["taken"], 1)
         test("acik pencere jetonu bir kez verir", t_pair_gives_token_once)
+
+        def t_pair_one_window_links_all_modules():
+            """Tek pencere UC MODULU de baglar. Pencere eskiden butun
+            kokenler icin tek kullanimlikti: AYS jetonu alinca SPI ve ESP
+            ayni pencerede 403 aliyordu ve kullanici «HKM'ye bagladim ama
+            oteki moduller gormuyor» diyordu. Her koken bir kez alir."""
+            S.srv.rate = {}       # kaba hiz siniri onceki testlerden dolmasin
+            S.call("/api/pair/open", body={})
+
+            def al(port):
+                kod, r = S.ham("/api/pair", b"{}", {
+                    "Content-Type": "application/json",
+                    "Origin": "http://127.0.0.1:%d" % port})
+                return kod, json.loads(r or "{}")
+            for port in (4173, 4183, 4193):
+                kod, r = al(port)
+                eq(kod, 200)
+                eq(r["token"], TOKEN)
+            # Ayni koken ikinci kez alamaz.
+            eq(al(4183)[0], 403)
+            kod, d = S.call("/api/pair/status")
+            eq(d["taken"], 3)
+            # Yeni pencere sayaci sifirlar.
+            S.call("/api/pair/open", body={})
+            eq(al(4183)[0], 200)
+        test("tek pencere uc modulu de baglar", t_pair_one_window_links_all_modules)
+
+        def t_pair_window_has_origin_cap():
+            """Koken basina tek kullanim SINIRSIZ degildir: bir pencere en
+            fazla PAIR_MAX_ORIGINS kokene jeton verir (yuz + uc modul)."""
+            S.srv.rate = {}
+            S.call("/api/pair/open", body={})
+            verilen = 0
+            for port in range(5000, 5000 + daemon.PAIR_MAX_ORIGINS + 2):
+                kod, _ = S.ham("/api/pair", b"{}", {
+                    "Content-Type": "application/json",
+                    "Origin": "http://localhost:%d" % port})
+                verilen += 1 if kod == 200 else 0
+            eq(verilen, daemon.PAIR_MAX_ORIGINS)
+            kod, d = S.call("/api/pair/status")
+            eq(d["open"], False)
+        test("pencere sinirli sayida kokene verir", t_pair_window_has_origin_cap)
 
         def t_pair_window_can_be_shortened_not_lengthened():
             """Tek tik, yuz icin KISA bir pencere ister: pencere ne kadar

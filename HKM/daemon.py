@@ -48,7 +48,7 @@ Ucnoktalar:
     POST /api/pair/open             esleme penceresini acar (bearer ister)
     GET  /api/pair/status           pencere acik mi (bearer ister)
     POST /api/pair                  jetonu YEREL cihaza verir — pencere acikken,
-                                    tek kullanimlik, bearer ISTEMEZ
+                                    koken basina tek kullanimlik, bearer ISTEMEZ
     POST /api/say                   gunun mesajini kanala gonderir (gunde bir)
     GET/POST /api/wa/webhook        WhatsApp — jetonsuz ama IMZALI (bkz. §7)
     POST /api/tg/webhook            Telegram — gizli baslikla dogrulanir
@@ -111,9 +111,10 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
 
 # Esleme penceresi: jetonu elle yapistirmayi bitirir ama kapiyi acik
-# birakmaz. Kisa, TEK KULLANIMLIK ve yalniz YEREL kokene.
+# birakmaz. Kisa, KOKEN BASINA TEK KULLANIMLIK ve yalniz YEREL kokene.
 PAIR_SECONDS = 120
 PAIR_MIN_SECONDS = 15        # pencere bundan kisa da olamaz, uzun da
+PAIR_MAX_ORIGINS = 4         # yuz + AYS + SPI + ESP; fazlasina verilmez
 
 # --------------------------------------------------------------- sinirlar
 #
@@ -144,6 +145,12 @@ sayfasinin yerel HKM'ye istek atabilmesi demektir. Jeton yine sarttir;
 CORS bir kimlik dogrulama degil, bir tarayici sinirdir."""
 LOCAL_ORIGIN = re.compile(
     r"^https?://(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$", re.I)
+
+
+def _koken_portu(koken):
+    """'http://127.0.0.1:4183' -> 4183; port yoksa ya da cozulemezse None."""
+    m = re.match(r"^https?://[^/]+:(\d+)$", koken or "")
+    return int(m.group(1)) if m else None
 
 
 def cors_origin(headers, cfg):
@@ -678,16 +685,23 @@ class Handler(BaseHTTPRequestHandler):
     # acmak:
     #
     #   · pencereyi yalniz jetonu ZATEN bilen taraf acabilir (bearer),
-    #   · pencere iki dakika yasar ve TEK KULLANIMLIKTIR,
+    #   · pencere iki dakika yasar ve KOKEN BASINA TEK KULLANIMLIKTIR,
+    #     en fazla PAIR_MAX_ORIGINS kokene verir,
     #   · jeton yalniz YEREL kokene verilir (127.0.0.1 / localhost / ::1),
     #   · jeton hicbir kayda, hicbir loga ve hicbir ekrana yazilmaz.
     #
     # Boylece «kapiyi ac» ile «kapiyi kir» arasindaki fark korunur.
+    #
+    # Neden koken basina: AYS, SPI ve ESP ayri portlarda, yani ayri
+    # tarayici depolarinda durur — biri jetonu aldi diye oteki goremez.
+    # Pencere butun kokenler icin tek kullanimlikken ilk baglanan modul
+    # pencereyi kapatiyor, oteki ikisi «pencere kapali» aliyordu; kullanici
+    # her modul icin «Cihazlari bagla»ya yeniden basmak zorundaydi.
 
     def _pair_state(self):
         srv = self.server
         if not hasattr(srv, "pair"):
-            srv.pair = {"until": 0.0, "used": True}
+            srv.pair = {"until": 0.0, "taken": set()}
             srv.pair_lock = threading.Lock()
         return srv.pair
 
@@ -706,16 +720,22 @@ class Handler(BaseHTTPRequestHandler):
         durum = self._pair_state()
         with self.server.pair_lock:
             durum["until"] = time.time() + sure
-            durum["used"] = False
+            durum["taken"] = set()
         return self._send(200, {"ok": True, "seconds": sure,
-                                "note": "Eşleme penceresi açıldı. Tek cihaz "
+                                "note": "Eşleme penceresi açıldı. AYS, SPİ ve "
+                                        "ESP bu süre içinde birer kez "
                                         "bağlanabilir; süre dolunca kapanır."})
 
     def _pair_status(self):
         durum = self._pair_state()
         kalan = max(0, int(durum["until"] - time.time()))
-        return self._send(200, {"open": bool(kalan) and not durum["used"],
-                                "seconds_left": kalan, "used": durum["used"]})
+        alan = len(durum["taken"])
+        # Kokenin kendisi yazilmaz, yalniz portu: yuz «AYS baglandi»
+        # diyebilsin diye. Port bir sir degildir; jeton hicbir yere gitmez.
+        portlar = sorted(p for p in (_koken_portu(k) for k in durum["taken"]) if p)
+        return self._send(200, {"open": bool(kalan) and alan < PAIR_MAX_ORIGINS,
+                                "seconds_left": kalan, "used": bool(alan),
+                                "taken": alan, "ports": portlar})
 
     def _pair_take(self):
         """Jetonu yerel cihaza verir. Bearer ISTEMEZ — isteyen taraf zaten
@@ -726,13 +746,20 @@ class Handler(BaseHTTPRequestHandler):
         if not self._rate_ok("pair", limit=20):
             return self._send(429, {"error": "cok fazla esleme denemesi"})
         durum = self._pair_state()
+        # Origin'siz istek (tarayici disi, ayni makine) tek bir koken sayilir.
+        koken = origin.lower() or "-"
         with self.server.pair_lock:
-            acik = time.time() < durum["until"] and not durum["used"]
+            acik = (time.time() < durum["until"]
+                    and len(durum["taken"]) < PAIR_MAX_ORIGINS)
             if not acik:
                 return self._send(403, {
                     "error": "esleme penceresi kapali",
                     "note": "HKM yüzünden «Cihazları bağla» denmeli."})
-            durum["used"] = True
+            if koken in durum["taken"]:
+                return self._send(403, {
+                    "error": "bu koken zaten aldi",
+                    "note": "Bu sistem bu pencerede zaten bağlandı."})
+            durum["taken"].add(koken)
         return self._send(200, {"token": self.server.config.get("local_token"),
                                 "note": "Bu jeton yalnız bu cihazda saklanır."})
 

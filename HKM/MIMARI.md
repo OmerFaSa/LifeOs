@@ -402,8 +402,8 @@ ağa çıkmaz: `transport` bağımlılığı dışarıdan verilebilir.
 Bearer'sız POST yolu üçtür ve her birinin kendi kapısı vardır:
 `/api/wa/webhook` (isteği Meta yollar; kapısı HMAC imzası),
 `/api/tg/webhook` (kapısı kurulumdaki gizli başlık; sır yoksa kapalı) ve
-`/api/pair` (kapısı HKM yüzünde açılan tek kullanımlık, süreli eşleme
-penceresi, yalnız yerel köken). WhatsApp'ın `GET` tarafı yalnız doğru
+`/api/pair` (kapısı HKM yüzünde açılan köken başına tek kullanımlık,
+süreli eşleme penceresi, yalnız yerel köken, en fazla dört köken). WhatsApp'ın `GET` tarafı yalnız doğru
 `verify_token` ile gelen meydan okumayı yansıtır.
 
 WhatsApp'ın çalışması için HKM'nin dışarıdan erişilebilir olması gerekir

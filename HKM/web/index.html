@@ -991,9 +991,10 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
           <span class="tag">Cihazlar</span>
           <p class="muted"><b>Bu ne işe yarar:</b> AYS, SPİ ve ESP'nin HKM'ye
             veri gönderebilmesi için HKM'nin anahtarını bilmesi gerekir.
-            «Cihazları bağla», iki dakikalık <b>tek kullanımlık</b> bir pencere
-            açar: o sırada ilgili sistemde «Bağlan» dediğinde anahtar
-            doğrudan ona verilir. Böylece anahtarı hiçbir yere yapıştırman
+            «Cihazları bağla», iki dakikalık bir pencere açar: o sırada AYS,
+            SPİ ve ESP'nin her birinde «Bağlan» dediğinde anahtar doğrudan
+            ona verilir. Her sistem bu pencereden <b>bir kez</b> alabilir;
+            üçünü tek pencerede bağlayabilirsin. Böylece anahtarı hiçbir yere yapıştırman
             gerekmez — bir sırrı kopyalamak, onu panoya ve tarayıcı
             geçmişine de yazmaktır.</p>
           <p class="muted">Pencere yalnız <b>bu bilgisayardan</b> ve yalnız
@@ -1717,13 +1718,27 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
      kapıyı açık bırakmaz — iki dakika, tek cihaz, yalnız yerel köken. */
   var esleSayac = null;
 
-  function eslemeCiz(kalan){
+  /* Pencere koken basina bir kez verir; daemon yalniz PORTLARI soyler.
+     Bilinmeyen port «başka bir sayfa» diye yazilir — gizlemek, kimin
+     aldigini bilmemek olurdu. */
+  var ESLEME_PORT = { 4173:'AYS', 4183:'SPİ', 4193:'ESP', 4200:'HKM yüzü' };
+  function baglananlar(d){
+    var l = (d && d.ports) || [];
+    if(!l.length) return '';
+    return 'Bağlananlar: ' + l.map(function(p){
+      return ESLEME_PORT[p] || ('başka bir sayfa (' + p + ')');
+    }).join(', ') + '.';
+  }
+
+  function eslemeCiz(kalan, d){
     var k = $('esleme');
     k.hidden = false;
+    var b = baglananlar(d);
     k.innerHTML = '<div class="tag">Eşleme penceresi</div>'
-      + '<p><b>' + esc(kalan) + ' saniye</b> — şimdi AYS, SPİ ya da ESP\'de '
-      + '<b>Ayarlar → HKM işareti → Bağlan</b> de. Pencere tek cihaz bağlar; '
-      + 'süre dolunca kendiliğinden kapanır.</p>'
+      + '<p><b>' + esc(kalan) + ' saniye</b> — şimdi AYS, SPİ ve ESP\'de '
+      + '<b>Ayarlar → HKM işareti → Bağlan</b> de. Her sistem bu pencereden '
+      + 'bir kez bağlanır; süre dolunca kendiliğinden kapanır.</p>'
+      + (b ? '<p>' + esc(b) + '</p>' : '')
       + '<p class="muted">Jeton hiçbir ekranda yazılmaz ve hiçbir kayda '
       + 'geçmez; cihaz onu doğrudan alır ve kendinde saklar.</p>';
   }
@@ -1738,12 +1753,12 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       if(!d.body.open){
         clearInterval(esleSayac); esleSayac = null;
         $('esleme').innerHTML = '<div class="tag">Eşleme penceresi</div>'
-          + '<p class="muted">' + (d.body.used
-            ? 'Bir cihaz bağlandı; pencere kapandı.'
-            : 'Süre doldu; pencere kapandı.') + '</p>';
+          + '<p class="muted">' + esc(d.body.used
+            ? 'Pencere kapandı. ' + baglananlar(d.body)
+            : 'Süre doldu; hiçbir sistem bağlanmadan pencere kapandı.') + '</p>';
         return;
       }
-      eslemeCiz(d.body.seconds_left);
+      eslemeCiz(d.body.seconds_left, d.body);
     }, 1000);
     eslemeCiz(r.body.seconds);
   }

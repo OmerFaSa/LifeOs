@@ -27,9 +27,13 @@ arka planda çalışır.
 
 Üç sistemi bağlamak da jeton kopyalamadan olur:
 
-1. Yüzde **Yönetim → Cihazları bağla** — iki dakikalık, **tek kullanımlık**
-   bir pencere açılır
-2. AYS / SPİ / ESP → Ayarlar → HKM işareti → **Bağlan**
+1. Yüzde **Yönetim → Cihazları bağla** — iki dakikalık bir pencere açılır
+2. AYS, SPİ ve ESP'nin her birinde → Ayarlar → HKM işareti → **Bağlan**
+
+Pencere **köken başına tek kullanımlıktır**: üç sistem aynı pencerede
+birer kez bağlanır (en fazla dört köken: yüz + üç sistem). Üç sistem ayrı
+portlarda, yani ayrı tarayıcı depolarında durduğu için biri bağlandı diye
+öteki jetonu göremez; her biri kendi «Bağlan»ına basmalıdır.
 
 Pencereyi yalnız jetonu zaten bilen taraf açabilir; jeton yalnız yerel
 kökene verilir ve pencere ilk cihazda kapanır. Her sistem için pencereyi
@@ -143,8 +147,8 @@ Bearer'sız POST yolu **üçtür**; her birinin kendi kapısı vardır:
 - `POST /api/tg/webhook` — Telegram imza yerine kurulumda verdiğin **gizli
   başlığı** geri gönderir; sır tanımsızsa bu webhook kapalıdır.
 - `POST /api/pair` — cihaz eşleme. İsteyen taraf jetonu zaten bilmez;
-  kapısı HKM yüzünde «Cihazları bağla» ile açılan **tek kullanımlık, süreli
-  pencere**, yalnız yerel köken ve deneme sınırıdır.
+  kapısı HKM yüzünde «Cihazları bağla» ile açılan **köken başına tek
+  kullanımlık, süreli pencere**, yalnız yerel köken ve deneme sınırıdır.
 
 ## 4. Telegram — iki yol, biri hiçbir kapı açmaz
 
