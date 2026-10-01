@@ -951,3 +951,51 @@ html, body{ background:var(--bg); }
     -webkit-backdrop-filter:none; backdrop-filter:none; }
 }
 
+/* ================================================================
+   YUMUŞAK — iPhone hissi (kullanıcı, 2026-10-02: «tasarımı daha iPhone,
+   daha yumuşak yap»). Renk ve düzen aynı; değişen dokunuş:
+   · düğmeler hap ve çerçevesiz; ikincil düğme gri dolgu (iOS «gray»),
+     basınca hafifçe küçülür,
+   · giriş alanları çerçevesiz gri dolgu, odakta beyaza döner,
+   · bölüm çubuğu iOS'un bölümlü seçicisi: gri ray, seçili beyaz hap,
+   · uyarı kutusu çerçevesiz, yumuşak tonlu; kahraman kartın köşesi büyük,
+   · yazı iOS gibi yumuşatılmış (antialiased).
+   Kartta gölge YOK (sadelik bütçesi); küçük gölge yalnız seçicinin
+   hapında ve açılır katmanda.
+   ================================================================ */
+html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-rendering:optimizeLegibility; }
+
+/* Gri dolgu YALNIZ düz düğmede: ana (koyu), mürekkep, hayalet ve tehlike
+   düğmeleri kendi rengini korur. */
+.btn{ border-color:transparent; border-radius:var(--r-pill); font-weight:600;
+  transition:transform var(--dur-press) var(--ease), background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.btn:not(.btn--primary):not(.btn--ink):not(.btn--ghost):not(.btn--danger){ background:var(--surface-2); }
+.btn:not(.btn--primary):not(.btn--ink):not(.btn--ghost):not(.btn--danger):hover{ background:var(--surface-3); }
+.btn:active:not(:disabled){ transform:scale(.97); }
+.btn--sm, .btn--lg{ border-radius:var(--r-pill); }
+.btn--ghost:hover{ background:var(--surface-2); }
+@media (prefers-reduced-motion:reduce){ .btn:active:not(:disabled){ transform:none; } }
+
+.input, .select, .textarea{ border-color:transparent; background:var(--surface-2); border-radius:12px; }
+.input:hover, .select:hover, .textarea:hover{ border-color:transparent; background:color-mix(in oklab, var(--surface-3) 60%, var(--surface-2)); }
+.input:focus, .select:focus, .textarea:focus{ background:var(--surface); border-color:transparent;
+  box-shadow:0 0 0 2px var(--primary), 0 0 0 5px var(--ring); }
+.input--ghost{ background:transparent; }
+
+.notice{ border-color:transparent; border-radius:var(--r-md); }
+
+.site--v5 .nextup, .kahraman .nextup{ border-radius:var(--r); }
+
+/* Bölümlü seçici (Genel bakış · Ayrıntı): gri ray, seçili beyaz hap. */
+.site--v5 .bolumcubugu{ display:inline-flex; gap:2px; padding:3px; border:0; border-radius:12px; max-width:100%;
+  background:color-mix(in oklab, var(--text) 7%, var(--bg)); }
+.site--v5 .bolumcubugu__ad{ height:30px; padding:0 16px; border-radius:9px; font-size:13px; font-weight:500;
+  color:var(--text-2); transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.site--v5 .bolumcubugu__ad:hover{ color:var(--text); }
+.site--v5 .bolumcubugu__ad.is-on{ background:var(--surface); color:var(--text); font-weight:600;
+  box-shadow:0 0 0 .5px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.08); }
+.site--v5 .bolumcubugu__ad.is-on::after{ display:none; }
+@media (min-width:680px){
+  html.kenar-dar .site--v5 .bolumcubugu--kabuk{ display:inline-flex; background:color-mix(in oklab, var(--text) 7%, var(--bg)); }
+}
+
