@@ -60,7 +60,12 @@
         expect(K.kenarDarMi()).toBe(true);
         expect(btn.getAttribute('aria-expanded')).toBe('false');
         let kayit = null; try{ kayit = localStorage.getItem('lifeos.kenar'); }catch(e){}
-        expect(kayit).toBe('dar');
+        /* Dar varsayılandır: kayıt yalnız kalıcı AÇIK için tutulur. */
+        expect(kayit).toBe(null);
+        K.kenarDar(false);
+        try{ kayit = localStorage.getItem('lifeos.kenar'); }catch(e){}
+        expect(kayit).toBe('acik');
+        K.kenarDar(true);
         /* Dar şeritte çekmece adı GÖRSEL olarak saklanır ama erişilebilir ad kalır. */
         const site = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays',
           cekmeceler:[{ id:'bugun', ad:'Bugün', route:'today', on:true }] }) + '</div>');
@@ -72,6 +77,12 @@
         }
         site.remove(); d.remove();
       }finally{ K.kenarDar(eski); try{ localStorage.removeItem('lifeos.kenar'); }catch(e){} }
+    });
+
+    it('sade: kenar varsayılan olarak dar; yalnız kalıcı açılan açık kalır', () => {
+      expect(K.kenarIlkDar(null)).toBe(true);
+      expect(K.kenarIlkDar('dar')).toBe(true);
+      expect(K.kenarIlkDar('acik')).toBe(false);
     });
 
     it('sekiz çekmece: ad ve sıra kullanıcı kararıyla aynı', () => {

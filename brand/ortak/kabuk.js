@@ -621,15 +621,21 @@ window.LIFEOS = window.LIFEOS || {};
     if(typeof document === 'undefined') return;
     const dar = v == null ? !kenarDarMi() : !!v;
     document.documentElement.classList.toggle('kenar-dar', dar);
-    try{ if(dar) localStorage.setItem(KENAR_ANAHTAR, 'dar'); else localStorage.removeItem(KENAR_ANAHTAR); }catch(e){}
+    try{ if(dar) localStorage.removeItem(KENAR_ANAHTAR); else localStorage.setItem(KENAR_ANAHTAR, 'acik'); }catch(e){}
     document.querySelectorAll('[data-kenar-ac]').forEach(b => {
       b.setAttribute('aria-expanded', dar ? 'false' : 'true');
       b.setAttribute('aria-label', 'Kenar çubuğunu ' + (dar ? 'aç' : 'daralt'));
     });
     return dar;
   }
+  /* SADE (kullanici, 2026-10-01): kenar VARSAYILAN olarak dardir ve
+     uzerine gelince acilir (kabuk.css). Yalniz dugmeyle kalici acilan
+     kenar acik kalir ('acik'). Eski 'dar' kaydi da dar demektir. */
+  function kenarIlkDar(kayit){ return kayit !== 'acik'; }
   if(typeof document !== 'undefined'){
-    try{ if(localStorage.getItem(KENAR_ANAHTAR) === 'dar') document.documentElement.classList.add('kenar-dar'); }catch(e){}
+    let kayit = null;
+    try{ kayit = localStorage.getItem(KENAR_ANAHTAR); }catch(e){}
+    if(kenarIlkDar(kayit)) document.documentElement.classList.add('kenar-dar');
   }
 
   let kuruldu = false;
@@ -661,6 +667,6 @@ window.LIFEOS = window.LIFEOS || {};
     simge, modulIsareti, adres, simdiOrani, saatMetni,
     ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, bolumCubugu, altBant, menuSayfasi,
     modulMenusu, bildirimPaneli, hizliEkle,
-    katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis, kenarDar, kenarDarMi,
+    katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis, kenarDar, kenarDarMi, kenarIlkDar,
   });
 })();

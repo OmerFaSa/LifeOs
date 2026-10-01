@@ -563,7 +563,9 @@ R.Screens.today = (function(){
     const goBtn = (label, route) => c.Button({ label, size:'sm', act:'go', data:{ 'data-route':route } });
     /* Her uyarı tonuyla döner: Bugün yalnız EN ACİL olanı gösterir
        (Şimdi alanı), hepsi Ayrıntı'da durur. */
-    const ekle = (tone, o) => out.push({ tone, kart:c.Notice(Object.assign({ tone }, o)) });
+    /* `sakin`: Bugün'de durmaz, yalnız Ayrıntı'da (yedek hatırlatması bir
+       iş değil bir bakımdır; kullanıcı, 2026-10-01: «yedekleme yazısını sil»). */
+    const ekle = (tone, o, sakin) => out.push({ tone, sakin:!!sakin, kart:c.Notice(Object.assign({ tone }, o)) });
 
     if(untilStart > 0){
       ekle('info', { title:untilStart+' gün sonra başlıyor.',
@@ -581,7 +583,7 @@ R.Screens.today = (function(){
     if(M.backupDue()){
       const age = M.backupAgeDays();
       ekle('info', { title:'Yedekleme.',
-        body:html`${age === null ? 'Henüz hiç yedek almadın.' : 'Son yedeğin '+age+' gün önce alındı.'} Tarayıcı verisi silinirse çalışma geçmişin kaybolur. ${goBtn('Yedek al','guide')}` });
+        body:html`${age === null ? 'Henüz hiç yedek almadın.' : 'Son yedeğin '+age+' gün önce alındı.'} Tarayıcı verisi silinirse çalışma geçmişin kaybolur. ${goBtn('Yedek al','guide')}` }, true);
     }
     const debt = C.analysisDebt();
     if(debt.length){
@@ -898,6 +900,8 @@ R.Screens.today = (function(){
   function uyarilar(){
     return Banners().sort((a, b) => (AGIRLIK[b.tone] || 0) - (AGIRLIK[a.tone] || 0));
   }
+  /* Bugün'deki tek uyarı: sakin olmayan en acil; geri kalanı Ayrıntı'da. */
+  function bugunUyarisi(l){ return (l || uyarilar()).find(u => !u.sakin) || null; }
 
   function AkisSatiri(b, siradaki){
     const d = b.startedAt ? 'suruyor' : b.status;
@@ -1176,9 +1180,11 @@ R.Screens.today = (function(){
       govde:html`<div class="durumkart__sayi">${sayiH({ deger:borc, birim:'%', kesinlik:kartVar ? 'computed' : 'missing',
           formul:'geciken kart ÷ vadeli kart', girdiler:kartVar ? [{ ad:'geciken', deger:geciken, kesinlik:'measured' },
             { ad:'vadeli', deger:vadeli, kesinlik:'measured' }] : [] })}
-          ${when(borc != null && borc > esik, () => html`<span class="durumkart__fark is-azaldi">eşik üstü</span>`)}</div>
+          ${when(!cubuk && borc != null && borc > esik, () => html`<span class="durumkart__fark is-azaldi">eşik üstü</span>`)}</div>
         ${cubuk}
-        <p class="durumkart__not">${terim('esik', 'Eşik')} %${esik}${when(vadeli && geciken != null, () => ' · ' + geciken + ' geciken ÷ ' + vadeli + ' vadeli kart')}</p>`,
+        ${/* Eşik çubuğu (029) eşiği ve farkı zaten yazar; not yalnız sayımı
+             söyler (sadelik: aynı değer üç kez yazıyordu). */''}
+        <p class="durumkart__not">${cubuk ? '' : html`${terim('esik', 'Eşik')} %${esik}`}${when(vadeli && geciken != null, () => (cubuk ? '' : ' · ') + geciken + ' geciken ÷ ' + vadeli + ' vadeli kart')}</p>`,
       ayak:vadeli ? c.Button({ label:'Tekrara git', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'cards' } }) : null });
   }
 
@@ -1242,7 +1248,7 @@ R.Screens.today = (function(){
     const n = M.currentWeek();
     await M.ensureWeek(n);
     const day = await M.ensureDay(U.today());
-    const acil = uyarilar()[0];
+    const acil = bugunUyarisi();
     const oneri = R.Screens.onaylar && R.Screens.onaylar.bekleyen() ? R.Screens.onaylar.oneriAlani() : '';
 
     return html`<div class="bugun" data-oz="003">
@@ -1258,12 +1264,11 @@ R.Screens.today = (function(){
           ${SayacKutusu(day, dateISO)}
           ${SonDenemeKutusu()}
           ${TekrarBorcuKutusu()}
-          <div class="bugun__genis">${AkisKutusu(day)}</div>
-        </section>
-      </div>
-      <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket sr-only" aria-hidden="true">Özet</h2>
+          ${/* Özet sağ sütunda tek başına küçük bir kutuydu ve sayfanın
+               yarısı boş kalıyordu (kullanıcı, 2026-10-01): Durum'un ikili
+               rafında tekrar borcunun eşi. */''}
           ${OzetKutusu(day, dateISO)}
+          <div class="bugun__genis">${AkisKutusu(day)}</div>
           ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
         </section>
         ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
@@ -1283,7 +1288,8 @@ R.Screens.today = (function(){
     const week = S.weeks[M.weekId(n)];
     const wd = R.WEEKDAYS[day.dow];
 
-    const banners = uyarilar().slice(1).map(b => b.kart);
+    const tum = uyarilar(), acil = bugunUyarisi(tum);
+    const banners = tum.filter(b => b !== acil).map(b => b.kart);
 
     return c.Grid(html`
       ${when(banners.length, () => c.Span(12, html`<div class="stack-sm">${banners}</div>`))}

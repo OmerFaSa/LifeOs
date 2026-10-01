@@ -33,12 +33,12 @@
 :root{
   /* v4 acik yuzey · metin · cizgi (jeton.css --bg --surface --text
      --text-2 --border --border-strong). */
-  --bg:#F7F8FA; --yuzey:#FFFFFF; --fg:#111318; --dim:#5E6572;
-  --line:#E8EAEE; --line-strong:#D3D7DE;
+  --bg:#F2F2F7; --yuzey:#FFFFFF; --fg:#111318; --dim:#5E6572;
+  --line:#E5E5EA; --line-strong:#D1D1D6;
   /* yon ve uyari: --ok-ink --accent --bad-ink */
   --ok:#17784A; --warn:#8C6400; --danger:#C0372F;
   /* Merkez moru (--mer-ink): kullanicinin karar verecegi yer. */
-  --accent:#7453D4; --mer-t:#F1EEFB; --yuzey-2:#F1F2F5;
+  --accent:#7453D4; --mer-t:#F1EEFB; --yuzey-2:#F2F2F7;
   /* Vurgu renginin UZERINE gelen metin ayri bir jetondur: koyu temada
      vurgu acilir ve uzerine beyaz yazmak kontrasti 2,2'ye dusuruyordu. */
   --on-accent:#ffffff;
@@ -52,16 +52,16 @@
 /* Koyu: jeton.css'in --d-* degerleri (vitrinin koyu temasi). */
 @media (prefers-color-scheme: dark){
   html:not([data-tema="acik"]) {
-    --bg:#09090B; --yuzey:#111215; --fg:#EDEEF0; --dim:#A3A9B4;
-    --line:#222429; --line-strong:#32353C;
+    --bg:#000000; --yuzey:#1C1C1E; --fg:#F5F5F7; --dim:#AEAEB2;
+    --line:#2C2C2E; --line-strong:#3A3A3C;
     --ok:#3FBF7F; --warn:#D9A441; --danger:#F06A62;
-    --accent:#9A86FF; --on-accent:#09090B; --mer-t:#1B1730; --yuzey-2:#18191D; }
+    --accent:#9A86FF; --on-accent:#09090B; --mer-t:#1B1730; --yuzey-2:#2C2C2E; }
 }
 html[data-tema="koyu"]{
-  --bg:#09090B; --yuzey:#111215; --fg:#EDEEF0; --dim:#A3A9B4;
-  --line:#222429; --line-strong:#32353C;
+  --bg:#000000; --yuzey:#1C1C1E; --fg:#F5F5F7; --dim:#AEAEB2;
+  --line:#2C2C2E; --line-strong:#3A3A3C;
   --ok:#3FBF7F; --warn:#D9A441; --danger:#F06A62;
-  --accent:#9A86FF; --on-accent:#09090B; --mer-t:#1B1730; --yuzey-2:#18191D;
+  --accent:#9A86FF; --on-accent:#09090B; --mer-t:#1B1730; --yuzey-2:#2C2C2E;
 }
 *{ box-sizing:border-box; }
 /* [hidden] ozniteligi, .row gibi display veren bir SINIFA yenilir:

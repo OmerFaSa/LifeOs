@@ -740,22 +740,36 @@ a.kenar__modul:hover{ color:var(--text); }
 /* Dar şerit: yalnız simgeler. Adlar GÖRSEL olarak saklanır (erişilebilir
    ad kalır); üzerine gelince title söyler. */
 @media (min-width:680px){
-  html.kenar-dar .site--v5{ grid-template-columns:64px minmax(0,1fr); }
-  html.kenar-dar .kenar{ padding:14px 8px 12px; align-items:center; gap:14px; }
-  html.kenar-dar .kenar__marka{ padding:0; justify-content:center; width:40px; }
-  html.kenar-dar .kenar__marka span, html.kenar-dar .kenar__bolumler, html.kenar-dar .kenar__bag span,
-  html.kenar-dar .kenar__rutbe span, html.kenar-dar .kenar__rutbe .kbk-ic{ display:none; }
-  html.kenar-dar .kenar__moduller{ grid-template-columns:1fr; width:44px; padding:3px; }
-  html.kenar-dar .kenar__modul{ height:30px; }
-  html.kenar-dar .kenar__modul span, html.kenar-dar .kenar__ad{ position:absolute; width:1px; height:1px; overflow:hidden;
+  html.kenar-dar .site--v5:has(> .kenar){ grid-template-columns:64px minmax(0,1fr); }
+  /* SADE (kullanici, 2026-10-01: «sol taraftaki kart hep kapali olsun,
+     uzerine gelince acilsin»): dar serit uzerine gelince ya da klavyeyle
+     odaklaninca icerigin USTUNE acilir; icerik kaymaz. Acik hali acilir
+     katmandir, golge yalniz orada. Dar kurallari yalniz KAPALIYKEN gecerli
+     (:not(:hover):not(:focus-within)); acikken tam kenarin kurallari kalir. */
+  html.kenar-dar .site--v5 > .kenar{ width:64px; z-index:calc(var(--z-nav) + 5);
+    transition:width var(--dur) var(--ease), box-shadow var(--dur) var(--ease); overflow:hidden; }
+  html.kenar-dar .site--v5 > .kenar:hover, html.kenar-dar .site--v5 > .kenar:focus-within{
+    width:240px; box-shadow:var(--shadow-lg); overflow-y:auto; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within){ padding:14px 8px 12px; align-items:center; gap:14px; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__marka{ padding:0; justify-content:center; width:40px; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__marka span,
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__bolumler,
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__bag span,
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__rutbe span,
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__rutbe .kbk-ic{ display:none; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__moduller{ grid-template-columns:1fr; width:44px; padding:3px; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__modul{ height:30px; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__modul span,
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__ad{ position:absolute; width:1px; height:1px; overflow:hidden;
     clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
-  html.kenar-dar .kenar__cekmece-kap{ display:flex; justify-content:center; }
-  html.kenar-dar .kenar__cekmece{ width:44px; height:40px; justify-content:center; padding:0; position:relative; }
-  html.kenar-dar .kenar__sayac{ position:absolute; top:2px; right:2px; min-width:16px; height:16px; font-size:10px; padding:0 4px; }
-  html.kenar-dar .kenar__bag, html.kenar-dar .kenar__rutbe{ justify-content:center; padding:10px; }
-  html.kenar-dar .kenar__dip{ align-items:center; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__cekmece-kap{ display:flex; justify-content:center; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__cekmece{ width:44px; height:40px; justify-content:center; padding:0; position:relative; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__sayac{ position:absolute; top:2px; right:2px; min-width:16px; height:16px; font-size:10px; padding:0 4px; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__bag,
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__rutbe{ justify-content:center; padding:10px; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__dip{ align-items:center; }
   html.kenar-dar .bolumcubugu--kabuk{ display:flex; position:sticky; top:var(--ust-h); z-index:calc(var(--z-nav) - 1);
-    background:var(--surface); margin:-8px 0 20px; }
+    background:var(--bg); margin:-8px 0 20px; }
 }
 
 /* Geniş sayfa: içerik yatayda daha çok yer kullanır. */
@@ -766,3 +780,80 @@ a.kenar__modul:hover{ color:var(--text); }
   .bugun__sol, .bugun__sag{ display:flex; flex-direction:column; gap:28px; min-width:0; }
   .bugun__sol:empty, .bugun__sag:empty{ display:none; }
 }
+
+/* ================================================================
+   SADE — iOS gibi sakin yüzey (kullanıcı, 2026-10-01: «çok minimalist,
+   gösterişten uzak, kartlar arka planla karışmasın, premium»).
+   Kart zeminden TON farkıyla ayrılır: çizgi yok, gölge yok, köşe 18.
+   Kartın içindeki ayraçlar en hafif çizgiyle; başlık satırı ayrılmaz.
+   ================================================================ */
+.kutu, .card, .site--v5 .ledger .lrow{ border-color:transparent; border-radius:var(--r); }
+.kutu__bas{ border-bottom:0; padding-bottom:var(--sp-2); }
+.kutu__ad{ font-size:16px; font-weight:600; letter-spacing:-.015em; }
+.site--v5 .sayfa{ background:var(--bg); }
+.site--v5 > .kenar{ background:var(--sidebar); border-right:0; }
+.kenar__cekmece.is-on{ background:var(--sidebar-active); }
+html, body{ background:var(--bg); }
+.ust.ust--v5{ background:color-mix(in oklab, var(--bg) 82%, transparent); border-bottom-color:transparent;
+  box-shadow:none; -webkit-backdrop-filter:saturate(180%) blur(20px); backdrop-filter:saturate(180%) blur(20px); }
+.site--v5 .sayfasonu{ background:var(--bg); border-top:0; }
+/* Bugün TEK SÜTUN ve ortalı (kullanıcı, 2026-10-01: sağ sütunda tek küçük
+   kutu, sayfanın yarısı boş). Kartlar içeride ikili rafta durur; okuma
+   genişliği sabit, sayfa başı da aynı genişlikte. */
+.bugun{ display:flex; flex-direction:column; gap:24px; }
+.bugun__sol, .bugun__sag{ display:contents; }
+@media (min-width:1400px){ .bugun{ display:flex; } .bugun__sol, .bugun__sag{ display:contents; } }
+.bugun > .bugun__sol > *, .bugun > .bugun__sag > *{ width:100%; max-width:none; }
+.site--v5 .sayfa:has(.bugun){ max-width:960px; margin-inline:auto; }
+/* Alan etiketleri (Şimdi · Durum · Öneri) yalnız ekran okuyucuya: kartın
+   adı zaten ne olduğunu söylüyor. */
+.bugun__etiket{ position:absolute !important; width:1px; height:1px; overflow:hidden;
+  clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; margin:0; }
+/* Sayfa başı sakin: eylem düğmeleri çerçevesiz, başlık iOS büyük başlığı. */
+.sayfabasi .btn:not(.btn--primary){ box-shadow:none; border-color:transparent; background:transparent; color:var(--text-2); }
+.sayfabasi .btn:not(.btn--primary):hover{ background:var(--surface); color:var(--text); }
+.site--v5, .site--v5 > .site__body{ background:var(--bg); }
+
+/* Daha az söz (2026-10-01):
+   · Üst çubuktaki yol başlığı ve sekmeyi tekrar ediyordu: masaüstünde
+     yalnız modül adı kalır (yol DOM'da ve ekran okuyucuda durur).
+   · Kart ayağı ayrı çizgili satır değil: eylem kartın sonunda sessiz bağ.
+   · Durum kartındaki eşik çubuğu kartın adını ikinci kez yazmaz. */
+@media (min-width:680px){
+  .ust--v5 .ust__yol .ust__yol-ayrac, .ust--v5 .ust__yol .ust__yol-oge{ position:absolute; width:1px; height:1px;
+    overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
+}
+.kutu__ayak{ border-top:0; padding-top:0; }
+.durumkart .esikcubuk__et{ display:none; }
+
+/* ================================================================
+   CAM (liquid glass, ucundan — kullanıcı, 2026-10-01). Yalnız YÜZEN
+   katmanlar camdır: üst çubuk, üzerine gelince açılan kenar, açılır
+   pencere ve alt çekmece. Kartlar opak kalır: okunan şey camın arkasında
+   durmaz. Cam = yarı saydam yüzey + bulanıklık + üst kenarda ince ışık.
+   Tarayıcı desteklemezse yüzey opak düşer (aşağıdaki @supports).
+   ================================================================ */
+:root{
+  --cam:color-mix(in oklab, var(--surface) 68%, transparent);
+  --cam-isik:inset 0 1px 0 rgba(255,255,255,.55), inset 0 0 0 1px rgba(255,255,255,.22);
+  --cam-bulan:saturate(180%) blur(24px);
+}
+:root[data-theme="dark"]{ --cam-isik:inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.06); }
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ --cam-isik:inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.06); }
+}
+@supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  @media (min-width:680px){
+    html.kenar-dar .site--v5 > .kenar:hover, html.kenar-dar .site--v5 > .kenar:focus-within{
+      background:var(--cam); -webkit-backdrop-filter:var(--cam-bulan); backdrop-filter:var(--cam-bulan);
+      box-shadow:var(--cam-isik), var(--shadow-lg); border-radius:0 20px 20px 0; }
+  }
+  .sheet, .popover{ background:var(--cam); -webkit-backdrop-filter:var(--cam-bulan); backdrop-filter:var(--cam-bulan);
+    box-shadow:var(--cam-isik), var(--shadow-lg); border-color:transparent; }
+  .ust.ust--v5{ box-shadow:inset 0 -1px 0 color-mix(in oklab, var(--border) 60%, transparent); }
+}
+@media (prefers-reduced-transparency:reduce){
+  .sheet, .popover, html.kenar-dar .site--v5 > .kenar:hover{ background:var(--surface);
+    -webkit-backdrop-filter:none; backdrop-filter:none; }
+}
+

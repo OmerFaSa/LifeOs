@@ -26,23 +26,26 @@
 
 :root{
   /* ---- yüzey ---- */
-  --bg:#F7F8FA;
+  /* SADE (kullanici, 2026-10-01: «kartlar arka planla karismasin, iPhone gibi
+     premium»): iOS gruplu zemin. Kart beyaz ve CIZGISIZ; zeminden TON farkiyla
+     ayrilir (gölge hâlâ yalniz acilir katmanda). */
+  --bg:#F2F2F7;
   --surface:#FFFFFF;
-  --surface-2:#F1F2F5;
-  --surface-3:#E8EAEE;
+  --surface-2:#F2F2F7;
+  --surface-3:#E5E5EA;
   --surface-hover:color-mix(in oklab, var(--surface) 55%, var(--bg));
-  --sidebar:#FFFFFF;
-  --sidebar-active:#F1F2F5;
+  --sidebar:#F2F2F7;
+  --sidebar-active:#FFFFFF;
 
   /* ---- metin ---- */
   --text:#111318;
   --text-2:#5E6572;      /* 5,9:1 beyazda */
-  --text-3:#6A7180;      /* 4,9:1 beyazda — v4'ün #979EAA'sı 2,7:1 olduğu için */
+  --text-3:#66666B;      /* beyazda 5,7:1 · #F2F2F7 zeminde 5,2:1 */
 
   /* ---- çizgi ---- */
-  --border:#E8EAEE;
-  --border-soft:#F1F2F5;
-  --border-strong:#D3D7DE;
+  --border:#E5E5EA;
+  --border-soft:#EFEFF4;
+  --border-strong:#D1D1D6;
   --rule:var(--border-strong);
 
   /* ---- modül renkleri: işaret (v4) + yazı (AA) + açık ton ---- */
@@ -94,7 +97,7 @@
   --r-xs:6px;
   --r-sm:8px;
   --r-md:10px;
-  --r:14px;
+  --r:18px;
   --r-pill:999px;
 
   /* ---- boşluk: 4 · 8 · 12 · 16 · 24 · 32 (· 40) ---- */
@@ -143,27 +146,28 @@
      Tema önizlemesi (181) geçerli tema koyuyken de AÇIK örneği çizer;
      koyu temada --bg artık açık değer değildir. Bu beş değer yukarıdaki
      açık yüzey ve metinle AYNI olmak zorunda (ayar.test.js denetler). */
-  --l-bg:#F7F8FA;
+  --l-bg:#F2F2F7;
   --l-surface:#FFFFFF;
   --l-text:#111318;
-  --l-text-3:#6A7180;
-  --l-border:#E8EAEE;
+  --l-text-3:#66666B;
+  --l-border:#E5E5EA;
 
   /* ================= KOYU — tek tanım (vitrin) =================
      Yalnız aşağıdaki iki eşleme bloğunda kullanılır. */
-  --d-bg:#09090B;
-  --d-surface:#111215;
-  --d-surface-2:#18191D;
-  --d-surface-3:#22252B;
-  --d-surface-hover:#181A1F;
-  --d-sidebar:#0D0E10;
-  --d-sidebar-active:#15171B;
-  --d-text:#EDEEF0;
-  --d-text-2:#A3A9B4;
-  --d-text-3:#8B919C;    /* vitrinin #6E727B'si koyu kartta 3,9:1 */
-  --d-border:#222429;
-  --d-border-soft:#1A1C21;
-  --d-border-strong:#32353C;
+  /* SADE: iOS koyu — siyah zemin, yükseltilmiş gri kart. */
+  --d-bg:#000000;
+  --d-surface:#1C1C1E;
+  --d-surface-2:#2C2C2E;
+  --d-surface-3:#3A3A3C;
+  --d-surface-hover:#242426;
+  --d-sidebar:#000000;
+  --d-sidebar-active:#1C1C1E;
+  --d-text:#F5F5F7;
+  --d-text-2:#AEAEB2;
+  --d-text-3:#98989D;    /* #1C1C1E kartta 5,8:1 */
+  --d-border:#2C2C2E;
+  --d-border-soft:#242426;
+  --d-border-strong:#3A3A3C;
   --d-ays:#4F86FF;  --d-ays-t:#121A2C;
   --d-spi:#2EC4A9;  --d-spi-t:#0E211E;
   --d-esp:#F2A93B;  --d-esp-t:#241A0D;

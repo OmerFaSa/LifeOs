@@ -801,9 +801,12 @@ SP.Screens.today = (function(){
   function uyarilar(){
     const out = M.openFlags().map(f => ({ tone:'danger', kart:P.flagCard(f) }));
     const y = yedekUyarisi();
-    if(y) out.push({ tone:'info', kart:y });
+    /* Yedek hatırlatması SAKİNDİR: Bugün'de durmaz, Ayrıntı'da durur
+       (kullanıcı, 2026-10-01: «yedekleme yazısını sil»). */
+    if(y) out.push({ tone:'info', sakin:true, kart:y });
     return out.sort((a, b) => (AGIRLIK[b.tone] || 0) - (AGIRLIK[a.tone] || 0));
   }
+  function bugunUyarisi(l){ return (l || uyarilar()).find(u => !u.sakin) || null; }
 
   /* Sık yazılan dört ölçüm. Kaydetmek yalnız burada yazılanı değiştirir:
      `save-vitals` ekranda olmayan alana dokunmaz. */
@@ -961,7 +964,13 @@ SP.Screens.today = (function(){
     const gunler = Object.keys(S.vitals || {}).sort().reverse();
     const son = alan => { const t = gunler.find(x => S.vitals[x] && S.vitals[x][alan] != null);
       return t ? { deger:Number(S.vitals[t][alan]), zaman:t } : null; };
-    const satirlar = [['Uyku', 'sleep', 'saat'], ['Kilo', 'weight', 'kg'], ['İstirahat nabzı', 'rhr', 'atım/dk'], ['HRV', 'hrv', 'ms']]
+    /* Bugün girilen değer «Günün ölçümü»nde yazılıdır; burada yalnız bugün
+       girilmemiş ölçünün son değeri durur (sadelik, 2026-10-01). */
+    const bugun = S.vitals && S.vitals[U.todayISO()] || {};
+    const liste = [['Uyku', 'sleep', 'saat'], ['Kilo', 'weight', 'kg'], ['İstirahat nabzı', 'rhr', 'atım/dk'], ['HRV', 'hrv', 'ms']]
+      .filter(([, alan]) => bugun[alan] == null);
+    if(!liste.length) return '';
+    const satirlar = liste
       .map(([ad, alan, birim]) => {
         const s = son(alan);
         return html`<li class="sonolcum__s"><span class="sonolcum__ad">${ad}</span>
@@ -973,7 +982,7 @@ SP.Screens.today = (function(){
   }
 
   async function render(){
-    const acil = uyarilar()[0];
+    const acil = bugunUyarisi();
     const vakti = SP.HatirlatUI ? SP.HatirlatUI.vaktiRow() : '';
     const soru = signalEntry();
     /* Onaylar tek çekmecede: burada yalnız en öndeki kart (screens/onaylar.js). */
@@ -1011,7 +1020,8 @@ SP.Screens.today = (function(){
      öğün, günün sorusu, en acil uyarı) burada tekrar çizilmez; ölçüm
      formu burada bütün alanlarıyla durur. */
   async function renderAyrinti(){
-    const banners = uyarilar().slice(1).map(u => u.kart);
+    const tum = uyarilar(), acil = bugunUyarisi(tum);
+    const banners = tum.filter(u => u !== acil).map(u => u.kart);
     const giris = K.Ledger([dunkuEntry(), formEntry(), tusEntry(), symptomEntry(), statusEntry(), whyEntry()].filter(Boolean));
     const ozet = K.Ledger([egilimEntry(), readinessEntry(), nutritionEntry(), minimumEntry(),
       SP.HatirlatUI ? SP.HatirlatUI.ozetEntry() : null, officeEntry(), moneyEntry()].filter(Boolean));

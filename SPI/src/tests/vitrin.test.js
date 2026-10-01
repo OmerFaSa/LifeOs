@@ -56,6 +56,23 @@
       expect(kutu.textContent).toContain('—');
     });
 
+    /* Sadelik: bugün girilen değer hemen yandaki «Günün ölçümü»nde yazılı;
+       «Son ölçümler» onu ikinci kez yazıyordu. Yalnız BUGÜN girilmemiş
+       ölçünün son değeri burada durur; dördü de bugünse kart çizilmez. */
+    it('sadelik: «Son ölçümler» bugün girilen ölçüyü tekrar yazmaz', async () => {
+      resetState();
+      const bugun = SP.U.todayISO();
+      const ad = k => Array.from(k.querySelectorAll('.kutu')).find(x => (x.querySelector('.kutu__ad') || {}).textContent === 'Son ölçümler');
+      pushVitals(SP.U.iso(SP.U.addDays(SP.U.parse(bugun), -3)), { weight:71.4 });
+      pushVitals(bugun, { sleep:7, rhr:56, hrv:55 });
+      let kutu = ad(dom(await SP.Screens.today.render()));
+      expect(kutu).toBeTruthy();
+      const satir = Array.from(kutu.querySelectorAll('.sonolcum__ad')).map(x => x.textContent.trim());
+      expect(satir.join(',')).toBe('Kilo');
+      pushVitals(bugun, { sleep:7, rhr:56, hrv:55, weight:71.4 });
+      expect(ad(dom(await SP.Screens.today.render()))).toBeFalsy();
+    });
+
     it('oz-018 tartıda 714 yazılınca kaydetmeden sorar; seçilen değer kaydedilir', async () => {
       await withTodayAsync('2026-10-12', async () => {
         resetState();

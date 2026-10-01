@@ -214,6 +214,18 @@
       });
     });
 
+    it('sadelik: yedek hatırlatması Bugün’de durmaz, Ayrıntı’da durur', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const due = R.Model.backupDue;
+        try{
+          R.Model.backupDue = () => true;
+          expect(dom(await R.Screens.today.render()).textContent.indexOf('Yedekleme.')).toBe(-1);
+          expect(dom(await R.Screens.gun.render()).textContent).toContain('Yedekleme.');
+        }finally{ R.Model.backupDue = due; }
+      });
+    });
+
     it('sadelik: Günün akışı planlanan toplam süreyi de söyler', async () => {
       await withTodayAsync('2026-10-12', async () => {
         const gun = await hazirla();
@@ -232,8 +244,10 @@
         const k = dom(await R.Screens.today.render());
         const adlar = Array.from(k.querySelectorAll('.ozet__ad')).map(x => x.textContent.trim());
         expect(adlar.join(',')).toBe('Sınava kalan,Seri');
-        const alan = k.querySelector('.bugun__alan[aria-label="Özet"]');
-        expect(alan.querySelector('.bugun__etiket').classList.contains('sr-only')).toBe(true);
+        /* Özet ayrı bir sağ sütun değil: Durum'un kutularından biri. */
+        expect(k.querySelector('.bugun__alan[aria-label="Özet"]')).toBeNull();
+        expect(k.querySelector('.bugun__alan[aria-label="Durum"] .ozet')).toBeTruthy();
+        expect(k.querySelector('.bugun__sag')).toBeNull();
       });
     });
 
