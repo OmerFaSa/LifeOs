@@ -16,7 +16,7 @@ R.App = (function(){
   const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
   const NAV = [
     { id:'bugun', label:CEK('bugun'), items:[
-      { id:'today', icon:'today', label:'Bugün' },
+      { id:'today', icon:'today', label:'Genel bakış' },   // çekmece adı zaten «Bugün»
       { id:'gun',   icon:'list',  label:'Ayrıntı' },
     ]},
     { id:'plan', label:CEK('plan'), items:[

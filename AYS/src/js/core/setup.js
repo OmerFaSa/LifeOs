@@ -344,6 +344,10 @@ R.Setup = (function(){
     p.level = draft.level;
     p.weakSubjects = draft.weakSubjects;
     p.setupDone = true;
+    /* Kurulum gunu: kopus sayaci (calc.protocolTriggers) bundan onceki
+       gunleri «kayitsiz gun» saymaz. Eski profillerde yoktur; o zaman
+       davranis degismez. */
+    if(!p.setupAt) p.setupAt = U.todayISO();
     await M.saveProfile();
 
     const plan = await M.ensurePlan(true);

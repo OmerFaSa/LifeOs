@@ -368,6 +368,39 @@ function topla(arg){
   document.querySelectorAll('#main button, #main [role="button"], #sheet button, #sheet [role="button"]')
     .forEach(el => { if(gorunur(el) && EVET.test((el.textContent || '').trim().replace(/\s+/g, ' '))) evetTamam++; });
 
+  /* TEKRAR (kullanici, 2026-10-01: «her sey her yerde, hic anlasilir
+     degil»): ayni ekranda iki kez gorunen BASLIK ya da CUMLE. Butce
+     dugmeyi ve boyu sayiyordu ama tekrari gormuyordu: AYS Bugun butcedeyken
+     «Ozet» iki kez, siradaki blok dort kez yaziyordu.
+       baslik — h1..h4, kutu/kart adi; ekran okuyucuya kalan (1 px) sayilmaz
+       cumle  — p/li/dd/small icinde 6+ kelimelik cumle; ic ice ayni yazi
+                bir kez sayilir (en icteki tutulur)
+     Kisa etiketler («veri yok», «Bitti») tekrar degildir: durum sozudur. */
+  const ekranda = el => {
+    if(!gorunur(el)) return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 2 && r.height > 2;
+  };
+  const norm = t => (t || '').replace(/\s+/g, ' ').trim().toLocaleLowerCase('tr');
+  const sayac = new Map();
+  const say = (tur, t) => { if(!t) return; const k = tur + '|' + t; sayac.set(k, (sayac.get(k) || 0) + 1); };
+  const tekrarKok = [main].concat(Array.from(document.querySelectorAll('.sayfabasi')).filter(b => !main.contains(b)));
+  const BASLIK = 'h1, h2, h3, h4, .kutu__ad, .card__title, .hero__title';
+  tekrarKok.forEach(kok => kok.querySelectorAll(BASLIK).forEach(el => {
+    if(el.parentElement && el.parentElement.closest(BASLIK)) return;
+    if(ekranda(el)) say('başlık', norm(el.innerText));
+  }));
+  const CUMLE = 'p, li, dd, small';
+  tekrarKok.forEach(kok => kok.querySelectorAll(CUMLE).forEach(el => {
+    if(el.querySelector(CUMLE) || el.closest(BASLIK) || !ekranda(el)) return;
+    norm(el.innerText).split(/(?<=[.!?])\s+/).forEach(c => {
+      if(kelimeSay(c) >= 6) say('cümle', c);
+    });
+  }));
+  const tekrarlar = [];
+  let tekrar = 0;
+  sayac.forEach((n, k) => { if(n > 1){ tekrar += n - 1; tekrarlar.push(k.replace('|', ': «').slice(0, 90) + '» ×' + n); } });
+
   const halka = gorunenler('svg').filter(s =>
     s.querySelector('circle[stroke-dasharray], circle[style*="dasharray"]')).length;
 
@@ -377,6 +410,7 @@ function topla(arg){
     alanlar,
     oz,
     baslik: ((document.querySelector('.hero__title') || {}).textContent || '').trim(),
+    tekrarlar,
     olcu: {
       kelime: kelimeSay(metin),
       dugme: gorunenler('button, [role="button"], a.btn').length,
@@ -391,6 +425,7 @@ function topla(arg){
       etiketsiz: main.querySelectorAll('.sayi[data-etiketsiz]').length,
       mor,
       evetTamam,
+      tekrar,
       boy: document.documentElement.scrollHeight,
     },
   };
@@ -463,7 +498,9 @@ async function gezinti(tarayici, ad, base, profil, genislik, sonuc){
       if(g !== true){ hatalar.push(rota + ': ' + g); continue; }
 
       const ilk = await sayfa.evaluate(topla, arg);
-      olculer[rota] = ilk.olcu;
+      /* Tekrarlanan yazilarin kendisi de tutulur: «3 tekrar» demek yetmez,
+         sadelik raporu hangisi oldugunu soyler. */
+      olculer[rota] = Object.assign({}, ilk.olcu, { tekrarlar:ilk.tekrarlar });
       birlestir(sonuc.eylemler, ilk.ekran, rota);
       birlestir(sonuc.eylemler, ilk.kabuk, '(kabuk)');
       const r = sonuc.rotalar[rota] || (sonuc.rotalar[rota] = { baslik:'', sekmeler:[], alanlar:[] });

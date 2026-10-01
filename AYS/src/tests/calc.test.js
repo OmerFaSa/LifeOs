@@ -352,7 +352,7 @@
       });
     });
     it('iki hafta ust uste %80 altinda telafi tetikler', function(){
-      resetState();
+      resetState(); S.profile.setupDone = true;
       withToday('2026-11-02', function(){          // Hafta 8 Pazartesi
         seedWeek(6, [['skipped','skipped','done'], [], [], [], [], [], []]);
         seedWeek(7, [['skipped','skipped','done'], [], [], [], [], [], []]);
@@ -361,7 +361,7 @@
       });
     });
     it('yeterli tamamlamada telafi tetiklemez', function(){
-      resetState();
+      resetState(); S.profile.setupDone = true;
       withToday('2026-11-02', function(){
         seedWeek(6, [['done','done','done'], [], [], [], [], [], []]);
         seedWeek(7, [['done','done','done'], [], [], [], [], [], []]);
@@ -370,14 +370,14 @@
       });
     });
     it('3+ gun kayit yoksa kopus protokolu tetikler', function(){
-      resetState();
+      resetState(); S.profile.setupDone = true;
       withToday('2026-11-02', function(){
         const ids = C.protocolTriggers().map(t => t.id);
         expect(ids).toContain('illness-break');
       });
     });
     it('tetiklenen protokol onerisi baslikta undefined tasimaz', function(){
-      resetState();
+      resetState(); S.profile.setupDone = true;
       withToday('2026-11-02', function(){
         const s = R.Auto.suggestions().find(x => x.id === 'proto-illness-break');
         expect(s.title.indexOf('undefined')).toBe(-1);
@@ -385,7 +385,7 @@
       });
     });
     it('Ekim ayinda TYT matematik 8 netin altindaysa tetikler', function(){
-      resetState();
+      resetState(); S.profile.setupDone = true;
       withToday('2026-10-26', function(){
         S.exams = [1,2,3].map((v,i) => makeExam({
           date:'2026-10-0'+(i+1),
@@ -396,7 +396,7 @@
       });
     });
     it('netler dort hafta duzse flat-nets tetikler', function(){
-      resetState();
+      resetState(); S.profile.setupDone = true;
       withToday('2026-11-02', function(){
         S.exams = [45,45,45,45,45,45].map((v,i) => examWithNet('2026-10-0'+(i+1), v));
         const ids = C.protocolTriggers().map(t => t.id);
@@ -404,11 +404,29 @@
       });
     });
     it('ayni protokol aktifken yeniden tetiklenmez', function(){
-      resetState();
+      resetState(); S.profile.setupDone = true;
       withToday('2026-11-02', function(){
         S.protocols = [{ id:'p1', protoId:'illness-break', status:'active', steps:{} }];
         const ids = C.protocolTriggers().map(t => t.id);
         expect(ids.indexOf('illness-break')).toBe(-1);
+      });
+    });
+    /* Kurulumu bitmemiş profilde plan yoktur; sapma ölçülemez. Yeni bir
+       kullanıcı ilk açılışta «7 gündür kayıt yok, telafi tetiklendi»
+       görüyordu. */
+    it('kurulum bitmeden telafi tetiklenmez', function(){
+      resetState(); S.profile.setupDone = false;
+      withToday('2026-11-02', function(){
+        expect(C.protocolTriggers()).toHaveLength(0);
+      });
+    });
+    it('kopus sayaci kurulumdan onceki gunleri saymaz', function(){
+      resetState(); S.profile.setupDone = true;
+      withToday('2026-11-02', function(){
+        S.profile.setupAt = '2026-11-01';
+        expect(C.protocolTriggers().map(t => t.id).indexOf('illness-break')).toBe(-1);
+        S.profile.setupAt = '2026-10-20';
+        expect(C.protocolTriggers().map(t => t.id)).toContain('illness-break');
       });
     });
   });

@@ -12263,7 +12263,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'f80410f', at:'2026-09-27 10:48', dirty:true };
+ESP.BUILD = { id:'61af259', at:'2026-10-01 18:07', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -28667,7 +28667,7 @@ ESP.SECTIONS_ALL = [
        çekmece çizilmez. `disc` artık BÖLÜMDEDİR: disiplin kapanınca yalnız
        onun bölümü düşer, Çalışma kalır. */
     { id:'bugun', icon:'pulse', label:'Bugün', note:'Günün pratiğini gir, karşılığını gör',
-      views:[{ route:'today', label:'Bugün', icon:'pulse' },
+      views:[{ route:'today', label:'Genel bakış', icon:'pulse' },   // çekmece adı zaten «Bugün»
         { route:'gun', label:'Ayrıntı', icon:'list' }] },
 
     { id:'plan', icon:'chart', label:'Plan', note:'Merdiven: her disiplinde bir sonraki basamak',
@@ -40243,10 +40243,16 @@ ESP.Plans = (function(){
        plan kaldırıldı) teklif yeniden üretilebilir hâle gelir — çünkü o
        zaman gerçekten yeniden gerekiyordur. */
     const karar = {};
-    (S.proposals || []).forEach(function(p){ karar[p.id] = p; });
+    const ortakKarar = {};
+    (S.proposals || []).forEach(function(p){
+      karar[p.id] = p;
+      if(ortakMi(p)) ortakKarar[ortakAnahtar(p)] = p;
+    });
 
     return out.filter(function(p){
-      const k = karar[p.id];
+      /* Ortak is (koc + Patron) kimden gelirse gelsin TEK karardir:
+         Koc'un teklifini reddeden, ayni isi Patron adiyla yeniden gormez. */
+      const k = karar[p.id] || (ortakMi(p) ? ortakKarar[ortakAnahtar(p)] : null);
       if(!k) return true;
       if(k.state === 'declined') return false;
       if(k.state === 'accepted') return !stillApplied(k);
@@ -40287,12 +40293,30 @@ ESP.Plans = (function(){
   }
 
   /* Bütün açık masaların teklifleri. */
+  /* ORTAK IS: kapsami 'coach' olan tur (haftalik plan, gunluk taban) hem
+     Koc'un hem Patron'un isidir. Ayni is iki ajan adina iki kart oluyordu;
+     anahtar ajansizdir: tur + teklifin anahtari. */
+  function ortakMi(p){ return !!p && (KIND_BY_ID[p.kind] || {}).scope === 'coach'; }
+  function ortakAnahtar(p){
+    const k = p.payload && p.payload.key;
+    if(k) return p.kind + ':' + k;
+    /* Kayitli teklifte payload olmayabilir: kimligin ajansiz kuyrugu. */
+    return String(p.id || '').replace(/^p:[^:]+:/, '') || (p.kind + ':' + p.title);
+  }
+
   function all(todayISO){
     return ESP.Memo.of('plans.all:' + (todayISO || U.todayISO()), function(){
       /* Kullanicinin onay bekleyen istekleri en ustte: onlari kullanici
          kendisi istedi, ajanin kendi bulgularindan once gelir. */
+      const gorulen = {};
       return istekler().concat(ESP.Mod.activeAgents().reduce(function(acc, a){
-        return acc.concat(proposalsFor(a.id, todayISO));
+        return acc.concat(proposalsFor(a.id, todayISO).filter(function(p){
+          if(!ortakMi(p)) return true;
+          const k = ortakAnahtar(p);
+          if(gorulen[k]) return false;
+          gorulen[k] = true;
+          return true;
+        }));
       }, []));
     });
   }
@@ -49598,18 +49622,16 @@ ESP.Screens.today = (function(){
      Geri kalan her satır «Bugün › Ayrıntı»dadır (renderAyrinti). Sadelik
      bütçesi: sayfa boyu 1800 px, görünen düğme 14. */
   function OzetKutusu(){
-    const rows = M.sessionsOf(gun());
-    const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
     const d = ESP.SRS.deckStatus();
     const hucre = (ad, deger, birim, not) => html`<div class="ozet__hucre">
       <span class="ozet__ad">${ad}</span>
       <b class="ozet__deger">${deger}${when(birim, () => html`<small> ${birim}</small>`)}</b>
       <span class="ozet__not">${not}</span></div>`;
-    /* Girilmemiş gün sıfır değildir: oturum yoksa dakika «—». */
-    return K.Kutu({ ad:'Özet', yuva:'bugün', bitisik:true, govde:html`<div class="ozet">
-      ${hucre('Bugün', rows.length ? U.fmtNum(toplam) : '—', rows.length ? 'dk' : '', rows.length + ' oturum')}
+    /* Yalnız başka yerde OLMAYAN iki sayı: günün dakikası başlıkta, «Günün
+       dakikası» halkasında ve oturum tablosunda; seri üst satırda zaten var
+       (sadelik, 2026-10-01: aynı sayı dört yerde yazıyordu). */
+    return K.Kutu({ ad:'Bekleyen iş', yuva:'bugün', bitisik:true, govde:html`<div class="ozet">
       ${hucre('Vadeli kart', d.due, '', 'tekrar bekliyor')}
-      ${hucre('Seri', M.streak(), 'gün', 'asgari gün tutuldu')}
       ${hucre('Açık disiplin', ESP.Mod.active().length, '', 'Çalışma’da')}
     </div>` });
   }

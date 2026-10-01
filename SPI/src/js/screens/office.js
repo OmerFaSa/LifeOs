@@ -212,7 +212,8 @@ SP.Screens.office = (function(){
       badge:b ? P.sourceBadge(b.source) : K.Badge({ label:'üretilmedi', tone:'muted' }),
       body:html`
         ${when(b, () => html`<p class="small">${b.text}</p>
-          ${when(b.headline, () => html`<p class="small dim mt-8">${b.headline}</p>`)}`)}
+          ${when(b.headline && String(b.text || '').indexOf(b.headline) < 0,
+            () => html`<p class="small dim mt-8">${b.headline}</p>`)}`)}
         ${when(!b, () => K.Notice({ tone:'info',
           body:'Brifing günde bir kez üretilir ve tek model çağrısı harcar. '
              + 'Model kapalıysa kural motorunun cümlesi yazılır.' }))}`,

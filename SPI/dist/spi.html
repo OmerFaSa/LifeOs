@@ -11421,7 +11421,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'0245f48', at:'2026-09-28 02:19', dirty:true };
+SP.BUILD = { id:'61af259', at:'2026-10-01 18:07', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -52125,7 +52125,8 @@ SP.Screens.office = (function(){
       badge:b ? P.sourceBadge(b.source) : K.Badge({ label:'üretilmedi', tone:'muted' }),
       body:html`
         ${when(b, () => html`<p class="small">${b.text}</p>
-          ${when(b.headline, () => html`<p class="small dim mt-8">${b.headline}</p>`)}`)}
+          ${when(b.headline && String(b.text || '').indexOf(b.headline) < 0,
+            () => html`<p class="small dim mt-8">${b.headline}</p>`)}`)}
         ${when(!b, () => K.Notice({ tone:'info',
           body:'Brifing günde bir kez üretilir ve tek model çağrısı harcar. '
              + 'Model kapalıysa kural motorunun cümlesi yazılır.' }))}`,
@@ -55828,7 +55829,7 @@ SP.App = (function(){
   const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
   const SECTIONS = [
     { id:'bugun', label:CEK('bugun'), views:[
-      { route:'today', label:'Bugün' },
+      { route:'today', label:'Genel bakış' },   // çekmece adı zaten «Bugün»
       { route:'gun',   label:'Ayrıntı' },
     ]},
     { id:'plan', label:CEK('plan'), views:[

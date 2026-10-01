@@ -13016,7 +13016,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'0245f48', at:'2026-09-28 02:18', dirty:true };
+R.BUILD = { id:'61af259', at:'2026-10-01 18:07', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -33894,6 +33894,9 @@ R.Calc = (function(){
   function protocolTriggers(){
     // Program baslamadan sapma olcumu anlamli degildir.
     if(M.daysUntilStart() > 0) return [];
+    // Kurulum bitmemisse plan yoktur; «7 gundur kayit yok» yeni bir
+    // kullaniciya ilk acilista telafi oneriyordu.
+    if(!(S.profile && S.profile.setupDone)) return [];
     const hits = [];
     const cur = M.currentWeek();
 
@@ -33925,6 +33928,8 @@ R.Calc = (function(){
     for(let i = 1; i <= 7; i++){
       const dayISO = U.iso(U.addDays(U.today(), -i));
       if(dayISO < R.PLAN.startISO) break;
+      // Kurulumdan onceki gun «kayitsiz gun» degildir: o gun sistem yoktu.
+      if(S.profile.setupAt && dayISO < S.profile.setupAt) break;
       const d = S.days[dayISO];
       const touched = d && (d.blocks.some(b => b.status !== 'pending') || d.paragraphActual > 0);
       if(touched) break;
@@ -51618,6 +51623,10 @@ R.Setup = (function(){
     p.level = draft.level;
     p.weakSubjects = draft.weakSubjects;
     p.setupDone = true;
+    /* Kurulum gunu: kopus sayaci (calc.protocolTriggers) bundan onceki
+       gunleri «kayitsiz gun» saymaz. Eski profillerde yoktur; o zaman
+       davranis degismez. */
+    if(!p.setupAt) p.setupAt = U.todayISO();
     await M.saveProfile();
 
     const plan = await M.ensurePlan(true);
@@ -52572,11 +52581,22 @@ R.Screens.today = (function(){
     </li>`;
   }
 
+  /* Planlanan dakika okunur bicimde: 45 dk · 3 sa · 3 sa 15 dk. */
+  function sureMetni(dk){
+    const n = Math.round(Number(dk) || 0);
+    const sa = Math.floor(n / 60), kalan = n % 60;
+    return sa ? sa + ' sa' + (kalan ? ' ' + kalan + ' dk' : '') : n + ' dk';
+  }
+
   function AkisKutusu(day){
     const bloklar = day.blocks.filter(b => b.slot !== 'Dinlenme');
     const bitti = bloklar.filter(b => b.status === 'done').length;
     const sira = (bloklar.find(b => b.status === 'pending' && !b.startedAt) || {}).id;
-    return c.Kutu({ ad:'Günün akışı', yuva:bloklar.length ? bloklar.length + ' blok · ' + bitti + ' bitti' : '',
+    /* Toplam sure eskiden ayri bir «Gunun acilisi» kartindaydi (006);
+       ayni gun, ayni bloklar ikinci kez yazilmasin diye burada tek satir. */
+    const dk = bloklar.reduce((t, b) => t + (Number(b.targetMin) || 0), 0);
+    return c.Kutu({ ad:'Günün akışı', yuva:bloklar.length ? bloklar.length + ' blok · ' + bitti + ' bitti'
+      + (dk > 0 ? ' · ' + sureMetni(dk) : '') : '',
       bitisik:true,
       govde:bloklar.length
         ? html`<ol class="akis" data-oz="001">${map(bloklar, b => AkisSatiri(b, sira))}</ol>${raw(VT() && bloklar.some(b => b.status === 'pending' && !b.startedAt) ? VT().kaydirIpucu() : '')}`
@@ -52597,11 +52617,12 @@ R.Screens.today = (function(){
       <span class="ozet__ad">${ad}</span>
       <b class="ozet__deger">${sayi(s)}</b>
       <span class="ozet__not">${not}</span></div>`;
-    const yuva = SAYI ? html`${raw(SAYI.kutuGlifi([z.kalan, z.blok, z.kart, z.seri]))}<span>bugün</span>` : 'bugün';
+    /* Yalniz Durum'da OLMAYAN iki sayi: gunun blogu basliktadir ve Gunun
+       akisi'nda, tekrar karti Tekrar borcu kutusunda. Ikinci kez yazilan
+       kart sayisi bir de «%0» diyerek «veri yok» ile celisiyordu. */
+    const yuva = SAYI ? html`${raw(SAYI.kutuGlifi([z.kalan, z.seri]))}<span>bugün</span>` : 'bugün';
     return c.Kutu({ ad:'Özet', yuva, bitisik:true, govde:html`<div class="ozet">
       ${hucre('Sınava kalan', z.kalan, z.kalan.kesinlik === 'estimated' ? 'TYT tarihi tahmini' : 'TYT tarihine')}
-      ${hucre('Bugünün bloğu', z.blok, R.WEEKDAYS[day.dow].label + ' düzeni')}
-      ${hucre('Tekrar kartı', z.kart, 'borç %' + C.cardDebt())}
       ${hucre('Seri', z.seri, seri.streak ? 'minimum gün tutuldu' : 'minimum gün başlatır')}
     </div>` });
   }
@@ -52717,11 +52738,14 @@ R.Screens.today = (function(){
   /* 006 GÜNÜN AÇILIŞI: hiçbir blok başlamamışken iş sayısı, planlanan
      süre ve ilk iş. 007 GÜN KAPANIŞI: bekleyen blok kalmayınca üç sayı;
      süre yalnız ÖLÇÜLMÜŞ dakikadır (girilmemişse «—»). */
-  function gunUcuHtml(day){
+  function gunUcuHtml(day, acilisDa){
     const bl = bloklarOf(day);
     if(!VT() || !bl.length || runningBlock()) return '';
     const bekleyen = bl.filter(b => b.status === 'pending');
     if(bekleyen.length === bl.length && !bl.some(b => b.startedAt)){
+      /* Bugun'de kahraman (042) ayni ilk isi ve ayni «basla»yi zaten
+         gosterir; acilis karti yalniz Ayrinti'da cizilir. */
+      if(!acilisDa) return '';
       const ilk = bekleyen[0];
       return VT().gunAcilisi({ is:bl.length, dk:bl.reduce((t, b) => t + (Number(b.targetMin) || 0), 0),
         modul:'ays', sistem:'AYS', ilk:{ ad:ilk.topic || ilk.subject || ilk.slot, not:ilk.slot },
@@ -52897,7 +52921,7 @@ R.Screens.today = (function(){
         </section>
       </div>
       <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>
+        <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket sr-only" aria-hidden="true">Özet</h2>
           ${OzetKutusu(day, dateISO)}
           ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
         </section>
@@ -52923,6 +52947,7 @@ R.Screens.today = (function(){
     return c.Grid(html`
       ${when(banners.length, () => c.Span(12, html`<div class="stack-sm">${banners}</div>`))}
       ${c.Span(12, HkmSerit())}
+      ${when(gunUcuHtml(day, true), () => c.Span(12, raw(gunUcuHtml(day, true))))}
 
       ${c.Span(6, c.Stack(html`
         ${AutoCard()}
@@ -53351,6 +53376,7 @@ R.Screens.today = (function(){
     lede(){ return ''; },
     cumle:bugunCumlesi,
     ozetSayilari,
+    sureMetni,
     actions(){
       return String(html`
         ${c.Button({ label:'Özeti paylaş', icon:'upload', size:'sm', act:'share-week' })}
@@ -65852,7 +65878,7 @@ R.App = (function(){
   const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
   const NAV = [
     { id:'bugun', label:CEK('bugun'), items:[
-      { id:'today', icon:'today', label:'Bugün' },
+      { id:'today', icon:'today', label:'Genel bakış' },   // çekmece adı zaten «Bugün»
       { id:'gun',   icon:'list',  label:'Ayrıntı' },
     ]},
     { id:'plan', label:CEK('plan'), items:[

@@ -27,7 +27,7 @@ SP.App = (function(){
   const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
   const SECTIONS = [
     { id:'bugun', label:CEK('bugun'), views:[
-      { route:'today', label:'Bugün' },
+      { route:'today', label:'Genel bakış' },   // çekmece adı zaten «Bugün»
       { route:'gun',   label:'Ayrıntı' },
     ]},
     { id:'plan', label:CEK('plan'), views:[

@@ -60,7 +60,32 @@ const DURUMLAR = [
   if(!alanOk) kirmizi++;
   console.log((alanOk ? '  ✓ ' : '  ✕ ') + 'sayfa başındaki seçici ekranın alanıdır; üst çubuk değildir'
     + (alanOk ? '' : ' (gelen ' + a.join(', ') + ')'));
+  /* TEKRAR (kullanıcı, 2026-10-01: «her şey her yerde»): aynı ekranda iki
+     kez görünen başlık ya da cümle. Ekran okuyucuya kalan gizli başlık,
+     farklı yazılar ve büyük/küçük harf farkı tekrar değildir. */
+  const cumle = 'Henüz tam TYT denemesi yok ve net burada kendiliğinden çıkar.';
+  const TEKRAR = [
+    { ad:'tekrar: aynı kutu başlığı iki kez → 1',
+      govde:'<h2>Özet</h2><div class="kutu"><h3 class="kutu__ad">Özet</h3></div>', beklenen:1 },
+    { ad:'tekrar: ekran okuyucuya kalan başlık sayılmaz → 0',
+      govde:'<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Özet</h2>'
+        + '<h3 class="kutu__ad">Özet</h3>', beklenen:0 },
+    { ad:'tekrar: aynı uzun cümle iki kartta → 1',
+      govde:'<p>' + cumle + '</p><div><p>' + cumle + '</p></div>', beklenen:1 },
+    { ad:'tekrar: iç içe aynı yazı tek kez sayılır → 0',
+      govde:'<ul><li><p>' + cumle + '</p></li></ul>', beklenen:0 },
+    { ad:'tekrar: kısa etiket («veri yok») tekrar sayılmaz → 0',
+      govde:'<span>veri yok</span><span>veri yok</span><p>veri yok</p><p>veri yok</p>', beklenen:0 },
+  ];
+  for(const d of TEKRAR){
+    await p.setContent('<style>body{margin:0}</style><main id="main">' + d.govde + '</main>');
+    const r = await p.evaluate(topla, { SEKME, SEKME_GRUBU });
+    const gelen = r.olcu.tekrar;
+    const ok = gelen === d.beklenen;
+    if(!ok) kirmizi++;
+    console.log((ok ? '  ✓ ' : '  ✕ ') + d.ad + (ok ? '' : ' (gelen ' + gelen + ': ' + JSON.stringify(r.tekrarlar) + ')'));
+  }
   await b.close();
-  console.log(kirmizi ? '\n' + kirmizi + ' durum kırmızı.' : '\nÖlçü testi temiz — ' + (DURUMLAR.length + 1) + ' durum.');
+  console.log(kirmizi ? '\n' + kirmizi + ' durum kırmızı.' : '\nÖlçü testi temiz — ' + (DURUMLAR.length + TEKRAR.length + 1) + ' durum.');
   process.exit(kirmizi ? 1 : 0);
 })().catch(e => { console.error('Koşum hatası:', e && e.stack || e); process.exit(2); });

@@ -296,6 +296,9 @@ R.Calc = (function(){
   function protocolTriggers(){
     // Program baslamadan sapma olcumu anlamli degildir.
     if(M.daysUntilStart() > 0) return [];
+    // Kurulum bitmemisse plan yoktur; «7 gundur kayit yok» yeni bir
+    // kullaniciya ilk acilista telafi oneriyordu.
+    if(!(S.profile && S.profile.setupDone)) return [];
     const hits = [];
     const cur = M.currentWeek();
 
@@ -327,6 +330,8 @@ R.Calc = (function(){
     for(let i = 1; i <= 7; i++){
       const dayISO = U.iso(U.addDays(U.today(), -i));
       if(dayISO < R.PLAN.startISO) break;
+      // Kurulumdan onceki gun «kayitsiz gun» degildir: o gun sistem yoktu.
+      if(S.profile.setupAt && dayISO < S.profile.setupAt) break;
       const d = S.days[dayISO];
       const touched = d && (d.blocks.some(b => b.status !== 'pending') || d.paragraphActual > 0);
       if(touched) break;

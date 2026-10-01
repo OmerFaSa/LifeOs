@@ -206,10 +206,16 @@ ESP.Plans = (function(){
        plan kaldırıldı) teklif yeniden üretilebilir hâle gelir — çünkü o
        zaman gerçekten yeniden gerekiyordur. */
     const karar = {};
-    (S.proposals || []).forEach(function(p){ karar[p.id] = p; });
+    const ortakKarar = {};
+    (S.proposals || []).forEach(function(p){
+      karar[p.id] = p;
+      if(ortakMi(p)) ortakKarar[ortakAnahtar(p)] = p;
+    });
 
     return out.filter(function(p){
-      const k = karar[p.id];
+      /* Ortak is (koc + Patron) kimden gelirse gelsin TEK karardir:
+         Koc'un teklifini reddeden, ayni isi Patron adiyla yeniden gormez. */
+      const k = karar[p.id] || (ortakMi(p) ? ortakKarar[ortakAnahtar(p)] : null);
       if(!k) return true;
       if(k.state === 'declined') return false;
       if(k.state === 'accepted') return !stillApplied(k);
@@ -250,12 +256,30 @@ ESP.Plans = (function(){
   }
 
   /* Bütün açık masaların teklifleri. */
+  /* ORTAK IS: kapsami 'coach' olan tur (haftalik plan, gunluk taban) hem
+     Koc'un hem Patron'un isidir. Ayni is iki ajan adina iki kart oluyordu;
+     anahtar ajansizdir: tur + teklifin anahtari. */
+  function ortakMi(p){ return !!p && (KIND_BY_ID[p.kind] || {}).scope === 'coach'; }
+  function ortakAnahtar(p){
+    const k = p.payload && p.payload.key;
+    if(k) return p.kind + ':' + k;
+    /* Kayitli teklifte payload olmayabilir: kimligin ajansiz kuyrugu. */
+    return String(p.id || '').replace(/^p:[^:]+:/, '') || (p.kind + ':' + p.title);
+  }
+
   function all(todayISO){
     return ESP.Memo.of('plans.all:' + (todayISO || U.todayISO()), function(){
       /* Kullanicinin onay bekleyen istekleri en ustte: onlari kullanici
          kendisi istedi, ajanin kendi bulgularindan once gelir. */
+      const gorulen = {};
       return istekler().concat(ESP.Mod.activeAgents().reduce(function(acc, a){
-        return acc.concat(proposalsFor(a.id, todayISO));
+        return acc.concat(proposalsFor(a.id, todayISO).filter(function(p){
+          if(!ortakMi(p)) return true;
+          const k = ortakAnahtar(p);
+          if(gorulen[k]) return false;
+          gorulen[k] = true;
+          return true;
+        }));
       }, []));
     });
   }

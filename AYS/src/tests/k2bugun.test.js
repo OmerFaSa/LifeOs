@@ -197,6 +197,46 @@
       });
     });
 
+    /* SADELİK — aynı bilgi Bugün'de bir kez söylenir (kullanıcı, 2026-10-01:
+       «her şey her yerde, hiç anlaşılır değil»). Sıradaki blok başlıkta ve
+       kahramanda durur; günün açılışı kartı aynı işi, aynı «başla» eylemini
+       üçüncü kez tekrarlıyordu. Özet kutusu Durum'daki sayıları ikinci kez
+       yazıyordu ve tekrar borcunu bir yerde «veri yok», öbüründe «%0» diye
+       çeliştiriyordu. */
+    it('sadelik: günün açılışı (006) Bugün\'de kahramanı tekrarlamaz, Ayrıntı\'da durur', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const k = dom(await R.Screens.today.render());
+        expect(k.querySelector('[data-oz="042"]')).toBeTruthy();
+        expect(k.querySelector('[data-oz~="006"]')).toBeNull();
+        const a = dom(await R.Screens.gun.render());
+        if(window.LIFEOS && LIFEOS.VITRIN) expect(a.querySelector('[data-oz~="006"]')).toBeTruthy();
+      });
+    });
+
+    it('sadelik: Günün akışı planlanan toplam süreyi de söyler', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        const gun = await hazirla();
+        const bl = gun.blocks.filter(b => b.slot !== 'Dinlenme');
+        const dk = bl.reduce((t, b) => t + (Number(b.targetMin) || 0), 0);
+        const akis = durumKart(dom(await R.Screens.today.render()), 'Günün akışı');
+        const yuva = akis.querySelector('.kutu__yuva').textContent;
+        expect(yuva).toContain(bl.length + ' blok · 0 bitti');
+        if(dk > 0) expect(yuva).toContain(R.Screens.today.sureMetni(dk));
+      });
+    });
+
+    it('sadelik: Özet yalnız Durum\'da olmayan sayıları taşır; alan adı kutu adıyla iki kez görünmez', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const k = dom(await R.Screens.today.render());
+        const adlar = Array.from(k.querySelectorAll('.ozet__ad')).map(x => x.textContent.trim());
+        expect(adlar.join(',')).toBe('Sınava kalan,Seri');
+        const alan = k.querySelector('.bugun__alan[aria-label="Özet"]');
+        expect(alan.querySelector('.bugun__etiket').classList.contains('sr-only')).toBe(true);
+      });
+    });
+
     it('oz-024 Ekrandaki her sayı brand/ortak/kesinlik ile işaretli; «veri yok» olan sayı hiçbir yerde 0 olarak çizilmez. (AYS Bugün › Özet)', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
@@ -204,7 +244,7 @@
         let k = dom(await R.Screens.today.render());
         const ozet = k.querySelector('.ozet');
         const sayilar = ozet.querySelectorAll('.sayi');
-        expect(sayilar).toHaveLength(4);
+        expect(sayilar).toHaveLength(2);
         sayilar.forEach(s => {
           expect(s.getAttribute('data-kesinlik').length > 0).toBeTruthy();
           expect(s.hasAttribute('data-etiketsiz')).toBeFalsy();

@@ -776,18 +776,16 @@ ESP.Screens.today = (function(){
      Geri kalan her satır «Bugün › Ayrıntı»dadır (renderAyrinti). Sadelik
      bütçesi: sayfa boyu 1800 px, görünen düğme 14. */
   function OzetKutusu(){
-    const rows = M.sessionsOf(gun());
-    const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
     const d = ESP.SRS.deckStatus();
     const hucre = (ad, deger, birim, not) => html`<div class="ozet__hucre">
       <span class="ozet__ad">${ad}</span>
       <b class="ozet__deger">${deger}${when(birim, () => html`<small> ${birim}</small>`)}</b>
       <span class="ozet__not">${not}</span></div>`;
-    /* Girilmemiş gün sıfır değildir: oturum yoksa dakika «—». */
-    return K.Kutu({ ad:'Özet', yuva:'bugün', bitisik:true, govde:html`<div class="ozet">
-      ${hucre('Bugün', rows.length ? U.fmtNum(toplam) : '—', rows.length ? 'dk' : '', rows.length + ' oturum')}
+    /* Yalnız başka yerde OLMAYAN iki sayı: günün dakikası başlıkta, «Günün
+       dakikası» halkasında ve oturum tablosunda; seri üst satırda zaten var
+       (sadelik, 2026-10-01: aynı sayı dört yerde yazıyordu). */
+    return K.Kutu({ ad:'Bekleyen iş', yuva:'bugün', bitisik:true, govde:html`<div class="ozet">
       ${hucre('Vadeli kart', d.due, '', 'tekrar bekliyor')}
-      ${hucre('Seri', M.streak(), 'gün', 'asgari gün tutuldu')}
       ${hucre('Açık disiplin', ESP.Mod.active().length, '', 'Çalışma’da')}
     </div>` });
   }

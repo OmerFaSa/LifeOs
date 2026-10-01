@@ -80,6 +80,31 @@
       });
     });
 
+    /* Koç ve Patron'un ORTAK işi (scope 'coach': haftalık plan, günlük
+       taban) iki ajan adına iki kez listeleniyordu; Onaylar'da aynı başlık
+       iki kart oluyordu (sadelik ölçümü, 2026-10-01). */
+    const ortakAnahtar = p => p.kind + ':' + (p.payload && p.payload.key || p.title);
+    const ortakMi = p => (P().KIND_BY_ID[p.kind] || {}).scope === 'coach';
+
+    it('ortak teklif (koç + Patron) bir kez listelenir', () => {
+      resetState();
+      withToday('2026-09-12', () => {
+        const l = P().all().filter(ortakMi).map(ortakAnahtar);
+        expect(l.length > 0).toBeTruthy();
+        expect(new Set(l).size).toBe(l.length);
+      });
+    });
+
+    it('reddedilen ortak teklif öteki ajanın adıyla geri gelmez', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        const t = P().all().filter(ortakMi)[0];
+        await P().decline(t);
+        ESP.Memo && ESP.Memo.clear && ESP.Memo.clear();
+        expect(P().all().some(p => ortakAnahtar(p) === ortakAnahtar(t))).toBeFalsy();
+      });
+    });
+
     it('reddedilen teklifin KAYDI silinmez', async () => {
       resetState();
       await withTodayAsync('2026-09-12', async () => {

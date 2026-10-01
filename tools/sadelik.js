@@ -64,6 +64,11 @@ const KURAL = [
      uc modulde ikisi de 0). Yeni bir olcu once `olcum:true` ile gelir. */
   { ad:'mor',          olcu:'mor',          en:0, yazi:'Merkez dışında mor (110)' },
   { ad:'evetTamam',    olcu:'evetTamam',    en:0, yazi:'«Evet/Tamam» onay düğmesi (022)' },
+  /* TEKRAR (2026-10-01, kullanici: «her sey her yerde»): ayni ekranda iki
+     kez gorunen baslik ya da 6+ kelimelik cumle. Ayni gun olcum olarak
+     geldi, uc modulde 0'a inince (2026-10-01) kullanicinin istegiyle
+     zorunlu oldu. */
+  { ad:'tekrar',       olcu:'tekrar',       en:0, yazi:'aynı ekranda tekrarlanan başlık/cümle' },
   { ad:'boy',          olcu:'boy',          en:1800, yazi:'sayfa boyu (px)', yalniz:['today'] },
   { ad:'dugme',        olcu:'dugme',        en:14, yazi:'görünen düğme', yalniz:['today'] },
 ];
@@ -172,7 +177,8 @@ function degerlendir(ad, olcu, taban){
       const v = o[k.olcu];
       if(v == null || v <= k.en) return;
       const t = taban && taban[rota] ? taban[rota][k.olcu] : null;
-      ihlal.push({ rota, kural:k.yazi, deger:v, en:k.en, taban:t, olcum:!!k.olcum });
+      ihlal.push({ rota, kural:k.yazi, deger:v, en:k.en, taban:t, olcum:!!k.olcum,
+        ornek:k.ad === 'tekrar' ? (o.tekrarlar || []) : null });
     });
   });
   return ihlal;
@@ -214,14 +220,20 @@ async function main(){
     if(denetlenir && n) kirmizi += n;
     console.log(ad + (denetlenir ? ' (DENETLENİR — teslim edildi)' : ' (yalnız ölçüm)') + ': '
       + (n ? n + ' bütçe aşımı' : 'bütçede') + ' · ' + Object.keys(olcu).length + ' ekran');
-    ihlal.forEach(x => console.log('   ' + (denetlenir ? '✕' : '·') + ' ' + x.rota + ' · ' + x.kural
-      + ' ' + x.deger + ' (en çok ' + x.en + (x.taban != null ? ', taban ' + x.taban : '') + ')'));
+    ihlal.forEach(x => {
+      console.log('   ' + (denetlenir ? '✕' : '·') + ' ' + x.rota + ' · ' + x.kural
+        + ' ' + x.deger + ' (en çok ' + x.en + (x.taban != null ? ', taban ' + x.taban : '') + ')');
+      (x.ornek || []).forEach(o => console.log('       ' + o));
+    });
     if(renkToplam){
       console.log('   ' + (denetlenir ? '✕' : '·') + ' jeton dışı ham renk ' + renkToplam + ': '
         + Object.keys(renk).map(f => f + ' ' + renk[f]).join(', '));
     }
     /* Olcum (kirmizi yapmaz): `olcum:true` tasiyan kural varsa yazilir. */
-    olcumler.forEach(x => console.log('   ölçüm · ' + x.rota + ' · ' + x.kural + ' ' + x.deger));
+    olcumler.forEach(x => {
+      console.log('   ölçüm · ' + x.rota + ' · ' + x.kural + ' ' + x.deger);
+      (x.ornek || []).forEach(o => console.log('       ' + o));
+    });
     /* 022 ZORUNLU (2026-09-25): 35 cagrinin hepsi sonucu soyleyen
        etiketi tasiyor; yeni bir varsayilan etiketli onay her modulde
        kirmizidir (teslim beklemez: kaynak kurali, ekran olcusu degil). */
