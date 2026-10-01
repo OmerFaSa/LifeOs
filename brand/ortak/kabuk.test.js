@@ -306,6 +306,63 @@
       d.remove(); tek.remove();
     });
 
+    /* Kullanıcı (2026-10-02): «böyle bilgiler başlığın sağ üstünde hafif bir
+       bilgi kartı olsun; "2 Ekim 2026 · veri bekliyor" böyle tarih yazmasın».
+       Açıklama ve durum satırı ekranda değil, başlığın yanındaki ⓘ'de. */
+    it('sade: açıklama ve durum satırı başlığın yanındaki bilgi kartında; ekranda tarih satırı yok', () => {
+      const d = yerlestir(K.sayfaBasi({ ust:'Hafta 3/40', baslik:'Bugün', ozet:'Uyku süresini yazman bile yeter.' }));
+      expect(d.querySelector('.sayfabasi__ust')).toBeNull();
+      expect(d.querySelector('.sayfabasi__ozet')).toBeNull();
+      const btn = d.querySelector('.sayfabasi__bilgi-dugme');
+      expect(!!btn).toBe(true);
+      expect(btn.getAttribute('aria-expanded')).toBe('false');
+      const kart = document.getElementById(btn.getAttribute('aria-controls'));
+      expect(kart.textContent).toContain('Uyku süresini yazman bile yeter.');
+      expect(kart.textContent).toContain('Hafta 3/40');
+      expect(getComputedStyle(kart).display).toBe('none');
+      btn.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
+      expect(btn.getAttribute('aria-expanded')).toBe('true');
+      expect(getComputedStyle(kart).display === 'none').toBe(false);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', bubbles:true }));
+      expect(btn.getAttribute('aria-expanded')).toBe('false');
+      d.remove();
+      /* Söyleyecek bir şey yoksa düğme de yok. */
+      const bos = yerlestir(K.sayfaBasi({ baslik:'Hafta' }));
+      expect(bos.querySelector('.sayfabasi__bilgi-dugme')).toBeNull();
+      bos.remove();
+    });
+
+    /* Kullanıcı (2026-10-02): «AYS ESP SPİ Merkez seçimlerini bir buton ile
+       açılan pencerede seçtir». Kenarda tek düğme (bu sistem), dört sistem
+       düğmeyle açılan küçük kartta; Esc ve dışarısı kapatır. */
+    it('sade: sistem seçimi tek düğme + açılan kart; dört sistem kartta', () => {
+      const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'spi', cekmeceler:[] }) + '</div>');
+      try{
+        const sec = d.querySelector('.kenar__modulsec');
+        expect(!!sec).toBe(true);
+        expect(sec.textContent).toContain('SPİ');
+        expect(sec.getAttribute('aria-expanded')).toBe('false');
+        const pen = document.getElementById(sec.getAttribute('aria-controls'));
+        expect(pen.querySelectorAll('.kenar__modul').length).toBe(4);
+        expect(pen.querySelector('.kenar__modul.is-on').textContent).toContain('SPİ');
+        expect(getComputedStyle(pen).visibility).toBe('hidden');
+        sec.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
+        expect(sec.getAttribute('aria-expanded')).toBe('true');
+        expect(sec.closest('.kenar__moduller').classList.contains('is-acik')).toBe(true);
+        document.dispatchEvent(new KeyboardEvent('keydown', { key:'Escape', bubbles:true }));
+        expect(sec.getAttribute('aria-expanded')).toBe('false');
+      }finally{ d.remove(); }
+    });
+
+    it('sade: sağ üstte arama yalnız simge; kısayol ve yazı yalnız erişilebilir adda', () => {
+      const d = yerlestir(K.ustSerit({ modul:'ays', yol:['Bugün'] }));
+      const ara = d.querySelector('.ust__ara');
+      expect(ara.querySelector('kbd')).toBeNull();
+      expect(ara.querySelector('.ust__ara-yazi')).toBeNull();
+      expect(ara.getAttribute('aria-label')).toContain('Ctrl+K');
+      d.remove();
+    });
+
     it('katman: tek seferde bir panel; kapanınca çapa işareti düşer', () => {
       const btn = yerlestir('<button id="kt-capa">aç</button>').firstElementChild;
       K.katmanAc('kt-bir', K.bildirimPaneli({ gruplar:[] }), btn);

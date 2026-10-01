@@ -1086,7 +1086,8 @@ ESP.Screens.today = (function(){
        işin adı kahraman kartında durur, başlıkta tekrar edilmez. */
     ust(){
       const s = M.streak();
-      return U.esc(U.fmtDate(gun()) + (s ? ' · ' + s + ' günlük seri' : ''));
+      /* Tarihsiz (kullanıcı, 2026-10-02); satır bilgi kartında durur. */
+      return s ? U.esc(s + ' günlük seri') : '';
     },
     headlineOz:'004',
     headline(){

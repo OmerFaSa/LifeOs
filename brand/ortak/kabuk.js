@@ -76,6 +76,7 @@ window.LIFEOS = window.LIFEOS || {};
     kutuphane:'<path d="M5 19.5V5.5a2 2 0 0 1 2-2h12v14H7a2 2 0 0 0-2 2zm0 0a2 2 0 0 0 2 2h12"/><path d="M9 8h6"/>',
     ayarlar:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
     ara:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
+    bilgi:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><path d="M12 7.6v.1"/>',
     zil:'<path d="M6.5 16v-4.5a5.5 5.5 0 0 1 11 0V16l1.5 2h-14z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
     kenar:'<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/>',
     gizli:'<rect x="4" y="4.5" width="16" height="5" rx="1.5"/><rect x="4" y="12.5" width="16" height="3" rx="1"/><path d="M4 19.5h7"/>',
@@ -221,16 +222,41 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* Dört biçimli modül geçişi (008, 155): bu modül basılı; öteki sistemin
      adresi biliniyorsa bağlantıdır, bilinmiyorsa uydurulmaz. */
+  /* SADE (kullanıcı, 2026-10-02: «sistem seçimlerini bir buton ile açılan
+     pencerede seçtir»): kenarda tek düğme bu sistemi söyler; dört sistem
+     düğmenin altında yumuşakça açılan küçük kartta, adları ve ne işe
+     yaradıklarıyla. Kapalı kart odak almaz (visibility). */
+  let modulPencereSayac = 0;
   function modulGecisi(modul, loc){
-    return '<div class="kenar__moduller" data-oz="008 155" role="group" aria-label="Sistemler">'
+    const su = MODULLER[modul] || MODULLER.ays;
+    const pid = 'kenar-sistemler-' + (++modulPencereSayac);
+    const satir = (k, m) => '<i class="kenar__nokta kenar__nokta--' + k + '" aria-hidden="true"></i>'
+      + '<span class="kenar__modul-metin"><span class="kenar__modul-ad">' + kac(m.ad) + '</span>'
+      + '<span class="kenar__modul-not">' + kac(m.not) + '</span></span>';
+    return '<div class="kenar__moduller" data-oz="008 155">'
+      + '<button type="button" class="kenar__modulsec" aria-expanded="false" aria-controls="' + pid + '"'
+      +   ' aria-label="' + kac('Sistem: ' + su.ad + ' — değiştir') + '" title="Sistem değiştir">'
+      +   '<i class="kenar__nokta kenar__nokta--' + kac(modul || 'ays') + '" aria-hidden="true"></i>'
+      +   '<span class="kenar__modulsec-ad">' + kac(su.ad) + '</span>'
+      +   '<svg class="kenar__modulsec-ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5"/></svg>'
+      + '</button>'
+      + '<div class="kenar__modulpencere" id="' + pid + '" role="group" aria-label="Sistemler"><div class="kenar__modulliste">'
       + SIRA.map(k => {
         const m = MODULLER[k];
-        const ic = '<i class="kenar__nokta kenar__nokta--' + k + '" aria-hidden="true"></i><span>' + kac(m.ad) + '</span>';
-        if(k === modul) return '<span class="kenar__modul is-on" aria-current="true">' + ic + '</span>';
+        if(k === modul) return '<span class="kenar__modul is-on" aria-current="true">' + satir(k, m) + '</span>';
         const url = adres(k, loc);
-        return url ? '<a class="kenar__modul" href="' + kac(url) + '" data-modul-gecis="' + k + '">' + ic + '</a>'
-          : '<span class="kenar__modul is-kapali" title="' + kac(m.ad + ' ayrı dosyada açılır') + '">' + ic + '</span>';
-      }).join('') + '</div>';
+        return url ? '<a class="kenar__modul" href="' + kac(url) + '" data-modul-gecis="' + k + '">' + satir(k, m) + '</a>'
+          : '<span class="kenar__modul is-kapali" title="' + kac(m.ad + ' ayrı dosyada açılır') + '">' + satir(k, m) + '</span>';
+      }).join('') + '</div></div></div>';
+  }
+  function modulPencereKapat(haric){
+    if(typeof document === 'undefined') return;
+    document.querySelectorAll('.kenar__moduller.is-acik').forEach(m => {
+      if(m === haric) return;
+      m.classList.remove('is-acik');
+      const b = m.querySelector('.kenar__modulsec');
+      if(b) b.setAttribute('aria-expanded', 'false');
+    });
   }
 
   /* o: { modul, baglam, loc,
@@ -309,8 +335,10 @@ window.LIFEOS = window.LIFEOS || {};
       + '<div class="ust__sag">'
       +   (onay.sayi ? '<button class="ust__onay ust--telefon" data-act="go" data-route="' + kac(onay.route || 'onaylar') + '"'
       +     ' aria-label="' + kac(onay.sayi + ' öneri onay bekliyor') + '"><i aria-hidden="true"></i>' + kac(onay.sayi) + '</button>' : '')
-      +   '<button class="ust__ara" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)">'
-      +     simge('ara') + '<span class="ust__ara-yazi">Ara ya da yaz</span><kbd>Ctrl K</kbd></button>'
+      /* Sağ üst sade (kullanıcı, 2026-10-02): arama yalnız simge; kısayol
+         erişilebilir adda ve ipucunda. */
+      +   '<button class="ust__ara" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)" title="Ara (Ctrl K)">'
+      +     simge('ara') + '</button>'
       /* Gizlenen/küçültülen bölümler (brand/ortak/gizle.js): düğme burada,
          sayısını ve panelini gizle.js yönetir. */
       +   '<button class="ust__gizli" type="button" aria-haspopup="dialog" aria-expanded="false"'
@@ -400,18 +428,44 @@ window.LIFEOS = window.LIFEOS || {};
   /* o: { yol:['Plan','Hafta'], baslik, ozet(HTML), eylem(HTML) }
      Başlık `hero__title` sınıfını da taşır: duman testi ve envanter
      ekranın başlığını o adla okuyor (H'nin araçları). */
+  /* SAYFA BAŞI SADE (kullanıcı, 2026-10-02: «böyle bilgiler başlığın sağ
+     üstünde hafif bir bilgi kartı olsun; böyle tarih yazmasın»). Ekranda
+     yalnız başlık ve eylemler durur. Açıklama (`ozet`) ve durum satırı
+     (`ust`) başlığın yanındaki ⓘ'dedir: üzerine gelince, dokununca ya da
+     odakla hafif bir kart açılır; Esc ve dışarı tıklamak kapatır. Söylenecek
+     bir şey yoksa düğme de yoktur. */
+  let bilgiSayac = 0;
   function sayfaBasi(o){
     o = o || {};
     const yol = (o.yol || []).filter(Boolean);
+    const bid = 'sb-bilgi-' + (++bilgiSayac);
+    const bilgi = o.ozet || o.ust
+      ? '<div class="sayfabasi__bilgi">'
+        + '<button type="button" class="sayfabasi__bilgi-dugme" aria-expanded="false" aria-controls="' + bid + '"'
+        +   ' aria-label="Bu sayfa hakkında" title="Bu sayfa hakkında">' + simge('bilgi') + '</button>'
+        + '<div class="bilgikart" id="' + bid + '" role="note">'
+        +   (o.ozet ? '<div class="bilgikart__metin">' + o.ozet + '</div>' : '')
+        +   (o.ust ? '<div class="bilgikart__alt">' + o.ust + '</div>' : '')
+        + '</div></div>'
+      : '';
     return '<div class="sayfabasi">'
       + '<div class="sayfabasi__metin">'
       + (yol.length > 1 ? '<p class="sayfabasi__yol">' + yol.map(kac).join('<span aria-hidden="true"> › </span>') + '</p>' : '')
-      + (o.ust ? '<p class="sayfabasi__ust">' + o.ust + '</p>' : '')
+      + '<div class="sayfabasi__satir">'
       + '<h1 class="sayfabasi__baslik hero__title"' + (o.oz ? ' data-oz="' + kac(o.oz) + '"' : '') + '>' + (o.baslikHtml || kac(o.baslik || '')) + '</h1>'
-      + (o.ozet ? '<p class="sayfabasi__ozet">' + o.ozet + '</p>' : '')
-      + '</div>'
+      + bilgi
+      + '</div></div>'
       + (o.eylem ? '<div class="sayfabasi__eylem">' + o.eylem + '</div>' : '')
       + '</div>';
+  }
+  function bilgiKapat(haric){
+    if(typeof document === 'undefined') return;
+    document.querySelectorAll('.sayfabasi__bilgi.is-acik').forEach(b => {
+      if(b === haric) return;
+      b.classList.remove('is-acik');
+      const d = b.querySelector('.sayfabasi__bilgi-dugme');
+      if(d) d.setAttribute('aria-expanded', 'false');
+    });
   }
 
   /* o: { cekmece:'Plan', bolumler:[{ route, ad, on, rozet:{text, quiet} }], kabuk }
@@ -657,6 +711,28 @@ window.LIFEOS = window.LIFEOS || {};
       katmanKapat();
     });
     document.addEventListener('click', e => {
+      /* Sayfa başındaki bilgi kartı: düğme açar/kapatır, dışarısı kapatır. */
+      const bd = e.target.closest && e.target.closest('.sayfabasi__bilgi-dugme');
+      if(bd){
+        const kap = bd.closest('.sayfabasi__bilgi');
+        const ac = !kap.classList.contains('is-acik');
+        bilgiKapat(kap);
+        kap.classList.toggle('is-acik', ac);
+        bd.setAttribute('aria-expanded', ac ? 'true' : 'false');
+        return;
+      }
+      if(!(e.target.closest && e.target.closest('.bilgikart'))) bilgiKapat();
+      /* Sistem seçimi: düğme kartı açar/kapatır, dışarısı kapatır. */
+      const ms = e.target.closest && e.target.closest('.kenar__modulsec');
+      if(ms){
+        const kap = ms.closest('.kenar__moduller');
+        const ac = !kap.classList.contains('is-acik');
+        modulPencereKapat(kap);
+        kap.classList.toggle('is-acik', ac);
+        ms.setAttribute('aria-expanded', ac ? 'true' : 'false');
+        return;
+      }
+      if(!(e.target.closest && e.target.closest('.kenar__modulpencere'))) modulPencereKapat();
       const k = e.target.closest && e.target.closest('[data-kenar-ac]');
       if(k){ e.preventDefault(); kenarDar(); return; }
       const a = e.target.closest && e.target.closest('a[data-modul-gecis]');
@@ -666,6 +742,12 @@ window.LIFEOS = window.LIFEOS || {};
       gecis(a.getAttribute('data-modul-gecis'), a.href);
     });
     window.addEventListener('resize', () => { if(acikId && !telefonMu()) katmanKapat(); });
+    document.addEventListener('keydown', e => { if(e.key === 'Escape'){ bilgiKapat(); modulPencereKapat(); } });
+    /* Dar kenar kapanınca (fare çıkınca) açık sistem kartı da kapanır. */
+    document.addEventListener('mouseout', e => {
+      const k = e.target.closest && e.target.closest('.kenar');
+      if(k && !(e.relatedTarget && k.contains(e.relatedTarget))) modulPencereKapat();
+    });
   }
   kur();
 

@@ -36,6 +36,8 @@
         /* v5: cümle sayfanın BÜYÜK BAŞLIĞIDIR; tarih üst satırda kalır. */
         expect(R.Screens.today.headline()).toBe(bir);
         expect(dom(R.Screens.today.ust()).textContent.length > 0).toBeTruthy();
+        /* Durum satırı tarihsiz: «Hafta 3/40» kalır, gün ve tarih yazılmaz. */
+        expect(/\d{4}|Pazartesi|Salı|Çarşamba|Perşembe|Cuma|Cumartesi|Pazar/.test(R.Screens.today.ust())).toBe(false);
       });
     });
 

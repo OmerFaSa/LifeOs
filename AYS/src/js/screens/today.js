@@ -1213,9 +1213,11 @@ R.Screens.today = (function(){
     return cumle + '.';
   }
 
+  /* Durum satırı TARİHSİZ (kullanıcı, 2026-10-02: «böyle tarih yazmasın»):
+     sayfa «Bugün»; tarih bilgi taşımaz. Satır başlığın yanındaki bilgi
+     kartında durur (kabuk sayfaBasi). */
   function tarihSatiri(){
-    const wd = R.WEEKDAYS[U.weekdayIndex(U.today())];
-    return wd.label + ' · ' + U.fmtDate(U.todayISO()) + ' · Hafta ' + M.currentWeek() + '/' + R.PLAN.totalWeeks;
+    return 'Hafta ' + M.currentWeek() + '/' + R.PLAN.totalWeeks;
   }
 
   /* Özet kutusunun sayıları (024): her sayı kesinlik etiketi ve köken kartı

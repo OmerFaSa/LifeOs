@@ -173,7 +173,9 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
         });
         document.querySelectorAll('button, a[href], [role="button"], input[type=checkbox], input[type=radio]')
           .forEach(el => {
-            if(!gorunur(el)) return;
+            /* inert katman (küçük bölümün salt bakılan önizlemesi) dokunma
+               hedefi değildir: içindeki düğmeye basılamaz. */
+            if(!gorunur(el) || el.closest('[inert]')) return;
             const b = el.getBoundingClientRect();
             if(b.width < 24 || b.height < 24)
               out.kucuk.push((el.className || el.tagName) + ' ' +

@@ -575,7 +575,7 @@ a.kmenu__satir:hover{ background:var(--surface-2); }
    «Kabuk anatomisi»). Değerler tuvalden: kenar 240 px, çekmece 34 px,
    bölüm 28 px, üst şerit 52 px. Gün şeridi yalnız Bugün'de.
    ================================================================ */
-.site--v5{ display:grid; grid-template-columns:240px minmax(0,1fr);
+.site--v5{ display:grid; grid-template-columns:208px minmax(0,1fr);
   grid-template-rows:auto 1fr auto; min-height:100vh; background:var(--surface); }
 .site--v5 > .kenar{ grid-column:1; grid-row:1 / -1; }
 .site--v5 > .ust{ grid-column:2; grid-row:1; }
@@ -699,9 +699,8 @@ a.kenar__modul:hover{ color:var(--text); }
   .kenar{ padding:14px 6px 12px; align-items:center; gap:14px; }
   .kenar__marka span, .kenar__baglam, .kenar__bolumler, .kenar__bag span, .kenar__rutbe span,
   .kenar__rutbe .kbk-ic{ display:none; }
-  .kenar__moduller{ grid-template-columns:1fr; width:76px; }
-  .kenar__modul{ height:30px; flex-direction:row; justify-content:flex-start; gap:7px; padding:0 8px; font-size:11.5px; }
-  .kenar__modul span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .kenar__moduller{ width:76px; }
+  .kenar__modul-not{ display:none; }
   .kenar__cekmece{ flex-direction:column; justify-content:center; gap:3px; width:76px; height:auto; min-height:52px;
     padding:6px 2px; position:relative; text-align:center; }
   .kenar__ad{ flex:none; max-width:72px; font-size:11px; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -764,12 +763,12 @@ a.kenar__modul:hover{ color:var(--text); }
   html.kenar-dar .site--v5 > .kenar{ width:64px; z-index:calc(var(--z-nav) + 5);
     transition:width var(--dur) var(--ease), box-shadow var(--dur) var(--ease); overflow:hidden; }
   html.kenar-dar .site--v5 > .kenar:hover, html.kenar-dar .site--v5 > .kenar:focus-within{
-    width:240px; box-shadow:var(--shadow-lg); overflow-y:auto; }
+    width:208px; box-shadow:var(--shadow-lg); overflow-y:auto; }
   html.kenar-dar .kenar:not(:hover):not(:focus-within){ padding:14px 8px 12px; align-items:center; gap:14px; }
   /* Açılırken adlar ve bölümler genişlemenin arkasından yumuşakça gelir. */
   @keyframes kenar-ad-gir{ from{ opacity:0; transform:translateX(-4px); } to{ opacity:1; transform:none; } }
   html.kenar-dar .kenar:hover .kenar__ad, html.kenar-dar .kenar:hover .kenar__bolumler,
-  html.kenar-dar .kenar:hover .kenar__marka span, html.kenar-dar .kenar:hover .kenar__modul span{
+  html.kenar-dar .kenar:hover .kenar__marka span, html.kenar-dar .kenar:hover .kenar__modulsec-ad{
     animation:kenar-ad-gir var(--dur-lg) var(--ease) 60ms both; }
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__marka{ padding:0; justify-content:center; width:40px; }
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__marka span,
@@ -777,9 +776,11 @@ a.kenar__modul:hover{ color:var(--text); }
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__bag span,
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__rutbe span,
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__rutbe .kbk-ic{ display:none; }
-  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__moduller{ grid-template-columns:1fr; width:44px; padding:3px; }
-  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__modul{ height:30px; }
-  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__modul span,
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__moduller{ width:44px; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__modulsec{ justify-content:center; padding:0; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__modulpencere{ display:none; }
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__modulsec-ad,
+  html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__modulsec-ok,
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__ad{ position:absolute; width:1px; height:1px; overflow:hidden;
     clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__cekmece-kap{ display:flex; justify-content:center; }
@@ -846,6 +847,70 @@ html, body{ background:var(--bg); }
 .kutu__ayak{ border-top:0; padding-top:0; }
 .durumkart .esikcubuk__et{ display:none; }
 
+/* SİSTEM SEÇİMİ (2026-10-02): tek düğme + altında yumuşakça açılan kart.
+   Açılış grid satırıyla (0fr -> 1fr) yapılır: yükseklik bilinmeden kayar. */
+.kenar__moduller{ display:block; padding:0; background:none; border-radius:0; }
+.kenar__modulsec{ width:100%; display:flex; align-items:center; gap:10px; height:36px; padding:0 10px; border:0;
+  border-radius:10px; background:var(--surface); box-shadow:0 0 0 1px var(--border); font:inherit; font-size:13.5px;
+  font-weight:600; color:var(--text); cursor:pointer; text-align:left;
+  transition:box-shadow var(--dur) var(--ease), background var(--dur) var(--ease); }
+.kenar__modulsec:hover{ box-shadow:0 0 0 1px var(--border-strong); }
+.kenar__modulsec-ad{ flex:1; min-width:0; }
+.kenar__modulsec-ok{ width:16px; height:16px; fill:none; stroke:var(--text-3); stroke-width:1.8; stroke-linecap:round;
+  stroke-linejoin:round; transition:transform var(--dur) var(--ease); }
+.kenar__moduller.is-acik .kenar__modulsec-ok{ transform:rotate(180deg); }
+.kenar__modulpencere{ display:grid; grid-template-rows:0fr; visibility:hidden; opacity:0;
+  transition:grid-template-rows var(--dur-lg) var(--ease), opacity var(--dur) var(--ease), margin var(--dur-lg) var(--ease),
+    visibility 0s linear var(--dur-lg); }
+.kenar__moduller.is-acik .kenar__modulpencere{ grid-template-rows:1fr; visibility:visible; opacity:1; margin-top:6px;
+  transition:grid-template-rows var(--dur-lg) var(--ease), opacity var(--dur) var(--ease), margin var(--dur-lg) var(--ease), visibility 0s; }
+.kenar__modulliste{ min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:2px; padding:4px;
+  border-radius:12px; background:var(--surface); box-shadow:0 0 0 1px var(--border); }
+.kenar__moduller .kenar__modul{ height:auto; min-height:40px; flex-direction:row; justify-content:flex-start; align-items:center;
+  gap:10px; padding:6px 10px; border-radius:8px; box-shadow:none; background:none; font-size:13px; color:var(--text-2); }
+.kenar__moduller .kenar__modul:hover{ background:var(--surface-2); color:var(--text); }
+.kenar__moduller .kenar__modul.is-on{ background:var(--surface-2); color:var(--text); box-shadow:none; }
+.kenar__modul-metin{ display:flex; flex-direction:column; min-width:0; line-height:1.25; }
+.kenar__modul-ad{ font-weight:600; }
+.kenar__modul-not{ font-size:11.5px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* SAYFA BAŞI BİLGİ KARTI (2026-10-02): başlığın sağ üstünde ⓘ; kart
+   başlığın altında, sayfa başı sütununun içinde açılır (telefonda taşmaz).
+   Kapalıyken çizilmez (display:none): ölçülmez, taşma yaratmaz. */
+.sayfabasi__satir{ position:relative; display:flex; align-items:flex-start; gap:6px; min-width:0; }
+.sayfabasi__satir > .sayfabasi__baslik{ min-width:0; }
+.sayfabasi__bilgi{ flex:none; margin-top:2px; }
+.sayfabasi__bilgi-dugme{ width:24px; height:24px; padding:0; border:0; border-radius:50%; background:none;
+  display:grid; place-items:center; color:var(--text-3); cursor:pointer;
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.sayfabasi__bilgi-dugme .kbk-ic{ width:17px; height:17px; }
+.sayfabasi__bilgi-dugme:hover, .sayfabasi__bilgi.is-acik .sayfabasi__bilgi-dugme{ background:var(--surface); color:var(--text); }
+.bilgikart{ display:none; position:absolute; left:0; top:calc(100% + 8px); z-index:var(--z-overlay);
+  width:max-content; max-width:min(420px, 100%); box-sizing:border-box; padding:12px 14px; border-radius:14px;
+  background:var(--surface); box-shadow:0 0 0 1px var(--border), var(--shadow-lg);
+  font-size:13px; line-height:1.55; color:var(--text-2); }
+.sayfabasi__bilgi:hover .bilgikart, .sayfabasi__bilgi:focus-within .bilgikart, .sayfabasi__bilgi.is-acik .bilgikart{
+  display:block; animation:bilgikart-gir var(--dur) var(--ease) both; }
+@keyframes bilgikart-gir{ from{ opacity:0; transform:translateY(-4px); } to{ opacity:1; transform:none; } }
+.bilgikart__alt{ margin-top:8px; font-size:12px; color:var(--text-3); }
+.bilgikart__metin + .bilgikart__alt{ padding-top:8px; border-top:1px solid var(--border-soft); }
+@media (prefers-reduced-motion:reduce){ .bilgikart{ animation:none !important; } }
+
+/* SAĞ ÜST SADE (2026-10-02): arama, sayfa düzeni, zil ve profil aynı
+   çerçevesiz yuvarlak simge; yalnız üzerine gelince zemin alır. Telefonun
+   kendi düzeni (arama ve profil Menü'de) değişmez. */
+@media (min-width:680px){
+.ust.ust--v5 .ust__sag{ gap:2px; }
+.ust.ust--v5 .ust__ara, .ust.ust--v5 .ust__gizli, .ust.ust--v5 .ust__zil{ width:34px; height:34px; padding:0; border:0;
+  border-radius:50%; background:none; box-shadow:none; display:grid; place-items:center; color:var(--text-2);
+  cursor:pointer; transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.ust.ust--v5 .ust__ara:hover, .ust.ust--v5 .ust__gizli:hover, .ust.ust--v5 .ust__zil:hover{ background:var(--surface); color:var(--text); }
+.ust.ust--v5 .ust__ara .kbk-ic, .ust.ust--v5 .ust__zil .kbk-ic{ width:18px; height:18px; }
+.ust.ust--v5 .ust__profil{ width:30px; height:30px; margin-left:6px; border-radius:50%; box-shadow:none;
+  background:var(--surface-3); color:var(--text); font-size:12px; }
+.ust.ust--v5 .ust__zil-nokta{ top:7px; right:8px; width:6px; height:6px; background:var(--now); box-shadow:none; }
+}
+
 /* ================================================================
    CAM (liquid glass, ucundan — kullanıcı, 2026-10-01). Yalnız YÜZEN
    katmanlar camdır: üst çubuk, üzerine gelince açılan kenar, açılır
@@ -874,7 +939,8 @@ html, body{ background:var(--bg); }
 }
 @media (prefers-reduced-motion:reduce){
   html.kenar-dar .kenar:hover .kenar__ad, html.kenar-dar .kenar:hover .kenar__bolumler,
-  html.kenar-dar .kenar:hover .kenar__marka span, html.kenar-dar .kenar:hover .kenar__modul span{ animation:none; }
+  html.kenar-dar .kenar:hover .kenar__marka span, html.kenar-dar .kenar:hover .kenar__modulsec-ad{ animation:none; }
+  .kenar__modulpencere, .kenar__modulsec-ok{ transition:none !important; }
   html.kenar-dar .site--v5 > .kenar{ transition:none; }
 }
 @media (prefers-reduced-transparency:reduce){

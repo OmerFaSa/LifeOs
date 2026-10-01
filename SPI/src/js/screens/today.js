@@ -1395,7 +1395,9 @@ SP.Screens.today = (function(){
     ust(){
       const d = shownDate();
       const r = SP.Move.readiness(d);
-      return U.esc(U.fmtDate(d) + (r.ok ? ' · toparlanma ' + r.score : ' · veri bekliyor'));
+      /* Tarihsiz (kullanıcı, 2026-10-02); «veri bekliyor» başlıkta zaten
+         yazılı. Satır başlığın yanındaki bilgi kartında durur. */
+      return r.ok ? U.esc('Toparlanma ' + r.score + '/100') : '';
     },
     subtitle(){ return ''; },
     actions(){
