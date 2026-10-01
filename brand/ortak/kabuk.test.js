@@ -76,6 +76,18 @@
       }finally{ K.kenarDar(eski); try{ localStorage.removeItem('lifeos.kenar'); }catch(e){} }
     });
 
+    it('sade: bölüm listesi yalnız çekmece değişince açılış hareketiyle gelir', () => {
+      const ciz = id => yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[
+        { id:'bugun', ad:'Bugün', route:'today', on:id === 'bugun', bolumler:[{ route:'today', ad:'Genel bakış', on:true }, { route:'gun', ad:'Ayrıntı' }] },
+        { id:'plan', ad:'Plan', route:'week', on:id === 'plan', bolumler:[{ route:'week', ad:'Hafta', on:true }, { route:'plan', ad:'Program' }] },
+      ] }) + '</div>');
+      const yeniMi = d => { const b = d.querySelector('.kenar__bolumler'); const v = b.classList.contains('is-yeni'); d.remove(); return v; };
+      yeniMi(ciz('bugun'));
+      expect(yeniMi(ciz('bugun'))).toBe(false);
+      expect(yeniMi(ciz('plan'))).toBe(true);
+      expect(yeniMi(ciz('plan'))).toBe(false);
+    });
+
     it('sade: kenar varsayılan olarak dar; yalnız kalıcı açılan açık kalır', () => {
       expect(K.kenarIlkDar(null)).toBe(true);
       expect(K.kenarIlkDar('dar')).toBe(true);

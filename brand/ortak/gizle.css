@@ -239,6 +239,26 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
 }
 .gizle-kucuk .gizle-araclar{ top:50%; transform:translateY(-50%); box-shadow:none; background:none; }
 
+/* ---------- açık bölüm: yalnız «Küçült», yalnız üzerine gelince ----------
+   Ekran sakin kalır: düğme görünmez (visibility, tıklanamaz ve sayılmaz);
+   bölümün üzerine gelince ya da içine odaklanınca yumuşakça belirir. */
+.gizle-acik{ position:relative; }
+.gizle-araclar--uzerinde{
+  background:none; box-shadow:none; visibility:hidden; opacity:0; transform:translateY(-2px);
+  transition:opacity var(--dur, .18s) var(--ease, ease), transform var(--dur, .18s) var(--ease, ease), visibility 0s linear var(--dur, .18s);
+}
+.gizle-acik:hover > .gizle-araclar--uzerinde, .gizle-acik:focus-within > .gizle-araclar--uzerinde{
+  visibility:visible; opacity:1; transform:none;
+  transition:opacity var(--dur, .18s) var(--ease, ease), transform var(--dur, .18s) var(--ease, ease), visibility 0s;
+}
+/* Köşede küçük cam yuvarlak: kartın başlık satırındaki yazının üstüne binmez. */
+.gizle-araclar--uzerinde{ top:-10px; right:-10px; padding:0; border-radius:999px;
+  background:color-mix(in oklab, var(--surface) 72%, transparent);
+  -webkit-backdrop-filter:saturate(180%) blur(16px); backdrop-filter:saturate(180%) blur(16px);
+  box-shadow:0 0 0 1px var(--border), 0 4px 12px rgba(0,0,0,.10); }
+.gizle-araclar--uzerinde .gizle-dugme{ width:26px; height:26px; border-radius:999px; color:var(--text-2); }
+@media (prefers-reduced-motion:reduce){ .gizle-araclar--uzerinde{ transition:none; transform:none; } }
+
 /* ---------- önizleme penceresi ---------- */
 .gizle-onizleme{
   position:fixed; z-index:calc(var(--z-overlay, 60) + 1);

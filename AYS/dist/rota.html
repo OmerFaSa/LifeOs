@@ -11113,12 +11113,30 @@ a.kenar__modul:hover{ color:var(--text); }
 .kenar__sayac{ min-width:20px; height:20px; box-sizing:border-box; padding:0 6px; border-radius:10px; background:var(--mer);
   color:var(--surface); font-size:11.5px; font-weight:600; display:flex; align-items:center; justify-content:center;
   font-variant-numeric:tabular-nums; }
-.kenar__bolumler{ display:flex; flex-direction:column; padding:2px 0 6px 19px; }
-.kenar__bolum{ display:flex; align-items:center; gap:8px; min-height:28px; padding:0 0 0 20px; border:0;
-  border-left:1.5px solid var(--border-strong); background:none; font:inherit; font-size:13px; color:var(--text-3);
-  cursor:pointer; text-align:left; }
-.kenar__bolum:hover{ color:var(--text); }
-.kenar__bolum.is-on{ border-left-color:var(--text); color:var(--text); font-weight:600; }
+/* Bölüm listesi (kullanıcı, 2026-10-02: «kitap ayracı gibi olan kısım daha
+   minimalist ve animasyonlu»): dikey çizgi ve siyah çubuk yok. Etkin bölüm
+   yazının ağırlığı ve modül renginde küçük bir noktayla söylenir; liste
+   çekmece değişince öğe öğe yumuşakça iner. */
+.kenar__bolumler{ display:flex; flex-direction:column; gap:1px; padding:2px 0 8px 30px; }
+.kenar__bolum{ position:relative; display:flex; align-items:center; gap:8px; min-height:28px; padding:0 10px; border:0;
+  border-radius:7px; background:none; font:inherit; font-size:13px; color:var(--text-3); cursor:pointer; text-align:left;
+  transition:color var(--dur) var(--ease), background var(--dur) var(--ease); }
+.kenar__bolum:hover{ color:var(--text); background:color-mix(in oklab, var(--surface) 65%, transparent); }
+.kenar__bolum.is-on{ color:var(--text); font-weight:600; }
+.kenar__bolum::before{ content:''; position:absolute; left:-6px; top:50%; width:5px; height:5px; border-radius:50%;
+  background:var(--primary); transform:translateY(-50%) scale(0); transition:transform var(--dur) var(--ease); }
+.kenar__bolum.is-on::before{ transform:translateY(-50%) scale(1); }
+@keyframes kenar-bolum-gir{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
+.kenar__bolumler.is-yeni > .kenar__bolum{ animation:kenar-bolum-gir var(--dur-lg) var(--ease) both; }
+.kenar__bolumler.is-yeni > .kenar__bolum:nth-child(2){ animation-delay:40ms; }
+.kenar__bolumler.is-yeni > .kenar__bolum:nth-child(3){ animation-delay:80ms; }
+.kenar__bolumler.is-yeni > .kenar__bolum:nth-child(4){ animation-delay:120ms; }
+.kenar__bolumler.is-yeni > .kenar__bolum:nth-child(n+5){ animation-delay:160ms; }
+.kenar__cekmece{ transition:background var(--dur) var(--ease), color var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+@media (prefers-reduced-motion:reduce){
+  .kenar__bolumler.is-yeni > .kenar__bolum{ animation:none; }
+  .kenar__bolum, .kenar__bolum::before, .kenar__cekmece{ transition:none; }
+}
 .kenar__rozet{ margin-left:auto; margin-right:6px; font-size:11px; font-weight:600; color:var(--text-2);
   font-variant-numeric:tabular-nums; }
 .kenar__rozet:not(.is-sessiz){ color:var(--bad-ink); }
@@ -11243,6 +11261,11 @@ a.kenar__modul:hover{ color:var(--text); }
   html.kenar-dar .site--v5 > .kenar:hover, html.kenar-dar .site--v5 > .kenar:focus-within{
     width:240px; box-shadow:var(--shadow-lg); overflow-y:auto; }
   html.kenar-dar .kenar:not(:hover):not(:focus-within){ padding:14px 8px 12px; align-items:center; gap:14px; }
+  /* Açılırken adlar ve bölümler genişlemenin arkasından yumuşakça gelir. */
+  @keyframes kenar-ad-gir{ from{ opacity:0; transform:translateX(-4px); } to{ opacity:1; transform:none; } }
+  html.kenar-dar .kenar:hover .kenar__ad, html.kenar-dar .kenar:hover .kenar__bolumler,
+  html.kenar-dar .kenar:hover .kenar__marka span, html.kenar-dar .kenar:hover .kenar__modul span{
+    animation:kenar-ad-gir var(--dur-lg) var(--ease) 60ms both; }
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__marka{ padding:0; justify-content:center; width:40px; }
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__marka span,
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__bolumler,
@@ -11343,6 +11366,11 @@ html, body{ background:var(--bg); }
   .sheet, .popover{ background:var(--cam); -webkit-backdrop-filter:var(--cam-bulan); backdrop-filter:var(--cam-bulan);
     box-shadow:var(--cam-isik), var(--shadow-lg); border-color:transparent; }
   .ust.ust--v5{ box-shadow:inset 0 -1px 0 color-mix(in oklab, var(--border) 60%, transparent); }
+}
+@media (prefers-reduced-motion:reduce){
+  html.kenar-dar .kenar:hover .kenar__ad, html.kenar-dar .kenar:hover .kenar__bolumler,
+  html.kenar-dar .kenar:hover .kenar__marka span, html.kenar-dar .kenar:hover .kenar__modul span{ animation:none; }
+  html.kenar-dar .site--v5 > .kenar{ transition:none; }
 }
 @media (prefers-reduced-transparency:reduce){
   .sheet, .popover, html.kenar-dar .site--v5 > .kenar:hover{ background:var(--surface);
@@ -11896,6 +11924,26 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
   opacity:.7;
 }
 .gizle-kucuk .gizle-araclar{ top:50%; transform:translateY(-50%); box-shadow:none; background:none; }
+
+/* ---------- açık bölüm: yalnız «Küçült», yalnız üzerine gelince ----------
+   Ekran sakin kalır: düğme görünmez (visibility, tıklanamaz ve sayılmaz);
+   bölümün üzerine gelince ya da içine odaklanınca yumuşakça belirir. */
+.gizle-acik{ position:relative; }
+.gizle-araclar--uzerinde{
+  background:none; box-shadow:none; visibility:hidden; opacity:0; transform:translateY(-2px);
+  transition:opacity var(--dur, .18s) var(--ease, ease), transform var(--dur, .18s) var(--ease, ease), visibility 0s linear var(--dur, .18s);
+}
+.gizle-acik:hover > .gizle-araclar--uzerinde, .gizle-acik:focus-within > .gizle-araclar--uzerinde{
+  visibility:visible; opacity:1; transform:none;
+  transition:opacity var(--dur, .18s) var(--ease, ease), transform var(--dur, .18s) var(--ease, ease), visibility 0s;
+}
+/* Köşede küçük cam yuvarlak: kartın başlık satırındaki yazının üstüne binmez. */
+.gizle-araclar--uzerinde{ top:-10px; right:-10px; padding:0; border-radius:999px;
+  background:color-mix(in oklab, var(--surface) 72%, transparent);
+  -webkit-backdrop-filter:saturate(180%) blur(16px); backdrop-filter:saturate(180%) blur(16px);
+  box-shadow:0 0 0 1px var(--border), 0 4px 12px rgba(0,0,0,.10); }
+.gizle-araclar--uzerinde .gizle-dugme{ width:26px; height:26px; border-radius:999px; color:var(--text-2); }
+@media (prefers-reduced-motion:reduce){ .gizle-araclar--uzerinde{ transition:none; transform:none; } }
 
 /* ---------- önizleme penceresi ---------- */
 .gizle-onizleme{
@@ -13110,7 +13158,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'46052be', at:'2026-10-01 18:28', dirty:true };
+R.BUILD = { id:'4d650b7', at:'2026-10-01 21:25', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -17769,13 +17817,20 @@ window.LIFEOS = window.LIFEOS || {};
   /* o: { modul, baglam, loc,
           cekmeceler:[{ id, ad, route, on, sayac, bolumler:[{ route, ad, on, rozet }] }],
           baglanti:{ durum, saat, route }, rutbe } */
+  /* Bölüm listesi yalnız ÇEKMECE DEĞİŞİNCE açılış hareketiyle gelir
+     (kullanıcı, 2026-10-02: «daha animasyonlu açılsın»); aynı çekmecede
+     her yeniden çizimde tekrar oynamaz. */
+  let sonCekmece = null;
   function kenarCubugu(o){
     o = o || {};
+    const acik = (o.cekmeceler || []).find(c => c.on);
+    const yeniCekmece = !!acik && acik.id !== sonCekmece;
+    sonCekmece = acik ? acik.id : null;
     const cek = (o.cekmeceler || []).map(c => {
       const sayac = c.sayac ? '<span class="kenar__sayac" data-oz="115" aria-label="' + kac(c.sayac + ' bekleyen') + '">'
         + kac(c.sayac) + '</span>' : '';
       const bol = c.on && (c.bolumler || []).length > 1
-        ? '<div class="kenar__bolumler" data-oz="019" role="group" aria-label="' + kac(c.ad + ' bölümleri') + '">'
+        ? '<div class="kenar__bolumler' + (yeniCekmece ? ' is-yeni' : '') + '" data-oz="019" role="group" aria-label="' + kac(c.ad + ' bölümleri') + '">'
           + c.bolumler.map(b => '<button class="kenar__bolum' + (b.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(b.route) + '"'
             + (b.on ? ' aria-current="page"' : '') + '>' + kac(b.ad)
             + (b.rozet ? '<span class="kenar__rozet' + (b.rozet.quiet ? ' is-sessiz' : '') + '" aria-label="' + kac(b.rozet.text + ' bekleyen') + '">'
@@ -19552,9 +19607,14 @@ LIFEOS.Gizle = (function(){
       }
       const eski = b.el.querySelector(':scope > .gizle-araclar');
       if(eski) eski.remove();
-      if(!g && (duzen || k)){
+      /* Açık bölüm de araç taşır (kullanıcı, 2026-10-02: «küçültüp açınca
+         tekrar küçültme düğmesi olmuyor»): düzen kipi dışında yalnız
+         «Küçült», o da yalnız üzerine gelince ya da odakla görünür. */
+      const acikSakin = !g && !k && !duzen;
+      b.el.classList.toggle('gizle-acik', acikSakin);
+      if(!g){
         const arac = document.createElement('div');
-        arac.className = 'gizle-araclar';
+        arac.className = 'gizle-araclar' + (acikSakin ? ' gizle-araclar--uzerinde' : '');
         const dugme = (ne, simge, etiket, ipucu) => {
           const btn = document.createElement('button');
           btn.type = 'button';

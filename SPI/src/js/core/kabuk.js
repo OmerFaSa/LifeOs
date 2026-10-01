@@ -239,13 +239,20 @@ window.LIFEOS = window.LIFEOS || {};
   /* o: { modul, baglam, loc,
           cekmeceler:[{ id, ad, route, on, sayac, bolumler:[{ route, ad, on, rozet }] }],
           baglanti:{ durum, saat, route }, rutbe } */
+  /* Bölüm listesi yalnız ÇEKMECE DEĞİŞİNCE açılış hareketiyle gelir
+     (kullanıcı, 2026-10-02: «daha animasyonlu açılsın»); aynı çekmecede
+     her yeniden çizimde tekrar oynamaz. */
+  let sonCekmece = null;
   function kenarCubugu(o){
     o = o || {};
+    const acik = (o.cekmeceler || []).find(c => c.on);
+    const yeniCekmece = !!acik && acik.id !== sonCekmece;
+    sonCekmece = acik ? acik.id : null;
     const cek = (o.cekmeceler || []).map(c => {
       const sayac = c.sayac ? '<span class="kenar__sayac" data-oz="115" aria-label="' + kac(c.sayac + ' bekleyen') + '">'
         + kac(c.sayac) + '</span>' : '';
       const bol = c.on && (c.bolumler || []).length > 1
-        ? '<div class="kenar__bolumler" data-oz="019" role="group" aria-label="' + kac(c.ad + ' bölümleri') + '">'
+        ? '<div class="kenar__bolumler' + (yeniCekmece ? ' is-yeni' : '') + '" data-oz="019" role="group" aria-label="' + kac(c.ad + ' bölümleri') + '">'
           + c.bolumler.map(b => '<button class="kenar__bolum' + (b.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(b.route) + '"'
             + (b.on ? ' aria-current="page"' : '') + '>' + kac(b.ad)
             + (b.rozet ? '<span class="kenar__rozet' + (b.rozet.quiet ? ' is-sessiz' : '') + '" aria-label="' + kac(b.rozet.text + ' bekleyen') + '">'

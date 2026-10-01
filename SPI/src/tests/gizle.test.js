@@ -9,7 +9,8 @@
 
    Kanıtladığı sözler: gizlenen bölüm çizilir ama gösterilmez ve panelde
    adıyla durur; geri gelir; küçültmek kalıcıdır ve yalnız başlık kalır;
-   önizleme salt bakmak içindir (inert); normal görünümde düğme yoktur;
+   önizleme salt bakmak içindir (inert); normal görünümde yalnız Küçült
+   vardır ve yalnız üzerine gelince görünür;
    anahtar sayı ve gün adından bağımsızdır; tercih ekran başınadır;
    varsayılan gizli bölüm geri getirilirse o seçim kalır. */
 
@@ -58,15 +59,37 @@
       }finally{ temizle(kok); }
     });
 
-    it('normal görünümde düğme yok; düzen kipinde her bölümde Küçült ve Gizle', () => {
+    /* Kullanıcı (2026-10-02): «küçültüp açınca tekrar küçültme düğmesi
+       olmuyor». Normal görünümde her açık bölümde YALNIZ «Küçült» durur ve
+       yalnız üzerine gelince (ya da odakla) görünür: ekran sakin kalır. */
+    it('normal görünümde yalnız Küçült, o da üzerine gelince görünür; düzen kipinde Küçült ve Gizle', () => {
       const kok = kur();
       try{
-        expect(kok.querySelectorAll('.gizle-dugme').length).toBe(0);
+        expect(kok.querySelectorAll('[data-gizle]').length).toBe(0);
+        expect(kok.querySelectorAll('[data-kucult]').length).toBe(3);
+        kok.querySelectorAll('.gizle-araclar').forEach(a => {
+          expect(a.classList.contains('gizle-araclar--uzerinde')).toBe(true);
+          expect(getComputedStyle(a).visibility).toBe('hidden');
+        });
         G().duzenle(true);
         expect(kok.querySelectorAll('[data-gizle]').length).toBe(3);
         expect(kok.querySelectorAll('[data-kucult]').length).toBe(3);
+        expect(kok.querySelectorAll('.gizle-araclar--uzerinde').length).toBe(0);
         G().duzenle(false);
-        expect(kok.querySelectorAll('.gizle-dugme').length).toBe(0);
+        expect(kok.querySelectorAll('[data-gizle]').length).toBe(0);
+      }finally{ temizle(kok); }
+    });
+
+    it('küçültülüp açılan bölümde yeniden Küçült düğmesi var', () => {
+      const kok = kur();
+      try{
+        const a = G().bolumler(kok)[0].anahtar;
+        G().kucult(a, true);
+        expect(!!G().bolumler(kok)[0].el.querySelector('[data-ac]')).toBe(true);
+        G().kucult(a, false);
+        const el = G().bolumler(kok)[0].el;
+        expect(!!el.querySelector('[data-kucult]')).toBe(true);
+        expect(!!el.querySelector('[data-ac]')).toBe(false);
       }finally{ temizle(kok); }
     });
 

@@ -216,9 +216,14 @@ LIFEOS.Gizle = (function(){
       }
       const eski = b.el.querySelector(':scope > .gizle-araclar');
       if(eski) eski.remove();
-      if(!g && (duzen || k)){
+      /* Açık bölüm de araç taşır (kullanıcı, 2026-10-02: «küçültüp açınca
+         tekrar küçültme düğmesi olmuyor»): düzen kipi dışında yalnız
+         «Küçült», o da yalnız üzerine gelince ya da odakla görünür. */
+      const acikSakin = !g && !k && !duzen;
+      b.el.classList.toggle('gizle-acik', acikSakin);
+      if(!g){
         const arac = document.createElement('div');
-        arac.className = 'gizle-araclar';
+        arac.className = 'gizle-araclar' + (acikSakin ? ' gizle-araclar--uzerinde' : '');
         const dugme = (ne, simge, etiket, ipucu) => {
           const btn = document.createElement('button');
           btn.type = 'button';

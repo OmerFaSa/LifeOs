@@ -618,12 +618,30 @@ a.kenar__modul:hover{ color:var(--text); }
 .kenar__sayac{ min-width:20px; height:20px; box-sizing:border-box; padding:0 6px; border-radius:10px; background:var(--mer);
   color:var(--surface); font-size:11.5px; font-weight:600; display:flex; align-items:center; justify-content:center;
   font-variant-numeric:tabular-nums; }
-.kenar__bolumler{ display:flex; flex-direction:column; padding:2px 0 6px 19px; }
-.kenar__bolum{ display:flex; align-items:center; gap:8px; min-height:28px; padding:0 0 0 20px; border:0;
-  border-left:1.5px solid var(--border-strong); background:none; font:inherit; font-size:13px; color:var(--text-3);
-  cursor:pointer; text-align:left; }
-.kenar__bolum:hover{ color:var(--text); }
-.kenar__bolum.is-on{ border-left-color:var(--text); color:var(--text); font-weight:600; }
+/* Bölüm listesi (kullanıcı, 2026-10-02: «kitap ayracı gibi olan kısım daha
+   minimalist ve animasyonlu»): dikey çizgi ve siyah çubuk yok. Etkin bölüm
+   yazının ağırlığı ve modül renginde küçük bir noktayla söylenir; liste
+   çekmece değişince öğe öğe yumuşakça iner. */
+.kenar__bolumler{ display:flex; flex-direction:column; gap:1px; padding:2px 0 8px 30px; }
+.kenar__bolum{ position:relative; display:flex; align-items:center; gap:8px; min-height:28px; padding:0 10px; border:0;
+  border-radius:7px; background:none; font:inherit; font-size:13px; color:var(--text-3); cursor:pointer; text-align:left;
+  transition:color var(--dur) var(--ease), background var(--dur) var(--ease); }
+.kenar__bolum:hover{ color:var(--text); background:color-mix(in oklab, var(--surface) 65%, transparent); }
+.kenar__bolum.is-on{ color:var(--text); font-weight:600; }
+.kenar__bolum::before{ content:''; position:absolute; left:-6px; top:50%; width:5px; height:5px; border-radius:50%;
+  background:var(--primary); transform:translateY(-50%) scale(0); transition:transform var(--dur) var(--ease); }
+.kenar__bolum.is-on::before{ transform:translateY(-50%) scale(1); }
+@keyframes kenar-bolum-gir{ from{ opacity:0; transform:translateY(-6px); } to{ opacity:1; transform:none; } }
+.kenar__bolumler.is-yeni > .kenar__bolum{ animation:kenar-bolum-gir var(--dur-lg) var(--ease) both; }
+.kenar__bolumler.is-yeni > .kenar__bolum:nth-child(2){ animation-delay:40ms; }
+.kenar__bolumler.is-yeni > .kenar__bolum:nth-child(3){ animation-delay:80ms; }
+.kenar__bolumler.is-yeni > .kenar__bolum:nth-child(4){ animation-delay:120ms; }
+.kenar__bolumler.is-yeni > .kenar__bolum:nth-child(n+5){ animation-delay:160ms; }
+.kenar__cekmece{ transition:background var(--dur) var(--ease), color var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+@media (prefers-reduced-motion:reduce){
+  .kenar__bolumler.is-yeni > .kenar__bolum{ animation:none; }
+  .kenar__bolum, .kenar__bolum::before, .kenar__cekmece{ transition:none; }
+}
 .kenar__rozet{ margin-left:auto; margin-right:6px; font-size:11px; font-weight:600; color:var(--text-2);
   font-variant-numeric:tabular-nums; }
 .kenar__rozet:not(.is-sessiz){ color:var(--bad-ink); }
@@ -748,6 +766,11 @@ a.kenar__modul:hover{ color:var(--text); }
   html.kenar-dar .site--v5 > .kenar:hover, html.kenar-dar .site--v5 > .kenar:focus-within{
     width:240px; box-shadow:var(--shadow-lg); overflow-y:auto; }
   html.kenar-dar .kenar:not(:hover):not(:focus-within){ padding:14px 8px 12px; align-items:center; gap:14px; }
+  /* Açılırken adlar ve bölümler genişlemenin arkasından yumuşakça gelir. */
+  @keyframes kenar-ad-gir{ from{ opacity:0; transform:translateX(-4px); } to{ opacity:1; transform:none; } }
+  html.kenar-dar .kenar:hover .kenar__ad, html.kenar-dar .kenar:hover .kenar__bolumler,
+  html.kenar-dar .kenar:hover .kenar__marka span, html.kenar-dar .kenar:hover .kenar__modul span{
+    animation:kenar-ad-gir var(--dur-lg) var(--ease) 60ms both; }
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__marka{ padding:0; justify-content:center; width:40px; }
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__marka span,
   html.kenar-dar .kenar:not(:hover):not(:focus-within) .kenar__bolumler,
@@ -848,6 +871,11 @@ html, body{ background:var(--bg); }
   .sheet, .popover{ background:var(--cam); -webkit-backdrop-filter:var(--cam-bulan); backdrop-filter:var(--cam-bulan);
     box-shadow:var(--cam-isik), var(--shadow-lg); border-color:transparent; }
   .ust.ust--v5{ box-shadow:inset 0 -1px 0 color-mix(in oklab, var(--border) 60%, transparent); }
+}
+@media (prefers-reduced-motion:reduce){
+  html.kenar-dar .kenar:hover .kenar__ad, html.kenar-dar .kenar:hover .kenar__bolumler,
+  html.kenar-dar .kenar:hover .kenar__marka span, html.kenar-dar .kenar:hover .kenar__modul span{ animation:none; }
+  html.kenar-dar .site--v5 > .kenar{ transition:none; }
 }
 @media (prefers-reduced-transparency:reduce){
   .sheet, .popover, html.kenar-dar .site--v5 > .kenar:hover{ background:var(--surface);
