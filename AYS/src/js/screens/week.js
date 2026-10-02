@@ -93,7 +93,7 @@ R.Screens.week = (function(){
     const curriculum = M.curriculumFor(n);
 
     return K.Card({
-      title:'Haftalık sözleşme', hint:'contract', sub:'En fazla ' + konuSiniri() + ' ana konu, çıktı temelli hedef',
+      title:'Haftalık sözleşme', hint:'contract', sub:'En fazla ' + konuSiniri() + ' ana konu',
       badge:signed ? K.Badge({ label:'İmzalandı', tone:'ok' }) : K.Badge({ label:'İmza bekliyor', tone:'warn' }),
       body:html`
         <div class="konuliste" data-oz="049">
@@ -121,8 +121,9 @@ R.Screens.week = (function(){
         ? html`<span class="small muted">${U.fmtDate(week.signedAt.slice(0, 10))} tarihinde imzalandı.</span>
                <span class="grow"></span>
                ${K.Button({ label:'Revize et', size:'sm', act:'week-revise' })}`
-        : html`${K.Button({ label:'Haftayı imzala', icon:'check', tone:'primary', act:'week-sign', disabled:over })}
-               <span class="small dim">Geçen haftanın verisi görülmeden yeni hedef yazılmaz.</span>`,
+        /* «çıktı temelli hedef» ve «geçen haftanın verisi görülmeden yeni
+           hedef yazılmaz» ⓘ'de (data/hints.js contract); ekranda tekrar yok. */
+        : html`${K.Button({ label:'Haftayı imzala', icon:'check', tone:'primary', act:'week-sign', disabled:over })}`,
         { wrap:true }),
     });
   }
@@ -677,12 +678,19 @@ R.Screens.week = (function(){
      kullanılan bölümler açık (gün şeridi, sözleşme, kapsam, hafta özeti,
      değerlendirme); ara sıra bakılanlar baştan küçük gelir — başlık kalır,
      dokununca açılır, açılırsa açık kalır (brand/ortak/gizle.js). */
-  const KUCUK = ['plan-tamamlama-geçmişi', 'sınava-kadar', 'plan-ızgarası', 'planın-şekli', 'müfredat-referansı'];
+  /* iPhone (2026-10-02, «haftalık kısmında sadece haftalık bölümü görebilirim
+     veya onun bir şeridini»): açık yalnız hafta. Özet hep şerit; sözleşme
+     imzalanınca şerit (imza bekliyorsa iş odur, açık kalır). Geçmiş, ızgara,
+     planın şekli ve referans app.js SADE_GIZLI'de. */
+  function kucukler(){
+    const w = S.weeks[M.weekId(viewN())];
+    return ['haftanın-özeti'].concat(w && w.signedAt ? ['haftalık-sözleşme'] : []);
+  }
 
   return {
     id:'week',
     title:'Hafta',
-    kucukVarsayilan:KUCUK,
+    get kucukVarsayilan(){ return kucukler(); },
     subtitle(){
       const n = viewN();
       return 'Hafta '+n+'/'+R.PLAN.totalWeeks+' · '+U.fmtRange(M.weekStart(n), M.weekEnd(n));

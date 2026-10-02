@@ -1028,6 +1028,13 @@
 /* Kat düzeni: çubuklu sayfada yalnız seçili bölüm görünür (019). */
 .sayfabolumler--kat > .sayfabolum:not(.is-on){ display:none; }
 .sayfabolumler--kat > .sayfabolum + .sayfabolum{ margin-top:0; }
+/* iPhone (2026-10-02): katmanlı bölümde başlık seçili sekmenin adını
+   ikinci kez yazıyordu («Genel» düğmesinin altında «Genel»). Başlık
+   ekran okuyucuya ve bolumeGit'in odak hedefine kalır; gözden kalkar. */
+.sayfabolumler--kat > .sayfabolum > .sayfabolum__ad{
+  position:absolute; width:1px; height:1px; margin:0; padding:0; border:0;
+  overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap;
+}
 .bolumcubugu--sayfa .bolumcubugu__ad.is-on{ color:var(--text); font-weight:600; }
 .bolumcubugu--sayfa .bolumcubugu__ad.is-on::after{ content:''; position:absolute; left:10px; right:10px; bottom:-1px;
   height:2px; border-radius:1px; background:var(--text); }

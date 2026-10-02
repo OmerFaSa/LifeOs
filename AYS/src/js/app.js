@@ -295,12 +295,13 @@ R.App = (function(){
     quiz:['neden-sınama'],
     analytics:['veri-doluluğu'],
     subjects:['kaynak-mimarisi'],
-    target:['sıra-referansları', 'yerleşen-profilleri'],
-    week:['müfredat-referansı'],
+    target:['sıra-referansları', 'yerleşen-profilleri', 'tahmini-sıra'],
+    week:['müfredat-referansı', 'plan-tamamlama-geçmişi', 'sınava-kadar', 'plan-ızgarası', 'planın-şekli', 'ders-dengesi', 'revizyon-kaydı'],
     cards:['kapanış-ölçütü'],
     exams:['deneme-hacmi', 'yayın-merdiveni', 'sıralama', 'hedefe-kalan', 'deneme-takvimi'],
     guide:['klavye-kısayolları', 'bu-uygulama-ne-değildir', 'kritik-işlemler', 'sınav-haftası-ve-sınav-günü', 'taper-haftası-planı', 'kaygı-azaltma', 'deneme-analizi-protokolü', 'hata-etiketleri-ve-reçeteler', 'yanlış-defteri-tasarımı', 'aralıklı-tekrar', 'hesap-verebilirlik', 'sınav-kaynağı', 'öğrenme-araştırması', 'kendi-verin', 'sistem-ayarı', 'denetim'],
     gun:['günlük-sayaç', 'son-deneme', 'tekrar-borcu', 'özet', 'hkm', 'sistem-önerileri', 'günün-akışı', 'hedeflerim', 'ofisten', 'bugünün-ödülü', 'mola', 'due-kartlar', 'tamir-kuyruğu', 'hafta-bağlamı'],
+    plan:['çalışma-yoğunluğu', 'program'],
   };
 
   function sayfaBasiHtml(sc){

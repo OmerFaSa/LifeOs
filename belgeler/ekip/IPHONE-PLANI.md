@@ -115,6 +115,30 @@ Her faz sonunda: üç modülde `runtests` · `smoke` · `layoutcheck` · `a11ych
   yerleşen profilleri gizli. Kesinlik açıklama satırı ve medyan tekrarı kalkar.
 - **ESP Merdiven:** açık yalnız bulunduğun kademe; öbür kademeler ve açıklamalar şerit/gizli.
 
+Faz 1'de yapılan (testler: `AYS/src/tests/iphone.test.js`, `ESP/src/tests/iphone.test.js`):
+
+- AYS Hafta: açık yalnız hafta şeridi + imza bekleyen sözleşme (imzalanınca o da şerit;
+  `kucukVarsayilan` artık hesaplanır). Ders dengesi ve revizyon kaydı da gizli. Sözleşme
+  kartındaki iki açıklama cümlesi ⓘ'de zaten vardı, ekrandan kalktı.
+- AYS Program: dönen «Program» kartı; «Sıradaki haftalar» (bu hafta + 3) ve «Tüm program ·
+  40 hafta» düğmesi (`program-tumu`). Varsayılan sınav tarihi TAHMİN etiketiyle. Sayfa başı
+  «Bu haftayı aç» kalktı (bölümlü seçicide Hafta var).
+- AYS Hedef: dönen «Hedef» kartı (ana hedef, tahmini sıra, hedefe kalan; az denemede cümle).
+  Kesinlik satırı, medyan tekrarı ve katman tablosunun açıklama paragrafı kalktı.
+- ESP Merdiven: dört açıklama paragrafı ekrandan kalktı (aynı öğreti `data/hints.js`'te,
+  ⓘ'de); ölçülemeyen kapılar ve kör noktalar şerit; Yol'da yalnız şimdiki kademe açık.
+- Ortak (`brand/ortak/kart.css`): katmanlı bölümde seçili sekmenin adını ikinci kez yazan
+  başlık gözden kalktı (ekran okuyucuya kalır) — üç modülde.
+- SPİ Hedefler zaten tek kart (ölçü bütçede); dokunulmadı.
+
+Faz 1'de görülen, sonraki fazlara kalan:
+
+- Hafta 1 253 px (imza bekleyen sözleşme açıkken). Sayfa sonundaki «Bu ekran nasıl okunur»
+  şeridi (~56 px) ⓘ'ye taşınınca bütçeye girer — Faz 6'nın ilk işi, öne alındı.
+- ESP'de sayfa başlığı ekranın cümlesi («Merdiven henüz başlamadı.»); iPhone'da başlık addır,
+  cümle ⓘ ya da widget'tadır — Faz 6.
+- Dolu profilde ilk açılışta üç rozet bildirimi üst üste çıkıyor — Faz 6.
+
 ## 7. Bilinen riskler
 
 - Testler kartları ekranda arar: gizlemek uygulama düzeyindedir (`Gizle.uygula`), çizimi
@@ -127,4 +151,4 @@ Her faz sonunda: üç modülde `runtests` · `smoke` · `layoutcheck` · `a11ych
 |---|---|---|---|
 | — | başlangıç (araç) | c689817 | 188 · aşan 22 ekran |
 | 0 | ✅ ölçü: `acikKart`, `boyHepsi` (ölçüm), envanter.test 13 durum | (bu commit) | 188 · aşan 22 |
-| 1 | sürüyor | — | — |
+| 1 | ✅ AYS Hafta · Program · Hedef, ESP Merdiven (SPİ Hedefler zaten bütçede) | (bu commit) | 180 · aşan 21 |

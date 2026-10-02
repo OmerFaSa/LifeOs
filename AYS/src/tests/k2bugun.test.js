@@ -228,7 +228,9 @@
           const G = window.LIFEOS.Gizle;
           const var_ = G.bolumler(kok).map(b => b.anahtar);
           (R.Screens.week.kucukVarsayilan || []).forEach(a => expect(var_.indexOf(a) >= 0).toBe(true));
-          expect((R.Screens.week.kucukVarsayilan || []).length >= 4).toBe(true);
+          /* iPhone Faz 1: ara sıra bakılanlar app.js SADE_GIZLI'de (iphone.test.js);
+             burada yalnız özet şerittir. */
+          expect((R.Screens.week.kucukVarsayilan || []).indexOf('haftanın-özeti') >= 0).toBe(true);
           expect(String(R.Screens.week.actions())).toBe('');
         }finally{ kok.remove(); }
       });

@@ -184,6 +184,50 @@ R.Screens.plan = (function(){
     });
   }
 
+  /* iPhone (2026-10-02, «program güzel ama H1, H2, H3 diye uzuyor; çalışma
+     yoğunluğu falan ekstraya kaçıyor»): dört istatistik tek küçük dönen
+     kart; zaman çizgisi bu hafta + sonraki üç hafta, tamamı «Tüm program»
+     ile. Isı haritası ve «Program» notu app.js SADE_GIZLI'de. */
+  const YAKIN = 3;
+  function DonenProgram(cur, totalQ, doneQ){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
+    /* Varsayılan tarih ÖSYM duyurusuna kadar tahmindir (data/curriculum.js). */
+    const profilTarihi = R.PLAN.examTytISO !== R.PROGRAM.examTytISO;
+    return raw(V.donen({ id:'ays-program', ad:'Program', maddeler:[
+      { ust:'İlerleme', sayi:sayi({ deger:M.programProgress(), birim:'%', kesinlik:'computed', formul:'geçen hafta ÷ program haftası' }),
+        cumle:'tamamlandı.', vurgu:'Hafta ' + cur + ' / ' + R.PLAN.totalWeeks + '.', sistem:'ays' },
+      { ust:'Sınava kalan', sayi:sayi({ deger:U.diffDays(U.todayISO(), R.PLAN.examTytISO), birim:'gün',
+          kesinlik:profilTarihi ? 'computed' : 'estimated', formul:'TYT tarihi − bugün' }),
+        cumle:'kaldı.', vurgu:profilTarihi ? 'TYT.' : 'TYT, tahmini tarih.', sistem:'ays' },
+      { ust:'Planlanan soru', sayi:sayi({ deger:totalQ, birim:'soru', kesinlik:'computed', formul:'haftaların soru hedefi toplamı' }),
+        cumle:'toplam.', vurgu:U.fmtNum(doneQ) + ' soru geride kaldı.', sistem:'ays' },
+    ] }));
+  }
+
+  function zamanCizgisi(gateWeeks){
+    const cur = M.currentWeek();
+    const tumu = !!S.ui.programTumu;
+    const dugme = K.Button({ label:tumu ? 'Yalnız sıradaki haftalar' : 'Tüm program · ' + R.PLAN.totalWeeks + ' hafta',
+      size:'sm', tone:'ghost', act:'program-tumu' });
+    if(tumu){
+      return K.Card({
+        title:'Program zaman çizgisi',
+        sub:U.fmtDate(R.PLAN.startISO)+' – '+U.fmtDate(U.iso(M.weekEnd(R.PLAN.totalWeeks)))+' · '+R.PLAN.totalWeeks+' hafta',
+        actions:html`<span class="small dim">Karar kapıları: H${gateWeeks.join(' · H')}</span>`,
+        body:html`<div class="timeline">${map(phaseRanges(), PhaseBlock)}</div><div class="mt-8">${dugme}</div>`,
+      });
+    }
+    const weeks = [];
+    for(let n = cur; n <= Math.min(R.PLAN.totalWeeks, cur + YAKIN); n++) weeks.push(n);
+    return K.Card({
+      title:'Sıradaki haftalar',
+      body:html`<div class="timeline"><div class="tlmonth">${map(weeks, WeekRow)}</div></div><div class="mt-8">${dugme}</div>`,
+    });
+  }
+
   async function render(){
     const cur = M.currentWeek();
     let totalQ = 0, doneQ = 0;
@@ -201,13 +245,7 @@ R.Screens.plan = (function(){
     const grid = C.intensityGrid();
 
     return String(K.Grid([
-      K.Span(12, K.Cols(4, [
-        K.Stat({ label:'Program ilerlemesi', value:'%'+M.programProgress(), note:'Hafta '+cur+' / '+R.PLAN.totalWeeks }),
-        K.Stat({ label:'Planlanan toplam soru', value:U.fmtNum(totalQ), note:'yeni ve bağımsız sorular' }),
-        K.Stat({ label:'Bugüne kadar planlanan', value:U.fmtNum(doneQ), note:'ilk '+Math.max(0, cur-1)+' hafta' }),
-        K.Stat({ label:'Sınava kalan', value:U.fmtNum(U.diffDays(U.todayISO(), R.PLAN.examTytISO)),
-          unit:' gün', note:'TYT tahmini' }),
-      ])),
+      K.Span(12, DonenProgram(cur, totalQ, doneQ)),
 
       K.Span(12, planCard()),
       K.Span(12, droppedCard()),
@@ -223,12 +261,7 @@ R.Screens.plan = (function(){
           ]))}`,
       })),
 
-      K.Span(12, K.Card({
-        title:'Program zaman çizgisi',
-        sub:U.fmtDate(R.PLAN.startISO)+' – '+U.fmtDate(U.iso(M.weekEnd(R.PLAN.totalWeeks)))+' · '+R.PLAN.totalWeeks+' hafta',
-        actions:html`<span class="small dim">Karar kapıları: H${gateWeeks.join(' · H')}</span>`,
-        body:html`<div class="timeline">${map(phaseRanges(), PhaseBlock)}</div>`,
-      })),
+      K.Span(12, zamanCizgisi(gateWeeks)),
     ]));
   }
 
@@ -240,6 +273,7 @@ R.Screens.plan = (function(){
     'istisna-onizle'(el){ return R.Screens.week.handle['istisna-onizle'](el); },
     async 'istisna-uygula'(el){ return R.Screens.week.handle['istisna-uygula'](el); },
     async 'toggle-dropped'(){ S.ui.droppedOpen = !S.ui.droppedOpen; R.App.render(); },
+    async 'program-tumu'(){ S.ui.programTumu = !S.ui.programTumu; R.App.render(); },
     async 'open-dropped'(el){
       S.ui.subjectOpen = el.dataset.subject;
       R.App.go('subjects');
@@ -264,9 +298,8 @@ R.Screens.plan = (function(){
       return 'Hafta '+M.currentWeek()+' / '+R.PLAN.totalWeeks+' · '
         + U.fmtDate(R.PLAN.startISO)+' – '+U.fmtDate(U.iso(M.weekEnd(R.PLAN.totalWeeks)));
     },
-    actions(){
-      return String(K.Button({ label:'Bu haftayı aç', size:'sm', act:'go', data:{ 'data-route':'week' } }));
-    },
+    /* «Bu haftayı aç» bölümlü seçicide zaten var (Hafta); sayfa başı sade. */
+    actions(){ return ''; },
     render, handle,
   };
 })();

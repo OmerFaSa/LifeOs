@@ -57,9 +57,6 @@ ESP.Screens.ladder = (function(){
     rows.push(K.Entry({
       label:'Genel kademe', hint:'level',
       meta:ov.cert === 'missing' ? 'veri yok' : ov.level.label,
-      note:'Genel kademe disiplinlerin ortalaması değildir: ortalama ile en '
-         + 'düşüğün arasıdır. Tek disiplinde üstat olup ötekileri bırakmak '
-         + 'üstatlık sayılmaz; tek zayıf disiplin de bütün emeği silmez.',
       body:ov.cert === 'missing'
         ? K.Notice({ tone:'info', body:'Hiçbir disiplinde ölçülmüş üretim yok. '
             + 'Merdiven ilk ölçümle başlar.' })
@@ -74,10 +71,8 @@ ESP.Screens.ladder = (function(){
     }));
 
     rows.push(K.Entry({
-      label:'Disiplinler',
+      label:'Disiplinler', hint:'ladder',
       meta:hepsi.length + ' merdiven',
-      note:'Kademe ardışıktır: alttaki kapı atlanarak üsttekine geçilmez. '
-         + 'Atlanan kapı ileride her zaman geri gelir.',
       wide:true,
       body:html`<div class="ladders">${map(hepsi, lv => {
         const d = discOf(lv.disc);
@@ -107,8 +102,6 @@ ESP.Screens.ladder = (function(){
     rows.push(K.Entry({
       label:'Ölçülemeyen kapılar', hint:'unknown-gate',
       meta:olcum.length ? olcum.length + ' kapı' : 'yok',
-      note:'Ölçülemeyen kapı geçilmiş sayılmaz ama kalınmış da sayılmaz. '
-         + 'Sıfır varsaymak, sistemin en pahalı hatasıdır.',
       body:olcum.length
         ? K.Table({ tight:true, headers:['Disiplin', 'Kapı', ''],
             rows:olcum.map(g => [
@@ -174,9 +167,6 @@ ESP.Screens.ladder = (function(){
       rows.push(K.Entry({
         label:'Bu merdivenin göremediği', hint:'blind',
         meta:lad.blind.length + ' madde',
-        note:'Kapılar ölçülebilir olanı ölçer. Aşağıdakiler ölçülemez ve '
-           + 'ölçülemediği için önemsiz değildir — asıl mesele çoğu zaman '
-           + 'buradadır.',
         wide:true,
         body:html`
           <ul class="studylist">${map(lad.blind, x => html`<li>${x}</li>`)}</ul>
@@ -228,7 +218,6 @@ ESP.Screens.ladder = (function(){
       K.Entry({
         label:'Seviye tespiti', hint:'placement',
         meta:(discOf(disc) || {}).label || disc,
-        note:ESP.PLACEMENT.note,
         body:html`
           ${K.Field({ label:'Disiplin',
             input:K.Select({ id:'pl-disc', value:disc, change:'pick-disc-sel',
@@ -246,8 +235,7 @@ ESP.Screens.ladder = (function(){
 
       K.Entry({
         label:'Sonuç',
-        meta:tahmin.answered + '/' + tahmin.total + ' cevap',
-        note:'Tahmin hiçbir kapıyı açmaz. Ölçülmüş kademe tahmini her zaman yener.',
+        meta:tahmin.answered + '/' + tahmin.total + ' cevap', hint:'placement',
         body:html`
           <div class="row wrap">
             ${K.Badge({ label:'tahmin: ' + tahmin.level.label, tone:'warn' })}
@@ -312,6 +300,18 @@ ESP.Screens.ladder = (function(){
 
   return {
     id:'ladder',
+    /* iPhone (2026-10-02, IPHONE-PLANI Faz 1): açık yalnız bulunduğun yer.
+       Ölçülemeyen kapılar ve kör noktalar şerit; Yol'da yalnız şimdiki
+       kademe açık, geçilen ve ilerideki kademeler şerit. Açıklama
+       paragrafları ⓘ'de (data/hints.js: level, ladder, unknown-gate,
+       blind, placement) — ekranda ikinci kez yazılmaz. */
+    get kucukVarsayilan(){
+      const G = (window.LIFEOS || {}).Gizle;
+      const yol = G ? C().roadmap(S.ui.curDisc || 'lang') : null;
+      const kademeler = (yol ? yol.steps : []).filter(st => st.state !== 'current')
+        .map(st => G.anahtar('Kademe ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short));
+      return ['ölçülemeyen-kapılar', 'bu-merdivenin-göremediği'].concat(kademeler);
+    },
     title:'Merdiven',
     headline(){
       const ov = C().overall();

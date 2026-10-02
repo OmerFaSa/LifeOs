@@ -199,29 +199,42 @@ R.Screens.target = (function(){
 
   /* ---------- ekran ---------- */
 
-  function certaintyLegend(){
-    return K.Span(12, html`<div class="row wrap gap-6">
-      <span class="mono-label as-center">Kesinlik</span>
-      ${map(Object.keys(R.PROVENANCE), k => K.Badge({ label:R.PROVENANCE[k].label, tone:R.PROVENANCE[k].tone }))}
-      ${raw(UI.hint('certainty'))}</div>`);
+  /* iPhone (2026-10-02): hedef ekranının işi hedef katmanı; tahmini sıra ve
+     hedefe kalan küçük dönen kartta. Kesinlik açıklama satırı (ⓘ'de) ve
+     medyan tekrarı (tahmini sıra kartında yazıyor) kalktı; ara sıra
+     açılanlar şerit, başvuru tabloları gizli (app.js SADE_GIZLI). */
+  function DonenHedef(){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const m = [];
+    const ana = (R.TARGET_TIERS || [])[0];
+    if(ana) m.push({ ust:'Ana hedef', cumle:ana.rank + '.', vurgu:'TYT ' + ana.tyt + ' · AYT ' + ana.ayt + ' net · koçluk hedefi.', sistem:'ays' });
+    const est = C.estimateScore();
+    m.push(est.ok
+      ? { ust:'Tahmini sıra', sayi:sayi({ deger:est.rank, kesinlik:'estimated', formul:'son tam denemelerin medyanı → sıra modeli' }),
+          cumle:'en olası.', vurgu:U.fmtNum(est.rankBest) + '–' + U.fmtNum(est.rankWorst) + ' · ' + est.samples + ' tam deneme.', sistem:'ays' }
+      : { ust:'Tahmini sıra', cumle:'Tahmin için 3 tam deneme gerekir.', vurgu:C.fullExams('TYT').length + ' tam deneme var.',
+          sistem:'ays', dugme:{ label:'Denemeler', act:'go', data:{ 'data-route':'exams' } } });
+    const gap = C.netGapToTarget();
+    if(gap) m.push({ ust:'Hedefe kalan', sayi:sayi({ deger:Math.max(0, Math.round(gap.netDiff * 100) / 100), birim:'net', ondalik:2, kesinlik:'estimated' }),
+      cumle:'kaldı.', vurgu:gap.reached ? 'Hedef bandın üstündesin.' : 'Mesafe göstergesi; hedef değil.', sistem:'ays' });
+    return raw(V.donen({ id:'ays-hedef', ad:'Hedef', maddeler:m }));
   }
 
   async function render(){
     const p = S.profile;
-    const tyt = C.medianTrend('TYT'), ayt = C.medianTrend('AYT');
 
     return String(K.Grid([
-      certaintyLegend(),
+      K.Span(12, DonenHedef()),
 
       K.Span(6, K.Stack([
         K.Card({
           title:'Hedef katmanları', hint:'tiers',
-          sub:p.program+' — 2026 taban başarı sırası '+U.fmtNum(R.PROGRAM.refRank)
-            + ' ('+R.PROGRAM.refQuota+'/'+R.PROGRAM.refQuota+' doluluk)',
+          sub:(p.program ? p.program + ' · ' : '') + '2026 taban sırası ' + U.fmtNum(R.PROGRAM.refRank),
           badge:raw(UI.provenance('ref2026')),
-          body:html`${tierTable()}
-            <p class="tiny dim mt-10">Puan yerine başarı sırası izlenir; standartlaştırma nedeniyle
-              aynı net ve puan farklı yıllarda farklı sıraya dönüşebilir.</p>`,
+          body:html`${tierTable()}`,
         }),
         K.Card({
           title:'Net matrisi', hint:'net-matrix',
@@ -234,10 +247,6 @@ R.Screens.target = (function(){
 
       K.Span(4, K.Stack([
         estimateCard(),
-        K.Cols(2, [
-          K.Stat({ label:'TYT medyanı', value:tyt.last3 == null ? '—' : U.fmtNet(tyt.last3), note:'son 3 tam deneme' }),
-          K.Stat({ label:'AYT medyanı', value:ayt.last3 == null ? '—' : U.fmtNet(ayt.last3), note:'son 3 tam deneme' }),
-        ]),
         obpCard(),
         K.Card({
           title:'2026 sıra referansları', badge:raw(UI.provenance('ref2026')),
@@ -292,7 +301,7 @@ R.Screens.target = (function(){
     /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-    kucukVarsayilan:['sıra-referansları', 'yerleşen-profilleri'],
+    kucukVarsayilan:['net-matrisi', 'tercih-mimarisi', 'obp-katkısı'],
     title:'Hedef',
     subtitle(){ return R.PROGRAM.program+' · 2026 sırası '+U.fmtNum(R.PROGRAM.refRank); },
     actions(){ return ''; },
