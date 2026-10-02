@@ -8978,8 +8978,6 @@ button.rutbe-rozet:focus-visible{
 
      .daycol      haftanın günü — dokununca o günün defteri açılır
      .seat/.floor kat planı — birer nesne, okunacak metin değil
-     .room3d__*   üç boyutlu oda — sahnenin kendisi
-     .desk3d__*   masalar — dokunulacak nesneler
      .qdrop       fotoğraf bırakma alanı — hedefin sınırı görünmeli
      .qmsg--*     sohbet balonu — kimin konuştuğunu zemin söyler
      .choice      şık — seçilecek
@@ -9826,319 +9824,6 @@ tbody tr:hover{ background:var(--surface-2); }
   background:var(--danger); color:#fff;
   font-size:10px; font-weight:700; line-height:17px; text-align:center;
 }
-
-/* ==================== ofis: 3B oda ====================
-   Kat planı ofisi bir mekân yaptı; bu görünüm onu bir ODA yapar: masalar
-   bir zeminin üstünde durur, Patron dipte karşıda oturur, kamera dönebilir.
-
-   Kütüphane yok. Uygulamanın hiçbir bağımlılığı yok ve tek dosyalık bir
-   HTML olarak yayımlanıyor; beş masalık bir oda için WebGL hem ağır hem
-   gereksizdir. Sahne tek bir dönüşümle eğilir, her masa kendi kutusunu üç
-   yüzeyle kurar.
-
-   İki kural bu bölümü ayakta tutar:
-   1) Yazı hiçbir açıda eğilmez. Ad kartları sahnenin TERS dönüşümünü alır
-      (rotateZ(-turn) rotateX(-tilt)); oda çevrilirken etiketler kameraya
-      dönük kalır ve düz okunur.
-   2) Renk yalnız token'lardan gelir; her masanın kimlik rengi --seat-color
-      üzerinden, kat planındakiyle aynı yerden okunur. */
-
-.room3d{
-  position:relative;
-  /* Sol duvarin genisligi odanin DERINLIGI kadardir; yuzdeyle yazilamaz
-     (yuzde genisligi olcer), bu yuzden yukseklik tek degiskende durur. */
-  --room-h:430px;
-  height:var(--room-h);
-  perspective:1150px;
-  perspective-origin:50% 38%;
-  /* Yatay sürükleme odayı çevirir, dikey hareket sayfayı kaydırmaya kalır. */
-  touch-action:pan-y;
-  cursor:grab;
-}
-
-.room3d.is-dragging{ cursor:grabbing; }
-
-.room3d__scene{
-  position:absolute; inset:0;
-  transform-style:preserve-3d;
-  transform:translateY(2%) scale(var(--zoom, .84)) rotateX(var(--tilt, 56deg)) rotateZ(var(--turn, -26deg));
-  transition:transform var(--dur-lg) var(--ease);
-}
-
-.room3d.is-dragging .room3d__scene{ transition:none; }
-
-/* Dekor İMLECE GÖRÜNMEZDİR. Zorunlu: preserve-3d bağlamında kardeşler tek
-   bir derinlik değerine göre sıralanır ve zemin gibi BÜYÜK bir düzlem,
-   kendisiyle aynı düzlemde duran masa düğmelerinin bir kısmını isabet
-   testinde örtüyor — Patron'un ve bir uzmanın masası hiç tıklanamıyordu.
-   Dekor zaten aria-hidden; imleci de hiç görmemeli. */
-.room3d__floor, .room3d__rug, .room3d__wall, .room3d__board{ pointer-events:none; }
-
-/* Zemin: kat planındaki ızgaranın aynısı, artık gerçekten yerde. */
-.room3d__floor{
-  position:absolute; left:2%; top:2%; width:96%; height:96%;
-  border-radius:12px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
-  box-shadow:0 0 0 1px var(--surface), 0 18px 40px rgba(0,0,0,.16);
-}
-
-.room3d__floor::before{
-  content:'';
-  position:absolute; inset:0;
-  border-radius:12px;
-  background-image:
-    linear-gradient(var(--c-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--c-grid) 1px, transparent 1px);
-  background-size:38px 38px;
-  opacity:.5;
-}
-
-/* Toplantı halısı: odanın ortasını işaretler, masaların hizasını okutur. */
-.room3d__rug{
-  position:absolute; left:22%; top:38%; width:56%; height:36%;
-  border-radius:999px;
-  background:var(--primary-soft);
-  opacity:.5;
-  transform:translateZ(.4px);
-}
-
-/* Duvarlar: zeminin kenarından yukarı kalkan iki düzlem. */
-.room3d__wall{
-  position:absolute;
-  background:var(--surface-3);
-  border:1px solid var(--border);
-}
-
-.room3d__wall--back{
-  left:2%; top:2%; width:96%; height:120px;
-  transform-origin:50% 0%;
-  transform:rotateX(90deg);
-  border-radius:10px 10px 0 0;
-}
-
-.room3d__wall--left{
-  left:2%; top:2%; width:calc(var(--room-h) * .96); height:120px;
-  transform-origin:0% 0%;
-  transform:rotateZ(90deg) rotateX(90deg);
-  border-radius:10px 10px 0 0;
-  filter:brightness(.94);
-}
-
-/* Duvardaki pano: haftanın tek işi. Duvarın çocuğu olduğu için onunla
-   birlikte dikilir; yazısı duvarın düzleminde durur ve okunur. */
-/* Duvar üst kenarından katlanarak dikildiği için içeriği baş aşağı kalır:
-   pano kendi düzleminde 180° çevrilir ve yazı düz okunur. */
-.room3d__board{
-  position:absolute; left:50%; bottom:26px;
-  transform:translateX(-50%) rotateX(180deg);
-  min-width:200px; max-width:74%;
-  padding:9px 14px;
-  border-radius:var(--r-sm);
-  background:var(--surface);
-  border:1px solid var(--border-strong);
-  box-shadow:var(--shadow);
-  text-align:center;
-}
-
-.room3d__board-label{
-  display:block; font-size:var(--fs-xs); color:var(--text-3);
-  text-transform:uppercase; letter-spacing:.06em;
-}
-
-.room3d__board b{
-  display:block; margin-top:2px;
-  font-family:var(--font-display); font-size:var(--fs-sm); font-weight:700;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-}
-
-/* ---------- masa ---------- */
-
-.desk3d{
-  position:absolute;
-  left:var(--x); top:var(--y);
-  width:126px; height:68px;
-  margin:-34px 0 0 -63px;
-  transform-style:preserve-3d;
-  background:none; border:0; padding:0;
-  cursor:pointer;
-}
-
-.desk3d--lead{ width:158px; margin-left:-79px; }
-
-.desk3d:focus-visible{ outline:none; }
-
-.desk3d:focus-visible .desk3d__top{ outline:2px solid var(--primary); outline-offset:3px; }
-
-/* Zemine düşen gölge: masayı gerçekten yerin üstüne oturtan şey budur. */
-.desk3d__shadow{
-  position:absolute; left:6px; right:6px; top:10px; bottom:-6px;
-  border-radius:999px;
-  background:rgba(0,0,0,.22);
-  filter:blur(7px);
-  transform:translateZ(.6px);
-}
-
-.desk3d__top{
-  position:absolute; inset:0;
-  border-radius:7px;
-  background:var(--surface);
-  border:1px solid var(--border-strong);
-  border-top:3px solid var(--seat-color, var(--border-strong));
-  transform:translateZ(30px);
-  transition:transform var(--dur) var(--ease);
-}
-
-/* İki kâğıt: masanın boş bir dikdörtgen değil, çalışılan bir masa olması. */
-.desk3d__paper{
-  position:absolute; left:12px; top:14px; width:26px; height:18px;
-  border-radius:2px;
-  background:var(--surface-2);
-  border:1px solid var(--border);
-}
-
-.desk3d__paper--b{ left:20px; top:26px; width:22px; height:14px; opacity:.8; }
-
-/* Kutunun iki görünen yüzü. */
-.desk3d__front{
-  position:absolute; left:0; right:0; bottom:0; height:30px;
-  transform-origin:50% 100%;
-  transform:rotateX(-90deg);
-  background:var(--surface-3);
-  border:1px solid var(--border);
-  border-radius:0 0 4px 4px;
-}
-
-.desk3d__side{
-  position:absolute; left:0; top:0; width:68px; height:30px;
-  transform-origin:0% 0%;
-  transform:rotateZ(90deg) rotateX(-90deg);
-  background:var(--surface-3);
-  border:1px solid var(--border);
-  filter:brightness(.93);
-}
-
-/* Ekran: masanın arka kenarında hafif geriye yatık durur. */
-.desk3d__screen{
-  position:absolute; left:50%; top:5px; width:52px; height:32px;
-  margin-left:-26px;
-  transform-origin:50% 100%;
-  transform:translateZ(30px) rotateX(-104deg);
-  border-radius:3px;
-  background:var(--seat-color, var(--primary));
-  border:1px solid var(--border-strong);
-  opacity:.85;
-}
-
-.desk3d__screen.is-busy{ animation:deskglow 1.4s var(--ease) infinite; }
-
-@keyframes deskglow{
-  0%,100%{ opacity:.55; }
-  50%    { opacity:1; }
-}
-
-/* Sandalye ve oturan: masanın ARKASINDA, kameraya dönük. Ofisi masalardan
-   ibaret bir kroki olmaktan çıkaran şey burası — masada biri oturuyor.
-
-   Silüet ajanın kimlik rengindedir (kat planındaki avatarla aynı renk,
-   aynı kaynaktan). Renk kimlik taşır, DURUM değil: durum her zaman ad
-   kartındaki ışıkla ve metniyle ayrıca verilir. */
-.desk3d__chair{
-  position:absolute; left:50%; top:-30px; width:36px; height:36px;
-  margin-left:-18px;
-  border-radius:50%;
-  background:var(--surface-3);
-  border:1px solid var(--border);
-  transform:translateZ(1px);
-}
-
-.desk3d__person{
-  position:absolute; left:50%; top:-12px;
-  width:30px; height:44px;
-  border-radius:15px 15px 4px 4px;
-  background:var(--seat-color, var(--text-3));
-  opacity:.92;
-  transform-origin:0% 0%;
-  transform:rotateZ(calc(-1 * var(--turn, -26deg))) rotateX(calc(-1 * var(--tilt, 56deg)))
-            translate(-50%, -100%);
-  transition:transform var(--dur-lg) var(--ease);
-}
-
-.room3d.is-dragging .desk3d__person{ transition:none; }
-
-.desk3d__person i{
-  position:absolute; left:50%; top:-14px;
-  width:19px; height:19px; margin-left:-9px;
-  border-radius:50%;
-  background:var(--seat-color, var(--text-3));
-  box-shadow:0 0 0 2px var(--surface);
-}
-
-/* ---------- ad kartı ----------
-   Sahnenin ters dönüşümünü alır: oda hangi açıda olursa olsun kameraya
-   dönük ve düz okunur kalır. */
-.desk3d__card{
-  position:absolute; left:50%; top:calc(100% + 24px);
-  display:flex; align-items:center; gap:6px;
-  padding:4px 10px 4px 7px;
-  border-radius:999px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  box-shadow:var(--shadow);
-  white-space:nowrap;
-  transform-origin:0% 0%;
-  /* Etiket, masanın ön kenarına çakılmış bir tabela gibi DİKİLİR.
-
-     Sıra önemli: translate(-50%,-100%) önce kartın alt-orta noktasını
-     çıpaya oturtur, ters dönüşüm onu kameraya çevirir, translateZ ise
-     masanın üstüne kaldırır. Böylece kartın HİÇBİR noktası masanın
-     düzleminin altına inmez — inseydi masa üstü yazının bir kısmını
-     boyardı ve adlar yarım görünürdü. */
-  transform:translateZ(38px) rotateZ(calc(-1 * var(--turn, -26deg))) rotateX(calc(-1 * var(--tilt, 56deg)))
-            translate(-50%, -100%);
-  transition:transform var(--dur-lg) var(--ease), border-color var(--dur) var(--ease);
-}
-
-.room3d.is-dragging .desk3d__card{ transition:none; }
-
-.desk3d__who{ flex:none; display:flex; }
-
-/* Ad kartı bir rozettir, kart değil: avatar da o ölçüye iner. */
-.desk3d__card .agentav{ width:20px; height:20px; font-size:10px; }
-
-.desk3d__name{
-  font-family:var(--font-display); font-size:var(--fs-xs); font-weight:700;
-  line-height:1.2;
-}
-
-.desk3d__state{
-  font-size:var(--fs-xs); color:var(--text-3);
-  max-width:110px; overflow:hidden; text-overflow:ellipsis;
-}
-
-.desk3d__count{
-  flex:none;
-  min-width:17px; height:17px; padding:0 4px;
-  border-radius:9px;
-  background:var(--danger); color:#fff;
-  font-size:10px; font-weight:700; line-height:17px; text-align:center;
-}
-
-/* Açık masa öne çıkar; üzerine gelince hafifçe kalkar. */
-.desk3d:hover .desk3d__top{ transform:translateZ(36px); }
-
-.desk3d.is-open .desk3d__top{
-  transform:translateZ(38px);
-  border-color:var(--seat-color, var(--primary));
-}
-
-.desk3d.is-open .desk3d__card{ border-color:var(--seat-color, var(--primary)); }
-
-/* 3B görünümde başlıktaki çevirme düğmeleri. */
-.room3d__turn{ display:flex; gap:4px; }
-
-/* Odanın kendi zemin ızgarası varken paneldeki ızgara gürültü yapar. */
-.floor--room::before{ opacity:.12; }
 
 /* ==================== ofis: onay kutusu ====================
    Ajan sisteme dokunmayı önerir; ne değişeceği ONAYDAN ÖNCE önce/sonra
@@ -11655,6 +11340,64 @@ svg.chart{ max-height:180px; }
    bölümde kırmızı bir uyarı varsa rozet yine görünür (söz 9). */
 .ust__gizli.is-dolu:not(.is-uyari) .ust__gizli-sayi{ display:none; }
 
+/* ================================================================
+   ORTA BAŞLIK VE KAYDIRMALI SEÇİCİ (2026-10-02, kullanıcı: «başlıkları
+   ortaya al; seçim şeyleri daha sade olsun; ana giriş ortada, sağa sola
+   kaydırırsın»). Başlık ve ⓘ ortada, eylemler sağda. Çekmecenin
+   bölümleri (Hafta · Program · Hedefler) iOS kamerasının kip seçicisi
+   gibi: ray ve hap yok, yalnız yazı; seçili koyu, altında küçük nokta.
+   Sayfa bölümleri (Ayarlar · Takvim…) bir boy küçük, seçili ince çizgili.
+   Sığarsa ortada durur, sığmazsa yatay kayar ve seçili ortaya gelir
+   (kabuk.seciciHazirla); dokunarak sürüklemek ve ok tuşları komşu bölüme
+   geçirir (kabuk.kur).
+   ================================================================ */
+.site--v5 .sayfabasi__metin{ text-align:center; }
+.site--v5 .sayfabasi__satir{ justify-content:center; }
+@media (min-width:680px){
+  .site--v5 .sayfabasi{ display:grid; grid-template-columns:minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items:center; column-gap:16px; padding-bottom:18px; }
+  .site--v5 .sayfabasi__metin{ grid-column:2; flex:none; min-width:0; }
+  .site--v5 .sayfabasi__eylem{ grid-column:3; justify-self:end; justify-content:flex-end; }
+}
+@media (max-width:679px){
+  .site--v5 .sayfabasi{ flex-direction:column; align-items:center; gap:10px; }
+  .site--v5 .sayfabasi__metin{ flex:none; width:100%; }
+  .site--v5 .sayfabasi__eylem{ justify-content:center; }
+}
+/* ⓘ kartı başlığın ortasından açılır; kısa başlıkta daralmaz. */
+.site--v5 .bilgikart{ left:50%; translate:-50% 0; max-width:min(420px, calc(100vw - 32px)); text-align:left; }
+
+.site--v5 .bolumcubugu{ display:flex; gap:2px; width:100%; max-width:100%; box-sizing:border-box; padding:0 0 6px;
+  margin:0 0 18px; border:0; border-radius:0; background:var(--bg); box-shadow:none;
+  overflow-x:auto; overflow-y:hidden; overscroll-behavior-x:contain; scroll-snap-type:x proximity;
+  scrollbar-width:none; padding-inline:14px;
+  /* Kenarlar yumuşakça söner: sığmayan çubukta devamı olduğu görünür; sığan
+     çubukta kenarlar zaten boştur. */
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+          mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); }
+.site--v5 .bolumcubugu::-webkit-scrollbar{ display:none; }
+/* Sığınca ortada; sığmazsa baştan kayar (otomatik kenar boşluğu taşınca sıfırlanır). */
+.site--v5 .bolumcubugu > :first-child{ margin-left:auto; }
+.site--v5 .bolumcubugu > :last-child{ margin-right:auto; }
+.site--v5 .bolumcubugu__ad{ position:relative; flex:none; scroll-snap-align:center; height:36px; padding:0 14px;
+  border:0; border-radius:10px; background:none; box-shadow:none; color:var(--text-3);
+  font-size:15px; font-weight:500; letter-spacing:-.01em;
+  transition:color var(--dur) var(--ease), background var(--dur) var(--ease); }
+.site--v5 .bolumcubugu__ad:hover{ color:var(--text); background:none; }
+.site--v5 .bolumcubugu__ad:focus-visible{ outline:2px solid var(--primary); outline-offset:-2px; }
+.site--v5 .bolumcubugu__ad.is-on{ color:var(--text); font-weight:650; background:none; box-shadow:none; }
+.site--v5 .bolumcubugu__ad.is-on::after{ display:block; content:''; position:absolute; left:50%; bottom:0;
+  width:5px; height:5px; margin-left:-2.5px; border-radius:50%; background:var(--text); }
+/* Dar kenar kipinin eski gri rayı (yukarıda) burada kalkar: çubuk zeminle bir. */
+@media (min-width:680px){
+  html.kenar-dar .site--v5 .bolumcubugu--kabuk{ display:flex; background:var(--bg); }
+}
+/* Sayfa bölümleri: bir boy küçük; seçilinin altında kısa çizgi. */
+.site--v5 .bolumcubugu--sayfa{ margin-bottom:22px; }
+.site--v5 .bolumcubugu--sayfa .bolumcubugu__ad{ height:32px; padding:0 12px; font-size:13.5px; }
+.site--v5 .bolumcubugu--sayfa .bolumcubugu__ad.is-on::after{ width:16px; height:2px; margin-left:-8px; border-radius:1px; }
+@media (prefers-reduced-motion:reduce){ .site--v5 .bolumcubugu{ scroll-behavior:auto; } }
+
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
@@ -12270,61 +12013,6 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
   .gizle-bitir{ left:16px; transform:none; max-width:calc(100vw - 104px);
     bottom:calc(var(--altbant-h, 64px) + 12px + env(safe-area-inset-bottom, 0px)); font-size:12.5px; }
   .gizle-bitir i{ display:none; }
-}
-
-/* ==== css/ofis3b.css ==== */
-/* 3B OFIS — canli sahnenin kabugu (js/core/ofis3b.js, ofis3d/sahne.js).
-
-   Sahne kendi isigini ve rengini kodla uretir; burada yalniz yerlesim,
-   kontrol satirlari ve dar ekran var. Sahnenin kutusu SABIT ORANDADIR:
-   tuval icerige gore uzamaz, sayfanin geri kalani kaymaz. Ofis genis bir
-   kat; kare bir kutuda (telefonda 340 px) altta ve ustte bos kaliyordu,
-   bu yuzden kutu yukseklikle degil oranla (16:9, telefonda 4:3) boyutlanir.
-
-   Dokunma: yatay surukleme odayi dondurur, dikey surukleme SAYFAYI kaydirir
-   (touch-action: pan-y). Telefonda 340 piksellik kaydirilamaz bir alan
-   birakmak, sayfayi o kutunun ustunde kilitlemek olurdu. Iki parmak
-   yakinlastirir. */
-
-.ofis3b{ display:block; }
-
-.ofis3b__arac{
-  display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px;
-  margin-bottom:8px;
-}
-
-.ofis3b__sahne{
-  position:relative; width:100%; aspect-ratio:16 / 9; max-height:560px;
-  border-radius:var(--r-md); overflow:hidden;
-  background:var(--surface-2);
-  touch-action:pan-y; cursor:grab;
-}
-.ofis3b__sahne:active{ cursor:grabbing; }
-.ofis3b__sahne canvas{ position:absolute; inset:0; display:block; width:100%; height:100%; }
-
-.ofis3b__olay{ margin:8px 0 0; }
-.ofis3b__olay:empty{ display:none; }
-.ofis3b__durum{ margin:4px 0 0; }
-
-.ofis3b__detay{ margin-top:10px; }
-.ofis3b__detay > summary{ cursor:pointer; min-height:24px; }
-
-.ofis3b__gorev{
-  display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr));
-  gap:8px; align-items:end;
-}
-.ofis3b__gorev label{ display:flex; flex-direction:column; gap:4px; }
-
-.ofis3b__bekle{
-  aspect-ratio:16 / 9; max-height:560px; display:grid; place-items:center; margin:0;
-  border-radius:var(--r-md); background:var(--surface-2);
-}
-
-.ofis3b-masalar{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
-.ofis3b-not{ margin:0 0 8px; }
-
-@media (max-width:480px){
-  .ofis3b__sahne, .ofis3b__bekle{ aspect-ratio:4 / 3; }
 }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
@@ -13438,7 +13126,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'9b44df0', at:'2026-10-02 14:59', dirty:true };
+R.BUILD = { id:'7d02baf', at:'2026-10-02 15:33', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -18502,6 +18190,27 @@ window.LIFEOS = window.LIFEOS || {};
     return tasindi;
   }
 
+  /* KAYDIRMALI SEÇİCİ (2026-10-02): sığmayan bölüm çubuğunda seçili bölüm
+     ortaya alınır — kaydırılmış bir çubukta seçiliyi aramak gerekmesin.
+     Her çizimden sonra çağrılır (Gizle.uygula). */
+  function seciciHazirla(kap){
+    if(typeof document === 'undefined') return;
+    (kap || document).querySelectorAll('.bolumcubugu').forEach(c => {
+      const on = c.querySelector('.bolumcubugu__ad.is-on');
+      if(!on || c.scrollWidth <= c.clientWidth + 1) return;
+      /* Ekran koordinatıyla: offsetLeft çubuk konumlandırılmamışsa sayfaya
+         göre ölçülür ve seçili yanlış yere kayardı. */
+      const cr = c.getBoundingClientRect(), or = on.getBoundingClientRect();
+      c.scrollLeft += (or.left + or.width / 2) - (cr.left + cr.width / 2);
+    });
+  }
+  /* Komşu bölüm: yon +1 sağdaki, -1 soldaki. Yoksa null. */
+  function seciciKomsu(c, yon){
+    const l = Array.from(c.querySelectorAll('.bolumcubugu__ad'));
+    const i = l.findIndex(b => b.classList.contains('is-on'));
+    return i < 0 ? null : (l[i + yon] || null);
+  }
+
   function bilgiKapat(haric){
     if(typeof document === 'undefined') return;
     document.querySelectorAll('.sayfabasi__bilgi.is-acik').forEach(b => {
@@ -18799,6 +18508,32 @@ window.LIFEOS = window.LIFEOS || {};
     });
     window.addEventListener('resize', () => { if(acikId && !telefonMu()) katmanKapat(); });
     document.addEventListener('keydown', e => { if(e.key === 'Escape'){ bilgiKapat(); modulPencereKapat(); } });
+    /* Seçicide ok tuşları komşu bölüme odaklanır (Enter/boşluk seçer). */
+    document.addEventListener('keydown', e => {
+      if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const b = e.target.closest && e.target.closest('.bolumcubugu__ad');
+      if(!b) return;
+      const l = Array.from(b.parentElement.querySelectorAll('.bolumcubugu__ad'));
+      const h = l[l.indexOf(b) + (e.key === 'ArrowRight' ? 1 : -1)];
+      if(h){ e.preventDefault(); h.focus(); h.scrollIntoView({ block:'nearest', inline:'center' }); }
+    });
+    /* Seçicide sürükleme: SIĞAN (kaymayan) çubukta yatay sürükleme komşu
+       bölüme geçirir — «ana giriş ortada, sağa sola kaydırırsın». Sığmayan
+       çubuk doğal kaydırmasıyla kalır. */
+    let kaydirma = null;
+    document.addEventListener('pointerdown', e => {
+      const c = e.target.closest && e.target.closest('.bolumcubugu');
+      kaydirma = c && c.scrollWidth <= c.clientWidth + 1 ? { c, x:e.clientX, y:e.clientY } : null;
+    }, { passive:true });
+    document.addEventListener('pointerup', e => {
+      if(!kaydirma) return;
+      const { c, x, y } = kaydirma;
+      kaydirma = null;
+      const dx = e.clientX - x, dy = e.clientY - y;
+      if(Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      const h = seciciKomsu(c, dx < 0 ? 1 : -1);
+      if(h) h.click();
+    });
     /* Dar kenar kapanınca (fare çıkınca) açık sistem kartı da kapanır. */
     document.addEventListener('mouseout', e => {
       const k = e.target.closest && e.target.closest('.kenar');
@@ -18810,7 +18545,8 @@ window.LIFEOS = window.LIFEOS || {};
   L.KABUK = Object.freeze({
     CEKMECELER, MODULLER, SIRA,
     simge, modulIsareti, adres, simdiOrani, saatMetni,
-    ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, railBilgiye, bolumCubugu, altBant, menuSayfasi,
+    ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, railBilgiye, seciciHazirla, seciciKomsu,
+    bolumCubugu, altBant, menuSayfasi,
     modulMenusu, bildirimPaneli, hizliEkle,
     katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis, kenarDar, kenarDarMi, kenarIlkDar,
   });
@@ -20218,6 +19954,8 @@ LIFEOS.Gizle = (function(){
        «Tamamını göster»in arkasında kalıyordu (2026-10-02). */
     /* «Nasıl okunur» şeridi ⓘ'ye (kabuk.railBilgiye): raf ölçmeden önce. */
     try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.railBilgiye && o.kok) KB.railBilgiye(o.kok); }catch(e){}
+    /* Bölüm çubukları (sayfa başındaki ve #main içindeki): seçili ortada. */
+    try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.seciciHazirla && o.kok) KB.seciciHazirla(o.kok.parentElement || o.kok); }catch(e){}
     try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.raf && o.kok) H.raf(o.kok); }catch(e){}
     dipCiz(o, liste, gizliUyari);
     sayacYaz(gizliListe().length, gizliUyari);
@@ -44578,8 +44316,6 @@ R.Office = (function(){
       endpoint:'',
       fallback:true,          // ilk model dusunce sirayi dene
       autoBriefing:true,      // sabah gunun brifingini kendiliginden uret
-      room3d:true,            // ofis ekrani: 3B oda mi, duz kat plani mi
-      sahne3b:'canli',        // 3B'de: 'canli' WebGL sahnesi (ofis3b.js) | 'hafif' CSS odasi
       meetingPace:'normal',   // toplanti akis hizi: hizli | normal | yavas
       meetingVoice:false,     // toplantiyi sesli dinle (tercih kalicidir)
       voices:{},              // agentId -> voiceURI (kullanicinin ses eslestirmesi)
@@ -46592,492 +46328,6 @@ R.Office = (function(){
     /* sabitler */
     CHAT_MAX, MEETING_MAX, ROUNDS,
   };
-})();
-
-/* ==== js/core/ofis3b.js ==== */
-/* 3B OFIS — yukleyici ve olay baglayicisi (sahne: src/ofis3d/sahne.js).
-
-   Sahne AYS'nin gorsel bir katmanidir; hicbir karari yoktur (AGENTS.md
-   §1.3 istisnasi). Buradaki sozler:
-
-     1. ISTEGE BAGLI. Three.js ve sahne tek dosyaya GOMULMEZ: rota.html'in
-        yanindaki ofis3d/ klasorunden yalniz Ofis'te 3B acilinca yuklenir.
-        Dosya yoksa, WebGL yoksa ya da yukleme hata verirse ekran bugunku
-        CSS odasina doner ve bunu soyler. Uygulamanin hicbir parcasi bu
-        katmana bagli degildir.
-     2. GERCEK OLAY GERCEK, TEMSILI TEMSILI. Ofis kendi kendine yasar ama
-        her hareketin AYS'de bir karsiligi vardir ve nedeni olay satirinda
-        yazar (tablo: «canli ekosistem» bolumu — not, oneri, onay, deneme,
-        brifing, HKM esitlemesi, plan/ara/ogle molasi, pazar kapanisi).
-        Olaysiz dolasma («Canli ofis», elle verilen gorev) ekranda
-        «Temsili:» diye yazilir.
-     3. KALICI KOK. AYS her cizimde #app'i yeniden yazar; WebGL baglami bunu
-        kaldiramaz. Sahnenin koku bir kez kurulur ve her cizimden sonra
-        yuvasina TASINIR. Ekran degisince cizim dongusu kendiliginden durur.
-     4. OTOMASYONDA KENDILIGINDEN ACILMAZ. Tarayici otomasyonunda WebGL
-        yazilimla cizilir (saniyede ~2 kare) ve oteki olcumleri bozar;
-        orada sahne yalniz acikca istenince acilir (tools/smoke.js akisi). */
-
-window.R = window.R || {};
-
-R.Ofis3B = (function(){
-  const DEPO = 'rota.ofis3b';
-  const KUYRUK_EN_COK = 3;
-  /* Sahnedeki masa sirasi -> AYS ajani. 4 patron masasidir (sahnede sabit). */
-  const SIRA = ['tyt', 'ayt', 'rehber', 'analist', 'patron', 'koc'];
-
-  const durum = { kok:null, api:null, yukleniyor:null, hata:null, istendi:false,
-    kuyruk:[], gorulen:{}, gun:null, sayac:null, toplantiyaGit:null, bekliyor:false,
-    tik:0, telefonIste:false, hkmDk:null, kapanista:false, toplantidaydi:false };
-
-  /* Dosya koku: dist/ ve src/ icin «ofis3d/», test sayfasi «../ofis3d/». */
-  let KOK = 'ofis3d/';
-
-  function sira(agentId){ return SIRA.indexOf(agentId); }
-  function ajan(i){ return R.AGENT_BY_ID && R.AGENT_BY_ID[SIRA[i]]; }
-  function adlar(){ return SIRA.map(id => (R.AGENT_BY_ID[id] || {}).name || id); }
-
-  let webgl = null;
-  function destek(){
-    if(webgl !== null) return webgl;
-    try{
-      const c = document.createElement('canvas');
-      webgl = !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
-    }catch(e){ webgl = false; }
-    return webgl;
-  }
-  function otomasyon(){ return !!(navigator && navigator.webdriver); }
-
-  /* Ofis ekrani bunu sorar: canli sahne mi, CSS odasi mi. */
-  function kullanilir(){
-    const O = R.Office;
-    if(O && O.settings().sahne3b === 'hafif') return false;
-    if(durum.hata || !destek()) return false;
-    return !otomasyon() || durum.istendi;
-  }
-
-  function okuDepo(){
-    try{ return JSON.parse(localStorage.getItem(DEPO) || 'null'); }catch(e){ return null; }
-  }
-  function yazDepo(v){
-    try{ localStorage.setItem(DEPO, JSON.stringify(v)); }catch(e){ /* depo kapali: sahne yine calisir */ }
-  }
-
-  function betik(src){
-    return new Promise((ok, ret) => {
-      const s = document.createElement('script');
-      s.src = src;
-      s.onload = () => ok();
-      s.onerror = () => ret(new Error(src + ' yüklenemedi'));
-      document.head.appendChild(s);
-    });
-  }
-
-  function yukle(){
-    if(window.RotaOfis3B) return Promise.resolve();
-    if(durum.yukleniyor) return durum.yukleniyor;
-    durum.yukleniyor = (window.THREE ? Promise.resolve() : betik(KOK + 'three-0.160.1.min.js'))
-      .then(() => betik(KOK + 'sahne.js'))
-      .catch(e => { durum.hata = 'Canlı 3B ofis dosyaları bulunamadı (ofis3d/); hafif görünüm gösteriliyor.'; throw e; });
-    return durum.yukleniyor;
-  }
-
-  /* ---------- kalici kok ---------- */
-
-  function kokHtml(){
-    const K = R.C, { html, raw } = R.h;
-    const b = (label, data, extra) => K.Button(Object.assign({ label, size:'sm', data }, extra || {}));
-    const ib = (icon, aria, data) => K.IconButton({ icon, size:'sm', aria, title:aria, data });
-    const ad = adlar();
-    const secenek = (sec) => ad.map((a, i) => html`<option value="${i}" ${i === sec ? raw('selected') : ''}>${a}</option>`);
-    return String(html`
-      <div class="ofis3b__arac">
-        <div class="row wrap gap-6">
-          ${b('Çapraz', { 'data-view':'angle', 'aria-pressed':'true' })}
-          ${b('Üstten', { 'data-view':'top', 'aria-pressed':'false' })}
-          ${b('Gece görünümü', { 'data-night':'', 'aria-pressed':'false' })}
-        </div>
-        <div class="row wrap gap-6">
-          ${ib('minus', 'Uzaklaş', { 'data-zoom':'out' })}
-          ${ib('plus', 'Yakınlaş', { 'data-zoom':'in' })}
-          ${ib('left', 'Kamerayı sola döndür', { 'data-turn':'left' })}
-          ${ib('right', 'Kamerayı sağa döndür', { 'data-turn':'right' })}
-        </div>
-      </div>
-      <div class="office-view ofis3b__sahne" role="img"
-        aria-label="Döndürülebilen üç boyutlu ofis: Patron ve beş uzmanın masaları, arşiv odası, dinlenme salonu ve toplantı odası. Masalara aşağıdaki düğmelerle de ulaşılır."></div>
-      <p class="small ofis3b__olay" data-olay aria-live="polite"></p>
-      <p class="tiny dim ofis3b__durum" data-status aria-live="polite">Ekip masasında.</p>
-      <button type="button" hidden data-meeting>Toplantıyı başlat</button>
-      <input type="checkbox" hidden data-call aria-hidden="true" tabindex="-1"/>
-      <details class="ofis3b__detay">
-        <summary class="small">Sahne ayarları</summary>
-        <div class="row wrap gap-6 mt-8">
-          ${b(ad[0] + '’nın masası', { 'data-designer':'', 'aria-pressed':'false' })}
-          ${b('Patron’un odası', { 'data-boss':'', 'aria-pressed':'false' })}
-          ${b('Arşiv odası', { 'data-area':'archive', 'aria-pressed':'false' })}
-          ${b('Dinlenme salonu', { 'data-area':'phone', 'aria-pressed':'false' })}
-          ${b('Toplantı odası', { 'data-area':'meeting', 'aria-pressed':'false' })}
-          ${b('Hareketi durdur', { 'data-motion':'', 'aria-pressed':'true' })}
-        </div>
-        <div class="row wrap gap-10 mt-8">
-          <label class="check"><input type="checkbox" data-walls checked/><span>Duvarları göster</span></label>
-          <label class="check"><input type="checkbox" data-follow/><span>Yürüyeni takip et</span></label>
-          
-          <label class="check"><input type="checkbox" data-auto/><span>Canlı ofis (temsili görevler)</span></label>
-        </div>
-        <p class="tiny dim mt-8">Temsili görev bir AYS olayına karşılık gelmez; ekranda «Temsili:» diye yazılır.</p>
-        <div class="ofis3b__gorev mt-8">
-          <label class="small">Kim<select class="select input--sm" data-actor>${secenek(0)}</select></label>
-          <label class="small">Ne<select class="select input--sm" data-job>
-            <option value="deliver">Belge götür</option>
-            <option value="archive">Arşivden dosya al</option>
-            <option value="break">Mola ver</option></select></label>
-          <label class="small">Kime<select class="select input--sm" data-recipient>${secenek(4)}</select></label>
-          <label class="small">Hız<select class="select input--sm" data-speed>
-            <option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select></label>
-          ${b('Temsili görevi başlat', { 'data-run':'' })}
-          ${b('Belge teslimini izle (temsili)', { 'data-demo':'' })}
-        </div>
-        <div class="row wrap gap-6 mt-10">
-          ${K.Button({ label:'Hafif görünüme geç', size:'sm', tone:'ghost', act:'office-sahne', data:{ 'data-mod':'hafif' } })}
-        </div>
-      </details>`);
-  }
-
-  function olayYaz(metin){
-    const el = durum.kok && durum.kok.querySelector('[data-olay]');
-    if(el) el.textContent = metin || '';
-  }
-
-  /* GECE/GUNDUZ saate uyar (20:00-06:59 gece) ve sahne acikken de gecis
-     yapar. Kullanici «Gece/Gunduz gorunumu»ne basarsa o gun onun secimi
-     kalir; ertesi gun yine saat belirler. */
-  const GECE_DEPO = 'rota.ofis3b.gece';
-  function geceMi(t){ const h = (t || new Date()).getHours(); return h >= 20 || h < 7; }
-  function gunAnahtari(t){ const d = t || new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
-  function hedefGece(t){
-    let e = null;
-    try{ e = JSON.parse(localStorage.getItem(GECE_DEPO) || 'null'); }catch(x){ e = null; }
-    if(e && e.gun === gunAnahtari(t) && typeof e.gece === 'boolean') return e.gece;
-    return geceMi(t);
-  }
-  function elleGece(gece, t){
-    try{ localStorage.setItem(GECE_DEPO, JSON.stringify({ gun:gunAnahtari(t), gece:!!gece })); }catch(x){}
-  }
-  function geceyiUygula(){
-    const api = durum.api;
-    if(!api) return;
-    const g = hedefGece();
-    if(api.durum().gece !== g) api.gece(g);
-  }
-
-  function kur(){
-    if(durum.api || durum.hata) return;
-    const kok = document.createElement('div');
-    kok.className = 'ofis3b';
-    kok.innerHTML = kokHtml();
-    durum.kok = kok;
-    const kayit = okuDepo();
-    const api = window.RotaOfis3B.kur(kok, {
-      adlar:adlar(),
-      durum:kayit,
-      gece:hedefGece(),
-      kaydet:v => yazDepo(v),
-      secildi:i => {
-        const a = ajan(i);
-        if(!a) return;
-        R.S.ui.officeDesk = R.S.ui.officeDesk === a.id ? null : a.id;
-        R.App.render();
-      },
-      bitti:b => bitti(b),
-    });
-    if(!api || !api.ok){
-      durum.hata = (api && api.why) || 'Canlı 3B ofis açılamadı; hafif görünüm gösteriliyor.';
-      durum.kok = null;
-      return;
-    }
-    durum.api = api;
-    api.koyu(koyuMu());
-    /* Elle basis o gunun secimidir (sahne dugmeyi kendisi degistirir). */
-    const d = kok.querySelector('[data-night]');
-    if(d) d.addEventListener('click', () => elleGece(api.durum().gece));
-    geceyiUygula();
-  }
-
-  function koyuMu(){
-    const t = document.documentElement.getAttribute('data-theme');
-    if(t) return t === 'dark';
-    try{ return matchMedia('(prefers-color-scheme: dark)').matches; }catch(e){ return false; }
-  }
-
-  /* ---------- olaylar ---------- */
-
-  function bugun(){ return R.U.todayISO(); }
-  function gunuYenile(){
-    if(durum.gun !== bugun()){ durum.gun = bugun(); durum.gorulen = gorulenYukle(); }
-  }
-
-  /* {tur:'deliver'|'break'|'archive', kim, kime, metin} — tekrarlar ve
-     tasma reddedilir; kuyruk kisadir, cunku eski bir olayi dakikalar sonra
-     canlandirmak onu simdiki gibi gostermek olurdu. */
-  function ekle(o){
-    gunuYenile();
-    if(o.anahtar && durum.gorulen[o.anahtar]) return false;
-    if(durum.kuyruk.length >= KUYRUK_EN_COK) return false;
-    if(o.kim < 0 || (o.tur === 'deliver' && (o.kime < 0 || o.kime === o.kim))) return false;
-    if(o.anahtar){ durum.gorulen[o.anahtar] = true; gorulenYaz(); }
-    durum.kuyruk.push(o);
-    return true;
-  }
-
-  function isle(){
-    const api = durum.api;
-    if(!api || !durum.kok || !durum.kok.isConnected){ durdur(); return; }
-    geceyiUygula();
-    if(++durum.tik % 7 === 0) tara();
-    /* Gercek toplanti ekranindan donuldu: ekip masasina yurur. Yalniz
-       o zaman — pazar kapanisi oturumu bir yeniden cizimle bitmemeli. */
-    if(durum.toplantidaydi && api.durum().toplanti === 'seated'){
-      durum.toplantidaydi = false;
-      api.toplanti(false);
-      olayYaz('Toplantı bitti; ekip masalarına dönüyor.');
-      return;
-    }
-    if(api.mesgul()) return;
-    if(durum.telefonIste !== api.durum().telefonda && api.telefon(durum.telefonIste) && durum.telefonIste){
-      olayYaz(ajan(3).name + ' HKM ile görüşüyor: son eşitleme ' + (durum.hkmDk ? durum.hkmDk + ' dakika önce.' : 'az önce.'));
-    }
-    if(!durum.kuyruk.length) return;
-    const o = durum.kuyruk.shift();
-    if(api.gorev(o.tur, o.kim, o.kime)) olayYaz(o.metin);
-    else durum.kuyruk.unshift(o);
-  }
-
-  function baslat(){
-    if(durum.sayac) return;
-    durum.sayac = setInterval(isle, 700);
-  }
-  function durdur(){
-    if(durum.sayac){ clearInterval(durum.sayac); durum.sayac = null; }
-  }
-
-  function bitti(b){
-    if(b.tur === 'toplanti' && b.durum === 'seated' && durum.toplantiyaGit){
-      const git = durum.toplantiyaGit; durum.toplantiyaGit = null;
-      git();
-      return;
-    }
-    if(b.tur === 'toplanti' && b.durum === 'seated' && durum.kapanista){
-      durum.kapanista = false;
-      setTimeout(() => {
-        if(durum.api && durum.api.durum().toplanti === 'seated'){
-          durum.api.toplanti(false);
-          olayYaz('Kapanış bitti; ekip masalarına dönüyor.');
-        }
-      }, 90000);
-      return;
-    }
-    if(!durum.kuyruk.length && !(b && b.temsili)) setTimeout(() => {
-      if(durum.api && !durum.api.mesgul() && !durum.kuyruk.length) olayYaz('');
-    }, 4000);
-  }
-
-  /* ---------- canli ekosistem ----------
-     Sahnedeki her hareket AYS'nin GERCEK durumundan dogar ve nedeni olay
-     satirinda yazar. Iki parca:
-       anlik(simdi)  AYS'nin durumunu okur (yan etkisiz),
-       olaylar(s)    o durumdan hangi hareketlerin dogacagini secer (SAF;
-                     test edilen yer burasi).
-     Hareketin karsiligi:
-       uzman -> Patron   masadaki not · yeni oneri · brifingde uyari bulgusu
-       Patron -> uzman   bugun onayladigin oneri sahibine doner
-       arsiv             bugun kaydedilen deneme: analist eskilerini getirir
-       telefon           HKM ile son 15 dakikada basarili esitleme
-       mola              model hakki doldu · plan bitti · ara gunu · ogle
-       toplanti          «Toplanti baslat» · pazar 18-21 haftalik kapanis
-     Ritim molalari (plan/ara/ogle) gece (22-07) cikmaz ve kuyruk bosken
-     eklenir: gercek olaylarin onune gecmez. */
-  const UYARI = { danger:true, warn:true };
-
-  function anlik(simdi){
-    simdi = simdi || new Date();
-    const O = R.Office, U = R.U, S = R.S;
-    const bugunIso = U.todayISO();
-    const dene = (f, yedek) => { try{ const v = f(); return v == null ? yedek : v; }catch(e){ return yedek; } };
-    const gunu = t => dene(() => U.gunOf(t), String(t || '').slice(0, 10));
-    const s = { saat:simdi.getHours(), haftaGunu:simdi.getDay(), notlar:[], oneriler:[], onaylar:[],
-      denemeler:[], brifing:false, bulgular:[], hakDolu:[], hkm:null, plan:null, ara:false };
-    s.notlar = dene(() => O.notes().map(n => ({ id:n.id, agent:n.agent, text:n.text })), []);
-    s.oneriler = dene(() => R.Proposals.pending().map(p => ({ id:p.id, agent:p.agent })), []);
-    s.onaylar = dene(() => R.Proposals.applied().filter(p => p.appliedAt && gunu(p.appliedAt) === bugunIso)
-      .map(p => ({ id:p.id, agent:p.agent })), []);
-    s.denemeler = dene(() => (S.exams || []).filter(e => e.createdAt && gunu(e.createdAt) === bugunIso)
-      .map(e => ({ id:e.id })), []);
-    s.brifing = !!dene(() => O.briefingOf(), null);
-    if(s.brifing){
-      s.bulgular = dene(() => R.AGENTS.filter(a => !a.lead).map(a => {
-        const f = (O.brief(a.id).findings || []).find(x => UYARI[x.tone]);
-        return f ? { agent:a.id, text:f.text } : null;
-      }).filter(Boolean), []);
-    }
-    if(dene(() => O.mode(), '') === 'llm'){
-      s.hakDolu = dene(() => R.AGENTS.filter(a => !a.lead && (O.agentQuota(a.id) || {}).full).map(a => a.id), []);
-    }
-    const b = dene(() => R.Beacon.settings(), null);
-    if(b && b.enabled && b.lastOkAt){
-      const dk = (simdi - new Date(b.lastOkAt)) / 60000;
-      if(isFinite(dk) && dk >= 0) s.hkm = { dk:Math.round(dk) };
-    }
-    const gun = S.days && S.days[bugunIso];
-    if(gun && Array.isArray(gun.blocks)){
-      const bl = gun.blocks;
-      s.plan = { toplam:bl.length, bitti:bl.filter(x => x.status === 'done').length,
-        bekleyen:bl.filter(x => x.status === 'pending').length };
-    }
-    s.ara = dene(() => { const x = R.Istisna.gunIcin(bugunIso); return !!x && x.tur === 'ara'; }, false);
-    return s;
-  }
-
-  function olaylar(s){
-    const P = sira('patron');
-    const ad = id => (R.AGENT_BY_ID[id] || {}).name || id;
-    const uzmanlar = R.AGENTS.filter(a => !a.lead).map(a => a.id);
-    const g = [];
-    const teslim = (kimden, kime, anahtar, metin) => {
-      const i = sira(kimden), j = sira(kime);
-      if(i >= 0 && j >= 0 && i !== j) g.push({ tur:'deliver', kim:i, kime:j, anahtar, metin });
-    };
-    for(const n of s.notlar || []) if(n.agent !== 'patron')
-      teslim(n.agent, 'patron', 'not:' + n.id, ad(n.agent) + ' masasındaki notu Patron’a götürüyor: ' + kisalt(n.text));
-    for(const p of s.oneriler || []) if(p.agent !== 'patron')
-      teslim(p.agent, 'patron', 'oneri:' + p.id, ad(p.agent) + ' önerisini Patron’a götürüyor; onayın Ofis’te bekliyor.');
-    for(const p of s.onaylar || []) if(p.agent !== 'patron')
-      teslim('patron', p.agent, 'onay:' + p.id, 'Patron onayladığın kararı ' + ad(p.agent) + '’a götürüyor.');
-    for(const e of s.denemeler || []) g.push({ tur:'archive', kim:sira('analist'), anahtar:'deneme:' + e.id,
-      metin:ad('analist') + ' bugünkü denemeyi eskileriyle karşılaştırmak için arşivden dosyaları alıyor.' });
-    if(s.brifing) for(const f of s.bulgular || [])
-      teslim(f.agent, 'patron', 'brif:' + f.agent, ad(f.agent) + ' sabah brifingi için bulgusunu Patron’a iletiyor: ' + kisalt(f.text));
-    for(const id of s.hakDolu || []) g.push({ tur:'break', kim:sira(id), anahtar:'hak:' + id,
-      metin:ad(id) + ' bugünkü model hakkını doldurdu; yarına kadar kural motoruyla çalışıyor.' });
-    const gunduz = s.saat >= 7 && s.saat < 22;
-    const ritim = (onek, metin) => uzmanlar.forEach(id => g.push({ tur:'break', kim:sira(id), ritim:true,
-      anahtar:onek + ':' + id, metin:metin(ad(id)) }));
-    if(gunduz){
-      const p = s.plan;
-      if(p && p.toplam > 0 && p.bekleyen === 0 && p.bitti > 0) ritim('plan', a => a + ' mola veriyor: bugünün planı tamamlandı.');
-      else if(s.ara) ritim('ara', a => 'Bugün ara günü; ' + a + ' dinlenme salonunda.');
-      else if(s.saat >= 12 && s.saat < 14) ritim('ogle', a => 'Öğle arası: ' + a + ' mola veriyor.');
-    }
-    return { gorevler:g,
-      telefon:!!(s.hkm && s.hkm.dk <= 15), hkmDk:s.hkm ? s.hkm.dk : null,
-      kapanis:s.haftaGunu === 0 && s.saat >= 18 && s.saat < 21 };
-  }
-
-  /* Gorulen olaylar gun boyu hatirlanir (sayfa yenilense de ayni not
-     ikinci kez yurumez); ertesi gun sifirlanir. */
-  const GORULEN_DEPO = 'rota.ofis3b.gorulen';
-  function gorulenYukle(){
-    try{
-      const d = JSON.parse(localStorage.getItem(GORULEN_DEPO) || 'null');
-      if(d && d.gun === bugun() && d.anahtar) return d.anahtar;
-    }catch(e){}
-    return {};
-  }
-  function gorulenYaz(){
-    try{ localStorage.setItem(GORULEN_DEPO, JSON.stringify({ gun:durum.gun, anahtar:durum.gorulen })); }catch(e){}
-  }
-
-  function tara(simdi){
-    const api = durum.api;
-    const o = olaylar(anlik(simdi));
-    for(const x of o.gorevler){
-      if(x.ritim && durum.kuyruk.length) break;
-      ekle(x);
-    }
-    durum.telefonIste = o.telefon;
-    durum.hkmDk = o.hkmDk;
-    if(api && o.kapanis && !durum.gorulen.kapanis && !api.mesgul() && !durum.kuyruk.length
-        && !durum.toplantiyaGit && api.toplanti(true)){
-      durum.gorulen.kapanis = true; gorulenYaz();
-      durum.kapanista = true;
-      olayYaz('Haftanın kapanışı (pazar): ekip toplantı odasında haftayı değerlendiriyor.');
-    }
-    return o;
-  }
-
-  function kisalt(t){
-    const s = String(t || '').replace(/\s+/g, ' ').trim();
-    return s.length > 90 ? s.slice(0, 89) + '…' : s;
-  }
-
-  /* «Masaları tara» sonucu: gelen her öneri, onu yazan uzmanın Patron'a
-     götürdüğü bir belgedir. */
-  function oneriler(eklenen){
-    let n = 0;
-    for(const p of eklenen || []){
-      const i = sira(p.agent);
-      if(i < 0 || p.agent === 'patron') continue;
-      const a = R.AGENT_BY_ID[p.agent];
-      if(ekle({ tur:'deliver', kim:i, kime:sira('patron'), anahtar:'oneri:' + (p.id || i),
-        metin:(a ? a.name : 'Bir uzman') + ' önerisini Patron’a götürüyor; onayın Ofis’te bekliyor.' })) n++;
-    }
-    return n;
-  }
-
-  /* Toplanti: ekip toplanti odasina yurur, oturunca gercek toplanti ekrani
-     acilir. Hareket azaltilmissa ya da sahne mesgulse beklemeden gidilir. */
-  function toplantiyaGotur(git){
-    const api = durum.api;
-    let azHareket = false;
-    try{ azHareket = matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
-    if(!api || !durum.kok || !durum.kok.isConnected || azHareket || api.mesgul()){ git(); return false; }
-    durum.kuyruk.length = 0;
-    api.hiz(4);
-    if(!api.toplanti(true)){ git(); return false; }
-    olayYaz('Ekip toplantı odasına geçiyor…');
-    let gitti = false;
-    const bir = () => { if(gitti) return; gitti = true; durum.toplantiyaGit = null; durum.toplantidaydi = true; api.hiz(1); git(); };
-    durum.toplantiyaGit = bir;
-    setTimeout(bir, 9000);
-    return true;
-  }
-
-  /* ---------- ekrana yerlestirme ---------- */
-
-  /* Ofis ekrani her cizimden sonra cagirir. `yuva` yoksa bir sey yapmaz. */
-  function yerlestir(yuva){
-    if(!yuva) { durdur(); return; }
-    if(!window.RotaOfis3B){
-      yuva.innerHTML = '<p class="small muted ofis3b__bekle">Canlı 3B ofis yükleniyor…</p>';
-      if(!durum.bekliyor){
-        durum.bekliyor = true;
-        const sonra = () => {
-          durum.bekliyor = false;
-          /* Dosya geldi ama sahne tanimlanmadiysa bir daha denenmez. */
-          if(!window.RotaOfis3B && !durum.hata) durum.hata = 'Canlı 3B ofis açılamadı; hafif görünüm gösteriliyor.';
-          R.App.render();
-        };
-        yukle().then(sonra, sonra);
-      }
-      return;
-    }
-    if(!durum.api && !durum.hata) kur();
-    if(!durum.api){ R.App.render(); return; }
-    yuva.replaceChildren(durum.kok);
-    durum.api.koyu(koyuMu());
-    durum.api.surdur();
-    geceyiUygula();
-    tara();
-    baslat();
-  }
-
-  function ac(){ durum.istendi = true; durum.hata = null; }
-
-  return { anlik, olaylar, geceMi, hedefGece, elleGece, kullanilir, destek, yukle, yerlestir, oneriler, toplantiyaGotur, ac,
-    hata:() => durum.hata, SIRA,
-    /* test kancalari */
-    _durum:durum, _kok:k => { KOK = k; }, _ekle:ekle, _isle:isle, _durdur:durdur };
 })();
 
 /* ==== js/core/solver.js ==== */
@@ -63708,185 +62958,10 @@ R.Screens.office = (function(){
     });
   }
 
-  /* ---------- kat planı ----------
-     Ofisi "panel" olmaktan çıkaran katman. Beş masa bir zemin üzerinde
-     durur: kimin ışığı yanıyor, kimin masasında iş birikmiş, kim şu an
-     konuşuyor — bakınca anlaşılır. Tıklayınca o masanın raporu açılır. */
-
-  function seat(agent){
-    const st = deskStatus(agent);
-    const notes = O.notes(agent.id);
-    const open = S.ui.officeDesk === agent.id;
-    const busy = S.ui.officeBusy === agent.id;
-    const load = Math.min(notes.length, 4);
-
-    return html`<button type="button"
-      class="${cls('seat', 'seat--' + agent.id, open && 'is-open')}"
-      data-act="office-desk" data-agent="${agent.id}"
-      aria-expanded="${open ? 'true' : 'false'}">
-      ${Avatar(agent)}
-      <span class="seat__body">
-        <span class="seat__name">${agent.name}</span>
-        <span class="seat__role">${agent.role}</span>
-        <span class="seat__state">
-          <i class="${cls('seatlight', busy ? 'seatlight--busy' : 'seatlight--' + st.tone)}"></i>
-          <span>${busy ? 'konuşuyor…' : (agent.lead ? st.text : st.short)}</span>
-        </span>
-        <span class="seat__load" aria-hidden="true">${map([0, 1, 2, 3], i =>
-          html`<i class="${cls(i < load && 'is-on')}"></i>`)}</span>
-        ${when(agent.lead, () => html`<span class="seat__task">Günün işi:
-          <b>${O.nextAction().title}</b></span>`)}
-      </span>
-      ${when(notes.length, () => html`<span class="seat__count">${notes.length}</span>`)}
-    </button>`;
-  }
-
-  /* ---------- 3B oda ----------
-     Kat planı ofisi bir mekân yaptı; 3B görünüm onu bir ODA yapar. Masalar
-     bir zeminin üstünde durur, Patron'un masası dipte karşıdadır, uzmanlar
-     iki sıra hâlinde önünde oturur. Kamera döndürülebilir.
-
-     Bu CSS odası kütüphanesizdir ve HER ZAMAN çalışır. Canlı WebGL sahnesi
-     (Three.js, `ofis3d/`) AGENTS.md §1.3'teki istisnayla AYS'ye eklenmiş,
-     2026-09-28'de aynı kararla kalıcı olarak kaldırılmıştı; `js/core/ofis3b.js`
-     köprüsü geriye dönük uyumluluk için kaldı ve sahne dosyaları yokken
-     zaten bu odaya dönüyordu — davranış değişmedi, yalnız artık HER ZAMAN
-     bu yoldan geçiliyor.
-
-     Erişilebilirlik: her masa hâlâ bir <button>'dur, klavyeyle gezilir ve
-     ad etiketleri kameraya karşı DÖNDÜRÜLÜR (ters dönüşüm), böylece oda
-     hangi açıda olursa olsun yazı düz okunur. Hareketi azaltılmış tercihte
-     geçiş animasyonu kapanır. */
-
-  /* Kameranın zemine bakış açısı ve başlangıç dönüşü. */
-  const ROOM_TILT = 56;
-  const ROOM_TURN = -26;
-  /* Odadaki yerler: zeminin yüzdesi. Patron dipte ortada, uzmanlar iki sıra. */
-  const ROOM_SPOTS = {
-    patron: { x:50, y:12 },
-    tyt:    { x:20, y:42 },
-    ayt:    { x:80, y:42 },
-    koc:    { x:50, y:56 },
-    rehber: { x:20, y:78 },
-    analist:{ x:80, y:78 },
-  };
-
-  /* Kamera açısı yeniden çizimler arasında korunur: kullanıcı odayı
-     çevirdikten sonra bir öneri onayladığında oda başa dönmemeli. */
-  let roomTurn = ROOM_TURN;
-
-  function desk3d(agent){
-    const st = deskStatus(agent);
-    const notes = O.notes(agent.id);
-    const open = S.ui.officeDesk === agent.id;
-    const busy = S.ui.officeBusy === agent.id;
-    const spot = ROOM_SPOTS[agent.id] || { x:50, y:50 };
-    /* Ad kartlari odada yan yana durur; hepsinde durum metni tasimak
-       masalari gorunmez ederdi. Metin YALNIZ soylenecek bir sey varken
-       cikar: her sey yolundayken isik yeter, kota dolunca ya da sira
-       olusunca yazi belirir. Sessiz arayuzun bedeli bilgi kaybi degildir —
-       masanin tam durumu title'da ve raporunda durur. */
-    const showState = busy || (st.tone !== 'ok' && st.tone !== 'muted');
-
-    return html`<button type="button"
-      class="${cls('desk3d', 'seat--' + agent.id, open && 'is-open', agent.lead && 'desk3d--lead')}"
-      style="--x:${spot.x}%; --y:${spot.y}%"
-      data-act="office-desk" data-agent="${agent.id}"
-      aria-expanded="${open ? 'true' : 'false'}">
-      <span class="desk3d__shadow" aria-hidden="true"></span>
-      <span class="desk3d__front" aria-hidden="true"></span>
-      <span class="desk3d__side" aria-hidden="true"></span>
-      <span class="desk3d__top" aria-hidden="true">
-        <i class="desk3d__paper"></i><i class="desk3d__paper desk3d__paper--b"></i>
-      </span>
-      <span class="${cls('desk3d__screen', busy && 'is-busy')}" aria-hidden="true"></span>
-      <span class="desk3d__chair" aria-hidden="true"></span>
-      <span class="desk3d__person" aria-hidden="true"><i></i></span>
-      <span class="desk3d__card" title="${agent.role} · ${busy ? 'konuşuyor' : st.text}">
-        <span class="desk3d__who">${Avatar(agent, 'sm')}</span>
-        <b class="desk3d__name">${agent.name}</b>
-        <i class="${cls('seatlight', busy ? 'seatlight--busy' : 'seatlight--' + st.tone)}"></i>
-        ${when(showState, () => html`<span class="desk3d__state">${busy ? 'konuşuyor…' : st.short}</span>`)}
-        ${when(notes.length, () => html`<span class="desk3d__count">${notes.length}</span>`)}
-      </span>
-    </button>`;
-  }
-
-  function room3d(){
-    const action = O.nextAction();
-    return html`
-      <div class="room3d" id="room3d">
-        <div class="room3d__scene" id="room3d-scene"
-          style="--turn:${roomTurn}deg; --tilt:${ROOM_TILT}deg">
-          <div class="room3d__floor" aria-hidden="true"></div>
-          <div class="room3d__rug" aria-hidden="true"></div>
-          <div class="room3d__wall room3d__wall--back" aria-hidden="true">
-            <span class="room3d__board">
-              <span class="room3d__board-label">Bu haftanın tek işi</span>
-              <b>${action.title}</b>
-            </span>
-          </div>
-          <div class="room3d__wall room3d__wall--left" aria-hidden="true"></div>
-          ${map(R.AGENTS, desk3d)}
-        </div>
-      </div>
-      <p class="tiny dim mt-8">Odayı sürükleyerek çevirebilirsin; masaya dokununca raporu açılır.</p>`;
-  }
-
-  /* Canli sahnede masalara klavye ve ekran okuyucuyla da ulasilir: tuval
-     bir resimdir, dugme degildir. Karaktere dokunmak ayni masayi acar. */
-  function masaDugmeleri(){
-    return html`<div class="ofis3b-masalar" role="group" aria-label="Masalar">${map(R.AGENTS, a => {
-      const n = O.notes(a.id).length;
-      const acik = S.ui.officeDesk === a.id;
-      return K.Button({ label:a.name + (n ? ' · ' + n + ' not' : ''), size:'sm',
-        tone:acik ? 'primary' : null, act:'office-desk',
-        data:{ 'data-agent':a.id, 'aria-expanded':acik ? 'true' : 'false' } });
-    })}</div>`;
-  }
-
-  function floorPlan(){
-    const specialists = R.AGENTS.filter(a => !a.lead);
-    const waiting = R.Proposals.actionable().length;
-    const three = O.settings().room3d !== false;
-    const Z = R.Ofis3B;
-    const canli = three && !!Z && Z.kullanilir();
-    const canliOlur = three && !canli && !!Z && Z.destek() && !Z.hata();
-
-    return html`
-      <div class="${cls('floor', three && 'floor--room')}">
-        <div class="floor__head">
-          <div class="minw0">
-            <div class="floor__title">${raw(UI.icon(three ? 'cube' : 'users'))}
-              ${three ? 'Ofis' : 'Ofis kat planı'}</div>
-            <div class="floor__meta">${O.mode() === 'llm' ? O.providerLabel() : 'kural motoru modu'}
-              · masaya dokununca raporu açılır</div>
-          </div>
-          <div class="row wrap gap-6">
-            ${when(waiting, () => K.Badge({ label:waiting + ' öneri bekliyor', tone:'warn' }))}
-            ${when(three && !canli, () => html`<span class="room3d__turn">
-              ${K.IconButton({ icon:'left', size:'sm', aria:'Odayı sola çevir',
-                title:'Odayı sola çevir', act:'office-turn', data:{ 'data-dir':'-1' } })}
-              ${K.IconButton({ icon:'right', size:'sm', aria:'Odayı sağa çevir',
-                title:'Odayı sağa çevir', act:'office-turn', data:{ 'data-dir':'1' } })}
-            </span>`)}
-            ${when(canliOlur, () => K.Button({ label:'Canlı 3B ofis', icon:'cube', size:'sm',
-              act:'office-sahne', data:{ 'data-mod':'canli' } }))}
-            ${K.Button({ label:three ? 'Kat planı' : '3B görünüm', icon:three ? 'grid' : 'cube',
-              size:'sm', act:'office-view' })}
-            ${K.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' })}
-          </div>
-        </div>
-        ${when(canli, () => html`<div class="ofis3b-yuva" id="ofis3b-yuva"></div>${masaDugmeleri()}`)}
-        ${when(three && !canli && Z && Z.hata(), () => html`<p class="tiny dim ofis3b-not">${Z.hata()}</p>`)}
-        ${when(three && !canli, room3d)}
-        ${when(!three, () => html`<div class="floor__room">
-          <div class="floor__lead">${seat(R.AGENT_BY_ID.patron)}</div>
-          ${map(specialists, seat)}
-        </div>`)}
-      </div>`;
-  }
-
+  /* 3B oda ve kat planı kalktı (kullanıcı kararı, 2026-10-02: «AYS Ofis'teki
+     3B kısmını kaldır»). Masalara erişim «Uzman masaları» kartında ve
+     Patron'un masasında durur; sahneye özgü eylemler (görünüm, canlı
+     sahne, odayı çevir) belgeler/ekip/envanter/kaldirilan.json'da. */
   /* ---------- onay kutusu ----------
      Ofisin sisteme dokunabildiği TEK kapı. Ne değişeceği onaydan önce
      önce/sonra olarak gösterilir; onaysız hiçbir satır uygulanmaz. */
@@ -64447,11 +63522,6 @@ R.Screens.office = (function(){
     /* 139 model kapalı kipi: gri şerit; ajanlar hazır cümleyle konuşur. */
     return String(K.Grid([
       K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:O.mode() === 'llm' })) : ''),
-      /* Ofis ekranının ilk gördüğü şey ofisin kendisidir: canlı 3B sahne
-         en üstte ve tam genişlikte (depo sahibi, 2026-09-26). Kartlar
-         altında; ikincil olanlar baştan gizli (gizliVarsayilan) ve üst
-         çubuktaki «Gizlenen bölümler»den geri gelir. */
-      K.Span(12, floorPlan()),
       K.Span(8, K.Stack([
         /* iPhone Faz 4: dört istatistik şeridi (bugün, sınava kalan, toplantı,
            açık karar) kalktı — tarih ve sınav sayacı Bugün'de, toplantı ve
@@ -64475,56 +63545,7 @@ R.Screens.office = (function(){
     ]));
   }
 
-  /* ---------- kamera ----------
-     Döndürme ekranı yeniden çizmez: tek bir CSS değişkeni değişir. Yeniden
-     çizim hem gereksiz (veri değişmiyor) hem de sürüklerken takılma yapardı. */
-
-  function applyTurn(deg){
-    roomTurn = ((deg % 360) + 360) % 360;
-    if(roomTurn > 180) roomTurn -= 360;
-    const scene = document.getElementById('room3d-scene');
-    if(scene) scene.style.setProperty('--turn', roomTurn + 'deg');
-  }
-
-  /* Odayı sürükleyerek çevirme. Dikey sürükleme sayfayı kaydırmaya kalır:
-     kullanıcı odanın üstünden geçerken sayfa kilitlenmemeli. */
-  function bindDrag(){
-    const stage = document.getElementById('room3d');
-    if(!stage || stage.dataset.bound) return;
-    stage.dataset.bound = '1';
-
-    let id = null, x0 = 0, base = 0, moved = false;
-
-    stage.addEventListener('pointerdown', e => {
-      if(e.button != null && e.button !== 0) return;
-      id = e.pointerId; x0 = e.clientX; base = roomTurn; moved = false;
-      stage.classList.add('is-dragging');
-    });
-    stage.addEventListener('pointermove', e => {
-      if(id !== e.pointerId) return;
-      const dx = e.clientX - x0;
-      if(!moved && Math.abs(dx) < 4) return;
-      if(!moved){ moved = true; try{ stage.setPointerCapture(id); }catch(err){} }
-      applyTurn(base + dx * 0.4);
-    });
-    const end = e => {
-      if(id !== e.pointerId) return;
-      /* Sürüklemeden sonra gelen tık masayı açmasın. */
-      if(moved) stage.dataset.dragged = '1';
-      id = null;
-      stage.classList.remove('is-dragging');
-    };
-    stage.addEventListener('pointerup', end);
-    stage.addEventListener('pointercancel', end);
-    stage.addEventListener('click', e => {
-      if(stage.dataset.dragged){ delete stage.dataset.dragged; e.stopPropagation(); e.preventDefault(); }
-    }, true);
-  }
-
-  function afterRender(){
-    bindDrag();
-    if(R.Ofis3B) R.Ofis3B.yerlestir(document.getElementById('ofis3b-yuva'));
-  }
+  function afterRender(){}
 
   /* ---------- eylemler ---------- */
 
@@ -64544,24 +63565,6 @@ R.Screens.office = (function(){
       UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
         async () => { await R.Urunler.sil(id); UI.toast('Silindi'); R.App.render(); }, true, 'Ürünü bu cihazdan sil');
     },
-    /* Görünüm tercihi kalıcıdır: kullanıcı 3B'yi kapattıysa her açılışta
-       geri gelmemeli. */
-    async 'office-view'(){
-      await O.saveSettings({ room3d:O.settings().room3d === false });
-      R.App.render();
-    },
-
-    /* Canli sahne (WebGL) ile hafif CSS odasi arasinda gecis; tercih kalicidir. */
-    async 'office-sahne'(el){
-      const mod = el.dataset.mod === 'hafif' ? 'hafif' : 'canli';
-      if(mod === 'canli' && R.Ofis3B) R.Ofis3B.ac();
-      await O.saveSettings({ sahne3b:mod });
-      R.App.render();
-    },
-
-    async 'office-turn'(el){
-      applyTurn(roomTurn + Number(el.dataset.dir || 1) * 30);
-    },
 
     async 'office-desk'(el){
       const id = el.dataset.agent;
@@ -64574,12 +63577,9 @@ R.Screens.office = (function(){
       R.App.go('team');
     },
 
-    /* Canli sahnede ekip once toplanti odasina yurur, oturunca gercek
-       toplanti ekrani acilir (ofis3b.js); sahne yoksa dogrudan gidilir. */
     async 'office-meet'(){
-      const git = () => { S.ui.meetingAuto = true; R.App.go('meeting'); };
-      if(R.Ofis3B && document.getElementById('ofis3b-yuva')) R.Ofis3B.toplantiyaGotur(git);
-      else git();
+      S.ui.meetingAuto = true;
+      R.App.go('meeting');
     },
 
     async 'office-settings'(el){
@@ -64765,7 +63765,6 @@ R.Screens.office = (function(){
       el.disabled = true;
       try{
         const added = await R.Proposals.refresh();
-        if(R.Ofis3B) R.Ofis3B.oneriler(added);
         UI.toast(added.length
           ? added.length + ' yeni öneri masaya bırakıldı'
           : 'Ofis her şeyi yerinde buldu');
@@ -64854,11 +63853,13 @@ R.Screens.office = (function(){
         + ' · ' + R.AGENTS.length + ' ajan' + (open ? ' · ' + open + ' açık karar' : '');
     },
     actions(){
-      return String(K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }));
+      /* «Masaları tara» 3B sahnenin başlığındaydı; sahne kalkınca buraya. */
+      return String(K.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' }))
+        + String(K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }));
     },
     render, afterRender, handle, change, openSettings,
-    /* Sadelik: 3B sahne masaları zaten gösterir; teknik model kartı ve son
-       toplantı ikincildir. Baştan gizli, üst çubuktan geri gelir (gizle.js). */
+    /* Sadelik: teknik model kartı, konuşan masa ve son toplantı
+       ikincildir. Baştan gizli, üst çubuktan geri gelir (gizle.js). */
     gizliVarsayilan:['masa', 'ofis-modeli', 'son-toplantı'],
     /* iPhone Faz 4 («brifing + tek eylem»): açık ofis, günün brifingi ve
        Patron'un masası (tek eylem). Masa cümleleri toplantı satırında,

@@ -1121,3 +1121,60 @@ svg.chart{ max-height:180px; }
    bölümde kırmızı bir uyarı varsa rozet yine görünür (söz 9). */
 .ust__gizli.is-dolu:not(.is-uyari) .ust__gizli-sayi{ display:none; }
 
+/* ================================================================
+   ORTA BAŞLIK VE KAYDIRMALI SEÇİCİ (2026-10-02, kullanıcı: «başlıkları
+   ortaya al; seçim şeyleri daha sade olsun; ana giriş ortada, sağa sola
+   kaydırırsın»). Başlık ve ⓘ ortada, eylemler sağda. Çekmecenin
+   bölümleri (Hafta · Program · Hedefler) iOS kamerasının kip seçicisi
+   gibi: ray ve hap yok, yalnız yazı; seçili koyu, altında küçük nokta.
+   Sayfa bölümleri (Ayarlar · Takvim…) bir boy küçük, seçili ince çizgili.
+   Sığarsa ortada durur, sığmazsa yatay kayar ve seçili ortaya gelir
+   (kabuk.seciciHazirla); dokunarak sürüklemek ve ok tuşları komşu bölüme
+   geçirir (kabuk.kur).
+   ================================================================ */
+.site--v5 .sayfabasi__metin{ text-align:center; }
+.site--v5 .sayfabasi__satir{ justify-content:center; }
+@media (min-width:680px){
+  .site--v5 .sayfabasi{ display:grid; grid-template-columns:minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items:center; column-gap:16px; padding-bottom:18px; }
+  .site--v5 .sayfabasi__metin{ grid-column:2; flex:none; min-width:0; }
+  .site--v5 .sayfabasi__eylem{ grid-column:3; justify-self:end; justify-content:flex-end; }
+}
+@media (max-width:679px){
+  .site--v5 .sayfabasi{ flex-direction:column; align-items:center; gap:10px; }
+  .site--v5 .sayfabasi__metin{ flex:none; width:100%; }
+  .site--v5 .sayfabasi__eylem{ justify-content:center; }
+}
+/* ⓘ kartı başlığın ortasından açılır; kısa başlıkta daralmaz. */
+.site--v5 .bilgikart{ left:50%; translate:-50% 0; max-width:min(420px, calc(100vw - 32px)); text-align:left; }
+
+.site--v5 .bolumcubugu{ display:flex; gap:2px; width:100%; max-width:100%; box-sizing:border-box; padding:0 0 6px;
+  margin:0 0 18px; border:0; border-radius:0; background:var(--bg); box-shadow:none;
+  overflow-x:auto; overflow-y:hidden; overscroll-behavior-x:contain; scroll-snap-type:x proximity;
+  scrollbar-width:none; padding-inline:14px;
+  /* Kenarlar yumuşakça söner: sığmayan çubukta devamı olduğu görünür; sığan
+     çubukta kenarlar zaten boştur. */
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+          mask-image:linear-gradient(90deg, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%); }
+.site--v5 .bolumcubugu::-webkit-scrollbar{ display:none; }
+/* Sığınca ortada; sığmazsa baştan kayar (otomatik kenar boşluğu taşınca sıfırlanır). */
+.site--v5 .bolumcubugu > :first-child{ margin-left:auto; }
+.site--v5 .bolumcubugu > :last-child{ margin-right:auto; }
+.site--v5 .bolumcubugu__ad{ position:relative; flex:none; scroll-snap-align:center; height:36px; padding:0 14px;
+  border:0; border-radius:10px; background:none; box-shadow:none; color:var(--text-3);
+  font-size:15px; font-weight:500; letter-spacing:-.01em;
+  transition:color var(--dur) var(--ease), background var(--dur) var(--ease); }
+.site--v5 .bolumcubugu__ad:hover{ color:var(--text); background:none; }
+.site--v5 .bolumcubugu__ad:focus-visible{ outline:2px solid var(--primary); outline-offset:-2px; }
+.site--v5 .bolumcubugu__ad.is-on{ color:var(--text); font-weight:650; background:none; box-shadow:none; }
+.site--v5 .bolumcubugu__ad.is-on::after{ display:block; content:''; position:absolute; left:50%; bottom:0;
+  width:5px; height:5px; margin-left:-2.5px; border-radius:50%; background:var(--text); }
+/* Dar kenar kipinin eski gri rayı (yukarıda) burada kalkar: çubuk zeminle bir. */
+@media (min-width:680px){
+  html.kenar-dar .site--v5 .bolumcubugu--kabuk{ display:flex; background:var(--bg); }
+}
+/* Sayfa bölümleri: bir boy küçük; seçilinin altında kısa çizgi. */
+.site--v5 .bolumcubugu--sayfa{ margin-bottom:22px; }
+.site--v5 .bolumcubugu--sayfa .bolumcubugu__ad{ height:32px; padding:0 12px; font-size:13.5px; }
+.site--v5 .bolumcubugu--sayfa .bolumcubugu__ad.is-on::after{ width:16px; height:2px; margin-left:-8px; border-radius:1px; }
+@media (prefers-reduced-motion:reduce){ .site--v5 .bolumcubugu{ scroll-behavior:auto; } }

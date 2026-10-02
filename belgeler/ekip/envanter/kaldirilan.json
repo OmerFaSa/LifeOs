@@ -3,11 +3,17 @@
   "AYS": {
     "eylem": {
       "set-palette": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
-      "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem"
+      "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
+      "office-view": "kullanıcı kararı (2026-10-02, «ofis kısmında AYS kısmındaki 3D kısmını kaldır»): 3B oda ve kat planı kalktı; masalar «Uzman masaları»nda, «Masaları tara» sayfa başında",
+      "office-sahne": "kullanıcı kararı (2026-10-02, «ofis kısmında AYS kısmındaki 3D kısmını kaldır»): 3B oda ve kat planı kalktı; masalar «Uzman masaları»nda, «Masaları tara» sayfa başında",
+      "office-turn": "kullanıcı kararı (2026-10-02, «ofis kısmında AYS kısmındaki 3D kısmını kaldır»): 3B oda ve kat planı kalktı; masalar «Uzman masaları»nda, «Masaları tara» sayfa başında"
     },
     "isleyici": {
       "set-palette": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
-      "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem"
+      "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
+      "office-view": "kullanıcı kararı (2026-10-02, «ofis kısmında AYS kısmındaki 3D kısmını kaldır»): 3B oda ve kat planı kalktı; masalar «Uzman masaları»nda, «Masaları tara» sayfa başında",
+      "office-sahne": "kullanıcı kararı (2026-10-02, «ofis kısmında AYS kısmındaki 3D kısmını kaldır»): 3B oda ve kat planı kalktı; masalar «Uzman masaları»nda, «Masaları tara» sayfa başında",
+      "office-turn": "kullanıcı kararı (2026-10-02, «ofis kısmında AYS kısmındaki 3D kısmını kaldır»): 3B oda ve kat planı kalktı; masalar «Uzman masaları»nda, «Masaları tara» sayfa başında"
     },
     "alan": {}
   },

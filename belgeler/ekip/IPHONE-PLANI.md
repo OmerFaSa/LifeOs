@@ -338,6 +338,7 @@ Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/�
 | 4–5 | ✅ Ofis · Danışma (3 ×; Onaylar ve Kütüphanem zaten bütçede); Ayarlar iOS listesi (3 ×); önizleme hatası | 2db1f82 | 87 · aşan 1 (AYS 26/0 · SPİ 31/1 · ESP 30/0) |
 | 6–7 | ✅ başlık ad, durum cümlesi ⓘ'de; rozet bildirimi tek; SPİ Bugün 3 açık; `acikKart` zorunlu; 390 px turu | 9b44df0 | 86 · aşan 0 (AYS 26 · SPİ 30 · ESP 30) |
 | tam | ✅ `sayilar.py --tam --yaz` yeşil (ilk kez bu makinede): Windows UTF-8, dönen kart kırpması, ESP Tarih 631 → 157 ms, HKM eşleme durumu, tarihe bağlı iki HKM testi; README/NOTLAR sayıları | ce98d9b | — |
+| tasarım | ✅ orta başlık; kaydırmalı bölüm seçici (yazı + nokta, sürükle/ok tuşu, seçili ortada); AYS Ofis 3B oda ve kat planı kalktı (kullanıcı kararı; kaldirilan.json) | (bu commit) | 86 · aşan 0 |
 | boy | ⏭ açık iş: 1 200 px'i aşan sayfalar — AYS Dersler 1 238 (raf tabanı), İlerleme 1 516, Ayrıntılı analiz 1 608, Ofis 1 838, Danışma 1 314, Genel 1 557, Günü düzenle 1 748; SPİ Analiz 1 506, Ofis 1 390, Günü düzenle 1 682; ESP Bugün 1 377, Analiz 1 803, Profil 1 286, Günü düzenle 1 525 | — | ölçüm |
 
 ## 9. Devir notu — sıradaki oturum buradan başlar

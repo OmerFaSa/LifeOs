@@ -270,6 +270,8 @@ LIFEOS.Gizle = (function(){
        «Tamamını göster»in arkasında kalıyordu (2026-10-02). */
     /* «Nasıl okunur» şeridi ⓘ'ye (kabuk.railBilgiye): raf ölçmeden önce. */
     try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.railBilgiye && o.kok) KB.railBilgiye(o.kok); }catch(e){}
+    /* Bölüm çubukları (sayfa başındaki ve #main içindeki): seçili ortada. */
+    try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.seciciHazirla && o.kok) KB.seciciHazirla(o.kok.parentElement || o.kok); }catch(e){}
     try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.raf && o.kok) H.raf(o.kok); }catch(e){}
     dipCiz(o, liste, gizliUyari);
     sayacYaz(gizliListe().length, gizliUyari);

@@ -2596,56 +2596,35 @@
     });
   });
 
-  /* ==================== 3B oda ====================
-     Ofis ekranı iki görünüm taşır: düz kat planı ve 3B oda. İkisi de AYNI
-     veriden çizilir ve ikisinde de masa bir <button>'dur — 3B görünüm bir
-     resim değil, aynı arayüzün başka bir çizimidir. */
+  /* ==================== sahnesiz ofis ====================
+     Kullanıcı kararı (2026-10-02): «AYS Ofis'teki 3B kısmını kaldır». Oda
+     ve kat planı kalktı; masalara erişim «Uzman masaları» kartında ve
+     Patron'un masasında durur, «Masaları tara» sayfa başına taşındı.
+     Kaldırılan eylemler belgeler/ekip/envanter/kaldirilan.json'da. */
 
-  describe('Ofis — 3B oda', () => {
+  describe('Ofis — sahnesiz', () => {
     async function draw(){
       reset();
       return String(await R.Screens.office.render());
     }
 
-    it('varsayılan görünüm 3B odadır', async () => {
-      reset();
-      expect(O.settings().room3d).toBe(true);
+    it('ekranda 3B oda, kat planı ya da canlı sahne yuvası yok', async () => {
+      const out = await draw();
+      ['class="room3d"', 'class="floor', 'ofis3b-yuva', 'desk3d', 'data-act="office-view"',
+        'data-act="office-turn"', 'data-act="office-sahne"'].forEach(x => expect(out.indexOf(x)).toBe(-1));
     });
 
-    it('odada beş masa vardır ve her masa tıklanabilir bir düğmedir', async () => {
+    it('her uzmanın masasına ekrandan ulaşılır', async () => {
       const out = await draw();
-      expect(out).toContain('class="room3d"');
-      const desks = out.match(/class="desk3d /g) || [];
-      expect(desks).toHaveLength(6);
-      R.AGENT_IDS.forEach(id => {
-        expect(out).toContain('data-act="office-desk" data-agent="' + id + '"');
+      R.AGENTS.filter(a => !a.lead).forEach(a => {
+        expect(out).toContain('data-agent="' + a.id + '"');
       });
-      /* Kimlik rengi kat planıyla AYNI kaynaktan gelir. */
-      expect(out).toContain('seat--patron');
     });
 
-    it('her masanın odada bir yeri vardır', async () => {
-      const out = await draw();
-      const spots = out.match(/--x:\d+%; --y:\d+%/g) || [];
-      expect(spots).toHaveLength(6);
-    });
-
-    it('durum metni yalnız söylenecek bir şey varken çıkar', async () => {
-      reset();
-      /* Kural motoru modunda hepsi aynı durumdadır: oda ad kartlarını
-         gereksiz metinle doldurmaz, ışık yeter. */
-      const quiet = String(await R.Screens.office.render());
-      expect(quiet.indexOf('desk3d__state')).toBe(-1);
-    });
-
-    it('kat planına geçilince oda kalkar, masalar kalır', async () => {
-      reset();
-      await O.saveSettings({ room3d:false });
-      const out = String(await R.Screens.office.render());
-      expect(out.indexOf('class="room3d"')).toBe(-1);
-      expect((out.match(/class="seat /g) || []).length).toBe(6);
-      expect(out).toContain('data-act="office-desk"');
-      await O.saveSettings({ room3d:true });
+    it('«Masaları tara» sayfa başında; işleyicisi bağlı', () => {
+      const ust = String(R.Screens.office.actions());
+      expect(ust).toContain('data-act="office-scan"');
+      expect(typeof R.Screens.office.handle['office-scan']).toBe('function');
     });
 
     it('ekranın ürettiği her office- eylemi bir işleyiciye bağlıdır', async () => {
@@ -2659,7 +2638,7 @@
     });
 
     it('ayarlar sayfasındaki eylemler de bağlıdır', () => {
-      ['office-models', 'office-diagnose', 'office-test', 'office-save', 'office-view', 'office-turn']
+      ['office-models', 'office-diagnose', 'office-test', 'office-save']
         .forEach(act => expect(typeof R.Screens.office.handle[act]).toBe('function'));
       ['office-provider', 'office-key', 'office-model']
         .forEach(act => expect(typeof R.Screens.office.change[act]).toBe('function'));

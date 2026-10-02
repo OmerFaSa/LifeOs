@@ -531,6 +531,27 @@ window.LIFEOS = window.LIFEOS || {};
     return tasindi;
   }
 
+  /* KAYDIRMALI SEÇİCİ (2026-10-02): sığmayan bölüm çubuğunda seçili bölüm
+     ortaya alınır — kaydırılmış bir çubukta seçiliyi aramak gerekmesin.
+     Her çizimden sonra çağrılır (Gizle.uygula). */
+  function seciciHazirla(kap){
+    if(typeof document === 'undefined') return;
+    (kap || document).querySelectorAll('.bolumcubugu').forEach(c => {
+      const on = c.querySelector('.bolumcubugu__ad.is-on');
+      if(!on || c.scrollWidth <= c.clientWidth + 1) return;
+      /* Ekran koordinatıyla: offsetLeft çubuk konumlandırılmamışsa sayfaya
+         göre ölçülür ve seçili yanlış yere kayardı. */
+      const cr = c.getBoundingClientRect(), or = on.getBoundingClientRect();
+      c.scrollLeft += (or.left + or.width / 2) - (cr.left + cr.width / 2);
+    });
+  }
+  /* Komşu bölüm: yon +1 sağdaki, -1 soldaki. Yoksa null. */
+  function seciciKomsu(c, yon){
+    const l = Array.from(c.querySelectorAll('.bolumcubugu__ad'));
+    const i = l.findIndex(b => b.classList.contains('is-on'));
+    return i < 0 ? null : (l[i + yon] || null);
+  }
+
   function bilgiKapat(haric){
     if(typeof document === 'undefined') return;
     document.querySelectorAll('.sayfabasi__bilgi.is-acik').forEach(b => {
@@ -828,6 +849,32 @@ window.LIFEOS = window.LIFEOS || {};
     });
     window.addEventListener('resize', () => { if(acikId && !telefonMu()) katmanKapat(); });
     document.addEventListener('keydown', e => { if(e.key === 'Escape'){ bilgiKapat(); modulPencereKapat(); } });
+    /* Seçicide ok tuşları komşu bölüme odaklanır (Enter/boşluk seçer). */
+    document.addEventListener('keydown', e => {
+      if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const b = e.target.closest && e.target.closest('.bolumcubugu__ad');
+      if(!b) return;
+      const l = Array.from(b.parentElement.querySelectorAll('.bolumcubugu__ad'));
+      const h = l[l.indexOf(b) + (e.key === 'ArrowRight' ? 1 : -1)];
+      if(h){ e.preventDefault(); h.focus(); h.scrollIntoView({ block:'nearest', inline:'center' }); }
+    });
+    /* Seçicide sürükleme: SIĞAN (kaymayan) çubukta yatay sürükleme komşu
+       bölüme geçirir — «ana giriş ortada, sağa sola kaydırırsın». Sığmayan
+       çubuk doğal kaydırmasıyla kalır. */
+    let kaydirma = null;
+    document.addEventListener('pointerdown', e => {
+      const c = e.target.closest && e.target.closest('.bolumcubugu');
+      kaydirma = c && c.scrollWidth <= c.clientWidth + 1 ? { c, x:e.clientX, y:e.clientY } : null;
+    }, { passive:true });
+    document.addEventListener('pointerup', e => {
+      if(!kaydirma) return;
+      const { c, x, y } = kaydirma;
+      kaydirma = null;
+      const dx = e.clientX - x, dy = e.clientY - y;
+      if(Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      const h = seciciKomsu(c, dx < 0 ? 1 : -1);
+      if(h) h.click();
+    });
     /* Dar kenar kapanınca (fare çıkınca) açık sistem kartı da kapanır. */
     document.addEventListener('mouseout', e => {
       const k = e.target.closest && e.target.closest('.kenar');
@@ -839,7 +886,8 @@ window.LIFEOS = window.LIFEOS || {};
   L.KABUK = Object.freeze({
     CEKMECELER, MODULLER, SIRA,
     simge, modulIsareti, adres, simdiOrani, saatMetni,
-    ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, railBilgiye, bolumCubugu, altBant, menuSayfasi,
+    ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, railBilgiye, seciciHazirla, seciciKomsu,
+    bolumCubugu, altBant, menuSayfasi,
     modulMenusu, bildirimPaneli, hizliEkle,
     katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis, kenarDar, kenarDarMi, kenarIlkDar,
   });

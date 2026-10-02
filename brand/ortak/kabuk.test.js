@@ -405,6 +405,53 @@
 
     /* iPhone §2.4 (2026-10-02): açıklama ⓘ'dedir; sayfa sonundaki «Bu ekran
        nasıl okunur» şeridi bilgi kartına taşınır, terim kaybolmaz. */
+    /* Orta başlık ve kaydırmalı seçici (kullanıcı, 2026-10-02: «başlıkları
+       ortaya al; ana giriş ortada, sağa sola kaydırırsın»). */
+    it('seçici: sığmayan çubukta seçili bölüm ortaya alınır', () => {
+      const ad = i => '<button class="bolumcubugu__ad' + (i === 5 ? ' is-on' : '') + '" style="flex:none;width:100px;margin:0">b' + i + '</button>';
+      const d = yerlestir('<div class="site--v5"><nav class="bolumcubugu" style="width:240px;display:flex;overflow-x:auto;padding:0;-webkit-mask-image:none;mask-image:none">'
+        + [0, 1, 2, 3, 4, 5, 6, 7].map(ad).join('') + '</nav></div>');
+      try{
+        const c = d.querySelector('.bolumcubugu'), on = d.querySelector('.is-on');
+        K.seciciHazirla(d);
+        const orta = on.getBoundingClientRect().left + on.offsetWidth / 2;
+        const cOrta = c.getBoundingClientRect().left + c.clientWidth / 2;
+        expect(Math.abs(orta - cOrta) < 3).toBe(true);
+        expect(K.seciciKomsu(c, 1).textContent).toBe('b6');
+        expect(K.seciciKomsu(c, -1).textContent).toBe('b4');
+      }finally{ d.remove(); }
+    });
+
+    it('seçici: sığan çubukta yatay sürükleme komşu bölüme geçirir; dikey kaydırma geçirmez', () => {
+      const d = yerlestir('<div class="site--v5"><nav class="bolumcubugu">'
+        + '<button class="bolumcubugu__ad">a</button><button class="bolumcubugu__ad is-on">b</button>'
+        + '<button class="bolumcubugu__ad">c</button></nav></div>');
+      try{
+        const c = d.querySelector('.bolumcubugu');
+        const tik = [];
+        c.querySelectorAll('.bolumcubugu__ad').forEach(b => b.addEventListener('click', () => tik.push(b.textContent)));
+        const r = c.getBoundingClientRect(), y = r.top + r.height / 2;
+        const sur = (x0, x1, y1) => {
+          c.dispatchEvent(new PointerEvent('pointerdown', { bubbles:true, clientX:x0, clientY:y }));
+          document.dispatchEvent(new PointerEvent('pointerup', { bubbles:true, clientX:x1, clientY:y1 }));
+        };
+        sur(r.left + 150, r.left + 60, y);           // sola sürükle: sağdaki komşu
+        expect(tik.join(',')).toBe('c');
+        sur(r.left + 60, r.left + 150, y);           // sağa sürükle: soldaki komşu
+        expect(tik.join(',')).toBe('c,a');
+        sur(r.left + 100, r.left + 60, y + 120);     // çoğu dikey: geçiş yok
+        expect(tik.join(',')).toBe('c,a');
+      }finally{ d.remove(); }
+    });
+
+    it('sayfa başı: başlık ortada', () => {
+      const d = yerlestir('<div class="site--v5">' + K.sayfaBasi({ baslik:'Hafta', ozet:'x' }) + '</div>');
+      try{
+        expect(getComputedStyle(d.querySelector('.sayfabasi__metin')).textAlign).toBe('center');
+        expect(getComputedStyle(d.querySelector('.sayfabasi__satir')).justifyContent).toBe('center');
+      }finally{ d.remove(); }
+    });
+
     it('iPhone: «nasıl okunur» şeridi bilgi kartına taşınır; kart yoksa yerinde kalır', () => {
       const serit = '<section class="rail"><button class="rail__toggle" data-act="rail-toggle"><span class="rail__label">Bu ekran nasıl okunur</span></button>'
         + '<div class="rail__body" hidden><button class="railcard" data-act="hint" data-hint="a"><span class="railcard__t">A</span><span class="railcard__b">a</span></button>'

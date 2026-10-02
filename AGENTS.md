@@ -40,7 +40,9 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    2026-09-28 kararıyla istisna geri alındı, `ofis3d/` (Three.js + sahne.js)
    iki sistemden de kalıcı olarak kaldırıldı. `js/core/ofis3b.js` köprüsü ve
    CSS ofis kaldı — dosya yokken zaten hafif odaya dönüyordu, bu davranış
-   değişmedi.
+   değişmedi. 2026-10-02'de depo sahibinin kararıyla AYS Ofis'teki 3B oda,
+   kat planı ve AYS'nin `ofis3b.js` köprüsü de kaldırıldı (kaldırılan eylemler
+   `belgeler/ekip/envanter/kaldirilan.json`'da); SPİ'nin köprüsü duruyor.
 4. **Modüller HKM'yi bilir ama ona bağımlı değildir.** AYS/SPİ/ESP,
    HKM'nin üst patron (King) olduğunu bilir ve onunla konuşabilir; ama HKM
    kapalıyken, yanıt vermezken ya da hata verirken hiçbiri bozulmaz,

@@ -123,185 +123,10 @@ R.Screens.office = (function(){
     });
   }
 
-  /* ---------- kat planı ----------
-     Ofisi "panel" olmaktan çıkaran katman. Beş masa bir zemin üzerinde
-     durur: kimin ışığı yanıyor, kimin masasında iş birikmiş, kim şu an
-     konuşuyor — bakınca anlaşılır. Tıklayınca o masanın raporu açılır. */
-
-  function seat(agent){
-    const st = deskStatus(agent);
-    const notes = O.notes(agent.id);
-    const open = S.ui.officeDesk === agent.id;
-    const busy = S.ui.officeBusy === agent.id;
-    const load = Math.min(notes.length, 4);
-
-    return html`<button type="button"
-      class="${cls('seat', 'seat--' + agent.id, open && 'is-open')}"
-      data-act="office-desk" data-agent="${agent.id}"
-      aria-expanded="${open ? 'true' : 'false'}">
-      ${Avatar(agent)}
-      <span class="seat__body">
-        <span class="seat__name">${agent.name}</span>
-        <span class="seat__role">${agent.role}</span>
-        <span class="seat__state">
-          <i class="${cls('seatlight', busy ? 'seatlight--busy' : 'seatlight--' + st.tone)}"></i>
-          <span>${busy ? 'konuşuyor…' : (agent.lead ? st.text : st.short)}</span>
-        </span>
-        <span class="seat__load" aria-hidden="true">${map([0, 1, 2, 3], i =>
-          html`<i class="${cls(i < load && 'is-on')}"></i>`)}</span>
-        ${when(agent.lead, () => html`<span class="seat__task">Günün işi:
-          <b>${O.nextAction().title}</b></span>`)}
-      </span>
-      ${when(notes.length, () => html`<span class="seat__count">${notes.length}</span>`)}
-    </button>`;
-  }
-
-  /* ---------- 3B oda ----------
-     Kat planı ofisi bir mekân yaptı; 3B görünüm onu bir ODA yapar. Masalar
-     bir zeminin üstünde durur, Patron'un masası dipte karşıdadır, uzmanlar
-     iki sıra hâlinde önünde oturur. Kamera döndürülebilir.
-
-     Bu CSS odası kütüphanesizdir ve HER ZAMAN çalışır. Canlı WebGL sahnesi
-     (Three.js, `ofis3d/`) AGENTS.md §1.3'teki istisnayla AYS'ye eklenmiş,
-     2026-09-28'de aynı kararla kalıcı olarak kaldırılmıştı; `js/core/ofis3b.js`
-     köprüsü geriye dönük uyumluluk için kaldı ve sahne dosyaları yokken
-     zaten bu odaya dönüyordu — davranış değişmedi, yalnız artık HER ZAMAN
-     bu yoldan geçiliyor.
-
-     Erişilebilirlik: her masa hâlâ bir <button>'dur, klavyeyle gezilir ve
-     ad etiketleri kameraya karşı DÖNDÜRÜLÜR (ters dönüşüm), böylece oda
-     hangi açıda olursa olsun yazı düz okunur. Hareketi azaltılmış tercihte
-     geçiş animasyonu kapanır. */
-
-  /* Kameranın zemine bakış açısı ve başlangıç dönüşü. */
-  const ROOM_TILT = 56;
-  const ROOM_TURN = -26;
-  /* Odadaki yerler: zeminin yüzdesi. Patron dipte ortada, uzmanlar iki sıra. */
-  const ROOM_SPOTS = {
-    patron: { x:50, y:12 },
-    tyt:    { x:20, y:42 },
-    ayt:    { x:80, y:42 },
-    koc:    { x:50, y:56 },
-    rehber: { x:20, y:78 },
-    analist:{ x:80, y:78 },
-  };
-
-  /* Kamera açısı yeniden çizimler arasında korunur: kullanıcı odayı
-     çevirdikten sonra bir öneri onayladığında oda başa dönmemeli. */
-  let roomTurn = ROOM_TURN;
-
-  function desk3d(agent){
-    const st = deskStatus(agent);
-    const notes = O.notes(agent.id);
-    const open = S.ui.officeDesk === agent.id;
-    const busy = S.ui.officeBusy === agent.id;
-    const spot = ROOM_SPOTS[agent.id] || { x:50, y:50 };
-    /* Ad kartlari odada yan yana durur; hepsinde durum metni tasimak
-       masalari gorunmez ederdi. Metin YALNIZ soylenecek bir sey varken
-       cikar: her sey yolundayken isik yeter, kota dolunca ya da sira
-       olusunca yazi belirir. Sessiz arayuzun bedeli bilgi kaybi degildir —
-       masanin tam durumu title'da ve raporunda durur. */
-    const showState = busy || (st.tone !== 'ok' && st.tone !== 'muted');
-
-    return html`<button type="button"
-      class="${cls('desk3d', 'seat--' + agent.id, open && 'is-open', agent.lead && 'desk3d--lead')}"
-      style="--x:${spot.x}%; --y:${spot.y}%"
-      data-act="office-desk" data-agent="${agent.id}"
-      aria-expanded="${open ? 'true' : 'false'}">
-      <span class="desk3d__shadow" aria-hidden="true"></span>
-      <span class="desk3d__front" aria-hidden="true"></span>
-      <span class="desk3d__side" aria-hidden="true"></span>
-      <span class="desk3d__top" aria-hidden="true">
-        <i class="desk3d__paper"></i><i class="desk3d__paper desk3d__paper--b"></i>
-      </span>
-      <span class="${cls('desk3d__screen', busy && 'is-busy')}" aria-hidden="true"></span>
-      <span class="desk3d__chair" aria-hidden="true"></span>
-      <span class="desk3d__person" aria-hidden="true"><i></i></span>
-      <span class="desk3d__card" title="${agent.role} · ${busy ? 'konuşuyor' : st.text}">
-        <span class="desk3d__who">${Avatar(agent, 'sm')}</span>
-        <b class="desk3d__name">${agent.name}</b>
-        <i class="${cls('seatlight', busy ? 'seatlight--busy' : 'seatlight--' + st.tone)}"></i>
-        ${when(showState, () => html`<span class="desk3d__state">${busy ? 'konuşuyor…' : st.short}</span>`)}
-        ${when(notes.length, () => html`<span class="desk3d__count">${notes.length}</span>`)}
-      </span>
-    </button>`;
-  }
-
-  function room3d(){
-    const action = O.nextAction();
-    return html`
-      <div class="room3d" id="room3d">
-        <div class="room3d__scene" id="room3d-scene"
-          style="--turn:${roomTurn}deg; --tilt:${ROOM_TILT}deg">
-          <div class="room3d__floor" aria-hidden="true"></div>
-          <div class="room3d__rug" aria-hidden="true"></div>
-          <div class="room3d__wall room3d__wall--back" aria-hidden="true">
-            <span class="room3d__board">
-              <span class="room3d__board-label">Bu haftanın tek işi</span>
-              <b>${action.title}</b>
-            </span>
-          </div>
-          <div class="room3d__wall room3d__wall--left" aria-hidden="true"></div>
-          ${map(R.AGENTS, desk3d)}
-        </div>
-      </div>
-      <p class="tiny dim mt-8">Odayı sürükleyerek çevirebilirsin; masaya dokununca raporu açılır.</p>`;
-  }
-
-  /* Canli sahnede masalara klavye ve ekran okuyucuyla da ulasilir: tuval
-     bir resimdir, dugme degildir. Karaktere dokunmak ayni masayi acar. */
-  function masaDugmeleri(){
-    return html`<div class="ofis3b-masalar" role="group" aria-label="Masalar">${map(R.AGENTS, a => {
-      const n = O.notes(a.id).length;
-      const acik = S.ui.officeDesk === a.id;
-      return K.Button({ label:a.name + (n ? ' · ' + n + ' not' : ''), size:'sm',
-        tone:acik ? 'primary' : null, act:'office-desk',
-        data:{ 'data-agent':a.id, 'aria-expanded':acik ? 'true' : 'false' } });
-    })}</div>`;
-  }
-
-  function floorPlan(){
-    const specialists = R.AGENTS.filter(a => !a.lead);
-    const waiting = R.Proposals.actionable().length;
-    const three = O.settings().room3d !== false;
-    const Z = R.Ofis3B;
-    const canli = three && !!Z && Z.kullanilir();
-    const canliOlur = three && !canli && !!Z && Z.destek() && !Z.hata();
-
-    return html`
-      <div class="${cls('floor', three && 'floor--room')}">
-        <div class="floor__head">
-          <div class="minw0">
-            <div class="floor__title">${raw(UI.icon(three ? 'cube' : 'users'))}
-              ${three ? 'Ofis' : 'Ofis kat planı'}</div>
-            <div class="floor__meta">${O.mode() === 'llm' ? O.providerLabel() : 'kural motoru modu'}
-              · masaya dokununca raporu açılır</div>
-          </div>
-          <div class="row wrap gap-6">
-            ${when(waiting, () => K.Badge({ label:waiting + ' öneri bekliyor', tone:'warn' }))}
-            ${when(three && !canli, () => html`<span class="room3d__turn">
-              ${K.IconButton({ icon:'left', size:'sm', aria:'Odayı sola çevir',
-                title:'Odayı sola çevir', act:'office-turn', data:{ 'data-dir':'-1' } })}
-              ${K.IconButton({ icon:'right', size:'sm', aria:'Odayı sağa çevir',
-                title:'Odayı sağa çevir', act:'office-turn', data:{ 'data-dir':'1' } })}
-            </span>`)}
-            ${when(canliOlur, () => K.Button({ label:'Canlı 3B ofis', icon:'cube', size:'sm',
-              act:'office-sahne', data:{ 'data-mod':'canli' } }))}
-            ${K.Button({ label:three ? 'Kat planı' : '3B görünüm', icon:three ? 'grid' : 'cube',
-              size:'sm', act:'office-view' })}
-            ${K.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' })}
-          </div>
-        </div>
-        ${when(canli, () => html`<div class="ofis3b-yuva" id="ofis3b-yuva"></div>${masaDugmeleri()}`)}
-        ${when(three && !canli && Z && Z.hata(), () => html`<p class="tiny dim ofis3b-not">${Z.hata()}</p>`)}
-        ${when(three && !canli, room3d)}
-        ${when(!three, () => html`<div class="floor__room">
-          <div class="floor__lead">${seat(R.AGENT_BY_ID.patron)}</div>
-          ${map(specialists, seat)}
-        </div>`)}
-      </div>`;
-  }
-
+  /* 3B oda ve kat planı kalktı (kullanıcı kararı, 2026-10-02: «AYS Ofis'teki
+     3B kısmını kaldır»). Masalara erişim «Uzman masaları» kartında ve
+     Patron'un masasında durur; sahneye özgü eylemler (görünüm, canlı
+     sahne, odayı çevir) belgeler/ekip/envanter/kaldirilan.json'da. */
   /* ---------- onay kutusu ----------
      Ofisin sisteme dokunabildiği TEK kapı. Ne değişeceği onaydan önce
      önce/sonra olarak gösterilir; onaysız hiçbir satır uygulanmaz. */
@@ -862,11 +687,6 @@ R.Screens.office = (function(){
     /* 139 model kapalı kipi: gri şerit; ajanlar hazır cümleyle konuşur. */
     return String(K.Grid([
       K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:O.mode() === 'llm' })) : ''),
-      /* Ofis ekranının ilk gördüğü şey ofisin kendisidir: canlı 3B sahne
-         en üstte ve tam genişlikte (depo sahibi, 2026-09-26). Kartlar
-         altında; ikincil olanlar baştan gizli (gizliVarsayilan) ve üst
-         çubuktaki «Gizlenen bölümler»den geri gelir. */
-      K.Span(12, floorPlan()),
       K.Span(8, K.Stack([
         /* iPhone Faz 4: dört istatistik şeridi (bugün, sınava kalan, toplantı,
            açık karar) kalktı — tarih ve sınav sayacı Bugün'de, toplantı ve
@@ -890,56 +710,7 @@ R.Screens.office = (function(){
     ]));
   }
 
-  /* ---------- kamera ----------
-     Döndürme ekranı yeniden çizmez: tek bir CSS değişkeni değişir. Yeniden
-     çizim hem gereksiz (veri değişmiyor) hem de sürüklerken takılma yapardı. */
-
-  function applyTurn(deg){
-    roomTurn = ((deg % 360) + 360) % 360;
-    if(roomTurn > 180) roomTurn -= 360;
-    const scene = document.getElementById('room3d-scene');
-    if(scene) scene.style.setProperty('--turn', roomTurn + 'deg');
-  }
-
-  /* Odayı sürükleyerek çevirme. Dikey sürükleme sayfayı kaydırmaya kalır:
-     kullanıcı odanın üstünden geçerken sayfa kilitlenmemeli. */
-  function bindDrag(){
-    const stage = document.getElementById('room3d');
-    if(!stage || stage.dataset.bound) return;
-    stage.dataset.bound = '1';
-
-    let id = null, x0 = 0, base = 0, moved = false;
-
-    stage.addEventListener('pointerdown', e => {
-      if(e.button != null && e.button !== 0) return;
-      id = e.pointerId; x0 = e.clientX; base = roomTurn; moved = false;
-      stage.classList.add('is-dragging');
-    });
-    stage.addEventListener('pointermove', e => {
-      if(id !== e.pointerId) return;
-      const dx = e.clientX - x0;
-      if(!moved && Math.abs(dx) < 4) return;
-      if(!moved){ moved = true; try{ stage.setPointerCapture(id); }catch(err){} }
-      applyTurn(base + dx * 0.4);
-    });
-    const end = e => {
-      if(id !== e.pointerId) return;
-      /* Sürüklemeden sonra gelen tık masayı açmasın. */
-      if(moved) stage.dataset.dragged = '1';
-      id = null;
-      stage.classList.remove('is-dragging');
-    };
-    stage.addEventListener('pointerup', end);
-    stage.addEventListener('pointercancel', end);
-    stage.addEventListener('click', e => {
-      if(stage.dataset.dragged){ delete stage.dataset.dragged; e.stopPropagation(); e.preventDefault(); }
-    }, true);
-  }
-
-  function afterRender(){
-    bindDrag();
-    if(R.Ofis3B) R.Ofis3B.yerlestir(document.getElementById('ofis3b-yuva'));
-  }
+  function afterRender(){}
 
   /* ---------- eylemler ---------- */
 
@@ -959,24 +730,6 @@ R.Screens.office = (function(){
       UI.confirmSheet('Ürünü sil', 'Ürün yalnız bu cihazdan silinir; HKM’deki kaydı durur.',
         async () => { await R.Urunler.sil(id); UI.toast('Silindi'); R.App.render(); }, true, 'Ürünü bu cihazdan sil');
     },
-    /* Görünüm tercihi kalıcıdır: kullanıcı 3B'yi kapattıysa her açılışta
-       geri gelmemeli. */
-    async 'office-view'(){
-      await O.saveSettings({ room3d:O.settings().room3d === false });
-      R.App.render();
-    },
-
-    /* Canli sahne (WebGL) ile hafif CSS odasi arasinda gecis; tercih kalicidir. */
-    async 'office-sahne'(el){
-      const mod = el.dataset.mod === 'hafif' ? 'hafif' : 'canli';
-      if(mod === 'canli' && R.Ofis3B) R.Ofis3B.ac();
-      await O.saveSettings({ sahne3b:mod });
-      R.App.render();
-    },
-
-    async 'office-turn'(el){
-      applyTurn(roomTurn + Number(el.dataset.dir || 1) * 30);
-    },
 
     async 'office-desk'(el){
       const id = el.dataset.agent;
@@ -989,12 +742,9 @@ R.Screens.office = (function(){
       R.App.go('team');
     },
 
-    /* Canli sahnede ekip once toplanti odasina yurur, oturunca gercek
-       toplanti ekrani acilir (ofis3b.js); sahne yoksa dogrudan gidilir. */
     async 'office-meet'(){
-      const git = () => { S.ui.meetingAuto = true; R.App.go('meeting'); };
-      if(R.Ofis3B && document.getElementById('ofis3b-yuva')) R.Ofis3B.toplantiyaGotur(git);
-      else git();
+      S.ui.meetingAuto = true;
+      R.App.go('meeting');
     },
 
     async 'office-settings'(el){
@@ -1180,7 +930,6 @@ R.Screens.office = (function(){
       el.disabled = true;
       try{
         const added = await R.Proposals.refresh();
-        if(R.Ofis3B) R.Ofis3B.oneriler(added);
         UI.toast(added.length
           ? added.length + ' yeni öneri masaya bırakıldı'
           : 'Ofis her şeyi yerinde buldu');
@@ -1269,11 +1018,13 @@ R.Screens.office = (function(){
         + ' · ' + R.AGENTS.length + ' ajan' + (open ? ' · ' + open + ' açık karar' : '');
     },
     actions(){
-      return String(K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }));
+      /* «Masaları tara» 3B sahnenin başlığındaydı; sahne kalkınca buraya. */
+      return String(K.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' }))
+        + String(K.Button({ label:'Ayarlar', icon:'gear', size:'sm', act:'office-settings' }));
     },
     render, afterRender, handle, change, openSettings,
-    /* Sadelik: 3B sahne masaları zaten gösterir; teknik model kartı ve son
-       toplantı ikincildir. Baştan gizli, üst çubuktan geri gelir (gizle.js). */
+    /* Sadelik: teknik model kartı, konuşan masa ve son toplantı
+       ikincildir. Baştan gizli, üst çubuktan geri gelir (gizle.js). */
     gizliVarsayilan:['masa', 'ofis-modeli', 'son-toplantı'],
     /* iPhone Faz 4 («brifing + tek eylem»): açık ofis, günün brifingi ve
        Patron'un masası (tek eylem). Masa cümleleri toplantı satırında,
