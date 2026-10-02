@@ -254,11 +254,11 @@ GIRIS_SAYFASI = """<!doctype html>
   --ays-t:#EEF2FD; --spi-t:#E7F4F1; --esp-t:#FBF2E7; --hkm-t:#F1EEFB;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
 @media (prefers-color-scheme:dark){ :root{
-  --bg:#0d0f12; --yuzey:#15181c; --yuzey-2:#1c2026; --fg:#eceef1; --fg-2:#b3b8c0; --fg-3:#8c929c;
-  --cizgi:#252a31; --cizgi-2:#323841; --golge:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
+  --bg:#121214; --yuzey:#1C1C1F; --yuzey-2:#26262A; --fg:#ECECEF; --fg-2:#ABABB3; --fg-3:#909099;
+  --cizgi:#2C2C31; --cizgi-2:#3A3A40; --golge:0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.25);
   --ok:#4cc38a; --ok-t:#122a20; --uyari:#f2a93b; --uyari-t:#2a1f0f; --kapali:#6b717b;
   --ays:#4F86FF; --spi:#2EC4A9; --esp:#F2A93B; --hkm:#9A86FF;
-  --ays-t:#121A2C; --spi-t:#0E211E; --esp-t:#241A0D; --hkm-t:#1B1730; } }
+  --ays-t:#1A1F2A; --spi-t:#18221F; --esp-t:#231E17; --hkm-t:#1F1C29; } }
 *{ box-sizing:border-box; }
 [hidden]{ display:none !important; }
 body{ margin:0; background:var(--bg); color:var(--fg);

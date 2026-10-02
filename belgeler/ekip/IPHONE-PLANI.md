@@ -338,10 +338,23 @@ Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/�
 | 4–5 | ✅ Ofis · Danışma (3 ×; Onaylar ve Kütüphanem zaten bütçede); Ayarlar iOS listesi (3 ×); önizleme hatası | 2db1f82 | 87 · aşan 1 (AYS 26/0 · SPİ 31/1 · ESP 30/0) |
 | 6–7 | ✅ başlık ad, durum cümlesi ⓘ'de; rozet bildirimi tek; SPİ Bugün 3 açık; `acikKart` zorunlu; 390 px turu | 9b44df0 | 86 · aşan 0 (AYS 26 · SPİ 30 · ESP 30) |
 | tam | ✅ `sayilar.py --tam --yaz` yeşil (ilk kez bu makinede): Windows UTF-8, dönen kart kırpması, ESP Tarih 631 → 157 ms, HKM eşleme durumu, tarihe bağlı iki HKM testi; README/NOTLAR sayıları | ce98d9b | — |
-| tasarım | ✅ orta başlık; kaydırmalı bölüm seçici (yazı + nokta, sürükle/ok tuşu, seçili ortada); AYS Ofis 3B oda ve kat planı kalktı (kullanıcı kararı; kaldirilan.json) | (bu commit) | 86 · aşan 0 |
+| tasarım | ✅ orta başlık; kaydırmalı bölüm seçici (yazı + nokta, sürükle/ok tuşu, seçili ortada); AYS Ofis 3B oda ve kat planı kalktı (kullanıcı kararı; kaldirilan.json) | ba051c9 | 86 · aşan 0 |
+| kabuk 2 | ✅ başlık çekmecenin adı (Çalışma; bölüm çubukta); sayfa bölümleri bölümlü seçici; kayan işaret (kenar zemini, bölüm noktası, seçici hapı — FLIP; azaltılmış harekette solma); sol üst boş; grafit koyu tema; SPİ 3B kampüs kalktı | a7d051d | 86 · aşan 0 |
+| sade içerik | ✅ SPİ/ESP/HKM AYS'nin diline: nötr uyarı, sınırlı grafik, çerçevesiz seçim kartı, serifsiz vitrin; SPİ/ESP Bugün sade; HKM yüzü (ortalı başlık + ⓘ, çerçevesiz kart, hap, bölümlü seçici, grafit) | 4df9260 | 85 (AYS 26 · SPİ 30 · ESP 29) |
+| koyu son | ✅ Meydan ve giriş paneli grafit; telefonda sağ üst simgeler çerçevesiz | (bu commit) | — |
 | boy | ⏭ açık iş: 1 200 px'i aşan sayfalar — AYS Dersler 1 238 (raf tabanı), İlerleme 1 516, Ayrıntılı analiz 1 608, Ofis 1 838, Danışma 1 314, Genel 1 557, Günü düzenle 1 748; SPİ Analiz 1 506, Ofis 1 390, Günü düzenle 1 682; ESP Bugün 1 377, Analiz 1 803, Profil 1 286, Günü düzenle 1 525 | — | ölçüm |
 
 ## 9. Devir notu — sıradaki oturum buradan başlar
+
+**Son devir (2026-10-02, 4. oturum, akşam):** kullanıcının beş isteği bitti — sol üst boş,
+başlık çekmecenin adı, iki seçici iki dil (yazı + nokta / bölümlü seçici), kayan işaret ve
+sayfa geçişi, SPİ/ESP/HKM sadeleşti, koyu tema grafit, SPİ 3B kampüs kalktı (a7d051d,
+4df9260 ve sonraki commit). Bilinen: bu makinede Windows «Animasyon efektleri» KAPALI;
+tarayıcı «hareketi azalt» bildirir, LifeOS kaymaz ama solarak geçer. Tam hareket için
+Windows Ayarlar › Erişilebilirlik › Görsel efektler › Animasyon efektleri açılmalı.
+HKM ekran görüntüsü için gerçek config'e dokunmadan: HKM'yi geçici klasöre kopyala,
+kendi deneme jetonunla `config.json` yaz, kopyadan `daemon.py` aç (jeton hiçbir çıktıya
+yazılmaz). Kalan tek açık iş yine §8 «boy» satırı.
 
 **Son devir (2026-10-02, 3. oturum):** Faz 3, 4–5, 6–7 bitti (55b2015, 2db1f82, 9b44df0), tam denetim yeşil (ce98d9b);
 açık kart 150 → 86, üçü aşan ekran 13 → 0, `acikKart` zorunlu. Kalan tek iş §8'deki «boy»

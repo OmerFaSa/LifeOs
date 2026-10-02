@@ -10326,6 +10326,15 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
 .mealcard__kcal{ font-weight:650; }
 .mealitem{ border-top-color:var(--border-soft); }
 
+/* Telefonda da sağ üst sade: simgeler çerçevesiz yuvarlak (masaüstüyle aynı),
+   kutucuk yok. */
+@media (max-width:679px){
+  .ust.ust--v5 .ust__gizli, .ust.ust--v5 .ust__zil{ width:36px; height:36px; padding:0; border:0; border-radius:50%;
+    background:none; box-shadow:none; display:grid; place-items:center; color:var(--text-2); }
+  .ust.ust--v5 .ust__madalya{ box-shadow:none; background:none; }
+  .ust.ust--v5 .ust__zil-nokta{ top:8px; right:9px; width:6px; height:6px; background:var(--now); box-shadow:none; }
+}
+
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
@@ -12054,7 +12063,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'a7d051d', at:'2026-10-02 17:36', dirty:true };
+SP.BUILD = { id:'4df9260', at:'2026-10-02 17:57', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.

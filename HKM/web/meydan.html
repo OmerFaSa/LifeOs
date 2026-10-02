@@ -35,19 +35,21 @@
 }
 @media (prefers-color-scheme: dark){
   html:not([data-tema="acik"]){
-    --bg:#0A0A0D; --yuzey:#141519; --yuzey-2:#1B1C21; --yuzey-3:#23252B; --fg:#EDEEF0; --dim:#A3A9B4; --soluk:#8C929D;
-    --line:#24262C; --line-strong:#33363D;
+    /* Grafit koyu (2026-10-02, «siyah tema çok kötü gözüküyor»): yüzün ve üç
+       arayüzün değerleri (jeton.css --d-*); saf siyaha yakın zemin yok. */
+    --bg:#121214; --yuzey:#1C1C1F; --yuzey-2:#26262A; --yuzey-3:#161618; --fg:#ECECEF; --dim:#ABABB3; --soluk:#909099;
+    --line:#2C2C31; --line-strong:#3A3A40;
     --ok:#3FBF7F; --warn:#D9A441; --danger:#F06A62;
-    --accent:#9A86FF; --on-accent:#0A0A0D; --mer-t:#1C1733;
-    --ays:#4F86FF; --spi:#2EC4A9; --esp:#F2A93B; --mer:#9A86FF; --sen:#A3A9B4; --av-yazi:#0A0A0D;
+    --accent:#9D8CFF; --on-accent:#0E0E10; --mer-t:#1F1C29;
+    --ays:#4F86FF; --spi:#2EC4A9; --esp:#F2A93B; --mer:#9A86FF; --sen:#ABABB3; --av-yazi:#0E0E10;
     --golge:0 1px 2px rgba(0,0,0,.4); --golge-2:0 14px 40px rgba(0,0,0,.5); }
 }
 html[data-tema="koyu"]{
-  --bg:#0A0A0D; --yuzey:#141519; --yuzey-2:#1B1C21; --yuzey-3:#23252B; --fg:#EDEEF0; --dim:#A3A9B4; --soluk:#8C929D;
-  --line:#24262C; --line-strong:#33363D;
+  --bg:#121214; --yuzey:#1C1C1F; --yuzey-2:#26262A; --yuzey-3:#161618; --fg:#ECECEF; --dim:#ABABB3; --soluk:#909099;
+  --line:#2C2C31; --line-strong:#3A3A40;
   --ok:#3FBF7F; --warn:#D9A441; --danger:#F06A62;
-  --accent:#9A86FF; --on-accent:#0A0A0D; --mer-t:#1C1733;
-  --ays:#4F86FF; --spi:#2EC4A9; --esp:#F2A93B; --mer:#9A86FF; --sen:#A3A9B4; --av-yazi:#0A0A0D;
+  --accent:#9D8CFF; --on-accent:#0E0E10; --mer-t:#1F1C29;
+  --ays:#4F86FF; --spi:#2EC4A9; --esp:#F2A93B; --mer:#9A86FF; --sen:#ABABB3; --av-yazi:#0E0E10;
   --golge:0 1px 2px rgba(0,0,0,.4); --golge-2:0 14px 40px rgba(0,0,0,.5);
 }
 *{ box-sizing:border-box; }

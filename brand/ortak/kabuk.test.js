@@ -529,5 +529,19 @@
         expect(/Newsreader/.test(getComputedStyle(d.querySelector('.vk .serif')).fontFamily)).toBe(false);
       }finally{ d.remove(); }
     });
+
+    it('telefonda da sağ üst sade: zil ve sayfa düzeni çerçevesiz yuvarlak (kutucuk yok)', () => {
+      /* Kaskatta SONUNCU kural geçerlidir: eski telefon kuralları önce gelir. */
+      let r = null;
+      for(const ss of Array.from(document.styleSheets)){
+        let kurallar = [];
+        try{ kurallar = Array.from(ss.cssRules || []); }catch(e){ continue; }
+        kurallar.forEach(m => { if(m.media && /max-width:\s*679px/.test(m.media.mediaText))
+          Array.from(m.cssRules || []).forEach(ic => { if(/\.ust__zil(?![-\w])/.test(ic.selectorText || '')) r = ic; }); });
+      }
+      expect(!!r).toBe(true);
+      expect(r.style.boxShadow).toBe('none');
+      expect(r.style.borderRadius).toBe('50%');
+    });
   });
 })();

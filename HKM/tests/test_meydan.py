@@ -523,6 +523,17 @@ def run():
         no("/api/meydan/hikaye" in s or "goruldu" in s, "izlenme sunucuya gidiyor")
     test("sayfa sifir bagimli, yuzun jetonu ve temasi; yuzde mini uygulama, sekme degil; «Evet/Tamam» yok", t_sayfa)
 
+    def t_koyu_grafit():
+        # Kullanici (2026-10-02): «siyah tema cok kotu gozukuyor». Meydan'in
+        # koyu temasi yuzun ve uc arayuzun grafit degerleri; siyaha yakin
+        # zemin (#0A0A0D) yok.
+        kok = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        s = open(os.path.join(kok, "web", "meydan.html"), encoding="utf-8").read()
+        no("#0A0A0D" in s, "koyu zemin siyaha yakin")
+        eq(s.count("--bg:#121214"), 2)
+        eq(s.count("--yuzey:#1C1C1F"), 2)
+    test("koyu tema grafit: siyaha yakin zemin yok", t_koyu_grafit)
+
 
 def run_daemon():
     """Uclar gercek bir soketle (tests/test_daemon.py kalibi)."""
