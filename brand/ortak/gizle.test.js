@@ -599,5 +599,27 @@
         expect(gorunen.map(x => x.querySelector('.gd-ad').textContent)).toEqual(['Beslenme']);
       }finally{ bitir(kok, d); }
     });
+
+    /* Sıra hatası (2026-10-02): raf düzeni sütunu bölümler küçülmeden ÖNCE
+       ölçüp kesiyordu; küçülen kart «Tamamını göster»in arkasında kayboluyordu.
+       Sayfa düzeni uygulanınca raf yeniden hesaplanır. */
+    it('baştan küçük uzun bölüm raf kesmesinde kalmaz', () => {
+      const H = window.LIFEOS.HAREKET;
+      const kok = document.createElement('div');
+      kok.className = 'site site--v5';
+      kok.style.cssText = 'position:absolute;left:-10000px;top:0;width:1300px';
+      kok.innerHTML = '<div class="ledger"><section class="lrow"><div class="lrow__side"><div class="lrow__label">Uzun bölüm</div></div>'
+        + '<div class="lrow__main"><div style="height:1600px">uzun</div></div></section></div>';
+      document.body.appendChild(kok);
+      try{
+        if(H && H.raf) H.raf(kok);
+        G()._sifirla();
+        G().uygula({ kok, modul:MOD, profil:'p', ekran:'raf', kucukVarsayilan:[G().anahtar('Uzun bölüm')] });
+        const b = G().bolumler(kok)[0].el;
+        expect(b.classList.contains('gizle-kucuk')).toBe(true);
+        expect(b.classList.contains('raf-uzun')).toBe(false);
+        expect(!!b.querySelector(':scope > .raf-ac')).toBe(false);
+      }finally{ temizle(kok); }
+    });
   });
 })();

@@ -29,7 +29,7 @@
     it('her ekran yolunu söyler: «Plan › Hafta»; tek bölümlü çekmecede yalnız ad', () => {
       expect(R.App.yolOf('week').join(' › ')).toBe('Plan › Hafta');
       expect(R.App.yolOf('exams').join(' › ')).toBe('Çalışma › Deneme');
-      expect(R.App.yolOf('today').join(' › ')).toBe('Bugün › Genel bakış');
+      expect(R.App.yolOf('today').join(' › ')).toBe('Bugün');
       expect(R.App.yolOf('onaylar').join(' › ')).toBe('Onaylar');
       /* Menüde olmayan ayrıntı ekranı üst bölümünün altında durur. */
       expect(R.App.yolOf('topic').join(' › ')).toBe('Çalışma › Konu çalış › Konu');

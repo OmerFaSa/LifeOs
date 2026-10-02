@@ -1098,3 +1098,8 @@ svg.chart{ max-height:180px; }
 .gizle-dip:not(.gizle-dip--uyari) button{ min-height:24px; padding:0 6px; border:0; background:none; color:var(--text-2); font-weight:500; }
 .gizle-dip:not(.gizle-dip--uyari) button:hover{ color:var(--text); background:var(--surface-2); }
 
+/* Sayfa düzeni rozeti yalnız UYARIDA (2026-10-02): bölümler artık baştan
+   gizli geldiği için gizli sayısı her sayfada boşuna yanıyordu. Gizli
+   bölümde kırmızı bir uyarı varsa rozet yine görünür (söz 9). */
+.ust__gizli.is-dolu:not(.is-uyari) .ust__gizli-sayi{ display:none; }
+

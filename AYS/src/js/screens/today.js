@@ -1376,16 +1376,19 @@ R.Screens.today = (function(){
         ${OfficeCard()}
         <div id="pane-anchors">${AnchorPane(day)}</div>
         <div id="pane-hedef">${hedefKutusu(day)}</div>
-        <div id="pane-energy">${EnergyCard()}</div>
+        ${/* SADE (2026-10-02): günün ara sıra dokunulan kayıtları tek
+             katlanır kartta (baştan küçük); hiçbiri kalkmadı. */''}
+        ${c.Card({ title:'Öbür kayıtlar', sub:'enerji, kötü gün, bölünme, seri, uyku, ritüel', body:c.Stack(html`
+          <div id="pane-energy">${EnergyCard()}</div>
+          ${BadDayCard(day)}
+          ${DistractionCard(day)}
+          ${PlanHealthCard()}
+          ${StreakCard()}
+          ${SleepCard(day)}
+          <div id="pane-ritual">${RitualCard(day)}</div>`) })}
         <div id="pane-reward">${RewardCard()}</div>
-        ${BadDayCard(day)}
-        ${DistractionCard(day)}
-        ${PlanHealthCard()}
-        ${StreakCard()}
-        ${SleepCard(day)}
         <div id="pane-break">${BreakCard()}</div>
         <div id="pane-due">${DueCards()}</div>
-        <div id="pane-ritual">${RitualCard(day)}</div>
         ${RepairQueue()}
         ${WeekContext(week, n)}
       `))}
@@ -1798,8 +1801,8 @@ R.Screens.today = (function(){
       /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
          bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
          «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-      kucukVarsayilan:['hafta-bağlamı', 'bugünün-ödülü'],
-      title:'Günün ayrıntısı',
+      kucukVarsayilan:['hafta-bağlamı', 'bugünün-ödülü', 'öbür-kayıtlar'],
+      title:'Günü düzenle',
       subtitle(){ return 'Bloklar, sayaçlar ve günün bütün kartları'; },
       actions(){
         return String(html`

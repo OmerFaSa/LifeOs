@@ -27,8 +27,7 @@ SP.App = (function(){
   const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
   const SECTIONS = [
     { id:'bugun', label:CEK('bugun'), views:[
-      { route:'today', label:'Genel bakış' },   // çekmece adı zaten «Bugün»
-      { route:'gun',   label:'Ayrıntı' },
+      { route:'today', label:'Genel bakış' },
     ]},
     { id:'plan', label:CEK('plan'), views:[
       { route:'hedefler', label:'Hedefler' },
@@ -64,7 +63,9 @@ SP.App = (function(){
   ];
 
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
-  const UST = {};
+  /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):
+     Bugün tek sayfa; «Günü düzenle» yalnız widget bağlarından açılır. */
+  const UST = { gun:'today' };
 
   /* Telefon alt bandı (karar 3): Bugün · Plan · Çalışma · Menü. */
   const BANT = ['bugun', 'plan', 'calisma'];
@@ -295,7 +296,7 @@ SP.App = (function(){
      (brand/ortak/gizle.js). Anahtar = bölüm başlığı (gizle.anahtar); her
      anahtarın gerçek bir bölüme denk geldiği test edilir (sade.test.js). */
   const SADE_GIZLI = {
-    gun:['neden-bunlar'],
+    gun:['neden-bunlar', 'toparlanma', 'asgari-gün', 'beslenme', 'hkm', 'seri', 'girilen-değerler', 'eğilim', 'hatırlatmalar', 'ofisten', 'bütçe', 'son-iki-hafta', 'taban-çizgin'],
     labs:['nasıl-okunur', 'sınır', 'hiç-ölçülmemiş-paneller', 'ölçülmemiş', 'dağılım'],
     analytics:['veri-doluluğu', 'raporun-mantığı'],
     guide:['nasıl-kullanılır', 'beş-modül', 'kullanım-hakkı', 'klinik-sınır'],
@@ -1543,7 +1544,7 @@ SP.App = (function(){
     }
   }
 
-  return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, THEMES, installManifest,
+  return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, UST, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
 })();
 

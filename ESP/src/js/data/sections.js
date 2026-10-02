@@ -26,8 +26,7 @@ ESP.SECTIONS_ALL = [
        çekmece çizilmez. `disc` artık BÖLÜMDEDİR: disiplin kapanınca yalnız
        onun bölümü düşer, Çalışma kalır. */
     { id:'bugun', icon:'pulse', label:'Bugün', note:'Günün pratiğini gir, karşılığını gör',
-      views:[{ route:'today', label:'Genel bakış', icon:'pulse' },   // çekmece adı zaten «Bugün»
-        { route:'gun', label:'Ayrıntı', icon:'list' }] },
+      views:[{ route:'today', label:'Genel bakış', icon:'pulse' }] },
 
     { id:'plan', icon:'chart', label:'Plan', note:'Merdiven: her disiplinde bir sonraki basamak',
       views:[{ route:'ladder', label:'Merdiven', icon:'chart' }] },

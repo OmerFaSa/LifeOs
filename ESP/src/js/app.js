@@ -28,7 +28,9 @@ ESP.App = (function(){
   const sectionsGorunen = ESP.Nav.sections;
 
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
-  const UST = {};
+  /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):
+     Bugün tek sayfa; «Günü düzenle» yalnız widget bağlarından açılır. */
+  const UST = { gun:'today' };
 
   /* Telefon alt bandı (karar 3): Bugün · Plan · Çalışma · Menü. */
   const BANT = ['bugun', 'plan', 'calisma'];
@@ -266,6 +268,7 @@ ESP.App = (function(){
     studio:['nefes-ve-vurgu', 'ısınma-sırası'],
     library:['öğrendiğini-anlat'],
     analytics:['veri-doluluğu'],
+    gun:['bekleyen-iş', 'günün-dakikası', 'yedek', 'hkm', 'seri', 'hedeflerim', 'günün-toplamı', 'asgari-gün', 'entelektüel-hacim', 'haftanın-dağılımı', 'son-gün', 'seçili-gün'],
   };
 
   function sayfaBasiHtml(sc){
@@ -1732,7 +1735,7 @@ ESP.App = (function(){
   }
 
   return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS,
-    sectionOf, routeOn, yolOf, SADE_GIZLI, THEMES, installManifest,
+    sectionOf, routeOn, yolOf, SADE_GIZLI, UST, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
 })();
 

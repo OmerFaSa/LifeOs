@@ -1158,7 +1158,7 @@ ESP.Screens.today = (function(){
     /* Bugün › Ayrıntı: aynı işleyiciler, ayrı bir çizim. */
     ayrinti:{
       id:'gun',
-      title:'Günün ayrıntısı',
+      title:'Günü düzenle',
       subtitle(){ return 'Oturum girişi, hatırlatmalar, özet ve geçmiş'; },
       actions(){ return ''; },
       render:renderAyrinti, afterRender:afterRenderAyrinti, handle, change,

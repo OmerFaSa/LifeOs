@@ -42,7 +42,7 @@
       expect(SP.App.yolOf('team').join(' › ')).toBe('Ofis › Danışma');
       expect(SP.App.yolOf('rutbe').join(' › ')).toBe('Ayarlar › Rütbe');
       expect(SP.App.yolOf('family').join(' › ')).toBe('Ayarlar › Profil');
-      expect(SP.App.yolOf('today').join(' › ')).toBe('Bugün › Genel bakış');
+      expect(SP.App.yolOf('today').join(' › ')).toBe('Bugün');
       expect(SP.App.yolOf('onaylar').join(' › ')).toBe('Onaylar');
       expect(SP.App.yolOf('hedefler').join(' › ')).toBe('Plan');
     });

@@ -10040,6 +10040,11 @@ svg.chart{ max-height:180px; }
 .gizle-dip:not(.gizle-dip--uyari) button{ min-height:24px; padding:0 6px; border:0; background:none; color:var(--text-2); font-weight:500; }
 .gizle-dip:not(.gizle-dip--uyari) button:hover{ color:var(--text); background:var(--surface-2); }
 
+/* Sayfa düzeni rozeti yalnız UYARIDA (2026-10-02): bölümler artık baştan
+   gizli geldiği için gizli sayısı her sayfada boşuna yanıyordu. Gizli
+   bölümde kırmızı bir uyarı varsa rozet yine görünür (söz 9). */
+.ust__gizli.is-dolu:not(.is-uyari) .ust__gizli-sayi{ display:none; }
+
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
@@ -11781,7 +11786,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'cc9b3e3', at:'2026-10-02 09:40', dirty:true };
+SP.BUILD = { id:'2c4d767', at:'2026-10-02 10:03', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -18510,6 +18515,10 @@ LIFEOS.Gizle = (function(){
     });
     if(degisti) yaz(o, d);
     if(o.kok) o.kok.classList.toggle('gizle-duzen', duzen);
+    /* Raf düzeni (hareket.js) uzun kutuyu keser; küçülen ya da gizlenen
+       bölümden SONRA yeniden ölçülmeli. Önce ölçülürse küçülen kart
+       «Tamamını göster»in arkasında kalıyordu (2026-10-02). */
+    try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.raf && o.kok) H.raf(o.kok); }catch(e){}
     dipCiz(o, liste, gizliUyari);
     sayacYaz(gizliListe().length, gizliUyari);
     if(panel) panelCiz();
@@ -47759,7 +47768,7 @@ SP.Screens.today = (function(){
          bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
          «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
       kucukVarsayilan:['neden-bunlar', 'taban-çizgin', 'son-iki-hafta'],
-      title:'Günün ayrıntısı',
+      title:'Günü düzenle',
       subtitle(){ return 'Ölçüm formu, şikâyetler, özet ve son iki hafta'; },
       actions(){ return ''; },
       render:renderAyrinti, afterRender:afterRenderAyrinti, handle,
@@ -56493,8 +56502,7 @@ SP.App = (function(){
   const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
   const SECTIONS = [
     { id:'bugun', label:CEK('bugun'), views:[
-      { route:'today', label:'Genel bakış' },   // çekmece adı zaten «Bugün»
-      { route:'gun',   label:'Ayrıntı' },
+      { route:'today', label:'Genel bakış' },
     ]},
     { id:'plan', label:CEK('plan'), views:[
       { route:'hedefler', label:'Hedefler' },
@@ -56530,7 +56538,9 @@ SP.App = (function(){
   ];
 
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
-  const UST = {};
+  /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):
+     Bugün tek sayfa; «Günü düzenle» yalnız widget bağlarından açılır. */
+  const UST = { gun:'today' };
 
   /* Telefon alt bandı (karar 3): Bugün · Plan · Çalışma · Menü. */
   const BANT = ['bugun', 'plan', 'calisma'];
@@ -56761,7 +56771,7 @@ SP.App = (function(){
      (brand/ortak/gizle.js). Anahtar = bölüm başlığı (gizle.anahtar); her
      anahtarın gerçek bir bölüme denk geldiği test edilir (sade.test.js). */
   const SADE_GIZLI = {
-    gun:['neden-bunlar'],
+    gun:['neden-bunlar', 'toparlanma', 'asgari-gün', 'beslenme', 'hkm', 'seri', 'girilen-değerler', 'eğilim', 'hatırlatmalar', 'ofisten', 'bütçe', 'son-iki-hafta', 'taban-çizgin'],
     labs:['nasıl-okunur', 'sınır', 'hiç-ölçülmemiş-paneller', 'ölçülmemiş', 'dağılım'],
     analytics:['veri-doluluğu', 'raporun-mantığı'],
     guide:['nasıl-kullanılır', 'beş-modül', 'kullanım-hakkı', 'klinik-sınır'],
@@ -58009,7 +58019,7 @@ SP.App = (function(){
     }
   }
 
-  return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, THEMES, installManifest,
+  return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, UST, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
 })();
 

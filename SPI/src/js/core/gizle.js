@@ -261,6 +261,10 @@ LIFEOS.Gizle = (function(){
     });
     if(degisti) yaz(o, d);
     if(o.kok) o.kok.classList.toggle('gizle-duzen', duzen);
+    /* Raf düzeni (hareket.js) uzun kutuyu keser; küçülen ya da gizlenen
+       bölümden SONRA yeniden ölçülmeli. Önce ölçülürse küçülen kart
+       «Tamamını göster»in arkasında kalıyordu (2026-10-02). */
+    try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.raf && o.kok) H.raf(o.kok); }catch(e){}
     dipCiz(o, liste, gizliUyari);
     sayacYaz(gizliListe().length, gizliUyari);
     if(panel) panelCiz();

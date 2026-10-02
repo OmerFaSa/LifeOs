@@ -62,7 +62,7 @@
     it('Bugün › Ayrıntı: sekme yok; form, şikâyet, geçmiş ve özet orada', async () => {
       dolu();
       await withTodayAsync(GUN, async () => {
-        expect(SP.App.yolOf('gun').join(' › ')).toBe('Bugün › Ayrıntı');
+        expect(SP.App.yolOf('gun').join(' › ')).toBe('Bugün › Günü düzenle');
         const d = yerlestir(await SP.Screens.gun.render());
         try{
           expect(d.querySelectorAll('[role="tab"], .subtabs').length).toBe(0);

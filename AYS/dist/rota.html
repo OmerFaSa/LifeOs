@@ -11618,6 +11618,11 @@ svg.chart{ max-height:180px; }
 .gizle-dip:not(.gizle-dip--uyari) button{ min-height:24px; padding:0 6px; border:0; background:none; color:var(--text-2); font-weight:500; }
 .gizle-dip:not(.gizle-dip--uyari) button:hover{ color:var(--text); background:var(--surface-2); }
 
+/* Sayfa düzeni rozeti yalnız UYARIDA (2026-10-02): bölümler artık baştan
+   gizli geldiği için gizli sayısı her sayfada boşuna yanıyordu. Gizli
+   bölümde kırmızı bir uyarı varsa rozet yine görünür (söz 9). */
+.ust__gizli.is-dolu:not(.is-uyari) .ust__gizli-sayi{ display:none; }
+
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
@@ -13399,7 +13404,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'cc9b3e3', at:'2026-10-02 09:39', dirty:true };
+R.BUILD = { id:'2c4d767', at:'2026-10-02 10:03', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20128,6 +20133,10 @@ LIFEOS.Gizle = (function(){
     });
     if(degisti) yaz(o, d);
     if(o.kok) o.kok.classList.toggle('gizle-duzen', duzen);
+    /* Raf düzeni (hareket.js) uzun kutuyu keser; küçülen ya da gizlenen
+       bölümden SONRA yeniden ölçülmeli. Önce ölçülürse küçülen kart
+       «Tamamını göster»in arkasında kalıyordu (2026-10-02). */
+    try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.raf && o.kok) H.raf(o.kok); }catch(e){}
     dipCiz(o, liste, gizliUyari);
     sayacYaz(gizliListe().length, gizliUyari);
     if(panel) panelCiz();
@@ -53671,16 +53680,19 @@ R.Screens.today = (function(){
         ${OfficeCard()}
         <div id="pane-anchors">${AnchorPane(day)}</div>
         <div id="pane-hedef">${hedefKutusu(day)}</div>
-        <div id="pane-energy">${EnergyCard()}</div>
+        ${/* SADE (2026-10-02): günün ara sıra dokunulan kayıtları tek
+             katlanır kartta (baştan küçük); hiçbiri kalkmadı. */''}
+        ${c.Card({ title:'Öbür kayıtlar', sub:'enerji, kötü gün, bölünme, seri, uyku, ritüel', body:c.Stack(html`
+          <div id="pane-energy">${EnergyCard()}</div>
+          ${BadDayCard(day)}
+          ${DistractionCard(day)}
+          ${PlanHealthCard()}
+          ${StreakCard()}
+          ${SleepCard(day)}
+          <div id="pane-ritual">${RitualCard(day)}</div>`) })}
         <div id="pane-reward">${RewardCard()}</div>
-        ${BadDayCard(day)}
-        ${DistractionCard(day)}
-        ${PlanHealthCard()}
-        ${StreakCard()}
-        ${SleepCard(day)}
         <div id="pane-break">${BreakCard()}</div>
         <div id="pane-due">${DueCards()}</div>
-        <div id="pane-ritual">${RitualCard(day)}</div>
         ${RepairQueue()}
         ${WeekContext(week, n)}
       `))}
@@ -54093,8 +54105,8 @@ R.Screens.today = (function(){
       /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
          bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
          «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-      kucukVarsayilan:['hafta-bağlamı', 'bugünün-ödülü'],
-      title:'Günün ayrıntısı',
+      kucukVarsayilan:['hafta-bağlamı', 'bugünün-ödülü', 'öbür-kayıtlar'],
+      title:'Günü düzenle',
       subtitle(){ return 'Bloklar, sayaçlar ve günün bütün kartları'; },
       actions(){
         return String(html`
@@ -66579,8 +66591,7 @@ R.App = (function(){
   const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
   const NAV = [
     { id:'bugun', label:CEK('bugun'), items:[
-      { id:'today', icon:'today', label:'Genel bakış' },   // çekmece adı zaten «Bugün»
-      { id:'gun',   icon:'list',  label:'Ayrıntı' },
+      { id:'today', icon:'today', label:'Genel bakış' },
     ]},
     { id:'plan', label:CEK('plan'), items:[
       { id:'week',   icon:'week',   label:'Hafta' },
@@ -66621,7 +66632,9 @@ R.App = (function(){
   ];
 
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
-  const UST = { topic:'subjects' };
+  /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):
+     Bugün tek sayfa; «Günü düzenle» yalnız widget bağlarından açılır. */
+  const UST = { topic:'subjects', gun:'today' };
 
   /* Telefon alt bandı (karar 3): Bugün · Plan · Çalışma · Menü. */
   const BANT = ['bugun', 'plan', 'calisma'];
@@ -66862,6 +66875,7 @@ R.App = (function(){
     cards:['kapanış-ölçütü'],
     exams:['deneme-hacmi', 'yayın-merdiveni'],
     guide:['klavye-kısayolları', 'bu-uygulama-ne-değildir', 'kritik-işlemler', 'sınav-haftası-ve-sınav-günü', 'taper-haftası-planı', 'kaygı-azaltma', 'deneme-analizi-protokolü', 'hata-etiketleri-ve-reçeteler', 'yanlış-defteri-tasarımı', 'aralıklı-tekrar', 'hesap-verebilirlik', 'sınav-kaynağı', 'öğrenme-araştırması', 'kendi-verin', 'sistem-ayarı', 'denetim'],
+    gun:['günlük-sayaç', 'son-deneme', 'tekrar-borcu', 'özet', 'hkm', 'sistem-önerileri', 'günün-akışı', 'hedeflerim', 'ofisten', 'bugünün-ödülü', 'mola', 'due-kartlar', 'tamir-kuyruğu', 'hafta-bağlamı'],
   };
 
   function sayfaBasiHtml(sc){
@@ -68130,7 +68144,7 @@ R.App = (function(){
     }
   }
 
-  return { boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, SADE_GIZLI, canInstall, promptInstall, installManifest,
+  return { boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, SADE_GIZLI, UST, canInstall, promptInstall, installManifest,
     notifyState, askNotify, notifyFromOffice };
 })();
 

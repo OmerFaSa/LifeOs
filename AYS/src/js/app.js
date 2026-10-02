@@ -16,8 +16,7 @@ R.App = (function(){
   const CEK = id => (K.CEKMECELER.find(c => c.id === id) || {}).ad || id;
   const NAV = [
     { id:'bugun', label:CEK('bugun'), items:[
-      { id:'today', icon:'today', label:'Genel bakış' },   // çekmece adı zaten «Bugün»
-      { id:'gun',   icon:'list',  label:'Ayrıntı' },
+      { id:'today', icon:'today', label:'Genel bakış' },
     ]},
     { id:'plan', label:CEK('plan'), items:[
       { id:'week',   icon:'week',   label:'Hafta' },
@@ -58,7 +57,9 @@ R.App = (function(){
   ];
 
   /* Menüde olmayan ayrıntı ekranı hangi bölümün altındadır. */
-  const UST = { topic:'subjects' };
+  /* «Ayrıntı» menüde yok (kullanıcı, 2026-10-02: «ayrıntılı görünümü kaldır»):
+     Bugün tek sayfa; «Günü düzenle» yalnız widget bağlarından açılır. */
+  const UST = { topic:'subjects', gun:'today' };
 
   /* Telefon alt bandı (karar 3): Bugün · Plan · Çalışma · Menü. */
   const BANT = ['bugun', 'plan', 'calisma'];
@@ -299,6 +300,7 @@ R.App = (function(){
     cards:['kapanış-ölçütü'],
     exams:['deneme-hacmi', 'yayın-merdiveni'],
     guide:['klavye-kısayolları', 'bu-uygulama-ne-değildir', 'kritik-işlemler', 'sınav-haftası-ve-sınav-günü', 'taper-haftası-planı', 'kaygı-azaltma', 'deneme-analizi-protokolü', 'hata-etiketleri-ve-reçeteler', 'yanlış-defteri-tasarımı', 'aralıklı-tekrar', 'hesap-verebilirlik', 'sınav-kaynağı', 'öğrenme-araştırması', 'kendi-verin', 'sistem-ayarı', 'denetim'],
+    gun:['günlük-sayaç', 'son-deneme', 'tekrar-borcu', 'özet', 'hkm', 'sistem-önerileri', 'günün-akışı', 'hedeflerim', 'ofisten', 'bugünün-ödülü', 'mola', 'due-kartlar', 'tamir-kuyruğu', 'hafta-bağlamı'],
   };
 
   function sayfaBasiHtml(sc){
@@ -1567,7 +1569,7 @@ R.App = (function(){
     }
   }
 
-  return { boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, SADE_GIZLI, canInstall, promptInstall, installManifest,
+  return { boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, SADE_GIZLI, UST, canInstall, promptInstall, installManifest,
     notifyState, askNotify, notifyFromOffice };
 })();
 

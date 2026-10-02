@@ -238,6 +238,9 @@ function rotalariBul(ns){
   try{ (N.App.NAV || []).forEach(s => (s.items || []).forEach(i => ekle(i.id))); }catch(e){}
   try{ (N.App.SECTIONS || []).forEach(s => (s.views || []).forEach(v => ekle(v.route))); }catch(e){}
   try{ (N.Nav.sections() || []).forEach(s => (s.views || []).forEach(v => ekle(v.route))); }catch(e){}
+  /* Menüde olmayan alt ekranlar (App.UST: «Günü düzenle», konu sayfası…):
+     menüden çıkan bir ekranın alanları gezilmezse «kayıp» sanılırdı. */
+  try{ Object.keys(N.App.UST || {}).forEach(ekle); }catch(e){}
   document.querySelectorAll('[data-act="go"][data-route]').forEach(b => ekle(b.dataset.route));
   return r;
 }

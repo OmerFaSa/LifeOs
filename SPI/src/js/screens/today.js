@@ -1454,7 +1454,7 @@ SP.Screens.today = (function(){
          bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
          «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
       kucukVarsayilan:['neden-bunlar', 'taban-çizgin', 'son-iki-hafta'],
-      title:'Günün ayrıntısı',
+      title:'Günü düzenle',
       subtitle(){ return 'Ölçüm formu, şikâyetler, özet ve son iki hafta'; },
       actions(){ return ''; },
       render:renderAyrinti, afterRender:afterRenderAyrinti, handle,
