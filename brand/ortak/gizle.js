@@ -261,6 +261,8 @@ LIFEOS.Gizle = (function(){
     /* Raf düzeni (hareket.js) uzun kutuyu keser; küçülen ya da gizlenen
        bölümden SONRA yeniden ölçülmeli. Önce ölçülürse küçülen kart
        «Tamamını göster»in arkasında kalıyordu (2026-10-02). */
+    /* «Nasıl okunur» şeridi ⓘ'ye (kabuk.railBilgiye): raf ölçmeden önce. */
+    try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.railBilgiye && o.kok) KB.railBilgiye(o.kok); }catch(e){}
     try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.raf && o.kok) H.raf(o.kok); }catch(e){}
     dipCiz(o, liste, gizliUyari);
     sayacYaz(gizliListe().length, gizliUyari);

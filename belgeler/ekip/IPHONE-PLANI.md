@@ -134,7 +134,8 @@ Faz 1'de yapılan (testler: `AYS/src/tests/iphone.test.js`, `ESP/src/tests/iphon
 Faz 1'de görülen, sonraki fazlara kalan:
 
 - Hafta 1 253 px (imza bekleyen sözleşme açıkken). Sayfa sonundaki «Bu ekran nasıl okunur»
-  şeridi (~56 px) ⓘ'ye taşınınca bütçeye girer — Faz 6'nın ilk işi, öne alındı.
+  şeridi (~56 px) ⓘ'ye taşınınca bütçeye girer — Faz 6'nın ilk işi, öne alındı (6a): şimdi
+  1 197 px.
 - ESP'de sayfa başlığı ekranın cümlesi («Merdiven henüz başlamadı.»); iPhone'da başlık addır,
   cümle ⓘ ya da widget'tadır — Faz 6.
 - Dolu profilde ilk açılışta üç rozet bildirimi üst üste çıkıyor — Faz 6.
@@ -150,5 +151,6 @@ Faz 1'de görülen, sonraki fazlara kalan:
 | Faz | Durum | Commit | Açık kart (toplam) |
 |---|---|---|---|
 | — | başlangıç (araç) | c689817 | 188 · aşan 22 ekran |
-| 0 | ✅ ölçü: `acikKart`, `boyHepsi` (ölçüm), envanter.test 13 durum | (bu commit) | 188 · aşan 22 |
-| 1 | ✅ AYS Hafta · Program · Hedef, ESP Merdiven (SPİ Hedefler zaten bütçede) | (bu commit) | 180 · aşan 21 |
+| 0 | ✅ ölçü: `acikKart`, `boyHepsi` (ölçüm), envanter.test 13 durum | 2f7df20 | 188 · aşan 22 |
+| 1 | ✅ AYS Hafta · Program · Hedef, ESP Merdiven (SPİ Hedefler zaten bütçede) | 147c177 | 180 · aşan 21 |
+| 6a | ✅ öne alındı: «Bu ekran nasıl okunur» şeridi her ekranda ⓘ kartına taşınır (`kabuk.railBilgiye`, `Gizle.uygula`'dan); terim kaybolmaz | (bu commit) | 180 · aşan 21 (boy: Hafta 1 197) |

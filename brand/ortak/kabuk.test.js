@@ -402,5 +402,28 @@
       expect(K.katmanKapat()).toBe(false);
       btn.parentNode.remove();
     });
+
+    /* iPhone §2.4 (2026-10-02): açıklama ⓘ'dedir; sayfa sonundaki «Bu ekran
+       nasıl okunur» şeridi bilgi kartına taşınır, terim kaybolmaz. */
+    it('iPhone: «nasıl okunur» şeridi bilgi kartına taşınır; kart yoksa yerinde kalır', () => {
+      const serit = '<section class="rail"><button class="rail__toggle" data-act="rail-toggle"><span class="rail__label">Bu ekran nasıl okunur</span></button>'
+        + '<div class="rail__body" hidden><button class="railcard" data-act="hint" data-hint="a"><span class="railcard__t">A</span><span class="railcard__b">a</span></button>'
+        + '<button class="railcard" data-act="hint" data-hint="b"><span class="railcard__t">B</span><span class="railcard__b">b</span></button></div></section>';
+      const d = yerlestir(K.sayfaBasi({ baslik:'Hafta', ozet:'Bu hafta.' }) + '<main id="rb-main">' + serit + '</main>');
+      try{
+        expect(K.railBilgiye(d.querySelector('#rb-main'))).toBe(true);
+        expect(d.querySelector('section.rail')).toBeNull();
+        const t = Array.from(d.querySelectorAll('.bilgikart .bilgikart__terimler .railcard'));
+        expect(t.map(x => x.getAttribute('data-hint')).join(',')).toBe('a,b');
+        t.forEach(x => expect(x.getAttribute('data-act')).toBe('hint'));
+        expect(d.querySelector('.bilgikart__terimler').getAttribute('aria-label')).toBe('Bu ekran nasıl okunur');
+        expect(K.railBilgiye(d.querySelector('#rb-main'))).toBe(false);
+      }finally{ d.remove(); }
+      const y = yerlestir(K.sayfaBasi({ baslik:'Boş' }) + '<main id="rb-yok">' + serit + '</main>');
+      try{
+        expect(K.railBilgiye(y.querySelector('#rb-yok'))).toBe(false);
+        expect(!!y.querySelector('section.rail')).toBe(true);
+      }finally{ y.remove(); }
+    });
   });
 })();

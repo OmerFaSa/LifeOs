@@ -491,6 +491,46 @@ window.LIFEOS = window.LIFEOS || {};
       + (o.eylem ? '<div class="sayfabasi__eylem">' + o.eylem + '</div>' : '')
       + '</div>';
   }
+  /* «BU EKRAN NASIL OKUNUR» ⓘ'DE (iPhone planı §2.4, 2026-10-02). Ekranın
+     sonundaki katlanır şerit (her modülün UI.rail'i) açıklamanın ikinci
+     yeriydi ve her sayfaya bir satır ekliyordu. Çizimden sonra terimler
+     sayfa başındaki bilgi kartına taşınır: ekranda satır kalmaz, hiçbir
+     terim kaybolmaz (düğmeler aynı `data-act="hint"` ile aynı açıklamayı
+     açar). Bilgi kartı olmayan ekranda şerit yerinde kalır. */
+  function railBilgiye(kok){
+    if(typeof document === 'undefined' || !kok) return false;
+    /* Sayfa başı #main'in kardeşidir (aynı .sayfa içinde); başka sayfanın
+       bilgi kartına taşınmasın diye yalnız orada aranır. */
+    const kap = kok.parentElement;
+    const kart = kap && kap.querySelector(':scope > .sayfabasi .sayfabasi__bilgi .bilgikart');
+    const serit = Array.from(kok.querySelectorAll('section.rail'));
+    if(!kart || !serit.length) return false;
+    let tasindi = false;
+    serit.forEach(r => {
+      const terimler = Array.from(r.querySelectorAll('.railcard'));
+      if(!terimler.length) return;
+      let liste = kart.querySelector('.bilgikart__terimler');
+      if(!liste){
+        const ad = r.querySelector('.rail__label');
+        const etiket = (ad && ad.textContent.trim()) || 'Bu ekran nasıl okunur';
+        liste = document.createElement('div');
+        liste.className = 'bilgikart__terimler';
+        liste.setAttribute('role', 'group');
+        liste.setAttribute('aria-label', etiket);
+        const bas = document.createElement('div');
+        bas.className = 'bilgikart__terimler-ad';
+        bas.setAttribute('aria-hidden', 'true');
+        bas.textContent = etiket;
+        liste.appendChild(bas);
+        kart.appendChild(liste);
+      }
+      terimler.forEach(t => liste.appendChild(t));
+      r.remove();
+      tasindi = true;
+    });
+    return tasindi;
+  }
+
   function bilgiKapat(haric){
     if(typeof document === 'undefined') return;
     document.querySelectorAll('.sayfabasi__bilgi.is-acik').forEach(b => {
@@ -799,7 +839,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.KABUK = Object.freeze({
     CEKMECELER, MODULLER, SIRA,
     simge, modulIsareti, adres, simdiOrani, saatMetni,
-    ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, bolumCubugu, altBant, menuSayfasi,
+    ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, railBilgiye, bolumCubugu, altBant, menuSayfasi,
     modulMenusu, bildirimPaneli, hizliEkle,
     katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis, kenarDar, kenarDarMi, kenarIlkDar,
   });

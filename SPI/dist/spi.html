@@ -9844,6 +9844,21 @@ html, body{ background:var(--bg); }
 .bilgikart__alt{ margin-top:8px; font-size:12px; color:var(--text-3); }
 .bilgikart__metin + .bilgikart__alt{ padding-top:8px; border-top:1px solid var(--border-soft); }
 @media (prefers-reduced-motion:reduce){ .bilgikart{ animation:none !important; } }
+/* «Bu ekran nasıl okunur» bilgi kartında (kabuk.railBilgiye): terimler
+   küçük yuvarlak etiketler; dokununca terimin açıklaması açılır. Modülün
+   .railcard biçimi (sol çizgi, tam genişlik) burada geçersiz. */
+.bilgikart__terimler{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; padding-top:10px;
+  border-top:1px solid var(--border-soft); }
+.bilgikart__terimler-ad{ flex-basis:100%; font-size:11px; font-weight:600; color:var(--text-3); }
+.bilgikart .bilgikart__terimler .railcard{ display:inline-flex; align-items:center; width:auto; min-height:26px;
+  padding:0 10px; margin:0; border:0; border-radius:999px; background:var(--surface-2); color:var(--text);
+  font:inherit; font-size:12px; text-align:left; cursor:pointer;
+  transition:background var(--dur) var(--ease); }
+.bilgikart .bilgikart__terimler .railcard:hover{ background:var(--surface-3); }
+.bilgikart .bilgikart__terimler .railcard:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.bilgikart .bilgikart__terimler .railcard__t{ display:inline; margin:0; font-size:inherit; font-weight:500;
+  letter-spacing:0; color:inherit; }
+.bilgikart .bilgikart__terimler .railcard__b{ display:none; }
 
 /* SAĞ ÜST SADE (2026-10-02): arama, sayfa düzeni, zil ve profil aynı
    çerçevesiz yuvarlak simge; yalnız üzerine gelince zemin alır. Telefonun
@@ -11793,7 +11808,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'2f7df20', at:'2026-10-02 10:48', dirty:true };
+SP.BUILD = { id:'147c177', at:'2026-10-02 10:58', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -16815,6 +16830,46 @@ window.LIFEOS = window.LIFEOS || {};
       + (o.eylem ? '<div class="sayfabasi__eylem">' + o.eylem + '</div>' : '')
       + '</div>';
   }
+  /* «BU EKRAN NASIL OKUNUR» ⓘ'DE (iPhone planı §2.4, 2026-10-02). Ekranın
+     sonundaki katlanır şerit (her modülün UI.rail'i) açıklamanın ikinci
+     yeriydi ve her sayfaya bir satır ekliyordu. Çizimden sonra terimler
+     sayfa başındaki bilgi kartına taşınır: ekranda satır kalmaz, hiçbir
+     terim kaybolmaz (düğmeler aynı `data-act="hint"` ile aynı açıklamayı
+     açar). Bilgi kartı olmayan ekranda şerit yerinde kalır. */
+  function railBilgiye(kok){
+    if(typeof document === 'undefined' || !kok) return false;
+    /* Sayfa başı #main'in kardeşidir (aynı .sayfa içinde); başka sayfanın
+       bilgi kartına taşınmasın diye yalnız orada aranır. */
+    const kap = kok.parentElement;
+    const kart = kap && kap.querySelector(':scope > .sayfabasi .sayfabasi__bilgi .bilgikart');
+    const serit = Array.from(kok.querySelectorAll('section.rail'));
+    if(!kart || !serit.length) return false;
+    let tasindi = false;
+    serit.forEach(r => {
+      const terimler = Array.from(r.querySelectorAll('.railcard'));
+      if(!terimler.length) return;
+      let liste = kart.querySelector('.bilgikart__terimler');
+      if(!liste){
+        const ad = r.querySelector('.rail__label');
+        const etiket = (ad && ad.textContent.trim()) || 'Bu ekran nasıl okunur';
+        liste = document.createElement('div');
+        liste.className = 'bilgikart__terimler';
+        liste.setAttribute('role', 'group');
+        liste.setAttribute('aria-label', etiket);
+        const bas = document.createElement('div');
+        bas.className = 'bilgikart__terimler-ad';
+        bas.setAttribute('aria-hidden', 'true');
+        bas.textContent = etiket;
+        liste.appendChild(bas);
+        kart.appendChild(liste);
+      }
+      terimler.forEach(t => liste.appendChild(t));
+      r.remove();
+      tasindi = true;
+    });
+    return tasindi;
+  }
+
   function bilgiKapat(haric){
     if(typeof document === 'undefined') return;
     document.querySelectorAll('.sayfabasi__bilgi.is-acik').forEach(b => {
@@ -17123,7 +17178,7 @@ window.LIFEOS = window.LIFEOS || {};
   L.KABUK = Object.freeze({
     CEKMECELER, MODULLER, SIRA,
     simge, modulIsareti, adres, simdiOrani, saatMetni,
-    ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, bolumCubugu, altBant, menuSayfasi,
+    ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, railBilgiye, bolumCubugu, altBant, menuSayfasi,
     modulMenusu, bildirimPaneli, hizliEkle,
     katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis, kenarDar, kenarDarMi, kenarIlkDar,
   });
@@ -18525,6 +18580,8 @@ LIFEOS.Gizle = (function(){
     /* Raf düzeni (hareket.js) uzun kutuyu keser; küçülen ya da gizlenen
        bölümden SONRA yeniden ölçülmeli. Önce ölçülürse küçülen kart
        «Tamamını göster»in arkasında kalıyordu (2026-10-02). */
+    /* «Nasıl okunur» şeridi ⓘ'ye (kabuk.railBilgiye): raf ölçmeden önce. */
+    try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.railBilgiye && o.kok) KB.railBilgiye(o.kok); }catch(e){}
     try{ const H = window.LIFEOS && window.LIFEOS.HAREKET; if(H && H.raf && o.kok) H.raf(o.kok); }catch(e){}
     dipCiz(o, liste, gizliUyari);
     sayacYaz(gizliListe().length, gizliUyari);
