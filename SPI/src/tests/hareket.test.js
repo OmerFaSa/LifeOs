@@ -329,6 +329,12 @@
         expect(b.classList.contains('is-kayan')).toBe(false);
         expect(b.classList.contains('is-beliren')).toBe(true);
         expect(b.style.getPropertyValue('--isaret-dx')).toBe('');
+        /* Azaltılmışta da aynı yerde yeniden çizim (yazarken, bir tik) işareti
+           yeniden soldurmaz: titreme olmaz. */
+        H.once(d);
+        d.innerHTML = ciz('b');
+        H.sonra(d, 'k', { az:true });
+        expect(d.querySelector('.is-on').classList.contains('is-beliren')).toBe(false);
         /* Sayfayı çizmeden seçim (bolumeGit) eski öğeyi kendisi verir. */
         const l = d.querySelectorAll('.bolumcubugu__ad');
         expect(H.isaretKaydir(l[2], l[0], { az:false })).toBe('kay');

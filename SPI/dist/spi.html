@@ -12063,7 +12063,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'4df9260', at:'2026-10-02 17:57', dirty:true };
+SP.BUILD = { id:'5752115', at:'2026-10-02 18:04', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -17595,6 +17595,9 @@ window.LIFEOS.HAREKET = (function(){
     const r = yeni.getBoundingClientRect();
     const e = eski && eski.getBoundingClientRect ? (() => { const x = eski.getBoundingClientRect();
       return { x:x.left, y:x.top, w:x.width, h:x.height }; })() : eski;
+    /* Yer değişmediyse (aynı ekranın yeniden çizimi) hiçbir şey oynamaz —
+       azaltılmış harekette de: her tuşta yeniden solan işaret titrer. */
+    if(e && Math.abs(e.x - r.left) < 1 && Math.abs(e.y - r.top) < 1 && Math.abs(e.w - r.width) < 1) return false;
     yeni.classList.remove('is-kayan', 'is-beliren');
     void yeni.offsetWidth;
     if(az || !e || !r.width || !e.w){
@@ -17603,7 +17606,6 @@ window.LIFEOS.HAREKET = (function(){
       return 'belir';
     }
     const dx = e.x - r.left, dy = e.y - r.top;
-    if(Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(e.w - r.width) < 1) return false;
     yeni.style.setProperty('--isaret-dx', dx.toFixed(1) + 'px');
     yeni.style.setProperty('--isaret-dy', dy.toFixed(1) + 'px');
     yeni.style.setProperty('--isaret-cx', ((e.x + e.w / 2) - (r.left + r.width / 2)).toFixed(1) + 'px');
