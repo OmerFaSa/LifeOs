@@ -336,12 +336,13 @@ Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/�
 | 2d | ✅ bölüm turu: ESP Dil · Felsefe · Yazı, SPİ bölümleri, AYS Sınama; 2b'ye sıkı ölçü; Faz 2 bitti | 207c451 | 150 · aşan 13 (araç varsayılan bölümü sayar; öbür bölümler testte) |
 | 3 | ✅ Analiz: AYS İlerleme · Ayrıntılı analiz · Telafi, SPİ Analiz, ESP Analiz; `%Infinity` hatası | 55b2015 | 131 · aşan 9 (AYS 43/2 · SPİ 43/4 · ESP 45/3) |
 | 4–5 | ✅ Ofis · Danışma (3 ×; Onaylar ve Kütüphanem zaten bütçede); Ayarlar iOS listesi (3 ×); önizleme hatası | 2db1f82 | 87 · aşan 1 (AYS 26/0 · SPİ 31/1 · ESP 30/0) |
-| 6–7 | ✅ başlık ad, durum cümlesi ⓘ'de; rozet bildirimi tek; SPİ Bugün 3 açık; `acikKart` zorunlu; 390 px turu | (bu commit) | 86 · aşan 0 (AYS 26 · SPİ 30 · ESP 30) |
+| 6–7 | ✅ başlık ad, durum cümlesi ⓘ'de; rozet bildirimi tek; SPİ Bugün 3 açık; `acikKart` zorunlu; 390 px turu | 9b44df0 | 86 · aşan 0 (AYS 26 · SPİ 30 · ESP 30) |
+| tam | ✅ `sayilar.py --tam --yaz` yeşil (ilk kez bu makinede): Windows UTF-8, dönen kart kırpması, ESP Tarih 631 → 157 ms, HKM eşleme durumu, tarihe bağlı iki HKM testi; README/NOTLAR sayıları | ce98d9b | — |
 | boy | ⏭ açık iş: 1 200 px'i aşan sayfalar — AYS Dersler 1 238 (raf tabanı), İlerleme 1 516, Ayrıntılı analiz 1 608, Ofis 1 838, Danışma 1 314, Genel 1 557, Günü düzenle 1 748; SPİ Analiz 1 506, Ofis 1 390, Günü düzenle 1 682; ESP Bugün 1 377, Analiz 1 803, Profil 1 286, Günü düzenle 1 525 | — | ölçüm |
 
 ## 9. Devir notu — sıradaki oturum buradan başlar
 
-**Son devir (2026-10-02, 3. oturum):** Faz 3, 4–5, 6–7 bitti (55b2015, 2db1f82 ve bu commit);
+**Son devir (2026-10-02, 3. oturum):** Faz 3, 4–5, 6–7 bitti (55b2015, 2db1f82, 9b44df0), tam denetim yeşil (ce98d9b);
 açık kart 150 → 86, üçü aşan ekran 13 → 0, `acikKart` zorunlu. Kalan tek iş §8'deki «boy»
 satırı (sayfa boyu ölçüm olarak kalıyor). Her şey commit'li; push'u kullanıcı yapar.
 
