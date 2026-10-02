@@ -52,7 +52,8 @@
    (sistem/sunucu.py başındaki not). «Üç modülde ortak» tercih bu yüzden
    LifeOS'un kendi modül geçişinde taşınır: kabuk.js `gecis()` adresin
    sonuna `#lifeos=…` ekler, varılan sayfada bu dosya (ilk betik) onu
-   okur, kendi deposuna yazar ve adresten siler. Yalnız `TASINAN`
+   okur, kendi deposuna yazar ve adresten siler (zemin.js bu dosyadan
+   SONRA yüklenir, taşınanı okur). Yalnız `TASINAN`
    listesindeki anahtarlar taşınır; kullanıcı verisi taşınmaz, parça
    (#…) sunucuya hiç gitmez. Yer imiyle doğrudan açılan modül kendi son
    ayarıyla açılır. */
@@ -216,7 +217,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------------------------------------------------------- modüller arası */
 
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){

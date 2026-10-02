@@ -11984,6 +11984,92 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
 @media (prefers-reduced-motion:reduce){
   .ust__ses.is-baglaniyor .ust__ses-nokta{ animation:none; }
 }
+
+/* ==== css/zemin.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/zemin.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* ZEMİN — yumuşak renk zemini ve içerik sütununun arkasındaki buzlu yüzey.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/zemin.css`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/css/` klasörüne birebir kopyalanır. Tercihi
+   `brand/ortak/zemin.js` tutar (`<html data-zemin="yumusak|sade">`).
+
+   Kullanıcı (2026-10-02): «arka plana soft bir resim, panellerin olduğu
+   yerin arkasına hafif, küçük, tam ekranı kaplamayacak buzlu madde».
+   Canlı denemeyi (açık ve koyu tema) görüp bu hâli seçti.
+
+   · «Resim» bir dosya değil: dört yumuşak renk lekesi, sol üstteki
+     modülün kendi rengi (--mod). Sabit katmanda (body::before) durur,
+     sayfayla kaymaz; açık/koyu temaya kendiliğinden uyar, ağ isteği yok.
+   · Buzlu yüzey içerik sütununun (.sayfa) ARKASINDA, kenarlardan içeride
+     yuvarlak bir levhadır; ekranı kaplamaz. Telefonda yok: orada sütun
+     zaten ekranın kendisi.
+   · backdrop-filter YOK: arkadaki lekeler zaten bulanık birer geçiş; yarı
+     saydam yüzey aynı «buzlu» görünüşü verir ve uzun sayfada kaydırma
+     pahalılaşmaz.
+   · Kartlar opak kalır (kabuk.css CAM kuralı: okunan şey camın arkasında
+     durmaz). Kontrast bu yüzden değişmez.
+   · `.sayfa` yalnız `position:relative` alır, z-index ALMAZ: yeni yığın
+     bağlamı açılmaz, sayfadaki katmanlar üst şerit ve kenarla eskisi gibi
+     dizilir. Levha ve zemin kök bağlamda z-index:-1'de, belge sırasıyla.
+   · «Saydamlığı azalt» tercihinde zemin.js `data-zemin`'i Sade yapar (CSS
+     koşulu değil: bu özelliği tanımayan tarayıcıda `not (…)` sorgusu
+     «bilinmez» sayılır ve zemini tümden kapatırdı). */
+
+:root{
+  --zemin-guc:30%;
+  --buz:color-mix(in oklab, var(--surface) 46%, transparent);
+  --buz-isik:inset 0 1px 0 rgba(255,255,255,.6), inset 0 0 0 1px rgba(255,255,255,.35);
+  --buz-golge:0 24px 60px -30px rgba(0,0,0,.25);
+}
+:root[data-theme="dark"]{
+  --zemin-guc:22%;
+  --buz:color-mix(in oklab, var(--surface) 52%, transparent);
+  --buz-isik:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --zemin-guc:22%;
+    --buz:color-mix(in oklab, var(--surface) 52%, transparent);
+    --buz-isik:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.06);
+  }
+}
+
+/* Zemin yalnız kökte (html = tuval) kalır; aradaki katmanlar saydam. */
+html[data-zemin="yumusak"] body,
+html[data-zemin="yumusak"] .site--v5,
+html[data-zemin="yumusak"] .site--v5 > .site__body,
+html[data-zemin="yumusak"] .site--v5 .sayfa,
+html[data-zemin="yumusak"] .site--v5 .sayfasonu{ background:transparent; }
+
+html[data-zemin="yumusak"] body::before{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(42% 52% at 18% 14%, color-mix(in oklab, var(--mod, var(--ays)) var(--zemin-guc), transparent), transparent 72%),
+    radial-gradient(38% 46% at 86% 10%, color-mix(in oklab, #E9A6C1 var(--zemin-guc), transparent), transparent 72%),
+    radial-gradient(48% 50% at 78% 92%, color-mix(in oklab, #8FD3BF var(--zemin-guc), transparent), transparent 72%),
+    radial-gradient(36% 40% at 22% 88%, color-mix(in oklab, #F3C98B var(--zemin-guc), transparent), transparent 72%),
+    var(--bg);
+}
+
+/* Çekmece çubuğu (yazı + nokta) zeminle bir: düz --bg şeridi levhanın
+   üstünde bant gibi duruyordu. Yapışık olduğunda kayan içeriği
+   bulanıklaştırır (renk katmaz): yapışmamışken arkası düz levha, iz
+   bırakmaz. Sayfa bölümlerinin raylı seçicisi (--sayfa) kendi gri rayını
+   (--seg-ray) taşır; ona dokunulmaz. */
+html[data-zemin="yumusak"] .site--v5 .bolumcubugu:not(.bolumcubugu--sayfa){ background:transparent; }
+html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
+  -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); }
+
+@media (min-width:680px){
+  html[data-zemin="yumusak"] .site--v5 .sayfa{ position:relative; }
+  html[data-zemin="yumusak"] .site--v5 .sayfa::before{
+    content:''; position:absolute; inset:18px 12px 24px; z-index:-1; pointer-events:none;
+    border-radius:32px; background:var(--buz); box-shadow:var(--buz-isik), var(--buz-golge);
+  }
+}
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -12133,7 +12219,8 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
    (sistem/sunucu.py başındaki not). «Üç modülde ortak» tercih bu yüzden
    LifeOS'un kendi modül geçişinde taşınır: kabuk.js `gecis()` adresin
    sonuna `#lifeos=…` ekler, varılan sayfada bu dosya (ilk betik) onu
-   okur, kendi deposuna yazar ve adresten siler. Yalnız `TASINAN`
+   okur, kendi deposuna yazar ve adresten siler (zemin.js bu dosyadan
+   SONRA yüklenir, taşınanı okur). Yalnız `TASINAN`
    listesindeki anahtarlar taşınır; kullanıcı verisi taşınmaz, parça
    (#…) sunucuya hiç gitmez. Yer imiyle doğrudan açılan modül kendi son
    ayarıyla açılır. */
@@ -12297,7 +12384,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------------------------------------------------------- modüller arası */
 
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -12354,6 +12441,114 @@ window.LIFEOS = window.LIFEOS || {};
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
   });
+})();
+
+/* ==== js/core/zemin.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/zemin.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* ZEMİN — yumuşak renk zemini ve içeriğin arkasındaki buzlu yüzey.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/zemin.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne birebir kopyalanır. Biçimi
+   `brand/ortak/zemin.css`, testi `brand/ortak/zemin.test.js`.
+   ==================================================================
+
+   KULLANICININ İSTEĞİ (2026-10-02): «arka plana soft bir resim koyup
+   panellerin olduğu yerin arkasına hafif, küçük, tam ekranı kaplamayacak
+   şekilde buzlu madde». Canlı denemeyi görüp seçti: resim DOSYASI değil,
+   modül rengine çalan yumuşak renk lekeleri; varsayılan açık, Görünüm'den
+   kapatılır.
+
+   KİPLER (tercih `localStorage` 'lifeos.zemin'; modül geçişinde taşınır,
+   animasyon.js TASINAN)
+
+     yumusak  renk zemini + içerik sütununun arkasında buzlu yüzey (VARSAYILAN)
+     sade     eski düz zemin
+
+   Bu dosya `<head>`'de animasyon.js'ten SONRA yüklenir: taşınan tercih
+   önce depoya yazılır, sonra burada okunur; `<html data-zemin>` ilk
+   çizimden önce konur, zemin açılışta yanıp sönmez. Görünüş tamamen
+   CSS'tedir; burası yalnız tercihi tutar. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+(function(){
+  'use strict';
+
+  const L = window.LIFEOS;
+  const ANAHTAR = 'lifeos.zemin';
+  const KIPLER = Object.freeze(['yumusak', 'sade']);
+  const AD = { yumusak:'Yumuşak', sade:'Sade' };
+  const IPUCU = { yumusak:'Yumuşak renk zemini, içeriğin arkasında buzlu yüzey', sade:'Düz zemin' };
+
+  function oku(){
+    let v = null;
+    try{ v = localStorage.getItem(ANAHTAR); }catch(e){}
+    return KIPLER.indexOf(v) >= 0 ? v : 'yumusak';
+  }
+  let simdiki = oku();
+  function kip(){ return simdiki; }
+
+  /* «Saydamlığı azalt» (işletim sistemi) açıksa zemin Sade çizilir; kayıtlı
+     tercih değişmez. Karar burada, CSS'te değil: bu özelliği tanımayan
+     tarayıcıda `not (…)` medya sorgusu zemini tümden kapatırdı. */
+  function saydamlikAz(){
+    try{ return !!(window.matchMedia && window.matchMedia('(prefers-reduced-transparency: reduce)').matches); }
+    catch(e){ return false; }
+  }
+  function uygula(){
+    if(typeof document !== 'undefined' && document.documentElement){
+      document.documentElement.setAttribute('data-zemin', simdiki === 'yumusak' && !saydamlikAz() ? 'yumusak' : 'sade');
+    }
+  }
+  function seciciGuncelle(){
+    if(typeof document === 'undefined') return;
+    document.querySelectorAll('[data-zemin-sec]').forEach(b => {
+      const on = b.getAttribute('data-zemin-sec') === simdiki;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  function ayarla(k){
+    if(KIPLER.indexOf(k) < 0) return false;
+    try{ localStorage.setItem(ANAHTAR, k); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
+    simdiki = k;
+    uygula();
+    seciciGuncelle();
+    return true;
+  }
+  function yenile(){
+    simdiki = oku();
+    uygula();
+    seciciGuncelle();
+    return simdiki;
+  }
+
+  /* Görünüm panelinin satırı (animasyon.js seciciHtml ile aynı biçim). */
+  function seciciHtml(){
+    return '<div class="seg seg--block zeminsec" role="group" aria-label="Zemin">'
+      + KIPLER.map(k => '<button type="button" class="' + (k === simdiki ? 'is-on' : '') + '" data-zemin-sec="' + k + '"'
+        + ' aria-pressed="' + (k === simdiki ? 'true' : 'false') + '" title="' + IPUCU[k] + '">' + AD[k] + '</button>').join('')
+      + '</div>';
+  }
+
+  uygula();
+  if(typeof document !== 'undefined'){
+    document.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-zemin-sec]') : null;
+      if(!b) return;
+      e.preventDefault();
+      ayarla(b.getAttribute('data-zemin-sec'));
+    });
+  }
+  if(typeof window !== 'undefined' && window.addEventListener){
+    window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); });
+    try{ window.matchMedia('(prefers-reduced-transparency: reduce)').addEventListener('change', uygula); }catch(e){}
+  }
+
+  L.ZEMIN = Object.freeze({ ANAHTAR, KIPLER, kip, ayarla, yenile, seciciHtml });
 })();
 
 /* ==== js/core/perde.js ==== */
@@ -13371,7 +13566,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'e219e63', at:'2026-10-02 19:45', dirty:true };
+ESP.BUILD = { id:'7d59ca2', at:'2026-10-02 20:11', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -60863,8 +61058,8 @@ ESP.App = (function(){
     { id:'dark',   icon:'moon2',   label:'Koyu' },
   ];
 
-  /* «Animasyonlar» satiri (Tam · Az · Sistem) ortak dosyadan gelir:
-     brand/ortak/animasyon.js. Olayi orada belge duzeyinde bagli,
+  /* «Animasyonlar» (Tam · Az · Sistem) ve «Zemin» (Yumusak · Sade) satirlari
+     ortak dosyalardan gelir: brand/ortak/animasyon.js, zemin.js. Olayi orada belge duzeyinde bagli,
      data-act'e dusmez; secim modul gecisinde tasinir. */
   function appearanceHtml(){
     const p = S.profile || {};
@@ -60881,6 +61076,8 @@ ESP.App = (function(){
         <div class="appear__themes">${ESP.C.TemaSecici({ value:theme, act:'set-theme' })}</div>
         <div class="appear__label">Animasyonlar</div>
         ${raw(window.LIFEOS.ANIMASYON ? LIFEOS.ANIMASYON.seciciHtml() : '')}
+        <div class="appear__label">Zemin</div>
+        ${raw(window.LIFEOS.ZEMIN ? LIFEOS.ZEMIN.seciciHtml() : '')}
 
         <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
           cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>

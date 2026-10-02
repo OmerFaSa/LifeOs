@@ -137,7 +137,7 @@
 
     it('modüller arası geçiş: yalnız izinli tercihler adrese girer ve varışta depoya yazılır', () => {
       const eski = {};
-      A.TASINAN.forEach(k => { try{ eski[k] = localStorage.getItem(k); }catch(e){} });
+      A.TASINAN.forEach(k => { try{ eski[k] = localStorage.getItem(k); localStorage.removeItem(k); }catch(e){} });
       try{
         localStorage.setItem('lifeos.hareket', 'tam');
         localStorage.setItem('lifeos.ses', '{"tur":"chill"}');

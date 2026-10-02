@@ -404,8 +404,8 @@ ESP.App = (function(){
     { id:'dark',   icon:'moon2',   label:'Koyu' },
   ];
 
-  /* «Animasyonlar» satiri (Tam · Az · Sistem) ortak dosyadan gelir:
-     brand/ortak/animasyon.js. Olayi orada belge duzeyinde bagli,
+  /* «Animasyonlar» (Tam · Az · Sistem) ve «Zemin» (Yumusak · Sade) satirlari
+     ortak dosyalardan gelir: brand/ortak/animasyon.js, zemin.js. Olayi orada belge duzeyinde bagli,
      data-act'e dusmez; secim modul gecisinde tasinir. */
   function appearanceHtml(){
     const p = S.profile || {};
@@ -422,6 +422,8 @@ ESP.App = (function(){
         <div class="appear__themes">${ESP.C.TemaSecici({ value:theme, act:'set-theme' })}</div>
         <div class="appear__label">Animasyonlar</div>
         ${raw(window.LIFEOS.ANIMASYON ? LIFEOS.ANIMASYON.seciciHtml() : '')}
+        <div class="appear__label">Zemin</div>
+        ${raw(window.LIFEOS.ZEMIN ? LIFEOS.ZEMIN.seciciHtml() : '')}
 
         <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
           cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>

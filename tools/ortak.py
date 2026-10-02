@@ -259,6 +259,12 @@ DOSYALAR = {
     "ses.js":         "js/core",
     "ses.css":        "css",
     "radyo.test.js":  "tests",
+    # ZEMIN (kullanici, 2026-10-02) — yumusak renk zemini ve icerigin
+    # arkasinda buzlu yuzey; <head>'de animasyon.js'ten SONRA (tasinan
+    # tercihi okur), ilk cizimden once <html data-zemin> koyar.
+    "zemin.js":       "js/core",
+    "zemin.css":      "css",
+    "zemin.test.js":  "tests",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     # 167 ana ekran rozeti (pwa.js rozet): pwa.test.js degismesin diye ayri dosya.

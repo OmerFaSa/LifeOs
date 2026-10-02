@@ -162,9 +162,21 @@ let DUZEN_SAYISI = 0;
         const site = document.querySelector('.site');
         const main = document.getElementById('main');
         const foot = document.querySelector('.sitefoot');
+        /* ZEMİN (brand/ortak/zemin.css, 2026-10-02): «Yumuşak» kipte kabuk
+           katmanları BİLEREK saydamdır; renk lekeleri sabit katmanda, taban
+           rengi kökte (html) durur. Kabuğun zemini, arkasındaki İLK OPAK
+           katmandır. Jeton döngüsü kökün zeminini de saydam yapar: denetim
+           onu yine yakalar (hiçbir katman opak değilse öğenin kendi rengi). */
+        const opakZemin = el => {
+          for(let e = el; e; e = e.parentElement){
+            const c = toRgb(getComputedStyle(e).backgroundColor);
+            if(c[3] >= 0.9) return c;
+          }
+          return toRgb(getComputedStyle(el).backgroundColor);
+        };
         return {
-          siteBg:toRgb(getComputedStyle(site).backgroundColor),
-          footBg:foot ? toRgb(getComputedStyle(foot).backgroundColor) : [0, 0, 0, 1],
+          siteBg:opakZemin(site),
+          footBg:foot ? opakZemin(foot) : [0, 0, 0, 1],
           text:toRgb(getComputedStyle(main || document.body).color),
         };
       });

@@ -1,0 +1,84 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/zemin.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* ZEMİN — yumuşak renk zemini ve içerik sütununun arkasındaki buzlu yüzey.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/zemin.css`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/css/` klasörüne birebir kopyalanır. Tercihi
+   `brand/ortak/zemin.js` tutar (`<html data-zemin="yumusak|sade">`).
+
+   Kullanıcı (2026-10-02): «arka plana soft bir resim, panellerin olduğu
+   yerin arkasına hafif, küçük, tam ekranı kaplamayacak buzlu madde».
+   Canlı denemeyi (açık ve koyu tema) görüp bu hâli seçti.
+
+   · «Resim» bir dosya değil: dört yumuşak renk lekesi, sol üstteki
+     modülün kendi rengi (--mod). Sabit katmanda (body::before) durur,
+     sayfayla kaymaz; açık/koyu temaya kendiliğinden uyar, ağ isteği yok.
+   · Buzlu yüzey içerik sütununun (.sayfa) ARKASINDA, kenarlardan içeride
+     yuvarlak bir levhadır; ekranı kaplamaz. Telefonda yok: orada sütun
+     zaten ekranın kendisi.
+   · backdrop-filter YOK: arkadaki lekeler zaten bulanık birer geçiş; yarı
+     saydam yüzey aynı «buzlu» görünüşü verir ve uzun sayfada kaydırma
+     pahalılaşmaz.
+   · Kartlar opak kalır (kabuk.css CAM kuralı: okunan şey camın arkasında
+     durmaz). Kontrast bu yüzden değişmez.
+   · `.sayfa` yalnız `position:relative` alır, z-index ALMAZ: yeni yığın
+     bağlamı açılmaz, sayfadaki katmanlar üst şerit ve kenarla eskisi gibi
+     dizilir. Levha ve zemin kök bağlamda z-index:-1'de, belge sırasıyla.
+   · «Saydamlığı azalt» tercihinde zemin.js `data-zemin`'i Sade yapar (CSS
+     koşulu değil: bu özelliği tanımayan tarayıcıda `not (…)` sorgusu
+     «bilinmez» sayılır ve zemini tümden kapatırdı). */
+
+:root{
+  --zemin-guc:30%;
+  --buz:color-mix(in oklab, var(--surface) 46%, transparent);
+  --buz-isik:inset 0 1px 0 rgba(255,255,255,.6), inset 0 0 0 1px rgba(255,255,255,.35);
+  --buz-golge:0 24px 60px -30px rgba(0,0,0,.25);
+}
+:root[data-theme="dark"]{
+  --zemin-guc:22%;
+  --buz:color-mix(in oklab, var(--surface) 52%, transparent);
+  --buz-isik:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --zemin-guc:22%;
+    --buz:color-mix(in oklab, var(--surface) 52%, transparent);
+    --buz-isik:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.06);
+  }
+}
+
+/* Zemin yalnız kökte (html = tuval) kalır; aradaki katmanlar saydam. */
+html[data-zemin="yumusak"] body,
+html[data-zemin="yumusak"] .site--v5,
+html[data-zemin="yumusak"] .site--v5 > .site__body,
+html[data-zemin="yumusak"] .site--v5 .sayfa,
+html[data-zemin="yumusak"] .site--v5 .sayfasonu{ background:transparent; }
+
+html[data-zemin="yumusak"] body::before{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(42% 52% at 18% 14%, color-mix(in oklab, var(--mod, var(--ays)) var(--zemin-guc), transparent), transparent 72%),
+    radial-gradient(38% 46% at 86% 10%, color-mix(in oklab, #E9A6C1 var(--zemin-guc), transparent), transparent 72%),
+    radial-gradient(48% 50% at 78% 92%, color-mix(in oklab, #8FD3BF var(--zemin-guc), transparent), transparent 72%),
+    radial-gradient(36% 40% at 22% 88%, color-mix(in oklab, #F3C98B var(--zemin-guc), transparent), transparent 72%),
+    var(--bg);
+}
+
+/* Çekmece çubuğu (yazı + nokta) zeminle bir: düz --bg şeridi levhanın
+   üstünde bant gibi duruyordu. Yapışık olduğunda kayan içeriği
+   bulanıklaştırır (renk katmaz): yapışmamışken arkası düz levha, iz
+   bırakmaz. Sayfa bölümlerinin raylı seçicisi (--sayfa) kendi gri rayını
+   (--seg-ray) taşır; ona dokunulmaz. */
+html[data-zemin="yumusak"] .site--v5 .bolumcubugu:not(.bolumcubugu--sayfa){ background:transparent; }
+html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
+  -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); }
+
+@media (min-width:680px){
+  html[data-zemin="yumusak"] .site--v5 .sayfa{ position:relative; }
+  html[data-zemin="yumusak"] .site--v5 .sayfa::before{
+    content:''; position:absolute; inset:18px 12px 24px; z-index:-1; pointer-events:none;
+    border-radius:32px; background:var(--buz); box-shadow:var(--buz-isik), var(--buz-golge);
+  }
+}

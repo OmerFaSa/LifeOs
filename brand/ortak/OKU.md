@@ -38,6 +38,7 @@ python3 tools/ortak.py --denetle   # kopyalar kaynakla aynı mı
 | `kilit.*` | `js/core`, `css`, `tests` | gizlilik kilidi (176): açılışta dört haneli kod, çizimden önce; perde, kasa değil (veriyi şifrelemez); «Kodu unuttum» beş dakika sonra kilidi kaldırır ve iz bırakır (Ayarlar yazar; K kararı §8-12) |
 | `animasyon.*` | `js/core`, `tests` | «Animasyonlar: Tam · Az · Sistem» (varsayılan Tam, webdriver'da Sistem): `<head>`'de stillerden sonra yüklenir; hareket koşullu medya kurallarını ve `matchMedia`'yı (yalnız hareket sorgusu) kipe göre ayarlar; `LIFEOS.hareketAz()`. Ortak tercihleri modül geçişinde adresle (`#lifeos=…`) taşır: kapılar ayrı köken |
 | `ses.*`, `radyo.test.js` | `js/core`, `css`, `tests` | internet radyosu (7 tür, doğrudan mp3/aac; ölü akışta sonraki istasyon, tükenirse radio-browser) ve tık sesleri (Web Audio, varsayılan kapalı); ♪ üst şeritte. Test adı `ses.test.js` değil: SPİ/ESP'nin konuşma testleri o adda |
+| `zemin.*` | `js/core`, `css`, `tests` | «Zemin: Yumuşak · Sade» (varsayılan Yumuşak): modül rengine çalan yumuşak renk lekeleri (dosya yok, sabit katman) ve içerik sütununun arkasında kenarlardan içeride buzlu levha; telefonda levha yok, kartlar opak; «saydamlığı azalt»ta Sade |
 | `sw.js` | `src/` kökü | çevrimdışı kabuk (service worker): ağ önce, ağ yoksa son kopya; `build.py` `dist/` yanına da koyar |
 
 Kopyalar «ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME» başlığı taşır. Elle
