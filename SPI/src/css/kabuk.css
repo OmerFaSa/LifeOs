@@ -1181,3 +1181,148 @@ svg.chart{ max-height:180px; }
 .site--v5 .bolumcubugu--sayfa .bolumcubugu__ad{ height:32px; padding:0 12px; font-size:13.5px; }
 .site--v5 .bolumcubugu--sayfa .bolumcubugu__ad.is-on::after{ width:16px; height:2px; margin-left:-8px; border-radius:1px; }
 @media (prefers-reduced-motion:reduce){ .site--v5 .bolumcubugu{ scroll-behavior:auto; } }
+
+/* ================================================================
+   PROFESYONEL KABUK (2026-10-02 akşam, kullanıcı: «sol üstteki ESP'yi ve
+   o kutucuk işaretini sil · Sınama'daysa üstte Sınama yazıyor, hayır
+   Çalışma kalacak, altındaki değişecek · seçilen yerin açılması, sayfa
+   geçişleri minik animasyonlu olsun · üstteki tamam ama altta bir daha
+   öyle bir şey olması kötü — daha profesyonel bir şey koy»).
+
+   1. Sol üst boş: kenar düğmesi kalktı (kabuk.js), konum satırı yalnız
+      ekran okuyucuda.
+   2. İki seçici iki ayrı DİL konuşur, aynı satır iki kez yazılmaz:
+      · çekmecenin bölümleri (Hafta · Program · Hedefler): yazı + nokta —
+        iOS kamerasının kip seçicisi, sayfanın ANA girişi;
+      · sayfanın bölümleri (Notlar · Matris · Kaynaklar): iOS'un bölümlü
+        seçicisi (segmented control) — gri ray, seçili beyaz hap. Bir
+        kontrol gibi durur, ikinci bir başlık satırı gibi değil.
+   3. İşaretler kayar (hareket.js isaretKaydir): kenarın seçili zemini,
+      bölüm çubuğunun noktası ve bölümlü seçicinin hapı eski yerinden
+      yenisine geçer. Sayfa değişince içerik yumuşakça gelir; başlık
+      yalnız çekmece değişince yeniden belirir.
+   4. Hareket azaltılmışsa (Windows «Animasyon efektleri» kapalıyken
+      tarayıcı böyle bildirir) hiçbir şey KAYMAZ ama solarak gelir:
+      solma konum değiştirmez, göz yormaz. Genel sıfırlama kuralını
+      (base.css) yalnız bu birkaç solma geçer (!important + özgüllük).
+   ================================================================ */
+:root{
+  --ease-ios:cubic-bezier(.32,.72,0,1);
+  --seg-ray:rgba(118,118,128,.12);
+  --seg-hap:#FFFFFF;
+  --seg-golge:0 3px 8px rgba(0,0,0,.08), 0 1px 1px rgba(0,0,0,.04), 0 0 0 .5px rgba(0,0,0,.04);
+}
+:root[data-theme="dark"]{
+  --seg-ray:rgba(118,118,128,.22);
+  --seg-hap:#3A3A40;
+  --seg-golge:0 1px 2px rgba(0,0,0,.35), inset 0 .5px 0 rgba(255,255,255,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --seg-ray:rgba(118,118,128,.22);
+    --seg-hap:#3A3A40;
+    --seg-golge:0 1px 2px rgba(0,0,0,.35), inset 0 .5px 0 rgba(255,255,255,.06);
+  }
+}
+
+/* 1 · Sol üst boş: konum satırı görünmez, ekran okuyucu okur. */
+.ust--v5 .ust__yol{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);
+  clip-path:inset(50%); white-space:nowrap; }
+.ust--v5 .ust__kenar{ display:none; }
+
+/* 2a · Kenarın seçili zemini bir katmandır (::before): yeni çekmeceye
+   eski yerinden kayar. */
+.site--v5 .kenar__cekmece{ position:relative; isolation:isolate; }
+.site--v5 .kenar__cekmece.is-on{ background:transparent; }
+.site--v5 .kenar__cekmece.is-on::before{ content:''; position:absolute; inset:0; z-index:-1; border-radius:inherit;
+  background:var(--sidebar-active); }
+.site--v5 .kenar__cekmece.is-on.is-kayan::before{ animation:isaret-dikey 380ms var(--ease-ios) both; }
+@keyframes isaret-dikey{ from{ transform:translateY(var(--isaret-dy, 0px)); } }
+
+/* 2b · Çekmecenin bölümleri: yazı + nokta; nokta kayar, seçili yazı
+   koyulaşarak gelir. Telefonda da sayfa başının altında durur (başlık
+   çekmecenin adı olduğu için bölüm başka yerde görünmezdi). */
+.site--v5 .bolumcubugu--kabuk .bolumcubugu__ad.is-on.is-kayan::after{ animation:isaret-yatay 380ms var(--ease-ios) both; }
+.site--v5 .bolumcubugu--kabuk .bolumcubugu__ad.is-on.is-kayan{ animation:secili-renk 320ms ease-out both; }
+@keyframes isaret-yatay{ from{ transform:translateX(var(--isaret-cx, 0px)); } }
+@keyframes secili-renk{ from{ color:var(--text-3); } }
+@media (max-width:679px){
+  .site--v5 .bolumcubugu--kabuk{ display:flex; position:static; margin:0 0 14px; background:var(--bg); }
+  .site--v5 .bolumcubugu--kabuk .bolumcubugu__ad{ height:36px; padding:0 12px; font-size:15px; }
+}
+
+/* 2c · Sayfanın bölümleri: bölümlü seçici. Ray zeminden bir ton koyu,
+   seçili hap yüzey renginde ve hafif gölgeli; hap eski bölümden yenisine
+   kayar (genişliği de eşleşir). Sığmazsa ray kendi içinde kayar. */
+.site--v5 .bolumcubugu--sayfa{ display:flex; gap:2px; width:fit-content; max-width:100%; box-sizing:border-box;
+  margin:0 auto 22px; padding:3px; border-radius:12px; background:var(--seg-ray);
+  -webkit-mask-image:none; mask-image:none; scroll-snap-type:none; scroll-padding-inline:3px; }
+.site--v5 .bolumcubugu--sayfa > :first-child, .site--v5 .bolumcubugu--sayfa > :last-child{ margin-left:0; margin-right:0; }
+.site--v5 .bolumcubugu--sayfa .bolumcubugu__ad{ position:relative; isolation:isolate; display:inline-flex; align-items:center;
+  gap:6px; height:30px; padding:0 14px; border-radius:9px; background:none; box-shadow:none;
+  font-size:13px; font-weight:500; color:var(--text-2); letter-spacing:-.005em; white-space:nowrap;
+  transition:color var(--dur) var(--ease); }
+.site--v5 .bolumcubugu--sayfa .bolumcubugu__ad:hover{ color:var(--text); background:none; }
+.site--v5 .bolumcubugu--sayfa .bolumcubugu__ad.is-on{ color:var(--text); font-weight:600; background:none; box-shadow:none; }
+.site--v5 .bolumcubugu--sayfa .bolumcubugu__ad.is-on::after{ display:block; content:''; position:absolute;
+  top:0; right:0; bottom:0; left:0; width:auto; height:auto; margin:0; z-index:-1; border-radius:inherit;
+  background:var(--seg-hap); box-shadow:var(--seg-golge); transform-origin:left center; }
+.site--v5 .bolumcubugu--sayfa .bolumcubugu__ad.is-on.is-kayan::after{ animation:isaret-hap 340ms var(--ease-ios) both; }
+@keyframes isaret-hap{ from{ transform:translateX(var(--isaret-dx, 0px)) scaleX(var(--isaret-sx, 1)); } }
+.site--v5 .bolumcubugu--sayfa .bolumcubugu__rozet{ min-width:16px; height:16px; padding:0 5px; border-radius:8px;
+  background:color-mix(in oklab, var(--text) 9%, transparent); color:var(--text-2); font-size:10.5px; font-weight:600;
+  line-height:16px; text-align:center; }
+@media (max-width:679px){
+  .site--v5 .bolumcubugu--sayfa{ margin-bottom:16px; }
+  .site--v5 .bolumcubugu--sayfa .bolumcubugu__ad{ padding:0 12px; }
+}
+
+/* 3 · Geçiş: aynı çekmecede bölüm değişince başlık yerinde durur. */
+html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
+/* Sayfa içi bölüm (kat) seçilince açılan kat yumuşakça gelir. */
+.sayfabolumler--kat > .sayfabolum.is-gelen{ animation:bolum-gel 300ms var(--ease-ios) both; }
+@keyframes bolum-gel{ from{ opacity:0; transform:translateY(6px); } }
+@keyframes sol-gel{ from{ opacity:0; } }
+/* İşaretin eski yeri yoksa (başka çekmece, ilk açılış) yerinde belirir. */
+.site--v5 .kenar__cekmece.is-on.is-beliren::before,
+.site--v5 .bolumcubugu__ad.is-on.is-beliren::after{ animation:sol-gel 240ms ease-out both !important; }
+.site--v5 .bolumcubugu__ad.is-on.is-beliren{ animation:secili-renk 240ms ease-out both !important; }
+
+/* 4 · Hareket azaltılmış: kayma yok, solma var. */
+@media (prefers-reduced-motion:reduce){
+  html.sayfa-gecis .site--v5 #main{ animation:sol-gel 260ms ease-out both !important; }
+  html.cekmece-gecis .site--v5 .sayfabasi,
+  html.cekmece-gecis .site--v5 .bolumcubugu--kabuk{ animation:sol-gel 260ms ease-out both !important; }
+  .sayfabolumler--kat > .sayfabolum.is-gelen{ animation:sol-gel 220ms ease-out both !important; }
+  .site--v5 .bolumcubugu--sayfa .bolumcubugu__ad{ transition:color 160ms ease !important; }
+  .site--v5 .kenar__cekmece{ transition:background 160ms ease, color 160ms ease !important; }
+  .donen__madde{ transition:opacity 300ms ease !important; transform:none !important; }
+}
+@media (prefers-reduced-motion:reduce) and (min-width:680px){
+  html.kenar-dar .site--v5 > .kenar:hover .kenar__ad,
+  html.kenar-dar .site--v5 > .kenar:hover .kenar__bolumler,
+  html.kenar-dar .site--v5 > .kenar:focus-within .kenar__ad,
+  html.kenar-dar .site--v5 > .kenar:focus-within .kenar__bolumler{ animation:sol-gel 200ms ease-out both !important; }
+}
+
+/* ================================================================
+   SAKİN YÜZEY · KOYU TEMA (2026-10-02 akşam). Jetonlar jeton.css'te
+   (grafit koyu); burada yalnız koyuda ton farkının yetmediği yerler:
+   · kart kıl inceliğinde bir kenarla ayrılır (koyuda iki gri tonu tek
+     başına kartın kenarını söylemez, kart zemine akar),
+   · açılır katmanların gölgesi kenarla birlikte (shadow-lg),
+   · filtre çipi iki temada da çerçevesiz hap: gri dolgu, seçili hap
+     koyu (açıkta) ya da kırık beyaz (koyuda) — kutu kutu çerçeve yok.
+   ================================================================ */
+:root{ --kart-kenar:transparent; }
+:root[data-theme="dark"]{ --kart-kenar:rgba(255,255,255,.055); }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){ --kart-kenar:rgba(255,255,255,.055); } }
+.kutu, .card, .site--v5 .ledger .lrow{ border-color:var(--kart-kenar); }
+.donen, .site--v5 .nextup{ box-shadow:inset 0 0 0 1px var(--kart-kenar); }
+
+.chip{ border-color:transparent; border-radius:var(--r-pill); background:var(--surface-2); color:var(--text-2);
+  font-weight:500; }
+.chip--tap{ transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.chip--tap:hover{ background:var(--surface-3); border-color:transparent; color:var(--text); }
+.chip--on, .chip--tap[aria-pressed="true"]{ background:var(--text); border-color:transparent; color:var(--bg); font-weight:600; }
+.chip--on:hover, .chip--tap[aria-pressed="true"]:hover{ background:color-mix(in oklab, var(--text) 88%, var(--bg)); color:var(--bg); }

@@ -20,9 +20,14 @@
   "SPI": {
     "eylem": {
       "set-palette": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
-      "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem"
+      "set-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
+      "office-3d": "kullanıcı kararı (2026-10-02, «3B kampüsü kaldıracak»): SPİ Ofis'teki 3B kampüs ve ofis3b.js köprüsü kalktı; masalar «Masa» ve uzman masalarında, «Toplantı» sayfa başında doğrudan Toplantı bölümünü açar",
+      "office-3d-meeting": "kullanıcı kararı (2026-10-02, «3B kampüsü kaldıracak»): SPİ Ofis'teki 3B kampüs ve ofis3b.js köprüsü kalktı; masalar «Masa» ve uzman masalarında, «Toplantı» sayfa başında doğrudan Toplantı bölümünü açar"
     },
-    "isleyici": {},
+    "isleyici": {
+      "office-3d": "kullanıcı kararı (2026-10-02, «3B kampüsü kaldıracak»): SPİ Ofis'teki 3B kampüs ve ofis3b.js köprüsü kalktı; masalar «Masa» ve uzman masalarında, «Toplantı» sayfa başında doğrudan Toplantı bölümünü açar",
+      "office-3d-meeting": "kullanıcı kararı (2026-10-02, «3B kampüsü kaldıracak»): SPİ Ofis'teki 3B kampüs ve ofis3b.js köprüsü kalktı; masalar «Masa» ve uzman masalarında, «Toplantı» sayfa başında doğrudan Toplantı bölümünü açar"
+    },
     "alan": {
       "pref-palette": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem",
       "pref-design": "kullanıcı kararı §8-4 (2026-09-24, «önerilerini uygula»): paletler ve beş düzen kalkar; yerine Görünüm: Açık · Koyu · Sistem"

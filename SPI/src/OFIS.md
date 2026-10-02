@@ -192,6 +192,8 @@ Model kapalıysa brifing yine üretilir — kural motorunun cümlesiyle.
 Ofis ekranında Kerem/Nesrin/Barış/Sedef/Patron'un çalıştığı isteğe bağlı bir
 3B WebGL kampüsü (Three.js) vardı. AGENTS.md §1.3'teki istisna 2026-09-28'de
 depo sahibi kararıyla geri alındı; `ofis3d/` (Three.js + sahne.js) SPİ'den
-kalıcı olarak kaldırıldı. `js/core/ofis3b.js` köprüsü ve **3B kampüsü aç**
-düğmesi geriye dönük durur ama artık her zaman hafif ofis mesajına döner —
-dosya yokken zaten bu davranışı gösteriyordu, değişen yalnız kalıcılığı.
+kalıcı olarak kaldırıldı. 2026-10-02'de depo sahibinin kararıyla
+`js/core/ofis3b.js` köprüsü, **3B kampüsü aç** düğmesi ve kampüs paneli de
+kalktı (kaldırılan eylemler `belgeler/ekip/envanter/kaldirilan.json`'da):
+Ofis masa, brifing ve uzman masalarıyla açılır; sayfa başındaki «Toplantı»
+doğrudan Toplantı bölümünü açar.

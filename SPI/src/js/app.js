@@ -326,17 +326,31 @@ SP.App = (function(){
   /* iPhone Faz 6 (2026-10-02): başlık ekranın ADIDIR («Testler», «Merdiven»);
      kural motorunun durum cümlesi ⓘ kartının ilk satırıdır. Bugün'ün günün
      cümlesi (004) başlıkta kalır. */
+  /* BAŞLIK ÇEKMECENİN ADIDIR (kullanıcı, 2026-10-02: «Sınama'daysa üstte
+     Sınama yazıyor; hayır, Çalışma kalacak, altındaki değişecek»). Başlık
+     çekmece değişince değişir; bölüm değişince yerinde durur ve seçim
+     altındaki bölüm çubuğunda görünür. Menüde olmayan ayrıntı ekranı (UST)
+     kendi adını taşır. Kural motorunun durum cümlesi — Bugün'ün günün
+     cümlesi (004) dahil — ⓘ kartının ilk satırıdır. */
+  function baslikOf(sc){
+    if(UST[sc.id]) return sc.title;
+    const sec = safe(() => sectionOf(sc.id), null);
+    /* sectionOf bilinmeyen rotada ilk çekmeceyi döndürür: yalnız gerçekten
+       o çekmecedeki ekran çekmecenin adını alır. */
+    const icinde = !!(sec && (sec.views || []).some(v => v.route === sc.id));
+    return (icinde && sec.label) || sc.title;
+  }
   function sayfaBasiHtml(sc){
     const cumle = safe(() => sc.headline ? sc.headline() : '');
-    const baslik = (sc.headlineOz && cumle) || sc.title || cumle;
+    const baslik = baslikOf(sc) || cumle;
     const aciklama = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
-    const ozet = [sc.headlineOz || cumle === baslik ? '' : cumle, aciklama].filter(Boolean).map(String).join(' ');
+    const ozet = [cumle === baslik ? '' : cumle, aciklama].filter(Boolean).map(String).join(' ');
     const AY = window.LIFEOS && window.LIFEOS.AYAR;
     const eylem = (AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '')
       + (safe(() => sc.actions ? sc.actions() : '') || '');
     return K.sayfaBasi({ yol:[], ust:safe(() => sc.ust ? String(sc.ust()) : ''), baslik, ozet:ozet ? String(ozet) : '', eylem:eylem ? String(eylem) : '',
-      /* 004: günün cümlesi başlıktaysa katalog numarası başlıkta durur. */
-      oz:sc.headlineOz || '' });
+      /* 004: günün cümlesi bilgi kartının ilk satırında. */
+      bilgiOz:cumle && cumle !== baslik ? (sc.headlineOz || '') : '' });
   }
 
   function bolumCubuguHtml(sc){
@@ -694,7 +708,6 @@ SP.App = (function(){
   }
 
   function go(route){
-    if(route !== 'office' && SP.Ofis3B) SP.Ofis3B.ayril();
     /* Ekran degisirse sesli oturum biter: paneli olmayan bir ekranda
        acik kalan mikrofon, kullanicinin goremedigi bir kayittir. */
     if(SP.Talk && SP.Talk.isActive()) SP.Talk.stop();

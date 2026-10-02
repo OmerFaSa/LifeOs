@@ -47,25 +47,20 @@
   const kok = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
   describe('Kabuk (T2)', () => {
-    it('kenar çubuğu açılıp kapanır: üst şeritte düğme, seçim kalıcı, kapalıyken ince simge şeridi', () => {
+    /* Kullanıcı (2026-10-02): «sol üstteki ESP'yi ve o kutucuk işaretini
+       sil». Üst şeritte kenar düğmesi yok, konum satırı yalnız ekran
+       okuyucuda; kenar hep ince şerittir ve üzerine gelince açılır. */
+    it('sol üst boş: kenar düğmesi yok, konum yalnız ekran okuyucuda, kenar ince şerit', () => {
       const eski = document.documentElement.classList.contains('kenar-dar');
       try{
-        K.kenarDar(false);
-        const d = yerlestir(K.ustSerit({ modul:'ays', yol:['Bugün'] }));
-        const btn = d.querySelector('.ust__kenar');
-        expect(!!btn).toBe(true);
-        expect(btn.getAttribute('aria-expanded')).toBe('true');
-        btn.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
-        expect(document.documentElement.classList.contains('kenar-dar')).toBe(true);
-        expect(K.kenarDarMi()).toBe(true);
-        expect(btn.getAttribute('aria-expanded')).toBe('false');
-        let kayit = null; try{ kayit = localStorage.getItem('lifeos.kenar'); }catch(e){}
-        /* Dar varsayılandır: kayıt yalnız kalıcı AÇIK için tutulur. */
-        expect(kayit).toBe(null);
-        K.kenarDar(false);
-        try{ kayit = localStorage.getItem('lifeos.kenar'); }catch(e){}
-        expect(kayit).toBe('acik');
         K.kenarDar(true);
+        const d = yerlestir('<div class="site--v5">' + K.ustSerit({ modul:'esp', yol:['Çalışma', 'Okuma'] }) + '</div>');
+        expect(!!d.querySelector('.ust__kenar, [data-kenar-ac]')).toBe(false);
+        const yol = d.querySelector('.ust__yol');
+        expect(!!yol).toBe(true);
+        expect(yol.getAttribute('aria-label')).toBe('Konum');
+        expect(yol.getBoundingClientRect().width <= 1).toBe(true);
+        expect(yol.textContent).toContain('ESP');
         /* Dar şeritte çekmece adı GÖRSEL olarak saklanır ama erişilebilir ad kalır. */
         const site = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays',
           cekmeceler:[{ id:'bugun', ad:'Bugün', route:'today', on:true }] }) + '</div>');
@@ -116,10 +111,10 @@
       }finally{ d.remove(); }
     });
 
-    it('sade: kenar varsayılan olarak dar; yalnız kalıcı açılan açık kalır', () => {
+    it('sade: kenar her zaman dar açılır; eski «açık» kaydı da dar (düğmesi yok)', () => {
       expect(K.kenarIlkDar(null)).toBe(true);
       expect(K.kenarIlkDar('dar')).toBe(true);
-      expect(K.kenarIlkDar('acik')).toBe(false);
+      expect(K.kenarIlkDar('acik')).toBe(true);
     });
 
     it('sekiz çekmece: ad ve sıra kullanıcı kararıyla aynı', () => {
@@ -474,6 +469,51 @@
         expect(K.railBilgiye(y.querySelector('#rb-yok'))).toBe(false);
         expect(!!y.querySelector('section.rail')).toBe(true);
       }finally{ y.remove(); }
+    });
+
+    /* Kullanıcı (2026-10-02): «üstteki tamam ama altta bir daha öyle bir şey
+       olması kötü». İki seçici iki ayrı dil konuşur: çekmecenin bölümleri
+       yazı + nokta; sayfanın bölümleri gri raylı bölümlü seçici (seçili
+       hap yüzey renginde). */
+    it('iki seçici iki dil: çekmece çubuğu yazı + nokta, sayfa bölümleri raylı bölümlü seçici', () => {
+      const d = yerlestir('<div class="site--v5">'
+        + K.bolumCubugu({ kabuk:true, cekmece:'Çalışma', bolumler:[{ route:'a', ad:'Dil', on:true }, { route:'b', ad:'Okuma' }] })
+        + '<nav class="bolumcubugu bolumcubugu--sayfa" aria-label="Bu sayfada"><button class="bolumcubugu__ad is-on" data-tab="x">Notlar</button>'
+        + '<button class="bolumcubugu__ad" data-tab="y">Matris</button></nav></div>');
+      try{
+        const ust = d.querySelector('.bolumcubugu--kabuk'), alt = d.querySelector('.bolumcubugu--sayfa');
+        const saydam = c => c === 'rgba(0, 0, 0, 0)' || c === 'transparent';
+        if(getComputedStyle(ust).display !== 'none') expect(getComputedStyle(ust.querySelector('.is-on'), '::after').width).toBe('5px');
+        expect(saydam(getComputedStyle(alt).backgroundColor)).toBe(false);
+        const hap = getComputedStyle(alt.querySelector('.is-on'), '::after');
+        expect(saydam(hap.backgroundColor)).toBe(false);
+        expect(hap.position).toBe('absolute');
+        expect(getComputedStyle(alt).borderRadius).toBe('12px');
+      }finally{ d.remove(); }
+    });
+
+    it('başlık çekmece değişince yeniden belirir; aynı çekmecede bölüm değişince yerinde durur', () => {
+      const k = document.documentElement;
+      const ciz = (id, route) => yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'esp', cekmeceler:[
+        { id:'calisma', ad:'Çalışma', route:'lang', on:id === 'calisma', bolumler:[{ route:'lang', ad:'Dil', on:route === 'lang' }, { route:'library', ad:'Okuma', on:route === 'library' }] },
+        { id:'analiz', ad:'Analiz', route:'analytics', on:id === 'analiz', bolumler:[{ route:'analytics', ad:'Analiz', on:true }] },
+      ] }) + '</div>').remove();
+      try{
+        ciz('calisma', 'lang');
+        ciz('calisma', 'library');
+        expect(k.classList.contains('sayfa-gecis')).toBe(true);
+        expect(k.classList.contains('cekmece-gecis')).toBe(false);
+        ciz('analiz', 'analytics');
+        expect(k.classList.contains('cekmece-gecis')).toBe(true);
+      }finally{ k.classList.remove('sayfa-gecis', 'cekmece-gecis'); }
+    });
+
+    it('bilgi kartının ilk satırı katalog numarasını taşıyabilir (004)', () => {
+      const d = yerlestir(K.sayfaBasi({ baslik:'Bugün', ozet:'Toparlanma iyi.', bilgiOz:'004' }));
+      try{
+        expect(d.querySelector('h1').textContent).toBe('Bugün');
+        expect(d.querySelector('.bilgikart__metin').getAttribute('data-oz')).toBe('004');
+      }finally{ d.remove(); }
     });
   });
 })();

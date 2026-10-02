@@ -271,14 +271,19 @@ window.LIFEOS = window.LIFEOS || {};
      sayfa değişince kök `sayfa-gecis` alır ve kartlar sırayla, hafifçe
      yukarı kayarak belirir (kabuk.css). Aynı sayfanın yeniden çizimi
      (bir sayaç, bir tik) hareketi tekrar oynatmaz. */
+  /* Çekmece değişince ayrıca `cekmece-gecis`: başlık (çekmecenin adı) yalnız
+     o zaman yeniden belirir; aynı çekmecede bölüm değişince başlık ve bölüm
+     çubuğu yerinde durur, yalnız içerik gelir — çerçeve sabit, sayfa değişir. */
   let sonSayfa = null, gecisSaati = null;
   function sayfaGecisi(anahtar){
     if(anahtar === sonSayfa || typeof document === 'undefined') return;
+    const cekmeceDegisti = String(anahtar).split(':')[0] !== String(sonSayfa).split(':')[0];
     sonSayfa = anahtar;
     const k = document.documentElement;
     k.classList.add('sayfa-gecis');
+    k.classList.toggle('cekmece-gecis', cekmeceDegisti);
     if(gecisSaati) clearTimeout(gecisSaati);
-    gecisSaati = setTimeout(() => k.classList.remove('sayfa-gecis'), 900);
+    gecisSaati = setTimeout(() => { k.classList.remove('sayfa-gecis'); k.classList.remove('cekmece-gecis'); }, 900);
   }
   /* İKİNCİL ÇEKMECELER (kullanıcı, 2026-10-02: «sol taraftaki seçim
      kısmındaki kalabalığı azalt»): ara sıra açılan çekmeceler tek «Daha
@@ -354,10 +359,13 @@ window.LIFEOS = window.LIFEOS || {};
     const harf = (prof.harf || (prof.ad || '').trim().charAt(0) || '·').toLocaleUpperCase('tr-TR');
     const onay = o.onay || {};
     const r = o.rutbe;
+    /* SOL ÜST BOŞ (kullanıcı, 2026-10-02: «sol üstteki ESP'yi ve o kutucuk
+       işaretini sil»). Kenar düğmesi kalktı: kenar hep ince şerittir,
+       üzerine gelince ya da klavyeyle odaklanınca açılır (kabuk.css).
+       Konum satırı yalnız ekran okuyucuda kalır (görünmez): sayfanın adı
+       başlıkta, bölüm seçicide söylenir. */
     return '<header class="ust ust--v5" data-modul="' + kac(o.modul || 'ays') + '">'
       + '<div class="ust__ic">'
-      + '<button class="ust__kenar" type="button" data-kenar-ac aria-controls="kenar" aria-expanded="' + (kenarDarMi() ? 'false' : 'true') + '"'
-      +   ' aria-label="Kenar çubuğunu ' + (kenarDarMi() ? 'aç' : 'daralt') + '" title="Kenar çubuğu">' + simge('kenar') + '</button>'
       + '<nav class="ust__yol" aria-label="Konum"><i class="kenar__nokta kenar__nokta--' + kac(o.modul || 'ays') + '" aria-hidden="true"></i>'
       +   '<span class="ust__yol-modul">' + kac(m.ad) + '</span>'
       +   yol.map((y, i) => '<span class="ust__yol-ayrac" aria-hidden="true">/</span><span class="ust__yol-oge' + (i === yol.length - 1 ? ' is-son' : '') + '">' + kac(y) + '</span>').join('')
@@ -455,7 +463,9 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ================================================== SAYFA BAŞI · BÖLÜM */
 
-  /* o: { yol:['Plan','Hafta'], baslik, ozet(HTML), eylem(HTML) }
+  /* o: { yol:['Plan','Hafta'], baslik, ozet(HTML), eylem(HTML), oz, bilgiOz }
+     `bilgiOz`: bilgi kartının ilk satırının katalog numarası (Bugün'ün
+     günün cümlesi, 004 — başlık çekmecenin adı olunca cümle karta indi).
      Başlık `hero__title` sınıfını da taşır: duman testi ve envanter
      ekranın başlığını o adla okuyor (H'nin araçları). */
   /* SAYFA BAŞI SADE (kullanıcı, 2026-10-02: «böyle bilgiler başlığın sağ
@@ -474,7 +484,7 @@ window.LIFEOS = window.LIFEOS || {};
         + '<button type="button" class="sayfabasi__bilgi-dugme" aria-expanded="false" aria-controls="' + bid + '"'
         +   ' aria-label="Bu sayfa hakkında" title="Bu sayfa hakkında">' + simge('bilgi') + '</button>'
         + '<div class="bilgikart" id="' + bid + '" role="note">'
-        +   (o.ozet ? '<div class="bilgikart__metin">' + o.ozet + '</div>' : '')
+        +   (o.ozet ? '<div class="bilgikart__metin"' + (o.bilgiOz ? ' data-oz="' + kac(o.bilgiOz) + '"' : '') + '>' + o.ozet + '</div>' : '')
         +   (o.ust ? '<div class="bilgikart__alt">' + o.ust + '</div>' : '')
         + '</div></div>'
       : '';
@@ -781,13 +791,15 @@ window.LIFEOS = window.LIFEOS || {};
     return dar;
   }
   /* SADE (kullanici, 2026-10-01): kenar VARSAYILAN olarak dardir ve
-     uzerine gelince acilir (kabuk.css). Yalniz dugmeyle kalici acilan
-     kenar acik kalir ('acik'). Eski 'dar' kaydi da dar demektir. */
-  function kenarIlkDar(kayit){ return kayit !== 'acik'; }
+     uzerine gelince acilir (kabuk.css). 2026-10-02'den beri kalici acma
+     dugmesi yok (sol ust bos): eski 'acik' kaydi da dar acilir ve silinir;
+     yoksa kenar dugmesiz, kapatilamaz bicimde acik kalirdi. */
+  function kenarIlkDar(kayit){ return true; }
   if(typeof document !== 'undefined'){
     let kayit = null;
     try{ kayit = localStorage.getItem(KENAR_ANAHTAR); }catch(e){}
     if(kenarIlkDar(kayit)) document.documentElement.classList.add('kenar-dar');
+    try{ if(kayit) localStorage.removeItem(KENAR_ANAHTAR); }catch(e){}
   }
 
   let kuruldu = false;

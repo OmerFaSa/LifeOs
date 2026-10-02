@@ -156,32 +156,38 @@
 
   /* ================= KOYU — tek tanım (vitrin) =================
      Yalnız aşağıdaki iki eşleme bloğunda kullanılır. */
-  /* SADE: iOS koyu — siyah zemin, yükseltilmiş gri kart. */
-  --d-bg:#000000;
-  --d-surface:#1C1C1E;
-  --d-surface-2:#2C2C2E;
-  --d-surface-3:#3A3A3C;
-  --d-surface-hover:#242426;
-  --d-sidebar:#000000;
-  --d-sidebar-active:#1C1C1E;
-  --d-text:#F5F5F7;
-  --d-text-2:#AEAEB2;
-  --d-text-3:#98989D;    /* #1C1C1E kartta 5,8:1 */
-  --d-border:#2C2C2E;
-  --d-border-soft:#242426;
-  --d-border-strong:#3A3A3C;
-  --d-ays:#4F86FF;  --d-ays-t:#121A2C;
-  --d-spi:#2EC4A9;  --d-spi-t:#0E211E;
-  --d-esp:#F2A93B;  --d-esp-t:#241A0D;
-  --d-mer:#9A86FF;  --d-mer-t:#1B1730;
-  --d-ok:#3FBF7F;   --d-ok-t:#0F2118;
-  --d-bad:#F06A62;  --d-bad-t:#2A1413;
-  --d-now:#FF5C61;
-  --d-accent:#D9A441;
+  /* GRAFİT KOYU (kullanıcı, 2026-10-02: «bütün modüllerde siyah tema çok
+     kötü gözüküyor»). Saf siyah zemin üstünde saf beyaz yazı ve tok gri
+     haplar gözü yoruyordu: sert karşıtlık, kartın kenarı kayboluyor, her
+     kalın yazı parlıyordu. Şimdi zemin koyu grafit, kart ondan bir ton
+     açık ve kıl inceliğinde bir kenarla ayrılır (kabuk.css), yazı kırık
+     beyaz; modül zeminleri (Kurulum, kahraman kart) yalnız hafif bir ton.
+     Kontrast hâlâ AA: soluk gri kartta 5,3:1, ikinci yüzeyde 4,7:1. */
+  --d-bg:#121214;
+  --d-surface:#1C1C1F;
+  --d-surface-2:#26262A;
+  --d-surface-3:#313136;
+  --d-surface-hover:#222226;
+  --d-sidebar:#121214;
+  --d-sidebar-active:#26262A;
+  --d-text:#ECECEF;
+  --d-text-2:#ABABB3;
+  --d-text-3:#909099;    /* #1C1C1F kartta 5,3:1 · #26262A'da 4,7:1 */
+  --d-border:#2C2C31;
+  --d-border-soft:#242428;
+  --d-border-strong:#3A3A40;
+  --d-ays:#5B8DFF;  --d-ays-t:#1A1F2A;
+  --d-spi:#34C2A6;  --d-spi-t:#18221F;
+  --d-esp:#EBA545;  --d-esp-t:#231E17;
+  --d-mer:#9D8CFF;  --d-mer-t:#1F1C29;
+  --d-ok:#45BE82;   --d-ok-t:#16231C;
+  --d-bad:#EE6E66;  --d-bad-t:#2A1A19;
+  --d-now:#FF6166;
+  --d-accent:#D4A24A;
   --d-info:#A3A6AD;
-  --d-ink:#050506;
-  --d-shadow-lg:0 24px 48px -24px rgba(0,0,0,.7);
-  --d-scrim:rgba(0,0,0,.62);
+  --d-ink:#0E0E10;
+  --d-shadow-lg:0 0 0 1px rgba(255,255,255,.05), 0 24px 48px -20px rgba(0,0,0,.65);
+  --d-scrim:rgba(8,8,10,.58);
 }
 
 /* Koyu eşleme — iki blok, aynı liste (sistem tercihi · elle seçim). */

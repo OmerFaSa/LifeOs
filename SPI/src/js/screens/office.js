@@ -305,9 +305,8 @@ SP.Screens.office = (function(){
     return String(html`
       ${(window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:SP.Office.ready('patron') })) : ''}
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
-      ${SP.Ofis3B.panel()}
       ${K.Ledger(() => [
-        when(vo.masa && !SP.Ofis3B.aktif(), () => K.Entry({ wide:true, hint:'not-masa', label:'Masa', meta:'kim konuşuyor',
+        when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:'Masa', meta:'kim konuşuyor',
           body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.sinir || '')}${raw(vo.durum || '')}</div>` })),
         when(vo.toplanti, () => K.Entry({ wide:true, label:'Günün toplantısı', meta:'her masadan tek cümle',
           body:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` })),
@@ -326,8 +325,9 @@ SP.Screens.office = (function(){
   }
 
   const handle = {
-    'office-3d'(){ SP.Ofis3B.acKapat(); },
-    'office-3d-meeting'(){ SP.Ofis3B.toplanti(); },
+    /* 3B kampüs kalktı (kullanıcı kararı 2026-10-02, «3B kampüsü kaldır»):
+       «3B kampüsü aç» ve kampüste toplantı eylemleri kaldirilan.json'da;
+       sayfa başındaki «Toplantı» doğrudan Toplantı bölümünü açar. */
     /* Devri tamamlayan hareket: bulgunun DUSTUGU ekrani, dogru sekmesi
        ve dogru satiri acik halde ac. Yoksa devir bir cumleden ibaret
        kalir. */
@@ -444,9 +444,8 @@ SP.Screens.office = (function(){
     },
     actions(){
       return String(K.Button({ label:'Toplantı', size:'sm', icon:'users', class:'btn--screen',
-        act:'office-3d-meeting' }));
+        act:'go', data:{ 'data-route':'meeting' } }));
     },
     render, handle,
-    afterRender(){ SP.Ofis3B.yerlestir(document.getElementById('spi-campus-mount')); },
   };
 })();

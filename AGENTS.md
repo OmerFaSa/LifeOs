@@ -42,7 +42,8 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    CSS ofis kaldı — dosya yokken zaten hafif odaya dönüyordu, bu davranış
    değişmedi. 2026-10-02'de depo sahibinin kararıyla AYS Ofis'teki 3B oda,
    kat planı ve AYS'nin `ofis3b.js` köprüsü de kaldırıldı (kaldırılan eylemler
-   `belgeler/ekip/envanter/kaldirilan.json`'da); SPİ'nin köprüsü duruyor.
+   `belgeler/ekip/envanter/kaldirilan.json`'da). Aynı gün SPİ'nin 3B kampüsü
+   ve `ofis3b.js` köprüsü de kalktı: iki sistemde de 3B yüz yok.
 4. **Modüller HKM'yi bilir ama ona bağımlı değildir.** AYS/SPİ/ESP,
    HKM'nin üst patron (King) olduğunu bilir ve onunla konuşabilir; ama HKM
    kapalıyken, yanıt vermezken ya da hata verirken hiçbiri bozulmaz,

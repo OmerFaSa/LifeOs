@@ -12,7 +12,10 @@
    başlığını taşır (154); geçiş desteklenmiyorsa ya da hareket azaltılmışsa
    iş doğrudan yapılır (153); önizleme metni kaçışlanır (159); odak kapısı
    Esc'te işin kendi çıkış düğmesine basar, açık katman varken basmaz (14);
-   azaltılmış harekette hiçbir sınıf konmaz. Bileşenler kancaları taşır. */
+   azaltılmış harekette hiçbir hareket sınıfı konmaz. Seçim işareti
+   (kenar, bölüm çubuğu, bölümlü seçici) yeniden çizimde eski yerinden
+   yenisine kayar; azaltılmış harekette kaymaz, yalnız solarak belirir.
+   Bileşenler kancaları taşır. */
 
 (function(){
   const NS = window.R || window.SP || window.ESP;
@@ -292,6 +295,41 @@
         expect(bul(d, 'Form').classList.contains('raf-uzun')).toBe(false);
         const h = bul(d, 'Uzman masaları').querySelector('.section-title h2');
         expect(h.classList.contains('sr-only')).toBe(true);
+      }finally{ d.remove(); }
+    });
+
+    /* Kullanıcı (2026-10-02): «seçilen yerin açılması, sayfa geçişleri
+       minik animasyonlu olsun». */
+    it('seçim işareti eski yerinden yenisine kayar; aynı yerde kaymaz; azaltılmışta yalnız belirir', () => {
+      const ciz = on => '<div class="site--v5"><nav class="bolumcubugu bolumcubugu--sayfa" aria-label="Bu sayfada">'
+        + ['a', 'b', 'c'].map(x => '<button class="bolumcubugu__ad' + (x === on ? ' is-on' : '') + '" data-act="t" style="width:80px">' + x + '</button>').join('')
+        + '</nav></div>';
+      const d = kok(ciz('a'));
+      try{
+        H.sonra(d, 'k', { az:false });
+        H.once(d);
+        d.innerHTML = ciz('c');
+        H.sonra(d, 'k', { az:false });
+        const on = d.querySelector('.is-on');
+        expect(on.classList.contains('is-kayan')).toBe(true);
+        expect(parseFloat(on.style.getPropertyValue('--isaret-dx')) < 0).toBe(true);
+        /* Aynı seçimle yeniden çizim (bir sayaç, bir tik) işareti oynatmaz. */
+        H.once(d);
+        d.innerHTML = ciz('c');
+        H.sonra(d, 'k', { az:false });
+        expect(d.querySelector('.is-on').classList.contains('is-kayan')).toBe(false);
+        /* Azaltılmış hareket: kayma yok, solma var. */
+        H.once(d);
+        d.innerHTML = ciz('b');
+        H.sonra(d, 'k', { az:true });
+        const b = d.querySelector('.is-on');
+        expect(b.classList.contains('is-kayan')).toBe(false);
+        expect(b.classList.contains('is-beliren')).toBe(true);
+        expect(b.style.getPropertyValue('--isaret-dx')).toBe('');
+        /* Sayfayı çizmeden seçim (bolumeGit) eski öğeyi kendisi verir. */
+        const l = d.querySelectorAll('.bolumcubugu__ad');
+        expect(H.isaretKaydir(l[2], l[0], { az:false })).toBe('kay');
+        expect(H.isaretKaydir(l[2], l[0], { az:true })).toBe('belir');
       }finally{ d.remove(); }
     });
   });

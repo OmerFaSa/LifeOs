@@ -452,30 +452,46 @@
   });
 })();
 
-/* iPhone planı · Faz 6 · Kabuk (SPİ): başlık ekranın adıdır, durum
+/* iPhone planı · Faz 6 · Kabuk (SPİ): başlık çekmecenin adıdır, durum
    cümlesi ⓘ'de; sessiz kipte zincirle gelen rozetler tek bildirim. */
 (function(){
   const { describe, it, expect, resetState } = SP.Test;
   describe('iPhone · Faz 6 · Kabuk (SPİ)', () => {
 
-    it('başlık ekranın adı; kural motorunun cümlesi bilgi kartında', () => {
+    /* Kullanıcı (2026-10-02): «Sınama'daysa üstte Sınama yazıyor; hayır,
+       Çalışma kalacak, altındaki değişecek». Başlık çekmecenin adıdır; bölüm
+       altındaki çubukta seçilidir; durum cümlesi ⓘ'de. */
+    it('başlık çekmecenin adı; bölüm çubukta seçili; kural motorunun cümlesi bilgi kartında', () => {
       resetState();
       const sc = SP.Screens.labs;
       const d = document.createElement('div');
       d.innerHTML = String(SP.App.sayfaBasiHtml(sc));
-      expect(d.querySelector('h1').textContent.trim()).toBe(sc.title);
+      expect(d.querySelector('h1').textContent.trim()).toBe('Çalışma');
       const cumle = sc.headline ? sc.headline() : '';
-      if(cumle && cumle !== sc.title) expect(d.querySelector('.bilgikart').textContent).toContain(cumle);
+      if(cumle && cumle !== 'Çalışma') expect(d.querySelector('.bilgikart').textContent).toContain(cumle);
     });
 
-    it('Bugün’ün günün cümlesi (004) başlıkta kalır', () => {
+    it('menüde olmayan ayrıntı ekranı kendi adını taşır', () => {
+      resetState();
+      const sc = SP.Screens.gun;
+      if(!sc) return;
+      const d = document.createElement('div');
+      d.innerHTML = String(SP.App.sayfaBasiHtml(sc));
+      expect(d.querySelector('h1').textContent.trim()).toBe(String(sc.title));
+    });
+
+    it('Bugün’ün başlığı «Bugün»; günün cümlesi (004) bilgi kartının ilk satırında', () => {
       resetState();
       const sc = SP.Screens.today;
       const d = document.createElement('div');
       d.innerHTML = String(SP.App.sayfaBasiHtml(sc));
-      const cumle = sc.headline ? sc.headline() : '';
-      if(cumle) expect(d.querySelector('h1').textContent.trim()).toBe(cumle);
-      expect(d.querySelector('h1').getAttribute('data-oz')).toBe('004');
+      expect(d.querySelector('h1').textContent.trim()).toBe('Bugün');
+      const cumle = sc.headline ? String(sc.headline()) : '';
+      if(cumle && cumle !== 'Bugün'){
+        const ilk = d.querySelector('.bilgikart__metin');
+        expect(ilk.textContent).toContain(cumle.replace(/<[^>]*>/g, '').trim().slice(0, 12));
+        expect(ilk.getAttribute('data-oz')).toBe('004');
+      }
     });
 
     it('zincirle gelen üç rozet tek bildirimdir', async () => {
@@ -486,6 +502,28 @@
         await new Promise(r => setTimeout(r, 480));
         expect(gelen.join('|')).toBe('3 yeni rozet — A · +2');
       }finally{ UI.toast = eski; }
+    });
+  });
+})();
+
+/* Kullanıcı kararı (2026-10-02): «3B kampüsü kaldır». SPİ Ofis'te kampüs
+   paneli, «3B kampüsü aç» ve kampüste toplantı eylemi yok; masa ve uzman
+   masaları yerinde; «Toplantı» doğrudan Toplantı bölümünü açar. */
+(function(){
+  const { describe, it, expect, resetState } = SP.Test;
+  describe('Ofis — kampüssüz (SPİ)', () => {
+    it('ekranda 3B kampüs ya da eylemi yok; masalar yerinde', async () => {
+      resetState();
+      const out = String(await SP.Screens.office.render());
+      ['spi-campus', 'office-3d', '3B kampüsü aç'].forEach(x => expect(out.indexOf(x)).toBe(-1));
+      expect(!!SP.Ofis3B).toBe(false);
+      SP.AGENTS.filter(a => a.id !== 'patron').forEach(a => expect(out).toContain('data-id="' + a.id + '"'));
+    });
+    it('«Toplantı» sayfa başında ve Toplantı bölümüne gider', () => {
+      const ust = String(SP.Screens.office.actions());
+      expect(ust).toContain('data-act="go"');
+      expect(ust).toContain('data-route="meeting"');
+      expect(typeof SP.Screens.office.handle['office-3d']).toBe('undefined');
     });
   });
 })();

@@ -382,30 +382,46 @@
   });
 })();
 
-/* iPhone planı · Faz 6 · Kabuk (AYS): başlık ekranın adıdır, durum
+/* iPhone planı · Faz 6 · Kabuk (AYS): başlık çekmecenin adıdır, durum
    cümlesi ⓘ'de; sessiz kipte zincirle gelen rozetler tek bildirim. */
 (function(){
   const { describe, it, expect, resetState } = R.Test;
   describe('iPhone · Faz 6 · Kabuk (AYS)', () => {
 
-    it('başlık ekranın adı; kural motorunun cümlesi bilgi kartında', () => {
+    /* Kullanıcı (2026-10-02): «Sınama'daysa üstte Sınama yazıyor; hayır,
+       Çalışma kalacak, altındaki değişecek». Başlık çekmecenin adıdır; bölüm
+       altındaki çubukta seçilidir; durum cümlesi ⓘ'de. */
+    it('başlık çekmecenin adı; bölüm çubukta seçili; kural motorunun cümlesi bilgi kartında', () => {
       resetState();
-      const sc = R.Screens.week;
+      const sc = R.Screens.quiz;
       const d = document.createElement('div');
       d.innerHTML = String(R.App.sayfaBasiHtml(sc));
-      expect(d.querySelector('h1').textContent.trim()).toBe(sc.title);
+      expect(d.querySelector('h1').textContent.trim()).toBe('Çalışma');
       const cumle = sc.headline ? sc.headline() : '';
-      if(cumle && cumle !== sc.title) expect(d.querySelector('.bilgikart').textContent).toContain(cumle);
+      if(cumle && cumle !== 'Çalışma') expect(d.querySelector('.bilgikart').textContent).toContain(cumle);
     });
 
-    it('Bugün’ün günün cümlesi (004) başlıkta kalır', () => {
+    it('menüde olmayan ayrıntı ekranı kendi adını taşır', () => {
+      resetState();
+      const sc = R.Screens.topic;
+      if(!sc) return;
+      const d = document.createElement('div');
+      d.innerHTML = String(R.App.sayfaBasiHtml(sc));
+      expect(d.querySelector('h1').textContent.trim()).toBe(String(sc.title));
+    });
+
+    it('Bugün’ün başlığı «Bugün»; günün cümlesi (004) bilgi kartının ilk satırında', () => {
       resetState();
       const sc = R.Screens.today;
       const d = document.createElement('div');
       d.innerHTML = String(R.App.sayfaBasiHtml(sc));
-      const cumle = sc.headline ? sc.headline() : '';
-      if(cumle) expect(d.querySelector('h1').textContent.trim()).toBe(cumle);
-      expect(d.querySelector('h1').getAttribute('data-oz')).toBe('004');
+      expect(d.querySelector('h1').textContent.trim()).toBe('Bugün');
+      const cumle = sc.headline ? String(sc.headline()) : '';
+      if(cumle && cumle !== 'Bugün'){
+        const ilk = d.querySelector('.bilgikart__metin');
+        expect(ilk.textContent).toContain(cumle.replace(/<[^>]*>/g, '').trim().slice(0, 12));
+        expect(ilk.getAttribute('data-oz')).toBe('004');
+      }
     });
 
     it('zincirle gelen üç rozet tek bildirimdir', async () => {

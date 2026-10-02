@@ -257,14 +257,22 @@ ESP.C = (function(){
     if(kap && kap.classList.contains('sayfabolumler')){
       Array.prototype.forEach.call(kap.children, s => s.classList.toggle('is-on', s === el));
       const nav = kap.previousElementSibling;
+      const H = window.LIFEOS && window.LIFEOS.HAREKET;
       if(nav && nav.classList.contains('bolumcubugu--sayfa')){
+        const eski = nav.querySelector('.bolumcubugu__ad.is-on');
         Array.prototype.forEach.call(nav.querySelectorAll('button[data-tab]'), btn => {
           const on = btn.getAttribute('data-tab') === id;
           btn.classList.toggle('is-on', on);
           if(on){ btn.setAttribute('aria-current', 'true'); AKTIF_BOLUM[btn.getAttribute('data-act') || ''] = id; }
           else btn.removeAttribute('aria-current');
         });
+        /* Seçili hap eski bölümden yenisine kayar (hareket.js isaretKaydir). */
+        const yeni = nav.querySelector('.bolumcubugu__ad.is-on');
+        if(H && H.isaretKaydir && yeni && eski && yeni !== eski) H.isaretKaydir(yeni, eski);
       }
+      /* Açılan kat yumuşakça gelir; yalnız seçimde (yeniden çizimde değil). */
+      el.classList.remove('is-gelen'); void el.offsetWidth; el.classList.add('is-gelen');
+      setTimeout(() => el.classList.remove('is-gelen'), 500);
       /* Gizli kattaki kutular ölçülemezdi; kat açılınca raf yeniden kurulur. */
       if(window.LIFEOS && window.LIFEOS.HAREKET && window.LIFEOS.HAREKET.raf) window.LIFEOS.HAREKET.raf(el);
     }

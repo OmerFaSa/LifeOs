@@ -55,8 +55,72 @@ window.LIFEOS.HAREKET = (function(){
 
   /* ---------------------------------------------------------- fotoğraf */
 
+  /* ---------------------------------------------------------- kayan işaret
+     (kullanıcı, 2026-10-02: «sol taraftaki seçilen yerin açılması, sayfa
+     geçişleri minik animasyonlu olsun»). Uygulama her yönlendirmede #app'i
+     baştan çizdiği için seçili öğenin zemini CSS geçişiyle kayamaz: eski
+     seçili öğenin yeri fotoğrafta tutulur, yeni seçili öğenin işareti
+     (kenarda zemin, bölüm çubuğunda nokta, bölümlü seçicide hap) eski
+     yerden yenisine kayar (FLIP). Azaltılmış harekette KAYMAZ, yerinde
+     yumuşakça belirir (solma hareket değildir). Grup anahtarı aynı değilse
+     (başka çekmece, başka seçici) işaret yalnız belirir. */
+  const ISARET = [
+    { sec:'.kenar__nav .kenar__cekmece.is-on', grup:() => 'kenar' },
+    { sec:'.bolumcubugu .bolumcubugu__ad.is-on', grup:e => {
+      const n = e.parentElement;
+      return (n && n.classList.contains('bolumcubugu--sayfa') ? 'sayfa|' : 'cekmece|')
+        + ((n && n.getAttribute('aria-label')) || '') + '|' + (e.getAttribute('data-act') || '');
+    } },
+  ];
+  function isaretFoto(kok){
+    const f = new Map();
+    ISARET.forEach(t => sec(kok, t.sec).forEach(e => {
+      if(!gorunur(e)) return;
+      const r = e.getBoundingClientRect();
+      f.set(t.grup(e), { x:r.left, y:r.top, w:r.width, h:r.height });
+    }));
+    return f;
+  }
+  /* Tek işaret: eski kutu (x, y, w) → yeni öğe. Bölümlü seçici sayfayı
+     yeniden çizmeden de seçim değiştirir (components.js bolumeGit): o yol
+     eski öğeyi kendisi verir. */
+  function isaretKaydir(yeni, eski, o){
+    if(!yeni || !yeni.getBoundingClientRect) return false;
+    o = o || {};
+    const az = o.az != null ? !!o.az : azMi();
+    const r = yeni.getBoundingClientRect();
+    const e = eski && eski.getBoundingClientRect ? (() => { const x = eski.getBoundingClientRect();
+      return { x:x.left, y:x.top, w:x.width, h:x.height }; })() : eski;
+    yeni.classList.remove('is-kayan', 'is-beliren');
+    void yeni.offsetWidth;
+    if(az || !e || !r.width || !e.w){
+      yeni.classList.add('is-beliren');
+      setTimeout(() => yeni.classList.remove('is-beliren'), 400);
+      return 'belir';
+    }
+    const dx = e.x - r.left, dy = e.y - r.top;
+    if(Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(e.w - r.width) < 1) return false;
+    yeni.style.setProperty('--isaret-dx', dx.toFixed(1) + 'px');
+    yeni.style.setProperty('--isaret-dy', dy.toFixed(1) + 'px');
+    yeni.style.setProperty('--isaret-cx', ((e.x + e.w / 2) - (r.left + r.width / 2)).toFixed(1) + 'px');
+    yeni.style.setProperty('--isaret-sx', (e.w / r.width).toFixed(4));
+    yeni.classList.add('is-kayan');
+    setTimeout(() => yeni.classList.remove('is-kayan'), 520);
+    return 'kay';
+  }
+  function isaretleriOynat(kok, onceki, az){
+    if(!onceki) return 0;
+    let n = 0;
+    ISARET.forEach(t => sec(kok, t.sec).forEach(e => {
+      const g = t.grup(e);
+      if(!onceki.has(g) || !gorunur(e)) return;
+      if(isaretKaydir(e, onceki.get(g), { az })) n++;
+    }));
+    return n;
+  }
+
   function once(kok){
-    const f = { rota:cizilenRota, sayi:new Map(), bitti:new Map(), satir:[] };
+    const f = { rota:cizilenRota, sayi:new Map(), bitti:new Map(), satir:[], isaret:isaretFoto(kok) };
     sec(kok, '[data-h-sayi]').forEach(e => f.sayi.set(e.getAttribute('data-h-sayi'), e.textContent.trim()));
     sec(kok, '[data-h][data-h-bitti]').forEach(e =>
       f.bitti.set(e.getAttribute('data-h'), e.getAttribute('data-h-bitti') === '1'));
@@ -79,6 +143,10 @@ window.LIFEOS.HAREKET = (function(){
     tekCanli(kok);
     baslikKopyala(kok);
     raf(kok);
+    /* Seçili bölüm sığmayan çubukta önce ortaya alınır, sonra ölçülür:
+       kayma yeni yerinden başlasın. */
+    try{ const KB = window.LIFEOS && window.LIFEOS.KABUK; if(KB && KB.seciciHazirla) KB.seciciHazirla(kok); }catch(e){}
+    sonuc.isaret = isaretleriOynat(kok, onceki && onceki.isaret, az);
     if(!az){
       const ust = kok.querySelector('.ust');
       if(ust && ilkCizim) ust.classList.add('h-ilk');
@@ -426,5 +494,5 @@ window.LIFEOS.HAREKET = (function(){
   }
 
   return { once, sonra, tekCanli, baslikKopyala, raf, kesimler, kaynak, gecis, halka, onizleIcerik, odakCik, kur,
-    EN_COK_KAPANAN };
+    isaretKaydir, EN_COK_KAPANAN };
 })();
