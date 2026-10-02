@@ -20,7 +20,10 @@
 const { spawn } = require('child_process');
 const path = require('path');
 
-const PORT = Number(process.argv[2]) || 4193;
+/* 4193 ESP'nin kendi sunucusudur (sistem/baslat.py): uygulama açıkken duman
+   testi aynı porta bağlanamıyor, «ağ kesilmedi (sunucu 404)» diye düşüyordu.
+   AYS (4176) ve SPİ (4184) gibi ayrı bir port. */
+const PORT = Number(process.argv[2]) || 4194;
 const ROOT = path.resolve(__dirname, '..');
 
 let chromium;

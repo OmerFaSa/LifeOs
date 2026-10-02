@@ -836,7 +836,7 @@ R.Screens.office = (function(){
       ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'urun-sil', data:{ 'data-id':u.id } })}
     </div>`)}</div>`;
     return K.Card({ title:'BAM ürünleri', hint:'hkm', sub:l.length + ' ürün',
-      body:html`${govde}<p class="tiny dim mt-8">Sohbette «… hakkında özet hazırla» dersen King’e iletilir; bitince teklif olarak gelir.</p>` });
+      body:govde });
   }
 
   /* ---------- ekran ---------- */
@@ -1278,7 +1278,8 @@ R.Screens.office = (function(){
     /* iPhone Faz 4 («brifing + tek eylem»): açık ofis, günün brifingi ve
        Patron'un masası (tek eylem). Masa cümleleri toplantı satırında,
        Patron'da ve uzman kartında üç kez yazılıyordu: toplantı ve uzman
-       masaları şerit; kararlar ve ürünler şerit. */
-    kucukVarsayilan:['günün-toplantısı', 'uzman-masaları', 'takipteki-kararlar', 'bam-ürünleri'],
+       masaları ve kararlar şerit. BAM ürünleri yalnız ürün varken çizilir
+       ve o zaman açıktır: yeni ürün gözden kaçmasın. */
+    kucukVarsayilan:['günün-toplantısı', 'uzman-masaları', 'takipteki-kararlar'],
   };
 })();

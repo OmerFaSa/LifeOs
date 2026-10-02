@@ -89,6 +89,7 @@ degistirilmesi bilincli bir karardir.
 import base64
 import datetime
 import json
+import math
 import os
 import re
 import sys
@@ -728,12 +729,17 @@ class Handler(BaseHTTPRequestHandler):
 
     def _pair_status(self):
         durum = self._pair_state()
-        kalan = max(0, int(durum["until"] - time.time()))
+        simdi = time.time()
         alan = len(durum["taken"])
+        # Jeton kapisiyla (_pair_take) AYNI olcut. Kalan sure asagi
+        # yuvarlaninca (int) son saniyede «kapali» deniyor, kapi ise jetonu
+        # hala veriyordu (2026-10-02, tests/test_daemon.py).
+        acik = simdi < durum["until"] and alan < PAIR_MAX_ORIGINS
+        kalan = max(0, math.ceil(durum["until"] - simdi))
         # Kokenin kendisi yazilmaz, yalniz portu: yuz «AYS baglandi»
         # diyebilsin diye. Port bir sir degildir; jeton hicbir yere gitmez.
         portlar = sorted(p for p in (_koken_portu(k) for k in durum["taken"]) if p)
-        return self._send(200, {"open": bool(kalan) and alan < PAIR_MAX_ORIGINS,
+        return self._send(200, {"open": acik,
                                 "seconds_left": kalan, "used": bool(alan),
                                 "taken": alan, "ports": portlar})
 

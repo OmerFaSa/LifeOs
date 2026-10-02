@@ -172,6 +172,7 @@ R.HINTS = {
     ['not-ofis-modeli', 'Ofis modeli', 'Ücretsiz bir model bağlayınca ajanlar konuşmaya başlar'],
     ['not-masasindaki-rapor', 'Masasındaki rapor', 'Kural motoru hesapladı; ajan bunu yorumlar'],
     ['not-ekipteki-digerleri', 'Ekipteki diğerleri', 'Alan dışı soruyu sahibine sor'],
+    ['hkm', null, 'Sohbette «… hakkında özet hazırla» dersen King’e iletilir; bitince BAM ürünü teklif olarak gelir.'],
   ].forEach(([k, t, c]) => {
     const m = /[.!?…»)]$/.test(c) ? c : c + '.';
     if(!H[k]){ H[k] = { t:t || k, b:m }; return; }

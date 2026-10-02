@@ -47,6 +47,23 @@ TAM = ['runtests.js', 'smoke.js', 'a11ycheck.js', 'palettecheck.js',
 BASLANGIC = '<!-- SAYILAR:baslangic -->'
 BITIS = '<!-- SAYILAR:bitis -->'
 
+# Python araçları çalışan yorumlayıcıyla çağrılır: «python3» Windows'ta yok
+# olabilir (ya da Mağaza yönlendirmesidir).
+PYTHON = sys.executable or 'python3'
+
+
+def calistir(komut, cwd, timeout, yalniz_stdout=False):
+    """Komutu çalıştırır; (çıkış kodu, boş olmayan satırlar). Çıktı UTF-8
+    okunur ve alt Python süreci UTF-8 yazar: varsayılan kod sayfasıyla
+    (Windows'ta cp1254) «Ş» gibi bir harf okuyucu iş parçacığını düşürüyor,
+    çıktı None kalıyor, betik TypeError ile duruyordu (2026-10-02,
+    tools/sayilar_test.py)."""
+    env = dict(os.environ, PYTHONIOENCODING='utf-8')
+    p = subprocess.run(komut, cwd=cwd, capture_output=True, text=True,
+                       encoding='utf-8', errors='replace', timeout=timeout, env=env)
+    metin = (p.stdout or '') if yalniz_stdout else (p.stdout or '') + '\n' + (p.stderr or '')
+    return p.returncode, [x.strip() for x in metin.splitlines() if x.strip()]
+
 
 def kosu(sistem, arac):
     """Aracı çalıştırır; (durum, son satır) döner. Yoksa None."""
@@ -54,29 +71,25 @@ def kosu(sistem, arac):
     if not os.path.exists(yol):
         return None
     try:
-        p = subprocess.run(['node', 'tools/' + arac], cwd=os.path.join(KOK, sistem),
-                           capture_output=True, text=True, timeout=900)
+        kod, satirlar = calistir(['node', 'tools/' + arac], os.path.join(KOK, sistem), 900)
     except subprocess.TimeoutExpired:
         return ('zaman aşımı', '—')
-    satirlar = [s.strip() for s in (p.stdout + '\n' + p.stderr).splitlines() if s.strip()]
     son = satirlar[-1] if satirlar else '—'
-    return ('geçti' if p.returncode == 0 else 'KALDI', son)
+    return ('geçti' if kod == 0 else 'KALDI', son)
 
 
 def kok_araclar():
     """Depo kokundeki denetimler — tek bir sistemin degil, ARALARININ."""
     out = {}
-    for ad, komut in (("HKM tests", ["python3", "-m", "tests.run"]),
-                      ("HKM perf", ["python3", "tools/perf.py"]),
+    for ad, komut in (("HKM tests", [PYTHON, "-m", "tests.run"]),
+                      ("HKM perf", [PYTHON, "tools/perf.py"]),
                       ("HKM yuz", ["node", "tools/yuz.js"])):
         try:
-            p = subprocess.run(komut, cwd=os.path.join(KOK, "HKM"),
-                               capture_output=True, text=True, timeout=900)
+            kod, satir = calistir(komut, os.path.join(KOK, "HKM"), 900, yalniz_stdout=True)
         except Exception as e:
             out[ad] = ("KALDI", str(e))
             continue
-        satir = [s.strip() for s in p.stdout.splitlines() if s.strip()]
-        out[ad] = ("gecti" if p.returncode == 0 else "KALDI",
+        out[ad] = ("gecti" if kod == 0 else "KALDI",
                    satir[-1] if satir else "—")
     # Marka adlandirmasi ve yol muhafizi. Bu arac bir teslimatta otuz
     # dosyayi tek seferde isimlendirip yerlestiriyor; kurali bozan bir
@@ -88,26 +101,21 @@ def kok_araclar():
     # adin kurali bozmasi. Hicbiri ekranda gorunmuyor; ancak bir denetim
     # soylerse bilinir.
     for ad, komut in (
-            ("marka.py", ["python3", "tools/marka.py", "--sina"]),
-            ("marka kunyesi", ["python3", "tools/marka.py", "--kunye", "--denetle"]),
-            ("seviye.py", ["python3", "tools/seviye.py", "--denetle"]),
-            ("ortak.py", ["python3", "tools/ortak.py", "--denetle"]),
+            ("marka.py", [PYTHON, "tools/marka.py", "--sina"]),
+            ("marka kunyesi", [PYTHON, "tools/marka.py", "--kunye", "--denetle"]),
+            ("seviye.py", [PYTHON, "tools/seviye.py", "--denetle"]),
+            ("ortak.py", [PYTHON, "tools/ortak.py", "--denetle"]),
     ):
         try:
-            p = subprocess.run(komut, cwd=KOK, capture_output=True,
-                               text=True, timeout=120)
-            satir = [s.strip() for s in (p.stdout + "\n" + p.stderr).splitlines()
-                     if s.strip()]
-            out[ad] = ("gecti" if p.returncode == 0 else "KALDI",
+            kod, satir = calistir(komut, KOK, 120)
+            out[ad] = ("gecti" if kod == 0 else "KALDI",
                        satir[-1] if satir else "—")
         except Exception as e:
             out[ad] = ("KALDI", str(e))
 
     try:
-        p = subprocess.run(["node", "tools/entegre.js"], cwd=KOK,
-                           capture_output=True, text=True, timeout=1800)
-        satir = [s.strip() for s in p.stdout.splitlines() if s.strip()]
-        out["entegre.js"] = ("gecti" if p.returncode == 0 else "KALDI",
+        kod, satir = calistir(["node", "tools/entegre.js"], KOK, 1800, yalniz_stdout=True)
+        out["entegre.js"] = ("gecti" if kod == 0 else "KALDI",
                              satir[-1] if satir else "—")
     except Exception as e:
         out["entegre.js"] = ("KALDI", str(e))

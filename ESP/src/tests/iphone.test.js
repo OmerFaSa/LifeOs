@@ -469,3 +469,34 @@
     });
   });
 })();
+
+/* Sıkı ölçü · uzun liste (2026-10-02): Tarih › Olaylar en yeni 5 + «Tümü».
+   Beş yıllık veride 2 010 olayın hepsi dört düğmeyle çiziliyordu
+   (loadcheck: Tarih 631 ms, eşik 400). Aramada liste kesilmez. */
+(function(){
+  const { describe, it, expect, resetState, pushEvent } = ESP.Test;
+  async function ciz(){
+    const k = document.createElement('div');
+    k.innerHTML = String(await ESP.Screens.history.render());
+    document.body.appendChild(k);
+    return k;
+  }
+  describe('iPhone · sıkı ölçü · Tarih olayları', () => {
+    it('Olaylar: en yeni 5 + «Tümü»; aramada kesilmez', async () => {
+      resetState();
+      for(let i = 0; i < 9; i++) pushEvent(1000 + i, 'olay ' + i, { kind:'siyasi', region:'anadolu' });
+      ESP.Memo.bitir();
+      let k = await ciz();
+      try{
+        expect(k.querySelectorAll('#bl-olaylar .evrow').length).toBe(5);
+        expect(!!k.querySelector('#bl-olaylar [data-act="olay-tumu"]')).toBe(true);
+      }finally{ k.remove(); }
+      ESP.S.ui.histQuery = 'olay';
+      k = await ciz();
+      try{
+        expect(k.querySelectorAll('#bl-olaylar .evrow').length).toBe(9);
+        expect(k.querySelector('#bl-olaylar [data-act="olay-tumu"]')).toBeNull();
+      }finally{ k.remove(); ESP.S.ui.histQuery = ''; ESP.Memo.bitir(); }
+    });
+  });
+})();

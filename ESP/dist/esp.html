@@ -10853,10 +10853,13 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
    (brand/ortak/vitrin.js · donen). Yükseklik sabit: dönerken sayfa
    oynamaz.
    ================================================================ */
-.donen{ position:relative; background:var(--surface); border-radius:var(--r); padding:14px 18px 10px;
-  height:132px; box-sizing:border-box; overflow:hidden; }
-.donen__sahne{ position:relative; height:82px; }
-.donen__madde{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-start;
+.donen{ position:relative; background:var(--surface); border-radius:var(--r); padding:14px 18px 40px;
+  min-height:132px; box-sizing:border-box; overflow:hidden; }
+/* Maddeler AYNI ızgara hücresinde üst üste durur: sahne en uzun maddenin
+   boyundadır, dönerken sayfa oynamaz; uzun cümle kesilmez, alt satıra
+   iner (tasarım denetimi: «içerik kırpılıyor», 2026-10-02). */
+.donen__sahne{ position:relative; display:grid; min-height:82px; }
+.donen__madde{ grid-area:1 / 1; position:relative; min-width:0; display:flex; flex-direction:column; justify-content:flex-start;
   opacity:0; transform:translateY(10px); pointer-events:none; visibility:hidden;
   transition:opacity .5s var(--ease), transform .5s var(--ease), visibility 0s linear .5s; }
 .donen__madde.is-on{ opacity:1; transform:none; pointer-events:auto; visibility:visible;
@@ -10866,12 +10869,12 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
   transition:opacity .18s var(--ease), transform .18s var(--ease); }
 .donen__bas{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; min-height:24px; }
 .donen__ust{ margin:0; font-size:12.5px; font-weight:500; color:var(--text-3); }
-/* iOS widget'ı gibi: üstte büyük sayı ve kısa söz, altında tek satır gri
-   ayrıntı. İkisi de tek satır; sığmayan üç noktayla biter, taşmaz. */
+/* iOS widget'ı gibi: üstte büyük sayı ve kısa söz, altında gri ayrıntı.
+   Sığmayan söz kesilmez, alt satıra iner. */
 .donen__cumle{ margin:0; font-size:22px; line-height:1.2; font-weight:600; letter-spacing:-.02em; color:var(--text);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  overflow-wrap:anywhere; }
 .donen__cumle em{ display:block; margin-top:3px; font-style:normal; font-size:13px; line-height:1.35; font-weight:500;
-  letter-spacing:0; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  letter-spacing:0; color:var(--text-3); overflow-wrap:anywhere; }
 .donen__sayi .sayi{ font-size:inherit; }
 .donen__dugme{ flex:none; min-height:24px; padding:0 4px; border:0; border-radius:8px; background:none; cursor:pointer;
   font:inherit; font-size:12.5px; font-weight:500; color:var(--text-2); transition:color var(--dur) var(--ease), background var(--dur) var(--ease); }
@@ -11515,7 +11518,9 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
   transition:opacity var(--dur, .18s) var(--ease, ease), transform var(--dur, .18s) var(--ease, ease), visibility 0s;
 }
 /* Köşede küçük cam yuvarlak: kartın başlık satırındaki yazının üstüne binmez. */
-.gizle-araclar--uzerinde{ top:-10px; right:-10px; padding:0; border-radius:999px;
+/* Köşenin İÇİNDE durur: dışarı taşan düğme, kesilen (raf) kartta içeriği
+   kırpıyordu ve kartı 10 px genişletiyordu (designcheck, 2026-10-02). */
+.gizle-araclar--uzerinde{ top:8px; right:8px; padding:0; border-radius:999px;
   background:color-mix(in oklab, var(--surface) 72%, transparent);
   -webkit-backdrop-filter:saturate(180%) blur(16px); backdrop-filter:saturate(180%) blur(16px);
   box-shadow:0 0 0 1px var(--border), 0 4px 12px rgba(0,0,0,.10); }
@@ -12677,7 +12682,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'2db1f82', at:'2026-10-02 14:10', dirty:true };
+ESP.BUILD = { id:'9b44df0', at:'2026-10-02 14:59', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -52251,9 +52256,11 @@ ESP.Screens.history = (function(){
     /* 100 TARİH ŞERİDİ (vitrin): yüzyıllar yatay, olaylar nokta; en son
        eklenen olay yanar. Yıl kaydın kendisinden; yılsız olay çizilmez. */
     const V = (window.LIFEOS || {}).VITRIN;
+    /* En yeni olay bir kez bulunur: her olay için listeyi yeniden sıralamak
+       beş yıllık veride (2 010 olay) karesel büyüyordu (loadcheck). */
+    const enYeni = evs().reduce((m, e) => (!m || (e.createdAt || '') > (m.createdAt || '')) ? e : m, null);
     const seritHtml = V ? V.tarihSeridi({ olaylar:evs().filter(e => typeof e.year === 'number').slice()
-      .sort((a, b) => a.year - b.year).map(e => ({ yil:e.year, ad:e.title,
-        on:e === evs().slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0] })) }) : '';
+      .sort((a, b) => a.year - b.year).map(e => ({ yil:e.year, ad:e.title, on:e === enYeni })) }) : '';
     if(seritHtml) rows.push(K.Entry({ label:'Şerit', meta:evs().length + ' olay', wide:true, body:raw(seritHtml) }));
 
     /* Dönem şeridi — her dönem kendi olay sayısıyla. */
@@ -52358,8 +52365,24 @@ ESP.Screens.history = (function(){
       .filter(e => !q || U.norm(e.title).indexOf(q) >= 0);
   }
 
+  /* iPhone sıkı ölçü (2026-10-02): uzun liste en yeni 5 + «Tümü». Beş yıllık
+     veride 2 010 olayın her biri dört düğmeyle çiziliyordu (Tarih 631 ms,
+     loadcheck eşiği 400). Arama ya da dönem süzgeci açıkken kesilmez; açık
+     olay her zaman listededir. */
+  const ILK_OLAY = 5;
+  function gorunenOlaylar(list){
+    const suzgec = !!(S.ui.histQuery || (S.ui.histEra && S.ui.histEra !== 'all'));
+    if(S.ui.olayTumu || suzgec || list.length <= ILK_OLAY) return list;
+    const yeni = list.slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, ILK_OLAY);
+    const acik = S.ui.eventOpen && list.find(e => e.id === S.ui.eventOpen);
+    if(acik && yeni.indexOf(acik) < 0) yeni.push(acik);
+    return yeni;
+  }
+
   function olayRows(){
     const list = filteredEvents();
+    const gorunen = gorunenOlaylar(list);
+    const suzgec = !!(S.ui.histQuery || (S.ui.histEra && S.ui.histEra !== 'all'));
     const rows = [];
 
     rows.push(K.Entry({
@@ -52403,7 +52426,7 @@ ESP.Screens.history = (function(){
       action:K.Input({ id:'ev-q', value:S.ui.histQuery || '', size:'sm',
         placeholder:'Olay ara…', change:'hist-query', aria:'Olay ara' }),
       wide:true,
-      body:html`${map(list, e => {
+      body:html`${map(gorunen, e => {
         const a = ESP.Chrono.explained(e.id);
         const era = ESP.ERA_BY_ID[e.era];
         return html`
@@ -52431,7 +52454,9 @@ ESP.Screens.history = (function(){
               ${when(S.ui.eventOpen === e.id, () => esZamanli(e))}
             </div>
           </div>`;
-      })}`,
+      })}
+      ${when(!suzgec && list.length > ILK_OLAY, () => K.Button({ size:'sm', tone:'ghost', act:'olay-tumu', class:'mt-8',
+        label:S.ui.olayTumu ? 'Yalnız son ' + ILK_OLAY : 'Tümü · ' + list.length + ' olay' }))}`,
     }));
 
     return rows;
@@ -52731,6 +52756,7 @@ ESP.Screens.history = (function(){
   /* ----------------------------------------------------------------- eylem */
 
   const handle = {
+    async 'olay-tumu'(){ S.ui.olayTumu = !S.ui.olayTumu; ESP.App.render(); },
     async 'belge-iste'(el){
       const k = document.getElementById('belge-' + el.dataset.alan);
       const r = await ESP.Belge.iste({ alan:el.dataset.alan, konu:k ? k.value : '' });

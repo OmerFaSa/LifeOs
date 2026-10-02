@@ -11551,10 +11551,13 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
    (brand/ortak/vitrin.js · donen). Yükseklik sabit: dönerken sayfa
    oynamaz.
    ================================================================ */
-.donen{ position:relative; background:var(--surface); border-radius:var(--r); padding:14px 18px 10px;
-  height:132px; box-sizing:border-box; overflow:hidden; }
-.donen__sahne{ position:relative; height:82px; }
-.donen__madde{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-start;
+.donen{ position:relative; background:var(--surface); border-radius:var(--r); padding:14px 18px 40px;
+  min-height:132px; box-sizing:border-box; overflow:hidden; }
+/* Maddeler AYNI ızgara hücresinde üst üste durur: sahne en uzun maddenin
+   boyundadır, dönerken sayfa oynamaz; uzun cümle kesilmez, alt satıra
+   iner (tasarım denetimi: «içerik kırpılıyor», 2026-10-02). */
+.donen__sahne{ position:relative; display:grid; min-height:82px; }
+.donen__madde{ grid-area:1 / 1; position:relative; min-width:0; display:flex; flex-direction:column; justify-content:flex-start;
   opacity:0; transform:translateY(10px); pointer-events:none; visibility:hidden;
   transition:opacity .5s var(--ease), transform .5s var(--ease), visibility 0s linear .5s; }
 .donen__madde.is-on{ opacity:1; transform:none; pointer-events:auto; visibility:visible;
@@ -11564,12 +11567,12 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
   transition:opacity .18s var(--ease), transform .18s var(--ease); }
 .donen__bas{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; min-height:24px; }
 .donen__ust{ margin:0; font-size:12.5px; font-weight:500; color:var(--text-3); }
-/* iOS widget'ı gibi: üstte büyük sayı ve kısa söz, altında tek satır gri
-   ayrıntı. İkisi de tek satır; sığmayan üç noktayla biter, taşmaz. */
+/* iOS widget'ı gibi: üstte büyük sayı ve kısa söz, altında gri ayrıntı.
+   Sığmayan söz kesilmez, alt satıra iner. */
 .donen__cumle{ margin:0; font-size:22px; line-height:1.2; font-weight:600; letter-spacing:-.02em; color:var(--text);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  overflow-wrap:anywhere; }
 .donen__cumle em{ display:block; margin-top:3px; font-style:normal; font-size:13px; line-height:1.35; font-weight:500;
-  letter-spacing:0; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  letter-spacing:0; color:var(--text-3); overflow-wrap:anywhere; }
 .donen__sayi .sayi{ font-size:inherit; }
 .donen__dugme{ flex:none; min-height:24px; padding:0 4px; border:0; border-radius:8px; background:none; cursor:pointer;
   font:inherit; font-size:12.5px; font-weight:500; color:var(--text-2); transition:color var(--dur) var(--ease), background var(--dur) var(--ease); }
@@ -12213,7 +12216,9 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
   transition:opacity var(--dur, .18s) var(--ease, ease), transform var(--dur, .18s) var(--ease, ease), visibility 0s;
 }
 /* Köşede küçük cam yuvarlak: kartın başlık satırındaki yazının üstüne binmez. */
-.gizle-araclar--uzerinde{ top:-10px; right:-10px; padding:0; border-radius:999px;
+/* Köşenin İÇİNDE durur: dışarı taşan düğme, kesilen (raf) kartta içeriği
+   kırpıyordu ve kartı 10 px genişletiyordu (designcheck, 2026-10-02). */
+.gizle-araclar--uzerinde{ top:8px; right:8px; padding:0; border-radius:999px;
   background:color-mix(in oklab, var(--surface) 72%, transparent);
   -webkit-backdrop-filter:saturate(180%) blur(16px); backdrop-filter:saturate(180%) blur(16px);
   box-shadow:0 0 0 1px var(--border), 0 4px 12px rgba(0,0,0,.10); }
@@ -13433,7 +13438,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'2db1f82', at:'2026-10-02 14:08', dirty:true };
+R.BUILD = { id:'9b44df0', at:'2026-10-02 14:59', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -27178,6 +27183,7 @@ R.HINTS = {
     ['not-ofis-modeli', 'Ofis modeli', 'Ücretsiz bir model bağlayınca ajanlar konuşmaya başlar'],
     ['not-masasindaki-rapor', 'Masasındaki rapor', 'Kural motoru hesapladı; ajan bunu yorumlar'],
     ['not-ekipteki-digerleri', 'Ekipteki diğerleri', 'Alan dışı soruyu sahibine sor'],
+    ['hkm', null, 'Sohbette «… hakkında özet hazırla» dersen King’e iletilir; bitince BAM ürünü teklif olarak gelir.'],
   ].forEach(([k, t, c]) => {
     const m = /[.!?…»)]$/.test(c) ? c : c + '.';
     if(!H[k]){ H[k] = { t:t || k, b:m }; return; }
@@ -64415,7 +64421,7 @@ R.Screens.office = (function(){
       ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'urun-sil', data:{ 'data-id':u.id } })}
     </div>`)}</div>`;
     return K.Card({ title:'BAM ürünleri', hint:'hkm', sub:l.length + ' ürün',
-      body:html`${govde}<p class="tiny dim mt-8">Sohbette «… hakkında özet hazırla» dersen King’e iletilir; bitince teklif olarak gelir.</p>` });
+      body:govde });
   }
 
   /* ---------- ekran ---------- */
@@ -64857,8 +64863,9 @@ R.Screens.office = (function(){
     /* iPhone Faz 4 («brifing + tek eylem»): açık ofis, günün brifingi ve
        Patron'un masası (tek eylem). Masa cümleleri toplantı satırında,
        Patron'da ve uzman kartında üç kez yazılıyordu: toplantı ve uzman
-       masaları şerit; kararlar ve ürünler şerit. */
-    kucukVarsayilan:['günün-toplantısı', 'uzman-masaları', 'takipteki-kararlar', 'bam-ürünleri'],
+       masaları ve kararlar şerit. BAM ürünleri yalnız ürün varken çizilir
+       ve o zaman açıktır: yeni ürün gözden kaçmasın. */
+    kucukVarsayilan:['günün-toplantısı', 'uzman-masaları', 'takipteki-kararlar'],
   };
 })();
 

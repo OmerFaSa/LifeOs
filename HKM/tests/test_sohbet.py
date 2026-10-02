@@ -5,6 +5,8 @@ Bu paket bir ozelligi degil bir SOZU korur: model otorite degildir.
 Ag'a CIKILMAZ — saglayicinin cevabi enjekte edilir.
 """
 
+import datetime
+
 from core import ai, butce, db, models, sohbet, sync_engine
 from tests.harness import eq, metric, no, ok, suite, test
 
@@ -263,7 +265,10 @@ def run():
         eq(sorted(r["ok"] for r in satir), [0, 1])
         eq(satir[0]["task"], "sohbet")
         eq(satir[0]["role"], "king")
-        d = butce.month(con, cfg, BUGUN)
+        # Harcama ÇAĞRININ YAPILDIĞI gün deftere yazılır (ölçüm, gerçek saat);
+        # ay toplamı da o günün ayından sorulur. Sabit BUGUN'un ayı sorulunca
+        # test 1 Ekim 2026'da kırmızıya döndü (Eylül'de yeşildi).
+        d = butce.month(con, cfg, datetime.date.today().isoformat())
         ok(d["spent_try"] > 0)
     test("her cagri deftere yazilir", t_every_call_is_recorded)
 
@@ -377,7 +382,10 @@ def run():
         sohbet.konus(con, cfg, "bugün nasıl?", BUGUN, transport=tasiyici)
         # Cagri, SECILEN anahtarla gitti.
         eq(gorulen["anahtar"], "AIza-kardes")
-        d = butce.month(con, cfg, BUGUN)
+        # Harcama ÇAĞRININ YAPILDIĞI gün deftere yazılır (ölçüm, gerçek saat);
+        # ay toplamı da o günün ayından sorulur. Sabit BUGUN'un ayı sorulunca
+        # test 1 Ekim 2026'da kırmızıya döndü (Eylül'de yeşildi).
+        d = butce.month(con, cfg, datetime.date.today().isoformat())
         eq(sorted(d["by_user"]), ["kardes"])
         ok(d["by_user"]["kardes"] > 0)
     test("harcama anahtarin sahibine yazilir", t_spend_goes_to_the_key_owner)

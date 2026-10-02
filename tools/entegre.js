@@ -64,6 +64,23 @@ function hkmFetch(yol, opt){
   }, opt || {}));
 }
 
+/* Eşleme penceresi tek pencerede dört kökeni bağlar (HKM/daemon.py
+   PAIR_MAX_ORIGINS: yüz + AYS + SPİ + ESP; 2026-10-01). Bir modül
+   bağlandıktan sonra pencere öbürleri için AÇIK kalır; «kapalı pencerede
+   eşleme başarısız» ve yüzün elle jeton yolu ancak pencere gerçekten
+   kapanınca sınanabilir. Test pencereyi en kısa süreyle açar ve bu iki
+   denetimden önce kapanmasını bekler — denetim atlanmaz. */
+async function pencereKapansin(){
+  for(let i = 0; i < 60; i++){
+    try{
+      const d = await (await hkmFetch('/api/pair/status')).json();
+      if(!d.open) return true;
+    }catch(e){ /* daemon henüz hazır değil */ }
+    await wait(500);
+  }
+  return false;
+}
+
 async function main(){
   const hatalar = [];
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hkm-entegre-'));
@@ -250,6 +267,7 @@ async function main(){
       /* 1.5 — ESLEME: jeton hicbir yere ELLE yazilmadan baglanabiliyor mu?
          Bu, kurulumun en pahali surtunmesiydi; calistigini gormeden
          «tek tik kurulum» demek, denenmemis bir onay isareti basmaktir. */
+      if(!await pencereKapansin()) hatalar.push(s.id + ': esleme penceresi kapanmadi');
       const kapaliPencere = await page.evaluate(async ([ns, url]) => {
         const B = window[ns].Beacon;
         await B.save({ enabled:false, token:'', url });
@@ -260,7 +278,7 @@ async function main(){
         hatalar.push(s.id + ': pencere kapaliyken esleme basarili gorundu');
       }
 
-      const ac = await hkmFetch('/api/pair/open', { method:'POST', body:'{}' });
+      const ac = await hkmFetch('/api/pair/open', { method:'POST', body:JSON.stringify({ seconds:15 }) });
       if(ac.status !== 200) hatalar.push(s.id + ': esleme penceresi acilamadi');
       const esleme = await page.evaluate(async ([ns, url]) => {
         const B = window[ns].Beacon;
@@ -907,6 +925,9 @@ async function main(){
     const yuz = await browser.newPage({ timezoneId:DILIM });
     const yuzHata = [];
     yuz.on('pageerror', e => yuzHata.push(String(e.message)));
+    /* Pencere açıkken yüz jetonu kendisi alır (baslat.py yolu); elle jeton
+       yolu kapalı pencerede sınanır. */
+    if(!await pencereKapansin()) hatalar.push('yuz: esleme penceresi kapanmadi');
     await yuz.goto('http://127.0.0.1:' + HKM_PORT + '/', { waitUntil:'load' });
     await yuz.waitForSelector('#giris', { timeout:10000 });
     await yuz.fill('#token', TOKEN);

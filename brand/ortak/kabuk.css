@@ -1017,10 +1017,13 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
    (brand/ortak/vitrin.js · donen). Yükseklik sabit: dönerken sayfa
    oynamaz.
    ================================================================ */
-.donen{ position:relative; background:var(--surface); border-radius:var(--r); padding:14px 18px 10px;
-  height:132px; box-sizing:border-box; overflow:hidden; }
-.donen__sahne{ position:relative; height:82px; }
-.donen__madde{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-start;
+.donen{ position:relative; background:var(--surface); border-radius:var(--r); padding:14px 18px 40px;
+  min-height:132px; box-sizing:border-box; overflow:hidden; }
+/* Maddeler AYNI ızgara hücresinde üst üste durur: sahne en uzun maddenin
+   boyundadır, dönerken sayfa oynamaz; uzun cümle kesilmez, alt satıra
+   iner (tasarım denetimi: «içerik kırpılıyor», 2026-10-02). */
+.donen__sahne{ position:relative; display:grid; min-height:82px; }
+.donen__madde{ grid-area:1 / 1; position:relative; min-width:0; display:flex; flex-direction:column; justify-content:flex-start;
   opacity:0; transform:translateY(10px); pointer-events:none; visibility:hidden;
   transition:opacity .5s var(--ease), transform .5s var(--ease), visibility 0s linear .5s; }
 .donen__madde.is-on{ opacity:1; transform:none; pointer-events:auto; visibility:visible;
@@ -1030,12 +1033,12 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
   transition:opacity .18s var(--ease), transform .18s var(--ease); }
 .donen__bas{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; min-height:24px; }
 .donen__ust{ margin:0; font-size:12.5px; font-weight:500; color:var(--text-3); }
-/* iOS widget'ı gibi: üstte büyük sayı ve kısa söz, altında tek satır gri
-   ayrıntı. İkisi de tek satır; sığmayan üç noktayla biter, taşmaz. */
+/* iOS widget'ı gibi: üstte büyük sayı ve kısa söz, altında gri ayrıntı.
+   Sığmayan söz kesilmez, alt satıra iner. */
 .donen__cumle{ margin:0; font-size:22px; line-height:1.2; font-weight:600; letter-spacing:-.02em; color:var(--text);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  overflow-wrap:anywhere; }
 .donen__cumle em{ display:block; margin-top:3px; font-style:normal; font-size:13px; line-height:1.35; font-weight:500;
-  letter-spacing:0; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  letter-spacing:0; color:var(--text-3); overflow-wrap:anywhere; }
 .donen__sayi .sayi{ font-size:inherit; }
 .donen__dugme{ flex:none; min-height:24px; padding:0 4px; border:0; border-radius:8px; background:none; cursor:pointer;
   font:inherit; font-size:12.5px; font-weight:500; color:var(--text-2); transition:color var(--dur) var(--ease), background var(--dur) var(--ease); }

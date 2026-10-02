@@ -13,6 +13,7 @@ import json
 import os
 import tempfile
 import threading
+import time
 import urllib.error
 import urllib.request
 from http.server import ThreadingHTTPServer
@@ -308,6 +309,29 @@ def _run():
             kod, d = S.call("/api/pair/status")
             eq(d["open"], False)
         test("pencere sinirli sayida kokene verir", t_pair_window_has_origin_cap)
+
+        def t_pair_status_agrees_with_take():
+            """Durum ucu ile jeton kapisi AYNI ölçütle karar verir. Durum
+            kalan süreyi aşağı yuvarlıyordu (int): son saniyede «kapalı»
+            derken kapı jetonu hâlâ veriyordu (2026-10-02, tools/entegre.js
+            «pencere kapalıyken eşleme başarılı göründü»)."""
+            S.srv.rate = {}
+            S.call("/api/pair/open", body={})
+            S.srv.pair["until"] = time.time() + 0.6     # son yarım saniye
+            kod, d = S.call("/api/pair/status")
+            eq(d["open"], True)
+            ok(d["seconds_left"] >= 1)
+            kod, _ = S.ham("/api/pair", b"{}", {"Content-Type": "application/json",
+                                               "Origin": "http://localhost:5101"})
+            eq(kod, 200)
+            S.srv.pair["until"] = time.time() - 0.01   # süre doldu
+            kod, d = S.call("/api/pair/status")
+            eq(d["open"], False)
+            eq(d["seconds_left"], 0)
+            kod, _ = S.ham("/api/pair", b"{}", {"Content-Type": "application/json",
+                                               "Origin": "http://localhost:5102"})
+            eq(kod, 403)
+        test("durum ucu ile jeton kapisi ayni seyi soyler", t_pair_status_agrees_with_take)
 
         def t_pair_window_can_be_shortened_not_lengthened():
             """Tek tik, yuz icin KISA bir pencere ister: pencere ne kadar

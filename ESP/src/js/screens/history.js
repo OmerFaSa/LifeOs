@@ -66,9 +66,11 @@ ESP.Screens.history = (function(){
     /* 100 TARİH ŞERİDİ (vitrin): yüzyıllar yatay, olaylar nokta; en son
        eklenen olay yanar. Yıl kaydın kendisinden; yılsız olay çizilmez. */
     const V = (window.LIFEOS || {}).VITRIN;
+    /* En yeni olay bir kez bulunur: her olay için listeyi yeniden sıralamak
+       beş yıllık veride (2 010 olay) karesel büyüyordu (loadcheck). */
+    const enYeni = evs().reduce((m, e) => (!m || (e.createdAt || '') > (m.createdAt || '')) ? e : m, null);
     const seritHtml = V ? V.tarihSeridi({ olaylar:evs().filter(e => typeof e.year === 'number').slice()
-      .sort((a, b) => a.year - b.year).map(e => ({ yil:e.year, ad:e.title,
-        on:e === evs().slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''))[0] })) }) : '';
+      .sort((a, b) => a.year - b.year).map(e => ({ yil:e.year, ad:e.title, on:e === enYeni })) }) : '';
     if(seritHtml) rows.push(K.Entry({ label:'Şerit', meta:evs().length + ' olay', wide:true, body:raw(seritHtml) }));
 
     /* Dönem şeridi — her dönem kendi olay sayısıyla. */
@@ -173,8 +175,24 @@ ESP.Screens.history = (function(){
       .filter(e => !q || U.norm(e.title).indexOf(q) >= 0);
   }
 
+  /* iPhone sıkı ölçü (2026-10-02): uzun liste en yeni 5 + «Tümü». Beş yıllık
+     veride 2 010 olayın her biri dört düğmeyle çiziliyordu (Tarih 631 ms,
+     loadcheck eşiği 400). Arama ya da dönem süzgeci açıkken kesilmez; açık
+     olay her zaman listededir. */
+  const ILK_OLAY = 5;
+  function gorunenOlaylar(list){
+    const suzgec = !!(S.ui.histQuery || (S.ui.histEra && S.ui.histEra !== 'all'));
+    if(S.ui.olayTumu || suzgec || list.length <= ILK_OLAY) return list;
+    const yeni = list.slice().sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, ILK_OLAY);
+    const acik = S.ui.eventOpen && list.find(e => e.id === S.ui.eventOpen);
+    if(acik && yeni.indexOf(acik) < 0) yeni.push(acik);
+    return yeni;
+  }
+
   function olayRows(){
     const list = filteredEvents();
+    const gorunen = gorunenOlaylar(list);
+    const suzgec = !!(S.ui.histQuery || (S.ui.histEra && S.ui.histEra !== 'all'));
     const rows = [];
 
     rows.push(K.Entry({
@@ -218,7 +236,7 @@ ESP.Screens.history = (function(){
       action:K.Input({ id:'ev-q', value:S.ui.histQuery || '', size:'sm',
         placeholder:'Olay ara…', change:'hist-query', aria:'Olay ara' }),
       wide:true,
-      body:html`${map(list, e => {
+      body:html`${map(gorunen, e => {
         const a = ESP.Chrono.explained(e.id);
         const era = ESP.ERA_BY_ID[e.era];
         return html`
@@ -246,7 +264,9 @@ ESP.Screens.history = (function(){
               ${when(S.ui.eventOpen === e.id, () => esZamanli(e))}
             </div>
           </div>`;
-      })}`,
+      })}
+      ${when(!suzgec && list.length > ILK_OLAY, () => K.Button({ size:'sm', tone:'ghost', act:'olay-tumu', class:'mt-8',
+        label:S.ui.olayTumu ? 'Yalnız son ' + ILK_OLAY : 'Tümü · ' + list.length + ' olay' }))}`,
     }));
 
     return rows;
@@ -546,6 +566,7 @@ ESP.Screens.history = (function(){
   /* ----------------------------------------------------------------- eylem */
 
   const handle = {
+    async 'olay-tumu'(){ S.ui.olayTumu = !S.ui.olayTumu; ESP.App.render(); },
     async 'belge-iste'(el){
       const k = document.getElementById('belge-' + el.dataset.alan);
       const r = await ESP.Belge.iste({ alan:el.dataset.alan, konu:k ? k.value : '' });
