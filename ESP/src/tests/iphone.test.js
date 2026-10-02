@@ -516,3 +516,29 @@
     });
   });
 })();
+
+/* Kullanıcı (2026-10-02): «ESP'de AYS kadar sade olmayan, göz yoran şeyler
+   var». Sıradaki iş AYS'deki gibi tek kart: üstünde ayrı etiket satırı
+   («Sıradaki iş · Öncelik 1») ve not yok; kuralın gerekçesi ve «Konuşarak
+   gir» örneği ekranın ⓘ kartında — hiçbir cümle kaybolmadı. */
+(function(){
+  const { describe, it, expect, resetState } = ESP.Test;
+  describe('Sade (ESP) · Bugün', () => {
+    it('sıradaki iş tek kart; gerekçe ve örnek ⓘ kartında', () => {
+      resetState();
+      const d = document.createElement('div');
+      d.innerHTML = String(ESP.Screens.today.render());
+      const kah = d.querySelector('.kahraman');
+      expect(!!kah).toBe(true);
+      expect(kah.matches('section.lrow')).toBe(false);
+      expect(kah.querySelector('.nextup__label').textContent).toContain(ESP.Planner.nextAction().rank ? 'Sıradaki iş' : 'Bekleyen iş yok');
+      expect(d.textContent.indexOf('Öncelik ')).toBe(-1);
+      expect(d.textContent.indexOf('gibi yazabilirsin')).toBe(-1);
+      const b = document.createElement('div');
+      b.innerHTML = String(ESP.App.sayfaBasiHtml(ESP.Screens.today));
+      const n = ESP.Planner.nextAction();
+      if(n.rank) expect(b.querySelector('.bilgikart').textContent).toContain(n.why);
+      expect(b.querySelector('.bilgikart').textContent).toContain('gibi yazabilirsin');
+    });
+  });
+})();

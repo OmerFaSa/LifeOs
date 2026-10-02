@@ -255,9 +255,10 @@ def t_sakin_hata():
 
 def t_v5_kabuk_ve_gun_cumlesi():
     """v5 (Tasarim Dili surum 5): masaustunde sol kenar cubugu, dort sistem
-    gecisi (Merkez burasi, oteki uc kendi kapisinda) ve Bugun'un buyuk
-    basligi gunun CUMLESI — koddan: kac sistemden veri geldi, oneri
-    bekliyor mu, ve Merkez'in module yazmadigi. Model cagrilmaz."""
+    gecisi (Merkez burasi, oteki uc kendi kapisinda) ve gunun CUMLESI —
+    koddan: kac sistemden veri geldi, oneri bekliyor mu, ve Merkez'in
+    module yazmadigi. Model cagrilmaz. (2026-10-02'den beri cumle
+    basligin yanindaki bilgi kartinda; bkz. t_sade_yuz.)"""
     m = _yuz()
     for s in ('class="moduller"', 'data-kapi="4173"', 'data-kapi="4183"', 'data-kapi="4193"',
               'aria-current="true"', 'id="gun-cumle"'):
@@ -323,6 +324,32 @@ def t_ne_degisti():
     ok('data-oz="017"' in m and "Ne değişti?" in m and "data-yenilik-kapat" in m)
 
 
+
+def t_sade_yuz():
+    """Kullanici (2026-10-02): «HKM'de cok goz yoran seyler var; AYS gibi
+    sade ve profesyonel olsun». Baslik uc moduldeki gibi cekmecenin adi
+    («Bugun», «Ofis») ve ortada; gunun cumlesi ve sayfa aciklamalari
+    basligin yanindaki bilgi kartinda (hicbir cumle silinmedi); sade blok
+    gri zemin, cercevesiz kart, bolumlu secici ve grafit koyu temayi
+    tasir; bilgi karti dokunmayla ve Esc ile kapanir."""
+    m = _yuz()
+    bug = m[m.index('<div data-bolme="bugun">'):m.index('<div class="serit" id="serit">')]
+    ok("<h1>Bugün</h1>" in bug, "Bugun basligi cekmecenin adi")
+    kart = bug[bug.index('class="hkm-bilgikart"'):]
+    ok('id="gun-cumle"' in kart and 'id="gun-selam"' in kart, "gunun cumlesi bilgi kartinda")
+    no('<p class="sub" style="margin-bottom:16px">' in m, "aciklama paragrafi ekranda kalmis")
+    for ad, cumle in (("Ofis", "BAM hiçbir sisteme yazmaz"), ("Hedefler", "Üç sistemin etkin hedefleri"),
+                      ("Teklifler", "HKM sistemlere doğrudan yazmaz"), ("Hayat Mottosu", "Kendi düşüncelerin.")):
+        bas = m.index("<h1>" + ad + "</h1>")
+        ok(cumle in m[bas:bas + 1600], ad + " aciklamasi bilgi kartinda")
+    sade = m[m.index('<style id="hkm-sade">'):]
+    sade = sade[:sade.index("</script>")]
+    for s in ("--bg:#121214", "--yuzey:#1C1C1F", ".tabs button.on", "grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)",
+              "border-radius:999px", "'Escape'", "aria-expanded"):
+        ok(s in sade, s)
+    no("#000000" in sade, "koyu tema saf siyah")
+    ok(m.index('<style id="hkm-sade">') < m.index("<!-- MEYDAN (kullan"), "sade blok Meydan blogundan once")
+
 def run():
     suite("HKM yüzü — giriş şeridi")
     test("üç adım vardır", t_giris_seridi_uc_adim)
@@ -339,6 +366,7 @@ def run():
     test("sakin hata: kırmızı satır yok, ortak cümle (011)", t_sakin_hata)
     test("v5 kabuk: kenar çubuğu, sistem geçişi, günün cümlesi", t_v5_kabuk_ve_gun_cumlesi)
     test("v5 düzen: sistemler paralel, konsey tam en", t_v5_duzen)
+    test("sade yüz: başlık çekmecenin adı, açıklama bilgi kartında, grafit koyu", t_sade_yuz)
     test("çapraz etki: kaynak → hedef, bilinmeyen türde uydurma yok (124)", t_capraz_etki)
     test("ne değişti: tek kart, yalnız eski kullanıcıya (017)", t_ne_degisti)
     test("fiş yükleme: önizleme, onay, küçültme", t_fis_yukleme)

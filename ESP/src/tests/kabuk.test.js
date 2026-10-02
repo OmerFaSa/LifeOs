@@ -515,5 +515,22 @@
         expect(d.querySelector('.bilgikart__metin').getAttribute('data-oz')).toBe('004');
       }finally{ d.remove(); }
     });
+
+    /* Kullanıcı (2026-10-02): «SPİ ve ESP'de AYS kadar sade olmayan, göz
+       yoran şeyler var». Uyarı kutusu nötr gri (tonu simge söyler), grafik
+       okuma genişliğinden büyümez, seçim kartı çerçevesiz, vitrin serifi
+       gövde yazısında. Üç modülde aynı kural. */
+    it('sakin içerik: nötr uyarı kutusu, sınırlı grafik, çerçevesiz seçim kartı, serifsiz vitrin', () => {
+      const d = yerlestir('<div class="site--v5"><div class="kutu"><div class="notice notice--warn"><svg></svg><div>x</div></div>'
+        + '<svg class="grafik" viewBox="0 0 560 120" preserveAspectRatio="none"></svg>'
+        + '<button class="pickcard">a</button><div class="vk"><b class="serif">3</b></div></div></div>');
+      try{
+        const n = d.querySelector('.notice');
+        expect(getComputedStyle(n).backgroundColor).toBe(renk(kok('--surface-2')));
+        expect(getComputedStyle(d.querySelector('.grafik')).maxWidth).toBe('640px');
+        expect(getComputedStyle(d.querySelector('.pickcard')).borderTopColor).toBe('rgba(0, 0, 0, 0)');
+        expect(/Newsreader/.test(getComputedStyle(d.querySelector('.vk .serif')).fontFamily)).toBe(false);
+      }finally{ d.remove(); }
+    });
   });
 })();

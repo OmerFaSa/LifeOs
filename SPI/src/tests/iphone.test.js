@@ -527,3 +527,26 @@
     });
   });
 })();
+
+/* Kullanıcı (2026-10-02): «SPİ'de AYS kadar sade olmayan, göz yoran şeyler
+   var». Bugün'ün dört ölçüm alanı simgesiz; kartlarda sabit açıklama
+   satırı yok — iki cümle ekranın ⓘ kartında (lede), kaybolmadı. */
+(function(){
+  const { describe, it, expect, resetState } = SP.Test;
+  describe('Sade (SPİ) · Bugün', () => {
+    it('günün ölçümü simgesiz; «boş alan» ve «ev ölçüsü» cümleleri ⓘ kartında', async () => {
+      resetState();
+      const d = document.createElement('div');
+      d.innerHTML = String(await SP.Screens.today.render());
+      const kutu = Array.from(d.querySelectorAll('.kutu')).find(k => /Günün ölçümü/.test(k.textContent));
+      expect(!!kutu).toBe(true);
+      expect(kutu.querySelectorAll('img').length).toBe(0);
+      expect(d.textContent.indexOf('Boş bıraktığın alan sıfır sayılmaz')).toBe(-1);
+      expect(d.textContent.indexOf('Ev ölçüsü «tahmin»')).toBe(-1);
+      const b = document.createElement('div');
+      b.innerHTML = String(SP.App.sayfaBasiHtml(SP.Screens.today));
+      expect(b.querySelector('.bilgikart').textContent).toContain('sıfır sayılmaz');
+      expect(b.querySelector('.bilgikart').textContent).toContain('«tahmin»');
+    });
+  });
+})();

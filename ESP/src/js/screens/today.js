@@ -26,28 +26,26 @@ ESP.Screens.today = (function(){
 
   /* ------------------------------------------------------------ siradaki is */
 
+  /* SADE (kullanıcı, 2026-10-02: «ESP'de AYS kadar sade olmayan, göz yoran
+     şeyler var»): sıradaki iş AYS'deki gibi tek kart — üstünde ayrı bir
+     etiket satırı («Sıradaki iş · Öncelik 1») ve not yok. Kuralın gerekçesi
+     (n.why) ekranın ⓘ kartında (lede); kartta iş ve ölçülen ayrıntı. */
   function nextCard(){
     const n = ESP.Planner.nextAction();
-    return K.Entry({
-      class:'kahraman',
-      label:'Sıradaki iş', hint:'next-action',
-      meta:n.rank ? 'Öncelik ' + n.rank : 'Bekleyen yok',
-      note:n.why,
-      body:K.NextUp({
+    return html`<div class="kahraman">${K.NextUp({
         icon:n.rank ? 'zap' : 'check',
         calm:!n.rank,
         /* Bekleyen iş kalmadığında görünür. ESP'nin işi bilgidir;
            kartın üstündeki kitap onu söyler. */
         sanat:'bilgi',
-        label:n.rank ? 'Kural motorunun seçtiği tek iş' : 'Bekleyen iş yok',
+        label:n.rank ? 'Sıradaki iş' : 'Bekleyen iş yok', hint:'next-action',
         title:n.title,
         why:n.detail,
         action:n.route && n.route !== 'today'
           ? K.Button({ label:'Aç', tone:'primary', size:'sm', act:'go',
               data:{ 'data-route':n.route } })
           : '',
-      }),
-    });
+      })}</div>`;
   }
 
   /* Denetim sorusu — AYRI EKRAN DEĞİL, mevcut akışın içinde tek satır.
@@ -162,8 +160,6 @@ ESP.Screens.today = (function(){
     return K.Entry({
       label:'Konuşarak gir',
       meta:'tek satır',
-      note:'«45 dakika gitar çalıştım ve 20 dakika kelime tekrarı yaptım» gibi '
-         + 'yazabilirsin. Anlaşılmayan satır atılmaz, sana geri gösterilir.',
       body:html`
         <div class="row">
           ${K.Input({ id:'quick-text', placeholder:'45 dk gitar, 20 dakika kelime',
@@ -845,7 +841,8 @@ ESP.Screens.today = (function(){
     return html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
-          ${K.Ledger(() => [nextCard(), quickForm(), signalRow()].filter(Boolean))}
+          ${nextCard()}
+          ${K.Ledger(() => [quickForm(), signalRow()].filter(Boolean))}
         </section>
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
           ${K.Ledger(() => [sessionList(), planRowToday()].filter(Boolean))}
@@ -1137,8 +1134,11 @@ ESP.Screens.today = (function(){
         + (n.rank ? ' Sıradaki iş hazır.' : ' Bekleyen iş kalmadı.');
     },
     lede(){
-      return M.sessionsOf(gun()).length ? ''
-        : 'Girilmemiş gün sıfır sayılmaz; hiçbir ortalamaya katılmaz.';
+      const n = ESP.Planner.nextAction();
+      return [n.rank && n.why ? 'Sıradaki iş (öncelik ' + n.rank + '): ' + n.why : '',
+        M.sessionsOf(gun()).length ? '' : 'Girilmemiş gün sıfır sayılmaz; hiçbir ortalamaya katılmaz.',
+        'Konuşarak gir: «45 dakika gitar çalıştım ve 20 dakika kelime tekrarı yaptım» gibi yazabilirsin; '
+          + 'anlaşılmayan satır atılmaz, sana geri gösterilir.'].filter(Boolean).join(' ');
     },
     stats(){
       const rows = M.sessionsOf(gun());

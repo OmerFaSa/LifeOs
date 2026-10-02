@@ -818,12 +818,15 @@ SP.Screens.today = (function(){
     const alanlar = FIELDS.filter(f => HIZLI_ALAN.indexOf(f.id) >= 0);
     return K.Kutu({ ad:'Günün ölçümü', class:'kahraman',
       yuva:raw(SP.h.esc(d === U.todayISO() ? 'bugün' : U.fmtDate(d)) + OdakRozeti(d)),
+      /* SADE (kullanıcı, 2026-10-02: «SPİ'de AYS kadar sade olmayan, göz
+         yoran şeyler var»): Bugün'ün dört alanı simgesiz, yalnız etiket —
+         renkli simgeler «Günü düzenle»nin tam formunda durur. «Boş alan
+         sıfır sayılmaz» cümlesi ekranın ⓘ kartında (lede). */
       govde:html`<div class="grid-form">${map(alanlar, f => K.Field({
-          label:raw(window.LIFEOS.SIMGELI('olcum', f.marker, f.label)),
+          label:f.label,
           input:K.Input({ id:'v-' + f.id, type:'number', numeric:true, step:f.step,
             min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
         }))}</div>
-        <p class="tiny dim mt-8">Boş bıraktığın alan sıfır sayılmaz; uyku tek başına yeter.</p>
         <div id="suphe-yuva" aria-live="polite"></div>
         <div class="row wrap gap-8 mt-8">
           ${K.Button({ label:'Kaydet', tone:'primary', act:'save-vitals' })}
@@ -838,8 +841,7 @@ SP.Screens.today = (function(){
           ${K.Input({ id:'quick-meal', placeholder:'1 tabak etli kuru fasulye, 1 bardak ayran',
             aria:'Öğün metni' })}
           ${K.Button({ label:'Öğüne ekle', act:'quick-meal' })}
-        </div>
-        <p class="tiny dim mt-8">Ev ölçüsü «tahmin», tartılmış gram «ölçüldü» olarak yazılır.</p>` });
+        </div>` });
   }
 
   /* ---------- D · vitrin kartları (brand/ortak/vitrin.js) ---------- */
@@ -1419,12 +1421,15 @@ SP.Screens.today = (function(){
       const r = SP.Move.readiness(d);
       if(!r.ok){
         return 'Uyku süresini yazman bile yeter: tek girdiyle anlamlı bir sonuç '
-          + 'çıkar. Boş bıraktığın alan sıfır sayılmaz, hesaba hiç girmez.';
+          + 'çıkar. Boş bıraktığın alan sıfır sayılmaz, hesaba hiç girmez. Öğünde ev '
+          + 'ölçüsü «tahmin», tartılmış gram «ölçüldü» olarak yazılır.';
       }
       const m = SP.Calc.minimumDay();
       const eksik = m.rows.filter(x => !x.ok).map(x => x.label.toLocaleLowerCase('tr-TR'));
       return r.band.order
-        + (eksik.length ? ' Asgari gün için kalan: ' + eksik.join(', ') + '.' : '');
+        + (eksik.length ? ' Asgari gün için kalan: ' + eksik.join(', ') + '.' : '')
+        + ' Boş bıraktığın alan sıfır sayılmaz; uyku tek başına yeter. Öğünde ev ölçüsü «tahmin», '
+        + 'tartılmış gram «ölçüldü» olarak yazılır.';
     },
     stats(){
       const m = SP.Calc.minimumDay();

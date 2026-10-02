@@ -11549,6 +11549,53 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
 .chip--on, .chip--tap[aria-pressed="true"]{ background:var(--text); border-color:transparent; color:var(--bg); font-weight:600; }
 .chip--on:hover, .chip--tap[aria-pressed="true"]:hover{ background:color-mix(in oklab, var(--text) 88%, var(--bg)); color:var(--bg); }
 
+/* ================================================================
+   SAKİN İÇERİK (2026-10-02 akşam, kullanıcı: «ESP ve SPİ'de AYS kadar
+   sade olmayan, çok göz yoran şeyler var — düzen getir, AYS gibi
+   profesyonel ve sade olsun»). Üç modülde aynı; AYS'nin görünüşü pek
+   değişmez, SPİ ve ESP ona yaklaşır:
+   · uyarı kutusu bej/yeşil dolgulu değil, nötr gri; tonu yalnız simge
+     söyler (kırmızı tehlike kutusu belirgin kalır),
+   · «Dil modeli kapalı» şeridi çizgisiz, tek sessiz satır,
+   · sayfa sonu üç modülde aynı sessiz satırlar (Sınır etiketi kalın değil),
+   · grafik okuma genişliğinden büyümez (560×120 çizgi tam ekranda 270 px
+     boy alıyor, zikzak bütün sayfayı kaplıyordu),
+   · seçim kartları (Seans seç, şablonlar) çerçevesiz yumuşak karo,
+   · vitrin kartlarının serif rakamı gövde yazısında, iç kutuların çizgisi
+     yarı ton; ajan kartının renkli halkası yok,
+   · SPİ öğün kartı kart içinde ikinci bir çerçeve değil, ayraçlı grup.
+   ================================================================ */
+.notice--info, .notice--warn, .notice--ok{ background:var(--surface-2); border-color:transparent; color:var(--text); }
+.notice--warn > svg, .notice--warn .icon{ color:var(--accent); }
+.notice--ok > svg, .notice--ok .icon{ color:var(--ok-ink); }
+.notice--info > svg, .notice--info .icon{ color:var(--text-3); }
+.notice--danger{ border-color:transparent; }
+.notice__title{ font-weight:600; }
+
+.modelsiz{ background:none; border-bottom:0; padding:0 2px; margin:0 0 12px; color:var(--text-3); font-size:12.5px; }
+.modelsiz__bas{ color:var(--text-2); font-weight:500; }
+
+.site--v5 .sayfasonu__ic{ font-size:12px; color:var(--text-3); row-gap:4px; }
+.site--v5 .sayfasonu .sitefoot__k{ color:var(--text-3); font-weight:500; text-transform:none; letter-spacing:0; }
+
+.grafik{ max-width:640px; margin-inline:auto; }
+
+.pickcard{ border-color:transparent; background:var(--surface-2); box-shadow:none; }
+.pickcard:hover{ border-color:transparent; background:var(--surface-3); }
+.pickcard.is-on{ border-color:transparent; background:var(--surface); box-shadow:0 0 0 1.5px var(--primary); }
+
+.site--v5 .vk{ --vk-serif:var(--font-body); --vk-l1:color-mix(in oklab, var(--border) 55%, transparent); }
+.site--v5 .vk .serif{ font-weight:500; letter-spacing:-.02em; }
+.site--v5 .vk .x47 .av{ width:56px; height:56px; font-size:18px; box-shadow:none; }
+.site--v5 .vk .x47 b{ font-weight:600; font-size:20px; letter-spacing:-.015em; }
+.site--v5 .vk .w17 .ls2 :is(div, button){ border-color:transparent; background:var(--vk-s2); }
+.site--v5 .vk .w17 .ls2 :is(div, button).on{ border-color:transparent; background:color-mix(in oklab, var(--spi) 10%, var(--surface)); }
+
+.mealcard{ border:0; border-radius:0; background:none; padding:var(--sp-3) 0; margin:0; }
+.mealcard + .mealcard{ border-top:1px solid var(--border-soft); }
+.mealcard__kcal{ font-weight:650; }
+.mealitem{ border-top-color:var(--border-soft); }
+
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
@@ -13277,7 +13324,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'ba051c9', at:'2026-10-02 16:50', dirty:true };
+R.BUILD = { id:'a7d051d', at:'2026-10-02 17:35', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
