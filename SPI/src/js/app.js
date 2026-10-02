@@ -300,13 +300,18 @@ SP.App = (function(){
     labs:['nasıl-okunur', 'sınır', 'hiç-ölçülmemiş-paneller', 'ölçülmemiş', 'dağılım', 'referans-bandı'],
     analytics:['veri-doluluğu', 'raporun-mantığı'],
     guide:['nasıl-kullanılır', 'beş-modül', 'kullanım-hakkı', 'klinik-sınır'],
-    /* iPhone Faz 2b (belgeler/ekip/IPHONE-PLANI.md): tekrar ve başvuru
-       kartları. Tabak, Günlük hedef'in sayılarını kalan gram olarak yeniden
-       çizer; iki hafta kartı dönen «Hareket» kartının haftasını; bütçenin
-       yeri ve fiyat kaynağı sabit başvuru metnidir. */
-    meals:['tabak', 'öğün-çizelgesi'],
-    move:['bu-hafta-hareket', 'antrenman-haftası'],
-    basket:['bütçenin-yeri', 'fiyatlar-nereden-geliyor'],
+    /* iPhone Faz 2b–2d (belgeler/ekip/IPHONE-PLANI.md, sıkı ölçü): tekrar,
+       ayrıntı ve başvuru kartları. Günlük hedef ve günün yük emri dönen
+       kartların ayrıntısıdır; Tabak hedefin sayılarını kalan gram olarak
+       yeniden çizer; iki hafta kartı dönen «Hareket» kartının haftasını;
+       ilerleme kuralı ⓘ'de ve künyede; hane tablosu Hane ekranında
+       düzenlenir; bütçenin yeri, kural sırası ve fiyat kaynağı sabit
+       başvuru metnidir. */
+    meals:['günlük-hedef', 'tabak', 'öğün-çizelgesi'],
+    move:['günün-yük-emri', 'bu-hafta-hareket', 'antrenman-haftası',
+      'ilerleme-kuralı-kardiyo', 'ilerleme-kuralı-kuvvet', 'ilerleme-kuralı-esneklik'],
+    basket:['bütçenin-yeri', 'fiyatlar-nereden-geliyor', 'kural-sırası'],
+    kitchen:['hane'],
   };
 
   function sayfaBasiHtml(sc){

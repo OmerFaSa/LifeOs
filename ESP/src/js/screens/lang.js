@@ -89,25 +89,18 @@ ESP.Screens.lang = (function(){
         return [K.Entry({
           label:'Çalışma', hint:'srs',
           meta:'vadesi gelen kart yok',
-          note:'Aralıklı tekrarın amacı her gün çalışmak değil, doğru günde '
-             + 'çalışmaktır. Bugün sırası gelen kart yok.',
           body:K.Notice({ tone:'ok', title:'Bugünlük bitti',
-            body:d.total + ' kartın hepsi ileri tarihli. Erken çalışmak aralığı '
-              + 'kısaltır ve tekrar sayısını artırır — kazanç getirmez.' }),
+            body:d.total + ' kartın hepsi ileri tarihli.' }),
         })];
       }
       return [K.Entry({
         label:'Çalışma', hint:'srs',
         meta:d.due + ' kart vadeli' + (d.overdue ? ' · ' + d.overdue + ' gecikmiş' : ''),
-        note:d.overdue
-          ? 'En çok geciken kart ' + d.maxOverdueDays + ' gündür bekliyor.'
-          : 'Bugün sırası gelenler.',
+        /* Gecikme yoksa künye («N kart vadeli») yeter; not yalnız gecikmeyi söyler. */
+        note:d.overdue ? 'En çok geciken kart ' + d.maxOverdueDays + ' gündür bekliyor.' : null,
         body:html`
           ${when(dersKapagi(d), () => html`<div class="mb-12">${raw(dersKapagi(d))}</div>`)}
-          ${K.Button({ label:d.due + ' kartı çalış', tone:'primary', act:'start-review' })}
-          <p class="small muted mt-10">Oturum başladığında liste dondurulur:
-            çalışırken cevapladığın kartın vadesi ileri gitse de kuyruktan düşmez,
-            ilerlemeyi görebilirsin.</p>`,
+          ${K.Button({ label:d.due + ' kartı çalış', tone:'primary', act:'start-review' })}`,
       })];
     }
 
@@ -201,14 +194,10 @@ ESP.Screens.lang = (function(){
     /* 103 KELİME AĞI: senin yazdığın eş/zıt anlamlılarla; en az iki bağ. */
     const agli = VT() && M.cardsOf(aktifDil()).find(c => (c.es || []).length + (c.zit || []).length >= 2);
     const ag = agli ? VT().kelimeAgi({ kelime:agli.front, es:agli.es, zit:agli.zit, dil:agli.lang }) : '';
-    return [when(bag, () => K.Entry({ label:'Bağlamda', meta:'örnek cümlede',
-      note:'Kelime kendi cümlesinin içinde; anlamı yerinde.', body:raw(bag) })),
-    when(ag, () => K.Entry({ label:'Kelime ağı', meta:agli.front,
-      note:'Eş anlamlılar çevresinde, zıt anlamlı kesik çerçeveyle; bağları kartı eklerken sen yazdın.', body:raw(ag) })), K.Entry({
-      label:'Deste',
+    return [when(bag, () => K.Entry({ label:'Bağlamda', meta:'örnek cümlede', body:raw(bag) })),
+    when(ag, () => K.Entry({ label:'Kelime ağı', hint:'kelime-agi', meta:agli.front, body:raw(ag) })), K.Entry({
+      label:'Deste', hint:'deste',
       meta:hepsi.length + ' kart',
-      note:'Vadesi yakın olan üstte. «Aktif» işareti kartın üretimde '
-         + 'kullanıldığını söyler; tanımak ile kullanmak ayrı şeylerdir.',
       action:html`${K.Input({ id:'card-q', value:S.ui.cardQuery || '',
         placeholder:'Kart ara…', change:'card-query', size:'sm', aria:'Kart ara' })}`,
       wide:true,
@@ -233,10 +222,8 @@ ESP.Screens.lang = (function(){
     const res = S.ui.vocabParsed;
     return [
       K.Entry({
-        label:'Liste yapıştır',
+        label:'Liste yapıştır', hint:'liste-yapistir',
         meta:'kelime – karşılık',
-        note:'Üç ayraç tanınır: tire, eşittir, iki nokta. Tanınmayan satır '
-           + 'atılmaz — sana geri gösterilir ve elle bağlarsın.',
         body:html`
           ${K.Textarea({ id:'vocab-text', rows:6, aria:'Kelime listesi',
             placeholder:'nevertheless – yine de\nto grasp = kavramak\nmake a point: bir noktaya değinmek' })}
@@ -269,10 +256,8 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'Tohum deste',
+        label:'Tohum deste', hint:'tohum-deste',
         meta:'başlangıç için',
-        note:'Bu kartlar senin ölçümün değildir; ilk ekranı boş bırakmamak için '
-           + 'vardır ve istediğin zaman silinir.',
         body:ESP.SEED_CARDS[aktifDil()]
           ? html`${K.Button({ label:'Tohum desteyi ekle', act:'seed-cards' })}
               <p class="small muted mt-8">${ESP.SEED_CARDS[aktifDil()].length} kart</p>`
@@ -353,8 +338,6 @@ ESP.Screens.lang = (function(){
       K.Entry({
         label:'Kutu dağılımı', hint:'srs',
         meta:d.total + ' kart',
-        note:'Kutu kaba sınıftır: bir kart doğru cevaplandıkça yukarı çıkar, '
-           + 'unutulduğunda başa döner.',
         body:d.total
           ? html`${when(desteDurumu(d), () => html`<div class="mb-12">${raw(desteDurumu(d))}</div>`)}${map(d.boxes, b => K.Meter({
               label:'Kutu ' + b.box + ' · ' + b.label,
@@ -364,10 +347,8 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'Bant', hint:'pedagogic',
+        label:'Bant', hint:'bant',
         meta:bant.band ? bant.band.label : 'ölçülemedi',
-        note:'Bant KİŞİYE değil ÜRETİME verilir ve iki ölçüm birden gerekir: '
-           + 'aktif kelime sayısı ve retansiyon.',
         body:html`
           ${K.Notice({ tone:bant.band ? 'info' : 'warn',
             body:bant.text || bant.why })}
@@ -382,10 +363,8 @@ ESP.Screens.lang = (function(){
       }),
 
       K.Entry({
-        label:'Shadowing',
+        label:'Shadowing', hint:'shadowing',
         meta:'kaynak türleri',
-        note:'Süre ölçülür, kalite ölçülmez: sistem sesini dinlemez. '
-           + 'Kendi işaretlediğin zorluk «tahmin» etiketiyle durur.',
         body:K.Table({ tight:true, headers:['Kaynak', 'Not'],
           rows:ESP.SHADOW_SOURCES.map(s => [s.label, s.note]) }),
       }),
@@ -416,39 +395,49 @@ ESP.Screens.lang = (function(){
       K.Entry({
         label:'İki eksen', hint:'grammar',
         meta:bant.band ? bant.band.label : 'bant yok',
-        note:'Soldaki eksen kelime (ölçülür), sağdaki işlev (beyan edilir). '
-           + 'İkisi ayrı durur çünkü biri ölçüm, öteki beyandır.',
         body:html`
-          ${K.Notice({ tone:'info', body:bant.text || bant.why })}
-          <p class="small muted mt-8">${ESP.AVOIDANCE_NOTE}</p>`,
+          ${K.Notice({ tone:'info', body:bant.text || bant.why })}`,
       }),
     ];
 
-    bantlar.forEach(b => {
-      const konular = ESP.GRAMMAR_BY_BAND[b] || [];
-      if(!konular.length) return;
-      const kac = konular.filter(t => isaret[t.id]).length;
-      rows.push(K.Entry({
-        label:b,
-        meta:kac + '/' + konular.length + ' beyan',
-        note:(ESP.CEFR.filter(x => x.label === b)[0] || {}).can || '',
-        wide:true,
-        body:html`${map(konular, t => html`
-          <div class="${cls('gramrow', isaret[t.id] && 'is-on')}">
-            ${K.Checkbox({ label:t.label, checked:!!isaret[t.id],
-              act:'mark-topic', data:{ 'data-id':t.id } })}
-            <span class="gramrow__can">${t.can}</span>
-            <span class="gramrow__trap"><b>Tuzak:</b> ${t.trap}</span>
-            ${when(isaret[t.id], () => ESP.Parts.cert('estimated'))}
-          </div>`)}`,
-      }));
-    });
+    /* iPhone Faz 2d (2026-10-02): altı düzey (A1…C2) altı ayrı karttı; tek
+       «Düzeyler» kartında her düzey açılır satır. Beyanı eksik ilk düzey —
+       çalıştığın sınır — açık gelir. Eski kartların başlığından üretilen
+       gizleme anahtarı rakam atıldığı için çakışıyordu («A1», «A2» → «a»):
+       ikinci kart hiç yönetilemiyordu. Hiçbir madde kalkmadı. */
+    const dolu = bantlar.filter(b => (ESP.GRAMMAR_BY_BAND[b] || []).length);
+    const sinir = dolu.find(b => ESP.GRAMMAR_BY_BAND[b].some(t => !isaret[t.id])) || null;
+    const toplam = dolu.reduce((n, b) => n + ESP.GRAMMAR_BY_BAND[b].length, 0);
+    const beyan = dolu.reduce((n, b) => n + ESP.GRAMMAR_BY_BAND[b].filter(t => isaret[t.id]).length, 0);
+    if(dolu.length) rows.push(K.Entry({
+      label:'Düzeyler', hint:'grammar',
+      meta:beyan + '/' + toplam + ' beyan',
+      wide:true,
+      body:html`${map(dolu, b => {
+        const konular = ESP.GRAMMAR_BY_BAND[b];
+        const kac = konular.filter(t => isaret[t.id]).length;
+        const can = (ESP.CEFR.filter(x => x.label === b)[0] || {}).can || '';
+        return html`<details class="acsatir duzey"${raw(b === sinir ? ' open' : '')}>
+          <summary class="acsatir__ozet">
+            <span class="acsatir__ad">${b}</span>
+            <span class="acsatir__tur">${can}</span>
+            <span class="acsatir__deger num">${kac}/${konular.length} beyan</span>
+          </summary>
+          <div class="acsatir__govde">${map(konular, t => html`
+            <div class="${cls('gramrow', isaret[t.id] && 'is-on')}">
+              ${K.Checkbox({ label:t.label, checked:!!isaret[t.id],
+                act:'mark-topic', data:{ 'data-id':t.id } })}
+              <span class="gramrow__can">${t.can}</span>
+              <span class="gramrow__trap"><b>Tuzak:</b> ${t.trap}</span>
+              ${when(isaret[t.id], () => ESP.Parts.cert('estimated'))}
+            </div>`)}</div>
+        </details>`;
+      })}`,
+    }));
 
     rows.push(K.Entry({
       label:'Hata günlüğü', hint:'error-log',
       meta:hataKartlari.length + ' kart',
-      note:'Bir hatayı adlandırmak onu bir daha görmenin tek yolu: '
-         + '«bir şeyler yanlıştı» tekrar eder, «edat eşleşmesi» tekrar etmez.',
       wide:true,
       body:html`
         <div class="cols-3">
@@ -529,8 +518,7 @@ ESP.Screens.lang = (function(){
     const V = ESP.Voice;
     const konus = VT() && V && V.kayitVar && V.kayitVar();
     return [
-      when(konus, () => K.Entry({ label:'Konuşma pratiği', meta:V.kayitSuruyor() ? 'dinliyor' : 'en çok 90 sn',
-        note:'Mikrofonun yalnız ses YÜKSEKLİĞİ okunur; ses kaydedilmez, gönderilmez. Süre ve 0,6 sn\'den uzun duraksamalar ölçülür.',
+      when(konus, () => K.Entry({ label:'Konuşma pratiği', hint:'konusma-pratigi', meta:V.kayitSuruyor() ? 'dinliyor' : 'en çok 90 sn',
         body:html`${when(S.ui.konusma, () => raw(VT().dalgaFormu({ genlik:S.ui.konusma.genlik,
             sure:Math.floor(S.ui.konusma.sureSn / 60) + ':' + String(S.ui.konusma.sureSn % 60).padStart(2, '0') })))}
           ${when(S.ui.konusma === null, () => html`<p class="small muted">Ses algılanmadı; ölçü yok.</p>`)}
@@ -538,18 +526,14 @@ ESP.Screens.lang = (function(){
             ? K.Button({ label:'Bitir ve ölç', tone:'primary', act:'konusma-bitir' })
             : K.Button({ label:'Konuşmaya başla', act:'konusma-basla' })}</div>`,
       })),
-      when(kur, () => K.Entry({ label:'Cümle kur', meta:'bağlam cümlesinden',
-        note:'Kelimeye sırayla dokun; yerleşen taş renk alır. Sıra yanlışsa taş yerinde kalır, puan yazılmaz.',
+      when(kur, () => K.Entry({ label:'Cümle kur', hint:'cumle-kur', meta:'bağlam cümlesinden',
         body:raw(kur) })),
-      when(dinle, () => K.Entry({ label:'Dinle ve oku', meta:'tarayıcının sesiyle',
-        note:'Bağlam cümlelerin sırayla okunur; okunan cümle büyür. Ses cihazda kalır, kaydedilmez.',
+      when(dinle, () => K.Entry({ label:'Dinle ve oku', hint:'dinle-oku', meta:'tarayıcının sesiyle',
         body:raw(dinle) })),
       K.Entry({
         label:'Pratik', hint:'practice',
         meta:S.ui.practice && S.ui.practice.deck === dil ? 'oturum açık'
           : ESP.PRACTICE_LENGTH + ' soru',
-        note:'Cevabın doğrudan aralıklı tekrara yazılır: pratik ayrı bir kayıt '
-           + 'açmaz. Çeldiriciler aynı desteden gelir, model uydurmaz.',
         wide:true,
         body:ESP.Parts.practice(dil),
       }),
@@ -558,8 +542,6 @@ ESP.Screens.lang = (function(){
         label:'Konular', hint:'topic',
         meta:ESP.Lesson.topicSummary('lang').topics + ' konu · '
           + ESP.Lesson.topicSummary('lang').items + ' madde',
-        note:'CEFR düzeylerine bağlı konu haritası. İşaretler beyandır: '
-           + 'hiçbir kapıyı açmaz, bandı değiştirmez.',
         wide:true,
         body:ESP.Parts.topics('lang'),
       }),
@@ -567,24 +549,18 @@ ESP.Screens.lang = (function(){
       K.Entry({
         label:'Üniteler', hint:'unit',
         meta:ESP.Lesson.units('lang', dil).length + ' ünite',
-        note:'İlerleme SRS\'ten okunur: bir kartı «bilinen» yapan şey bir kez '
-           + 'doğru bilmek değil, aralığının uzamasıdır.',
         wide:true,
         body:html`
           ${when(malzemesiz, () => K.Notice({ tone:'info',
-            body:malzemesiz + ' ünitenin ' + (l.label || dil) + ' malzemesi yok. '
-              + 'Yanlış çeviriyle dolu bir ünite, boş bir üniteden pahalıdır: '
-              + 'konusu duruyor, kartını sen yazarsın.' }))}
+            body:malzemesiz + ' ünitenin ' + (l.label || dil) + ' malzemesi yok; kartını sen yazarsın.' }))}
           ${ESP.Parts.units('lang', dil)}`,
       }),
 
       /* BAM'dan ünite (Part 8d): istek King'in onay kapısından geçer; ünite
          Bugün'e teklif olarak gelir ve ESP kendi koduyla sınamadan eklenmez. */
       K.Entry({
-        label:'Ünite iste', hint:'unit',
+        label:'Ünite iste', hint:'unite-iste',
         meta:(l.label || dil) + ' · HKM',
-        note:'Başlık, ölçülebilir hedef, görev ve öğeler. Soru yazdırılmaz: pratik '
-           + 'sorularını ESP kendi destenden kurar. Kaynaksızdır; yanlış kartı silersin.',
         wide:true,
         body:html`<div class="row gap-8 wrap">
           ${K.Select({ id:'unite-duzey', value:S.ui.uniteDuzey || 'A1', aria:'Düzey', size:'sm',
@@ -812,6 +788,11 @@ ESP.Screens.lang = (function(){
 
   return {
     id:'lang',
+    /* iPhone Faz 2d (sıkı ölçü): her bölümde iş açık; ara sıra açılan
+       araçlar (konuşma, cümle kurma, dinleme, ünite isteği, tohum deste) ve
+       başvuru (konu haritası, kutu dağılımı, shadowing kaynakları) şerit. */
+    kucukVarsayilan:['tohum-deste', 'konuşma-pratiği', 'cümle-kur', 'dinle-ve-oku', 'konular', 'ünite-iste',
+      'kutu-dağılımı', 'shadowing'],
     title:'Dil Stüdyosu',
     headline(){
       const d = ESP.SRS.deckStatus(aktifDil());

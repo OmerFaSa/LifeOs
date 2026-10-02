@@ -33,6 +33,16 @@ SP.HINTS = {
     more:'Ayıklayıcı satır satır okur, bilinen isim ve kısaltmaları eşler, birimi doğrular. Emin olamadığı satırı atmaz; "eşleşmedi" olarak gösterir ve elle bağlamana izin verir.' },
   'lab-results':{ t:'Sonuçlar', b:'Bütün ölçümler tek listede, önem sırasına göre: önce bandın dışındakiler.',
     more:'Sıra: kırmızı bayrak → referans dışı → hedef dışı → hedefte. Sabitlediğin ölçümler listenin başında durur. Bir satıra dokununca referans aralığı, hedef bant ve beslenme bağı açılır.' },
+  'lab-entry':{ t:'Test girişi', b:'Raporun bütün değerlerini tek seferde yaz.',
+    more:'Boş bıraktığın satır yok sayılır — sıfır olarak kaydedilmez. Her test oturumu bir tarihtir: aynı tarihe ikinci kez girilen değerler o oturumun üstüne yazılır.' },
+  'paneller':{ t:'Paneller', b:'Bir organı ya da sistemi bir arada okumak için.',
+    more:'Bir panelin bütünü, parçalarının toplamından fazlasını söyler. Tek liste önem sırasına göre okunur; panel görünümü onun yerine geçmez, yanında durur.' },
+  'karsilastir':{ t:'Karşılaştırma', b:'İki test oturumu yan yana: hangi farkın gerçek olduğu.',
+    more:'Fark yazmak kolaydır; zor olan hangi farkın gerçek olduğunu söylemektir. Her satır kendi ölçümlerinin saçılmasına göre işaretlenir: saçılma eşiktir. Tek oturumla «ne değişti» sorusunun cevabı yoktur. Yan yana görünümde çerçeve aralık dışını gösterir; yorum yapılmaz.' },
+  'ilac':{ t:'İlaç ve takviye', b:'Ne kullandığın, bir ölçümdeki değişimin sebebini arayabilmek için kaydedilir.',
+    more:'Bir hap ölçümü değiştirir: demir takviyesi ferritini yükseltir, statin LDL’yi düşürür, mide ilacı B12 emilimini bozar. Kayıt olmadan sistem «değişti» der ama sebebini bilemez. Bırakmak silmek değildir: bırakılmış bir ilaç geçmiş bir ölçümü hâlâ açıklar ve karşılaştırma bu kayıtları da okur. Sistem doz önermez, başlatmaz, kestirmez.' },
+  'hekim':{ t:'Hekim talimatı', b:'Hekiminin yazılı talimatı en yüksek öncelikli kısıttır.',
+    more:'Talimatı eklersen hedeflerin ve planların ona uyar; talimatla çelişen kısım hazırlanmaz ve bu sana söylenir. Sistem talimatı yorumlamaz, değiştirmez; yalnız saklar.' },
 
   /* --- beslenme --- */
   'macro-target':{ t:'Makro hedefi', b:'Protein kilogram başına, yağ kalori yüzdesi olarak, karbonhidrat kalandan hesaplanır.',
@@ -54,13 +64,13 @@ SP.HINTS = {
 
   /* --- hareket --- */
   'load':{ t:'Akut/kronik yük', b:'Son 7 günün ortalama yükü, son 28 günün ortalamasına bölünür.',
-    more:'0,8 altı kondisyonun gerilediği, 1,5 üstü sakatlanma riskinin belirgin arttığı bölgedir. Aradaki bant "alıştığın yük" demektir.' },
+    more:'0,8 altı kondisyonun gerilediği, 1,5 üstü sakatlanma riskinin belirgin arttığı bölgedir. Aradaki bant "alıştığın yük" demektir. Seans yükü süre × zorluktur: zorluk önce senin bildirdiğin algılanan zorluktan, yoksa hareketlerin MET ortalamasından gelir; ikisi de yoksa seans yük üretmez — uydurulmuş yük yazılmaz. Yük eğrisi yalnız yapılan işi değil, yapılmayanı da sayar. Kardiyoda haftalık toplam süre %10’dan hızlı artmaz.' },
   'progression':{ t:'Kademeli ilerleme', b:'Her hareketin kendi merdiveni vardır; basamak hedefe ulaşılmadan atlanmaz.',
-    more:'Aşırı yüklenmenin en yaygın sebebi basamak atlamaktır. Sistem bir üst basamağı ancak mevcut basamağın hedefi tutturulduğunda açar.' },
+    more:'Aşırı yüklenmenin en yaygın sebebi basamak atlamaktır. Sistem bir üst basamağı ancak mevcut basamağın hedefi tutturulduğunda açar. Kuvvette ilerleme ağırlıkla değil, merdivenin bir üst basamağıyla olur; künyede kaç günde kaç seans gerektiği yazar.' },
   'deload':{ t:'Yük indirme haftası', b:'Beş haftada bir toplam yük %40 azaltılır.',
     more:'Kazanç antrenmanda değil, antrenmandan sonraki toparlanmada oluşur. İndirme haftası bir geri adım değil, planın parçasıdır.' },
   'recovery-order':{ t:'Günün yük emri', b:'Toparlanma bandı, planlanan yükün ne kadarının uygulanacağını söyler.',
-    more:'Emri toparlanma belirler, istek değil: sistem yükü kendiliğinden azaltabilir ama asla kendiliğinden artıramaz. Skor düşükken ağır yük kazanç değil borç üretir. Sistem yükü azalttığında nedenini yazar; kararı yine sen verirsin.' },
+    more:'Emri toparlanma belirler, istek değil: sistem yükü kendiliğinden azaltabilir ama asla kendiliğinden artıramaz. Skor düşükken ağır yük kazanç değil borç üretir. Sistem yükü azalttığında nedenini yazar; kararı yine sen verirsin. Toparlanma düşükken esneklik (mobilite) akışı ağır antrenmanın yerine geçer: yük üretmez ama zinciri kırmaz.' },
   'session-pick':{ t:'Seans seç', b:'Öneri toparlanma bandından gelir; istediğini seçebilirsin.',
     more:'Önerilen şablonlar günün yük emrine göre seçilir: dinlenme gününde mobilite, hafif günde mobilite ve yürüyüş, azaltılmış günde yürüyüş ve tam vücut, tam yükte tam vücut ve dayanıklılık. İşaretli olan ilk öneridir; seçim senindir.' },
 

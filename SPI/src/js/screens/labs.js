@@ -145,8 +145,7 @@ SP.Screens.labs = (function(){
     const satirlar = rows.filter(r => refDizi(r.ref)).slice(0, 6)
       .map(r => ({ ad:r.marker.name, deger:Number(r.value), ref:refDizi(r.ref), birim:r.marker.unit }));
     const ic = VT().referansBandi({ satirlar });
-    return ic ? K.Entry({ label:'Referans bandı', meta:satirlar.length + ' ölçüm',
-      note:'Nokta son değer, bant laboratuvarın aralığı. Aralık dışı yalnız işaretlenir.', body:raw(ic) }) : null;
+    return ic ? K.Entry({ label:'Referans bandı', hint:'ref-range', meta:satirlar.length + ' ölçüm', body:raw(ic) }) : null;
   }
 
   /* 078 SONRAKİ KONTROL: panelin en yeni ölçümü + 180 gün (Bio.overdue ile
@@ -174,7 +173,7 @@ SP.Screens.labs = (function(){
     if(!VT()) return null;
     const ic = VT().tahlilKarsilastirma({ onceAd:U.fmtShort(recA.date), sonraAd:U.fmtShort(recB.date),
       satirlar:rows.slice(0, 10).map(r => ({ ad:r.marker.name, once:r.from, sonra:r.to, ref:refDizi(SP.Bio.refFor(r.marker.id)) })) });
-    return ic ? K.Entry({ label:'Yan yana', meta:Math.min(10, rows.length) + ' ölçüm', note:'Çerçeve aralık dışını gösterir; yorum yapılmaz.', body:raw(ic) }) : null;
+    return ic ? K.Entry({ label:'Yan yana', hint:'karsilastir', meta:Math.min(10, rows.length) + ' ölçüm', body:raw(ic) }) : null;
   }
 
   function resultsView(){
@@ -195,9 +194,7 @@ SP.Screens.labs = (function(){
 
     if(!total){
       return K.Ledger([K.Entry({
-        label:'Sonuçlar', meta:'kayıt yok',
-        note:'Elindeki hastane raporunu yapıştır ya da dosyasını bırak; '
-          + 'değerler kendiliğinden şemaya oturur.',
+        label:'Sonuçlar', hint:'lab-paste', meta:'kayıt yok',
         action:K.Button({ label:'Rapor yapıştır', act:'open-paste' }),
         body:P.empty('Henüz hiç test girilmedi.'),
       })]);
@@ -274,9 +271,7 @@ SP.Screens.labs = (function(){
       })),
 
       K.Entry({
-        label:'Dağılım', meta:'durum sayımı',
-        note:'Referans aralığı laboratuvarın normal saydığı yer; hedef bandı '
-          + 'ise bu sistemin istediği daha dar yer. İkisi aynı şey değildir.',
+        label:'Dağılım', hint:'optimal-band', meta:'durum sayımı',
         body:html`<div class="pair">
           <div>
             <div class="sidestat"><span class="sidestat__v">${s.measured}</span>
@@ -294,9 +289,7 @@ SP.Screens.labs = (function(){
       }),
 
       when(missing.length, () => K.Entry({
-        label:'Ölçülmemiş', meta:missing.length + ' ölçüm',
-        note:'Bu ölçümler için hiç değer girilmedi. Eksik veri sıfır sayılmaz; '
-          + 'hesaplarda yok kabul edilir.',
+        label:'Ölçülmemiş', hint:'certainty', meta:missing.length + ' ölçüm',
         body:html`<div class="chips">${map(missing, b => html`
           <span class="chip chip--muted">${b.name}</span>`)}</div>`,
       })),
@@ -325,8 +318,7 @@ SP.Screens.labs = (function(){
 
     return K.Ledger([
       K.Entry({
-        label:'Oturum', meta:'tarih ve laboratuvar',
-        note:'Aynı tarihe ikinci kez girilen değerler o oturumun üstüne yazılır.',
+        label:'Oturum', hint:'lab-entry', meta:'tarih ve laboratuvar',
         action:K.Button({ label:'Rapor yapıştır', icon:'flask',
           act:'open-paste' }),
         body:html`
@@ -359,9 +351,7 @@ SP.Screens.labs = (function(){
       }),
 
       K.Entry({
-        label:'Değerler', meta:list.length + ' satır',
-        note:'Elindeki rapordaki bütün değerleri tek seferde yaz. Boş bıraktığın '
-          + 'satır yok sayılır — sıfır olarak kaydedilmez.',
+        label:'Değerler', hint:'lab-entry', meta:list.length + ' satır',
         action:K.Input({ id:'entry-q', value:S.ui.labQuery || '',
           placeholder:'Ölçüm ara…', aria:'Test girişinde ölçüm ara', change:'lab-query', debounce:200 }),
         body:html`
@@ -410,10 +400,8 @@ SP.Screens.labs = (function(){
     return K.Ledger([
       K.Entry({
         wide:true,
-        label:b ? b.name : 'Eğilim',
+        label:b ? b.name : 'Eğilim', hint:'trend',
         meta:series.length + ' ölçüm',
-        note:'Bir ölçüm başkasıyla değil, KENDİ geçmişiyle kıyaslanır. '
-          + 'Yön en az ' + SP.Bio.MIN_POINTS + ' ölçümle söylenir.',
         action:K.Select({ value:id, change:'pick-marker', aria:'Eğilimi gösterilecek ölçüm', options }),
         body:html`
           ${when(series.length < 2, () => K.Notice({ tone:'info',
@@ -774,9 +762,7 @@ SP.Screens.labs = (function(){
 
     if(!dolu.length){
       return K.Ledger([K.Entry({
-        label:'Paneller', meta:'kayıt yok',
-        note:'Bir panelin bütünü, parçalarının toplamından fazlasını söyler. '
-          + 'Test girince paneller burada bir arada okunur.',
+        label:'Paneller', hint:'paneller', meta:'kayıt yok',
         action:K.Button({ label:'Rapor yapıştır', act:'open-paste' }),
         body:P.empty('Henüz test girilmedi.'),
       })]);
@@ -784,10 +770,7 @@ SP.Screens.labs = (function(){
 
     return K.Ledger([
       K.Entry({
-        label:'Paneller', meta:dolu.length + ' panelde ölçüm var',
-        note:'Tek liste önem sırasına göre okunur; panel görünümü bir organı '
-          + 'ya da bir sistemi bir arada okumak içindir. İkisi birbirinin '
-          + 'yerine geçmez.',
+        label:'Paneller', hint:'paneller', meta:dolu.length + ' panelde ölçüm var',
         body:html`<div class="panelgrid">${map(dolu, x => html`
           <div class="${cls('panelcard', x.out.length && 'has-out')}">
             <div class="panelcard__h">
@@ -817,9 +800,7 @@ SP.Screens.labs = (function(){
       }),
 
       when(bos.length, () => K.Entry({
-        label:'Hiç ölçülmemiş paneller', meta:bos.length + ' panel',
-        note:'Bu panellerin hiçbir ölçümü girilmemiş. Eksik veri sıfır sayılmaz; '
-          + 'hesaplarda yok kabul edilir.',
+        label:'Hiç ölçülmemiş paneller', hint:'certainty', meta:bos.length + ' panel',
         body:html`<div class="chips">${map(bos, x => html`
           <span class="chip chip--muted">${x.pan.name}</span>`)}</div>`,
       })),
@@ -870,10 +851,7 @@ SP.Screens.labs = (function(){
 
     return K.Ledger([
       K.Entry({
-        label:'Kullandıkların', meta:etkin.length + ' etkin',
-        note:'Bir hap ölçümü değiştirir: demir takviyesi ferritini yükseltir, '
-          + 'statin LDL\'yi düşürür, mide ilacı B12 emilimini bozar. Kayıt '
-          + 'olmadan sistem «değişti» der ama sebebini bilemez.',
+        label:'Kullandıkların', hint:'ilac', meta:etkin.length + ' etkin',
         action:K.Button({ label:'Ekle', act:'add-med' }),
         body:html`
           ${when(!etkin.length, () => P.empty('Şu an kullandığın bir şey kayıtlı değil.'))}
@@ -881,9 +859,7 @@ SP.Screens.labs = (function(){
       }),
 
       when(gecmis.length, () => K.Entry({
-        label:'Bıraktıkların', meta:gecmis.length + ' kayıt',
-        note:'Bırakmak silmek değildir: bırakılmış bir ilaç geçmiş bir ölçümü '
-          + 'hâlâ açıklar. Karşılaştırma ekranı bu kayıtları da okur.',
+        label:'Bıraktıkların', hint:'ilac', meta:gecmis.length + ' kayıt',
         body:html`<div class="medlist">${map(gecmis, r => satir(r, false))}</div>`,
       })),
 
@@ -906,9 +882,7 @@ SP.Screens.labs = (function(){
     if(!SP.Hedefler) return null;
     const l = SP.Hedefler.talimatlar();
     return K.Entry({
-      label:'Hekim talimatları', meta:l.length ? l.length + ' kayıt' : 'yok',
-      note:'Hekiminin yazdığı talimatı buraya ekle. Hedeflerin ve planların ona uyar; '
-        + 'talimatla çelişen kısım hazırlanmaz ve bu sana söylenir.',
+      label:'Hekim talimatları', hint:'hekim', meta:l.length ? l.length + ' kayıt' : 'yok',
       body:html`
         ${when(!l.length, () => P.empty('Kayıtlı hekim talimatı yok.'))}
         ${when(l.length, () => html`<div class="medlist">${map(l, t => html`
@@ -1025,9 +999,7 @@ SP.Screens.labs = (function(){
   function compareView(){
     if(S.labs.length < 2){
       return K.Ledger([K.Entry({
-        label:'Karşılaştır', meta:S.labs.length + ' oturum',
-        note:'Karşılaştırma için en az iki test oturumu gerekir. '
-          + 'Tek oturumla «ne değişti» sorusunun cevabı yoktur.',
+        label:'Karşılaştır', hint:'karsilastir', meta:S.labs.length + ' oturum',
         action:K.Button({ label:'Rapor yapıştır', act:'open-paste' }),
         body:P.empty('En az iki test oturumu gerekir.'),
       })]);
@@ -1055,10 +1027,8 @@ SP.Screens.labs = (function(){
 
     return K.Ledger([
       K.Entry({
-        label:'Karşılaştır',
+        label:'Karşılaştır', hint:'karsilastir',
         meta:U.fmtDate(recA.date) + ' → ' + U.fmtDate(recB.date),
-        note:'Fark yazmak kolaydır; zor olan hangi farkın gerçek olduğunu '
-          + 'söylemektir. Her satır kendi saçılmana göre işaretlenir.',
         action:html`<div class="stack-sm">
           ${K.Field({ label:'Önceki', input:K.Select({ id:'cmp-a', change:'cmp-pick',
             value:a, options:opts }) })}
@@ -1124,8 +1094,7 @@ SP.Screens.labs = (function(){
       yanYanaEntry(recA, recB, rows),
 
       K.Entry({
-        label:'Nasıl okunur', meta:'eşik',
-        note:'Kendi ölçümlerinin saçılması eşiktir.',
+        label:'Nasıl okunur', hint:'karsilastir', meta:'eşik',
         body:K.Ayrinti({ ozet:'Fark kendi saçılmandan küçükse «gürültü sayılır»; '
             + SP.Bio.BASELINE_MIN + ' kayıttan azsa «eşik yok».',
           govde:html`<p>Bir ölçümün en az ${SP.Bio.BASELINE_MIN} kaydı varsa kendi ortalaması
@@ -1147,9 +1116,7 @@ SP.Screens.labs = (function(){
       })]);
     }
     return K.Ledger([K.Entry({
-      label:'Geçmiş', meta:S.labs.length + ' oturum',
-      note:'Her satır bir test oturumudur. Aynı güne ikinci kez girilen '
-        + 'değerler o oturumun üstüne yazılır.',
+      label:'Geçmiş', hint:'lab-entry', meta:S.labs.length + ' oturum',
       body:html`<div class="list">${map(S.labs.slice().reverse(), l => html`
         <div class="listitem">
           <div class="grow">

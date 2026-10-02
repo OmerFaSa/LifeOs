@@ -238,3 +238,96 @@
     });
   });
 })();
+
+/* iPhone planı · Faz 2d · bölüm turu: ESP Dil, Felsefe, Yazı.
+
+   Ölçü aracı yalnız varsayılan bölümü görür; bu ekranların öbür
+   bölümlerinde sekiz karta, sekiz nota varan kalabalık vardı (Dil ›
+   Dilbilgisi). Sıkı ölçü: her bölümde açık en çok üç, başvuru şerit,
+   sabit açıklama notu yok (öğreti ⓘ'de). */
+(function(){
+  const { describe, it, expect, resetState } = ESP.Test;
+
+  async function bolumTuru(bek, gizliBek){
+    for(const ekran of Object.keys(bek)){
+      const sc = ESP.Screens[ekran];
+      const kok = document.createElement('div');
+      kok.innerHTML = String(await sc.render());
+      document.body.appendChild(kok);
+      try{
+        const G = window.LIFEOS.Gizle;
+        const gizli = (sc.gizliVarsayilan || []).concat(ESP.App.SADE_GIZLI[ekran] || []);
+        const kucuk = sc.kucukVarsayilan || [];
+        const hepsi = G.bolumler(kok);
+        kok.querySelectorAll('section.sayfabolum').forEach(pn => {
+          if(pn.id === 'bl-tezgah') return;
+          const acik = hepsi.filter(b => pn.contains(b.el)).map(b => b.anahtar)
+            .filter(a => gizli.indexOf(a) < 0 && kucuk.indexOf(a) < 0);
+          if(acik.length > 3) throw new Error(ekran + '/' + pn.id + ' açık ' + acik.join(','));
+        });
+        Object.keys(bek[ekran]).forEach(bl => bek[ekran][bl].forEach(a => {
+          const b = hepsi.find(x => x.anahtar === a);
+          if(!b) throw new Error(ekran + ': «' + a + '» bölümü yok');
+          expect(!!kok.querySelector('#bl-' + bl).contains(b.el)).toBe(true);
+          expect(kucuk.indexOf(a) >= 0).toBe(true);
+        }));
+        ((gizliBek || {})[ekran] || []).forEach(a => {
+          if(!hepsi.find(x => x.anahtar === a)) throw new Error(ekran + ': gizli «' + a + '» yok');
+          expect(gizli.indexOf(a) >= 0).toBe(true);
+        });
+      }finally{ kok.remove(); }
+    }
+  }
+
+  describe('iPhone · Faz 2d · ESP bölüm turu', () => {
+
+    it('Dil, Felsefe, Yazı: her bölümde açık en çok üç; başvuru şerit, Yazı’nın sınır kartı gizli', async () => {
+      resetState();
+      ESP.Memo.bitir();
+      await bolumTuru({
+        lang:{ ilerleme:['kutu-dağılımı'], ekle:['tohum-deste'], ogren:['konular', 'ünite-iste'] },
+        symposium:{ metinler:['belge-iste'], ekle:['sokratik-sorular'], deneyler:['düşünce-deneyleri', 'argüman-alıştırmaları'] },
+        writing:{ olcum:['pratik-süresi'], araclar:['yazı-örnekleri-iste', 'revizyon-geçişleri', 'yapı-kalıpları', 'retorik-figürler'] },
+      }, { writing:['sınır'] });
+    });
+
+    it('Dil › Dilbilgisi: altı düzey tek «Düzeyler» kartında; «A1/A2» anahtarı artık çakışmaz', async () => {
+      resetState();
+      ESP.Memo.bitir();
+      const kok = document.createElement('div');
+      kok.innerHTML = String(await ESP.Screens.lang.render());
+      document.body.appendChild(kok);
+      try{
+        const anahtarlar = window.LIFEOS.Gizle.bolumler(kok).map(b => b.anahtar);
+        ['a', 'b', 'c'].forEach(a => expect(anahtarlar.indexOf(a)).toBe(-1));
+        expect(anahtarlar.indexOf('düzeyler') >= 0).toBe(true);
+        const bantlar = ESP.CEFR.filter(x => (ESP.GRAMMAR_BY_BAND[x.label] || []).length);
+        expect(kok.querySelectorAll('#bl-gramer details.duzey').length).toBe(bantlar.length);
+        /* sınırdaki düzey (beyanı eksik ilk düzey) açık gelir */
+        expect(kok.querySelectorAll('#bl-gramer details.duzey[open]').length).toBe(1);
+      }finally{ kok.remove(); }
+    });
+
+    it('Dil, Felsefe, Yazı: sabit açıklama cümleleri ekranda değil ⓘ’de', async () => {
+      resetState();
+      ESP.Memo.bitir();
+      const yok = ['Aralıklı tekrarın amacı', 'Üç ayraç tanınır', 'Bu kartlar senin ölçümün değildir',
+        'Kutu kaba sınıftır', 'Bant KİŞİYE', 'Süre ölçülür, kalite ölçülmez', 'Soldaki eksen kelime',
+        'Bilmediğin yapıdan kaçınmak', 'Bir hatayı adlandırmak', 'Mikrofonun yalnız', 'Kelimeye sırayla dokun',
+        'Bağlam cümlelerin sırayla', 'Cevabın doğrudan aralıklı', 'CEFR düzeylerine bağlı', 'İlerleme SRS',
+        'Başlık, ölçülebilir hedef', 'Deney bir tezi sınar', 'Safsata denetimi metinde', 'Uzun deneme gerekmez',
+        'Model kapalıyken Socrates', 'Primer metin filozofun', 'Konunun düşünürleri', 'Yazar adının iki farklı',
+        'Konu listesi bir müfredattır', 'Üslubu örnek gösterilen', 'Sıra önemlidir', 'Kalıp seçmek',
+        'Sürekli yeni taslak', 'Ateşman formülü', 'Bu ekran üslup yargılamaz'];
+      for(const ekran of ['lang', 'symposium', 'writing']){
+        const metin = String(await ESP.Screens[ekran].render());
+        yok.forEach(t => { if(metin.indexOf(t) >= 0) throw new Error(ekran + ': «' + t + '» ekranda'); });
+      }
+      expect(ESP.HINTS.readability.more).toContain('Ateşman');
+      expect(ESP.HINTS.bant.more).toContain('ÜRETİME');
+      expect(ESP.HINTS['konusma-pratigi'].more).toContain('kaydedilmez');
+      expect(ESP.HINTS.kanon.more).toContain('ikiye katlıyordu');
+      expect(ESP.HINTS.belge.more).toContain('Okuma › Kaynaklar');
+    });
+  });
+})();

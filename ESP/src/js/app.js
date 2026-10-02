@@ -269,6 +269,7 @@ ESP.App = (function(){
     history:['egzersiz-kataloğu', 'yüzyıl-boşlukları', 'dağılım'],
     studio:['nefes-ve-vurgu', 'ısınma-sırası', 'paket-iste'],
     library:['öğrendiğini-anlat', 'bağlı-notlar'],
+    writing:['sınır'],
     analytics:['veri-doluluğu'],
     gun:['bekleyen-iş', 'günün-dakikası', 'yedek', 'hkm', 'seri', 'hedeflerim', 'günün-toplamı', 'asgari-gün', 'entelektüel-hacim', 'haftanın-dağılımı', 'son-gün', 'seçili-gün'],
   };

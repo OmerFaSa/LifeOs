@@ -201,8 +201,7 @@ SP.Screens.move = (function(){
 
     return K.Ledger([
       when(areaId === 'kardiyo', () => K.Entry({
-        label:'Haftalık süre', hint:'load', meta:'%10 kuralı',
-        note:area.note, body:cardioBody(),
+        label:'Haftalık süre', hint:'load', meta:'%10 kuralı', body:cardioBody(),
       })),
 
       when(areaId === 'esneklik' && rx.kind !== 'full', () => K.Entry({
@@ -214,9 +213,8 @@ SP.Screens.move = (function(){
       })),
 
       K.Entry({
-        label:area.label,
+        label:area.label, hint:'progression',
         meta:list.length + ' hareket',
-        note:area.note,
         action:K.Button({ label:'Seans ekle', icon:'plus',
           act:'start-area', data:{ 'data-area':areaId } }),
         body:html`
@@ -230,7 +228,9 @@ SP.Screens.move = (function(){
       })),
 
       K.Entry({
-        label:'İlerleme kuralı', hint:'progression',
+        /* Üç bölümde aynı kart: başlıkta bölümün adı, yoksa gizle.js yalnız
+           ilkini yönetirdi (aynı anahtar). Öğreti ⓘ'de ve künyede; gizli. */
+        label:'İlerleme kuralı · ' + area.label, hint:'progression',
         meta:SP.Move.ADVANCE_SESSIONS + ' seans / ' + SP.Move.ADVANCE_WINDOW + ' gün',
         body:html`<p class="small muted">Bir üst basamak, mevcut basamakta son
           ${SP.Move.ADVANCE_WINDOW} günde ${SP.Move.ADVANCE_SESSIONS} seans yapıldığında açılır.
@@ -283,8 +283,6 @@ SP.Screens.move = (function(){
       K.Entry({
         label:'Bugün dinlenmeli misin?', hint:'recovery-order',
         meta:rx.kind === 'rest' ? 'evet' : rx.kind === 'full' ? 'hayır' : 'hafiflet',
-        note:SP.AREA_BY_ID.dinlenme.note + ' Kazanç antrenmanda değil, antrenmandan '
-          + 'sonraki toparlanmada oluşur.',
         action:when(!r.ok, () => K.Button({ label:'Veri gir',
           act:'go', data:{ 'data-route':'today' } })),
         body:html`
@@ -302,13 +300,11 @@ SP.Screens.move = (function(){
       K.Entry({
         label:'İndirme haftası', hint:'deload',
         meta:!dl.started ? 'başlamadı' : dl.due ? 'bu hafta' : dl.inCycle + '/' + dl.every,
-        note:SP.LOAD_RULES.deload.note,
         body:html`<p class="small">${dl.note}</p>`,
       }),
 
       K.Entry({
-        label:'Son yedi gün', meta:off + ' boş gün',
-        note:'Yük eğrisi yalnız yapılan işi değil, yapılmayanı da sayar.',
+        label:'Son yedi gün', hint:'load', meta:off + ' boş gün',
         body:html`${K.Ayrinti({ govde:html`<p>Üst üste boş geçen günler kondisyonu düşürür;
           hiç boş geçmeyen haftalar son haftayı son aya göre şişirir. İkisi de aynı ölçüde
           izlenir.</p>` })}
@@ -524,9 +520,6 @@ SP.Screens.move = (function(){
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
     ilerleme:() => html`${K.Ledger([
         K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
-          note:'Seans yükü süre × zorluktur. Zorluk önce senin bildirdiğin algılanan '
-            + 'zorluktan, yoksa hareketlerin MET ortalamasından gelir. İkisi de yoksa '
-            + 'seans yük üretmez — uydurulmuş yük yazılmaz.',
           body:loadBody() }),
         yogunlukKutusu(),
         K.Entry({ label:'Seans geçmişi', meta:S.workouts.length + ' kayıt',
@@ -661,9 +654,6 @@ SP.Screens.move = (function(){
 
   return {
     id:'move',
-    /* iPhone Faz 2b: iş seansı seçmek ve kaydetmek; emrin ayrıntısı şerit
-       (skoru ve emri dönen «Hareket» kartında). */
-    kucukVarsayilan:['günün-yük-emri'],
     title:'Hareket',
     headline(){
       const rx = SP.Move.prescription();

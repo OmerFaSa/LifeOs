@@ -11808,7 +11808,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'f73a9a7', at:'2026-10-02 12:24', dirty:true };
+SP.BUILD = { id:'a36e5e6', at:'2026-10-02 12:47', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -27644,6 +27644,16 @@ SP.HINTS = {
     more:'Ayıklayıcı satır satır okur, bilinen isim ve kısaltmaları eşler, birimi doğrular. Emin olamadığı satırı atmaz; "eşleşmedi" olarak gösterir ve elle bağlamana izin verir.' },
   'lab-results':{ t:'Sonuçlar', b:'Bütün ölçümler tek listede, önem sırasına göre: önce bandın dışındakiler.',
     more:'Sıra: kırmızı bayrak → referans dışı → hedef dışı → hedefte. Sabitlediğin ölçümler listenin başında durur. Bir satıra dokununca referans aralığı, hedef bant ve beslenme bağı açılır.' },
+  'lab-entry':{ t:'Test girişi', b:'Raporun bütün değerlerini tek seferde yaz.',
+    more:'Boş bıraktığın satır yok sayılır — sıfır olarak kaydedilmez. Her test oturumu bir tarihtir: aynı tarihe ikinci kez girilen değerler o oturumun üstüne yazılır.' },
+  'paneller':{ t:'Paneller', b:'Bir organı ya da sistemi bir arada okumak için.',
+    more:'Bir panelin bütünü, parçalarının toplamından fazlasını söyler. Tek liste önem sırasına göre okunur; panel görünümü onun yerine geçmez, yanında durur.' },
+  'karsilastir':{ t:'Karşılaştırma', b:'İki test oturumu yan yana: hangi farkın gerçek olduğu.',
+    more:'Fark yazmak kolaydır; zor olan hangi farkın gerçek olduğunu söylemektir. Her satır kendi ölçümlerinin saçılmasına göre işaretlenir: saçılma eşiktir. Tek oturumla «ne değişti» sorusunun cevabı yoktur. Yan yana görünümde çerçeve aralık dışını gösterir; yorum yapılmaz.' },
+  'ilac':{ t:'İlaç ve takviye', b:'Ne kullandığın, bir ölçümdeki değişimin sebebini arayabilmek için kaydedilir.',
+    more:'Bir hap ölçümü değiştirir: demir takviyesi ferritini yükseltir, statin LDL’yi düşürür, mide ilacı B12 emilimini bozar. Kayıt olmadan sistem «değişti» der ama sebebini bilemez. Bırakmak silmek değildir: bırakılmış bir ilaç geçmiş bir ölçümü hâlâ açıklar ve karşılaştırma bu kayıtları da okur. Sistem doz önermez, başlatmaz, kestirmez.' },
+  'hekim':{ t:'Hekim talimatı', b:'Hekiminin yazılı talimatı en yüksek öncelikli kısıttır.',
+    more:'Talimatı eklersen hedeflerin ve planların ona uyar; talimatla çelişen kısım hazırlanmaz ve bu sana söylenir. Sistem talimatı yorumlamaz, değiştirmez; yalnız saklar.' },
 
   /* --- beslenme --- */
   'macro-target':{ t:'Makro hedefi', b:'Protein kilogram başına, yağ kalori yüzdesi olarak, karbonhidrat kalandan hesaplanır.',
@@ -27665,13 +27675,13 @@ SP.HINTS = {
 
   /* --- hareket --- */
   'load':{ t:'Akut/kronik yük', b:'Son 7 günün ortalama yükü, son 28 günün ortalamasına bölünür.',
-    more:'0,8 altı kondisyonun gerilediği, 1,5 üstü sakatlanma riskinin belirgin arttığı bölgedir. Aradaki bant "alıştığın yük" demektir.' },
+    more:'0,8 altı kondisyonun gerilediği, 1,5 üstü sakatlanma riskinin belirgin arttığı bölgedir. Aradaki bant "alıştığın yük" demektir. Seans yükü süre × zorluktur: zorluk önce senin bildirdiğin algılanan zorluktan, yoksa hareketlerin MET ortalamasından gelir; ikisi de yoksa seans yük üretmez — uydurulmuş yük yazılmaz. Yük eğrisi yalnız yapılan işi değil, yapılmayanı da sayar. Kardiyoda haftalık toplam süre %10’dan hızlı artmaz.' },
   'progression':{ t:'Kademeli ilerleme', b:'Her hareketin kendi merdiveni vardır; basamak hedefe ulaşılmadan atlanmaz.',
-    more:'Aşırı yüklenmenin en yaygın sebebi basamak atlamaktır. Sistem bir üst basamağı ancak mevcut basamağın hedefi tutturulduğunda açar.' },
+    more:'Aşırı yüklenmenin en yaygın sebebi basamak atlamaktır. Sistem bir üst basamağı ancak mevcut basamağın hedefi tutturulduğunda açar. Kuvvette ilerleme ağırlıkla değil, merdivenin bir üst basamağıyla olur; künyede kaç günde kaç seans gerektiği yazar.' },
   'deload':{ t:'Yük indirme haftası', b:'Beş haftada bir toplam yük %40 azaltılır.',
     more:'Kazanç antrenmanda değil, antrenmandan sonraki toparlanmada oluşur. İndirme haftası bir geri adım değil, planın parçasıdır.' },
   'recovery-order':{ t:'Günün yük emri', b:'Toparlanma bandı, planlanan yükün ne kadarının uygulanacağını söyler.',
-    more:'Emri toparlanma belirler, istek değil: sistem yükü kendiliğinden azaltabilir ama asla kendiliğinden artıramaz. Skor düşükken ağır yük kazanç değil borç üretir. Sistem yükü azalttığında nedenini yazar; kararı yine sen verirsin.' },
+    more:'Emri toparlanma belirler, istek değil: sistem yükü kendiliğinden azaltabilir ama asla kendiliğinden artıramaz. Skor düşükken ağır yük kazanç değil borç üretir. Sistem yükü azalttığında nedenini yazar; kararı yine sen verirsin. Toparlanma düşükken esneklik (mobilite) akışı ağır antrenmanın yerine geçer: yük üretmez ama zinciri kırmaz.' },
   'session-pick':{ t:'Seans seç', b:'Öneri toparlanma bandından gelir; istediğini seçebilirsin.',
     more:'Önerilen şablonlar günün yük emrine göre seçilir: dinlenme gününde mobilite, hafif günde mobilite ve yürüyüş, azaltılmış günde yürüyüş ve tam vücut, tam yükte tam vücut ve dayanıklılık. İşaretli olan ilk öneridir; seçim senindir.' },
 
@@ -48013,8 +48023,7 @@ SP.Screens.labs = (function(){
     const satirlar = rows.filter(r => refDizi(r.ref)).slice(0, 6)
       .map(r => ({ ad:r.marker.name, deger:Number(r.value), ref:refDizi(r.ref), birim:r.marker.unit }));
     const ic = VT().referansBandi({ satirlar });
-    return ic ? K.Entry({ label:'Referans bandı', meta:satirlar.length + ' ölçüm',
-      note:'Nokta son değer, bant laboratuvarın aralığı. Aralık dışı yalnız işaretlenir.', body:raw(ic) }) : null;
+    return ic ? K.Entry({ label:'Referans bandı', hint:'ref-range', meta:satirlar.length + ' ölçüm', body:raw(ic) }) : null;
   }
 
   /* 078 SONRAKİ KONTROL: panelin en yeni ölçümü + 180 gün (Bio.overdue ile
@@ -48042,7 +48051,7 @@ SP.Screens.labs = (function(){
     if(!VT()) return null;
     const ic = VT().tahlilKarsilastirma({ onceAd:U.fmtShort(recA.date), sonraAd:U.fmtShort(recB.date),
       satirlar:rows.slice(0, 10).map(r => ({ ad:r.marker.name, once:r.from, sonra:r.to, ref:refDizi(SP.Bio.refFor(r.marker.id)) })) });
-    return ic ? K.Entry({ label:'Yan yana', meta:Math.min(10, rows.length) + ' ölçüm', note:'Çerçeve aralık dışını gösterir; yorum yapılmaz.', body:raw(ic) }) : null;
+    return ic ? K.Entry({ label:'Yan yana', hint:'karsilastir', meta:Math.min(10, rows.length) + ' ölçüm', body:raw(ic) }) : null;
   }
 
   function resultsView(){
@@ -48063,9 +48072,7 @@ SP.Screens.labs = (function(){
 
     if(!total){
       return K.Ledger([K.Entry({
-        label:'Sonuçlar', meta:'kayıt yok',
-        note:'Elindeki hastane raporunu yapıştır ya da dosyasını bırak; '
-          + 'değerler kendiliğinden şemaya oturur.',
+        label:'Sonuçlar', hint:'lab-paste', meta:'kayıt yok',
         action:K.Button({ label:'Rapor yapıştır', act:'open-paste' }),
         body:P.empty('Henüz hiç test girilmedi.'),
       })]);
@@ -48142,9 +48149,7 @@ SP.Screens.labs = (function(){
       })),
 
       K.Entry({
-        label:'Dağılım', meta:'durum sayımı',
-        note:'Referans aralığı laboratuvarın normal saydığı yer; hedef bandı '
-          + 'ise bu sistemin istediği daha dar yer. İkisi aynı şey değildir.',
+        label:'Dağılım', hint:'optimal-band', meta:'durum sayımı',
         body:html`<div class="pair">
           <div>
             <div class="sidestat"><span class="sidestat__v">${s.measured}</span>
@@ -48162,9 +48167,7 @@ SP.Screens.labs = (function(){
       }),
 
       when(missing.length, () => K.Entry({
-        label:'Ölçülmemiş', meta:missing.length + ' ölçüm',
-        note:'Bu ölçümler için hiç değer girilmedi. Eksik veri sıfır sayılmaz; '
-          + 'hesaplarda yok kabul edilir.',
+        label:'Ölçülmemiş', hint:'certainty', meta:missing.length + ' ölçüm',
         body:html`<div class="chips">${map(missing, b => html`
           <span class="chip chip--muted">${b.name}</span>`)}</div>`,
       })),
@@ -48193,8 +48196,7 @@ SP.Screens.labs = (function(){
 
     return K.Ledger([
       K.Entry({
-        label:'Oturum', meta:'tarih ve laboratuvar',
-        note:'Aynı tarihe ikinci kez girilen değerler o oturumun üstüne yazılır.',
+        label:'Oturum', hint:'lab-entry', meta:'tarih ve laboratuvar',
         action:K.Button({ label:'Rapor yapıştır', icon:'flask',
           act:'open-paste' }),
         body:html`
@@ -48227,9 +48229,7 @@ SP.Screens.labs = (function(){
       }),
 
       K.Entry({
-        label:'Değerler', meta:list.length + ' satır',
-        note:'Elindeki rapordaki bütün değerleri tek seferde yaz. Boş bıraktığın '
-          + 'satır yok sayılır — sıfır olarak kaydedilmez.',
+        label:'Değerler', hint:'lab-entry', meta:list.length + ' satır',
         action:K.Input({ id:'entry-q', value:S.ui.labQuery || '',
           placeholder:'Ölçüm ara…', aria:'Test girişinde ölçüm ara', change:'lab-query', debounce:200 }),
         body:html`
@@ -48278,10 +48278,8 @@ SP.Screens.labs = (function(){
     return K.Ledger([
       K.Entry({
         wide:true,
-        label:b ? b.name : 'Eğilim',
+        label:b ? b.name : 'Eğilim', hint:'trend',
         meta:series.length + ' ölçüm',
-        note:'Bir ölçüm başkasıyla değil, KENDİ geçmişiyle kıyaslanır. '
-          + 'Yön en az ' + SP.Bio.MIN_POINTS + ' ölçümle söylenir.',
         action:K.Select({ value:id, change:'pick-marker', aria:'Eğilimi gösterilecek ölçüm', options }),
         body:html`
           ${when(series.length < 2, () => K.Notice({ tone:'info',
@@ -48642,9 +48640,7 @@ SP.Screens.labs = (function(){
 
     if(!dolu.length){
       return K.Ledger([K.Entry({
-        label:'Paneller', meta:'kayıt yok',
-        note:'Bir panelin bütünü, parçalarının toplamından fazlasını söyler. '
-          + 'Test girince paneller burada bir arada okunur.',
+        label:'Paneller', hint:'paneller', meta:'kayıt yok',
         action:K.Button({ label:'Rapor yapıştır', act:'open-paste' }),
         body:P.empty('Henüz test girilmedi.'),
       })]);
@@ -48652,10 +48648,7 @@ SP.Screens.labs = (function(){
 
     return K.Ledger([
       K.Entry({
-        label:'Paneller', meta:dolu.length + ' panelde ölçüm var',
-        note:'Tek liste önem sırasına göre okunur; panel görünümü bir organı '
-          + 'ya da bir sistemi bir arada okumak içindir. İkisi birbirinin '
-          + 'yerine geçmez.',
+        label:'Paneller', hint:'paneller', meta:dolu.length + ' panelde ölçüm var',
         body:html`<div class="panelgrid">${map(dolu, x => html`
           <div class="${cls('panelcard', x.out.length && 'has-out')}">
             <div class="panelcard__h">
@@ -48685,9 +48678,7 @@ SP.Screens.labs = (function(){
       }),
 
       when(bos.length, () => K.Entry({
-        label:'Hiç ölçülmemiş paneller', meta:bos.length + ' panel',
-        note:'Bu panellerin hiçbir ölçümü girilmemiş. Eksik veri sıfır sayılmaz; '
-          + 'hesaplarda yok kabul edilir.',
+        label:'Hiç ölçülmemiş paneller', hint:'certainty', meta:bos.length + ' panel',
         body:html`<div class="chips">${map(bos, x => html`
           <span class="chip chip--muted">${x.pan.name}</span>`)}</div>`,
       })),
@@ -48738,10 +48729,7 @@ SP.Screens.labs = (function(){
 
     return K.Ledger([
       K.Entry({
-        label:'Kullandıkların', meta:etkin.length + ' etkin',
-        note:'Bir hap ölçümü değiştirir: demir takviyesi ferritini yükseltir, '
-          + 'statin LDL\'yi düşürür, mide ilacı B12 emilimini bozar. Kayıt '
-          + 'olmadan sistem «değişti» der ama sebebini bilemez.',
+        label:'Kullandıkların', hint:'ilac', meta:etkin.length + ' etkin',
         action:K.Button({ label:'Ekle', act:'add-med' }),
         body:html`
           ${when(!etkin.length, () => P.empty('Şu an kullandığın bir şey kayıtlı değil.'))}
@@ -48749,9 +48737,7 @@ SP.Screens.labs = (function(){
       }),
 
       when(gecmis.length, () => K.Entry({
-        label:'Bıraktıkların', meta:gecmis.length + ' kayıt',
-        note:'Bırakmak silmek değildir: bırakılmış bir ilaç geçmiş bir ölçümü '
-          + 'hâlâ açıklar. Karşılaştırma ekranı bu kayıtları da okur.',
+        label:'Bıraktıkların', hint:'ilac', meta:gecmis.length + ' kayıt',
         body:html`<div class="medlist">${map(gecmis, r => satir(r, false))}</div>`,
       })),
 
@@ -48774,9 +48760,7 @@ SP.Screens.labs = (function(){
     if(!SP.Hedefler) return null;
     const l = SP.Hedefler.talimatlar();
     return K.Entry({
-      label:'Hekim talimatları', meta:l.length ? l.length + ' kayıt' : 'yok',
-      note:'Hekiminin yazdığı talimatı buraya ekle. Hedeflerin ve planların ona uyar; '
-        + 'talimatla çelişen kısım hazırlanmaz ve bu sana söylenir.',
+      label:'Hekim talimatları', hint:'hekim', meta:l.length ? l.length + ' kayıt' : 'yok',
       body:html`
         ${when(!l.length, () => P.empty('Kayıtlı hekim talimatı yok.'))}
         ${when(l.length, () => html`<div class="medlist">${map(l, t => html`
@@ -48893,9 +48877,7 @@ SP.Screens.labs = (function(){
   function compareView(){
     if(S.labs.length < 2){
       return K.Ledger([K.Entry({
-        label:'Karşılaştır', meta:S.labs.length + ' oturum',
-        note:'Karşılaştırma için en az iki test oturumu gerekir. '
-          + 'Tek oturumla «ne değişti» sorusunun cevabı yoktur.',
+        label:'Karşılaştır', hint:'karsilastir', meta:S.labs.length + ' oturum',
         action:K.Button({ label:'Rapor yapıştır', act:'open-paste' }),
         body:P.empty('En az iki test oturumu gerekir.'),
       })]);
@@ -48923,10 +48905,8 @@ SP.Screens.labs = (function(){
 
     return K.Ledger([
       K.Entry({
-        label:'Karşılaştır',
+        label:'Karşılaştır', hint:'karsilastir',
         meta:U.fmtDate(recA.date) + ' → ' + U.fmtDate(recB.date),
-        note:'Fark yazmak kolaydır; zor olan hangi farkın gerçek olduğunu '
-          + 'söylemektir. Her satır kendi saçılmana göre işaretlenir.',
         action:html`<div class="stack-sm">
           ${K.Field({ label:'Önceki', input:K.Select({ id:'cmp-a', change:'cmp-pick',
             value:a, options:opts }) })}
@@ -48992,8 +48972,7 @@ SP.Screens.labs = (function(){
       yanYanaEntry(recA, recB, rows),
 
       K.Entry({
-        label:'Nasıl okunur', meta:'eşik',
-        note:'Kendi ölçümlerinin saçılması eşiktir.',
+        label:'Nasıl okunur', hint:'karsilastir', meta:'eşik',
         body:K.Ayrinti({ ozet:'Fark kendi saçılmandan küçükse «gürültü sayılır»; '
             + SP.Bio.BASELINE_MIN + ' kayıttan azsa «eşik yok».',
           govde:html`<p>Bir ölçümün en az ${SP.Bio.BASELINE_MIN} kaydı varsa kendi ortalaması
@@ -49015,9 +48994,7 @@ SP.Screens.labs = (function(){
       })]);
     }
     return K.Ledger([K.Entry({
-      label:'Geçmiş', meta:S.labs.length + ' oturum',
-      note:'Her satır bir test oturumudur. Aynı güne ikinci kez girilen '
-        + 'değerler o oturumun üstüne yazılır.',
+      label:'Geçmiş', hint:'lab-entry', meta:S.labs.length + ' oturum',
       body:html`<div class="list">${map(S.labs.slice().reverse(), l => html`
         <div class="listitem">
           <div class="grow">
@@ -50410,9 +50387,6 @@ SP.Screens.meals = (function(){
 
   return {
     id:'meals',
-    /* iPhone Faz 2b: iş öğünü yazmak; hedefin ayrıntısı şerit (sayıları
-       dönen «Öğün» kartında), Tabak ve çizelge gizli (app.js SADE_GIZLI). */
-    kucukVarsayilan:['günlük-hedef'],
     title:'Öğünler',
     headline(){
       const tg = SP.Nutri.targets();
@@ -50809,7 +50783,7 @@ SP.Screens.kitchen = (function(){
 
   return {
     id:'kitchen',
-    kucukVarsayilan:['hane', 'evde-ne-var', 'kendi-gıdaların'],
+    kucukVarsayilan:['evde-ne-var', 'kendi-gıdaların'],
     title:'Mutfak',
     headline(){
       const list = SP.Model.householdList();
@@ -51033,8 +51007,7 @@ SP.Screens.move = (function(){
 
     return K.Ledger([
       when(areaId === 'kardiyo', () => K.Entry({
-        label:'Haftalık süre', hint:'load', meta:'%10 kuralı',
-        note:area.note, body:cardioBody(),
+        label:'Haftalık süre', hint:'load', meta:'%10 kuralı', body:cardioBody(),
       })),
 
       when(areaId === 'esneklik' && rx.kind !== 'full', () => K.Entry({
@@ -51046,9 +51019,8 @@ SP.Screens.move = (function(){
       })),
 
       K.Entry({
-        label:area.label,
+        label:area.label, hint:'progression',
         meta:list.length + ' hareket',
-        note:area.note,
         action:K.Button({ label:'Seans ekle', icon:'plus',
           act:'start-area', data:{ 'data-area':areaId } }),
         body:html`
@@ -51062,7 +51034,9 @@ SP.Screens.move = (function(){
       })),
 
       K.Entry({
-        label:'İlerleme kuralı', hint:'progression',
+        /* Üç bölümde aynı kart: başlıkta bölümün adı, yoksa gizle.js yalnız
+           ilkini yönetirdi (aynı anahtar). Öğreti ⓘ'de ve künyede; gizli. */
+        label:'İlerleme kuralı · ' + area.label, hint:'progression',
         meta:SP.Move.ADVANCE_SESSIONS + ' seans / ' + SP.Move.ADVANCE_WINDOW + ' gün',
         body:html`<p class="small muted">Bir üst basamak, mevcut basamakta son
           ${SP.Move.ADVANCE_WINDOW} günde ${SP.Move.ADVANCE_SESSIONS} seans yapıldığında açılır.
@@ -51115,8 +51089,6 @@ SP.Screens.move = (function(){
       K.Entry({
         label:'Bugün dinlenmeli misin?', hint:'recovery-order',
         meta:rx.kind === 'rest' ? 'evet' : rx.kind === 'full' ? 'hayır' : 'hafiflet',
-        note:SP.AREA_BY_ID.dinlenme.note + ' Kazanç antrenmanda değil, antrenmandan '
-          + 'sonraki toparlanmada oluşur.',
         action:when(!r.ok, () => K.Button({ label:'Veri gir',
           act:'go', data:{ 'data-route':'today' } })),
         body:html`
@@ -51134,13 +51106,11 @@ SP.Screens.move = (function(){
       K.Entry({
         label:'İndirme haftası', hint:'deload',
         meta:!dl.started ? 'başlamadı' : dl.due ? 'bu hafta' : dl.inCycle + '/' + dl.every,
-        note:SP.LOAD_RULES.deload.note,
         body:html`<p class="small">${dl.note}</p>`,
       }),
 
       K.Entry({
-        label:'Son yedi gün', meta:off + ' boş gün',
-        note:'Yük eğrisi yalnız yapılan işi değil, yapılmayanı da sayar.',
+        label:'Son yedi gün', hint:'load', meta:off + ' boş gün',
         body:html`${K.Ayrinti({ govde:html`<p>Üst üste boş geçen günler kondisyonu düşürür;
           hiç boş geçmeyen haftalar son haftayı son aya göre şişirir. İkisi de aynı ölçüde
           izlenir.</p>` })}
@@ -51356,9 +51326,6 @@ SP.Screens.move = (function(){
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
     ilerleme:() => html`${K.Ledger([
         K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
-          note:'Seans yükü süre × zorluktur. Zorluk önce senin bildirdiğin algılanan '
-            + 'zorluktan, yoksa hareketlerin MET ortalamasından gelir. İkisi de yoksa '
-            + 'seans yük üretmez — uydurulmuş yük yazılmaz.',
           body:loadBody() }),
         yogunlukKutusu(),
         K.Entry({ label:'Seans geçmişi', meta:S.workouts.length + ' kayıt',
@@ -51493,9 +51460,6 @@ SP.Screens.move = (function(){
 
   return {
     id:'move',
-    /* iPhone Faz 2b: iş seansı seçmek ve kaydetmek; emrin ayrıntısı şerit
-       (skoru ve emri dönen «Hareket» kartında). */
-    kucukVarsayilan:['günün-yük-emri'],
     title:'Hareket',
     headline(){
       const rx = SP.Move.prescription();
@@ -52030,8 +51994,9 @@ SP.Screens.basket = (function(){
     sepet:() => html`${K.Ledger(() => [totalCard(), itemsCard(), coverageCard()])}
       <div class="mt-24">${raw(UI.rail(['price-estimate', 'substitute', 'bulk', 'budget-rank']))}</div>`,
     ikame:() => html`${K.Ledger(() => [swapCard(), bulkCard(),
-        K.Entry({ label:'Bütçenin yeri', hint:'budget-rank', meta:'öncelik sırası',
-          note:SP.PRECEDENCE[5].note,
+        /* Bütçe bölümündeki «Bütçenin yeri» ile aynı tablo: aynı başlık aynı
+           gizleme anahtarı olurdu ve bu kopya yönetilemezdi. Gizli. */
+        K.Entry({ label:'Kural sırası', hint:'budget-rank', meta:'öncelik sırası',
           body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
             rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
       ])}
@@ -56966,13 +56931,18 @@ SP.App = (function(){
     labs:['nasıl-okunur', 'sınır', 'hiç-ölçülmemiş-paneller', 'ölçülmemiş', 'dağılım', 'referans-bandı'],
     analytics:['veri-doluluğu', 'raporun-mantığı'],
     guide:['nasıl-kullanılır', 'beş-modül', 'kullanım-hakkı', 'klinik-sınır'],
-    /* iPhone Faz 2b (belgeler/ekip/IPHONE-PLANI.md): tekrar ve başvuru
-       kartları. Tabak, Günlük hedef'in sayılarını kalan gram olarak yeniden
-       çizer; iki hafta kartı dönen «Hareket» kartının haftasını; bütçenin
-       yeri ve fiyat kaynağı sabit başvuru metnidir. */
-    meals:['tabak', 'öğün-çizelgesi'],
-    move:['bu-hafta-hareket', 'antrenman-haftası'],
-    basket:['bütçenin-yeri', 'fiyatlar-nereden-geliyor'],
+    /* iPhone Faz 2b–2d (belgeler/ekip/IPHONE-PLANI.md, sıkı ölçü): tekrar,
+       ayrıntı ve başvuru kartları. Günlük hedef ve günün yük emri dönen
+       kartların ayrıntısıdır; Tabak hedefin sayılarını kalan gram olarak
+       yeniden çizer; iki hafta kartı dönen «Hareket» kartının haftasını;
+       ilerleme kuralı ⓘ'de ve künyede; hane tablosu Hane ekranında
+       düzenlenir; bütçenin yeri, kural sırası ve fiyat kaynağı sabit
+       başvuru metnidir. */
+    meals:['günlük-hedef', 'tabak', 'öğün-çizelgesi'],
+    move:['günün-yük-emri', 'bu-hafta-hareket', 'antrenman-haftası',
+      'ilerleme-kuralı-kardiyo', 'ilerleme-kuralı-kuvvet', 'ilerleme-kuralı-esneklik'],
+    basket:['bütçenin-yeri', 'fiyatlar-nereden-geliyor', 'kural-sırası'],
+    kitchen:['hane'],
   };
 
   function sayfaBasiHtml(sc){

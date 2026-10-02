@@ -235,20 +235,31 @@ Yapılan (2c, sıkı ölçüyle; testler `ESP/src/tests/iphone.test.js` «Faz 2c
   boyunu Konular'ın raf kesme tabanı belirliyor (en az 560 + 56 px «Tamamını göster»,
   `hareket.js kesimler`). Ortak raf kuralıdır; Faz 7'de bütçeyle birlikte ele alınır.
 
-Sıradaki — **2d, bölüm turu** (sıkı ölçüyle; ölçüm 2026-10-02, 1440, dolu profil):
+Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/…/iphone.test.js`
+«Faz 2d», `AYS/…/iphone.test.js` «Faz 2d»):
 
-- **ESP Dil** (`lang`): Dilbilgisi 8 açık + 8 not (A1…C2 tabloları başvuru → şerit), Öğren 5,
-  İlerleme 4, Ekle 3; her bölümde not.
-- **ESP Felsefe** (`symposium`): Ekle 2 · Metinler 3 · Deneyler 2 · Öğren 1 — hepsinde not.
-- **ESP Yazı** (`writing`): Ölçüm 5 + 5 not, Araçlar 4 + 4 not.
-- **SPİ bölümleri:** sabit notlar — Test gir 2, Karşılaştır 2, İlaç 2, Geçmiş 1, Eğilim 1,
-  Paneller 1; Hareket › Kardiyo 2, Kuvvet 1, Esneklik 1, Dinlenme 3, İlerleme 1; Bütçe ›
-  İkame 1.
-- **AYS:** Sınama 2 not, Dersler 3 not.
-- **2b'ye sıkı ölçü turu:** Öğün'de Günlük hedef (sayıları dönen kartta) ve Hareket'te Günün
-  yük emri (dönen kartta; kırmızı gerekçe zaten söyleniyor) şeritten gizliye; Mutfak'ta Hane
-  (başvuru tablosu) gizli.
-- Ölçüm betiği (her bölümü ayrı sayar) §9'da.
+- **ESP Dil:** Dilbilgisi'nin altı «A1…C2» kartı tek «Düzeyler» kartı: her düzey açılır satır
+  (`details.acsatir`), beyanı eksik ilk düzey açık. Eski başlıklar rakam atılınca aynı anahtara
+  düşüyordu («A1»/«A2» → `a`): ikinci kart hiç gizlenemiyordu. Öğren'de Pratik ve Üniteler açık;
+  konuşma, cümle kurma, dinleme, Konular, Ünite iste şerit. İlerleme'de Kutu dağılımı ve
+  Shadowing, Ekle'de Tohum deste şerit. 15 sabit not ve üç açıklama paragrafı ipuçlarına (yeni:
+  `deste`, `kelime-agi`, `liste-yapistir`, `tohum-deste`, `bant`, `konusma-pratigi`,
+  `cumle-kur`, `dinle-oku`, `unite-iste`). Çalış'ta not yalnız gecikmeyi söyler.
+- **ESP Felsefe:** Belge iste, Sokratik sorular, iki egzersiz kataloğu şerit; 8 not (yeni
+  `sokratik`, `kanon`). **ESP Yazı:** Ölçüm'de üç sayı açık, Pratik süresi şerit, Sınır kartı
+  gizli (pedagojik sınır sayfa sonunda ve ⓘ'de); Araçlar'ın dördü şerit; 8 not.
+- **SPİ:** bölümlerdeki 20 sabit not kalktı (yeni `lab-entry`, `paneller`, `karsilastir`,
+  `ilac`, `hekim`; `load`, `progression`, `recovery-order` genişledi). Aynı başlıklı kopyalar
+  yönetilemiyordu: Hareket'in üç «İlerleme kuralı» kartı «İlerleme kuralı · Kardiyo» vb. oldu
+  (gizli), Bütçe › İkame'deki «Bütçenin yeri» kopyası «Kural sırası» (gizli). 2b'ye sıkı ölçü:
+  Günlük hedef, Günün yük emri, Hane şeritten gizliye. **İstisna (doktrin):** Testler › «Birlikte
+  okuma»daki «Hiçbiri teşhis değildir» sağlık çıkarımının yanındaki klinik sınırdır — kalır.
+- **AYS:** Sınama kur ve Kaynaklarım'ın öğreti alt yazısı ⓘ'de (`quiz`, `solve`). AYS'de kart
+  alt yazısı not satırı olarak çizilir; dört kelimeyi aşmayan künyeler kaldı.
+- Gizli bir başvuru kartının GÖVDESİ içeriktir (İlerleme kuralı, Bütçenin yeri, Yazı › Sınır):
+  kalır; kalkan, kartların üstündeki açıklama notudur.
+- Testler: bölümlü ekranlarda her bölüm ≤ 3 açık; aynı anahtarlı ikinci kart yok (SPİ);
+  kaldırılan cümleler ekranda yok, ipuçlarında var.
 
 ## 7. Bilinen riskler
 
@@ -266,8 +277,9 @@ Sıradaki — **2d, bölüm turu** (sıkı ölçüyle; ölçüm 2026-10-02, 1440
 | 6a | ✅ öne alındı: «Bu ekran nasıl okunur» şeridi her ekranda ⓘ kartına taşınır (`kabuk.railBilgiye`, `Gizle.uygula`'dan); terim kaybolmaz | 75a889a | 180 · aşan 21 (boy: Hafta 1 197) |
 | 2a | ✅ AYS Dersler · Soru çöz · Tekrar | 1d22ef6 | 172 · aşan 19 (AYS 59/5 · SPİ 55/8 · ESP 58/6) |
 | 2b | ✅ SPİ Testler · Öğün · Mutfak · Hareket · Bütçe (beşi de açık ≤ 3, boy ≤ 1 200); Bütçe «0 TL» hatası | f73a9a7 | 161 · aşan 15 (AYS 59/5 · SPİ 44/4 · ESP 58/6) |
-| 2c | ✅ sıkı ölçü: ESP Tarih · Ses · Okuma (her bölüm), AYS Soru çöz; Dersler 1 238 (raf tabanı) | (bu commit) | 150 · aşan 13 (AYS 59/5 · SPİ 44/4 · ESP 47/4) |
-| 2d | ⏭ sıradaki: bölüm turu — ESP Dil · Felsefe · Yazı, SPİ ve AYS bölümlerinin notları, 2b'ye sıkı ölçü | — | — |
+| 2c | ✅ sıkı ölçü: ESP Tarih · Ses · Okuma (her bölüm), AYS Soru çöz; Dersler 1 238 (raf tabanı) | a36e5e6 | 150 · aşan 13 (AYS 59/5 · SPİ 44/4 · ESP 47/4) |
+| 2d | ✅ bölüm turu: ESP Dil · Felsefe · Yazı, SPİ bölümleri, AYS Sınama; 2b'ye sıkı ölçü; Faz 2 bitti | (bu commit) | 150 · aşan 13 (araç varsayılan bölümü sayar; öbür bölümler testte) |
+| 3 | ⏭ sıradaki: Analiz — AYS İlerleme · Analiz · Telafi; SPİ Analiz; ESP Analiz | — | — |
 
 ## 9. Devir notu — sıradaki oturum buradan başlar
 

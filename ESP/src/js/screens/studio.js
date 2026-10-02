@@ -158,13 +158,13 @@ ESP.Screens.studio = (function(){
       const sonDeneme = (p.attempts || []).slice(-6).reverse();
       const esik = t.cert === 'missing' ? 'eşik yok'
         : t.value + (p.targetBpm ? ' / ' + p.targetBpm + (p.targetRef ? ' (referans)' : '') : '') + ' BPM';
-      return html`<details class="parca"${raw(secili === p ? ' open' : '')}>
-        <summary class="parca__ozet">
-          <span class="parca__ad">${p.name}</span>
-          <span class="parca__tur">${p.kind === 'technique' ? 'teknik' : 'parça'}</span>
-          <span class="parca__esik num">${esik}</span>
+      return html`<details class="acsatir parca"${raw(secili === p ? ' open' : '')}>
+        <summary class="acsatir__ozet">
+          <span class="acsatir__ad">${p.name}</span>
+          <span class="acsatir__tur">${p.kind === 'technique' ? 'teknik' : 'parça'}</span>
+          <span class="acsatir__deger num">${esik}</span>
         </summary>
-        <div class="parca__govde">
+        <div class="acsatir__govde">
           ${when((p.tags || []).indexOf('bam') >= 0, () => html`<p class="small muted">
             BAM alıştırması${p.key ? ' · ' + p.key : ''}${(p.progression || []).length
               ? ' · ' + p.progression.join('–') : ''}${p.startBpm ? ' · başlangıç ' + p.startBpm + ' BPM' : ''}

@@ -45,8 +45,8 @@ R.Screens.quiz = (function(){
     return K.Grid([
       K.Span(7, K.Stack([
         K.Card({
-          title:'Sınama kur', hint:'recall',
-          sub:'Önce cevabı üret, sonra bak. Tanımak bilmek değildir.',
+          /* iPhone Faz 2d: «önce üret, sonra bak» ⓘ'de (hints: quiz) */
+          title:'Sınama kur', hint:'quiz',
           body:html`
             ${K.Field({ label:'Kaynak', hint:mode === 'zayif' && Q.zayifKonular(3).length
               ? 'Ölçümden: ' + Q.zayifKonular(3).map(x => x.konu + ' (' + x.acikYanlis + ' açık yanlış)').join(', ')

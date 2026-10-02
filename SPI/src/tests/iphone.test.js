@@ -82,7 +82,8 @@
           /* ev ölçüsünden gelen gram tahmindir: toplam da tahmin etiketli, kaynağı yazılı */
           expect(!!d.querySelector('[data-donen-madde="0"] .sayi--estimated')).toBe(true);
           expect(d.querySelector('[data-donen-madde="0"] .koken').textContent.indexOf('kayıtlı değil')).toBe(-1);
-          expect(b.kucuk.indexOf('günlük-hedef') >= 0).toBe(true);
+          /* sıkı ölçü (2d): hedefin ayrıntısı dönen kartın tekrarı — gizli */
+          expect(b.gizli.indexOf('günlük-hedef') >= 0).toBe(true);
           expect(b.var.indexOf('tabak') >= 0).toBe(true);
           ['tabak', 'öğün-çizelgesi'].filter(a => b.var.indexOf(a) >= 0)
             .forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
@@ -154,7 +155,9 @@
       resetState();
       const b = await bolumle('kitchen');
       try{
-        ['hane', 'evde-ne-var', 'kendi-gıdaların'].forEach(a => expect(b.kucuk.indexOf(a) >= 0).toBe(true));
+        ['evde-ne-var', 'kendi-gıdaların'].forEach(a => expect(b.kucuk.indexOf(a) >= 0).toBe(true));
+        /* sıkı ölçü (2d): hane tablosu başvurudur (düzenleme Hane ekranında) — gizli */
+        expect(b.gizli.indexOf('hane') >= 0).toBe(true);
         expect(b.acik.indexOf('pişen-yemek') >= 0).toBe(true);
         expect(b.acik.length).toBe(3);
         /* açıklama satırları ekranda değil ⓘ'de; bilgi kaybolmadı */
@@ -206,7 +209,8 @@
           d.querySelectorAll('.koken').forEach(k => expect(k.textContent.indexOf('kayıtlı değil')).toBe(-1));
           /* Pazartesi 2026-09-28: Çarşamba 40 dk ve Cuma 20 dk asgari 15 dakikayı geçti */
           expect(d.querySelector('[data-donen-madde="1"]').textContent).toContain('2/7');
-          expect(b.kucuk.indexOf('günün-yük-emri') >= 0).toBe(true);
+          /* sıkı ölçü (2d): emrin ayrıntısı dönen kartta; kırmızı gerekçe orada söylenir — gizli */
+          expect(b.gizli.indexOf('günün-yük-emri') >= 0).toBe(true);
           ['bu-hafta-hareket', 'antrenman-haftası'].forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
           expect(b.acik.indexOf('seans-seç') >= 0 && b.acik.indexOf('bugünün-seansları') >= 0).toBe(true);
           expect(b.acik.length <= 3).toBe(true);
@@ -258,6 +262,91 @@
         if(b.var.indexOf('harcama-şeritleri') >= 0) expect(b.kucuk.indexOf('harcama-şeritleri') >= 0).toBe(true);
         expect(b.acik.length <= 3).toBe(true);
       }finally{ b.bitir(); }
+    });
+  });
+})();
+
+/* iPhone planı · Faz 2d · SPİ bölüm turu (sıkı ölçü).
+
+   Ölçü aracı yalnız varsayılan bölümü görür: Testler, Öğün, Hareket ve
+   Bütçe'nin öbür bölümleri burada sayılır. Sabit açıklama notu hiçbir
+   bölümde kalmaz (öğreti ⓘ'de). İstisna, doktrin gereği: «Birlikte
+   okuma»daki «Hiçbiri teşhis değildir» — sağlık çıkarımının hemen yanındaki
+   klinik sınırdır (AGENTS §1.5), kalır. */
+(function(){
+  const { describe, it, expect, resetState, withTodayAsync, pushLab, pushMeal, pushWorkout } = SP.Test;
+
+  async function ciz(id){
+    const kok = document.createElement('div');
+    kok.innerHTML = String(await SP.Screens[id].render());
+    document.body.appendChild(kok);
+    return kok;
+  }
+
+  describe('iPhone · Faz 2d · SPİ bölüm turu', () => {
+
+    it('Testler, Öğün, Hareket, Bütçe: her bölümde açık en çok üç; aynı başlıklı kart tekrar etmez', async () => {
+      await withTodayAsync('2026-10-02', async () => {
+        resetState();
+        pushLab('2026-06-03', { ferritin:30, hgb:13.5 });
+        pushLab('2026-08-03', { ferritin:22, hgb:13.1, glucose:88 });
+        pushMeal('2026-10-02', 'ogle', [['yumurta', 100]]);
+        pushWorkout('2026-10-01', { minutes:40, rpe:6 });
+        for(const id of ['labs', 'meals', 'move', 'basket']){
+          const kok = await ciz(id);
+          try{
+            const sc = SP.Screens[id];
+            const G = window.LIFEOS.Gizle;
+            const gizli = (sc.gizliVarsayilan || []).concat(SP.App.SADE_GIZLI[id] || []);
+            const kucuk = sc.kucukVarsayilan || [];
+            const hepsi = G.bolumler(kok);
+            kok.querySelectorAll('section.sayfabolum').forEach(pn => {
+              const acik = hepsi.filter(b => pn.contains(b.el)).map(b => b.anahtar)
+                .filter(a => gizli.indexOf(a) < 0 && kucuk.indexOf(a) < 0);
+              if(acik.length > 3) throw new Error(id + '/' + pn.id + ' açık ' + acik.join(','));
+            });
+            /* yönetilemeyen kart yok: başlığı başka bir bölümle aynı olan
+               kartı gizle.js yok sayar (ilk görülen anahtar kazanır) */
+            const say = {};
+            kok.querySelectorAll('section.lrow, section.kutu, .card').forEach(el => {
+              if(el.parentElement && el.parentElement.closest('section.lrow, section.kutu, .card')) return;
+              const b = el.querySelector(':scope > .lrow__side .lrow__label, :scope > .kutu__bas .kutu__ad, :scope > .card__head h3');
+              if(!b) return;
+              const kopya = b.cloneNode(true);
+              kopya.querySelectorAll('.hint, button, svg, .sr-only, [role="tooltip"]').forEach(x => x.remove());
+              const k = window.LIFEOS.Gizle.anahtar(kopya.textContent.replace(/\s+/g, ' ').trim());
+              say[k] = (say[k] || 0) + 1;
+            });
+            const iki = Object.keys(say).filter(k => k && say[k] > 1);
+            if(iki.length) throw new Error(id + ': aynı anahtarlı kart ' + iki.join(','));
+          }finally{ kok.remove(); }
+        }
+      });
+    });
+
+    it('Testler, Hareket, Bütçe: sabit açıklama cümleleri ekranda değil ⓘ’de', async () => {
+      await withTodayAsync('2026-10-02', async () => {
+        resetState();
+        pushLab('2026-06-03', { ferritin:30, hgb:13.5 });
+        pushLab('2026-08-03', { ferritin:22, hgb:13.1, glucose:88 });
+        const yok = ['Nokta son değer', 'Çerçeve aralık dışını', 'Referans aralığı laboratuvarın normal',
+          'Bu ölçümler için hiç değer', 'Aynı tarihe ikinci kez', 'Elindeki rapordaki bütün değerleri',
+          'KENDİ geçmişiyle', 'Bir panelin bütünü', 'Tek liste önem sırasına', 'Bu panellerin hiçbir ölçümü',
+          'Bir hap ölçümü değiştirir', 'Bırakmak silmek değildir', 'Hekiminin yazdığı talimatı',
+          'Fark yazmak kolaydır', 'Kendi ölçümlerinin saçılması', 'Her satır bir test oturumudur',
+          'Yürüyüş, koşu ve evde sprint', 'Vücut ağırlığıyla altı temel', 'Mobilite akışları.',
+          'Kazanç antrenmanda değil', 'Beş haftada bir yük', 'yapılmayanı da sayar', 'Seans yükü süre ×'];
+        /* gizli başvuru kartlarının GÖVDESİ (İlerleme kuralı, Bütçenin yeri) içeriktir, not değil: kalır */
+        for(const id of ['labs', 'move', 'basket']){
+          const metin = String(await SP.Screens[id].render());
+          yok.forEach(t => { if(metin.indexOf(t) >= 0) throw new Error(id + ': «' + t + '» ekranda'); });
+        }
+        expect(SP.HINTS['lab-entry'].more).toContain('sıfır olarak kaydedilmez');
+        expect(SP.HINTS.karsilastir.more).toContain('saçılma');
+        expect(SP.HINTS.ilac.more).toContain('Bırakmak silmek değildir');
+        expect(SP.HINTS.load.more).toContain('MET');
+        expect(SP.HINTS.progression.more).toContain('basamak');
+      });
     });
   });
 })();

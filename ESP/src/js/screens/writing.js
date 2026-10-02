@@ -40,10 +40,8 @@ ESP.Screens.writing = (function(){
       /* BAM'dan yazı örnekleri (Part 8f-2): üslubu örnek gösterilen yazarlar
          ve eserleri; kaynaklı. Eserler Okuma › Kaynaklar'a «başlanmadı» girer. */
       K2.Entry({
-        label:'Yazı örnekleri iste', hint:'revision',
+        label:'Yazı örnekleri iste', hint:'belge',
         meta:'yazı · HKM',
-        note:'Üslubu örnek gösterilen yazarlar ve eserleri web kaynaklarından çıkarılır; yazar '
-           + 'adı alıntıda doğrulanır. Eserler Okuma › Kaynaklar’a gelir.',
         wide:true,
         body:html`<div class="row gap-8 wrap">
           ${K2.Input({ id:'belge-yazi', placeholder:'Konu: deneme, kısa öykü…', aria:'Yazı konusu',
@@ -55,8 +53,6 @@ ESP.Screens.writing = (function(){
       K2.Entry({
         label:'Revizyon geçişleri', hint:'revision',
         meta:ESP.REVISION_PASSES.length + ' geçiş',
-        note:'Sıra önemlidir: yapı düzelmeden cümle cilalamak, silinecek '
-           + 'paragrafı güzelleştirmektir.',
         wide:true,
         body:K2.Table({ tight:true,
           headers:[{ label:'#', num:true }, 'Geçiş', 'Sorusu', 'Not'],
@@ -67,7 +63,6 @@ ESP.Screens.writing = (function(){
       K2.Entry({
         label:'Yapı kalıpları', hint:'structure',
         meta:ESP.STRUCTURES.length + ' kalıp',
-        note:'Kalıp seçmek yaratıcılığı sınırlamaz; boş sayfayı sınırlar.',
         wide:true,
         body:html`${map(ESP.STRUCTURES, st => html`
           <div class="toolrow">
@@ -80,7 +75,6 @@ ESP.Screens.writing = (function(){
       K2.Entry({
         label:'Retorik figürler', hint:'rhetoric',
         meta:ESP.RHETORIC.length + ' figür',
-        note:'Bilerek yapılan tekrar figürdür; farkında olunmayan tekrar gürültü.',
         wide:true,
         body:K2.Table({ tight:true, headers:['Figür', 'Ne yapar', 'Neden işe yarar', 'Örnek'],
           rows:ESP.RHETORIC.map(r => [r.label, r.what, r.why, r.ex]) }),
@@ -201,8 +195,6 @@ ESP.Screens.writing = (function(){
         label:'TASLAK–REVİZYON', hint:'draft-ratio',
         meta:r.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(r.value * 10) / 10) + ' / taslak',
-        note:'Sürekli yeni taslak açıp hiçbirini revize etmemek en yaygın yazı '
-           + 'tıkanmasıdır. Oran bir hedef değil bir aynadır.',
         body:r.cert === 'missing'
           ? K.Empty({ text:'Henüz taslak yok.' })
           : html`${K.Meter({ label:r.drafts + ' taslak, ' + r.revisions + ' revizyon',
@@ -212,9 +204,6 @@ ESP.Screens.writing = (function(){
       K.Entry({
         label:'Okunabilirlik', hint:'readability',
         meta:olculen.length + ' taslak ölçüldü',
-        note:'Ateşman formülü: 198,825 − 40,175 × (hece/kelime) − 2,610 × (kelime/cümle). '
-           + 'Türkçede hece sayısı = ünlü harf sayısıdır; bu yüzden hece sayacı bir '
-           + 'tahmin değil bir ölçümdür.',
         wide:true,
         body:olculen.length
           ? K.Table({ tight:true,
@@ -246,7 +235,6 @@ ESP.Screens.writing = (function(){
       K.Entry({
         label:'Sınır', hint:'pedagogic',
         meta:'ne söylenmez',
-        note:'Bu ekran üslup yargılamaz.',
         body:K.Notice({ tone:'info',
           body:'«Kusursuz», «yayımlanmaya hazır», «şaheser» gibi ifadeler estetik '
             + 'otorite iddiasıdır ve ajan çıktısında yakalanır. Ölçülebilen şey '
@@ -264,8 +252,6 @@ ESP.Screens.writing = (function(){
       K.Entry({
         label:'Konular', hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
-        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
-           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
         wide:true,
         body:ESP.Parts.topics('writing'),
       }),
@@ -374,6 +360,10 @@ ESP.Screens.writing = (function(){
 
   return {
     id:'writing',
+    /* iPhone Faz 2d (sıkı ölçü): Ölçüm'de üç sayı açık, pratik süresi şerit;
+       Araçlar'ın dördü de başvuru (şerit). Sınır kartı gizli: pedagojik
+       sınır her sayfanın sonunda ve ⓘ'de (hints: pedagogic). */
+    kucukVarsayilan:['pratik-süresi', 'yazı-örnekleri-iste', 'revizyon-geçişleri', 'yapı-kalıpları', 'retorik-figürler'],
     title:'Yazı Laboratuvarı',
     headline(){
       const w = ESP.Intellect.wordsWritten(7);

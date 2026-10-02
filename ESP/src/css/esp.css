@@ -222,26 +222,27 @@
 .metro__step:hover{ background:var(--surface-hover); color:var(--text); }
 .metro__ctrl{ display:flex; gap:var(--sp-2); align-items:center; }
 
-/* Parcalar (iPhone Faz 2c): her parca tek satir; dokununca esik cubugu,
-   siradaki basamak ve son tekrarlar satirin icinde acilir. Ok, gizli
+/* Acilir satir (iPhone Faz 2c-2d): tek satirlik ozet, dokununca icerik
+   satirin icinde acilir (Ses › Parcalar, Dil › Duzeyler). Ok, gizli
    bolumun seridindeki okun aynisi. */
-.parca{ border-bottom:1px solid var(--rule); }
-.parca:last-child{ border-bottom:0; }
-.parca__ozet{
+.acsatir{ border-bottom:1px solid var(--rule); }
+.acsatir:last-child{ border-bottom:0; }
+.acsatir__ozet{
   display:flex; align-items:center; gap:var(--sp-3); min-height:44px;
   padding:var(--sp-2) 0; cursor:pointer; list-style:none;
 }
-.parca__ozet::-webkit-details-marker{ display:none; }
-.parca__ozet::before{
+.acsatir__ozet::-webkit-details-marker{ display:none; }
+.acsatir__ozet::before{
   content:''; flex:none; width:6px; height:6px; margin:0 var(--sp-1);
   border-right:1.6px solid currentColor; border-bottom:1.6px solid currentColor;
   transform:rotate(-45deg); opacity:.6; transition:transform var(--dur) var(--ease);
 }
-.parca[open] > .parca__ozet::before{ transform:rotate(45deg); }
-.parca__ad{ flex:1 1 auto; min-width:0; font-weight:550; overflow-wrap:anywhere; }
-.parca__tur{ font-size:var(--fs-xs); color:var(--text-3); }
-.parca__esik{ font-size:var(--fs-sm); color:var(--text-2); white-space:nowrap; }
-.parca__govde{ padding:0 0 var(--sp-4) calc(var(--sp-1) * 2 + 6px + var(--sp-3)); }
+.acsatir[open] > .acsatir__ozet::before{ transform:rotate(45deg); }
+.acsatir__ad{ flex:0 1 auto; min-width:0; font-weight:550; overflow-wrap:anywhere; }
+.acsatir__tur{ flex:1 1 0; min-width:0; font-size:var(--fs-xs); color:var(--text-3);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.acsatir__deger{ flex:none; font-size:var(--fs-sm); color:var(--text-2); white-space:nowrap; }
+.acsatir__govde{ padding:0 0 var(--sp-4) calc(var(--sp-1) * 2 + 6px + var(--sp-3)); }
 
 .twister{
   font-family:var(--font-serif); font-size:var(--fs-lg); line-height:1.5;
@@ -406,7 +407,7 @@
 /* Hareket azaltilmis tercihinde gecisler durur; STIL'deki genel kural
    burada da gecerlidir. */
 @media (prefers-reduced-motion:reduce){
-  .daycell, .srscard__reveal, .metro__step, .handoff, .parca__ozet::before{ transition:none; }
+  .daycell, .srscard__reveal, .metro__step, .handoff, .acsatir__ozet::before{ transition:none; }
 }
 
 

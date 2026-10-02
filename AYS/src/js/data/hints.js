@@ -129,7 +129,7 @@ R.HINTS = {
   'estimate':{ t:'Tahmini sıra', b:'Son 3 denemenin medyanından üretilen bant — tek sayı değil.',
     more:'ÖSYM puanı ham netten değil, standartlaştırılmış puandan gelir ve aday dağılımı her yıl değişir. Bu yüzden sonuç aralık olarak verilir ve deneme sayısı arttıkça aralık daralır.' },
   'solve':{ t:'Soru çöz', b:'Sorunun fotoğrafını ya da metnini ver; model çözer ve anlatır.',
-    more:'Fotoğraf üç yoldan girer: bırak, tıkla ya da Ctrl+V ile yapıştır. Notun isteğe bağlıdır: nerede takıldığını yazarsan çözüm oraya odaklanır. Model bağlı değilse çözüm üretilmez.' },
+    more:'Fotoğraf üç yoldan girer: bırak, tıkla ya da Ctrl+V ile yapıştır. Notun isteğe bağlıdır: nerede takıldığını yazarsan çözüm oraya odaklanır. Model bağlı değilse çözüm üretilmez. Kaynaklarım’da zorluk etiketten değil, senin çözüm oranından çıkar.' },
   'quick-log':{ t:'Hızlı kayıt', b:'Ders, konu ve sonuç seç; Enter kaydeder.',
     more:'Açılır pencere yok: satırı doldurup Enter’a (ya da ↵ düğmesine) basmak soruyu kaydeder. Çözümü yazdırmadan çözülmüş bir soruyu konu takibine bağlar. Kayıt küçük aksiyondur: sormadan uygulanır, «Geri al» kalır.' },
   'quiz':{ t:'Sınama', b:'Kart çevirmek tanımadır; sınama üretmeyi ölçer.',

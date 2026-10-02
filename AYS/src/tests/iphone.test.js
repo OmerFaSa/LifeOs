@@ -209,3 +209,20 @@
     });
   });
 })();
+
+/* iPhone planı · Faz 2d · AYS: kart alt yazısındaki öğreti ⓘ'de (sıkı ölçü). */
+(function(){
+  const { describe, it, expect, resetState } = R.Test;
+  describe('iPhone · Faz 2d · AYS', () => {
+    it('Sınama kur ve Kaynaklarım: açıklama cümlesi ekranda değil ⓘ’de', async () => {
+      resetState();
+      R.S.profile.setupDone = true;
+      const sinama = String(await R.Screens.quiz.render());
+      expect(sinama.indexOf('Önce cevabı üret')).toBe(-1);
+      expect(sinama.indexOf('data-hint="quiz"') >= 0).toBe(true);
+      const coz = String(await R.Screens.solve.render());
+      expect(coz.indexOf('Zorluk etiketten değil')).toBe(-1);
+      expect(R.HINTS.solve.more).toContain('Kaynaklarım');
+    });
+  });
+})();

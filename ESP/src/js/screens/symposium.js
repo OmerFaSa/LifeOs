@@ -46,8 +46,6 @@ ESP.Screens.symposium = (function(){
       K.Entry({
         label:'Düşünce deneyleri', hint:'experiment',
         meta:list.length + ' deney',
-        note:'Deney bir tezi sınar. Tezini sarsmayan bir deney seçmek, '
-           + 'sınamadan geçmiş saymaktır.',
         action:K.Select({ id:'exp-field', value:alan, change:'exp-field',
           aria:'Alan süzgeci',
           options:[{ value:'all', label:'Bütün alanlar' }]
@@ -70,7 +68,6 @@ ESP.Screens.symposium = (function(){
       K.Entry({
         label:'Argüman alıştırmaları', hint:'argument-drill',
         meta:ESP.ARGUMENT_DRILLS.length + ' alıştırma',
-        note:'Safsata denetimi metinde desen arar; bunlar egzersizdir.',
         wide:true,
         body:K.Table({ tight:true, headers:['Alıştırma', 'Ne yapılır', 'Neden'],
           rows:ESP.ARGUMENT_DRILLS.map(d => [d.label, d.task, d.note]) }),
@@ -198,8 +195,6 @@ ESP.Screens.symposium = (function(){
       K.Entry({
         label:'Yeni tez', hint:'argument',
         meta:'tek cümle yeter',
-        note:'Uzun deneme gerekmez. «X doğrudur çünkü Y. Ama Z olabilir.» yazarsan '
-           + 'tez, destek ve itiraz ayrıştırılır — anlaşılmayan cümle atılmaz, sorulur.',
         body:html`
           ${K.Textarea({ id:'arg-text', rows:4, aria:'Tez metni',
             placeholder:'Özgürlük yalnızca seçenek çokluğu değildir çünkü seçenekleri '
@@ -228,10 +223,8 @@ ESP.Screens.symposium = (function(){
       }),
 
       K.Entry({
-        label:'Sokratik sorular',
+        label:'Sokratik sorular', hint:'sokratik',
         meta:ESP.SOCRATIC.length + ' kalıp',
-        note:'Model kapalıyken Socrates bu kalıplardan sorar. Kalıp olmaları '
-           + 'kasıtlı: bir soru ancak teze bağlandığında işe yarar.',
         body:K.Table({ tight:true, headers:['Soru'],
           rows:ESP.SOCRATIC.map(q => [q.q]) }),
       }),
@@ -244,8 +237,6 @@ ESP.Screens.symposium = (function(){
       K.Entry({
         label:'Kaynaklar', hint:'primary-text',
         meta:kitaplar.length + ' kayıt',
-        note:'Primer metin filozofun kendi metnidir; yorum ayrı tutulur. '
-           + 'Sentez katsayısı yalnızca primer metinden kurulan bağları sayar.',
         wide:true,
         body:kitaplar.length
           ? K.Table({ tight:true, headers:['Eser', 'Yazar', 'Tür', 'Başlangıç', ''],
@@ -261,10 +252,8 @@ ESP.Screens.symposium = (function(){
       /* BAM'dan belge (Part 8f): konu → düşünür, eser ve tez; kaynaklı.
          Teklif Bugün'e gelir, ESP kendi koduyla sınamadan eklenmez. */
       K.Entry({
-        label:'Belge iste', hint:'primary-text',
+        label:'Belge iste', hint:'belge',
         meta:'felsefe · HKM',
-        note:'Konunun düşünürleri, eserleri ve ana tezleri web kaynaklarından çıkarılır; ad '
-           + 'alıntıda doğrulanır. Tezler açık tartışma olarak gelir. Web kapalıysa belge yazılmaz.',
         body:html`<div class="row gap-8 wrap">
           ${K.Input({ id:'belge-felsefe', placeholder:'Konu: Stoacılık, varoluşçuluk…', aria:'Felsefe konusu',
             size:'sm', class:'grow' })}
@@ -274,10 +263,8 @@ ESP.Screens.symposium = (function(){
       }),
 
       K.Entry({
-        label:'Kanondan ekle',
+        label:'Kanondan ekle', hint:'kanon',
         meta:ESP.CANON.length + ' eser',
-        note:'Yazar adının iki farklı yazımı sentez katsayısının yazar sayısını '
-           + 'ikiye katlıyordu; listeden seçmek bunu kapatır.',
         body:html`
           <div class="row wrap">
             ${K.Select({ id:'canon-pick', aria:'Kanondan eser seç',
@@ -307,8 +294,6 @@ ESP.Screens.symposium = (function(){
       K.Entry({
         label:'Konular', hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
-        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
-           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
         wide:true,
         body:ESP.Parts.topics('philo'),
       }),
@@ -511,6 +496,9 @@ ESP.Screens.symposium = (function(){
 
   return {
     id:'symposium',
+    /* iPhone Faz 2d (sıkı ölçü): belge isteği, Sokratik soru kalıpları ve iki
+       egzersiz kataloğu başvurudur — şerit, dokununca açılır. */
+    kucukVarsayilan:['belge-iste', 'sokratik-sorular', 'düşünce-deneyleri', 'argüman-alıştırmaları'],
     title:'Sempozyum',
     headline(){
       const acik = ESP.Intellect.openArguments();

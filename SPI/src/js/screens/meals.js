@@ -909,9 +909,6 @@ SP.Screens.meals = (function(){
 
   return {
     id:'meals',
-    /* iPhone Faz 2b: iş öğünü yazmak; hedefin ayrıntısı şerit (sayıları
-       dönen «Öğün» kartında), Tabak ve çizelge gizli (app.js SADE_GIZLI). */
-    kucukVarsayilan:['günlük-hedef'],
     title:'Öğünler',
     headline(){
       const tg = SP.Nutri.targets();

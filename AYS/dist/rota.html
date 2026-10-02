@@ -13433,7 +13433,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'f73a9a7', at:'2026-10-02 12:24', dirty:true };
+R.BUILD = { id:'a36e5e6', at:'2026-10-02 12:47', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -27131,7 +27131,7 @@ R.HINTS = {
   'estimate':{ t:'Tahmini sıra', b:'Son 3 denemenin medyanından üretilen bant — tek sayı değil.',
     more:'ÖSYM puanı ham netten değil, standartlaştırılmış puandan gelir ve aday dağılımı her yıl değişir. Bu yüzden sonuç aralık olarak verilir ve deneme sayısı arttıkça aralık daralır.' },
   'solve':{ t:'Soru çöz', b:'Sorunun fotoğrafını ya da metnini ver; model çözer ve anlatır.',
-    more:'Fotoğraf üç yoldan girer: bırak, tıkla ya da Ctrl+V ile yapıştır. Notun isteğe bağlıdır: nerede takıldığını yazarsan çözüm oraya odaklanır. Model bağlı değilse çözüm üretilmez.' },
+    more:'Fotoğraf üç yoldan girer: bırak, tıkla ya da Ctrl+V ile yapıştır. Notun isteğe bağlıdır: nerede takıldığını yazarsan çözüm oraya odaklanır. Model bağlı değilse çözüm üretilmez. Kaynaklarım’da zorluk etiketten değil, senin çözüm oranından çıkar.' },
   'quick-log':{ t:'Hızlı kayıt', b:'Ders, konu ve sonuç seç; Enter kaydeder.',
     more:'Açılır pencere yok: satırı doldurup Enter’a (ya da ↵ düğmesine) basmak soruyu kaydeder. Çözümü yazdırmadan çözülmüş bir soruyu konu takibine bağlar. Kayıt küçük aksiyondur: sormadan uygulanır, «Geri al» kalır.' },
   'quiz':{ t:'Sınama', b:'Kart çevirmek tanımadır; sınama üretmeyi ölçer.',
@@ -56934,8 +56934,8 @@ R.Screens.quiz = (function(){
     return K.Grid([
       K.Span(7, K.Stack([
         K.Card({
-          title:'Sınama kur', hint:'recall',
-          sub:'Önce cevabı üret, sonra bak. Tanımak bilmek değildir.',
+          /* iPhone Faz 2d: «önce üret, sonra bak» ⓘ'de (hints: quiz) */
+          title:'Sınama kur', hint:'quiz',
           body:html`
             ${K.Field({ label:'Kaynak', hint:mode === 'zayif' && Q.zayifKonular(3).length
               ? 'Ölçümden: ' + Q.zayifKonular(3).map(x => x.konu + ' (' + x.acikYanlis + ' açık yanlış)').join(', ')
@@ -57867,7 +57867,8 @@ R.Screens.solve = (function(){
     const warn = R.Sources.ladderWarning();
 
     return K.Card({
-      title:'Kaynaklarım', sub:'Zorluk etiketten değil, senin oranından çıkar',
+      /* iPhone Faz 2d: zorluğun nereden geldiği ⓘ'de (hints: solve) */
+      title:'Kaynaklarım', hint:'solve',
       actions:K.Button({ label:'Kaynak ekle', icon:'plus', size:'sm', act:'q-src-new' }),
       body:html`
         ${when(warn, () => K.Notice({ tone:'warn', title:'Yayın merdiveni:', body:warn.text }))}

@@ -450,7 +450,8 @@
       pushLab('2026-01-01', { ferritin:20 });
       SP.S.ui.labTab = 'kiyas';
       const out = String(await SP.Screens.labs.render());
-      expect(out.indexOf('en az iki test oturumu') > 0).toBeTruthy();
+      /* iPhone Faz 2d: cümle bir kez, boş durumun kendisinde («En az iki…») */
+      expect(out.toLocaleLowerCase('tr-TR').indexOf('en az iki test oturumu') > 0).toBeTruthy();
     });
 
     it('hekim çıktısı eylemi var', () => {

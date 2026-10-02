@@ -344,7 +344,7 @@ SP.Screens.kitchen = (function(){
 
   return {
     id:'kitchen',
-    kucukVarsayilan:['hane', 'evde-ne-var', 'kendi-gıdaların'],
+    kucukVarsayilan:['evde-ne-var', 'kendi-gıdaların'],
     title:'Mutfak',
     headline(){
       const list = SP.Model.householdList();

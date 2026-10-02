@@ -487,8 +487,9 @@ SP.Screens.basket = (function(){
     sepet:() => html`${K.Ledger(() => [totalCard(), itemsCard(), coverageCard()])}
       <div class="mt-24">${raw(UI.rail(['price-estimate', 'substitute', 'bulk', 'budget-rank']))}</div>`,
     ikame:() => html`${K.Ledger(() => [swapCard(), bulkCard(),
-        K.Entry({ label:'Bütçenin yeri', hint:'budget-rank', meta:'öncelik sırası',
-          note:SP.PRECEDENCE[5].note,
+        /* Bütçe bölümündeki «Bütçenin yeri» ile aynı tablo: aynı başlık aynı
+           gizleme anahtarı olurdu ve bu kopya yönetilemezdi. Gizli. */
+        K.Entry({ label:'Kural sırası', hint:'budget-rank', meta:'öncelik sırası',
           body:K.Table({ tight:true, headers:['Sıra', 'Kural'],
             rows:SP.PRECEDENCE.map(p => [String(p.rank), p.label]) }) }),
       ])}

@@ -22,21 +22,43 @@ ESP.HINTS = {
 
   /* --- dil --- */
   'srs':{ t:'Aralıklı tekrar', b:'Bir kartı tam unutmadan hemen önce sorar; aralık her doğru cevapta uzar.',
-    more:'Leitner kutularının SM-2 ile yumuşatılmış hâli. Kolay bulduğun kart daha uzun süre görünmez, zorlandığın kart başa döner. Amaç tekrar sayısını azaltmak değil, aynı hatırlamayı daha az tekrarla elde etmektir. Her disiplinin destesi ayrı ölçülür — tarih destesi dil destesinden AYRI: birinin iyi olması ötekinin çöküşünü gizlememeli.' },
+    more:'Leitner kutularının SM-2 ile yumuşatılmış hâli. Kolay bulduğun kart daha uzun süre görünmez, zorlandığın kart başa döner. Amaç tekrar sayısını azaltmak değil, aynı hatırlamayı daha az tekrarla elde etmektir. Her disiplinin destesi ayrı ölçülür — tarih destesi dil destesinden AYRI: birinin iyi olması ötekinin çöküşünü gizlememeli. Aralıklı tekrarın amacı her gün çalışmak değil, doğru günde çalışmaktır: sırası gelen kart yoksa çalışılacak kart da yoktur. Erken çalışmak aralığı kısaltır ve tekrar sayısını artırır — kazanç getirmez. Oturum başladığında liste dondurulur: cevapladığın kartın vadesi ileri gitse de kuyruktan düşmez, ilerlemeyi görürsün.' },
   'retention':{ t:'Retansiyon', b:'Bugün sorulsa hatırlama olasılığının ortalaması. R(t) = e^(−t/S).',
     more:'S kartın kendi kararlılığıdır ve her doğru cevapta büyür. Hiç çalışılmamış kart bu ortalamaya girmez: «veri yok» sıfır sayılmaz, yoksa bir gün ara vermek retansiyonu çökmüş gibi gösterirdi.' },
   'shadowing':{ t:'Shadowing', b:'Duyduğun konuşmayı birkaç kelime geriden, aynı tonlamayla tekrarlama.',
     more:'Süre ölçülür, kalite ölçülmez — sistem sesini dinlemez. Kendi işaretlediğin zorluk «tahmin» etiketiyle durur ve hiçbir skoru tek başına belirlemez.' },
   'i-plus-one':{ t:'i+1 üretim', b:'Bildiğinin bir adım üstünde üretim: tanıdığın kalıbın yeni bağlamda kullanımı.',
     more:'Kartı tanımak (pasif) ile cümlede kullanmak (aktif) farklı şeylerdir. Aktif kelime sayısı yalnızca üretimde geçen kelimeleri sayar; tanıdıkların ayrı tutulur.' },
+  'deste':{ t:'Deste', b:'Vadesi yakın kart üstte durur.',
+    more:'«Aktif» işareti kartın üretimde kullanıldığını söyler; tanımak ile kullanmak ayrı şeylerdir.' },
+  'kelime-agi':{ t:'Kelime ağı', b:'Eş anlamlılar çevrede, zıt anlamlı kesik çerçeveyle.',
+    more:'Bağları kartı eklerken sen yazdın; sistem bağ uydurmaz.' },
+  'liste-yapistir':{ t:'Liste yapıştır', b:'Kelime listesini olduğu gibi yapıştır.',
+    more:'Üç ayraç tanınır: tire, eşittir, iki nokta. Tanınmayan satır atılmaz — sana geri gösterilir ve elle bağlarsın.' },
+  'tohum-deste':{ t:'Tohum deste', b:'İlk ekranı boş bırakmamak için hazır kartlar.',
+    more:'Bu kartlar senin ölçümün değildir; istediğin zaman silinir ve «tohum» etiketini taşır.' },
+  'bant':{ t:'Bant', b:'Aktif kelime ve retansiyondan okunan dil bandı.',
+    more:'Bant KİŞİYE değil ÜRETİME verilir ve iki ölçüm birden gerekir: aktif kelime sayısı ve retansiyon. Bir öz-değerlendirmedir, sertifika değildir.' },
+  'konusma-pratigi':{ t:'Konuşma pratiği', b:'Süre ve duraksamalar ölçülür.',
+    more:'Mikrofonun yalnız ses YÜKSEKLİĞİ okunur; ses kaydedilmez, gönderilmez. Süre ve 0,6 saniyeden uzun duraksamalar ölçülür.' },
+  'cumle-kur':{ t:'Cümle kur', b:'Kelimelere sırayla dokunarak cümleyi kur.',
+    more:'Yerleşen taş renk alır. Sıra yanlışsa taş yerinde kalır, puan yazılmaz.' },
+  'dinle-oku':{ t:'Dinle ve oku', b:'Bağlam cümleleri sırayla okunur.',
+    more:'Okunan cümle büyür. Ses cihazda kalır, kaydedilmez.' },
+  'unite-iste':{ t:'Ünite iste', b:'Başlık, ölçülebilir hedef, görev ve öğeler.',
+    more:'Soru yazdırılmaz: pratik sorularını ESP kendi destenden kurar. Ünite kaynaksızdır; yanlış kartı silersin.' },
 
   /* --- felsefe --- */
   'argument':{ t:'Argüman', b:'Tek cümlelik tez, destekleri ve itirazları. Uzun deneme gerekmez.',
-    more:'Bir tez «açık» kalır: itirazı cevaplanmadıysa kapanmaz. Socrates cevabı yazmaz, soruyu sorar — cevabı sen verirsin. Açık tez bir eksiklik değil, çalışan bir düşüncedir; yalnızca 14 günden uzun sürerse masa notu düşer.' },
+    more:'Bir tez «açık» kalır: itirazı cevaplanmadıysa kapanmaz. Socrates cevabı yazmaz, soruyu sorar — cevabı sen verirsin. Açık tez bir eksiklik değil, çalışan bir düşüncedir; yalnızca 14 günden uzun sürerse masa notu düşer. Yazım kalıbı yeter: «X doğrudur çünkü Y. Ama Z olabilir.» — tez, destek ve itiraz ayrıştırılır; anlaşılmayan cümle atılmaz, sorulur.' },
+  'sokratik':{ t:'Sokratik sorular', b:'Model kapalıyken Socrates bu kalıplardan sorar.',
+    more:'Kalıp olmaları kasıtlı: bir soru ancak teze bağlandığında işe yarar.' },
   'fallacy':{ t:'Safsata denetimi', b:'Metindeki mantık hatası kalıplarını arar: kişiye saldırı, korkuluk adam, kaçınılmaz sonuç.',
     more:'Denetim kalıp tabanlıdır ve kesin değildir: «bulgu» olarak işaretler, yargı vermez. Bir kalıbın yakalanması argümanın yanlış olduğunu göstermez — bakmaya değer olduğunu gösterir.' },
   'primary-text':{ t:'Primer metin', b:'Filozofun kendi metni; hakkında yazılmış yorum değil.',
     more:'Yorum okumak kötü değildir ama kaydı ayrı tutulur: sentez katsayısı yalnızca primer metinden kurulan bağları sayar. Yoksa bir özet kitabı on filozof okumuş gibi görünürdü.' },
+  'kanon':{ t:'Kanondan ekle', b:'Yazarı listeden seç; adı tek yazımla girer.',
+    more:'Yazar adının iki farklı yazımı sentez katsayısının yazar sayısını ikiye katlıyordu; listeden seçmek bunu kapatır.' },
 
   /* --- ses --- */
   'clean-bpm':{ t:'Temiz BPM', b:'Hata yapmadan çalabildiğin en yüksek tempo. Ulaşılan en yüksek tempo değil.',
@@ -75,7 +97,7 @@ ESP.HINTS = {
 
   /* --- yazi --- */
   'readability':{ t:'Okunabilirlik', b:'Cümle uzunluğu ve kelime uzunluğundan hesaplanan bir okuma yükü göstergesi.',
-    more:'Bir kalite yargısı değildir: uzun cümle kötü değildir, farkında olmadan uzayan cümle sorundur. Gösterge kendi geçmiş metinlerinle karşılaştırılır.' },
+    more:'Bir kalite yargısı değildir: uzun cümle kötü değildir, farkında olmadan uzayan cümle sorundur. Gösterge kendi geçmiş metinlerinle karşılaştırılır. Ateşman formülü: 198,825 − 40,175 × (hece/kelime) − 2,610 × (kelime/cümle). Türkçede hece sayısı ünlü harf sayısıdır; bu yüzden hece sayacı bir tahmin değil bir ölçümdür.' },
   'draft-ratio':{ t:'Taslak–revizyon', b:'Üretilen kelime ile revize edilen kelimenin oranı.',
     more:'Sürekli yeni taslak açıp hiçbirini revize etmemek en yaygın yazı tıkanmasıdır. Oran bir hedef değil bir aynadır; Montaigne yalnızca sayıyı söyler.' },
 
@@ -87,7 +109,7 @@ ESP.HINTS = {
   'handoff':{ t:'Masalar arası devir', b:'Bir masanın bulgusu başka bir masanın işi olduğunda düşen satır.',
     more:'Devir bir tavsiye değildir: «şu ölçüldü, şu masaya düşüyor» der. Ölçülmemiş bir şey devredilemez — tahmin devir üretmez.' },
   'pedagogic':{ t:'Pedagojik sınır', b:'Sistem sertifika vermez, yetenek yargısı kurmaz, sonuç garantisi etmez.',
-    more:'SPİ\'nin klinik sınırının buradaki karşılığı. Seviye etiketi kişiye değil ÜRETİME verilir ve daima tarih aralığıyla birlikte: «son 30 günlük üretimin B2 bandının kriterlerini karşılıyor — bu bir öz-değerlendirmedir».' },
+    more:'SPİ\'nin klinik sınırının buradaki karşılığı. Seviye etiketi kişiye değil ÜRETİME verilir ve daima tarih aralığıyla birlikte: «son 30 günlük üretimin B2 bandının kriterlerini karşılıyor — bu bir öz-değerlendirmedir». Yazıda «kusursuz», «yayımlanmaya hazır», «şaheser» gibi estetik otorite iddiaları ajan çıktısında yakalanır; ölçülebilen şey söylenir: uzunluk, tekrar, akış.' },
   'precedence':{ t:'Öncelik sırası', b:'İki uzman ters şey söylediğinde Patron\'un uyduğu sıra.',
     more:'Üstteki alttakini her zaman yener. Ama yenilen uzmanın işi bitmez: yeni parça yerine mevcut repertuarda ilerleme önerir. «Hiçbir şey yapma» demek değildir.' },
   'ehs':{ t:'Entelektüel hacim', b:'EHS = Σ (disiplin ağırlığı × ölçülen saat × kalite katsayısı).',
@@ -151,7 +173,7 @@ ESP.HINTS = {
   'tarih-pratik':{ t:'Tarih pratiği', b:'Dört soru türü: hatırla, seç, dönem ve sırala.',
     more:'Sıralamada seçenekler hazır dizilmez — sırayı sen kurarsın. Cevap tekrar ekranındakiyle aynı SRS’e yazılır; ayrı bir hafıza kaydı açılmaz.' },
   'belge':{ t:'Belge iste', b:'King web kaynaklarından kaynaklı içerik getirir.',
-    more:'İstek King’e iletilir; içerik web kaynaklarından çıkarılır ve her satır alıntısıyla gelir — alıntısı kaynakta bulunmayan satır eklenmez. Tarihte yıl, okuma listesinde yazar adı alıntıda doğrulanır; eserler «başlanmadı» olarak gelir. Web kapalıysa hiçbir şey yazılmaz.' },
+    more:'İstek King’e iletilir; içerik web kaynaklarından çıkarılır ve her satır alıntısıyla gelir — alıntısı kaynakta bulunmayan satır eklenmez. Tarihte yıl, okuma listesinde yazar adı alıntıda doğrulanır; eserler «başlanmadı» olarak gelir. Web kapalıysa hiçbir şey yazılmaz. Felsefede düşünürler, eserleri ve ana tezleri gelir — ad alıntıda doğrulanır, tezler açık tartışma olarak durur. Yazıda üslubu örnek gösterilen yazarlar ve eserleri gelir; eserler Okuma › Kaynaklar’a düşer.' },
 
   /* --- dil (ikinci eksen) --- */
   'grammar':{ t:'Dilbilgisi ekseni', b:'Kelime ölçülür, işlev beyan edilir.',
@@ -183,7 +205,7 @@ ESP.HINTS = {
   'experiment':{ t:'Düşünce deneyi', b:'Bir tezi laboratuvarsız sınamanın yolu.',
     more:'Deneylerin «doğru cevabı» yazılmaz: cevabı veren bir liste, deneyi bilgi yarışması sorusuna çevirir. Yazılan tek şey deneyin hangi AYRIMI zorladığıdır. Tezini sarsmayan bir deney seçmek, sınamadan geçmiş saymaktır.' },
   'argument-drill':{ t:'Argüman alıştırması', b:'Tez kurma ve sınama egzersizleri.',
-    more:'Çelik adam kuralı en önemlisidir: karşı tarafı zayıf kurmak tartışmayı kazandırır, doğruyu kaybettirir. Yanlışlanamayan tez bir iddia değil bir inançtır.' },
+    more:'Çelik adam kuralı en önemlisidir: karşı tarafı zayıf kurmak tartışmayı kazandırır, doğruyu kaybettirir. Yanlışlanamayan tez bir iddia değil bir inançtır. Safsata denetimi metinde desen arar; buradakiler egzersizdir.' },
 
   /* --- müzik (ikinci eksen) --- */
   'ear':{ t:'Kulak eğitimi', b:'Duyduğunu adlandırabilme: aralık, akor, derece.',
@@ -204,7 +226,7 @@ ESP.HINTS = {
   'reminder':{ t:'Hatırlatma', b:'Kendine söylediğin bir şeyin günü gelince tekrar söylenmesi.',
     more:'Bir görev değildir: sistem hiçbir şeyi zorunlu kılmaz ve kaçırılan bir hatırlatıcı ceza üretmez, borç yazmaz. Tekrarlı olan tamamlanınca silinmez, bir sonraki tarihe taşınır — ve o tarih BUGÜNDEN sayılır: iki hafta geciken günlük bir hatırlatıcı on dört kez üst üste düşmemeli.' },
   'unit':{ t:'Ünite', b:'Bir konunun somut öğeleri ve ölçülebilir hedefi.',
-    more:'Ünite bir ders değildir — ESP öğretmen değil — bir başlangıç malzemesidir: boş ekranı kaldırır. Üniteden gelen kartlar «tohum» etiketi taşır, yani «bu kartı ben yazmadım» bilgisi kaybolmaz. İlerleme ayrı bir «tamamlandı» bayrağından değil SRS\'ten okunur: bir kartı bilinen yapan şey bir kez doğru bilmek değil, aralığının uzamasıdır.' },
+    more:'Ünite bir ders değildir — ESP öğretmen değil — bir başlangıç malzemesidir: boş ekranı kaldırır. Üniteden gelen kartlar «tohum» etiketi taşır, yani «bu kartı ben yazmadım» bilgisi kaybolmaz. İlerleme ayrı bir «tamamlandı» bayrağından değil SRS\'ten okunur: bir kartı bilinen yapan şey bir kez doğru bilmek değil, aralığının uzamasıdır. Yanlış çeviriyle dolu bir ünite, boş bir üniteden pahalıdır: malzemesi olmayan ünitenin konusu durur, kartını sen yazarsın.' },
   'practice':{ t:'Pratik', b:'Destedeki kartlardan üretilen soru–cevap oturumu.',
     more:'Pratik ayrı bir hafıza kaydı açmaz: cevabın tekrar ekranındakiyle aynı yere, aynı SRS\'e yazılır. Çeldiriciler aynı desteden gelir ve model uydurmaz — uydurulmuş bir çeldirici yanlış bir şeyi öğretebilir. «Bilmiyorum» bir atlama değildir: kart «tekrar» işaretlenir ve başa döner.' },
   'proposal':{ t:'Teklif', b:'Bir masanın kendi alanında önerdiği somut eylem.',

@@ -476,7 +476,8 @@ R.Screens.solve = (function(){
     const warn = R.Sources.ladderWarning();
 
     return K.Card({
-      title:'Kaynaklarım', sub:'Zorluk etiketten değil, senin oranından çıkar',
+      /* iPhone Faz 2d: zorluğun nereden geldiği ⓘ'de (hints: solve) */
+      title:'Kaynaklarım', hint:'solve',
       actions:K.Button({ label:'Kaynak ekle', icon:'plus', size:'sm', act:'q-src-new' }),
       body:html`
         ${when(warn, () => K.Notice({ tone:'warn', title:'Yayın merdiveni:', body:warn.text }))}
