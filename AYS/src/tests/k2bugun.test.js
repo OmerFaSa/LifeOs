@@ -258,6 +258,24 @@
       });
     });
 
+    /* Deneme (2026-10-02): sağ sütunun beş kartı tek dönen «Gidişat» kartı.
+       Az denemede sıralama sayı değil cümledir. */
+    it('sadelik: Deneme sağ sütunu tek dönen kart; az denemede sıralama cümle', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const exams = R.S.exams;
+        try{
+          R.S.exams = [];
+          const k = dom(await R.Screens.exams.render());
+          const d = k.querySelector('.donen[aria-label="Gidişat"]');
+          expect(!!d).toBe(true);
+          const ust = Array.from(d.querySelectorAll('.donen__ust')).map(x => x.textContent.trim());
+          expect(ust[0]).toBe('Sıralama');
+          expect(d.textContent).toContain('Tahmin için 3 tam deneme gerekir.');
+        }finally{ R.S.exams = exams; }
+      });
+    });
+
     it('oz-042 kurulum bitmemişse kahraman yerine kurulum kartı', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();

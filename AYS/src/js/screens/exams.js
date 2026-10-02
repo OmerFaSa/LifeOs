@@ -104,10 +104,8 @@ R.Screens.exams = (function(){
 
   /* 057 DENEME TAKVİMİ: son deneme netiyle, sonraki üç deneme günü PLANDAN
      (haftanın deneme ritüeli; ara günü atlanır). */
-  function denemeTakvimi(){
-    if(!VT()) return '';
-    const bugun = U.todayISO();
-    const gecmis = S.exams.filter(e => e.date <= bugun).sort((a, b) => a.date.localeCompare(b.date)).slice(-1);
+  /* Plandaki sonraki üç deneme günü (haftanın deneme ritüeli; ara günü atlanır). */
+  function sonrakiDenemeler(){
     const gun = R.WEEKDAYS.findIndex(w => w.ritual === 'exam');
     const plan = [];
     for(let i = 1; i <= 35 && plan.length < 3; i++){
@@ -117,6 +115,14 @@ R.Screens.exams = (function(){
       if(ist && ist.tur === 'ara') continue;
       plan.push(d);
     }
+    return plan;
+  }
+
+  function denemeTakvimi(){
+    if(!VT()) return '';
+    const bugun = U.todayISO();
+    const gecmis = S.exams.filter(e => e.date <= bugun).sort((a, b) => a.date.localeCompare(b.date)).slice(-1);
+    const plan = sonrakiDenemeler();
     if(!plan.length) return '';
     const ilk = gecmis.length ? gecmis[0].date : bugun, son = plan[plan.length - 1];
     const aralik = Math.max(1, U.diffDays(ilk, son));
@@ -152,6 +158,7 @@ R.Screens.exams = (function(){
         K.Card({ body, pad:'sm' }),
       ])),
       K.Span(3, K.Stack([
+        DonenGidisat(),
         siralamaKutusu(),
         hedefeKalanKutusu(),
         denemeTakvimi(),
@@ -615,6 +622,39 @@ R.Screens.exams = (function(){
     tagSel.addEventListener('change', () => {
       document.getElementById('er-recipe').value = R.ERROR_TAGS[tagSel.value].recipe;
     });
+  }
+
+  /* DÖNEN GİDİŞAT (kullanıcı, 2026-10-02: «Genel bakış'taki özeti her yere
+     yap»). Sağ sütunun beş kartı (sıralama, hedefe kalan, takvim, hacim,
+     yayın merdiveni) tek küçük dönen kart; büyük kartlar baştan gizli
+     (app.js SADE_GIZLI), «Göster» ile açılır. Sayı kural motorundan,
+     tahmin TAHMİN etiketiyle; yeterli deneme yoksa cümle. */
+  function DonenGidisat(){
+    const V = VT();
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const m = [];
+    const est = C.estimateScore();
+    m.push(est.ok
+      ? { ust:'Sıralama', sayi:sayi({ deger:est.rank, kesinlik:'estimated', formul:'son tam denemelerin medyanı → sıra modeli' }),
+          cumle:'en olası.', vurgu:U.fmtNum(est.rankBest) + '–' + U.fmtNum(est.rankWorst) + ' · ' + est.samples + ' tam deneme.', sistem:'ays' }
+      : { ust:'Sıralama', cumle:'Tahmin için 3 tam deneme gerekir.', vurgu:C.fullExams('TYT').length + ' tam deneme var.', sistem:'ays' });
+    const gap = C.netGapToTarget();
+    const tyt = C.fullExams('TYT');
+    if(gap && tyt.length){
+      const hafta = Math.max(1, Math.ceil(U.diffDays(U.todayISO(), R.PLAN.examTytISO) / 7));
+      const kalan = Math.max(0, gap.netDiff);
+      m.push({ ust:'Hedefe kalan', sayi:sayi({ deger:r2(kalan), birim:'net', ondalik:2, kesinlik:'estimated' }), cumle:'kaldı.',
+        vurgu:gap.reached ? 'Hedef bandın üstündesin.' : 'Haftada +' + U.fmtNet(r2(kalan / hafta)) + ' net yeter.', sistem:'ays' });
+    }
+    const plan = sonrakiDenemeler();
+    if(plan.length){
+      const g = U.diffDays(U.todayISO(), plan[0]);
+      m.push({ ust:'Sonraki deneme', cumle:U.fmtShort(plan[0]) + '.', vurgu:(g < 7 ? g + ' gün sonra' : Math.round(g / 7) + ' hafta sonra') + ' · plandan.',
+        sistem:'ays', dugme:{ label:'Süreli başla', act:'run-open' } });
+    }
+    return raw(V.donen({ id:'ays-deneme', ad:'Gidişat', maddeler:m }));
   }
 
   async function render(){
