@@ -392,6 +392,12 @@ SP.App = (function(){
     { ad:'Tahlil raporu yapıştır', act:'cmdk-run', data:{ 'data-id':'act:paste' } },
   ];
 
+  /* SAYFA SONU YALNIZ AYARLAR › GENEL'DE (kullanıcı, 2026-10-02: «bu yazıları
+     kaldırıp sayfayı biraz daha ortala»). Sınır cümlesi, mahremiyet satırı ve
+     derleme damgası («tazele» düğmesiyle) her ekranın dibinde duruyordu;
+     artık yalnız Genel'in sonunda — hiçbiri silinmedi, «tazele» de orada. */
+  function sayfaSonuRota(route){ return route === 'guide'; }
+
   /* Sayfa sonu: sistemin iki değişmez cümlesi —klinik sınır ve
      mahremiyet— her ekranda bir kez; yanında derleme damgası. Seviye
      rozeti burada durmaz: üst çubuktaki rütbe çipi onu gösterir. */
@@ -644,7 +650,7 @@ SP.App = (function(){
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>
           </div>
-          ${safe(footerHtml)}
+          ${sayfaSonuRota(S.route) ? safe(footerHtml) : ''}
           ${raw(safe(() => altBantHtml(sc)))}
         </div>
         ${when(S.sidebarOpen, () => raw(safe(() => menuHtml(sc))))}`);
@@ -1601,7 +1607,7 @@ SP.App = (function(){
     }
   }
 
-  return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
+  return { sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml };
 })();
 

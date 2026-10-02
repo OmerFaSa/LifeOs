@@ -63,7 +63,7 @@
       const b = await bolumle('labs', 'sonuc');
       try{
         expect(b.alan.textContent.indexOf(SP.CLINICAL.disclaimer)).toBe(-1);
-        /* sayfa sonu satırı her ekranda bir kez: o KALIR */
+        /* sayfa sonu satırı Ayarlar › Genel'in sonunda: o KALIR */
         expect(String(SP.App.footerHtml())).toContain(SP.CLINICAL.disclaimer);
       }finally{ b.bitir(); }
     });
@@ -547,6 +547,19 @@
       b.innerHTML = String(SP.App.sayfaBasiHtml(SP.Screens.today));
       expect(b.querySelector('.bilgikart').textContent).toContain('sıfır sayılmaz');
       expect(b.querySelector('.bilgikart').textContent).toContain('«tahmin»');
+    });
+  });
+})();
+
+/* Kullanıcı (2026-10-02 gece): «bu yazıları kaldırıp sayfayı biraz daha
+   ortala». Sınır cümlesi, mahremiyet satırı ve derleme damgası («tazele»)
+   her ekranın dibinde değil, yalnız Ayarlar › Genel'in sonunda. */
+(function(){
+  const { describe, it, expect } = SP.Test;
+  describe('Sayfa sonu yalnız Genel’de', () => {
+    it('Genel’de çizilir, öteki ekranlarda çizilmez; «tazele» kaybolmaz', () => {
+      expect(SP.App.sayfaSonuRota('guide')).toBe(true);
+      ['today', 'rutbe', 'onaylar'].forEach(r => expect(SP.App.sayfaSonuRota(r)).toBe(false));
     });
   });
 })();

@@ -294,6 +294,8 @@ window.LIFEOS = window.LIFEOS || {};
      Hiçbir çekmece kalkmadı; sıra ve adlar aynı (CEKMECELER). */
   const IKINCIL = ['ofis', 'kutuphane'];
   let dahaFazlaAcik = false;
+  /* Kenar açıkken yapılan son çizimin zamanı (bkz. kur: «açık kaldı»). */
+  let acikCizimZamani = 0;
   function kenarCubugu(o){
     o = o || {};
     const acik = (o.cekmeceler || []).find(c => c.on);
@@ -305,8 +307,9 @@ window.LIFEOS = window.LIFEOS || {};
         + kac(c.sayac) + '</span>' : '';
       const bol = c.on && (c.bolumler || []).length > 1
         ? '<div class="kenar__bolumler' + (yeniCekmece ? ' is-yeni' : '') + '" data-oz="019" role="group" aria-label="' + kac(c.ad + ' bölümleri') + '">'
-          + c.bolumler.map(b => '<button class="kenar__bolum' + (b.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(b.route) + '"'
-            + (b.on ? ' aria-current="page"' : '') + '>' + kac(b.ad)
+          /* --i: sıra; açılışta bölümler yukarıdan aşağı tek tek gelir (kabuk.css «AYRAÇ»). */
+          + c.bolumler.map((b, i) => '<button class="kenar__bolum' + (b.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(b.route) + '"'
+            + ' style="--i:' + i + '"' + (b.on ? ' aria-current="page"' : '') + '>' + kac(b.ad)
             + (b.rozet ? '<span class="kenar__rozet' + (b.rozet.quiet ? ' is-sessiz' : '') + '" aria-label="' + kac(b.rozet.text + ' bekleyen') + '">'
               + kac(b.rozet.text) + '</span>' : '')
             + '</button>').join('')
@@ -337,7 +340,14 @@ window.LIFEOS = window.LIFEOS || {};
         + ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '">'
         + '<i class="kenar__madalya" aria-hidden="true"' + (r.renk ? ' style="--kademe-renk:' + kac(r.renk) + '"' : '') + '></i>'
         + '<span><b>' + kac(r.ad || '') + '</b> ' + kac(r.etiket) + '</span>' + simge('ileri') + '</button>' : '';
-    return '<aside class="kenar" id="kenar" data-modul="' + kac(o.modul || 'ays') + '" aria-label="Gezinme">'
+    /* Kenar açıkken (fare üstünde ya da odak içinde) yeniden çizilirse —
+       bir bölüme basınca olduğu gibi — açılış dizilişi TEKRAR oynamaz:
+       çizim eski kenar hâlâ ekrandayken kurulur, açık olduğu buradan bilinir.
+       Fare kenardan çıkınca sınıf düşer (kur), sonraki açılış yine dizilir. */
+    const acikKaldi = typeof document !== 'undefined'
+      && !!document.querySelector('.kenar:hover, .kenar:focus-within');
+    if(acikKaldi) acikCizimZamani = Date.now();
+    return '<aside class="kenar' + (acikKaldi ? ' kenar--acik-kaldi' : '') + '" id="kenar" data-modul="' + kac(o.modul || 'ays') + '" aria-label="Gezinme">'
       + '<button class="kenar__marka" data-act="modul-menu" aria-haspopup="dialog" aria-label="LifeOS — sistemler arası geçiş">'
       +   '<i class="kenar__logo" aria-hidden="true"><b></b><b></b><b></b><b></b></i><span>LifeOS</span></button>'
       + modulGecisi(o.modul, o.loc)
@@ -888,9 +898,26 @@ window.LIFEOS = window.LIFEOS || {};
       if(h) h.click();
     });
     /* Dar kenar kapanınca (fare çıkınca) açık sistem kartı da kapanır. */
+    /* «Açık kaldı» işareti fare kenardan GERÇEKTEN çıkınca ya da dışarıdan
+       girince düşer; sonraki açılış yine dizilir. Yeniden çizimden sonra
+       olay eski (söküldü) kenardan gelebilir: işaret o yüzden ekrandaki
+       kenardan silinir. Çizimden hemen sonra tarayıcı, fare yerindeyken bile
+       «dışarıdan geldi» diyen bir olay yollar (söküldü düğümün yerine üst
+       öğeyi koyar): o kısa pencerede olaylar yok sayılır. */
+    const disarida = n => !!(n && n.isConnected && n.closest && !n.closest('.kenar'));
+    const isaretiDusur = () => {
+      if(Date.now() - acikCizimZamani < 400) return;
+      document.querySelectorAll('.kenar.kenar--acik-kaldi').forEach(x => x.classList.remove('kenar--acik-kaldi'));
+    };
     document.addEventListener('mouseout', e => {
       const k = e.target.closest && e.target.closest('.kenar');
-      if(k && !(e.relatedTarget && k.contains(e.relatedTarget))) modulPencereKapat();
+      if(k && !(e.relatedTarget && k.contains(e.relatedTarget))){
+        modulPencereKapat();
+        if(disarida(e.relatedTarget)) isaretiDusur();
+      }
+    });
+    document.addEventListener('mouseover', e => {
+      if(e.target.closest && e.target.closest('.kenar') && disarida(e.relatedTarget)) isaretiDusur();
     });
   }
   kur();

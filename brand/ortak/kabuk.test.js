@@ -545,5 +545,33 @@
       expect(r.style.boxShadow).toBe('none');
       expect(r.style.borderRadius).toBe('50%');
     });
+
+    /* Kullanıcı (2026-10-02 gece): «sol taraftaki bölüm seçtiğimiz kitap
+       ayracı gibi olan kısma hoş bir animasyon ekle». */
+    it('ayraç: bölümler sırayla gelir (--i); açık kenarın yeniden çiziminde diziliş tekrar oynamaz', () => {
+      const ciz = () => K.kenarCubugu({ modul:'ays', cekmeceler:[
+        { id:'calisma', ad:'Çalışma', route:'subjects', on:true, bolumler:[
+          { route:'subjects', ad:'Konu çalış', on:true }, { route:'solve', ad:'Soru çöz' }, { route:'quiz', ad:'Sınama' }] }] });
+      const d = yerlestir('<div class="site--v5">' + ciz() + '</div>');
+      try{
+        const b = Array.from(d.querySelectorAll('.kenar__bolum'));
+        expect(b.map(x => x.style.getPropertyValue('--i')).join(',')).toBe('0,1,2');
+        expect(d.querySelector('.kenar').classList.contains('kenar--acik-kaldi')).toBe(false);
+        const yeni = d.querySelector('.kenar__bolumler.is-yeni > .kenar__bolum:not(.is-on)');
+        if(yeni) expect(/ayrac-gir|sol-gel/.test(getComputedStyle(yeni).animationName)).toBe(true);
+      }finally{ d.remove(); }
+    });
+
+    it('orta duruş: sayfanın üst boşluğu ekranın boyuyla büyür (içerikle değil)', () => {
+      let r = null;
+      for(const ss of Array.from(document.styleSheets)){
+        let kurallar = [];
+        try{ kurallar = Array.from(ss.cssRules || []); }catch(e){ continue; }
+        kurallar.forEach(m => { if(m.media && /min-width:\s*680px/.test(m.media.mediaText))
+          Array.from(m.cssRules || []).forEach(ic => { if(ic.selectorText === '.site--v5 .sayfa' && /vh/.test(ic.style.paddingTop)) r = ic; }); });
+      }
+      expect(!!r).toBe(true);
+      expect(r.style.paddingTop).toContain('clamp(');
+    });
   });
 })();

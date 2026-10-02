@@ -6041,6 +6041,27 @@ details.detay > summary::before{ content:"›"; display:inline-block; width:14px
 details.detay[open] > summary::before{ content:"›"; transform:rotate(90deg); }
 .kapak{ box-shadow:0 6px 16px rgba(0,0,0,.18); }
 
+/* ---- ayraç (kullanıcı, 2026-10-02 gece: «bölüm seçtiğimiz kitap ayracı gibi
+   olan kısma hoş bir animasyon»): kenardaki bölüm listesi açılınca satırlar
+   tek tek gelir; seçilen bölümün noktası büyüyerek konar; üzerine gelince
+   satır hafifçe kayar. Hareket azaltılmışsa yalnız solma. ---- */
+@keyframes hkm-ayrac-gir{ from{ opacity:0; transform:translateX(-8px); } }
+@keyframes hkm-nokta{ 0%{ transform:scale(0); } 60%{ transform:scale(1.6); } 100%{ transform:scale(1); } }
+@media (min-width:1024px){
+  .bolumcubugu__ic:not([hidden]) a{ animation:hkm-ayrac-gir 340ms cubic-bezier(.32,.72,0,1) both; }
+  .bolumcubugu__ic:not([hidden]) a:nth-child(2){ animation-delay:40ms; }
+  .bolumcubugu__ic:not([hidden]) a:nth-child(3){ animation-delay:80ms; }
+  .bolumcubugu__ic:not([hidden]) a:nth-child(n+4){ animation-delay:120ms; }
+  .bolumcubugu a.on::before{ animation:hkm-nokta 400ms cubic-bezier(.32,.72,0,1) both; }
+  .bolumcubugu a{ transition:color .16s ease, background .16s ease, transform .18s cubic-bezier(.32,.72,0,1); }
+  .bolumcubugu a:hover:not(.on){ transform:translateX(3px); }
+}
+@media (prefers-reduced-motion: reduce) and (min-width:1024px){
+  .bolumcubugu__ic:not([hidden]) a{ animation-name:hkm-sol; }
+  .bolumcubugu a.on::before{ animation:hkm-sol 260ms ease-out both; }
+  .bolumcubugu a:hover:not(.on){ transform:none; }
+}
+
 /* ---- geçiş: çekmece açılınca içerik solarak gelir (hareket azaltılmış
    olsa da: solma konum değiştirmez) ---- */
 @keyframes hkm-sol{ from{ opacity:0; } }

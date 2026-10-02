@@ -338,5 +338,21 @@
         expect(H.isaretKaydir(l[2], l[0], { az:true })).toBe('belir');
       }finally{ d.remove(); }
     });
+
+    it('ayraç: kenarın seçili bölüm noktası eski bölümden yenisine kayar', () => {
+      const ciz = on => '<div class="site--v5"><div class="kenar__bolumler" aria-label="Çalışma bölümleri" style="display:flex;flex-direction:column">'
+        + ['a', 'b', 'c'].map(x => '<button class="kenar__bolum' + (x === on ? ' is-on' : '') + '" style="height:28px">' + x + '</button>').join('')
+        + '</div></div>';
+      const d = kok(ciz('a'));
+      try{
+        H.sonra(d, 'k', { az:false });
+        H.once(d);
+        d.innerHTML = ciz('c');
+        H.sonra(d, 'k', { az:false });
+        const on = d.querySelector('.kenar__bolum.is-on');
+        expect(on.classList.contains('is-kayan')).toBe(true);
+        expect(parseFloat(on.style.getPropertyValue('--isaret-dy')) < 0).toBe(true);
+      }finally{ d.remove(); }
+    });
   });
 })();

@@ -379,6 +379,12 @@ R.App = (function(){
      çubuktaki rütbe çipi onu gösterir; rozetin kendisi Rütbe ekranında
      ve Menü'nün ayağında durmaz — tek yerde görünür. */
 
+  /* SAYFA SONU YALNIZ AYARLAR › GENEL'DE (kullanıcı, 2026-10-02: «bu yazıları
+     kaldırıp sayfayı biraz daha ortala»). Sınır cümlesi, mahremiyet satırı ve
+     derleme damgası («tazele» düğmesiyle) her ekranın dibinde duruyordu;
+     artık yalnız Genel'in sonunda — hiçbiri silinmedi, «tazele» de orada. */
+  function sayfaSonuRota(route){ return route === 'guide'; }
+
   /* Sayfa sonu: künye yer imi. Derleme damgası ve mahremiyet cümlesi. */
   function footerHtml(){
     return html`
@@ -603,7 +609,7 @@ R.App = (function(){
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>
           </div>
-          ${safe(footerHtml)}
+          ${sayfaSonuRota(S.route) ? safe(footerHtml) : ''}
           ${raw(safe(() => altBantHtml(sc)))}
         </div>
         ${when(S.sidebarOpen, () => raw(safe(() => menuHtml(sc))))}`); };
@@ -1614,7 +1620,7 @@ R.App = (function(){
     }
   }
 
-  return { boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, canInstall, promptInstall, installManifest,
+  return { sayfaSonuRota, boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, canInstall, promptInstall, installManifest,
     notifyState, askNotify, notifyFromOffice };
 })();
 

@@ -88,7 +88,10 @@ async function measure(p){
   });
 }
 
-function checksOf(m){
+/* altBant: sayfa sonu yalniz Ayarlar › Genel'de cizilir (app.js sayfaSonuRota,
+   kullanici 2026-10-02: «bu yazilari kaldir»). Orada OLCULUR ve yoksa
+   kirmizidir; oteki ekranlarda olculecek alt bant yoktur. */
+function checksOf(m, altBant){
   return [
     ['metin/zemin', ratio(m.text, m.bg), 4.5],
     ['ikincil/zemin', ratio(m.text2, m.bg), 4.5],
@@ -99,13 +102,13 @@ function checksOf(m){
     ['düğme yazısı/bölüm rengi', ratio(m.primInk, m.sec), 4.5],
     /* Alt bant yoksa olcum 0 olur ve KIRMIZIDIR: olculmeyen sey «temiz»
        diye raporlanmaz (AGENTS.md §1.7). */
-    ['alt bant en zayıf yazı (' + m.footAd + ')', m.footMin == null ? 0 : m.footMin, 4.5],
+    altBant ? ['alt bant en zayıf yazı (' + m.footAd + ')', m.footMin == null ? 0 : m.footMin, 4.5] : null,
     ['cetvel çizgisi/yüzey', ratio(m.rule, m.surf), 1.25],
     /* Metin merdiveni SIRALI kalmali: ikincil metin, ucunculden her
        zaman guclu olmali. Bir duzen jetonlari yeniden turetirken bu
        siranin bozulmasi kolaydir ve gozle fark edilmez. */
     ['metin merdiveni sırası', ratio(m.text2, m.bg) / ratio(m.text3, m.bg), 1.0],
-  ];
+  ].filter(Boolean);
 }
 
 (async () => {
@@ -157,7 +160,7 @@ function checksOf(m){
   const designs = secenek.duzen;
   console.log('Ölçülen: ' + pals.length + ' palet (' + pals.join(', ') + '), '
     + designs.length + ' ek düzen' + (designs.length ? ' (' + designs.join(', ') + ')' : '') + ', iki tema.');
-  const secs = ['today','labs','meals','move','basket','office','family'];
+  const secs = ['today','labs','meals','move','basket','office','family','guide'];
   const bad = [];
   /* Gecen bir denetim de SAYI gostermeli. */
   let olcum = 0, dar = null;
@@ -171,7 +174,7 @@ function checksOf(m){
         await p.evaluate(id => SP.App.go(id), route);
         await wait(180);
         const m = await measure(p);
-        checksOf(m).forEach(([name, r, min]) => {
+        checksOf(m, route === 'guide').forEach(([name, r, min]) => {
           olcum++;
           if(!dar || r - min < dar.pay) dar = { pay:r - min, name, r, min,
             where:`${theme}/${pal}/${route}` };
@@ -191,7 +194,7 @@ function checksOf(m){
         await p.evaluate(id => SP.App.go(id), 'labs');
         await wait(220);
         const m = await measure(p);
-        checksOf(m).forEach(([name, r, min]) => {
+        checksOf(m, false).forEach(([name, r, min]) => {
           olcum++;
           if(!dar || r - min < dar.pay) dar = { pay:r - min, name, r, min,
             where:`${theme}/${pal}/${design}` };

@@ -542,3 +542,16 @@
     });
   });
 })();
+
+/* Kullanıcı (2026-10-02 gece): «bu yazıları kaldırıp sayfayı biraz daha
+   ortala». Sınır cümlesi, mahremiyet satırı ve derleme damgası («tazele»)
+   her ekranın dibinde değil, yalnız Ayarlar › Genel'in sonunda. */
+(function(){
+  const { describe, it, expect } = ESP.Test;
+  describe('Sayfa sonu yalnız Genel’de', () => {
+    it('Genel’de çizilir, öteki ekranlarda çizilmez; «tazele» kaybolmaz', () => {
+      expect(ESP.App.sayfaSonuRota('guide')).toBe(true);
+      ['today', 'rutbe', 'onaylar'].forEach(r => expect(ESP.App.sayfaSonuRota(r)).toBe(false));
+    });
+  });
+})();

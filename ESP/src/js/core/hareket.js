@@ -66,6 +66,10 @@ window.LIFEOS.HAREKET = (function(){
      (başka çekmece, başka seçici) işaret yalnız belirir. */
   const ISARET = [
     { sec:'.kenar__nav .kenar__cekmece.is-on', grup:() => 'kenar' },
+    /* Kenarın bölüm listesi (ayraç): seçili bölümün noktası yeni bölüme
+       uzayarak kayar — yalnız kenar açıkken (kapalıyken liste görünmez). */
+    { sec:'.kenar__bolumler .kenar__bolum.is-on', grup:e =>
+      'kenar-bolum|' + ((e.parentElement && e.parentElement.getAttribute('aria-label')) || '') },
     { sec:'.bolumcubugu .bolumcubugu__ad.is-on', grup:e => {
       const n = e.parentElement;
       return (n && n.classList.contains('bolumcubugu--sayfa') ? 'sayfa|' : 'cekmece|')

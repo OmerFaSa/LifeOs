@@ -348,6 +348,9 @@ def t_sade_yuz():
               "border-radius:999px", "'Escape'", "aria-expanded"):
         ok(s in sade, s)
     no("#000000" in sade, "koyu tema saf siyah")
+    # Ayrac (2026-10-02 gece): kenarin bolum listesi sirayla gelir, secilen nokta buyuyerek konar.
+    for s in ("@keyframes hkm-ayrac-gir", "@keyframes hkm-nokta", ".bolumcubugu a.on::before{ animation:hkm-nokta"):
+        ok(s in sade, s)
     ok(m.index('<style id="hkm-sade">') < m.index("<!-- MEYDAN (kullan"), "sade blok Meydan blogundan once")
 
 def run():

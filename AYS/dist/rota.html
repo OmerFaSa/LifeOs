@@ -11607,6 +11607,72 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
   .ust.ust--v5 .ust__zil-nokta{ top:8px; right:9px; width:6px; height:6px; background:var(--now); box-shadow:none; }
 }
 
+/* ================================================================
+   AYRAÇ (2026-10-02 gece, kullanıcı: «sol taraftaki bölüm seçtiğimiz
+   kitap ayracı gibi olan kısma hoş bir animasyon ekle»). Açık çekmecenin
+   bölüm listesi:
+   · kenar açılınca bölümler yukarıdan aşağı tek tek gelir (--i sırası,
+     kabuk.js); çekmece değişince yeni liste de böyle gelir,
+   · seçili bölümün noktası yeni bölüme UZAYARAK kayar (iOS sayfa noktası
+     gibi: yolda incelip uzar, varınca yine nokta olur — hareket.js FLIP),
+     seçilen yazı koyulaşarak gelir,
+   · üzerine gelince satır hafifçe sağa kayar.
+   Kenar açıkken yeniden çizimde (bir bölüme basınca) açılış dizilişi
+   TEKRAR oynamaz (.kenar--acik-kaldi). Hareket azaltılmışsa kayma yok:
+   satırlar ve nokta solarak, yine sırayla gelir.
+   ================================================================ */
+@keyframes ayrac-gir{ from{ opacity:0; transform:translate(-8px, -2px); } }
+@keyframes ayrac-kay{
+  0%{ transform:translateY(calc(-50% + var(--isaret-dy, 0px))) scale(1); }
+  45%{ transform:translateY(calc(-50% + var(--isaret-dy, 0px) * .42)) scale(.8, 3.6); }
+  100%{ transform:translateY(-50%) scale(1); }
+}
+.site--v5 .kenar__bolum{ transition:color var(--dur) var(--ease), background var(--dur) var(--ease),
+  transform 180ms var(--ease-ios); }
+.site--v5 .kenar__bolum:hover:not(.is-on){ transform:translateX(3px); }
+.site--v5 .kenar__bolum::before{ left:-7px; width:6px; height:6px; }
+.site--v5 .kenar__bolum.is-on.is-kayan::before{ animation:ayrac-kay 480ms var(--ease-ios) both; }
+.site--v5 .kenar__bolum.is-on.is-kayan{ animation:secili-renk 340ms ease-out both; }
+.site--v5 .kenar__bolum.is-on.is-beliren::before{ animation:sol-gel 260ms ease-out both !important; }
+.site--v5 .kenar__bolum.is-on.is-beliren{ animation:secili-renk 260ms ease-out both !important; }
+.site--v5 .kenar__bolumler.is-yeni > .kenar__bolum:not(.is-kayan){ animation:ayrac-gir 340ms var(--ease-ios) both;
+  animation-delay:calc(var(--i, 0) * 34ms); }
+@media (min-width:680px){
+  html.kenar-dar .site--v5 > .kenar:not(.kenar--acik-kaldi):is(:hover, :focus-within) .kenar__bolumler{ animation:none; }
+  html.kenar-dar .site--v5 > .kenar:not(.kenar--acik-kaldi):is(:hover, :focus-within) .kenar__bolum{
+    animation:ayrac-gir 340ms var(--ease-ios) both; animation-delay:calc(80ms + var(--i, 0) * 34ms); }
+  /* Açık kenarda yeniden çizim: adlar ve liste yeniden «gelmez». */
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi :is(.kenar__ad, .kenar__bolumler, .kenar__marka span, .kenar__modulsec-ad){
+    animation:none; }
+}
+@media (prefers-reduced-motion:reduce){
+  .site--v5 .kenar__bolum:hover:not(.is-on){ transform:none; }
+  .site--v5 .kenar__bolumler.is-yeni > .kenar__bolum:not(.is-beliren){ animation:sol-gel 280ms ease-out both !important;
+    animation-delay:calc(var(--i, 0) * 45ms) !important; }
+}
+@media (prefers-reduced-motion:reduce) and (min-width:680px){
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within) .kenar__bolumler{ animation:none !important; }
+  html.kenar-dar .site--v5 > .kenar:not(.kenar--acik-kaldi):is(:hover, :focus-within) .kenar__bolum{
+    animation:sol-gel 280ms ease-out both !important; animation-delay:calc(70ms + var(--i, 0) * 45ms) !important; }
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi :is(.kenar__ad, .kenar__bolumler, .kenar__marka span, .kenar__modulsec-ad){
+    animation:none !important; }
+}
+
+/* ================================================================
+   ORTA DURUŞ (2026-10-02 gece, kullanıcı: «bu yazıları kaldırıp sayfayı biraz
+   daha ortala»). Sayfa sonu yalnız Ayarlar › Genel'de (app.js sayfaSonuRota).
+   Yüksek ekranda sayfa yukarıya yapışmaz: üst boşluk ekranın boyuyla büyür
+   (900 px'te 40, 1080 px'te 150) — içerik ekranın ortasına yaklaşır. Boşluk
+   içeriğe değil EKRANA bağlıdır: bölüm değişince başlık yerinden oynamaz.
+   Sayfa sonu olmayan ekranda alttaki nefes payı sayfanın kendisinde.
+   ================================================================ */
+@media (min-width:680px){
+  .site--v5 .sayfa{ padding-top:clamp(28px, calc(50vh - 390px), 150px); padding-bottom:72px; }
+}
+@media (max-width:679px){
+  .site--v5:not(:has(> .sayfasonu)) > .site__body{ padding-bottom:calc(var(--altbant-h) + 88px); }
+}
+
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
@@ -13335,7 +13401,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'d262c31', at:'2026-10-02 18:16', dirty:true };
+R.BUILD = { id:'53115f6', at:'2026-10-02 18:37', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -18162,6 +18228,8 @@ window.LIFEOS = window.LIFEOS || {};
      Hiçbir çekmece kalkmadı; sıra ve adlar aynı (CEKMECELER). */
   const IKINCIL = ['ofis', 'kutuphane'];
   let dahaFazlaAcik = false;
+  /* Kenar açıkken yapılan son çizimin zamanı (bkz. kur: «açık kaldı»). */
+  let acikCizimZamani = 0;
   function kenarCubugu(o){
     o = o || {};
     const acik = (o.cekmeceler || []).find(c => c.on);
@@ -18173,8 +18241,9 @@ window.LIFEOS = window.LIFEOS || {};
         + kac(c.sayac) + '</span>' : '';
       const bol = c.on && (c.bolumler || []).length > 1
         ? '<div class="kenar__bolumler' + (yeniCekmece ? ' is-yeni' : '') + '" data-oz="019" role="group" aria-label="' + kac(c.ad + ' bölümleri') + '">'
-          + c.bolumler.map(b => '<button class="kenar__bolum' + (b.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(b.route) + '"'
-            + (b.on ? ' aria-current="page"' : '') + '>' + kac(b.ad)
+          /* --i: sıra; açılışta bölümler yukarıdan aşağı tek tek gelir (kabuk.css «AYRAÇ»). */
+          + c.bolumler.map((b, i) => '<button class="kenar__bolum' + (b.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(b.route) + '"'
+            + ' style="--i:' + i + '"' + (b.on ? ' aria-current="page"' : '') + '>' + kac(b.ad)
             + (b.rozet ? '<span class="kenar__rozet' + (b.rozet.quiet ? ' is-sessiz' : '') + '" aria-label="' + kac(b.rozet.text + ' bekleyen') + '">'
               + kac(b.rozet.text) + '</span>' : '')
             + '</button>').join('')
@@ -18205,7 +18274,14 @@ window.LIFEOS = window.LIFEOS || {};
         + ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '">'
         + '<i class="kenar__madalya" aria-hidden="true"' + (r.renk ? ' style="--kademe-renk:' + kac(r.renk) + '"' : '') + '></i>'
         + '<span><b>' + kac(r.ad || '') + '</b> ' + kac(r.etiket) + '</span>' + simge('ileri') + '</button>' : '';
-    return '<aside class="kenar" id="kenar" data-modul="' + kac(o.modul || 'ays') + '" aria-label="Gezinme">'
+    /* Kenar açıkken (fare üstünde ya da odak içinde) yeniden çizilirse —
+       bir bölüme basınca olduğu gibi — açılış dizilişi TEKRAR oynamaz:
+       çizim eski kenar hâlâ ekrandayken kurulur, açık olduğu buradan bilinir.
+       Fare kenardan çıkınca sınıf düşer (kur), sonraki açılış yine dizilir. */
+    const acikKaldi = typeof document !== 'undefined'
+      && !!document.querySelector('.kenar:hover, .kenar:focus-within');
+    if(acikKaldi) acikCizimZamani = Date.now();
+    return '<aside class="kenar' + (acikKaldi ? ' kenar--acik-kaldi' : '') + '" id="kenar" data-modul="' + kac(o.modul || 'ays') + '" aria-label="Gezinme">'
       + '<button class="kenar__marka" data-act="modul-menu" aria-haspopup="dialog" aria-label="LifeOS — sistemler arası geçiş">'
       +   '<i class="kenar__logo" aria-hidden="true"><b></b><b></b><b></b><b></b></i><span>LifeOS</span></button>'
       + modulGecisi(o.modul, o.loc)
@@ -18756,9 +18832,26 @@ window.LIFEOS = window.LIFEOS || {};
       if(h) h.click();
     });
     /* Dar kenar kapanınca (fare çıkınca) açık sistem kartı da kapanır. */
+    /* «Açık kaldı» işareti fare kenardan GERÇEKTEN çıkınca ya da dışarıdan
+       girince düşer; sonraki açılış yine dizilir. Yeniden çizimden sonra
+       olay eski (söküldü) kenardan gelebilir: işaret o yüzden ekrandaki
+       kenardan silinir. Çizimden hemen sonra tarayıcı, fare yerindeyken bile
+       «dışarıdan geldi» diyen bir olay yollar (söküldü düğümün yerine üst
+       öğeyi koyar): o kısa pencerede olaylar yok sayılır. */
+    const disarida = n => !!(n && n.isConnected && n.closest && !n.closest('.kenar'));
+    const isaretiDusur = () => {
+      if(Date.now() - acikCizimZamani < 400) return;
+      document.querySelectorAll('.kenar.kenar--acik-kaldi').forEach(x => x.classList.remove('kenar--acik-kaldi'));
+    };
     document.addEventListener('mouseout', e => {
       const k = e.target.closest && e.target.closest('.kenar');
-      if(k && !(e.relatedTarget && k.contains(e.relatedTarget))) modulPencereKapat();
+      if(k && !(e.relatedTarget && k.contains(e.relatedTarget))){
+        modulPencereKapat();
+        if(disarida(e.relatedTarget)) isaretiDusur();
+      }
+    });
+    document.addEventListener('mouseover', e => {
+      if(e.target.closest && e.target.closest('.kenar') && disarida(e.relatedTarget)) isaretiDusur();
     });
   }
   kur();
@@ -18842,6 +18935,10 @@ window.LIFEOS.HAREKET = (function(){
      (başka çekmece, başka seçici) işaret yalnız belirir. */
   const ISARET = [
     { sec:'.kenar__nav .kenar__cekmece.is-on', grup:() => 'kenar' },
+    /* Kenarın bölüm listesi (ayraç): seçili bölümün noktası yeni bölüme
+       uzayarak kayar — yalnız kenar açıkken (kapalıyken liste görünmez). */
+    { sec:'.kenar__bolumler .kenar__bolum.is-on', grup:e =>
+      'kenar-bolum|' + ((e.parentElement && e.parentElement.getAttribute('aria-label')) || '') },
     { sec:'.bolumcubugu .bolumcubugu__ad.is-on', grup:e => {
       const n = e.parentElement;
       return (n && n.classList.contains('bolumcubugu--sayfa') ? 'sayfa|' : 'cekmece|')
@@ -66474,6 +66571,12 @@ R.App = (function(){
      çubuktaki rütbe çipi onu gösterir; rozetin kendisi Rütbe ekranında
      ve Menü'nün ayağında durmaz — tek yerde görünür. */
 
+  /* SAYFA SONU YALNIZ AYARLAR › GENEL'DE (kullanıcı, 2026-10-02: «bu yazıları
+     kaldırıp sayfayı biraz daha ortala»). Sınır cümlesi, mahremiyet satırı ve
+     derleme damgası («tazele» düğmesiyle) her ekranın dibinde duruyordu;
+     artık yalnız Genel'in sonunda — hiçbiri silinmedi, «tazele» de orada. */
+  function sayfaSonuRota(route){ return route === 'guide'; }
+
   /* Sayfa sonu: künye yer imi. Derleme damgası ve mahremiyet cümlesi. */
   function footerHtml(){
     return html`
@@ -66698,7 +66801,7 @@ R.App = (function(){
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>
           </div>
-          ${safe(footerHtml)}
+          ${sayfaSonuRota(S.route) ? safe(footerHtml) : ''}
           ${raw(safe(() => altBantHtml(sc)))}
         </div>
         ${when(S.sidebarOpen, () => raw(safe(() => menuHtml(sc))))}`); };
@@ -67709,7 +67812,7 @@ R.App = (function(){
     }
   }
 
-  return { boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, canInstall, promptInstall, installManifest,
+  return { sayfaSonuRota, boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, canInstall, promptInstall, installManifest,
     notifyState, askNotify, notifyFromOffice };
 })();
 

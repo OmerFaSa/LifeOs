@@ -1384,3 +1384,69 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
   .ust.ust--v5 .ust__madalya{ box-shadow:none; background:none; }
   .ust.ust--v5 .ust__zil-nokta{ top:8px; right:9px; width:6px; height:6px; background:var(--now); box-shadow:none; }
 }
+
+/* ================================================================
+   AYRAÇ (2026-10-02 gece, kullanıcı: «sol taraftaki bölüm seçtiğimiz
+   kitap ayracı gibi olan kısma hoş bir animasyon ekle»). Açık çekmecenin
+   bölüm listesi:
+   · kenar açılınca bölümler yukarıdan aşağı tek tek gelir (--i sırası,
+     kabuk.js); çekmece değişince yeni liste de böyle gelir,
+   · seçili bölümün noktası yeni bölüme UZAYARAK kayar (iOS sayfa noktası
+     gibi: yolda incelip uzar, varınca yine nokta olur — hareket.js FLIP),
+     seçilen yazı koyulaşarak gelir,
+   · üzerine gelince satır hafifçe sağa kayar.
+   Kenar açıkken yeniden çizimde (bir bölüme basınca) açılış dizilişi
+   TEKRAR oynamaz (.kenar--acik-kaldi). Hareket azaltılmışsa kayma yok:
+   satırlar ve nokta solarak, yine sırayla gelir.
+   ================================================================ */
+@keyframes ayrac-gir{ from{ opacity:0; transform:translate(-8px, -2px); } }
+@keyframes ayrac-kay{
+  0%{ transform:translateY(calc(-50% + var(--isaret-dy, 0px))) scale(1); }
+  45%{ transform:translateY(calc(-50% + var(--isaret-dy, 0px) * .42)) scale(.8, 3.6); }
+  100%{ transform:translateY(-50%) scale(1); }
+}
+.site--v5 .kenar__bolum{ transition:color var(--dur) var(--ease), background var(--dur) var(--ease),
+  transform 180ms var(--ease-ios); }
+.site--v5 .kenar__bolum:hover:not(.is-on){ transform:translateX(3px); }
+.site--v5 .kenar__bolum::before{ left:-7px; width:6px; height:6px; }
+.site--v5 .kenar__bolum.is-on.is-kayan::before{ animation:ayrac-kay 480ms var(--ease-ios) both; }
+.site--v5 .kenar__bolum.is-on.is-kayan{ animation:secili-renk 340ms ease-out both; }
+.site--v5 .kenar__bolum.is-on.is-beliren::before{ animation:sol-gel 260ms ease-out both !important; }
+.site--v5 .kenar__bolum.is-on.is-beliren{ animation:secili-renk 260ms ease-out both !important; }
+.site--v5 .kenar__bolumler.is-yeni > .kenar__bolum:not(.is-kayan){ animation:ayrac-gir 340ms var(--ease-ios) both;
+  animation-delay:calc(var(--i, 0) * 34ms); }
+@media (min-width:680px){
+  html.kenar-dar .site--v5 > .kenar:not(.kenar--acik-kaldi):is(:hover, :focus-within) .kenar__bolumler{ animation:none; }
+  html.kenar-dar .site--v5 > .kenar:not(.kenar--acik-kaldi):is(:hover, :focus-within) .kenar__bolum{
+    animation:ayrac-gir 340ms var(--ease-ios) both; animation-delay:calc(80ms + var(--i, 0) * 34ms); }
+  /* Açık kenarda yeniden çizim: adlar ve liste yeniden «gelmez». */
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi :is(.kenar__ad, .kenar__bolumler, .kenar__marka span, .kenar__modulsec-ad){
+    animation:none; }
+}
+@media (prefers-reduced-motion:reduce){
+  .site--v5 .kenar__bolum:hover:not(.is-on){ transform:none; }
+  .site--v5 .kenar__bolumler.is-yeni > .kenar__bolum:not(.is-beliren){ animation:sol-gel 280ms ease-out both !important;
+    animation-delay:calc(var(--i, 0) * 45ms) !important; }
+}
+@media (prefers-reduced-motion:reduce) and (min-width:680px){
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within) .kenar__bolumler{ animation:none !important; }
+  html.kenar-dar .site--v5 > .kenar:not(.kenar--acik-kaldi):is(:hover, :focus-within) .kenar__bolum{
+    animation:sol-gel 280ms ease-out both !important; animation-delay:calc(70ms + var(--i, 0) * 45ms) !important; }
+  html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi :is(.kenar__ad, .kenar__bolumler, .kenar__marka span, .kenar__modulsec-ad){
+    animation:none !important; }
+}
+
+/* ================================================================
+   ORTA DURUŞ (2026-10-02 gece, kullanıcı: «bu yazıları kaldırıp sayfayı biraz
+   daha ortala»). Sayfa sonu yalnız Ayarlar › Genel'de (app.js sayfaSonuRota).
+   Yüksek ekranda sayfa yukarıya yapışmaz: üst boşluk ekranın boyuyla büyür
+   (900 px'te 40, 1080 px'te 150) — içerik ekranın ortasına yaklaşır. Boşluk
+   içeriğe değil EKRANA bağlıdır: bölüm değişince başlık yerinden oynamaz.
+   Sayfa sonu olmayan ekranda alttaki nefes payı sayfanın kendisinde.
+   ================================================================ */
+@media (min-width:680px){
+  .site--v5 .sayfa{ padding-top:clamp(28px, calc(50vh - 390px), 150px); padding-bottom:72px; }
+}
+@media (max-width:679px){
+  .site--v5:not(:has(> .sayfasonu)) > .site__body{ padding-bottom:calc(var(--altbant-h) + 88px); }
+}
