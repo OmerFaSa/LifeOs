@@ -29,12 +29,12 @@ SP.Screens.meals = (function(){
 
   /* ---------------------------------------------------------- giris */
 
+  /* iPhone Faz 2b: ev ölçüsü listesi ve «tarttıysan gramı yaz» ⓘ'de
+     (hints: portion); alanın örnek metni biçimi zaten gösteriyor. */
   function quickEntry(){
     return K.Entry({
       label:'Öğün ekle', hint:'portion',
       meta:'tek satır, tek Enter',
-      note:'Ev ölçüsü tanınır: tabak · kase · dilim · bardak · avuç · kaşık. '
-        + 'Tarttıysan «150 g tavuk göğsü» yaz.',
       action:html`${K.Button({ label:'Besin ara', act:'open-search' })}
         ${K.Button({ label:'Fotoğraftan', icon:'camera', act:'open-photo' })}`,
       body:html`
@@ -233,7 +233,9 @@ SP.Screens.meals = (function(){
   function sablonKutusu(){
     if(!VT()) return '';
     const bugun = M.mealsOf(shownDate()).map(m => (m.items || []).map(x => x.foodId).sort().join('+'));
-    return vkutu('Sık öğünler', 'tek dokunuş', VT().ogunSablonlari({ act:'sablon-ekle', sablonlar:sablonlar().map(x => {
+    /* Bileşenin kendi künyesi kutunun adını («Sık öğünler · tek dokunuş»)
+       ikinci kez yazıyordu; yerine pencerenin kendisi. */
+    return vkutu('Sık öğünler', 'tek dokunuş', VT().ogunSablonlari({ act:'sablon-ekle', baslik:'son 30 gün', sablonlar:sablonlar().map(x => {
       const sl = SP.MEAL_SLOTS.find(y => y.id === x.slot);
       return { ad:sl ? sl.label : x.slot, icerik:x.ids.map(id => SP.FOOD_BY_ID[id].name.toLocaleLowerCase('tr-TR')).join(' · '),
         on:bugun.indexOf(x.anahtar) >= 0, data:{ 'data-date':x.ornek.date, 'data-id':x.ornek.id } };
@@ -276,6 +278,64 @@ SP.Screens.meals = (function(){
             <li><b>${SP.NUTRI_BY_ID[k] ? SP.NUTRI_BY_ID[k].name : k}</b>
               ×${U.fmtNet(t.adjustments[k].mult)} — ${t.adjustments[k].why}</li>`)}</ul>` }))}`,
     });
+  }
+
+  /* iPhone Faz 2b (2026-10-02): günün kalorisi ve proteini hedefle birlikte
+     küçük dönen kartta; «Günlük hedef» kartı ayrıntısıyla şerittir. Hedef
+     hesaplanır (bazal metabolizma). Yenen toplam ev ölçüsünden geldiyse
+     TAHMİN, hepsi tartıldıysa HESAPLANDI. Öğün girilmemiş gün ve gramı
+     olmayan kalem «0 kcal» değildir: sayı değil cümle, eksik kalem yazılır
+     (AGENTS §1.2). Her madde tek söz söyler (satır tek satırdır, sığmayan
+     kesilir): eksik kalem Kalori'de, eksik profil kendi maddesinde. */
+  function DonenOgun(){
+    const V = VT();
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const d = shownDate();
+    const gun = d === U.todayISO() ? '' : ' · ' + U.fmtShort(d);
+    const tg = SP.Nutri.targets();
+    const t = SP.Nutri.dayTotals(d);
+    const kalemler = M.mealsOf(d).reduce((a, x) => a.concat(x.items || []), []).filter(it => SP.FOOD_BY_ID[it.foodId]);
+    const gramli = kalemler.filter(it => Number(it.g) > 0);
+    const eksik = [t.unknownFoods.length ? t.unknownFoods.length + ' kalem tanınmadı' : '',
+      kalemler.length > gramli.length ? (kalemler.length - gramli.length) + ' kalemin gramı yok' : ''].filter(Boolean).join(', ');
+    const tahmin = gramli.some(it => it.cert !== 'measured');
+    const m = [];
+    if(!gramli.length){
+      m.push({ ust:'Kalori' + gun, cumle:t.empty ? 'Öğün girilmedi.' : kalemler.length ? 'Gram girilmedi.' : 'Kalem tanınmadı.',
+        vurgu:eksik ? eksik + '.' : tg.ok ? 'Hedef ' + U.fmtNum(tg.kcal) + ' kcal.' : '', sistem:'spi' });
+      if(tg.ok) m.push({ ust:'Protein' + gun, cumle:'Hedef ' + tg.protein.min + '–' + tg.protein.max + ' g.',
+        vurgu:'Öğün girilince hesaplanır.', sistem:'spi' });
+    }else{
+      /* Köken kartı (025): tahminde kaynak, hesapta formül ve girdi. */
+      const kes = tahmin
+        ? { kesinlik:'estimated', kaynak:'ev ölçüsünden gram × besin tablosu', zaman:d }
+        : { kesinlik:'computed', formul:'tartılan gram × besin tablosu', zaman:d,
+            girdiler:[{ ad:'Tartılan kalem', deger:gramli.length, birim:'kalem', kesinlik:'measured' }] };
+      m.push({ ust:'Kalori' + gun, sayi:sayi(Object.assign({ deger:Math.round(t.kcal), birim:'kcal' }, kes)), cumle:'alındı.',
+        vurgu:eksik ? eksik + '; toplama girmedi.'
+          : tg.ok ? 'Hedef ' + U.fmtNum(tg.kcal) + ' kcal' + (tahmin ? ' · tahmin.' : '.')
+          : tahmin ? 'Ev ölçüsünden tahmin.' : 'Tartılan gramdan.', sistem:'spi' });
+      m.push({ ust:'Protein' + gun, sayi:sayi(Object.assign({ deger:Math.round(t.protein), birim:'g' }, kes)), cumle:'alındı.',
+        vurgu:tg.ok ? 'Hedef ' + tg.protein.min + '–' + tg.protein.max + ' g.' : 'Hedef hesaplanmadı.', sistem:'spi' });
+    }
+    if(!tg.ok){
+      m.push({ ust:'Günlük hedef', cumle:'Hedef yok.', vurgu:'Profilde ' + tg.missing.join(', ') + ' eksik.', sistem:'spi',
+        dugme:{ label:'Profil', act:'go', data:{ 'data-route':'family' } } });
+    }
+    const adj = tg.ok ? Object.keys(tg.adjustments || {}) : [];
+    if(adj.length){
+      const girdiler = adj.map(k => {
+        const mk = tg.adjustments[k].marker, son = M.latestOf(mk), b = SP.BIO_BY_ID[mk];
+        return { ad:b ? b.name : mk, deger:son ? son.v : null, birim:b ? b.unit : '', kesinlik:son ? 'measured' : 'missing' };
+      });
+      m.push({ ust:'Tahlil bağı', sayi:sayi({ deger:adj.length, birim:'hedef', kesinlik:'computed',
+          formul:'hedef bandın dışındaki tahlil → besin hedefi çarpanı', girdiler, zaman:U.todayISO() }),
+        cumle:'yükseltildi.', vurgu:adj.map(k => SP.NUTRI_BY_ID[k] ? SP.NUTRI_BY_ID[k].name : k).join(', ') + '.', sistem:'spi',
+        dugme:{ label:'Öneri', act:'meal-tab', data:{ 'data-tab':'oneri' } } });
+    }
+    return raw(V.donen({ id:'spi-ogun', ad:'Öğün', maddeler:m }));
   }
 
   function microCard(){
@@ -667,7 +727,10 @@ SP.Screens.meals = (function(){
      günün öğün sayısı çubukta rozet. Bir bölüm çizilemezse yalnız o bölüm
      sakin bir notla düşer. */
   const BODIES = {
-    gunluk:() => html`${K.Ledger(() => [quickEntry(), sablonKutusu(), dayCard(), cizelgeKutusu(), targetCard(), tabakKutusu()])}
+    /* iPhone Faz 2b: sol sütun iş (öğünü yaz, günün öğünleri), sağ sütun
+       durum ve kısayol (dönen «Öğün» kartı, sık öğünler); raf DOM sırasıyla
+       ikişer dizer. Telefonda tek sütun: önce yazma alanı. */
+    gunluk:() => html`${K.Ledger(() => [quickEntry(), DonenOgun(), dayCard(), sablonKutusu(), cizelgeKutusu(), targetCard(), tabakKutusu()])}
       <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`,
     oneri:() => html`${K.Ledger(() => [energyCard(), labLinkCard(), suggestCard()])}
       <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`,
@@ -846,6 +909,9 @@ SP.Screens.meals = (function(){
 
   return {
     id:'meals',
+    /* iPhone Faz 2b: iş öğünü yazmak; hedefin ayrıntısı şerit (sayıları
+       dönen «Öğün» kartında), Tabak ve çizelge gizli (app.js SADE_GIZLI). */
+    kucukVarsayilan:['günlük-hedef'],
     title:'Öğünler',
     headline(){
       const tg = SP.Nutri.targets();

@@ -11808,7 +11808,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'147c177', at:'2026-10-02 10:58', dirty:true };
+SP.BUILD = { id:'1d22ef6', at:'2026-10-02 11:51', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -27640,6 +27640,8 @@ SP.HINTS = {
     more:'Girdilerden biri eksikse ölçüm hiç yazılmaz. Tahmin edilmez: eksik veri, uydurulmuş veriden iyidir.' },
   'lab-paste':{ t:'Tahlil yapıştırma', b:'Laboratuvar raporunun metnini olduğu gibi yapıştır; değerler ayıklanıp şemaya oturur.',
     more:'Ayıklayıcı satır satır okur, bilinen isim ve kısaltmaları eşler, birimi doğrular. Emin olamadığı satırı atmaz; "eşleşmedi" olarak gösterir ve elle bağlamana izin verir.' },
+  'lab-results':{ t:'Sonuçlar', b:'Bütün ölçümler tek listede, önem sırasına göre: önce bandın dışındakiler.',
+    more:'Sıra: kırmızı bayrak → referans dışı → hedef dışı → hedefte. Sabitlediğin ölçümler listenin başında durur. Bir satıra dokununca referans aralığı, hedef bant ve beslenme bağı açılır.' },
 
   /* --- beslenme --- */
   'macro-target':{ t:'Makro hedefi', b:'Protein kilogram başına, yağ kalori yüzdesi olarak, karbonhidrat kalandan hesaplanır.',
@@ -27651,9 +27653,13 @@ SP.HINTS = {
   'lab-linked-food':{ t:'Tahlile bağlı reçete', b:'Laboratuvarda düşük çıkan öğe, beslenme hedefini doğrudan değiştirir.',
     more:'Ferritin düşükse demir hedefi yükselir ve C vitamini eşleşmesi zorunlu hâle gelir. D vitamini düşükse yağlı öğünle eşleştirme önerilir. Bu, Modül 1 ile Modül 2 arasındaki tek yönlü bağdır.' },
   'portion':{ t:'Porsiyon tahmini', b:'"1 tabak etli kuru fasulye" yazman yeter; gramaj ev ölçüsü tablosundan gelir.',
-    more:'Tartılmadığı için bu bir tahmindir ve öyle etiketlenir. Tartmak istersen gramı doğrudan yazabilirsin; o zaman "ölçüldü" olur.' },
+    more:'Tanınan ev ölçüleri: tabak, kase, dilim, bardak, avuç, kaşık. Tartılmadığı için bu bir tahmindir ve öyle etiketlenir. Tarttıysan gramı doğrudan yaz («150 g tavuk göğsü»); o zaman "ölçüldü" olur.' },
   'household':{ t:'Hane mutfağı', b:'Tek tencere yemek, her bireyin hedefine göre porsiyon çarpanıyla paylaştırılır.',
-    more:'Herkese ayrı yemek pişirmek sürdürülebilir değildir. Sistem pişen yemeğin 100 gramdaki profilini bilir ve kişi başına düşen porsiyonu hedefe göre büyütür ya da küçültür; farkı yan gıdayla kapatır.' },
+    more:'Herkese ayrı yemek pişirmek sürdürülebilir değildir. Sistem pişen yemeğin 100 gramdaki profilini bilir ve kişi başına düşen porsiyonu hedefe göre büyütür ya da küçültür; farkı yan gıdayla kapatır. Tencerede kaç gram olduğunu bilmiyorsan kaba bir tahmin yeter: paylaştırma oranları değişmez, yalnızca mutlak gramlar ölçeklenir.' },
+  'evdeki':{ t:'Evde ne var?', b:'Evdeki malzemeden hangi ev yemeğinin çıktığı ve neyin eksik kaldığı.',
+    more:'Genel ev usulü malzeme listesine bakılır; miktar ve tarif değildir. Yağ ve tuz sayılmaz. Dil modeli kullanılmaz; listede bulunamayan malzeme «tanınmadı» diye ayrıca yazılır.' },
+  'custom-food':{ t:'Kendi gıdaların', b:'Sistemin tablosunda olmayan bir ürünü ekle.',
+    more:'Ürünün ambalajındaki besin değerleri tablosunu fotoğrafla ya da değerleri elle yaz. Bütün değerler 100 gram içindir; boş bıraktığın alan sıfır sayılmaz. Eklenen gıda öğün girişinde, sepette ve hesaplarda görünür.' },
 
   /* --- hareket --- */
   'load':{ t:'Akut/kronik yük', b:'Son 7 günün ortalama yükü, son 28 günün ortalamasına bölünür.',
@@ -27663,7 +27669,9 @@ SP.HINTS = {
   'deload':{ t:'Yük indirme haftası', b:'Beş haftada bir toplam yük %40 azaltılır.',
     more:'Kazanç antrenmanda değil, antrenmandan sonraki toparlanmada oluşur. İndirme haftası bir geri adım değil, planın parçasıdır.' },
   'recovery-order':{ t:'Günün yük emri', b:'Toparlanma bandı, planlanan yükün ne kadarının uygulanacağını söyler.',
-    more:'Skor düşükken ağır yük kazanç değil borç üretir. Sistem yükü kendiliğinden azaltır ve nedenini yazar; kararı yine sen verirsin.' },
+    more:'Emri toparlanma belirler, istek değil: sistem yükü kendiliğinden azaltabilir ama asla kendiliğinden artıramaz. Skor düşükken ağır yük kazanç değil borç üretir. Sistem yükü azalttığında nedenini yazar; kararı yine sen verirsin.' },
+  'session-pick':{ t:'Seans seç', b:'Öneri toparlanma bandından gelir; istediğini seçebilirsin.',
+    more:'Önerilen şablonlar günün yük emrine göre seçilir: dinlenme gününde mobilite, hafif günde mobilite ve yürüyüş, azaltılmış günde yürüyüş ve tam vücut, tam yükte tam vücut ve dayanıklılık. İşaretli olan ilk öneridir; seçim senindir.' },
 
   /* --- ekonomi --- */
   'price-estimate':{ t:'Fiyat tahmini', b:'Uygulama market taramaz. Başlangıç fiyatları tahmindir ve öyle işaretlenir.',
@@ -48066,16 +48074,15 @@ SP.Screens.labs = (function(){
     const last = S.labs.length ? S.labs[S.labs.length - 1] : null;
     const pats = SP.Bio.patterns();
 
+    /* iPhone Faz 2b: sıranın açıklaması ⓘ'de (hints: lab-results); «Test
+       gir» sayfa başında zaten durduğu için kartta ikinci kez yazılmaz.
+       Liste ekranın tek işi: tam en, her ölçüm tek satır (cetvel). */
     return K.Ledger([
       K.Entry({
-        label:'Sonuçlar',
+        label:'Sonuçlar', hint:'lab-results', wide:true,
         meta:total + ' ölçüm' + (last ? ' · ' + U.fmtDate(last.date) : ''),
-        note:'Önem sırasına göre: önce bandın dışındakiler. Bir satıra '
-          + 'tıklayınca referans aralığı, hedef bandı ve beslenme bağı açılır.',
         action:html`${K.Input({ id:'lab-q', value:S.ui.labQuery || '',
           placeholder:'Ölçüm ara…', aria:'Ölçüm ara', change:'lab-query', debounce:200 })}
-          ${K.Button({ label:'Test gir', act:'lab-tab',
-            data:{ 'data-tab':'giris' } })}
           ${K.Button({ label:'Hekime götür', act:'open-doctor' })}`,
         body:html`
           ${when(panelFilter(), () => raw(String(panelFilter())))}
@@ -49117,8 +49124,10 @@ SP.Screens.labs = (function(){
   /* Sekme yok (EKIP-PLANI §1.2): yedi bölüm alt alta; bölüm çubuğu kaydırır.
      Açık kırmızı bayraklar her şeyin üstünde kalır. Bir bölüm çizilemezse
      yalnız o bölüm sakin bir notla düşer. */
+  /* Sınır cümlesi her ekranın sayfa sonunda bir kez durur (app.js
+     footerHtml, AGENTS §1.5); Sonuçlar'ın altında ikinci kez yazılmaz. */
   const BODIES = {
-    sonuc:() => html`${resultsView()}<div class="mt-24">${P.clinicalNote()}</div>`,
+    sonuc:() => resultsView(),
     giris:() => entryView(), gecmis:() => historyView(), kiyas:() => compareView(),
     panel:() => panelView(), ilac:() => medsView(), trend:() => trendView(),
   };
@@ -49440,8 +49449,9 @@ SP.Screens.labs = (function(){
     id:'labs',
     /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
-       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-    kucukVarsayilan:['nasıl-okunur', 'paneller', 'hiç-ölçülmemiş-paneller'],
+       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik.
+       iPhone Faz 2b: sonraki kontrol ara sira bakilan bir hatirlatmadir. */
+    kucukVarsayilan:['nasıl-okunur', 'paneller', 'hiç-ölçülmemiş-paneller', 'sonraki-kontrol'],
     title:'Testler',
 
     /* Başlık durumun kendisidir: ekranın adı zaten üstte yazıyor. */
@@ -49518,12 +49528,12 @@ SP.Screens.meals = (function(){
 
   /* ---------------------------------------------------------- giris */
 
+  /* iPhone Faz 2b: ev ölçüsü listesi ve «tarttıysan gramı yaz» ⓘ'de
+     (hints: portion); alanın örnek metni biçimi zaten gösteriyor. */
   function quickEntry(){
     return K.Entry({
       label:'Öğün ekle', hint:'portion',
       meta:'tek satır, tek Enter',
-      note:'Ev ölçüsü tanınır: tabak · kase · dilim · bardak · avuç · kaşık. '
-        + 'Tarttıysan «150 g tavuk göğsü» yaz.',
       action:html`${K.Button({ label:'Besin ara', act:'open-search' })}
         ${K.Button({ label:'Fotoğraftan', icon:'camera', act:'open-photo' })}`,
       body:html`
@@ -49722,7 +49732,9 @@ SP.Screens.meals = (function(){
   function sablonKutusu(){
     if(!VT()) return '';
     const bugun = M.mealsOf(shownDate()).map(m => (m.items || []).map(x => x.foodId).sort().join('+'));
-    return vkutu('Sık öğünler', 'tek dokunuş', VT().ogunSablonlari({ act:'sablon-ekle', sablonlar:sablonlar().map(x => {
+    /* Bileşenin kendi künyesi kutunun adını («Sık öğünler · tek dokunuş»)
+       ikinci kez yazıyordu; yerine pencerenin kendisi. */
+    return vkutu('Sık öğünler', 'tek dokunuş', VT().ogunSablonlari({ act:'sablon-ekle', baslik:'son 30 gün', sablonlar:sablonlar().map(x => {
       const sl = SP.MEAL_SLOTS.find(y => y.id === x.slot);
       return { ad:sl ? sl.label : x.slot, icerik:x.ids.map(id => SP.FOOD_BY_ID[id].name.toLocaleLowerCase('tr-TR')).join(' · '),
         on:bugun.indexOf(x.anahtar) >= 0, data:{ 'data-date':x.ornek.date, 'data-id':x.ornek.id } };
@@ -49765,6 +49777,64 @@ SP.Screens.meals = (function(){
             <li><b>${SP.NUTRI_BY_ID[k] ? SP.NUTRI_BY_ID[k].name : k}</b>
               ×${U.fmtNet(t.adjustments[k].mult)} — ${t.adjustments[k].why}</li>`)}</ul>` }))}`,
     });
+  }
+
+  /* iPhone Faz 2b (2026-10-02): günün kalorisi ve proteini hedefle birlikte
+     küçük dönen kartta; «Günlük hedef» kartı ayrıntısıyla şerittir. Hedef
+     hesaplanır (bazal metabolizma). Yenen toplam ev ölçüsünden geldiyse
+     TAHMİN, hepsi tartıldıysa HESAPLANDI. Öğün girilmemiş gün ve gramı
+     olmayan kalem «0 kcal» değildir: sayı değil cümle, eksik kalem yazılır
+     (AGENTS §1.2). Her madde tek söz söyler (satır tek satırdır, sığmayan
+     kesilir): eksik kalem Kalori'de, eksik profil kendi maddesinde. */
+  function DonenOgun(){
+    const V = VT();
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const d = shownDate();
+    const gun = d === U.todayISO() ? '' : ' · ' + U.fmtShort(d);
+    const tg = SP.Nutri.targets();
+    const t = SP.Nutri.dayTotals(d);
+    const kalemler = M.mealsOf(d).reduce((a, x) => a.concat(x.items || []), []).filter(it => SP.FOOD_BY_ID[it.foodId]);
+    const gramli = kalemler.filter(it => Number(it.g) > 0);
+    const eksik = [t.unknownFoods.length ? t.unknownFoods.length + ' kalem tanınmadı' : '',
+      kalemler.length > gramli.length ? (kalemler.length - gramli.length) + ' kalemin gramı yok' : ''].filter(Boolean).join(', ');
+    const tahmin = gramli.some(it => it.cert !== 'measured');
+    const m = [];
+    if(!gramli.length){
+      m.push({ ust:'Kalori' + gun, cumle:t.empty ? 'Öğün girilmedi.' : kalemler.length ? 'Gram girilmedi.' : 'Kalem tanınmadı.',
+        vurgu:eksik ? eksik + '.' : tg.ok ? 'Hedef ' + U.fmtNum(tg.kcal) + ' kcal.' : '', sistem:'spi' });
+      if(tg.ok) m.push({ ust:'Protein' + gun, cumle:'Hedef ' + tg.protein.min + '–' + tg.protein.max + ' g.',
+        vurgu:'Öğün girilince hesaplanır.', sistem:'spi' });
+    }else{
+      /* Köken kartı (025): tahminde kaynak, hesapta formül ve girdi. */
+      const kes = tahmin
+        ? { kesinlik:'estimated', kaynak:'ev ölçüsünden gram × besin tablosu', zaman:d }
+        : { kesinlik:'computed', formul:'tartılan gram × besin tablosu', zaman:d,
+            girdiler:[{ ad:'Tartılan kalem', deger:gramli.length, birim:'kalem', kesinlik:'measured' }] };
+      m.push({ ust:'Kalori' + gun, sayi:sayi(Object.assign({ deger:Math.round(t.kcal), birim:'kcal' }, kes)), cumle:'alındı.',
+        vurgu:eksik ? eksik + '; toplama girmedi.'
+          : tg.ok ? 'Hedef ' + U.fmtNum(tg.kcal) + ' kcal' + (tahmin ? ' · tahmin.' : '.')
+          : tahmin ? 'Ev ölçüsünden tahmin.' : 'Tartılan gramdan.', sistem:'spi' });
+      m.push({ ust:'Protein' + gun, sayi:sayi(Object.assign({ deger:Math.round(t.protein), birim:'g' }, kes)), cumle:'alındı.',
+        vurgu:tg.ok ? 'Hedef ' + tg.protein.min + '–' + tg.protein.max + ' g.' : 'Hedef hesaplanmadı.', sistem:'spi' });
+    }
+    if(!tg.ok){
+      m.push({ ust:'Günlük hedef', cumle:'Hedef yok.', vurgu:'Profilde ' + tg.missing.join(', ') + ' eksik.', sistem:'spi',
+        dugme:{ label:'Profil', act:'go', data:{ 'data-route':'family' } } });
+    }
+    const adj = tg.ok ? Object.keys(tg.adjustments || {}) : [];
+    if(adj.length){
+      const girdiler = adj.map(k => {
+        const mk = tg.adjustments[k].marker, son = M.latestOf(mk), b = SP.BIO_BY_ID[mk];
+        return { ad:b ? b.name : mk, deger:son ? son.v : null, birim:b ? b.unit : '', kesinlik:son ? 'measured' : 'missing' };
+      });
+      m.push({ ust:'Tahlil bağı', sayi:sayi({ deger:adj.length, birim:'hedef', kesinlik:'computed',
+          formul:'hedef bandın dışındaki tahlil → besin hedefi çarpanı', girdiler, zaman:U.todayISO() }),
+        cumle:'yükseltildi.', vurgu:adj.map(k => SP.NUTRI_BY_ID[k] ? SP.NUTRI_BY_ID[k].name : k).join(', ') + '.', sistem:'spi',
+        dugme:{ label:'Öneri', act:'meal-tab', data:{ 'data-tab':'oneri' } } });
+    }
+    return raw(V.donen({ id:'spi-ogun', ad:'Öğün', maddeler:m }));
   }
 
   function microCard(){
@@ -50156,7 +50226,10 @@ SP.Screens.meals = (function(){
      günün öğün sayısı çubukta rozet. Bir bölüm çizilemezse yalnız o bölüm
      sakin bir notla düşer. */
   const BODIES = {
-    gunluk:() => html`${K.Ledger(() => [quickEntry(), sablonKutusu(), dayCard(), cizelgeKutusu(), targetCard(), tabakKutusu()])}
+    /* iPhone Faz 2b: sol sütun iş (öğünü yaz, günün öğünleri), sağ sütun
+       durum ve kısayol (dönen «Öğün» kartı, sık öğünler); raf DOM sırasıyla
+       ikişer dizer. Telefonda tek sütun: önce yazma alanı. */
+    gunluk:() => html`${K.Ledger(() => [quickEntry(), DonenOgun(), dayCard(), sablonKutusu(), cizelgeKutusu(), targetCard(), tabakKutusu()])}
       <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`,
     oneri:() => html`${K.Ledger(() => [energyCard(), labLinkCard(), suggestCard()])}
       <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`,
@@ -50335,6 +50408,9 @@ SP.Screens.meals = (function(){
 
   return {
     id:'meals',
+    /* iPhone Faz 2b: iş öğünü yazmak; hedefin ayrıntısı şerit (sayıları
+       dönen «Öğün» kartında), Tabak ve çizelge gizli (app.js SADE_GIZLI). */
+    kucukVarsayilan:['günlük-hedef'],
     title:'Öğünler',
     headline(){
       const tg = SP.Nutri.targets();
@@ -50431,9 +50507,7 @@ SP.Screens.kitchen = (function(){
           ${K.Field({ label:'Toplam gram',
             input:K.Input({ id:'kitchen-g', type:'number', numeric:true, step:'50', min:100,
               value:S.ui.kitchenGrams, change:'set-grams' }) })}
-        </div>
-        <p class="small muted mt-10">Tencerede kaç gram olduğunu bilmiyorsan kaba bir tahmin yeter:
-          paylaştırma oranları değişmez, yalnızca mutlak gramlar ölçeklenir.</p>`,
+        </div>`,
     });
   }
 
@@ -50504,7 +50578,7 @@ SP.Screens.kitchen = (function(){
     const okunan = SP.Evdeki.oku(metin);
     const l = metin.trim() ? SP.Evdeki.oner(okunan.var) : [];
     return K.Card({
-      title:'Evde ne var?', sub:'Malzemeyi yaz; hangi yemeğin olduğu ve neyin eksik kaldığı',
+      title:'Evde ne var?', hint:'evdeki', sub:'malzemeden yemek',
       body:html`
         <div class="row gap-6 wrap">
           ${K.Input({ id:'evdeki-q', value:metin, class:'grow', aria:'Evdeki malzemeler',
@@ -50521,25 +50595,28 @@ SP.Screens.kitchen = (function(){
             html`<b>${r.yemek.name}</b>${when(r.arti.length, () => html`<div class="tiny dim">+ ${r.arti.join(', ')}</div>`)}`,
             r.eksik.length ? 'eksik: ' + r.eksik.join(', ') : 'yapılabilir',
             K.Button({ label:'Seç', size:'sm', act:'evdeki-sec', data:{ 'data-id':r.yemek.id } }),
-          ]) })}</div>`)}
-        <p class="tiny dim mt-10">Genel ev usulü malzeme listesi; miktar ve tarif değil. Yağ ve tuz
-          sayılmaz.</p>`,
+          ]) })}</div>`)}`,
     });
   }
 
+  /* 100 gramın değeri bir hedef değildir: eskiden her biri kendi hedefiymiş
+     gibi «132 / 132 kcal · %100» çiziliyordu (aynı sayı iki kez, anlamsız
+     çubuk). Değer bir kez yazılır; tabloda olmayan değer «veri yok»tur —
+     demiri bilinmeyen yemek «0 mg» değildir (AGENTS §1.2). */
   function dishInfoCard(){
     const f = SP.FOOD_BY_ID[S.ui.kitchenDish || 'kuru-fasulye-etli'];
     if(!f) return null;
     const c = SP.Nutri.contribution(f.id, 100);
+    const deger = (ad, v, birim, basamak) => html`<div class="sidestat">
+      <span class="sidestat__v">${v == null ? '—' : html`${U.fmtNum(U.round(v, basamak))}<small>${birim}</small>`}</span>
+      <span class="sidestat__k">${ad}${v == null ? ' · veri yok' : ''}</span></div>`;
     return K.Card({
       title:f.name, sub:'100 gramda',
       body:html`
         ${raw(UI.macroSplit({ protein:c.protein * 4, fat:c.fat * 9, carb:c.carb * 4 }))}
-        <div class="nutgrid mt-12">
-          ${P.nutCell({ label:'Kalori', got:c.kcal, target:c.kcal, unit:'kcal' })}
-          ${P.nutCell({ label:'Protein', got:c.protein, target:c.protein, unit:'g', digits:1 })}
-          ${P.nutCell({ label:'Lif', got:c.fiber, target:c.fiber, unit:'g', digits:1 })}
-          ${P.nutCell({ label:'Demir', got:c.micro.iron || 0, target:c.micro.iron || 1, unit:'mg', digits:1 })}
+        <div class="pair mt-12">
+          <div>${deger('Kalori', c.kcal, 'kcal', 0)}${deger('Protein', c.protein, 'g', 1)}</div>
+          <div>${deger('Lif', c.fiber, 'g', 1)}${deger('Demir', c.micro.iron, 'mg', 1)}</div>
         </div>
         ${when((f.flags || []).length, () => html`<div class="mt-10">${map(f.flags, fl => {
           const a = SP.ABSORB_FACTORS[fl];
@@ -50562,11 +50639,8 @@ SP.Screens.kitchen = (function(){
   function customCard(){
     const liste = (S.foods || []);
     return K.Card({
-      title:'Kendi gıdaların', sub:liste.length + ' kayıt',
+      title:'Kendi gıdaların', hint:'custom-food', sub:liste.length + ' kayıt',
       body:html`
-        <p class="small muted">Sistemin tablosunda olmayan bir ürünü ekle:
-          ambalajın besin değerleri tablosunu fotoğrafla ya da değerleri elle yaz.
-          Eklenen gıda öğün girişinde, sepette ve hesaplarda görünür.</p>
         ${when(!liste.length, () => P.empty('Henüz kendi gıdan yok.'))}
         ${when(liste.length, () => html`<div class="list mt-10">${map(liste, f => html`
           <div class="listitem">
@@ -50618,10 +50692,13 @@ SP.Screens.kitchen = (function(){
     ]));
   }
 
+  /* iPhone Faz 2b: iş tencere ve tabaktır — pişen yemek, paylaştırma ve
+     yemeğin besin kartı açık ve üstte; hane, evdeki malzeme ve kendi
+     gıdaların şerit (dokununca açılır), sonda. */
   async function render(){
     return String(html`
-      ${K.Ledger(() => [setupCard(), splitCard(), memberCard(), evdekiCard(), customCard(),
-        dishInfoCard()].filter(Boolean))}
+      ${K.Ledger(() => [setupCard(), splitCard(), dishInfoCard(), memberCard(), evdekiCard(),
+        customCard()].filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['household', 'portion', 'profiles']))}</div>`);
   }
 
@@ -50730,6 +50807,7 @@ SP.Screens.kitchen = (function(){
 
   return {
     id:'kitchen',
+    kucukVarsayilan:['hane', 'evde-ne-var', 'kendi-gıdaların'],
     title:'Mutfak',
     headline(){
       const list = SP.Model.householdList();
@@ -50823,8 +50901,7 @@ SP.Screens.move = (function(){
     return K.Entry({
       label:'Günün yük emri', hint:'recovery-order',
       meta:rx.factor >= 1 ? 'tam yük' : 'yükün %' + Math.round(rx.factor * 100) + '\u2019i',
-      note:'Emri toparlanma belirler, istek değil. Sistem yükü kendiliğinden '
-        + 'azaltabilir ama asla kendiliğinden artıramaz.',
+      /* «Emri toparlanma belirler…» ⓘ'de (hints: recovery-order). */
       action:when(!r.ok, () => K.Button({ label:'Veri gir',
         act:'go', data:{ 'data-route':'today' } })),
       body:html`
@@ -50847,9 +50924,8 @@ SP.Screens.move = (function(){
     const rx = SP.Move.prescription();
     const suggested = rx.suggest.map(t => t.id);
     return K.Entry({
-      label:'Seans seç',
+      label:'Seans seç', hint:'session-pick',
       meta:SP.SESSION_TEMPLATES.length + ' şablon',
-      note:'Öneri toparlanma bandından gelir; istediğini seçebilirsin.',
       body:html`<div class="picks">${map(SP.SESSION_TEMPLATES, t => html`
         <button class="${cls('pickcard', suggested[0] === t.id && 'is-on')}"
           data-act="start-session" data-id="${t.id}">
@@ -51205,6 +51281,41 @@ SP.Screens.move = (function(){
     }) }));
   }
 
+  /* iPhone Faz 2b (2026-10-02): günün yük emri ve haftanın hareketi tek
+     küçük dönen kartta. Skor ve emir kural motorundan (Move.prescription);
+     ölçüm yoksa sayı değil cümle. Kırmızı ya da sarı gerekçe (ateş, aşırı
+     yük, indirme haftası) emrin altında söylenir: kart küçüldü diye uyarı
+     susmaz. Emrin tamamı «Günün yük emri» şeridinde; haftanın halkaları ve
+     antrenman haftası gizli bölümde (app.js SADE_GIZLI). */
+  function DonenHareket(){
+    const V = VT();
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const rx = SP.Move.prescription();
+    const r = rx.readiness;
+    const ek = rx.reasons.filter(x => x.id !== 'readiness' && x.id !== 'no-data');
+    const onemli = ek.find(x => x.kind === 'danger') || ek.find(x => x.kind === 'warn');
+    const yuk = rx.factor === 0 ? 'dinlenme' : rx.factor >= 1 ? 'tam yük' : 'yükün %' + Math.round(rx.factor * 100) + '’i';
+    const m = [r.ok
+      ? { ust:'Günün yük emri', sayi:sayi({ deger:r.score, birim:'/100', kesinlik:'computed', zaman:rx.date,
+            formul:'toparlanma: girilen ölçümlerin ağırlıklı ortalaması',
+            girdiler:r.parts.filter(p => p.score != null).map(p => ({ ad:p.label, deger:p.value, kesinlik:'measured' })) }),
+          cumle:r.band.label.toLocaleLowerCase('tr-TR') + ' · ' + yuk + '.', vurgu:onemli ? onemli.short : r.band.order, sistem:'spi' }
+      : { ust:'Günün yük emri', cumle:'Ölçüm bekliyor.', vurgu:onemli ? onemli.short : 'Uyku süresini yazman bile yeter.', sistem:'spi',
+          dugme:{ label:'Veri gir', act:'go', data:{ 'data-route':'today' } } }];
+    const bugun = U.todayISO(), esik = SP.LOAD_RULES.minDay.minutes;
+    const gunler = haftaGunleri();
+    const tutan = gunler.filter(d => U.sum(M.workoutsOf(d).map(w => w.minutes || 0)) >= esik).length;
+    const kayitsiz = gunler.filter(d => d < bugun && !(M.workoutsOf(d).length || S.vitals[d] || M.mealsOf(d).length)).length;
+    const seans = gunler.reduce((n, d) => n + M.workoutsOf(d).length, 0);
+    m.push({ ust:'Bu hafta', sayi:sayi({ deger:tutan + '/7', kesinlik:'computed', zaman:bugun,
+        formul:'en az ' + esik + ' dk hareket edilen gün / 7',
+        girdiler:[{ ad:'Seans kaydı', deger:seans, birim:'seans', kesinlik:'measured' }] }),
+      cumle:'gün hareket.', vurgu:'Asgari gün ' + esik + ' dk.' + (kayitsiz ? ' ' + kayitsiz + ' geçmiş gün kayıtsız.' : ''), sistem:'spi' });
+    return raw(V.donen({ id:'spi-hareket', ad:'Hareket', maddeler:m }));
+  }
+
   /* 081 YOĞUNLUK BÖLGELERİ: son 28 günün seans dakikası, SENİN yazdığın
      zorluğa (1–10) göre dört bantta. Nabız ölçülmediği için bant nabız
      değil zorluk bandıdır; eşikleri kod koyar. Zorluğu yazılmamış seans
@@ -51239,7 +51350,7 @@ SP.Screens.move = (function(){
      dengesi» eskiden üç sekmede ayrı ayrı çiziliyordu; alt alta durunca
      aynı kart üç kez görünürdü — yalnız Kuvvet'te, kalıpların yanında. */
   const BODIES = {
-    bugun:() => html`${K.Ledger([orderEntry(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), halkaKutusu(), haftaKutusu()])}
+    bugun:() => html`${K.Ledger([DonenHareket(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), orderEntry(), halkaKutusu(), haftaKutusu()])}
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
     ilerleme:() => html`${K.Ledger([
         K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
@@ -51380,6 +51491,9 @@ SP.Screens.move = (function(){
 
   return {
     id:'move',
+    /* iPhone Faz 2b: iş seansı seçmek ve kaydetmek; emrin ayrıntısı şerit
+       (skoru ve emri dönen «Hareket» kartında). */
+    kucukVarsayilan:['günün-yük-emri'],
     title:'Hareket',
     headline(){
       const rx = SP.Move.prescription();
@@ -51693,6 +51807,9 @@ SP.Screens.basket = (function(){
   function budgetView(){
     const b = SP.Money.budget();
     const st = SP.Money.status();
+    /* Hiçbir kalemin karşılığı bilinmiyorsa toplam «0 TL» değil bilinmiyor;
+       sınıra göre durum da hesaplanamaz (AGENTS §1.2). */
+    const bilinen = b.rows.some(r => r.monthly != null);
 
     return html`
       <section class="sect">
@@ -51704,8 +51821,8 @@ SP.Screens.basket = (function(){
             ${seritKarti(b)}
             ${K.Card({
               title:'Talep tablosu', hint:'budget-rank',
-              badge:K.Badge({ label:U.fmtNum(b.total) + ' TL / ay',
-                tone:b.over ? 'warn' : 'info' }),
+              badge:K.Badge({ label:bilinen ? U.fmtNum(b.total) + ' TL / ay' : 'veri yok',
+                tone:!bilinen ? 'muted' : b.over ? 'warn' : 'info' }),
               body:html`${map(b.rows, r => html`
                 <div class="demand">
                   <div class="demand__who">
@@ -51729,7 +51846,11 @@ SP.Screens.basket = (function(){
                   Bütün kalemlerin karşılığı hesaplandı.</span>`)}`,
             })}
 
-            ${when(b.limit != null, () => K.Card({
+            ${when(b.limit != null && !bilinen, () => K.Card({
+              title:'Aylık sınır',
+              body:html`<p class="small">Sınır ${U.fmtNum(b.limit)} TL. Kalemlerin karşılığı bilinmiyor;
+                sınıra göre durum hesaplanmadı.</p>` }))}
+            ${when(b.limit != null && bilinen, () => K.Card({
               title:'Aylık sınır',
               body:html`${K.Meter({ label:'Kullanılan',
                 value:Math.min(100, b.pct || 0),
@@ -52073,6 +52194,10 @@ SP.Screens.basket = (function(){
 
   return {
     id:'basket',
+    /* iPhone Faz 2b: iş talep tablosu ve Sedef'in notu (sınır varsa sınır
+       kartı); harcama şeritleri aynı kalemleri çizgiyle yeniden çizer, şerit.
+       Bütçenin yeri ve fiyat kaynağı gizli (app.js SADE_GIZLI). */
+    kucukVarsayilan:['harcama-şeritleri'],
     title:'Finans',
     headline(){
       const b = SP.Money.budget();
@@ -56836,9 +56961,16 @@ SP.App = (function(){
      anahtarın gerçek bir bölüme denk geldiği test edilir (sade.test.js). */
   const SADE_GIZLI = {
     gun:['neden-bunlar', 'toparlanma', 'asgari-gün', 'beslenme', 'hkm', 'seri', 'girilen-değerler', 'eğilim', 'hatırlatmalar', 'ofisten', 'bütçe', 'son-iki-hafta', 'taban-çizgin'],
-    labs:['nasıl-okunur', 'sınır', 'hiç-ölçülmemiş-paneller', 'ölçülmemiş', 'dağılım'],
+    labs:['nasıl-okunur', 'sınır', 'hiç-ölçülmemiş-paneller', 'ölçülmemiş', 'dağılım', 'referans-bandı'],
     analytics:['veri-doluluğu', 'raporun-mantığı'],
     guide:['nasıl-kullanılır', 'beş-modül', 'kullanım-hakkı', 'klinik-sınır'],
+    /* iPhone Faz 2b (belgeler/ekip/IPHONE-PLANI.md): tekrar ve başvuru
+       kartları. Tabak, Günlük hedef'in sayılarını kalan gram olarak yeniden
+       çizer; iki hafta kartı dönen «Hareket» kartının haftasını; bütçenin
+       yeri ve fiyat kaynağı sabit başvuru metnidir. */
+    meals:['tabak', 'öğün-çizelgesi'],
+    move:['bu-hafta-hareket', 'antrenman-haftası'],
+    basket:['bütçenin-yeri', 'fiyatlar-nereden-geliyor'],
   };
 
   function sayfaBasiHtml(sc){
@@ -58084,7 +58216,7 @@ SP.App = (function(){
   }
 
   return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, UST, THEMES, installManifest,
-    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
+    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml };
 })();
 
 /* Test paketi bu dosyayı da yükler (ekran sözleşmelerini denetlemek için)

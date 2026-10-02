@@ -266,6 +266,9 @@ SP.Screens.basket = (function(){
   function budgetView(){
     const b = SP.Money.budget();
     const st = SP.Money.status();
+    /* Hiçbir kalemin karşılığı bilinmiyorsa toplam «0 TL» değil bilinmiyor;
+       sınıra göre durum da hesaplanamaz (AGENTS §1.2). */
+    const bilinen = b.rows.some(r => r.monthly != null);
 
     return html`
       <section class="sect">
@@ -277,8 +280,8 @@ SP.Screens.basket = (function(){
             ${seritKarti(b)}
             ${K.Card({
               title:'Talep tablosu', hint:'budget-rank',
-              badge:K.Badge({ label:U.fmtNum(b.total) + ' TL / ay',
-                tone:b.over ? 'warn' : 'info' }),
+              badge:K.Badge({ label:bilinen ? U.fmtNum(b.total) + ' TL / ay' : 'veri yok',
+                tone:!bilinen ? 'muted' : b.over ? 'warn' : 'info' }),
               body:html`${map(b.rows, r => html`
                 <div class="demand">
                   <div class="demand__who">
@@ -302,7 +305,11 @@ SP.Screens.basket = (function(){
                   Bütün kalemlerin karşılığı hesaplandı.</span>`)}`,
             })}
 
-            ${when(b.limit != null, () => K.Card({
+            ${when(b.limit != null && !bilinen, () => K.Card({
+              title:'Aylık sınır',
+              body:html`<p class="small">Sınır ${U.fmtNum(b.limit)} TL. Kalemlerin karşılığı bilinmiyor;
+                sınıra göre durum hesaplanmadı.</p>` }))}
+            ${when(b.limit != null && bilinen, () => K.Card({
               title:'Aylık sınır',
               body:html`${K.Meter({ label:'Kullanılan',
                 value:Math.min(100, b.pct || 0),
@@ -646,6 +653,10 @@ SP.Screens.basket = (function(){
 
   return {
     id:'basket',
+    /* iPhone Faz 2b: iş talep tablosu ve Sedef'in notu (sınır varsa sınır
+       kartı); harcama şeritleri aynı kalemleri çizgiyle yeniden çizer, şerit.
+       Bütçenin yeri ve fiyat kaynağı gizli (app.js SADE_GIZLI). */
+    kucukVarsayilan:['harcama-şeritleri'],
     title:'Finans',
     headline(){
       const b = SP.Money.budget();

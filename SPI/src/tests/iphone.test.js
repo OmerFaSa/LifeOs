@@ -1,0 +1,263 @@
+/* iPhone planı (belgeler/ekip/IPHONE-PLANI.md) · Faz 2b · SPİ Çalışma.
+
+   Testler · Öğün · Mutfak · Hareket · Bütçe. Sözleşme §2.2: açık kart ≤ 3;
+   §2.4: açıklama ⓘ'dedir, ekranda ikinci kez yazılmaz; §2.6: durum
+   sayıları küçük dönen kartta, eksik veri sayı değil cümle.
+
+   Gizlemek uygulama düzeyindedir (app.js SADE_GIZLI + ekranın
+   kucukVarsayilan'ı); bu testler çizimi gerçek bölümlere ayırıp hangilerinin
+   AÇIK kaldığını sayar. Anahtar yanlış yazılırsa bölüm sessizce açık
+   kalırdı: bu da burada yakalanır. Bölümlü ekranlarda yalnız varsayılan
+   bölüm (ilk sekme) sayılır — ekran açılınca görünen odur. */
+
+(function(){
+  const { describe, it, expect, resetState, withTodayAsync, pushLab, pushMeal, pushWorkout, pushVitals } = SP.Test;
+
+  /* Ekranı çizer, bölümlerini ayırır: { kok, alan, var, acik, kucuk, gizli } */
+  async function bolumle(id, bolum){
+    const sc = SP.Screens[id];
+    const kok = document.createElement('div');
+    kok.innerHTML = String(await sc.render());
+    document.body.appendChild(kok);
+    const G = window.LIFEOS.Gizle;
+    const gizliler = (sc.gizliVarsayilan || []).concat(SP.App.SADE_GIZLI[id] || []);
+    const kucukler = sc.kucukVarsayilan || [];
+    const alan = bolum ? kok.querySelector('#bl-' + bolum) : kok;
+    const var_ = G.bolumler(alan).map(b => b.anahtar);
+    return {
+      kok, alan, var:var_,
+      gizli:var_.filter(a => gizliler.indexOf(a) >= 0),
+      kucuk:var_.filter(a => gizliler.indexOf(a) < 0 && kucukler.indexOf(a) >= 0),
+      acik:var_.filter(a => gizliler.indexOf(a) < 0 && kucukler.indexOf(a) < 0),
+      bitir(){ kok.remove(); },
+    };
+  }
+  const ustler = d => Array.from(d.querySelectorAll('.donen__ust')).map(x => x.textContent.trim());
+
+  describe('iPhone · Faz 2b · SPİ Çalışma', () => {
+
+    it('Testler: açık yalnız sonuçlar; referans bandı gizli, sonraki kontrol şerit', async () => {
+      await withTodayAsync('2026-10-02', async () => {
+        resetState();
+        pushLab('2026-08-03', { ferritin:22, hgb:13.1, glucose:88 });
+        const b = await bolumle('labs', 'sonuc');
+        try{
+          expect(b.acik.join(',')).toBe('sonuçlar');
+          expect(b.gizli.indexOf('referans-bandı') >= 0).toBe(true);
+          expect(b.kucuk.indexOf('sonraki-kontrol') >= 0).toBe(true);
+          /* Sonuçlar kartı sayfa başının «Test gir»ini ikinci kez taşımaz */
+          const kart = b.alan.querySelector('section.lrow');
+          expect(kart.querySelectorAll('[data-act="lab-tab"][data-tab="giris"]').length).toBe(0);
+          expect(!!kart.querySelector('[data-act="open-doctor"]')).toBe(true);
+          /* «Önem sırasına göre…» ekranda değil ⓘ'de */
+          expect(b.alan.textContent.indexOf('Önem sırasına göre')).toBe(-1);
+          expect(!!kart.querySelector('[data-hint="lab-results"]')).toBe(true);
+          expect(SP.HINTS['lab-results'].more).toContain('referans aralığı, hedef bant');
+        }finally{ b.bitir(); }
+      });
+    });
+
+    it('Testler: sınır cümlesi sayfanın içinde tekrar etmez, sayfa sonunda durur (AGENTS §1.5)', async () => {
+      resetState();
+      pushLab('2026-08-03', { ferritin:22 });
+      const b = await bolumle('labs', 'sonuc');
+      try{
+        expect(b.alan.textContent.indexOf(SP.CLINICAL.disclaimer)).toBe(-1);
+        /* sayfa sonu satırı her ekranda bir kez: o KALIR */
+        expect(String(SP.App.footerHtml())).toContain(SP.CLINICAL.disclaimer);
+      }finally{ b.bitir(); }
+    });
+
+    it('Öğün: açık öğün ekle, sık öğünler ve günün öğünleri; hedef dönen kartta, ayrıntısı şerit', async () => {
+      await withTodayAsync('2026-10-02', async () => {
+        resetState();
+        /* aynı öğün iki günde: «Sık öğünler» ancak o zaman çizilir */
+        pushMeal('2026-10-01', 'ogle', [['yumurta', 100]]);
+        pushMeal('2026-10-02', 'ogle', [['yumurta', 100]]);
+        const b = await bolumle('meals', 'gunluk');
+        try{
+          const d = b.alan.querySelector('.donen[aria-label="Öğün"]');
+          expect(!!d).toBe(true);
+          expect(ustler(d).slice(0, 2).join(',')).toBe('Kalori,Protein');
+          /* ev ölçüsünden gelen gram tahmindir: toplam da tahmin etiketli, kaynağı yazılı */
+          expect(!!d.querySelector('[data-donen-madde="0"] .sayi--estimated')).toBe(true);
+          expect(d.querySelector('[data-donen-madde="0"] .koken').textContent.indexOf('kayıtlı değil')).toBe(-1);
+          expect(b.kucuk.indexOf('günlük-hedef') >= 0).toBe(true);
+          expect(b.var.indexOf('tabak') >= 0).toBe(true);
+          ['tabak', 'öğün-çizelgesi'].filter(a => b.var.indexOf(a) >= 0)
+            .forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
+          expect(b.acik.indexOf('öğün-ekle') >= 0 && b.acik.indexOf('sık-öğünler') >= 0).toBe(true);
+          expect(b.acik.length <= 3).toBe(true);
+          /* ev ölçüsü açıklaması ekranda değil ⓘ'de */
+          expect(b.alan.textContent.indexOf('Ev ölçüsü tanınır')).toBe(-1);
+          expect(SP.HINTS.portion.more).toContain('kase');
+        }finally{ b.bitir(); }
+      });
+    });
+
+    it('Öğün: tartılan öğünde toplam hesaplanır; öğün yokken ve profil eksikken sayı değil cümle', async () => {
+      await withTodayAsync('2026-10-02', async () => {
+        resetState();
+        pushMeal('2026-10-02', 'ogle', [['yumurta', 100, 'measured']]);
+        let b = await bolumle('meals', 'gunluk');
+        try{
+          const d = b.alan.querySelector('.donen[aria-label="Öğün"]');
+          expect(!!d.querySelector('[data-donen-madde="0"] .sayi--computed')).toBe(true);
+          expect(d.querySelector('[data-donen-madde="0"] .koken').textContent.indexOf('kayıtlı değil')).toBe(-1);
+        }finally{ b.bitir(); }
+
+        resetState();
+        b = await bolumle('meals', 'gunluk');
+        try{
+          const d = b.alan.querySelector('.donen[aria-label="Öğün"]');
+          expect(d.querySelectorAll('[data-donen-madde="0"] .sayi').length).toBe(0);
+          expect(d.textContent).toContain('Öğün girilmedi.');
+        }finally{ b.bitir(); }
+
+        resetState();
+        SP.S.profile.weightKg = null;
+        b = await bolumle('meals', 'gunluk');
+        try{
+          const d = b.alan.querySelector('.donen[aria-label="Öğün"]');
+          expect(d.querySelectorAll('.sayi').length).toBe(0);
+          expect(ustler(d).join(',')).toBe('Kalori,Günlük hedef');
+          expect(d.textContent).toContain('Hedef yok.');
+          expect(!!d.querySelector('[data-route="family"]')).toBe(true);
+        }finally{ b.bitir(); }
+      });
+    });
+
+    it('Öğün: gramı olmayan kalem «0 kcal» sayılmaz; cümle olur ve eksik kalem yazılır', async () => {
+      await withTodayAsync('2026-10-02', async () => {
+        resetState();
+        pushMeal('2026-10-02', 'ogle', [['yumurta', undefined]]);
+        let b = await bolumle('meals', 'gunluk');
+        try{
+          const m = b.alan.querySelector('.donen[aria-label="Öğün"] [data-donen-madde="0"]');
+          expect(m.querySelectorAll('.sayi').length).toBe(0);
+          expect(m.textContent).toContain('Gram girilmedi.');
+          expect(m.textContent).toContain('1 kalemin gramı yok');
+        }finally{ b.bitir(); }
+
+        resetState();
+        pushMeal('2026-10-02', 'ogle', [['yumurta', 100], ['yumurta', undefined]]);
+        b = await bolumle('meals', 'gunluk');
+        try{
+          const m = b.alan.querySelector('.donen[aria-label="Öğün"] [data-donen-madde="0"]');
+          expect(m.querySelectorAll('.sayi').length).toBe(1);
+          expect(m.textContent).toContain('1 kalemin gramı yok; toplama girmedi.');
+        }finally{ b.bitir(); }
+      });
+    });
+
+    it('Mutfak: açık pişen yemek, paylaştırma ve yemeğin kartı; hane, evde ne var, kendi gıdaların şerit', async () => {
+      resetState();
+      const b = await bolumle('kitchen');
+      try{
+        ['hane', 'evde-ne-var', 'kendi-gıdaların'].forEach(a => expect(b.kucuk.indexOf(a) >= 0).toBe(true));
+        expect(b.acik.indexOf('pişen-yemek') >= 0).toBe(true);
+        expect(b.acik.length).toBe(3);
+        /* açıklama satırları ekranda değil ⓘ'de; bilgi kaybolmadı */
+        ['Tencerede kaç gram', 'Sistemin tablosunda olmayan', 'Genel ev usulü']
+          .forEach(t => expect(b.kok.textContent.indexOf(t)).toBe(-1));
+        expect(SP.HINTS.household.more).toContain('kaba bir tahmin');
+        expect(SP.HINTS['custom-food'].more).toContain('ambalaj');
+        expect(SP.HINTS.evdeki.more).toContain('Yağ ve tuz');
+        ['custom-food', 'evdeki'].forEach(k => expect(!!b.kok.querySelector('[data-hint="' + k + '"]')).toBe(true));
+      }finally{ b.bitir(); }
+    });
+
+    it('Mutfak: yemeğin kartı 100 gramın değerini bir kez yazar; bilinmeyen değer «veri yok», sıfır değil', async () => {
+      resetState();
+      const f = SP.FOOD_BY_ID['kuru-fasulye-etli'];
+      const kartOf = b => window.LIFEOS.Gizle.bolumler(b.kok).find(x => x.anahtar === window.LIFEOS.Gizle.anahtar(f.name)).el;
+      let b = await bolumle('kitchen');
+      try{
+        const kart = kartOf(b);
+        expect(kart.querySelectorAll('.nutcell').length).toBe(0);
+        expect(kart.querySelectorAll('.sidestat').length).toBe(4);
+        expect(kart.textContent.indexOf('%100')).toBe(-1);
+      }finally{ b.bitir(); }
+
+      const eski = f.micro;
+      f.micro = Object.assign({}, eski);
+      delete f.micro.iron;
+      try{
+        b = await bolumle('kitchen');
+        const demir = Array.from(kartOf(b).querySelectorAll('.sidestat')).find(x => x.textContent.indexOf('Demir') >= 0);
+        expect(demir.textContent).toContain('veri yok');
+        expect(demir.querySelector('.sidestat__v').textContent.trim()).toBe('—');
+        b.bitir();
+      }finally{ f.micro = eski; }
+    });
+
+    it('Hareket: yük emri ve hafta tek dönen kartta; açık seans seç ve bugünün seansları; hafta kartları gizli', async () => {
+      await withTodayAsync('2026-10-02', async () => {
+        resetState();
+        pushVitals('2026-10-02', { sleep:7.5 });
+        pushWorkout('2026-09-30', { minutes:40, rpe:6 });
+        pushWorkout('2026-10-02', { minutes:20, rpe:5 });
+        const b = await bolumle('move', 'bugun');
+        try{
+          const d = b.alan.querySelector('.donen[aria-label="Hareket"]');
+          expect(!!d).toBe(true);
+          expect(ustler(d).join(',')).toBe('Günün yük emri,Bu hafta');
+          expect(!!d.querySelector('[data-donen-madde="0"] .sayi--computed')).toBe(true);
+          d.querySelectorAll('.koken').forEach(k => expect(k.textContent.indexOf('kayıtlı değil')).toBe(-1));
+          /* Pazartesi 2026-09-28: Çarşamba 40 dk ve Cuma 20 dk asgari 15 dakikayı geçti */
+          expect(d.querySelector('[data-donen-madde="1"]').textContent).toContain('2/7');
+          expect(b.kucuk.indexOf('günün-yük-emri') >= 0).toBe(true);
+          ['bu-hafta-hareket', 'antrenman-haftası'].forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
+          expect(b.acik.indexOf('seans-seç') >= 0 && b.acik.indexOf('bugünün-seansları') >= 0).toBe(true);
+          expect(b.acik.length <= 3).toBe(true);
+          ['Emri toparlanma belirler', 'Öneri toparlanma bandından gelir']
+            .forEach(t => expect(b.alan.textContent.indexOf(t)).toBe(-1));
+          expect(SP.HINTS['recovery-order'].more).toContain('asla kendiliğinden artıramaz');
+          expect(SP.HINTS['session-pick'].b).toContain('toparlanma bandından');
+        }finally{ b.bitir(); }
+      });
+    });
+
+    it('Hareket: ölçüm yokken yük emri sayı değil cümle; kırmızı gerekçe dönen kartta söylenir', async () => {
+      await withTodayAsync('2026-10-02', async () => {
+        resetState();
+        let b = await bolumle('move', 'bugun');
+        try{
+          const m = b.alan.querySelector('.donen[aria-label="Hareket"] [data-donen-madde="0"]');
+          expect(m.querySelectorAll('.sayi').length).toBe(0);
+          expect(m.textContent).toContain('Ölçüm bekliyor.');
+          expect(!!m.querySelector('[data-route="today"]')).toBe(true);
+        }finally{ b.bitir(); }
+
+        resetState();
+        pushVitals('2026-10-02', { sleep:7.5, temp:38.9 });
+        b = await bolumle('move', 'bugun');
+        try{
+          const m = b.alan.querySelector('.donen[aria-label="Hareket"] [data-donen-madde="0"]');
+          expect(m.textContent).toContain('Ateş');
+        }finally{ b.bitir(); }
+      });
+    });
+
+    it('Bütçe: açık talep tablosu ve Sedef’in notu; bütçenin yeri ve fiyat kaynağı gizli', async () => {
+      resetState();
+      const b = await bolumle('basket', 'butce');
+      try{
+        ['bütçenin-yeri', 'fiyatlar-nereden-geliyor'].forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
+        expect(b.acik.indexOf('talep-tablosu') >= 0 && b.acik.indexOf('sedef-in-notu') >= 0).toBe(true);
+        expect(b.acik.length <= 3).toBe(true);
+      }finally{ b.bitir(); }
+    });
+
+    it('Bütçe: sınır girilince de açık en çok üç; harcama şeritleri şerit', async () => {
+      resetState();
+      SP.S.basket.monthlyLimit = 3000;
+      const b = await bolumle('basket', 'butce');
+      try{
+        expect(b.var.indexOf('aylık-sınır') >= 0).toBe(true);
+        if(b.var.indexOf('harcama-şeritleri') >= 0) expect(b.kucuk.indexOf('harcama-şeritleri') >= 0).toBe(true);
+        expect(b.acik.length <= 3).toBe(true);
+      }finally{ b.bitir(); }
+    });
+  });
+})();

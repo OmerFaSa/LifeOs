@@ -71,8 +71,7 @@ SP.Screens.move = (function(){
     return K.Entry({
       label:'Günün yük emri', hint:'recovery-order',
       meta:rx.factor >= 1 ? 'tam yük' : 'yükün %' + Math.round(rx.factor * 100) + '\u2019i',
-      note:'Emri toparlanma belirler, istek değil. Sistem yükü kendiliğinden '
-        + 'azaltabilir ama asla kendiliğinden artıramaz.',
+      /* «Emri toparlanma belirler…» ⓘ'de (hints: recovery-order). */
       action:when(!r.ok, () => K.Button({ label:'Veri gir',
         act:'go', data:{ 'data-route':'today' } })),
       body:html`
@@ -95,9 +94,8 @@ SP.Screens.move = (function(){
     const rx = SP.Move.prescription();
     const suggested = rx.suggest.map(t => t.id);
     return K.Entry({
-      label:'Seans seç',
+      label:'Seans seç', hint:'session-pick',
       meta:SP.SESSION_TEMPLATES.length + ' şablon',
-      note:'Öneri toparlanma bandından gelir; istediğini seçebilirsin.',
       body:html`<div class="picks">${map(SP.SESSION_TEMPLATES, t => html`
         <button class="${cls('pickcard', suggested[0] === t.id && 'is-on')}"
           data-act="start-session" data-id="${t.id}">
@@ -453,6 +451,41 @@ SP.Screens.move = (function(){
     }) }));
   }
 
+  /* iPhone Faz 2b (2026-10-02): günün yük emri ve haftanın hareketi tek
+     küçük dönen kartta. Skor ve emir kural motorundan (Move.prescription);
+     ölçüm yoksa sayı değil cümle. Kırmızı ya da sarı gerekçe (ateş, aşırı
+     yük, indirme haftası) emrin altında söylenir: kart küçüldü diye uyarı
+     susmaz. Emrin tamamı «Günün yük emri» şeridinde; haftanın halkaları ve
+     antrenman haftası gizli bölümde (app.js SADE_GIZLI). */
+  function DonenHareket(){
+    const V = VT();
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const rx = SP.Move.prescription();
+    const r = rx.readiness;
+    const ek = rx.reasons.filter(x => x.id !== 'readiness' && x.id !== 'no-data');
+    const onemli = ek.find(x => x.kind === 'danger') || ek.find(x => x.kind === 'warn');
+    const yuk = rx.factor === 0 ? 'dinlenme' : rx.factor >= 1 ? 'tam yük' : 'yükün %' + Math.round(rx.factor * 100) + '’i';
+    const m = [r.ok
+      ? { ust:'Günün yük emri', sayi:sayi({ deger:r.score, birim:'/100', kesinlik:'computed', zaman:rx.date,
+            formul:'toparlanma: girilen ölçümlerin ağırlıklı ortalaması',
+            girdiler:r.parts.filter(p => p.score != null).map(p => ({ ad:p.label, deger:p.value, kesinlik:'measured' })) }),
+          cumle:r.band.label.toLocaleLowerCase('tr-TR') + ' · ' + yuk + '.', vurgu:onemli ? onemli.short : r.band.order, sistem:'spi' }
+      : { ust:'Günün yük emri', cumle:'Ölçüm bekliyor.', vurgu:onemli ? onemli.short : 'Uyku süresini yazman bile yeter.', sistem:'spi',
+          dugme:{ label:'Veri gir', act:'go', data:{ 'data-route':'today' } } }];
+    const bugun = U.todayISO(), esik = SP.LOAD_RULES.minDay.minutes;
+    const gunler = haftaGunleri();
+    const tutan = gunler.filter(d => U.sum(M.workoutsOf(d).map(w => w.minutes || 0)) >= esik).length;
+    const kayitsiz = gunler.filter(d => d < bugun && !(M.workoutsOf(d).length || S.vitals[d] || M.mealsOf(d).length)).length;
+    const seans = gunler.reduce((n, d) => n + M.workoutsOf(d).length, 0);
+    m.push({ ust:'Bu hafta', sayi:sayi({ deger:tutan + '/7', kesinlik:'computed', zaman:bugun,
+        formul:'en az ' + esik + ' dk hareket edilen gün / 7',
+        girdiler:[{ ad:'Seans kaydı', deger:seans, birim:'seans', kesinlik:'measured' }] }),
+      cumle:'gün hareket.', vurgu:'Asgari gün ' + esik + ' dk.' + (kayitsiz ? ' ' + kayitsiz + ' geçmiş gün kayıtsız.' : ''), sistem:'spi' });
+    return raw(V.donen({ id:'spi-hareket', ad:'Hareket', maddeler:m }));
+  }
+
   /* 081 YOĞUNLUK BÖLGELERİ: son 28 günün seans dakikası, SENİN yazdığın
      zorluğa (1–10) göre dört bantta. Nabız ölçülmediği için bant nabız
      değil zorluk bandıdır; eşikleri kod koyar. Zorluğu yazılmamış seans
@@ -487,7 +520,7 @@ SP.Screens.move = (function(){
      dengesi» eskiden üç sekmede ayrı ayrı çiziliyordu; alt alta durunca
      aynı kart üç kez görünürdü — yalnız Kuvvet'te, kalıpların yanında. */
   const BODIES = {
-    bugun:() => html`${K.Ledger([orderEntry(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), halkaKutusu(), haftaKutusu()])}
+    bugun:() => html`${K.Ledger([DonenHareket(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), orderEntry(), halkaKutusu(), haftaKutusu()])}
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
     ilerleme:() => html`${K.Ledger([
         K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
@@ -628,6 +661,9 @@ SP.Screens.move = (function(){
 
   return {
     id:'move',
+    /* iPhone Faz 2b: iş seansı seçmek ve kaydetmek; emrin ayrıntısı şerit
+       (skoru ve emri dönen «Hareket» kartında). */
+    kucukVarsayilan:['günün-yük-emri'],
     title:'Hareket',
     headline(){
       const rx = SP.Move.prescription();

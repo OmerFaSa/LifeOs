@@ -31,6 +31,8 @@ SP.HINTS = {
     more:'Girdilerden biri eksikse ölçüm hiç yazılmaz. Tahmin edilmez: eksik veri, uydurulmuş veriden iyidir.' },
   'lab-paste':{ t:'Tahlil yapıştırma', b:'Laboratuvar raporunun metnini olduğu gibi yapıştır; değerler ayıklanıp şemaya oturur.',
     more:'Ayıklayıcı satır satır okur, bilinen isim ve kısaltmaları eşler, birimi doğrular. Emin olamadığı satırı atmaz; "eşleşmedi" olarak gösterir ve elle bağlamana izin verir.' },
+  'lab-results':{ t:'Sonuçlar', b:'Bütün ölçümler tek listede, önem sırasına göre: önce bandın dışındakiler.',
+    more:'Sıra: kırmızı bayrak → referans dışı → hedef dışı → hedefte. Sabitlediğin ölçümler listenin başında durur. Bir satıra dokununca referans aralığı, hedef bant ve beslenme bağı açılır.' },
 
   /* --- beslenme --- */
   'macro-target':{ t:'Makro hedefi', b:'Protein kilogram başına, yağ kalori yüzdesi olarak, karbonhidrat kalandan hesaplanır.',
@@ -42,9 +44,13 @@ SP.HINTS = {
   'lab-linked-food':{ t:'Tahlile bağlı reçete', b:'Laboratuvarda düşük çıkan öğe, beslenme hedefini doğrudan değiştirir.',
     more:'Ferritin düşükse demir hedefi yükselir ve C vitamini eşleşmesi zorunlu hâle gelir. D vitamini düşükse yağlı öğünle eşleştirme önerilir. Bu, Modül 1 ile Modül 2 arasındaki tek yönlü bağdır.' },
   'portion':{ t:'Porsiyon tahmini', b:'"1 tabak etli kuru fasulye" yazman yeter; gramaj ev ölçüsü tablosundan gelir.',
-    more:'Tartılmadığı için bu bir tahmindir ve öyle etiketlenir. Tartmak istersen gramı doğrudan yazabilirsin; o zaman "ölçüldü" olur.' },
+    more:'Tanınan ev ölçüleri: tabak, kase, dilim, bardak, avuç, kaşık. Tartılmadığı için bu bir tahmindir ve öyle etiketlenir. Tarttıysan gramı doğrudan yaz («150 g tavuk göğsü»); o zaman "ölçüldü" olur.' },
   'household':{ t:'Hane mutfağı', b:'Tek tencere yemek, her bireyin hedefine göre porsiyon çarpanıyla paylaştırılır.',
-    more:'Herkese ayrı yemek pişirmek sürdürülebilir değildir. Sistem pişen yemeğin 100 gramdaki profilini bilir ve kişi başına düşen porsiyonu hedefe göre büyütür ya da küçültür; farkı yan gıdayla kapatır.' },
+    more:'Herkese ayrı yemek pişirmek sürdürülebilir değildir. Sistem pişen yemeğin 100 gramdaki profilini bilir ve kişi başına düşen porsiyonu hedefe göre büyütür ya da küçültür; farkı yan gıdayla kapatır. Tencerede kaç gram olduğunu bilmiyorsan kaba bir tahmin yeter: paylaştırma oranları değişmez, yalnızca mutlak gramlar ölçeklenir.' },
+  'evdeki':{ t:'Evde ne var?', b:'Evdeki malzemeden hangi ev yemeğinin çıktığı ve neyin eksik kaldığı.',
+    more:'Genel ev usulü malzeme listesine bakılır; miktar ve tarif değildir. Yağ ve tuz sayılmaz. Dil modeli kullanılmaz; listede bulunamayan malzeme «tanınmadı» diye ayrıca yazılır.' },
+  'custom-food':{ t:'Kendi gıdaların', b:'Sistemin tablosunda olmayan bir ürünü ekle.',
+    more:'Ürünün ambalajındaki besin değerleri tablosunu fotoğrafla ya da değerleri elle yaz. Bütün değerler 100 gram içindir; boş bıraktığın alan sıfır sayılmaz. Eklenen gıda öğün girişinde, sepette ve hesaplarda görünür.' },
 
   /* --- hareket --- */
   'load':{ t:'Akut/kronik yük', b:'Son 7 günün ortalama yükü, son 28 günün ortalamasına bölünür.',
@@ -54,7 +60,9 @@ SP.HINTS = {
   'deload':{ t:'Yük indirme haftası', b:'Beş haftada bir toplam yük %40 azaltılır.',
     more:'Kazanç antrenmanda değil, antrenmandan sonraki toparlanmada oluşur. İndirme haftası bir geri adım değil, planın parçasıdır.' },
   'recovery-order':{ t:'Günün yük emri', b:'Toparlanma bandı, planlanan yükün ne kadarının uygulanacağını söyler.',
-    more:'Skor düşükken ağır yük kazanç değil borç üretir. Sistem yükü kendiliğinden azaltır ve nedenini yazar; kararı yine sen verirsin.' },
+    more:'Emri toparlanma belirler, istek değil: sistem yükü kendiliğinden azaltabilir ama asla kendiliğinden artıramaz. Skor düşükken ağır yük kazanç değil borç üretir. Sistem yükü azalttığında nedenini yazar; kararı yine sen verirsin.' },
+  'session-pick':{ t:'Seans seç', b:'Öneri toparlanma bandından gelir; istediğini seçebilirsin.',
+    more:'Önerilen şablonlar günün yük emrine göre seçilir: dinlenme gününde mobilite, hafif günde mobilite ve yürüyüş, azaltılmış günde yürüyüş ve tam vücut, tam yükte tam vücut ve dayanıklılık. İşaretli olan ilk öneridir; seçim senindir.' },
 
   /* --- ekonomi --- */
   'price-estimate':{ t:'Fiyat tahmini', b:'Uygulama market taramaz. Başlangıç fiyatları tahmindir ve öyle işaretlenir.',

@@ -153,25 +153,51 @@ Yapılan (2a, AYS; testler `AYS/src/tests/iphone.test.js` «Faz 2»):
 - **AYS Tekrar:** Due/Borç istatistikleri kalktı (sekme rozeti + uyarı + ⓘ zaten söylüyor);
   gelecek yük, tekrar takvimi, defter alanları gizli; «Dokun veya boşluk tuşuna bas» kalktı.
 
-Sıradaki (2b–2c; ekran görüntüleriyle incelendi, karar verildi — kodu yazılmadı):
+Yapılan (2b, SPİ; testler `SPI/src/tests/iphone.test.js` «Faz 2b», `money.test.js`):
+
+- **SPİ Testler:** Referans bandı gizli (satırlardaki bantların tekrarı); Sonraki kontrol
+  şerit. Sonuçlar tam en (`wide`): satır 700 px'ten geniş kutuda tek satırlık cetveldir, yarım
+  kutuda üç satıra kırılıp «Tamamını göster»e düşüyordu — şimdi yedi ölçüm kesilmeden görünür.
+  «Önem sırasına göre…» ⓘ'de (hints: `lab-results`); kart içindeki ikinci «Test gir» kalktı.
+  Sayfa içi «Sınır» kutusu kalktı; sayfa sonu satırı her ekranda durur ve test edilir
+  (`SP.App.footerHtml` dışa açıldı, AGENTS §1.5).
+- **SPİ Öğün:** dönen «Öğün» kartı (Kalori, Protein; tahlil bağı varsa üçüncü madde). Yenen
+  toplam ev ölçüsünden geldiyse TAHMİN, hepsi tartıldıysa HESAPLANDI; köken kartı dolu.
+  Öğün yokken, gramı olmayan kalemde ve profil eksikken sayı değil cümle; eksik kalem yazılır
+  («3 kalemin gramı yok; toplama girmedi»). Günlük hedef şerit; Tabak ve Öğün çizelgesi gizli.
+  Ev ölçüsü listesi ⓘ'de (hints: `portion`). Yerleşim: sol sütun yazma alanı + günün öğünleri,
+  sağ sütun dönen kart + sık öğünler (1 228 → 1 133 px). «Sık öğünler» kutusu adını içinde
+  ikinci kez yazıyordu; künyesi artık «son 30 gün».
+- **SPİ Mutfak:** açık pişen yemek, paylaştırma, yemeğin kartı (yan yana); Hane, Evde ne var?,
+  Kendi gıdaların şerit; üç açıklama ⓘ'de (hints: `household`, yeni `evdeki`, `custom-food`).
+  Yemeğin kartı 100 gramın değerini «132 / 132 kcal · %100» diye kendi hedefiymiş gibi
+  çiziyordu (aynı sayı iki kez); artık bir kez yazılır, bilinmeyen değer «veri yok» (demiri
+  bilinmeyen yemek «0 / 1 mg» çizilirdi).
+- **SPİ Hareket:** dönen «Hareket» kartı (günün yük emri: toparlanma skoru + bant + yük; bu
+  hafta: asgari dakikayı geçen gün n/7, kayıtsız gün sayısı). Kırmızı/sarı gerekçe (ateş, aşırı
+  yük, indirme haftası) emrin altında söylenir. Günün yük emri şerit; Bu hafta hareket ve
+  Antrenman haftası gizli. İki açıklama ⓘ'de (hints: `recovery-order`, yeni `session-pick`).
+- **SPİ Bütçe:** Bütçenin yeri ve Fiyatlar nereden geliyor? gizli; sınır girilince çıkan
+  Harcama şeritleri şerit. **Hata düzeltildi:** hiçbir kalemin karşılığı bilinmezken talep
+  rozeti «0 TL / ay», sınır kartı «0 / 3.000 TL · Talep aylık sınırın içinde» yazıyordu
+  (AGENTS §1.2) — artık «veri yok» ve «sınıra göre durum hesaplanmadı».
+
+Faz 2b'de görülen, sonraya kalan:
+
+- `tools/envanter.js` dolu SPİ profilinin öğün kalemleri `grams` alanıyla yazılıyor; uygulama
+  gramı `g`'de tutar («Öğün — gram kaybı» testleri). Bu yüzden dolu profilde öğün kartı
+  «0 kcal · veri yok» gösteriyor. Ölçü aracının verisidir, uygulama hatası değil; düzeltilince
+  Öğün'ün boyu değişir (ölçü tabanıyla birlikte ele alınmalı).
+- Çekirdekte gramı olmayan kalem 0 sayılır (`Nutri.contribution`: `Number(grams) || 0`);
+  arayüz gramsız kalem yazmadığı için uykuda. Dönen kart bunu artık dürüstçe söylüyor; öğün
+  kartı hâlâ «0 kcal» yazar.
+- `meals.js` `adviceView` hiçbir yerden çağrılmıyor (eski düzen); içinde sayfa içi sınır kutusu var.
+
+Sıradaki (2c; ekran görüntüleriyle incelendi, karar verildi — kodu yazılmadı):
 
 - **AYS Soru çöz** hâlâ 1 293 px: fotoğraf kutusu alçalsın; «Notun isteğe bağlı — nerede
   takıldığını…» ve «Açılır pencere yok · Enter kaydeder» açıklamaları ⓘ'ye. **AYS Dersler**
   1 238 px (küçük kırpma yeter).
-- **SPİ Testler** (`labs`): «Referans bandı» kartı sonuç satırlarındaki bantların tekrarı →
-  gizli. Sayfa içindeki «Sınır» uyarısı sayfa sonundaki sınır satırının tekrarı → kalkar
-  (sayfa sonu satırı KALIR, AGENTS §1.5). Sonuçlar kartındaki «Önem sırasına göre…» cümlesi
-  ⓘ'ye; kart içindeki «Test gir» sayfa başı eylemini tekrarlıyor. «Sonraki kontrol» şerit.
-- **SPİ Öğün** (`meals`): «Ev ölçüsü tanınır…» açıklaması ⓘ'ye; «Günlük hedef» şerit (ya da
-  dönen kart: kcal/protein ↔ hedef); açık: öğün ekle + günün öğünleri + sık öğünler.
-- **SPİ Mutfak** (`kitchen`, açık 6): açık pişen yemek + paylaştırma + yemeğin besin kartı;
-  Hane, Evde ne var?, Kendi gıdaların şerit; açıklama satırları ⓘ'ye.
-- **SPİ Hareket** (`move`): «Bu hafta hareket» halkaları ile «Antrenman haftası» çubukları
-  AYNI haftayı iki kez gösteriyor → Antrenman haftası gizli. Günün yük emri + bu hafta tek
-  dönen karta dönebilir (yük emri, toparlanma 73, hafta n/7). «Emri toparlanma belirler…» ve
-  «Öneri toparlanma bandından gelir…» açıklamaları ⓘ'ye.
-- **SPİ Bütçe** (`basket`): «Bütçenin yeri» (kural sırası tablosu) ve «Fiyatlar nereden
-  geliyor?» gizli; açık talep tablosu + Sedef'in notu.
 - **ESP Tarih** (`history`): açık şerit + dönemler; yüzyıl boşlukları ve dağılım şerit;
   `note` açıklamaları ⓘ'ye (ESP Merdiven'de yapılan gibi: önce `data/hints.js`'te aynı öğreti
   var mı bak, yoksa hint'e taşı, sonra ekrandan sil).
@@ -200,9 +226,9 @@ Sıradaki (2b–2c; ekran görüntüleriyle incelendi, karar verildi — kodu ya
 | 0 | ✅ ölçü: `acikKart`, `boyHepsi` (ölçüm), envanter.test 13 durum | 2f7df20 | 188 · aşan 22 |
 | 1 | ✅ AYS Hafta · Program · Hedef, ESP Merdiven (SPİ Hedefler zaten bütçede) | 147c177 | 180 · aşan 21 |
 | 6a | ✅ öne alındı: «Bu ekran nasıl okunur» şeridi her ekranda ⓘ kartına taşınır (`kabuk.railBilgiye`, `Gizle.uygula`'dan); terim kaybolmaz | 75a889a | 180 · aşan 21 (boy: Hafta 1 197) |
-| 2a | ✅ AYS Dersler · Soru çöz · Tekrar | (bu commit) | 172 · aşan 19 (AYS 59/5 · SPİ 55/8 · ESP 58/6) |
-| 2b | ⏭ sıradaki: SPİ Testler · Öğün · Mutfak · Hareket · Bütçe (kararlar yukarıda) | — | — |
-| 2c | ⏭ ESP Tarih · Ses · Okuma; AYS Soru çöz/Dersler boy kırpması; sekmelerin elle turu | — | — |
+| 2a | ✅ AYS Dersler · Soru çöz · Tekrar | 1d22ef6 | 172 · aşan 19 (AYS 59/5 · SPİ 55/8 · ESP 58/6) |
+| 2b | ✅ SPİ Testler · Öğün · Mutfak · Hareket · Bütçe (beşi de açık ≤ 3, boy ≤ 1 200); Bütçe «0 TL» hatası | (bu commit) | 161 · aşan 15 (AYS 59/5 · SPİ 44/4 · ESP 58/6) |
+| 2c | ⏭ sıradaki: ESP Tarih · Ses · Okuma; AYS Soru çöz/Dersler boy kırpması; sekmelerin elle turu | — | — |
 
 ## 9. Devir notu — sıradaki oturum buradan başlar
 
@@ -215,7 +241,12 @@ commit'li, denetimler temiz). Sıradaki iş §8'deki ilk ⏭ satırı.
 2. Durum sayıları → `LIFEOS.VITRIN.donen({ id, ad, maddeler:[{ ust, sayi, cumle, vurgu,
    sistem, dugme }] })`; sayı `LIFEOS.SAYI.html({ deger, birim, kesinlik, formul })` ile
    (`measured / computed / estimated`; veri yoksa sayı değil cümle). Örnek:
-   `AYS/src/js/screens/plan.js` `DonenProgram`, `target.js` `DonenHedef`.
+   `AYS/src/js/screens/plan.js` `DonenProgram`, `target.js` `DonenHedef`, SPİ `meals.js`
+   `DonenOgun`, `move.js` `DonenHareket`. Köken kartı (025) alanları: tahminde `kaynak`,
+   hesapta `formul` + `girdiler` + `zaman` — verilmeyen alan «kayıtlı değil» yazar. Cümle ve
+   vurgu TEK satırdır (sığmayan üç noktayla kesilir): her madde tek söz söyler. Dönen kart
+   defterin içinde bir hücredir: yanındaki yarım kartla eşleşir (SPİ Öğün: yazma alanının
+   yanında), geniş kartın önünde tam satır olur (SPİ Hareket).
 3. Başvuru/açıklama/tekrar kartı → `app.js` `SADE_GIZLI[ekran]` (gizli); ara sıra açılan →
    ekranın `kucukVarsayilan`'ı (şerit). Duruma göre değişiyorsa getter: `week.js`,
    `ESP/.../ladder.js`, `subjects.js`. Anahtar `LIFEOS.Gizle.anahtar(başlık)`: Türkçe küçük
@@ -224,9 +255,10 @@ commit'li, denetimler temiz). Sıradaki iş §8'deki ilk ⏭ satırı.
    bak; varsa ekrandan sil, yoksa hint'e taşı (bilgi kaybolmaz, ⓘ'de durur).
 5. Raf iki sütunu DOM sırasıyla ikişer dizer (`.card`/`.lrow` bir hücre, `kutu`/`donen` tam
    satır): yerleşimi sıra belirler (`subjects.js` render örneği).
-6. Test: `AYS/src/tests/iphone.test.js` ya da `ESP/src/tests/iphone.test.js` kalıbı
-   (`bolumle(ekran)` → `acik / kucuk / gizli`); SPİ için `SPI/src/tests/iphone.test.js` açılır
-   ve `tests/index.html`'e eklenir. Önce test, sonra kod.
+6. Test: `AYS/…`, `SPI/…` ya da `ESP/src/tests/iphone.test.js` kalıbı (`bolumle(ekran[,
+   bölüm])` → `acik / kucuk / gizli`; bölümlü ekranda yalnız varsayılan bölüm `#bl-<id>`
+   sayılır). Önce test, sonra kod. Bir vitrin kutusu ancak verisi varsa çizilir (ör. «Sık
+   öğünler» aynı öğün iki günde girilince): testte veriyi kur.
 
 **Denetim sırası** (her faz sonunda; Windows'ta `export PATH="/c/Program Files/nodejs:$PATH"`
 ve `PYTHONIOENCODING=utf-8`): değişen modülde `python build.py` → `node tools/runtests.js`;

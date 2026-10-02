@@ -297,9 +297,16 @@ SP.App = (function(){
      anahtarın gerçek bir bölüme denk geldiği test edilir (sade.test.js). */
   const SADE_GIZLI = {
     gun:['neden-bunlar', 'toparlanma', 'asgari-gün', 'beslenme', 'hkm', 'seri', 'girilen-değerler', 'eğilim', 'hatırlatmalar', 'ofisten', 'bütçe', 'son-iki-hafta', 'taban-çizgin'],
-    labs:['nasıl-okunur', 'sınır', 'hiç-ölçülmemiş-paneller', 'ölçülmemiş', 'dağılım'],
+    labs:['nasıl-okunur', 'sınır', 'hiç-ölçülmemiş-paneller', 'ölçülmemiş', 'dağılım', 'referans-bandı'],
     analytics:['veri-doluluğu', 'raporun-mantığı'],
     guide:['nasıl-kullanılır', 'beş-modül', 'kullanım-hakkı', 'klinik-sınır'],
+    /* iPhone Faz 2b (belgeler/ekip/IPHONE-PLANI.md): tekrar ve başvuru
+       kartları. Tabak, Günlük hedef'in sayılarını kalan gram olarak yeniden
+       çizer; iki hafta kartı dönen «Hareket» kartının haftasını; bütçenin
+       yeri ve fiyat kaynağı sabit başvuru metnidir. */
+    meals:['tabak', 'öğün-çizelgesi'],
+    move:['bu-hafta-hareket', 'antrenman-haftası'],
+    basket:['bütçenin-yeri', 'fiyatlar-nereden-geliyor'],
   };
 
   function sayfaBasiHtml(sc){
@@ -1545,7 +1552,7 @@ SP.App = (function(){
   }
 
   return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, UST, THEMES, installManifest,
-    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
+    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml };
 })();
 
 /* Test paketi bu dosyayı da yükler (ekran sözleşmelerini denetlemek için)

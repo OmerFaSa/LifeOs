@@ -44,9 +44,7 @@ SP.Screens.kitchen = (function(){
           ${K.Field({ label:'Toplam gram',
             input:K.Input({ id:'kitchen-g', type:'number', numeric:true, step:'50', min:100,
               value:S.ui.kitchenGrams, change:'set-grams' }) })}
-        </div>
-        <p class="small muted mt-10">Tencerede kaç gram olduğunu bilmiyorsan kaba bir tahmin yeter:
-          paylaştırma oranları değişmez, yalnızca mutlak gramlar ölçeklenir.</p>`,
+        </div>`,
     });
   }
 
@@ -117,7 +115,7 @@ SP.Screens.kitchen = (function(){
     const okunan = SP.Evdeki.oku(metin);
     const l = metin.trim() ? SP.Evdeki.oner(okunan.var) : [];
     return K.Card({
-      title:'Evde ne var?', sub:'Malzemeyi yaz; hangi yemeğin olduğu ve neyin eksik kaldığı',
+      title:'Evde ne var?', hint:'evdeki', sub:'malzemeden yemek',
       body:html`
         <div class="row gap-6 wrap">
           ${K.Input({ id:'evdeki-q', value:metin, class:'grow', aria:'Evdeki malzemeler',
@@ -134,25 +132,28 @@ SP.Screens.kitchen = (function(){
             html`<b>${r.yemek.name}</b>${when(r.arti.length, () => html`<div class="tiny dim">+ ${r.arti.join(', ')}</div>`)}`,
             r.eksik.length ? 'eksik: ' + r.eksik.join(', ') : 'yapılabilir',
             K.Button({ label:'Seç', size:'sm', act:'evdeki-sec', data:{ 'data-id':r.yemek.id } }),
-          ]) })}</div>`)}
-        <p class="tiny dim mt-10">Genel ev usulü malzeme listesi; miktar ve tarif değil. Yağ ve tuz
-          sayılmaz.</p>`,
+          ]) })}</div>`)}`,
     });
   }
 
+  /* 100 gramın değeri bir hedef değildir: eskiden her biri kendi hedefiymiş
+     gibi «132 / 132 kcal · %100» çiziliyordu (aynı sayı iki kez, anlamsız
+     çubuk). Değer bir kez yazılır; tabloda olmayan değer «veri yok»tur —
+     demiri bilinmeyen yemek «0 mg» değildir (AGENTS §1.2). */
   function dishInfoCard(){
     const f = SP.FOOD_BY_ID[S.ui.kitchenDish || 'kuru-fasulye-etli'];
     if(!f) return null;
     const c = SP.Nutri.contribution(f.id, 100);
+    const deger = (ad, v, birim, basamak) => html`<div class="sidestat">
+      <span class="sidestat__v">${v == null ? '—' : html`${U.fmtNum(U.round(v, basamak))}<small>${birim}</small>`}</span>
+      <span class="sidestat__k">${ad}${v == null ? ' · veri yok' : ''}</span></div>`;
     return K.Card({
       title:f.name, sub:'100 gramda',
       body:html`
         ${raw(UI.macroSplit({ protein:c.protein * 4, fat:c.fat * 9, carb:c.carb * 4 }))}
-        <div class="nutgrid mt-12">
-          ${P.nutCell({ label:'Kalori', got:c.kcal, target:c.kcal, unit:'kcal' })}
-          ${P.nutCell({ label:'Protein', got:c.protein, target:c.protein, unit:'g', digits:1 })}
-          ${P.nutCell({ label:'Lif', got:c.fiber, target:c.fiber, unit:'g', digits:1 })}
-          ${P.nutCell({ label:'Demir', got:c.micro.iron || 0, target:c.micro.iron || 1, unit:'mg', digits:1 })}
+        <div class="pair mt-12">
+          <div>${deger('Kalori', c.kcal, 'kcal', 0)}${deger('Protein', c.protein, 'g', 1)}</div>
+          <div>${deger('Lif', c.fiber, 'g', 1)}${deger('Demir', c.micro.iron, 'mg', 1)}</div>
         </div>
         ${when((f.flags || []).length, () => html`<div class="mt-10">${map(f.flags, fl => {
           const a = SP.ABSORB_FACTORS[fl];
@@ -175,11 +176,8 @@ SP.Screens.kitchen = (function(){
   function customCard(){
     const liste = (S.foods || []);
     return K.Card({
-      title:'Kendi gıdaların', sub:liste.length + ' kayıt',
+      title:'Kendi gıdaların', hint:'custom-food', sub:liste.length + ' kayıt',
       body:html`
-        <p class="small muted">Sistemin tablosunda olmayan bir ürünü ekle:
-          ambalajın besin değerleri tablosunu fotoğrafla ya da değerleri elle yaz.
-          Eklenen gıda öğün girişinde, sepette ve hesaplarda görünür.</p>
         ${when(!liste.length, () => P.empty('Henüz kendi gıdan yok.'))}
         ${when(liste.length, () => html`<div class="list mt-10">${map(liste, f => html`
           <div class="listitem">
@@ -231,10 +229,13 @@ SP.Screens.kitchen = (function(){
     ]));
   }
 
+  /* iPhone Faz 2b: iş tencere ve tabaktır — pişen yemek, paylaştırma ve
+     yemeğin besin kartı açık ve üstte; hane, evdeki malzeme ve kendi
+     gıdaların şerit (dokununca açılır), sonda. */
   async function render(){
     return String(html`
-      ${K.Ledger(() => [setupCard(), splitCard(), memberCard(), evdekiCard(), customCard(),
-        dishInfoCard()].filter(Boolean))}
+      ${K.Ledger(() => [setupCard(), splitCard(), dishInfoCard(), memberCard(), evdekiCard(),
+        customCard()].filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['household', 'portion', 'profiles']))}</div>`);
   }
 
@@ -343,6 +344,7 @@ SP.Screens.kitchen = (function(){
 
   return {
     id:'kitchen',
+    kucukVarsayilan:['hane', 'evde-ne-var', 'kendi-gıdaların'],
     title:'Mutfak',
     headline(){
       const list = SP.Model.householdList();

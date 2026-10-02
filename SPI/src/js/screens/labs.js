@@ -208,16 +208,15 @@ SP.Screens.labs = (function(){
     const last = S.labs.length ? S.labs[S.labs.length - 1] : null;
     const pats = SP.Bio.patterns();
 
+    /* iPhone Faz 2b: sıranın açıklaması ⓘ'de (hints: lab-results); «Test
+       gir» sayfa başında zaten durduğu için kartta ikinci kez yazılmaz.
+       Liste ekranın tek işi: tam en, her ölçüm tek satır (cetvel). */
     return K.Ledger([
       K.Entry({
-        label:'Sonuçlar',
+        label:'Sonuçlar', hint:'lab-results', wide:true,
         meta:total + ' ölçüm' + (last ? ' · ' + U.fmtDate(last.date) : ''),
-        note:'Önem sırasına göre: önce bandın dışındakiler. Bir satıra '
-          + 'tıklayınca referans aralığı, hedef bandı ve beslenme bağı açılır.',
         action:html`${K.Input({ id:'lab-q', value:S.ui.labQuery || '',
           placeholder:'Ölçüm ara…', aria:'Ölçüm ara', change:'lab-query', debounce:200 })}
-          ${K.Button({ label:'Test gir', act:'lab-tab',
-            data:{ 'data-tab':'giris' } })}
           ${K.Button({ label:'Hekime götür', act:'open-doctor' })}`,
         body:html`
           ${when(panelFilter(), () => raw(String(panelFilter())))}
@@ -1259,8 +1258,10 @@ SP.Screens.labs = (function(){
   /* Sekme yok (EKIP-PLANI §1.2): yedi bölüm alt alta; bölüm çubuğu kaydırır.
      Açık kırmızı bayraklar her şeyin üstünde kalır. Bir bölüm çizilemezse
      yalnız o bölüm sakin bir notla düşer. */
+  /* Sınır cümlesi her ekranın sayfa sonunda bir kez durur (app.js
+     footerHtml, AGENTS §1.5); Sonuçlar'ın altında ikinci kez yazılmaz. */
   const BODIES = {
-    sonuc:() => html`${resultsView()}<div class="mt-24">${P.clinicalNote()}</div>`,
+    sonuc:() => resultsView(),
     giris:() => entryView(), gecmis:() => historyView(), kiyas:() => compareView(),
     panel:() => panelView(), ilac:() => medsView(), trend:() => trendView(),
   };
@@ -1582,8 +1583,9 @@ SP.Screens.labs = (function(){
     id:'labs',
     /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
-       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-    kucukVarsayilan:['nasıl-okunur', 'paneller', 'hiç-ölçülmemiş-paneller'],
+       «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik.
+       iPhone Faz 2b: sonraki kontrol ara sira bakilan bir hatirlatmadir. */
+    kucukVarsayilan:['nasıl-okunur', 'paneller', 'hiç-ölçülmemiş-paneller', 'sonraki-kontrol'],
     title:'Testler',
 
     /* Başlık durumun kendisidir: ekranın adı zaten üstte yazıyor. */

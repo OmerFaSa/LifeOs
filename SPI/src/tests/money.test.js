@@ -299,6 +299,28 @@ describe('Bütçe — koçların talebi', () => {
     const b = SP.Money.budget();
     if(b.total > 10) expect(b.over).toBeTruthy();
   });
+
+  /* 2026-10-02 (iPhone Faz 2b turu): hiçbir kalemin karşılığı bilinmezken
+     tablo rozeti «0 TL / ay», sınır kartı «0 / 3.000 TL · Talep aylık sınırın
+     içinde» yazıyordu. Bilinmeyen toplam sıfır değildir (AGENTS §1.2). */
+  it('hiçbir kalemin karşılığı bilinmiyorsa tablo «0 TL» ve sınır kartı «içinde» demez', async () => {
+    resetState();
+    expect(SP.Money.budget().rows.every(r => r.monthly == null)).toBeTruthy();
+    const kart = (d, ad) => Array.from(d.querySelectorAll('.card')).find(c => {
+      const h = c.querySelector('.card__head h3');
+      return h && h.textContent.trim().indexOf(ad) === 0;
+    });
+    const d = document.createElement('div');
+    d.innerHTML = String(await SP.Screens.basket.render());
+    expect(kart(d, 'Talep tablosu').querySelector('.card__head .badge').textContent.trim()).toBe('veri yok');
+
+    SP.S.basket.monthlyLimit = 3000;
+    d.innerHTML = String(await SP.Screens.basket.render());
+    const sinir = kart(d, 'Aylık sınır');
+    expect(sinir.textContent.indexOf('sınırın içinde')).toBe(-1);
+    expect(/(^|\D)0 \//.test(sinir.textContent)).toBe(false);
+    expect(sinir.textContent).toContain('bilinmiyor');
+  });
 });
 
   describe('Money — öğünlerden alışveriş listesi (fikir 30)', () => {
