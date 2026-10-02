@@ -85,7 +85,24 @@ const DURUMLAR = [
     if(!ok) kirmizi++;
     console.log((ok ? '  ✓ ' : '  ✕ ') + d.ad + (ok ? '' : ' (gelen ' + gelen + ': ' + JSON.stringify(r.tekrarlar) + ')'));
   }
+  /* AÇIK KART (iPhone planı §2.2): görünen, başlıklı, en dıştaki bölüm;
+     küçük şerit ve gizli bölüm sayılmaz, iç içe kart bir kez sayılır. */
+  const kart = (ad, ek) => '<section class="kutu' + (ek || '') + '"><header class="kutu__bas"><h3 class="kutu__ad">' + ad + '</h3></header><div class="kutu__govde">x</div></section>';
+  const ACIK = [
+    { ad:'açık kart: üç görünen kart → 3', govde:kart('A') + kart('B') + kart('C'), beklenen:3 },
+    { ad:'açık kart: küçük şerit ve gizli sayılmaz → 1',
+      govde:kart('A') + kart('B', ' gizle-kucuk') + '<section class="kutu" hidden style="display:none"><header class="kutu__bas"><h3 class="kutu__ad">C</h3></header></section>', beklenen:1 },
+    { ad:'açık kart: iç içe kart ve başlıksız kutu sayılmaz → 1',
+      govde:'<div class="card"><div class="card__head"><h3>Dış</h3></div>' + kart('İç') + '</div><section class="kutu"><div>başlıksız</div></section>', beklenen:1 },
+  ];
+  for(const d of ACIK){
+    await p.setContent('<main id="main">' + d.govde + '</main>');
+    const r = await p.evaluate(topla, { SEKME, SEKME_GRUBU });
+    const ok = r.olcu.acikKart === d.beklenen;
+    if(!ok) kirmizi++;
+    console.log((ok ? '  ✓ ' : '  ✕ ') + d.ad + (ok ? '' : ' (gelen ' + r.olcu.acikKart + ')'));
+  }
   await b.close();
-  console.log(kirmizi ? '\n' + kirmizi + ' durum kırmızı.' : '\nÖlçü testi temiz — ' + (DURUMLAR.length + TEKRAR.length + 1) + ' durum.');
+  console.log(kirmizi ? '\n' + kirmizi + ' durum kırmızı.' : '\nÖlçü testi temiz — ' + (DURUMLAR.length + TEKRAR.length + ACIK.length + 1) + ' durum.');
   process.exit(kirmizi ? 1 : 0);
 })().catch(e => { console.error('Koşum hatası:', e && e.stack || e); process.exit(2); });

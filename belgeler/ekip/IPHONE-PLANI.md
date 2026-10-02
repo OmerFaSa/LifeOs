@@ -8,8 +8,9 @@
 
 ## 1. Ölçülen başlangıç (dolu örnek profil, 1440 × 900)
 
-58 ekranda **434 açık kart** (küçük şerit ve gizli hariç); ekran başına ortalama 7,5.
-En kalabalıklar:
+Gezinti betiği 58 ekranda 434 başlıklı kart saydı (kapalı sekmeler dahil). **Araç ölçüsü**
+(§5: görünen, en dıştaki, küçük/gizli olmayan; Rütbe hariç): **188 açık kart, 3'ü aşan 22
+ekran** (AYS 74 / 8 · SPİ 55 / 8 · ESP 59 / 6). En kalabalıklar:
 
 | Ekran | Açık kart | Sayfa boyu |
 |---|---|---|
@@ -124,5 +125,6 @@ Her faz sonunda: üç modülde `runtests` · `smoke` · `layoutcheck` · `a11ych
 
 | Faz | Durum | Commit | Açık kart (toplam) |
 |---|---|---|---|
-| — | başlangıç | c689817 | 434 |
-| 0 | sürüyor | — | — |
+| — | başlangıç (araç) | c689817 | 188 · aşan 22 ekran |
+| 0 | ✅ ölçü: `acikKart`, `boyHepsi` (ölçüm), envanter.test 13 durum | (bu commit) | 188 · aşan 22 |
+| 1 | sürüyor | — | — |

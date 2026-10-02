@@ -400,6 +400,18 @@ function topla(arg){
       if(kelimeSay(c) >= 6) say('cümle', c);
     });
   }));
+  /* AÇIK KART (iPhone planı §2.2, 2026-10-02): görünen, başlıklı, en dıştaki
+     bölüm (sayfa düzeniyle aynı tanım: section.lrow, section.kutu, .card);
+     küçük şerit (gizle-kucuk) ve gizli bölüm sayılmaz. */
+  const KART = 'section.lrow, section.kutu, .card';
+  const KART_BASLIK = ':scope > .lrow__side .lrow__label, :scope > .kutu__bas .kutu__ad, :scope > .card__head h3';
+  let acikKart = 0;
+  main.querySelectorAll(KART).forEach(el => {
+    if(el.parentElement && el.parentElement.closest(KART)) return;
+    if(!el.querySelector(KART_BASLIK) || el.classList.contains('gizle-kucuk') || !ekranda(el)) return;
+    acikKart++;
+  });
+
   const tekrarlar = [];
   let tekrar = 0;
   sayac.forEach((n, k) => { if(n > 1){ tekrar += n - 1; tekrarlar.push(k.replace('|', ': «').slice(0, 90) + '» ×' + n); } });
@@ -429,6 +441,7 @@ function topla(arg){
       mor,
       evetTamam,
       tekrar,
+      acikKart,
       boy: document.documentElement.scrollHeight,
     },
   };

@@ -69,6 +69,11 @@ const KURAL = [
      geldi, uc modulde 0'a inince (2026-10-01) kullanicinin istegiyle
      zorunlu oldu. */
   { ad:'tekrar',       olcu:'tekrar',       en:0, yazi:'aynı ekranda tekrarlanan başlık/cümle' },
+  /* iPhone planı (belgeler/ekip/IPHONE-PLANI.md §5, 2026-10-02): önce ölçüm;
+     bir çekmece bütçeye girince o çekmece için, Faz 7'de hepsi zorunlu.
+     Rütbe ekranları kullanıcı kararıyla olduğu gibi kalır. */
+  { ad:'acikKart',     olcu:'acikKart',     en:3, yazi:'açık kart (iPhone §2.2)', olcum:true, haric:['rutbe'] },
+  { ad:'boyHepsi',     olcu:'boy',          en:1200, yazi:'sayfa boyu px (iPhone §2.3)', olcum:true, haric:['rutbe'] },
   { ad:'boy',          olcu:'boy',          en:1800, yazi:'sayfa boyu (px)', yalniz:['today'] },
   { ad:'dugme',        olcu:'dugme',        en:14, yazi:'görünen düğme', yalniz:['today'] },
 ];
@@ -220,6 +225,11 @@ async function main(){
     if(denetlenir && n) kirmizi += n;
     console.log(ad + (denetlenir ? ' (DENETLENİR — teslim edildi)' : ' (yalnız ölçüm)') + ': '
       + (n ? n + ' bütçe aşımı' : 'bütçede') + ' · ' + Object.keys(olcu).length + ' ekran');
+    /* iPhone planı §5: açık kart toplamı ve 3'ü aşan ekran sayısı (Rütbe hariç). */
+    const rotalar = Object.keys(olcu).filter(r => r !== 'rutbe');
+    const acikToplam = rotalar.reduce((t, r) => t + (olcu[r].acikKart || 0), 0);
+    const asan = rotalar.filter(r => (olcu[r].acikKart || 0) > 3).length;
+    console.log('   iPhone · açık kart ' + acikToplam + ' · üçü aşan ekran ' + asan + ' / ' + rotalar.length);
     ihlal.forEach(x => {
       console.log('   ' + (denetlenir ? '✕' : '·') + ' ' + x.rota + ' · ' + x.kural
         + ' ' + x.deger + ' (en çok ' + x.en + (x.taban != null ? ', taban ' + x.taban : '') + ')');
