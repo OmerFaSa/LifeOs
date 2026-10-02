@@ -99,7 +99,16 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
     if(kabuk.lang !== 'tr') problems.push('kök dil "tr" değil: ' + kabuk.lang);
     if(kabuk.main !== 1) problems.push('tam olarak bir <main> olmalı, ' + kabuk.main + ' var');
     if(!kabuk.nav) problems.push('gezinme yer imi yok');
-    if(!kabuk.footer) problems.push('künye yer imi yok');
+    /* Künye (sayfa sonu) 2026-10-02'den beri yalnız Ayarlar › Genel'in
+       sonunda çizilir (App.sayfaSonuRota, kullanıcı kararı, 02732fb):
+       yer imi orada aranır. İlk sayfada aramak, kararın ardından SPİ ve
+       ESP'de «künye yer imi yok» diye boşuna kırmızı veriyordu. */
+    const kunye = kabuk.footer || await page.evaluate(async () => {
+      await SP.App.go('guide');
+      await new Promise(r => setTimeout(r, 380));
+      return document.querySelectorAll('footer,[role=contentinfo]').length;
+    });
+    if(!kunye) problems.push('künye yer imi yok (Ayarlar › Genel)');
 
     /* ---- her ekran ---- */
     const routes = await page.evaluate(() =>

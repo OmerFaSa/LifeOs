@@ -1,5 +1,43 @@
 # Devir — internet radyosu, tık sesleri, «Animasyonlar» ayarı
 
+> **DURUM (2026-10-02 gece, sonraki oturum): YAPILDI.** Aşağıdaki not olduğu
+> gibi duruyor; yapılanlar ve nottan ayrılan yerler bu kutuda.
+>
+> - **Animasyonlar** (`brand/ortak/animasyon.js`, `<head>`'de stillerden sonra):
+>   Görünüm panelinde Tema'nın altında «Tam · Az · Sistem», varsayılan Tam,
+>   webdriver'da Sistem. Medya kuralları ve `matchMedia` (yalnız hareket
+>   sorgusu) tek dönüştürücüden geçer; `LIFEOS.hareketAz()`. Kenar 64→208 px
+>   Tam'da 0.2 s'de açılır (ölçüldü, tarayıcı «azalt» derken).
+> - **Nottan ayrılan 1 — depo kapılar arasında PAYLAŞILMAZ.** 4173/4183/4193
+>   ayrı köken; «localStorage'da, üç modülde ortak» tek başına çalışmaz.
+>   Çözüm: kabuk `gecis()` adrese `#lifeos=…` ekler (yalnız `lifeos.hareket`,
+>   `lifeos.ses`), varılan sayfa ilk betikte okur, kendi deposuna yazar,
+>   adresten siler. Radyo modül geçişinde devredilir (`SES.devret`): kaynak
+>   sayfanın «çalıyordu» damgası sıfırlanır, Geri tuşuyla dönünce durdurulmuş
+>   müzik kendiliğinden başlamaz. Damga 3 dakikadan eskiyse sürdürülmez.
+> - **Radyo** (`brand/ortak/ses.js` + `ses.css`, üst şeritte zilin solunda ♪,
+>   SVG simge — sadelik «emoji 0»): yedi tür, 2–4 istasyon; HER BİRİ Edge'de
+>   `<audio>` ile çalınarak doğrulandı. Nottan ayrılan 2: Türkçe Rap bulundu
+>   (Power Türk Rap — Power'ın doğrudan icecast yolu `listen.powerapp.com.tr/
+>   <kanal>/mpeg/icecast.audio`; Number 1 Türk Rap). Aynı yoldan Power Türk,
+>   Power Türk Akustik, Power Pop, Power Love; ayrıca Virgin Radio, bigFM US Rap,
+>   bigFM Oldschool Rap. Joy FM https yönlendirmesiyle. Süper FM bazı uç
+>   sunucularda takılıyor → türün sonunda. SomaFM «Headless» kimliği 403 ile
+>   reddeder; gerçek tarayıcıda çalar. Liste tükenirse radio-browser'a bir kez
+>   sorulur (yalnız https, HLS ve mp3/aac dışı elenir). Tür çipine basmak çalar.
+> - **Tık sesleri**: varsayılan kapalı; kapalıyken AudioContext kurulmaz.
+>   «Tamam» notası `#toast-root`'a bildirim düşünce, tıkın ardından.
+> - **Kenar etkisi:** marka girişi (3 sn logo, `brand/seviye/perde.html`)
+>   hareket tercihine bakar; Tam'da artık her açılışta görünür — kullanıcının
+>   «bu logolar sadece» kararıyla şekillenmiş davranış budur. İstenmezse Az.
+> - Testler: `brand/ortak/animasyon.test.js` (6), `radyo.test.js` (18; adı
+>   `ses.test.js` değil — SPİ/ESP'nin konuşma testleri o adda). Yazarken
+>   bulunan iki hata testle kapandı: «dokun» hâlinde paneldeki Çal sürmek
+>   yerine durduruyordu; Geri tuşuyla dönülen modülde durdurulmuş müzik
+>   yeniden başlayabiliyordu (devir).
+> - Ayrıca: SPİ/ESP a11ycheck «künye yer imi yok» HEAD'de (02732fb sonrası)
+>   kırmızıydı; künye yalnız Genel'de çizildiği için denetim orada arıyor.
+>
 > Yazan: Claude Code (masaüstü), 2026-10-02 gece. Kullanıcı: «bunu sonra CLI
 > Claude'a yaz». Kod YAZILMADI; aşağıdaki her şey yapılacak iş + bulgulardır.
 > Son durum commit'li: 02732fb (ayraç animasyonu, sayfa sonu yalnız Genel'de).

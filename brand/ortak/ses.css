@@ -1,0 +1,73 @@
+/* SES — üst şeritteki ♪ düğmesi ve radyo paneli (brand/ortak/ses.js).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/ses.css`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/css/` klasörüne birebir kopyalanır.
+
+   ♪ sağ üstteki öteki simgelerle aynıdır: çerçevesiz yuvarlak, yalnız
+   üzerine gelince zemin alır (kabuk.css «SAĞ ÜST SADE»). Durumu tek küçük
+   nokta söyler: çalıyor (modül rengi, dolu) · bağlanıyor (soluk, nabız) ·
+   dokun, sürsün (halka). Panel kabuğun katmanıdır; telefonda alttan açılır. */
+
+.ust__ses{ position:relative; }
+.ust.ust--v5 .ust__ses{ width:34px; height:34px; padding:0; border:0; border-radius:50%;
+  background:none; box-shadow:none; display:grid; place-items:center; color:var(--text-2);
+  cursor:pointer; transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.ust.ust--v5 .ust__ses:hover{ background:var(--surface); color:var(--text); }
+.ust.ust--v5 .ust__ses .kbk-ic{ width:18px; height:18px; }
+.ust.ust--v5 .ust__ses.is-caliyor, .ust.ust--v5 .ust__ses.is-dokun{ color:var(--text); }
+
+.ust__ses-nokta{ position:absolute; top:7px; right:7px; width:6px; height:6px; border-radius:50%;
+  background:var(--mod, var(--text)); opacity:0; transform:scale(.4); pointer-events:none;
+  transition:opacity var(--dur) var(--ease), transform var(--dur) var(--ease); }
+.ust__ses.is-caliyor .ust__ses-nokta{ opacity:1; transform:none; }
+.ust__ses.is-baglaniyor .ust__ses-nokta{ opacity:.5; transform:none; animation:ses-nabiz 1.2s ease-in-out infinite; }
+.ust__ses.is-dokun .ust__ses-nokta{ opacity:1; transform:none; background:none;
+  box-shadow:inset 0 0 0 1.5px var(--mod, var(--text)); }
+@keyframes ses-nabiz{ 50%{ opacity:.15; } }
+
+@media (max-width:679px){
+  .ust.ust--v5 .ust__ses{ width:36px; height:36px; }
+  .ust__ses-nokta{ top:8px; right:8px; }
+}
+
+/* ---------- panel ---------- */
+.kmenu--ses{ width:min(328px, calc(100vw - 24px)); padding:8px 10px 12px; }
+/* Telefonda öteki katmanlar gibi kenardan kenara (kabuk.css .katman.is-alttan). */
+.kmenu--ses.is-alttan{ width:auto; }
+.kmenu--ses .kmenu__bas{ margin:4px 2px 8px; }
+
+.ses__turler{ display:flex; flex-wrap:wrap; gap:6px; margin:0 0 12px; }
+.ses__tur{ min-height:28px; padding:0 11px; border:0; border-radius:999px;
+  background:var(--surface-2); color:var(--text-2); font:inherit; font-size:12.5px; font-weight:500;
+  cursor:pointer; transition:background var(--dur) var(--ease), color var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+.ses__tur:hover{ color:var(--text); }
+.ses__tur.is-on{ background:var(--surface); color:var(--text); font-weight:600; box-shadow:inset 0 0 0 1.5px var(--text); }
+
+.ses__simdi{ margin:0 2px 10px; min-height:18px; font-size:13px; color:var(--text-2);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ses__simdi.is-caliyor{ color:var(--text); font-weight:500; }
+
+.ses__eylem{ display:flex; gap:8px; margin:0 0 12px; }
+.ses__cal, .ses__sonraki{ display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  min-height:34px; padding:0 14px; border:0; border-radius:999px; font:inherit; font-size:13px; cursor:pointer; }
+.ses__cal{ min-width:96px; background:var(--text); color:var(--surface); font-weight:600; }
+.ses__sonraki{ background:var(--surface-2); color:var(--text); font-weight:500; }
+.ses__sonraki:hover{ background:var(--surface-3, var(--surface-2)); }
+.ses__sim{ width:14px; height:14px; fill:currentColor; flex:none; }
+
+.ses__duzey{ display:flex; align-items:center; gap:10px; margin:0 2px 12px; font-size:13px; color:var(--text-2); }
+.ses__duzey input{ flex:1; min-width:0; min-height:24px; margin:0; accent-color:var(--text); }
+
+.ses__satir{ display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:10px 2px 0; border-top:1px solid var(--border); font-size:13px; color:var(--text); }
+.ses__anahtar{ min-height:28px; min-width:64px; padding:0 12px; border:0; border-radius:999px;
+  background:var(--surface-2); color:var(--text-2); font:inherit; font-size:12.5px; font-weight:500; cursor:pointer; }
+.ses__anahtar[aria-checked="true"]{ background:var(--text); color:var(--surface); font-weight:600; }
+
+.ses__tur:focus-visible, .ses__cal:focus-visible, .ses__sonraki:focus-visible, .ses__anahtar:focus-visible,
+.ust.ust--v5 .ust__ses:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
+@media (prefers-reduced-motion:reduce){
+  .ust__ses.is-baglaniyor .ust__ses-nokta{ animation:none; }
+}

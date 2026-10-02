@@ -248,6 +248,17 @@ DOSYALAR = {
     "gizle.js":       "js/core",
     "gizle.css":      "css",
     "gizle.test.js":  "tests",
+    # ANIMASYONLAR (kullanici, 2026-10-02) — Tam · Az · Sistem. <head>'de,
+    # stillerden SONRA yuklenir: hareket kosullu medya kurallarini ve
+    # matchMedia'yi (yalniz hareket sorgusu) ilk cizimden once ayarlar.
+    "animasyon.js":      "js/core",
+    "animasyon.test.js": "tests",
+    # SES — internet radyosu ve tik sesleri; dugmesi kabugun ust seridinde.
+    # Test adi `ses.test.js` DEGIL: SPI ve ESP'nin kendi ses (konusma)
+    # testleri o adi tasir ve yayim onlarin ustune yazardi.
+    "ses.js":         "js/core",
+    "ses.css":        "css",
+    "radyo.test.js":  "tests",
     "pwa.js":         "js/core",
     "pwa.test.js":    "tests",
     # 167 ana ekran rozeti (pwa.js rozet): pwa.test.js degismesin diye ayri dosya.

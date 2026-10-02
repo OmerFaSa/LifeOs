@@ -43,12 +43,12 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 2248/2248 gecti | 1845/1845 gecti | 1832/1832 gecti |
+| `runtests.js` | 2276/2276 gecti | 1873/1873 gecti | 1860/1860 gecti |
 | `smoke.js` | Duman testi temiz — 2 hedefte 42 ekran, 0 sekme gezildi. | Duman testi temiz — 2 hedefte 32 ekran, 0 sekme gezildi. | Duman testi temiz — 2 hedefte 34 ekran, 0 sekme gezildi. |
 | `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
-| `palettecheck.js` | 120 kontrast ölçümü AA geçti — en dar pay: metin merdiveni sırası 1.03 (asgari 1) — light/kagit/today | 140 kontrast olcumu AA gecti — en dar pay: metin merdiveni sırası 1.03 (asgari 1) — light/kagit/today | 160 kontrast ölçümü AA geçti — en dar pay: metin merdiveni sırası 1.03 (asgari 1) — light/kagit/today |
+| `palettecheck.js` | 110 kontrast ölçümü AA geçti — en dar pay: metin merdiveni sırası 1.03 (asgari 1) — light/kagit/today | 146 kontrast olcumu AA gecti — en dar pay: metin merdiveni sırası 1.03 (asgari 1) — light/kagit/today | 164 kontrast ölçümü AA geçti — en dar pay: metin merdiveni sırası 1.03 (asgari 1) — light/kagit/today |
 | `layoutcheck.js` | Telefon ve tablet düzeni temiz — 390 ve 820 pikselde 42 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon ve tablet düzeni temiz — 390 ve 820 pikselde 32 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon ve tablet düzeni temiz — 390 ve 820 pikselde 34 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 34.7 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı analytics 30.3 ms (bütçe 140). | Bütün ekranlar bütçede — en ağırı office 33.5 ms (bütçe 100). |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 30 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı analytics 34.8 ms (bütçe 140). | Bütün ekranlar bütçede — en ağırı office 41.6 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
 | `designcheck.js` | — | 1 düzen temiz — 104 ekran/genişlik kombinasyonu bakıldı | — |
 | `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
@@ -62,7 +62,7 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 | `marka.py` | marka adlandirma ve yol muhafizi temiz (25 durum) |
 | `marka kunyesi` | Medya kunyesi taze (43 gorsel, 4 aile). |
 | `seviye.py` | Seviye sistemi: uc arayuzde de kaynakla ayni. |
-| `ortak.py` | Ortak kaynak: kopyalar kaynakla ayni (87 dosya, 261 kopya). |
+| `ortak.py` | Ortak kaynak: kopyalar kaynakla ayni (92 dosya, 276 kopya). |
 | `entegre.js` | Butunlesme temiz: uc arayuz de HKM ile konustu, HKM kapaliyken hicbiri bozulmadi. |
 <!-- SAYILAR:bitis -->
 

@@ -434,6 +434,9 @@ R.App = (function(){
     { id:'dark',   icon:'moon2',   label:'Koyu' },
   ];
 
+  /* «Animasyonlar» satiri (Tam · Az · Sistem) ortak dosyadan gelir:
+     brand/ortak/animasyon.js. Olayi orada belge duzeyinde bagli,
+     data-act'e dusmez; secim modul gecisinde tasinir. */
   function appearanceHtml(){
     const p = S.profile || {};
     const theme = p.theme || 'system';
@@ -447,6 +450,8 @@ R.App = (function(){
         </div>
         <div class="appear__label">Tema</div>
         <div class="appear__themes">${R.C.TemaSecici({ value:theme, act:'set-theme' })}</div>
+        <div class="appear__label">Animasyonlar</div>
+        ${raw(window.LIFEOS.ANIMASYON ? LIFEOS.ANIMASYON.seciciHtml() : '')}
 
         <p class="appear__note">Tema bu profile kaydedilir. «Sistem» seçiliyken
           cihazın açık/koyu tercihi izlenir. Tek tasarım: renk modülü söyler.</p>

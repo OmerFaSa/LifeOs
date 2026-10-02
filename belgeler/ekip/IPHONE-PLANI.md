@@ -342,9 +342,17 @@ Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/�
 | kabuk 2 | ✅ başlık çekmecenin adı (Çalışma; bölüm çubukta); sayfa bölümleri bölümlü seçici; kayan işaret (kenar zemini, bölüm noktası, seçici hapı — FLIP; azaltılmış harekette solma); sol üst boş; grafit koyu tema; SPİ 3B kampüs kalktı | a7d051d | 86 · aşan 0 |
 | sade içerik | ✅ SPİ/ESP/HKM AYS'nin diline: nötr uyarı, sınırlı grafik, çerçevesiz seçim kartı, serifsiz vitrin; SPİ/ESP Bugün sade; HKM yüzü (ortalı başlık + ⓘ, çerçevesiz kart, hap, bölümlü seçici, grafit) | 4df9260 | 85 (AYS 26 · SPİ 30 · ESP 29) |
 | koyu son | ✅ Meydan ve giriş paneli grafit; telefonda sağ üst simgeler çerçevesiz | (bu commit) | — |
+| ses · hareket | ✅ «Animasyonlar: Tam · Az · Sistem» (Görünüm; varsayılan Tam, webdriver'da Sistem — Windows'ta animasyon kapalıyken de kenar kayar); üst şeritte ♪ radyo (7 tür, çalınarak doğrulanmış istasyonlar) ve tık sesleri; tercihler modül geçişinde adresle taşınır (kapılar ayrı köken); SPİ/ESP a11y künyeyi Genel'de arar. Ayrıntı: DEVIR-RADYO.md «DURUM» | (bu commit) | — |
 | boy | ⏭ açık iş: 1 200 px'i aşan sayfalar — AYS Dersler 1 238 (raf tabanı), İlerleme 1 516, Ayrıntılı analiz 1 608, Ofis 1 838, Danışma 1 314, Genel 1 557, Günü düzenle 1 748; SPİ Analiz 1 506, Ofis 1 390, Günü düzenle 1 682; ESP Bugün 1 377, Analiz 1 803, Profil 1 286, Günü düzenle 1 525 | — | ölçüm |
 
 ## 9. Devir notu — sıradaki oturum buradan başlar
+
+**Son devir (2026-10-02, 5. oturum, gece):** `DEVIR-RADYO.md`'deki üç iş bitti — internet
+radyosu, tık sesleri, «Animasyonlar» ayarı (ayrıntı ve nottan ayrılan yerler o belgenin
+başındaki DURUM kutusunda). Aşağıdaki «Windows animasyonu kapalı → LifeOS solarak geçer»
+notu ESKİDİ: LifeOS artık kendi ayarına bakar (Görünüm › Animasyonlar, varsayılan Tam).
+Denetim araçları webdriver'da Sistem kipinde ölçer, yani ölçümler değişmedi. Kalan tek
+açık iş yine §8 «boy» satırı.
 
 **Son devir (2026-10-02, 4. oturum, akşam):** kullanıcının beş isteği bitti — sol üst boş,
 başlık çekmecenin adı, iki seçici iki dil (yazı + nokta / bölümlü seçici), kayan işaret ve

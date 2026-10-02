@@ -36,6 +36,8 @@ python3 tools/ortak.py --denetle   # kopyalar kaynakla aynı mı
 | `ayar.*` | `js/core`, `css`, `tests` | T5 ayar ekranları: kaydedilmemiş değişiklik şeridi (21), varsayılana dön (`data-varsayilan`, 182), ayar arama ve tam yol (183), tema önizlemesi (`C.TemaSecici`, 181; açık örnek `--l-*` jetonlarından) |
 | `yenilik.*` | `js/core`, `css`, `tests` | «Ne değişti?» (17): güncellemeden sonraki ilk açılışta sayfanın başında tek kart; ilk kez açana ve kurulumu bitmemişe gösterilmez. Yeni sürümde `SURUM` ve maddeler baştan yazılır |
 | `kilit.*` | `js/core`, `css`, `tests` | gizlilik kilidi (176): açılışta dört haneli kod, çizimden önce; perde, kasa değil (veriyi şifrelemez); «Kodu unuttum» beş dakika sonra kilidi kaldırır ve iz bırakır (Ayarlar yazar; K kararı §8-12) |
+| `animasyon.*` | `js/core`, `tests` | «Animasyonlar: Tam · Az · Sistem» (varsayılan Tam, webdriver'da Sistem): `<head>`'de stillerden sonra yüklenir; hareket koşullu medya kurallarını ve `matchMedia`'yı (yalnız hareket sorgusu) kipe göre ayarlar; `LIFEOS.hareketAz()`. Ortak tercihleri modül geçişinde adresle (`#lifeos=…`) taşır: kapılar ayrı köken |
+| `ses.*`, `radyo.test.js` | `js/core`, `css`, `tests` | internet radyosu (7 tür, doğrudan mp3/aac; ölü akışta sonraki istasyon, tükenirse radio-browser) ve tık sesleri (Web Audio, varsayılan kapalı); ♪ üst şeritte. Test adı `ses.test.js` değil: SPİ/ESP'nin konuşma testleri o adda |
 | `sw.js` | `src/` kökü | çevrimdışı kabuk (service worker): ağ önce, ağ yoksa son kopya; `build.py` `dist/` yanına da koyar |
 
 Kopyalar «ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME» başlığı taşır. Elle
