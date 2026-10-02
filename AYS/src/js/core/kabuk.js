@@ -80,6 +80,7 @@ window.LIFEOS = window.LIFEOS || {};
     ayarlar:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
     ara:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
     bilgi:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><path d="M12 7.6v.1"/>',
+    dahafazla:'<circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/>',
     zil:'<path d="M6.5 16v-4.5a5.5 5.5 0 0 1 11 0V16l1.5 2h-14z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
     kenar:'<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/>',
     gizli:'<rect x="4" y="4.5" width="16" height="5" rx="1.5"/><rect x="4" y="12.5" width="16" height="3" rx="1"/><path d="M4 19.5h7"/>',
@@ -269,12 +270,32 @@ window.LIFEOS = window.LIFEOS || {};
      (kullanıcı, 2026-10-02: «daha animasyonlu açılsın»); aynı çekmecede
      her yeniden çizimde tekrar oynamaz. */
   let sonCekmece = null;
+  /* SAYFA GEÇİŞİ (kullanıcı, 2026-10-02: «sisteme biraz animasyon kat»):
+     sayfa değişince kök `sayfa-gecis` alır ve kartlar sırayla, hafifçe
+     yukarı kayarak belirir (kabuk.css). Aynı sayfanın yeniden çizimi
+     (bir sayaç, bir tik) hareketi tekrar oynatmaz. */
+  let sonSayfa = null, gecisSaati = null;
+  function sayfaGecisi(anahtar){
+    if(anahtar === sonSayfa || typeof document === 'undefined') return;
+    sonSayfa = anahtar;
+    const k = document.documentElement;
+    k.classList.add('sayfa-gecis');
+    if(gecisSaati) clearTimeout(gecisSaati);
+    gecisSaati = setTimeout(() => k.classList.remove('sayfa-gecis'), 900);
+  }
+  /* İKİNCİL ÇEKMECELER (kullanıcı, 2026-10-02: «sol taraftaki seçim
+     kısmındaki kalabalığı azalt»): ara sıra açılan çekmeceler tek «Daha
+     fazla» satırının altında durur; içlerinden birindeyken açık gelir.
+     Hiçbir çekmece kalkmadı; sıra ve adlar aynı (CEKMECELER). */
+  const IKINCIL = ['ofis', 'kutuphane'];
+  let dahaFazlaAcik = false;
   function kenarCubugu(o){
     o = o || {};
     const acik = (o.cekmeceler || []).find(c => c.on);
     const yeniCekmece = !!acik && acik.id !== sonCekmece;
     sonCekmece = acik ? acik.id : null;
-    const cek = (o.cekmeceler || []).map(c => {
+    if(acik) sayfaGecisi(acik.id + ':' + (((acik.bolumler || []).find(b => b.on) || {}).route || acik.route));
+    const cekHtml = c => {
       const sayac = c.sayac ? '<span class="kenar__sayac" data-oz="115" aria-label="' + kac(c.sayac + ' bekleyen') + '">'
         + kac(c.sayac) + '</span>' : '';
       const bol = c.on && (c.bolumler || []).length > 1
@@ -289,7 +310,16 @@ window.LIFEOS = window.LIFEOS || {};
         + '<button class="kenar__cekmece' + (c.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(c.route) + '"'
         + ' data-cekmece="' + kac(c.id) + '" title="' + kac(c.ad) + '"' + (c.on && !(c.bolumler || []).some(b => b.on && b.route !== c.route) ? ' aria-current="page"' : '') + '>'
         + simge(c.id) + '<span class="kenar__ad">' + kac(c.ad) + '</span>' + sayac + '</button>' + bol + '</div>';
-    }).join('');
+    };
+    const tum = o.cekmeceler || [];
+    const ikincilL = tum.filter(c => IKINCIL.indexOf(c.id) >= 0);
+    const dfAcik = dahaFazlaAcik || ikincilL.some(c => c.on);
+    const cek = tum.filter(c => IKINCIL.indexOf(c.id) < 0).map(cekHtml).join('')
+      + (ikincilL.length ? '<div class="kenar__dahafazla' + (dfAcik ? ' is-acik' : '') + '">'
+        + '<div class="kenar__cekmece-kap"><button type="button" class="kenar__cekmece kenar__dahafazla-dugme" aria-expanded="' + (dfAcik ? 'true' : 'false') + '"'
+        +   ' aria-controls="kenar-dahafazla" title="Daha fazla">' + simge('dahafazla') + '<span class="kenar__ad">Daha fazla</span></button></div>'
+        + '<div class="kenar__dahafazla-liste" id="kenar-dahafazla"' + (dfAcik ? '' : ' hidden') + '>' + ikincilL.map(cekHtml).join('') + '</div>'
+        + '</div>' : '');
     const b = o.baglanti || {};
     const d = b.durum || 'kapali';
     const bagMetin = d === 'bagli' ? 'Merkez bağlı' : d === 'ulasilamadi' ? 'Merkeze ulaşılamadı'
@@ -736,6 +766,18 @@ window.LIFEOS = window.LIFEOS || {};
         return;
       }
       if(!(e.target.closest && e.target.closest('.kenar__modulpencere'))) modulPencereKapat();
+      /* «Daha fazla»: ikincil çekmeceleri açar/kapatır; seçim yeniden
+         çizimde korunur. */
+      const df = e.target.closest && e.target.closest('.kenar__dahafazla-dugme');
+      if(df){
+        const kap = df.closest('.kenar__dahafazla');
+        const liste = kap.querySelector('.kenar__dahafazla-liste');
+        dahaFazlaAcik = liste.hidden;
+        liste.hidden = !dahaFazlaAcik;
+        kap.classList.toggle('is-acik', dahaFazlaAcik);
+        df.setAttribute('aria-expanded', dahaFazlaAcik ? 'true' : 'false');
+        return;
+      }
       const k = e.target.closest && e.target.closest('[data-kenar-ac]');
       if(k){ e.preventDefault(); kenarDar(); return; }
       const a = e.target.closest && e.target.closest('a[data-modul-gecis]');

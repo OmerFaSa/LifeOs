@@ -17,7 +17,7 @@ R.Palette = (function(){
     const go = (id, label, icon, group) => ({ group, label, icon, route:id, run(){ R.App.go(id); } });
 
     list.push(go('today','Bugün','today','Git'));
-    list.push(go('week','Hafta — sözleşme ve review','week','Git'));
+    list.push(go('week','Hafta — sözleşme ve değerlendirme','week','Git'));
     list.push(go('learn','Öğrenme — video ve ders notu','play','Git'));
     list.push(go('exams','Deneme','exam','Git'));
     list.push(go('quiz','Sınama — kendini test et','zap','Git'));
@@ -37,7 +37,7 @@ R.Palette = (function(){
     list.push({ group:'Kayıt', label:'Ders ekle (video / not)', icon:'plus', route:'learn', run(){ R.App.go('learn'); setTimeout(()=>R.Screens.learn.handle['note-new']({dataset:{}}), 60); } });
     list.push({ group:'Kayıt', label:'Süreli deneme oturumu', icon:'clock', run(){ R.App.go('exams'); setTimeout(()=>R.Screens.exams.handle['run-open']({dataset:{}}), 60); } });
     list.push({ group:'Kayıt', label:'Sınamayı başlat', icon:'play', route:'quiz', run(){ R.App.go('quiz'); setTimeout(()=>R.Screens.quiz.handle['quiz-start']({dataset:{}}), 60); } });
-    list.push({ group:'Kayıt', label:'Weekly review’u aç', icon:'check', hint:'Paz', run(){ R.App.go('week'); setTimeout(()=>R.Screens.week.openReview(), 60); } });
+    list.push({ group:'Kayıt', label:'Haftalık değerlendirmeyi aç', icon:'check', hint:'Paz', run(){ R.App.go('week'); setTimeout(()=>R.Screens.week.openReview(), 60); } });
 
     const day = S.days[U.todayISO()];
     if(day){

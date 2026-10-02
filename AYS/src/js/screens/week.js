@@ -55,25 +55,26 @@ R.Screens.week = (function(){
 
   /* ---------- sozlesme ---------- */
 
+  /* SADE (kullanıcı, 2026-10-02: «çok uzun, çok büyük»): her konu üç
+     satırlık ayrı bir kart değil, TEK SATIR. Sütun adları listenin üstünde
+     bir kez yazılır; her alan erişilebilir adını kendisi taşır. Telefonda
+     ad üst satırda, sayılar ve ders altında. */
   function TopicRow(t, i, signed, count){
     const subjectOpts = [{ value:'', label:'— ders —' }].concat(R.SUBJECTS.map(s => ({ value:s.id, label:s.name })));
-    const num = (label, change, value) => K.Field({ label,
-      input:K.Input({ type:'number', size:'sm', numeric:true, value, disabled:signed, change, data:{ 'data-i':i } }) });
-
-    return K.Card({ flat:true, pad:'sm', class:'stack-sm', body:html`
-      <div class="row gap-8">
-        <span class="topicrow__order">${i+1}</span>
-        ${K.Input({ class:'grow', value:t.name, aria:'konu adı', disabled:signed,
-          change:'topic-name', data:{ 'data-i':i } })}
-        ${when(count > 1 && !signed, () => K.IconButton({ icon:'close', size:'sm', plain:true,
-          aria:'konuyu kaldır', act:'topic-remove', data:{ 'data-i':i } }))}
-      </div>
-      ${K.Cols(3, [
-        num('Soru hedefi', 'topic-q', t.questionTarget),
-        num('Doğruluk %', 'topic-acc', t.accuracy),
-        K.Field({ label:'Ders', input:K.Select({ options:subjectOpts, value:t.subjectId || '', size:'sm',
-          disabled:signed, change:'topic-subject', data:{ 'data-i':i } }) }),
-      ])}` });
+    const ad = (t.name || (i + 1) + '. konu');
+    const num = (aria, change, value) => K.Input({ type:'number', size:'sm', numeric:true, value, aria:ad + ' — ' + aria,
+      disabled:signed, change, data:{ 'data-i':i } });
+    return html`<div class="konusatir">
+      <span class="topicrow__order">${i+1}</span>
+      ${K.Input({ class:'konusatir__ad', size:'sm', value:t.name, aria:'konu adı', disabled:signed,
+        change:'topic-name', data:{ 'data-i':i } })}
+      ${num('soru hedefi', 'topic-q', t.questionTarget)}
+      ${num('doğruluk yüzdesi', 'topic-acc', t.accuracy)}
+      ${K.Select({ options:subjectOpts, value:t.subjectId || '', size:'sm', aria:ad + ' — ders',
+        disabled:signed, change:'topic-subject', data:{ 'data-i':i } })}
+      ${count > 1 && !signed ? K.IconButton({ icon:'close', size:'sm', plain:true,
+        aria:'konuyu kaldır', act:'topic-remove', data:{ 'data-i':i } }) : html`<span></span>`}
+    </div>`;
   }
 
   function contractCard(week, n){
@@ -86,7 +87,10 @@ R.Screens.week = (function(){
       title:'Haftalık sözleşme', hint:'contract', sub:'En fazla ' + konuSiniri() + ' ana konu, çıktı temelli hedef',
       badge:signed ? K.Badge({ label:'İmzalandı', tone:'ok' }) : K.Badge({ label:'İmza bekliyor', tone:'warn' }),
       body:html`
-        ${K.Stack(map(week.mainTopics, (t, i) => TopicRow(t, i, signed, week.mainTopics.length)), 'sm')}
+        <div class="konuliste">
+          <div class="konusatir konusatir--bas" aria-hidden="true"><span></span><span>Konu</span><span>Soru</span><span>Doğruluk %</span><span>Ders</span><span></span></div>
+          ${map(week.mainTopics, (t, i) => TopicRow(t, i, signed, week.mainTopics.length))}
+        </div>
         ${when(!signed && week.mainTopics.length < konuSiniri(), () => K.Button({ label:'Konu ekle', icon:'plus',
           size:'sm', class:'mt-8', act:'topic-add' }))}
 
@@ -130,7 +134,7 @@ R.Screens.week = (function(){
     const reasons = C.skipReasonCounts(n);
 
     return K.Card({
-      title:'Weekly review', hint:'review', sub:'Pazar · 30–40 dakika',
+      title:'Haftalık değerlendirme', hint:'review', sub:'Pazar · 30–40 dakika',
       badge:rev ? K.Badge({ label:'tamamlandı', tone:'ok' }) : K.Badge({ label:'bekliyor', tone:'muted' }),
       body:html`
         <div class="cols-2 mb-10">
@@ -140,7 +144,7 @@ R.Screens.week = (function(){
         </div>
         ${reasonChips(reasons) || html`<p class="small dim">Bu hafta atlanan blok yok.</p>`}
         ${when(rev && rev.decision, () => html`<div class="mt-10">${K.Notice({ tone:'ok', title:'Düzeltme:', body:rev.decision })}</div>`)}
-        ${K.Button({ label:rev ? 'Review’u güncelle' : 'Review’u doldur', block:true,
+        ${K.Button({ label:rev ? 'Değerlendirmeyi güncelle' : 'Değerlendirmeyi doldur', block:true,
           class:'mt-12', act:'open-review' })}`,
     });
   }
@@ -181,7 +185,7 @@ R.Screens.week = (function(){
     if(!lines.length) lines.push('Bu hafta için kayda değer sapma yok.');
 
     return K.Card({
-      title:'Hafta özeti', sub:'Review yazmadan önce buna bak',
+      title:'Hafta özeti', sub:'Değerlendirmeden önce buna bak',
       badge:comp == null ? null : K.Badge({ label:'%'+comp,
         tone:comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' }),
       body:html`<div class="rapor-govde">
@@ -236,7 +240,7 @@ R.Screens.week = (function(){
     ]);
 
     UI.sheet({
-      title:'Weekly review — Hafta '+n,
+      title:'Haftalık değerlendirme — Hafta '+n,
       subtitle:U.fmtRange(M.weekStart(n), M.weekEnd(n)),
       body:String(body),
       footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
@@ -589,7 +593,7 @@ R.Screens.week = (function(){
         title:'Sözleşmeyi revize et',
         body:String(html`
           ${K.Notice({ tone:'info', body:'İmzalı bir hafta değiştirildiğinde neden kaydedilir; '
-            + 'bu, sonraki review’da sapma analizini mümkün kılar.' })}
+            + 'bu, sonraki değerlendirmede sapma analizini mümkün kılar.' })}
           ${K.Field({ label:'Revizyon nedeni', input:K.Textarea({ id:'rev-reason', rows:2,
             placeholder:'ör. hastalık nedeniyle soru hedefi %20 azaltıldı' }) })}`),
         footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
@@ -687,16 +691,23 @@ R.Screens.week = (function(){
     },
   };
 
+  /* SADE (kullanıcı, 2026-10-02: «çok uzun, çok büyük, gereksiz»): her hafta
+     kullanılan bölümler açık (gün şeridi, sözleşme, kapsam, hafta özeti,
+     değerlendirme); ara sıra bakılanlar baştan küçük gelir — başlık kalır,
+     dokununca açılır, açılırsa açık kalır (brand/ortak/gizle.js). */
+  const KUCUK = ['plan-tamamlama-geçmişi', 'sınava-kadar', 'plan-ızgarası', 'planın-şekli', 'müfredat-referansı'];
+
   return {
     id:'week',
     title:'Hafta',
+    kucukVarsayilan:KUCUK,
     subtitle(){
       const n = viewN();
       return 'Hafta '+n+'/'+R.PLAN.totalWeeks+' · '+U.fmtRange(M.weekStart(n), M.weekEnd(n));
     },
-    actions(){
-      return String(K.Button({ label:'Weekly review', icon:'check', size:'sm', act:'open-review' }));
-    },
+    /* Değerlendirme düğmesi kartın içinde («Değerlendirmeyi doldur»);
+       sayfa başı sade kalır. */
+    actions(){ return ''; },
     render, handle, change, openReview, sureOner,
   };
 })();

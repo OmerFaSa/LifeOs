@@ -91,6 +91,31 @@
       expect(yeniMi(ciz('plan'))).toBe(false);
     });
 
+    /* Kullanıcı (2026-10-02): «sol taraftaki seçim kısmındaki kalabalığı
+       azalt». Ofis ve Kütüphanem «Daha fazla»nın altında; içlerinden
+       birindeyken açık gelir; hiçbir çekmece kalkmaz. */
+    it('sade: ikincil çekmeceler «Daha fazla» altında; içlerindeyken açık; hiçbiri kalkmaz', () => {
+      const cek = on => K.CEKMECELER.map(c => ({ id:c.id, ad:c.ad, route:c.id, on:c.id === on }));
+      const say = d => d.querySelectorAll('[data-cekmece]').length;
+      let d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:cek('bugun') }) + '</div>');
+      try{
+        expect(say(d)).toBe(K.CEKMECELER.length);
+        const liste = d.querySelector('.kenar__dahafazla-liste');
+        expect(liste.hidden).toBe(true);
+        expect(Array.from(liste.querySelectorAll('[data-cekmece]')).map(x => x.dataset.cekmece).join(',')).toBe('ofis,kutuphane');
+        const dg = d.querySelector('.kenar__dahafazla-dugme');
+        dg.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
+        expect(liste.hidden).toBe(false);
+        expect(dg.getAttribute('aria-expanded')).toBe('true');
+        dg.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
+        expect(liste.hidden).toBe(true);
+      }finally{ d.remove(); }
+      d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:cek('ofis') }) + '</div>');
+      try{
+        expect(d.querySelector('.kenar__dahafazla-liste').hidden).toBe(false);
+      }finally{ d.remove(); }
+    });
+
     it('sade: kenar varsayılan olarak dar; yalnız kalıcı açılan açık kalır', () => {
       expect(K.kenarIlkDar(null)).toBe(true);
       expect(K.kenarIlkDar('dar')).toBe(true);

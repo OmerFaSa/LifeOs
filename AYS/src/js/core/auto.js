@@ -216,7 +216,7 @@ R.Auto = (function(){
     if(dow === 6 && !S.reviews[M.weekId(n)]){
       out.push({
         id:'close-week', icon:'check', title:'Haftayı kapat',
-        why:'Pazar review’u 30–40 dakika. Sistem özeti hazırladı; sen dört sütunu doldur.',
+        why:'Pazar değerlendirmesi 30–40 dakika. Sistem özeti hazırladı; sen dört sütunu doldur.',
         act:'auto-close-week', tone:'primary',
       });
     }

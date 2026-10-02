@@ -291,7 +291,7 @@ R.Screens.today = (function(){
       ? c.Button({ label:'Haftalık sözleşmeyi aç', tone:'primary', block:true, act:'go', data:{ 'data-route':'week' } })
       : ritual === 'exam'
         ? c.Button({ label:'Deneme ekle', tone:'primary', block:true, act:'go', data:{ 'data-route':'exams' } })
-        : c.Button({ label:'Weekly review’u aç', tone:'primary', block:true, act:'open-review' });
+        : c.Button({ label:'Haftalık değerlendirmeyi aç', tone:'primary', block:true, act:'open-review' });
 
     return c.Card({ title:list.label, sub:'Bugünün ritüeli', body:html`
       <div class="stack-xs">

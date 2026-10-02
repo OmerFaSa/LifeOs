@@ -1012,8 +1012,10 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
   opacity:0; transform:translateY(10px); pointer-events:none; visibility:hidden;
   transition:opacity .5s var(--ease), transform .5s var(--ease), visibility 0s linear .5s; }
 .donen__madde.is-on{ opacity:1; transform:none; pointer-events:auto; visibility:visible;
-  transition:opacity .5s var(--ease), transform .5s var(--ease), visibility 0s; }
-.donen__madde.is-cikis{ opacity:0; transform:translateY(-10px); visibility:visible; }
+  transition:opacity .42s var(--ease) .18s, transform .42s var(--ease) .18s, visibility 0s; }
+/* Önce eskisi söner, sonra yenisi gelir: iki cümle üst üste binmez. */
+.donen__madde.is-cikis{ opacity:0; transform:translateY(-8px); visibility:visible;
+  transition:opacity .18s var(--ease), transform .18s var(--ease); }
 .donen__bas{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; min-height:24px; }
 .donen__ust{ margin:0; font-size:12.5px; font-weight:500; color:var(--text-3); }
 /* iOS widget'ı gibi: üstte büyük sayı ve kısa söz, altında tek satır gri
@@ -1042,4 +1044,54 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
 .donen__dur svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
 .donen.is-dur .donen__dur svg path{ d:path("M8 6l10 6-10 6z"); }
 @media (prefers-reduced-motion:reduce){ .donen__madde, .donen__nokta{ transition:none; } .donen__dur{ display:none; } }
+
+/* ================================================================
+   KENAR SADE (2026-10-02): «LifeOS» marka düğmesi sistem seçiciyle aynı işi
+   yapıyordu; görünmez (DOM'da kalır, telefon menüsü ve kısayol onu kullanır).
+   İkincil çekmeceler «Daha fazla»nın altında; dipteki Merkez satırı tek
+   satır (alt yazı yalnız ekran okuyucuda).
+   ================================================================ */
+@media (min-width:680px){
+  .site--v5 .kenar__marka{ display:none; }
+  .kenar__bag small{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
+  .kenar__bag b, .kenar__rutbe b{ font-weight:500; }
+  .kenar__bag, .kenar__rutbe{ font-size:12.5px; color:var(--text-3); }
+  .kenar__dip{ border-top:0; gap:0; }
+}
+.kenar__dahafazla-dugme{ color:var(--text-3); }
+.kenar__dahafazla-liste{ display:flex; flex-direction:column; gap:2px; }
+.kenar__dahafazla-liste:not([hidden]){ animation:kenar-bolum-gir var(--dur-lg) var(--ease) both; }
+
+/* SAYFA GEÇİŞİ (2026-10-02): yalnız sayfa değişince; kartlar sırayla,
+   hafifçe yukarı kayarak belirir. Aynı sayfanın yeniden çizimi oynatmaz. */
+@keyframes sayfa-gir{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+html.sayfa-gecis .site--v5 .sayfabasi{ animation:sayfa-gir var(--dur-lg) var(--ease) both; }
+html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .bolumcubugu){
+  animation:sayfa-gir 460ms var(--ease) both; }
+html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(2){ animation-delay:50ms; }
+html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(3){ animation-delay:100ms; }
+html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(4){ animation-delay:150ms; }
+html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(n+5){ animation-delay:200ms; }
+@media (prefers-reduced-motion:reduce){
+  html.sayfa-gecis .site--v5 .sayfabasi,
+  html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .bolumcubugu),
+  .kenar__dahafazla-liste:not([hidden]){ animation:none; }
+}
+
+/* Grafik ölçülü: üç çubuk yarım ekran kaplamaz. */
+svg.chart{ max-height:180px; }
+
+/* VİTRİN ETİKETLERİ SAKİN (2026-10-02): katalog kartlarının eş aralıklı
+   etiket yazısı («38 HAFTA KALDI», «TAHMİN») sade dile uymuyordu. Yazı
+   tipi gövdeninki; rakamlar yine tablo hizalı. vitrin.css üretilir
+   (tools/vitrin.py) — burada yalnız değişkeni bağlanır. */
+.vk{ --vk-mono:var(--font-body); }
+.vk .mono{ font-variant-numeric:tabular-nums; }
+
+/* Küçük bölüm şeritleri (sayfa düzeni) eşit ve sakin: aynı yazı boyutu,
+   tek ok (soldaki), sağdaki «Aç» düğmesi yalnız üzerine gelince. */
+.gizle-kucuk .lrow__label, .gizle-kucuk .kutu__ad, .gizle-kucuk .card__head h3{ font-size:14px; font-weight:500; letter-spacing:0; }
+.gizle-kucuk .kutu__bas{ padding-top:12px; padding-bottom:12px; }
+.gizle-kucuk .gizle-araclar{ opacity:0; transition:opacity var(--dur) var(--ease); }
+.gizle-kucuk:hover .gizle-araclar, .gizle-kucuk:focus-within .gizle-araclar{ opacity:1; }
 

@@ -215,6 +215,25 @@
       });
     });
 
+    /* Hafta sade (2026-10-02): ara sıra bakılan bölümler baştan küçük. Anahtar
+       yanlış yazılırsa bölüm sessizce açık kalırdı: her anahtar gerçek bir
+       bölüme denk gelmeli. */
+    it('sadelik: Hafta\u2019nın baştan küçük bölümleri gerçek bölümlere denk gelir', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const kok = document.createElement('div');
+        kok.innerHTML = String(await R.Screens.week.render());
+        document.body.appendChild(kok);
+        try{
+          const G = window.LIFEOS.Gizle;
+          const var_ = G.bolumler(kok).map(b => b.anahtar);
+          (R.Screens.week.kucukVarsayilan || []).forEach(a => expect(var_.indexOf(a) >= 0).toBe(true));
+          expect((R.Screens.week.kucukVarsayilan || []).length >= 4).toBe(true);
+          expect(String(R.Screens.week.actions())).toBe('');
+        }finally{ kok.remove(); }
+      });
+    });
+
     it('oz-042 kurulum bitmemişse kahraman yerine kurulum kartı', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();

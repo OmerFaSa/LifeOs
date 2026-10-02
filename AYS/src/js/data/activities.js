@@ -47,7 +47,7 @@ R.ACTIVITIES = [
   { id:'draw',         name:'Çizim / karalama',        minutes:10, energy:'low',  kind:'yaratici',
     note:'İyi çizmek gerekmiyor. Elin başka bir iş yapması dikkati tazeler.' },
   { id:'write',        name:'Serbest yazı',            minutes:10, energy:'low',  kind:'yaratici',
-    note:'Günün nasıl geçtiğini üç cümleyle yaz. Pazar review’unda işine yarar.' },
+    note:'Günün nasıl geçtiğini üç cümleyle yaz. Pazar değerlendirmesinde işine yarar.' },
   { id:'cook',         name:'Bir şeyler hazırla',      minutes:15, energy:'mid',  kind:'yaratici',
     note:'Çay, meyve, basit bir atıştırmalık. Ayakta geçen 15 dakika.' },
   { id:'music',        name:'Sözsüz müzik dinle',      minutes:10, energy:'low',  kind:'yaratici',

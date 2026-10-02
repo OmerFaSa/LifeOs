@@ -605,7 +605,7 @@ R.Calc = (function(){
     }
     if(!beforeStart && dow === 6 && !S.reviews[M.weekId(n)]){
       return { key:'review', icon:'check', label:'Pazar ritüeli',
-        title:'Weekly review’u doldur',
+        title:'Haftalık değerlendirmeyi doldur',
         why:'Planlandı / yapıldı / neden sapıldı / düzeltme — 30–40 dakika.',
         route:'week', act:'open-review', tone:'ritual' };
     }

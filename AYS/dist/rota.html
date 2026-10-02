@@ -10491,6 +10491,23 @@ tbody tr:hover{ background:var(--surface-2); }
 .cardsgrid{ display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:20px; align-items:start; }
 @media (max-width:900px){ .cardsgrid{ grid-template-columns:minmax(0,1fr); } }
 
+/* Haftalık sözleşme: konu başına tek satır (2026-10-02, «çok uzun, çok büyük»). */
+.konuliste{ display:flex; flex-direction:column; }
+.konusatir{ display:grid; grid-template-columns:24px minmax(0,1fr) 88px 88px 160px 28px; gap:8px; align-items:center;
+  padding:6px 0; border-bottom:1px solid var(--border-soft); }
+.konusatir:last-child{ border-bottom:0; }
+.konusatir--bas{ padding:0 0 2px; border-bottom:0; font-size:12px; color:var(--text-3); }
+.konusatir .input, .konusatir .select{ min-width:0; }
+@media (max-width:679px){
+  .konusatir{ grid-template-columns:24px minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr) 28px; row-gap:6px; }
+  .konusatir--bas{ display:none; }
+  .konusatir > .konusatir__ad{ grid-column:2 / 5; grid-row:1; }
+  .konusatir > :nth-child(6){ grid-column:5; grid-row:1; }
+  .konusatir > :nth-child(3){ grid-column:2; grid-row:2; }
+  .konusatir > :nth-child(4){ grid-column:3; grid-row:2; }
+  .konusatir > :nth-child(5){ grid-column:4; grid-row:2; }
+}
+
 /* ==== css/kabuk.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/kabuk.css içine yazılır; burası bir sonraki
@@ -11506,8 +11523,10 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
   opacity:0; transform:translateY(10px); pointer-events:none; visibility:hidden;
   transition:opacity .5s var(--ease), transform .5s var(--ease), visibility 0s linear .5s; }
 .donen__madde.is-on{ opacity:1; transform:none; pointer-events:auto; visibility:visible;
-  transition:opacity .5s var(--ease), transform .5s var(--ease), visibility 0s; }
-.donen__madde.is-cikis{ opacity:0; transform:translateY(-10px); visibility:visible; }
+  transition:opacity .42s var(--ease) .18s, transform .42s var(--ease) .18s, visibility 0s; }
+/* Önce eskisi söner, sonra yenisi gelir: iki cümle üst üste binmez. */
+.donen__madde.is-cikis{ opacity:0; transform:translateY(-8px); visibility:visible;
+  transition:opacity .18s var(--ease), transform .18s var(--ease); }
 .donen__bas{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; min-height:24px; }
 .donen__ust{ margin:0; font-size:12.5px; font-weight:500; color:var(--text-3); }
 /* iOS widget'ı gibi: üstte büyük sayı ve kısa söz, altında tek satır gri
@@ -11536,6 +11555,56 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
 .donen__dur svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
 .donen.is-dur .donen__dur svg path{ d:path("M8 6l10 6-10 6z"); }
 @media (prefers-reduced-motion:reduce){ .donen__madde, .donen__nokta{ transition:none; } .donen__dur{ display:none; } }
+
+/* ================================================================
+   KENAR SADE (2026-10-02): «LifeOS» marka düğmesi sistem seçiciyle aynı işi
+   yapıyordu; görünmez (DOM'da kalır, telefon menüsü ve kısayol onu kullanır).
+   İkincil çekmeceler «Daha fazla»nın altında; dipteki Merkez satırı tek
+   satır (alt yazı yalnız ekran okuyucuda).
+   ================================================================ */
+@media (min-width:680px){
+  .site--v5 .kenar__marka{ display:none; }
+  .kenar__bag small{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; }
+  .kenar__bag b, .kenar__rutbe b{ font-weight:500; }
+  .kenar__bag, .kenar__rutbe{ font-size:12.5px; color:var(--text-3); }
+  .kenar__dip{ border-top:0; gap:0; }
+}
+.kenar__dahafazla-dugme{ color:var(--text-3); }
+.kenar__dahafazla-liste{ display:flex; flex-direction:column; gap:2px; }
+.kenar__dahafazla-liste:not([hidden]){ animation:kenar-bolum-gir var(--dur-lg) var(--ease) both; }
+
+/* SAYFA GEÇİŞİ (2026-10-02): yalnız sayfa değişince; kartlar sırayla,
+   hafifçe yukarı kayarak belirir. Aynı sayfanın yeniden çizimi oynatmaz. */
+@keyframes sayfa-gir{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+html.sayfa-gecis .site--v5 .sayfabasi{ animation:sayfa-gir var(--dur-lg) var(--ease) both; }
+html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .bolumcubugu){
+  animation:sayfa-gir 460ms var(--ease) both; }
+html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(2){ animation-delay:50ms; }
+html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(3){ animation-delay:100ms; }
+html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(4){ animation-delay:150ms; }
+html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar):nth-child(n+5){ animation-delay:200ms; }
+@media (prefers-reduced-motion:reduce){
+  html.sayfa-gecis .site--v5 .sayfabasi,
+  html.sayfa-gecis .site--v5 #main :is(.kutu, .card, .donen, .kahraman, .notice, .okart-sar, .bolumcubugu),
+  .kenar__dahafazla-liste:not([hidden]){ animation:none; }
+}
+
+/* Grafik ölçülü: üç çubuk yarım ekran kaplamaz. */
+svg.chart{ max-height:180px; }
+
+/* VİTRİN ETİKETLERİ SAKİN (2026-10-02): katalog kartlarının eş aralıklı
+   etiket yazısı («38 HAFTA KALDI», «TAHMİN») sade dile uymuyordu. Yazı
+   tipi gövdeninki; rakamlar yine tablo hizalı. vitrin.css üretilir
+   (tools/vitrin.py) — burada yalnız değişkeni bağlanır. */
+.vk{ --vk-mono:var(--font-body); }
+.vk .mono{ font-variant-numeric:tabular-nums; }
+
+/* Küçük bölüm şeritleri (sayfa düzeni) eşit ve sakin: aynı yazı boyutu,
+   tek ok (soldaki), sağdaki «Aç» düğmesi yalnız üzerine gelince. */
+.gizle-kucuk .lrow__label, .gizle-kucuk .kutu__ad, .gizle-kucuk .card__head h3{ font-size:14px; font-weight:500; letter-spacing:0; }
+.gizle-kucuk .kutu__bas{ padding-top:12px; padding-bottom:12px; }
+.gizle-kucuk .gizle-araclar{ opacity:0; transition:opacity var(--dur) var(--ease); }
+.gizle-kucuk:hover .gizle-araclar, .gizle-kucuk:focus-within .gizle-araclar{ opacity:1; }
 
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13318,7 +13387,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'5139652', at:'2026-10-02 09:05', dirty:true };
+R.BUILD = { id:'afd98c7', at:'2026-10-02 09:22', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -17929,6 +17998,7 @@ window.LIFEOS = window.LIFEOS || {};
     ayarlar:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
     ara:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
     bilgi:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><path d="M12 7.6v.1"/>',
+    dahafazla:'<circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/>',
     zil:'<path d="M6.5 16v-4.5a5.5 5.5 0 0 1 11 0V16l1.5 2h-14z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
     kenar:'<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/>',
     gizli:'<rect x="4" y="4.5" width="16" height="5" rx="1.5"/><rect x="4" y="12.5" width="16" height="3" rx="1"/><path d="M4 19.5h7"/>',
@@ -18118,12 +18188,32 @@ window.LIFEOS = window.LIFEOS || {};
      (kullanıcı, 2026-10-02: «daha animasyonlu açılsın»); aynı çekmecede
      her yeniden çizimde tekrar oynamaz. */
   let sonCekmece = null;
+  /* SAYFA GEÇİŞİ (kullanıcı, 2026-10-02: «sisteme biraz animasyon kat»):
+     sayfa değişince kök `sayfa-gecis` alır ve kartlar sırayla, hafifçe
+     yukarı kayarak belirir (kabuk.css). Aynı sayfanın yeniden çizimi
+     (bir sayaç, bir tik) hareketi tekrar oynatmaz. */
+  let sonSayfa = null, gecisSaati = null;
+  function sayfaGecisi(anahtar){
+    if(anahtar === sonSayfa || typeof document === 'undefined') return;
+    sonSayfa = anahtar;
+    const k = document.documentElement;
+    k.classList.add('sayfa-gecis');
+    if(gecisSaati) clearTimeout(gecisSaati);
+    gecisSaati = setTimeout(() => k.classList.remove('sayfa-gecis'), 900);
+  }
+  /* İKİNCİL ÇEKMECELER (kullanıcı, 2026-10-02: «sol taraftaki seçim
+     kısmındaki kalabalığı azalt»): ara sıra açılan çekmeceler tek «Daha
+     fazla» satırının altında durur; içlerinden birindeyken açık gelir.
+     Hiçbir çekmece kalkmadı; sıra ve adlar aynı (CEKMECELER). */
+  const IKINCIL = ['ofis', 'kutuphane'];
+  let dahaFazlaAcik = false;
   function kenarCubugu(o){
     o = o || {};
     const acik = (o.cekmeceler || []).find(c => c.on);
     const yeniCekmece = !!acik && acik.id !== sonCekmece;
     sonCekmece = acik ? acik.id : null;
-    const cek = (o.cekmeceler || []).map(c => {
+    if(acik) sayfaGecisi(acik.id + ':' + (((acik.bolumler || []).find(b => b.on) || {}).route || acik.route));
+    const cekHtml = c => {
       const sayac = c.sayac ? '<span class="kenar__sayac" data-oz="115" aria-label="' + kac(c.sayac + ' bekleyen') + '">'
         + kac(c.sayac) + '</span>' : '';
       const bol = c.on && (c.bolumler || []).length > 1
@@ -18138,7 +18228,16 @@ window.LIFEOS = window.LIFEOS || {};
         + '<button class="kenar__cekmece' + (c.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(c.route) + '"'
         + ' data-cekmece="' + kac(c.id) + '" title="' + kac(c.ad) + '"' + (c.on && !(c.bolumler || []).some(b => b.on && b.route !== c.route) ? ' aria-current="page"' : '') + '>'
         + simge(c.id) + '<span class="kenar__ad">' + kac(c.ad) + '</span>' + sayac + '</button>' + bol + '</div>';
-    }).join('');
+    };
+    const tum = o.cekmeceler || [];
+    const ikincilL = tum.filter(c => IKINCIL.indexOf(c.id) >= 0);
+    const dfAcik = dahaFazlaAcik || ikincilL.some(c => c.on);
+    const cek = tum.filter(c => IKINCIL.indexOf(c.id) < 0).map(cekHtml).join('')
+      + (ikincilL.length ? '<div class="kenar__dahafazla' + (dfAcik ? ' is-acik' : '') + '">'
+        + '<div class="kenar__cekmece-kap"><button type="button" class="kenar__cekmece kenar__dahafazla-dugme" aria-expanded="' + (dfAcik ? 'true' : 'false') + '"'
+        +   ' aria-controls="kenar-dahafazla" title="Daha fazla">' + simge('dahafazla') + '<span class="kenar__ad">Daha fazla</span></button></div>'
+        + '<div class="kenar__dahafazla-liste" id="kenar-dahafazla"' + (dfAcik ? '' : ' hidden') + '>' + ikincilL.map(cekHtml).join('') + '</div>'
+        + '</div>' : '');
     const b = o.baglanti || {};
     const d = b.durum || 'kapali';
     const bagMetin = d === 'bagli' ? 'Merkez bağlı' : d === 'ulasilamadi' ? 'Merkeze ulaşılamadı'
@@ -18585,6 +18684,18 @@ window.LIFEOS = window.LIFEOS || {};
         return;
       }
       if(!(e.target.closest && e.target.closest('.kenar__modulpencere'))) modulPencereKapat();
+      /* «Daha fazla»: ikincil çekmeceleri açar/kapatır; seçim yeniden
+         çizimde korunur. */
+      const df = e.target.closest && e.target.closest('.kenar__dahafazla-dugme');
+      if(df){
+        const kap = df.closest('.kenar__dahafazla');
+        const liste = kap.querySelector('.kenar__dahafazla-liste');
+        dahaFazlaAcik = liste.hidden;
+        liste.hidden = !dahaFazlaAcik;
+        kap.classList.toggle('is-acik', dahaFazlaAcik);
+        df.setAttribute('aria-expanded', dahaFazlaAcik ? 'true' : 'false');
+        return;
+      }
       const k = e.target.closest && e.target.closest('[data-kenar-ac]');
       if(k){ e.preventDefault(); kenarDar(); return; }
       const a = e.target.closest && e.target.closest('a[data-modul-gecis]');
@@ -25532,7 +25643,7 @@ R.WEEKDAYS = [
   { label:'Cumartesi', short:'Cmt', ritual:'exam',
     blocks:[ {slot:'Deneme', subject:'Deneme (gerçek süre)', min:165}, {slot:'Analiz', subject:'Deneme analizi', min:60}, {slot:'Mikro konu', subject:'Eksik mikro konu', min:40} ] },
   { label:'Pazar', short:'Paz', ritual:'review',
-    blocks:[ {slot:'Review', subject:'Weekly review', min:35}, {slot:'Dinlenme', subject:'Dinlenme', min:0}, {slot:'Kart', subject:'Hafif kart (gerekirse)', min:20} ] },
+    blocks:[ {slot:'Değerlendirme', subject:'Haftalık değerlendirme', min:35}, {slot:'Dinlenme', subject:'Dinlenme', min:0}, {slot:'Kart', subject:'Hafif kart (gerekirse)', min:20} ] },
 ];
 
 /* ==== js/data/subjects.js ==== */
@@ -26560,7 +26671,7 @@ R.ACTIVITIES = [
   { id:'draw',         name:'Çizim / karalama',        minutes:10, energy:'low',  kind:'yaratici',
     note:'İyi çizmek gerekmiyor. Elin başka bir iş yapması dikkati tazeler.' },
   { id:'write',        name:'Serbest yazı',            minutes:10, energy:'low',  kind:'yaratici',
-    note:'Günün nasıl geçtiğini üç cümleyle yaz. Pazar review’unda işine yarar.' },
+    note:'Günün nasıl geçtiğini üç cümleyle yaz. Pazar değerlendirmesinde işine yarar.' },
   { id:'cook',         name:'Bir şeyler hazırla',      minutes:15, energy:'mid',  kind:'yaratici',
     note:'Çay, meyve, basit bir atıştırmalık. Ayakta geçen 15 dakika.' },
   { id:'music',        name:'Sözsüz müzik dinle',      minutes:10, energy:'low',  kind:'yaratici',
@@ -26831,7 +26942,7 @@ R.HINTS = {
     more:'Bloklar arası 10–15 dakika ara verilir. Blok konusu haftanın ana konularından seçilir; konu sayısı bloktan fazlaysa konular günlere sırayla dağılır. Serbestçe değiştirilebilir.' },
   'timer':{ t:'Odak zamanlayıcı', b:'Başlat’a basınca süre kendi işler, bitirince blok otomatik işaretlenir.',
     more:'Gerçekleşen süre elle girilmez; ölçülen süre plan tamamlama ve süre sapması KPI’larını besler.' },
-  'skip-reason':{ t:'Atlama nedeni', b:'Atlanan blok suç değil veri: neden seçilir, pazar review’unda kümelenir.',
+  'skip-reason':{ t:'Atlama nedeni', b:'Atlanan blok suç değil veri: neden seçilir, pazar değerlendirmesinde kümelenir.',
     more:'İki hafta üst üste düşük tamamlama “irade sorunu” sayılmaz; hedef hacmi azaltılır ve süreç engeli kaldırılır.' },
   'streak':{ t:'Davranış serisi', b:'Ödül nete değil davranışa bağlıdır: minimum standardı tutturduğun gün sayısı.',
     more:'Tek denemede yüksek net ödüllendirilmez. Düzen, analizin zamanında bitmesi ve uyku saatine uyum ödüllendirilir.' },
@@ -26845,7 +26956,7 @@ R.HINTS = {
     more:'“Matematik çalış” değil, “rasyonel sayılardan 120 soru, en az %70 doğruluk”. Geçen haftanın verisi görülmeden yeni hedef yazılmaz.' },
   'capacity':{ t:'Kapasite', b:'Planlanan yük kapasitenin %110’unu aşarsa hafta imzalanamaz.',
     more:'Kapasite haftada 21 saat (3–4 saat × 6 gün) varsayılır. Gerçekçi olmayan plan, tamamlama oranını da anlamsız kılar.' },
-  'review':{ t:'Weekly review', b:'Pazar 30–40 dakika: planlandı / yapıldı / neden sapıldı / düzeltme.',
+  'review':{ t:'Haftalık değerlendirme', b:'Pazar 30–40 dakika: planlandı / yapıldı / neden sapıldı / düzeltme.',
     more:'Yeni haftaya yalnız en yüksek etkili iki eksik taşınır; kalan iş otomatik ötelenmez.' },
   'carry':{ t:'Devir', b:'Sonraki haftaya en fazla iki eksik taşınır.',
     more:'Tamamlanmayan her iş taşınırsa plan birikir ve gerçekçiliğini kaybeder.' },
@@ -34716,7 +34827,7 @@ R.Calc = (function(){
     }
     if(!beforeStart && dow === 6 && !S.reviews[M.weekId(n)]){
       return { key:'review', icon:'check', label:'Pazar ritüeli',
-        title:'Weekly review’u doldur',
+        title:'Haftalık değerlendirmeyi doldur',
         why:'Planlandı / yapıldı / neden sapıldı / düzeltme — 30–40 dakika.',
         route:'week', act:'open-review', tone:'ritual' };
     }
@@ -40949,7 +41060,7 @@ R.Auto = (function(){
     if(dow === 6 && !S.reviews[M.weekId(n)]){
       out.push({
         id:'close-week', icon:'check', title:'Haftayı kapat',
-        why:'Pazar review’u 30–40 dakika. Sistem özeti hazırladı; sen dört sütunu doldur.',
+        why:'Pazar değerlendirmesi 30–40 dakika. Sistem özeti hazırladı; sen dört sütunu doldur.',
         act:'auto-close-week', tone:'primary',
       });
     }
@@ -51279,7 +51390,7 @@ R.Palette = (function(){
     const go = (id, label, icon, group) => ({ group, label, icon, route:id, run(){ R.App.go(id); } });
 
     list.push(go('today','Bugün','today','Git'));
-    list.push(go('week','Hafta — sözleşme ve review','week','Git'));
+    list.push(go('week','Hafta — sözleşme ve değerlendirme','week','Git'));
     list.push(go('learn','Öğrenme — video ve ders notu','play','Git'));
     list.push(go('exams','Deneme','exam','Git'));
     list.push(go('quiz','Sınama — kendini test et','zap','Git'));
@@ -51299,7 +51410,7 @@ R.Palette = (function(){
     list.push({ group:'Kayıt', label:'Ders ekle (video / not)', icon:'plus', route:'learn', run(){ R.App.go('learn'); setTimeout(()=>R.Screens.learn.handle['note-new']({dataset:{}}), 60); } });
     list.push({ group:'Kayıt', label:'Süreli deneme oturumu', icon:'clock', run(){ R.App.go('exams'); setTimeout(()=>R.Screens.exams.handle['run-open']({dataset:{}}), 60); } });
     list.push({ group:'Kayıt', label:'Sınamayı başlat', icon:'play', route:'quiz', run(){ R.App.go('quiz'); setTimeout(()=>R.Screens.quiz.handle['quiz-start']({dataset:{}}), 60); } });
-    list.push({ group:'Kayıt', label:'Weekly review’u aç', icon:'check', hint:'Paz', run(){ R.App.go('week'); setTimeout(()=>R.Screens.week.openReview(), 60); } });
+    list.push({ group:'Kayıt', label:'Haftalık değerlendirmeyi aç', icon:'check', hint:'Paz', run(){ R.App.go('week'); setTimeout(()=>R.Screens.week.openReview(), 60); } });
 
     const day = S.days[U.todayISO()];
     if(day){
@@ -52463,7 +52574,7 @@ R.Screens.today = (function(){
       ? c.Button({ label:'Haftalık sözleşmeyi aç', tone:'primary', block:true, act:'go', data:{ 'data-route':'week' } })
       : ritual === 'exam'
         ? c.Button({ label:'Deneme ekle', tone:'primary', block:true, act:'go', data:{ 'data-route':'exams' } })
-        : c.Button({ label:'Weekly review’u aç', tone:'primary', block:true, act:'open-review' });
+        : c.Button({ label:'Haftalık değerlendirmeyi aç', tone:'primary', block:true, act:'open-review' });
 
     return c.Card({ title:list.label, sub:'Bugünün ritüeli', body:html`
       <div class="stack-xs">
@@ -54043,25 +54154,26 @@ R.Screens.week = (function(){
 
   /* ---------- sozlesme ---------- */
 
+  /* SADE (kullanıcı, 2026-10-02: «çok uzun, çok büyük»): her konu üç
+     satırlık ayrı bir kart değil, TEK SATIR. Sütun adları listenin üstünde
+     bir kez yazılır; her alan erişilebilir adını kendisi taşır. Telefonda
+     ad üst satırda, sayılar ve ders altında. */
   function TopicRow(t, i, signed, count){
     const subjectOpts = [{ value:'', label:'— ders —' }].concat(R.SUBJECTS.map(s => ({ value:s.id, label:s.name })));
-    const num = (label, change, value) => K.Field({ label,
-      input:K.Input({ type:'number', size:'sm', numeric:true, value, disabled:signed, change, data:{ 'data-i':i } }) });
-
-    return K.Card({ flat:true, pad:'sm', class:'stack-sm', body:html`
-      <div class="row gap-8">
-        <span class="topicrow__order">${i+1}</span>
-        ${K.Input({ class:'grow', value:t.name, aria:'konu adı', disabled:signed,
-          change:'topic-name', data:{ 'data-i':i } })}
-        ${when(count > 1 && !signed, () => K.IconButton({ icon:'close', size:'sm', plain:true,
-          aria:'konuyu kaldır', act:'topic-remove', data:{ 'data-i':i } }))}
-      </div>
-      ${K.Cols(3, [
-        num('Soru hedefi', 'topic-q', t.questionTarget),
-        num('Doğruluk %', 'topic-acc', t.accuracy),
-        K.Field({ label:'Ders', input:K.Select({ options:subjectOpts, value:t.subjectId || '', size:'sm',
-          disabled:signed, change:'topic-subject', data:{ 'data-i':i } }) }),
-      ])}` });
+    const ad = (t.name || (i + 1) + '. konu');
+    const num = (aria, change, value) => K.Input({ type:'number', size:'sm', numeric:true, value, aria:ad + ' — ' + aria,
+      disabled:signed, change, data:{ 'data-i':i } });
+    return html`<div class="konusatir">
+      <span class="topicrow__order">${i+1}</span>
+      ${K.Input({ class:'konusatir__ad', size:'sm', value:t.name, aria:'konu adı', disabled:signed,
+        change:'topic-name', data:{ 'data-i':i } })}
+      ${num('soru hedefi', 'topic-q', t.questionTarget)}
+      ${num('doğruluk yüzdesi', 'topic-acc', t.accuracy)}
+      ${K.Select({ options:subjectOpts, value:t.subjectId || '', size:'sm', aria:ad + ' — ders',
+        disabled:signed, change:'topic-subject', data:{ 'data-i':i } })}
+      ${count > 1 && !signed ? K.IconButton({ icon:'close', size:'sm', plain:true,
+        aria:'konuyu kaldır', act:'topic-remove', data:{ 'data-i':i } }) : html`<span></span>`}
+    </div>`;
   }
 
   function contractCard(week, n){
@@ -54074,7 +54186,10 @@ R.Screens.week = (function(){
       title:'Haftalık sözleşme', hint:'contract', sub:'En fazla ' + konuSiniri() + ' ana konu, çıktı temelli hedef',
       badge:signed ? K.Badge({ label:'İmzalandı', tone:'ok' }) : K.Badge({ label:'İmza bekliyor', tone:'warn' }),
       body:html`
-        ${K.Stack(map(week.mainTopics, (t, i) => TopicRow(t, i, signed, week.mainTopics.length)), 'sm')}
+        <div class="konuliste">
+          <div class="konusatir konusatir--bas" aria-hidden="true"><span></span><span>Konu</span><span>Soru</span><span>Doğruluk %</span><span>Ders</span><span></span></div>
+          ${map(week.mainTopics, (t, i) => TopicRow(t, i, signed, week.mainTopics.length))}
+        </div>
         ${when(!signed && week.mainTopics.length < konuSiniri(), () => K.Button({ label:'Konu ekle', icon:'plus',
           size:'sm', class:'mt-8', act:'topic-add' }))}
 
@@ -54118,7 +54233,7 @@ R.Screens.week = (function(){
     const reasons = C.skipReasonCounts(n);
 
     return K.Card({
-      title:'Weekly review', hint:'review', sub:'Pazar · 30–40 dakika',
+      title:'Haftalık değerlendirme', hint:'review', sub:'Pazar · 30–40 dakika',
       badge:rev ? K.Badge({ label:'tamamlandı', tone:'ok' }) : K.Badge({ label:'bekliyor', tone:'muted' }),
       body:html`
         <div class="cols-2 mb-10">
@@ -54128,7 +54243,7 @@ R.Screens.week = (function(){
         </div>
         ${reasonChips(reasons) || html`<p class="small dim">Bu hafta atlanan blok yok.</p>`}
         ${when(rev && rev.decision, () => html`<div class="mt-10">${K.Notice({ tone:'ok', title:'Düzeltme:', body:rev.decision })}</div>`)}
-        ${K.Button({ label:rev ? 'Review’u güncelle' : 'Review’u doldur', block:true,
+        ${K.Button({ label:rev ? 'Değerlendirmeyi güncelle' : 'Değerlendirmeyi doldur', block:true,
           class:'mt-12', act:'open-review' })}`,
     });
   }
@@ -54169,7 +54284,7 @@ R.Screens.week = (function(){
     if(!lines.length) lines.push('Bu hafta için kayda değer sapma yok.');
 
     return K.Card({
-      title:'Hafta özeti', sub:'Review yazmadan önce buna bak',
+      title:'Hafta özeti', sub:'Değerlendirmeden önce buna bak',
       badge:comp == null ? null : K.Badge({ label:'%'+comp,
         tone:comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' }),
       body:html`<div class="rapor-govde">
@@ -54224,7 +54339,7 @@ R.Screens.week = (function(){
     ]);
 
     UI.sheet({
-      title:'Weekly review — Hafta '+n,
+      title:'Haftalık değerlendirme — Hafta '+n,
       subtitle:U.fmtRange(M.weekStart(n), M.weekEnd(n)),
       body:String(body),
       footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
@@ -54577,7 +54692,7 @@ R.Screens.week = (function(){
         title:'Sözleşmeyi revize et',
         body:String(html`
           ${K.Notice({ tone:'info', body:'İmzalı bir hafta değiştirildiğinde neden kaydedilir; '
-            + 'bu, sonraki review’da sapma analizini mümkün kılar.' })}
+            + 'bu, sonraki değerlendirmede sapma analizini mümkün kılar.' })}
           ${K.Field({ label:'Revizyon nedeni', input:K.Textarea({ id:'rev-reason', rows:2,
             placeholder:'ör. hastalık nedeniyle soru hedefi %20 azaltıldı' }) })}`),
         footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
@@ -54675,16 +54790,23 @@ R.Screens.week = (function(){
     },
   };
 
+  /* SADE (kullanıcı, 2026-10-02: «çok uzun, çok büyük, gereksiz»): her hafta
+     kullanılan bölümler açık (gün şeridi, sözleşme, kapsam, hafta özeti,
+     değerlendirme); ara sıra bakılanlar baştan küçük gelir — başlık kalır,
+     dokununca açılır, açılırsa açık kalır (brand/ortak/gizle.js). */
+  const KUCUK = ['plan-tamamlama-geçmişi', 'sınava-kadar', 'plan-ızgarası', 'planın-şekli', 'müfredat-referansı'];
+
   return {
     id:'week',
     title:'Hafta',
+    kucukVarsayilan:KUCUK,
     subtitle(){
       const n = viewN();
       return 'Hafta '+n+'/'+R.PLAN.totalWeeks+' · '+U.fmtRange(M.weekStart(n), M.weekEnd(n));
     },
-    actions(){
-      return String(K.Button({ label:'Weekly review', icon:'check', size:'sm', act:'open-review' }));
-    },
+    /* Değerlendirme düğmesi kartın içinde («Değerlendirmeyi doldur»);
+       sayfa başı sade kalır. */
+    actions(){ return ''; },
     render, handle, change, openReview, sureOner,
   };
 })();

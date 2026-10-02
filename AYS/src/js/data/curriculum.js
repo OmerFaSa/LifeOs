@@ -124,5 +124,5 @@ R.WEEKDAYS = [
   { label:'Cumartesi', short:'Cmt', ritual:'exam',
     blocks:[ {slot:'Deneme', subject:'Deneme (gerçek süre)', min:165}, {slot:'Analiz', subject:'Deneme analizi', min:60}, {slot:'Mikro konu', subject:'Eksik mikro konu', min:40} ] },
   { label:'Pazar', short:'Paz', ritual:'review',
-    blocks:[ {slot:'Review', subject:'Weekly review', min:35}, {slot:'Dinlenme', subject:'Dinlenme', min:0}, {slot:'Kart', subject:'Hafif kart (gerekirse)', min:20} ] },
+    blocks:[ {slot:'Değerlendirme', subject:'Haftalık değerlendirme', min:35}, {slot:'Dinlenme', subject:'Dinlenme', min:0}, {slot:'Kart', subject:'Hafif kart (gerekirse)', min:20} ] },
 ];
