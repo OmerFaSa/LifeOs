@@ -70,9 +70,10 @@ const KURAL = [
      zorunlu oldu. */
   { ad:'tekrar',       olcu:'tekrar',       en:0, yazi:'aynı ekranda tekrarlanan başlık/cümle' },
   /* iPhone planı (belgeler/ekip/IPHONE-PLANI.md §5, 2026-10-02): önce ölçüm;
-     bir çekmece bütçeye girince o çekmece için, Faz 7'de hepsi zorunlu.
+     üç modülde üçü aşan ekran sıfıra inince (Faz 6) açık kart ZORUNLU oldu
+     (Faz 7). Sayfa boyu hâlâ ölçümdür: aşan sayfalar planın §8'inde.
      Rütbe ekranları kullanıcı kararıyla olduğu gibi kalır. */
-  { ad:'acikKart',     olcu:'acikKart',     en:3, yazi:'açık kart (iPhone §2.2)', olcum:true, haric:['rutbe'] },
+  { ad:'acikKart',     olcu:'acikKart',     en:3, yazi:'açık kart (iPhone §2.2)', haric:['rutbe'] },
   { ad:'boyHepsi',     olcu:'boy',          en:1200, yazi:'sayfa boyu px (iPhone §2.3)', olcum:true, haric:['rutbe'] },
   { ad:'boy',          olcu:'boy',          en:1800, yazi:'sayfa boyu (px)', yalniz:['today'] },
   { ad:'dugme',        olcu:'dugme',        en:14, yazi:'görünen düğme', yalniz:['today'] },

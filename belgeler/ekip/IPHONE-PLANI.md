@@ -99,6 +99,10 @@ Eklenecek: §5 ölçüleri; uzun liste kısaltıcı kalıbı (ilk N + «Tümü»
 Önce **ölçüm** (kırmızı yapmaz); bir çekmecenin bütün ekranları bütçeye girince o çekmece için
 zorunlu olur, Faz 7'de hepsi zorunlu.
 
+**Faz 7 durumu (2026-10-02):** `acikKart` artık ZORUNLU (üç modülde üçü aşan ekran 0; aşarsa
+`sadelik.js` kırmızı). `boyHepsi` hâlâ ölçüm: 1 200 px'i aşan sayfalar §8'in son satırında; çoğu
+bölümlü ekranın en uzun bölümü ya da raf kesme tabanıdır.
+
 ## 6. Fazlar
 
 | Faz | Kapsam | Hedef |
@@ -299,6 +303,19 @@ Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/�
 - SPİ `a11ycheck` alt sayfa kipliliğini «Karar ekle» ile sınar: kart artık şerit olduğu için önce
   şeridi açar (kullanıcının yaptığı gibi).
 
+### Faz 6–7 kararları (yapıldı; testler «Faz 6», `sadelik.js`)
+
+- **Başlık ad olur:** `sayfaBasiHtml` (üç `app.js`) — başlık ekranın adıdır («Testler»,
+  «Merdiven», «Ofis»); kural motorunun durum cümlesi ⓘ kartının ilk satırı. Bugün'ün günün
+  cümlesi (004) başlıkta kalır.
+- **Rozet bildirimi tek:** sessiz kipte zincirle gelen rozetler `rozetBildir`'de toplanır,
+  zincir bitince bir kez söylenir («3 yeni rozet — İstikrar 1 ay · +2»); açılışta üç balon üst
+  üste biniyordu.
+- **SPİ Bugün:** «Günün hissi» şerit (dört giriş kartı açıktı).
+- **HKM yüzü:** jetonlar zaten ortak (`t_jetonlar_ortak`); bu turda ek değişiklik yok.
+- **Kural:** `acikKart` zorunlu (Faz 7). 390 px turu: `layoutcheck` üç modülde temiz; Bugün,
+  SPİ Testler, ESP Ses elle bakıldı.
+
 ## 7. Bilinen riskler
 
 - Testler kartları ekranda arar: gizlemek uygulama düzeyindedir (`Gizle.uygula`), çizimi
@@ -318,13 +335,17 @@ Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/�
 | 2c | ✅ sıkı ölçü: ESP Tarih · Ses · Okuma (her bölüm), AYS Soru çöz; Dersler 1 238 (raf tabanı) | a36e5e6 | 150 · aşan 13 (AYS 59/5 · SPİ 44/4 · ESP 47/4) |
 | 2d | ✅ bölüm turu: ESP Dil · Felsefe · Yazı, SPİ bölümleri, AYS Sınama; 2b'ye sıkı ölçü; Faz 2 bitti | 207c451 | 150 · aşan 13 (araç varsayılan bölümü sayar; öbür bölümler testte) |
 | 3 | ✅ Analiz: AYS İlerleme · Ayrıntılı analiz · Telafi, SPİ Analiz, ESP Analiz; `%Infinity` hatası | 55b2015 | 131 · aşan 9 (AYS 43/2 · SPİ 43/4 · ESP 45/3) |
-| 4–5 | ✅ Ofis · Danışma (3 ×; Onaylar ve Kütüphanem zaten bütçede); Ayarlar iOS listesi (3 ×); önizleme hatası | (bu commit) | 87 · aşan 1 (AYS 26/0 · SPİ 31/1 · ESP 30/0) |
-| 6 | ⏭ sıradaki: kabuk — başlık ad olsun (durum cümlesi ⓘ'ye; Bugün'ün 004 cümlesi kalır), rozet bildirimleri tek, SPİ Bugün 4 açık, HKM yüzü | — | — |
-| 7 | ⏭ kurallar zorunlu, 390 px turu, boyu aşan 14 sayfa, belgeler | — | — |
+| 4–5 | ✅ Ofis · Danışma (3 ×; Onaylar ve Kütüphanem zaten bütçede); Ayarlar iOS listesi (3 ×); önizleme hatası | 2db1f82 | 87 · aşan 1 (AYS 26/0 · SPİ 31/1 · ESP 30/0) |
+| 6–7 | ✅ başlık ad, durum cümlesi ⓘ'de; rozet bildirimi tek; SPİ Bugün 3 açık; `acikKart` zorunlu; 390 px turu | (bu commit) | 86 · aşan 0 (AYS 26 · SPİ 30 · ESP 30) |
+| boy | ⏭ açık iş: 1 200 px'i aşan sayfalar — AYS Dersler 1 238 (raf tabanı), İlerleme 1 516, Ayrıntılı analiz 1 608, Ofis 1 838, Danışma 1 314, Genel 1 557, Günü düzenle 1 748; SPİ Analiz 1 506, Ofis 1 390, Günü düzenle 1 682; ESP Bugün 1 377, Analiz 1 803, Profil 1 286, Günü düzenle 1 525 | — | ölçüm |
 
 ## 9. Devir notu — sıradaki oturum buradan başlar
 
-**Son devir (2026-10-02, 2. oturum):** Faz 2 bitti (2b f73a9a7, 2c a36e5e6, 2d 207c451); her şey
+**Son devir (2026-10-02, 3. oturum):** Faz 3, 4–5, 6–7 bitti (55b2015, 2db1f82 ve bu commit);
+açık kart 150 → 86, üçü aşan ekran 13 → 0, `acikKart` zorunlu. Kalan tek iş §8'deki «boy»
+satırı (sayfa boyu ölçüm olarak kalıyor). Her şey commit'li; push'u kullanıcı yapar.
+
+**Önceki devir (2026-10-02, 2. oturum):** Faz 2 bitti (2b f73a9a7, 2c a36e5e6, 2d 207c451); her şey
 commit'li, üç modülde bütün denetimler temiz. Kullanıcı 2b'den sonra «çok daha sade, çok daha
 minimalist» dedi → §2 «sıkı ölçü» bundan sonra her fazın ölçüsü. Push'u kullanıcı yapar.
 

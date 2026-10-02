@@ -315,9 +315,14 @@ R.App = (function(){
     return LIFEOS.Gizle.bolumler(kok).map(b => b.anahtar).filter(a => gizli.indexOf(a) < 0).slice(1);
   }
 
+  /* iPhone Faz 6 (2026-10-02): başlık ekranın ADIDIR («Testler», «Merdiven»);
+     kural motorunun durum cümlesi ⓘ kartının ilk satırıdır. Bugün'ün günün
+     cümlesi (004) başlıkta kalır. */
   function sayfaBasiHtml(sc){
-    const baslik = safe(() => sc.headline ? sc.headline() : '') || sc.title;
-    const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
+    const cumle = safe(() => sc.headline ? sc.headline() : '');
+    const baslik = (sc.headlineOz && cumle) || sc.title || cumle;
+    const aciklama = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
+    const ozet = [sc.headlineOz || cumle === baslik ? '' : cumle, aciklama].filter(Boolean).map(String).join(' ');
     const AY = window.LIFEOS && window.LIFEOS.AYAR;
     const eylem = (AY && ayarlardaMi(sc.id) ? AY.aramaKutusu() : '')
       + (safe(() => sc.actions ? sc.actions() : '') || '');
@@ -992,6 +997,26 @@ R.App = (function(){
      olur: ikinci çağrı AYNI rozeti bir kez daha açardı. */
   let rozetPerdede = false;
 
+  /* iPhone Faz 6 (2026-10-02): sessiz kipte zincirle gelen rozetler TEK
+     bildirimdir — açılışta üç «Yeni rozet» balonu üst üste biniyordu.
+     Zincir bitince (kısa bir sessizlikten sonra) birikenler bir kez söylenir. */
+  let rozetBirikim = [], rozetSakin = false, rozetSayac = null;
+  function rozetBildir(ad, sakin){
+    rozetBirikim.push(ad);
+    rozetSakin = sakin;
+    clearTimeout(rozetSayac);
+    rozetSayac = setTimeout(() => {
+      const adlar = rozetBirikim;
+      rozetBirikim = [];
+      if(!adlar.length) return;
+      const ust = adlar.length === 1 ? 'Yeni rozet' : adlar.length + ' yeni rozet';
+      const ad = adlar.length === 1 ? adlar[0] : adlar[0] + ' · +' + (adlar.length - 1);
+      const V = (window.LIFEOS || {}).VITRIN;
+      if(!(rozetSakin && V && V.sakinGoster && V.sakinGoster({ ust, ad, sistem:'AYS' })))
+        UI.toast(ust + ' — ' + ad);
+    }, 400);
+  }
+
   function rozetKutla(){
     if(!R.Basarim || !R.Perde || rozetPerdede) return;
     const r = R.Basarim.bekleyen();
@@ -1004,9 +1029,7 @@ R.App = (function(){
     };
     const sonuc = R.Perde.rozetKutla(r, { bitti:damgala });
     if(sonuc && sonuc.sessiz){
-      const V = (window.LIFEOS || {}).VITRIN;
-      if(!(sonuc.sakin && V && V.sakinGoster && V.sakinGoster({ ust:'Yeni rozet', ad:r.ad, sistem:'AYS' })))
-        UI.toast('Yeni rozet — ' + r.ad);
+      rozetBildir(r.ad, !!sonuc.sakin);
       damgala();
     }
   }
@@ -1581,7 +1604,7 @@ R.App = (function(){
     }
   }
 
-  return { boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, SADE_GIZLI, ayarListesi, UST, canInstall, promptInstall, installManifest,
+  return { boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, canInstall, promptInstall, installManifest,
     notifyState, askNotify, notifyFromOffice };
 })();
 

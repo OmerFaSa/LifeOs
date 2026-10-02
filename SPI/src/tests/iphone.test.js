@@ -451,3 +451,41 @@
     });
   });
 })();
+
+/* iPhone planı · Faz 6 · Kabuk (SPİ): başlık ekranın adıdır, durum
+   cümlesi ⓘ'de; sessiz kipte zincirle gelen rozetler tek bildirim. */
+(function(){
+  const { describe, it, expect, resetState } = SP.Test;
+  describe('iPhone · Faz 6 · Kabuk (SPİ)', () => {
+
+    it('başlık ekranın adı; kural motorunun cümlesi bilgi kartında', () => {
+      resetState();
+      const sc = SP.Screens.labs;
+      const d = document.createElement('div');
+      d.innerHTML = String(SP.App.sayfaBasiHtml(sc));
+      expect(d.querySelector('h1').textContent.trim()).toBe(sc.title);
+      const cumle = sc.headline ? sc.headline() : '';
+      if(cumle && cumle !== sc.title) expect(d.querySelector('.bilgikart').textContent).toContain(cumle);
+    });
+
+    it('Bugün’ün günün cümlesi (004) başlıkta kalır', () => {
+      resetState();
+      const sc = SP.Screens.today;
+      const d = document.createElement('div');
+      d.innerHTML = String(SP.App.sayfaBasiHtml(sc));
+      const cumle = sc.headline ? sc.headline() : '';
+      if(cumle) expect(d.querySelector('h1').textContent.trim()).toBe(cumle);
+      expect(d.querySelector('h1').getAttribute('data-oz')).toBe('004');
+    });
+
+    it('zincirle gelen üç rozet tek bildirimdir', async () => {
+      const UI = SP.UI, eski = UI.toast, gelen = [];
+      UI.toast = t => gelen.push(t);
+      try{
+        ['A', 'B', 'C'].forEach(x => SP.App.rozetBildir(x, false));
+        await new Promise(r => setTimeout(r, 480));
+        expect(gelen.join('|')).toBe('3 yeni rozet — A · +2');
+      }finally{ UI.toast = eski; }
+    });
+  });
+})();

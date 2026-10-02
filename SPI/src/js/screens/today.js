@@ -1396,6 +1396,9 @@ SP.Screens.today = (function(){
 
   return {
     id:'today',
+    /* iPhone Faz 6 (2026-10-02): Bugün'de açık dört giriş kartı vardı; günün
+       hissi isteğe bağlı bir kayıttır — şerit, dokununca açılır. */
+    kucukVarsayilan:['günün-hissi'],
     title:'Bugün',
     /* Bu sayfanın başlığı BUGÜNÜ anlatır. Sıradaki hamle başka bir
        bölüme aitse (tahlil, sepet) onu buraya başlık yapmak kafa
