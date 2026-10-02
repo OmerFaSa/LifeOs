@@ -1095,3 +1095,9 @@ svg.chart{ max-height:180px; }
 .gizle-kucuk .gizle-araclar{ opacity:0; transition:opacity var(--dur) var(--ease); }
 .gizle-kucuk:hover .gizle-araclar, .gizle-kucuk:focus-within .gizle-araclar{ opacity:1; }
 
+/* Gizli bölüm notu tek ince satır (2026-10-02): çerçevesiz, küçük, sağda
+   sessiz bir «Göster» bağı. Uyarılı hâli (gizlide kırmızı) yine belirgin. */
+.gizle-dip:not(.gizle-dip--uyari){ margin:16px 0 0; padding:4px 2px; border:0; background:none; font-size:12px; }
+.gizle-dip:not(.gizle-dip--uyari) button{ min-height:24px; padding:0 6px; border:0; background:none; color:var(--text-2); font-weight:500; }
+.gizle-dip:not(.gizle-dip--uyari) button:hover{ color:var(--text); background:var(--surface-2); }
+

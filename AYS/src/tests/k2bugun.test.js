@@ -234,6 +234,30 @@
       });
     });
 
+    /* Hafta (2026-10-02): «Hafta özeti» soruyu yalnız bloklardan (208),
+       «Haftalık değerlendirme» günün sorusundan (473) sayıyordu. İkisi tek
+       kart oldu ve soru TEK TANIMDAN gelir (HATALAR O-5). */
+    it('sadelik: Haftanın özeti tek kart; soru günün sorusu tanımından (plan dışı dahil)', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        const gun = await hazirla();
+        const b = gun.blocks.filter(x => x.slot !== 'Dinlenme')[0];
+        b.status = 'done'; b.actualQ = 10; b.correctQ = 8;
+        gun.freeQ = 40;
+        const n = R.Model.currentWeek();
+        const qr = R.Calc.questionRealization(n);
+        expect(qr.solved >= 50).toBe(true);
+        const k = dom(await R.Screens.week.render());
+        const basliklar = Array.from(k.querySelectorAll('.card__title, h3, .kutu__ad')).map(x => x.textContent.trim());
+        expect(basliklar.indexOf('Hafta özeti')).toBe(-1);
+        expect(basliklar.indexOf('Haftalık değerlendirme')).toBe(-1);
+        expect(basliklar.indexOf('Konu kapsamı')).toBe(-1);
+        const kart = Array.from(k.querySelectorAll('.card, .lrow')).find(x => /Haftanın özeti/.test(x.textContent));
+        expect(!!kart).toBe(true);
+        expect(kart.textContent).toContain(R.U.fmtNum(qr.solved));
+        expect(!!k.querySelector('[data-oz="049"]')).toBe(true);
+      });
+    });
+
     it('oz-042 kurulum bitmemişse kahraman yerine kurulum kartı', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();

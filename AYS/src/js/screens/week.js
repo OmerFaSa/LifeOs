@@ -59,15 +59,24 @@ R.Screens.week = (function(){
      satırlık ayrı bir kart değil, TEK SATIR. Sütun adları listenin üstünde
      bir kez yazılır; her alan erişilebilir adını kendisi taşır. Telefonda
      ad üst satırda, sayılar ve ders altında. */
-  function TopicRow(t, i, signed, count){
+  function TopicRow(t, i, signed, count, cozulen){
     const subjectOpts = [{ value:'', label:'— ders —' }].concat(R.SUBJECTS.map(s => ({ value:s.id, label:s.name })));
     const ad = (t.name || (i + 1) + '. konu');
+    /* 049 KAPSAM satır içinde (EKIP-PLANI §1.4: «konu tablosunda satır içi
+       ince çubuk»): ayrı «Konu kapsamı» kartı aynı konuları ikinci kez
+       listeliyordu. Çözülen sayı ölçümdür; hedef yoksa oran yoktur. */
+    const plan = Number(t.questionTarget) || null;
+    const oran = plan ? Math.min(100, Math.round(100 * (cozulen || 0) / plan)) : null;
     const num = (aria, change, value) => K.Input({ type:'number', size:'sm', numeric:true, value, aria:ad + ' — ' + aria,
       disabled:signed, change, data:{ 'data-i':i } });
     return html`<div class="konusatir">
       <span class="topicrow__order">${i+1}</span>
-      ${K.Input({ class:'konusatir__ad', size:'sm', value:t.name, aria:'konu adı', disabled:signed,
-        change:'topic-name', data:{ 'data-i':i } })}
+      <div class="konusatir__adkap">
+        ${K.Input({ class:'konusatir__ad', size:'sm', value:t.name, aria:'konu adı', disabled:signed,
+          change:'topic-name', data:{ 'data-i':i } })}
+        ${when(oran != null, () => html`<span class="konusatir__cubuk" aria-hidden="true"><i style="width:${oran}%"></i></span>`)}
+      </div>
+      <span class="konusatir__cozulen num" title="Bu hafta çözülen / hedef">${cozulen || 0}<small> / ${plan || '—'}</small></span>
       ${num('soru hedefi', 'topic-q', t.questionTarget)}
       ${num('doğruluk yüzdesi', 'topic-acc', t.accuracy)}
       ${K.Select({ options:subjectOpts, value:t.subjectId || '', size:'sm', aria:ad + ' — ders',
@@ -87,9 +96,9 @@ R.Screens.week = (function(){
       title:'Haftalık sözleşme', hint:'contract', sub:'En fazla ' + konuSiniri() + ' ana konu, çıktı temelli hedef',
       badge:signed ? K.Badge({ label:'İmzalandı', tone:'ok' }) : K.Badge({ label:'İmza bekliyor', tone:'warn' }),
       body:html`
-        <div class="konuliste">
-          <div class="konusatir konusatir--bas" aria-hidden="true"><span></span><span>Konu</span><span>Soru</span><span>Doğruluk %</span><span>Ders</span><span></span></div>
-          ${map(week.mainTopics, (t, i) => TopicRow(t, i, signed, week.mainTopics.length))}
+        <div class="konuliste" data-oz="049">
+          <div class="konusatir konusatir--bas" aria-hidden="true"><span></span><span>Konu</span><span>Çözülen</span><span>Soru</span><span>Doğruluk %</span><span>Ders</span><span></span></div>
+          ${map(week.mainTopics, (t, i) => TopicRow(t, i, signed, week.mainTopics.length, cozulenOf(t, n)))}
         </div>
         ${when(!signed && week.mainTopics.length < konuSiniri(), () => K.Button({ label:'Konu ekle', icon:'plus',
           size:'sm', class:'mt-8', act:'topic-add' }))}
@@ -127,52 +136,28 @@ R.Screens.week = (function(){
       ${K.Row(map(keys, r => K.Chip(r+' × '+reasons[r])), { wrap:true })}</div>`;
   }
 
-  function reviewCard(n){
+  /* HAFTANIN ÖZETİ (kullanıcı, 2026-10-02: «gereksiz kart sayısını azalt»).
+     «Hafta özeti» ile «Haftalık değerlendirme» aynı haftayı iki kart olarak
+     özetliyordu ve soruyu iki ayrı tanımla sayıyordu: özet yalnız blok
+     sorusunu (208), değerlendirme günün sorusunu (473) yazıyordu. Tek kart,
+     tek tanım: soru = C.questionRealization (gunSorusu: blok + serbest +
+     paragraf + problem, HATALAR O-5). Doğruluk yalnız blok sorusundan
+     ölçülebilir (doğru sayısı yalnız orada girilir); notu bunu söyler. */
+  function ozetCard(n){
     const rev = S.reviews[M.weekId(n)];
     const comp = C.planCompletion(n);
     const qr = C.questionRealization(n);
-    const reasons = C.skipReasonCounts(n);
-
-    return K.Card({
-      title:'Haftalık değerlendirme', hint:'review', sub:'Pazar · 30–40 dakika',
-      badge:rev ? K.Badge({ label:'tamamlandı', tone:'ok' }) : K.Badge({ label:'bekliyor', tone:'muted' }),
-      body:html`
-        <div class="cols-2 mb-10">
-          ${K.Stat({ label:'Plan tamamlama', value:comp == null ? '—' : '%'+comp,
-            tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' })}
-          ${K.Stat({ label:'Soru gerçekleşme', value:qr && qr.pct != null ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target : 'hedef yok' })}
-        </div>
-        ${reasonChips(reasons) || html`<p class="small dim">Bu hafta atlanan blok yok.</p>`}
-        ${when(rev && rev.decision, () => html`<div class="mt-10">${K.Notice({ tone:'ok', title:'Düzeltme:', body:rev.decision })}</div>`)}
-        ${K.Button({ label:rev ? 'Değerlendirmeyi güncelle' : 'Değerlendirmeyi doldur', block:true,
-          class:'mt-12', act:'open-review' })}`,
-    });
-  }
-
-  /* Haftalık özet — review yazmadan önce bakılacak tek kart. */
-  function digestCard(n){
-    const comp = C.planCompletion(n);
-    const qr = C.questionRealization(n);
     const time = C.timeRealization(n);
-    const blocks = C.weekBlocks(n, true);
-    const solved = U.sum(blocks.map(b => b.actualQ || 0));
-    const correct = U.sum(blocks.map(b => b.correctQ || 0));
-    const acc = solved ? U.pct(correct, solved) : null;
-    const exams = S.exams.filter(e => {
-      const d = U.parse(e.date);
-      return d >= M.weekStart(n) && d <= M.weekEnd(n);
-    });
-    const newErrors = S.errors.filter(e => {
-      const d = R.U.gunOf((e.createdAt || ''));
-      return d && d >= U.iso(M.weekStart(n)) && d <= U.iso(M.weekEnd(n));
-    });
-    const notes = S.videoNotes.filter(v => {
-      const d = R.U.gunOf((v.createdAt || ''));
-      return d && d >= U.iso(M.weekStart(n)) && d <= U.iso(M.weekEnd(n));
-    });
-    const reviewed = S.cards.filter(c => c.lastReviewedAt
-      && c.lastReviewedAt >= U.iso(M.weekStart(n)) && c.lastReviewedAt <= U.iso(M.weekEnd(n))).length;
     const reasons = C.skipReasonCounts(n);
+    const blocks = C.weekBlocks(n, true);
+    const bSoru = U.sum(blocks.map(b => b.actualQ || 0));
+    const correct = U.sum(blocks.map(b => b.correctQ || 0));
+    const acc = bSoru ? U.pct(correct, bSoru) : null;
+    const icinde = iso => iso && iso >= U.iso(M.weekStart(n)) && iso <= U.iso(M.weekEnd(n));
+    const exams = S.exams.filter(e => icinde(e.date));
+    const newErrors = S.errors.filter(e => icinde(R.U.gunOf(e.createdAt || '')));
+    const notes = S.videoNotes.filter(v => icinde(R.U.gunOf(v.createdAt || '')));
+    const reviewed = S.cards.filter(c => c.lastReviewedAt && icinde(String(c.lastReviewedAt).slice(0, 10))).length;
     const topReason = Object.keys(reasons).sort((a, b) => reasons[b] - reasons[a])[0];
 
     const lines = [];
@@ -185,28 +170,29 @@ R.Screens.week = (function(){
     if(!lines.length) lines.push('Bu hafta için kayda değer sapma yok.');
 
     return K.Card({
-      title:'Hafta özeti', sub:'Değerlendirmeden önce buna bak',
-      badge:comp == null ? null : K.Badge({ label:'%'+comp,
-        tone:comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' }),
-      body:html`<div class="rapor-govde">
-        <!-- RAPOR KAPAĞI — belgenin yüzü. Mühür belgeyi imzalar, kapak
-             adlandırır; ikisi ayrı şeydir. Dosya yoksa düğüm kalkar. -->
-        <img class="rapor-kapak" src="img/marka/kapak-akademik-rapor.webp"
-          alt="Akademik rapor kapağı" loading="lazy" onerror="this.remove()">
+      title:'Haftanın özeti', hint:'review', sub:'Pazar değerlendirmesi · 30–40 dakika',
+      badge:rev ? K.Badge({ label:'değerlendirildi', tone:'ok' }) : K.Badge({ label:'değerlendirme bekliyor', tone:'muted' }),
+      body:html`
         ${K.Cols(4, [
-          K.Stat({ label:'Soru', value:U.fmtNum(solved), note:qr ? 'hedef '+qr.target : 'hedef yok' }),
-          K.Stat({ label:'Doğruluk', value:acc == null ? '—' : '%'+acc,
+          K.Stat({ label:'Plan tamamlama', value:comp == null ? '—' : '%'+comp,
+            tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' }),
+          K.Stat({ label:'Soru', value:qr ? U.fmtNum(qr.solved) : '—',
+            note:qr ? 'hedef ' + qr.target + (qr.pct != null ? ' · %' + qr.pct : '') : 'hedef yok' }),
+          K.Stat({ label:'Doğruluk', value:acc == null ? '—' : '%'+acc, note:'blok sorularında',
             tone:acc == null ? null : acc >= 70 ? 'ok' : 'warn' }),
           K.Stat({ label:'Süre', value:U.fmtMin(time.actual), note:'plan '+U.fmtMin(time.target) }),
-          K.Stat({ label:'Tekrar', value:U.fmtNum(reviewed), note:'kart çözüldü' }),
         ])}
         ${K.Row([
           K.Chip(U.plural(exams.length, 'deneme', 'deneme')),
           K.Chip(U.plural(newErrors.length, 'yeni yanlış', 'yeni yanlış')),
           K.Chip(U.plural(notes.length, 'ders notu', 'ders notu')),
+          K.Chip(U.plural(reviewed, 'kart tekrarı', 'kart tekrarı')),
         ], { wrap:true })}
         <ul class="bullets small muted mt-10">${map(lines, l => html`<li>${l}</li>`)}</ul>
-      </div>`,
+        ${reasonChips(reasons) || ''}
+        ${when(rev && rev.decision, () => html`<div class="mt-10">${K.Notice({ tone:'ok', title:'Düzeltme:', body:rev.decision })}</div>`)}
+        ${K.Button({ label:rev ? 'Değerlendirmeyi güncelle' : 'Değerlendirmeyi doldur', block:true,
+          class:'mt-12', act:'open-review' })}`,
     });
   }
 
@@ -448,13 +434,10 @@ R.Screens.week = (function(){
 
   /* 049 KONU KAPSAM HALKASI: sözleşmedeki ana konuların soru hedefine
      karşı, haftanın bloklarında o konuda çözülen soru. */
-  function kapsam(week, n){
-    if(!VT() || !week.mainTopics || !week.mainTopics.length) return '';
+  /* Konunun bu hafta çözülen sorusu: konu adıyla eşleşen blokların ölçümü. */
+  function cozulenOf(t, n){
     const bl = C.weekBlocks(n, true);
-    const satirlar = week.mainTopics.filter(t => String(t.name || '').trim()).map(t => ({ ad:t.name,
-      plan:Number(t.questionTarget) || null,
-      cozulen:U.sum(bl.filter(b => U.norm(b.topic || '') === U.norm(t.name)).map(b => Number(b.actualQ) || 0)) }));
-    return kutu('Konu kapsamı', 'hesaplandı', VT().kapsamHalkasi({ satirlar }));
+    return U.sum(bl.filter(b => U.norm(b.topic || '') === U.norm(t.name || '')).map(b => Number(b.actualQ) || 0));
   }
 
   /* 061 DERS DENGESİ ve 067 DERS İŞARETLERİ: planlanan ve gerçekleşen
@@ -496,7 +479,8 @@ R.Screens.week = (function(){
 
       K.Span(6, K.Stack([
         contractCard(week, n),
-        kapsam(week, n),
+        /* her hafta kullanılan iki kart üstte; ara sıra bakılanlar altta */
+        ozetCard(n),
         dersDengesi(n),
         K.Card({ title:'Plan tamamlama geçmişi', sub:'Hedef %85',
           body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) }),
@@ -507,8 +491,6 @@ R.Screens.week = (function(){
         haftaCizgisi(n),
         planIzgarasi(n),
         istisnaCard(),
-        digestCard(n),
-        reviewCard(n),
         K.Card({ title:'Müfredat referansı', sub:'Bu haftanın plandaki karşılığı', body:html`
           <div class="stack-xs"><span class="mono-label">Konu blokları</span>
             ${K.Row(map(curriculum.topics, t => K.Chip(t)), { wrap:true })}</div>

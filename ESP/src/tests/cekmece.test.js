@@ -77,3 +77,24 @@
     });
   });
 })();
+
+/* Sade gizli (2026-10-02): gereksiz kartlar baştan gizli. Haritadaki her
+   ekran gerçek bir ekrandır ve her anahtar bölüm başlığının biçimindedir
+   (yanlış yazılan anahtar bölümü sessizce açık bırakırdı). Anahtarların
+   kartlara denk geldiği gezintiyle de ölçüldü. */
+(function(){
+  const NS = window.R || window.SP || window.ESP;
+  const { describe, it, expect } = NS.Test;
+  describe('Sade gizli kartlar', () => {
+    it('her ekran gerçek, her anahtar bölüm başlığı biçiminde; hiçbir ekran boş kalmaz', () => {
+      const har = NS.App.SADE_GIZLI;
+      const G = window.LIFEOS.Gizle;
+      expect(Object.keys(har).length > 0).toBe(true);
+      Object.keys(har).forEach(id => {
+        expect(!!NS.Screens[id]).toBe(true);
+        har[id].forEach(a => expect(G.anahtar(a)).toBe(a));
+      });
+    });
+  });
+})();
+

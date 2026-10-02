@@ -282,6 +282,25 @@ R.App = (function(){
   function ayarlardaMi(route){ return !!safe(() => bolumOf(route) && bolumOf(route).id === 'ayarlar', false); }
   function ayarRotalari(){ return safe(() => (NAV.find(s => s.id === 'ayarlar') || { items:[] }).items.map(v => ({ route:v.id, ad:v.label })), []) || []; }
 
+  /* SADE GİZLİ (kullanıcı, 2026-10-02: «sistemdeki gereksiz kartların
+     hepsini kaldır, yalnız gerçekten işe yarayanlar kalsın»). Eylemi ya da
+     giriş alanı olmayan ve yalnız açıklama, başvuru tablosu ya da tekrar
+     taşıyan kartlar baştan GİZLİDİR. Silinmez: veri ve kod yerinde; sayfanın
+     sonundaki «N bölüm gizli · Göster» notu ve Sayfa düzeni geri getirir
+     (brand/ortak/gizle.js). Anahtar = bölüm başlığı (gizle.anahtar); her
+     anahtarın gerçek bir bölüme denk geldiği test edilir (sade.test.js). */
+  const SADE_GIZLI = {
+    learn:['nasıl-çalışır'],
+    quiz:['neden-sınama'],
+    analytics:['veri-doluluğu'],
+    subjects:['kaynak-mimarisi'],
+    target:['sıra-referansları', 'yerleşen-profilleri'],
+    week:['müfredat-referansı'],
+    cards:['kapanış-ölçütü'],
+    exams:['deneme-hacmi', 'yayın-merdiveni'],
+    guide:['klavye-kısayolları', 'bu-uygulama-ne-değildir', 'kritik-işlemler', 'sınav-haftası-ve-sınav-günü', 'taper-haftası-planı', 'kaygı-azaltma', 'deneme-analizi-protokolü', 'hata-etiketleri-ve-reçeteler', 'yanlış-defteri-tasarımı', 'aralıklı-tekrar', 'hesap-verebilirlik', 'sınav-kaynağı', 'öğrenme-araştırması', 'kendi-verin', 'sistem-ayarı', 'denetim'],
+  };
+
   function sayfaBasiHtml(sc){
     const baslik = safe(() => sc.headline ? sc.headline() : '') || sc.title;
     const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
@@ -586,7 +605,7 @@ R.App = (function(){
         try{
           LIFEOS.Gizle.uygula({ kok:document.getElementById('main'), modul:'ays',
             profil:(R.Ornek && R.Ornek.aktif && R.Ornek.aktif()) || 'main', ekran:sc.id,
-            varsayilan:sc.gizliVarsayilan || [], kucukVarsayilan:sc.kucukVarsayilan || [] });
+            varsayilan:(sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []), kucukVarsayilan:sc.kucukVarsayilan || [] });
         }catch(e){ console.error('Gizle:', e); }
       }
     }catch(err){
@@ -1548,7 +1567,7 @@ R.App = (function(){
     }
   }
 
-  return { boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, canInstall, promptInstall, installManifest,
+  return { boot, onaySayisi, errorPanel, replanEtiketi, render, patch, go, applyTheme, NAV, yolOf, SADE_GIZLI, canInstall, promptInstall, installManifest,
     notifyState, askNotify, notifyFromOffice };
 })();
 

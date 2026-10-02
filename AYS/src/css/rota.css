@@ -1541,7 +1541,7 @@ tbody tr:hover{ background:var(--surface-2); }
 
 /* Haftalık sözleşme: konu başına tek satır (2026-10-02, «çok uzun, çok büyük»). */
 .konuliste{ display:flex; flex-direction:column; }
-.konusatir{ display:grid; grid-template-columns:24px minmax(0,1fr) 88px 88px 160px 28px; gap:8px; align-items:center;
+.konusatir{ display:grid; grid-template-columns:24px minmax(0,1fr) 72px 88px 88px 160px 28px; gap:8px; align-items:center;
   padding:6px 0; border-bottom:1px solid var(--border-soft); }
 .konusatir:last-child{ border-bottom:0; }
 .konusatir--bas{ padding:0 0 2px; border-bottom:0; font-size:12px; color:var(--text-3); }
@@ -1549,10 +1549,16 @@ tbody tr:hover{ background:var(--surface-2); }
 @media (max-width:679px){
   .konusatir{ grid-template-columns:24px minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr) 28px; row-gap:6px; }
   .konusatir--bas{ display:none; }
-  .konusatir > .konusatir__ad{ grid-column:2 / 5; grid-row:1; }
-  .konusatir > :nth-child(6){ grid-column:5; grid-row:1; }
-  .konusatir > :nth-child(3){ grid-column:2; grid-row:2; }
-  .konusatir > :nth-child(4){ grid-column:3; grid-row:2; }
-  .konusatir > :nth-child(5){ grid-column:4; grid-row:2; }
+  .konusatir > .konusatir__adkap{ grid-column:2 / 4; grid-row:1; }
+  .konusatir > .konusatir__cozulen{ grid-column:4; grid-row:1; text-align:right; }
+  .konusatir > :nth-child(7){ grid-column:5; grid-row:1; }
+  .konusatir > :nth-child(4){ grid-column:2; grid-row:2; }
+  .konusatir > :nth-child(5){ grid-column:3; grid-row:2; }
+  .konusatir > :nth-child(6){ grid-column:4; grid-row:2; }
 }
+.konusatir__adkap{ position:relative; min-width:0; }
+.konusatir__cubuk{ position:absolute; left:10px; right:10px; bottom:3px; height:2px; border-radius:1px; background:var(--surface-3); overflow:hidden; }
+.konusatir__cubuk i{ display:block; height:100%; background:var(--ays); }
+.konusatir__cozulen{ font-size:13px; font-weight:600; color:var(--text); text-align:center; }
+.konusatir__cozulen small{ font-weight:400; color:var(--text-3); }
 

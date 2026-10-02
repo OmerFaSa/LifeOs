@@ -253,6 +253,21 @@ ESP.App = (function(){
   function ayarlardaMi(route){ return !!safe(() => sectionOf(route) && sectionOf(route).id === 'ayarlar', false); }
   function ayarRotalari(){ return safe(() => ((typeof SECTIONS === 'function' ? SECTIONS() : SECTIONS).find(s => s.id === 'ayarlar') || { views:[] }).views.map(v => ({ route:v.route, ad:v.label })), []) || []; }
 
+  /* SADE GİZLİ (kullanıcı, 2026-10-02: «sistemdeki gereksiz kartların
+     hepsini kaldır, yalnız gerçekten işe yarayanlar kalsın»). Eylemi ya da
+     giriş alanı olmayan ve yalnız açıklama, başvuru tablosu ya da tekrar
+     taşıyan kartlar baştan GİZLİDİR. Silinmez: veri ve kod yerinde; sayfanın
+     sonundaki «N bölüm gizli · Göster» notu ve Sayfa düzeni geri getirir
+     (brand/ortak/gizle.js). Anahtar = bölüm başlığı (gizle.anahtar); her
+     anahtarın gerçek bir bölüme denk geldiği test edilir (sade.test.js). */
+  const SADE_GIZLI = {
+    guide:['nasıl-çalışır', 'sıfır-sürtünme', 'kısayollar', 'yedi-disiplin', 'çıktı-denetimi', 'ne-büyüyor', 'nerede-duruyor', 'doktrin', 'yapılmayacaklar', 'kardeş-projeler', 'yayımlanmış-çerçeve', 'öğrenme-araştırması', 'kendi-ölçümün', 'sistem-ayarı', 'denetim'],
+    history:['egzersiz-kataloğu'],
+    studio:['nefes-ve-vurgu', 'ısınma-sırası'],
+    library:['öğrendiğini-anlat'],
+    analytics:['veri-doluluğu'],
+  };
+
   function sayfaBasiHtml(sc){
     const baslik = safe(() => sc.headline ? sc.headline() : '') || sc.title;
     const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
@@ -558,7 +573,7 @@ ESP.App = (function(){
         try{
           LIFEOS.Gizle.uygula({ kok:document.getElementById('main'), modul:'esp',
             profil:(ESP.Ornek && ESP.Ornek.aktif && ESP.Ornek.aktif()) || 'main', ekran:sc.id,
-            varsayilan:sc.gizliVarsayilan || [], kucukVarsayilan:sc.kucukVarsayilan || [] });
+            varsayilan:(sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []), kucukVarsayilan:sc.kucukVarsayilan || [] });
         }catch(e){ console.error('Gizle:', e); }
       }
     }catch(err){
@@ -1717,7 +1732,7 @@ ESP.App = (function(){
   }
 
   return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS,
-    sectionOf, routeOn, yolOf, THEMES, installManifest,
+    sectionOf, routeOn, yolOf, SADE_GIZLI, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
 })();
 
