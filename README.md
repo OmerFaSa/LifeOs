@@ -93,12 +93,12 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Araç | AYS | SPI | ESP |
 |---|---|---|---|
-| `runtests.js` | 2257/2257 gecti | 1836/1836 gecti | 1821/1821 gecti |
+| `runtests.js` | 2248/2248 gecti | 1845/1845 gecti | 1832/1832 gecti |
 | `smoke.js` | Duman testi temiz — 2 hedefte 42 ekran, 0 sekme gezildi. | Duman testi temiz — 2 hedefte 32 ekran, 0 sekme gezildi. | Duman testi temiz — 2 hedefte 34 ekran, 0 sekme gezildi. |
 | `a11ycheck.js` | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (1 bilinen eksik izin listesinde) | erisilebilirlik temiz (3 bilinen eksik izin listesinde) |
 | `palettecheck.js` | 120 kontrast ölçümü AA geçti — en dar pay: metin merdiveni sırası 1.03 (asgari 1) — light/kagit/today | 140 kontrast olcumu AA gecti — en dar pay: metin merdiveni sırası 1.03 (asgari 1) — light/kagit/today | 160 kontrast ölçümü AA geçti — en dar pay: metin merdiveni sırası 1.03 (asgari 1) — light/kagit/today |
 | `layoutcheck.js` | Telefon ve tablet düzeni temiz — 390 ve 820 pikselde 42 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon ve tablet düzeni temiz — 390 ve 820 pikselde 32 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. | Telefon ve tablet düzeni temiz — 390 ve 820 pikselde 34 yerde taşma yok, bütün dokunma hedefleri 24px ve üstü. |
-| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 45.8 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı analytics 35.2 ms (bütçe 140). | Bütün ekranlar bütçede — en ağırı office 47.4 ms (bütçe 100). |
+| `perfcheck.js` | Bütün ekranlar bütçede — en ağırı office 34.7 ms (bütçe 120). | Bütün ekranlar bütçede — en ağırı analytics 30.3 ms (bütçe 140). | Bütün ekranlar bütçede — en ağırı office 33.5 ms (bütçe 100). |
 | `ledgercheck.js` | — | 32 ekran/sekmede defter düzeni temiz | — |
 | `designcheck.js` | — | 1 düzen temiz — 104 ekran/genişlik kombinasyonu bakıldı | — |
 | `tasarimcheck.js` | — | 21 tasarım örneği temiz | — |
@@ -106,7 +106,7 @@ _Bu bölüm elle yazılmaz: `python3 tools/sayilar.py --yaz` araçları koşturu
 
 | Depo denetimi | Sonuç |
 |---|---|
-| `HKM tests` | 776/776 test gecti |
+| `HKM tests` | 778/778 test gecti |
 | `HKM perf` | Bütün sorgular bütçede. |
 | `HKM yuz` | HKM yüzü temiz — 52 görünümde taşma yok, bütün hedefler 24px ve üstü, etiketler yerinde, kontrast AA. |
 | `marka.py` | marka adlandirma ve yol muhafizi temiz (25 durum) |
