@@ -11065,8 +11065,10 @@ svg.chart{ max-height:180px; }
 }
 
 /* 1 · Sol üst boş: konum satırı görünmez, ekran okuyucu okur. */
-.ust--v5 .ust__yol{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);
+.ust--v5 .ust__yol, .ust--v5 .ust__yol > *{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);
   clip-path:inset(50%); white-space:nowrap; }
+/* Çocuklar da 1×1: kendi «…» kesmeleri (ust__yol-oge) telefonda kırpılan
+   içerik sayılıyordu (SPİ designcheck); okuyucu metni bilerek kırpılır. */
 .ust--v5 .ust__kenar{ display:none; }
 
 /* 2a · Kenarın seçili zemini bir katmandır (::before): yeni çekmeceye
@@ -12947,7 +12949,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'5752115', at:'2026-10-02 18:04', dirty:true };
+ESP.BUILD = { id:'d262c31', at:'2026-10-02 18:17', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.

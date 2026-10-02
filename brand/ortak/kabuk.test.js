@@ -58,6 +58,8 @@
         expect(yol.getAttribute('aria-label')).toBe('Konum');
         expect(yol.getBoundingClientRect().width <= 1).toBe(true);
         expect(yol.textContent).toContain('ESP');
+        /* Çocuklar da 1×1 okuyucu metni: kendi «…» kesmeleri kırpılan içerik sayılmasın. */
+        Array.from(yol.children).forEach(c => expect(c.clientWidth <= 1 && getComputedStyle(c).position === 'absolute').toBe(true));
         /* Dar şeritte çekmece adı GÖRSEL olarak saklanır ama erişilebilir ad kalır. */
         const site = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays',
           cekmeceler:[{ id:'bugun', ad:'Bugün', route:'today', on:true }] }) + '</div>');
