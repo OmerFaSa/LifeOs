@@ -236,6 +236,18 @@ ESP.Goodhart = (function(){
 
   /* ------------------------------------------------------------ ölçüm */
 
+  /* Ayrışma cümlesi (2026-10-02). Önceki pencere sıfırken oran sonsuzdur:
+     yüzde değil «sıfırdan» denir — «%Infinity arttı» yazılıyordu. */
+  function ayrismaNotu(def, dC, sonuc){
+    const yuzde = x => '%' + Math.round(Math.abs(x) * 100);
+    const artis = isFinite(dC) ? yuzde(dC) + ' arttı' : 'sıfırdan başladı';
+    const s = sonuc == null ? 'ölçülemedi'
+      : !isFinite(sonuc) ? (sonuc > 0 ? 'sıfırdan yükseldi' : 'sıfırdan geriledi')
+      : Math.round(sonuc * 100) === 0 ? 'değişmedi'
+      : sonuc > 0 ? yuzde(sonuc) + ' değişti' : yuzde(sonuc) + ' geriledi';
+    return def.effortLabel + ' ' + artis + ', ' + def.outcomeLabel + ' ' + s + '.';
+  }
+
   function oran(yeni, eski){
     if(eski == null || yeni == null) return null;
     if(eski === 0) return yeni > 0 ? Infinity : 0;
@@ -303,10 +315,7 @@ ESP.Goodhart = (function(){
       direction:yon.id,
       regressed:sonucIyilesme != null && sonucIyilesme < -SONUC_DURGUN,
       effortChange:dC, outcomeChange:sonucIyilesme,
-      note:def.effortLabel + ' %' + Math.round(dC * 100) + ' arttı, '
-         + def.outcomeLabel + ' ' + (sonucIyilesme == null ? 'ölçülemedi'
-            : (sonucIyilesme >= 0 ? '%' + Math.round(sonucIyilesme * 100) + ' değişti'
-               : '%' + Math.round(Math.abs(sonucIyilesme) * 100) + ' geriledi')) + '.' });
+      note:ayrismaNotu(def, dC, sonucIyilesme) });
   }
 
   /* Açık bölümlerin çiftleri. Kapalı bölüm hakkında hüküm kurulmaz. */
@@ -334,6 +343,6 @@ ESP.Goodhart = (function(){
 
   function policy(){ return POLICY; }
 
-  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS,
+  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS, ayrismaNotu,
     PENCERE, CABA_ARTIS, SONUC_DURGUN, ASGARI_CABA };
 })();

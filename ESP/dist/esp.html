@@ -12677,7 +12677,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'a36e5e6', at:'2026-10-02 12:47', dirty:true };
+ESP.BUILD = { id:'aabaa40', at:'2026-10-02 13:27', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -29396,6 +29396,31 @@ ESP.HINTS = {
     more:'Ünite KARTA döner, konu dönmez: bir dil ünitesi on kelimeyi desteye ekler ve ilerlemesi SRS\'ten okunur; «barre akorlar» ya da «kaynak eleştirisi» ise çalışılacak bir konudur ve ölçüsü kart değildir. Bu yüzden konu işaretleri ÖLÇÜM DEĞİL BEYANDIR: hiçbir kapıyı açmaz, kademeyi değiştirmez, hiçbir hesaba girmez. Çerçeveler uydurulmadı — CEFR (2020 Companion Volume), klasik retoriğin beş kanonu, Türkçe diksiyon başlıkları, yaygın gitar müfredatı ve Adler\'in okuma düzeyleri. Kaynağı olan konuda kaynak satırı yazar.' },
 };
 
+/* iPhone sıkı ölçü (2026-10-02): ekrandan kalkan sabit açıklama notları
+   ⓘ'de sürer. [anahtar, yeni ipucunun başlığı | null, cümle]: yeni ipucu
+   açılır ya da var olanın «more»una eklenir. */
+(function(H){
+  [
+    ['not-denge', 'Denge', 'Yoğunlaşma kasıtlı olabilir; sistem yalnızca görünür kılar, suçlamaz.'],
+    ['not-haftalik-rota', 'Haftalık rota', 'Rota bir takvim değildir: hangi disiplinin öne geçtiğini söyler, «salı 19:00» demez. Odak yalnızca eşitliği bozar.'],
+    ['not-gunluk-sure', 'Günlük süre', 'Girilmemiş gün grafikte boşluktur, sıfır değildir. Ortalama yalnızca kayıtlı günlerden hesaplanır.'],
+    ['streak', null, 'Seri bir hedef değil bir gözlemdir. Hiç girilmemiş gün seriyi kırar; «0 dakika» girilen gün de kırar — ikisi ayrı şeydir.'],
+    ['retention', null, 'Hiç cevaplanmamış kart bu ortalamaya girmez.'],
+    ['not-haftalik-rapor', 'Haftalık rapor', 'İyi haber kötü haberin arkasına saklanmaz: kötü olan önce söylenir.'],
+    ['not-capraz-bulgular', 'Çapraz bulgular', 'İki AYRI masanın verisi birlikte anlam kazandığında çıkar. «Birlikte hareket ediyor» denir, «sebep oldu» denmez.'],
+    ['not-gunun-brifingi', 'Günün brifingi', 'Günde tek model çağrısı. Sonuç güne yazılır; aynı gün tekrar çağrılmaz.'],
+    ['signal', null, 'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün ekranına tek satır olarak düşer. Burası o soruların defteri.'],
+    ['friction', null, 'Sistemde geçen süre ile çalışmada geçen süre. Pratik sayacı açıkken geçen süre çalışma sayılır, yönetim değil.'],
+    ['goodhart', null, 'Çaba arttı da sonuç yerinde mi saydı? Nöbetçi hüküm vermez, soru sorar: ayrışmanın meşru sebepleri vardır.'],
+    ['calib', null, 'Sistem söylemeden önce sen söyle. Ölçülen şey dardır: kayıtlı türlerde kör tahminlerinin kayıtlı sayıya ne kadar yaklaştığı. «Kendini tanıma» ölçülmez; bu bir üstbiliş sinyalidir. Değeri, sistem kapalıyken de elde kalmasıdır.'],
+    ['calib', null, 'Gerçek değer girilince tahmin kapanır ve deftere yazılır.'],
+  ].forEach(([k, t, c]) => {
+    const m = /[.!?…»)]$/.test(c) ? c : c + '.';
+    if(!H[k]){ H[k] = { t:t || k, b:m }; return; }
+    if(String(H[k].b + ' ' + (H[k].more || '')).indexOf(m) < 0) H[k].more = (H[k].more ? H[k].more + ' ' : '') + m;
+  });
+})(ESP.HINTS);
+
 /* ==== js/data/sections.js ==== */
 /* Gezinme kataloğu — hangi bölüm, hangi sayfalar.
 
@@ -37603,6 +37628,18 @@ ESP.Goodhart = (function(){
 
   /* ------------------------------------------------------------ ölçüm */
 
+  /* Ayrışma cümlesi (2026-10-02). Önceki pencere sıfırken oran sonsuzdur:
+     yüzde değil «sıfırdan» denir — «%Infinity arttı» yazılıyordu. */
+  function ayrismaNotu(def, dC, sonuc){
+    const yuzde = x => '%' + Math.round(Math.abs(x) * 100);
+    const artis = isFinite(dC) ? yuzde(dC) + ' arttı' : 'sıfırdan başladı';
+    const s = sonuc == null ? 'ölçülemedi'
+      : !isFinite(sonuc) ? (sonuc > 0 ? 'sıfırdan yükseldi' : 'sıfırdan geriledi')
+      : Math.round(sonuc * 100) === 0 ? 'değişmedi'
+      : sonuc > 0 ? yuzde(sonuc) + ' değişti' : yuzde(sonuc) + ' geriledi';
+    return def.effortLabel + ' ' + artis + ', ' + def.outcomeLabel + ' ' + s + '.';
+  }
+
   function oran(yeni, eski){
     if(eski == null || yeni == null) return null;
     if(eski === 0) return yeni > 0 ? Infinity : 0;
@@ -37670,10 +37707,7 @@ ESP.Goodhart = (function(){
       direction:yon.id,
       regressed:sonucIyilesme != null && sonucIyilesme < -SONUC_DURGUN,
       effortChange:dC, outcomeChange:sonucIyilesme,
-      note:def.effortLabel + ' %' + Math.round(dC * 100) + ' arttı, '
-         + def.outcomeLabel + ' ' + (sonucIyilesme == null ? 'ölçülemedi'
-            : (sonucIyilesme >= 0 ? '%' + Math.round(sonucIyilesme * 100) + ' değişti'
-               : '%' + Math.round(Math.abs(sonucIyilesme) * 100) + ' geriledi')) + '.' });
+      note:ayrismaNotu(def, dC, sonucIyilesme) });
   }
 
   /* Açık bölümlerin çiftleri. Kapalı bölüm hakkında hüküm kurulmaz. */
@@ -37701,7 +37735,7 @@ ESP.Goodhart = (function(){
 
   function policy(){ return POLICY; }
 
-  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS,
+  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS, ayrismaNotu,
     PENCERE, CABA_ARTIS, SONUC_DURGUN, ASGARI_CABA };
 })();
 
@@ -55695,13 +55729,11 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'Denge',
+        hint:'not-denge', label:'Denge',
         meta:(function(){
           const b = ESP.Planner.balance(7);
           return b.cert === 'missing' ? 'veri yok' : (b.skewed ? 'dengesiz' : 'dengeli');
         })(),
-        note:'Yoğunlaşma kasıtlı olabilir; sistem yalnızca görünür kılar, '
-           + 'suçlamaz.',
         body:(function(){
           const b = ESP.Planner.balance(7);
           if(b.cert === 'missing'){
@@ -55719,10 +55751,8 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'Haftalık rota',
+        hint:'not-haftalik-rota', label:'Haftalık rota',
         meta:'öncelik sırasına göre',
-        note:'Rota bir takvim değildir: hangi disiplinin öne geçtiğini söyler, '
-           + '«salı 19:00» demez. Odak yalnızca eşitliği bozar.',
         body:(function(){
           const r = ESP.Planner.weeklyRoute();
           return html`
@@ -55754,10 +55784,8 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        label:'Günlük süre',
+        hint:'not-gunluk-sure', label:'Günlük süre',
         meta:olculen.length + '/' + gunler.length + ' günde kayıt',
-        note:'Girilmemiş gün grafikte boşluktur, sıfır değildir. '
-           + 'Ortalama yalnızca kayıtlı günlerden hesaplanır.',
         action:K.Select({ value:disipl, change:'series-disc', size:'sm',
           aria:'Disiplin süzgeci',
           options:[{ value:'all', label:'Tümü' }]
@@ -55778,8 +55806,6 @@ ESP.Screens.analytics = (function(){
       K.Entry({
         label:'Seri', hint:'streak',
         meta:M.streak() + ' gün',
-        note:'Seri bir hedef değil bir gözlemdir. Hiç girilmemiş gün seriyi '
-           + 'kırar; «0 dakika» girilen gün de kırar — ikisi ayrı şeydir.',
         body:html`
           ${K.Meter({ label:'Üst üste kayıtlı gün', value:Math.min(100, M.streak() / 30 * 100),
             text:M.streak() + ' gün' })}
@@ -55793,7 +55819,6 @@ ESP.Screens.analytics = (function(){
           const r = ESP.SRS.retention();
           return r.cert === 'missing' ? 'veri yok' : '%' + Math.round(r.value * 100);
         })(),
-        note:'Hiç cevaplanmamış kart bu ortalamaya girmez.',
         body:(function(){
           const r = ESP.SRS.retention();
           if(r.cert === 'missing'){
@@ -55816,9 +55841,8 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        label:'Haftalık rapor',
+        hint:'not-haftalik-rapor', label:'Haftalık rapor',
         meta:'kural motorundan',
-        note:'İyi haber kötü haberin arkasına saklanmaz: kötü olan önce söylenir.',
         wide:true,
         body:html`<div class="rapor-govde">
           <!-- RAPOR KAPAĞI — belgenin yüzü. Mühür belgeyi imzalar, kapak
@@ -55830,10 +55854,8 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'Çapraz bulgular',
+        hint:'not-capraz-bulgular', label:'Çapraz bulgular',
         meta:cross.length ? cross.length + ' bulgu' : 'yok',
-        note:'İki AYRI masanın verisi birlikte anlam kazandığında çıkar. '
-           + '«Birlikte hareket ediyor» denir, «sebep oldu» denmez.',
         wide:true,
         body:cross.length
           ? html`${map(cross, c => html`
@@ -55851,10 +55873,8 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'Günün brifingi',
+        hint:'not-gunun-brifingi', label:'Günün brifingi',
         meta:gunluk ? (gunluk.source === 'model' ? 'model' : 'kural motoru') : 'üretilmedi',
-        note:'Günde tek model çağrısı. Sonuç güne yazılır; aynı gün tekrar '
-           + 'çağrılmaz.',
         action:K.Button({ label:gunluk ? 'Yeniden üret' : 'Üret', size:'sm',
           act:'gen-briefing' }),
         body:gunluk
@@ -55907,8 +55927,6 @@ ESP.Screens.analytics = (function(){
     return K.Entry({
       label:'Denetim defteri', hint:'signal',
       meta:e.opened ? e.answered + '/' + e.opened + ' cevaplandı' : 'sinyal yok',
-      note:'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün '
-         + 'ekranına tek satır olarak düşer. Burası o soruların defteri.',
       wide:true,
       body:html`
         ${K.Notice({ tone:h.level === 'used' ? 'ok' : h.level === 'unknown' ? 'info' : 'warn',
@@ -55965,8 +55983,6 @@ ESP.Screens.analytics = (function(){
         meta:f.cert === 'missing' ? 'veri yok'
           : f.window.perDay + ' dk/gün'
             + (f.window.ratio == null ? '' : ' · %' + Math.round(f.window.ratio * 100)),
-        note:'Sistemde geçen süre ile çalışmada geçen süre. Pratik sayacı '
-           + 'açıkken geçen süre çalışma sayılır, yönetim değil.',
         wide:true,
         body:html`
           ${K.Notice({ tone:f.level === 'high' ? 'warn' : 'info',
@@ -55989,8 +56005,6 @@ ESP.Screens.analytics = (function(){
       K.Entry({
         label:'Gösterge ayrışması', hint:'goodhart',
         meta:ayrisan.length ? ayrisan.length + ' ayrışma' : 'temiz',
-        note:'Çaba arttı da sonuç yerinde mi saydı? Nöbetçi hüküm vermez, '
-           + 'soru sorar: ayrışmanın meşru sebepleri vardır.',
         wide:true,
         body:bayraklar.length
           ? html`${K.Table({ tight:true,
@@ -56032,10 +56046,6 @@ ESP.Screens.analytics = (function(){
         label:'Kalibrasyon', hint:'calib',
         meta:puan.cert === 'missing' ? puan.n + '/' + ESP.Calib.ASGARI + ' tahmin'
           : (puan.grade || (puan.brier == null ? '—' : 'brier ' + puan.brier.toFixed(2))),
-        note:'Sistem söylemeden önce sen söyle. Ölçülen şey dardır: kayıtlı '
-           + 'türlerde kör tahminlerinin kayıtlı sayıya ne kadar yaklaştığı. '
-           + '«Kendini tanıma» ölçülmez; bu bir üstbiliş sinyalidir. Değeri, '
-           + 'sistem kapalıyken de elde kalmasıdır.',
         wide:true,
         body:html`
           ${K.Notice({ tone:'info', body:puan.note })}
@@ -56062,7 +56072,6 @@ ESP.Screens.analytics = (function(){
               ${map(vadesi, fo => K.Entry({
                 label:(ESP.Calib.kindOf(fo.kind) || {}).label || fo.kind,
                 meta:'tahminin: ' + U.fmtNum(fo.guess),
-                note:'Gerçek değer girilince tahmin kapanır ve deftere yazılır.',
                 body:html`
                   ${K.Field({ label:'Gerçekleşen',
                     input:K.Input({ id:'calib-actual-' + fo.id, type:'number', numeric:true }) })}
@@ -56174,6 +56183,14 @@ ESP.Screens.analytics = (function(){
 
   return {
     id:'analytics',
+    /* iPhone Faz 3: her bölümde açık yalnız işin kendisi; ikincil kartlar,
+       dürüstlüğün meta kartları ve disiplin başına ayrışma kartları şerit. */
+    get kucukVarsayilan(){
+      const G = (window.LIFEOS || {}).Gizle;
+      const bayrak = G && ESP.Goodhart ? ESP.Goodhart.flags().map(p => G.anahtar(p.effortLabel.toUpperCase())) : [];
+      return ['denge', 'haftalık-rota', 'seri', 'çapraz-bulgular', 'günün-brifingi',
+        'denetim-defteri', 'sürtünme', 'gösterge-ayrışması'].concat(bayrak);
+    },
     title:'Analiz',
     headline(){
       const b = ESP.Planner.balance(7);
@@ -59101,7 +59118,7 @@ ESP.App = (function(){
     studio:['nefes-ve-vurgu', 'ısınma-sırası', 'paket-iste'],
     library:['öğrendiğini-anlat', 'bağlı-notlar'],
     writing:['sınır'],
-    analytics:['veri-doluluğu'],
+    analytics:['veri-doluluğu', 'sınır'],
     gun:['bekleyen-iş', 'günün-dakikası', 'yedek', 'hkm', 'seri', 'hedeflerim', 'günün-toplamı', 'asgari-gün', 'entelektüel-hacim', 'haftanın-dağılımı', 'son-gün', 'seçili-gün'],
   };
 

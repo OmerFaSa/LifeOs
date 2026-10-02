@@ -13433,7 +13433,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'a36e5e6', at:'2026-10-02 12:47', dirty:true };
+R.BUILD = { id:'aabaa40', at:'2026-10-02 13:34', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -27143,6 +27143,47 @@ R.HINTS = {
   'command':{ t:'Komut paleti', b:'Ctrl+K ile her yere atla, kayıt aç, tema değiştir.' },
 };
 
+/* iPhone sıkı ölçü (2026-10-02): ekrandan kalkan sabit açıklama notları
+   ⓘ'de sürer. [anahtar, yeni ipucunun başlığı | null, cümle]: yeni ipucu
+   açılır ya da var olanın «more»una eklenir. */
+(function(H){
+  [
+    ['not-iki-denemeyi-yan-yana-koy', 'İki denemeyi yan yana koy', 'Toplam net değil, test bazında ne değişti'],
+    ['not-bos-birakma-stratejisi', 'Boş bırakma stratejisi', 'Boş sayısı ile net arasındaki ilişki'],
+    ['not-yayin-zorluk-farki', 'Yayın zorluk farkı', 'Kolay yayından gelen yükseliş yanıltır'],
+    ['not-konu-hata-tipi', 'Konu × hata tipi', 'Aynı konu farklı hata üretiyorsa reçete de farklıdır'],
+    ['not-yapiskan-kartlar', 'Yapışkan kartlar', 'Dört kez üst üste unutulan kart kötü yazılmıştır'],
+    ['estimate', null, 'Her noktada son 3 denemenin medyanı — tek fotoğraf değil film'],
+    ['not-bant-tablosu', 'Bant tablosu', 'Her denemeden sonraki iyimser–kötümser aralık'],
+    ['not-hiz-isabet-dengesi', 'Hız–isabet dengesi', 'Soru başına saniye ve doğruluk'],
+    ['quiz', null, 'İlk 20 dakika ile kalanı arasındaki fark'],
+    ['not-konu-net-katkisi', 'Konu net katkısı', 'Bu konu kapanırsa yaklaşık kaç net gelir'],
+    ['sleep', null, 'Genel tavsiye değil, senin verin'],
+    ['srs', null, 'Hangi aralıkta gerçekten hatırlıyorsun'],
+    ['not-kapasite-gerceklik-kontrolu', 'Kapasite kontrolü', 'Söylenen saat ile çalışılan saat'],
+    ['not-dikkat-dagilmasi', 'Dikkat dağılması', 'Blok sırasında kaç kez bölündün'],
+    ['friction', null, 'Sistemi yönetmek ile çalışmak'],
+    ['calib', null, 'Sistem söylemeden önce sen söyle'],
+    ['median', null, 'Yalnız tam denemeler'],
+    ['gate', null, 'Son 3 denemenin medyanı vs bu ayın bandı'],
+    ['pareto', null, 'Son haftaların hata dağılımı'],
+    ['not-surec-gostergeleri', 'Süreç göstergeleri', 'Nete değil sürece bakar: tekrar borcu, konu kapanışı ve uyku.'],
+    ['protocol', null, 'Kapatırken sonucu yaz — sonraki kapıda karşılaştırılır.'],
+    ['audit', null, 'Veri eşiğin altındaysa bu «temiz» değil «ölçülmedi» demektir; gri satırlar onu söyler. Her bulgu eyleme bağlıdır ve hangi kayıtların söz konusu olduğunu yazar; hiçbir bulgu kişiyi suçlamaz — «şu kayıtlar şu durumda» der.'],
+  ].forEach(([k, t, c]) => {
+    const m = /[.!?…»)]$/.test(c) ? c : c + '.';
+    if(!H[k]){ H[k] = { t:t || k, b:m }; return; }
+    if(String(H[k].b + ' ' + (H[k].more || '')).indexOf(m) < 0) H[k].more = (H[k].more ? H[k].more + ' ' : '') + m;
+  });
+})(R.HINTS);
+
+/* Karar kapısı algoritması ⓘ'de (eskiden kartın altında beş madde; tek
+   kaynak R.GATE_ALGORITHM). */
+if(R.HINTS.gate && R.GATE_ALGORITHM && String(R.HINTS.gate.more || '').indexOf('Algoritma:') < 0){
+  R.HINTS.gate.more = (R.HINTS.gate.more ? R.HINTS.gate.more + ' ' : '')
+    + 'Algoritma: ' + R.GATE_ALGORITHM.map((s, i) => (i + 1) + ') ' + s).join(' ');
+}
+
 /* ==== js/data/rules.js ==== */
 /* Ev kuralları ve istem parçaları — tek kaynak, sürümlü.
 
@@ -38882,6 +38923,18 @@ R.Goodhart = (function(){
 
   /* ---------------------------------------------------------------- ölçüm */
 
+  /* Ayrışma cümlesi (2026-10-02). Önceki pencere sıfırken oran sonsuzdur:
+     yüzde değil «sıfırdan» denir — «%Infinity arttı» yazılıyordu.
+     gerileme: null ölçülemedi, 0 yerinde saydı, eksi sayı geriledi. */
+  function ayrismaNotu(def, dC, gerileme){
+    const artis = isFinite(dC) ? '%' + Math.round(dC * 100) + ' arttı' : 'sıfırdan başladı';
+    const sonuc = gerileme == null ? ' ölçülemedi'
+      : gerileme < 0 ? (isFinite(gerileme) ? ' %' + Math.round(Math.abs(gerileme) * 100) + ' GERİLEDİ'
+        : ' GERİLEDİ (önceki pencerede sıfırdı)')
+      : ' yerinde saydı';
+    return def.effortLabel + ' ' + artis + ', ' + def.outcomeLabel + sonuc + '.';
+  }
+
   function oran(yeni, eski){
     if(eski == null || yeni == null) return null;
     if(eski === 0) return yeni > 0 ? Infinity : 0;
@@ -38939,10 +38992,7 @@ R.Goodhart = (function(){
     return Object.assign(base, { status:'decoupled', cert:'measured',
       direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
       regressed:geriledi,
-      note:def.effortLabel + ' %' + Math.round(dC * 100) + ' arttı, '
-         + def.outcomeLabel + (dS == null ? ' ölçülemedi'
-            : geriledi ? ' %' + Math.round(Math.abs(iyilesme) * 100) + ' GERİLEDİ'
-            : ' yerinde saydı') + '.' });
+      note:ayrismaNotu(def, dC, dS == null ? null : geriledi ? iyilesme : 0) });
   }
 
   function scan(){ return PAIRS.map(pair); }
@@ -38961,7 +39011,7 @@ R.Goodhart = (function(){
 
   function policy(){ return POLICY; }
 
-  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS,
+  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS, ayrismaNotu,
     PENCERE, CABA_ARTIS, SONUC_DURGUN };
 })();
 
@@ -59850,47 +59900,54 @@ R.Screens.progress = (function(){
     })();
 
     return [
-      { key:'planCompletion', value:comp == null ? '—' : '%'+comp, spark:history, note:'bu hafta',
+      { key:'planCompletion', num:comp, birim:'%', value:comp == null ? '—' : '%'+comp, spark:history, note:'bu hafta',
         progress:comp, target:85,
         tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' },
-      { key:'questionRate', value:qr && qr.pct != null ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
+      { key:'questionRate', num:qr && qr.pct != null ? qr.pct : null, birim:'%', value:qr && qr.pct != null ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
         progress:qr ? qr.pct : null, target:90,
         tone:qr && qr.pct >= 90 ? 'ok' : qr && qr.pct >= 70 ? 'warn' : null },
-      { key:'topicClosure', value:'%'+closure.pct, tone:closure.pct >= 55 ? 'ok' : 'warn',
+      { key:'topicClosure', num:closure.pct, birim:'%', value:'%'+closure.pct, tone:closure.pct >= 55 ? 'ok' : 'warn',
         progress:closure.pct, target:55,
         note:closure.closed+' / '+closure.total+' konu' },
-      { key:'netTrend', spark:tyt.series,
+      { key:'netTrend', num:tyt.delta, birim:'net', ondalik:2, spark:tyt.series,
         value:tyt.delta == null ? '—' : (tyt.delta > 0 ? '+' : '')+U.fmtNet(tyt.delta),
         tone:tyt.delta == null ? null : tyt.delta > 0 ? 'ok' : tyt.delta < -1 ? 'danger' : 'warn',
         note:tyt.last3 == null ? 'en az 3 tam TYT gerekir'
           : 'son3 '+U.fmtNet(tyt.last3)+(tyt.prev3 != null ? ' · önceki3 '+U.fmtNet(tyt.prev3) : '') },
-      { key:'examBase', value:base == null ? '—' : U.fmtNet(base), note:'son 4 denemenin en düşüğü' },
+      { key:'examBase', num:base, birim:'net', ondalik:2, value:base == null ? '—' : U.fmtNet(base), note:'son 4 denemenin en düşüğü' },
       { key:'errorMix', value:pareto[0] && pareto[0].count ? pareto[0].tag : '—',
         note:pareto[0] && pareto[0].count ? R.ERROR_TAGS[pareto[0].tag].name+' · %'+pareto[0].pct : 'hata kaydı yok' },
-      { key:'timeDrift', value:timeDrift == null ? '—' : (timeDrift > 0 ? '+' : '')+timeDrift,
+      { key:'timeDrift', num:timeDrift, birim:'dk', value:timeDrift == null ? '—' : (timeDrift > 0 ? '+' : '')+timeDrift,
         unit:timeDrift == null ? '' : ' dk', note:'son tam TYT',
         tone:timeDrift == null ? null : timeDrift > 5 ? 'warn' : 'ok' },
-      { key:'cardDebt', value:'%'+debt, tone:debt > 10 ? 'danger' : 'ok',
+      { key:'cardDebt', num:debt, birim:'%', value:'%'+debt, tone:debt > 10 ? 'danger' : 'ok',
         progress:debt, target:10,
         note:C.overdueCards().length+' gecikmiş kart' },
     ];
   }
 
-  function KpiTile(c){
-    const def = R.KPI_DEFS.find(d => d.key === c.key);
-    const hasSpark = c.spark && c.spark.filter(v => v != null).length > 1;
-    return html`
-      <div class="${c.tone ? 'stat stat--'+c.tone : 'stat'}" title="${def.formula}">
-        <div class="row between"><span class="stat__label">${def.name}</span>
-          <span class="tiny dim">${def.target}</span></div>
-        <span class="stat__value">${c.value}${when(c.unit, () => html`<small>${c.unit}</small>`)}</span>
-        ${when(hasSpark, () => raw(UI.sparkline(c.spark)))}
-        ${when(c.progress != null, () => html`<span class="stat__bar" aria-hidden="true">
-          <i style="width:${Math.max(0, Math.min(100, c.progress))}%"></i>
-          ${when(c.target != null, () => html`<b style="left:${Math.max(0, Math.min(100, c.target))}%"></b>`)}
-        </span>`)}
-        <span class="stat__note">${c.note || ''}</span>
-      </div>`;
+  /* iPhone Faz 3 (2026-10-02): sekiz KPI kutusu tek dönen kart. Sıra kural
+     motorundan: hedefin dışındakiler önce (danger, warn), sonra öbürleri.
+     Ölçülmemiş KPI sayı değil cümledir. */
+  function DonenGidisat(){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = o => L.SAYI ? L.SAYI.html(o) : U.esc(String(o.deger) + (o.birim ? ' ' + o.birim : ''));
+    const sira = t => t === 'danger' ? 0 : t === 'warn' ? 1 : 2;
+    const buyuk = t => String(t || '').charAt(0).toLocaleUpperCase('tr-TR') + String(t || '').slice(1);
+    const m = kpiValues().map((c, i) => ({ c, i, def:R.KPI_DEFS.find(d => d.key === c.key) }))
+      .sort((a, b) => (sira(a.c.tone) - sira(b.c.tone)) || a.i - b.i)
+      .map(({ c, def }) => c.num == null
+        ? { ust:def.name, cumle:(c.value !== '—' ? c.note : /gerek|yok|girilmemiş/.test(c.note || '') ? buyuk(c.note) : 'Veri yok') + '.',
+            vurgu:'Hedef ' + def.target + '.', sistem:'ays' }
+        : { ust:def.name, sayi:sayi({ deger:c.num, birim:c.birim, ondalik:c.ondalik, kesinlik:'computed', formul:def.formula }),
+            cumle:c.tone === 'ok' ? 'hedefte.' : c.tone ? 'hedefin dışında.' : '',
+            vurgu:'Hedef ' + def.target + (c.note ? ' · ' + c.note : '') + '.', sistem:'ays' });
+    const ayt = C.medianTrend('AYT'), ab = C.examBase('AYT');
+    if(ayt.last3 != null) m.push({ ust:'AYT medyanı', sayi:sayi({ deger:ayt.last3, birim:'net', ondalik:2, kesinlik:'computed',
+      formul:'son 3 tam AYT denemesinin medyanı' }), cumle:'son 3 tam deneme.', vurgu:ab == null ? 'Taban yok.' : 'Taban ' + U.fmtNet(ab) + '.', sistem:'ays' });
+    return raw(V.donen({ id:'ays-gidisat', ad:'Gidişat', maddeler:m }));
   }
 
   /* ---------- trend ---------- */
@@ -59909,22 +59966,16 @@ R.Screens.progress = (function(){
       K.Badge({ label:fam+' '+(t.delta > 0 ? '+' : '')+U.fmtNet(t.delta), tone:t.delta > 0 ? 'ok' : 'warn' }));
 
     return K.Card({
-      title:'Deneme net trendi', sub:'Yalnız tam denemeler',
-      actions:html`<div class="row-sm">${delta('TYT', tyt)}${delta('AYT', ayt)}</div>`,
+      hint:'median', title:'Deneme net trendi',       actions:html`<div class="row-sm">${delta('TYT', tyt)}${delta('AYT', ayt)}</div>`,
       body:html`
         ${raw(UI.lineChart([{ data:tyt.series }, { data:ayt.series, accent:true }],
-          { labels:C.fullExams('TYT').map(e => U.fmtShort(e.date)), band:gate ? gate.tyt : null, height:210 }))}
+          { labels:C.fullExams('TYT').map(e => U.fmtShort(e.date)), band:gate ? gate.tyt : null, height:180 }))}
         ${raw(UI.legend([
           { label:'TYT tam deneme', color:'var(--primary)' },
           { label:'AYT tam deneme', color:'var(--accent)' },
           { label:'bu ayın gözlenen bandı', color:'var(--c-band)' },
         ]))}
-        <div class="cols-4 mt-12">
-          ${K.Stat({ label:'TYT son 3 medyan', value:tyt.last3 == null ? '—' : U.fmtNet(tyt.last3) })}
-          ${K.Stat({ label:'TYT tabanı', value:C.examBase('TYT') == null ? '—' : U.fmtNet(C.examBase('TYT')) })}
-          ${K.Stat({ label:'AYT son 3 medyan', value:ayt.last3 == null ? '—' : U.fmtNet(ayt.last3) })}
-          ${K.Stat({ label:'AYT tabanı', value:C.examBase('AYT') == null ? '—' : U.fmtNet(C.examBase('AYT')) })}
-        </div>`,
+`,
     });
   }
 
@@ -59950,7 +60001,7 @@ R.Screens.progress = (function(){
           <div class="small muted">Veri dönemi: ${decision.window} · Yeniden değerlendirme: ${U.fmtDate(decision.reevaluateAt)}</div>` })}
         ${K.Button({ label:'Müdahaleyi değiştir', size:'sm', act:'clear-decision', data:{ 'data-key':key } })}`
       : html`
-        <div class="stack-xs"><span class="mono-label">En fazla üç öneri — yalnız biri seçilir</span>
+        <div class="stack-xs"><span class="mono-label">Bir ana müdahale seç</span>
           ${map(g.suggestions, (s, i) => html`
             <label class="check"><input type="radio" name="gate-opt" value="${i}"/>
               <span>${s.text}<br/><span class="tiny dim">${s.why}</span></span></label>`)}
@@ -59958,8 +60009,7 @@ R.Screens.progress = (function(){
         ${K.Button({ label:'Ana müdahaleyi kaydet', tone:'primary', act:'save-decision' })}`;
 
     return K.Card({
-      title:'Aylık karar kapısı — '+gate.month,
-      sub:'Son 3 denemenin medyanı vs bu ayın bandı',
+      hint:'gate', title:'Aylık karar kapısı — '+gate.month,
       badge:decision ? K.Badge({ label:'karar verildi', tone:'ok' }) : K.Badge({ label:'karar bekliyor', tone:'warn' }),
       body:K.Stack([
         meter('TYT', g.tytStatus, g.tyt.last3, gate.tyt, gate.tytSafe),
@@ -59967,8 +60017,6 @@ R.Screens.progress = (function(){
         K.Notice({ tone:'info', title:'Bu ayın kuralı:', body:gate.note }),
         choice,
       ]),
-      foot:html`<span class="mono-label">Karar kapısı algoritması</span>
-        <ol class="bullets small muted mt-6">${map(R.GATE_ALGORITHM, s => html`<li>${s}</li>`)}</ol>`,
     });
   }
 
@@ -60056,25 +60104,25 @@ R.Screens.progress = (function(){
     const debt = C.cardDebt();
     const closure = C.overallClosure().pct;
 
+    /* Raf iki sütunu DOM sırasıyla dizer: trend ile karar kapısı yan yana,
+       şeritler altta; gizli başvuru kartları en sonda (iPhone Faz 3). */
     return String(K.Grid([
-      K.Span(12, html`<div class="kpigrid">${map(kpiValues(), KpiTile)}</div>`),
-
+      K.Span(12, DonenGidisat()),
+      K.Span(6, K.Stack([ trendCard() ])),
+      K.Span(4, K.Stack([ gateCard() ])),
       K.Span(6, K.Stack([
-        trendCard(),
         testTrendCard(),
         K.Card({ title:'Plan tamamlama — son 8 hafta', sub:'Hedef %85',
           body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) }),
         monthCurveCard(),
         kpiReference(),
       ])),
-
       K.Span(4, K.Stack([
-        gateCard(),
-        K.Card({ title:'Hata paretosu', sub:'Son haftaların hata dağılımı', body:html`
+        K.Card({ hint:'pareto', title:'Hata paretosu', body:html`
           ${raw(UI.paretoBars(pareto))}
           ${when(pareto[0] && pareto[0].count, () => html`<div class="mt-10">${K.Notice({ tone:'info',
             body:'Reçete: '+R.ERROR_TAGS[pareto[0].tag].recipe })}</div>`)}` }),
-        K.Card({ title:'Süreç göstergeleri', sub:'Nete değil sürece bakar', body:K.Stack([
+        K.Card({ hint:'not-surec-gostergeleri', title:'Süreç göstergeleri', body:K.Stack([
           K.Meter({ label:'Tekrar borcu', value:debt, text:'%'+debt, tone:debt > 10 ? 'danger' : '' }),
           K.Meter({ label:'Konu kapanışı', value:closure, text:'%'+closure }),
           /* «Bu hızla» (fikir 20): kapanış hızından sınava yetişme — tahmin. */
@@ -60125,6 +60173,15 @@ R.Screens.progress = (function(){
 
   return {
     id:'progress',
+    /* iPhone Faz 3: açık trend ve (karar bekliyorsa) karar kapısı; test
+       trendi, plan geçmişi ve pareto şerit; başvuru kartları app.js'te gizli. */
+    get kucukVarsayilan(){
+      const G = (window.LIFEOS || {}).Gizle;
+      const gate = C.currentGate();
+      const verildi = gate && S.decisions[U.monthKey(U.today())];
+      return ['test-bazlı-trend', 'plan-tamamlama-son-hafta', 'hata-paretosu']
+        .concat(G && verildi ? [G.anahtar('Aylık karar kapısı — ' + gate.month)] : []);
+    },
     title:'İlerleme',
     subtitle(){
       const t = C.medianTrend('TYT');
@@ -60187,8 +60244,7 @@ R.Screens.analytics = (function(){
 
     return K.Grid([
       K.Span(8, K.Stack([
-        K.Card({ title:'İki denemeyi yan yana koy', sub:'Toplam net değil, test bazında ne değişti',
-          body:html`
+        K.Card({ hint:'not-iki-denemeyi-yan-yana-koy', title:'İki denemeyi yan yana koy',           body:html`
             ${K.Cols(2, [
               K.Field({ label:'Önceki', input:K.Select({ options:opts, value:a, change:'cmp-a' }) }),
               K.Field({ label:'Sonraki', input:K.Select({ options:opts, value:b, change:'cmp-b' }) }),
@@ -60222,8 +60278,7 @@ R.Screens.analytics = (function(){
     const b = A().blankStrategy('TYT');
     if(!b.ok) return K.Card({ title:'Boş bırakma', body:K.Notice({ tone:'info', body:b.why }) });
     return K.Card({
-      title:'Boş bırakma stratejisi', sub:'Boş sayısı ile net arasındaki ilişki',
-      badge:K.Badge({ label:'ort. '+b.avgBlank+' boş', tone:'muted' }),
+      hint:'not-bos-birakma-stratejisi', title:'Boş bırakma stratejisi',       badge:K.Badge({ label:'ort. '+b.avgBlank+' boş', tone:'muted' }),
       body:html`
         ${K.Cols(2, [
           K.Stat({ label:'En iyi deneme', value:U.fmtNet(b.best.net), note:b.best.blank+' boş' }),
@@ -60238,8 +60293,7 @@ R.Screens.analytics = (function(){
     const p = A().publisherAdjust('TYT');
     if(!p.ok) return K.Card({ title:'Yayın etkisi', body:K.Notice({ tone:'info', body:p.why }) });
     return K.Card({
-      title:'Yayın zorluk farkı', sub:'Kolay yayından gelen yükseliş yanıltır',
-      badge:K.Badge({ label:'fark '+U.fmtNet(p.spread), tone:p.spread >= 6 ? 'warn' : 'muted' }),
+      hint:'not-yayin-zorluk-farki', title:'Yayın zorluk farkı',       badge:K.Badge({ label:'fark '+U.fmtNet(p.spread), tone:p.spread >= 6 ? 'warn' : 'muted' }),
       body:html`
         ${K.Table({ tight:true, headers:['Yayın', { label:'Deneme', num:true },
           { label:'Medyan', num:true }, { label:'Sapma', num:true }],
@@ -60266,8 +60320,7 @@ R.Screens.analytics = (function(){
 
     return K.Grid([
       K.Span(8, K.Card({
-        title:'Konu × hata tipi', sub:'Aynı konu farklı hata üretiyorsa reçete de farklıdır',
-        body:html`
+        hint:'not-konu-hata-tipi', title:'Konu × hata tipi',         body:html`
           ${K.Table({ tight:true,
             headers:['Konu'].concat(h.tags.map(t => ({ label:t, num:true })))
               .concat([{ label:'Toplam', num:true }]),
@@ -60286,8 +60339,7 @@ R.Screens.analytics = (function(){
   function leechCard(){
     const rows = A().leechCards(4);
     return K.Card({
-      title:'Yapışkan kartlar', sub:'Dört kez üst üste unutulan kart kötü yazılmıştır',
-      badge:rows.length ? K.Badge({ label:String(rows.length), tone:'warn' }) : null,
+      hint:'not-yapiskan-kartlar', title:'Yapışkan kartlar',       badge:rows.length ? K.Badge({ label:String(rows.length), tone:'warn' }) : null,
       body:rows.length
         ? html`<div class="stack-xs">${map(rows.slice(0, 8), c => html`
             <div class="row between">
@@ -60316,7 +60368,6 @@ R.Screens.analytics = (function(){
       K.Span(8, K.Stack([
         K.Card({
           title:'Tahmini sıra zaman içinde', hint:'estimate',
-          sub:'Her noktada son 3 denemenin medyanı — tek fotoğraf değil film',
           badge:raw(UI.provenance('estimate')),
           body:html`
             ${when((window.LIFEOS || {}).GRAFIK, () => {
@@ -60339,8 +60390,7 @@ R.Screens.analytics = (function(){
                 tone:moved > 0 ? 'ok' : moved < 0 ? 'warn' : null }),
             ])}` }),
 
-        K.Card({ title:'Bant tablosu', sub:'Her denemeden sonraki iyimser–kötümser aralık',
-          body:K.Table({ tight:true,
+        K.Card({ hint:'not-bant-tablosu', title:'Bant tablosu',           body:K.Table({ tight:true,
             headers:['Tarih', { label:'Puan', num:true }, { label:'İyimser sıra', num:true },
               { label:'Kötümser sıra', num:true }],
             rows:hist.slice().reverse().map(h => [
@@ -60370,8 +60420,7 @@ R.Screens.analytics = (function(){
     return K.Grid([
       K.Span(7, K.Stack([
         sp.ok
-          ? K.Card({ title:'Hız–isabet dengesi', sub:'Soru başına saniye ve doğruluk',
-              body:html`
+          ? K.Card({ hint:'not-hiz-isabet-dengesi', title:'Hız–isabet dengesi',               body:html`
                 ${K.Table({ tight:true, headers:['Test', { label:'sn/soru', num:true },
                   { label:'Doğruluk', num:true }, 'Profil'],
                   rows:sp.rows.map(r => [
@@ -60387,8 +60436,7 @@ R.Screens.analytics = (function(){
                   <div class="small muted"><b>${r.test}:</b> ${r.note}</div>`)}</div>` })
           : empty(sp.why, addExam),
 
-        K.Card({ title:'Isınma', hint:'quiz', sub:'İlk 20 dakika ile kalanı arasındaki fark',
-          body:w.ok
+        K.Card({ title:'Isınma', hint:'quiz',           body:w.ok
             ? html`${K.Cols(3, [
                 K.Stat({ label:'İlk 20 dk', value:'%'+w.early }),
                 K.Stat({ label:'Sonrası', value:'%'+w.late }),
@@ -60438,8 +60486,7 @@ R.Screens.analytics = (function(){
     const totalGap = U.round(U.sum(dokunulmus.map(r => r.gap)), 1);
     return K.Grid([
       K.Span(8, K.Card({
-        title:'Konu net katkısı', sub:'Bu konu kapanırsa yaklaşık kaç net gelir',
-        badge:K.Badge({ label:'~'+U.fmtNet(totalGap)+' net açık'
+        hint:'not-konu-net-katkisi', title:'Konu net katkısı',         badge:K.Badge({ label:'~'+U.fmtNet(totalGap)+' net açık'
           + (dokunulmamis ? ' · ' + dokunulmamis + ' konu hiç çalışılmadı' : ''),
           tone:'warn' }),
         body:html`
@@ -60476,8 +60523,7 @@ R.Screens.analytics = (function(){
 
     return K.Grid([
       K.Span(6, K.Stack([
-        K.Card({ title:'Uyku ve net', hint:'sleep', sub:'Genel tavsiye değil, senin verin',
-          body:sleep.ok
+        K.Card({ title:'Uyku ve net', hint:'sleep',           body:sleep.ok
             ? html`${K.Cols(3, [
                 K.Stat({ label:'Yeterli uyku', value:U.fmtNet(sleep.goodMedian), note:sleep.goodCount+' deneme' }),
                 K.Stat({ label:'Yetersiz uyku', value:U.fmtNet(sleep.badMedian), note:sleep.badCount+' deneme' }),
@@ -60487,8 +60533,7 @@ R.Screens.analytics = (function(){
               <div class="mt-12">${K.Notice({ tone:'info', body:sleep.note })}</div>`
             : K.Empty({ icon:'moon', text:sleep.why }) }),
 
-        K.Card({ title:'Unutma eğrisi', hint:'srs', sub:'Hangi aralıkta gerçekten hatırlıyorsun',
-          body:curve.ok
+        K.Card({ title:'Unutma eğrisi', hint:'srs',           body:curve.ok
             ? html`
               ${K.Table({ tight:true, headers:['Aralık', { label:'Tekrar', num:true }, { label:'Hatırlama', num:true }],
                 rows:curve.rows.map(r => [r.gap, r.total,
@@ -60498,8 +60543,7 @@ R.Screens.analytics = (function(){
       ])),
 
       K.Span(6, K.Stack([
-        K.Card({ title:'Kapasite gerçeklik kontrolü', sub:'Söylenen saat ile çalışılan saat',
-          badge:cap.ok ? K.Badge({ label:'%'+cap.ratio,
+        K.Card({ hint:'not-kapasite-gerceklik-kontrolu', title:'Kapasite gerçeklik kontrolü',           badge:cap.ok ? K.Badge({ label:'%'+cap.ratio,
             tone:cap.status === 'gercekci' ? 'ok' : cap.status === 'iyimser' ? 'warn' : 'danger' }) : null,
           body:cap.ok
             ? html`${K.Cols(2, [
@@ -60512,8 +60556,7 @@ R.Screens.analytics = (function(){
                 class:'mt-10', act:'setup-open' }))}`
             : K.Empty({ icon:'clock', text:cap.why }) }),
 
-        K.Card({ title:'Dikkat dağılması', sub:'Blok sırasında kaç kez bölündün',
-          body:dist.ok
+        K.Card({ hint:'not-dikkat-dagilmasi', title:'Dikkat dağılması',           body:dist.ok
             ? html`${raw(UI.barChart(dist.rows.map(r => ({ label:U.fmtShort(r.date).split(' ')[0], value:r.count })),
                 { goodAt:0 }))}
               <div class="mt-12">${K.Notice({ tone:dist.avg >= 5 ? 'warn' : 'info', body:dist.note })}</div>
@@ -60600,7 +60643,6 @@ R.Screens.analytics = (function(){
       K.Span(12, SignalLedger()),
       K.Span(6, K.Stack([
         K.Card({ title:'Sürtünme', hint:'friction',
-          sub:'Sistemi yönetmek ile çalışmak',
           body:html`
             ${K.Notice({ tone:f.level === 'high' ? 'warn' : 'info', body:f.title + ' — ' + f.note })}
             ${when(f.cert === 'measured', () => html`
@@ -60619,7 +60661,6 @@ R.Screens.analytics = (function(){
               </div>`)}</div>`)}` }),
 
         K.Card({ title:'Gösterge ayrışması', hint:'goodhart',
-          sub:'Çaba arttı da sonuç yerinde mi saydı?',
           body:html`
             ${K.Table({ tight:true, headers:['Çift', 'Yön', 'Çaba', 'Sonuç', 'Durum'],
               rows:cifts.map(p => [
@@ -60658,7 +60699,6 @@ R.Screens.analytics = (function(){
 
       K.Span(6, K.Stack([
         K.Card({ title:'Kalibrasyon', hint:'calib',
-          sub:'Sistem söylemeden önce sen söyle',
           body:html`
             ${K.Notice({ tone:'info', body:puan.note })}
             ${when(puan.bias.cert === 'measured',
@@ -60727,12 +60767,7 @@ R.Screens.analytics = (function(){
         sub:ciddi.length ? ciddi.length + ' bulgu' : 'temiz',
         body:html`
           ${when(!ciddi.length, () => K.Notice({ tone:'ok',
-            body:'Beş alanda da bakım borcu görünmüyor. Veri eşiğin '
-               + 'altındaysa bu "temiz" değil "ölçülmedi" demektir — '
-               + 'aşağıdaki gri satırlar onu söyler.' }))}
-          <p class="tiny dim">Her bulgu eyleme bağlıdır: yanında hangi
-            kayıtların söz konusu olduğu yazar. Hiçbir bulgu kişiyi
-            suçlamaz — «şu kayıtlar şu durumda» der.</p>` })),
+            body:'Beş alanda da bakım borcu görünmüyor.' }))}` })),
 
       ...R.Audit.AREAS.map(function(a){
         const bulgular = R.Audit.of(a.id);
@@ -60848,6 +60883,15 @@ R.Screens.analytics = (function(){
 
   return {
     id:'analytics',
+    /* iPhone Faz 3: her bölümde açık yalnız işin kendisi; ikincil analiz ve
+       dürüstlüğün üç meta kartı şerit (kalibrasyon girişi açık). */
+    get kucukVarsayilan(){
+      const G = (window.LIFEOS || {}).Gizle;
+      /* Denetim'de özet açık; beş alanın bulgu kartları şerit. */
+      const alanlar = G && R.Audit ? R.Audit.AREAS.map(a => G.anahtar(a.label)) : [];
+      return ['boş-bırakma-stratejisi', 'boş-bırakma', 'yayın-zorluk-farkı', 'yayın-etkisi', 'yapışkan-kartlar',
+        'bant-tablosu', 'unutma-eğrisi', 'dikkat-dağılması', 'denetim-defteri', 'sürtünme', 'gösterge-ayrışması'].concat(alanlar);
+    },
     title:'Ayrıntılı analiz',
     subtitle(){ return 'Denemelerden ve kayıtlardan türetilen okumalar'; },
     actions(){ return ''; },
@@ -60888,11 +60932,11 @@ R.Screens.protocols = (function(){
     return K.Card({
       class:active ? 'card--primary' : trigger ? 'card--accent' : null,
       title:def.title,
-      sub:'Tetik: '+def.trigger+' · süre '+def.durationDays+' gün',
       badge:active ? K.Badge({ label:doneCount+'/'+def.steps.length+' adım', tone:'ok' })
         : trigger ? K.Badge({ label:'tetiklendi', tone:'warn' })
         : K.Badge({ label:'hazır', tone:'muted' }),
       body:html`
+        <p class="small muted">Tetik: ${def.trigger} · süre ${def.durationDays} gün</p>
         ${when(trigger && !active, () => K.Notice({ tone:'warn', title:'Şu an geçerli:', body:trigger.detail }))}
         ${when(active, () => K.Notice({ tone:'ok', body:U.fmtDate(active.startedAt)+' tarihinde başladı · '
           + U.fmtDate(active.endsAt)+' tarihinde değerlendirilecek' }))}
@@ -60900,8 +60944,7 @@ R.Screens.protocols = (function(){
           act:'toggle-proto', data:{ 'data-key':def.id } }))}
         ${when(expanded, () => stepList(def, active))}`,
       foot:K.Row(active
-        ? html`${K.Button({ label:'Protokolü kapat', size:'sm', act:'proto-finish', data:{ 'data-id':active.id } })}
-               <span class="small dim">Kapatırken sonucu yaz — sonraki kapıda karşılaştırılır.</span>`
+        ? html`${K.Button({ label:'Protokolü kapat', size:'sm', act:'proto-finish', data:{ 'data-id':active.id } })}`
         : K.Button({ label:'Protokolü başlat', size:'sm', tone:trigger ? 'primary' : null,
             act:'proto-start', data:{ 'data-id':def.id } }),
         { wrap:true }),
@@ -60936,8 +60979,7 @@ R.Screens.protocols = (function(){
     const md = R.ROUTINES.minimumDay;
     const cells = [[md.minutes, 'dakika'], [md.paragraphs, 'paragraf'], [C.dueCards().length, 'due kart']];
     return K.Card({
-      title:'Minimum gün standardı', hint:'minimum-day', sub:'Kötü günün alt sınırı',
-      body:html`
+      title:'Minimum gün standardı', hint:'minimum-day',       body:html`
         <div class="minday">${map(cells, c => html`
           <div><div class="stat__value num">${c[0]}</div><div class="tiny dim">${c[1]}</div></div>`)}</div>
         <p class="small muted mt-10">${md.note}</p>`,
@@ -60965,12 +61007,10 @@ R.Screens.protocols = (function(){
       K.Span(12, triggers.length
         ? K.Notice({ tone:'warn', title:triggers.length+' tetikleyici aktif.',
             body:triggers.map(t => t.detail).join(' · ')+' — aşağıdaki protokoller öneriliyor.' })
-        : K.Notice({ tone:'ok', body:'Şu an telafi gerektiren bir sapma yok. '
-            + 'Protokoller ihtiyaç doğduğunda otomatik olarak burada işaretlenir.' })),
+        : K.Notice({ tone:'ok', body:'Telafi gerektiren sapma yok.' })),
 
       K.Span(8, K.Stack([
-        K.SectionTitle('Telafi protokolleri',
-          html`<span class="small dim">Kural motoru öneri verir, uygulama kararı sende</span>`),
+        K.SectionTitle('Telafi protokolleri'),
         map(R.RECOVERY_PROTOCOLS, def => protocolCard(def, triggerMap[def.id], activeMap[def.id])),
         historyCard(),
       ])),
@@ -61034,6 +61074,16 @@ R.Screens.protocols = (function(){
 
   return {
     id:'protocols',
+    /* iPhone Faz 3: açık yalnız tetiklenen ya da süren protokol; öbürleri,
+       asgari gün, uyku ve geçmiş şerit; iki başvuru listesi gizli. */
+    get kucukVarsayilan(){
+      const G = (window.LIFEOS || {}).Gizle;
+      if(!G) return [];
+      const tetik = {}; C.protocolTriggers().forEach(t => { tetik[t.id] = true; });
+      const etkin = {}; M.activeProtocols().forEach(a => { etkin[a.protoId] = true; });
+      return R.RECOVERY_PROTOCOLS.filter(d => !tetik[d.id] && !etkin[d.id]).map(d => G.anahtar(d.title))
+        .concat(['minimum-gün-standardı', 'uyku', 'geçmiş-protokoller']);
+    },
     title:'Telafi',
     subtitle(){
       const a = M.activeProtocols().length, t = C.protocolTriggers().length;
@@ -67061,6 +67111,8 @@ R.App = (function(){
     guide:['klavye-kısayolları', 'bu-uygulama-ne-değildir', 'kritik-işlemler', 'sınav-haftası-ve-sınav-günü', 'taper-haftası-planı', 'kaygı-azaltma', 'deneme-analizi-protokolü', 'hata-etiketleri-ve-reçeteler', 'yanlış-defteri-tasarımı', 'aralıklı-tekrar', 'hesap-verebilirlik', 'sınav-kaynağı', 'öğrenme-araştırması', 'kendi-verin', 'sistem-ayarı', 'denetim'],
     gun:['günlük-sayaç', 'son-deneme', 'tekrar-borcu', 'özet', 'hkm', 'sistem-önerileri', 'günün-akışı', 'hedeflerim', 'ofisten', 'bugünün-ödülü', 'mola', 'due-kartlar', 'tamir-kuyruğu', 'hafta-bağlamı'],
     plan:['çalışma-yoğunluğu', 'program'],
+    progress:['aylık-net-gelişim-eğrisi', 'kpı-sözlüğü', 'süreç-göstergeleri'],
+    protocols:['motivasyon-ve-dalgalanma', 'sınav-kaygısı'],
   };
 
   function sayfaBasiHtml(sc){

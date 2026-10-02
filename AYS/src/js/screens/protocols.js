@@ -30,11 +30,11 @@ R.Screens.protocols = (function(){
     return K.Card({
       class:active ? 'card--primary' : trigger ? 'card--accent' : null,
       title:def.title,
-      sub:'Tetik: '+def.trigger+' · süre '+def.durationDays+' gün',
       badge:active ? K.Badge({ label:doneCount+'/'+def.steps.length+' adım', tone:'ok' })
         : trigger ? K.Badge({ label:'tetiklendi', tone:'warn' })
         : K.Badge({ label:'hazır', tone:'muted' }),
       body:html`
+        <p class="small muted">Tetik: ${def.trigger} · süre ${def.durationDays} gün</p>
         ${when(trigger && !active, () => K.Notice({ tone:'warn', title:'Şu an geçerli:', body:trigger.detail }))}
         ${when(active, () => K.Notice({ tone:'ok', body:U.fmtDate(active.startedAt)+' tarihinde başladı · '
           + U.fmtDate(active.endsAt)+' tarihinde değerlendirilecek' }))}
@@ -42,8 +42,7 @@ R.Screens.protocols = (function(){
           act:'toggle-proto', data:{ 'data-key':def.id } }))}
         ${when(expanded, () => stepList(def, active))}`,
       foot:K.Row(active
-        ? html`${K.Button({ label:'Protokolü kapat', size:'sm', act:'proto-finish', data:{ 'data-id':active.id } })}
-               <span class="small dim">Kapatırken sonucu yaz — sonraki kapıda karşılaştırılır.</span>`
+        ? html`${K.Button({ label:'Protokolü kapat', size:'sm', act:'proto-finish', data:{ 'data-id':active.id } })}`
         : K.Button({ label:'Protokolü başlat', size:'sm', tone:trigger ? 'primary' : null,
             act:'proto-start', data:{ 'data-id':def.id } }),
         { wrap:true }),
@@ -78,8 +77,7 @@ R.Screens.protocols = (function(){
     const md = R.ROUTINES.minimumDay;
     const cells = [[md.minutes, 'dakika'], [md.paragraphs, 'paragraf'], [C.dueCards().length, 'due kart']];
     return K.Card({
-      title:'Minimum gün standardı', hint:'minimum-day', sub:'Kötü günün alt sınırı',
-      body:html`
+      title:'Minimum gün standardı', hint:'minimum-day',       body:html`
         <div class="minday">${map(cells, c => html`
           <div><div class="stat__value num">${c[0]}</div><div class="tiny dim">${c[1]}</div></div>`)}</div>
         <p class="small muted mt-10">${md.note}</p>`,
@@ -107,12 +105,10 @@ R.Screens.protocols = (function(){
       K.Span(12, triggers.length
         ? K.Notice({ tone:'warn', title:triggers.length+' tetikleyici aktif.',
             body:triggers.map(t => t.detail).join(' · ')+' — aşağıdaki protokoller öneriliyor.' })
-        : K.Notice({ tone:'ok', body:'Şu an telafi gerektiren bir sapma yok. '
-            + 'Protokoller ihtiyaç doğduğunda otomatik olarak burada işaretlenir.' })),
+        : K.Notice({ tone:'ok', body:'Telafi gerektiren sapma yok.' })),
 
       K.Span(8, K.Stack([
-        K.SectionTitle('Telafi protokolleri',
-          html`<span class="small dim">Kural motoru öneri verir, uygulama kararı sende</span>`),
+        K.SectionTitle('Telafi protokolleri'),
         map(R.RECOVERY_PROTOCOLS, def => protocolCard(def, triggerMap[def.id], activeMap[def.id])),
         historyCard(),
       ])),
@@ -176,6 +172,16 @@ R.Screens.protocols = (function(){
 
   return {
     id:'protocols',
+    /* iPhone Faz 3: açık yalnız tetiklenen ya da süren protokol; öbürleri,
+       asgari gün, uyku ve geçmiş şerit; iki başvuru listesi gizli. */
+    get kucukVarsayilan(){
+      const G = (window.LIFEOS || {}).Gizle;
+      if(!G) return [];
+      const tetik = {}; C.protocolTriggers().forEach(t => { tetik[t.id] = true; });
+      const etkin = {}; M.activeProtocols().forEach(a => { etkin[a.protoId] = true; });
+      return R.RECOVERY_PROTOCOLS.filter(d => !tetik[d.id] && !etkin[d.id]).map(d => G.anahtar(d.title))
+        .concat(['minimum-gün-standardı', 'uyku', 'geçmiş-protokoller']);
+    },
     title:'Telafi',
     subtitle(){
       const a = M.activeProtocols().length, t = C.protocolTriggers().length;

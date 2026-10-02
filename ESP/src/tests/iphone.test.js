@@ -331,3 +331,42 @@
     });
   });
 })();
+
+/* iPhone planı · Faz 3 · Analiz (ESP). Sıkı ölçü. */
+(function(){
+  const { describe, it, expect, resetState } = ESP.Test;
+
+  /* Bölümlü ekranın her bölümü ayrı sayılır (sıkı ölçü): açık en çok üç. */
+  function bolumBolum(NS, id, kok){
+    const sc = NS.Screens[id], G = window.LIFEOS.Gizle;
+    const gizli = (sc.gizliVarsayilan || []).concat(NS.App.SADE_GIZLI[id] || []);
+    const kucuk = sc.kucukVarsayilan || [];
+    const bl = Array.from(kok.querySelectorAll('section.sayfabolum'));
+    return (bl.length ? bl : [kok]).map(b => ({ id:b.id,
+      acik:G.bolumler(b).map(x => x.anahtar).filter(a => gizli.indexOf(a) < 0 && kucuk.indexOf(a) < 0) }));
+  }
+
+  describe('iPhone · Faz 3 · Analiz (ESP)', () => {
+
+    it('Analiz: her bölümde açık en çok üç; sınır kartı gizli; notlar ⓘ\u2019de', async () => {
+      resetState();
+      const kok = document.createElement('div');
+      kok.innerHTML = String(await ESP.Screens.analytics.render());
+      document.body.appendChild(kok);
+      try{
+        bolumBolum(ESP, 'analytics', kok).forEach(b => expect(b.id + ':' + (b.acik.length <= 3)).toBe(b.id + ':true'));
+        expect(ESP.App.SADE_GIZLI.analytics.indexOf('sınır') >= 0).toBe(true);
+        ['Yoğunlaşma kasıtlı olabilir', 'Nöbetçi ve sürtünme ölçer', 'Hiç cevaplanmamış kart bu ortalamaya girmez']
+          .forEach(t => expect(kok.textContent.indexOf(t)).toBe(-1));
+        expect(ESP.HINTS['not-denge'].b).toContain('Yoğunlaşma kasıtlı');
+        expect(kok.textContent.indexOf('Infinity')).toBe(-1);
+      }finally{ kok.remove(); }
+    });
+
+    it('Gösterge ayrışması: önceki pencere sıfırken «%Infinity» değil «sıfırdan»', () => {
+      const n = ESP.Goodhart.ayrismaNotu({ effortLabel:'okuma dakikası', outcomeLabel:'çıkan not' }, Infinity, 0);
+      expect(n).toBe('okuma dakikası sıfırdan başladı, çıkan not değişmedi.');
+      expect(ESP.Goodhart.ayrismaNotu({ effortLabel:'a', outcomeLabel:'b' }, 0.4, 0.2)).toBe('a %40 arttı, b %20 değişti.');
+    });
+  });
+})();

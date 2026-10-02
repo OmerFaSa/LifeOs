@@ -67,13 +67,11 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'Denge',
+        hint:'not-denge', label:'Denge',
         meta:(function(){
           const b = ESP.Planner.balance(7);
           return b.cert === 'missing' ? 'veri yok' : (b.skewed ? 'dengesiz' : 'dengeli');
         })(),
-        note:'Yoğunlaşma kasıtlı olabilir; sistem yalnızca görünür kılar, '
-           + 'suçlamaz.',
         body:(function(){
           const b = ESP.Planner.balance(7);
           if(b.cert === 'missing'){
@@ -91,10 +89,8 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'Haftalık rota',
+        hint:'not-haftalik-rota', label:'Haftalık rota',
         meta:'öncelik sırasına göre',
-        note:'Rota bir takvim değildir: hangi disiplinin öne geçtiğini söyler, '
-           + '«salı 19:00» demez. Odak yalnızca eşitliği bozar.',
         body:(function(){
           const r = ESP.Planner.weeklyRoute();
           return html`
@@ -126,10 +122,8 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        label:'Günlük süre',
+        hint:'not-gunluk-sure', label:'Günlük süre',
         meta:olculen.length + '/' + gunler.length + ' günde kayıt',
-        note:'Girilmemiş gün grafikte boşluktur, sıfır değildir. '
-           + 'Ortalama yalnızca kayıtlı günlerden hesaplanır.',
         action:K.Select({ value:disipl, change:'series-disc', size:'sm',
           aria:'Disiplin süzgeci',
           options:[{ value:'all', label:'Tümü' }]
@@ -150,8 +144,6 @@ ESP.Screens.analytics = (function(){
       K.Entry({
         label:'Seri', hint:'streak',
         meta:M.streak() + ' gün',
-        note:'Seri bir hedef değil bir gözlemdir. Hiç girilmemiş gün seriyi '
-           + 'kırar; «0 dakika» girilen gün de kırar — ikisi ayrı şeydir.',
         body:html`
           ${K.Meter({ label:'Üst üste kayıtlı gün', value:Math.min(100, M.streak() / 30 * 100),
             text:M.streak() + ' gün' })}
@@ -165,7 +157,6 @@ ESP.Screens.analytics = (function(){
           const r = ESP.SRS.retention();
           return r.cert === 'missing' ? 'veri yok' : '%' + Math.round(r.value * 100);
         })(),
-        note:'Hiç cevaplanmamış kart bu ortalamaya girmez.',
         body:(function(){
           const r = ESP.SRS.retention();
           if(r.cert === 'missing'){
@@ -188,9 +179,8 @@ ESP.Screens.analytics = (function(){
 
     return [
       K.Entry({
-        label:'Haftalık rapor',
+        hint:'not-haftalik-rapor', label:'Haftalık rapor',
         meta:'kural motorundan',
-        note:'İyi haber kötü haberin arkasına saklanmaz: kötü olan önce söylenir.',
         wide:true,
         body:html`<div class="rapor-govde">
           <!-- RAPOR KAPAĞI — belgenin yüzü. Mühür belgeyi imzalar, kapak
@@ -202,10 +192,8 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'Çapraz bulgular',
+        hint:'not-capraz-bulgular', label:'Çapraz bulgular',
         meta:cross.length ? cross.length + ' bulgu' : 'yok',
-        note:'İki AYRI masanın verisi birlikte anlam kazandığında çıkar. '
-           + '«Birlikte hareket ediyor» denir, «sebep oldu» denmez.',
         wide:true,
         body:cross.length
           ? html`${map(cross, c => html`
@@ -223,10 +211,8 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'Günün brifingi',
+        hint:'not-gunun-brifingi', label:'Günün brifingi',
         meta:gunluk ? (gunluk.source === 'model' ? 'model' : 'kural motoru') : 'üretilmedi',
-        note:'Günde tek model çağrısı. Sonuç güne yazılır; aynı gün tekrar '
-           + 'çağrılmaz.',
         action:K.Button({ label:gunluk ? 'Yeniden üret' : 'Üret', size:'sm',
           act:'gen-briefing' }),
         body:gunluk
@@ -279,8 +265,6 @@ ESP.Screens.analytics = (function(){
     return K.Entry({
       label:'Denetim defteri', hint:'signal',
       meta:e.opened ? e.answered + '/' + e.opened + ' cevaplandı' : 'sinyal yok',
-      note:'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün '
-         + 'ekranına tek satır olarak düşer. Burası o soruların defteri.',
       wide:true,
       body:html`
         ${K.Notice({ tone:h.level === 'used' ? 'ok' : h.level === 'unknown' ? 'info' : 'warn',
@@ -337,8 +321,6 @@ ESP.Screens.analytics = (function(){
         meta:f.cert === 'missing' ? 'veri yok'
           : f.window.perDay + ' dk/gün'
             + (f.window.ratio == null ? '' : ' · %' + Math.round(f.window.ratio * 100)),
-        note:'Sistemde geçen süre ile çalışmada geçen süre. Pratik sayacı '
-           + 'açıkken geçen süre çalışma sayılır, yönetim değil.',
         wide:true,
         body:html`
           ${K.Notice({ tone:f.level === 'high' ? 'warn' : 'info',
@@ -361,8 +343,6 @@ ESP.Screens.analytics = (function(){
       K.Entry({
         label:'Gösterge ayrışması', hint:'goodhart',
         meta:ayrisan.length ? ayrisan.length + ' ayrışma' : 'temiz',
-        note:'Çaba arttı da sonuç yerinde mi saydı? Nöbetçi hüküm vermez, '
-           + 'soru sorar: ayrışmanın meşru sebepleri vardır.',
         wide:true,
         body:bayraklar.length
           ? html`${K.Table({ tight:true,
@@ -404,10 +384,6 @@ ESP.Screens.analytics = (function(){
         label:'Kalibrasyon', hint:'calib',
         meta:puan.cert === 'missing' ? puan.n + '/' + ESP.Calib.ASGARI + ' tahmin'
           : (puan.grade || (puan.brier == null ? '—' : 'brier ' + puan.brier.toFixed(2))),
-        note:'Sistem söylemeden önce sen söyle. Ölçülen şey dardır: kayıtlı '
-           + 'türlerde kör tahminlerinin kayıtlı sayıya ne kadar yaklaştığı. '
-           + '«Kendini tanıma» ölçülmez; bu bir üstbiliş sinyalidir. Değeri, '
-           + 'sistem kapalıyken de elde kalmasıdır.',
         wide:true,
         body:html`
           ${K.Notice({ tone:'info', body:puan.note })}
@@ -434,7 +410,6 @@ ESP.Screens.analytics = (function(){
               ${map(vadesi, fo => K.Entry({
                 label:(ESP.Calib.kindOf(fo.kind) || {}).label || fo.kind,
                 meta:'tahminin: ' + U.fmtNum(fo.guess),
-                note:'Gerçek değer girilince tahmin kapanır ve deftere yazılır.',
                 body:html`
                   ${K.Field({ label:'Gerçekleşen',
                     input:K.Input({ id:'calib-actual-' + fo.id, type:'number', numeric:true }) })}
@@ -546,6 +521,14 @@ ESP.Screens.analytics = (function(){
 
   return {
     id:'analytics',
+    /* iPhone Faz 3: her bölümde açık yalnız işin kendisi; ikincil kartlar,
+       dürüstlüğün meta kartları ve disiplin başına ayrışma kartları şerit. */
+    get kucukVarsayilan(){
+      const G = (window.LIFEOS || {}).Gizle;
+      const bayrak = G && ESP.Goodhart ? ESP.Goodhart.flags().map(p => G.anahtar(p.effortLabel.toUpperCase())) : [];
+      return ['denge', 'haftalık-rota', 'seri', 'çapraz-bulgular', 'günün-brifingi',
+        'denetim-defteri', 'sürtünme', 'gösterge-ayrışması'].concat(bayrak);
+    },
     title:'Analiz',
     headline(){
       const b = ESP.Planner.balance(7);

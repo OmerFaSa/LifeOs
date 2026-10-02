@@ -238,3 +238,28 @@ ESP.HINTS = {
   'topic':{ t:'Konu haritası', b:'Bu bölümde nelerin çalışılacağı.',
     more:'Ünite KARTA döner, konu dönmez: bir dil ünitesi on kelimeyi desteye ekler ve ilerlemesi SRS\'ten okunur; «barre akorlar» ya da «kaynak eleştirisi» ise çalışılacak bir konudur ve ölçüsü kart değildir. Bu yüzden konu işaretleri ÖLÇÜM DEĞİL BEYANDIR: hiçbir kapıyı açmaz, kademeyi değiştirmez, hiçbir hesaba girmez. Çerçeveler uydurulmadı — CEFR (2020 Companion Volume), klasik retoriğin beş kanonu, Türkçe diksiyon başlıkları, yaygın gitar müfredatı ve Adler\'in okuma düzeyleri. Kaynağı olan konuda kaynak satırı yazar.' },
 };
+
+/* iPhone sıkı ölçü (2026-10-02): ekrandan kalkan sabit açıklama notları
+   ⓘ'de sürer. [anahtar, yeni ipucunun başlığı | null, cümle]: yeni ipucu
+   açılır ya da var olanın «more»una eklenir. */
+(function(H){
+  [
+    ['not-denge', 'Denge', 'Yoğunlaşma kasıtlı olabilir; sistem yalnızca görünür kılar, suçlamaz.'],
+    ['not-haftalik-rota', 'Haftalık rota', 'Rota bir takvim değildir: hangi disiplinin öne geçtiğini söyler, «salı 19:00» demez. Odak yalnızca eşitliği bozar.'],
+    ['not-gunluk-sure', 'Günlük süre', 'Girilmemiş gün grafikte boşluktur, sıfır değildir. Ortalama yalnızca kayıtlı günlerden hesaplanır.'],
+    ['streak', null, 'Seri bir hedef değil bir gözlemdir. Hiç girilmemiş gün seriyi kırar; «0 dakika» girilen gün de kırar — ikisi ayrı şeydir.'],
+    ['retention', null, 'Hiç cevaplanmamış kart bu ortalamaya girmez.'],
+    ['not-haftalik-rapor', 'Haftalık rapor', 'İyi haber kötü haberin arkasına saklanmaz: kötü olan önce söylenir.'],
+    ['not-capraz-bulgular', 'Çapraz bulgular', 'İki AYRI masanın verisi birlikte anlam kazandığında çıkar. «Birlikte hareket ediyor» denir, «sebep oldu» denmez.'],
+    ['not-gunun-brifingi', 'Günün brifingi', 'Günde tek model çağrısı. Sonuç güne yazılır; aynı gün tekrar çağrılmaz.'],
+    ['signal', null, 'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün ekranına tek satır olarak düşer. Burası o soruların defteri.'],
+    ['friction', null, 'Sistemde geçen süre ile çalışmada geçen süre. Pratik sayacı açıkken geçen süre çalışma sayılır, yönetim değil.'],
+    ['goodhart', null, 'Çaba arttı da sonuç yerinde mi saydı? Nöbetçi hüküm vermez, soru sorar: ayrışmanın meşru sebepleri vardır.'],
+    ['calib', null, 'Sistem söylemeden önce sen söyle. Ölçülen şey dardır: kayıtlı türlerde kör tahminlerinin kayıtlı sayıya ne kadar yaklaştığı. «Kendini tanıma» ölçülmez; bu bir üstbiliş sinyalidir. Değeri, sistem kapalıyken de elde kalmasıdır.'],
+    ['calib', null, 'Gerçek değer girilince tahmin kapanır ve deftere yazılır.'],
+  ].forEach(([k, t, c]) => {
+    const m = /[.!?…»)]$/.test(c) ? c : c + '.';
+    if(!H[k]){ H[k] = { t:t || k, b:m }; return; }
+    if(String(H[k].b + ' ' + (H[k].more || '')).indexOf(m) < 0) H[k].more = (H[k].more ? H[k].more + ' ' : '') + m;
+  });
+})(ESP.HINTS);

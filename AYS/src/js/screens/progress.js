@@ -38,47 +38,54 @@ R.Screens.progress = (function(){
     })();
 
     return [
-      { key:'planCompletion', value:comp == null ? '—' : '%'+comp, spark:history, note:'bu hafta',
+      { key:'planCompletion', num:comp, birim:'%', value:comp == null ? '—' : '%'+comp, spark:history, note:'bu hafta',
         progress:comp, target:85,
         tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' },
-      { key:'questionRate', value:qr && qr.pct != null ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
+      { key:'questionRate', num:qr && qr.pct != null ? qr.pct : null, birim:'%', value:qr && qr.pct != null ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
         progress:qr ? qr.pct : null, target:90,
         tone:qr && qr.pct >= 90 ? 'ok' : qr && qr.pct >= 70 ? 'warn' : null },
-      { key:'topicClosure', value:'%'+closure.pct, tone:closure.pct >= 55 ? 'ok' : 'warn',
+      { key:'topicClosure', num:closure.pct, birim:'%', value:'%'+closure.pct, tone:closure.pct >= 55 ? 'ok' : 'warn',
         progress:closure.pct, target:55,
         note:closure.closed+' / '+closure.total+' konu' },
-      { key:'netTrend', spark:tyt.series,
+      { key:'netTrend', num:tyt.delta, birim:'net', ondalik:2, spark:tyt.series,
         value:tyt.delta == null ? '—' : (tyt.delta > 0 ? '+' : '')+U.fmtNet(tyt.delta),
         tone:tyt.delta == null ? null : tyt.delta > 0 ? 'ok' : tyt.delta < -1 ? 'danger' : 'warn',
         note:tyt.last3 == null ? 'en az 3 tam TYT gerekir'
           : 'son3 '+U.fmtNet(tyt.last3)+(tyt.prev3 != null ? ' · önceki3 '+U.fmtNet(tyt.prev3) : '') },
-      { key:'examBase', value:base == null ? '—' : U.fmtNet(base), note:'son 4 denemenin en düşüğü' },
+      { key:'examBase', num:base, birim:'net', ondalik:2, value:base == null ? '—' : U.fmtNet(base), note:'son 4 denemenin en düşüğü' },
       { key:'errorMix', value:pareto[0] && pareto[0].count ? pareto[0].tag : '—',
         note:pareto[0] && pareto[0].count ? R.ERROR_TAGS[pareto[0].tag].name+' · %'+pareto[0].pct : 'hata kaydı yok' },
-      { key:'timeDrift', value:timeDrift == null ? '—' : (timeDrift > 0 ? '+' : '')+timeDrift,
+      { key:'timeDrift', num:timeDrift, birim:'dk', value:timeDrift == null ? '—' : (timeDrift > 0 ? '+' : '')+timeDrift,
         unit:timeDrift == null ? '' : ' dk', note:'son tam TYT',
         tone:timeDrift == null ? null : timeDrift > 5 ? 'warn' : 'ok' },
-      { key:'cardDebt', value:'%'+debt, tone:debt > 10 ? 'danger' : 'ok',
+      { key:'cardDebt', num:debt, birim:'%', value:'%'+debt, tone:debt > 10 ? 'danger' : 'ok',
         progress:debt, target:10,
         note:C.overdueCards().length+' gecikmiş kart' },
     ];
   }
 
-  function KpiTile(c){
-    const def = R.KPI_DEFS.find(d => d.key === c.key);
-    const hasSpark = c.spark && c.spark.filter(v => v != null).length > 1;
-    return html`
-      <div class="${c.tone ? 'stat stat--'+c.tone : 'stat'}" title="${def.formula}">
-        <div class="row between"><span class="stat__label">${def.name}</span>
-          <span class="tiny dim">${def.target}</span></div>
-        <span class="stat__value">${c.value}${when(c.unit, () => html`<small>${c.unit}</small>`)}</span>
-        ${when(hasSpark, () => raw(UI.sparkline(c.spark)))}
-        ${when(c.progress != null, () => html`<span class="stat__bar" aria-hidden="true">
-          <i style="width:${Math.max(0, Math.min(100, c.progress))}%"></i>
-          ${when(c.target != null, () => html`<b style="left:${Math.max(0, Math.min(100, c.target))}%"></b>`)}
-        </span>`)}
-        <span class="stat__note">${c.note || ''}</span>
-      </div>`;
+  /* iPhone Faz 3 (2026-10-02): sekiz KPI kutusu tek dönen kart. Sıra kural
+     motorundan: hedefin dışındakiler önce (danger, warn), sonra öbürleri.
+     Ölçülmemiş KPI sayı değil cümledir. */
+  function DonenGidisat(){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = o => L.SAYI ? L.SAYI.html(o) : U.esc(String(o.deger) + (o.birim ? ' ' + o.birim : ''));
+    const sira = t => t === 'danger' ? 0 : t === 'warn' ? 1 : 2;
+    const buyuk = t => String(t || '').charAt(0).toLocaleUpperCase('tr-TR') + String(t || '').slice(1);
+    const m = kpiValues().map((c, i) => ({ c, i, def:R.KPI_DEFS.find(d => d.key === c.key) }))
+      .sort((a, b) => (sira(a.c.tone) - sira(b.c.tone)) || a.i - b.i)
+      .map(({ c, def }) => c.num == null
+        ? { ust:def.name, cumle:(c.value !== '—' ? c.note : /gerek|yok|girilmemiş/.test(c.note || '') ? buyuk(c.note) : 'Veri yok') + '.',
+            vurgu:'Hedef ' + def.target + '.', sistem:'ays' }
+        : { ust:def.name, sayi:sayi({ deger:c.num, birim:c.birim, ondalik:c.ondalik, kesinlik:'computed', formul:def.formula }),
+            cumle:c.tone === 'ok' ? 'hedefte.' : c.tone ? 'hedefin dışında.' : '',
+            vurgu:'Hedef ' + def.target + (c.note ? ' · ' + c.note : '') + '.', sistem:'ays' });
+    const ayt = C.medianTrend('AYT'), ab = C.examBase('AYT');
+    if(ayt.last3 != null) m.push({ ust:'AYT medyanı', sayi:sayi({ deger:ayt.last3, birim:'net', ondalik:2, kesinlik:'computed',
+      formul:'son 3 tam AYT denemesinin medyanı' }), cumle:'son 3 tam deneme.', vurgu:ab == null ? 'Taban yok.' : 'Taban ' + U.fmtNet(ab) + '.', sistem:'ays' });
+    return raw(V.donen({ id:'ays-gidisat', ad:'Gidişat', maddeler:m }));
   }
 
   /* ---------- trend ---------- */
@@ -97,22 +104,16 @@ R.Screens.progress = (function(){
       K.Badge({ label:fam+' '+(t.delta > 0 ? '+' : '')+U.fmtNet(t.delta), tone:t.delta > 0 ? 'ok' : 'warn' }));
 
     return K.Card({
-      title:'Deneme net trendi', sub:'Yalnız tam denemeler',
-      actions:html`<div class="row-sm">${delta('TYT', tyt)}${delta('AYT', ayt)}</div>`,
+      hint:'median', title:'Deneme net trendi',       actions:html`<div class="row-sm">${delta('TYT', tyt)}${delta('AYT', ayt)}</div>`,
       body:html`
         ${raw(UI.lineChart([{ data:tyt.series }, { data:ayt.series, accent:true }],
-          { labels:C.fullExams('TYT').map(e => U.fmtShort(e.date)), band:gate ? gate.tyt : null, height:210 }))}
+          { labels:C.fullExams('TYT').map(e => U.fmtShort(e.date)), band:gate ? gate.tyt : null, height:180 }))}
         ${raw(UI.legend([
           { label:'TYT tam deneme', color:'var(--primary)' },
           { label:'AYT tam deneme', color:'var(--accent)' },
           { label:'bu ayın gözlenen bandı', color:'var(--c-band)' },
         ]))}
-        <div class="cols-4 mt-12">
-          ${K.Stat({ label:'TYT son 3 medyan', value:tyt.last3 == null ? '—' : U.fmtNet(tyt.last3) })}
-          ${K.Stat({ label:'TYT tabanı', value:C.examBase('TYT') == null ? '—' : U.fmtNet(C.examBase('TYT')) })}
-          ${K.Stat({ label:'AYT son 3 medyan', value:ayt.last3 == null ? '—' : U.fmtNet(ayt.last3) })}
-          ${K.Stat({ label:'AYT tabanı', value:C.examBase('AYT') == null ? '—' : U.fmtNet(C.examBase('AYT')) })}
-        </div>`,
+`,
     });
   }
 
@@ -138,7 +139,7 @@ R.Screens.progress = (function(){
           <div class="small muted">Veri dönemi: ${decision.window} · Yeniden değerlendirme: ${U.fmtDate(decision.reevaluateAt)}</div>` })}
         ${K.Button({ label:'Müdahaleyi değiştir', size:'sm', act:'clear-decision', data:{ 'data-key':key } })}`
       : html`
-        <div class="stack-xs"><span class="mono-label">En fazla üç öneri — yalnız biri seçilir</span>
+        <div class="stack-xs"><span class="mono-label">Bir ana müdahale seç</span>
           ${map(g.suggestions, (s, i) => html`
             <label class="check"><input type="radio" name="gate-opt" value="${i}"/>
               <span>${s.text}<br/><span class="tiny dim">${s.why}</span></span></label>`)}
@@ -146,8 +147,7 @@ R.Screens.progress = (function(){
         ${K.Button({ label:'Ana müdahaleyi kaydet', tone:'primary', act:'save-decision' })}`;
 
     return K.Card({
-      title:'Aylık karar kapısı — '+gate.month,
-      sub:'Son 3 denemenin medyanı vs bu ayın bandı',
+      hint:'gate', title:'Aylık karar kapısı — '+gate.month,
       badge:decision ? K.Badge({ label:'karar verildi', tone:'ok' }) : K.Badge({ label:'karar bekliyor', tone:'warn' }),
       body:K.Stack([
         meter('TYT', g.tytStatus, g.tyt.last3, gate.tyt, gate.tytSafe),
@@ -155,8 +155,6 @@ R.Screens.progress = (function(){
         K.Notice({ tone:'info', title:'Bu ayın kuralı:', body:gate.note }),
         choice,
       ]),
-      foot:html`<span class="mono-label">Karar kapısı algoritması</span>
-        <ol class="bullets small muted mt-6">${map(R.GATE_ALGORITHM, s => html`<li>${s}</li>`)}</ol>`,
     });
   }
 
@@ -244,25 +242,25 @@ R.Screens.progress = (function(){
     const debt = C.cardDebt();
     const closure = C.overallClosure().pct;
 
+    /* Raf iki sütunu DOM sırasıyla dizer: trend ile karar kapısı yan yana,
+       şeritler altta; gizli başvuru kartları en sonda (iPhone Faz 3). */
     return String(K.Grid([
-      K.Span(12, html`<div class="kpigrid">${map(kpiValues(), KpiTile)}</div>`),
-
+      K.Span(12, DonenGidisat()),
+      K.Span(6, K.Stack([ trendCard() ])),
+      K.Span(4, K.Stack([ gateCard() ])),
       K.Span(6, K.Stack([
-        trendCard(),
         testTrendCard(),
         K.Card({ title:'Plan tamamlama — son 8 hafta', sub:'Hedef %85',
           body:raw(UI.barChart(history, { targetLine:85, goodAt:85 })) }),
         monthCurveCard(),
         kpiReference(),
       ])),
-
       K.Span(4, K.Stack([
-        gateCard(),
-        K.Card({ title:'Hata paretosu', sub:'Son haftaların hata dağılımı', body:html`
+        K.Card({ hint:'pareto', title:'Hata paretosu', body:html`
           ${raw(UI.paretoBars(pareto))}
           ${when(pareto[0] && pareto[0].count, () => html`<div class="mt-10">${K.Notice({ tone:'info',
             body:'Reçete: '+R.ERROR_TAGS[pareto[0].tag].recipe })}</div>`)}` }),
-        K.Card({ title:'Süreç göstergeleri', sub:'Nete değil sürece bakar', body:K.Stack([
+        K.Card({ hint:'not-surec-gostergeleri', title:'Süreç göstergeleri', body:K.Stack([
           K.Meter({ label:'Tekrar borcu', value:debt, text:'%'+debt, tone:debt > 10 ? 'danger' : '' }),
           K.Meter({ label:'Konu kapanışı', value:closure, text:'%'+closure }),
           /* «Bu hızla» (fikir 20): kapanış hızından sınava yetişme — tahmin. */
@@ -313,6 +311,15 @@ R.Screens.progress = (function(){
 
   return {
     id:'progress',
+    /* iPhone Faz 3: açık trend ve (karar bekliyorsa) karar kapısı; test
+       trendi, plan geçmişi ve pareto şerit; başvuru kartları app.js'te gizli. */
+    get kucukVarsayilan(){
+      const G = (window.LIFEOS || {}).Gizle;
+      const gate = C.currentGate();
+      const verildi = gate && S.decisions[U.monthKey(U.today())];
+      return ['test-bazlı-trend', 'plan-tamamlama-son-hafta', 'hata-paretosu']
+        .concat(G && verildi ? [G.anahtar('Aylık karar kapısı — ' + gate.month)] : []);
+    },
     title:'İlerleme',
     subtitle(){
       const t = C.medianTrend('TYT');

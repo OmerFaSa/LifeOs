@@ -140,3 +140,44 @@ R.HINTS = {
     more:'Mola dinlenme değil pekişme aralığıdır. Günde altıdan fazla mola mola değil kaçınmadır; sistem bu eşikte uyarır.' },
   'command':{ t:'Komut paleti', b:'Ctrl+K ile her yere atla, kayıt aç, tema değiştir.' },
 };
+
+/* iPhone sıkı ölçü (2026-10-02): ekrandan kalkan sabit açıklama notları
+   ⓘ'de sürer. [anahtar, yeni ipucunun başlığı | null, cümle]: yeni ipucu
+   açılır ya da var olanın «more»una eklenir. */
+(function(H){
+  [
+    ['not-iki-denemeyi-yan-yana-koy', 'İki denemeyi yan yana koy', 'Toplam net değil, test bazında ne değişti'],
+    ['not-bos-birakma-stratejisi', 'Boş bırakma stratejisi', 'Boş sayısı ile net arasındaki ilişki'],
+    ['not-yayin-zorluk-farki', 'Yayın zorluk farkı', 'Kolay yayından gelen yükseliş yanıltır'],
+    ['not-konu-hata-tipi', 'Konu × hata tipi', 'Aynı konu farklı hata üretiyorsa reçete de farklıdır'],
+    ['not-yapiskan-kartlar', 'Yapışkan kartlar', 'Dört kez üst üste unutulan kart kötü yazılmıştır'],
+    ['estimate', null, 'Her noktada son 3 denemenin medyanı — tek fotoğraf değil film'],
+    ['not-bant-tablosu', 'Bant tablosu', 'Her denemeden sonraki iyimser–kötümser aralık'],
+    ['not-hiz-isabet-dengesi', 'Hız–isabet dengesi', 'Soru başına saniye ve doğruluk'],
+    ['quiz', null, 'İlk 20 dakika ile kalanı arasındaki fark'],
+    ['not-konu-net-katkisi', 'Konu net katkısı', 'Bu konu kapanırsa yaklaşık kaç net gelir'],
+    ['sleep', null, 'Genel tavsiye değil, senin verin'],
+    ['srs', null, 'Hangi aralıkta gerçekten hatırlıyorsun'],
+    ['not-kapasite-gerceklik-kontrolu', 'Kapasite kontrolü', 'Söylenen saat ile çalışılan saat'],
+    ['not-dikkat-dagilmasi', 'Dikkat dağılması', 'Blok sırasında kaç kez bölündün'],
+    ['friction', null, 'Sistemi yönetmek ile çalışmak'],
+    ['calib', null, 'Sistem söylemeden önce sen söyle'],
+    ['median', null, 'Yalnız tam denemeler'],
+    ['gate', null, 'Son 3 denemenin medyanı vs bu ayın bandı'],
+    ['pareto', null, 'Son haftaların hata dağılımı'],
+    ['not-surec-gostergeleri', 'Süreç göstergeleri', 'Nete değil sürece bakar: tekrar borcu, konu kapanışı ve uyku.'],
+    ['protocol', null, 'Kapatırken sonucu yaz — sonraki kapıda karşılaştırılır.'],
+    ['audit', null, 'Veri eşiğin altındaysa bu «temiz» değil «ölçülmedi» demektir; gri satırlar onu söyler. Her bulgu eyleme bağlıdır ve hangi kayıtların söz konusu olduğunu yazar; hiçbir bulgu kişiyi suçlamaz — «şu kayıtlar şu durumda» der.'],
+  ].forEach(([k, t, c]) => {
+    const m = /[.!?…»)]$/.test(c) ? c : c + '.';
+    if(!H[k]){ H[k] = { t:t || k, b:m }; return; }
+    if(String(H[k].b + ' ' + (H[k].more || '')).indexOf(m) < 0) H[k].more = (H[k].more ? H[k].more + ' ' : '') + m;
+  });
+})(R.HINTS);
+
+/* Karar kapısı algoritması ⓘ'de (eskiden kartın altında beş madde; tek
+   kaynak R.GATE_ALGORITHM). */
+if(R.HINTS.gate && R.GATE_ALGORITHM && String(R.HINTS.gate.more || '').indexOf('Algoritma:') < 0){
+  R.HINTS.gate.more = (R.HINTS.gate.more ? R.HINTS.gate.more + ' ' : '')
+    + 'Algoritma: ' + R.GATE_ALGORITHM.map((s, i) => (i + 1) + ') ' + s).join(' ');
+}

@@ -226,3 +226,92 @@
     });
   });
 })();
+
+/* iPhone planı · Faz 3 · Analiz (AYS): İlerleme, Ayrıntılı analiz, Telafi.
+   Sıkı ölçü: açık yalnız iş + en çok bir dönen kart; sabit not ⓘ'de. */
+(function(){
+  const { describe, it, expect, resetState, withTodayAsync } = R.Test;
+
+  /* Bölümlü ekranın her bölümü ayrı sayılır (sıkı ölçü): açık en çok üç. */
+  function bolumBolum(NS, id, kok){
+    const sc = NS.Screens[id], G = window.LIFEOS.Gizle;
+    const gizli = (sc.gizliVarsayilan || []).concat(NS.App.SADE_GIZLI[id] || []);
+    const kucuk = sc.kucukVarsayilan || [];
+    const bl = Array.from(kok.querySelectorAll('section.sayfabolum'));
+    return (bl.length ? bl : [kok]).map(b => ({ id:b.id,
+      acik:G.bolumler(b).map(x => x.anahtar).filter(a => gizli.indexOf(a) < 0 && kucuk.indexOf(a) < 0) }));
+  }
+
+  async function ciz(id){
+    const kok = document.createElement('div');
+    kok.innerHTML = String(await R.Screens[id].render());
+    document.body.appendChild(kok);
+    return kok;
+  }
+  async function hazirla(){
+    resetState();
+    R.S.profile.setupDone = true;
+    await R.Model.ensurePlan(true);
+    await R.Model.ensureWeek(R.Model.currentWeek());
+    await R.Model.ensureDay(R.U.today());
+  }
+
+  describe('iPhone · Faz 3 · Analiz (AYS)', () => {
+
+    it('İlerleme: sekiz KPI tek dönen kart; açık trend ve karar kapısı; başvuru gizli', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const kok = await ciz('progress');
+        try{
+          expect(kok.querySelector('.kpigrid')).toBeNull();
+          const d = kok.querySelector('.donen[aria-label="Gidişat"]');
+          expect(!!d).toBe(true);
+          expect(d.querySelectorAll('.donen__madde').length >= 8).toBe(true);
+          const acik = bolumBolum(R, 'progress', kok)[0].acik;
+          expect(acik.length <= 3).toBe(true);
+          expect(acik.indexOf('test-bazlı-trend')).toBe(-1);
+          ['aylık-net-gelişim-eğrisi', 'kpı-sözlüğü', 'süreç-göstergeleri']
+            .forEach(a => expect(R.App.SADE_GIZLI.progress.indexOf(a) >= 0).toBe(true));
+          expect(kok.textContent.indexOf('Karar kapısı algoritması')).toBe(-1);
+          expect(kok.textContent.indexOf('TYT son 3 medyan')).toBe(-1);
+          expect(R.HINTS.gate.more).toContain('Algoritma:');
+        }finally{ kok.remove(); }
+      });
+    });
+
+    it('Telafi: tetik yokken protokoller şerit; iki başvuru listesi gizli', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const kok = await ciz('protocols');
+        try{
+          const acik = bolumBolum(R, 'protocols', kok)[0].acik;
+          const tetik = R.Calc.protocolTriggers().length + R.Model.activeProtocols().length;
+          expect(acik.length <= tetik).toBe(true);
+          ['motivasyon-ve-dalgalanma', 'sınav-kaygısı'].forEach(a => expect(R.App.SADE_GIZLI.protocols.indexOf(a) >= 0).toBe(true));
+          expect(kok.textContent.indexOf('Kural motoru öneri verir')).toBe(-1);
+        }finally{ kok.remove(); }
+      });
+    });
+
+    it('Ayrıntılı analiz: her bölümde açık en çok üç; sabit notlar ⓘ\u2019de', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const kok = await ciz('analytics');
+        try{
+          bolumBolum(R, 'analytics', kok).forEach(b => expect(b.id + ':' + (b.acik.length <= 3)).toBe(b.id + ':true'));
+          ['Toplam net değil, test bazında ne değişti', 'Genel tavsiye değil, senin verin', 'Sistem söylemeden önce sen söyle']
+            .forEach(t => expect(kok.textContent.indexOf(t)).toBe(-1));
+          expect(R.HINTS.sleep.more).toContain('Genel tavsiye değil');
+          expect(R.HINTS['not-iki-denemeyi-yan-yana-koy'].b).toContain('test bazında');
+        }finally{ kok.remove(); }
+      });
+    });
+
+    it('Gösterge ayrışması: önceki pencere sıfırken «%Infinity» değil «sıfırdan»', () => {
+      const n = R.Goodhart.ayrismaNotu({ effortLabel:'çalışma dakikası', outcomeLabel:'net' }, Infinity, 0);
+      expect(n).toBe('çalışma dakikası sıfırdan başladı, net yerinde saydı.');
+      expect(R.Goodhart.ayrismaNotu({ effortLabel:'a', outcomeLabel:'b' }, 0.5, -Infinity).indexOf('Infinity')).toBe(-1);
+      expect(R.Goodhart.ayrismaNotu({ effortLabel:'a', outcomeLabel:'b' }, 0.5, -0.25)).toBe('a %50 arttı, b %25 GERİLEDİ.');
+    });
+  });
+})();

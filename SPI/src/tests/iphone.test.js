@@ -350,3 +350,43 @@
     });
   });
 })();
+
+/* iPhone planı · Faz 3 · Analiz (SPİ). Sıkı ölçü; klinik sınır notu kalır. */
+(function(){
+  const { describe, it, expect, resetState } = SP.Test;
+
+  /* Bölümlü ekranın her bölümü ayrı sayılır (sıkı ölçü): açık en çok üç. */
+  function bolumBolum(NS, id, kok){
+    const sc = NS.Screens[id], G = window.LIFEOS.Gizle;
+    const gizli = (sc.gizliVarsayilan || []).concat(NS.App.SADE_GIZLI[id] || []);
+    const kucuk = sc.kucukVarsayilan || [];
+    const bl = Array.from(kok.querySelectorAll('section.sayfabolum'));
+    return (bl.length ? bl : [kok]).map(b => ({ id:b.id,
+      acik:G.bolumler(b).map(x => x.anahtar).filter(a => gizli.indexOf(a) < 0 && kucuk.indexOf(a) < 0) }));
+  }
+
+  describe('iPhone · Faz 3 · Analiz (SPİ)', () => {
+
+    it('Analiz: her bölümde açık en çok üç; dürüstlüğün meta kartları şerit; notlar ⓘ\u2019de', async () => {
+      resetState();
+      const kok = document.createElement('div');
+      kok.innerHTML = String(await SP.Screens.analytics.render());
+      document.body.appendChild(kok);
+      try{
+        bolumBolum(SP, 'analytics', kok).forEach(b => expect(b.id + ':' + (b.acik.length <= 3)).toBe(b.id + ':true'));
+        ['denetim-defteri', 'sürtünme', 'gösterge-ayrışması'].forEach(a =>
+          expect(SP.Screens.analytics.kucukVarsayilan.indexOf(a) >= 0).toBe(true));
+        expect(kok.textContent.indexOf('Tahmin KÖR yazılır')).toBe(-1);
+        expect(String(SP.HINTS.calib.b) + ' ' + String(SP.HINTS.calib.more)).toContain('Tahmin KÖR yazılır');
+        /* klinik sınır (AGENTS §1.5) ekranda kalır */
+        expect(kok.textContent).toContain('Bu denetim teşhis koymaz');
+      }finally{ kok.remove(); }
+    });
+
+    it('Gösterge ayrışması: önceki pencere sıfırken «%Infinity» değil «sıfırdan»', () => {
+      const n = SP.Goodhart.ayrismaNotu({ effortLabel:'antrenman dakikası', outcomeLabel:'toparlanma' }, Infinity, -0.5);
+      expect(n).toBe('antrenman dakikası sıfırdan başladı, toparlanma %50 GERİLEDİ.');
+      expect(n.indexOf('Infinity')).toBe(-1);
+    });
+  });
+})();

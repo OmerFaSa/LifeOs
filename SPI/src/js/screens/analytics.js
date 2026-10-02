@@ -26,8 +26,7 @@ SP.Screens.analytics = (function(){
     const rows = SP.Calc.crossFindings(60);
     const strong = rows.filter(r => r.ok && !r.weak);
     return K.Card({
-      title:'Çapraz bağlar',
-      sub:'Son 60 gün · aynı günde ölçülmüş veriler',
+      hint:'not-capraz-baglar', title:'Çapraz bağlar',
       badge:K.Badge({ label:strong.length + ' belirgin bağ', tone:strong.length ? 'info' : 'muted' }),
       body:html`
         ${K.Notice({ tone:'info', body:'Katsayı iki ölçümün birlikte hareket edip etmediğini söyler. '
@@ -53,8 +52,7 @@ SP.Screens.analytics = (function(){
     const opts = Object.keys(SP.Calc.SERIES).map(id => ({ value:id, label:seriesLabel(id) }));
 
     return K.Card({
-      title:'Kendi bağını kur',
-      sub:'İki ölçümü seç, birlikte hareket edip etmediklerine bak',
+      hint:'not-kendi-bagini-kur', title:'Kendi bağını kur',
       body:html`
         <div class="cols-2">
           ${K.Field({ label:'Birinci ölçüm', input:K.Select({ value:a, change:'pair-a', options:opts }) })}
@@ -193,8 +191,6 @@ SP.Screens.analytics = (function(){
     return K.Entry({
       label:'Denetim defteri', hint:'signal',
       meta:e.opened ? e.answered + '/' + e.opened + ' cevaplandı' : 'sinyal yok',
-      note:'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün '
-         + 'ekranına tek kart olarak düşer. Burası o soruların defteri.',
       wide:true,
       body:html`
         ${K.Notice({ tone:h.level === 'used' ? 'ok' : h.level === 'unknown' ? 'info' : 'warn',
@@ -232,9 +228,6 @@ SP.Screens.analytics = (function(){
     return K.Entry({
       label:'Sürtünme', hint:'friction',
       meta:f.cert === 'missing' ? 'veri yok' : f.window.perDay + ' dk/gün',
-      note:'SPİ\'de ORAN hesaplanmaz: sağlıklı yaşamak bir saat işi değildir. '
-         + 'Uyumak, doğru yemek ve yürümek uygulamada dakika olarak görünmez; '
-         + 'sahte bir payda uydurmak ölçülmemişi ölçülmüş göstermek olurdu.',
       wide:true,
       body:html`
         ${K.Notice({ tone:f.level === 'high' ? 'warn' : 'info',
@@ -255,8 +248,6 @@ SP.Screens.analytics = (function(){
     return K.Entry({
       label:'Gösterge ayrışması', hint:'goodhart',
       meta:ayrisan.length ? ayrisan.length + ' ayrışma' : 'temiz',
-      note:'Sağlık verisi gürültülüdür: pencere 56 gün, eşik %35. İki '
-         + 'pencerede de ölçüm yoksa hüküm kurulmaz.',
       wide:true,
       body:html`
         ${K.Table({ tight:true, headers:['Çift', 'Yön', 'Çaba', 'Sonuç', 'Durum'],
@@ -299,7 +290,6 @@ SP.Screens.analytics = (function(){
       label:'Kalibrasyon', hint:'calib',
       meta:puan.cert === 'missing' ? puan.n + '/' + SP.Calib.ASGARI + ' tahmin'
         : (puan.grade || '—'),
-      note:'Tahmin KÖR yazılır: değer ekranda dururken yazılan tahmin, tahmin değil kopyadır.',
       wide:true,
       body:html`
         ${K.Ayrinti({ govde:html`<p>Her sayıyı cihazdan bekleyen biri, cihaz yokken kendini
@@ -511,6 +501,9 @@ SP.Screens.analytics = (function(){
 
   return {
     id:'analytics',
+    /* iPhone Faz 3: açık yalnız işin kendisi; kendi bağını kur ve dürüstlüğün
+       üç meta kartı şerit (kalibrasyon girişi açık). */
+    kucukVarsayilan:['kendi-bağını-kur', 'denetim-defteri', 'sürtünme', 'gösterge-ayrışması'],
     title:'Analiz',
     headline(){
       const rows = SP.Calc.crossFindings(60).filter(r => r.ok && !r.weak);

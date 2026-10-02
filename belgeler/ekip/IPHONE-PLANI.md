@@ -261,6 +261,25 @@ Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/�
 - Testler: bölümlü ekranlarda her bölüm ≤ 3 açık; aynı anahtarlı ikinci kart yok (SPİ);
   kaldırılan cümleler ekranda yok, ipuçlarında var.
 
+### Faz 3 kararları (yapıldı; testler üç `iphone.test.js`'te «Faz 3»)
+
+- **AYS İlerleme:** sekiz KPI kutusu tek dönen «Gidişat» kartı (hedefin dışındakiler önce;
+  ölçülmemiş KPI cümle; AYT medyanı varsa ek madde). Açık: Deneme net trendi (grafik 180 px,
+  altındaki dört istatistik kalktı — dönen kartta ve karar kapısında var) ve Aylık karar kapısı
+  (karar verilince şerit). Test bazlı trend, Plan tamamlama, Hata paretosu şerit; Aylık net
+  gelişim eğrisi, KPI sözlüğü, Süreç göstergeleri gizli. Karar kapısı algoritması ⓘ'de (`gate`,
+  tek kaynak `R.GATE_ALGORITHM`). 2 682 → 1 516 px.
+- **AYS Telafi:** tetiklenmeyen ve sürmeyen protokoller şerit (getter), Minimum gün, Uyku,
+  Geçmiş şerit; Motivasyon ve Sınav kaygısı gizli. Protokolün tetik satırı kart gövdesinde.
+- **Analiz (üç modül):** 41 sabit not ⓘ'ye (`notlar.py` kalıbı: not ipucunda varsa silinir,
+  yoksa `hints.js` sonundaki ek bloğa eklenir — yeni ipucu ya da `more`). Dürüstlük'ün üç meta
+  kartı (Denetim defteri, Sürtünme, Gösterge ayrışması) şerit, Kalibrasyon girişi açık; ikincil
+  analizler şerit; ESP Rapor › Sınır gizli; AYS Denetim'de beş alanın kartı şerit.
+- **Hata düzeltildi (üç modül, `goodhart.js`):** önceki pencerede çaba sıfırken oran sonsuz
+  çıkıyor ve ekranda «okuma dakikası %Infinity arttı» yazıyordu. Cümle artık `ayrismaNotu`'nda
+  kurulur: «sıfırdan başladı»; sonuç değişmediyse «değişmedi».
+- **Tuzak:** «KPI» Türkçe küçük harfte «kpı» olur — gizleme anahtarı `kpı-sözlüğü`.
+
 ## 7. Bilinen riskler
 
 - Testler kartları ekranda arar: gizlemek uygulama düzeyindedir (`Gizle.uygula`), çizimi
@@ -278,8 +297,9 @@ Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/�
 | 2a | ✅ AYS Dersler · Soru çöz · Tekrar | 1d22ef6 | 172 · aşan 19 (AYS 59/5 · SPİ 55/8 · ESP 58/6) |
 | 2b | ✅ SPİ Testler · Öğün · Mutfak · Hareket · Bütçe (beşi de açık ≤ 3, boy ≤ 1 200); Bütçe «0 TL» hatası | f73a9a7 | 161 · aşan 15 (AYS 59/5 · SPİ 44/4 · ESP 58/6) |
 | 2c | ✅ sıkı ölçü: ESP Tarih · Ses · Okuma (her bölüm), AYS Soru çöz; Dersler 1 238 (raf tabanı) | a36e5e6 | 150 · aşan 13 (AYS 59/5 · SPİ 44/4 · ESP 47/4) |
-| 2d | ✅ bölüm turu: ESP Dil · Felsefe · Yazı, SPİ bölümleri, AYS Sınama; 2b'ye sıkı ölçü; Faz 2 bitti | (bu commit) | 150 · aşan 13 (araç varsayılan bölümü sayar; öbür bölümler testte) |
-| 3 | ⏭ sıradaki: Analiz — AYS İlerleme · Analiz · Telafi; SPİ Analiz; ESP Analiz | — | — |
+| 2d | ✅ bölüm turu: ESP Dil · Felsefe · Yazı, SPİ bölümleri, AYS Sınama; 2b'ye sıkı ölçü; Faz 2 bitti | 207c451 | 150 · aşan 13 (araç varsayılan bölümü sayar; öbür bölümler testte) |
+| 3 | ✅ Analiz: AYS İlerleme · Ayrıntılı analiz · Telafi, SPİ Analiz, ESP Analiz; `%Infinity` hatası | (bu commit) | 131 · aşan 9 (AYS 43/2 · SPİ 43/4 · ESP 45/3) |
+| 4 | ⏭ sıradaki: Onaylar · Ofis · Kütüphanem (3 ×) | — | — |
 
 ## 9. Devir notu — sıradaki oturum buradan başlar
 

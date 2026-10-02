@@ -119,3 +119,20 @@ SP.HINTS = {
   'backup':{ t:'Yedek', b:'Veriler bu cihazda tutulur. Yedek dosyası şifresizdir.',
     more:'Tarayıcı verisi silinirse kayıt gider. Ayda bir yedek almak yeterlidir. Yedek dosyası paylaşılan bir dizine konmaz.' },
 };
+
+/* iPhone sıkı ölçü (2026-10-02): ekrandan kalkan sabit açıklama notları
+   ⓘ'de sürer. [anahtar, yeni ipucunun başlığı | null, cümle]: yeni ipucu
+   açılır ya da var olanın «more»una eklenir. */
+(function(H){
+  [
+    ['not-capraz-baglar', 'Çapraz bağlar', 'Son 60 gün · aynı günde ölçülmüş veriler'],
+    ['not-kendi-bagini-kur', 'Kendi bağını kur', 'İki ölçümü seç, birlikte hareket edip etmediklerine bak'],
+    ['signal', null, 'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün ekranına tek kart olarak düşer. Burası o soruların defteri.'],
+    ['goodhart', null, 'Sağlık verisi gürültülüdür: pencere 56 gün, eşik %35. İki pencerede de ölçüm yoksa hüküm kurulmaz.'],
+    ['calib', null, 'Tahmin KÖR yazılır: değer ekranda dururken yazılan tahmin, tahmin değil kopyadır.'],
+  ].forEach(([k, t, c]) => {
+    const m = /[.!?…»)]$/.test(c) ? c : c + '.';
+    if(!H[k]){ H[k] = { t:t || k, b:m }; return; }
+    if(String(H[k].b + ' ' + (H[k].more || '')).indexOf(m) < 0) H[k].more = (H[k].more ? H[k].more + ' ' : '') + m;
+  });
+})(SP.HINTS);

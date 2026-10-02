@@ -270,7 +270,7 @@ ESP.App = (function(){
     studio:['nefes-ve-vurgu', 'ısınma-sırası', 'paket-iste'],
     library:['öğrendiğini-anlat', 'bağlı-notlar'],
     writing:['sınır'],
-    analytics:['veri-doluluğu'],
+    analytics:['veri-doluluğu', 'sınır'],
     gun:['bekleyen-iş', 'günün-dakikası', 'yedek', 'hkm', 'seri', 'hedeflerim', 'günün-toplamı', 'asgari-gün', 'entelektüel-hacim', 'haftanın-dağılımı', 'son-gün', 'seçili-gün'],
   };
 

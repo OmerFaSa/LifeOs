@@ -190,6 +190,18 @@ R.Goodhart = (function(){
 
   /* ---------------------------------------------------------------- ölçüm */
 
+  /* Ayrışma cümlesi (2026-10-02). Önceki pencere sıfırken oran sonsuzdur:
+     yüzde değil «sıfırdan» denir — «%Infinity arttı» yazılıyordu.
+     gerileme: null ölçülemedi, 0 yerinde saydı, eksi sayı geriledi. */
+  function ayrismaNotu(def, dC, gerileme){
+    const artis = isFinite(dC) ? '%' + Math.round(dC * 100) + ' arttı' : 'sıfırdan başladı';
+    const sonuc = gerileme == null ? ' ölçülemedi'
+      : gerileme < 0 ? (isFinite(gerileme) ? ' %' + Math.round(Math.abs(gerileme) * 100) + ' GERİLEDİ'
+        : ' GERİLEDİ (önceki pencerede sıfırdı)')
+      : ' yerinde saydı';
+    return def.effortLabel + ' ' + artis + ', ' + def.outcomeLabel + sonuc + '.';
+  }
+
   function oran(yeni, eski){
     if(eski == null || yeni == null) return null;
     if(eski === 0) return yeni > 0 ? Infinity : 0;
@@ -247,10 +259,7 @@ R.Goodhart = (function(){
     return Object.assign(base, { status:'decoupled', cert:'measured',
       direction:yon.id, effortChange:dC, outcomeChange:dS, improvement:iyilesme,
       regressed:geriledi,
-      note:def.effortLabel + ' %' + Math.round(dC * 100) + ' arttı, '
-         + def.outcomeLabel + (dS == null ? ' ölçülemedi'
-            : geriledi ? ' %' + Math.round(Math.abs(iyilesme) * 100) + ' GERİLEDİ'
-            : ' yerinde saydı') + '.' });
+      note:ayrismaNotu(def, dC, dS == null ? null : geriledi ? iyilesme : 0) });
   }
 
   function scan(){ return PAIRS.map(pair); }
@@ -269,6 +278,6 @@ R.Goodhart = (function(){
 
   function policy(){ return POLICY; }
 
-  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS,
+  return { PAIRS, windows, pair, scan, flags, brief, policy, DIRECTIONS, ayrismaNotu,
     PENCERE, CABA_ARTIS, SONUC_DURGUN };
 })();
