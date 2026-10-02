@@ -24,6 +24,9 @@ ESP.Screens.studio = (function(){
     { id:'kulak',    label:'Kulak' },
     { id:'ogren',    label:'Öğren' },
     { id:'ilerleme', label:'İlerleme' },
+    /* iPhone Faz 2c: iki masa (müzik, diksiyon) öbür ekranlardaki gibi kendi
+       bölümünde; Müzik ve Diksiyon işle başlar. */
+    { id:'tezgah',   label:'Tezgâh' },
   ];
 
   /* ------------------------------------------------------------------ kulak
@@ -46,8 +49,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Kulak egzersizleri', hint:'ear',
         meta:ESP.EAR_DRILLS.length + ' egzersiz',
-        note:'Ölçülen şey yetenek değil isabet: yirmi denemede kaç doğru. '
-           + 'Sistem sesini dinlemez; sayıyı sen girersin.',
         wide:true,
         body:K.Table({ tight:true,
           headers:[{ label:'Kademe', num:true }, 'Egzersiz', 'Ne yapılır', 'Ne ölçülür'],
@@ -57,8 +58,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Aralıklar', hint:'interval',
         meta:ESP.INTERVALS.length + ' aralık',
-        note:'Kanca (hook) bir ezber kolaylığıdır, kural değil: kendi kancanı '
-           + 'bulursan daha iyi tutar.',
         wide:true,
         body:K.Table({ tight:true,
           headers:['Aralık', { label:'Yarım ses', num:true }, 'Kanca'],
@@ -68,8 +67,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Caged', hint:'caged',
         meta:'beş şekil',
-        note:'Bir sır değil bir harita: aynı akorun klavyede beş yerde nasıl '
-           + 'kurulduğunu gösterir.',
         body:K.Table({ tight:true, headers:['Şekil', 'Kök', 'Not'],
           rows:ESP.CAGED.map(c => [c.shape, c.root, c.note]) }),
       }),
@@ -77,7 +74,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Deşifre', hint:'sight-reading',
         meta:ESP.SIGHT_READING.length + ' kademe',
-        note:'Okumak çalmaktan ayrı bir beceridir ve ayrı çalışılır.',
         body:K.Table({ tight:true, headers:[{ label:'Kademe', num:true }, 'Ne', 'Nasıl'],
           rows:ESP.SIGHT_READING.map(s => [String(s.level), s.label, s.task]) }),
       }),
@@ -85,8 +81,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Repertuar bakımı', hint:'repertoire',
         meta:eskiyen.length ? eskiyen.length + ' bakımsız' : 'güncel',
-        note:'«Bitti» diye bir hâl yoktur: ' + ESP.REPERTOIRE_STALE_DAYS
-           + ' günden uzun süredir çalınmayan parça çalınabilir ama garanti değil.',
         body:eskiyen.length
           ? K.Table({ tight:true, headers:['Parça', 'Son çalınma'],
               rows:eskiyen.map(p => {
@@ -146,73 +140,31 @@ ESP.Screens.studio = (function(){
 
   /* ------------------------------------------------------------------ müzik */
 
-  function musicRows(){
-    const bpm = S.ui.metronomeBpm || 80;
-    const parcalar = S.pieces || [];
-    const acik = S.ui.pieceOpen ? parcalar.find(p => p.id === S.ui.pieceOpen) : null;
-
-    const rows = [
-      K.Entry({
-        label:'Metronom',
-        meta:bpm + ' BPM',
-        note:'Temiz çalınan tempo, hızlı çalınan tempodan önce gelir. '
-           + 'Eşik yalnızca «temiz» işaretlenen tekrarlardan açılır.',
-        body:html`
-          <div class="metro">
-            <div class="metro__bpm">
-              <button class="metro__step" data-act="bpm" data-d="-5" aria-label="5 azalt">−5</button>
-              <span class="metro__val num">${bpm}</span>
-              <button class="metro__step" data-act="bpm" data-d="5" aria-label="5 artır">+5</button>
-            </div>
-            <div class="metro__ctrl">
-              ${K.Button({ label:S.ui.metronomeOn ? 'Durdur' : 'Başlat',
-                act:'metro-toggle' })}
-              ${K.Select({ id:'metro-sig', value:S.ui.metroSig || '4/4', change:'metro-sig',
-                aria:'Ölçü türü',
-                options:ESP.TIME_SIGNATURES.map(t => ({ value:t.id, label:t.label })) })}
-            </div>
-          </div>
-          <p class="small muted mt-8">Vuruş aralığı
-            ${U.fmtNum(Math.round(ESP.Acoustic.beatMs(bpm)))} ms.
-            İlk vuruş vurgulu: metronomun işi vuruşu değil ölçünün nerede
-            başladığını duyurmaktır.</p>`,
-      }),
-
-      K.Entry({
-        label:'Tekrar kaydet',
-        meta:acik ? acik.name : 'parça seç',
-        note:'«Temiz» senin işaretindir: sistem duymaz. Bu yüzden tempo ve tarih '
-           + '«ölçüldü», temizlik yargısı senindir.',
-        body:parcalar.length
-          ? html`
-            <div class="row wrap">
-              ${K.Select({ id:'att-piece', value:acik ? acik.id : parcalar[0].id,
-                change:'pick-piece', aria:'Tekrarın yazılacağı parça',
-                options:parcalar.map(p => ({ value:p.id, label:p.name })) })}
-              ${K.Button({ label:'Temiz tekrar', tone:'primary', act:'log-clean' })}
-              ${K.Button({ label:'Hatalı tekrar', act:'log-dirty' })}
-            </div>
-            <p class="small muted mt-8">
-              ${ESP.Acoustic.CLEAN_STREAK} temiz tekrar aynı tempoda ve son
-              ${ESP.Acoustic.CLEAN_WINDOW_DAYS} gün içinde geldiğinde eşik açılır.
-              Eşik kendiliğinden artar, kendiliğinden düşmez.</p>`
-          : K.Empty({ text:'Henüz parça ya da teknik yok. Aşağıdan ekleyebilirsin.' }),
-      }),
-    ];
-
-    parcalar.forEach(p => {
+  /* iPhone Faz 2c (2026-10-02): her parça ayrı bir «TEKNİK» kartıydı (altı
+     parçada 3 600 px; hepsi aynı başlıkta olduğu için tek tek gizlenemiyordu).
+     Şimdi tek «Parçalar» listesi: satırda ad ve temiz eşik / hedef; dokununca
+     eşik çubuğu, sıradaki basamak, son tekrarlar ve Sil açılır. İlk beş +
+     «Tümü»; tekrarı yazılan (seçili) parça her zaman görünür ve açıktır.
+     Hiçbir bilgi kalkmadı: satırın içinde durur. */
+  const PARCA_ILK = 5;
+  function parcalarEntry(parcalar){
+    const tumu = !!S.ui.parcaTumu;
+    const secili = S.ui.pieceOpen ? parcalar.find(p => p.id === S.ui.pieceOpen) : null;
+    let gosterilen = tumu ? parcalar : parcalar.slice(0, PARCA_ILK);
+    if(secili && gosterilen.indexOf(secili) < 0) gosterilen = gosterilen.concat([secili]);
+    const satir = p => {
       const t = ESP.Acoustic.cleanThreshold(p);
       const next = ESP.Acoustic.nextStep(p);
       const sonDeneme = (p.attempts || []).slice(-6).reverse();
-      rows.push(K.Entry({
-        label:p.kind === 'technique' ? 'TEKNİK' : 'PARÇA',
-        meta:p.name,
-        note:t.cert === 'missing'
-          ? (t.why || 'Henüz temiz eşik ölçülmedi.')
-          : 'Temiz eşik ' + t.value + ' BPM' + (p.targetBpm ? ' · hedef ' + p.targetBpm
-            + (p.targetRef ? ' (referans)' : '') : ''),
-        action:K.Button({ label:'Sil', size:'sm', act:'del-piece', data:{ 'data-id':p.id } }),
-        body:html`
+      const esik = t.cert === 'missing' ? 'eşik yok'
+        : t.value + (p.targetBpm ? ' / ' + p.targetBpm + (p.targetRef ? ' (referans)' : '') : '') + ' BPM';
+      return html`<details class="parca"${raw(secili === p ? ' open' : '')}>
+        <summary class="parca__ozet">
+          <span class="parca__ad">${p.name}</span>
+          <span class="parca__tur">${p.kind === 'technique' ? 'teknik' : 'parça'}</span>
+          <span class="parca__esik num">${esik}</span>
+        </summary>
+        <div class="parca__govde">
           ${when((p.tags || []).indexOf('bam') >= 0, () => html`<p class="small muted">
             BAM alıştırması${p.key ? ' · ' + p.key : ''}${(p.progression || []).length
               ? ' · ' + p.progression.join('–') : ''}${p.startBpm ? ' · başlangıç ' + p.startBpm + ' BPM' : ''}
@@ -229,9 +181,64 @@ ESP.Screens.studio = (function(){
           ${when(sonDeneme.length, () => K.Table({ tight:true,
             headers:['Tarih', { label:'BPM', num:true }, 'Temiz'],
             rows:sonDeneme.map(a => [U.fmtShort(a.date), String(a.bpm),
-              a.clean ? 'evet' : 'hayır']) }))}`,
-      }));
+              a.clean ? 'evet' : 'hayır']) }))}
+          <div class="mt-8">${K.Button({ label:'Sil', size:'sm', act:'del-piece', data:{ 'data-id':p.id } })}</div>
+        </div>
+      </details>`;
+    };
+    return K.Entry({
+      label:'Parçalar', hint:'clean-bpm', meta:parcalar.length + ' parça', wide:true,
+      body:html`<div class="parcalar">${map(gosterilen, satir)}</div>
+        ${when(parcalar.length > PARCA_ILK, () => K.Button({ size:'sm', tone:'ghost', act:'parca-tumu', class:'mt-8',
+          label:tumu ? 'Yalnız ilk ' + PARCA_ILK : 'Tümü · ' + parcalar.length + ' parça' }))}`,
     });
+  }
+
+  function musicRows(){
+    const bpm = S.ui.metronomeBpm || 80;
+    const parcalar = S.pieces || [];
+    const acik = S.ui.pieceOpen ? parcalar.find(p => p.id === S.ui.pieceOpen) : null;
+
+    /* iPhone Faz 2c: iş metronom, tekrar kaydı ve parçalar. Açıklamalar ⓘ'de
+       (hints: metronome, clean-bpm); vuruş aralığı künyede. */
+    const rows = [
+      K.Entry({
+        label:'Metronom', hint:'metronome',
+        meta:bpm + ' BPM · ' + U.fmtNum(Math.round(ESP.Acoustic.beatMs(bpm))) + ' ms',
+        body:html`
+          <div class="metro">
+            <div class="metro__bpm">
+              <button class="metro__step" data-act="bpm" data-d="-5" aria-label="5 azalt">−5</button>
+              <span class="metro__val num">${bpm}</span>
+              <button class="metro__step" data-act="bpm" data-d="5" aria-label="5 artır">+5</button>
+            </div>
+            <div class="metro__ctrl">
+              ${K.Button({ label:S.ui.metronomeOn ? 'Durdur' : 'Başlat',
+                act:'metro-toggle' })}
+              ${K.Select({ id:'metro-sig', value:S.ui.metroSig || '4/4', change:'metro-sig',
+                aria:'Ölçü türü',
+                options:ESP.TIME_SIGNATURES.map(t => ({ value:t.id, label:t.label })) })}
+            </div>
+          </div>`,
+      }),
+
+      K.Entry({
+        label:'Tekrar kaydet', hint:'clean-bpm',
+        meta:acik ? acik.name : 'parça seç',
+        body:parcalar.length
+          ? html`
+            <div class="row wrap">
+              ${K.Select({ id:'att-piece', value:acik ? acik.id : parcalar[0].id,
+                change:'pick-piece', aria:'Tekrarın yazılacağı parça',
+                options:parcalar.map(p => ({ value:p.id, label:p.name })) })}
+              ${K.Button({ label:'Temiz tekrar', tone:'primary', act:'log-clean' })}
+              ${K.Button({ label:'Hatalı tekrar', act:'log-dirty' })}
+            </div>`
+          : K.Empty({ text:'Henüz parça ya da teknik yok. Aşağıdan ekleyebilirsin.' }),
+      }),
+    ];
+
+    if(parcalar.length) rows.push(parcalarEntry(parcalar));
 
     rows.push(K.Entry({
       label:'Parça ekle',
@@ -256,10 +263,8 @@ ESP.Screens.studio = (function(){
     /* BAM'dan alıştırma paketi (Part 8d-2): istek King'in onay kapısından
        geçer; paket Bugün'e teklif olarak gelir ve ESP kendi koduyla sınar. */
     rows.push(K.Entry({
-      label:'Paket iste',
+      label:'Paket iste', hint:'paket',
       meta:'gitar · HKM',
-      note:'Konu ve düzeyden alıştırma listesi (ton, derece ilerleyişi, başlangıç ve hedef '
-         + 'tempo). Tempolar referanstır; eşik senin temiz tekrarından açılır.',
       body:html`<div class="row gap-8 wrap">
         ${K.Select({ id:'gitar-duzey', value:S.ui.gitarDuzey || 'başlangıç', aria:'Düzey', size:'sm',
           options:[{ value:'başlangıç', label:'Başlangıç' }, { value:'orta', label:'Orta' },
@@ -289,8 +294,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Çalışma metni', hint:'articulation',
         meta:secili.kaynak ? 'kaynaklı okuma parçası' : 'düzey ' + secili.level + ' · ' + grup.label,
-        note:'Hedef hızlı söylemek değil, hangi sesin düzeldiği. Hızlı ama bozuk '
-           + 'bir tekerleme çalışmanın başarısı değil başarısızlığıdır.',
         body:html`
           <div class="row wrap">
             ${K.Select({ id:'tw-pick', value:secili.id, change:'pick-twister',
@@ -307,8 +310,7 @@ ESP.Screens.studio = (function(){
       /* Diksiyon belgesi (kullanıcı 2026-09-24: «ikisi birden»): telaffuz
          kuralı ve okuma parçası, BAM'ın web kaynaklarından; kural kaynağıyla. */
       K.Entry({
-        label:'Telaffuz kuralları', meta:dk.kurallar.length ? dk.kurallar.length + ' kural · kaynaklı' : 'henüz yok',
-        note:'Kural ve okuma parçası web kaynaklarından gelir; alıntısı kaynakta bulunmayan satır eklenmez.',
+        label:'Telaffuz kuralları', hint:'belge', meta:dk.kurallar.length ? dk.kurallar.length + ' kural · kaynaklı' : 'henüz yok',
         wide:true,
         body:html`
           ${when(dk.kurallar.length, () => html`<ul class="setup__list">${map(dk.kurallar, k => html`
@@ -323,10 +325,8 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Kayıt ölçümü',
+        label:'Kayıt ölçümü', hint:'kayit-olcumu',
         meta:'ses dosyası tutulmaz',
-        note:'Saklanan şey süre, kelime ve senin işaretlediğin hata sayısıdır. '
-           + 'Olmayan ses dosyası sızamaz.',
         body:html`
           <div class="cols-3">
             ${K.Field({ label:'Süre (saniye)',
@@ -351,7 +351,6 @@ ESP.Screens.studio = (function(){
         label:'Konuşma hızı', hint:'wpm',
         meta:d.cert === 'missing' ? 'veri yok'
           : (d.wpm.cert === 'missing' ? 'hesaplanamadı' : d.wpm.value + ' kelime/dk'),
-        note:ESP.WPM_NOTE,
         body:d.cert === 'missing'
           ? K.Empty({ text:'Son 30 günde kayıt yok.' })
           : html`
@@ -369,9 +368,8 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Nefes ve vurgu',
+        label:'Nefes ve vurgu', hint:'nefes',
         meta:ESP.BREATH_DRILLS.length + ' çalışma',
-        note:'Ölçülen şey süredir, «iyi yaptım» değil.',
         body:html`
           ${K.Table({ tight:true, headers:['Çalışma', { label:'Süre', num:true }, 'Not'],
             rows:ESP.BREATH_DRILLS.map(b => [b.label, U.fmtMin(Math.round(b.seconds / 60)) , b.note]) })}
@@ -416,8 +414,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Plato', hint:'plateau',
         meta:plato.length ? plato.length + ' teknik' : 'yok',
-        note:'Plato bir başarısızlık değil bir sinyaldir: aynı çalışma aynı '
-           + 'sonucu veriyorsa değişmesi gereken çalışmanın kendisidir.',
         body:plato.length
           ? K.Table({ tight:true, headers:['Parça', { label:'Gün', num:true }, { label:'BPM', num:true }],
               rows:plato.map(p => [p.piece.name, String(p.days), String(p.bpm)]) })
@@ -427,10 +423,9 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Hedefe ulaşma',
+        label:'Hedefe ulaşma', hint:'hedef-tempo',
         meta:m.progress && m.progress.cert !== 'missing'
           ? m.progress.reached + '/' + m.progress.n : 'veri yok',
-        note:'Hedefi girilmemiş parça paydaya girmez: hedefsiz parça başarısız değildir.',
         body:m.progress && m.progress.cert !== 'missing'
           ? K.Meter({ label:'Hedef tempoya ulaşan parça oranı',
               value:m.progress.value * 100,
@@ -439,10 +434,8 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Diksiyon eğilimi',
+        label:'Diksiyon eğilimi', hint:'diksiyon-egilimi',
         meta:t.cert === 'missing' ? 'veri yok' : t.direction,
-        note:'İki pencere karşılaştırılır: son 14 gün ve ondan önceki 14 gün. '
-           + 'İkisinde de ölçüm yoksa bulgu üretilmez.',
         body:t.cert === 'missing'
           ? K.Notice({ tone:'info', body:t.why })
           : K.Notice({ tone:t.direction === 'iyi' ? 'ok' : t.direction === 'kotu' ? 'warn' : 'info',
@@ -451,9 +444,8 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Isınma sırası',
+        label:'Isınma sırası', hint:'isinma',
         meta:'öneri',
-        note:'Zorunlu değildir; sistem senin yerine karar vermez.',
         body:K.Table({ tight:true, headers:['Aşama', { label:'Dakika', num:true }, 'Not'],
           rows:ESP.WARMUP.map(w => [w.label, String(w.minutes), w.note]) }),
       }),
@@ -472,8 +464,6 @@ ESP.Screens.studio = (function(){
       return K.Entry({
         label:d.label, hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
-        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
-           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
         wide:true,
         body:ESP.Parts.topics(d.id),
       });
@@ -482,15 +472,15 @@ ESP.Screens.studio = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
-  /* Sekme yok (EKIP-PLANI §1.2): beş bölüm alt alta. Stüdyoda iki
-     disiplin var; her birinin tezgâhı kendi bölümünün başında durur (koç o
-     masanın reçetesini yazar). */
+  /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta. Stüdyoda iki disiplin
+     var; iki tezgâh (koç her masanın reçetesini ayrı yazar) son bölümde,
+     öbür ekranlardaki «Tezgâh» gibi (iPhone Faz 2c). */
   function render(){
     return K.Grid(html`
       ${K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:'Stüdyo bölümleri', tabs:TABS, govde:{
-        muzik:() => [ESP.Parts.desk('music')].concat(musicRows()),
-        diksiyon:() => [ESP.Parts.desk('diction')].concat(dictionRows()),
-        kulak:earRows, ogren:topicRows, ilerleme:progressRows } }))}`);
+        muzik:musicRows, diksiyon:dictionRows,
+        kulak:earRows, ogren:topicRows, ilerleme:progressRows,
+        tezgah:() => [ESP.Parts.desk('music'), ESP.Parts.desk('diction')] } }))}`);
   }
 
   function afterRender(){ ESP.Parts.bolumIstegi('studioTab', TABS[0].id); }
@@ -513,6 +503,7 @@ ESP.Screens.studio = (function(){
     },
     /* Bölüme kayar; metronom durmaz (bölümler aynı sayfada). */
     async 'studio-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'parca-tumu'(){ S.ui.parcaTumu = !S.ui.parcaTumu; ESP.App.render(); },
 
     async 'bpm'(el){
       const d = Number(el.dataset.d) || 0;
@@ -633,7 +624,10 @@ ESP.Screens.studio = (function(){
     /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-    kucukVarsayilan:['kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları'],
+    /* iPhone Faz 2c: parça ekleme ara sıra; Diksiyon'da kural listesi ve
+       geçmiş kayıtlar, Kulak'ta üç başvuru tablosu şerit. */
+    kucukVarsayilan:['kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları', 'parça-ekle',
+      'telaffuz-kuralları', 'son-kayıtlar', 'aralıklar', 'caged', 'deşifre'],
     title:'Stüdyo',
     headline(){
       const plato = ESP.Acoustic.plateaus();

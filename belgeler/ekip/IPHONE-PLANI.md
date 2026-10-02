@@ -53,6 +53,20 @@ ekran** (AYS 74 / 8 · SPİ 55 / 8 · ESP 59 / 6). En kalabalıklar:
 Doktrin aynen: kural motoru otorite, eksik veri sıfır değil, sıfır bağımlılık, Türkçe metin,
 SPİ sınır satırı (sayfa sonu) kalır. **Rütbe ekranları olduğu gibi kalır** (kullanıcı kararı).
 
+**Sıkı ölçü** (kullanıcı, 2026-10-02, 2b'den sonra: «çok daha sade, çok daha minimalist devam
+edelim»). 2c'den itibaren her ekranda:
+
+- Açık yalnız işin kendisi (1–2 kart) ve en çok bir dönen kart.
+- Şerit yalnız ara sıra açılan araç için; başvuru tablosu, tekrar ve ayrıntı kartı gizli ya da
+  şerit — açık değil.
+- **Hiçbir bölümde sabit açıklama notu yok.** Öğreti ⓘ'dedir (`data/hints.js`; yoksa önce
+  oraya taşınır). Veriden gelen not kalır: zincirin sorusu, tezgâhın sıradaki kapısı, formülün
+  kendi değerleri.
+- Aynı cümle iki yerde yazılmaz (kart notu + bilgi kutusu, kutu adı + bileşen künyesi).
+- Uzun liste ilk 5 + «Tümü»; arama/süzgeç açıkken liste kesilmez.
+- Bölümlü ekranda HER bölüm ayrı ayrı bu ölçüye girer (araç yalnız varsayılan bölümü ölçer;
+  öbürleri testte sayılır — `ESP/src/tests/iphone.test.js` «her bölümde açık en çok üç»).
+
 ## 3. Ekran türleri ve kalıpları
 
 | Tür | Ekranlar | Açık kalan (iş) | Widget | Şerit (küçük) | Gizli |
@@ -193,24 +207,48 @@ Faz 2b'de görülen, sonraya kalan:
   kartı hâlâ «0 kcal» yazar.
 - `meals.js` `adviceView` hiçbir yerden çağrılmıyor (eski düzen); içinde sayfa içi sınır kutusu var.
 
-Sıradaki (2c; ekran görüntüleriyle incelendi, karar verildi — kodu yazılmadı):
+Yapılan (2c, sıkı ölçüyle; testler `ESP/src/tests/iphone.test.js` «Faz 2c»,
+`brand/ortak/vitrinkart.test.js`):
 
-- **AYS Soru çöz** hâlâ 1 293 px: fotoğraf kutusu alçalsın; «Notun isteğe bağlı — nerede
-  takıldığını…» ve «Açılır pencere yok · Enter kaydeder» açıklamaları ⓘ'ye. **AYS Dersler**
-  1 238 px (küçük kırpma yeter).
-- **ESP Tarih** (`history`): açık şerit + dönemler; yüzyıl boşlukları ve dağılım şerit;
-  `note` açıklamaları ⓘ'ye (ESP Merdiven'de yapılan gibi: önce `data/hints.js`'te aynı öğreti
-  var mı bak, yoksa hint'e taşı, sonra ekrandan sil).
-- **ESP Ses** (`studio`, açık 11, 3 636 px): her parça ayrı «TEKNİK» kartı — hepsi aynı
-  başlık, yani aynı gizle anahtarı (`teknik`; `bolumler` tekrar anahtarı atar, tek tek
-  yönetilemez). Tek «Parçalar» kartında kompakt satır (ad · eşik/hedef BPM · çubuk; dokununca
-  geçmiş tablosu), ilk 5 + «Tümü». Müzik bölümünün başındaki Tezgâh şerit; Metronom ve Tekrar
-  kaydet açık (iş bunlar), açıklama satırları ⓘ'ye; Parça ekle ve Paket iste şerit.
-- **ESP Okuma** (`library`): «Not ekle»nin iki açıklama satırı ⓘ'ye; not listesi kompakt
-  satır (metin + etiketler tek satır), ilk 5 + «Tümü».
-- **Ölçünün görmediği:** araç yalnız VARSAYILAN sekmeyi ölçer (katmanlı bölümlerde öbür
-  sekmeler `display:none`). ESP Dil / Felsefe / Yazı ve AYS Ders notları / Deneme / Sınama
-  bütçede görünüyor ama öbür sekmeleri elle gezilmeli (Faz 0 elle sayımında ESP Dil 21 kart).
+- **ESP Tarih:** dönen «Kapsam» kartı (dönem, alan, bölge n/N, yüzyıl boşluğu; boş eksen
+  adıyla). Açık yalnız zaman şeridi; Dönemler şerit; Yüzyıl boşlukları ve Dağılım gizli. Her
+  bölümdeki 15 sabit not kalktı (öğreti ipuçlarında; yeni `belge`, `tarih-pratik`; `chrono`,
+  `srs` genişledi). «Tohumu yükle» her bölümün üstündeki ayrı satırdan «Olay ekle»nin yanına
+  taştı. Belge iste, iki başvuru tablosu şerit. 1 463 → 900 px.
+- **ESP Ses:** altı «TEKNİK» kartı (3 636 px) tek «Parçalar» listesine döndü: satırda ad · tür ·
+  eşik/hedef BPM, dokununca eşik çubuğu, sıradaki basamak, son tekrarlar, Sil (`details`);
+  ilk 5 + «Tümü», seçili parça her zaman görünür ve açık. İki tezgâh Müzik ve Diksiyon'un
+  başından kendi «Tezgâh» bölümüne taştı (öbür ESP ekranları gibi). Metronom künyesi vuruş
+  aralığını taşır («80 BPM · 750 ms»). 18 sabit not kalktı (yeni ipuçları: `metronome`,
+  `paket`, `kayit-olcumu`, `diksiyon-egilimi`, `hedef-tempo`, `nefes`, `isinma`). Paket iste
+  gizli; Parça ekle, Telaffuz kuralları, Son kayıtlar, Kulak'ın üç tablosu şerit. → 1 084 px.
+- **ESP Okuma:** not satırı tek satır (metin solda, etiket ve eylem sağda); en yeni 5 not +
+  «Tümü» (arama/kavram süzgecinde kesilmez); Bağlı notlar gizli; Raf, Okuma listesi iste ve
+  Yöntem'in beş başvuru kartı şerit; 11 sabit not ve iki açıklama paragrafı kalktı (yeni
+  `kavram-matrisi`, `anlat`). Sentez katsayısı eksikken gerekçeyi iki kez yazıyordu (not +
+  kutu). → 1 182 px.
+- **AYS Soru çöz:** fotoğraf kutusu boşken tek satır (132 → 64 px); kart alt yazısı (bırakma
+  kutusunun ve metin alanının söylediğinin üçüncü tekrarı), «Notun»un uzun ipucu ve hızlı
+  kaydın «Açılır pencere yok · Enter kaydeder / küçük · geri alınır» notları ⓘ'de (yeni
+  `solve`, `quick-log`). Ortak `tekSatirSoru` artık `not:false` alır. 1 293 → 1 176 px.
+- **AYS Dersler:** ders listesi sıklaştı (satır 58 → 52 px) ama sayfa 1 238 px kaldı: satırın
+  boyunu Konular'ın raf kesme tabanı belirliyor (en az 560 + 56 px «Tamamını göster»,
+  `hareket.js kesimler`). Ortak raf kuralıdır; Faz 7'de bütçeyle birlikte ele alınır.
+
+Sıradaki — **2d, bölüm turu** (sıkı ölçüyle; ölçüm 2026-10-02, 1440, dolu profil):
+
+- **ESP Dil** (`lang`): Dilbilgisi 8 açık + 8 not (A1…C2 tabloları başvuru → şerit), Öğren 5,
+  İlerleme 4, Ekle 3; her bölümde not.
+- **ESP Felsefe** (`symposium`): Ekle 2 · Metinler 3 · Deneyler 2 · Öğren 1 — hepsinde not.
+- **ESP Yazı** (`writing`): Ölçüm 5 + 5 not, Araçlar 4 + 4 not.
+- **SPİ bölümleri:** sabit notlar — Test gir 2, Karşılaştır 2, İlaç 2, Geçmiş 1, Eğilim 1,
+  Paneller 1; Hareket › Kardiyo 2, Kuvvet 1, Esneklik 1, Dinlenme 3, İlerleme 1; Bütçe ›
+  İkame 1.
+- **AYS:** Sınama 2 not, Dersler 3 not.
+- **2b'ye sıkı ölçü turu:** Öğün'de Günlük hedef (sayıları dönen kartta) ve Hareket'te Günün
+  yük emri (dönen kartta; kırmızı gerekçe zaten söyleniyor) şeritten gizliye; Mutfak'ta Hane
+  (başvuru tablosu) gizli.
+- Ölçüm betiği (her bölümü ayrı sayar) §9'da.
 
 ## 7. Bilinen riskler
 
@@ -227,8 +265,9 @@ Sıradaki (2c; ekran görüntüleriyle incelendi, karar verildi — kodu yazılm
 | 1 | ✅ AYS Hafta · Program · Hedef, ESP Merdiven (SPİ Hedefler zaten bütçede) | 147c177 | 180 · aşan 21 |
 | 6a | ✅ öne alındı: «Bu ekran nasıl okunur» şeridi her ekranda ⓘ kartına taşınır (`kabuk.railBilgiye`, `Gizle.uygula`'dan); terim kaybolmaz | 75a889a | 180 · aşan 21 (boy: Hafta 1 197) |
 | 2a | ✅ AYS Dersler · Soru çöz · Tekrar | 1d22ef6 | 172 · aşan 19 (AYS 59/5 · SPİ 55/8 · ESP 58/6) |
-| 2b | ✅ SPİ Testler · Öğün · Mutfak · Hareket · Bütçe (beşi de açık ≤ 3, boy ≤ 1 200); Bütçe «0 TL» hatası | (bu commit) | 161 · aşan 15 (AYS 59/5 · SPİ 44/4 · ESP 58/6) |
-| 2c | ⏭ sıradaki: ESP Tarih · Ses · Okuma; AYS Soru çöz/Dersler boy kırpması; sekmelerin elle turu | — | — |
+| 2b | ✅ SPİ Testler · Öğün · Mutfak · Hareket · Bütçe (beşi de açık ≤ 3, boy ≤ 1 200); Bütçe «0 TL» hatası | f73a9a7 | 161 · aşan 15 (AYS 59/5 · SPİ 44/4 · ESP 58/6) |
+| 2c | ✅ sıkı ölçü: ESP Tarih · Ses · Okuma (her bölüm), AYS Soru çöz; Dersler 1 238 (raf tabanı) | (bu commit) | 150 · aşan 13 (AYS 59/5 · SPİ 44/4 · ESP 47/4) |
+| 2d | ⏭ sıradaki: bölüm turu — ESP Dil · Felsefe · Yazı, SPİ ve AYS bölümlerinin notları, 2b'ye sıkı ölçü | — | — |
 
 ## 9. Devir notu — sıradaki oturum buradan başlar
 
@@ -291,6 +330,13 @@ const PORT = { AYS:4173, SPI:4183, ESP:4193 };
   await b.close();
 })();
 ```
+
+**Bölüm ölçümü** (araç yalnız varsayılan bölümü görür). Yukarıdaki betikte `go`dan sonra
+her `section.sayfabolum` için sayılır: en dıştaki başlıklı `section.lrow, section.kutu, .card`
+(gizli: `[data-gizle-gizli]`; şerit: `.gizle-kucuk`; geri kalanı açık) ve `.lrow__note`
+(tezgâh notu hariç = sabit not). Açılışta `localStorage`'daki `lifeos.gizli.*` silinir, yoksa
+eski elle seçimler ölçüye karışır. Bash aracında heredoc içindeki `\\` tek `\`'ye iner:
+ters bölü taşıyan Python betiği önce dosyaya yazılıp öyle çalıştırılır.
 
 **Değişmeyenler:** Rütbe ekranlarına dokunulmaz. Hiçbir işlev silinmez (envanter kayıp 0).
 Kullanıcının kendi dosyaları commit'e girmez: `.gitignore` değişikliği, `veri/`,

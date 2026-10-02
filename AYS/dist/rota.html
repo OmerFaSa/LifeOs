@@ -9146,6 +9146,11 @@ tbody tr:hover{ background:var(--surface-2); }
 
 .daycol__block.is-skipped{ border-left-color:var(--danger); opacity:.65; text-decoration:line-through; }
 
+/* ---------- ders listesi (Dersler) ----------
+   iPhone Faz 2c: sekiz ders tek bakışta; satır sık (dokunma hedefi yine
+   36 px'in üstünde). */
+.list--sik .listitem--tap{ padding-top:8px; padding-bottom:8px; }
+
 /* ---------- konu satiri (Dersler) ---------- */
 .topicrow{
   display:grid;
@@ -10262,11 +10267,13 @@ tbody tr:hover{ background:var(--surface-2); }
 
 /* Fotoğraf bırakma alanı. Üç yol da aynı kapıya çıkar: tıkla, sürükle,
    Ctrl+V ile yapıştır — telefonda çeken de bilgisayarda kırpan da girebilsin. */
+/* iPhone Faz 2c: boşken tek satır (simge · «Fotoğrafı buraya bırak» · yol);
+   fotoğraf seçilince sütun olur ve görseli taşır. */
 .qdrop{
   position:relative;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:6px;
-  min-height:132px; padding:var(--sp-4);
+  display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:center;
+  gap:6px 10px;
+  min-height:64px; padding:var(--sp-3) var(--sp-4);
   border:2px dashed var(--border-strong);
   border-radius:var(--r);
   background:var(--surface-2);
@@ -10280,7 +10287,7 @@ tbody tr:hover{ background:var(--surface-2); }
 
 .qdrop:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 
-.qdrop.is-full{ padding:var(--sp-2); border-style:solid; background:var(--surface); }
+.qdrop.is-full{ flex-direction:column; padding:var(--sp-2); border-style:solid; background:var(--surface); }
 
 .qdrop__icon svg{ width:26px; height:26px; stroke:currentColor; fill:none; stroke-width:1.6; color:var(--text-3); }
 
@@ -13426,7 +13433,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'75a889a', at:'2026-10-02 11:13', dirty:true };
+R.BUILD = { id:'f73a9a7', at:'2026-10-02 12:24', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -15284,7 +15291,9 @@ window.LIFEOS = window.LIFEOS || {};
       + secim(o.id + '-konu', 'Konu', o.konular || [], o.konu)
       + secim(o.id + '-sonuc', 'Sonuç', o.sonuclar || [], o.sonuc, sonuc.iyi ? 'i' : '')
       + '<button type="button" class="kbd-d" data-act="' + kac(o.act) + '" aria-label="Kaydet (Enter)"><kbd>↵</kbd></button></div>'
-      + '<div class="cap">' + kac(buyuk(o.not || 'Açılır pencere yok · Enter kaydeder')) + '</div>');
+      /* not:false — kullanım notu ⓘ'dedir (iPhone planı §2.4); düğmenin
+         aria-label'ı «Enter» bilgisini yine taşır. */
+      + (o.not === false ? '' : '<div class="cap">' + kac(buyuk(o.not || 'Açılır pencere yok · Enter kaydeder')) + '</div>'));
   }
 
   /* 056 YANLIŞ NEDENLERİ — set sonunda her yanlışa tek dokunuşla neden;
@@ -27121,6 +27130,10 @@ R.HINTS = {
     more:'Yüksek frekanslı ve kapanmamış bir konu, düşük frekanslı ve kapalı bir konudan daha risklidir. Skor bir emir değil öneri sırasıdır; imzalı haftalık sözleşme her zaman önce gelir.' },
   'estimate':{ t:'Tahmini sıra', b:'Son 3 denemenin medyanından üretilen bant — tek sayı değil.',
     more:'ÖSYM puanı ham netten değil, standartlaştırılmış puandan gelir ve aday dağılımı her yıl değişir. Bu yüzden sonuç aralık olarak verilir ve deneme sayısı arttıkça aralık daralır.' },
+  'solve':{ t:'Soru çöz', b:'Sorunun fotoğrafını ya da metnini ver; model çözer ve anlatır.',
+    more:'Fotoğraf üç yoldan girer: bırak, tıkla ya da Ctrl+V ile yapıştır. Notun isteğe bağlıdır: nerede takıldığını yazarsan çözüm oraya odaklanır. Model bağlı değilse çözüm üretilmez.' },
+  'quick-log':{ t:'Hızlı kayıt', b:'Ders, konu ve sonuç seç; Enter kaydeder.',
+    more:'Açılır pencere yok: satırı doldurup Enter’a (ya da ↵ düğmesine) basmak soruyu kaydeder. Çözümü yazdırmadan çözülmüş bir soruyu konu takibine bağlar. Kayıt küçük aksiyondur: sormadan uygulanır, «Geri al» kalır.' },
   'quiz':{ t:'Sınama', b:'Kart çevirmek tanımadır; sınama üretmeyi ölçer.',
     more:'Cevabı görmeden önce kendine söylemen gerekir. Bilmediğin madde otomatik karta düşer, bildiğin maddenin tekrar aralığı uzar.' },
   'energy':{ t:'Enerji', b:'Günde tek soru: 1 bitkin … 5 yüksek. Plan buna göre esner.',
@@ -57475,8 +57488,11 @@ R.Screens.solve = (function(){
     const canText = Q.ready(false);
     const canImage = visionReady();
 
+    /* iPhone Faz 2c: «fotoğrafını yapıştır ya da metnini yaz» bırakma
+       kutusunun ve metin alanının kendi yazısında; notun ne işe yaradığı ⓘ'de
+       (hints: solve). */
     return K.Card({
-      title:'Soruyu ver', sub:'Fotoğrafını yapıştır ya da metnini yaz',
+      title:'Soruyu ver', hint:'solve',
       body:K.Stack([
         when(!canText, () => K.Notice({ tone:'warn', title:'Model bağlı değil.',
           body:html`Soru çözmek için bir model gerekiyor.
@@ -57514,7 +57530,7 @@ R.Screens.solve = (function(){
           input:K.Textarea({ id:'q-text', rows:4,
             placeholder:'Soruyu buraya yazabilir ya da yapıştırabilirsin' }) }),
 
-        K.Field({ label:'Notun', hint:'isteğe bağlı — nerede takıldığını yazarsan oraya odaklanır',
+        K.Field({ label:'Notun', hint:'isteğe bağlı',
           input:K.Input({ id:'q-note', placeholder:'ör. ikinci adımı anlamadım' }) }),
 
         K.Row([
@@ -57936,8 +57952,10 @@ R.Screens.solve = (function(){
       dersler:R.SUBJECTS.map(x => ({ value:x.id, label:x.name })), ders:hizli.ders,
       konular:[{ value:'', label:'Konu seç' }].concat(ders.topics.map(t => ({ value:t.id, label:t.name }))), konu:hizli.konu,
       sonuclar:R.SOLVE_RESULT_ORDER.map(id => ({ value:id, label:R.SOLVE_RESULTS[id].label, iyi:id === 'dogru' || id === 'zorla' })),
-      sonuc:hizli.sonuc, not:'Açılır pencere yok · Enter kaydeder' });
-    return K.Kutu({ ad:'Hızlı kayıt', yuva:'küçük · geri alınır', class:'vkutu', id:'q-hizli-kutu', govde:raw(ic) });
+      sonuc:hizli.sonuc, not:false });
+    /* «Açılır pencere yok · Enter kaydeder» ve «küçük · geri alınır» ⓘ'de
+       (hints: quick-log); ↵ düğmesi «Kaydet (Enter)» diye okunur. */
+    return K.Kutu({ ad:'Hızlı kayıt', ipucu:'quick-log', class:'vkutu', id:'q-hizli-kutu', govde:raw(ic) });
   }
 
   async function render(){
@@ -58624,7 +58642,7 @@ R.Screens.subjects = (function(){
   /* ---------- ekran ---------- */
 
   function subjectNav(sid){
-    return html`<div class="list">${map(R.SUBJECTS, s => {
+    return html`<div class="list list--sik">${map(R.SUBJECTS, s => {
       const c = C.subjectClosure(s.id);
       return html`
         <button class="${s.id === sid ? 'listitem listitem--tap is-on' : 'listitem listitem--tap'}"

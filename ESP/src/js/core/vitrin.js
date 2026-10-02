@@ -383,7 +383,9 @@ window.LIFEOS = window.LIFEOS || {};
       + secim(o.id + '-konu', 'Konu', o.konular || [], o.konu)
       + secim(o.id + '-sonuc', 'Sonuç', o.sonuclar || [], o.sonuc, sonuc.iyi ? 'i' : '')
       + '<button type="button" class="kbd-d" data-act="' + kac(o.act) + '" aria-label="Kaydet (Enter)"><kbd>↵</kbd></button></div>'
-      + '<div class="cap">' + kac(buyuk(o.not || 'Açılır pencere yok · Enter kaydeder')) + '</div>');
+      /* not:false — kullanım notu ⓘ'dedir (iPhone planı §2.4); düğmenin
+         aria-label'ı «Enter» bilgisini yine taşır. */
+      + (o.not === false ? '' : '<div class="cap">' + kac(buyuk(o.not || 'Açılır pencere yok · Enter kaydeder')) + '</div>'));
   }
 
   /* 056 YANLIŞ NEDENLERİ — set sonunda her yanlışa tek dokunuşla neden;

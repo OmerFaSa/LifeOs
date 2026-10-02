@@ -97,8 +97,11 @@ R.Screens.solve = (function(){
     const canText = Q.ready(false);
     const canImage = visionReady();
 
+    /* iPhone Faz 2c: «fotoğrafını yapıştır ya da metnini yaz» bırakma
+       kutusunun ve metin alanının kendi yazısında; notun ne işe yaradığı ⓘ'de
+       (hints: solve). */
     return K.Card({
-      title:'Soruyu ver', sub:'Fotoğrafını yapıştır ya da metnini yaz',
+      title:'Soruyu ver', hint:'solve',
       body:K.Stack([
         when(!canText, () => K.Notice({ tone:'warn', title:'Model bağlı değil.',
           body:html`Soru çözmek için bir model gerekiyor.
@@ -136,7 +139,7 @@ R.Screens.solve = (function(){
           input:K.Textarea({ id:'q-text', rows:4,
             placeholder:'Soruyu buraya yazabilir ya da yapıştırabilirsin' }) }),
 
-        K.Field({ label:'Notun', hint:'isteğe bağlı — nerede takıldığını yazarsan oraya odaklanır',
+        K.Field({ label:'Notun', hint:'isteğe bağlı',
           input:K.Input({ id:'q-note', placeholder:'ör. ikinci adımı anlamadım' }) }),
 
         K.Row([
@@ -558,8 +561,10 @@ R.Screens.solve = (function(){
       dersler:R.SUBJECTS.map(x => ({ value:x.id, label:x.name })), ders:hizli.ders,
       konular:[{ value:'', label:'Konu seç' }].concat(ders.topics.map(t => ({ value:t.id, label:t.name }))), konu:hizli.konu,
       sonuclar:R.SOLVE_RESULT_ORDER.map(id => ({ value:id, label:R.SOLVE_RESULTS[id].label, iyi:id === 'dogru' || id === 'zorla' })),
-      sonuc:hizli.sonuc, not:'Açılır pencere yok · Enter kaydeder' });
-    return K.Kutu({ ad:'Hızlı kayıt', yuva:'küçük · geri alınır', class:'vkutu', id:'q-hizli-kutu', govde:raw(ic) });
+      sonuc:hizli.sonuc, not:false });
+    /* «Açılır pencere yok · Enter kaydeder» ve «küçük · geri alınır» ⓘ'de
+       (hints: quick-log); ↵ düğmesi «Kaydet (Enter)» diye okunur. */
+    return K.Kutu({ ad:'Hızlı kayıt', ipucu:'quick-log', class:'vkutu', id:'q-hizli-kutu', govde:raw(ic) });
   }
 
   async function render(){

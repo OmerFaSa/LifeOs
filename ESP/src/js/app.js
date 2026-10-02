@@ -264,9 +264,11 @@ ESP.App = (function(){
      anahtarın gerçek bir bölüme denk geldiği test edilir (sade.test.js). */
   const SADE_GIZLI = {
     guide:['nasıl-çalışır', 'sıfır-sürtünme', 'kısayollar', 'yedi-disiplin', 'çıktı-denetimi', 'ne-büyüyor', 'nerede-duruyor', 'doktrin', 'yapılmayacaklar', 'kardeş-projeler', 'yayımlanmış-çerçeve', 'öğrenme-araştırması', 'kendi-ölçümün', 'sistem-ayarı', 'denetim'],
-    history:['egzersiz-kataloğu'],
-    studio:['nefes-ve-vurgu', 'ısınma-sırası'],
-    library:['öğrendiğini-anlat'],
+    /* iPhone Faz 2c: boşluk ve dağılımın sayısı dönen «Kapsam» kartında;
+       paket isteği ara sıra; bağlı notlar not listesinin tekrarı. */
+    history:['egzersiz-kataloğu', 'yüzyıl-boşlukları', 'dağılım'],
+    studio:['nefes-ve-vurgu', 'ısınma-sırası', 'paket-iste'],
+    library:['öğrendiğini-anlat', 'bağlı-notlar'],
     analytics:['veri-doluluğu'],
     gun:['bekleyen-iş', 'günün-dakikası', 'yedek', 'hkm', 'seri', 'hedeflerim', 'günün-toplamı', 'asgari-gün', 'entelektüel-hacim', 'haftanın-dağılımı', 'son-gün', 'seçili-gün'],
   };

@@ -9143,6 +9143,27 @@ button.rutbe-rozet:focus-visible{
 .metro__step:hover{ background:var(--surface-hover); color:var(--text); }
 .metro__ctrl{ display:flex; gap:var(--sp-2); align-items:center; }
 
+/* Parcalar (iPhone Faz 2c): her parca tek satir; dokununca esik cubugu,
+   siradaki basamak ve son tekrarlar satirin icinde acilir. Ok, gizli
+   bolumun seridindeki okun aynisi. */
+.parca{ border-bottom:1px solid var(--rule); }
+.parca:last-child{ border-bottom:0; }
+.parca__ozet{
+  display:flex; align-items:center; gap:var(--sp-3); min-height:44px;
+  padding:var(--sp-2) 0; cursor:pointer; list-style:none;
+}
+.parca__ozet::-webkit-details-marker{ display:none; }
+.parca__ozet::before{
+  content:''; flex:none; width:6px; height:6px; margin:0 var(--sp-1);
+  border-right:1.6px solid currentColor; border-bottom:1.6px solid currentColor;
+  transform:rotate(-45deg); opacity:.6; transition:transform var(--dur) var(--ease);
+}
+.parca[open] > .parca__ozet::before{ transform:rotate(45deg); }
+.parca__ad{ flex:1 1 auto; min-width:0; font-weight:550; overflow-wrap:anywhere; }
+.parca__tur{ font-size:var(--fs-xs); color:var(--text-3); }
+.parca__esik{ font-size:var(--fs-sm); color:var(--text-2); white-space:nowrap; }
+.parca__govde{ padding:0 0 var(--sp-4) calc(var(--sp-1) * 2 + 6px + var(--sp-3)); }
+
 .twister{
   font-family:var(--font-serif); font-size:var(--fs-lg); line-height:1.5;
   padding:var(--sp-4) var(--sp-5);
@@ -9153,13 +9174,18 @@ button.rutbe-rozet:focus-visible{
 
 /* --------------------------------------------------------------- notlar */
 
-.noterow{ padding:var(--sp-4) 0; border-bottom:1px solid var(--rule); }
+/* iPhone Faz 2c: not tek satir (metin solda, etiket ve eylemler sagda);
+   dar kutuda eylemler alta iner. Bag formu ve baglar tam en, alt satirda. */
+.noterow{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2) var(--sp-4);
+  padding:var(--sp-3) 0; border-bottom:1px solid var(--rule);
+}
 .noterow:last-child{ border-bottom:0; }
-.noterow__text{ font-size:var(--fs-base); line-height:1.5; text-wrap:pretty; }
+.noterow__text{ flex:1 1 280px; min-width:0; font-size:var(--fs-base); line-height:1.5; text-wrap:pretty; }
 .noterow__meta{
   display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-2);
-  margin-top:var(--sp-2);
 }
+.noterow > .noterow__links, .noterow > .linkform, .noterow > .notice{ flex:1 1 100%; }
 .noterow__links{ list-style:none; margin-top:var(--sp-3); display:flex;
   flex-direction:column; gap:var(--sp-2); }
 .noterow__links li{
@@ -9301,7 +9327,7 @@ button.rutbe-rozet:focus-visible{
 /* Hareket azaltilmis tercihinde gecisler durur; STIL'deki genel kural
    burada da gecerlidir. */
 @media (prefers-reduced-motion:reduce){
-  .daycell, .srscard__reveal, .metro__step, .handoff{ transition:none; }
+  .daycell, .srscard__reveal, .metro__step, .handoff, .parca__ozet::before{ transition:none; }
 }
 
 
@@ -12650,7 +12676,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'147c177', at:'2026-10-02 10:59', dirty:true };
+ESP.BUILD = { id:'f73a9a7', at:'2026-10-02 12:24', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -14508,7 +14534,9 @@ window.LIFEOS = window.LIFEOS || {};
       + secim(o.id + '-konu', 'Konu', o.konular || [], o.konu)
       + secim(o.id + '-sonuc', 'Sonuç', o.sonuclar || [], o.sonuc, sonuc.iyi ? 'i' : '')
       + '<button type="button" class="kbd-d" data-act="' + kac(o.act) + '" aria-label="Kaydet (Enter)"><kbd>↵</kbd></button></div>'
-      + '<div class="cap">' + kac(buyuk(o.not || 'Açılır pencere yok · Enter kaydeder')) + '</div>');
+      /* not:false — kullanım notu ⓘ'dedir (iPhone planı §2.4); düğmenin
+         aria-label'ı «Enter» bilgisini yine taşır. */
+      + (o.not === false ? '' : '<div class="cap">' + kac(buyuk(o.not || 'Açılır pencere yok · Enter kaydeder')) + '</div>'));
   }
 
   /* 056 YANLIŞ NEDENLERİ — set sonunda her yanlışa tek dokunuşla neden;
@@ -29150,7 +29178,7 @@ ESP.HINTS = {
 
   /* --- dil --- */
   'srs':{ t:'Aralıklı tekrar', b:'Bir kartı tam unutmadan hemen önce sorar; aralık her doğru cevapta uzar.',
-    more:'Leitner kutularının SM-2 ile yumuşatılmış hâli. Kolay bulduğun kart daha uzun süre görünmez, zorlandığın kart başa döner. Amaç tekrar sayısını azaltmak değil, aynı hatırlamayı daha az tekrarla elde etmektir.' },
+    more:'Leitner kutularının SM-2 ile yumuşatılmış hâli. Kolay bulduğun kart daha uzun süre görünmez, zorlandığın kart başa döner. Amaç tekrar sayısını azaltmak değil, aynı hatırlamayı daha az tekrarla elde etmektir. Her disiplinin destesi ayrı ölçülür — tarih destesi dil destesinden AYRI: birinin iyi olması ötekinin çöküşünü gizlememeli.' },
   'retention':{ t:'Retansiyon', b:'Bugün sorulsa hatırlama olasılığının ortalaması. R(t) = e^(−t/S).',
     more:'S kartın kendi kararlılığıdır ve her doğru cevapta büyür. Hiç çalışılmamış kart bu ortalamaya girmez: «veri yok» sıfır sayılmaz, yoksa bir gün ara vermek retansiyonu çökmüş gibi gösterirdi.' },
   'shadowing':{ t:'Shadowing', b:'Duyduğun konuşmayı birkaç kelime geriden, aynı tonlamayla tekrarlama.',
@@ -29168,21 +29196,38 @@ ESP.HINTS = {
 
   /* --- ses --- */
   'clean-bpm':{ t:'Temiz BPM', b:'Hata yapmadan çalabildiğin en yüksek tempo. Ulaşılan en yüksek tempo değil.',
-    more:'Sistem yalnızca «temiz» işaretlenen tekrarların BPM\'ini eşik sayar. Hız eşiği kendiliğinden artar, kendiliğinden düşmez: bir kötü gün eşiği geri almaz, ama üst üste üç temiz tekrar yeni eşiği açar.' },
+    more:'Sistem yalnızca «temiz» işaretlenen tekrarların BPM\'ini eşik sayar. Hız eşiği kendiliğinden artar, kendiliğinden düşmez: bir kötü gün eşiği geri almaz, ama üst üste üç temiz tekrar yeni eşiği açar. «Temiz» senin işaretindir: sistem duymaz — tempo ve tarih «ölçüldü», temizlik yargısı senindir. Üç temiz tekrarın aynı tempoda ve son 14 gün içinde gelmesi gerekir.' },
   'plateau':{ t:'Plato', b:'Bir teknikte 14+ gündür temiz BPM eşiğinin artmaması.',
     more:'Plato bir başarısızlık değil bir sinyaldir: aynı çalışma aynı sonucu veriyorsa çalışmanın kendisi değişmeli. Öncelik sırasında «tıkanmış temel» sayılır ve yeni repertuarın önüne geçer.' },
   'articulation':{ t:'Artikülasyon', b:'Sesleri tam ve ayrık çıkarabilme. Tekerleme hızıyla değil temizliğiyle ölçülür.',
-    more:'Kayıt tutulur ama çözümlenmez — sistem konuşma tanıma modeli kullanmaz. Hata sayısını kendin işaretlersin; bu yüzden «tahmin» etiketi taşır ve kendi geçmişinle karşılaştırılır, başkasıyla değil.' },
+    more:'Kayıt tutulur ama çözümlenmez — sistem konuşma tanıma modeli kullanmaz. Hata sayısını kendin işaretlersin; bu yüzden «tahmin» etiketi taşır ve kendi geçmişinle karşılaştırılır, başkasıyla değil. Hedef hızlı söylemek değil, hangi sesin düzeldiği: hızlı ama bozuk bir tekerleme çalışmanın başarısı değil başarısızlığıdır.' },
   'wpm':{ t:'Konuşma hızı', b:'Dakikadaki kelime. Ölçülmüş süre ve sayılmış kelimeden hesaplanır.',
     more:'Yüksek WPM iyi değildir; hedef banda yakın WPM iyidir. Türkçe sunumda rahat okunan bant kabaca 120–150 arasıdır ve bu bir kural değil bir başlangıç çizgisidir; kendi kayıtların bandı yerine oturtur.' },
+  'metronome':{ t:'Metronom', b:'Tempoyu tutar; ilk vuruş vurgulu.',
+    more:'İlk vuruş vurgulu: metronomun işi vuruşu değil ölçünün nerede başladığını duyurmaktır. Vuruş aralığı tempodan hesaplanır (60 000 ÷ BPM milisaniye). Temiz çalınan tempo, hızlı çalınan tempodan önce gelir.' },
+  'paket':{ t:'Paket iste', b:'Konu ve düzeyden alıştırma listesi; King’e iletilir.',
+    more:'Ton, derece ilerleyişi, başlangıç ve hedef tempo taşıyan alıştırma listesi King’in onay kapısından geçer ve Bugün’e teklif olarak gelir. Tempolar referanstır; eşik senin temiz tekrarından açılır.' },
+  'kayit-olcumu':{ t:'Kayıt ölçümü', b:'Süre, kelime ve kendi işaretlediğin hata sayısı.',
+    more:'Saklanan şey süre, kelime ve senin işaretlediğin hata sayısıdır; ses dosyası saklanmaz, olmayan dosya sızamaz. Hata sayısı senin işaretindir, bu yüzden «tahmin» etiketi taşır.' },
+  'diksiyon-egilimi':{ t:'Diksiyon eğilimi', b:'Son 14 gün ile ondan önceki 14 gün karşılaştırılır.',
+    more:'İki pencere karşılaştırılır: son 14 gün ve ondan önceki 14 gün. İkisinde de ölçüm yoksa bulgu üretilmez.' },
+  'hedef-tempo':{ t:'Hedefe ulaşma', b:'Hedef tempoya ulaşan parçaların oranı.',
+    more:'Hedefi girilmemiş parça paydaya girmez: hedefsiz parça başarısız değildir.' },
+  'nefes':{ t:'Nefes ve vurgu', b:'Ölçülen şey süredir, «iyi yaptım» değil.' },
+  'isinma':{ t:'Isınma sırası', b:'Önerilen aşamalar ve süreleri.',
+    more:'Zorunlu değildir; sistem senin yerine karar vermez.' },
 
   /* --- okuma --- */
   'atomic-note':{ t:'Atomik not', b:'Tek bir fikri taşıyan, tek cümlelik kart. Kitap özeti değil.',
-    more:'Zettelkasten\'in tek kuralı budur: bir not bir fikir. İki fikir taşıyan not hiçbir yere bağlanamaz, çünkü hangi fikirle bağlandığı belirsizdir.' },
+    more:'Zettelkasten\'in tek kuralı budur: bir not bir fikir. İki fikir taşıyan not hiçbir yere bağlanamaz, çünkü hangi fikirle bağlandığı belirsizdir. İki fikir taşıyorsa bölerek yaz. Kavram etiketleri metinden kendiliğinden çıkarılır; kanonda olmayan kelime uydurulmaz, elle ekleyebilirsin.' },
   'syntopic':{ t:'Sentopik bağ', b:'İki farklı yazarın aynı kavram hakkında söylediğini birbirine bağlayan iz.',
-    more:'Sentopik okuma aynı soruyu birden çok yazara sormaktır. Bağ kurulmamış not «henüz sermaye değil» sayılır — okunmuş ama yerleşmemiştir.' },
+    more:'Sentopik okuma aynı soruyu birden çok yazara sormaktır. Bağ kurulmamış not «henüz sermaye değil» sayılır — okunmuş ama yerleşmemiştir. Sistem bağı KURMAZ, önerir: bağın nedenini sen yazarsın, sistem nedeni uyduramaz.' },
   'ssk':{ t:'Sentez katsayısı', b:'SSK = (bağlantılı not / toplam kitap) × log(1 + yazar sayısı).',
     more:'Orijinal formül log(yazar) idi ve tek yazarda log(1)=0 tüm sentezi sıfırlıyordu: bir kitabı derinlemesine analiz eden kullanıcı cezalandırılıyordu. log(1+n) bu tekilliği giderir ve henüz kitap yokken de tanımlı kalır.' },
+  'kavram-matrisi':{ t:'Kavram matrisi', b:'Her kavramda kaç not ve kaç ayrı yazar.',
+    more:'Bir kavramda kaç ayrı yazar okunduğu, o kavramın ne kadar sentopik çalışıldığını söyler. Tek yazar bir başlangıçtır, bir eksiklik değil.' },
+  'anlat':{ t:'Öğrendiğini anlat', b:'Kaynağı kendi sözünle anlat; geçen kavramlar sayılır.',
+    more:'Notlarındaki kavramlardan hangilerinin geçtiği sayılır. Anlatım notlanmaz ve metni kaydedilmez.' },
 
   /* --- yazi --- */
   'readability':{ t:'Okunabilirlik', b:'Cümle uzunluğu ve kelime uzunluğundan hesaplanan bir okuma yükü göstergesi.',
@@ -29240,7 +29285,7 @@ ESP.HINTS = {
 
   /* --- tarih --- */
   'chrono':{ t:'Kronoloji', b:'Olayların zaman şeridi: tarihin iskeleti.',
-    more:'Boş bir kronoloji «%0 kapsam» değil «veri yok»tur. Üç eksen ayrı ölçülür ve tek puana toplanmaz: kapsam (dönem, bölge, alan), derinlik (zincir ve kaynak), tutma (SRS retansiyonu). Tek puan, hangi eksenin zayıf olduğunu gizler.' },
+    more:'Boş bir kronoloji «%0 kapsam» değil «veri yok»tur. Üç eksen ayrı ölçülür ve tek puana toplanmaz: kapsam (dönem, bölge, alan), derinlik (zincir ve kaynak), tutma (SRS retansiyonu). Tek puan, hangi eksenin zayıf olduğunu gizler. Tohum listesi bir müfredat değil bir iskelettir: kendi olaylarını eklemek için bir zemin; olanı atlar, eksik olanı ekler.' },
   'era':{ t:'Dönem', b:'Büyük tarihsel bölümler ve tartışmalı sınırları.',
     more:'«Orta Çağ 476\'da başladı» demek bir ölçüm değil bir karardır — üstelik Batı\'ya özgü bir karar. Ekranda her dönemin yanında sınırının neden tartışmalı olduğu yazar.' },
   'gap':{ t:'Yüzyıl boşluğu', b:'Kronolojide üst üste üç yüzyıldan uzun boş aralık.',
@@ -29259,6 +29304,10 @@ ESP.HINTS = {
     more:'En sessiz hatadır: yanlış cevap vermez, yanlış soru sordurur. 1500\'de «Türkiye» ya da «Almanya» yoktu; hanedan ve din vardı. Kaçınılmazlık yanılgısı da buraya girer: olan şey olmak zorunda değildi.' },
   'school':{ t:'Tarih yazımı okulu', b:'Aynı olaya farklı soru soran gelenekler.',
     more:'Olaysal tarih «ne oldu» diye sorar, Annales «yüzyıllarca değişmeyen ne vardı», Marksist tarih «kim kazandı», mikro tarih «küçük bir vaka büyük yapıyı nasıl ele veriyor». Bunu görmek, tarih bilmek ile tarihsel düşünmek arasındaki farktır.' },
+  'tarih-pratik':{ t:'Tarih pratiği', b:'Dört soru türü: hatırla, seç, dönem ve sırala.',
+    more:'Sıralamada seçenekler hazır dizilmez — sırayı sen kurarsın. Cevap tekrar ekranındakiyle aynı SRS’e yazılır; ayrı bir hafıza kaydı açılmaz.' },
+  'belge':{ t:'Belge iste', b:'King web kaynaklarından kaynaklı içerik getirir.',
+    more:'İstek King’e iletilir; içerik web kaynaklarından çıkarılır ve her satır alıntısıyla gelir — alıntısı kaynakta bulunmayan satır eklenmez. Tarihte yıl, okuma listesinde yazar adı alıntıda doğrulanır; eserler «başlanmadı» olarak gelir. Web kapalıysa hiçbir şey yazılmaz.' },
 
   /* --- dil (ikinci eksen) --- */
   'grammar':{ t:'Dilbilgisi ekseni', b:'Kelime ölçülür, işlev beyan edilir.',
@@ -29294,7 +29343,7 @@ ESP.HINTS = {
 
   /* --- müzik (ikinci eksen) --- */
   'ear':{ t:'Kulak eğitimi', b:'Duyduğunu adlandırabilme: aralık, akor, derece.',
-    more:'Metronom parmakları eğitir, kulak eğitmez. Hızlı çalan ama duymayan biri her yeni parçayı sıfırdan ezberler. Burada «mutlak kulak» diye bir kapı yoktur ve bilerek yoktur: ölçülen tek şey deneme başına isabettir, yetenek değil.' },
+    more:'Metronom parmakları eğitir, kulak eğitmez. Hızlı çalan ama duymayan biri her yeni parçayı sıfırdan ezberler. Burada «mutlak kulak» diye bir kapı yoktur ve bilerek yoktur: ölçülen tek şey deneme başına isabettir, yetenek değil. Sistem sesini dinlemez; yirmi denemede kaç doğru olduğunu sen girersin.' },
   'interval':{ t:'Aralık', b:'İki ses arasındaki mesafe ve onu hatırlatan kanca.',
     more:'Kanca bir ezber kolaylığıdır, kural değil: kendi kancanı bulursan daha iyi tutar.' },
   'caged':{ t:'CAGED', b:'Aynı akorun klavyede beş farklı şekli.',
@@ -52146,22 +52195,21 @@ ESP.Screens.history = (function(){
     const st = ESP.Chrono.status();
     const rows = [];
 
+    /* iPhone Faz 2c: boş şeridin ve tohumun açıklaması ⓘ'de (hints: chrono);
+       tohumun kaç olay taşıdığı düğmenin üstünde. */
     if(!evs().length){
       rows.push(K.Entry({
         label:'Boş şerit', hint:'chrono',
         meta:'olay yok',
-        note:'Kronoloji boşken kapsam ölçülmez. Sıfır kapsam ile ölçülmemiş '
-           + 'kapsam aynı şey değildir.',
         body:html`
           ${K.Empty({ text:'Zaman şeridinde hiç olay yok.' })}
-          ${K.Notice({ tone:'info',
-            body:'Tohum listesi ' + (ESP.SEED_EVENTS || []).length + ' dönüm noktası '
-              + 'taşıyor. Tohum bir müfredat değil bir iskelettir: kendi olaylarını '
-              + 'eklemek için bir zemin.' })}
-          ${K.Button({ label:'Tohumu yükle', tone:'primary', act:'seed', class:'mt-10' })}`,
+          ${K.Button({ label:'Tohumu yükle · ' + (ESP.SEED_EVENTS || []).length + ' olay', tone:'primary',
+            act:'seed', class:'mt-10' })}`,
       }));
       return rows;
     }
+
+    rows.push(DonenKapsam(st));
 
     /* 100 TARİH ŞERİDİ (vitrin): yüzyıllar yatay, olaylar nokta; en son
        eklenen olay yanar. Yıl kaydın kendisinden; yılsız olay çizilmez. */
@@ -52176,8 +52224,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Dönemler', hint:'era',
       meta:st.eras.covered + '/' + st.eras.total + ' kapsandı',
-      note:'Dönem sınırları tartışmalıdır ve öyle gösterilir: bir sınır bir '
-         + 'ölçüm değil bir karardır.',
       wide:true,
       body:html`<div class="erastrip">${map(donem.buckets, b => {
         const e = ESP.ERA_BY_ID[b.id];
@@ -52206,8 +52252,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Yüzyıl boşlukları', hint:'gap',
       meta:st.gaps.length ? st.gaps.length + ' boşluk' : 'yok',
-      note:'Üst üste üç yüzyıl boş kaldığında kör nokta sayılır. Her yüzyılda '
-         + 'dönüm noktası olmak zorunda değil — ama üç yüzyıl sessizlik bir sorudur.',
       body:st.gaps.length
         ? K.Table({ tight:true, headers:['Aralık', { label:'Yüzyıl', num:true }],
             rows:st.gaps.map(g => [
@@ -52221,8 +52265,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Dağılım', hint:'coverage',
       meta:st.kinds.covered + '/' + st.kinds.total + ' alan',
-      note:'Yalnızca savaş ve antlaşma girilirse nedensellik hep askerî kalır. '
-         + 'Ekonomik ve düşünsel olaylar zinciri değiştirir.',
       wide:true,
       body:html`
         <div class="cols-2">
@@ -52244,6 +52286,32 @@ ESP.Screens.history = (function(){
     return rows;
   }
 
+  /* iPhone Faz 2c (2026-10-02): kapsamın üç ekseni ve yüzyıl boşluğu tek
+     küçük dönen kartta; Dönemler şerit, Yüzyıl boşlukları ve Dağılım gizli
+     (app.js SADE_GIZLI). Sayılar Chrono.status'tan: hesaplandı. Boş eksen
+     adıyla yazılır; boşluk yoksa sayı değil cümle. */
+  function DonenKapsam(st){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const girdiler = [{ ad:'Olay', deger:st.events, birim:'olay', kesinlik:'measured' }];
+    const oran = (o, ad) => sayi({ deger:o.covered + '/' + o.total, kesinlik:'computed',
+      formul:'olayı olan ' + ad + ' / ' + ad, girdiler, zaman:U.todayISO() });
+    const bos = (o, tam) => o.empty.length ? 'Boş: ' + o.empty.join(', ') + '.' : tam;
+    return raw(V.donen({ id:'esp-kapsam', ad:'Kapsam', maddeler:[
+      { ust:'Dönem', sayi:oran(st.eras, 'dönem'), cumle:'dönem kapsandı.', vurgu:bos(st.eras, 'Bütün dönemlerde olay var.'), sistem:'esp' },
+      { ust:'Alan', sayi:oran(st.kinds, 'alan'), cumle:'alan.', vurgu:bos(st.kinds, 'Bütün alanlarda olay var.'), sistem:'esp' },
+      { ust:'Bölge', sayi:oran(st.regions, 'bölge'), cumle:'bölge.', vurgu:bos(st.regions, 'Bütün bölgelerde olay var.'), sistem:'esp' },
+      st.gaps.length
+        ? { ust:'Yüzyıl boşluğu', sayi:sayi({ deger:st.gaps.length, birim:'boşluk', kesinlik:'computed',
+              formul:'üst üste üç yüzyıldan uzun boş aralık', girdiler, zaman:U.todayISO() }),
+            cumle:'kör nokta.', vurgu:st.gaps.map(g => ESP.centuryLabel(g.from) + ' – ' + ESP.centuryLabel(g.to)).join(', ') + '.',
+            sistem:'esp' }
+        : { ust:'Yüzyıl boşluğu', cumle:'Boşluk yok.', vurgu:'Üç yüzyıldan uzun sessizlik yok.', sistem:'esp' },
+    ] }));
+  }
+
   /* ---------------------------------------------------------------- olaylar */
 
   function filteredEvents(){
@@ -52260,8 +52328,9 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Olay ekle', hint:'event',
       meta:'yıl zorunlu',
-      note:'Dönem yıldan türetilir, sorulmaz: aynı yıl iki döneme düşemez ve '
-         + 'elle girilen dönem zamanla yanlış kalır.',
+      /* Tohum olanı atlar, eksik olanı ekler: ara sıra bir eylem. Eskiden her
+         bölümün üstünde ayrı bir satırdı; olay eklemenin yanında durur. */
+      action:K.Button({ label:'Tohumu yükle', size:'sm', act:'seed' }),
       body:html`
         <div class="cols-2">
           ${K.Field({ label:'Olay',
@@ -52356,10 +52425,8 @@ ESP.Screens.history = (function(){
     /* BAM'dan belge (Part 8f): konu → olaylar ve kaynakları; yıl alıntıda
        doğrulanır. Teklif Bugün'e gelir, ESP kendi koduyla sınamadan eklemez. */
     rows.push(K.Entry({
-      label:'Belge iste', hint:'source',
+      label:'Belge iste', hint:'belge',
       meta:'tarih · HKM',
-      note:'Konunun olayları web kaynaklarından çıkarılır; yıl alıntıda doğrulanır, her olay '
-         + 'kaynağıyla gelir. Web kapalıysa belge yazılmaz.',
       body:html`<div class="row gap-8 wrap">
         ${K.Input({ id:'belge-tarih', placeholder:'Konu: Osmanlı’nın kuruluşu, Fransız Devrimi…',
           aria:'Tarih konusu', size:'sm', class:'grow' })}
@@ -52371,7 +52438,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Kaynak ekle', hint:'source',
       meta:'birincil / ikincil',
-      note:'Tek kaynağa dayanan bir iddia bir tezdir, bir olgu değil.',
       body:html`
         <div class="cols-2">
           ${K.Field({ label:'Kaynak',
@@ -52398,8 +52464,6 @@ ESP.Screens.history = (function(){
       label:'Denge', hint:'balance',
       meta:b.cert === 'missing' ? 'veri yok'
         : b.primary + '/' + b.total + ' birincil',
-      note:'Birincil oran bir kalite değil bir kompozisyon ölçüsüdür: %100 '
-         + 'birincil de sağlıklı değildir, bağlamı ikincil kaynak verir.',
       body:b.cert === 'missing'
         ? K.Empty({ text:'Henüz kaynak değerlendirilmedi.' })
         : html`
@@ -52460,8 +52524,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Neden zinciri', hint:'causal',
       meta:chs().length + ' zincir',
-      note:'Yapısal koşul ile tetikleyici aynı şey değildir. Yalnızca kıvılcımdan '
-         + 'kurulan bir açıklama, tarihin en yaygın hatasıdır.',
       body:evs().length
         ? html`
           <div class="row wrap">
@@ -52534,7 +52596,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Bugünün egzersizi', hint:'drill',
       meta:drill ? 'kademe ' + drill.level : '—',
-      note:'Egzersizi kural motoru seçer, model değil: açığı olan eksen önce gelir.',
       body:drill
         ? K.NextUp({ icon:'zap', label:drill.label, title:drill.task,
             why:'Bu egzersiz, ölçülen açığa göre seçildi.' })
@@ -52544,8 +52605,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Tarih destesi', hint:'srs',
       meta:due.length ? due.length + ' kart vadeli' : 'vadesi gelen yok',
-      note:'Tarih destesi dil destesinden AYRI ölçülür: birinin iyi olması '
-         + 'ötekinin çöküşünü gizlememeli.',
       body:html`
         ${r.cert === 'missing'
           ? K.Notice({ tone:'info', body:'Retansiyon henüz ölçülemedi: taban için '
@@ -52561,8 +52620,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Anakronizm tuzakları', hint:'anachronism',
       meta:ESP.ANACHRONISMS.length + ' tuzak',
-      note:'Bugünün gözüyle okumak, tarihin en sessiz hatasıdır: yanlış cevap '
-         + 'vermez, yanlış soru sordurur.',
       body:K.Table({ tight:true, headers:['Tuzak', 'Ne yapar'],
         rows:ESP.ANACHRONISMS.map(a => [a.label, a.note]) }),
     }));
@@ -52570,8 +52627,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Tarih yazımı okulları', hint:'school',
       meta:ESP.HISTORIOGRAPHY.length + ' okul',
-      note:'Aynı olay, farklı okulda farklı bir hikâyedir. Bunu görmek, tarih '
-         + 'bilmek ile tarihsel düşünmek arasındaki fark.',
       wide:true,
       body:K.Table({ tight:true, headers:['Okul', 'Neye bakar', 'Sorusu'],
         rows:ESP.HISTORIOGRAPHY.map(h => [h.label, h.note, h.asks]) }),
@@ -52598,11 +52653,9 @@ ESP.Screens.history = (function(){
   function learnRows(){
     return [
       K.Entry({
-        label:'Pratik', hint:'practice',
+        label:'Pratik', hint:'tarih-pratik',
         meta:S.ui.practice && S.ui.practice.deck === ESP.HISTORY_DECK
           ? 'oturum açık' : ESP.PRACTICE_LENGTH + ' soru',
-        note:'Tarih destesinde dört soru türü var: hatırla, seç, dönem ve '
-           + 'sırala. Sıralamada seçenekler hazır dizilmez — sırayı sen kurarsın.',
         wide:true,
         body:ESP.Parts.practice(ESP.HISTORY_DECK),
       }),
@@ -52611,8 +52664,6 @@ ESP.Screens.history = (function(){
         label:'Konular', hint:'topic',
         meta:ESP.Lesson.topicSummary('history').topics + ' konu · '
           + ESP.Lesson.topicSummary('history').items + ' madde',
-        note:'Kronoloji, nedensellik, kaynak eleştirisi ve tarih yazımı. '
-           + 'İşaretler beyandır.',
         wide:true,
         body:ESP.Parts.topics('history'),
       }),
@@ -52620,8 +52671,6 @@ ESP.Screens.history = (function(){
       K.Entry({
         label:'Üniteler', hint:'unit',
         meta:ESP.Lesson.units('history').length + ' ünite',
-        note:'Ünite bir dönemi, bölgeyi ya da alanı toplar. Eklenen kartlar '
-           + '«tohum» etiketiyle durur: bu kartları sen yazmadın.',
         wide:true,
         body:ESP.Parts.units('history'),
       }),
@@ -52636,8 +52685,6 @@ ESP.Screens.history = (function(){
 
   function render(){
     return K.Grid(html`
-      ${when(evs().length, () => K.Span(12, K.Toolbar({ actions:K.Button({ label:'Tohumu yükle', size:'sm',
-        act:'seed' }) })))}
       ${K.Span(12, ESP.Parts.bolumler('history', { act:'pick-tab', aria:'Tarih bölümleri', tabs:TABS,
         govde:GOVDE }))}`);
   }
@@ -52817,6 +52864,10 @@ ESP.Screens.history = (function(){
 
   return {
     id:'history',
+    /* iPhone Faz 2c: Şerit'te iş zaman şeridinin kendisi; dönem kutuları
+       ara sıra açılan süzgeç (şerit), boşluk ve dağılım dönen kartta.
+       Öbür bölümlerde belge isteği ve iki başvuru tablosu şerit. */
+    kucukVarsayilan:['dönemler', 'belge-iste', 'anakronizm-tuzakları', 'tarih-yazımı-okulları'],
     title:'Kronoloji',
     headline(){
       const st = ESP.Chrono.status();
@@ -53229,6 +53280,9 @@ ESP.Screens.studio = (function(){
     { id:'kulak',    label:'Kulak' },
     { id:'ogren',    label:'Öğren' },
     { id:'ilerleme', label:'İlerleme' },
+    /* iPhone Faz 2c: iki masa (müzik, diksiyon) öbür ekranlardaki gibi kendi
+       bölümünde; Müzik ve Diksiyon işle başlar. */
+    { id:'tezgah',   label:'Tezgâh' },
   ];
 
   /* ------------------------------------------------------------------ kulak
@@ -53251,8 +53305,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Kulak egzersizleri', hint:'ear',
         meta:ESP.EAR_DRILLS.length + ' egzersiz',
-        note:'Ölçülen şey yetenek değil isabet: yirmi denemede kaç doğru. '
-           + 'Sistem sesini dinlemez; sayıyı sen girersin.',
         wide:true,
         body:K.Table({ tight:true,
           headers:[{ label:'Kademe', num:true }, 'Egzersiz', 'Ne yapılır', 'Ne ölçülür'],
@@ -53262,8 +53314,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Aralıklar', hint:'interval',
         meta:ESP.INTERVALS.length + ' aralık',
-        note:'Kanca (hook) bir ezber kolaylığıdır, kural değil: kendi kancanı '
-           + 'bulursan daha iyi tutar.',
         wide:true,
         body:K.Table({ tight:true,
           headers:['Aralık', { label:'Yarım ses', num:true }, 'Kanca'],
@@ -53273,8 +53323,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Caged', hint:'caged',
         meta:'beş şekil',
-        note:'Bir sır değil bir harita: aynı akorun klavyede beş yerde nasıl '
-           + 'kurulduğunu gösterir.',
         body:K.Table({ tight:true, headers:['Şekil', 'Kök', 'Not'],
           rows:ESP.CAGED.map(c => [c.shape, c.root, c.note]) }),
       }),
@@ -53282,7 +53330,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Deşifre', hint:'sight-reading',
         meta:ESP.SIGHT_READING.length + ' kademe',
-        note:'Okumak çalmaktan ayrı bir beceridir ve ayrı çalışılır.',
         body:K.Table({ tight:true, headers:[{ label:'Kademe', num:true }, 'Ne', 'Nasıl'],
           rows:ESP.SIGHT_READING.map(s => [String(s.level), s.label, s.task]) }),
       }),
@@ -53290,8 +53337,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Repertuar bakımı', hint:'repertoire',
         meta:eskiyen.length ? eskiyen.length + ' bakımsız' : 'güncel',
-        note:'«Bitti» diye bir hâl yoktur: ' + ESP.REPERTOIRE_STALE_DAYS
-           + ' günden uzun süredir çalınmayan parça çalınabilir ama garanti değil.',
         body:eskiyen.length
           ? K.Table({ tight:true, headers:['Parça', 'Son çalınma'],
               rows:eskiyen.map(p => {
@@ -53351,73 +53396,31 @@ ESP.Screens.studio = (function(){
 
   /* ------------------------------------------------------------------ müzik */
 
-  function musicRows(){
-    const bpm = S.ui.metronomeBpm || 80;
-    const parcalar = S.pieces || [];
-    const acik = S.ui.pieceOpen ? parcalar.find(p => p.id === S.ui.pieceOpen) : null;
-
-    const rows = [
-      K.Entry({
-        label:'Metronom',
-        meta:bpm + ' BPM',
-        note:'Temiz çalınan tempo, hızlı çalınan tempodan önce gelir. '
-           + 'Eşik yalnızca «temiz» işaretlenen tekrarlardan açılır.',
-        body:html`
-          <div class="metro">
-            <div class="metro__bpm">
-              <button class="metro__step" data-act="bpm" data-d="-5" aria-label="5 azalt">−5</button>
-              <span class="metro__val num">${bpm}</span>
-              <button class="metro__step" data-act="bpm" data-d="5" aria-label="5 artır">+5</button>
-            </div>
-            <div class="metro__ctrl">
-              ${K.Button({ label:S.ui.metronomeOn ? 'Durdur' : 'Başlat',
-                act:'metro-toggle' })}
-              ${K.Select({ id:'metro-sig', value:S.ui.metroSig || '4/4', change:'metro-sig',
-                aria:'Ölçü türü',
-                options:ESP.TIME_SIGNATURES.map(t => ({ value:t.id, label:t.label })) })}
-            </div>
-          </div>
-          <p class="small muted mt-8">Vuruş aralığı
-            ${U.fmtNum(Math.round(ESP.Acoustic.beatMs(bpm)))} ms.
-            İlk vuruş vurgulu: metronomun işi vuruşu değil ölçünün nerede
-            başladığını duyurmaktır.</p>`,
-      }),
-
-      K.Entry({
-        label:'Tekrar kaydet',
-        meta:acik ? acik.name : 'parça seç',
-        note:'«Temiz» senin işaretindir: sistem duymaz. Bu yüzden tempo ve tarih '
-           + '«ölçüldü», temizlik yargısı senindir.',
-        body:parcalar.length
-          ? html`
-            <div class="row wrap">
-              ${K.Select({ id:'att-piece', value:acik ? acik.id : parcalar[0].id,
-                change:'pick-piece', aria:'Tekrarın yazılacağı parça',
-                options:parcalar.map(p => ({ value:p.id, label:p.name })) })}
-              ${K.Button({ label:'Temiz tekrar', tone:'primary', act:'log-clean' })}
-              ${K.Button({ label:'Hatalı tekrar', act:'log-dirty' })}
-            </div>
-            <p class="small muted mt-8">
-              ${ESP.Acoustic.CLEAN_STREAK} temiz tekrar aynı tempoda ve son
-              ${ESP.Acoustic.CLEAN_WINDOW_DAYS} gün içinde geldiğinde eşik açılır.
-              Eşik kendiliğinden artar, kendiliğinden düşmez.</p>`
-          : K.Empty({ text:'Henüz parça ya da teknik yok. Aşağıdan ekleyebilirsin.' }),
-      }),
-    ];
-
-    parcalar.forEach(p => {
+  /* iPhone Faz 2c (2026-10-02): her parça ayrı bir «TEKNİK» kartıydı (altı
+     parçada 3 600 px; hepsi aynı başlıkta olduğu için tek tek gizlenemiyordu).
+     Şimdi tek «Parçalar» listesi: satırda ad ve temiz eşik / hedef; dokununca
+     eşik çubuğu, sıradaki basamak, son tekrarlar ve Sil açılır. İlk beş +
+     «Tümü»; tekrarı yazılan (seçili) parça her zaman görünür ve açıktır.
+     Hiçbir bilgi kalkmadı: satırın içinde durur. */
+  const PARCA_ILK = 5;
+  function parcalarEntry(parcalar){
+    const tumu = !!S.ui.parcaTumu;
+    const secili = S.ui.pieceOpen ? parcalar.find(p => p.id === S.ui.pieceOpen) : null;
+    let gosterilen = tumu ? parcalar : parcalar.slice(0, PARCA_ILK);
+    if(secili && gosterilen.indexOf(secili) < 0) gosterilen = gosterilen.concat([secili]);
+    const satir = p => {
       const t = ESP.Acoustic.cleanThreshold(p);
       const next = ESP.Acoustic.nextStep(p);
       const sonDeneme = (p.attempts || []).slice(-6).reverse();
-      rows.push(K.Entry({
-        label:p.kind === 'technique' ? 'TEKNİK' : 'PARÇA',
-        meta:p.name,
-        note:t.cert === 'missing'
-          ? (t.why || 'Henüz temiz eşik ölçülmedi.')
-          : 'Temiz eşik ' + t.value + ' BPM' + (p.targetBpm ? ' · hedef ' + p.targetBpm
-            + (p.targetRef ? ' (referans)' : '') : ''),
-        action:K.Button({ label:'Sil', size:'sm', act:'del-piece', data:{ 'data-id':p.id } }),
-        body:html`
+      const esik = t.cert === 'missing' ? 'eşik yok'
+        : t.value + (p.targetBpm ? ' / ' + p.targetBpm + (p.targetRef ? ' (referans)' : '') : '') + ' BPM';
+      return html`<details class="parca"${raw(secili === p ? ' open' : '')}>
+        <summary class="parca__ozet">
+          <span class="parca__ad">${p.name}</span>
+          <span class="parca__tur">${p.kind === 'technique' ? 'teknik' : 'parça'}</span>
+          <span class="parca__esik num">${esik}</span>
+        </summary>
+        <div class="parca__govde">
           ${when((p.tags || []).indexOf('bam') >= 0, () => html`<p class="small muted">
             BAM alıştırması${p.key ? ' · ' + p.key : ''}${(p.progression || []).length
               ? ' · ' + p.progression.join('–') : ''}${p.startBpm ? ' · başlangıç ' + p.startBpm + ' BPM' : ''}
@@ -53434,9 +53437,64 @@ ESP.Screens.studio = (function(){
           ${when(sonDeneme.length, () => K.Table({ tight:true,
             headers:['Tarih', { label:'BPM', num:true }, 'Temiz'],
             rows:sonDeneme.map(a => [U.fmtShort(a.date), String(a.bpm),
-              a.clean ? 'evet' : 'hayır']) }))}`,
-      }));
+              a.clean ? 'evet' : 'hayır']) }))}
+          <div class="mt-8">${K.Button({ label:'Sil', size:'sm', act:'del-piece', data:{ 'data-id':p.id } })}</div>
+        </div>
+      </details>`;
+    };
+    return K.Entry({
+      label:'Parçalar', hint:'clean-bpm', meta:parcalar.length + ' parça', wide:true,
+      body:html`<div class="parcalar">${map(gosterilen, satir)}</div>
+        ${when(parcalar.length > PARCA_ILK, () => K.Button({ size:'sm', tone:'ghost', act:'parca-tumu', class:'mt-8',
+          label:tumu ? 'Yalnız ilk ' + PARCA_ILK : 'Tümü · ' + parcalar.length + ' parça' }))}`,
     });
+  }
+
+  function musicRows(){
+    const bpm = S.ui.metronomeBpm || 80;
+    const parcalar = S.pieces || [];
+    const acik = S.ui.pieceOpen ? parcalar.find(p => p.id === S.ui.pieceOpen) : null;
+
+    /* iPhone Faz 2c: iş metronom, tekrar kaydı ve parçalar. Açıklamalar ⓘ'de
+       (hints: metronome, clean-bpm); vuruş aralığı künyede. */
+    const rows = [
+      K.Entry({
+        label:'Metronom', hint:'metronome',
+        meta:bpm + ' BPM · ' + U.fmtNum(Math.round(ESP.Acoustic.beatMs(bpm))) + ' ms',
+        body:html`
+          <div class="metro">
+            <div class="metro__bpm">
+              <button class="metro__step" data-act="bpm" data-d="-5" aria-label="5 azalt">−5</button>
+              <span class="metro__val num">${bpm}</span>
+              <button class="metro__step" data-act="bpm" data-d="5" aria-label="5 artır">+5</button>
+            </div>
+            <div class="metro__ctrl">
+              ${K.Button({ label:S.ui.metronomeOn ? 'Durdur' : 'Başlat',
+                act:'metro-toggle' })}
+              ${K.Select({ id:'metro-sig', value:S.ui.metroSig || '4/4', change:'metro-sig',
+                aria:'Ölçü türü',
+                options:ESP.TIME_SIGNATURES.map(t => ({ value:t.id, label:t.label })) })}
+            </div>
+          </div>`,
+      }),
+
+      K.Entry({
+        label:'Tekrar kaydet', hint:'clean-bpm',
+        meta:acik ? acik.name : 'parça seç',
+        body:parcalar.length
+          ? html`
+            <div class="row wrap">
+              ${K.Select({ id:'att-piece', value:acik ? acik.id : parcalar[0].id,
+                change:'pick-piece', aria:'Tekrarın yazılacağı parça',
+                options:parcalar.map(p => ({ value:p.id, label:p.name })) })}
+              ${K.Button({ label:'Temiz tekrar', tone:'primary', act:'log-clean' })}
+              ${K.Button({ label:'Hatalı tekrar', act:'log-dirty' })}
+            </div>`
+          : K.Empty({ text:'Henüz parça ya da teknik yok. Aşağıdan ekleyebilirsin.' }),
+      }),
+    ];
+
+    if(parcalar.length) rows.push(parcalarEntry(parcalar));
 
     rows.push(K.Entry({
       label:'Parça ekle',
@@ -53461,10 +53519,8 @@ ESP.Screens.studio = (function(){
     /* BAM'dan alıştırma paketi (Part 8d-2): istek King'in onay kapısından
        geçer; paket Bugün'e teklif olarak gelir ve ESP kendi koduyla sınar. */
     rows.push(K.Entry({
-      label:'Paket iste',
+      label:'Paket iste', hint:'paket',
       meta:'gitar · HKM',
-      note:'Konu ve düzeyden alıştırma listesi (ton, derece ilerleyişi, başlangıç ve hedef '
-         + 'tempo). Tempolar referanstır; eşik senin temiz tekrarından açılır.',
       body:html`<div class="row gap-8 wrap">
         ${K.Select({ id:'gitar-duzey', value:S.ui.gitarDuzey || 'başlangıç', aria:'Düzey', size:'sm',
           options:[{ value:'başlangıç', label:'Başlangıç' }, { value:'orta', label:'Orta' },
@@ -53494,8 +53550,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Çalışma metni', hint:'articulation',
         meta:secili.kaynak ? 'kaynaklı okuma parçası' : 'düzey ' + secili.level + ' · ' + grup.label,
-        note:'Hedef hızlı söylemek değil, hangi sesin düzeldiği. Hızlı ama bozuk '
-           + 'bir tekerleme çalışmanın başarısı değil başarısızlığıdır.',
         body:html`
           <div class="row wrap">
             ${K.Select({ id:'tw-pick', value:secili.id, change:'pick-twister',
@@ -53512,8 +53566,7 @@ ESP.Screens.studio = (function(){
       /* Diksiyon belgesi (kullanıcı 2026-09-24: «ikisi birden»): telaffuz
          kuralı ve okuma parçası, BAM'ın web kaynaklarından; kural kaynağıyla. */
       K.Entry({
-        label:'Telaffuz kuralları', meta:dk.kurallar.length ? dk.kurallar.length + ' kural · kaynaklı' : 'henüz yok',
-        note:'Kural ve okuma parçası web kaynaklarından gelir; alıntısı kaynakta bulunmayan satır eklenmez.',
+        label:'Telaffuz kuralları', hint:'belge', meta:dk.kurallar.length ? dk.kurallar.length + ' kural · kaynaklı' : 'henüz yok',
         wide:true,
         body:html`
           ${when(dk.kurallar.length, () => html`<ul class="setup__list">${map(dk.kurallar, k => html`
@@ -53528,10 +53581,8 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Kayıt ölçümü',
+        label:'Kayıt ölçümü', hint:'kayit-olcumu',
         meta:'ses dosyası tutulmaz',
-        note:'Saklanan şey süre, kelime ve senin işaretlediğin hata sayısıdır. '
-           + 'Olmayan ses dosyası sızamaz.',
         body:html`
           <div class="cols-3">
             ${K.Field({ label:'Süre (saniye)',
@@ -53556,7 +53607,6 @@ ESP.Screens.studio = (function(){
         label:'Konuşma hızı', hint:'wpm',
         meta:d.cert === 'missing' ? 'veri yok'
           : (d.wpm.cert === 'missing' ? 'hesaplanamadı' : d.wpm.value + ' kelime/dk'),
-        note:ESP.WPM_NOTE,
         body:d.cert === 'missing'
           ? K.Empty({ text:'Son 30 günde kayıt yok.' })
           : html`
@@ -53574,9 +53624,8 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Nefes ve vurgu',
+        label:'Nefes ve vurgu', hint:'nefes',
         meta:ESP.BREATH_DRILLS.length + ' çalışma',
-        note:'Ölçülen şey süredir, «iyi yaptım» değil.',
         body:html`
           ${K.Table({ tight:true, headers:['Çalışma', { label:'Süre', num:true }, 'Not'],
             rows:ESP.BREATH_DRILLS.map(b => [b.label, U.fmtMin(Math.round(b.seconds / 60)) , b.note]) })}
@@ -53621,8 +53670,6 @@ ESP.Screens.studio = (function(){
       K.Entry({
         label:'Plato', hint:'plateau',
         meta:plato.length ? plato.length + ' teknik' : 'yok',
-        note:'Plato bir başarısızlık değil bir sinyaldir: aynı çalışma aynı '
-           + 'sonucu veriyorsa değişmesi gereken çalışmanın kendisidir.',
         body:plato.length
           ? K.Table({ tight:true, headers:['Parça', { label:'Gün', num:true }, { label:'BPM', num:true }],
               rows:plato.map(p => [p.piece.name, String(p.days), String(p.bpm)]) })
@@ -53632,10 +53679,9 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Hedefe ulaşma',
+        label:'Hedefe ulaşma', hint:'hedef-tempo',
         meta:m.progress && m.progress.cert !== 'missing'
           ? m.progress.reached + '/' + m.progress.n : 'veri yok',
-        note:'Hedefi girilmemiş parça paydaya girmez: hedefsiz parça başarısız değildir.',
         body:m.progress && m.progress.cert !== 'missing'
           ? K.Meter({ label:'Hedef tempoya ulaşan parça oranı',
               value:m.progress.value * 100,
@@ -53644,10 +53690,8 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Diksiyon eğilimi',
+        label:'Diksiyon eğilimi', hint:'diksiyon-egilimi',
         meta:t.cert === 'missing' ? 'veri yok' : t.direction,
-        note:'İki pencere karşılaştırılır: son 14 gün ve ondan önceki 14 gün. '
-           + 'İkisinde de ölçüm yoksa bulgu üretilmez.',
         body:t.cert === 'missing'
           ? K.Notice({ tone:'info', body:t.why })
           : K.Notice({ tone:t.direction === 'iyi' ? 'ok' : t.direction === 'kotu' ? 'warn' : 'info',
@@ -53656,9 +53700,8 @@ ESP.Screens.studio = (function(){
       }),
 
       K.Entry({
-        label:'Isınma sırası',
+        label:'Isınma sırası', hint:'isinma',
         meta:'öneri',
-        note:'Zorunlu değildir; sistem senin yerine karar vermez.',
         body:K.Table({ tight:true, headers:['Aşama', { label:'Dakika', num:true }, 'Not'],
           rows:ESP.WARMUP.map(w => [w.label, String(w.minutes), w.note]) }),
       }),
@@ -53677,8 +53720,6 @@ ESP.Screens.studio = (function(){
       return K.Entry({
         label:d.label, hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
-        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
-           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
         wide:true,
         body:ESP.Parts.topics(d.id),
       });
@@ -53687,15 +53728,15 @@ ESP.Screens.studio = (function(){
 
   /* ------------------------------------------------------------------ çizim */
 
-  /* Sekme yok (EKIP-PLANI §1.2): beş bölüm alt alta. Stüdyoda iki
-     disiplin var; her birinin tezgâhı kendi bölümünün başında durur (koç o
-     masanın reçetesini yazar). */
+  /* Sekme yok (EKIP-PLANI §1.2): bölümler alt alta. Stüdyoda iki disiplin
+     var; iki tezgâh (koç her masanın reçetesini ayrı yazar) son bölümde,
+     öbür ekranlardaki «Tezgâh» gibi (iPhone Faz 2c). */
   function render(){
     return K.Grid(html`
       ${K.Span(12, ESP.Parts.bolumler(null, { act:'studio-tab', aria:'Stüdyo bölümleri', tabs:TABS, govde:{
-        muzik:() => [ESP.Parts.desk('music')].concat(musicRows()),
-        diksiyon:() => [ESP.Parts.desk('diction')].concat(dictionRows()),
-        kulak:earRows, ogren:topicRows, ilerleme:progressRows } }))}`);
+        muzik:musicRows, diksiyon:dictionRows,
+        kulak:earRows, ogren:topicRows, ilerleme:progressRows,
+        tezgah:() => [ESP.Parts.desk('music'), ESP.Parts.desk('diction')] } }))}`);
   }
 
   function afterRender(){ ESP.Parts.bolumIstegi('studioTab', TABS[0].id); }
@@ -53718,6 +53759,7 @@ ESP.Screens.studio = (function(){
     },
     /* Bölüme kayar; metronom durmaz (bölümler aynı sayfada). */
     async 'studio-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'parca-tumu'(){ S.ui.parcaTumu = !S.ui.parcaTumu; ESP.App.render(); },
 
     async 'bpm'(el){
       const d = Number(el.dataset.d) || 0;
@@ -53838,7 +53880,10 @@ ESP.Screens.studio = (function(){
     /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-    kucukVarsayilan:['kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları'],
+    /* iPhone Faz 2c: parça ekleme ara sıra; Diksiyon'da kural listesi ve
+       geçmiş kayıtlar, Kulak'ta üç başvuru tablosu şerit. */
+    kucukVarsayilan:['kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları', 'parça-ekle',
+      'telaffuz-kuralları', 'son-kayıtlar', 'aralıklar', 'caged', 'deşifre'],
     title:'Stüdyo',
     headline(){
       const plato = ESP.Acoustic.plateaus();
@@ -53912,8 +53957,6 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Dört düzey', hint:'reading-level',
         meta:ESP.READING_LEVELS.length + ' düzey',
-        note:'Hangi düzeyde okuduğunu bilmek, ne kadar okuduğunu bilmekten '
-           + 'daha çok şey söyler.',
         wide:true,
         body:K.Table({ tight:true,
           headers:[{ label:'#', num:true }, 'Düzey', 'Sorusu', 'Not'],
@@ -53923,7 +53966,6 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Analitik okumanın dört sorusu', hint:'analytic',
         meta:'kitap bitince',
-        note:'Cevaplanmayan soru, okunmamış bir bölüm kadar eksiktir.',
         wide:true,
         body:html`${map(ESP.ANALYTIC_QUESTIONS, q => html`
           <div class="toolrow">
@@ -53935,7 +53977,6 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Okuma protokolü', hint:'protocol',
         meta:ESP.READING_PROTOCOL.length + ' adım',
-        note:'Not yazmak için okumayı durdurmak, okumayı da notu da bozar.',
         body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Adım', 'Ne yapılır'],
           rows:ESP.READING_PROTOCOL.map(p => [String(p.step), p.label, p.do]) }),
       }),
@@ -53943,7 +53984,6 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Not şablonları', hint:'note-template',
         meta:ESP.NOTE_TEMPLATES.length + ' şablon',
-        note:'Şablonsuz not, sonradan ne için alındığı anlaşılmayan nottur.',
         wide:true,
         body:K.Table({ tight:true, headers:['Şablon', 'Biçim', 'Ne zaman'],
           rows:ESP.NOTE_TEMPLATES.map(t => [t.label, t.form, t.use]) }),
@@ -53977,18 +54017,15 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Not ekle', hint:'atomic-note',
         meta:'tek fikir, tek cümle',
-        note:'Kitap özeti değil. İki fikir taşıyan not bağlanamaz; bölerek yaz.',
         body:html`
-          ${K.Textarea({ id:'note-text', rows:3, aria:'Atomik not metni',
+          ${K.Textarea({ id:'note-text', rows:2, aria:'Atomik not metni',
             placeholder:'Özgürlük, seçenek çokluğu değil seçebilme kapasitesidir.' })}
-          <div class="row wrap mt-10">
-            ${K.Select({ id:'note-book', value:'', aria:'Notun kaynağı',
+          <div class="row gap-8 mt-10">
+            <div class="grow">${K.Select({ id:'note-book', value:'', aria:'Notun kaynağı',
               options:[{ value:'', label:'Kaynak seç (isteğe bağlı)' }]
-                .concat((S.books || []).map(b => ({ value:b.id, label:b.author + ' — ' + b.title }))) })}
+                .concat((S.books || []).map(b => ({ value:b.id, label:b.author + ' — ' + b.title }))) })}</div>
             ${K.Button({ label:'Notu ekle', tone:'primary', act:'add-note' })}
-          </div>
-          <p class="small muted mt-8">Kavram etiketleri metinden otomatik çıkarılır;
-            kanonda olmayan kelime uydurulmaz, elle ekleyebilirsin.</p>`,
+          </div>`,
       }),
     ];
 
@@ -54001,6 +54038,11 @@ ESP.Screens.library = (function(){
 
     const bagHtml = bagli();
     if(bagHtml) rows.push(K.Entry({ label:'Bağlı notlar', meta:'en çok bağı olan', body:raw(bagHtml) }));
+    /* iPhone Faz 2c: uzun liste kısa gelir — en yeni beş not + «Tümü».
+       Arama ya da kavram süzgeci açıkken liste kesilmez (aranan bulunur). */
+    const suzgec = !!(q || kavram);
+    const tumu = suzgec || !!S.ui.notTumu;
+    const gosterilen = tumu ? hepsi : hepsi.slice(0, NOT_ILK);
     rows.push(K.Entry({
       label:'Notlar',
       meta:hepsi.length + ' not' + (kavram ? ' · ' + (ESP.CONCEPT_BY_ID[kavram] || {}).label : ''),
@@ -54008,7 +54050,7 @@ ESP.Screens.library = (function(){
           placeholder:'Not ara…', change:'note-query', size:'sm', aria:'Not ara' })}
         ${when(kavram, () => K.Button({ label:'Süzgeci kaldır', size:'sm', act:'clear-concept' }))}`,
       wide:true,
-      body:html`${raw(notSuzgec(hepsi.length))}${map(hepsi, n => {
+      body:html`${raw(notSuzgec(hepsi.length))}${map(gosterilen, n => {
         const kitap = bookOf(n.bookId);
         return html`
           <div class="noterow">
@@ -54033,11 +54075,14 @@ ESP.Screens.library = (function(){
                 </li>`;
               })}</ul>`)}
           </div>`;
-      })}`,
+      })}
+      ${when(!suzgec && hepsi.length > NOT_ILK, () => K.Button({ size:'sm', tone:'ghost', act:'not-tumu', class:'mt-8',
+        label:S.ui.notTumu ? 'Yalnız son ' + NOT_ILK : 'Tümü · ' + hepsi.length + ' not' }))}`,
     }));
 
     return rows;
   }
+  const NOT_ILK = 5;
 
   function linkForm(n){
     const adaylar = (S.notes || []).filter(x => x.id !== n.id
@@ -54086,7 +54131,9 @@ ESP.Screens.library = (function(){
         label:'Sentez katsayısı', hint:'ssk',
         meta:ss.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(ss.value * 100) / 100),
-        note:ss.cert === 'missing' ? (ss.why || 'Hesap için kaynak gerekir.')
+        /* Eksikken gerekçe aşağıdaki kutuda bir kez yazılır (eskiden not
+           olarak ikinci kez); hesaplanınca not, formülün kendi değerleridir. */
+        note:ss.cert === 'missing' ? null
           : ss.linked + ' bağlı not ÷ ' + ss.books + ' kaynak × log(1 + '
             + ss.authors + ' yazar)',
         body:ss.cert === 'missing'
@@ -54094,17 +54141,12 @@ ESP.Screens.library = (function(){
               || 'Not ve kaynak girildiğinde katsayı hesaplanmaya başlar.' })
           : html`
             ${K.Meter({ label:'Bağlanmış not oranı', value:ss.linkedRatio * 100,
-              text:ss.linked + '/' + ss.total })}
-            <p class="small muted mt-8">Formül tek yazarda sıfırlanmaz:
-              log(1 + n) kullanılır. Bir kitabı derinlemesine analiz eden
-              kullanıcı cezalandırılmaz.</p>`,
+              text:ss.linked + '/' + ss.total })}`,
       }),
 
       K.Entry({
         label:'Bağ önerileri', hint:'syntopic',
         meta:oneri.length + ' öneri',
-        note:'Sistem bağı KURMAZ, önerir. Bağın nedenini sen yazarsın; '
-           + 'sistem nedeni uyduramaz.',
         wide:true,
         body:oneri.length
           ? html`${map(oneri, o => html`
@@ -54127,11 +54169,8 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'Kavram matrisi',
+        label:'Kavram matrisi', hint:'kavram-matrisi',
         meta:kavramSatirlari.length + ' kavram',
-        note:'Bir kavramda kaç ayrı yazar okunduğu, o kavramın ne kadar '
-           + 'sentopik çalışıldığını söyler. Tek yazar bir başlangıçtır, '
-           + 'bir eksiklik değil.',
         wide:true,
         body:kavramSatirlari.length
           ? K.Table({ tight:true,
@@ -54171,9 +54210,7 @@ ESP.Screens.library = (function(){
     const k = S.ui.anlatSonuc;
     const son = secili ? ESP.Anlat.son(secili.id) : null;
     return K.Entry({
-      label:'Öğrendiğini anlat', meta:'sesle ya da yazıyla',
-      note:'Kaynağı kendi sözünle anlat; notlarındaki kavramlardan hangilerinin geçtiği sayılır. '
-         + 'Anlatım notlanmaz ve metni kaydedilmez.',
+      label:'Öğrendiğini anlat', hint:'anlat', meta:'sesle ya da yazıyla',
       wide:true,
       body:!uygun.length
         ? K.Empty({ text:'Notlarında en az ' + ESP.Anlat.EN_AZ_KAVRAM + ' kavram etiketi olan bir kaynak yok. '
@@ -54281,8 +54318,6 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Kaynaklar', hint:'primary-text',
         meta:kitaplar.length + ' kayıt',
-        note:'Primer metin sentez katsayısına girer, yorum girmez. '
-           + 'Yoksa bir özet kitabı on filozof okumuş gibi görünürdü.',
         wide:true,
         body:kitaplar.length
           ? K.Table({ tight:true,
@@ -54308,10 +54343,8 @@ ESP.Screens.library = (function(){
       anlatEntry(),
 
       K.Entry({
-        label:'Okuma listesi iste', hint:'primary-text',
+        label:'Okuma listesi iste', hint:'belge',
         meta:'okuma · HKM',
-        note:'Konunun temel eserleri web kaynaklarından çıkarılır; yazar adı alıntıda doğrulanır. '
-           + 'Eserler «başlanmadı» olarak gelir. Web kapalıysa liste yazılmaz.',
         body:html`<div class="row gap-8 wrap">
           ${K.Input({ id:'belge-okuma', placeholder:'Konu: Stoacılık, bilim tarihi…', aria:'Okuma konusu',
             size:'sm', class:'grow' })}
@@ -54346,8 +54379,6 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Konular', hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
-        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
-           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
         wide:true,
         body:ESP.Parts.topics('reading'),
       }),
@@ -54371,6 +54402,7 @@ ESP.Screens.library = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'not-tumu'(){ S.ui.notTumu = !S.ui.notTumu; ESP.App.render(); },
     async 'anlat-olc'(){
       const kitap = document.getElementById('anlat-kitap');
       const metin = document.getElementById('anlat-metin');
@@ -54505,6 +54537,10 @@ ESP.Screens.library = (function(){
 
   return {
     id:'library',
+    /* iPhone Faz 2c: Kaynaklar'da raf (listenin görseli) ve okuma listesi
+       isteği, Yöntem'in beş başvuru kartı şerit — dokununca açılır. */
+    kucukVarsayilan:['raf', 'okuma-listesi-iste', 'dört-düzey', 'analitik-okumanın-dört-sorusu',
+      'okuma-protokolü', 'not-şablonları', 'bırakma-izni'],
     title:'Kütüphane',
     headline(){
       const ss = ESP.Intellect.syntopic();
@@ -59077,9 +59113,11 @@ ESP.App = (function(){
      anahtarın gerçek bir bölüme denk geldiği test edilir (sade.test.js). */
   const SADE_GIZLI = {
     guide:['nasıl-çalışır', 'sıfır-sürtünme', 'kısayollar', 'yedi-disiplin', 'çıktı-denetimi', 'ne-büyüyor', 'nerede-duruyor', 'doktrin', 'yapılmayacaklar', 'kardeş-projeler', 'yayımlanmış-çerçeve', 'öğrenme-araştırması', 'kendi-ölçümün', 'sistem-ayarı', 'denetim'],
-    history:['egzersiz-kataloğu'],
-    studio:['nefes-ve-vurgu', 'ısınma-sırası'],
-    library:['öğrendiğini-anlat'],
+    /* iPhone Faz 2c: boşluk ve dağılımın sayısı dönen «Kapsam» kartında;
+       paket isteği ara sıra; bağlı notlar not listesinin tekrarı. */
+    history:['egzersiz-kataloğu', 'yüzyıl-boşlukları', 'dağılım'],
+    studio:['nefes-ve-vurgu', 'ısınma-sırası', 'paket-iste'],
+    library:['öğrendiğini-anlat', 'bağlı-notlar'],
     analytics:['veri-doluluğu'],
     gun:['bekleyen-iş', 'günün-dakikası', 'yedek', 'hkm', 'seri', 'hedeflerim', 'günün-toplamı', 'asgari-gün', 'entelektüel-hacim', 'haftanın-dağılımı', 'son-gün', 'seçili-gün'],
   };

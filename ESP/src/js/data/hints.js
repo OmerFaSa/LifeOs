@@ -22,7 +22,7 @@ ESP.HINTS = {
 
   /* --- dil --- */
   'srs':{ t:'Aralıklı tekrar', b:'Bir kartı tam unutmadan hemen önce sorar; aralık her doğru cevapta uzar.',
-    more:'Leitner kutularının SM-2 ile yumuşatılmış hâli. Kolay bulduğun kart daha uzun süre görünmez, zorlandığın kart başa döner. Amaç tekrar sayısını azaltmak değil, aynı hatırlamayı daha az tekrarla elde etmektir.' },
+    more:'Leitner kutularının SM-2 ile yumuşatılmış hâli. Kolay bulduğun kart daha uzun süre görünmez, zorlandığın kart başa döner. Amaç tekrar sayısını azaltmak değil, aynı hatırlamayı daha az tekrarla elde etmektir. Her disiplinin destesi ayrı ölçülür — tarih destesi dil destesinden AYRI: birinin iyi olması ötekinin çöküşünü gizlememeli.' },
   'retention':{ t:'Retansiyon', b:'Bugün sorulsa hatırlama olasılığının ortalaması. R(t) = e^(−t/S).',
     more:'S kartın kendi kararlılığıdır ve her doğru cevapta büyür. Hiç çalışılmamış kart bu ortalamaya girmez: «veri yok» sıfır sayılmaz, yoksa bir gün ara vermek retansiyonu çökmüş gibi gösterirdi.' },
   'shadowing':{ t:'Shadowing', b:'Duyduğun konuşmayı birkaç kelime geriden, aynı tonlamayla tekrarlama.',
@@ -40,21 +40,38 @@ ESP.HINTS = {
 
   /* --- ses --- */
   'clean-bpm':{ t:'Temiz BPM', b:'Hata yapmadan çalabildiğin en yüksek tempo. Ulaşılan en yüksek tempo değil.',
-    more:'Sistem yalnızca «temiz» işaretlenen tekrarların BPM\'ini eşik sayar. Hız eşiği kendiliğinden artar, kendiliğinden düşmez: bir kötü gün eşiği geri almaz, ama üst üste üç temiz tekrar yeni eşiği açar.' },
+    more:'Sistem yalnızca «temiz» işaretlenen tekrarların BPM\'ini eşik sayar. Hız eşiği kendiliğinden artar, kendiliğinden düşmez: bir kötü gün eşiği geri almaz, ama üst üste üç temiz tekrar yeni eşiği açar. «Temiz» senin işaretindir: sistem duymaz — tempo ve tarih «ölçüldü», temizlik yargısı senindir. Üç temiz tekrarın aynı tempoda ve son 14 gün içinde gelmesi gerekir.' },
   'plateau':{ t:'Plato', b:'Bir teknikte 14+ gündür temiz BPM eşiğinin artmaması.',
     more:'Plato bir başarısızlık değil bir sinyaldir: aynı çalışma aynı sonucu veriyorsa çalışmanın kendisi değişmeli. Öncelik sırasında «tıkanmış temel» sayılır ve yeni repertuarın önüne geçer.' },
   'articulation':{ t:'Artikülasyon', b:'Sesleri tam ve ayrık çıkarabilme. Tekerleme hızıyla değil temizliğiyle ölçülür.',
-    more:'Kayıt tutulur ama çözümlenmez — sistem konuşma tanıma modeli kullanmaz. Hata sayısını kendin işaretlersin; bu yüzden «tahmin» etiketi taşır ve kendi geçmişinle karşılaştırılır, başkasıyla değil.' },
+    more:'Kayıt tutulur ama çözümlenmez — sistem konuşma tanıma modeli kullanmaz. Hata sayısını kendin işaretlersin; bu yüzden «tahmin» etiketi taşır ve kendi geçmişinle karşılaştırılır, başkasıyla değil. Hedef hızlı söylemek değil, hangi sesin düzeldiği: hızlı ama bozuk bir tekerleme çalışmanın başarısı değil başarısızlığıdır.' },
   'wpm':{ t:'Konuşma hızı', b:'Dakikadaki kelime. Ölçülmüş süre ve sayılmış kelimeden hesaplanır.',
     more:'Yüksek WPM iyi değildir; hedef banda yakın WPM iyidir. Türkçe sunumda rahat okunan bant kabaca 120–150 arasıdır ve bu bir kural değil bir başlangıç çizgisidir; kendi kayıtların bandı yerine oturtur.' },
+  'metronome':{ t:'Metronom', b:'Tempoyu tutar; ilk vuruş vurgulu.',
+    more:'İlk vuruş vurgulu: metronomun işi vuruşu değil ölçünün nerede başladığını duyurmaktır. Vuruş aralığı tempodan hesaplanır (60 000 ÷ BPM milisaniye). Temiz çalınan tempo, hızlı çalınan tempodan önce gelir.' },
+  'paket':{ t:'Paket iste', b:'Konu ve düzeyden alıştırma listesi; King’e iletilir.',
+    more:'Ton, derece ilerleyişi, başlangıç ve hedef tempo taşıyan alıştırma listesi King’in onay kapısından geçer ve Bugün’e teklif olarak gelir. Tempolar referanstır; eşik senin temiz tekrarından açılır.' },
+  'kayit-olcumu':{ t:'Kayıt ölçümü', b:'Süre, kelime ve kendi işaretlediğin hata sayısı.',
+    more:'Saklanan şey süre, kelime ve senin işaretlediğin hata sayısıdır; ses dosyası saklanmaz, olmayan dosya sızamaz. Hata sayısı senin işaretindir, bu yüzden «tahmin» etiketi taşır.' },
+  'diksiyon-egilimi':{ t:'Diksiyon eğilimi', b:'Son 14 gün ile ondan önceki 14 gün karşılaştırılır.',
+    more:'İki pencere karşılaştırılır: son 14 gün ve ondan önceki 14 gün. İkisinde de ölçüm yoksa bulgu üretilmez.' },
+  'hedef-tempo':{ t:'Hedefe ulaşma', b:'Hedef tempoya ulaşan parçaların oranı.',
+    more:'Hedefi girilmemiş parça paydaya girmez: hedefsiz parça başarısız değildir.' },
+  'nefes':{ t:'Nefes ve vurgu', b:'Ölçülen şey süredir, «iyi yaptım» değil.' },
+  'isinma':{ t:'Isınma sırası', b:'Önerilen aşamalar ve süreleri.',
+    more:'Zorunlu değildir; sistem senin yerine karar vermez.' },
 
   /* --- okuma --- */
   'atomic-note':{ t:'Atomik not', b:'Tek bir fikri taşıyan, tek cümlelik kart. Kitap özeti değil.',
-    more:'Zettelkasten\'in tek kuralı budur: bir not bir fikir. İki fikir taşıyan not hiçbir yere bağlanamaz, çünkü hangi fikirle bağlandığı belirsizdir.' },
+    more:'Zettelkasten\'in tek kuralı budur: bir not bir fikir. İki fikir taşıyan not hiçbir yere bağlanamaz, çünkü hangi fikirle bağlandığı belirsizdir. İki fikir taşıyorsa bölerek yaz. Kavram etiketleri metinden kendiliğinden çıkarılır; kanonda olmayan kelime uydurulmaz, elle ekleyebilirsin.' },
   'syntopic':{ t:'Sentopik bağ', b:'İki farklı yazarın aynı kavram hakkında söylediğini birbirine bağlayan iz.',
-    more:'Sentopik okuma aynı soruyu birden çok yazara sormaktır. Bağ kurulmamış not «henüz sermaye değil» sayılır — okunmuş ama yerleşmemiştir.' },
+    more:'Sentopik okuma aynı soruyu birden çok yazara sormaktır. Bağ kurulmamış not «henüz sermaye değil» sayılır — okunmuş ama yerleşmemiştir. Sistem bağı KURMAZ, önerir: bağın nedenini sen yazarsın, sistem nedeni uyduramaz.' },
   'ssk':{ t:'Sentez katsayısı', b:'SSK = (bağlantılı not / toplam kitap) × log(1 + yazar sayısı).',
     more:'Orijinal formül log(yazar) idi ve tek yazarda log(1)=0 tüm sentezi sıfırlıyordu: bir kitabı derinlemesine analiz eden kullanıcı cezalandırılıyordu. log(1+n) bu tekilliği giderir ve henüz kitap yokken de tanımlı kalır.' },
+  'kavram-matrisi':{ t:'Kavram matrisi', b:'Her kavramda kaç not ve kaç ayrı yazar.',
+    more:'Bir kavramda kaç ayrı yazar okunduğu, o kavramın ne kadar sentopik çalışıldığını söyler. Tek yazar bir başlangıçtır, bir eksiklik değil.' },
+  'anlat':{ t:'Öğrendiğini anlat', b:'Kaynağı kendi sözünle anlat; geçen kavramlar sayılır.',
+    more:'Notlarındaki kavramlardan hangilerinin geçtiği sayılır. Anlatım notlanmaz ve metni kaydedilmez.' },
 
   /* --- yazi --- */
   'readability':{ t:'Okunabilirlik', b:'Cümle uzunluğu ve kelime uzunluğundan hesaplanan bir okuma yükü göstergesi.',
@@ -112,7 +129,7 @@ ESP.HINTS = {
 
   /* --- tarih --- */
   'chrono':{ t:'Kronoloji', b:'Olayların zaman şeridi: tarihin iskeleti.',
-    more:'Boş bir kronoloji «%0 kapsam» değil «veri yok»tur. Üç eksen ayrı ölçülür ve tek puana toplanmaz: kapsam (dönem, bölge, alan), derinlik (zincir ve kaynak), tutma (SRS retansiyonu). Tek puan, hangi eksenin zayıf olduğunu gizler.' },
+    more:'Boş bir kronoloji «%0 kapsam» değil «veri yok»tur. Üç eksen ayrı ölçülür ve tek puana toplanmaz: kapsam (dönem, bölge, alan), derinlik (zincir ve kaynak), tutma (SRS retansiyonu). Tek puan, hangi eksenin zayıf olduğunu gizler. Tohum listesi bir müfredat değil bir iskelettir: kendi olaylarını eklemek için bir zemin; olanı atlar, eksik olanı ekler.' },
   'era':{ t:'Dönem', b:'Büyük tarihsel bölümler ve tartışmalı sınırları.',
     more:'«Orta Çağ 476\'da başladı» demek bir ölçüm değil bir karardır — üstelik Batı\'ya özgü bir karar. Ekranda her dönemin yanında sınırının neden tartışmalı olduğu yazar.' },
   'gap':{ t:'Yüzyıl boşluğu', b:'Kronolojide üst üste üç yüzyıldan uzun boş aralık.',
@@ -131,6 +148,10 @@ ESP.HINTS = {
     more:'En sessiz hatadır: yanlış cevap vermez, yanlış soru sordurur. 1500\'de «Türkiye» ya da «Almanya» yoktu; hanedan ve din vardı. Kaçınılmazlık yanılgısı da buraya girer: olan şey olmak zorunda değildi.' },
   'school':{ t:'Tarih yazımı okulu', b:'Aynı olaya farklı soru soran gelenekler.',
     more:'Olaysal tarih «ne oldu» diye sorar, Annales «yüzyıllarca değişmeyen ne vardı», Marksist tarih «kim kazandı», mikro tarih «küçük bir vaka büyük yapıyı nasıl ele veriyor». Bunu görmek, tarih bilmek ile tarihsel düşünmek arasındaki farktır.' },
+  'tarih-pratik':{ t:'Tarih pratiği', b:'Dört soru türü: hatırla, seç, dönem ve sırala.',
+    more:'Sıralamada seçenekler hazır dizilmez — sırayı sen kurarsın. Cevap tekrar ekranındakiyle aynı SRS’e yazılır; ayrı bir hafıza kaydı açılmaz.' },
+  'belge':{ t:'Belge iste', b:'King web kaynaklarından kaynaklı içerik getirir.',
+    more:'İstek King’e iletilir; içerik web kaynaklarından çıkarılır ve her satır alıntısıyla gelir — alıntısı kaynakta bulunmayan satır eklenmez. Tarihte yıl, okuma listesinde yazar adı alıntıda doğrulanır; eserler «başlanmadı» olarak gelir. Web kapalıysa hiçbir şey yazılmaz.' },
 
   /* --- dil (ikinci eksen) --- */
   'grammar':{ t:'Dilbilgisi ekseni', b:'Kelime ölçülür, işlev beyan edilir.',
@@ -166,7 +187,7 @@ ESP.HINTS = {
 
   /* --- müzik (ikinci eksen) --- */
   'ear':{ t:'Kulak eğitimi', b:'Duyduğunu adlandırabilme: aralık, akor, derece.',
-    more:'Metronom parmakları eğitir, kulak eğitmez. Hızlı çalan ama duymayan biri her yeni parçayı sıfırdan ezberler. Burada «mutlak kulak» diye bir kapı yoktur ve bilerek yoktur: ölçülen tek şey deneme başına isabettir, yetenek değil.' },
+    more:'Metronom parmakları eğitir, kulak eğitmez. Hızlı çalan ama duymayan biri her yeni parçayı sıfırdan ezberler. Burada «mutlak kulak» diye bir kapı yoktur ve bilerek yoktur: ölçülen tek şey deneme başına isabettir, yetenek değil. Sistem sesini dinlemez; yirmi denemede kaç doğru olduğunu sen girersin.' },
   'interval':{ t:'Aralık', b:'İki ses arasındaki mesafe ve onu hatırlatan kanca.',
     more:'Kanca bir ezber kolaylığıdır, kural değil: kendi kancanı bulursan daha iyi tutar.' },
   'caged':{ t:'CAGED', b:'Aynı akorun klavyede beş farklı şekli.',

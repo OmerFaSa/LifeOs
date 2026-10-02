@@ -47,22 +47,21 @@ ESP.Screens.history = (function(){
     const st = ESP.Chrono.status();
     const rows = [];
 
+    /* iPhone Faz 2c: boş şeridin ve tohumun açıklaması ⓘ'de (hints: chrono);
+       tohumun kaç olay taşıdığı düğmenin üstünde. */
     if(!evs().length){
       rows.push(K.Entry({
         label:'Boş şerit', hint:'chrono',
         meta:'olay yok',
-        note:'Kronoloji boşken kapsam ölçülmez. Sıfır kapsam ile ölçülmemiş '
-           + 'kapsam aynı şey değildir.',
         body:html`
           ${K.Empty({ text:'Zaman şeridinde hiç olay yok.' })}
-          ${K.Notice({ tone:'info',
-            body:'Tohum listesi ' + (ESP.SEED_EVENTS || []).length + ' dönüm noktası '
-              + 'taşıyor. Tohum bir müfredat değil bir iskelettir: kendi olaylarını '
-              + 'eklemek için bir zemin.' })}
-          ${K.Button({ label:'Tohumu yükle', tone:'primary', act:'seed', class:'mt-10' })}`,
+          ${K.Button({ label:'Tohumu yükle · ' + (ESP.SEED_EVENTS || []).length + ' olay', tone:'primary',
+            act:'seed', class:'mt-10' })}`,
       }));
       return rows;
     }
+
+    rows.push(DonenKapsam(st));
 
     /* 100 TARİH ŞERİDİ (vitrin): yüzyıllar yatay, olaylar nokta; en son
        eklenen olay yanar. Yıl kaydın kendisinden; yılsız olay çizilmez. */
@@ -77,8 +76,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Dönemler', hint:'era',
       meta:st.eras.covered + '/' + st.eras.total + ' kapsandı',
-      note:'Dönem sınırları tartışmalıdır ve öyle gösterilir: bir sınır bir '
-         + 'ölçüm değil bir karardır.',
       wide:true,
       body:html`<div class="erastrip">${map(donem.buckets, b => {
         const e = ESP.ERA_BY_ID[b.id];
@@ -107,8 +104,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Yüzyıl boşlukları', hint:'gap',
       meta:st.gaps.length ? st.gaps.length + ' boşluk' : 'yok',
-      note:'Üst üste üç yüzyıl boş kaldığında kör nokta sayılır. Her yüzyılda '
-         + 'dönüm noktası olmak zorunda değil — ama üç yüzyıl sessizlik bir sorudur.',
       body:st.gaps.length
         ? K.Table({ tight:true, headers:['Aralık', { label:'Yüzyıl', num:true }],
             rows:st.gaps.map(g => [
@@ -122,8 +117,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Dağılım', hint:'coverage',
       meta:st.kinds.covered + '/' + st.kinds.total + ' alan',
-      note:'Yalnızca savaş ve antlaşma girilirse nedensellik hep askerî kalır. '
-         + 'Ekonomik ve düşünsel olaylar zinciri değiştirir.',
       wide:true,
       body:html`
         <div class="cols-2">
@@ -145,6 +138,32 @@ ESP.Screens.history = (function(){
     return rows;
   }
 
+  /* iPhone Faz 2c (2026-10-02): kapsamın üç ekseni ve yüzyıl boşluğu tek
+     küçük dönen kartta; Dönemler şerit, Yüzyıl boşlukları ve Dağılım gizli
+     (app.js SADE_GIZLI). Sayılar Chrono.status'tan: hesaplandı. Boş eksen
+     adıyla yazılır; boşluk yoksa sayı değil cümle. */
+  function DonenKapsam(st){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const girdiler = [{ ad:'Olay', deger:st.events, birim:'olay', kesinlik:'measured' }];
+    const oran = (o, ad) => sayi({ deger:o.covered + '/' + o.total, kesinlik:'computed',
+      formul:'olayı olan ' + ad + ' / ' + ad, girdiler, zaman:U.todayISO() });
+    const bos = (o, tam) => o.empty.length ? 'Boş: ' + o.empty.join(', ') + '.' : tam;
+    return raw(V.donen({ id:'esp-kapsam', ad:'Kapsam', maddeler:[
+      { ust:'Dönem', sayi:oran(st.eras, 'dönem'), cumle:'dönem kapsandı.', vurgu:bos(st.eras, 'Bütün dönemlerde olay var.'), sistem:'esp' },
+      { ust:'Alan', sayi:oran(st.kinds, 'alan'), cumle:'alan.', vurgu:bos(st.kinds, 'Bütün alanlarda olay var.'), sistem:'esp' },
+      { ust:'Bölge', sayi:oran(st.regions, 'bölge'), cumle:'bölge.', vurgu:bos(st.regions, 'Bütün bölgelerde olay var.'), sistem:'esp' },
+      st.gaps.length
+        ? { ust:'Yüzyıl boşluğu', sayi:sayi({ deger:st.gaps.length, birim:'boşluk', kesinlik:'computed',
+              formul:'üst üste üç yüzyıldan uzun boş aralık', girdiler, zaman:U.todayISO() }),
+            cumle:'kör nokta.', vurgu:st.gaps.map(g => ESP.centuryLabel(g.from) + ' – ' + ESP.centuryLabel(g.to)).join(', ') + '.',
+            sistem:'esp' }
+        : { ust:'Yüzyıl boşluğu', cumle:'Boşluk yok.', vurgu:'Üç yüzyıldan uzun sessizlik yok.', sistem:'esp' },
+    ] }));
+  }
+
   /* ---------------------------------------------------------------- olaylar */
 
   function filteredEvents(){
@@ -161,8 +180,9 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Olay ekle', hint:'event',
       meta:'yıl zorunlu',
-      note:'Dönem yıldan türetilir, sorulmaz: aynı yıl iki döneme düşemez ve '
-         + 'elle girilen dönem zamanla yanlış kalır.',
+      /* Tohum olanı atlar, eksik olanı ekler: ara sıra bir eylem. Eskiden her
+         bölümün üstünde ayrı bir satırdı; olay eklemenin yanında durur. */
+      action:K.Button({ label:'Tohumu yükle', size:'sm', act:'seed' }),
       body:html`
         <div class="cols-2">
           ${K.Field({ label:'Olay',
@@ -257,10 +277,8 @@ ESP.Screens.history = (function(){
     /* BAM'dan belge (Part 8f): konu → olaylar ve kaynakları; yıl alıntıda
        doğrulanır. Teklif Bugün'e gelir, ESP kendi koduyla sınamadan eklemez. */
     rows.push(K.Entry({
-      label:'Belge iste', hint:'source',
+      label:'Belge iste', hint:'belge',
       meta:'tarih · HKM',
-      note:'Konunun olayları web kaynaklarından çıkarılır; yıl alıntıda doğrulanır, her olay '
-         + 'kaynağıyla gelir. Web kapalıysa belge yazılmaz.',
       body:html`<div class="row gap-8 wrap">
         ${K.Input({ id:'belge-tarih', placeholder:'Konu: Osmanlı’nın kuruluşu, Fransız Devrimi…',
           aria:'Tarih konusu', size:'sm', class:'grow' })}
@@ -272,7 +290,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Kaynak ekle', hint:'source',
       meta:'birincil / ikincil',
-      note:'Tek kaynağa dayanan bir iddia bir tezdir, bir olgu değil.',
       body:html`
         <div class="cols-2">
           ${K.Field({ label:'Kaynak',
@@ -299,8 +316,6 @@ ESP.Screens.history = (function(){
       label:'Denge', hint:'balance',
       meta:b.cert === 'missing' ? 'veri yok'
         : b.primary + '/' + b.total + ' birincil',
-      note:'Birincil oran bir kalite değil bir kompozisyon ölçüsüdür: %100 '
-         + 'birincil de sağlıklı değildir, bağlamı ikincil kaynak verir.',
       body:b.cert === 'missing'
         ? K.Empty({ text:'Henüz kaynak değerlendirilmedi.' })
         : html`
@@ -361,8 +376,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Neden zinciri', hint:'causal',
       meta:chs().length + ' zincir',
-      note:'Yapısal koşul ile tetikleyici aynı şey değildir. Yalnızca kıvılcımdan '
-         + 'kurulan bir açıklama, tarihin en yaygın hatasıdır.',
       body:evs().length
         ? html`
           <div class="row wrap">
@@ -435,7 +448,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Bugünün egzersizi', hint:'drill',
       meta:drill ? 'kademe ' + drill.level : '—',
-      note:'Egzersizi kural motoru seçer, model değil: açığı olan eksen önce gelir.',
       body:drill
         ? K.NextUp({ icon:'zap', label:drill.label, title:drill.task,
             why:'Bu egzersiz, ölçülen açığa göre seçildi.' })
@@ -445,8 +457,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Tarih destesi', hint:'srs',
       meta:due.length ? due.length + ' kart vadeli' : 'vadesi gelen yok',
-      note:'Tarih destesi dil destesinden AYRI ölçülür: birinin iyi olması '
-         + 'ötekinin çöküşünü gizlememeli.',
       body:html`
         ${r.cert === 'missing'
           ? K.Notice({ tone:'info', body:'Retansiyon henüz ölçülemedi: taban için '
@@ -462,8 +472,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Anakronizm tuzakları', hint:'anachronism',
       meta:ESP.ANACHRONISMS.length + ' tuzak',
-      note:'Bugünün gözüyle okumak, tarihin en sessiz hatasıdır: yanlış cevap '
-         + 'vermez, yanlış soru sordurur.',
       body:K.Table({ tight:true, headers:['Tuzak', 'Ne yapar'],
         rows:ESP.ANACHRONISMS.map(a => [a.label, a.note]) }),
     }));
@@ -471,8 +479,6 @@ ESP.Screens.history = (function(){
     rows.push(K.Entry({
       label:'Tarih yazımı okulları', hint:'school',
       meta:ESP.HISTORIOGRAPHY.length + ' okul',
-      note:'Aynı olay, farklı okulda farklı bir hikâyedir. Bunu görmek, tarih '
-         + 'bilmek ile tarihsel düşünmek arasındaki fark.',
       wide:true,
       body:K.Table({ tight:true, headers:['Okul', 'Neye bakar', 'Sorusu'],
         rows:ESP.HISTORIOGRAPHY.map(h => [h.label, h.note, h.asks]) }),
@@ -499,11 +505,9 @@ ESP.Screens.history = (function(){
   function learnRows(){
     return [
       K.Entry({
-        label:'Pratik', hint:'practice',
+        label:'Pratik', hint:'tarih-pratik',
         meta:S.ui.practice && S.ui.practice.deck === ESP.HISTORY_DECK
           ? 'oturum açık' : ESP.PRACTICE_LENGTH + ' soru',
-        note:'Tarih destesinde dört soru türü var: hatırla, seç, dönem ve '
-           + 'sırala. Sıralamada seçenekler hazır dizilmez — sırayı sen kurarsın.',
         wide:true,
         body:ESP.Parts.practice(ESP.HISTORY_DECK),
       }),
@@ -512,8 +516,6 @@ ESP.Screens.history = (function(){
         label:'Konular', hint:'topic',
         meta:ESP.Lesson.topicSummary('history').topics + ' konu · '
           + ESP.Lesson.topicSummary('history').items + ' madde',
-        note:'Kronoloji, nedensellik, kaynak eleştirisi ve tarih yazımı. '
-           + 'İşaretler beyandır.',
         wide:true,
         body:ESP.Parts.topics('history'),
       }),
@@ -521,8 +523,6 @@ ESP.Screens.history = (function(){
       K.Entry({
         label:'Üniteler', hint:'unit',
         meta:ESP.Lesson.units('history').length + ' ünite',
-        note:'Ünite bir dönemi, bölgeyi ya da alanı toplar. Eklenen kartlar '
-           + '«tohum» etiketiyle durur: bu kartları sen yazmadın.',
         wide:true,
         body:ESP.Parts.units('history'),
       }),
@@ -537,8 +537,6 @@ ESP.Screens.history = (function(){
 
   function render(){
     return K.Grid(html`
-      ${when(evs().length, () => K.Span(12, K.Toolbar({ actions:K.Button({ label:'Tohumu yükle', size:'sm',
-        act:'seed' }) })))}
       ${K.Span(12, ESP.Parts.bolumler('history', { act:'pick-tab', aria:'Tarih bölümleri', tabs:TABS,
         govde:GOVDE }))}`);
   }
@@ -718,6 +716,10 @@ ESP.Screens.history = (function(){
 
   return {
     id:'history',
+    /* iPhone Faz 2c: Şerit'te iş zaman şeridinin kendisi; dönem kutuları
+       ara sıra açılan süzgeç (şerit), boşluk ve dağılım dönen kartta.
+       Öbür bölümlerde belge isteği ve iki başvuru tablosu şerit. */
+    kucukVarsayilan:['dönemler', 'belge-iste', 'anakronizm-tuzakları', 'tarih-yazımı-okulları'],
     title:'Kronoloji',
     headline(){
       const st = ESP.Chrono.status();

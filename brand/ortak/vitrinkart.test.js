@@ -175,6 +175,13 @@ describe('C · AYS kartları', () => {
       expect(k.querySelectorAll('select')).toHaveLength(3);
       expect(k.querySelector('[data-act="q-hizli"]')).toBeTruthy();
       expect(k.querySelector('.ci.i')).toBeTruthy();
+      expect(k.querySelector('.cap').textContent).toContain('ENTER');
+    });
+    /* iPhone planı §2.4: kullanım notu ⓘ'ye taşınabilir (not:false) */
+    icinde(V().tekSatirSoru({ id:'qh', act:'q-hizli', not:false, dersler:[{ value:'mat', label:'Matematik' }],
+      konular:[], sonuclar:[{ value:'dogru', label:'Doğru', iyi:true }], sonuc:'dogru' }), k => {
+      expect(k.querySelector('.cap')).toBeNull();
+      expect(k.querySelector('[data-act="q-hizli"]')).toBeTruthy();
     });
   });
 

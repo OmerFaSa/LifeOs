@@ -187,6 +187,11 @@ tbody tr:hover{ background:var(--surface-2); }
 
 .daycol__block.is-skipped{ border-left-color:var(--danger); opacity:.65; text-decoration:line-through; }
 
+/* ---------- ders listesi (Dersler) ----------
+   iPhone Faz 2c: sekiz ders tek bakışta; satır sık (dokunma hedefi yine
+   36 px'in üstünde). */
+.list--sik .listitem--tap{ padding-top:8px; padding-bottom:8px; }
+
 /* ---------- konu satiri (Dersler) ---------- */
 .topicrow{
   display:grid;
@@ -1303,11 +1308,13 @@ tbody tr:hover{ background:var(--surface-2); }
 
 /* Fotoğraf bırakma alanı. Üç yol da aynı kapıya çıkar: tıkla, sürükle,
    Ctrl+V ile yapıştır — telefonda çeken de bilgisayarda kırpan da girebilsin. */
+/* iPhone Faz 2c: boşken tek satır (simge · «Fotoğrafı buraya bırak» · yol);
+   fotoğraf seçilince sütun olur ve görseli taşır. */
 .qdrop{
   position:relative;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:6px;
-  min-height:132px; padding:var(--sp-4);
+  display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:center;
+  gap:6px 10px;
+  min-height:64px; padding:var(--sp-3) var(--sp-4);
   border:2px dashed var(--border-strong);
   border-radius:var(--r);
   background:var(--surface-2);
@@ -1321,7 +1328,7 @@ tbody tr:hover{ background:var(--surface-2); }
 
 .qdrop:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 
-.qdrop.is-full{ padding:var(--sp-2); border-style:solid; background:var(--surface); }
+.qdrop.is-full{ flex-direction:column; padding:var(--sp-2); border-style:solid; background:var(--surface); }
 
 .qdrop__icon svg{ width:26px; height:26px; stroke:currentColor; fill:none; stroke-width:1.6; color:var(--text-3); }
 

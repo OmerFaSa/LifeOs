@@ -256,7 +256,7 @@ R.Screens.subjects = (function(){
   /* ---------- ekran ---------- */
 
   function subjectNav(sid){
-    return html`<div class="list">${map(R.SUBJECTS, s => {
+    return html`<div class="list list--sik">${map(R.SUBJECTS, s => {
       const c = C.subjectClosure(s.id);
       return html`
         <button class="${s.id === sid ? 'listitem listitem--tap is-on' : 'listitem listitem--tap'}"

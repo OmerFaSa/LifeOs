@@ -52,3 +52,189 @@
     });
   });
 })();
+
+/* iPhone planı · Faz 2c · ESP Çalışma: Tarih, Ses, Okuma.
+
+   Kullanıcı (2026-10-02): «çok daha sade, çok daha minimalist». Ekranda
+   yalnız işin kendisi ve en çok bir dönen kart; ara sıra açılan araç
+   şerit, başvuru ve tekrar gizli; sabit açıklama notu hiçbir bölümde
+   kalmaz (öğreti ⓘ'de, data/hints.js). Veriden gelen not (zincirin
+   sorusu, tezgâhın sıradaki kapısı) açıklama değildir, kalır. */
+(function(){
+  const { describe, it, expect, resetState, pushEvent, pushPiece, pushNote } = ESP.Test;
+
+  async function bolumle(id, bolum){
+    const sc = ESP.Screens[id];
+    const kok = document.createElement('div');
+    kok.innerHTML = String(await sc.render());
+    document.body.appendChild(kok);
+    const G = window.LIFEOS.Gizle;
+    const gizliler = (sc.gizliVarsayilan || []).concat(ESP.App.SADE_GIZLI[id] || []);
+    const kucukler = sc.kucukVarsayilan || [];
+    const alan = bolum ? kok.querySelector('#bl-' + bolum) : kok;
+    const var_ = G.bolumler(alan).map(b => b.anahtar);
+    return {
+      kok, alan, var:var_,
+      gizli:var_.filter(a => gizliler.indexOf(a) >= 0),
+      kucuk:var_.filter(a => gizliler.indexOf(a) < 0 && kucukler.indexOf(a) >= 0),
+      acik:var_.filter(a => gizliler.indexOf(a) < 0 && kucukler.indexOf(a) < 0),
+      bitir(){ kok.remove(); },
+    };
+  }
+  const ustler = d => Array.from(d.querySelectorAll('.donen__ust')).map(x => x.textContent.trim());
+  /* Tezgâhın notu (sıradaki kapı) veridir; geri kalan not sabit açıklamadır. */
+  const sabitNotlar = kok => Array.from(kok.querySelectorAll('.lrow__note'))
+    .filter(n => !n.closest('#bl-tezgah'));
+
+  describe('iPhone · Faz 2c · ESP Çalışma', () => {
+
+    it('Tarih: açık yalnız şerit; kapsam dönen kartta; dönemler şerit; boşluk ve dağılım gizli', async () => {
+      resetState();
+      pushEvent(1071, 'Malazgirt', { kind:'siyasi', region:'anadolu' });
+      pushEvent(1453, 'İstanbul’un fethi', { kind:'siyasi', region:'anadolu' });
+      pushEvent(1789, 'Fransız Devrimi', { kind:'toplumsal', region:'avrupa' });
+      ESP.Memo.bitir();
+      const b = await bolumle('history', 'serit');
+      try{
+        const d = b.alan.querySelector('.donen[aria-label="Kapsam"]');
+        expect(!!d).toBe(true);
+        expect(ustler(d).slice(0, 2).join(',')).toBe('Dönem,Alan');
+        expect(b.acik.join(',')).toBe('şerit');
+        expect(b.kucuk.indexOf('dönemler') >= 0).toBe(true);
+        ['yüzyıl-boşlukları', 'dağılım'].forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
+        /* «Tohumu yükle» ayrı bir satır değil: olay ekleme kartının yanında */
+        expect(b.kok.querySelectorAll('[data-act="seed"]').length).toBe(1);
+        expect(!!b.kok.querySelector('#bl-olaylar [data-act="seed"]')).toBe(true);
+      }finally{ b.bitir(); ESP.Memo.bitir(); }
+    });
+
+    it('Tarih: hiçbir bölümde sabit açıklama notu yok; öğreti ⓘ’de', async () => {
+      resetState();
+      pushEvent(1071, 'Malazgirt', { kind:'siyasi', region:'anadolu' });
+      ESP.Memo.bitir();
+      const b = await bolumle('history');
+      try{
+        expect(sabitNotlar(b.kok).map(n => n.textContent.trim()).join(' | ')).toBe('');
+        expect(ESP.HINTS.belge.more).toContain('Web kapalıysa');
+        expect(ESP.HINTS.srs.more).toContain('çöküşünü gizlememeli');
+        expect(ESP.HINTS['tarih-pratik'].b).toContain('sırala');
+      }finally{ b.bitir(); ESP.Memo.bitir(); }
+    });
+
+    it('Ses: açık metronom, tekrar kaydet ve tek «Parçalar» listesi; tezgâh kendi bölümünde', async () => {
+      resetState();
+      for(let i = 0; i < 7; i++) pushPiece('parça' + i, { kind:'technique', targetBpm:140 });
+      ESP.Memo.bitir();
+      const b = await bolumle('studio', 'muzik');
+      try{
+        expect(b.acik.join(',')).toBe('metronom,tekrar-kaydet,parçalar');
+        expect(b.var.indexOf('teknik')).toBe(-1);
+        expect(b.var.indexOf('tezgâh')).toBe(-1);
+        expect(b.kucuk.indexOf('parça-ekle') >= 0).toBe(true);
+        expect(b.gizli.indexOf('paket-iste') >= 0).toBe(true);
+        /* iki masa da kendi bölümünde */
+        ['music', 'diction'].forEach(x =>
+          expect(!!b.kok.querySelector('#bl-tezgah [data-act="desk-toggle"][data-disc="' + x + '"]')).toBe(true));
+        /* ilk beş parça + «Tümü» */
+        expect(b.alan.querySelectorAll('.parca').length).toBe(5);
+        expect(!!b.alan.querySelector('[data-act="parca-tumu"]')).toBe(true);
+        expect(sabitNotlar(b.kok).map(n => n.textContent.trim()).join(' | ')).toBe('');
+        expect(ESP.HINTS['clean-bpm'].more).toContain('sistem duymaz');
+        expect(ESP.HINTS.metronome.more).toContain('ölçünün nerede başladığını');
+      }finally{ b.bitir(); ESP.Memo.bitir(); }
+    });
+
+    it('Ses: «Tümü» bütün parçaları açar; seçili parçanın geçmişi kendi satırında', async () => {
+      resetState();
+      for(let i = 0; i < 7; i++) pushPiece('parça' + i, { kind:'technique', targetBpm:140 });
+      const p = ESP.S.pieces[6];
+      p.attempts = [{ date:'2026-10-01', bpm:80, clean:true }];
+      ESP.Memo.bitir();
+      const cizim = ESP.App.render;
+      ESP.App.render = () => {};
+      try{
+        await ESP.Screens.studio.handle['parca-tumu']();
+        expect(ESP.S.ui.parcaTumu).toBe(true);
+        ESP.S.ui.pieceOpen = p.id;
+        const b = await bolumle('studio', 'muzik');
+        try{
+          expect(b.alan.querySelectorAll('.parca').length).toBe(7);
+          const acik = b.alan.querySelector('.parca[open]');
+          expect(!!acik && acik.textContent.indexOf('parça6') >= 0).toBe(true);
+          expect(!!acik.querySelector('table')).toBe(true);
+        }finally{ b.bitir(); }
+      }finally{ ESP.App.render = cizim; ESP.S.ui.parcaTumu = false; ESP.S.ui.pieceOpen = null; ESP.Memo.bitir(); }
+    });
+
+    it('Okuma: not ekle ve kısa not listesi (ilk 5 + Tümü); açıklama ⓘ’de', async () => {
+      resetState();
+      for(let i = 0; i < 7; i++) pushNote('not ' + i);
+      ESP.Memo.bitir();
+      const b = await bolumle('library', 'notlar');
+      try{
+        expect(b.acik.join(',')).toBe('not-ekle,notlar');
+        expect(b.alan.querySelectorAll('.noterow').length).toBe(5);
+        expect(!!b.alan.querySelector('[data-act="not-tumu"]')).toBe(true);
+        expect(sabitNotlar(b.kok).map(n => n.textContent.trim()).join(' | ')).toBe('');
+        expect(b.alan.textContent.indexOf('Kavram etiketleri metinden')).toBe(-1);
+        expect(ESP.HINTS['atomic-note'].more).toContain('Kavram etiketleri');
+      }finally{ b.bitir(); ESP.Memo.bitir(); }
+    });
+
+    /* Ölçü aracı yalnız varsayılan bölümü görür; öbür bölümler burada
+       sayılır: her bölümde açık ≤ 3, başvuru tabloları şerit. */
+    it('Tarih, Ses, Okuma: her bölümde açık en çok üç; başvuru tabloları şerit', async () => {
+      resetState();
+      pushEvent(1071, 'Malazgirt', { kind:'siyasi', region:'anadolu' });
+      for(let i = 0; i < 3; i++) pushPiece('parça' + i, { kind:'technique', targetBpm:140 });
+      for(let i = 0; i < 3; i++) pushNote('not ' + i);
+      ESP.Test.pushBook('Devlet', 'Platon');
+      ESP.Memo.bitir();
+      const bek = {
+        history:{ kaynaklar:['belge-iste'], calisma:['anakronizm-tuzakları', 'tarih-yazımı-okulları'] },
+        studio:{ diksiyon:['telaffuz-kuralları', 'son-kayıtlar'], kulak:['aralıklar', 'caged', 'deşifre'] },
+        library:{ kaynaklar:['raf', 'okuma-listesi-iste'],
+          yontem:['dört-düzey', 'analitik-okumanın-dört-sorusu', 'okuma-protokolü', 'not-şablonları', 'bırakma-izni'] },
+      };
+      for(const ekran of Object.keys(bek)){
+        const sc = ESP.Screens[ekran];
+        const kok = document.createElement('div');
+        kok.innerHTML = String(await sc.render());
+        document.body.appendChild(kok);
+        try{
+          const G = window.LIFEOS.Gizle;
+          const gizli = (sc.gizliVarsayilan || []).concat(ESP.App.SADE_GIZLI[ekran] || []);
+          const kucuk = sc.kucukVarsayilan || [];
+          /* gizle.js bir anahtarı ekranın ilk bölümünde yönetir: anahtar
+             kümesi bütün ekran üzerinden kurulur, sonra bölüme ayrılır */
+          const hepsi = G.bolumler(kok);
+          kok.querySelectorAll('section.sayfabolum').forEach(pn => {
+            if(pn.id === 'bl-tezgah') return;
+            const burada = hepsi.filter(b => pn.contains(b.el)).map(b => b.anahtar);
+            const acik = burada.filter(a => gizli.indexOf(a) < 0 && kucuk.indexOf(a) < 0);
+            if(acik.length > 3) throw new Error(ekran + '/' + pn.id + ' açık ' + acik.join(','));
+          });
+          Object.keys(bek[ekran]).forEach(bl => bek[ekran][bl].forEach(a => {
+            const b = hepsi.find(x => x.anahtar === a);
+            if(!b) throw new Error(ekran + ': «' + a + '» bölümü yok');
+            expect(!!kok.querySelector('#bl-' + bl).contains(b.el)).toBe(true);
+            expect(kucuk.indexOf(a) >= 0).toBe(true);
+          }));
+        }finally{ kok.remove(); }
+      }
+      ESP.Memo.bitir();
+    });
+
+    it('Okuma: arama süzgeci açıkken liste kesilmez', async () => {
+      resetState();
+      for(let i = 0; i < 7; i++) pushNote('not ' + i);
+      ESP.S.ui.noteQuery = 'not';
+      ESP.Memo.bitir();
+      const b = await bolumle('library', 'notlar');
+      try{
+        expect(b.alan.querySelectorAll('.noterow').length).toBe(7);
+        expect(b.alan.querySelectorAll('[data-act="not-tumu"]').length).toBe(0);
+      }finally{ b.bitir(); ESP.S.ui.noteQuery = ''; ESP.Memo.bitir(); }
+    });
+  });
+})();

@@ -35,8 +35,6 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Dört düzey', hint:'reading-level',
         meta:ESP.READING_LEVELS.length + ' düzey',
-        note:'Hangi düzeyde okuduğunu bilmek, ne kadar okuduğunu bilmekten '
-           + 'daha çok şey söyler.',
         wide:true,
         body:K.Table({ tight:true,
           headers:[{ label:'#', num:true }, 'Düzey', 'Sorusu', 'Not'],
@@ -46,7 +44,6 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Analitik okumanın dört sorusu', hint:'analytic',
         meta:'kitap bitince',
-        note:'Cevaplanmayan soru, okunmamış bir bölüm kadar eksiktir.',
         wide:true,
         body:html`${map(ESP.ANALYTIC_QUESTIONS, q => html`
           <div class="toolrow">
@@ -58,7 +55,6 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Okuma protokolü', hint:'protocol',
         meta:ESP.READING_PROTOCOL.length + ' adım',
-        note:'Not yazmak için okumayı durdurmak, okumayı da notu da bozar.',
         body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Adım', 'Ne yapılır'],
           rows:ESP.READING_PROTOCOL.map(p => [String(p.step), p.label, p.do]) }),
       }),
@@ -66,7 +62,6 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Not şablonları', hint:'note-template',
         meta:ESP.NOTE_TEMPLATES.length + ' şablon',
-        note:'Şablonsuz not, sonradan ne için alındığı anlaşılmayan nottur.',
         wide:true,
         body:K.Table({ tight:true, headers:['Şablon', 'Biçim', 'Ne zaman'],
           rows:ESP.NOTE_TEMPLATES.map(t => [t.label, t.form, t.use]) }),
@@ -100,18 +95,15 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Not ekle', hint:'atomic-note',
         meta:'tek fikir, tek cümle',
-        note:'Kitap özeti değil. İki fikir taşıyan not bağlanamaz; bölerek yaz.',
         body:html`
-          ${K.Textarea({ id:'note-text', rows:3, aria:'Atomik not metni',
+          ${K.Textarea({ id:'note-text', rows:2, aria:'Atomik not metni',
             placeholder:'Özgürlük, seçenek çokluğu değil seçebilme kapasitesidir.' })}
-          <div class="row wrap mt-10">
-            ${K.Select({ id:'note-book', value:'', aria:'Notun kaynağı',
+          <div class="row gap-8 mt-10">
+            <div class="grow">${K.Select({ id:'note-book', value:'', aria:'Notun kaynağı',
               options:[{ value:'', label:'Kaynak seç (isteğe bağlı)' }]
-                .concat((S.books || []).map(b => ({ value:b.id, label:b.author + ' — ' + b.title }))) })}
+                .concat((S.books || []).map(b => ({ value:b.id, label:b.author + ' — ' + b.title }))) })}</div>
             ${K.Button({ label:'Notu ekle', tone:'primary', act:'add-note' })}
-          </div>
-          <p class="small muted mt-8">Kavram etiketleri metinden otomatik çıkarılır;
-            kanonda olmayan kelime uydurulmaz, elle ekleyebilirsin.</p>`,
+          </div>`,
       }),
     ];
 
@@ -124,6 +116,11 @@ ESP.Screens.library = (function(){
 
     const bagHtml = bagli();
     if(bagHtml) rows.push(K.Entry({ label:'Bağlı notlar', meta:'en çok bağı olan', body:raw(bagHtml) }));
+    /* iPhone Faz 2c: uzun liste kısa gelir — en yeni beş not + «Tümü».
+       Arama ya da kavram süzgeci açıkken liste kesilmez (aranan bulunur). */
+    const suzgec = !!(q || kavram);
+    const tumu = suzgec || !!S.ui.notTumu;
+    const gosterilen = tumu ? hepsi : hepsi.slice(0, NOT_ILK);
     rows.push(K.Entry({
       label:'Notlar',
       meta:hepsi.length + ' not' + (kavram ? ' · ' + (ESP.CONCEPT_BY_ID[kavram] || {}).label : ''),
@@ -131,7 +128,7 @@ ESP.Screens.library = (function(){
           placeholder:'Not ara…', change:'note-query', size:'sm', aria:'Not ara' })}
         ${when(kavram, () => K.Button({ label:'Süzgeci kaldır', size:'sm', act:'clear-concept' }))}`,
       wide:true,
-      body:html`${raw(notSuzgec(hepsi.length))}${map(hepsi, n => {
+      body:html`${raw(notSuzgec(hepsi.length))}${map(gosterilen, n => {
         const kitap = bookOf(n.bookId);
         return html`
           <div class="noterow">
@@ -156,11 +153,14 @@ ESP.Screens.library = (function(){
                 </li>`;
               })}</ul>`)}
           </div>`;
-      })}`,
+      })}
+      ${when(!suzgec && hepsi.length > NOT_ILK, () => K.Button({ size:'sm', tone:'ghost', act:'not-tumu', class:'mt-8',
+        label:S.ui.notTumu ? 'Yalnız son ' + NOT_ILK : 'Tümü · ' + hepsi.length + ' not' }))}`,
     }));
 
     return rows;
   }
+  const NOT_ILK = 5;
 
   function linkForm(n){
     const adaylar = (S.notes || []).filter(x => x.id !== n.id
@@ -209,7 +209,9 @@ ESP.Screens.library = (function(){
         label:'Sentez katsayısı', hint:'ssk',
         meta:ss.cert === 'missing' ? 'veri yok'
           : U.fmtNum(Math.round(ss.value * 100) / 100),
-        note:ss.cert === 'missing' ? (ss.why || 'Hesap için kaynak gerekir.')
+        /* Eksikken gerekçe aşağıdaki kutuda bir kez yazılır (eskiden not
+           olarak ikinci kez); hesaplanınca not, formülün kendi değerleridir. */
+        note:ss.cert === 'missing' ? null
           : ss.linked + ' bağlı not ÷ ' + ss.books + ' kaynak × log(1 + '
             + ss.authors + ' yazar)',
         body:ss.cert === 'missing'
@@ -217,17 +219,12 @@ ESP.Screens.library = (function(){
               || 'Not ve kaynak girildiğinde katsayı hesaplanmaya başlar.' })
           : html`
             ${K.Meter({ label:'Bağlanmış not oranı', value:ss.linkedRatio * 100,
-              text:ss.linked + '/' + ss.total })}
-            <p class="small muted mt-8">Formül tek yazarda sıfırlanmaz:
-              log(1 + n) kullanılır. Bir kitabı derinlemesine analiz eden
-              kullanıcı cezalandırılmaz.</p>`,
+              text:ss.linked + '/' + ss.total })}`,
       }),
 
       K.Entry({
         label:'Bağ önerileri', hint:'syntopic',
         meta:oneri.length + ' öneri',
-        note:'Sistem bağı KURMAZ, önerir. Bağın nedenini sen yazarsın; '
-           + 'sistem nedeni uyduramaz.',
         wide:true,
         body:oneri.length
           ? html`${map(oneri, o => html`
@@ -250,11 +247,8 @@ ESP.Screens.library = (function(){
       }),
 
       K.Entry({
-        label:'Kavram matrisi',
+        label:'Kavram matrisi', hint:'kavram-matrisi',
         meta:kavramSatirlari.length + ' kavram',
-        note:'Bir kavramda kaç ayrı yazar okunduğu, o kavramın ne kadar '
-           + 'sentopik çalışıldığını söyler. Tek yazar bir başlangıçtır, '
-           + 'bir eksiklik değil.',
         wide:true,
         body:kavramSatirlari.length
           ? K.Table({ tight:true,
@@ -294,9 +288,7 @@ ESP.Screens.library = (function(){
     const k = S.ui.anlatSonuc;
     const son = secili ? ESP.Anlat.son(secili.id) : null;
     return K.Entry({
-      label:'Öğrendiğini anlat', meta:'sesle ya da yazıyla',
-      note:'Kaynağı kendi sözünle anlat; notlarındaki kavramlardan hangilerinin geçtiği sayılır. '
-         + 'Anlatım notlanmaz ve metni kaydedilmez.',
+      label:'Öğrendiğini anlat', hint:'anlat', meta:'sesle ya da yazıyla',
       wide:true,
       body:!uygun.length
         ? K.Empty({ text:'Notlarında en az ' + ESP.Anlat.EN_AZ_KAVRAM + ' kavram etiketi olan bir kaynak yok. '
@@ -404,8 +396,6 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Kaynaklar', hint:'primary-text',
         meta:kitaplar.length + ' kayıt',
-        note:'Primer metin sentez katsayısına girer, yorum girmez. '
-           + 'Yoksa bir özet kitabı on filozof okumuş gibi görünürdü.',
         wide:true,
         body:kitaplar.length
           ? K.Table({ tight:true,
@@ -431,10 +421,8 @@ ESP.Screens.library = (function(){
       anlatEntry(),
 
       K.Entry({
-        label:'Okuma listesi iste', hint:'primary-text',
+        label:'Okuma listesi iste', hint:'belge',
         meta:'okuma · HKM',
-        note:'Konunun temel eserleri web kaynaklarından çıkarılır; yazar adı alıntıda doğrulanır. '
-           + 'Eserler «başlanmadı» olarak gelir. Web kapalıysa liste yazılmaz.',
         body:html`<div class="row gap-8 wrap">
           ${K.Input({ id:'belge-okuma', placeholder:'Konu: Stoacılık, bilim tarihi…', aria:'Okuma konusu',
             size:'sm', class:'grow' })}
@@ -469,8 +457,6 @@ ESP.Screens.library = (function(){
       K.Entry({
         label:'Konular', hint:'topic',
         meta:ozet.topics + ' konu · ' + ozet.items + ' madde',
-        note:'Konu listesi bir müfredattır, bir ölçüm değil. İşaretlediklerin '
-           + '«beyan» olarak durur: hiçbir kapıyı açmaz, kademeyi değiştirmez.',
         wide:true,
         body:ESP.Parts.topics('reading'),
       }),
@@ -494,6 +480,7 @@ ESP.Screens.library = (function(){
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
   const handle = {
+    async 'not-tumu'(){ S.ui.notTumu = !S.ui.notTumu; ESP.App.render(); },
     async 'anlat-olc'(){
       const kitap = document.getElementById('anlat-kitap');
       const metin = document.getElementById('anlat-metin');
@@ -628,6 +615,10 @@ ESP.Screens.library = (function(){
 
   return {
     id:'library',
+    /* iPhone Faz 2c: Kaynaklar'da raf (listenin görseli) ve okuma listesi
+       isteği, Yöntem'in beş başvuru kartı şerit — dokununca açılır. */
+    kucukVarsayilan:['raf', 'okuma-listesi-iste', 'dört-düzey', 'analitik-okumanın-dört-sorusu',
+      'okuma-protokolü', 'not-şablonları', 'bırakma-izni'],
     title:'Kütüphane',
     headline(){
       const ss = ESP.Intellect.syntopic();
