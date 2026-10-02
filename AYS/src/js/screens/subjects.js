@@ -151,14 +151,18 @@ R.Screens.subjects = (function(){
     return topics;
   }
 
+  /* Seçili dersin parçaları: künye kartı, konu zinciri, konular, kaynak
+     mimarisi. iPhone Faz 2: raf kutuları DOM sırasıyla ikişer dizer;
+     konular ders listesinin YANINDA durur, künye ve öncelik şeritleri
+     altta (render). */
   function subjectPanel(subject){
     const closure = C.subjectClosure(subject.id);
     const topics = filterTopics(subject);
     const son = sonCalisma(subject.id), eksik = eksikOnkosul(subject);
     const highCount = subject.topics.filter(t => t.freq === 'high').length;
 
-    return K.Stack([
-      K.Card({
+    return {
+      kart:K.Card({
         title:subject.name, sub:subject.questions+' soru · '+subject.weight,
         actions:html`<div class="row-sm">${raw(UI.donut(closure.pct, closure.closed+'/'+closure.total, 72))}</div>`,
         body:html`
@@ -171,8 +175,8 @@ R.Screens.subjects = (function(){
           <p class="small muted mt-10">${subject.insight}</p>`,
       }),
 
-      zincir(subject),
-      K.Card({
+      zincir:zincir(subject),
+      konular:K.Card({
         title:'Konular', hint:'source-arch', sub:'Önkoşul ve getiri sırasına göre',
         actions:K.Segmented({ items:FILTERS, value:S.ui.topicFilter || 'all', act:'topic-filter', aria:'Konu süzgeci' }),
         body:html`
@@ -193,13 +197,13 @@ R.Screens.subjects = (function(){
                 action:K.Button({ label:'Süzgeci sıfırla', size:'sm', act:'topic-reset' }) })}`,
       }),
 
-      K.Card({
+      kaynak:K.Card({
         title:'Kaynak mimarisi', sub:'Temel → orta → branş',
         body:html`<div class="ladder">${map(subject.sources, s => html`
           <div class="ladder__row"><span class="ladder__level">${s.level}</span>
             <span class="muted">${s.detail}</span></div>`)}</div>`,
       }),
-    ]);
+    };
   }
 
   /* ---------- konu formu ---------- */
@@ -281,9 +285,9 @@ R.Screens.subjects = (function(){
       if(r.staleDays != null && r.staleDays >= R.SCORING.staleDays) parts.push(r.staleDays+' gündür dokunulmadı');
       return parts.slice(0, 3).join(' · ');
     };
+    /* Skorun nasıl hesaplandığı ve «emir değil öneri» notu ⓘ'de (hints: risk). */
     return K.Card({
-      title:'Öncelik sırası', hint:'closure',
-      sub:'Frekans, kapanış, açık yanlış, gecikmiş kart ve tazelikten hesaplanır',
+      title:'Öncelik sırası', hint:'risk',
       actions:K.Button({ label:'Analiste sor', icon:'zap', size:'sm',
         act:'ask-agent', data:{ 'data-agent':'analist' } }),
       body:html`
@@ -296,9 +300,7 @@ R.Screens.subjects = (function(){
               <div class="tiny dim truncate">${r.subjectName} · ${reason(r)}</div>
             </div>
             ${K.Badge({ label:r.label, tone:r.tone })}
-          </div>`)}
-        <p class="tiny dim mt-10">Sıra bir emir değil, bir öneridir: haftanın sözleşmesi imzalıysa
-          önce onu bitir, riski gelecek haftaya taşı.</p>`,
+          </div>`)}`,
     });
   }
 
@@ -402,27 +404,31 @@ R.Screens.subjects = (function(){
       </div>` }));
   }
 
+  /* iPhone Faz 2 (2026-10-02): üç kapanış istatistiği tek küçük dönen kart.
+     Sayı kural motorundan (C.overallClosure / examClosure), hesaplandı. */
+  function DonenKapanis(){
+    const V = VT();
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const madde = (ust, k) => ({ ust, sayi:sayi({ deger:k.pct, birim:'%', kesinlik:'computed', formul:'kapanan konu ÷ konu' }),
+      cumle:'kapandı.', vurgu:k.closed + ' / ' + k.total + ' konu.', sistem:'ays' });
+    return raw(V.donen({ id:'ays-kapanis', ad:'Kapanış', maddeler:[
+      madde('Konu kapanışı', C.overallClosure()), madde('TYT', C.examClosure('TYT')), madde('AYT', C.examClosure('AYT')) ] }));
+  }
+
   async function render(){
     const sid = openId();
     const subject = R.SUBJECTS.find(s => s.id === sid);
-    const overall = C.overallClosure();
-    const tyt = C.examClosure('TYT');
-    const ayt = C.examClosure('AYT');
+    const P = subjectPanel(subject);
 
     return String(K.Grid([
-      K.Span(12, K.Cols(3, [
-        K.Stat({ label:'Toplam konu kapanışı', value:'%'+overall.pct, hint:'closure',
-          note:overall.closed+' / '+overall.total+' konu', progress:overall.pct }),
-        K.Stat({ label:'TYT kapanış', value:'%'+tyt.pct, note:tyt.closed+' / '+tyt.total, progress:tyt.pct }),
-        K.Stat({ label:'AYT kapanış', value:'%'+ayt.pct, note:ayt.closed+' / '+ayt.total,
-          progress:ayt.pct, tone:ayt.pct < 55 ? 'warn' : null }),
-      ])),
+      K.Span(12, DonenKapanis()),
       pendingCard(C.pendingSecondChecks()),
-      K.Span(3, K.Stack([
-        K.Card({ pad:'sm', title:'Dersler', sub:R.SUBJECTS.length+' ders', body:subjectNav(sid) }),
-        riskCard(),
-      ])),
-      K.Span(7, subjectPanel(subject)),
+      K.Span(3, K.Stack([ K.Card({ pad:'sm', title:'Dersler', sub:R.SUBJECTS.length+' ders', body:subjectNav(sid) }) ])),
+      K.Span(7, K.Stack([ P.konular, P.zincir ])),
+      K.Span(3, K.Stack([ riskCard() ])),
+      K.Span(7, K.Stack([ P.kart, P.kaynak ])),
       profilKarti(),
       K.Span(12, raw(UI.rail(['closure', 'second-check', 'source-arch']))),
     ]));
@@ -516,7 +522,13 @@ R.Screens.subjects = (function(){
     /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-    kucukVarsayilan:['kaynak-mimarisi'],
+    /* iPhone Faz 2: açık ders listesi ve konular; öncelik sırası ve seçili
+       dersin künyesi (soru sayısı, hedef bandı, not) şerit. */
+    get kucukVarsayilan(){
+      const G = (window.LIFEOS || {}).Gizle;
+      const s = R.SUBJECTS.find(x => x.id === openId());
+      return ['kaynak-mimarisi', 'öncelik-sırası'].concat(G && s ? [G.anahtar(s.name)] : []);
+    },
     title:'Dersler',
     subtitle(){
       const o = C.overallClosure();

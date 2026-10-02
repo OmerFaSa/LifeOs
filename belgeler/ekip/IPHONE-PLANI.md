@@ -140,6 +140,52 @@ Faz 1'de görülen, sonraki fazlara kalan:
   cümle ⓘ ya da widget'tadır — Faz 6.
 - Dolu profilde ilk açılışta üç rozet bildirimi üst üste çıkıyor — Faz 6.
 
+### Faz 2 kararları (ayrıntı)
+
+Yapılan (2a, AYS; testler `AYS/src/tests/iphone.test.js` «Faz 2»):
+
+- **AYS Dersler:** üç kapanış istatistiği → dönen «Kapanış» kartı. Açık: ders listesi ve
+  konular (yan yana — raf kutuları DOM sırasıyla ikişer dizer, `subjectPanel` parçalara
+  ayrıldı). Öncelik sırası ve seçili dersin künyesi şerit (anahtar `kucukVarsayilan`
+  getter'ında hesaplanır); Sınav profilleri gizli; «emir değil öneri» notu ⓘ'de (hints: risk).
+- **AYS Soru çöz:** «Çözüm kaydı» kartı → dönen «Çözüm» kartı (kayıt yokken oran cümle).
+  Kaynaklarım, konu başına çözüm, çözülen sorular şerit.
+- **AYS Tekrar:** Due/Borç istatistikleri kalktı (sekme rozeti + uyarı + ⓘ zaten söylüyor);
+  gelecek yük, tekrar takvimi, defter alanları gizli; «Dokun veya boşluk tuşuna bas» kalktı.
+
+Sıradaki (2b–2c; ekran görüntüleriyle incelendi, karar verildi — kodu yazılmadı):
+
+- **AYS Soru çöz** hâlâ 1 293 px: fotoğraf kutusu alçalsın; «Notun isteğe bağlı — nerede
+  takıldığını…» ve «Açılır pencere yok · Enter kaydeder» açıklamaları ⓘ'ye. **AYS Dersler**
+  1 238 px (küçük kırpma yeter).
+- **SPİ Testler** (`labs`): «Referans bandı» kartı sonuç satırlarındaki bantların tekrarı →
+  gizli. Sayfa içindeki «Sınır» uyarısı sayfa sonundaki sınır satırının tekrarı → kalkar
+  (sayfa sonu satırı KALIR, AGENTS §1.5). Sonuçlar kartındaki «Önem sırasına göre…» cümlesi
+  ⓘ'ye; kart içindeki «Test gir» sayfa başı eylemini tekrarlıyor. «Sonraki kontrol» şerit.
+- **SPİ Öğün** (`meals`): «Ev ölçüsü tanınır…» açıklaması ⓘ'ye; «Günlük hedef» şerit (ya da
+  dönen kart: kcal/protein ↔ hedef); açık: öğün ekle + günün öğünleri + sık öğünler.
+- **SPİ Mutfak** (`kitchen`, açık 6): açık pişen yemek + paylaştırma + yemeğin besin kartı;
+  Hane, Evde ne var?, Kendi gıdaların şerit; açıklama satırları ⓘ'ye.
+- **SPİ Hareket** (`move`): «Bu hafta hareket» halkaları ile «Antrenman haftası» çubukları
+  AYNI haftayı iki kez gösteriyor → Antrenman haftası gizli. Günün yük emri + bu hafta tek
+  dönen karta dönebilir (yük emri, toparlanma 73, hafta n/7). «Emri toparlanma belirler…» ve
+  «Öneri toparlanma bandından gelir…» açıklamaları ⓘ'ye.
+- **SPİ Bütçe** (`basket`): «Bütçenin yeri» (kural sırası tablosu) ve «Fiyatlar nereden
+  geliyor?» gizli; açık talep tablosu + Sedef'in notu.
+- **ESP Tarih** (`history`): açık şerit + dönemler; yüzyıl boşlukları ve dağılım şerit;
+  `note` açıklamaları ⓘ'ye (ESP Merdiven'de yapılan gibi: önce `data/hints.js`'te aynı öğreti
+  var mı bak, yoksa hint'e taşı, sonra ekrandan sil).
+- **ESP Ses** (`studio`, açık 11, 3 636 px): her parça ayrı «TEKNİK» kartı — hepsi aynı
+  başlık, yani aynı gizle anahtarı (`teknik`; `bolumler` tekrar anahtarı atar, tek tek
+  yönetilemez). Tek «Parçalar» kartında kompakt satır (ad · eşik/hedef BPM · çubuk; dokununca
+  geçmiş tablosu), ilk 5 + «Tümü». Müzik bölümünün başındaki Tezgâh şerit; Metronom ve Tekrar
+  kaydet açık (iş bunlar), açıklama satırları ⓘ'ye; Parça ekle ve Paket iste şerit.
+- **ESP Okuma** (`library`): «Not ekle»nin iki açıklama satırı ⓘ'ye; not listesi kompakt
+  satır (metin + etiketler tek satır), ilk 5 + «Tümü».
+- **Ölçünün görmediği:** araç yalnız VARSAYILAN sekmeyi ölçer (katmanlı bölümlerde öbür
+  sekmeler `display:none`). ESP Dil / Felsefe / Yazı ve AYS Ders notları / Deneme / Sınama
+  bütçede görünüyor ama öbür sekmeleri elle gezilmeli (Faz 0 elle sayımında ESP Dil 21 kart).
+
 ## 7. Bilinen riskler
 
 - Testler kartları ekranda arar: gizlemek uygulama düzeyindedir (`Gizle.uygula`), çizimi
@@ -153,4 +199,70 @@ Faz 1'de görülen, sonraki fazlara kalan:
 | — | başlangıç (araç) | c689817 | 188 · aşan 22 ekran |
 | 0 | ✅ ölçü: `acikKart`, `boyHepsi` (ölçüm), envanter.test 13 durum | 2f7df20 | 188 · aşan 22 |
 | 1 | ✅ AYS Hafta · Program · Hedef, ESP Merdiven (SPİ Hedefler zaten bütçede) | 147c177 | 180 · aşan 21 |
-| 6a | ✅ öne alındı: «Bu ekran nasıl okunur» şeridi her ekranda ⓘ kartına taşınır (`kabuk.railBilgiye`, `Gizle.uygula`'dan); terim kaybolmaz | (bu commit) | 180 · aşan 21 (boy: Hafta 1 197) |
+| 6a | ✅ öne alındı: «Bu ekran nasıl okunur» şeridi her ekranda ⓘ kartına taşınır (`kabuk.railBilgiye`, `Gizle.uygula`'dan); terim kaybolmaz | 75a889a | 180 · aşan 21 (boy: Hafta 1 197) |
+| 2a | ✅ AYS Dersler · Soru çöz · Tekrar | (bu commit) | 172 · aşan 19 (AYS 59/5 · SPİ 55/8 · ESP 58/6) |
+| 2b | ⏭ sıradaki: SPİ Testler · Öğün · Mutfak · Hareket · Bütçe (kararlar yukarıda) | — | — |
+| 2c | ⏭ ESP Tarih · Ses · Okuma; AYS Soru çöz/Dersler boy kırpması; sekmelerin elle turu | — | — |
+
+## 9. Devir notu — sıradaki oturum buradan başlar
+
+Oturum 2026-10-02'de bağlam doldu; iş yarıda değil, faz sınırında bırakıldı (her şey
+commit'li, denetimler temiz). Sıradaki iş §8'deki ilk ⏭ satırı.
+
+**Bir ekranı sadeleştirme kalıbı** (Faz 1–2'de oturdu):
+
+1. Ekranın görüntüsünü al (aşağıdaki betik) ve kartları say: iş hangisi, gerisi ne?
+2. Durum sayıları → `LIFEOS.VITRIN.donen({ id, ad, maddeler:[{ ust, sayi, cumle, vurgu,
+   sistem, dugme }] })`; sayı `LIFEOS.SAYI.html({ deger, birim, kesinlik, formul })` ile
+   (`measured / computed / estimated`; veri yoksa sayı değil cümle). Örnek:
+   `AYS/src/js/screens/plan.js` `DonenProgram`, `target.js` `DonenHedef`.
+3. Başvuru/açıklama/tekrar kartı → `app.js` `SADE_GIZLI[ekran]` (gizli); ara sıra açılan →
+   ekranın `kucukVarsayilan`'ı (şerit). Duruma göre değişiyorsa getter: `week.js`,
+   `ESP/.../ladder.js`, `subjects.js`. Anahtar `LIFEOS.Gizle.anahtar(başlık)`: Türkçe küçük
+   harf, RAKAMLAR ve gün adları atılır, aynı anahtarlı ikinci bölüm yok sayılır.
+4. Kart içindeki açıklama cümlesi → önce o ekranın `data/hints.js`'inde aynı öğreti var mı
+   bak; varsa ekrandan sil, yoksa hint'e taşı (bilgi kaybolmaz, ⓘ'de durur).
+5. Raf iki sütunu DOM sırasıyla ikişer dizer (`.card`/`.lrow` bir hücre, `kutu`/`donen` tam
+   satır): yerleşimi sıra belirler (`subjects.js` render örneği).
+6. Test: `AYS/src/tests/iphone.test.js` ya da `ESP/src/tests/iphone.test.js` kalıbı
+   (`bolumle(ekran)` → `acik / kucuk / gizli`); SPİ için `SPI/src/tests/iphone.test.js` açılır
+   ve `tests/index.html`'e eklenir. Önce test, sonra kod.
+
+**Denetim sırası** (her faz sonunda; Windows'ta `export PATH="/c/Program Files/nodejs:$PATH"`
+ve `PYTHONIOENCODING=utf-8`): değişen modülde `python build.py` → `node tools/runtests.js`;
+üç modülde `node tools/smoke.js <4179|4189|4199>`, `layoutcheck`, `a11ycheck`,
+`palettecheck`; `brand/ortak` değiştiyse `python tools/ortak.py --yay` ve üç `build.py`;
+kökte `node tools/envanter.js` (kayıp 0), `node tools/sadelik.js` (§8'e sayı),
+`build.py --denetle`, `ortak.py --denetle`. `runtests` yalnız özet basar; tek bir testin
+sonucunu görmek için `/tests/` sayfası açılıp `window.__ROTA_TESTS__` / `__SPI_TESTS__` /
+`__ESP_TESTS__` süzülür.
+
+**Ekran görüntüsü** (sistem `python sistem/baslat.py --tarayicisiz` ile açıkken; AYS 4173,
+SPİ 4183, ESP 4193; dolu örnek profil envanterden):
+
+```js
+// node ekran.js AYS week  -> AYS_week.png
+const ENV = require('<depo>/tools/envanter.js');
+const { chromium } = require('<depo>/AYS/node_modules/playwright');
+const PORT = { AYS:4173, SPI:4183, ESP:4193 };
+(async () => {
+  const [ad, rota] = process.argv.slice(2);
+  const b = await chromium.launch();
+  const p = await b.newPage({ reducedMotion:'reduce', viewport:{ width:1440, height:900 } });
+  await p.goto('http://127.0.0.1:' + PORT[ad] + '/index.html');
+  await p.waitForSelector('.site');
+  const gec = await p.$('[data-act="setup-skip"]'); if(gec) await gec.click();
+  await p.evaluate(ENV.DOLDUR_KAYNAK[ad]);
+  await p.evaluate(a => window[a.ns].App.go(a.rota), { ns:ENV.MODUL[ad].ns, rota });
+  await p.waitForTimeout(1200); await p.mouse.move(1430, 890);
+  await p.screenshot({ path:ad + '_' + rota + '.png', fullPage:true });
+  await b.close();
+})();
+```
+
+**Değişmeyenler:** Rütbe ekranlarına dokunulmaz. Hiçbir işlev silinmez (envanter kayıp 0).
+Kullanıcının kendi dosyaları commit'e girmez: `.gitignore` değişikliği, `veri/`,
+`tools/veri_*.py`, `HKM/db/`. HKM `local_token` hiçbir çıktıya yazılmaz. Commit kimliği
+kalıcı ayarlanmaz (`git -c user.name=… -c user.email=…`); bu makinede push kimlik bilgisi
+yok — `git push origin main`'i depo sahibi koşar.
+

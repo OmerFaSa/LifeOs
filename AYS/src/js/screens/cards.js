@@ -83,7 +83,6 @@ R.Screens.cards = (function(){
         text:doneToday+' / '+(doneToday+due.length) })}
 
       <div class="mt-14">${kartYuzu(card, flipped)}</div>
-      ${when(!flipped, () => html`<p class="tiny dim mt-6">Dokun veya boşluk tuşuna bas.</p>`)}
       ${raw(takvimCizgisi(card))}
 
       ${flipped
@@ -299,14 +298,9 @@ R.Screens.cards = (function(){
   }
 
   function sidebar(){
-    const debt = C.cardDebt();
-    const due = C.dueCards().length;
+    /* iPhone Faz 2: «Due» ve «Borç» sayıları kalktı — bekleyen kart sekme
+       rozetinde, borç %10'u aşınca sayfanın başındaki uyarıda, ikisi de ⓘ'de. */
     return html`<div>${K.Stack([
-      K.Cols(2, [
-        K.Stat({ label:'Due', value:due, tone:due ? null : 'ok' }),
-        K.Stat({ label:'Borç', value:'%'+debt, tone:debt > 10 ? 'warn' : 'ok',
-          progress:debt, note:'hedef ≤%10' }),
-      ]),
       /* Aciklama tek satira sigmiyordu ve yarida kesiliyordu; gun etiketi
          ustte, aciklama altinda tam metin olarak durur. */
       K.Card({ title:'Tekrar takvimi', hint:'srs', sub:'Aralıklar sabittir',

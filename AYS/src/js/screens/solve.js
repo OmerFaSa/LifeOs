@@ -69,23 +69,25 @@ R.Screens.solve = (function(){
 
   /* ---------- parçalar ---------- */
 
-  function statCard(){
+  /* iPhone Faz 2 (2026-10-02): «Çözüm kaydı» kartının dört istatistiği tek
+     küçük dönen kart. Ölçülmemiş oran sayı değil cümledir. */
+  function DonenCozum(){
+    const V = VT();
+    if(!V || !V.donen) return '';
+    const L = window.LIFEOS || {};
+    const sayi = o => L.SAYI ? L.SAYI.html(o) : U.esc(String(o.deger) + (o.birim ? ' ' + o.birim : ''));
     const s = Q.summary();
-    return K.Card({
-      title:'Çözüm kaydı', sub:'Her çözülen soru bir konuya ve bir zorluğa oturur',
-      body:html`${K.Cols(2, [
-        K.Stat({ label:'Toplam soru', value:s.toplam }),
-        K.Stat({ label:'Bugün', value:s.bugun }),
-        K.Stat({ label:'Kendi çözdüğün',
-          value:s.cozumOrani == null ? '—' : '%' + s.cozumOrani,
-          tone:s.cozumOrani == null ? 'muted' : s.cozumOrani >= 60 ? 'ok' : 'warn' }),
-        K.Stat({ label:'Ortalama zorluk',
-          value:s.ortZorluk == null ? '—' : s.ortZorluk }),
-      ])}
-      ${when(s.etiketsiz, () => html`<p class="tiny dim mt-8">
-        ${s.etiketsiz} kayıt konuya bağlanmadı — model konuyu listede bulamamış olabilir,
-        aşağıdan elle seçebilirsin.</p>`)}`,
-    });
+    const m = [
+      { ust:'Çözülen soru', sayi:sayi({ deger:s.toplam, birim:'soru', kesinlik:'measured' }), cumle:'toplam.',
+        vurgu:'Bugün ' + s.bugun + '.', sistem:'ays' },
+      s.cozumOrani == null
+        ? { ust:'Kendi çözdüğün', cumle:'Henüz kayıt yok.', vurgu:'Bir soru çözünce oran çıkar.', sistem:'ays' }
+        : { ust:'Kendi çözdüğün', sayi:sayi({ deger:s.cozumOrani, birim:'%', kesinlik:'computed', formul:'kendin çözdüğün ÷ kayıt' }),
+            cumle:'kendin.', vurgu:s.ortZorluk == null ? 'Zorluk ölçülmedi.' : 'Ortalama zorluk ' + s.ortZorluk + '.', sistem:'ays' },
+    ];
+    if(s.etiketsiz) m.push({ ust:'Konusuz kayıt', sayi:sayi({ deger:s.etiketsiz, birim:'kayıt', kesinlik:'measured' }),
+      cumle:'konuya bağlanmadı.', vurgu:'«Çözülen sorular»dan elle seç.', sistem:'ays' });
+    return raw(V.donen({ id:'ays-cozum', ad:'Çözüm', maddeler:m }));
   }
 
   /* Görsel okuyabilen bir model bağlı mı? Fotoğraf kutusu buna göre konuşur. */
@@ -563,7 +565,7 @@ R.Screens.solve = (function(){
   async function render(){
     return String(K.Grid([
       K.Span(8, K.Stack([ inputCard(), resultCard() ])),
-      K.Span(4, K.Stack([ hizliSatir(), statCard(), sourceCard(), topicCard(), historyCard() ])),
+      K.Span(4, K.Stack([ DonenCozum(), hizliSatir(), sourceCard(), topicCard(), historyCard() ])),
     ]));
   }
 
@@ -971,6 +973,9 @@ R.Screens.solve = (function(){
   return {
     id:'solve',
     sureSuphesi,
+    /* iPhone Faz 2: iş soruyu vermek ve kaydetmek; kaynaklar, konu başına
+       oran ve son kayıtlar şerit (dokununca açılır). */
+    kucukVarsayilan:['kaynaklarım', 'konu-başına-çözüm', 'çözülen-sorular'],
     title:'Soru çöz',
     subtitle(){
       const s = Q.summary();

@@ -150,4 +150,62 @@
       });
     });
   });
+
+  describe('iPhone · Faz 2 · Çalışma', () => {
+
+    it('Dersler: üç kapanış sayısı tek dönen kart; açık ders listesi ve konular', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const b = await bolumle('subjects');
+        try{
+          const d = b.kok.querySelector('.donen[aria-label="Kapanış"]');
+          expect(!!d).toBe(true);
+          const ust = Array.from(d.querySelectorAll('.donen__ust')).map(x => x.textContent.trim());
+          expect(ust.join(',')).toBe('Konu kapanışı,TYT,AYT');
+          expect(b.kok.textContent.indexOf('Toplam konu kapanışı')).toBe(-1);
+          expect(b.kucuk.indexOf('öncelik-sırası') >= 0).toBe(true);
+          const ders = R.SUBJECTS.find(x => x.id === (R.S.ui.subjectOpen || R.SUBJECTS[0].id));
+          expect(b.kucuk.indexOf(window.LIFEOS.Gizle.anahtar(ders.name)) >= 0).toBe(true);
+          expect(b.gizli.indexOf('sınav-profilleri') >= 0).toBe(true);
+          expect(b.acik.indexOf('dersler') >= 0 && b.acik.indexOf('konular') >= 0).toBe(true);
+          expect(b.acik.length <= 3).toBe(true);
+          /* «emir değil öneri» notu ekranda değil ⓘ'de */
+          expect(b.kok.textContent.indexOf('Sıra bir emir değil')).toBe(-1);
+          expect(R.HINTS.risk.more).toContain('emir değil');
+        }finally{ b.bitir(); }
+      });
+    });
+
+    it('Soru çöz: dört istatistik dönen kartta; kaynak, oran ve son kayıtlar şerit', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const solved = R.S.solved;
+        R.S.solved = [];
+        const b = await bolumle('solve');
+        try{
+          const d = b.kok.querySelector('.donen[aria-label="Çözüm"]');
+          expect(!!d).toBe(true);
+          /* kayıt yokken oran sayı değil cümle */
+          expect(d.textContent).toContain('Henüz kayıt yok.');
+          expect(b.var.indexOf('çözüm-kaydı')).toBe(-1);
+          ['kaynaklarım', 'çözülen-sorular'].forEach(a => expect(b.kucuk.indexOf(a) >= 0).toBe(true));
+          expect(b.acik.length <= 3).toBe(true);
+        }finally{ b.bitir(); R.S.solved = solved; }
+      });
+    });
+
+    it('Tekrar: «Due/Borç» tekrarı yok; gelecek yük, takvim ve defter alanları gizli', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const b = await bolumle('cards');
+        try{
+          const etiketler = Array.from(b.kok.querySelectorAll('.stat__label')).map(x => x.textContent.trim());
+          expect(etiketler.indexOf('Due')).toBe(-1);
+          expect(etiketler.indexOf('Borç')).toBe(-1);
+          ['tekrar-takvimi', 'defter-alanları'].forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
+          expect(R.App.SADE_GIZLI.cards.indexOf('gelecek-yük') >= 0).toBe(true);
+        }finally{ b.bitir(); }
+      });
+    });
+  });
 })();
