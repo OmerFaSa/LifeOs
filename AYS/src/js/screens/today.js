@@ -1188,6 +1188,71 @@ R.Screens.today = (function(){
       ayak:vadeli ? c.Button({ label:'Tekrara git', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'cards' } }) : null });
   }
 
+  /* DÖNEN DURUM (kullanıcı, 2026-10-02: «çok daha az yer kaplayan, modern
+     ve minimal küçük widget'lar»). Durum'un dört kartı (sayaç, son deneme,
+     tekrar borcu, özet) Bugün'de TEK küçük dönen karttır; kartların kendisi
+     Ayrıntı'nın başında durur, hiçbiri kalkmadı. Maddeyi ve sayıyı kural
+     motoru verir; sayı kesinlik işaretini taşır (SAYI); eksik veri sayı
+     değil cümledir. */
+  function DonenKutu(day, dateISO){
+    const V = VT();
+    if(!V || !V.donen) return '';
+    const L = VL();
+    const sayi = s => L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger == null ? '—' : s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const git = (label, route) => ({ label, act:'go', data:{ 'data-route':route } });
+    const m = [];
+
+    if(!day.ara){
+      const p = Number(day.paragraphActual) || 0, q = Number(day.problemActual) || 0;
+      const hedef = (Number(day.paragraphTarget) || 0) + (Number(day.problemTarget) || 0);
+      /* 0 «girilmedi»dir, ölçüm değil (HATALAR O-5). Plan dışı soru
+         (Telegram «soru 40», derssiz giriş) burada görünmezse kayıt
+         kaybolmuş sanılır. */
+      const serbest = Number(day.freeQ) || 0;
+      const dogru = day.freeCorrect == null ? null : Number(day.freeCorrect);
+      const planDisi = serbest > 0 ? 'Plan dışı: ' + serbest + ' soru' + (dogru ? ' · ' + dogru + ' doğru' : '') : '';
+      m.push(p + q > 0
+        ? { ust:'Günlük sayaç', sayi:sayi({ deger:p + q, birim:'soru', kesinlik:'measured' }), cumle:'çözüldü.',
+            vurgu:planDisi || (hedef ? 'Hedef ' + hedef + '.' : ''), sistem:'ays', dugme:git('Sayaçlar', 'gun') }
+        : { ust:'Günlük sayaç', cumle:'Bugün sayaç boş.', vurgu:planDisi || 'Paragraf ve problem girilmedi.', sistem:'ays', dugme:git('Sayaçlar', 'gun') });
+    }
+
+    const tyt = (S.exams || []).filter(e => e.family === 'TYT' && e.kind === 'full')
+      .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+    if(tyt.length){
+      const net = Math.round(M.examNet(tyt[tyt.length - 1]) * 100) / 100;
+      const once = tyt.length > 1 ? M.examNet(tyt[tyt.length - 2]) : null;
+      const fark = once == null ? null : Math.round((net - once) * 100) / 100;
+      m.push({ ust:'Son deneme', sayi:sayi({ deger:net, birim:'net', ondalik:2, kesinlik:'computed', formul:'doğru − yanlış ÷ 4' }),
+        cumle:'', vurgu:fark == null ? 'İlk tam deneme.' : (fark > 0 ? '+' : '') + U.fmtNet(fark) + ' öncekinden.',
+        sistem:'ays', dugme:git('Denemeler', 'exams') });
+    }else{
+      m.push({ ust:'Son deneme', cumle:'Henüz tam deneme yok.', vurgu:'Net ilk denemeyle çıkar.', sistem:'ays', dugme:git('Denemeler', 'exams') });
+    }
+
+    const vadeli = C.dueCards().length;
+    if((S.cards || []).length){
+      const borc = C.cardDebt();
+      m.push({ ust:'Tekrar borcu', sayi:sayi({ deger:borc, birim:'%', kesinlik:'computed', formul:'geciken kart ÷ vadeli kart' }),
+        cumle:'tekrar borcu.', vurgu:borc > 10 ? 'Eşiğin üstünde.' : 'Eşik %10.', sistem:'ays',
+        dugme:vadeli ? git('Tekrara git', 'cards') : null });
+    }else{
+      m.push({ ust:'Tekrar borcu', cumle:'Tekrar kartı yok.', vurgu:'Borç ilk kartla ölçülür.', sistem:'ays' });
+    }
+
+    const z = ozetSayilari(day, dateISO);
+    m.push({ ust:'Sınav', sayi:sayi(z.kalan), cumle:'kaldı.', vurgu:z.kalan.kesinlik === 'estimated' ? 'TYT, tahmini tarih.' : 'TYT.',
+      sistem:'ays', dugme:git('Plana bak', 'plan') });
+    const seri = C.behaviorStreak();
+    m.push({ ust:'Seri', sayi:sayi(z.seri), cumle:'seri.', vurgu:seri.streak ? 'Minimum gün tutuldu.' : 'Minimum gün başlatır.', sistem:'ays' });
+
+    /* İki küçük widget yan yana (iOS gibi): «Bugün» günün kendisi, «Gidişat»
+       haftaların toplamı. Her biri kendi başına döner. */
+    const bugunAd = ['Günlük sayaç', 'Seri'];
+    return raw(V.donen({ id:'ays-bugun', ad:'Bugün', maddeler:m.filter(x => bugunAd.indexOf(x.ust) >= 0) })
+      + V.donen({ id:'ays-gidisat', ad:'Gidişat', maddeler:m.filter(x => bugunAd.indexOf(x.ust) < 0) }));
+  }
+
   /* 04 SAYFA BAŞI CÜMLESİ (belgeler/ekip/EKIP-PLANI Ek A) — günün durumu TEK cümle,
      KODDAN: bloklar, sıradaki iş ve (eşik aşıldıysa) tekrar borcu. Dil
      modeli hiç çağrılmaz; model kapalıyken de aynı cümle çıkar. Kural
@@ -1263,13 +1328,7 @@ R.Screens.today = (function(){
           ${when(R.Signals && R.Signals.current(), () => SignalCard())}
         </section>
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
-          ${SayacKutusu(day, dateISO)}
-          ${SonDenemeKutusu()}
-          ${TekrarBorcuKutusu()}
-          ${/* Özet sağ sütunda tek başına küçük bir kutuydu ve sayfanın
-               yarısı boş kalıyordu (kullanıcı, 2026-10-01): Durum'un ikili
-               rafında tekrar borcunun eşi. */''}
-          ${OzetKutusu(day, dateISO)}
+          ${DonenKutu(day, dateISO)}
           <div class="bugun__genis">${AkisKutusu(day)}</div>
           ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
         </section>
@@ -1295,6 +1354,9 @@ R.Screens.today = (function(){
 
     return c.Grid(html`
       ${when(banners.length, () => c.Span(12, html`<div class="stack-sm">${banners}</div>`))}
+      ${/* Bugün'deki dönen kartın açık hâli: dört Durum kartı burada. */''}
+      ${c.Span(12, html`<section class="bugun__alan" aria-label="Durum">
+        ${SayacKutusu(day, dateISO)}${SonDenemeKutusu()}${TekrarBorcuKutusu()}${OzetKutusu(day, dateISO)}</section>`)}
       ${c.Span(12, HkmSerit())}
       ${when(gunUcuHtml(day, true), () => c.Span(12, raw(gunUcuHtml(day, true))))}
 
@@ -1726,11 +1788,9 @@ R.Screens.today = (function(){
     cumle:bugunCumlesi,
     ozetSayilari,
     sureMetni,
-    actions(){
-      return String(html`
-        ${c.Button({ label:'Özeti paylaş', icon:'upload', size:'sm', act:'share-week' })}
-        ${c.Button({ label:'Deneme ekle', icon:'exam', size:'sm', act:'go', data:{ 'data-route':'exams' } })}`);
-    },
+    /* Sayfa başı sade (kullanıcı, 2026-10-02: «özeti paylaş, deneme ekle
+       oradan kalksın»): ikisi Bugün › Ayrıntı'nın başında durur. */
+    actions(){ return ''; },
     render, afterRender, handle, change,
     /* Bugün › Ayrıntı: aynı işleyiciler, aynı sayaç; ayrı bir çizim. */
     ayrinti:{
@@ -1741,7 +1801,11 @@ R.Screens.today = (function(){
       kucukVarsayilan:['hafta-bağlamı', 'bugünün-ödülü'],
       title:'Günün ayrıntısı',
       subtitle(){ return 'Bloklar, sayaçlar ve günün bütün kartları'; },
-      actions(){ return ''; },
+      actions(){
+        return String(html`
+          ${c.Button({ label:'Özeti paylaş', icon:'upload', size:'sm', act:'share-week' })}
+          ${c.Button({ label:'Deneme ekle', icon:'exam', size:'sm', act:'go', data:{ 'data-route':'exams' } })}`);
+      },
       render:renderAyrinti, afterRender, handle, change,
     },
   };

@@ -999,3 +999,47 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
   html.kenar-dar .site--v5 .bolumcubugu--kabuk{ display:inline-flex; background:color-mix(in oklab, var(--text) 7%, var(--bg)); }
 }
 
+/* ================================================================
+   DÖNEN WIDGET (2026-10-02): Bugün'ün Durum alanı tek küçük kart; her
+   madde tek cümle + en çok bir düğme; 3 sn'de bir yumuşakça geçer
+   (brand/ortak/vitrin.js · donen). Yükseklik sabit: dönerken sayfa
+   oynamaz.
+   ================================================================ */
+.donen{ position:relative; background:var(--surface); border-radius:var(--r); padding:14px 18px 10px;
+  height:132px; box-sizing:border-box; overflow:hidden; }
+.donen__sahne{ position:relative; height:82px; }
+.donen__madde{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-start;
+  opacity:0; transform:translateY(10px); pointer-events:none; visibility:hidden;
+  transition:opacity .5s var(--ease), transform .5s var(--ease), visibility 0s linear .5s; }
+.donen__madde.is-on{ opacity:1; transform:none; pointer-events:auto; visibility:visible;
+  transition:opacity .5s var(--ease), transform .5s var(--ease), visibility 0s; }
+.donen__madde.is-cikis{ opacity:0; transform:translateY(-10px); visibility:visible; }
+.donen__bas{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; min-height:24px; }
+.donen__ust{ margin:0; font-size:12.5px; font-weight:500; color:var(--text-3); }
+/* iOS widget'ı gibi: üstte büyük sayı ve kısa söz, altında tek satır gri
+   ayrıntı. İkisi de tek satır; sığmayan üç noktayla biter, taşmaz. */
+.donen__cumle{ margin:0; font-size:22px; line-height:1.2; font-weight:600; letter-spacing:-.02em; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.donen__cumle em{ display:block; margin-top:3px; font-style:normal; font-size:13px; line-height:1.35; font-weight:500;
+  letter-spacing:0; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.donen__sayi .sayi{ font-size:inherit; }
+.donen__dugme{ flex:none; min-height:24px; padding:0 4px; border:0; border-radius:8px; background:none; cursor:pointer;
+  font:inherit; font-size:12.5px; font-weight:500; color:var(--text-2); transition:color var(--dur) var(--ease), background var(--dur) var(--ease); }
+.donen__dugme:hover{ color:var(--text); background:var(--surface-2); }
+.donen__alt{ position:absolute; left:18px; right:10px; bottom:8px; display:flex; align-items:center; height:24px; }
+.donen__noktalar{ display:flex; align-items:center; gap:8px; }
+.donen__nokta{ position:relative; display:block; width:6px; height:6px; padding:0; border:0; border-radius:3px; cursor:pointer;
+  background:var(--border-strong); transition:width var(--dur-lg) var(--ease), background var(--dur-lg) var(--ease); }
+.donen__nokta::after{ content:''; position:absolute; left:50%; top:50%; width:16px; height:16px; transform:translate(-50%,-50%); }
+.donen__nokta.is-on{ width:18px; background:var(--text); }
+.donen__nokta.is-on[data-sistem="ays"]{ background:var(--ays); }
+.donen__nokta.is-on[data-sistem="spi"]{ background:var(--spi); }
+.donen__nokta.is-on[data-sistem="esp"]{ background:var(--esp); }
+.donen__nokta.is-on[data-sistem="mer"]{ background:var(--mer); }
+.donen__dur{ margin-left:auto; width:24px; height:24px; padding:0; border:0; border-radius:50%; background:none;
+  display:grid; place-items:center; color:var(--text-3); cursor:pointer; opacity:0; transition:opacity var(--dur) var(--ease); }
+.donen:hover .donen__dur, .donen:focus-within .donen__dur, .donen.is-dur .donen__dur{ opacity:1; }
+.donen__dur svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.donen.is-dur .donen__dur svg path{ d:path("M8 6l10 6-10 6z"); }
+@media (prefers-reduced-motion:reduce){ .donen__madde, .donen__nokta{ transition:none; } .donen__dur{ display:none; } }
+

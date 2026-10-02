@@ -811,4 +811,71 @@ describe('Son parti · 020 125 134 136 143 157 161 122 180', () => {
   });
 });
 
+/* Dönen widget (kullanıcı, 2026-10-02): Bugün'ün Durum alanı tek küçük
+   kart; 3 sn'de bir sonraki madde. Durunca durur, görünmeyen madde inert. */
+describe('Dönen widget', () => {
+  const MAD = [
+    { ust:'Sayaç', sayi:'<span class="sayi">31</span>', cumle:'soru bugün', vurgu:'hedef 36', sistem:'ays',
+      dugme:{ label:'Sayaçlar', act:'go', data:{ 'data-route':'gun' } } },
+    { ust:'Deneme', cumle:'Henüz tam deneme yok.', sistem:'ays' },
+    { ust:'Tekrar', cumle:'Tekrar kartı yok.' },
+  ];
+  it('tek kart; her madde tek cümle, görünen yalnız biri, ötekiler inert', () => {
+    icinde(V().donen({ id:'t-donen-1', ad:'Durum', maddeler:MAD }), k => {
+      const d = k.querySelector('.donen');
+      expect(d.getAttribute('aria-label')).toBe('Durum');
+      const m = d.querySelectorAll('[data-donen-madde]');
+      expect(m.length).toBe(3);
+      expect(m[0].classList.contains('is-on')).toBe(true);
+      expect(m[0].hasAttribute('inert')).toBe(false);
+      expect(m[1].hasAttribute('inert')).toBe(true);
+      expect(m[0].querySelector('em').textContent).toBe('hedef 36');
+      expect(m[0].querySelector('[data-act="go"]').getAttribute('data-route')).toBe('gun');
+      expect(d.querySelectorAll('[data-donen-git]').length).toBe(3);
+    });
+  });
+  it('3 saniye geçince sonraki maddeye geçer; yeniden çizimde kaldığı yerden sürer', () => {
+    icinde(V().donen({ id:'t-donen-2', maddeler:MAD }), k => {
+      const d = k.querySelector('.donen');
+      const t = Date.now() + 60000, h = { azHareket:false };
+      d.dataset.son = String(t);   /* sayfanın kendi saatinden bağımsız başlangıç */
+      V().donenAdim(t + V().DONEN_ARA - 10, h);
+      expect(d.querySelector('.is-on[data-donen-madde]').getAttribute('data-donen-madde')).toBe('0');
+      V().donenAdim(t + V().DONEN_ARA + 10, h);
+      expect(d.querySelector('.is-on[data-donen-madde]').getAttribute('data-donen-madde')).toBe('1');
+      expect(d.querySelector('[data-donen-madde="0"]').hasAttribute('inert')).toBe(true);
+      expect(d.querySelector('.donen__nokta.is-on').getAttribute('data-donen-git')).toBe('1');
+    });
+    icinde(V().donen({ id:'t-donen-2', maddeler:MAD }), k => {
+      expect(k.querySelector('.is-on[data-donen-madde]').getAttribute('data-donen-madde')).toBe('1');
+    });
+  });
+  it('durdurulan kart dönmez; noktaya basmak o maddeye götürür', () => {
+    icinde(V().donen({ id:'t-donen-3', maddeler:MAD }), k => {
+      const d = k.querySelector('.donen');
+      const dur = d.querySelector('[data-donen-dur]');
+      dur.dispatchEvent(new MouseEvent('click', { bubbles:true }));
+      expect(dur.getAttribute('aria-pressed')).toBe('true');
+      const t = Date.now() + 60000, h = { azHareket:false };
+      V().donenAdim(t, h); V().donenAdim(t + 10 * V().DONEN_ARA, h);
+      expect(d.querySelector('.is-on[data-donen-madde]').getAttribute('data-donen-madde')).toBe('0');
+      d.querySelector('[data-donen-git="2"]').dispatchEvent(new MouseEvent('click', { bubbles:true }));
+      expect(d.querySelector('.is-on[data-donen-madde]').getAttribute('data-donen-madde')).toBe('2');
+    });
+  });
+  it('hareketi azaltma tercihinde kendiliğinden dönmez', () => {
+    icinde(V().donen({ id:'t-donen-5', maddeler:MAD }), k => {
+      const t = Date.now() + 60000, az = { azHareket:true };
+      V().donenAdim(t, az); V().donenAdim(t + 10 * V().DONEN_ARA, az);
+      expect(k.querySelector('.is-on[data-donen-madde]').getAttribute('data-donen-madde')).toBe('0');
+    });
+  });
+  it('tek maddede nokta ve durdurma yok; maddesiz kart çizilmez', () => {
+    icinde(V().donen({ id:'t-donen-4', maddeler:[MAD[1]] }), k => {
+      expect(k.querySelector('.donen__alt')).toBeNull();
+    });
+    expect(V().donen({ maddeler:[] })).toBe('');
+  });
+});
+
 })();

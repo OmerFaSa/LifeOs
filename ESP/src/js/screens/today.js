@@ -803,6 +803,42 @@ ESP.Screens.today = (function(){
     return ic ? K.Kutu({ ad:'Günün dakikası', yuva:'ölçüt ' + hedef + ' dk', class:'vkutu', govde:raw(ic) }) : '';
   }
 
+  /* DÖNEN DURUM (kullanıcı, 2026-10-02: «çok daha az yer kaplayan küçük
+     widget'lar»). «Bekleyen iş» ve «Günün dakikası» kartları Bugün'de iki
+     küçük dönen karttır: «Bugün» (dakika, seri) ve «Çalışma» (vadeli kart,
+     açık disiplin). Kartların kendisi Ayrıntı'nın başındadır. Dokunulmamış
+     gün «—» değil cümledir. */
+  function DonenKutular(){
+    const V = (window.LIFEOS || {}).VITRIN;
+    if(!V || !V.donen) return '';
+    const SAYI = (window.LIFEOS || {}).SAYI;
+    const sayi = s => SAYI ? SAYI.html(s) : U.esc(String(s.deger == null ? '—' : s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const git = (label, route) => ({ label, act:'go', data:{ 'data-route':route } });
+    const rows = M.sessionsOf(gun());
+    const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
+    const hedef = ESP.GunSure ? ESP.GunSure.taban(gun()).dakika : ((S.profile && S.profile.dailyMinutes) || null);
+
+    const bugun = [];
+    bugun.push(rows.length
+      ? { ust:'Günün dakikası', sayi:sayi({ deger:toplam, birim:'dk', kesinlik:'measured' }), cumle:'çalışıldı.',
+          vurgu:rows.length + ' oturum' + (hedef ? ' · ölçüt ' + hedef + ' dk' : '') + '.', sistem:'esp', dugme:git('Oturumlar', 'gun') }
+      : { ust:'Günün dakikası', cumle:'Bugün oturum yok.', vurgu:hedef ? 'Ölçüt ' + hedef + ' dk.' : 'İlk oturumla başlar.', sistem:'esp', dugme:git('Oturum gir', 'gun') });
+    const seri = M.streak();
+    bugun.push({ ust:'Seri', sayi:sayi({ deger:seri, birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
+      cumle:'seri.', vurgu:'Asgari gün seriyi sürdürür.', sistem:'esp' });
+
+    const calisma = [];
+    const d = ESP.SRS.deckStatus();
+    calisma.push(d.due
+      ? { ust:'Tekrar', sayi:sayi({ deger:d.due, birim:'kart', kesinlik:'computed', formul:'vadesi bugün ya da geçmiş kart' }),
+          cumle:'bekliyor.', vurgu:'Vadeli kelime kartları.', sistem:'esp', dugme:git('Çalış', 'lang') }
+      : { ust:'Tekrar', cumle:'Vadeli kart yok.', vurgu:'Deste bugün temiz.', sistem:'esp' });
+    calisma.push({ ust:'Disiplinler', sayi:sayi({ deger:ESP.Mod.active().length, kesinlik:'measured' }), cumle:'açık disiplin.',
+      vurgu:'Çalışma çekmecesinde.', sistem:'esp' });
+
+    return raw(V.donen({ id:'esp-bugun', ad:'Bugün', maddeler:bugun }) + V.donen({ id:'esp-calisma', ad:'Çalışma', maddeler:calisma }));
+  }
+
   function render(){
     const O = ESP.Screens.onaylar;
     const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
@@ -818,7 +854,7 @@ ESP.Screens.today = (function(){
         </section>
       </div>
       <div class="bugun__sag">
-        <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>${OzetKutusu()}${DakikaKutusu()}${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}</section>
+        <section class="bugun__alan" aria-label="Özet"><h2 class="bugun__etiket" aria-hidden="true">Özet</h2>${DonenKutular()}${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}</section>
         ${when(oneri, () => html`<section class="bugun__alan" aria-label="Öneri"><h2 class="bugun__etiket" aria-hidden="true">Öneri</h2>${oneri}</section>`)}
       </div>
     </div>`;
@@ -832,7 +868,9 @@ ESP.Screens.today = (function(){
   function renderAyrinti(){
     const guvenli = f => { try{ return K.Ledger(() => [].concat(f()).filter(Boolean)); }
       catch(e){ console.error(e); return K.Notice({ tone:'warn', body:'Bu bölüm şu an çizilemedi; kayıtların yerinde duruyor.' }); } };
-    return K.Grid(html`${K.Span(12, K.SayfaBolumleri({ act:'day-tab', aria:'Günün bölümleri', bolumler:[
+    /* Bugün'deki dönen kartların açık hâli: iki kart burada. */
+    return K.Grid(html`${K.Span(12, html`<section class="bugun__alan" aria-label="Özet">${OzetKutusu()}${DakikaKutusu()}</section>`)}
+      ${K.Span(12, K.SayfaBolumleri({ act:'day-tab', aria:'Günün bölümleri', bolumler:[
       { id:'giris', ad:'Giriş', sayi:M.sessionsOf(gun()).length || null, govde:guvenli(() => [yedekRow(), hkmSeritRow(),
         seriRow(), dunkuRow(), planRow(), reminderRow(), entryForm()]) },
       { id:'ozet', ad:'Özet', govde:guvenli(summaryRows) },

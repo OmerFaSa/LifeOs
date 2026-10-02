@@ -102,9 +102,10 @@
       expect(k.querySelector('[data-oz="105"] .u b').textContent).toBe('2 kart');
     });
 
-    it('oz-091 Bugün: dakika halkası; dokunulmamış disiplin «—»', async () => {
+    /* 2026-10-02: halka Bugün'de küçük dönen kartın açık hâlidir; Ayrıntı'da durur. */
+    it('oz-091 Bugün › Ayrıntı: dakika halkası; dokunulmamış disiplin «—»', async () => {
       ESP.Test.resetState();
-      const k = dom2(await ESP.Screens.today.render());
+      const k = dom2(await ESP.Screens.gun.render());
       const h = k.querySelector('[data-oz="091"]');
       expect(h).toBeTruthy();
       expect(h.textContent).toContain('—');

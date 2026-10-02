@@ -49,7 +49,7 @@
     it('oz-015 oz-026 Bugün «Son ölçümler» eski ölçümün yaşını yazar; ölçülmemiş «—»', async () => {
       resetState();
       pushVitals(SP.U.iso(SP.U.addDays(SP.U.parse(SP.U.todayISO()), -12)), { weight:71.4 });
-      const k = dom(await SP.Screens.today.render());
+      const k = dom(await SP.Screens.gun.render());
       const kutu = Array.from(k.querySelectorAll('.kutu')).find(x => (x.querySelector('.kutu__ad') || {}).textContent === 'Son ölçümler');
       expect(kutu).toBeTruthy();
       expect(kutu.querySelector('[data-oz~="026"]')).toBeTruthy();
@@ -65,12 +65,12 @@
       const ad = k => Array.from(k.querySelectorAll('.kutu')).find(x => (x.querySelector('.kutu__ad') || {}).textContent === 'Son ölçümler');
       pushVitals(SP.U.iso(SP.U.addDays(SP.U.parse(bugun), -3)), { weight:71.4 });
       pushVitals(bugun, { sleep:7, rhr:56, hrv:55 });
-      let kutu = ad(dom(await SP.Screens.today.render()));
+      let kutu = ad(dom(await SP.Screens.gun.render()));
       expect(kutu).toBeTruthy();
       const satir = Array.from(kutu.querySelectorAll('.sonolcum__ad')).map(x => x.textContent.trim());
       expect(satir.join(',')).toBe('Kilo');
       pushVitals(bugun, { sleep:7, rhr:56, hrv:55, weight:71.4 });
-      expect(ad(dom(await SP.Screens.today.render()))).toBeFalsy();
+      expect(ad(dom(await SP.Screens.gun.render()))).toBeFalsy();
     });
 
     it('oz-018 tartıda 714 yazılınca kaydetmeden sorar; seçilen değer kaydedilir', async () => {
@@ -126,7 +126,7 @@
       await withTodayAsync('2026-10-12', async () => {
         resetState();
         for(let i = -6; i <= 0; i++) pushVitals(gun(i), { sleep:7, weight:71 + (i % 2) * 0.4 });
-        const k = dom(await SP.Screens.today.render());
+        const k = dom(await SP.Screens.gun.render());
         expect(k.querySelector('[data-oz="068"] text')).toBeTruthy();
         expect(k.querySelector('[data-oz="088"]').textContent).toContain('kurulmadı');
       });

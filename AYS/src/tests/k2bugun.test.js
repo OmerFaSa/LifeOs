@@ -137,10 +137,9 @@
         const exams = R.S.exams, cards = R.S.cards;
         try{
           R.S.exams = []; R.S.cards = [];
-          const k = dom(await R.Screens.today.render());
+          const k = dom(await R.Screens.gun.render());
           const adlar = Array.from(k.querySelectorAll('.bugun__alan[aria-label="Durum"] .kutu__ad')).map(adMetni);
           expect(adlar.slice(0, 3).join(',')).toBe('Günlük sayaç,Son deneme,Tekrar borcu');
-          expect(adlar).toContain('Günün akışı');
           expect(durumKart(k, 'Son deneme').querySelector('.kutu__yuva').textContent.trim()).toBe('veri yok');
           const borc = durumKart(k, 'Tekrar borcu');
           expect(borc.querySelector('.kutu__yuva').textContent.trim()).toBe('veri yok');
@@ -160,7 +159,7 @@
         const e = (id, date, correct, wrong) => ({ id, family:'TYT', kind:'full', date, tests:[{ correct, wrong }] });
         try{
           R.S.exams = [e('d1', '2026-10-01', 80, 8), e('d2', '2026-10-08', 84, 6)];
-          const son = durumKart(dom(await R.Screens.today.render()), 'Son deneme');
+          const son = durumKart(dom(await R.Screens.gun.render()), 'Son deneme');
           expect(son.querySelector('.kutu__yuva').textContent.trim()).toBe('hesaplandı');
           const sayi = son.querySelector('[data-oz~="024"]');
           expect(sayi.textContent).toContain('82,5');
@@ -178,7 +177,7 @@
         const cards = R.S.cards;
         try{
           R.S.cards = [{ id:'k1', dueAt:'2026-10-01' }, { id:'k2', dueAt:'2026-10-12' }];
-          const k = dom(await R.Screens.today.render());
+          const k = dom(await R.Screens.gun.render());
           const borc = durumKart(k, 'Tekrar borcu');
           expect(borc.querySelector('[data-oz="029"]')).toBeTruthy();
           expect(borc.querySelector('.kutu__yuva').textContent.trim()).toBe('hesaplandı');
@@ -186,6 +185,33 @@
             expect(durumKart(k, 'Günlük sayaç').querySelector('[data-oz="030"]')).toBeTruthy();
           }
         }finally{ R.S.cards = cards; }
+      });
+    });
+
+    /* Dönen Durum (2026-10-02): Bugün'de dört büyük kart yerine tek küçük
+       dönen kart; maddeler kural motorundan, eksik veri cümle. */
+    it('sadelik: Bugün Durum tek dönen kart; dört kart Ayrıntı\u2019da; eksik veri sıfır değil cümle', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const exams = R.S.exams, cards = R.S.cards;
+        try{
+          R.S.exams = []; R.S.cards = [];
+          const k = dom(await R.Screens.today.render());
+          const durum = k.querySelector('.bugun__alan[aria-label="Durum"]');
+          /* iki küçük widget: Bugün (sayaç, seri) ve Gidişat (deneme, borç, sınav) */
+          expect(Array.from(durum.querySelectorAll('.donen')).map(d => d.getAttribute('aria-label')).join(',')).toBe('Bugün,Gidişat');
+          expect(durum.querySelectorAll('.kutu .ozet, .durumkart').length).toBe(0);
+          const ust = Array.from(durum.querySelectorAll('.donen__ust')).map(x => x.textContent.trim());
+          expect(ust.indexOf('Son deneme') >= 0 && ust.indexOf('Tekrar borcu') >= 0 && ust.indexOf('Sınav') >= 0).toBe(true);
+          const metin = durum.textContent;
+          expect(metin).toContain('Henüz tam deneme yok.');
+          expect(metin).toContain('Tekrar kartı yok.');
+          /* Görünmeyen madde odak almaz. */
+          expect(durum.querySelectorAll('.donen__madde:not([inert])').length).toBe(2);
+          const a = dom(await R.Screens.gun.render());
+          const adlar = Array.from(a.querySelectorAll('.bugun__alan[aria-label="Durum"] .kutu__ad')).map(adMetni);
+          expect(adlar.slice(0, 3).join(',')).toBe('Günlük sayaç,Son deneme,Tekrar borcu');
+        }finally{ R.S.exams = exams; R.S.cards = cards; }
       });
     });
 
@@ -243,13 +269,13 @@
     it('sadelik: Özet yalnız Durum\'da olmayan sayıları taşır; alan adı kutu adıyla iki kez görünmez', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
-        const k = dom(await R.Screens.today.render());
+        const k = dom(await R.Screens.gun.render());
         const adlar = Array.from(k.querySelectorAll('.ozet__ad')).map(x => x.textContent.trim());
         expect(adlar.join(',')).toBe('Sınava kalan,Seri');
         /* Özet ayrı bir sağ sütun değil: Durum'un kutularından biri. */
         expect(k.querySelector('.bugun__alan[aria-label="Özet"]')).toBeNull();
         expect(k.querySelector('.bugun__alan[aria-label="Durum"] .ozet')).toBeTruthy();
-        expect(k.querySelector('.bugun__sag')).toBeNull();
+        expect(dom(await R.Screens.today.render()).querySelector('.bugun__sag')).toBeNull();
       });
     });
 
@@ -257,7 +283,7 @@
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
         R.S.profile.examTytISO = null;
-        let k = dom(await R.Screens.today.render());
+        let k = dom(await R.Screens.gun.render());
         const ozet = k.querySelector('.ozet');
         const sayilar = ozet.querySelectorAll('.sayi');
         expect(sayilar).toHaveLength(2);
@@ -270,7 +296,7 @@
         /* Kutunun başındaki glif en zayıf sayınınki. */
         expect(ozet.closest('.kutu').querySelector('.kutu__yuva .kesinlik--estimated')).toBeTruthy();
         R.S.profile.examTytISO = '2027-06-20';
-        k = dom(await R.Screens.today.render());
+        k = dom(await R.Screens.gun.render());
         expect(k.querySelector('.ozet .sayi').getAttribute('data-kesinlik')).toBe('computed');
         R.S.profile.examTytISO = null;
       });

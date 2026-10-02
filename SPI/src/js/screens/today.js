@@ -941,6 +941,51 @@ SP.Screens.today = (function(){
       govde:html`${map(m.rows, P.minRow)}` });
   }
 
+  /* DÖNEN DURUM (kullanıcı, 2026-10-02: «çok daha az yer kaplayan küçük
+     widget'lar»). Durum'un büyük kartları Bugün'de iki küçük dönen karttır:
+     «Bugün» (sıradaki hamle, asgari gün, seri) ve «Sağlık» (toparlanma,
+     beslenme). Kartların kendisi Ayrıntı'nın başındadır, hiçbiri kalkmadı.
+     Madde ve sayıyı kural motoru verir; eksik veri sayı değil cümledir. */
+  function DonenKutular(){
+    const V = VT();
+    if(!V || !V.donen) return '';
+    const SAYI = (window.LIFEOS || {}).SAYI;
+    const sayi = s => SAYI ? SAYI.html(s) : U.esc(String(s.deger == null ? '—' : s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const git = (label, route) => ({ label, act:'go', data:{ 'data-route':route } });
+
+    const gun = [];
+    const n = SP.Calc.nextAction();
+    if(!n.calm && n.title){
+      gun.push({ ust:'Sıradaki', cumle:n.title + '.', vurgu:n.action || n.why || '', sistem:'spi',
+        dugme:n.route && n.route !== 'today' ? git('Aç', n.route) : null });
+    }
+    const m = SP.Calc.minimumDay();
+    const kalan = m.rows.filter(x => !x.ok).map(x => x.label.toLocaleLowerCase('tr-TR'));
+    gun.push({ ust:'Asgari gün', sayi:sayi({ deger:m.done + '/' + m.total, kesinlik:'computed', formul:'tutulan madde / madde' }),
+      cumle:'tamam.', vurgu:kalan.length ? 'Kalan: ' + kalan.join(', ') + '.' : 'Bugün tamam.', sistem:'spi' });
+    gun.push({ ust:'Seri', sayi:sayi({ deger:SP.Calc.streak(), birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
+      cumle:'seri.', vurgu:'Asgari gün seriyi sürdürür.', sistem:'spi' });
+
+    const saglik = [];
+    const r = SP.Move.readiness(shownDate());
+    saglik.push(r.ok
+      ? { ust:'Toparlanma', sayi:sayi({ deger:r.score, birim:'/100', kesinlik:'computed', formul:'kaynakların ağırlıklı ortalaması' }),
+          cumle:r.band.label.toLocaleLowerCase('tr-TR') + '.', vurgu:r.band.order || '', sistem:'spi' }
+      : { ust:'Toparlanma', cumle:'Ölçüm bekliyor.', vurgu:'Uyku süresini yazman bile yeter.', sistem:'spi' });
+    const t = SP.Nutri.dayTotals(U.todayISO());
+    const tg = SP.Nutri.targets();
+    if(!tg.ok){
+      saglik.push({ ust:'Beslenme', cumle:'Hedef yok.', vurgu:'Profilde ' + tg.missing.join(', ') + ' eksik.', sistem:'spi', dugme:git('Profil', 'family') });
+    }else if(t.empty){
+      saglik.push({ ust:'Beslenme', cumle:'Öğün girilmedi.', vurgu:'Hedef ' + U.fmtNum(tg.kcal) + ' kcal.', sistem:'spi' });
+    }else{
+      saglik.push({ ust:'Beslenme', sayi:sayi({ deger:t.meals, birim:'öğün', kesinlik:'measured' }), cumle:'girildi.',
+        vurgu:'Hedef ' + U.fmtNum(tg.kcal) + ' kcal.', sistem:'spi', dugme:git('Öğünler', 'meals') });
+    }
+
+    return raw(V.donen({ id:'spi-bugun', ad:'Bugün', maddeler:gun }) + V.donen({ id:'spi-saglik', ad:'Sağlık', maddeler:saglik }));
+  }
+
   function BeslenmeKutusu(){
     const t = SP.Nutri.dayTotals(U.todayISO());
     const tg = SP.Nutri.targets();
@@ -1001,11 +1046,7 @@ SP.Screens.today = (function(){
       </div>
       <div class="bugun__sag">
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
-          ${ToparlanmaKutusu()}
-          ${AsgariKutusu()}
-          ${BeslenmeKutusu()}
-          ${raw(TartiHatirlatici())}
-          ${SonOlcumlerKutusu()}
+          ${DonenKutular()}
           ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
           ${raw(window.LIFEOS.ONERI && SP.Hedefler && SP.Hedefler.ag ? window.LIFEOS.ONERI.butceCakismaHtml(SP.Hedefler.ag.butce()) : '')}
         </section>
@@ -1028,6 +1069,8 @@ SP.Screens.today = (function(){
     const gecmis = K.Ledger([historyEntry(), baselineEntry()]);
     return String(html`
       ${when(banners.length, () => html`<div class="stack-sm mb-16">${banners}</div>`)}
+      ${/* Bugün'deki dönen kartların açık hâli: Durum kartları burada. */''}
+      <section class="bugun__alan mb-16" aria-label="Durum">${ToparlanmaKutusu()}${AsgariKutusu()}${BeslenmeKutusu()}${raw(TartiHatirlatici())}${SonOlcumlerKutusu()}</section>
       ${when((S.ui.hkmBildirim || []).length, () => html`<div class="mb-16">${K.Ledger([kingBildirimRow()])}</div>`)}
       <div class="mb-16">${K.Ledger([hkmSeritRow()].concat(SP.Seri ? [seriRow()] : []))}</div>
       ${K.SayfaBolumleri({ act:'day-tab', aria:'Günün bölümleri', bolumler:[
@@ -1400,13 +1443,9 @@ SP.Screens.today = (function(){
       return r.ok ? U.esc('Toparlanma ' + r.score + '/100') : '';
     },
     subtitle(){ return ''; },
-    actions(){
-      const n = SP.Calc.nextAction();
-      /* «Bütün alanlar» ölçüm kutusunda; burada yalnız sıradaki hamle
-         (başka bir ekrana aitse). */
-      return String(html`${when(!n.calm && n.route !== 'today', () => K.Button({ label:n.action || 'Aç',
-          size:'sm', act:'go', data:{ 'data-route':n.route } }))}`);
-    },
+    /* Sayfa başı sade (kullanıcı, 2026-10-02): sıradaki hamle başlıkta
+       düğme değil, «Bugün» widget'ının ilk maddesidir. */
+    actions(){ return ''; },
     render, handle,
     /* Bugün › Ayrıntı: aynı işleyiciler, ayrı bir çizim. */
     ayrinti:{

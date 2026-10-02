@@ -1661,7 +1661,118 @@ window.LIFEOS = window.LIFEOS || {};
     return true;
   }
 
+  /* ------------------------------------------------ DÖNEN WIDGET
+
+     Kullanıcı (2026-10-02): «ESP, AYS, SPİ için çok daha az yer kaplayan,
+     modern ve minimal küçük widget'lar; 3 saniye sonra diğer maddeye
+     geçsin». Bugün'ün büyük Durum kartlarının yerine TEK küçük kart: her
+     madde tek cümle (gri vurgulu devamıyla) ve en çok bir düğme. Kartların
+     kendisi «Ayrıntı»da durur; hiçbir özellik silinmez.
+
+       o = { id, ad, maddeler:[{ ust, sayi, cumle, vurgu, sistem,
+                                  dugme:{ label, act, data } }] }
+
+     · MADDELERİ ÇAĞIRAN MODÜL KURAR (kural motoru); burası hesap yapmaz.
+       `sayi` hazır HTML'dir (LIFEOS.SAYI: kesinlik işaretiyle); eksik veri
+       sayı değil cümledir («Uykunu girmedin»).
+     · 3 saniyede bir sonraki madde. Üzerine gelince, içine odaklanınca ya
+       da ⏸ ile durur (WCAG 2.2.2). Hareketi azaltma tercihinde
+       kendiliğinden dönmez; noktalarla geçilir.
+     · Görünmeyen madde `inert`tir: odak almaz, ekran okuyucu okumaz.
+     · Yeniden çizimde kaldığı maddeden sürer (id başına).
+     · Tek madde varsa nokta ve ⏸ yok; hiç madde yoksa çizilmez. */
+  const DONEN_ARA = 3000;
+  const DONEN_SIRA = {};
+  function donenAzHareket(){
+    try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; }
+  }
+  function donen(o){
+    o = o || {};
+    const l = (o.maddeler || []).filter(m => m && (m.cumle || m.sayi));
+    if(!l.length) return '';
+    const id = String(o.id || 'donen');
+    const i = Math.min(DONEN_SIRA[id] || 0, l.length - 1);
+    const veri = d => Object.keys(d || {}).map(k => ' ' + kac(k) + '="' + kac(d[k]) + '"').join('');
+    const madde = (m, k) => '<div class="donen__madde' + (k === i ? ' is-on' : '') + '" data-donen-madde="' + k + '"'
+        + (m.sistem ? ' data-sistem="' + kac(m.sistem) + '"' : '') + (k === i ? '' : ' inert') + '>'
+      /* Başlık satırı: maddenin adı solda, eylemi sağda küçük bir bağ
+         (iOS widget'ında düğme yoktur; eylem tek dokunuşluk sessiz bağdır). */
+      + '<div class="donen__bas"><p class="donen__ust">' + kac(m.ust || '') + '</p>'
+      + (m.dugme && m.dugme.label ? '<button type="button" class="donen__dugme"'
+        + (m.dugme.act ? ' data-act="' + kac(m.dugme.act) + '"' : '') + veri(m.dugme.data) + '>' + kac(m.dugme.label)
+        + '<span aria-hidden="true"> ›</span></button>' : '')
+      + '</div>'
+      + '<p class="donen__cumle">' + (m.sayi ? '<span class="donen__sayi">' + m.sayi + '</span> ' : '')
+      + kac(m.cumle || '') + (m.vurgu ? ' <em>' + kac(m.vurgu) + '</em>' : '') + '</p>'
+      + '</div>';
+    const coklu = l.length > 1;
+    return '<section class="donen" data-donen="' + kac(id) + '" aria-roledescription="dönen kart" aria-label="' + kac(o.ad || 'Durum') + '">'
+      + '<div class="donen__sahne">' + l.map(madde).join('') + '</div>'
+      + (coklu ? '<div class="donen__alt"><div class="donen__noktalar">'
+        /* Noktalar süstür (fareyle tıklanınca o maddeye geçer); düğme değil:
+           her maddenin açık hâli Ayrıntı'da durur, klavye ⏸ ile durdurur. */
+        + l.map((m, k) => '<span class="donen__nokta' + (k === i ? ' is-on' : '') + '" data-donen-git="' + k + '"'
+          + (m.sistem ? ' data-sistem="' + kac(m.sistem) + '"' : '') + ' aria-hidden="true"></span>').join('')
+        + '</div><button type="button" class="donen__dur" data-donen-dur aria-pressed="false" aria-label="Dönmeyi durdur" title="Durdur">'
+        + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg></button></div>' : '')
+      + '</section>';
+  }
+  /* Kartı n. maddeye geçirir (n verilmezse bir sonrakine). */
+  function donenGit(el, n){
+    if(!el) return;
+    const l = Array.prototype.slice.call(el.querySelectorAll('[data-donen-madde]'));
+    if(l.length < 2) return;
+    const simdi = l.findIndex(x => x.classList.contains('is-on'));
+    const yeni = ((n == null ? simdi + 1 : Number(n)) % l.length + l.length) % l.length;
+    if(yeni === simdi) return;
+    const eski = l[simdi];
+    if(eski){
+      eski.classList.remove('is-on'); eski.classList.add('is-cikis'); eski.setAttribute('inert', '');
+      setTimeout(() => eski.classList.remove('is-cikis'), 520);
+    }
+    l[yeni].classList.add('is-on'); l[yeni].removeAttribute('inert');
+    el.querySelectorAll('[data-donen-git]').forEach((d, k) => d.classList.toggle('is-on', k === yeni));
+    DONEN_SIRA[el.getAttribute('data-donen')] = yeni;
+    el.dataset.son = String(Date.now());
+  }
+  function donenDuruyor(el, az){
+    if(el.classList.contains('is-dur') || az) return true;
+    try{ if(el.matches(':hover')) return true; }catch(e){}
+    const a = typeof document !== 'undefined' ? document.activeElement : null;
+    return !!(a && a !== document.body && el.contains(a));
+  }
+  /* Tek saat: sayfadaki bütün dönen kartlar için. Kart yeniden çizilse de
+     çalışır (durum DOM'da ve DONEN_SIRA'da). */
+  /* o.azHareket: tercihi dışarıdan verir (test); verilmezse cihazınki. */
+  function donenAdim(simdi, o){
+    if(typeof document === 'undefined') return;
+    const t = simdi || Date.now();
+    const az = o && o.azHareket != null ? !!o.azHareket : donenAzHareket();
+    document.querySelectorAll('.donen[data-donen]').forEach(el => {
+      if(!el.dataset.son){ el.dataset.son = String(t); return; }
+      if(donenDuruyor(el, az)){ el.dataset.son = String(t); return; }
+      if(t - Number(el.dataset.son) >= DONEN_ARA) donenGit(el);
+    });
+  }
+  if(typeof document !== 'undefined' && typeof setInterval === 'function'){
+    setInterval(() => donenAdim(), 500);
+    document.addEventListener('click', e => {
+      const g = e.target.closest && e.target.closest('[data-donen-git]');
+      if(g){ donenGit(g.closest('.donen'), g.getAttribute('data-donen-git')); return; }
+      const d = e.target.closest && e.target.closest('[data-donen-dur]');
+      if(d){
+        const el = d.closest('.donen');
+        const dur = !el.classList.contains('is-dur');
+        el.classList.toggle('is-dur', dur);
+        d.setAttribute('aria-pressed', dur ? 'true' : 'false');
+        d.setAttribute('aria-label', dur ? 'Dönmeyi sürdür' : 'Dönmeyi durdur');
+        d.title = dur ? 'Sürdür' : 'Durdur';
+      }
+    });
+  }
+
   L.VITRIN = {
+    donen, donenGit, donenAdim, DONEN_ARA,
     kac, sayi, isaretli, dkMetni, et, ikon, tik, hl, fk, kok, dugme, renk, KES,
     geriSayim, notrSerit, yanlisKarti, denemeKarnesi, hizSeridi, denemeKarsilastirma,
     kapsamHalkasi, konuZinciri, haftaCizgisi, planIzgarasi, araHaftasi, tasimaGolgesi,

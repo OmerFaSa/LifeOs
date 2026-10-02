@@ -9938,6 +9938,50 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
   html.kenar-dar .site--v5 .bolumcubugu--kabuk{ display:inline-flex; background:color-mix(in oklab, var(--text) 7%, var(--bg)); }
 }
 
+/* ================================================================
+   DÖNEN WIDGET (2026-10-02): Bugün'ün Durum alanı tek küçük kart; her
+   madde tek cümle + en çok bir düğme; 3 sn'de bir yumuşakça geçer
+   (brand/ortak/vitrin.js · donen). Yükseklik sabit: dönerken sayfa
+   oynamaz.
+   ================================================================ */
+.donen{ position:relative; background:var(--surface); border-radius:var(--r); padding:14px 18px 10px;
+  height:132px; box-sizing:border-box; overflow:hidden; }
+.donen__sahne{ position:relative; height:82px; }
+.donen__madde{ position:absolute; inset:0; display:flex; flex-direction:column; justify-content:flex-start;
+  opacity:0; transform:translateY(10px); pointer-events:none; visibility:hidden;
+  transition:opacity .5s var(--ease), transform .5s var(--ease), visibility 0s linear .5s; }
+.donen__madde.is-on{ opacity:1; transform:none; pointer-events:auto; visibility:visible;
+  transition:opacity .5s var(--ease), transform .5s var(--ease), visibility 0s; }
+.donen__madde.is-cikis{ opacity:0; transform:translateY(-10px); visibility:visible; }
+.donen__bas{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; min-height:24px; }
+.donen__ust{ margin:0; font-size:12.5px; font-weight:500; color:var(--text-3); }
+/* iOS widget'ı gibi: üstte büyük sayı ve kısa söz, altında tek satır gri
+   ayrıntı. İkisi de tek satır; sığmayan üç noktayla biter, taşmaz. */
+.donen__cumle{ margin:0; font-size:22px; line-height:1.2; font-weight:600; letter-spacing:-.02em; color:var(--text);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.donen__cumle em{ display:block; margin-top:3px; font-style:normal; font-size:13px; line-height:1.35; font-weight:500;
+  letter-spacing:0; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.donen__sayi .sayi{ font-size:inherit; }
+.donen__dugme{ flex:none; min-height:24px; padding:0 4px; border:0; border-radius:8px; background:none; cursor:pointer;
+  font:inherit; font-size:12.5px; font-weight:500; color:var(--text-2); transition:color var(--dur) var(--ease), background var(--dur) var(--ease); }
+.donen__dugme:hover{ color:var(--text); background:var(--surface-2); }
+.donen__alt{ position:absolute; left:18px; right:10px; bottom:8px; display:flex; align-items:center; height:24px; }
+.donen__noktalar{ display:flex; align-items:center; gap:8px; }
+.donen__nokta{ position:relative; display:block; width:6px; height:6px; padding:0; border:0; border-radius:3px; cursor:pointer;
+  background:var(--border-strong); transition:width var(--dur-lg) var(--ease), background var(--dur-lg) var(--ease); }
+.donen__nokta::after{ content:''; position:absolute; left:50%; top:50%; width:16px; height:16px; transform:translate(-50%,-50%); }
+.donen__nokta.is-on{ width:18px; background:var(--text); }
+.donen__nokta.is-on[data-sistem="ays"]{ background:var(--ays); }
+.donen__nokta.is-on[data-sistem="spi"]{ background:var(--spi); }
+.donen__nokta.is-on[data-sistem="esp"]{ background:var(--esp); }
+.donen__nokta.is-on[data-sistem="mer"]{ background:var(--mer); }
+.donen__dur{ margin-left:auto; width:24px; height:24px; padding:0; border:0; border-radius:50%; background:none;
+  display:grid; place-items:center; color:var(--text-3); cursor:pointer; opacity:0; transition:opacity var(--dur) var(--ease); }
+.donen:hover .donen__dur, .donen:focus-within .donen__dur, .donen.is-dur .donen__dur{ opacity:1; }
+.donen__dur svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.donen.is-dur .donen__dur svg path{ d:path("M8 6l10 6-10 6z"); }
+@media (prefers-reduced-motion:reduce){ .donen__madde, .donen__nokta{ transition:none; } .donen__dur{ display:none; } }
+
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
@@ -11679,7 +11723,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'8da3f3d', at:'2026-10-01 21:59', dirty:true };
+SP.BUILD = { id:'5139652', at:'2026-10-02 09:05', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -14815,7 +14859,118 @@ window.LIFEOS = window.LIFEOS || {};
     return true;
   }
 
+  /* ------------------------------------------------ DÖNEN WIDGET
+
+     Kullanıcı (2026-10-02): «ESP, AYS, SPİ için çok daha az yer kaplayan,
+     modern ve minimal küçük widget'lar; 3 saniye sonra diğer maddeye
+     geçsin». Bugün'ün büyük Durum kartlarının yerine TEK küçük kart: her
+     madde tek cümle (gri vurgulu devamıyla) ve en çok bir düğme. Kartların
+     kendisi «Ayrıntı»da durur; hiçbir özellik silinmez.
+
+       o = { id, ad, maddeler:[{ ust, sayi, cumle, vurgu, sistem,
+                                  dugme:{ label, act, data } }] }
+
+     · MADDELERİ ÇAĞIRAN MODÜL KURAR (kural motoru); burası hesap yapmaz.
+       `sayi` hazır HTML'dir (LIFEOS.SAYI: kesinlik işaretiyle); eksik veri
+       sayı değil cümledir («Uykunu girmedin»).
+     · 3 saniyede bir sonraki madde. Üzerine gelince, içine odaklanınca ya
+       da ⏸ ile durur (WCAG 2.2.2). Hareketi azaltma tercihinde
+       kendiliğinden dönmez; noktalarla geçilir.
+     · Görünmeyen madde `inert`tir: odak almaz, ekran okuyucu okumaz.
+     · Yeniden çizimde kaldığı maddeden sürer (id başına).
+     · Tek madde varsa nokta ve ⏸ yok; hiç madde yoksa çizilmez. */
+  const DONEN_ARA = 3000;
+  const DONEN_SIRA = {};
+  function donenAzHareket(){
+    try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return false; }
+  }
+  function donen(o){
+    o = o || {};
+    const l = (o.maddeler || []).filter(m => m && (m.cumle || m.sayi));
+    if(!l.length) return '';
+    const id = String(o.id || 'donen');
+    const i = Math.min(DONEN_SIRA[id] || 0, l.length - 1);
+    const veri = d => Object.keys(d || {}).map(k => ' ' + kac(k) + '="' + kac(d[k]) + '"').join('');
+    const madde = (m, k) => '<div class="donen__madde' + (k === i ? ' is-on' : '') + '" data-donen-madde="' + k + '"'
+        + (m.sistem ? ' data-sistem="' + kac(m.sistem) + '"' : '') + (k === i ? '' : ' inert') + '>'
+      /* Başlık satırı: maddenin adı solda, eylemi sağda küçük bir bağ
+         (iOS widget'ında düğme yoktur; eylem tek dokunuşluk sessiz bağdır). */
+      + '<div class="donen__bas"><p class="donen__ust">' + kac(m.ust || '') + '</p>'
+      + (m.dugme && m.dugme.label ? '<button type="button" class="donen__dugme"'
+        + (m.dugme.act ? ' data-act="' + kac(m.dugme.act) + '"' : '') + veri(m.dugme.data) + '>' + kac(m.dugme.label)
+        + '<span aria-hidden="true"> ›</span></button>' : '')
+      + '</div>'
+      + '<p class="donen__cumle">' + (m.sayi ? '<span class="donen__sayi">' + m.sayi + '</span> ' : '')
+      + kac(m.cumle || '') + (m.vurgu ? ' <em>' + kac(m.vurgu) + '</em>' : '') + '</p>'
+      + '</div>';
+    const coklu = l.length > 1;
+    return '<section class="donen" data-donen="' + kac(id) + '" aria-roledescription="dönen kart" aria-label="' + kac(o.ad || 'Durum') + '">'
+      + '<div class="donen__sahne">' + l.map(madde).join('') + '</div>'
+      + (coklu ? '<div class="donen__alt"><div class="donen__noktalar">'
+        /* Noktalar süstür (fareyle tıklanınca o maddeye geçer); düğme değil:
+           her maddenin açık hâli Ayrıntı'da durur, klavye ⏸ ile durdurur. */
+        + l.map((m, k) => '<span class="donen__nokta' + (k === i ? ' is-on' : '') + '" data-donen-git="' + k + '"'
+          + (m.sistem ? ' data-sistem="' + kac(m.sistem) + '"' : '') + ' aria-hidden="true"></span>').join('')
+        + '</div><button type="button" class="donen__dur" data-donen-dur aria-pressed="false" aria-label="Dönmeyi durdur" title="Durdur">'
+        + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg></button></div>' : '')
+      + '</section>';
+  }
+  /* Kartı n. maddeye geçirir (n verilmezse bir sonrakine). */
+  function donenGit(el, n){
+    if(!el) return;
+    const l = Array.prototype.slice.call(el.querySelectorAll('[data-donen-madde]'));
+    if(l.length < 2) return;
+    const simdi = l.findIndex(x => x.classList.contains('is-on'));
+    const yeni = ((n == null ? simdi + 1 : Number(n)) % l.length + l.length) % l.length;
+    if(yeni === simdi) return;
+    const eski = l[simdi];
+    if(eski){
+      eski.classList.remove('is-on'); eski.classList.add('is-cikis'); eski.setAttribute('inert', '');
+      setTimeout(() => eski.classList.remove('is-cikis'), 520);
+    }
+    l[yeni].classList.add('is-on'); l[yeni].removeAttribute('inert');
+    el.querySelectorAll('[data-donen-git]').forEach((d, k) => d.classList.toggle('is-on', k === yeni));
+    DONEN_SIRA[el.getAttribute('data-donen')] = yeni;
+    el.dataset.son = String(Date.now());
+  }
+  function donenDuruyor(el, az){
+    if(el.classList.contains('is-dur') || az) return true;
+    try{ if(el.matches(':hover')) return true; }catch(e){}
+    const a = typeof document !== 'undefined' ? document.activeElement : null;
+    return !!(a && a !== document.body && el.contains(a));
+  }
+  /* Tek saat: sayfadaki bütün dönen kartlar için. Kart yeniden çizilse de
+     çalışır (durum DOM'da ve DONEN_SIRA'da). */
+  /* o.azHareket: tercihi dışarıdan verir (test); verilmezse cihazınki. */
+  function donenAdim(simdi, o){
+    if(typeof document === 'undefined') return;
+    const t = simdi || Date.now();
+    const az = o && o.azHareket != null ? !!o.azHareket : donenAzHareket();
+    document.querySelectorAll('.donen[data-donen]').forEach(el => {
+      if(!el.dataset.son){ el.dataset.son = String(t); return; }
+      if(donenDuruyor(el, az)){ el.dataset.son = String(t); return; }
+      if(t - Number(el.dataset.son) >= DONEN_ARA) donenGit(el);
+    });
+  }
+  if(typeof document !== 'undefined' && typeof setInterval === 'function'){
+    setInterval(() => donenAdim(), 500);
+    document.addEventListener('click', e => {
+      const g = e.target.closest && e.target.closest('[data-donen-git]');
+      if(g){ donenGit(g.closest('.donen'), g.getAttribute('data-donen-git')); return; }
+      const d = e.target.closest && e.target.closest('[data-donen-dur]');
+      if(d){
+        const el = d.closest('.donen');
+        const dur = !el.classList.contains('is-dur');
+        el.classList.toggle('is-dur', dur);
+        d.setAttribute('aria-pressed', dur ? 'true' : 'false');
+        d.setAttribute('aria-label', dur ? 'Dönmeyi sürdür' : 'Dönmeyi durdur');
+        d.title = dur ? 'Sürdür' : 'Durdur';
+      }
+    });
+  }
+
   L.VITRIN = {
+    donen, donenGit, donenAdim, DONEN_ARA,
     kac, sayi, isaretli, dkMetni, et, ikon, tik, hl, fk, kok, dugme, renk, KES,
     geriSayim, notrSerit, yanlisKarti, denemeKarnesi, hizSeridi, denemeKarsilastirma,
     kapsamHalkasi, konuZinciri, haftaCizgisi, planIzgarasi, araHaftasi, tasimaGolgesi,
@@ -46991,6 +47146,51 @@ SP.Screens.today = (function(){
       govde:html`${map(m.rows, P.minRow)}` });
   }
 
+  /* DÖNEN DURUM (kullanıcı, 2026-10-02: «çok daha az yer kaplayan küçük
+     widget'lar»). Durum'un büyük kartları Bugün'de iki küçük dönen karttır:
+     «Bugün» (sıradaki hamle, asgari gün, seri) ve «Sağlık» (toparlanma,
+     beslenme). Kartların kendisi Ayrıntı'nın başındadır, hiçbiri kalkmadı.
+     Madde ve sayıyı kural motoru verir; eksik veri sayı değil cümledir. */
+  function DonenKutular(){
+    const V = VT();
+    if(!V || !V.donen) return '';
+    const SAYI = (window.LIFEOS || {}).SAYI;
+    const sayi = s => SAYI ? SAYI.html(s) : U.esc(String(s.deger == null ? '—' : s.deger) + (s.birim ? ' ' + s.birim : ''));
+    const git = (label, route) => ({ label, act:'go', data:{ 'data-route':route } });
+
+    const gun = [];
+    const n = SP.Calc.nextAction();
+    if(!n.calm && n.title){
+      gun.push({ ust:'Sıradaki', cumle:n.title + '.', vurgu:n.action || n.why || '', sistem:'spi',
+        dugme:n.route && n.route !== 'today' ? git('Aç', n.route) : null });
+    }
+    const m = SP.Calc.minimumDay();
+    const kalan = m.rows.filter(x => !x.ok).map(x => x.label.toLocaleLowerCase('tr-TR'));
+    gun.push({ ust:'Asgari gün', sayi:sayi({ deger:m.done + '/' + m.total, kesinlik:'computed', formul:'tutulan madde / madde' }),
+      cumle:'tamam.', vurgu:kalan.length ? 'Kalan: ' + kalan.join(', ') + '.' : 'Bugün tamam.', sistem:'spi' });
+    gun.push({ ust:'Seri', sayi:sayi({ deger:SP.Calc.streak(), birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
+      cumle:'seri.', vurgu:'Asgari gün seriyi sürdürür.', sistem:'spi' });
+
+    const saglik = [];
+    const r = SP.Move.readiness(shownDate());
+    saglik.push(r.ok
+      ? { ust:'Toparlanma', sayi:sayi({ deger:r.score, birim:'/100', kesinlik:'computed', formul:'kaynakların ağırlıklı ortalaması' }),
+          cumle:r.band.label.toLocaleLowerCase('tr-TR') + '.', vurgu:r.band.order || '', sistem:'spi' }
+      : { ust:'Toparlanma', cumle:'Ölçüm bekliyor.', vurgu:'Uyku süresini yazman bile yeter.', sistem:'spi' });
+    const t = SP.Nutri.dayTotals(U.todayISO());
+    const tg = SP.Nutri.targets();
+    if(!tg.ok){
+      saglik.push({ ust:'Beslenme', cumle:'Hedef yok.', vurgu:'Profilde ' + tg.missing.join(', ') + ' eksik.', sistem:'spi', dugme:git('Profil', 'family') });
+    }else if(t.empty){
+      saglik.push({ ust:'Beslenme', cumle:'Öğün girilmedi.', vurgu:'Hedef ' + U.fmtNum(tg.kcal) + ' kcal.', sistem:'spi' });
+    }else{
+      saglik.push({ ust:'Beslenme', sayi:sayi({ deger:t.meals, birim:'öğün', kesinlik:'measured' }), cumle:'girildi.',
+        vurgu:'Hedef ' + U.fmtNum(tg.kcal) + ' kcal.', sistem:'spi', dugme:git('Öğünler', 'meals') });
+    }
+
+    return raw(V.donen({ id:'spi-bugun', ad:'Bugün', maddeler:gun }) + V.donen({ id:'spi-saglik', ad:'Sağlık', maddeler:saglik }));
+  }
+
   function BeslenmeKutusu(){
     const t = SP.Nutri.dayTotals(U.todayISO());
     const tg = SP.Nutri.targets();
@@ -47051,11 +47251,7 @@ SP.Screens.today = (function(){
       </div>
       <div class="bugun__sag">
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
-          ${ToparlanmaKutusu()}
-          ${AsgariKutusu()}
-          ${BeslenmeKutusu()}
-          ${raw(TartiHatirlatici())}
-          ${SonOlcumlerKutusu()}
+          ${DonenKutular()}
           ${when(S.ui.haftaOzet && window.LIFEOS.HaftaOzet, () => raw(window.LIFEOS.HaftaOzet.kartHtml(S.ui.haftaOzet)))}
           ${raw(window.LIFEOS.ONERI && SP.Hedefler && SP.Hedefler.ag ? window.LIFEOS.ONERI.butceCakismaHtml(SP.Hedefler.ag.butce()) : '')}
         </section>
@@ -47078,6 +47274,8 @@ SP.Screens.today = (function(){
     const gecmis = K.Ledger([historyEntry(), baselineEntry()]);
     return String(html`
       ${when(banners.length, () => html`<div class="stack-sm mb-16">${banners}</div>`)}
+      ${/* Bugün'deki dönen kartların açık hâli: Durum kartları burada. */''}
+      <section class="bugun__alan mb-16" aria-label="Durum">${ToparlanmaKutusu()}${AsgariKutusu()}${BeslenmeKutusu()}${raw(TartiHatirlatici())}${SonOlcumlerKutusu()}</section>
       ${when((S.ui.hkmBildirim || []).length, () => html`<div class="mb-16">${K.Ledger([kingBildirimRow()])}</div>`)}
       <div class="mb-16">${K.Ledger([hkmSeritRow()].concat(SP.Seri ? [seriRow()] : []))}</div>
       ${K.SayfaBolumleri({ act:'day-tab', aria:'Günün bölümleri', bolumler:[
@@ -47450,13 +47648,9 @@ SP.Screens.today = (function(){
       return r.ok ? U.esc('Toparlanma ' + r.score + '/100') : '';
     },
     subtitle(){ return ''; },
-    actions(){
-      const n = SP.Calc.nextAction();
-      /* «Bütün alanlar» ölçüm kutusunda; burada yalnız sıradaki hamle
-         (başka bir ekrana aitse). */
-      return String(html`${when(!n.calm && n.route !== 'today', () => K.Button({ label:n.action || 'Aç',
-          size:'sm', act:'go', data:{ 'data-route':n.route } }))}`);
-    },
+    /* Sayfa başı sade (kullanıcı, 2026-10-02): sıradaki hamle başlıkta
+       düğme değil, «Bugün» widget'ının ilk maddesidir. */
+    actions(){ return ''; },
     render, handle,
     /* Bugün › Ayrıntı: aynı işleyiciler, ayrı bir çizim. */
     ayrinti:{
