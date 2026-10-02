@@ -95,8 +95,7 @@ ESP.Screens.office = (function(){
     return K.Grid(html`
       ${K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:ESP.Office.ready('patron') })) : '')}
       ${K.Span(12, K.Ledger(() => [
-        when(vo.masa, () => K.Entry({ wide:true, label:'Masa', meta:'kim konuşuyor',
-          note:'Balondaki sayılar kural motorunun; model açık da olsa sayıyı o yazmaz.',
+        when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:'Masa', meta:'kim konuşuyor',
           body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
         when(vo.toplanti, () => K.Entry({ wide:true, label:'Günün toplantısı', meta:'her masadan tek cümle',
           body:raw(vo.toplanti) })),
@@ -104,8 +103,6 @@ ESP.Screens.office = (function(){
         K.Entry({
           label:'Patron', hint:'rule-engine',
           meta:ESP.Office.ready('patron') ? 'model bağlı' : 'kural motoru',
-          note:'Patron kendi hesabını yapmaz: yedi uzman ve bir koçun raporunu okur, '
-             + 'çelişkiyi öncelik sırasına göre çözer.',
           action:K.Button({ label:'Danış', size:'sm', act:'open-agent',
             data:{ 'data-agent':'patron' } }),
           body:html`
@@ -118,8 +115,6 @@ ESP.Screens.office = (function(){
         K.Entry({
           label:'Masalar arası devir', hint:'handoff',
           meta:devir.length ? devir.length + ' devir' : 'yok',
-          note:'Devir bir tavsiye değildir: «şu ölçüldü, şu masaya düşüyor» der. '
-             + 'Ölçülmemiş bir şey devredilemez — tahmin devir üretmez.',
           wide:true,
           body:devir.length
             ? html`${when(vo.devir, () => html`<div class="mb-12">${raw(vo.devir)}</div>`)}${map(devir, h => html`
@@ -133,10 +128,8 @@ ESP.Screens.office = (function(){
         }),
 
         K.Entry({
-          label:'Uzman masaları',
+          hint:'not-uzman-masalari', label:'Uzman masaları',
           meta:uzmanlar.length + ' masa',
-          note:'Her ajan yalnızca kendi alanına bakar. Alan dışı bir soru gelirse '
-             + 'sahibine yönlendirir, cevap uydurmaz.',
           wide:true,
           /* Masa kartlarinin basligi h3'tur; araya bir h2 girmezse baslik
              sirasi h1'den h3'e atlar ve ekran okuyucu bir seviye kaybeder.
@@ -154,8 +147,6 @@ ESP.Screens.office = (function(){
         K.Entry({
           label:'Haftalık plan', hint:'weekplan',
           meta:ESP.Plans.plan() ? 'kurulu' : 'yok',
-          note:'Takvim değil sıra: hangi gün hangi disiplinin düştüğünü söyler, '
-             + 'saat vermez.',
           wide:true,
           body:ESP.Parts.weekPlan(),
         }),
@@ -163,8 +154,6 @@ ESP.Screens.office = (function(){
         K.Entry({
           label:'Öncelik sırası', hint:'precedence',
           meta:ESP.PRECEDENCE.length + ' kural',
-          note:'İki uzman ters şey söylediğinde Patron bu sıraya uyar. '
-             + 'Üstteki alttakini her zaman yener.',
           body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Kural', 'Neden'],
             rows:ESP.PRECEDENCE.map(p => [String(p.rank), p.label, p.note]) }),
         }),
@@ -186,7 +175,9 @@ ESP.Screens.office = (function(){
     /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-    kucukVarsayilan:['masalar-arası-devir', 'öncelik-sırası'],
+    /* iPhone Faz 4 («brifing + tek eylem»): açık Patron ve teklifler;
+       konuşan masa, toplantı satırları, uzman masaları, haftalık plan şerit. */
+    kucukVarsayilan:['masalar-arası-devir', 'öncelik-sırası', 'masa', 'günün-toplantısı', 'uzman-masaları', 'haftalık-plan'],
     title:'Masalar',
     headline(){
       const n = ESP.Office.notes().filter(x => x.tone === 'danger').length;

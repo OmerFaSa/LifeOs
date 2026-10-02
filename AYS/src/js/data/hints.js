@@ -168,6 +168,10 @@ R.HINTS = {
     ['not-surec-gostergeleri', 'Süreç göstergeleri', 'Nete değil sürece bakar: tekrar borcu, konu kapanışı ve uyku.'],
     ['protocol', null, 'Kapatırken sonucu yaz — sonraki kapıda karşılaştırılır.'],
     ['audit', null, 'Veri eşiğin altındaysa bu «temiz» değil «ölçülmedi» demektir; gri satırlar onu söyler. Her bulgu eyleme bağlıdır ve hangi kayıtların söz konusu olduğunu yazar; hiçbir bulgu kişiyi suçlamaz — «şu kayıtlar şu durumda» der.'],
+    ['not-takipteki-kararlar', 'Takipteki kararlar', 'Toplantıda verildi, henüz kapanmadı'],
+    ['not-ofis-modeli', 'Ofis modeli', 'Ücretsiz bir model bağlayınca ajanlar konuşmaya başlar'],
+    ['not-masasindaki-rapor', 'Masasındaki rapor', 'Kural motoru hesapladı; ajan bunu yorumlar'],
+    ['not-ekipteki-digerleri', 'Ekipteki diğerleri', 'Alan dışı soruyu sahibine sor'],
   ].forEach(([k, t, c]) => {
     const m = /[.!?…»)]$/.test(c) ? c : c + '.';
     if(!H[k]){ H[k] = { t:t || k, b:m }; return; }

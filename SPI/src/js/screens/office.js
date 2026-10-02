@@ -254,8 +254,6 @@ SP.Screens.office = (function(){
     return K.Entry({
       wide:true, label:'Masalar arası devir', hint:'office',
       meta:rows.length ? rows.length + ' bağ' + (loud ? ' · ' + loud + ' acil' : '') : 'bağ yok',
-      note:'Bir masanın bulgusu başka bir masanın işi olabilir. Devri Patron görür, '
-        + 'kararı devredilen masa verir. Satıra bas: bulgunun düştüğü yere gider.',
       body:rows.length
         ? html`${when(vd, () => html`<div class="mb-12">${raw(vd)}</div>`)}<div class="handoffs">${map(rows.slice(0, HANDOFF_MAX), handoffRow)}</div>
             ${when(rows.length > HANDOFF_MAX, () => html`<p class="tiny dim mt-8">
@@ -268,8 +266,7 @@ SP.Screens.office = (function(){
   function agendaCard(){
     const rows = SP.Office.agendaCandidates().slice(0, 5);
     return K.Card({
-      title:'Gündem adayları',
-      sub:'Puanlama kural motorundan gelir',
+      hint:'not-gundem-adaylari', title:'Gündem adayları',
       body:html`<div class="list">${map(rows, (a, i) => html`
         <div class="listitem">
           <div class="grow"><b class="small">${a.label}</b>
@@ -310,20 +307,15 @@ SP.Screens.office = (function(){
       ${when(flags.length, () => html`<div class="stack-sm mb-16">${map(flags, P.flagCard)}</div>`)}
       ${SP.Ofis3B.panel()}
       ${K.Ledger(() => [
-        when(vo.masa && !SP.Ofis3B.aktif(), () => K.Entry({ wide:true, label:'Masa', meta:'kim konuşuyor',
-          note:'Balondaki sayılar kural motorunun; model açık da olsa sayıyı o yazmaz.',
+        when(vo.masa && !SP.Ofis3B.aktif(), () => K.Entry({ wide:true, hint:'not-masa', label:'Masa', meta:'kim konuşuyor',
           body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.sinir || '')}${raw(vo.durum || '')}</div>` })),
         when(vo.toplanti, () => K.Entry({ wide:true, label:'Günün toplantısı', meta:'her masadan tek cümle',
           body:html`${raw(vo.toplanti)}${raw(vo.hazir || '')}` })),
         briefingCard(),
         K.Entry({ wide:true, label:'Patron masası', hint:'office', meta:'orkestrasyon',
-          note:'Patron kendi hesabını yapmaz. Dört masanın raporunu okur, çelişkiyi '
-            + 'sıraya koyar, kararı gerekçesiyle yazar.',
           body:html`<div class="desks desks--solo">${deskCard(SP.AGENT_BY_ID.patron)}</div>` }),
         handoffEntry(),
-        K.Entry({ wide:true, label:'Dört uzman masası', meta:COACHES.length + ' ajan',
-          note:'Her uzman yalnız kendi alanına bakar. Yetki dışına çıkmaz; '
-            + 'çıkarsa çıktısı basılmaz.',
+        K.Entry({ wide:true, hint:'not-dort-uzman-masasi', label:'Dört uzman masası', meta:COACHES.length + ' ajan',
           body:html`<div class="desks">${map(COACHES, deskCard)}</div>` }),
         agendaCard(), decisionCard(),
         K.Entry({ label:'Yetki ayrımı', hint:'office', meta:'kim neye bakar',
@@ -408,7 +400,11 @@ SP.Screens.office = (function(){
     /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-    kucukVarsayilan:['masalar-arası-devir', 'yetki-ayrımı'],
+    /* iPhone Faz 4 («brifing + tek eylem»): açık günün brifingi ve Patron
+       masası; konuşan masa, toplantı satırları, uzman masaları, gündem ve
+       kararlar şerit. */
+    kucukVarsayilan:['masalar-arası-devir', 'yetki-ayrımı', 'masa', 'günün-toplantısı', 'dört-uzman-masası',
+      'gündem-adayları', 'takipteki-kararlar'],
     title:'Ofis',
     headline(){
       const notes = SP.Office.notes();

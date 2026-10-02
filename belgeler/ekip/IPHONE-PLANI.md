@@ -280,6 +280,25 @@ Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/�
   kurulur: «sıfırdan başladı»; sonuç değişmediyse «değişmedi».
 - **Tuzak:** «KPI» Türkçe küçük harfte «kpı» olur — gizleme anahtarı `kpı-sözlüğü`.
 
+### Faz 4–5 kararları (yapıldı; testler «Faz 4», «Faz 5», `gizle.test.js`)
+
+- **Ofis (3 ×):** «brifing + tek eylem». Masa cümleleri toplantı satırında, Patron'da ve uzman
+  kartında üç kez yazılıyordu: açık günün brifingi ve Patron (AYS'de ofis sahnesi en üstte kalır —
+  depo sahibi kararı); Günün toplantısı, uzman masaları, konuşan masa, gündem, takipteki kararlar
+  şerit. AYS'nin dört istatistik şeridi (bugün, sınava kalan, toplantı, açık karar) kalktı; uzman
+  masaları başlıklı karta sarıldı (şerit olabilsin). 17 sabit not ⓘ'de.
+- **Danışma (3 ×):** açık sohbet ve ajanın raporu/masası; tanıtım, örnek sorular, brifing,
+  ekibin geri kalanı şerit.
+- **Ayarlar (3 ×):** iOS Ayarlar listesi — `App.ayarListesi`: Ayarlar çekmecesindeki her ekranda
+  ilk görünür bölüm (profil formu, görünüm) açık, gerisi baştan şerit. Rütbe hariç (kullanıcı
+  kararı).
+- **Hata düzeltildi (`gizle.js`):** şeride gelince önizleme 250 ms sonra açılıyordu; o arada sayfa
+  değişirse ÖNCEKİ ekranın bölümü yeni sayfada açılıyordu (duman testi: ESP Profil'in düğmeleri
+  Genel'de «ölü düğme»). `uygula` önizlemeyi ve bekleyen zamanlayıcıyı düşürür; DOM'dan düşmüş
+  bölüm önizlenmez.
+- SPİ `a11ycheck` alt sayfa kipliliğini «Karar ekle» ile sınar: kart artık şerit olduğu için önce
+  şeridi açar (kullanıcının yaptığı gibi).
+
 ## 7. Bilinen riskler
 
 - Testler kartları ekranda arar: gizlemek uygulama düzeyindedir (`Gizle.uygula`), çizimi
@@ -298,8 +317,10 @@ Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/�
 | 2b | ✅ SPİ Testler · Öğün · Mutfak · Hareket · Bütçe (beşi de açık ≤ 3, boy ≤ 1 200); Bütçe «0 TL» hatası | f73a9a7 | 161 · aşan 15 (AYS 59/5 · SPİ 44/4 · ESP 58/6) |
 | 2c | ✅ sıkı ölçü: ESP Tarih · Ses · Okuma (her bölüm), AYS Soru çöz; Dersler 1 238 (raf tabanı) | a36e5e6 | 150 · aşan 13 (AYS 59/5 · SPİ 44/4 · ESP 47/4) |
 | 2d | ✅ bölüm turu: ESP Dil · Felsefe · Yazı, SPİ bölümleri, AYS Sınama; 2b'ye sıkı ölçü; Faz 2 bitti | 207c451 | 150 · aşan 13 (araç varsayılan bölümü sayar; öbür bölümler testte) |
-| 3 | ✅ Analiz: AYS İlerleme · Ayrıntılı analiz · Telafi, SPİ Analiz, ESP Analiz; `%Infinity` hatası | (bu commit) | 131 · aşan 9 (AYS 43/2 · SPİ 43/4 · ESP 45/3) |
-| 4 | ⏭ sıradaki: Onaylar · Ofis · Kütüphanem (3 ×) | — | — |
+| 3 | ✅ Analiz: AYS İlerleme · Ayrıntılı analiz · Telafi, SPİ Analiz, ESP Analiz; `%Infinity` hatası | 55b2015 | 131 · aşan 9 (AYS 43/2 · SPİ 43/4 · ESP 45/3) |
+| 4–5 | ✅ Ofis · Danışma (3 ×; Onaylar ve Kütüphanem zaten bütçede); Ayarlar iOS listesi (3 ×); önizleme hatası | (bu commit) | 87 · aşan 1 (AYS 26/0 · SPİ 31/1 · ESP 30/0) |
+| 6 | ⏭ sıradaki: kabuk — başlık ad olsun (durum cümlesi ⓘ'ye; Bugün'ün 004 cümlesi kalır), rozet bildirimleri tek, SPİ Bugün 4 açık, HKM yüzü | — | — |
+| 7 | ⏭ kurallar zorunlu, 390 px turu, boyu aşan 14 sayfa, belgeler | — | — |
 
 ## 9. Devir notu — sıradaki oturum buradan başlar
 

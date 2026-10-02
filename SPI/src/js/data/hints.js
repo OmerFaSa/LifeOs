@@ -130,6 +130,11 @@ SP.HINTS = {
     ['signal', null, 'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün ekranına tek kart olarak düşer. Burası o soruların defteri.'],
     ['goodhart', null, 'Sağlık verisi gürültülüdür: pencere 56 gün, eşik %35. İki pencerede de ölçüm yoksa hüküm kurulmaz.'],
     ['calib', null, 'Tahmin KÖR yazılır: değer ekranda dururken yazılan tahmin, tahmin değil kopyadır.'],
+    ['office', null, 'Bir masanın bulgusu başka bir masanın işi olabilir. Devri Patron görür, kararı devredilen masa verir. Satıra bas: bulgunun düştüğü yere gider.'],
+    ['not-gundem-adaylari', 'Gündem adayları', 'Puanlama kural motorundan gelir'],
+    ['not-masa', 'Masa', 'Balondaki sayılar kural motorunun; model açık da olsa sayıyı o yazmaz.'],
+    ['office', null, 'Patron kendi hesabını yapmaz. Dört masanın raporunu okur, çelişkiyi sıraya koyar, kararı gerekçesiyle yazar.'],
+    ['not-dort-uzman-masasi', 'Dört uzman masası', 'Her uzman yalnız kendi alanına bakar. Yetki dışına çıkmaz; çıkarsa çıktısı basılmaz.'],
   ].forEach(([k, t, c]) => {
     const m = /[.!?…»)]$/.test(c) ? c : c + '.';
     if(!H[k]){ H[k] = { t:t || k, b:m }; return; }

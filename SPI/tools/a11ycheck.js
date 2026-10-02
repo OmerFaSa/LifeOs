@@ -264,6 +264,14 @@ const izinli = (tur, metin) => IZIN.some(x => x.tur === tur && x.desen.test(meti
     /* ---- alt sayfa kipliliği ---- */
     await page.evaluate(async () => { await SP.App.go('office'); });
     await wait(400);
+    /* «Takipteki kararlar» baştan şerittir (iPhone Faz 4): kullanıcı gibi
+       önce şeridi açar, sonra «Karar ekle»ye basar. */
+    await page.evaluate(() => {
+      const d = document.querySelector('[data-act="add-decision"]');
+      const k = d && d.closest('[data-gizle-kucuk]');
+      if(k && window.LIFEOS && LIFEOS.Gizle) LIFEOS.Gizle.kucult(k.getAttribute('data-gizle-kucuk'), false);
+    });
+    await wait(300);
     const ac = await page.$('[data-act="add-decision"]');
     if(ac){
       await ac.click();

@@ -307,40 +307,6 @@ R.Screens.office = (function(){
      önce/sonra olarak gösterilir; onaysız hiçbir satır uygulanmaz. */
 
   /* Ofis panosu — girişte asılı tahta: hangi gün, kaç gün kaldı, ekip ne durumda. */
-  function boardCard(){
-    const n = M().currentWeek();
-    const daysLeft = U.diffDays(U.todayISO(), R.PLAN.examTytISO);
-    const meetings = O.meetings().length;
-    const open = O.openDecisions().length;
-
-    return K.Card({
-      class:'board',
-      body:html`
-        <div class="board__row">
-          <div class="board__cell">
-            <span class="board__label">Bugün</span>
-            <b class="board__value">${U.fmtShort(U.today())}</b>
-            <span class="board__note">hafta ${n}/${R.PLAN.totalWeeks}</span>
-          </div>
-          <div class="board__cell">
-            <span class="board__label">TYT’ye kalan</span>
-            <b class="board__value num">${daysLeft}</b>
-            <span class="board__note">gün (tahmin)</span>
-          </div>
-          <div class="board__cell">
-            <span class="board__label">Toplantı</span>
-            <b class="board__value num">${meetings}</b>
-            <span class="board__note">${meetings ? 'tutanak arşivde' : 'henüz yapılmadı'}</span>
-          </div>
-          <div class="board__cell">
-            <span class="board__label">Açık karar</span>
-            <b class="${cls('board__value num', open && 'is-warn')}">${open}</b>
-            <span class="board__note">${open ? 'takipte' : 'temiz'}</span>
-          </div>
-        </div>`,
-    });
-  }
-
   function M(){ return R.Model; }
 
   /* Gunluk brifing — sabah bir kez uretilir, gun boyu onbellekten okunur. */
@@ -422,8 +388,7 @@ R.Screens.office = (function(){
     const open = O.openDecisions();
     if(!open.length) return '';
     return K.Card({
-      title:'Takipteki kararlar', sub:'Toplantıda verildi, henüz kapanmadı',
-      badge:K.Badge({ label:String(open.length), tone:'warn' }),
+      hint:'not-takipteki-kararlar', title:'Takipteki kararlar',       badge:K.Badge({ label:String(open.length), tone:'warn' }),
       body:html`<div class="stack-sm">${map(open, d => html`
         <div class="decisionrow">
           <div class="minw0">
@@ -450,8 +415,7 @@ R.Screens.office = (function(){
 
     if(O.mode() !== 'llm'){
       return K.Card({
-        title:'Ofis modeli', sub:'Ücretsiz bir model bağlayınca ajanlar konuşmaya başlar',
-        actions:K.Button({ label:'Bağla', icon:'gear', size:'sm', act:'office-settings' }),
+        hint:'not-ofis-modeli', title:'Ofis modeli',         actions:K.Button({ label:'Bağla', icon:'gear', size:'sm', act:'office-settings' }),
         body:html`
           ${K.Notice({ tone:'info', title:'Şu an kural motoru modundasın.',
             body:'Ajanlar veriyi okuyup bulgularını yazıyor ama cümleleri sabit. '
@@ -904,7 +868,9 @@ R.Screens.office = (function(){
          çubuktaki «Gizlenen bölümler»den geri gelir. */
       K.Span(12, floorPlan()),
       K.Span(8, K.Stack([
-        boardCard(),
+        /* iPhone Faz 4: dört istatistik şeridi (bugün, sınava kalan, toplantı,
+           açık karar) kalktı — tarih ve sınav sayacı Bugün'de, toplantı ve
+           karar sayısı ilgili kartın başlığında. */
         when(vo.masa, () => K.Kutu({ ad:'Masa', yuva:'kim konuşuyor', class:'vkutu',
           govde:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
         when(vo.toplanti, () => K.Kutu({ ad:'Günün toplantısı', yuva:'her masadan tek cümle', class:'vkutu',
@@ -912,8 +878,8 @@ R.Screens.office = (function(){
         briefingCard(),
         BossCard(),
         decisionsCard(),
-        K.SectionTitle('Uzman masaları'),
-        html`<div class="desks">${map(specialists, Desk)}</div>`,
+        /* Uzman masaları başlıklı kart: şerit olabilsin (iPhone Faz 4). */
+        K.Card({ title:'Uzman masaları', body:html`<div class="desks">${map(specialists, Desk)}</div>` }),
       ])),
       K.Span(4, K.Stack([
         urunlerKart(),
@@ -1309,5 +1275,10 @@ R.Screens.office = (function(){
     /* Sadelik: 3B sahne masaları zaten gösterir; teknik model kartı ve son
        toplantı ikincildir. Baştan gizli, üst çubuktan geri gelir (gizle.js). */
     gizliVarsayilan:['masa', 'ofis-modeli', 'son-toplantı'],
+    /* iPhone Faz 4 («brifing + tek eylem»): açık ofis, günün brifingi ve
+       Patron'un masası (tek eylem). Masa cümleleri toplantı satırında,
+       Patron'da ve uzman kartında üç kez yazılıyordu: toplantı ve uzman
+       masaları şerit; kararlar ve ürünler şerit. */
+    kucukVarsayilan:['günün-toplantısı', 'uzman-masaları', 'takipteki-kararlar', 'bam-ürünleri'],
   };
 })();

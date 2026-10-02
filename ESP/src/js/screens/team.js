@@ -83,8 +83,6 @@ ESP.Screens.team = (function(){
         K.Entry({
           label:'Kural motorunun cümlesi', hint:'rule-engine',
           meta:'model olmadan',
-          note:'Model kapalıyken ajanın konuştuğu dil budur. Yedek değil '
-             + 'varsayılan: model bir iyileştirmedir.',
           body:html`<p class="rulesay">${ESP.Office.ruleText(a.id, brf)}</p>`,
         }),
 
@@ -125,8 +123,6 @@ ESP.Screens.team = (function(){
         K.Entry({
           label:'Brifing', hint:'brief',
           meta:'ajanın gördüğü tek şey',
-          note:'Ham ses kaydı, tam taslak metni ve notun kendi cümlesi buraya '
-             + 'girmez — yalnızca ölçülmüş metrikler ve durum etiketleri.',
           wide:true,
           body:K.Collapsible({
             title:'Ham brifing (JSON)',
@@ -180,6 +176,8 @@ ESP.Screens.team = (function(){
 
   return {
     id:'team',
+    /* iPhone Faz 4: açık masa ve konuşma; kural cümlesi, defter ve brifing şerit. */
+    kucukVarsayilan:['kural-motorunun-cümlesi', 'bu-masanın-defteri', 'brifing'],
     title:'Danışma',
     headline(){
       const a = agent();

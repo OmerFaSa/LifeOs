@@ -174,6 +174,10 @@ LIFEOS.Gizle = (function(){
   /* Her çizimden sonra: gizlileri sakla, düzen kipinde düğmeleri koy,
      üst çubuktaki sayacı güncelle. o: { kok, modul, profil, ekran, varsayilan } */
   function uygula(o){
+    /* Yeni çizimde eski önizleme ve bekleyen zamanlayıcısı düşer: şeride
+       gelinip 250 ms dolmadan sayfa değişirse önceki ekranın bölümü YENİ
+       sayfada açılıyordu (ESP Profil'in düğmeleri Genel'de, 2026-10-02). */
+    onizlemeKapat();
     son = o;
     const d = oku(o);
     let degisti = false;
@@ -673,7 +677,7 @@ LIFEOS.Gizle = (function(){
   let onizleme = null, onizSayac = null;
   function onizlemeAc(kaynak, yakin){
     onizlemeKapat();
-    if(!kaynak) return;
+    if(!kaynak || !kaynak.isConnected) return;   // çizimden düşmüş bölüm önizlenmez
     const kopya = kaynak.cloneNode(true);
     kopya.hidden = false;
     kopya.removeAttribute('data-gizle-gizli');

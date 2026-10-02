@@ -314,6 +314,15 @@ SP.App = (function(){
     kitchen:['hane'],
   };
 
+  /* iPhone Faz 5 (2026-10-02): Ayarlar bir iOS Ayarlar listesidir — ilk
+     görünür bölüm (profil formu, görünüm) açık, gerisi baştan tek satırlık
+     şerit; dokununca açılır. Rütbe olduğu gibi kalır (kullanıcı kararı). */
+  function ayarListesi(sc, kok){
+    if(!sc || sc.id === 'rutbe' || !kok || !ayarlardaMi(sc.id) || !(window.LIFEOS && LIFEOS.Gizle)) return [];
+    const gizli = (sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []);
+    return LIFEOS.Gizle.bolumler(kok).map(b => b.anahtar).filter(a => gizli.indexOf(a) < 0).slice(1);
+  }
+
   function sayfaBasiHtml(sc){
     const baslik = safe(() => sc.headline ? sc.headline() : '') || sc.title;
     const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
@@ -655,7 +664,7 @@ SP.App = (function(){
         try{
           LIFEOS.Gizle.uygula({ kok:document.getElementById('main'), modul:'spi',
             profil:(SP.Ornek && SP.Ornek.aktif && SP.Ornek.aktif()) || 'main', ekran:sc.id,
-            varsayilan:(sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []), kucukVarsayilan:sc.kucukVarsayilan || [] });
+            varsayilan:(sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []), kucukVarsayilan:(sc.kucukVarsayilan || []).concat(ayarListesi(sc, document.getElementById('main'))) });
         }catch(e){ console.error('Gizle:', e); }
       }
     }catch(err){
@@ -1556,7 +1565,7 @@ SP.App = (function(){
     }
   }
 
-  return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, UST, THEMES, installManifest,
+  return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, UST, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml };
 })();
 

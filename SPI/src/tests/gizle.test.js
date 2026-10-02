@@ -195,6 +195,23 @@
       }finally{ temizle(kok); }
     });
 
+    it('sayfa değişince eski bölümün önizlemesi açılmaz (bekleyen de düşer)', () => {
+      const kok = kur();
+      try{
+        const b = G().bolumler(kok)[0];
+        G().onizlemeAc(b.el, b.el);
+        expect(G().onizlemeVar()).toBe(true);
+        /* yeni çizim: önizleme kapanır */
+        G().uygula({ kok, modul:MOD, profil:'main', ekran:'x' });
+        expect(G().onizlemeVar()).toBe(false);
+        /* çizimden düşmüş (DOM'da olmayan) bölüm önizlenmez */
+        const kopuk = b.el.cloneNode(true);
+        G().onizlemeAc(kopuk, b.el);
+        expect(G().onizlemeVar()).toBe(false);
+        expect(document.querySelector('.gizle-onizleme')).toBe(null);
+      }finally{ G().onizlemeKapat(); temizle(kok); }
+    });
+
     it('başlık balonları anahtara karışmaz; â/î/û korunur', () => {
       const kok = document.createElement('div');
       kok.innerHTML = '<section class="kutu"><header class="kutu__bas"><h2 class="kutu__ad">'

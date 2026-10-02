@@ -311,8 +311,7 @@ R.Screens.team = (function(){
            kotudur. */
         voiceCard(),
         K.Card({
-          title:'Masasındaki rapor', sub:'Kural motoru hesapladı; ajan bunu yorumlar',
-          actions:K.Button({ label:'Brifing', icon:'refresh', size:'sm', act:'team-brief' }),
+          hint:'not-masasindaki-rapor', title:'Masasındaki rapor',           actions:K.Button({ label:'Brifing', icon:'refresh', size:'sm', act:'team-brief' }),
           body:html`
             <div class="stack-xs">${map(O.brief(agent.id).findings, f => html`
               <div class="finding">
@@ -324,8 +323,7 @@ R.Screens.team = (function(){
                 : html`<span class="tiny dim">${agent.reads.length} veri kaynağı</span>`}</div>`,
         }),
         K.Card({
-          title:'Ekipteki diğerleri', sub:'Alan dışı soruyu sahibine sor',
-          body:html`<div class="stack-xs">${map(R.AGENTS.filter(a => a.id !== agent.id), a => html`
+          hint:'not-ekipteki-digerleri', title:'Ekipteki diğerleri',           body:html`<div class="stack-xs">${map(R.AGENTS.filter(a => a.id !== agent.id), a => html`
             <button class="agentrow" data-act="team-agent" data-value="${a.id}">
               ${Avatar(a)}
               <span class="minw0"><b class="small">${a.name}</b>
@@ -481,6 +479,8 @@ R.Screens.team = (function(){
 
   return {
     id:'team',
+    /* iPhone Faz 4: açık sohbet ve ajanın raporu; ekibin geri kalanı şerit. */
+    kucukVarsayilan:['ekipteki-diğerleri'],
     title:'Ekip sohbeti',
     subtitle(){
       const agent = current();

@@ -257,6 +257,13 @@ ESP.HINTS = {
     ['goodhart', null, 'Çaba arttı da sonuç yerinde mi saydı? Nöbetçi hüküm vermez, soru sorar: ayrışmanın meşru sebepleri vardır.'],
     ['calib', null, 'Sistem söylemeden önce sen söyle. Ölçülen şey dardır: kayıtlı türlerde kör tahminlerinin kayıtlı sayıya ne kadar yaklaştığı. «Kendini tanıma» ölçülmez; bu bir üstbiliş sinyalidir. Değeri, sistem kapalıyken de elde kalmasıdır.'],
     ['calib', null, 'Gerçek değer girilince tahmin kapanır ve deftere yazılır.'],
+    ['not-masa', 'Masa', 'Balondaki sayılar kural motorunun; model açık da olsa sayıyı o yazmaz.'],
+    ['rule-engine', null, 'Patron kendi hesabını yapmaz: yedi uzman ve bir koçun raporunu okur, çelişkiyi öncelik sırasına göre çözer.'],
+    ['not-uzman-masalari', 'Uzman masaları', 'Her ajan yalnızca kendi alanına bakar. Alan dışı bir soru gelirse sahibine yönlendirir, cevap uydurmaz.'],
+    ['weekplan', null, 'Takvim değil sıra: hangi gün hangi disiplinin düştüğünü söyler, saat vermez.'],
+    ['precedence', null, 'İki uzman ters şey söylediğinde Patron bu sıraya uyar. Üstteki alttakini her zaman yener.'],
+    ['rule-engine', null, 'Model kapalıyken ajanın konuştuğu dil budur. Yedek değil varsayılan: model bir iyileştirmedir.'],
+    ['brief', null, 'Ham ses kaydı, tam taslak metni ve notun kendi cümlesi buraya girmez — yalnızca ölçülmüş metrikler ve durum etiketleri.'],
   ].forEach(([k, t, c]) => {
     const m = /[.!?…»)]$/.test(c) ? c : c + '.';
     if(!H[k]){ H[k] = { t:t || k, b:m }; return; }

@@ -12677,7 +12677,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'aabaa40', at:'2026-10-02 13:27', dirty:true };
+ESP.BUILD = { id:'55b2015', at:'2026-10-02 13:55', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19361,6 +19361,10 @@ LIFEOS.Gizle = (function(){
   /* Her çizimden sonra: gizlileri sakla, düzen kipinde düğmeleri koy,
      üst çubuktaki sayacı güncelle. o: { kok, modul, profil, ekran, varsayilan } */
   function uygula(o){
+    /* Yeni çizimde eski önizleme ve bekleyen zamanlayıcısı düşer: şeride
+       gelinip 250 ms dolmadan sayfa değişirse önceki ekranın bölümü YENİ
+       sayfada açılıyordu (ESP Profil'in düğmeleri Genel'de, 2026-10-02). */
+    onizlemeKapat();
     son = o;
     const d = oku(o);
     let degisti = false;
@@ -19860,7 +19864,7 @@ LIFEOS.Gizle = (function(){
   let onizleme = null, onizSayac = null;
   function onizlemeAc(kaynak, yakin){
     onizlemeKapat();
-    if(!kaynak) return;
+    if(!kaynak || !kaynak.isConnected) return;   // çizimden düşmüş bölüm önizlenmez
     const kopya = kaynak.cloneNode(true);
     kopya.hidden = false;
     kopya.removeAttribute('data-gizle-gizli');
@@ -29414,6 +29418,13 @@ ESP.HINTS = {
     ['goodhart', null, 'Çaba arttı da sonuç yerinde mi saydı? Nöbetçi hüküm vermez, soru sorar: ayrışmanın meşru sebepleri vardır.'],
     ['calib', null, 'Sistem söylemeden önce sen söyle. Ölçülen şey dardır: kayıtlı türlerde kör tahminlerinin kayıtlı sayıya ne kadar yaklaştığı. «Kendini tanıma» ölçülmez; bu bir üstbiliş sinyalidir. Değeri, sistem kapalıyken de elde kalmasıdır.'],
     ['calib', null, 'Gerçek değer girilince tahmin kapanır ve deftere yazılır.'],
+    ['not-masa', 'Masa', 'Balondaki sayılar kural motorunun; model açık da olsa sayıyı o yazmaz.'],
+    ['rule-engine', null, 'Patron kendi hesabını yapmaz: yedi uzman ve bir koçun raporunu okur, çelişkiyi öncelik sırasına göre çözer.'],
+    ['not-uzman-masalari', 'Uzman masaları', 'Her ajan yalnızca kendi alanına bakar. Alan dışı bir soru gelirse sahibine yönlendirir, cevap uydurmaz.'],
+    ['weekplan', null, 'Takvim değil sıra: hangi gün hangi disiplinin düştüğünü söyler, saat vermez.'],
+    ['precedence', null, 'İki uzman ters şey söylediğinde Patron bu sıraya uyar. Üstteki alttakini her zaman yener.'],
+    ['rule-engine', null, 'Model kapalıyken ajanın konuştuğu dil budur. Yedek değil varsayılan: model bir iyileştirmedir.'],
+    ['brief', null, 'Ham ses kaydı, tam taslak metni ve notun kendi cümlesi buraya girmez — yalnızca ölçülmüş metrikler ve durum etiketleri.'],
   ].forEach(([k, t, c]) => {
     const m = /[.!?…»)]$/.test(c) ? c : c + '.';
     if(!H[k]){ H[k] = { t:t || k, b:m }; return; }
@@ -55094,8 +55105,7 @@ ESP.Screens.office = (function(){
     return K.Grid(html`
       ${K.Span(12, (window.LIFEOS || {}).SOZLUK ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:ESP.Office.ready('patron') })) : '')}
       ${K.Span(12, K.Ledger(() => [
-        when(vo.masa, () => K.Entry({ wide:true, label:'Masa', meta:'kim konuşuyor',
-          note:'Balondaki sayılar kural motorunun; model açık da olsa sayıyı o yazmaz.',
+        when(vo.masa, () => K.Entry({ wide:true, hint:'not-masa', label:'Masa', meta:'kim konuşuyor',
           body:html`<div class="vofis">${raw(vo.masa)}${raw(vo.balon || '')}${raw(vo.durum || '')}</div>` })),
         when(vo.toplanti, () => K.Entry({ wide:true, label:'Günün toplantısı', meta:'her masadan tek cümle',
           body:raw(vo.toplanti) })),
@@ -55103,8 +55113,6 @@ ESP.Screens.office = (function(){
         K.Entry({
           label:'Patron', hint:'rule-engine',
           meta:ESP.Office.ready('patron') ? 'model bağlı' : 'kural motoru',
-          note:'Patron kendi hesabını yapmaz: yedi uzman ve bir koçun raporunu okur, '
-             + 'çelişkiyi öncelik sırasına göre çözer.',
           action:K.Button({ label:'Danış', size:'sm', act:'open-agent',
             data:{ 'data-agent':'patron' } }),
           body:html`
@@ -55117,8 +55125,6 @@ ESP.Screens.office = (function(){
         K.Entry({
           label:'Masalar arası devir', hint:'handoff',
           meta:devir.length ? devir.length + ' devir' : 'yok',
-          note:'Devir bir tavsiye değildir: «şu ölçüldü, şu masaya düşüyor» der. '
-             + 'Ölçülmemiş bir şey devredilemez — tahmin devir üretmez.',
           wide:true,
           body:devir.length
             ? html`${when(vo.devir, () => html`<div class="mb-12">${raw(vo.devir)}</div>`)}${map(devir, h => html`
@@ -55132,10 +55138,8 @@ ESP.Screens.office = (function(){
         }),
 
         K.Entry({
-          label:'Uzman masaları',
+          hint:'not-uzman-masalari', label:'Uzman masaları',
           meta:uzmanlar.length + ' masa',
-          note:'Her ajan yalnızca kendi alanına bakar. Alan dışı bir soru gelirse '
-             + 'sahibine yönlendirir, cevap uydurmaz.',
           wide:true,
           /* Masa kartlarinin basligi h3'tur; araya bir h2 girmezse baslik
              sirasi h1'den h3'e atlar ve ekran okuyucu bir seviye kaybeder.
@@ -55153,8 +55157,6 @@ ESP.Screens.office = (function(){
         K.Entry({
           label:'Haftalık plan', hint:'weekplan',
           meta:ESP.Plans.plan() ? 'kurulu' : 'yok',
-          note:'Takvim değil sıra: hangi gün hangi disiplinin düştüğünü söyler, '
-             + 'saat vermez.',
           wide:true,
           body:ESP.Parts.weekPlan(),
         }),
@@ -55162,8 +55164,6 @@ ESP.Screens.office = (function(){
         K.Entry({
           label:'Öncelik sırası', hint:'precedence',
           meta:ESP.PRECEDENCE.length + ' kural',
-          note:'İki uzman ters şey söylediğinde Patron bu sıraya uyar. '
-             + 'Üstteki alttakini her zaman yener.',
           body:K.Table({ tight:true, headers:[{ label:'#', num:true }, 'Kural', 'Neden'],
             rows:ESP.PRECEDENCE.map(p => [String(p.rank), p.label, p.note]) }),
         }),
@@ -55185,7 +55185,9 @@ ESP.Screens.office = (function(){
     /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
        bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
        «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-    kucukVarsayilan:['masalar-arası-devir', 'öncelik-sırası'],
+    /* iPhone Faz 4 («brifing + tek eylem»): açık Patron ve teklifler;
+       konuşan masa, toplantı satırları, uzman masaları, haftalık plan şerit. */
+    kucukVarsayilan:['masalar-arası-devir', 'öncelik-sırası', 'masa', 'günün-toplantısı', 'uzman-masaları', 'haftalık-plan'],
     title:'Masalar',
     headline(){
       const n = ESP.Office.notes().filter(x => x.tone === 'danger').length;
@@ -55299,8 +55301,6 @@ ESP.Screens.team = (function(){
         K.Entry({
           label:'Kural motorunun cümlesi', hint:'rule-engine',
           meta:'model olmadan',
-          note:'Model kapalıyken ajanın konuştuğu dil budur. Yedek değil '
-             + 'varsayılan: model bir iyileştirmedir.',
           body:html`<p class="rulesay">${ESP.Office.ruleText(a.id, brf)}</p>`,
         }),
 
@@ -55341,8 +55341,6 @@ ESP.Screens.team = (function(){
         K.Entry({
           label:'Brifing', hint:'brief',
           meta:'ajanın gördüğü tek şey',
-          note:'Ham ses kaydı, tam taslak metni ve notun kendi cümlesi buraya '
-             + 'girmez — yalnızca ölçülmüş metrikler ve durum etiketleri.',
           wide:true,
           body:K.Collapsible({
             title:'Ham brifing (JSON)',
@@ -55396,6 +55394,8 @@ ESP.Screens.team = (function(){
 
   return {
     id:'team',
+    /* iPhone Faz 4: açık masa ve konuşma; kural cümlesi, defter ve brifing şerit. */
+    kucukVarsayilan:['kural-motorunun-cümlesi', 'bu-masanın-defteri', 'brifing'],
     title:'Danışma',
     headline(){
       const a = agent();
@@ -59122,6 +59122,15 @@ ESP.App = (function(){
     gun:['bekleyen-iş', 'günün-dakikası', 'yedek', 'hkm', 'seri', 'hedeflerim', 'günün-toplamı', 'asgari-gün', 'entelektüel-hacim', 'haftanın-dağılımı', 'son-gün', 'seçili-gün'],
   };
 
+  /* iPhone Faz 5 (2026-10-02): Ayarlar bir iOS Ayarlar listesidir — ilk
+     görünür bölüm (profil formu, görünüm) açık, gerisi baştan tek satırlık
+     şerit; dokununca açılır. Rütbe olduğu gibi kalır (kullanıcı kararı). */
+  function ayarListesi(sc, kok){
+    if(!sc || sc.id === 'rutbe' || !kok || !ayarlardaMi(sc.id) || !(window.LIFEOS && LIFEOS.Gizle)) return [];
+    const gizli = (sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []);
+    return LIFEOS.Gizle.bolumler(kok).map(b => b.anahtar).filter(a => gizli.indexOf(a) < 0).slice(1);
+  }
+
   function sayfaBasiHtml(sc){
     const baslik = safe(() => sc.headline ? sc.headline() : '') || sc.title;
     const ozet = safe(() => sc.lede ? sc.lede() : '') || safe(() => sc.subtitle());
@@ -59427,7 +59436,7 @@ ESP.App = (function(){
         try{
           LIFEOS.Gizle.uygula({ kok:document.getElementById('main'), modul:'esp',
             profil:(ESP.Ornek && ESP.Ornek.aktif && ESP.Ornek.aktif()) || 'main', ekran:sc.id,
-            varsayilan:(sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []), kucukVarsayilan:sc.kucukVarsayilan || [] });
+            varsayilan:(sc.gizliVarsayilan || []).concat(SADE_GIZLI[sc.id] || []), kucukVarsayilan:(sc.kucukVarsayilan || []).concat(ayarListesi(sc, document.getElementById('main'))) });
         }catch(e){ console.error('Gizle:', e); }
       }
     }catch(err){
@@ -60586,7 +60595,7 @@ ESP.App = (function(){
   }
 
   return { boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS,
-    sectionOf, routeOn, yolOf, SADE_GIZLI, UST, THEMES, installManifest,
+    sectionOf, routeOn, yolOf, SADE_GIZLI, ayarListesi, UST, THEMES, installManifest,
     openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
 })();
 

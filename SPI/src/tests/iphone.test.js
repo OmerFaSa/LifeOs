@@ -390,3 +390,64 @@
     });
   });
 })();
+
+/* iPhone planı · Faz 4 · Ofis ve Danışma (SPİ): «brifing + tek eylem».
+   Masa cümleleri toplantıda, Patron'da ve uzman kartında üç kez yazılıyordu;
+   açık yalnız iş, gerisi şerit. Sabit notlar ⓘ'de. */
+(function(){
+  const { describe, it, expect, resetState } = SP.Test;
+  async function ciz(id){
+    const kok = document.createElement('div');
+    kok.innerHTML = String(await SP.Screens[id].render());
+    document.body.appendChild(kok);
+    return kok;
+  }
+  function acik(id, kok){
+    const sc = SP.Screens[id], G = window.LIFEOS.Gizle;
+    const gizli = (sc.gizliVarsayilan || []).concat(SP.App.SADE_GIZLI[id] || []);
+    const kucuk = sc.kucukVarsayilan || [];
+    return G.bolumler(kok).map(x => x.anahtar).filter(a => gizli.indexOf(a) < 0 && kucuk.indexOf(a) < 0);
+  }
+
+  describe('iPhone · Faz 4 · Ofis ve Danışma (SPİ)', () => {
+    ['office', 'team'].forEach(id => {
+      it(id + ': açık en çok üç; sabit not ekranda yok', async () => {
+        resetState();
+        const kok = await ciz(id);
+        try{
+          const a = acik(id, kok);
+          expect(id + ':' + a.join(',') + ':' + (a.length <= 3)).toBe(id + ':' + a.join(',') + ':true');
+          if(id === 'office') expect(kok.textContent.indexOf('Patron kendi hesabını yapmaz')).toBe(-1);
+        }finally{ kok.remove(); }
+      });
+    });
+  });
+})();
+
+/* iPhone planı · Faz 5 · Ayarlar (SPİ): iOS Ayarlar listesi. İlk görünür
+   bölüm açık, gerisi tek satırlık şerit; Rütbe olduğu gibi kalır. */
+(function(){
+  const { describe, it, expect, resetState } = SP.Test;
+  describe('iPhone · Faz 5 · Ayarlar (SPİ)', () => {
+    ['family', 'guide'].forEach(id => {
+      it(id + ': ilk bölüm açık, gerisi şerit; gizliler gizli kalır', async () => {
+        resetState();
+        const sc = SP.Screens[id];
+        const kok = document.createElement('div');
+        kok.innerHTML = String(await sc.render());
+        document.body.appendChild(kok);
+        try{
+          const G = window.LIFEOS.Gizle;
+          const gizli = (sc.gizliVarsayilan || []).concat(SP.App.SADE_GIZLI[id] || []);
+          const gorunen = G.bolumler(kok).map(b => b.anahtar).filter(a => gizli.indexOf(a) < 0);
+          const serit = SP.App.ayarListesi(sc, kok);
+          expect(serit.join(',')).toBe(gorunen.slice(1).join(','));
+          expect(gorunen.filter(a => serit.indexOf(a) < 0).length <= 1).toBe(true);
+        }finally{ kok.remove(); }
+      });
+    });
+    it('Rütbe ayar listesine girmez (olduğu gibi kalır)', () => {
+      expect(SP.App.ayarListesi({ id:'rutbe' }, document.body).length).toBe(0);
+    });
+  });
+})();

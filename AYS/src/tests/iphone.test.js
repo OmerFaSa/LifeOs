@@ -315,3 +315,69 @@
     });
   });
 })();
+
+/* iPhone planı · Faz 4 · Ofis ve Danışma (AYS): «brifing + tek eylem».
+   Masa cümleleri toplantıda, Patron'da ve uzman kartında üç kez yazılıyordu;
+   açık yalnız iş, gerisi şerit. Sabit notlar ⓘ'de. */
+(function(){
+  const { describe, it, expect, resetState } = R.Test;
+  async function ciz(id){
+    const kok = document.createElement('div');
+    kok.innerHTML = String(await R.Screens[id].render());
+    document.body.appendChild(kok);
+    return kok;
+  }
+  function acik(id, kok){
+    const sc = R.Screens[id], G = window.LIFEOS.Gizle;
+    const gizli = (sc.gizliVarsayilan || []).concat(R.App.SADE_GIZLI[id] || []);
+    const kucuk = sc.kucukVarsayilan || [];
+    return G.bolumler(kok).map(x => x.anahtar).filter(a => gizli.indexOf(a) < 0 && kucuk.indexOf(a) < 0);
+  }
+
+  describe('iPhone · Faz 4 · Ofis ve Danışma (AYS)', () => {
+    ['office', 'team'].forEach(id => {
+      it(id + ': açık en çok üç; sabit not ekranda yok', async () => {
+        resetState();
+        R.S.profile.setupDone = true;
+        await R.Model.ensurePlan(true);
+        await R.Model.ensureWeek(R.Model.currentWeek());
+        await R.Model.ensureDay(R.U.today());
+        const kok = await ciz(id);
+        try{
+          const a = acik(id, kok);
+          expect(id + ':' + a.join(',') + ':' + (a.length <= 3)).toBe(id + ':' + a.join(',') + ':true');
+          if(id === 'office'){ expect(kok.querySelector('.board')).toBeNull(); expect(R.Screens.office.kucukVarsayilan.indexOf('uzman-masaları') >= 0).toBe(true); }
+          if(id === 'team') expect(kok.textContent.indexOf('Alan dışı soruyu sahibine sor')).toBe(-1);
+        }finally{ kok.remove(); }
+      });
+    });
+  });
+})();
+
+/* iPhone planı · Faz 5 · Ayarlar (AYS): iOS Ayarlar listesi. İlk görünür
+   bölüm açık, gerisi tek satırlık şerit; Rütbe olduğu gibi kalır. */
+(function(){
+  const { describe, it, expect, resetState } = R.Test;
+  describe('iPhone · Faz 5 · Ayarlar (AYS)', () => {
+    ['guide', 'profiles'].forEach(id => {
+      it(id + ': ilk bölüm açık, gerisi şerit; gizliler gizli kalır', async () => {
+        resetState();
+        const sc = R.Screens[id];
+        const kok = document.createElement('div');
+        kok.innerHTML = String(await sc.render());
+        document.body.appendChild(kok);
+        try{
+          const G = window.LIFEOS.Gizle;
+          const gizli = (sc.gizliVarsayilan || []).concat(R.App.SADE_GIZLI[id] || []);
+          const gorunen = G.bolumler(kok).map(b => b.anahtar).filter(a => gizli.indexOf(a) < 0);
+          const serit = R.App.ayarListesi(sc, kok);
+          expect(serit.join(',')).toBe(gorunen.slice(1).join(','));
+          expect(gorunen.filter(a => serit.indexOf(a) < 0).length <= 1).toBe(true);
+        }finally{ kok.remove(); }
+      });
+    });
+    it('Rütbe ayar listesine girmez (olduğu gibi kalır)', () => {
+      expect(R.App.ayarListesi({ id:'rutbe' }, document.body).length).toBe(0);
+    });
+  });
+})();
