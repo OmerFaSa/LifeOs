@@ -63,12 +63,15 @@
         expect(yol.textContent).toContain('ESP');
         /* Çocuklar da 1×1 okuyucu metni: kendi «…» kesmeleri kırpılan içerik sayılmasın. */
         Array.from(yol.children).forEach(c => expect(c.clientWidth <= 1 && getComputedStyle(c).position === 'absolute').toBe(true));
-        /* Dar şeritte çekmece adı GÖRSEL olarak saklanır ama erişilebilir ad kalır. */
+        /* Dar şeritte görünen ad yok (2026-10-03: kapalıyken display:none,
+           açılınca solarak gelir); erişilebilir ad düğmenin kendisinde,
+           sayaç varsa adın yanında okunur. */
         const site = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays',
-          cekmeceler:[{ id:'bugun', ad:'Bugün', route:'today', on:true }] }) + '</div>');
+          cekmeceler:[{ id:'bugun', ad:'Bugün', route:'today', on:true }, { id:'onaylar', ad:'Onaylar', route:'onaylar', sayac:3 }] }) + '</div>');
         const cek = site.querySelector('.kenar__cekmece');
         expect(cek.getAttribute('title')).toBe('Bugün');
-        expect(getComputedStyle(site.querySelector('.kenar__ad')).display === 'none').toBe(false);
+        expect(cek.getAttribute('aria-label')).toBe('Bugün');
+        expect(site.querySelector('[data-cekmece="onaylar"]').getAttribute('aria-label')).toBe('Onaylar, 3 bekleyen');
         if(window.innerWidth >= 680){
           expect(getComputedStyle(site.firstElementChild).gridTemplateColumns.split(' ')[0]).toBe('64px');
         }
@@ -88,28 +91,16 @@
       expect(yeniMi(ciz('plan'))).toBe(false);
     });
 
-    /* Kullanıcı (2026-10-02): «sol taraftaki seçim kısmındaki kalabalığı
-       azalt». Ofis ve Kütüphanem «Daha fazla»nın altında; içlerinden
-       birindeyken açık gelir; hiçbir çekmece kalkmaz. */
-    it('sade: ikincil çekmeceler «Daha fazla» altında; içlerindeyken açık; hiçbiri kalkmaz', () => {
+    /* Kullanıcı (2026-10-03): «şu daha fazla kısmını da kaldır, bir işe
+       yaramıyor». Sekiz çekmece kenarda düz listede; hiçbiri kalkmaz. */
+    it('sade: sekiz çekmece düz listede, «Daha fazla» yok; hiçbiri kalkmaz', () => {
       const cek = on => K.CEKMECELER.map(c => ({ id:c.id, ad:c.ad, route:c.id, on:c.id === on }));
-      const say = d => d.querySelectorAll('[data-cekmece]').length;
-      let d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:cek('bugun') }) + '</div>');
+      const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:cek('ofis') }) + '</div>');
       try{
-        expect(say(d)).toBe(K.CEKMECELER.length);
-        const liste = d.querySelector('.kenar__dahafazla-liste');
-        expect(liste.hidden).toBe(true);
-        expect(Array.from(liste.querySelectorAll('[data-cekmece]')).map(x => x.dataset.cekmece).join(',')).toBe('ofis,kutuphane');
-        const dg = d.querySelector('.kenar__dahafazla-dugme');
-        dg.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
-        expect(liste.hidden).toBe(false);
-        expect(dg.getAttribute('aria-expanded')).toBe('true');
-        dg.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true }));
-        expect(liste.hidden).toBe(true);
-      }finally{ d.remove(); }
-      d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:cek('ofis') }) + '</div>');
-      try{
-        expect(d.querySelector('.kenar__dahafazla-liste').hidden).toBe(false);
+        expect(Array.from(d.querySelectorAll('.kenar__nav [data-cekmece]')).map(x => x.dataset.cekmece))
+          .toEqual(K.CEKMECELER.map(c => c.id));
+        expect(!!d.querySelector('.kenar__dahafazla, .kenar__dahafazla-dugme, .kenar__dahafazla-liste')).toBe(false);
+        expect(d.querySelector('[data-cekmece="ofis"]').classList.contains('is-on')).toBe(true);
       }finally{ d.remove(); }
     });
 
@@ -565,16 +556,112 @@
       }finally{ d.remove(); }
     });
 
-    it('orta duruş: sayfanın üst boşluğu ekranın boyuyla büyür (içerikle değil)', () => {
-      let r = null;
-      for(const ss of Array.from(document.styleSheets)){
-        let kurallar = [];
-        try{ kurallar = Array.from(ss.cssRules || []); }catch(e){ continue; }
-        kurallar.forEach(m => { if(m.media && /min-width:\s*680px/.test(m.media.mediaText))
-          Array.from(m.cssRules || []).forEach(ic => { if(ic.selectorText === '.site--v5 .sayfa' && /vh/.test(ic.style.paddingTop)) r = ic; }); });
-      }
-      expect(!!r).toBe(true);
-      expect(r.style.paddingTop).toContain('clamp(');
+    /* Kullanıcı (2026-10-02 gece): «yeşil yerdeki rank ve o kısmı kaldır,
+       kırmızı yerdeki simgeleri oraya taşı, üstteki kartı kaldır; sayfanın
+       ortasındaki asıl yer hep en ortada olsun». */
+    it('kenarın dibi: ara · sayfa düzeni · radyo · bildirimler · profil; rütbe ve Merkez satırı yok', () => {
+      const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[],
+        baglanti:{ durum:'bagli', saat:'14:08' }, rutbe:{ ad:'Bronz', etiket:'1.1', route:'rutbe' },
+        bildirim:{ sayi:2 }, profil:{ ad:'Ömer' } }) + '</div>');
+      try{
+        const a = Array.from(d.querySelectorAll('.kenar__dip button'));
+        expect(a.map(b => b.querySelector('.kenar__ad').textContent)).toEqual(['Ara', 'Sayfa düzeni', 'Radyo', 'Bildirimler', 'Ömer']);
+        expect(a[0].getAttribute('data-act')).toBe('open-palette');
+        expect(a[1].classList.contains('ust__gizli')).toBe(true);
+        expect(a[2].classList.contains('ust__ses')).toBe(true);
+        expect(a[3].getAttribute('data-act')).toBe('bildirim-ac');
+        expect(!!a[3].querySelector('.ust__zil-nokta')).toBe(true);
+        expect(a[4].getAttribute('data-act')).toBe('open-appearance');
+        expect(!!d.querySelector('.kenar__rutbe, .kenar__bag, [data-oz="140"], [data-oz="118"]')).toBe(false);
+        /* Erişilebilir ad görünen yazıyı içerir. */
+        a.forEach(b => expect(b.getAttribute('aria-label').indexOf(b.querySelector('.kenar__ad').textContent) >= 0).toBe(true));
+      }finally{ d.remove(); }
+    });
+
+    it('masaüstünde üst şerit yok: araçlar kenarda, yapışık çubuklar ekranın tepesine yapışır', () => {
+      const d = yerlestir('<div class="site site--v5">' + K.iskeletV5({ modul:'ays', cekmeceler:[], yol:['Bugün'] })
+        + '<div class="site__body"><div class="wrapc sayfa">x</div></div></div>');
+      try{
+        expect(getComputedStyle(d.querySelector('.ust')).display).toBe('none');
+        expect(getComputedStyle(d.querySelector('.site--v5')).getPropertyValue('--ust-h').trim()).toBe('0px');
+        expect(getComputedStyle(d.querySelector('.kenar__dip .ust__zil')).display !== 'none').toBe(true);
+      }finally{ d.remove(); }
+    });
+
+    it('kenar açılıp kapanırken yerleşim zıplamaz: simge yerinde, ad solar, ayraç yükseklikte açılır', async () => {
+      const d = yerlestir('<div class="site site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[
+        { id:'calisma', ad:'Çalışma', route:'subjects', on:true, bolumler:[
+          { route:'subjects', ad:'Konu çalış', on:true }, { route:'solve', ad:'Soru çöz' }] }] }) + '</div>');
+      try{
+        const kenar = d.querySelector('.kenar');
+        const cek = kenar.querySelector('.kenar__cekmece');
+        const ad = cek.querySelector('.kenar__ad');
+        const liste = kenar.querySelector('.kenar__bolumler');
+        const simgeX = () => Math.round(cek.querySelector('.kbk-ic').getBoundingClientRect().left - kenar.getBoundingClientRect().left);
+        /* Dikey: kullanıcı (2026-10-03) «açınca ikonlar aşağı kayıyor» — sistem
+           seçicinin kapalı listesi açık kenarda 8 px yer tutuyordu. */
+        const cekY = () => Math.round(cek.getBoundingClientRect().top - kenar.getBoundingClientRect().top);
+        /* Kapalı: ad ve ayraç yok (odaklanmaz, kırpılmış sayılmaz); simge yerinde. */
+        expect(getComputedStyle(ad).display).toBe('none');
+        expect(getComputedStyle(liste).display).toBe('none');
+        /* Sistem seçicinin kapalı listesi de yok: çizili kalınca kırpılmış
+           içerik sayılıyor ve dolgusu yer tutuyordu. */
+        expect(getComputedStyle(kenar.querySelector('.kenar__modulpencere')).display).toBe('none');
+        expect(cek.getAttribute('title')).toBe('Çalışma');
+        const kapaliX = simgeX(), kapaliY = cekY();
+        kenar.classList.add('kenar--tutulu');
+        /* Ad bilerek gecikmeli gelir (önce yer açılır): geçişin bitişini bekle. */
+        await new Promise(r => setTimeout(r, 500));
+        expect(getComputedStyle(ad).opacity).toBe('1');
+        expect(simgeX()).toBe(kapaliX);
+        expect(cekY()).toBe(kapaliY);
+        expect(parseFloat(getComputedStyle(liste).height) > 0).toBe(true);
+        /* Açılış ve kapanış yumuşak eğriyle (kural; süre azaltılmış kipte sıfırlanır). */
+        let acilis = null;
+        for(const ss of Array.from(document.styleSheets)){
+          let kurallar = [];
+          try{ kurallar = Array.from(ss.cssRules || []); }catch(e){ continue; }
+          kurallar.forEach(m => Array.from(m.cssRules || []).forEach(ic => {
+            if(/kenar--tutulu/.test(ic.selectorText || '') && /width/.test(ic.style.transitionProperty || ic.style.transition || '')) acilis = ic; }));
+        }
+        expect(!!acilis).toBe(true);
+        expect(/cubic-bezier/.test(acilis.style.transitionTimingFunction || acilis.style.transition)).toBe(true);
+      }finally{ d.remove(); }
+    });
+
+    it('kenardan açılan katman kenarı açık tutar, kenarın sağına ve düğmenin hizasına yerleşir', () => {
+      /* Gerçekte kenar ekrana yapışıktır: deneme kabuğu da görüş alanında. */
+      const d = yerlestir('<div class="site site--v5" style="position:fixed;inset:0;z-index:1">' + K.kenarCubugu({ modul:'ays', cekmeceler:[] }) + '</div>');
+      try{
+        const kenar = d.querySelector('.kenar');
+        const btn = kenar.querySelector('.kenar__dip [data-act="bildirim-ac"]');
+        const p = K.katmanAc('kt-kenar', K.bildirimPaneli({ gruplar:[] }), btn);
+        expect(kenar.classList.contains('kenar--tutulu')).toBe(true);
+        const pr = p.getBoundingClientRect(), kr = kenar.getBoundingClientRect(), br = btn.getBoundingClientRect();
+        expect(pr.left >= kr.left + 200).toBe(true);
+        expect(Math.abs(pr.bottom - br.bottom) < 2 || Math.round(pr.top) === 12).toBe(true);
+        K.katmanKapat();
+        expect(kenar.classList.contains('kenar--tutulu')).toBe(false);
+      }finally{ K.katmanKapat(); d.remove(); }
+    });
+
+    it('orta duruş: kısa sayfa hep dikeyde ortada; uzun sayfa üstten başlar, yukarı taşmaz', () => {
+      const kur = boy => yerlestir('<div class="site site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[] })
+        + '<div class="site__body"><div class="wrapc sayfa"><main class="content"><div style="height:' + boy + 'px"></div></main></div></div></div>');
+      const kisa = kur(120);
+      try{
+        const b = kisa.querySelector('.site__body').getBoundingClientRect(), s = kisa.querySelector('.sayfa').getBoundingClientRect();
+        expect(Math.abs((s.top - b.top) - (b.bottom - s.bottom)) < 2).toBe(true);
+        expect(s.top - b.top > 40).toBe(true);
+        /* Levhanın içinde de simetrik: içeriğin alt dolgusu .sayfa'nınkine eklenmez. */
+        const ic = kisa.querySelector('.content').getBoundingClientRect();
+        expect(Math.abs((ic.top - s.top) - (s.bottom - ic.bottom)) < 2).toBe(true);
+      }finally{ kisa.remove(); }
+      const uzun = kur(3000);
+      try{
+        const b = uzun.querySelector('.site__body').getBoundingClientRect(), s = uzun.querySelector('.sayfa').getBoundingClientRect();
+        expect(Math.abs(s.top - b.top) < 1).toBe(true);
+      }finally{ uzun.remove(); }
     });
   });
 })();

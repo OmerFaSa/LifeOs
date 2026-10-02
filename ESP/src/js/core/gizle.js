@@ -1029,6 +1029,13 @@ LIFEOS.Gizle = (function(){
     if(b && !b.el.hidden) b.el.classList.add('gizle-vurgu');
   }
 
+  /* Düğme iki yerde durur (masaüstünde kenarın dibi, telefonda üst şerit);
+     her genişlikte yalnız biri görünür. */
+  function gorunurDugme(){
+    const hepsi = Array.from(document.querySelectorAll('.ust__gizli'));
+    return hepsi.find(b => b.getClientRects().length > 0) || hepsi[0] || null;
+  }
+
   function panelAc(dugme){
     if(panel){ panelKapat(); return; }
     panelSekme = 'sayfa';
@@ -1039,12 +1046,17 @@ LIFEOS.Gizle = (function(){
     panel.setAttribute('aria-label', 'Sayfa düzeni');
     panelCiz();
     document.body.appendChild(panel);
-    const r = dugme.getBoundingClientRect();
-    /* Sağ kenarı düğmeye hizalı, ama dar ekranda da ekranın içinde. */
-    const w = panel.offsetWidth, W = document.documentElement.clientWidth || window.innerWidth;
-    panel.style.top = Math.round(r.bottom + 6) + 'px';
-    panel.style.left = Math.round(Math.max(8, Math.min(r.right - w, W - w - 8))) + 'px';
-    panel.style.right = 'auto';
+    /* Düğme kenarın dibindeyse (masaüstü) panel kenarın sağına, düğmenin
+       hizasına yerleşir ve kenarı açık tutar (kabuk.js capaYerlestir). */
+    const K = window.LIFEOS && window.LIFEOS.KABUK;
+    if(!(K && K.capaYerlestir && K.capaYerlestir(panel, dugme))){
+      const r = dugme.getBoundingClientRect();
+      /* Sağ kenarı düğmeye hizalı, ama dar ekranda da ekranın içinde. */
+      const w = panel.offsetWidth, W = document.documentElement.clientWidth || window.innerWidth;
+      panel.style.top = Math.round(r.bottom + 6) + 'px';
+      panel.style.left = Math.round(Math.max(8, Math.min(r.right - w, W - w - 8))) + 'px';
+      panel.style.right = 'auto';
+    }
     dugme.setAttribute('aria-expanded', 'true');
     const ilk = panel.querySelector('[data-satir]') || panel.querySelector('button');
     if(ilk) ilk.focus();
@@ -1054,6 +1066,8 @@ LIFEOS.Gizle = (function(){
     vurgula(null, false);
     if(!panel) return;
     panel.remove(); panel = null;
+    const K = window.LIFEOS && window.LIFEOS.KABUK;
+    if(K && K.kenarBirak) K.kenarBirak();
     document.querySelectorAll('.ust__gizli').forEach(b => b.setAttribute('aria-expanded', 'false'));
   }
 
@@ -1069,7 +1083,7 @@ LIFEOS.Gizle = (function(){
       if(ac){ e.preventDefault(); panelAc(ac); return; }
       if(t.closest('[data-duzen-bitir]')){ e.preventDefault(); duzenle(false); return; }
       const dp = t.closest('[data-gizle-dip]');
-      if(dp){ e.preventDefault(); e.stopPropagation(); const u = document.querySelector('.ust__gizli'); if(u) panelAc(u); return; }
+      if(dp){ e.preventDefault(); e.stopPropagation(); const u = gorunurDugme(); if(u) panelAc(u); return; }
       const ga = t.closest('[data-geri-al]');
       if(ga){ e.preventDefault(); geriAl(ga.closest('.gizle-geri')); return; }
       const gz = t.closest('[data-gizle]');

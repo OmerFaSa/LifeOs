@@ -641,5 +641,26 @@
         expect(!!b.querySelector(':scope > .raf-ac')).toBe(false);
       }finally{ temizle(kok); }
     });
+
+    /* Kullanıcı (2026-10-02 gece): sağ üstün araçları kenarın dibine taşındı. */
+    it('kenarın dibindeki düğmeden açılan panel kenarın sağına yerleşir ve kenarı açık tutar; kapanınca bırakır', () => {
+      const kok = sayfa3('Kenar', AD); G()._sifirla();
+      const k = document.createElement('div');
+      k.className = 'site site--v5';
+      k.innerHTML = '<aside class="kenar"><div class="kenar__dip"><button class="ust__gizli kenar__arac" type="button">'
+        + '<i class="ust__gizli-sayi"></i><span class="kenar__ad">Sayfa düzeni</span></button></div></aside>';
+      document.body.appendChild(k);
+      G().uygula({ kok, modul:MOD, profil:'p', ekran:'kenar' });
+      try{
+        const kenar = k.querySelector('.kenar'), d = k.querySelector('.ust__gizli');
+        G().panelAc(d);
+        const p = document.querySelector('.kmenu--gizle');
+        expect(!!p).toBe(true);
+        expect(kenar.classList.contains('kenar--tutulu')).toBe(true);
+        expect(p.getBoundingClientRect().left >= kenar.getBoundingClientRect().left + 200).toBe(true);
+        G().panelKapat();
+        expect(kenar.classList.contains('kenar--tutulu')).toBe(false);
+      }finally{ bitir(kok); k.remove(); }
+    });
   });
 })();

@@ -52,7 +52,7 @@
         const buz = getComputedStyle(s, '::before');
         expect(buz.content !== 'none').toBe(true);
         expect(buz.zIndex).toBe('-1');
-        expect(buz.borderTopLeftRadius).toBe('32px');
+        expect(buz.borderTopLeftRadius).toBe('28px');
         /* Kenarlardan içeride: tam ekran değil, sütunun kendisi. */
         expect(parseFloat(buz.left) > 0 && parseFloat(buz.right) > 0 && parseFloat(buz.top) > 0).toBe(true);
         /* Yeni yığın bağlamı açılmaz: sayfanın içindeki katmanlar üst

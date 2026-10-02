@@ -77,7 +77,6 @@ window.LIFEOS = window.LIFEOS || {};
     ayarlar:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
     ara:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
     bilgi:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><path d="M12 7.6v.1"/>',
-    dahafazla:'<circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/>',
     zil:'<path d="M6.5 16v-4.5a5.5 5.5 0 0 1 11 0V16l1.5 2h-14z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
     muzik:'<path d="M9.5 17.5V6.5l9-2v11"/><circle cx="7" cy="17.5" r="2.5"/><circle cx="16" cy="15.5" r="2.5"/>',
     kenar:'<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/>',
@@ -286,12 +285,6 @@ window.LIFEOS = window.LIFEOS || {};
     if(gecisSaati) clearTimeout(gecisSaati);
     gecisSaati = setTimeout(() => { k.classList.remove('sayfa-gecis'); k.classList.remove('cekmece-gecis'); }, 900);
   }
-  /* İKİNCİL ÇEKMECELER (kullanıcı, 2026-10-02: «sol taraftaki seçim
-     kısmındaki kalabalığı azalt»): ara sıra açılan çekmeceler tek «Daha
-     fazla» satırının altında durur; içlerinden birindeyken açık gelir.
-     Hiçbir çekmece kalkmadı; sıra ve adlar aynı (CEKMECELER). */
-  const IKINCIL = ['ofis', 'kutuphane'];
-  let dahaFazlaAcik = false;
   /* Kenar açıkken yapılan son çizimin zamanı (bkz. kur: «açık kaldı»). */
   let acikCizimZamani = 0;
   function kenarCubugu(o){
@@ -314,48 +307,62 @@ window.LIFEOS = window.LIFEOS || {};
           + '</div>' : '';
       return '<div class="kenar__cekmece-kap">'
         + '<button class="kenar__cekmece' + (c.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(c.route) + '"'
-        + ' data-cekmece="' + kac(c.id) + '" title="' + kac(c.ad) + '"' + (c.on && !(c.bolumler || []).some(b => b.on && b.route !== c.route) ? ' aria-current="page"' : '') + '>'
+        /* Erişilebilir ad düğmenin kendisinde: dar kenarda görünen ad yoktur
+           (kabuk.css), sayacı olan çekmece yalnız «3 bekleyen» diye okunurdu. */
+        + ' data-cekmece="' + kac(c.id) + '" title="' + kac(c.ad) + '"'
+        + ' aria-label="' + kac(c.ad + (c.sayac ? ', ' + c.sayac + ' bekleyen' : '')) + '"' + (c.on && !(c.bolumler || []).some(b => b.on && b.route !== c.route) ? ' aria-current="page"' : '') + '>'
         + simge(c.id) + '<span class="kenar__ad">' + kac(c.ad) + '</span>' + sayac + '</button>' + bol + '</div>';
     };
-    const tum = o.cekmeceler || [];
-    const ikincilL = tum.filter(c => IKINCIL.indexOf(c.id) >= 0);
-    const dfAcik = dahaFazlaAcik || ikincilL.some(c => c.on);
-    const cek = tum.filter(c => IKINCIL.indexOf(c.id) < 0).map(cekHtml).join('')
-      + (ikincilL.length ? '<div class="kenar__dahafazla' + (dfAcik ? ' is-acik' : '') + '">'
-        + '<div class="kenar__cekmece-kap"><button type="button" class="kenar__cekmece kenar__dahafazla-dugme" aria-expanded="' + (dfAcik ? 'true' : 'false') + '"'
-        +   ' aria-controls="kenar-dahafazla" title="Daha fazla">' + simge('dahafazla') + '<span class="kenar__ad">Daha fazla</span></button></div>'
-        + '<div class="kenar__dahafazla-liste" id="kenar-dahafazla"' + (dfAcik ? '' : ' hidden') + '>' + ikincilL.map(cekHtml).join('') + '</div>'
-        + '</div>' : '');
-    const b = o.baglanti || {};
-    const d = b.durum || 'kapali';
-    const bagMetin = d === 'bagli' ? 'Merkez bağlı' : d === 'ulasilamadi' ? 'Merkeze ulaşılamadı'
-      : d === 'bekliyor' ? 'Merkez açık' : 'Merkez kapalı';
-    const bagAlt = d === 'bagli' ? (b.saat ? 'Son eşleme ' + b.saat : 'bağlı')
-      : d === 'bekliyor' ? 'henüz gönderim olmadı' : 'her şey çalışıyor';
-    const r = o.rutbe;
-    const rutbe = r && r.etiket && r.etiket !== '—'
-      ? '<button class="kenar__rutbe" data-oz="140" data-act="go" data-route="' + kac(r.route || 'rutbe') + '"'
-        + ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '">'
-        + '<i class="kenar__madalya" aria-hidden="true"' + (r.renk ? ' style="--kademe-renk:' + kac(r.renk) + '"' : '') + '></i>'
-        + '<span><b>' + kac(r.ad || '') + '</b> ' + kac(r.etiket) + '</span>' + simge('ileri') + '</button>' : '';
+    /* Sekiz çekmece DÜZ listede (kullanıcı, 2026-10-03: «şu daha fazla
+       kısmını da kaldır, bir işe yaramıyor»). Ofis ve Kütüphanem önceden
+       «Daha fazla»nın altındaydı; hiçbiri kalkmadı, sıra ve adlar aynı. */
+    const cek = (o.cekmeceler || []).map(cekHtml).join('');
     /* Kenar açıkken (fare üstünde ya da odak içinde) yeniden çizilirse —
        bir bölüme basınca olduğu gibi — açılış dizilişi TEKRAR oynamaz:
        çizim eski kenar hâlâ ekrandayken kurulur, açık olduğu buradan bilinir.
        Fare kenardan çıkınca sınıf düşer (kur), sonraki açılış yine dizilir. */
     const acikKaldi = typeof document !== 'undefined'
-      && !!document.querySelector('.kenar:hover, .kenar:focus-within');
+      && !!document.querySelector('.kenar:hover, .kenar:focus-within, .kenar.kenar--tutulu');
     if(acikKaldi) acikCizimZamani = Date.now();
-    return '<aside class="kenar' + (acikKaldi ? ' kenar--acik-kaldi' : '') + '" id="kenar" data-modul="' + kac(o.modul || 'ays') + '" aria-label="Gezinme">'
+    /* Kenardan açılmış bir katman açıkken yeniden çizim (tema değişti):
+       kenar açık KALIR, katman havada asılı kalmaz. */
+    const tutulu = kenarTutuluMu();
+    return '<aside class="kenar' + (acikKaldi ? ' kenar--acik-kaldi' : '') + (tutulu ? ' kenar--tutulu' : '') + '" id="kenar" data-modul="' + kac(o.modul || 'ays') + '" aria-label="Gezinme">'
       + '<button class="kenar__marka" data-act="modul-menu" aria-haspopup="dialog" aria-label="LifeOS — sistemler arası geçiş">'
       +   '<i class="kenar__logo" aria-hidden="true"><b></b><b></b><b></b><b></b></i><span>LifeOS</span></button>'
       + modulGecisi(o.modul, o.loc)
       + (o.baglam ? '<p class="kenar__baglam">' + kac(o.baglam) + '</p>' : '')
       + '<nav class="kenar__nav" aria-label="Çekmeceler">' + cek + '</nav>'
-      + '<div class="kenar__dip">'
-      +   '<button class="kenar__bag kenar__bag--' + kac(d) + '" data-oz="118" data-act="go" data-route="' + kac(b.route || 'guide') + '">'
-      +     '<i class="kenar__merkez" aria-hidden="true"></i><span><b>' + kac(bagMetin) + '</b><small>' + kac(bagAlt) + '</small></span></button>'
-      +   rutbe
-      + '</div></aside>';
+      + '<div class="kenar__dip">' + kenarAraclari(o) + '</div></aside>';
+  }
+
+  /* KENARIN DİBİ (kullanıcı, 2026-10-02 gece: «yeşil yerdeki rank ve o
+     kısmı kaldır, kırmızı yerdeki simgeleri oraya taşı»). Sağ üstün
+     araçları burada; rütbe çipi ve Merkez satırı kenardan kalktı (rütbe
+     Ayarlar › Rütbe'de, Merkez bağlantısı Ayarlar'da). Sınıflar üst
+     şeritle aynı: gizle.js sayacı, ses.js durumu ve data-act işleyicileri
+     iki yerde de aynen çalışır. Masaüstünde üst şerit yok, telefonda kenar
+     yok: her genişlikte tek takım görünür (kabuk.css «ARAÇLAR KENARDA»). */
+  function kenarAraclari(o){
+    const bil = o.bildirim || {};
+    const prof = o.profil || {};
+    const ad = (prof.ad || '').trim();
+    const harf = (prof.harf || ad.charAt(0) || '·').toLocaleUpperCase('tr-TR');
+    const etiket = s => '<span class="kenar__ad">' + kac(s) + '</span>';
+    return '<div class="kenar__araclar" role="group" aria-label="Araçlar">'
+      + '<button class="ust__ara kenar__arac" type="button" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)" title="Ara (Ctrl K)">'
+      +   simge('ara') + etiket('Ara') + '</button>'
+      + '<button class="ust__gizli kenar__arac" type="button" aria-haspopup="dialog" aria-expanded="false"'
+      +   ' aria-label="Sayfa düzeni" title="Sayfa düzeni: sırala, küçült, gizle">'
+      +   simge('gizli') + '<i class="ust__gizli-sayi" aria-hidden="true"></i>' + etiket('Sayfa düzeni') + '</button>'
+      + ustSes(true)
+      + '<button class="ust__zil kenar__arac" type="button" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
+      +   ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
+      +   simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + etiket('Bildirimler') + '</button>'
+      + '<button class="ust__profil kenar__arac kenar__arac--profil" type="button" data-act="open-appearance" aria-haspopup="dialog"'
+      +   ' aria-label="' + kac('Profil ve görünüm' + (ad ? ' — ' + ad : '')) + '">'
+      +   '<i class="kenar__avatar" aria-hidden="true">' + kac(harf) + '</i>' + etiket(ad || 'Profil') + '</button>'
+      + '</div>';
   }
 
   /* İnce üst şerit. o: { modul, yol:[…], bildirim:{ sayi, acil }, profil,
@@ -408,13 +415,14 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div></div></header>';
   }
 
-  function ustSes(){
+  function ustSes(kenarda){
     const S = L.SES;
     const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Radyo ve sesler', ipucu:'Radyo' };
-    return '<button class="ust__ses' + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
+    return '<button class="ust__ses' + (kenarda ? ' kenar__arac' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
       + ' aria-expanded="' + (katmanAcik('kabuk-ses') ? 'true' : 'false') + '"'
       + ' aria-label="' + kac(d.etiket) + '" title="' + kac(d.ipucu) + '">'
-      + simge('muzik') + '<i class="ust__ses-nokta" aria-hidden="true"></i></button>';
+      + simge('muzik') + '<i class="ust__ses-nokta" aria-hidden="true"></i>'
+      + (kenarda ? '<span class="kenar__ad">Radyo</span>' : '') + '</button>';
   }
 
   /* Modüllerin tek çağrısı: ustCubuk'a verilen nesnenin aynısı + her
@@ -716,6 +724,35 @@ window.LIFEOS = window.LIFEOS || {};
   let acikId = null;
   let capa = null;
 
+  /* KENARDAN AÇILAN KATMAN: kenar açık tutulur (.kenar--tutulu; fare
+     katmana geçince kenar kapanıp katman havada kalmasın) ve katman
+     kenarın AÇIK sağ kenarına, düğmenin alt hizasına yerleşir (araçlar
+     kenarın dibinde: yukarı doğru açılır). gizle.js de kullanır. */
+  let kenarTutan = false;
+  function kenarTutuluMu(){
+    return kenarTutan && typeof document !== 'undefined'
+      && !!((acikId && document.getElementById(acikId)) || document.querySelector('.kmenu--gizle'));
+  }
+  function capaYerlestir(panel, anchor){
+    const kenar = anchor && anchor.closest ? anchor.closest('.kenar') : null;
+    if(!kenar || telefonMu()) return false;
+    kenar.classList.add('kenar--tutulu');
+    kenarTutan = true;
+    const kr = kenar.getBoundingClientRect(), r = anchor.getBoundingClientRect();
+    const acik = parseFloat(getComputedStyle(kenar).getPropertyValue('--kenar-acik')) || 216;
+    const h = panel.offsetHeight, w = panel.offsetWidth;
+    const left = Math.min(kr.left + acik + 10, Math.max(12, window.innerWidth - w - 12));
+    const top = Math.max(12, Math.min(r.bottom - h, window.innerHeight - h - 12));
+    panel.style.left = Math.round(left) + 'px';
+    panel.style.top = Math.round(top) + 'px';
+    panel.style.right = 'auto';
+    return true;
+  }
+  function kenarBirak(){
+    kenarTutan = false;
+    if(typeof document !== 'undefined') document.querySelectorAll('.kenar.kenar--tutulu').forEach(k => k.classList.remove('kenar--tutulu'));
+  }
+
   function katmanAc(id, htmlMetin, anchor){
     katmanKapat();
     const kok = document.getElementById('overlay-root') || document.body;
@@ -728,7 +765,8 @@ window.LIFEOS = window.LIFEOS || {};
     acikId = id;
     capa = anchor || null;
     if(capa) capa.setAttribute('aria-expanded', 'true');
-    if(!telefonMu() && anchor && anchor.getBoundingClientRect){
+    if(capaYerlestir(panel, anchor)){ /* kenarın sağında, düğmenin hizasında */ }
+    else if(!telefonMu() && anchor && anchor.getBoundingClientRect){
       const r = anchor.getBoundingClientRect();
       const w = panel.offsetWidth;
       let left = r.right - w;
@@ -750,6 +788,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(!acikId) return false;
     const el = document.getElementById(acikId);
     if(el) el.remove();
+    kenarBirak();
     if(capa){
       capa.setAttribute('aria-expanded', 'false');
       if(capa.isConnected && document.activeElement === document.body){ try{ capa.focus({ preventScroll:true }); }catch(e){} }
@@ -868,18 +907,6 @@ window.LIFEOS = window.LIFEOS || {};
         return;
       }
       if(!(e.target.closest && e.target.closest('.kenar__modulpencere'))) modulPencereKapat();
-      /* «Daha fazla»: ikincil çekmeceleri açar/kapatır; seçim yeniden
-         çizimde korunur. */
-      const df = e.target.closest && e.target.closest('.kenar__dahafazla-dugme');
-      if(df){
-        const kap = df.closest('.kenar__dahafazla');
-        const liste = kap.querySelector('.kenar__dahafazla-liste');
-        dahaFazlaAcik = liste.hidden;
-        liste.hidden = !dahaFazlaAcik;
-        kap.classList.toggle('is-acik', dahaFazlaAcik);
-        df.setAttribute('aria-expanded', dahaFazlaAcik ? 'true' : 'false');
-        return;
-      }
       const k = e.target.closest && e.target.closest('[data-kenar-ac]');
       if(k){ e.preventDefault(); kenarDar(); return; }
       const a = e.target.closest && e.target.closest('a[data-modul-gecis]');
@@ -948,5 +975,6 @@ window.LIFEOS = window.LIFEOS || {};
     bolumCubugu, altBant, menuSayfasi,
     modulMenusu, bildirimPaneli, hizliEkle,
     katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis, kenarDar, kenarDarMi, kenarIlkDar,
+    capaYerlestir, kenarBirak,
   });
 })();

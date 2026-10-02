@@ -1,4 +1,4 @@
-/* ZEMİN — yumuşak renk zemini ve içerik sütununun arkasındaki buzlu yüzey.
+/* ZEMİN — yumuşak renk zemini ve içerik sütununun arkasındaki buzlu levha.
 
    ===================== BU DOSYA TEK KAYNAKTIR =====================
    Kaynağı `brand/ortak/zemin.css`; `python3 tools/ortak.py --yay` ile üç
@@ -6,47 +6,106 @@
    `brand/ortak/zemin.js` tutar (`<html data-zemin="yumusak|sade">`).
 
    Kullanıcı (2026-10-02): «arka plana soft bir resim, panellerin olduğu
-   yerin arkasına hafif, küçük, tam ekranı kaplamayacak buzlu madde».
-   Canlı denemeyi (açık ve koyu tema) görüp bu hâli seçti.
+   yerin arkasına hafif, küçük, tam ekranı kaplamayacak buzlu madde»;
+   canlı denemeyi görüp seçti. Aynı gece: «camsı panelin arkasındaki renk
+   kısmını çok daha güzel, profesyonel yap», «bazı sayfalarda yatay,
+   bazılarında dikey» (levhanın eni sayfadan sayfaya değişiyordu).
 
-   · «Resim» bir dosya değil: dört yumuşak renk lekesi, sol üstteki
-     modülün kendi rengi (--mod). Sabit katmanda (body::before) durur,
-     sayfayla kaymaz; açık/koyu temaya kendiliğinden uyar, ağ isteği yok.
-   · Buzlu yüzey içerik sütununun (.sayfa) ARKASINDA, kenarlardan içeride
-     yuvarlak bir levhadır; ekranı kaplamaz. Telefonda yok: orada sütun
-     zaten ekranın kendisi.
-   · backdrop-filter YOK: arkadaki lekeler zaten bulanık birer geçiş; yarı
-     saydam yüzey aynı «buzlu» görünüşü verir ve uzun sayfada kaydırma
-     pahalılaşmaz.
+   · «Resim» bir dosya değil. Renkler MODÜLÜN RENGİNDEN türetilir (oklch
+     göreli renk): sol üstte modülün kendisi, sağ üstte ve sağ altta iki
+     komşu tonu (±40°), sol altta sabit sıcak bir kum tonu; altta
+     yukarıdan aşağı çok hafif bir taban geçişi. Böylece AYS mavi-mor-gök,
+     SPİ camgöbeği-mavi-yeşil, ESP turuncu-altın-gül olur: dört rastgele
+     pastel değil, tek ailenin tonları. Göreli rengi tanımayan tarayıcıda
+     onaylanmış pastel lekeler kalır.
+   · İnce bir gren (SVG gürültüsü, dosya değil) geniş geçişlerdeki bant
+     izini kırar; koyuda kenarlar hafifçe kararır (derinlik). Hepsi sabit
+     katmanda (body::before/::after), sayfayla kaymaz, ağ isteği yok.
+   · Buzlu levha içerik sütununun (.sayfa) arkasında, kenarlardan
+     içeride, yukarıdan aşağı hafifçe incelen yarı saydam yüzey; üst
+     kenarında ışık çizgisi, altında yumuşak gölge. Her sayfada AYNI EN
+     (1180 px, --content-max): Bugün'ün 960 px okuma sütunu levhanın içinde
+     ortalanır. Telefonda levha yok: orada sütun zaten ekranın kendisi.
+     Dikeyde hep ortada (kabuk.css «ORTA DURUŞ»).
+   · Levhada backdrop-filter YOK: arkası zaten bulanık geçiş; uzun sayfada
+     kaydırma pahalılaşmaz. Kenar (dar, yapışık) camdır: küçük alan.
    · Kartlar opak kalır (kabuk.css CAM kuralı: okunan şey camın arkasında
      durmaz). Kontrast bu yüzden değişmez.
    · `.sayfa` yalnız `position:relative` alır, z-index ALMAZ: yeni yığın
-     bağlamı açılmaz, sayfadaki katmanlar üst şerit ve kenarla eskisi gibi
-     dizilir. Levha ve zemin kök bağlamda z-index:-1'de, belge sırasıyla.
+     bağlamı açılmaz. Levha ve zemin kök bağlamda z-index:-1'de.
    · «Saydamlığı azalt» tercihinde zemin.js `data-zemin`'i Sade yapar (CSS
      koşulu değil: bu özelliği tanımayan tarayıcıda `not (…)` sorgusu
      «bilinmez» sayılır ve zemini tümden kapatırdı). */
 
 :root{
-  --zemin-guc:30%;
-  --buz:color-mix(in oklab, var(--surface) 46%, transparent);
-  --buz-isik:inset 0 1px 0 rgba(255,255,255,.6), inset 0 0 0 1px rgba(255,255,255,.35);
-  --buz-golge:0 24px 60px -30px rgba(0,0,0,.25);
+  --zemin-1:color-mix(in oklab, var(--mod, var(--ays)) 30%, transparent);
+  --zemin-2:color-mix(in oklab, #E9A6C1 30%, transparent);
+  --zemin-3:color-mix(in oklab, #8FD3BF 30%, transparent);
+  --zemin-4:color-mix(in oklab, #F3C98B 30%, transparent);
+  --zemin-ust:color-mix(in oklab, var(--bg) 55%, #fff);
+  --zemin-alt:var(--bg);
+  --zemin-golge:transparent;
+  --zemin-gren:.045;
+  --buz-ust:color-mix(in oklab, var(--surface) 66%, transparent);
+  --buz-alt:color-mix(in oklab, var(--surface) 46%, transparent);
+  --buz-isik:inset 0 1px 0 rgba(255,255,255,.8), inset 0 0 0 1px rgba(255,255,255,.42);
+  --buz-golge:0 1px 2px rgba(20,24,40,.04), 0 32px 72px -36px rgba(20,24,40,.32);
+  --kenar-cam:color-mix(in oklab, var(--surface) 56%, transparent);
+  --kenar-cam-acik:color-mix(in oklab, var(--surface) 82%, transparent);
 }
 :root[data-theme="dark"]{
-  --zemin-guc:22%;
-  --buz:color-mix(in oklab, var(--surface) 52%, transparent);
-  --buz-isik:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.06);
+  --zemin-1:color-mix(in oklab, var(--mod, var(--ays)) 22%, transparent);
+  --zemin-2:color-mix(in oklab, #E9A6C1 16%, transparent);
+  --zemin-3:color-mix(in oklab, #8FD3BF 16%, transparent);
+  --zemin-4:color-mix(in oklab, #F3C98B 14%, transparent);
+  --zemin-ust:#18181c;
+  --zemin-golge:rgba(0,0,0,.32);
+  --zemin-gren:.06;
+  --buz-ust:color-mix(in oklab, var(--surface) 60%, transparent);
+  --buz-alt:color-mix(in oklab, var(--surface) 44%, transparent);
+  --buz-isik:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.055);
+  --buz-golge:0 32px 72px -36px rgba(0,0,0,.6);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --zemin-guc:22%;
-    --buz:color-mix(in oklab, var(--surface) 52%, transparent);
-    --buz-isik:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.06);
+    --zemin-1:color-mix(in oklab, var(--mod, var(--ays)) 22%, transparent);
+    --zemin-2:color-mix(in oklab, #E9A6C1 16%, transparent);
+    --zemin-3:color-mix(in oklab, #8FD3BF 16%, transparent);
+    --zemin-4:color-mix(in oklab, #F3C98B 14%, transparent);
+    --zemin-ust:#18181c;
+    --zemin-golge:rgba(0,0,0,.32);
+    --zemin-gren:.06;
+    --buz-ust:color-mix(in oklab, var(--surface) 60%, transparent);
+    --buz-alt:color-mix(in oklab, var(--surface) 44%, transparent);
+    --buz-isik:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.055);
+    --buz-golge:0 32px 72px -36px rgba(0,0,0,.6);
+  }
+}
+/* Tek aile: modülün rengi ve iki komşusu (göreli renk). */
+@supports (color: oklch(from red l c h)){
+  :root{
+    --zemin-1:oklch(from var(--mod, var(--ays)) .80 .10 h / .55);
+    --zemin-2:oklch(from var(--mod, var(--ays)) .85 .085 calc(h + 40) / .5);
+    --zemin-3:oklch(from var(--mod, var(--ays)) .87 .07 calc(h - 40) / .5);
+    --zemin-4:oklch(.92 .045 75 / .55);
+  }
+  :root[data-theme="dark"]{
+    --zemin-1:oklch(from var(--mod, var(--ays)) .42 .11 h / .5);
+    --zemin-2:oklch(from var(--mod, var(--ays)) .38 .09 calc(h + 40) / .42);
+    --zemin-3:oklch(from var(--mod, var(--ays)) .36 .08 calc(h - 40) / .4);
+    --zemin-4:oklch(.34 .04 70 / .3);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --zemin-1:oklch(from var(--mod, var(--ays)) .42 .11 h / .5);
+      --zemin-2:oklch(from var(--mod, var(--ays)) .38 .09 calc(h + 40) / .42);
+      --zemin-3:oklch(from var(--mod, var(--ays)) .36 .08 calc(h - 40) / .4);
+      --zemin-4:oklch(.34 .04 70 / .3);
+    }
   }
 }
 
-/* Zemin yalnız kökte (html = tuval) kalır; aradaki katmanlar saydam. */
+/* Zemin yalnız kökte (html = tuval) ve sabit katmanda; aradaki katmanlar saydam. */
 html[data-zemin="yumusak"] body,
 html[data-zemin="yumusak"] .site--v5,
 html[data-zemin="yumusak"] .site--v5 > .site__body,
@@ -56,11 +115,16 @@ html[data-zemin="yumusak"] .site--v5 .sayfasonu{ background:transparent; }
 html[data-zemin="yumusak"] body::before{
   content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:
-    radial-gradient(42% 52% at 18% 14%, color-mix(in oklab, var(--mod, var(--ays)) var(--zemin-guc), transparent), transparent 72%),
-    radial-gradient(38% 46% at 86% 10%, color-mix(in oklab, #E9A6C1 var(--zemin-guc), transparent), transparent 72%),
-    radial-gradient(48% 50% at 78% 92%, color-mix(in oklab, #8FD3BF var(--zemin-guc), transparent), transparent 72%),
-    radial-gradient(36% 40% at 22% 88%, color-mix(in oklab, #F3C98B var(--zemin-guc), transparent), transparent 72%),
-    var(--bg);
+    radial-gradient(120% 90% at 50% 45%, transparent 55%, var(--zemin-golge) 100%),
+    radial-gradient(58% 62% at 14% 10%, var(--zemin-1), transparent 70%),
+    radial-gradient(48% 54% at 90% 8%, var(--zemin-2), transparent 70%),
+    radial-gradient(56% 60% at 86% 96%, var(--zemin-3), transparent 72%),
+    radial-gradient(44% 50% at 10% 94%, var(--zemin-4), transparent 70%),
+    linear-gradient(180deg, var(--zemin-ust), var(--zemin-alt));
+}
+html[data-zemin="yumusak"] body::after{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:var(--zemin-gren);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
 /* Çekmece çubuğu (yazı + nokta) zeminle bir: düz --bg şeridi levhanın
@@ -73,9 +137,22 @@ html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
   -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); }
 
 @media (min-width:680px){
-  html[data-zemin="yumusak"] .site--v5 .sayfa{ position:relative; }
+  /* Levha: her sayfada aynı en; dikeyde ortada (kabuk.css ORTA DURUŞ). */
+  html[data-zemin="yumusak"] .site--v5 .sayfa,
+  html[data-zemin="yumusak"] .site--v5 .sayfa:has(.bugun){ max-width:var(--content-max, 1180px); position:relative; }
+  html[data-zemin="yumusak"] .site--v5 .sayfa:has(.bugun) > *{ max-width:960px; margin-inline:auto; }
   html[data-zemin="yumusak"] .site--v5 .sayfa::before{
-    content:''; position:absolute; inset:18px 12px 24px; z-index:-1; pointer-events:none;
-    border-radius:32px; background:var(--buz); box-shadow:var(--buz-isik), var(--buz-golge);
+    content:''; position:absolute; inset:16px 12px; z-index:-1; pointer-events:none;
+    border-radius:28px; background:linear-gradient(180deg, var(--buz-ust), var(--buz-alt));
+    box-shadow:var(--buz-isik), var(--buz-golge);
   }
+
+  /* Kenar camdır: arkasındaki renk süzülür; açıkken daha dolgun. */
+  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar{
+    background:var(--kenar-cam); border-right-color:transparent;
+    box-shadow:inset -1px 0 0 color-mix(in oklab, var(--border) 70%, transparent);
+    -webkit-backdrop-filter:saturate(160%) blur(24px); backdrop-filter:saturate(160%) blur(24px); }
+  html[data-zemin="yumusak"].kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu){
+    background:var(--kenar-cam-acik); border-radius:0 20px 20px 0;
+    box-shadow:var(--cam-isik, none), var(--shadow-lg); }
 }
