@@ -283,8 +283,40 @@ Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/�
 
 ## 9. Devir notu — sıradaki oturum buradan başlar
 
-Oturum 2026-10-02'de bağlam doldu; iş yarıda değil, faz sınırında bırakıldı (her şey
-commit'li, denetimler temiz). Sıradaki iş §8'deki ilk ⏭ satırı.
+**Son devir (2026-10-02, 2. oturum):** Faz 2 bitti (2b f73a9a7, 2c a36e5e6, 2d 207c451); her şey
+commit'li, üç modülde bütün denetimler temiz. Kullanıcı 2b'den sonra «çok daha sade, çok daha
+minimalist» dedi → §2 «sıkı ölçü» bundan sonra her fazın ölçüsü. Push'u kullanıcı yapar.
+
+**Faz 3 (Analiz) başlamadı — yalnız ölçüldü** (1440, dolu profil; bölüm bölüm):
+
+- AYS İlerleme (`progress`, 2 682 px): 8 açık + 6 not — KPI ızgarası, Deneme net trendi,
+  Test bazlı trend, Plan tamamlama, Aylık net gelişim eğrisi, KPI sözlüğü, Aylık karar kapısı,
+  Hata paretosu, Süreç göstergeleri. Öneri: KPI ızgarası + Süreç göstergeleri → tek dönen kart;
+  açık Deneme net trendi + Aylık karar kapısı (karar eylemi); Test bazlı trend, Plan tamamlama,
+  Hata paretosu şerit; Aylık eğri ve KPI sözlüğü gizli; notlar ⓘ'ye.
+- AYS Telafi (`protocols`, 1 382 px): 9 açık + 7 not — dokuz protokol kartı → tek liste,
+  her protokol açılır satır (`details`, ESP `acsatir` kalıbı); tetiklenen protokol açık.
+- AYS Analiz (`analytics`): Karşılaştırma 4 · Hata haritası 2 · Sıra geçmişi 2 · Hız 2 · Konu
+  değeri 1 · Alışkanlık 4 · Denetim 3 · Dürüstlük 4 — hepsinde not.
+- SPİ Analiz: Dürüstlük 4 + 4 not; öbürleri ≤ 2. ESP Analiz: Dürüstlük 7 + 8 not (disiplin
+  başına gösterge ayrışması kartları), Rapor 4 (+ Sınır kartı), Radar 3, Seriler 3.
+- «Dürüstlük» (üç modülde aynı: Denetim defteri, Sürtünme, Gösterge ayrışması, Kalibrasyon)
+  §3'e göre «meta» → şerit (bölümün kendisi bunlar; tek satır kalsın) ya da tek dönen kart.
+
+**Bu oturumda öğrenilen tuzaklar:**
+
+- Gizleme anahtarı başlıktan üretilir, RAKAMLAR atılır: «A1»/«A2» aynı anahtar → ikinci kart
+  yönetilemez. Aynı başlık birden çok bölümde (ör. «İlerleme kuralı») → yalnız ilki yönetilir.
+  Çare: başlığa ayırt edici kelime ya da tek kart + açılır satır.
+- Gizli başvuru kartının GÖVDESİ kalır; kalkan, üstündeki açıklama notudur. Testte metin
+  arıyorsan gizli kartın gövdesi de DOM'dadır.
+- Dönen kart defter (ledger) içinde bir hücredir: yarım kartla eşleşir, geniş kartın önünde
+  tam satır olur. SPİ'de `lband` yok.
+- Satır içi not (`note:'…', body:…` aynı satırda) betikle silinmez, elle.
+- Python betiği heredoc'la değil dosyayla çalıştır (heredoc `\\`'yi `\`'ye indiriyor); konsol
+  çıktısı için `PYTHONIOENCODING=utf-8`; dosyalar CRLF — okurken `\r\n`→`\n`, yazarken geri.
+- AYS'de `K.Card` alt yazısı (`sub`) not satırı olarak çizilir.
+- Raf, eşi kısa olan uzun kutuyu en az 560 + 56 px'te keser (Dersler 1 238 px bundan).
 
 **Bir ekranı sadeleştirme kalıbı** (Faz 1–2'de oturdu):
 
