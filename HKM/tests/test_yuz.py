@@ -447,6 +447,96 @@ def t_kenar_secince_cekilir():
     ok("const ORTUSME" in denetim and "elementFromPoint" in denetim, "yuz.js kenarin sekmeyi ortmesini olcer")
 
 
+def _kural(css, secici):
+    """`secici{ ... }` kurallarinin bildirimleri; ayni ozellik birden cok
+    kez yazilmissa sonuncusu kazanir (CSS'teki gibi). Secici satirin ya da
+    kuralin BASINDA aranir: `.modul{` ararken `.ust .modul{` sayilmaz."""
+    d = {}
+    for m in re.finditer(r"(?:^|[\n}])[ \t]*" + re.escape(secici) + r"\s*\{([^}]*)\}", css):
+        for b in m.group(1).split(";"):
+            if ":" in b:
+                k, v = b.split(":", 1)
+                d[k.strip()] = v.strip()
+    return d
+
+
+def _px(deger):
+    ok(re.fullmatch(r"\d+(\.\d+)?(px)?", deger), "px bekleniyordu: " + deger)
+    return float(deger.replace("px", ""))
+
+
+def _dikey_dolgu(padding):
+    """`padding` kisaltmasinin ust + alt toplami (1–4 deger)."""
+    p = [_px(x) for x in padding.split()]
+    return p[0] + (p[2] if len(p) > 2 else p[0])
+
+
+KAPALI = ".ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible))"
+
+
+def t_kenar_acilinca_satirlar_kaymaz():
+    """Hata (2026-10-03, cam kabuk 55a24945): kapali seritte sistem secici
+    36 px (yalniz Merkez isareti), acik kenarda 50 px (dort sistem, 3 px
+    dolgu). Fare kenara girince alttaki yedi cekmece 14 px ASAGI kayiyordu:
+    Ayarlar simgesinin ust kenarina (32, 307) gelen fare, kenar acilinca
+    Sohbet'in ustune dusuyor ve tik yanlis cekmeceyi aciyordu. Ortak kabuk
+    da ayni sozu verir (brand/ortak/kabuk.css «simgeler yerinden hic
+    oynamaz»); kullanici: «hicbir oge ziplamaz».
+    Olcu: kapali secicinin dikey kutusu acik secicininkiyle AYNI; kapali
+    cekmece satiri yuksekligini ve dolgusunu degistirmez. (Gercek tarayicida
+    ayni olcu: HKM/tools/yuz.js «kenar acilinca cekmeceler kaydi».)"""
+    m = _yuz()
+    sade = m[m.index('<style id="hkm-sade">'):]
+    sade = sade[:sade.index('</style>')]
+    cam = sade[sade.index("CAM KABUK"):]
+    acik_dolgu, acik_boy = _kural(m, ".moduller")["padding"], _kural(m, ".modul")["height"]
+    km, kmo = _kural(cam, KAPALI + " .moduller"), _kural(cam, KAPALI + " .modul.on")
+    acik = _dikey_dolgu(acik_dolgu) + _px(acik_boy)
+    kapali = _dikey_dolgu(km.get("padding", acik_dolgu)) + _px(kmo.get("height", acik_boy))
+    eq(kapali, acik, "sistem secicinin dikey kutusu (kapali / acik)")
+    for ozellik in ("height", "min-height", "padding", "padding-top", "margin", "margin-top"):
+        no(ozellik in _kural(cam, KAPALI + " .gez a"), "kapali cekmece satiri " + ozellik + " degistiriyor")
+
+
+# Kenardaki baglantilar: cekmeceler, Ayarlar, bolum cubugu.
+KENAR_TIK = r"\.click\(\s*'(?:#gez\b|#ayar-bag\b|#bolumcubugu\b)"
+
+
+def _kenarda_kalan_tik(js, sayfa):
+    """Fare tiklamalarini sirayla okur (`sayfa.click(...)` ve bekletilen
+    oge tiklamasi `await buton.click()`; sayfanin icinde kosan `a.click()`
+    fare degildir): kenardaki bir baglantiya tiklandiktan sonra
+    `kenardanCik()` cagrilmadan tiklanan ilk icerik ogesinin satirlari."""
+    sorun, bekleyen = [], None
+    for sira, s in enumerate(js.splitlines(), 1):
+        if re.search(r"\bkenardanCik\(\)", s):
+            bekleyen = None
+        if re.search(r"\b" + sayfa + KENAR_TIK, s):
+            bekleyen = sira
+        elif re.search(r"\b" + sayfa + r"\.click\(|\bawait\s+\w+\.click\(", s) and bekleyen:
+            sorun.append(sira)
+            bekleyen = None
+    return sorun
+
+
+def t_denetimler_kenardan_cikar():
+    """Hata (2026-10-03): `node tools/entegre.js` HKM yuzunde 30 sn zaman
+    asimina dusuyordu («<header class="ust"> intercepts pointer events»).
+    Masaustunde Merkez'in kenari dar camdir; fare USTUNDEYKEN 216 px acilir
+    ve icerigin USTUNDE durur (tasarim: icerik kaymaz). Denetim #ayar-bag'a
+    tiklayip fareyi kenarda birakiyordu; Ayarlar'in ilk sekmesi acik kenarin
+    altinda kaliyor, Playwright fareyi hic kenardan cikarmadigi icin her
+    denemede Onaylar baglantisina ya da basligin kendisine carpiyordu.
+    Kullanici gibi denetim de kenardan sonra fareyi icerige goturur
+    (`kenardanCik`); HKM/tools/yuz.js bunu 55a24945'te yapiyordu,
+    tools/entegre.js yapmiyordu."""
+    for yol, sayfa in ((KOK / "tools" / "entegre.js", "yuz"), (KOK / "HKM" / "tools" / "yuz.js", "page")):
+        js = yol.read_text(encoding="utf-8")
+        ok(re.search(r"\b" + sayfa + KENAR_TIK, js), yol.name + ": kenar tiklamasi bulunamadi")
+        eq(_kenarda_kalan_tik(js, sayfa), [], yol.name + ": fare kenarda kalirken tiklanan satirlar")
+        ok(re.search(r"kenardanCik\s*=\s*async[^\n]*\n[^\n]*mouse\.move", js), yol.name + ": kenardanCik fareyi tasimiyor")
+
+
 def run():
     suite("HKM yüzü — giriş şeridi")
     test("üç adım vardır", t_giris_seridi_uc_adim)
@@ -472,3 +562,5 @@ def run():
     test("giriş kartı: ortada buğulu kart, göster/gizle, Enter (2026-10-03)", t_giris_karti)
     test("cam kabuk: zemin, buzlu levha, dar cam kenar (2026-10-03)", t_cam_kabuk)
     test("dar kenar seçimden sonra çekilir, sekmeyi örtmez (W6, 2026-10-03)", t_kenar_secince_cekilir)
+    test("cam kabuk: kenar açılınca çekmeceler yerinden kaymaz", t_kenar_acilinca_satirlar_kaymaz)
+    test("denetimler kenardaki bağlantıdan sonra fareyi kenardan çıkarır", t_denetimler_kenardan_cikar)

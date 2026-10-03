@@ -6315,10 +6315,14 @@ html[data-tema="koyu"]{
     box-shadow:var(--kenar-golge); transition:width 520ms cubic-bezier(.32,.72,0,1), background .2s ease, border-radius .2s ease, box-shadow .2s ease; }
   .marka{ display:none; }
 
-  /* Sistem seçici: kapalıyken yalnız Merkez'in işareti (32 px ekseninde). */
-  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .moduller{ display:block; padding:0; background:none; }
+  /* Sistem seçici: kapalıyken yalnız Merkez'in işareti (32 px ekseninde).
+     Kutusu açık seçiciyle AYNI boyda (3 + 44 + 3 px): kenar açılınca alttaki
+     çekmeceler yerinden kaymaz. Önce 36 px'ti; fare kenara girince satırlar
+     14 px iniyor, bir simgenin üst kenarındaki tık bir üstteki çekmeceyi
+     açıyordu (test_yuz «kenar açılınca çekmeceler yerinden kaymaz»). */
+  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .moduller{ display:block; padding:3px 0; background:none; }
   .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .modul:not(.on){ display:none; }
-  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .modul.on{ width:44px; height:36px; font-size:0; gap:0; background:none; box-shadow:none; }
+  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .modul.on{ width:44px; height:44px; font-size:0; gap:0; background:none; box-shadow:none; }
   .moduller{ width:196px; box-sizing:border-box; }
 
   /* Çekmeceler: simge (maske) + ad; kapalıyken yalnız simge. */

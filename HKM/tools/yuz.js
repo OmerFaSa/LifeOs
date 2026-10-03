@@ -316,6 +316,20 @@ async function main(){
           if(k) await page.mouse.move(k.x + 22, k.y + k.height / 2 + 8);
           await wait(700);
         };
+        /* Kenar açılınca çekmeceler yerinden kaymaz (2026-10-03): kapalı
+           şeritte bir simgenin üst kenarına gelen fare, açılan kenarda bir
+           üstteki çekmeceye düşmemeli. Her çekmecenin üst kenarı iki hâlde. */
+        if(genislik >= 1024){
+          const satirlar = () => page.evaluate(() => [...document.querySelectorAll('#gez a')]
+            .map(a => a.dataset.yol + ' ' + Math.round(a.getBoundingClientRect().top)).join(', '));
+          await kenardanCik();
+          const kapali = await satirlar();
+          await page.mouse.move(32, Math.round(yukseklik / 2));
+          await wait(620);
+          const acik = await satirlar();
+          await kenardanCik();
+          if(kapali !== acik) hatalar.push(ad + '/' + tema + ': kenar açılınca çekmeceler kaydı — ' + kapali + ' → ' + acik);
+        }
         const duraklar = GORUNUMLER.map(g => ({ ad:g, git:async () => {
           if(CEKMECE[g]){
             await page.click('#gez a[data-yol="' + CEKMECE[g] + '"]');

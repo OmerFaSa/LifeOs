@@ -948,6 +948,16 @@ async function main(){
        brifing cizilir ve oneri varsa cevaplanabilir. Yuklenmeyen bir
        sayfa curur; bu yuzden denetim sayfayi da gezer. */
     const yuz = await browser.newPage({ timezoneId:DILIM });
+    /* Masaustunde Merkez'in kenari dar camdir: fare USTUNDEYKEN acilir ve
+       icerigin USTUNDE durur (cam kabuk, 2026-10-03). Kenardaki bir
+       baglantiya tiklayan kullanici gibi denetim de fareyi icerige goturur;
+       yoksa acik kenar sonraki dugmenin ustunu orter ve tik 30 sn
+       «header intercepts pointer events» ile duser (HKM/tools/yuz.js ayni;
+       HKM/tests/test_yuz «denetimler ... kenardan cikarir»). */
+    const kenardanCik = async () => {
+      await yuz.mouse.move(yuz.viewportSize().width - 20, Math.round(yuz.viewportSize().height / 2));
+      await wait(420);
+    };
     const yuzHata = [];
     yuz.on('pageerror', e => yuzHata.push(String(e.message)));
     /* Pencere açıkken yüz jetonu kendisi alır (baslat.py yolu); elle jeton
@@ -960,6 +970,7 @@ async function main(){
     await wait(900);
     /* Sistemler sekmesi: ambardaki seri gercekten ciziliyor mu? */
     await yuz.click('#gez a[data-yol="sistemler"]');
+    await kenardanCik();
     await wait(400);
     const sistemler = await yuz.evaluate(() => ({
       metin:(document.querySelector('#sistemler') || {}).textContent || '',
@@ -985,6 +996,7 @@ async function main(){
     /* W6 — Ofis: depo denetimi olculur, kayit PDF olarak INDIRILIR (jetonla,
        adres satirina jeton yazilmadan), adimlarin ajan izi gorunur. */
     await yuz.click('#gez a[data-yol="ofis"]');
+    await kenardanCik();
     await wait(500);
     await yuz.click('#depo-denetle');
     await wait(400);
@@ -1007,6 +1019,7 @@ async function main(){
 
     /* W6 — Web ayarlari: kaydedilir, anahtar MASKELI doner ve geri okunmaz. */
     await yuz.click('#ayar-bag');
+    await kenardanCik();
     await wait(400);
     /* K7: Web paneli «Yapay zekâ ve bütçe» bölümünde (yedi sekme → dört bölüm). */
     await yuz.click('[data-ayar="yapayzeka"]');
@@ -1031,6 +1044,7 @@ async function main(){
     /* Yonetim sekmesi: esik kaydi GERCEKTEN yaziliyor ve bozuk deger
        REDDEDILIYOR mu? */
     await yuz.click('#ayar-bag');
+    await kenardanCik();
     await wait(400);
     await yuz.click('[data-ayar="esikler"]');
     await wait(400);
@@ -1149,6 +1163,7 @@ async function main(){
     }
 
     await yuz.click('#gez a[data-yol="bugun"]');
+    await kenardanCik();
     await wait(300);
 
     /* Icerik artik GORUNUME GORE cekiliyor: her sekmede butun ambari
@@ -1162,18 +1177,21 @@ async function main(){
       girisAcik:await yuz.evaluate(() => !document.querySelector('#giris').hidden),
     };
     await yuz.click('#gez a[data-yol="sistemler"]');
+    await kenardanCik();
     await wait(700);
     ekran.ikiz = await oku('#ikiz');
     ekran.gecmis = await oku('#gecmis');
     ekran.etki = await oku('#etki');
     ekran.hafta = await oku('#hafta');
     await yuz.click('#ayar-bag');
+    await kenardanCik();
     await wait(300);
     await yuz.click('[data-ayar="sunucu"]');
     await wait(700);
     ekran.kutu = await oku('#kutu');
     ekran.ritim = await oku('#ritim');
     await yuz.click('#gez a[data-yol="bugun"]');
+    await kenardanCik();
     await wait(500);
     if(ekran.girisAcik) hatalar.push('HKM yuzu: dogru jetonla bile giris ekraninda kaldi');
     if(ekran.brifing.length < 40) hatalar.push('HKM yuzu: brifing cizilmedi');
@@ -1217,6 +1235,7 @@ async function main(){
        gorunur. Kanal (WhatsApp) kapali olsa bile yerel kanal calisir.
        Patron kutusu «HKM» sekmesindedir. */
     await yuz.click('#gez a[data-yol="sohbet"]');
+    await kenardanCik();
     await wait(300);
     await yuz.fill('#mesaj', 'neden');
     await yuz.click('#gonder');
