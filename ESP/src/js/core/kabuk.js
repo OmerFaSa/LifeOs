@@ -420,12 +420,12 @@ window.LIFEOS = window.LIFEOS || {};
 
   function ustSes(kenarda){
     const S = L.SES;
-    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Müzik ve sesler', ipucu:'Müzik' };
+    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Radyo ve sesler', ipucu:'Radyo' };
     return '<button class="ust__ses' + (kenarda ? ' kenar__arac' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
       + ' aria-expanded="' + (katmanAcik('kabuk-ses') ? 'true' : 'false') + '"'
       + ' aria-label="' + kac(d.etiket) + '" title="' + kac(d.ipucu) + '">'
       + simge('muzik') + '<i class="ust__ses-nokta" aria-hidden="true"></i>'
-      + (kenarda ? '<span class="kenar__ad">Müzik</span>' : '') + '</button>';
+      + (kenarda ? '<span class="kenar__ad">Radyo</span>' : '') + '</button>';
   }
 
   /* Modüllerin tek çağrısı: ustCubuk'a verilen nesnenin aynısı + her

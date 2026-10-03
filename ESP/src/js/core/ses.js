@@ -66,7 +66,6 @@ window.LIFEOS = window.LIFEOS || {};
   /* Bağlanamayan ya da takılan akış bu kadar beklenir, sonra geçilir. */
   const BEKLEME = 12 * 1000;
   const YEDEK = 'https://de1.api.radio-browser.info/json/stations/search';
-  const SPOTIFY_EN_COK = 20;
 
   /* İSTASYONLAR — 2026-10-02'de Edge'de (Chromium) `<audio>` ile ÇALINARAK
      doğrulandı: her biri 3 saniyeden uzun çaldı. Sıra anlamlıdır: ilk
@@ -124,7 +123,6 @@ window.LIFEOS = window.LIFEOS || {};
      durumu ve bekleme süresi buradan verilir. */
   const VARSAYILAN_ORTAM = {
     sesOgesi:null, fetch:null, AudioContext:null, cevrimici:null, sentetik:false, bekleme:BEKLEME,
-    cerceve:null,
   };
   let ortam = Object.assign({}, VARSAYILAN_ORTAM);
   function cevrimici(){
@@ -134,9 +132,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------------------------------------------------------- tercih */
 
-  function bosTercih(){
-    return { tur:'chill', ses:0.6, tik:false, son:{}, caliyordu:0, sekme:'radyo', spotify:[], spotifySecili:null };
-  }
+  function bosTercih(){ return { tur:'chill', ses:0.6, tik:false, son:{}, caliyordu:0 }; }
   function tercihOku(){
     const t = bosTercih();
     let d = null;
@@ -149,11 +145,6 @@ window.LIFEOS = window.LIFEOS || {};
       if(typeof d.son[k] === 'string' && /^https:\/\//.test(d.son[k])) t.son[k] = d.son[k];
     });
     if(typeof d.caliyordu === 'number') t.caliyordu = d.caliyordu;
-    if(d.sekme === 'spotify') t.sekme = 'spotify';
-    if(Array.isArray(d.spotify)) t.spotify = d.spotify.filter(x => x && /^[A-Za-z0-9]{22}$/.test(x.id)
-      && (x.tur === 'playlist' || x.tur === 'album')).slice(0, SPOTIFY_EN_COK)
-      .map(x => ({ id:x.id, tur:x.tur, ad:String(x.ad || 'Spotify listesi').slice(0, 60) }));
-    if(t.spotify.some(x => x.id === d.spotifySecili)) t.spotifySecili = d.spotifySecili;
     return t;
   }
   let tercih = tercihOku();
@@ -436,215 +427,35 @@ window.LIFEOS = window.LIFEOS || {};
   /* Kabuğun ♪ düğmesi için: sınıf, erişilebilir ad, ipucu. */
   function dugme(){
     const sinif = hal === 'caliyor' ? ' is-caliyor' : hal === 'baglaniyor' ? ' is-baglaniyor' : hal === 'dokun' ? ' is-dokun' : '';
-    const etiket = hal === 'caliyor' ? 'Müzik ve sesler — çalıyor: ' + (aktif ? aktif.ad : '')
-      : hal === 'dokun' ? 'Müzik bekliyor — dokun, sürsün'
-      : 'Müzik ve sesler';
-    const ipucu = hal === 'caliyor' ? (aktif ? aktif.ad : 'Müzik') : hal === 'dokun' ? 'Dokun, sürsün' : 'Müzik';
+    const etiket = hal === 'caliyor' ? 'Radyo ve sesler — çalıyor: ' + (aktif ? aktif.ad : '')
+      : hal === 'dokun' ? 'Radyo bekliyor — dokun, sürsün'
+      : 'Radyo ve sesler';
+    const ipucu = hal === 'caliyor' ? (aktif ? aktif.ad : 'Radyo') : hal === 'dokun' ? 'Dokun, sürsün' : 'Radyo';
     return { sinif, etiket, ipucu };
   }
 
   const SIMGE_CAL = '<svg class="ses__sim" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z"/></svg>';
   const SIMGE_DUR = '<svg class="ses__sim" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="7" y="6" width="3.5" height="12" rx="1"/><rect x="13.5" y="6" width="3.5" height="12" rx="1"/></svg>';
 
-  const SIMGE_LISTE = '<svg class="ses__sim" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6.5h11M4 11.5h11M4 16.5h7"/><path d="M17.5 18.5V9l3-1"/><circle cx="15.8" cy="18.5" r="1.8"/></svg>';
-  const SIMGE_SIL = '<svg class="ses__sim" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 7l10 10M17 7L7 17"/></svg>';
-
-  function sekmeDugme(id, ad){
-    const on = tercih.sekme === id;
-    return '<button type="button" class="' + (on ? 'is-on' : '') + '" data-ses-sekme="' + id + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + ad + '</button>';
-  }
-  function spotifyHtml(){
-    const l = tercih.spotify, sec = tercih.spotifySecili;
-    const secili = l.find(x => x.id === sec);
-    const liste = l.length
-      ? '<ul class="ses__listeler">' + l.map(x => '<li class="ses__liste' + (x.id === sec ? ' is-on' : '') + '">'
-          + '<button type="button" class="ses__liste-ad" data-sp-sec="' + x.id + '" aria-pressed="' + (x.id === sec ? 'true' : 'false') + '">'
-          + SIMGE_LISTE + '<span>' + kac(x.ad) + '</span></button>'
-          + '<button type="button" class="ses__liste-sil" data-sp-sil="' + x.id + '" aria-label="' + kac(x.ad + ' listesini kaldır') + '" title="Kaldır">'
-          + SIMGE_SIL + '</button></li>').join('') + '</ul>'
-      : '<p class="ses__bos">Henüz liste yok. Spotify\'da listeyi aç: Paylaş › Bağlantıyı kopyala, sonra buraya yapıştır.</p>';
-    return liste
-      + '<div class="ses__oynatici' + (secili ? ' is-dolu' : '') + '">' + (secili ? '' : (l.length ? '<span>Dinlemek için bir liste seç</span>' : '')) + '</div>'
-      + '<div class="ses__ekle"><input type="url" inputmode="url" data-sp-ekle placeholder="open.spotify.com/playlist/…" aria-label="Spotify liste bağlantısı">'
-      +   '<button type="button" class="ses__ekle-dugme" data-sp="ekle">Ekle</button></div>'
-      + '<p class="ses__sp-not" role="status" aria-live="polite"></p>';
-  }
-
   function panelHtml(){
-    const sp = tercih.sekme === 'spotify';
-    return '<div class="katman kmenu kmenu--ses" role="dialog" aria-label="Müzik ve sesler" data-ses-panel>'
-      + '<p class="kmenu__bas">Müzik</p>'
-      + '<div class="seg seg--block ses__sekmeler" role="group" aria-label="Kaynak">' + sekmeDugme('radyo', 'Radyo') + sekmeDugme('spotify', 'Spotify') + '</div>'
-      + '<div class="ses__radyo"' + (sp ? ' hidden' : '') + '>'
-      +   '<div class="ses__turler" role="group" aria-label="Tür">'
-      +     TURLER.map(t => '<button type="button" class="ses__tur' + (t.id === tercih.tur ? ' is-on' : '') + '" data-ses-tur="' + t.id + '"'
-            + ' aria-pressed="' + (t.id === tercih.tur ? 'true' : 'false') + '">' + kac(t.ad) + '</button>').join('')
-      +   '</div>'
-      +   '<p class="ses__simdi' + (hal === 'caliyor' ? ' is-caliyor' : '') + '" role="status" aria-live="polite">' + kac(mesaj()) + '</p>'
-      +   '<div class="ses__eylem">'
-      +     '<button type="button" class="ses__cal" data-ses="cal">' + (calarMi() ? SIMGE_DUR + 'Durdur' : SIMGE_CAL + 'Çal') + '</button>'
-      +     '<button type="button" class="ses__sonraki" data-ses="sonraki">Sonraki istasyon</button>'
-      +   '</div>'
-      +   '<label class="ses__duzey"><span>Ses</span>'
-      +     '<input type="range" min="0" max="100" step="1" value="' + Math.round(tercih.ses * 100) + '" data-ses="duzey" aria-label="Ses düzeyi"></label>'
+    return '<div class="katman kmenu kmenu--ses" role="dialog" aria-label="Radyo ve sesler" data-ses-panel>'
+      + '<p class="kmenu__bas">Radyo</p>'
+      + '<div class="ses__turler" role="group" aria-label="Tür">'
+      +   TURLER.map(t => '<button type="button" class="ses__tur' + (t.id === tercih.tur ? ' is-on' : '') + '" data-ses-tur="' + t.id + '"'
+          + ' aria-pressed="' + (t.id === tercih.tur ? 'true' : 'false') + '">' + kac(t.ad) + '</button>').join('')
       + '</div>'
-      + '<div class="ses__spotify"' + (sp ? '' : ' hidden') + '>' + spotifyHtml() + '</div>'
+      + '<p class="ses__simdi' + (hal === 'caliyor' ? ' is-caliyor' : '') + '" role="status" aria-live="polite">' + kac(mesaj()) + '</p>'
+      + '<div class="ses__eylem">'
+      +   '<button type="button" class="ses__cal" data-ses="cal">' + (calarMi() ? SIMGE_DUR + 'Durdur' : SIMGE_CAL + 'Çal') + '</button>'
+      +   '<button type="button" class="ses__sonraki" data-ses="sonraki">Sonraki istasyon</button>'
+      + '</div>'
+      + '<label class="ses__duzey"><span>Ses</span>'
+      +   '<input type="range" min="0" max="100" step="1" value="' + Math.round(tercih.ses * 100) + '" data-ses="duzey" aria-label="Ses düzeyi"></label>'
       + '<div class="ses__satir"><span id="ses-tik-ad">Tık sesleri</span>'
       +   '<button type="button" class="ses__anahtar" data-ses="tik" role="switch" aria-labelledby="ses-tik-ad ses-tik-deger"'
       +     ' aria-checked="' + (tercih.tik ? 'true' : 'false') + '"><span id="ses-tik-deger">' + (tercih.tik ? 'Açık' : 'Kapalı') + '</span></button>'
       + '</div>'
       + '</div>';
-  }
-
-  /* ---------------------------------------------------------- spotify
-
-     Kullanıcı (2026-10-03): «radyo kanallarının yanında birden fazla
-     Spotify listesi de ekleyebilelim; bu listeleri görebileceğimiz bir
-     bölüm olsun». Liste Spotify'ın KENDİ gömme oynatıcısıyla çalar
-     (open.spotify.com/embed): şarkı listesi orada görünür, çalma orada
-     yönetilir. Tarayıcıda Spotify hesabı açıksa tam şarkı, değilse
-     Spotify'ın kendi kısıtı geçerlidir — bunu Spotify belirler.
-
-     Oynatıcı TEK ve document.body'dedir (radyonun <audio>'su gibi): panel
-     açıkken paneldeki yerin (.ses__oynatici) TAM ÜSTÜNE oturur, panel
-     kapanınca ekran dışına çekilir ve çalmaya devam eder. Taşımak olmazdı:
-     DOM'da yeri değişen iframe baştan yüklenir, müzik kesilir.
-
-     Ağa yalnız kullanıcı istediğinde çıkılır: liste eklenince adı için bir
-     kez oEmbed, liste seçilince (ya da panel seçili listeyle açılınca)
-     oynatıcı. Liste radyo seçilince durmaz (Spotify'ın içini göremeyiz);
-     liste seçilince radyo durur: iki müzik üst üste çalmasın. */
-  function spotifyCoz(metin){
-    const s = String(metin || '').trim();
-    let m = /^spotify:(playlist|album):([A-Za-z0-9]{22})$/.exec(s);
-    if(m) return { tur:m[1], id:m[2] };
-    m = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}(?:-[a-z]{2})?\/)?(?:embed\/)?(playlist|album)\/([A-Za-z0-9]{22})(?:[/?#].*)?$/i.exec(s);
-    return m ? { tur:m[1].toLowerCase(), id:m[2] } : null;
-  }
-  function spotifyAdres(l){ return 'https://open.spotify.com/embed/' + l.tur + '/' + l.id; }
-  function spotifyAdi(l){
-    const yedek = l.tur === 'album' ? 'Spotify albümü' : 'Spotify listesi';
-    const getir = ortam.fetch || (typeof fetch === 'function' ? fetch.bind(window) : null);
-    if(!getir) return Promise.resolve(yedek);
-    const url = 'https://open.spotify.com/oembed?url=' + encodeURIComponent('https://open.spotify.com/' + l.tur + '/' + l.id);
-    let iptal = null, zaman = null;
-    try{ iptal = new AbortController(); zaman = setTimeout(() => iptal.abort(), 6000); }catch(e){}
-    return Promise.resolve()
-      .then(() => getir(url, iptal ? { signal:iptal.signal } : {}))
-      .then(r => r && r.ok ? r.json() : null)
-      .then(v => { const ad = v && typeof v.title === 'string' ? v.title.trim().slice(0, 60) : ''; return ad || yedek; })
-      .catch(() => yedek)
-      .then(v => { if(zaman) clearTimeout(zaman); return v; });
-  }
-  async function spotifyEkle(metin){
-    const l = spotifyCoz(metin);
-    if(!l) return { ok:false, mesaj:'Bu bir Spotify liste bağlantısı değil' };
-    if(tercih.spotify.some(x => x.id === l.id)) return { ok:false, mesaj:'Bu liste zaten ekli' };
-    if(tercih.spotify.length >= SPOTIFY_EN_COK) return { ok:false, mesaj:'En çok ' + SPOTIFY_EN_COK + ' liste eklenir' };
-    const ad = await spotifyAdi(l);
-    if(tercih.spotify.some(x => x.id === l.id)) return { ok:false, mesaj:'Bu liste zaten ekli' };
-    const yeni = { id:l.id, tur:l.tur, ad };
-    tercihYaz({ spotify:tercih.spotify.concat([yeni]) });
-    panelYenile();
-    return { ok:true, liste:yeni };
-  }
-
-  let spKap = null;
-  function spotifyKap(){
-    if(spKap && spKap.isConnected) return spKap;
-    spKap = document.getElementById('lifeos-spotify');
-    if(!spKap){
-      spKap = document.createElement('div');
-      spKap.id = 'lifeos-spotify';
-      spKap.className = 'spotify-kap';
-      document.body.appendChild(spKap);
-    }
-    return spKap;
-  }
-  function cerceveKur(l){
-    const kap = spotifyKap();
-    const src = spotifyAdres(l);
-    const eski = kap.querySelector('iframe');
-    if(eski && kap.getAttribute('data-liste') === l.id) return eski;
-    kap.innerHTML = '';
-    let f;
-    if(ortam.cerceve) f = ortam.cerceve(src);
-    else{ f = document.createElement('iframe'); f.src = src; }
-    f.setAttribute('title', 'Spotify: ' + l.ad);
-    f.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture');
-    f.setAttribute('loading', 'lazy');
-    f.className = 'spotify-kap__cerceve';
-    kap.appendChild(f);
-    kap.setAttribute('data-liste', l.id);
-    return f;
-  }
-  function spotifySec(id){
-    const l = tercih.spotify.find(x => x.id === id);
-    if(!l) return false;
-    if(calarMi() || hal === 'dokun') durdur();
-    tercihYaz({ spotifySecili:id });
-    cerceveKur(l);
-    panelYenile();
-    return true;
-  }
-  function spotifySil(id){
-    const secili = tercih.spotifySecili === id;
-    tercihYaz({ spotify:tercih.spotify.filter(x => x.id !== id), spotifySecili:secili ? null : tercih.spotifySecili });
-    if(secili && spKap){ spKap.innerHTML = ''; spKap.removeAttribute('data-liste'); }
-    panelYenile();
-    return true;
-  }
-  function sekmeSec(s){
-    if(s !== 'radyo' && s !== 'spotify') return false;
-    tercihYaz({ sekme:s });
-    panelYenile();
-    return true;
-  }
-
-  /* Oynatıcıyı paneldeki yerin üstüne oturtur; yer yoksa (panel kapalı,
-     Radyo sekmesi) ekran dışına çeker. Panel açıkken her karede bir kez
-     (panel açılırken kayar, kendi içinde kaydırılabilir). */
-  let yerKare = 0;
-  function spotifyYerlestir(){
-    if(typeof document === 'undefined') return;
-    const yer = document.querySelector('[data-ses-panel] .ses__oynatici.is-dolu');
-    const gorunur = yer && yer.getClientRects().length > 0;
-    if(gorunur){
-      const l = tercih.spotify.find(x => x.id === tercih.spotifySecili);
-      if(l) cerceveKur(l);
-    }
-    if(!spKap) return;
-    if(gorunur){
-      const r = yer.getBoundingClientRect();
-      spKap.style.left = Math.round(r.left) + 'px';
-      spKap.style.top = Math.round(r.top) + 'px';
-      spKap.style.width = Math.round(r.width) + 'px';
-      spKap.style.height = Math.round(r.height) + 'px';
-      spKap.classList.add('is-yerinde');
-      if(!yerKare && typeof requestAnimationFrame === 'function') yerKare = requestAnimationFrame(() => { yerKare = 0; spotifyYerlestir(); });
-    }else{
-      spKap.classList.remove('is-yerinde');
-      spKap.style.left = '-10000px';
-    }
-  }
-
-  /* Panel açıkken içerik değişti (liste eklendi/silindi, sekme): panel
-     yerinde yeniden çizilir, kenardaki düğmeye göre yeniden yerleşir ve
-     odak aynı denetime döner. */
-  let sonCapa = null;
-  function panelYenile(){
-    const K = L.KABUK;
-    if(typeof document === 'undefined' || !K || !K.katmanAcik('kabuk-ses')){ spotifyYerlestir(); return; }
-    const odak = document.activeElement;
-    const odakSecici = odak && odak.closest && odak.closest('[data-ses-panel]')
-      ? ['data-ses-sekme', 'data-sp-sec', 'data-sp', 'data-ses'].map(a => odak.hasAttribute(a) ? '[' + a + '="' + odak.getAttribute(a) + '"]' : '').find(Boolean)
-        || (odak.hasAttribute('data-sp-ekle') ? '[data-sp-ekle]' : null)
-      : null;
-    K.katmanTazele('kabuk-ses', panelHtml());
-    const p = document.getElementById('kabuk-ses');
-    if(p && sonCapa && sonCapa.isConnected && K.capaYerlestir) K.capaYerlestir(p, sonCapa);
-    if(p && odakSecici){ const o = p.querySelector(odakSecici); if(o) try{ o.focus({ preventScroll:true }); }catch(e){} }
-    spotifyYerlestir();
   }
 
   /* Durum değişince ekrandaki ♪ ve açık panel YERİNDE güncellenir: panel
@@ -761,26 +572,8 @@ window.LIFEOS = window.LIFEOS || {};
   function panelAcKapa(dugmeEl){
     const K = L.KABUK;
     if(!K) return;
-    if(K.katmanAcik('kabuk-ses')){ K.katmanKapat(); spotifyYerlestir(); return; }
-    sonCapa = dugmeEl;
+    if(K.katmanAcik('kabuk-ses')){ K.katmanKapat(); return; }
     K.katmanAc('kabuk-ses', panelHtml(), dugmeEl);
-    spotifyYerlestir();
-  }
-
-  async function ekleGirdisi(panel){
-    const g = panel && panel.querySelector('[data-sp-ekle]');
-    const not = panel && panel.querySelector('.ses__sp-not');
-    if(!g) return;
-    if(!g.value.trim()){ if(not) not.textContent = 'Önce Spotify bağlantısını yapıştır'; return; }
-    if(!cevrimici()){ if(not) not.textContent = 'Bağlantı yok'; return; }
-    if(not) not.textContent = 'Ekleniyor…';
-    const r = await spotifyEkle(g.value);
-    if(!r.ok){
-      const p2 = document.querySelector('[data-ses-panel] .ses__sp-not');
-      if(p2) p2.textContent = r.mesaj;
-      return;
-    }
-    spotifySec(r.liste.id);
   }
 
   let bagli = false;
@@ -831,13 +624,6 @@ window.LIFEOS = window.LIFEOS || {};
         return;
       }
       if(!t.closest('[data-ses-panel]')) return;
-      const sk = t.closest('[data-ses-sekme]');
-      if(sk){ sekmeSec(sk.getAttribute('data-ses-sekme')); return; }
-      const ss = t.closest('[data-sp-sec]');
-      if(ss){ spotifySec(ss.getAttribute('data-sp-sec')); return; }
-      const sl = t.closest('[data-sp-sil]');
-      if(sl){ spotifySil(sl.getAttribute('data-sp-sil')); return; }
-      if(t.closest('[data-sp="ekle"]')){ ekleGirdisi(t.closest('[data-ses-panel]')); return; }
       const tr = t.closest('[data-ses-tur]');
       if(tr){ turSec(tr.getAttribute('data-ses-tur')); return; }
       const is = t.closest('[data-ses]');
@@ -851,14 +637,6 @@ window.LIFEOS = window.LIFEOS || {};
         if(ac) tik('ac');
       }
     });
-    document.addEventListener('keydown', e => {
-      const g = e.target;
-      if(e.key === 'Enter' && g && g.matches && g.matches('[data-ses-panel] [data-sp-ekle]')){ e.preventDefault(); ekleGirdisi(g.closest('[data-ses-panel]')); }
-    });
-    /* Panel kapanınca (dışarı tık, Esc, başka panel) oynatıcı ekran dışına. */
-    document.addEventListener('mousedown', () => setTimeout(spotifyYerlestir, 0), true);
-    document.addEventListener('keydown', e => { if(e.key === 'Escape') setTimeout(spotifyYerlestir, 0); }, true);
-    window.addEventListener('resize', () => spotifyYerlestir());
     document.addEventListener('input', e => {
       const r = e.target;
       if(r && r.matches && r.matches('[data-ses-panel] [data-ses="duzey"]')) sesAyarla(Number(r.value) / 100);
@@ -903,7 +681,6 @@ window.LIFEOS = window.LIFEOS || {};
     Object.keys(yedekler).forEach(k => delete yedekler[k]);
     Object.keys(yedekSoruldu).forEach(k => delete yedekSoruldu[k]);
     baglamKapat();
-    if(spKap){ spKap.remove(); spKap = null; }
     tercih = tercihOku();
     guncelle();
   }
@@ -914,7 +691,6 @@ window.LIFEOS = window.LIFEOS || {};
     tercih:() => JSON.parse(JSON.stringify(tercih)),
     durum, dugme, panelHtml,
     cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret,
-    spotifyCoz, spotifyAdres, spotifyEkle, spotifySec, spotifySil, sekmeSec,
     _ortam, _sifirla, _acilis:acilis, _sayfadanCik:sayfadanCik,
   });
   /* Başka modülde çalıyorduysa: gövde hazır olunca sürdürmeyi dene. */

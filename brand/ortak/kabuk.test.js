@@ -581,7 +581,7 @@
         bildirim:{ sayi:2 }, profil:{ ad:'Ömer' } }) + '</div>');
       try{
         const a = Array.from(d.querySelectorAll('.kenar__dip button'));
-        expect(a.map(b => b.querySelector('.kenar__ad').textContent)).toEqual(['Ara', 'Sayfa düzeni', 'Müzik', 'Bildirimler', 'Ömer']);
+        expect(a.map(b => b.querySelector('.kenar__ad').textContent)).toEqual(['Ara', 'Sayfa düzeni', 'Radyo', 'Bildirimler', 'Ömer']);
         expect(a[0].getAttribute('data-act')).toBe('open-palette');
         expect(a[1].classList.contains('ust__gizli')).toBe(true);
         expect(a[2].classList.contains('ust__ses')).toBe(true);
