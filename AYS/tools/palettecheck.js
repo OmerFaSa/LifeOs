@@ -221,6 +221,10 @@ function checksOf(m, altBant){
   }
   if(bad.length){
     console.log('KONTRAST SORUNU:\n' + bad.join('\n'));
+    /* SORUN BULAN DENETIM KIRMIZI CIKAR. Burasi sorunu yazip asagidaki
+       exit(0)'a dusuyordu; CI ve sayilar.py yalniz cikis koduna bakar,
+       yani hicbir kontrast sorunu hicbir yerde kizarmiyordu. */
+    await b.close(); srv.kill(); process.exit(1);
   }else{
     console.log(`${olcum} kontrast ölçümü AA geçti — en dar pay: ${en.ad} `
       + `${en.oran.toFixed(2)} (asgari ${en.min}) — ${en.yer}`);

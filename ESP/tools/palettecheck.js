@@ -240,6 +240,10 @@ function checksOf(m, altBant){
   }
   if(bad.length){
     console.log('KONTRAST SORUNU (' + bad.length + '):\n' + bad.join('\n'));
+    /* SORUN BULAN DENETIM KIRMIZI CIKAR. Burasi sorunu yazip asagidaki
+       exit(0)'a dusuyordu; CI ve sayilar.py yalniz cikis koduna bakar,
+       yani hicbir kontrast sorunu hicbir yerde kizarmiyordu. */
+    await b.close(); srv.kill(); process.exit(1);
   }else{
     console.log(olculen + ' kontrast ölçümü AA geçti'
       + (enDar ? ' — en dar pay: ' + enDar.name + ' ' + enDar.r.toFixed(2)
