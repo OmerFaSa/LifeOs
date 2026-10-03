@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <!-- LifeOS işareti — uygulama simgesi (2026-10-03). Eski altın «LF»
+       amblemi yerine arayüzdeki güncel işaret: dört sistem, dört şekil,
+       dört renk (giriş sayfası sistem/sunucu.py _IKON ve kenarın logosu
+       ile aynı düzen): AYS mavi kare, SPİ yeşil daire, ESP turuncu karo,
+       Merkez mor kare. Yumuşak açık karo üstünde, hafif ışık ve gölge.
+       PNG ve ICO bu dosyadan üretilir; elle düzenlenmez. -->
+  <defs>
+    <linearGradient id="zemin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E7E8F0"/>
+    </linearGradient>
+    <linearGradient id="ays" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6F9BFF"/><stop offset="1" stop-color="#2D5BE3"/>
+    </linearGradient>
+    <linearGradient id="spi" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4FD9BF"/><stop offset="1" stop-color="#0E8C79"/>
+    </linearGradient>
+    <linearGradient id="esp" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFC56B"/><stop offset="1" stop-color="#D97E1E"/>
+    </linearGradient>
+    <linearGradient id="mer" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#B5A7FF"/><stop offset="1" stop-color="#7453D4"/>
+    </linearGradient>
+    <linearGradient id="isik" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".55"/><stop offset=".5" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="golge" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#1B1F3A" flood-opacity=".2"/>
+    </filter>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#zemin)"/>
+  <rect x="8.5" y="8.5" width="239" height="239" rx="55.5" fill="none" stroke="#1B1F3A" stroke-opacity=".08"/>
+  <g filter="url(#golge)">
+    <rect x="56" y="56" width="64" height="64" rx="17" fill="url(#ays)"/>
+    <circle cx="168" cy="88" r="33" fill="url(#spi)"/>
+    <rect x="63" y="143" width="50" height="50" rx="11" fill="url(#esp)" transform="rotate(45 88 168)"/>
+    <rect x="136" y="136" width="64" height="64" rx="17" fill="url(#mer)"/>
+  </g>
+  <g fill="url(#isik)">
+    <rect x="56" y="56" width="64" height="64" rx="17"/>
+    <circle cx="168" cy="88" r="33"/>
+    <rect x="136" y="136" width="64" height="64" rx="17"/>
+  </g>
+</svg>
