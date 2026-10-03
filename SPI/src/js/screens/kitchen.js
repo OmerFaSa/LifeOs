@@ -40,7 +40,10 @@ SP.Screens.kitchen = (function(){
       body:html`
         <div class="cols-2">
           ${K.Field({ label:'Yemek',
-            input:K.Select({ value:dishId, change:'pick-dish', options:dishOptions() }) })}
+            /* Pişen yemeğin kendi fotoğrafı: seçicinin yanında tek minik kare. */
+            input:html`<span class="secici-kare">${K.Select({ value:dishId, change:'pick-dish', options:dishOptions() })}
+              ${raw(String(SP.FotoUI.kutu({ sahip:'yemek:' + dishId,
+                ad:(SP.FOOD_BY_ID[dishId] || { name:'Yemek' }).name })))}</span>` })}
           ${K.Field({ label:'Toplam gram',
             input:K.Input({ id:'kitchen-g', type:'number', numeric:true, step:'50', min:100,
               value:S.ui.kitchenGrams, change:'set-grams' }) })}

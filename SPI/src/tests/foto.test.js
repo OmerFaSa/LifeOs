@@ -340,6 +340,16 @@
       expect(F.url('ogun:' + m.id)).toBeNull();
     }));
 
+    it('Mutfak › Pişen yemek: seçilen yemeğin karesi seçicinin yanında', () => depoyla(async () => {
+      resetState();
+      SP.S.ui.kitchenDish = 'mercimek-corbasi';
+      const d = document.createElement('div');
+      d.innerHTML = await SP.Screens.kitchen.render();
+      const kare = d.querySelector('.secici-kare [data-sahip="yemek:mercimek-corbasi"]');
+      expect(kare).toBeTruthy();
+      expect(kare.getAttribute('aria-label')).toContain('Mercimek çorbası');
+    }));
+
     it('İlerleme › Vücut: ilk kare bugünündür', () => depoyla(async () => {
       resetState();
       const d = document.createElement('div');

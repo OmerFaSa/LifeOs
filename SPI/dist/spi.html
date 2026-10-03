@@ -11708,6 +11708,10 @@ body.is-dragging .rota{ outline:2px dashed var(--spi); outline-offset:6px; borde
 .foto-serit{ display:flex; gap:12px; overflow-x:auto; padding-bottom:2px; }
 .foto-serit__ge{ display:flex; flex:none; flex-direction:column; align-items:center; gap:4px; }
 
+/* Seçici + minik kare yan yana (Mutfak › Pişen yemek). */
+.secici-kare{ display:flex; align-items:center; gap:8px; }
+.secici-kare > :first-child{ flex:1; min-width:0; }
+
 /* Bırakma alanının altındaki «Kamerayla çek». */
 .drop-kap{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
 
@@ -13325,7 +13329,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'3c7c5766', at:'2026-10-03 14:05', dirty:true };
+SP.BUILD = { id:'b80d9bb7', at:'2026-10-03 14:08', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -54409,7 +54413,10 @@ SP.Screens.kitchen = (function(){
       body:html`
         <div class="cols-2">
           ${K.Field({ label:'Yemek',
-            input:K.Select({ value:dishId, change:'pick-dish', options:dishOptions() }) })}
+            /* Pişen yemeğin kendi fotoğrafı: seçicinin yanında tek minik kare. */
+            input:html`<span class="secici-kare">${K.Select({ value:dishId, change:'pick-dish', options:dishOptions() })}
+              ${raw(String(SP.FotoUI.kutu({ sahip:'yemek:' + dishId,
+                ad:(SP.FOOD_BY_ID[dishId] || { name:'Yemek' }).name })))}</span>` })}
           ${K.Field({ label:'Toplam gram',
             input:K.Input({ id:'kitchen-g', type:'number', numeric:true, step:'50', min:100,
               value:S.ui.kitchenGrams, change:'set-grams' }) })}
