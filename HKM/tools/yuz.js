@@ -13,7 +13,7 @@
  *
  *   node tools/yuz.js
  *
- * Cikis kodu: 0 temiz, 1 sorun, 2 arac eksik.
+ * Cikis kodu: 0 temiz, 1 sorun, 2 kosulamadi (arac eksik ya da port dolu).
  */
 
 const { spawn } = require('child_process');
@@ -220,8 +220,35 @@ const ORTUSME = `(() => {
   return sonuc;
 })()`;
 
+/* PORT MUHAFIZI (2026-10-03). Port ve jeton sabittir: ikinci bir yuz.js
+   (baska bir worktree'de) ayni anda kosarsa onun HKM'si portu alamaz ama
+   saglik denetimi BU kosunun HKM'sinden cevap alir — ayni jetonla oteki
+   kosunun veritabanina tohum yazar ve oteki kopyanin yuzunu olcer. Port
+   doluysa denetim HIC baslamaz — config yazmaz, HKM acmaz: cikis 2
+   (kirmizi degil, kosulamadi). Desen tools/entegre.js'ten;
+   tools/portmuhafiz.test.js sinar. */
+function portDolu(port){
+  const dene = host => new Promise(r => {
+    const s = require('net').connect({ host, port });
+    s.setTimeout(1000, () => { s.destroy(); r(false); });
+    s.once('connect', () => { s.destroy(); r(true); });
+    s.once('error', () => r(false));
+  });
+  return Promise.all([dene('127.0.0.1'), dene('::1')]).then(x => x.some(Boolean));
+}
+async function portMuhafizi(portlar, ipucu){
+  const dolu = [];
+  for(const p of portlar) if(await portDolu(p)) dolu.push(p);
+  if(!dolu.length) return;
+  console.error('Port dolu: ' + dolu.join(', ') + ' — başka bir koşu (belki başka bir worktree\'de) '
+    + 'ya da açık bir sunucu kullanıyor.\nBu koşu kendi sunucusunu açamaz, ötekini ölçerdi; '
+    + 'o bitince yeniden koş' + (ipucu ? ' ya da boş bir port ver: ' + ipucu : '') + '.');
+  process.exit(2);
+}
+
 let DB_YOLU = null;
 async function main(){
+  await portMuhafizi([PORT]);
   const hatalar = [];
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hkm-yuz-'));
   DB_YOLU = path.join(tmp, 'hkm.db');

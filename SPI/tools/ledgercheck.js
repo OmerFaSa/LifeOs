@@ -10,19 +10,53 @@
    ic karti isaretlemeyi unutmak (box:true) sessizce bozuk duzen uretir.
    Bu betik onu yakalar.
 
-   Kullanim:  node tools/ledgercheck.js */
+   Kullanim:  node tools/ledgercheck.js [port] */
 
 const { chromium } = require('playwright');
 const { spawn } = require('child_process');
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
+/* Kendi portu. Eskiden devserver'in varsayilani 4183'u kullaniyordu: o
+   UYGULAMANIN portudur (sistem/sunucu.py). Uygulama aciksa denetim kendi
+   sunucusunu acamiyor ve acik uygulamayi — baska bir kopyanin dosyalarini
+   — olcuyordu. */
+const PORT = Number(process.argv[2]) || 4181;
 /* Sunucu, denetimin KENDI klasorunden acilir. Burada depo koku SABIT
    yaziliydi (`/home/user/LifeOs/...`): o yol yalnizca bir gelistirme
    makinesinde vardi, baska her yerde sunucu hic acilmiyor ve denetim
-   bos sayfa olcuyordu. __dirname her yerde dogrudur. */
-const srv = spawn('python3', ['devserver.py'], { cwd:ROOT, stdio:'ignore' });
+   bos sayfa olcuyordu. __dirname her yerde dogrudur. Sunucu muhafizdan
+   SONRA acilir (asagida). */
+let srv = null;
 const wait = ms => new Promise(r => setTimeout(r, ms));
+
+/* PORT MUHAFIZI (2026-10-03). Port sabittir: ayni denetim baska bir
+   worktree'de ayni anda kosarsa bu kosunun sunucusu portu alamaz, ama
+   saglik denetimi OTEKININ sunucusundan cevap alir ve denetim baska bir
+   kopyanin dosyalarini olcer. Port doluysa denetim HIC baslamaz — dosya
+   yazmaz, sunucu acmaz: cikis 2 (kirmizi degil, kosulamadi). Desen
+   tools/entegre.js'ten; tools/portmuhafiz.test.js sinar. */
+function portDolu(port){
+  const dene = host => new Promise(r => {
+    const s = require('net').connect({ host, port });
+    s.setTimeout(1000, () => { s.destroy(); r(false); });
+    s.once('connect', () => { s.destroy(); r(true); });
+    s.once('error', () => r(false));
+  });
+  return Promise.all([dene('127.0.0.1'), dene('::1')]).then(x => x.some(Boolean));
+}
+async function portMuhafizi(portlar, ipucu){
+  const dolu = [];
+  for(const p of portlar) if(await portDolu(p)) dolu.push(p);
+  if(!dolu.length) return;
+  console.error('Port dolu: ' + dolu.join(', ') + ' — başka bir koşu (belki başka bir worktree\'de) '
+    + 'ya da açık bir sunucu kullanıyor.\nBu koşu kendi sunucusunu açamaz, ötekini ölçerdi; '
+    + 'o bitince yeniden koş' + (ipucu ? ' ya da boş bir port ver: ' + ipucu : '') + '.');
+  process.exit(2);
+}
+
 (async () => {
+  await portMuhafizi([PORT], 'node tools/ledgercheck.js <port>');
+  srv = spawn('python3', ['devserver.py', String(PORT)], { cwd:ROOT, stdio:'ignore' });
   await wait(1200);
   /* Tarayici ikilisi: CHROMIUM_PATH verilmisse O, verilmemisse
      Playwright'in kendi kurdugu. Burada bir yol SABIT yaziliydi ve o
@@ -33,7 +67,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const p = await b.newPage({ reducedMotion:'reduce', viewport:{ width:1440, height:900 } });
   const errs = [];
   p.on('pageerror', e => errs.push(String(e)));
-  await p.goto('http://127.0.0.1:4183/index.html', { waitUntil:'load' });
+  await p.goto('http://127.0.0.1:' + PORT + '/index.html', { waitUntil:'load' });
   await wait(1400);
   const s = await p.$('[data-act="setup-skip"]'); if(s){ await s.click(); await wait(500); }
   await p.evaluate(async () => {
@@ -76,4 +110,4 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   console.log(bad.length ? 'DUZEN SORUNU:\n' + bad.join('\n')
     : bakilan + ' ekran/sekmede defter düzeni temiz');
   await b.close(); srv.kill(); process.exit(0);
-})().catch(e => { console.error(e); srv.kill(); process.exit(1); });
+})().catch(e => { console.error(e); if(srv) srv.kill(); process.exit(1); });

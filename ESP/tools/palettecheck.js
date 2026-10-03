@@ -6,7 +6,7 @@
      metin/zemin, ikincil metin/zemin, bolum rengi/zemin,
      dugme yazisi/bolum rengi, alt bant yazilari, cetvel cizgisi/yuzey
 
-   Kullanim:  node tools/palettecheck.js
+   Kullanim:  node tools/palettecheck.js [port]
    Cikti:     "butun paletler AA gecti"  ya da  sorunlu kombinasyonlar
 
    Ayrica /tmp/pal altina her paletin ekran goruntusunu birakir. */
@@ -14,14 +14,20 @@
 const { chromium } = require('playwright');
 const { spawn } = require('child_process');
 const fs = require('fs');
-const OUT = '/tmp/pal'; fs.mkdirSync(OUT, { recursive:true });
+const OUT = '/tmp/pal';
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
+/* Kendi portu. Eskiden devserver'in varsayilani 4193'u kullaniyordu: o
+   UYGULAMANIN portudur (sistem/sunucu.py). Uygulama aciksa denetim kendi
+   sunucusunu acamiyor ve acik uygulamayi — baska bir kopyanin dosyalarini
+   — olcuyordu. */
+const PORT = Number(process.argv[2]) || 4195;
 /* Sunucu, denetimin KENDI klasorunden acilir. Burada depo koku SABIT
    yaziliydi (`/home/user/LifeOs/...`): o yol yalnizca bir gelistirme
    makinesinde vardi, baska her yerde sunucu hic acilmiyor ve denetim
-   bos sayfa olcuyordu. __dirname her yerde dogrudur. */
-const srv = spawn('python3', ['devserver.py'], { cwd:ROOT, stdio:'ignore' });
+   bos sayfa olcuyordu. __dirname her yerde dogrudur. Sunucu muhafizdan
+   SONRA acilir (asagida). */
+let srv = null;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
 /* WCAG kontrast — arayuzun okunabilirligi goz kararina birakilmaz. */
@@ -111,7 +117,35 @@ function checksOf(m, altBant){
   ].filter(Boolean);
 }
 
+/* PORT MUHAFIZI (2026-10-03). Port sabittir: ayni denetim baska bir
+   worktree'de ayni anda kosarsa bu kosunun sunucusu portu alamaz, ama
+   saglik denetimi OTEKININ sunucusundan cevap alir ve denetim baska bir
+   kopyanin dosyalarini olcer. Port doluysa denetim HIC baslamaz — dosya
+   yazmaz, sunucu acmaz: cikis 2 (kirmizi degil, kosulamadi). Desen
+   tools/entegre.js'ten; tools/portmuhafiz.test.js sinar. */
+function portDolu(port){
+  const dene = host => new Promise(r => {
+    const s = require('net').connect({ host, port });
+    s.setTimeout(1000, () => { s.destroy(); r(false); });
+    s.once('connect', () => { s.destroy(); r(true); });
+    s.once('error', () => r(false));
+  });
+  return Promise.all([dene('127.0.0.1'), dene('::1')]).then(x => x.some(Boolean));
+}
+async function portMuhafizi(portlar, ipucu){
+  const dolu = [];
+  for(const p of portlar) if(await portDolu(p)) dolu.push(p);
+  if(!dolu.length) return;
+  console.error('Port dolu: ' + dolu.join(', ') + ' — başka bir koşu (belki başka bir worktree\'de) '
+    + 'ya da açık bir sunucu kullanıyor.\nBu koşu kendi sunucusunu açamaz, ötekini ölçerdi; '
+    + 'o bitince yeniden koş' + (ipucu ? ' ya da boş bir port ver: ' + ipucu : '') + '.');
+  process.exit(2);
+}
+
 (async () => {
+  await portMuhafizi([PORT], 'node tools/palettecheck.js <port>');
+  fs.mkdirSync(OUT, { recursive:true });
+  srv = spawn('python3', ['devserver.py', String(PORT)], { cwd:ROOT, stdio:'ignore' });
   await wait(1200);
   /* Tarayici ikilisi: CHROMIUM_PATH verilmisse O, verilmemisse
      Playwright'in kendi kurdugu. Burada bir yol SABIT yaziliydi ve o
@@ -120,7 +154,7 @@ function checksOf(m, altBant){
      kosmayacak bir denetimdi. */
   const b = await chromium.launch({ executablePath:process.env.CHROMIUM_PATH || undefined });
   const p = await b.newPage({ reducedMotion:'reduce', viewport:{ width:1280, height:900 } });
-  await p.goto('http://127.0.0.1:4193/index.html', { waitUntil:'load' });
+  await p.goto('http://127.0.0.1:' + PORT + '/index.html', { waitUntil:'load' });
   await wait(1500);
   const skip = await p.$('[data-act="setup-skip"]'); if(skip){ await skip.click(); await wait(500); }
   /* Bos bir uygulama duzen ve kontrast hatalarini GIZLER: satirlar cizilmez,
@@ -246,4 +280,4 @@ function checksOf(m, altBant){
           + ' (asgari ' + enDar.min + ') — ' + enDar.where : ''));
   }
   await b.close(); srv.kill(); process.exit(0);
-})().catch(e => { console.error(e); srv.kill(); process.exit(1); });
+})().catch(e => { console.error(e); if(srv) srv.kill(); process.exit(1); });

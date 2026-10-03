@@ -59,7 +59,7 @@
  *
  *   CHROMIUM_PATH=/opt/pw-browsers/chromium node tools/envanter.js
  *
- * Cikis kodu: 0 kayip yok, 1 kayip var, 2 kosum hatasi.
+ * Cikis kodu: 0 kayip yok, 1 kayip var, 2 kosum hatasi ya da port dolu.
  */
 'use strict';
 
@@ -713,7 +713,33 @@ function karsilastir(ad, taban, simdi, izin){
 /* ------------------------------------------------------------------
    ANA */
 
+/* PORT MUHAFIZI (2026-10-03). Portlar sabittir: ayni gezinti baska bir
+   worktree'de ayni anda kosarsa bu kosunun sunuculari portu alamaz, ama
+   saglik denetimi OTEKININ sunucusundan cevap alir ve envanter baska bir
+   kopyanin dosyalarini gezer. Port doluysa gezinti HIC baslamaz: cikis 2
+   (kirmizi degil, kosulamadi). gez() icindedir — sadelik.js --gezinti de
+   buradan gecer. Desen tools/entegre.js'ten; tools/portmuhafiz.test.js sinar. */
+function portDolu(port){
+  const dene = host => new Promise(r => {
+    const s = require('net').connect({ host, port });
+    s.setTimeout(1000, () => { s.destroy(); r(false); });
+    s.once('connect', () => { s.destroy(); r(true); });
+    s.once('error', () => r(false));
+  });
+  return Promise.all([dene('127.0.0.1'), dene('::1')]).then(x => x.some(Boolean));
+}
+async function portMuhafizi(portlar, ipucu){
+  const dolu = [];
+  for(const p of portlar) if(await portDolu(p)) dolu.push(p);
+  if(!dolu.length) return;
+  console.error('Port dolu: ' + dolu.join(', ') + ' — başka bir koşu (belki başka bir worktree\'de) '
+    + 'ya da açık bir sunucu kullanıyor.\nBu koşu kendi sunucusunu açamaz, ötekini ölçerdi; '
+    + 'o bitince yeniden koş' + (ipucu ? ' ya da boş bir port ver: ' + ipucu : '') + '.');
+  process.exit(2);
+}
+
 async function gez(moduller){
+  await portMuhafizi(moduller.map(ad => MODUL[ad].port));
   const tarayici = await tarayiciYukle().launch(process.env.CHROMIUM_PATH
     ? { executablePath:process.env.CHROMIUM_PATH } : {});
   const out = {};

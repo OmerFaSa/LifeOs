@@ -180,6 +180,13 @@ jobs:
       # tarayıcısız denetimlerin Playwright istemediği sınanır.
       - name: Onay düğmeleri sonucu söylüyor mu
         run: node tools/playwrightsiz.test.js && node tools/envanterhkm.test.js && node tools/sadelik.test.js && node tools/sadelik.js --onay
+      # PORT MUHAFIZI. Denetimlerin portları sabittir; iki worktree aynı
+      # denetimi aynı anda koşunca ikincisi ötekinin sunucusunu ölçüyordu
+      # (2026-10-03, entegre.js: üç geçersiz koşu). Her araç port doluysa
+      # hiçbir şey başlatmadan 2 ile çıkmalı. Test tarayıcı, python3 ve alt
+      # süreç istemez (hepsi engellenir) — bu hızlı işte koşar.
+      - name: Sabit portlu denetimler port doluysa başlamaz
+        run: node tools/portmuhafiz.test.js
 
   hkm:
     name: HKM — testler, sorgu bütçesi, panonun yüzü

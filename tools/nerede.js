@@ -9,7 +9,9 @@
    Kırmızı yapmaz; bir iş listesi verir. (K yazdı, T3 SPİ'de kullanıldı.) */
 const path = require('path');
 const { spawn } = require('child_process');
-const KOK = '/home/user/LifeOs';
+/* Depo koku __dirname'den: burada SABIT `/home/user/LifeOs` yaziliydi ve o
+   yol yalnizca bir gelistirme makinesinde vardi (palettecheck'te de aynisi). */
+const KOK = path.resolve(__dirname, '..');
 const ad = process.argv[2];
 const NS = { AYS:'R', SPI:'SP', ESP:'ESP' }[ad];
 const { chromium } = require(path.join(KOK, ad, 'node_modules/playwright'));
@@ -19,8 +21,31 @@ const bas = env.indexOf('\n  ' + ad + ': () => {');
 let i = env.indexOf('{', bas), d = 0, j = i;
 for(; j < env.length; j++){ if(env[j] === '{') d++; else if(env[j] === '}'){ d--; if(!d) break; } }
 const doldur = '() => ' + env.slice(i, j + 1);
+/* PORT MUHAFIZI (2026-10-03). Port sabittir: baska bir worktree'de ayni
+   anda kosan nerede.js'in sunucusu varken bu kosu kendi sunucusunu acamaz
+   ve OTEKININ dosyalarini olcerdi. Port doluysa HIC baslamaz: cikis 2.
+   Desen tools/entegre.js'ten; tools/portmuhafiz.test.js sinar. */
+function portDolu(port){
+  const dene = host => new Promise(r => {
+    const s = require('net').connect({ host, port });
+    s.setTimeout(1000, () => { s.destroy(); r(false); });
+    s.once('connect', () => { s.destroy(); r(true); });
+    s.once('error', () => r(false));
+  });
+  return Promise.all([dene('127.0.0.1'), dene('::1')]).then(x => x.some(Boolean));
+}
+async function portMuhafizi(portlar, ipucu){
+  const dolu = [];
+  for(const p of portlar) if(await portDolu(p)) dolu.push(p);
+  if(!dolu.length) return;
+  console.error('Port dolu: ' + dolu.join(', ') + ' — başka bir koşu (belki başka bir worktree\'de) '
+    + 'ya da açık bir sunucu kullanıyor.\nBu koşu kendi sunucusunu açamaz, ötekini ölçerdi; '
+    + 'o bitince yeniden koş' + (ipucu ? ' ya da boş bir port ver: ' + ipucu : '') + '.');
+  process.exit(2);
+}
 (async () => {
   const port = 4389;
+  await portMuhafizi([port]);
   const srv = spawn('python3', [path.join(KOK, ad, 'devserver.py'), String(port)], { cwd:path.join(KOK, ad), stdio:'ignore' });
   await new Promise(r => setTimeout(r, 1500));
   const b = await chromium.launch({ ...(process.env.CHROMIUM_PATH ? { executablePath:process.env.CHROMIUM_PATH } : {}) });

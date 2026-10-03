@@ -79,7 +79,33 @@ function waitForServer(url, tries){
   });
 }
 
+/* PORT MUHAFIZI (2026-10-03). Port sabittir: ayni denetim baska bir
+   worktree'de ayni anda kosarsa bu kosunun sunucusu portu alamaz, ama
+   saglik denetimi OTEKININ sunucusundan cevap alir ve denetim baska bir
+   kopyanin dosyalarini olcer. Port doluysa denetim HIC baslamaz — dosya
+   yazmaz, sunucu acmaz: cikis 2 (kirmizi degil, kosulamadi). Desen
+   tools/entegre.js'ten; tools/portmuhafiz.test.js sinar. */
+function portDolu(port){
+  const dene = host => new Promise(r => {
+    const s = require('net').connect({ host, port });
+    s.setTimeout(1000, () => { s.destroy(); r(false); });
+    s.once('connect', () => { s.destroy(); r(true); });
+    s.once('error', () => r(false));
+  });
+  return Promise.all([dene('127.0.0.1'), dene('::1')]).then(x => x.some(Boolean));
+}
+async function portMuhafizi(portlar, ipucu){
+  const dolu = [];
+  for(const p of portlar) if(await portDolu(p)) dolu.push(p);
+  if(!dolu.length) return;
+  console.error('Port dolu: ' + dolu.join(', ') + ' — başka bir koşu (belki başka bir worktree\'de) '
+    + 'ya da açık bir sunucu kullanıyor.\nBu koşu kendi sunucusunu açamaz, ötekini ölçerdi; '
+    + 'o bitince yeniden koş' + (ipucu ? ' ya da boş bir port ver: ' + ipucu : '') + '.');
+  process.exit(2);
+}
+
 (async () => {
+  await portMuhafizi([PORT], 'node tools/perfcheck.js <port>');
   const server = spawn('python3', [path.join(ROOT, 'devserver.py'), String(PORT)],
     { cwd:ROOT, stdio:'ignore' });
   let browser;

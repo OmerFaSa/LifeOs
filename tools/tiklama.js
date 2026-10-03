@@ -43,7 +43,7 @@
  *
  *   CHROMIUM_PATH=/opt/pw-browsers/chromium node tools/tiklama.js
  *
- * Cikis kodu: 0 temiz, 1 en az bir dugme hata verdi, 2 kosum hatasi.
+ * Cikis kodu: 0 temiz, 1 en az bir dugme hata verdi, 2 kosum hatasi ya da port dolu.
  */
 'use strict';
 
@@ -252,6 +252,31 @@ async function tara(tarayici, ad, secilenEkran, ikinciKat){
   return { basilan, bulgular };
 }
 
+/* PORT MUHAFIZI (2026-10-03). Portlar sabittir: ayni tarama baska bir
+   worktree'de ayni anda kosarsa bu kosunun sunuculari portu alamaz, ama
+   saglik denetimi OTEKININ sunucusundan cevap alir ve tarama baska bir
+   kopyanin dosyalarina basar. Port doluysa tarama HIC baslamaz: cikis 2
+   (kirmizi degil, kosulamadi). Desen tools/entegre.js'ten;
+   tools/portmuhafiz.test.js sinar. */
+function portDolu(port){
+  const dene = host => new Promise(r => {
+    const s = require('net').connect({ host, port });
+    s.setTimeout(1000, () => { s.destroy(); r(false); });
+    s.once('connect', () => { s.destroy(); r(true); });
+    s.once('error', () => r(false));
+  });
+  return Promise.all([dene('127.0.0.1'), dene('::1')]).then(x => x.some(Boolean));
+}
+async function portMuhafizi(portlar, ipucu){
+  const dolu = [];
+  for(const p of portlar) if(await portDolu(p)) dolu.push(p);
+  if(!dolu.length) return;
+  console.error('Port dolu: ' + dolu.join(', ') + ' — başka bir koşu (belki başka bir worktree\'de) '
+    + 'ya da açık bir sunucu kullanıyor.\nBu koşu kendi sunucusunu açamaz, ötekini ölçerdi; '
+    + 'o bitince yeniden koş' + (ipucu ? ' ya da boş bir port ver: ' + ipucu : '') + '.');
+  process.exit(2);
+}
+
 async function main(){
   const argv = process.argv.slice(2);
   const secilen = argv.filter(a => ENV.MODUL[a]);
@@ -260,6 +285,7 @@ async function main(){
   const ekran = ei >= 0 ? argv[ei + 1] : null;
   const ikinciKat = !argv.includes('--sig');
 
+  await portMuhafizi(moduller.map(ad => PORT[ad]));
   const tarayici = await chromium.launch(process.env.CHROMIUM_PATH
     ? { executablePath:process.env.CHROMIUM_PATH } : {});
   let toplam = 0;

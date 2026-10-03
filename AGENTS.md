@@ -109,6 +109,7 @@ cd HKM && python3 -m tests.run && python3 tools/perf.py && node tools/yuz.js
 # depo kökü: hepsi + belgelerdeki sayıları tazeler
 python3 tools/sayilar.py --tam --yaz
 node tools/entegre.js       # üç arayüz + HKM uçtan uca
+node tools/portmuhafiz.test.js  # sabit portlu her denetim port doluysa başlamaz (çıkış 2)
 ```
 
 **Kural:** bir değişiklik, dokunduğu sistemin testleri ve duman testi

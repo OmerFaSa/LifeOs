@@ -51,6 +51,7 @@
  *   node tools/kapsam.js --esik 40      # eşiğin altı KIRMIZI (çıkış 1)
  *
  * Eşik verilmezse araç bir ÖLÇÜMDÜR, denetim değil: çıkış kodu 0.
+ * Çıkış 2: koşulamadı (koşum hatası ya da port dolu).
  * Kırmızıya dönmeyen bir denetim denetim değildir (bkz. CI yorumu),
  * o yüzden eşik AÇIKÇA istenir — bugünkü kapsamı bir gecede eşiğe
  * çevirmek, bugünü yarının ölçütü yapmak olurdu.
@@ -197,6 +198,31 @@ function yaz(sonuc, ayrinti, esik){
   return topla(core);
 }
 
+/* PORT MUHAFIZI (2026-10-03). Portlar sabittir: ayni olcum baska bir
+   worktree'de ayni anda kosarsa bu kosunun sunuculari portu alamaz, ama
+   saglik denetimi OTEKININ sunucusundan cevap alir ve kapsam baska bir
+   kopyanin dosyalarinda olculur. Port doluysa olcum HIC baslamaz: cikis 2
+   (kirmizi degil, kosulamadi). Desen tools/entegre.js'ten;
+   tools/portmuhafiz.test.js sinar. */
+function portDolu(port){
+  const dene = host => new Promise(r => {
+    const s = require('net').connect({ host, port });
+    s.setTimeout(1000, () => { s.destroy(); r(false); });
+    s.once('connect', () => { s.destroy(); r(true); });
+    s.once('error', () => r(false));
+  });
+  return Promise.all([dene('127.0.0.1'), dene('::1')]).then(x => x.some(Boolean));
+}
+async function portMuhafizi(portlar, ipucu){
+  const dolu = [];
+  for(const p of portlar) if(await portDolu(p)) dolu.push(p);
+  if(!dolu.length) return;
+  console.error('Port dolu: ' + dolu.join(', ') + ' — başka bir koşu (belki başka bir worktree\'de) '
+    + 'ya da açık bir sunucu kullanıyor.\nBu koşu kendi sunucusunu açamaz, ötekini ölçerdi; '
+    + 'o bitince yeniden koş' + (ipucu ? ' ya da boş bir port ver: ' + ipucu : '') + '.');
+  process.exit(2);
+}
+
 (async () => {
   const arg = process.argv.slice(2);
   const ayrinti = arg.includes('--ayrinti');
@@ -209,13 +235,18 @@ function yaz(sonuc, ayrinti, esik){
 
   let kod = 0;
   let port = 4601;
-  const ozetler = [];
+  const plan = [];
   for(const s of liste){
     if(!fs.existsSync(path.join(KOK, s, 'devserver.py'))){
       console.log('atlandi: ' + s + ' (devserver.py yok)');
       continue;
     }
-    const sonuc = await olc(s, port++);
+    plan.push([s, port++]);
+  }
+  await portMuhafizi(plan.map(x => x[1]));
+  const ozetler = [];
+  for(const [s, p] of plan){
+    const sonuc = await olc(s, p);
     const t = yaz(sonuc, ayrinti, esik);
     ozetler.push({ sistem:s, ...t, test:sonuc.test });
     if(esik != null){
