@@ -27,6 +27,8 @@ import datetime
 import json
 import re
 
+from core import goruntu
+
 MODULLER = ("ays", "spi", "esp")
 MODUL_AD = {"ays": "AYS", "spi": "SPİ", "esp": "ESP"}
 MAX_HEDEF = 30
@@ -104,17 +106,24 @@ def temizle(h):
     return out
 
 
-def esitle(con, modul, hedefler, now=None):
-    """Modulun hedef ozetlerinin ANLIK GORUNTUSUNU esitler.
-
-    Modulde olmayan ozet duser (hedef bitti ya da birakildi). Bozuk ozet
-    reddedilir ve SAYILIR. Oku-sonra-yaz tek islemdir (bkz. memory.esitle)."""
+def _liste_hatasi(modul, hedefler):
     if modul not in MODULLER:
         return {"ok": False, "note": "Bilinmeyen modül."}
     if not isinstance(hedefler, list):
         return {"ok": False, "note": "Hedefler liste olmalı."}
     if len(hedefler) > MAX_HEDEF:
         return {"ok": False, "note": "Bir modül en fazla %d hedef yollayabilir." % MAX_HEDEF}
+    return None
+
+
+def esitle(con, modul, hedefler, now=None):
+    """Modulun hedef ozetlerinin ANLIK GORUNTUSUNU esitler.
+
+    Modulde olmayan ozet duser (hedef bitti ya da birakildi). Bozuk ozet
+    reddedilir ve SAYILIR. Oku-sonra-yaz tek islemdir (bkz. memory.esitle)."""
+    hata = _liste_hatasi(modul, hedefler)
+    if hata:
+        return hata
     at = _simdi(now)
     kendi = not con.in_transaction
     if kendi:
@@ -146,6 +155,52 @@ def esitle(con, modul, hedefler, now=None):
         raise
     return {"ok": True, "yazilan": yazilan, "reddedilen": reddedilen, "dusen": len(dusen),
             "toplam": len(gelen)}
+
+
+def goruntu_yaz(con, modul, govde, now=None):
+    """`/api/hedef/sync/<modul>` govdesinin TAMAMI — hedefler, tatil, yarin,
+    dil karti — TEK ISLEMDE ve SIRASIYLA (core/goruntu.py).
+
+    hedefag.js goruntuyu beklemeden yollar. Once parcalar ayri ayri
+    yaziliyordu ve gec gelen eski govde biten hedefi, kalkan tatili geri
+    getirebiliyordu; yalniz hedefleri sirayla korumak da yetmezdi: iki
+    govde ic ice gecerse eskinin tatili yeninin ustune yazilirdi.
+    Bozuk hedef listesi HICBIR SEY yazmaz, sirayi da ilerletmez. Tatil,
+    yarin ve dil karti kendi sonucunu dondurur; biri bozuksa digerleri
+    yine yazilir (onceki davranis)."""
+    if not isinstance(govde, dict):
+        return {"ok": False, "note": "Gövde bir nesne olmalı."}
+    hata = _liste_hatasi(modul, govde.get("hedefler"))
+    if hata:
+        return hata
+    oturum, sira = govde.get("oturum"), govde.get("sira")
+    if not goruntu.gecerli(oturum, sira):
+        return {"ok": False, "note": goruntu.NOT}
+    kendi = not con.in_transaction
+    if kendi:
+        con.execute("BEGIN IMMEDIATE")
+    try:
+        if goruntu.eski_mi(con, "hedef", modul, oturum, sira, _simdi(now)):
+            r = {"ok": True, "eski": True, "yazilan": 0, "reddedilen": 0, "dusen": 0,
+                 "toplam": 0}
+        else:
+            r = esitle(con, modul, govde["hedefler"], now)
+            if "tatil" in govde:
+                # Tatil modu (brand/ortak/seri.js): yalniz tarih; null siler.
+                r["tatil"] = tatil_yaz(con, modul, govde.get("tatil"), now)
+            if govde.get("yarin") is not None:
+                # Aksam «yarin sunlar var» (core/schedule.py): modulun sectigi isler.
+                r["yarin"] = yarin_yaz(con, modul, govde.get("yarin"), now)
+            if govde.get("dil_karti") is not None:
+                # Gunun dil karti (fikir 38): yalniz ESP; HKM saatinde dizer.
+                r["dil_karti"] = dilkart_yaz(con, modul, govde.get("dil_karti"), now)
+        if kendi:
+            con.execute("COMMIT")
+    except Exception:
+        if kendi:
+            con.execute("ROLLBACK")
+        raise
+    return r
 
 
 def yarin_yaz(con, modul, yarin, now=None):

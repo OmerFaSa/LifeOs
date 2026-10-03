@@ -145,6 +145,35 @@
       expect(a.giden.length).toBe(1);
     });
 
+    /* Görüntüler gönderildiği sırayla varmayabilir: «ekle»nin görüntüsü
+       geç gelirse «unut»la silineni HKM'de diriltirdi (tools/entegre.js
+       arada bir). HKM aynı oturumda eski sırayı yok sayar. */
+    it('her görüntü oturumunu ve kesin artan sırasını taşır', async () => {
+      const a = ortam(ACIK);
+      await a.h.yukle();
+      const e = await a.h.ekle('Pazar çalışmam', { katman:'soz', kaynak:'kullanici' });
+      await a.h.unut(e.kayit.id);
+      await a.h.hkmeGonder();
+      await new Promise(r => setTimeout(r, 0));
+      const g = a.giden.map(x => JSON.parse(x.o.body));
+      expect(g).toHaveLength(3);
+      /* HKM'nin kabul ettiği biçim: 1–60 karakter oturum, 1'den büyük tam sayı sıra. */
+      expect(typeof g[0].oturum).toBe('string');
+      expect(g[0].oturum.length > 0 && g[0].oturum.length <= 60).toBe(true);
+      expect(Number.isInteger(g[0].sira) && g[0].sira >= 1).toBe(true);
+      g.forEach(x => expect(x.oturum).toBe(g[0].oturum));
+      /* ekle'nin görüntüsü kaydı taşır ve sırası unut'unkinden küçüktür. */
+      expect(g[0].items.map(x => x.metin)).toEqual(['Pazar çalışmam']);
+      expect(g[1].items).toEqual([]);
+      expect(g[0].sira).toBeLessThan(g[1].sira);
+      expect(g[1].sira).toBeLessThan(g[2].sira);
+      /* Sayfa yeniden açılınca (yeni kur) sayaç baştan başlar, oturum değişir. */
+      const b = ortam(ACIK);
+      await b.h.yukle();
+      await b.h.hkmeGonder();
+      expect(JSON.parse(b.giden[0].o.body).oturum === g[0].oturum).toBe(false);
+    });
+
     it('ağ hatası fırlatmaz; kayıt yerelde durur', async () => {
       const a = ortam(ACIK, async () => { throw new Error('bağlantı reddedildi'); });
       await a.h.yukle();

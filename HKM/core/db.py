@@ -192,6 +192,19 @@ CREATE TABLE IF NOT EXISTS memories (
 );
 CREATE INDEX IF NOT EXISTS ix_memories_user_state ON memories(user,state,scope);
 
+/* Modul anlik goruntusunun SIRASI (core/goruntu.py): hafiza ve hedef
+   agi. Modul goruntuyu beklemeden yollar; varis sirasi gonderim sirasi
+   degildir. Ayni oturumda uygulanandan eski goruntu yok sayilir. Gecici
+   sira bilgisidir: yedege girmez. */
+CREATE TABLE IF NOT EXISTS goruntu_sira (
+  kanal       TEXT NOT NULL,                      -- hafiza|hedef
+  modul       TEXT NOT NULL,
+  oturum      TEXT NOT NULL,
+  sira        INTEGER NOT NULL,
+  guncelleme  TEXT NOT NULL,
+  PRIMARY KEY (kanal, modul)
+);
+
 /* BAM — Bilgi ve Aksiyon Modulu (core/bam.py). Is kuyrugu, kayitlar
    ve «bu neden var» iz zinciri. BAM hicbir module YAZMAZ; teklifi
    niyet kuyruguna (intents) birakir. */

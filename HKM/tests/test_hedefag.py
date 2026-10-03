@@ -84,3 +84,64 @@ def run():
         eq(l["a2"]["plan"]["bitis"], None)
         eq(l["a2"]["plan"]["ilerleme"]["durum"], "veri_yok")
     test("plan ozeti suzulur: bozuk tarih ve bilinmeyen durum kabul edilmez", t_plan_ozeti)
+
+    def t_goruntu_sira():
+        """hedefag.js goruntuyu beklemeden yollar; varis sirasi gonderim
+        sirasi degildir (bkz. test_memory t_module_sync_sira). Govdenin
+        TAMAMI (hedefler, tatil, yarin, dil karti) tek islemde ve sirasiyla
+        yazilir: gec gelen eski govde ne biten hedefi ne kalkan tatili
+        geri getirir, ne de yarinin islerini eskisiyle ezer."""
+        from core import memory
+        con = db.connect(":memory:")
+
+        def say(tablo):
+            return con.execute("SELECT COUNT(*) FROM %s WHERE modul='ays'" % tablo).fetchone()[0]
+        tatil = {"bas": "2026-10-10", "bit": "2026-10-12"}
+        eski_yarin = {"gun": "2026-10-04", "isler": [{"metin": "Eski iş", "dk": 30}]}
+        yeni_yarin = {"gun": "2026-10-04", "isler": [{"metin": "Yeni iş", "dk": 45}]}
+        r = hedefag.goruntu_yaz(con, "ays", {"hedefler": [_h("a1", "AYT Fizik", 60)],
+                                             "tatil": tatil, "yarin": eski_yarin,
+                                             "oturum": "o1", "sira": 2})
+        ok(r["ok"], r)
+        eq((say("hedef_ozet"), say("tatil_ozet")), (1, 1))
+        r = hedefag.goruntu_yaz(con, "ays", {"hedefler": [], "tatil": None, "yarin": yeni_yarin,
+                                             "oturum": "o1", "sira": 3})
+        eq((r["dusen"], r["tatil"]["tatil"], r["yarin"]["adet"]), (1, None, 1))
+        r = hedefag.goruntu_yaz(con, "ays", {"hedefler": [_h("a1", "AYT Fizik", 60)],
+                                             "tatil": tatil, "yarin": eski_yarin,
+                                             "oturum": "o1", "sira": 1})
+        ok(r["ok"])
+        ok(r["eski"])
+        no("tatil" in r or "yarin" in r, r)
+        eq((say("hedef_ozet"), say("tatil_ozet")), (0, 0), "gec gelen eski govde geri getirdi")
+        eq(hedefag.yarin_oku(con, "2026-10-04")["ays"][0]["metin"], "Yeni iş")
+        # Sira KANAL basinadir: hafizanin sirasi hedefinkini etkilemez.
+        no(memory.esitle(con, "ays", [], oturum="o1", sira=1).get("eski"))
+        ok(memory.esitle(con, "ays", [], oturum="o1", sira=1)["eski"])
+        r = hedefag.goruntu_yaz(con, "ays", {"hedefler": [], "oturum": "o1", "sira": 4})
+        no(r.get("eski"))
+        # Bozuk govde hicbir sey yazmaz ve SIRAYI DA ILERLETMEZ: sonraki
+        # gecerli goruntu (sira 5) yine uygulanir.
+        r = hedefag.goruntu_yaz(con, "ays", {"hedefler": "liste degil", "tatil": tatil,
+                                             "oturum": "o1", "sira": 99})
+        no(r["ok"])
+        eq(say("tatil_ozet"), 0)
+        r = hedefag.goruntu_yaz(con, "ays", {"hedefler": [_h("a2", "TYT", 30)],
+                                             "oturum": "o1", "sira": 5})
+        no(r.get("eski"))
+        eq(say("hedef_ozet"), 1)
+        # Yeni oturum ve sirasiz govde (eski modul surumu) uygulanir.
+        no(hedefag.goruntu_yaz(con, "ays", {"hedefler": [], "oturum": "o2", "sira": 1}).get("eski"))
+        eq(say("hedef_ozet"), 0)
+        no(hedefag.goruntu_yaz(con, "ays", {"hedefler": [_h("a3", "Geo")]}).get("eski"))
+        eq(say("hedef_ozet"), 1)
+        # Bozuk sira ya da oturum, ya da ikisinden yalniz biri reddedilir.
+        for bozuk in ({"oturum": "o1", "sira": "2"}, {"oturum": "o1", "sira": True},
+                      {"oturum": "", "sira": 5}, {"sira": 5}, {"oturum": "o1"}):
+            no(hedefag.goruntu_yaz(con, "ays", dict(bozuk, hedefler=[]))["ok"], bozuk)
+        eq(say("hedef_ozet"), 1)
+        no(hedefag.goruntu_yaz(con, "king", {"hedefler": []})["ok"])
+        no(con.in_transaction, "islem acik kaldi")
+        no("goruntu_sira" in db.BACKUP_TABLES)
+    test("hedef govdesi tek islemde ve sirasiyla: gec gelen eski govde yok sayilir",
+         t_goruntu_sira)

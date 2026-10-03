@@ -17,6 +17,8 @@ ust patrondur ve HEPSINI gorur. Modullerden gelen kayitlar `esitle` ile
 gelir ve kendi modulunun kapsamina yazilir."""
 import datetime
 
+from core import goruntu
+
 SCOPES = {"all", "king", "ays", "spi", "esp"}
 MODULLER = ("ays", "spi", "esp")
 MAX_TEXT = 600
@@ -266,7 +268,7 @@ def _gecerli_kayit(k):
     return {"dis_id": dis_id, "metin": metin, "katman": katman, "kaynak": kaynak, "at": at}
 
 
-def esitle(con, modul, kayitlar, user="ben", now=None):
+def esitle(con, modul, kayitlar, user="ben", now=None, oturum=None, sira=None):
     """Modul hafizasinin ANLIK GORUNTUSUNU HKM kopyasina esitler.
 
     - Ayni goruntu iki kez gelirse hicbir sey degismez (idempotent).
@@ -276,13 +278,22 @@ def esitle(con, modul, kayitlar, user="ben", now=None):
       kalici olarak unutturuyordu).
     - HKM'de UNUTULMUS kayit geri gelmez: HKM module yazamaz ve
       kullanicinin «unut» sozu bir senkronla ezilemez.
-    - Modelden gelen ya da bozuk kayit reddedilir ve SAYILIR."""
+    - Modelden gelen ya da bozuk kayit reddedilir ve SAYILIR.
+    - GEC GELEN ESKI GORUNTU YOK SAYILIR. Modul goruntuyu beklemeden
+      yollar (hafiza.js); varis sirasi gonderim sirasi degildir: ekle'nin
+      [kayit] goruntusu yazma kilidini beklerken unut'un [] goruntusu once
+      uygulanirsa eski goruntu unutulani diriltiyordu (tools/entegre.js
+      arada bir). Goruntu `oturum` + `sira` tasir; ayni oturumda
+      uygulanandan eski ya da ona esit sira hicbir sey yazmaz
+      ({"eski": True}). Kural core/goruntu.py'dedir."""
     if modul not in MODULLER:
         return {"ok": False, "note": "Bilinmeyen modül."}
     if not isinstance(kayitlar, list):
         return {"ok": False, "note": "Kayıtlar liste olmalı."}
     if len(kayitlar) > MAX_ESITLE:
         return {"ok": False, "note": "Bir modül en fazla %d hafıza kaydı yollayabilir." % MAX_ESITLE}
+    if not goruntu.gecerli(oturum, sira):
+        return {"ok": False, "note": goruntu.NOT}
     at = _simdi(now)
     # OKU-SONRA-YAZ TEK ISLEMDIR. Modul kaydi ekler eklemez arka planda bir
     # esitleme yollar; hemen ardindan ikincisi gelebilir. Iki istek ayri
@@ -294,6 +305,11 @@ def esitle(con, modul, kayitlar, user="ben", now=None):
     if kendi:
         con.execute("BEGIN IMMEDIATE")
     try:
+        if goruntu.eski_mi(con, "hafiza", modul, oturum, sira, at):
+            if kendi:
+                con.execute("COMMIT")
+            return {"ok": True, "modul": modul, "eski": True, "eklenen": 0,
+                    "guncellenen": 0, "dusen": 0, "dirilen": 0, "reddedilen": 0}
         var = {r["dis_id"]: dict(r) for r in con.execute(
             "SELECT id,dis_id,text,COALESCE(katman,'soz') AS katman,state FROM memories "
             "WHERE user=? AND modul=? AND dis_id IS NOT NULL", (user, modul)).fetchall()}

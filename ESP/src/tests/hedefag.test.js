@@ -120,6 +120,49 @@
       expect('tatil' in giden[2]).toBe(false);
     });
 
+    /* Görüntüler gönderildiği sırayla varmayabilir: eski görüntü geç
+       gelirse biten hedefi ya da kalkan tatili HKM'de geri getirirdi.
+       HKM aynı oturumda eski sırayı yok sayar (HKM hedefag.goruntu_yaz). */
+    it('her görüntü oturumunu ve kesin artan sırasını taşır', async () => {
+      const giden = [];
+      const f = async (url, o) => { giden.push(JSON.parse(o.body));
+        return { status:200, json:async () => ({ ok:true }) }; };
+      const ag = A().kur({ hkm:() => beacon(true), modul:'ays', ozetler:() => [], fetch:f });
+      await ag.gonder();
+      await ag.gonder();
+      await ag.gonder();
+      /* HKM'nin kabul ettiği biçim: 1–60 karakter oturum, 1'den büyük tam sayı sıra. */
+      expect(typeof giden[0].oturum).toBe('string');
+      expect(giden[0].oturum.length > 0 && giden[0].oturum.length <= 60).toBe(true);
+      expect(Number.isInteger(giden[0].sira) && giden[0].sira >= 1).toBe(true);
+      giden.forEach(g => expect(g.oturum).toBe(giden[0].oturum));
+      expect(giden[0].sira).toBeLessThan(giden[1].sira);
+      expect(giden[1].sira).toBeLessThan(giden[2].sira);
+      /* Sayfa yeniden açılınca (yeni kur) oturum değişir. */
+      await A().kur({ hkm:() => beacon(true), modul:'ays', ozetler:() => [], fetch:f }).gonder();
+      expect(giden[3].oturum === giden[0].oturum).toBe(false);
+    });
+
+    it('sıra, hedefler ve tatil AYNI ANDA alınır: yarın kancası beklerken değişen tatil karışmaz', async () => {
+      /* Gönderim yarın kancasında beklerken tatil kalkar. Tatil beklemeden
+         SONRA okunsaydı gönderim, sırasını aldığı andan daha yeni bir tatili
+         taşırdı: sıra ile görüntü birbirini tutmaz, HKM'nin «eski mi?»
+         kararı yanlış görüntüye verilirdi. */
+      const giden = [];
+      const f = async (url, o) => { giden.push(JSON.parse(o.body));
+        return { status:200, json:async () => ({ ok:true }) }; };
+      let t = { bas:'2026-10-10', bit:'2026-10-12' };
+      let bekle = null;
+      const ag = A().kur({ hkm:() => beacon(true), modul:'ays', ozetler:() => [], tatil:() => t,
+        yarin:() => new Promise(r => { bekle = r; }), fetch:f });
+      const ilk = ag.gonder();
+      t = null;
+      bekle({ gun:'2026-10-04', isler:[] });
+      await ilk;
+      expect(giden[0].tatil).toEqual({ bas:'2026-10-10', bit:'2026-10-12', donus_planli:false });
+      expect(giden[0].sira).toBe(1);
+    });
+
     it('HKM hata verirse sessizce düşer', async () => {
       const ag = A().kur({ hkm:() => beacon(true), modul:'spi', ozetler:() => [],
         fetch:async () => { throw new Error('ağ yok'); } });

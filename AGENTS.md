@@ -116,6 +116,20 @@ node tools/portmuhafiz.test.js  # sabit portlu her denetim port doluysa başlama
 geçmeden önerilmez. Yeni davranış **testsiz gelmez**; düzeltilen her hata
 için önce o hatayı yakalayan bir test yazılır.
 
+**Uçtan uca kural:** `brand/ortak/`, `HKM/core/`, `HKM/daemon.py` ya da
+`HKM/web/`'e dokunan bir değişiklik commit'ten önce `node tools/entegre.js`
+koşar (~1,5 dk). Bunlar sistemlerin birbirine değdiği yerlerdir; tek
+sistemin testi oradaki kırılmayı görmez. Kırmızı «bilinen aralıklı hata»
+diye geçilmez: ya düzeltilir ya da değişikliksiz HEAD'de de kırmızı olduğu
+**gösterilir** ve commit mesajına yazılır. Zaten kırmızı bir alarm yeni
+kırmızıyı gizler: 2026-10-03'te iki HKM tasarım commit'inden gelen W6
+gerilemesi fark edilmeden kaldı; entegre o sırada bir yarış yüzünden zaten
+«arada bir kırmızı» idi. CI entegre'yi yalnız push'ta koşar; push
+edilmemiş commit CI'dan geçmemiştir. Denetim araçlarının portları
+sabittir: iki oturum aynı denetimi aynı anda koşarsa birbirinin
+sunucusuyla konuşur. entegre portu doluysa başlamaz (çıkış 2 = koşulamadı,
+kırmızı değil); o bitince yeniden koşulur.
+
 ## 3. Dal ve birleştirme düzeni
 
 | Kim | Nerede çalışır | Nasıl teslim eder |
