@@ -37,6 +37,18 @@ const AYAR_SEKMELERI = ['yapayzeka', 'kanallar', 'esikler', 'sunucu'];
 /* K7: Profil, Motto ve Para artık bir çekmecenin BÖLÜMÜ: üstte çekmece,
    altta bölüm çubuğu (#bolumcubugu). */
 const CEKMECE = { profil:'ayarlar', motto:'ayarlar', para:'sistemler' };
+/* Tohumlu veriyle DOLU cizilmesi gereken kartlar: kart gorunmezse olculen
+   sey bos bir kutu olurdu. Gorunum verisini acildiktan SONRA ister (para:
+   yuklePara tek istek atar, 082 ile 087'yi ayni cevaptan tek seferde
+   cizer). Sabit bir bekleyis yetmez: 2026-10-03'te yuk altinda para
+   gorunumu tiktan 835-927 ms sonra cizildi, denetim ~980 ms'de bakiyordu
+   ve arada bir «katalog 087 tohumlu veriyle cizilmedi» verdi. Kart gelene
+   kadar beklenir — en cok DOLU_SURE; gelmezse denetim yine kirmizidir. */
+const DOLU = {
+  profil:[['[data-aday-onayla]', 'hafıza adayı']],
+  para:[['[data-oz="082"]', 'katalog 082'], ['[data-oz="087"]', 'katalog 087']],
+};
+const DOLU_SURE = 8000;
 const MIN_TAP = 24;
 const MIN_KONTRAST = 4.5;
 
@@ -332,6 +344,11 @@ async function main(){
         for(const durak of duraklar){
           await durak.git();
           await wait(350);
+          const dolu = DOLU[durak.ad] || [];
+          if(dolu.length){
+            await page.waitForFunction(s => s.every(q => document.querySelector(q)),
+              dolu.map(x => x[0]), { timeout:DOLU_SURE }).catch(() => {});
+          }
           bakilan++;
           const r = await page.evaluate(OLC);
           const yer = ad + '/' + tema + '/' + durak.ad;
@@ -342,14 +359,8 @@ async function main(){
           r.kucuk.forEach(k => hatalar.push(yer + ': küçük dokunma hedefi — ' + k));
           r.etiketsiz.forEach(k => hatalar.push(yer + ': etiketsiz öge — ' + k));
           r.kontrast.forEach(k => hatalar.push(yer + ': düşük kontrast — ' + k));
-          /* Tohumlu para verisiyle 082 ve 087 dolu çizilmeli: kart görünmezse
-             ölçülen şey boş bir kutu olurdu. */
-          if(durak.ad === 'profil' && !(await page.$('[data-aday-onayla]'))){
-            hatalar.push(yer + ': hafıza adayı tohumlu veriyle çizilmedi');
-          }
-          if(durak.ad === 'para'){
-            const oz = await page.evaluate(() => ['082', '087'].filter(n => !document.querySelector('[data-oz="' + n + '"]')));
-            oz.forEach(n => hatalar.push(yer + ': katalog ' + n + ' tohumlu veriyle çizilmedi'));
+          for(const [q, adi] of dolu){
+            if(!(await page.$(q))) hatalar.push(yer + ': ' + adi + ' tohumlu veriyle çizilmedi');
           }
         }
         if(konsol.length) hatalar.push(ad + '/' + tema + ': sayfa hatası — ' + konsol[0]);

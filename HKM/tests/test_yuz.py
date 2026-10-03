@@ -212,6 +212,28 @@ def t_denetim_her_gorunumu_gezer():
     ok("const AYAR_SEKMELERI" in d)
 
 
+def t_denetim_dolu_karti_bekler():
+    """Yuz denetimi tohumlu kartlari (hafiza adayi, 082, 087) SABIT bir
+    bekleyisle degil, gorunene kadar bekler (2026-10-03). Para gorunumu
+    verisini acildiktan SONRA ister ve 082 ile 087'yi tek cevaptan tek
+    seferde cizer; yuk altinda cizim tiktan 835-927 ms sonra geldi, denetim
+    ~980 ms'de bakiyordu ve arada bir «katalog 087 tohumlu veriyle
+    cizilmedi» verdi (hemen tekrarinda temiz). Bekleyisin bir siniri vardir
+    ve sonra kartin VARLIGI ayrica sorulur: kart hic gelmezse denetim yine
+    kirmizidir. Olcum (tasma, kontrast) de kart geldikten sonra yapilir."""
+    d = (KOK / "HKM" / "tools" / "yuz.js").read_text(encoding="utf-8")
+    ok("const DOLU = {" in d and "const DOLU_SURE" in d, "dolu kart listesi ve bekleme siniri")
+    dolu = d[d.index("const DOLU = {"):d.index("const DOLU_SURE")]
+    for s in ("'[data-aday-onayla]'", "'[data-oz=\"082\"]'", "'[data-oz=\"087\"]'"):
+        ok(s in dolu, s)
+    dongu = d[d.index("for(const durak of duraklar)"):]
+    bekle = dongu.index("page.waitForFunction(")
+    ok("timeout:DOLU_SURE" in dongu[bekle:bekle + 300], "bekleyisin siniri var")
+    ok(bekle < dongu.index("page.evaluate(OLC)"), "olcum kart geldikten sonra")
+    ok(dongu.index("page.evaluate(OLC)") < dongu.index("tohumlu veriyle çizilmedi"),
+       "kartin varligi bekleyisten sonra ayrica sorulur")
+
+
 def t_jetonlar_ortak():
     """K7a: yuz tek dosya kalir ve ortak dosyayi YUKLEMEZ; ama degerleri uc
     arayuzun v4 jetonlaridir. jeton.css'te biri degisirse burada kirilir.
@@ -446,6 +468,7 @@ def run():
     test("ne değişti: tek kart, yalnız eski kullanıcıya (017)", t_ne_degisti)
     test("fiş yükleme: önizleme, onay, küçültme", t_fis_yukleme)
     test("yüz denetimi yüzün her görünümünü gezer (Motto, Hedefler)", t_denetim_her_gorunumu_gezer)
+    test("yüz denetimi tohumlu kartı görünene kadar bekler (087, 2026-10-03)", t_denetim_dolu_karti_bekler)
     test("giriş kartı: ortada buğulu kart, göster/gizle, Enter (2026-10-03)", t_giris_karti)
     test("cam kabuk: zemin, buzlu levha, dar cam kenar (2026-10-03)", t_cam_kabuk)
     test("dar kenar seçimden sonra çekilir, sekmeyi örtmez (W6, 2026-10-03)", t_kenar_secince_cekilir)
