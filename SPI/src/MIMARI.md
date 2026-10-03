@@ -182,6 +182,27 @@ yalnızca daha temkinli yapabilir.
 mevcut basamakta son 14 günde 3 seans yapıldığında açılır. Sistem basamak
 atlatmaz — aşırı yüklenmenin en yaygın sebebi budur.
 
+**Rotalar** (Kardiyo bölümü, 2026-10-03). Strava'daki rota haritasının
+karşılığı: GPS izi (GPX dosyası) haritaya çizilir; mesafe, hareket süresi,
+tempo, km dilimleri ve tırmanış **izden hesaplanır** (`core/rota.js`),
+dosyada yazan özet okunmaz. Duraklama (0,5 m/sn altı) tempoya girmez; 3
+metrelik GPS titremesi ve 50 m/sn'yi aşan sıçrama mesafe üretmez; iki
+parça arasındaki boşluk sayılmaz. Zamanı olmayan iz (planlanmış rota)
+reddedilir; tür dosyada tanınmazsa sorulur. Yükseklik yoksa tırmanış
+«veri yok» yazar. Rota seansa dönüşür: yük MET × hareket süresidir, zorluk
+uydurulmaz. Saklanan yalnız sadeleştirilmiş iz (en çok 600 nokta, kodlanmış
+çizgi), dilimler ve 100 noktalık profildir — 5 km'lik koşu ~1 KB. Ekranda
+tek kart durur; dilimler, yükseklik ve ısı haritası kağıtta açılır.
+
+**OpenStreetMap istisnası.** Haritanın zemini OSM karolarıdır
+(`core/harita.js`, kitaplık yok: Web Mercator + tek SVG). Bu, «veri cihazda
+kalır» ilkesine **depo sahibinin 2026-10-03 kararıyla** verilmiş bilinçli
+bir istisnadır: karo isteği OSM sunucusuna haritanın **hangi bölgesine**
+bakıldığını söyler. Rota, seans kaydı ve GPS noktaları cihazdan çıkmaz;
+HKM'ye yalnız dakika gider. Karo süstür: bağlantı yoksa rota zeminsiz
+çizilir, hiçbir işlev karoya bağlı değildir. Lisans gereği her haritada
+«© OpenStreetMap katkıcıları» yazar.
+
 ### Modül 4 — Sağlık ekonomisi
 
 Bu modülün etik kuralı görünürdür: **uygulama market taramaz.**
@@ -406,6 +427,8 @@ src/
       hedefler.js       hedef motorunun SPİ paketi: kilo / VKİ, güvenlik, hekim kapısı
       plan.js           hedeften plan: enerji, protein, tartı günü, kontrol noktaları
       move.js           Modül 3 kural motoru
+      rota.js           GPS izi: GPX okuma, mesafe/tempo/dilim/tırmanış, iz sıkıştırma
+      harita.js         rota haritası: Web Mercator, OSM karoları, ısı haritası, profil
       money.js          Modül 4 kural motoru
       calc.js           orkestratör: sıradaki hamle, çapraz çıkarım
       parse.js          serbest metin ayrıştırıcıları

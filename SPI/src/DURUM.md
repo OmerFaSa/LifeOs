@@ -190,3 +190,24 @@ Bitiş çizgisi bir özellik listesi değildi. Üç cümleydi; üçü de artık
 
 Üçü sağlandı. Bundan sonrası **iyileştirmedir**, gereklilik değil — ve
 iyileştirmenin ilk adımı yeni ekran değil, yukarıdaki borç listesidir.
+
+---
+
+## 9. Sonradan gelen yetenek — Rotalar (2026-10-03)
+
+Depo sahibinin isteği: Strava'daki rota haritası, «minimalistliği
+bozmadan». Hareket › Kardiyo'da tek kart; ayrıntı kağıtta.
+
+| Parça | Durum |
+|---|---|
+| GPX içe aktarma, önizleme, tür sorma, ikinci kez eklememe | **tamam** |
+| Mesafe, hareket süresi, tempo/hız, km dilimleri, tırmanış, yükseklik profili | **tamam** |
+| Isı haritası (en sık bölge; uzaktaki rota sayılıp söylenir) | **tamam** |
+| OSM zemini — «veri cihazda kalır» istisnası (MIMARI › Modül 3) | **tamam** |
+| Testler (`tests/rota.test.js`), duman testinde GPX akışı | **tamam** |
+| Canlı kayıt: rota hareket ederken çizilir | **sürüyor** — depo sahibi 2026-10-03 istedi |
+
+Canlı kaydın dürüst sınırı: tarayıcı konumu yalnız **güvenli bağlantıda**
+(https ya da bu makinedeki localhost) ve **ekran açıkken** verir. Ekran
+kilitliyken kayıt yalnız yerel bir uygulama sarmalayıcısıyla mümkündür; bu
+sıfır bağımlılık kuralına (AGENTS §1.3) dokunur ve depo sahibinin kararıdır.

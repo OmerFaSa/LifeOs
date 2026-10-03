@@ -42,8 +42,11 @@ try{
    kademe numarasi gorunur — yani 404 burada bir hata degil, sistemin
    tasarlanmis ara halidir (bkz. brand/seviye/OKU.md). Dosyalar
    eklendikce bu satirlar susar. */
+/* tile.openstreetmap.org gormezden gelinir: rota haritasinin zemini
+   (core/harita.js). Karo SUSTUR, rota bilgidir — cevrimdisi ya da CI'da
+   karo gelmezse rota zeminsiz cizilir; uygulama hatasi degildir. */
 const IGNORE = [/fonts\.googleapis\.com/, /fonts\.gstatic\.com/, /favicon\.ico/,
-  /img\/brand\/intro\.mp4/, /img\/seviye\//];
+  /img\/brand\/intro\.mp4/, /img\/seviye\//, /tile\.openstreetmap\.org/];
 function ignorable(url){ return IGNORE.some(re => re.test(url || '')); }
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -237,7 +240,34 @@ async function walkFlows(page, base, errors){
   const score = await page.evaluate(() => SP.Move.readiness().score);
   if(!(score > 0)) errors.push('toparlanma akışı: skor üretilmedi');
 
-  console.log('  akışlar → öğün, tahlil, laboratuvar bağı ve toparlanma çalıştı');
+  /* 5 — GPX rota: gercek dosya seciciden onizleme, kayit, kartta harita.
+     2 km, 5:00 dk/km kuzeye duz kosu; tur dosyada yazili. */
+  await page.evaluate(() => SP.App.go('move'));
+  await wait(300);
+  const nokta = Array.from({ length:201 }, (_, i) => '<trkpt lat="' + (41 + i * 10 / 111195.08).toFixed(7)
+    + '" lon="29"><ele>' + (100 + i * 0.1).toFixed(1) + '</ele><time>'
+    + new Date(Date.UTC(2026, 8, 20, 6, 0, 3 * i)).toISOString() + '</time></trkpt>').join('');
+  const gpx = '<?xml version="1.0"?><gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1">'
+    + '<trk><name>Duman</name><type>running</type><trkseg>' + nokta + '</trkseg></trk></gpx>';
+  await page.setInputFiles('input[data-change="rota-dosya"]',
+    { name:'duman.gpx', mimeType:'application/gpx+xml', buffer:Buffer.from(gpx) });
+  try{
+    await page.waitForSelector('#sheet [data-act="rota-kaydet"]:not([disabled])', { timeout:5000 });
+    await page.click('#sheet [data-act="rota-kaydet"]');
+    await wait(500);
+    const rota = await page.evaluate(() => ({
+      n:SP.S.workouts.filter(w => w.rota).length,
+      mesafe:(SP.S.workouts.find(w => w.rota) || { rota:{} }).rota.mesafe,
+      harita:!!document.querySelector('.rota .harita svg polyline'),
+    }));
+    if(rota.n !== 1) errors.push('rota akışı: 1 rotalı seans bekleniyordu, ' + rota.n + ' geldi');
+    else if(Math.abs(rota.mesafe - 2000) > 5) errors.push('rota akışı: 2000 m bekleniyordu, ' + rota.mesafe + ' geldi');
+    else if(!rota.harita) errors.push('rota akışı: Kardiyo kartında harita çizilmedi');
+  }catch(e){
+    errors.push('rota akışı: önizleme açılmadı — ' + (e && e.message || e));
+  }
+
+  console.log('  akışlar → öğün, tahlil, laboratuvar bağı, toparlanma ve GPX rota çalıştı');
 }
 
 

@@ -73,6 +73,8 @@ SP.HINTS = {
     more:'Emri toparlanma belirler, istek değil: sistem yükü kendiliğinden azaltabilir ama asla kendiliğinden artıramaz. Skor düşükken ağır yük kazanç değil borç üretir. Sistem yükü azalttığında nedenini yazar; kararı yine sen verirsin. Toparlanma düşükken esneklik (mobilite) akışı ağır antrenmanın yerine geçer: yük üretmez ama zinciri kırmaz.' },
   'session-pick':{ t:'Seans seç', b:'Öneri toparlanma bandından gelir; istediğini seçebilirsin.',
     more:'Önerilen şablonlar günün yük emrine göre seçilir: dinlenme gününde mobilite, hafif günde mobilite ve yürüyüş, azaltılmış günde yürüyüş ve tam vücut, tam yükte tam vücut ve dayanıklılık. İşaretli olan ilk öneridir; seçim senindir.' },
+  'rota':{ t:'Rotalar', b:'GPX dosyasındaki GPS izi haritaya çizilir; mesafe, süre, tempo ve tırmanış izden hesaplanır.',
+    more:'Strava’da aktivitenin ⋯ menüsünden GPX olarak dışa aktar; saat ve telefon uygulamalarında da aynı seçenek vardır. Dosyayı «GPX ekle» ile seç ya da bu karta bırak. Duraklamalar tempoya girmez; dosyada yükseklik yoksa tırmanış «veri yok» yazar, sıfır yazmaz. Rota seansa dönüşür ve yüke sayılır. Konumun cihazda kalır; yalnız harita zemini OpenStreetMap’ten gelir ve baktığın bölge karo isteğiyle oraya gider. Bağlantı yoksa rota zeminsiz çizilir.' },
 
   /* --- ekonomi --- */
   'price-estimate':{ t:'Fiyat tahmini', b:'Uygulama market taramaz. Başlangıç fiyatları tahmindir ve öyle işaretlenir.',

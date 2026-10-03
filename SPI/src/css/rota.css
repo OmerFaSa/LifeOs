@@ -1,0 +1,73 @@
+/* ROTA — Hareket › Kardiyo'daki rota kartı ve kağıtları (core/rota.js,
+   core/harita.js). Sade kalır: harita, bir satır özet, iki hayalet düğme.
+   Karolar geri çekilir (soluk); öne çıkan tek renk rotanın kendisidir. */
+
+.harita{
+  /* flex:none — kağıdın gövdesi esnek sütundur; orada en-boy oranı
+     büzülmeye yenilir ve harita yassılaşır. */
+  position:relative; display:block; flex:none; width:100%; margin:0; overflow:hidden;
+  border-radius:var(--r); background:var(--surface-2);
+}
+.harita__svg{ display:block; width:100%; height:100%; }
+.harita__taban{ fill:var(--surface-2); }
+.harita__karolar{ filter:saturate(.45) contrast(.92) brightness(1.03); }
+.harita__hale, .harita__iz, .harita__isi{
+  fill:none; stroke-linejoin:round; stroke-linecap:round;
+  vector-effect:non-scaling-stroke;
+}
+.harita__hale{ stroke:var(--surface); stroke-opacity:.9; stroke-width:7; }
+.harita__iz{ stroke:var(--spi); stroke-width:3.5; }
+.harita__isi{ stroke:var(--spi); stroke-opacity:.38; stroke-width:3; }
+.harita__bas, .harita__son{ stroke:var(--surface); stroke-width:2; vector-effect:non-scaling-stroke; }
+.harita__bas{ fill:var(--ok); }
+.harita__son{ fill:var(--text); }
+
+.harita__dugme{
+  display:block; width:100%; height:100%; padding:0; margin:0;
+  border:0; background:none; cursor:pointer; border-radius:inherit;
+}
+.harita__dugme:focus-visible{ outline:2px solid var(--spi); outline-offset:-2px; }
+
+/* OSM künyesi: lisansın istediği tek satır, haritanın köşesinde. */
+.harita__kunye{
+  position:absolute; right:6px; bottom:6px;
+  font-size:10px; line-height:1; padding:4px 7px; border-radius:6px;
+  background:rgba(255,255,255,.86);
+}
+.harita__kunye a{ color:#3B3D45; text-decoration:none; }
+.harita__kunye a:hover{ text-decoration:underline; }
+
+.harita__profil{ display:block; flex:none; width:100%; height:auto; max-height:none; }
+
+/* Rota ayrıntı kağıdı tek sarmalın içindedir. Kağıt gövdesi esnek
+   sütundur; kaydırma kabı olan tablo sarmalı (.tablewrap) orada 0
+   piksele büzülüyor, Dilimler başlığı görünüp tablo görünmüyordu.
+   Sarmalın içi düz akıştır: gövde bütünüyle kayar, hiçbir parça ezilmez. */
+.rota-kagit{ flex:none; }
+
+.rota__satir{
+  display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between;
+  gap:4px 12px; margin-top:12px;
+}
+.rota__alt{ display:flex; gap:4px; margin:8px 0 0 -10px; }
+.rota__ekle{ position:relative; cursor:pointer; }
+.rota__ekle:focus-within{ outline:2px solid var(--spi); outline-offset:2px; }
+.rota__satirdugme{ width:100%; text-align:left; background:none; border:0; cursor:pointer; color:inherit; font:inherit; }
+.rota__satirdugme svg{ width:16px; height:16px; color:var(--text-3); flex:none; }
+
+/* Sürüklerken kart hedef olduğunu söyler; başka hiçbir şey değişmez. */
+body.is-dragging .rota{ outline:2px dashed var(--spi); outline-offset:6px; border-radius:var(--r); }
+
+/* Koyu tema: karolar ters çevrilir ve kısılır; rota rengi aynı kalır. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) .harita__karolar{
+    filter:invert(1) hue-rotate(180deg) saturate(.35) brightness(.82) contrast(.9);
+  }
+  :root:not([data-theme="light"]) .harita__kunye{ background:rgba(18,18,20,.8); }
+  :root:not([data-theme="light"]) .harita__kunye a{ color:#C9CAD1; }
+}
+:root[data-theme="dark"] .harita__karolar{
+  filter:invert(1) hue-rotate(180deg) saturate(.35) brightness(.82) contrast(.9);
+}
+:root[data-theme="dark"] .harita__kunye{ background:rgba(18,18,20,.8); }
+:root[data-theme="dark"] .harita__kunye a{ color:#C9CAD1; }

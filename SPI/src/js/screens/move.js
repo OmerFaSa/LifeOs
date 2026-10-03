@@ -200,6 +200,7 @@ SP.Screens.move = (function(){
     const rx = SP.Move.prescription();
 
     return K.Ledger([
+      when(areaId === 'kardiyo', () => rotaKarti()),
       when(areaId === 'kardiyo', () => K.Entry({
         label:'Haftalık süre', hint:'load', meta:'%10 kuralı', body:cardioBody(),
       })),
@@ -262,6 +263,174 @@ SP.Screens.move = (function(){
             ? 'Bu hafta geçen haftanın %10 üstünü aştı. Süreyi artırmak yerine tempoyu koru.'
             : SP.LOAD_RULES.weeklyGrowth.note)
           : 'Geçen hafta kardiyo kaydı yok; tavan hesaplanmadı. Eksik veri sıfır sayılmaz.' })}`;
+  }
+
+  /* ------------------------------------------------------------ rotalar
+
+     Strava'daki rota haritası (kullanıcı, 2026-10-03: «minimalistliği
+     bozmadan»). Ekranda TEK kart: son rotanın haritası ve bir satır özet.
+     Dilimler, yükseklik ve ısı haritası karta dokununca açılan kağıtta.
+     Hesap `core/rota.js`, çizim `core/harita.js`. */
+  const Ro = () => SP.Rota;
+  const sayiHtml = s => {
+    const L = window.LIFEOS || {};
+    return L.SAYI ? L.SAYI.html(s) : U.esc(String(s.deger) + (s.birim ? ' ' + s.birim : ''));
+  };
+  const rotaIzi = w => Ro().coz(w.rota.iz);
+  const ROTA_DOSYA_EN_COK = 25 * 1024 * 1024;
+
+  /* «5,24 km · 28:10 · 5:22 dk/km» — bisiklette tempo yerine hız. */
+  function rotaSatiri(r, exId){
+    const R = Ro();
+    const parca = [R.km(r.mesafe) + ' km', R.sureMetni(r.hareket)];
+    if(R.hizMi(exId)){
+      const h = R.hiz(r.hareket, r.mesafe);
+      if(h != null) parca.push(U.fmtNum(Math.round(h * 10) / 10) + ' km/sa');
+    }else{
+      const t = R.tempo(r.hareket, r.mesafe);
+      if(t != null) parca.push(R.sureMetni(t) + ' dk/km');
+    }
+    return parca.join(' · ');
+  }
+  function rotaAdi(w){
+    return w.name + ' · ' + U.fmtShort(w.rota ? U.iso(new Date(w.rota.bas)) : w.date);
+  }
+
+  function gpxDugmesi(){
+    return html`<label class="btn btn--sm rota__ekle">
+      ${raw(UI.icon('plus'))}<span class="btn__label">GPX ekle</span>
+      <input type="file" class="sr-only" accept=".gpx,application/gpx+xml"
+        data-change="rota-dosya" aria-label="GPX dosyası seç"/>
+    </label>`;
+  }
+
+  function rotaKarti(){
+    const R = Ro(), rotalar = R.liste(S.workouts), son = rotalar[0];
+    return K.Entry({
+      label:'Rotalar', hint:'rota', meta:rotalar.length ? rotalar.length + ' rota' : 'GPS izi',
+      action:gpxDugmesi(),
+      body:html`<div class="rota" data-drop="rota-dosya">${son ? html`
+        ${raw(SP.Harita.ciz([rotaIzi(son)], { gen:640, yuk:300,
+          dugme:{ act:'rota-ac', id:son.id, aria:'Rotayı aç: ' + rotaAdi(son) } }).html)}
+        <div class="rota__satir">
+          <b class="small">${rotaAdi(son)}</b>
+          <span class="small dim num">${rotaSatiri(son.rota, R.exOf(son))}</span>
+        </div>
+        ${when(rotalar.length > 1, () => html`<div class="rota__alt">
+          ${K.Button({ label:'Isı haritası', size:'sm', tone:'ghost', act:'rota-isi' })}
+          ${K.Button({ label:'Tümü', size:'sm', tone:'ghost', act:'rota-tumu' })}
+        </div>`)}`
+        : html`<p class="small dim">GPX dosyası ekleyince rota burada, haritada görünür.</p>`}
+      </div>`,
+    });
+  }
+
+  function rotaKagidi(w){
+    const R = Ro(), r = w.rota, exId = R.exOf(w);
+    const zaman = U.iso(new Date(r.bas));
+    const hesap = (deger, birim, formul) => ({ deger, birim, kesinlik:'computed', zaman, formul,
+      girdiler:[{ ad:'GPS noktası', deger:r.nokta, kesinlik:'measured' }] });
+    const tempo = R.tempo(r.hareket, r.mesafe), hiz = R.hiz(r.hareket, r.mesafe);
+    const tirmanis = r.tirmanis == null
+      ? { deger:null, kesinlik:'missing' }
+      : hesap(r.tirmanis, 'm', 'yumuşatılmış yükseklikte ' + R.TIRMANIS_ESIK + ' m eşikle toplam çıkış');
+    const dilimSatiri = x => [
+      x.m >= 1000 ? String(r.dilimler.indexOf(x) + 1) : R.km(x.m),
+      R.hizMi(exId)
+        ? (R.hiz(x.sn, x.m) == null ? '—' : U.fmtNum(Math.round(R.hiz(x.sn, x.m) * 10) / 10) + ' km/sa')
+        : (R.tempo(x.sn, x.m) == null ? '—' : R.sureMetni(R.tempo(x.sn, x.m))),
+      x.dy == null ? '—' : (x.dy > 0 ? '+' : '') + U.fmtNum(x.dy) + ' m',
+    ];
+    UI.sheet({
+      title:w.name, wide:true,
+      subtitle:U.fmtDate(zaman) + (r.ad ? ' · ' + r.ad : ''),
+      /* Tek sarmal: kağıt gövdesi esnek sütundur ve tablo orada büzülür
+         (bkz. css/rota.css › .rota-kagit). */
+      body:String(html`<div class="rota-kagit">
+        ${raw(SP.Harita.ciz([rotaIzi(w)], { gen:640, yuk:360, etiket:'Rota: ' + rotaAdi(w) }).html)}
+        <div class="cols-4 mt-16">
+          ${K.Stat({ label:'Mesafe', value:raw(sayiHtml(Object.assign(hesap(r.mesafe / 1000, 'km',
+            'GPS noktaları arası mesafelerin toplamı'), { ondalik:2 }))) })}
+          ${K.Stat({ label:'Hareket süresi', value:raw(sayiHtml({ deger:R.sureMetni(r.hareket), kesinlik:'computed',
+            zaman, formul:'hızın ' + U.fmtNum(R.HAREKET_MS) + ' m/sn üstünde olduğu süre' })),
+            note:'toplam ' + R.sureMetni(r.sure) })}
+          ${R.hizMi(exId)
+            ? K.Stat({ label:'Ortalama hız', value:raw(sayiHtml(hiz == null ? { deger:null, kesinlik:'missing' }
+              : hesap(Math.round(hiz * 10) / 10, 'km/sa', 'mesafe ÷ hareket süresi'))) })
+            : K.Stat({ label:'Ortalama tempo', value:raw(sayiHtml(tempo == null ? { deger:null, kesinlik:'missing' }
+              : { deger:R.sureMetni(tempo), birim:'dk/km', kesinlik:'computed', zaman,
+                formul:'hareket süresi ÷ mesafe' })) })}
+          ${K.Stat({ label:'Tırmanış', value:raw(sayiHtml(tirmanis)),
+            note:r.tirmanis == null ? 'dosyada yükseklik yok' : null })}
+        </div>
+        ${when(r.profil, () => html`<h3 class="section-h mt-24">Yükseklik</h3>
+          ${raw(SP.Harita.profilSvg(r.profil, r.mesafe))}`)}
+        ${when((r.dilimler || []).length, () => html`<h3 class="section-h mt-24">Dilimler</h3>
+          ${K.Table({ tight:true,
+            headers:['Km', { label:R.hizMi(exId) ? 'Hız' : 'Tempo', num:true }, { label:'Yükseklik', num:true }],
+            rows:r.dilimler.map(dilimSatiri) })}`)}
+      </div>`),
+      footer:String(html`${K.Button({ label:'Sil', tone:'danger', act:'del-session', data:{ 'data-id':w.id } })}
+        ${K.Button({ label:'Kapat', act:'sheet-close' })}`),
+      noFocus:true,
+    });
+  }
+
+  function rotaListesi(){
+    const R = Ro(), rotalar = R.liste(S.workouts);
+    UI.sheet({
+      title:'Rotalar', subtitle:rotalar.length + ' rota',
+      body:String(html`<div class="list">${map(rotalar, w => html`
+        <button type="button" class="listitem rota__satirdugme" data-act="rota-ac" data-id="${w.id}">
+          <span class="grow">
+            <b class="small">${rotaAdi(w)}</b>
+            <span class="tiny dim num" style="display:block">${rotaSatiri(w.rota, R.exOf(w))}</span>
+          </span>
+          ${raw(UI.icon('right'))}
+        </button>`)}</div>`),
+      footer:String(K.Button({ label:'Kapat', act:'sheet-close' })),
+      noFocus:true,
+    });
+  }
+
+  function isiKagidi(){
+    const R = Ro(), b = SP.Harita.bolge(R.liste(S.workouts).map(rotaIzi));
+    UI.sheet({
+      title:'Isı haritası', wide:true,
+      subtitle:b.secilen.length + ' rota üst üste',
+      body:String(html`
+        ${raw(SP.Harita.ciz(b.secilen, { gen:640, yuk:480, isi:true,
+          etiket:'Isı haritası: ' + b.secilen.length + ' rota' }).html)}
+        ${when(b.disarida, () => html`<p class="tiny dim mt-8">${b.disarida} rota başka bir
+          bölgede; bu haritaya alınmadı.</p>`)}`),
+      footer:String(K.Button({ label:'Kapat', act:'sheet-close' })),
+      noFocus:true,
+    });
+  }
+
+  /* İçe aktarma: dosya okunur, ÖNİZLENİR; kayıt yalnız «Kaydet»le. Tür
+     dosyadan tanınmadıysa seçilmeden kaydedilmez (AGENTS §1.7). */
+  let rotaTaslak = null;
+  function onizleme(){
+    const R = Ro(), t = rotaTaslak, r = t.rota;
+    const bas = new Date(r.bas);
+    const saat = String(bas.getHours()).padStart(2, '0') + ':' + String(bas.getMinutes()).padStart(2, '0');
+    UI.sheet({
+      title:'Rotayı ekle', wide:true,
+      subtitle:U.fmtDate(U.iso(bas)) + ' · ' + saat,
+      body:String(html`
+        ${raw(SP.Harita.ciz([R.coz(r.iz)], { gen:640, yuk:340, etiket:'Eklenecek rota' }).html)}
+        <p class="small num mt-12">${rotaSatiri(r, t.tur)}${r.tirmanis != null
+          ? ' · ↑ ' + U.fmtNum(r.tirmanis) + ' m' : ''}</p>
+        <div class="mt-16">${K.Segmented({ act:'rota-tur', value:t.tur || '', aria:'Hareket türü',
+          items:R.HAREKETLER.map(id => ({ value:id, label:SP.EX_BY_ID[id].name })) })}</div>
+        ${when(!t.tur, () => html`<p class="tiny dim mt-8">Dosyada tür yazmıyor${t.turYazi
+          ? ' («' + t.turYazi + '» tanınmadı)' : ''}; hangisi olduğunu seç.</p>`)}
+        ${when(r.atlanan, () => html`<p class="tiny dim mt-8">${r.atlanan} bozuk GPS noktası atlandı.</p>`)}`),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'rota-kaydet', disabled:!t.tur })}`),
+      noFocus:true,
+    });
   }
 
   /* ---------------------------------------------------------- dinlenme
@@ -556,8 +725,47 @@ SP.Screens.move = (function(){
     if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
   }
 
+  /* GPX dosyası: düğmedeki seçici ya da karta bırakılan dosya. */
+  const change = {
+    async 'rota-dosya'(el){
+      const file = el.files && el.files[0];
+      if(el.value) el.value = '';          /* aynı dosya yeniden seçilebilsin */
+      if(!file) return;
+      if(file.size > ROTA_DOSYA_EN_COK){ UI.toast('Dosya çok büyük (en çok 25 MB).'); return; }
+      const sonuc = Ro().oku(await file.text(), file.name);
+      if(!sonuc.ok){ UI.toast(sonuc.why); return; }
+      const var_ = Ro().kayitli(sonuc.rota, S.workouts);
+      if(var_){ UI.toast('Bu rota zaten kayıtlı: ' + rotaAdi(var_) + '.'); return; }
+      rotaTaslak = { rota:sonuc.rota, tur:sonuc.tur, turYazi:sonuc.turYazi };
+      onizleme();
+    },
+  };
+
   const handle = {
     async 'move-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'rota-ac'(el){
+      const w = S.workouts.find(x => x.id === el.dataset.id && x.rota);
+      if(w) rotaKagidi(w);
+    },
+    async 'rota-tumu'(){ rotaListesi(); },
+    async 'rota-isi'(){ isiKagidi(); },
+    async 'rota-tur'(el){
+      if(!rotaTaslak || Ro().HAREKETLER.indexOf(el.dataset.value) < 0) return;
+      rotaTaslak.tur = el.dataset.value;
+      onizleme();
+    },
+    async 'rota-kaydet'(){
+      if(!rotaTaslak || !rotaTaslak.tur) return;
+      if(Ro().kayitli(rotaTaslak.rota, S.workouts)){ UI.closeSheet(); rotaTaslak = null; return; }
+      const w = Ro().seans(rotaTaslak.rota, rotaTaslak.tur);
+      if(!w) return;
+      await M.saveWorkout(w);
+      rotaTaslak = null;
+      UI.closeSheet();
+      UI.toast('Rota eklendi');
+      S.ui.moveTab = 'kardiyo';
+      SP.App.render();
+    },
     async 'set-bitti'(el){
       const w = S.workouts.find(x => x.id === el.dataset.w);
       const it = w && w.items[Number(el.dataset.i)];
@@ -694,6 +902,6 @@ SP.Screens.move = (function(){
       return String(K.Button({ label:'Seans ekle', icon:'plus', size:'sm', tone:'primary',
         act:'start-session', data:{ 'data-id':'' } }));
     },
-    yogunlukBantlari, render, afterRender, handle,
+    yogunlukBantlari, render, afterRender, handle, change,
   };
 })();
