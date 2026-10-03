@@ -199,6 +199,66 @@
       expect(SP.Model.latestOf('hgb').v).toBe(15);
     });
 
+    /* latestOf seriyi kurup siralamadan son noktayi bulur (bes yillik
+       veriyle labs ekrani bu yuzden 400 ms butceyi asiyordu). Ayni gune
+       dusen iki nokta varsa siralanmis serinin SONUNDAKI secilmeli:
+       tahlil once, gunluk olcum sonra; ayni gunde iki tahlilde sonraki. */
+    it('aynı günde tahlil ve günlük ölçüm varsa latestOf serinin sonuncusunu verir', () => {
+      resetState();
+      pushLab('2026-05-01', { weight:80 });
+      pushVitals('2026-05-01', { weight:79 });
+      pushLab('2026-03-01', { weight:82 });
+      const s = SP.Model.seriesOf('weight');
+      const son = SP.Model.latestOf('weight');
+      expect(son.src).toBe(s[s.length - 1].src);
+      expect(son.v).toBe(79);
+      expect(son.date).toBe('2026-05-01');
+    });
+
+    it('aynı günde iki tahlil varsa latestOf serinin sonuncusunu verir', () => {
+      resetState();
+      const a = pushLab('2026-05-01', { hgb:14 });
+      const b = pushLab('2026-05-01', { hgb:15 });
+      const s = SP.Model.seriesOf('hgb');
+      const son = SP.Model.latestOf('hgb');
+      expect(son.id).toBe(s[s.length - 1].id);
+      expect([a.id, b.id]).toContain(son.id);
+      expect(son.v).toBe(s[s.length - 1].v);
+      expect(son.cert).toBe('measured');
+    });
+
+    it('ölçümü olmayan belirteçte latestOf null döner', () => {
+      resetState();
+      pushVitals('2026-05-01', { weight:79 });
+      expect(SP.Model.latestOf('hgb')).toBe(null);
+    });
+
+    /* Bes yillik veriyle labs ve analytics ekranlari ayni belirtecin
+       serisini bir cizimde defalarca kuruyordu (secici listesi her
+       belirtec icin seriesOf().length soruyordu). Kare onbellegi: kare
+       icinde AYNI dizi doner, kare disinda her cagri taze hesaplanir. */
+    it('kare içinde seriesOf aynı belirteç için bir kez kurulur', () => {
+      resetState();
+      pushLab('2026-01-01', { weight:80 });
+      pushVitals('2026-02-01', { weight:79 });
+      SP.Memo.baslat();
+      const a = SP.Model.seriesOf('weight');
+      const b = SP.Model.seriesOf('weight');
+      SP.Memo.bitir();
+      expect(a === b).toBeTruthy();
+      expect(a).toHaveLength(2);
+    });
+
+    it('kare dışında seriesOf her çağrıda taze hesaplanır', () => {
+      resetState();
+      pushLab('2026-01-01', { weight:80 });
+      const once = SP.Model.seriesOf('weight');
+      pushVitals('2026-02-01', { weight:79 });
+      const sonra = SP.Model.seriesOf('weight');
+      expect(once === sonra).toBeFalsy();
+      expect(sonra).toHaveLength(2);
+    });
+
     it('özet sayıları toplamda belirteç sayısını verir', () => {
       resetState();
       pushLab('2026-01-01', { ferritin:20, glucose:85 });

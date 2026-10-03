@@ -103,13 +103,19 @@ SP.U = (function(){
     return round(100*part/whole, 0);
   }
 
+  /* Tek bicimleyici paylasilir: toLocaleString('tr-TR') her cagrida
+     yeni bir Intl.NumberFormat kurar; bes yillik veriyle analytics'in
+     olcum tablosu bunu binlerce kez yapip 400 ms butceyi asiyordu.
+     Cikti ayni (toLocaleString tanim geregi bu bicimleyiciyi kullanir). */
+  const SAYI = new Intl.NumberFormat('tr-TR');
+  const NET = new Intl.NumberFormat('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
   function fmtNet(x){
     if(x == null || (typeof x === 'number' && !isFinite(x))) return '—';
-    return (Math.round(x*100)/100).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    return NET.format(Math.round(x*100)/100);
   }
   function fmtNum(x){
     if(x == null || (typeof x === 'number' && !isFinite(x))) return '—';
-    return Number(x).toLocaleString('tr-TR');
+    return SAYI.format(Number(x));
   }
   function fmtMin(mins){
     /* HATALAR D-8: once toplam yuvarlanir; 119,6 «1 sa 60 dk» yaziliyordu. */

@@ -492,8 +492,18 @@ SP.Model = (function(){
 
   /* Bir biyobelirtecin butun gecmisi — tarihe gore artan.
      Vital olcumler gunluk kayittan, laboratuvar degerleri tahlil
-     oturumlarindan gelir; ikisi tek seride birlesir. */
+     oturumlarindan gelir; ikisi tek seride birlesir.
+
+     Kare onbellegi (memo.js): bes yillik veriyle labs ve analytics ayni
+     belirtecin serisini bir cizimde defalarca kuruyordu (secici listesi
+     her belirtec icin seriesOf().length sorar) ve 400 ms butceyi
+     asiyordu. Kare icinde AYNI dizi doner: cagiran onu ve noktalarini
+     DEGISTIRMEZ (siralamak icin once slice). Kare disinda taze hesap. */
   function seriesOf(markerId){
+    return SP.Memo.of('model.series:' + markerId, () => seriesOfHam(markerId));
+  }
+
+  function seriesOfHam(markerId){
     const out = [];
     SP.S.labs.forEach(l => {
       const cell = l.values[markerId];
@@ -507,9 +517,28 @@ SP.Model = (function(){
     return out;
   }
 
+  /* Serinin son noktasi — seriyi kurup siralamadan. latestAll her
+     belirtec icin bunu sorar; bes yillik veriyle her cagri 1825 gunu
+     siraliyordu. Sonuc siralanmis serinin sonuncusuyla aynidir: tarama
+     seriesOf ile ayni sirada (once tahliller, sonra gunluk olcumler)
+     gider ve esit tarihte SONRAKI kazanir (>=), kararli siralamanin
+     sonuna dusen nokta gibi. */
   function latestOf(markerId){
-    const s = seriesOf(markerId);
-    return s.length ? s[s.length - 1] : null;
+    let lab = null, gun = null, tarih = null;
+    SP.S.labs.forEach(l => {
+      const cell = l.values[markerId];
+      if(cell && cell.v != null && (tarih == null || l.date >= tarih)){ lab = l; gun = null; tarih = l.date; }
+    });
+    Object.keys(SP.S.vitals).forEach(d => {
+      const v = SP.S.vitals[d];
+      if(v && v[markerId] != null && (tarih == null || d >= tarih)){ gun = d; tarih = d; }
+    });
+    if(gun != null) return { date:gun, v:Number(SP.S.vitals[gun][markerId]), cert:'measured', src:'vital' };
+    if(lab){
+      const cell = lab.values[markerId];
+      return { date:lab.date, v:Number(cell.v), cert:cell.cert, src:'lab', id:lab.id };
+    }
+    return null;
   }
 
   /* Butun belirteclerin son degeri — kirmizi bayrak ve ofis brifingi icin. */

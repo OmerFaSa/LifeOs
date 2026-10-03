@@ -324,4 +324,32 @@
       expect(SP.U.fmtMin(NaN)).toBe('—');
     });
   });
+
+  /* fmtNum/fmtNet tek bir Intl bicimleyiciyi paylasir (her cagrida
+     yenisini kurmak bes yillik veriyle analytics'in 400 ms butcesini
+     asiyordu). Cikti toLocaleString('tr-TR') ile birebir ayni kalmali. */
+  describe('U.fmtNum ve U.fmtNet — Türkçe sayı biçimi', () => {
+    it('binlik nokta, ondalık virgül; metin sayı da biçimlenir', () => {
+      expect(SP.U.fmtNum(1234.5)).toBe('1.234,5');
+      expect(SP.U.fmtNum(1234567)).toBe('1.234.567');
+      expect(SP.U.fmtNum('12.5')).toBe('12,5');
+      expect(SP.U.fmtNum(0)).toBe('0');
+      expect(SP.U.fmtNum(-3.25)).toBe('-3,25');
+      expect(SP.U.fmtNum(1234.5)).toBe((1234.5).toLocaleString('tr-TR'));
+    });
+
+    it('eksik ya da sonsuz değer «—»', () => {
+      expect(SP.U.fmtNum(null)).toBe('—');
+      expect(SP.U.fmtNum(undefined)).toBe('—');
+      expect(SP.U.fmtNum(Infinity)).toBe('—');
+      expect(SP.U.fmtNet(null)).toBe('—');
+      expect(SP.U.fmtNet(NaN)).toBe('—');
+    });
+
+    it('fmtNet iki ondalık basamak yazar', () => {
+      expect(SP.U.fmtNet(3.14159)).toBe('3,14');
+      expect(SP.U.fmtNet(1234)).toBe('1.234,00');
+      expect(SP.U.fmtNet(0.005)).toBe((0.01).toLocaleString('tr-TR', { minimumFractionDigits:2, maximumFractionDigits:2 }));
+    });
+  });
 })();

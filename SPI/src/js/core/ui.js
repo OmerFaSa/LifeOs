@@ -268,7 +268,18 @@ SP.UI = (function(){
        · HER NOKTANIN kendi başlığı var: fareyle üstüne gelince tarih ve
          değer okunur. Kitaplık gerekmiyor — SVG `<title>` yeter.
        · NOKTALAR YÜZEY HALKASI taşır: üst üste binen iki nokta
-         birbirine karışmaz. */
+         birbirine karışmaz.
+
+     YOĞUN SERİ (2026-10-03). Beş yıllık günlük ölçüm 1825 nokta demek:
+     542 px'lik çizim alanında piksel başına üç nokta. Daireler tek tek
+     seçilemiyordu, 913 tarih etiketi üst üste basılıyordu ve 3650 SVG
+     düğümü labs/analytics çizimini 400 ms bütçenin üstüne itiyordu.
+     Artık nokta NOKTA_SINIRI'nı aşarsa yalnız son nokta daire alır
+     (vurgulu ve başlıklı); çizgi yine her noktadan geçer. Tarih etiketi
+     en çok ETIKET_SINIRI kadardır; 24 noktaya kadar eskisi gibi birer
+     atlanır. */
+  const NOKTA_SINIRI = 90;     /* 542 px / 90 ≈ 6 px: r=3 daireler ayrışır */
+  const ETIKET_SINIRI = 12;    /* «12 Oca» ~35 px; 542 / 12 ≈ 45 px aralık */
   function lineChart(series, opts){
     const o = opts || {};
     const w = 640, h = o.height || 190;
@@ -325,8 +336,10 @@ SP.UI = (function(){
       }
       svg += '<path class="line' + (s2.accent ? ' line--accent' : '') + '" d="' + d + '"/>';
 
+      const yogun = pts.length > NOKTA_SINIRI;
       pts.forEach((p2, i) => {
         const sonNokta = i === pts.length - 1;
+        if(yogun && !sonNokta) return;
         const etiket = (o.labels && o.labels[p2[3]]) ? o.labels[p2[3]] + ' · ' : '';
         svg += '<circle class="pt' + (s2.accent ? ' pt--accent' : '')
           + (sonNokta ? ' pt--last' : '') + '" cx="' + p2[0].toFixed(1) + '" cy="'
@@ -348,8 +361,9 @@ SP.UI = (function(){
     });
 
     if(o.labels){
+      const adim = n > 8 ? Math.max(2, Math.ceil(n / ETIKET_SINIRI)) : 1;
       o.labels.forEach((lb, i) => {
-        if(n > 8 && i % 2) return;
+        if(i % adim) return;
         svg += '<text x="' + X(i) + '" y="' + (h - 8) + '" text-anchor="middle">'
           + U.esc(lb) + '</text>';
       });

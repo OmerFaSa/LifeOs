@@ -106,6 +106,13 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 *::-webkit-scrollbar-thumb:hover{ background:var(--text-3); }
 
 @media (prefers-reduced-motion:reduce){
+  /* Geçiş tanımlamayan eleman geçişli sayılmaz. transition-property
+     başlangıçta `all`dır: aşağıdaki süre her elemana yazılınca geçişi
+     olmayan eleman da «bütün özellikleri geçişli» olur ve tarayıcı her
+     stil hesabında yüzlerce özelliği karşılaştırır (SPİ Tahliller, beş
+     yıllık veri: tek hesap 73 ms → 37). Özgüllük 0: geçiş tanımlayan
+     her kural bunu ezer, onun geçişi aşağıdaki süreyle kalır. */
+  *, *::before, *::after{ transition-property:none; }
   *, *::before, *::after{
     animation-duration:.001ms !important;
     animation-iteration-count:1 !important;

@@ -501,6 +501,13 @@ hr{ border:none; border-top:1px solid var(--border); margin:var(--sp-4) 0; }
 *::-webkit-scrollbar-thumb:hover{ background:var(--text-3); }
 
 @media (prefers-reduced-motion:reduce){
+  /* Geçiş tanımlamayan eleman geçişli sayılmaz. transition-property
+     başlangıçta `all`dır: aşağıdaki süre her elemana yazılınca geçişi
+     olmayan eleman da «bütün özellikleri geçişli» olur ve tarayıcı her
+     stil hesabında yüzlerce özelliği karşılaştırır (SPİ Tahliller, beş
+     yıllık veri: tek hesap 73 ms → 37). Özgüllük 0: geçiş tanımlayan
+     her kural bunu ezer, onun geçişi aşağıdaki süreyle kalır. */
+  *, *::before, *::after{ transition-property:none; }
   *, *::before, *::after{
     animation-duration:.001ms !important;
     animation-iteration-count:1 !important;
@@ -13329,7 +13336,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'b80d9bb7', at:'2026-10-03 14:08', dirty:true };
+SP.BUILD = { id:'937aa94d', at:'2026-10-03 20:50', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19175,35 +19182,52 @@ window.LIFEOS.HAREKET = (function(){
     const kes = Math.max(KISA_PX, esBoy - DUGME_PX);
     return boy - (kes + DUGME_PX) >= KAZANC_PX ? kes : null;
   }
+  /* BÜTÜN LEDGER'LAR BİRLİKTE, FAZ FAZ (2026-10-03). Eskiden her ledger
+     kendi içinde yaz-oku-yaz-oku yapıyordu; sayfadaki :has() kuralları
+     yüzünden her okuma BÜTÜN sayfanın stilini yeniden hesaplatır. Altı
+     bölümlü bir ekran (SPİ Tahliller) altı-on iki tam hesap ödüyordu ve
+     beş yıllık veriyle yük denetiminin 400 ms bütçesini aşıyordu. Şimdi:
+     hepsine yaz → hepsini oku → yaz → hepsini ölç → yaz: iki tam hesap.
+     .raf-tek yalnız kendi kutusunun sütununu değiştirir (kart.css), bu
+     yüzden okumalar bitince eklenmesi kararı değiştirmez. */
   function raf(kok){
     const ledgerler = kok && kok.matches && kok.matches('.ledger') ? [kok] : [];
-    sec(kok, '.site--v5 .ledger').concat(ledgerler).forEach(ledger => {
-      if(ledger.parentElement && ledger.parentElement.closest('.ledger')) return;
-      const kutular = rafKutulari(ledger);
-      kutular.forEach(k => { k.classList.remove('raf-tek'); kutuSifirla(k); ikizBaslik(k); });
-      const ikiSutun = getComputedStyle(ledger).gridTemplateColumns.trim().split(/\s+/).length > 1;
-      const ciftler = [];
+    const raflar = sec(kok, '.site--v5 .ledger').concat(ledgerler)
+      .filter(ledger => !(ledger.parentElement && ledger.parentElement.closest('.ledger')))
+      .map(ledger => ({ ledger, kutular:rafKutulari(ledger), ciftler:[], tek:[] }));
+    /* 1 · yaz: önceki çizimin izleri silinir */
+    raflar.forEach(r => r.kutular.forEach(k => { k.classList.remove('raf-tek'); kutuSifirla(k); ikizBaslik(k); }));
+    /* 2 · oku: sütun sayısı ve kutuların eni */
+    raflar.forEach(r => {
+      r.ikiSutun = getComputedStyle(r.ledger).gridTemplateColumns.trim().split(/\s+/).length > 1;
       let bekleyen = null;
-      kutular.forEach(k => {
+      r.kutular.forEach(k => {
         const cs = getComputedStyle(k);
         if(cs.display === 'none') return;
         const genis = cs.gridColumnEnd === '-1' || /span/.test(cs.gridColumnEnd);
-        if(genis){ if(bekleyen) bekleyen.classList.add('raf-tek'); bekleyen = null; ciftler.push([k]); return; }
-        if(bekleyen){ ciftler[ciftler.length - 1].push(k); bekleyen = null; }
-        else { bekleyen = k; ciftler.push([k]); }
+        if(genis){ if(bekleyen) r.tek.push(bekleyen); bekleyen = null; r.ciftler.push([k]); return; }
+        if(bekleyen){ r.ciftler[r.ciftler.length - 1].push(k); bekleyen = null; }
+        else { bekleyen = k; r.ciftler.push([k]); }
       });
-      if(bekleyen) bekleyen.classList.add('raf-tek');
-      /* doğal boy: eşine gerilmeden ölç (yaz hepsini, sonra oku — tek yerleşim) */
-      const olc = ciftler.flat().filter(k => !k.classList.contains('kahraman'));
-      olc.forEach(k => { k.style.alignSelf = 'start'; });
-      const boy = new Map(olc.map(k => [k, k.offsetHeight]));
-      olc.forEach(k => { k.style.removeProperty('align-self'); });
-      ciftler.forEach(c => {
-        const es = ikiSutun && c.length === 2;
+      if(bekleyen) r.tek.push(bekleyen);
+    });
+    /* 3 · yaz: eşsiz kutu bütün eni alır; doğal boy için eşine gerilmez */
+    raflar.forEach(r => {
+      r.tek.forEach(k => k.classList.add('raf-tek'));
+      r.olc = r.ciftler.flat().filter(k => !k.classList.contains('kahraman'));
+      r.olc.forEach(k => { k.style.alignSelf = 'start'; });
+    });
+    /* 4 · oku: doğal boylar (tek yerleşim) */
+    raflar.forEach(r => { r.boy = new Map(r.olc.map(k => [k, k.offsetHeight])); });
+    /* 5 · yaz: uzun kutu kesilir */
+    raflar.forEach(r => {
+      r.olc.forEach(k => { k.style.removeProperty('align-self'); });
+      r.ciftler.forEach(c => {
+        const es = r.ikiSutun && c.length === 2;
         c.forEach((k, i) => {
-          if(!boy.has(k) || !boy.get(k) || kesilmez(k)) return;
+          if(!r.boy.has(k) || !r.boy.get(k) || kesilmez(k)) return;
           const esi = es ? c[1 - i] : null;
-          const kes = kesimler(boy.get(k), esi && boy.has(esi) ? boy.get(esi) : null);
+          const kes = kesimler(r.boy.get(k), esi && r.boy.has(esi) ? r.boy.get(esi) : null);
           if(kes != null) kutuKes(k, kes);
         });
       });
@@ -30881,13 +30905,19 @@ SP.U = (function(){
     return round(100*part/whole, 0);
   }
 
+  /* Tek bicimleyici paylasilir: toLocaleString('tr-TR') her cagrida
+     yeni bir Intl.NumberFormat kurar; bes yillik veriyle analytics'in
+     olcum tablosu bunu binlerce kez yapip 400 ms butceyi asiyordu.
+     Cikti ayni (toLocaleString tanim geregi bu bicimleyiciyi kullanir). */
+  const SAYI = new Intl.NumberFormat('tr-TR');
+  const NET = new Intl.NumberFormat('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
   function fmtNet(x){
     if(x == null || (typeof x === 'number' && !isFinite(x))) return '—';
-    return (Math.round(x*100)/100).toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    return NET.format(Math.round(x*100)/100);
   }
   function fmtNum(x){
     if(x == null || (typeof x === 'number' && !isFinite(x))) return '—';
-    return Number(x).toLocaleString('tr-TR');
+    return SAYI.format(Number(x));
   }
   function fmtMin(mins){
     /* HATALAR D-8: once toplam yuvarlanir; 119,6 «1 sa 60 dk» yaziliyordu. */
@@ -32072,8 +32102,18 @@ SP.Model = (function(){
 
   /* Bir biyobelirtecin butun gecmisi — tarihe gore artan.
      Vital olcumler gunluk kayittan, laboratuvar degerleri tahlil
-     oturumlarindan gelir; ikisi tek seride birlesir. */
+     oturumlarindan gelir; ikisi tek seride birlesir.
+
+     Kare onbellegi (memo.js): bes yillik veriyle labs ve analytics ayni
+     belirtecin serisini bir cizimde defalarca kuruyordu (secici listesi
+     her belirtec icin seriesOf().length sorar) ve 400 ms butceyi
+     asiyordu. Kare icinde AYNI dizi doner: cagiran onu ve noktalarini
+     DEGISTIRMEZ (siralamak icin once slice). Kare disinda taze hesap. */
   function seriesOf(markerId){
+    return SP.Memo.of('model.series:' + markerId, () => seriesOfHam(markerId));
+  }
+
+  function seriesOfHam(markerId){
     const out = [];
     SP.S.labs.forEach(l => {
       const cell = l.values[markerId];
@@ -32087,9 +32127,28 @@ SP.Model = (function(){
     return out;
   }
 
+  /* Serinin son noktasi — seriyi kurup siralamadan. latestAll her
+     belirtec icin bunu sorar; bes yillik veriyle her cagri 1825 gunu
+     siraliyordu. Sonuc siralanmis serinin sonuncusuyla aynidir: tarama
+     seriesOf ile ayni sirada (once tahliller, sonra gunluk olcumler)
+     gider ve esit tarihte SONRAKI kazanir (>=), kararli siralamanin
+     sonuna dusen nokta gibi. */
   function latestOf(markerId){
-    const s = seriesOf(markerId);
-    return s.length ? s[s.length - 1] : null;
+    let lab = null, gun = null, tarih = null;
+    SP.S.labs.forEach(l => {
+      const cell = l.values[markerId];
+      if(cell && cell.v != null && (tarih == null || l.date >= tarih)){ lab = l; gun = null; tarih = l.date; }
+    });
+    Object.keys(SP.S.vitals).forEach(d => {
+      const v = SP.S.vitals[d];
+      if(v && v[markerId] != null && (tarih == null || d >= tarih)){ gun = d; tarih = d; }
+    });
+    if(gun != null) return { date:gun, v:Number(SP.S.vitals[gun][markerId]), cert:'measured', src:'vital' };
+    if(lab){
+      const cell = lab.values[markerId];
+      return { date:lab.date, v:Number(cell.v), cert:cell.cert, src:'lab', id:lab.id };
+    }
+    return null;
   }
 
   /* Butun belirteclerin son degeri — kirmizi bayrak ve ofis brifingi icin. */
@@ -43179,7 +43238,18 @@ SP.UI = (function(){
        · HER NOKTANIN kendi başlığı var: fareyle üstüne gelince tarih ve
          değer okunur. Kitaplık gerekmiyor — SVG `<title>` yeter.
        · NOKTALAR YÜZEY HALKASI taşır: üst üste binen iki nokta
-         birbirine karışmaz. */
+         birbirine karışmaz.
+
+     YOĞUN SERİ (2026-10-03). Beş yıllık günlük ölçüm 1825 nokta demek:
+     542 px'lik çizim alanında piksel başına üç nokta. Daireler tek tek
+     seçilemiyordu, 913 tarih etiketi üst üste basılıyordu ve 3650 SVG
+     düğümü labs/analytics çizimini 400 ms bütçenin üstüne itiyordu.
+     Artık nokta NOKTA_SINIRI'nı aşarsa yalnız son nokta daire alır
+     (vurgulu ve başlıklı); çizgi yine her noktadan geçer. Tarih etiketi
+     en çok ETIKET_SINIRI kadardır; 24 noktaya kadar eskisi gibi birer
+     atlanır. */
+  const NOKTA_SINIRI = 90;     /* 542 px / 90 ≈ 6 px: r=3 daireler ayrışır */
+  const ETIKET_SINIRI = 12;    /* «12 Oca» ~35 px; 542 / 12 ≈ 45 px aralık */
   function lineChart(series, opts){
     const o = opts || {};
     const w = 640, h = o.height || 190;
@@ -43236,8 +43306,10 @@ SP.UI = (function(){
       }
       svg += '<path class="line' + (s2.accent ? ' line--accent' : '') + '" d="' + d + '"/>';
 
+      const yogun = pts.length > NOKTA_SINIRI;
       pts.forEach((p2, i) => {
         const sonNokta = i === pts.length - 1;
+        if(yogun && !sonNokta) return;
         const etiket = (o.labels && o.labels[p2[3]]) ? o.labels[p2[3]] + ' · ' : '';
         svg += '<circle class="pt' + (s2.accent ? ' pt--accent' : '')
           + (sonNokta ? ' pt--last' : '') + '" cx="' + p2[0].toFixed(1) + '" cy="'
@@ -43259,8 +43331,9 @@ SP.UI = (function(){
     });
 
     if(o.labels){
+      const adim = n > 8 ? Math.max(2, Math.ceil(n / ETIKET_SINIRI)) : 1;
       o.labels.forEach((lb, i) => {
-        if(n > 8 && i % 2) return;
+        if(i % adim) return;
         svg += '<text x="' + X(i) + '" y="' + (h - 8) + '" text-anchor="middle">'
           + U.esc(lb) + '</text>';
       });

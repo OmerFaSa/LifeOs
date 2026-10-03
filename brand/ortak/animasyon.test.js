@@ -101,6 +101,40 @@
       }
     });
 
+    /* base.css'in azaltılmış kipi geçiş süresini HER elemanda .001ms yapar.
+       transition-property başlangıçta `all` olduğu için geçiş tanımlamayan
+       eleman da «bütün özellikleri geçişli» sayılıyordu: her stil hesabında
+       tarayıcı yüzlerce özelliği karşılaştırır. SPİ Tahliller'de 1039 eleman,
+       tek tam hesap 73 ms (azaltma yokken 32), beş yıllık veriyle yük
+       denetimi kırmızı (2026-10-03). Geçiş tanımlayan eleman etkilenmez. */
+    it('Az kipinde geçiş tanımlamayan eleman geçişli sayılmaz; tanımlayanın geçişi kalır', () => {
+      const st = sayfaEkle('.anim-sina-gecisli{ transition:opacity .2s ease; }');
+      const duz = document.createElement('div');
+      const gecisli = document.createElement('div');
+      gecisli.className = 'anim-sina-gecisli';
+      const satirici = document.createElement('div');
+      satirici.style.transition = 'transform .3s';
+      document.body.append(duz, gecisli, satirici);
+      try{
+        kipleSina(() => {
+          A.ayarla('az');
+          const cs = el => getComputedStyle(el);
+          /* saniye; Chrome .001ms'yi «1e-06s» diye yazar */
+          const sure = el => parseFloat(cs(el).transitionDuration);
+          /* ön koşul: base.css'in azaltılmış kuralı etkin */
+          expect(sure(duz) > 0 && sure(duz) < 0.001).toBe(true);
+          expect(cs(duz).transitionProperty).toBe('none');
+          expect(cs(gecisli).transitionProperty).toBe('opacity');
+          expect(sure(gecisli) > 0 && sure(gecisli) < 0.001).toBe(true);
+          expect(cs(satirici).transitionProperty).toBe('transform');
+          A.ayarla('tam');
+          expect(cs(duz).transitionProperty).toBe('all');
+          expect(sure(duz)).toBe(0);
+          expect(sure(gecisli)).toBe(0.2);
+        });
+      }finally{ duz.remove(); gecisli.remove(); satirici.remove(); st.remove(); }
+    });
+
     it('JS tarafı aynı kipi söyler: matchMedia ve hareketAz', () => {
       kipleSina(() => {
         A.ayarla('tam');

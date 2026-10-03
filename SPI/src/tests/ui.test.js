@@ -168,6 +168,48 @@
       expect(SP.UI.lineChart([{ data:[] }])).toContain('veri yok');
     });
 
+    /* Bes yillik gunluk olcum (1825 nokta): grafik 913 tarih etiketini
+       640 px'e ust uste basiyor, 3650 SVG dugumu uretiyordu (labs ve
+       analytics yuk denetiminde 400 ms'yi asti). Etiket sayisi cizim
+       alaniyla, nokta dairesi nokta yogunluguyla sinirlanir; cizgi her
+       noktadan gecmeye devam eder. */
+    const seri = n => {
+      const data = [], labels = [];
+      for(let i = 0; i < n; i++){ data.push(70 + (i % 9) / 3); labels.push('g' + i); }
+      return { data, labels };
+    };
+    const say = (s, re) => (s.match(re) || []).length;
+
+    it('yoğun seride x ekseni etiketleri üst üste binmez', () => {
+      const s = seri(1825);
+      const out = SP.UI.lineChart([{ data:s.data }], { labels:s.labels });
+      expect(say(out, /text-anchor="middle"/g) <= 12).toBeTruthy();
+      expect(say(out, /text-anchor="middle"/g) >= 6).toBeTruthy();
+    });
+
+    it('yoğun seride nokta başına daire çizilmez; son nokta vurgulu ve başlıklı kalır', () => {
+      const s = seri(1825);
+      const out = SP.UI.lineChart([{ data:s.data }], { labels:s.labels, unit:'kg' });
+      expect(say(out, /<circle/g)).toBe(1);
+      expect(out).toContain('pt--last');
+      expect(out).toContain('<title>g1824 · ');
+      /* cizgi butun noktalardan gecer: yolda 1825 nokta */
+      const yol = out.match(/class="line" d="([^"]+)"/)[1];
+      expect(yol.split(' L ').length).toBe(1825);
+    });
+
+    it('seyrek seride her nokta kendi dairesini ve başlığını taşır', () => {
+      const s = seri(20);
+      const out = SP.UI.lineChart([{ data:s.data }], { labels:s.labels });
+      expect(say(out, /<circle/g)).toBe(20);
+      expect(say(out, /<title>/g)).toBe(20);
+    });
+
+    it('24 noktaya kadar etiketler eskisi gibi birer atlanır', () => {
+      expect(say(SP.UI.lineChart([{ data:seri(8).data }], { labels:seri(8).labels }), /text-anchor="middle"/g)).toBe(8);
+      expect(say(SP.UI.lineChart([{ data:seri(24).data }], { labels:seri(24).labels }), /text-anchor="middle"/g)).toBe(12);
+    });
+
     it('ipucu bilinmeyen anahtarda boş döner', () => {
       expect(SP.UI.hint('olmayan-anahtar')).toBe('');
       expect(SP.UI.hint('readiness')).toContain('data-hint');

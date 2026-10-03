@@ -298,35 +298,52 @@ window.LIFEOS.HAREKET = (function(){
     const kes = Math.max(KISA_PX, esBoy - DUGME_PX);
     return boy - (kes + DUGME_PX) >= KAZANC_PX ? kes : null;
   }
+  /* BÜTÜN LEDGER'LAR BİRLİKTE, FAZ FAZ (2026-10-03). Eskiden her ledger
+     kendi içinde yaz-oku-yaz-oku yapıyordu; sayfadaki :has() kuralları
+     yüzünden her okuma BÜTÜN sayfanın stilini yeniden hesaplatır. Altı
+     bölümlü bir ekran (SPİ Tahliller) altı-on iki tam hesap ödüyordu ve
+     beş yıllık veriyle yük denetiminin 400 ms bütçesini aşıyordu. Şimdi:
+     hepsine yaz → hepsini oku → yaz → hepsini ölç → yaz: iki tam hesap.
+     .raf-tek yalnız kendi kutusunun sütununu değiştirir (kart.css), bu
+     yüzden okumalar bitince eklenmesi kararı değiştirmez. */
   function raf(kok){
     const ledgerler = kok && kok.matches && kok.matches('.ledger') ? [kok] : [];
-    sec(kok, '.site--v5 .ledger').concat(ledgerler).forEach(ledger => {
-      if(ledger.parentElement && ledger.parentElement.closest('.ledger')) return;
-      const kutular = rafKutulari(ledger);
-      kutular.forEach(k => { k.classList.remove('raf-tek'); kutuSifirla(k); ikizBaslik(k); });
-      const ikiSutun = getComputedStyle(ledger).gridTemplateColumns.trim().split(/\s+/).length > 1;
-      const ciftler = [];
+    const raflar = sec(kok, '.site--v5 .ledger').concat(ledgerler)
+      .filter(ledger => !(ledger.parentElement && ledger.parentElement.closest('.ledger')))
+      .map(ledger => ({ ledger, kutular:rafKutulari(ledger), ciftler:[], tek:[] }));
+    /* 1 · yaz: önceki çizimin izleri silinir */
+    raflar.forEach(r => r.kutular.forEach(k => { k.classList.remove('raf-tek'); kutuSifirla(k); ikizBaslik(k); }));
+    /* 2 · oku: sütun sayısı ve kutuların eni */
+    raflar.forEach(r => {
+      r.ikiSutun = getComputedStyle(r.ledger).gridTemplateColumns.trim().split(/\s+/).length > 1;
       let bekleyen = null;
-      kutular.forEach(k => {
+      r.kutular.forEach(k => {
         const cs = getComputedStyle(k);
         if(cs.display === 'none') return;
         const genis = cs.gridColumnEnd === '-1' || /span/.test(cs.gridColumnEnd);
-        if(genis){ if(bekleyen) bekleyen.classList.add('raf-tek'); bekleyen = null; ciftler.push([k]); return; }
-        if(bekleyen){ ciftler[ciftler.length - 1].push(k); bekleyen = null; }
-        else { bekleyen = k; ciftler.push([k]); }
+        if(genis){ if(bekleyen) r.tek.push(bekleyen); bekleyen = null; r.ciftler.push([k]); return; }
+        if(bekleyen){ r.ciftler[r.ciftler.length - 1].push(k); bekleyen = null; }
+        else { bekleyen = k; r.ciftler.push([k]); }
       });
-      if(bekleyen) bekleyen.classList.add('raf-tek');
-      /* doğal boy: eşine gerilmeden ölç (yaz hepsini, sonra oku — tek yerleşim) */
-      const olc = ciftler.flat().filter(k => !k.classList.contains('kahraman'));
-      olc.forEach(k => { k.style.alignSelf = 'start'; });
-      const boy = new Map(olc.map(k => [k, k.offsetHeight]));
-      olc.forEach(k => { k.style.removeProperty('align-self'); });
-      ciftler.forEach(c => {
-        const es = ikiSutun && c.length === 2;
+      if(bekleyen) r.tek.push(bekleyen);
+    });
+    /* 3 · yaz: eşsiz kutu bütün eni alır; doğal boy için eşine gerilmez */
+    raflar.forEach(r => {
+      r.tek.forEach(k => k.classList.add('raf-tek'));
+      r.olc = r.ciftler.flat().filter(k => !k.classList.contains('kahraman'));
+      r.olc.forEach(k => { k.style.alignSelf = 'start'; });
+    });
+    /* 4 · oku: doğal boylar (tek yerleşim) */
+    raflar.forEach(r => { r.boy = new Map(r.olc.map(k => [k, k.offsetHeight])); });
+    /* 5 · yaz: uzun kutu kesilir */
+    raflar.forEach(r => {
+      r.olc.forEach(k => { k.style.removeProperty('align-self'); });
+      r.ciftler.forEach(c => {
+        const es = r.ikiSutun && c.length === 2;
         c.forEach((k, i) => {
-          if(!boy.has(k) || !boy.get(k) || kesilmez(k)) return;
+          if(!r.boy.has(k) || !r.boy.get(k) || kesilmez(k)) return;
           const esi = es ? c[1 - i] : null;
-          const kes = kesimler(boy.get(k), esi && boy.has(esi) ? boy.get(esi) : null);
+          const kes = kesimler(r.boy.get(k), esi && r.boy.has(esi) ? r.boy.get(esi) : null);
           if(kes != null) kutuKes(k, kes);
         });
       });

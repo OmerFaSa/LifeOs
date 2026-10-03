@@ -289,6 +289,50 @@
       }finally{ d.remove(); }
     });
 
+    /* Her ledger kendi içinde yaz-oku yapınca sayfanın stili ledger
+       başına yeniden hesaplanıyordu (:has() kuralları her yazmada bütün
+       sayfayı geçersiz kılar). SPİ Tahliller'de altı bölüm, beş yıllık
+       veriyle 400 ms bütçenin üstü (2026-10-03). Ölçü: bir yazmadan
+       sonraki ilk okuma bir zorunlu hesaptır; ledger sayısından bağımsız
+       en çok iki tane olmalı. */
+    it('çok ledger\'lı sayfada stil ledger başına değil, en çok iki kez zorla hesaplanır', () => {
+      const d = document.createElement('div');
+      d.className = 'site site--v5';
+      d.style.cssText = 'position:absolute;left:-10000px;top:0;width:1300px';
+      d.innerHTML = [1, 2, 3, 4].map(n => '<div class="ledger">' + kutu('A' + n, 100)
+        + kutu('B' + n, 100) + kutu('C' + n, 1500) + '</div>').join('');
+      document.body.appendChild(d);
+      let yazildi = true, zorunlu = 0;
+      const yaz = () => { yazildi = true; };
+      const oku = () => { if(yazildi){ zorunlu++; yazildi = false; } };
+      const gcs = window.getComputedStyle;
+      const tl = DOMTokenList.prototype, ekle = tl.add, cikar = tl.remove;
+      const cs = CSSStyleDeclaration.prototype, sp = cs.setProperty, rp = cs.removeProperty;
+      const oh = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetHeight');
+      window.getComputedStyle = function(){ oku(); return gcs.apply(this, arguments); };
+      tl.add = function(){ yaz(); return ekle.apply(this, arguments); };
+      tl.remove = function(){ yaz(); return cikar.apply(this, arguments); };
+      cs.setProperty = function(){ yaz(); return sp.apply(this, arguments); };
+      cs.removeProperty = function(){ yaz(); return rp.apply(this, arguments); };
+      Object.defineProperty(HTMLElement.prototype, 'offsetHeight',
+        { configurable:true, get(){ oku(); return oh.get.call(this); } });
+      try{ H.raf(d); }
+      finally{
+        window.getComputedStyle = gcs; tl.add = ekle; tl.remove = cikar;
+        cs.setProperty = sp; cs.removeProperty = rp;
+        Object.defineProperty(HTMLElement.prototype, 'offsetHeight', oh);
+      }
+      try{
+        /* sonuç aynı: eşsiz kutu tek, uzun kutu kesik — dört ledger'da da */
+        [1, 2, 3, 4].forEach(n => {
+          expect(bul(d, 'A' + n).classList.contains('raf-tek')).toBe(false);
+          expect(bul(d, 'C' + n).classList.contains('raf-tek')).toBe(true);
+          expect(bul(d, 'C' + n).classList.contains('raf-uzun')).toBe(true);
+        });
+        expect(zorunlu <= 2).toBe(true);
+      }finally{ d.remove(); }
+    });
+
     it('kart ızgarası ve form kesilmez; kutu adıyla aynı bölüm başlığı gözden gizlenir', () => {
       const d = raf(kutu('Uzman masaları', 1500,
         '<div class="section-title"><h2>Uzman masaları</h2></div><div class="desks"></div>')
