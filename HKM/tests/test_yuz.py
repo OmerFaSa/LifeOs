@@ -381,7 +381,8 @@ def t_cam_kabuk():
     sade = sade[:sade.index('</style>')]
     cam = sade[sade.index("CAM KABUK"):]
     for s in ("oklch(from var(--mer)", "body:not(:has(#giris:not([hidden])))::before",
-              ".wrap::before", "backdrop-filter:saturate(160%) blur(24px)", ".ust:hover, .ust:has(:focus-visible)",
+              ".wrap::before", "backdrop-filter:saturate(160%) blur(24px)",
+              ".ust:hover:where(:not(.ust--dinlen)), .ust:has(:focus-visible){ width:216px",
               ".marka{ display:none; }", "prefers-reduced-transparency"):
         ok(s in cam, s)
     # yedi cekmecenin her birinin simgesi var; yazilari aynen duruyor
@@ -395,6 +396,33 @@ def t_cam_kabuk():
     for s in ("--kart-golge:0 1px 2px rgba(20,24,40,.03)", ".card :is(.card, .serit__kutu){ --kart-golge:0 0 #0000; }"):
         ok(s in cam, s)
     ok(m.index('<style id="hkm-sade">') < m.index("<!-- MEYDAN (kullan"), "sade blok Meydan blogundan once")
+
+
+def t_kenar_secince_cekilir():
+    """entegre W6 (2026-10-03): dar cam kenar ustune gelince icerigin USTUNDE
+    acilir; fare secilen baglantinin ustunde kaldikca acik kalip 1024-1440
+    px'te Ayarlar'in ilk sekmesini ortuyordu (tiklama «Onaylar»a gidiyordu).
+    Fareyle ya da dokunarak secilince kenar cekilir (.ust--dinlen); klavye
+    odagi kenari acik tutar. Davranisi tools/yuz.js tarayicida olcer
+    (elementFromPoint); burada sozlesme durur."""
+    m = _yuz()
+    sade = m[m.index('<style id="hkm-sade">'):]
+    sade = sade[:sade.index('</style>')]
+    cam = sade[sade.index("CAM KABUK"):]
+    ok(".ust:hover:where(:not(.ust--dinlen)), .ust:has(:focus-visible){ width:216px" in cam,
+       "dinlenen kenar uzerine gelinince acilmaz; klavye odagi acar")
+    kapali = ".ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible))"
+    for s in (kapali + " .gez a{ width:44px", kapali + " .bolumcubugu{ display:none; }", kapali + " .modul:not(.on)"):
+        ok(s in cam, s)
+    no(".ust:not(:hover):not(:has(:focus-visible))" in cam, "kapali hal dinlenen kenari da kapsar")
+    # Betik: yalniz fare/dokunma secimi (detail > 0) kenari ceker; fare
+    # cikinca ya da kenarda gezinince isaret duser.
+    for s in ("e.target.closest('#gez a[href], #bolumcubugu a[href]')", "if(!e.detail",
+              "ust.classList.add('ust--dinlen')", "ust.addEventListener('pointerleave', birak)",
+              "saat = setTimeout(birak, 320)"):
+        ok(s in m, s)
+    denetim = (KOK / "HKM" / "tools" / "yuz.js").read_text(encoding="utf-8")
+    ok("const ORTUSME" in denetim and "elementFromPoint" in denetim, "yuz.js kenarin sekmeyi ortmesini olcer")
 
 
 def run():
@@ -420,3 +448,4 @@ def run():
     test("yüz denetimi yüzün her görünümünü gezer (Motto, Hedefler)", t_denetim_her_gorunumu_gezer)
     test("giriş kartı: ortada buğulu kart, göster/gizle, Enter (2026-10-03)", t_giris_karti)
     test("cam kabuk: zemin, buzlu levha, dar cam kenar (2026-10-03)", t_cam_kabuk)
+    test("dar kenar seçimden sonra çekilir, sekmeyi örtmez (W6, 2026-10-03)", t_kenar_secince_cekilir)

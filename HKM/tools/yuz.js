@@ -197,6 +197,29 @@ const OLC = `(() => {
   return sonuc;
 })()`;
 
+/* Kenar sekmeleri ortmesin (W6, 2026-10-03): masaustunde dar cam kenar
+   uzerine gelince icerigin USTUNDE acilir. Ayarlar'a kenardan gidilince fare
+   kenarda kalir; kenar acik kalirsa 1024-1440 px'te Ayarlar'in ilk sekmesini
+   orter ve tiklama kenardaki «Onaylar»a gider (entegre.js W6 boyle kirildi).
+   Olcu kullanicinin yerinden yapilir: fare kenardan CEKILMEDEN, her sekmenin
+   ortasindaki oge kenara mi ait? */
+const ORTUSME = `(() => {
+  const ust = document.querySelector('header.ust');
+  const sonuc = { bakilan:0, ortulen:[] };
+  document.querySelectorAll('[data-ayar]').forEach(b => {
+    const r = b.getBoundingClientRect();
+    if(!r.width || !r.height) return;
+    const x = r.left + r.width / 2, y = r.top + r.height / 2;
+    if(x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) return;
+    sonuc.bakilan++;
+    const e = document.elementFromPoint(x, y);
+    if(e && ust && ust.contains(e)){
+      sonuc.ortulen.push(b.dataset.ayar + ' (üstündeki: ' + ((e.dataset && e.dataset.yol) || e.id || e.tagName.toLowerCase()) + ')');
+    }
+  });
+  return sonuc;
+})()`;
+
 let DB_YOLU = null;
 async function main(){
   const hatalar = [];
@@ -247,10 +270,17 @@ async function main(){
           await page.mouse.move(genislik - 20, Math.round(yukseklik / 2));
           await wait(420);
         };
+        /* Kenar seçimden sonra çekilir (.ust--dinlen): bölüm çubuğunu arayan
+           kullanıcı gibi fare kenarda biraz gezinir, kenar yeniden açılır. */
+        const bolumeUzan = async cekmece => {
+          const k = await page.locator('#gez a[data-yol="' + cekmece + '"]').boundingBox();
+          if(k) await page.mouse.move(k.x + 22, k.y + k.height / 2 + 8);
+          await wait(700);
+        };
         const duraklar = GORUNUMLER.map(g => ({ ad:g, git:async () => {
           if(CEKMECE[g]){
             await page.click('#gez a[data-yol="' + CEKMECE[g] + '"]');
-            await wait(250);
+            await bolumeUzan(CEKMECE[g]);
             await page.click('#bolumcubugu a[data-yol="' + g + '"]');
           }else{
             await page.click('#gez a[data-yol="' + g + '"]');
@@ -260,8 +290,16 @@ async function main(){
         for(const a of AYAR_SEKMELERI){
           duraklar.push({ ad:'ayarlar/' + a, git:async () => {
             await page.click('#ayar-bag');
-            await kenardanCik();
+            await wait(450);                      /* kenarın kapanış geçişi 340 ms */
+            const o = await page.evaluate(ORTUSME);
+            const yer = ad + '/' + tema + '/ayarlar/' + a;
+            if(!o.bakilan) hatalar.push(yer + ': Ayarlar sekmeleri ekranda bulunamadı');
+            if(o.ortulen.length){
+              hatalar.push(yer + ': kenar, kenardan Ayarlar açılınca sekmeyi örtüyor — ' + o.ortulen.join(', '));
+              await kenardanCik();                /* koşu sürsün, sorun yukarıda yazıldı */
+            }
             await page.click('[data-ayar="' + a + '"]');
+            await kenardanCik();
           }});
         }
         for(const durak of duraklar){

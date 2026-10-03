@@ -6305,14 +6305,20 @@ html[data-tema="koyu"]{
     -webkit-backdrop-filter:saturate(160%) blur(24px); backdrop-filter:saturate(160%) blur(24px);
     transition:width 340ms cubic-bezier(.4,0,.2,1), background .2s ease, border-radius .2s ease, box-shadow .2s ease; }
   .ust::-webkit-scrollbar{ display:none; }
-  .ust:hover, .ust:has(:focus-visible){ width:216px; background:var(--kenar-cam-acik); border-radius:0 20px 20px 0;
+  /* Kenardan bir yer seçilince kenar çekilir (.ust--dinlen, aşağıdaki betik):
+     fare seçilen bağlantının üstünde kalsa da açık kenar sayfanın sol şeridini
+     (1024–1440 px'te Ayarlar'ın ilk sekmesi) örtmez. Fare kenardan çıkınca ya
+     da kenarda bir an gezinince (bölüm çubuğu için) yeniden açılır; klavye
+     odağı (:focus-visible) kenarı her zaman açık tutar. :where/:is özgüllüğü
+     değiştirmez: azaltılmış saydamlık ve hareket kuralları yine kazanır. */
+  .ust:hover:where(:not(.ust--dinlen)), .ust:has(:focus-visible){ width:216px; background:var(--kenar-cam-acik); border-radius:0 20px 20px 0;
     box-shadow:var(--kenar-golge); transition:width 520ms cubic-bezier(.32,.72,0,1), background .2s ease, border-radius .2s ease, box-shadow .2s ease; }
   .marka{ display:none; }
 
   /* Sistem seçici: kapalıyken yalnız Merkez'in işareti (32 px ekseninde). */
-  .ust:not(:hover):not(:has(:focus-visible)) .moduller{ display:block; padding:0; background:none; }
-  .ust:not(:hover):not(:has(:focus-visible)) .modul:not(.on){ display:none; }
-  .ust:not(:hover):not(:has(:focus-visible)) .modul.on{ width:44px; height:36px; font-size:0; gap:0; background:none; box-shadow:none; }
+  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .moduller{ display:block; padding:0; background:none; }
+  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .modul:not(.on){ display:none; }
+  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .modul.on{ width:44px; height:36px; font-size:0; gap:0; background:none; box-shadow:none; }
   .moduller{ width:196px; box-sizing:border-box; }
 
   /* Çekmeceler: simge (maske) + ad; kapalıyken yalnız simge. */
@@ -6330,8 +6336,8 @@ html[data-tema="koyu"]{
   .gez a[data-yol="ofis"]{ --ic:var(--ic-ofis); }
   .gez a[data-yol="sohbet"]{ --ic:var(--ic-sohbet); }
   .gez a[data-yol="ayarlar"]{ --ic:var(--ic-ayarlar); }
-  .ust:not(:hover):not(:has(:focus-visible)) .gez a{ width:44px; color:transparent; transition:color 0s, background .16s ease; }
-  .ust:not(:hover):not(:has(:focus-visible)) .bolumcubugu{ display:none; }
+  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .gez a{ width:44px; color:transparent; transition:color 0s, background .16s ease; }
+  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .bolumcubugu{ display:none; }
   .bolumcubugu{ width:196px; }
 
   /* Tema düğmesi dipte, simgelerle aynı eksende. */
@@ -6381,6 +6387,37 @@ html[data-tema="koyu"]{ --kart-golge:0 1px 1px rgba(0,0,0,.22), 0 14px 34px -20p
     if(!(e.target.closest && e.target.closest('.hkm-bilgikart'))) kapat();
   });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape') kapat(); });
+})();
+</script>
+<script>
+/* Dar cam kenar seçimden sonra çekilir (2026-10-03, entegre W6): kenar
+   üzerine gelince içeriğin ÜSTÜNDE açılır ve fare seçilen bağlantının
+   üstünde kaldıkça açık kalıyordu; 1024–1440 px'te Ayarlar'ın ilk sekmesini
+   örtüyor, sekmeye tıklayan kenardaki «Onaylar»a gidiyordu. Fareyle ya da
+   dokunarak bir çekmece/bölüm seçilince kenar kapanır (.ust--dinlen, CSS'i
+   «CAM KABUK»ta). Fare kenardan çıkınca işaret düşer; kenarda bir an
+   gezinen (bölüm çubuğunu arayan) için kenar yeniden açılır. Klavyeyle
+   seçimde (detail 0) dokunulmaz: odak kenarı açık tutar. Yalnız sınıf
+   değiştirir; telefonda (< 1024 px) sınıfın görünür etkisi yoktur. */
+(function(){
+  var ust = document.querySelector('header.ust');
+  if(!ust) return;
+  var saat = null, x0 = 0, y0 = 0;
+  function birak(){ clearTimeout(saat); saat = null; ust.classList.remove('ust--dinlen'); }
+  ust.addEventListener('click', function(e){
+    if(!e.detail || !(e.target.closest && e.target.closest('#gez a[href], #bolumcubugu a[href]'))) return;
+    clearTimeout(saat); saat = null; x0 = e.clientX; y0 = e.clientY;
+    ust.classList.add('ust--dinlen');
+  });
+  /* Yerinde titreme (ya da düzen değişince tarayıcının yolladığı aynı
+     noktadaki olay) gezinme sayılmaz; kenardan geçip giden fare 320 ms
+     dolmadan çıkar ve kenarı açmaz. */
+  ust.addEventListener('pointermove', function(e){
+    if(saat || !ust.classList.contains('ust--dinlen')) return;
+    if(Math.abs(e.clientX - x0) + Math.abs(e.clientY - y0) < 4) return;
+    saat = setTimeout(birak, 320);
+  });
+  ust.addEventListener('pointerleave', birak);
 })();
 </script>
 
