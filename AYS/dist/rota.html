@@ -10577,12 +10577,15 @@ tbody tr:hover{ background:var(--surface-2); }
 .bolumcubugu__rozet.is-sessiz{ background:var(--surface-2); color:var(--text-2); }
 
 /* Sayfa bölümleri (019): iç sekmelerin yerine alt alta bölümler; çubuk
-   sayfa içi bağlantıdır ve kaydırırken üst çubuğun altında yapışık kalır. */
+   sayfa içi bağlantıdır ve kaydırırken üst çubuğun altında yapışık kalır.
+   Çekmece çubuğu da yapışıksa (--cekmece-cubugu: onun boyu, aşağıda
+   .bolumcubugu--kabuk) ray onun ALTINA yapışır: iki çubuk aynı satıra
+   binmez, bölüme kayınca bölümün başı ikisinin altında kalır. */
 .bolumcubugu--sayfa{
-  position:sticky; top:var(--ust-h); z-index:calc(var(--z-nav) - 1);
+  position:sticky; top:calc(var(--ust-h) + var(--cekmece-cubugu, 0px)); z-index:calc(var(--z-nav) - 1);
   background:var(--bg); margin-bottom:20px;
 }
-.sayfabolum{ scroll-margin-top:calc(var(--ust-h) + 52px); min-width:0; }
+.sayfabolum{ scroll-margin-top:calc(var(--ust-h) + var(--cekmece-cubugu, 0px) + 52px); min-width:0; }
 .sayfabolum + .sayfabolum{ margin-top:40px; }
 .sayfabolum__ad{
   margin:0 0 14px; font-size:var(--fs-lg); font-weight:700;
@@ -10978,10 +10981,13 @@ a.kenar__modul:hover{ color:var(--text); }
   .ust--v5 .ust__ara{ width:200px; }
 }
 .bolumcubugu--kabuk{ display:none; }
+/* Çubuk yapışık olduğu her yerde boyunu sayfa rayına bildirir
+   (.bolumcubugu--sayfa yukarıda): v5'te 36 px düğme + 6 px alt boşluk. */
 @media (max-width:1279px) and (min-width:680px){
   .bolumcubugu--kabuk{ display:flex; position:sticky; top:var(--ust-h); z-index:calc(var(--z-nav) - 1);
     background:var(--surface); margin:-8px 0 20px; }
   .bolumcubugu--kabuk .bolumcubugu__ad{ height:44px; }
+  .sayfa:has(> .bolumcubugu--kabuk){ --cekmece-cubugu:42px; }
 }
 
 /* Telefon: kenar yok; üstte modül ve konum, onay ve rütbe; altta bant. */
@@ -11110,6 +11116,7 @@ a.kenar__modul:hover{ color:var(--text); }
   html.kenar-dar .site--v5 > .kenar .kenar__dip{ align-items:stretch; }
   html.kenar-dar .bolumcubugu--kabuk{ display:flex; position:sticky; top:var(--ust-h); z-index:calc(var(--z-nav) - 1);
     background:var(--bg); margin:-8px 0 20px; }
+  html.kenar-dar .sayfa:has(> .bolumcubugu--kabuk){ --cekmece-cubugu:42px; }
 }
 
 /* Geniş sayfa: içerik yatayda daha çok yer kullanır. */
@@ -11573,9 +11580,14 @@ svg.chart{ max-height:180px; }
 .site--v5 .bolumcubugu--kabuk .bolumcubugu__ad.is-on.is-kayan{ animation:secili-renk 320ms ease-out both; }
 @keyframes isaret-yatay{ from{ transform:translateX(var(--isaret-cx, 0px)); } }
 @keyframes secili-renk{ from{ color:var(--text-3); } }
+/* Düğme her genişlikte 36 px: yapışık çubuğun boyu (36 + 6 alt boşluk =
+   42) sayfa rayının yapışma yerinde yazılı (--cekmece-cubugu); CSS
+   sırasına bırakılmaz (kart.css'teki 40 px sonra yüklenirse çubuk 46 px
+   olur ve rayın üstüne 4 px taşardı). */
+.site--v5 .bolumcubugu--kabuk .bolumcubugu__ad{ height:36px; }
 @media (max-width:679px){
   .site--v5 .bolumcubugu--kabuk{ display:flex; position:static; margin:0 0 14px; background:var(--bg); }
-  .site--v5 .bolumcubugu--kabuk .bolumcubugu__ad{ height:36px; padding:0 12px; font-size:15px; }
+  .site--v5 .bolumcubugu--kabuk .bolumcubugu__ad{ padding:0 12px; font-size:15px; }
 }
 
 /* 2c · Sayfanın bölümleri: bölümlü seçici. Ray zeminden bir ton koyu,
@@ -11583,7 +11595,11 @@ svg.chart{ max-height:180px; }
    kayar (genişliği de eşleşir). Sığmazsa ray kendi içinde kayar. */
 .site--v5 .bolumcubugu--sayfa{ display:flex; gap:2px; width:fit-content; max-width:100%; box-sizing:border-box;
   margin:0 auto 22px; padding:3px; border-radius:12px; background:var(--seg-ray);
-  -webkit-mask-image:none; mask-image:none; scroll-snap-type:none; scroll-padding-inline:3px; }
+  -webkit-mask-image:none; mask-image:none; scroll-snap-type:none; scroll-padding-inline:3px;
+  /* Ray yarı saydam ve yapışık: altından kayan kartın yazısı rayın
+     yazısıyla üst üste okunmasın diye arkası bulanıklaşır (renk katmaz;
+     yerinde dururken arkası düz zemin, fark görünmez). */
+  -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); }
 .site--v5 .bolumcubugu--sayfa > :first-child, .site--v5 .bolumcubugu--sayfa > :last-child{ margin-left:0; margin-right:0; }
 .site--v5 .bolumcubugu--sayfa .bolumcubugu__ad{ position:relative; isolation:isolate; display:inline-flex; align-items:center;
   gap:6px; height:30px; padding:0 14px; border-radius:9px; background:none; box-shadow:none;
@@ -14375,7 +14391,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'937aa94d', at:'2026-10-03 20:50', dirty:true };
+R.BUILD = { id:'03c27746', at:'2026-10-03 21:07', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.

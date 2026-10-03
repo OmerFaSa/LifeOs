@@ -501,6 +501,57 @@
       }finally{ d.remove(); }
     });
 
+    /* Hata (2026-10-02, AYS Ayarlar › Genel, 1440 px): aşağı kaydırınca iki
+       yapışık çubuk aynı `top`a yapışıyor, «Genel · Profil» yazıları
+       «Ayarlar · Takvim istisnaları» rayının üstüne biniyordu. Çekmece
+       çubuğu yapışıkken ray onun ALTINA yapışır; bölüme kayınca bölümün
+       başı iki çubuğun altında kalır. */
+    it('iki yapışık çubuk üst üste binmez: ray çekmece çubuğunun altına yapışır', () => {
+      const eski = document.documentElement.classList.contains('kenar-dar');
+      let d = null;
+      try{
+        K.kenarDar(true);
+        d = yerlestir('<div class="site--v5"><div class="wrapc sayfa">'
+          + K.bolumCubugu({ kabuk:true, cekmece:'Ayarlar', bolumler:[{ route:'guide', ad:'Genel', on:true }, { route:'profil', ad:'Profil' }] })
+          + '<main class="content"><div><nav class="bolumcubugu bolumcubugu--sayfa" aria-label="Bu sayfada">'
+          + '<button class="bolumcubugu__ad is-on" data-tab="x">Ayarlar</button><button class="bolumcubugu__ad" data-tab="y">Takvim istisnaları</button></nav>'
+          + '<div class="sayfabolumler sayfabolumler--kat"><section class="sayfabolum is-on" id="bl-x">x</section></div></div></main></div></div>');
+        const ust = d.querySelector('.bolumcubugu--kabuk'), alt = d.querySelector('.bolumcubugu--sayfa');
+        const yapisik = el => getComputedStyle(el).display !== 'none' && getComputedStyle(el).position === 'sticky';
+        const ustu = el => parseFloat(getComputedStyle(el).top);
+        expect(yapisik(alt)).toBe(true);
+        if(window.innerWidth >= 680) expect(yapisik(ust)).toBe(true);
+        if(yapisik(ust)){
+          expect(ust.offsetHeight > 0).toBe(true);
+          expect(ustu(alt) - ustu(ust) >= ust.offsetHeight).toBe(true);
+        }
+        /* Bölüme kayış (bolumeGit, block:'start') bölümün başını rayın altına bırakır. */
+        expect(parseFloat(getComputedStyle(d.querySelector('.sayfabolum')).scrollMarginTop) >= ustu(alt) + alt.offsetHeight).toBe(true);
+        /* Ray yarı saydam: altından kayan kartın yazısı («Diploma notu»)
+           rayın yazısının üstüne çıkmasın diye arkası bulanıklaşır. */
+        expect(/blur\(/.test(getComputedStyle(alt).backdropFilter || getComputedStyle(alt).webkitBackdropFilter || '')).toBe(true);
+      }finally{
+        if(d) d.remove();
+        K.kenarDar(eski); try{ localStorage.removeItem('lifeos.kenar'); }catch(e){}
+      }
+    });
+
+    it('tek yapışık çubuk: çekmece çubuğu yokken ray üst çubuğun hemen altına yapışır', () => {
+      const eski = document.documentElement.classList.contains('kenar-dar');
+      let d = null;
+      try{
+        K.kenarDar(true);
+        d = yerlestir('<div class="site--v5"><div class="wrapc sayfa"><main class="content"><div>'
+          + '<nav class="bolumcubugu bolumcubugu--sayfa" aria-label="Bu sayfada"><button class="bolumcubugu__ad is-on" data-tab="x">A</button>'
+          + '<button class="bolumcubugu__ad" data-tab="y">B</button></nav></div></main></div></div>');
+        const alt = d.querySelector('.bolumcubugu--sayfa');
+        expect(getComputedStyle(alt).top).toBe(getComputedStyle(d.firstElementChild).getPropertyValue('--ust-h').trim());
+      }finally{
+        if(d) d.remove();
+        K.kenarDar(eski); try{ localStorage.removeItem('lifeos.kenar'); }catch(e){}
+      }
+    });
+
     it('başlık çekmece değişince yeniden belirir; aynı çekmecede bölüm değişince yerinde durur', () => {
       const k = document.documentElement;
       const ciz = (id, route) => yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'esp', cekmeceler:[
