@@ -448,8 +448,11 @@ SP.C = (function(){
 
   /* Dosya birakma alani. Tiklayinca dosya secici acilir, uzerine
      birakinca da alir. Iki yol da ayni eylemi tetikler. */
+  /* o.kamera ({ yon }) verilirse altında tek bir «Kamerayla çek» durur:
+     uygulama içi, geri sayımlı kamera (core/kamera.js). Çekilen fotoğraf
+     bırakılmış dosya gibi aynı `act` değişikliğine gider. */
   function Drop(o){
-    return html`<label class="drop" data-drop="${o.act}">
+    const kutu = html`<label class="drop" data-drop="${o.act}">
       <input type="file" class="drop__input" accept="${o.accept || ''}"
         data-change="${o.act}" ${when(o.id, () => attrs({ id:o.id }))}/>
       <span class="drop__icon" aria-hidden="true">${raw(SP.UI.icon(o.icon || 'upload'))}</span>
@@ -458,6 +461,10 @@ SP.C = (function(){
         <span>${o.hint || 'Dosyayı buraya bırak ya da seçmek için tıkla'}</span>
       </span>
     </label>`;
+    if(!o.kamera) return kutu;
+    return html`<div class="drop-kap">${kutu}
+      ${Button({ label:'Kamerayla çek', icon:'camera', size:'sm', tone:'ghost', act:'kamera-drop',
+        data:{ 'data-hedef':o.act, 'data-yon':o.kamera.yon || 'environment', 'data-ad':o.label } })}</div>`;
   }
 
   function Field(o){

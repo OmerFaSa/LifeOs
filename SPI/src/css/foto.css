@@ -1,0 +1,121 @@
+/* FOTO — kayıtların yanındaki minik kare (screens/fotoui.js) ve uygulama
+   içi geri sayımlı kamera (core/kamera.js). Kare 40 piksel: ekranı
+   kaplamaz; boşken silik bir çizgi, doluyken fotoğraf. */
+
+.foto-kutu{
+  flex:none; display:grid; place-items:center;
+  width:40px; height:40px; padding:0; overflow:hidden;
+  border:0; border-radius:10px; cursor:pointer;
+  background:var(--surface-2); color:var(--text-3);
+}
+.foto-kutu img{ display:block; width:100%; height:100%; object-fit:cover; }
+.foto-kutu--bos{ background:transparent; border:1px dashed var(--border-strong); }
+.foto-kutu--bos svg{ width:18px; height:18px; }
+.foto-kutu--bos:hover{ color:var(--text-2); border-color:var(--text-3); }
+.foto-kutu:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.foto-kutu--sm{ width:32px; height:32px; border-radius:8px; }
+.foto-kutu--sm svg{ width:16px; height:16px; }
+
+/* Hareket kartında kare adın soluna girince alt satır yarıdan
+   kırılıyordu: alt satır her zaman adın altında. */
+.ladderblk__head .minw0 > .tiny{ display:block; }
+
+/* Büyük görünüm (kağıtta). flex:none — kağıt gövdesi esnek sütundur. */
+.foto-buyuk{
+  display:block; flex:none; width:100%; max-height:70vh; object-fit:contain;
+  border-radius:var(--r); background:var(--surface-2);
+}
+
+/* İlerleme › Vücut: tek satır, yatay kayar. */
+.foto-serit{ display:flex; gap:12px; overflow-x:auto; padding-bottom:2px; }
+.foto-serit__ge{ display:flex; flex:none; flex-direction:column; align-items:center; gap:4px; }
+
+/* Bırakma alanının altındaki «Kamerayla çek». */
+.drop-kap{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
+
+/* ------------------------------------------------------------ kamera
+   Tam ekran, siyah; altta deklanşör, solunda galeri, sağında çevir.
+   Renkler sabittir (fotoğraf her temada siyah zemin üstünde bakılır). */
+.kamera{
+  position:fixed; inset:0; z-index:2147483000;
+  display:flex; flex-direction:column; overflow:hidden;
+  background:#000; color:#fff; -webkit-user-select:none; user-select:none;
+}
+.kamera [hidden]{ display:none !important; }
+.kamera__video, .kamera__onizleme{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;
+}
+.kamera__onizleme{ object-fit:contain; background:#000; }
+.kamera__video.is-ayna{ transform:scaleX(-1); }
+
+.kamera__ust{
+  position:relative; z-index:4; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:max(12px, env(safe-area-inset-top)) 16px 24px;
+  background:linear-gradient(rgba(0,0,0,.45), transparent);
+}
+.kamera__baslik{ min-width:0; font-size:15px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.kamera__alt{
+  position:absolute; left:0; right:0; bottom:0; z-index:4;
+  display:flex; flex-direction:column; align-items:center; gap:18px;
+  padding:32px 16px max(20px, env(safe-area-inset-bottom));
+  background:linear-gradient(transparent, rgba(0,0,0,.55));
+}
+.kamera__sureler{ display:flex; gap:2px; padding:3px; border-radius:999px; background:rgba(0,0,0,.4); }
+.kamera__sureler button{
+  min-height:28px; padding:0 12px; border:0; border-radius:999px; cursor:pointer;
+  background:none; color:#fff; font:inherit; font-size:13px; font-weight:600; opacity:.8;
+}
+.kamera__sureler button.is-on{ background:#fff; color:#111; opacity:1; }
+.kamera__satir{ display:flex; align-items:center; justify-content:space-between; width:100%; max-width:360px; }
+.kamera__satir--sonuc{ justify-content:center; gap:12px; }
+
+.kamera__dug{
+  display:grid; place-items:center; width:44px; height:44px; flex:none;
+  border:0; border-radius:50%; cursor:pointer;
+  background:rgba(255,255,255,.16); color:#fff;
+}
+.kamera__dug svg{ width:22px; height:22px; }
+.kamera__dug:disabled{ opacity:.35; cursor:default; }
+.kamera__galeri:focus-within, .kamera__dug:focus-visible, .kamera__deklansor:focus-visible,
+.kamera__metin:focus-visible, .kamera__sureler button:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
+
+.kamera__deklansor{
+  width:72px; height:72px; flex:none; padding:4px; cursor:pointer;
+  border:4px solid #fff; border-radius:50%; background:#fff; background-clip:content-box;
+  transition:transform .12s ease;
+}
+.kamera__deklansor:active{ transform:scale(.93); }
+.kamera__deklansor:disabled{ opacity:.35; cursor:default; }
+
+.kamera__metin{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:120px; min-height:44px; padding:0 20px; cursor:pointer;
+  border:0; border-radius:999px; background:rgba(255,255,255,.16); color:#fff;
+  font:inherit; font-weight:600;
+}
+.kamera__metin--ana{ background:#fff; color:#111; }
+
+.kamera__sayi{
+  position:absolute; inset:0; z-index:2; display:grid; place-items:center; pointer-events:none;
+  font-size:min(42vw, 260px); font-weight:700; line-height:1; font-variant-numeric:tabular-nums;
+  text-shadow:0 4px 30px rgba(0,0,0,.45);
+}
+.kamera__ipucu{
+  position:absolute; left:0; right:0; bottom:max(40px, env(safe-area-inset-bottom)); z-index:3;
+  text-align:center; font-size:14px; opacity:0; pointer-events:none;
+}
+.kamera.is-sayiyor .kamera__ipucu{ opacity:.85; }
+.kamera.is-sayiyor .kamera__sureler, .kamera.is-sayiyor .kamera__satir--cek{ visibility:hidden; }
+
+.kamera__flas{ position:absolute; inset:0; z-index:3; background:#fff; opacity:0; pointer-events:none; }
+.kamera.is-flas .kamera__flas{ animation:kamera-flas .35s ease-out; }
+@keyframes kamera-flas{ from{ opacity:.85; } to{ opacity:0; } }
+@media (prefers-reduced-motion:reduce){ .kamera.is-flas .kamera__flas{ animation:none; } }
+
+.kamera__mesaj{
+  position:absolute; inset:0; z-index:1;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+  padding:32px; text-align:center;
+}
+.kamera__mesaj p{ max-width:320px; line-height:1.5; opacity:.9; }

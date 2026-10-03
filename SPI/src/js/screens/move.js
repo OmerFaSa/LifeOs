@@ -163,7 +163,8 @@ SP.Screens.move = (function(){
     return html`
       <div class="ladderblk">
         <div class="ladderblk__head">
-          <div class="minw0">
+          ${raw(String(SP.FotoUI.kutu({ sahip:'hareket:' + ex.id, ad:ex.name, yon:'user' })))}
+          <div class="minw0 grow">
             <b class="ladderblk__name">${ex.name}</b>
             <span class="tiny dim">${pattern ? pattern.label
               : ex.kind === 'cardio' ? 'Dayanıklılık' : 'Mobilite'}
@@ -685,6 +686,23 @@ SP.Screens.move = (function(){
       ${when(dl.due, () => K.Notice({ tone:'warn', body:dl.note }))}`;
   }
 
+  /* Vücut fotoğrafları: kendini zaman içinde görmek için tek satır minik
+     kare; ilki bugünündür. Fotoğraftan SAYI ÜRETİLMEZ — kilo, yağ oranı,
+     endeks ölçülür, fotoğraftan tahmin edilmez (AGENTS §1.1). */
+  function vucutKutusu(){
+    if(!SP.Foto.var()) return '';
+    const bugun = U.todayISO();
+    const gunler = SP.Foto.sahipler('vucut:').map(s => s.slice(6)).filter(g => g !== bugun);
+    const kare = g => raw(String(SP.FotoUI.kutu({ sahip:'vucut:' + g, ad:'Vücut · ' + U.fmtShort(g), yon:'user' })));
+    return K.Entry({
+      label:'Vücut', hint:'vucut-foto', meta:gunler.length ? (gunler.length + 1) + ' gün' : null,
+      body:html`<div class="foto-serit">
+        <span class="foto-serit__ge">${kare(bugun)}<span class="tiny dim">Bugün</span></span>
+        ${map(gunler.slice(0, 12), g => html`<span class="foto-serit__ge">${kare(g)}<span class="tiny dim">${U.fmtShort(g)}</span></span>`)}
+      </div>`,
+    });
+  }
+
   function historyBody(){
     const rows = S.workouts.slice(-20).reverse();
     if(!rows.length) return P.empty('Henüz seans kaydı yok.');
@@ -854,6 +872,7 @@ SP.Screens.move = (function(){
     bugun:() => html`${K.Ledger([DonenHareket(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), orderEntry(), halkaKutusu(), haftaKutusu()])}
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
     ilerleme:() => html`${K.Ledger([
+        vucutKutusu(),
         K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
           body:loadBody() }),
         yogunlukKutusu(),

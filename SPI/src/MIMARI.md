@@ -388,6 +388,17 @@ Gramaj ev ölçüsünden geldiyse «tahmin», tartıldıysa «ölçüldü» olur
 - **Eğitim.** Hiçbir veri ticari model eğitimine gönderilmez.
 - **API anahtarı.** Yalnızca tarayıcıda, uygulama verisinden ayrı bir
   anahtarda durur. Yedeğe girmez, buluta gitmez, modele gönderilmez.
+- **Fotoğraflar** (2026-10-03, `core/foto.js`, `core/kamera.js`). Hareket,
+  öğün, kendi gıdan ve vücut kayıtlarının yanında 40 piksellik minik kare;
+  dokununca büyük açılır. Kamera uygulamanın içinde açılır, 3/5/10 saniye
+  geri sayımla (her saniye bip) — telefonu bırakıp hareketi yaparken kendi
+  fotoğrafını çekmek için. Fotoğraf bu cihazın **IndexedDB**'sinde durur
+  (uzun kenar en çok 1080 px, JPEG): ana defteri (localStorage) şişirmez,
+  yedeğe girmez — yedek kartı bunu söyler —, modele ve HKM'ye gitmez;
+  «Bütün veriyi sil» onları da siler. Fotoğraftan **sayı üretilmez**: kilo,
+  yağ oranı, endeks ölçülür, tahmin edilmez (§1). Kamera yalnız güvenli
+  bağlantıda açılır; değilse aynı ekranda telefonun kendi kamerası tek
+  dokunuştadır (geri sayımsız).
 - **Hane izolasyonu.** Her profil kendi depo anahtarında yaşar
   (`spi.v1.<profil>`). Profil geçişi sayfayı yeniden yükler: yarım kalmış bir
   yazma işleminin yanlış profile düşmesi böylece imkânsızdır.
@@ -446,6 +457,8 @@ src/
       rota.js           GPS izi: GPX okuma, mesafe/tempo/dilim/tırmanış, iz sıkıştırma
       harita.js         rota haritası: Web Mercator, OSM karoları, ısı haritası, profil
       canli.js          canlı rota kaydı: konum izleme, taslak, duraklat/sürdür, ekran kilidi
+      foto.js           kayıtlara bağlı fotoğraflar: IndexedDB, küçültme, profil ayrımı
+      kamera.js         uygulama içi kamera: geri sayım (3/5/10 sn, bip), galeri, çevir
       money.js          Modül 4 kural motoru
       calc.js           orkestratör: sıradaki hamle, çapraz çıkarım
       parse.js          serbest metin ayrıştırıcıları
@@ -462,7 +475,7 @@ src/
       llm.js quota.js   model çağrısı ve kota yönetimi
       palette.js        komut paleti
       setup.js          ilk kurulum
-    screens/            12 ekran
+    screens/            12 ekran (+ fotoui.js: minik fotoğraf karesi, her ekranda aynı)
     app.js              kabuk: gezinme, görünüm paneli, olay dağıtımı, açılış
   tests/                512 test, 12 paket
 tools/

@@ -75,7 +75,7 @@ SP.Screens.meals = (function(){
           body:'Fotoğraftan öğün okumak için Ayarlar → Rehber → Model bölümünden '
             + 'görüntü destekleyen bir sağlayıcı seç. Öğünü tek satır yazarak '
             + 'modelsiz de girebilirsin.' })),
-        K.Drop({ act:'meal-photo', label:'Yemek fotoğrafı', icon:'camera',
+        K.Drop({ act:'meal-photo', label:'Yemek fotoğrafı', icon:'camera', kamera:{},
           accept:'image/*', hint:'Fotoğrafı buraya bırak ya da seçmek için tıkla' }),
         html`<div id="photo-name" class="small dim">${photoFile ? photoFile.name : ''}</div>`,
         html`<div class="cols-2">
@@ -139,6 +139,8 @@ SP.Screens.meals = (function(){
           ${raw(UI.icon(slot ? slot.icon : 'meal'))}
           <span class="mealcard__slot">${slot ? slot.label : meal.slot}</span>
           <span class="mealcard__kcal num">${Math.round(a.raw.kcal)} kcal</span>
+          ${raw(String(SP.FotoUI.kutu({ sahip:'ogun:' + meal.id, sinif:'foto-kutu--sm',
+            ad:(slot ? slot.label : meal.slot) + ' · ' + U.fmtShort(shownDate()) })))}
           ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Öğünü sil',
             act:'del-meal', data:{ 'data-id':meal.id } })}
         </div>
@@ -477,7 +479,7 @@ SP.Screens.meals = (function(){
     UI.sheet({
       title:'Barkod', subtitle:'ilk okutmada bir gıdaya bağlanır, sonra doğrudan gelir',
       body:String(K.Stack([
-        when(SP.Barkod.fotoVar(), () => K.Drop({ act:'barkod-foto', label:'Barkodun fotoğrafı',
+        when(SP.Barkod.fotoVar(), () => K.Drop({ act:'barkod-foto', label:'Barkodun fotoğrafı', kamera:{},
           icon:'file', accept:'image/*', hint:'Barkodu yakından çek ya da fotoğraf seç' })),
         when(!SP.Barkod.fotoVar(), () => K.Notice({ tone:'info',
           body:'Bu tarayıcı fotoğraftan barkod okuyamıyor; numarayı elle yaz.' })),
@@ -844,6 +846,8 @@ SP.Screens.meals = (function(){
     },
     async 'del-meal'(el){
       await M.deleteMeal(shownDate(), el.dataset.id);
+      /* Öğünle birlikte fotoğrafı da gider; sahipsiz fotoğraf kalmaz. */
+      if(SP.Foto) await SP.Foto.sil('ogun:' + el.dataset.id);
       SP.App.render();
     },
     async 'del-item'(el){

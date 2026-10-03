@@ -302,7 +302,34 @@ async function walkFlows(page, base, errors){
     errors.push('canlı kayıt: ' + (e && e.message || e));
   }
 
-  console.log('  akışlar → öğün, tahlil, laboratuvar bağı, toparlanma, GPX rota ve canlı kayıt çalıştı');
+  /* 7 — Kamera: tarayicinin GERCEK getUserMedia'si (Chromium sahte
+     kamerasi, baslatma bayraklari asagida). Hareket karesinden kamera
+     acilir, geri sayimsiz cekilir, «Kullan» fotografi depoya yazar. */
+  try{
+    await page.evaluate(() => { SP.UI.closeSheet(); SP.S.ui.moveTab = 'kuvvet'; SP.App.go('move'); });
+    await wait(400);
+    await page.evaluate(() => document.querySelector('[data-act="foto-cek"][data-sahip="hareket:squat"]').click());
+    await page.waitForFunction(() => {
+      const v = document.querySelector('#kamera .kamera__video');
+      return v && v.videoWidth > 0;
+    }, null, { timeout:8000 });
+    await page.click('#kamera [data-k="sure"][data-v="0"]');
+    await page.click('#kamera [data-k="cek"]');
+    await page.waitForSelector('#kamera [data-k="kullan"]', { state:'visible', timeout:5000 });
+    await page.click('#kamera [data-k="kullan"]');
+    await page.waitForFunction(() => !!SP.Foto.url('hareket:squat'), null, { timeout:5000 });
+    const foto = await page.evaluate(async () => {
+      const b = await SP.Foto.al('hareket:squat');
+      return { tur:b && b.type, boy:b && b.size, kamera:!!document.getElementById('kamera') };
+    });
+    if(foto.tur !== 'image/jpeg' || !(foto.boy > 0)) errors.push('kamera: fotoğraf depoya yazılmadı');
+    if(foto.kamera) errors.push('kamera: «Kullan»dan sonra kamera kapanmadı');
+    console.log('  kamera → hareket fotoğrafı çekildi (' + Math.round((foto.boy || 0) / 1024) + ' KB)');
+  }catch(e){
+    errors.push('kamera: ' + (e && e.message || e));
+  }
+
+  console.log('  akışlar → öğün, tahlil, laboratuvar bağı, toparlanma, GPX rota, canlı kayıt ve kamera çalıştı');
 }
 
 
@@ -499,8 +526,10 @@ async function cevrimdisi(browser, base, hedefler, durdur, errors){
 
   try{
     await waitForServer(base + '/index.html');
-    browser = await chromium.launch(process.env.CHROMIUM_PATH
-      ? { executablePath:process.env.CHROMIUM_PATH } : {});
+    /* Sahte kamera: izin sorulmaz, test görüntüsü üretir (kamera akışı). */
+    browser = await chromium.launch(Object.assign({
+      args:['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'],
+    }, process.env.CHROMIUM_PATH ? { executablePath:process.env.CHROMIUM_PATH } : {}));
     const page = await browser.newPage({ reducedMotion:'reduce' });
 
     page.on('pageerror', e => errors.push('sayfa hatası: ' + (e && e.message || e)));

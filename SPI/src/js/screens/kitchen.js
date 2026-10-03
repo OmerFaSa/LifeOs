@@ -181,6 +181,7 @@ SP.Screens.kitchen = (function(){
         ${when(!liste.length, () => P.empty('Henüz kendi gıdan yok.'))}
         ${when(liste.length, () => html`<div class="list mt-10">${map(liste, f => html`
           <div class="listitem">
+            ${raw(String(SP.FotoUI.kutu({ sahip:'besin:' + f.id, ad:f.name })))}
             <div class="grow minw0">
               <b class="small">${f.name}</b>
               <div class="tiny dim">100 g · ${U.fmtNum(f.kcal)} kcal ·
@@ -277,7 +278,7 @@ SP.Screens.kitchen = (function(){
       UI.sheet({ title:'Besin etiketi', subtitle:'ambalajın tablosunu fotoğrafla',
         wide:true,
         body:String(K.Stack([
-          K.Drop({ act:'label-file', label:'Etiket fotoğrafı', icon:'camera',
+          K.Drop({ act:'label-file', label:'Etiket fotoğrafı', icon:'camera', kamera:{},
             accept:'image/*' }),
           html`<div id="label-name" class="small dim"></div>`,
           K.Notice({ tone:'info',
@@ -320,8 +321,14 @@ SP.Screens.kitchen = (function(){
       const f = (S.foods || []).find(x => x.id === el.dataset.id);
       if(!f) return;
       const kopya = JSON.parse(JSON.stringify(f));
+      /* Fotoğraf da gider ama «Geri al» onu da yerine koyar. */
+      const foto = SP.Foto ? await SP.Foto.al('besin:' + f.id) : null;
       await M.deleteFood(f.id);
-      S.ui.undo = { restore:() => M.saveFood(kopya) };
+      if(foto) await SP.Foto.sil('besin:' + f.id);
+      S.ui.undo = { restore:async () => {
+        await M.saveFood(kopya);
+        if(foto) await SP.Foto.kaydet('besin:' + kopya.id, foto);
+      } };
       UI.toast(kopya.name + ' silindi', { undo:true });
       SP.App.render();
     },

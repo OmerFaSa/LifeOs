@@ -11674,6 +11674,129 @@ body.is-dragging .rota{ outline:2px dashed var(--spi); outline-offset:6px; borde
 }
 :root[data-theme="dark"] .harita__kunye{ background:rgba(18,18,20,.8); }
 :root[data-theme="dark"] .harita__kunye a{ color:#C9CAD1; }
+
+/* ==== css/foto.css ==== */
+/* FOTO — kayıtların yanındaki minik kare (screens/fotoui.js) ve uygulama
+   içi geri sayımlı kamera (core/kamera.js). Kare 40 piksel: ekranı
+   kaplamaz; boşken silik bir çizgi, doluyken fotoğraf. */
+
+.foto-kutu{
+  flex:none; display:grid; place-items:center;
+  width:40px; height:40px; padding:0; overflow:hidden;
+  border:0; border-radius:10px; cursor:pointer;
+  background:var(--surface-2); color:var(--text-3);
+}
+.foto-kutu img{ display:block; width:100%; height:100%; object-fit:cover; }
+.foto-kutu--bos{ background:transparent; border:1px dashed var(--border-strong); }
+.foto-kutu--bos svg{ width:18px; height:18px; }
+.foto-kutu--bos:hover{ color:var(--text-2); border-color:var(--text-3); }
+.foto-kutu:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.foto-kutu--sm{ width:32px; height:32px; border-radius:8px; }
+.foto-kutu--sm svg{ width:16px; height:16px; }
+
+/* Hareket kartında kare adın soluna girince alt satır yarıdan
+   kırılıyordu: alt satır her zaman adın altında. */
+.ladderblk__head .minw0 > .tiny{ display:block; }
+
+/* Büyük görünüm (kağıtta). flex:none — kağıt gövdesi esnek sütundur. */
+.foto-buyuk{
+  display:block; flex:none; width:100%; max-height:70vh; object-fit:contain;
+  border-radius:var(--r); background:var(--surface-2);
+}
+
+/* İlerleme › Vücut: tek satır, yatay kayar. */
+.foto-serit{ display:flex; gap:12px; overflow-x:auto; padding-bottom:2px; }
+.foto-serit__ge{ display:flex; flex:none; flex-direction:column; align-items:center; gap:4px; }
+
+/* Bırakma alanının altındaki «Kamerayla çek». */
+.drop-kap{ display:flex; flex-direction:column; align-items:flex-start; gap:6px; }
+
+/* ------------------------------------------------------------ kamera
+   Tam ekran, siyah; altta deklanşör, solunda galeri, sağında çevir.
+   Renkler sabittir (fotoğraf her temada siyah zemin üstünde bakılır). */
+.kamera{
+  position:fixed; inset:0; z-index:2147483000;
+  display:flex; flex-direction:column; overflow:hidden;
+  background:#000; color:#fff; -webkit-user-select:none; user-select:none;
+}
+.kamera [hidden]{ display:none !important; }
+.kamera__video, .kamera__onizleme{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:0;
+}
+.kamera__onizleme{ object-fit:contain; background:#000; }
+.kamera__video.is-ayna{ transform:scaleX(-1); }
+
+.kamera__ust{
+  position:relative; z-index:4; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:max(12px, env(safe-area-inset-top)) 16px 24px;
+  background:linear-gradient(rgba(0,0,0,.45), transparent);
+}
+.kamera__baslik{ min-width:0; font-size:15px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.kamera__alt{
+  position:absolute; left:0; right:0; bottom:0; z-index:4;
+  display:flex; flex-direction:column; align-items:center; gap:18px;
+  padding:32px 16px max(20px, env(safe-area-inset-bottom));
+  background:linear-gradient(transparent, rgba(0,0,0,.55));
+}
+.kamera__sureler{ display:flex; gap:2px; padding:3px; border-radius:999px; background:rgba(0,0,0,.4); }
+.kamera__sureler button{
+  min-height:28px; padding:0 12px; border:0; border-radius:999px; cursor:pointer;
+  background:none; color:#fff; font:inherit; font-size:13px; font-weight:600; opacity:.8;
+}
+.kamera__sureler button.is-on{ background:#fff; color:#111; opacity:1; }
+.kamera__satir{ display:flex; align-items:center; justify-content:space-between; width:100%; max-width:360px; }
+.kamera__satir--sonuc{ justify-content:center; gap:12px; }
+
+.kamera__dug{
+  display:grid; place-items:center; width:44px; height:44px; flex:none;
+  border:0; border-radius:50%; cursor:pointer;
+  background:rgba(255,255,255,.16); color:#fff;
+}
+.kamera__dug svg{ width:22px; height:22px; }
+.kamera__dug:disabled{ opacity:.35; cursor:default; }
+.kamera__galeri:focus-within, .kamera__dug:focus-visible, .kamera__deklansor:focus-visible,
+.kamera__metin:focus-visible, .kamera__sureler button:focus-visible{ outline:2px solid #fff; outline-offset:3px; }
+
+.kamera__deklansor{
+  width:72px; height:72px; flex:none; padding:4px; cursor:pointer;
+  border:4px solid #fff; border-radius:50%; background:#fff; background-clip:content-box;
+  transition:transform .12s ease;
+}
+.kamera__deklansor:active{ transform:scale(.93); }
+.kamera__deklansor:disabled{ opacity:.35; cursor:default; }
+
+.kamera__metin{
+  display:inline-flex; align-items:center; justify-content:center;
+  min-width:120px; min-height:44px; padding:0 20px; cursor:pointer;
+  border:0; border-radius:999px; background:rgba(255,255,255,.16); color:#fff;
+  font:inherit; font-weight:600;
+}
+.kamera__metin--ana{ background:#fff; color:#111; }
+
+.kamera__sayi{
+  position:absolute; inset:0; z-index:2; display:grid; place-items:center; pointer-events:none;
+  font-size:min(42vw, 260px); font-weight:700; line-height:1; font-variant-numeric:tabular-nums;
+  text-shadow:0 4px 30px rgba(0,0,0,.45);
+}
+.kamera__ipucu{
+  position:absolute; left:0; right:0; bottom:max(40px, env(safe-area-inset-bottom)); z-index:3;
+  text-align:center; font-size:14px; opacity:0; pointer-events:none;
+}
+.kamera.is-sayiyor .kamera__ipucu{ opacity:.85; }
+.kamera.is-sayiyor .kamera__sureler, .kamera.is-sayiyor .kamera__satir--cek{ visibility:hidden; }
+
+.kamera__flas{ position:absolute; inset:0; z-index:3; background:#fff; opacity:0; pointer-events:none; }
+.kamera.is-flas .kamera__flas{ animation:kamera-flas .35s ease-out; }
+@keyframes kamera-flas{ from{ opacity:.85; } to{ opacity:0; } }
+@media (prefers-reduced-motion:reduce){ .kamera.is-flas .kamera__flas{ animation:none; } }
+
+.kamera__mesaj{
+  position:absolute; inset:0; z-index:1;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+  padding:32px; text-align:center;
+}
+.kamera__mesaj p{ max-width:320px; line-height:1.5; opacity:.9; }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -13202,7 +13325,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'b6757a9f', at:'2026-10-03 13:32', dirty:true };
+SP.BUILD = { id:'3c7c5766', at:'2026-10-03 14:05', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -30039,6 +30162,8 @@ SP.HINTS = {
     more:'Emri toparlanma belirler, istek değil: sistem yükü kendiliğinden azaltabilir ama asla kendiliğinden artıramaz. Skor düşükken ağır yük kazanç değil borç üretir. Sistem yükü azalttığında nedenini yazar; kararı yine sen verirsin. Toparlanma düşükken esneklik (mobilite) akışı ağır antrenmanın yerine geçer: yük üretmez ama zinciri kırmaz.' },
   'session-pick':{ t:'Seans seç', b:'Öneri toparlanma bandından gelir; istediğini seçebilirsin.',
     more:'Önerilen şablonlar günün yük emrine göre seçilir: dinlenme gününde mobilite, hafif günde mobilite ve yürüyüş, azaltılmış günde yürüyüş ve tam vücut, tam yükte tam vücut ve dayanıklılık. İşaretli olan ilk öneridir; seçim senindir.' },
+  'vucut-foto':{ t:'Vücut', b:'Kendini zaman içinde görmek için günde bir fotoğraf. Fotoğraf bu cihazda kalır.',
+    more:'Kare boşsa dokun: ön kamera geri sayımla açılır (3, 5 ya da 10 saniye; her saniye bip). Telefonu bırak, geç, poz ver. Fotoğraftan kilo, yağ oranı ya da endeks çıkarılmaz: bunlar ölçülür, tahmin edilmez. Fotoğraflar yedek dosyasına girmez; yalnız bu cihazda durur.' },
   'rota':{ t:'Rotalar', b:'«Kayda başla»: rota sen hareket ettikçe haritada çizilir; mesafe, süre ve tempo GPS izinden hesaplanır.',
     more:'Ekran açık kalmalı; kilitli ekranda tarayıcı konum vermez. Konum yalnız güvenli bağlantıda (https) alınır. Duraklatılan aradaki yol sayılmaz; sayfa kapanırsa kayıt kaybolmaz. Strava ya da saatinden aldığın GPX dosyasını «Tümü» › «GPX ekle» ile seçebilir ya da bu karta bırakabilirsin. Rota seansa dönüşür ve yüke sayılır. Konumun cihazda kalır; yalnız harita zemini OpenStreetMap’ten gelir.' },
 
@@ -39747,6 +39872,493 @@ SP.Canli = (function(){
   };
 })();
 
+/* ==== js/core/foto.js ==== */
+/* FOTO — kayıtlara bağlı küçük fotoğraflar: hareket, öğün, kendi gıdan,
+   vücut. Kullanıcı isteği (2026-10-03): «minik fotoğraflar olsun, çok
+   ekranı kaplamasın ama tıklayıp bakabilelim».
+
+   Sözler:
+     1. FOTOĞRAF CİHAZDAN ÇIKMAZ. Bu cihazın IndexedDB'sinde durur; dil
+        modeline, HKM'ye, buluta gitmez. (Öğün fotoğrafını «Oku»yla
+        modele göndermek ayrı ve açık bir eylemdir; o yol buraya yazmaz.)
+     2. DEFTER ŞİŞMEZ. Ana defter localStorage'dadır (~5 MB); fotoğraf
+        oraya girmez. Yedek dosyasına da girmez — bu ⓘ'de söylenir.
+     3. KÜÇÜLTÜLÜR. Uzun kenar en çok 1080 piksel, JPEG; bir fotoğraf
+        ~100–200 KB. Ekranda 40 piksellik kare, dokununca büyük.
+     4. SAHİP BİR METİNDİR: «hareket:squat», «ogun:<id>», «besin:<id>»,
+        «vucut:2026-10-03». Her sahibin en çok bir fotoğrafı vardır;
+        yenisi eskisinin yerine geçer. Profiller karışmaz: anahtar profil
+        kimliğiyle başlar.
+     5. DEPO YOKSA SÖYLENİR. IndexedDB açılamazsa (gizli pencere, eski
+        tarayıcı) fotoğraf kareleri hiç çizilmez ve kaydetmeye çalışan
+        eylem nedenini söyler; başka hiçbir işlev bozulmaz.
+
+   Çizim eşzamanlıdır: açılışta bütün fotoğraflar bir kez okunur ve her
+   sahip için bir nesne adresi (blob URL) bellekte tutulur. */
+
+window.SP = window.SP || {};
+
+SP.Foto = (function(){
+  const DB_AD = 'spi-foto', DEPO = 'foto';
+  const EN_UZUN = 1080, KALITE = 0.82;
+
+  const ortam = {
+    idb:() => (typeof indexedDB !== 'undefined' ? indexedDB : null),
+    dbAd:DB_AD,
+  };
+
+  let db = null, hazir = null, yok = false;
+  const adres = new Map();        /* anahtar → blob URL */
+  const dinleyiciler = [];
+
+  function profil(){
+    try{ return localStorage.getItem('spi.activeProfile') || 'ben'; }catch(e){ return 'ben'; }
+  }
+  const anahtar = sahip => profil() + '|' + sahip;
+
+  function bildir(sahip){
+    dinleyiciler.slice().forEach(fn => { try{ fn(sahip); }catch(e){ console.error('Foto dinleyicisi:', e); } });
+  }
+  function dinle(fn){
+    dinleyiciler.push(fn);
+    return () => { const i = dinleyiciler.indexOf(fn); if(i >= 0) dinleyiciler.splice(i, 1); };
+  }
+
+  function ac(){
+    return new Promise((ok, red) => {
+      const idb = ortam.idb();
+      if(!idb){ red(new Error('IndexedDB yok')); return; }
+      let r;
+      try{ r = idb.open(ortam.dbAd, 1); }catch(e){ red(e); return; }
+      r.onupgradeneeded = () => { r.result.createObjectStore(DEPO, { keyPath:'k' }); };
+      r.onsuccess = () => ok(r.result);
+      r.onerror = () => red(r.error || new Error('IndexedDB açılamadı'));
+    });
+  }
+  function islem(kip, fn){
+    return new Promise((ok, red) => {
+      const tx = db.transaction(DEPO, kip);
+      const sonuc = fn(tx.objectStore(DEPO));
+      tx.oncomplete = () => ok(sonuc && 'result' in sonuc ? sonuc.result : undefined);
+      tx.onerror = () => red(tx.error);
+      tx.onabort = () => red(tx.error || new Error('işlem kesildi'));
+    });
+  }
+
+  /* Açılışta bir kez: depoyu açar, bu profilin fotoğraflarını belleğe
+     adres olarak alır. Birden çok çağrı aynı sözü döner. */
+  function hazirla(){
+    if(hazir) return hazir;
+    hazir = (async () => {
+      try{
+        db = await ac();
+        const hepsi = await islem('readonly', s => s.getAll());
+        const on = profil() + '|';
+        (hepsi || []).forEach(r => {
+          if(r && r.k && r.k.indexOf(on) === 0 && r.blob) adres.set(r.k, URL.createObjectURL(r.blob));
+        });
+      }catch(e){
+        yok = true;
+        console.warn('Fotoğraf deposu açılamadı:', e);
+      }
+      bildir(null);
+      return !yok;
+    })();
+    return hazir;
+  }
+
+  function var_(){ return !!db && !yok; }
+  function url(sahip){ return adres.get(anahtar(sahip)) || null; }
+
+  /* Herhangi bir görsel (kameradan Blob ya da seçilen dosya) → küçültülmüş
+     JPEG Blob. Uzun kenar EN_UZUN'u aşmaz; küçükse büyütülmez. */
+  async function kucult(kaynak){
+    const bmp = await gorselOku(kaynak);
+    const oran = Math.min(1, EN_UZUN / Math.max(bmp.width, bmp.height));
+    const w = Math.max(1, Math.round(bmp.width * oran)), h = Math.max(1, Math.round(bmp.height * oran));
+    const tuval = document.createElement('canvas');
+    tuval.width = w; tuval.height = h;
+    tuval.getContext('2d').drawImage(bmp, 0, 0, w, h);
+    if(bmp.close) bmp.close();
+    return await new Promise((ok, red) => tuval.toBlob(b => b ? ok(b) : red(new Error('JPEG üretilemedi')),
+      'image/jpeg', KALITE));
+  }
+  async function gorselOku(kaynak){
+    if(typeof createImageBitmap === 'function'){
+      try{ return await createImageBitmap(kaynak, { imageOrientation:'from-image' }); }
+      catch(e){ /* eski imza: seçeneksiz dene */ }
+      try{ return await createImageBitmap(kaynak); }catch(e){ /* img yoluna düş */ }
+    }
+    const u = URL.createObjectURL(kaynak);
+    try{
+      return await new Promise((ok, red) => {
+        const img = new Image();
+        img.onload = () => ok(img);
+        img.onerror = () => red(new Error('Görsel okunamadı'));
+        img.src = u;
+      });
+    }finally{ setTimeout(() => URL.revokeObjectURL(u), 0); }
+  }
+
+  /* Döner: { ok } ya da { ok:false, why }. */
+  async function kaydet(sahip, kaynak){
+    await hazirla();
+    if(!var_()) return { ok:false, why:'Bu tarayıcı fotoğraf saklayamıyor (gizli pencere olabilir).' };
+    if(!kaynak || !/^image\//.test(kaynak.type || 'image/')) return { ok:false, why:'Bu bir fotoğraf değil.' };
+    let blob;
+    try{ blob = await kucult(kaynak); }
+    catch(e){ return { ok:false, why:'Fotoğraf okunamadı.' }; }
+    const k = anahtar(sahip);
+    try{ await islem('readwrite', s => s.put({ k, blob, at:new Date().toISOString() })); }
+    catch(e){ return { ok:false, why:'Fotoğraf kaydedilemedi (depo dolu olabilir).' }; }
+    const eski = adres.get(k);
+    if(eski) URL.revokeObjectURL(eski);
+    adres.set(k, URL.createObjectURL(blob));
+    bildir(sahip);
+    return { ok:true };
+  }
+
+  async function al(sahip){
+    await hazirla();
+    if(!var_()) return null;
+    const r = await islem('readonly', s => s.get(anahtar(sahip)));
+    return r ? r.blob : null;
+  }
+
+  async function sil(sahip){
+    await hazirla();
+    if(!var_()) return;
+    const k = anahtar(sahip);
+    try{ await islem('readwrite', s => s.delete(k)); }catch(e){ return; }
+    const eski = adres.get(k);
+    if(eski) URL.revokeObjectURL(eski);
+    adres.delete(k);
+    bildir(sahip);
+  }
+
+  /* Bu profilin BÜTÜN fotoğrafları — «Bütün veriyi sil». Silinen veri
+     cihazda fotoğraf olarak kalmasın. Döner: silinen sayı. */
+  async function temizle(){
+    await hazirla();
+    if(!var_()) return 0;
+    const on = profil() + '|';
+    const anahtarlar = ((await islem('readonly', s => s.getAllKeys())) || [])
+      .filter(k => String(k).indexOf(on) === 0);
+    if(anahtarlar.length) await islem('readwrite', s => { anahtarlar.forEach(k => s.delete(k)); });
+    anahtarlar.forEach(k => { const u = adres.get(k); if(u) URL.revokeObjectURL(u); adres.delete(k); });
+    bildir(null);
+    return anahtarlar.length;
+  }
+
+  /* Bir önekin sahipleri (ör. «vucut:») — en yenisi başta. */
+  function sahipler(onek){
+    const on = profil() + '|' + onek;
+    return Array.from(adres.keys()).filter(k => k.indexOf(on) === 0)
+      .map(k => k.slice(profil().length + 1)).sort().reverse();
+  }
+
+  /* Testler için: bağlantıyı bırakır, belleği boşaltır. */
+  function _sifirla(){
+    if(db){ try{ db.close(); }catch(e){ /* kapalı */ } }
+    adres.forEach(u => URL.revokeObjectURL(u));
+    adres.clear();
+    db = null; hazir = null; yok = false;
+  }
+
+  return { hazirla, var:var_, url, kaydet, al, sil, temizle, sahipler, kucult, dinle,
+    EN_UZUN, _ortam:ortam, _sifirla };
+})();
+
+/* ==== js/core/kamera.js ==== */
+/* KAMERA — uygulamanın içinden, geri sayımlı fotoğraf. Kullanıcı isteği
+   (2026-10-03): «kameraya anlık ulaşabileyim; 3, 5, 10 saniye geri
+   sayayım ki telefonu bırakıp hareketi yaparken kendi fotoğrafımı
+   çekebileyim». Kitaplık yok: getUserMedia + video + canvas.
+
+   Sözler:
+     1. TEK EKRAN, ÜÇ DÜĞME. Altta deklanşör; solunda galeri, sağında
+        kamerayı çevir. Üstünde geri sayım seçimi: Hemen · 3 · 5 · 10.
+        Çekince önizleme: «Yeniden» ya da «Kullan».
+     2. GERİ SAYIM DUYULUR. Telefon uzaktayken rakam okunmaz: her saniye
+        kısa bir bip, çekişte daha ince bir bip ve ekran bir an ağarır.
+        Ekrana dokunmak sayımı keser.
+     3. KAMERA YOKSA YOL KAPANMAZ. Tarayıcı kamerayı yalnız güvenli
+        bağlantıda (https ya da localhost) verir; izin de reddedilebilir.
+        O zaman aynı ekranda neden yazılır ve telefonun kendi kamerası /
+        galerisi tek dokunuşla açılır (geri sayımsız).
+     4. GÖRÜNTÜ CİHAZDA KALIR. Kamera akışı hiçbir yere gönderilmez;
+        kapanınca bütün izler (track) durdurulur.
+
+   Kullanım: `const blob = await SP.Kamera.cek({ baslik, yon })` —
+   vazgeçilirse null. `yon`: 'user' (ön, kendin) ya da 'environment'. */
+
+window.SP = window.SP || {};
+
+SP.Kamera = (function(){
+  const SURELER = [0, 3, 5, 10];
+
+  /* Dış dünya tek yerde; testler değiştirir. */
+  const ortam = {
+    medya:() => (navigator.mediaDevices && navigator.mediaDevices.getUserMedia ? navigator.mediaDevices : null),
+    guvenli:() => window.isSecureContext !== false,
+    bekle:ms => new Promise(r => setTimeout(r, ms)),
+    bip:null,                       /* null → WebAudio */
+  };
+
+  let ses = null;
+  function bip(frekans, ms){
+    if(ortam.bip){ ortam.bip(frekans, ms); return; }
+    try{
+      const C = window.AudioContext || window.webkitAudioContext;
+      if(!C) return;
+      ses = ses || new C();
+      if(ses.state === 'suspended' && ses.resume) ses.resume();
+      const t = ses.currentTime, o = ses.createOscillator(), g = ses.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(frekans, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.28, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + ms / 1000);
+      o.connect(g); g.connect(ses.destination);
+      o.start(t); o.stop(t + ms / 1000 + 0.02);
+    }catch(e){ /* ses yoksa sayım sessiz sürer */ }
+  }
+
+  const sureAnahtari = yon => 'spi.kamera.sure.' + (yon === 'user' ? 'on' : 'arka');
+  function sureOku(yon){
+    try{
+      const v = Number(localStorage.getItem(sureAnahtari(yon)));
+      if(SURELER.indexOf(v) >= 0 && localStorage.getItem(sureAnahtari(yon)) != null) return v;
+    }catch(e){ /* depo yok */ }
+    return yon === 'user' ? 5 : 0;
+  }
+  function sureYaz(yon, v){ try{ localStorage.setItem(sureAnahtari(yon), String(v)); }catch(e){ /* depo yok */ } }
+
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  const ikon = ad => (SP.UI && SP.UI.icon) ? SP.UI.icon(ad) : '';
+
+  function destek(){ return !!ortam.medya() && ortam.guvenli(); }
+
+  let acik = null;                  /* aynı anda tek kamera */
+
+  function cek(o){
+    o = o || {};
+    if(acik) acik.kapat(null);
+    return new Promise(coz => { acik = oturum(o, coz); });
+  }
+
+  function oturum(o, coz){
+    let yon = o.yon === 'user' ? 'user' : 'environment';
+    let sure = sureOku(yon);
+    let akis = null, sonuc = null, sayiyor = null, bitti = false;
+    const once = document.activeElement;
+
+    const el = document.createElement('div');
+    el.className = 'kamera';
+    el.id = 'kamera';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-label', o.baslik || 'Kamera');
+    el.innerHTML =
+      '<video class="kamera__video" playsinline muted autoplay></video>'
+      + '<img class="kamera__onizleme" alt="" hidden/>'
+      + '<div class="kamera__mesaj" hidden></div>'
+      + '<div class="kamera__sayi" aria-live="assertive"></div>'
+      + '<div class="kamera__ipucu">Durdurmak için dokun</div>'
+      + '<div class="kamera__flas"></div>'
+      + '<div class="kamera__ust">'
+      +   '<span class="kamera__baslik">' + esc(o.baslik || '') + '</span>'
+      +   '<button type="button" class="kamera__dug kamera__kapat" data-k="kapat" aria-label="Kapat">' + ikon('close') + '</button>'
+      + '</div>'
+      + '<div class="kamera__alt">'
+      +   '<div class="kamera__sureler" role="group" aria-label="Geri sayım">'
+      +     SURELER.map(v => '<button type="button" data-k="sure" data-v="' + v + '">' + (v ? v + ' sn' : 'Hemen') + '</button>').join('')
+      +   '</div>'
+      +   '<div class="kamera__satir kamera__satir--cek">'
+      +     '<label class="kamera__dug kamera__galeri" aria-label="Galeriden seç">' + ikon('image')
+      +       '<input type="file" accept="image/*" class="sr-only" data-k="galeri"/></label>'
+      +     '<button type="button" class="kamera__deklansor" data-k="cek" aria-label="Fotoğraf çek"></button>'
+      +     '<button type="button" class="kamera__dug" data-k="cevir" aria-label="Kamerayı çevir">' + ikon('refresh') + '</button>'
+      +   '</div>'
+      +   '<div class="kamera__satir kamera__satir--sonuc" hidden>'
+      +     '<button type="button" class="kamera__metin" data-k="yeniden">Yeniden</button>'
+      +     '<button type="button" class="kamera__metin kamera__metin--ana" data-k="kullan">Kullan</button>'
+      +   '</div>'
+      + '</div>';
+    document.body.appendChild(el);
+
+    const $ = s => el.querySelector(s);
+    const video = $('.kamera__video'), onizleme = $('.kamera__onizleme'), mesaj = $('.kamera__mesaj');
+    const sayi = $('.kamera__sayi');
+
+    function sureCiz(){
+      el.querySelectorAll('[data-k="sure"]').forEach(b => {
+        const on = Number(b.dataset.v) === sure;
+        b.classList.toggle('is-on', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+    function durumCiz(){
+      const bekliyor = !!sonuc;
+      $('.kamera__satir--cek').hidden = bekliyor;
+      $('.kamera__satir--sonuc').hidden = !bekliyor;
+      $('.kamera__sureler').hidden = bekliyor || !akis;
+      onizleme.hidden = !bekliyor;
+      video.hidden = bekliyor || !akis;
+      el.classList.toggle('is-sayiyor', !!sayiyor);
+    }
+
+    function izleriDurdur(){
+      if(akis){ akis.getTracks().forEach(t => { try{ t.stop(); }catch(e){ /* durmuş */ } }); }
+      akis = null;
+      video.srcObject = null;
+    }
+
+    /* Kamera açılamazsa aynı ekran nedenini söyler; galeri ve telefonun
+       kendi kamerası (capture) yine tek dokunuş uzaklıktadır. */
+    function kameraYok(neden){
+      izleriDurdur();
+      mesaj.hidden = false;
+      mesaj.innerHTML = '<p>' + esc(neden) + '</p>'
+        + '<label class="kamera__metin kamera__metin--ana">Telefonun kamerasıyla çek'
+        + '<input type="file" accept="image/*" capture="' + (yon === 'user' ? 'user' : 'environment')
+        + '" class="sr-only" data-k="galeri"/></label>';
+      $('.kamera__deklansor').disabled = true;
+      $('[data-k="cevir"]').disabled = true;
+      durumCiz();
+    }
+
+    async function baslat(){
+      izleriDurdur();
+      if(!ortam.guvenli()){ kameraYok('Kamera bu bağlantıda açılamıyor: tarayıcı kamerayı yalnız güvenli bağlantıda (https) verir.'); return; }
+      const m = ortam.medya();
+      if(!m){ kameraYok('Bu tarayıcı uygulama içinden kamera açamıyor.'); return; }
+      try{
+        akis = await m.getUserMedia({ audio:false,
+          video:{ facingMode:{ ideal:yon }, width:{ ideal:1920 }, height:{ ideal:1440 } } });
+      }catch(e){
+        kameraYok(e && e.name === 'NotAllowedError'
+          ? 'Kamera izni verilmedi. Tarayıcının site ayarlarından kameraya izin ver.'
+          : 'Kamera açılamadı.');
+        return;
+      }
+      if(bitti){ izleriDurdur(); return; }
+      mesaj.hidden = true;
+      $('.kamera__deklansor').disabled = false;
+      $('[data-k="cevir"]').disabled = false;
+      video.classList.toggle('is-ayna', yon === 'user');
+      video.srcObject = akis;
+      try{ await video.play(); }catch(e){ /* autoplay zaten oynatır */ }
+      durumCiz();
+    }
+
+    /* Videonun o anki karesi → JPEG Blob. Ön kamera önizlemede aynalıdır
+       ama çekilen fotoğraf aynalı DEĞİLDİR (başkasının gördüğü gibi). */
+    function kareAl(){
+      const w = video.videoWidth || 0, h = video.videoHeight || 0;
+      if(!w || !h) return Promise.resolve(null);
+      const t = document.createElement('canvas');
+      t.width = w; t.height = h;
+      t.getContext('2d').drawImage(video, 0, 0, w, h);
+      return new Promise(r => t.toBlob(b => r(b), 'image/jpeg', 0.92));
+    }
+
+    async function cekim(){
+      if(sayiyor || sonuc || !akis) return;
+      if(sure){
+        const kimlik = {};
+        sayiyor = kimlik;
+        durumCiz();
+        for(let s = sure; s > 0; s--){
+          if(sayiyor !== kimlik) return;
+          sayi.textContent = String(s);
+          bip(880, 120);
+          await ortam.bekle(1000);
+        }
+        if(sayiyor !== kimlik) return;
+        sayi.textContent = '';
+        sayiyor = null;
+      }
+      bip(1320, 180);
+      el.classList.remove('is-flas'); void el.offsetWidth; el.classList.add('is-flas');
+      const b = await kareAl();
+      if(!b || bitti) { durumCiz(); return; }
+      sonucGoster(b);
+    }
+
+    function sonucGoster(b){
+      sonuc = b;
+      if(onizleme.src) URL.revokeObjectURL(onizleme.src);
+      onizleme.src = URL.createObjectURL(b);
+      durumCiz();
+      const k = $('[data-k="kullan"]');
+      if(k) k.focus();
+    }
+
+    function sayimiKes(){
+      if(!sayiyor) return false;
+      sayiyor = null;
+      sayi.textContent = '';
+      durumCiz();
+      return true;
+    }
+
+    function kapat(deger){
+      if(bitti) return;
+      bitti = true;
+      sayiyor = null;
+      izleriDurdur();
+      if(onizleme.src) URL.revokeObjectURL(onizleme.src);
+      el.remove();
+      document.removeEventListener('keydown', tus, true);
+      if(acik && acik.el === el) acik = null;
+      if(once && document.contains(once)){ try{ once.focus(); }catch(e){ /* odak verilemedi */ } }
+      coz(deger);
+    }
+
+    el.addEventListener('click', async e => {
+      const d = e.target.closest('[data-k]');
+      if(!d){ sayimiKes(); return; }
+      const k = d.dataset.k;
+      if(k === 'galeri') return;                      /* dosya seçici kendi açılır */
+      if(sayimiKes() && k !== 'kapat') return;        /* sayım sırasında dokunuş keser */
+      if(k === 'kapat') kapat(null);
+      else if(k === 'sure'){ sure = Number(d.dataset.v) || 0; sureYaz(yon, sure); sureCiz(); }
+      else if(k === 'cevir'){ yon = yon === 'user' ? 'environment' : 'user'; sure = sureOku(yon); sureCiz(); baslat(); }
+      else if(k === 'cek') cekim();
+      else if(k === 'yeniden'){ sonuc = null; durumCiz(); if(!akis) baslat(); }
+      else if(k === 'kullan' && sonuc) kapat(sonuc);
+    });
+    el.addEventListener('change', e => {
+      const g = e.target.closest('[data-k="galeri"]');
+      const f = g && g.files && g.files[0];
+      if(f) sonucGoster(f);
+    });
+
+    /* Esc kapatır (sayım sürüyorsa önce keser); Tab kamerada döner. */
+    function tus(e){
+      if(e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); if(!sayimiKes()) kapat(null); return; }
+      if(e.key !== 'Tab') return;
+      const liste = Array.from(el.querySelectorAll('button:not([disabled]), input'))
+        .filter(n => n.offsetParent !== null || n.closest('label:not([hidden])'));
+      if(!liste.length) return;
+      const ilk = liste[0], son = liste[liste.length - 1];
+      if(e.shiftKey && document.activeElement === ilk){ e.preventDefault(); son.focus(); }
+      else if(!e.shiftKey && document.activeElement === son){ e.preventDefault(); ilk.focus(); }
+    }
+    document.addEventListener('keydown', tus, true);
+
+    sureCiz();
+    durumCiz();
+    baslat().then(() => { const d = $('.kamera__deklansor'); if(d && !d.disabled) d.focus(); });
+
+    return { el, kapat, _cek:cekim, _durum:() => ({ akis:!!akis, sayiyor:!!sayiyor, sonuc:!!sonuc, sure, yon }) };
+  }
+
+  return { cek, destek, SURELER, _ortam:ortam, _acik:() => acik };
+})();
+
 /* ==== js/core/meds.js ==== */
 /* ILAC VE TAKVIYE KURAL MOTORU.
 
@@ -42361,6 +42973,8 @@ SP.UI = (function(){
       + '<path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21M9 21h6"/>',
     camera:'<path d="M3.5 8.5A1.5 1.5 0 015 7h2.2l1.2-2h7.2l1.2 2H19a1.5 1.5 0 011.5 1.5v9A1.5 1.5 0 0119 19H5a1.5 1.5 0 01-1.5-1.5z"/>'
       + '<circle cx="12" cy="12.5" r="3.4"/>',
+    image:'<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/>'
+      + '<path d="M20.5 15.5l-4.8-4.8L7 19.5"/>',
     file:'<path d="M7 3.5h7l5 5V19a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 016 19V5a1.5 1.5 0 011-1.5z"/>'
       + '<path d="M13.5 3.5V9H19"/>',
 
@@ -43620,8 +44234,11 @@ SP.C = (function(){
 
   /* Dosya birakma alani. Tiklayinca dosya secici acilir, uzerine
      birakinca da alir. Iki yol da ayni eylemi tetikler. */
+  /* o.kamera ({ yon }) verilirse altında tek bir «Kamerayla çek» durur:
+     uygulama içi, geri sayımlı kamera (core/kamera.js). Çekilen fotoğraf
+     bırakılmış dosya gibi aynı `act` değişikliğine gider. */
   function Drop(o){
-    return html`<label class="drop" data-drop="${o.act}">
+    const kutu = html`<label class="drop" data-drop="${o.act}">
       <input type="file" class="drop__input" accept="${o.accept || ''}"
         data-change="${o.act}" ${when(o.id, () => attrs({ id:o.id }))}/>
       <span class="drop__icon" aria-hidden="true">${raw(SP.UI.icon(o.icon || 'upload'))}</span>
@@ -43630,6 +44247,10 @@ SP.C = (function(){
         <span>${o.hint || 'Dosyayı buraya bırak ya da seçmek için tıkla'}</span>
       </span>
     </label>`;
+    if(!o.kamera) return kutu;
+    return html`<div class="drop-kap">${kutu}
+      ${Button({ label:'Kamerayla çek', icon:'camera', size:'sm', tone:'ghost', act:'kamera-drop',
+        data:{ 'data-hedef':o.act, 'data-yon':o.kamera.yon || 'environment', 'data-ad':o.label } })}</div>`;
   }
 
   function Field(o){
@@ -49618,6 +50239,80 @@ SP.HatirlatUI = (function(){
   return { vaktiRow, ozetEntry, handle, change };
 })();
 
+/* ==== js/screens/fotoui.js ==== */
+/* FOTO KARESİ — kayıtların yanındaki 40 piksellik minik fotoğraf.
+   Boşsa silik bir kamera simgesidir: dokununca geri sayımlı kamera açılır
+   (core/kamera.js). Doluysa küçük resimdir: dokununca büyük açılır;
+   oradan yeniden çekilir ya da silinir. Depo `core/foto.js`.
+
+   Eylemler her ekranda çalışsın diye geneldir (app.js bağlar), Hatırlat
+   kalıbıyla aynı: `SP.FotoUI.handle`. */
+
+window.SP = window.SP || {};
+
+SP.FotoUI = (function(){
+  const { html, raw, cls } = SP.h;
+
+  /* o: { sahip, ad, yon:'user'|'environment', sinif } — depo yoksa hiç
+     çizilmez (boş bir düğme, çalışmayan bir söz olurdu). */
+  function kutu(o){
+    if(!SP.Foto.var()) return '';
+    const u = SP.Foto.url(o.sahip), yon = o.yon || 'environment';
+    return u
+      ? html`<button type="button" class="${cls('foto-kutu', o.sinif)}" data-act="foto-ac"
+          data-sahip="${o.sahip}" data-ad="${o.ad}" data-yon="${yon}"
+          aria-label="${o.ad + ': fotoğrafı aç'}"><img src="${u}" alt="" decoding="async"/></button>`
+      : html`<button type="button" class="${cls('foto-kutu foto-kutu--bos', o.sinif)}" data-act="foto-cek"
+          data-sahip="${o.sahip}" data-ad="${o.ad}" data-yon="${yon}"
+          aria-label="${o.ad + ': fotoğraf çek'}">${raw(SP.UI.icon('camera'))}</button>`;
+  }
+
+  async function cekVeKaydet(d){
+    const b = await SP.Kamera.cek({ baslik:d.ad, yon:d.yon });
+    if(!b) return false;
+    const r = await SP.Foto.kaydet(d.sahip, b);
+    if(!r.ok){ SP.UI.toast(r.why); return false; }
+    return true;
+  }
+
+  function goster(d){
+    const u = SP.Foto.url(d.sahip);
+    if(!u) return;
+    const K = SP.C, veri = { 'data-sahip':d.sahip, 'data-ad':d.ad, 'data-yon':d.yon };
+    SP.UI.sheet({
+      title:d.ad, wide:true,
+      body:String(html`<img class="foto-buyuk" src="${u}" alt="${d.ad}"/>`),
+      footer:String(html`${K.Button({ label:'Sil', tone:'ghost', act:'foto-sil', data:veri })}
+        <span class="grow"></span>
+        ${K.Button({ label:'Yeniden çek', icon:'camera', act:'foto-yeniden', data:veri })}
+        ${K.Button({ label:'Kapat', act:'sheet-close' })}`),
+      noFocus:true,
+    });
+  }
+
+  const handle = {
+    async 'foto-cek'(el){ if(await cekVeKaydet(el.dataset)) SP.App.render(); },
+    async 'foto-ac'(el){ goster(el.dataset); },
+    async 'foto-yeniden'(el){
+      const d = Object.assign({}, el.dataset);
+      SP.UI.closeSheet();
+      if(await cekVeKaydet(d)) SP.App.render();
+    },
+    /* Silme geri alınabilir: blob bellekte tutulur, «Geri al» yerine koyar. */
+    async 'foto-sil'(el){
+      const d = Object.assign({}, el.dataset);
+      const blob = await SP.Foto.al(d.sahip);
+      await SP.Foto.sil(d.sahip);
+      SP.UI.closeSheet();
+      if(blob) SP.S.ui.undo = { restore:() => SP.Foto.kaydet(d.sahip, blob) };
+      SP.UI.toast('Fotoğraf silindi', { undo:!!blob });
+      SP.App.render();
+    },
+  };
+
+  return { kutu, goster, handle };
+})();
+
 /* ==== js/screens/today.js ==== */
 /* Bugün — sistemin günlük sayfası.
 
@@ -52275,7 +52970,7 @@ SP.Screens.labs = (function(){
       subtitle:'Metni olduğu gibi yapıştır — değerler ayıklanıp şemaya oturur',
       wide:true,
       body:String(K.Stack([
-        K.Drop({ act:'lab-file', label:'Rapor dosyası ya da fotoğrafı',
+        K.Drop({ act:'lab-file', label:'Rapor dosyası ya da fotoğrafı', kamera:{},
           icon:'file', accept:'.txt,.csv,.md,image/*',
           hint:'Metin dosyası modelsiz okunur · fotoğraf için model gerekir' }),
         K.Notice({ tone:'info', body:'Ayıklayıcı emin olamadığı satırı atmaz. '
@@ -52784,7 +53479,7 @@ SP.Screens.meals = (function(){
           body:'Fotoğraftan öğün okumak için Ayarlar → Rehber → Model bölümünden '
             + 'görüntü destekleyen bir sağlayıcı seç. Öğünü tek satır yazarak '
             + 'modelsiz de girebilirsin.' })),
-        K.Drop({ act:'meal-photo', label:'Yemek fotoğrafı', icon:'camera',
+        K.Drop({ act:'meal-photo', label:'Yemek fotoğrafı', icon:'camera', kamera:{},
           accept:'image/*', hint:'Fotoğrafı buraya bırak ya da seçmek için tıkla' }),
         html`<div id="photo-name" class="small dim">${photoFile ? photoFile.name : ''}</div>`,
         html`<div class="cols-2">
@@ -52848,6 +53543,8 @@ SP.Screens.meals = (function(){
           ${raw(UI.icon(slot ? slot.icon : 'meal'))}
           <span class="mealcard__slot">${slot ? slot.label : meal.slot}</span>
           <span class="mealcard__kcal num">${Math.round(a.raw.kcal)} kcal</span>
+          ${raw(String(SP.FotoUI.kutu({ sahip:'ogun:' + meal.id, sinif:'foto-kutu--sm',
+            ad:(slot ? slot.label : meal.slot) + ' · ' + U.fmtShort(shownDate()) })))}
           ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Öğünü sil',
             act:'del-meal', data:{ 'data-id':meal.id } })}
         </div>
@@ -53186,7 +53883,7 @@ SP.Screens.meals = (function(){
     UI.sheet({
       title:'Barkod', subtitle:'ilk okutmada bir gıdaya bağlanır, sonra doğrudan gelir',
       body:String(K.Stack([
-        when(SP.Barkod.fotoVar(), () => K.Drop({ act:'barkod-foto', label:'Barkodun fotoğrafı',
+        when(SP.Barkod.fotoVar(), () => K.Drop({ act:'barkod-foto', label:'Barkodun fotoğrafı', kamera:{},
           icon:'file', accept:'image/*', hint:'Barkodu yakından çek ya da fotoğraf seç' })),
         when(!SP.Barkod.fotoVar(), () => K.Notice({ tone:'info',
           body:'Bu tarayıcı fotoğraftan barkod okuyamıyor; numarayı elle yaz.' })),
@@ -53553,6 +54250,8 @@ SP.Screens.meals = (function(){
     },
     async 'del-meal'(el){
       await M.deleteMeal(shownDate(), el.dataset.id);
+      /* Öğünle birlikte fotoğrafı da gider; sahipsiz fotoğraf kalmaz. */
+      if(SP.Foto) await SP.Foto.sil('ogun:' + el.dataset.id);
       SP.App.render();
     },
     async 'del-item'(el){
@@ -53851,6 +54550,7 @@ SP.Screens.kitchen = (function(){
         ${when(!liste.length, () => P.empty('Henüz kendi gıdan yok.'))}
         ${when(liste.length, () => html`<div class="list mt-10">${map(liste, f => html`
           <div class="listitem">
+            ${raw(String(SP.FotoUI.kutu({ sahip:'besin:' + f.id, ad:f.name })))}
             <div class="grow minw0">
               <b class="small">${f.name}</b>
               <div class="tiny dim">100 g · ${U.fmtNum(f.kcal)} kcal ·
@@ -53947,7 +54647,7 @@ SP.Screens.kitchen = (function(){
       UI.sheet({ title:'Besin etiketi', subtitle:'ambalajın tablosunu fotoğrafla',
         wide:true,
         body:String(K.Stack([
-          K.Drop({ act:'label-file', label:'Etiket fotoğrafı', icon:'camera',
+          K.Drop({ act:'label-file', label:'Etiket fotoğrafı', icon:'camera', kamera:{},
             accept:'image/*' }),
           html`<div id="label-name" class="small dim"></div>`,
           K.Notice({ tone:'info',
@@ -53990,8 +54690,14 @@ SP.Screens.kitchen = (function(){
       const f = (S.foods || []).find(x => x.id === el.dataset.id);
       if(!f) return;
       const kopya = JSON.parse(JSON.stringify(f));
+      /* Fotoğraf da gider ama «Geri al» onu da yerine koyar. */
+      const foto = SP.Foto ? await SP.Foto.al('besin:' + f.id) : null;
       await M.deleteFood(f.id);
-      S.ui.undo = { restore:() => M.saveFood(kopya) };
+      if(foto) await SP.Foto.sil('besin:' + f.id);
+      S.ui.undo = { restore:async () => {
+        await M.saveFood(kopya);
+        if(foto) await SP.Foto.kaydet('besin:' + kopya.id, foto);
+      } };
       UI.toast(kopya.name + ' silindi', { undo:true });
       SP.App.render();
     },
@@ -54200,7 +54906,8 @@ SP.Screens.move = (function(){
     return html`
       <div class="ladderblk">
         <div class="ladderblk__head">
-          <div class="minw0">
+          ${raw(String(SP.FotoUI.kutu({ sahip:'hareket:' + ex.id, ad:ex.name, yon:'user' })))}
+          <div class="minw0 grow">
             <b class="ladderblk__name">${ex.name}</b>
             <span class="tiny dim">${pattern ? pattern.label
               : ex.kind === 'cardio' ? 'Dayanıklılık' : 'Mobilite'}
@@ -54722,6 +55429,23 @@ SP.Screens.move = (function(){
       ${when(dl.due, () => K.Notice({ tone:'warn', body:dl.note }))}`;
   }
 
+  /* Vücut fotoğrafları: kendini zaman içinde görmek için tek satır minik
+     kare; ilki bugünündür. Fotoğraftan SAYI ÜRETİLMEZ — kilo, yağ oranı,
+     endeks ölçülür, fotoğraftan tahmin edilmez (AGENTS §1.1). */
+  function vucutKutusu(){
+    if(!SP.Foto.var()) return '';
+    const bugun = U.todayISO();
+    const gunler = SP.Foto.sahipler('vucut:').map(s => s.slice(6)).filter(g => g !== bugun);
+    const kare = g => raw(String(SP.FotoUI.kutu({ sahip:'vucut:' + g, ad:'Vücut · ' + U.fmtShort(g), yon:'user' })));
+    return K.Entry({
+      label:'Vücut', hint:'vucut-foto', meta:gunler.length ? (gunler.length + 1) + ' gün' : null,
+      body:html`<div class="foto-serit">
+        <span class="foto-serit__ge">${kare(bugun)}<span class="tiny dim">Bugün</span></span>
+        ${map(gunler.slice(0, 12), g => html`<span class="foto-serit__ge">${kare(g)}<span class="tiny dim">${U.fmtShort(g)}</span></span>`)}
+      </div>`,
+    });
+  }
+
   function historyBody(){
     const rows = S.workouts.slice(-20).reverse();
     if(!rows.length) return P.empty('Henüz seans kaydı yok.');
@@ -54891,6 +55615,7 @@ SP.Screens.move = (function(){
     bugun:() => html`${K.Ledger([DonenHareket(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), orderEntry(), halkaKutusu(), haftaKutusu()])}
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
     ilerleme:() => html`${K.Ledger([
+        vucutKutusu(),
         K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
           body:loadBody() }),
         yogunlukKutusu(),
@@ -55540,7 +56265,7 @@ SP.Screens.basket = (function(){
           title:'Model bağlı değil.',
           body:'Fiş okumak için Ayarlar → Rehber → Model bölümünden bir sağlayıcı '
             + 'seç. Fiyatları Fiyat sayfasından elle de girebilirsin.' })),
-        K.Drop({ act:'receipt-file', label:'Fiş fotoğrafı ya da metni',
+        K.Drop({ act:'receipt-file', label:'Fiş fotoğrafı ya da metni', kamera:{},
           icon:'file', accept:'image/*,.txt,.csv',
           hint:'Fişi buraya bırak ya da seçmek için tıkla' }),
         html`<div id="receipt-name" class="small dim">${receiptFile ? receiptFile.name : ''}</div>`,
@@ -59203,7 +59928,9 @@ SP.Screens.guide = (function(){
           ['Öğün günü', String(f.mealDays)],
           ['Antrenman', String(f.workouts)],
           ['Kapladığı alan', U.fmtNum(Math.round(f.bytes / 1024)) + ' KB · %' + f.pct],
-        ] })}
+        ].concat(SP.Foto && SP.Foto.sahipler('').length
+          /* Fotoğraflar ayrı depoda (core/foto.js): yedeğe girmediği söylenir. */
+          ? [['Fotoğraf · yedeğe girmez', String(SP.Foto.sahipler('').length)]] : []) })}
         ${when(VT(), () => raw('<div class="mt-10">' + VT().veriNerede({
           merkezNot:(SP.Beacon && SP.Beacon.settings().enabled) ? 'bağlı · teklif yazar, modüle yazmaz' : 'isteğe bağlı · şu an kapalı' })
           + '</div><div class="mt-10">' + VT().disaAktar({ act:'backup', sistem:'SPİ', not:'tüm kayıt · tek dosya', kayit:f.total,
@@ -59653,14 +60380,15 @@ SP.Screens.guide = (function(){
         const yedek = SP.Store.exportAll();
         G.kapiAc({ baslik:'Bütün veriyi sil', nesne:'kaydı', sayi:Object.keys(yedek.data || yedek || {}).length,
           sheet:o => UI.sheet(o), yedekAl:() => handle.backup(),
-          sil:async () => { await SP.Store.clear(); UI.closeSheet(); location.reload(); } });
+          sil:async () => { await SP.Store.clear(); if(SP.Foto) await SP.Foto.temizle(); UI.closeSheet(); location.reload(); } });
         return;
       }
       UI.confirmSheet('Bütün veriyi sil',
-        'Bu profildeki tahliller, ölçümler, öğünler ve antrenmanlar silinir. '
+        'Bu profildeki tahliller, ölçümler, öğünler, antrenmanlar ve fotoğraflar silinir. '
         + 'Geri alınamaz. Önce yedek al.',
         async () => {
           await SP.Store.clear();
+          if(SP.Foto) await SP.Foto.temizle();
           UI.closeSheet();
           location.reload();
         }, true, 'Bütün veriyi sil');
@@ -61250,6 +61978,19 @@ SP.App = (function(){
     Object.assign(globalHandle, SP.HatirlatUI.handle);
     Object.assign(globalChange, SP.HatirlatUI.change);
   }
+  /* Minik fotoğraf kareleri (screens/fotoui.js) her ekranda aynı. */
+  if(SP.FotoUI) Object.assign(globalHandle, SP.FotoUI.handle);
+  /* Kamerayla çekilen fotoğraf, dosya bırakılmış gibi ekranın KENDİ
+     değişiklik eylemine gider (öğün fotoğrafı, besin etiketi, barkod):
+     o akışların hiçbiri kameradan haberdar olmak zorunda değil. */
+  globalHandle['kamera-drop'] = async el => {
+    const b = await SP.Kamera.cek({ baslik:el.dataset.ad, yon:el.dataset.yon });
+    if(!b) return;
+    const act = el.dataset.hedef, sc = screen();
+    const fn = (sc.change && sc.change[act]) || globalChange[act];
+    const dosya = b instanceof File ? b : new File([b], 'kamera.jpg', { type:b.type || 'image/jpeg' });
+    if(fn) await fn({ files:[dosya], value:'' });
+  };
 
   /* Sayımları deftere eşitle. GECİKMELİ ve SESSİZ:
 
@@ -61680,6 +62421,9 @@ SP.App = (function(){
       }
 
       wireStoreErrors();
+      /* Fotoğraf deposu (core/foto.js) defterle paralel açılır; minik
+         kareler ilk çizimde hazır olsun. Açılamazsa kareler çizilmez. */
+      const fotoHazir = SP.Foto ? SP.Foto.hazirla() : null;
       await M.loadAll();
       /* 172: örnek profilde örnek kayıtlar belleğe yazılır (core/ornekveri.js). */
       if(ornekAcik() && SP.OrnekVeri){
@@ -61713,6 +62457,7 @@ SP.App = (function(){
         const isaret = safe(() => window.LIFEOS.KABUK.modulIsareti('spi', true), '');
         await window.LIFEOS.KILIT.ac('spi', { isaret });
       }
+      if(fotoHazir) await fotoHazir;
       await render();
       installManifest();
       /* Çevrimdışı kabuk: yalnız sunucuyla açılınca (brand/ortak/pwa.js). */

@@ -340,7 +340,9 @@ SP.Screens.guide = (function(){
           ['Öğün günü', String(f.mealDays)],
           ['Antrenman', String(f.workouts)],
           ['Kapladığı alan', U.fmtNum(Math.round(f.bytes / 1024)) + ' KB · %' + f.pct],
-        ] })}
+        ].concat(SP.Foto && SP.Foto.sahipler('').length
+          /* Fotoğraflar ayrı depoda (core/foto.js): yedeğe girmediği söylenir. */
+          ? [['Fotoğraf · yedeğe girmez', String(SP.Foto.sahipler('').length)]] : []) })}
         ${when(VT(), () => raw('<div class="mt-10">' + VT().veriNerede({
           merkezNot:(SP.Beacon && SP.Beacon.settings().enabled) ? 'bağlı · teklif yazar, modüle yazmaz' : 'isteğe bağlı · şu an kapalı' })
           + '</div><div class="mt-10">' + VT().disaAktar({ act:'backup', sistem:'SPİ', not:'tüm kayıt · tek dosya', kayit:f.total,
@@ -790,14 +792,15 @@ SP.Screens.guide = (function(){
         const yedek = SP.Store.exportAll();
         G.kapiAc({ baslik:'Bütün veriyi sil', nesne:'kaydı', sayi:Object.keys(yedek.data || yedek || {}).length,
           sheet:o => UI.sheet(o), yedekAl:() => handle.backup(),
-          sil:async () => { await SP.Store.clear(); UI.closeSheet(); location.reload(); } });
+          sil:async () => { await SP.Store.clear(); if(SP.Foto) await SP.Foto.temizle(); UI.closeSheet(); location.reload(); } });
         return;
       }
       UI.confirmSheet('Bütün veriyi sil',
-        'Bu profildeki tahliller, ölçümler, öğünler ve antrenmanlar silinir. '
+        'Bu profildeki tahliller, ölçümler, öğünler, antrenmanlar ve fotoğraflar silinir. '
         + 'Geri alınamaz. Önce yedek al.',
         async () => {
           await SP.Store.clear();
+          if(SP.Foto) await SP.Foto.temizle();
           UI.closeSheet();
           location.reload();
         }, true, 'Bütün veriyi sil');

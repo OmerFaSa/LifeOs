@@ -388,7 +388,7 @@ SP.Screens.basket = (function(){
           title:'Model bağlı değil.',
           body:'Fiş okumak için Ayarlar → Rehber → Model bölümünden bir sağlayıcı '
             + 'seç. Fiyatları Fiyat sayfasından elle de girebilirsin.' })),
-        K.Drop({ act:'receipt-file', label:'Fiş fotoğrafı ya da metni',
+        K.Drop({ act:'receipt-file', label:'Fiş fotoğrafı ya da metni', kamera:{},
           icon:'file', accept:'image/*,.txt,.csv',
           hint:'Fişi buraya bırak ya da seçmek için tıkla' }),
         html`<div id="receipt-name" class="small dim">${receiptFile ? receiptFile.name : ''}</div>`,

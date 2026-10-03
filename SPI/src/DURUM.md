@@ -215,3 +215,18 @@ telefona konum vermez; canlı kayıt telefonda ancak uygulama https ile
 servis edilince çalışır. Ekran kilitliyken kayıt yalnız yerel bir uygulama
 sarmalayıcısıyla mümkündür; bu sıfır bağımlılık kuralına (AGENTS §1.3)
 dokunur. İkisi de depo sahibinin kararıdır.
+
+## 10. Fotoğraf ve geri sayımlı kamera (2026-10-03)
+
+Depo sahibinin isteği: fotoğraf eklenen her yerde kameraya anında
+ulaşmak, 3/5/10 saniye geri sayım; «minik fotoğraflar, ekranı kaplamasın,
+dokununca açılsın; sadelik bozulmadan».
+
+| Parça | Durum |
+|---|---|
+| Uygulama içi kamera: geri sayım + bip, galeri, ön/arka, önizleme (`core/kamera.js`) | **tamam** |
+| Cihazda fotoğraf deposu, IndexedDB, profil ayrımı, «Bütün veriyi sil» (`core/foto.js`) | **tamam** |
+| Minik kare: hareketler, öğünler, kendi gıdaların, İlerleme › Vücut | **tamam** |
+| Öğün fotoğrafı, besin etiketi, barkod, tahlil, fiş: «Kamerayla çek» | **tamam** |
+| Fotoğraftan kilo/yağ oranı/endeks tahmini | **yapılmadı** — §1 (ölçülen sayı tahmin edilmez); depo sahibine soruldu |
+| Fotoğrafların yedeğe girmesi | **yok** — bilerek; yedek kartı söylüyor |

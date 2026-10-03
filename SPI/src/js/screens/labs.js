@@ -1166,7 +1166,7 @@ SP.Screens.labs = (function(){
       subtitle:'Metni olduğu gibi yapıştır — değerler ayıklanıp şemaya oturur',
       wide:true,
       body:String(K.Stack([
-        K.Drop({ act:'lab-file', label:'Rapor dosyası ya da fotoğrafı',
+        K.Drop({ act:'lab-file', label:'Rapor dosyası ya da fotoğrafı', kamera:{},
           icon:'file', accept:'.txt,.csv,.md,image/*',
           hint:'Metin dosyası modelsiz okunur · fotoğraf için model gerekir' }),
         K.Notice({ tone:'info', body:'Ayıklayıcı emin olamadığı satırı atmaz. '

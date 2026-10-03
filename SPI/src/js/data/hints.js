@@ -73,6 +73,8 @@ SP.HINTS = {
     more:'Emri toparlanma belirler, istek değil: sistem yükü kendiliğinden azaltabilir ama asla kendiliğinden artıramaz. Skor düşükken ağır yük kazanç değil borç üretir. Sistem yükü azalttığında nedenini yazar; kararı yine sen verirsin. Toparlanma düşükken esneklik (mobilite) akışı ağır antrenmanın yerine geçer: yük üretmez ama zinciri kırmaz.' },
   'session-pick':{ t:'Seans seç', b:'Öneri toparlanma bandından gelir; istediğini seçebilirsin.',
     more:'Önerilen şablonlar günün yük emrine göre seçilir: dinlenme gününde mobilite, hafif günde mobilite ve yürüyüş, azaltılmış günde yürüyüş ve tam vücut, tam yükte tam vücut ve dayanıklılık. İşaretli olan ilk öneridir; seçim senindir.' },
+  'vucut-foto':{ t:'Vücut', b:'Kendini zaman içinde görmek için günde bir fotoğraf. Fotoğraf bu cihazda kalır.',
+    more:'Kare boşsa dokun: ön kamera geri sayımla açılır (3, 5 ya da 10 saniye; her saniye bip). Telefonu bırak, geç, poz ver. Fotoğraftan kilo, yağ oranı ya da endeks çıkarılmaz: bunlar ölçülür, tahmin edilmez. Fotoğraflar yedek dosyasına girmez; yalnız bu cihazda durur.' },
   'rota':{ t:'Rotalar', b:'«Kayda başla»: rota sen hareket ettikçe haritada çizilir; mesafe, süre ve tempo GPS izinden hesaplanır.',
     more:'Ekran açık kalmalı; kilitli ekranda tarayıcı konum vermez. Konum yalnız güvenli bağlantıda (https) alınır. Duraklatılan aradaki yol sayılmaz; sayfa kapanırsa kayıt kaybolmaz. Strava ya da saatinden aldığın GPX dosyasını «Tümü» › «GPX ekle» ile seçebilir ya da bu karta bırakabilirsin. Rota seansa dönüşür ve yüke sayılır. Konumun cihazda kalır; yalnız harita zemini OpenStreetMap’ten gelir.' },
 

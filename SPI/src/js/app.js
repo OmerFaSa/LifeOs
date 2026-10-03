@@ -984,6 +984,19 @@ SP.App = (function(){
     Object.assign(globalHandle, SP.HatirlatUI.handle);
     Object.assign(globalChange, SP.HatirlatUI.change);
   }
+  /* Minik fotoğraf kareleri (screens/fotoui.js) her ekranda aynı. */
+  if(SP.FotoUI) Object.assign(globalHandle, SP.FotoUI.handle);
+  /* Kamerayla çekilen fotoğraf, dosya bırakılmış gibi ekranın KENDİ
+     değişiklik eylemine gider (öğün fotoğrafı, besin etiketi, barkod):
+     o akışların hiçbiri kameradan haberdar olmak zorunda değil. */
+  globalHandle['kamera-drop'] = async el => {
+    const b = await SP.Kamera.cek({ baslik:el.dataset.ad, yon:el.dataset.yon });
+    if(!b) return;
+    const act = el.dataset.hedef, sc = screen();
+    const fn = (sc.change && sc.change[act]) || globalChange[act];
+    const dosya = b instanceof File ? b : new File([b], 'kamera.jpg', { type:b.type || 'image/jpeg' });
+    if(fn) await fn({ files:[dosya], value:'' });
+  };
 
   /* Sayımları deftere eşitle. GECİKMELİ ve SESSİZ:
 
@@ -1414,6 +1427,9 @@ SP.App = (function(){
       }
 
       wireStoreErrors();
+      /* Fotoğraf deposu (core/foto.js) defterle paralel açılır; minik
+         kareler ilk çizimde hazır olsun. Açılamazsa kareler çizilmez. */
+      const fotoHazir = SP.Foto ? SP.Foto.hazirla() : null;
       await M.loadAll();
       /* 172: örnek profilde örnek kayıtlar belleğe yazılır (core/ornekveri.js). */
       if(ornekAcik() && SP.OrnekVeri){
@@ -1447,6 +1463,7 @@ SP.App = (function(){
         const isaret = safe(() => window.LIFEOS.KABUK.modulIsareti('spi', true), '');
         await window.LIFEOS.KILIT.ac('spi', { isaret });
       }
+      if(fotoHazir) await fotoHazir;
       await render();
       installManifest();
       /* Çevrimdışı kabuk: yalnız sunucuyla açılınca (brand/ortak/pwa.js). */
