@@ -270,7 +270,9 @@ SP.Screens.move = (function(){
      Strava'daki rota haritası (kullanıcı, 2026-10-03: «minimalistliği
      bozmadan»). Ekranda TEK kart: son rotanın haritası ve bir satır özet.
      Dilimler, yükseklik ve ısı haritası karta dokununca açılan kağıtta.
-     Hesap `core/rota.js`, çizim `core/harita.js`. */
+     Rota iki yoldan gelir: hareket ederken canlı kayıt (kullanıcı, aynı
+     gün: «rotayı biz hareket ederken çizecek») ya da GPX dosyası.
+     Hesap `core/rota.js`, çizim `core/harita.js`, kayıt `core/canli.js`. */
   const Ro = () => SP.Rota;
   const sayiHtml = s => {
     const L = window.LIFEOS || {};
@@ -297,32 +299,187 @@ SP.Screens.move = (function(){
   }
 
   function gpxDugmesi(){
-    return html`<label class="btn btn--sm rota__ekle">
+    return html`<label class="btn btn--sm btn--ghost rota__ekle">
       ${raw(UI.icon('plus'))}<span class="btn__label">GPX ekle</span>
       <input type="file" class="sr-only" accept=".gpx,application/gpx+xml"
         data-change="rota-dosya" aria-label="GPX dosyası seç"/>
     </label>`;
   }
 
+  /* Hareket seçicilerinde kısa ad: «Tempolu yürüyüş» telefonda iki satıra
+     bölünüyordu. */
+  const KISA_AD = { kosu:'Koşu', yuruyus:'Yürüyüş', bisiklet:'Bisiklet' };
+  const turSecici = (act, value) => K.Segmented({ act, value:value || '', aria:'Hareket türü', block:true,
+    items:Ro().HAREKETLER.map(id => ({ value:id, label:KISA_AD[id] || SP.EX_BY_ID[id].name })) });
+
+  /* Kartta tek ana eylem («Kayda başla») ve tek bağlantı («Tümü»). Kayıt
+     varken ana eylemin yerinde kaydın durumu durur. GPX ekle ve ısı
+     haritası «Tümü» kağıdında; rota yokken GPX ekle kartta kalır. */
   function rotaKarti(){
     const R = Ro(), rotalar = R.liste(S.workouts), son = rotalar[0];
+    const c = SP.Canli.durum();
     return K.Entry({
-      label:'Rotalar', hint:'rota', meta:rotalar.length ? rotalar.length + ' rota' : 'GPS izi',
-      action:gpxDugmesi(),
-      body:html`<div class="rota" data-drop="rota-dosya">${son ? html`
+      label:'Rotalar', hint:'rota', meta:rotalar.length ? rotalar.length + ' rota' : null,
+      action:c ? null : K.Button({ label:'Kayda başla', icon:'play', size:'sm', act:'canli-ac' }),
+      body:html`<div class="rota" data-drop="rota-dosya">
+        ${when(c, () => html`<div class="canli-kart" id="canli-kart" data-hal="${c.hal}">${raw(canliKartIc(c))}</div>`)}
+        ${son ? html`
         ${raw(SP.Harita.ciz([rotaIzi(son)], { gen:640, yuk:300,
           dugme:{ act:'rota-ac', id:son.id, aria:'Rotayı aç: ' + rotaAdi(son) } }).html)}
         <div class="rota__satir">
           <b class="small">${rotaAdi(son)}</b>
           <span class="small dim num">${rotaSatiri(son.rota, R.exOf(son))}</span>
         </div>
-        ${when(rotalar.length > 1, () => html`<div class="rota__alt">
-          ${K.Button({ label:'Isı haritası', size:'sm', tone:'ghost', act:'rota-isi' })}
-          ${K.Button({ label:'Tümü', size:'sm', tone:'ghost', act:'rota-tumu' })}
-        </div>`)}`
-        : html`<p class="small dim">GPX dosyası ekleyince rota burada, haritada görünür.</p>`}
+        <div class="rota__alt">${K.Button({ label:'Tümü', size:'sm', tone:'ghost', act:'rota-tumu' })}</div>`
+        : when(!c, () => html`<p class="small dim">Hareket ettikçe rota haritada çizilir.</p>
+          <div class="rota__alt">${gpxDugmesi()}</div>`)}
       </div>`,
     });
+  }
+
+  /* ------------------------------------------------------- canlı kayıt
+
+     Kayıt motoru ekrandan bağımsızdır (core/canli.js): kağıt kapansa,
+     başka ekrana geçilse de sürer. Ekran yalnız gösterir. Saniyede bir
+     yalnız METİNLER tazelenir; düğmeler hâl değişince yeniden çizilir
+     (her saniye çizilen düğme odağı kullanıcının elinden alır). Harita en
+     sık üç saniyede bir çizilir. */
+  let canliTur = null, canliSaat = null, canliHal = null;
+  let canliCizim = { n:-1, t:0 };
+
+  function canliKartMetni(c){
+    const R = Ro(), o = SP.Canli.ozet();
+    const ad = c.hal === 'kayitta' ? 'Kayıt sürüyor' : c.hal === 'bitti' ? 'Kaydedilmemiş rota'
+      : c.geriGeldi ? 'Kayıt yarıda kaldı' : 'Duraklatıldı';
+    const km = o ? R.km(o.mesafe) + ' km' : c.nokta ? '0,00 km' : 'konum bekleniyor';
+    return String(html`<i class="${cls('canli-kart__isaret', c.hal === 'kayitta' && 'is-canli')}" aria-hidden="true"></i>
+      <b class="small">${ad}</b> <span class="small dim num">${R.sureMetni(c.sure)} · ${km}</span>`);
+  }
+  function canliKartIc(c){
+    const dug = c.hal === 'kayitta'
+      ? K.Button({ label:'Aç', size:'sm', act:'canli-ekran' })
+      : c.hal === 'bitti'
+        ? html`${K.Button({ label:'Gözden geçir', size:'sm', tone:'primary', act:'canli-gozden' })}
+          ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'canli-sil' })}`
+        : html`${K.Button({ label:'Sürdür', icon:'play', size:'sm', tone:'primary', act:'canli-surdur' })}
+          ${K.Button({ label:'Bitir', size:'sm', act:'canli-bitir' })}`;
+    return String(html`<span class="canli-kart__ne" id="canli-kart-ne">${raw(canliKartMetni(c))}</span>
+      <span class="canli-kart__dug">${dug}</span>`);
+  }
+
+  function canliBaslatKagidi(){
+    const R = Ro();
+    if(!canliTur){ const son = R.liste(S.workouts)[0]; canliTur = (son && R.exOf(son)) || 'kosu'; }
+    UI.sheet({
+      title:'Kayda başla',
+      body:String(html`${turSecici('canli-tur', canliTur)}
+        <p class="tiny dim">Ekran açık kalmalı; kilitli ekranda konum gelmez.</p>`),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Başlat', icon:'play', tone:'primary', act:'canli-basla' })}`),
+      noFocus:true,
+    });
+  }
+
+  function canliSayilar(c){
+    const R = Ro(), o = SP.Canli.ozet(), bisiklet = R.hizMi(c.tur);
+    const yok = { deger:null, kesinlik:'missing' };
+    const hesap = (deger, birim, extra) => Object.assign({ deger, birim, kesinlik:'computed' }, extra);
+    const hiz = o && R.hiz(o.hareket, o.mesafe), tempo = o && R.tempo(o.hareket, o.mesafe);
+    const kutu = (ad, s) => '<div class="canli__sayi"><span class="tiny dim">' + ad
+      + '</span><b class="canli__deger num">' + sayiHtml(s) + '</b></div>';
+    return kutu('Süre', { deger:R.sureMetni(c.sure), kesinlik:'measured' })
+      + kutu('Mesafe', o ? hesap(o.mesafe / 1000, 'km', { ondalik:2 }) : yok)
+      + (bisiklet
+        ? kutu('Ort. hız', hiz == null ? yok : hesap(Math.round(hiz * 10) / 10, 'km/sa'))
+        : kutu('Ort. tempo', tempo == null ? yok : hesap(R.sureMetni(tempo), 'dk/km')));
+  }
+  function canliHarita(c){
+    const o = SP.Canli.ozet();
+    const h = o ? SP.Harita.ciz([Ro().sakla(o.iz)], { gen:640, yuk:360, etiket:'Canlı rota' }).html : '';
+    return h || '<div class="harita canli__bos" style="aspect-ratio:640 / 360"><span class="small dim">'
+      + (c.nokta ? 'Hareket bekleniyor…' : 'Konum bekleniyor…') + '</span></div>';
+  }
+  /* Durum satırı yalnız DİKKAT gerekince konuşur; her şey yolundaysa boş. */
+  function canliDurumMetni(c){
+    if(c.hal !== 'kayitta'){
+      return c.hata || (c.geriGeldi ? 'Sayfa kapandığı için kayıt durdu.' : 'Duraklatıldı; aradaki yol sayılmaz.');
+    }
+    if(c.hata) return c.hata;
+    if(!c.nokta) return 'Konum bekleniyor…';
+    return c.ekran === 'acik' ? '' : 'Ekranı açık tut; kilitli ekranda konum gelmez.';
+  }
+  function canliDugmeleri(c){
+    return String(html`${c.hal === 'kayitta'
+      ? K.Button({ label:'Duraklat', icon:'pause', act:'canli-duraklat' })
+      : K.Button({ label:'Sürdür', icon:'play', act:'canli-surdur' })}
+      ${K.Button({ label:'Bitir', icon:'stop', tone:'primary', act:'canli-bitir' })}`);
+  }
+
+  function canliEkrani(){
+    const c = SP.Canli.durum();
+    if(!c) return;
+    if(c.hal === 'bitti'){ handle['canli-gozden'](); return; }
+    UI.sheet({
+      title:c.tur ? KISA_AD[c.tur] : 'Kayıt', wide:true,
+      body:String(html`<div class="canli" id="canli-ekran">
+        <div class="canli__sayilar" id="canli-sayilar">${raw(canliSayilar(c))}</div>
+        <div id="canli-harita">${raw(canliHarita(c))}</div>
+        <p class="tiny dim" id="canli-durum" aria-live="polite">${canliDurumMetni(c)}</p>
+      </div>`),
+      footer:canliDugmeleri(c),
+      noFocus:true,
+    });
+    const ayak = document.querySelector('#sheet .sheet__foot');
+    if(ayak) ayak.dataset.hal = c.hal;
+    canliCizim = { n:c.nokta, t:Date.now() };
+  }
+
+  /* Ekrandaki canlı parçaları yerinde tazeler; çizim yapmaz. */
+  function canliTazele(){
+    const c = SP.Canli.durum();
+    if(!c || c.hal !== 'kayitta'){ clearInterval(canliSaat); canliSaat = null; }
+    const kart = document.getElementById('canli-kart');
+    if(kart && c){
+      if(kart.dataset.hal !== c.hal){ kart.innerHTML = canliKartIc(c); kart.dataset.hal = c.hal; }
+      else{ const ne = document.getElementById('canli-kart-ne'); if(ne) ne.innerHTML = canliKartMetni(c); }
+    }
+    const ekran = document.getElementById('canli-ekran');
+    if(!ekran || !c) return;
+    document.getElementById('canli-sayilar').innerHTML = canliSayilar(c);
+    /* Durum satırı aria-live: yalnız DEĞİŞİNCE yazılır, yoksa ekran
+       okuyucu aynı cümleyi her saniye yeniden okur. */
+    const dur = document.getElementById('canli-durum'), metin = canliDurumMetni(c);
+    if(dur.textContent !== metin) dur.textContent = metin;
+    if(c.nokta !== canliCizim.n && (canliCizim.n < 2 || Date.now() - canliCizim.t >= 3000)){
+      document.getElementById('canli-harita').innerHTML = canliHarita(c);
+      canliCizim = { n:c.nokta, t:Date.now() };
+    }
+    const ayak = ekran.closest('.sheet').querySelector('.sheet__foot');
+    if(ayak && ayak.dataset.hal !== c.hal){ ayak.innerHTML = canliDugmeleri(c); ayak.dataset.hal = c.hal; }
+  }
+  function canliSaatKur(){
+    if(!canliSaat) canliSaat = setInterval(canliTazele, 1000);
+  }
+
+  /* Motorun kendi başına değiştirdiği hâl (izin kalktı, kayıt silindi)
+     de ekrana yansır; hata cümlesi bildirim olarak söylenir. */
+  SP.Canli.dinle(olay => {
+    if(olay.tip === 'hata') UI.toast(olay.why);
+    const c = SP.Canli.durum(), hal = c ? c.hal : null;
+    if(hal === 'kayitta') canliSaatKur();
+    if(hal === canliHal) return;
+    const kartVardi = canliHal != null;
+    canliHal = hal;
+    canliTazele();
+    /* Kart kabı hâlin VARLIĞINA bağlı: kayıt doğunca ya da silinince
+       ekran yeniden çizilir. */
+    if(S.route === 'move' && kartVardi !== (hal != null)) SP.App.render();
+  });
+
+  function canliOnizle(rota){
+    const c = SP.Canli.durum();
+    rotaTaslak = { rota, tur:c && c.tur, turYazi:null, canli:true };
+    onizleme();
   }
 
   function rotaKagidi(w){
@@ -353,7 +510,7 @@ SP.Screens.move = (function(){
             'GPS noktaları arası mesafelerin toplamı'), { ondalik:2 }))) })}
           ${K.Stat({ label:'Hareket süresi', value:raw(sayiHtml({ deger:R.sureMetni(r.hareket), kesinlik:'computed',
             zaman, formul:'hızın ' + U.fmtNum(R.HAREKET_MS) + ' m/sn üstünde olduğu süre' })),
-            note:'toplam ' + R.sureMetni(r.sure) })}
+            note:r.sure - r.hareket >= 60 ? 'toplam ' + R.sureMetni(r.sure) : null })}
           ${R.hizMi(exId)
             ? K.Stat({ label:'Ortalama hız', value:raw(sayiHtml(hiz == null ? { deger:null, kesinlik:'missing' }
               : hesap(Math.round(hiz * 10) / 10, 'km/sa', 'mesafe ÷ hareket süresi'))) })
@@ -388,7 +545,9 @@ SP.Screens.move = (function(){
           </span>
           ${raw(UI.icon('right'))}
         </button>`)}</div>`),
-      footer:String(K.Button({ label:'Kapat', act:'sheet-close' })),
+      footer:String(html`<span class="rota__ayak">${gpxDugmesi()}
+        ${when(rotalar.length > 1, () => K.Button({ label:'Isı haritası', size:'sm', tone:'ghost', act:'rota-isi' }))}</span>
+        ${K.Button({ label:'Kapat', act:'sheet-close' })}`),
       noFocus:true,
     });
   }
@@ -408,26 +567,33 @@ SP.Screens.move = (function(){
     });
   }
 
-  /* İçe aktarma: dosya okunur, ÖNİZLENİR; kayıt yalnız «Kaydet»le. Tür
-     dosyadan tanınmadıysa seçilmeden kaydedilmez (AGENTS §1.7). */
+  /* İçe aktarma ve canlı kaydın sonu: rota ÖNİZLENİR; kayıt yalnız
+     «Kaydet»le. Tür bilinmiyorsa seçilmeden kaydedilmez (AGENTS §1.7).
+     Canlı kayıtta «Sonra» kaydı silmez: kartta «Kaydedilmemiş rota»
+     olarak bekler. */
   let rotaTaslak = null;
+  const sureKisa = sn => sn < 60 ? sn + ' sn' : Math.round(sn / 60) + ' dk';
   function onizleme(){
     const R = Ro(), t = rotaTaslak, r = t.rota;
     const bas = new Date(r.bas);
     const saat = String(bas.getHours()).padStart(2, '0') + ':' + String(bas.getMinutes()).padStart(2, '0');
     UI.sheet({
-      title:'Rotayı ekle', wide:true,
+      title:t.canli ? 'Kaydı kaydet' : 'Rotayı ekle', wide:true,
       subtitle:U.fmtDate(U.iso(bas)) + ' · ' + saat,
       body:String(html`
         ${raw(SP.Harita.ciz([R.coz(r.iz)], { gen:640, yuk:340, etiket:'Eklenecek rota' }).html)}
         <p class="small num mt-12">${rotaSatiri(r, t.tur)}${r.tirmanis != null
           ? ' · ↑ ' + U.fmtNum(r.tirmanis) + ' m' : ''}</p>
-        <div class="mt-16">${K.Segmented({ act:'rota-tur', value:t.tur || '', aria:'Hareket türü',
-          items:R.HAREKETLER.map(id => ({ value:id, label:SP.EX_BY_ID[id].name })) })}</div>
-        ${when(!t.tur, () => html`<p class="tiny dim mt-8">Dosyada tür yazmıyor${t.turYazi
-          ? ' («' + t.turYazi + '» tanınmadı)' : ''}; hangisi olduğunu seç.</p>`)}
-        ${when(r.atlanan, () => html`<p class="tiny dim mt-8">${r.atlanan} bozuk GPS noktası atlandı.</p>`)}`),
-      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        <div class="mt-16">${turSecici('rota-tur', t.tur)}</div>
+        ${when(!t.tur, () => html`<p class="tiny dim mt-8">${t.canli ? 'Hangi hareket olduğunu seç.'
+          : 'Dosyada tür yazmıyor' + (t.turYazi ? ' («' + t.turYazi + '» tanınmadı)' : '')
+            + '; hangisi olduğunu seç.'}</p>`)}
+        ${when(r.atlanan, () => html`<p class="tiny dim mt-8">${r.atlanan} bozuk GPS noktası atlandı.</p>`)}
+        ${when(r.zayif, () => html`<p class="tiny dim mt-8">${r.zayif} zayıf konum
+          (±${SP.Canli.DOGRULUK_M} m'den kötü) ize alınmadı.</p>`)}
+        ${when(r.bosluk, () => html`<p class="tiny dim mt-8">${sureKisa(r.bosluk)} boyunca konum gelmedi
+          (ekran kapalı olabilir); o aralık iki uç arasında düz çizgi sayıldı.</p>`)}`),
+      footer:String(html`${K.Button({ label:t.canli ? 'Sonra' : 'Vazgeç', act:'sheet-close' })}
         ${K.Button({ label:'Kaydet', tone:'primary', act:'rota-kaydet', disabled:!t.tur })}`),
       noFocus:true,
     });
@@ -748,6 +914,39 @@ SP.Screens.move = (function(){
       if(w) rotaKagidi(w);
     },
     async 'rota-tumu'(){ rotaListesi(); },
+    async 'canli-ac'(){ canliTur = null; canliBaslatKagidi(); },
+    async 'canli-tur'(el){
+      if(Ro().HAREKETLER.indexOf(el.dataset.value) < 0) return;
+      canliTur = el.dataset.value;
+      canliBaslatKagidi();
+    },
+    async 'canli-basla'(){
+      const r = SP.Canli.baslat(canliTur || 'kosu');
+      if(!r.ok){ UI.toast(r.why); return; }
+      canliSaatKur();
+      canliEkrani();
+    },
+    async 'canli-ekran'(){ canliEkrani(); },
+    async 'canli-duraklat'(){ SP.Canli.duraklat(); },
+    async 'canli-surdur'(){
+      const r = SP.Canli.surdur();
+      if(!r.ok){ UI.toast(r.why); return; }
+      if(!document.getElementById('canli-ekran')) canliEkrani();
+    },
+    async 'canli-bitir'(){
+      const r = SP.Canli.bitir();
+      if(!r.ok){ UI.toast(r.why); return; }
+      canliOnizle(r.rota);
+    },
+    async 'canli-gozden'(){
+      const r = SP.Canli.rota();
+      if(!r.ok){ UI.toast(r.why); return; }
+      canliOnizle(r.rota);
+    },
+    async 'canli-sil'(){
+      UI.confirmSheet('Kaydı sil', 'Bu canlı kayıt ve bütün konum noktaları silinir; geri alınamaz.',
+        async () => { SP.Canli.sil(); UI.closeSheet(); }, true, 'Kaydı sil');
+    },
     async 'rota-isi'(){ isiKagidi(); },
     async 'rota-tur'(el){
       if(!rotaTaslak || Ro().HAREKETLER.indexOf(el.dataset.value) < 0) return;
@@ -756,10 +955,17 @@ SP.Screens.move = (function(){
     },
     async 'rota-kaydet'(){
       if(!rotaTaslak || !rotaTaslak.tur) return;
-      if(Ro().kayitli(rotaTaslak.rota, S.workouts)){ UI.closeSheet(); rotaTaslak = null; return; }
+      const canli = rotaTaslak.canli;
+      if(Ro().kayitli(rotaTaslak.rota, S.workouts)){
+        UI.closeSheet(); rotaTaslak = null;
+        if(canli) SP.Canli.sil();
+        return;
+      }
       const w = Ro().seans(rotaTaslak.rota, rotaTaslak.tur);
       if(!w) return;
       await M.saveWorkout(w);
+      /* Taslak ancak seans KAYDEDİLDİKTEN sonra silinir. */
+      if(canli) SP.Canli.sil();
       rotaTaslak = null;
       UI.closeSheet();
       UI.toast('Rota eklendi');

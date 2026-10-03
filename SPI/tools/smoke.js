@@ -267,7 +267,42 @@ async function walkFlows(page, base, errors){
     errors.push('rota akışı: önizleme açılmadı — ' + (e && e.message || e));
   }
 
-  console.log('  akışlar → öğün, tahlil, laboratuvar bağı, toparlanma ve GPX rota çalıştı');
+  /* 6 — Canli kayit: tarayicinin GERCEK konum servisi (Playwright konum
+     oykunmesi). Birim testleri sahte kaynakla kosar; burada watchPosition'in
+     gercekten nokta getirdigi sinanir. 10 m / 300 ms = 33 m/sn: sicrama
+     esiginin (50 m/sn) altinda, yani hareket sayilir. */
+  try{
+    const ctx = page.context();
+    await ctx.grantPermissions(['geolocation'], { origin:base });
+    await ctx.setGeolocation({ latitude:41.1, longitude:29.05, accuracy:5 });
+    await page.evaluate(() => { SP.UI.closeSheet(); SP.S.ui.moveTab = 'kardiyo'; SP.App.go('move'); });
+    await wait(400);
+    await page.evaluate(() => SP.Screens.move.handle['canli-ac']());
+    await page.click('#sheet [data-act="canli-basla"]');
+    await page.waitForSelector('#canli-ekran', { timeout:5000 });
+    for(let i = 1; i <= 20; i++){
+      await ctx.setGeolocation({ latitude:41.1 + i * 10 / 111195.08, longitude:29.05, accuracy:5 });
+      await wait(300);
+    }
+    const canli = await page.evaluate(() => SP.Canli.durum());
+    if(!canli || canli.nokta < 10) errors.push('canlı kayıt: konum gelmedi (' + (canli ? canli.nokta : 'kayıt yok') + ' nokta)');
+    await page.click('#sheet [data-act="canli-bitir"]');
+    await page.waitForSelector('#sheet [data-act="rota-kaydet"]:not([disabled])', { timeout:5000 });
+    await page.click('#sheet [data-act="rota-kaydet"]');
+    await wait(500);
+    const son = await page.evaluate(() => ({
+      seans:SP.S.workouts.filter(w => w.rota && w.rota.kaynak === 'canli').map(w => w.rota.mesafe),
+      taslak:!!SP.Canli.durum(),
+    }));
+    if(son.seans.length !== 1) errors.push('canlı kayıt: 1 seans bekleniyordu, ' + son.seans.length + ' geldi');
+    else if(!(son.seans[0] > 100)) errors.push('canlı kayıt: mesafe ' + son.seans[0] + ' m, ~200 bekleniyordu');
+    if(son.taslak) errors.push('canlı kayıt: kaydedildikten sonra taslak silinmedi');
+    console.log('  canlı kayıt → ' + (canli ? canli.nokta : 0) + ' nokta, ' + (son.seans[0] || 0) + ' m kaydedildi');
+  }catch(e){
+    errors.push('canlı kayıt: ' + (e && e.message || e));
+  }
+
+  console.log('  akışlar → öğün, tahlil, laboratuvar bağı, toparlanma, GPX rota ve canlı kayıt çalıştı');
 }
 
 

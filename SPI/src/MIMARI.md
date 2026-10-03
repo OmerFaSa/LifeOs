@@ -194,6 +194,22 @@ uydurulmaz. Saklanan yalnız sadeleştirilmiş iz (en çok 600 nokta, kodlanmı�
 çizgi), dilimler ve 100 noktalık profildir — 5 km'lik koşu ~1 KB. Ekranda
 tek kart durur; dilimler, yükseklik ve ısı haritası kağıtta açılır.
 
+**Canlı kayıt** (`core/canli.js`, aynı gün depo sahibinin isteği: «rotayı
+biz hareket ederken çizecek»). «Kayda başla» tarayıcının konum servisini
+(`navigator.geolocation`) izler; rota hareket ettikçe haritada çizilir,
+süre/mesafe/tempo canlı yazılır. Hesap için ayrı kural yoktur: noktalar
+bitişte GPX'le aynı `analiz`ten geçer. Doğruluğu 30 m'den kötü konum ize
+girmez; Duraklat'tan Sürdür'e kadar gidilen yol sayılmaz (yeni parça).
+Noktalar 15 saniyede bir ve sayfa gizlenirken **ayrı bir anahtara**
+(`spi.canli.<profil>`) yazılır — her yazımda bütün defter yeniden
+yazılmasın; sayfa kapanırsa kayıt duraklatılmış geri gelir, seans
+kaydedilince taslak silinir. Dürüst sınırlar: konum yalnız güvenli
+bağlantıda (https ya da localhost) alınır; tarayıcı kilitli ekranda konum
+vermez — ekran Wake Lock ile açık tutulmaya çalışılır, konumun gelmediği
+süre kayıt sonunda söylenir ve o aralık düz çizgi sayılır. Kilitli ekranda
+kayıt yalnız yerel bir uygulama sarmalayıcısıyla mümkündür; bu sıfır
+bağımlılık kuralına (AGENTS §1.3) dokunan, depo sahibine ait bir karardır.
+
 **OpenStreetMap istisnası.** Haritanın zemini OSM karolarıdır
 (`core/harita.js`, kitaplık yok: Web Mercator + tek SVG). Bu, «veri cihazda
 kalır» ilkesine **depo sahibinin 2026-10-03 kararıyla** verilmiş bilinçli
@@ -429,6 +445,7 @@ src/
       move.js           Modül 3 kural motoru
       rota.js           GPS izi: GPX okuma, mesafe/tempo/dilim/tırmanış, iz sıkıştırma
       harita.js         rota haritası: Web Mercator, OSM karoları, ısı haritası, profil
+      canli.js          canlı rota kaydı: konum izleme, taslak, duraklat/sürdür, ekran kilidi
       money.js          Modül 4 kural motoru
       calc.js           orkestratör: sıradaki hamle, çapraz çıkarım
       parse.js          serbest metin ayrıştırıcıları

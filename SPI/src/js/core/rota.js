@@ -1,6 +1,7 @@
 /* ROTA — GPS izinden (GPX) mesafe, süre, tempo, kilometre dilimleri ve
    yükseklik. Modül 3'ün (Hareket) parçası; Strava'daki rota haritasının
-   SPİ karşılığı. Çizim `core/harita.js`'tedir; burada hesap var.
+   SPİ karşılığı. Çizim `core/harita.js`'tedir, canlı kayıt
+   `core/canli.js`'te; burada hesap var ve İKİ KAYNAK DA ondan geçer.
 
    Sözler:
      1. SAYIYI KOD ÜRETİR. Mesafe, süre, tempo ve tırmanış GPS
@@ -38,6 +39,7 @@ SP.Rota = (function(){
   const PROFIL_NOKTA = 100;
   const EN_COK_IZ = 600;            /* saklanan izin nokta tavanı */
   const SON_DILIM_M = 50;           /* bundan kısa son dilim gösterilmez */
+  const HAREKET_YOK = 'İzde hareket yok: kayıt başladığı yerde kalmış.';
 
   /* GPX tür yazısı → SPİ hareketi. Yalnız YAZIYLA gelen türler; sayı
      kodları (bazı servisler «9» yazar) burada doğrulanmadığı için
@@ -147,11 +149,15 @@ SP.Rota = (function(){
      Dönen `iz` kabul edilen noktalardır; her biri birikmiş mesafe (d),
      birikmiş hareket süresi (m) ve varsa yumuşatılmış yükseklik (e) taşır. */
   function analiz(noktalar){
-    const zamanli = (noktalar || []).filter(p => p.t != null);
-    if(zamanli.length < 2 || zamanli.length < noktalar.length / 2){
+    const tum = noktalar || [];
+    const zamanli = tum.filter(p => p.t != null);
+    /* Zamansız iz ile tek noktalı iz ayrı şeydir: tek nokta «zaman yok»
+       değil «hareket yok»tur. */
+    if(zamanli.length < tum.length / 2 || (tum.length >= 2 && zamanli.length < 2)){
       return { ok:false, why:'Dosyada zaman bilgisi yok; süre ve tempo hesaplanamaz. '
         + 'Planlanmış bir rota değil, kaydedilmiş bir aktivite seç.' };
     }
+    if(zamanli.length < 2) return { ok:false, why:HAREKET_YOK };
     const iz = [];
     let son = null, d = 0, m = 0, yeniParca = false;
     zamanli.forEach(p => {
@@ -173,9 +179,7 @@ SP.Rota = (function(){
       son = p;
       iz.push(Object.assign({}, p, { d, m }));
     });
-    if(iz.length < 2 || d < 10){
-      return { ok:false, why:'İzde hareket yok: kayıt başladığı yerde kalmış.' };
-    }
+    if(iz.length < 2 || d < 10) return { ok:false, why:HAREKET_YOK };
 
     const yuksekli = iz.filter(p => p.ele != null).length;
     const yukVar = yuksekli >= iz.length / 2;
@@ -338,21 +342,37 @@ SP.Rota = (function(){
 
   /* ------------------------------------------------------- kayıt */
 
+  /* Analiz → kaydedilecek rota. `ek` kaynağa özgü alanları ekler. */
+  function rotaOf(a, ek){
+    return Object.assign({
+      v:1, kaynak:'gpx', dosya:null, ad:null,
+      bas:a.bas, mesafe:a.mesafe, sure:a.sure, hareket:a.hareket,
+      tirmanis:a.tirmanis, enAlcak:a.enAlcak, enYuksek:a.enYuksek,
+      dilimler:a.dilimler, profil:a.profil,
+      iz:kodla(sakla(a.iz)), nokta:a.nokta, atlanan:0,
+    }, ek || {});
+  }
+
   /* GPX metni → { ok, rota, tur, ad } (kaydedilecek biçim) ya da { ok:false, why }. */
   function oku(metin, dosyaAdi){
     const g = gpxOku(metin);
     if(!g.ok) return g;
     const a = analiz(g.noktalar);
     if(!a.ok) return a;
-    const rota = {
-      v:1, kaynak:'gpx', dosya:dosyaAdi ? String(dosyaAdi).slice(0, 120) : null,
+    const rota = rotaOf(a, {
+      dosya:dosyaAdi ? String(dosyaAdi).slice(0, 120) : null,
       ad:g.ad ? String(g.ad).slice(0, 120) : null,
-      bas:a.bas, mesafe:a.mesafe, sure:a.sure, hareket:a.hareket,
-      tirmanis:a.tirmanis, enAlcak:a.enAlcak, enYuksek:a.enYuksek,
-      dilimler:a.dilimler, profil:a.profil,
-      iz:kodla(sakla(a.iz)), nokta:a.nokta, atlanan:g.atlanan,
-    };
+      atlanan:g.atlanan,
+    });
     return { ok:true, rota, tur:g.tur, turYazi:g.turYazi };
+  }
+
+  /* Canlı kayıttan gelen noktalar → { ok, rota } ya da { ok:false, why }.
+     GPX ile aynı analizden geçer: canlı kayıt için ayrı kural yoktur. */
+  function noktalardan(noktalar, ek){
+    const a = analiz(noktalar);
+    if(!a.ok) return a;
+    return { ok:true, rota:rotaOf(a, ek) };
   }
 
   /* Aynı aktivite ikinci kez eklenmez: başlangıç anı aynı olan rota. */
@@ -407,7 +427,7 @@ SP.Rota = (function(){
   function hizMi(exId){ return exId === 'bisiklet'; }
 
   return {
-    gpxOku, analiz, oku, kayitli, seans, exOf, liste, mesafe, sadelestir, sakla,
+    gpxOku, analiz, oku, noktalardan, kayitli, seans, exOf, liste, mesafe, sadelestir, sakla,
     kodla, coz, km, sureMetni, tempo, hiz, hizMi, turOf, tirmanisOf,
     HAREKETLER, TITREME_M, HAREKET_MS, SICRAMA_MS, TIRMANIS_ESIK,
   };

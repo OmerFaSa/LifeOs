@@ -205,9 +205,13 @@ bozmadan». Hareket › Kardiyo'da tek kart; ayrıntı kağıtta.
 | Isı haritası (en sık bölge; uzaktaki rota sayılıp söylenir) | **tamam** |
 | OSM zemini — «veri cihazda kalır» istisnası (MIMARI › Modül 3) | **tamam** |
 | Testler (`tests/rota.test.js`), duman testinde GPX akışı | **tamam** |
-| Canlı kayıt: rota hareket ederken çizilir | **sürüyor** — depo sahibi 2026-10-03 istedi |
+| Canlı kayıt: rota hareket ederken çizilir (`core/canli.js`, `tests/canli.test.js`; duman testinde gerçek konum servisiyle) | **tamam** — depo sahibi 2026-10-03 istedi |
+| Telefonda canlı kayıt için https'li bir adres | **karar bekliyor** — depo sahibinin |
 
 Canlı kaydın dürüst sınırı: tarayıcı konumu yalnız **güvenli bağlantıda**
-(https ya da bu makinedeki localhost) ve **ekran açıkken** verir. Ekran
-kilitliyken kayıt yalnız yerel bir uygulama sarmalayıcısıyla mümkündür; bu
-sıfır bağımlılık kuralına (AGENTS §1.3) dokunur ve depo sahibinin kararıdır.
+(https ya da bu makinedeki localhost) ve **ekran açıkken** verir. Bugünkü
+telefon yolu (tek dosya, `file://`) ve `127.0.0.1`'e bağlı yerel sunucu
+telefona konum vermez; canlı kayıt telefonda ancak uygulama https ile
+servis edilince çalışır. Ekran kilitliyken kayıt yalnız yerel bir uygulama
+sarmalayıcısıyla mümkündür; bu sıfır bağımlılık kuralına (AGENTS §1.3)
+dokunur. İkisi de depo sahibinin kararıdır.

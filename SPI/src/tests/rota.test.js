@@ -155,6 +155,15 @@
       expect(a.why).toContain('hareket yok');
     });
 
+    /* Hata (2026-10-03): tek noktalı iz «Dosyada zaman bilgisi yok,
+       planlanmış rota» diyordu; noktanın zamanı vardı. */
+    it('tek noktalı iz «hareket yok» der, «zaman yok» demez', () => {
+      const a = R.analiz(hat(1, 10, 3));
+      expect(a.ok).toBe(false);
+      expect(a.why).toContain('hareket yok');
+      expect(R.analiz([]).why).toContain('hareket yok');
+    });
+
     it('GPS sıçraması mesafeye de süreye de girmez', () => {
       const p = hat(201, 10, 3);
       p[100] = Object.assign({}, p[100], { lat:p[100].lat + 5000 / M_DERECE });
@@ -420,7 +429,9 @@
       expect(d.querySelector('.rota .harita svg')).toBeTruthy();
       expect(d.querySelector('.rota [data-act="rota-ac"]').getAttribute('data-id')).toBe(w.id);
       expect(d.querySelector('[data-act="rota-isi"]')).toBeNull();
-      expect(d.querySelector('input[data-change="rota-dosya"]')).toBeTruthy();
+      /* Sade kart: rota varken tek bağlantı «Tümü»; GPX ekle onun kağıdında. */
+      expect(d.querySelector('.rota [data-act="rota-tumu"]')).toBeTruthy();
+      expect(d.querySelector('.rota input[data-change="rota-dosya"]')).toBeNull();
     });
 
     it('rota yokken kart haritasız, ne yapılacağını söyler', async () => {
@@ -428,7 +439,8 @@
       const d = document.createElement('div');
       d.innerHTML = await scr.render();
       expect(d.querySelector('.rota .harita')).toBeNull();
-      expect(d.querySelector('.rota').textContent).toContain('GPX dosyası ekleyince');
+      expect(d.querySelector('.rota').textContent).toContain('Hareket ettikçe rota haritada çizilir');
+      expect(d.querySelector('.rota input[data-change="rota-dosya"]')).toBeTruthy();
     });
 
     it('türü bilinmeyen rota tür seçilmeden kaydedilmez', async () => {
@@ -532,9 +544,11 @@
       pushRota(gpx([hat(300, 10, 3, { lat0:39.93, lon0:32.85, t0:T0 + 2 * 86400e3 })]));
       const d = document.createElement('div');
       d.innerHTML = await scr.render();
-      expect(d.querySelector('[data-act="rota-isi"]')).toBeTruthy();
+      expect(d.querySelector('[data-act="rota-isi"]')).toBeNull();
       await sessiz(async () => { await scr.handle['rota-tumu'](); });
       expect(kagit().querySelectorAll('[data-act="rota-ac"]')).toHaveLength(3);
+      expect(kagit().querySelector('[data-act="rota-isi"]')).toBeTruthy();
+      expect(kagit().querySelector('input[data-change="rota-dosya"]')).toBeTruthy();
       await sessiz(async () => { await scr.handle['rota-isi'](); });
       expect(kagit().querySelectorAll('polyline.harita__isi')).toHaveLength(2);
       expect(kagit().textContent).toContain('1 rota başka bir');

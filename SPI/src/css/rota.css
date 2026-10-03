@@ -49,7 +49,36 @@
   display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between;
   gap:4px 12px; margin-top:12px;
 }
-.rota__alt{ display:flex; gap:4px; margin:8px 0 0 -10px; }
+.rota__alt{ display:flex; flex-wrap:wrap; gap:4px; margin:8px 0 0 -10px; }
+/* «Tümü» kağıdının ayağı: solda ikincil eylemler, sağda Kapat. */
+.rota__ayak{ display:flex; gap:4px; margin-right:auto; }
+
+/* Ayrıntıdaki dört sayı telefonda tek sütuna dökülmesin: 2×2, genişte 4. */
+.rota-kagit .cols-4{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+@media (min-width:721px){ .rota-kagit .cols-4{ grid-template-columns:repeat(4, minmax(0, 1fr)); } }
+
+/* Canlı kayıt — kartta tek satır durum; kağıtta üç büyük sayı, harita ve
+   bir satır durum cümlesi. Yanıp sönen işaret yalnız kayıt sürerken. */
+.canli-kart{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  gap:8px 12px; padding:10px 12px; margin-bottom:12px;
+  border-radius:var(--r); background:var(--surface-2);
+}
+.canli-kart__ne{ display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; min-width:0; }
+.canli-kart__dug{ display:flex; gap:6px; flex:none; }
+.canli-kart__isaret{
+  display:inline-block; width:8px; height:8px; border-radius:50%;
+  background:var(--text-3); align-self:center;
+}
+.canli-kart__isaret.is-canli{ background:var(--danger); animation:canli-nabiz 1.6s ease-in-out infinite; }
+@keyframes canli-nabiz{ 50%{ opacity:.35; } }
+@media (prefers-reduced-motion:reduce){ .canli-kart__isaret.is-canli{ animation:none; } }
+
+.canli{ display:flex; flex-direction:column; gap:14px; flex:none; }
+.canli__sayilar{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:8px; }
+.canli__sayi{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.canli__deger{ font-size:var(--fs-xl, 24px); line-height:1.15; font-weight:700; white-space:nowrap; }
+.canli__bos{ display:grid; place-items:center; }
 .rota__ekle{ position:relative; cursor:pointer; }
 .rota__ekle:focus-within{ outline:2px solid var(--spi); outline-offset:2px; }
 .rota__satirdugme{ width:100%; text-align:left; background:none; border:0; cursor:pointer; color:inherit; font:inherit; }
