@@ -758,9 +758,10 @@ a.kenar__modul:hover{ color:var(--text); }
    görünüyordu. Şimdi kapalı kenar, açık kenarın KIRPILMIŞ hâlidir:
    · dolgu, hizalama ve satır düzeni iki hâlde AYNI; simgeler 32 px
      ekseninde yerinden hiç oynamaz,
-   · genişlik açılırken yumuşak bir yayla (420 ms), kapanırken daha çabuk
-     ve sakin (260 ms) değişir; kenarın sınırı ve gölgesi onunla gelir,
-   · adlar düzende durur, yalnız solar ve hafifçe kayar (açılışta biraz
+   · genişlik açılırken yumuşak bir yayla (520 ms, sakin başlayan eğri:
+     .32,.72,0,1), kapanırken yavaş başlayıp yavaş biten (340 ms) değişir;
+     kenarın sınırı ve gölgesi onunla gelir (2026-10-03: «daha soft»),
+   · adlar hafif bulanıktan netleşerek solar ve hafifçe kayar (açılışta
      gecikmeli: önce yer açılır, sonra yazı gelir; kapanışta önce yazı gider),
    · ayraç (etkin çekmecenin bölüm listesi) yükseklikte açılıp kapanır
      (height:auto geçişi, interpolate-size); satırları sırayla gelir (AYRAÇ).
@@ -771,13 +772,13 @@ a.kenar__modul:hover{ color:var(--text); }
   html.kenar-dar .site--v5 > .kenar{ --kenar-acik:216px; width:64px; z-index:calc(var(--z-nav) + 5);
     padding:14px 10px 12px; gap:14px; align-items:stretch; overflow:hidden auto; scrollbar-width:none;
     interpolate-size:allow-keywords;
-    transition:width 260ms cubic-bezier(.4,0,.2,1), box-shadow 260ms ease, border-radius 260ms ease,
-      background-color 260ms ease; }
+    transition:width 340ms cubic-bezier(.4,0,.2,1), box-shadow 300ms ease, border-radius 340ms ease,
+      background-color 300ms ease; }
   html.kenar-dar .site--v5 > .kenar::-webkit-scrollbar{ display:none; }
   html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within), html.kenar-dar .site--v5 > .kenar.kenar--tutulu{
     width:var(--kenar-acik); box-shadow:var(--shadow-lg);
-    transition:width 420ms cubic-bezier(.22,1,.36,1), box-shadow 420ms ease, border-radius 420ms ease,
-      background-color 420ms ease; }
+    transition:width 520ms cubic-bezier(.32,.72,0,1), box-shadow 520ms ease, border-radius 520ms ease,
+      background-color 520ms ease; }
 
   /* Satırlar: simge 13 px içeriden başlar (10 + 13 + 9 = 32: şeridin ortası). */
   html.kenar-dar .site--v5 > .kenar .kenar__cekmece-kap{ display:block; }
@@ -792,17 +793,19 @@ a.kenar__modul:hover{ color:var(--text); }
      (@starting-style), kapanışta önce solar, sonra kalkar (allow-discrete).
      Desteklemeyen tarayıcıda yalnız solma yoktur, yerleşim yine oynamaz. */
   html.kenar-dar .site--v5 > .kenar :is(.kenar__ad, .kenar__modulsec-ad, .kenar__modulsec-ok){
-    display:none; white-space:nowrap; overflow:hidden; text-overflow:clip; opacity:0; transform:translateX(-6px);
-    animation:none; transition:opacity 120ms ease, transform 160ms ease, display 160ms allow-discrete; }
+    display:none; white-space:nowrap; overflow:hidden; text-overflow:clip; opacity:0; transform:translateX(-4px);
+    filter:blur(3px); animation:none;
+    transition:opacity 140ms ease, transform 180ms ease, filter 140ms ease, display 180ms allow-discrete; }
   html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ad, .kenar__modulsec-ad){
     display:block; }
   html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__modulsec-ok{ display:inline-block; }
   html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ad, .kenar__modulsec-ad, .kenar__modulsec-ok){
-    opacity:1; transform:none;
-    transition:opacity 260ms ease 110ms, transform 380ms cubic-bezier(.22,1,.36,1) 80ms, display 0s allow-discrete; }
+    opacity:1; transform:none; filter:none;
+    transition:opacity 340ms ease 140ms, transform 520ms cubic-bezier(.32,.72,0,1) 100ms, filter 340ms ease 140ms,
+      display 0s allow-discrete; }
   @starting-style{
     html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ad, .kenar__modulsec-ad, .kenar__modulsec-ok){
-      opacity:0; transform:translateX(-6px); }
+      opacity:0; transform:translateX(-4px); filter:blur(3px); }
   }
   /* Eski tablet düzeni (simge üstte, ad altta, 52 px) bu kenarda geçmez. */
   html.kenar-dar .site--v5 > .kenar .kenar__cekmece{ flex-direction:row; min-height:0; text-align:left; }
@@ -820,13 +823,13 @@ a.kenar__modul:hover{ color:var(--text); }
      bölümler sayfanın üstündeki çubukta: orada kenarda açılmaz. */
   html.kenar-dar .site--v5 > .kenar .kenar__bolumler{ display:none; height:0; opacity:0; overflow:hidden;
     padding-top:0; padding-bottom:0;
-    transition:height 240ms cubic-bezier(.4,0,.2,1), opacity 120ms ease, padding 240ms cubic-bezier(.4,0,.2,1),
-      display 240ms allow-discrete; }
+    transition:height 300ms cubic-bezier(.4,0,.2,1), opacity 140ms ease, padding 300ms cubic-bezier(.4,0,.2,1),
+      display 300ms allow-discrete; }
 }
 @media (min-width:1280px){
   html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__bolumler{
     display:flex; height:auto; opacity:1; padding-top:2px; padding-bottom:8px;
-    transition:height 420ms cubic-bezier(.22,1,.36,1), opacity 240ms ease 90ms, padding 420ms cubic-bezier(.22,1,.36,1),
+    transition:height 520ms cubic-bezier(.32,.72,0,1), opacity 320ms ease 120ms, padding 520ms cubic-bezier(.32,.72,0,1),
       display 0s allow-discrete; }
   @starting-style{
     html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__bolumler{
@@ -1471,7 +1474,7 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
 @media (min-width:680px){
   html.kenar-dar .site--v5 > .kenar:not(.kenar--acik-kaldi):is(:hover, :focus-within) .kenar__bolumler{ animation:none; }
   html.kenar-dar .site--v5 > .kenar:not(.kenar--acik-kaldi):is(:hover, :focus-within) .kenar__bolum{
-    animation:ayrac-gir 340ms var(--ease-ios) both; animation-delay:calc(80ms + var(--i, 0) * 34ms); }
+    animation:ayrac-gir 460ms var(--ease-ios) both; animation-delay:calc(140ms + var(--i, 0) * 40ms); }
   /* Açık kenarda yeniden çizim: adlar ve liste yeniden «gelmez». */
   html.kenar-dar .site--v5 > .kenar.kenar--acik-kaldi :is(.kenar__ad, .kenar__bolumler, .kenar__marka span, .kenar__modulsec-ad){
     animation:none; }
