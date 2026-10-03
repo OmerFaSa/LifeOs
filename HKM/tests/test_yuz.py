@@ -353,6 +353,22 @@ def t_sade_yuz():
         ok(s in sade, s)
     ok(m.index('<style id="hkm-sade">') < m.index("<!-- MEYDAN (kullan"), "sade blok Meydan blogundan once")
 
+def t_giris_karti():
+    """Giris karti (kullanici, 2026-10-03: «HKM giris sifresi yazan yeri
+    guzel modelle»): ortada bugulu kart, kilit, baslik, goster/gizle,
+    Enter ile baglanir. Kimlikler (#token, #gir, #giris-not) DEGISMEZ:
+    entegre.js ve tools/yuz.js onlari kullanir."""
+    m = _yuz()
+    for s in ('id="token"', 'id="gir"', 'id="giris-not"', 'class="giris__baslik"', 'id="token-goz"',
+              'aria-label="Anahtarı göster"', 'autocomplete="current-password"'):
+        ok(s in m, s)
+    ok(re.search(r"\$\('token'\)\.addEventListener\('keydown'", m) is not None, "Enter ile baglanir")
+    sade = m[m.index('<style id="hkm-sade">'):]
+    sade = sade[:sade.index('</style>')]
+    for s in ('#giris.card{', 'backdrop-filter', '.giris__goz', '@keyframes giris-gir'):
+        ok(s in sade, s)
+
+
 def run():
     suite("HKM yüzü — giriş şeridi")
     test("üç adım vardır", t_giris_seridi_uc_adim)
@@ -374,3 +390,4 @@ def run():
     test("ne değişti: tek kart, yalnız eski kullanıcıya (017)", t_ne_degisti)
     test("fiş yükleme: önizleme, onay, küçültme", t_fis_yukleme)
     test("yüz denetimi yüzün her görünümünü gezer (Motto, Hedefler)", t_denetim_her_gorunumu_gezer)
+    test("giriş kartı: ortada buğulu kart, göster/gizle, Enter (2026-10-03)", t_giris_karti)

@@ -261,6 +261,25 @@
       d.remove(); bos.remove();
     });
 
+    /* Kullanıcı (2026-10-03): «bildirim kısmı sol altta sıkışmasın, daha
+       güzel tasarla». Kenardan açılınca ekranın boyunca bir yan çekmece. */
+    it('bildirimler: başlık ve sayı; kenardan yan çekmece olarak açılır, sıkışmaz', () => {
+      const d = yerlestir('<div class="site site--v5" style="position:fixed;inset:0;z-index:1">' + K.kenarCubugu({ modul:'ays', cekmeceler:[] }) + '</div>');
+      try{
+        const btn = d.querySelector('.kenar__dip [data-act="bildirim-ac"]');
+        const p = K.katmanAc('kt-bil', K.bildirimPaneli({ gruplar:[
+          { modul:'ays', satirlar:[{ metin:'12 kart bekliyor', route:'cards', acil:true }, { metin:'Deneme gir', route:'exams' }] }] }), btn);
+        expect(p.querySelector('.bildirim__bas').textContent).toContain('Bildirimler');
+        expect(p.querySelector('.bildirim__sayi').textContent.trim()).toBe('2');
+        expect(!!p.querySelector('.kmenu__bildirim.is-acil .bildirim__acil')).toBe(true);
+        const r = p.getBoundingClientRect();
+        expect(Math.round(r.top)).toBe(12);
+        expect(Math.round(window.innerHeight - r.bottom)).toBe(12);
+        expect(r.width >= 340).toBe(true);
+        expect(r.left >= d.querySelector('.kenar').getBoundingClientRect().left + 200).toBe(true);
+      }finally{ K.katmanKapat(); d.remove(); }
+    });
+
     it('oz-169 oz-166 telefonda dört sekme ve sağ altta +', () => {
       const d = yerlestir(K.altBant({ sekmeler:[
         { id:'bugun', ad:'Bugün', route:'today', on:true }, { id:'plan', ad:'Plan', route:'week' },
@@ -565,7 +584,7 @@
         bildirim:{ sayi:2 }, profil:{ ad:'Ömer' } }) + '</div>');
       try{
         const a = Array.from(d.querySelectorAll('.kenar__dip button'));
-        expect(a.map(b => b.querySelector('.kenar__ad').textContent)).toEqual(['Ara', 'Sayfa düzeni', 'Radyo', 'Bildirimler', 'Ömer']);
+        expect(a.map(b => b.querySelector('.kenar__ad').textContent)).toEqual(['Ara', 'Sayfa düzeni', 'Müzik', 'Bildirimler', 'Ömer']);
         expect(a[0].getAttribute('data-act')).toBe('open-palette');
         expect(a[1].classList.contains('ust__gizli')).toBe(true);
         expect(a[2].classList.contains('ust__ses')).toBe(true);

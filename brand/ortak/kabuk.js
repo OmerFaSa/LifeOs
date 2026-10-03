@@ -417,12 +417,12 @@ window.LIFEOS = window.LIFEOS || {};
 
   function ustSes(kenarda){
     const S = L.SES;
-    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Radyo ve sesler', ipucu:'Radyo' };
+    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Müzik ve sesler', ipucu:'Müzik' };
     return '<button class="ust__ses' + (kenarda ? ' kenar__arac' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
       + ' aria-expanded="' + (katmanAcik('kabuk-ses') ? 'true' : 'false') + '"'
       + ' aria-label="' + kac(d.etiket) + '" title="' + kac(d.ipucu) + '">'
       + simge('muzik') + '<i class="ust__ses-nokta" aria-hidden="true"></i>'
-      + (kenarda ? '<span class="kenar__ad">Radyo</span>' : '') + '</button>';
+      + (kenarda ? '<span class="kenar__ad">Müzik</span>' : '') + '</button>';
   }
 
   /* Modüllerin tek çağrısı: ustCubuk'a verilen nesnenin aynısı + her
@@ -678,25 +678,39 @@ window.LIFEOS = window.LIFEOS || {};
   }
 
   /* Gruplu bildirimler (09). o: { gruplar:[{ modul, satirlar:[{ metin, route, act, data, acil }] }] }
-     Modül grupları önce, Merkez önerileri ayrı kümede en sonda. */
+     Modül grupları önce, Merkez önerileri ayrı kümede en sonda.
+     BİÇİM (kullanıcı, 2026-10-03: «bildirim kısmı sol altta sıkışmasın,
+     daha güzel tasarla»): başlık, toplam sayı ve kapat; her bildirim bir
+     kart satırı (acil olan kırmızı çizgi ve «Acil» etiketiyle); boşken
+     sakin bir boş ekran. Kenardan açılınca ekranın boyunca bir yan çekmece
+     (.kmenu--yan, capaYerlestir); telefonda alttan açılır. */
   function bildirimPaneli(o){
     o = o || {};
     const gr = (o.gruplar || []).filter(g => g && g.satirlar && g.satirlar.length);
     const sirali = gr.filter(g => g.modul !== 'mer').concat(gr.filter(g => g.modul === 'mer'));
+    const toplam = sirali.reduce((n, g) => n + g.satirlar.length, 0);
     const govde = sirali.length ? sirali.map(g => {
       const m = MODULLER[g.modul] || { ad:g.modul };
       return '<section class="kmenu__grup kmenu__grup--' + kac(g.modul) + '">'
-        + '<h2 class="kmenu__grup-bas">' + modulIsareti(g.modul) + '<span>' + kac(g.modul === 'mer' ? 'Merkez önerileri' : m.ad) + '</span></h2>'
+        + '<h2 class="kmenu__grup-bas">' + modulIsareti(g.modul) + '<span>' + kac(g.modul === 'mer' ? 'Merkez önerileri' : m.ad) + '</span>'
+        + '<small class="bildirim__grup-sayi">' + g.satirlar.length + '</small></h2>'
         + g.satirlar.map(s => {
           const veri = Object.keys(s.data || {}).map(a => ' ' + kac(a) + '="' + kac(s.data[a]) + '"').join('');
           const hedef = s.route ? ' data-act="go" data-route="' + kac(s.route) + '"' : ' data-act="' + kac(s.act) + '"';
           return '<button class="kmenu__bildirim' + (s.acil ? ' is-acil' : '') + '"' + hedef + veri + '>'
-            + kac(s.metin) + '</button>';
+            + '<span class="bildirim__metin">' + kac(s.metin) + '</span>'
+            + (s.acil ? '<span class="bildirim__acil">Acil</span>' : '')
+            + simge('ileri') + '</button>';
         }).join('')
         + '</section>';
-    }).join('') : '<p class="kmenu__bos">Bekleyen bir şey yok.</p>';
-    return '<div class="katman kmenu kmenu--bildirim" role="dialog" aria-label="Bildirimler">'
-      + '<p class="kmenu__bas">Bildirimler</p>' + govde + '</div>';
+    }).join('') : '<div class="kmenu__bos bildirim__bos"><span class="bildirim__bos-simge" aria-hidden="true">' + simge('zil') + '</span>'
+      + '<b>Bekleyen bir şey yok.</b><small>Yeni bir şey olunca burada görünür.</small></div>';
+    return '<div class="katman kmenu kmenu--bildirim kmenu--yan" role="dialog" aria-label="Bildirimler">'
+      + '<header class="bildirim__bas"><b>Bildirimler</b>'
+      +   (toplam ? '<span class="bildirim__sayi" aria-label="' + toplam + ' bildirim">' + toplam + '</span>' : '')
+      +   '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Bildirimleri kapat">' + simge('kapat') + '</button>'
+      + '</header>'
+      + '<div class="bildirim__liste">' + govde + '</div></div>';
   }
 
   /* Hızlı ekle yelpazesi (166). o: { modul, satirlar:[{ ad, act, data }], loc }
@@ -742,10 +756,16 @@ window.LIFEOS = window.LIFEOS || {};
     const acik = parseFloat(getComputedStyle(kenar).getPropertyValue('--kenar-acik')) || 216;
     const h = panel.offsetHeight, w = panel.offsetWidth;
     const left = Math.min(kr.left + acik + 10, Math.max(12, window.innerWidth - w - 12));
-    const top = Math.max(12, Math.min(r.bottom - h, window.innerHeight - h - 12));
     panel.style.left = Math.round(left) + 'px';
-    panel.style.top = Math.round(top) + 'px';
     panel.style.right = 'auto';
+    /* Yan çekmece (bildirimler): ekranın boyunca, dipte sıkışmaz. */
+    if(panel.classList.contains('kmenu--yan')){
+      panel.style.top = '12px';
+      panel.style.bottom = '12px';
+      return true;
+    }
+    const top = Math.max(12, Math.min(r.bottom - h, window.innerHeight - h - 12));
+    panel.style.top = Math.round(top) + 'px';
     return true;
   }
   function kenarBirak(){
@@ -779,7 +799,8 @@ window.LIFEOS = window.LIFEOS || {};
     }else{
       panel.classList.add('is-alttan');
     }
-    const ilk = panel.querySelector('a[href], button');
+    /* İlk odak ilk İŞE gider; kapat düğmesi (başlıkta) atlanır. */
+    const ilk = panel.querySelector('a[href]:not([data-katman-kapat]), button:not([data-katman-kapat])') || panel.querySelector('a[href], button');
     if(ilk && !panel.hasAttribute('data-odaksiz')){ try{ ilk.focus({ preventScroll:true }); }catch(e){} }
     return panel;
   }
@@ -885,6 +906,8 @@ window.LIFEOS = window.LIFEOS || {};
       katmanKapat();
     });
     document.addEventListener('click', e => {
+      /* Katmanın kendi kapat düğmesi (bildirimler). */
+      if(e.target.closest && e.target.closest('[data-katman-kapat]')){ e.preventDefault(); katmanKapat(); return; }
       /* Sayfa başındaki bilgi kartı: düğme açar/kapatır, dışarısı kapatır. */
       const bd = e.target.closest && e.target.closest('.sayfabasi__bilgi-dugme');
       if(bd){

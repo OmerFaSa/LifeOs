@@ -101,6 +101,41 @@
   opacity:.42;
 }
 
+/* MARKA GİRİŞİ TEMAYA UYAR VE BUĞULUDUR (kullanıcı, 2026-10-03: «tema
+   beyazdaysa girişte 3 saniye beklediğimiz yer beyaz olsun, o da buğulu
+   olsun»). Düz koyu zemin yerine yarı saydam, bulanık bir cam: arkada
+   açılmakta olan uygulama ve zemin renkleri buğulu görünür. Açık temada
+   açık cam, koyu yazı ve düğme; koyuda koyu cam. Tema ilk karede
+   bilinsin diye son tema hatırlanır (brand/ortak/zemin.js). Seviye
+   kutlaması (rütbe) bu kurala GİRMEZ: yalnız .perde--marka. */
+.perde--marka{
+  --pm-zemin:rgba(12,13,18,.72); --pm-yazi:#fff; --pm-golge:rgba(0,0,0,.5);
+  --pm-dugme:rgba(14,14,16,.42); --pm-dugme-ust:rgba(255,255,255,.16);
+  --pm-dugme-kenar:rgba(255,255,255,.22); --pm-iz:rgba(255,255,255,.22);
+  background:var(--pm-zemin);
+  -webkit-backdrop-filter:blur(28px) saturate(1.35); backdrop-filter:blur(28px) saturate(1.35);
+}
+:root[data-theme="light"] .perde--marka{
+  --pm-zemin:rgba(244,244,248,.7); --pm-yazi:#15161C; --pm-golge:rgba(30,34,60,.16);
+  --pm-dugme:rgba(255,255,255,.6); --pm-dugme-ust:rgba(255,255,255,.88);
+  --pm-dugme-kenar:rgba(20,22,30,.12); --pm-iz:rgba(20,22,30,.16);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]) .perde--marka{
+    --pm-zemin:rgba(244,244,248,.7); --pm-yazi:#15161C; --pm-golge:rgba(30,34,60,.16);
+    --pm-dugme:rgba(255,255,255,.6); --pm-dugme-ust:rgba(255,255,255,.88);
+    --pm-dugme-kenar:rgba(20,22,30,.12); --pm-iz:rgba(20,22,30,.16);
+  }
+}
+.perde--marka .perde__ortam{ opacity:.34; }
+.perde--marka .perde__logo{ filter:drop-shadow(0 22px 56px var(--pm-golge)); }
+.perde--marka .perde__dugme{ background:var(--pm-dugme); border-color:var(--pm-dugme-kenar); color:var(--pm-yazi); }
+.perde--marka .perde__dugme:hover{ background:var(--pm-dugme-ust); }
+.perde--marka .perde__dugme:focus-visible{ outline-color:var(--pm-yazi); }
+.perde--marka .perde__gec-iz{ stroke:var(--pm-iz); }
+.perde--marka .perde__gec-yol{ stroke:var(--pm-yazi); }
+.perde--marka .perde__gec-sayi{ color:var(--pm-yazi); }
+
 /* ---------- araç şeridi ---------- */
 .perde__araclar{
   position:absolute; right:clamp(14px, 3vw, 28px); bottom:clamp(14px, 3vw, 28px);

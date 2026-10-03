@@ -91,5 +91,58 @@
         expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(Z.ANAHTAR) >= 0).toBe(true);
       }finally{ d.remove(); }
     }));
+
+    /* Kullanıcı (2026-10-03): «tema beyazdaysa girişte 3 saniye beklediğimiz
+       yer de beyaz olsun, buğulu olsun». Tema profilden gelir ve uygulama
+       açılınca konur; ilk karede bilinsin diye son tema hatırlanır. */
+    it('son tema hatırlanır ve ilk çizimde (uygulamadan önce) konur', () => {
+      const kok = document.documentElement;
+      const eskiTema = kok.getAttribute('data-theme');
+      let eskiDepo = null;
+      try{ eskiDepo = localStorage.getItem(Z.TEMA); }catch(e){}
+      try{
+        kok.setAttribute('data-theme', 'dark');
+        Z._temaKaydet();
+        expect(localStorage.getItem(Z.TEMA)).toBe('dark');
+        kok.removeAttribute('data-theme');
+        expect(Z.temaIlk()).toBe('dark');
+        expect(kok.getAttribute('data-theme')).toBe('dark');
+        /* «Sistem» seçilince (nitelik yok) hatıra da silinir. */
+        kok.removeAttribute('data-theme');
+        Z._temaKaydet();
+        expect(localStorage.getItem(Z.TEMA)).toBeNull();
+        expect(Z.temaIlk()).toBeNull();
+      }finally{
+        if(eskiTema == null) kok.removeAttribute('data-theme'); else kok.setAttribute('data-theme', eskiTema);
+        try{ if(eskiDepo == null) localStorage.removeItem(Z.TEMA); else localStorage.setItem(Z.TEMA, eskiDepo); }catch(e){}
+      }
+    });
+
+    it('marka girişi temaya uyar ve buğuludur: açıkta açık, koyuda koyu', async () => {
+      const kok = document.documentElement;
+      const eskiTema = kok.getAttribute('data-theme');
+      const link = document.createElement('link');
+      link.rel = 'stylesheet'; link.href = '../css/seviye.css';
+      await new Promise(r => { link.onload = r; link.onerror = r; document.head.appendChild(link); });
+      const d = document.createElement('div');
+      d.className = 'perde perde--marka';
+      d.style.zIndex = '-1';
+      document.body.appendChild(d);
+      const parlaklik = () => {
+        const m = getComputedStyle(d).backgroundColor.match(/[\d.]+/g).map(Number);
+        return (m[0] + m[1] + m[2]) / 3;
+      };
+      try{
+        kok.setAttribute('data-theme', 'light');
+        expect(parlaklik() > 200).toBe(true);
+        expect(/blur/.test(getComputedStyle(d).backdropFilter || getComputedStyle(d).webkitBackdropFilter || '')).toBe(true);
+        kok.setAttribute('data-theme', 'dark');
+        expect(parlaklik() < 60).toBe(true);
+        expect(/blur/.test(getComputedStyle(d).backdropFilter || getComputedStyle(d).webkitBackdropFilter || '')).toBe(true);
+      }finally{
+        d.remove(); link.remove();
+        if(eskiTema == null) kok.removeAttribute('data-theme'); else kok.setAttribute('data-theme', eskiTema);
+      }
+    });
   });
 })();

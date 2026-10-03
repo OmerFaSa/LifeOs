@@ -1553,3 +1553,54 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
   background:var(--surface-3); color:var(--text); font-style:normal; font-size:11px; font-weight:600; }
 @media (max-width:679px){ .kenar__araclar{ display:none; } }
 
+/* ================================================================
+   BİLDİRİMLER (kullanıcı, 2026-10-03: «bildirim kısmı sol altta
+   sıkışmasın, daha güzel tasarla»). Kenardan açılınca ekranın boyunca
+   cam bir yan çekmece (kabuk.js capaYerlestir, .kmenu--yan): başlık,
+   toplam sayı, kapat; her bildirim yumuşak bir kart satırı, acil olanın
+   solunda kırmızı çizgi ve «Acil»; boşken ortada sakin bir boş ekran.
+   Açılış kenarın temposunda (yumuşak yay). Telefonda alttan açılır.
+   ================================================================ */
+@keyframes yan-gir{ from{ opacity:0; transform:translateX(-14px); } to{ opacity:1; transform:none; } }
+.kmenu--yan:not(.is-alttan){ width:min(380px, calc(100vw - 260px)); max-width:none; max-height:none; padding:0;
+  display:flex; flex-direction:column; overflow:hidden; border-radius:20px;
+  animation:yan-gir 460ms cubic-bezier(.32,.72,0,1) both; }
+@supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  .kmenu--yan:not(.is-alttan){ background:var(--cam); -webkit-backdrop-filter:var(--cam-bulan); backdrop-filter:var(--cam-bulan);
+    border-color:transparent; box-shadow:var(--cam-isik), var(--shadow-lg); }
+}
+.bildirim__bas{ display:flex; align-items:center; gap:8px; padding:16px 14px 10px 20px; flex:none; }
+.bildirim__bas b{ font-size:17px; font-weight:650; letter-spacing:-.01em; color:var(--text); }
+.bildirim__sayi{ min-width:22px; height:22px; box-sizing:border-box; padding:0 7px; border-radius:11px;
+  display:inline-grid; place-items:center; background:var(--now, #E5484D); color:#fff; font-size:12px; font-weight:600;
+  font-variant-numeric:tabular-nums; }
+.bildirim__kapat{ margin-left:auto; width:30px; height:30px; padding:0; border:0; border-radius:50%; cursor:pointer;
+  display:grid; place-items:center; background:var(--surface-2); color:var(--text-2);
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.bildirim__kapat:hover{ background:var(--surface-3, var(--surface-2)); color:var(--text); }
+.bildirim__kapat .kbk-ic{ width:14px; height:14px; }
+.bildirim__liste{ flex:1; min-height:0; overflow:auto; padding:2px 12px 14px; }
+.kmenu--bildirim .kmenu__grup{ padding:4px 0 0; }
+.kmenu--bildirim .kmenu__grup + .kmenu__grup{ border-top:0; margin-top:12px; padding-top:4px; }
+.kmenu--bildirim .kmenu__grup-bas{ margin:2px 8px 8px; font-size:12.5px; font-weight:600; color:var(--text-2); }
+.bildirim__grup-sayi{ margin-left:auto; font-size:12px; font-weight:500; color:var(--text-3); font-variant-numeric:tabular-nums; }
+.kmenu--bildirim .kmenu__bildirim{ display:flex; align-items:center; gap:10px; width:100%; min-height:52px; box-sizing:border-box;
+  margin:0 0 6px; padding:12px 12px 12px 14px; border:0; border-radius:14px; background:var(--surface-2);
+  color:var(--text); font-size:14px; line-height:1.35; text-align:left; cursor:pointer;
+  transition:background var(--dur) var(--ease), transform 160ms var(--ease); }
+.kmenu--bildirim .kmenu__bildirim:hover{ background:var(--surface-3, var(--surface-2)); }
+.kmenu--bildirim .kmenu__bildirim:active{ transform:scale(.99); }
+.kmenu--bildirim .kmenu__bildirim .kbk-ic{ width:16px; height:16px; flex:none; color:var(--text-3); }
+.bildirim__metin{ flex:1; min-width:0; }
+.kmenu--bildirim .kmenu__bildirim.is-acil{ font-weight:600; box-shadow:inset 3px 0 0 var(--now, #E5484D); }
+.bildirim__acil{ flex:none; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600;
+  background:color-mix(in oklab, var(--now, #E5484D) 14%, transparent); color:var(--bad-ink, #B4232C); }
+.kmenu--bildirim .bildirim__bos{ margin:0; min-height:260px; height:100%; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:4px; text-align:center; color:var(--text-2); }
+.bildirim__bos-simge{ width:56px; height:56px; margin-bottom:8px; border-radius:50%; display:grid; place-items:center;
+  background:var(--surface-2); color:var(--text-3); }
+.bildirim__bos-simge .kbk-ic{ width:24px; height:24px; }
+.bildirim__bos b{ font-size:15px; font-weight:600; color:var(--text); }
+.bildirim__bos small{ font-size:13px; color:var(--text-3); }
+@media (prefers-reduced-motion:reduce){ .kmenu--yan:not(.is-alttan){ animation:sol-gel 200ms ease-out both; } }
+

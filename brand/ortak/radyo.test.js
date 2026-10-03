@@ -296,7 +296,7 @@
       try{
         const b = d.querySelector('.ust__sag .ust__ses');
         expect(!!b).toBe(true);
-        expect(b.getAttribute('aria-label')).toBe('Radyo ve sesler');
+        expect(b.getAttribute('aria-label')).toBe('Müzik ve sesler');
         expect(b.getAttribute('aria-haspopup')).toBe('dialog');
         expect(!!b.querySelector('svg.kbk-ic')).toBe(true);
         expect(b.classList.contains('is-caliyor')).toBe(false);
@@ -380,5 +380,89 @@
         }finally{ d.remove(); }
       });
     });
+  });
+
+  /* Kullanıcı (2026-10-03): «müzik kısmında radyo kanalları var; birden
+     fazla Spotify listesi de ekleyebilelim ve bu listeleri görebileceğimiz
+     bir bölüm olsun». Testte ağa çıkılmaz: oEmbed fetch'i ve çerçeve sahte. */
+  describe('Ses — Spotify listeleri', () => {
+    const LISTE = 'https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M';
+    const ALBUM = 'https://open.spotify.com/album/4aawyAB9vmqN3uQ7FjRGTy';
+    function sahteCerceve(){
+      const yapilan = [];
+      return { yapilan, cerceve:src => { const f = document.createElement('iframe'); f.setAttribute('data-src', src); yapilan.push(f); return f; } };
+    }
+
+    it('bağlantı çözümü: liste ve albüm (her biçim); başka adres reddedilir', () => {
+      const C = S.spotifyCoz;
+      expect(C(LISTE + '?si=abc')).toEqual({ tur:'playlist', id:'37i9dQZF1DXcBWIGoYBM5M' });
+      expect(C('https://open.spotify.com/intl-tr/playlist/37i9dQZF1DXcBWIGoYBM5M')).toEqual({ tur:'playlist', id:'37i9dQZF1DXcBWIGoYBM5M' });
+      expect(C('spotify:playlist:37i9dQZF1DXcBWIGoYBM5M')).toEqual({ tur:'playlist', id:'37i9dQZF1DXcBWIGoYBM5M' });
+      expect(C(ALBUM)).toEqual({ tur:'album', id:'4aawyAB9vmqN3uQ7FjRGTy' });
+      expect(C('https://example.com/playlist/37i9dQZF1DXcBWIGoYBM5M')).toBeNull();
+      expect(C('https://open.spotify.com/track/37i9dQZF1DXcBWIGoYBM5M')).toBeNull();
+      expect(C('')).toBeNull();
+      expect(S.spotifyAdres({ tur:'playlist', id:'37i9dQZF1DXcBWIGoYBM5M' }))
+        .toBe('https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M');
+    });
+
+    it('birden çok liste eklenir; adı Spotify\'dan gelir, gelmezse sade ad; aynısı iki kez eklenmez; kalıcı', () => {
+      let sorgu = null;
+      return ortamla({ fetch:u => { sorgu = u; return Promise.resolve({ ok:true, json:() => ({ title:'Odak Listesi' }) }); } }, async () => {
+        const a = await S.spotifyEkle(LISTE);
+        expect(a.ok).toBe(true);
+        expect(sorgu.indexOf('https://open.spotify.com/oembed?url=')).toBe(0);
+        S._ortam({ fetch:() => Promise.reject(new Error('ağ yok')), cevrimici:() => true });
+        expect((await S.spotifyEkle(ALBUM)).ok).toBe(true);
+        const c = await S.spotifyEkle('spotify:playlist:37i9dQZF1DXcBWIGoYBM5M');
+        expect(c.ok).toBe(false);
+        expect(c.mesaj).toBe('Bu liste zaten ekli');
+        expect((await S.spotifyEkle('https://example.com/x')).mesaj).toBe('Bu bir Spotify liste bağlantısı değil');
+        expect(S.tercih().spotify.map(x => x.ad)).toEqual(['Odak Listesi', 'Spotify albümü']);
+        S._sifirla();
+        expect(S.tercih().spotify.length).toBe(2);
+      });
+    });
+
+    it('seçilen liste body\'de TEK oynatıcıda açılır (panel kapanınca da çalar); radyo durur; silinince oynatıcı gider', () => {
+      const a = sahteOge(), c = sahteCerceve();
+      return ortamla({ sesOgesi:() => a, cerceve:c.cerceve }, async () => {
+        await S.spotifyEkle(LISTE);
+        await S.spotifyEkle(ALBUM);
+        S.turSec('chill'); a.tetikle('playing');
+        expect(S.durum().hal).toBe('caliyor');
+        S.spotifySec('37i9dQZF1DXcBWIGoYBM5M');
+        expect(S.durum().hal).toBe('kapali');
+        const kap = document.getElementById('lifeos-spotify');
+        expect(kap.parentElement).toBe(document.body);
+        expect(kap.querySelector('iframe').getAttribute('data-src')).toBe('https://open.spotify.com/embed/playlist/37i9dQZF1DXcBWIGoYBM5M');
+        expect(S.tercih().spotifySecili).toBe('37i9dQZF1DXcBWIGoYBM5M');
+        /* İkinci liste aynı kabı kullanır: tek oynatıcı, iki ses yok. */
+        S.spotifySec('4aawyAB9vmqN3uQ7FjRGTy');
+        expect(document.querySelectorAll('#lifeos-spotify iframe').length).toBe(1);
+        expect(c.yapilan.length).toBe(2);
+        S.spotifySil('4aawyAB9vmqN3uQ7FjRGTy');
+        expect(!!document.querySelector('#lifeos-spotify iframe')).toBe(false);
+        expect(S.tercih().spotify.length).toBe(1);
+      });
+    });
+
+    it('panel: Radyo · Spotify; Spotify\'da listeler, oynatıcı yeri ve ekleme alanı', () => ortamla({}, async () => {
+      await S.spotifyEkle(LISTE);
+      S.sekmeSec('spotify');
+      const d = document.createElement('div');
+      d.innerHTML = S.panelHtml();
+      const p = d.firstElementChild;
+      expect(Array.from(p.querySelectorAll('[data-ses-sekme]')).map(b => b.textContent.trim())).toEqual(['Radyo', 'Spotify']);
+      expect(p.querySelector('[data-ses-sekme="spotify"]').getAttribute('aria-pressed')).toBe('true');
+      expect(p.querySelector('.ses__radyo').hidden).toBe(true);
+      expect(p.querySelectorAll('[data-sp-sec]').length).toBe(1);
+      expect(p.querySelector('[data-sp-sil]').getAttribute('aria-label')).toContain('kaldır');
+      expect(p.querySelector('input[data-sp-ekle]').getAttribute('aria-label')).toBe('Spotify liste bağlantısı');
+      expect(!!p.querySelector('.ses__oynatici')).toBe(true);
+      S.sekmeSec('radyo');
+      d.innerHTML = S.panelHtml();
+      expect(d.querySelector('.ses__spotify').hidden).toBe(true);
+    }));
   });
 })();

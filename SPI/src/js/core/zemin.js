@@ -88,7 +88,36 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div>';
   }
 
+  /* SON TEMA (kullanıcı, 2026-10-03: «tema beyazdaysa girişte 3 saniye
+     beklediğimiz yer de beyaz olsun»). Tema profilde durur ve uygulama
+     açılınca konur (app.js applyTheme): ilk karede — marka girişi tam o
+     an görünür — bilinmez. Son konan tema bu kapının deposunda hatırlanır
+     ve ilk çizimden ÖNCE konur; uygulama açılınca aynısını yine koyar ya da
+     «Sistem»se kaldırır (o zaman hatıra da silinir). Kullanıcı verisi
+     değil, yalnız 'light' / 'dark'. */
+  const TEMA = 'lifeos.tema';
+  function _temaKaydet(){
+    if(typeof document === 'undefined') return;
+    try{
+      const v = document.documentElement.getAttribute('data-theme');
+      if(v === 'light' || v === 'dark') localStorage.setItem(TEMA, v); else localStorage.removeItem(TEMA);
+    }catch(e){}
+  }
+  function temaIlk(){
+    let v = null;
+    try{ v = localStorage.getItem(TEMA); }catch(e){}
+    if(v !== 'light' && v !== 'dark') return null;
+    if(typeof document !== 'undefined' && !document.documentElement.hasAttribute('data-theme')){
+      document.documentElement.setAttribute('data-theme', v);
+    }
+    return v;
+  }
+
   uygula();
+  temaIlk();
+  if(typeof document !== 'undefined' && typeof MutationObserver !== 'undefined'){
+    new MutationObserver(_temaKaydet).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+  }
   if(typeof document !== 'undefined'){
     document.addEventListener('click', e => {
       const b = e.target && e.target.closest ? e.target.closest('[data-zemin-sec]') : null;
@@ -102,5 +131,5 @@ window.LIFEOS = window.LIFEOS || {};
     try{ window.matchMedia('(prefers-reduced-transparency: reduce)').addEventListener('change', uygula); }catch(e){}
   }
 
-  L.ZEMIN = Object.freeze({ ANAHTAR, KIPLER, kip, ayarla, yenile, seciciHtml });
+  L.ZEMIN = Object.freeze({ ANAHTAR, KIPLER, TEMA, kip, ayarla, yenile, seciciHtml, temaIlk, _temaKaydet });
 })();

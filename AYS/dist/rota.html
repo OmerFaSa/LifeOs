@@ -7061,6 +7061,41 @@ body.is-dragging .drop.is-over{
   opacity:.42;
 }
 
+/* MARKA GİRİŞİ TEMAYA UYAR VE BUĞULUDUR (kullanıcı, 2026-10-03: «tema
+   beyazdaysa girişte 3 saniye beklediğimiz yer beyaz olsun, o da buğulu
+   olsun»). Düz koyu zemin yerine yarı saydam, bulanık bir cam: arkada
+   açılmakta olan uygulama ve zemin renkleri buğulu görünür. Açık temada
+   açık cam, koyu yazı ve düğme; koyuda koyu cam. Tema ilk karede
+   bilinsin diye son tema hatırlanır (brand/ortak/zemin.js). Seviye
+   kutlaması (rütbe) bu kurala GİRMEZ: yalnız .perde--marka. */
+.perde--marka{
+  --pm-zemin:rgba(12,13,18,.72); --pm-yazi:#fff; --pm-golge:rgba(0,0,0,.5);
+  --pm-dugme:rgba(14,14,16,.42); --pm-dugme-ust:rgba(255,255,255,.16);
+  --pm-dugme-kenar:rgba(255,255,255,.22); --pm-iz:rgba(255,255,255,.22);
+  background:var(--pm-zemin);
+  -webkit-backdrop-filter:blur(28px) saturate(1.35); backdrop-filter:blur(28px) saturate(1.35);
+}
+:root[data-theme="light"] .perde--marka{
+  --pm-zemin:rgba(244,244,248,.7); --pm-yazi:#15161C; --pm-golge:rgba(30,34,60,.16);
+  --pm-dugme:rgba(255,255,255,.6); --pm-dugme-ust:rgba(255,255,255,.88);
+  --pm-dugme-kenar:rgba(20,22,30,.12); --pm-iz:rgba(20,22,30,.16);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]) .perde--marka{
+    --pm-zemin:rgba(244,244,248,.7); --pm-yazi:#15161C; --pm-golge:rgba(30,34,60,.16);
+    --pm-dugme:rgba(255,255,255,.6); --pm-dugme-ust:rgba(255,255,255,.88);
+    --pm-dugme-kenar:rgba(20,22,30,.12); --pm-iz:rgba(20,22,30,.16);
+  }
+}
+.perde--marka .perde__ortam{ opacity:.34; }
+.perde--marka .perde__logo{ filter:drop-shadow(0 22px 56px var(--pm-golge)); }
+.perde--marka .perde__dugme{ background:var(--pm-dugme); border-color:var(--pm-dugme-kenar); color:var(--pm-yazi); }
+.perde--marka .perde__dugme:hover{ background:var(--pm-dugme-ust); }
+.perde--marka .perde__dugme:focus-visible{ outline-color:var(--pm-yazi); }
+.perde--marka .perde__gec-iz{ stroke:var(--pm-iz); }
+.perde--marka .perde__gec-yol{ stroke:var(--pm-yazi); }
+.perde--marka .perde__gec-sayi{ color:var(--pm-yazi); }
+
 /* ---------- araç şeridi ---------- */
 .perde__araclar{
   position:absolute; right:clamp(14px, 3vw, 28px); bottom:clamp(14px, 3vw, 28px);
@@ -11778,6 +11813,57 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
   background:var(--surface-3); color:var(--text); font-style:normal; font-size:11px; font-weight:600; }
 @media (max-width:679px){ .kenar__araclar{ display:none; } }
 
+/* ================================================================
+   BİLDİRİMLER (kullanıcı, 2026-10-03: «bildirim kısmı sol altta
+   sıkışmasın, daha güzel tasarla»). Kenardan açılınca ekranın boyunca
+   cam bir yan çekmece (kabuk.js capaYerlestir, .kmenu--yan): başlık,
+   toplam sayı, kapat; her bildirim yumuşak bir kart satırı, acil olanın
+   solunda kırmızı çizgi ve «Acil»; boşken ortada sakin bir boş ekran.
+   Açılış kenarın temposunda (yumuşak yay). Telefonda alttan açılır.
+   ================================================================ */
+@keyframes yan-gir{ from{ opacity:0; transform:translateX(-14px); } to{ opacity:1; transform:none; } }
+.kmenu--yan:not(.is-alttan){ width:min(380px, calc(100vw - 260px)); max-width:none; max-height:none; padding:0;
+  display:flex; flex-direction:column; overflow:hidden; border-radius:20px;
+  animation:yan-gir 460ms cubic-bezier(.32,.72,0,1) both; }
+@supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  .kmenu--yan:not(.is-alttan){ background:var(--cam); -webkit-backdrop-filter:var(--cam-bulan); backdrop-filter:var(--cam-bulan);
+    border-color:transparent; box-shadow:var(--cam-isik), var(--shadow-lg); }
+}
+.bildirim__bas{ display:flex; align-items:center; gap:8px; padding:16px 14px 10px 20px; flex:none; }
+.bildirim__bas b{ font-size:17px; font-weight:650; letter-spacing:-.01em; color:var(--text); }
+.bildirim__sayi{ min-width:22px; height:22px; box-sizing:border-box; padding:0 7px; border-radius:11px;
+  display:inline-grid; place-items:center; background:var(--now, #E5484D); color:#fff; font-size:12px; font-weight:600;
+  font-variant-numeric:tabular-nums; }
+.bildirim__kapat{ margin-left:auto; width:30px; height:30px; padding:0; border:0; border-radius:50%; cursor:pointer;
+  display:grid; place-items:center; background:var(--surface-2); color:var(--text-2);
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.bildirim__kapat:hover{ background:var(--surface-3, var(--surface-2)); color:var(--text); }
+.bildirim__kapat .kbk-ic{ width:14px; height:14px; }
+.bildirim__liste{ flex:1; min-height:0; overflow:auto; padding:2px 12px 14px; }
+.kmenu--bildirim .kmenu__grup{ padding:4px 0 0; }
+.kmenu--bildirim .kmenu__grup + .kmenu__grup{ border-top:0; margin-top:12px; padding-top:4px; }
+.kmenu--bildirim .kmenu__grup-bas{ margin:2px 8px 8px; font-size:12.5px; font-weight:600; color:var(--text-2); }
+.bildirim__grup-sayi{ margin-left:auto; font-size:12px; font-weight:500; color:var(--text-3); font-variant-numeric:tabular-nums; }
+.kmenu--bildirim .kmenu__bildirim{ display:flex; align-items:center; gap:10px; width:100%; min-height:52px; box-sizing:border-box;
+  margin:0 0 6px; padding:12px 12px 12px 14px; border:0; border-radius:14px; background:var(--surface-2);
+  color:var(--text); font-size:14px; line-height:1.35; text-align:left; cursor:pointer;
+  transition:background var(--dur) var(--ease), transform 160ms var(--ease); }
+.kmenu--bildirim .kmenu__bildirim:hover{ background:var(--surface-3, var(--surface-2)); }
+.kmenu--bildirim .kmenu__bildirim:active{ transform:scale(.99); }
+.kmenu--bildirim .kmenu__bildirim .kbk-ic{ width:16px; height:16px; flex:none; color:var(--text-3); }
+.bildirim__metin{ flex:1; min-width:0; }
+.kmenu--bildirim .kmenu__bildirim.is-acil{ font-weight:600; box-shadow:inset 3px 0 0 var(--now, #E5484D); }
+.bildirim__acil{ flex:none; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600;
+  background:color-mix(in oklab, var(--now, #E5484D) 14%, transparent); color:var(--bad-ink, #B4232C); }
+.kmenu--bildirim .bildirim__bos{ margin:0; min-height:260px; height:100%; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:4px; text-align:center; color:var(--text-2); }
+.bildirim__bos-simge{ width:56px; height:56px; margin-bottom:8px; border-radius:50%; display:grid; place-items:center;
+  background:var(--surface-2); color:var(--text-3); }
+.bildirim__bos-simge .kbk-ic{ width:24px; height:24px; }
+.bildirim__bos b{ font-size:15px; font-weight:600; color:var(--text); }
+.bildirim__bos small{ font-size:13px; color:var(--text-3); }
+@media (prefers-reduced-motion:reduce){ .kmenu--yan:not(.is-alttan){ animation:sol-gel 200ms ease-out both; } }
+
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
@@ -12433,7 +12519,7 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
 }
 
 /* ---------- panel ---------- */
-.kmenu--ses{ width:min(328px, calc(100vw - 24px)); padding:8px 10px 12px; }
+.kmenu--ses{ width:min(348px, calc(100vw - 24px)); max-height:min(86vh, 780px); padding:8px 10px 12px; }
 /* Telefonda öteki katmanlar gibi kenardan kenara (kabuk.css .katman.is-alttan). */
 .kmenu--ses.is-alttan{ width:auto; }
 .kmenu--ses .kmenu__bas{ margin:4px 2px 8px; }
@@ -12472,6 +12558,43 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
 @media (prefers-reduced-motion:reduce){
   .ust__ses.is-baglaniyor .ust__ses-nokta{ animation:none; }
 }
+
+/* ---------- Radyo · Spotify (2026-10-03) ----------
+   Sekmeler bölümlü seçici (.seg). Spotify'da: eklenen listeler (adı
+   Spotify'dan), seçilenin oynatıcısı ve ekleme alanı. Oynatıcı panelin
+   içinde değil, ÜSTÜNDEDİR (#lifeos-spotify, body'de tek): panel
+   kapanınca ekran dışına çekilir, müzik kesilmez (ses.js). */
+.ses__sekmeler{ margin:0 0 12px; }
+.ses__sekmeler button{ min-height:30px; cursor:pointer; }
+.ses__listeler{ list-style:none; margin:0 0 10px; padding:0; display:flex; flex-direction:column; gap:4px; }
+.ses__liste{ display:flex; align-items:center; gap:4px; border-radius:12px; background:var(--surface-2);
+  transition:background var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+.ses__liste.is-on{ background:var(--surface); box-shadow:inset 0 0 0 1.5px var(--text); }
+.ses__liste-ad{ flex:1; min-width:0; display:flex; align-items:center; gap:10px; min-height:40px; padding:0 4px 0 12px;
+  border:0; background:none; color:var(--text); font:inherit; font-size:13.5px; font-weight:500; text-align:left; cursor:pointer; }
+.ses__liste-ad span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ses__liste-ad .ses__sim{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; color:var(--text-2); }
+.ses__liste-sil{ flex:none; width:32px; height:32px; margin-right:4px; border:0; border-radius:50%; background:none;
+  color:var(--text-3); display:grid; place-items:center; cursor:pointer; }
+.ses__liste-sil:hover{ background:var(--surface-3, var(--surface-2)); color:var(--text); }
+.ses__liste-sil .ses__sim{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.ses__oynatici{ margin:0 0 10px; }
+.ses__oynatici.is-dolu{ height:352px; border-radius:12px; background:var(--surface-2); }
+.ses__oynatici:not(.is-dolu) span{ display:block; padding:2px 4px 4px; font-size:12.5px; color:var(--text-3); }
+.ses__bos{ margin:0 2px 10px; font-size:12.5px; line-height:1.45; color:var(--text-3); }
+.ses__ekle{ display:flex; gap:8px; margin:0 0 4px; }
+.ses__ekle input{ flex:1; min-width:0; min-height:36px; box-sizing:border-box; padding:0 12px; border:0; border-radius:10px;
+  background:var(--surface-2); color:var(--text); font:inherit; font-size:13px; }
+.ses__ekle input:focus{ outline:2px solid var(--primary); outline-offset:0; background:var(--surface); }
+.ses__ekle-dugme{ min-height:36px; padding:0 14px; border:0; border-radius:999px; background:var(--text); color:var(--surface);
+  font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.ses__sp-not{ margin:2px 2px 8px; min-height:16px; font-size:12px; color:var(--text-3); }
+.ses__spotify + .ses__satir, .ses__radyo + .ses__spotify[hidden] + .ses__satir{ margin-top:4px; }
+
+.spotify-kap{ position:fixed; left:-10000px; top:0; width:320px; height:352px; z-index:calc(var(--z-overlay, 60) + 1);
+  border-radius:12px; overflow:hidden; pointer-events:none; }
+.spotify-kap.is-yerinde{ pointer-events:auto; }
+.spotify-kap__cerceve{ display:block; width:100%; height:100%; border:0; border-radius:12px; background:transparent; }
 
 /* ==== css/zemin.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13102,7 +13225,36 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div>';
   }
 
+  /* SON TEMA (kullanıcı, 2026-10-03: «tema beyazdaysa girişte 3 saniye
+     beklediğimiz yer de beyaz olsun»). Tema profilde durur ve uygulama
+     açılınca konur (app.js applyTheme): ilk karede — marka girişi tam o
+     an görünür — bilinmez. Son konan tema bu kapının deposunda hatırlanır
+     ve ilk çizimden ÖNCE konur; uygulama açılınca aynısını yine koyar ya da
+     «Sistem»se kaldırır (o zaman hatıra da silinir). Kullanıcı verisi
+     değil, yalnız 'light' / 'dark'. */
+  const TEMA = 'lifeos.tema';
+  function _temaKaydet(){
+    if(typeof document === 'undefined') return;
+    try{
+      const v = document.documentElement.getAttribute('data-theme');
+      if(v === 'light' || v === 'dark') localStorage.setItem(TEMA, v); else localStorage.removeItem(TEMA);
+    }catch(e){}
+  }
+  function temaIlk(){
+    let v = null;
+    try{ v = localStorage.getItem(TEMA); }catch(e){}
+    if(v !== 'light' && v !== 'dark') return null;
+    if(typeof document !== 'undefined' && !document.documentElement.hasAttribute('data-theme')){
+      document.documentElement.setAttribute('data-theme', v);
+    }
+    return v;
+  }
+
   uygula();
+  temaIlk();
+  if(typeof document !== 'undefined' && typeof MutationObserver !== 'undefined'){
+    new MutationObserver(_temaKaydet).observe(document.documentElement, { attributes:true, attributeFilter:['data-theme'] });
+  }
   if(typeof document !== 'undefined'){
     document.addEventListener('click', e => {
       const b = e.target && e.target.closest ? e.target.closest('[data-zemin-sec]') : null;
@@ -13116,7 +13268,7 @@ window.LIFEOS = window.LIFEOS || {};
     try{ window.matchMedia('(prefers-reduced-transparency: reduce)').addEventListener('change', uygula); }catch(e){}
   }
 
-  L.ZEMIN = Object.freeze({ ANAHTAR, KIPLER, kip, ayarla, yenile, seciciHtml });
+  L.ZEMIN = Object.freeze({ ANAHTAR, KIPLER, TEMA, kip, ayarla, yenile, seciciHtml, temaIlk, _temaKaydet });
 })();
 
 /* ==== js/core/perde.js ==== */
@@ -14134,7 +14286,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'d07439b3', at:'2026-10-03 09:44', dirty:true };
+R.BUILD = { id:'553005e6', at:'2026-10-03 10:16', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19087,12 +19239,12 @@ window.LIFEOS = window.LIFEOS || {};
 
   function ustSes(kenarda){
     const S = L.SES;
-    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Radyo ve sesler', ipucu:'Radyo' };
+    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Müzik ve sesler', ipucu:'Müzik' };
     return '<button class="ust__ses' + (kenarda ? ' kenar__arac' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
       + ' aria-expanded="' + (katmanAcik('kabuk-ses') ? 'true' : 'false') + '"'
       + ' aria-label="' + kac(d.etiket) + '" title="' + kac(d.ipucu) + '">'
       + simge('muzik') + '<i class="ust__ses-nokta" aria-hidden="true"></i>'
-      + (kenarda ? '<span class="kenar__ad">Radyo</span>' : '') + '</button>';
+      + (kenarda ? '<span class="kenar__ad">Müzik</span>' : '') + '</button>';
   }
 
   /* Modüllerin tek çağrısı: ustCubuk'a verilen nesnenin aynısı + her
@@ -19348,25 +19500,39 @@ window.LIFEOS = window.LIFEOS || {};
   }
 
   /* Gruplu bildirimler (09). o: { gruplar:[{ modul, satirlar:[{ metin, route, act, data, acil }] }] }
-     Modül grupları önce, Merkez önerileri ayrı kümede en sonda. */
+     Modül grupları önce, Merkez önerileri ayrı kümede en sonda.
+     BİÇİM (kullanıcı, 2026-10-03: «bildirim kısmı sol altta sıkışmasın,
+     daha güzel tasarla»): başlık, toplam sayı ve kapat; her bildirim bir
+     kart satırı (acil olan kırmızı çizgi ve «Acil» etiketiyle); boşken
+     sakin bir boş ekran. Kenardan açılınca ekranın boyunca bir yan çekmece
+     (.kmenu--yan, capaYerlestir); telefonda alttan açılır. */
   function bildirimPaneli(o){
     o = o || {};
     const gr = (o.gruplar || []).filter(g => g && g.satirlar && g.satirlar.length);
     const sirali = gr.filter(g => g.modul !== 'mer').concat(gr.filter(g => g.modul === 'mer'));
+    const toplam = sirali.reduce((n, g) => n + g.satirlar.length, 0);
     const govde = sirali.length ? sirali.map(g => {
       const m = MODULLER[g.modul] || { ad:g.modul };
       return '<section class="kmenu__grup kmenu__grup--' + kac(g.modul) + '">'
-        + '<h2 class="kmenu__grup-bas">' + modulIsareti(g.modul) + '<span>' + kac(g.modul === 'mer' ? 'Merkez önerileri' : m.ad) + '</span></h2>'
+        + '<h2 class="kmenu__grup-bas">' + modulIsareti(g.modul) + '<span>' + kac(g.modul === 'mer' ? 'Merkez önerileri' : m.ad) + '</span>'
+        + '<small class="bildirim__grup-sayi">' + g.satirlar.length + '</small></h2>'
         + g.satirlar.map(s => {
           const veri = Object.keys(s.data || {}).map(a => ' ' + kac(a) + '="' + kac(s.data[a]) + '"').join('');
           const hedef = s.route ? ' data-act="go" data-route="' + kac(s.route) + '"' : ' data-act="' + kac(s.act) + '"';
           return '<button class="kmenu__bildirim' + (s.acil ? ' is-acil' : '') + '"' + hedef + veri + '>'
-            + kac(s.metin) + '</button>';
+            + '<span class="bildirim__metin">' + kac(s.metin) + '</span>'
+            + (s.acil ? '<span class="bildirim__acil">Acil</span>' : '')
+            + simge('ileri') + '</button>';
         }).join('')
         + '</section>';
-    }).join('') : '<p class="kmenu__bos">Bekleyen bir şey yok.</p>';
-    return '<div class="katman kmenu kmenu--bildirim" role="dialog" aria-label="Bildirimler">'
-      + '<p class="kmenu__bas">Bildirimler</p>' + govde + '</div>';
+    }).join('') : '<div class="kmenu__bos bildirim__bos"><span class="bildirim__bos-simge" aria-hidden="true">' + simge('zil') + '</span>'
+      + '<b>Bekleyen bir şey yok.</b><small>Yeni bir şey olunca burada görünür.</small></div>';
+    return '<div class="katman kmenu kmenu--bildirim kmenu--yan" role="dialog" aria-label="Bildirimler">'
+      + '<header class="bildirim__bas"><b>Bildirimler</b>'
+      +   (toplam ? '<span class="bildirim__sayi" aria-label="' + toplam + ' bildirim">' + toplam + '</span>' : '')
+      +   '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Bildirimleri kapat">' + simge('kapat') + '</button>'
+      + '</header>'
+      + '<div class="bildirim__liste">' + govde + '</div></div>';
   }
 
   /* Hızlı ekle yelpazesi (166). o: { modul, satirlar:[{ ad, act, data }], loc }
@@ -19412,10 +19578,16 @@ window.LIFEOS = window.LIFEOS || {};
     const acik = parseFloat(getComputedStyle(kenar).getPropertyValue('--kenar-acik')) || 216;
     const h = panel.offsetHeight, w = panel.offsetWidth;
     const left = Math.min(kr.left + acik + 10, Math.max(12, window.innerWidth - w - 12));
-    const top = Math.max(12, Math.min(r.bottom - h, window.innerHeight - h - 12));
     panel.style.left = Math.round(left) + 'px';
-    panel.style.top = Math.round(top) + 'px';
     panel.style.right = 'auto';
+    /* Yan çekmece (bildirimler): ekranın boyunca, dipte sıkışmaz. */
+    if(panel.classList.contains('kmenu--yan')){
+      panel.style.top = '12px';
+      panel.style.bottom = '12px';
+      return true;
+    }
+    const top = Math.max(12, Math.min(r.bottom - h, window.innerHeight - h - 12));
+    panel.style.top = Math.round(top) + 'px';
     return true;
   }
   function kenarBirak(){
@@ -19449,7 +19621,8 @@ window.LIFEOS = window.LIFEOS || {};
     }else{
       panel.classList.add('is-alttan');
     }
-    const ilk = panel.querySelector('a[href], button');
+    /* İlk odak ilk İŞE gider; kapat düğmesi (başlıkta) atlanır. */
+    const ilk = panel.querySelector('a[href]:not([data-katman-kapat]), button:not([data-katman-kapat])') || panel.querySelector('a[href], button');
     if(ilk && !panel.hasAttribute('data-odaksiz')){ try{ ilk.focus({ preventScroll:true }); }catch(e){} }
     return panel;
   }
@@ -19555,6 +19728,8 @@ window.LIFEOS = window.LIFEOS || {};
       katmanKapat();
     });
     document.addEventListener('click', e => {
+      /* Katmanın kendi kapat düğmesi (bildirimler). */
+      if(e.target.closest && e.target.closest('[data-katman-kapat]')){ e.preventDefault(); katmanKapat(); return; }
       /* Sayfa başındaki bilgi kartı: düğme açar/kapatır, dışarısı kapatır. */
       const bd = e.target.closest && e.target.closest('.sayfabasi__bilgi-dugme');
       if(bd){
@@ -22156,6 +22331,7 @@ window.LIFEOS = window.LIFEOS || {};
   /* Bağlanamayan ya da takılan akış bu kadar beklenir, sonra geçilir. */
   const BEKLEME = 12 * 1000;
   const YEDEK = 'https://de1.api.radio-browser.info/json/stations/search';
+  const SPOTIFY_EN_COK = 20;
 
   /* İSTASYONLAR — 2026-10-02'de Edge'de (Chromium) `<audio>` ile ÇALINARAK
      doğrulandı: her biri 3 saniyeden uzun çaldı. Sıra anlamlıdır: ilk
@@ -22213,6 +22389,7 @@ window.LIFEOS = window.LIFEOS || {};
      durumu ve bekleme süresi buradan verilir. */
   const VARSAYILAN_ORTAM = {
     sesOgesi:null, fetch:null, AudioContext:null, cevrimici:null, sentetik:false, bekleme:BEKLEME,
+    cerceve:null,
   };
   let ortam = Object.assign({}, VARSAYILAN_ORTAM);
   function cevrimici(){
@@ -22222,7 +22399,9 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------------------------------------------------------- tercih */
 
-  function bosTercih(){ return { tur:'chill', ses:0.6, tik:false, son:{}, caliyordu:0 }; }
+  function bosTercih(){
+    return { tur:'chill', ses:0.6, tik:false, son:{}, caliyordu:0, sekme:'radyo', spotify:[], spotifySecili:null };
+  }
   function tercihOku(){
     const t = bosTercih();
     let d = null;
@@ -22235,6 +22414,11 @@ window.LIFEOS = window.LIFEOS || {};
       if(typeof d.son[k] === 'string' && /^https:\/\//.test(d.son[k])) t.son[k] = d.son[k];
     });
     if(typeof d.caliyordu === 'number') t.caliyordu = d.caliyordu;
+    if(d.sekme === 'spotify') t.sekme = 'spotify';
+    if(Array.isArray(d.spotify)) t.spotify = d.spotify.filter(x => x && /^[A-Za-z0-9]{22}$/.test(x.id)
+      && (x.tur === 'playlist' || x.tur === 'album')).slice(0, SPOTIFY_EN_COK)
+      .map(x => ({ id:x.id, tur:x.tur, ad:String(x.ad || 'Spotify listesi').slice(0, 60) }));
+    if(t.spotify.some(x => x.id === d.spotifySecili)) t.spotifySecili = d.spotifySecili;
     return t;
   }
   let tercih = tercihOku();
@@ -22517,35 +22701,215 @@ window.LIFEOS = window.LIFEOS || {};
   /* Kabuğun ♪ düğmesi için: sınıf, erişilebilir ad, ipucu. */
   function dugme(){
     const sinif = hal === 'caliyor' ? ' is-caliyor' : hal === 'baglaniyor' ? ' is-baglaniyor' : hal === 'dokun' ? ' is-dokun' : '';
-    const etiket = hal === 'caliyor' ? 'Radyo ve sesler — çalıyor: ' + (aktif ? aktif.ad : '')
-      : hal === 'dokun' ? 'Radyo bekliyor — dokun, sürsün'
-      : 'Radyo ve sesler';
-    const ipucu = hal === 'caliyor' ? (aktif ? aktif.ad : 'Radyo') : hal === 'dokun' ? 'Dokun, sürsün' : 'Radyo';
+    const etiket = hal === 'caliyor' ? 'Müzik ve sesler — çalıyor: ' + (aktif ? aktif.ad : '')
+      : hal === 'dokun' ? 'Müzik bekliyor — dokun, sürsün'
+      : 'Müzik ve sesler';
+    const ipucu = hal === 'caliyor' ? (aktif ? aktif.ad : 'Müzik') : hal === 'dokun' ? 'Dokun, sürsün' : 'Müzik';
     return { sinif, etiket, ipucu };
   }
 
   const SIMGE_CAL = '<svg class="ses__sim" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z"/></svg>';
   const SIMGE_DUR = '<svg class="ses__sim" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="7" y="6" width="3.5" height="12" rx="1"/><rect x="13.5" y="6" width="3.5" height="12" rx="1"/></svg>';
 
+  const SIMGE_LISTE = '<svg class="ses__sim" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 6.5h11M4 11.5h11M4 16.5h7"/><path d="M17.5 18.5V9l3-1"/><circle cx="15.8" cy="18.5" r="1.8"/></svg>';
+  const SIMGE_SIL = '<svg class="ses__sim" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 7l10 10M17 7L7 17"/></svg>';
+
+  function sekmeDugme(id, ad){
+    const on = tercih.sekme === id;
+    return '<button type="button" class="' + (on ? 'is-on' : '') + '" data-ses-sekme="' + id + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + ad + '</button>';
+  }
+  function spotifyHtml(){
+    const l = tercih.spotify, sec = tercih.spotifySecili;
+    const secili = l.find(x => x.id === sec);
+    const liste = l.length
+      ? '<ul class="ses__listeler">' + l.map(x => '<li class="ses__liste' + (x.id === sec ? ' is-on' : '') + '">'
+          + '<button type="button" class="ses__liste-ad" data-sp-sec="' + x.id + '" aria-pressed="' + (x.id === sec ? 'true' : 'false') + '">'
+          + SIMGE_LISTE + '<span>' + kac(x.ad) + '</span></button>'
+          + '<button type="button" class="ses__liste-sil" data-sp-sil="' + x.id + '" aria-label="' + kac(x.ad + ' listesini kaldır') + '" title="Kaldır">'
+          + SIMGE_SIL + '</button></li>').join('') + '</ul>'
+      : '<p class="ses__bos">Henüz liste yok. Spotify\'da listeyi aç: Paylaş › Bağlantıyı kopyala, sonra buraya yapıştır.</p>';
+    return liste
+      + '<div class="ses__oynatici' + (secili ? ' is-dolu' : '') + '">' + (secili ? '' : (l.length ? '<span>Dinlemek için bir liste seç</span>' : '')) + '</div>'
+      + '<div class="ses__ekle"><input type="url" inputmode="url" data-sp-ekle placeholder="open.spotify.com/playlist/…" aria-label="Spotify liste bağlantısı">'
+      +   '<button type="button" class="ses__ekle-dugme" data-sp="ekle">Ekle</button></div>'
+      + '<p class="ses__sp-not" role="status" aria-live="polite"></p>';
+  }
+
   function panelHtml(){
-    return '<div class="katman kmenu kmenu--ses" role="dialog" aria-label="Radyo ve sesler" data-ses-panel>'
-      + '<p class="kmenu__bas">Radyo</p>'
-      + '<div class="ses__turler" role="group" aria-label="Tür">'
-      +   TURLER.map(t => '<button type="button" class="ses__tur' + (t.id === tercih.tur ? ' is-on' : '') + '" data-ses-tur="' + t.id + '"'
-          + ' aria-pressed="' + (t.id === tercih.tur ? 'true' : 'false') + '">' + kac(t.ad) + '</button>').join('')
+    const sp = tercih.sekme === 'spotify';
+    return '<div class="katman kmenu kmenu--ses" role="dialog" aria-label="Müzik ve sesler" data-ses-panel>'
+      + '<p class="kmenu__bas">Müzik</p>'
+      + '<div class="seg seg--block ses__sekmeler" role="group" aria-label="Kaynak">' + sekmeDugme('radyo', 'Radyo') + sekmeDugme('spotify', 'Spotify') + '</div>'
+      + '<div class="ses__radyo"' + (sp ? ' hidden' : '') + '>'
+      +   '<div class="ses__turler" role="group" aria-label="Tür">'
+      +     TURLER.map(t => '<button type="button" class="ses__tur' + (t.id === tercih.tur ? ' is-on' : '') + '" data-ses-tur="' + t.id + '"'
+            + ' aria-pressed="' + (t.id === tercih.tur ? 'true' : 'false') + '">' + kac(t.ad) + '</button>').join('')
+      +   '</div>'
+      +   '<p class="ses__simdi' + (hal === 'caliyor' ? ' is-caliyor' : '') + '" role="status" aria-live="polite">' + kac(mesaj()) + '</p>'
+      +   '<div class="ses__eylem">'
+      +     '<button type="button" class="ses__cal" data-ses="cal">' + (calarMi() ? SIMGE_DUR + 'Durdur' : SIMGE_CAL + 'Çal') + '</button>'
+      +     '<button type="button" class="ses__sonraki" data-ses="sonraki">Sonraki istasyon</button>'
+      +   '</div>'
+      +   '<label class="ses__duzey"><span>Ses</span>'
+      +     '<input type="range" min="0" max="100" step="1" value="' + Math.round(tercih.ses * 100) + '" data-ses="duzey" aria-label="Ses düzeyi"></label>'
       + '</div>'
-      + '<p class="ses__simdi' + (hal === 'caliyor' ? ' is-caliyor' : '') + '" role="status" aria-live="polite">' + kac(mesaj()) + '</p>'
-      + '<div class="ses__eylem">'
-      +   '<button type="button" class="ses__cal" data-ses="cal">' + (calarMi() ? SIMGE_DUR + 'Durdur' : SIMGE_CAL + 'Çal') + '</button>'
-      +   '<button type="button" class="ses__sonraki" data-ses="sonraki">Sonraki istasyon</button>'
-      + '</div>'
-      + '<label class="ses__duzey"><span>Ses</span>'
-      +   '<input type="range" min="0" max="100" step="1" value="' + Math.round(tercih.ses * 100) + '" data-ses="duzey" aria-label="Ses düzeyi"></label>'
+      + '<div class="ses__spotify"' + (sp ? '' : ' hidden') + '>' + spotifyHtml() + '</div>'
       + '<div class="ses__satir"><span id="ses-tik-ad">Tık sesleri</span>'
       +   '<button type="button" class="ses__anahtar" data-ses="tik" role="switch" aria-labelledby="ses-tik-ad ses-tik-deger"'
       +     ' aria-checked="' + (tercih.tik ? 'true' : 'false') + '"><span id="ses-tik-deger">' + (tercih.tik ? 'Açık' : 'Kapalı') + '</span></button>'
       + '</div>'
       + '</div>';
+  }
+
+  /* ---------------------------------------------------------- spotify
+
+     Kullanıcı (2026-10-03): «radyo kanallarının yanında birden fazla
+     Spotify listesi de ekleyebilelim; bu listeleri görebileceğimiz bir
+     bölüm olsun». Liste Spotify'ın KENDİ gömme oynatıcısıyla çalar
+     (open.spotify.com/embed): şarkı listesi orada görünür, çalma orada
+     yönetilir. Tarayıcıda Spotify hesabı açıksa tam şarkı, değilse
+     Spotify'ın kendi kısıtı geçerlidir — bunu Spotify belirler.
+
+     Oynatıcı TEK ve document.body'dedir (radyonun <audio>'su gibi): panel
+     açıkken paneldeki yerin (.ses__oynatici) TAM ÜSTÜNE oturur, panel
+     kapanınca ekran dışına çekilir ve çalmaya devam eder. Taşımak olmazdı:
+     DOM'da yeri değişen iframe baştan yüklenir, müzik kesilir.
+
+     Ağa yalnız kullanıcı istediğinde çıkılır: liste eklenince adı için bir
+     kez oEmbed, liste seçilince (ya da panel seçili listeyle açılınca)
+     oynatıcı. Liste radyo seçilince durmaz (Spotify'ın içini göremeyiz);
+     liste seçilince radyo durur: iki müzik üst üste çalmasın. */
+  function spotifyCoz(metin){
+    const s = String(metin || '').trim();
+    let m = /^spotify:(playlist|album):([A-Za-z0-9]{22})$/.exec(s);
+    if(m) return { tur:m[1], id:m[2] };
+    m = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z]{2}(?:-[a-z]{2})?\/)?(?:embed\/)?(playlist|album)\/([A-Za-z0-9]{22})(?:[/?#].*)?$/i.exec(s);
+    return m ? { tur:m[1].toLowerCase(), id:m[2] } : null;
+  }
+  function spotifyAdres(l){ return 'https://open.spotify.com/embed/' + l.tur + '/' + l.id; }
+  function spotifyAdi(l){
+    const yedek = l.tur === 'album' ? 'Spotify albümü' : 'Spotify listesi';
+    const getir = ortam.fetch || (typeof fetch === 'function' ? fetch.bind(window) : null);
+    if(!getir) return Promise.resolve(yedek);
+    const url = 'https://open.spotify.com/oembed?url=' + encodeURIComponent('https://open.spotify.com/' + l.tur + '/' + l.id);
+    let iptal = null, zaman = null;
+    try{ iptal = new AbortController(); zaman = setTimeout(() => iptal.abort(), 6000); }catch(e){}
+    return Promise.resolve()
+      .then(() => getir(url, iptal ? { signal:iptal.signal } : {}))
+      .then(r => r && r.ok ? r.json() : null)
+      .then(v => { const ad = v && typeof v.title === 'string' ? v.title.trim().slice(0, 60) : ''; return ad || yedek; })
+      .catch(() => yedek)
+      .then(v => { if(zaman) clearTimeout(zaman); return v; });
+  }
+  async function spotifyEkle(metin){
+    const l = spotifyCoz(metin);
+    if(!l) return { ok:false, mesaj:'Bu bir Spotify liste bağlantısı değil' };
+    if(tercih.spotify.some(x => x.id === l.id)) return { ok:false, mesaj:'Bu liste zaten ekli' };
+    if(tercih.spotify.length >= SPOTIFY_EN_COK) return { ok:false, mesaj:'En çok ' + SPOTIFY_EN_COK + ' liste eklenir' };
+    const ad = await spotifyAdi(l);
+    if(tercih.spotify.some(x => x.id === l.id)) return { ok:false, mesaj:'Bu liste zaten ekli' };
+    const yeni = { id:l.id, tur:l.tur, ad };
+    tercihYaz({ spotify:tercih.spotify.concat([yeni]) });
+    panelYenile();
+    return { ok:true, liste:yeni };
+  }
+
+  let spKap = null;
+  function spotifyKap(){
+    if(spKap && spKap.isConnected) return spKap;
+    spKap = document.getElementById('lifeos-spotify');
+    if(!spKap){
+      spKap = document.createElement('div');
+      spKap.id = 'lifeos-spotify';
+      spKap.className = 'spotify-kap';
+      document.body.appendChild(spKap);
+    }
+    return spKap;
+  }
+  function cerceveKur(l){
+    const kap = spotifyKap();
+    const src = spotifyAdres(l);
+    const eski = kap.querySelector('iframe');
+    if(eski && kap.getAttribute('data-liste') === l.id) return eski;
+    kap.innerHTML = '';
+    let f;
+    if(ortam.cerceve) f = ortam.cerceve(src);
+    else{ f = document.createElement('iframe'); f.src = src; }
+    f.setAttribute('title', 'Spotify: ' + l.ad);
+    f.setAttribute('allow', 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture');
+    f.setAttribute('loading', 'lazy');
+    f.className = 'spotify-kap__cerceve';
+    kap.appendChild(f);
+    kap.setAttribute('data-liste', l.id);
+    return f;
+  }
+  function spotifySec(id){
+    const l = tercih.spotify.find(x => x.id === id);
+    if(!l) return false;
+    if(calarMi() || hal === 'dokun') durdur();
+    tercihYaz({ spotifySecili:id });
+    cerceveKur(l);
+    panelYenile();
+    return true;
+  }
+  function spotifySil(id){
+    const secili = tercih.spotifySecili === id;
+    tercihYaz({ spotify:tercih.spotify.filter(x => x.id !== id), spotifySecili:secili ? null : tercih.spotifySecili });
+    if(secili && spKap){ spKap.innerHTML = ''; spKap.removeAttribute('data-liste'); }
+    panelYenile();
+    return true;
+  }
+  function sekmeSec(s){
+    if(s !== 'radyo' && s !== 'spotify') return false;
+    tercihYaz({ sekme:s });
+    panelYenile();
+    return true;
+  }
+
+  /* Oynatıcıyı paneldeki yerin üstüne oturtur; yer yoksa (panel kapalı,
+     Radyo sekmesi) ekran dışına çeker. Panel açıkken her karede bir kez
+     (panel açılırken kayar, kendi içinde kaydırılabilir). */
+  let yerKare = 0;
+  function spotifyYerlestir(){
+    if(typeof document === 'undefined') return;
+    const yer = document.querySelector('[data-ses-panel] .ses__oynatici.is-dolu');
+    const gorunur = yer && yer.getClientRects().length > 0;
+    if(gorunur){
+      const l = tercih.spotify.find(x => x.id === tercih.spotifySecili);
+      if(l) cerceveKur(l);
+    }
+    if(!spKap) return;
+    if(gorunur){
+      const r = yer.getBoundingClientRect();
+      spKap.style.left = Math.round(r.left) + 'px';
+      spKap.style.top = Math.round(r.top) + 'px';
+      spKap.style.width = Math.round(r.width) + 'px';
+      spKap.style.height = Math.round(r.height) + 'px';
+      spKap.classList.add('is-yerinde');
+      if(!yerKare && typeof requestAnimationFrame === 'function') yerKare = requestAnimationFrame(() => { yerKare = 0; spotifyYerlestir(); });
+    }else{
+      spKap.classList.remove('is-yerinde');
+      spKap.style.left = '-10000px';
+    }
+  }
+
+  /* Panel açıkken içerik değişti (liste eklendi/silindi, sekme): panel
+     yerinde yeniden çizilir, kenardaki düğmeye göre yeniden yerleşir ve
+     odak aynı denetime döner. */
+  let sonCapa = null;
+  function panelYenile(){
+    const K = L.KABUK;
+    if(typeof document === 'undefined' || !K || !K.katmanAcik('kabuk-ses')){ spotifyYerlestir(); return; }
+    const odak = document.activeElement;
+    const odakSecici = odak && odak.closest && odak.closest('[data-ses-panel]')
+      ? ['data-ses-sekme', 'data-sp-sec', 'data-sp', 'data-ses'].map(a => odak.hasAttribute(a) ? '[' + a + '="' + odak.getAttribute(a) + '"]' : '').find(Boolean)
+        || (odak.hasAttribute('data-sp-ekle') ? '[data-sp-ekle]' : null)
+      : null;
+    K.katmanTazele('kabuk-ses', panelHtml());
+    const p = document.getElementById('kabuk-ses');
+    if(p && sonCapa && sonCapa.isConnected && K.capaYerlestir) K.capaYerlestir(p, sonCapa);
+    if(p && odakSecici){ const o = p.querySelector(odakSecici); if(o) try{ o.focus({ preventScroll:true }); }catch(e){} }
+    spotifyYerlestir();
   }
 
   /* Durum değişince ekrandaki ♪ ve açık panel YERİNDE güncellenir: panel
@@ -22662,8 +23026,26 @@ window.LIFEOS = window.LIFEOS || {};
   function panelAcKapa(dugmeEl){
     const K = L.KABUK;
     if(!K) return;
-    if(K.katmanAcik('kabuk-ses')){ K.katmanKapat(); return; }
+    if(K.katmanAcik('kabuk-ses')){ K.katmanKapat(); spotifyYerlestir(); return; }
+    sonCapa = dugmeEl;
     K.katmanAc('kabuk-ses', panelHtml(), dugmeEl);
+    spotifyYerlestir();
+  }
+
+  async function ekleGirdisi(panel){
+    const g = panel && panel.querySelector('[data-sp-ekle]');
+    const not = panel && panel.querySelector('.ses__sp-not');
+    if(!g) return;
+    if(!g.value.trim()){ if(not) not.textContent = 'Önce Spotify bağlantısını yapıştır'; return; }
+    if(!cevrimici()){ if(not) not.textContent = 'Bağlantı yok'; return; }
+    if(not) not.textContent = 'Ekleniyor…';
+    const r = await spotifyEkle(g.value);
+    if(!r.ok){
+      const p2 = document.querySelector('[data-ses-panel] .ses__sp-not');
+      if(p2) p2.textContent = r.mesaj;
+      return;
+    }
+    spotifySec(r.liste.id);
   }
 
   let bagli = false;
@@ -22714,6 +23096,13 @@ window.LIFEOS = window.LIFEOS || {};
         return;
       }
       if(!t.closest('[data-ses-panel]')) return;
+      const sk = t.closest('[data-ses-sekme]');
+      if(sk){ sekmeSec(sk.getAttribute('data-ses-sekme')); return; }
+      const ss = t.closest('[data-sp-sec]');
+      if(ss){ spotifySec(ss.getAttribute('data-sp-sec')); return; }
+      const sl = t.closest('[data-sp-sil]');
+      if(sl){ spotifySil(sl.getAttribute('data-sp-sil')); return; }
+      if(t.closest('[data-sp="ekle"]')){ ekleGirdisi(t.closest('[data-ses-panel]')); return; }
       const tr = t.closest('[data-ses-tur]');
       if(tr){ turSec(tr.getAttribute('data-ses-tur')); return; }
       const is = t.closest('[data-ses]');
@@ -22727,6 +23116,14 @@ window.LIFEOS = window.LIFEOS || {};
         if(ac) tik('ac');
       }
     });
+    document.addEventListener('keydown', e => {
+      const g = e.target;
+      if(e.key === 'Enter' && g && g.matches && g.matches('[data-ses-panel] [data-sp-ekle]')){ e.preventDefault(); ekleGirdisi(g.closest('[data-ses-panel]')); }
+    });
+    /* Panel kapanınca (dışarı tık, Esc, başka panel) oynatıcı ekran dışına. */
+    document.addEventListener('mousedown', () => setTimeout(spotifyYerlestir, 0), true);
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') setTimeout(spotifyYerlestir, 0); }, true);
+    window.addEventListener('resize', () => spotifyYerlestir());
     document.addEventListener('input', e => {
       const r = e.target;
       if(r && r.matches && r.matches('[data-ses-panel] [data-ses="duzey"]')) sesAyarla(Number(r.value) / 100);
@@ -22771,6 +23168,7 @@ window.LIFEOS = window.LIFEOS || {};
     Object.keys(yedekler).forEach(k => delete yedekler[k]);
     Object.keys(yedekSoruldu).forEach(k => delete yedekSoruldu[k]);
     baglamKapat();
+    if(spKap){ spKap.remove(); spKap = null; }
     tercih = tercihOku();
     guncelle();
   }
@@ -22781,6 +23179,7 @@ window.LIFEOS = window.LIFEOS || {};
     tercih:() => JSON.parse(JSON.stringify(tercih)),
     durum, dugme, panelHtml,
     cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret,
+    spotifyCoz, spotifyAdres, spotifyEkle, spotifySec, spotifySil, sekmeSec,
     _ortam, _sifirla, _acilis:acilis, _sayfadanCik:sayfadanCik,
   });
   /* Başka modülde çalıyorduysa: gövde hazır olunca sürdürmeyi dene. */

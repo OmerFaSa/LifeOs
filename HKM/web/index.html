@@ -734,16 +734,26 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
         </div>
       </div>
     </div>
-    <div class="tag">Bağlan</div>
-    <p class="muted">HKM yalnız bu bilgisayarda çalışıyor. Bağlanmak için
-      bir kez anahtar gerekiyor; <code>HKM/config.json</code> içindeki
-      <code>local_token</code> değeri.</p>
-    <div class="row">
-      <input id="token" type="password" placeholder="anahtar" class="alan alan--genis"
-        aria-label="Yerel anahtar"/>
-      <button class="primary" id="gir">Bağlan</button>
+    <!-- GİRİŞ (kullanıcı, 2026-10-03: «HKM giriş şifresi yazan yeri güzel
+         modelle»): ortada buğulu bir kart; kilit, kısa başlık, tek alan,
+         göster/gizle, Enter ile bağlanır. Kimlikler (#token, #gir,
+         #giris-not) değişmez: entegre ve yüz denetimi onları kullanır. -->
+    <div class="giris__govde">
+      <span class="giris__kilit" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/><path d="M12 14.5v2"/></svg></span>
+      <h1 class="giris__baslik">Merkez'e bağlan</h1>
+      <p class="giris__alt">HKM yalnız bu bilgisayarda çalışır. Bir kez anahtar gerekir:
+        <code>HKM/config.json</code> içindeki <code>local_token</code>.</p>
+      <div class="giris__form">
+        <div class="giris__alan">
+          <input id="token" type="password" placeholder="Anahtar" autocomplete="current-password"
+            spellcheck="false" aria-label="Yerel anahtar"/>
+          <button type="button" class="giris__goz" id="token-goz" aria-pressed="false"
+            aria-label="Anahtarı göster" title="Göster"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg></button>
+        </div>
+        <button class="primary giris__dugme" id="gir">Bağlan</button>
+      </div>
+      <p class="giris__not" id="giris-not" role="status" aria-live="polite"></p>
     </div>
-    <p class="muted" id="giris-not"></p>
   </div>
 
   <div id="govde" hidden>
@@ -5600,6 +5610,24 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     });
   })();
 
+  /* Giriş: Enter bağlanır; göz anahtarı gösterir/gizler (yalnız bu ekranda). */
+  $('token').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); $('gir').click(); }
+  });
+  (function(){
+    var g = $('token-goz');
+    if(!g) return;
+    g.addEventListener('click', function(){
+      var alan = $('token');
+      var ac = alan.type === 'password';
+      alan.type = ac ? 'text' : 'password';
+      g.setAttribute('aria-pressed', ac ? 'true' : 'false');
+      g.setAttribute('aria-label', ac ? 'Anahtarı gizle' : 'Anahtarı göster');
+      g.setAttribute('title', ac ? 'Gizle' : 'Göster');
+      alan.focus();
+    });
+  })();
+
   $('gir').addEventListener('click', async function(){
     token = $('token').value.trim();
     if(!token){ $('giris-not').textContent = 'Jeton boş olamaz.'; return; }
@@ -6082,6 +6110,59 @@ details.detay[open] > summary::before{ content:"›"; transform:rotate(90deg); }
   [data-bolme]:not([hidden]){ animation:hkm-sol 240ms ease-out both; }
   button:active:not(:disabled){ transform:none; }
 }
+
+/* GİRİŞ (kullanıcı, 2026-10-03: «HKM giriş şifresi yazan yeri güzel
+   modelle»). Ekranın ortasında buğulu bir cam kart; arkada Merkez
+   morunun yumuşak ışığı. Tanıtım şeridi kartın başında, altında kilit,
+   başlık, kısa açıklama, tek alan (göz düğmesiyle) ve hap düğme. */
+body:has(#giris:not([hidden])){ background:
+  radial-gradient(55% 50% at 14% 10%, color-mix(in srgb, var(--mer) 24%, transparent), transparent 70%),
+  radial-gradient(45% 50% at 90% 92%, color-mix(in srgb, var(--ays) 14%, transparent), transparent 72%),
+  var(--bg); background-attachment:fixed; }
+.wrap:has(> #giris:not([hidden])){ min-height:calc(100vh - 72px); display:grid; place-items:center; }
+#giris.card{ width:min(440px, calc(100vw - 32px)); max-width:none; box-sizing:border-box; margin:24px auto;
+  padding:0; border:0; border-radius:26px; overflow:hidden;
+  /* Yarı saydam zemin düz rgba ile: color-mix «color(srgb …)» diye
+     serileşir ve yüz denetimi (tools/yuz.js) onu 0–255 sanıp siyah okurdu. */
+  background:rgba(255,255,255,.82);
+  -webkit-backdrop-filter:blur(24px) saturate(1.4); backdrop-filter:blur(24px) saturate(1.4);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.6), 0 1px 2px rgba(0,0,0,.04), 0 32px 72px -32px rgba(20,24,40,.35);
+  animation:giris-gir 520ms cubic-bezier(.32,.72,0,1) both; }
+@keyframes giris-gir{ from{ opacity:0; transform:translateY(10px) scale(.985); } to{ opacity:1; transform:none; } }
+#giris .gserit{ margin:0; gap:10px; }
+/* Afiş kartın tam eninde; başlığı ve ilk satırları görünür, altı solar. */
+#giris .gserit__kare{ max-width:none; height:clamp(240px, 40vh, 360px); border-radius:0; }
+#giris .gserit__alt{ padding:0 26px; }
+#giris .gserit__yazi{ color:var(--dim); }
+.giris__govde{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:22px 26px 24px; text-align:center; }
+.giris__kilit{ width:46px; height:46px; margin-bottom:6px; border-radius:15px; display:grid; place-items:center;
+  background:var(--mer-t); color:var(--mer); }
+.giris__kilit svg{ width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.giris__baslik{ margin:0; font-size:21px; font-weight:650; letter-spacing:-.015em; color:var(--fg); }
+.giris__alt{ max-width:34ch; margin:0 0 12px; font-size:13px; line-height:1.5; color:var(--dim); }
+.giris__alt code{ padding:1px 5px; border-radius:6px; background:var(--yuzey-2); font-size:12px; }
+.giris__form{ width:100%; display:flex; flex-direction:column; gap:10px; }
+.giris__alan{ position:relative; }
+#giris #token{ width:100%; box-sizing:border-box; min-height:48px; padding:0 48px 0 16px; border:0; border-radius:14px;
+  background:var(--yuzey-2); color:var(--fg); font:inherit; font-size:15px; letter-spacing:.02em;
+  transition:background .2s ease, box-shadow .2s ease; }
+#giris #token::placeholder{ color:var(--dim); }
+#giris #token:focus{ outline:none; background:var(--yuzey);
+  box-shadow:0 0 0 2px var(--mer), 0 0 0 6px color-mix(in srgb, var(--mer) 18%, transparent); }
+.giris__goz{ position:absolute; top:50%; right:7px; width:34px; height:34px; padding:0; border:0; border-radius:50%;
+  transform:translateY(-50%); display:grid; place-items:center; background:none; color:var(--dim); cursor:pointer; }
+.giris__goz:hover{ background:var(--gri-ray); color:var(--fg); }
+.giris__goz[aria-pressed="true"]{ color:var(--mer); }
+.giris__goz svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+#giris #gir{ min-height:48px; border-radius:14px; font-size:15px; font-weight:600; }
+.giris__not{ min-height:18px; margin:8px 0 0; font-size:13px; color:var(--fg); }
+html[data-tema="koyu"] #giris.card{ background:rgba(28,28,31,.82);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 32px 72px -32px rgba(0,0,0,.7); }
+@media (prefers-color-scheme: dark){
+  html:not([data-tema="acik"]) #giris.card{ background:rgba(28,28,31,.82);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 32px 72px -32px rgba(0,0,0,.7); }
+}
+@media (prefers-reduced-motion: reduce){ #giris.card{ animation:hkm-sol 240ms ease-out both; } }
 </style>
 <script>
 /* ⓘ kartı: dokununca açılır/kapanır, dışarısı ve Esc kapatır (fare için
