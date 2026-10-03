@@ -247,8 +247,14 @@ async function portMuhafizi(portlar, ipucu){
       await p.screenshot({ path:`${OUT}/${theme}-${pal}.png` });
     }
   }
-  console.log(bad.length ? 'KONTRAST SORUNU:\n' + bad.join('\n')
-    : olcum + ' kontrast olcumu AA gecti — en dar pay: ' + dar.name + ' '
-      + dar.r.toFixed(2) + ' (asgari ' + dar.min + ') — ' + dar.where);
+  if(bad.length){
+    console.log('KONTRAST SORUNU:\n' + bad.join('\n'));
+    /* SORUN BULAN DENETIM KIRMIZI CIKAR. Burasi sorunu yazip asagidaki
+       exit(0)'a dusuyordu; CI ve sayilar.py yalniz cikis koduna bakar,
+       yani hicbir kontrast sorunu hicbir yerde kizarmiyordu. */
+    await b.close(); srv.kill(); process.exit(1);
+  }
+  console.log(olcum + ' kontrast olcumu AA gecti — en dar pay: ' + dar.name + ' '
+    + dar.r.toFixed(2) + ' (asgari ' + dar.min + ') — ' + dar.where);
   await b.close(); srv.kill(); process.exit(0);
 })().catch(e => { console.error(e); if(srv) srv.kill(); process.exit(1); });

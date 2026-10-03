@@ -157,9 +157,19 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
         super().log_message(fmt, *args)
 
 
+class KuyrukluSunucu(ThreadingHTTPServer):
+    # Varsayilan listen(5). HTTP/1.0'da her betik ayri baglanti; kabul
+    # dongusu bir an gecikince kuyruk tasar ve Windows tasani REDDEDER:
+    # sayfa bir betigi hic yuklemez, uygulama yarim acilir. tools/kuyruk_test.py
+    request_queue_size = 128
+
+
+def sunucu_kur(port):
+    return KuyrukluSunucu(("127.0.0.1", port), partial(NoCacheHandler, directory=ROOT))
+
+
 def main():
-    handler = partial(NoCacheHandler, directory=ROOT)
-    server = ThreadingHTTPServer(("127.0.0.1", PORT), handler)
+    server = sunucu_kur(PORT)
     print(f"SPİ dev sunucusu:  http://localhost:{PORT}")
     print(f"Testler:            http://localhost:{PORT}/tests/")
     print(f"Derlenmis surum:    http://localhost:{PORT}/dist/spi.html")

@@ -107,7 +107,13 @@ async function portMuhafizi(portlar, ipucu){
     }
   }
   console.log(errs.length ? 'JS HATASI:\n'+errs.slice(0,5).join('\n') : 'js temiz');
-  console.log(bad.length ? 'DUZEN SORUNU:\n' + bad.join('\n')
-    : bakilan + ' ekran/sekmede defter düzeni temiz');
+  if(bad.length) console.log('DUZEN SORUNU:\n' + bad.join('\n'));
+  /* SORUN BULAN DENETIM KIRMIZI CIKAR. Burasi sorunu yazip asagidaki
+     exit(0)'a dusuyordu; CI ve sayilar.py yalniz cikis koduna bakar,
+     yani bozuk defter duzeni hicbir yerde kizarmiyordu. Sayfa hatasi da
+     kirmizidir (a11ycheck, designcheck gibi): hata veren ekran yarim
+     cizilmis olabilir ve olculmemis duzen «temiz» diye yazilmaz. */
+  if(bad.length || errs.length){ await b.close(); srv.kill(); process.exit(1); }
+  console.log(bakilan + ' ekran/sekmede defter düzeni temiz');
   await b.close(); srv.kill(); process.exit(0);
 })().catch(e => { console.error(e); if(srv) srv.kill(); process.exit(1); });

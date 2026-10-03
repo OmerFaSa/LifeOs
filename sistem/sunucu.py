@@ -659,6 +659,14 @@ class Giris(SimpleHTTPRequestHandler):
         return
 
 
+class KuyrukluSunucu(ThreadingHTTPServer):
+    """Varsayilan listen(5) bu surece dar: dort kapi TEK surecte, tek GIL'i
+    paylasir ve HTTP/1.0'da her betik ayri baglantidir. Kabul dongusu bir an
+    gecikince kuyruk tasar; Windows tasani REDDEDER ve sayfa bir betigi hic
+    yuklemez — uygulama yarim acilir. tools/kuyruk_test.py sinar."""
+    request_queue_size = 128
+
+
 def _sunucu_kur(klasor, port):
     """Bir sistemin sunucusu. Klasor yoksa None doner: olmayan bir sistemi
     «ayakta» gostermek, bulunmayan bir kapiya isaret etmek olurdu."""
@@ -667,7 +675,7 @@ def _sunucu_kur(klasor, port):
     if not os.path.isdir(src):
         return None
     sinif = type("Sunucu_" + klasor, (Sunucu,), {"repo": kok})
-    return ThreadingHTTPServer((HOST, port), partial(sinif, directory=src))
+    return KuyrukluSunucu((HOST, port), partial(sinif, directory=src))
 
 
 
@@ -711,7 +719,7 @@ def main():
         return 1
 
     try:
-        giris = ThreadingHTTPServer((HOST, GIRIS_PORT), Giris)
+        giris = KuyrukluSunucu((HOST, GIRIS_PORT), Giris)
     except OSError as e:
         print("  ✕ Giriş sayfası açılamadı (%s): %s" % (GIRIS_PORT, e))
         return 1
