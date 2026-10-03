@@ -62,8 +62,10 @@ function butce(rota){
 let chromium;
 try{ ({ chromium } = require('playwright')); }
 catch(e){
+  /* Playwright yoksa denetim HIC olcmemistir: 0 donmek onu CI'da ve
+     sayilar.py'de «gecti» gosterirdi. 2 = kosulamadi (runtests/smoke gibi). */
   console.error('Playwright kurulu değil: npm i -D playwright');
-  process.exit(0);
+  process.exit(2);
 }
 
 function waitForServer(url, tries){
