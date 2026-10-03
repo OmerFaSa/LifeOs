@@ -691,7 +691,10 @@ Yazıldığı ilk koşumda üç gerçek kusur buldu:
 (`brand/ortak/hafiza.js`): *senin sözün* · *sohbetten* · *tahmin*. Model hiçbir
 katmana yazamaz. Modüller hafızalarının **anlık görüntüsünü**
 `POST /api/memory/sync/<modül>` ile yollar; HKM kopyasını eşitler (modülde
-silinen düşer, HKM'de unutulan geri gelmez). King bütün kapsamları görür,
+silinen düşer, HKM'de unutulan geri gelmez). Görüntü sayfa başına bir `oturum`
+ve her gönderimde artan bir `sira` taşır; aynı oturumda geç gelen eski görüntü
+yok sayılır (`hafiza_sira`, yedeğe girmez) — yoksa «ekle»nin geciken görüntüsü
+«unut»la silineni diriltirdi. King bütün kapsamları görür,
 alt görevli yalnız kendi modülününkini. Profil › «King senin hakkında ne biliyor?»
 
 **Patronlar arası kanal** (`core/kanal.py`, `GET /api/kanal/<modül>`): öteki

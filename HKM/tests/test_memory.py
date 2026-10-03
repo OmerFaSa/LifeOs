@@ -221,6 +221,54 @@ def run():
         c.close()
     test("es zamanli iki esitleme ayni hafizayi iki kez yazmaz", t_module_sync_concurrent)
 
+    def t_module_sync_sira():
+        """Modul her degisiklikte goruntuyu BEKLEMEDEN yollar (hafiza.js);
+        varis sirasi gonderim sirasi degildir. ekle'nin [kayit] goruntusu
+        yazma kilidini beklerken unut'un [] goruntusu once uygulanirsa gec
+        gelen eski goruntu unutulani diriltiyordu (tools/entegre.js arada
+        bir: «modulde unutulan hafiza HKM'de etkin kaldi»). Goruntu
+        oturumunu ve sirasini tasir; ayni oturumda uygulanandan eski ya da
+        ona esit sira yok sayilir."""
+        con = db.connect(":memory:")
+        a = [_kayit("h1", "Pazar çalışmam")]
+        # Gonderim: 1 ekle [a] · 2 ekle'den sonra elle [a] · 3 unut [] · 4 elle []
+        # Varis:    2, 3, 4, 1
+        ok(memory.esitle(con, "ays", a, oturum="o1", sira=2)["ok"])
+        eq(len(memory.list_active(con, scope="ays")), 1)
+        eq(memory.esitle(con, "ays", [], oturum="o1", sira=3)["dusen"], 1)
+        eq(memory.esitle(con, "ays", [], oturum="o1", sira=4)["dusen"], 0)
+        r = memory.esitle(con, "ays", a, oturum="o1", sira=1)
+        ok(r["ok"])
+        ok(r["eski"])
+        eq((r["eklenen"], r["dirilen"]), (0, 0))
+        eq(memory.list_active(con, scope="ays"), [], "gec gelen eski goruntu diriltti")
+        # Ayni sira ikinci kez gelirse de yok sayilir.
+        ok(memory.esitle(con, "ays", a, oturum="o1", sira=4)["eski"])
+        eq(memory.list_active(con, scope="ays"), [])
+        # Sira MODUL basinadir: oteki modulun sirasi bunu etkilemez.
+        ok(memory.esitle(con, "spi", a, oturum="o1", sira=1)["ok"])
+        eq(len(memory.list_active(con, scope="spi")), 1)
+        # Yeni oturum (sayfa yeniden acildi, sayac bastan) uygulanir.
+        r = memory.esitle(con, "ays", a, oturum="o2", sira=1)
+        no(r.get("eski"))
+        eq(r["dirilen"], 1)
+        # Sirasiz goruntu (eski modul surumu) her zaman uygulanir.
+        r = memory.esitle(con, "ays", [])
+        no(r.get("eski"))
+        eq(r["dusen"], 1)
+        # Bozuk sira ya da oturum reddedilir; tek basina biri de.
+        for bozuk in ({"oturum": "o1", "sira": "2"}, {"oturum": "o1", "sira": 0},
+                      {"oturum": "o1", "sira": True}, {"oturum": "o1", "sira": 2 ** 63},
+                      {"oturum": "", "sira": 5},
+                      {"oturum": "x" * 61, "sira": 5}, {"oturum": 7, "sira": 5},
+                      {"sira": 5}, {"oturum": "o1"}):
+            no(memory.esitle(con, "ays", a, **bozuk)["ok"], bozuk)
+        eq(memory.list_active(con, scope="ays"), [])
+        # Sira gecici bilgidir: yedege girmez.
+        no("hafiza_sira" in db.BACKUP_TABLES)
+    test("gec gelen eski goruntu yok sayilir; yeni oturum ve sirasiz goruntu uygulanir",
+         t_module_sync_sira)
+
     def t_forgotten_in_hkm_stays_forgotten():
         con = db.connect(":memory:")
         memory.esitle(con, "esp", [_kayit("x", "diksiyonu sevmiyorum")])

@@ -1382,7 +1382,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200 if r.get("ok") else 422, r)
         # Modul hafizasinin anlik goruntusu (core/memory.py esitle). Modul
         # TAMAMINI yollar, HKM kendi kopyasini esitler; ayni goruntu iki
-        # kez gelirse hicbir sey degismez.
+        # kez gelirse hicbir sey degismez. `oturum` + `sira`: gec gelen
+        # eski goruntu yok sayilir.
         if u.path.startswith("/api/memory/sync/"):
             ham, hata = self._read_body()
             if hata:
@@ -1393,7 +1394,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
             if not isinstance(body, dict):
                 return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
-            r = memory.esitle(self.con, u.path.rsplit("/", 1)[-1], body.get("items"))
+            r = memory.esitle(self.con, u.path.rsplit("/", 1)[-1], body.get("items"),
+                              oturum=body.get("oturum"), sira=body.get("sira"))
             return self._send(200 if r.get("ok") else 422, r)
         # ---- BAM: is ac, ilerlet, iptal, devam ----
         if u.path == "/api/bam/is":

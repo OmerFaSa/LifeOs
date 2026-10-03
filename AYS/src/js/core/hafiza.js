@@ -34,6 +34,14 @@
    okur; HKM kendi kopyasını eşitler (HKM core/memory.py esitle).
    Gönderim beklenmez ve hiçbir koşulda fırlatmaz.
 
+   SIRA: gönderim beklenmediği için görüntüler HKM'ye gönderildiği
+   sırayla VARMAYABİLİR — «ekle»nin görüntüsü geç gelirse «unut»la
+   silinen kaydı HKM'de diriltirdi. Bu yüzden her görüntü sayfa başına
+   bir `oturum` ve her gönderimde artan bir `sira` taşır; HKM aynı
+   oturumda uygulanandan eski görüntüyü yok sayar. Görüntü ile sıra
+   aynı anda, ilk beklemeden önce alınır: büyük sıra hep daha yeni
+   görüntüdür. Saat kullanılmaz; saat geri gidebilir.
+
    KOMUTLAR HKM ile aynıdır — iki yerde iki ayrı dil öğrenilmesin:
      «hatırla: …» · «bunu hatırla: …» · «unutma: …» · «aklında tut: …»
      «hafızam» · «neyi hatırlıyorsun» · «benim hakkımda ne biliyorsun»
@@ -161,6 +169,9 @@ LIFEOS.Hafiza = (function(){
   function kur(ortam){
     const store = () => ortam.store();
     const durum = () => ortam.durum();
+    /* Görüntü sırası (yukarıda SIRA): sayfa başına bir oturum. */
+    const oturum = 'o' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    let sayac = 0;
     function liste(){ return (durum().hafiza || []).slice(); }
 
     async function yukle(){
@@ -186,15 +197,17 @@ LIFEOS.Hafiza = (function(){
         if(!a.token || !b.urlOk(a.url)) return { ok:false, reason:'ayar' };
         const f = ortam.fetch || (typeof fetch === 'function' ? fetch : null);
         if(!f) return { ok:false, reason:'yok' };
+        /* Görüntü ve sırası BİRLİKTE, ilk await'ten önce. */
         const items = etkin(liste()).map(x => ({ id:x.id, metin:x.metin, katman:x.katman,
           kaynak:x.kaynak, at:x.at }));
+        const sira = ++sayac;
         const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
         const zaman = ctrl ? setTimeout(() => ctrl.abort(), 4000) : null;
         try{
           const res = await f(String(a.url).replace(/\/$/, '') + '/api/memory/sync/' + b.MODULE, {
             method:'POST',
             headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + a.token },
-            body:JSON.stringify({ items }),
+            body:JSON.stringify({ items, oturum, sira }),
             signal:ctrl ? ctrl.signal : undefined,
           });
           return { ok:res.status === 200, status:res.status };

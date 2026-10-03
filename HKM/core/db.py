@@ -192,6 +192,17 @@ CREATE TABLE IF NOT EXISTS memories (
 );
 CREATE INDEX IF NOT EXISTS ix_memories_user_state ON memories(user,state,scope);
 
+/* Modul hafiza goruntusunun SIRASI (core/memory.py esitle). Modul
+   goruntuyu beklemeden yollar; varis sirasi gonderim sirasi degildir.
+   Ayni oturumda uygulanandan eski goruntu yok sayilir. Gecici sira
+   bilgisidir: yedege girmez. */
+CREATE TABLE IF NOT EXISTS hafiza_sira (
+  modul       TEXT PRIMARY KEY,
+  oturum      TEXT NOT NULL,
+  sira        INTEGER NOT NULL,
+  guncelleme  TEXT NOT NULL
+);
+
 /* BAM — Bilgi ve Aksiyon Modulu (core/bam.py). Is kuyrugu, kayitlar
    ve «bu neden var» iz zinciri. BAM hicbir module YAZMAZ; teklifi
    niyet kuyruguna (intents) birakir. */

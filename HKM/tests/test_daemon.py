@@ -820,6 +820,29 @@ def run_extra(S):
     test("modul hafizasi esitleme ucu yetki ister ve idempotenttir",
          t_memory_sync_endpoint)
 
+    def t_memory_sync_gec_gelen_eski_goruntu():
+        """tools/entegre.js arada bir: «modulde unutulan hafiza HKM'de
+        etkin kaldi». Modul goruntuyu BEKLEMEDEN yollar; ekle'nin goruntusu
+        yazma kilidini beklerken unut'unki once uygulanabilir. Gec gelen
+        eski goruntu unutulani diriltmemeli."""
+        kayit = {"id": "g1", "metin": "geç gelen deneme", "katman": "soz",
+                 "kaynak": "kullanici", "at": "2026-09-20T10:00:00"}
+
+        def etkin():
+            r = S.call("/api/memory?scope=king&limit=200")[1]
+            return [m for m in r["memories"] if m["text"] == "geç gelen deneme"]
+        S.call("/api/memory/sync/esp", body={"items": [kayit], "oturum": "o1", "sira": 2})
+        eq(len(etkin()), 1)
+        S.call("/api/memory/sync/esp", body={"items": [], "oturum": "o1", "sira": 3})
+        eq(etkin(), [])
+        kod, r = S.call("/api/memory/sync/esp", body={"items": [kayit], "oturum": "o1", "sira": 1})
+        eq(kod, 200)
+        ok(r.get("eski"), r)
+        eq(etkin(), [], "gec gelen eski goruntu unutulan hafizayi diriltti")
+        eq(S.call("/api/memory/sync/esp", body={"items": [], "sira": "bir"})[0], 422)
+    test("gec gelen eski hafiza goruntusu unutulani diriltmez",
+         t_memory_sync_gec_gelen_eski_goruntu)
+
     def t_hafiza_adayi_ucu():
         from core import memory
         con = db.connect(S.db_path)
