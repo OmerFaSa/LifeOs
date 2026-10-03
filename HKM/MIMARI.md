@@ -693,8 +693,8 @@ katmana yazamaz. Modüller hafızalarının **anlık görüntüsünü**
 `POST /api/memory/sync/<modül>` ile yollar; HKM kopyasını eşitler (modülde
 silinen düşer, HKM'de unutulan geri gelmez). Görüntü sayfa başına bir `oturum`
 ve her gönderimde artan bir `sira` taşır; aynı oturumda geç gelen eski görüntü
-yok sayılır (`hafiza_sira`, yedeğe girmez) — yoksa «ekle»nin geciken görüntüsü
-«unut»la silineni diriltirdi. King bütün kapsamları görür,
+yok sayılır (`core/goruntu.py`, tablo `goruntu_sira`, yedeğe girmez) — yoksa
+«ekle»nin geciken görüntüsü «unut»la silineni diriltirdi. King bütün kapsamları görür,
 alt görevli yalnız kendi modülününkini. Profil › «King senin hakkında ne biliyor?»
 
 **Patronlar arası kanal** (`core/kanal.py`, `GET /api/kanal/<modül>`): öteki
@@ -770,6 +770,9 @@ aynı günü paylaşır. Modül etkin hedeflerinin **özetini** yollar
 (`POST /api/hedef/sync/<modül>`, anlık görüntü; istemci `brand/ortak/hedefag.js`).
 HKM özeti kurala göre süzer: kimlik, kısa ad, durum, son tarih, vakit,
 kararın bandı, planın ilerlemesi. Hedefin cümlesi ve kişisel ölçümler gelmez.
+Gövdenin tamamı (hedefler, tatil, yarın, dil kartı) tek işlemde yazılır ve
+hafızayla aynı sıra kuralına uyar (`hedefag.goruntu_yaz`, `core/goruntu.py`):
+geç gelen eski gövde biten hedefi ya da kalkan tatili geri getirmez.
 
 Zaman bütçesi kodla kurulur: talep = etkin hedeflerin haftalık vakti
 (günlük dakika × haftada gün), vakit = kullanıcının beyanı (`POST /api/zaman`).

@@ -931,6 +931,37 @@ def run_extra(S):
         S.call("/api/hedef/sync/ays", body={"hedefler": []})
     test("hedef agi uclari: esitleme, zaman, pano — yetkili", t_hedef_endpoints)
 
+    def t_hedef_sync_gec_gelen_eski_goruntu():
+        """Hafizadaki yarisin (t_memory_sync_gec_gelen_eski_goruntu) hedef
+        agindaki ikizi: hedefag.js de goruntuyu beklemeden yollar. Gec
+        gelen eski goruntu ne biten hedefi ne de kalkan tatili geri getirir."""
+        h = {"id": "g1", "ozet": "Geç gelen hedef", "durum": "aktif", "paket": "konu"}
+        tatil = {"bas": "2026-10-10", "bit": "2026-10-12", "donus_planli": False}
+
+        def durum():
+            p = S.call("/api/hedefler")[1]
+            c = db.connect(S.db_path)
+            try:
+                tatil_n = c.execute("SELECT COUNT(*) FROM tatil_ozet WHERE modul='spi'").fetchone()[0]
+            finally:
+                c.close()
+            return p["moduller"].get("spi", 0), tatil_n
+        S.call("/api/hedef/sync/spi", body={"hedefler": [h], "tatil": tatil,
+                                            "oturum": "o1", "sira": 2})
+        eq(durum(), (1, 1))
+        S.call("/api/hedef/sync/spi", body={"hedefler": [], "tatil": None,
+                                            "oturum": "o1", "sira": 3})
+        eq(durum(), (0, 0))
+        kod, r = S.call("/api/hedef/sync/spi", body={"hedefler": [h], "tatil": tatil,
+                                                     "oturum": "o1", "sira": 1})
+        eq(kod, 200)
+        ok(r.get("eski"), r)
+        ok("butce" in r, r)
+        eq(durum(), (0, 0), "gec gelen eski goruntu hedefi ya da tatili geri getirdi")
+        eq(S.call("/api/hedef/sync/spi", body={"hedefler": [], "sira": "bir"})[0], 422)
+    test("gec gelen eski hedef goruntusu biteni ve kalkan tatili geri getirmez",
+         t_hedef_sync_gec_gelen_eski_goruntu)
+
     def t_depo_tara():
         from core import bam as _bam
         con = db.connect(S.db_path)

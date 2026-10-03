@@ -17,12 +17,12 @@ ust patrondur ve HEPSINI gorur. Modullerden gelen kayitlar `esitle` ile
 gelir ve kendi modulunun kapsamina yazilir."""
 import datetime
 
+from core import goruntu
+
 SCOPES = {"all", "king", "ays", "spi", "esp"}
 MODULLER = ("ays", "spi", "esp")
 MAX_TEXT = 600
 MAX_ESITLE = 200          # modulun tuttugu en fazla kayit (hafiza.js MAX_KAYIT)
-MAX_OTURUM = 60           # goruntu oturum kimligi (hafiza.js oturum)
-MAX_SIRA = 2 ** 53 - 1    # JS'nin tam sayi siniri; SQLite INTEGER'a da sigar
 
 KATMANLAR = {"soz": "senin sözün", "sohbet": "sohbetten", "cikarim": "tahmin"}
 KAYNAK_IZNI = {"soz": {"explicit", "kullanici"},
@@ -268,16 +268,6 @@ def _gecerli_kayit(k):
     return {"dis_id": dis_id, "metin": metin, "katman": katman, "kaynak": kaynak, "at": at}
 
 
-def _sira_gecerli(oturum, sira):
-    """Goruntunun sira bilgisi: ya ikisi birden ya hicbiri. bool bir
-    int'tir; True «1» diye gecmesin."""
-    if oturum is None and sira is None:
-        return True
-    return (isinstance(oturum, str) and 1 <= len(oturum) <= MAX_OTURUM
-            and isinstance(sira, int) and not isinstance(sira, bool)
-            and 1 <= sira <= MAX_SIRA)
-
-
 def esitle(con, modul, kayitlar, user="ben", now=None, oturum=None, sira=None):
     """Modul hafizasinin ANLIK GORUNTUSUNU HKM kopyasina esitler.
 
@@ -293,20 +283,17 @@ def esitle(con, modul, kayitlar, user="ben", now=None, oturum=None, sira=None):
       yollar (hafiza.js); varis sirasi gonderim sirasi degildir: ekle'nin
       [kayit] goruntusu yazma kilidini beklerken unut'un [] goruntusu once
       uygulanirsa eski goruntu unutulani diriltiyordu (tools/entegre.js
-      arada bir). Modul sayfa basina bir `oturum` ve her gonderimde artan
-      bir `sira` yollar; ayni oturumda uygulanandan eski ya da ona esit
-      sira hicbir sey yazmaz ({"eski": True}). Saat damgasi KULLANILMAZ:
-      saat geri giderse butun esitlemeler yok sayilirdi. Yeni oturum
-      (sayfa yeniden acildi) ve sirasiz goruntu (eski modul surumu)
-      uygulanir. Sira modul basinadir."""
+      arada bir). Goruntu `oturum` + `sira` tasir; ayni oturumda
+      uygulanandan eski ya da ona esit sira hicbir sey yazmaz
+      ({"eski": True}). Kural core/goruntu.py'dedir."""
     if modul not in MODULLER:
         return {"ok": False, "note": "Bilinmeyen modül."}
     if not isinstance(kayitlar, list):
         return {"ok": False, "note": "Kayıtlar liste olmalı."}
     if len(kayitlar) > MAX_ESITLE:
         return {"ok": False, "note": "Bir modül en fazla %d hafıza kaydı yollayabilir." % MAX_ESITLE}
-    if not _sira_gecerli(oturum, sira):
-        return {"ok": False, "note": "Görüntünün oturumu ve sırası birlikte ve geçerli gelmeli."}
+    if not goruntu.gecerli(oturum, sira):
+        return {"ok": False, "note": goruntu.NOT}
     at = _simdi(now)
     # OKU-SONRA-YAZ TEK ISLEMDIR. Modul kaydi ekler eklemez arka planda bir
     # esitleme yollar; hemen ardindan ikincisi gelebilir. Iki istek ayri
@@ -318,20 +305,11 @@ def esitle(con, modul, kayitlar, user="ben", now=None, oturum=None, sira=None):
     if kendi:
         con.execute("BEGIN IMMEDIATE")
     try:
-        # Sira da kilidin ICINDE okunur: iki goruntu ayni anda «bundan
-        # yeniyim» diyemesin.
-        if sira is not None:
-            son = con.execute("SELECT oturum, sira FROM hafiza_sira WHERE modul=?",
-                              (modul,)).fetchone()
-            if son is not None and son["oturum"] == oturum and sira <= son["sira"]:
-                if kendi:
-                    con.execute("COMMIT")
-                return {"ok": True, "modul": modul, "eski": True, "eklenen": 0,
-                        "guncellenen": 0, "dusen": 0, "dirilen": 0, "reddedilen": 0}
-            con.execute("INSERT INTO hafiza_sira(modul, oturum, sira, guncelleme) "
-                        "VALUES (?,?,?,?) ON CONFLICT(modul) DO UPDATE SET "
-                        "oturum=excluded.oturum, sira=excluded.sira, "
-                        "guncelleme=excluded.guncelleme", (modul, oturum, sira, at))
+        if goruntu.eski_mi(con, "hafiza", modul, oturum, sira, at):
+            if kendi:
+                con.execute("COMMIT")
+            return {"ok": True, "modul": modul, "eski": True, "eklenen": 0,
+                    "guncellenen": 0, "dusen": 0, "dirilen": 0, "reddedilen": 0}
         var = {r["dis_id"]: dict(r) for r in con.execute(
             "SELECT id,dis_id,text,COALESCE(katman,'soz') AS katman,state FROM memories "
             "WHERE user=? AND modul=? AND dis_id IS NOT NULL", (user, modul)).fetchall()}

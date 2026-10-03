@@ -20,6 +20,7 @@
 
 const { spawn, execFileSync } = require('child_process');
 const fs = require('fs');
+const net = require('net');
 const os = require('os');
 const path = require('path');
 
@@ -50,6 +51,21 @@ catch(e){
 }
 
 const wait = ms => new Promise(r => setTimeout(r, ms));
+
+/* PORT MUHAFIZI. Portlar ve jeton sabittir. Ikinci bir entegre ayni anda
+   kosarsa onun HKM'si portu alamaz ama saglik denetimi BU kosunun HKM'sinden
+   cevap alir: iki kosu birbirinin verisini gorur ve sahte kirmizi uretir
+   («is emri #1 zaten hazirlaniyor», «niyet kuyrugu bos»). 2026-10-03'te iki
+   paralel oturumda boyle oldu ve uc kosu da gecersiz cikti. Port doluysa
+   denetim HIC baslamaz (cikis 2: test kirmizisi degil, kosulamadi). */
+function portDolu(port){
+  return new Promise(r => {
+    const s = net.connect({ host:'127.0.0.1', port });
+    s.setTimeout(1000, () => { s.destroy(); r(false); });
+    s.once('connect', () => { s.destroy(); r(true); });
+    s.once('error', () => r(false));
+  });
+}
 
 async function waitForServer(url, tries){
   for(let i = 0; i < (tries || 60); i++){
@@ -82,6 +98,15 @@ async function pencereKapansin(){
 }
 
 async function main(){
+  const dolu = [];
+  for(const p of [HKM_PORT].concat(SISTEMLER.map(s => s.port))){
+    if(await portDolu(p)) dolu.push(p);
+  }
+  if(dolu.length){
+    console.error('Port dolu: ' + dolu.join(', ') + ' — baska bir entegre kosusu suruyor olabilir.\n'
+      + 'Iki kosu ayni HKM\'yi paylasir ve sonuclar birbirine karisirdi; o bitince yeniden kos.');
+    process.exit(2);
+  }
   const hatalar = [];
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hkm-entegre-'));
   const cfg = path.join(ROOT, 'HKM', 'config.json');

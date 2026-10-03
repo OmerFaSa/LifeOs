@@ -20,7 +20,13 @@
    3. HKM KAPALIYKEN HİÇBİR ŞEY OLMAZ. Bağlantı yoksa, yavaşsa ya da
       hata verirse gönderim sessizce düşer; modül yavaşlamaz.
    4. BÜTÇENİN CÜMLESİNİ HKM KURAR. Modül sayı hesaplamaz, gelen metni
-      gösterir (yüz kendi sayısını üretmez). */
+      gösterir (yüz kendi sayısını üretmez).
+   5. SIRA. Gönderim beklenmez; görüntüler HKM'ye gönderildiği sırayla
+      VARMAYABİLİR ve eski görüntü biten hedefi ya da kalkan tatili geri
+      getirirdi. Her görüntü sayfa başına bir `oturum` ve her gönderimde
+      artan bir `sira` taşır; HKM aynı oturumda eskisini yok sayar (HKM
+      core/goruntu.py, hafiza.js ile aynı kural). Sıra, hedefler ve tatil
+      AYNI ANDA, ilk beklemeden önce alınır. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -52,6 +58,9 @@ LIFEOS.HedefAg = (function(){
   function kur(ortam){
     let zaman = null;
     let son = null;
+    /* Görüntü sırası (yukarıda 5): sayfa başına bir oturum. */
+    const oturum = 'o' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    let sayac = 0;
 
     function baglanti(){
       const b = ortam.hkm ? ortam.hkm() : null;
@@ -123,13 +132,10 @@ LIFEOS.HedefAg = (function(){
     }
 
     async function gonder(){
+      /* Hedefler, tatil ve sıra BİRLİKTE, ilk await'ten önce (yukarıda 5). */
       let l = [];
       try{ l = (ortam.ozetler() || []).slice(0, 30); }catch(e){ return { ok:false }; }
-      const govde = { hedefler:l };
-      const y = await yarin();
-      if(y) govde.yarin = y;
-      const dk = await dilKarti();
-      if(dk) govde.dil_karti = dk;
+      const govde = { hedefler:l, oturum, sira:++sayac };
       /* Tatil modu (seri.js): yalnız tarih. Yoksa açıkça null: HKM siler. */
       if(typeof ortam.tatil === 'function'){
         try{
@@ -139,6 +145,10 @@ LIFEOS.HedefAg = (function(){
             ? { bas:t.bas, bit:t.bit, donus_planli:!!t.donus_planli } : null;
         }catch(e){ /* kanca bozuksa tatil gönderilmez */ }
       }
+      const y = await yarin();
+      if(y) govde.yarin = y;
+      const dk = await dilKarti();
+      if(dk) govde.dil_karti = dk;
       const g = await istek('/api/hedef/sync/' + ortam.modul, govde);
       if(g && g.butce) son = g.butce;
       return { ok:!!(g && g.ok), butce:son };

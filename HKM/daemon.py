@@ -1364,21 +1364,11 @@ class Handler(BaseHTTPRequestHandler):
                 if r.get("ok"):
                     r["butce"] = hedefag.butce(self.con)
                 return self._send(200 if r.get("ok") else 422, r)
-            r = hedefag.esitle(self.con, u.path.rsplit("/", 1)[-1], body.get("hedefler"))
+            # Govdenin tamami (hedefler, tatil, yarin, dil karti) tek islemde
+            # ve sirasiyla: gec gelen eski govde yok sayilir (core/goruntu.py).
+            r = hedefag.goruntu_yaz(self.con, u.path.rsplit("/", 1)[-1], body)
             if r.get("ok"):
                 r["butce"] = hedefag.butce(self.con)
-                if "tatil" in body:
-                    # Tatil modu (brand/ortak/seri.js): yalniz tarih; null siler.
-                    r["tatil"] = hedefag.tatil_yaz(self.con, u.path.rsplit("/", 1)[-1],
-                                                   body.get("tatil"))
-                if body.get("yarin") is not None:
-                    # Aksam «yarin sunlar var» (core/schedule.py): modulun sectigi isler.
-                    r["yarin"] = hedefag.yarin_yaz(self.con, u.path.rsplit("/", 1)[-1],
-                                                   body.get("yarin"))
-                if body.get("dil_karti") is not None:
-                    # Gunun dil karti (fikir 38): yalniz ESP; HKM saatinde dizer.
-                    r["dil_karti"] = hedefag.dilkart_yaz(self.con, u.path.rsplit("/", 1)[-1],
-                                                         body.get("dil_karti"))
             return self._send(200 if r.get("ok") else 422, r)
         # Modul hafizasinin anlik goruntusu (core/memory.py esitle). Modul
         # TAMAMINI yollar, HKM kendi kopyasini esitler; ayni goruntu iki

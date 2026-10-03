@@ -265,7 +265,7 @@ def run():
             no(memory.esitle(con, "ays", a, **bozuk)["ok"], bozuk)
         eq(memory.list_active(con, scope="ays"), [])
         # Sira gecici bilgidir: yedege girmez.
-        no("hafiza_sira" in db.BACKUP_TABLES)
+        no("goruntu_sira" in db.BACKUP_TABLES)
     test("gec gelen eski goruntu yok sayilir; yeni oturum ve sirasiz goruntu uygulanir",
          t_module_sync_sira)
 
