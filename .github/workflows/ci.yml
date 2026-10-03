@@ -162,6 +162,14 @@ jobs:
       - name: Marka adlandırması ve yol muhafızı
         run: python3 tools/marka.py --sina
 
+      # DİNLEME KUYRUĞU. Python sunucusu varsayılan olarak listen(5) ile
+      # açılır; Windows taşan bağlantıyı reddeder ve sayfa bir betiği hiç
+      # yüklemez (2026-10-03: paralel denetimlerde açılışların yarısından
+      # fazlası). Linux taşanı reddetmez; burada test kuyruk boyunu, yani
+      # listen()'e giden sayıyı sınar.
+      - name: Sunucular bekleyen bağlantıyı reddetmez
+        run: python3 tools/kuyruk_test.py
+
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
       # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç
