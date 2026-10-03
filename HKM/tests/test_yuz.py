@@ -390,6 +390,10 @@ def t_cam_kabuk():
     for s in ('<nav class="gez" id="gez"', 'class="moduller"', 'data-kapi="4173"', 'id="ust-araclar"'):
         ok(s in m, s)
     no("#000000" in cam, "koyu tema saf siyah")
+    # Suzulen kart (2026-10-03, «kartlara da golge ekle»): modullerle ayni jeton;
+    # kartin icindeki kart golge almaz.
+    for s in ("--kart-golge:0 1px 2px rgba(20,24,40,.03)", ".card :is(.card, .serit__kutu){ --kart-golge:0 0 #0000; }"):
+        ok(s in cam, s)
     ok(m.index('<style id="hkm-sade">') < m.index("<!-- MEYDAN (kullan"), "sade blok Meydan blogundan once")
 
 

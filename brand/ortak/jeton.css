@@ -20,7 +20,9 @@
       çubuk, çizgi (≥ 3:1). Yazı ve dolu düğme için aynı ailenin AA
       tonu (--spi-ink, ≥ 4.5:1) kullanılır. v4'ün SPİ yeşili 4,16, ESP
       turuncusu 3,52, soluk grisi 2,70 ölçüldü: yazıda AA'yı geçmezler.
-   4. Yüzey TON + İNCE ÇİZGİ ile ayrılır; gölge yalnız açılır katmanda.
+   4. Yüzey TON + İNCE ÇİZGİ ile ayrılır; belirgin gölge yalnız açılır
+      katmanda. Kartın altında yalnız çok hafif bir süzülme gölgesi durur
+      (--kart-golge, kabuk.css «SÜZÜLEN KART»; kullanıcı, 2026-10-03).
    5. Koyu tema vitrinin değerleridir; sistem ayarını izler ya da elle
       seçilir (data-theme). Azaltılmış harekette bütün süreler 0. */
 
@@ -88,7 +90,7 @@
 
   --ring:color-mix(in srgb, var(--primary) 45%, transparent);
 
-  /* ---- gölge: kartta YOK; yalnız açılır katman ---- */
+  /* ---- gölge: açılır katman; kartın süzülme gölgesi kabuk.css'te ---- */
   --shadow:none;
   --shadow-lg:0 1px 2px rgba(17,19,24,.05), 0 20px 50px rgba(17,19,24,.12);
   --scrim:rgba(17,19,24,.40);

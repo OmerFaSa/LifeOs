@@ -139,8 +139,8 @@ SP.C = (function(){
 
   /* Kutu (katalog 02): TEK KUTU İSKELETİ — v4. Her ekranda aynı: solda simge
      ve ad, sağda KESİNLİK YUVASI. Yuva boşken de durur; içini K'nin sayı
-     bileşeni doldurur (kesinlik glifi, tazelik). Kart gölgesizdir: yüzey ton
-     ve ince çizgiyle ayrılır (temel.css). `bitisik`: gövde kendi dolgusunu
+     bileşeni doldurur (kesinlik glifi, tazelik). Kart yüzey tonuyla
+     ayrılır, altında yalnız hafif süzülme gölgesi (kabuk.css). `bitisik`: gövde kendi dolgusunu
      taşır (tablo, liste satırları). */
   function Kutu(o){
     const bas = o.ad || o.simge || o.yuva != null;

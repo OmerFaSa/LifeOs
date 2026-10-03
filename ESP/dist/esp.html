@@ -102,7 +102,9 @@
       çubuk, çizgi (≥ 3:1). Yazı ve dolu düğme için aynı ailenin AA
       tonu (--spi-ink, ≥ 4.5:1) kullanılır. v4'ün SPİ yeşili 4,16, ESP
       turuncusu 3,52, soluk grisi 2,70 ölçüldü: yazıda AA'yı geçmezler.
-   4. Yüzey TON + İNCE ÇİZGİ ile ayrılır; gölge yalnız açılır katmanda.
+   4. Yüzey TON + İNCE ÇİZGİ ile ayrılır; belirgin gölge yalnız açılır
+      katmanda. Kartın altında yalnız çok hafif bir süzülme gölgesi durur
+      (--kart-golge, kabuk.css «SÜZÜLEN KART»; kullanıcı, 2026-10-03).
    5. Koyu tema vitrinin değerleridir; sistem ayarını izler ya da elle
       seçilir (data-theme). Azaltılmış harekette bütün süreler 0. */
 
@@ -170,7 +172,7 @@
 
   --ring:color-mix(in srgb, var(--primary) 45%, transparent);
 
-  /* ---- gölge: kartta YOK; yalnız açılır katman ---- */
+  /* ---- gölge: açılır katman; kartın süzülme gölgesi kabuk.css'te ---- */
   --shadow:none;
   --shadow-lg:0 1px 2px rgba(17,19,24,.05), 0 20px 50px rgba(17,19,24,.12);
   --scrim:rgba(17,19,24,.40);
@@ -11565,6 +11567,33 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
   .site--v5 .kahraman .nextup__why{ margin-top:6px; }
 }
 
+/* ================================================================
+   SÜZÜLEN KART (2026-10-03, kullanıcı: önce «gölge göz yoruyor sanki»,
+   sonra «vazgeçtim, kartlara da gölge ekle»). Beyaz kart camın üstünde
+   kesip yapıştırılmış gibi düz duruyordu; altına neredeyse görünmeyen,
+   geniş ve aşağı kayık bir gölge girer: kart levhanın üstünde hafifçe
+   süzülür. Levhanın kendi gölgesi (zemin.css) olduğu gibi kalır.
+   · Tek jeton (--kart-golge); koyuda kendi değeri (açığın gölgesi grafit
+     zeminde kirli gri leke gibi durur).
+   · İçteki kart gölge almaz: kartın içindeki kart, ve açılır katmandaki
+     (alt çekmece, balon) kart — iç içe gölge çerçeve içinde çerçevedir.
+   · Görünmeyen kap gölge almaz: kahraman defter satırı (.lrow.kahraman)
+     yalnız bir sarmalayıcıdır, gölgesi boşlukta asılı kalırdı.
+   jeton.css kural 4 buna göre güncellendi: belirgin gölge yine yalnız
+   açılır katmanda; kartta yalnız bu süzülme gölgesi.
+   ================================================================ */
+:root{ --kart-golge:0 1px 2px rgba(20,24,40,.03), 0 12px 32px -20px rgba(20,24,40,.18); }
+:root[data-theme="dark"]{ --kart-golge:0 1px 1px rgba(0,0,0,.22), 0 14px 34px -20px rgba(0,0,0,.55); }
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ --kart-golge:0 1px 1px rgba(0,0,0,.22), 0 14px 34px -20px rgba(0,0,0,.55); }
+}
+.kutu, .card:not(.card--flat), .site--v5 .ledger .lrow:not(.kahraman),
+.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{ box-shadow:var(--kart-golge); }
+.donen, .site--v5 .nextup{ box-shadow:inset 0 0 0 1px var(--kart-kenar), var(--kart-golge); }
+:is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup,
+  .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover)
+  :is(.kutu, .card, .lrow, .donen, .nextup){ --kart-golge:0 0 #0000; }
+
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
@@ -13953,7 +13982,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'a38c01de', at:'2026-10-03 11:17', dirty:true };
+ESP.BUILD = { id:'55a24945', at:'2026-10-03 12:06', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -47443,8 +47472,8 @@ ESP.C = (function(){
 
   /* Kutu (katalog 02): TEK KUTU İSKELETİ — v4. Her ekranda aynı: solda simge
      ve ad, sağda KESİNLİK YUVASI. Yuva boşken de durur; içini K'nin sayı
-     bileşeni doldurur (kesinlik glifi, tazelik). Kart gölgesizdir: yüzey ton
-     ve ince çizgiyle ayrılır (temel.css). `bitisik`: gövde kendi dolgusunu
+     bileşeni doldurur (kesinlik glifi, tazelik). Kart yüzey tonuyla
+     ayrılır, altında yalnız hafif süzülme gölgesi (kabuk.css). `bitisik`: gövde kendi dolgusunu
      taşır (tablo, liste satırları). */
   function Kutu(o){
     const bas = o.ad || o.simge || o.yuva != null;

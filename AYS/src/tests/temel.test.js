@@ -35,9 +35,14 @@
       /* Yuva boşken de durur: K'nin kesinlik glifi hep aynı yere düşer. */
       const d2 = yerlestir(C.Kutu({ ad:'Seri', govde:'—' }));
       expect(!!d2.querySelector('.kutu__yuva')).toBe(true);
-      /* Kart gölgesi yok (v4): gölge yalnız açılır katmanda. */
-      expect(getComputedStyle(k).boxShadow).toBe('none');
-      d.remove(); d2.remove();
+      /* Kart camın üstünde hafifçe süzülür (kullanıcı, 2026-10-03: «kartlara da
+         gölge ekle»; v4'te kart gölgesizdi). Kartın içindeki kart gölge almaz:
+         iç içe gölge çerçeve içinde çerçeve gibi durur. */
+      expect(getComputedStyle(k).boxShadow === 'none').toBe(false);
+      const d3 = yerlestir(C.Kutu({ ad:'Dış', govde:C.Kutu({ ad:'İç', govde:'—' }) }));
+      const ic = d3.querySelectorAll('.kutu')[1];
+      expect(/^(none|rgba\(0, 0, 0, 0\) 0px 0px 0px 0px)$/.test(getComputedStyle(ic).boxShadow)).toBe(true);
+      d.remove(); d2.remove(); d3.remove();
     });
 
     it('oz-165 modül renksiz de ayırt edilir: renk + harf + şekil', () => {
