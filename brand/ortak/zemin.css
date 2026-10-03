@@ -127,6 +127,12 @@ html[data-zemin="yumusak"] body::after{
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
 }
 
+/* Üstteki 2 px modül şeridi (base.css .site::before) yumuşak zeminde çizilmez:
+   hangi modülde olunduğunu zeminin rengi zaten söylüyor; ekranın tepesinde
+   koyu bir kıl çizgisi gibi duruyordu (tasarım turu, 2026-10-03). Sade
+   zeminde şerit kalır. */
+html[data-zemin="yumusak"] .site::before{ display:none; }
+
 /* Çekmece çubuğu (yazı + nokta) zeminle bir: düz --bg şeridi levhanın
    üstünde bant gibi duruyordu. Yapışık olduğunda kayan içeriği
    bulanıklaştırır (renk katmaz): yapışmamışken arkası düz levha, iz

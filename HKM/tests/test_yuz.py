@@ -369,6 +369,30 @@ def t_giris_karti():
         ok(s in sade, s)
 
 
+def t_cam_kabuk():
+    """Kullanici (2026-10-03): «Merkez kismini da diger kisimlar gibi sade ve
+    camsi efektle yapar misin». Masaustunde uc modulun kabugu: Merkez
+    morundan tureyen yumusak zemin, icerigin arkasinda buzlu levha, dar cam
+    kenar (yalniz simge, ustune gelince adlar), sol ustte logo yok.
+    Isaretleme DEGISMEZ (cekmece adlari, sistem gecisi, kimlikler): simgeler
+    CSS maskesidir; giris karti kendi zemininde kalir."""
+    m = _yuz()
+    sade = m[m.index('<style id="hkm-sade">'):]
+    sade = sade[:sade.index('</style>')]
+    cam = sade[sade.index("CAM KABUK"):]
+    for s in ("oklch(from var(--mer)", "body:not(:has(#giris:not([hidden])))::before",
+              ".wrap::before", "backdrop-filter:saturate(160%) blur(24px)", ".ust:hover, .ust:has(:focus-visible)",
+              ".marka{ display:none; }", "prefers-reduced-transparency"):
+        ok(s in cam, s)
+    # yedi cekmecenin her birinin simgesi var; yazilari aynen duruyor
+    for yol in ("bugun", "teklifler", "hedefler", "sistemler", "ofis", "sohbet", "ayarlar"):
+        ok('.gez a[data-yol="' + yol + '"]' in cam, yol + " simgesi")
+    for s in ('<nav class="gez" id="gez"', 'class="moduller"', 'data-kapi="4173"', 'id="ust-araclar"'):
+        ok(s in m, s)
+    no("#000000" in cam, "koyu tema saf siyah")
+    ok(m.index('<style id="hkm-sade">') < m.index("<!-- MEYDAN (kullan"), "sade blok Meydan blogundan once")
+
+
 def run():
     suite("HKM yüzü — giriş şeridi")
     test("üç adım vardır", t_giris_seridi_uc_adim)
@@ -391,3 +415,4 @@ def run():
     test("fiş yükleme: önizleme, onay, küçültme", t_fis_yukleme)
     test("yüz denetimi yüzün her görünümünü gezer (Motto, Hedefler)", t_denetim_her_gorunumu_gezer)
     test("giriş kartı: ortada buğulu kart, göster/gizle, Enter (2026-10-03)", t_giris_karti)
+    test("cam kabuk: zemin, buzlu levha, dar cam kenar (2026-10-03)", t_cam_kabuk)

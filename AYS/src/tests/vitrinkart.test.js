@@ -857,6 +857,26 @@ describe('Dönen widget', () => {
       expect(k.querySelector('.is-on[data-donen-madde]').getAttribute('data-donen-madde')).toBe('1');
     });
   });
+  /* Tasarım turu (2026-10-03): yan yana iki dönen kart aynı anda dönünce
+     bütün sıra birlikte yanıp sönüyordu. Birlikte çizilen kartlar yarım
+     tur arayla döner. */
+  it('birlikte çizilen iki kart aynı anda dönmez: ikincisi yarım tur sonra', () => {
+    icinde(V().donen({ id:'t-donen-6', maddeler:MAD }) + V().donen({ id:'t-donen-7', maddeler:MAD }), k => {
+      const [a, b] = k.querySelectorAll('.donen');
+      const sira = el => el.querySelector('.is-on[data-donen-madde]').getAttribute('data-donen-madde');
+      const t = Date.now() + 60000, h = { azHareket:false }, T = V().DONEN_ARA;
+      V().donenAdim(t, h);
+      V().donenAdim(t + T + 10, h);
+      expect(sira(a)).toBe('1');
+      expect(sira(b)).toBe('0');
+      V().donenAdim(t + T * 1.5 + 10, h);
+      expect(sira(a)).toBe('1');
+      expect(sira(b)).toBe('1');
+      V().donenAdim(t + T * 2 + 20, h);
+      expect(sira(a)).toBe('2');
+      expect(sira(b)).toBe('1');
+    });
+  });
   it('durdurulan kart dönmez; noktaya basmak o maddeye götürür', () => {
     icinde(V().donen({ id:'t-donen-3', maddeler:MAD }), k => {
       const d = k.querySelector('.donen');

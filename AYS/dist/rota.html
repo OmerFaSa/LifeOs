@@ -11864,6 +11864,90 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
 .bildirim__bos small{ font-size:13px; color:var(--text-3); }
 @media (prefers-reduced-motion:reduce){ .kmenu--yan:not(.is-alttan){ animation:sol-gel 200ms ease-out both; } }
 
+/* ================================================================
+   FERAH (2026-10-03, kullanıcı: «tasarım profesyonel duruyor değil mi»
+   → «bunları tüm sistem için düzelt, daha profesyonel bir hale getir» ·
+   «daha bi ferah, hoş bir olay olsun»). Üç modülde aynı. Telefonun
+   ölçüsü değişmez: orada yer dar ve sıkı ölçü zaten oturdu.
+   · Tek kart ölçüsü: iç boşluk 24 px (kutu, defter satırı, dönen kart,
+     sıradaki iş, eski kart). Önce 18, 20 ve 22 px karışıktı: Bugün'de
+     yan yana üç kartın yazısı üç ayrı sol çizgideydi.
+   · Ritim: kartlar arası 20 px, Bugün'ün alanları arası 32 px, başlık
+     ile içerik arası 12 px daha geniş; levhanın kenarı ile içerik arası geniş
+     ekranda 56 px (önce 36 px: içerik camın kenarına yapışık duruyordu).
+   · Başlık sırası: kahraman kartın başlığı 22 px (önce 26 px; 28 px'lik
+     sayfa başlığıyla yarışıyor, göz iki başlangıç noktası görüyordu).
+   · Kartın ayağındaki ya da hemen altındaki sessiz bağlantı (hayalet
+     düğme) YAZISIYLA kartın sol çizgisine hizalanır: düğmenin iç boşluğu
+     kadar sola çekilir (13 px içeride duruyordu); üzerine gelince açılan
+     hap yine düğmenin kendisidir.
+   · ⓘ tek çizim: kart başlığındaki ipucu düğmesi sayfa başlığındaki
+     simgeyle aynı (ince halka + i, --text-3). Önce biri kalın halkalı
+     «i» harfiydi, öbürü ince SVG; yan yana iki farklı ⓘ duruyordu.
+   · Mor yalnız Merkez'indir (jeton.css kural 2): Bugün'ün Öneri alanı
+     mor çerçeveyi yalnız Merkez'in önerisi varken taşır; modülün kendi
+     önerisi (Patron) sıradan bir karttır. Önerinin kendi kutusu alanın
+     içinde ikinci kez dolgu almaz (çerçeve içinde çerçeve).
+   ================================================================ */
+
+/* ⓘ ipucu düğmesi: sayfa başlığının `bilgi` simgesiyle aynı çizim (simge.js
+   kbk-ic: 24'lük kutuda r 8,5 halka, 1,7 çizgi). Yalnız düğme hâli
+   (`[data-act="hint"]`): `.field .hint` aynı sınıfı alan yazısında kullanır. */
+.hint[data-act="hint"]{ width:17px; height:17px; border:0; border-radius:50%; background:none;
+  font-size:0; color:transparent; vertical-align:middle; top:-1px;
+  transition:background var(--dur) var(--ease); }
+.hint[data-act="hint"]::before{ content:''; position:absolute; inset:0; background:var(--text-3);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M12 11v5M12 7.6v.1'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M12 11v5M12 7.6v.1'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+  transition:background var(--dur) var(--ease); }
+.hint[data-act="hint"]:hover, .hint[data-act="hint"][aria-expanded="true"]{ background:var(--surface-2); border-color:transparent; }
+.hint[data-act="hint"]:hover::before, .hint[data-act="hint"][aria-expanded="true"]::before{ background:var(--text); }
+
+/* Hayalet bağlantı yazısıyla hizalı (kart ayağı; kartın hemen altı). */
+.kutu__ayak > .btn--ghost:first-child{ margin-left:-14px; }
+.kutu__ayak > .btn--ghost.btn--sm:first-child{ margin-left:-12px; }
+.bugun__alan > p.small > .btn--ghost.btn--sm:first-child{ margin-left:calc(var(--kp, 20px) - 12px); }
+
+/* Mor yalnız Merkez'in önerisinde. */
+.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{ border-radius:var(--r); }
+.site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *:not(:has(.okart--merkez)){ border-color:var(--kart-kenar); }
+.site--v5 .bugun__alan[aria-label="Öneri"] .okart{ padding:0; border:0; background:none; }
+
+@media (min-width:680px){
+  .site--v5{ --kp:24px; }
+
+  /* Levha ile içerik arası: geniş ekranda 56 px (levha kenardan 12 px içeride). */
+  .site--v5 .sayfa{ padding-inline:clamp(32px, 3.6vw, 68px); }
+  /* Başlık (ve altındaki bölüm seçici) ile içerik arası 12 px daha geniş;
+     seçici başlığa yapışık kalır (başlığın kendi alt boşluğu değişmez). */
+  .site--v5 .sayfa > .content{ padding-top:12px; }
+
+  /* Bugün'ün ritmi. */
+  .site--v5 .bugun{ gap:32px; }
+  .site--v5 .bugun__alan, .bugun__alan[aria-label="Durum"], .bugun__alan[aria-label="Özet"], .bugun__cift{ gap:20px; }
+  .site--v5 .ledger{ gap:20px; }
+
+  /* Tek kart ölçüsü. */
+  .kutu__bas{ padding-top:20px; padding-inline:var(--kp); }
+  .kutu__govde:not(.kutu__govde--bitisik){ padding-inline:var(--kp); }
+  .kutu__ayak{ padding-inline:var(--kp); padding-bottom:16px; }
+  .card:not(.card--pad-sm){ padding:22px var(--kp); }
+  .site--v5 .ledger > .lrow:not(.kahraman), .site--v5 .ledger > .ledger__item,
+  .site--v5 .ledger > .lband > .lrow, .site--v5 .ledger > .lband > :is(.stack, .stack-sm, .stack-xs) > .lrow{
+    padding:20px var(--kp); }
+  .site--v5 .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *{ padding:20px var(--kp); }
+  .site--v5 .nextup{ padding:20px var(--kp); }
+  .site--v5 .kahraman .nextup{ padding:26px var(--kp); }
+  .donen{ min-height:140px; padding:18px var(--kp) 44px; }
+  .donen__alt{ left:var(--kp); right:12px; bottom:10px; }
+  .akis__satir{ min-height:52px; padding-inline:var(--kp); }
+
+  /* Başlık sırası: sayfa başlığı 28 px, kahramanın başlığı 22 px. */
+  .site--v5 .kahraman .nextup__title, .kahraman .nextup__title{ font-size:22px; font-weight:650; letter-spacing:-.015em;
+    line-height:1.25; margin-top:6px; }
+  .site--v5 .kahraman .nextup__why{ margin-top:6px; }
+}
+
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
@@ -12691,6 +12775,12 @@ html[data-zemin="yumusak"] body::after{
   content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:var(--zemin-gren);
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
 }
+
+/* Üstteki 2 px modül şeridi (base.css .site::before) yumuşak zeminde çizilmez:
+   hangi modülde olunduğunu zeminin rengi zaten söylüyor; ekranın tepesinde
+   koyu bir kıl çizgisi gibi duruyordu (tasarım turu, 2026-10-03). Sade
+   zeminde şerit kalır. */
+html[data-zemin="yumusak"] .site::before{ display:none; }
 
 /* Çekmece çubuğu (yazı + nokta) zeminle bir: düz --bg şeridi levhanın
    üstünde bant gibi duruyordu. Yapışık olduğunda kayan içeriği
@@ -14249,7 +14339,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'25254331', at:'2026-10-03 11:02', dirty:true };
+R.BUILD = { id:'a38c01de', at:'2026-10-03 11:17', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -17468,16 +17558,20 @@ window.LIFEOS = window.LIFEOS || {};
     return !!(a && a !== document.body && el.contains(a));
   }
   /* Tek saat: sayfadaki bütün dönen kartlar için. Kart yeniden çizilse de
-     çalışır (durum DOM'da ve DONEN_SIRA'da). */
+     çalışır (durum DOM'da ve DONEN_SIRA'da). Birlikte çizilen kartlar
+     (aynı adımda ilk kez görülenler) yarım tur arayla başlar: yan yana iki
+     kart aynı anda dönünce bütün sıra birlikte yanıp sönüyordu (tasarım
+     turu, 2026-10-03). */
   /* o.azHareket: tercihi dışarıdan verir (test); verilmezse cihazınki. */
   function donenAdim(simdi, o){
     if(typeof document === 'undefined') return;
     const t = simdi || Date.now();
     const az = o && o.azHareket != null ? !!o.azHareket : donenAzHareket();
+    let yeni = 0;
     document.querySelectorAll('.donen[data-donen]').forEach(el => {
-      if(!el.dataset.son){ el.dataset.son = String(t); return; }
+      if(!el.dataset.son){ el.dataset.son = String(t + (yeni++ % 2) * DONEN_ARA / 2); return; }
       if(donenDuruyor(el, az)){ el.dataset.son = String(t); return; }
-      if(t - Number(el.dataset.son) >= DONEN_ARA) donenGit(el);
+      if(t - Number(el.dataset.son) >= DONEN_ARA){ donenGit(el); el.dataset.son = String(t); }
     });
   }
   if(typeof document !== 'undefined' && typeof setInterval === 'function'){

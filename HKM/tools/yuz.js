@@ -128,8 +128,15 @@ const OLC = `(() => {
       if(c.length >= 3 && a > 0.1) return c.slice(0, 3).map(Number);
       p = p.parentElement;
     }
-    const c = oku(getComputedStyle(document.body).backgroundColor);
-    return c.length >= 3 ? c.slice(0, 3).map(Number) : [255, 255, 255];
+    /* Gövde saydamsa (masaüstünde cam kabuk: zemin kökte ve sabit katmanda,
+       yazı buzlu levhanın üstünde) zemin kökün rengidir; saydam gövde
+       «siyah» sayılmaz. */
+    for(const k of [document.body, document.documentElement]){
+      const c = oku(getComputedStyle(k).backgroundColor);
+      const a = c.length > 3 ? Number(c[3]) : 1;
+      if(c.length >= 3 && a > 0.1) return c.slice(0, 3).map(Number);
+    }
+    return [255, 255, 255];
   };
   const oran = (a, b) => {
     const la = luminans(a[0], a[1], a[2]), lb = luminans(b[0], b[1], b[2]);
@@ -232,6 +239,14 @@ async function main(){
         await page.fill('#token', TOKEN);
         await page.click('#gir');
         await wait(1500);
+        /* Masaüstünde kenar dar camdır ve üzerine gelince içeriğin ÜSTÜNDE
+           açılır (cam kabuk, 2026-10-03): kenardan gezinen kullanıcı gibi fare
+           içeriğe döner, kenar kapanır; yoksa açık kenar sayfadaki düğmenin
+           üstünü örter ve ölçüm de açık kenarla yapılırdı. */
+        const kenardanCik = async () => {
+          await page.mouse.move(genislik - 20, Math.round(yukseklik / 2));
+          await wait(420);
+        };
         const duraklar = GORUNUMLER.map(g => ({ ad:g, git:async () => {
           if(CEKMECE[g]){
             await page.click('#gez a[data-yol="' + CEKMECE[g] + '"]');
@@ -240,11 +255,12 @@ async function main(){
           }else{
             await page.click('#gez a[data-yol="' + g + '"]');
           }
+          await kenardanCik();
         }}));
         for(const a of AYAR_SEKMELERI){
           duraklar.push({ ad:'ayarlar/' + a, git:async () => {
             await page.click('#ayar-bag');
-            await wait(250);
+            await kenardanCik();
             await page.click('[data-ayar="' + a + '"]');
           }});
         }

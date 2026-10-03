@@ -1744,16 +1744,20 @@ window.LIFEOS = window.LIFEOS || {};
     return !!(a && a !== document.body && el.contains(a));
   }
   /* Tek saat: sayfadaki bütün dönen kartlar için. Kart yeniden çizilse de
-     çalışır (durum DOM'da ve DONEN_SIRA'da). */
+     çalışır (durum DOM'da ve DONEN_SIRA'da). Birlikte çizilen kartlar
+     (aynı adımda ilk kez görülenler) yarım tur arayla başlar: yan yana iki
+     kart aynı anda dönünce bütün sıra birlikte yanıp sönüyordu (tasarım
+     turu, 2026-10-03). */
   /* o.azHareket: tercihi dışarıdan verir (test); verilmezse cihazınki. */
   function donenAdim(simdi, o){
     if(typeof document === 'undefined') return;
     const t = simdi || Date.now();
     const az = o && o.azHareket != null ? !!o.azHareket : donenAzHareket();
+    let yeni = 0;
     document.querySelectorAll('.donen[data-donen]').forEach(el => {
-      if(!el.dataset.son){ el.dataset.son = String(t); return; }
+      if(!el.dataset.son){ el.dataset.son = String(t + (yeni++ % 2) * DONEN_ARA / 2); return; }
       if(donenDuruyor(el, az)){ el.dataset.son = String(t); return; }
-      if(t - Number(el.dataset.son) >= DONEN_ARA) donenGit(el);
+      if(t - Number(el.dataset.son) >= DONEN_ARA){ donenGit(el); el.dataset.son = String(t); }
     });
   }
   if(typeof document !== 'undefined' && typeof setInterval === 'function'){
