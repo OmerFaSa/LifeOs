@@ -1114,7 +1114,12 @@ R.App = (function(){
     const fn = (sc.handle && sc.handle[act]) || globalHandle[act];
     if(!fn) return;
     if(el.tagName !== 'INPUT') e.preventDefault();
-    try{ await fn(el, e); }
+    const kayitBas = Date.now();
+    try{
+      await fn(el, e);
+      /* Kaydet dokunuşu: yalnız gerçekten kayıt yazıldıysa (hareket.js). */
+      if(window.LIFEOS && window.LIFEOS.HAREKET && window.LIFEOS.HAREKET.kaydedildi) window.LIFEOS.HAREKET.kaydedildi(el, act, kayitBas);
+    }
     catch(err){ console.error('Eylem hatası ('+act+'):', err); UI.toast('Bir şeyler ters gitti'); }
     /* Veri değişmiş olabilir: XP sayımını tazele (gecikmeli, sessiz). */
     xpTara();

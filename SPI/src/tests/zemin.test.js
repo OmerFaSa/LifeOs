@@ -145,4 +145,39 @@
       }
     });
   });
+  /* 2026-10-05 (kullanıcı, «6 güzel»): zemin günün saatine göre çok az kayar. */
+  describe('Zemin — günün saati', () => {
+    const Z = () => window.LIFEOS.ZEMIN;
+    const saat = (h, m) => new Date(2026, 9, 5, h, m || 0);
+    it('sabah sıcak, gün ortası nötr, akşam altın, gece serin; geçiş yumuşak', () => {
+      expect(Z().saatTonu(saat(7))).toEqual({ renk:'#ffc58a', guc:0.14 });
+      expect(Z().saatTonu(saat(13)).guc).toBe(0);
+      expect(Z().saatTonu(saat(18, 30)).renk).toBe('#ffb37a');
+      const gece = Z().saatTonu(saat(23)).renk, kanal = i => parseInt(gece.slice(i, i + 2), 16);
+      expect(kanal(5) > kanal(1)).toBe(true);                      // gece serin: mavi > kırmızı
+      const g8 = Z().saatTonu(saat(8)).guc;
+      expect(g8 < 0.14 && g8 > 0.04).toBe(true);                  // 7 ile 10 arası, sıçrama yok
+      expect(Z().saatTonu(saat(2)).guc >= 0.1).toBe(true);
+      expect(/^#[0-9a-f]{6}$/.test(Z().saatTonu(saat(21, 15)).renk)).toBe(true);
+    });
+    it('uygulanınca kökte --zemin-saat yazılır', () => {
+      Z().saatUygula();
+      expect(document.documentElement.style.getPropertyValue('--zemin-saat') !== '').toBe(true);
+    });
+    it('tema değişince ton hemen tazelenir; koyuda yarısı', async () => {
+      const kok = document.documentElement, eski = kok.getAttribute('data-theme');
+      const tik = () => new Promise(r => setTimeout(r, 0));
+      const once = Z()._saatSaglayici(() => saat(7));
+      try{
+        kok.setAttribute('data-theme', 'light'); await tik();
+        expect(kok.style.getPropertyValue('--zemin-saat')).toContain(' 14%');
+        kok.setAttribute('data-theme', 'dark'); await tik();
+        expect(kok.style.getPropertyValue('--zemin-saat')).toContain(' 7%');
+      }finally{
+        Z()._saatSaglayici(once);
+        if(eski === null) kok.removeAttribute('data-theme'); else kok.setAttribute('data-theme', eski);
+        await tik();
+      }
+    });
+  });
 })();

@@ -399,4 +399,39 @@
       }finally{ d.remove(); }
     });
   });
+  /* 2026-10-05 (kullanıcı, «3 güzel»): Kaydet dokunuşu yalnız gerçekten
+     kayıt yazıldıysa; doğrulama geri çevirdiyse «kaydedildi» hissi yok. */
+  describe('Hareket — Kaydet dokunuşu', () => {
+    const H = () => window.LIFEOS.HAREKET;
+    function kur(){
+      const kap = document.createElement('div');
+      kap.innerHTML = '<div class="kutu"><button class="btn" data-act="save-deneme"><span>Kaydet</span></button></div>';
+      document.body.appendChild(kap);
+      return kap;
+    }
+    async function hareketli(fn){
+      const eski = window.matchMedia;
+      window.matchMedia = q => ({ matches:false, media:q, addEventListener(){}, removeEventListener(){}, addListener(){}, removeListener(){} });
+      try{ await fn(); }finally{ window.matchMedia = eski; }
+    }
+    it('kayıt yazıldıysa düğme onaya döner, kartta ışık geçer', () => hareketli(async () => {
+      const kap = kur(), b = kap.querySelector('button');
+      try{
+        const bas = Date.now();
+        window.dispatchEvent(new CustomEvent('lifeos:kayit', { detail:{ yollar:['x'] } }));
+        expect(H().kaydedildi(b, 'save-deneme', bas)).toBe(true);
+        expect(b.classList.contains('h-kaydedildi')).toBe(true);
+        expect(kap.querySelector('.kutu').classList.contains('h-isik')).toBe(true);
+      }finally{ kap.remove(); }
+    }));
+    it('kayıt yazılmadıysa ya da eylem kaydetme değilse oynamaz', () => hareketli(async () => {
+      const kap = kur(), b = kap.querySelector('button');
+      try{
+        expect(H().kaydedildi(b, 'save-deneme', Date.now() + 60000)).toBe(false);   // sonra kayıt yok
+        window.dispatchEvent(new CustomEvent('lifeos:kayit'));
+        expect(H().kaydedildi(b, 'go', 0)).toBe(false);
+        expect(b.classList.contains('h-kaydedildi')).toBe(false);
+      }finally{ kap.remove(); }
+    }));
+  });
 })();

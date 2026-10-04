@@ -90,6 +90,11 @@ window.LIFEOS.HESAP = (function(){
   let sunucu = null;          // /api/hesap/durum cevabı; null = API yok/ulaşılamadı
   let erteleId = null, araId = null;
   let yenileBekliyor = false, sonGorunur = 0, panelMesaj = '';
+  /* EŞİTLENDİ İŞARETİ (kullanıcı, 2026-10-05, «7 güzel»): bir şey gerçekten
+     gidip geldiyse bulut simgesinde onay bir kez belirip söner. Boş tur
+     (dakikalık yoklama) işaret koymaz. */
+  const ONAY_MS = 1800;
+  let onayBitis = 0;
   const dinleyiciler = [];
 
   function kac(s){
@@ -276,7 +281,7 @@ window.LIFEOS.HESAP = (function(){
         + '» hesabına bağlı; «' + o.a + '» ile eşitlenmez.');
     }
     durumYaz('esitleniyor', '');
-    let uygulanan = 0;
+    let uygulanan = 0, giden = 0;
     try{
       let im = ortam.depo.oku(anahtar('imlec', a));
       if(!bagli || !im || typeof im !== 'object'){
@@ -291,6 +296,7 @@ window.LIFEOS.HESAP = (function(){
           ? (im.kalan || []).filter(y => hepsi[y] !== undefined).map(y => ({ y, d:hepsi[y], z:1, ilk:true }))
           : Object.entries(siraOku(a)).map(([y, z]) => ({ y, d:hepsi[y] === undefined ? null : hepsi[y], z:Number(z) || 1 }));
         const parti = partile(aday);
+        giden += parti.length;
         const c = await istek(base, '/api/hesap/esitle', { alan:a, cihaz:cihazKimligi(), cihaz_ad:cihazAdi(),
           son:im.son || 0, gonder:parti }, o.j, ZAMAN_ASIMI);
         /* Uzaktan gelenler; sırada daha yeni değişikliği olan yol atlanır (söz 7). */
@@ -317,6 +323,10 @@ window.LIFEOS.HESAP = (function(){
         if(!c.daha && (!kalan || !parti.length)) break;
       }
       ortam.depo.yaz(anahtar('son', a), ortam.simdi());
+      if(giden || uygulanan){
+        onayBitis = ortam.simdi() + ONAY_MS;
+        ortam.zamanla(() => { onayBitis = 0; dugmeTazele(); }, ONAY_MS);
+      }
       durumYaz('tamam', '');
     }catch(e){
       if(e.kod === 401){
@@ -484,7 +494,8 @@ window.LIFEOS.HESAP = (function(){
   /* kabuk.js düğmeyi çizerken sorar. */
   function dugme(){
     const o = oturum();
-    const sinif = ' is-' + (hal.durum === 'tamam' && bekleyen() ? 'bekliyor' : hal.durum);
+    const sinif = ' is-' + (hal.durum === 'tamam' && bekleyen() ? 'bekliyor' : hal.durum)
+      + (onayBitis > ortam.simdi() ? ' is-esitlendi' : '');
     const metin = durumMetni();
     return {
       sinif, gizli:gizliMi(),
@@ -864,7 +875,7 @@ window.LIFEOS.HESAP = (function(){
     if(erteleId != null) ortam.iptal(erteleId);
     erteleId = null;
     ayar = null; hal = { durum:'bilinmiyor', mesaj:'' }; sunucu = null;
-    aktif = null; siradaki = null; yenileBekliyor = false; panelMesaj = '';
+    aktif = null; siradaki = null; yenileBekliyor = false; panelMesaj = ''; onayBitis = 0;
     kapi = { gorunum:'giris', soru:null, ad:'', adres:null };
     kapiKapat();
   }

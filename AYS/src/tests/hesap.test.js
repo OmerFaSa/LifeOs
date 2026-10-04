@@ -354,6 +354,21 @@
       expect(esitleIstekleri(srv).length).toBe(0);
     }));
 
+    it('eşitlendi işareti yalnız bir şey gidip gelince; boş turda yok', () => sahneyle(async () => {
+      const srv = sunucuKur(), c = cihazKur(srv);
+      c.ortam.simdi = () => 1700000000000;
+      const h = sahne(c);
+      await hazir();
+      await h.girisYap('omer', 'parola-123');
+      await h.esitle();
+      c.depo.yaz('notes/x', { t:1 });
+      await h.esitle();
+      expect(h.dugme().sinif).toContain('is-esitlendi');
+      h._ortam.simdi = () => 1700000000000 + 5000;              // işaret söndü
+      await h.esitle();                                           // boş tur
+      expect(h.dugme().sinif.indexOf('is-esitlendi') < 0).toBe(true);
+    }));
+
     it('büyük alan partilerle gider, hepsi sunucuya ulaşır', () => sahneyle(async () => {
       const veri = {};
       for(let i = 0; i < 900; i++) veri['k/' + i] = { i };

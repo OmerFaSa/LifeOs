@@ -516,6 +516,41 @@ window.LIFEOS.HAREKET = (function(){
     window.addEventListener('scroll', onizleKapat, true);
   }
 
-  return { once, sonra, tekCanli, baslikKopyala, raf, kesimler, kaynak, gecis, halka, onizleIcerik, odakCik, kur,
+  /* ------------------------------------------------ KAYDET DOKUNUŞU
+     (kullanıcı, 2026-10-05, «3 güzel»): «Kaydet»e basınca düğme bir an
+     onay işaretine döner, kartın kenarından modül renginde ince bir ışık
+     geçer. YALNIZ GERÇEKTEN KAYIT YAZILDIYSA: depo her yazmada
+     `lifeos:kayit` yayar (store.js); düğmeye basıldıktan sonra yazma
+     olmadıysa (doğrulama geri çevirdi) dokunuş oynamaz. */
+  const KAYDET_EYLEM = /^save-|kaydet/;
+  let sonKayit = 0;
+  if(typeof window !== 'undefined'){
+    window.addEventListener('lifeos:kayit', () => { sonKayit = Date.now(); });
+  }
+  function kaydedildi(el, act, bas){
+    if(!el || !KAYDET_EYLEM.test(act || '') || azMi()) return false;
+    if(!(sonKayit >= (bas || 0))) return false;
+    /* Kaydetmek çoğu zaman yeniden çizer: aynı eylemli düğme yeni ekranda aranır. */
+    let d = el.isConnected ? el : null;
+    if(!d){
+      const sec = '[data-act="' + String(act).replace(/["\\]/g, '') + '"]';
+      d = Array.from(document.querySelectorAll(sec)).find(gorunur) || null;
+    }
+    if(!d) return false;
+    d.classList.remove('h-kaydedildi');
+    void d.offsetWidth;
+    d.classList.add('h-kaydedildi');
+    setTimeout(() => d.classList.remove('h-kaydedildi'), 1100);
+    const kart = d.closest('.kutu, .card, .sheet, .entry, .lrow');
+    if(kart){
+      kart.classList.remove('h-isik');
+      void kart.offsetWidth;
+      kart.classList.add('h-isik');
+      setTimeout(() => kart.classList.remove('h-isik'), 1000);
+    }
+    return true;
+  }
+
+  return { once, sonra, tekCanli, baslikKopyala, raf, kesimler, kaynak, gecis, halka, onizleIcerik, odakCik, kur, kaydedildi,
     isaretKaydir, EN_COK_KAPANAN };
 })();

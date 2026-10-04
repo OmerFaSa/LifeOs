@@ -176,9 +176,11 @@ ESP.Store = (function(){
      ait anahtarlar (CIHAZA_AIT: HKM jetonu) eşitlenmez. */
   let onDegisim = null;
   function degisti(yollar){
-    if(typeof onDegisim !== 'function') return;
     const y = (yollar || []).filter(p => CIHAZA_AIT.indexOf(p) < 0);
     if(!y.length) return;
+    /* Kaydet dokunuşu (brand/ortak/hareket.js) gerçekten yazıldığını bilsin. */
+    try{ window.dispatchEvent(new CustomEvent('lifeos:kayit', { detail:{ yollar:y } })); }catch(e){ /* olay yok */ }
+    if(typeof onDegisim !== 'function') return;
     try{ onDegisim(y); }catch(e){ console.error('[Store:esitle]', e); }
   }
   function hepsi(){ return cihazsiz(localAll()); }

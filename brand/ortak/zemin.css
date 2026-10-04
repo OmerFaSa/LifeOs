@@ -115,6 +115,7 @@ html[data-zemin="yumusak"] .site--v5 .sayfasonu{ background:transparent; }
 html[data-zemin="yumusak"] body::before{
   content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:
+    radial-gradient(140% 90% at 50% 0%, var(--zemin-saat, transparent), transparent 75%),
     radial-gradient(120% 90% at 50% 45%, transparent 55%, var(--zemin-golge) 100%),
     radial-gradient(58% 62% at 14% 10%, var(--zemin-1), transparent 70%),
     radial-gradient(48% 54% at 90% 8%, var(--zemin-2), transparent 70%),

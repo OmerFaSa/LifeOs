@@ -140,3 +140,15 @@ html.hesap-kapi-acik{ overflow:hidden; }
 @keyframes hesap-kapi-gel{ from{ opacity:0; } to{ opacity:1; } }
 @keyframes hesap-kart-gel{ from{ opacity:0; transform:translateY(10px) scale(.985); } to{ opacity:1; transform:none; } }
 @media (prefers-reduced-motion:reduce){ .hesap-kapi, .hesap-kapi__kart{ animation:none; } }
+
+/* ---------- eşitlendi işareti (bir kez) ----------
+   Buluttaki onay çizgisi çizilir, nokta bir kez nefes alır, söner. */
+.ust__hesap.is-esitlendi .kbk-ic path:last-child{ stroke-dasharray:9; stroke-dashoffset:9;
+  animation:hesap-onay .7s cubic-bezier(.32,.72,0,1) forwards; }
+.ust__hesap.is-esitlendi .ust__hesap-nokta{ opacity:1; transform:none; background:var(--ok);
+  animation:hesap-onay-nokta 1.6s cubic-bezier(.32,.72,0,1) forwards; }
+@keyframes hesap-onay{ to{ stroke-dashoffset:0; } }
+@keyframes hesap-onay-nokta{ 0%{ transform:scale(.4); } 30%{ transform:scale(1.6); } 100%{ transform:scale(1); } }
+@media (prefers-reduced-motion:reduce){
+  .ust__hesap.is-esitlendi .kbk-ic path:last-child, .ust__hesap.is-esitlendi .ust__hesap-nokta{ animation:none; stroke-dashoffset:0; }
+}
