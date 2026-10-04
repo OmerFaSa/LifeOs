@@ -95,6 +95,28 @@
       expect(R.gpxOku('<gpx><trk><trkseg></trkseg></trk></gpx>').why).toBe('Dosyada GPS noktası yok.');
     });
 
+    /* iPhone (2026-10-04): ekran kapalıyken rotayı başka bir uygulama
+       kaydeder (ör. Open GPX Tracker), GPX SPİ'ye aktarılır. Böyle dosyalar
+       metadata, işaret noktası (wpt), extensions taşır; bazıları baştaki
+       boş satır ya da BOM ile başlar — XML bildirimi o zaman ilk karakter
+       değildir ve ayrıştırıcı dosyayı reddederdi. */
+    it('iPhone kayıt uygulamasının dosyası okunur: metadata, wpt, extensions, BOM ve baştaki boşluk', () => {
+      const p = hat(4, 10, 3, { ele:i => 50 + i });
+      const nokta = q => '\n\t\t\t<trkpt lat="' + q.lat + '" lon="' + q.lon + '">\n\t\t\t\t<ele>' + q.ele
+        + '</ele>\n\t\t\t\t<time>' + new Date(q.t).toISOString() + '</time>\n\t\t\t\t<extensions><speed>2.8</speed></extensions>\n\t\t\t</trkpt>';
+      const metin = '﻿\n  <?xml version="1.0" encoding="UTF-8"?>\n'
+        + '<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
+        + ' version="1.1" creator="Open GPX Tracker for iOS">\n'
+        + '\t<metadata><name>Sabah</name><time>' + new Date(p[0].t).toISOString() + '</time></metadata>\n'
+        + '\t<wpt lat="41" lon="29"><name>Başlangıç</name></wpt>\n'
+        + '\t<trk>\n\t\t<trkseg>' + p.map(nokta).join('') + '\n\t\t</trkseg>\n\t</trk>\n</gpx>\n';
+      const g = R.gpxOku(metin);
+      expect(g.ok).toBe(true);
+      expect(g.noktalar).toHaveLength(4);
+      expect(g.noktalar[3].ele).toBe(53);
+      expect(g.noktalar[3].t).toBe(p[3].t);
+    });
+
     it('tür yazısı tanınır; sayı kodu tahmin edilmez', () => {
       expect(R.turOf('Running')).toBe('kosu');
       expect(R.turOf('trail running')).toBe('kosu');
@@ -441,6 +463,18 @@
       expect(d.querySelector('.rota .harita')).toBeNull();
       expect(d.querySelector('.rota').textContent).toContain('Hareket ettikçe rota haritada çizilir');
       expect(d.querySelector('.rota input[data-change="rota-dosya"]')).toBeTruthy();
+    });
+
+    /* iPhone'un dosya seçicisi `accept`'i türlere çevirir; tanımadığı
+       `.gpx` uzantısında dosya soluk görünür, seçilemez. Genel XML ve veri
+       türleri de verilir; GPX olmayan dosyayı okuyucu zaten reddeder. */
+    it('GPX seçicisi iPhone\'da dosyayı soluk bırakmaz: genel XML ve veri türlerini de kabul eder', async () => {
+      resetState();
+      const d = document.createElement('div');
+      d.innerHTML = await scr.render();
+      const kabul = d.querySelector('.rota input[data-change="rota-dosya"]').getAttribute('accept').split(',');
+      ['.gpx', 'application/gpx+xml', 'application/xml', 'text/xml', 'application/octet-stream']
+        .forEach(t => expect(kabul).toContain(t));
     });
 
     it('türü bilinmeyen rota tür seçilmeden kaydedilmez', async () => {

@@ -80,6 +80,9 @@ SP.Rota = (function(){
      iki parça arasındaki boşluk mesafe sayılmaz. */
   function gpxOku(metin){
     if(typeof metin !== 'string' || !metin.trim()) return { ok:false, why:'Dosya boş.' };
+    /* BOM ve baştaki boşluk: XML bildirimi ilk karakter olmalı, yoksa
+       ayrıştırıcı dosyayı reddeder (bazı kayıt uygulamalarının dışa aktarımı). */
+    metin = metin.replace(/^[﻿\s]+/, '');
     let doc;
     try{ doc = new DOMParser().parseFromString(metin, 'application/xml'); }
     catch(e){ return { ok:false, why:'Dosya okunamadı.' }; }

@@ -13352,7 +13352,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'7fb6ab1c', at:'2026-10-04 00:47', dirty:true };
+SP.BUILD = { id:'a7952f16', at:'2026-10-04 01:17', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -39140,6 +39140,9 @@ SP.Rota = (function(){
      iki parça arasındaki boşluk mesafe sayılmaz. */
   function gpxOku(metin){
     if(typeof metin !== 'string' || !metin.trim()) return { ok:false, why:'Dosya boş.' };
+    /* BOM ve baştaki boşluk: XML bildirimi ilk karakter olmalı, yoksa
+       ayrıştırıcı dosyayı reddeder (bazı kayıt uygulamalarının dışa aktarımı). */
+    metin = metin.replace(/^[﻿\s]+/, '');
     let doc;
     try{ doc = new DOMParser().parseFromString(metin, 'application/xml'); }
     catch(e){ return { ok:false, why:'Dosya okunamadı.' }; }
@@ -55179,7 +55182,8 @@ SP.Screens.move = (function(){
   function gpxDugmesi(){
     return html`<label class="btn btn--sm btn--ghost rota__ekle">
       ${raw(UI.icon('plus'))}<span class="btn__label">GPX ekle</span>
-      <input type="file" class="sr-only" accept=".gpx,application/gpx+xml"
+      <input type="file" class="sr-only"
+        accept=".gpx,application/gpx+xml,application/xml,text/xml,application/octet-stream"
         data-change="rota-dosya" aria-label="GPX dosyası seç"/>
     </label>`;
   }

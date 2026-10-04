@@ -302,7 +302,8 @@ SP.Screens.move = (function(){
   function gpxDugmesi(){
     return html`<label class="btn btn--sm btn--ghost rota__ekle">
       ${raw(UI.icon('plus'))}<span class="btn__label">GPX ekle</span>
-      <input type="file" class="sr-only" accept=".gpx,application/gpx+xml"
+      <input type="file" class="sr-only"
+        accept=".gpx,application/gpx+xml,application/xml,text/xml,application/octet-stream"
         data-change="rota-dosya" aria-label="GPX dosyası seç"/>
     </label>`;
   }
