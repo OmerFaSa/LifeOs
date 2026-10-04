@@ -14005,7 +14005,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'7fb6ab1c', at:'2026-10-04 00:47', dirty:true };
+ESP.BUILD = { id:'87409f24', at:'2026-10-04 19:02', dirty:false };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -23421,7 +23421,46 @@ LIFEOS.Ofis = (function(){
       + '«hatırla: …» diye kendisi yazar.',
     'Kararı kullanıcı verir. Gerekçeyi ve seçeneği açık söylersin; baskı kurmazsın, suçlamazsın, '
       + 'kötü haberi iyi haberin arkasına saklamazsın.',
+    'Kendi adınla ve rolünle konuşursun; kendini «yapay zekâ», «dil modeli» ya da «asistan» diye '
+      + 'tanıtmaz, duygun olup olmadığını tartışmazsın. Kullanıcıya «sen» diye hitap edersin; '
+      + '«Kullanıcı» demezsin.',
   ];
+
+  /* SELAMLASMA — kisa sosyal mesaj. Selama RAPOR GONDERILMEZ: brifing
+     modelin onundeyse model onu okur («merhaba» → «aktif kelime sayin 0»).
+     AYS'nin CHAT_KINDS.selam kalibiyla ayni; yalniz kisa mesajda gecerli. */
+  const SELAM_RE = /^\s*(selam|merhaba|meraba|mrb|slm|sa[,.! ]|sa$|aleyküm|günaydın|iyi akşamlar|iyi geceler|iyi günler|naber|ne haber|nasılsın|nasilsin|napıyorsun|hey|hi[,.! ]|hello|kanka|hocam|müsait misin|orada mısın|teşekkür|sağol|sağ ol|tşk|tsk|eyvallah|görüşürüz|hoşça kal|hoşçakal|tamam|peki|süper|harika|kimsin|sen kimsin|ne iş yaparsın)/i;
+  function selamMi(text){
+    const q = String(text || '').trim().toLocaleLowerCase('tr');
+    return !!q && q.length <= 64 && SELAM_RE.test(q);
+  }
+
+  /* SAYI HAVUZU — ajanin yazabilecegi sayilar brifingin DEGERLERIDIR.
+     Anahtar adlari ve YAPI sayilari (kutu sirasi, pencere uzunlugu, surum)
+     olcum degildir: gemma3:4b «box:5»i «5 kart», «windowDays:14»u
+     «shadowing suresi 14 gun» diye okudu ve metin icinde arama bunu
+     yakalamadi. Yapi anahtarinin altindaki sayi havuza girmez. */
+  /* YANKI — kucuk model istemi geri kusabilir: brifing JSON'unu ya da
+     bolum basligini («BRİFİNG:», «KURALLAR») oldugu gibi yazar. Bu bir
+     cevap degildir; kural motorunun cumlesi gecer. */
+  const YANKI_RE = /(BRİFİNG|KURALLAR|ORTAK İLKELER|NASIL ÇALIŞIRSIN|KİMLİK:|KONUMUN:|"cert"\s*:|\{\s*"[a-zA-Z_]+"\s*:)/;
+  function yankiMi(text){ return YANKI_RE.test(String(text || '')); }
+
+  const YAPI_ANAHTARI = { box:1, windowDays:1, rank:1, version:1, index:1, order:1 };
+  function sayiHavuzu(brief){
+    const out = [];
+    const sayilar = s => (String(s).match(/\d+(?:[.,]\d+)?/g) || [])
+      .map(x => Number(x.replace(',', '.'))).filter(Number.isFinite);
+    const walk = (v, anahtar) => {
+      if(v == null || YAPI_ANAHTARI[anahtar]) return;
+      if(typeof v === 'number'){ if(Number.isFinite(v)) out.push(v); return; }
+      if(typeof v === 'string'){ sayilar(v).forEach(n => out.push(n)); return; }
+      if(Array.isArray(v)){ v.forEach(x => walk(x, anahtar)); return; }
+      if(typeof v === 'object') Object.keys(v).forEach(k => walk(v[k], k));
+    };
+    walk(brief, '');
+    return out;
+  }
 
   function katOf(ajan){
     return ajan && (ajan.lead || ajan.id === 'patron') ? 'patron' : 'uzman';
@@ -23477,11 +23516,20 @@ LIFEOS.Ofis = (function(){
     };
     bolum('KİMLİK', o.kimlik);
     bolum('KONUMUN', liste(konum(o.modul, o.ajan, o), false));
-    bolum('NASIL ÇALIŞIRSIN', liste(o.yontem, true));
+    /* Selamda yontem ve kurallar gitmez: kucuk model onlari kopyaliyordu
+       («son 30 günlük üretimin…»). Ortak ilkeler kalir. */
+    bolum('NASIL ÇALIŞIRSIN', o.selam ? '' : liste(o.yontem, true));
     bolum('ORTAK İLKELER (tartışılmaz)', liste(ILKELER, true));
-    bolum(o.kurallarAdi || 'KURALLAR', liste(o.kurallar, true));
+    bolum(o.kurallarAdi || 'KURALLAR', o.selam ? '' : liste(o.kurallar, true));
     bolum('ÜSLUP', o.uslup);
+    if(o.model) bolum('ARKADAKİ MODEL', 'Cümlelerini ' + o.model + ' dil modeli kuruyor. '
+      + 'Hangi modelle çalıştığın sorulursa bunu dürüstçe söylersin.');
     if(o.hafiza && String(o.hafiza).trim()) b.push(String(o.hafiza).trim());
+    if(o.selam){
+      bolum('BU MESAJ', 'Kısa bir selamlaşma ya da sohbet. Rapor okuma, sayı söyleme. Adınla, '
+        + 'sıcak ve kısa karşılık ver (en fazla iki cümle); istersen ne konuşmak istediğini sor.');
+      return b.join('\n\n');
+    }
     bolum('BRİFİNG (kural motorundan; tek veri kaynağın)', o.brifing);
     return b.join('\n\n');
   }
@@ -23689,7 +23737,7 @@ LIFEOS.Ofis = (function(){
     return { ilet };
   }
 
-  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, kanalKur, bamIstegi, bamKur, bamMadde };
+  return { MODULLER, KATLAR, ILKELER, katOf, konum, istem, selamMi, sayiHavuzu, yankiMi, kanalKur, bamIstegi, bamKur, bamMadde };
 })();
 
 /* ==== js/core/urun.js ==== */
@@ -41005,6 +41053,37 @@ ESP.Beacon = (function(){
     return { ok:true, note:'Bağlandı. İşaret açıldı; ne gönderildiği aşağıda yazıyor.' };
   }
 
+  /* TEK TIKLA BAĞLAMA — HKM yüzündeki «Üç sistemi bağla» düğmesi.
+
+     HKM yüzü eşleme penceresini açar ve bu modülü GİZLİ bir çerçevede
+     `#hkm-bagla` işaretiyle yükler. Burada: eşle (işaret böylece açılır),
+     bir kez gönder, sonucu üst pencereye bildir. Kural değişmez: işaret
+     yine kullanıcının bastığı bir düğmeyle açılır; pencere bearer ister
+     ve tek kullanımlıktır. Mesaj jeton TAŞIMAZ; yalnız yerel kökene gider. */
+  function bagCagrisiMi(){
+    try{ return window.location.hash === '#hkm-bagla' && window.parent !== window; }
+    catch(e){ return false; }
+  }
+  async function hkmBagla(){
+    let ust = '';
+    try{ ust = new URL(document.referrer).origin; }catch(e){ ust = ''; }
+    if(!/^http:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/i.test(ust)) return { ok:false, note:'Yerel olmayan çağrı.' };
+    let sonuc;
+    if(profilim() === 'ornek'){
+      sonuc = { ok:false, neden:'ornek', note:'Örnek profil açık; örnek profil HKM\'ye bağlanamaz.' };
+    }else{
+      const r = await pair(ust);
+      sonuc = { ok:!!r.ok, note:r.note };
+      if(r.ok){
+        const g = await send({ force:true });
+        sonuc.gonderim = !!(g && g.ok);
+      }
+    }
+    sonuc.tur = 'hkm-bagla'; sonuc.modul = MODULE;
+    try{ window.parent.postMessage(sonuc, ust); }catch(e){}
+    return sonuc;
+  }
+
   /* ------------------------------------------------------------- gönderim */
 
   function urlOk(url){
@@ -41621,7 +41700,7 @@ ESP.Beacon = (function(){
   /* Ayar ekranı «Varsayılana dön» için okur (T5, 182); kopya verilir. */
   const varsayilan = () => Object.assign({}, VARSAYILAN);
 
-  return { varsayilan, load, save, settings, collect, payload, preview, contract, metric,
+  return { varsayilan, bagCagrisiMi, hkmBagla, load, save, settings, collect, payload, preview, contract, metric,
     MODULE, profil:profilim, urlOk, due, send, ping, pair, backfill, levelOf, LEVELS,
     intents, answerIntent, applyIntent, canApply, INTENT_KINDS, APPLIABLE, desteOf, kayitOku,
     kartOnizle, kartGeriAl,
@@ -49256,6 +49335,28 @@ ESP.LLM = (function(){
     return head.length >= s.length * 0.4 ? head : s;
   }
 
+  /* Cumle tavani KODDA uygulanir. Istem «en fazla 4 cumle» der ama
+     kucuk yerel modeller (gemma3:4b) bunu sik dinlemez: on bes cumlelik
+     bir ders anlatip sonuna «bir uzmana danisin» ekler. Tavan asilirsa
+     ilk n tam cumle kalir. Sayi icindeki nokta (1.500) ve kisaltma
+     sonrasi bosluk olmayan nokta cumle sonu sayilmaz. n gecersizse
+     metne dokunulmaz. */
+  function capSentences(text, n){
+    const s = String(text || '').trim();
+    const k = Math.floor(Number(n));
+    if(!s || !(k > 0)) return s;
+    const re = /[.!?…]+["'»”)]*(?=\s|$)/g;
+    let m, count = 0;
+    while((m = re.exec(s))){
+      count++;
+      if(count === k){
+        const end = m.index + m[0].length;
+        return end < s.length ? s.slice(0, end).trim() : s;
+      }
+    }
+    return s;
+  }
+
   /* Kesilen metnin son kelimesi yarim kalmis olabilir ("kaybı" degil
      "kayb"). Devam istemeden once o kelime atilir ve modelden kaldigi
      noktadan sonrasi istenir: boylece birlestirme ne kelime boler ne de
@@ -50534,7 +50635,7 @@ ESP.LLM = (function(){
     chat, complete, test, ready, diagnose,
     listModels, modelsFor, cachedModels, clearCatalog, MODEL_STORE,
     errorText, retryable, resumable, offline, onceOnline, inSandbox, KEY_STORE,
-    truncated, trimToSentence, joinContinuation, dropLastWord, stripThinking,
+    truncated, trimToSentence, capSentences, joinContinuation, dropLastWord, stripThinking,
     endpointFor, normalizeOpenAI, normalizeGemini, classify,
     hasImages, supportsVision, visionChain,
     DEFAULT_MAX_TOKENS,
@@ -50565,6 +50666,7 @@ ESP.LLM = (function(){
 window.ESP = window.ESP || {};
 
 ESP.Office = (function(){
+  const CUMLE_TAVANI = 3;   // uslup istemindeki «En fazla 3 cümle»
   const U = ESP.U;
   const S = ESP.S;
 
@@ -50596,7 +50698,15 @@ ESP.Office = (function(){
   function cfgFor(agentId){
     const s = settings();
     const own = s.perAgent && s.perAgent[agentId];
-    return own && own.provider ? own : { provider:s.provider, model:s.model };
+    /* Yerel saglayici (Ollama, LM Studio) adres ister: adres tasinmazsa
+       LLM.ready() hep false doner ve ofis kural motorunda kalirdi. Adres
+       ayarda yoksa saglayicinin kendi varsayilani kullanilir. */
+    const cfg = own && own.provider ? Object.assign({}, own) : { provider:s.provider, model:s.model, endpoint:s.endpoint };
+    if(!cfg.endpoint){
+      const p = ESP.PROVIDERS && ESP.PROVIDERS[cfg.provider];
+      cfg.endpoint = (p && p.endpoint) || '';
+    }
+    return cfg;
   }
 
   function ready(agentId){
@@ -51014,10 +51124,11 @@ ESP.Office = (function(){
   /* Istem iskeleti LIFEOS.Ofis.istem'dedir (brand/ortak/ofis.js):
      kimlik -> konum (King > Patron > uzman) -> yontem -> ortak ilkeler ->
      ESP kurallari -> uslup -> hafiza -> brifing. */
-  function systemPrompt(agentId, b){
+  function systemPrompt(agentId, b, ek){
+    const e = ek || {};
     const a = ESP.AGENT_BY_ID[agentId] || ESP.AGENT_BY_ID.patron;
     return LIFEOS.Ofis.istem({
-      modul:'esp', ajan:a, yontem:a.yontem,
+      modul:'esp', ajan:a, yontem:a.yontem, selam:!!e.selam, model:e.model || '',
       kimlik:'Sen ' + a.name + ' adında bir entelektüel pratik ajanısın. Rolün: ' + a.role + '.\n'
         + 'Alanın: ' + a.scope + '\n'
         + 'Alanın DIŞI: ' + a.notScope + ' Alan dışı bir soru gelirse kısaca ilgili uzmana yönlendir.',
@@ -51088,7 +51199,10 @@ ESP.Office = (function(){
        olcum iddiasi degil dilin kendisidir. */
     const unsupported = [];
     if(o.brief){
-      const havuz = JSON.stringify(o.brief);
+      /* Metin icinde arama («"5" JSON'da bir yerde geciyor mu») kutu sirasini
+         ve pencere uzunlugunu da kabul ediyordu. Artik yalniz DEGERLER. */
+      const havuz = (window.LIFEOS && LIFEOS.Ofis && LIFEOS.Ofis.sayiHavuzu)
+        ? LIFEOS.Ofis.sayiHavuzu(o.brief) : [];
       const sayilar = s.match(/\d+(?:[.,]\d+)?/g) || [];
       const gorulen = {};
       sayilar.forEach(n => {
@@ -51098,9 +51212,9 @@ ESP.Office = (function(){
         gorulen[n] = true;
         /* Yuvarlanmis hali de kabul edilir: brifingde 0.384 varsa metinde
            "%38" yazmasi uydurma degildir. */
-        const yakin = [n, String(Math.round(sayi)), String(Math.round(sayi * 100) / 100),
-          String(sayi / 100)];
-        if(!yakin.some(v => havuz.indexOf(v) >= 0)){
+        const yakin = h => Math.abs(h - sayi) < 0.051 || Math.round(h) === sayi
+          || Math.abs(h * 100 - sayi) < 0.51;
+        if(!havuz.some(yakin)){
           unsupported.push(n);
         }
       });
@@ -51143,20 +51257,30 @@ ESP.Office = (function(){
     /* Gecmis acikca kapatilabilir: toplantida her ajan gundeme TEK basina
        cevap verir, sohbet gecmisi oraya karismaz. */
     const gecmis = o.history === false ? [] : historyFor(agentId, o.history);
+    const selam = !!(question && window.LIFEOS && LIFEOS.Ofis.selamMi && LIFEOS.Ofis.selamMi(question));
 
     try{
       const res = await ESP.LLM.chat(cfg, {
-        system:systemPrompt(agentId, b),
+        system:systemPrompt(agentId, b, { selam, model:cfg.model }),
         messages:gecmis.concat([{ role:'user', text:question || 'Durumu özetle.' }]),
         temperature:settings().temperature,
         maxTokens:o.maxTokens || 600,
       });
-      const check = validate(res.text, { agentId, brief:b });
+      /* Selamda brifing gonderilmedi: sayi da ona gore denetlenir. */
+      if(LIFEOS.Ofis.yankiMi && LIFEOS.Ofis.yankiMi(res.text)){
+        return { text:fallback.text, source:'rules', brief:b,
+          note:'Model istemi geri yazdı; kural motorunun cümlesi gösterildi.' };
+      }
+      /* Model adindaki rakam («gemma3:4b») uydurma sayi degildir. */
+      const havuzEk = { model:String(cfg.model || '') };
+      const check = validate(res.text, { agentId, brief:selam ? havuzEk : Object.assign({}, b, havuzEk) });
       if(!check.ok){
         return { text:fallback.text, source:'rules', brief:b,
           blocked:check, note:'Model çıktısı ev kurallarına takıldı: ' + check.note };
       }
-      return { text:res.text.trim(), source:'model', brief:b, model:cfg.model };
+      /* Istemdeki tavan («En fazla 3 cümle») kodda da uygulanir. */
+      const kisa = ESP.LLM.capSentences ? ESP.LLM.capSentences(res.text, o.sentences || CUMLE_TAVANI) : res.text.trim();
+      return { text:kisa, source:'model', brief:b, model:cfg.model };
     }catch(e){
       return Object.assign({}, fallback, {
         error:ESP.LLM.errorText ? ESP.LLM.errorText(e) : String(e && e.message || e) });
@@ -57598,6 +57722,13 @@ window.ESP = window.ESP || {};
 ESP.Screens = ESP.Screens || {};
 
 ESP.Screens.team = (function(){
+  /* Mesaj saati. m.at ISO tarih metnidir; fmtClock SANIYE bekler ve
+     «NaN:NaN» basiyordu. Gecersiz tarih bos kalir. */
+  function saatOf(at){
+    const d = new Date(at);
+    if(isNaN(d.getTime())) return '';
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
   const U = ESP.U, S = ESP.S;
   const { html, raw, when, map, cls } = ESP.h;
   const K = ESP.C;
@@ -57626,7 +57757,7 @@ ESP.Screens.team = (function(){
           ${when(kaynak, () => K.Badge({ label:kaynak.label, tone:kaynak.tone, icon:false }))}
           ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
           ${when(m.error, () => K.Badge({ label:'hata', tone:'danger' }))}
-          <span class="tiny dim">${U.fmtClock ? U.fmtClock(m.at) : ''}</span>
+          <span class="tiny dim">${saatOf(m.at)}</span>
         </div>
       </div>`;
   }
@@ -62828,6 +62959,9 @@ ESP.App = (function(){
 
       wireStoreErrors();
       await M.loadAll();
+      /* «Üç sistemi bağla» (HKM yüzü): gizli çerçevede yalnız eşle ve dön;
+         ekran çizilmez (core/beacon.js hkmBagla). */
+      if(ESP.Beacon && ESP.Beacon.bagCagrisiMi()){ await ESP.Beacon.hkmBagla(); return; }
       /* 172: örnek profilde örnek kayıtlar belleğe yazılır (core/ornekveri.js). */
       if(ornekAcik() && ESP.OrnekVeri){
         try{ ESP.OrnekVeri.doldur(); }catch(e){ console.error(e); }
