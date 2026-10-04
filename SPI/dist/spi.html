@@ -10730,6 +10730,21 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
   .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover)
   :is(.kutu, .card, .lrow, .donen, .nextup){ --kart-golge:0 0 #0000; }
 
+/* ================================================================
+   SAKİN KENAR (kullanıcı, 2026-10-05: «sol kenardaki kartı da
+   bulanıklaştırsak mı, bir süre geçtikten sonra odak dağıtmasın»).
+   Fare kenardan ayrıldıktan birkaç saniye sonra (kabuk.js SAKIN_MS)
+   kenarın içi yavaşça solar ve hafifçe bulanıklaşır; cam yerinde kalır.
+   Yaklaşınca hızla netleşir. Telefonda kenar yoktur.
+   ================================================================ */
+@media (min-width:680px){
+  .site--v5 > .kenar > *{ transition:opacity .24s ease, filter .24s ease; }
+  html.kenar-sakin .site--v5 > .kenar:not(:hover):not(:focus-within):not(.kenar--tutulu) > *{
+    opacity:.4; filter:blur(1.4px) saturate(.6);
+    transition-duration:1.2s; transition-timing-function:cubic-bezier(.32,.72,0,1); }
+}
+@media (prefers-reduced-motion:reduce){ .site--v5 > .kenar > *{ transition:none; } }
+
 /* ==== css/hareket.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/hareket.css içine yazılır; burası bir sonraki
@@ -13608,7 +13623,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'0a4d04c7', at:'2026-10-04 21:26', dirty:true };
+SP.BUILD = { id:'a736c891', at:'2026-10-04 22:07', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19164,6 +19179,49 @@ window.LIFEOS = window.LIFEOS || {};
     document.addEventListener('mouseover', e => {
       if(e.target.closest && e.target.closest('.kenar') && disarida(e.relatedTarget)) isaretiDusur();
     });
+    /* SAKİN KENAR: fare yaklaşınca, kenara odak gelince ya da klavyeyle
+       gezinilince uyanır; kenardan ayrılınca SAKIN_MS sonra sakinleşir. */
+    document.addEventListener('pointermove', e => {
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      const k = document.querySelector('.site--v5 > .kenar');
+      if(!k) return;
+      const sag = k.getBoundingClientRect().right;
+      if(e.clientX <= sag + 48){ kenarUyandir(); }
+      else if(sakinZaman == null && !document.documentElement.classList.contains('kenar-sakin')) sakinZamanla();
+    }, { passive:true });
+    document.addEventListener('focusin', e => {
+      if(e.target && e.target.closest && e.target.closest('.kenar')) kenarUyandir();
+    });
+    document.addEventListener('focusout', e => {
+      if(e.target && e.target.closest && e.target.closest('.kenar')) sakinZamanla();
+    });
+    sakinZamanla();
+  }
+
+  /* SAKİN KENAR (kullanıcı, 2026-10-05: «sol kenardaki kartı da
+     bulanıklaştırsak mı, bir süre geçtikten sonra odak dağıtmasın»): fare
+     kenardan ayrıldıktan SAKIN_MS sonra kenarın İÇİ solar ve hafifçe
+     bulanıklaşır (html.kenar-sakin; kabuk.css); cam yerinde kalır. Fare
+     yaklaşınca, odak gelince ya da kenardan bir katman açıkken anında net.
+     Durum <html>'de: kenar her çizimde yeniden kurulur, işaret kaybolmaz. */
+  const SAKIN_MS = 6000;
+  let sakinZaman = null;
+  function kenarMesgul(){
+    return typeof document !== 'undefined'
+      && !!document.querySelector('.kenar:hover, .kenar:focus-within, .kenar.kenar--tutulu');
+  }
+  function kenarSakinlestir(){
+    if(typeof document === 'undefined' || kenarMesgul()) return false;
+    document.documentElement.classList.add('kenar-sakin');
+    return true;
+  }
+  function kenarUyandir(){
+    if(sakinZaman != null){ clearTimeout(sakinZaman); sakinZaman = null; }
+    if(typeof document !== 'undefined') document.documentElement.classList.remove('kenar-sakin');
+  }
+  function sakinZamanla(ms){
+    if(sakinZaman != null) clearTimeout(sakinZaman);
+    sakinZaman = setTimeout(() => { sakinZaman = null; if(!kenarSakinlestir()) sakinZamanla(); }, ms == null ? SAKIN_MS : ms);
   }
   kur();
 
@@ -19174,7 +19232,7 @@ window.LIFEOS = window.LIFEOS || {};
     bolumCubugu, altBant, menuSayfasi,
     modulMenusu, bildirimPaneli, hizliEkle,
     katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis, kenarDar, kenarDarMi, kenarIlkDar,
-    capaYerlestir, kenarBirak,
+    capaYerlestir, kenarBirak, kenarSakinlestir, kenarUyandir, SAKIN_MS,
   });
 })();
 

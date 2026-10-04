@@ -1012,6 +1012,49 @@ window.LIFEOS = window.LIFEOS || {};
     document.addEventListener('mouseover', e => {
       if(e.target.closest && e.target.closest('.kenar') && disarida(e.relatedTarget)) isaretiDusur();
     });
+    /* SAKİN KENAR: fare yaklaşınca, kenara odak gelince ya da klavyeyle
+       gezinilince uyanır; kenardan ayrılınca SAKIN_MS sonra sakinleşir. */
+    document.addEventListener('pointermove', e => {
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      const k = document.querySelector('.site--v5 > .kenar');
+      if(!k) return;
+      const sag = k.getBoundingClientRect().right;
+      if(e.clientX <= sag + 48){ kenarUyandir(); }
+      else if(sakinZaman == null && !document.documentElement.classList.contains('kenar-sakin')) sakinZamanla();
+    }, { passive:true });
+    document.addEventListener('focusin', e => {
+      if(e.target && e.target.closest && e.target.closest('.kenar')) kenarUyandir();
+    });
+    document.addEventListener('focusout', e => {
+      if(e.target && e.target.closest && e.target.closest('.kenar')) sakinZamanla();
+    });
+    sakinZamanla();
+  }
+
+  /* SAKİN KENAR (kullanıcı, 2026-10-05: «sol kenardaki kartı da
+     bulanıklaştırsak mı, bir süre geçtikten sonra odak dağıtmasın»): fare
+     kenardan ayrıldıktan SAKIN_MS sonra kenarın İÇİ solar ve hafifçe
+     bulanıklaşır (html.kenar-sakin; kabuk.css); cam yerinde kalır. Fare
+     yaklaşınca, odak gelince ya da kenardan bir katman açıkken anında net.
+     Durum <html>'de: kenar her çizimde yeniden kurulur, işaret kaybolmaz. */
+  const SAKIN_MS = 6000;
+  let sakinZaman = null;
+  function kenarMesgul(){
+    return typeof document !== 'undefined'
+      && !!document.querySelector('.kenar:hover, .kenar:focus-within, .kenar.kenar--tutulu');
+  }
+  function kenarSakinlestir(){
+    if(typeof document === 'undefined' || kenarMesgul()) return false;
+    document.documentElement.classList.add('kenar-sakin');
+    return true;
+  }
+  function kenarUyandir(){
+    if(sakinZaman != null){ clearTimeout(sakinZaman); sakinZaman = null; }
+    if(typeof document !== 'undefined') document.documentElement.classList.remove('kenar-sakin');
+  }
+  function sakinZamanla(ms){
+    if(sakinZaman != null) clearTimeout(sakinZaman);
+    sakinZaman = setTimeout(() => { sakinZaman = null; if(!kenarSakinlestir()) sakinZamanla(); }, ms == null ? SAKIN_MS : ms);
   }
   kur();
 
@@ -1022,6 +1065,6 @@ window.LIFEOS = window.LIFEOS || {};
     bolumCubugu, altBant, menuSayfasi,
     modulMenusu, bildirimPaneli, hizliEkle,
     katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis, kenarDar, kenarDarMi, kenarIlkDar,
-    capaYerlestir, kenarBirak,
+    capaYerlestir, kenarBirak, kenarSakinlestir, kenarUyandir, SAKIN_MS,
   });
 })();

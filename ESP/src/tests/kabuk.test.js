@@ -629,6 +629,28 @@
     /* Kullanıcı (2026-10-02 gece): «yeşil yerdeki rank ve o kısmı kaldır,
        kırmızı yerdeki simgeleri oraya taşı, üstteki kartı kaldır; sayfanın
        ortasındaki asıl yer hep en ortada olsun». */
+    /* Kullanıcı (2026-10-05): «sol kenardaki kartı bir süre sonra
+       bulanıklaştıralım, odak dağıtmasın». Durum <html>'de; kenardan katman
+       açıkken (tutulu) ya da odak içerideyken sakinleşmez. */
+    it('sakin kenar: bir süre sonra solar; tutuluyken solmaz; yaklaşınca netleşir', () => {
+      const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[], profil:{ ad:'Ömer' } }) + '</div>');
+      const kok = document.documentElement;
+      try{
+        expect(K.SAKIN_MS >= 3000).toBe(true);
+        expect(K.kenarSakinlestir()).toBe(true);
+        expect(kok.classList.contains('kenar-sakin')).toBe(true);
+        K.kenarUyandir();
+        expect(kok.classList.contains('kenar-sakin')).toBe(false);
+        d.querySelector('.kenar').classList.add('kenar--tutulu');
+        expect(K.kenarSakinlestir()).toBe(false);
+        expect(kok.classList.contains('kenar-sakin')).toBe(false);
+        d.querySelector('.kenar').classList.remove('kenar--tutulu');
+        K.kenarSakinlestir();
+        d.querySelector('.kenar__dip button').dispatchEvent(new FocusEvent('focusin', { bubbles:true }));
+        expect(kok.classList.contains('kenar-sakin')).toBe(false);
+      }finally{ K.kenarUyandir(); d.remove(); }
+    });
+
     it('kenarın dibi: ara · sayfa düzeni · radyo · bildirimler · profil; rütbe ve Merkez satırı yok', () => {
       const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[],
         baglanti:{ durum:'bagli', saat:'14:08' }, rutbe:{ ad:'Bronz', etiket:'1.1', route:'rutbe' },

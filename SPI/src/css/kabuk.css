@@ -1733,3 +1733,18 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
 :is(.kutu, .card, .ledger .lrow:not(.kahraman), .donen, .nextup,
   .bugun__alan[aria-label="Öneri"] > .bugun__etiket + *, #overlay-root, .sheet, .popover)
   :is(.kutu, .card, .lrow, .donen, .nextup){ --kart-golge:0 0 #0000; }
+
+/* ================================================================
+   SAKİN KENAR (kullanıcı, 2026-10-05: «sol kenardaki kartı da
+   bulanıklaştırsak mı, bir süre geçtikten sonra odak dağıtmasın»).
+   Fare kenardan ayrıldıktan birkaç saniye sonra (kabuk.js SAKIN_MS)
+   kenarın içi yavaşça solar ve hafifçe bulanıklaşır; cam yerinde kalır.
+   Yaklaşınca hızla netleşir. Telefonda kenar yoktur.
+   ================================================================ */
+@media (min-width:680px){
+  .site--v5 > .kenar > *{ transition:opacity .24s ease, filter .24s ease; }
+  html.kenar-sakin .site--v5 > .kenar:not(:hover):not(:focus-within):not(.kenar--tutulu) > *{
+    opacity:.4; filter:blur(1.4px) saturate(.6);
+    transition-duration:1.2s; transition-timing-function:cubic-bezier(.32,.72,0,1); }
+}
+@media (prefers-reduced-motion:reduce){ .site--v5 > .kenar > *{ transition:none; } }
