@@ -600,6 +600,12 @@ window.LIFEOS.HESAP = (function(){
     return '';
   }
 
+  /* LifeOS işareti: dört sistemin rengi (seçim sayfasının sekme simgesiyle aynı). */
+  const ISARET = '<svg class="hesap-kapi__isaret" viewBox="0 0 32 32" aria-hidden="true">'
+    + '<rect x="3" y="3" width="12" height="12" rx="3" fill="#4F86FF"/><circle cx="23" cy="9" r="6" fill="#2EC4A9"/>'
+    + '<rect x="5" y="19" width="9" height="9" rx="2" fill="#F2A93B" transform="rotate(45 9.5 23.5)"/>'
+    + '<rect x="17" y="17" width="12" height="12" rx="3" fill="#9A86FF"/></svg>';
+
   function kapiGovde(){
     const g = kapi.gorunum, not = kapiNotu();
     const mesaj = '<p class="hesap__mesaj" id="hesap-mesaj" role="alert" hidden></p>';
@@ -615,7 +621,8 @@ window.LIFEOS.HESAP = (function(){
         + alanHtml('hesap-ad', 'Kullanıcı adı', 'text', 'autocomplete="username" ' + AD_EK)
         + alanHtml('hesap-parola', 'Şifre (en az 8)', 'password', 'autocomplete="new-password" required minlength="8"')
         + alanHtml('hesap-parola2', 'Şifre (tekrar)', 'password', 'autocomplete="new-password" required minlength="8"')
-        + alanHtml('hesap-soru', 'Kurtarma sorusu (kendin yaz)', 'text',
+        + '<p class="hesap-kapi__ara">Şifreni unutursan</p>'
+        + alanHtml('hesap-soru', 'Kendine bir soru', 'text',
           'required minlength="4" maxlength="120" autocomplete="off" placeholder="Örn. İlk öğretmenimin adı?"')
         + alanHtml('hesap-cevap', 'Cevabın', 'text', CEVAP_EK)
         + mesaj + '<button type="submit" class="hesap__ana hesap__ana--tam">Hesap oluştur</button></form>';
@@ -637,11 +644,14 @@ window.LIFEOS.HESAP = (function(){
         + mesaj + '<button type="submit" class="hesap__ana hesap__ana--tam">Giriş yap</button></form>'
         + '<button type="button" class="hesap-kapi__bag" data-hesap="unuttum">Şifremi unuttum</button>';
     }
-    return '<h1 class="hesap-kapi__baslik" id="hesap-kapi-baslik">' + (g === 'unuttum' ? 'Şifreni yenile' : 'LifeOS') + '</h1>'
+    const alt = g === 'unuttum' ? (kapi.soru ? 'Kendi sorunu cevapla' : 'Kullanıcı adını yaz')
+      : g === 'kayit' ? 'Yeni hesap' : 'Hesabınla devam et';
+    return '<div class="hesap-kapi__marka">' + ISARET
+      + '<h1 class="hesap-kapi__baslik" id="hesap-kapi-baslik">' + (g === 'unuttum' ? 'Şifreni yenile' : 'LifeOS') + '</h1>'
+      + '<p class="hesap-kapi__alt">' + alt + '</p></div>'
       + (not ? '<p class="hesap__not hesap-kapi__not">' + kac(not) + '</p>' : '')
       + sec + form
-      + '<div class="hesap-kapi__ayak"><button type="button" class="hesap-kapi__beta" data-hesap="beta">Beta girişi</button>'
-      + '<span>hesapsız, kayıtlar yalnız bu cihazda</span></div>';
+      + '<button type="button" class="hesap-kapi__beta" data-hesap="beta"><b>Beta girişi</b> · hesapsız, yalnız bu cihazda</button>';
   }
 
   function kapiAcikMi(){ return !!(typeof document !== 'undefined' && document.querySelector('[data-hesap-kapi]')); }

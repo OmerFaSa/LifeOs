@@ -299,8 +299,10 @@ GIRIS_SAYFASI = """<!doctype html>
 [hidden]{ display:none !important; }
 /* Giris ekrani (brand/ortak/hesap.css): modul secimi bir kez, burada. Kartin
    degiskenleri bu sayfanin renklerine eslenir. */
-.hesap-kapi{ --surface:var(--yuzey); --surface-2:var(--yuzey-2); --text:var(--fg); --text-2:var(--fg-2);
+.hesap-kapi{ --surface:var(--yuzey); --surface-2:var(--yuzey-2); --text:var(--fg); --text-2:var(--fg-2); --text-3:var(--fg-3);
   --border:var(--cizgi); --kart-golge:var(--golge); --primary:var(--fg); --bad:#c8463b; }
+@media (prefers-color-scheme:dark){ .hesap-kapi{ --buz-isik:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.055);
+  --buz-golge:0 32px 72px -36px rgba(0,0,0,.6); } }
 .hesap-kapi .seg{ display:flex; gap:2px; background:var(--yuzey-2); border:1px solid var(--cizgi); border-radius:9px; padding:3px; }
 .hesap-kapi .seg button{ flex:1; min-height:32px; border:0; border-radius:7px; background:none; font:inherit;
   font-size:13.5px; font-weight:500; color:var(--fg-2); cursor:pointer; }

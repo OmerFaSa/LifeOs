@@ -40,13 +40,16 @@
       await H().ekle({ tur:'su', saatler:'10:00' });
       await H().ekle({ tur:'su', saatler:'10:00, 14:00' });
       expect(H().durum().liste).toHaveLength(1);
-      const r = H().bugun(saat('2026-09-20', '15:00'));
+      /* Günler BUGÜNE göre: işaretler 14 günden eskiyse temizlenir (kaydet);
+         sabit bir tarih (2026-09-20) 2026-10-05'te pencereden düştü. */
+      const g1 = SP.U.todayISO(), g2 = SP.U.iso(SP.U.addDays(SP.U.today(), 1));
+      const r = H().bugun(saat(g1, '15:00'));
       expect(r.map(x => x.durum)).toEqual(['vakti', 'vakti']);
-      await H().isaretle(r[0].anahtar, true, '2026-09-20');
-      expect(H().bugun(saat('2026-09-20', '15:00')).map(x => x.durum)).toEqual(['yapildi', 'vakti']);
-      expect(H().bugun(saat('2026-09-21', '15:00')).map(x => x.durum)).toEqual(['vakti', 'vakti']);
-      await H().isaretle(r[0].anahtar, false, '2026-09-20');
-      expect(H().bugun(saat('2026-09-20', '15:00'))[0].durum).toBe('vakti');
+      await H().isaretle(r[0].anahtar, true, g1);
+      expect(H().bugun(saat(g1, '15:00')).map(x => x.durum)).toEqual(['yapildi', 'vakti']);
+      expect(H().bugun(saat(g2, '15:00')).map(x => x.durum)).toEqual(['vakti', 'vakti']);
+      await H().isaretle(r[0].anahtar, false, g1);
+      expect(H().bugun(saat(g1, '15:00'))[0].durum).toBe('vakti');
     });
 
     it('silinen hatırlatma geri konur', async () => {

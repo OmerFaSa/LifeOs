@@ -83,29 +83,57 @@
 }
 
 /* ---------- giriş ekranı (açılışta, hesap yoksa) ----------
-   Uygulamanın önünde tek kart; zemin buzlu, kart sade. Ölçü kabuğun
-   FERAH ritmi: kart içi 24 px. Açılış yumuşak (520 ms, sakin başlar). */
+   Sistemin dili: yumuşak renk zemini (zemin.css --zemin-*) ve üstünde
+   buzlu levha (--buz-*). Seçim sayfasında (4180) bu değişkenler yoktur;
+   dört modülün renginden yedeklere düşer. Alanlar «Günün ölçümü»ndeki gibi
+   dolu ve çerçevesiz; ana eylem siyah hap. Açılış: zemin belirir, kart
+   hafifçe yükselir (520 ms, sakin başlar). */
 html.hesap-kapi-acik{ overflow:hidden; }
 .hesap-kapi{ position:fixed; inset:0; z-index:9000; display:grid; place-items:center; padding:24px 16px;
-  overflow-y:auto; background:color-mix(in oklab, var(--bg) 80%, transparent);
-  -webkit-backdrop-filter:blur(22px) saturate(1.15); backdrop-filter:blur(22px) saturate(1.15);
-  animation:hesap-kapi-gel .52s cubic-bezier(.32,.72,0,1); }
-.hesap-kapi__kart{ width:min(380px, 100%); padding:28px 24px 20px; border-radius:24px; background:var(--surface);
-  box-shadow:var(--kart-golge); display:flex; flex-direction:column; gap:14px; }
-.hesap-kapi__baslik{ margin:0 0 2px; font-size:24px; font-weight:650; letter-spacing:-.01em; color:var(--text); }
-.hesap-kapi__not{ margin:0; }
-.hesap-kapi__sec{ margin:2px 0; }
-.hesap-kapi__soru{ margin:0; font-size:15px; font-weight:600; color:var(--text); }
-.hesap-kapi .hesap__alan input{ min-height:44px; }
-.hesap__form .hesap__ana--tam{ align-self:stretch; min-height:44px; }
-.hesap-kapi__bag{ align-self:center; min-height:32px; padding:0 10px; border:0; border-radius:999px; background:none;
-  color:var(--text-2); font:inherit; font-size:13px; cursor:pointer; }
-.hesap-kapi__bag:hover{ color:var(--text); }
-.hesap-kapi__ayak{ display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:4px;
-  padding-top:14px; border-top:1px solid var(--border); }
-.hesap-kapi__beta{ min-height:36px; padding:0 18px; border:0; border-radius:999px; background:var(--surface-2);
-  color:var(--text); font:inherit; font-size:13.5px; font-weight:500; cursor:pointer; }
-.hesap-kapi__ayak span{ font-size:12px; color:var(--text-2); }
+  overflow-y:auto;
+  background:
+    radial-gradient(40% 36% at 16% 20%, var(--zemin-1, color-mix(in oklab, #2D5BE3 20%, transparent)), transparent 72%),
+    radial-gradient(36% 34% at 86% 16%, var(--zemin-2, color-mix(in oklab, #7453D4 16%, transparent)), transparent 72%),
+    radial-gradient(42% 38% at 80% 88%, var(--zemin-3, color-mix(in oklab, #0E8C79 16%, transparent)), transparent 72%),
+    radial-gradient(38% 34% at 14% 86%, var(--zemin-4, color-mix(in oklab, #C8741C 14%, transparent)), transparent 72%),
+    color-mix(in oklab, var(--bg) 88%, transparent);
+  -webkit-backdrop-filter:blur(28px) saturate(1.2); backdrop-filter:blur(28px) saturate(1.2);
+  animation:hesap-kapi-gel .52s cubic-bezier(.32,.72,0,1) both; }
+.hesap-kapi__kart{ width:min(380px, 100%); padding:32px 28px 18px; border-radius:28px;
+  background:var(--buz-ust, color-mix(in oklab, var(--surface) 84%, transparent));
+  -webkit-backdrop-filter:blur(24px) saturate(1.3); backdrop-filter:blur(24px) saturate(1.3);
+  box-shadow:var(--buz-isik, inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 0 1px rgba(255,255,255,.4)),
+    var(--buz-golge, 0 1px 2px rgba(20,24,40,.04), 0 32px 72px -36px rgba(20,24,40,.32));
+  display:flex; flex-direction:column; gap:16px;
+  animation:hesap-kart-gel .62s cubic-bezier(.32,.72,0,1) .04s both; }
+.hesap-kapi__marka{ display:flex; flex-direction:column; align-items:center; gap:8px; margin:0 0 2px; text-align:center; }
+.hesap-kapi__isaret{ width:40px; height:40px; margin-bottom:4px; }
+.hesap-kapi__baslik{ margin:0; font-size:22px; font-weight:650; letter-spacing:-.015em; color:var(--text); }
+.hesap-kapi__alt{ margin:0; font-size:13.5px; color:var(--text-2); }
+.hesap-kapi__not{ margin:0; text-align:center; }
+.hesap-kapi__sec{ margin:0; }
+.hesap-kapi .hesap__form{ gap:12px; }
+.hesap-kapi .hesap__alan{ gap:6px; font-size:12px; font-weight:500; color:var(--text-2); }
+.hesap-kapi .hesap__alan input{ min-height:44px; padding:0 14px; border:1px solid transparent; border-radius:12px;
+  background:var(--surface-2); color:var(--text); font-size:15px;
+  transition:border-color .2s ease, background .2s ease; }
+.hesap-kapi .hesap__alan input::placeholder{ color:var(--text-3, var(--text-2)); opacity:.8; }
+.hesap-kapi .hesap__alan input:focus{ outline:none; border-color:var(--primary); background:var(--surface); }
+.hesap-kapi .hesap__mesaj{ margin:0; font-size:13px; color:var(--bad, #c8463b); }
+.hesap-kapi__soru{ margin:0; font-size:15px; font-weight:600; color:var(--text); text-align:center; }
+.hesap-kapi__ara{ display:flex; align-items:center; gap:10px; margin:6px 0 -2px; font-size:11.5px; font-weight:500;
+  letter-spacing:.02em; color:var(--text-2); }
+.hesap-kapi__ara::before, .hesap-kapi__ara::after{ content:''; flex:1; height:1px; background:var(--border); }
+.hesap__form .hesap__ana--tam{ align-self:stretch; min-height:46px; margin-top:4px; font-size:14.5px; }
+.hesap-kapi__bag{ align-self:center; min-height:32px; padding:0 12px; border:0; border-radius:999px; background:none;
+  color:var(--text-2); font:inherit; font-size:13px; cursor:pointer; transition:background .2s ease, color .2s ease; }
+.hesap-kapi__bag:hover{ color:var(--text); background:var(--surface-2); }
+.hesap-kapi__beta{ align-self:center; min-height:32px; margin-top:2px; padding:0 12px; border:0; border-radius:999px;
+  background:none; color:var(--text-2); font:inherit; font-size:12.5px; cursor:pointer; transition:background .2s ease; }
+.hesap-kapi__beta b{ font-weight:600; color:var(--text); }
+.hesap-kapi__beta:hover{ background:var(--surface-2); }
 .hesap-kapi__bag:focus-visible, .hesap-kapi__beta:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+@media (max-width:679px){ .hesap-kapi__kart{ padding:28px 20px 16px; border-radius:24px; } }
 @keyframes hesap-kapi-gel{ from{ opacity:0; } to{ opacity:1; } }
-@media (prefers-reduced-motion:reduce){ .hesap-kapi{ animation:none; } }
+@keyframes hesap-kart-gel{ from{ opacity:0; transform:translateY(10px) scale(.985); } to{ opacity:1; transform:none; } }
+@media (prefers-reduced-motion:reduce){ .hesap-kapi, .hesap-kapi__kart{ animation:none; } }
