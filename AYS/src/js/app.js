@@ -1441,6 +1441,11 @@ R.App = (function(){
         window.LIFEOS.HESAP.kur({ modul:'ays', depo:R.Store, ornek:ornekAcik,
           yenile:async () => { await M.loadAll(); render(); } });
       }
+      /* KING (brand/ortak/king.js): her yerden sade sohbet. */
+      if(window.LIFEOS && window.LIFEOS.KING){
+        window.LIFEOS.KING.kur({ modul:'ays', git:route => go(route),
+          ozet:() => [R.Screens.today.headline()] });
+      }
 
       /* YARIM KALMIŞ SÜRELİ OTURUM — diskten geri alınır.
 

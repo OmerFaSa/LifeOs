@@ -634,7 +634,9 @@
         /* Hesap düğmesi (brand/ortak/hesap.js) yerinde ama sunucu ve oturum
            yokken gizli: görünen sıra değişmez. */
         expect(!!d.querySelector('.kenar__dip .ust__hesap')).toBe(true);
-        const a = Array.from(d.querySelectorAll('.kenar__dip button:not([hidden])'));
+        /* King (brand/ortak/king.js) kenarın dibinde ilk araç. */
+        expect(d.querySelector('.kenar__dip button[data-king-ac] .kenar__ad').textContent).toBe('King');
+        const a = Array.from(d.querySelectorAll('.kenar__dip button:not([hidden]):not([data-king-ac])'));
         expect(a.map(b => b.querySelector('.kenar__ad').textContent)).toEqual(['Ara', 'Sayfa düzeni', 'Radyo', 'Bildirimler', 'Ömer']);
         expect(a[0].getAttribute('data-act')).toBe('open-palette');
         expect(a[1].classList.contains('ust__gizli')).toBe(true);

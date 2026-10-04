@@ -1451,6 +1451,25 @@ SP.App = (function(){
             render();
           } });
       }
+      /* KING (brand/ortak/king.js): her yerden sade sohbet. Özet ve veri
+         girişi bu modülün kendi koduyla (SP.Quick: önizleme, onayla kayıt). */
+      if(window.LIFEOS && window.LIFEOS.KING){
+        window.LIFEOS.KING.kur({ modul:'spi',
+          git:(route, ek) => { if(route === 'move' && ek && ek.sekme) S.ui.moveTab = ek.sekme; go(route); },
+          ozet:() => {
+            const d = U.todayISO(), v = M.vitalsOf(d) || {}, og = (M.mealsOf(d) || []).length;
+            const dk = (M.workoutsOf(d) || []).reduce((a, w) => a + (Number(w.minutes) || 0), 0);
+            return [SP.Screens.today.headline(),
+              [v.sleep != null ? 'Uyku ' + U.fmtNum(v.sleep) + ' sa' : 'Uyku girilmedi',
+                v.water != null ? 'Su ' + U.fmtNum(Math.round(v.water / 100) / 10) + ' L' : null,
+                og ? og + ' öğün' : 'Öğün yok', dk ? dk + ' dk hareket' : null].filter(Boolean).join(' · ')];
+          },
+          veri:{ onizle:t => {
+            const p = SP.Quick && SP.Quick.parse(t);
+            return p ? { metin:p.label, ipucu:p.hint, kaydet:async () => {
+              const r = await SP.Quick.apply(p); render(); return r && r.text; } } : null;
+          } } });
+      }
 
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).
 

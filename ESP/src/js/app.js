@@ -1631,6 +1631,11 @@ ESP.App = (function(){
             render();
           } });
       }
+      /* KING (brand/ortak/king.js): her yerden sade sohbet. */
+      if(window.LIFEOS && window.LIFEOS.KING){
+        window.LIFEOS.KING.kur({ modul:'esp', git:route => go(route),
+          ozet:() => [ESP.Screens.today.headline()] });
+      }
 
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).
 

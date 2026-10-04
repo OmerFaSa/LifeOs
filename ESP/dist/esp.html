@@ -12456,6 +12456,113 @@ html.hesap-kapi-acik{ overflow:hidden; }
 @keyframes hesap-kart-gel{ from{ opacity:0; transform:translateY(10px) scale(.985); } to{ opacity:1; transform:none; } }
 @media (prefers-reduced-motion:reduce){ .hesap-kapi, .hesap-kapi__kart{ animation:none; } }
 
+/* ==== css/king.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/king.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KING — kenar ışığı ve konuşma baloncuğu (brand/ortak/king.js).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/king.css`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/css/` klasörüne birebir kopyalanır.
+
+   Apple Intelligence'ın sadeliği: konuşma başlayınca ekranın kenarlarından
+   ÇOK HAFİF bir ışık süzülür (dört modülün rengi, yavaş döner) ve altta tek
+   buzlu baloncuk yükselir. Işık tıklamayı engellemez. Geçiş kabuğun
+   yumuşak ritmiyle: 520 ms, sakin başlar; kapanış 340 ms. */
+
+@property --king-aci{ syntax:'<angle>'; inherits:false; initial-value:0deg; }
+
+.king{ position:fixed; inset:0; z-index:8990; pointer-events:none; }
+.king-perde{ position:absolute; inset:0; pointer-events:auto; opacity:0;
+  background:rgba(12,14,22,.2); -webkit-backdrop-filter:blur(4px) saturate(.9); backdrop-filter:blur(4px) saturate(.9);
+  transition:opacity .52s cubic-bezier(.32,.72,0,1); }
+:root[data-theme="dark"] .king-perde{ background:rgba(0,0,0,.42); }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .king-perde{ background:rgba(0,0,0,.42); } }
+.king.is-acik .king-perde{ opacity:1; }
+.king.is-kapaniyor .king-perde{ opacity:0; transition-duration:.34s; pointer-events:none; }
+.king-isik{ position:absolute; inset:0; pointer-events:none; opacity:0;
+  transition:opacity .52s cubic-bezier(.32,.72,0,1); }
+.king.is-acik .king-isik{ opacity:1; }
+.king.is-kapaniyor .king-isik{ opacity:0; transition-duration:.34s; }
+.king-isik::before, .king-isik::after{ content:''; position:absolute; inset:0;
+  background:conic-gradient(from var(--king-aci), #4F86FF, #2EC4A9, #F2A93B, #E9A6C1, #9A86FF, #4F86FF);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  animation:king-don 9s linear infinite; }
+.king-isik::before{ padding:2px; filter:blur(4px); opacity:.55; }
+.king-isik::after{ padding:18px; filter:blur(28px); opacity:.28; }
+@keyframes king-don{ to{ --king-aci:360deg; } }
+
+/* ---------- baloncuk ---------- */
+.king__kutu{ position:absolute; left:50%; bottom:calc(28px + env(safe-area-inset-bottom, 0px));
+  width:min(540px, calc(100vw - 32px)); max-height:min(70vh, 560px); display:flex; flex-direction:column; gap:12px;
+  padding:16px 16px 14px; border-radius:28px; pointer-events:auto;
+  background:var(--buz-ust, color-mix(in oklab, var(--surface) 84%, transparent));
+  -webkit-backdrop-filter:blur(28px) saturate(1.4); backdrop-filter:blur(28px) saturate(1.4);
+  box-shadow:var(--buz-isik, inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 0 1px rgba(255,255,255,.4)),
+    0 1px 2px rgba(20,24,40,.05), 0 24px 64px -24px rgba(20,24,40,.35);
+  opacity:0; transform:translate(-50%, 16px) scale(.98);
+  transition:opacity .52s cubic-bezier(.32,.72,0,1), transform .52s cubic-bezier(.32,.72,0,1); }
+.king.is-acik .king__kutu{ opacity:1; transform:translate(-50%, 0); }
+.king.is-kapaniyor .king__kutu{ opacity:0; transform:translate(-50%, 10px) scale(.985); transition-duration:.34s;
+  transition-timing-function:cubic-bezier(.4,0,.2,1); }
+
+.king__akis{ display:flex; flex-direction:column; gap:10px; overflow-y:auto; min-height:0; padding:2px 2px 0; }
+.king__balon{ display:flex; align-items:flex-start; gap:10px; max-width:100%; }
+.king__balon p{ margin:0; font-size:15px; line-height:1.45; color:var(--text); }
+.king__balon ul{ margin:6px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:3px; }
+.king__balon li{ font-size:13.5px; color:var(--text-2); }
+.king__balon--king > div{ padding:2px 0; }
+.king__balon--sen{ align-self:flex-end; max-width:80%; padding:8px 13px; border-radius:18px 18px 6px 18px;
+  background:var(--surface-2); }
+.king__balon--sen p{ font-size:14.5px; }
+
+/* Konuşan küre: dört rengin yumuşak karışımı, nefes alır. */
+.king__kure{ flex:none; width:22px; height:22px; margin-top:1px; border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, #fff 0 8%, transparent 9%),
+    conic-gradient(from 200deg, #4F86FF, #2EC4A9, #F2A93B, #9A86FF, #4F86FF);
+  box-shadow:0 0 12px color-mix(in oklab, #4F86FF 40%, transparent);
+  animation:king-nefes 2.8s ease-in-out infinite; }
+@keyframes king-nefes{ 50%{ transform:scale(1.08); filter:saturate(1.3); } }
+
+.king__cipler{ display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding:1px; margin:0 -2px; }
+.king__cipler::-webkit-scrollbar{ display:none; }
+.king__cip{ flex:none; min-height:32px; padding:0 13px; border:0; border-radius:999px;
+  background:var(--surface-2); color:var(--text); font:inherit; font-size:13px; font-weight:500; cursor:pointer;
+  white-space:nowrap; transition:background .2s ease, transform .2s ease; }
+.king__cip:hover{ background:color-mix(in oklab, var(--surface-2) 70%, var(--text) 8%); }
+.king__cip:active{ transform:scale(.97); }
+.king__cip--ana{ background:var(--text); color:var(--surface); }
+
+.king__yaz{ display:flex; align-items:center; gap:8px; margin:0; }
+.king__girdi{ flex:1; min-width:0; min-height:44px; padding:0 16px; border:1px solid transparent; border-radius:22px;
+  background:var(--surface-2); color:var(--text); font:inherit; font-size:15px;
+  transition:border-color .2s ease, background .2s ease; }
+.king__girdi::placeholder{ color:var(--text-3, var(--text-2)); }
+.king__girdi:focus{ outline:none; border-color:var(--primary); background:var(--surface); }
+.king__gonder{ flex:none; width:40px; height:40px; display:grid; place-items:center; padding:0; border:0;
+  border-radius:50%; background:var(--text); color:var(--surface); cursor:pointer; }
+.king__gonder svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2.2;
+  stroke-linecap:round; stroke-linejoin:round; }
+.king__cip:focus-visible, .king__gonder:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
+/* Telefonda alt bandın üstünde. */
+@media (max-width:679px){
+  .king__kutu{ bottom:calc(84px + env(safe-area-inset-bottom, 0px)); border-radius:24px; padding:14px 12px 12px; }
+}
+
+/* King açıkken telefondaki «+» baloncuğun altında kalmasın. */
+html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2s ease; }
+
+/* Kabuktaki giriş: kenarda «King», hızlı eklede «King'e sor». */
+.kmenu__hizli--king .king__kure{ width:18px; height:18px; animation:none; }
+
+@media (prefers-reduced-motion:reduce){
+  .king-isik::before, .king-isik::after, .king__kure{ animation:none; }
+  .king__kutu, .king-isik, .king-perde{ transition-duration:.01s; }
+}
+
 /* ==== css/zemin.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/zemin.css içine yazılır; burası bir sonraki
@@ -14149,7 +14256,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'020ae7ab', at:'2026-10-04 21:01', dirty:true };
+ESP.BUILD = { id:'0a4d04c7', at:'2026-10-04 21:26', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -18772,6 +18879,7 @@ window.LIFEOS = window.LIFEOS || {};
     bilgi:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><path d="M12 7.6v.1"/>',
     zil:'<path d="M6.5 16v-4.5a5.5 5.5 0 0 1 11 0V16l1.5 2h-14z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
     muzik:'<path d="M9.5 17.5V6.5l9-2v11"/><circle cx="7" cy="17.5" r="2.5"/><circle cx="16" cy="15.5" r="2.5"/>',
+    king:'<path d="M12 3.5c.6 3.9 2.6 5.9 6.5 6.5-3.9.6-5.9 2.6-6.5 6.5-.6-3.9-2.6-5.9-6.5-6.5 3.9-.6 5.9-2.6 6.5-6.5z"/><path d="M18.5 15c.25 1.6 1 2.35 2.5 2.5-1.5.25-2.25 1-2.5 2.5-.25-1.5-1-2.25-2.5-2.5 1.5-.15 2.25-.9 2.5-2.5z"/>',
     hesap:'<path d="M7.5 18.5h9.25a3.75 3.75 0 0 0 .55-7.46A5.5 5.5 0 0 0 6.6 9.9a4.3 4.3 0 0 0 .9 8.6z"/><path d="M10 14l1.8 1.8L15 12.5"/>',
     kenar:'<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/>',
     gizli:'<rect x="4" y="4.5" width="16" height="5" rx="1.5"/><rect x="4" y="12.5" width="16" height="3" rx="1"/><path d="M4 19.5h7"/>',
@@ -19044,6 +19152,9 @@ window.LIFEOS = window.LIFEOS || {};
     const harf = (prof.harf || ad.charAt(0) || '·').toLocaleUpperCase('tr-TR');
     const etiket = s => '<span class="kenar__ad">' + kac(s) + '</span>';
     return '<div class="kenar__araclar" role="group" aria-label="Araçlar">'
+      /* King (brand/ortak/king.js): her yerden sade sohbet; Ctrl iki kez. */
+      + '<button class="ust__king kenar__arac" type="button" data-king-ac aria-haspopup="dialog"'
+      +   ' aria-label="King ile konuş (Ctrl iki kez)" title="King (Ctrl iki kez)">' + simge('king') + etiket('King') + '</button>'
       + '<button class="ust__ara kenar__arac" type="button" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)" title="Ara (Ctrl K)">'
       +   simge('ara') + etiket('Ara') + '</button>'
       + '<button class="ust__gizli kenar__arac" type="button" aria-haspopup="dialog" aria-expanded="false"'
@@ -19428,7 +19539,10 @@ window.LIFEOS = window.LIFEOS || {};
      biliniyorsa bağlantı olarak durur (kayıt kendi sistemine yazılır). */
   function hizliEkle(o){
     o = o || {};
-    const kendi = (o.satirlar || []).map(s => {
+    /* İlk satır King (brand/ortak/king.js): «+»ya basılı tutmak da açar. */
+    const king = L.KING ? '<button class="kmenu__hizli kmenu__hizli--king" type="button" data-king-ac>'
+      + '<span class="king__kure" aria-hidden="true"></span><span>King\'e sor</span></button>' : '';
+    const kendi = king + (o.satirlar || []).map(s => {
       const veri = Object.keys(s.data || {}).map(a => ' ' + kac(a) + '="' + kac(s.data[a]) + '"').join('');
       return '<button class="kmenu__hizli" data-act="' + kac(s.act) + '"' + veri + '>'
         + modulIsareti(o.modul) + '<span>' + kac(s.ad) + '</span></button>';
@@ -23754,6 +23868,402 @@ window.LIFEOS.HESAP = (function(){
     betaGir, kapiAc, kapiAcikMi, dugme, durum, dinle, silmeNotu, panelHtml, adresDuzelt, cihazKimligi,
     _ortam:ortam, _sifirla, _istek:istek,
     CEREZ, ONEK,
+  };
+})();
+
+/* ==== js/core/king.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/king.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KING — her yerden sade sohbet (Apple Intelligence gibi).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/king.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Biçimi `king.css`.
+   ==================================================================
+
+   Depo sahibi (2026-10-05): «her bölümden, her yerden bir şey yaparak King
+   ile Apple Intelligence gibi konuşabilelim, çok sade minimalist; konuşma
+   başlayınca kenarlardan çok hafif ışık süzülmesi; konuşmayı hissettiren
+   bir baloncuk; şu sayfaya git, şu verileri gir, bana bugünün özeti gibi;
+   hazır cevaplar — antrenman yapacağım, besin gireceğim, test çözeceğim,
+   dil çalışacağım — tıklayınca kolay gelsin deyip o sayfaya atsın».
+
+   NASIL AÇILIR: masaüstünde Ctrl'e iki kez basmak ya da kenardaki «King»;
+   telefonda «+» › «King'e sor» ya da «+»ya basılı tutmak. Esc kapatır.
+
+   Sözler:
+   1. KURAL MOTORU KONUŞUR (AGENTS §1.1). Bu sürümde dil modeli yok:
+      nereye gidileceğine, neyin kaydedileceğine ve özetteki sayılara kod
+      karar verir; King yalnız kısa cümle kurar.
+   2. ANLAŞILMAYAN İSTEK TAHMİN EDİLMEZ (§1.7): «anlayamadım» der ve neler
+      yapabildiğini gösterir; rastgele bir sayfaya götürmez.
+   3. VERİ ÖNCE ÖNİZLENİR: satır modülün KENDİ ayrıştırıcısına gider (SPİ:
+      SP.Quick); kayıt yalnız «Kaydet»le. Yeni ayrıştırıcı yazılmaz.
+   4. MODÜL ONSUZ DA ÇALIŞIR: King yalnız bir giriş yoludur; modül King'e,
+      King de HKM'ye bağlı değildir.
+   5. ADRES YALNIZ KATALOGDAN: modüller arası geçişte hedef `#king=<rota>`
+      ile taşınır; katalogda olmayan rota yok sayılır. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.KING = (function(){
+  'use strict';
+
+  const L = window.LIFEOS;
+  const MODUL_AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+
+  /* Sayfalar: «şu sayfaya git». es = aranan sözcükler (küçük harf). */
+  const SAYFALAR = [
+    { modul:'spi', route:'today',     ad:'Bugün',      es:['bugün', 'genel bakış', 'ölçüm'] },
+    { modul:'spi', route:'meals',     ad:'Öğün',       es:['öğün', 'besin', 'yemek', 'beslenme'] },
+    { modul:'spi', route:'kitchen',   ad:'Mutfak',     es:['mutfak', 'tarif'] },
+    { modul:'spi', route:'move',      ad:'Hareket',    es:['hareket', 'antrenman', 'egzersiz', 'spor'] },
+    { modul:'spi', route:'labs',      ad:'Testler',    es:['tahlil', 'kan testi', 'laboratuvar', 'testler'] },
+    { modul:'spi', route:'basket',    ad:'Bütçe',      es:['bütçe', 'market', 'sepet'] },
+    { modul:'ays', route:'today',     ad:'Bugün',      es:['bugün', 'genel bakış'] },
+    { modul:'ays', route:'week',      ad:'Hafta',      es:['hafta'] },
+    { modul:'ays', route:'plan',      ad:'Program',    es:['program'] },
+    { modul:'ays', route:'subjects',  ad:'Konu çalış', es:['konu', 'ders'] },
+    { modul:'ays', route:'solve',     ad:'Soru çöz',   es:['soru çöz', 'soru', 'test çöz'] },
+    { modul:'ays', route:'exams',     ad:'Deneme',     es:['deneme', 'sınav'] },
+    { modul:'ays', route:'cards',     ad:'Tekrar',     es:['tekrar', 'kart'] },
+    { modul:'ays', route:'progress',  ad:'İlerleme',   es:['ilerleme'] },
+    { modul:'esp', route:'today',     ad:'Bugün',      es:['bugün', 'genel bakış'] },
+    { modul:'esp', route:'lang',      ad:'Dil',        es:['dil', 'ingilizce', 'almanca', 'kelime'] },
+    { modul:'esp', route:'library',   ad:'Okuma',      es:['okuma', 'kitap'] },
+    { modul:'esp', route:'writing',   ad:'Yazı',       es:['yazı', 'yazma'] },
+    { modul:'esp', route:'symposium', ad:'Felsefe',    es:['felsefe'] },
+    { modul:'esp', route:'history',   ad:'Tarih',      es:['tarih'] },
+    { modul:'esp', route:'studio',    ad:'Ses',        es:['müzik', 'diksiyon'] },
+  ];
+
+  /* Hazır cevaplar — kullanıcının örnekleri, sırasıyla. */
+  const HAZIR = [
+    { ad:'Antrenman yapacağım', modul:'spi', route:'move', ek:{ sekme:'kuvvet' }, cevap:'Kolay gelsin.' },
+    { ad:'Besin gireceğim',     modul:'spi', route:'meals', cevap:'Afiyet olsun.' },
+    { ad:'Test çözeceğim',      modul:'ays', route:'solve', cevap:'Kolay gelsin.' },
+    { ad:'Dil çalışacağım',     modul:'esp', route:'lang',  cevap:'Kolay gelsin.' },
+    { ad:'Bugünün özeti',       ozet:true },
+  ];
+
+  /* Serbest yazıdan niyet: ilk eşleşen kazanır (sıra önemli). Türkçe
+     harflerde \b çalışmaz: sözcük başı (^|\s) ile aranır. */
+  const B = '(?:^|\\s)';
+  const NIYET = [
+    { es:new RegExp(B + '(tahlil|kan testi|laboratuvar)'), modul:'spi', route:'labs', cevap:'Tamam.' },
+    { es:new RegExp(B + '(antrenman|egzersiz|idman|spor|ağırlık|kuvvet)'), modul:'spi', route:'move', ek:{ sekme:'kuvvet' }, cevap:'Kolay gelsin.' },
+    { es:new RegExp(B + '(koş|yürüyüş|bisiklet|kardiyo)'), modul:'spi', route:'move', ek:{ sekme:'kardiyo' }, cevap:'Kolay gelsin.' },
+    { es:new RegExp(B + '(besin|yemek|öğün|kahvaltı|yedim|yiyeceğim)'), modul:'spi', route:'meals', cevap:'Afiyet olsun.' },
+    { es:new RegExp(B + '(deneme)'), modul:'ays', route:'exams', cevap:'Kolay gelsin.' },
+    { es:new RegExp(B + '(test|soru)'), modul:'ays', route:'solve', cevap:'Kolay gelsin.' },
+    { es:new RegExp(B + '(konu|ders)'), modul:'ays', route:'subjects', cevap:'Kolay gelsin.' },
+    { es:new RegExp(B + '(tekrar|kart)'), modul:'ays', route:'cards', cevap:'Kolay gelsin.' },
+    { es:new RegExp(B + '(dil|ingilizce|almanca|fransızca|kelime)'), modul:'esp', route:'lang', cevap:'Kolay gelsin.' },
+    { es:new RegExp(B + '(kitap|okuma|okuyacağım)'), modul:'esp', route:'library', cevap:'Keyifli okumalar.' },
+    { es:new RegExp(B + '(yazı|yazacağım)'), modul:'esp', route:'writing', cevap:'Kolay gelsin.' },
+    { es:new RegExp(B + '(felsefe)'), modul:'esp', route:'symposium', cevap:'Kolay gelsin.' },
+    { es:new RegExp(B + '(müzik|diksiyon)'), modul:'esp', route:'studio', cevap:'Kolay gelsin.' },
+  ];
+
+  const ortam = {
+    git:url => { window.location.href = url; },
+    zamanla:(fn, ms) => setTimeout(fn, ms),
+    simdi:() => new Date(),
+    hash:() => (typeof location !== 'undefined' ? location.hash : ''),
+    hashSil:() => { try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){ /* eski tarayıcı */ } },
+    adres:k => (L.KABUK && L.KABUK.adres ? L.KABUK.adres(k) : null),
+  };
+
+  let ayar = null;           // { modul, git(route, ek), ozet(), veri:{ onizle(metin) } }
+  let acik = false;
+  let akis = [];             // [{ kim:'king'|'sen', metin, satirlar? }]
+  let cipler = null;         // null = hazır cevaplar; ya da [{ ad, is }]
+  let bekleyen = null;       // veri önizlemesi
+
+  function kac(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+  const kucuk = s => String(s || '').toLocaleLowerCase('tr-TR').replace(/\s+/g, ' ').trim();
+
+  /* ------------------------------------------------------- anlama */
+
+  function sayfaBul(t){
+    let en = null, uzun = 0;
+    SAYFALAR.forEach(s => s.es.forEach(e => {
+      if(!new RegExp(B + e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(t)) return;
+      const puan = e.length + (ayar && s.modul === ayar.modul ? 0.5 : 0);   // eşitlikte bulunulan modül
+      if(puan > uzun){ uzun = puan; en = s; }
+    }));
+    return en;
+  }
+
+  /* Metin → ne yapılacak. Saf: depoya, ekrana dokunmaz (testler sınar). */
+  function yorumla(metin){
+    const t = kucuk(metin);
+    if(!t) return { tur:'bos' };
+    if(/(özet|nasıl gid|bugün ne|durumum|durum ne)/.test(t)) return { tur:'ozet' };
+    const gitMi = new RegExp(B + '(git|aç|götür|geç|gidelim)').test(t);
+    if(gitMi){
+      const s = sayfaBul(t);
+      if(s) return { tur:'git', hedef:s, cevap:'Tamam.' };
+    }
+    if(ayar && ayar.veri && typeof ayar.veri.onizle === 'function'){
+      let p = null;
+      try{ p = ayar.veri.onizle(String(metin).trim()); }catch(e){ p = null; }
+      if(p) return { tur:'veri', onizleme:p };
+    }
+    for(const n of NIYET){
+      if(n.es.test(t)) return { tur:'git', hedef:n, cevap:n.cevap };
+    }
+    const s = sayfaBul(t);
+    if(s) return { tur:'git', hedef:s, cevap:'Tamam.' };
+    return { tur:'bilinmiyor' };
+  }
+
+  /* ------------------------------------------------------- eylem */
+
+  function gecerliRota(modul, route){
+    return SAYFALAR.some(s => s.modul === modul && s.route === route)
+      || HAZIR.some(h => h.modul === modul && h.route === route)
+      || NIYET.some(n => n.modul === modul && n.route === route);
+  }
+
+  /* Aynı modülde doğrudan; ötekinde adresiyle (#king=rota[:sekme]). */
+  function git(h){
+    if(!ayar || !h) return false;
+    if(h.modul === ayar.modul){
+      kapat();
+      try{ ayar.git(h.route, h.ek || {}); }catch(e){ console.error('King: git', e); }
+      return true;
+    }
+    const url = ortam.adres(h.modul);
+    if(!url){
+      soyle(MODUL_AD[h.modul] + ' bu sayfadan açılamıyor; LifeOS panelinden aç.');
+      return false;
+    }
+    ortam.git(url + '#king=' + h.route + (h.ek && h.ek.sekme ? ':' + h.ek.sekme : ''));
+    return true;
+  }
+
+  function ozetSatirlari(){
+    let s = [];
+    try{ s = (ayar && ayar.ozet ? ayar.ozet() : []) || []; }catch(e){ s = []; }
+    return (Array.isArray(s) ? s : [s]).filter(Boolean).map(String);
+  }
+
+  function soyle(metin, satirlar){
+    akis.push({ kim:'king', metin, satirlar });
+    akis = akis.slice(-4);
+    ciz();
+  }
+
+  async function isle(metin){
+    const y = yorumla(metin);
+    if(y.tur === 'bos') return y;
+    akis.push({ kim:'sen', metin:String(metin).trim() });
+    bekleyen = null;
+    cipler = null;
+    if(y.tur === 'ozet'){
+      const s = ozetSatirlari();
+      soyle(s.length ? (MODUL_AD[ayar.modul] || '') + '’de bugün:' : 'Bugün için henüz bir şey yok.', s);
+    }else if(y.tur === 'git'){
+      soyle(y.cevap || 'Kolay gelsin.');
+      ortam.zamanla(() => git(y.hedef), 650);
+    }else if(y.tur === 'veri'){
+      bekleyen = y.onizleme;
+      cipler = [{ ad:'Kaydet', is:'kaydet' }, { ad:'Vazgeç', is:'vazgec' }];
+      soyle('Şunu kaydedeyim mi?', [y.onizleme.metin + (y.onizleme.ipucu ? ' · ' + y.onizleme.ipucu : '')]);
+    }else{
+      soyle('Bunu anlayamadım. Şunlardan birini seçebilir ya da «hareket sayfasına git», «uyku 7», '
+        + '«bugünün özeti» gibi yazabilirsin.');
+    }
+    return y;
+  }
+
+  async function kaydet(){
+    const p = bekleyen;
+    bekleyen = null;
+    cipler = null;
+    if(!p) return;
+    try{
+      const r = await p.kaydet();
+      soyle((r && String(r)) || 'Kaydedildi.');
+    }catch(e){
+      soyle('Kaydedilemedi: ' + ((e && e.message) || 'bilinmeyen hata'));
+    }
+  }
+
+  function hazirSec(i){
+    const h = HAZIR[i];
+    if(!h) return;
+    akis.push({ kim:'sen', metin:h.ad });
+    if(h.ozet){ cipler = null; const s = ozetSatirlari(); soyle(s.length ? (MODUL_AD[ayar.modul] || '') + '’de bugün:' : 'Bugün için henüz bir şey yok.', s); return; }
+    soyle(h.cevap || 'Kolay gelsin.');
+    ortam.zamanla(() => git(h), 650);
+  }
+
+  /* ------------------------------------------------------- görünüm */
+
+  function selam(){
+    const s = ortam.simdi().getHours();
+    const ad = (L.HESAP && L.HESAP.durum && (L.HESAP.durum().oturum || {}).ad) || '';
+    const zaman = s < 5 ? 'İyi geceler' : s < 12 ? 'Günaydın' : s < 18 ? 'İyi günler' : 'İyi akşamlar';
+    return zaman + (ad ? ' ' + ad : '') + '. Ne yapıyoruz?';
+  }
+
+  const KURE = '<span class="king__kure" aria-hidden="true"></span>';
+
+  function govde(){
+    const satirlar = akis.length ? akis : [{ kim:'king', metin:selam() }];
+    const balonlar = satirlar.map(m => m.kim === 'sen'
+      ? '<div class="king__balon king__balon--sen"><p>' + kac(m.metin) + '</p></div>'
+      : '<div class="king__balon king__balon--king">' + KURE + '<div><p>' + kac(m.metin) + '</p>'
+        + (m.satirlar && m.satirlar.length ? '<ul>' + m.satirlar.map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>' : '')
+        + '</div></div>').join('');
+    const cip = cipler
+      ? cipler.map(c => '<button type="button" class="king__cip' + (c.is === 'kaydet' ? ' king__cip--ana' : '')
+          + '" data-king="' + c.is + '">' + kac(c.ad) + '</button>').join('')
+      : HAZIR.map((h, i) => '<button type="button" class="king__cip" data-king-hazir="' + i + '">' + kac(h.ad) + '</button>').join('');
+    return '<div class="king__akis" aria-live="polite">' + balonlar + '</div>'
+      + '<div class="king__cipler" role="group" aria-label="Hazır cevaplar">' + cip + '</div>'
+      + '<form class="king__yaz" data-king-form data-ayar-disi>'
+      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="King\'e yaz…" autocomplete="off" enterkeyhint="send"/>'
+      + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
+      + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>';
+  }
+
+  function ciz(odak){
+    if(typeof document === 'undefined') return;
+    const k = document.querySelector('[data-king]');
+    if(!k) return;
+    const kutu = k.querySelector('.king__kutu');
+    kutu.innerHTML = govde();
+    const g = kutu.querySelector('.king__girdi');
+    const akisEl = kutu.querySelector('.king__akis');
+    if(akisEl) akisEl.scrollTop = akisEl.scrollHeight;
+    if(odak !== false && g && !(L.KABUK && L.KABUK.telefonMu && L.KABUK.telefonMu())){
+      try{ g.focus({ preventScroll:true }); }catch(e){ /* odak yok */ }
+    }
+  }
+
+  function ac(){
+    if(typeof document === 'undefined' || !document.body || !ayar) return;
+    if(L.KABUK && L.KABUK.katmanAcik && L.KABUK.katmanAcik()) L.KABUK.katmanKapat();
+    if(acik){ const g = document.querySelector('.king__girdi'); if(g) try{ g.focus(); }catch(e){} return; }
+    acik = true;
+    akis = []; cipler = null; bekleyen = null;
+    const el = document.createElement('div');
+    el.className = 'king';
+    el.setAttribute('data-king', '');
+    /* Perde: arka plan hafifçe kararır (odak baloncukta); dokununca kapanır. */
+    el.innerHTML = '<div class="king-perde" aria-hidden="true"></div><div class="king-isik" aria-hidden="true"></div>'
+      + '<div class="king__kutu" role="dialog" aria-modal="false" aria-label="King ile konuş"></div>';
+    document.body.appendChild(el);
+    document.documentElement.classList.add('king-acik');
+    ciz();
+    /* Bir kare sonra: geçiş başlasın (ışık süzülür, baloncuk yükselir). */
+    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-acik')));
+  }
+
+  function kapat(){
+    if(!acik || typeof document === 'undefined') return;
+    acik = false;
+    const el = document.querySelector('[data-king]');
+    if(!el) return;
+    el.classList.remove('is-acik');
+    el.classList.add('is-kapaniyor');
+    document.documentElement.classList.remove('king-acik');
+    setTimeout(() => el.remove(), 360);
+  }
+
+  /* ------------------------------------------------------- olaylar */
+
+  let bagli = false, sonCtrl = 0, baskaTus = false, basili = null;
+  function bagla(){
+    if(bagli || typeof document === 'undefined') return;
+    bagli = true;
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape' && acik){ e.preventDefault(); kapat(); return; }
+      if(e.key !== 'Control'){ baskaTus = true; return; }
+      if(e.repeat) return;
+      const s = Date.now();
+      if(!baskaTus && s - sonCtrl < 400){ sonCtrl = 0; acik ? kapat() : ac(); return; }
+      sonCtrl = s;
+      baskaTus = false;
+    }, true);
+    document.addEventListener('click', e => {
+      const t = e.target && e.target.closest ? e.target : null;
+      if(!t) return;
+      if(t.closest('[data-king-ac]')){ e.preventDefault(); e.stopPropagation(); ac(); return; }
+      if(t.closest('.king-perde')){ e.preventDefault(); e.stopPropagation(); kapat(); return; }
+      const k = t.closest('[data-king]');
+      if(!k){ if(acik) kapat(); return; }
+      const h = t.closest('[data-king-hazir]');
+      if(h){ hazirSec(Number(h.getAttribute('data-king-hazir'))); return; }
+      const c = t.closest('[data-king]:not(.king)');
+      if(c){
+        const is = c.getAttribute('data-king');
+        if(is === 'kaydet') kaydet();
+        else if(is === 'vazgec'){ bekleyen = null; cipler = null; soyle('Tamam, kaydetmedim.'); }
+      }
+    }, true);
+    document.addEventListener('submit', e => {
+      const f = e.target && e.target.closest ? e.target.closest('[data-king-form]') : null;
+      if(!f) return;
+      e.preventDefault();
+      const g = f.querySelector('.king__girdi');
+      const m = g ? g.value : '';
+      if(g) g.value = '';
+      isle(m);
+    });
+    /* Telefonda «+»ya basılı tutmak: King. */
+    document.addEventListener('pointerdown', e => {
+      const p = e.target && e.target.closest ? e.target.closest('.hizliekle') : null;
+      if(!p) return;
+      basili = setTimeout(() => { basili = 'oldu'; ac(); }, 450);
+    }, true);
+    const birak = e => {
+      if(basili === 'oldu'){ basili = null; if(e && e.type === 'pointerup') e.preventDefault(); return; }
+      if(basili){ clearTimeout(basili); basili = null; }
+    };
+    document.addEventListener('pointerup', birak, true);
+    document.addEventListener('pointercancel', birak, true);
+    document.addEventListener('click', e => {
+      if(basili === 'oldu' && e.target && e.target.closest && e.target.closest('.hizliekle')){
+        e.preventDefault(); e.stopPropagation(); basili = null;
+      }
+    }, true);
+  }
+
+  /* Modülün tek çağrısı (app.js, model yüklendikten sonra). Başka bir
+     modülden King'le gelindiyse (#king=rota[:sekme]) oraya gidilir. */
+  function kur(o){
+    ayar = Object.assign({ modul:'spi' }, o || {});
+    bagla();
+    const m = String(ortam.hash() || '').match(/^#king=([a-z]+)(?::([a-z]+))?$/);
+    if(m){
+      ortam.hashSil();
+      if(gecerliRota(ayar.modul, m[1])){
+        ortam.zamanla(() => { try{ ayar.git(m[1], m[2] ? { sekme:m[2] } : {}); }catch(e){ console.error('King:', e); } }, 60);
+      }
+    }
+  }
+
+  function _sifirla(){
+    if(typeof document !== 'undefined'){
+      const el = document.querySelector('[data-king]');
+      if(el) el.remove();
+      document.documentElement.classList.remove('king-acik');
+    }
+    ayar = null; acik = false; akis = []; cipler = null; bekleyen = null;
+  }
+
+  return {
+    kur, ac, kapat, yorumla, isle, hazirSec, kaydet,
+    acikMi:() => acik, akis:() => akis.slice(),
+    SAYFALAR, HAZIR, _ortam:ortam, _sifirla,
   };
 })();
 
@@ -64063,6 +64573,11 @@ ESP.App = (function(){
             if(sihirbaz() && ESP.Setup && !ESP.Setup.needed()) UI.closeSheet();
             render();
           } });
+      }
+      /* KING (brand/ortak/king.js): her yerden sade sohbet. */
+      if(window.LIFEOS && window.LIFEOS.KING){
+        window.LIFEOS.KING.kur({ modul:'esp', git:route => go(route),
+          ozet:() => [ESP.Screens.today.headline()] });
       }
 
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).

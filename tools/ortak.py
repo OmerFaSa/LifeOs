@@ -265,6 +265,11 @@ DOSYALAR = {
     "hesap.js":       "js/core",
     "hesap.css":      "css",
     "hesap.test.js":  "tests",
+    # KING — her yerden sade sohbet (2026-10-05): ayni katalog, ayni isik,
+    # ayni baloncuk uc arayuzde.
+    "king.js":        "js/core",
+    "king.css":       "css",
+    "king.test.js":   "tests",
     # ZEMIN (kullanici, 2026-10-02) — yumusak renk zemini ve icerigin
     # arkasinda buzlu yuzey; <head>'de animasyon.js'ten SONRA (tasinan
     # tercihi okur), ilk cizimden once <html data-zemin> koyar.
