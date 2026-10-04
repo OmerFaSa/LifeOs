@@ -39,23 +39,31 @@
 
    3. YALNIZ YEREL. 127.0.0.1'e baglanir. Disari acmak ayri ve BILINCLI
       bir karardir; bu betik o karari kullanici yerine vermez.
+      Tek istisna o kararin kendisidir: kullanici `python sistem/telefon.py`
+      ile sertifika urettiyse uc modul ev aginda https ile DE acilir
+      (5173/5183/5193; kurulum sayfasi http 5180). Bilgisayardaki 127.0.0.1
+      kapilari ve onlarin verisi degismez; giris sayfasi ve API'ler ev agina
+      hic acilmaz. `telefon.py --kapat` geri alir.
 """
 
+import html
 import json
 import os
+import ssl
 import subprocess
 import sys
 import threading
 import time
 import urllib.request
 from functools import partial
-from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from http.server import BaseHTTPRequestHandler, SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 SISTEM = os.path.dirname(os.path.abspath(__file__))
 KOK = os.path.dirname(SISTEM)          # deponun koku (sistem/ bir alt klasor)
 sys.dont_write_bytecode = True      # __pycache__ birikmesin
 sys.path.insert(0, SISTEM)
 import guncelle  # noqa: E402
+import telefon  # noqa: E402
 
 HOST = "127.0.0.1"
 GIRIS_PORT = 4180
@@ -678,6 +686,164 @@ def _sunucu_kur(klasor, port):
     return KuyrukluSunucu((HOST, port), partial(sinif, directory=src))
 
 
+# ------------------------------------------------------------ telefon
+# Ev agi kapilari (telefon.py ile sertifika uretildiyse). Ayni durgun
+# dosya sunucusu, yalniz https ve 0.0.0.0. Kisisel veri sunucuda durmaz,
+# her cihazin kendi tarayicisindadir: bu kapilar yalniz kodu ve gorselleri
+# verir. Giris sayfasi (4180) ve onun API'leri ev agina ACILMAZ.
+TELEFON_HOST = "0.0.0.0"
+EL_SIKISMA_SN = 15
+
+
+class TelefonSunucu(KuyrukluSunucu):
+    """https kapisi. TLS el sikismasi kabul dongusunde DEGIL, istegin kendi
+    is parcaciginda yapilir: sertifikaya henuz guvenmeyen bir telefon ya da
+    yarim kalan bir baglanti kapiyi kilitlemez; basarisiz el sikisma sessizce
+    duser, kapi digerlerine hizmet etmeye devam eder."""
+    ssl_baglam = None
+
+    def finish_request(self, request, client_address):
+        request.settimeout(EL_SIKISMA_SN)
+        try:
+            guvenli = self.ssl_baglam.wrap_socket(request, server_side=True)
+        except (ssl.SSLError, OSError):
+            return
+        try:
+            self.RequestHandlerClass(guvenli, client_address, self)
+        finally:
+            try:
+                guvenli.close()
+            except OSError:
+                pass
+
+
+def telefon_baglami(y):
+    b = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    b.minimum_version = ssl.TLSVersion.TLSv1_2
+    b.load_cert_chain(y["sertifika"], y["anahtar"])
+    return b
+
+
+def telefon_sunuculari(k=None, portlar=None, host=TELEFON_HOST):
+    """Doner: ([(ad, port, sunucu)], [sorun]). Sertifika yoksa iki liste de
+    bostur: sunucu eskisi gibi yalniz 127.0.0.1'dedir (kural 3). Acilamayan
+    kapi atlanir ve sorun olarak yazilir; bilgisayardaki sistemler bundan
+    etkilenmez."""
+    if not telefon.acik_mi(k):
+        return [], []
+    try:
+        baglam = telefon_baglami(telefon.yollar(k))
+    except (ssl.SSLError, OSError) as e:
+        return [], ["sertifika okunamadı: %s" % e]
+    portlar = portlar or telefon.PORTLAR
+    acik, sorun = [], []
+    for klasor, ad, _, _, _ in SISTEMLER:
+        port = portlar.get(klasor)
+        src = os.path.join(KOK, klasor, "src")
+        if port is None or not os.path.isdir(src):
+            continue
+        sinif = type("Telefon_" + klasor, (Sunucu,), {"repo": os.path.join(KOK, klasor)})
+        try:
+            s = TelefonSunucu((host, port), partial(sinif, directory=src))
+        except OSError as e:
+            sorun.append("%s (%s): %s" % (ad, port, e))
+            continue
+        s.ssl_baglam = baglam
+        acik.append((ad, port, s))
+    return acik, sorun
+
+
+def telefon_kurulum_html(bilgisayar, ip_listesi, parmak):
+    a = telefon.adresler(bilgisayar, ip_listesi)
+    modul = "".join(
+        '<li><b>%s</b> <a href="%s">%s</a>%s</li>' % (
+            _kac(m), _kac(a[m][0]), _kac(a[m][0]),
+            (' <span class="yedek">yedek: <a href="%s">%s</a></span>' % (_kac(a[m][1]), _kac(a[m][1]))
+             if len(a[m]) > 1 else ""))
+        for m in ("AYS", "SPI", "ESP"))
+    return """<!doctype html><html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LifeOS — telefon kurulumu</title>
+<style>
+:root{ --bg:#f6f6f8; --kart:#fff; --yazi:#1d1d22; --ikinci:#5c5c66; --vurgu:#3d3f8f; }
+@media (prefers-color-scheme:dark){ :root{ --bg:#16171b; --kart:#202227; --yazi:#ececf1; --ikinci:#a3a3ad; --vurgu:#a7a9ff; } }
+body{ margin:0; padding:24px 16px 40px; background:var(--bg); color:var(--yazi);
+  font:16px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; }
+main{ max-width:560px; margin:0 auto; }
+section{ background:var(--kart); border-radius:16px; padding:16px 18px; margin:0 0 14px; }
+h1{ font-size:22px; margin:0 0 16px; } h2{ font-size:16px; margin:0 0 8px; }
+p, li{ color:var(--ikinci); } b{ color:var(--yazi); } a{ color:var(--vurgu); word-break:break-all; }
+.dugme{ display:inline-block; margin-top:6px; padding:12px 18px; border-radius:999px;
+  background:var(--vurgu); color:#fff; text-decoration:none; font-weight:600; }
+@media (prefers-color-scheme:dark){ .dugme{ color:#16171b; } }
+ul{ padding-left:18px; margin:6px 0; } .yedek{ font-size:13px; } code{ font-size:12px; word-break:break-all; }
+</style></head><body><main>
+<h1>LifeOS'u telefona kur</h1>
+<section><h2>1. Sertifikayı indir</h2>
+<p>Telefon bilgisayarla aynı Wi-Fi'da olmalı. Bu sertifika yalnız senin
+bilgisayarının adresine güvenmeyi sağlar; internete hiçbir şey çıkmaz.</p>
+<a class="dugme" href="/lifeos-kok.cer">Sertifikayı indir</a></section>
+<section><h2>2. Sertifikayı kur</h2>
+<p><b>iPhone:</b> Ayarlar › İndirilen Profil › Yükle. Sonra Ayarlar › Genel ›
+Hakkında › Sertifika Güven Ayarları › «LifeOS Yerel Kok» için tam güveni aç.</p>
+<p><b>Android:</b> Ayarlar › Güvenlik › Şifreleme ve kimlik bilgileri ›
+Sertifika yükle › CA sertifikası › indirilen dosyayı seç.</p>
+<p>Parmak izi (profilde aynı olmalı):<br><code>%s</code></p></section>
+<section><h2>3. Modülü aç, ana ekrana ekle</h2>
+<ul>%s</ul>
+<p>Bir modülü hep aynı adresten aç: adres değişirse verin ayrı bir kökende
+kalır ve «silinmiş» görünür. <b>.local</b> açılmazsa yedek adresi kullan.</p>
+<p><b>iPhone:</b> Paylaş › Ana Ekrana Ekle. Verin o uygulamada durur.
+<b>Android:</b> Chrome menüsü › Ana ekrana ekle.</p></section>
+<section><h2>4. Evde bir kez aç</h2>
+<p>Ana ekrandan bir kez açınca dosyalar telefona kaydedilir. Sonra dışarıda
+internetsiz de açılır; kamera ve canlı rota çalışır. Harita karoları için
+mobil internet gerekir.</p></section>
+</main></body></html>""" % (_kac(parmak), modul)
+
+
+class TelefonKurulum(BaseHTTPRequestHandler):
+    """Ev agindan http ile acilan TEK sayfa: yonerge ve kok sertifikanin
+    ACIK kismi. BaseHTTPRequestHandler bilincli: SimpleHTTPRequestHandler'in
+    HEAD'i calisma klasorunu (deponun koku: veri/, HKM/db/) sunardi. Burada
+    tanimlanmayan her yol ve yontem 404/501'dir; ozel anahtar hic okunmaz."""
+    klasor = None
+
+    def do_GET(self):
+        yol = self.path.split("?", 1)[0]
+        y = telefon.yollar(self.klasor)
+        if yol == "/lifeos-kok.cer":
+            try:
+                with open(y["kok_der"], "rb") as f:
+                    govde = f.read()
+            except OSError:
+                return self.send_error(404)
+            self.send_response(200)
+            self.send_header("Content-Type", "application/x-x509-ca-cert")
+            self.send_header("Content-Disposition", 'attachment; filename="lifeos-kok.cer"')
+        elif yol in ("/", "/index.html"):
+            ipl = telefon.ipler()
+            govde = telefon_kurulum_html(telefon.ad(), ipl, telefon.parmak_izi(y)).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+        else:
+            return self.send_error(404)
+        self.send_header("Content-Length", str(len(govde)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(govde)
+
+    def log_message(self, fmt, *args):
+        return
+
+
+def telefon_kurulum_sunucusu(k=None, port=None, host=TELEFON_HOST):
+    if not telefon.acik_mi(k):
+        return None
+    sinif = type("TelefonKurulum_", (TelefonKurulum,), {"klasor": k})
+    return KuyrukluSunucu((host, telefon.KURULUM_PORT if port is None else port), sinif)
+
+
 
 def _cikti_utf8():
     """Cikti dosyaya ya da boruya gidiyorsa UTF-8 yazilir.
@@ -730,10 +896,30 @@ def main():
     for k in eksik:
         print("  • %-38s klasör yok, atlandı" % k)
     print("\n  Giriş sayfası:  http://%s:%d\n" % (HOST, GIRIS_PORT))
+
+    # Telefon: yalniz telefon.py ile sertifika uretildiyse. Acilamazsa
+    # bilgisayardaki sistemler yine calisir.
+    tel, tel_sorun = telefon_sunuculari()
+    kurulum = None
+    if tel:
+        try:
+            kurulum = telefon_kurulum_sunucusu()
+        except OSError as e:
+            tel_sorun.append("kurulum sayfası (%s): %s" % (telefon.KURULUM_PORT, e))
+        ipl = telefon.ipler()
+        print("  Telefon (ev ağı, https):")
+        for ad, port, _ in tel:
+            print("  ✓ %-38s https://%s.local:%d" % (ad, telefon.ad(), port))
+        if kurulum and ipl:
+            print("  Telefon kurulumu:  http://%s:%d\n" % (ipl[0], telefon.KURULUM_PORT))
+    for s in tel_sorun:
+        print("  • Telefon kapısı açılamadı — " + s)
     print("  Durdurmak için: Ctrl+C\n")
 
-    for _, _, s in sunucular:
+    for _, _, s in sunucular + tel:
         threading.Thread(target=s.serve_forever, daemon=True).start()
+    if kurulum:
+        threading.Thread(target=kurulum.serve_forever, daemon=True).start()
     try:
         giris.serve_forever()
     except KeyboardInterrupt:

@@ -170,6 +170,12 @@ jobs:
       - name: Sunucular bekleyen bağlantıyı reddetmez
         run: python3 tools/kuyruk_test.py
 
+      # TELEFON (ev ağı + https). Sertifika yokken hiçbir kapı ev ağına
+      # açılmaz; varsa üç modül https ile açılır, kurulum sayfası özel
+      # anahtarı ve depo dosyalarını asla vermez. Geçici klasörde koşar.
+      - name: Telefon kapıları yalnız bilinçli kurulumla ve https ile açılır
+        run: python3 tools/telefon_test.py
+
       # MEDYA KÜNYESİ TAZE Mİ. Künye (`brand/ortak/medya.js`) üretilmiş
       # bir dosyadır ve ekranın hangi görseli isteyebileceğini söyler.
       # Taze değilse iki yönde de bozulur: yeni gelen bir görsel hiç

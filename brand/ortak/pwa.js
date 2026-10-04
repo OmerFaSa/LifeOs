@@ -13,6 +13,10 @@
         adresi (yalnız aynı kökenden) kabuğa gönderilir.
      4. BİLDİRİM KARTI (katalog 164) — aşağıda: kodla kurulur, izin
         kendiliğinden istenmez, eylemi service worker uygulamaz.
+     5. KALICI DEPO, YALNIZ TELEFONDA. Telefon yolunda (https, ev ağı —
+        sistem/telefon.py) kabuk kurulunca depo bir kez kalıcı istenir:
+        tarayıcı yer darlığında sitenin verisini silmesin. Bilgisayarda
+        (http://127.0.0.1) istenmez; Firefox bunu kullanıcıya sorar.
 
    Manifest ayrı dosya değildir: `app.js › installManifest` onu gömülü
    üretir (tek dosya sürümüyle aynı yol). */
@@ -54,10 +58,21 @@
       const isci = (hazir && hazir.active) || kayit.active;
       const perf = o.performance || (typeof performance !== 'undefined' ? performance : null);
       if(isci) isci.postMessage({ tur:'onbellek', adresler:adresler(loc, perf) });
-      return { ok:true };
+      return { ok:true, kalici:loc.protocol === 'https:' ? await kaliciIste(nav) : null };
     }catch(e){
       return { ok:false, neden:'kayit', hata:String((e && e.message) || e) };
     }
+  }
+
+  /* Söz 5. Doner: true (kalıcı), false (reddedildi / hata), null (destek yok).
+     Zaten kalıcıysa yeniden sorulmaz; hata uygulamaya taşınmaz. */
+  async function kaliciIste(nav){
+    const d = nav && nav.storage;
+    if(!d || typeof d.persist !== 'function') return null;
+    try{
+      if(typeof d.persisted === 'function' && await d.persisted()) return true;
+      return !!(await d.persist());
+    }catch(e){ return false; }
   }
 
 
@@ -276,7 +291,7 @@
   }
   const rozet = rozetKur();
 
-  L.Pwa = { uygun, adresler, kaydet, EN_COK, rozet, rozetKur,
+  L.Pwa = { uygun, adresler, kaydet, kaliciIste, EN_COK, rozet, rozetKur,
     bildirimAyari, bildirimAyariYaz, turAcik, sessizMi, gonderilebilir,
     EN_COK_EYLEM, bildirimDestegi, bildirimKarti, bildir, izinIste, bildirimDinle, bildirimSorusu };
 })();

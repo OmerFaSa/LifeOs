@@ -223,6 +223,29 @@ ara sıra bakmak için. Kod yok, altyapı yok — üç adım.
    `build.py` artık onları kaynaktan taşıyor ve duman testi her koşumda
    arıyor.)
 
+**İkinci yol: ev ağı + https (kamera ve canlı rota için).** Tarayıcı
+kamerayı ve konumu yalnız `https`'e (ya da bilgisayarın kendisine) verir;
+tek dosya (`file://`) ya da ev ağından `http` ile SPİ'nin kamerası ve canlı
+rota kaydı çalışmaz. Bir kez:
+
+```bash
+python3 sistem/telefon.py            # yerel kök + sunucu sertifikası (openssl yalnız burada)
+python3 sistem/baslat.py --yeniden   # sunucu ev ağında https kapılarını da açar
+```
+
+Sertifika varsa `sistem/sunucu.py` üç modülü ev ağında **ayrıca** açar:
+AYS `https://<bilgisayar>.local:5173`, SPİ `:5183`, ESP `:5193`; kurulum
+sayfası `http://<IP>:5180` (yönerge + kökün açık kısmı). Bilgisayardaki
+`127.0.0.1` kapıları ve onların verisi değişmez; giriş sayfası ve API'ler
+ev ağına açılmaz. Sertifikalar deponun dışında, kullanıcı klasöründedir
+(`%LOCALAPPDATA%\LifeOS\telefon`, ötekilerde `~/.lifeos/telefon`). Telefona
+kök bir kez kurulur (iPhone: profil + «tam güven»; Android: CA sertifikası),
+modül ana ekrana eklenir ve evde bir kez açılır: sonra çevrimdışı kabukla her
+yerde açılır. Telefon yolunda depo kalıcı istenir (`pwa.js` söz 5). IP
+değişince `telefon.py --yenile` (kök kalır, telefona yeniden kurulmaz);
+kapatmak: `telefon.py --kapat`. Bir modülü hep aynı adresten aç: adres
+başka bir kökendir, verisi ayrı durur. Test: `tools/telefon_test.py`.
+
 **Veriyi taşımak — yedek dosyası.** Her sistemde *Rehber* ekranında
 (ESP'de ayrıca *Profil*) iki düğme var:
 

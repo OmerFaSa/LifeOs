@@ -74,6 +74,51 @@
       for(let i = 0; i < 600; i++) cok.push('http://127.0.0.1:4173/img/' + i + '.png');
       expect(P().adresler(yer('http://127.0.0.1:4173/'), perf(cok))).toHaveLength(P().EN_COK);
     });
+
+    /* Telefon (2026-10-04): tarayıcı yer darlığında sitenin deposunu
+       silebilir (Android Chrome'un «en iyi çaba» deposu). Telefon yolunda
+       (https) kabuk kurulunca depo bir kez KALICI istenir; zaten kalıcıysa
+       yeniden sorulmaz. Bilgisayarda (http://127.0.0.1) hiç sorulmaz:
+       Firefox bunu kullanıcıya sorar, izin kendiliğinden istenmez. */
+    const depolu = (persisted, persist) => {
+      const s = sahteNav(); s.sor = 0;
+      s.nav.storage = { persisted:async () => persisted,
+        persist:async () => { s.sor++; if(persist instanceof Error) throw persist; return persist; } };
+      return s;
+    };
+
+    it('telefonda (https) kabuk kurulunca depo kalıcı istenir; zaten kalıcıysa yeniden sorulmaz', async () => {
+      const s = depolu(false, true);
+      const r = await P().kaydet({ location:yer('https://ev.local:5183/'), navigator:s.nav });
+      expect(r.ok).toBe(true);
+      expect(r.kalici).toBe(true);
+      expect(s.sor).toBe(1);
+      const s2 = depolu(true, true);
+      const r2 = await P().kaydet({ location:yer('https://ev.local:5183/'), navigator:s2.nav });
+      expect(r2.kalici).toBe(true);
+      expect(s2.sor).toBe(0);
+    });
+
+    it('bilgisayarda (http) kalıcı depo istenmez', async () => {
+      const s = depolu(false, true);
+      const r = await P().kaydet({ location:yer('http://127.0.0.1:4183/'), navigator:s.nav });
+      expect(r.ok).toBe(true);
+      expect(r.kalici).toBe(null);
+      expect(s.sor).toBe(0);
+    });
+
+    it('depo desteği yoksa, reddedilirse ya da hata verirse kabuk yine kurulur', async () => {
+      const yok = sahteNav();
+      const r = await P().kaydet({ location:yer('https://ev.local:5183/'), navigator:yok.nav });
+      expect(r.ok).toBe(true);
+      expect(r.kalici).toBe(null);
+      const red = depolu(false, false);
+      expect((await P().kaydet({ location:yer('https://ev.local:5183/'), navigator:red.nav })).kalici).toBe(false);
+      const hata = depolu(false, new Error('kota'));
+      const r3 = await P().kaydet({ location:yer('https://ev.local:5183/'), navigator:hata.nav });
+      expect(r3.ok).toBe(true);
+      expect(r3.kalici).toBe(false);
+    });
   });
 
   describe('164 · Bildirim kartı', () => {
