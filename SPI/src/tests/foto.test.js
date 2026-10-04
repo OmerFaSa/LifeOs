@@ -145,6 +145,7 @@
     const bipler = [];
     KM._ortam.bip = f => bipler.push(f);
     KM._ortam.guvenli = () => o.guvenli !== false;
+    KM._ortam.uygulama = () => !!o.uygulama;
     KM._ortam.bekle = o.bekle || (() => Promise.resolve());
     KM._ortam.medya = () => (o.medya === null ? null : {
       getUserMedia:async () => {
@@ -272,6 +273,15 @@
       KM.cek({ yon:'environment' });
       expect(await kadar(() => !kam().querySelector('.kamera__mesaj').hidden)).toBe(true);
       expect(kam().querySelector('.kamera__mesaj').textContent).toContain('Kamera izni verilmedi');
+    }));
+
+    /* Uygulamada tarayıcı yok: izin telefonun Ayarlar'ındadır (2026-10-04). */
+    it('uygulamada izin reddi telefonun Ayarlar\'ını gösterir, tarayıcıyı değil', () => kameraIle({ red:'NotAllowedError', uygulama:true }, async () => {
+      KM.cek({ yon:'environment' });
+      expect(await kadar(() => !kam().querySelector('.kamera__mesaj').hidden)).toBe(true);
+      const metin = kam().querySelector('.kamera__mesaj').textContent;
+      expect(metin).toContain('Ayarlar');
+      expect(/[Tt]arayıcı/.test(metin)).toBe(false);
     }));
   });
 

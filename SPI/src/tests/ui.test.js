@@ -560,6 +560,18 @@
       resetState();
       expect(SP.Setup.needed()).toBeFalsy();
     });
+
+    /* 2026-10-04 telefon denemesi: «Şimdilik atla» hatırlanmıyordu; sihirbaz
+       her açılışta (uygulamada her modül dönüşünde) yeniden geliyordu. */
+    it('atlanan kurulum bir daha kendiliğinden açılmaz, profil yine eksik sayılır', async () => {
+      resetState();
+      SP.S.profile = SP.Model.defaultProfile();
+      expect(SP.Setup.acilsinMi()).toBeTruthy();
+      await SP.Setup.skip();
+      expect(SP.Setup.acilsinMi()).toBeFalsy();
+      expect(SP.Setup.needed()).toBeTruthy();
+      expect((await SP.Store.get('prefs')).kurulumAtlandi).toBe(true);
+    });
   });
 
   describe('Yardımcılar', () => {

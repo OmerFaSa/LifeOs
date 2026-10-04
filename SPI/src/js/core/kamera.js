@@ -29,6 +29,8 @@ SP.Kamera = (function(){
   const ortam = {
     medya:() => (navigator.mediaDevices && navigator.mediaDevices.getUserMedia ? navigator.mediaDevices : null),
     guvenli:() => window.isSecureContext !== false,
+    /* LifeOS uygulaması (uygulama/ios): tarayıcı yok, izin telefonun Ayarlar'ında. */
+    uygulama:() => !!window.LIFEOS_YEREL,
     bekle:ms => new Promise(r => setTimeout(r, ms)),
     bip:null,                       /* null → WebAudio */
   };
@@ -167,7 +169,9 @@ SP.Kamera = (function(){
           video:{ facingMode:{ ideal:yon }, width:{ ideal:1920 }, height:{ ideal:1440 } } });
       }catch(e){
         kameraYok(e && e.name === 'NotAllowedError'
-          ? 'Kamera izni verilmedi. Tarayıcının site ayarlarından kameraya izin ver.'
+          ? (ortam.uygulama()
+            ? 'Kamera izni verilmedi. Telefonun Ayarlar\'ında LifeOS › Kamera\'yı aç.'
+            : 'Kamera izni verilmedi. Tarayıcının site ayarlarından kameraya izin ver.')
           : 'Kamera açılamadı.');
         return;
       }

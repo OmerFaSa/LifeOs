@@ -122,6 +122,16 @@ async function portMuhafizi(portlar, ipucu){
             kind:'strength', items:[], minutes:45, rpe:6, note:'',
             createdAt:new Date().toISOString() });
         }
+        /* Rotalı koşu: Kardiyo'daki harita kartı (ve OSM künyesi) ancak
+           rotayla çizilir. Rotasız veriyle künye bağlantısı hiç ölçülmüyordu;
+           2026-10-04 telefon denemesinde 132×12 px çıktı. */
+        const iz = [];
+        for(let i = 0; i < 120; i++){
+          iz.push({ lat:41.044 + i * 15 / 111195, lon:28.993, ele:50 + (i % 20),
+            t:Date.now() - 3600e3 + i * 5000, parca:i === 0 });
+        }
+        const rota = SP.Rota.noktalardan(iz, { kaynak:'canli' });
+        if(rota.ok) SP.S.workouts.push(SP.Rota.seans(rota.rota, 'kosu'));
         SP.S.meds.push({ id:'m1', kindId:'demir',
           name:'Cok uzun bir ilac adi yazildiginda satir tasabilir',
           dose:'1x1', startDate:U.todayISO(), endDate:null, note:'' });
@@ -134,16 +144,22 @@ async function portMuhafizi(portlar, ipucu){
         await page.evaluate(id => SP.App.go(id), r);
         await page.waitForTimeout(160);
 
-        /* Sekmeleri de gez: tasma cogu zaman ikinci sekmede. */
-        const tabs = await page.$$eval('.subtabs .subtab',
-          els => els.map(e => e.getAttribute('data-tab')).filter(Boolean));
+        /* Sekmeleri de gez: tasma cogu zaman ikinci sekmede. Iki tur
+           sekme var: ekran ici sekmeler (.subtabs) ve sayfa bolumleri
+           (bolum cubugu, K.SayfaBolumleri). Bolum cubugu uzun sure
+           gezilmedi: Hareket › Kardiyo gibi ilk bolum disindaki her sey
+           olculmuyordu (2026-10-04, harita kunyesi 132×12 px boyle kacti). */
+        const SEKME = '.subtabs .subtab[data-tab], .bolumcubugu--sayfa .bolumcubugu__ad[data-tab]';
+        const tabs = await page.$$eval(SEKME, els => els
+          .filter(e => !e.classList.contains('is-on'))
+          .map(e => e.getAttribute('data-tab')).filter(Boolean));
         const yerler = [null].concat(tabs);
 
         for(const t of yerler){
           if(t){
-            const btn = await page.$('.subtabs .subtab[data-tab="' + t + '"]');
+            const btn = await page.$(':is(.subtabs .subtab, .bolumcubugu--sayfa .bolumcubugu__ad)[data-tab="' + t + '"]');
             if(!btn) continue;
-            await btn.click();
+            await btn.evaluate(e => e.click());
             await page.waitForTimeout(120);
           }
           const sonuc = await page.evaluate(({ minTap, allow }) => {

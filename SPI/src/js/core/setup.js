@@ -181,10 +181,19 @@ SP.Setup = (function(){
     return true;
   }
 
-  function skip(){
-    SP.UI.closeSheet();
-    SP.UI.toast('Atlandı — Hane ekranından istediğin zaman doldurabilirsin');
+  /* Açılışta kendiliğinden açılsın mı? «Şimdilik atla» bu profilde
+     hatırlanır: sihirbaz her açılışta (telefon uygulamasında her modül
+     dönüşünde) yeniden gelmez. Profil yine eksik sayılır (needed): «profil
+     eksik» kartları durur, Hane'den doldurulur. */
+  function acilsinMi(){
+    return needed() && !(SP.S.prefs && SP.S.prefs.kurulumAtlandi);
   }
 
-  return { needed, open, save, skip };
+  async function skip(){
+    SP.UI.closeSheet();
+    SP.UI.toast('Atlandı — Hane ekranından istediğin zaman doldurabilirsin');
+    await SP.Model.savePrefs({ kurulumAtlandi:true });
+  }
+
+  return { needed, acilsinMi, open, save, skip };
 })();

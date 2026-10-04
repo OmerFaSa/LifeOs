@@ -11631,7 +11631,12 @@ html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
   font-size:10px; line-height:1; padding:4px 7px; border-radius:6px;
   background:rgba(255,255,255,.86);
 }
-.harita__kunye a{ color:#3B3D45; text-decoration:none; }
+/* Dokunma hedefi en az 24 px (layoutcheck tabanı): dolgu görünmez, eksi
+   pay satırı büyütmez — künye kutusu aynı boyda kalır. */
+.harita__kunye a{
+  color:#3B3D45; text-decoration:none;
+  display:inline-block; padding:8px 0; margin:-8px 0;
+}
 .harita__kunye a:hover{ text-decoration:underline; }
 
 .harita__profil{ display:block; flex:none; width:100%; height:auto; max-height:none; }
@@ -13352,7 +13357,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'b9146a06', at:'2026-10-04 18:03', dirty:true };
+SP.BUILD = { id:'e25a4000', at:'2026-10-04 18:39', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -40234,6 +40239,8 @@ SP.Kamera = (function(){
   const ortam = {
     medya:() => (navigator.mediaDevices && navigator.mediaDevices.getUserMedia ? navigator.mediaDevices : null),
     guvenli:() => window.isSecureContext !== false,
+    /* LifeOS uygulaması (uygulama/ios): tarayıcı yok, izin telefonun Ayarlar'ında. */
+    uygulama:() => !!window.LIFEOS_YEREL,
     bekle:ms => new Promise(r => setTimeout(r, ms)),
     bip:null,                       /* null → WebAudio */
   };
@@ -40372,7 +40379,9 @@ SP.Kamera = (function(){
           video:{ facingMode:{ ideal:yon }, width:{ ideal:1920 }, height:{ ideal:1440 } } });
       }catch(e){
         kameraYok(e && e.name === 'NotAllowedError'
-          ? 'Kamera izni verilmedi. Tarayıcının site ayarlarından kameraya izin ver.'
+          ? (ortam.uygulama()
+            ? 'Kamera izni verilmedi. Telefonun Ayarlar\'ında LifeOS › Kamera\'yı aç.'
+            : 'Kamera izni verilmedi. Tarayıcının site ayarlarından kameraya izin ver.')
           : 'Kamera açılamadı.');
         return;
       }
@@ -50221,12 +50230,21 @@ SP.Setup = (function(){
     return true;
   }
 
-  function skip(){
-    SP.UI.closeSheet();
-    SP.UI.toast('Atlandı — Hane ekranından istediğin zaman doldurabilirsin');
+  /* Açılışta kendiliğinden açılsın mı? «Şimdilik atla» bu profilde
+     hatırlanır: sihirbaz her açılışta (telefon uygulamasında her modül
+     dönüşünde) yeniden gelmez. Profil yine eksik sayılır (needed): «profil
+     eksik» kartları durur, Hane'den doldurulur. */
+  function acilsinMi(){
+    return needed() && !(SP.S.prefs && SP.S.prefs.kurulumAtlandi);
   }
 
-  return { needed, open, save, skip };
+  async function skip(){
+    SP.UI.closeSheet();
+    SP.UI.toast('Atlandı — Hane ekranından istediğin zaman doldurabilirsin');
+    await SP.Model.savePrefs({ kurulumAtlandi:true });
+  }
+
+  return { needed, acilsinMi, open, save, skip };
 })();
 
 /* ==== js/screens/hatirlatui.js ==== */
@@ -62059,7 +62077,7 @@ SP.App = (function(){
       location.replace(u.toString());
     },
     async 'setup-save'(){ await SP.Setup.save(); },
-    async 'setup-skip'(){ SP.Setup.skip(); },
+    async 'setup-skip'(){ await SP.Setup.skip(); },
     /* TANITIM ŞERİDİ — nokta basıldığında panel değişir.
 
        Sihirbaz YENİDEN ÇİZİLMEZ: `TANITIM_ADIM` doğrudan DOM'a
@@ -62768,7 +62786,7 @@ SP.App = (function(){
         });
       }
 
-      if(SP.Setup.needed()) setTimeout(() => SP.Setup.open(), 400);
+      if(SP.Setup.acilsinMi()) setTimeout(() => SP.Setup.open(), 400);
     }catch(err){
       console.error('Açılış hatası:', err);
       const markup = String(html`<div class="content">

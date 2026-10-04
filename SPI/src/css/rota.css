@@ -34,7 +34,12 @@
   font-size:10px; line-height:1; padding:4px 7px; border-radius:6px;
   background:rgba(255,255,255,.86);
 }
-.harita__kunye a{ color:#3B3D45; text-decoration:none; }
+/* Dokunma hedefi en az 24 px (layoutcheck tabanı): dolgu görünmez, eksi
+   pay satırı büyütmez — künye kutusu aynı boyda kalır. */
+.harita__kunye a{
+  color:#3B3D45; text-decoration:none;
+  display:inline-block; padding:8px 0; margin:-8px 0;
+}
 .harita__kunye a:hover{ text-decoration:underline; }
 
 .harita__profil{ display:block; flex:none; width:100%; height:auto; max-height:none; }
