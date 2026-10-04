@@ -49,6 +49,7 @@
 import html
 import json
 import os
+import socket
 import ssl
 import subprocess
 import sys
@@ -695,15 +696,47 @@ TELEFON_HOST = "0.0.0.0"
 EL_SIKISMA_SN = 15
 
 
+class HttpsYonlendir(BaseHTTPRequestHandler):
+    """https kapisina duz http gelirse: ayni adresin https'ine 301. Adres
+    semasiz ya da http:// ile yazilinca «bos yanit» yerine sayfa acilir."""
+    def _yonlendir(self):
+        host = (self.headers.get("Host") or "").strip()
+        if not host or any(c in host for c in "\r\n /\\@"):
+            return self.send_error(400)
+        self.send_response(301)
+        self.send_header("Location", "https://" + host + self.path)
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
+    do_GET = do_HEAD = _yonlendir
+
+    def log_message(self, fmt, *args):
+        return
+
+
 class TelefonSunucu(KuyrukluSunucu):
-    """https kapisi. TLS el sikismasi kabul dongusunde DEGIL, istegin kendi
-    is parcaciginda yapilir: sertifikaya henuz guvenmeyen bir telefon ya da
-    yarim kalan bir baglanti kapiyi kilitlemez; basarisiz el sikisma sessizce
-    duser, kapi digerlerine hizmet etmeye devam eder."""
+    """Ev agi kapisi. Ilk bayta bakar (okumadan, MSG_PEEK): 0x16 TLS el
+    sikismasidir → https; oteki duz http'dir → `duz_isleyici` (modul
+    kapisinda https'e yonlendirme, kurulum kapisinda ayni sayfa). Telefonda
+    «güvenli bağlantı sağlanamıyor» buydu: semasiz yazilan adreste tarayici
+    http kapisina https deniyordu (2026-10-04).
+    El sikisma kabul dongusunde DEGIL, istegin kendi is parcaciginda
+    yapilir: sertifikaya henuz guvenmeyen bir telefon ya da yarim kalan bir
+    baglanti kapiyi kilitlemez; basarisiz el sikisma sessizce duser."""
     ssl_baglam = None
+    duz_isleyici = HttpsYonlendir
 
     def finish_request(self, request, client_address):
         request.settimeout(EL_SIKISMA_SN)
+        try:
+            ilk = request.recv(1, socket.MSG_PEEK)
+        except OSError:
+            return
+        if not ilk:
+            return
+        if ilk != b"\x16":
+            self.duz_isleyici(request, client_address, self)
+            return
         try:
             guvenli = self.ssl_baglam.wrap_socket(request, server_side=True)
         except (ssl.SSLError, OSError):
@@ -838,10 +871,15 @@ class TelefonKurulum(BaseHTTPRequestHandler):
 
 
 def telefon_kurulum_sunucusu(k=None, port=None, host=TELEFON_HOST):
+    """Kurulum kapisi hem http hem https konusur: kok kurulmadan once
+    https'te tarayici uyari verir (gecilebilir), sonra temiz acilir."""
     if not telefon.acik_mi(k):
         return None
     sinif = type("TelefonKurulum_", (TelefonKurulum,), {"klasor": k})
-    return KuyrukluSunucu((host, telefon.KURULUM_PORT if port is None else port), sinif)
+    s = TelefonSunucu((host, telefon.KURULUM_PORT if port is None else port), sinif)
+    s.ssl_baglam = telefon_baglami(telefon.yollar(k))
+    s.duz_isleyici = sinif
+    return s
 
 
 

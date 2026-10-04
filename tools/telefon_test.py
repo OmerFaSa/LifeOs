@@ -180,11 +180,20 @@ with tempfile.TemporaryDirectory() as gecici:
     durum, _ = https_al(port, y["kok"], yol="/sw.js")
     dogru("service worker https ile gelir (cevrimdisi kabuk)", durum == 200, durum)
 
-    # 5 — bozuk ve sessiz baglanti kapiyi kilitlemez
-    with socket.create_connection(("127.0.0.1", port), timeout=5) as duz:
-        duz.sendall(b"GET / HTTP/1.0\r\n\r\n")       # https kapisina duz http
+    # 5 — duz http yonlendirilir; bozuk ve sessiz baglanti kapiyi kilitlemez
+    # (2026-10-04, telefonda «güvenli bağlantı sağlanamıyor»: adres semasiz
+    # yazilinca tarayici bir kapiya https, digerine http deniyor.)
+    c = http.client.HTTPConnection("127.0.0.1", port, timeout=5)
+    c.request("GET", "/js/app.js?x=1", headers={"Host": "lifeos-test.local:%d" % port})
+    r = c.getresponse()
+    yer = r.getheader("Location") or ""
+    c.close()
+    dogru("https kapisina duz http aynı adresin https'ine yonlendirilir",
+          r.status == 301 and yer == "https://lifeos-test.local:%d/js/app.js?x=1" % port, (r.status, yer))
+    with socket.create_connection(("127.0.0.1", port), timeout=5) as bozuk:
+        bozuk.sendall(b"\x16\x03\x01\x00\x05zzzzz")   # bozuk TLS
         try:
-            duz.recv(100)
+            bozuk.recv(100)
         except OSError:
             pass
     sessiz = socket.create_connection(("127.0.0.1", port), timeout=5)   # hic konusmaz
@@ -192,7 +201,7 @@ with tempfile.TemporaryDirectory() as gecici:
     durum, _ = https_al(port, y["kok"])
     sure = time.monotonic() - t0
     sessiz.close()
-    dogru("duz http ve sessiz baglantidan sonra kapi hizmet eder", durum == 200, durum)
+    dogru("bozuk TLS ve sessiz baglantidan sonra kapi hizmet eder", durum == 200, durum)
     dogru("sessiz baglanti el sikismayi bekletmez (< 3 sn)", sure < 3, round(sure, 2))
     spi.shutdown()
     spi.server_close()
@@ -217,6 +226,20 @@ with tempfile.TemporaryDirectory() as gecici:
     dogru("kurulum: ozel anahtar ve depo dosyalari verilmez", not sizinti, sizinti)
     dogru("kurulum: HEAD yok", http_al(kp, "HEAD")[0] == 501, http_al(kp, "HEAD")[0])
     dogru("kurulum: POST yok", http_al(kp, "POST", "/api/yeniden")[0] == 501)
+    # Adres semasiz yazilinca tarayici https dener: kurulum kapisi onu da
+    # karsilar (kok kurulmadan once uyari cikar, gecilebilir; sonra temiz).
+    try:
+        durum, govde = https_al(kp, y["kok"], ad="lifeos-test.local")
+        tls_sayfa = durum == 200 and "Sertifikayı indir" in govde.decode("utf-8", "replace")
+    except (ssl.SSLError, OSError) as e:
+        tls_sayfa = repr(e)
+    dogru("kurulum kapisi https ile gelen tarayiciya da sayfayi verir", tls_sayfa is True, tls_sayfa)
+    try:
+        durum, govde = https_al(kp, y["kok"], yol="/lifeos-kok.cer")
+        tls_cer = durum == 200 and govde == der
+    except (ssl.SSLError, OSError) as e:
+        tls_cer = repr(e)
+    dogru("kurulum kapisi https ile de kok sertifikayi verir", tls_cer is True, tls_cer)
     kur_s.shutdown()
     kur_s.server_close()
 
