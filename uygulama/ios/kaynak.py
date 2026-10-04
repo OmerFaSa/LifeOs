@@ -14,6 +14,9 @@ Kurallar (faq.altstore.io/developers/make-a-source):
     yazilmaz, derlenmis uygulamanin kendi Info.plist'inden okunur.
   - Imzasiz IPA'da yetki (entitlement) yoktur; liste bostur.
   - Surum dizisinin SIRASI onemlidir: ilk eleman en yeni surumdur.
+  - Gorunen surum de her derlemede degisir (0.1.<derleme>): ilk kaynakta hep
+    «0.1.0» idi, yalniz buildVersion degisiyordu ve AltStore telefonda «No
+    Updates» dedi (2026-10-04) — gorunen surume bakiyor.
 """
 import datetime
 import json

@@ -94,7 +94,7 @@ jobs:
           set -o pipefail
           xcodebuild -project LifeOS.xcodeproj -scheme LifeOS -configuration Release \
             -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
-            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            MARKETING_VERSION=0.1.${{ github.run_number }} CURRENT_PROJECT_VERSION=${{ github.run_number }} \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build 2>&1 | tail -5
           rm -rf Payload && mkdir Payload
           cp -R build/Build/Products/Release-iphoneos/LifeOS.app Payload/
