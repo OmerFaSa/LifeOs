@@ -228,6 +228,31 @@
       kos(20, 0);
       expect(C.durum().nokta).toBe(20);
     }));
+
+    /* Uygulamada tarayıcı yok: «site ayarları» diye bir yer gösterilemez.
+       2026-10-04 telefon denemesi: izin kalkınca ekranda «Tarayıcının site
+       ayarlarından konuma izin ver.» yazıyordu. */
+    it('uygulamada izin reddi telefonun Ayarlar\'ını gösterir, tarayıcıyı değil', () => sahneyle(async () => {
+      C._ortam.arkaPlan = () => true;
+      const olaylar = [];
+      const kes = C.dinle(o => olaylar.push(o));
+      try{
+        C.baslat('kosu');
+        kos(20, 0);
+        kaynak.hataFn({ code:1, message:'Konum izni verilmedi.' });
+        expect(C.durum().hal).toBe('duraklat');
+        expect(C.durum().hata).toBe(C.IZIN_YOK_UYGULAMA);
+        C.sil();
+        C.baslat('kosu');
+        kaynak.hataFn({ code:1 });
+      }finally{ kes(); }
+      expect(C.durum()).toBeNull();
+      const metinler = olaylar.filter(o => o.tip === 'hata').map(o => o.why);
+      expect(metinler.length).toBe(2);
+      expect(metinler.every(m => m === C.IZIN_YOK_UYGULAMA)).toBe(true);
+      expect(C.IZIN_YOK_UYGULAMA).toContain('Ayarlar');
+      expect(/[Tt]arayıcı/.test(C.IZIN_YOK_UYGULAMA)).toBe(false);
+    }));
   });
 
   /* -------------------------------------------------- Kardiyo ekranı */

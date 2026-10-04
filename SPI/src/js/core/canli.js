@@ -46,6 +46,9 @@ SP.Canli = (function(){
     + 'güvenli bağlantıda (https) verir.';
   const KONUM_YOK = 'Bu tarayıcı konum vermiyor.';
   const IZIN_YOK = 'Konum izni verilmedi. Tarayıcının site ayarlarından konuma izin ver.';
+  /* Uygulamada tarayıcı yok; izin telefonun Ayarlar'ındadır. */
+  const IZIN_YOK_UYGULAMA = 'Konum izni verilmedi. Telefonun Ayarlar\'ında LifeOS › Konum › '
+    + '«Uygulamayı Kullanırken»i seç.';
 
   /* Dış dünya tek yerde; testler bunları değiştirir. */
   const ortam = {
@@ -163,11 +166,12 @@ SP.Canli = (function(){
   function hata(e){
     if(!d) return;
     if(e && e.code === 1){
+      const why = ortam.arkaPlan() ? IZIN_YOK_UYGULAMA : IZIN_YOK;
       /* İzin yok: hiç nokta yoksa kayıt hiç başlamamış sayılır. */
-      if(!d.noktalar.length){ sil(); bildir({ tip:'hata', why:IZIN_YOK }); return; }
+      if(!d.noktalar.length){ sil(); bildir({ tip:'hata', why }); return; }
       duraklat();
-      d.hata = IZIN_YOK;
-      bildir({ tip:'hata', why:IZIN_YOK });
+      d.hata = why;
+      bildir({ tip:'hata', why });
       return;
     }
     d.hata = 'GPS sinyali yok';
@@ -329,6 +333,6 @@ SP.Canli = (function(){
 
   return {
     durum, noktalar, ozet, baslat, duraklat, surdur, bitir, rota, sil, dinle, yukle,
-    DOGRULUK_M, BOSLUK_MS, GUVENSIZ, IZIN_YOK, _ortam:ortam, _sifirla,
+    DOGRULUK_M, BOSLUK_MS, GUVENSIZ, IZIN_YOK, IZIN_YOK_UYGULAMA, _ortam:ortam, _sifirla,
   };
 })();
