@@ -4,6 +4,9 @@
 name: LifeOS
 options:
   bundleIdPrefix: com.omerfasa
+  # Uygulamanin dili Turkce: yoksa iPhone uygulama icindeki sistem dugmelerini
+  # (kamera, dosya secici, paylas) Turkce telefonda da Ingilizce gosterir.
+  developmentLanguage: tr
   deploymentTarget:
     iOS: "15.0"
 settings:
@@ -28,6 +31,9 @@ targets:
       path: LifeOS/Info.plist
       properties:
         CFBundleDisplayName: LifeOS
+        CFBundleDevelopmentRegion: tr
+        CFBundleLocalizations:
+          - tr
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         LSRequiresIPhoneOS: true

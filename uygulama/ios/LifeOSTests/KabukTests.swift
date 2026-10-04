@@ -15,6 +15,13 @@ final class KabukTests: XCTestCase {
         XCTAssertFalse(KabukDenetleyici.icerde(URL(string: "http://ornek.com:4183/")!))
     }
 
+    /// Uygulamanin dili Turkce: tanimsizken (XcodeGen varsayilani en) iPhone
+    /// uygulama icindeki sistem dugmelerini Ingilizce gosteriyordu.
+    func testUygulamaDiliTurkce() {
+        XCTAssertEqual(Bundle.main.object(forInfoDictionaryKey: "CFBundleDevelopmentRegion") as? String, "tr")
+        XCTAssertEqual(Bundle.main.object(forInfoDictionaryKey: "CFBundleLocalizations") as? [String], ["tr"])
+    }
+
     /// Kullanici (2026-10-04): «normal modul secme kismi ile gelse» — uygulama
     /// giris sayfasiyla acilir; giris sayfasi uc modulun kartini tasir.
     func testUygulamaGirisSayfasiylaAcilirUcKartDogruKapiya() throws {
