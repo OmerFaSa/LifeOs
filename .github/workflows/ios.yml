@@ -68,6 +68,16 @@ jobs:
             CODE_SIGNING_ALLOWED=NO 2>&1 | tee test.log \
             | grep -E "Test Case .*(passed|failed)|error:|XCTAssert|Executed|TEST (SUCCEEDED|FAILED)"
 
+      # Günlük indirmek GitHub girişi ister; hata özetleri (annotation) ise
+      # herkese açık API'den okunur. Kalan testin satırı oraya yazılır.
+      - name: Kalan testleri özetle (herkese açık hata özeti)
+        if: failure()
+        working-directory: uygulama/ios
+        run: |
+          grep -E "error: -\[|: error: |Test Case .* failed|Testing failed|TEST FAILED|Fatal error|Crash" test.log \
+            | head -20 | sed -e 's/%/%25/g' | while IFS= read -r s; do echo "::error title=iOS testi::${s}"; done
+          true
+
       - name: Test günlüğü
         if: failure()
         uses: actions/upload-artifact@v4
