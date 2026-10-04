@@ -375,7 +375,9 @@ SP.Screens.move = (function(){
     UI.sheet({
       title:'Kayda başla',
       body:String(html`${turSecici('canli-tur', canliTur)}
-        <p class="tiny dim">Ekran açık kalmalı; kilitli ekranda konum gelmez.</p>`),
+        <p class="tiny dim">${SP.Canli._ortam.arkaPlan()
+          ? 'Ekran kapalıyken de kaydeder; telefon cebinde olabilir.'
+          : 'Ekran açık kalmalı; kilitli ekranda konum gelmez.'}</p>`),
       footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
         ${K.Button({ label:'Başlat', icon:'play', tone:'primary', act:'canli-basla' })}`),
       noFocus:true,
@@ -408,7 +410,7 @@ SP.Screens.move = (function(){
     }
     if(c.hata) return c.hata;
     if(!c.nokta) return 'Konum bekleniyor…';
-    return c.ekran === 'acik' ? '' : 'Ekranı açık tut; kilitli ekranda konum gelmez.';
+    return c.ekran === 'acik' || c.ekran === 'arka-plan' ? '' : 'Ekranı açık tut; kilitli ekranda konum gelmez.';
   }
   function canliDugmeleri(c){
     return String(html`${c.hal === 'kayitta'

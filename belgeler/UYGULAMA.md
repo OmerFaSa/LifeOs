@@ -38,7 +38,7 @@ uygulama/ios/
 | | Durum | Ne |
 |---|---|---|
 | 1 | yazıldı | Kabuk: üç modül uygulamada, yerel sunucu, kamera, ön planda konum, yedek indirme. CI simülatörde sınar. |
-| 2 | sırada | **Ekran kapalıyken rota:** yerel konum servisi (CoreLocation, arka plan konum kipi) noktaları biriktirir; SPİ dönünce kendi zaman damgalarıyla alır (`canli.js` `p.timestamp` kullanır). |
+| 2 | yazıldı | **Ekran kapalıyken rota:** `KonumKoprusu.swift` sayfanın `navigator.geolocation`'ını CoreLocation'a bağlar (arka plan konum kipi). Arka plandayken noktalar telefonda birikir, öne gelince kendi sırası ve zamanıyla SPİ'ye gider; `canli.js` aynı arayüzden okur. Uygulamada ekran kilidi istenmez, «ekranı açık tut» denmez (`window.LIFEOS_YEREL`). Her sayfa kimlik taşır: modül değişince eski izleyici biter, GPS durur. **Sınır:** iOS web sürecini öldürürse (nadir) o ana kadar biriken noktalar kayıtta değil, taslak duraklatılmış döner. |
 | 3 | sonra | Android (ücretsiz, APK). |
 
 ## Kurulum (Windows + iPhone, ücretsiz — AltStore)

@@ -20,6 +20,11 @@
         vermez. Ekran açık tutulmaya çalışılır (Wake Lock); 30 saniyeden
         uzun konum boşlukları toplanır ve kayıt sonunda söylenir. Boşlukta
         yol uydurulmaz: iki uç arası düz çizgidir ve bu yazılır.
+        İSTİSNA: iPhone uygulaması (uygulama/ios) konumu telefonun kendi
+        servisinden verir ve ekran kapalıyken de biriktirir
+        (`window.LIFEOS_YEREL.konum === 'arka-plan'`). Orada ekran kilidi
+        istenmez, ekran durumu «arka-plan»dır; noktalar kendi zamanlarıyla
+        gelir, boşluk kuralı aynen geçerlidir.
      5. KONUM YALNIZ GÜVENLİ BAĞLANTIDA. Tarayıcı konumu https ya da
         localhost dışında vermez; o zaman kayıt başlamaz ve nedeni söylenir.
      6. KONUM CİHAZDAN ÇIKMAZ. Noktalar yalnız bu cihazın deposuna yazılır.
@@ -48,6 +53,9 @@ SP.Canli = (function(){
     guvenli:() => window.isSecureContext !== false,
     saat:() => Date.now(),
     kilit:() => (typeof navigator !== 'undefined' && navigator.wakeLock) || null,
+    /* Söz 4 istisnası: konum ekran kapalıyken de geliyor mu (uygulama)? */
+    arkaPlan:() => !!(typeof window !== 'undefined' && window.LIFEOS_YEREL
+      && window.LIFEOS_YEREL.konum === 'arka-plan'),
     depo:{
       oku(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } },
       yaz(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } },
@@ -169,6 +177,7 @@ SP.Canli = (function(){
   /* ------------------------------------------------------- ekran kilidi */
 
   async function ekranAc(){
+    if(ortam.arkaPlan()){ if(d) d.ekran = 'arka-plan'; bildir(); return; }
     const w = ortam.kilit();
     if(!w || typeof w.request !== 'function'){ if(d) d.ekran = 'yok'; bildir(); return; }
     try{

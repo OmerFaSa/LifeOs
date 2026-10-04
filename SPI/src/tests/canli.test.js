@@ -24,6 +24,7 @@
     o.guvenli = () => guvenli;
     o.saat = () => saat;
     o.kilit = () => null;
+    o.arkaPlan = () => false;
     o.depo = {
       oku:k => depo[k] ? JSON.parse(depo[k]) : null,
       yaz:(k, v) => { depo[k] = JSON.stringify(v); return true; },
@@ -212,6 +213,21 @@
       await bekle();
       expect(C.durum().ekran).toBe('yok');
     }));
+
+    /* iPhone uygulaması (uygulama/ios, 2026-10-04): konumu iPhone'un kendi
+       servisi verir ve ekran kapalıyken de gelir. Orada ekran kilidi
+       istenmez; ekran durumu «arka-plan»dır. */
+    it('uygulamada (arka planda konum) ekran kilidi istenmez', () => sahneyle(async () => {
+      let istek = 0;
+      C._ortam.kilit = () => ({ request:async () => { istek++; return { release(){}, addEventListener(){} }; } });
+      C._ortam.arkaPlan = () => true;
+      C.baslat('kosu');
+      await bekle();
+      expect(C.durum().ekran).toBe('arka-plan');
+      expect(istek).toBe(0);
+      kos(20, 0);
+      expect(C.durum().nokta).toBe(20);
+    }));
   });
 
   /* -------------------------------------------------- Kardiyo ekranı */
@@ -265,6 +281,36 @@
       expect(C.durum()).toBeNull();
       expect(t[0]).toContain('https');
       SP.UI.closeSheet();
+    }));
+
+    it('tarayıcıda «ekranı açık tut» denir; uygulamada denmez, ekran kapalıyken de kaydettiği söylenir', () => sahneyle(async () => {
+      resetState();
+      await sessiz(async () => { await scr.handle['canli-ac'](); });
+      expect(kagit().textContent).toContain('kilitli ekranda konum gelmez');
+      SP.UI.closeSheet();
+      const durumSatiri = async () => {
+        await sessiz(async () => { await scr.handle['canli-ekran'](); });
+        const s = document.getElementById('canli-durum');
+        const metin = s ? s.textContent : null;
+        SP.UI.closeSheet();
+        return metin;
+      };
+      C.baslat('kosu');
+      await bekle();
+      kos(20, 0);
+      expect(await durumSatiri()).toContain('Ekranı açık tut');
+      C.sil();
+
+      C._ortam.arkaPlan = () => true;
+      await sessiz(async () => { await scr.handle['canli-ac'](); });
+      expect(kagit().textContent.indexOf('kilitli ekranda') < 0).toBe(true);
+      expect(kagit().textContent).toContain('Ekran kapalıyken de kaydeder');
+      SP.UI.closeSheet();
+      C.baslat('kosu');
+      await bekle();
+      kos(20, 0);
+      const uygulamada = await durumSatiri();
+      expect(uygulamada !== null && uygulamada.indexOf('Ekranı açık tut') < 0).toBe(true);
     }));
 
     it('kayıt sürerken kart durumu ve süreyi gösterir', () => sahneyle(async () => {

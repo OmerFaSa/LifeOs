@@ -45,18 +45,8 @@ final class KabukTests: XCTestCase {
         }
     }
 
-    /// JS ifadesi true olana kadar bekler; olmazsa son degeri doner.
-    private func bekle(_ w: WKWebView, _ ifade: String, sure: TimeInterval = 40) -> Any? {
-        let son = Date().addingTimeInterval(sure)
-        var deger: Any?
-        while Date() < son {
-            let bitti = expectation(description: "js")
-            w.evaluateJavaScript(ifade) { v, _ in deger = v; bitti.fulfill() }
-            wait(for: [bitti], timeout: 5)
-            if let b = deger as? Bool, b { return b }
-            RunLoop.current.run(until: Date().addingTimeInterval(0.5))
-        }
-        return deger
+    private func bekle(_ w: WKWebView, _ ifade: String, sure: TimeInterval = 60) -> Any? {
+        jsBekle(w, ifade, sure: sure)
     }
 
     /// Uc modul uygulamanin icinde acilir; koken guvenli (kamera ve konum buna bagli).

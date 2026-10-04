@@ -13,6 +13,8 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
     static let varsayilanKapi = 4183   // SPI: telefonda en cok o kullanilir
 
     private(set) var web: WKWebView!
+    /// Ekran kapaliyken rota (asama 2): navigator.geolocation → CoreLocation.
+    let kopru = KonumKoprusu()
     private var indirilen: URL?
 
     override func loadView() {
@@ -20,7 +22,10 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
         ayar.websiteDataStore = .default()               // kalici depo
         ayar.allowsInlineMediaPlayback = true
         ayar.mediaTypesRequiringUserActionForPlayback = []
+        ayar.userContentController.addUserScript(KonumKoprusu.betik)
+        ayar.userContentController.add(kopru, name: KonumKoprusu.ad)
         let w = WKWebView(frame: .zero, configuration: ayar)
+        kopru.web = w
         w.navigationDelegate = self
         w.uiDelegate = self
         w.allowsBackForwardNavigationGestures = false
@@ -69,6 +74,13 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         decisionHandler(navigationResponse.canShowMIMEType ? .allow : .download)
+    }
+
+    /// Sayfadan ayriliniyor (modul gecisi, yeniden yukleme): eski sayfanin
+    /// konum izleyicileri biter, GPS durur. Ayni sayfa icindeki #rota
+    /// degisimi bu yoldan gecmez.
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        kopru.sayfaDegisti()
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {

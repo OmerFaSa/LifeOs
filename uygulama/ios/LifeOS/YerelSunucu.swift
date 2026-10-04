@@ -79,7 +79,8 @@ final class YerelSunucu {
         }
         d.newConnectionHandler = { [weak self] c in self?.baglanti(c) }
         d.start(queue: kuyruk)
-        if hazir.wait(timeout: .now() + 5) == .timedOut {
+        // 5 sn CI'da bir kez yetmedi (yuklu makine): 15 sn. Telefonda an meselesi.
+        if hazir.wait(timeout: .now() + 15) == .timedOut {
             d.cancel()
             throw Hata.zamanAsimi
         }
