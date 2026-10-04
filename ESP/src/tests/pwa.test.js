@@ -235,6 +235,20 @@
       return is;
     }
 
+    /* Hesap API'si (brand/ortak/hesap.js) kasaya GİRMEZ: cevabı kişiseldir
+       (kullanıcı adı, kayıtlar) ve bayat bir «durum» çevrimdışıyken yanlış
+       söylerdi. SW bu isteklere hiç karışmaz; dosyalar eskisi gibi. */
+    it('hesap API istekleri service worker kasasına girmez', async () => {
+      const sw = await swKos([]);
+      const karsilanan = [];
+      const istek = u => ({ request:{ method:'GET', url:u, headers:new Headers() },
+        respondWith:p => { karsilanan.push(u); if(p && p.catch) p.catch(() => {}); }, waitUntil:() => {} });
+      sw.dinle.fetch(istek('http://yerel/api/hesap/ben'));
+      sw.dinle.fetch(istek('http://yerel/api/hesap/durum'));
+      sw.dinle.fetch(istek('http://yerel/js/app.js'));
+      expect(karsilanan).toEqual(['http://yerel/js/app.js']);
+    });
+
     it('T2-11 uygulama kapalıyken bildirimdeki eylem adrese taşınır, kaybolmaz', async () => {
       const kapali = await swKos([]);
       await tik(kapali, 'bitti');

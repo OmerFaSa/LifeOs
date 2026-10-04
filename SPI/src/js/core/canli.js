@@ -27,7 +27,11 @@
         gelir, boşluk kuralı aynen geçerlidir.
      5. KONUM YALNIZ GÜVENLİ BAĞLANTIDA. Tarayıcı konumu https ya da
         localhost dışında vermez; o zaman kayıt başlamaz ve nedeni söylenir.
-     6. KONUM CİHAZDAN ÇIKMAZ. Noktalar yalnız bu cihazın deposuna yazılır.
+     6. KONUM KULLANICININ CİHAZLARINDAN ÇIKMAZ. Kayıt sürerken noktalar
+        yalnız bu cihazın deposuna (taslak) yazılır. Kaydedilen rota bir
+        seanstır: hesap açıksa kullanıcının KENDİ PC'sindeki LifeOS
+        sunucusuyla eşitlenir (brand/ortak/hesap.js, 2026-10-04); hiçbir
+        şirketin sunucusuna gitmez.
 
    Hâller: (yok) → kayitta ⇄ duraklat → bitti → kaydedilir ya da silinir. */
 

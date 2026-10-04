@@ -12,7 +12,8 @@
    böyle bozulmaz: kaynak düzenlenince yeni sürüm hemen gelir, eski kopya
    YALNIZ ağ yokken görünür.
 
-   Saklanmayanlar: başka kökenden gelen (HKM, yazı tipi), GET olmayan,
+   Saklanmayanlar: başka kökenden gelen (HKM, yazı tipi), /api/ (hesap),
+   GET olmayan,
    parça isteği (Range / 206) ve hatalı cevap. Kişisel veri buraya hiç
    girmez: veri tarayıcı deposunda durur, bu kasa yalnız uygulamanın
    dosyalarını (sayfa, kod, görsel) tutar. */
@@ -24,8 +25,15 @@ function ayniKoken(adres){
   try{ return new URL(adres).origin === self.location.origin; }catch(e){ return false; }
 }
 
+/* /api/ (hesap ve eşitleme, brand/ortak/hesap.js) hiç karışılmaz: cevabı
+   kişiseldir ve kasaya girmez; bayat bir «durum» çevrimdışıyken yanlış
+   söylerdi. */
+function apiMi(adres){
+  try{ return new URL(adres).pathname.indexOf('/api/') === 0; }catch(e){ return false; }
+}
+
 function ilgili(istek){
-  return istek.method === 'GET' && ayniKoken(istek.url);
+  return istek.method === 'GET' && ayniKoken(istek.url) && !apiMi(istek.url);
 }
 
 function saklanir(istek, cevap){

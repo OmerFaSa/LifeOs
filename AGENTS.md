@@ -58,6 +58,15 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    yavaşlamaz, veri kaybetmez. HKM hiçbir modüle **yazmaz**; teklif yazar,
    modül kendi koduyla uygular (`HKM/core/intents.py`). BAM, HKM'nin alt
    modülüdür; beşinci bir sistem değildir.
+   **Hesap ve eşitleme (2026-10-04, depo sahibinin kararı):** PC, telefon
+   ve tablet aynı hesapla girer; kayıtların kopyası kullanıcının KENDİ
+   PC'sindeki LifeOS sunucusunda durur (`sistem/hesap.py`, her modül
+   kapısında `/api/hesap/`; istemci `brand/ortak/hesap.js`). Aynı kural
+   geçerlidir: sunucu kapalıyken modül bozulmaz, yavaşlamaz; değişiklik
+   cihazda sıraya girer, bağlanınca akar. Veri hiçbir şirketin sunucusuna
+   gitmez. Admin yalnız PC'nin kendisinden kurulur; parola düz tutulmaz.
+   Kayıt düzeyinde son yazan kazanır; bir cihazın ilk eşitlemesi
+   sunucudakini ezmez. Fotoğraflar eşitlenmez (çekildiği cihazda kalır).
 5. **Sınırlar:** SPİ teşhis koymaz ve doz önermez; ESP/AYS sertifika
    vermez, yetenek yargısı kurmaz, sonuç garantisi etmez.
 6. **XP karar vermez.** Seviye sistemi (`brand/seviye/`) yalnızca

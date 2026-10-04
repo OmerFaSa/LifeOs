@@ -45,8 +45,13 @@ try{
 /* tile.openstreetmap.org gormezden gelinir: rota haritasinin zemini
    (core/harita.js). Karo SUSTUR, rota bilgidir — cevrimdisi ya da CI'da
    karo gelmezse rota zeminsiz cizilir; uygulama hatasi degildir. */
+/* /api/hesap/durum gormezden gelinir: hesap API'si yalniz sistem/sunucu.py'de
+   (her modul kapisinda) vardir, bu betigin gelistirme sunucusunda yoktur.
+   Istemci (core/hesap.js) 404'u «hesap yok» diye okur ve dugmeyi gizler;
+   PC, tablet ve telefon uygulamasinda bu yoklama ya API'ye ulasir ya hic
+   yapilmaz. Yalniz yoklama adresi: baska /api/ 404'u yine hatadir. */
 const IGNORE = [/fonts\.googleapis\.com/, /fonts\.gstatic\.com/, /favicon\.ico/,
-  /img\/brand\/intro\.mp4/, /img\/seviye\//, /tile\.openstreetmap\.org/];
+  /img\/brand\/intro\.mp4/, /img\/seviye\//, /tile\.openstreetmap\.org/, /\/api\/hesap\/durum$/];
 function ignorable(url){ return IGNORE.some(re => re.test(url || '')); }
 
 const wait = ms => new Promise(r => setTimeout(r, ms));

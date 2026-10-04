@@ -259,6 +259,12 @@ DOSYALAR = {
     "ses.js":         "js/core",
     "ses.css":        "css",
     "radyo.test.js":  "tests",
+    # HESAP — PC sunucusuyla giris ve esitleme (sistem/hesap.py, 2026-10-04).
+    # Ayni oturum, ayni sira kurali, ayni panel: uc arayuzde ayni olmak
+    # zorunda (biri «ilk esitleme ezmez» sozunu unutursa veri ezilir).
+    "hesap.js":       "js/core",
+    "hesap.css":      "css",
+    "hesap.test.js":  "tests",
     # ZEMIN (kullanici, 2026-10-02) — yumusak renk zemini ve icerigin
     # arkasinda buzlu yuzey; <head>'de animasyon.js'ten SONRA (tasinan
     # tercihi okur), ilk cizimden once <html data-zemin> koyar.

@@ -790,7 +790,7 @@ SP.Screens.guide = (function(){
       const G = (window.LIFEOS || {}).GUVEN;
       if(G && G.kapiAc){
         const yedek = SP.Store.exportAll();
-        G.kapiAc({ baslik:'Bütün veriyi sil', nesne:'kaydı', sayi:Object.keys(yedek.data || yedek || {}).length,
+        G.kapiAc({ baslik:'Bütün veriyi sil', not:(window.LIFEOS && window.LIFEOS.HESAP ? window.LIFEOS.HESAP.silmeNotu() : null), nesne:'kaydı', sayi:Object.keys(yedek.data || yedek || {}).length,
           sheet:o => UI.sheet(o), yedekAl:() => handle.backup(),
           sil:async () => { await SP.Store.clear(); if(SP.Foto) await SP.Foto.temizle(); UI.closeSheet(); location.reload(); } });
         return;

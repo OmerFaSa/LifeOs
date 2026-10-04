@@ -576,7 +576,7 @@ ESP.Screens.guide = (function(){
       const G = (window.LIFEOS || {}).GUVEN;
       if(G && G.kapiAc){
         const yedek = await ESP.Store.exportAll();
-        G.kapiAc({ baslik:'Bu profilin verisini sil', nesne:'kaydı', sayi:Object.keys(yedek.data || yedek || {}).length,
+        G.kapiAc({ baslik:'Bu profilin verisini sil', not:(window.LIFEOS && window.LIFEOS.HESAP ? window.LIFEOS.HESAP.silmeNotu() : null), nesne:'kaydı', sayi:Object.keys(yedek.data || yedek || {}).length,
           sheet:o => ESP.UI.sheet(o), yedekAl:() => handle['export-data2'](),
           sil:async () => { await ESP.Store.clear(); location.reload(); } });
         return;

@@ -53,8 +53,9 @@ targets:
         NSCameraUsageDescription: "SPİ'de hareketin, öğünün ya da ilerlemenin fotoğrafını çekmek için. Fotoğraf yalnız bu telefonda kalır."
         NSPhotoLibraryUsageDescription: "Galeriden fotoğraf seçip kayda eklemek için. Fotoğraf yalnız bu telefonda kalır."
         NSMicrophoneUsageDescription: "Kamera açılırken sistem mikrofonu da sorabilir; LifeOS ses kaydetmez."
-        NSLocationWhenInUseUsageDescription: "SPİ'de koşu, yürüyüş ve bisiklet rotasını kaydetmek için — ekran kapalıyken de. Konum yalnız bu telefonda kalır."
-        NSLocationAlwaysAndWhenInUseUsageDescription: "Kayıt sürerken ekran kapalıyken de rotayı çizmek için. Konum yalnız bu telefonda kalır."
+        NSLocationWhenInUseUsageDescription: "SPİ'de koşu, yürüyüş ve bisiklet rotasını kaydetmek için — ekran kapalıyken de. Konum yalnız senin cihazlarında kalır."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Kayıt sürerken ekran kapalıyken de rotayı çizmek için. Konum yalnız senin cihazlarında kalır."
+        NSLocalNetworkUsageDescription: "Hesabını bilgisayarındaki LifeOS ile eşitlemek için ev ağındaki bilgisayara bağlanır. Veri yalnız senin bilgisayarına gider."
         UIBackgroundModes:
           - location
     settings:

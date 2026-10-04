@@ -49,8 +49,13 @@ try{
    kademe numarasi gorunur — yani 404 burada bir hata degil, sistemin
    tasarlanmis ara halidir (bkz. brand/seviye/OKU.md). Dosyalar
    eklendikce bu satirlar susar. */
+/* /api/hesap/durum gormezden gelinir: hesap API'si yalniz sistem/sunucu.py'de
+   (her modul kapisinda) vardir, bu betigin gelistirme sunucusunda yoktur.
+   Istemci (core/hesap.js) 404'u «hesap yok» diye okur ve dugmeyi gizler;
+   PC, tablet ve telefon uygulamasinda bu yoklama ya API'ye ulasir ya hic
+   yapilmaz. Yalniz yoklama adresi: baska /api/ 404'u yine hatadir. */
 const IGNORE = [/fonts\.googleapis\.com/, /fonts\.gstatic\.com/, /favicon\.ico/,
-  /img\/brand\/intro\.mp4/, /img\/seviye\//];
+  /img\/brand\/intro\.mp4/, /img\/seviye\//, /\/api\/hesap\/durum$/];
 function ignorable(url){ return IGNORE.some(re => re.test(url || '')); }
 
 const wait = ms => new Promise(r => setTimeout(r, ms));

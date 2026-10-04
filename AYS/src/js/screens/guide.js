@@ -1103,7 +1103,7 @@ R.Screens.guide = (function(){
       const G = (window.LIFEOS || {}).GUVEN;
       if(G && G.kapiAc){
         const yedek = R.Store.exportAll();
-        G.kapiAc({ baslik:'Tüm veriyi sıfırla', nesne:'kaydı', sayi:Object.keys(yedek.data || {}).length,
+        G.kapiAc({ baslik:'Tüm veriyi sıfırla', not:(window.LIFEOS && window.LIFEOS.HESAP ? window.LIFEOS.HESAP.silmeNotu() : null), nesne:'kaydı', sayi:Object.keys(yedek.data || {}).length,
           sheet:o => UI.sheet(o), yedekAl:() => handle['export-data'](),
           sil:async () => { await R.Store.clear(); UI.closeSheet(); location.reload(); } });
         return;

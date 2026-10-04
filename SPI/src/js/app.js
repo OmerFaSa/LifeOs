@@ -1438,6 +1438,13 @@ SP.App = (function(){
       if(ornekAcik() && SP.OrnekVeri){
         try{ SP.OrnekVeri.doldur(); }catch(e){ console.error(e); }
       }
+      /* HESAP (brand/ortak/hesap.js): PC sunucusuyla giriş ve eşitleme.
+         Sunucu yoksa hiçbir şey beklemez; uzaktan kayıt gelirse model
+         yeniden yüklenir ve ekran çizilir (yazı yazılırken beklenir). */
+      if(window.LIFEOS && window.LIFEOS.HESAP){
+        window.LIFEOS.HESAP.kur({ modul:'spi', depo:SP.Store, ornek:ornekAcik,
+          yenile:async () => { await M.loadAll(); render(); } });
+      }
 
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).
 

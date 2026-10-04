@@ -42,8 +42,14 @@
       Tek istisna o kararin kendisidir: kullanici `python sistem/telefon.py`
       ile sertifika urettiyse uc modul ev aginda https ile DE acilir
       (5173/5183/5193; kurulum sayfasi http 5180). Bilgisayardaki 127.0.0.1
-      kapilari ve onlarin verisi degismez; giris sayfasi ve API'ler ev agina
-      hic acilmaz. `telefon.py --kapat` geri alir.
+      kapilari ve onlarin verisi degismez; giris sayfasi ve onun API'leri
+      ev agina hic acilmaz. `telefon.py --kapat` geri alir.
+
+   4. HESAP API'SI MODUL KAPILARINDADIR (2026-10-04, depo sahibinin
+      karari). /api/hesap/... (sistem/hesap.py) hem 127.0.0.1 hem ev agi
+      kapilarinda calisir: PC, telefon ve tablet ayni hesapla girer, verinin
+      kopyasi bu bilgisayarda durur. Jetonsuz istek veri goremez; admin
+      yalniz bu bilgisayardan kurulur.
 """
 
 import html
@@ -64,6 +70,7 @@ KOK = os.path.dirname(SISTEM)          # deponun koku (sistem/ bir alt klasor)
 sys.dont_write_bytecode = True      # __pycache__ birikmesin
 sys.path.insert(0, SISTEM)
 import guncelle  # noqa: E402
+import hesap  # noqa: E402
 import telefon  # noqa: E402
 
 HOST = "127.0.0.1"
@@ -209,6 +216,25 @@ class Sunucu(SimpleHTTPRequestHandler):
                     "text/javascript", "application/json", "text/plain"):
             return base + "; charset=utf-8"
         return ctype
+
+    # HESAP ve ESITLEME (sistem/hesap.py): her modul kapisinda ayni API.
+    # PC'de ayni koken (http 127.0.0.1), tablette ayni koken (ev agi
+    # https), telefon uygulamasindan capraz koken (yalniz uygulamanin
+    # kendi kokenleri). Dosya sunumu bundan etkilenmez.
+    def do_GET(self):
+        if self.path.startswith("/api/hesap/"):
+            return hesap.isle(self)
+        return super().do_GET()
+
+    def do_POST(self):
+        if self.path.startswith("/api/hesap/"):
+            return hesap.isle(self)
+        return self.send_error(405)
+
+    def do_OPTIONS(self):
+        if self.path.startswith("/api/hesap/"):
+            return hesap.isle(self)
+        return self.send_error(405)
 
     def end_headers(self):
         self.send_header("Cache-Control",
@@ -731,10 +757,10 @@ def _sunucu_kur(klasor, port):
 
 
 # ------------------------------------------------------------ telefon
-# Ev agi kapilari (telefon.py ile sertifika uretildiyse). Ayni durgun
-# dosya sunucusu, yalniz https ve 0.0.0.0. Kisisel veri sunucuda durmaz,
-# her cihazin kendi tarayicisindadir: bu kapilar yalniz kodu ve gorselleri
-# verir. Giris sayfasi (4180) ve onun API'leri ev agina ACILMAZ.
+# Ev agi kapilari (telefon.py ile sertifika uretildiyse). Ayni dosya
+# sunucusu, yalniz https ve 0.0.0.0: kodu ve gorselleri verir, bir de
+# hesap API'sini (kural 4; jetonsuz istek veri goremez). Giris sayfasi
+# (4180) ve onun API'leri ev agina ACILMAZ.
 TELEFON_HOST = "0.0.0.0"
 EL_SIKISMA_SN = 15
 

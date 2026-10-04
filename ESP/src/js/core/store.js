@@ -169,6 +169,29 @@ ESP.Store = (function(){
     return out;
   }
 
+  /* ---------- eşitleme kancası (brand/ortak/hesap.js) ----------
+     Her yazma hangi yolun değiştiğini hesap katmanına bildirir; hesap
+     yolu sıraya yazar ve PC sunucusuna ulaşınca gönderir. Uzaktan gelen
+     kayıt `uzaktan` ile yazılır ve BİLDİRİLMEZ (geri gönderilmez). Cihaza
+     ait anahtarlar (CIHAZA_AIT: HKM jetonu) eşitlenmez. */
+  let onDegisim = null;
+  function degisti(yollar){
+    if(typeof onDegisim !== 'function') return;
+    const y = (yollar || []).filter(p => CIHAZA_AIT.indexOf(p) < 0);
+    if(!y.length) return;
+    try{ onDegisim(y); }catch(e){ console.error('[Store:esitle]', e); }
+  }
+  function hepsi(){ return cihazsiz(localAll()); }
+  function uzaktan(ciftler){
+    const all = localAll();
+    (ciftler || []).forEach(c => {
+      const y = c && c[0], d = c && c[1];
+      if(typeof y !== 'string' || !y || CIHAZA_AIT.indexOf(y) >= 0) return;
+      if(d === null || d === undefined) delete all[y]; else all[y] = d;
+    });
+    return localWrite(all);
+  }
+
   async function init(){
     try{
       if(window.claude && typeof window.claude.use === 'function'){
@@ -205,6 +228,7 @@ ESP.Store = (function(){
 
   async function set(path, data){
     const localOk = lSet(path, data);
+    degisti([path]);
     if(db){
       health.pendingCloudWrites++;
       try{
@@ -224,6 +248,7 @@ ESP.Store = (function(){
 
   async function remove(path){
     lDel(path);
+    degisti([path]);
     if(db){
       try{ await db.doc(path).delete(); }
       catch(e){
@@ -334,6 +359,7 @@ ESP.Store = (function(){
     const mevcut = localAll();
     const veri = cihazsiz(parsed.data);
     CIHAZA_AIT.forEach(k => { if(mevcut[k] !== undefined) veri[k] = mevcut[k]; });
+    const onceki = Object.keys(mevcut);
     const yerel = localWrite(veri);
     if(!yerel){
       const e = new Error('Yedek bu cihaza yazılamadı; mevcut kayıt '
@@ -342,6 +368,7 @@ ESP.Store = (function(){
       e.code = 'local-write';
       throw e;
     }
+    degisti(Array.from(new Set(onceki.concat(Object.keys(veri)))));
 
     /* Buluta KISMI yazma ayrica raporlanir: «tamamlandi» izlenimi
        verilmez. */
@@ -382,12 +409,14 @@ ESP.Store = (function(){
     try{ parsed = JSON.parse(raw); }
     catch(e){ throw new Error('Geri alma kaydı bozuk.'); }
 
+    const onceki = Object.keys(localAll());
     const yerel = localWrite(parsed.data);
     if(!yerel){
       const e = new Error('Geri alma bu cihaza yazılamadı. Depolama alanı dolu olabilir.');
       e.code = 'local-write';
       throw e;
     }
+    degisti(Array.from(new Set(onceki.concat(Object.keys(parsed.data || {})))));
     try{ localStorage.removeItem(UNDO_KEY); }catch(e){}
 
     let bulutYazilan = 0, bulutHata = 0;
@@ -404,6 +433,8 @@ ESP.Store = (function(){
     const all = localAll();
     kopya = {};
     try{ localStorage.removeItem(LOCAL_KEY); }catch(e){}
+    /* Hesaba bağlıysa silme sunucuya ve öteki cihazlara da gider (kapı bunu söyler). */
+    degisti(Object.keys(all));
     if(db){
       for(const k of Object.keys(all)){
         try{ await db.doc(k).delete(); }catch(e){}
@@ -462,7 +493,9 @@ ESP.Store = (function(){
   }
 
   return {
-    init, get, set, remove, list,
+    init, get, set, remove, list, hepsi, uzaktan,
+    alan:'esp/' + PROFILE,
+    set onDegisim(fn){ onDegisim = fn; },
     /* Aktif profilin kimligi. state.js varsayilan profili kurarken buna
        ihtiyac duyar; depo anahtarini uretmis olan katman soylesin diye
        disari acilir. */

@@ -1434,6 +1434,13 @@ R.App = (function(){
       if(ornekAcik() && R.OrnekVeri){
         try{ R.OrnekVeri.doldur(); }catch(e){ console.error(e); }
       }
+      /* HESAP (brand/ortak/hesap.js): PC sunucusuyla giriş ve eşitleme.
+         Sunucu yoksa hiçbir şey beklemez; uzaktan kayıt gelirse model
+         yeniden yüklenir ve ekran çizilir (yazı yazılırken beklenir). */
+      if(window.LIFEOS && window.LIFEOS.HESAP){
+        window.LIFEOS.HESAP.kur({ modul:'ays', depo:R.Store, ornek:ornekAcik,
+          yenile:async () => { await M.loadAll(); render(); } });
+      }
 
       /* YARIM KALMIŞ SÜRELİ OTURUM — diskten geri alınır.
 

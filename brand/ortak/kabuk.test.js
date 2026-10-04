@@ -631,7 +631,10 @@
         baglanti:{ durum:'bagli', saat:'14:08' }, rutbe:{ ad:'Bronz', etiket:'1.1', route:'rutbe' },
         bildirim:{ sayi:2 }, profil:{ ad:'Ömer' } }) + '</div>');
       try{
-        const a = Array.from(d.querySelectorAll('.kenar__dip button'));
+        /* Hesap düğmesi (brand/ortak/hesap.js) yerinde ama sunucu ve oturum
+           yokken gizli: görünen sıra değişmez. */
+        expect(!!d.querySelector('.kenar__dip .ust__hesap')).toBe(true);
+        const a = Array.from(d.querySelectorAll('.kenar__dip button:not([hidden])'));
         expect(a.map(b => b.querySelector('.kenar__ad').textContent)).toEqual(['Ara', 'Sayfa düzeni', 'Radyo', 'Bildirimler', 'Ömer']);
         expect(a[0].getAttribute('data-act')).toBe('open-palette');
         expect(a[1].classList.contains('ust__gizli')).toBe(true);

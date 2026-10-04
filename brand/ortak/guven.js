@@ -206,7 +206,11 @@ window.LIFEOS = window.LIFEOS || {};
     const d = { donusNoktasi:null, yazilan:'' };
     const durum = () => silmeDurumu({ sayi:o.sayi, donusNoktasi:d.donusNoktasi, yazilan:d.yazilan });
     const ciz = () => silmeHtml({ nesne:o.nesne, sayi:o.sayi, donusNoktasi:d.donusNoktasi, yazilan:d.yazilan, id:'kapi' });
-    o.sheet({ title:o.baslik || 'Kalıcı sil', body:'<div class="silme-kap" id="silme-kap">' + ciz() + '</div>' });
+    /* o.not: kapının üstünde tek cümle (ör. hesaba bağlıysa silme öteki
+       cihazlara da gider — brand/ortak/hesap.js). */
+    const not = o.not ? '<p class="small silme-not">' + String(o.not).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]) + '</p>' : '';
+    o.sheet({ title:o.baslik || 'Kalıcı sil', body:not + '<div class="silme-kap" id="silme-kap">' + ciz() + '</div>' });
     const kap = typeof document !== 'undefined' ? document.getElementById('silme-kap') : null;
     if(!kap) return null;
     kap.addEventListener('click', async e => {

@@ -4,7 +4,10 @@
 
 Kişisel ve aile odaklı bütüncül sağlık yönetim sistemi. Beş ajanlı bir ofis,
 dört dikey uzman modül ve bir orkestratör. Çevrimdışı çalışır, veri cihazda
-kalır, dil modeli olmadan da tam işlevlidir.
+kalır, dil modeli olmadan da tam işlevlidir. Hesap açıldıysa (2026-10-04,
+depo sahibinin kararı) kayıtların kopyası kullanıcının **kendi PC'sindeki**
+LifeOS sunucusuyla eşitlenir (`brand/ortak/hesap.js`, `sistem/hesap.py`);
+hiçbir şirketin sunucusuna gitmez, sunucu kapalıyken her şey cihazda çalışır.
 
 Bu belge mimari spesifikasyonun kod karşılığını anlatır: hangi kararın nerede
 yaşadığını ve neden orada olduğunu.
@@ -214,8 +217,10 @@ bağımlılık kuralına (AGENTS §1.3) dokunan, depo sahibine ait bir karardır
 (`core/harita.js`, kitaplık yok: Web Mercator + tek SVG). Bu, «veri cihazda
 kalır» ilkesine **depo sahibinin 2026-10-03 kararıyla** verilmiş bilinçli
 bir istisnadır: karo isteği OSM sunucusuna haritanın **hangi bölgesine**
-bakıldığını söyler. Rota, seans kaydı ve GPS noktaları cihazdan çıkmaz;
-HKM'ye yalnız dakika gider. Karo süstür: bağlantı yoksa rota zeminsiz
+bakıldığını söyler. Rota, seans kaydı ve GPS noktaları kullanıcının
+cihazlarından çıkmaz (hesap varsa kaydedilen rota kendi PC'sine eşitlenir;
+kayıt sürerken noktalar yalnız kaydı yapan cihazdadır); HKM'ye yalnız dakika
+gider. Karo süstür: bağlantı yoksa rota zeminsiz
 çizilir, hiçbir işlev karoya bağlı değildir. Lisans gereği her haritada
 «© OpenStreetMap katkıcıları» yazar.
 

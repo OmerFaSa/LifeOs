@@ -79,6 +79,7 @@ window.LIFEOS = window.LIFEOS || {};
     bilgi:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><path d="M12 7.6v.1"/>',
     zil:'<path d="M6.5 16v-4.5a5.5 5.5 0 0 1 11 0V16l1.5 2h-14z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
     muzik:'<path d="M9.5 17.5V6.5l9-2v11"/><circle cx="7" cy="17.5" r="2.5"/><circle cx="16" cy="15.5" r="2.5"/>',
+    hesap:'<path d="M7.5 18.5h9.25a3.75 3.75 0 0 0 .55-7.46A5.5 5.5 0 0 0 6.6 9.9a4.3 4.3 0 0 0 .9 8.6z"/><path d="M10 14l1.8 1.8L15 12.5"/>',
     kenar:'<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/>',
     gizli:'<rect x="4" y="4.5" width="16" height="5" rx="1.5"/><rect x="4" y="12.5" width="16" height="3" rx="1"/><path d="M4 19.5h7"/>',
     menu:'<path d="M4.5 7h15M4.5 12h15M4.5 17h15"/>',
@@ -356,6 +357,7 @@ window.LIFEOS = window.LIFEOS || {};
       +   ' aria-label="Sayfa düzeni" title="Sayfa düzeni: sırala, küçült, gizle">'
       +   simge('gizli') + '<i class="ust__gizli-sayi" aria-hidden="true"></i>' + etiket('Sayfa düzeni') + '</button>'
       + ustSes(true)
+      + ustHesap(true)
       + '<button class="ust__zil kenar__arac" type="button" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
       +   ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
       +   simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + etiket('Bildirimler') + '</button>'
@@ -403,6 +405,7 @@ window.LIFEOS = window.LIFEOS || {};
       /* Radyo ve tık sesleri (brand/ortak/ses.js): düğme burada, durumunu
          (çalıyor · bağlanıyor · dokun, sürsün) ve panelini ses.js yönetir. */
       +   ustSes()
+      +   ustHesap()
       +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
       +     ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
       +     simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</button>'
@@ -423,6 +426,20 @@ window.LIFEOS = window.LIFEOS || {};
       + ' aria-label="' + kac(d.etiket) + '" title="' + kac(d.ipucu) + '">'
       + simge('muzik') + '<i class="ust__ses-nokta" aria-hidden="true"></i>'
       + (kenarda ? '<span class="kenar__ad">Radyo</span>' : '') + '</button>';
+  }
+
+  /* Hesap ve eşitleme (brand/ortak/hesap.js): düğme burada, durumunu
+     (eşitlendi · sırada bekleyen · çevrimdışı · giriş yok) ve panelini
+     hesap.js yönetir. Sunucu yoksa ve oturum yoksa gizlidir. */
+  function ustHesap(kenarda){
+    const H = L.HESAP;
+    const d = (H && H.dugme ? H.dugme() : null) || { sinif:'', etiket:'Hesap', ipucu:'Hesap', gizli:true };
+    return '<button class="ust__hesap' + (kenarda ? ' kenar__arac' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
+      + ' aria-expanded="' + (katmanAcik('kabuk-hesap') ? 'true' : 'false') + '"'
+      + (d.gizli ? ' hidden' : '')
+      + ' aria-label="' + kac(d.etiket) + '" title="' + kac(d.ipucu) + '">'
+      + simge('hesap') + '<i class="ust__hesap-nokta" aria-hidden="true"></i>'
+      + (kenarda ? '<span class="kenar__ad">Hesap</span>' : '') + '</button>';
   }
 
   /* Modüllerin tek çağrısı: ustCubuk'a verilen nesnenin aynısı + her
