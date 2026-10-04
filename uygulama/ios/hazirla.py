@@ -7,13 +7,15 @@ Uc modulun derlenmis tek dosyasi (AYS/SPI/ESP `dist/`) uygulama/ios/
 LifeOS/Web/ altina kopyalanir. Ortak gorseller (img/seviye, img/marka) uc
 modulde AYNI dosyalardir; tek kopya `Web/ortak/` altina gider ve yerel
 sunucu onu uc kapidan da verir (sistem/sunucu.py gibi) — uygulama ~320 MB
-yerine ~110 MB olur. Uc kopya ayrisirsa (biri digerinden farkliysa) hicbir
-sey yazilmaz: hangisinin dogru oldugu tahmin edilmez.
+yerine ~110 MB olur.
+
+Ortak gorseller KAYNAKTAN alinir (build.py copy_level_assets ile ayni
+kural): dist/img/seviye ve dist/img/marka git'te degildir (.gitignore),
+CI'daki kopyada yoktur. Ilk derlemede bu yuzden uygulamaya hic girmediler
+ve sessizce atlandilar (IPA 10,8 MB). Artik bos kalirlarsa betik durur.
 
 Simge: brand/life/logo.png → AppIcon (macOS'ta `sips` ile 1024 px'e).
 """
-import filecmp
-import os
 import shutil
 import subprocess
 import sys
@@ -25,13 +27,21 @@ WEB = BURASI / "LifeOS" / "Web"
 SIMGE = BURASI / "LifeOS" / "Assets.xcassets" / "AppIcon.appiconset" / "icon-1024.png"
 MODULLER = [("AYS", "rota.html"), ("SPI", "spi.html"), ("ESP", "esp.html")]
 ORTAK = ("seviye", "marka")
+MEDYA = (".mp4", ".webm", ".png", ".jpg", ".webp", ".svg")
 
 
-def ayni_agac(a, b):
-    k = filecmp.dircmp(a, b)
-    if k.left_only or k.right_only or k.diff_files or k.funny_files:
-        return False
-    return all(ayni_agac(os.path.join(a, d), os.path.join(b, d)) for d in k.common_dirs)
+def ortak_kaynak():
+    """{"seviye": [dosya], "marka": [dosya]} — build.py ile ayni secim:
+    brand/seviye/medya/* ve brand/medya/<aile>/* (duz adla)."""
+    sec = lambda d: sorted(f for f in d.iterdir() if f.is_file() and f.suffix.lower() in MEDYA) if d.is_dir() else []
+    seviye = sec(KOK / "brand" / "seviye" / "medya")
+    marka_kok = KOK / "brand" / "medya"
+    marka = []
+    if marka_kok.is_dir():
+        for aile in sorted(marka_kok.iterdir()):
+            if aile.is_dir():
+                marka += sec(aile)
+    return {"seviye": seviye, "marka": marka}
 
 
 def boyut(yol):
@@ -41,16 +51,15 @@ def boyut(yol):
 def main():
     for ad, sayfa in MODULLER:
         d = KOK / ad / "dist"
-        for gerek in (d / sayfa, d / "sw.js", d / "img"):
+        for gerek in (d / sayfa, d / "sw.js", d / "img" / "brand"):
             if not gerek.exists():
                 print("✕ eksik: %s — önce `python3 build.py` (%s klasöründe)" % (gerek, ad))
                 return 1
-    ilk = KOK / MODULLER[0][0] / "dist" / "img"
-    for ad, _ in MODULLER[1:]:
-        for o in ORTAK:
-            if (ilk / o).exists() and not ayni_agac(ilk / o, KOK / ad / "dist" / "img" / o):
-                print("✕ img/%s üç modülde aynı değil (%s farklı); tek kopya yapılamaz" % (o, ad))
-                return 1
+    kaynak = ortak_kaynak()
+    for o in ORTAK:
+        if not kaynak[o]:
+            print("✕ ortak görsel kaynağı boş: img/%s (brand/) — uygulama eksik çıkardı" % o)
+            return 1
 
     if WEB.exists():
         shutil.rmtree(WEB)
@@ -68,8 +77,13 @@ def main():
                 (h / "img").mkdir(parents=True, exist_ok=True)
                 shutil.copy2(alt, h / "img" / alt.name)
     for o in ORTAK:
-        if (ilk / o).exists():
-            shutil.copytree(ilk / o, WEB / "ortak" / o)
+        hedef = WEB / "ortak" / o
+        hedef.mkdir(parents=True)
+        for f in kaynak[o]:
+            if (hedef / f.name).exists():
+                print("✕ aynı adlı iki ortak görsel: %s" % f.name)
+                return 1
+            shutil.copy2(f, hedef / f.name)
 
     shutil.copy2(KOK / "brand" / "life" / "logo.png", SIMGE)
     if sys.platform == "darwin":

@@ -23,6 +23,28 @@ final class KabukTests: XCTestCase {
         XCTAssertEqual(KabukDenetleyici.baslangic(d).port, 4183)
     }
 
+    /// Ortak gorseller (rutbe, marka) uygulamanin icinde ve uc kapidan da gelir.
+    /// Ilk derlemede git'te olmadiklari icin sessizce disarida kalmislardi.
+    func testOrtakGorsellerUygulamadaVeUcKapidanGelir() throws {
+        let web = try XCTUnwrap(Bundle.main.url(forResource: "Web", withExtension: nil))
+        for o in ["seviye", "marka"] {
+            let dosyalar = (try? FileManager.default.contentsOfDirectory(atPath: web.appendingPathComponent("ortak/\(o)").path)) ?? []
+            XCTAssertFalse(dosyalar.isEmpty, "uygulamada img/\(o) yok")
+            guard let ad = dosyalar.sorted().first,
+                  let kodlu = ad.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else { continue }
+            for kapi in [4173, 4183, 4193] {
+                let bitti = expectation(description: "\(o) \(kapi)")
+                var kod = 0
+                URLSession(configuration: .ephemeral).dataTask(with: URL(string: "http://127.0.0.1:\(kapi)/img/\(o)/\(kodlu)")!) { _, y, _ in
+                    kod = (y as? HTTPURLResponse)?.statusCode ?? 0
+                    bitti.fulfill()
+                }.resume()
+                wait(for: [bitti], timeout: 15)
+                XCTAssertEqual(kod, 200, "img/\(o)/\(ad) \(kapi) kapısından gelmedi")
+            }
+        }
+    }
+
     /// JS ifadesi true olana kadar bekler; olmazsa son degeri doner.
     private func bekle(_ w: WKWebView, _ ifade: String, sure: TimeInterval = 40) -> Any? {
         let son = Date().addingTimeInterval(sure)
