@@ -486,11 +486,26 @@ def _kac(t):
             .replace(">", "&gt;").replace('"', "&quot;"))
 
 
-def giris_html():
+def giris_html(telefon=False):
+    """Giris sayfasi. telefon=True: iPhone uygulamasinin acilis sayfasi
+    (uygulama/ios/hazirla.py derlemede uretir) — ayni stil ve kartlar; HKM
+    karti, guncelleme kutusu ve bilgisayarin API'lerine giden betik yok
+    (telefonda ikisi de yok; moduller HKM'siz calisir, AGENTS §1.4)."""
     kartlar = []
     for anahtar, kisa, ad, aciklama, port in KARTLAR:
         adres = "http://%s:%d/" % (HOST, port)
         hkm = anahtar == "hkm"
+        if telefon:
+            if hkm:
+                continue
+            kartlar.append(
+                '<a class="kart" href="%s" style="--renk:var(--%s);--renk-t:var(--%s-t)">'
+                '<div class="kart__ust"><span class="logo"><img src="/logo/%s.png" alt="" width="40" height="40"/></span>'
+                '<div><div class="kart__ad">%s <small>%s</small></div>'
+                '<div class="kart__acik">%s</div></div></div>'
+                '<div class="kart__alt"><span class="dugme">Aç</span></div></a>'
+                % (adres, anahtar, anahtar, anahtar, _kac(kisa), _kac(ad), _kac(aciklama)))
+            continue
         kartlar.append(
             '<a class="kart" href="%s" style="--renk:var(--%s);--renk-t:var(--%s-t)" %s>'
             '<div class="kart__ust"><span class="logo"><img src="/logo/%s.png" alt="" width="40" height="40"/></span>'
@@ -505,8 +520,28 @@ def giris_html():
                "Başlat" if hkm else "Aç"))
     s = guncelle.surum()
     surum = ("sürüm %s · %s" % (s["kisa"], s["tarih"])) if s else "zip sürümü"
-    return (GIRIS_SAYFASI.replace("__KARTLAR__", "\n  ".join(kartlar))
+    sayfa = GIRIS_SAYFASI
+    if telefon:
+        sayfa = _telefon_iskeleti(sayfa)
+    return (sayfa.replace("__KARTLAR__", "\n  ".join(kartlar))
             .replace("__SURUM__", _kac(surum)).replace("__IKON__", _IKON))
+
+
+def _telefon_iskeleti(sayfa):
+    """Bilgisayara ozgu parcalar cikar: guncelleme kutusu, betik (API'ler),
+    dipteki durdurma komutu. Parca bulunamazsa sessizce gecilmez: hata."""
+    def kes(s, bas, son):
+        i = s.index(bas)
+        j = s.index(son, i) + len(son)
+        return s[:i] + s[j:]
+    sayfa = kes(sayfa, '<section class="guncel"', "</section>")
+    sayfa = kes(sayfa, "<script>", "</script>")
+    i = sayfa.index('<footer class="dip">')
+    j = sayfa.index("</footer>", i) + len("</footer>")
+    dip = ('<footer class="dip"><span>Verin bu telefonda kalır; bilgisayardakinden ayrıdır '
+           '(taşımak için modüllerdeki yedek düğmeleri).</span>'
+           '<span>Merkez (HKM) bilgisayarda çalışır.</span></footer>')
+    return sayfa[:i] + dip + sayfa[j:]
 
 
 def hkm_ayakta(timeout=1.0):

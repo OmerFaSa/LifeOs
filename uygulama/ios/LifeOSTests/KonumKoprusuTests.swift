@@ -68,12 +68,12 @@ final class KonumKoprusuTests: XCTestCase {
     }
 
     private func kabuk() throws -> KabukDenetleyici {
-        UserDefaults.standard.set(4183, forKey: KabukDenetleyici.sonKapiAnahtari)
         let d = KabukDenetleyici()
         let p = UIWindow(frame: UIScreen.main.bounds)
         p.rootViewController = d
         p.makeKeyAndVisible()
         d.loadViewIfNeeded()
+        d.web.load(URLRequest(url: URL(string: "http://127.0.0.1:4183/")!))   // giristen SPI'ye
         XCTAssertEqual(bekle(d.web, "!!(document.querySelector('.site') && window.SP && window.SP.Canli)") as? Bool, true, "SPİ açılmadı")
         return d
     }

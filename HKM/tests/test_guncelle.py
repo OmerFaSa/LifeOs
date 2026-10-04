@@ -19,7 +19,7 @@ if os.path.join(KOK, "sistem") not in sys.path:
 sys.dont_write_bytecode = True
 
 import guncelle  # noqa: E402
-from tests.harness import eq, ok, suite, test  # noqa: E402
+from tests.harness import eq, no, ok, suite, test  # noqa: E402
 
 
 def _g(d, *args):
@@ -270,6 +270,27 @@ def run():
             ok(y not in h)                              # yer tutucu kalmadi
         ok('data-hkm="1"' in h)
     test("giris sayfasi dort logoyu, surumu ve guncelleme kutusunu tasir", t_sayfa)
+
+    def t_telefon_sayfa():
+        """Telefon uygulamasinin giris sayfasi (uygulama/ios, 2026-10-04): ayni
+        sayfa ve ayni kartlar; telefonda olmayan HKM, guncelleme ve bilgisayarin
+        API'leri yok. Kullanici: «normal modul secme kismi ile gelse».
+        """
+        h = sunucu.giris_html(telefon=True)
+        for a, port in (("ays", 4173), ("spi", 4183), ("esp", 4193)):
+            ok('src="/logo/%s.png"' % a in h, a)
+            ok('href="http://127.0.0.1:%d/"' % port in h, a)
+        no(any(x in h for x in ('/logo/hkm.png', 'data-hkm', 'id="guncel"', "<script", "/api/")),
+           "telefonda HKM, guncelleme ve betik yok")
+        for y in ("__KARTLAR__", "__SURUM__", "__IKON__"):
+            no(y in h)
+        bas = sunucu.giris_html()
+        stil = lambda s: s[s.index("<style>"):s.index("</style>")]
+        eq(stil(h), stil(bas))                          # tasarim tek kaynaktan
+        for _, kisa, ad, aciklama, _ in sunucu.KARTLAR[:3]:
+            ok(sunucu._kac(ad) in h and sunucu._kac(aciklama) in h, kisa)
+        ok("telefonda" in h)
+    test("telefon giris sayfasi: uc modul karti, HKM/guncelleme/betik yok, tasarim ayni", t_telefon_sayfa)
 
     def t_uclar():
         srv = _Srv(("127.0.0.1", 0), sunucu.Giris)

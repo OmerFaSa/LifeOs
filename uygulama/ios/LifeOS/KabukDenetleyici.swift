@@ -1,16 +1,17 @@
 // KABUK — uc modulu yerel sunucudan acan tek web gorunumu.
 //
-// Modul gecisi (kabuk.js) baska bir kapiya gider: ayni gorunumde, ayni
-// uygulamada kalir; depolar kapiya gore ayridir (bilgisayardaki gibi).
-// Son acilan modul hatirlanir. Disari giden ana sayfa gezintisi Safari'de
-// acilir; harita karolari gibi alt istekler engellenmez.
+// Uygulama giris sayfasiyla (4180, bilgisayardakiyle ayni kartlar) acilir;
+// kullanici: «normal modul secme kismi ile gelse». Modul gecisi (kabuk.js)
+// baska bir kapiya gider: ayni gorunumde, ayni uygulamada kalir; depolar
+// kapiya gore ayridir (bilgisayardaki gibi). Disari giden ana sayfa
+// gezintisi Safari'de acilir; harita karolari gibi alt istekler engellenmez.
 
 import UIKit
 import WebKit
 
 final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelegate, WKDownloadDelegate {
-    static let sonKapiAnahtari = "lifeos.sonKapi"
-    static let varsayilanKapi = 4183   // SPI: telefonda en cok o kullanilir
+    /// Acilis: giris sayfasi (modul secimi).
+    static let baslangic = URL(string: "http://127.0.0.1:\(YerelSunucu.giris.kapi)/")!
 
     private(set) var web: WKWebView!
     /// Ekran kapaliyken rota (asama 2): navigator.geolocation → CoreLocation.
@@ -39,19 +40,13 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        web.load(URLRequest(url: KabukDenetleyici.baslangic()))
+        web.load(URLRequest(url: KabukDenetleyici.baslangic))
     }
 
-    static func baslangic(_ depo: UserDefaults = .standard) -> URL {
-        let kayitli = depo.integer(forKey: sonKapiAnahtari)
-        let kapi = YerelSunucu.tablo.contains { Int($0.kapi) == kayitli } ? kayitli : varsayilanKapi
-        return URL(string: "http://127.0.0.1:\(kapi)/")!
-    }
-
-    /// Uygulamanin kendi sayfasi mi? (127.0.0.1 ve uc modul kapisindan biri)
+    /// Uygulamanin kendi sayfasi mi? (127.0.0.1; giris ya da uc modul kapisi)
     static func icerde(_ u: URL) -> Bool {
         guard u.scheme == "http", u.host == "127.0.0.1", let p = u.port else { return false }
-        return YerelSunucu.tablo.contains { Int($0.kapi) == p }
+        return (YerelSunucu.tablo + [YerelSunucu.giris]).contains { Int($0.kapi) == p }
     }
 
     // MARK: - gezinti
@@ -83,17 +78,11 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
         kopru.sayfaDegisti()
     }
 
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        if let u = webView.url, KabukDenetleyici.icerde(u), let p = u.port {
-            UserDefaults.standard.set(p, forKey: KabukDenetleyici.sonKapiAnahtari)
-        }
-    }
-
     /// iOS arka planda web icerigini sonlandirabilir: geri donunce yeniden yuklenir.
     /// (Canli rota taslagi her gizlenmede depoya yazilir; kayit kaybolmaz.)
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
         webView.load(URLRequest(url: webView.url.flatMap { KabukDenetleyici.icerde($0) ? $0 : nil }
-                                ?? KabukDenetleyici.baslangic()))
+                                ?? KabukDenetleyici.baslangic))
     }
 
     // MARK: - indirme (yedek dosyasi): paylas menusu → Dosyalar

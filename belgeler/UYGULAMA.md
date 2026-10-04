@@ -22,6 +22,10 @@ uygulama/ios/
 - **Web kodu değişmez.** Uygulama üç modülün derlenmiş tek dosyasını
   (`AYS/SPI/ESP dist/`) içine alır. Kabukta çerçeve ve üçüncü taraf paket yok;
   yalnız Apple'ın kitaplıkları (UIKit, WebKit, Network).
+- **Giriş sayfasıyla açılır.** Uygulama bilgisayardaki giriş sayfasının aynısıyla
+  (`:4180`, modül kartları) başlar; sayfa derlemede `sistem/sunucu.py`
+  `giris_html(telefon=True)`'dan üretilir: aynı stil ve kartlar, HKM kartı,
+  güncelleme kutusu ve bilgisayarın API'leri yok.
 - **Yerel sunucu, aynı kapılar.** Telefonun içinde (yalnız loopback)
   `127.0.0.1:4173` AYS, `:4183` SPİ, `:4193` ESP. Bilgisayardaki gibi ayrı
   köken, ayrı depo; `kabuk.js`'in modül geçişi olduğu gibi çalışır. `127.0.0.1`

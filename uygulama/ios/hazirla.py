@@ -85,6 +85,16 @@ def main():
                 return 1
             shutil.copy2(f, hedef / f.name)
 
+    # Giris sayfasi (4180): bilgisayardakiyle ayni sayfa ve kartlar, telefon kipi
+    # (sistem/sunucu.py giris_html(telefon=True)) — tasarim tek kaynaktan.
+    sys.path.insert(0, str(KOK / "sistem"))
+    import sunucu  # noqa: E402
+    giris = WEB / "giris"
+    (giris / "logo").mkdir(parents=True)
+    (giris / "index.html").write_text(sunucu.giris_html(telefon=True), encoding="utf-8")
+    for anahtar in ("ays", "spi", "esp"):
+        shutil.copy2(KOK.joinpath(*sunucu.LOGOLAR[anahtar]), giris / "logo" / (anahtar + ".png"))
+
     shutil.copy2(KOK / "brand" / "life" / "logo.png", SIMGE)
     if sys.platform == "darwin":
         subprocess.run(["sips", "-z", "1024", "1024", str(SIMGE)], check=True, capture_output=True)

@@ -35,6 +35,8 @@ final class YerelSunucu {
         ("SPI", 4183, "spi.html"),
         ("ESP", 4193, "esp.html"),
     ]
+    /// Giris sayfasi: bilgisayardaki gibi 4180 (sistem/sunucu.py giris_html, telefon kipi).
+    static let giris: (ad: String, kapi: UInt16, sayfa: String) = ("giris", 4180, "index.html")
 
     let modul: Modul
     let ortak: URL
@@ -257,7 +259,7 @@ final class SunucuDuzeni {
             return
         }
         let ortak = web.appendingPathComponent("ortak", isDirectory: true)
-        sunucular = YerelSunucu.tablo.map {
+        sunucular = (YerelSunucu.tablo + [YerelSunucu.giris]).map {
             YerelSunucu(modul: .init(ad: $0.ad, kapi: $0.kapi,
                                      klasor: web.appendingPathComponent($0.ad, isDirectory: true),
                                      sayfa: $0.sayfa),

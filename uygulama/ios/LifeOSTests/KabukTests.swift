@@ -9,18 +9,28 @@ final class KabukTests: XCTestCase {
     func testIcerdeKurali() {
         XCTAssertTrue(KabukDenetleyici.icerde(URL(string: "http://127.0.0.1:4183/")!))
         XCTAssertTrue(KabukDenetleyici.icerde(URL(string: "http://127.0.0.1:4173/#lifeos=x")!))
+        XCTAssertTrue(KabukDenetleyici.icerde(URL(string: "http://127.0.0.1:4180/")!))    // giris
         XCTAssertFalse(KabukDenetleyici.icerde(URL(string: "http://127.0.0.1:4200/")!))   // HKM telefonda yok
         XCTAssertFalse(KabukDenetleyici.icerde(URL(string: "https://127.0.0.1:4183/")!))
         XCTAssertFalse(KabukDenetleyici.icerde(URL(string: "http://ornek.com:4183/")!))
     }
 
-    func testBaslangicSonModulVeVarsayilan() {
-        let d = UserDefaults(suiteName: "lifeos-test-\(UUID().uuidString)")!
-        XCTAssertEqual(KabukDenetleyici.baslangic(d).port, 4183)
-        d.set(4193, forKey: KabukDenetleyici.sonKapiAnahtari)
-        XCTAssertEqual(KabukDenetleyici.baslangic(d).port, 4193)
-        d.set(4200, forKey: KabukDenetleyici.sonKapiAnahtari)
-        XCTAssertEqual(KabukDenetleyici.baslangic(d).port, 4183)
+    /// Kullanici (2026-10-04): «normal modul secme kismi ile gelse» — uygulama
+    /// giris sayfasiyla acilir; giris sayfasi uc modulun kartini tasir.
+    func testUygulamaGirisSayfasiylaAcilirUcKartDogruKapiya() throws {
+        XCTAssertEqual(KabukDenetleyici.baslangic.absoluteString, "http://127.0.0.1:4180/")
+        let d = KabukDenetleyici()
+        let p = UIWindow(frame: UIScreen.main.bounds)
+        p.rootViewController = d
+        p.makeKeyAndVisible()
+        d.loadViewIfNeeded()
+        XCTAssertEqual(bekle(d.web, "document.querySelectorAll('a.kart').length === 3") as? Bool, true, "giriş sayfası açılmadı")
+        let hedefler = jsDegerlendir(d.web, "Array.from(document.querySelectorAll('a.kart')).map(a => a.getAttribute('href')).join(' ')").deger as? String
+        XCTAssertEqual(hedefler, "http://127.0.0.1:4173/ http://127.0.0.1:4183/ http://127.0.0.1:4193/")
+        XCTAssertEqual(bekle(d.web, "Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)", sure: 10) as? Bool, true, "logolar yüklenmedi")
+        XCTAssertEqual(jsDegerlendir(d.web, "!document.querySelector('[data-hkm], #guncel, script')").deger as? Bool, true)
+        jsCalistir(d.web, "document.querySelectorAll('a.kart')[1].click()")
+        XCTAssertEqual(bekle(d.web, "location.port === '4183' && !!(document.querySelector('.site') && window.SP)") as? Bool, true, "karttan SPİ açılmadı")
     }
 
     /// Ortak gorseller (rutbe, marka) uygulamanin icinde ve uc kapidan da gelir.

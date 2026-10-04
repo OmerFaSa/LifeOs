@@ -123,5 +123,6 @@ final class YerelSunucuTests: XCTestCase {
     func testKapiTablosuKabukIleAyni() {
         // brand/ortak/kabuk.js MODULLER: ays 4173, spi 4183, esp 4193
         XCTAssertEqual(YerelSunucu.tablo.map { $0.kapi }, [4173, 4183, 4193])
+        XCTAssertEqual(YerelSunucu.giris.kapi, 4180)          // sistem/sunucu.py GIRIS_PORT
     }
 }
