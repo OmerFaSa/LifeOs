@@ -44,6 +44,14 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    kat planı ve AYS'nin `ofis3b.js` köprüsü de kaldırıldı (kaldırılan eylemler
    `belgeler/ekip/envanter/kaldirilan.json`'da). Aynı gün SPİ'nin 3B kampüsü
    ve `ofis3b.js` köprüsü de kalktı: iki sistemde de 3B yüz yok.
+   **Telefon kabuğu istisnası (2026-10-04, depo sahibinin kararı):** ekran
+   kapalıyken rota kaydı tarayıcıda olmaz; bu yüzden `uygulama/` altında
+   telefon için yerel bir kabuk var (önce iOS, Swift). Sınırları: çerçeve ve
+   üçüncü taraf paket YOK (Capacitor/Cordova değil; yalnız Apple'ın kendi
+   kitaplıkları); üç arayüzün web kodu değişmez ve sıfır bağımlılık kalır;
+   kabuk derlenmiş tek dosyaları (`dist/`) içine alır ve telefonda yerel bir
+   sunucuyla 4173/4183/4193'te açar. Derleme araçları (Xcode, XcodeGen)
+   yalnız CI'da koşar. Ayrıntı: `belgeler/UYGULAMA.md`.
 4. **Modüller HKM'yi bilir ama ona bağımlı değildir.** AYS/SPİ/ESP,
    HKM'nin üst patron (King) olduğunu bilir ve onunla konuşabilir; ama HKM
    kapalıyken, yanıt vermezken ya da hata verirken hiçbiri bozulmaz,

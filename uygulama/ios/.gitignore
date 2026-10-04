@@ -1,0 +1,8 @@
+# Uretilenler (hazirla.py ve xcodegen): kaynagi depoda, kopyasi degil.
+LifeOS/Web/
+LifeOS/Info.plist
+LifeOS/Assets.xcassets/AppIcon.appiconset/icon-1024.png
+LifeOS.xcodeproj/
+build/
+Payload/
+*.ipa

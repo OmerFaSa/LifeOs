@@ -1,0 +1,78 @@
+# XcodeGen tanimi: Xcode projesi depoda durmaz, CI'da bundan uretilir
+# (`xcodegen generate`). Uretilmis bir proje dosyasi bir gun kaynagiyla
+# ayrisir; bu dosya tektir.
+name: LifeOS
+options:
+  bundleIdPrefix: com.omerfasa
+  deploymentTarget:
+    iOS: "15.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1"
+targets:
+  LifeOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: LifeOS
+        excludes:
+          - "Web"
+          - "Web/**"
+      - path: LifeOS/Web
+        type: folder
+        buildPhase: resources
+    info:
+      path: LifeOS/Info.plist
+      properties:
+        CFBundleDisplayName: LifeOS
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIStatusBarStyle: UIStatusBarStyleDefault
+        ITSAppUsesNonExemptEncryption: false
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+          NSAllowsArbitraryLoadsInWebContent: true
+          NSExceptionDomains:
+            "127.0.0.1":
+              NSExceptionAllowsInsecureHTTPLoads: true
+            localhost:
+              NSExceptionAllowsInsecureHTTPLoads: true
+        NSCameraUsageDescription: "SPİ'de hareketin, öğünün ya da ilerlemenin fotoğrafını çekmek için. Fotoğraf yalnız bu telefonda kalır."
+        NSPhotoLibraryUsageDescription: "Galeriden fotoğraf seçip kayda eklemek için. Fotoğraf yalnız bu telefonda kalır."
+        NSMicrophoneUsageDescription: "Kamera açılırken sistem mikrofonu da sorabilir; LifeOS ses kaydetmez."
+        NSLocationWhenInUseUsageDescription: "SPİ'de koşu, yürüyüş ve bisiklet rotasını kaydetmek için. Konum yalnız bu telefonda kalır."
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.omerfasa.lifeos
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGNING_ALLOWED: "NO"
+        CODE_SIGNING_REQUIRED: "NO"
+        CODE_SIGN_IDENTITY: ""
+  LifeOSTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: LifeOSTests
+    dependencies:
+      - target: LifeOS
+    settings:
+      base:
+        CODE_SIGNING_ALLOWED: "NO"
+        GENERATE_INFOPLIST_FILE: "YES"
+schemes:
+  LifeOS:
+    build:
+      targets:
+        LifeOS: all
+        LifeOSTests: [test]
+    test:
+      targets:
+        - LifeOSTests

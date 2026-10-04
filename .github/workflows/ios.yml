@@ -1,0 +1,103 @@
+name: iOS uygulaması
+
+# Telefon kabuğu (uygulama/ios): macOS makinesinde derlenir, iPhone
+# simülatöründe sınanır, imzasız IPA üretilir. IPA'yı AltStore (ya da
+# Sideloadly) kullanıcının kendi Apple kimliğiyle imzalar. Ayrıntı:
+# belgeler/UYGULAMA.md. Depo herkese açık: macOS makinesi ücretsizdir.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'uygulama/ios/**'
+      - 'AYS/dist/**'
+      - 'SPI/dist/**'
+      - 'ESP/dist/**'
+      - 'brand/life/logo.png'
+      - '.github/workflows/ios.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ios
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    name: iOS — derle, simülatörde sına, IPA üret
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: XcodeGen kur (yalnız derleme aracı)
+        run: brew install xcodegen
+
+      - name: Sayfaları uygulamaya hazırla (dist → Web, ortak görsel tek kopya)
+        run: python3 uygulama/ios/hazirla.py
+
+      - name: Xcode projesini üret
+        working-directory: uygulama/ios
+        run: xcodegen generate
+
+      - name: Simülatör seç (en yeni iOS, ilk iPhone)
+        id: sim
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          d = json.load(sys.stdin)["devices"]
+          surum = lambda k: [int(x) for x in k.split("iOS-")[-1].split("-") if x.isdigit()]
+          for k in sorted((k for k in d if "iOS" in k), key=surum, reverse=True):
+              for c in d[k]:
+                  if c["name"].startswith("iPhone"):
+                      print(c["udid"]); sys.exit()
+          ')
+          echo "Simülatör: $UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+
+      - name: Simülatörde testler (sunucu + üç modül açılır, köken güvenli)
+        working-directory: uygulama/ios
+        run: |
+          set -o pipefail
+          xcodebuild test -project LifeOS.xcodeproj -scheme LifeOS \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            CODE_SIGNING_ALLOWED=NO 2>&1 | tee test.log \
+            | grep -E "Test Case .*(passed|failed)|error:|XCTAssert|Executed|TEST (SUCCEEDED|FAILED)"
+
+      - name: Test günlüğü
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-test-gunlugu
+          path: uygulama/ios/test.log
+
+      - name: İmzasız IPA üret
+        working-directory: uygulama/ios
+        run: |
+          set -o pipefail
+          xcodebuild -project LifeOS.xcodeproj -scheme LifeOS -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build 2>&1 | tail -5
+          rm -rf Payload && mkdir Payload
+          cp -R build/Build/Products/Release-iphoneos/LifeOS.app Payload/
+          zip -qry LifeOS.ipa Payload
+          ls -lh LifeOS.ipa
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LifeOS-ipa
+          path: uygulama/ios/LifeOS.ipa
+          retention-days: 30
+
+      - name: Sürüm sayfasına koy (telefondan Safari ile indirilir)
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NOT="Son derleme: $(git rev-parse --short HEAD) · $(date -u +%Y-%m-%d). Kurulum: belgeler/UYGULAMA.md (AltStore)."
+          gh release view ios-son >/dev/null 2>&1 \
+            || gh release create ios-son --prerelease --title "LifeOS iOS — son derleme" --notes "$NOT"
+          gh release upload ios-son uygulama/ios/LifeOS.ipa --clobber
+          gh release edit ios-son --notes "$NOT"
