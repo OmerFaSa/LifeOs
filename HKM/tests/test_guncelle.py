@@ -135,6 +135,49 @@ def run():
             eq(_oku(r.kul, "OKU.md"), "bir\n")
     test("yerel dal ayrismissa birlestirmez", t_ayrismis)
 
+    # 2026-10-04: masaustu uygulamasinin kopyasi (LifeOS-Sistem) 4 yerel
+    # kayitla ayrismisti; «Güncelle» bir hafta boyunca hep «ileri sarmak
+    # mumkun degil» dedi, PC eski surumde kaldi. Cikis yolu kullanicinin
+    # ACIK istegiyle: yerel kayitlar bir yedek dala, main en yeni surume.
+    def t_ayrismis_yedekle():
+        with _Depo() as r:
+            r.yeni("OKU.md", "iki\n", "uzakta")
+            _yaz(r.kul, "yerel.md", "y\n")
+            _g(r.kul, "add", "-A"); _g(r.kul, "commit", "-m", "yerelde")
+            _yaz(r.kul, "veri.json", "{}")                      # izlenmeyen kullanici verisi
+            eski = subprocess.run(["git", "rev-parse", "HEAD"], cwd=r.kul,
+                                  capture_output=True, text=True).stdout.strip()
+            d = guncelle.durum(r.kul)
+            eq(d["ileride"], 1)
+            ok(d["yedeklenebilir"])
+            s = guncelle.uygula(r.kul)
+            eq(s["durum"], "engel")
+            ok(s["yedeklenebilir"])
+            s = guncelle.uygula(r.kul, yedekle=True)
+            eq(s["durum"], "guncellendi")
+            eq(_oku(r.kul, "OKU.md"), "iki\n")
+            no(os.path.exists(os.path.join(r.kul, "yerel.md")))
+            eq(_oku(r.kul, "veri.json"), "{}")
+            dal = s["yedek_dal"]
+            ok(dal.startswith("yedek/yerel-"))
+            eq(subprocess.run(["git", "rev-parse", dal], cwd=r.kul,
+                              capture_output=True, text=True).stdout.strip(), eski)
+            eq(guncelle.durum(r.kul)["ileride"], 0)
+    test("ayrismis dal yalniz istenince yedek dala alinir ve guncellenir", t_ayrismis_yedekle)
+
+    def t_ayrismis_yedekle_kirli():
+        with _Depo() as r:
+            r.yeni("OKU.md", "iki\n", "uzakta")
+            _yaz(r.kul, "yerel.md", "y\n")
+            _g(r.kul, "add", "-A"); _g(r.kul, "commit", "-m", "yerelde")
+            _yaz(r.kul, "OKU.md", "elle\n")
+            s = guncelle.uygula(r.kul, yedekle=True)
+            eq(s["durum"], "engel")
+            eq(_oku(r.kul, "OKU.md"), "elle\n")
+            no(subprocess.run(["git", "branch", "--list", "yedek/*"], cwd=r.kul,
+                              capture_output=True, text=True).stdout.strip())
+    test("yedekle istense de elle degistirilmis dosyanin ustune yazilmaz", t_ayrismis_yedekle_kirli)
+
     def t_git_degil():
         d = tempfile.mkdtemp(prefix="lifeos-zip-")
         try:
@@ -240,7 +283,7 @@ def run():
     def t_http():
         cagri = []
         eski = sunucu.guncelle.uygula
-        sunucu.guncelle.uygula = lambda: cagri.append(1) or {"durum": "guncel", "mesaj": "Sistem zaten güncel."}
+        sunucu.guncelle.uygula = lambda **k: cagri.append(k) or {"durum": "guncel", "mesaj": "Sistem zaten güncel."}
         srv = _Srv(("127.0.0.1", 0), sunucu.Giris)
         _th.Thread(target=srv.serve_forever, daemon=True).start()
         adres = "http://127.0.0.1:%d/api/guncelle" % srv.server_address[1]
@@ -255,6 +298,10 @@ def run():
                                         headers={"X-LifeOS": "guncelle"}), timeout=5)
             eq(_json.loads(r.read().decode("utf-8"))["durum"], "guncel")
             eq(len(cagri), 1)
+            eq(bool(cagri[0].get("yedekle")), False)            # yedekleme yalniz acik istekle
+            _ur.urlopen(_ur.Request(adres + "?yedekle=1", data=b"", method="POST",
+                                    headers={"X-LifeOS": "guncelle"}), timeout=5)
+            eq(cagri[1].get("yedekle"), True)
         finally:
             srv.shutdown(); srv.server_close()
             sunucu.guncelle.uygula = eski
@@ -269,6 +316,7 @@ def run():
         for y in ("__KARTLAR__", "__SURUM__", "__IKON__"):
             ok(y not in h)                              # yer tutucu kalmadi
         ok('data-hkm="1"' in h)
+        ok("Yedekle ve güncelle" in h and "yedekle=1" in h)   # ayrismis kopyanin cikisi
     test("giris sayfasi dort logoyu, surumu ve guncelleme kutusunu tasir", t_sayfa)
 
     def t_telefon_sayfa():

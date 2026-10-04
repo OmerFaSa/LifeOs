@@ -404,6 +404,11 @@ button{ font:inherit; }
       return ana('Bağla ve güncelle', guncelle);
     }
     if(d.durum !== 'ok'){ hal('uyari', 'Güncelleme durumu okunamadı', d.mesaj || ''); return ana('', null); }
+    if(d.geride > 0 && d.yedeklenebilir){
+      hal('var', d.geride + ' yenilik var', 'Bu klasörde GitHub'da olmayan ' + d.ileride + ' kayıt var; ileri sarılamıyor. '
+        + 'Önce onlar bir yedek dala konur, sonra en yeni sürüm kurulur. Hiçbir kayıt silinmez; verin korunur.', d.yeni);
+      return ana('Yedekle ve güncelle', function(){ guncelle(true); });
+    }
     if(d.geride > 0){
       hal('var', d.geride + ' yenilik var', 'İndirmek bir dakikadan kısa sürer; verin korunur.', d.yeni);
       return ana('Güncelle', guncelle);
@@ -416,15 +421,17 @@ button{ font:inherit; }
     fetch('/api/guncelleme' + (taze ? '?taze=1' : '')).then(function(r){ return r.json(); }).then(ciz)
       .catch(function(){ hal('uyari', 'Güncelleme durumu okunamadı', ''); bak.hidden = false; });
   }
-  function guncelle(){
+  function guncelle(yedekle){
     dugme.disabled = true; dugme.textContent = 'İndiriliyor…'; bak.hidden = true;
-    post('/api/guncelle').then(function(s){
+    post('/api/guncelle' + (yedekle === true ? '?yedekle=1' : '')).then(function(s){
       if(s.durum === 'guncellendi'){
         hal('ok', s.mesaj || 'Güncellendi', s.yeniden_baslat ? 'Yeni sürümün tamamı için sistemi yeniden başlat.' : 'Açık sayfaları yenile.', s.yeni);
         return s.yeniden_baslat ? ana('Yeniden başlat', yeniden) : ana('Sayfayı yenile', function(){ location.reload(); });
       }
       if(s.durum === 'guncel'){ hal('ok', 'Sistem güncel', ''); return ana('', null); }
-      hal('uyari', 'Güncelleme yapılmadı', s.mesaj || ''); bak.hidden = false; ana('', null);
+      hal('uyari', 'Güncelleme yapılmadı', s.mesaj || ''); bak.hidden = false;
+      if(s.yedeklenebilir) return ana('Yedekle ve güncelle', function(){ guncelle(true); });
+      ana('', null);
     }).catch(function(){ hal('uyari', 'Güncelleme isteği gönderilemedi', ''); ana('Yeniden dene', guncelle); });
   }
   function yeniden(){
@@ -639,7 +646,8 @@ class Giris(SimpleHTTPRequestHandler):
             yeniden_baslat_zamanla()
             return self._json(200, {"ok": True})
         with _GUNCEL_KILIT:
-            sonuc = guncelle.uygula()
+            # yedekle=1 yalniz kutudaki «Yedekle ve güncelle» dugmesinden gelir.
+            sonuc = guncelle.uygula(yedekle="yedekle=1" in self.path)
             _GUNCEL.update(zaman=0.0, veri=None)
         return self._json(200, sonuc)
 

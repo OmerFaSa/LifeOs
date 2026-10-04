@@ -146,6 +146,12 @@ kırmızı değil); o bitince yeniden koşulur.
 | Diğer ajanlar (Codex vb.) | `gpt/<konu>` dalı | **pull request** |
 
 - `main`'e doğrudan push **yalnız** depo sahibinin oturumundan yapılır.
+- **Çalışan kopyada geliştirme yapılmaz.** Masaüstü uygulaması (LifeOS.exe)
+  depoyu `%USERPROFILE%\LifeOS-Sistem` kopyasından çalıştırır; o kopya
+  yalnız «Güncelle» ile ileri sarılır, orada commit yapılmaz. 2026-09-29'da
+  orada yapılan dört commit gönderilmeden kaldı, dal ayrıştı ve PC bir hafta
+  eski sürümde takıldı (kurtarıldı: 613875c4…87409f24). Ayrışırsa giriş
+  sayfası «Yedekle ve güncelle» der: yerel kayıtlar `yedek/yerel-…` dalına.
 - Her PR: ne değişti, hangi denetimler koşturuldu, hangi çıktı alındı.
 - Çakışma olursa **doktrin kazanır**, sonra testler, sonra tarih sırası.
 

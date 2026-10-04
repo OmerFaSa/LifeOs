@@ -97,8 +97,12 @@ def durum(kok=KOK, calistir=subprocess.run, getir=True):
         _, log = _git(["log", "--format=%s", "-n", "15", "HEAD.." + hedef],
                       kok, calistir)
         yeni = [s for s in log.splitlines() if s.strip()]
+    # Ayrismis: hem uzakta yenilik var hem burada uzakta olmayan kayit.
+    # Ileri sarilamaz; ancak kullanici isterse yerel kayitlar yedek dala
+    # alinip guncellenebilir (uygula(yedekle=True)).
     return {"durum": "ok", "dal": dal.strip(), "geride": geride,
-            "ileride": ileride, "kirli": kirli, "yeni": yeni, "ag": ag}
+            "ileride": ileride, "kirli": kirli, "yeni": yeni, "ag": ag,
+            "yedeklenebilir": bool(geride and ileride)}
 
 
 # Eski surumlerin kok klasorde biraktigi, git disi URETILMIS artiklar.
@@ -183,8 +187,24 @@ def surum(kok=KOK, calistir=subprocess.run):
     return {"kisa": k, "tarih": t, "baslik": b}
 
 
-def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None):
+def _yedek_dal(kok, calistir):
+    """HEAD'i yeni bir yedek dala koyar; dalin adi ya da None."""
+    import time
+    ad = "yedek/yerel-" + time.strftime("%Y%m%d-%H%M%S")
+    for ek in [""] + ["-%d" % i for i in range(2, 10)]:
+        kod, _ = _git(["branch", ad + ek, "HEAD"], kok, calistir)
+        if kod == 0:
+            return ad + ek
+    return None
+
+
+def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None, yedekle=False):
     """Guncellemeyi indirir — yalniz guvenliyse.
+
+    yedekle=True YALNIZ kullanicinin acik istegiyle verilir: dal ayrismissa
+    (burada uzakta olmayan kayitlar varsa) o kayitlar «yedek/yerel-…»
+    dalina konur ve main en yeni surume alinir. Hicbir kayit silinmez;
+    elle degistirilmis dosya varsa yine dokunulmaz.
 
     Doner: {"durum": "guncellendi" | "guncel" | "engel" | "git-yok" |
     "git-degil" | "hata", "mesaj": ..., ...}"""
@@ -209,12 +229,23 @@ def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None):
                           + (" …" if len(d["kirli"]) > 6 else ""))
     if not d["geride"]:
         return dict(d, durum="guncel", mesaj="Sistem zaten güncel.")
-    if d["ileride"]:
-        return dict(d, durum="engel",
-                    mesaj="Bu klasörde main'de olmayan %d kayıt var; "
-                          "ileri sarmak mümkün değil." % d["ileride"])
+    yedek_dal = None
     _, eski = _git(["rev-parse", "HEAD"], kok, calistir)
-    kod, cikti = _git(["merge", "--ff-only", UZAK + "/" + DAL], kok, calistir)
+    if d["ileride"]:
+        if not yedekle:
+            return dict(d, durum="engel",
+                        mesaj="Bu klasörde GitHub'da olmayan %d kayıt var; ileri "
+                              "sarmak mümkün değil. «Yedekle ve güncelle» onları "
+                              "«yedek/yerel-…» dalına koyar ve en yeni sürümü "
+                              "kurar; hiçbir kayıt silinmez." % d["ileride"])
+        yedek_dal = _yedek_dal(kok, calistir)
+        if not yedek_dal:
+            return dict(d, durum="hata", mesaj="Yerel kayıtlar yedek dala konamadı; "
+                                               "hiçbir şey değişmedi.")
+        # --keep: izlenen dosyalar degisir, izlenmeyenler (veri) yerinde kalir.
+        kod, cikti = _git(["reset", "--keep", UZAK + "/" + DAL], kok, calistir, timeout=300)
+    else:
+        kod, cikti = _git(["merge", "--ff-only", UZAK + "/" + DAL], kok, calistir)
     if kod != 0:
         return dict(d, durum="hata",
                     mesaj="Güncelleme uygulanamadı: " + (cikti.splitlines() or ["?"])[-1])
@@ -223,8 +254,10 @@ def uygula(kok=KOK, calistir=subprocess.run, uzak_url=None):
     yeniden = any(s.endswith(".py") for s in degisen)
     artiklari_temizle(kok)
     return dict(d, durum="guncellendi", degisen=len(degisen),
-                yeniden_baslat=yeniden,
+                yeniden_baslat=yeniden, yedek_dal=yedek_dal,
                 mesaj="%d yenilik indirildi." % d["geride"]
+                      + (" Bu klasöre özgü %d kayıt «%s» dalında saklı."
+                         % (d["ileride"], yedek_dal) if yedek_dal else "")
                       + (" Sunucu dosyaları da değişti: sistemi yeniden "
                          "başlat." if yeniden else " Açık sayfaları yenile."))
 
@@ -254,9 +287,24 @@ def main(argv=None):
                 print("      - " + s)
         else:
             _yaz("✓", "Sistem güncel.")
+        if d["ileride"]:
+            _yaz("!", "Bu klasörde GitHub'da olmayan %d kayıt var%s." % (
+                d["ileride"], "; ileri sarılamaz (--yedekle ile yedek dala alınıp "
+                              "güncellenir)" if d["geride"] else ""))
         return 0
 
-    s = uygula()
+    yedekle = "--yedekle" in argv
+    s = uygula(yedekle=yedekle)
+    if s["durum"] == "engel" and s.get("yedeklenebilir") and not yedekle:
+        _yaz("✕", s["mesaj"])
+        try:
+            cevap = input("\n  Yedekleyip güncelleyeyim mi? (E/H) ") if sys.stdin.isatty() else ""
+        except EOFError:
+            cevap = ""
+        if cevap.strip().lower() not in ("e", "evet", "y", "yes"):
+            print("  Hiçbir şey değişmedi.")
+            return 1
+        s = uygula(yedekle=True)
     isaret = {"guncellendi": "✓", "guncel": "✓"}.get(s["durum"], "✕")
     _yaz(isaret, s["mesaj"])
     for y in s.get("yeni", []) if s["durum"] == "guncellendi" else []:
