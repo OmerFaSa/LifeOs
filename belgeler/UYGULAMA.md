@@ -60,12 +60,18 @@ Bir kez:
    iOS 16 ve sonrası: Ayarlar › Gizlilik ve Güvenlik › **Geliştirici Kipi**'ni
    aç (telefon yeniden başlar).
 
-Her yeni sürümde:
+Güncellemeler (bir kez kaynak ekle, sonra tek dokunuş):
 
-5. iPhone'da Safari ile GitHub'daki **«LifeOS iOS — son derleme»** sürüm
-   sayfasını aç (`github.com/OmerFaSa/LifeOs/releases/tag/ios-son`),
-   `LifeOS.ipa`'yı indir.
-6. AltStore › **My Apps** › **+** › indirilen `LifeOS.ipa`.
+5. AltStore › **Sources** (Kaynaklar) › **+** › şu adresi yapıştır:
+   `https://github.com/OmerFaSa/LifeOs/releases/download/ios-son/altstore-kaynak.json`
+6. Yeni derleme çıkınca AltStore › **My Apps**'te LifeOS'un yanında
+   **Update** belirir; dokun. Veri silinmez.
+
+Kaynak her derlemede CI'da üretilir (`uygulama/ios/kaynak.py`): sürüm ve izin
+metinleri derlenmiş uygulamanın kendi Info.plist'inden okunur (AltStore izinler
+uyuşmazsa kurmayı reddeder); her derleme kendi numarasını taşır
+(`github.run_number`). Elle kurulum da çalışır: sürüm sayfasından
+`LifeOS.ipa` → AltStore › My Apps › **+**.
 
 **Sınırlar (Apple'ın, bizim değil):** ücretsiz kimlikle uygulama **7 günde bir
 yenilenmeli**. AltStore bunu, iPhone ve AltServer'lı bilgisayar aynı

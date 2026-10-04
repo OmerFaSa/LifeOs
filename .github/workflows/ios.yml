@@ -40,6 +40,9 @@ jobs:
       - name: Sayfaları uygulamaya hazırla (dist → Web, ortak görsel tek kopya)
         run: python3 uygulama/ios/hazirla.py
 
+      - name: AltStore kaynağı üreticisi sınanır
+        run: python3 uygulama/ios/kaynak_test.py
+
       - name: Xcode projesini üret
         working-directory: uygulama/ios
         run: xcodegen generate
@@ -91,11 +94,21 @@ jobs:
           set -o pipefail
           xcodebuild -project LifeOS.xcodeproj -scheme LifeOS -configuration Release \
             -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build 2>&1 | tail -5
           rm -rf Payload && mkdir Payload
           cp -R build/Build/Products/Release-iphoneos/LifeOS.app Payload/
           zip -qry LifeOS.ipa Payload
           ls -lh LifeOS.ipa
+
+      # AltStore kaynağı: telefonda «Güncelle» düğmesi. İzin metinleri ve sürüm
+      # derlenmiş uygulamanın kendi Info.plist'inden okunur (uyuşmazsa AltStore
+      # kurmayı reddeder); her derleme kendi numarasını taşır (run_number).
+      - name: AltStore kaynağı üret
+        working-directory: uygulama/ios
+        run: |
+          KAYNAK_ACIKLAMA="$(git log -1 --format=%s)" \
+            python3 kaynak.py build/Build/Products/Release-iphoneos/LifeOS.app LifeOS.ipa altstore-kaynak.json
 
       - uses: actions/upload-artifact@v4
         with:
@@ -108,8 +121,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          NOT="Son derleme: $(git rev-parse --short HEAD) · $(date -u +%Y-%m-%d). Kurulum: belgeler/UYGULAMA.md (AltStore)."
+          NOT="Son derleme: $(git rev-parse --short HEAD) · $(date -u +%Y-%m-%d) · derleme ${{ github.run_number }}. Kurulum: belgeler/UYGULAMA.md (AltStore). AltStore kaynağı: https://github.com/OmerFaSa/LifeOs/releases/download/ios-son/altstore-kaynak.json"
           gh release view ios-son >/dev/null 2>&1 \
             || gh release create ios-son --prerelease --title "LifeOS iOS — son derleme" --notes "$NOT"
-          gh release upload ios-son uygulama/ios/LifeOS.ipa --clobber
+          gh release upload ios-son uygulama/ios/LifeOS.ipa uygulama/ios/altstore-kaynak.json --clobber
           gh release edit ios-son --notes "$NOT"
