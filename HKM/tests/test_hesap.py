@@ -242,6 +242,73 @@ def run():
                                      [{"y": "a", "d": "x" * (hesap.KAYIT_EN_BUYUK + 1), "z": 1}]), 413)
     test("gecersiz alan, cihaz, imlec ve kayit reddedilir", t_gecersiz)
 
+    # ----------------------------------------------- kayit ve kurtarma
+
+    def t_kayit():
+        with _Depo() as r:
+            _hata(lambda: r.d.kayit("omer", "parola-123", "İlk okulum?", "atatürk", False), 403)
+            s = r.d.kayit("omer", "parola-123", "İlk okulum?", "atatürk", True, A)
+            eq(s["kullanici"]["rol"], "admin")                       # ilk hesap admin
+            ok(r.d.oturum(s["jeton"]))
+            u = r.d.kayit("anne", "parola-456", "Doğduğum şehir?", "Rize", False, B)
+            eq(u["kullanici"]["rol"], "uye")                         # sonrakiler uye, ev agindan da
+            _hata(lambda: r.d.kayit("ANNE", "parola-456", "Soru nedir?", "x1", False), 409)
+            _hata(lambda: r.d.kayit("cocuk", "parola-456", "", "cevap", False), 400)
+            _hata(lambda: r.d.kayit("cocuk", "parola-456", "Uzun soru?", " ", False), 400)
+            eq(r.d.soru("anne"), "Doğduğum şehir?")
+            _hata(lambda: r.d.soru("yok"), 404)
+            ham = open(r.d.yol, "rb").read()
+            no("atatürk".encode("utf-8") in ham or b"Rize" in ham)   # cevap duz yazilmaz
+    test("kayit: ilk hesap PC'den admin, sonrakiler uye; cevap duz yazilmaz", t_kayit)
+
+    def t_kurtar():
+        with _Depo() as r:
+            s = r.d.kayit("omer", "parola-123", "İlk öğretmenim?", "  Işık   Hanım ", True, A)
+            j2 = r.d.giris("omer", "parola-123", B)["jeton"]
+            _hata(lambda: r.d.kurtar("omer", "yanlis", "yeni-sifre-1", B, ip="5.5.5.5"), 401)
+            _hata(lambda: r.d.kurtar("omer", "ışık hanım", "kisa", B, ip="5.5.5.5"), 400)
+            k = r.d.kurtar("omer", "IŞIK hanım", "yeni-sifre-1", B, ip="5.5.5.5")   # harf/bosluk fark etmez
+            eq(k["kullanici"]["ad"], "omer")
+            ok(r.d.oturum(k["jeton"]))
+            eq(r.d.oturum(s["jeton"]), None)                       # eski oturumlar kapandi
+            eq(r.d.oturum(j2), None)
+            _hata(lambda: r.d.giris("omer", "parola-123", B), 401)
+            ok(r.d.giris("omer", "yeni-sifre-1", B)["jeton"])
+    test("kurtarma: dogru cevap yeni sifre koydurur, eski oturumlar kapanir", t_kurtar)
+
+    def t_kurtar_bekletme():
+        with _Depo() as r:
+            r.d.kayit("omer", "parola-123", "Soru nedir?", "cevap", True)
+            for _ in range(hesap.DENEME_ESIK):
+                _hata(lambda: r.d.kurtar("omer", "yanlis", "yeni-sifre-1", ip="7.7.7.7"), 401)
+            _hata(lambda: r.d.kurtar("omer", "cevap", "yeni-sifre-1", ip="7.7.7.7"), 429)
+            _hata(lambda: r.d.kurtar("yok", "cevap", "yeni-sifre-1", ip="8.8.8.8"), 401)
+    test("kurtarma: yanlis cevapta bekletilir; olmayan kullanici da 401", t_kurtar_bekletme)
+
+    def t_soru_ayarla():
+        with _Depo() as r:
+            k, _ = _admin(r)                                     # eski yol (kur): sorusuz admin
+            no(r.d.soru_var(k))
+            _hata(lambda: r.d.soru("omer"), 404)
+            _hata(lambda: r.d.soru_ayarla(k, "yanlis", "Yeni soru?", "yeni cevap"), 401)
+            r.d.soru_ayarla(k, "parola-123", "Yeni soru?", "yeni cevap")
+            ok(r.d.soru_var(k))
+            ok(r.d.kurtar("omer", "Yeni Cevap", "yeni-sifre-1")["jeton"])
+    test("kurtarma sorusu sonradan sifreyle ayarlanir", t_soru_ayarla)
+
+    def t_gocur():
+        with _Depo() as r:
+            import sqlite3
+            yol = os.path.join(r.klasor, "eski.db")
+            c = sqlite3.connect(yol)
+            c.executescript("CREATE TABLE kullanici(id INTEGER PRIMARY KEY, ad TEXT NOT NULL UNIQUE COLLATE NOCASE, "
+                            "rol TEXT NOT NULL, tuz BLOB NOT NULL, ozet BLOB NOT NULL, tur INTEGER NOT NULL, "
+                            "olusturma TEXT NOT NULL);")
+            c.commit(); c.close()
+            d = hesap.Depo(yol, tur=1000)
+            ok(d.kayit("omer", "parola-123", "Soru nedir?", "cevap", True)["jeton"])
+    test("surum 1 deposu kurtarma sutunlarina gocer", t_gocur)
+
     # -------------------------------------------------------------- HTTP
 
     import sunucu  # noqa: E402
@@ -303,6 +370,24 @@ def run():
             eq(s.iste("/api/hesap/ben", baslik={"Authorization": "Bearer " + j})[0], 401)
     test("HTTP: kurulum, eslesme basligi, jetonla esitleme, cikis", t_http_akis)
 
+    def t_http_kayit():
+        with _Srv() as s:
+            kod, _, v = s.iste("/api/hesap/kayit", {"ad": "omer", "parola": "parola-123", "soru": "Soru nedir?",
+                                                    "cevap": "Cevap", "cihaz": A}, H)
+            eq((kod, v["kullanici"]["rol"]), (200, "admin"))
+            kod, _, v = s.iste("/api/hesap/soru", {"ad": "omer"}, H)
+            eq((kod, v["soru"]), (200, "Soru nedir?"))
+            kod, _, v = s.iste("/api/hesap/kurtar", {"ad": "omer", "cevap": "cevap", "yeni": "yeni-sifre-1", "cihaz": B}, H)
+            eq(kod, 200)
+            yetki = {"Authorization": "Bearer " + v["jeton"]}
+            kod, _, v = s.iste("/api/hesap/ben", baslik=yetki)
+            eq((kod, v["soru_var"]), (200, True))
+            eq(s.iste("/api/hesap/soru-ayarla", {"parola": "yeni-sifre-1", "soru": "Baska soru?", "cevap": "b"},
+                      dict(H, **yetki))[0], 400)               # cevap cok kisa
+            eq(s.iste("/api/hesap/soru-ayarla", {"parola": "yeni-sifre-1", "soru": "Baska soru?", "cevap": "bb"},
+                      dict(H, **yetki))[0], 200)
+    test("HTTP: kayit, soru, kurtarma ve soru ayarlama", t_http_kayit)
+
     def t_http_koken():
         with _Srv() as s:
             uygulama = {"Origin": "http://127.0.0.1:4183", "Access-Control-Request-Method": "POST"}
@@ -319,6 +404,32 @@ def run():
             kod, b, _ = s.iste("/api/hesap/durum", baslik={"Origin": "http://127.0.0.1:4193"})
             eq((kod, b.get("Access-Control-Allow-Origin")), (200, "http://127.0.0.1:4193"))
     test("HTTP: capraz koken yalniz telefon uygulamasina acik", t_http_koken)
+
+    def t_giris_sayfasi():
+        """Giris bir kez, modul secim sayfasinda (2026-10-04, depo sahibi)."""
+        for h in (sunucu.giris_html(), sunucu.giris_html(telefon=True)):
+            ok('<script src="/hesap.js" data-giris></script>' in h and 'href="/hesap.css"' in h)
+        eski = hesap._DEPO
+        r = _Depo().__enter__()
+        hesap.depo_kur(r.d)
+        srv = sunucu.KuyrukluSunucu(("127.0.0.1", 0), sunucu.Giris)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        adres = "http://127.0.0.1:%d" % srv.server_address[1]
+        try:
+            with urllib.request.urlopen(adres + "/hesap.js", timeout=10) as c:
+                ok(b"LIFEOS.HESAP" in c.read() and "javascript" in c.headers.get("Content-Type"))
+            with urllib.request.urlopen(adres + "/api/hesap/durum", timeout=10) as c:
+                ok(json.loads(c.read())["kurulum"])
+            q = urllib.request.Request(adres + "/api/hesap/kayit", method="POST", data=json.dumps(
+                {"ad": "omer", "parola": "parola-123", "soru": "Soru nedir?", "cevap": "cevap"}).encode("utf-8"),
+                headers={"Content-Type": "application/json", "X-LifeOS": "hesap"})
+            with urllib.request.urlopen(q, timeout=10) as c:
+                eq(json.loads(c.read())["kullanici"]["rol"], "admin")   # PC'deki secim sayfasindan admin
+        finally:
+            srv.shutdown(); srv.server_close()
+            hesap.depo_kur(eski)
+            r.__exit__()
+    test("giris bir kez secim sayfasinda: hesap dosyalari ve API 4180'de", t_giris_sayfasi)
 
     def t_http_dosya():
         with _Srv() as s:

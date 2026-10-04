@@ -319,6 +319,29 @@ def run():
         ok("Yedekle ve güncelle" in h and "yedekle=1" in h)   # ayrismis kopyanin cikisi
     test("giris sayfasi dort logoyu, surumu ve guncelleme kutusunu tasir", t_sayfa)
 
+    # 2026-10-04: «Yedekle ve güncelle» metnindeki kesme isareti Python
+    # kaynaginda yanlis kacislandi (GitHub'da) ve sayfanin TEK betigi
+    # sozdizimi hatasiyla dustu: guncelleme kutusu, modul durumlari ve HKM
+    # karti olu kaldi. Metne bakan testler bunu gormedi; betik derlenir.
+    def t_sayfa_betigi():
+        import re as _re
+        import shutil as _sh
+        node = _sh.which("node")
+        if not node:
+            return
+        for h in (sunucu.giris_html(), sunucu.giris_html(telefon=True)):
+            for b in _re.findall(r"<script>(.*?)</script>", h, _re.S):
+                d = tempfile.mkdtemp(prefix="lifeos-betik-")
+                try:
+                    yol = os.path.join(d, "b.js")
+                    with open(yol, "w", encoding="utf-8") as f:
+                        f.write(b)
+                    r = subprocess.run([node, "--check", yol], capture_output=True, text=True)
+                    eq(r.returncode, 0, (r.stderr or "")[-300:])
+                finally:
+                    shutil.rmtree(d, ignore_errors=True)
+    test("giris sayfasinin betigi gecerli JavaScript (node --check)", t_sayfa_betigi)
+
     def t_telefon_sayfa():
         """Telefon uygulamasinin giris sayfasi (uygulama/ios, 2026-10-04): ayni
         sayfa ve ayni kartlar; telefonda olmayan HKM, guncelleme ve bilgisayarin
@@ -328,8 +351,10 @@ def run():
         for a, port in (("ays", 4173), ("spi", 4183), ("esp", 4193)):
             ok('src="/logo/%s.png"' % a in h, a)
             ok('href="http://127.0.0.1:%d/"' % port in h, a)
-        no(any(x in h for x in ('/logo/hkm.png', 'data-hkm', 'id="guncel"', "<script", "/api/")),
-           "telefonda HKM, guncelleme ve betik yok")
+        no(any(x in h for x in ('/logo/hkm.png', 'data-hkm', 'id="guncel"', "<script>", "/api/")),
+           "telefonda HKM, guncelleme ve bilgisayarin betigi yok")
+        eq(h.count("<script"), 1)                         # yalniz giris ekrani (hesap.js)
+        ok('<script src="/hesap.js" data-giris></script>' in h)
         for y in ("__KARTLAR__", "__SURUM__", "__IKON__"):
             no(y in h)
         bas = sunucu.giris_html()

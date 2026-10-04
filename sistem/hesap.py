@@ -24,8 +24,14 @@
       kendisi degil SHA-256 ozeti saklanir. Art arda yanlis giriste
       bekletilir; olmayan kullanicida da ayni hesap yapilir (ad sizmaz).
    5. ADMIN YALNIZ PC'DEN KURULUR. Hic kullanici yokken ilk hesap (admin)
-      yalniz bu bilgisayarin kendisinden (127.0.0.1) kurulur. Ev agindaki
-      bir cihaz admin olamaz, kurulumu da kapamaz.
+      yalniz bu bilgisayarin kendisinden (127.0.0.1) acilir. Ev agindaki
+      bir cihaz admin olamaz, kurulumu da kapamaz. Sonraki hesaplari herkes
+      kendisi acar (kayit, uye) — su an ev agiyla sinirli bir beta.
+   7. SIFRE KURTARMA KULLANICININ KENDI SORUSUYLA. Kayitta kullanici bir
+      soru ve cevap yazar; cevap sifre gibi tuzlu ozetle saklanir (buyuk/
+      kucuk harf, Turkce I/İ ve fazla bosluk fark etmez). Dogru cevap yeni
+      sifre koydurur ve butun eski oturumlari kapatir; yanlis cevap girisle
+      ayni bekletmeye tabidir.
    6. VERI DEPONUN DISINDA. %LOCALAPPDATA%\\LifeOS\\hesap\\hesap.db
       (Windows) ya da ~/.lifeos/hesap: commit'e giremez, guncelleme ona
       dokunmaz. LIFEOS_HESAP_KLASOR testler icin.
@@ -44,13 +50,15 @@ import sqlite3
 import threading
 import time
 
-SURUM = 1
+SURUM = 2
 TUR = 600000                    # PBKDF2 tur sayisi (OWASP 2023, SHA-256)
 EN_KISA_PAROLA = 8
 EN_UZUN_PAROLA = 256
 AD_RE = re.compile(r"^[0-9A-Za-zÇĞİÖŞÜçğıöşü_.\-]{2,32}$")
 ALAN_RE = re.compile(r"^(ays|spi|esp)/[A-Za-z0-9_.\-]{1,40}$")
 CIHAZ_RE = re.compile(r"^[A-Za-z0-9_\-]{6,64}$")
+SORU_EN_KISA, SORU_EN_UZUN = 4, 120
+CEVAP_EN_KISA = 2
 YOL_EN_UZUN = 300
 KAYIT_EN_BUYUK = 2 * 1024 * 1024      # tek kayit (JSON); fotograf buraya girmez
 GOVDE_EN_BUYUK = 24 * 1024 * 1024
@@ -127,6 +135,14 @@ class Depo:
         self._deneme = {}               # anahtar -> [yanlis sayisi, bekleme bitisi]
         with self._islem() as c:
             c.executescript(SEMA)
+            self._gocur(c)
+
+    def _gocur(self, c):
+        """Eski depoya yeni sutunlar (surum 2: kurtarma sorusu)."""
+        var = {r["name"] for r in c.execute("PRAGMA table_info(kullanici)")}
+        for ad, tur in (("soru", "TEXT"), ("cevap_tuz", "BLOB"), ("cevap_ozet", "BLOB"), ("cevap_tur", "INTEGER")):
+            if ad not in var:
+                c.execute("ALTER TABLE kullanici ADD COLUMN %s %s" % (ad, tur))
 
     @contextlib.contextmanager
     def _islem(self):
@@ -157,10 +173,29 @@ class Depo:
     @staticmethod
     def _parola_dogrula(parola):
         if not isinstance(parola, str) or len(parola) < EN_KISA_PAROLA:
-            raise Hata(400, "Parola en az %d karakter olmalı." % EN_KISA_PAROLA)
+            raise Hata(400, "Şifre en az %d karakter olmalı." % EN_KISA_PAROLA)
         if len(parola) > EN_UZUN_PAROLA:
-            raise Hata(400, "Parola çok uzun.")
+            raise Hata(400, "Şifre çok uzun.")
         return parola
+
+    @staticmethod
+    def _cevap_normal(cevap):
+        s = str(cevap or "").replace("I", "ı").replace("İ", "i").lower()
+        return " ".join(s.split())
+
+    @staticmethod
+    def _soru_dogrula(soru, cevap):
+        soru = " ".join(str(soru or "").split())
+        if not (SORU_EN_KISA <= len(soru) <= SORU_EN_UZUN):
+            raise Hata(400, "Kurtarma sorusu %d–%d karakter olmalı." % (SORU_EN_KISA, SORU_EN_UZUN))
+        if len(Depo._cevap_normal(cevap)) < CEVAP_EN_KISA:
+            raise Hata(400, "Kurtarma cevabı en az %d karakter olmalı." % CEVAP_EN_KISA)
+        return soru
+
+    def _soru_yaz(self, c, kid, soru, cevap):
+        tuz = secrets.token_bytes(16)
+        c.execute("UPDATE kullanici SET soru=?, cevap_tuz=?, cevap_ozet=?, cevap_tur=? WHERE id=?",
+                  (soru, tuz, self._ozet(self._cevap_normal(cevap), tuz, self.tur), self.tur, kid))
 
     def _kullanici_yaz(self, c, ad, parola, rol):
         tuz = secrets.token_bytes(16)
@@ -203,6 +238,70 @@ class Depo:
             return {"jeton": self._oturum_ac(c, kid, cihaz, cihaz_ad),
                     "kullanici": self._kullanici(c, kid)}
 
+    def kayit(self, ad, parola, soru, cevap, yerel, cihaz="", cihaz_ad=""):
+        """Kendi kendine hesap. Ilk hesap admin olur ve yalniz PC'den acilir."""
+        ad = self._ad_dogrula(ad)
+        self._parola_dogrula(parola)
+        soru = self._soru_dogrula(soru, cevap)
+        with self._islem() as c:
+            ilk = c.execute("SELECT COUNT(*) FROM kullanici").fetchone()[0] == 0
+            if ilk and not yerel:
+                raise Hata(403, "İlk hesap (admin) bilgisayarın kendisinde açılır.")
+            kid = self._kullanici_yaz(c, ad, parola, "admin" if ilk else "uye")
+            self._soru_yaz(c, kid, soru, cevap)
+            return {"jeton": self._oturum_ac(c, kid, cihaz, cihaz_ad),
+                    "kullanici": self._kullanici(c, kid)}
+
+    def soru(self, ad):
+        """Sifremi unuttum, adim 1: kullanicinin kendi sorusu."""
+        with self._islem() as c:
+            r = c.execute("SELECT soru FROM kullanici WHERE ad=?", ((ad or "").strip(),)).fetchone()
+        if r is None or not r["soru"]:
+            raise Hata(404, "Bu kullanıcı adı için kurtarma sorusu yok.")
+        return r["soru"]
+
+    def kurtar(self, ad, cevap, yeni, cihaz="", cihaz_ad="", ip=""):
+        """Sifremi unuttum, adim 2: dogru cevap yeni sifre koydurur."""
+        ad = (ad or "").strip()
+        anahtarlar = [("kurtar", ad.lower()), ("ip", ip)]
+        with self.kilit:
+            self._deneme_bak(anahtarlar)
+        self._parola_dogrula(yeni)
+        with self._islem() as c:
+            r = c.execute("SELECT id, cevap_tuz, cevap_ozet, cevap_tur FROM kullanici WHERE ad=?", (ad,)).fetchone()
+            if r is not None and r["cevap_ozet"]:
+                dogru = hmac.compare_digest(
+                    self._ozet(self._cevap_normal(cevap), r["cevap_tuz"], r["cevap_tur"]), r["cevap_ozet"])
+            else:
+                self._ozet("", b"\0" * 16, self.tur)      # sure sizdirmasin
+                dogru = False
+            if not dogru:
+                with self.kilit:
+                    self._deneme_yanlis(anahtarlar)
+                raise Hata(401, "Cevap yanlış.")
+            with self.kilit:
+                for a in anahtarlar:
+                    self._deneme.pop(a, None)
+            tuz = secrets.token_bytes(16)
+            c.execute("UPDATE kullanici SET tuz=?, ozet=?, tur=? WHERE id=?",
+                      (tuz, self._ozet(yeni, tuz, self.tur), self.tur, r["id"]))
+            c.execute("DELETE FROM oturum WHERE kullanici=?", (r["id"],))
+            return {"jeton": self._oturum_ac(c, r["id"], cihaz, cihaz_ad),
+                    "kullanici": self._kullanici(c, r["id"])}
+
+    def soru_ayarla(self, kullanici, parola, soru, cevap):
+        soru = self._soru_dogrula(soru, cevap)
+        with self._islem() as c:
+            r = c.execute("SELECT tuz, ozet, tur FROM kullanici WHERE id=?", (kullanici["id"],)).fetchone()
+            if r is None or not hmac.compare_digest(self._ozet(parola or "", r["tuz"], r["tur"]), r["ozet"]):
+                raise Hata(401, "Şifre yanlış.")
+            self._soru_yaz(c, kullanici["id"], soru, cevap)
+
+    def soru_var(self, kullanici):
+        with self._islem() as c:
+            r = c.execute("SELECT soru FROM kullanici WHERE id=?", (kullanici["id"],)).fetchone()
+            return bool(r and r["soru"])
+
     def _deneme_bak(self, anahtarlar):
         simdi = self.saat()
         for a in anahtarlar:
@@ -237,7 +336,7 @@ class Depo:
             if not dogru:
                 with self.kilit:
                     self._deneme_yanlis(anahtarlar)
-                raise Hata(401, "Kullanıcı adı ya da parola yanlış.")
+                raise Hata(401, "Kullanıcı adı ya da şifre yanlış.")
             with self.kilit:
                 for a in anahtarlar:
                     self._deneme.pop(a, None)
@@ -270,7 +369,7 @@ class Depo:
         with self._islem() as c:
             r = c.execute("SELECT tuz, ozet, tur FROM kullanici WHERE id=?", (kullanici["id"],)).fetchone()
             if r is None or not hmac.compare_digest(self._ozet(eski or "", r["tuz"], r["tur"]), r["ozet"]):
-                raise Hata(401, "Şimdiki parola yanlış.")
+                raise Hata(401, "Şimdiki şifre yanlış.")
             tuz = secrets.token_bytes(16)
             c.execute("UPDATE kullanici SET tuz=?, ozet=?, tur=? WHERE id=?",
                       (tuz, self._ozet(yeni, tuz, self.tur), self.tur, kullanici["id"]))
@@ -493,6 +592,14 @@ def isle(h):
             cihaz_ad = str(v.get("cihaz_ad") or "")[:80]
             if yol == "/api/hesap/kur":
                 return _cevap(h, 200, d.kur(v.get("ad"), v.get("parola"), _yerel_mi(h), cihaz, cihaz_ad))
+            if yol == "/api/hesap/kayit":
+                return _cevap(h, 200, d.kayit(v.get("ad"), v.get("parola"), v.get("soru"), v.get("cevap"),
+                                              _yerel_mi(h), cihaz, cihaz_ad))
+            if yol == "/api/hesap/soru":
+                return _cevap(h, 200, {"soru": d.soru(v.get("ad"))})
+            if yol == "/api/hesap/kurtar":
+                return _cevap(h, 200, d.kurtar(v.get("ad"), v.get("cevap"), v.get("yeni"), cihaz, cihaz_ad,
+                                               (h.client_address or ("",))[0]))
             if yol == "/api/hesap/giris":
                 return _cevap(h, 200, d.giris(v.get("ad"), v.get("parola"), cihaz, cihaz_ad,
                                               (h.client_address or ("",))[0]))
@@ -509,6 +616,9 @@ def isle(h):
             if yol == "/api/hesap/parola":
                 d.parola_degistir(k, _jeton(h), v.get("eski"), v.get("yeni"))
                 return _cevap(h, 200, {"ok": True})
+            if yol == "/api/hesap/soru-ayarla":
+                d.soru_ayarla(k, v.get("parola"), v.get("soru"), v.get("cevap"))
+                return _cevap(h, 200, {"ok": True})
             if yol == "/api/hesap/kullanici":
                 return _cevap(h, 200, d.kullanici_ekle(k, v.get("ad"), v.get("parola"), v.get("rol") or "uye"))
             raise Hata(404, "Böyle bir istek yok.")
@@ -517,7 +627,7 @@ def isle(h):
             if k is None:
                 raise Hata(401, "Oturum yok ya da süresi doldu; yeniden giriş yap.")
             if yol == "/api/hesap/ben":
-                return _cevap(h, 200, {"kullanici": k, "ozet": d.ozet(k)})
+                return _cevap(h, 200, {"kullanici": k, "ozet": d.ozet(k), "soru_var": d.soru_var(k)})
             if yol == "/api/hesap/kullanicilar":
                 return _cevap(h, 200, {"kullanicilar": d.kullanicilar(k)})
         raise Hata(404, "Böyle bir istek yok.")

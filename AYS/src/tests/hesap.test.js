@@ -17,6 +17,9 @@
     10. Büyük alan partilerle gider.
     11. Gerçek depo (store.js) kancası: yazma bildirilir, uzaktan gelen
         bildirilmez, HKM jetonu eşitlenmez.
+    12. Giriş ekranı: sunucu varken ve hesap yokken açılışta çıkar; sunucu
+        yoksa çıkmaz; beta girişi kapatır (bu oturumda yeniden çıkmaz);
+        kayıt ve «şifremi unuttum» oturum açar; hata yazılanı silmez.
    Sunucunun kendi kuralları HKM/tests/test_hesap.py'de gerçek SQLite ile
    sınanır; buradaki sahte sunucu aynı kuralı taklit eder. */
 
@@ -38,6 +41,27 @@
       if(s.yok) return cevap(404, null);
       const govde = op && op.body ? JSON.parse(op.body) : null;
       if(yol === '/api/hesap/durum') return cevap(200, { surum:1, kurulum:s.kurulum, yerel:true });
+      if(yol === '/api/hesap/kayit'){
+        if(s.kullanicilar[govde.ad]) return cevap(409, { hata:'Bu adla bir kullanıcı zaten var.' });
+        const ilk = !Object.keys(s.kullanicilar).length;
+        s.kullanicilar[govde.ad] = { parola:govde.parola, rol:ilk ? 'admin' : 'uye', soru:govde.soru, cevap:govde.cevap };
+        s.kurulum = false;
+        const j = 'jeton-k' + Object.keys(s.jetonlar).length + '-gizli';
+        s.jetonlar[j] = govde.ad;
+        return cevap(200, { jeton:j, kullanici:{ ad:govde.ad, rol:s.kullanicilar[govde.ad].rol } });
+      }
+      if(yol === '/api/hesap/soru'){
+        const k = s.kullanicilar[govde.ad];
+        return k && k.soru ? cevap(200, { soru:k.soru }) : cevap(404, { hata:'Bu kullanıcı adı için kurtarma sorusu yok.' });
+      }
+      if(yol === '/api/hesap/kurtar'){
+        const k = s.kullanicilar[govde.ad];
+        if(!k || String(k.cevap).toLowerCase() !== String(govde.cevap).trim().toLowerCase()) return cevap(401, { hata:'Cevap yanlış.' });
+        k.parola = govde.yeni;
+        const j = 'jeton-r' + Object.keys(s.jetonlar).length + '-gizli';
+        s.jetonlar[j] = govde.ad;
+        return cevap(200, { jeton:j, kullanici:{ ad:govde.ad, rol:k.rol } });
+      }
       if(yol === '/api/hesap/giris'){
         const k = s.kullanicilar[govde.ad];
         if(!k || k.parola !== govde.parola) return cevap(401, { hata:'Kullanıcı adı ya da parola yanlış.' });
@@ -125,7 +149,8 @@
     yedek = yedek || Object.assign({}, h._ortam);
     Object.assign(h._ortam, cihaz.ortam);
     h.kur({ modul:'spi', depo:cihaz.depo, ornek:cihaz.ornek || (() => false),
-      yenile:async () => { cihaz.depo.yenilenen++; }, mesgul:() => false });
+      yenile:async () => { cihaz.depo.yenilenen++; },
+      mesgul:cihaz.mesgul || (() => false), kesilebilir:cihaz.kesilebilir });
     return h;
   }
   function birak(){
@@ -187,6 +212,44 @@
       expect(c.depo.veri['vitals/2026-10-01']).toEqual({ sleep:8 });
       expect(h.durum().durum).toBe('tamam');
       expect(c.depo.yenilenen > 0).toBe(true);
+    }));
+
+    /* Yeni cihazda profil boşken kurulum sihirbazı açılır; sunucudan profil
+       gelince ekran yenilenmeli (sihirbaz kapanabilir). Açık bir kağıt
+       öteki her durumda yenilemeyi bekletir: yarım form silinmez. */
+    it('açık kağıt yenilemeyi bekletir; kesilebilir kağıt (sihirbaz) bekletmez', () => sahneyle(async () => {
+      let kap = document.getElementById('sheet'), yeniKap = !kap;
+      if(yeniKap){ kap = document.createElement('div'); kap.id = 'sheet'; document.body.appendChild(kap); }
+      const k = document.createElement('div');
+      k.className = 'sheet';
+      k.innerHTML = '<button data-act="setup-skip">Şimdilik atla</button>';
+      k.style.cssText = 'display:block;width:10px;height:10px';
+      kap.appendChild(k);
+      try{
+        const srv = sunucuKur();
+        srv.yaz('omer', 'spi/ben', 'profile', { name:'Ömer' }, 5);
+        let c = cihazKur(srv);
+        c.mesgul = undefined;
+        let h = sahne(c);
+        await hazir();
+        await h.girisYap('omer', 'parola-123');
+        await h.esitle();
+        await hazir();
+        expect(c.depo.yenilenen).toBe(0);                       // kağıt açık: beklenir
+        const srv2 = sunucuKur();
+        srv2.yaz('omer', 'spi/ben', 'profile', { name:'Ömer' }, 5);
+        c = cihazKur(srv2);
+        c.kesilebilir = () => !!document.querySelector('#sheet [data-act="setup-skip"]');
+        h = sahne(c);
+        await hazir();
+        await h.girisYap('omer', 'parola-123');
+        await h.esitle();
+        await hazir();
+        expect(c.depo.yenilenen > 0).toBe(true);                // sihirbaz: beklenmez
+      }finally{
+        k.remove();
+        if(yeniKap) kap.remove();
+      }
     }));
 
     it('çevrimdışı değişiklik sırada kalır, bağlanınca akar', () => sahneyle(async () => {
@@ -341,7 +404,8 @@
       const h = sahne(c);
       await hazir();
       expect(h.dugme().gizli).toBe(false);
-      expect(h.panelHtml()).toContain('Bilgisayarın adresi');
+      expect(h.kapiAcikMi()).toBe(true);
+      expect(document.querySelector('[data-hesap-kapi]').textContent).toContain('Bilgisayarın adresi');
       expect(h.adresDuzelt('192.168.0.10')).toBe('https://192.168.0.10:5183');
       expect(h.adresDuzelt('https://pc.local:5173/x?y')).toBe('https://pc.local:5173');
       expect(h.adresDuzelt('')).toBeNull();
@@ -349,6 +413,98 @@
       expect(srv.istekler.some(x => x.url === 'https://192.168.0.10:5183/api/hesap/giris')).toBe(true);
       await h.esitle();
       expect(esitleIstekleri(srv)[0].url).toBe('https://192.168.0.10:5183/api/hesap/esitle');
+    }));
+  });
+
+  describe('Hesap — giriş ekranı', () => {
+    const kapi = () => document.querySelector('[data-hesap-kapi]');
+    const yaz = (id, v) => { document.getElementById(id).value = v; };
+    const gonder = sel => kapi().querySelector(sel).requestSubmit();
+
+    it('sunucu varken ve hesap yokken açılışta çıkar; sunucu yoksa çıkmaz', () => sahneyle(async () => {
+      let srv = sunucuKur(), c = cihazKur(srv);
+      let h = sahne(c);
+      await hazir();
+      expect(h.kapiAcikMi()).toBe(true);
+      expect(kapi().textContent).toContain('Beta girişi');
+      expect(kapi().textContent).toContain('Şifremi unuttum');
+      srv = sunucuKur({ yok:true }); c = cihazKur(srv);
+      h = sahne(c);
+      await hazir();
+      expect(h.kapiAcikMi()).toBe(false);
+    }));
+
+    it('beta girişi ekranı kapatır, oturumluk çerez yazar, yeniden çıkmaz', () => sahneyle(async () => {
+      const srv = sunucuKur(), c = cihazKur(srv);
+      let h = sahne(c);
+      await hazir();
+      kapi().querySelector('[data-hesap="beta"]').click();
+      expect(h.kapiAcikMi()).toBe(false);
+      expect(c.jar.__son).toContain('lifeos_beta');
+      expect(/Max-Age/.test(c.jar.__son)).toBe(false);
+      h = sahne(c);                                  // aynı cihaz, yeni sayfa (modül değişti)
+      await hazir();
+      expect(h.kapiAcikMi()).toBe(false);
+    }));
+
+    it('ilk açılışta «Hesap oluştur» seçili; kayıt oturum açar, ekran kapanır', () => sahneyle(async () => {
+      const srv = sunucuKur({ kullanicilar:{}, kurulum:true }), c = cihazKur(srv);
+      const h = sahne(c);
+      await hazir();
+      expect(kapi().querySelector('[data-gorunum="kayit"]').getAttribute('aria-pressed')).toBe('true');
+      expect(kapi().textContent).toContain('İlk hesap admin olur');
+      yaz('hesap-ad', 'omer'); yaz('hesap-parola', 'sifre-1234'); yaz('hesap-parola2', 'sifre-9999');
+      yaz('hesap-soru', 'İlk öğretmenim?'); yaz('hesap-cevap', 'Ayşe');
+      gonder('[data-hesap-form="kayit"]');
+      await hazir();
+      expect(document.getElementById('hesap-mesaj').textContent).toContain('aynı değil');
+      expect(document.getElementById('hesap-soru').value).toBe('İlk öğretmenim?');   // yazılan silinmedi
+      yaz('hesap-parola2', 'sifre-1234');
+      gonder('[data-hesap-form="kayit"]');
+      await hazir();
+      expect(h.kapiAcikMi()).toBe(false);
+      expect(h.durum().oturum.ad).toBe('omer');
+      expect(h.durum().oturum.rol).toBe('admin');
+      expect(srv.kullanicilar.omer.soru).toBe('İlk öğretmenim?');
+    }));
+
+    it('yanlış şifrede ekran açık kalır, mesaj yazar, ad silinmez', () => sahneyle(async () => {
+      const srv = sunucuKur(), c = cihazKur(srv);
+      const h = sahne(c);
+      await hazir();
+      yaz('hesap-ad', 'omer'); yaz('hesap-parola', 'yanlis');
+      gonder('[data-hesap-form="giris"]');
+      await hazir();
+      expect(h.kapiAcikMi()).toBe(true);
+      expect(document.getElementById('hesap-mesaj').textContent).toContain('yanlış');
+      expect(document.getElementById('hesap-ad').value).toBe('omer');
+    }));
+
+    it('şifremi unuttum: kendi sorusu gelir, doğru cevapla yeni şifre ve oturum', () => sahneyle(async () => {
+      const srv = sunucuKur(), c = cihazKur(srv);
+      srv.kullanicilar.omer.soru = 'İlk evcil hayvanım?';
+      srv.kullanicilar.omer.cevap = 'pamuk';
+      const h = sahne(c);
+      await hazir();
+      yaz('hesap-ad', 'omer');
+      kapi().querySelector('[data-hesap="unuttum"]').click();
+      expect(document.getElementById('hesap-ad').value).toBe('omer');           // ad taşındı
+      gonder('[data-hesap-form="soru"]');
+      await hazir();
+      expect(kapi().textContent).toContain('İlk evcil hayvanım?');
+      yaz('hesap-cevap', 'Pamuk'); yaz('hesap-parola', 'yeni-sifre-1'); yaz('hesap-parola2', 'yeni-sifre-1');
+      gonder('[data-hesap-form="kurtar"]');
+      await hazir();
+      expect(h.kapiAcikMi()).toBe(false);
+      expect(h.durum().oturum.ad).toBe('omer');
+      expect(srv.kullanicilar.omer.parola).toBe('yeni-sifre-1');
+    }));
+
+    it('örnek profilde giriş ekranı çıkmaz', () => sahneyle(async () => {
+      const srv = sunucuKur(), c = cihazKur(srv, { ornek:() => true });
+      const h = sahne(c);
+      await hazir();
+      expect(h.kapiAcikMi()).toBe(false);
     }));
   });
 

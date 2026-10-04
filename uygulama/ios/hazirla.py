@@ -94,6 +94,9 @@ def main():
     (giris / "index.html").write_text(sunucu.giris_html(telefon=True), encoding="utf-8")
     for anahtar in ("ays", "spi", "esp"):
         shutil.copy2(KOK.joinpath(*sunucu.LOGOLAR[anahtar]), giris / "logo" / (anahtar + ".png"))
+    # Giris ekrani (hesap): secim sayfasinda bir kez giris (brand/ortak/hesap.*).
+    for ad in ("hesap.js", "hesap.css"):
+        shutil.copy2(KOK / "brand" / "ortak" / ad, giris / ad)
 
     shutil.copy2(KOK / "brand" / "life" / "logo.png", SIMGE)
     if sys.platform == "darwin":

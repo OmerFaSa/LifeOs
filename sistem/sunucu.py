@@ -280,6 +280,7 @@ GIRIS_SAYFASI = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>LifeOS — Kontrol paneli</title>
 <link rel="icon" href="__IKON__"/>
+<link rel="stylesheet" href="/hesap.css"/>
 <style>
 :root{ color-scheme:light dark;
   --bg:#f5f6f8; --yuzey:#ffffff; --yuzey-2:#f0f1f4; --fg:#15171a; --fg-2:#4a4f57; --fg-3:#6b717b;
@@ -296,6 +297,14 @@ GIRIS_SAYFASI = """<!doctype html>
   --ays-t:#1A1F2A; --spi-t:#18221F; --esp-t:#231E17; --hkm-t:#1F1C29; } }
 *{ box-sizing:border-box; }
 [hidden]{ display:none !important; }
+/* Giris ekrani (brand/ortak/hesap.css): modul secimi bir kez, burada. Kartin
+   degiskenleri bu sayfanin renklerine eslenir. */
+.hesap-kapi{ --surface:var(--yuzey); --surface-2:var(--yuzey-2); --text:var(--fg); --text-2:var(--fg-2);
+  --border:var(--cizgi); --kart-golge:var(--golge); --primary:var(--fg); --bad:#c8463b; }
+.hesap-kapi .seg{ display:flex; gap:2px; background:var(--yuzey-2); border:1px solid var(--cizgi); border-radius:9px; padding:3px; }
+.hesap-kapi .seg button{ flex:1; min-height:32px; border:0; border-radius:7px; background:none; font:inherit;
+  font-size:13.5px; font-weight:500; color:var(--fg-2); cursor:pointer; }
+.hesap-kapi .seg button.is-on{ background:var(--yuzey); color:var(--fg); box-shadow:0 1px 2px rgba(0,0,0,.08); }
 body{ margin:0; background:var(--bg); color:var(--fg);
   font:15px/1.55 "Segoe UI Variable Text","Segoe UI",ui-sans-serif,system-ui,-apple-system,Roboto,sans-serif;
   -webkit-font-smoothing:antialiased; }
@@ -431,7 +440,7 @@ button{ font:inherit; }
     }
     if(d.durum !== 'ok'){ hal('uyari', 'Güncelleme durumu okunamadı', d.mesaj || ''); return ana('', null); }
     if(d.geride > 0 && d.yedeklenebilir){
-      hal('var', d.geride + ' yenilik var', 'Bu klasörde GitHub'da olmayan ' + d.ileride + ' kayıt var; ileri sarılamıyor. '
+      hal('var', d.geride + ' yenilik var', 'Bu klasörde GitHub’da olmayan ' + d.ileride + ' kayıt var; ileri sarılamıyor. '
         + 'Önce onlar bir yedek dala konur, sonra en yeni sürüm kurulur. Hiçbir kayıt silinmez; verin korunur.', d.yeni);
       return ana('Yedekle ve güncelle', function(){ guncelle(true); });
     }
@@ -510,6 +519,7 @@ button{ font:inherit; }
   });
 })();
 </script>
+<script src="/hesap.js" data-giris></script>
 </body></html>
 """
 
@@ -571,8 +581,8 @@ def _telefon_iskeleti(sayfa):
     sayfa = kes(sayfa, "<script>", "</script>")
     i = sayfa.index('<footer class="dip">')
     j = sayfa.index("</footer>", i) + len("</footer>")
-    dip = ('<footer class="dip"><span>Verin bu telefonda kalır; bilgisayardakinden ayrıdır '
-           '(taşımak için modüllerdeki yedek düğmeleri).</span>'
+    dip = ('<footer class="dip"><span>Hesabınla girince bu telefondaki veri bilgisayarındaki '
+           'LifeOS ile eşitlenir; beta girişinde yalnız bu telefonda kalır.</span>'
            '<span>Merkez (HKM) bilgisayarda çalışır.</span></footer>')
     return sayfa[:i] + dip + sayfa[j:]
 
@@ -660,8 +670,27 @@ class Giris(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(govde)
 
+    def do_OPTIONS(self):
+        if self.path.startswith("/api/hesap/"):
+            return hesap.isle(self)
+        return self.send_error(405)
+
+    def _hesap_dosyasi(self, ad):
+        """/hesap.js, /hesap.css — giris ekrani (brand/ortak); kapali liste."""
+        tur = {"hesap.js": "text/javascript; charset=utf-8", "hesap.css": "text/css; charset=utf-8"}[ad]
+        with open(os.path.join(KOK, "brand", "ortak", ad), "rb") as f:
+            govde = f.read()
+        self.send_response(200)
+        self.send_header("Content-Type", tur)
+        self.send_header("Content-Length", str(len(govde)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        self.wfile.write(govde)
+
     def do_POST(self):
         yol = self.path.split("?", 1)[0]
+        if yol.startswith("/api/hesap/"):
+            return hesap.isle(self)
         if yol not in ("/api/guncelle", "/api/hkm", "/api/yeniden"):
             return self.send_error(404)
         if not guncelleme_izinli(self.headers):
@@ -679,6 +708,10 @@ class Giris(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         yol = self.path.split("?", 1)[0]
+        if yol.startswith("/api/hesap/"):
+            return hesap.isle(self)
+        if yol in ("/hesap.js", "/hesap.css"):
+            return self._hesap_dosyasi(yol[1:])
         if yol == "/api/guncelleme":
             return self._json(200, guncelleme_durumu(taze="taze=1" in self.path))
         if yol == "/api/durum":

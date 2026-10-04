@@ -1442,8 +1442,14 @@ SP.App = (function(){
          Sunucu yoksa hiçbir şey beklemez; uzaktan kayıt gelirse model
          yeniden yüklenir ve ekran çizilir (yazı yazılırken beklenir). */
       if(window.LIFEOS && window.LIFEOS.HESAP){
-        window.LIFEOS.HESAP.kur({ modul:'spi', depo:SP.Store, ornek:ornekAcik,
-          yenile:async () => { await M.loadAll(); render(); } });
+        const sihirbaz = () => !!document.querySelector('#sheet [data-act="setup-skip"]');
+        window.LIFEOS.HESAP.kur({ modul:'spi', depo:SP.Store, ornek:ornekAcik, kesilebilir:sihirbaz,
+          yenile:async () => {
+            await M.loadAll();
+            /* Profil sunucudan geldiyse kurulum sihirbazının işi kalmadı. */
+            if(sihirbaz() && SP.Setup && !SP.Setup.needed()) UI.closeSheet();
+            render();
+          } });
       }
 
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).
