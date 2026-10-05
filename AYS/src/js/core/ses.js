@@ -431,7 +431,9 @@ window.LIFEOS = window.LIFEOS || {};
       : hal === 'dokun' ? 'Radyo bekliyor — dokun, sürsün'
       : 'Radyo ve sesler';
     const ipucu = hal === 'caliyor' ? (aktif ? aktif.ad : 'Radyo') : hal === 'dokun' ? 'Dokun, sürsün' : 'Radyo';
-    return { sinif, etiket, ipucu };
+    /* Kenarda «Radyo» satırının yanında çalan istasyon (2026-10-06). */
+    const ad = hal === 'caliyor' && aktif ? aktif.ad : '';
+    return { sinif, etiket, ipucu, ad };
   }
 
   const SIMGE_CAL = '<svg class="ses__sim" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z"/></svg>';
@@ -470,6 +472,8 @@ window.LIFEOS = window.LIFEOS || {};
       b.classList.toggle('is-dokun', hal === 'dokun');
       b.setAttribute('aria-label', d.etiket);
       b.setAttribute('title', d.ipucu);
+      const ad = b.querySelector('[data-ses-ad]');
+      if(ad && ad.textContent !== d.ad) ad.textContent = d.ad;
     });
     document.querySelectorAll('[data-ses-panel]').forEach(p => {
       p.querySelectorAll('[data-ses-tur]').forEach(c => {

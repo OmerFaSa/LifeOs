@@ -733,6 +733,27 @@ window.LIFEOS.HESAP = (function(){
     return hal.durum === 'yok' || hal.durum === 'bilinmiyor';
   }
 
+  /* Kenarın «ben» satırında profil adının altındaki kısa durum (kabuk.js
+     kenarAraclari; kullanıcı, 2026-10-06: «burayı da düzenle, daha sade»).
+     Hesap ayrı satır değil: tek bakışta «Eşitlendi · 14:20». */
+  function kisaDurum(){
+    if(gizliMi()) return '';
+    if(!oturum() && betaMi()) return 'Beta · yalnız bu cihazda';
+    const n = bekleyen(), sira = n ? ' · ' + n + ' sırada' : '';
+    switch(hal.durum){
+      case 'tamam': {
+        const s = saatMetni(ortam.depo.oku(anahtar('son', alan())));
+        return 'Eşitlendi' + (s ? ' · ' + s : '') + sira;
+      }
+      case 'esitleniyor': return 'Eşitleniyor…';
+      case 'cevrimdisi': return 'Çevrimdışı' + sira;
+      case 'giris': return 'Giriş yapılmadı';
+      case 'ornek': return 'Örnek profil';
+      case 'yok': case 'bilinmiyor': return '';
+      default: return 'Eşitleme durdu';
+    }
+  }
+
   /* kabuk.js düğmeyi çizerken sorar. */
   function dugme(){
     const o = oturum();
@@ -740,7 +761,7 @@ window.LIFEOS.HESAP = (function(){
       + (onayBitis > ortam.simdi() ? ' is-esitlendi' : '');
     const metin = durumMetni();
     return {
-      sinif, gizli:gizliMi(),
+      sinif, gizli:gizliMi(), kisa:kisaDurum(), hal:hal.durum,
       etiket:'Hesap ve eşitleme' + (o ? ' — ' + o.a : '') + (metin ? ': ' + metin : ''),
       ipucu:o ? o.a + (metin ? ' · ' + metin : '') : 'Hesap: giriş yapılmadı',
     };
@@ -789,6 +810,11 @@ window.LIFEOS.HESAP = (function(){
       b.hidden = d.gizli;
       b.setAttribute('aria-label', d.etiket);
       b.setAttribute('title', d.ipucu);
+    });
+    document.querySelectorAll('[data-hesap-ben]').forEach(b => {
+      b.setAttribute('data-hal', d.gizli ? 'yok' : d.hal);
+      const s = b.querySelector('[data-hesap-durum]');
+      if(s){ if(s.textContent !== d.kisa) s.textContent = d.kisa; s.hidden = !d.kisa; }
     });
   }
 

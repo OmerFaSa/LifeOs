@@ -10602,8 +10602,13 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
   html .site--v5{ --ust-h:0px; }
   .site--v5 > .ust{ display:none; }
 }
-.kenar__araclar{ display:flex; flex-direction:column; gap:2px; }
-.site--v5 .kenar .kenar__arac{ position:relative; display:flex; align-items:center; gap:12px; width:100%; height:38px;
+/* SADE DİP (kullanıcı, 2026-10-06: «burayı da düzenle, daha sade güzel yap»).
+   İki küçük grup (yardım · sayfa) ve bir «ben» satırı; gruplar arası nefes,
+   satırlar biraz daha ince. Kısayol, istasyon adı ve sayı satırın sağında;
+   hesap durumu profil adının altında, bulut ben satırının sağında. */
+.kenar__araclar{ display:flex; flex-direction:column; gap:10px; }
+.kenar__grup{ display:flex; flex-direction:column; gap:1px; }
+.site--v5 .kenar .kenar__arac{ position:relative; display:flex; align-items:center; gap:12px; width:100%; height:36px;
   margin:0; padding:0 0 0 13px; border:0; border-radius:8px; background:transparent; box-shadow:none;
   font:inherit; font-size:13.5px; font-weight:500; color:var(--text-2); text-align:left; cursor:pointer;
   transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
@@ -10616,10 +10621,61 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
   border-radius:50%; background:var(--now); box-shadow:none; }
 .site--v5 .kenar .kenar__arac .ust__gizli-sayi{ top:3px; left:25px; right:auto; }
 .site--v5 .kenar .kenar__arac .ust__ses-nokta{ top:8px; left:27px; right:auto; }
-/* Profil: baş harf küçük yuvarlak (simge boyunda, 32 px ekseninde). */
-.site--v5 .kenar .kenar__arac--profil{ padding-left:11px; }
-.kenar__avatar{ width:22px; height:22px; flex:none; border-radius:50%; display:grid; place-items:center;
+/* Satırın sağındaki ekler: kısayol (yalnız üzerine gelince, soluk), çalan
+   istasyon, bildirim sayısı. */
+.kenar__kisayol{ flex:none; margin-right:10px; font:inherit; font-size:11px; letter-spacing:.02em; color:var(--text-3);
+  white-space:nowrap; opacity:0; transition:opacity .2s ease; }
+html .site--v5 > .kenar .kenar__arac:is(:hover, :focus-visible) .kenar__kisayol{ opacity:1; }
+@media not (hover:hover){ .kenar__kisayol{ display:none !important; } }
+.kenar__ek{ flex:0 1 auto; min-width:0; max-width:92px; margin-right:10px; overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap; font-size:11.5px; color:var(--text-3); }
+.kenar__ek:empty{ display:none !important; }
+.kenar__sayi{ flex:none; min-width:20px; height:20px; margin-right:8px; padding:0 6px; border-radius:10px;
+  display:grid; place-items:center; font-size:11px; font-weight:600; font-variant-numeric:tabular-nums;
+  background:color-mix(in oklab, var(--surface) 70%, transparent); color:var(--text-2); }
+.kenar__sayi.is-acil{ background:var(--now); color:#fff; }
+/* Ben satırı: profil (ad, altında hesap durumu) ve hesap bulutu. Avatarın
+   köşesindeki nokta eşitleme durumudur: kenar dar iken de görünür. */
+.kenar__ben{ display:flex; align-items:center; gap:2px; margin-top:2px; padding-top:8px; border-top:1px solid var(--border); }
+.site--v5 .kenar .kenar__ben > .kenar__arac--profil{ flex:1; min-width:0; width:auto; height:44px; padding-left:10px; }
+.kenar__kim{ flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; line-height:1.25; }
+.site--v5 .kenar .kenar__kim .kenar__ad{ flex:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  color:var(--text); font-weight:600; }
+.kenar__durum{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11.5px; font-weight:450;
+  color:var(--text-3); }
+.kenar__durum[hidden]{ display:none !important; }
+.site--v5 .kenar .kenar__arac--profil{ padding-left:10px; }
+.kenar__avatar{ position:relative; width:24px; height:24px; flex:none; border-radius:50%; display:grid; place-items:center;
   background:var(--surface-3); color:var(--text); font-style:normal; font-size:11px; font-weight:600; }
+.kenar__arac--profil:is([data-hal="tamam"], [data-hal="esitleniyor"], [data-hal="cevrimdisi"]) .kenar__avatar::after{
+  content:''; position:absolute; right:-2px; bottom:-2px; width:9px; height:9px; border-radius:50%;
+  border:2px solid var(--surface-2); background:var(--ok); }
+.kenar__arac--profil[data-hal="esitleniyor"] .kenar__avatar::after{ background:var(--primary); animation:hesap-nabiz 1.4s ease-in-out infinite; }
+.kenar__arac--profil[data-hal="cevrimdisi"] .kenar__avatar::after{ background:var(--accent, #d99a1e); }
+.site--v5 .kenar .kenar__hesap{ position:relative; flex:none; width:34px; height:34px; display:grid; place-items:center;
+  margin:0 2px 0 0; padding:0; border:0; border-radius:8px; background:transparent; color:var(--text-3); cursor:pointer;
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.site--v5 .kenar .kenar__hesap:hover{ color:var(--text); background:color-mix(in oklab, var(--surface) 60%, transparent); }
+.site--v5 .kenar .kenar__hesap:focus-visible{ outline:2px solid var(--primary); outline-offset:-2px; }
+.site--v5 .kenar .kenar__hesap[aria-expanded="true"]{ color:var(--text); background:var(--surface); }
+.site--v5 .kenar .kenar__hesap .kbk-ic{ width:18px; height:18px; }
+.kenar__hesap[hidden]{ display:none !important; }
+@media (prefers-reduced-motion:reduce){ .kenar__arac--profil[data-hal="esitleniyor"] .kenar__avatar::after{ animation:none; } }
+/* Dar kenar (açık kenarın kırpılmış hâli): ekler ve bulut adlar gibi kapalıyken
+   yoktur, kenar açılınca solarak gelir; simgeler ve avatar yerinde kalır. */
+@media (min-width:680px){
+  html.kenar-dar .site--v5 > .kenar :is(.kenar__kisayol, .kenar__ek, .kenar__sayi, .kenar__durum, .kenar__hesap){
+    display:none; opacity:0; transition:opacity 140ms ease, display 180ms allow-discrete; }
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) .kenar__kisayol{ display:inline-block; }
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ek, .kenar__durum){ display:block; }
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__sayi, .kenar__hesap){ display:grid; }
+  html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ek, .kenar__sayi, .kenar__durum, .kenar__hesap){
+    opacity:1; transition:opacity 340ms ease 140ms, display 0s allow-discrete; }
+  @starting-style{
+    html.kenar-dar .site--v5 > .kenar:is(:hover, :focus-within, .kenar--tutulu) :is(.kenar__ek, .kenar__sayi, .kenar__durum, .kenar__hesap){
+      opacity:0; }
+  }
+}
 @media (max-width:679px){ .kenar__araclar{ display:none; } }
 
 /* ================================================================
@@ -14173,7 +14229,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'364b54df', at:'2026-10-05 22:37', dirty:true };
+SP.BUILD = { id:'5080164b', at:'2026-10-05 23:02', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19091,30 +19147,49 @@ window.LIFEOS = window.LIFEOS || {};
      şeritle aynı: gizle.js sayacı, ses.js durumu ve data-act işleyicileri
      iki yerde de aynen çalışır. Masaüstünde üst şerit yok, telefonda kenar
      yok: her genişlikte tek takım görünür (kabuk.css «ARAÇLAR KENARDA»). */
+  /* SADE DİP (kullanıcı, 2026-10-06, ekran görüntüsüyle: «burayı da düzenle,
+     daha sade güzel yap; buradaki özellikleri de geliştirebilirsin»). Yedi eşit
+     satır iki küçük gruba ve bir «ben» satırına indi:
+       yardım  King · Ara — kısayolları yalnız üzerine gelince, soluk
+       sayfa   Sayfa düzeni · Radyo (çalarken istasyon adı) · Bildirimler (sayı)
+       ben     profil (ad, altında hesap durumu: «Eşitlendi · 14:20») · bulut
+     Hesap ayrı satır değil; bulut düğmesi ben satırının sağında. Daralmış
+     kenar açık kenarın kırpılmış hâlidir: simgeler yerinde kalır. */
   function kenarAraclari(o){
     const bil = o.bildirim || {};
     const prof = o.profil || {};
     const ad = (prof.ad || '').trim();
     const harf = (prof.harf || ad.charAt(0) || '·').toLocaleUpperCase('tr-TR');
     const etiket = s => '<span class="kenar__ad">' + kac(s) + '</span>';
+    const kisayol = s => '<kbd class="kenar__kisayol" aria-hidden="true">' + kac(s) + '</kbd>';
+    const H = L.HESAP;
+    const hd = (H && H.dugme ? H.dugme() : null) || { kisa:'', hal:'yok', gizli:true };
     return '<div class="kenar__araclar" role="group" aria-label="Araçlar">'
+      + '<div class="kenar__grup">'
       /* King (brand/ortak/king.js): her yerden sade sohbet; Ctrl iki kez. */
       + '<button class="ust__king kenar__arac" type="button" data-king-ac aria-haspopup="dialog"'
-      +   ' aria-label="King ile konuş (Ctrl iki kez)" title="King (Ctrl iki kez)">' + simge('king') + etiket('King') + '</button>'
+      +   ' aria-label="King ile konuş (Ctrl iki kez)" title="King (Ctrl iki kez)">' + simge('king') + etiket('King') + kisayol('Ctrl Ctrl') + '</button>'
       + '<button class="ust__ara kenar__arac" type="button" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)" title="Ara (Ctrl K)">'
-      +   simge('ara') + etiket('Ara') + '</button>'
+      +   simge('ara') + etiket('Ara') + kisayol('Ctrl K') + '</button>'
+      + '</div><div class="kenar__grup">'
       + '<button class="ust__gizli kenar__arac" type="button" aria-haspopup="dialog" aria-expanded="false"'
       +   ' aria-label="Sayfa düzeni" title="Sayfa düzeni: sırala, küçült, gizle">'
       +   simge('gizli') + '<i class="ust__gizli-sayi" aria-hidden="true"></i>' + etiket('Sayfa düzeni') + '</button>'
       + ustSes(true)
-      + ustHesap(true)
       + '<button class="ust__zil kenar__arac" type="button" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
       +   ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
-      +   simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + etiket('Bildirimler') + '</button>'
+      +   simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + etiket('Bildirimler')
+      +   (bil.sayi ? '<span class="kenar__sayi' + (bil.acil ? ' is-acil' : '') + '" aria-hidden="true">' + kac(bil.sayi) + '</span>' : '')
+      + '</button>'
+      + '</div><div class="kenar__ben">'
       + '<button class="ust__profil kenar__arac kenar__arac--profil" type="button" data-act="open-appearance" aria-haspopup="dialog"'
+      +   ' data-hesap-ben data-hal="' + kac(hd.gizli ? 'yok' : hd.hal) + '"'
       +   ' aria-label="' + kac('Profil ve görünüm' + (ad ? ' — ' + ad : '')) + '">'
-      +   '<i class="kenar__avatar" aria-hidden="true">' + kac(harf) + '</i>' + etiket(ad || 'Profil') + '</button>'
-      + '</div>';
+      +   '<i class="kenar__avatar" aria-hidden="true">' + kac(harf) + '</i>'
+      +   '<span class="kenar__kim">' + etiket(ad || 'Profil')
+      +   '<small class="kenar__durum" data-hesap-durum' + (hd.kisa ? '' : ' hidden') + '>' + kac(hd.kisa) + '</small></span></button>'
+      + ustHesap(true)
+      + '</div></div>';
   }
 
   /* İnce üst şerit. o: { modul, yol:[…], bildirim:{ sayi, acil }, profil,
@@ -19170,26 +19245,28 @@ window.LIFEOS = window.LIFEOS || {};
 
   function ustSes(kenarda){
     const S = L.SES;
-    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Radyo ve sesler', ipucu:'Radyo' };
+    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Radyo ve sesler', ipucu:'Radyo', ad:'' };
     return '<button class="ust__ses' + (kenarda ? ' kenar__arac' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
       + ' aria-expanded="' + (katmanAcik('kabuk-ses') ? 'true' : 'false') + '"'
       + ' aria-label="' + kac(d.etiket) + '" title="' + kac(d.ipucu) + '">'
       + simge('muzik') + '<i class="ust__ses-nokta" aria-hidden="true"></i>'
-      + (kenarda ? '<span class="kenar__ad">Radyo</span>' : '') + '</button>';
+      /* Kenarda çalan istasyonun adı (ses.js guncelle yerinde tazeler). */
+      + (kenarda ? '<span class="kenar__ad">Radyo</span><span class="kenar__ek" data-ses-ad aria-hidden="true">' + kac(d.ad || '') + '</span>' : '')
+      + '</button>';
   }
 
   /* Hesap ve eşitleme (brand/ortak/hesap.js): düğme burada, durumunu
      (eşitlendi · sırada bekleyen · çevrimdışı · giriş yok) ve panelini
      hesap.js yönetir. Sunucu yoksa ve oturum yoksa gizlidir. */
+  /* Kenarda yalnız simge (ben satırının sağında; durumu profil adının altında). */
   function ustHesap(kenarda){
     const H = L.HESAP;
     const d = (H && H.dugme ? H.dugme() : null) || { sinif:'', etiket:'Hesap', ipucu:'Hesap', gizli:true };
-    return '<button class="ust__hesap' + (kenarda ? ' kenar__arac' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
+    return '<button class="ust__hesap' + (kenarda ? ' kenar__hesap' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
       + ' aria-expanded="' + (katmanAcik('kabuk-hesap') ? 'true' : 'false') + '"'
       + (d.gizli ? ' hidden' : '')
       + ' aria-label="' + kac(d.etiket) + '" title="' + kac(d.ipucu) + '">'
-      + simge('hesap') + '<i class="ust__hesap-nokta" aria-hidden="true"></i>'
-      + (kenarda ? '<span class="kenar__ad">Hesap</span>' : '') + '</button>';
+      + simge('hesap') + '<i class="ust__hesap-nokta" aria-hidden="true"></i></button>';
   }
 
   /* Modüllerin tek çağrısı: ustCubuk'a verilen nesnenin aynısı + her
@@ -22764,7 +22841,9 @@ window.LIFEOS = window.LIFEOS || {};
       : hal === 'dokun' ? 'Radyo bekliyor — dokun, sürsün'
       : 'Radyo ve sesler';
     const ipucu = hal === 'caliyor' ? (aktif ? aktif.ad : 'Radyo') : hal === 'dokun' ? 'Dokun, sürsün' : 'Radyo';
-    return { sinif, etiket, ipucu };
+    /* Kenarda «Radyo» satırının yanında çalan istasyon (2026-10-06). */
+    const ad = hal === 'caliyor' && aktif ? aktif.ad : '';
+    return { sinif, etiket, ipucu, ad };
   }
 
   const SIMGE_CAL = '<svg class="ses__sim" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z"/></svg>';
@@ -22803,6 +22882,8 @@ window.LIFEOS = window.LIFEOS || {};
       b.classList.toggle('is-dokun', hal === 'dokun');
       b.setAttribute('aria-label', d.etiket);
       b.setAttribute('title', d.ipucu);
+      const ad = b.querySelector('[data-ses-ad]');
+      if(ad && ad.textContent !== d.ad) ad.textContent = d.ad;
     });
     document.querySelectorAll('[data-ses-panel]').forEach(p => {
       p.querySelectorAll('[data-ses-tur]').forEach(c => {
@@ -23769,6 +23850,27 @@ window.LIFEOS.HESAP = (function(){
     return hal.durum === 'yok' || hal.durum === 'bilinmiyor';
   }
 
+  /* Kenarın «ben» satırında profil adının altındaki kısa durum (kabuk.js
+     kenarAraclari; kullanıcı, 2026-10-06: «burayı da düzenle, daha sade»).
+     Hesap ayrı satır değil: tek bakışta «Eşitlendi · 14:20». */
+  function kisaDurum(){
+    if(gizliMi()) return '';
+    if(!oturum() && betaMi()) return 'Beta · yalnız bu cihazda';
+    const n = bekleyen(), sira = n ? ' · ' + n + ' sırada' : '';
+    switch(hal.durum){
+      case 'tamam': {
+        const s = saatMetni(ortam.depo.oku(anahtar('son', alan())));
+        return 'Eşitlendi' + (s ? ' · ' + s : '') + sira;
+      }
+      case 'esitleniyor': return 'Eşitleniyor…';
+      case 'cevrimdisi': return 'Çevrimdışı' + sira;
+      case 'giris': return 'Giriş yapılmadı';
+      case 'ornek': return 'Örnek profil';
+      case 'yok': case 'bilinmiyor': return '';
+      default: return 'Eşitleme durdu';
+    }
+  }
+
   /* kabuk.js düğmeyi çizerken sorar. */
   function dugme(){
     const o = oturum();
@@ -23776,7 +23878,7 @@ window.LIFEOS.HESAP = (function(){
       + (onayBitis > ortam.simdi() ? ' is-esitlendi' : '');
     const metin = durumMetni();
     return {
-      sinif, gizli:gizliMi(),
+      sinif, gizli:gizliMi(), kisa:kisaDurum(), hal:hal.durum,
       etiket:'Hesap ve eşitleme' + (o ? ' — ' + o.a : '') + (metin ? ': ' + metin : ''),
       ipucu:o ? o.a + (metin ? ' · ' + metin : '') : 'Hesap: giriş yapılmadı',
     };
@@ -23825,6 +23927,11 @@ window.LIFEOS.HESAP = (function(){
       b.hidden = d.gizli;
       b.setAttribute('aria-label', d.etiket);
       b.setAttribute('title', d.ipucu);
+    });
+    document.querySelectorAll('[data-hesap-ben]').forEach(b => {
+      b.setAttribute('data-hal', d.gizli ? 'yok' : d.hal);
+      const s = b.querySelector('[data-hesap-durum]');
+      if(s){ if(s.textContent !== d.kisa) s.textContent = d.kisa; s.hidden = !d.kisa; }
     });
   }
 

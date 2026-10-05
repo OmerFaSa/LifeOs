@@ -740,6 +740,46 @@
      gelmeden önce milisaniyelik ilk o seçim ekranını gösteriyor», «beta
      girişine tıklayınca animasyonla gelsin», «seçme kısmında o bölümle ilgili
      minik özetler geçilsin». */
+  /* Kenarın «ben» satırı (kullanıcı, 2026-10-06: «burayı da düzenle, daha
+     sade»): Hesap ayrı satır değil; durumu profil adının altında kısa yazılır. */
+  describe('Hesap — kenarın ben satırı', () => {
+    function benSatiri(){
+      const el = document.createElement('div');
+      el.innerHTML = '<button class="ust__profil" data-hesap-ben><small data-hesap-durum></small></button>';
+      document.body.appendChild(el);
+      return { el, yazi:() => el.querySelector('[data-hesap-durum]').textContent,
+        gizli:() => el.querySelector('[data-hesap-durum]').hidden };
+    }
+    it('durum adın altında kısa: giriş yok → eşitlendi (saatiyle); beta; sunucu da oturum da yoksa boş', () => sahneyle(async () => {
+      let b = benSatiri();
+      try{
+        const srv = sunucuKur(), c = cihazKur(srv);
+        const h = sahne(c);
+        await hazir();
+        expect(b.yazi()).toBe('Giriş yapılmadı');
+        await h.girisYap('omer', 'parola-123');
+        await h.esitle();
+        expect(/^Eşitlendi · \d\d:\d\d$/.test(b.yazi())).toBe(true);
+        expect(b.el.querySelector('[data-hesap-ben]').getAttribute('data-hal')).toBe('tamam');
+      }finally{ b.el.remove(); }
+      b = benSatiri();
+      try{
+        const c = cihazKur(sunucuKur());
+        c.jar.lifeos_beta = '1';
+        sahne(c);
+        await hazir();
+        expect(b.yazi()).toBe('Beta · yalnız bu cihazda');
+      }finally{ b.el.remove(); }
+      b = benSatiri();
+      try{
+        sahne(cihazKur(sunucuKur({ yok:true })));
+        await hazir();
+        expect(b.yazi()).toBe('');
+        expect(b.gizli()).toBe(true);
+      }finally{ b.el.remove(); }
+    }));
+  });
+
   describe('Hesap — seçim sayfası', () => {
     const kok = () => document.documentElement;
     /* Seçim sayfasının kendisi gibi kurar: modul 'giris', depo yok. */

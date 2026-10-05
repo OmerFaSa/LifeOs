@@ -805,6 +805,41 @@
       }finally{ d.remove(); }
     });
 
+    /* Kullanıcı (2026-10-06, ekran görüntüsüyle): «burayı da düzenle, daha sade
+       güzel yap; buradaki özellikleri de geliştirebilirsin». Yedi eşit satır
+       iki küçük gruba ve bir «ben» satırına indi: Hesap profil satırına katıldı
+       (durumu adın altında), bildirim sayısı satırda, radyo çalarken istasyon
+       adı, kısayollar yalnız üzerine gelince. Sınıflar aynı: sayaç, radyo ve
+       hesap işleyicileri olduğu gibi çalışır. */
+    it('kenarın dibi sade: iki grup + ben satırı; sayı, istasyon, kısayol ve hesap durumu yerinde', () => {
+      const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[],
+        bildirim:{ sayi:3, acil:true }, profil:{ ad:'Altay' } }) + '</div>');
+      try{
+        const dip = d.querySelector('.kenar__dip');
+        expect(dip.querySelectorAll('.kenar__grup').length).toBe(2);
+        const g = Array.from(dip.querySelectorAll('.kenar__grup')).map(x =>
+          Array.from(x.querySelectorAll('.kenar__ad')).map(a => a.textContent));
+        expect(g).toEqual([['King', 'Ara'], ['Sayfa düzeni', 'Radyo', 'Bildirimler']]);
+        /* Kısayol görünür metindir ama ekran okuyucuya ikinci kez okunmaz (aria-label'da var). */
+        const k = Array.from(dip.querySelectorAll('.kenar__kisayol')).map(x => x.textContent);
+        expect(k).toEqual(['Ctrl Ctrl', 'Ctrl K']);
+        expect(dip.querySelector('.kenar__kisayol').getAttribute('aria-hidden')).toBe('true');
+        const zil = dip.querySelector('.ust__zil');
+        expect(zil.querySelector('.kenar__sayi').textContent).toBe('3');
+        expect(zil.querySelector('.kenar__sayi').classList.contains('is-acil')).toBe(true);
+        expect(!!dip.querySelector('.ust__ses [data-ses-ad]')).toBe(true);
+        /* Ben satırı: profil düğmesi + hesap (bulut) düğmesi; durum adın altında. */
+        const ben = dip.querySelector('.kenar__ben');
+        expect(Array.from(ben.children).map(x => x.classList.contains('ust__profil') ? 'profil'
+          : x.classList.contains('ust__hesap') ? 'hesap' : '?')).toEqual(['profil', 'hesap']);
+        expect(!!ben.querySelector('.ust__profil [data-hesap-durum]')).toBe(true);
+        expect(ben.querySelector('.ust__profil').hasAttribute('data-hesap-ben')).toBe(true);
+        expect(!!dip.querySelector('.kenar__grup .ust__hesap')).toBe(false);   // ayrı satır değil
+      }finally{ d.remove(); }
+      const bos = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[], bildirim:{ sayi:0 } }) + '</div>');
+      try{ expect(!!bos.querySelector('.kenar__sayi')).toBe(false); }finally{ bos.remove(); }
+    });
+
     it('masaüstünde üst şerit yok: araçlar kenarda, yapışık çubuklar ekranın tepesine yapışır', () => {
       const d = yerlestir('<div class="site site--v5">' + K.iskeletV5({ modul:'ays', cekmeceler:[], yol:['Bugün'] })
         + '<div class="site__body"><div class="wrapc sayfa">x</div></div></div>');

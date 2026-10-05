@@ -351,30 +351,49 @@ window.LIFEOS = window.LIFEOS || {};
      şeritle aynı: gizle.js sayacı, ses.js durumu ve data-act işleyicileri
      iki yerde de aynen çalışır. Masaüstünde üst şerit yok, telefonda kenar
      yok: her genişlikte tek takım görünür (kabuk.css «ARAÇLAR KENARDA»). */
+  /* SADE DİP (kullanıcı, 2026-10-06, ekran görüntüsüyle: «burayı da düzenle,
+     daha sade güzel yap; buradaki özellikleri de geliştirebilirsin»). Yedi eşit
+     satır iki küçük gruba ve bir «ben» satırına indi:
+       yardım  King · Ara — kısayolları yalnız üzerine gelince, soluk
+       sayfa   Sayfa düzeni · Radyo (çalarken istasyon adı) · Bildirimler (sayı)
+       ben     profil (ad, altında hesap durumu: «Eşitlendi · 14:20») · bulut
+     Hesap ayrı satır değil; bulut düğmesi ben satırının sağında. Daralmış
+     kenar açık kenarın kırpılmış hâlidir: simgeler yerinde kalır. */
   function kenarAraclari(o){
     const bil = o.bildirim || {};
     const prof = o.profil || {};
     const ad = (prof.ad || '').trim();
     const harf = (prof.harf || ad.charAt(0) || '·').toLocaleUpperCase('tr-TR');
     const etiket = s => '<span class="kenar__ad">' + kac(s) + '</span>';
+    const kisayol = s => '<kbd class="kenar__kisayol" aria-hidden="true">' + kac(s) + '</kbd>';
+    const H = L.HESAP;
+    const hd = (H && H.dugme ? H.dugme() : null) || { kisa:'', hal:'yok', gizli:true };
     return '<div class="kenar__araclar" role="group" aria-label="Araçlar">'
+      + '<div class="kenar__grup">'
       /* King (brand/ortak/king.js): her yerden sade sohbet; Ctrl iki kez. */
       + '<button class="ust__king kenar__arac" type="button" data-king-ac aria-haspopup="dialog"'
-      +   ' aria-label="King ile konuş (Ctrl iki kez)" title="King (Ctrl iki kez)">' + simge('king') + etiket('King') + '</button>'
+      +   ' aria-label="King ile konuş (Ctrl iki kez)" title="King (Ctrl iki kez)">' + simge('king') + etiket('King') + kisayol('Ctrl Ctrl') + '</button>'
       + '<button class="ust__ara kenar__arac" type="button" data-oz="013" data-act="open-palette" aria-label="Ara ve komut (Ctrl+K)" title="Ara (Ctrl K)">'
-      +   simge('ara') + etiket('Ara') + '</button>'
+      +   simge('ara') + etiket('Ara') + kisayol('Ctrl K') + '</button>'
+      + '</div><div class="kenar__grup">'
       + '<button class="ust__gizli kenar__arac" type="button" aria-haspopup="dialog" aria-expanded="false"'
       +   ' aria-label="Sayfa düzeni" title="Sayfa düzeni: sırala, küçült, gizle">'
       +   simge('gizli') + '<i class="ust__gizli-sayi" aria-hidden="true"></i>' + etiket('Sayfa düzeni') + '</button>'
       + ustSes(true)
-      + ustHesap(true)
       + '<button class="ust__zil kenar__arac" type="button" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
       +   ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
-      +   simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + etiket('Bildirimler') + '</button>'
+      +   simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + etiket('Bildirimler')
+      +   (bil.sayi ? '<span class="kenar__sayi' + (bil.acil ? ' is-acil' : '') + '" aria-hidden="true">' + kac(bil.sayi) + '</span>' : '')
+      + '</button>'
+      + '</div><div class="kenar__ben">'
       + '<button class="ust__profil kenar__arac kenar__arac--profil" type="button" data-act="open-appearance" aria-haspopup="dialog"'
+      +   ' data-hesap-ben data-hal="' + kac(hd.gizli ? 'yok' : hd.hal) + '"'
       +   ' aria-label="' + kac('Profil ve görünüm' + (ad ? ' — ' + ad : '')) + '">'
-      +   '<i class="kenar__avatar" aria-hidden="true">' + kac(harf) + '</i>' + etiket(ad || 'Profil') + '</button>'
-      + '</div>';
+      +   '<i class="kenar__avatar" aria-hidden="true">' + kac(harf) + '</i>'
+      +   '<span class="kenar__kim">' + etiket(ad || 'Profil')
+      +   '<small class="kenar__durum" data-hesap-durum' + (hd.kisa ? '' : ' hidden') + '>' + kac(hd.kisa) + '</small></span></button>'
+      + ustHesap(true)
+      + '</div></div>';
   }
 
   /* İnce üst şerit. o: { modul, yol:[…], bildirim:{ sayi, acil }, profil,
@@ -430,26 +449,28 @@ window.LIFEOS = window.LIFEOS || {};
 
   function ustSes(kenarda){
     const S = L.SES;
-    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Radyo ve sesler', ipucu:'Radyo' };
+    const d = (S && S.dugme ? S.dugme() : null) || { sinif:'', etiket:'Radyo ve sesler', ipucu:'Radyo', ad:'' };
     return '<button class="ust__ses' + (kenarda ? ' kenar__arac' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
       + ' aria-expanded="' + (katmanAcik('kabuk-ses') ? 'true' : 'false') + '"'
       + ' aria-label="' + kac(d.etiket) + '" title="' + kac(d.ipucu) + '">'
       + simge('muzik') + '<i class="ust__ses-nokta" aria-hidden="true"></i>'
-      + (kenarda ? '<span class="kenar__ad">Radyo</span>' : '') + '</button>';
+      /* Kenarda çalan istasyonun adı (ses.js guncelle yerinde tazeler). */
+      + (kenarda ? '<span class="kenar__ad">Radyo</span><span class="kenar__ek" data-ses-ad aria-hidden="true">' + kac(d.ad || '') + '</span>' : '')
+      + '</button>';
   }
 
   /* Hesap ve eşitleme (brand/ortak/hesap.js): düğme burada, durumunu
      (eşitlendi · sırada bekleyen · çevrimdışı · giriş yok) ve panelini
      hesap.js yönetir. Sunucu yoksa ve oturum yoksa gizlidir. */
+  /* Kenarda yalnız simge (ben satırının sağında; durumu profil adının altında). */
   function ustHesap(kenarda){
     const H = L.HESAP;
     const d = (H && H.dugme ? H.dugme() : null) || { sinif:'', etiket:'Hesap', ipucu:'Hesap', gizli:true };
-    return '<button class="ust__hesap' + (kenarda ? ' kenar__arac' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
+    return '<button class="ust__hesap' + (kenarda ? ' kenar__hesap' : '') + kac(d.sinif) + '" type="button" aria-haspopup="dialog"'
       + ' aria-expanded="' + (katmanAcik('kabuk-hesap') ? 'true' : 'false') + '"'
       + (d.gizli ? ' hidden' : '')
       + ' aria-label="' + kac(d.etiket) + '" title="' + kac(d.ipucu) + '">'
-      + simge('hesap') + '<i class="ust__hesap-nokta" aria-hidden="true"></i>'
-      + (kenarda ? '<span class="kenar__ad">Hesap</span>' : '') + '</button>';
+      + simge('hesap') + '<i class="ust__hesap-nokta" aria-hidden="true"></i></button>';
   }
 
   /* Modüllerin tek çağrısı: ustCubuk'a verilen nesnenin aynısı + her
