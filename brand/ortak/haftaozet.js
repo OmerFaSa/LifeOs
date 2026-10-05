@@ -99,7 +99,26 @@ LIFEOS.HaftaOzet = (function(){
       return v;
     }
 
-    return { cek, son:() => (onbellek ? onbellek.veri : null) };
+    /* MODÜLÜN YOKLAMASI (app.js: açılışta ve beş dakikada bir).
+       g = { al, koy, ciz }: özet modülün durumuna HEMEN konur; değiştiyse
+       ekran yeniden çizilir — ama kullanıcı yazmıyorken (brand/ortak/
+       hesap.js cizIste, söz 9): yazılıp kaydedilmemiş değer silinmez. */
+    function tazeleyici(g){
+      return () => cek().then(v => {
+        const once = g.al() || null;
+        g.koy(v);
+        if(once !== v) cizIste(g.ciz);
+      }).catch(() => {});
+    }
+
+    return { cek, tazeleyici, son:() => (onbellek ? onbellek.veri : null) };
+  }
+
+  /* Hesap dosyası yoksa çizim hemen yapılır (eski davranış). */
+  function cizIste(fn){
+    const H = window.LIFEOS.HESAP;
+    if(H && typeof H.cizIste === 'function') H.cizIste(fn);
+    else fn();
   }
 
   function kisaTarih(iso){

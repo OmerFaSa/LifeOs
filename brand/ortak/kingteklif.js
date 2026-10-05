@@ -110,7 +110,27 @@ LIFEOS.KingTeklif = (function(){
       return { ok:true, metin:'Teklif iptal edildi; iş açılmadı.' };
     }
 
-    return { cek, onayla, parca, iptal, liste:() => son.slice() };
+    /* MODÜLÜN YOKLAMASI (app.js: açılışta, King'e iş verilince, dakikada
+       bir). g = { al, koy, ciz }: liste modülün durumuna HEMEN konur;
+       değiştiyse ekran yeniden çizilir — ama kullanıcı yazmıyorken
+       (brand/ortak/hesap.js cizIste, söz 9). Çizim #app'i baştan kurar:
+       Bugün'de yazılıp kaydedilmemiş değer dakikalık yoklamayla silinmez. */
+    function tazeleyici(g){
+      return () => cek().then(l => {
+        const once = JSON.stringify(g.al() || []);
+        g.koy(l);
+        if(JSON.stringify(l) !== once) cizIste(g.ciz);
+      }).catch(() => {});
+    }
+
+    return { cek, onayla, parca, iptal, tazeleyici, liste:() => son.slice() };
+  }
+
+  /* Hesap dosyası yoksa çizim hemen yapılır (eski davranış). */
+  function cizIste(fn){
+    const H = window.LIFEOS.HESAP;
+    if(H && typeof H.cizIste === 'function') H.cizIste(fn);
+    else fn();
   }
 
   /* Modül King'e iş verdiğinde çağırır: kart hemen tazelenir. */

@@ -13807,7 +13807,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'b5b8fae7', at:'2026-10-05 11:54', dirty:true };
+SP.BUILD = { id:'76d443de', at:'2026-10-05 12:27', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -22680,7 +22680,9 @@ window.LIFEOS = window.LIFEOS || {};
       beklenir — odak alandan çıkmış olsa da (telefonda klavye kapandı).
       Açık bir kağıt ikisini de bekletir. Eskiden ikisi birlikte
       bekliyordu: «Kaydet» eski modelden kurulan kaydı yazıp öteki
-      cihazın az önce gelen değişikliğini eziyordu.
+      cihazın az önce gelen değişikliğini eziyordu. Aynı denetim arka
+      plan yoklamalarına da açıktır (cizIste): King'in teklifleri ve
+      haftalık özet veriyi hemen koyar, ekranı yazı bitince çizer.
   10. AYNI DEĞER EKRANI YENİLEMEZ. Uzaktan gelen kayıt bu cihazdakiyle
       aynıysa yazılmaz, ekran yenilenmez: değişmemiş bir kaydı yeniden
       yazan bir cihaz öteki cihazları durmadan yenilemesin. */
@@ -23035,6 +23037,16 @@ window.LIFEOS.HESAP = (function(){
     if(/^(hidden|button|submit|reset|image|file)$/.test(t)) return false;
     return el.value !== el.defaultValue;
   }
+  /* Dinleyici dosya yüklenince kurulur, kur()'u beklemez: çizim isteyen
+     öteki tazeleyiciler (cizIste) de aynı bilgiye bakar. */
+  if(dokunulan && typeof document !== 'undefined' && document.addEventListener){
+    const dokun = e => {
+      const t = e.target;
+      if(t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) dokunulan.add(t);
+    };
+    document.addEventListener('input', dokun, true);
+    document.addEventListener('change', dokun, true);
+  }
 
   /* Neden beklenir? 'kagit': açık bir kağıt (ya da modülün kendi işi) —
      model de ekran da bekler, kağıdın elindeki kayıt tazelenen modelden
@@ -23084,6 +23096,29 @@ window.LIFEOS.HESAP = (function(){
         .catch(e => console.error('Hesap: yeniden yükleme', e));
     }
     if(modelBekliyor || ekranBekliyor) yenileId = ortam.zamanla(() => { yenileId = null; yenileDene(); }, 1500);
+  }
+
+  /* ÖTEKİ TAZELEYİCİLER DE YAZILANI SİLMEZ (söz 9). King'in teklifleri ve
+     haftalık özet gibi arka plan yoklamaları da ekranı baştan çizer:
+     veriyi hemen koyar, çizimi buradan ister. Kullanıcı yazmıyorsa hemen
+     çizilir; yazıyorsa, yazıp kaydetmediyse ya da kağıt açıksa 1,5 sn'de
+     bir yeniden bakılır. Aynı çizim üst üste istenirse bir kez yapılır.
+     Denetim eşitlemeninkidir (mesgulNeden); ikinci bir «yazıyor mu?» yok. */
+  const cizimler = [];
+  let cizimId = null;
+  function cizIste(fn){
+    if(typeof fn !== 'function') return;
+    if(cizimler.indexOf(fn) < 0) cizimler.push(fn);
+    cizimDene();
+  }
+  function cizimDene(){
+    if(cizimId != null){ ortam.iptal(cizimId); cizimId = null; }
+    if(!cizimler.length) return;
+    if(mesgulNeden()){ cizimId = ortam.zamanla(() => { cizimId = null; cizimDene(); }, 1500); return; }
+    cizimler.splice(0).forEach(fn => {
+      try{ Promise.resolve(fn()).catch(e => console.error('Hesap: çizim', e)); }
+      catch(e){ console.error('Hesap: çizim', e); }
+    });
   }
 
   /* ------------------------------------------------------- hesap işleri */
@@ -23528,13 +23563,6 @@ window.LIFEOS.HESAP = (function(){
   function bagla(){
     if(bagli || typeof document === 'undefined') return;
     bagli = true;
-    /* Dokunulan alan (söz 9): yalnız kullanıcının yazdığı sayılır. */
-    const dokun = e => {
-      const t = e.target;
-      if(dokunulan && t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) dokunulan.add(t);
-    };
-    document.addEventListener('input', dokun, true);
-    document.addEventListener('change', dokun, true);
     document.addEventListener('click', e => {
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
@@ -23594,7 +23622,8 @@ window.LIFEOS.HESAP = (function(){
   function _sifirla(){
     if(erteleId != null) ortam.iptal(erteleId);
     if(yenileId != null) ortam.iptal(yenileId);
-    erteleId = null; yenileId = null;
+    if(cizimId != null) ortam.iptal(cizimId);
+    erteleId = null; yenileId = null; cizimId = null; cizimler.length = 0;
     ayar = null; hal = { durum:'bilinmiyor', mesaj:'' }; sunucu = null;
     aktif = null; siradaki = null; panelMesaj = ''; onayBitis = 0;
     modelBekliyor = false; ekranBekliyor = false; tazeleme = null;
@@ -23611,7 +23640,7 @@ window.LIFEOS.HESAP = (function(){
 
   return {
     kur, esitle, yokla, degisti, girisYap, kayitOl, soruGetir, kurtar, cikisYap, parolaDegistir, soruAyarla,
-    betaGir, kapiAc, kapiAcikMi, dugme, durum, dinle, silmeNotu, panelHtml, adresDuzelt, cihazKimligi,
+    betaGir, kapiAc, kapiAcikMi, dugme, durum, dinle, silmeNotu, panelHtml, adresDuzelt, cihazKimligi, cizIste,
     _ortam:ortam, _sifirla, _istek:istek,
     CEREZ, ONEK,
   };
@@ -26777,7 +26806,27 @@ LIFEOS.KingTeklif = (function(){
       return { ok:true, metin:'Teklif iptal edildi; iş açılmadı.' };
     }
 
-    return { cek, onayla, parca, iptal, liste:() => son.slice() };
+    /* MODÜLÜN YOKLAMASI (app.js: açılışta, King'e iş verilince, dakikada
+       bir). g = { al, koy, ciz }: liste modülün durumuna HEMEN konur;
+       değiştiyse ekran yeniden çizilir — ama kullanıcı yazmıyorken
+       (brand/ortak/hesap.js cizIste, söz 9). Çizim #app'i baştan kurar:
+       Bugün'de yazılıp kaydedilmemiş değer dakikalık yoklamayla silinmez. */
+    function tazeleyici(g){
+      return () => cek().then(l => {
+        const once = JSON.stringify(g.al() || []);
+        g.koy(l);
+        if(JSON.stringify(l) !== once) cizIste(g.ciz);
+      }).catch(() => {});
+    }
+
+    return { cek, onayla, parca, iptal, tazeleyici, liste:() => son.slice() };
+  }
+
+  /* Hesap dosyası yoksa çizim hemen yapılır (eski davranış). */
+  function cizIste(fn){
+    const H = window.LIFEOS.HESAP;
+    if(H && typeof H.cizIste === 'function') H.cizIste(fn);
+    else fn();
   }
 
   /* Modül King'e iş verdiğinde çağırır: kart hemen tazelenir. */
@@ -26893,7 +26942,26 @@ LIFEOS.HaftaOzet = (function(){
       return v;
     }
 
-    return { cek, son:() => (onbellek ? onbellek.veri : null) };
+    /* MODÜLÜN YOKLAMASI (app.js: açılışta ve beş dakikada bir).
+       g = { al, koy, ciz }: özet modülün durumuna HEMEN konur; değiştiyse
+       ekran yeniden çizilir — ama kullanıcı yazmıyorken (brand/ortak/
+       hesap.js cizIste, söz 9): yazılıp kaydedilmemiş değer silinmez. */
+    function tazeleyici(g){
+      return () => cek().then(v => {
+        const once = g.al() || null;
+        g.koy(v);
+        if(once !== v) cizIste(g.ciz);
+      }).catch(() => {});
+    }
+
+    return { cek, tazeleyici, son:() => (onbellek ? onbellek.veri : null) };
+  }
+
+  /* Hesap dosyası yoksa çizim hemen yapılır (eski davranış). */
+  function cizIste(fn){
+    const H = window.LIFEOS.HESAP;
+    if(H && typeof H.cizIste === 'function') H.cizIste(fn);
+    else fn();
   }
 
   function kisaTarih(iso){
@@ -64893,27 +64961,23 @@ SP.App = (function(){
       }
       /* King'in teklifleri (brand/ortak/kingteklif.js): onay bekleyen ücretli
          işler Bugün'de. Modül King'e iş verince hemen, yoksa dakikada bir
-         tazelenir; HKM kapalıysa liste boş kalır ve kart çizilmez. */
+         tazelenir; HKM kapalıysa liste boş kalır ve kart çizilmez. Liste
+         hemen konur, ekran kullanıcı yazmıyorken çizilir (hesap.js cizIste). */
       if(window.LIFEOS && LIFEOS.KingTeklif){
         SP.KingTeklif = LIFEOS.KingTeklif.kur({ hkm:() => SP.Beacon, modul:'spi' });
-        const kingTazele = () => SP.KingTeklif.cek().then(l => {
-          const once = JSON.stringify(S.ui.kingTeklifler || []);
-          S.ui.kingTeklifler = l;
-          if(JSON.stringify(l) !== once) render();
-        }).catch(() => {});
+        const kingTazele = SP.KingTeklif.tazeleyici({ al:() => S.ui.kingTeklifler,
+          koy:l => { S.ui.kingTeklifler = l; }, ciz:render });
         kingTazele();
         window.addEventListener(LIFEOS.KingTeklif.OLAY, kingTazele);
         setInterval(kingTazele, 60000);
       }
       /* 120 Haftalık Merkez özeti (brand/ortak/haftaozet.js): pazar 17:00
-         sonrası Bugün'de tek kart. HKM kapalıysa ya da eşleşmemişse kart yok. */
+         sonrası Bugün'de tek kart. HKM kapalıysa ya da eşleşmemişse kart yok.
+         Özet hemen konur, ekran kullanıcı yazmıyorken çizilir (cizIste). */
       if(window.LIFEOS && LIFEOS.HaftaOzet){
         SP.HaftaOzet = LIFEOS.HaftaOzet.kur({ hkm:() => SP.Beacon });
-        const haftaTazele = () => SP.HaftaOzet.cek().then(v => {
-          const once = S.ui.haftaOzet || null;
-          S.ui.haftaOzet = v;
-          if(once !== v) render();
-        }).catch(() => {});
+        const haftaTazele = SP.HaftaOzet.tazeleyici({ al:() => S.ui.haftaOzet,
+          koy:v => { S.ui.haftaOzet = v; }, ciz:render });
         haftaTazele();
         setInterval(haftaTazele, 5 * 60000);
       }

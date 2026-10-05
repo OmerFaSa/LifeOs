@@ -3,11 +3,13 @@
    Kanıtlanan sözler: HKM bağlı değilse ya da pazar akşamı değilse istek
    yapılmaz; HKM yanıt vermezse süre dolunca kart yok; önbellek aynı gün
    tekrar sormaz; kart her modülden bir satır, kesinlik çipi ve en altta
-   bekleyenleri yazar; «veri yok» sıfır diye çizilmez; metin kaçırılır. */
+   bekleyenleri yazar; «veri yok» sıfır diye çizilmez; metin kaçırılır;
+   yoklama yazılanı silmez (özet hemen, çizim kullanıcı yazmıyorken). */
 
 (function(){
   const { describe, it, expect } = (window.R || window.SP || window.ESP).Test;
   const H = () => window.LIFEOS.HaftaOzet;
+  const HESAP = () => window.LIFEOS.HESAP;
   const PAZAR = new Date(2026, 8, 27, 18, 0);        // 27 Eylül 2026 pazar 18:00
   const VERI = { from:'2026-09-21', to:'2026-09-27', zamani:true, not:'«veri yok» sıfır değildir.',
     satirlar:[{ modul:'ays', modul_adi:'AYS', cumle:'Net: 4 arttı', kesinlik:'hesaplandı' },
@@ -73,6 +75,56 @@
       expect(kart.querySelectorAll('button').length).toBe(0);
       expect(H().kartHtml(null)).toBe('');
       expect(H().kartHtml({ from:'x', satirlar:[] })).toBe('');
+    });
+  });
+
+  /* YAZILAN SİLİNMEZ (2026-10-05). Yoklama (app.js haftaTazele: beş
+     dakikada bir) yeni özet gelince ekranı baştan çiziyordu; pazar akşamı
+     Bugün'de yazılıp kaydedilmemiş değer siliniyordu. Özet hemen konur;
+     çizim kullanıcı yazmıyorken (brand/ortak/hesap.js cizIste). */
+  function kirliAlan(){
+    const el = document.createElement('input');
+    el.type = 'number';
+    el.style.cssText = 'display:block;width:40px;height:20px';
+    document.body.appendChild(el);
+    el.value = '7';                                        // kullanıcı yazdı…
+    el.dispatchEvent(new Event('input', { bubbles:true }));
+    el.blur();                                             // …ve alandan çıktı
+    return el;
+  }
+
+  describe('120 Haftalık Merkez özeti — yoklama yazılanı silmez', () => {
+    it('oz-120 kirli alan varken özet konur ama çizilmez; alan gidince bir kez çizilir', async () => {
+      const h = HESAP(), eski = h._ortam.zamanla, sonra = [];
+      h._ortam.zamanla = fn => { sonra.push(fn); return 0; };
+      if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      let el = null;
+      try{
+        let an = PAZAR.getTime();
+        const k = H().kur({ hkm:() => beacon(true), simdi:() => new Date(an),
+          fetch:async () => ({ status:200, json:async () => JSON.parse(JSON.stringify(VERI)) }) });
+        const ui = { ozet:null };
+        let cizim = 0;
+        const tazele = k.tazeleyici({ al:() => ui.ozet, koy:v => { ui.ozet = v; }, ciz:() => { cizim++; } });
+        await tazele();
+        expect(cizim).toBe(1);                                   // kimse yazmıyor: hemen
+        el = kirliAlan();
+        an += H().TAZE_MS;                                       // önbellek eskidi: yeni cevap
+        const once = ui.ozet;
+        await tazele();
+        expect(ui.ozet !== once && ui.ozet.to === '2026-09-27').toBe(true);   // veri hemen…
+        expect(cizim).toBe(1);                                   // …çizim bekler
+        el.remove(); el = null;                                  // kaydedildi, form yeniden çizildi
+        sonra.splice(0).forEach(fn => fn());
+        expect(cizim).toBe(2);
+        await tazele();                                          // önbellekten aynı özet: çizim yok
+        sonra.splice(0).forEach(fn => fn());
+        expect(cizim).toBe(2);
+      }finally{
+        if(el) el.remove();
+        h._ortam.zamanla = eski;
+        h._sifirla();
+      }
     });
   });
 })();

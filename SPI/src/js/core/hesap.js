@@ -45,7 +45,9 @@
       beklenir — odak alandan çıkmış olsa da (telefonda klavye kapandı).
       Açık bir kağıt ikisini de bekletir. Eskiden ikisi birlikte
       bekliyordu: «Kaydet» eski modelden kurulan kaydı yazıp öteki
-      cihazın az önce gelen değişikliğini eziyordu.
+      cihazın az önce gelen değişikliğini eziyordu. Aynı denetim arka
+      plan yoklamalarına da açıktır (cizIste): King'in teklifleri ve
+      haftalık özet veriyi hemen koyar, ekranı yazı bitince çizer.
   10. AYNI DEĞER EKRANI YENİLEMEZ. Uzaktan gelen kayıt bu cihazdakiyle
       aynıysa yazılmaz, ekran yenilenmez: değişmemiş bir kaydı yeniden
       yazan bir cihaz öteki cihazları durmadan yenilemesin. */
@@ -400,6 +402,16 @@ window.LIFEOS.HESAP = (function(){
     if(/^(hidden|button|submit|reset|image|file)$/.test(t)) return false;
     return el.value !== el.defaultValue;
   }
+  /* Dinleyici dosya yüklenince kurulur, kur()'u beklemez: çizim isteyen
+     öteki tazeleyiciler (cizIste) de aynı bilgiye bakar. */
+  if(dokunulan && typeof document !== 'undefined' && document.addEventListener){
+    const dokun = e => {
+      const t = e.target;
+      if(t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) dokunulan.add(t);
+    };
+    document.addEventListener('input', dokun, true);
+    document.addEventListener('change', dokun, true);
+  }
 
   /* Neden beklenir? 'kagit': açık bir kağıt (ya da modülün kendi işi) —
      model de ekran da bekler, kağıdın elindeki kayıt tazelenen modelden
@@ -449,6 +461,29 @@ window.LIFEOS.HESAP = (function(){
         .catch(e => console.error('Hesap: yeniden yükleme', e));
     }
     if(modelBekliyor || ekranBekliyor) yenileId = ortam.zamanla(() => { yenileId = null; yenileDene(); }, 1500);
+  }
+
+  /* ÖTEKİ TAZELEYİCİLER DE YAZILANI SİLMEZ (söz 9). King'in teklifleri ve
+     haftalık özet gibi arka plan yoklamaları da ekranı baştan çizer:
+     veriyi hemen koyar, çizimi buradan ister. Kullanıcı yazmıyorsa hemen
+     çizilir; yazıyorsa, yazıp kaydetmediyse ya da kağıt açıksa 1,5 sn'de
+     bir yeniden bakılır. Aynı çizim üst üste istenirse bir kez yapılır.
+     Denetim eşitlemeninkidir (mesgulNeden); ikinci bir «yazıyor mu?» yok. */
+  const cizimler = [];
+  let cizimId = null;
+  function cizIste(fn){
+    if(typeof fn !== 'function') return;
+    if(cizimler.indexOf(fn) < 0) cizimler.push(fn);
+    cizimDene();
+  }
+  function cizimDene(){
+    if(cizimId != null){ ortam.iptal(cizimId); cizimId = null; }
+    if(!cizimler.length) return;
+    if(mesgulNeden()){ cizimId = ortam.zamanla(() => { cizimId = null; cizimDene(); }, 1500); return; }
+    cizimler.splice(0).forEach(fn => {
+      try{ Promise.resolve(fn()).catch(e => console.error('Hesap: çizim', e)); }
+      catch(e){ console.error('Hesap: çizim', e); }
+    });
   }
 
   /* ------------------------------------------------------- hesap işleri */
@@ -893,13 +928,6 @@ window.LIFEOS.HESAP = (function(){
   function bagla(){
     if(bagli || typeof document === 'undefined') return;
     bagli = true;
-    /* Dokunulan alan (söz 9): yalnız kullanıcının yazdığı sayılır. */
-    const dokun = e => {
-      const t = e.target;
-      if(dokunulan && t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) dokunulan.add(t);
-    };
-    document.addEventListener('input', dokun, true);
-    document.addEventListener('change', dokun, true);
     document.addEventListener('click', e => {
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
@@ -959,7 +987,8 @@ window.LIFEOS.HESAP = (function(){
   function _sifirla(){
     if(erteleId != null) ortam.iptal(erteleId);
     if(yenileId != null) ortam.iptal(yenileId);
-    erteleId = null; yenileId = null;
+    if(cizimId != null) ortam.iptal(cizimId);
+    erteleId = null; yenileId = null; cizimId = null; cizimler.length = 0;
     ayar = null; hal = { durum:'bilinmiyor', mesaj:'' }; sunucu = null;
     aktif = null; siradaki = null; panelMesaj = ''; onayBitis = 0;
     modelBekliyor = false; ekranBekliyor = false; tazeleme = null;
@@ -976,7 +1005,7 @@ window.LIFEOS.HESAP = (function(){
 
   return {
     kur, esitle, yokla, degisti, girisYap, kayitOl, soruGetir, kurtar, cikisYap, parolaDegistir, soruAyarla,
-    betaGir, kapiAc, kapiAcikMi, dugme, durum, dinle, silmeNotu, panelHtml, adresDuzelt, cihazKimligi,
+    betaGir, kapiAc, kapiAcikMi, dugme, durum, dinle, silmeNotu, panelHtml, adresDuzelt, cihazKimligi, cizIste,
     _ortam:ortam, _sifirla, _istek:istek,
     CEREZ, ONEK,
   };

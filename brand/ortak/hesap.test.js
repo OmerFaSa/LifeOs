@@ -22,6 +22,9 @@
         bekletir.
     14. Uzaktan gelen kayıt yereldekiyle aynıysa ekran yenilenmez.
     15. Depo ölçümü (storage) cihaza aittir: eşitlenmez.
+    16. Öteki tazeleyicilerin çizimi (cizIste) aynı denetimden geçer:
+        kirli alan, odak ya da açık kağıt varken bekler, bitince bir kez
+        çizer; üst üste istek tek çizimdir; kur() çağrılmadan da çalışır.
    Sunucunun kendi kuralları HKM/tests/test_hesap.py'de gerçek SQLite ile
    sınanır; buradaki sahte sunucu aynı kuralı taklit eder. */
 
@@ -166,6 +169,22 @@
   async function hazir(){ for(let i = 0; i < 20; i++) await bekle(); }
   const esitleIstekleri = srv => srv.istekler.filter(x => /esitle$/.test(x.url));
 
+  /* YAZILAN AMA KAYDEDİLMEYEN DEĞER (2026-10-05, aralıklı e2e kırmızısı).
+     Yeniden çizim formu modelden kurar; yazılıp henüz kaydedilmemiş
+     değer silinir ve «Kaydet» boş alanı yazar (sunucuda uyku null).
+     Odak denetimi yetmez: telefonda klavye kapatılınca, masaüstünde
+     «Kaydet»e basılırken odak alandan çıkar ama yazılan hâlâ kaydedilmemiştir. */
+  function kirliAlan(){
+    const el = document.createElement('input');
+    el.type = 'number';
+    el.style.cssText = 'display:block;width:40px;height:20px';
+    document.body.appendChild(el);
+    el.value = '7';                                           // kullanıcı yazdı…
+    el.dispatchEvent(new Event('input', { bubbles:true }));
+    el.blur();                                                // …ve alandan çıktı
+    return el;
+  }
+
   describe('Hesap — sunucu ve giriş', () => {
     it('sunucu yoksa düğme gizli, hiçbir şey beklemez', () => sahneyle(async () => {
       const srv = sunucuKur({ yok:true }), c = cihazKur(srv);
@@ -255,21 +274,6 @@
       }
     }));
 
-    /* YAZILAN AMA KAYDEDİLMEYEN DEĞER (2026-10-05, aralıklı e2e kırmızısı).
-       Yeniden çizim formu modelden kurar; yazılıp henüz kaydedilmemiş
-       değer silinir ve «Kaydet» boş alanı yazar (sunucuda uyku null).
-       Odak denetimi yetmez: telefonda klavye kapatılınca, masaüstünde
-       «Kaydet»e basılırken odak alandan çıkar ama yazılan hâlâ kaydedilmemiştir. */
-    function kirliAlan(){
-      const el = document.createElement('input');
-      el.type = 'number';
-      el.style.cssText = 'display:block;width:40px;height:20px';
-      document.body.appendChild(el);
-      el.value = '7';                                           // kullanıcı yazdı…
-      el.dispatchEvent(new Event('input', { bubbles:true }));
-      el.blur();                                                // …ve alandan çıktı
-      return el;
-    }
     const zamanlayici = c => {
       const bekleyen = [];
       c.ortam.zamanla = (fn, ms) => { if(ms === 1500) bekleyen.push(fn); return 0; };
@@ -511,6 +515,79 @@
       expect(Object.keys(srv.kayit['omer|spi/ben']).length).toBe(900);
       expect(h.durum().durum).toBe('tamam');
     }));
+  });
+
+  /* ÖTEKİ TAZELEYİCİLER (2026-10-05). King'in teklifleri dakikada bir,
+     haftalık özet beş dakikada bir yoklanır ve değişince ekranı baştan
+     çizer; çizim Bugün'de yazılıp kaydedilmemiş değeri siliyordu. Çizim
+     eşitlemeninkiyle aynı denetimden geçer: cizIste. kur() çağrılmaz —
+     denetim eşitlemenin kurulmasına bağlı değildir. */
+  describe('Hesap — öteki tazeleyicilerin çizimi (cizIste)', () => {
+    function zamanlaYakala(){
+      const h = H(), eski = h._ortam.zamanla, bekleyen = [];
+      h._sifirla();
+      h._ortam.zamanla = (fn, ms) => { bekleyen.push({ fn, ms }); return 0; };
+      if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      return { bekleyen, sur:() => bekleyen.splice(0).forEach(x => x.fn()),
+        birak:() => { h._ortam.zamanla = eski; h._sifirla(); } };
+    }
+
+    it('kimse yazmıyorsa hemen çizer; kirli alan varken bekler, alan gidince bir kez çizer', () => {
+      const z = zamanlaYakala();
+      let el = null;
+      try{
+        let a = 0, b = 0;
+        const A = () => { a++; }, B = () => { b++; };
+        H().cizIste(A);
+        expect(a).toBe(1);                                       // hemen
+        el = kirliAlan();
+        H().cizIste(A); H().cizIste(A); H().cizIste(B);
+        expect([a, b]).toEqual([1, 0]);                          // yazılı: bekler
+        expect(z.bekleyen.length > 0 && z.bekleyen.every(x => x.ms === 1500)).toBe(true);
+        z.sur();
+        expect([a, b]).toEqual([1, 0]);                          // hâlâ yazılı: yine bekler
+        el.remove(); el = null;                                  // kaydedildi
+        z.sur();
+        expect([a, b]).toEqual([2, 1]);                          // üst üste istek tek çizim
+        z.sur();
+        expect([a, b]).toEqual([2, 1]);
+      }finally{ if(el) el.remove(); z.birak(); }
+    });
+
+    it('odak alandayken ve açık kağıtta bekler; programın koyduğu değer yazı sayılmaz', () => {
+      const z = zamanlaYakala();
+      const alan = document.createElement('input');
+      alan.style.cssText = 'display:block;width:40px;height:20px';
+      document.body.appendChild(alan);
+      let kap = document.getElementById('sheet'), yeniKap = !kap;
+      if(yeniKap){ kap = document.createElement('div'); kap.id = 'sheet'; document.body.appendChild(kap); }
+      const k = document.createElement('div');
+      k.className = 'sheet';
+      k.style.cssText = 'display:block;width:10px;height:10px';
+      try{
+        let n = 0;
+        const A = () => { n++; };
+        alan.value = '42';                                       // program koydu: olay yok
+        H().cizIste(A);
+        expect(n).toBe(1);
+        alan.focus();                                            // kullanıcı alanda
+        H().cizIste(A);
+        expect(n).toBe(1);
+        alan.blur();
+        z.sur();
+        expect(n).toBe(2);
+        kap.appendChild(k);                                      // kağıt açık
+        H().cizIste(A);
+        expect(n).toBe(2);
+        k.remove();
+        z.sur();
+        expect(n).toBe(3);
+      }finally{
+        alan.remove(); k.remove();
+        if(yeniKap) kap.remove();
+        z.birak();
+      }
+    });
   });
 
   describe('Hesap — güvenlik ve uygulama', () => {

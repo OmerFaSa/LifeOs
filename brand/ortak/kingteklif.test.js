@@ -3,11 +3,14 @@
    Kanıtlanan sözler:
      1. HKM bağlı değilse istek yapılmaz; liste boş gelir.
      2. Onay ve iptal HKM'nin tek kapısına gider; cevap HKM'nin sayısıyla.
-     3. HKM hata verirse ya da düşerse önceki liste bekliyor gösterilmez. */
+     3. HKM hata verirse ya da düşerse önceki liste bekliyor gösterilmez.
+     4. Yoklama yazılanı silmez: liste hemen konur, çizim kullanıcı
+        yazmıyorken (brand/ortak/hesap.js cizIste). */
 
 (function(){
   const { describe, it, expect } = (window.R || window.SP || window.ESP).Test;
   const K = () => window.LIFEOS.KingTeklif;
+  const HESAP = () => window.LIFEOS.HESAP;
   const TEKLIF = { id:12, konu:'Türev özeti', tur:'bam.urun', oneri:'tam', neden:null,
     secenekler:[{ id:'tam', ad:'tam', metin:'tam: düşük sınıf · maliyet ~0,0043 USD' }] };
 
@@ -84,6 +87,56 @@
       expect((await k.cek()).length).toBe(1);
       dusuk = true;
       expect(await k.cek()).toEqual([]);
+    });
+  });
+
+  /* YAZILAN SİLİNMEZ (2026-10-05). Yoklama (app.js kingTazele: açılışta,
+     King'e iş verilince, dakikada bir) liste değişince ekranı baştan
+     çiziyordu: Bugün'de yazılıp henüz kaydedilmemiş değer (#v-sleep)
+     siliniyor, sonra basılan «Kaydet» boş alanı yazabiliyordu. Liste
+     hemen konur; çizim kullanıcı yazmıyorken (hesap.js cizIste). */
+  function kirliAlan(){
+    const el = document.createElement('input');
+    el.type = 'number';
+    el.style.cssText = 'display:block;width:40px;height:20px';
+    document.body.appendChild(el);
+    el.value = '7';                                        // kullanıcı yazdı…
+    el.dispatchEvent(new Event('input', { bubbles:true }));
+    el.blur();                                             // …ve alandan çıktı
+    return el;
+  }
+
+  describe('King teklifi — yoklama yazılanı silmez', () => {
+    it('kirli alan varken liste konur ama çizilmez; alan gidince bir kez çizilir', async () => {
+      const h = HESAP(), eski = h._ortam.zamanla, sonra = [];
+      h._ortam.zamanla = fn => { sonra.push(fn); return 0; };
+      if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      let el = null;
+      try{
+        let cevap = [TEKLIF];
+        const k = K().kur({ hkm:() => beacon(true), modul:'spi',
+          fetch:async () => ({ status:200, json:async () => ({ teklifler:cevap }) }) });
+        const ui = {};
+        let cizim = 0;
+        const tazele = k.tazeleyici({ al:() => ui.liste, koy:l => { ui.liste = l; }, ciz:() => { cizim++; } });
+        await tazele();
+        expect(cizim).toBe(1);                                   // kimse yazmıyor: hemen
+        el = kirliAlan();
+        cevap = [TEKLIF, Object.assign({}, TEKLIF, { id:13 })];
+        await tazele();
+        expect(ui.liste.map(x => x.id)).toEqual([12, 13]);       // veri hemen…
+        expect(cizim).toBe(1);                                   // …çizim bekler
+        el.remove(); el = null;                                  // kaydedildi, form yeniden çizildi
+        sonra.splice(0).forEach(fn => fn());
+        expect(cizim).toBe(2);
+        await tazele();                                          // aynı liste: çizim yok
+        sonra.splice(0).forEach(fn => fn());
+        expect(cizim).toBe(2);
+      }finally{
+        if(el) el.remove();
+        h._ortam.zamanla = eski;
+        h._sifirla();
+      }
     });
   });
 })();

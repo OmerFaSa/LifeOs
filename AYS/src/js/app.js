@@ -1515,27 +1515,23 @@ R.App = (function(){
       }
       /* King'in teklifleri (brand/ortak/kingteklif.js): onay bekleyen ücretli
          işler Bugün'de. Modül King'e iş verince hemen, yoksa dakikada bir
-         tazelenir; HKM kapalıysa liste boş kalır ve kart çizilmez. */
+         tazelenir; HKM kapalıysa liste boş kalır ve kart çizilmez. Liste
+         hemen konur, ekran kullanıcı yazmıyorken çizilir (hesap.js cizIste). */
       if(window.LIFEOS && LIFEOS.KingTeklif){
         R.KingTeklif = LIFEOS.KingTeklif.kur({ hkm:() => R.Beacon, modul:'ays' });
-        const kingTazele = () => R.KingTeklif.cek().then(l => {
-          const once = JSON.stringify(S.ui.kingTeklifler || []);
-          S.ui.kingTeklifler = l;
-          if(JSON.stringify(l) !== once) render();
-        }).catch(() => {});
+        const kingTazele = R.KingTeklif.tazeleyici({ al:() => S.ui.kingTeklifler,
+          koy:l => { S.ui.kingTeklifler = l; }, ciz:render });
         kingTazele();
         window.addEventListener(LIFEOS.KingTeklif.OLAY, kingTazele);
         setInterval(kingTazele, 60000);
       }
       /* 120 Haftalık Merkez özeti (brand/ortak/haftaozet.js): pazar 17:00
-         sonrası Bugün'de tek kart. HKM kapalıysa ya da eşleşmemişse kart yok. */
+         sonrası Bugün'de tek kart. HKM kapalıysa ya da eşleşmemişse kart yok.
+         Özet hemen konur, ekran kullanıcı yazmıyorken çizilir (cizIste). */
       if(window.LIFEOS && LIFEOS.HaftaOzet){
         R.HaftaOzet = LIFEOS.HaftaOzet.kur({ hkm:() => R.Beacon });
-        const haftaTazele = () => R.HaftaOzet.cek().then(v => {
-          const once = S.ui.haftaOzet || null;
-          S.ui.haftaOzet = v;
-          if(once !== v) render();
-        }).catch(() => {});
+        const haftaTazele = R.HaftaOzet.tazeleyici({ al:() => S.ui.haftaOzet,
+          koy:v => { S.ui.haftaOzet = v; }, ciz:render });
         haftaTazele();
         setInterval(haftaTazele, 5 * 60000);
       }
