@@ -262,8 +262,9 @@ final class KonumKoprusuTests: XCTestCase {
         let son = Date().addingTimeInterval(5)
         while d.kopru.izleyenler.isEmpty && Date() < son { RunLoop.current.run(until: Date().addingTimeInterval(0.1)) }
         // Kopru durumunu sayfaya bildirir; SPI onu okur (beklemenin nedeni).
+        // Konum Servisleri bilgisi sonra gelir (yavas soru): sart degil.
         XCTAssertEqual(bekle(d.web, "!!(window.__lifeosKonum.durum() && typeof window.__lifeosKonum.durum().izin === 'string'"
-            + " && typeof window.__lifeosKonum.durum().servis === 'boolean' && ('bekleme' in SP.Canli.durum()))", sure: 5) as? Bool, true,
+            + " && ('bekleme' in SP.Canli.durum()))", sure: 10) as? Bool, true,
             "köprünün konum durumu sayfaya ulaşmadı")
         let simdi = Date().timeIntervalSince1970 - 1_790_000_000
         d.kopru.arkayaGitti()                          // ekran kapali: noktalar birikir

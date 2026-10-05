@@ -247,13 +247,23 @@ final class KonumKoprusu: NSObject, WKScriptMessageHandler, CLLocationManagerDel
         return d
     }
 
+    /// Son bilinen Konum Servisleri durumu (ilk cevap gelene dek nil).
+    private var servisBilinen: Bool?
+
+    /// Durum HEMEN gider; Konum Servisleri bilgisi sonra eklenir.
+    /// locationServicesEnabled konum surecine eszamanli bir sorudur: ana is
+    /// parcaciginda cagrilmaz (iOS uyarir) ve yuklu bir CI simulatorunde
+    /// saniyeler surebiliyordu — durum onu bekleyince sayfaya gec ulasiyor,
+    /// test araliklı kiriliyordu (derleme 33). Bilgi degisirse ikinci mesaj.
     private func durumBildir() {
-        // locationServicesEnabled ana is parcaciginda cagrilmaz (iOS uyarir).
+        cagir("durumGeldi", [durumSozlugu(servis: servisBilinen)])
         DispatchQueue.global(qos: .utility).async { [weak self] in
             let servis = CLLocationManager.locationServicesEnabled()
             DispatchQueue.main.async {
                 guard let self = self else { return }
-                self.cagir("durumGeldi", [self.durumSozlugu(servis: servis)])
+                let degisti = self.servisBilinen != servis
+                self.servisBilinen = servis
+                if degisti { self.cagir("durumGeldi", [self.durumSozlugu(servis: servis)]) }
             }
         }
     }
