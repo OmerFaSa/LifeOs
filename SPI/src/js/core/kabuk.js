@@ -71,6 +71,8 @@ window.LIFEOS = window.LIFEOS || {};
      üçünde aynı görünsün diye simgesini kendisi taşır. */
   const SIMGE = {
     bugun:'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+    /* Rütbe (2026-10-05): madalya — kurdele ve tek halka, öteki simgeler gibi tek renk. */
+    rutbe:'<circle cx="12" cy="14.6" r="5.4"/><path d="M9.2 9.9L6.6 3.6h3.8L12 7.3M14.8 9.9l2.6-6.3h-3.8L12 7.3"/>',
     plan:'<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
     calisma:'<path d="M14 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5z"/><path d="M14 3.5v5h5M9 13h6M9 16.5h4"/>',
     analiz:'<path d="M5 20v-8M12 20V5M19 20v-5"/>',
@@ -417,8 +419,8 @@ window.LIFEOS = window.LIFEOS || {};
       +     ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
       +     simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</button>'
       +   (r && r.etiket && r.etiket !== '—' ? '<button class="ust__madalya ust--telefon" data-act="go" data-route="' + kac(r.route || 'rutbe') + '"'
-      +     ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '"><i class="kenar__madalya" aria-hidden="true"'
-      +     (r.renk ? ' style="--kademe-renk:' + kac(r.renk) + '"' : '') + '></i></button>' : '')
+      +     ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '">'
+      +     simge('rutbe') + '</button>' : '')   /* SADE (2026-10-05): renkli daire değil, çizgi madalya */
       +   '<button class="ust__profil" data-act="open-appearance" aria-haspopup="dialog"'
       +     ' aria-label="' + kac('Profil ve görünüm' + (prof.ad ? ' — ' + prof.ad : '')) + '">' + kac(harf) + '</button>'
       +   '<button class="ust__menu" data-act="toggle-sidebar" aria-label="Menü">' + simge('menu') + '</button>'

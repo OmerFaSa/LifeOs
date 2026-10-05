@@ -1454,7 +1454,7 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
 /* Telefonda da sağ üst sade: simgeler çerçevesiz yuvarlak (masaüstüyle aynı),
    kutucuk yok. */
 @media (max-width:679px){
-  .ust.ust--v5 .ust__gizli, .ust.ust--v5 .ust__zil{ width:36px; height:36px; padding:0; border:0; border-radius:50%;
+  .ust.ust--v5 .ust__gizli, .ust.ust--v5 .ust__zil, .ust.ust--v5 .ust__madalya{ width:36px; height:36px; padding:0; border:0; border-radius:50%;
     background:none; box-shadow:none; display:grid; place-items:center; color:var(--text-2); }
   .ust.ust--v5 .ust__madalya{ box-shadow:none; background:none; }
   .ust.ust--v5 .ust__zil-nokta{ top:8px; right:9px; width:6px; height:6px; background:var(--now); box-shadow:none; }

@@ -192,6 +192,22 @@
       d.remove(); yok.remove();
     });
 
+    it('telefondaki rütbe düğmesi öteki simgeler gibi tek renk çizgi; renkli daire yok (2026-10-05)', () => {
+      /* Kullanıcı: «bu tüm ambiyansı bozuyor, daha minimalist yap» — kademe
+         renginde içi dolu daire, çerçevesiz çizgi simgelerin yanında göze
+         batıyordu. Kademe adı ve etiketi düğmenin adında kalır. */
+      const d = yerlestir(K.ustSerit({ modul:'spi', yol:['Bugün'],
+        rutbe:{ ad:'Bronz', etiket:'1.1', renk:'#B87333', route:'rutbe' } }));
+      const m = d.querySelector('.ust__madalya');
+      expect(!!m).toBe(true);
+      expect(!!m.querySelector('svg.kbk-ic')).toBe(true);
+      expect(!!m.querySelector('.kenar__madalya')).toBe(false);
+      expect(((m.getAttribute('style') || '') + m.innerHTML).indexOf('#B87333')).toBe(-1);
+      expect(m.getAttribute('aria-label')).toContain('Bronz');
+      expect(m.getAttribute('data-route')).toBe('rutbe');
+      d.remove();
+    });
+
     it('oz-151 şimdi çizgisi saatin yerinde; dilim dışında kenarda', () => {
       const saat = (h, m) => { const x = new Date(2026, 8, 24, h, m); return x; };
       expect(K.simdiOrani(saat(15, 0), 6, 24)).toBe(0.5);
