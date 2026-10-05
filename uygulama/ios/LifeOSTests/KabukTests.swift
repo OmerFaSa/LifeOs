@@ -35,7 +35,13 @@ final class KabukTests: XCTestCase {
         let hedefler = jsDegerlendir(d.web, "Array.from(document.querySelectorAll('a.kart')).map(a => a.getAttribute('href')).join(' ')").deger as? String
         XCTAssertEqual(hedefler, "http://127.0.0.1:4173/ http://127.0.0.1:4183/ http://127.0.0.1:4193/")
         XCTAssertEqual(bekle(d.web, "Array.from(document.images).every(i => i.complete && i.naturalWidth > 0)", sure: 10) as? Bool, true, "logolar yüklenmedi")
-        XCTAssertEqual(jsDegerlendir(d.web, "!document.querySelector('[data-hkm], #guncel, script')").deger as? Bool, true)
+        // Bilgisayara ozgu parca yok: HKM karti, guncelleme kutusu, PC API'lerine
+        // giden betik. Tek betik giris ekranidir (hesap.js, 020ae7ab): bilerek
+        // vardir. Bu satir once «hic betik yok» diyordu; giris ekrani gelince
+        // 13. derlemeden beri kirmiziydi ve telefona hic guncelleme gitmedi.
+        XCTAssertEqual(jsDegerlendir(d.web, "!document.querySelector('[data-hkm], #guncel, .guncel') && Array.from(document.scripts).every(s => (s.getAttribute('src') || '').endsWith('/hesap.js'))").deger as? Bool, true,
+                       "telefonun giriş sayfasında bilgisayara özgü parça var")
+        XCTAssertEqual(bekle(d.web, "!!(window.LIFEOS && window.LIFEOS.HESAP)", sure: 10) as? Bool, true, "giriş ekranı (hesap.js) yüklenmedi")
         jsCalistir(d.web, "document.querySelectorAll('a.kart')[1].click()")
         XCTAssertEqual(bekle(d.web, "location.port === '4183' && !!(document.querySelector('.site') && window.SP)") as? Bool, true, "karttan SPİ açılmadı")
     }
