@@ -4,9 +4,14 @@
    yavasken ya da yokken oldugu gibi calisir. */
 
 (function(){
-  const { describe, it, expect, resetState } = ESP.Test;
+  const { describe, it:yalinIt, expect, resetState, withTodayAsync } = ESP.Test;
   const B = () => ESP.Beacon;
   const BUGUN = ESP.U.todayISO();
+  /* GECE YARISI (2026-10-05 23:59): BUGUN dosya yüklenirken bir kez alınır,
+     kod «bugün»ü gönderim anında yeniden okur. Koşu gece yarısını geçince
+     ikisi ayrışıyor, dört test kalıyordu (sahte saatle 23:59:30'da
+     yeniden üretildi). Her test BUGUN'de sabit koşar. */
+  const it = (ad, fn) => yalinIt(ad, () => withTodayAsync(BUGUN, fn));
   const DUN = ESP.U.iso(ESP.U.addDays(ESP.U.parse(BUGUN), -1));
 
   /* Gercek fetch'i hicbir test cagirmaz: agla konusan bir birim testi,

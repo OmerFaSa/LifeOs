@@ -4,10 +4,15 @@
    yavasken ya da yokken oldugu gibi calisir. */
 
 (function(){
-  const { describe, it, expect, resetState, withTodayAsync } = R.Test;
+  const { describe, it:yalinIt, expect, resetState, withTodayAsync } = R.Test;
   const B = () => R.Beacon;
   const BUGUN = R.U.todayISO();
   const DUN = R.U.iso(R.U.addDays(R.U.parse(BUGUN), -1));
+  /* GECE YARISI (2026-10-05 23:59): BUGUN dosya yüklenirken bir kez alınır,
+     kod «bugün»ü gönderim anında yeniden okur. Koşu gece yarısını geçince
+     ikisi ayrışıyor, testler kalıyordu (sahte saatle 23:59:30'da yeniden
+     üretildi). Her test BUGUN'de sabit koşar. */
+  const it = (ad, fn) => yalinIt(ad, () => withTodayAsync(BUGUN, fn));
 
   /* Gercek fetch'i hicbir test cagirmaz: agla konusan bir birim testi,
      olcmedigi bir seye bagli olur. */
