@@ -1083,7 +1083,7 @@ ESP.App = (function(){
       location.replace(u.toString());
     },
     async 'setup-save'(){ await ESP.Setup.save(); },
-    async 'setup-skip'(){ ESP.Setup.skip(); },
+    async 'setup-skip'(){ await ESP.Setup.skip(); },
     /* TANITIM ŞERİDİ — nokta basıldığında panel değişir.
 
        Sihirbaz YENİDEN ÇİZİLMEZ: `TANITIM_ADIM` doğrudan DOM'a
@@ -1813,7 +1813,7 @@ ESP.App = (function(){
         });
       }
 
-      if(ESP.Setup.needed()) setTimeout(() => ESP.Setup.open(), 400);
+      if(ESP.Setup.acilsinMi()) setTimeout(() => ESP.Setup.open(), 400);
     }catch(err){
       console.error('Açılış hatası:', err);
       const markup = String(html`<div class="content">

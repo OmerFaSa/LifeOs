@@ -57,5 +57,19 @@
       expect([p.name, p.focus, p.langs[0], p.dailyMinutes]).toEqual(['Ömer', 'balanced', 'en', 60]);
       expect(St().needed()).toBe(false);
     });
+
+    /* 2026-10-04 telefon denemesi (SPİ'de 1c4854ef ile düzeldi): «Şimdilik
+       atla» hatırlanmıyordu; sihirbaz her açılışta (telefon uygulamasında
+       her modül dönüşünde) yeniden geliyordu. */
+    it('atlanan kurulum yeniden açılışta kendiliğinden gelmez; profil yine eksik sayılır', async () => {
+      resetState();
+      ESP.S.profile = Object.assign({}, ESP.S.profile, { name:'' });
+      expect(St().acilsinMi()).toBe(true);
+      await sessiz(async () => { St().open(); await St().skip(); });
+      /* Yeniden açılış: tercihler depodan okunur (loadAll gibi). */
+      ESP.S.prefs = Object.assign(ESP.Model.defaultPrefs(), await ESP.Store.get('prefs'));
+      expect(St().acilsinMi()).toBe(false);
+      expect(St().needed()).toBe(true);
+    });
   });
 })();

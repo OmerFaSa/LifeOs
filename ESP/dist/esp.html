@@ -14455,7 +14455,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'b5b8fae7', at:'2026-10-05 11:54', dirty:true };
+ESP.BUILD = { id:'a40618a8', at:'2026-10-05 11:59', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -54170,13 +54170,22 @@ ESP.Setup = (function(){
     return true;
   }
 
-  function skip(){
+  /* Açılışta kendiliğinden açılsın mı? «Şimdilik atla» bu profilde
+     hatırlanır: sihirbaz her açılışta (telefon uygulamasında her modül
+     dönüşünde) yeniden gelmez. Profil yine eksik sayılır (needed): Profil
+     ekranından doldurulur. SPİ'nin ikizi (1c4854ef). */
+  function acilsinMi(){
+    return needed() && !(ESP.S.prefs && ESP.S.prefs.kurulumAtlandi);
+  }
+
+  async function skip(){
     secim = null;
     ESP.UI.closeSheet();
     ESP.UI.toast('Atlandı — Profil ekranından istediğin zaman doldurabilirsin');
+    await ESP.Model.savePrefs({ kurulumAtlandi:true });
   }
 
-  return { needed, open, save, skip, pick, picked };
+  return { needed, acilsinMi, open, save, skip, pick, picked };
 })();
 
 /* ==== js/screens/today.js ==== */
@@ -64493,7 +64502,7 @@ ESP.App = (function(){
       location.replace(u.toString());
     },
     async 'setup-save'(){ await ESP.Setup.save(); },
-    async 'setup-skip'(){ ESP.Setup.skip(); },
+    async 'setup-skip'(){ await ESP.Setup.skip(); },
     /* TANITIM ŞERİDİ — nokta basıldığında panel değişir.
 
        Sihirbaz YENİDEN ÇİZİLMEZ: `TANITIM_ADIM` doğrudan DOM'a
@@ -65223,7 +65232,7 @@ ESP.App = (function(){
         });
       }
 
-      if(ESP.Setup.needed()) setTimeout(() => ESP.Setup.open(), 400);
+      if(ESP.Setup.acilsinMi()) setTimeout(() => ESP.Setup.open(), 400);
     }catch(err){
       console.error('Açılış hatası:', err);
       const markup = String(html`<div class="content">

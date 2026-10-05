@@ -198,11 +198,20 @@ ESP.Setup = (function(){
     return true;
   }
 
-  function skip(){
+  /* Açılışta kendiliğinden açılsın mı? «Şimdilik atla» bu profilde
+     hatırlanır: sihirbaz her açılışta (telefon uygulamasında her modül
+     dönüşünde) yeniden gelmez. Profil yine eksik sayılır (needed): Profil
+     ekranından doldurulur. SPİ'nin ikizi (1c4854ef). */
+  function acilsinMi(){
+    return needed() && !(ESP.S.prefs && ESP.S.prefs.kurulumAtlandi);
+  }
+
+  async function skip(){
     secim = null;
     ESP.UI.closeSheet();
     ESP.UI.toast('Atlandı — Profil ekranından istediğin zaman doldurabilirsin');
+    await ESP.Model.savePrefs({ kurulumAtlandi:true });
   }
 
-  return { needed, open, save, skip, pick, picked };
+  return { needed, acilsinMi, open, save, skip, pick, picked };
 })();
