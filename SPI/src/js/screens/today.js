@@ -985,7 +985,9 @@ SP.Screens.today = (function(){
         vurgu:'Hedef ' + U.fmtNum(tg.kcal) + ' kcal.', sistem:'spi', dugme:git('Öğünler', 'meals') });
     }
 
-    return raw(V.donen({ id:'spi-bugun', ad:'Bugün', maddeler:gun }) + V.donen({ id:'spi-saglik', ad:'Sağlık', maddeler:saglik }));
+    /* Seçim sayfasının minik özeti (hesap.js söz 16); örnek profil yazmaz. */
+    const ozet = SP.Ornek && SP.Ornek.acik() ? null : 'spi';
+    return raw(V.donen({ id:'spi-bugun', ad:'Bugün', ozet, maddeler:gun }) + V.donen({ id:'spi-saglik', ad:'Sağlık', ozet, maddeler:saglik }));
   }
 
   function BeslenmeKutusu(){

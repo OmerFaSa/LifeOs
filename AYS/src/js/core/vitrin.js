@@ -1691,8 +1691,14 @@ window.LIFEOS = window.LIFEOS || {};
   function donen(o){
     o = o || {};
     const l = (o.maddeler || []).filter(m => m && (m.cumle || m.sayi));
-    if(!l.length) return '';
     const id = String(o.id || 'donen');
+    /* Bugün'ün dönen kartı seçim sayfasının minik özetidir (hesap.js söz 16):
+       modül `ozet:'ays'` verir; örnek profilde vermez. Boş kart da yazılır,
+       eski özet kalmasın. */
+    if(o.ozet && L.HESAP && L.HESAP.ozetYaz){
+      try{ L.HESAP.ozetYaz(o.ozet, id, l); }catch(e){ /* özet yazılamadı: kart yine çizilir */ }
+    }
+    if(!l.length) return '';
     const i = Math.min(DONEN_SIRA[id] || 0, l.length - 1);
     const veri = d => Object.keys(d || {}).map(k => ' ' + kac(k) + '="' + kac(d[k]) + '"').join('');
     const madde = (m, k) => '<div class="donen__madde' + (k === i ? ' is-on' : '') + '" data-donen-madde="' + k + '"'

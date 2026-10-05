@@ -736,6 +736,126 @@
     }));
   });
 
+  /* SEÇİM SAYFASI (kullanıcı, 2026-10-06, telefondan): «hesap girme kısmına
+     gelmeden önce milisaniyelik ilk o seçim ekranını gösteriyor», «beta
+     girişine tıklayınca animasyonla gelsin», «seçme kısmında o bölümle ilgili
+     minik özetler geçilsin». */
+  describe('Hesap — seçim sayfası', () => {
+    const kok = () => document.documentElement;
+    /* Seçim sayfasının kendisi gibi kurar: modul 'giris', depo yok. */
+    function girisSahne(cihaz){
+      const h = H();
+      h._sifirla();
+      yedek = yedek || Object.assign({}, h._ortam);
+      Object.assign(h._ortam, cihaz.ortam);
+      h.kur({ modul:'giris' });
+      return h;
+    }
+
+    it('titremez: uygulamada kapı ağ beklemeden açılır; beta/oturum varken sayfa hemen görünür', () => sahneyle(async () => {
+      let c = cihazKur(sunucuKur(), { uygulama:true });
+      let h = girisSahne(c);
+      expect(h.kapiAcikMi()).toBe(true);                 // aynı anda: sunucu cevabı beklenmedi
+      expect(kok().classList.contains('giris-hazir')).toBe(true);
+      await hazir();
+      expect(h.kapiAcikMi()).toBe(true);
+      expect(kok().classList.contains('giris-hazir')).toBe(true);
+
+      c = cihazKur(sunucuKur(), { uygulama:true });
+      c.jar.lifeos_beta = '1';
+      h = girisSahne(c);
+      expect(h.kapiAcikMi()).toBe(false);
+      expect(kok().classList.contains('giris-hazir')).toBe(true);
+    }));
+
+    it('tarayıcıda karar sunucuyu bekler: o ana dek sayfa gizli, sonra kapı (seçim sayfası bir an görünmez)', () => sahneyle(async () => {
+      const c = cihazKur(sunucuKur());
+      const h = girisSahne(c);
+      expect(kok().classList.contains('giris-hazir')).toBe(false);
+      expect(h.kapiAcikMi()).toBe(false);
+      await hazir();
+      expect(h.kapiAcikMi()).toBe(true);
+      expect(kok().classList.contains('giris-hazir')).toBe(true);
+    }));
+
+    it('beta girişi: kapı animasyonla çekilir, seçim sayfası hemen belirir; azaltılmış harekette anında', () => sahneyle(async () => {
+      const zaman = [];
+      let c = cihazKur(sunucuKur(), { uygulama:true });
+      c.ortam.zamanla = (fn, ms) => { zaman.push({ fn, ms }); return zaman.length; };
+      c.ortam.azalt = () => false;
+      let h = girisSahne(c);
+      document.querySelector('[data-hesap-kapi] [data-hesap="beta"]').click();
+      expect(h.kapiAcikMi()).toBe(false);                // kapı artık kapı sayılmaz…
+      const cikan = document.querySelector('.hesap-kapi.is-cikis');
+      expect(!!cikan).toBe(true);                        // …ama çekilirken görünür
+      expect(cikan.getAttribute('aria-hidden')).toBe('true');
+      expect(kok().classList.contains('hesap-kapi-acik')).toBe(false);   // kartlar aynı anda belirir
+      const sil = zaman.find(z => z.ms >= 300 && z.ms <= 600);
+      expect(!!sil).toBe(true);
+      sil.fn();
+      expect(!!document.querySelector('.hesap-kapi')).toBe(false);
+
+      c = cihazKur(sunucuKur(), { uygulama:true });
+      c.ortam.azalt = () => true;
+      h = girisSahne(c);
+      document.querySelector('[data-hesap-kapi] [data-hesap="beta"]').click();
+      expect(!!document.querySelector('.hesap-kapi')).toBe(false);
+    }));
+
+    /* Modüller ayrı kapıda: seçim sayfası onların deposunu okuyamaz; özet
+       kapıya bakmayan çerezle gelir. Sayı etiketiyle gider (AGENTS §1.2). */
+    it('özet: Bugün’ün dönen maddeleri etiketleriyle yazılır, iki kart sırayla karışır, sınırlı', () => sahneyle(async () => {
+      const c = cihazKur(sunucuKur(), { uygulama:true });
+      const h = girisSahne(c);
+      const sayi = (d, b, k) => '<span class="sayi sayi--' + k + '"><span class="sayi__d">' + d + '</span> <span class="sayi__b">' + b + '</span></span>';
+      h.ozetYaz('spi', 'spi-bugun', [
+        { ust:'Sıradaki', cumle:'Lipid paneli bekliyor.', vurgu:'Tahlil sonucunu gir.' },
+        { ust:'Seri', sayi:sayi(4, 'gün', 'computed'), cumle:'asgari gün.' },
+        { ust:'Asgari gün', sayi:sayi('—', '', 'missing'), cumle:'veri yok.' },
+      ]);
+      h.ozetYaz('spi', 'spi-saglik', [
+        { ust:'Toparlanma', sayi:sayi(73, '/100', 'computed'), cumle:'iyi.' },
+        { ust:'Beslenme', sayi:sayi(2, 'öğün', 'measured'), cumle:'girildi & <işlendi>.' },
+      ]);
+      expect(/Max-Age=\d+/.test(c.jar.__son)).toBe(true);
+      const o = h.ozetOku('spi');
+      expect(o.satirlar.map(s => s.u)).toEqual(['Sıradaki', 'Toparlanma', 'Seri', 'Beslenme']);   // en çok 4, sırayla karışık
+      expect(o.satirlar[0]).toEqual({ u:'Sıradaki', m:'Lipid paneli bekliyor.', k:null });
+      expect(o.satirlar[1]).toEqual({ u:'Toparlanma', m:'73 /100 iyi.', k:'computed' });
+      expect(o.satirlar[3]).toEqual({ u:'Beslenme', m:'2 öğün girildi & <işlendi>.', k:'measured' });
+      h.ozetYaz('spi', 'spi-bugun', [{ ust:'Seri', sayi:sayi(5, 'gün', 'computed'), cumle:'asgari gün.' }]);
+      expect(h.ozetOku('spi').satirlar.map(s => s.m)).toEqual(['5 gün asgari gün.', '73 /100 iyi.', '2 öğün girildi & <işlendi>.']);
+      expect(h.ozetOku('ays')).toBeNull();
+    }));
+
+    it('özet: kartta etiketiyle ve zamanıyla çizilir; yedi günden eskisi gösterilmez; bozuk çerez yok sayılır', () => sahneyle(async () => {
+      const c = cihazKur(sunucuKur(), { uygulama:true });
+      const h = girisSahne(c);
+      const yuva = document.createElement('div');
+      yuva.innerHTML = '<a class="kart" data-modul="esp"><div class="kart__ozet" data-ozet="esp" hidden></div></a>'
+        + '<a class="kart" data-modul="ays"><div class="kart__ozet" data-ozet="ays" hidden></div></a>';
+      document.body.appendChild(yuva);
+      try{
+        h.ozetYaz('esp', 'esp-bugun', [{ ust:'Tekrar', sayi:'<span class="sayi sayi--computed"><span class="sayi__d">15</span> <span class="sayi__b">kart</span></span>', cumle:'bekliyor.' }]);
+        h.ozetCiz();
+        const esp = yuva.querySelector('[data-ozet="esp"]');
+        expect(esp.hidden).toBe(false);
+        expect(esp.textContent).toContain('Tekrar');
+        expect(esp.textContent).toContain('15 kart bekliyor.');
+        expect(esp.textContent).toContain('hesaplandı');
+        expect(esp.textContent).toContain('bugün');
+        expect(yuva.querySelector('[data-ozet="ays"]').hidden).toBe(true);
+        c.jar.lifeos_ozet_ays = '%7Bbozuk';
+        h.ozetCiz();
+        expect(yuva.querySelector('[data-ozet="ays"]').hidden).toBe(true);
+        const simdi = h._ortam.simdi();
+        h._ortam.simdi = () => simdi + 8 * 864e5;
+        h.ozetCiz();
+        expect(esp.hidden).toBe(true);
+      }finally{ yuva.remove(); }
+    }));
+  });
+
   describe('Hesap — giriş ekranı', () => {
     const kapi = () => document.querySelector('[data-hesap-kapi]');
     const yaz = (id, v) => { document.getElementById(id).value = v; };

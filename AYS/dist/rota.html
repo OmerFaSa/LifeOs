@@ -13060,6 +13060,13 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 @keyframes hesap-tanitim-gel{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
 
 @keyframes hesap-kapi-gel{ from{ opacity:0; } to{ opacity:1; } }
+/* Kapı çekilirken (beta girişi, giriş, kayıt; hesap.js söz 15): önce kart
+   hafifçe yükselip bulanıklaşarak solar, perde arkasından çekilir; seçim
+   sayfası aynı anda belirir. 420 ms, sakin biter; hiçbir şey zıplamaz. */
+.hesap-kapi.is-cikis{ pointer-events:none; animation:hesap-kapi-cik .42s cubic-bezier(.4,0,.2,1) both; }
+.hesap-kapi.is-cikis .hesap-kapi__sahne{ animation:hesap-sahne-cik .34s cubic-bezier(.4,0,.2,1) both; }
+@keyframes hesap-kapi-cik{ from{ opacity:1; } to{ opacity:0; } }
+@keyframes hesap-sahne-cik{ to{ opacity:0; transform:translateY(-10px) scale(.98); filter:blur(4px); } }
 @keyframes hesap-kart-gel{ from{ opacity:0; transform:translateY(10px) scale(.985); } to{ opacity:1; transform:none; } }
 @keyframes hesap-ileri{ from{ opacity:0; transform:translateX(18px); filter:blur(2px); } to{ opacity:1; transform:none; filter:none; } }
 @keyframes hesap-geri{ from{ opacity:0; transform:translateX(-18px); filter:blur(2px); } to{ opacity:1; transform:none; filter:none; } }
@@ -13250,7 +13257,8 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 .hesap-cip span:last-child{ max-width:140px; overflow:hidden; text-overflow:ellipsis; }
 
 @media (prefers-reduced-motion:reduce){
-  .hesap-kapi, .hesap-kapi__kart, .hesap-kapi__ic, .hesap-kapi__isaret g, .hesap-merkez, .hesap-merkez__kart,
+  .hesap-kapi, .hesap-kapi.is-cikis, .hesap-kapi.is-cikis .hesap-kapi__sahne,
+  .hesap-kapi__kart, .hesap-kapi__ic, .hesap-kapi__isaret g, .hesap-merkez, .hesap-merkez__kart,
   .hesap-merkez__ic, .hesap-merkez__mesaj, .hesap-kapi__tanitim, .hesap-kapi__sistemler li,
   .hesap-kapi__sozler{ animation:none !important; }
 }
@@ -13797,10 +13805,28 @@ window.LIFEOS = window.LIFEOS || {};
     if(webdriver == null){ try{ webdriver = !!navigator.webdriver; }catch(e){ webdriver = false; } }
     return webdriver ? 'sistem' : 'tam';
   }
+  /* SEÇİM SAYFASI (4180) ayrı kapıdır: modülün deposunu göremez. Tercih
+     kapıya bakmayan çereze de yazılır; deposunda tercih olmayan sayfa
+     (seçim sayfası, ilk açılan modül) çerezden okur (2026-10-06). */
+  const CEREZ = 'lifeos_hareket';
+  function cerezOku(){
+    try{ const m = document.cookie.match(/(?:^|;\s*)lifeos_hareket=([^;]*)/); return m ? m[1] : null; }catch(e){ return null; }
+  }
+  function cerezYaz(k){
+    try{
+      const guvenli = location.protocol === 'https:' ? '; Secure' : '';
+      document.cookie = CEREZ + '=' + k + '; Path=/; Max-Age=34560000; SameSite=Strict' + guvenli;
+    }catch(e){ /* çerez kapalı: bu kapıda geçerli */ }
+  }
   function oku(){
     let v = null;
     try{ v = localStorage.getItem(ANAHTAR); }catch(e){}
-    return KIPLER.indexOf(v) >= 0 ? v : varsayilan();
+    if(KIPLER.indexOf(v) >= 0){
+      if(cerezOku() !== v) cerezYaz(v);
+      return v;
+    }
+    const c = cerezOku();
+    return KIPLER.indexOf(c) >= 0 ? c : varsayilan();
   }
   /* Her matchMedia çağrısında depoya gidilmez: kip bellekte tutulur,
      ayarla(), yenile() ve başka sekmenin yazması (storage) tazeler. */
@@ -13906,6 +13932,7 @@ window.LIFEOS = window.LIFEOS || {};
   function ayarla(k){
     if(KIPLER.indexOf(k) < 0) return false;
     try{ localStorage.setItem(ANAHTAR, k); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
+    cerezYaz(k);
     simdiki = k;
     uygula(k);
     seciciGuncelle();
@@ -15191,7 +15218,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'092dc608', at:'2026-10-05 18:11', dirty:true };
+R.BUILD = { id:'364b54df', at:'2026-10-05 22:37', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -18374,8 +18401,14 @@ window.LIFEOS = window.LIFEOS || {};
   function donen(o){
     o = o || {};
     const l = (o.maddeler || []).filter(m => m && (m.cumle || m.sayi));
-    if(!l.length) return '';
     const id = String(o.id || 'donen');
+    /* Bugün'ün dönen kartı seçim sayfasının minik özetidir (hesap.js söz 16):
+       modül `ozet:'ays'` verir; örnek profilde vermez. Boş kart da yazılır,
+       eski özet kalmasın. */
+    if(o.ozet && L.HESAP && L.HESAP.ozetYaz){
+      try{ L.HESAP.ozetYaz(o.ozet, id, l); }catch(e){ /* özet yazılamadı: kart yine çizilir */ }
+    }
+    if(!l.length) return '';
     const i = Math.min(DONEN_SIRA[id] || 0, l.length - 1);
     const veri = d => Object.keys(d || {}).map(k => ' ' + kac(k) + '="' + kac(d[k]) + '"').join('');
     const madde = (m, k) => '<div class="donen__madde' + (k === i ? ' is-on' : '') + '" data-donen-madde="' + k + '"'
@@ -24120,7 +24153,21 @@ window.LIFEOS = window.LIFEOS || {};
   14. KİŞİSEL BİLGİ YALNIZ OKUNDUĞU YERDE. Hitap ve doğum günü King'in
       selamına girer; başka hiçbir hesaba, plana, karara girmez. Sunucu
       cevabı gelmeden kişisel alanlar formda çizilmez: boş form
-      kaydedilip var olan bilgi silinmesin. */
+      kaydedilip var olan bilgi silinmesin.
+  15. SEÇİM SAYFASI TİTREMEZ (depo sahibi, 2026-10-06: «hesap girme kısmına
+      gelmeden önce milisaniyelik ilk o seçim ekranını gösteriyor»). Sayfa
+      (sunucu.py) kartları `giris-hazir` gelene dek gizler; karar ağ
+      beklemeden verilebiliyorsa (oturum, beta, uygulama) hemen verilir,
+      yoksa sunucu cevabıyla. Kapı çekilirken solar, kartlar aynı anda
+      belirir («beta girişine tıklayınca animasyonla gelsin»). Modüllerin
+      minik özetleri (söz 16) kartlarda döner.
+  16. ÖZET ETİKETİYLE VE ZAMANIYLA. Modüller ayrı kapıda: seçim sayfası
+      onların deposunu okuyamaz; Bugün'ün dönen maddeleri kapıya bakmayan
+      çereze yazılır (ozetYaz, vitrin.js donen). Her sayı kesinliğini
+      taşır, kartta «ne zamanın» özeti olduğu yazar; yedi günden eskisi
+      gösterilmez. Eksik sayı yazılmaz (sıfır değildir). Örnek profil
+      yazmaz (modül vermez). Çerez bu cihazdan yalnız kullanıcının kendi
+      LifeOS sunucusuna gider. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -24167,6 +24214,9 @@ window.LIFEOS.HESAP = (function(){
     },
     zamanla:(fn, ms) => setTimeout(fn, ms),
     iptal:id => clearTimeout(id),
+    /* Hareket azaltılmış mı (animasyon.js matchMedia'yı LifeOS ayarına göre
+       sarar; seçim sayfasında da yüklüdür). */
+    azalt:() => { try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return true; } },
     /* Dosya ver: uygulamada paylaşım sayfası (indirme yok), tarayıcıda indirme. */
     indir:(ad, metin) => {
       const blob = new Blob([metin], { type:'application/json' });
@@ -25119,9 +25169,102 @@ window.LIFEOS.HESAP = (function(){
   }
 
   function kapiAcikMi(){ return !!(typeof document !== 'undefined' && document.querySelector('[data-hesap-kapi]')); }
-  function azaltilmis(){
-    try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return true; }
+
+  /* ------------------------------------------------------- seçim sayfası (söz 15, 16) */
+
+  function girisHazir(){
+    if(typeof document !== 'undefined') document.documentElement.classList.add('giris-hazir');
   }
+
+  const OZET = 'lifeos_ozet_';
+  const OZET_SATIR = 4, OZET_UZUN = 80, OZET_GUN = 7, OZET_DON = 3600;
+  const KES_AD = { measured:'ölçüldü', computed:'hesaplandı', estimated:'tahmin', missing:'veri yok' };
+  const VARLIK = { amp:'&', lt:'<', gt:'>', quot:'"', '#39':"'" };
+  function duzMetin(html){
+    return String(html == null ? '' : html).replace(/<[^>]*>/g, ' ')
+      .replace(/&(amp|lt|gt|quot|#39);/g, (_, v) => VARLIK[v]).replace(/\s+/g, ' ').trim();
+  }
+  const sade = t => String(t == null ? '' : t).replace(/\s+/g, ' ').trim();
+  /* Vitrin maddesi → [ust, metin, kesinlik]. `sayi` HTML'dir (LIFEOS.SAYI),
+     ust/cumle/vurgu düz metin (vitrin kaçışlar). Eksik sayı yazılmaz (sıfır değil). */
+  function ozetSatiri(m){
+    if(!m) return null;
+    const k = (String(m.sayi || '').match(/sayi--(measured|computed|estimated|missing)/) || [])[1] || null;
+    const sayi = m.sayi && k !== 'missing' ? duzMetin(m.sayi) : '';
+    const metin = ([sayi, sade(m.cumle)].filter(Boolean).join(' ') || sade(m.vurgu)).slice(0, OZET_UZUN);
+    const ust = sade(m.ust).slice(0, 32);
+    if(!ust || !metin || k === 'missing') return null;
+    return [ust, metin, k];
+  }
+  function ozetHam(modul){
+    const v = cerezOku(OZET + modul);
+    return v && typeof v === 'object' && Number.isFinite(v.t) && v.d && typeof v.d === 'object' ? v : null;
+  }
+  /* modul: 'ays' | 'spi' | 'esp'; id: dönen kartın kimliği (iki kart birbirini silmez). */
+  function ozetYaz(modul, id, maddeler){
+    if(!/^(ays|spi|esp)$/.test(String(modul)) || !id) return false;
+    const satirlar = (maddeler || []).map(ozetSatiri).filter(Boolean).slice(0, OZET_SATIR);
+    const v = ozetHam(modul) || { t:0, d:{} };
+    v.d[String(id).slice(0, 24)] = satirlar;
+    v.t = ortam.simdi();
+    const guvenli = ortam.konum().protocol === 'https:' ? '; Secure' : '';
+    ortam.cerez.yaz(OZET + modul + '=' + encodeURIComponent(JSON.stringify(v))
+      + '; Path=/; Max-Age=' + (OZET_GUN + 1) * 86400 + '; SameSite=Strict' + guvenli);
+    return true;
+  }
+  /* Kartlar sırayla karışır: her dönen karttan önce birincisi, sonra ikincisi. */
+  function ozetOku(modul){
+    const v = ozetHam(modul);
+    if(!v || ortam.simdi() - v.t > OZET_GUN * 864e5) return null;
+    const listeler = Object.keys(v.d).map(k => (Array.isArray(v.d[k]) ? v.d[k] : []));
+    const satirlar = [];
+    for(let i = 0; satirlar.length < OZET_SATIR && listeler.some(l => l.length > i); i++){
+      listeler.forEach(l => {
+        const x = l[i];
+        if(satirlar.length < OZET_SATIR && Array.isArray(x) && typeof x[0] === 'string' && typeof x[1] === 'string'){
+          satirlar.push({ u:x[0], m:x[1], k:KES_AD[x[2]] ? x[2] : null });
+        }
+      });
+    }
+    return satirlar.length ? { t:v.t, satirlar } : null;
+  }
+  function ozetZamani(t){
+    const simdi = new Date(ortam.simdi()), d = new Date(t);
+    const gun = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+    const fark = Math.round((gun(simdi) - gun(d)) / 864e5);
+    if(fark <= 0) return 'bugün ' + saatMetni(t);
+    if(fark === 1) return 'dün';
+    return fark + ' gün önce';
+  }
+  let ozetId = null;
+  function ozetCiz(){
+    if(typeof document === 'undefined') return;
+    document.querySelectorAll('[data-ozet]').forEach(el => {
+      const o = ozetOku(el.getAttribute('data-ozet'));
+      el.hidden = !o;
+      if(!o){ el.innerHTML = ''; return; }
+      el.innerHTML = '<span class="kart__ozet-sahne">' + o.satirlar.map((x, i) =>
+          '<span class="kart__ozet-satir' + (i ? '' : ' is-on') + '"><b>' + kac(x.u) + '</b> ' + kac(x.m)
+          + (x.k ? ' <i>' + KES_AD[x.k] + '</i>' : '') + '</span>').join('') + '</span>'
+        + '<span class="kart__ozet-ne">' + kac(ozetZamani(o.t)) + '</span>';
+    });
+    if(ozetId == null) ozetId = ortam.zamanla(ozetDondur, OZET_DON);
+  }
+  function ozetDondur(){
+    ozetId = null;
+    if(typeof document === 'undefined') return;
+    /* Giden satır yukarı solar, gelen aşağıdan belirir (sunucu.py stili). */
+    document.querySelectorAll('.kart__ozet-sahne').forEach(sahne => {
+      const l = sahne.children;
+      if(l.length < 2) return;
+      const i = Array.prototype.findIndex.call(l, x => x.classList.contains('is-on'));
+      Array.prototype.forEach.call(l, x => x.classList.remove('is-giden'));
+      if(i >= 0){ l[i].classList.remove('is-on'); l[i].classList.add('is-giden'); }
+      l[(i + 1) % l.length].classList.add('is-on');
+    });
+    ozetId = ortam.zamanla(ozetDondur, OZET_DON);
+  }
+  function azaltilmis(){ try{ return !!ortam.azalt(); }catch(e){ return true; } }
   /* Kart yeni içeriğin boyuna yumuşakça uzar/kısalır (zıplamaz). */
   let boyId = null;
   function kapiTazele(yon){
@@ -25171,11 +25314,22 @@ window.LIFEOS.HESAP = (function(){
     }
     kapiTazele();
   }
-  function kapiKapat(){
+  /* Kapı çekilirken solar (söz 15): kapı sayılmaz (data-hesap-kapi kalkar),
+     odak almaz, yalnız görünür; seçim sayfası/modül aynı anda belirir.
+     `anim:false` (sıfırlama) ya da azaltılmış hareket: anında. */
+  const KAPI_CIKIS_MS = 420;
+  function kapiKapat(anim){
     if(typeof document === 'undefined') return;
     const el = document.querySelector('[data-hesap-kapi]');
-    if(el) el.remove();
     document.documentElement.classList.remove('hesap-kapi-acik');
+    if(!el) return;
+    if(anim === false || azaltilmis()){ el.remove(); return; }
+    el.removeAttribute('data-hesap-kapi');
+    el.setAttribute('data-hesap-kapi-cikis', '');
+    el.setAttribute('aria-hidden', 'true');
+    el.inert = true;
+    el.classList.add('is-cikis');
+    ortam.zamanla(() => el.remove(), KAPI_CIKIS_MS);
   }
 
   /* ------------------------------------------------------- hesap işleri (sayfa)
@@ -26056,11 +26210,25 @@ window.LIFEOS.HESAP = (function(){
     bagla();
     if(ornekMi()){ durumYaz('ornek', 'Örnek profil eşitlenmez.'); return; }
     durumYaz('bilinmiyor', '');
+    const giris = ayar.modul === 'giris';
+    /* Söz 15: ağ beklemeden verilebilen karar hemen verilir. */
+    if(giris){
+      if(oturum() || betaMi()) girisHazir();
+      else if(ortam.yerelUygulama()){ kapiAc(); girisHazir(); }
+      ozetCiz();
+      if(typeof window !== 'undefined' && window.addEventListener){
+        window.addEventListener('pageshow', () => ozetCiz());
+      }
+    }
     yokla().then(() => {
       cipTazele();
-      if(kapiGerekli()) kapiAc();
+      if(kapiGerekli()){
+        if(!kapiAcikMi()) kapiAc();
+        else if(kapi.gorunum === 'karsila') kapiTazele();   // sunucunun durumu (kurulum, kayıt) çizilsin
+      }else if(giris && kapiAcikMi()) kapiKapat(false);
+      if(giris) girisHazir();
       return esitle();
-    }).catch(e => console.error('Hesap:', e));
+    }).catch(e => { if(giris) girisHazir(); console.error('Hesap:', e); });
     if(araId == null && typeof setInterval === 'function'){
       araId = setInterval(() => {
         if(typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
@@ -26079,8 +26247,14 @@ window.LIFEOS.HESAP = (function(){
     aktif = null; siradaki = null; panelMesaj = ''; onayBitis = 0;
     modelBekliyor = false; ekranBekliyor = false; tazeleme = null; profilTazelendi = false;
     kapi = { gorunum:'karsila', soru:null, ad:'', adres:null, secili:null, ilk:true };
-    kapiKapat();
+    kapiKapat(false);
     merkezKapat();
+    if(ozetId != null) ortam.iptal(ozetId);
+    ozetId = null;
+    if(typeof document !== 'undefined'){
+      document.querySelectorAll('[data-hesap-kapi-cikis]').forEach(el => el.remove());
+      document.documentElement.classList.remove('giris-hazir');
+    }
   }
 
   /* Modül seçim sayfası (sistem/sunucu.py giris_html, telefonda da): giriş
@@ -26095,6 +26269,7 @@ window.LIFEOS.HESAP = (function(){
     betaGir, kapiAc, kapiAcikMi, dugme, durum, dinle, silmeNotu, panelHtml, adresDuzelt, cihazKimligi, cizIste,
     ben, profilAyarla, cihazlar, cihazCikar, otekilerdenCik, kullanicilar, yonet, kayitAyarla, kullaniciEkle,
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
+    ozetYaz, ozetOku, ozetCiz,
     _ortam:ortam, _sifirla, _istek:istek,
     CEREZ, ONEK,
   };
@@ -58831,8 +59006,10 @@ R.Screens.today = (function(){
     /* İki küçük widget yan yana (iOS gibi): «Bugün» günün kendisi, «Gidişat»
        haftaların toplamı. Her biri kendi başına döner. */
     const bugunAd = ['Günlük sayaç', 'Seri'];
-    return raw(V.donen({ id:'ays-bugun', ad:'Bugün', maddeler:m.filter(x => bugunAd.indexOf(x.ust) >= 0) })
-      + V.donen({ id:'ays-gidisat', ad:'Gidişat', maddeler:m.filter(x => bugunAd.indexOf(x.ust) < 0) }));
+    /* Seçim sayfasının minik özeti (hesap.js söz 16); örnek profil yazmaz. */
+    const ozet = R.Ornek && R.Ornek.acik() ? null : 'ays';
+    return raw(V.donen({ id:'ays-bugun', ad:'Bugün', ozet, maddeler:m.filter(x => bugunAd.indexOf(x.ust) >= 0) })
+      + V.donen({ id:'ays-gidisat', ad:'Gidişat', ozet, maddeler:m.filter(x => bugunAd.indexOf(x.ust) < 0) }));
   }
 
   /* 04 SAYFA BAŞI CÜMLESİ (belgeler/ekip/EKIP-PLANI Ek A) — günün durumu TEK cümle,

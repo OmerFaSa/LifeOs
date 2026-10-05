@@ -837,7 +837,9 @@ ESP.Screens.today = (function(){
     calisma.push({ ust:'Disiplinler', sayi:sayi({ deger:ESP.Mod.active().length, kesinlik:'measured' }), cumle:'açık disiplin.',
       vurgu:'Çalışma çekmecesinde.', sistem:'esp' });
 
-    return raw(V.donen({ id:'esp-bugun', ad:'Bugün', maddeler:bugun }) + V.donen({ id:'esp-calisma', ad:'Çalışma', maddeler:calisma }));
+    /* Seçim sayfasının minik özeti (hesap.js söz 16); örnek profil yazmaz. */
+    const ozet = ESP.Ornek && ESP.Ornek.acik() ? null : 'esp';
+    return raw(V.donen({ id:'esp-bugun', ad:'Bugün', ozet, maddeler:bugun }) + V.donen({ id:'esp-calisma', ad:'Çalışma', ozet, maddeler:calisma }));
   }
 
   function render(){

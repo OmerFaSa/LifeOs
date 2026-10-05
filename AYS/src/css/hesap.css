@@ -249,6 +249,13 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 @keyframes hesap-tanitim-gel{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
 
 @keyframes hesap-kapi-gel{ from{ opacity:0; } to{ opacity:1; } }
+/* Kapı çekilirken (beta girişi, giriş, kayıt; hesap.js söz 15): önce kart
+   hafifçe yükselip bulanıklaşarak solar, perde arkasından çekilir; seçim
+   sayfası aynı anda belirir. 420 ms, sakin biter; hiçbir şey zıplamaz. */
+.hesap-kapi.is-cikis{ pointer-events:none; animation:hesap-kapi-cik .42s cubic-bezier(.4,0,.2,1) both; }
+.hesap-kapi.is-cikis .hesap-kapi__sahne{ animation:hesap-sahne-cik .34s cubic-bezier(.4,0,.2,1) both; }
+@keyframes hesap-kapi-cik{ from{ opacity:1; } to{ opacity:0; } }
+@keyframes hesap-sahne-cik{ to{ opacity:0; transform:translateY(-10px) scale(.98); filter:blur(4px); } }
 @keyframes hesap-kart-gel{ from{ opacity:0; transform:translateY(10px) scale(.985); } to{ opacity:1; transform:none; } }
 @keyframes hesap-ileri{ from{ opacity:0; transform:translateX(18px); filter:blur(2px); } to{ opacity:1; transform:none; filter:none; } }
 @keyframes hesap-geri{ from{ opacity:0; transform:translateX(-18px); filter:blur(2px); } to{ opacity:1; transform:none; filter:none; } }
@@ -439,7 +446,8 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 .hesap-cip span:last-child{ max-width:140px; overflow:hidden; text-overflow:ellipsis; }
 
 @media (prefers-reduced-motion:reduce){
-  .hesap-kapi, .hesap-kapi__kart, .hesap-kapi__ic, .hesap-kapi__isaret g, .hesap-merkez, .hesap-merkez__kart,
+  .hesap-kapi, .hesap-kapi.is-cikis, .hesap-kapi.is-cikis .hesap-kapi__sahne,
+  .hesap-kapi__kart, .hesap-kapi__ic, .hesap-kapi__isaret g, .hesap-merkez, .hesap-merkez__kart,
   .hesap-merkez__ic, .hesap-merkez__mesaj, .hesap-kapi__tanitim, .hesap-kapi__sistemler li,
   .hesap-kapi__sozler{ animation:none !important; }
 }

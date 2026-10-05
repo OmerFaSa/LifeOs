@@ -353,8 +353,9 @@ def run():
             ok('href="http://127.0.0.1:%d/"' % port in h, a)
         no(any(x in h for x in ('/logo/hkm.png', 'data-hkm', 'id="guncel"', "<script>", "/api/")),
            "telefonda HKM, guncelleme ve bilgisayarin betigi yok")
-        eq(h.count("<script"), 1)                         # yalniz giris ekrani (hesap.js)
+        eq(h.count("<script"), 2)                         # giris ekrani (hesap.js) + Animasyonlar ayari
         ok('<script src="/hesap.js" data-giris></script>' in h)
+        ok('<script src="/animasyon.js"></script>' in h)
         for y in ("__KARTLAR__", "__SURUM__", "__IKON__"):
             no(y in h)
         bas = sunucu.giris_html()
@@ -364,6 +365,24 @@ def run():
             ok(sunucu._kac(ad) in h and sunucu._kac(aciklama) in h, kisa)
         ok("telefonda" in h)
     test("telefon giris sayfasi: uc modul karti, HKM/guncelleme/betik yok, tasarim ayni", t_telefon_sayfa)
+
+    # 2026-10-06 (kullanici, telefondan): «hesap girme kismina gelmeden once
+    # milisaniyelik ilk o secim ekranini gosteriyor»; «secme kismi daha guzel,
+    # animasyonlu; o bolumle ilgili minik ozetler gecilsin».
+    def t_secim_sayfasi():
+        for h in (sunucu.giris_html(), sunucu.giris_html(telefon=True)):
+            ok("html:not(.giris-hazir) .sarmal{ visibility:hidden;" in h)      # karar gelene dek gizli
+            ok("@keyframes giris-yedek" in h)                                   # betik yoksa kendiliginden
+            ok("animation:giris-gel" in h)
+            for a in ("ays", "spi", "esp"):
+                ok('data-ozet="%s"' % a in h, a)                               # minik ozet yuvasi
+                ok('data-modul="%s"' % a in h, a)
+            no('data-ozet="hkm"' in h)
+        pc, tel = sunucu.giris_html(), sunucu.giris_html(telefon=True)
+        eq(tel.count('class="kart__ok"'), 3)                                    # telefonda «Ac» yerine ok
+        no('<span class="dugme">Aç</span>' in tel)
+        ok('<span class="dugme">Aç</span>' in pc and 'data-hkm="1"' in pc)       # PC'de durum ve dugme kalir
+    test("secim sayfasi: karar gelene dek gizli, belirme, ozet yuvalari, telefonda ok", t_secim_sayfasi)
 
     def t_uclar():
         srv = _Srv(("127.0.0.1", 0), sunucu.Giris)

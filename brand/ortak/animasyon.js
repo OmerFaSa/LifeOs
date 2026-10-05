@@ -80,10 +80,28 @@ window.LIFEOS = window.LIFEOS || {};
     if(webdriver == null){ try{ webdriver = !!navigator.webdriver; }catch(e){ webdriver = false; } }
     return webdriver ? 'sistem' : 'tam';
   }
+  /* SEÇİM SAYFASI (4180) ayrı kapıdır: modülün deposunu göremez. Tercih
+     kapıya bakmayan çereze de yazılır; deposunda tercih olmayan sayfa
+     (seçim sayfası, ilk açılan modül) çerezden okur (2026-10-06). */
+  const CEREZ = 'lifeos_hareket';
+  function cerezOku(){
+    try{ const m = document.cookie.match(/(?:^|;\s*)lifeos_hareket=([^;]*)/); return m ? m[1] : null; }catch(e){ return null; }
+  }
+  function cerezYaz(k){
+    try{
+      const guvenli = location.protocol === 'https:' ? '; Secure' : '';
+      document.cookie = CEREZ + '=' + k + '; Path=/; Max-Age=34560000; SameSite=Strict' + guvenli;
+    }catch(e){ /* çerez kapalı: bu kapıda geçerli */ }
+  }
   function oku(){
     let v = null;
     try{ v = localStorage.getItem(ANAHTAR); }catch(e){}
-    return KIPLER.indexOf(v) >= 0 ? v : varsayilan();
+    if(KIPLER.indexOf(v) >= 0){
+      if(cerezOku() !== v) cerezYaz(v);
+      return v;
+    }
+    const c = cerezOku();
+    return KIPLER.indexOf(c) >= 0 ? c : varsayilan();
   }
   /* Her matchMedia çağrısında depoya gidilmez: kip bellekte tutulur,
      ayarla(), yenile() ve başka sekmenin yazması (storage) tazeler. */
@@ -189,6 +207,7 @@ window.LIFEOS = window.LIFEOS || {};
   function ayarla(k){
     if(KIPLER.indexOf(k) < 0) return false;
     try{ localStorage.setItem(ANAHTAR, k); }catch(e){ /* depo kapalı: bu sayfada geçerli */ }
+    cerezYaz(k);
     simdiki = k;
     uygula(k);
     seciciGuncelle();

@@ -172,6 +172,30 @@
       });
     });
 
+    /* Seçim sayfası (4180) ayrı kapıdır; modülün deposunu göremez. Windows'ta
+       animasyon kapalıyken tarayıcı «azalt» der ve sayfa hiç kıpırdamazdı
+       (kullanıcı, 2026-10-06: «animasyonla gelsin»). Tercih kapıya bakmayan
+       çereze de yazılır; deposunda tercih olmayan sayfa çerezden okur. */
+    it('tercih seçim sayfasına çerezle taşınır; depoda yoksa çerezden okunur', () => {
+      let eskiCerez = (document.cookie.match(/(?:^|;\s*)lifeos_hareket=([^;]*)/) || [])[1] || null;
+      kipleSina(() => {
+        try{
+          A.ayarla('az');
+          expect(/(?:^|;\s*)lifeos_hareket=az(?:;|$)/.test(document.cookie)).toBe(true);
+          localStorage.removeItem(A.ANAHTAR);
+          document.cookie = 'lifeos_hareket=sistem; Path=/; SameSite=Strict';
+          A.yenile();
+          expect(A.kip()).toBe('sistem');
+          document.cookie = 'lifeos_hareket=bozuk; Path=/; SameSite=Strict';
+          A.yenile();
+          expect(A.kip()).toBe(A.varsayilan());
+        }finally{
+          document.cookie = eskiCerez == null ? 'lifeos_hareket=; Path=/; Max-Age=0'
+            : 'lifeos_hareket=' + eskiCerez + '; Path=/; SameSite=Strict';
+        }
+      });
+    });
+
     it('modüller arası geçiş: yalnız izinli tercihler adrese girer ve varışta depoya yazılır', () => {
       const eski = {};
       A.TASINAN.forEach(k => { try{ eski[k] = localStorage.getItem(k); localStorage.removeItem(k); }catch(e){} });

@@ -1249,8 +1249,10 @@ R.Screens.today = (function(){
     /* İki küçük widget yan yana (iOS gibi): «Bugün» günün kendisi, «Gidişat»
        haftaların toplamı. Her biri kendi başına döner. */
     const bugunAd = ['Günlük sayaç', 'Seri'];
-    return raw(V.donen({ id:'ays-bugun', ad:'Bugün', maddeler:m.filter(x => bugunAd.indexOf(x.ust) >= 0) })
-      + V.donen({ id:'ays-gidisat', ad:'Gidişat', maddeler:m.filter(x => bugunAd.indexOf(x.ust) < 0) }));
+    /* Seçim sayfasının minik özeti (hesap.js söz 16); örnek profil yazmaz. */
+    const ozet = R.Ornek && R.Ornek.acik() ? null : 'ays';
+    return raw(V.donen({ id:'ays-bugun', ad:'Bugün', ozet, maddeler:m.filter(x => bugunAd.indexOf(x.ust) >= 0) })
+      + V.donen({ id:'ays-gidisat', ad:'Gidişat', ozet, maddeler:m.filter(x => bugunAd.indexOf(x.ust) < 0) }));
   }
 
   /* 04 SAYFA BAŞI CÜMLESİ (belgeler/ekip/EKIP-PLANI Ek A) — günün durumu TEK cümle,

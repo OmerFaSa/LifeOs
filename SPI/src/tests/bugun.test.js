@@ -131,4 +131,29 @@
       }finally{ SP.Model.openFlags = eski; SP.S.flags = []; }
     });
   });
+  /* Seçim sayfasının minik özeti (hesap.js söz 16; kullanıcı, 2026-10-06):
+     Bugün çizilince dönen kartlar özet olarak yazılır; örnek profilin
+     verisi seçim sayfasına hiç gitmez. */
+  describe('Bugün — seçim sayfası özeti', () => {
+    it('Bugün çizilince özet yazılır; örnek profilde yazılmaz', async () => {
+      const H = window.LIFEOS.HESAP;
+      const sil = () => { document.cookie = 'lifeos_ozet_spi=; Path=/; Max-Age=0'; };
+      const eski = SP.Ornek ? SP.Ornek.acik : null;
+      sil();
+      try{
+        resetState();
+        yerlestir(await SP.Screens.today.render()).remove();
+        const o = H.ozetOku('spi');
+        expect(!!o && o.satirlar.length > 0).toBe(true);
+        expect(o.satirlar.every(x => typeof x.u === 'string' && x.u.length > 0)).toBe(true);
+        sil();
+        SP.Ornek.acik = () => true;
+        yerlestir(await SP.Screens.today.render()).remove();
+        expect(H.ozetOku('spi')).toBeNull();
+      }finally{
+        if(SP.Ornek) SP.Ornek.acik = eski;
+        sil();
+      }
+    });
+  });
 })();

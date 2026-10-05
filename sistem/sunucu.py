@@ -281,6 +281,7 @@ GIRIS_SAYFASI = """<!doctype html>
 <title>LifeOS — Kontrol paneli</title>
 <link rel="icon" href="__IKON__"/>
 <link rel="stylesheet" href="/hesap.css"/>
+<script src="/animasyon.js"></script>
 <style>
 :root{ color-scheme:light dark;
   --bg:#f5f6f8; --yuzey:#ffffff; --yuzey-2:#f0f1f4; --fg:#15171a; --fg-2:#4a4f57; --fg-3:#6b717b;
@@ -350,27 +351,52 @@ button{ font:inherit; }
 /* ---- sistemler ---- */
 .bolum{ font-size:12px; font-weight:650; letter-spacing:.08em; text-transform:uppercase; color:var(--fg-3); margin:0 0 12px 2px; }
 .izgara{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; }
-.kart{ display:flex; flex-direction:column; gap:14px; padding:18px; border-radius:14px; background:var(--yuzey);
+/* SECIM KARTI (kullanici, 2026-10-06: «daha guzel, modern, sade ve
+   animasyonlu; o bolumle ilgili minik ozetler gecilsin»). Ferah, yumusak;
+   ust cizgi yerine modulun renginde kosede hafif bir isik. Dokununca hafifce
+   basilir, birakinca yerine oturur; ok yana kayar. */
+.kart{ display:flex; flex-direction:column; padding:20px; border-radius:20px; background:var(--yuzey);
   border:1px solid var(--cizgi); box-shadow:var(--golge); color:inherit; text-decoration:none;
-  transition:border-color .15s, transform .15s; position:relative; overflow:hidden; }
-.kart::before{ content:''; position:absolute; left:0; top:0; right:0; height:3px; background:var(--renk); opacity:.9; }
-.kart:hover{ border-color:var(--cizgi-2); transform:translateY(-1px); }
+  position:relative; overflow:hidden; isolation:isolate; -webkit-tap-highlight-color:transparent;
+  transition:transform .42s cubic-bezier(.32,.72,0,1), box-shadow .42s cubic-bezier(.32,.72,0,1), border-color .2s; }
+.kart::before{ content:''; position:absolute; z-index:-1; top:-55%; right:-25%; width:70%; aspect-ratio:1; border-radius:50%;
+  background:radial-gradient(closest-side, var(--renk-t), transparent); pointer-events:none; }
+.kart:hover{ border-color:var(--cizgi-2); transform:translateY(-2px);
+  box-shadow:0 1px 2px rgba(16,24,40,.05), 0 14px 32px -12px rgba(16,24,40,.16); }
+.kart:active{ transform:scale(.985); transition-duration:.12s; }
 .kart__ust{ display:flex; gap:14px; align-items:center; }
-.logo{ flex:none; width:52px; height:52px; border-radius:13px; background:var(--renk-t); display:grid; place-items:center; }
+.kart__metin{ flex:1; min-width:0; }
+.kart__ok{ flex:none; width:20px; height:20px; color:var(--fg-3); fill:none; stroke:currentColor; stroke-width:2;
+  stroke-linecap:round; stroke-linejoin:round; transition:transform .42s cubic-bezier(.32,.72,0,1); }
+.kart:hover .kart__ok{ transform:translateX(3px); }
+.logo{ flex:none; width:48px; height:48px; border-radius:14px; background:var(--renk-t); display:grid; place-items:center; }
 .logo img{ width:40px; height:40px; object-fit:contain; }
 /* SADE (kullanıcı, 2026-10-05: «görseller profesyonel gözükmüyor; daha
    sade»): parlak 3B logo yerine LifeOS işaretinin şekli, modülün renginde
    — AYS kare, SPİ daire, ESP karo, Merkez altıgen (renk körlüğünde de
    ayrılır). */
-.sekil{ display:block; width:18px; height:18px; background:var(--renk); }
+.sekil{ display:block; width:20px; height:20px; background:var(--renk); }
 .sekil--ays{ border-radius:4px; }
 .sekil--spi{ border-radius:50%; }
 .sekil--esp{ transform:rotate(45deg) scale(.86); border-radius:3px; }
 .sekil--hkm{ clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
-.kart__ad{ font-size:16px; font-weight:650; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.kart__ad{ font-size:17px; font-weight:650; letter-spacing:-.01em; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
 .kart__ad small{ font-size:12.5px; font-weight:500; color:var(--fg-3); }
 .kart__acik{ color:var(--fg-2); font-size:13.5px; margin-top:2px; }
-.kart__alt{ display:flex; align-items:center; gap:10px; margin-top:auto; padding-top:12px; border-top:1px solid var(--cizgi); }
+.kart__alt{ display:flex; align-items:center; gap:10px; margin-top:auto; padding-top:14px; }
+/* Minik ozet (hesap.js soz 16): Bugun'un donen maddeleri; her sayi kesinligiyle,
+   sagda ne zamanin ozeti oldugu. Giden satir yukari solar, gelen asagidan. */
+.kart__ozet{ display:flex; align-items:center; gap:12px; margin-top:16px; padding-top:14px; border-top:1px solid var(--cizgi);
+  font-size:13px; color:var(--fg-2); }
+.kart__ozet-sahne{ position:relative; flex:1; min-width:0; height:21px; overflow:hidden; }
+.kart__ozet-satir{ position:absolute; inset:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  opacity:0; transform:translateY(10px);
+  transition:opacity .5s cubic-bezier(.32,.72,0,1), transform .5s cubic-bezier(.32,.72,0,1); }
+.kart__ozet-satir.is-giden{ transform:translateY(-10px); }
+.kart__ozet-satir.is-on{ opacity:1; transform:none; }
+.kart__ozet b{ font-weight:600; color:var(--fg); }
+.kart__ozet i{ font-style:normal; font-size:11.5px; color:var(--fg-3); margin-left:2px; }
+.kart__ozet-ne{ flex:none; font-size:12px; color:var(--fg-3); }
 .durum{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--fg-3); }
 .durum i{ width:8px; height:8px; border-radius:50%; background:var(--kapali); }
 .durum[data-hal="acik"]{ color:var(--ok); } .durum[data-hal="acik"] i{ background:var(--ok); box-shadow:0 0 0 3px var(--ok-t); }
@@ -387,17 +413,32 @@ button{ font:inherit; }
   .surum{ display:none; }
   .ust:has(.hesap-cip:not([hidden])) h1 span{ display:none; }
 }
-@media (prefers-reduced-motion:reduce){ *{ transition:none !important; } }
+/* TITREMEZ (hesap.js soz 15): hesap.js «giris ekrani gerekli mi» kararini
+   verene dek sayfa gorunmez; giris ekranindan once bir an gorunuyordu.
+   Betik yuklenemezse 1,5 sn sonra kendiliginden gorunur. */
+html:not(.giris-hazir) .sarmal{ visibility:hidden; animation:giris-yedek 0s 1.5s forwards; }
+@keyframes giris-yedek{ to{ visibility:visible; } }
+/* BELIRME: giris ekrani yokken (acilis, beta girisi, giris) once yer, sonra
+   yazi; sirayla, sakin baslayarak. */
+html.giris-hazir:not(.hesap-kapi-acik) :is(.ust, .guncel, .bolum, .kart){
+  animation:giris-gel .62s cubic-bezier(.32,.72,0,1) both; animation-delay:calc(var(--sira, 0) * 70ms); }
+html.giris-hazir:not(.hesap-kapi-acik) :is(.kart__ust, .kart__ozet, .kart__alt){
+  animation:giris-yazi .5s cubic-bezier(.32,.72,0,1) both; animation-delay:calc(var(--sira, 0) * 70ms + 140ms); }
+@keyframes giris-gel{ from{ opacity:0; transform:translateY(16px) scale(.985); } to{ opacity:1; transform:none; } }
+@keyframes giris-yazi{ from{ opacity:0; filter:blur(3px); } to{ opacity:1; filter:none; } }
+/* Azaltilmis harekette (LifeOS'un kendi ayari, animasyon.js) gecis yok;
+   kendiliginden gorunme (yedek) kalir. */
+@media (prefers-reduced-motion:reduce){ *{ transition:none !important; } :not(.sarmal){ animation:none !important; } }
 </style></head><body>
 <main class="sarmal">
-  <header class="ust">
+  <header class="ust" style="--sira:0">
     <span class="isaret" aria-hidden="true"><b></b><b></b><b></b><b></b></span>
     <h1>LifeOS<span>Kontrol paneli</span></h1>
     <button type="button" class="hesap-cip" data-hesap-cip hidden></button>
     <span class="surum" id="surum">__SURUM__</span>
   </header>
 
-  <section class="guncel" id="guncel" data-hal="bekle" aria-live="polite" aria-label="Güncelleme">
+  <section class="guncel" id="guncel" data-hal="bekle" aria-live="polite" aria-label="Güncelleme" style="--sira:1">
     <div class="guncel__ikon" id="guncel-ikon"></div>
     <div class="guncel__govde">
       <div class="guncel__baslik" id="guncel-baslik">Güncelleme kontrol ediliyor…</div>
@@ -410,7 +451,7 @@ button{ font:inherit; }
     </div>
   </section>
 
-  <h2 class="bolum">Sistemler</h2>
+  <h2 class="bolum" style="--sira:1">Sistemler</h2>
   <div class="izgara">
   __KARTLAR__
   </div>
@@ -541,38 +582,39 @@ def _kac(t):
             .replace(">", "&gt;").replace('"', "&quot;"))
 
 
+# Telefonda kartin sagindaki ok («Ac» dugmesi yerine; kartin tamami baglantidir).
+_OK = ('<svg class="kart__ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6.5L15 12l-5.5 5.5"/></svg>')
+
+
 def giris_html(telefon=False):
     """Giris sayfasi. telefon=True: iPhone uygulamasinin acilis sayfasi
     (uygulama/ios/hazirla.py derlemede uretir) — ayni stil ve kartlar; HKM
     karti, guncelleme kutusu ve bilgisayarin API'lerine giden betik yok
     (telefonda ikisi de yok; moduller HKM'siz calisir, AGENTS §1.4)."""
     kartlar = []
+    sira = 2
     for anahtar, kisa, ad, aciklama, port in KARTLAR:
         adres = "http://%s:%d/" % (HOST, port)
         hkm = anahtar == "hkm"
-        if telefon:
-            if hkm:
-                continue
-            kartlar.append(
-                '<a class="kart" href="%s" style="--renk:var(--%s);--renk-t:var(--%s-t)">'
-                '<div class="kart__ust"><span class="logo" aria-hidden="true"><i class="sekil sekil--%s"></i></span>'
-                '<div><div class="kart__ad">%s <small>%s</small></div>'
-                '<div class="kart__acik">%s</div></div></div>'
-                '<div class="kart__alt"><span class="dugme">Aç</span></div></a>'
-                % (adres, anahtar, anahtar, anahtar, _kac(kisa), _kac(ad), _kac(aciklama)))
+        if telefon and hkm:
             continue
-        kartlar.append(
-            '<a class="kart" href="%s" style="--renk:var(--%s);--renk-t:var(--%s-t)" %s>'
-            '<div class="kart__ust"><span class="logo" aria-hidden="true"><i class="sekil sekil--%s"></i></span>'
-            '<div><div class="kart__ad">%s <small>%s</small></div>'
-            '<div class="kart__acik">%s</div></div></div>'
-            '<div class="kart__alt"><span class="durum" data-hal="bekle"><i></i><span>Bakılıyor…</span></span>'
-            '<span class="port">:%d</span>'
-            '<span class="dugme">%s</span></div></a>'
-            % (adres, anahtar, anahtar,
-               'data-hkm="1"' if hkm else 'data-yokla="%s"' % adres,
-               anahtar, _kac(kisa), _kac(ad), _kac(aciklama), port,
-               "Başlat" if hkm else "Aç"))
+        sira += 1
+        # Minik ozet yuvasi (hesap.js soz 16): HKM'nin kendi ozeti yok.
+        ozet = '' if hkm else '<div class="kart__ozet" data-ozet="%s" hidden></div>' % anahtar
+        bas = ('<a class="kart" href="%s" data-modul="%s" title="%s · %s" style="--renk:var(--%s);--renk-t:var(--%s-t);--sira:%d"%s>'
+               '<div class="kart__ust"><span class="logo" aria-hidden="true"><i class="sekil sekil--%s"></i></span>'
+               '<div class="kart__metin"><div class="kart__ad">%s <small>%s</small></div>'
+               '<div class="kart__acik">%s</div></div>%s</div>'
+               % (adres, anahtar, _kac(kisa), port, anahtar, anahtar, sira,
+                  "" if telefon else (' data-hkm="1"' if hkm else ' data-yokla="%s"' % adres),
+                  anahtar, _kac(kisa), _kac(ad), _kac(aciklama),
+                  _OK if telefon else ""))
+        if telefon:
+            kartlar.append(bas + ozet + '</a>')
+            continue
+        kartlar.append(bas + ozet
+                       + '<div class="kart__alt"><span class="durum" data-hal="bekle"><i></i><span>Bakılıyor…</span></span>'
+                       '<span class="dugme">%s</span></div></a>' % ("Başlat" if hkm else "Aç"))
     s = guncelle.surum()
     surum = ("sürüm %s · %s" % (s["kisa"], s["tarih"])) if s else "zip sürümü"
     sayfa = GIRIS_SAYFASI
@@ -688,8 +730,10 @@ class Giris(SimpleHTTPRequestHandler):
         return self.send_error(405)
 
     def _hesap_dosyasi(self, ad):
-        """/hesap.js, /hesap.css — giris ekrani (brand/ortak); kapali liste."""
-        tur = {"hesap.js": "text/javascript; charset=utf-8", "hesap.css": "text/css; charset=utf-8"}[ad]
+        """/hesap.js, /hesap.css, /animasyon.js — giris ve secim sayfasi
+        (brand/ortak); kapali liste."""
+        tur = {"hesap.js": "text/javascript; charset=utf-8", "hesap.css": "text/css; charset=utf-8",
+               "animasyon.js": "text/javascript; charset=utf-8"}[ad]
         with open(os.path.join(KOK, "brand", "ortak", ad), "rb") as f:
             govde = f.read()
         self.send_response(200)
@@ -722,7 +766,7 @@ class Giris(SimpleHTTPRequestHandler):
         yol = self.path.split("?", 1)[0]
         if yol.startswith("/api/hesap/"):
             return hesap.isle(self)
-        if yol in ("/hesap.js", "/hesap.css"):
+        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js"):
             return self._hesap_dosyasi(yol[1:])
         if yol == "/api/guncelleme":
             return self._json(200, guncelleme_durumu(taze="taze=1" in self.path))

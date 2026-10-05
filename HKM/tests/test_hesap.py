@@ -698,6 +698,9 @@ def run():
         try:
             with urllib.request.urlopen(adres + "/hesap.js", timeout=10) as c:
                 ok(b"LIFEOS.HESAP" in c.read() and "javascript" in c.headers.get("Content-Type"))
+            # Secim sayfasi LifeOS'un kendi «Animasyonlar» ayarini izler (2026-10-06).
+            with urllib.request.urlopen(adres + "/animasyon.js", timeout=10) as c:
+                ok(b"L.ANIMASYON = Object.freeze" in c.read() and "javascript" in c.headers.get("Content-Type"))
             with urllib.request.urlopen(adres + "/api/hesap/durum", timeout=10) as c:
                 ok(json.loads(c.read())["kurulum"])
             q = urllib.request.Request(adres + "/api/hesap/kayit", method="POST", data=json.dumps(
