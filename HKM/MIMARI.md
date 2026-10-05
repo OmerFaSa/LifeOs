@@ -1631,7 +1631,11 @@ gösterilir ve onaylanırsa **o sistemin kendi kodu** uygular.
 **Modüller girişte sorar, sekmeye dönünce yeniden sorar.** Önce yalnız
 açılışta soruluyordu: HKM bir teklif bıraktığında, sayfa açıkken
 görmüyordun. Odaklanma bir kullanıcı eylemidir, çizim değil — bu istek
-hiçbir çizimde atılmaz ve 30 saniyeden sık tekrarlanmaz.
+hiçbir çizimde atılmaz ve 30 saniyeden sık tekrarlanmaz. Gelen teklif
+(SPİ'de King'in bildirimi de) modülün belleğine hemen konur; ekran ise
+kullanıcı yazmıyorken yeniden çizilir (`app.js` `arkaPlan`,
+`brand/ortak/hesap.js` `cizIste`): dönüşte yazılıp kaydedilmemiş değer
+silinmez. Değişmeyen bildirim listesi ekranı hiç çizmez.
 
 **Bugün ekranından sistemler açılır.** Üç kartın her biri kendi sistemine
 bağlantı taşır ve yanındaki nokta o kapının gerçekten cevap verdiğini

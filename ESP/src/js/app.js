@@ -1582,6 +1582,84 @@ ESP.App = (function(){
     }, 1000);
   }
 
+  /* --------------------------------------------------------- arka plan işleri
+
+     Kullanıcı bir şey yapmadan gelen ve ekranı yeniden çizen işler:
+     açılışta bir kez (hedef ağı, sinyaller, ofis ve günün brifingi, HKM'nin
+     teklifleri) ve sekmeye dönünce (HKM). Her biri çizimi kendisine verilen
+     `ciz`le ister: açılışta render, testlerde sayaç.
+
+     YAZILAN SİLİNMEZ (söz 9, brand/ortak/hesap.js cizIste). Çizim #app'i
+     baştan kurar: bunlar render'ı doğrudan çağırırken yazılıp
+     kaydedilmemiş değer siliniyordu (bekleyen bir teklifle sekmeye dönünce,
+     brifing gelince). Veri hemen konur; çizim arkaCiz ile, kullanıcı
+     yazmıyorken. Kullanıcının kendi eylemi (tıklama, Kaydet, go) render'ı
+     doğrudan çağırır. */
+  function arkaCiz(ciz){
+    const H = window.LIFEOS && window.LIFEOS.HESAP;
+    if(H && typeof H.cizIste === 'function') H.cizIste(ciz);
+    else ciz();   /* hesap dosyası yoksa hemen (eski davranış) */
+  }
+
+  const arkaPlan = {
+    /* Hedef ağı: etkin hedeflerin özeti HKM'ye, zaman bütçesi geri
+       (brand/ortak/hedefag.js). HKM kapalıysa hiçbir şey olmaz. */
+    hedefAg(ciz){
+      return ESP.Hedefler.ag.gonder().then(r => { if(r && r.butce) arkaCiz(ciz); }).catch(() => {});
+    },
+    /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez
+       koşar ve gerekiyorsa TEK bir soru açar (core/signals.js). Açılışı
+       bloklamaz; soru varsa Bugün ekranına bir satır olarak düşer. */
+    sinyaller(ciz){
+      return ESP.Signals.sync().then(r => { if(r && r.changed) arkaCiz(ciz); })
+        .catch(e => console.error('Sinyal eşitleme hatası:', e));
+    },
+    /* Ofis açılışı bloklamaz: yüklenince yeniden çizilir ve günün
+       brifingi bir kez üretilir (dil modeline gidiyorsa saniyeler sürer). */
+    ofis(ciz){
+      return ESP.Office.load().then(async () => {
+        arkaCiz(ciz);
+        try{
+          if(ESP.Office.settings().autoBriefing !== false) await ESP.Office.dailyBriefing();
+        }catch(e){ /* brifing açılışı bozmaz */ }
+        arkaCiz(ciz);
+      });
+    },
+    /* HKM'nin bekleyen teklifleri — acilista BIR KEZ, ateşle ve unut.
+       Kuyruk okumak bir izin degildir: gelen sey Bugun ekraninda bir
+       teklif satiri olur ve kullanici gormeden hicbir sey uygulanmaz.
+       HKM kapaliysa kuyruk bos gelir ve hicbir sey degismez.
+       g = { ciz, simdi }: simdi saattir (testler ileri alır). */
+    hkm(g){
+      const simdi = g.simdi || (() => Date.now());
+      let sonSoru = simdi();
+      const teklifler = () => ESP.Beacon.intents().then(liste => {
+        if(liste && liste.length){ S.ui.hkmIntents = liste; arkaCiz(g.ciz); }
+      }).catch(() => {});
+      return {
+        acilis(){
+          return Promise.all([teklifler(),
+            /* Uygulamasi yarida kalmis teklifler: kuyruktan bagimsiz, YEREL
+               defterden gelir. HKM kapali olsa da gosterilir — cunku belirsiz
+               kalan is bizim tarafimizdadir. */
+            ESP.Beacon.intentDoubts().then(d => {
+              if(d && d.length){ S.ui.hkmDoubts = d; arkaCiz(g.ciz); }
+            }).catch(() => {})]);
+        },
+        /* Sekmeye GERI DONUNCE tekrar sor. Once yalniz acilista
+           soruluyordu: HKM bir teklif biraktiginda, sayfa acikken
+           gormuyordun — yenilemeden haberin olmuyordu. Odaklanma bir
+           kullanici eylemidir, cizim degil: bu istek hicbir cizimde
+           atilmaz. */
+        donus(){
+          if(simdi() - sonSoru < 30000) return Promise.resolve();   /* sekme takibi degil */
+          sonSoru = simdi();
+          return teklifler();
+        },
+      };
+    },
+  };
+
   async function boot(){
     try{
       /* Hareket (T4, hareket.js): odak halkası, önizleme, odak kapısı.
@@ -1678,11 +1756,8 @@ ESP.App = (function(){
       if(window.LIFEOS && LIFEOS.Pwa) LIFEOS.Pwa.kaydet().catch(() => {});
       /* Tek dosya görselsiz açıldıysa bunu söyle (brand/ortak/gorsel.js). */
       if(window.LIFEOS && LIFEOS.Gorsel) LIFEOS.Gorsel.denetle('esp', m => UI.toast(m, { life:12000 }));
-      /* Hedef ağı: etkin hedeflerin özeti HKM'ye, zaman bütçesi geri
-         (brand/ortak/hedefag.js). HKM kapalıysa hiçbir şey olmaz. */
-      if(ESP.Hedefler && ESP.Hedefler.ag){
-        ESP.Hedefler.ag.gonder().then(r => { if(r && r.butce) render(); }).catch(() => {});
-      }
+      /* Hedef ağı (arkaPlan.hedefAg). */
+      if(ESP.Hedefler && ESP.Hedefler.ag) arkaPlan.hedefAg(render);
       /* Otomatik yedek: HKM açıksa günde bir, doğrulanınca hatırlatma
          kapanır (brand/ortak/yedekag.js). HKM kapalıysa hiçbir şey olmaz. */
       if(window.LIFEOS && LIFEOS.YedekAg){
@@ -1753,23 +1828,9 @@ ESP.App = (function(){
       xpTara();
       startClock();
 
-      /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez
-         koşar ve gerekiyorsa TEK bir soru açar (core/signals.js). Açılışı
-         bloklamaz; soru varsa Bugün ekranına bir satır olarak düşer. */
-      if(ESP.Signals){
-        ESP.Signals.sync().then(r => { if(r && r.changed) render(); })
-          .catch(e => console.error('Sinyal eşitleme hatası:', e));
-      }
-
-      /* Ofis açılışı bloklamaz: yüklenince yeniden çizilir ve günün
-         brifingi bir kez üretilir. */
-      ESP.Office.load().then(async () => {
-        render();
-        try{
-          if(ESP.Office.settings().autoBriefing !== false) await ESP.Office.dailyBriefing();
-        }catch(e){ /* brifing açılışı bozmaz */ }
-        render();
-      });
+      /* Denetim sinyalleri ve ofis (arkaPlan.sinyaller, arkaPlan.ofis). */
+      if(ESP.Signals) arkaPlan.sinyaller(render);
+      arkaPlan.ofis(render);
 
 
       /* HKM işareti — AÇILIŞTA BİR KEZ, aralığı dolduysa. Bir ekranın
@@ -1778,35 +1839,12 @@ ESP.App = (function(){
          bloklamaz. İşaret kapalıysa (varsayılan) hiçbir şey olmaz. */
       if(ESP.Beacon) ESP.Beacon.ping();
 
-      /* HKM'nin bekleyen teklifleri — acilista BIR KEZ, ateşle ve unut.
-         Kuyruk okumak bir izin degildir: gelen sey Bugun ekraninda bir
-         teklif satiri olur ve kullanici gormeden hicbir sey uygulanmaz.
-         HKM kapaliysa kuyruk bos gelir ve hicbir sey degismez. */
+      /* HKM'nin teklifleri: açılışta bir kez, sekmeye dönünce yeniden
+         (arkaPlan.hkm). */
       if(ESP.Beacon){
-        ESP.Beacon.intents().then(liste => {
-          if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
-        }).catch(() => {});
-        /* Uygulamasi yarida kalmis teklifler: kuyruktan bagimsiz, YEREL
-           defterden gelir. HKM kapali olsa da gosterilir — cunku belirsiz
-           kalan is bizim tarafimizdadir. */
-        ESP.Beacon.intentDoubts().then(d => {
-          if(d && d.length){ S.ui.hkmDoubts = d; render(); }
-        }).catch(() => {});
-
-        /* Sekmeye GERI DONUNCE tekrar sor. Once yalniz acilista
-           soruluyordu: HKM bir teklif biraktiginda, sayfa acikken
-           gormuyordun — yenilemeden haberin olmuyordu. Odaklanma bir
-           kullanici eylemidir, cizim degil: bu istek hicbir cizimde
-           atilmaz. */
-        let sonSoru = Date.now();
-        document.addEventListener('visibilitychange', () => {
-          if(document.hidden) return;
-          if(Date.now() - sonSoru < 30000) return;   /* sekme takibi degil */
-          sonSoru = Date.now();
-          ESP.Beacon.intents().then(liste => {
-            if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
-          }).catch(() => {});
-        });
+        const hkm = arkaPlan.hkm({ ciz:render });
+        hkm.acilis();
+        document.addEventListener('visibilitychange', () => { if(!document.hidden) hkm.donus(); });
       }
 
       if(ESP.Setup.acilsinMi()) setTimeout(() => ESP.Setup.open(), 400);
@@ -1821,7 +1859,7 @@ ESP.App = (function(){
 
   return { sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS,
     sectionOf, routeOn, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
-    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari };
+    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, arkaPlan };
 })();
 
 /* Test paketi bu dosyayı da yükler (ekran sözleşmelerini denetlemek için)

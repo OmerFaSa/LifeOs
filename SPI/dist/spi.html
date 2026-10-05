@@ -13807,7 +13807,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'76d443de', at:'2026-10-05 12:27', dirty:true };
+SP.BUILD = { id:'43407713', at:'2026-10-05 13:01', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -64833,6 +64833,98 @@ SP.App = (function(){
     }catch(e){}
   }
 
+  /* --------------------------------------------------------- arka plan işleri
+
+     Kullanıcı bir şey yapmadan gelen ve ekranı yeniden çizen işler:
+     açılışta bir kez (hedef ağı, sinyaller, ofis ve günün brifingi, HKM'nin
+     teklifleri ile King'in bildirimleri) ve sekmeye dönünce (HKM). Her biri
+     çizimi kendisine verilen `ciz`le ister: açılışta render, testlerde sayaç.
+
+     YAZILAN SİLİNMEZ (söz 9, brand/ortak/hesap.js cizIste). Çizim #app'i
+     baştan kurar: bunlar render'ı doğrudan çağırırken Bugün'de yazılıp
+     kaydedilmemiş değer (#v-sleep) siliniyor, sonra basılan «Kaydet»
+     hiçbir şey yazmıyordu — en sık yol: uykuyu yaz, başka uygulamaya geç,
+     dön. Veri (S.ui.*) hemen konur; çizim arkaCiz ile, kullanıcı yazmıyorken.
+     Kullanıcının kendi eylemi (tıklama, Kaydet, go) render'ı doğrudan çağırır. */
+  function arkaCiz(ciz){
+    const H = window.LIFEOS && window.LIFEOS.HESAP;
+    if(H && typeof H.cizIste === 'function') H.cizIste(ciz);
+    else ciz();   /* hesap dosyası yoksa hemen (eski davranış) */
+  }
+
+  const arkaPlan = {
+    /* Hedef ağı: etkin hedeflerin özeti HKM'ye, zaman bütçesi geri
+       (brand/ortak/hedefag.js). HKM kapalıysa hiçbir şey olmaz. */
+    hedefAg(ciz){
+      return SP.Hedefler.ag.gonder().then(r => { if(r && r.butce) arkaCiz(ciz); }).catch(() => {});
+    },
+    /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez
+       koşar ve gerekiyorsa TEK soru açar (core/signals.js). */
+    sinyaller(ciz){
+      return SP.Signals.sync().then(r => { if(r && r.changed) arkaCiz(ciz); })
+        .catch(e => console.error('Sinyal eşitleme hatası:', e));
+    },
+    /* Ofis açılışı bloklamaz: yüklenince yeniden çizilir ve günün
+       brifingi bir kez üretilir (dil modeline gidiyorsa saniyeler sürer). */
+    ofis(ciz){
+      return SP.Office.load().then(async () => {
+        arkaCiz(ciz);
+        try{
+          if(SP.Office.settings().autoBriefing !== false) await SP.Office.dailyBriefing();
+        }catch(e){ /* brifing açılışı bozmaz */ }
+        arkaCiz(ciz);
+      });
+    },
+    /* HKM'nin bekleyen teklifleri — acilista BIR KEZ, ateşle ve unut.
+       Kuyruk okumak bir izin degildir: gelen sey Bugun ekraninda bir
+       teklif satiri olur ve kullanici gormeden hicbir sey uygulanmaz.
+       HKM kapaliysa kuyruk bos gelir ve hicbir sey degismez.
+       g = { ciz, simdi }: simdi saattir (testler ileri alır). */
+    hkm(g){
+      const simdi = g.simdi || (() => Date.now());
+      let sonSoru = simdi();
+      const teklifler = () => SP.Beacon.intents().then(liste => {
+        if(liste && liste.length){ S.ui.hkmIntents = liste; arkaCiz(g.ciz); }
+      }).catch(() => {});
+      /* King'in bildirimleri (core/plan.js) — ayni kural. HKM kapaliysa
+         null gelir ve hicbir sey degismez. Bos liste de konur: baska yerde
+         okunan bildirim listeden dussun. Ekran yalniz liste DEGISTIYSE
+         cizilir: HKM bagliyken her donuste gelen bos liste ekrani bastan
+         cizip yazilani siliyordu. */
+      const bildirimler = () => SP.Plan.bildirimleriCek().then(l => {
+        if(!l) return;
+        const once = JSON.stringify(S.ui.hkmBildirim || []);
+        S.ui.hkmBildirim = l;
+        if(JSON.stringify(l) !== once) arkaCiz(g.ciz);
+      }).catch(() => {});
+      return {
+        acilis(){
+          const isler = [teklifler()];
+          if(SP.Plan) isler.push(bildirimler());
+          /* Uygulamasi yarida kalmis teklifler: kuyruktan bagimsiz, YEREL
+             defterden gelir. HKM kapali olsa da gosterilir — cunku belirsiz
+             kalan is bizim tarafimizdadir. */
+          isler.push(SP.Beacon.intentDoubts().then(d => {
+            if(d && d.length){ S.ui.hkmDoubts = d; arkaCiz(g.ciz); }
+          }).catch(() => {}));
+          return Promise.all(isler);
+        },
+        /* Sekmeye GERI DONUNCE tekrar sor. Once yalniz acilista
+           soruluyordu: HKM bir teklif biraktiginda, sayfa acikken
+           gormuyordun — yenilemeden haberin olmuyordu. Odaklanma bir
+           kullanici eylemidir, cizim degil: bu istek hicbir cizimde
+           atilmaz. */
+        donus(){
+          if(simdi() - sonSoru < 30000) return Promise.resolve();   /* sekme takibi degil */
+          sonSoru = simdi();
+          const isler = [teklifler()];
+          if(SP.Plan) isler.push(bildirimler());
+          return Promise.all(isler);
+        },
+      };
+    },
+  };
+
   /* ------------------------------------------------------------------ açılış */
   async function boot(){
     try{
@@ -64946,11 +65038,8 @@ SP.App = (function(){
       if(window.LIFEOS && LIFEOS.Pwa) LIFEOS.Pwa.kaydet().catch(() => {});
       /* Tek dosya görselsiz açıldıysa bunu söyle (brand/ortak/gorsel.js). */
       if(window.LIFEOS && LIFEOS.Gorsel) LIFEOS.Gorsel.denetle('spi', m => UI.toast(m, { life:12000 }));
-      /* Hedef ağı: etkin hedeflerin özeti HKM'ye, zaman bütçesi geri
-         (brand/ortak/hedefag.js). HKM kapalıysa hiçbir şey olmaz. */
-      if(SP.Hedefler && SP.Hedefler.ag){
-        SP.Hedefler.ag.gonder().then(r => { if(r && r.butce) render(); }).catch(() => {});
-      }
+      /* Hedef ağı (arkaPlan.hedefAg). */
+      if(SP.Hedefler && SP.Hedefler.ag) arkaPlan.hedefAg(render);
       /* Otomatik yedek: HKM açıksa günde bir, doğrulanınca hatırlatma
          kapanır (brand/ortak/yedekag.js). HKM kapalıysa hiçbir şey olmaz. */
       if(window.LIFEOS && LIFEOS.YedekAg){
@@ -65026,22 +65115,9 @@ SP.App = (function(){
          bağlanmadan önce) girilmiş kayıtlar da sayılsın. */
       xpTara();
 
-      /* Denetim sinyalleri: nöbetçi ve sürtünme ölçer arka planda bir kez
-         koşar ve gerekiyorsa TEK soru açar (core/signals.js). */
-      if(SP.Signals){
-        SP.Signals.sync().then(r => { if(r && r.changed) render(); })
-          .catch(e => console.error('Sinyal eşitleme hatası:', e));
-      }
-
-      /* Ofis açılışı bloklamaz: yüklenince yeniden çizilir ve günün
-         brifingi bir kez üretilir. */
-      SP.Office.load().then(async () => {
-        render();
-        try{
-          if(SP.Office.settings().autoBriefing !== false) await SP.Office.dailyBriefing();
-        }catch(e){ /* brifing açılışı bozmaz */ }
-        render();
-      });
+      /* Denetim sinyalleri ve ofis (arkaPlan.sinyaller, arkaPlan.ofis). */
+      if(SP.Signals) arkaPlan.sinyaller(render);
+      arkaPlan.ofis(render);
 
 
       /* HKM işareti — AÇILIŞTA BİR KEZ, aralığı dolduysa. Bir ekranın
@@ -65050,47 +65126,12 @@ SP.App = (function(){
          bloklamaz. İşaret kapalıysa (varsayılan) hiçbir şey olmaz. */
       if(SP.Beacon) SP.Beacon.ping();
 
-      /* HKM'nin bekleyen teklifleri — acilista BIR KEZ, ateşle ve unut.
-         Kuyruk okumak bir izin degildir: gelen sey Bugun ekraninda bir
-         teklif satiri olur ve kullanici gormeden hicbir sey uygulanmaz.
-         HKM kapaliysa kuyruk bos gelir ve hicbir sey degismez. */
+      /* HKM'nin teklifleri ve King'in bildirimleri: açılışta bir kez,
+         sekmeye dönünce yeniden (arkaPlan.hkm). */
       if(SP.Beacon){
-        SP.Beacon.intents().then(liste => {
-          if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
-        }).catch(() => {});
-        /* King'in bildirimleri (core/plan.js) — ayni kural: acilista BIR KEZ,
-           HKM kapaliysa bos gelir ve hicbir sey cizilmez. */
-        if(SP.Plan){
-          SP.Plan.bildirimleriCek().then(l => {
-            if(l && l.length){ S.ui.hkmBildirim = l; render(); }
-          }).catch(() => {});
-        }
-        /* Uygulamasi yarida kalmis teklifler: kuyruktan bagimsiz, YEREL
-           defterden gelir. HKM kapali olsa da gosterilir — cunku belirsiz
-           kalan is bizim tarafimizdadir. */
-        SP.Beacon.intentDoubts().then(d => {
-          if(d && d.length){ S.ui.hkmDoubts = d; render(); }
-        }).catch(() => {});
-
-        /* Sekmeye GERI DONUNCE tekrar sor. Once yalniz acilista
-           soruluyordu: HKM bir teklif biraktiginda, sayfa acikken
-           gormuyordun — yenilemeden haberin olmuyordu. Odaklanma bir
-           kullanici eylemidir, cizim degil: bu istek hicbir cizimde
-           atilmaz. */
-        let sonSoru = Date.now();
-        document.addEventListener('visibilitychange', () => {
-          if(document.hidden) return;
-          if(Date.now() - sonSoru < 30000) return;   /* sekme takibi degil */
-          sonSoru = Date.now();
-          SP.Beacon.intents().then(liste => {
-            if(liste && liste.length){ S.ui.hkmIntents = liste; render(); }
-          }).catch(() => {});
-          if(SP.Plan){
-            SP.Plan.bildirimleriCek().then(l => {
-              if(l){ S.ui.hkmBildirim = l; render(); }
-            }).catch(() => {});
-          }
-        });
+        const hkm = arkaPlan.hkm({ ciz:render });
+        hkm.acilis();
+        document.addEventListener('visibilitychange', () => { if(!document.hidden) hkm.donus(); });
       }
 
       if(SP.Setup.acilsinMi()) setTimeout(() => SP.Setup.open(), 400);
@@ -65104,7 +65145,7 @@ SP.App = (function(){
   }
 
   return { sayfaSonuRota, boot, onaySayisi, errorPanel, render, go, applyTheme, SECTIONS, sectionOf, yolOf, SADE_GIZLI, ayarListesi, sayfaBasiHtml, rozetBildir, UST, THEMES, installManifest,
-    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml };
+    openAppearance, closeAppearance, isAppearanceOpen, bildirimGruplari, footerHtml, arkaPlan };
 })();
 
 /* Test paketi bu dosyayı da yükler (ekran sözleşmelerini denetlemek için)
