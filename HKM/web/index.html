@@ -655,11 +655,21 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     <!-- v5 (LifeOS Tasarım Dili sürüm 5, «Kenar çubuğu» 008 155): dört
          sistem geçişi. Merkez burasıdır; öteki üçü kendi kapısında açılır.
          Kapı bilinmiyorsa (dosyadan açılmış yüz) bağlantı kurulmaz. -->
+    <!-- SİSTEM SEÇİMİ (kullanıcı, 2026-10-05: «tıklayınca açılan modül seçme
+         kısmı olmalı»): modüllerin kenarındaki gibi tek düğme bu sistemi
+         söyler; dört sistem düğmenin altında yumuşakça açılan kartta, adları
+         ve ne işe yaradıklarıyla (brand/ortak/kabuk.js MODULLER). Telefonda
+         Menü yaprağında kart hep açık ve yan yanadır. -->
     <div class="moduller" role="group" aria-label="Sistemler">
-      <a class="modul" data-kapi="4173"><i class="nokta nokta--ays" aria-hidden="true"></i>AYS</a>
-      <a class="modul" data-kapi="4183"><i class="nokta nokta--spi" aria-hidden="true"></i>SPİ</a>
-      <a class="modul" data-kapi="4193"><i class="nokta nokta--esp" aria-hidden="true"></i>ESP</a>
-      <span class="modul on" aria-current="true"><i class="nokta nokta--mer" aria-hidden="true"></i>Merkez</span>
+      <button type="button" class="modulsec" id="modulsec" aria-expanded="false" aria-controls="modul-pencere"
+        aria-label="Sistem: Merkez — değiştir" title="Sistem değiştir"><i class="nokta nokta--mer" aria-hidden="true"></i><span
+        class="modulsec__ad">Merkez</span><svg class="modulsec__ok" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 10l5 5 5-5"/></svg></button>
+      <div class="modul-pencere" id="modul-pencere"><div class="modul-liste">
+        <a class="modul" data-kapi="4173"><i class="nokta nokta--ays" aria-hidden="true"></i><span class="modul__metin"><span class="modul__ad">AYS</span><span class="modul__not">sınav hazırlığı</span></span></a>
+        <a class="modul" data-kapi="4183"><i class="nokta nokta--spi" aria-hidden="true"></i><span class="modul__metin"><span class="modul__ad">SPİ</span><span class="modul__not">uyku, beslenme, hareket</span></span></a>
+        <a class="modul" data-kapi="4193"><i class="nokta nokta--esp" aria-hidden="true"></i><span class="modul__metin"><span class="modul__ad">ESP</span><span class="modul__not">dil, felsefe, müzik</span></span></a>
+        <span class="modul on" aria-current="true"><i class="nokta nokta--mer" aria-hidden="true"></i><span class="modul__metin"><span class="modul__ad">Merkez</span><span class="modul__not">üçünün özeti</span></span></span>
+      </div></div>
     </div>
     <p class="baglam">HKM · King ve BAM</p>
     <!-- YEDİ ÇEKMECE (K7, belgeler/ekip/CEKMECE-HARITASI.md «HKM yüzü»): Bugün ·
@@ -668,13 +678,13 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
          bozulmaz, değişen yalnız gruplama. Profil ve Motto Ayarlar'ın,
          Para Sistemler'in bölümüdür (aşağıdaki bölüm çubuğu). -->
     <nav class="gez" id="gez" aria-label="Çekmeceler" hidden>
-      <a href="#/bugun" data-yol="bugun">Bugün</a>
-      <a href="#/teklifler" data-yol="teklifler">Onaylar</a>
-      <a href="#/hedefler" data-yol="hedefler">Hedefler</a>
-      <a href="#/sistemler" data-yol="sistemler">Sistemler</a>
-      <a href="#/ofis" data-yol="ofis">Ofis</a>
-      <a href="#/sohbet" data-yol="sohbet">Sohbet</a>
-      <a href="#/ayarlar" data-yol="ayarlar" id="ayar-bag">Ayarlar</a>
+      <a href="#/bugun" data-yol="bugun"><span class="gez__ad">Bugün</span></a>
+      <a href="#/teklifler" data-yol="teklifler"><span class="gez__ad">Onaylar</span></a>
+      <a href="#/hedefler" data-yol="hedefler"><span class="gez__ad">Hedefler</span></a>
+      <a href="#/sistemler" data-yol="sistemler"><span class="gez__ad">Sistemler</span></a>
+      <a href="#/ofis" data-yol="ofis"><span class="gez__ad">Ofis</span></a>
+      <a href="#/sohbet" data-yol="sohbet"><span class="gez__ad">Sohbet</span></a>
+      <a href="#/ayarlar" data-yol="ayarlar" id="ayar-bag"><span class="gez__ad">Ayarlar</span></a>
       <!-- Telefonda alt bantta dört çekmece + Menü (2026-10-05, «HKM'yi de
            modern ve sade yap»): Hedefler, Sistemler, Ayarlar, sistem geçişi
            ve tema Menü'nün açtığı yaprakta. Geniş ekranda görünmez. -->
@@ -6454,14 +6464,12 @@ body:not(:has(#giris:not([hidden]))){ background:transparent; }
     box-shadow:var(--kenar-golge); transition:width 520ms cubic-bezier(.32,.72,0,1), background .2s ease, border-radius .2s ease, box-shadow .2s ease; }
   .marka{ display:none; }
 
-  /* Sistem seçici: kapalıyken yalnız Merkez'in işareti (32 px ekseninde).
-     Kutusu açık seçiciyle AYNI boyda (3 + 44 + 3 px): kenar açılınca alttaki
-     çekmeceler yerinden kaymaz. Önce 36 px'ti; fare kenara girince satırlar
-     14 px iniyor, bir simgenin üst kenarındaki tık bir üstteki çekmeceyi
-     açıyordu (test_yuz «kenar açılınca çekmeceler yerinden kaymaz»). */
-  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .moduller{ display:block; padding:3px 0; background:none; }
-  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .modul:not(.on){ display:none; }
-  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .modul.on{ width:44px; height:44px; font-size:0; gap:0; background:none; box-shadow:none; }
+  /* Sistem seçici (2026-10-05): tek düğme; kapalı kenarda yalnız nokta
+     (32 px ekseninde), zemini ve halkası yok. Düğmenin boyu iki hâlde AYNI
+     (36 px): kenar açılınca alttaki çekmeceler yerinden kaymaz (test_yuz
+     «kenar açılınca çekmeceler yerinden kaymaz»). Dört sistemin kartı yalnız
+     TIKLAYINCA açılır, üzerine gelince değil. */
+  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .modulsec{ background:transparent; box-shadow:none; }
   .moduller{ width:196px; box-sizing:border-box; }
 
   /* Çekmeceler: simge (maske) + ad; kapalıyken yalnız simge. */
@@ -6629,7 +6637,15 @@ html[data-tema="koyu"]{ --kart-golge:0 1px 1px rgba(0,0,0,.22), 0 14px 34px -20p
     -webkit-backdrop-filter:blur(3px); backdrop-filter:blur(3px); animation:hkm-sol .24s ease-out both; }
   .ust--menu .ust__ic{ border-radius:26px 26px 0 0; padding-top:16px;
     box-shadow:inset 0 1px 0 rgba(255,255,255,.5), 0 -18px 48px -24px rgba(17,19,24,.35); }
-  .ust--menu .moduller{ display:grid; flex:1 1 auto; margin:0 10px 0 16px; animation:hkm-menu-gel .34s cubic-bezier(.32,.72,0,1) both; }
+  .ust--menu .moduller{ display:block; flex:1 1 auto; margin:0 10px 0 16px; animation:hkm-menu-gel .34s cubic-bezier(.32,.72,0,1) both; }
+  .ust--menu .modulsec{ display:none; }
+  .ust--menu .modul-pencere{ display:block; opacity:1; visibility:visible; margin:0; }
+  header.ust--menu .moduller .modul-liste{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:2px; padding:3px;
+    border-radius:12px; background:var(--gri-ray); box-shadow:none; }
+  .ust--menu .modul-liste .modul{ flex-direction:column; justify-content:center; gap:4px; height:44px; min-height:44px; padding:0;
+    font-size:11px; }
+  .ust--menu .modul-liste .modul.on{ background:var(--hap); box-shadow:var(--hap-golge); }
+  .ust--menu .modul__not{ display:none; }
   .ust--menu #ust-araclar{ display:flex; flex:none; margin-right:16px; animation:hkm-menu-gel .34s cubic-bezier(.32,.72,0,1) both; }
   .ust--menu #ust-araclar .ikon-dugme{ width:50px; height:50px; border-radius:14px; background:var(--gri-ray); color:var(--fg); font-size:18px; }
   .ust--menu .gez{ grid-template-rows:auto var(--hkm-bant); row-gap:12px; padding-top:14px; }
@@ -6677,7 +6693,14 @@ html[data-tema="koyu"]{ --kart-golge:0 1px 1px rgba(0,0,0,.22), 0 14px 34px -20p
   body:has(#giris:not([hidden])) .ust{ display:none; }
   .ust__ic{ display:contents; }
   .marka, .baglam, .bosluk{ display:none; }
-  .moduller{ order:1; display:grid; grid-template-columns:1fr; width:76px; gap:2px; padding:3px; }
+  .moduller{ order:1; width:76px; }
+  .ust .modulsec{ flex-direction:column; justify-content:center; gap:4px; height:auto; min-height:48px; padding:6px 2px;
+    font-size:11px; text-align:center; }
+  .ust .modulsec__ad{ flex:none; }
+  .ust .modulsec__ok{ display:none; }
+  .ust .modul-liste .modul{ flex-direction:column; justify-content:center; gap:3px; min-height:44px; padding:6px 2px;
+    font-size:11px; text-align:center; }
+  .ust .modul__not{ display:none; }
   .gez{ order:2; display:flex; flex-direction:column; align-items:center; gap:2px; overflow:visible; }
   .gez a{ position:relative; width:76px; height:auto; min-height:54px; display:flex; flex-direction:column; align-items:center;
     justify-content:center; gap:4px; padding:7px 2px; border:0; border-radius:14px; color:var(--dim); font-size:11px;
@@ -6706,6 +6729,87 @@ html[data-tema="koyu"]{ --kart-golge:0 1px 1px rgba(0,0,0,.22), 0 14px 34px -20p
   body:not(:has(#giris:not([hidden]))) .wrap::before{ content:''; position:absolute; inset:14px 12px 72px; z-index:-1;
     pointer-events:none; border-radius:28px; background:linear-gradient(180deg, var(--buz-ust), var(--buz-alt));
     box-shadow:var(--buz-isik), var(--buz-golge); }
+}
+
+/* ======================================================================
+   SİSTEM SEÇİCİ ve YUMUŞAK AÇILIŞ (kullanıcı, 2026-10-05: «sol taraftaki
+   çubuk diğer bölümler gibi soft açılmıyor; tıklayınca açılan modül seçme
+   kısmı olmalı»). Ortak kabuğun dili (brand/ortak/kabuk.css «SİSTEM
+   SEÇİMİ», «DAR ŞERİT ve AÇILIŞ»):
+   · tek düğme bu sistemi söyler; dört sistem altında yumuşakça açılan
+     kartta (satır 0fr → 1fr), adları ve notlarıyla; dışarısı, Esc ve
+     fare kenardan çıkınca kapanır,
+   · kenar açılırken adlar önce yer açılsın diye gecikmeli, hafif bulanıktan
+     netleşerek ve 4 px kayarak gelir; kapanışta önce yazı gider,
+   · ayraç (çekmecenin bölümleri) yükseklikte açılır.
+   Simgeler ve nokta 32 px ekseninde yerinden hiç oynamaz.
+   ====================================================================== */
+.ust .moduller{ padding:0; background:none; border-radius:0; }
+/* Telefonda seçici yalnız Menü yaprağında (.ust--menu); kenarda her zaman. */
+@media (min-width:680px){ .ust .moduller{ display:block; } }
+.modulsec{ width:100%; display:flex; align-items:center; gap:10px; height:36px; min-height:36px; padding:0 10px; border:0;
+  border-radius:10px; background:var(--yuzey); box-shadow:0 0 0 1px var(--line); color:var(--fg);
+  font:600 13.5px/1.2 'Inter', ui-sans-serif, system-ui, sans-serif; cursor:pointer; text-align:left;
+  transition:box-shadow .2s ease, background .2s ease; }
+.modulsec:hover{ background:var(--yuzey); box-shadow:0 0 0 1px var(--line-strong); }
+.modulsec:active:not(:disabled){ transform:none; }
+.modulsec .nokta{ flex:none; }
+.modulsec__ad{ flex:1; min-width:0; white-space:nowrap; }
+.modulsec__ok{ flex:none; width:16px; height:16px; fill:none; stroke:var(--dim); stroke-width:1.8; stroke-linecap:round;
+  stroke-linejoin:round; transition:transform .32s cubic-bezier(.32,.72,0,1); }
+.moduller.is-acik .modulsec__ok{ transform:rotate(180deg); }
+.modul-pencere{ display:none; grid-template-rows:0fr; visibility:hidden; opacity:0;
+  transition:grid-template-rows .36s cubic-bezier(.32,.72,0,1), opacity .2s ease, margin .36s cubic-bezier(.32,.72,0,1),
+    visibility 0s linear .36s, display .36s allow-discrete; }
+.moduller.is-acik .modul-pencere{ display:grid; grid-template-rows:1fr; visibility:visible; opacity:1; margin-top:6px;
+  transition:grid-template-rows .42s cubic-bezier(.32,.72,0,1), opacity .26s ease, margin .42s cubic-bezier(.32,.72,0,1),
+    visibility 0s, display 0s allow-discrete; }
+@starting-style{
+  .moduller.is-acik .modul-pencere{ grid-template-rows:0fr; opacity:0; margin-top:0; }
+}
+.modul-liste{ min-height:0; overflow:hidden; display:flex; flex-direction:column; gap:2px; padding:4px; border-radius:12px;
+  background:var(--yuzey); box-shadow:0 0 0 1px var(--line); transition:padding .36s cubic-bezier(.32,.72,0,1); }
+.moduller:not(.is-acik) .modul-liste{ padding-top:0; padding-bottom:0; }
+.modul-liste .modul{ width:auto; height:auto; min-height:40px; display:flex; flex-direction:row; justify-content:flex-start;
+  align-items:center; gap:10px; padding:6px 10px; border-radius:8px; background:none; box-shadow:none; font-size:13px;
+  color:var(--dim); text-decoration:none; }
+.modul-liste .modul:hover{ background:var(--yuzey-2); color:var(--fg); }
+.modul-liste .modul.on{ background:var(--yuzey-2); color:var(--fg); box-shadow:none; font-weight:500; }
+.modul__metin{ display:flex; flex-direction:column; min-width:0; line-height:1.25; }
+.modul__ad{ font-weight:600; color:var(--fg); }
+.modul__not{ font-size:11.5px; color:var(--dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+@media (min-width:1024px){
+  .ust .modulsec{ padding:0 8px 0 18px; }
+  /* Adlar: kapalı kenarda yoklar (odaklanmaz, kırpılmış yazı sayılmaz);
+     açılışta yer açıldıktan sonra gelir (@starting-style), kapanışta önce
+     solar, sonra kalkar (allow-discrete). */
+  .ust :is(.gez__ad, .modulsec__ad, .modulsec__ok){ display:none; white-space:nowrap; opacity:0;
+    transform:translateX(-4px); filter:blur(3px);
+    transition:opacity 140ms ease, transform 180ms ease, filter 140ms ease, display 180ms allow-discrete; }
+  .ust:hover:where(:not(.ust--dinlen)) :is(.gez__ad, .modulsec__ad), .ust:has(:focus-visible) :is(.gez__ad, .modulsec__ad){ display:inline-block; }
+  .ust:hover:where(:not(.ust--dinlen)) .modulsec__ok, .ust:has(:focus-visible) .modulsec__ok{ display:block; }
+  .ust:hover:where(:not(.ust--dinlen)) :is(.gez__ad, .modulsec__ad, .modulsec__ok), .ust:has(:focus-visible) :is(.gez__ad, .modulsec__ad, .modulsec__ok){
+    opacity:1; transform:none; filter:none;
+    transition:opacity 340ms ease 140ms, transform 520ms cubic-bezier(.32,.72,0,1) 100ms, filter 340ms ease 140ms,
+      display 0s allow-discrete; }
+  @starting-style{
+    .ust:hover:where(:not(.ust--dinlen)) :is(.gez__ad, .modulsec__ad, .modulsec__ok), .ust:has(:focus-visible) :is(.gez__ad, .modulsec__ad, .modulsec__ok){
+      opacity:0; transform:translateX(-4px); filter:blur(3px); }
+  }
+  .moduller.is-acik .modulsec__ok{ transform:rotate(180deg); }
+  /* Yazı rengi kenarın kendi geçişinde değil adın geçişinde değişir. */
+  .gez a{ transition:background .16s ease; }
+  /* Ayraç: yükseklikte açılır. */
+  .ust .bolumcubugu{ interpolate-size:allow-keywords; overflow:hidden;
+    transition:height 520ms cubic-bezier(.32,.72,0,1), opacity 320ms ease 120ms, display 0s allow-discrete; }
+  @starting-style{
+    .ust:hover:where(:not(.ust--dinlen)) .bolumcubugu, .ust:has(:focus-visible) .bolumcubugu{ height:0; opacity:0; }
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .ust :is(.gez__ad, .modulsec__ad, .modulsec__ok){ filter:none; transform:none; }
+  .modul-pencere, .modulsec__ok, .ust .bolumcubugu{ transition:none !important; }
 }
 @media (max-width:1023px) and (prefers-reduced-transparency: reduce){
   .ust__ic, .ust, .bolumcubugu__ic{ -webkit-backdrop-filter:none; backdrop-filter:none; }
@@ -6908,6 +7012,23 @@ button.gorevli.on:hover{ background:var(--fg); }
   });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && ust.classList.contains('ust--menu')) ac(false); });
   window.addEventListener('hashchange', function(){ ac(false); });
+})();
+/* Sistem seçici (2026-10-05): düğme kartı açar/kapar; dışarısı, Esc ve
+   fare kenardan çıkınca (masaüstünde kenar o an daralır) kapanır. Yalnız
+   sınıf ve aria-expanded değiştirir; bağlantılar kendi kapısına gider. */
+(function(){
+  var kap = document.querySelector('.moduller'), d = document.getElementById('modulsec');
+  if(!kap || !d) return;
+  function ac(v){ kap.classList.toggle('is-acik', v); d.setAttribute('aria-expanded', v ? 'true' : 'false'); }
+  d.addEventListener('click', function(e){ e.stopPropagation(); ac(!kap.classList.contains('is-acik')); });
+  document.addEventListener('click', function(e){
+    if(kap.classList.contains('is-acik') && !(e.target.closest && e.target.closest('.modul-pencere'))) ac(false);
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && kap.classList.contains('is-acik')){ ac(false); d.focus(); }
+  });
+  var ust = document.querySelector('header.ust');
+  if(ust) ust.addEventListener('pointerleave', function(){ if(window.innerWidth >= 1024) ac(false); });
 })();
 /* Brifingin «Tümü» düğmesi kalan satırları aynı kartta açar; yazma alanı
    yazdıkça büyür (en çok 160 px). Yalnız sınıf ve yükseklik değiştirir. */

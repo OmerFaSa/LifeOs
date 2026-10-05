@@ -179,7 +179,7 @@ def t_cekmeceler():
     gez = gez[:gez.index("</nav>")]
     eq(re.findall(r'data-yol="([a-z]+)"', gez),
        ["bugun", "teklifler", "hedefler", "sistemler", "ofis", "sohbet", "ayarlar"])
-    eq(re.findall(r'data-yol="[a-z]+"[^>]*>([^<]+)</a>', gez),
+    eq(re.findall(r'data-yol="[a-z]+"[^>]*><span class="gez__ad">([^<]+)</span></a>', gez),
        ["Bugün", "Onaylar", "Hedefler", "Sistemler", "Ofis", "Sohbet", "Ayarlar"])
     ok('id="ayar-bag"' in gez)
     bc = m[m.index('<nav class="bolumcubugu"'):]
@@ -434,7 +434,7 @@ def t_kenar_secince_cekilir():
     ok(".ust:hover:where(:not(.ust--dinlen)), .ust:has(:focus-visible){ width:216px" in cam,
        "dinlenen kenar uzerine gelinince acilmaz; klavye odagi acar")
     kapali = ".ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible))"
-    for s in (kapali + " .gez a{ width:44px", kapali + " .bolumcubugu{ display:none; }", kapali + " .modul:not(.on)"):
+    for s in (kapali + " .gez a{ width:44px", kapali + " .bolumcubugu{ display:none; }", kapali + " .modulsec{ background:transparent; box-shadow:none; }"):
         ok(s in cam, s)
     no(".ust:not(:hover):not(:has(:focus-visible))" in cam, "kapali hal dinlenen kenari da kapsar")
     # Betik: yalniz fare/dokunma secimi (detail > 0) kenari ceker; fare
@@ -482,20 +482,27 @@ def t_kenar_acilinca_satirlar_kaymaz():
     Sohbet'in ustune dusuyor ve tik yanlis cekmeceyi aciyordu. Ortak kabuk
     da ayni sozu verir (brand/ortak/kabuk.css «simgeler yerinden hic
     oynamaz»); kullanici: «hicbir oge ziplamaz».
-    Olcu: kapali secicinin dikey kutusu acik secicininkiyle AYNI; kapali
-    cekmece satiri yuksekligini ve dolgusunu degistirmez. (Gercek tarayicida
-    ayni olcu: HKM/tools/yuz.js «kenar acilinca cekmeceler kaydi».)"""
+    2026-10-05'ten beri sistem secici TEK DUGMEDIR (36 px): kapali kenarda
+    yalniz nokta, acik kenarda nokta + ad + ok; dort sistemin karti yalniz
+    TIKLAYINCA acilir, uzerine gelince degil.
+    Olcu: kapali dugme boyunu, dolgusunu ve payini degistirmez; kart yalniz
+    .is-acik ile gorunur; kapali cekmece satiri yuksekligini ve dolgusunu
+    degistirmez. (Gercek tarayicida ayni olcu: HKM/tools/yuz.js «kenar
+    acilinca cekmeceler kaydi».)"""
     m = _yuz()
     sade = m[m.index('<style id="hkm-sade">'):]
     sade = sade[:sade.index('</style>')]
     cam = sade[sade.index("CAM KABUK"):]
-    acik_dolgu, acik_boy = _kural(m, ".moduller")["padding"], _kural(m, ".modul")["height"]
-    km, kmo = _kural(cam, KAPALI + " .moduller"), _kural(cam, KAPALI + " .modul.on")
-    acik = _dikey_dolgu(acik_dolgu) + _px(acik_boy)
-    kapali = _dikey_dolgu(km.get("padding", acik_dolgu)) + _px(kmo.get("height", acik_boy))
-    eq(kapali, acik, "sistem secicinin dikey kutusu (kapali / acik)")
-    for ozellik in ("height", "min-height", "padding", "padding-top", "margin", "margin-top"):
+    for ozellik in ("height", "min-height", "padding", "padding-top", "padding-bottom", "margin", "margin-top"):
+        no(ozellik in _kural(cam, KAPALI + " .modulsec"), "kapali sistem dugmesi " + ozellik + " degistiriyor")
         no(ozellik in _kural(cam, KAPALI + " .gez a"), "kapali cekmece satiri " + ozellik + " degistiriyor")
+    no(re.search(re.escape(KAPALI) + r" \.modul\b", cam), "eski «acilinca dort sistem» kurali kalmis")
+    k = m[m.index('<style id="hkm-kabuk">'):]
+    k = k[:k.index("</style>")]
+    eq(_kural(k, ".modulsec").get("height"), "36px")
+    ok(".modul-pencere{ display:none;" in k and ".moduller.is-acik .modul-pencere{ display:grid;" in k,
+       "kart yalniz tiklayinca acilir")
+    no(re.search(r":hover[^{]*\.modul-pencere", k), "kart uzerine gelince acilmaz")
 
 
 # Kenardaki baglantilar: cekmeceler, Ayarlar, bolum cubugu.
@@ -565,7 +572,7 @@ def t_telefon_ve_tablet_kabugu():
     tel = k[k.index("@media (max-width:679px){"):]
     for s in (".ust__ic{ position:fixed; left:0; right:0; bottom:0;", "backdrop-filter:saturate(160%) blur(24px)",
               '.gez a:is([data-yol="hedefler"], [data-yol="sistemler"], [data-yol="ayarlar"]){ display:none; }',
-              ".ust--menu .moduller{ display:grid;", ".ust--menu #ust-araclar{ display:flex;",
+              ".ust--menu .modul-pencere{ display:block;", ".ust--menu .modulsec{ display:none; }", ".ust--menu #ust-araclar{ display:flex;",
               '.ust--menu .gez a:is([data-yol="hedefler"], [data-yol="sistemler"], [data-yol="ayarlar"]){ display:flex;',
               ".bolumcubugu{ position:fixed;", "env(safe-area-inset-bottom", "html .meydan-ac > span:last-child{ display:none; }",
               "body:has(#giris:not([hidden])) .ust{ display:none; }"):
@@ -655,6 +662,43 @@ def t_ekranlar_sade():
         ok("kartBas(" in f and cumle in f, ad)
 
 
+def t_sistem_secici_ve_yumusak_acilis():
+    """Kullanici (2026-10-05): «HKM'nin sol taraftaki cubugu diger bolumler gibi
+    soft acilmiyor; tiklayinca acilan modul secme kismi olmali». Ortak
+    kabugun dili: tek dugme bu sistemi soyler, dort sistem altinda yumusakca
+    acilan kartta adlari ve NOTLARIYLA (kabuk.js MODULLER ile AYNI soz);
+    kenar acilirken adlar gecikmeli, hafif bulaniktan netleserek gelir
+    (@starting-style); ayrac yukseklikte acilir. Kart disari tiklayinca, Esc'te
+    ve fare kenardan cikinca kapanir."""
+    m = _yuz()
+    mod = m[m.index('<div class="moduller"'):]
+    mod = mod[:mod.index("</div></div>")]
+    for s in ('class="modulsec" id="modulsec" aria-expanded="false" aria-controls="modul-pencere"',
+              'class="modul-pencere" id="modul-pencere"', 'class="modulsec__ok"'):
+        ok(s in mod, s)
+    kabuk = (KOK / "brand" / "ortak" / "kabuk.js").read_text(encoding="utf-8")
+    for kod, kapi in (("ays", "4173"), ("spi", "4183"), ("esp", "4193")):
+        a = re.search(kod + r":\{ harf:'.', ad:'([^']+)',\s+uzun:'[^']+',\s+not:'([^']+)'", kabuk)
+        ok(a, kod + " kabuk.js'te")
+        ok('data-kapi="' + kapi + '"><i class="nokta nokta--' + kod + '" aria-hidden="true"></i><span class="modul__metin">'
+           '<span class="modul__ad">' + a.group(1) + '</span><span class="modul__not">' + a.group(2) + '</span>' in mod, kod)
+    ok('aria-current="true"' in mod and "üçünün özeti" in mod)
+    k = m[m.index('<style id="hkm-kabuk">'):]
+    k = k[:k.index("</style>")]
+    for s in ("grid-template-rows:0fr", "@starting-style", "filter:blur(3px)", "transform:translateX(-4px)",
+              "opacity 340ms ease 140ms", "transform 520ms cubic-bezier(.32,.72,0,1) 100ms",
+              "display 180ms allow-discrete", "interpolate-size:allow-keywords", "@media (min-width:680px){ .ust .moduller{ display:block; } }",
+              ".moduller.is-acik .modulsec__ok{ transform:rotate(180deg); }"):
+        ok(s in k, s)
+    # Telefonda bant yalniz sekmeleri tasir: secici gizli, Menu yapraginda gorunur.
+    no(re.search(r"(?:^|[\n}])\s*\.ust \.moduller\{[^}]*display:block", k), "secici telefonda bandin ustunde")
+    b = m[m.index("Sistem seçici (2026-10-05): düğme kartı açar/kapar"):]
+    b = b[:b.index("})();")]
+    for s in ("kap.classList.toggle('is-acik', v)", "aria-expanded", "e.key === 'Escape'", "'pointerleave'",
+              "closest('.modul-pencere')"):
+        ok(s in b, s)
+
+
 def run():
     suite("HKM yüzü — giriş şeridi")
     test("üç adım vardır", t_giris_seridi_uc_adim)
@@ -684,4 +728,5 @@ def run():
     test("denetimler kenardaki bağlantıdan sonra fareyi kenardan çıkarır", t_denetimler_kenardan_cikar)
     test("telefon ve tablet kabuğu: alt bant, Menü, dar kenar, zemin her boyutta (2026-10-05)", t_telefon_ve_tablet_kabugu)
     test("Bugün sade: tek sistem kartı, üç satır + Tümü, King hapı, konsey satırı", t_bugun_sade)
+    test("sistem seçici tıklayınca açılır; kenar yumuşak açılır (2026-10-05)", t_sistem_secici_ve_yumusak_acilis)
     test("ekranlar sade: başlık çekmecenin adı, satır, katlı form, açıklama ⓘ'de", t_ekranlar_sade)
