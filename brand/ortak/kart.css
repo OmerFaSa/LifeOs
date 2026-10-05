@@ -865,6 +865,10 @@
    ekranda yan yana, dar ekranda alt alta (sadelik: Bugün en çok 1 800 px). */
 .bugun__cift{ display:flex; flex-wrap:wrap; gap:16px; align-items:stretch; }
 .bugun__cift > *{ flex:1 1 280px; min-width:0; }
+/* Küçültülmüş kart (sayfa düzeni) kendi satırını alır: yarım genişlikte ince
+   bir şerit, yanındaki uzun kartın yanında boşluk bırakıyordu (tablet
+   incelemesi, 2026-10-05, SPİ Bugün › Günün hissi + Su). */
+.bugun__cift > .gizle-kucuk{ flex-basis:100%; }
 .sayfabasi__ust{ margin:0 0 6px; font-size:13px; color:var(--text-2); }
 .site--v5 .sayfabasi__baslik{ font-size:28px; }
 
@@ -890,6 +894,10 @@
 .site--v5 .lrow__note{ flex-basis:100%; margin:0; max-width:70ch; font-size:13px; }
 .site--v5 .lrow__act{ margin:0 0 0 auto; flex-direction:row; flex-wrap:wrap; }
 .site--v5 .lrow__act .btn{ width:auto; }
+/* Başlıktaki arama kutusu esner, yanındaki düğme alt satıra düşmez (tablet
+   incelemesi, 2026-10-05, SPİ Sonuçlar: kutu tam en alıyordu, «Hekime
+   götür» altında tek başına ortada kalıyordu). */
+.site--v5 .lrow__act > .input{ flex:1 1 160px; width:auto; min-width:0; }
 .site--v5 .lrow.kahraman{ border-top:0; }
 
 /* v5 · ÖNERİ ALANI: Merkez'in sesi mor çerçevede durur (teklif, karar değil). */

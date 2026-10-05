@@ -535,7 +535,7 @@ R.Screens.today = (function(){
     if(!sig.seenAt) R.Signals.markSeen(sig.id);
 
     return c.Card({ title:'Bir soru', hint:'signal',
-      sub:sig.kind === 'friction' ? 'sürtünme ölçer' : 'gösterge nöbetçisi',
+      sub:sig.kind === 'friction' ? 'sürtünme' : 'gösterge',
       body:html`
         <p class="small muted">${sig.title}</p>
         ${c.Notice({ tone:'info', body:sig.question })}
@@ -1325,7 +1325,7 @@ R.Screens.today = (function(){
           ${R.Setup.needed() ? raw(R.Setup.card()) : html`<div class="kahraman" data-oz="042">${NextUpCard()}</div>`}
           ${when(runningBlock(), () => html`<div id="geri-sayim" class="bugun__vitrin">${raw(geriSayimHtml(runningBlock()))}</div>`)}
           ${when(!R.Setup.needed(), () => raw(gunUcuHtml(day) + blokBitisHtml(day)))}
-          ${when(R.Signals && R.Signals.current(), () => SignalCard())}
+          ${when(R.Signals && R.Signals.current(), () => c.Ledger([SignalCard()]))}
         </section>
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
           ${DonenKutu(day, dateISO)}

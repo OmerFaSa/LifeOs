@@ -720,6 +720,70 @@
       }finally{ K.kenarUyandir(); d.remove(); }
     });
 
+    /* Tablet incelemesi (2026-10-05): dokunmatik tablette fare yok, «yaklaşınca
+       netleşir» hiç olmaz; kenar birkaç saniye sonra kalıcı olarak soluk ve
+       bulanık kalıyor, gezinme devre dışıymış gibi görünüyordu. Solma yalnız
+       fareli (hover) cihazda. */
+    it('sakin kenar yalnız fareli cihazda; dokunmatik tablette kenar solmaz', () => {
+      let fareli = 0, fareliOlmayan = 0;
+      for(const ss of Array.from(document.styleSheets)){
+        let kurallar = [];
+        try{ kurallar = Array.from(ss.cssRules || []); }catch(e){ continue; }
+        for(const r of kurallar){
+          const icler = r.cssRules ? Array.from(r.cssRules) : [r];
+          for(const ic of icler){
+            if(!/html\.kenar-sakin/.test(ic.selectorText || '')) continue;
+            if(r.media && /hover:\s*hover/.test(r.media.mediaText) && /pointer:\s*fine/.test(r.media.mediaText)) fareli++;
+            else fareliOlmayan++;
+          }
+        }
+      }
+      expect(fareli > 0).toBe(true);
+      expect(fareliOlmayan).toBe(0);
+    });
+
+    /* Tablet incelemesi (2026-10-05, AYS Ayarlar): yan yana iki alanda biri
+       etiketinin yanında not taşıyınca (iki satır) kutusu ötekinden aşağıda
+       kalıyordu. Yan yana alanların kutuları aynı hizadadır. */
+    it('yan yana alanlarda kutular aynı hizada (etiket iki satıra sarsa da)', () => {
+      const d = yerlestir('<div style="width:420px"><div class="cols-2">'
+        + '<label class="field"><span>Kısa</span><input class="input" value="1"></label>'
+        + '<label class="field"><span>Uzun bir etiket <span class="hint-text">ve yanında epeyce uzun bir not, iki satıra sarar</span></span>'
+        + '<input class="input" value="2"></label></div></div>');
+      try{
+        const k = Array.from(d.querySelectorAll('input')).map(i => Math.round(i.getBoundingClientRect().top));
+        expect(Math.abs(k[0] - k[1]) <= 1).toBe(true);
+      }finally{ d.remove(); }
+    });
+
+    /* Tablet incelemesi (2026-10-05, SPİ Bugün): küçültülmüş «Günün hissi»
+       şeridi, yanındaki uzun «Su» kartının yanında yarım genişlikte kalıyor,
+       altı boş görünüyordu. Küçük kart kendi satırını alır, öteki tam genişlik. */
+    it('çift kartta küçültülmüş kart kendi satırını alır; öteki tam genişlikte', () => {
+      const d = yerlestir('<div style="width:700px"><div class="bugun__cift">'
+        + '<section class="gizle-kucuk" style="height:40px">his</section>'
+        + '<section style="height:140px">su</section></div></div>');
+      try{
+        const [a, b] = Array.from(d.querySelectorAll('.bugun__cift > section')).map(x => x.getBoundingClientRect());
+        const w = d.querySelector('.bugun__cift').getBoundingClientRect().width;
+        expect(Math.abs(a.width - w) <= 1).toBe(true);
+        expect(Math.abs(b.width - w) <= 1).toBe(true);
+        expect(b.top >= a.bottom).toBe(true);
+      }finally{ d.remove(); }
+    });
+
+    it('kart başlığındaki arama kutusu ile düğme aynı satırda', () => {
+      /* 348 px: SPİ Sonuçlar'da dikey tablette (800 px) eylem alanının ölçülen eni. */
+      /* .site--v5 kabuk ızgarasıdır (ilk sütunu kenar): testte blok olur. */
+      const d = yerlestir('<div class="site--v5" style="display:block"><div style="width:348px"><div class="lrow__act">'
+        + '<input class="input" placeholder="Ölçüm ara…"><button class="btn">Hekime götür</button></div></div></div>');
+      try{
+        const g = Math.round(d.querySelector('.lrow__act .input').getBoundingClientRect().top);
+        const b = Math.round(d.querySelector('.lrow__act .btn').getBoundingClientRect().top);
+        expect(Math.abs(g - b) <= 6).toBe(true);
+      }finally{ d.remove(); }
+    });
+
     it('kenarın dibi: ara · sayfa düzeni · radyo · bildirimler · profil; rütbe ve Merkez satırı yok', () => {
       const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[],
         baglanti:{ durum:'bagli', saat:'14:08' }, rutbe:{ ad:'Bronz', etiket:'1.1', route:'rutbe' },

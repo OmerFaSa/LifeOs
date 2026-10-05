@@ -1152,6 +1152,10 @@ table td, table th{
 .cols-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .cols-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
 .cols-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+/* Yan yana form alanlarının kutuları aynı hizada: biri etiketinin yanında
+   not taşıyıp iki satıra sarınca ötekinin kutusu yukarıda kalıyordu
+   (tablet incelemesi, 2026-10-05). Yalnız alanlar; kartlar boylarını korur. */
+.cols-2 > .field, .cols-3 > .field, .cols-4 > .field, .auto-fit > .field{ align-self:end; }
 .auto-fit{ display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:14px; }
 
 /* ---------- duyarlı ---------- */
@@ -6485,6 +6489,10 @@ body.is-dragging .drop.is-over{
    ekranda yan yana, dar ekranda alt alta (sadelik: Bugün en çok 1 800 px). */
 .bugun__cift{ display:flex; flex-wrap:wrap; gap:16px; align-items:stretch; }
 .bugun__cift > *{ flex:1 1 280px; min-width:0; }
+/* Küçültülmüş kart (sayfa düzeni) kendi satırını alır: yarım genişlikte ince
+   bir şerit, yanındaki uzun kartın yanında boşluk bırakıyordu (tablet
+   incelemesi, 2026-10-05, SPİ Bugün › Günün hissi + Su). */
+.bugun__cift > .gizle-kucuk{ flex-basis:100%; }
 .sayfabasi__ust{ margin:0 0 6px; font-size:13px; color:var(--text-2); }
 .site--v5 .sayfabasi__baslik{ font-size:28px; }
 
@@ -6510,6 +6518,10 @@ body.is-dragging .drop.is-over{
 .site--v5 .lrow__note{ flex-basis:100%; margin:0; max-width:70ch; font-size:13px; }
 .site--v5 .lrow__act{ margin:0 0 0 auto; flex-direction:row; flex-wrap:wrap; }
 .site--v5 .lrow__act .btn{ width:auto; }
+/* Başlıktaki arama kutusu esner, yanındaki düğme alt satıra düşmez (tablet
+   incelemesi, 2026-10-05, SPİ Sonuçlar: kutu tam en alıyordu, «Hekime
+   götür» altında tek başına ortada kalıyordu). */
+.site--v5 .lrow__act > .input{ flex:1 1 160px; width:auto; min-width:0; }
 .site--v5 .lrow.kahraman{ border-top:0; }
 
 /* v5 · ÖNERİ ALANI: Merkez'in sesi mor çerçevede durur (teklif, karar değil). */
@@ -9189,6 +9201,9 @@ tbody tr:hover{ background:var(--surface-2); }
    üstüne biner. Sabit satır ezilmez; tavanın altında kalanı raf keser. */
 .weekgrid{ grid-auto-rows:max-content; }
 @media (max-width:480px){ .weekgrid{ grid-template-columns:1fr; } }
+/* Tablet (dikey 800 px'te sütun 88 px'e düşüyordu; «Değerlendirme» kutudan
+   taşıyor, ders adları kesiliyordu): dar aralıkta hafta 4+3 dizilir. */
+@media (min-width:481px) and (max-width:1023px){ .weekgrid{ grid-template-columns:repeat(4, minmax(0,1fr)); } }
 
 /* Haftanın günü SEÇİLEBİLİR: dokununca o günün defteri açılır. Kutu
    kalır ama gölgesiz — yan yana yedi gölge bir tepsi görüntüsü verir. */
@@ -9213,6 +9228,9 @@ tbody tr:hover{ background:var(--surface-2); }
   font-size:var(--fs-xs); line-height:1.3;
   padding:5px 6px; border-radius:var(--r-sm);
   background:var(--surface-2); border-left:2px solid var(--border-strong);
+  /* Uzun kelime kutudan taşmaz: heceden bölünür (html lang="tr"), o da
+     yetmezse kırılır. */
+  min-width:0; hyphens:auto; -webkit-hyphens:auto; overflow-wrap:anywhere;
 }
 
 .daycol__block.is-done{ border-left-color:var(--primary); color:var(--text-2); }
@@ -10272,6 +10290,11 @@ tbody tr:hover{ background:var(--surface-2); }
 .konusatir:last-child{ border-bottom:0; }
 .konusatir--bas{ padding:0 0 2px; border-bottom:0; font-size:12px; color:var(--text-3); }
 .konusatir .input, .konusatir .select{ min-width:0; }
+/* Tablet (dikey 800 px): sabit sütunlar konuya 112 px bırakıyordu, konu adı
+   «Paragraf ana dü…» diye kesiliyordu. Üç basamaklı sayıya 64 px yeter. */
+@media (min-width:680px) and (max-width:1023px){
+  .konusatir{ grid-template-columns:24px minmax(0,1fr) 56px 64px 72px 128px 28px; }
+}
 @media (max-width:679px){
   .konusatir{ grid-template-columns:24px minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr) 28px; row-gap:6px; }
   .konusatir--bas{ display:none; }
@@ -12048,8 +12071,11 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
    Fare kenardan ayrıldıktan birkaç saniye sonra (kabuk.js SAKIN_MS)
    kenarın içi yavaşça solar ve hafifçe bulanıklaşır; cam yerinde kalır.
    Yaklaşınca hızla netleşir. Telefonda kenar yoktur.
+   YALNIZ FARELİ CİHAZDA (tablet incelemesi, 2026-10-05): dokunmatik
+   tablette «yaklaşınca» hiç olmaz; kenar kalıcı olarak soluk kalıp
+   gezinme devre dışıymış gibi görünüyordu.
    ================================================================ */
-@media (min-width:680px){
+@media (min-width:680px) and (hover:hover) and (pointer:fine){
   .site--v5 > .kenar > *{ transition:opacity .24s ease, filter .24s ease; }
   html.kenar-sakin .site--v5 > .kenar:not(:hover):not(:focus-within):not(.kenar--tutulu) > *{
     opacity:.4; filter:blur(1.4px) saturate(.6);
@@ -15165,7 +15191,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'72c7fa00', at:'2026-10-05 17:08', dirty:true };
+R.BUILD = { id:'092dc608', at:'2026-10-05 18:11', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -58091,7 +58117,7 @@ R.Screens.today = (function(){
     if(!sig.seenAt) R.Signals.markSeen(sig.id);
 
     return c.Card({ title:'Bir soru', hint:'signal',
-      sub:sig.kind === 'friction' ? 'sürtünme ölçer' : 'gösterge nöbetçisi',
+      sub:sig.kind === 'friction' ? 'sürtünme' : 'gösterge',
       body:html`
         <p class="small muted">${sig.title}</p>
         ${c.Notice({ tone:'info', body:sig.question })}
@@ -58881,7 +58907,7 @@ R.Screens.today = (function(){
           ${R.Setup.needed() ? raw(R.Setup.card()) : html`<div class="kahraman" data-oz="042">${NextUpCard()}</div>`}
           ${when(runningBlock(), () => html`<div id="geri-sayim" class="bugun__vitrin">${raw(geriSayimHtml(runningBlock()))}</div>`)}
           ${when(!R.Setup.needed(), () => raw(gunUcuHtml(day) + blokBitisHtml(day)))}
-          ${when(R.Signals && R.Signals.current(), () => SignalCard())}
+          ${when(R.Signals && R.Signals.current(), () => c.Ledger([SignalCard()]))}
         </section>
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
           ${DonenKutu(day, dateISO)}

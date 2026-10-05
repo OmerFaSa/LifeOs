@@ -1754,8 +1754,11 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
    Fare kenardan ayrıldıktan birkaç saniye sonra (kabuk.js SAKIN_MS)
    kenarın içi yavaşça solar ve hafifçe bulanıklaşır; cam yerinde kalır.
    Yaklaşınca hızla netleşir. Telefonda kenar yoktur.
+   YALNIZ FARELİ CİHAZDA (tablet incelemesi, 2026-10-05): dokunmatik
+   tablette «yaklaşınca» hiç olmaz; kenar kalıcı olarak soluk kalıp
+   gezinme devre dışıymış gibi görünüyordu.
    ================================================================ */
-@media (min-width:680px){
+@media (min-width:680px) and (hover:hover) and (pointer:fine){
   .site--v5 > .kenar > *{ transition:opacity .24s ease, filter .24s ease; }
   html.kenar-sakin .site--v5 > .kenar:not(:hover):not(:focus-within):not(.kenar--tutulu) > *{
     opacity:.4; filter:blur(1.4px) saturate(.6);

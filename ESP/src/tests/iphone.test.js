@@ -554,4 +554,26 @@
       ['today', 'rutbe', 'onaylar'].forEach(r => expect(ESP.App.sayfaSonuRota(r)).toBe(false));
     });
   });
+  /* Tablet incelemesi (2026-10-05): «Oturum gir ve bütün satırlar» düğmesi
+     Durum alanında defterin DIŞINDA, kartsız yüzüyordu. Oturum listesinin
+     içinde durur (AYS'de «Blokları ve sayaçları aç» gibi). */
+  describe('Tablet · Bugün', () => {
+    it('«Oturum gir ve bütün satırlar» oturum kartının içinde (oturum varken de yokken de)', async () => {
+      for(const oturum of [false, true]){
+        ESP.Test.resetState();
+        if(oturum){
+          const t = ESP.S.ui.dayDate || ESP.U.todayISO();
+          ESP.S.days[t] = Object.assign({}, ESP.S.days[t] || {}, { sessions:[{ id:'o1', disc:'lang', minutes:30 }] });
+        }
+        const d = document.createElement('div');
+        d.innerHTML = String(await ESP.Screens.today.render());
+        document.body.appendChild(d);
+        try{
+          const b = Array.from(d.querySelectorAll('[data-route="gun"]')).find(x => /Oturum gir/.test(x.textContent));
+          expect(!!b).toBe(true);
+          expect(!!b.closest('.ledger')).toBe(true);
+        }finally{ d.remove(); }
+      }
+    });
+  });
 })();

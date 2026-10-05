@@ -378,6 +378,10 @@
 .cols-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .cols-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
 .cols-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+/* Yan yana form alanlarının kutuları aynı hizada: biri etiketinin yanında
+   not taşıyıp iki satıra sarınca ötekinin kutusu yukarıda kalıyordu
+   (tablet incelemesi, 2026-10-05). Yalnız alanlar; kartlar boylarını korur. */
+.cols-2 > .field, .cols-3 > .field, .cols-4 > .field, .auto-fit > .field{ align-self:end; }
 .auto-fit{ display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:14px; }
 
 /* ---------- duyarlı ---------- */

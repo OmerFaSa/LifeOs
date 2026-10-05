@@ -193,13 +193,18 @@ ESP.Screens.today = (function(){
 
   /* ------------------------------------------------------------- gunun listesi */
 
+  /* Günün defterine geçiş oturum kartının içinde durur (tablet incelemesi,
+     2026-10-05: kartın dışında, kartsız yüzüyordu). */
+  const gunDugmesi = () => html`<div class="mt-8">${K.Button({ label:'Oturum gir ve bütün satırlar', size:'sm',
+    tone:'ghost', act:'go', data:{ 'data-route':'gun' } })}</div>`;
+
   function sessionList(){
     const rows = M.sessionsOf(gun());
     if(!rows.length){
       return K.Entry({
         label:'Bugün', meta:'kayıt yok',
-        body:K.Empty({ text:'Bu güne henüz oturum girilmedi. '
-          + 'Girilmemiş gün sıfır sayılmaz — hiçbir ortalamaya katılmaz.' }),
+        body:html`${K.Empty({ text:'Bu güne henüz oturum girilmedi. '
+          + 'Girilmemiş gün sıfır sayılmaz — hiçbir ortalamaya katılmaz.' })}${gunDugmesi()}`,
       });
     }
     const toplam = rows.reduce((a, s) => a + (s.minutes || 0), 0);
@@ -211,7 +216,7 @@ ESP.Screens.today = (function(){
          BU GÜNÜN kendisi (bkz. core/basarim.js, gununOdagi). Eşiğin
          altındaki gün rozet almaz ve boş döner. */
       action:raw(ESP.Basarim ? ESP.Basarim.odakHtml(toplam) : ''),
-      body:K.Table({ tight:true,
+      body:html`${K.Table({ tight:true,
         headers:['Disiplin', 'Süre', 'Sayım', 'Not', ''],
         rows:rows.map(s => {
           const d = ESP.DISCIPLINE_BY_ID[s.disc];
@@ -222,7 +227,7 @@ ESP.Screens.today = (function(){
             s.note || '—',
             K.Button({ label:'Sil', size:'sm', act:'del-session', data:{ 'data-id':s.id } }),
           ];
-        }) }),
+        }) })}${gunDugmesi()}`,
     });
   }
 
@@ -846,8 +851,6 @@ ESP.Screens.today = (function(){
         </section>
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
           ${K.Ledger(() => [sessionList(), planRowToday()].filter(Boolean))}
-          <p class="small">${K.Button({ label:'Oturum gir ve bütün satırlar', size:'sm', tone:'ghost',
-            act:'go', data:{ 'data-route':'gun' } })}</p>
         </section>
       </div>
       <div class="bugun__sag">

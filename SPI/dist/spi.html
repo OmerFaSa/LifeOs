@@ -1128,6 +1128,10 @@ table td, table th{
 .cols-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .cols-3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
 .cols-4{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+/* Yan yana form alanlarının kutuları aynı hizada: biri etiketinin yanında
+   not taşıyıp iki satıra sarınca ötekinin kutusu yukarıda kalıyordu
+   (tablet incelemesi, 2026-10-05). Yalnız alanlar; kartlar boylarını korur. */
+.cols-2 > .field, .cols-3 > .field, .cols-4 > .field, .auto-fit > .field{ align-self:end; }
 .auto-fit{ display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr)); gap:14px; }
 
 /* ---------- duyarlı ---------- */
@@ -6472,6 +6476,10 @@ body.is-dragging .drop.is-over{
    ekranda yan yana, dar ekranda alt alta (sadelik: Bugün en çok 1 800 px). */
 .bugun__cift{ display:flex; flex-wrap:wrap; gap:16px; align-items:stretch; }
 .bugun__cift > *{ flex:1 1 280px; min-width:0; }
+/* Küçültülmüş kart (sayfa düzeni) kendi satırını alır: yarım genişlikte ince
+   bir şerit, yanındaki uzun kartın yanında boşluk bırakıyordu (tablet
+   incelemesi, 2026-10-05, SPİ Bugün › Günün hissi + Su). */
+.bugun__cift > .gizle-kucuk{ flex-basis:100%; }
 .sayfabasi__ust{ margin:0 0 6px; font-size:13px; color:var(--text-2); }
 .site--v5 .sayfabasi__baslik{ font-size:28px; }
 
@@ -6497,6 +6505,10 @@ body.is-dragging .drop.is-over{
 .site--v5 .lrow__note{ flex-basis:100%; margin:0; max-width:70ch; font-size:13px; }
 .site--v5 .lrow__act{ margin:0 0 0 auto; flex-direction:row; flex-wrap:wrap; }
 .site--v5 .lrow__act .btn{ width:auto; }
+/* Başlıktaki arama kutusu esner, yanındaki düğme alt satıra düşmez (tablet
+   incelemesi, 2026-10-05, SPİ Sonuçlar: kutu tam en alıyordu, «Hekime
+   götür» altında tek başına ortada kalıyordu). */
+.site--v5 .lrow__act > .input{ flex:1 1 160px; width:auto; min-width:0; }
 .site--v5 .lrow.kahraman{ border-top:0; }
 
 /* v5 · ÖNERİ ALANI: Merkez'in sesi mor çerçevede durur (teklif, karar değil). */
@@ -10778,8 +10790,11 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
    Fare kenardan ayrıldıktan birkaç saniye sonra (kabuk.js SAKIN_MS)
    kenarın içi yavaşça solar ve hafifçe bulanıklaşır; cam yerinde kalır.
    Yaklaşınca hızla netleşir. Telefonda kenar yoktur.
+   YALNIZ FARELİ CİHAZDA (tablet incelemesi, 2026-10-05): dokunmatik
+   tablette «yaklaşınca» hiç olmaz; kenar kalıcı olarak soluk kalıp
+   gezinme devre dışıymış gibi görünüyordu.
    ================================================================ */
-@media (min-width:680px){
+@media (min-width:680px) and (hover:hover) and (pointer:fine){
   .site--v5 > .kenar > *{ transition:opacity .24s ease, filter .24s ease; }
   html.kenar-sakin .site--v5 > .kenar:not(:hover):not(:focus-within):not(.kenar--tutulu) > *{
     opacity:.4; filter:blur(1.4px) saturate(.6);
@@ -14131,7 +14146,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'b6291646', at:'2026-10-05 17:22', dirty:true };
+SP.BUILD = { id:'092dc608', at:'2026-10-05 18:10', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.

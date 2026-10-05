@@ -447,4 +447,72 @@
       ['today', 'rutbe', 'onaylar'].forEach(r => expect(R.App.sayfaSonuRota(r)).toBe(false));
     });
   });
+  /* Tablet incelemesi (2026-10-05, 800 px dikey): hafta ızgarası 481 px'ten
+     başlayarak hep yedi sütundu; sütun 88 px'e düşünce «Değerlendirme» kutudan
+     taşıyor, «AYT Matematik / Geometri» kesiliyordu. */
+  describe('Tablet · hafta ızgarası', () => {
+    function medyaKurali(medya, secici){
+      for(const ss of Array.from(document.styleSheets)){
+        let k = [];
+        try{ k = Array.from(ss.cssRules || []); }catch(e){ continue; }
+        for(const r of k){
+          if(!r.media || !medya.test(r.media.mediaText)) continue;
+          for(const ic of Array.from(r.cssRules || [])) if(secici.test(ic.selectorText || '')) return ic;
+        }
+      }
+      return null;
+    }
+
+    it('dar aralıkta (481–1023 px) hafta 4+3 dizilir; geniş ekranda yedi sütun', () => {
+      const r = medyaKurali(/min-width:\s*481px\)\s*and\s*\(max-width:\s*1023px/, /^\.weekgrid$/);
+      expect(!!r).toBe(true);
+      expect(/repeat\(4/.test(r.style.gridTemplateColumns)).toBe(true);
+    });
+
+    it('haftalık sözleşmede tablet aralığında konu sütunu genişler (sayı kutuları daralır)', () => {
+      const r = medyaKurali(/min-width:\s*680px\)\s*and\s*\(max-width:\s*1023px/, /^\.konusatir$/);
+      expect(!!r).toBe(true);
+      const sutun = r.style.gridTemplateColumns.split(/\s+(?![^(]*\))/);
+      expect(sutun.length).toBe(7);
+      const sabit = sutun.filter(x => /px$/.test(x)).reduce((t, x) => t + parseFloat(x), 0);
+      expect(sabit <= 380).toBe(true);
+    });
+
+    /* Tablet incelemesi: «Bir soru» defter satırı tek başına çiziliyordu;
+       arka plansız, kartların arasında yüzüyordu (SPİ'de defterin içinde). */
+    it('Bugün: «Bir soru» satırı defterin (kartın) içinde; alt yazı sade', async () => {
+      R.Test.resetState();
+      R.S.profile.setupDone = true;
+      await R.Model.ensurePlan(true);
+      await R.Model.ensureWeek(R.Model.currentWeek());
+      await R.Model.ensureDay(R.U.today());
+      const eski = R.Signals.current;
+      R.Signals.current = () => ({ id:'s1', kind:'goodhart', title:'çalışma dakikası → kapanan konu',
+        question:'Süre artıyor ama konu kapanmıyor?', seenAt:new Date().toISOString() });
+      const d = document.createElement('div');
+      try{
+        d.innerHTML = String(await R.Screens.today.render());
+        document.body.appendChild(d);
+        const satir = Array.from(d.querySelectorAll('.lrow')).find(x => /Bir soru/.test(x.textContent));
+        expect(!!satir).toBe(true);
+        expect(!!satir.closest('.ledger')).toBe(true);
+        expect(/nöbetçisi/.test(satir.textContent)).toBe(false);
+      }finally{ R.Signals.current = eski; d.remove(); }
+    });
+
+    it('uzun kelime gün kutusundan taşmaz', () => {
+      const d = document.createElement('div');
+      d.style.width = '420px';
+      d.innerHTML = '<div class="weekgrid" style="grid-template-columns:repeat(7, minmax(0,1fr))">'
+        + Array.from({ length:7 }, () => '<div class="daycol"><div class="daycol__block"><b>Değerlendirme</b>'
+          + '<br>Haftalıkdeğerlendirme</div></div>').join('') + '</div>';
+      document.body.appendChild(d);
+      try{
+        const bloklar = Array.from(d.querySelectorAll('.daycol__block'));
+        expect(bloklar.every(b => b.scrollWidth <= b.clientWidth + 1)).toBe(true);
+        const kol = d.querySelector('.daycol');
+        expect(kol.scrollWidth <= kol.clientWidth + 1).toBe(true);
+      }finally{ d.remove(); }
+    });
+  });
 })();
