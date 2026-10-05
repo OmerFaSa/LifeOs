@@ -361,7 +361,7 @@ def t_sade_yuz():
     ok('id="gun-cumle"' in kart and 'id="gun-selam"' in kart, "gunun cumlesi bilgi kartinda")
     no('<p class="sub" style="margin-bottom:16px">' in m, "aciklama paragrafi ekranda kalmis")
     for ad, cumle in (("Ofis", "BAM hiçbir sisteme yazmaz"), ("Hedefler", "Üç sistemin etkin hedefleri"),
-                      ("Teklifler", "HKM sistemlere doğrudan yazmaz"), ("Hayat Mottosu", "Kendi düşüncelerin.")):
+                      ("Onaylar", "HKM sistemlere doğrudan yazmaz"), ("Hayat Mottosu", "Kendi düşüncelerin.")):
         bas = m.index("<h1>" + ad + "</h1>")
         ok(cumle in m[bas:bas + 1600], ad + " aciklamasi bilgi kartinda")
     sade = m[m.index('<style id="hkm-sade">'):]
@@ -537,6 +537,124 @@ def t_denetimler_kenardan_cikar():
         ok(re.search(r"kenardanCik\s*=\s*async[^\n]*\n[^\n]*mouse\.move", js), yol.name + ": kenardanCik fareyi tasimiyor")
 
 
+def _blok(m, bas):
+    b = m[m.index(bas):]
+    return b[:b.index("</style>")]
+
+
+def _islev(m, ad):
+    f = m[m.index("function " + ad + "("):]
+    return f[:f.index("\n  }\n")]
+
+
+def t_telefon_ve_tablet_kabugu():
+    """Kullanici (2026-10-05): «HKM kismi diger taraflara gore her yonu ile cok
+    ilkel kalmis; modern, guzel, sade yap». < 1024 px'te ust logo ve yana
+    kayan yazi sekmeleri vardi, zemin duz griydi. Artik modullerin kalibi:
+    telefonda gezinme ALTTA cam bantta (simge + ad: dort cekmece ve Menu);
+    Menu yapragi sistem gecisini, temayi ve oteki uc cekmeceyi acar; bolumler
+    ustte yuzen bolumlu secicide; tablette dar cam kenar, simgenin altinda ad.
+    Zemin her boyutta. Isaretleme degismez: yedi cekmece nav'da kalir, Menu
+    dugmesi cekmece degildir (data-yol tasimaz)."""
+    m = _yuz()
+    gez = m[m.index('<nav class="gez" id="gez"'):]
+    gez = gez[:gez.index("</nav>")]
+    ok('id="gez-menu"' in gez and 'aria-expanded="false"' in gez, "Menu dugmesi nav'da")
+    no(re.search(r'<button[^>]*data-yol', gez), "Menu dugmesi cekmece sayilmaz")
+    k = _blok(m, '<style id="hkm-kabuk">')
+    tel = k[k.index("@media (max-width:679px){"):]
+    for s in (".ust__ic{ position:fixed; left:0; right:0; bottom:0;", "backdrop-filter:saturate(160%) blur(24px)",
+              '.gez a:is([data-yol="hedefler"], [data-yol="sistemler"], [data-yol="ayarlar"]){ display:none; }',
+              ".ust--menu .moduller{ display:grid;", ".ust--menu #ust-araclar{ display:flex;",
+              '.ust--menu .gez a:is([data-yol="hedefler"], [data-yol="sistemler"], [data-yol="ayarlar"]){ display:flex;',
+              ".bolumcubugu{ position:fixed;", "env(safe-area-inset-bottom", "html .meydan-ac > span:last-child{ display:none; }",
+              "body:has(#giris:not([hidden])) .ust{ display:none; }"):
+        ok(s in tel, s)
+    for yol in ("bugun", "teklifler", "hedefler", "sistemler", "ofis", "sohbet", "ayarlar"):
+        ok('.gez a[data-yol="' + yol + '"]{ --ic:var(--ic-' in tel, yol + " simgesi (telefon)")
+    tab = k[k.index("@media (min-width:680px) and (max-width:1023px){"):]
+    for s in (".ust{ position:fixed; left:0; top:0; bottom:0; z-index:6; width:88px;", "flex-direction:column",
+              "margin:0 0 0 88px", ".wrap::before"):
+        ok(s in tab, s)
+    ok("prefers-reduced-transparency: reduce" in k, "saydamligi azalt tercihi")
+    # Zemin her boyutta: sabit katman artik masaustu sorgusunun disinda.
+    cam = m[m.index("CAM KABUK"):]
+    z = cam.index("body:not(:has(#giris:not([hidden])))::before{")
+    ok(cam.rfind("@media (min-width:1024px){", 0, z) < cam.rfind("@media all{", 0, z), "zemin yalniz masaustunde degil")
+    # Betik: Menu acilir/kapanir; secince, Esc'te ve adres degisince kapanir.
+    b = m[m.index("Telefondaki Menü (hkm-kabuk)"):]
+    b = b[:b.index("</script>")]
+    for s in ("ust.classList.toggle('ust--menu', v)", "aria-expanded", "e.key === 'Escape'",
+              "addEventListener('hashchange'", "#gez a[href], .modul[href], #bolumcubugu a[href]"):
+        ok(s in b, s)
+    ok(m.index('<style id="hkm-kabuk">') < m.index("<!-- MEYDAN (kullan"), "blok Meydan blogundan once")
+    d = (KOK / "HKM" / "tools" / "yuz.js").read_text(encoding="utf-8")
+    ok("const menuAc = async" in d and "#gez-menu" in d, "yuz.js telefonda Menu'den gezer")
+
+
+def t_bugun_sade():
+    """Bugun (2026-10-05): uc sistem TEK kartta (muhur yerine modulun
+    isareti); brifingin ilk UC satiri, gerisi ayni kartta «Tumu» ile (satir
+    silinmez); King tek hap (kure, alan, ses, gonder simgesi); konsey uc satir
+    ve aciklamasi ⓘ'de (cumleler korunur); «oneri yok» cumlesi ekranda degil
+    ⓘ'de — gunun cumlesi zaten «Bekleyen oneri yok» der. Sayi ve cumle
+    koddan gelir."""
+    m = _yuz()
+    serit = _islev(m, "seritCiz")
+    no("muhurHtml(" in serit, "seritte muhur yok")
+    for s in ("nokta nokta--", "data-yokla", "data-ac-bag hidden", "data-kapali-not hidden", "BASLAT.bat"):
+        ok(s in serit, s)
+    ozet = _islev(m, "ozetCiz")
+    for s in ("var ILK = 3;", "data-brifing-tumu", "line--fazla", "satirlar.forEach("):
+        ok(s in ozet, s)
+    no("satirlar.slice(0, 5)" in ozet, "fazla satir kesilmez, katlanir")
+    ok("k.classList.toggle('is-tumu', ac)" in m, "Tumu ayni kartta acar")
+    bug = m[m.index('<div class="card" id="bugun-sohbet">'):]
+    bug = bug[:bug.index('<p class="muted yaz__not" id="bugun-sohbet-not"></p>')]
+    for s in ('class="king-kure"', 'class="yaz yaz--hap"', 'id="bugun-mesaj" rows="1"', 'class="primary yaz__gonder" id="bugun-gonder" aria-label="Gönder"',
+              'href="#/sohbet"'):
+        ok(s in bug, s)
+    ok(".yaz__not:empty{ display:none; }" in m, "durum satiri bosken gorunmez")
+    kon = _islev(m, "konseyCiz")
+    for s in ("konsey__satir", "hkm-bilgikart", "esc(k.note)", "Bugün hiçbir sıra ateşlenmedi", "Büyük Patron o sıradan taşıdı",
+              "#/sohbet/"):
+        ok(s in kon, s)
+    onay = _islev(m, "onayCiz")
+    ok("satir.rank == null" in onay and "gunOneri.textContent = satir.text" in onay, "oneri yok cumlesi ⓘ'de")
+    ok('<p id="gun-oneri"></p>' in m)
+
+
+def t_ekranlar_sade():
+    """Oteki ekranlar (2026-10-05): baslik cekmecenin adi (Onaylar, Sohbet);
+    Onaylar'da once acik teklifler (bolumlu sistem secicisi basta), yeni
+    teklif formu katli; Sohbet'te dort gorevli tek sira cip; Sistemler'in
+    durumu tablo degil satir ve once bozuk; Ayarlar'in «Baslarken» rehberi
+    katli (anahtar kurulu degilse acik gelir); Ofis ve Hedefler'in sabit
+    aciklamalari kart basinin ⓘ'sinde (kartBas) — cumleler silinmedi."""
+    m = _yuz()
+    ok("<h1>Onaylar</h1>" in m and "<h1>Sohbet</h1>" in m)
+    no("<h1>Teklifler</h1>" in m or "<h1>Sohbetler</h1>" in m, "eski basliklar")
+    ok(m.index('id="teklif-liste"') < m.index('id="teklif-form"'), "once acik teklifler")
+    ok('class="card teklif-yeni" id="teklif-form"' in m and ".teklif-yeni:not(.is-acik) .teklif-yeni__govde{ display:none; }" in m)
+    liste = _islev(m, "teklifListeCiz")
+    ok("data-teklif-modul" in liste and "teklifDugmeleri();" in liste and "<table>" not in liste)
+    ok("Teklifi «istenmedi» diye kapatır; kayıt silinmez." in liste, "Geri al'in sozu korunur")
+    gor = _islev(m, "gorevlilerCiz")
+    for s in ('class="gorevli-sec" role="group"', "aria-pressed", "data-gorevli", "komutlarla konuşuyorsun"):
+        ok(s in gor, s)
+    tani = _islev(m, "taniCiz")
+    ok("bozuk:0, uyari:1, tamam:2" in tani and "<table>" not in tani and 'class="hap ' in tani)
+    bas = _islev(m, "baslarkenCiz")
+    ok("(kurulu_mu ? '' : ' open')" in bas and "</details>" in bas)
+    ok("function kartBas(" in m)
+    for ad, cumle in (("ofisKatlarCiz", "Patron değişmez, uzmanlar değişebilir."),
+                      ("ofisKingCiz", "onay yine kullanıcınındır."),
+                      ("ofisBamCiz", "Depolama Bürosu’ndan geçer."),
+                      ("hedefZamanCiz", "«tahmin» etiketini taşır.")):
+        f = _islev(m, ad)
+        ok("kartBas(" in f and cumle in f, ad)
+
+
 def run():
     suite("HKM yüzü — giriş şeridi")
     test("üç adım vardır", t_giris_seridi_uc_adim)
@@ -564,3 +682,6 @@ def run():
     test("dar kenar seçimden sonra çekilir, sekmeyi örtmez (W6, 2026-10-03)", t_kenar_secince_cekilir)
     test("cam kabuk: kenar açılınca çekmeceler yerinden kaymaz", t_kenar_acilinca_satirlar_kaymaz)
     test("denetimler kenardaki bağlantıdan sonra fareyi kenardan çıkarır", t_denetimler_kenardan_cikar)
+    test("telefon ve tablet kabuğu: alt bant, Menü, dar kenar, zemin her boyutta (2026-10-05)", t_telefon_ve_tablet_kabugu)
+    test("Bugün sade: tek sistem kartı, üç satır + Tümü, King hapı, konsey satırı", t_bugun_sade)
+    test("ekranlar sade: başlık çekmecenin adı, satır, katlı form, açıklama ⓘ'de", t_ekranlar_sade)

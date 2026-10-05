@@ -330,18 +330,27 @@ async function main(){
           await kenardanCik();
           if(kapali !== acik) hatalar.push(ad + '/' + tema + ': kenar açılınca çekmeceler kaydı — ' + kapali + ' → ' + acik);
         }
+        /* Telefonda (< 680 px, 2026-10-05) Hedefler, Sistemler ve Ayarlar alt
+           bandın Menü yaprağındadır: kullanıcı gibi önce Menü açılır. */
+        const menuAc = async sec => {
+          if(await page.locator(sec).isVisible()) return;
+          if(await page.locator('#gez-menu').isVisible()){ await page.locator('#gez-menu').click(); await wait(380); }
+        };
         const duraklar = GORUNUMLER.map(g => ({ ad:g, git:async () => {
           if(CEKMECE[g]){
+            await menuAc('#gez a[data-yol="' + CEKMECE[g] + '"]');
             await page.click('#gez a[data-yol="' + CEKMECE[g] + '"]');
             await bolumeUzan(CEKMECE[g]);
             await page.click('#bolumcubugu a[data-yol="' + g + '"]');
           }else{
+            await menuAc('#gez a[data-yol="' + g + '"]');
             await page.click('#gez a[data-yol="' + g + '"]');
           }
           await kenardanCik();
         }}));
         for(const a of AYAR_SEKMELERI){
           duraklar.push({ ad:'ayarlar/' + a, git:async () => {
+            await menuAc('#ayar-bag');
             await page.click('#ayar-bag');
             await wait(450);                      /* kenarın kapanış geçişi 340 ms */
             const o = await page.evaluate(ORTUSME);
