@@ -674,7 +674,7 @@ R.Screens.office = (function(){
     if(!V || !V.ofis) return {};
     return V.ofis({ modul:'ays', acik:S.ui.officeDesk, act:{ ac:'office-desk' },
       ajanlar:R.AGENTS.map(a => ({ id:a.id, ad:a.name, harf:a.initial, rol:a.role, patron:!!a.lead,
-        gorsel:'img/marka/ajan-kare-ays-' + a.id + '.webp', hazir:O.ready(a.id),
+        gorsel:'', hazir:O.ready(a.id),
         cumle:(() => { try{ const b = O.brief(a.id); return b && b.headline ? String(b.headline) + '.' : ''; }catch(e){ return ''; } })(),
         yapar:[], yapmaz:[] })) });
   }

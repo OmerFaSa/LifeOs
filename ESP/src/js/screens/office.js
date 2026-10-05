@@ -74,11 +74,11 @@ ESP.Screens.office = (function(){
     const V = (window.LIFEOS || {}).VITRIN;
     if(!V || !V.ofis) return {};
     const aktif = ['patron'].concat(ESP.Mod.activeAgents().map(a => a.id).filter(id => id !== 'patron'));
-    const kisi = id => { const a = ESP.AGENT_BY_ID[id]; return a ? { ad:a.short || a.name, harf:a.initial, gorsel:'img/marka/ajan-kare-esp-' + a.id + '.webp' } : null; };
+    const kisi = id => { const a = ESP.AGENT_BY_ID[id]; return a ? { ad:a.short || a.name, harf:a.initial, gorsel:'' } : null; };
     const h = ESP.Office.handoffs()[0];
     return V.ofis({ modul:'esp', act:{ sor:'open-agent' },
       ajanlar:aktif.map(id => ESP.AGENT_BY_ID[id]).filter(Boolean).map(a => ({ id:a.id, ad:a.short || a.name, harf:a.initial, rol:a.role,
-        patron:a.id === 'patron', gorsel:'img/marka/ajan-kare-esp-' + a.id + '.webp', hazir:ESP.Office.ready(a.id),
+        patron:a.id === 'patron', gorsel:'', hazir:ESP.Office.ready(a.id),
         cumle:(() => { try{ return ESP.Office.ruleText(a.id, a.id === 'patron' ? ESP.Office.patronBrief() : ESP.Office.brief(a.id)); }catch(e){ return ''; } })(),
         yapar:V.maddele(a.scope), yapmaz:V.maddele(a.notScope) })),
       devir:h && kisi(h.from) && kisi(h.to) ? { kaynak:kisi(h.from), hedef:kisi(h.to), metin:h.finding + ' — ' + h.toName + '’a düşüyor.' } : null });

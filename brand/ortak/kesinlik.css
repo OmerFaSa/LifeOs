@@ -42,6 +42,11 @@
   display:block;
 }
 
+/* SADE İŞARET (2026-10-05): 12 px, yazının renginde ama bir ton sönük;
+   anlamı şekli taşır (kesinlik.js KESINLIK_ISARET). */
+.kesinlik__isaret{ display:block; width:12px; height:12px; flex:0 0 12px; color:var(--ink-2, var(--text-2)); }
+.kesinlik--measured .kesinlik__isaret{ color:var(--text, currentColor); }
+
 /* «Veri yok» SÖNÜK yazılır — ama silik değil.
 
    Sönük olması doğru: o satırda bir ölçüm yok. Silik olması yanlış
@@ -64,4 +69,5 @@
     white-space:nowrap;
   }
   .kesinlik__im{ width:18px; height:18px; flex-basis:18px; }
+  .kesinlik__isaret{ width:14px; height:14px; flex-basis:14px; }
 }

@@ -198,7 +198,7 @@ SP.Screens.today = (function(){
              dönüyordu — var olmayacağı bilinen bir dosyayı istemek.
              (Duman testi bunu yakaladı; her 404'te kırmızıya döner.)
              Markersız alan simgesiz kalır, etiketi olduğu gibi. */
-          label:raw(window.LIFEOS.SIMGELI('olcum', f.marker, f.label)),
+          label:raw(window.LIFEOS.SIMGELI('olcum', f.marker || f.id, f.label)),   /* su: işareti yok, simgesi var */
           input:K.Input({ id:'v-' + f.id, type:'number', numeric:true, step:f.step,
             min:f.min, max:f.max, value:v[f.id] == null ? '' : v[f.id] }),
         }))}</div>

@@ -289,10 +289,10 @@ SP.Screens.office = (function(){
     const V = (window.LIFEOS || {}).VITRIN;
     if(!V || !V.ofis) return {};
     const h = SP.Office.handoffs()[0];
-    const kisi = id => { const a = SP.AGENT_BY_ID[id]; return a ? { ad:a.name, harf:a.initial, gorsel:'img/marka/ajan-kare-spi-' + a.id + '.webp' } : null; };
+    const kisi = id => { const a = SP.AGENT_BY_ID[id]; return a ? { ad:a.name, harf:a.initial, gorsel:'' } : null; };
     return V.ofis({ modul:'spi', acik:S.ui.officeDesk, act:{ ac:'toggle-desk', sor:'ask-agent' },
       ajanlar:SP.AGENTS.map(a => ({ id:a.id, ad:a.name, harf:a.initial, rol:a.role, patron:a.id === 'patron',
-        gorsel:'img/marka/ajan-kare-spi-' + a.id + '.webp', hazir:SP.Office.ready(a.id),
+        gorsel:'', hazir:SP.Office.ready(a.id),
         cumle:(() => { try{ return SP.Office.ruleText(a.id, SP.Office.brief(a.id)); }catch(e){ return ''; } })(),
         yapar:V.maddele(a.scope), yapmaz:V.maddele(a.notScope) })),
       /* Balonda bulgu; kime ve ne sorulduğu okta ve alttaki devir satırında. */

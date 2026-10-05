@@ -790,14 +790,11 @@ ESP.UI = (function(){
 
      Tek yerde durmasinin sebebi: ayni isaretleme on ayri ekranda
      yaziliydi ve on kopya bir gun ayrisir. */
-  function pp(id){
-    if(!id) return '';
-    var t = String(id).replace(/[^a-z0-9_-]/gi, '');
-    if(!t) return '';
-    return ESP.h.raw('<img class="agentav__pp" src="img/marka/ajan-esp-'
-      + t + '.webp" alt="" aria-hidden="true" loading="lazy"'
-      + ' onerror="this.remove()">');
-  }
+  /* SADE (kullanıcı, 2026-10-05: «görseller beyaz temada profesyonel
+     gözükmüyor; daha minimalist, daha sade»): yapay portre YOK. Kutunun
+     altındaki baş harf görünür kalır — modülün renginde sakin bir
+     monogram. İmza aynı kaldı: çağıran yer değişmez. */
+  function pp(id){ return ''; }
 
   /* AYNI AJANIN KARE PORTRESI — masa basliginda.
 
@@ -845,14 +842,7 @@ ESP.UI = (function(){
     }, 1100);
   }
 
-  function ppKare(id){
-    if(!id) return '';
-    var t = String(id).replace(/[^a-z0-9_-]/gi, '');
-    if(!t) return '';
-    return ESP.h.raw('<img class="agentkare__pp" src="img/marka/ajan-kare-esp-'
-      + t + '.webp" alt="" aria-hidden="true" loading="lazy"'
-      + ' onerror="this.remove()">');
-  }
+  function ppKare(id){ return ''; }   /* SADE (2026-10-05): portre yok, baş harf kalır */
 
 
   return { pp:pp, ppKare:ppKare, onayMuhru:onayMuhru,

@@ -60,21 +60,28 @@ describe('Kesinlik — katalog', () => {
 describe('Kesinlik — işaretleme', () => {
   const L = () => window.LIFEOS;
 
-  it('etiket hem görseli hem YAZIYI taşır', () => {
-    /* Görsel bir ektir; anlamı taşıyan şey hâlâ kelimedir. Yalnız
-       görsel gösteren bir etiket, dosya yüklenmediğinde hiçbir şey
-       söylemezdi. */
+  it('etiket hem işareti hem YAZIYI taşır', () => {
+    /* İşaret bir ektir; anlamı taşıyan şey hâlâ kelimedir. */
     const h = L().KESINLIK_HTML('measured');
-    expect(h.indexOf('etiket-olculdu.webp') >= 0).toBeTruthy();
+    expect(h.indexOf('kesinlik__isaret') >= 0).toBeTruthy();
     expect(h.indexOf('ölçüldü') >= 0).toBeTruthy();
     expect(h.indexOf('kesinlik--measured') >= 0).toBeTruthy();
   });
 
-  it('görsel yüklenmezse DÜĞÜM KALKAR, yazı kalır', () => {
-    /* Kırık resim simgesi göstermek, hiç göstermemekten kötüdür —
-       bu deponun her görselinde aynı kural. */
-    expect(L().KESINLIK_HTML('computed').indexOf('onerror="this.remove()"') >= 0)
-      .toBeTruthy();
+  /* 2026-10-05 (kullanıcı: «görseller beyaz temada profesyonel
+     gözükmüyor; daha sade»): koyu zeminli rozet görseli değil, 12 px
+     geometrik işaret; dosya istenmez. ANLAM ŞEKİLDEDİR: dört etiketin
+     dördü ayrı çizilir (renk körlüğünde de okunur). */
+  it('işaret dosya istemez; dört etiketin şekli birbirinden ayrı', () => {
+    const sekiller = L().KESINLIK.map(e => {
+      const h = L().KESINLIK_HTML(e.id);
+      expect(h.indexOf('.webp') >= 0).toBeFalsy();
+      expect(h.indexOf('aria-hidden="true"') >= 0).toBeTruthy();
+      return L().KESINLIK_ISARET[e.id];
+    });
+    expect(new Set(sekiller).size).toBe(4);
+    expect(L().KESINLIK_ISARET.estimated.indexOf('stroke-dasharray') >= 0).toBeTruthy();   // kesik: yaklaşık
+    expect(L().KESINLIK_ISARET.measured.indexOf('fill="currentColor"') >= 0).toBeTruthy(); // dolu: ölçüldü
   });
 
   it('BİLİNMEYEN kimlikte karşılık UYDURULMAZ', () => {
@@ -84,7 +91,7 @@ describe('Kesinlik — işaretleme', () => {
        ve görsel hiç çizilmez. */
     const h = L().KESINLIK_HTML('yepyeni-etiket');
     expect(h.indexOf('yepyeni-etiket') >= 0).toBeTruthy();
-    expect(h.indexOf('<img') >= 0).toBeFalsy();
+    expect(h.indexOf('<img') >= 0 || h.indexOf('<svg') >= 0).toBeFalsy();
     expect(h.indexOf('kesinlik--') >= 0).toBeFalsy();
   });
 
@@ -94,12 +101,6 @@ describe('Kesinlik — işaretleme', () => {
     expect(h.indexOf('&lt;script&gt;') >= 0).toBeTruthy();
   });
 
-  it('kök değiştirilebilir — tek dosya sürümü için', () => {
-    /* `merdiven({kok})` ile aynı gerekçe: dist sürümünde medya başka
-       bir yerden servis edilebilir. */
-    expect(L().KESINLIK_HTML('tahmin' in {} ? 'x' : 'estimated', { kok:'medya/' })
-      .indexOf('medya/etiket-tahmin.webp') >= 0).toBeTruthy();
-  });
 
   it('dört etiketin dördü de ÇİZİLEBİLİR', () => {
     /* Biri boş HTML dönerse o satır «Kaynak» sütununda sessizce
@@ -108,7 +109,7 @@ describe('Kesinlik — işaretleme', () => {
     L().KESINLIK.forEach(e => {
       const h = L().KESINLIK_HTML(e.id);
       expect(h.length > 0).toBeTruthy();
-      expect(h.indexOf(e.gorsel + '.webp') >= 0).toBeTruthy();
+      expect(h.indexOf('kesinlik__isaret') >= 0).toBeTruthy();
     });
   });
 });

@@ -359,6 +359,15 @@ button{ font:inherit; }
 .kart__ust{ display:flex; gap:14px; align-items:center; }
 .logo{ flex:none; width:52px; height:52px; border-radius:13px; background:var(--renk-t); display:grid; place-items:center; }
 .logo img{ width:40px; height:40px; object-fit:contain; }
+/* SADE (kullanıcı, 2026-10-05: «görseller profesyonel gözükmüyor; daha
+   sade»): parlak 3B logo yerine LifeOS işaretinin şekli, modülün renginde
+   — AYS kare, SPİ daire, ESP karo, Merkez altıgen (renk körlüğünde de
+   ayrılır). */
+.sekil{ display:block; width:18px; height:18px; background:var(--renk); }
+.sekil--ays{ border-radius:4px; }
+.sekil--spi{ border-radius:50%; }
+.sekil--esp{ transform:rotate(45deg) scale(.86); border-radius:3px; }
+.sekil--hkm{ clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%); }
 .kart__ad{ font-size:16px; font-weight:650; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
 .kart__ad small{ font-size:12.5px; font-weight:500; color:var(--fg-3); }
 .kart__acik{ color:var(--fg-2); font-size:13.5px; margin-top:2px; }
@@ -545,7 +554,7 @@ def giris_html(telefon=False):
                 continue
             kartlar.append(
                 '<a class="kart" href="%s" style="--renk:var(--%s);--renk-t:var(--%s-t)">'
-                '<div class="kart__ust"><span class="logo"><img src="/logo/%s.png" alt="" width="40" height="40"/></span>'
+                '<div class="kart__ust"><span class="logo" aria-hidden="true"><i class="sekil sekil--%s"></i></span>'
                 '<div><div class="kart__ad">%s <small>%s</small></div>'
                 '<div class="kart__acik">%s</div></div></div>'
                 '<div class="kart__alt"><span class="dugme">Aç</span></div></a>'
@@ -553,7 +562,7 @@ def giris_html(telefon=False):
             continue
         kartlar.append(
             '<a class="kart" href="%s" style="--renk:var(--%s);--renk-t:var(--%s-t)" %s>'
-            '<div class="kart__ust"><span class="logo"><img src="/logo/%s.png" alt="" width="40" height="40"/></span>'
+            '<div class="kart__ust"><span class="logo" aria-hidden="true"><i class="sekil sekil--%s"></i></span>'
             '<div><div class="kart__ad">%s <small>%s</small></div>'
             '<div class="kart__acik">%s</div></div></div>'
             '<div class="kart__alt"><span class="durum" data-hal="bekle"><i></i><span>Bakılıyor…</span></span>'

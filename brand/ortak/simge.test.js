@@ -44,7 +44,11 @@ describe('Simge — ad kuralı', () => {
     expect(L().MEDYA).toBeTruthy();
     expect(L().SIMGE_ADI('disiplin', 'lang')).toBe('disiplin-lang');
     expect(L().SIMGE_ADI('disiplin', 'music')).toBeNull();
-    expect(L().SIMGE_HTML('disiplin', 'music')).toBe('');
+    /* 2026-10-05'ten beri disiplinin simgesi ÇİZİMDİR: dosya istenmez,
+       müziğin de bir çizgisi var. Çizimi de dosyası da olmayan kimlik
+       yine boş döner (simge ailesinde künyede olmayan). */
+    expect(L().SIMGE_HTML('disiplin', 'music').indexOf('<svg') === 0).toBeTruthy();
+    expect(L().SIMGE_HTML('simge', 'yok-boyle')).toBe('');
     /* Yazı yine de görünür: görsel bir ektir. */
     expect(L().SIMGELI('disiplin', 'music', 'Müzik').indexOf('Müzik') >= 0)
       .toBeTruthy();
@@ -70,18 +74,34 @@ describe('Simge — ad kuralı', () => {
 describe('Simge — işaretleme', () => {
   const L = () => window.LIFEOS;
 
-  it('simge bir SÜSTÜR: alt metni boş, okuyucuya görünmez', () => {
+  it('simge bir SÜSTÜR: okuyucuya görünmez, odak almaz', () => {
     /* Yanında duran yazı zaten aynı şeyi söylüyor; ikinci kez
        okutmak listeyi iki katı uzatmaktan başka bir şey yapmaz. */
     const h = L().SIMGE_HTML('olcum', 'hrv');
-    expect(h.indexOf('alt=""') >= 0).toBeTruthy();
     expect(h.indexOf('aria-hidden="true"') >= 0).toBeTruthy();
-    expect(h.indexOf('img/marka/olcum-hrv.webp') >= 0).toBeTruthy();
+    expect(h.indexOf('focusable="false"') >= 0).toBeTruthy();
   });
 
-  it('dosya yoksa DÜĞÜM KALKAR', () => {
-    expect(L().SIMGE_HTML('ders', 'ayt-fizik')
-      .indexOf('onerror="this.remove()"') >= 0).toBeTruthy();
+  /* 2026-10-05 (kullanıcı: «görseller beyaz temada profesyonel
+     gözükmüyor; daha minimalist, daha sade»): ölçüm, ders ve disiplin
+     parlak rozet DOSYASI değil, tek renk çizgi simgedir; rengi ailenin
+     modül mürekkebi. Rütbe'nin «simge» ailesi raster kalır. */
+  it('ölçüm, ders ve disiplin tek renk çizgi simgedir; dosya istenmez', () => {
+    ['olcum', 'ders', 'disiplin'].forEach(a => {
+      L().MEDYA[a].forEach(id => {
+        const h = L().SIMGE_HTML(a, id);
+        expect(h.indexOf('<svg class="simge simge--cizgi simge--' + a) === 0).toBeTruthy();
+        expect(h.indexOf('.webp') >= 0).toBeFalsy();
+        expect(h.indexOf('fill="#') >= 0 || h.indexOf('stroke="#') >= 0).toBeFalsy();   // renk CSS'ten
+      });
+    });
+    expect(L().SIMGE_HTML('ders', 'ayt-fizik') !== L().SIMGE_HTML('ders', 'ayt-kimya')).toBeTruthy();
+  });
+
+  it('Rütbe\'nin simge ailesi dokunulmadan raster kalır', () => {
+    const h = L().SIMGE_HTML('simge', 'kalp');
+    expect(h.indexOf('img/marka/simge-kalp.webp') >= 0).toBeTruthy();
+    expect(h.indexOf('onerror="this.remove()"') >= 0).toBeTruthy();
   });
 
   it('üç ölçü vardır, dördüncüsü yoktur', () => {
@@ -96,8 +116,8 @@ describe('Simge — işaretleme', () => {
   });
 
   it('kök değiştirilebilir — tek dosya sürümü için', () => {
-    expect(L().SIMGE_HTML('disiplin', 'philo', { kok:'medya/' })
-      .indexOf('medya/disiplin-philo.webp') >= 0).toBeTruthy();
+    expect(L().SIMGE_HTML('simge', 'kalp', { kok:'medya/' })
+      .indexOf('medya/simge-kalp.webp') >= 0).toBeTruthy();
   });
 
   it('SİMGELİ yazıyı KAÇIRIR', () => {

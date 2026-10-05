@@ -76,9 +76,26 @@ LIFEOS.KESINLIK_ILE = function(id){
    bir gün beşinci bir etiket eklerse — kimliğin KENDİSİ yazılır:
    uydurma bir karşılık göstermek, anlamadığını anlamış gibi yapmaktır
    (AGENTS.md §1.7). */
+/* SADE İŞARET (kullanıcı, 2026-10-05: «görseller beyaz temada profesyonel
+   gözükmüyor; daha minimalist, daha sade»). Koyu zeminli parlak rozet
+   görselleri yerine 12 px'lik geometrik bir işaret; ANLAM ŞEKİLDEDİR,
+   renkte değil (renk körlüğünde de okunur):
+       ölçüldü      dolu nokta — arkasında bir kayıt var
+       hesaplandı   yarısı dolu — başka sayılardan türedi
+       tahmin       kesik halka — yaklaşık, kullanıcının kestirimi
+       veri yok     boş halka ve çizgi — yokluk; sıfır değil
+   Dosya istenmez; yazı yine işaretin yanında durur. */
+LIFEOS.KESINLIK_ISARET = {
+  measured:'<circle cx="8" cy="8" r="4.5" fill="currentColor"/>',
+  computed:'<circle cx="8" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/>'
+    + '<path d="M8 3.5a4.5 4.5 0 0 1 0 9z" fill="currentColor"/>',
+  estimated:'<circle cx="8" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.2 1.9"/>',
+  missing:'<circle cx="8" cy="8" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/>'
+    + '<path d="M4.8 11.2l6.4-6.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
+};
+
 LIFEOS.KESINLIK_HTML = function(id, secenekler){
   secenekler = secenekler || {};
-  var kok = secenekler.kok || 'img/marka/';
   var e = LIFEOS.KESINLIK_ILE(id);
   var ad = e ? e.ad : String(id == null ? '' : id);
   var kac = function(t){
@@ -86,9 +103,9 @@ LIFEOS.KESINLIK_HTML = function(id, secenekler){
       return ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' })[c];
     });
   };
-  var gorsel = e
-    ? '<img class="kesinlik__im" src="' + kac(kok + e.gorsel) + '.webp"'
-      + ' alt="" aria-hidden="true" loading="lazy" onerror="this.remove()">'
+  var gorsel = e && LIFEOS.KESINLIK_ISARET[e.id]
+    ? '<svg class="kesinlik__isaret" viewBox="0 0 16 16" aria-hidden="true" focusable="false">'
+      + LIFEOS.KESINLIK_ISARET[e.id] + '</svg>'
     : '';
   return '<span class="kesinlik' + (e ? ' kesinlik--' + kac(e.id) : '') + '"'
     + (e ? ' title="' + kac(e.ozet) + '"' : '') + '>'

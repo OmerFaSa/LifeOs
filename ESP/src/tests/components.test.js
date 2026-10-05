@@ -274,18 +274,16 @@
       expect(K.paginate([], 1, 3).pages).toBe(1);
     });
 
-    it('NextUp SAKİN DEĞİLKEN kutlama görseli çizmez', () => {
-      /* Bekleyen iş varken kutlama yapmak, yapılmamış bir şeyi
-         yapılmış göstermekti. */
-      expect(String(K.NextUp({ icon:'check', sanat:'gorev', label:'L', title:'T' }))
-        .indexOf('nextup__sanat')).toBe(-1);
-      expect(String(K.NextUp({ icon:'check', calm:true, sanat:'gorev',
-        label:'L', title:'T' }))).toContain('durum-tamamlandi-gorev');
-    });
-
-    it('NextUp görseli yüklenmezse DÜĞÜM KALKAR', () => {
-      expect(String(K.NextUp({ icon:'check', calm:true, sanat:'gorev',
-        label:'L', title:'T' }))).toContain('onerror="this.remove()"');
+    it('NextUp kutlama görseli çizmez — sakin kart kendi simgesiyle (SADE, 2026-10-05)', () => {
+      /* Kullanıcı: «görseller beyaz temada profesyonel gözükmüyor; daha
+         sade». Koyu afiş görseli kalktı; bekleyen iş varken de yokken de
+         kart yalnız simgesi ve cümlesiyle durur, dosya istenmez. */
+      [false, true].forEach(calm => {
+        const h = String(K.NextUp({ icon:'check', calm, sanat:'gorev', label:'L', title:'T' }));
+        expect(h.indexOf('nextup__sanat')).toBe(-1);
+        expect(h.indexOf('durum-tamamlandi')).toBe(-1);
+        expect(h.indexOf('<img')).toBe(-1);
+      });
     });
   });
 

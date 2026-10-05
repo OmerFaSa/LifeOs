@@ -59,7 +59,7 @@ ESP.Screens.lang = (function(){
     const disc = ESP.DISCIPLINE_BY_ID.lang, a = disc && ESP.AGENT_BY_ID[disc.agent];
     if(!a) return '';
     const yeni = ESP.SRS.dueCards().filter(c => c.lang === aktifDil() && !c.reps).length;
-    return VT().dersKapagi({ ad:a.name, harf:a.initial, alan:disc.short, gorsel:'img/marka/ajan-kare-esp-' + a.id + '.webp',
+    return VT().dersKapagi({ ad:a.name, harf:a.initial, alan:disc.short, gorsel:'',
       cumle:'Bugün ' + d.due + ' kart vadeli' + (yeni ? '; ' + yeni + '\'i hiç sorulmadı.' : '.') });
   }
 

@@ -260,13 +260,18 @@ table td, table th{
 .agentkare{
   position:relative; overflow:hidden;
   flex:none;
-  width:60px; height:75px;
+  width:52px; height:52px;
   display:grid; place-items:center;
-  border-radius:12px;
-  font:600 22px/1 ui-serif, Georgia, serif;
-  color:#fff;
-  background:var(--line, #2a2a2a);
-  box-shadow:0 6px 18px rgba(0,0,0,.28);
+  border-radius:16px;
+  font-size:20px; font-weight:600; line-height:1;
+  font-family:inherit;
+  letter-spacing:-.01em;
+  /* SADE (kullanıcı, 2026-10-05: «görseller beyaz temada profesyonel
+     gözükmüyor; daha sade»): yapay portre kalktı; kutu modülün renginde
+     sakin bir monogramdır — açık zemin, modül mürekkebinde harf, gölge yok
+     (önce koyu dolgu, serif harf ve ağır gölge: portrenin yedeğiydi). */
+  color:color-mix(in srgb, var(--mod, var(--primary)) 80%, var(--text));
+  background:color-mix(in srgb, var(--mod, var(--primary)) 14%, var(--surface));
 }
 .agentkare__pp{
   position:absolute; inset:0;

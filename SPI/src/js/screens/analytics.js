@@ -91,10 +91,7 @@ SP.Screens.analytics = (function(){
       badge:K.Badge({ label:r.discipline.minDays + '/7 asgari gün',
         tone:r.discipline.minDays >= 5 ? 'ok' : 'warn' }),
       body:html`<div class="rapor-govde">
-        <!-- RAPOR KAPAĞI — belgenin yüzü. Mühür belgeyi imzalar, kapak
-             adlandırır; ikisi ayrı şeydir. Dosya yoksa düğüm kalkar. -->
-        <img class="rapor-kapak" src="img/marka/kapak-saglik-raporu.webp"
-          alt="Sağlık raporu kapağı" loading="lazy" onerror="this.remove()">
+        <!-- Kapak görseli kalktı (SADE, 2026-10-05): rapor başlığı ve sayılarıyla başlar. -->
         ${K.Notice({ tone:'info', body:SP.Calc.headline(r) })}
         <div class="cols-4 mt-12">
           ${K.Stat({ label:'Toparlanma', value:r.readiness.avg == null ? '—' : String(r.readiness.avg),

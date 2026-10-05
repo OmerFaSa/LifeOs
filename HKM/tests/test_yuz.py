@@ -79,29 +79,23 @@ def t_ikinci_adim_siniri_soyler():
     ok(re.search(r"me[yz]|maz|mez", g[1]))
 
 
-def t_paneller_okuyucuya_gorunmez():
-    """Panellerin uzerinde yazi var ve o yazi okunamaz; cumle ALTTA
-    gercek metin olarak durur. Panel `alt=""` ve `aria-hidden` olmali,
-    yoksa ekran okuyucu bir afisle oyalanir."""
+def t_seritte_afis_yok():
+    """SADE (kullanici, 2026-10-05: «gorseller beyaz temada profesyonel
+    gozukmuyor; daha minimalist, daha sade»): giris seridinde afis YOK.
+    Uc soru ve cevabi ayni anda, gercek metin olarak numarali satirda —
+    modullerin kurulum seridiyle ayni dil. Afis dosyasi istenmez."""
     metin = _yuz()
-    m = re.search(r'<div class="gserit"(.*?)</div>\s*</div>', metin, re.S)
-    ok(m is not None)
-    serit = m.group(1)
-    eq(serit.count('class="gserit__afis'), 3)
-    eq(serit.count('aria-hidden="true"'), 3)
-    eq(serit.count('alt=""'), 3)
-    # Dosya yoksa YALNIZ o panel kalkar.
-    eq(serit.count('onerror="this.remove()"'), 3)
+    ok('<div class="gserit gserit--sade" id="gserit"><ol class="gserit__maddeler"></ol></div>' in metin)
+    no("gserit__afis" in metin or "/img/marka/tanitim-hkm" in metin, "afis istenmis")
+    f = metin[metin.index("(function gserit(){"):]
+    f = f[:f.index("})();")]
+    ok("GSERIT.map(" in f and "GSERIT_SORU[i]" in f and "esc(c)" in f)
 
 
-def t_her_nokta_kendi_adini_soyler():
-    """Nokta bir daire; ustunde yazi yok. Adini `aria-label` soyler,
-    yoksa klavyeyle gezen biri ucunu de «dugme» diye duyar."""
-    metin = _yuz()
-    for no, soru in ((1, "Ne ölçüyoruz?"),
-                     (2, "Neye karar vermiyoruz?"),
-                     (3, "Nasıl başlıyoruz?")):
-        ok('aria-label="%d/3 — %s"' % (no, soru) in metin)
+def t_her_adim_kendi_sorusunu_soyler():
+    """Her satirin basinda kendi sorusu yazar (afiste yazan ama
+    okunamayan soru artik gercek metin)."""
+    eq(_js_dizi(_yuz(), "GSERIT_SORU"), ["Ne ölçüyoruz?", "Neye karar vermiyoruz?", "Nasıl başlıyoruz?"])
 
 
 def t_eski_tek_afis_kalkti():
@@ -704,8 +698,8 @@ def run():
     test("üç adım vardır", t_giris_seridi_uc_adim)
     test("cümleler ortak sözle AYNI", t_giris_seridi_ortak_sozle_ayni)
     test("ikinci adım sınırı söyler", t_ikinci_adim_siniri_soyler)
-    test("paneller okuyucuya görünmez", t_paneller_okuyucuya_gorunmez)
-    test("her nokta kendi adını söyler", t_her_nokta_kendi_adini_soyler)
+    test("şeritte afiş yok: üç cümle numaralı satırda (2026-10-05)", t_seritte_afis_yok)
+    test("her adım kendi sorusunu söyler", t_her_adim_kendi_sorusunu_soyler)
     test("eski tek afiş kalktı", t_eski_tek_afis_kalkti)
     test("mikrofon yazar, göndermez", t_mikrofon_yazar_gondermez)
     test("bugün yerel gündür", t_bugun_yerel_gun)

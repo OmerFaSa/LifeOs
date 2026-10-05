@@ -33,6 +33,16 @@
 .simge--sm{ width:16px; height:16px; flex-basis:16px; }
 .simge--lg{ width:34px; height:34px; flex-basis:34px; }
 
+/* SADE ÇİZGİ (2026-10-05): tek renk, ince, yuvarlak uçlu; rengi ailenin
+   modül mürekkebi, açık ve koyu temada kendiliğinden doğru ton. Büyük
+   ölçüde çizgi incelir (34 px'te 1,75 kalın dururdu). */
+.simge--cizgi{ fill:none; stroke:currentColor; stroke-width:1.75; stroke-linecap:round; stroke-linejoin:round;
+  color:var(--simge-renk, var(--text-2)); }
+.simge--cizgi.simge--lg{ stroke-width:1.5; }
+.simge--cizgi.simge--olcum{ --simge-renk:var(--spi-ink, var(--spi)); }
+.simge--cizgi.simge--ders{ --simge-renk:var(--ays-ink, var(--ays)); }
+.simge--cizgi.simge--disiplin{ --simge-renk:var(--esp-ink, var(--esp)); }
+
 .simgeli{
   display:inline-flex;
   align-items:center;

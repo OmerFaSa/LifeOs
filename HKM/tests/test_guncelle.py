@@ -311,7 +311,7 @@ def run():
         """Giris sayfasi: dort sistemin KENDI logosu, surum, guncelleme kutusu."""
         h = sunucu.giris_html()
         for a in ("ays", "spi", "esp", "hkm"):
-            ok('src="/logo/%s.png"' % a in h)
+            ok('class="sekil sekil--%s"' % a in h)
         ok('id="guncel"' in h and 'id="surum"' in h)
         for y in ("__KARTLAR__", "__SURUM__", "__IKON__"):
             ok(y not in h)                              # yer tutucu kalmadi
@@ -349,7 +349,7 @@ def run():
         """
         h = sunucu.giris_html(telefon=True)
         for a, port in (("ays", 4173), ("spi", 4183), ("esp", 4193)):
-            ok('src="/logo/%s.png"' % a in h, a)
+            ok('class="sekil sekil--%s"' % a in h, a)
             ok('href="http://127.0.0.1:%d/"' % port in h, a)
         no(any(x in h for x in ('/logo/hkm.png', 'data-hkm', 'id="guncel"', "<script>", "/api/")),
            "telefonda HKM, guncelleme ve bilgisayarin betigi yok")
