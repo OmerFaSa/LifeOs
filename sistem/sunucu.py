@@ -299,14 +299,13 @@ GIRIS_SAYFASI = """<!doctype html>
 [hidden]{ display:none !important; }
 /* Giris ekrani (brand/ortak/hesap.css): modul secimi bir kez, burada. Kartin
    degiskenleri bu sayfanin renklerine eslenir. */
-.hesap-kapi{ --surface:var(--yuzey); --surface-2:var(--yuzey-2); --text:var(--fg); --text-2:var(--fg-2); --text-3:var(--fg-3);
-  --border:var(--cizgi); --kart-golge:var(--golge); --primary:var(--fg); --bad:#c8463b; }
-@media (prefers-color-scheme:dark){ .hesap-kapi{ --buz-isik:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.055);
+.hesap-kapi, .hesap-merkez, .hesap-cip{ --surface:var(--yuzey); --surface-2:var(--yuzey-2); --text:var(--fg); --text-2:var(--fg-2);
+  --text-3:var(--fg-3); --border:var(--cizgi); --kart-golge:var(--golge); --primary:var(--fg);
+  --bad:#c8463b; --bad-ink:#b53a30; --ok-ink:var(--ok); --accent:#d99a1e; }
+@media (prefers-color-scheme:dark){ .hesap-kapi, .hesap-merkez, .hesap-cip{ --bad:#ef6b61; --bad-ink:#ef6b61;
+  --buz-isik:inset 0 1px 0 rgba(255,255,255,.09), inset 0 0 0 1px rgba(255,255,255,.055);
   --buz-golge:0 32px 72px -36px rgba(0,0,0,.6); } }
-.hesap-kapi .seg{ display:flex; gap:2px; background:var(--yuzey-2); border:1px solid var(--cizgi); border-radius:9px; padding:3px; }
-.hesap-kapi .seg button{ flex:1; min-height:32px; border:0; border-radius:7px; background:none; font:inherit;
-  font-size:13.5px; font-weight:500; color:var(--fg-2); cursor:pointer; }
-.hesap-kapi .seg button.is-on{ background:var(--yuzey); color:var(--fg); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+.hesap-cip:not([hidden]) + .surum{ margin-left:0; }
 body{ margin:0; background:var(--bg); color:var(--fg);
   font:15px/1.55 "Segoe UI Variable Text","Segoe UI",ui-sans-serif,system-ui,-apple-system,Roboto,sans-serif;
   -webkit-font-smoothing:antialiased; }
@@ -386,6 +385,7 @@ button{ font:inherit; }
   .guncel{ flex-wrap:wrap; }
   .guncel__eylem{ width:100%; justify-content:flex-start; }
   .surum{ display:none; }
+  .ust:has(.hesap-cip:not([hidden])) h1 span{ display:none; }
 }
 @media (prefers-reduced-motion:reduce){ *{ transition:none !important; } }
 </style></head><body>
@@ -393,6 +393,7 @@ button{ font:inherit; }
   <header class="ust">
     <span class="isaret" aria-hidden="true"><b></b><b></b><b></b><b></b></span>
     <h1>LifeOS<span>Kontrol paneli</span></h1>
+    <button type="button" class="hesap-cip" data-hesap-cip hidden></button>
     <span class="surum" id="surum">__SURUM__</span>
   </header>
 

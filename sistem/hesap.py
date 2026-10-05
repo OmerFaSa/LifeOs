@@ -35,6 +35,20 @@
    6. VERI DEPONUN DISINDA. %LOCALAPPDATA%\\LifeOS\\hesap\\hesap.db
       (Windows) ya da ~/.lifeos/hesap: commit'e giremez, guncelleme ona
       dokunmaz. LIFEOS_HESAP_KLASOR testler icin.
+   8. PROFIL VE PLAN (depo sahibi, 2026-10-05: «hesap cok daha ayarli
+      olsun; ucretli surumler gorunsun»). Gorunen ad ve profil rengi
+      kullanicinin kendi ayaridir, kapali bir renk listesinden secilir.
+      Plan YALNIZ GORUNURLUKTUR: odeme yok, hicbir ozellik plana bakmaz,
+      hicbir sayi ya da karar plana gore degismez (AGENTS §1.1). Katalog
+      tek yerde (PLANLAR); istemci onu sunucudan okur. Plani yalniz admin
+      atar.
+   9. CIHAZLAR. Kullanici kendi oturumlarini (cihaz adi, son gorulme)
+      gorur; birini ya da bu cihaz disindakilerin hepsini kapatabilir.
+      Jeton ve ozeti hicbir cevaba girmez; oturumun kimligi satir
+      numarasidir ve yalniz sahibinin oturumlarinda gecerlidir.
+  10. YONETIM. Admin kullanicilarin rolunu ve planini degistirir, yeni
+      hesap acmayi kapatabilir (kapaliyken hesabi admin ekler). Son admin
+      uyeye dusurulemez: sistem adminsiz kalmaz.
 
    Yalniz Python standart kutuphanesi (AGENTS §1.3).
 """
@@ -50,7 +64,7 @@ import sqlite3
 import threading
 import time
 
-SURUM = 2
+SURUM = 3
 TUR = 600000                    # PBKDF2 tur sayisi (OWASP 2023, SHA-256)
 EN_KISA_PAROLA = 8
 EN_UZUN_PAROLA = 256
@@ -67,6 +81,33 @@ SINIR = 1000                          # tek cevapta en cok kayit
 OTURUM_GUN = 400
 DENEME_ESIK = 5                       # bu kadar yanlistan sonra bekletilir
 DENEME_TAVAN_SN = 900
+GORUNEN_AD_EN_UZUN = 40
+
+# Profil rengi: kapali liste (soz 8). Renklerin kendisi istemcide
+# (hesap.js RENK); burada yalniz kimlikler dogrulanir.
+RENKLER = ("mavi", "turkuaz", "turuncu", "mor", "pembe", "yesil", "grafit")
+
+# PLANLAR — yalniz gorunurluk (soz 8). Odeme yok, hicbir ozellik kilitli
+# degil. Ad, ozet ve ozellik satirlari ekranda AYNEN gorunur; degistirmek
+# icin yalniz burasi duzenlenir. «yakinda» plan secilemez gibi gorunur ama
+# admin elle atayabilir (deneme icin).
+PLANLAR = (
+    {"id": "ucretsiz", "ad": "Ücretsiz", "etiket": "Beta", "durum": "acik",
+     "ozet": "Bugün kullandığın her şey.",
+     "ozellik": ["AYS, SPİ, ESP ve Merkez", "PC, telefon ve tablet eşitleme",
+                 "Veri kendi bilgisayarında", "King ve kural motoru"]},
+    {"id": "plus", "ad": "Plus", "etiket": "Yakında", "durum": "yakinda",
+     "ozet": "Daha çok cihaz, daha çok plan.",
+     "ozellik": ["Ücretsizdeki her şey", "Fotoğraflar da eşitlenir",
+                 "Hedef motoru: 100 günlük planlar", "Kaynaklı internet araştırması"]},
+    {"id": "pro", "ad": "Pro", "etiket": "Yakında", "durum": "yakinda",
+     "ozet": "Bütün sınavlar ve sağlık hedefleri.",
+     "ozellik": ["Plus’taki her şey", "KPSS, DGS ve LGS profilleri",
+                 "Sağlık hedef planları", "Yeni özellikler önce sende"]},
+)
+PLAN_IDS = tuple(p["id"] for p in PLANLAR)
+PLAN_AD = {p["id"]: p["ad"] for p in PLANLAR}
+VARSAYILAN_PLAN = PLAN_IDS[0]
 
 SEMA = """
 PRAGMA journal_mode=WAL;
@@ -99,6 +140,7 @@ CREATE TABLE IF NOT EXISTS kayit(
 );
 CREATE INDEX IF NOT EXISTS kayit_sira ON kayit(kullanici, alan, sira);
 CREATE TABLE IF NOT EXISTS sayac(ad TEXT PRIMARY KEY, deger INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS ayar(ad TEXT PRIMARY KEY, deger TEXT NOT NULL);
 """
 
 
@@ -138,9 +180,11 @@ class Depo:
             self._gocur(c)
 
     def _gocur(self, c):
-        """Eski depoya yeni sutunlar (surum 2: kurtarma sorusu)."""
+        """Eski depoya yeni sutunlar (surum 2: kurtarma sorusu; surum 3:
+        gorunen ad, profil rengi, plan)."""
         var = {r["name"] for r in c.execute("PRAGMA table_info(kullanici)")}
-        for ad, tur in (("soru", "TEXT"), ("cevap_tuz", "BLOB"), ("cevap_ozet", "BLOB"), ("cevap_tur", "INTEGER")):
+        for ad, tur in (("soru", "TEXT"), ("cevap_tuz", "BLOB"), ("cevap_ozet", "BLOB"), ("cevap_tur", "INTEGER"),
+                        ("gorunen_ad", "TEXT"), ("renk", "TEXT"), ("plan", "TEXT")):
             if ad not in var:
                 c.execute("ALTER TABLE kullanici ADD COLUMN %s %s" % (ad, tur))
 
@@ -217,13 +261,44 @@ class Depo:
                   (_jeton_ozeti(jeton), kullanici, cihaz or "", (cihaz_ad or "")[:80], simdi, simdi))
         return jeton
 
+    @staticmethod
+    def _profil(r):
+        plan = r["plan"] if r["plan"] in PLAN_IDS else VARSAYILAN_PLAN
+        return {"id": r["id"], "ad": r["ad"], "rol": r["rol"],
+                "gorunen_ad": r["gorunen_ad"] or r["ad"],
+                "renk": r["renk"] if r["renk"] in RENKLER else RENKLER[0],
+                "plan": plan, "plan_ad": PLAN_AD[plan],
+                "olusturma": r["olusturma"]}
+
     def _kullanici(self, c, kid):
-        r = c.execute("SELECT id, ad, rol FROM kullanici WHERE id=?", (kid,)).fetchone()
-        return {"id": r["id"], "ad": r["ad"], "rol": r["rol"]} if r else None
+        r = c.execute("SELECT id, ad, rol, gorunen_ad, renk, plan, olusturma FROM kullanici WHERE id=?",
+                      (kid,)).fetchone()
+        return self._profil(r) if r else None
 
     def kurulum_gerekli(self):
         with self._islem() as c:
             return c.execute("SELECT COUNT(*) FROM kullanici").fetchone()[0] == 0
+
+    # ------------------------------------------------------- ayar (soz 10)
+
+    def _ayar(self, c, ad, varsayilan):
+        r = c.execute("SELECT deger FROM ayar WHERE ad=?", (ad,)).fetchone()
+        return r["deger"] if r else varsayilan
+
+    def kayit_acik(self):
+        """Yeni hesap acilabilir mi? Varsayilan acik (ev agiyla sinirli beta)."""
+        with self._islem() as c:
+            return self._ayar(c, "kayit_acik", "1") == "1"
+
+    def kayit_ayarla(self, yapan, acik):
+        if not yapan or yapan.get("rol") != "admin":
+            raise Hata(403, "Bu ayarı yalnız admin değiştirir.")
+        if not isinstance(acik, bool):
+            raise Hata(400, "Geçersiz ayar.")
+        with self._islem() as c:
+            c.execute("INSERT INTO ayar(ad, deger) VALUES('kayit_acik', ?) ON CONFLICT(ad) DO UPDATE "
+                      "SET deger=excluded.deger", ("1" if acik else "0",))
+        return acik
 
     def kur(self, ad, parola, yerel, cihaz="", cihaz_ad=""):
         """Ilk hesap (admin). Yalniz hic kullanici yokken ve yalniz PC'den."""
@@ -247,6 +322,8 @@ class Depo:
             ilk = c.execute("SELECT COUNT(*) FROM kullanici").fetchone()[0] == 0
             if ilk and not yerel:
                 raise Hata(403, "İlk hesap (admin) bilgisayarın kendisinde açılır.")
+            if not ilk and self._ayar(c, "kayit_acik", "1") != "1":
+                raise Hata(403, "Yeni hesap açma kapalı. Hesabı admin ekler.")
             kid = self._kullanici_yaz(c, ad, parola, "admin" if ilk else "uye")
             self._soru_yaz(c, kid, soru, cevap)
             return {"jeton": self._oturum_ac(c, kid, cihaz, cihaz_ad),
@@ -392,8 +469,95 @@ class Depo:
         if not yapan or yapan.get("rol") != "admin":
             raise Hata(403, "Kullanıcı listesini yalnız admin görür.")
         with self._islem() as c:
-            return [{"id": r["id"], "ad": r["ad"], "rol": r["rol"], "olusturma": r["olusturma"]}
-                    for r in c.execute("SELECT id, ad, rol, olusturma FROM kullanici ORDER BY id")]
+            out = []
+            for r in c.execute(
+                    "SELECT k.id, k.ad, k.rol, k.gorunen_ad, k.renk, k.plan, k.olusturma, "
+                    "COUNT(o.ozet) AS cihaz, MAX(o.son) AS son FROM kullanici k "
+                    "LEFT JOIN oturum o ON o.kullanici=k.id GROUP BY k.id ORDER BY k.id").fetchall():
+                p = self._profil(r)
+                p["cihaz"] = r["cihaz"]
+                p["son"] = int(r["son"] * 1000) if r["son"] else None
+                out.append(p)
+            return out
+
+    # -------------------------------------------------- profil (soz 8)
+
+    @staticmethod
+    def _gorunen_ad_dogrula(s):
+        s = " ".join(str(s or "").split())
+        if any(ord(ch) < 32 for ch in s):
+            raise Hata(400, "Görünen ad okunamadı.")
+        if len(s) > GORUNEN_AD_EN_UZUN:
+            raise Hata(400, "Görünen ad en çok %d karakter olabilir." % GORUNEN_AD_EN_UZUN)
+        return s or None
+
+    def profil_ayarla(self, kullanici, gorunen_ad=None, renk=None):
+        """Kullanicinin kendi ayari. None verilen alan degismez; bos ad
+        kullanici adina doner."""
+        with self._islem() as c:
+            if gorunen_ad is not None:
+                c.execute("UPDATE kullanici SET gorunen_ad=? WHERE id=?",
+                          (self._gorunen_ad_dogrula(gorunen_ad), kullanici["id"]))
+            if renk is not None:
+                if renk not in RENKLER:
+                    raise Hata(400, "Bu renk listede yok.")
+                c.execute("UPDATE kullanici SET renk=? WHERE id=?", (renk, kullanici["id"]))
+            return self._kullanici(c, kullanici["id"])
+
+    # ------------------------------------------------- cihazlar (soz 9)
+
+    def cihazlar(self, kullanici, jeton):
+        bu = _jeton_ozeti(jeton or "")
+        with self._islem() as c:
+            return [{"id": r["id"], "cihaz_ad": r["cihaz_ad"] or "Cihaz",
+                     "olusturma": int(r["olusturma"] * 1000), "son": int(r["son"] * 1000),
+                     "bu": r["ozet"] == bu}
+                    for r in c.execute("SELECT rowid AS id, ozet, cihaz_ad, olusturma, son FROM oturum "
+                                       "WHERE kullanici=? ORDER BY (ozet=?) DESC, son DESC",
+                                       (kullanici["id"], bu))]
+
+    def cihaz_cikar(self, kullanici, jeton, oid):
+        """Kendi oturumlarindan birini kapatir. Doner: kapanan bu cihaz miydi."""
+        if not isinstance(oid, int) or isinstance(oid, bool):
+            raise Hata(400, "Geçersiz cihaz.")
+        with self._islem() as c:
+            r = c.execute("SELECT ozet FROM oturum WHERE rowid=? AND kullanici=?",
+                          (oid, kullanici["id"])).fetchone()
+            if r is None:
+                raise Hata(404, "Bu cihaz artık listede yok.")
+            c.execute("DELETE FROM oturum WHERE rowid=? AND kullanici=?", (oid, kullanici["id"]))
+            return r["ozet"] == _jeton_ozeti(jeton or "")
+
+    def otekilerden_cik(self, kullanici, jeton):
+        with self._islem() as c:
+            cur = c.execute("DELETE FROM oturum WHERE kullanici=? AND ozet<>?",
+                            (kullanici["id"], _jeton_ozeti(jeton or "")))
+            return cur.rowcount
+
+    # ------------------------------------------------- yonetim (soz 10)
+
+    def yonet(self, yapan, kid, rol=None, plan=None):
+        if not yapan or yapan.get("rol") != "admin":
+            raise Hata(403, "Kullanıcıları yalnız admin yönetir.")
+        if not isinstance(kid, int) or isinstance(kid, bool):
+            raise Hata(400, "Geçersiz kullanıcı.")
+        if rol is not None and rol not in ("admin", "uye"):
+            raise Hata(400, "Rol «admin» ya da «uye» olmalı.")
+        if plan is not None and plan not in PLAN_IDS:
+            raise Hata(400, "Bu plan katalogda yok.")
+        with self._islem() as c:
+            r = c.execute("SELECT rol FROM kullanici WHERE id=?", (kid,)).fetchone()
+            if r is None:
+                raise Hata(404, "Bu kullanıcı yok.")
+            if rol == "uye" and r["rol"] == "admin":
+                adminler = c.execute("SELECT COUNT(*) FROM kullanici WHERE rol='admin'").fetchone()[0]
+                if adminler <= 1:
+                    raise Hata(409, "Son admin üyeye düşürülemez; önce başka birini admin yap.")
+            if rol is not None:
+                c.execute("UPDATE kullanici SET rol=? WHERE id=?", (rol, kid))
+            if plan is not None:
+                c.execute("UPDATE kullanici SET plan=? WHERE id=?", (plan, kid))
+            return self._kullanici(c, kid)
 
     # ---------------------------------------------------------- esitleme
 
@@ -580,7 +744,7 @@ def isle(h):
             raise Hata(403, "İzin yok.")
         d = depo()
         if yontem == "GET" and yol == "/api/hesap/durum":
-            return _cevap(h, 200, {"surum": SURUM, "kurulum": d.kurulum_gerekli(),
+            return _cevap(h, 200, {"surum": SURUM, "kurulum": d.kurulum_gerekli(), "kayit": d.kayit_acik(),
                                    "yerel": _yerel_mi(h), "ev_agi": ev_agi()})
         if yontem == "POST":
             # Ozel baslik + JSON: baska bir site tarayicidan «basit istek»
@@ -621,15 +785,29 @@ def isle(h):
                 return _cevap(h, 200, {"ok": True})
             if yol == "/api/hesap/kullanici":
                 return _cevap(h, 200, d.kullanici_ekle(k, v.get("ad"), v.get("parola"), v.get("rol") or "uye"))
+            if yol == "/api/hesap/profil":
+                return _cevap(h, 200, {"kullanici": d.profil_ayarla(k, v.get("gorunen_ad"), v.get("renk"))})
+            if yol == "/api/hesap/cihaz-cikar":
+                return _cevap(h, 200, {"ok": True, "bu": d.cihaz_cikar(k, _jeton(h), v.get("id"))})
+            if yol == "/api/hesap/otekilerden-cik":
+                return _cevap(h, 200, {"ok": True, "n": d.otekilerden_cik(k, _jeton(h))})
+            if yol == "/api/hesap/yonet":
+                return _cevap(h, 200, {"kullanici": d.yonet(k, v.get("id"), v.get("rol"), v.get("plan"))})
+            if yol == "/api/hesap/ayar":
+                return _cevap(h, 200, {"kayit": d.kayit_ayarla(k, v.get("kayit"))})
             raise Hata(404, "Böyle bir istek yok.")
         if yontem == "GET":
             k = d.oturum(_jeton(h))
             if k is None:
                 raise Hata(401, "Oturum yok ya da süresi doldu; yeniden giriş yap.")
             if yol == "/api/hesap/ben":
-                return _cevap(h, 200, {"kullanici": k, "ozet": d.ozet(k), "soru_var": d.soru_var(k)})
+                return _cevap(h, 200, {"kullanici": k, "ozet": d.ozet(k), "soru_var": d.soru_var(k),
+                                       "planlar": list(PLANLAR), "renkler": list(RENKLER),
+                                       "kayit": d.kayit_acik()})
+            if yol == "/api/hesap/cihazlar":
+                return _cevap(h, 200, {"cihazlar": d.cihazlar(k, _jeton(h))})
             if yol == "/api/hesap/kullanicilar":
-                return _cevap(h, 200, {"kullanicilar": d.kullanicilar(k)})
+                return _cevap(h, 200, {"kullanicilar": d.kullanicilar(k), "kayit": d.kayit_acik()})
         raise Hata(404, "Böyle bir istek yok.")
     except Hata as e:
         return _cevap(h, e.kod, {"hata": e.mesaj})

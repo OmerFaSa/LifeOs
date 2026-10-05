@@ -309,6 +309,109 @@ def run():
             ok(d.kayit("omer", "parola-123", "Soru nedir?", "cevap", True)["jeton"])
     test("surum 1 deposu kurtarma sutunlarina gocer", t_gocur)
 
+    # ------------------------------------------- profil, plan, cihazlar
+
+    def t_profil():
+        with _Depo() as r:
+            k, _ = _admin(r)
+            eq((k["gorunen_ad"], k["renk"], k["plan"]), ("omer", "mavi", "ucretsiz"))   # varsayilanlar
+            p = r.d.profil_ayarla(k, "  Ömer   Faruk ", "turkuaz")
+            eq((p["gorunen_ad"], p["renk"]), ("Ömer Faruk", "turkuaz"))
+            eq(r.d.giris("omer", "parola-123", B)["kullanici"]["gorunen_ad"], "Ömer Faruk")  # giriste gelir
+            eq(r.d.profil_ayarla(k, None, "mor")["gorunen_ad"], "Ömer Faruk")            # None: degismez
+            eq(r.d.profil_ayarla(k, "", None)["gorunen_ad"], "omer")                    # bos: ada doner
+            _hata(lambda: r.d.profil_ayarla(k, None, "#ff0000"), 400)                  # kapali liste
+            _hata(lambda: r.d.profil_ayarla(k, "x" * (hesap.GORUNEN_AD_EN_UZUN + 1)), 400)
+            _hata(lambda: r.d.profil_ayarla(k, "a\u0007b"), 400)
+    test("profil: gorunen ad ve renk kullanicinin kendi ayari, renk kapali listeden", t_profil)
+
+    def t_plan_yalniz_gorunurluk():
+        ids = [p["id"] for p in hesap.PLANLAR]
+        eq(ids[0], hesap.VARSAYILAN_PLAN)
+        eq(len(ids), len(set(ids)))
+        for p in hesap.PLANLAR:
+            ok(p["ad"] and p["ozet"] and p["ozellik"] and p["durum"] in ("acik", "yakinda"))
+            no(any(a in p for a in ("fiyat", "odeme", "kilit")))        # odeme yok, kilit yok
+    test("plan katalogu tek yerde; odeme ve kilit alani yok", t_plan_yalniz_gorunurluk)
+
+    def t_yonet():
+        with _Depo() as r:
+            k, _ = _admin(r)
+            u = r.d.kullanici_ekle(k, "anne", "parola-456")
+            eq(r.d.yonet(k, u["id"], plan="plus")["plan"], "plus")
+            _hata(lambda: r.d.yonet(k, u["id"], plan="altin"), 400)
+            _hata(lambda: r.d.yonet(k, u["id"], rol="kral"), 400)
+            _hata(lambda: r.d.yonet(u, k["id"], plan="pro"), 403)                     # uye yonetemez
+            _hata(lambda: r.d.yonet(k, 999, plan="pro"), 404)
+            _hata(lambda: r.d.yonet(k, k["id"], rol="uye"), 409)                       # son admin
+            eq(r.d.yonet(k, u["id"], rol="admin")["rol"], "admin")
+            eq(r.d.yonet(k, k["id"], rol="uye")["rol"], "uye")                         # artik iki admin vardi
+            l = {x["ad"]: x for x in r.d.kullanicilar(r.d.oturum(r.d.giris("anne", "parola-456")["jeton"]))}
+            eq((l["anne"]["rol"], l["anne"]["plan"], l["omer"]["rol"]), ("admin", "plus", "uye"))
+            ok(l["omer"]["cihaz"] >= 1 and l["omer"]["son"])
+    test("yonetim: rol ve plani admin atar, son admin dusurulmez", t_yonet)
+
+    def t_kayit_kapali():
+        with _Depo() as r:
+            k, _ = _admin(r)
+            ok(r.d.kayit_acik())
+            u = r.d.kayit("anne", "parola-456", "Soru nedir?", "cevap", False)["kullanici"]
+            _hata(lambda: r.d.kayit_ayarla(u, False), 403)                             # uye kapatamaz
+            _hata(lambda: r.d.kayit_ayarla(k, "hayir"), 400)
+            r.d.kayit_ayarla(k, False)
+            no(r.d.kayit_acik())
+            e = _hata(lambda: r.d.kayit("cocuk", "parola-789", "Soru nedir?", "cevap", True), 403)
+            ok("admin" in e.mesaj)
+            eq(r.d.kullanici_ekle(k, "cocuk", "parola-789")["rol"], "uye")             # admin yine ekler
+            r.d.kayit_ayarla(k, True)
+            ok(r.d.kayit("dede", "parola-000", "Soru nedir?", "cevap", False)["jeton"])
+    test("yeni hesap acma admin ayari: kapaliyken kayit olmaz, admin ekler", t_kayit_kapali)
+
+    def t_cihazlar():
+        with _Depo() as r:
+            k, j_pc = _admin(r)
+            j_tel = r.d.giris("omer", "parola-123", B, "iPhone · uygulama")["jeton"]
+            r.saat.t += 120
+            j_tab = r.d.giris("omer", "parola-123", "cihazC-111111", "Android tablet")["jeton"]
+            anne = r.d.kullanici_ekle(k, "anne", "parola-456")
+            j_anne = r.d.giris("anne", "parola-456", "cihazD-222222", "iPhone")["jeton"]
+            l = r.d.cihazlar(k, j_pc)
+            eq(len(l), 3)
+            eq((l[0]["cihaz_ad"], l[0]["bu"]), ("PC", True))                          # bu cihaz basta
+            eq(l[1]["cihaz_ad"], "Android tablet")                                     # sonra en yeni
+            metin = json.dumps(l)
+            for j in (j_pc, j_tel, j_tab):
+                no(j in metin)
+                no(hesap._jeton_ozeti(j) in metin)                                     # ozet de sizmaz
+            tel = [x for x in l if x["cihaz_ad"].startswith("iPhone")][0]
+            anne_id = r.d.cihazlar(r.d.oturum(j_anne), j_anne)[0]["id"]
+            _hata(lambda: r.d.cihaz_cikar(k, j_pc, anne_id), 404)                     # baskasinin oturumu
+            ok(r.d.oturum(j_anne))
+            no(r.d.cihaz_cikar(k, j_pc, tel["id"]))
+            eq(r.d.oturum(j_tel), None)
+            _hata(lambda: r.d.cihaz_cikar(k, j_pc, tel["id"]), 404)
+            _hata(lambda: r.d.cihaz_cikar(k, j_pc, "1"), 400)
+            eq(r.d.otekilerden_cik(k, j_pc), 1)
+            eq(r.d.oturum(j_tab), None)
+            ok(r.d.oturum(j_pc) and r.d.oturum(j_anne))                               # bu cihaz ve baskasi kalir
+            ok(r.d.cihaz_cikar(k, j_pc, r.d.cihazlar(k, j_pc)[0]["id"]))              # kendini cikarmak = cikis
+            eq(r.d.oturum(j_pc), None)
+    test("cihazlar: kendi oturumlarini gorur ve kapatir; jeton sizmaz", t_cihazlar)
+
+    def t_gocur_surum2():
+        with _Depo() as r:
+            import sqlite3
+            yol = os.path.join(r.klasor, "surum2.db")
+            d = hesap.Depo(yol, tur=1000)
+            d.kayit("omer", "parola-123", "Soru nedir?", "cevap", True)
+            c = sqlite3.connect(yol)                     # surum 2'nin sutunlarina indir
+            for s in ("gorunen_ad", "renk", "plan"):
+                c.execute("ALTER TABLE kullanici DROP COLUMN %s" % s)
+            c.commit(); c.close()
+            k = hesap.Depo(yol, tur=1000).giris("omer", "parola-123")["kullanici"]
+            eq((k["gorunen_ad"], k["renk"], k["plan"]), ("omer", "mavi", "ucretsiz"))
+    test("surum 2 deposu profil ve plan sutunlarina gocer", t_gocur_surum2)
+
     # -------------------------------------------------------------- HTTP
 
     import sunucu  # noqa: E402
@@ -387,6 +490,40 @@ def run():
             eq(s.iste("/api/hesap/soru-ayarla", {"parola": "yeni-sifre-1", "soru": "Baska soru?", "cevap": "bb"},
                       dict(H, **yetki))[0], 200)
     test("HTTP: kayit, soru, kurtarma ve soru ayarlama", t_http_kayit)
+
+    def t_http_hesap_ayarlari():
+        with _Srv() as s:
+            kod, _, v = s.iste("/api/hesap/kayit", {"ad": "omer", "parola": "parola-123", "soru": "Soru nedir?",
+                                                    "cevap": "Cevap", "cihaz": A, "cihaz_ad": "Windows PC"}, H)
+            eq((kod, v["kullanici"]["plan"], v["kullanici"]["renk"]), (200, "ucretsiz", "mavi"))
+            y = dict(H, Authorization="Bearer " + v["jeton"])
+            kod, _, v = s.iste("/api/hesap/ben", baslik=y)
+            eq([p["id"] for p in v["planlar"]], list(hesap.PLAN_IDS))
+            eq((v["renkler"][0], v["kayit"]), ("mavi", True))
+            kod, _, v = s.iste("/api/hesap/profil", {"gorunen_ad": "Ömer", "renk": "mor"}, y)
+            eq((kod, v["kullanici"]["gorunen_ad"], v["kullanici"]["renk"]), (200, "Ömer", "mor"))
+            eq(s.iste("/api/hesap/profil", {"renk": "altin"}, y)[0], 400)
+            kod, _, v = s.iste("/api/hesap/giris", {"ad": "omer", "parola": "parola-123", "cihaz": B,
+                                                    "cihaz_ad": "iPhone · uygulama"}, H)
+            y_tel = dict(H, Authorization="Bearer " + v["jeton"])
+            kod, _, v = s.iste("/api/hesap/cihazlar", baslik=y)
+            eq([(c["cihaz_ad"], c["bu"]) for c in v["cihazlar"]], [("Windows PC", True), ("iPhone · uygulama", False)])
+            no(any(a in c for c in v["cihazlar"] for a in ("ozet", "jeton", "cihaz")))
+            kod, _, v = s.iste("/api/hesap/otekilerden-cik", {}, y)
+            eq((kod, v["n"]), (200, 1))
+            eq(s.iste("/api/hesap/ben", baslik=y_tel)[0], 401)
+            kod, _, v = s.iste("/api/hesap/ayar", {"kayit": False}, y)
+            eq((kod, v["kayit"]), (200, False))
+            eq(s.iste("/api/hesap/durum")[2]["kayit"], False)
+            eq(s.iste("/api/hesap/kayit", {"ad": "anne", "parola": "parola-456", "soru": "Soru nedir?",
+                                           "cevap": "Cevap"}, H)[0], 403)
+            kod, _, v = s.iste("/api/hesap/kullanici", {"ad": "anne", "parola": "parola-456"}, y)
+            kod, _, v = s.iste("/api/hesap/yonet", {"id": v["id"], "plan": "pro"}, y)
+            eq((kod, v["kullanici"]["plan"]), (200, "pro"))
+            kod, _, v = s.iste("/api/hesap/kullanicilar", baslik=y)
+            eq(([u["plan"] for u in v["kullanicilar"]], v["kayit"]), (["ucretsiz", "pro"], False))
+            eq(s.iste("/api/hesap/yonet", {"id": 1, "plan": "pro"}, H)[0], 401)       # jetonsuz yonetim yok
+    test("HTTP: profil, plan katalogu, cihazlar, yeni hesap ayari ve yonetim", t_http_hesap_ayarlari)
 
     def t_http_koken():
         with _Srv() as s:
