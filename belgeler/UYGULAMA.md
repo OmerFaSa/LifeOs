@@ -15,6 +15,8 @@ uygulama/ios/
   LifeOS/Uygulama.swift      açılış: üç sunucu, sonra kabuk
   LifeOS/YerelSunucu.swift   sistem/sunucu.py'nin telefondaki ikizi
   LifeOS/KabukDenetleyici.swift  tek web görünümü, izinler, indirme
+  LifeOS/KonumKoprusu.swift      ekran kapalıyken konum (CoreLocation)
+  LifeOS/KaliciTampon.swift      sayfanın yazmadığı noktalar diskte
   LifeOSTests/               simülatörde koşan testler
 .github/workflows/ios.yml    macOS'ta derle → sına → imzasız IPA → sürüm sayfası
 ```
@@ -42,7 +44,8 @@ uygulama/ios/
 | | Durum | Ne |
 |---|---|---|
 | 1 | yazıldı | Kabuk: üç modül uygulamada, yerel sunucu, kamera, ön planda konum, yedek indirme. CI simülatörde sınar. |
-| 2 | yazıldı | **Ekran kapalıyken rota:** `KonumKoprusu.swift` sayfanın `navigator.geolocation`'ını CoreLocation'a bağlar (arka plan konum kipi). Arka plandayken noktalar telefonda birikir, öne gelince kendi sırası ve zamanıyla SPİ'ye gider; `canli.js` aynı arayüzden okur. Uygulamada ekran kilidi istenmez, «ekranı açık tut» denmez (`window.LIFEOS_YEREL`). Her sayfa kimlik taşır: modül değişince eski izleyici biter, GPS durur. **Sınır:** iOS web sürecini öldürürse (nadir) o ana kadar biriken noktalar kayıtta değil, taslak duraklatılmış döner. |
+| 2 | yazıldı | **Ekran kapalıyken rota:** `KonumKoprusu.swift` sayfanın `navigator.geolocation`'ını CoreLocation'a bağlar (arka plan konum kipi). Arka plandayken noktalar telefonda birikir, öne gelince kendi sırası ve zamanıyla SPİ'ye gider; `canli.js` aynı arayüzden okur. Uygulamada ekran kilidi istenmez, «ekranı açık tut» denmez (`window.LIFEOS_YEREL`). Her sayfa kimlik taşır: modül değişince eski izleyici biter, GPS durur. |
+| 2b | yazıldı | **Nokta kaybolmaz:** izlenen her nokta diske de yazılır (`KaliciTampon.swift`); SPİ taslağını depoya yazınca «buraya kadar yazdım» der (`yazildi`), o kısım silinir. **iOS web sürecini öldürürse** GPS durmaz, noktalar diske akmaya devam eder; yeniden açılan sayfa sorar (`kurtar`) ve kayıt kaldığı yerden sürer (süre ve yol kesilmez). **Uygulamanın kendisi kapanırsa** noktalar diskte kalır; SPİ açılınca kayda eklenir, kayıt duraklatılmış gelir, süre son noktaya dek sayılır. Önceden bu iki durumda ekran kapalı kısım kayboluyordu. |
 | 3 | sonra | Android (ücretsiz, APK). |
 
 ## Kurulum (Windows + iPhone, ücretsiz — AltStore)
@@ -84,5 +87,7 @@ yenileme derdi yok).
 
 `.github/workflows/ios.yml` her `uygulama/ios/` ya da `dist/` değişikliğinde:
 simülatörde `YerelSunucuTests` (sayfa, MIME, parça isteği, kökün dışı, gizli
-dosya, yöntem) ve `KabukTests` (üç modül uygulamada açılır, `isSecureContext`,
-konum arayüzü). Telefonda deneme kullanıcıdadır: kurulum, kamera izni, konum.
+dosya, yöntem), `KabukTests` (üç modül uygulamada açılır, `isSecureContext`,
+konum arayüzü) ve `KonumKoprusuTests` (arka planda birikme, diskteki tampon;
+gerçek SPİ sayfasında web süreci ölünce kaydın sürmesi, uygulama kapanınca
+noktaların kayda eklenmesi). Telefonda deneme kullanıcıdadır: kurulum, kamera izni, konum.

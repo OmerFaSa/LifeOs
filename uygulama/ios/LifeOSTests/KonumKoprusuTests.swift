@@ -12,10 +12,20 @@ final class KonumKoprusuTests: XCTestCase {
                    course: -1, speed: 2.8, timestamp: Date(timeIntervalSince1970: 1_790_000_000 + sn))
     }
 
+    /// Her test kendi dosyasini kullanir: uygulamanin gercek tamponuna dokunulmaz.
+    private func geciciTampon(sinir: Int = 100_000) -> KaliciTampon {
+        let u = FileManager.default.temporaryDirectory.appendingPathComponent("lifeos-konum-\(UUID().uuidString).jsonl")
+        return KaliciTampon(dosya: u, sinir: sinir)
+    }
+
+    private func yeniKopru() -> KonumKoprusu { KonumKoprusu(kalici: geciciTampon()) }
+
+    private func ms(_ sn: TimeInterval) -> Double { ((1_790_000_000 + sn) * 1000).rounded() }
+
     // MARK: - saf
 
     func testIzleBirakVeSayfaKimligi() {
-        let k = KonumKoprusu()
+        let k = yeniKopru()
         k.istek("izle", 1, sayfa: "a")
         XCTAssertEqual(k.izleyenler, [1])
         k.istek("birak", 1, sayfa: "b")              // baska sayfanin birakisi
@@ -47,7 +57,7 @@ final class KonumKoprusuTests: XCTestCase {
     }
 
     func testArkaPlandaBirikirOneGelinceBosalir() {
-        let k = KonumKoprusu()
+        let k = yeniKopru()
         k.istek("izle", 1, sayfa: "a")
         k.arkayaGitti()
         k.locationManager(k.yonetici, didUpdateLocations: [nokta(1), nokta(2), nokta(3, dogruluk: -1)])
@@ -55,6 +65,131 @@ final class KonumKoprusuTests: XCTestCase {
         k.oneGeldi()
         XCTAssertTrue(k.tampon.isEmpty)
         XCTAssertTrue(k.onPlanda)
+    }
+
+    // MARK: - asama 2b: diskteki tampon
+
+    func testKaliciTamponDiskteKalirYazilaniSiler() throws {
+        let t = geciciTampon()
+        t.ekle([KonumKoprusu.js(nokta(1)), KonumKoprusu.js(nokta(2))])
+        t.ekle([KonumKoprusu.js(nokta(3))])
+        XCTAssertEqual(KaliciTampon(dosya: t.dosya).noktalar.count, 3, "uygulama yeniden açılınca noktalar diskte")
+        t.yazildi(ms(2))
+        XCTAssertEqual(t.noktalar.count, 1)
+        XCTAssertEqual(KaliciTampon(dosya: t.dosya).noktalar.count, 1, "yazılan kısım diskten de silinir")
+
+        // Uygulama yazarken kapandi: son satir yarim. Okunurken atlanir,
+        // sonraki ekleme ona yapismaz.
+        let h = try FileHandle(forWritingTo: t.dosya)
+        try h.seekToEnd()
+        try h.write(contentsOf: Data("{\"coords\":{\"lat".utf8))
+        try h.close()
+        XCTAssertEqual(KaliciTampon(dosya: t.dosya).noktalar.count, 1, "yarım satır atlanır")
+        t.ekle([KonumKoprusu.js(nokta(4))])
+        XCTAssertEqual(KaliciTampon(dosya: t.dosya).noktalar.count, 2, "yarım satırdan sonra eklenen kaybolmaz")
+
+        t.temizle()
+        XCTAssertFalse(FileManager.default.fileExists(atPath: t.dosya.path))
+        XCTAssertTrue(KaliciTampon(dosya: t.dosya).noktalar.isEmpty)
+    }
+
+    func testKaliciTamponSinirindaEnEskiDuser() {
+        let t = geciciTampon(sinir: 3)
+        t.ekle((1...5).map { KonumKoprusu.js(nokta(Double($0))) })
+        XCTAssertEqual(t.noktalar.compactMap(KaliciTampon.zaman), [ms(3), ms(4), ms(5)])
+        XCTAssertEqual(KaliciTampon(dosya: t.dosya).noktalar.count, 3)
+    }
+
+    func testIzlenenNoktaDiskeYazilirSayfaYazdiginiSoyleyinceSilinir() {
+        let k = yeniKopru()
+        k.istek("tek", 1, sayfa: "a")
+        k.locationManager(k.yonetici, didUpdateLocations: [nokta(1)])
+        XCTAssertTrue(k.kalici.noktalar.isEmpty, "tek konum isteği (izleme yok) diske yazılmaz")
+        k.istek("izle", 2, sayfa: "a")
+        k.locationManager(k.yonetici, didUpdateLocations: [nokta(2), nokta(3), nokta(4)])
+        XCTAssertEqual(k.kalici.noktalar.count, 3)
+        k.istek("yazildi", 0, sayfa: "a", t: ms(3))
+        XCTAssertEqual(k.kalici.noktalar.compactMap(KaliciTampon.zaman), [ms(4)])
+        k.istek("birak", 2, sayfa: "a")                // sayfa izlemeyi bıraktı (duraklat, sil)
+        XCTAssertTrue(k.kalici.noktalar.isEmpty)
+        XCTAssertFalse(k.gpsIstendi)
+    }
+
+    func testBitenSayfaninYazdimBildirimiDeGecerli() {
+        let k = yeniKopru()
+        k.istek("izle", 1, sayfa: "a")
+        k.locationManager(k.yonetici, didUpdateLocations: [nokta(1), nokta(2)])
+        k.sayfaDegisti()                                // modül geçişi; pagehide yazımı sonra gelir
+        XCTAssertEqual(k.kalici.noktalar.count, 2, "sayfa değişti diye noktalar silinmez")
+        k.istek("yazildi", 0, sayfa: "a", t: ms(2))
+        XCTAssertTrue(k.kalici.noktalar.isEmpty)
+    }
+
+    /// Kok neden (asama 2b): web sureci olunce yeniden yukleme sayfaDegisti'yi
+    /// cagiriyordu → tampon silinir, GPS durur; kosunun kalani kaydedilmezdi.
+    func testWebSureciOlurseGPSDurmazYeniSayfaKaydiSahiplenir() {
+        let k = yeniKopru()
+        k.istek("izle", 1, sayfa: "a")
+        k.arkayaGitti()
+        k.locationManager(k.yonetici, didUpdateLocations: [nokta(1), nokta(2)])
+        k.sayfaOldu()
+        XCTAssertTrue(k.sahipsiz)
+        XCTAssertTrue(k.gpsIstendi, "web süreci öldü diye GPS durmaz")
+        k.sayfaDegisti()                                // ölen sayfanın yeniden yüklenmesi
+        XCTAssertTrue(k.sahipsiz)
+        XCTAssertTrue(k.gpsIstendi)
+        k.locationManager(k.yonetici, didUpdateLocations: [nokta(3)])
+        XCTAssertEqual(k.kalici.noktalar.count, 3, "sayfa yokken de diske")
+        XCTAssertTrue(k.tampon.isEmpty, "izleyen yok: sayfaya gidecek bir şey birikmez")
+
+        k.istek("kurtar", 1, sayfa: "b", devam: true)
+        XCTAssertTrue(k.sahipsiz, "izleme gelene dek sahipsiz")
+        k.istek("izle", 2, sayfa: "b")
+        XCTAssertFalse(k.sahipsiz)
+        XCTAssertEqual(k.izleyenler, [2])
+        XCTAssertEqual(k.tampon.count, 3, "arka plandaysa noktalar öne gelince sayfaya gider")
+        k.istek("yazildi", 0, sayfa: "b", t: ms(3))
+        XCTAssertTrue(k.kalici.noktalar.isEmpty)
+    }
+
+    func testSahipsizKayitYarimKaydiOlmayanSayfadaDurur() {
+        let k = yeniKopru()
+        k.istek("izle", 1, sayfa: "a")
+        k.locationManager(k.yonetici, didUpdateLocations: [nokta(1)])
+        k.sayfaOldu()
+        k.sayfaDegisti()
+        k.istek("kurtar", 1, sayfa: "b", devam: false)
+        XCTAssertFalse(k.sahipsiz)
+        XCTAssertFalse(k.gpsIstendi)
+        XCTAssertEqual(k.kalici.noktalar.count, 1, "noktalar silinmez; sahibi sonra ister")
+    }
+
+    func testOlumdenSonrakiIkinciGezintiSahipsizligiBitirir() {
+        let k = yeniKopru()
+        k.istek("izle", 1, sayfa: "a")
+        k.sayfaOldu()
+        k.sayfaDegisti()                                // yeniden yükleme
+        k.sayfaDegisti()                                // kullanıcı başka modüle geçti
+        XCTAssertFalse(k.sahipsiz)
+        XCTAssertFalse(k.gpsIstendi)
+    }
+
+    func testIzleyenYokkenWebSureciOlurseGPSDurur() {
+        let k = yeniKopru()
+        k.istek("tek", 1, sayfa: "a")
+        k.sayfaOldu()
+        XCTAssertFalse(k.sahipsiz)
+        XCTAssertFalse(k.gpsIstendi)
+    }
+
+    func testUygulamaYenidenAcilincaNoktalarDiskten() {
+        let k = yeniKopru()
+        k.istek("izle", 1, sayfa: "a")
+        k.arkayaGitti()
+        k.locationManager(k.yonetici, didUpdateLocations: [nokta(1), nokta(2)])
+        let yeni = KonumKoprusu(kalici: KaliciTampon(dosya: k.kalici.dosya))   // uygulama kapandı, açıldı
+        XCTAssertEqual(yeni.kalici.noktalar.count, 2)
+        XCTAssertFalse(yeni.sahipsiz, "kapanmış uygulamada GPS sürmüyordu")
     }
 
     // MARK: - uctan uca: gercek kabuk, SPI sayfasi
@@ -67,8 +202,8 @@ final class KonumKoprusuTests: XCTestCase {
         jsCalistir(w, betik)
     }
 
-    private func kabuk() throws -> KabukDenetleyici {
-        let d = KabukDenetleyici()
+    private func kabuk(kalici: KaliciTampon? = nil) throws -> KabukDenetleyici {
+        let d = KabukDenetleyici(kopru: KonumKoprusu(kalici: kalici ?? geciciTampon()))
         let p = UIWindow(frame: UIScreen.main.bounds)
         p.rootViewController = d
         p.makeKeyAndVisible()
@@ -112,5 +247,62 @@ final class KonumKoprusuTests: XCTestCase {
         XCTAssertEqual(bekle(d.web, "SP.Canli.durum().nokta >= 10", sure: 10) as? Bool, true, "noktalar rotaya girmedi")
         XCTAssertEqual(bekle(d.web, "SP.Canli.durum().ekran === 'arka-plan'", sure: 2) as? Bool, true, "uygulamada ekran kilidi istenmemeli")
         calistir(d.web, "SP.Canli.sil();")
+    }
+
+    /// Kayit baslar, ekran kapanir, noktalar telefonda birikir (sayfaya gitmez).
+    private func ekranKapaliKos(_ d: KabukDenetleyici, nokta n: Int) {
+        calistir(d.web, "SP.Canli.sil && SP.Canli.sil(); window.__b = SP.Canli.baslat('kosu');")
+        XCTAssertEqual(bekle(d.web, "!!(__b && __b.ok !== false && SP.Canli.durum() && SP.Canli.durum().hal === 'kayitta')", sure: 5) as? Bool, true, "kayıt başlamadı")
+        let son = Date().addingTimeInterval(5)
+        while d.kopru.izleyenler.isEmpty && Date() < son { RunLoop.current.run(until: Date().addingTimeInterval(0.1)) }
+        XCTAssertFalse(d.kopru.izleyenler.isEmpty, "watchPosition köprüye ulaşmadı")
+        let simdi = Date().timeIntervalSince1970 - 1_790_000_000
+        d.kopru.arkayaGitti()
+        d.kopru.locationManager(d.kopru.yonetici, didUpdateLocations:
+            (0..<n).map { nokta(simdi + 1 + Double($0) * 4, lat: 41.0 + Double($0) * 0.0001) })
+        XCTAssertEqual(d.kopru.kalici.noktalar.count, n, "noktalar diske yazılmadı")
+    }
+
+    private func diskBosalsin(_ k: KonumKoprusu, sure: TimeInterval = 10) -> Bool {
+        let son = Date().addingTimeInterval(sure)
+        while !k.kalici.noktalar.isEmpty && Date() < son { RunLoop.current.run(until: Date().addingTimeInterval(0.1)) }
+        return k.kalici.noktalar.isEmpty
+    }
+
+    /// Asama 2b: iOS web surecini oldurur, uygulama yasar. Kayit durmaz;
+    /// yeniden acilan sayfa ekran kapali kismi alir ve kaldigi yerden surer.
+    func testWebSureciOlunceKayitKaldigiYerdenSurer() throws {
+        let d = try kabuk()
+        ekranKapaliKos(d, nokta: 30)
+        calistir(d.web, "window.__eski = true;")
+        d.webViewWebContentProcessDidTerminate(d.web)
+        XCTAssertTrue(d.kopru.sahipsiz)
+        XCTAssertEqual(bekle(d.web, "!window.__eski && !!(window.SP && SP.Canli && SP.Canli.durum()) && SP.Canli.durum().hal === 'kayitta' && SP.Canli.durum().nokta === 30", sure: 60) as? Bool, true,
+                       "yeniden açılan sayfa kaydı sürdürmedi ya da ekran kapalı kısım gelmedi")
+        XCTAssertFalse(d.kopru.sahipsiz, "sayfa kaydı sahiplenmedi")
+        XCTAssertFalse(d.kopru.izleyenler.isEmpty)
+        XCTAssertEqual(bekle(d.web, "SP.Canli.durum().ekran === 'arka-plan' && !SP.Canli.durum().geriGeldi", sure: 2) as? Bool, true)
+        XCTAssertTrue(diskBosalsin(d.kopru), "sayfa yazdığını bildirmedi; disk boşalmadı")
+        d.kopru.oneGeldi()
+        XCTAssertEqual(bekle(d.web, "SP.Canli.durum().nokta === 30", sure: 2) as? Bool, true, "aynı nokta ikinci kez girmemeli")
+        calistir(d.web, "SP.Canli.sil();")
+    }
+
+    /// Asama 2b: uygulama kapanir (ya da iOS kapatir). Noktalar diskte kalir;
+    /// yeniden acilinca kayda eklenir, kayit duraklatilmis gelir.
+    func testUygulamaKapanincaNoktalarKaybolmazKayitDuraklatilmisGelir() throws {
+        let d = try kabuk()
+        ekranKapaliKos(d, nokta: 30)
+        let dosya = d.kopru.kalici.dosya
+        d.web.load(URLRequest(url: URL(string: "about:blank")!))      // sayfa da köprü de gider; disk kalır
+        XCTAssertEqual(bekle(d.web, "location.href === 'about:blank'", sure: 10) as? Bool, true)
+        XCTAssertEqual(KaliciTampon(dosya: dosya).noktalar.count, 30)
+
+        let yeni = try kabuk(kalici: KaliciTampon(dosya: dosya))
+        XCTAssertEqual(bekle(yeni.web, "SP.Canli.durum() && SP.Canli.durum().hal === 'duraklat' && SP.Canli.durum().geriGeldi && SP.Canli.durum().nokta === 30", sure: 60) as? Bool, true,
+                       "ekran kapalı kısım kayda eklenmedi")
+        XCTAssertTrue(yeni.kopru.izleyenler.isEmpty, "kapanmış kayıt kendiliğinden sürmemeli")
+        XCTAssertTrue(diskBosalsin(yeni.kopru))
+        calistir(yeni.web, "SP.Canli.sil();")
     }
 }

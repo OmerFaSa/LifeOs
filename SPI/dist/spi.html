@@ -14110,7 +14110,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'0707e9a9', at:'2026-10-05 15:42', dirty:true };
+SP.BUILD = { id:'edd4a2b1', at:'2026-10-05 16:30', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -43279,7 +43279,10 @@ SP.Harita = (function(){
         servisinden verir ve ekran kapalıyken de biriktirir
         (`window.LIFEOS_YEREL.konum === 'arka-plan'`). Orada ekran kilidi
         istenmez, ekran durumu «arka-plan»dır; noktalar kendi zamanlarıyla
-        gelir, boşluk kuralı aynen geçerlidir.
+        gelir, boşluk kuralı aynen geçerlidir. Telefon, sayfanın «depoya
+        yazdım» demediği her noktayı diskte tutar: iOS web sürecini
+        öldürse ya da uygulamayı kapatsa da noktalar kaybolmaz; sayfa
+        açılınca istenir (aşağıda «uygulamada kurtarma»).
      5. KONUM YALNIZ GÜVENLİ BAĞLANTIDA. Tarayıcı konumu https ya da
         localhost dışında vermez; o zaman kayıt başlamaz ve nedeni söylenir.
      6. KONUM KULLANICININ CİHAZLARINDAN ÇIKMAZ. Kayıt sürerken noktalar
@@ -43318,6 +43321,11 @@ SP.Canli = (function(){
     /* Söz 4 istisnası: konum ekran kapalıyken de geliyor mu (uygulama)? */
     arkaPlan:() => !!(typeof window !== 'undefined' && window.LIFEOS_YEREL
       && window.LIFEOS_YEREL.konum === 'arka-plan'),
+    /* Telefonun konum köprüsü (uygulama/ios KonumKoprusu): yalnız uygulamada. */
+    kopru:() => {
+      const k = typeof window !== 'undefined' && window.__lifeosKonum;
+      return k && typeof k.kurtar === 'function' && typeof k.yazildi === 'function' ? k : null;
+    },
     depo:{
       oku(k){ try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } },
       yaz(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } },
@@ -43330,6 +43338,7 @@ SP.Canli = (function(){
   let izNo = null;           /* watchPosition kimliği */
   let kilit = null;          /* ekran kilidi (WakeLockSentinel) */
   let sonYazim = 0;
+  let kurtarNo = 0;
   let onbellek = { d:null, n:-1, a:null };
   const dinleyiciler = [];
 
@@ -43351,33 +43360,89 @@ SP.Canli = (function(){
   /* ------------------------------------------------------------ taslak
      Noktalar kısa dizilerle: [lat, lon, yükseklik|null, başlangıçtan ms,
      yeni parça 1/0]. İki saatlik koşu ~300 KB. */
+  /* `sg`: işlenen son konumun zamanı (ize girmese de). Uygulamada telefona
+     «buraya kadar depoda» diye bu bildirilir; depo yazılamadıysa bildirilmez. */
   function yaz(){
     if(!d) return;
     sonYazim = ortam.saat();
-    ortam.depo.yaz(anahtar(), {
+    const ok = ortam.depo.yaz(anahtar(), {
       v:1, hal:d.hal, tur:d.tur, bas:d.bas, sureMs:d.sureMs, aktifBas:d.aktifBas,
-      kotu:d.kotu, bosluk:d.bosluk, yazildi:sonYazim,
+      kotu:d.kotu, bosluk:d.bosluk, yazildi:sonYazim, sg:d.sonGelis,
       n:d.noktalar.map(p => [p.lat, p.lon, p.ele, p.t - d.bas, p.parca ? 1 : 0]),
     });
+    const b = ok && d.sonGelis != null ? ortam.kopru() : null;
+    if(b){ try{ b.yazildi(d.sonGelis); }catch(e){ /* köprü yok: telefon tutmaya devam eder */ } }
   }
 
   /* Taslaktan geri gelen kayıt her zaman DURAKLATILMIŞTIR: izleme sayfayla
      birlikte durdu. Son yazıma kadar geçen süre sayılır, sonrası
-     sayılmaz (ne kadar sürdüğü bilinmiyor). */
+     sayılmaz (ne kadar sürdüğü bilinmiyor). İSTİSNA uygulamada: telefon
+     GPS'in hiç durmadığını söylerse kayıt kaldığı yerden sürer (kurtar). */
   function yukle(){
     if(yuklendi) return;
     yuklendi = true;
+    taslaktan();
+    kurtar();
+  }
+  function taslaktan(){
     const t = ortam.depo.oku(anahtar());
     /* Number.isFinite: JSON'dan gelen null, isFinite(null) ile «sayı» geçiyordu. */
     if(!t || t.v !== 1 || !Array.isArray(t.n) || !Number.isFinite(t.bas)) return;
     const kesik = t.hal === 'kayitta' && Number.isFinite(t.aktifBas);
+    const yazildi = Number.isFinite(t.yazildi) ? t.yazildi : t.aktifBas;
+    const noktalar = t.n.map(x => ({ lat:x[0], lon:x[1], ele:x[2], t:t.bas + x[3], parca:!!x[4] }));
+    const son = noktalar[noktalar.length - 1];
     d = {
       hal:t.hal === 'bitti' ? 'bitti' : 'duraklat', tur:t.tur || null, bas:t.bas,
-      sureMs:(t.sureMs || 0) + (kesik ? Math.max(0, (t.yazildi || t.aktifBas) - t.aktifBas) : 0),
-      aktifBas:null, kotu:t.kotu || 0, bosluk:t.bosluk || 0,
-      noktalar:t.n.map(x => ({ lat:x[0], lon:x[1], ele:x[2], t:t.bas + x[3], parca:!!x[4] })),
+      sureMs:(t.sureMs || 0) + (kesik ? Math.max(0, yazildi - t.aktifBas) : 0),
+      aktifBas:null, kotu:t.kotu || 0, bosluk:t.bosluk || 0, noktalar,
       yeniParca:true, sonGelis:null, hata:null, ekran:null, geriGeldi:kesik,
+      /* Yarıda kalan kaydın kesildiği an; yalnız kurtarma okur. */
+      geri:kesik ? { sureMs:t.sureMs || 0, aktifBas:t.aktifBas, yazildi,
+        sonGelis:Number.isFinite(t.sg) ? t.sg : (son ? son.t : null) } : null,
     };
+  }
+
+  /* ------------------------------------------------ uygulamada kurtarma
+     iPhone uygulamasında ekran kapalıyken noktalar sayfaya gitmez,
+     telefonda birikir. iOS bu arada web sürecini öldürebilir ya da
+     uygulamayı kapatabilir. Telefon, sayfanın yazdığını bildirmediği her
+     noktayı diskte tutar (KonumKoprusu); sayfa açılınca bir kez sorulur:
+       - GPS hiç durmadıysa (yalnız web süreci öldü) kayıt KALDIĞI YERDEN
+         sürer: süre kesilmez, yol parçalanmaz, izleme yeniden bağlanır.
+       - Durduysa (uygulama kapandı) noktalar eklenir ve kayıt söz 1'deki
+         gibi DURAKLATILMIŞ gelir; süre son noktaya dek sayılır.
+     Taslak yoksa noktalar hiçbir kayda eklenmez. Kayıttan önceki ve
+     zaten işlenmiş konum alınmaz (telefon aynı noktayı yeniden verebilir). */
+  function kurtar(){
+    const b = ortam.kopru();
+    if(!b) return;
+    const devam = !!(d && d.geri && d.hal === 'duraklat');
+    const no = ++kurtarNo;                       /* geç gelen eski cevap işlenmez */
+    try{ b.kurtar(devam, c => { if(no === kurtarNo) kurtarildi(c); }); }
+    catch(e){ /* köprü cevap vermezse taslak olduğu gibi kalır */ }
+  }
+
+  function kurtarildi(c){
+    const g = d && d.hal === 'duraklat' ? d.geri : null;
+    if(!g || !c || !Array.isArray(c.noktalar)) return;
+    d.geri = null;
+    const k = c.suruyor ? ortam.kaynak() : null;
+    Object.assign(d, { hal:'kayitta', sonGelis:g.sonGelis, yeniParca:!d.noktalar.length });
+    c.noktalar.forEach(p => {
+      if(p && p.coords && Number.isFinite(p.timestamp) && p.timestamp >= d.bas) isle(p);
+    });
+    if(k){
+      Object.assign(d, { sureMs:g.sureMs, aktifBas:g.aktifBas, geriGeldi:false });
+      izle(k);
+      yaz();
+      ekranAc();
+    }else{
+      const son = Math.max(g.yazildi, d.sonGelis || 0);
+      Object.assign(d, { hal:'duraklat', sureMs:g.sureMs + Math.max(0, son - g.aktifBas), yeniParca:true });
+      yaz();
+    }
+    bildir();
   }
 
   /* ------------------------------------------------------------- konum */
@@ -43395,14 +43460,22 @@ SP.Canli = (function(){
 
   function konum(p){
     if(!d || d.hal !== 'kayitta' || !p || !p.coords) return;
+    if(isle(p) && ortam.saat() - sonYazim >= YAZ_MS) yaz();
+    bildir();
+  }
+
+  /* Konumu ize işler; ize girdiyse true. Aynı ya da daha eski zamanlı
+     konum ikinci kez işlenmez: telefon, depoya yazıldığını duymadığı
+     noktayı yeniden verebilir (kurtarma). */
+  function isle(p){
     const c = p.coords, t = isFinite(p.timestamp) ? p.timestamp : ortam.saat();
+    if(d.sonGelis != null && t <= d.sonGelis) return false;
     if(d.sonGelis != null && t - d.sonGelis > BOSLUK_MS) d.bosluk += t - d.sonGelis;
     d.sonGelis = t;
     if(!(c.accuracy <= DOGRULUK_M)){
       d.kotu++;
       d.hata = isFinite(c.accuracy) ? 'Konum zayıf (±' + Math.round(c.accuracy) + ' m)' : 'Konum zayıf';
-      bildir();
-      return;
+      return false;
     }
     d.hata = null;
     const n = {
@@ -43411,15 +43484,11 @@ SP.Canli = (function(){
       t, parca:d.yeniParca,
     };
     const son = d.noktalar[d.noktalar.length - 1];
-    if(son && t < son.t) return;
-    if(son && !n.parca && t - son.t < SEYREK_MS && SP.Rota.mesafe(son, n) < SP.Rota.TITREME_M){
-      bildir();
-      return;
-    }
+    if(son && t < son.t) return false;
+    if(son && !n.parca && t - son.t < SEYREK_MS && SP.Rota.mesafe(son, n) < SP.Rota.TITREME_M) return false;
     d.yeniParca = false;
     d.noktalar.push(n);
-    if(ortam.saat() - sonYazim >= YAZ_MS) yaz();
-    bildir();
+    return true;
   }
 
   function hata(e){
@@ -43502,7 +43571,7 @@ SP.Canli = (function(){
     const k = ortam.kaynak();
     if(!k) return { ok:false, why:KONUM_YOK };
     Object.assign(d, { hal:'kayitta', aktifBas:ortam.saat(), yeniParca:true, sonGelis:null,
-      hata:null, geriGeldi:false });
+      hata:null, geriGeldi:false, geri:null });
     izle(k);
     yaz();
     ekranAc();
@@ -43579,6 +43648,10 @@ SP.Canli = (function(){
     if(d.hal === 'kayitta' && !kilit) ekranAc();
   });
   window.addEventListener('pagehide', () => { if(d) yaz(); });
+
+  /* Uygulamada telefona sayfa açılır açılmaz sorulur, kayıt ekranı
+     açılmasa da: GPS sahipsiz kalmasın, ekran kapalı kısım beklemesin. */
+  setTimeout(() => { if(ortam.kopru()) yukle(); }, 0);
 
   /* Testler için: bellekteki kaydı bırakır (depoya dokunmadan). */
   function _sifirla(){

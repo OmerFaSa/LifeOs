@@ -11,10 +11,27 @@
 
   /* Sahte dünya: kaynak.ver(...) bir konum gönderir. */
   let eski = null, kaynak = null, depo = {}, saat = T0, guvenli = true;
+  /* Sahte telefon köprüsü (uygulama/ios KonumKoprusu): her konumu, sayfa
+     «yazdım» diyene dek diskte tutar. `arkada` iken konum sayfaya gitmez
+     (ekran kapalı, web süreci uyuyor ya da ölü). */
+  let telefon = null, arkada = false;
+  function telefonKur(suruyor){
+    telefon = { noktalar:[], yazildiT:[], kurtarIstek:[], suruyor,
+      kurtar(devam, cb){
+        telefon.kurtarIstek.push(devam);
+        const c = { noktalar:telefon.noktalar.slice(), suruyor:!!(devam && telefon.suruyor) };
+        setTimeout(() => cb(c), 0);
+      },
+      yazildi(t){ telefon.yazildiT.push(t); telefon.noktalar = telefon.noktalar.filter(p => p.timestamp > t); },
+    };
+    C._ortam.kopru = () => telefon;
+    C._ortam.arkaPlan = () => true;
+  }
   function kur(){
     const o = C._ortam;
     eski = Object.assign({}, o);
-    depo = {}; saat = T0; guvenli = true;
+    depo = {}; saat = T0; guvenli = true; telefon = null; arkada = false;
+    o.kopru = () => null;
     kaynak = {
       izleniyor:false, kapandi:0,
       watchPosition(ok, hata){ kaynak.ok = ok; kaynak.hataFn = hata; kaynak.izleniyor = true; return 7; },
@@ -38,8 +55,10 @@
   /* `sn` saniyede (T0'dan) konum; doğruluk ve yükseklik isteğe bağlı. */
   function ver(lat, lon, sn, dogruluk, ele){
     saat = T0 + sn * 1000;
-    if(kaynak.ok) kaynak.ok({ coords:{ latitude:lat, longitude:lon,
-      accuracy:dogruluk == null ? 5 : dogruluk, altitude:ele == null ? null : ele }, timestamp:saat });
+    const p = { coords:{ latitude:lat, longitude:lon,
+      accuracy:dogruluk == null ? 5 : dogruluk, altitude:ele == null ? null : ele }, timestamp:saat };
+    if(telefon) telefon.noktalar.push(p);
+    if(kaynak.ok && !arkada) kaynak.ok(p);
   }
   /* Kuzeye düz koşu: n nokta, adım 10 m / 3 sn, `basSn`'den ve `lat0`'dan. */
   function kos(n, basSn, lat0){
@@ -252,6 +271,128 @@
       expect(metinler.every(m => m === C.IZIN_YOK_UYGULAMA)).toBe(true);
       expect(C.IZIN_YOK_UYGULAMA).toContain('Ayarlar');
       expect(/[Tt]arayıcı/.test(C.IZIN_YOK_UYGULAMA)).toBe(false);
+    }));
+  });
+
+  /* ------------------------------------- uygulamada kurtarma (aşama 2b)
+     iPhone uygulamasında ekran kapalıyken noktalar telefonda birikir.
+     iOS web sürecini öldürürse ya da uygulamayı kapatırsa o noktalar
+     yalnız bellekteydi: koşunun ekran kapalı kısmı kayboluyordu ve
+     sayfa yeniden açılınca GPS duruyordu. Artık telefon, sayfanın
+     «yazdım» demediği her noktayı diskte tutar; sayfa açılınca ister. */
+
+  describe('Canlı kayıt — uygulamada kurtarma', () => {
+    it('yazılan nokta telefona bildirilir; depo yazılamazsa bildirilmez', () => sahneyle(async () => {
+      telefonKur(true);
+      C.baslat('kosu');
+      kos(10, 0);                                   /* 0–27 sn; 15. sn'de yazılır */
+      expect(telefon.yazildiT.length > 0).toBe(true);
+      const son = telefon.yazildiT[telefon.yazildiT.length - 1];
+      expect(son).toBe(taslak().sg);
+      expect(telefon.noktalar.every(p => p.timestamp > son)).toBe(true);
+      const once = telefon.yazildiT.length;
+      C._ortam.depo.yaz = () => false;               /* depo dolu */
+      kos(10, 60, 41 + 200 / M_DERECE);
+      C.duraklat();
+      expect(telefon.yazildiT.length).toBe(once);
+    }));
+
+    it('web süreci ölür, GPS durmazsa: kayıt kaldığı yerden sürer, ekran kapalı kısım ize girer', () => sahneyle(async () => {
+      telefonKur(true);
+      C.baslat('kosu');
+      kos(20, 0);                                   /* ekran açık: 0–57 sn, ~190 m */
+      arkada = true;                                 /* ekran kapandı */
+      kos(80, 60, 41 + 200 / M_DERECE);             /* 60–297 sn yalnız telefonda */
+      C._sifirla();                                  /* web süreci öldü, sayfa yeniden açıldı */
+      expect(C.durum().hal).toBe('duraklat');        /* telefon cevap verene dek */
+      expect(telefon.kurtarIstek).toEqual([false, true]);   /* ilk sayfa (taslak yoktu), yeniden açılan */
+      await bekle();
+      arkada = false;
+      const d = C.durum();
+      expect(d.hal).toBe('kayitta');
+      expect(d.geriGeldi).toBe(false);
+      expect(d.nokta).toBe(100);
+      expect(d.sure).toBe(297);                      /* süre hiç durmadı */
+      expect(d.ekran).toBe('arka-plan');
+      expect(kaynak.izleniyor).toBe(true);
+      expect(C.noktalar().filter(n => n.parca)).toHaveLength(1);   /* tek parça: yol kesilmedi */
+      expect(taslak().n).toHaveLength(100);
+      expect(telefon.noktalar).toHaveLength(0);      /* yazıldı, telefon sildi */
+      kos(10, 300, 41 + 1000 / M_DERECE);
+      expect(C.durum().nokta).toBe(110);
+    }));
+
+    it('uygulama kapanmışsa (GPS durdu): noktalar eklenir, kayıt duraklatılmış gelir, süre son noktaya dek', () => sahneyle(async () => {
+      telefonKur(false);
+      C.baslat('kosu');
+      kos(20, 0);
+      arkada = true;
+      kos(80, 60, 41 + 200 / M_DERECE);              /* son nokta 297. sn */
+      C._sifirla();
+      saat = T0 + 3600e3;                            /* bir saat sonra açıldı */
+      C.durum();
+      await bekle();
+      const d = C.durum();
+      expect(d.hal).toBe('duraklat');
+      expect(d.geriGeldi).toBe(true);
+      expect(d.nokta).toBe(100);
+      expect(d.sure).toBe(297);
+      expect(kaynak.izleniyor).toBe(false);
+      expect(taslak().n).toHaveLength(100);
+      expect(telefon.noktalar).toHaveLength(0);
+      expect(C.surdur().ok).toBe(true);              /* sürdürünce yeni parça */
+      arkada = false;
+      kos(5, 3700, 41 + 2000 / M_DERECE);
+      expect(C.noktalar()[100].parca).toBe(true);
+    }));
+
+    it('telefonun yeniden verdiği nokta ikinci kez işlenmez', () => sahneyle(async () => {
+      telefonKur(true);
+      telefon.yazildi = t => { telefon.yazildiT.push(t); };   /* bildirim telefona ulaşmadı: hepsi elinde */
+      C.baslat('kosu');
+      kos(20, 0);                                    /* taslakta 0–45 sn */
+      ver(41.5, 29, 70, 80);                         /* zayıf konum: taslakta yok, bir kez sayılır */
+      expect(telefon.noktalar).toHaveLength(21);
+      C._sifirla();
+      C.durum();
+      await bekle();
+      expect(C.durum().nokta).toBe(20);
+      expect(C.durum().kotu).toBe(1);
+      expect(C.noktalar().every((n, i, a) => i === 0 || n.t > a[i - 1].t)).toBe(true);
+    }));
+
+    it('taslak yoksa telefonun noktaları hiçbir kayda eklenmez', () => sahneyle(async () => {
+      telefonKur(true);
+      telefon.noktalar.push({ coords:{ latitude:41, longitude:29, accuracy:5, altitude:null }, timestamp:T0 });
+      expect(C.durum()).toBeNull();
+      await bekle();
+      expect(telefon.kurtarIstek).toEqual([false]);
+      expect(C.durum()).toBeNull();
+      expect(telefon.yazildiT).toHaveLength(0);
+    }));
+
+    it('kayıttan önceki (eski kayda ait) nokta eklenmez', () => sahneyle(async () => {
+      telefonKur(true);
+      saat = T0 + 600e3;
+      C.baslat('kosu');
+      kos(5, 600);
+      const eskiler = [];
+      for(let i = 0; i < 5; i++) eskiler.push({ coords:{ latitude:40, longitude:29 + i * 0.001, accuracy:5, altitude:null }, timestamp:T0 + i * 1000 });
+      C._sifirla();
+      telefon.noktalar = eskiler.concat(telefon.noktalar);
+      C.durum();
+      await bekle();
+      expect(C.durum().nokta).toBe(5);
+      expect(C.noktalar().every(n => n.lat === 41 || n.lat > 41)).toBe(true);
+    }));
+
+    it('tarayıcıda (köprü yok) telefona hiçbir şey sorulmaz', () => sahneyle(async () => {
+      C.baslat('kosu');
+      kos(20, 0);
+      C._sifirla();
+      expect(C.durum().hal).toBe('duraklat');
+      await bekle();
+      expect(C.durum().hal).toBe('duraklat');
     }));
   });
 

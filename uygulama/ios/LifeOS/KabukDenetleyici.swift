@@ -15,8 +15,15 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
 
     private(set) var web: WKWebView!
     /// Ekran kapaliyken rota (asama 2): navigator.geolocation → CoreLocation.
-    let kopru = KonumKoprusu()
+    let kopru: KonumKoprusu
     private var indirilen: URL?
+
+    init(kopru: KonumKoprusu = KonumKoprusu()) {
+        self.kopru = kopru
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) { fatalError("kullanilmaz") }
 
     override func loadView() {
         let ayar = WKWebViewConfiguration()
@@ -78,9 +85,11 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
         kopru.sayfaDegisti()
     }
 
-    /// iOS arka planda web icerigini sonlandirabilir: geri donunce yeniden yuklenir.
-    /// (Canli rota taslagi her gizlenmede depoya yazilir; kayit kaybolmaz.)
+    /// iOS arka planda web icerigini sonlandirabilir: yeniden yuklenir. Kayit
+    /// suruyorsa GPS durmaz; noktalar diske yazilir, yeni sayfa kaydi
+    /// sahiplenip kaldigi yerden surdurur (KonumKoprusu, asama 2b).
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        kopru.sayfaOldu()
         webView.load(URLRequest(url: webView.url.flatMap { KabukDenetleyici.icerde($0) ? $0 : nil }
                                 ?? KabukDenetleyici.baslangic))
     }
