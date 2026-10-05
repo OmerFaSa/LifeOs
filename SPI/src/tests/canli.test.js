@@ -32,6 +32,7 @@
     eski = Object.assign({}, o);
     depo = {}; saat = T0; guvenli = true; telefon = null; arkada = false;
     o.kopru = () => null;
+    o.cihaz = () => null;
     kaynak = {
       izleniyor:false, kapandi:0,
       watchPosition(ok, hata){ kaynak.ok = ok; kaynak.hataFn = hata; kaynak.izleniyor = true; return 7; },
@@ -384,6 +385,49 @@
       await bekle();
       expect(C.durum().nokta).toBe(5);
       expect(C.noktalar().every(n => n.lat === 41 || n.lat > 41)).toBe(true);
+    }));
+
+    /* Kullanıcı (2026-10-05, telefondan): «direk konum gelmiyor»; ekranda
+       yalnız «Konum bekleniyor…» vardı ve Ayarlar › LifeOS'ta Konum satırı
+       hiç yoktu — yani telefon izin bile sormamıştı. Ekran nedenini
+       söylemiyordu. Artık telefonun bildirdiği duruma göre söyler. */
+    it('uygulamada konum beklenirken nedeni söylenir (telefonun bildirdiği duruma göre)', () => sahneyle(async () => {
+      telefonKur(true);
+      let cihaz = null;
+      C._ortam.cihaz = () => cihaz;
+      C.baslat('kosu');
+      const metin = () => C.durum().bekleme;
+      expect(metin()).toBe(null);                              /* ilk saniyeler: sıradan bekleme */
+      saat = T0 + 5000;
+      expect(metin()).toContain('cevap vermedi');              /* köprü hiç durum bildirmedi */
+      cihaz = { izin:'soruluyor', kesin:true, servis:true, gps:false, gelen:0 };
+      expect(metin()).toContain('«Uygulamayı Kullanırken»');
+      cihaz = { izin:'izinli', kesin:true, servis:false, gps:false, gelen:0 };
+      expect(metin()).toContain('Konum Servisleri');
+      cihaz = { izin:'izinli', kesin:false, servis:true, gps:true, gelen:0 };
+      expect(metin()).toContain('Kesin Konum');
+      cihaz = { izin:'izinli', kesin:true, servis:true, gps:true, gelen:0 };
+      expect(metin()).toContain('ilk konum bekleniyor');
+      cihaz = { izin:'reddedildi', kesin:true, servis:true, gps:false, gelen:0 };
+      expect(metin()).toBe(C.IZIN_YOK_UYGULAMA);
+      kos(3, 10);
+      expect(metin()).toBe(null);                              /* nokta geldi: söylenecek bir şey yok */
+    }));
+
+    it('telefon durum bildirince ekran yenilenir; tarayıcıda neden söylenmez', () => sahneyle(async () => {
+      telefonKur(true);
+      C.baslat('kosu');
+      let olay = 0;
+      const kes = C.dinle(() => olay++);
+      try{ window.dispatchEvent(new CustomEvent('lifeos-konum-durum', { detail:{ izin:'izinli' } })); }
+      finally{ kes(); }
+      expect(olay).toBe(1);
+      C.sil();
+      C._ortam.kopru = () => null;
+      C._ortam.arkaPlan = () => false;
+      C.baslat('kosu');
+      saat = T0 + 60000;
+      expect(C.durum().bekleme).toBe(null);
     }));
 
     it('tarayıcıda (köprü yok) telefona hiçbir şey sorulmaz', () => sahneyle(async () => {

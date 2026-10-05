@@ -182,6 +182,28 @@ final class KonumKoprusuTests: XCTestCase {
         XCTAssertFalse(k.gpsIstendi)
     }
 
+    /// Kullanici (2026-10-05): «direk konum gelmiyor», Ayarlar › LifeOS'ta Konum
+    /// satiri yok. Kopru durumunu soyler: izin soruldu mu, kac konum geldi.
+    func testDurumIzinIsteginiVeGelenKonumuSoyler() {
+        let k = yeniKopru()
+        XCTAssertFalse(k.izinIstendi)
+        let ilk = k.durumSozlugu(servis: true)
+        XCTAssertEqual(ilk["gelen"] as? Int, 0)
+        XCTAssertEqual(ilk["servis"] as? Bool, true)
+        XCTAssertNotNil(ilk["kesin"] as? Bool)
+        let soruldu = k.yonetici.authorizationStatus == .notDetermined
+        k.istek("izle", 1, sayfa: "a")
+        if soruldu {
+            XCTAssertTrue(k.izinIstendi, "izin hiç istenmedi")
+            XCTAssertEqual(k.durumSozlugu(servis: nil)["izin"] as? String, "soruluyor")
+            XCTAssertEqual(k.durumSozlugu(servis: nil)["gps"] as? Bool, false)
+        }
+        k.locationManager(k.yonetici, didUpdateLocations: [nokta(1), nokta(2, dogruluk: -1)])
+        XCTAssertEqual(k.durumSozlugu(servis: nil)["gelen"] as? Int, 2, "geçersiz konum da sayılır: GPS cevap veriyor demektir")
+        k.istek("birak", 1, sayfa: "a")
+        XCTAssertEqual(k.gelen, 0)
+    }
+
     func testUygulamaYenidenAcilincaNoktalarDiskten() {
         let k = yeniKopru()
         k.istek("izle", 1, sayfa: "a")
@@ -239,6 +261,10 @@ final class KonumKoprusuTests: XCTestCase {
         XCTAssertEqual(bekle(d.web, "!!(__b && __b.ok !== false && SP.Canli.durum() && SP.Canli.durum().hal === 'kayitta')", sure: 5) as? Bool, true, "kayıt başlamadı")
         let son = Date().addingTimeInterval(5)
         while d.kopru.izleyenler.isEmpty && Date() < son { RunLoop.current.run(until: Date().addingTimeInterval(0.1)) }
+        // Kopru durumunu sayfaya bildirir; SPI onu okur (beklemenin nedeni).
+        XCTAssertEqual(bekle(d.web, "!!(window.__lifeosKonum.durum() && typeof window.__lifeosKonum.durum().izin === 'string'"
+            + " && typeof window.__lifeosKonum.durum().servis === 'boolean' && ('bekleme' in SP.Canli.durum()))", sure: 5) as? Bool, true,
+            "köprünün konum durumu sayfaya ulaşmadı")
         let simdi = Date().timeIntervalSince1970 - 1_790_000_000
         d.kopru.arkayaGitti()                          // ekran kapali: noktalar birikir
         d.kopru.locationManager(d.kopru.yonetici, didUpdateLocations:

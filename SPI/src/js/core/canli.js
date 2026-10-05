@@ -66,6 +66,12 @@ SP.Canli = (function(){
     /* Söz 4 istisnası: konum ekran kapalıyken de geliyor mu (uygulama)? */
     arkaPlan:() => !!(typeof window !== 'undefined' && window.LIFEOS_YEREL
       && window.LIFEOS_YEREL.konum === 'arka-plan'),
+    /* Telefonun bildirdiği konum durumu (izin, kesinlik, servis, GPS):
+       yalnız uygulamada; gelmediyse null. */
+    cihaz:() => {
+      const k = typeof window !== 'undefined' && window.__lifeosKonum;
+      return k && typeof k.durum === 'function' ? k.durum() : null;
+    },
     /* Telefonun konum köprüsü (uygulama/ios KonumKoprusu): yalnız uygulamada. */
     kopru:() => {
       const k = typeof window !== 'undefined' && window.__lifeosKonum;
@@ -368,7 +374,29 @@ SP.Canli = (function(){
     if(!d) return null;
     return { hal:d.hal, tur:d.tur, bas:d.bas, sure:sure(), nokta:d.noktalar.length,
       kotu:d.kotu, bosluk:Math.round(d.bosluk / 1000), hata:d.hata, ekran:d.ekran,
-      geriGeldi:d.geriGeldi };
+      geriGeldi:d.geriGeldi, bekleme:bekleme() };
+  }
+
+  /* Uygulamada konum beklenirken NEDENİ (kullanıcı, 2026-10-05: «direk
+     konum gelmiyor»; ekranda yalnız «Konum bekleniyor…» vardı, Ayarlar ›
+     LifeOS'ta Konum satırı hiç yoktu — telefon izin bile sormamıştı).
+     Telefonun bildirdiği duruma göre söylenir; söylenecek bir şey yoksa
+     null (ekran sıradan bekleme yazısını gösterir). Tarayıcıda null. */
+  const BEKLEME_MS = 3000;
+  function bekleme(){
+    if(!d || d.hal !== 'kayitta' || d.noktalar.length || !ortam.arkaPlan() || !ortam.kopru()) return null;
+    const k = ortam.cihaz();
+    if(!k){
+      return d.aktifBas != null && ortam.saat() - d.aktifBas >= BEKLEME_MS
+        ? 'Telefonun konum servisi cevap vermedi. Uygulamayı tamamen kapatıp yeniden aç.' : null;
+    }
+    if(k.servis === false) return "Telefonun konum servisi kapalı: Ayarlar › Gizlilik ve Güvenlik › Konum Servisleri'ni aç.";
+    if(k.izin === 'reddedildi' || k.izin === 'kisitli') return IZIN_YOK_UYGULAMA;
+    if(k.izin === 'sorulmadi') return 'Telefon konum iznini henüz sormadı.';
+    if(k.izin !== 'izinli') return 'Telefon konum izni soruyor: çıkan pencerede «Uygulamayı Kullanırken»i seç.';
+    if(k.kesin === false) return "Kesin Konum kapalı; yaklaşık konumla rota çizilemez. Ayarlar › LifeOS › Konum › Kesin Konum'u aç.";
+    if(!k.gelen) return 'GPS açık, ilk konum bekleniyor; açık havada birkaç saniye sürer.';
+    return null;
   }
 
   function noktalar(){ yukle(); return d ? d.noktalar : []; }
@@ -393,6 +421,8 @@ SP.Canli = (function(){
     if(d.hal === 'kayitta' && !kilit) ekranAc();
   });
   window.addEventListener('pagehide', () => { if(d) yaz(); });
+  /* Telefon konum durumunu bildirince (izin verildi, GPS açıldı) ekran yenilenir. */
+  window.addEventListener('lifeos-konum-durum', () => { if(d) bildir(); });
 
   /* Uygulamada telefona sayfa açılır açılmaz sorulur, kayıt ekranı
      açılmasa da: GPS sahipsiz kalmasın, ekran kapalı kısım beklemesin. */

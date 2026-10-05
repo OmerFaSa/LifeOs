@@ -47,6 +47,10 @@ final class KonumKoprusu: NSObject, WKScriptMessageHandler, CLLocationManagerDel
     private(set) var gpsIstendi = false
     /// Olen sayfanin yeniden yuklenmesi: bunun gezintisi GPS'i durdurmaz.
     private var olumYuklemesi = false
+    /// Bu acilista konum izni istendi mi: «soruluyor» ile «sorulmadi»yi ayirir.
+    private(set) var izinIstendi = false
+    /// Bu izlemede CoreLocation'dan gelen konum sayisi (gecersizler dahil).
+    private(set) var gelen = 0
     private var biten = Set<String>()
 
     init(yonetici: CLLocationManager = CLLocationManager(), kalici: KaliciTampon = KaliciTampon()) {
@@ -106,7 +110,8 @@ final class KonumKoprusu: NSObject, WKScriptMessageHandler, CLLocationManagerDel
             if sahiplendi {
                 if onPlanda { ilet(kalici.noktalar) } else { tampon = kalici.noktalar }
             }
-        case "tek": tekler.insert(id); basla()
+            durumBildir()
+        case "tek": tekler.insert(id); basla(); durumBildir()
         case "birak":
             guard izleyenler.remove(id) != nil else { return }
             // Sayfa izlemeyi kendisi birakti (duraklat, sil): taslagini yazdi.
@@ -166,6 +171,7 @@ final class KonumKoprusu: NSObject, WKScriptMessageHandler, CLLocationManagerDel
         gpsIstendi = true
         switch yonetici.authorizationStatus {
         case .notDetermined:
+            izinIstendi = true
             yonetici.requestWhenInUseAuthorization()       // devami: locationManagerDidChangeAuthorization
         case .denied, .restricted:
             hata(1, "Konum izni verilmedi. Ayarlar › LifeOS › Konum › «Uygulamayı Kullanırken».")
@@ -178,6 +184,7 @@ final class KonumKoprusu: NSObject, WKScriptMessageHandler, CLLocationManagerDel
 
     private func dur() {
         gpsIstendi = false
+        gelen = 0
         yonetici.stopUpdatingLocation()
         yonetici.allowsBackgroundLocationUpdates = false
     }
@@ -189,9 +196,13 @@ final class KonumKoprusu: NSObject, WKScriptMessageHandler, CLLocationManagerDel
         case .denied, .restricted: hata(1, "Konum izni verilmedi. Ayarlar › LifeOS › Konum.")
         default: break
         }
+        durumBildir()
     }
 
     func locationManager(_ m: CLLocationManager, didUpdateLocations l: [CLLocation]) {
+        let ilk = gelen == 0
+        gelen += l.count
+        if ilk && !l.isEmpty { durumBildir() }
         let noktalar = l.filter { $0.horizontalAccuracy >= 0 }.map(KonumKoprusu.js)
         guard !noktalar.isEmpty else { return }
         if !izleyenler.isEmpty || sahipsiz { kalici.ekle(noktalar) }
@@ -207,6 +218,44 @@ final class KonumKoprusu: NSObject, WKScriptMessageHandler, CLLocationManagerDel
     func locationManager(_ m: CLLocationManager, didFailWithError e: Error) {
         if (e as? CLError)?.code == .denied { hata(1, "Konum izni verilmedi.") }
         // locationUnknown gecicidir: servis denemeye devam eder.
+    }
+
+    // MARK: - durum (kullanici, 2026-10-05: «direk konum gelmiyor»)
+    //
+    // Telefonda ekranda yalniz «Konum bekleniyor…» vardi ve Ayarlar › LifeOS'ta
+    // Konum satiri hic yoktu: izin bile sorulmamisti, ama hangi halkada
+    // takildigi gorulemiyordu. Kopru artik durumunu sayfaya bildirir; SPI
+    // nedenini yazar (izin soruluyor · Konum Servisleri kapali · Kesin Konum
+    // kapali · GPS acik, ilk konum bekleniyor). Durum hic gelmezse sayfa
+    // «cevap vermedi» der: istek kopruye ulasmamistir.
+
+    func durumSozlugu(servis: Bool?) -> [String: Any] {
+        let izin: String
+        switch yonetici.authorizationStatus {
+        case .notDetermined: izin = izinIstendi ? "soruluyor" : "sorulmadi"
+        case .denied: izin = "reddedildi"
+        case .restricted: izin = "kisitli"
+        default: izin = "izinli"
+        }
+        var d: [String: Any] = [
+            "izin": izin,
+            "kesin": yonetici.accuracyAuthorization == .fullAccuracy,
+            "gps": gpsIstendi && izin == "izinli",
+            "gelen": gelen,
+        ]
+        if let s = servis { d["servis"] = s }
+        return d
+    }
+
+    private func durumBildir() {
+        // locationServicesEnabled ana is parcaciginda cagrilmaz (iOS uyarir).
+        DispatchQueue.global(qos: .utility).async { [weak self] in
+            let servis = CLLocationManager.locationServicesEnabled()
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.cagir("durumGeldi", [self.durumSozlugu(servis: servis)])
+            }
+        }
     }
 
     // MARK: - one / arkaya
@@ -269,7 +318,7 @@ final class KonumKoprusu: NSObject, WKScriptMessageHandler, CLLocationManagerDel
       if (window.__lifeosKonum) return;
       var h = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.lifeosKonum;
       if (!h) return;
-      var sira = 0, izleyen = {}, tek = {}, kurtaran = {};
+      var sira = 0, izleyen = {}, tek = {}, kurtaran = {}, sonDurum = null;
       var sayfa = Math.random().toString(36).slice(2) + Date.now().toString(36);
       function yolla(m){ m.sayfa = sayfa; try { h.postMessage(m); } catch (e) {} }
       function nesne(p){ var c = p.coords; return { timestamp: p.timestamp, coords: {
@@ -297,7 +346,10 @@ final class KonumKoprusu: NSObject, WKScriptMessageHandler, CLLocationManagerDel
         /* Asama 2b: sayfa acilinca telefondaki noktalari ister; depoya yazinca bildirir. */
         kurtar: function(devam, cb){ var id = ++sira; kurtaran[id] = cb; yolla({ tur: 'kurtar', id: id, devam: !!devam }); },
         kurtarildi: function(id, cevap){ var cb = kurtaran[id]; delete kurtaran[id]; if (cb) try { cb(cevap); } catch (e) {} },
-        yazildi: function(t){ if (typeof t === 'number' && isFinite(t)) yolla({ tur: 'yazildi', id: 0, t: t }); }
+        yazildi: function(t){ if (typeof t === 'number' && isFinite(t)) yolla({ tur: 'yazildi', id: 0, t: t }); },
+        /* Telefonun konum durumu (izin, kesinlik, servis, GPS); SPI nedenini yazar. */
+        durumGeldi: function(d){ sonDurum = d; try { window.dispatchEvent(new CustomEvent('lifeos-konum-durum', { detail: d })); } catch (e) {} },
+        durum: function(){ return sonDurum; }
       };
       try { Object.defineProperty(navigator, 'geolocation', { configurable: true, get: function(){ return geo; } }); } catch (e) {}
       window.LIFEOS_YEREL = Object.freeze({ konum: 'arka-plan' });

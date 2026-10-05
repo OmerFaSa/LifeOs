@@ -409,7 +409,7 @@ SP.Screens.move = (function(){
       return c.hata || (c.geriGeldi ? 'Sayfa kapandığı için kayıt durdu.' : 'Duraklatıldı; aradaki yol sayılmaz.');
     }
     if(c.hata) return c.hata;
-    if(!c.nokta) return 'Konum bekleniyor…';
+    if(!c.nokta) return c.bekleme || 'Konum bekleniyor…';
     return c.ekran === 'acik' || c.ekran === 'arka-plan' ? '' : 'Ekranı açık tut; kilitli ekranda konum gelmez.';
   }
   function canliDugmeleri(c){
