@@ -144,6 +144,13 @@
       /* Tek dosya (file://) ya da bilinmeyen bir sunucu: adres YOK. */
       expect(K.adres('spi', { protocol:'file:', hostname:'', port:'' })).toBe(null);
       expect(K.adres('spi', { protocol:'https:', hostname:'ornek.com', port:'' })).toBe(null);
+      /* Ev ağı (telefon, tablet; sistem/telefon.py PORTLAR): 5173/5183/5193
+         birbirini tanır. Önceden tanımıyordu: tablette sistem geçişi kapalıydı.
+         Merkez ev ağına açılmaz: adresi yok. */
+      const ev = { protocol:'https:', hostname:'192.168.0.10', port:'5183' };
+      expect(K.adres('ays', ev)).toBe('https://192.168.0.10:5173/');
+      expect(K.adres('esp', ev)).toBe('https://192.168.0.10:5193/');
+      expect(K.adres('mer', ev)).toBe(null);
 
       const d = yerlestir(K.modulMenusu({ modul:'ays', loc:tek }));
       const satir = Array.from(d.querySelectorAll('.kmenu__satir'));
@@ -318,6 +325,52 @@
       expect(d.querySelectorAll('.menusayfa .ust__sayac').length).toBe(1);
       expect(d.querySelector('.menusayfa__kapat').getAttribute('data-act')).toBe('toggle-sidebar');
       expect(d.querySelector('.menusayfa__ayak').textContent).toBe('ayak');
+      d.remove();
+    });
+
+    /* Kullanıcı (2026-10-05, telefondan): «modüller arasında geçiş
+       yapabileceğim bir yer yok». Masaüstünde kenardaydı; telefonda kenar
+       yok, Menü'de de yoktu. */
+    it('Menü: sistemler arası geçiş — bu sistem işaretli, ötekiler bağlantı', () => {
+      const tek = { protocol:'http:', hostname:'127.0.0.1', port:'4173' };
+      const d = yerlestir(K.menuSayfasi({ modul:'ays', loc:tek, yerel:false, cekmeceler:[] }));
+      const s = Array.from(d.querySelectorAll('.menusayfa__sistem'));
+      expect(s.map(x => x.textContent.trim())).toEqual(['AYS', 'SPİ', 'ESP', 'Merkez']);
+      expect(s[0].getAttribute('aria-current')).toBe('true');
+      expect(s[0].tagName).toBe('SPAN');
+      expect(s[1].getAttribute('href')).toBe('http://127.0.0.1:4183/');
+      expect(s[1].getAttribute('data-modul-gecis')).toBe('spi');
+      expect(d.querySelector('.menusayfa__sistemler').getAttribute('aria-label')).toBe('Sistemler');
+      d.remove();
+
+      /* iPhone uygulaması: Merkez (HKM) telefonda yok; bağlantısı gösterilmez. */
+      const u = yerlestir(K.menuSayfasi({ modul:'spi', loc:tek, yerel:true, cekmeceler:[] }));
+      expect(Array.from(u.querySelectorAll('.menusayfa__sistem')).map(x => x.textContent.trim())).toEqual(['AYS', 'SPİ', 'ESP']);
+      u.remove();
+
+      /* Ev ağı: Merkez yok, üç modül birbirine bağlı. */
+      const ev = yerlestir(K.menuSayfasi({ modul:'esp', loc:{ protocol:'https:', hostname:'192.168.0.10', port:'5193' }, yerel:false, cekmeceler:[] }));
+      expect(Array.from(ev.querySelectorAll('a.menusayfa__sistem')).map(x => x.getAttribute('href')))
+        .toEqual(['https://192.168.0.10:5173/', 'https://192.168.0.10:5183/']);
+      ev.remove();
+
+      /* Öteki sistemin adresi bilinmiyorsa (tek dosya) satır hiç çizilmez;
+         modül söylenmemişse de. */
+      const f = yerlestir(K.menuSayfasi({ modul:'ays', loc:{ protocol:'file:', hostname:'', port:'' }, cekmeceler:[] }));
+      expect(f.querySelector('.menusayfa__sistemler')).toBe(null);
+      f.remove();
+      const e = yerlestir(K.menuSayfasi({ cekmeceler:[] }));
+      expect(e.querySelector('.menusayfa__sistemler')).toBe(null);
+      e.remove();
+    });
+
+    /* Telefonda düğmeye basılı tutmak yazısını seçiyordu (kullanıcının
+       ekran görüntüsü: alt bantta «Bugün» seçili, tutamaçlarla). */
+    it('düğme ve alt bant yazısı basılı tutunca seçilmez', () => {
+      const d = yerlestir(K.altBant({ sekmeler:[{ id:'bugun', ad:'Bugün', route:'today', on:true }] }));
+      const b = d.querySelector('.altbant__sekme');
+      const st = getComputedStyle(b);
+      expect(st.userSelect === 'none' || st.webkitUserSelect === 'none').toBe(true);
       d.remove();
     });
 

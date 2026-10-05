@@ -363,7 +363,7 @@ SP.App = (function(){
   function menuHtml(sc){
     const aktif = UST[sc.id] || sc.id;
     const onay = onaySayisi();
-    return K.menuSayfasi({
+    return K.menuSayfasi({ modul:'spi',
       cekmeceler:sectionsGorunen().map(g => ({ id:g.id, ad:g.label, sayac:g.id === 'onaylar' ? onay : 0,
         bolumler:g.views.map(v => ({ route:v.route, ad:v.label, on:v.route === aktif })) })),
       ayak:storeHealthHtml(),

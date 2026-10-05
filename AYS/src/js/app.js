@@ -351,7 +351,7 @@ R.App = (function(){
   function menuHtml(sc){
     const aktif = UST[sc.id] || sc.id;
     const onay = onaySayisi();
-    return K.menuSayfasi({
+    return K.menuSayfasi({ modul:'ays',
       cekmeceler:navGorunen().map(g => ({ id:g.id, ad:g.label, sayac:g.id === 'onaylar' ? onay : 0,
         bolumler:g.items.map(v => ({ route:v.id, ad:v.label, on:v.id === aktif })) })),
       ayak:storeHealthHtml(),

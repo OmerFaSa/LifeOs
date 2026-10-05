@@ -116,14 +116,18 @@ window.LIFEOS = window.LIFEOS || {};
   /* Öteki sistemin adresi: yalnız tek sunucunun kapılarından biriyle
      açılmışsak bilinir. file:// ile açılmış tek dosyada, ya da başka bir
      sunucuda, adres UYDURULMAZ (AGENTS.md §1.7). */
+  /* Ev ağı kapıları (sistem/telefon.py PORTLAR): telefon ve tablet PC'ye
+     bunlarla, https ile girer. Merkez (HKM) ev ağına açılmaz. */
+  const EV_AGI = Object.freeze({ ays:5173, spi:5183, esp:5193 });
   function adres(k, loc){
     loc = loc || window.location;
     const m = MODULLER[k];
     if(!m || !loc || !/^https?:$/.test(loc.protocol || '')) return null;
     const kapi = Number(loc.port);
-    const bizim = SIRA.some(x => MODULLER[x].kapi === kapi);
-    if(!bizim) return null;
-    return loc.protocol + '//' + loc.hostname + ':' + m.kapi + '/';
+    const kok = loc.protocol + '//' + loc.hostname + ':';
+    if(SIRA.some(x => MODULLER[x].kapi === kapi)) return kok + m.kapi + '/';
+    if(Object.keys(EV_AGI).some(x => EV_AGI[x] === kapi)) return EV_AGI[k] ? kok + EV_AGI[k] + '/' : null;
+    return null;
   }
 
   /* Şimdi çizgisinin yeri: günün uyanık diliminde (varsayılan 06–24) oran. */
@@ -661,9 +665,33 @@ window.LIFEOS = window.LIFEOS || {};
       + simge('arti') + '</button>';
   }
 
+  /* Menü'nün başındaki sistem geçişi (kullanıcı, 2026-10-05, telefondan:
+     «modüller arasında geçiş yapabileceğim bir yer yok»). Masaüstünde
+     kenardadır; telefonda kenar yok. Bu sistem işaretli durur, ötekiler
+     bağlantıdır; adresi bilinmeyen sistem gösterilmez (uydurulmaz, gürültü
+     de olmaz). iPhone uygulamasında Merkez yoktur (HKM bilgisayarda). */
+  function sistemSecici(o){
+    const su = MODULLER[o.modul];
+    if(!su) return '';
+    const yerel = o.yerel != null ? !!o.yerel
+      : !!(typeof window !== 'undefined' && window.LIFEOS_YEREL);
+    const oge = k => '<i class="kenar__nokta kenar__nokta--' + k + '" aria-hidden="true"></i><span>' + kac(MODULLER[k].ad) + '</span>';
+    let baska = 0;
+    const satir = SIRA.map(k => {
+      if(k === o.modul) return '<span class="menusayfa__sistem is-on" aria-current="true">' + oge(k) + '</span>';
+      if(k === 'mer' && yerel) return '';
+      const url = adres(k, o.loc);
+      if(!url) return '';
+      baska++;
+      return '<a class="menusayfa__sistem" href="' + kac(url) + '" data-modul-gecis="' + k + '">' + oge(k) + '</a>';
+    }).join('');
+    return baska ? '<nav class="menusayfa__sistemler" data-oz="008" aria-label="Sistemler">' + satir + '</nav>' : '';
+  }
+
   /* Menü (telefonda alt bandın dördüncü sekmesi, dar masaüstünde üst
-     çubuğun menü düğmesi): sekiz çekmece ve bölümleri tek listede.
-     o: { cekmeceler:[{ id, ad, sayac, bolumler:[{ route, ad, on }] }], ayak(HTML) } */
+     çubuğun menü düğmesi): sistem geçişi, sekiz çekmece ve bölümleri tek
+     listede. o: { modul, loc, yerel, cekmeceler:[{ id, ad, sayac,
+     bolumler:[{ route, ad, on }] }], ayak(HTML) } */
   function menuSayfasi(o){
     o = o || {};
     const govde = (o.cekmeceler || []).map(c => '<section class="menusayfa__cekmece">'
@@ -676,6 +704,7 @@ window.LIFEOS = window.LIFEOS || {};
     return '<div class="menusayfa" role="dialog" aria-modal="true" aria-label="Menü">'
       + '<div class="menusayfa__bas"><b>Menü</b>'
       + '<button class="menusayfa__kapat" data-act="toggle-sidebar" aria-label="Menüyü kapat">' + simge('kapat') + '</button></div>'
+      + sistemSecici(o)
       + '<nav class="menusayfa__govde" aria-label="Bütün çekmeceler">' + govde + '</nav>'
       + (o.ayak ? '<div class="menusayfa__ayak">' + o.ayak + '</div>' : '')
       + '</div>';

@@ -44,6 +44,10 @@ button, input, select, textarea{
   color:inherit;
 }
 button{ cursor:pointer; }
+/* Telefonda düğmeye basılı tutmak yazısını seçmez (kullanıcının ekran
+   görüntüsü, 2026-10-05: alt bantta «Bugün» tutamaçlarla seçiliydi). Bir
+   düğmenin adını seçmek hiçbir işe yaramaz; içerik yazısı seçilebilir kalır. */
+button{ -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
 
 a{ color:var(--primary); text-decoration-thickness:1px; text-underline-offset:2px; }
 a:hover{ color:var(--primary-hover); }

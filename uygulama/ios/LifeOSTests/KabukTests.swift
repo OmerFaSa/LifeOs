@@ -72,6 +72,52 @@ final class KabukTests: XCTestCase {
         jsBekle(w, ifade, sure: sure)
     }
 
+    func testKoyuMu() {
+        XCTAssertTrue(KabukDenetleyici.koyuMu(0, 0, 0))
+        XCTAssertTrue(KabukDenetleyici.koyuMu(18, 18, 20))         // grafit koyu tema (#121214)
+        XCTAssertFalse(KabukDenetleyici.koyuMu(255, 255, 255))
+        XCTAssertFalse(KabukDenetleyici.koyuMu(242, 242, 247))     // açık tema yüzeyi (#F2F2F7)
+    }
+
+    private func renkBekle(_ d: KabukDenetleyici, _ r: Int, _ g: Int, _ b: Int, sure: TimeInterval = 10) -> Bool {
+        let son = Date().addingTimeInterval(sure)
+        func tamam() -> Bool { d.ustRenk?.r == r && d.ustRenk?.g == g && d.ustRenk?.b == b }
+        while !tamam() && Date() < son { RunLoop.current.run(until: Date().addingTimeInterval(0.1)) }
+        return tamam()
+    }
+
+    /// Kullanici (2026-10-05, telefondan): kaydirinca icerik saatin arkasindan
+    /// akiyor, gizli «Iceriye atla» baglantisi saatin ustunde gorunuyordu.
+    /// Sayfa artik durum cubugunun altindan baslar; serit sayfanin en ustteki
+    /// rengini alir, yazisi zemine gore acik ya da koyu olur.
+    func testSayfaDurumCubugununAltindanBaslarSeritSayfaRenginde() throws {
+        let d = KabukDenetleyici()
+        let p = UIWindow(frame: UIScreen.main.bounds)
+        p.rootViewController = d
+        p.makeKeyAndVisible()
+        d.loadViewIfNeeded()
+        d.web.load(URLRequest(url: URL(string: "http://127.0.0.1:4183/")!))
+        XCTAssertEqual(bekle(d.web, "!!(document.querySelector('.site') && window.SP)") as? Bool, true, "SPİ açılmadı")
+        d.view.layoutIfNeeded()
+        XCTAssertGreaterThan(d.view.safeAreaInsets.top, 0, "simülatörde durum çubuğu bölgesi yok")
+        XCTAssertEqual(d.web.frame.minY, d.view.safeAreaInsets.top, accuracy: 0.5, "sayfa durum çubuğunun altından başlamalı")
+        XCTAssertEqual(d.web.frame.maxY, d.view.bounds.maxY, accuracy: 0.5)
+
+        let son = Date().addingTimeInterval(10)
+        while d.ustRenk == nil && Date() < son { RunLoop.current.run(until: Date().addingTimeInterval(0.1)) }
+        XCTAssertNotNil(d.ustRenk, "sayfanın üst rengi gelmedi")
+
+        jsCalistir(d.web, "var s = document.createElement('div'); s.id = '__serit';"
+            + " s.style.cssText = 'position:fixed;top:0;left:0;right:0;height:40px;z-index:2147483647;background:#fff';"
+            + " document.body.appendChild(s);")
+        XCTAssertTrue(renkBekle(d, 255, 255, 255), "üst şerit sayfanın rengini almadı")
+        XCTAssertEqual(d.preferredStatusBarStyle, .darkContent, "açık zeminde koyu yazı")
+        jsCalistir(d.web, "document.getElementById('__serit').style.background = '#000';")
+        XCTAssertTrue(renkBekle(d, 0, 0, 0), "renk değişince şerit izlemedi")
+        XCTAssertEqual(d.preferredStatusBarStyle, .lightContent, "koyu zeminde açık yazı")
+        jsCalistir(d.web, "document.getElementById('__serit').remove();")
+    }
+
     /// Uc modul uygulamanin icinde acilir; koken guvenli (kamera ve konum buna bagli).
     func testUcModulAcilirVeKokenGuvenli() throws {
         let uygulama = try XCTUnwrap(UIApplication.shared.delegate as? Uygulama)
