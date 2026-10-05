@@ -823,16 +823,12 @@ window.LIFEOS.HESAP = (function(){
 
   /* Şifre alanı: göster/gizle, büyük harf kilidi uyarısı ve (yeni
      şifrede) güç çubuğu. Güç yalnız ipucudur; sunucu uzunluğa bakar. */
-  /* gonder: alanın içinde «→» gönder düğmesi (kilit ekranı girişi). */
-  function sifreAlani(id, etiket, ac, guc, gonder){
-    return '<label class="hesap__alan' + (gonder ? ' hesap__alan--tek' : '') + '" for="' + id + '"><span>' + kac(etiket) + '</span>'
-      + '<span class="hesap__sifre' + (gonder ? ' hesap__sifre--gonder' : '') + '"><input id="' + id + '" type="password" autocomplete="'
-      + ac + '" required' + (ac === 'new-password' ? ' minlength="8"' : '') + (gonder ? ' placeholder="' + kac(etiket) + '"' : '')
-      + ' data-sifre/>'
+  function sifreAlani(id, etiket, ac, guc){
+    return '<label class="hesap__alan" for="' + id + '"><span>' + kac(etiket) + '</span>'
+      + '<span class="hesap__sifre"><input id="' + id + '" type="password" autocomplete="' + ac + '" required'
+      + (ac === 'new-password' ? ' minlength="8"' : '') + ' data-sifre/>'
       + '<button type="button" class="hesap__goster" data-hesap="goster" aria-label="Şifreyi göster" aria-pressed="false">'
-      + ikon('goz') + '</button>'
-      + (gonder ? '<button type="submit" class="hesap__ileri" aria-label="Giriş yap">' + ikon('ileri') + '</button>' : '')
-      + '</span>'
+      + ikon('goz') + '</button></span>'
       + (guc ? '<span class="hesap__guc" data-guc="0" hidden><i></i><i></i><i></i><small></small></span>' : '')
       + '</label>';
   }
@@ -957,47 +953,27 @@ window.LIFEOS.HESAP = (function(){
       + '<g><rect x="17" y="17" width="12" height="12" rx="3" fill="#9A86FF"/></g></svg>';
   }
 
-  /* KİLİT EKRANI (depo sahibi, 2026-10-05: «giriş kısmına bir anasayfa»,
-     «üst düzey», sonra «daha farklı, daha enteresan»). Telefonun kilit
-     ekranı gibi: günün saatine göre değişen duvar kağıdı (sabah, gün,
-     akşam, gece — dört sistemin renklerinden), büyük saat ve tarih, dört
-     sistemin cam simgesi; altta hesaplar yuvarlak monogramlarla. Bir
-     hesaba dokununca Mac'in giriş ekranı gibi yalnız şifre sorulur. Saat
-     gerçek bilgidir (10 sn'de bir tazelenir); sürekli oynayan süs yok. */
+  /* ANA SAYFA (depo sahibi, 2026-10-05: «giriş kısmına bir anasayfa;
+     güzel bir giriş»). Kartın yanında (telefonda üstünde) tek ekranlık
+     tanıtım: işaret, tek cümle, dört sistem, üç söz. Kaydırma yok;
+     telefonda form açılınca tanıtım çekilir, form tek işe kalır. */
   const SISTEMLER = [
     ['AYS', 'Sınav hazırlığı', '<rect x="5" y="5" width="14" height="14" rx="3.5"/>', '#4F86FF'],
     ['SPİ', 'Sağlık ve toparlanma', '<circle cx="12" cy="12" r="7.5"/>', '#2EC4A9'],
     ['ESP', 'Dil, müzik, okuma', '<rect x="6.6" y="6.6" width="10.8" height="10.8" rx="2.4" transform="rotate(45 12 12)"/>', '#F2A93B'],
     ['Merkez', 'Günün özeti', '<path d="M12 4.3 18.8 8.2v7.6L12 19.7 5.2 15.8V8.2z"/>', '#9A86FF'],
   ];
-  const SOZLER = ['PC, telefon ve tablet aynı hesapla', 'Verin hiçbir şirkete gitmez', 'Bilgisayar kapalıyken de çalışır'];
-  const GUNLER = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
-  let saatId = null;
-  function vakit(h){ return h >= 5 && h < 11 ? 'sabah' : h >= 11 && h < 17 ? 'gun' : h >= 17 && h < 21 ? 'aksam' : 'gece'; }
-  function selamla(){
-    return { sabah:'Günaydın', gun:'İyi günler', aksam:'İyi akşamlar', gece:'İyi geceler' }[vakit(new Date(ortam.simdi()).getHours())];
-  }
-  function saatCiz(){
-    const kok = typeof document !== 'undefined' && document.querySelector('[data-hesap-kapi]');
-    if(!kok) return;
-    const d = new Date(ortam.simdi());
-    const saat = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-    const tarih = d.getDate() + ' ' + AYLAR[d.getMonth()] + ' ' + GUNLER[d.getDay()];
-    const s = kok.querySelector('.hesap-kapi__saat'), t = kok.querySelector('.hesap-kapi__tarih');
-    if(s && s.textContent !== saat) s.textContent = saat;
-    if(t && t.textContent !== tarih) t.textContent = tarih;
-    const v = vakit(d.getHours());
-    if(kok.getAttribute('data-vakit') !== v) kok.setAttribute('data-vakit', v);
-  }
+  const SOZLER = ['PC, telefon ve tablet aynı hesapla', 'Verin hiçbir şirketin sunucusuna gitmez',
+    'Bilgisayar kapalıyken de çalışır'];
   function tanitimHtml(){
-    return '<header class="hesap-kapi__ust">' + isaret(true) + '<p class="hesap-kapi__ad">LifeOS</p>'
-      + '<span class="hesap-kapi__rozet">Beta</span></header>'
-      + '<section class="hesap-kapi__tanitim" aria-label="LifeOS">'
-      + '<div class="hesap-kapi__zaman"><p class="hesap-kapi__tarih"></p><p class="hesap-kapi__saat"></p></div>'
+    return '<section class="hesap-kapi__tanitim" aria-label="LifeOS">' + isaret(true)
+      + '<p class="hesap-kapi__ad">LifeOS</p>'
+      + '<p class="hesap-kapi__slogan">Sınav, sağlık ve gelişim tek yerde.</p>'
       + '<ul class="hesap-kapi__sistemler">' + SISTEMLER.map(([ad, acik, sekil, renk], i) =>
-          '<li style="--renk:' + renk + ';--sira:' + i + '"><i aria-hidden="true"><svg viewBox="0 0 24 24">' + sekil + '</svg></i>'
-          + '<b>' + kac(ad) + '</b><span class="hesap-gizli">' + kac(acik) + '</span></li>').join('') + '</ul>'
-      + '</section>';
+          '<li style="--renk:' + renk + ';--sira:' + i + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + sekil + '</svg>'
+          + '<b>' + kac(ad) + '</b><span>' + kac(acik) + '</span></li>').join('') + '</ul>'
+      + '<ul class="hesap-kapi__sozler">' + SOZLER.map(x => '<li>' + ikon('tamam') + '<span>' + kac(x) + '</span></li>').join('')
+      + '</ul></section>';
   }
 
   function karsilaGovde(){
@@ -1007,7 +983,7 @@ window.LIFEOS.HESAP = (function(){
       ? '<ul class="hesap-kapi__hesaplar" aria-label="Bu cihazdaki hesaplar">' + l.map(x =>
           '<li class="hesap-kapi__hesap">'
           + '<button type="button" class="hesap-kapi__hesap-sec" data-hesap="hatirla" data-ad="' + kac(x.a) + '">'
-          +   avatar(x.g || x.a, x.k, 72)
+          +   avatar(x.g || x.a, x.k, 40)
           +   '<span class="hesap-kapi__hesap-ad"><b>' + kac(x.g || x.a) + '</b><small>@' + kac(x.a) + '</small></span></button>'
           + '<button type="button" class="hesap-kapi__unut" data-hesap="unut" data-ad="' + kac(x.a) + '"'
           +   ' aria-label="' + kac('«' + x.a + '» hesabını bu cihazdan unut') + '" title="Bu cihazdan unut">' + ikon('kapat') + '</button>'
@@ -1023,7 +999,7 @@ window.LIFEOS.HESAP = (function(){
         + ' data-hesap="gorunum" data-gorunum="kayit">Hesap oluştur</button>');
     }
     return '<div class="hesap-kapi__marka hesap-kapi__marka--ana">'
-      + '<h1 class="hesap-kapi__baslik" id="hesap-kapi-baslik">' + selamla() + '</h1>'
+      + '<h1 class="hesap-kapi__baslik" id="hesap-kapi-baslik">Hoş geldin</h1>'
       + '<p class="hesap-kapi__alt">' + (kurulum ? 'İlk hesabı aç, dört sistem birlikte açılsın.'
         : l.length ? 'Hesabını seç, kaldığın yerden devam et.' : 'Tek hesap, dört sistem.') + '</p></div>'
       + (not ? '<p class="hesap__not hesap-kapi__not">' + kac(not) + '</p>' : '')
@@ -1078,17 +1054,16 @@ window.LIFEOS.HESAP = (function(){
     const bas = s
       ? '<button type="button" class="hesap-kapi__geri" data-hesap="gorunum" data-gorunum="karsila" aria-label="Ana menüye dön">'
         + ikon('geri') + '</button>'
-        + '<div class="hesap-kapi__marka">' + avatar(s.g || s.a, s.k, 96)
+        + '<div class="hesap-kapi__marka">' + avatar(s.g || s.a, s.k, 64)
         + '<h1 class="hesap-kapi__baslik" id="hesap-kapi-baslik">' + kac(s.g || s.a) + '</h1>'
         + '<p class="hesap-kapi__alt">@' + kac(s.a) + '</p></div>'
       : kapiBaslik('Giriş yap', '');
-    /* Hatırlanan hesapta Mac'in giriş ekranı gibi: yalnız şifre, içinde «→». */
     return bas
       + '<form class="hesap__form" data-hesap-form="giris" data-ayar-disi>' + adresAlani()
       + (s ? '<input id="hesap-ad" type="hidden" autocomplete="username" value="' + kac(s.a) + '"/>'
         : alanHtml('hesap-ad', 'Kullanıcı adı', 'text', 'autocomplete="username" ' + AD_EK))
-      + sifreAlani('hesap-parola', 'Şifre', 'current-password', false, !!s)
-      + CAPS + mesaj + (s ? '' : ana('Giriş yap')) + '</form>'
+      + sifreAlani('hesap-parola', 'Şifre', 'current-password')
+      + CAPS + mesaj + ana('Giriş yap') + '</form>'
       + '<div class="hesap-kapi__baglar">'
       +   '<button type="button" class="hesap-kapi__bag" data-hesap="unuttum">Şifremi unuttum</button>'
       +   (s ? '<button type="button" class="hesap-kapi__bag" data-hesap="gorunum" data-gorunum="giris">Başka hesap</button>' : '')
@@ -1109,11 +1084,7 @@ window.LIFEOS.HESAP = (function(){
     kart.innerHTML = '<div class="hesap-kapi__ic' + (yon ? ' is-' + yon : '') + '">' + kapiGovde() + '</div>';
     kapi.ilk = false;
     const kok = kart.closest('[data-hesap-kapi]');
-    if(kok){
-      kok.classList.toggle('is-form', kapi.gorunum !== 'karsila');
-      kok.classList.toggle('is-secili', kapi.gorunum === 'giris' && !!kapi.secili);
-      saatCiz();
-    }
+    if(kok) kok.classList.toggle('is-form', kapi.gorunum !== 'karsila');
     const sonra = once ? kart.offsetHeight : 0;
     if(once && sonra && Math.abs(once - sonra) > 2){
       kart.style.height = once + 'px';
@@ -1146,12 +1117,9 @@ window.LIFEOS.HESAP = (function(){
       el.setAttribute('aria-labelledby', 'hesap-kapi-baslik');
       el.setAttribute('data-hesap-panel', '');
       el.setAttribute('data-hesap-kapi', '');
-      el.innerHTML = '<div class="hesap-kapi__sahne">' + tanitimHtml()
-        + '<div class="hesap-kapi__panel"><div class="hesap-kapi__kart" tabindex="-1"></div></div>'
-        + '<ul class="hesap-kapi__sozler">' + SOZLER.map(x => '<li>' + kac(x) + '</li>').join('') + '</ul></div>';
+      el.innerHTML = '<div class="hesap-kapi__sahne">' + tanitimHtml() + '<div class="hesap-kapi__kart" tabindex="-1"></div></div>';
       document.body.appendChild(el);
       document.documentElement.classList.add('hesap-kapi-acik');
-      if(saatId == null && typeof setInterval === 'function') saatId = setInterval(saatCiz, 10000);
     }
     kapiTazele();
   }
@@ -1160,7 +1128,6 @@ window.LIFEOS.HESAP = (function(){
     const el = document.querySelector('[data-hesap-kapi]');
     if(el) el.remove();
     document.documentElement.classList.remove('hesap-kapi-acik');
-    if(saatId != null){ clearInterval(saatId); saatId = null; }
   }
 
   /* ------------------------------------------------------- hesap işleri (sayfa)
