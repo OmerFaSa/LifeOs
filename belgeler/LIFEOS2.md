@@ -45,14 +45,25 @@
 
 ## 3. Bilerek bekleyenler — karar kullanıcıyla verilecek
 
+> 2026-10-05 düzeltmesi: bu tablo 2026-09-23'teki Hedef motoru turlarından
+> sonra güncellenmemişti; «bekliyor» dediği beş parçanın dördü kodda vardı ve
+> bir oturum hedef motorunu yeniden önerdi (AGENTS.md §5.1). Biten parçalar
+> aşağıdaki ikinci tabloya taşındı. Bir satırı «bekliyor» diye yazmadan önce
+> kodda ara.
+
 | Parça | Neden bekliyor | Ne gerekiyor |
 |---|---|---|
-| **Hedef motoru** (Planlama Ofisi) | «TYT Matematiği 100 günde», «6 ayda 5 kg», «gitar 6 ay» — hedefin nasıl ölçüleceği kullanıcıyla tasarlanacak | hedef türleri, ilerleme ölçüsü, plan farkı (5 eklenecek / 3 taşınacak) |
-| **Sınav profilleri** (KPSS, DGS, LGS) | müfredat ve puanlama resmî kaynaktan doğrulanmadan yazılamaz; uydurulmuş müfredat en tehlikeli hata olur | hangi sınavlar, hangi yıl, kaynak |
-| **Sağlık hedef planları** | hedef motorunun SPİ yüzü; klinik değerlerde teşhis/doz sınırı korunmalı | hedef motoru ile birlikte |
+| **Sınav profillerinin resmî kaynağı** (KPSS, DGS, ALES…) | mekanizma var (`AYS core/sinavprofil.js`: müfredat BAM raporu olarak teklif gelir, AYS yeniden doğrular), ama kaynaksız profil «doğrulanmadı» kalır ve puanlama yoktur; uydurulmuş müfredat en tehlikeli hata olur | hangi sınav, hangi yıl, resmî kaynak; puanlama için resmî formül |
 | **İnternetten araştırma** | Araştırma Ofisi bugün modelin bilgisiyle çalışır ve her kaydı «doğrulanmadı» işaretler | arama sağlayıcısı ve bütçe kararı |
-| **ESP'ye materyal** | ESP'nin dil desteleri henüz `material.add` almıyor | ESP'de kart içe alma sözleşmesi |
-| **Ortak sunucu ve senkron** | tek kullanıcı, tek cihaz + HKM bugün yetiyor | çok cihaz ihtiyacı doğarsa |
+
+**Bekliyor sanılıp yapılmış olanlar** (ayrıntı kendi dosyasında):
+
+| Parça | Nerede | Ne zaman |
+|---|---|---|
+| Hedef motoru (genel çerçeve, kapasite, plan) | `brand/ortak/hedef.js`; AYS `core/hedefler.js` + `hedefplan.js` (konu bitirme, net hedefi), ESP `core/hedefler.js` (dil CEFR, okuma…), hedef ağı `brand/ortak/hedefag.js` → HKM zaman bütçesi | 2026-09-23 (1bfc69fd, Tur 1–4) |
+| Sağlık hedef planları | SPİ `core/hedefler.js` (kilo/VKİ, güvenlik kapısı, hekim kapısı ve talimatı) + `core/plan.js` | 2026-09-23 (efb1bbc2) |
+| ESP'ye materyal | ESP `core/beacon.js` `materyalUygula`: BAM seti dil ve tarih destesine kart olarak | 2026-09-23 (b4026b81) |
+| Ortak sunucu ve senkron | `sistem/hesap.py`, `brand/ortak/hesap.js`: PC, telefon ve tablet aynı hesapla; veri kullanıcının PC'sinde | 2026-10-04 (e7972a6c) |
 
 ## 4. Değişmeyen sözler
 
