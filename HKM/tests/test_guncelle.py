@@ -373,6 +373,7 @@ def run():
         for h in (sunucu.giris_html(), sunucu.giris_html(telefon=True)):
             ok("html:not(.giris-hazir) .sarmal{ visibility:hidden;" in h)      # karar gelene dek gizli
             ok("@keyframes giris-yedek" in h)                                   # betik yoksa kendiliginden
+            ok("html.hesap-kapi-acik .sarmal{ visibility:hidden; }" in h)       # kapi belirirken kartlar arkadan gorunmez
             ok("animation:giris-gel" in h)
             for a in ("ays", "spi", "esp"):
                 ok('data-ozet="%s"' % a in h, a)                               # minik ozet yuvasi

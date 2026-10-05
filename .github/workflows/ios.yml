@@ -10,6 +10,11 @@ on:
     branches: [main]
     paths:
       - 'uygulama/ios/**'
+      # Telefonun giris sayfasi derlemede buradan uretilir (hazirla.py giris_html).
+      - 'sistem/sunucu.py'
+      - 'brand/ortak/hesap.js'
+      - 'brand/ortak/hesap.css'
+      - 'brand/ortak/animasyon.js'
       - 'AYS/dist/**'
       - 'SPI/dist/**'
       - 'ESP/dist/**'

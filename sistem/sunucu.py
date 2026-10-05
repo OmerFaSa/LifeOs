@@ -418,6 +418,11 @@ button{ font:inherit; }
    Betik yuklenemezse 1,5 sn sonra kendiliginden gorunur. */
 html:not(.giris-hazir) .sarmal{ visibility:hidden; animation:giris-yedek 0s 1.5s forwards; }
 @keyframes giris-yedek{ to{ visibility:visible; } }
+/* Giris ekrani acikken secim sayfasi gizli: ekran saydamdan belirirken
+   kartlar arkasindan goruluyordu (2026-10-06, PC acilisi: 119-191 ms'de
+   8 karede kapi %0-37 opakken kartlar gorunur). Kapi cekilince kartlar
+   sirayla belirir. */
+html.hesap-kapi-acik .sarmal{ visibility:hidden; }
 /* BELIRME: giris ekrani yokken (acilis, beta girisi, giris) once yer, sonra
    yazi; sirayla, sakin baslayarak. */
 html.giris-hazir:not(.hesap-kapi-acik) :is(.ust, .guncel, .bolum, .kart){
