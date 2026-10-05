@@ -52,10 +52,19 @@
       anne:{ parola:'parola-456', rol:'uye' } }, jetonlar:{}, oturumlar:{}, kayit:{}, sira:0, oturumSira:0,
       kurulum:false, kayitAcik:true, istekler:[], kapali:false, yok:false }, o || {});
     const cevap = (kod, v) => ({ ok:kod < 300, status:kod, json:async () => v });
+    s.kimlikSira = s.kimlikSira || 0;
+    const kimlik = k => k.kimlik || (k.kimlik = (++s.kimlikSira).toString(16).padStart(16, '0'));
     const profil = ad => {
       const k = s.kullanicilar[ad], plan = k.plan || 'ucretsiz';
       return { id:Object.keys(s.kullanicilar).indexOf(ad) + 1, ad, rol:k.rol, gorunen_ad:k.gorunen_ad || ad,
-        renk:k.renk || 'mavi', plan, plan_ad:(PLANLAR.find(p => p.id === plan) || PLANLAR[0]).ad, olusturma:'2026-10-05T10:00:00' };
+        renk:k.renk || 'mavi', plan, plan_ad:(PLANLAR.find(p => p.id === plan) || PLANLAR[0]).ad, olusturma:'2026-10-05T10:00:00',
+        kimlik:kimlik(k), dogum:k.dogum || '', hitap:k.hitap || '', eposta:k.eposta || '' };
+    };
+    /* Hesabı sunucuda sil / aynı adla yeniden aç (başka cihazdan yapılmış gibi). */
+    s.silKullanici = ad => {
+      delete s.kullanicilar[ad];
+      Object.keys(s.jetonlar).forEach(j => { if(s.jetonlar[j] === ad){ delete s.jetonlar[j]; delete s.oturumlar[j]; } });
+      Object.keys(s.kayit).forEach(x => { if(x.indexOf(ad + '|') === 0) delete s.kayit[x]; });
     };
     const oturumAc = (ad, on, govde) => {
       const j = 'jeton-' + on + Object.keys(s.jetonlar).length + '-gizli';
@@ -108,7 +117,25 @@
         const k = s.kullanicilar[ad];
         if(govde.gorunen_ad != null) k.gorunen_ad = String(govde.gorunen_ad).trim() || null;
         if(govde.renk != null) k.renk = govde.renk;
+        ['dogum', 'hitap', 'eposta'].forEach(a => { if(govde[a] != null) k[a] = String(govde[a]).trim(); });
         return cevap(200, { kullanici:profil(ad) });
+      }
+      if(yol === '/api/hesap/etkinlik') return cevap(200, { olaylar:s.olaylar || [] });
+      if(yol === '/api/hesap/disa'){
+        const alanlar = {};
+        Object.keys(s.kayit).filter(x => x.indexOf(ad + '|') === 0).forEach(x => {
+          const t = s.kayit[x], a = x.slice(ad.length + 1);
+          Object.keys(t).forEach(y => { if(t[y].d !== null) (alanlar[a] = alanlar[a] || {})[y] = t[y].d; });
+        });
+        return cevap(200, { lifeos_hesap:4, kullanici:profil(ad), alanlar });
+      }
+      if(yol === '/api/hesap/sil'){
+        if(s.kullanicilar[ad].parola !== govde.parola) return cevap(401, { hata:'Şifre yanlış.' });
+        s.silKullanici(ad);
+        return cevap(200, { ok:true });
+      }
+      if(yol === '/api/hesap/yasiyor'){
+        return cevap(200, { var:Object.values(s.kullanicilar).some(k => k.kimlik === govde.kimlik) });
       }
       if(yol === '/api/hesap/cihazlar'){
         return cevap(200, { cihazlar:Object.keys(s.oturumlar).filter(j => s.jetonlar[j] === ad)
@@ -742,6 +769,21 @@
       expect(kapi().querySelector('form')).toBeNull();
     }));
 
+    it('ana sayfa: dört sistem ve üç söz; form açılınca tanıtım çekilir', () => sahneyle(async () => {
+      const srv = sunucuKur(), c = cihazKur(srv);
+      sahne(c);
+      await hazir();
+      const t = kapi().querySelector('.hesap-kapi__tanitim');
+      ['AYS', 'SPİ', 'ESP', 'Merkez'].forEach(x => expect(t.textContent).toContain(x));
+      expect(t.querySelectorAll('.hesap-kapi__sozler li').length).toBe(3);
+      expect(kapi().querySelector('h1').textContent).toBe('Hoş geldin');
+      expect(kapi().classList.contains('is-form')).toBe(false);
+      git('giris');
+      expect(kapi().classList.contains('is-form')).toBe(true);
+      git('karsila');
+      expect(kapi().classList.contains('is-form')).toBe(false);
+    }));
+
     it('beta girişi ekranı kapatır, oturumluk çerez yazar, yeniden çıkmaz', () => sahneyle(async () => {
       const srv = sunucuKur(), c = cihazKur(srv);
       let h = sahne(c);
@@ -984,6 +1026,102 @@
       expect(h.durum().bekleyen).toBe(1);
     }));
 
+    it('özet şeridi: ölçülmemiş sayı «—», sunucu cevabıyla sayı', () => sahneyle(async () => {
+      const { h, srv } = await girisli();
+      srv.kapali = true;
+      await h.merkezAc();
+      expect(merkez().querySelector('.hesap-sayilar').textContent).toContain('—');
+      h.merkezKapat();
+      srv.kapali = false;
+      srv.yaz('omer', 'spi/ben', 'a', { x:1 }, 5);
+      srv.ozet = { 'spi/ben':1 };
+      const ben = srv.fetch;
+      srv.fetch = async (u, o) => {
+        const c = await ben(u, o);
+        if(!/\/ben$/.test(u)) return c;
+        const v = await c.json();
+        v.ayrinti = { 'spi/ben':{ n:1240, bayt:2048, son:1700000000000 } };
+        return { ok:true, status:200, json:async () => v };
+      };
+      h._ortam.fetch = srv.fetch;
+      await h.merkezAc();
+      const t = merkez().querySelector('.hesap-sayilar').textContent;
+      expect(t).toContain('1.240');
+      expect(t.indexOf('—') < 0).toBe(true);
+    }));
+
+    it('kişisel bilgiler kaydedilir, çereze hitap ve doğum günü iner; sunucu yokken alanlar çizilmez', () => sahneyle(async () => {
+      const { h, srv } = await girisli();
+      srv.kapali = true;
+      await h.merkezAc('profil');
+      expect(document.getElementById('hesap-hitap')).toBeNull();          // boş form var olanı silmesin
+      h.merkezKapat();
+      srv.kapali = false;
+      srv.kullanicilar.omer.eposta = 'omer@ornek.com';
+      await h.merkezAc('profil');
+      expect(document.getElementById('hesap-eposta').value).toBe('omer@ornek.com');
+      document.getElementById('hesap-hitap').value = 'Ömer';
+      document.getElementById('hesap-dogum').value = '1999-04-23';
+      merkez().querySelector('[data-hesap-form="profil"]').requestSubmit();
+      await hazir();
+      expect(srv.kullanicilar.omer.hitap).toBe('Ömer');
+      expect(srv.kullanicilar.omer.eposta).toBe('omer@ornek.com');           // dokunulmayan kaldı
+      expect(h.durum().oturum.hitap).toBe('Ömer');
+      expect(h.durum().oturum.dogum_gun).toBe('04-23');
+    }));
+
+    it('etkinlik: yanlış denemeler işaretli, üstte uyarı, kökte sayı', () => sahneyle(async () => {
+      const { h, srv, c } = await girisli();
+      const simdi = c.ortam.simdi();
+      srv.olaylar = [
+        { tur:'giris', cihaz_ad:'iPhone', ip:'192.168.0.23', ayrinti:'', zaman:simdi - 1000 },
+        { tur:'yanlis', cihaz_ad:'iPhone', ip:'192.168.0.23', ayrinti:'', zaman:simdi - 2000 },
+        { tur:'yanlis', cihaz_ad:'Cihaz', ip:'192.168.0.99', ayrinti:'', zaman:simdi - 3000 },
+        { tur:'kayit', cihaz_ad:'Windows PC', ip:'127.0.0.1', ayrinti:'', zaman:simdi - 9 * 86400000 },
+      ];
+      await h.merkezAc();
+      expect(merkez().querySelector('[data-sayfa="etkinlik"]').textContent).toContain('2 yanlış deneme');
+      tikla('[data-sayfa="etkinlik"]');
+      await hazir();
+      expect(merkez().querySelector('.hesap-uyari').textContent).toContain('2 yanlış deneme');
+      expect(merkez().querySelectorAll('.hesap-olay.is-dikkat').length).toBe(2);
+      expect(merkez().textContent).toContain('192.168.0.99');
+      expect(merkez().querySelectorAll('.hesap-olay').length).toBe(4);
+    }));
+
+    it('verin: indir dosyayı verir; sil onay ve şifre ister; silince oturum, bağ ve hatırlanan gider', () => sahneyle(async () => {
+      const { h, srv, c } = await girisli();
+      const verilen = [];
+      h._ortam.indir = (ad, metin) => { verilen.push([ad, JSON.parse(metin)]); };
+      c.depo.yaz('vitals/2026-10-05', { sleep:7 });
+      await h.esitle();
+      await h.merkezAc('verin');
+      tikla('[data-hesap="indir"]');
+      await hazir();
+      expect(verilen.length).toBe(1);
+      expect(verilen[0][0]).toContain('lifeos-hesap-omer-');
+      expect(verilen[0][1].alanlar['spi/ben']['vitals/2026-10-05']).toEqual({ sleep:7 });
+      expect(merkez().textContent).toContain('hazır');
+      expect(srv.kullanicilar.omer).toBeTruthy();
+      tikla('[data-hesap="sil-ac"]');
+      expect(srv.kullanicilar.omer).toBeTruthy();                             // onaysız silinmez
+      document.getElementById('hesap-sil-sifre').value = 'yanlis';
+      merkez().querySelector('[data-hesap-form="sil"]').requestSubmit();
+      await hazir();
+      expect(merkez().querySelector('[data-hesap-form="sil"] .hesap__mesaj').textContent).toContain('yanlış');
+      expect(srv.kullanicilar.omer).toBeTruthy();
+      document.getElementById('hesap-sil-sifre').value = 'parola-123';
+      merkez().querySelector('[data-hesap-form="sil"]').requestSubmit();
+      await hazir();
+      expect(srv.kullanicilar.omer).toBe(undefined);
+      expect(h.merkezAcikMi()).toBe(false);
+      expect(h.durum().oturum).toBeNull();
+      expect(h.kapiAcikMi()).toBe(true);
+      expect(h.hatirlananlar().length).toBe(0);
+      expect(c.depo.veri['vitals/2026-10-05']).toEqual({ sleep:7 });           // cihazdaki veri kaldı
+      expect(c.ls['lifeos.hesap.sahip.spi/ben']).toBe(undefined);              // bağ çözüldü
+    }));
+
     it('oturum başka cihazdan kapatıldıysa sayfa kapanır, giriş ekranı gelir', () => sahneyle(async () => {
       const { h, srv } = await girisli();
       Object.keys(srv.jetonlar).forEach(j => { delete srv.jetonlar[j]; });
@@ -991,6 +1129,44 @@
       expect(h.merkezAcikMi()).toBe(false);
       expect(h.durum().oturum).toBeNull();
       expect(h.kapiAcikMi()).toBe(true);
+    }));
+  });
+
+  describe('Hesap — silinen hesap cihazı kilitlemez (söz 13)', () => {
+    it('aynı adla yeniden açılan hesaba cihazdaki veri ilk eşitlemeyle gider', () => sahneyle(async () => {
+      const srv = sunucuKur(), c = cihazKur(srv, { veri:{ profile:{ name:'ben' }, 'vitals/1':{ sleep:7 } } });
+      const h = sahne(c);
+      await hazir();
+      await h.girisYap('omer', 'parola-123');
+      await h.esitle();
+      expect(srv.oku('omer', 'spi/ben', 'vitals/1')).toEqual({ sleep:7 });
+      srv.silKullanici('omer');                                                 // başka cihazdan silindi
+      srv.kullanicilar.omer = { parola:'parola-999', rol:'admin' };              // aynı adla yeniden açıldı
+      await h.esitle();                                                         // eski oturum: 401
+      await h.girisYap('omer', 'parola-999');
+      await h.esitle();
+      await h.esitle();
+      expect(h.durum().durum).toBe('tamam');
+      expect(srv.oku('omer', 'spi/ben', 'vitals/1')).toEqual({ sleep:7 });       // yeni hesaba gitti
+      expect(srv.oku('omer', 'spi/ben', 'profile')).toEqual({ name:'ben' });
+    }));
+
+    it('silinen hesaptan sonra başka adla girince bağ çözülür; hesap yaşıyorsa çözülmez', () => sahneyle(async () => {
+      let srv = sunucuKur(), c = cihazKur(srv, { veri:{ 'vitals/1':{ sleep:6 } } });
+      let h = sahne(c);
+      await hazir();
+      await h.girisYap('omer', 'parola-123');
+      await h.esitle();
+      await h.cikisYap();
+      await h.girisYap('anne', 'parola-456');
+      await h.esitle();
+      expect(h.durum().durum).toBe('baska');                                    // omer yaşıyor: söz 5
+      expect(srv.oku('anne', 'spi/ben', 'vitals/1')).toBe(undefined);
+      srv.silKullanici('omer');
+      await h.esitle();
+      await h.esitle();
+      expect(h.durum().durum).toBe('tamam');
+      expect(srv.oku('anne', 'spi/ben', 'vitals/1')).toEqual({ sleep:6 });
     }));
   });
 

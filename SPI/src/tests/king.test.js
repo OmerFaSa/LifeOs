@@ -153,6 +153,25 @@
   /* 2026-10-05 (kullanıcı: «Apple Intelligence gibi olan King'i
      profesyonelleştir»): başlık ve kapat, yeni cevap belirerek gelir, hazır
      cevapta modülün noktası, veri önizlemesi kart. */
+  describe('King — hitap', () => {
+    it('hesaptaki hitapla selamlar, yoksa görünen adla; doğum gününde kutlar', () => sahneyle(async () => {
+      const H = window.LIFEOS.HESAP, eski = H && H.durum;
+      if(!H){ expect('hesap.js').toBe('yüklü'); return; }
+      const baloncuk = () => document.querySelector('[data-king]').textContent;
+      try{
+        H.durum = () => ({ oturum:{ ad:'omer', gorunen_ad:'Ömer Faruk', hitap:'Ömer', dogum_gun:'04-23' } });
+        let { k } = sahne();
+        k.ac();
+        expect(baloncuk()).toContain('Günaydın Ömer.');
+        k.kapat();
+        H.durum = () => ({ oturum:{ ad:'omer', gorunen_ad:'Ömer Faruk', hitap:'', dogum_gun:'10-05' } });   // sahnenin günü
+        ({ k } = sahne());
+        k.ac();
+        expect(baloncuk()).toContain('İyi ki doğdun Ömer Faruk.');
+      }finally{ H.durum = eski; }
+    }));
+  });
+
   describe('King — profesyonel görünüm', () => {
     it('başlıkta King ve bulunulan modül; kapat düğmesi kapatır', () => sahneyle(async () => {
       const { k } = sahne({ modul:'esp' });

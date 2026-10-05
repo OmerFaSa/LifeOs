@@ -89,7 +89,7 @@
   transition:opacity .2s ease, background .2s ease, transform .1s ease; }
 .hesap__ana{ background:var(--text); color:var(--surface); font-weight:600; }
 .hesap__ikinci{ background:var(--surface-2); color:var(--text); font-weight:500; }
-.hesap__tehlike{ background:var(--bad-ink, var(--bad)); color:#fff; font-weight:600; }
+.hesap__tehlike{ background:var(--bad-ink, var(--bad)); color:var(--surface); font-weight:600; }
 .hesap__ana:hover{ opacity:.88; }
 .hesap__ikinci:hover{ background:color-mix(in oklab, var(--text) 9%, var(--surface-2)); }
 .hesap__ana:active, .hesap__ikinci:active, .hesap__tehlike:active{ transform:scale(.985); }
@@ -133,7 +133,7 @@
    işaret, bu cihazdaki hesaplar, iki eylem, beta. Form yandan kayarak
    gelir (önce yer, sonra yazı; 420 ms, sakin başlar), «‹» geri kaydırır. */
 html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
-.hesap-kapi{ position:fixed; inset:0; z-index:9000; display:grid; place-items:center; padding:24px 16px;
+.hesap-kapi{ position:fixed; inset:0; z-index:9000; display:grid; padding:24px 16px;
   overflow-y:auto;
   background:
     radial-gradient(40% 36% at 16% 20%, var(--zemin-1, color-mix(in oklab, #2D5BE3 20%, transparent)), transparent 72%),
@@ -205,6 +205,46 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 .hesap-kapi__hesap-sec:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 @media (max-width:679px){ .hesap-kapi__kart{ padding:28px 20px 16px; border-radius:24px; } }
 
+/* ANA SAYFA (hesap.js «ANA SAYFA»): masaüstünde solda tanıtım, sağda kart;
+   dar ekranda tanıtım kartın üstünde kısalır (dört sistem tek satır
+   hap), form açılınca çekilir. Sahne `margin:auto` ile ortalanır: ekrandan
+   uzunsa üstü kesilmez, kaydırılır. Önce yer, sonra yazı: tanıtım belirir,
+   sistemler sırayla gelir. */
+.hesap-kapi__sahne{ margin:auto; display:grid; grid-template-columns:minmax(0, 420px) minmax(0, 380px); gap:72px;
+  align-items:center; justify-content:center; width:min(900px, 100%); }
+.hesap-kapi__tanitim{ display:flex; flex-direction:column; align-items:flex-start;
+  animation:hesap-tanitim-gel .7s cubic-bezier(.32,.72,0,1) both; }
+.hesap-kapi__tanitim .hesap-kapi__isaret{ width:56px; height:56px; margin:0 0 20px; }
+.hesap-kapi__ad{ margin:0; font-size:42px; font-weight:700; line-height:1.05; letter-spacing:-.03em; color:var(--text); }
+.hesap-kapi__slogan{ margin:10px 0 28px; font-size:17px; line-height:1.45; color:var(--text-2); }
+.hesap-kapi__sistemler{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; width:100%; margin:0 0 26px;
+  padding:0; list-style:none; }
+.hesap-kapi__sistemler li{ display:grid; grid-template-columns:26px minmax(0, 1fr); column-gap:10px; align-items:center;
+  padding:14px; border-radius:16px; background:color-mix(in oklab, var(--surface) 58%, transparent);
+  box-shadow:inset 0 0 0 1px color-mix(in oklab, var(--text) 7%, transparent);
+  animation:hesap-tanitim-gel .6s cubic-bezier(.32,.72,0,1) both; animation-delay:calc(.14s + var(--sira, 0) * .07s); }
+.hesap-kapi__sistemler svg{ grid-row:1 / span 2; width:26px; height:26px; fill:var(--renk); }
+.hesap-kapi__sistemler b{ font-size:14.5px; font-weight:650; color:var(--text); }
+.hesap-kapi__sistemler span{ font-size:12.5px; color:var(--text-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hesap-kapi__sozler{ display:flex; flex-direction:column; gap:9px; margin:0; padding:0; list-style:none;
+  font-size:13.5px; color:var(--text-2); animation:hesap-tanitim-gel .6s cubic-bezier(.32,.72,0,1) .45s both; }
+.hesap-kapi__sozler li{ display:flex; align-items:center; gap:9px; }
+.hesap-kapi__sozler .hesap-ikon{ width:15px; height:15px; color:var(--ok-ink, var(--ok, #1a7f5a)); stroke-width:2.2; }
+@media (max-width:899px){
+  .hesap-kapi__sahne{ grid-template-columns:minmax(0, 380px); gap:22px; }
+  .hesap-kapi__tanitim{ align-items:center; text-align:center; }
+  .hesap-kapi__tanitim .hesap-kapi__isaret{ width:44px; height:44px; margin-bottom:12px; }
+  .hesap-kapi__ad{ font-size:30px; }
+  .hesap-kapi__slogan{ margin:6px 0 16px; font-size:14.5px; }
+  .hesap-kapi__sistemler{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin:0; }
+  .hesap-kapi__sistemler li{ display:flex; gap:6px; padding:6px 11px 6px 8px; border-radius:999px; }
+  .hesap-kapi__sistemler svg{ width:13px; height:13px; }
+  .hesap-kapi__sistemler b{ font-size:12.5px; font-weight:600; }
+  .hesap-kapi__sistemler span, .hesap-kapi__sozler{ display:none; }
+  .hesap-kapi.is-form .hesap-kapi__tanitim{ display:none; }
+}
+@keyframes hesap-tanitim-gel{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+
 @keyframes hesap-kapi-gel{ from{ opacity:0; } to{ opacity:1; } }
 @keyframes hesap-kart-gel{ from{ opacity:0; transform:translateY(10px) scale(.985); } to{ opacity:1; transform:none; } }
 @keyframes hesap-ileri{ from{ opacity:0; transform:translateX(18px); filter:blur(2px); } to{ opacity:1; transform:none; filter:none; } }
@@ -254,6 +294,15 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
     animation:hesap-alttan .52s cubic-bezier(.32,.72,0,1) both; }
   .hesap-merkez__govde{ padding:8px 16px calc(28px + env(safe-area-inset-bottom, 0px)); }
 }
+
+/* Özet şeridi: ölçülmemiş sayı «—» (sıfır değil). */
+.hesap-sayilar{ display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); margin:-6px 0 22px; padding:14px 4px;
+  border-radius:16px; background:var(--surface-2); text-align:center; }
+.hesap-sayilar > div{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.hesap-sayilar > div + div{ border-left:1px solid var(--border); }
+.hesap-sayilar b{ font-size:19px; font-weight:650; letter-spacing:-.01em; color:var(--text); font-variant-numeric:tabular-nums; }
+.hesap-sayilar span{ font-size:12px; color:var(--text-2); }
+.hesap-kimlik__kutla{ margin:6px 0 0; font-size:13.5px; font-weight:600; color:var(--text); }
 
 /* Kimlik */
 .hesap-kimlik{ display:flex; flex-direction:column; align-items:center; gap:4px; margin:4px 0 24px; text-align:center; }
@@ -337,6 +386,21 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 .hesap-plan__durum svg{ width:15px; height:15px; fill:none; stroke:var(--ok-ink, var(--ok)); stroke-width:2.2;
   stroke-linecap:round; stroke-linejoin:round; }
 
+/* Etkinlik ve uyarı */
+.hesap-satir.is-dikkat .hesap-satir__detay{ color:var(--bad-ink, var(--bad)); font-weight:500; }
+.hesap-olay.is-dikkat b, .hesap-olay.is-dikkat .hesap-satir__ikon{ color:var(--bad-ink, var(--bad)); }
+.hesap-uyari{ display:flex; align-items:center; gap:12px; margin:0 0 20px; padding:14px 14px 14px 16px; border-radius:16px;
+  background:color-mix(in oklab, var(--bad) 10%, var(--surface-2)); }
+.hesap-uyari > .hesap-ikon{ width:20px; height:20px; color:var(--bad-ink, var(--bad)); }
+.hesap-uyari p{ flex:1; margin:0; font-size:13.5px; line-height:1.45; color:var(--text); }
+.hesap__kucuk--duz{ color:var(--text); }
+.hesap-onay__liste{ margin:0 0 14px; padding-left:18px; font-size:13.5px; line-height:1.5; color:var(--text); }
+.hesap-onay__liste li + li{ margin-top:4px; }
+.hesap-onay .hesap__form{ margin:0; }
+.hesap-onay .hesap__alan input{ background:var(--surface); }
+.hesap-bolum--form{ margin:10px 2px -2px; }
+.hesap__not--form{ margin:-4px 2px 0; }
+
 /* Onay, eşitleme, yönetim */
 .hesap-onay{ margin:0 0 20px; padding:16px; border-radius:16px; background:color-mix(in oklab, var(--bad) 9%, var(--surface-2)); }
 .hesap-onay p{ margin:0 0 12px; font-size:14px; line-height:1.45; color:var(--text); }
@@ -373,7 +437,8 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 
 @media (prefers-reduced-motion:reduce){
   .hesap-kapi, .hesap-kapi__kart, .hesap-kapi__ic, .hesap-kapi__isaret g, .hesap-merkez, .hesap-merkez__kart,
-  .hesap-merkez__ic, .hesap-merkez__mesaj{ animation:none !important; }
+  .hesap-merkez__ic, .hesap-merkez__mesaj, .hesap-kapi__tanitim, .hesap-kapi__sistemler li,
+  .hesap-kapi__sozler{ animation:none !important; }
 }
 
 /* ---------- eşitlendi işareti (bir kez) ----------

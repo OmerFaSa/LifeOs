@@ -15,6 +15,7 @@ import shutil
 import sys
 import tempfile
 import threading
+import time
 import urllib.error
 import urllib.request
 
@@ -412,6 +413,122 @@ def run():
             eq((k["gorunen_ad"], k["renk"], k["plan"]), ("omer", "mavi", "ucretsiz"))
     test("surum 2 deposu profil ve plan sutunlarina gocer", t_gocur_surum2)
 
+    # ---------------------------- etkinlik, kisisel bilgiler, verin (11-13)
+
+    def t_etkinlik():
+        with _Depo() as r:
+            k, j = _admin(r)
+            r.d.kullanici_ekle(k, "anne", "parola-456")
+            _hata(lambda: r.d.giris("omer", "yanlis-parola", B, "iPhone", "192.168.0.23"), 401)
+            _hata(lambda: r.d.giris("yok", "yanlis-parola", B, "iPhone", "192.168.0.24"), 401)   # hesap yok: yazilmaz
+            j2 = r.d.giris("omer", "parola-123", B, "iPhone", "192.168.0.23")["jeton"]
+            r.d.parola_degistir(k, j, "parola-123", "yeni-parola-1", "127.0.0.1")
+            r.d.soru_ayarla(k, "yeni-parola-1", "Soru nedir?", "cevap", j, "127.0.0.1")
+            r.d.cikis(j, "127.0.0.1")
+            l = r.d.etkinlik(k)
+            eq([o["tur"] for o in l], ["cikis", "soru", "parola", "giris", "yanlis", "kayit"])
+            eq((l[4]["cihaz_ad"], l[4]["ip"]), ("iPhone", "192.168.0.23"))
+            eq(l[1]["cihaz_ad"], "PC")                                     # oturumun cihazi
+            metin = json.dumps(l)
+            for gizli in ("yanlis-parola", "parola-123", "yeni-parola-1", "cevap", j, j2):
+                no(gizli in metin)
+            eq(r.d.etkinlik(r.d.oturum(r.d.giris("anne", "parola-456")["jeton"]))[0]["tur"], "giris")  # herkes kendininkini
+            for _ in range(hesap.OLAY_EN_COK + 20):
+                r.d._deneme.clear()
+                _hata(lambda: r.d.giris("omer", "yanlis", B, "", "9.9.9.9"), 401)
+            ok(len(r.d.etkinlik(k, hesap.OLAY_EN_COK)) == hesap.OLAY_EN_COK)  # defter sinirli
+    test("etkinlik: giris, yanlis sifre, degisiklikler yazilir; sifre ve jeton yazilmaz", t_etkinlik)
+
+    def t_etkinlik_kurtar_yonetim():
+        with _Depo() as r:
+            k = r.d.kayit("omer", "parola-123", "Soru nedir?", "cevap", True, A, "PC")["kullanici"]
+            u = r.d.kullanici_ekle(k, "anne", "parola-456")
+            _hata(lambda: r.d.kurtar("omer", "yanlis", "yeni-sifre-1", B, "iPhone", "1.1.1.1"), 401)
+            r.d.kurtar("omer", "cevap", "yeni-sifre-1", B, "iPhone", "1.1.1.1")
+            r.d.yonet(k, u["id"], plan="plus")
+            eq([o["tur"] for o in r.d.etkinlik(k)][:2], ["kurtar", "kurtar-yanlis"])
+            ok("Plus" in r.d.etkinlik(u)[0]["ayrinti"] and "omer" in r.d.etkinlik(u)[0]["ayrinti"])
+            j = r.d.giris("omer", "yeni-sifre-1", A, "PC")["jeton"]
+            r.d.giris("omer", "yeni-sifre-1", "cihazC-111111", "Android tablet")
+            tablet = [c for c in r.d.cihazlar(k, j) if c["cihaz_ad"] == "Android tablet"][0]
+            r.d.cihaz_cikar(k, j, tablet["id"], "127.0.0.1")
+            o = r.d.etkinlik(k)[0]
+            eq((o["tur"], o["cihaz_ad"], o["ayrinti"]), ("cihaz", "PC", "Android tablet"))
+    test("etkinlik: kurtarma, cihazdan cikis ve admin degisikligi", t_etkinlik_kurtar_yonetim)
+
+    def t_kisisel():
+        with _Depo() as r:
+            k, _ = _admin(r)
+            bugun = time.strftime("%Y-%m-%d", time.localtime(r.saat()))
+            p = r.d.profil_ayarla(k, dogum="1999-04-23", hitap="  Ömer  ", eposta="omer@ornek.com")
+            eq((p["dogum"], p["hitap"], p["eposta"]), ("1999-04-23", "Ömer", "omer@ornek.com"))
+            eq(r.d.profil_ayarla(k, gorunen_ad="Ö")["hitap"], "Ömer")               # None: degismez
+            eq(r.d.profil_ayarla(k, hitap="", eposta="")["eposta"], "")             # bos: silinir
+            _hata(lambda: r.d.profil_ayarla(k, dogum="1999-02-30"), 400)
+            _hata(lambda: r.d.profil_ayarla(k, dogum="23.04.1999"), 400)
+            _hata(lambda: r.d.profil_ayarla(k, dogum="2999-01-01"), 400)            # gelecek
+            ok(r.d.profil_ayarla(k, dogum=bugun)["dogum"] == bugun)
+            _hata(lambda: r.d.profil_ayarla(k, eposta="omer.ornek.com"), 400)
+            _hata(lambda: r.d.profil_ayarla(k, hitap="x" * (hesap.HITAP_EN_UZUN + 1)), 400)
+            u = r.d.kullanici_ekle(k, "anne", "parola-456")
+            r.d.profil_ayarla(u, dogum="1970-01-01", eposta="anne@ornek.com")
+            metin = json.dumps(r.d.kullanicilar(k))
+            for gizli in ("1970-01-01", "anne@ornek.com", "kimlik", "eposta"):
+                no(gizli in metin)                                                  # admin baskasinin kisiselini gormez
+            no("anne@ornek.com" in json.dumps(r.d.yonet(k, u["id"], plan="pro")))
+    test("kisisel bilgiler istege bagli, dogrulanir; admin listesinde gorunmez", t_kisisel)
+
+    def t_disa_sil():
+        with _Depo() as r:
+            k, j = _admin(r)
+            u = r.d.kayit("anne", "parola-456", "Soru nedir?", "cevap", False, B, "iPhone")
+            ku, ju = u["kullanici"], u["jeton"]
+            r.d.esitle(ku, "spi/ben", B, 0, [{"y": "a", "d": {"x": 1}, "z": 5}, {"y": "b", "d": {"y": 2}, "z": 5}], jeton=ju)
+            r.d.esitle(ku, "spi/ben", B, 0, [{"y": "b", "d": None, "z": 9}])         # silinen disa girmez
+            r.d.esitle(k, "spi/ben", A, 0, [{"y": "o", "d": {"z": 3}, "z": 5}])
+            v = r.d.disa(ku)
+            eq(v["alanlar"], {"spi/ben": {"a": {"x": 1}}})
+            eq((v["kullanici"]["ad"], "kimlik" in v["kullanici"]), ("anne", False))
+            ay = r.d.ayrinti(ku)["spi/ben"]
+            eq((ay["n"], ay["son"]), (1, 5))                                        # silinen sayilmaz
+            ok(ay["bayt"] > 0)
+            ok(r.d.cihazlar(ku, ju)[0]["esitleme"])                                  # cihazin son esitlemesi
+            _hata(lambda: r.d.sil(ku, "yanlis"), 401)
+            _hata(lambda: r.d.sil(k, "parola-123"), 409)                             # son admin, baskasi varken
+            kim = ku["kimlik"]
+            ok(r.d.yasiyor(kim))
+            r.d.sil(ku, "parola-456")
+            eq(r.d.oturum(ju), None)
+            no(r.d.yasiyor(kim))
+            eq(r.d.disa(k)["alanlar"], {"spi/ben": {"o": {"z": 3}}})                 # baskasininki kalir
+            _hata(lambda: r.d.yasiyor("kotu"), 400)
+            yeni = r.d.kayit("anne", "parola-456", "Soru nedir?", "cevap", False)["kullanici"]
+            ok(yeni["kimlik"] != kim)                                                # ayni ad, yeni hesap
+            eq(r.d.etkinlik(yeni)[0]["tur"], "kayit")                                # eski defter gitti
+            eq(len(r.d.etkinlik(yeni)), 1)
+            r.d.sil(yeni, "parola-456")
+            r.d.sil(k, "parola-123")                                                 # tek kalan admin silebilir
+            ok(r.d.kurulum_gerekli())
+    test("verin: disa aktarim, ayrinti; hesap sifreyle silinir, son admin korunur", t_disa_sil)
+
+    def t_gocur_surum3():
+        with _Depo() as r:
+            import sqlite3
+            yol = os.path.join(r.klasor, "surum3.db")
+            hesap.Depo(yol, tur=1000).kayit("omer", "parola-123", "Soru nedir?", "cevap", True)
+            c = sqlite3.connect(yol)
+            for s in ("kimlik", "dogum", "hitap", "eposta"):
+                c.execute("ALTER TABLE kullanici DROP COLUMN %s" % s)
+            c.execute("ALTER TABLE oturum DROP COLUMN esitleme")
+            c.execute("DROP TABLE olay")
+            c.commit(); c.close()
+            d = hesap.Depo(yol, tur=1000)
+            k = d.giris("omer", "parola-123")["kullanici"]
+            ok(hesap.KIMLIK_RE.match(k["kimlik"]))
+            eq((k["dogum"], k["hitap"]), ("", ""))
+            eq(d.etkinlik(k)[0]["tur"], "giris")
+    test("surum 3 deposu kimlik, kisisel bilgi ve etkinlik tablosuna gocer", t_gocur_surum3)
+
     # -------------------------------------------------------------- HTTP
 
     import sunucu  # noqa: E402
@@ -524,6 +641,32 @@ def run():
             eq(([u["plan"] for u in v["kullanicilar"]], v["kayit"]), (["ucretsiz", "pro"], False))
             eq(s.iste("/api/hesap/yonet", {"id": 1, "plan": "pro"}, H)[0], 401)       # jetonsuz yonetim yok
     test("HTTP: profil, plan katalogu, cihazlar, yeni hesap ayari ve yonetim", t_http_hesap_ayarlari)
+
+    def t_http_verin():
+        with _Srv() as s:
+            kod, _, v = s.iste("/api/hesap/kayit", {"ad": "omer", "parola": "parola-123", "soru": "Soru nedir?",
+                                                    "cevap": "Cevap", "cihaz": A, "cihaz_ad": "Windows PC"}, H)
+            y = dict(H, Authorization="Bearer " + v["jeton"])
+            kim = v["kullanici"]["kimlik"]
+            eq(s.iste("/api/hesap/giris", {"ad": "omer", "parola": "yanlis", "cihaz_ad": "iPhone"}, H)[0], 401)
+            kod, _, v = s.iste("/api/hesap/etkinlik", baslik=y)
+            eq([o["tur"] for o in v["olaylar"]], ["yanlis", "kayit"])
+            eq(v["olaylar"][0]["ip"], "127.0.0.1")
+            s.iste("/api/hesap/esitle", {"alan": "ays/ben", "cihaz": A, "son": 0,
+                                         "gonder": [{"y": "v", "d": {"a": 1}, "z": 5}]}, y)
+            kod, _, v = s.iste("/api/hesap/ben", baslik=y)
+            eq(v["ayrinti"]["ays/ben"]["n"], 1)
+            kod, _, v = s.iste("/api/hesap/disa", baslik=y)
+            eq((kod, v["alanlar"]), (200, {"ays/ben": {"v": {"a": 1}}}))
+            kod, _, v = s.iste("/api/hesap/profil", {"hitap": "Ömer", "dogum": "1999-04-23"}, y)
+            eq((v["kullanici"]["hitap"], v["kullanici"]["dogum"]), ("Ömer", "1999-04-23"))
+            eq(s.iste("/api/hesap/yasiyor", {"kimlik": kim}, y)[2], {"var": True})
+            eq(s.iste("/api/hesap/sil", {"parola": "yanlis"}, y)[0], 401)
+            eq(s.iste("/api/hesap/sil", {"parola": "parola-123"}, y)[0], 200)
+            eq(s.iste("/api/hesap/ben", baslik=y)[0], 401)
+            ok(s.iste("/api/hesap/durum")[2]["kurulum"])
+            eq(s.iste("/api/hesap/etkinlik")[0], 401)                                 # jetonsuz yok
+    test("HTTP: etkinlik, ayrinti, disa aktarim, kisisel bilgi ve hesabi silme", t_http_verin)
 
     def t_http_koken():
         with _Srv() as s:

@@ -234,9 +234,15 @@ window.LIFEOS.KING = (function(){
 
   /* ------------------------------------------------------- görünüm */
 
+  /* HİTAP (hesap › Profil, 2026-10-05): kullanıcı nasıl seslenilmesini
+     yazdıysa öyle; yoksa görünen adı. Doğum gününde «İyi ki doğdun» —
+     yalnız gerçek günde, başka hiçbir yerde. */
   function selam(){
-    const s = ortam.simdi().getHours();
-    const ad = (L.HESAP && L.HESAP.durum && (L.HESAP.durum().oturum || {}).ad) || '';
+    const t = ortam.simdi(), s = t.getHours();
+    const o = (L.HESAP && L.HESAP.durum && L.HESAP.durum().oturum) || {};
+    const ad = o.hitap || o.gorunen_ad || o.ad || '';
+    const gun = String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+    if(o.dogum_gun && o.dogum_gun === gun) return 'İyi ki doğdun' + (ad ? ' ' + ad : '') + '. Ne yapıyoruz?';
     const zaman = s < 5 ? 'İyi geceler' : s < 12 ? 'Günaydın' : s < 18 ? 'İyi günler' : 'İyi akşamlar';
     return zaman + (ad ? ' ' + ad : '') + '. Ne yapıyoruz?';
   }
