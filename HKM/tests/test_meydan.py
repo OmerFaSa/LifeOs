@@ -534,6 +534,30 @@ def run():
         eq(s.count("--yuzey:#1C1C1F"), 2)
     test("koyu tema grafit: siyaha yakin zemin yok", t_koyu_grafit)
 
+    def t_sade_profesyonel():
+        # Kullanici (2026-10-05): «medya fikrini gelistir, sadelestir,
+        # profesyonellestir». LifeOS'un dili: zemin lekeleri, suzulen kart,
+        # avatar modul renginde TON (sekil ayni), hikayede kisa ad, es aralikli
+        # ve buyuk harfli etiket yok. Sayi, cumle, kesinlik degismez.
+        kok = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        s = open(os.path.join(kok, "web", "meydan.html"), encoding="utf-8").read()
+        blok = s[s.index("SADE VE PROFESYONEL"):s.index("</style>", s.index("SADE VE PROFESYONEL"))]
+        for parca in ("radial-gradient(60% 42% at 10% 0%, color-mix(in srgb, var(--mer) 15%",
+                      "color-mix(in srgb, var(--c) var(--av-ton), var(--yuzey))", "--kart-golge:",
+                      ".ust-bilgi{ font-size:12.5px; font-weight:600; letter-spacing:0; text-transform:none; }",
+                      ".ray h3, .yan h3{ font-size:12.5px; font-weight:600; letter-spacing:0; text-transform:none; }",
+                      ".mini-sayilar > :first-child{ border-left:0;", "prefers-reduced-transparency"):
+            ok(parca in blok, parca)
+        mono = blok[blok.index(":is(.hbtn small, .sayi .eg, .kes"):]
+        ok("font-family:var(--font)" in mono[:mono.index("}")], "kesinlik ve egilim es aralikli kalmis")
+        # Sekil kurali korunur (renk korlugunde de ayrilir).
+        for sekil in (".av.ays{ border-radius:11px; }", ".av.esp{ clip-path:", ".av.merkez{ clip-path:"):
+            ok(sekil in s, sekil)
+        ok("function kisaAd(h)" in s and "esc(kisaAd(h.hesap))" in s, "hikaye adi kisa degil")
+        hk = s[s.index("function cizHikayeler("):s.index("function gununOzeti(")]
+        ok("esc(hesap(h.hesap).ad + ' hikâyesi: '" in hk, "tam ad dugmenin etiketinde kalir")
+    test("sade ve profesyonel: zemin, ton avatar, kisa hikaye adi, es aralikli etiket yok (2026-10-05)", t_sade_profesyonel)
+
 
 def run_daemon():
     """Uclar gercek bir soketle (tests/test_daemon.py kalibi)."""

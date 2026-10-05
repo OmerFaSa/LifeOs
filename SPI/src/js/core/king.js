@@ -179,8 +179,9 @@ window.LIFEOS.KING = (function(){
     return (Array.isArray(s) ? s : [s]).filter(Boolean).map(String);
   }
 
-  function soyle(metin, satirlar){
-    akis.push({ kim:'king', metin, satirlar });
+  function soyle(metin, satirlar, onizleme){
+    akis.forEach(m => { m.yeni = false; });
+    akis.push({ kim:'king', metin, satirlar, onizleme, yeni:true });
     akis = akis.slice(-4);
     ciz();
   }
@@ -200,7 +201,8 @@ window.LIFEOS.KING = (function(){
     }else if(y.tur === 'veri'){
       bekleyen = y.onizleme;
       cipler = [{ ad:'Kaydet', is:'kaydet' }, { ad:'Vazgeç', is:'vazgec' }];
-      soyle('Şunu kaydedeyim mi?', [y.onizleme.metin + (y.onizleme.ipucu ? ' · ' + y.onizleme.ipucu : '')]);
+      soyle('Şunu kaydedeyim mi?', [y.onizleme.metin + (y.onizleme.ipucu ? ' · ' + y.onizleme.ipucu : '')],
+        { metin:y.onizleme.metin, ipucu:y.onizleme.ipucu || '' });
     }else{
       soyle('Bunu anlayamadım. Şunlardan birini seçebilir ya da «hareket sayfasına git», «uyku 7», '
         + '«bugünün özeti» gibi yazabilirsin.');
@@ -240,24 +242,39 @@ window.LIFEOS.KING = (function(){
   }
 
   const KURE = '<span class="king__kure" aria-hidden="true"></span>';
+  const NOKTA = m => '<i class="king__nokta king__nokta--' + (m || 'mer') + '" aria-hidden="true"></i>';
 
+  /* PROFESYONEL (kullanıcı, 2026-10-05: «Apple Intelligence gibi olan King'i
+     profesyonelleştir»): baloncuğun başında King ve bulunulan modül, sağda
+     kapat; King'in cevabı avatar balonu değil düz yazı ve yalnız EN YENİSİ
+     hafif bulanıktan netleşerek belirir; veri önizlemesi ayrı kart; hazır
+     cevapta gideceği modülün noktası. */
   function govde(){
-    const satirlar = akis.length ? akis : [{ kim:'king', metin:selam() }];
+    const satirlar = akis.length ? akis : [{ kim:'king', metin:selam(), yeni:true }];
+    const bas = '<div class="king__bas">' + KURE + '<b>King</b>'
+      + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + '</span>'
+      + '<button type="button" class="king__kapat" data-king="kapat" aria-label="Kapat" title="Kapat (Esc)">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>';
     const balonlar = satirlar.map(m => m.kim === 'sen'
       ? '<div class="king__balon king__balon--sen"><p>' + kac(m.metin) + '</p></div>'
-      : '<div class="king__balon king__balon--king">' + KURE + '<div><p>' + kac(m.metin) + '</p>'
-        + (m.satirlar && m.satirlar.length ? '<ul>' + m.satirlar.map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>' : '')
+      : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + '"><div><p>' + kac(m.metin) + '</p>'
+        + (m.onizleme
+          ? '<div class="king__onizle"><span class="king__onizle-ad">Kaydedilecek</span><b>' + kac(m.onizleme.metin) + '</b>'
+            + (m.onizleme.ipucu ? '<small>' + kac(m.onizleme.ipucu) + '</small>' : '') + '</div>'
+          : (m.satirlar && m.satirlar.length ? '<ul>' + m.satirlar.map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>' : ''))
         + '</div></div>').join('');
     const cip = cipler
       ? cipler.map(c => '<button type="button" class="king__cip' + (c.is === 'kaydet' ? ' king__cip--ana' : '')
           + '" data-king="' + c.is + '">' + kac(c.ad) + '</button>').join('')
-      : HAZIR.map((h, i) => '<button type="button" class="king__cip" data-king-hazir="' + i + '">' + kac(h.ad) + '</button>').join('');
-    return '<div class="king__akis" aria-live="polite">' + balonlar + '</div>'
+      : HAZIR.map((h, i) => '<button type="button" class="king__cip" data-king-hazir="' + i + '">'
+          + NOKTA(h.ozet ? (ayar && ayar.modul) : h.modul) + kac(h.ad) + '</button>').join('');
+    return bas + '<div class="king__akis" aria-live="polite">' + balonlar + '</div>'
       + '<div class="king__cipler" role="group" aria-label="Hazır cevaplar">' + cip + '</div>'
       + '<form class="king__yaz" data-king-form data-ayar-disi>'
       + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="King\'e yaz…" autocomplete="off" enterkeyhint="send"/>'
       + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
-      + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>';
+      + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>'
+      + '<p class="king__ipucu" aria-hidden="true">Enter gönderir · Esc kapatır</p>';
   }
 
   function ciz(odak){
@@ -269,6 +286,7 @@ window.LIFEOS.KING = (function(){
     const g = kutu.querySelector('.king__girdi');
     const akisEl = kutu.querySelector('.king__akis');
     if(akisEl) akisEl.scrollTop = akisEl.scrollHeight;
+    akis.forEach(m => { m.yeni = false; });
     if(odak !== false && g && !(L.KABUK && L.KABUK.telefonMu && L.KABUK.telefonMu())){
       try{ g.focus({ preventScroll:true }); }catch(e){ /* odak yok */ }
     }
@@ -331,6 +349,7 @@ window.LIFEOS.KING = (function(){
       const c = t.closest('[data-king]:not(.king)');
       if(c){
         const is = c.getAttribute('data-king');
+        if(is === 'kapat'){ kapat(); return; }
         if(is === 'kaydet') kaydet();
         else if(is === 'vazgec'){ bekleyen = null; cipler = null; soyle('Tamam, kaydetmedim.'); }
       }

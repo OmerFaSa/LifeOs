@@ -149,4 +149,49 @@
       expect(k.acikMi()).toBe(false);
     }));
   });
+
+  /* 2026-10-05 (kullanıcı: «Apple Intelligence gibi olan King'i
+     profesyonelleştir»): başlık ve kapat, yeni cevap belirerek gelir, hazır
+     cevapta modülün noktası, veri önizlemesi kart. */
+  describe('King — profesyonel görünüm', () => {
+    it('başlıkta King ve bulunulan modül; kapat düğmesi kapatır', () => sahneyle(async () => {
+      const { k } = sahne({ modul:'esp' });
+      k.ac();
+      const bas = document.querySelector('[data-king] .king__bas');
+      expect(!!bas).toBe(true);
+      expect(bas.textContent).toContain('King');
+      expect(bas.textContent).toContain('ESP');
+      const kapat = bas.querySelector('[data-king="kapat"]');
+      expect(kapat.getAttribute('aria-label')).toBe('Kapat');
+      kapat.click();
+      expect(k.acikMi()).toBe(false);
+    }));
+
+    it('yalnız en yeni cevap belirerek gelir; hazır cevapta modül noktası', () => sahneyle(async () => {
+      const { k } = sahne();
+      k.ac();
+      const hazir = Array.from(document.querySelectorAll('[data-king-hazir]'));
+      expect(hazir[0].querySelector('.king__nokta--spi') !== null).toBe(true);   // Antrenman → SPİ
+      expect(hazir[2].querySelector('.king__nokta--ays') !== null).toBe(true);   // Test → AYS
+      await k.isle('bugünün özeti');
+      await k.isle('nasıl gidiyorum');
+      const king = document.querySelectorAll('[data-king] .king__balon--king');
+      expect(king.length).toBe(2);
+      expect(king[1].classList.contains('is-yeni')).toBe(true);
+      expect(king[0].classList.contains('is-yeni')).toBe(false);
+    }));
+
+    it('veri önizlemesi kart olarak çizilir; Kaydet ana düğme', () => sahneyle(async () => {
+      const veri = { onizle:t => (/uyku/.test(t) ? { metin:'Uyku 7 sa', ipucu:'Günlük ölçüm',
+        kaydet:async () => 'Uyku kaydedildi' } : null) };
+      const { k } = sahne({ veri });
+      k.ac();
+      await k.isle('uyku 7');
+      const kart = document.querySelector('[data-king] .king__onizle');
+      expect(!!kart).toBe(true);
+      expect(kart.textContent).toContain('Uyku 7 sa');
+      expect(kart.textContent).toContain('Günlük ölçüm');
+      expect(document.querySelector('[data-king="kaydet"]').classList.contains('king__cip--ana')).toBe(true);
+    }));
+  });
 })();

@@ -23,19 +23,30 @@
   transition:opacity .52s cubic-bezier(.32,.72,0,1); }
 .king.is-acik .king-isik{ opacity:1; }
 .king.is-kapaniyor .king-isik{ opacity:0; transition-duration:.34s; }
+/* Işık kenardan içeri SOLAR (2026-10-05, profesyonel): dört kenarda içe doğru
+   saydamlaşan maske. Önce halka maskesi + bulanıklıktı; tarayıcı maskeyi
+   bulanıklıktan SONRA uyguladığı için içte keskin bir çerçeve çizgisi
+   kalıyordu. İnce parlak kenar (::before, 10 px) ve geniş yumuşak süzülme
+   (::after, 72 px); ikisi de aynı dönen renklerle. */
 .king-isik::before, .king-isik::after{ content:''; position:absolute; inset:0;
   background:conic-gradient(from var(--king-aci), #4F86FF, #2EC4A9, #F2A93B, #E9A6C1, #9A86FF, #4F86FF);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor; mask-composite:exclude;
+  -webkit-mask:linear-gradient(to bottom, #000, transparent) top / 100% var(--k) no-repeat,
+    linear-gradient(to top, #000, transparent) bottom / 100% var(--k) no-repeat,
+    linear-gradient(to right, #000, transparent) left / var(--k) 100% no-repeat,
+    linear-gradient(to left, #000, transparent) right / var(--k) 100% no-repeat;
+  mask:linear-gradient(to bottom, #000, transparent) top / 100% var(--k) no-repeat,
+    linear-gradient(to top, #000, transparent) bottom / 100% var(--k) no-repeat,
+    linear-gradient(to right, #000, transparent) left / var(--k) 100% no-repeat,
+    linear-gradient(to left, #000, transparent) right / var(--k) 100% no-repeat;
   animation:king-don 9s linear infinite; }
-.king-isik::before{ padding:2px; filter:blur(4px); opacity:.55; }
-.king-isik::after{ padding:18px; filter:blur(28px); opacity:.28; }
+.king-isik::before{ --k:10px; opacity:.7; }
+.king-isik::after{ --k:72px; opacity:.32; }
 @keyframes king-don{ to{ --king-aci:360deg; } }
 
 /* ---------- baloncuk ---------- */
 .king__kutu{ position:absolute; left:50%; bottom:calc(28px + env(safe-area-inset-bottom, 0px));
-  width:min(540px, calc(100vw - 32px)); max-height:min(70vh, 560px); display:flex; flex-direction:column; gap:12px;
-  padding:16px 16px 14px; border-radius:28px; pointer-events:auto;
+  width:min(560px, calc(100vw - 32px)); max-height:min(72vh, 600px); display:flex; flex-direction:column; gap:12px;
+  padding:12px 14px 12px; border-radius:28px; pointer-events:auto;
   background:var(--buz-ust, color-mix(in oklab, var(--surface) 84%, transparent));
   -webkit-backdrop-filter:blur(28px) saturate(1.4); backdrop-filter:blur(28px) saturate(1.4);
   box-shadow:var(--buz-isik, inset 0 1px 0 rgba(255,255,255,.7), inset 0 0 0 1px rgba(255,255,255,.4)),
@@ -51,7 +62,8 @@
 .king__balon p{ margin:0; font-size:15px; line-height:1.45; color:var(--text); }
 .king__balon ul{ margin:6px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:3px; }
 .king__balon li{ font-size:13.5px; color:var(--text-2); }
-.king__balon--king > div{ padding:2px 0; }
+.king__balon--king > div{ padding:2px 4px 0; min-width:0; }
+.king__balon--king p{ font-size:15.5px; line-height:1.5; letter-spacing:-.005em; }
 .king__balon--sen{ align-self:flex-end; max-width:80%; padding:8px 13px; border-radius:18px 18px 6px 18px;
   background:var(--surface-2); }
 .king__balon--sen p{ font-size:14.5px; }
@@ -85,6 +97,64 @@
   stroke-linecap:round; stroke-linejoin:round; }
 .king__cip:focus-visible, .king__gonder:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 
+
+/* ======================================================================
+   PROFESYONEL (kullanıcı, 2026-10-05: «Apple Intelligence gibi olan King
+   özelliğini profesyonelleştir»): baloncuğun başında King ve bulunulan
+   modül, sağda kapat; cevap düz yazı, yalnız EN YENİSİ hafif bulanıktan
+   netleşerek belirir (satırlar sırayla); veri önizlemesi kart; hazır
+   cevapta gideceği modülün noktası, sıra sağda solarak biter; alan odakta
+   ışığın renkleriyle ince bir halka alır; boşken gönder sönük.
+   ====================================================================== */
+.king__bas{ display:flex; align-items:center; gap:8px; min-height:32px; padding:0 0 0 4px; }
+.king__bas .king__kure{ width:18px; height:18px; margin:0; }
+.king__bas b{ font-size:14.5px; font-weight:650; letter-spacing:-.01em; color:var(--text); }
+.king__yer{ display:inline-flex; align-items:center; gap:6px; padding:0 9px; height:22px; border-radius:999px;
+  background:var(--surface-2); font-size:12px; font-weight:600; color:var(--text-2); }
+.king__nokta{ flex:none; width:7px; height:7px; border-radius:50%; background:var(--mer); }
+.king__nokta--ays{ background:var(--ays); } .king__nokta--spi{ background:var(--spi); }
+.king__nokta--esp{ background:var(--esp); } .king__nokta--mer{ background:var(--mer); }
+.king__kapat{ margin-left:auto; width:32px; height:32px; display:grid; place-items:center; padding:0; border:0;
+  border-radius:50%; background:none; color:var(--text-2); cursor:pointer; transition:background .2s ease, color .2s ease; }
+.king__kapat:hover{ background:var(--surface-2); color:var(--text); }
+.king__kapat svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.king__kapat:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
+/* Cevap belirir: bulanıktan netleşir, satırlar sırayla. */
+@keyframes king-belir{ from{ opacity:0; filter:blur(6px); transform:translateY(4px); } }
+.king__balon--king.is-yeni p, .king__balon--king.is-yeni li, .king__balon--king.is-yeni .king__onizle{
+  animation:king-belir .56s cubic-bezier(.32,.72,0,1) both; }
+.king__balon--king.is-yeni li:nth-child(1){ animation-delay:.08s; }
+.king__balon--king.is-yeni li:nth-child(2){ animation-delay:.16s; }
+.king__balon--king.is-yeni li:nth-child(n+3){ animation-delay:.24s; }
+.king__balon--king.is-yeni .king__onizle{ animation-delay:.1s; }
+
+/* Veri önizlemesi: kaydedilecek şey tek kartta. */
+.king__onizle{ display:grid; gap:2px; margin-top:8px; padding:12px 14px; border-radius:16px; background:var(--surface-2); }
+.king__onizle-ad{ font-size:11.5px; font-weight:600; color:var(--text-2); }
+.king__onizle b{ font-size:17px; font-weight:650; letter-spacing:-.015em; color:var(--text); }
+.king__onizle small{ font-size:12.5px; color:var(--text-2); }
+
+/* Hazır cevaplar: modülün noktası; sıra sağda solarak biter. */
+.king__cip{ display:inline-flex; align-items:center; gap:7px; }
+.king__cip .king__nokta{ width:6px; height:6px; }
+.king__cipler{ padding-right:28px;
+  -webkit-mask-image:linear-gradient(90deg, #000 calc(100% - 36px), transparent);
+  mask-image:linear-gradient(90deg, #000 calc(100% - 36px), transparent); }
+.king__cip--ana{ font-weight:600; }
+
+/* Alan: odakta ışığın renkleriyle ince halka; boşken gönder sönük. */
+.king__girdi{ border-width:1.5px; }
+.king__girdi:focus{ border-color:transparent;
+  background:linear-gradient(var(--surface), var(--surface)) padding-box,
+    conic-gradient(from var(--king-aci), #4F86FF, #2EC4A9, #F2A93B, #E9A6C1, #9A86FF, #4F86FF) border-box;
+  animation:king-don 6s linear infinite; }
+.king__gonder{ transition:opacity .2s ease, transform .2s ease; }
+.king__yaz:has(.king__girdi:placeholder-shown) .king__gonder{ opacity:.35; }
+.king__gonder:active{ transform:scale(.94); }
+.king__ipucu{ margin:-4px 0 0; text-align:center; font-size:11.5px; color:var(--text-2); }
+@media (max-width:679px), (hover:none){ .king__ipucu{ display:none; } }
+
 /* Telefonda alt bandın üstünde. */
 @media (max-width:679px){
   .king__kutu{ bottom:calc(84px + env(safe-area-inset-bottom, 0px)); border-radius:24px; padding:14px 12px 12px; }
@@ -97,6 +167,7 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .kmenu__hizli--king .king__kure{ width:18px; height:18px; animation:none; }
 
 @media (prefers-reduced-motion:reduce){
-  .king-isik::before, .king-isik::after, .king__kure{ animation:none; }
+  .king-isik::before, .king-isik::after, .king__kure, .king__girdi:focus{ animation:none; }
+  .king__balon--king.is-yeni p, .king__balon--king.is-yeni li, .king__balon--king.is-yeni .king__onizle{ animation:none; }
   .king__kutu, .king-isik, .king-perde{ transition-duration:.01s; }
 }

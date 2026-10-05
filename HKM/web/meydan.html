@@ -529,6 +529,115 @@ textarea.alan{ resize:none; min-height:120px; font-size:16px; line-height:1.45; 
 .sakin b{ display:block; margin-bottom:10px; }
 
 @media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } }
+/* ======================================================================
+   SADE VE PROFESYONEL (kullanıcı, 2026-10-05: «medya fikrini geliştirir,
+   sadeleştirir, profesyonelleştirir misin»). LifeOS'un diliyle:
+   · zemin Merkez morunun ve üç modülün çok hafif lekeleri; üst ve alt bant
+     buzlu cam; kartlar zeminden hafifçe süzülür (HKM yüzünün jetonu),
+   · avatar modülün renginde TON (dolgu değil), ŞEKLİ aynı (AYS kare, SPİ
+     daire, ESP karo, Merkez altıgen — renk körlüğünde de ayrılır),
+   · gönderinin başı tek satır: ad, altında «modül · zaman»; tür sağda sakin
+     yazı (uyarı turuncu hap); başlık 650 ağırlık,
+   · özet kartı tek cümle + kıl çizgiyle ayrılan üç sayı,
+   · eş aralıklı ve BÜYÜK HARFLİ etiket yok (kullanıcı: «göz yoruyor»).
+   Hiçbir sayı, cümle, etiket ya da kesinlik işareti değişmedi.
+   ====================================================================== */
+:root{ --r-kart:22px; --kart-golge:0 1px 2px rgba(20,24,40,.04), 0 12px 32px -20px rgba(20,24,40,.2);
+  --kart-kenar:rgba(15,17,21,.05); --av-ton:16%; }
+@media (prefers-color-scheme: dark){
+  html:not([data-tema="acik"]){ --kart-golge:0 1px 1px rgba(0,0,0,.22), 0 14px 34px -20px rgba(0,0,0,.55);
+    --kart-kenar:rgba(255,255,255,.055); --av-ton:24%; }
+}
+html[data-tema="koyu"]{ --kart-golge:0 1px 1px rgba(0,0,0,.22), 0 14px 34px -20px rgba(0,0,0,.55);
+  --kart-kenar:rgba(255,255,255,.055); --av-ton:24%; }
+
+.kabuk{ background:
+  radial-gradient(60% 42% at 10% 0%, color-mix(in srgb, var(--mer) 15%, transparent), transparent 70%),
+  radial-gradient(48% 38% at 96% 6%, color-mix(in srgb, var(--ays) 9%, transparent), transparent 70%),
+  radial-gradient(55% 42% at 92% 100%, color-mix(in srgb, var(--spi) 8%, transparent), transparent 72%),
+  radial-gradient(45% 40% at 4% 100%, color-mix(in srgb, var(--esp) 8%, transparent), transparent 70%),
+  var(--bg); }
+.ust{ background:color-mix(in srgb, var(--bg) 72%, transparent); border-bottom-color:color-mix(in srgb, var(--line) 70%, transparent); }
+.alt{ background:color-mix(in srgb, var(--yuzey) 78%, transparent); border-top-color:color-mix(in srgb, var(--line) 70%, transparent); }
+.ust .ad b, .ray .marka b{ font-size:17px; font-weight:700; }
+.sekme{ font-weight:600; }
+.arti{ border-radius:16px; }
+@media (min-width:900px){
+  .ray, .yan{ background:color-mix(in srgb, var(--bg) 55%, transparent); border-color:color-mix(in srgb, var(--line) 70%, transparent); }
+}
+.ray h3, .yan h3{ font-size:12.5px; font-weight:600; letter-spacing:0; text-transform:none; }
+.rbtn{ font-weight:550; }
+.rbtn[aria-current="page"]{ box-shadow:var(--kart-golge), inset 0 0 0 1px var(--kart-kenar); }
+.hbtn span{ font-weight:550; }
+.kart-y{ border-radius:var(--r-kart); box-shadow:var(--kart-golge), inset 0 0 0 1px var(--kart-kenar); padding:16px; }
+.kart-y h2{ font-weight:650; }
+.ara{ box-shadow:inset 0 0 0 1px var(--kart-kenar); }
+
+/* Avatar: modül renginde ton; harf modülün renginde. Şekil aynı. */
+.av{ background:color-mix(in srgb, var(--c) var(--av-ton), var(--yuzey)); color:color-mix(in srgb, var(--c) 85%, var(--fg));
+  font-weight:650; }
+/* Koyuda harf daha açık: tonlu zeminde AA (AYS mavisi 4,2 kalıyordu). */
+@media (prefers-color-scheme: dark){ html:not([data-tema="acik"]) .av{ color:color-mix(in srgb, var(--c) 62%, #fff); } }
+html[data-tema="koyu"] .av{ color:color-mix(in srgb, var(--c) 62%, #fff); }
+/* Arama alanı kutunun bütün boyunu tutar (dokunma hedefi 40 px). */
+.ara input{ align-self:stretch; }
+.hk .halka{ width:60px; height:60px; padding:2px; }
+.hk.onemli:not(.gordu) .halka{ padding:2.5px; }
+.hk.gordu .halka{ background:var(--line); }
+.halka .av{ width:48px; height:48px; font-size:16px; }
+.hk{ width:64px; }
+.hk .ad{ max-width:64px; font-size:11.5px; font-weight:500; }
+
+/* Süzgeç: sakin çip. */
+.cip{ height:32px; padding:0 13px; font-size:13px; font-weight:600; box-shadow:inset 0 0 0 1px var(--kart-kenar); }
+
+/* Günün özeti: tek kart, cümle + kıl çizgiyle ayrılan üç sayı. */
+.gunun{ background:var(--yuzey); border-radius:var(--r-kart); box-shadow:var(--kart-golge), inset 0 0 0 1px var(--kart-kenar);
+  padding:16px; gap:12px; }
+.gunun .ust-bilgi{ color:var(--dim); }
+.ust-bilgi{ font-size:12.5px; font-weight:600; letter-spacing:0; text-transform:none; }
+.gunun p{ font-size:14.5px; }
+.mini-sayilar{ gap:0; }
+.mini-sayilar div, .mini-sayilar button{ background:none; box-shadow:none; border-radius:0; padding:2px 12px;
+  border-left:1px solid var(--line); }
+.mini-sayilar > :first-child{ border-left:0; padding-left:0; }
+.mini-sayilar button:hover{ box-shadow:none; }
+.mini-sayilar button:hover span{ color:var(--fg); }
+.mini-sayilar b{ font-size:20px; font-weight:700; }
+
+/* Gönderi: süzülen kart, sakin başlık. */
+.akis{ gap:12px; }
+.g{ border-radius:var(--r-kart); box-shadow:var(--kart-golge), inset 0 0 0 1px var(--kart-kenar); padding:16px 16px 6px; }
+.g.bekliyor{ border:0; padding:16px 16px 6px;
+  box-shadow:0 0 0 1.5px color-mix(in srgb, var(--accent) 50%, transparent), var(--kart-golge); }
+.g.bekliyor .serit{ margin:-16px -16px 14px; border-radius:var(--r-kart) var(--r-kart) 0 0; font-weight:600; }
+.gb .kim b{ font-size:14.5px; font-weight:650; }
+.mr{ padding:0; background:none; border-radius:0; font-size:12px; font-weight:600; letter-spacing:0; }
+.mr:not(:empty) + .num::before{ content:'·'; margin-right:6px; color:var(--soluk); }
+.tur{ padding:0; background:none; font-size:12px; font-weight:500; color:var(--soluk); }
+.tur.u{ padding:3px 9px; border-radius:999px; font-weight:600; }
+.baslik-g{ font-size:16px; font-weight:650; letter-spacing:-.012em; }
+.cumle{ font-size:14px; }
+.cumle.tek{ font-size:15px; }
+.sayi b{ font-weight:700; }
+.eylem{ border-top-color:color-mix(in srgb, var(--line) 70%, transparent); }
+.ey{ font-weight:500; }
+.baglanti{ border-radius:14px; }
+.dolu, .ince{ border-radius:999px; font-weight:650; }
+.katli, .bosdurum{ border-radius:var(--r-kart); }
+.son .tik{ box-shadow:var(--kart-golge); }
+
+/* Eş aralıklı yazı yok: kesinlik, eğilim ve küçük sayılar Inter'le
+   (rakamlar yine tablo hizasında). */
+:is(.hbtn small, .sayi .eg, .kes, .balon small, .akor small, .slayt small, .dereceler button small, .satir small,
+  .izg .kas, .izg .eg, .iz-sec em, .iz-kart small){ font-family:var(--font); font-variant-numeric:tabular-nums; letter-spacing:0; }
+.kes{ font-size:11px; font-weight:500; }
+.sayi .eg{ font-weight:500; }
+:is(.yuz small, .izg .kas, .iz-kart small){ text-transform:none; letter-spacing:0; }
+@media (prefers-reduced-transparency: reduce){
+  .kabuk{ background:var(--bg); }
+  .ust, .alt{ background:var(--bg); -webkit-backdrop-filter:none; backdrop-filter:none; }
+}
 </style>
 </head>
 <body>
@@ -676,6 +785,7 @@ textarea.alan{ resize:none; min-height:120px; font-size:16px; line-height:1.45; 
   function hesap(h){ return hesaplar()[h] || { ad:h, modul:'merkez', bas:'?', rol:'' }; }
   function modulOf(h){ return hesap(h).modul || 'sen'; }
   function av(h){ var m = modulOf(h); return '<div class="av ' + m + ' c-' + m + '" aria-hidden="true">' + esc(hesap(h).bas) + '</div>'; }
+  function kisaAd(h){ var m = modulOf(h); return { ays:1, spi:1, esp:1 }[m] ? MOD_AD[m] : hesap(h).ad; }
   function kes(k){ return '<span class="kes ' + (KES[k] || 'y') + '"><i></i>' + esc(k) + '</span>'; }
   function sayilar(l){
     if(!l || !l.length) return '';
@@ -831,7 +941,7 @@ textarea.alan{ resize:none; min-height:120px; font-size:16px; line-height:1.45; 
         var m = modulOf(h.hesap);
         return '<button class="hk c-' + m + (h.onemli ? ' onemli' : ' kisa') + (gd[h.id] ? ' gordu' : '') + '" data-hikaye="' + i + '" aria-label="' +
           esc(hesap(h.hesap).ad + ' hikâyesi: ' + h.neden_yazi + (gd[h.id] ? ', görüldü' : '')) + '">' +
-          '<span class="halka"><span class="ic">' + av(h.hesap) + '</span></span><span class="ad">' + esc(hesap(h.hesap).ad) + '</span></button>';
+          '<span class="halka"><span class="ic">' + av(h.hesap) + '</span></span><span class="ad">' + esc(kisaAd(h.hesap)) + '</span></button>';
       }).join('');
   }
   /* Gunun ozeti tek karttir: cumle + uc kutu. Karar ve tekrar kutusu
