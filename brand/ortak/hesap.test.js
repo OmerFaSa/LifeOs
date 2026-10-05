@@ -766,14 +766,17 @@
       expect(kapi().querySelector('form')).toBeNull();
     }));
 
-    it('ana sayfa: dört sistem ve üç söz; form açılınca tanıtım çekilir', () => sahneyle(async () => {
+    it('kilit ekranı: saat, tarih, dört sistem, üç söz, günün saatine göre selam', () => sahneyle(async () => {
       const srv = sunucuKur(), c = cihazKur(srv);
       sahne(c);
       await hazir();
       const t = kapi().querySelector('.hesap-kapi__tanitim');
       ['AYS', 'SPİ', 'ESP', 'Merkez'].forEach(x => expect(t.textContent).toContain(x));
-      expect(t.querySelectorAll('.hesap-kapi__sozler li').length).toBe(3);
-      expect(kapi().querySelector('h1').textContent).toBe('Hoş geldin');
+      expect(kapi().querySelectorAll('.hesap-kapi__sozler li').length).toBe(3);
+      expect(/^\d{2}:\d{2}$/.test(kapi().querySelector('.hesap-kapi__saat').textContent)).toBe(true);
+      expect(kapi().querySelector('.hesap-kapi__tarih').textContent.length > 4).toBe(true);
+      expect(['sabah', 'gun', 'aksam', 'gece'].indexOf(kapi().getAttribute('data-vakit')) >= 0).toBe(true);
+      expect(['Günaydın', 'İyi günler', 'İyi akşamlar', 'İyi geceler'].indexOf(kapi().querySelector('h1').textContent) >= 0).toBe(true);
       expect(kapi().classList.contains('is-form')).toBe(false);
       git('giris');
       expect(kapi().classList.contains('is-form')).toBe(true);
@@ -873,6 +876,8 @@
       expect(String(c.jar.lifeos_hesaplar).indexOf('parola') < 0).toBe(true);  // şifre hatırlanmaz
       sec.click();
       expect(document.getElementById('hesap-ad').type).toBe('hidden');       // ad sorulmaz
+      expect(kapi().classList.contains('is-secili')).toBe(true);
+      expect(kapi().querySelector('.hesap__ileri').getAttribute('aria-label')).toBe('Giriş yap');   // şifrenin içinde «→»
       expect(document.getElementById('hesap-ad').value).toBe('omer');
       yaz('hesap-parola', 'parola-123');
       gonder('[data-hesap-form="giris"]');
