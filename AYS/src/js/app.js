@@ -1537,7 +1537,7 @@ R.App = (function(){
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'ays', git:route => go(route),
+        window.LIFEOS.KING.kur({ modul:'ays', hkm:() => R.Beacon, git:route => go(route),
           ozet:() => [R.Screens.today.headline()] });
       }
 

@@ -16,17 +16,28 @@
    telefonda «+» › «King'e sor» ya da «+»ya basılı tutmak. Esc kapatır.
 
    Sözler:
-   1. KURAL MOTORU KONUŞUR (AGENTS §1.1). Bu sürümde dil modeli yok:
+   1. KURAL MOTORU KONUŞUR (AGENTS §1.1). Bu dosyada dil modeli yok:
       nereye gidileceğine, neyin kaydedileceğine ve özetteki sayılara kod
-      karar verir; King yalnız kısa cümle kurar.
+      karar verir; King yalnız kısa cümle kurar. Sohbet HKM'deki King'le
+      yapılır (söz 6); orada da sayıyı kod üretir, model cümleye çevirir.
    2. ANLAŞILMAYAN İSTEK TAHMİN EDİLMEZ (§1.7): «anlayamadım» der ve neler
       yapabildiğini gösterir; rastgele bir sayfaya götürmez.
    3. VERİ ÖNCE ÖNİZLENİR: satır modülün KENDİ ayrıştırıcısına gider (SPİ:
       SP.Quick); kayıt yalnız «Kaydet»le. Yeni ayrıştırıcı yazılmaz.
    4. MODÜL ONSUZ DA ÇALIŞIR: King yalnız bir giriş yoludur; modül King'e,
-      King de HKM'ye bağlı değildir.
+      King de HKM'ye bağlı değildir: HKM kapalıysa, yavaşsa ya da modeli
+      yoksa yerel King aynen sürer ve nedenini söyler.
    5. ADRES YALNIZ KATALOGDAN: modüller arası geçişte hedef `#king=<rota>`
-      ile taşınır; katalogda olmayan rota yok sayılır. */
+      ile taşınır; katalogda olmayan rota yok sayılır.
+   6. HKM'DEKİ KING İLE AYNI KONUŞMA (depo sahibi, 2026-10-06: «kingle
+      konuşurken HKM'deki kingle konuşur gibi olacak, o AI kısmında»). HKM
+      bağlıyken (modülün HKM işareti; bağın sahibi bu profil) sorular, özet
+      ve yerelde anlaşılmayan her şey HKM'nin King'ine gider (/api/chat,
+      agent king). Geçmişi HKM tutar: modülden konuşmak oradaki konuşmanın
+      devamıdır. Yerelde kalan: «… git/aç» komutu, niyet cümlesi («antrenman
+      yapacağım») ve kayıt önizlemesi — HKM modüle yazmaz (§1.4). Soru
+      cümlesi, içinde sayfa adına benzeyen bir sözcük var diye sayfaya
+      götürülmez. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -96,9 +107,12 @@ window.LIFEOS.KING = (function(){
     hash:() => (typeof location !== 'undefined' ? location.hash : ''),
     hashSil:() => { try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){ /* eski tarayıcı */ } },
     adres:k => (L.KABUK && L.KABUK.adres ? L.KABUK.adres(k) : null),
+    fetch:(u, o) => fetch(u, o),
   };
+  /* HKM'deki King'in modelli cevabı yerel modelde saniyeler sürebilir. */
+  const MERKEZ_ZAMAN_ASIMI = 60000;
 
-  let ayar = null;           // { modul, git(route, ek), ozet(), veri:{ onizle(metin) } }
+  let ayar = null;           // { modul, git(route, ek), ozet(), veri:{ onizle(metin) }, hkm() → Beacon }
   let acik = false;
   let akis = [];             // [{ kim:'king'|'sen', metin, satirlar? }]
   let cipler = null;         // null = hazır cevaplar; ya da [{ ad, is }]
@@ -130,7 +144,7 @@ window.LIFEOS.KING = (function(){
     const gitMi = new RegExp(B + '(git|aç|götür|geç|gidelim)').test(t);
     if(gitMi){
       const s = sayfaBul(t);
-      if(s) return { tur:'git', hedef:s, cevap:'Tamam.' };
+      if(s) return { tur:'git', hedef:s, cevap:'Tamam.', kaynak:'komut' };
     }
     if(ayar && ayar.veri && typeof ayar.veri.onizle === 'function'){
       let p = null;
@@ -138,11 +152,56 @@ window.LIFEOS.KING = (function(){
       if(p) return { tur:'veri', onizleme:p };
     }
     for(const n of NIYET){
-      if(n.es.test(t)) return { tur:'git', hedef:n, cevap:n.cevap };
+      if(n.es.test(t)) return { tur:'git', hedef:n, cevap:n.cevap, kaynak:'niyet' };
     }
     const s = sayfaBul(t);
-    if(s) return { tur:'git', hedef:s, cevap:'Tamam.' };
+    if(s) return { tur:'git', hedef:s, cevap:'Tamam.', kaynak:'sayfa' };
     return { tur:'bilinmiyor' };
+  }
+
+  /* Soru cümlesi mi (soru işareti ya da soru sözcüğü/eki)? Sözcük başı (^|\s). */
+  const SORU = new RegExp('\\?|' + B + '(ne|neden|niye|nasıl|hangi|kaç|kim|nerede|nereye|niçin|m[ıiuü](?:s[ıiuü]n(?:[ıiuü]z)?|y[ıiuü][mz]|d[ıiuü]r)?)(?=$|\\s|[.,!])');
+  function soruMu(t){ return SORU.test(kucuk(t)); }
+
+  /* ------------------------------------------------------- HKM'deki King (söz 6) */
+
+  function baglanti(){
+    const b = ayar && ayar.hkm ? ayar.hkm() : null;
+    if(!b || typeof b.settings !== 'function') return null;
+    const a = b.settings() || {};
+    if(!a.enabled || !a.token || !(b.urlOk ? b.urlOk(a.url) : a.url)) return null;
+    return { url:String(a.url).replace(/\/$/, ''), token:a.token };
+  }
+  function bugunISO(){
+    const d = ortam.simdi();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  /* Doner: { ok:true, text, mode } ya da { ok:false, neden:'baglanti'|'yok' }. */
+  async function merkezeSor(metin){
+    const k = baglanti();
+    if(!k) return { ok:false, neden:'baglanti' };
+    const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    const t = ctrl ? setTimeout(() => ctrl.abort(), MERKEZ_ZAMAN_ASIMI) : null;
+    try{
+      /* fetch bir nesnenin yöntemi olarak çağrılamaz («Illegal invocation»). */
+      const f = ortam.fetch;
+      const res = await f(k.url + '/api/chat', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        body:JSON.stringify({ text:String(metin).trim(), agent:'king', date:bugunISO() }),
+        signal:ctrl ? ctrl.signal : undefined,
+      });
+      let g = null;
+      try{ g = await res.json(); }catch(e){ g = null; }
+      if(res.status === 200 && g && g.ok !== false && typeof g.text === 'string' && g.text.trim()){
+        return { ok:true, text:g.text.trim(), mode:g.mode || '' };
+      }
+      return { ok:false, neden:res.status === 200 ? 'yok' : 'baglanti' };
+    }catch(e){
+      return { ok:false, neden:'baglanti' };
+    }finally{
+      if(t) clearTimeout(t);
+    }
   }
 
   /* ------------------------------------------------------- eylem */
@@ -189,6 +248,27 @@ window.LIFEOS.KING = (function(){
     akis.push({ kim:'sen', metin:String(metin).trim() });
     bekleyen = null;
     cipler = null;
+    /* Söz 6: soru, özet ve anlaşılmayan istek HKM'deki King'e. */
+    const merkeze = !!baglanti() && (y.tur === 'bilinmiyor' || y.tur === 'ozet'
+      || (y.tur === 'git' && y.kaynak !== 'komut' && soruMu(metin)));
+    let neden = null;
+    if(merkeze){
+      const bek = { kim:'king', bekliyor:true, metin:'' };
+      akis.push(bek);
+      ciz(false);
+      const r = await merkezeSor(metin);
+      akis = akis.filter(m => m !== bek);
+      if(r.ok){
+        soyle(r.text);
+        return { tur:'merkez', mode:r.mode };
+      }
+      neden = r.neden;
+    }
+    return yerel(y, neden);
+  }
+
+  /* Yerel King (HKM yoksa ya da cevap veremediyse; sayfa ve kayıt hep burada). */
+  function yerel(y, neden){
     if(y.tur === 'ozet'){
       const s = ozetSatirlari();
       soyle(s.length ? (MODUL_AD[ayar.modul] || '') + '’de bugün:' : 'Bugün için henüz bir şey yok.', s);
@@ -201,7 +281,9 @@ window.LIFEOS.KING = (function(){
       soyle('Şunu kaydedeyim mi?', [y.onizleme.metin + (y.onizleme.ipucu ? ' · ' + y.onizleme.ipucu : '')],
         { metin:y.onizleme.metin, ipucu:y.onizleme.ipucu || '' });
     }else{
-      soyle('Bunu anlayamadım. Şunlardan birini seçebilir ya da «hareket sayfasına git», «uyku 7», '
+      const on = neden === 'yok' ? 'King’in modeli şu an kapalı. '
+        : neden === 'baglanti' ? 'Merkeze (HKM) şu an ulaşılamadı. ' : '';
+      soyle(on + 'Bunu anlayamadım. Şunlardan birini seçebilir ya da «hareket sayfasına git», «uyku 7», '
         + '«bugünün özeti» gibi yazabilirsin.');
     }
     return y;
@@ -260,6 +342,9 @@ window.LIFEOS.KING = (function(){
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>';
     const balonlar = satirlar.map(m => m.kim === 'sen'
       ? '<div class="king__balon king__balon--sen"><p>' + kac(m.metin) + '</p></div>'
+      : m.bekliyor
+      ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
+        + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
       : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + '"><div><p>' + kac(m.metin) + '</p>'
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Kaydedilecek</span><b>' + kac(m.onizleme.metin) + '</b>'

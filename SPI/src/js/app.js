@@ -1552,7 +1552,7 @@ SP.App = (function(){
       /* KING (brand/ortak/king.js): her yerden sade sohbet. Özet ve veri
          girişi bu modülün kendi koduyla (SP.Quick: önizleme, onayla kayıt). */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'spi',
+        window.LIFEOS.KING.kur({ modul:'spi', hkm:() => SP.Beacon,
           git:(route, ek) => { if(route === 'move' && ek && ek.sekme) S.ui.moveTab = ek.sekme; go(route); },
           ozet:() => {
             const d = U.todayISO(), v = M.vitalsOf(d) || {}, og = (M.mealsOf(d) || []).length;

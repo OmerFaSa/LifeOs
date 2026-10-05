@@ -29,9 +29,9 @@
       hashSil:() => { giden.push('hash-silindi'); },
       adres:m => ({ ays:'http://127.0.0.1:4173/', spi:'http://127.0.0.1:4183/', esp:'http://127.0.0.1:4193/' })[m],
       simdi:() => new Date(2026, 9, 5, 9, 0),
-    });
+    }, o.fetch ? { fetch:o.fetch } : {});
     k.kur({ modul:o.modul || 'spi', git:(r, ek) => gidilen.push([r, ek || {}]),
-      ozet:o.ozet || (() => ['Toparlanma iyi.', 'Uyku 7 sa · 2 öğün']), veri:o.veri });
+      ozet:o.ozet || (() => ['Toparlanma iyi.', 'Uyku 7 sa · 2 öğün']), veri:o.veri, hkm:o.hkm });
     return { k, giden, gidilen };
   }
   function birak(){ const k = K(); k._sifirla(); if(yedek) Object.assign(k._ortam, yedek); }
@@ -211,6 +211,86 @@
       expect(kart.textContent).toContain('Uyku 7 sa');
       expect(kart.textContent).toContain('Günlük ölçüm');
       expect(document.querySelector('[data-king="kaydet"]').classList.contains('king__cip--ana')).toBe(true);
+    }));
+  });
+  /* Kullanıcı (2026-10-06): «kingle konuşurken HKM'deki kingle konuşur gibi
+     olacak, o AI kısmında». HKM bağlıyken sorular, özet ve anlaşılmayan istek
+     HKM'deki King'e (/api/chat, agent king) gider: geçmişi HKM tutar, modülden
+     konuşmak oradaki konuşmanın devamıdır. Sayfaya götürme ve kayıt yerelde
+     kalır (HKM modüle yazmaz, §1.4). HKM yoksa yerel King aynen sürer. */
+  describe('King — HKM’deki King', () => {
+    function merkez(cevap){
+      const istekler = [];
+      const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200/' }), urlOk:() => true });
+      const fetch = async (url, o) => {
+        istekler.push({ url, o, govde:JSON.parse(o.body) });
+        const c = typeof cevap === 'function' ? await cevap() : cevap;
+        if(c instanceof Error) throw c;
+        return { status:200, json:async () => c };
+      };
+      return { hkm, fetch, istekler };
+    }
+    function bagliSahne(m, o){
+      return sahne(Object.assign({ hkm:m.hkm, fetch:m.fetch, ozet:() => ['Toparlanma iyi.'] }, o || {}));
+    }
+
+    it('soru ve anlaşılmayan istek HKM’deki King’e gider; cevap söylenir, hiçbir yere götürülmez', () => sahneyle(async () => {
+      const m = merkez({ ok:true, mode:'model', text:'Dün 6 saat uyudun; bu gece erken yat.' });
+      const { k, giden, gidilen } = bagliSahne(m);
+      await k.isle('Bugün neden yorgunum?');
+      expect(m.istekler.length).toBe(1);
+      expect(m.istekler[0].url).toBe('http://127.0.0.1:4200/api/chat');
+      expect(m.istekler[0].o.headers.Authorization).toBe('Bearer jeton');
+      expect(m.istekler[0].govde.agent).toBe('king');
+      expect(m.istekler[0].govde.text).toBe('Bugün neden yorgunum?');
+      expect(/^\d{4}-\d\d-\d\d$/.test(m.istekler[0].govde.date)).toBe(true);
+      expect(k.akis().slice(-1)[0].metin).toBe('Dün 6 saat uyudun; bu gece erken yat.');
+      /* Kelimesi sayfa adına benzeyen SORU artık sayfaya götürülmez. */
+      await k.isle('hangi derse çalışayım?');
+      await k.isle('bilmem ne şey');
+      expect(m.istekler.length).toBe(3);
+      expect(giden.length + gidilen.length).toBe(0);
+    }));
+
+    it('sayfa komutu, niyet cümlesi ve kayıt yerelde kalır (HKM’ye gitmez)', () => sahneyle(async () => {
+      const m = merkez({ ok:true, mode:'model', text:'x' });
+      let kaydedildi = 0;
+      const { k, gidilen } = bagliSahne(m, { veri:{ onizle:t => /^uyku \d/.test(t)
+        ? { metin:'Uyku 7 sa', kaydet:async () => { kaydedildi++; return 'Kaydedildi.'; } } : null } });
+      await k.isle('hareket sayfasına git');
+      await k.isle('antrenman yapacağım');
+      await k.isle('uyku 7');
+      expect(m.istekler.length).toBe(0);
+      expect(gidilen.map(g => g[0])).toEqual(['move', 'move']);
+      expect(k.akis().slice(-1)[0].onizleme.metin).toBe('Uyku 7 sa');
+    }));
+
+    it('düşünürken baloncuk bekler; cevap gelince yerini alır', () => sahneyle(async () => {
+      let bitir = null;
+      const m = merkez(() => new Promise(r => { bitir = () => r({ ok:true, mode:'model', text:'Hazırım.' }); }));
+      const { k } = bagliSahne(m);
+      const is = k.isle('bugün ne yapmalıyım?');
+      await new Promise(r => setTimeout(r, 0));
+      expect(k.akis().slice(-1)[0].bekliyor).toBe(true);
+      bitir();
+      await is;
+      expect(k.akis().some(x => x.bekliyor)).toBe(false);
+      expect(k.akis().slice(-1)[0].metin).toBe('Hazırım.');
+    }));
+
+    it('HKM’ye ulaşılamazsa ya da modeli yoksa yerel King sürer ve nedenini söyler', () => sahneyle(async () => {
+      let m = merkez(new Error('ağ yok'));
+      let sh = bagliSahne(m);
+      await sh.k.isle('bugünün özeti');
+      expect(sh.k.akis().slice(-1)[0].satirlar).toEqual(['Toparlanma iyi.']);          // yerel özet
+      await sh.k.isle('bilmem ne şey');
+      expect(sh.k.akis().slice(-1)[0].metin).toContain('Merkeze (HKM) şu an ulaşılamadı');
+      birak();
+      m = merkez({ ok:false, mode:'yok', text:null, note:'Model kapalı.' });
+      sh = bagliSahne(m);
+      await sh.k.isle('bilmem ne şey');
+      expect(sh.k.akis().slice(-1)[0].metin).toContain('modeli şu an kapalı');
+      expect(sh.k.akis().slice(-1)[0].metin).toContain('anlayamadım');
     }));
   });
 })();

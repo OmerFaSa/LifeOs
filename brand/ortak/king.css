@@ -171,3 +171,16 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
   .king__balon--king.is-yeni p, .king__balon--king.is-yeni li, .king__balon--king.is-yeni .king__onizle{ animation:none; }
   .king__kutu, .king-isik, .king-perde{ transition-duration:.01s; }
 }
+
+/* HKM'deki King düşünürken (king.js söz 6): üç küçük nokta sırayla nefes
+   alır; cevap gelince yerini düz yazı alır. Modelin cevabı satır sonlarını
+   korur (madde, paragraf). */
+.king__balon--king p{ white-space:pre-line; }
+.king__balon.is-bekliyor{ padding-block:6px; }
+.king__dusun{ display:inline-flex; gap:5px; padding:10px 4px; }
+.king__dusun i{ width:7px; height:7px; border-radius:50%; background:var(--text-3);
+  animation:king-dusun 1.2s ease-in-out infinite; }
+.king__dusun i:nth-child(2){ animation-delay:.16s; }
+.king__dusun i:nth-child(3){ animation-delay:.32s; }
+@keyframes king-dusun{ 0%, 80%, 100%{ opacity:.25; transform:translateY(0); } 40%{ opacity:1; transform:translateY(-3px); } }
+@media (prefers-reduced-motion:reduce){ .king__dusun i{ animation:none; opacity:.6; } }

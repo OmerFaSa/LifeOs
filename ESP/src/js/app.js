@@ -1717,7 +1717,7 @@ ESP.App = (function(){
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'esp', git:route => go(route),
+        window.LIFEOS.KING.kur({ modul:'esp', hkm:() => ESP.Beacon, git:route => go(route),
           ozet:() => [ESP.Screens.today.headline()] });
       }
 

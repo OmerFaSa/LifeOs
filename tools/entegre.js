@@ -575,6 +575,27 @@ async function main(){
         console.log('  ' + s.id + ' → sohbetteki urun istegi King’e modul adina gitti');
       }
 
+      /* KING (brand/ortak/king.js söz 6, kullanıcı 2026-10-06: «kingle
+         konuşurken HKM'deki kingle konuşur gibi olacak»): modüldeki King'e
+         yazılan HKM'deki King'e gider; cevap oradan gelir ve konuşma HKM'nin
+         King geçmişine yazılır (aynı konuşma). Selamı kural cevaplar: model
+         gerekmez, test belirlenimci. */
+      const kingSohbet = await page.evaluate(async () => {
+        const K = window.LIFEOS.KING;
+        const r = await K.isle('merhaba');
+        return { tur:r && r.tur, metin:(K.akis().slice(-1)[0] || {}).metin || '' };
+      });
+      const kGecmis = await hkmFetch('/api/conversation?agent=king&limit=4').then(r => r.json()).catch(() => ({}));
+      const kMesaj = (kGecmis.messages || []);
+      const kSon = kMesaj[kMesaj.length - 1] || {}, kOnceki = kMesaj[kMesaj.length - 2] || {};
+      if(kingSohbet.tur !== 'merkez' || !kingSohbet.metin){
+        hatalar.push(s.id + ': King HKM’ye gitmedi — ' + JSON.stringify(kingSohbet));
+      }else if(kOnceki.text !== 'merhaba' || kSon.text !== kingSohbet.metin){
+        hatalar.push(s.id + ': King konuşması HKM geçmişinde yok — ' + JSON.stringify(kMesaj.slice(-2)));
+      }else{
+        console.log('  ' + s.id + ' → King HKM’deki King’le konuştu, konuşma HKM geçmişinde («' + kingSohbet.metin.slice(0, 40) + '»)');
+      }
+
       /* 2.77 — KING TEKLIFI (Part 8a-3b): ucretli is King'in onay kapisinda
          bekler; modulun Bugun kartinda gorunur ve MODULDEN onaylanir. Onay
          HKM'nin tek kapisina gider (POST /api/king/emir/<id>/onayla). */

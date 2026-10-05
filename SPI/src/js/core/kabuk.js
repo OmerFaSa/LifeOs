@@ -84,7 +84,9 @@ window.LIFEOS = window.LIFEOS || {};
     bilgi:'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><path d="M12 7.6v.1"/>',
     zil:'<path d="M6.5 16v-4.5a5.5 5.5 0 0 1 11 0V16l1.5 2h-14z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
     muzik:'<path d="M9.5 17.5V6.5l9-2v11"/><circle cx="7" cy="17.5" r="2.5"/><circle cx="16" cy="15.5" r="2.5"/>',
-    king:'<path d="M12 3.5c.6 3.9 2.6 5.9 6.5 6.5-3.9.6-5.9 2.6-6.5 6.5-.6-3.9-2.6-5.9-6.5-6.5 3.9-.6 5.9-2.6 6.5-6.5z"/><path d="M18.5 15c.25 1.6 1 2.35 2.5 2.5-1.5.25-2.25 1-2.5 2.5-.25-1.5-1-2.25-2.5-2.5 1.5-.15 2.25-.9 2.5-2.5z"/>',
+    /* King: ince çizgi taç (kullanıcı, 2026-10-06: «King'in yanındaki işaret
+       olmamış»; parıltı yapay zekâ klişesiydi). Öteki simgeler gibi tek renk. */
+    king:'<path d="M5.5 16.5L4 8.5l4.6 3.4L12 6l3.4 5.9L20 8.5l-1.5 8z"/><path d="M6 19.5h12"/>',
     hesap:'<path d="M7.5 18.5h9.25a3.75 3.75 0 0 0 .55-7.46A5.5 5.5 0 0 0 6.6 9.9a4.3 4.3 0 0 0 .9 8.6z"/><path d="M10 14l1.8 1.8L15 12.5"/>',
     kenar:'<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/>',
     gizli:'<rect x="4" y="4.5" width="16" height="5" rx="1.5"/><rect x="4" y="12.5" width="16" height="3" rx="1"/><path d="M4 19.5h7"/>',
