@@ -264,4 +264,22 @@
       expect(m.lastBackupAt).toBe('2026-01-01T00:00:00.000Z');
     });
   });
+
+  /* YÜKLEME YAZI ÜRETMEZ (hesap.js, 2026-10-05). Eşitleme uzaktan kayıt
+     gelince modeli loadAll ile tazeler; loadAll'un yazdığı her yol öteki
+     cihaza «değişiklik» diye gider ve o cihaz da tazelerken yazarsa iki
+     açık cihaz birbirini durmadan yeniletir. Depo ölçümü (storage) bu
+     cihaza aittir ve eşitlenmez (store.js CIHAZA_AIT). */
+  describe('Yükleme', function(){
+    it('ikinci loadAll depoya yalnız cihaza ait ölçümü yazar', async function(){
+      resetState();
+      const yazilan = [], set = R.Store.set;
+      R.Store.set = function(y, v){ yazilan.push(y); return set.call(this, y, v); };
+      await M.loadAll();
+      yazilan.length = 0;
+      await M.loadAll();
+      expect(yazilan.filter(y => y !== 'storage')).toEqual([]);
+      resetState();
+    });
+  });
 })();

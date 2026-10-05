@@ -1338,8 +1338,14 @@ ESP.Model = (function(){
   async function loadAll(){
     await ESP.Store.init();
 
-    S.meta = migrate(await ESP.Store.get('meta') || { schemaVersion:ESP.SCHEMA_VERSION });
-    await ESP.Store.set('meta', S.meta);
+    /* Künye YALNIZ değiştiyse yazılır (yoksa ya da göç ettiyse). Eşitleme
+       uzaktan kayıt gelince modeli buradan tazeler; her yüklemede yazılan
+       künye öteki cihaza «değişiklik» diye gidiyor, o da tazelerken
+       yazıyordu: iki açık cihaz birbirini durmadan yeniletti (hesap.js). */
+    const metaHam = await ESP.Store.get('meta');
+    const metaOnce = metaHam ? JSON.stringify(metaHam) : null;
+    S.meta = migrate(metaHam || { schemaVersion:ESP.SCHEMA_VERSION });
+    if(JSON.stringify(S.meta) !== metaOnce) await ESP.Store.set('meta', S.meta);
 
     S.profile = Object.assign(defaultProfile(), await ESP.Store.get('profile'));
     S.prefs = Object.assign(defaultPrefs(), await ESP.Store.get('prefs'));

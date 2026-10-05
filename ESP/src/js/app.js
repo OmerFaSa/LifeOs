@@ -1624,16 +1624,17 @@ ESP.App = (function(){
         try{ ESP.OrnekVeri.doldur(); }catch(e){ console.error(e); }
       }
       /* HESAP (brand/ortak/hesap.js): PC sunucusuyla giriş ve eşitleme.
-         Sunucu yoksa hiçbir şey beklemez; uzaktan kayıt gelirse model
-         yeniden yüklenir ve ekran çizilir (yazı yazılırken beklenir). */
+         Sunucu yoksa hiçbir şey beklemez. Uzaktan kayıt gelirse model
+         hemen yeniden yüklenir (Kaydet en yeni kaydın üstüne yazar);
+         ekran kullanıcı yazmıyorken çizilir (yazılan silinmez). */
       if(window.LIFEOS && window.LIFEOS.HESAP){
         const sihirbaz = () => !!document.querySelector('#sheet [data-act="setup-skip"]');
         window.LIFEOS.HESAP.kur({ modul:'esp', depo:ESP.Store, ornek:ornekAcik, kesilebilir:sihirbaz,
-          yenile:async () => {
-            await M.loadAll();
+          yukle:() => M.loadAll(),
+          yenile:() => {
             /* Profil sunucudan geldiyse kurulum sihirbazının işi kalmadı. */
             if(sihirbaz() && ESP.Setup && !ESP.Setup.needed()) UI.closeSheet();
-            render();
+            return render();
           } });
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */

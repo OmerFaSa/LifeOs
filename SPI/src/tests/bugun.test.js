@@ -59,6 +59,36 @@
       });
     });
 
+    /* ÖTEKİ CİHAZIN DEĞERİ EZİLMEZ (hesap.js, 2026-10-05). Form çizildikten
+       sonra telefondan kilo geldi; eşitleme modeli tazeledi ama kullanıcı
+       uyku yazarken ekran yeniden çizilmez. «Kaydet» formdaki ESKİ kiloyu
+       da yazıyordu: telefonun kilosu iki cihazda da kayboluyordu. Kaydet
+       yalnız kullanıcının değiştirdiği alanı yazar. */
+    it('kaydetmek dokunulmamış alanı yazmaz: arada öteki cihazdan gelen değer korunur', async () => {
+      dolu();
+      await withTodayAsync(GUN, async () => {
+        const d = yerlestir(await SP.Screens.today.render());
+        try{
+          SP.S.vitals[GUN] = Object.assign({}, SP.S.vitals[GUN], { weight:79.4 });
+          d.querySelector('#v-sleep').value = '8';
+          const toast = SP.UI.toast;
+          SP.UI.toast = () => {};
+          try{ await SP.Screens.today.handle['save-vitals'](); }
+          finally{ SP.UI.toast = toast; }
+          const v = SP.Model.vitalsOf(GUN);
+          expect(v.sleep).toBe(8);
+          expect(v.weight).toBe(79.4);
+          expect([v.rhr, v.hrv, v.water]).toEqual([58, 52, 2100]);
+          /* Silmek de bir değişikliktir: boşaltılan alan boş yazılır. */
+          d.querySelector('#v-rhr').value = '';
+          SP.UI.toast = () => {};
+          try{ await SP.Screens.today.handle['save-vitals'](); }
+          finally{ SP.UI.toast = toast; }
+          expect(SP.Model.vitalsOf(GUN).rhr).toBe(null);
+        }finally{ d.remove(); }
+      });
+    });
+
     it('Bugün › Ayrıntı: sekme yok; form, şikâyet, geçmiş ve özet orada', async () => {
       dolu();
       await withTodayAsync(GUN, async () => {

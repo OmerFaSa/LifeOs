@@ -395,4 +395,26 @@ describe('Bozuk belge — depodan gelen gün sessizce hayatta kalmaz', () => {
   });
 });
 
+/* YÜKLEME YAZI ÜRETMEZ (hesap.js, 2026-10-05). Eşitleme uzaktan kayıt
+   gelince modeli loadAll ile tazeler. loadAll değişmemiş künyeyi (meta)
+   her seferinde yeniden yazıyordu; yazılan yol öteki cihaza «değişiklik»
+   diye gidiyor, o cihaz da tazelerken aynısını yapıyordu: iki açık cihaz
+   dakikada bir birbirini yeniletti. Depo ölçümü (storage) bu cihaza
+   aittir ve eşitlenmez (store.js CIHAZA_AIT). */
+describe('Yükleme — eşitlemeye yazı üretmez', () => {
+  it('ikinci loadAll depoya yalnız cihaza ait ölçümü yazar', async () => {
+    resetState();
+    const geri = profilListesiniKoru();
+    const yazilan = [], set = ESP.Store.set;
+    ESP.Store.set = function(y, v){ yazilan.push(y); return set.call(this, y, v); };
+    try{
+      await ESP.Store.set('days/2026-03-04', { date:'2026-03-04', sessions:[] });
+      await M.loadAll();
+      yazilan.length = 0;
+      await M.loadAll();
+      expect(yazilan.filter(y => y !== 'storage')).toEqual([]);
+    }finally{ geri(); resetState(); }
+  });
+});
+
 })();

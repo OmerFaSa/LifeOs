@@ -14455,7 +14455,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'0cbef830', at:'2026-10-05 10:55', dirty:true };
+ESP.BUILD = { id:'b5b8fae7', at:'2026-10-05 11:54', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -23321,7 +23321,17 @@ window.LIFEOS = window.LIFEOS || {};
       cihazda daha yeni bir değişikliği sırada bekleyen yolun üstüne
       yazılmaz.
    8. FOTOĞRAFLAR EŞİTLENMEZ: tarayıcının ayrı deposundadır (foto.js) ve
-      bu sürümde çekildiği cihazda kalır. Panel bunu söyler. */
+      bu sürümde çekildiği cihazda kalır. Panel bunu söyler.
+   9. YAZILAN SİLİNMEZ, KAYDET EN YENİNİN ÜSTÜNE YAZAR (2026-10-05).
+      Uzaktan kayıt gelince model hemen tazelenir (modülün `yukle`'si);
+      ekran (`yenile`) kullanıcı yazarken ya da yazıp henüz kaydetmemişken
+      beklenir — odak alandan çıkmış olsa da (telefonda klavye kapandı).
+      Açık bir kağıt ikisini de bekletir. Eskiden ikisi birlikte
+      bekliyordu: «Kaydet» eski modelden kurulan kaydı yazıp öteki
+      cihazın az önce gelen değişikliğini eziyordu.
+  10. AYNI DEĞER EKRANI YENİLEMEZ. Uzaktan gelen kayıt bu cihazdakiyle
+      aynıysa yazılmaz, ekran yenilenmez: değişmemiş bir kaydı yeniden
+      yazan bir cihaz öteki cihazları durmadan yenilemesin. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -23368,11 +23378,13 @@ window.LIFEOS.HESAP = (function(){
     },
   };
 
-  let ayar = null;            // { modul, depo, yenile, mesgul, ornek }
+  let ayar = null;            // { modul, depo, yukle, yenile, mesgul, kesilebilir, ornek }
   let hal = { durum:'bilinmiyor', mesaj:'' };
   let sunucu = null;          // /api/hesap/durum cevabı; null = API yok/ulaşılamadı
   let erteleId = null, araId = null;
-  let yenileBekliyor = false, sonGorunur = 0, panelMesaj = '';
+  let sonGorunur = 0, panelMesaj = '';
+  /* Uzaktan gelenin modele (yukle) ve ekrana (yenile) inişi (söz 9). */
+  let modelBekliyor = false, ekranBekliyor = false, yenileId = null, tazeleme = null;
   /* EŞİTLENDİ İŞARETİ (kullanıcı, 2026-10-05, «7 güzel»): bir şey gerçekten
      gidip geldiyse bulut simgesinde onay bir kez belirip söner. Boş tur
      (dakikalık yoklama) işaret koymaz. */
@@ -23383,6 +23395,21 @@ window.LIFEOS.HESAP = (function(){
   function kac(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
       ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+
+  /* İki JSON değeri aynı mı? Anahtar sırası önemsiz (söz 10). */
+  function esit(a, b){
+    if(a === b) return true;
+    if(a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+    if(Array.isArray(a) !== Array.isArray(b)) return false;
+    if(Array.isArray(a)){
+      if(a.length !== b.length) return false;
+      for(let i = 0; i < a.length; i++) if(!esit(a[i], b[i])) return false;
+      return true;
+    }
+    const ka = Object.keys(a);
+    if(ka.length !== Object.keys(b).length) return false;
+    return ka.every(k => Object.prototype.hasOwnProperty.call(b, k) && esit(a[k], b[k]));
   }
 
   /* --------------------------------------------------------- çerez */
@@ -23582,12 +23609,15 @@ window.LIFEOS.HESAP = (function(){
         giden += parti.length;
         const c = await istek(base, '/api/hesap/esitle', { alan:a, cihaz:cihazKimligi(), cihaz_ad:cihazAdi(),
           son:im.son || 0, gonder:parti }, o.j, ZAMAN_ASIMI);
-        /* Uzaktan gelenler; sırada daha yeni değişikliği olan yol atlanır (söz 7). */
-        const sira = siraOku(a), yaz = [];
+        /* Uzaktan gelenler; sırada daha yeni değişikliği olan yol atlanır
+           (söz 7), bu cihazdakiyle aynı olan yazılmaz (söz 10). */
+        const sira = siraOku(a), yaz = [], yerel = (c.al || []).length ? ayar.depo.hepsi() : {};
         (c.al || []).forEach(r => {
           if(!r || typeof r.y !== 'string') return;
           if(sira[r.y] != null && Number(sira[r.y]) > Number(r.z)) return;
-          yaz.push([r.y, r.d === undefined ? null : r.d]);
+          const d = r.d === undefined ? null : r.d;
+          if(esit(yerel[r.y] === undefined ? null : yerel[r.y], d)) return;
+          yaz.push([r.y, d]);
         });
         if(yaz.length){ ayar.depo.uzaktan(yaz); uygulanan += yaz.length; }
         /* Gönderilen, gönderimden sonra yeniden değişmediyse sıradan düşer. */
@@ -23627,33 +23657,81 @@ window.LIFEOS.HESAP = (function(){
   }
 
   /* Uzaktan gelen kayıtlar uygulamanın belleğine (model) ancak yeniden
-     yüklemeyle girer. Kullanıcı bir şey yazıyorsa ya da bir kağıt
-     açıksa beklenir: yarım kalan form silinmez. */
-  function mesgulMu(){
-    if(ayar && typeof ayar.mesgul === 'function'){
-      try{ if(ayar.mesgul()) return true; }catch(e){ /* sorulamadı */ }
+     yüklemeyle girer, ekrana ancak yeniden çizimle (söz 9).
+
+     DOKUNULAN ALAN. Kullanıcının yazdığı (input/change olayı gelen) ve
+     değeri çizildiği değerden (defaultValue) farklı olan görünür alan
+     «kaydedilmemiş yazı»dır: yeniden çizim onu siler. Programın kendi
+     koyduğu değer olay üretmez, sayılmaz. Kaydedince form yeniden
+     çizilir, yeni alan temizdir. */
+  const dokunulan = typeof WeakSet === 'function' ? new WeakSet() : null;
+  function kirliMi(el){
+    if(!dokunulan || !dokunulan.has(el) || el.disabled || el.readOnly) return false;
+    if(el.tagName === 'SELECT'){
+      const o = el.options;
+      if(el.multiple || el.size > 1){
+        for(let i = 0; i < o.length; i++) if(o[i].selected !== o[i].defaultSelected) return true;
+        return false;
+      }
+      let v = -1;
+      for(let i = 0; i < o.length; i++) if(o[i].defaultSelected) v = i;
+      if(v < 0) for(let i = 0; i < o.length; i++) if(!o[i].disabled){ v = i; break; }
+      return el.selectedIndex !== v;
     }
-    if(typeof document === 'undefined') return false;
+    const t = String(el.type || '').toLowerCase();
+    if(t === 'checkbox' || t === 'radio') return el.checked !== el.defaultChecked;
+    if(/^(hidden|button|submit|reset|image|file)$/.test(t)) return false;
+    return el.value !== el.defaultValue;
+  }
+
+  /* Neden beklenir? 'kagit': açık bir kağıt (ya da modülün kendi işi) —
+     model de ekran da bekler, kağıdın elindeki kayıt tazelenen modelden
+     kopmasın. 'yazi': kullanıcı yazıyor ya da yazıp henüz kaydetmedi —
+     model hemen tazelenir, ekran bekler. null: beklenmez. */
+  function mesgulNeden(){
+    if(ayar && typeof ayar.mesgul === 'function'){
+      try{ if(ayar.mesgul()) return 'kagit'; }catch(e){ /* sorulamadı */ }
+    }
+    if(typeof document === 'undefined') return null;
     /* Kesilebilir kağıt (kurulum sihirbazı): profil sunucudan gelince
        yenilenir ve sihirbaz kendiliğinden kapanır; beklemek, girişten sonra
        zaten dolu bir profilin boş formunu göstermek olurdu. */
     let kesilir = false;
     try{ kesilir = !!(ayar && typeof ayar.kesilebilir === 'function' && ayar.kesilebilir()); }catch(e){ kesilir = false; }
-    const a = document.activeElement;
-    if(a && a !== document.body && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))
-      && !(a.closest && a.closest('[data-hesap-panel]')) && !(kesilir && a.closest && a.closest('#sheet'))) return true;
     const k = document.querySelector('#sheet .sheet');
-    return !!(k && k.getClientRects().length && !kesilir);
+    if(k && k.getClientRects().length && !kesilir) return 'kagit';
+    const sayilir = el => !(el.closest && (el.closest('[data-hesap-panel]') || (kesilir && el.closest('#sheet'))));
+    const a = document.activeElement;
+    if(a && a !== document.body && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) && sayilir(a)) return 'yazi';
+    const alanlar = document.querySelectorAll('input, textarea, select');
+    for(let i = 0; i < alanlar.length; i++){
+      const el = alanlar[i];
+      if(kirliMi(el) && sayilir(el) && el.getClientRects().length) return 'yazi';
+    }
+    return null;
   }
   function yenileIste(){
-    if(!ayar || typeof ayar.yenile !== 'function' || yenileBekliyor) return;
-    yenileBekliyor = true;
-    const dene = () => {
-      if(mesgulMu()){ ortam.zamanla(dene, 1500); return; }
-      yenileBekliyor = false;
-      Promise.resolve().then(() => ayar.yenile()).catch(e => console.error('Hesap: yeniden yükleme', e));
-    };
-    dene();
+    if(!ayar) return;
+    if(typeof ayar.yukle === 'function') modelBekliyor = true;
+    if(typeof ayar.yenile === 'function') ekranBekliyor = true;
+    yenileDene();
+  }
+  function yenileDene(){
+    if(yenileId != null){ ortam.iptal(yenileId); yenileId = null; }
+    const o = ayar;
+    if(!o) return;
+    const neden = mesgulNeden();
+    if(modelBekliyor && neden !== 'kagit'){
+      modelBekliyor = false;
+      tazeleme = Promise.resolve(tazeleme).then(() => o.yukle())
+        .catch(e => console.error('Hesap: model tazelenemedi', e));
+    }
+    if(ekranBekliyor && !modelBekliyor && !neden){
+      ekranBekliyor = false;
+      Promise.resolve(tazeleme).then(() => o.yenile())
+        .catch(e => console.error('Hesap: yeniden yükleme', e));
+    }
+    if(modelBekliyor || ekranBekliyor) yenileId = ortam.zamanla(() => { yenileId = null; yenileDene(); }, 1500);
   }
 
   /* ------------------------------------------------------- hesap işleri */
@@ -24098,6 +24176,13 @@ window.LIFEOS.HESAP = (function(){
   function bagla(){
     if(bagli || typeof document === 'undefined') return;
     bagli = true;
+    /* Dokunulan alan (söz 9): yalnız kullanıcının yazdığı sayılır. */
+    const dokun = e => {
+      const t = e.target;
+      if(dokunulan && t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) dokunulan.add(t);
+    };
+    document.addEventListener('input', dokun, true);
+    document.addEventListener('change', dokun, true);
     document.addEventListener('click', e => {
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
@@ -24156,9 +24241,11 @@ window.LIFEOS.HESAP = (function(){
   /* Testler için: bellekteki hâli bırakır. */
   function _sifirla(){
     if(erteleId != null) ortam.iptal(erteleId);
-    erteleId = null;
+    if(yenileId != null) ortam.iptal(yenileId);
+    erteleId = null; yenileId = null;
     ayar = null; hal = { durum:'bilinmiyor', mesaj:'' }; sunucu = null;
-    aktif = null; siradaki = null; yenileBekliyor = false; panelMesaj = ''; onayBitis = 0;
+    aktif = null; siradaki = null; panelMesaj = ''; onayBitis = 0;
+    modelBekliyor = false; ekranBekliyor = false; tazeleme = null;
     kapi = { gorunum:'giris', soru:null, ad:'', adres:null };
     kapiKapat();
   }
@@ -34613,7 +34700,7 @@ ESP.Store = (function(){
      Her yazma hangi yolun değiştiğini hesap katmanına bildirir; hesap
      yolu sıraya yazar ve PC sunucusuna ulaşınca gönderir. Uzaktan gelen
      kayıt `uzaktan` ile yazılır ve BİLDİRİLMEZ (geri gönderilmez). Cihaza
-     ait anahtarlar (CIHAZA_AIT: HKM jetonu) eşitlenmez. */
+     ait anahtarlar (CIHAZA_AIT: HKM jetonu, depo ölçümü) eşitlenmez. */
   let onDegisim = null;
   function degisti(yollar){
     const y = (yollar || []).filter(p => CIHAZA_AIT.indexOf(p) < 0);
@@ -34726,8 +34813,14 @@ ESP.Store = (function(){
      dosyasi e-postaya, buluta, baska bir diske gider; jeton oraya duz
      metin girmemeli. Geri yukleme de baska bir cihazin (ya da eski bir
      donemin) «acik» ayarini sormadan geri getirmemeli: bu cihazin
-     ayari neyse o kalir, hic kurulmamissa kurulmamis kalir. */
-  const CIHAZA_AIT = ['hkm'];
+     ayari neyse o kalir, hic kurulmamissa kurulmamis kalir.
+
+     `storage`: BU tarayicinin deposunun boyut defteri (core/storage.js,
+     her acilista bir ornek). Baska bir cihazin olcumu bu deponun buyume
+     hizini bozar. Eslenirken her acilis oteki cihazlara «degisiklik» diye
+     gidiyor, o cihaz da yenilerken kendi olcumunu yaziyordu: iki acik
+     cihaz birbirini durmadan yeniletti (hesap.js, 2026-10-05). */
+  const CIHAZA_AIT = ['hkm', 'storage'];
   function cihazsiz(data){
     const out = Object.assign({}, data);
     CIHAZA_AIT.forEach(k => { delete out[k]; });
@@ -36291,8 +36384,14 @@ ESP.Model = (function(){
   async function loadAll(){
     await ESP.Store.init();
 
-    S.meta = migrate(await ESP.Store.get('meta') || { schemaVersion:ESP.SCHEMA_VERSION });
-    await ESP.Store.set('meta', S.meta);
+    /* Künye YALNIZ değiştiyse yazılır (yoksa ya da göç ettiyse). Eşitleme
+       uzaktan kayıt gelince modeli buradan tazeler; her yüklemede yazılan
+       künye öteki cihaza «değişiklik» diye gidiyor, o da tazelerken
+       yazıyordu: iki açık cihaz birbirini durmadan yeniletti (hesap.js). */
+    const metaHam = await ESP.Store.get('meta');
+    const metaOnce = metaHam ? JSON.stringify(metaHam) : null;
+    S.meta = migrate(metaHam || { schemaVersion:ESP.SCHEMA_VERSION });
+    if(JSON.stringify(S.meta) !== metaOnce) await ESP.Store.set('meta', S.meta);
 
     S.profile = Object.assign(defaultProfile(), await ESP.Store.get('profile'));
     S.prefs = Object.assign(defaultPrefs(), await ESP.Store.get('prefs'));
@@ -64935,16 +65034,17 @@ ESP.App = (function(){
         try{ ESP.OrnekVeri.doldur(); }catch(e){ console.error(e); }
       }
       /* HESAP (brand/ortak/hesap.js): PC sunucusuyla giriş ve eşitleme.
-         Sunucu yoksa hiçbir şey beklemez; uzaktan kayıt gelirse model
-         yeniden yüklenir ve ekran çizilir (yazı yazılırken beklenir). */
+         Sunucu yoksa hiçbir şey beklemez. Uzaktan kayıt gelirse model
+         hemen yeniden yüklenir (Kaydet en yeni kaydın üstüne yazar);
+         ekran kullanıcı yazmıyorken çizilir (yazılan silinmez). */
       if(window.LIFEOS && window.LIFEOS.HESAP){
         const sihirbaz = () => !!document.querySelector('#sheet [data-act="setup-skip"]');
         window.LIFEOS.HESAP.kur({ modul:'esp', depo:ESP.Store, ornek:ornekAcik, kesilebilir:sihirbaz,
-          yenile:async () => {
-            await M.loadAll();
+          yukle:() => M.loadAll(),
+          yenile:() => {
             /* Profil sunucudan geldiyse kurulum sihirbazının işi kalmadı. */
             if(sihirbaz() && ESP.Setup && !ESP.Setup.needed()) UI.closeSheet();
-            render();
+            return render();
           } });
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */

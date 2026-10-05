@@ -20,6 +20,11 @@
     12. Giriş ekranı: sunucu varken ve hesap yokken açılışta çıkar; sunucu
         yoksa çıkmaz; beta girişi kapatır (bu oturumda yeniden çıkmaz);
         kayıt ve «şifremi unuttum» oturum açar; hata yazılanı silmez.
+    13. Yazılıp kaydedilmemiş alan ekran yenilemesini bekletir (odak
+        alanda olmasa da); model hemen tazelenir; açık kağıt ikisini de
+        bekletir.
+    14. Uzaktan gelen kayıt yereldekiyle aynıysa ekran yenilenmez.
+    15. Depo ölçümü (storage) cihaza aittir: eşitlenmez.
    Sunucunun kendi kuralları HKM/tests/test_hesap.py'de gerçek SQLite ile
    sınanır; buradaki sahte sunucu aynı kuralı taklit eder. */
 
@@ -106,7 +111,7 @@
     o = o || {};
     const jar = {}, ls = {};
     const depo = {
-      alan:o.alan || 'spi/ben', veri:Object.assign({}, o.veri || {}), _d:null, yenilenen:0,
+      alan:o.alan || 'spi/ben', veri:Object.assign({}, o.veri || {}), _d:null, yenilenen:0, yuklenen:0,
       hepsi(){ return Object.assign({}, this.veri); },
       uzaktan(c){ c.forEach(([y, d]) => { if(d === null) delete this.veri[y]; else this.veri[y] = d; }); return true; },
       set onDegisim(fn){ this._d = fn; },
@@ -150,6 +155,7 @@
     Object.assign(h._ortam, cihaz.ortam);
     h.kur({ modul:'spi', depo:cihaz.depo, ornek:cihaz.ornek || (() => false),
       yenile:async () => { cihaz.depo.yenilenen++; },
+      yukle:cihaz.yukle ? async () => { cihaz.depo.yuklenen++; } : undefined,
       mesgul:cihaz.mesgul || (() => false), kesilebilir:cihaz.kesilebilir });
     return h;
   }
@@ -250,6 +256,131 @@
         k.remove();
         if(yeniKap) kap.remove();
       }
+    }));
+
+    /* YAZILAN AMA KAYDEDİLMEYEN DEĞER (2026-10-05, aralıklı e2e kırmızısı).
+       Yeniden çizim formu modelden kurar; yazılıp henüz kaydedilmemiş
+       değer silinir ve «Kaydet» boş alanı yazar (sunucuda uyku null).
+       Odak denetimi yetmez: telefonda klavye kapatılınca, masaüstünde
+       «Kaydet»e basılırken odak alandan çıkar ama yazılan hâlâ kaydedilmemiştir. */
+    function kirliAlan(){
+      const el = document.createElement('input');
+      el.type = 'number';
+      el.style.cssText = 'display:block;width:40px;height:20px';
+      document.body.appendChild(el);
+      el.value = '7';                                           // kullanıcı yazdı…
+      el.dispatchEvent(new Event('input', { bubbles:true }));
+      el.blur();                                                // …ve alandan çıktı
+      return el;
+    }
+    const zamanlayici = c => {
+      const bekleyen = [];
+      c.ortam.zamanla = (fn, ms) => { if(ms === 1500) bekleyen.push(fn); return 0; };
+      return () => bekleyen.splice(0).forEach(fn => fn());
+    };
+
+    it('yazılıp kaydedilmemiş alan ekran yenilemesini bekletir; odak alanda olmasa da', () => sahneyle(async () => {
+      let el = null;
+      try{
+        const srv = sunucuKur();
+        srv.yaz('omer', 'spi/ben', 'vitals/2026-10-05', { water:250 }, 5);
+        const c = cihazKur(srv);
+        const sonra = zamanlayici(c);
+        const h = sahne(c);
+        await hazir();
+        el = kirliAlan();
+        await h.girisYap('omer', 'parola-123');
+        await h.esitle();
+        await hazir();
+        expect(c.depo.veri['vitals/2026-10-05']).toEqual({ water:250 });   // veri indi…
+        expect(c.depo.yenilenen).toBe(0);                                   // …ekran beklendi
+        el.remove();                                                        // kaydedildi, form yeniden çizildi
+        sonra();
+        await hazir();
+        expect(c.depo.yenilenen).toBe(1);
+      }finally{ if(el) el.remove(); }
+    }));
+
+    /* KAYDET EN YENİ KAYDIN ÜSTÜNE YAZAR. Ekran beklerken model de eski
+       kalıyordu: kullanıcı «Kaydet»e basınca eski modelden kurulan kayıt,
+       öteki cihazdan az önce gelen değişikliği kayıt düzeyinde eziyordu.
+       Model hemen tazelenir, yalnız ekran bekler. Açık kağıt (kesilemez)
+       ikisini de bekletir: kağıdın elindeki kayıt modelden kopmasın. */
+    it('kullanıcı yazarken model hemen tazelenir, ekran bekler; açık kağıtta ikisi de bekler', () => sahneyle(async () => {
+      let el = null;
+      try{
+        const srv = sunucuKur();
+        srv.yaz('omer', 'spi/ben', 'vitals/2026-10-05', { weight:79.4 }, 5);
+        const c = cihazKur(srv);
+        c.yukle = true;
+        const sonra = zamanlayici(c);
+        const h = sahne(c);
+        await hazir();
+        el = kirliAlan();
+        await h.girisYap('omer', 'parola-123');
+        await h.esitle();
+        await hazir();
+        expect(c.depo.yuklenen).toBe(1);
+        expect(c.depo.yenilenen).toBe(0);
+        el.remove();
+        sonra();
+        await hazir();
+        expect([c.depo.yuklenen, c.depo.yenilenen]).toEqual([1, 1]);
+      }finally{ if(el) el.remove(); }
+
+      let kap = document.getElementById('sheet'), yeniKap = !kap;
+      if(yeniKap){ kap = document.createElement('div'); kap.id = 'sheet'; document.body.appendChild(kap); }
+      const k = document.createElement('div');
+      k.className = 'sheet';
+      k.innerHTML = '<p>Tahlil düzenle</p>';
+      k.style.cssText = 'display:block;width:10px;height:10px';
+      kap.appendChild(k);
+      try{
+        const srv = sunucuKur();
+        srv.yaz('omer', 'spi/ben', 'labs/l1', { tsh:2.1 }, 5);
+        const c = cihazKur(srv);
+        c.yukle = true;
+        const sonra = zamanlayici(c);
+        const h = sahne(c);
+        await hazir();
+        await h.girisYap('omer', 'parola-123');
+        await h.esitle();
+        await hazir();
+        expect([c.depo.yuklenen, c.depo.yenilenen]).toEqual([0, 0]);
+        k.remove();                                                         // kağıt kapandı
+        sonra();
+        await hazir();
+        expect([c.depo.yuklenen, c.depo.yenilenen]).toEqual([1, 1]);
+      }finally{
+        k.remove();
+        if(yeniKap) kap.remove();
+      }
+    }));
+
+    /* GİDİP GELME YOK. Bir cihaz değişmemiş bir kaydı yeniden yazınca
+       (açılışta künye, depo ölçümü…) öteki cihaz onu «yeni» diye alıp
+       ekranını yeniliyor, yenilerken kendisi de yazıyordu: iki açık cihaz
+       dakikada bir birbirini yeniletiyordu. Aynı değer yazılmaz, ekran
+       yenilenmez; gerçek değişiklik yine iner. */
+    it('uzaktan gelen kayıt yereldekiyle aynıysa ekran yenilenmez; gerçek değişiklik iner', () => sahneyle(async () => {
+      const srv = sunucuKur();
+      const c = cihazKur(srv, { veri:{ meta:{ schemaVersion:1, lastBackupAt:null }, 'vitals/x':{ a:1, b:[1, { c:2 }] } } });
+      const h = sahne(c);
+      await hazir();
+      await h.girisYap('omer', 'parola-123');
+      await h.esitle();
+      await hazir();
+      const once = c.depo.yenilenen;
+      srv.yaz('omer', 'spi/ben', 'meta', { lastBackupAt:null, schemaVersion:1 }, 9000000000000);
+      srv.yaz('omer', 'spi/ben', 'vitals/x', { b:[1, { c:2 }], a:1 }, 9000000000000);
+      await h.esitle();
+      await hazir();
+      expect(c.depo.yenilenen).toBe(once);
+      srv.yaz('omer', 'spi/ben', 'vitals/x', { a:2, b:[1, { c:2 }] }, 9000000000001);
+      await h.esitle();
+      await hazir();
+      expect(c.depo.veri['vitals/x']).toEqual({ a:2, b:[1, { c:2 }] });
+      expect(c.depo.yenilenen).toBe(once + 1);
     }));
 
     it('çevrimdışı değişiklik sırada kalır, bağlanınca akar', () => sahneyle(async () => {
@@ -542,6 +673,27 @@
         S.onDegisim = null;
         S.uzaktan([['zzhesap/b', null]]);
         if(eskiHkm == null) await S.remove('hkm'); else await S.set('hkm', eskiHkm);
+      }
+    });
+
+    /* `storage` bu tarayıcının deposunun boyut defteridir (core/storage.js,
+       her açılışta bir örnek). Eşitlenince her açılış öteki cihazlara
+       «değişiklik» diye gidiyor ve PC'nin büyüme hızı telefonun
+       ölçümleriyle eziliyordu. */
+    it('depo ölçümü (storage) cihaza aittir: eşitlemeye bildirilmez, uzaktan gelmez', async () => {
+      if(!S || typeof S.uzaktan !== 'function'){ expect('store.js kancası').toBe('var'); return; }
+      const gelen = [], eski = await S.get('storage');
+      const yedek = eski == null ? null : JSON.parse(JSON.stringify(eski));
+      S.onDegisim = y => gelen.push.apply(gelen, y);
+      try{
+        await S.set('storage', { samples:[{ date:'2026-10-05', bytes:1234 }] });
+        expect(gelen).toEqual([]);
+        expect(S.hepsi().storage).toBe(undefined);
+        S.uzaktan([['storage', { samples:[{ date:'2026-10-05', bytes:999999 }] }]]);
+        expect((await S.get('storage')).samples[0].bytes).toBe(1234);
+      }finally{
+        S.onDegisim = null;
+        if(yedek == null) await S.remove('storage'); else await S.set('storage', yedek);
       }
     });
   });

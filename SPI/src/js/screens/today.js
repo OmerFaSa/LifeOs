@@ -1316,10 +1316,17 @@ SP.Screens.today = (function(){
       SP.App.render();
     },
     async 'save-vitals'(){
+      /* YALNIZ DEĞİŞTİRİLEN ALAN YAZILIR (hesap.js, 2026-10-05). Form
+         çizildikten sonra öteki cihazdan gelen değer modelde tazelenir,
+         ama kullanıcı yazarken ekran yeniden çizilmez (yazılan silinmesin).
+         Dokunulmamış alanın formdaki ESKİ değerini yazmak o değişikliği
+         ezerdi. «Değişti» = alanın değeri çizildiği değerden farklı;
+         boşaltmak da değişikliktir. */
+      const degisti = el => el.value !== el.defaultValue;
       const patch = {};
       FIELDS.forEach(f => {
         const el = document.getElementById('v-' + f.id);
-        if(!el) return;
+        if(!el || !degisti(el)) return;
         const raw = el.value.trim();
         patch[f.id] = raw === '' ? null : Number(raw.replace(',', '.'));
       });
@@ -1342,7 +1349,7 @@ SP.Screens.today = (function(){
       }
       supheGecti = false; supheAlan = null;
       const note = document.getElementById('v-note');
-      if(note) patch.note = note.value.trim();
+      if(note && degisti(note)) patch.note = note.value.trim();
       /* 088: tartının KAYIT ANI (yalnız bugün girilen ve değişen tartı). */
       const eski = M.vitalsOf(shownDate());
       if(patch.weight != null && shownDate() === U.todayISO() && (!eski || eski.weight !== patch.weight)) patch.weightAt = new Date().toISOString();

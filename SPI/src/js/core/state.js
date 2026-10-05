@@ -767,10 +767,20 @@ SP.Model = (function(){
     return out;
   }
 
+  /* `lastSeenAt` her değerlendirmede değişir ve hiçbir yerde okunmaz;
+     kaydı yeniden yazmaya değmez. Yazmak, eşitlemede öteki cihaza her
+     yüklemede «değişiklik» göndermek demekti (hesap.js, 2026-10-05). */
+  const bayrakIzi = list => JSON.stringify((list || []).map(f => {
+    const k = Object.assign({}, f);
+    delete k.lastSeenAt;
+    return k;
+  }));
+
   async function refreshFlags(){
     const live = evaluateFlags();
     const now = new Date().toISOString();
     const prev = SP.S.flags || [];
+    const once = bayrakIzi(prev);
     const byId = {};
     prev.forEach(f => { byId[f.id] = f; });
 
@@ -790,7 +800,7 @@ SP.Model = (function(){
     });
 
     SP.S.flags = Object.keys(byId).map(k => byId[k]);
-    await SP.Store.set('flags', SP.S.flags);
+    if(bayrakIzi(SP.S.flags) !== once) await SP.Store.set('flags', SP.S.flags);
     return SP.S.flags;
   }
 
@@ -879,8 +889,14 @@ SP.Model = (function(){
     const S = SP.S;
     await SP.Store.init();
 
-    S.meta = migrate(await SP.Store.get('meta') || { schemaVersion:SP.SCHEMA_VERSION });
-    await SP.Store.set('meta', S.meta);
+    /* Künye YALNIZ değiştiyse yazılır (yoksa ya da göç ettiyse). Eşitleme
+       uzaktan kayıt gelince modeli buradan tazeler; her yüklemede yazılan
+       künye öteki cihaza «değişiklik» diye gidiyor, o da tazelerken
+       yazıyordu: iki açık cihaz birbirini durmadan yeniletti (hesap.js). */
+    const metaHam = await SP.Store.get('meta');
+    const metaOnce = metaHam ? JSON.stringify(metaHam) : null;
+    S.meta = migrate(metaHam || { schemaVersion:SP.SCHEMA_VERSION });
+    if(JSON.stringify(S.meta) !== metaOnce) await SP.Store.set('meta', S.meta);
 
     S.profile = (await SP.Store.get('profile')) || defaultProfile();
     S.profile.id = activeProfileId();

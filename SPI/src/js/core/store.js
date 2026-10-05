@@ -172,7 +172,7 @@ SP.Store = (function(){
      Her yazma hangi yolun değiştiğini hesap katmanına bildirir; hesap
      yolu sıraya yazar ve PC sunucusuna ulaşınca gönderir. Uzaktan gelen
      kayıt `uzaktan` ile yazılır ve BİLDİRİLMEZ (geri gönderilmez). Cihaza
-     ait anahtarlar (CIHAZA_AIT: HKM jetonu) eşitlenmez. */
+     ait anahtarlar (CIHAZA_AIT: HKM jetonu, depo ölçümü) eşitlenmez. */
   let onDegisim = null;
   function degisti(yollar){
     const y = (yollar || []).filter(p => CIHAZA_AIT.indexOf(p) < 0);
@@ -285,8 +285,14 @@ SP.Store = (function(){
      dosyasi e-postaya, buluta, baska bir diske gider; jeton oraya duz
      metin girmemeli. Geri yukleme de baska bir cihazin (ya da eski bir
      donemin) «acik» ayarini sormadan geri getirmemeli: bu cihazin
-     ayari neyse o kalir, hic kurulmamissa kurulmamis kalir. */
-  const CIHAZA_AIT = ['hkm'];
+     ayari neyse o kalir, hic kurulmamissa kurulmamis kalir.
+
+     `storage`: BU tarayicinin deposunun boyut defteri (core/storage.js,
+     her acilista bir ornek). Baska bir cihazin olcumu bu deponun buyume
+     hizini bozar. Eslenirken her acilis oteki cihazlara «degisiklik» diye
+     gidiyor, o cihaz da yenilerken kendi olcumunu yaziyordu: iki acik
+     cihaz birbirini durmadan yeniletti (hesap.js, 2026-10-05). */
+  const CIHAZA_AIT = ['hkm', 'storage'];
   function cihazsiz(data){
     const out = Object.assign({}, data);
     CIHAZA_AIT.forEach(k => { delete out[k]; });

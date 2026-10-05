@@ -1440,11 +1440,12 @@ R.App = (function(){
         try{ R.OrnekVeri.doldur(); }catch(e){ console.error(e); }
       }
       /* HESAP (brand/ortak/hesap.js): PC sunucusuyla giriş ve eşitleme.
-         Sunucu yoksa hiçbir şey beklemez; uzaktan kayıt gelirse model
-         yeniden yüklenir ve ekran çizilir (yazı yazılırken beklenir). */
+         Sunucu yoksa hiçbir şey beklemez. Uzaktan kayıt gelirse model
+         hemen yeniden yüklenir (Kaydet en yeni kaydın üstüne yazar);
+         ekran kullanıcı yazmıyorken çizilir (yazılan silinmez). */
       if(window.LIFEOS && window.LIFEOS.HESAP){
         window.LIFEOS.HESAP.kur({ modul:'ays', depo:R.Store, ornek:ornekAcik,
-          yenile:async () => { await M.loadAll(); render(); } });
+          yukle:() => M.loadAll(), yenile:() => render() });
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){

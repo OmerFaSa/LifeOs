@@ -35,7 +35,17 @@
       cihazda daha yeni bir değişikliği sırada bekleyen yolun üstüne
       yazılmaz.
    8. FOTOĞRAFLAR EŞİTLENMEZ: tarayıcının ayrı deposundadır (foto.js) ve
-      bu sürümde çekildiği cihazda kalır. Panel bunu söyler. */
+      bu sürümde çekildiği cihazda kalır. Panel bunu söyler.
+   9. YAZILAN SİLİNMEZ, KAYDET EN YENİNİN ÜSTÜNE YAZAR (2026-10-05).
+      Uzaktan kayıt gelince model hemen tazelenir (modülün `yukle`'si);
+      ekran (`yenile`) kullanıcı yazarken ya da yazıp henüz kaydetmemişken
+      beklenir — odak alandan çıkmış olsa da (telefonda klavye kapandı).
+      Açık bir kağıt ikisini de bekletir. Eskiden ikisi birlikte
+      bekliyordu: «Kaydet» eski modelden kurulan kaydı yazıp öteki
+      cihazın az önce gelen değişikliğini eziyordu.
+  10. AYNI DEĞER EKRANI YENİLEMEZ. Uzaktan gelen kayıt bu cihazdakiyle
+      aynıysa yazılmaz, ekran yenilenmez: değişmemiş bir kaydı yeniden
+      yazan bir cihaz öteki cihazları durmadan yenilemesin. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -82,11 +92,13 @@ window.LIFEOS.HESAP = (function(){
     },
   };
 
-  let ayar = null;            // { modul, depo, yenile, mesgul, ornek }
+  let ayar = null;            // { modul, depo, yukle, yenile, mesgul, kesilebilir, ornek }
   let hal = { durum:'bilinmiyor', mesaj:'' };
   let sunucu = null;          // /api/hesap/durum cevabı; null = API yok/ulaşılamadı
   let erteleId = null, araId = null;
-  let yenileBekliyor = false, sonGorunur = 0, panelMesaj = '';
+  let sonGorunur = 0, panelMesaj = '';
+  /* Uzaktan gelenin modele (yukle) ve ekrana (yenile) inişi (söz 9). */
+  let modelBekliyor = false, ekranBekliyor = false, yenileId = null, tazeleme = null;
   /* EŞİTLENDİ İŞARETİ (kullanıcı, 2026-10-05, «7 güzel»): bir şey gerçekten
      gidip geldiyse bulut simgesinde onay bir kez belirip söner. Boş tur
      (dakikalık yoklama) işaret koymaz. */
@@ -97,6 +109,21 @@ window.LIFEOS.HESAP = (function(){
   function kac(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
       ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+
+  /* İki JSON değeri aynı mı? Anahtar sırası önemsiz (söz 10). */
+  function esit(a, b){
+    if(a === b) return true;
+    if(a === null || b === null || typeof a !== 'object' || typeof b !== 'object') return false;
+    if(Array.isArray(a) !== Array.isArray(b)) return false;
+    if(Array.isArray(a)){
+      if(a.length !== b.length) return false;
+      for(let i = 0; i < a.length; i++) if(!esit(a[i], b[i])) return false;
+      return true;
+    }
+    const ka = Object.keys(a);
+    if(ka.length !== Object.keys(b).length) return false;
+    return ka.every(k => Object.prototype.hasOwnProperty.call(b, k) && esit(a[k], b[k]));
   }
 
   /* --------------------------------------------------------- çerez */
@@ -296,12 +323,15 @@ window.LIFEOS.HESAP = (function(){
         giden += parti.length;
         const c = await istek(base, '/api/hesap/esitle', { alan:a, cihaz:cihazKimligi(), cihaz_ad:cihazAdi(),
           son:im.son || 0, gonder:parti }, o.j, ZAMAN_ASIMI);
-        /* Uzaktan gelenler; sırada daha yeni değişikliği olan yol atlanır (söz 7). */
-        const sira = siraOku(a), yaz = [];
+        /* Uzaktan gelenler; sırada daha yeni değişikliği olan yol atlanır
+           (söz 7), bu cihazdakiyle aynı olan yazılmaz (söz 10). */
+        const sira = siraOku(a), yaz = [], yerel = (c.al || []).length ? ayar.depo.hepsi() : {};
         (c.al || []).forEach(r => {
           if(!r || typeof r.y !== 'string') return;
           if(sira[r.y] != null && Number(sira[r.y]) > Number(r.z)) return;
-          yaz.push([r.y, r.d === undefined ? null : r.d]);
+          const d = r.d === undefined ? null : r.d;
+          if(esit(yerel[r.y] === undefined ? null : yerel[r.y], d)) return;
+          yaz.push([r.y, d]);
         });
         if(yaz.length){ ayar.depo.uzaktan(yaz); uygulanan += yaz.length; }
         /* Gönderilen, gönderimden sonra yeniden değişmediyse sıradan düşer. */
@@ -341,33 +371,81 @@ window.LIFEOS.HESAP = (function(){
   }
 
   /* Uzaktan gelen kayıtlar uygulamanın belleğine (model) ancak yeniden
-     yüklemeyle girer. Kullanıcı bir şey yazıyorsa ya da bir kağıt
-     açıksa beklenir: yarım kalan form silinmez. */
-  function mesgulMu(){
-    if(ayar && typeof ayar.mesgul === 'function'){
-      try{ if(ayar.mesgul()) return true; }catch(e){ /* sorulamadı */ }
+     yüklemeyle girer, ekrana ancak yeniden çizimle (söz 9).
+
+     DOKUNULAN ALAN. Kullanıcının yazdığı (input/change olayı gelen) ve
+     değeri çizildiği değerden (defaultValue) farklı olan görünür alan
+     «kaydedilmemiş yazı»dır: yeniden çizim onu siler. Programın kendi
+     koyduğu değer olay üretmez, sayılmaz. Kaydedince form yeniden
+     çizilir, yeni alan temizdir. */
+  const dokunulan = typeof WeakSet === 'function' ? new WeakSet() : null;
+  function kirliMi(el){
+    if(!dokunulan || !dokunulan.has(el) || el.disabled || el.readOnly) return false;
+    if(el.tagName === 'SELECT'){
+      const o = el.options;
+      if(el.multiple || el.size > 1){
+        for(let i = 0; i < o.length; i++) if(o[i].selected !== o[i].defaultSelected) return true;
+        return false;
+      }
+      let v = -1;
+      for(let i = 0; i < o.length; i++) if(o[i].defaultSelected) v = i;
+      if(v < 0) for(let i = 0; i < o.length; i++) if(!o[i].disabled){ v = i; break; }
+      return el.selectedIndex !== v;
     }
-    if(typeof document === 'undefined') return false;
+    const t = String(el.type || '').toLowerCase();
+    if(t === 'checkbox' || t === 'radio') return el.checked !== el.defaultChecked;
+    if(/^(hidden|button|submit|reset|image|file)$/.test(t)) return false;
+    return el.value !== el.defaultValue;
+  }
+
+  /* Neden beklenir? 'kagit': açık bir kağıt (ya da modülün kendi işi) —
+     model de ekran da bekler, kağıdın elindeki kayıt tazelenen modelden
+     kopmasın. 'yazi': kullanıcı yazıyor ya da yazıp henüz kaydetmedi —
+     model hemen tazelenir, ekran bekler. null: beklenmez. */
+  function mesgulNeden(){
+    if(ayar && typeof ayar.mesgul === 'function'){
+      try{ if(ayar.mesgul()) return 'kagit'; }catch(e){ /* sorulamadı */ }
+    }
+    if(typeof document === 'undefined') return null;
     /* Kesilebilir kağıt (kurulum sihirbazı): profil sunucudan gelince
        yenilenir ve sihirbaz kendiliğinden kapanır; beklemek, girişten sonra
        zaten dolu bir profilin boş formunu göstermek olurdu. */
     let kesilir = false;
     try{ kesilir = !!(ayar && typeof ayar.kesilebilir === 'function' && ayar.kesilebilir()); }catch(e){ kesilir = false; }
-    const a = document.activeElement;
-    if(a && a !== document.body && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))
-      && !(a.closest && a.closest('[data-hesap-panel]')) && !(kesilir && a.closest && a.closest('#sheet'))) return true;
     const k = document.querySelector('#sheet .sheet');
-    return !!(k && k.getClientRects().length && !kesilir);
+    if(k && k.getClientRects().length && !kesilir) return 'kagit';
+    const sayilir = el => !(el.closest && (el.closest('[data-hesap-panel]') || (kesilir && el.closest('#sheet'))));
+    const a = document.activeElement;
+    if(a && a !== document.body && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) && sayilir(a)) return 'yazi';
+    const alanlar = document.querySelectorAll('input, textarea, select');
+    for(let i = 0; i < alanlar.length; i++){
+      const el = alanlar[i];
+      if(kirliMi(el) && sayilir(el) && el.getClientRects().length) return 'yazi';
+    }
+    return null;
   }
   function yenileIste(){
-    if(!ayar || typeof ayar.yenile !== 'function' || yenileBekliyor) return;
-    yenileBekliyor = true;
-    const dene = () => {
-      if(mesgulMu()){ ortam.zamanla(dene, 1500); return; }
-      yenileBekliyor = false;
-      Promise.resolve().then(() => ayar.yenile()).catch(e => console.error('Hesap: yeniden yükleme', e));
-    };
-    dene();
+    if(!ayar) return;
+    if(typeof ayar.yukle === 'function') modelBekliyor = true;
+    if(typeof ayar.yenile === 'function') ekranBekliyor = true;
+    yenileDene();
+  }
+  function yenileDene(){
+    if(yenileId != null){ ortam.iptal(yenileId); yenileId = null; }
+    const o = ayar;
+    if(!o) return;
+    const neden = mesgulNeden();
+    if(modelBekliyor && neden !== 'kagit'){
+      modelBekliyor = false;
+      tazeleme = Promise.resolve(tazeleme).then(() => o.yukle())
+        .catch(e => console.error('Hesap: model tazelenemedi', e));
+    }
+    if(ekranBekliyor && !modelBekliyor && !neden){
+      ekranBekliyor = false;
+      Promise.resolve(tazeleme).then(() => o.yenile())
+        .catch(e => console.error('Hesap: yeniden yükleme', e));
+    }
+    if(modelBekliyor || ekranBekliyor) yenileId = ortam.zamanla(() => { yenileId = null; yenileDene(); }, 1500);
   }
 
   /* ------------------------------------------------------- hesap işleri */
@@ -812,6 +890,13 @@ window.LIFEOS.HESAP = (function(){
   function bagla(){
     if(bagli || typeof document === 'undefined') return;
     bagli = true;
+    /* Dokunulan alan (söz 9): yalnız kullanıcının yazdığı sayılır. */
+    const dokun = e => {
+      const t = e.target;
+      if(dokunulan && t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) dokunulan.add(t);
+    };
+    document.addEventListener('input', dokun, true);
+    document.addEventListener('change', dokun, true);
     document.addEventListener('click', e => {
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
@@ -870,9 +955,11 @@ window.LIFEOS.HESAP = (function(){
   /* Testler için: bellekteki hâli bırakır. */
   function _sifirla(){
     if(erteleId != null) ortam.iptal(erteleId);
-    erteleId = null;
+    if(yenileId != null) ortam.iptal(yenileId);
+    erteleId = null; yenileId = null;
     ayar = null; hal = { durum:'bilinmiyor', mesaj:'' }; sunucu = null;
-    aktif = null; siradaki = null; yenileBekliyor = false; panelMesaj = ''; onayBitis = 0;
+    aktif = null; siradaki = null; panelMesaj = ''; onayBitis = 0;
+    modelBekliyor = false; ekranBekliyor = false; tazeleme = null;
     kapi = { gorunum:'giris', soru:null, ad:'', adres:null };
     kapiKapat();
   }

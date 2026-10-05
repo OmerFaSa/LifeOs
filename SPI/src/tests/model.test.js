@@ -361,4 +361,27 @@
       expect(SP.Model.removeHouseholdMember(aktif).ok).toBeFalsy();
     });
   });
+
+  /* YÜKLEME YAZI ÜRETMEZ (hesap.js, 2026-10-05). Eşitleme uzaktan kayıt
+     gelince modeli loadAll ile tazeler. loadAll değişmemiş künyeyi
+     (meta) ve bayrakları (yalnız lastSeenAt değişmiş) her seferinde
+     yeniden yazıyordu; yazılan her yol öteki cihaza «değişiklik» diye
+     gidiyor, o cihaz da tazelerken aynısını yapıyordu: iki açık cihaz
+     dakikada bir birbirini yeniletti. Depo ölçümü (storage) bu cihaza
+     aittir ve eşitlenmez (store.js CIHAZA_AIT). */
+  describe('Model — yükleme', () => {
+    it('ikinci loadAll depoya yalnız cihaza ait ölçümü yazar', async () => {
+      resetState();
+      const yazilan = [], set = SP.Store.set;
+      SP.Store.set = function(y, v){ yazilan.push(y); return set.call(this, y, v); };
+      await SP.Store.set('profile', SP.S.profile);
+      await SP.Store.set('vitals/2026-03-10', { date:'2026-03-10', sbp:190, dbp:95, sleep:7 });
+      await SP.Model.loadAll();
+      expect(SP.Model.openFlags().length > 0).toBe(true);       // bayrak yolu gerçekten koştu
+      yazilan.length = 0;
+      await SP.Model.loadAll();
+      expect(yazilan.filter(y => y !== 'storage')).toEqual([]);
+      resetState();
+    });
+  });
 })();
