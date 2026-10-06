@@ -11716,22 +11716,74 @@ section.lrow.gizle-kucuk{ display:block !important; padding-top:12px !important;
 }
 
 /* ---------- giriş ekranı (açılışta, hesap yoksa) ----------
-   Sistemin dili: yumuşak renk zemini (zemin.css --zemin-*) ve üstünde
-   buzlu levha (--buz-*). Seçim sayfasında (4180) bu değişkenler yoktur;
-   dört modülün renginden yedeklere düşer. ÖNCE ANA MENÜ (hesap.js söz 11):
-   işaret, bu cihazdaki hesaplar, iki eylem, beta. Form yandan kayarak
-   gelir (önce yer, sonra yazı; 420 ms, sakin başlar), «‹» geri kaydırır. */
+   Sistemin dili: yumuşak renk zemini ve üstünde buzlu levha (--buz-*).
+   ÖNCE ANA MENÜ (hesap.js söz 11): işaret, bu cihazdaki hesaplar, iki
+   eylem, beta. Form yandan kayarak gelir (önce yer, sonra yazı; 420 ms,
+   sakin başlar), «‹» geri kaydırır.
+
+   ZEMİN DÖRT SİSTEMİN RENGİDİR (kullanıcı, 2026-10-06: «burayı da
+   geliştir», iki canlı denemeden «Dört sistem»): soldaki kartlar gibi AYS
+   sol üstte, Merkez sağ üstte, SPİ sağ altta, ESP sol altta. Dördü AYNI
+   açıklıkta (oklch göreli renk, ton kartın renginden); koyuda renkli ışık
+   olur, turuncu kahverengiye dönmez. Her leke zemin.css gibi beş ara
+   durakla söner: disk kenarı yok. Modülde de seçim sayfasında da aynı,
+   çünkü giriş dört sistemin ortak kapısıdır. Eskiden modülde modülün
+   kendi ailesi (--zemin-*), seçim sayfasında dört modülün AÇIK tema
+   rengi %14–20 karışıyordu (koyuda da: ESP çamura dönüyordu). Merkez'in
+   rengi modülde --mer, seçim sayfasında --hkm adını taşır. */
 html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
-.hesap-kapi{ position:fixed; inset:0; z-index:9000; display:grid; padding:24px 16px;
+.hesap-kapi{
+  --kapi-1:color-mix(in oklab, var(--ays, #2D5BE3) 22%, transparent);
+  --kapi-2:color-mix(in oklab, var(--mer, var(--hkm, #7453D4)) 20%, transparent);
+  --kapi-3:color-mix(in oklab, var(--spi, #0E8C79) 18%, transparent);
+  --kapi-4:color-mix(in oklab, var(--esp, #C8741C) 16%, transparent);
+  --kapi-golge:transparent;
+  position:fixed; inset:0; z-index:9000; display:grid; padding:24px 16px;
   overflow-y:auto;
   background:
-    radial-gradient(40% 36% at 16% 20%, var(--zemin-1, color-mix(in oklab, #2D5BE3 20%, transparent)), transparent 72%),
-    radial-gradient(36% 34% at 86% 16%, var(--zemin-2, color-mix(in oklab, #7453D4 16%, transparent)), transparent 72%),
-    radial-gradient(42% 38% at 80% 88%, var(--zemin-3, color-mix(in oklab, #0E8C79 16%, transparent)), transparent 72%),
-    radial-gradient(38% 34% at 14% 86%, var(--zemin-4, color-mix(in oklab, #C8741C 14%, transparent)), transparent 72%),
+    radial-gradient(120% 90% at 50% 45%, transparent 55%, var(--kapi-golge) 100%),
+    radial-gradient(66% 72% at 12% 8%, var(--kapi-1) 0%,
+      color-mix(in oklab, var(--kapi-1) 80%, transparent) 17%, color-mix(in oklab, var(--kapi-1) 52%, transparent) 33%,
+      color-mix(in oklab, var(--kapi-1) 24%, transparent) 48%, color-mix(in oklab, var(--kapi-1) 7%, transparent) 64%, transparent 78%),
+    radial-gradient(54% 60% at 90% 10%, var(--kapi-2) 0%,
+      color-mix(in oklab, var(--kapi-2) 80%, transparent) 17%, color-mix(in oklab, var(--kapi-2) 52%, transparent) 33%,
+      color-mix(in oklab, var(--kapi-2) 24%, transparent) 48%, color-mix(in oklab, var(--kapi-2) 7%, transparent) 64%, transparent 78%),
+    radial-gradient(60% 64% at 88% 96%, var(--kapi-3) 0%,
+      color-mix(in oklab, var(--kapi-3) 80%, transparent) 17%, color-mix(in oklab, var(--kapi-3) 52%, transparent) 33%,
+      color-mix(in oklab, var(--kapi-3) 24%, transparent) 48%, color-mix(in oklab, var(--kapi-3) 7%, transparent) 64%, transparent 78%),
+    radial-gradient(50% 56% at 8% 96%, var(--kapi-4) 0%,
+      color-mix(in oklab, var(--kapi-4) 80%, transparent) 17%, color-mix(in oklab, var(--kapi-4) 52%, transparent) 33%,
+      color-mix(in oklab, var(--kapi-4) 24%, transparent) 48%, color-mix(in oklab, var(--kapi-4) 7%, transparent) 64%, transparent 78%),
     color-mix(in oklab, var(--bg) 88%, transparent);
   -webkit-backdrop-filter:blur(28px) saturate(1.2); backdrop-filter:blur(28px) saturate(1.2);
   animation:hesap-kapi-gel .52s cubic-bezier(.32,.72,0,1) both; }
+/* Dördü aynı açıklıkta (göreli renk); koyuda renkli ışık ve kenarlarda hafif gölge. */
+@supports (color: oklch(from red l c h)){
+  .hesap-kapi{
+    --kapi-1:oklch(from var(--ays, #2D5BE3) .80 .11 h / .6);
+    --kapi-2:oklch(from var(--mer, var(--hkm, #7453D4)) .80 .11 h / .55);
+    --kapi-3:oklch(from var(--spi, #0E8C79) .82 .10 h / .55);
+    --kapi-4:oklch(from var(--esp, #C8741C) .85 .10 h / .55);
+  }
+}
+:root[data-theme="dark"] .hesap-kapi{ --kapi-golge:rgba(0,0,0,.3); }
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .hesap-kapi{ --kapi-golge:rgba(0,0,0,.3); } }
+@supports (color: oklch(from red l c h)){
+  :root[data-theme="dark"] .hesap-kapi{
+    --kapi-1:oklch(from var(--ays, #2D5BE3) .55 .14 h / .36);
+    --kapi-2:oklch(from var(--mer, var(--hkm, #7453D4)) .55 .14 h / .34);
+    --kapi-3:oklch(from var(--spi, #0E8C79) .58 .12 h / .3);
+    --kapi-4:oklch(from var(--esp, #C8741C) .62 .13 h / .26);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]) .hesap-kapi{
+      --kapi-1:oklch(from var(--ays, #2D5BE3) .55 .14 h / .36);
+      --kapi-2:oklch(from var(--mer, var(--hkm, #7453D4)) .55 .14 h / .34);
+      --kapi-3:oklch(from var(--spi, #0E8C79) .58 .12 h / .3);
+      --kapi-4:oklch(from var(--esp, #C8741C) .62 .13 h / .26);
+    }
+  }
+}
 .hesap-kapi__kart{ position:relative; box-sizing:border-box; width:min(380px, 100%); padding:32px 28px 18px; border-radius:28px; overflow:hidden;
   background:var(--buz-ust, color-mix(in oklab, var(--surface) 84%, transparent));
   -webkit-backdrop-filter:blur(24px) saturate(1.3); backdrop-filter:blur(24px) saturate(1.3);
@@ -14260,7 +14312,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'ee20cf84', at:'2026-10-06 11:26', dirty:true };
+SP.BUILD = { id:'71455af1', at:'2026-10-06 17:29', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
