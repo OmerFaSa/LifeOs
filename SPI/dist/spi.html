@@ -6423,6 +6423,9 @@ body.is-dragging .drop.is-over{
    ================================================================ */
 
 .birikim{ margin:0; }
+/* Eğri en boy oranını korumaz (preserveAspectRatio="none"); 640 px
+   genişlikte 240 px boyla kartın yarısı boş kalıyordu (iPhone §8 «boy»). */
+.birikim__svg{ max-height:140px; }
 .birikim--yok{ font-size:var(--fs-sm); color:var(--text-3); }
 .birikim__plan{
   fill:none;
@@ -14312,7 +14315,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'71455af1', at:'2026-10-06 17:29', dirty:true };
+SP.BUILD = { id:'0ecc276f', at:'2026-10-06 23:39', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -34316,7 +34319,8 @@ SP.HINTS = {
    açılır ya da var olanın «more»una eklenir. */
 (function(H){
   [
-    ['not-capraz-baglar', 'Çapraz bağlar', 'Son 60 gün · aynı günde ölçülmüş veriler'],
+    ['not-sikayet', 'Bugün bir şikâyetin var mı?', 'Kan değeri deponun bir kısmını gösterir; kramp ve uyku şikâyeti değerden önemli olabilir. İşaretlediklerin ilgili ölçümün yanında ve hekim çıktısında görünür.'],
+    ['not-capraz-baglar', 'Çapraz bağlar', 'Son 60 gün · aynı günde ölçülmüş veriler. Katsayı iki ölçümün birlikte hareket edip etmediğini söyler; birinin diğerine sebep olduğunu söylemez — bunu ancak deneyerek anlarsın.'],
     ['not-kendi-bagini-kur', 'Kendi bağını kur', 'İki ölçümü seç, birlikte hareket edip etmediklerine bak'],
     ['signal', null, 'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün ekranına tek kart olarak düşer. Burası o soruların defteri.'],
     ['goodhart', null, 'Sağlık verisi gürültülüdür: pencere 56 gün, eşik %35. İki pencerede de ölçüm yoksa hüküm kurulmaz.'],
@@ -54829,13 +54833,11 @@ SP.Screens.today = (function(){
     const w = SP.Symptom.window(30);
 
     return K.Entry({
-      label:'Bugün bir şikâyetin var mı?',
+      label:'Bugün bir şikâyetin var mı?', hint:'not-sikayet',
       meta:Object.keys(secili).length
         ? Object.keys(secili).length + ' işaretli'
         : (v && v.symptomsLogged ? 'şikâyet yok' : 'girilmedi'),
-      note:'Kan değeri deponun bir kısmını gösterir; kramp ve uyku şikâyeti '
-        + 'değerden önemli olabilir. İşaretlediklerin ilgili ölçümün yanında '
-        + 've hekim çıktısında görünür.',
+      /* Açıklama ⓘ'de (hints.js «not-sikayet»): sıkı ölçüde sabit not yok. */
       action:html`${K.Button({ label:'Şikâyetim yok', size:'sm', act:'no-symptoms' })}`,
       body:html`
         ${map(SP.SYMPTOM_GROUPS, g => html`
@@ -61022,10 +61024,11 @@ SP.Screens.analytics = (function(){
     return K.Card({
       hint:'not-capraz-baglar', title:'Çapraz bağlar',
       badge:K.Badge({ label:strong.length + ' belirgin bağ', tone:strong.length ? 'info' : 'muted' }),
+      /* Sınır cümlesi görünür kalır, başlığın yanında tek satır; uzun
+         açıklaması ⓘ'de (hints.js). */
+      note:'Birlikte hareket etmek, sebep olmak demek değildir.',
       body:html`
-        ${K.Notice({ tone:'info', body:'Katsayı iki ölçümün birlikte hareket edip etmediğini söyler. '
-          + 'Birinin diğerine sebep olduğunu söylemez — bunu ancak deneyerek anlarsın.' })}
-        <div class="list mt-12">${map(rows, r => html`
+        <div class="list">${map(rows, r => html`
           <div class="listitem">
             <div class="grow">
               <b class="small">${r.link.title}</b>

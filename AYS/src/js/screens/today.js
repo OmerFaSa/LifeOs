@@ -1802,8 +1802,10 @@ R.Screens.today = (function(){
       id:'gun',
       /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
          bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
-         «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-      kucukVarsayilan:['hafta-bağlamı', 'bugünün-ödülü', 'öbür-kayıtlar'],
+         «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik.
+         Gunluk hedef ara sira degisen bir ayardir; hedef sayisi sayaclarin
+         altinda («/ 18 soru») zaten yazili (iPhone §8 «boy»). */
+      kucukVarsayilan:['hafta-bağlamı', 'bugünün-ödülü', 'öbür-kayıtlar', 'günlük-hedef'],
       title:'Günü düzenle',
       subtitle(){ return 'Bloklar, sayaçlar ve günün bütün kartları'; },
       actions(){

@@ -130,9 +130,9 @@ ESP.Screens.today = (function(){
           ${K.Button({ label:'Oturumu kaydet', tone:'primary', act:'add-session' })}
           ${when(disc, () => K.Button({ label:disc.label + ' ekranını aç', act:'go',
             data:{ 'data-route':disc.route } }))}
-        </div>
-
-        <p class="small muted mt-10">${disc ? disc.note : ''}</p>`,
+        </div>`,
+      /* Disiplinin sabit tanımı (`disc.note`) burada yazılmaz: Rehber'de
+         duruyor; sıkı ölçüde sabit açıklama ekranda durmaz (iPhone §2). */
     });
   }
 

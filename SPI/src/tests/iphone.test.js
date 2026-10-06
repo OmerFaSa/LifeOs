@@ -383,6 +383,31 @@
       }finally{ kok.remove(); }
     });
 
+    it('Çapraz bağlar: sınır cümlesi ekranda tek satır, uzun açıklaması ⓘ’de', async () => {
+      resetState();
+      const kok = document.createElement('div');
+      kok.innerHTML = String(await SP.Screens.analytics.render());
+      document.body.appendChild(kok);
+      try{
+        expect(kok.textContent).toContain('Birlikte hareket etmek, sebep olmak demek değildir.');
+        expect(kok.textContent.indexOf('bunu ancak deneyerek anlarsın')).toBe(-1);
+        const h = SP.HINTS['not-capraz-baglar'];
+        expect(String(h.b) + ' ' + String(h.more || '')).toContain('bunu ancak deneyerek anlarsın');
+      }finally{ kok.remove(); }
+    });
+
+    it('Günü düzenle: şikâyet kartının açıklaması ⓘ’de, kartta değil', async () => {
+      resetState();
+      const kok = document.createElement('div');
+      kok.innerHTML = String(await SP.Screens.gun.render());
+      document.body.appendChild(kok);
+      try{
+        expect(kok.textContent).toContain('Bugün bir şikâyetin var mı?');
+        expect(kok.textContent.indexOf('Kan değeri deponun bir kısmını')).toBe(-1);
+        expect(String(SP.HINTS['not-sikayet'].b)).toContain('Kan değeri deponun bir kısmını');
+      }finally{ kok.remove(); }
+    });
+
     it('Gösterge ayrışması: önceki pencere sıfırken «%Infinity» değil «sıfırdan»', () => {
       const n = SP.Goodhart.ayrismaNotu({ effortLabel:'antrenman dakikası', outcomeLabel:'toparlanma' }, Infinity, -0.5);
       expect(n).toBe('antrenman dakikası sıfırdan başladı, toparlanma %50 GERİLEDİ.');

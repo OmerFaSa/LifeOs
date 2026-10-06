@@ -129,7 +129,8 @@ SP.HINTS = {
    açılır ya da var olanın «more»una eklenir. */
 (function(H){
   [
-    ['not-capraz-baglar', 'Çapraz bağlar', 'Son 60 gün · aynı günde ölçülmüş veriler'],
+    ['not-sikayet', 'Bugün bir şikâyetin var mı?', 'Kan değeri deponun bir kısmını gösterir; kramp ve uyku şikâyeti değerden önemli olabilir. İşaretlediklerin ilgili ölçümün yanında ve hekim çıktısında görünür.'],
+    ['not-capraz-baglar', 'Çapraz bağlar', 'Son 60 gün · aynı günde ölçülmüş veriler. Katsayı iki ölçümün birlikte hareket edip etmediğini söyler; birinin diğerine sebep olduğunu söylemez — bunu ancak deneyerek anlarsın.'],
     ['not-kendi-bagini-kur', 'Kendi bağını kur', 'İki ölçümü seç, birlikte hareket edip etmediklerine bak'],
     ['signal', null, 'Nöbetçi ve sürtünme ölçer arka planda çalışır; soruları Bugün ekranına tek kart olarak düşer. Burası o soruların defteri.'],
     ['goodhart', null, 'Sağlık verisi gürültülüdür: pencere 56 gün, eşik %35. İki pencerede de ölçüm yoksa hüküm kurulmaz.'],

@@ -152,7 +152,9 @@ R.Screens.progress = (function(){
       body:K.Stack([
         meter('TYT', g.tytStatus, g.tyt.last3, gate.tyt, gate.tytSafe),
         when(gate.ayt, () => meter('AYT', g.aytStatus, g.ayt.last3, gate.ayt, gate.aytSafe)),
-        K.Notice({ tone:'info', title:'Bu ayın kuralı:', body:gate.note }),
+        /* Karar beklerken kural zaten ilk seçenektir («Bu ayın kapı kuralı»);
+           ayrıca kutuda yazmak aynı cümleyi iki kez okutuyordu. */
+        when(decision, () => K.Notice({ tone:'info', title:'Bu ayın kuralı:', body:gate.note })),
         choice,
       ]),
     });

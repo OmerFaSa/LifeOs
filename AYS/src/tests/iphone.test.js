@@ -279,6 +279,31 @@
       });
     });
 
+    it('İlerleme: karar beklerken kapının kuralı bir kez yazılır (ilk seçenek); karar verilince kutuda', async () => {
+      await withTodayAsync('2026-10-12', async () => {
+        await hazirla();
+        const gate = R.Calc.currentGate();
+        expect(!!gate).toBe(true);
+        const say = t => t.split(gate.note).length - 1;
+        let kok = await ciz('progress');
+        try{
+          expect(say(kok.textContent)).toBe(1);
+          expect(kok.textContent.indexOf('Bu ayın kuralı:')).toBe(-1);
+        }finally{ kok.remove(); }
+        const key = R.U.monthKey(R.U.today());
+        R.S.decisions[key] = { action:'Hacmi azalt', window:'Eylül', reevaluateAt:'2026-11-01' };
+        try{
+          kok = await ciz('progress');
+          try{ expect(kok.textContent).toContain('Bu ayın kuralı:'); }
+          finally{ kok.remove(); }
+        }finally{ delete R.S.decisions[key]; }
+      });
+    });
+
+    it('Günü düzenle: Günlük hedef baştan şerit (hedef sayaçların altında yazılı)', () => {
+      expect(R.Screens.gun.kucukVarsayilan).toContain('günlük-hedef');
+    });
+
     it('Telafi: tetik yokken protokoller şerit; iki başvuru listesi gizli', async () => {
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();

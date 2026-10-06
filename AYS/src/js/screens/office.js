@@ -154,7 +154,10 @@ R.Screens.office = (function(){
                   title:'Bu brifing eskidi.',
                   body:'Masalardaki notlar brifing yazıldıktan sonra değişti. '
                      + 'Aşağıdaki notlar günceldir; brifingi yenileyebilirsin.' })}</div>`)}
-                ${when(b.mode === 'kural', () => html`<p class="tiny dim mt-8">
+                ${/* Model kapalıyken sayfanın üstündeki «Dil modeli kapalı» şeridi
+                     bunu zaten söylüyor; satır yalnız model açıkken (brifing kurala
+                     düştüyse) çizilir. */
+                  when(b.mode === 'kural' && O.mode() === 'llm', () => html`<p class="tiny dim mt-8">
                   Kural motoru metni — model bağlı değil.</p>`)}`
             : html`<p class="small muted">${O.ruleBriefingText()}</p>`}
         </div>

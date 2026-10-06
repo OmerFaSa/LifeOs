@@ -112,13 +112,11 @@ SP.Screens.today = (function(){
     const w = SP.Symptom.window(30);
 
     return K.Entry({
-      label:'Bugün bir şikâyetin var mı?',
+      label:'Bugün bir şikâyetin var mı?', hint:'not-sikayet',
       meta:Object.keys(secili).length
         ? Object.keys(secili).length + ' işaretli'
         : (v && v.symptomsLogged ? 'şikâyet yok' : 'girilmedi'),
-      note:'Kan değeri deponun bir kısmını gösterir; kramp ve uyku şikâyeti '
-        + 'değerden önemli olabilir. İşaretlediklerin ilgili ölçümün yanında '
-        + 've hekim çıktısında görünür.',
+      /* Açıklama ⓘ'de (hints.js «not-sikayet»): sıkı ölçüde sabit not yok. */
       action:html`${K.Button({ label:'Şikâyetim yok', size:'sm', act:'no-symptoms' })}`,
       body:html`
         ${map(SP.SYMPTOM_GROUPS, g => html`

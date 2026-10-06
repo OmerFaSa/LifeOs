@@ -363,6 +363,29 @@
       }finally{ kok.remove(); }
     });
 
+    it('Radar: radar ile disiplin tablosu tek kapta (genişte yan yana, esp.css .radarcift)', async () => {
+      resetState();
+      const kok = document.createElement('div');
+      kok.innerHTML = String(await ESP.Screens.analytics.render());
+      document.body.appendChild(kok);
+      try{
+        const cift = kok.querySelector('.radarcift');
+        expect(!!cift).toBe(true);
+        expect(!!cift.querySelector('table')).toBe(true);
+      }finally{ kok.remove(); }
+    });
+
+    it('Günü düzenle: oturum kartında disiplinin sabit tanımı yok (Rehber’de)', async () => {
+      resetState();
+      const kok = document.createElement('div');
+      kok.innerHTML = String(await ESP.Screens.gun.render());
+      document.body.appendChild(kok);
+      try{
+        expect(kok.textContent).toContain('Oturum ekle');
+        expect(kok.textContent.indexOf(ESP.DISCIPLINE_BY_ID.lang.note)).toBe(-1);
+      }finally{ kok.remove(); }
+    });
+
     it('Gösterge ayrışması: önceki pencere sıfırken «%Infinity» değil «sıfırdan»', () => {
       const n = ESP.Goodhart.ayrismaNotu({ effortLabel:'okuma dakikası', outcomeLabel:'çıkan not' }, Infinity, 0);
       expect(n).toBe('okuma dakikası sıfırdan başladı, çıkan not değişmedi.');

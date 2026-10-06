@@ -52,7 +52,9 @@ ESP.Screens.analytics = (function(){
           options:[{ value:'7', label:'7 gün' }, { value:'14', label:'14 gün' },
             { value:'30', label:'30 gün' }] }),
         wide:true,
-        body:html`
+        /* Geniş ekranda radar ile tablo yan yana (esp.css .radarcift):
+           radar ortada dar duruyordu, iki yanı boştu (iPhone §8 «boy»). */
+        body:html`<div class="radarcift">
           ${P.radar(eksenler, { scale:'Dış halka = bu penceredeki en yüksek disiplin.' })}
           ${K.Table({ tight:true,
             headers:['Disiplin', { label:'Süre', num:true }, { label:'Gün', num:true },
@@ -63,7 +65,7 @@ ESP.Screens.analytics = (function(){
               r.cert === 'missing' ? '—' : String(r.enteredDays),
               r.cert === 'missing' ? '—' : U.fmtNum(Math.round(r.k * 100) / 100),
               r.kWhy,
-            ]) })}`,
+            ]) })}</div>`,
       }),
 
       K.Entry({

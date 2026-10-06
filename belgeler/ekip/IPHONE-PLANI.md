@@ -349,7 +349,7 @@ Yapılan (2d, bölüm turu; testler `ESP/…/iphone.test.js` «Faz 2d», `SPI/�
 | ferah · Merkez cam | ✅ Tasarım turu (kullanıcı: «profesyonel duruyor mu» → «tüm sistem için düzelt», «daha ferah», «Merkez'i de sade ve camsı yap»): tek kart ölçüsü 24 px iç boşluk, kartlar arası 20, Bugün alanları arası 32, levha ile içerik arası 56 px (kabuk.css FERAH); kahraman başlığı 22 px (sayfa başlığıyla yarışmaz); hayalet bağlantı yazısıyla kartın sol çizgisinde; ⓘ tek çizim (kart ipucu = başlık simgesi); yan yana dönen kartlar yarım tur arayla (vitrin.js, test); Bugün Öneri alanı mor yalnız Merkez önerisinde (Patron önerisi mor taşıyordu); üstteki 2 px şerit yumuşak zeminde yok. Merkez yüzü masaüstünde modüllerin kabuğunda: mor tonlu zemin, buzlu levha, dar cam kenar (CSS maskeli simgeler, işaretleme aynı), sol üstte logo yok (test_yuz t_cam_kabuk; yuz.js saydam gövdede kökün zeminini okur, kenardan gezinince fareyi içeriğe çeker) | (bu commit) | — |
 | süzülen kart | ✅ Kullanıcı (önce «gölge göz yoruyor», sonra «kartlara da gölge ekle»): kartın altında çok hafif süzülme gölgesi (`--kart-golge`, açık ve koyu ayrı; kabuk.css «SÜZÜLEN KART», HKM aynı jeton); iç içe kart ve açılır katmandaki kart gölge almaz; levhanın gölgesi kalır. jeton.css kural 4 güncellendi; temel.test oz-002 yeni kuralı denetler | (bu commit) | — |
 | Merkez modern | ✅ Kullanıcı (2026-10-05: «HKM kısmı her yönü ile çok ilkel kalmış; modern, güzel, sade yap»): telefonda gezinme altta cam bantta (Bugün · Onaylar · Ofis · Sohbet · Menü; Menü yaprağında sistem geçişi, tema, Hedefler · Sistemler · Ayarlar), bölümler üstte yüzen seçicide, Meydan bandın üstünde simge; tablette dar cam kenar (simge + ad); zemin her boyutta. Bugün: üç sistem tek kart, brifing ilk 3 satır + «Tümü», King tek hap (küre · ses · gönder), konsey üç satır (açıklama ⓘ). Onaylar başlığı çekmecenin adı, önce açık teklifler, form katlı; Sohbet görevli çipi; Sistemler durumu satır (önce bozuk); Başlarken katlı; Ofis/Hedefler açıklamaları `kartBas` ⓘ'sinde. İşaretleme ve kimlikler aynı; yuz.js telefonda Menü'den gezer (test_yuz üç yeni test) | (bu commit) | — |
-| boy | ⏭ açık iş: 1 200 px'i aşan sayfalar — AYS Dersler 1 238 (raf tabanı), İlerleme 1 516, Ayrıntılı analiz 1 608, Ofis 1 838, Danışma 1 314, Genel 1 557, Günü düzenle 1 748; SPİ Analiz 1 506, Ofis 1 390, Günü düzenle 1 682; ESP Bugün 1 377, Analiz 1 803, Profil 1 286, Günü düzenle 1 525 | — | ölçüm |
+| boy | ✅ 2026-10-07 (depo sahibi «yapılması gerekenleri yap»): yeniden ölçüldü, 14 değil 9 sayfa aşıyordu. Bütçeye girenler: AYS Analiz › Ayrıntı 1 273→1 173 (birikim eğrisi en çok 140 px, `brand/ortak/kart.css`), Ofis 1 219→1 193 (model kapalıyken «model bağlı değil» satırı üstteki şeridin tekrarıydı), SPİ Analiz 1 227→1 198 (Çapraz bağlar sınır cümlesi kutudan başlık notuna, uzunu ⓘ'de), ESP Analiz 1 509→1 147 (radar ve tablo genişte yan yana). Kısalan ama bilerek aşan: AYS İlerleme 1 421→1 359 (karar kapısında kural ilk seçeneğin tekrarıydı; kalan aşım yalnız karar BEKLERKEN — karar verilince kapı şerit olur), AYS Günü düzenle 1 648→1 505 (Günlük hedef şerit), SPİ Günü düzenle 1 552→1 458 (şikâyet notu ⓘ'de), ESP Günü düzenle 1 365→1 334 (disiplin tanımı Rehber'de). Dokunulmayan: AYS Ayarlar 1 576 — Faz 5 kararı (ilk bölüm açık, gerisi iOS listesi gibi şerit). Üç «Günü düzenle» veri giriş formudur; kart kısaltmak alan gizlemek olurdu, ölçüm olarak kalır | (bu commit) | aşan 9 → 5 |
 
 ## 9. Devir notu — sıradaki oturum buradan başlar
 
@@ -358,7 +358,7 @@ radyosu, tık sesleri, «Animasyonlar» ayarı (ayrıntı ve nottan ayrılan yer
 başındaki DURUM kutusunda). Aşağıdaki «Windows animasyonu kapalı → LifeOS solarak geçer»
 notu ESKİDİ: LifeOS artık kendi ayarına bakar (Görünüm › Animasyonlar, varsayılan Tam).
 Denetim araçları webdriver'da Sistem kipinde ölçer, yani ölçümler değişmedi. Kalan tek
-açık iş yine §8 «boy» satırı.
+§8 «boy» satırı da kapandı (2026-10-07).
 
 **Son devir (2026-10-02, 4. oturum, akşam):** kullanıcının beş isteği bitti — sol üst boş,
 başlık çekmecenin adı, iki seçici iki dil (yazı + nokta / bölümlü seçici), kayan işaret ve
@@ -368,7 +368,7 @@ tarayıcı «hareketi azalt» bildirir, LifeOS kaymaz ama solarak geçer. Tam ha
 Windows Ayarlar › Erişilebilirlik › Görsel efektler › Animasyon efektleri açılmalı.
 HKM ekran görüntüsü için gerçek config'e dokunmadan: HKM'yi geçici klasöre kopyala,
 kendi deneme jetonunla `config.json` yaz, kopyadan `daemon.py` aç (jeton hiçbir çıktıya
-yazılmaz). Kalan tek açık iş yine §8 «boy» satırı.
+yazılmaz). Kalan tek §8 «boy» satırı da kapandı (2026-10-07).
 
 **Son devir (2026-10-02, 3. oturum):** Faz 3, 4–5, 6–7 bitti (55b2015, 2db1f82, 9b44df0), tam denetim yeşil (ce98d9b);
 açık kart 150 → 86, üçü aşan ekran 13 → 0, `acikKart` zorunlu. Kalan tek iş §8'deki «boy»

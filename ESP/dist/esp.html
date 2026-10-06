@@ -6398,6 +6398,9 @@ body.is-dragging .drop.is-over{
    ================================================================ */
 
 .birikim{ margin:0; }
+/* Eğri en boy oranını korumaz (preserveAspectRatio="none"); 640 px
+   genişlikte 240 px boyla kartın yarısı boş kalıyordu (iPhone §8 «boy»). */
+.birikim__svg{ max-height:140px; }
 .birikim--yok{ font-size:var(--fs-sm); color:var(--text-3); }
 .birikim__plan{
   fill:none;
@@ -9402,6 +9405,12 @@ button.rutbe-rozet:focus-visible{
   display:flex; flex-direction:column; gap:2px;
 }
 .radar__none{ color:var(--text-3); font-style:italic; }
+/* Radar + disiplin tablosu: dar ekranda alt alta, genişte yan yana. */
+.radarcift{ display:flex; flex-direction:column; gap:var(--sp-4); }
+@media (min-width:1180px){
+  .radarcift{ display:grid; grid-template-columns:minmax(260px, 320px) minmax(0, 1fr); gap:32px; align-items:center; }
+  .radarcift > *{ min-width:0; }
+}
 
 /* --------------------------------------------------------- disiplin secimi
 
@@ -14960,7 +14969,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'71455af1', at:'2026-10-06 17:29', dirty:true };
+ESP.BUILD = { id:'0ecc276f', at:'2026-10-06 23:32', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -56256,9 +56265,9 @@ ESP.Screens.today = (function(){
           ${K.Button({ label:'Oturumu kaydet', tone:'primary', act:'add-session' })}
           ${when(disc, () => K.Button({ label:disc.label + ' ekranını aç', act:'go',
             data:{ 'data-route':disc.route } }))}
-        </div>
-
-        <p class="small muted mt-10">${disc ? disc.note : ''}</p>`,
+        </div>`,
+      /* Disiplinin sabit tanımı (`disc.note`) burada yazılmaz: Rehber'de
+         duruyor; sıkı ölçüde sabit açıklama ekranda durmaz (iPhone §2). */
     });
   }
 
@@ -62225,7 +62234,9 @@ ESP.Screens.analytics = (function(){
           options:[{ value:'7', label:'7 gün' }, { value:'14', label:'14 gün' },
             { value:'30', label:'30 gün' }] }),
         wide:true,
-        body:html`
+        /* Geniş ekranda radar ile tablo yan yana (esp.css .radarcift):
+           radar ortada dar duruyordu, iki yanı boştu (iPhone §8 «boy»). */
+        body:html`<div class="radarcift">
           ${P.radar(eksenler, { scale:'Dış halka = bu penceredeki en yüksek disiplin.' })}
           ${K.Table({ tight:true,
             headers:['Disiplin', { label:'Süre', num:true }, { label:'Gün', num:true },
@@ -62236,7 +62247,7 @@ ESP.Screens.analytics = (function(){
               r.cert === 'missing' ? '—' : String(r.enteredDays),
               r.cert === 'missing' ? '—' : U.fmtNum(Math.round(r.k * 100) / 100),
               r.kWhy,
-            ]) })}`,
+            ]) })}</div>`,
       }),
 
       K.Entry({

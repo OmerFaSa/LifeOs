@@ -815,6 +815,9 @@
    ================================================================ */
 
 .birikim{ margin:0; }
+/* Eğri en boy oranını korumaz (preserveAspectRatio="none"); 640 px
+   genişlikte 240 px boyla kartın yarısı boş kalıyordu (iPhone §8 «boy»). */
+.birikim__svg{ max-height:140px; }
 .birikim--yok{ font-size:var(--fs-sm); color:var(--text-3); }
 .birikim__plan{
   fill:none;

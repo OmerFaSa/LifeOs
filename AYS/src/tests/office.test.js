@@ -2614,6 +2614,23 @@
         'data-act="office-turn"', 'data-act="office-sahne"'].forEach(x => expect(out.indexOf(x)).toBe(-1));
     });
 
+    it('model kapalıyken brifingin altında «model bağlı değil» tekrarı yok; şerit söylüyor', async () => {
+      reset();
+      const gun = R.U.todayISO();
+      R.S.officeBriefings = { [gun]:{ id:gun, at:new Date().toISOString(), text:'Kural brifingi.',
+        mode:'kural', noteIds:O.notes().map(n => n.id).sort().join(','), noteCount:0 } };
+      const gercek = O.mode;
+      try{
+        O.mode = () => 'kural';
+        let out = String(await R.Screens.office.render());
+        expect(out).toContain('Dil modeli kapalı');
+        expect(out.indexOf('model bağlı değil')).toBe(-1);
+        O.mode = () => 'llm';
+        out = String(await R.Screens.office.render());
+        expect(out).toContain('model bağlı değil');
+      }finally{ O.mode = gercek; R.S.officeBriefings = {}; }
+    });
+
     it('her uzmanın masasına ekrandan ulaşılır', async () => {
       const out = await draw();
       R.AGENTS.filter(a => !a.lead).forEach(a => {

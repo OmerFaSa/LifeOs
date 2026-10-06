@@ -6436,6 +6436,9 @@ body.is-dragging .drop.is-over{
    ================================================================ */
 
 .birikim{ margin:0; }
+/* Eğri en boy oranını korumaz (preserveAspectRatio="none"); 640 px
+   genişlikte 240 px boyla kartın yarısı boş kalıyordu (iPhone §8 «boy»). */
+.birikim__svg{ max-height:140px; }
 .birikim--yok{ font-size:var(--fs-sm); color:var(--text-3); }
 .birikim__plan{
   fill:none;
@@ -15357,7 +15360,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'71455af1', at:'2026-10-06 17:29', dirty:true };
+R.BUILD = { id:'0ecc276f', at:'2026-10-06 23:32', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -59836,8 +59839,10 @@ R.Screens.today = (function(){
       id:'gun',
       /* Sadelik (brand/ortak/gizle.js): uzun aciklama ve basvuru bolumleri
          bastan kucuk gelir; baslik gorunur, ustune gelince onizlenir,
-         «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik. */
-      kucukVarsayilan:['hafta-bağlamı', 'bugünün-ödülü', 'öbür-kayıtlar'],
+         «Ac» denirse acik kalir. Is yapilan bolumler ve sinir metinleri acik.
+         Gunluk hedef ara sira degisen bir ayardir; hedef sayisi sayaclarin
+         altinda («/ 18 soru») zaten yazili (iPhone §8 «boy»). */
+      kucukVarsayilan:['hafta-bağlamı', 'bugünün-ödülü', 'öbür-kayıtlar', 'günlük-hedef'],
       title:'Günü düzenle',
       subtitle(){ return 'Bloklar, sayaçlar ve günün bütün kartları'; },
       actions(){
@@ -65619,7 +65624,9 @@ R.Screens.progress = (function(){
       body:K.Stack([
         meter('TYT', g.tytStatus, g.tyt.last3, gate.tyt, gate.tytSafe),
         when(gate.ayt, () => meter('AYT', g.aytStatus, g.ayt.last3, gate.ayt, gate.aytSafe)),
-        K.Notice({ tone:'info', title:'Bu ayın kuralı:', body:gate.note }),
+        /* Karar beklerken kural zaten ilk seçenektir («Bu ayın kapı kuralı»);
+           ayrıca kutuda yazmak aynı cümleyi iki kez okutuyordu. */
+        when(decision, () => K.Notice({ tone:'info', title:'Bu ayın kuralı:', body:gate.note })),
         choice,
       ]),
     });
@@ -69330,7 +69337,10 @@ R.Screens.office = (function(){
                   title:'Bu brifing eskidi.',
                   body:'Masalardaki notlar brifing yazıldıktan sonra değişti. '
                      + 'Aşağıdaki notlar günceldir; brifingi yenileyebilirsin.' })}</div>`)}
-                ${when(b.mode === 'kural', () => html`<p class="tiny dim mt-8">
+                ${/* Model kapalıyken sayfanın üstündeki «Dil modeli kapalı» şeridi
+                     bunu zaten söylüyor; satır yalnız model açıkken (brifing kurala
+                     düştüyse) çizilir. */
+                  when(b.mode === 'kural' && O.mode() === 'llm', () => html`<p class="tiny dim mt-8">
                   Kural motoru metni — model bağlı değil.</p>`)}`
             : html`<p class="small muted">${O.ruleBriefingText()}</p>`}
         </div>

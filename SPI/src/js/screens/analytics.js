@@ -28,10 +28,11 @@ SP.Screens.analytics = (function(){
     return K.Card({
       hint:'not-capraz-baglar', title:'Çapraz bağlar',
       badge:K.Badge({ label:strong.length + ' belirgin bağ', tone:strong.length ? 'info' : 'muted' }),
+      /* Sınır cümlesi görünür kalır, başlığın yanında tek satır; uzun
+         açıklaması ⓘ'de (hints.js). */
+      note:'Birlikte hareket etmek, sebep olmak demek değildir.',
       body:html`
-        ${K.Notice({ tone:'info', body:'Katsayı iki ölçümün birlikte hareket edip etmediğini söyler. '
-          + 'Birinin diğerine sebep olduğunu söylemez — bunu ancak deneyerek anlarsın.' })}
-        <div class="list mt-12">${map(rows, r => html`
+        <div class="list">${map(rows, r => html`
           <div class="listitem">
             <div class="grow">
               <b class="small">${r.link.title}</b>
