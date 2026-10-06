@@ -13146,12 +13146,20 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
    bazılarında dikey» (levhanın eni sayfadan sayfaya değişiyordu).
 
    · «Resim» bir dosya değil. Renkler MODÜLÜN RENGİNDEN türetilir (oklch
-     göreli renk): sol üstte modülün kendisi, sağ üstte ve sağ altta iki
-     komşu tonu (±40°), sol altta sabit sıcak bir kum tonu; altta
-     yukarıdan aşağı çok hafif bir taban geçişi. Böylece AYS mavi-mor-gök,
-     SPİ camgöbeği-mavi-yeşil, ESP turuncu-altın-gül olur: dört rastgele
-     pastel değil, tek ailenin tonları. Göreli rengi tanımayan tarayıcıda
-     onaylanmış pastel lekeler kalır.
+     göreli renk) ve TEK AİLEDİR: sol üstte modülün kendisi, sağ üstte ve
+     sağ altta iki komşu tonu (±30°), sol altta modülün açık bir tonu;
+     altta yukarıdan aşağı çok hafif bir taban geçişi. AYS mavi-mor-gök,
+     SPİ yeşil-camgöbeği-mavi, ESP mercan-turuncu-kehribar olur.
+     Kullanıcı (2026-10-06): «arka planda 4 farklı renk var, daha
+     profesyonel olsun». Komşular ±40° ve sol alt sabit bir kum tonuydu:
+     AYS'de mavi, pembe-mor, camgöbeği, şeftali dört ayrı renk gibi
+     duruyordu, koyuda kum tonu kahverengi çamura dönüyordu. Dört başka
+     yön (ızgara, geometri, bant, duvar kâğıdı) canlı denemeyle gösterildi;
+     «şimdiki iyi, onu geliştir» dedi ve iki geliştirmeden «Canlı»yı seçti.
+     Göreli rengi tanımayan tarayıcıda lekeler modül renginin saydam
+     tonlarıdır: orada da yabancı renk yok.
+   · Lekeler doğrusal değil, Gauss'a yakın söner (beş ara durak): kenarda
+     «disk» izi kalmaz.
    · İnce bir gren (SVG gürültüsü, dosya değil) geniş geçişlerdeki bant
      izini kırar; koyuda kenarlar hafifçe kararır (derinlik). Hepsi sabit
      katmanda (body::before/::after), sayfayla kaymaz, ağ isteği yok.
@@ -13172,10 +13180,10 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
      «bilinmez» sayılır ve zemini tümden kapatırdı). */
 
 :root{
-  --zemin-1:color-mix(in oklab, var(--mod, var(--ays)) 30%, transparent);
-  --zemin-2:color-mix(in oklab, #E9A6C1 30%, transparent);
-  --zemin-3:color-mix(in oklab, #8FD3BF 30%, transparent);
-  --zemin-4:color-mix(in oklab, #F3C98B 30%, transparent);
+  --zemin-1:color-mix(in oklab, var(--mod, var(--ays)) 34%, transparent);
+  --zemin-2:color-mix(in oklab, var(--mod, var(--ays)) 22%, transparent);
+  --zemin-3:color-mix(in oklab, var(--mod, var(--ays)) 20%, transparent);
+  --zemin-4:color-mix(in oklab, var(--mod, var(--ays)) 14%, transparent);
   --zemin-ust:color-mix(in oklab, var(--bg) 55%, #fff);
   --zemin-alt:var(--bg);
   --zemin-golge:transparent;
@@ -13188,10 +13196,10 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
   --kenar-cam-acik:color-mix(in oklab, var(--surface) 82%, transparent);
 }
 :root[data-theme="dark"]{
-  --zemin-1:color-mix(in oklab, var(--mod, var(--ays)) 22%, transparent);
-  --zemin-2:color-mix(in oklab, #E9A6C1 16%, transparent);
-  --zemin-3:color-mix(in oklab, #8FD3BF 16%, transparent);
-  --zemin-4:color-mix(in oklab, #F3C98B 14%, transparent);
+  --zemin-1:color-mix(in oklab, var(--mod, var(--ays)) 26%, transparent);
+  --zemin-2:color-mix(in oklab, var(--mod, var(--ays)) 18%, transparent);
+  --zemin-3:color-mix(in oklab, var(--mod, var(--ays)) 16%, transparent);
+  --zemin-4:color-mix(in oklab, var(--mod, var(--ays)) 12%, transparent);
   --zemin-ust:#18181c;
   --zemin-golge:rgba(0,0,0,.32);
   --zemin-gren:.06;
@@ -13202,10 +13210,10 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --zemin-1:color-mix(in oklab, var(--mod, var(--ays)) 22%, transparent);
-    --zemin-2:color-mix(in oklab, #E9A6C1 16%, transparent);
-    --zemin-3:color-mix(in oklab, #8FD3BF 16%, transparent);
-    --zemin-4:color-mix(in oklab, #F3C98B 14%, transparent);
+    --zemin-1:color-mix(in oklab, var(--mod, var(--ays)) 26%, transparent);
+    --zemin-2:color-mix(in oklab, var(--mod, var(--ays)) 18%, transparent);
+    --zemin-3:color-mix(in oklab, var(--mod, var(--ays)) 16%, transparent);
+    --zemin-4:color-mix(in oklab, var(--mod, var(--ays)) 12%, transparent);
     --zemin-ust:#18181c;
     --zemin-golge:rgba(0,0,0,.32);
     --zemin-gren:.06;
@@ -13215,26 +13223,26 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
     --buz-golge:0 32px 72px -36px rgba(0,0,0,.6);
   }
 }
-/* Tek aile: modülün rengi ve iki komşusu (göreli renk). */
+/* Tek aile: modülün rengi, iki komşusu (±30°) ve açık bir tonu (göreli renk). */
 @supports (color: oklch(from red l c h)){
   :root{
-    --zemin-1:oklch(from var(--mod, var(--ays)) .80 .10 h / .55);
-    --zemin-2:oklch(from var(--mod, var(--ays)) .85 .085 calc(h + 40) / .5);
-    --zemin-3:oklch(from var(--mod, var(--ays)) .87 .07 calc(h - 40) / .5);
-    --zemin-4:oklch(.92 .045 75 / .55);
+    --zemin-1:oklch(from var(--mod, var(--ays)) .78 .125 h / .66);
+    --zemin-2:oklch(from var(--mod, var(--ays)) .83 .105 calc(h + 30) / .56);
+    --zemin-3:oklch(from var(--mod, var(--ays)) .85 .09 calc(h - 30) / .56);
+    --zemin-4:oklch(from var(--mod, var(--ays)) .89 .06 h / .54);
   }
   :root[data-theme="dark"]{
-    --zemin-1:oklch(from var(--mod, var(--ays)) .42 .11 h / .5);
-    --zemin-2:oklch(from var(--mod, var(--ays)) .38 .09 calc(h + 40) / .42);
-    --zemin-3:oklch(from var(--mod, var(--ays)) .36 .08 calc(h - 40) / .4);
-    --zemin-4:oklch(.34 .04 70 / .3);
+    --zemin-1:oklch(from var(--mod, var(--ays)) .43 .135 h / .62);
+    --zemin-2:oklch(from var(--mod, var(--ays)) .38 .115 calc(h + 30) / .5);
+    --zemin-3:oklch(from var(--mod, var(--ays)) .36 .10 calc(h - 30) / .48);
+    --zemin-4:oklch(from var(--mod, var(--ays)) .31 .07 h / .4);
   }
   @media (prefers-color-scheme:dark){
     :root:not([data-theme="light"]){
-      --zemin-1:oklch(from var(--mod, var(--ays)) .42 .11 h / .5);
-      --zemin-2:oklch(from var(--mod, var(--ays)) .38 .09 calc(h + 40) / .42);
-      --zemin-3:oklch(from var(--mod, var(--ays)) .36 .08 calc(h - 40) / .4);
-      --zemin-4:oklch(.34 .04 70 / .3);
+      --zemin-1:oklch(from var(--mod, var(--ays)) .43 .135 h / .62);
+      --zemin-2:oklch(from var(--mod, var(--ays)) .38 .115 calc(h + 30) / .5);
+      --zemin-3:oklch(from var(--mod, var(--ays)) .36 .10 calc(h - 30) / .48);
+      --zemin-4:oklch(from var(--mod, var(--ays)) .31 .07 h / .4);
     }
   }
 }
@@ -13246,15 +13254,25 @@ html[data-zemin="yumusak"] .site--v5 > .site__body,
 html[data-zemin="yumusak"] .site--v5 .sayfa,
 html[data-zemin="yumusak"] .site--v5 .sayfasonu{ background:transparent; }
 
+/* Her leke beş ara durakla söner (Gauss'a yakın): rengin %80, %52, %24 ve
+   %7'si, sonra hiç. Doğrusal sönüm kenarda bir disk izi bırakıyordu. */
 html[data-zemin="yumusak"] body::before{
   content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
   background:
     radial-gradient(140% 90% at 50% 0%, var(--zemin-saat, transparent), transparent 75%),
     radial-gradient(120% 90% at 50% 45%, transparent 55%, var(--zemin-golge) 100%),
-    radial-gradient(58% 62% at 14% 10%, var(--zemin-1), transparent 70%),
-    radial-gradient(48% 54% at 90% 8%, var(--zemin-2), transparent 70%),
-    radial-gradient(56% 60% at 86% 96%, var(--zemin-3), transparent 72%),
-    radial-gradient(44% 50% at 10% 94%, var(--zemin-4), transparent 70%),
+    radial-gradient(66% 72% at 12% 8%, var(--zemin-1) 0%,
+      color-mix(in oklab, var(--zemin-1) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-1) 52%, transparent) 33%,
+      color-mix(in oklab, var(--zemin-1) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-1) 7%, transparent) 64%, transparent 78%),
+    radial-gradient(54% 60% at 90% 10%, var(--zemin-2) 0%,
+      color-mix(in oklab, var(--zemin-2) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-2) 52%, transparent) 33%,
+      color-mix(in oklab, var(--zemin-2) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-2) 7%, transparent) 64%, transparent 78%),
+    radial-gradient(60% 64% at 88% 96%, var(--zemin-3) 0%,
+      color-mix(in oklab, var(--zemin-3) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-3) 52%, transparent) 33%,
+      color-mix(in oklab, var(--zemin-3) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-3) 7%, transparent) 64%, transparent 78%),
+    radial-gradient(50% 56% at 8% 96%, var(--zemin-4) 0%,
+      color-mix(in oklab, var(--zemin-4) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-4) 52%, transparent) 33%,
+      color-mix(in oklab, var(--zemin-4) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-4) 7%, transparent) 64%, transparent 78%),
     linear-gradient(180deg, var(--zemin-ust), var(--zemin-alt));
 }
 html[data-zemin="yumusak"] body::after{
@@ -14890,7 +14908,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'a1e58457', at:'2026-10-05 23:29', dirty:true };
+ESP.BUILD = { id:'ee20cf84', at:'2026-10-06 11:26', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.

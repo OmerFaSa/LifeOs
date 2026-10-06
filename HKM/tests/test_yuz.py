@@ -414,6 +414,28 @@ def t_cam_kabuk():
     ok(m.index('<style id="hkm-sade">') < m.index("<!-- MEYDAN (kullan"), "sade blok Meydan blogundan once")
 
 
+def t_zemin_tek_aile():
+    """Kullanici (2026-10-06): «arka planda 4 farkli renk var, daha profesyonel
+    olsun» → baska yonler gosterildi → «simdiki iyi, onu gelistir» → «Canli».
+    Merkez'in zemini modullerinkiyle (brand/ortak/zemin.css) ayni formul: dort
+    leke TEK aile (mor, ±30° iki komsu, acik bir ton), sabit kum/pembe/mavi
+    yok; her leke bes ara durakla soner. Eskiden ±40° ve sabit kum vardi."""
+    m = _yuz()
+    cam = m[m.index("CAM KABUK"):]
+    cam = cam[:cam.index("@media (prefers-reduced-transparency: reduce)")]
+    for yabanci in ("#E9A6C1", "#8FB8F0", "#F3C98B", "calc(h + 40)", "calc(h - 40)", "oklch(.92 .045 75", "oklch(.34 .04 70"):
+        no(yabanci in cam, "zeminde yabanci ton: " + yabanci)
+    for s in ("--zemin-2:oklch(from var(--mer) .83 .105 calc(h + 30) / .56);",
+              "--zemin-3:oklch(from var(--mer) .85 .09 calc(h - 30) / .56);",
+              "--zemin-4:oklch(from var(--mer) .89 .06 h / .54);",
+              "--zemin-4:color-mix(in oklab, var(--mer) 14%, transparent);"):
+        ok(s in cam, s)
+    z = cam[cam.index("body:not(:has(#giris:not([hidden])))::before{"):]
+    z = z[:z.index("}")]
+    for n in (1, 2, 3, 4):
+        ok("color-mix(in oklab, var(--zemin-%d) 7%%, transparent) 64%%, transparent 78%%" % n in z, "leke %d yumusak sonmuyor" % n)
+
+
 def t_kenar_secince_cekilir():
     """entegre W6 (2026-10-03): dar cam kenar ustune gelince icerigin USTUNDE
     acilir; fare secilen baglantinin ustunde kaldikca acik kalip 1024-1440
@@ -717,6 +739,7 @@ def run():
     test("yüz denetimi tohumlu kartı görünene kadar bekler (087, 2026-10-03)", t_denetim_dolu_karti_bekler)
     test("giriş kartı: ortada buğulu kart, göster/gizle, Enter (2026-10-03)", t_giris_karti)
     test("cam kabuk: zemin, buzlu levha, dar cam kenar (2026-10-03)", t_cam_kabuk)
+    test("zemin tek renk ailesi: mor ve ±30° komşular, sabit kum yok, yumuşak sönüm (2026-10-06)", t_zemin_tek_aile)
     test("dar kenar seçimden sonra çekilir, sekmeyi örtmez (W6, 2026-10-03)", t_kenar_secince_cekilir)
     test("cam kabuk: kenar açılınca çekmeceler yerinden kaymaz", t_kenar_acilinca_satirlar_kaymaz)
     test("denetimler kenardaki bağlantıdan sonra fareyi kenardan çıkarır", t_denetimler_kenardan_cikar)

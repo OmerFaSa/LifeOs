@@ -6260,9 +6260,11 @@ html[data-tema="koyu"] #giris.card{ background:rgba(28,28,31,.82);
    CAM KABUK (kullanıcı, 2026-10-03: «Merkez kısmını da diğer kısımlar gibi
    sade ve camsı efektle yapar mısın»). Üç modülün kabuğu (brand/ortak
    kabuk.css «kenar dar», zemin.css) Merkez'in yüzünde, masaüstünde:
-   · zemin: Merkez'in morundan ve iki komşu tonundan (±40°) yumuşak renk
-     lekeleri, sol altta sıcak kum, ince gren — sabit katman, dosya yok;
-     koyuda kenarlar hafifçe kararır,
+   · zemin: Merkez'in morundan TEK aile yumuşak renk lekeleri — mor, iki
+     komşu tonu (±30°) ve açık bir tonu; her leke Gauss'a yakın söner
+     (zemin.css ile aynı; 2026-10-06 «Canlı»: eskiden ±40° ve sol altta
+     sabit kum vardı, dört ayrı renk gibi duruyordu), ince gren — sabit
+     katman, dosya yok; koyuda kenarlar hafifçe kararır,
    · içerik sütununun arkasında buzlu levha: 1180 px, kenarından 56 px iç
      pay, dikeyde ortada (kısa sayfa ekranın ortasında, uzun sayfa üstten),
    · kenar dar ve camdır (64 px): yalnız simgeler; üzerine gelince ya da
@@ -6275,10 +6277,10 @@ html[data-tema="koyu"] #giris.card{ background:rgba(28,28,31,.82);
    kalır. «Saydamlığı azalt» tercihinde zemin ve cam düz yüzeye döner.
    ====================================================================== */
 :root{
-  --zemin-1:color-mix(in oklab, var(--mer) 30%, transparent);
-  --zemin-2:color-mix(in oklab, #E9A6C1 30%, transparent);
-  --zemin-3:color-mix(in oklab, #8FB8F0 30%, transparent);
-  --zemin-4:color-mix(in oklab, #F3C98B 30%, transparent);
+  --zemin-1:color-mix(in oklab, var(--mer) 34%, transparent);
+  --zemin-2:color-mix(in oklab, var(--mer) 22%, transparent);
+  --zemin-3:color-mix(in oklab, var(--mer) 20%, transparent);
+  --zemin-4:color-mix(in oklab, var(--mer) 14%, transparent);
   --zemin-ust:color-mix(in oklab, var(--bg) 55%, #fff);
   --zemin-golge:transparent;
   --zemin-gren:.045;
@@ -6301,17 +6303,17 @@ html[data-tema="koyu"] #giris.card{ background:rgba(28,28,31,.82);
 }
 @supports (color: oklch(from red l c h)){
   :root{
-    --zemin-1:oklch(from var(--mer) .80 .10 h / .55);
-    --zemin-2:oklch(from var(--mer) .85 .085 calc(h + 40) / .5);
-    --zemin-3:oklch(from var(--mer) .87 .07 calc(h - 40) / .5);
-    --zemin-4:oklch(.92 .045 75 / .55);
+    --zemin-1:oklch(from var(--mer) .78 .125 h / .66);
+    --zemin-2:oklch(from var(--mer) .83 .105 calc(h + 30) / .56);
+    --zemin-3:oklch(from var(--mer) .85 .09 calc(h - 30) / .56);
+    --zemin-4:oklch(from var(--mer) .89 .06 h / .54);
   }
 }
 html[data-tema="koyu"]{
-  --zemin-1:color-mix(in oklab, var(--mer) 22%, transparent);
-  --zemin-2:color-mix(in oklab, #E9A6C1 16%, transparent);
-  --zemin-3:color-mix(in oklab, #8FB8F0 16%, transparent);
-  --zemin-4:color-mix(in oklab, #F3C98B 14%, transparent);
+  --zemin-1:color-mix(in oklab, var(--mer) 26%, transparent);
+  --zemin-2:color-mix(in oklab, var(--mer) 18%, transparent);
+  --zemin-3:color-mix(in oklab, var(--mer) 16%, transparent);
+  --zemin-4:color-mix(in oklab, var(--mer) 12%, transparent);
   --zemin-ust:#18181c; --zemin-golge:rgba(0,0,0,.32); --zemin-gren:.06;
   --buz-ust:color-mix(in oklab, var(--yuzey) 60%, transparent);
   --buz-alt:color-mix(in oklab, var(--yuzey) 44%, transparent);
@@ -6322,10 +6324,10 @@ html[data-tema="koyu"]{
 }
 @media (prefers-color-scheme: dark){
   html:not([data-tema="acik"]){
-    --zemin-1:color-mix(in oklab, var(--mer) 22%, transparent);
-    --zemin-2:color-mix(in oklab, #E9A6C1 16%, transparent);
-    --zemin-3:color-mix(in oklab, #8FB8F0 16%, transparent);
-    --zemin-4:color-mix(in oklab, #F3C98B 14%, transparent);
+    --zemin-1:color-mix(in oklab, var(--mer) 26%, transparent);
+    --zemin-2:color-mix(in oklab, var(--mer) 18%, transparent);
+    --zemin-3:color-mix(in oklab, var(--mer) 16%, transparent);
+    --zemin-4:color-mix(in oklab, var(--mer) 12%, transparent);
     --zemin-ust:#18181c; --zemin-golge:rgba(0,0,0,.32); --zemin-gren:.06;
     --buz-ust:color-mix(in oklab, var(--yuzey) 60%, transparent);
     --buz-alt:color-mix(in oklab, var(--yuzey) 44%, transparent);
@@ -6337,17 +6339,17 @@ html[data-tema="koyu"]{
 }
 @supports (color: oklch(from red l c h)){
   html[data-tema="koyu"]{
-    --zemin-1:oklch(from var(--mer) .42 .11 h / .5);
-    --zemin-2:oklch(from var(--mer) .38 .09 calc(h + 40) / .42);
-    --zemin-3:oklch(from var(--mer) .36 .08 calc(h - 40) / .4);
-    --zemin-4:oklch(.34 .04 70 / .3);
+    --zemin-1:oklch(from var(--mer) .43 .135 h / .62);
+    --zemin-2:oklch(from var(--mer) .38 .115 calc(h + 30) / .5);
+    --zemin-3:oklch(from var(--mer) .36 .10 calc(h - 30) / .48);
+    --zemin-4:oklch(from var(--mer) .31 .07 h / .4);
   }
   @media (prefers-color-scheme: dark){
     html:not([data-tema="acik"]){
-      --zemin-1:oklch(from var(--mer) .42 .11 h / .5);
-      --zemin-2:oklch(from var(--mer) .38 .09 calc(h + 40) / .42);
-      --zemin-3:oklch(from var(--mer) .36 .08 calc(h - 40) / .4);
-      --zemin-4:oklch(.34 .04 70 / .3);
+      --zemin-1:oklch(from var(--mer) .43 .135 h / .62);
+      --zemin-2:oklch(from var(--mer) .38 .115 calc(h + 30) / .5);
+      --zemin-3:oklch(from var(--mer) .36 .10 calc(h - 30) / .48);
+      --zemin-4:oklch(from var(--mer) .31 .07 h / .4);
     }
   }
 }
@@ -6365,10 +6367,18 @@ body:not(:has(#giris:not([hidden]))){ background:transparent; }
     content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
     background:
       radial-gradient(120% 90% at 50% 45%, transparent 55%, var(--zemin-golge) 100%),
-      radial-gradient(58% 62% at 14% 10%, var(--zemin-1), transparent 70%),
-      radial-gradient(48% 54% at 90% 8%, var(--zemin-2), transparent 70%),
-      radial-gradient(56% 60% at 86% 96%, var(--zemin-3), transparent 72%),
-      radial-gradient(44% 50% at 10% 94%, var(--zemin-4), transparent 70%),
+      radial-gradient(66% 72% at 12% 8%, var(--zemin-1) 0%,
+        color-mix(in oklab, var(--zemin-1) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-1) 52%, transparent) 33%,
+        color-mix(in oklab, var(--zemin-1) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-1) 7%, transparent) 64%, transparent 78%),
+      radial-gradient(54% 60% at 90% 10%, var(--zemin-2) 0%,
+        color-mix(in oklab, var(--zemin-2) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-2) 52%, transparent) 33%,
+        color-mix(in oklab, var(--zemin-2) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-2) 7%, transparent) 64%, transparent 78%),
+      radial-gradient(60% 64% at 88% 96%, var(--zemin-3) 0%,
+        color-mix(in oklab, var(--zemin-3) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-3) 52%, transparent) 33%,
+        color-mix(in oklab, var(--zemin-3) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-3) 7%, transparent) 64%, transparent 78%),
+      radial-gradient(50% 56% at 8% 96%, var(--zemin-4) 0%,
+        color-mix(in oklab, var(--zemin-4) 80%, transparent) 17%, color-mix(in oklab, var(--zemin-4) 52%, transparent) 33%,
+        color-mix(in oklab, var(--zemin-4) 24%, transparent) 48%, color-mix(in oklab, var(--zemin-4) 7%, transparent) 64%, transparent 78%),
       linear-gradient(180deg, var(--zemin-ust), var(--bg)); }
   body:not(:has(#giris:not([hidden])))::after{
     content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:var(--zemin-gren);

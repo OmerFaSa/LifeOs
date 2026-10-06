@@ -180,4 +180,74 @@
       }
     });
   });
+
+  /* 2026-10-06 (kullanıcı): «arka planda 4 farklı renk var, daha profesyonel
+     olsun» → başka yönler gösterildi → «şimdiki iyi, onu geliştir» → «Canlı».
+     Söz: dört leke TEK renk ailesidir (modülün tonu ±30°; sabit kum, pembe ya
+     da nane tonu yok) ve her leke yumuşak söner (disk izi yok). Eski zeminde
+     kum tonu AYS'nin mavisinden ~190°, komşular 40° uzaktaydı. */
+  describe('Zemin — tek renk ailesi', () => {
+    /* sRGB (0–255) → OKLab. Chrome hesaplanmış rengi rgb()/oklab()/oklch() yazar. */
+    function oklab(r, g, b){
+      const d = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+      const R = d(r), G = d(g), B = d(b);
+      const l = Math.cbrt(0.4122214708 * R + 0.5363325363 * G + 0.0514459929 * B);
+      const m = Math.cbrt(0.2119034982 * R + 0.6806995451 * G + 0.1073969566 * B);
+      const s = Math.cbrt(0.0883024619 * R + 0.2817188376 * G + 0.6299787005 * B);
+      return [0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s,
+        1.9779984951 * l - 2.4285922050 * m + 0.4505937099 * s,
+        0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s];
+    }
+    /* Renk metni → { c: kroma, h: ton (derece), a: saydamlık }. */
+    function cozumle(t){
+      const n = (t.match(/-?[\d.]+(?:e-?\d+)?/g) || []).map(Number);
+      const a = n.length > 3 ? n[3] : 1;
+      if(/^oklch/.test(t)) return { c:n[1], h:n[2], a };
+      const [, A, B] = /^oklab/.test(t) ? n : oklab(n[0], n[1], n[2]);
+      return { c:Math.hypot(A, B), h:(Math.atan2(B, A) * 180 / Math.PI + 360) % 360, a };
+    }
+    const fark = (x, y) => { const d = Math.abs(x - y) % 360; return d > 180 ? 360 - d : d; };
+    const RENK = /(?:oklch|oklab|rgba?)\([^()]*\)/g;
+    /* Arka planı üst düzey katmanlarına böler (parantez içindeki virgüller değil). */
+    function katmanlar(bi){
+      const out = []; let derin = 0, bas = 0;
+      for(let i = 0; i < bi.length; i++){
+        if(bi[i] === '(') derin++;
+        else if(bi[i] === ')') derin--;
+        else if(bi[i] === ',' && derin === 0){ out.push(bi.slice(bas, i).trim()); bas = i + 1; }
+      }
+      out.push(bi.slice(bas).trim());
+      return out;
+    }
+
+    it('dört leke modülün tonundan en çok 35° uzakta; her biri beş ara durakla söner (açık ve koyu)', () => kipleSina(() => {
+      const kok = document.documentElement, eskiTema = kok.getAttribute('data-theme');
+      const onceSaat = Z._saatSaglayici(() => new Date(2026, 9, 6, 13, 0));   // gün ortası: saat tonu yok
+      const olcu = document.createElement('i');
+      olcu.style.color = 'var(--mod, var(--ays))';
+      document.body.appendChild(olcu);
+      try{
+        Z.ayarla('yumusak');
+        ['light', 'dark'].forEach(tema => {
+          kok.setAttribute('data-theme', tema);
+          Z.saatUygula();
+          const mod = cozumle(getComputedStyle(olcu).color);
+          const lekeler = katmanlar(getComputedStyle(document.body, '::before').backgroundImage)
+            .map(k => (k.match(RENK) || []).map(cozumle))
+            .filter(r => r.some(x => x.a > 0.01 && x.c > 0.03));
+          expect(tema + ': ' + lekeler.length + ' leke').toBe(tema + ': 4 leke');
+          const uzak = [].concat(...lekeler).filter(x => x.a > 0.01 && x.c > 0.03 && fark(x.h, mod.h) > 35)
+            .map(x => Math.round(x.h) + '°');
+          expect(tema + ': ' + uzak.join(' ')).toBe(tema + ': ');
+          /* Başlangıç + dört ara durak + saydam son: en az altı renk. */
+          expect(lekeler.every(r => r.length >= 6)).toBe(true);
+        });
+      }finally{
+        olcu.remove();
+        Z._saatSaglayici(onceSaat);
+        if(eskiTema == null) kok.removeAttribute('data-theme'); else kok.setAttribute('data-theme', eskiTema);
+        Z.saatUygula();
+      }
+    }));
+  });
 })();
