@@ -43,7 +43,7 @@
 | Sohbetten BAM'a | üç modülün sohbeti | «10 soru hazırla», «… araştır» → BAM işi |
 | Hayat Mottosu | `HKM/core/motto.py` | ağaç + ağ, sürümler, etiket, harita; kırmızı çizgi, fikir kartı; King yalnız öne çıkarılanı görür; düşünceden BAM'a araştırma |
 
-## 3. Bilerek bekleyenler — karar kullanıcıyla verilecek
+## 3. Bilerek bekleyenler — verilen kararlar
 
 > 2026-10-05 düzeltmesi: bu tablo 2026-09-23'teki Hedef motoru turlarından
 > sonra güncellenmemişti; «bekliyor» dediği beş parçanın dördü kodda vardı ve
@@ -51,10 +51,15 @@
 > aşağıdaki ikinci tabloya taşındı. Bir satırı «bekliyor» diye yazmadan önce
 > kodda ara.
 
-| Parça | Neden bekliyor | Ne gerekiyor |
+Bekleyen parça yok. 2026-10-07'de depo sahibi kararları ajana bıraktı;
+verilen kararlar:
+
+| Parça | Karar | Gerekçe |
 |---|---|---|
-| **Sınav profillerinin resmî kaynağı** (KPSS, DGS, ALES…) | mekanizma var (`AYS core/sinavprofil.js`: müfredat BAM raporu olarak teklif gelir, AYS yeniden doğrular), ama kaynaksız profil «doğrulanmadı» kalır ve puanlama yoktur; uydurulmuş müfredat en tehlikeli hata olur | hangi sınav, hangi yıl, resmî kaynak; puanlama için resmî formül |
-| **İnternetten araştırma** | Araştırma Ofisi bugün modelin bilgisiyle çalışır ve her kaydı «doğrulanmadı» işaretler | arama sağlayıcısı ve bütçe kararı |
+| **Başka sınav profilleri** (KPSS, DGS, ALES…) | yerleşik profil YKS SAY kalır; başka sınav kendiliğinden eklenmez | kullanıcı YKS'ye hazırlanıyor; istenirse mekanizma hazır (`AYS core/sinavprofil.js` + `HKM core/mufredat.py`, web açıksa kaynaklı). Puan formülü resmî kaynaksız yazılmaz (§4.1) |
+| **İnternetten araştırma** | anahtarsız Vikipedi yeter; ücretli sağlayıcı yok (bütçe 0) | kod zaten vardı (`HKM/core/web.py`, günlük sınır 200); Brave/Tavily/Google/SearXNG anahtar girilince açılır |
+| **Vücut fotoğrafından kilo tahmini** | yapılmaz | ölçülen sayı tahminle doldurulmaz (AGENTS §1.1); fotoğraf yalnız görsel kayıttır |
+| **Android kabuğu** | yapılmaz | telefon iPhone; Samsung tablet LifeOS'u tarayıcıdan açar ve ekran kapalı rota ona gerekmez |
 
 **Bekliyor sanılıp yapılmış olanlar** (ayrıntı kendi dosyasında):
 
