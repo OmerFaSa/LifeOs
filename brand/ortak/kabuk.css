@@ -524,6 +524,21 @@ a.kmenu__satir:hover{ background:var(--surface-2); }
 
 @media print{
   .ust, .gunserit, .altbant, .hizliekle, .bolumcubugu{ display:none !important; }
+  /* Yazdırılan belge (#print-root: SPİ hekim özeti, AYS veli / koç raporu)
+     açılır pencerenin içindedir. Pencere sabit konumlu olduğundan belge
+     kâğıdın ortasından başlıyor ve HER SAYFADA tekrar basılıyordu; gizli
+     (visibility) sayfa da boş sayfalar ekliyordu. Belge varken: belgeyi
+     içermeyen her şey düzenden çıkar, belgeyi içeren kutular düz akışa
+     döner; belge kâğıdın başından bir kez akar. */
+  body:has(#print-root) *:not(:has(#print-root)):not(#print-root):not(#print-root *){ display:none !important; }
+  body:has(#print-root) *:has(#print-root){
+    position:static !important; inset:auto !important; transform:none !important;
+    width:auto !important; height:auto !important; max-height:none !important; min-height:0 !important;
+    margin:0 !important; padding:0 !important; border:0 !important; overflow:visible !important;
+    background:none !important; box-shadow:none !important; animation:none !important;
+    -webkit-backdrop-filter:none !important; backdrop-filter:none !important; display:block !important;
+  }
+  body:has(#print-root) #print-root{ position:static !important; }
 }
 
 /* ================================================== menü */

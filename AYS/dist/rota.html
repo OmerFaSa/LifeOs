@@ -10844,6 +10844,21 @@ a.kmenu__satir:hover{ background:var(--surface-2); }
 
 @media print{
   .ust, .gunserit, .altbant, .hizliekle, .bolumcubugu{ display:none !important; }
+  /* Yazdırılan belge (#print-root: SPİ hekim özeti, AYS veli / koç raporu)
+     açılır pencerenin içindedir. Pencere sabit konumlu olduğundan belge
+     kâğıdın ortasından başlıyor ve HER SAYFADA tekrar basılıyordu; gizli
+     (visibility) sayfa da boş sayfalar ekliyordu. Belge varken: belgeyi
+     içermeyen her şey düzenden çıkar, belgeyi içeren kutular düz akışa
+     döner; belge kâğıdın başından bir kez akar. */
+  body:has(#print-root) *:not(:has(#print-root)):not(#print-root):not(#print-root *){ display:none !important; }
+  body:has(#print-root) *:has(#print-root){
+    position:static !important; inset:auto !important; transform:none !important;
+    width:auto !important; height:auto !important; max-height:none !important; min-height:0 !important;
+    margin:0 !important; padding:0 !important; border:0 !important; overflow:visible !important;
+    background:none !important; box-shadow:none !important; animation:none !important;
+    -webkit-backdrop-filter:none !important; backdrop-filter:none !important; display:block !important;
+  }
+  body:has(#print-root) #print-root{ position:static !important; }
 }
 
 /* ================================================== menü */
@@ -15360,7 +15375,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'0ecc276f', at:'2026-10-06 23:32', dirty:true };
+R.BUILD = { id:'aa6d35dc', at:'2026-10-07 04:14', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -56015,6 +56030,123 @@ R.SinavOneri = (function(){
   return { EGITIM, HEDEF, SINAVLAR, oner };
 })();
 
+/* ==== js/core/haftarapor.js ==== */
+/* VELİ / KOÇ RAPORU — haftanın yazdırılabilir tek sayfası (DEVIR Y10).
+
+   Kullanıcı 2026-09-23: «veli ya da koç için haftada bir-iki PDF». Alıcı
+   sorusu açık kalmıştı; karar (2026-10-07, depo sahibi kararı ajana
+   bıraktı): rapor KİMSEYE KENDİLİĞİNDEN GİTMEZ. Kullanıcı Bugün › Günü
+   düzenle › «Özeti paylaş»tan açar, tarayıcının «PDF olarak kaydet»iyle
+   dosyaya çevirir ve istediğine kendisi verir. PDF'i tarayıcı yazar:
+   sıfır bağımlılık (AGENTS §1.3), Türkçe harfler doğru (SPİ hekim özeti
+   ile aynı yol).
+
+   Sözler:
+   1. SAYI KODDAN. Her satır `calc.js`'in ekranda kullandığı işlevden
+      gelir; burada yeniden hesap yok (iki hesap iki gerçek yaratır).
+   2. HER SAYININ ETİKETİ VAR (AGENTS §1.2). Ölçülmemiş satır «—» ve
+      «veri yok» der; sıfır yazılmaz.
+   3. BELGE DEĞİL (AGENTS §1.5). Rapor başarı belgesi, yetenek yargısı ya
+      da sonuç tahmini değildir; bu sayfada yazar. «Bu hızla» varsa
+      «tahmin» etiketiyle ve dayanağıyla durur. */
+
+window.R = window.R || {};
+
+R.HaftaRapor = (function(){
+  const { html, when, map } = R.h;
+  const U = R.U, M = R.Model, C = R.Calc;
+
+  const KES = k => (R.CERTAINTY[k] || R.CERTAINTY.missing).label;
+  const satir = (ad, deger, kes) => deger == null
+    ? { ad, deger:'—', kes:'missing' }
+    : { ad, deger:String(deger), kes };
+
+  /* Haftanın verisi; çizimden ayrı ki test sayıya baksın. */
+  function veri(n){
+    n = n || M.currentWeek();
+    const gunler = M.weekDates(n).map(d => U.iso(d));
+    const bas = gunler[0], son = gunler[6];
+    const kayitli = gunler.filter(t => {
+      const d = R.S.days[t];
+      return d && (C.gunSorusu(d) > 0 || (d.blocks || []).some(b => b.status && b.status !== 'pending'));
+    });
+    const comp = C.planCompletion(n);
+    const qr = C.questionRealization(n);
+    const tyt = C.medianTrend('TYT'), ayt = C.medianTrend('AYT');
+    const kap = C.overallClosure();
+    const borc = C.analysisDebt().length;
+
+    const satirlar = [
+      satir('Plan tamamlama', comp == null ? null : '%' + comp, 'derived'),
+      satir('Çözülen soru', qr ? qr.solved + (qr.target ? ' / ' + qr.target + ' hedef' : '') : null, 'measured'),
+      satir('Kayıt girilen gün', kayitli.length ? kayitli.length + ' / 7' : null, 'measured'),
+      satir('TYT medyanı (son 3 tam deneme)', tyt.last3 == null ? null : U.fmtNet(tyt.last3) + ' net', 'derived'),
+      satir('AYT medyanı (son 3 tam deneme)', ayt.last3 == null ? null : U.fmtNet(ayt.last3) + ' net', 'derived'),
+      satir('Konu kapanışı', kap.total ? '%' + kap.pct + ' (' + kap.closed + ' / ' + kap.total + ' konu)' : null, 'derived'),
+      satir('Davranış serisi', C.behaviorStreak().streak + ' gün', 'derived'),
+      satir('Analizi bekleyen deneme', String(borc), 'derived'),
+    ];
+
+    const denemeler = (R.S.exams || [])
+      .filter(e => e.date >= bas && e.date <= son)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map(e => ({ tarih:e.date, ad:e.type || e.family || 'Deneme',
+        yayin:e.publisher || '', net:U.fmtNet(M.examNet(e)) }));
+
+    return { hafta:n, bas, son, satirlar, denemeler, hiz:C.buHizla(),
+      ad:(R.S.profile && R.S.profile.name) || '' };
+  }
+
+  function htmlOf(n){
+    const v = veri(n);
+    return String(html`<div id="print-root" class="printdoc" data-oz="Y10">
+      <div class="printdoc__head">
+        <div>
+          <b class="printdoc__title">Haftalık çalışma raporu</b>
+          <span class="printdoc__sub">Hafta ${v.hafta} · ${U.fmtDate(v.bas)} – ${U.fmtDate(v.son)} ·
+            ${U.fmtDate(U.todayISO())} tarihinde hazırlandı</span>
+        </div>
+        ${when(v.ad, () => html`<div class="printdoc__who"><b>${v.ad}</b><span>YKS hazırlığı</span></div>`)}
+      </div>
+
+      <p class="printdoc__limit"><b>Bu bir başarı belgesi değildir.</b>
+        Yalnız kayda geçen çalışmanın özetidir; yetenek yargısı ya da sınav sonucu
+        tahmini içermez.</p>
+
+      <p class="printdoc__key"><b>Kesinlik anahtarı —</b>
+        <b>ölçüldü:</b> öğrencinin girdiği kayıt ·
+        <b>hesaplandı:</b> kayıtlardan formülle türetildi ·
+        <b>veri yok:</b> kayıt girilmedi; sıfır sayılmaz.</p>
+
+      <h3 class="printdoc__h">Hafta</h3>
+      <table class="table--tight">
+        <thead><tr><th>Gösterge</th><th class="num">Değer</th><th>Kesinlik</th></tr></thead>
+        <tbody>${map(v.satirlar, s => html`<tr>
+          <td>${s.ad}</td><td class="num">${s.deger}</td><td>${KES(s.kes)}</td></tr>`)}</tbody>
+      </table>
+
+      <h3 class="printdoc__h">Bu haftanın denemeleri</h3>
+      ${v.denemeler.length
+        ? html`<table class="table--tight">
+            <thead><tr><th>Tarih</th><th>Deneme</th><th>Yayın</th><th class="num">Net</th></tr></thead>
+            <tbody>${map(v.denemeler, d => html`<tr>
+              <td>${U.fmtDate(d.tarih)}</td><td>${d.ad}</td><td>${d.yayin || '—'}</td>
+              <td class="num">${d.net}</td></tr>`)}</tbody>
+          </table>
+          <p class="printdoc__note">Netler ölçüldü: doğru − yanlış / 4.</p>`
+        : html`<p class="printdoc__note">Bu hafta deneme kaydı yok.</p>`}
+
+      <h3 class="printdoc__h">Bu hızla</h3>
+      <p class="printdoc__note">${v.hiz.metin} <b>(${v.hiz.etiket})</b></p>
+
+      <p class="printdoc__foot">AYS · kayıtlar öğrencinin cihazında tutulur; bu sayfa
+        yazdırılınca hiçbir yere gönderilmez.</p>
+    </div>`);
+  }
+
+  return { veri, html:htmlOf };
+})();
+
 /* ==== js/core/testkitabi.js ==== */
 /* TEST KİTABI — BAM'ın bölümlü kitabını AYS'de sınav biçiminde çözmek
    (belgeler/ekip/PLAN.md §3.E ve §3.L; Tur 4).
@@ -59601,9 +59733,29 @@ R.Screens.today = (function(){
       UI.sheet({
         title:'Hafta özeti', subtitle:'Paylaşmadan önce istemediğin satırı sil',
         body:String(c.Textarea({ id:'share-box', rows:9, value:text })),
-        footer:String(html`${c.Button({ label:'Kopyala', act:'share-week-copy' })}
+        footer:String(html`${c.Button({ label:'Veli / koç raporu', act:'veli-rapor' })}
+          ${c.Button({ label:'Kopyala', act:'share-week-copy' })}
           ${c.Button({ label:'Paylaş', tone:'primary', act:'share-week-send' })}`),
       });
+    },
+    /* Veli / koç raporu (DEVIR Y10, core/haftarapor.js): yazdırılabilir tek
+       sayfa; hiçbir yere kendiliğinden gitmez. PDF'i tarayıcı yazar (SPİ
+       hekim özetiyle aynı yol): dosya adı başlıktan alınır. */
+    async 'veli-rapor'(){
+      UI.sheet({ title:'Veli / koç raporu', subtitle:'tek sayfa · yazdırılabilir', wide:true,
+        body:R.HaftaRapor.html(M.currentWeek()), noFocus:true,
+        footer:String(html`${c.Button({ label:'Kapat', act:'sheet-close' })}
+          ${c.Button({ label:'PDF olarak kaydet', act:'veli-rapor-pdf' })}
+          ${c.Button({ label:'Yazdır', tone:'primary', act:'veli-rapor-yazdir' })}`) });
+    },
+    async 'veli-rapor-yazdir'(){ window.print(); },
+    async 'veli-rapor-pdf'(){
+      const eski = document.title;
+      document.title = 'AYS-haftalik-rapor-' + U.todayISO();
+      const geri = () => { document.title = eski; window.removeEventListener('afterprint', geri); };
+      window.addEventListener('afterprint', geri);
+      UI.toast('Yazdır penceresinde hedef olarak «PDF olarak kaydet»i seç.', { life:5000 });
+      window.print();
     },
     async 'share-week-copy'(){
       const el = document.getElementById('share-box');

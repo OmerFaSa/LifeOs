@@ -1564,9 +1564,29 @@ R.Screens.today = (function(){
       UI.sheet({
         title:'Hafta özeti', subtitle:'Paylaşmadan önce istemediğin satırı sil',
         body:String(c.Textarea({ id:'share-box', rows:9, value:text })),
-        footer:String(html`${c.Button({ label:'Kopyala', act:'share-week-copy' })}
+        footer:String(html`${c.Button({ label:'Veli / koç raporu', act:'veli-rapor' })}
+          ${c.Button({ label:'Kopyala', act:'share-week-copy' })}
           ${c.Button({ label:'Paylaş', tone:'primary', act:'share-week-send' })}`),
       });
+    },
+    /* Veli / koç raporu (DEVIR Y10, core/haftarapor.js): yazdırılabilir tek
+       sayfa; hiçbir yere kendiliğinden gitmez. PDF'i tarayıcı yazar (SPİ
+       hekim özetiyle aynı yol): dosya adı başlıktan alınır. */
+    async 'veli-rapor'(){
+      UI.sheet({ title:'Veli / koç raporu', subtitle:'tek sayfa · yazdırılabilir', wide:true,
+        body:R.HaftaRapor.html(M.currentWeek()), noFocus:true,
+        footer:String(html`${c.Button({ label:'Kapat', act:'sheet-close' })}
+          ${c.Button({ label:'PDF olarak kaydet', act:'veli-rapor-pdf' })}
+          ${c.Button({ label:'Yazdır', tone:'primary', act:'veli-rapor-yazdir' })}`) });
+    },
+    async 'veli-rapor-yazdir'(){ window.print(); },
+    async 'veli-rapor-pdf'(){
+      const eski = document.title;
+      document.title = 'AYS-haftalik-rapor-' + U.todayISO();
+      const geri = () => { document.title = eski; window.removeEventListener('afterprint', geri); };
+      window.addEventListener('afterprint', geri);
+      UI.toast('Yazdır penceresinde hedef olarak «PDF olarak kaydet»i seç.', { life:5000 });
+      window.print();
     },
     async 'share-week-copy'(){
       const el = document.getElementById('share-box');

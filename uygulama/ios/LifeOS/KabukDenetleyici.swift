@@ -42,6 +42,8 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
         ayar.userContentController.add(kopru, name: KonumKoprusu.ad)
         ayar.userContentController.addUserScript(KabukDenetleyici.renkBetigi)
         ayar.userContentController.add(ZayifDinleyici(self), name: KabukDenetleyici.renkAdi)
+        ayar.userContentController.addUserScript(KabukDenetleyici.yazdirBetigi)
+        ayar.userContentController.add(ZayifDinleyici(self), name: KabukDenetleyici.yazdirAdi)
         let w = WKWebView(frame: .zero, configuration: ayar)
         kopru.web = w
         w.navigationDelegate = self
@@ -85,6 +87,10 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
     }
 
     func userContentController(_ ucc: WKUserContentController, didReceive m: WKScriptMessage) {
+        if m.name == KabukDenetleyici.yazdirAdi, m.frameInfo.isMainFrame {
+            yazdir(baslik: m.body as? String)
+            return
+        }
         guard m.name == KabukDenetleyici.renkAdi, m.frameInfo.isMainFrame,
               let a = m.body as? [NSNumber], a.count >= 3 else { return }
         let r = (r: a[0].intValue, g: a[1].intValue, b: a[2].intValue)
@@ -96,6 +102,54 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
     }
 
     static let renkAdi = "lifeosRenk"
+
+    // MARK: - yazdirma
+    //
+    // WKWebView `window.print()`'i yok sayar: SPİ hekim özeti ve AYS veli /
+    // koç raporu telefonda hiçbir şey yapmıyordu. Sayfanın print'i iOS'un
+    // Yazdır paneline bağlanır; panelden yazıcıya, «PDF olarak kaydet»e ya da
+    // paylaşıma gidilir. Sayfanın @media print kuralları geçerlidir (yalnız
+    // #print-root basılır). Panel kapanınca `afterprint` gelir: sayfa
+    // başlığını geri alır.
+
+    static let yazdirAdi = "lifeosYazdir"
+    /// Son yazdırma isteğinin başlığı (PDF adı); test bunu okur.
+    private(set) var sonYazdirma: String?
+    /// Testte panel açılmaz; yalnız istek kaydedilir.
+    var yazdirmaPaneli = true
+
+    func yazdir(baslik: String?) {
+        let ad = (baslik?.isEmpty == false) ? baslik! : "LifeOS"
+        sonYazdirma = ad
+        guard yazdirmaPaneli, view.window != nil else { return bitti() }
+        let bilgi = UIPrintInfo(dictionary: nil)
+        bilgi.outputType = .general
+        bilgi.jobName = ad
+        let pc = UIPrintInteractionController.shared
+        pc.printInfo = bilgi
+        pc.printFormatter = web.viewPrintFormatter()
+        pc.present(animated: true) { [weak self] _, _, _ in self?.bitti() }
+    }
+
+    private func bitti() {
+        web.evaluateJavaScript("window.dispatchEvent(new Event('afterprint'))", completionHandler: nil)
+    }
+
+    static var yazdirBetigi: WKUserScript {
+        WKUserScript(source: yazdirKaynak, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+    }
+
+    static let yazdirKaynak = """
+    (function(){
+      var h = window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.lifeosYazdir;
+      if (!h || window.__lifeosYazdir) return;
+      window.__lifeosYazdir = true;
+      window.print = function(){
+        try { window.dispatchEvent(new Event('beforeprint')); } catch (e) {}
+        h.postMessage(String(document.title || ''));
+      };
+    })();
+    """
 
     /// Sayfanin en ust satirinda GORUNEN rengi olcer: o noktadaki ogeler
     /// ustten alta, saydamliklariyla ust uste bindirilir (Menu'nun karartmasi

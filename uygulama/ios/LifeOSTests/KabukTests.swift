@@ -119,6 +119,25 @@ final class KabukTests: XCTestCase {
         jsCalistir(d.web, "document.getElementById('__serit').remove();")
     }
 
+    /// window.print() iOS'ta yok sayiliyordu: kabuk onu Yazdir paneline baglar
+    /// (SPİ hekim özeti, AYS veli / koç raporu). Baslik PDF adi olur.
+    func testSayfaninYazdirmasiKabugaUlasir() throws {
+        let d = KabukDenetleyici()
+        d.yazdirmaPaneli = false
+        let p = UIWindow(frame: UIScreen.main.bounds)
+        p.rootViewController = d
+        p.makeKeyAndVisible()
+        d.loadViewIfNeeded()
+        d.web.load(URLRequest(url: URL(string: "http://127.0.0.1:4173/")!))
+        XCTAssertEqual(bekle(d.web, "!!(document.querySelector('.site') && window.R)") as? Bool, true, "AYS açılmadı")
+        jsCalistir(d.web, "window.__sonra = 0; window.addEventListener('afterprint', function(){ window.__sonra++; });"
+            + " document.title = 'AYS-haftalik-rapor'; window.print();")
+        let son = Date().addingTimeInterval(10)
+        while d.sonYazdirma == nil && Date() < son { RunLoop.current.run(until: Date().addingTimeInterval(0.1)) }
+        XCTAssertEqual(d.sonYazdirma, "AYS-haftalik-rapor", "print kabuğa ulaşmadı")
+        XCTAssertEqual(bekle(d.web, "window.__sonra === 1", sure: 5) as? Bool, true, "afterprint gelmedi")
+    }
+
     /// Uc modul uygulamanin icinde acilir; koken guvenli (kamera ve konum buna bagli).
     func testUcModulAcilirVeKokenGuvenli() throws {
         let uygulama = try XCTUnwrap(UIApplication.shared.delegate as? Uygulama)
