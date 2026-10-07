@@ -31,6 +31,41 @@
     { tarih:'2026-09-26', deger:7.2 },
   ];
 
+describe('Grafik kabını doldurur (2026-10-07)', () => {
+  const kare = () => new Promise(c => requestAnimationFrame(() => requestAnimationFrame(c)));
+
+  it('640 ile yazılan eksenli grafik kabının gerçek enine yeniden çizilir; gizli kap göründüğü an', async () => {
+    let kimlik = '';
+    const ciz = gen => '<svg class="chart" data-grafik="' + kimlik + '" viewBox="0 0 ' + gen + ' 100"></svg>';
+    kimlik = G().sigdir(ciz);
+    const k = sahne('');
+    k.style.width = '900px';
+    k.innerHTML = ciz(640);
+    try{
+      await kare(); await kare();
+      expect(k.querySelector('svg').getAttribute('viewBox')).toBe('0 0 900 100');
+      /* Kap gizliyken (kapalı bölüm) çizilmez, açılınca çizilir. */
+      k.style.display = 'none';
+      k.style.width = '500px';
+      await kare();
+      expect(k.querySelector('svg').getAttribute('viewBox')).toBe('0 0 900 100');
+      k.style.display = '';
+      await kare(); await kare();
+      expect(k.querySelector('svg').getAttribute('viewBox')).toBe('0 0 500 100');
+    }finally{ k.remove(); }
+  });
+
+  it('tek günlük nokta daire değil yuvarlak uçlu çizgi: kartın eninde elipse dönmez', () => {
+    const s = G().seri([{ tarih:'2026-09-20', deger:7 }, { tarih:'2026-09-22', deger:7.5 }]);
+    const k = sahne(G().cizgiSvg(s, { etiket:'Uyku' }));
+    try{
+      const n = k.querySelector('.grafik__tek');
+      expect(n.tagName.toLowerCase()).toBe('path');
+      expect(getComputedStyle(n).strokeLinecap).toBe('round');
+    }finally{ k.remove(); }
+  });
+});
+
 describe('027 · Eksik gün boşluğu', () => {
 
   it('oz-027 Verisi olmayan gün çizgide boşluk olarak kalır; hiçbir grafik eksik günü 0’a çizmez (birim testiyle).', () => {

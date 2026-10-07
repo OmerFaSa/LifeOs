@@ -1203,6 +1203,12 @@ svg.chart{ max-height:180px; }
    (tools/vitrin.py) — burada yalnız değişkeni bağlanır. */
 .vk{ --vk-mono:var(--font-body); }
 .vk .mono{ font-variant-numeric:tabular-nums; }
+/* 2026-10-07: etiketler artık cümle düzeninde (vitrin.js `buyuk`); büyük
+   harf için açılmış harf aralığı kalkar, 9,5–10 px'lik yazı okunur boya
+   çıkar. Rütbe kartları olduğu gibi kalır (kullanıcı kararı). */
+.site--v5 .vk:not(#pane-rutbe .vk) :is(.cap, .et, .mod, .bs, .lb, .uy, .gb, .kn2, .hd, small){ letter-spacing:0; }
+.site--v5 .vk:not(#pane-rutbe .vk) .cap{ font-size:12px; }
+.site--v5 .vk:not(#pane-rutbe .vk) :is(.et, .mod){ font-size:11.5px; }
 
 /* Küçük bölüm şeritleri (sayfa düzeni) eşit ve sakin: aynı yazı boyutu,
    tek ok (soldaki), sağdaki «Aç» düğmesi yalnız üzerine gelince. */
@@ -1465,7 +1471,11 @@ html.sayfa-gecis:not(.cekmece-gecis) .site--v5 .sayfabasi{ animation:none; }
 .site--v5 .sayfasonu__ic{ font-size:12px; color:var(--text-3); row-gap:4px; }
 .site--v5 .sayfasonu .sitefoot__k{ color:var(--text-3); font-weight:500; text-transform:none; letter-spacing:0; }
 
-.grafik{ max-width:640px; margin-inline:auto; }
+/* Çizgi grafiği kartın eninde (2026-10-07): 640 px'e kısılıp ortalanınca
+   geniş kartta yazının sol çizgisinden kopuyor, kartın yarısı boş
+   kalıyordu. Eğri en boy oranını korumaz (preserveAspectRatio="none");
+   boyu sınırlıdır, çizgi kalınlığı sabittir, nokta yuvarlak uçlu çizgidir. */
+.grafik{ max-height:150px; min-height:72px; }
 
 .pickcard{ border-color:transparent; background:var(--surface-2); box-shadow:none; }
 .pickcard:hover{ border-color:transparent; background:var(--surface-3); }
@@ -1839,3 +1849,82 @@ html .site--v5 > .kenar .kenar__arac:is(:hover, :focus-visible) .kenar__kisayol{
     transition-duration:1.2s; transition-timing-function:cubic-bezier(.32,.72,0,1); }
 }
 @media (prefers-reduced-motion:reduce){ .site--v5 > .kenar > *{ transition:none; } }
+
+/* ================================================================
+   TASARIM TURU (2026-10-07, kullanıcı: «tasarımda geride kalan yerleri
+   ayıkla, eksikleri geliştir, sadeleştir, profesyonelleştir»). Bütün
+   ekranlar görüntülenip tek tek bakıldı; bu blok ekranlar arasında
+   tekrar eden eski kalıpları toplar.
+   ================================================================ */
+
+/* Boş durum kartın içinde ikinci bir çerçeve çizmez («çerçeve içinde
+   çerçeve»): yalnız cümle ve eylem kalır. Tek başına duran boş durum
+   (kartın dışında, ör. «Konu seçilmedi») kart gibi durur; kesikli çizgi
+   yalnız bırakma alanınındır. */
+:is(.card, .lrow, .kutu, .sheet, .donen, .nextup, .popover) .empty{
+  border:0; border-radius:0; padding:0; background:none; }
+.site--v5 #main .empty:not(:is(.card, .lrow, .kutu, .sheet, .donen, .nextup, .popover) .empty){
+  border:1px solid var(--kart-kenar); border-radius:var(--r); background:var(--surface);
+  box-shadow:var(--kart-golge); padding:24px; }
+
+/* Masa notları (Ofis brifingi, Bugün uyarıları) nötr zeminde durur: tonu
+   yalnız nokta söyler. Bej/yeşil dolgu kutu «göz yoruyordu» (kullanıcı,
+   2026-10-02); uyarı kutusu (notice) aynı kararı çoktan almıştı. */
+.note--warn, .note--ok, .note--info, .note--danger{ background:var(--surface-2); }
+/* SPİ Mutfak emilim notu (Fitat, C vitamini) de nötr: yönü ok söyler. */
+.absorb--block, .absorb--boost{ background:var(--surface-2); }
+
+/* Vitrin kartlarındaki dolu düğme sistemin birincil düğmesiyle aynıdır
+   (grafit, zemin rengi yazı). Modül mavisi dolgu («Paketi başlat», sayaç
+   «+») ekranda ikinci bir birincil düğme dili açıyordu. */
+.site--v5 .vk:not(#pane-rutbe .vk) .bt.m{ background:var(--text); color:var(--bg); }
+.site--v5 .vk:not(#pane-rutbe .vk) .bt.m:hover{ background:color-mix(in oklab, var(--text) 86%, var(--bg)); }
+
+/* Vitrin kartının kendi kutusu (.kt: «Bugün kapandı», «Sabah tartısı»,
+   blok bitişi…) sistemin kartıyla aynı ölçüdedir: 22 px köşe, 24 px iç
+   boşluk, süzülme gölgesi. 10 px köşe ve gri dolgu eski vitrin kalıbıydı;
+   levhada öbür kartların arasında ayrı bir dil gibi duruyordu. Kartın
+   içindeyse ikinci çerçeve çizmez. */
+.site--v5 .vk:not(#pane-rutbe .vk) .kt{
+  background:var(--surface); border:1px solid var(--kart-kenar); border-radius:var(--r);
+  padding:24px; box-shadow:var(--kart-golge); }
+.site--v5 :is(.card, .lrow, .kutu, .sheet, .donen, .popover) .vk .kt{
+  background:none; border:0; border-radius:0; padding:0; box-shadow:none; }
+/* «Bugün kapandı»: başlık gövde yazısıyla (ince serif değil), üç sayı
+   kutusuz ve ayraçlı — kahraman sayısının diliyle. */
+.site--v5 .vk .y03 b.bs{ font:700 22px/1.25 var(--font-body); letter-spacing:-.02em; }
+.site--v5 .vk .y03 .uc{ border:0; border-radius:0; margin-top:16px; gap:0; }
+.site--v5 .vk .y03 .uc div{ background:none; border-left:1px solid var(--border-soft); padding:0 16px; }
+.site--v5 .vk .y03 .uc div:first-child{ padding-left:0; }
+.site--v5 .vk .y03 .uc b{ font:600 20px/1.2 var(--font-body); font-variant-numeric:tabular-nums; }
+.site--v5 .vk .y03 .uc span{ font-size:12px; color:var(--text-3); }
+/* Adımlı sayı (Günü düzenle sayaçları): artı düğmesi birincil düğme gibi
+   grafit, sayı gövde yazısıyla (ince serif değil). */
+.site--v5 .vk .w37 .st3 .bt.w{ background:var(--text); color:var(--bg); }
+.site--v5 .vk .w37 .st3 b{ font:600 40px/1 var(--font-body); letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+
+/* Sayısız rozet bir noktadır (kabuk.js rozetHtml). */
+.site--v5 :is(.bolumcubugu__rozet, .kenar__rozet).is-nokta, :is(.bolumcubugu__rozet, .kenar__rozet).is-nokta{
+  min-width:0; width:6px; height:6px; padding:0; border-radius:50%; background:currentColor; align-self:center; }
+
+/* Sayfa başındaki ayar arama kutusu levhanın camında beyaz durur: gri
+   kutu (surface-2) açık levhada zeminle karışıyor, kutu hiç görünmüyordu. */
+.site--v5 .sayfabasi .ayar-ara__kutu{ background:var(--surface); box-shadow:var(--kart-golge); }
+/* Derleme damgası eş aralıklı değil: gövde yazısı, tablo rakamı. */
+.sitefoot__sha{ font-family:inherit; font-variant-numeric:tabular-nums; }
+
+/* Kart başlığı (h3) gövde yazısıyla ve kutu başlığıyla aynı ölçüde: eski
+   serif dönemin 18 px / 500'ü SPİ Bütçe'de («Talep tablosu») ve rapor
+   kartlarında öbür kartlardan ayrı bir dil gibi duruyordu. */
+.site--v5 .card__head h3{ font-family:var(--font-body); font-size:16px; font-weight:600; letter-spacing:-.015em; }
+
+/* Ajan monogramı modülün tonundadır (2026-10-05 kararı: «modül tonunda baş
+   harf monogramı»). Her ajanın ayrı rengi (koyu yeşil, kahverengi, mor…)
+   ekranda gökkuşağı gibi duruyordu; ajanı harf ayırır. */
+.site--v5 .agentav{ background:var(--primary-soft); color:var(--primary); }
+
+/* Tablo satırı ortadan hizalı: hücrede düğme varken («Aç») yazı satırın
+   tepesinde, düğme ortasında kalıyordu (ESP Yazı › Taslaklar). Sayı
+   sütunundan sonra gelen yazı sütunu nefes alır («0  7 Eki» yapışıyordu). */
+.site--v5 td{ vertical-align:middle; }
+.site--v5 :is(td, th).num + :is(td, th):not(.num){ padding-left:24px; }

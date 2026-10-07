@@ -280,9 +280,25 @@ SP.UI = (function(){
      atlanır. */
   const NOKTA_SINIRI = 90;     /* 542 px / 90 ≈ 6 px: r=3 daireler ayrışır */
   const ETIKET_SINIRI = 12;    /* «12 Oca» ~35 px; 542 / 12 ≈ 45 px aralık */
+  /* Grafik kabını doldurur (2026-10-07): çizim önce 640 ile yazılır,
+     sayfaya girince kabının gerçek enine göre yeniden çizilir
+     (LIFEOS.GRAFIK.sigdir). Kapta boy en çok 180 px (svg.chart). */
+  function sigdirilmis(ciz, opts){
+    const G = window.LIFEOS && window.LIFEOS.GRAFIK;
+    let kimlik = '';
+    if(G && typeof G.sigdir === 'function'){
+      kimlik = G.sigdir(gen => ciz(Object.assign({}, opts, { gen:gen }), kimlik));
+    }
+    return ciz(opts, kimlik);
+  }
+  function grafikKimligi(kimlik){ return kimlik ? ' data-grafik="' + kimlik + '"' : ''; }
+
   function lineChart(series, opts){
+    return sigdirilmis((o, kimlik) => cizgiGrafigi(series, o, kimlik), opts);
+  }
+  function cizgiGrafigi(series, opts, kimlik){
     const o = opts || {};
-    const w = 640, h = o.height || 190;
+    const w = o.gen || 640, h = o.gen ? Math.min(o.height || 190, 180) : (o.height || 190);
     const padL = 36, padT = 16, padB = 28;
     /* Son noktanın etiketi için sağda yer ayrılır; yoksa sayı grafiğin
        dışına taşar ve kırpılır. */
@@ -300,7 +316,7 @@ SP.UI = (function(){
     const X = i => padL + (w - padL - padR) * (n <= 1 ? 0.5 : i / (n - 1));
     const Y = v => h - padB - (h - padT - padB) * ((v - bottom) / ((top - bottom) || 1));
 
-    let svg = '<svg class="chart" viewBox="0 0 ' + w + ' ' + h + '" role="img"'
+    let svg = '<svg class="chart"' + grafikKimligi(kimlik) + ' viewBox="0 0 ' + w + ' ' + h + '" role="img"'
       + (o.title ? ' aria-label="' + U.esc(o.title) + '"' : '') + '>';
 
     /* Hedef bandı çizgilerin ALTINDA durur ve adı yazılır. */
@@ -361,7 +377,8 @@ SP.UI = (function(){
     });
 
     if(o.labels){
-      const adim = n > 8 ? Math.max(2, Math.ceil(n / ETIKET_SINIRI)) : 1;
+      const adim = Math.max(n > 8 ? Math.max(2, Math.ceil(n / ETIKET_SINIRI)) : 1,
+        Math.ceil(n * 44 / Math.max(1, w - padL - padR)));
       o.labels.forEach((lb, i) => {
         if(i % adim) return;
         svg += '<text x="' + X(i) + '" y="' + (h - 8) + '" text-anchor="middle">'
@@ -372,12 +389,17 @@ SP.UI = (function(){
     return svg;
   }
   function barChart(rows, opts){
+    return sigdirilmis((o, kimlik) => cubukGrafigi(rows, o, kimlik), opts);
+  }
+  function cubukGrafigi(rows, opts, kimlik){
     const o = opts || {};
-    const w = 640, h = o.height || 150, padL = 30, padR = 10, padT = 12, padB = 26;
+    const w = o.gen || 640, h = o.height || 150, padL = 30, padR = 10, padT = 12, padB = 26;
     if(!rows.length) return '<p class="small dim">Veri yok.</p>';
     const top = o.max || 100;
     const bw = (w-padL-padR) / rows.length;
-    let svg = '<svg class="chart" viewBox="0 0 '+w+' '+h+'" role="img">';
+    let svg = '<svg class="chart"' + grafikKimligi(kimlik) + ' viewBox="0 0 '+w+' '+h+'" role="img">';
+    /* Dar kapta etiket başına en az 40 px. */
+    const etiketAdim = Math.max(1, Math.ceil(rows.length * 40 / Math.max(1, w - padL - padR)));
     [0, 0.5, 1].forEach(f => {
       const y = padT + (h-padT-padB)*f;
       svg += '<line class="axis" x1="'+padL+'" x2="'+(w-padR)+'" y1="'+y+'" y2="'+y+'"/>';
@@ -395,7 +417,7 @@ SP.UI = (function(){
       const cls = r.value == null ? 'barfill--muted' : (r.value >= (o.goodAt||85) ? 'barfill' : 'barfill--muted');
       svg += '<rect class="'+cls+'" x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+(bw*0.64).toFixed(1)+'" height="'+Math.max(1,bh).toFixed(1)+'" rx="3"'
         + (r.value != null && r.value < (o.goodAt||85) ? ' fill="var(--accent)"' : '') + '/>';
-      svg += '<text x="'+(padL+bw*i+bw/2).toFixed(1)+'" y="'+(h-8)+'" text-anchor="middle">'+U.esc(r.label)+'</text>';
+      if(!(i % etiketAdim)) svg += '<text x="'+(padL+bw*i+bw/2).toFixed(1)+'" y="'+(h-8)+'" text-anchor="middle">'+U.esc(r.label)+'</text>';
     });
     svg += '</svg>';
     return svg;

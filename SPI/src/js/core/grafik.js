@@ -195,7 +195,7 @@ window.LIFEOS = window.LIFEOS || {};
     let govde = '';
     if(op && ovs.length){
       govde += '<g class="grafik__onceki" data-oz="032">' + op.parcalar.map(par => par.length === 1
-        ? '<circle cx="' + yuvarla(x(par[0].i)) + '" cy="' + yuvarla(y(par[0].deger)) + '" r="1.5"/>'
+        ? '<path class="grafik__onceki-nokta" d="M' + yuvarla(x(par[0].i)) + ' ' + yuvarla(y(par[0].deger)) + 'h0"/>'
         : '<polyline points="' + par.map(nk).join(' ') + '"/>').join('') + '</g>';
     }
     if(bant){
@@ -207,8 +207,10 @@ window.LIFEOS = window.LIFEOS || {};
       if(par.length === 1 && bant){
         /* bantlı grafikte tek gün de «nokta» olarak aşağıda çizilir */
       }else if(par.length === 1){
-        govde += '<circle class="grafik__tek" cx="' + yuvarla(x(par[0].i)) + '" cy="'
-          + yuvarla(y(par[0].deger)) + '" r="2.5" data-tarih="' + par[0].tarih + '"/>';
+        /* Nokta, sıfır boylu yuvarlak uçlu çizgidir: eğri en boy oranını
+           korumadığından bir daire kartın eninde elipse dönüşürdü. */
+        govde += '<path class="grafik__tek" d="M' + yuvarla(x(par[0].i)) + ' '
+          + yuvarla(y(par[0].deger)) + 'h0" data-tarih="' + par[0].tarih + '"/>';
       }else{
         govde += '<polyline class="grafik__cizgi" points="' + par.map(nk).join(' ') + '"/>';
       }
@@ -764,6 +766,78 @@ window.LIFEOS = window.LIFEOS || {};
       + '</svg><figcaption class="grafik__cumle">' + kac(r.metin) + '</figcaption></figure>';
   }
 
+  /* ------------------------------------------ grafik kabını doldurur
+
+     2026-10-07: eksenli grafikler (her modülün ui.js'indeki lineChart ve
+     barChart) viewBox'ı 640'a sabit yazıyordu. 1 000 px'lik kartta grafik
+     ortada küçük kalıyor, telefonda yazıları yarı boya iniyordu. Çizen
+     işlev burada bir «yeniden çiz» kaydı bırakır; grafik sayfaya girince
+     kabının gerçek enine göre yeniden çizilir, yazılar 1:1 kalır. Kap
+     gizliyse (kapalı bölüm, açılmamış şerit) göründüğü an çizilir.
+
+       sigdir(ciz) → kimlik.  ciz(gen) aynı kimliği (data-grafik) taşıyan
+       bir SVG dizesi döner. Değişiklik ResizeObserver'ın dışında, bir
+       sonraki karede yapılır (gözcü döngüsü uyarısı doğmaz). */
+  const SIGDIR = new Map();
+  const SIGDIR_EN_DAR = 160;
+  const SIGDIR_PAY = 8;
+  const sigdirKaplar = new Set();
+  let sigdirNo = 0, sigdirSirada = false, sigdirGozcu = null;
+
+  function sigdirKap(kap){
+    if(!kap || !kap.isConnected) return;
+    const gen = Math.floor(kap.clientWidth);
+    if(gen < SIGDIR_EN_DAR) return;
+    Array.prototype.forEach.call(kap.children, svg => {
+      if(!svg.hasAttribute || !svg.hasAttribute('data-grafik')) return;
+      const ciz = SIGDIR.get(svg.getAttribute('data-grafik'));
+      if(!ciz) return;
+      const vb = Number(String(svg.getAttribute('viewBox') || '').split(/\s+/)[2]);
+      if(Math.abs(vb - gen) < SIGDIR_PAY) return;
+      const gecici = document.createElement('div');
+      gecici.innerHTML = ciz(gen);
+      const yeni = gecici.querySelector('svg');
+      if(yeni) svg.replaceWith(yeni);
+    });
+  }
+  function sigdirTara(){
+    sigdirSirada = false;
+    if(typeof document === 'undefined') return;
+    if(!sigdirGozcu && typeof ResizeObserver === 'function'){
+      sigdirGozcu = new ResizeObserver(girdiler => {
+        const kaplar = girdiler.map(g => g.target);
+        requestAnimationFrame(() => kaplar.forEach(sigdirKap));
+      });
+    }
+    sigdirKaplar.forEach(k => {
+      if(k.isConnected) return;
+      if(sigdirGozcu) sigdirGozcu.unobserve(k);
+      sigdirKaplar.delete(k);
+    });
+    document.querySelectorAll('svg[data-grafik]').forEach(svg => {
+      const kap = svg.parentElement;
+      if(!kap) return;
+      if(sigdirKaplar.has(kap)){ sigdirKap(kap); return; }
+      sigdirKaplar.add(kap);
+      if(sigdirGozcu) sigdirGozcu.observe(kap); else sigdirKap(kap);
+    });
+    /* Sayfadan çıkmış çizimlerin kaydı bırakılır (önce en eskiler). */
+    if(SIGDIR.size > 200){
+      const canli = new Set(Array.prototype.map.call(document.querySelectorAll('svg[data-grafik]'),
+        s2 => s2.getAttribute('data-grafik')));
+      Array.from(SIGDIR.keys()).slice(0, SIGDIR.size - 100).forEach(k => { if(!canli.has(k)) SIGDIR.delete(k); });
+    }
+  }
+  function sigdir(ciz){
+    const kimlik = 'g' + (++sigdirNo);
+    SIGDIR.set(kimlik, ciz);
+    if(!sigdirSirada && typeof requestAnimationFrame === 'function'){
+      sigdirSirada = true;
+      requestAnimationFrame(sigdirTara);
+    }
+    return kimlik;
+  }
+
   L.GRAFIK = {
     EGILIM_EN_AZ:EGILIM_EN_AZ,
     DUZ_ORAN:DUZ_ORAN,
@@ -773,6 +847,7 @@ window.LIFEOS = window.LIFEOS || {};
     seri:seri,
     parcalar:parcalar,
     cizgiSvg:cizgiSvg,
+    sigdir:sigdir,
     aralik:aralik,
     aralikHtml:aralikHtml,
     egilim:egilim,

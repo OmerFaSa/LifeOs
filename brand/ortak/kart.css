@@ -173,7 +173,7 @@
   stroke-dasharray:var(--sp-1) var(--sp-1);
   vector-effect:non-scaling-stroke;
 }
-.grafik__tek{ fill:currentColor; }
+.grafik__tek{ fill:none; stroke:currentColor; stroke-width:6; stroke-linecap:round; vector-effect:non-scaling-stroke; }
 
 /* 031 · hedef bandı: bant ton, bant dışındaki nokta İÇİ BOŞ (renk değil). */
 .grafik__bant{ fill:var(--primary-soft); }
@@ -795,7 +795,7 @@
   opacity:.6;
   vector-effect:non-scaling-stroke;
 }
-.grafik__onceki circle{ fill:var(--text-3); opacity:.6; }
+.grafik__onceki .grafik__onceki-nokta{ fill:none; stroke:var(--text-3); stroke-width:4; stroke-linecap:round; opacity:.6; vector-effect:non-scaling-stroke; }
 
 /* ================================================================
    036 · DAĞILIM ŞERİDİ — her gece bir nokta, ortada medyan
@@ -891,7 +891,15 @@
    satırdır (tasarım dili: alan etiketi + kutu). Üç modülün her ekranı. */
 .site--v5 .lrow{ grid-template-columns:minmax(0,1fr); gap:12px; padding-block:24px; }
 .site--v5 .ledger > .lrow:first-child{ padding-top:4px; }
-.site--v5 .lrow__side{ position:static; display:flex; align-items:baseline; gap:6px 12px; flex-wrap:wrap; }
+/* Künye kutunun bütün enini alır ve eylemi başlık satırının SAĞINDADIR,
+   not altta (2026-10-07). Eski künye sütununun `align-self:start`'ı
+   (layout.css) burada kalmıştı: künye notun boyuna büzülüyor, düğme
+   («Merdiven», «Yenile», «Profil ekle») notun altında kartın ortasında
+   tek başına duruyordu. */
+.site--v5 .lrow__side{ position:static; display:flex; align-items:baseline; gap:6px 12px; flex-wrap:wrap; align-self:stretch; }
+/* Not kendi satırındadır: kutu boyu (100%) alır, yazısı yine 70 karakterde
+   kırılır (iç boşlukla; max-width notu düğmenin yanına sığdırıyordu). */
+.site--v5 .lrow__side > .lrow__note{ order:1; flex-basis:100%; max-width:none; padding-right:max(0px, calc(100% - 70ch)); }
 .site--v5 .lrow__label{ font-size:12px; letter-spacing:.06em; color:var(--text-2); }
 .site--v5 .lrow__meta{ margin-top:0; font-size:13px; }
 .site--v5 .lrow__note{ flex-basis:100%; margin:0; max-width:70ch; font-size:13px; }

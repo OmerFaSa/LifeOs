@@ -38,7 +38,7 @@ describe('Vitrin kartı · çekirdek', () => {
     });
   });
   it('kesinlik etiketi dört etiketten biridir; bilinmeyen «veri yok» olur', () => {
-    expect(V().et('estimated')).toContain('TAHMİN');
+    expect(V().et('estimated')).toContain('Tahmin');
     expect(V().et('computed')).toContain('class="et h"');
     expect(V().et('uydurma')).toContain('data-kesinlik="missing"');
   });
@@ -58,17 +58,17 @@ describe('Vitrin kartı · çekirdek', () => {
 
 describe('C · AYS kartları', () => {
   it('oz-043 geri sayım uzakta sakin, son 15 dakikada canlıdır', () => {
-    expect(V().geriSayim({ dakika:380 })).toContain('UZAKTA · SAKİN');
+    expect(V().geriSayim({ dakika:380 })).toContain('Uzakta · sakin');
     expect(V().geriSayim({ dakika:380 })).toContain('6 sa 20 dk');
     const c = V().geriSayim({ dakika:14 });
-    expect(c).toContain('SON 15 DK · CANLI');
+    expect(c).toContain('Son 15 dk · canlı');
     expect(c).toContain('is-canli');
     expect(V().geriSayim({ dakika:null })).toBe('');
   });
 
   it('oz-044 çözerken doğru/yanlış rengi yoktur; set bitince açılır', () => {
     icinde(V().notrSerit({ cevaplar:[true, true, false, null] }), k => {
-      expect(k.textContent).toContain('ÇÖZERKEN · 2 / 4');
+      expect(k.textContent).toContain('Çözerken · 2 / 4');
       expect(k.querySelectorAll('.t-i, .t-k')).toHaveLength(0);
       expect(k.querySelectorAll('.t-g')).toHaveLength(2);
     });
@@ -85,7 +85,7 @@ describe('C · AYS kartları', () => {
       expect(kok.getAttribute('role')).toBe('button');
       expect(kok.getAttribute('aria-pressed')).toBe('true');
       expect(k.querySelector('.kk.is-cevrik')).toBeTruthy();
-      expect(k.textContent).toContain('YANLIŞ NOTU');
+      expect(k.textContent).toContain('Yanlış notu');
     });
     expect(V().yanlisKarti({ on:'' })).toBe('');
   });
@@ -143,7 +143,7 @@ describe('C · AYS kartları', () => {
       expect(k.querySelectorAll('.t-g')).toHaveLength(2);
       expect(k.querySelectorAll('.t-n')).toHaveLength(1);
       expect(k.querySelectorAll('.t-h')).toHaveLength(1);
-      expect(k.textContent).toContain('3 / 10 HAFTA');
+      expect(k.textContent).toContain('3 / 10 hafta');
     });
   });
 
@@ -161,7 +161,7 @@ describe('C · AYS kartları', () => {
   it('oz-053 ara haftası önizlemesi etkilenen haftayı ve seviyeyi gösterir', () => {
     const h = V().araHaftasi({ haftalar:[{ ad:'H9' }, { ad:'H10', durum:'a' }], seviye:'orta', ozet:'7 gün boşalır', act:'x' });
     expect(h).toContain('class="a"');
-    expect(h).toContain('ORTA');
+    expect(h).toContain('Orta');
     expect(h).toContain('data-act="x"');
   });
 
@@ -178,7 +178,7 @@ describe('C · AYS kartları', () => {
       expect(k.querySelectorAll('select')).toHaveLength(3);
       expect(k.querySelector('[data-act="q-hizli"]')).toBeTruthy();
       expect(k.querySelector('.ci.i')).toBeTruthy();
-      expect(k.querySelector('.cap').textContent).toContain('ENTER');
+      expect(k.querySelector('.cap').textContent).toContain('Enter');
     });
     /* iPhone planı §2.4: kullanım notu ⓘ'ye taşınabilir (not:false) */
     icinde(V().tekSatirSoru({ id:'qh', act:'q-hizli', not:false, dersler:[{ value:'mat', label:'Matematik' }],
@@ -192,7 +192,7 @@ describe('C · AYS kartları', () => {
     icinde(V().yanlisNedenleri({ nedenler:[{ ad:'Bilgi', n:9 }, { ad:'Dikkat', n:6 }, { ad:'Süre', n:0 }] }), k => {
       expect(k.querySelector('.u b').textContent).toBe('15 yanlış');
       expect(k.querySelectorAll('.br i')).toHaveLength(2);    // sıfır olan dağılıma girmez
-      expect(k.textContent).toContain('BEYAN');
+      expect(k.textContent).toContain('Beyan');
     });
     expect(V().yanlisNedenleri({ nedenler:[] })).toBe('');
   });
@@ -206,7 +206,7 @@ describe('C · AYS kartları', () => {
 
   it('oz-058 soru ekranı çözerken doğru/yanlış göstermez; yalnız seçili şık', () => {
     icinde(V().soruEkrani({ no:3, toplam:10, soru:'Hangisi?', secenekler:['a', 'b', 'c'], secili:1, act:'kitap-sec' }), k => {
-      expect(k.textContent).toContain('SORU 3 / 10');
+      expect(k.textContent).toContain('Soru 3 / 10');
       expect(k.querySelectorAll('.sik')).toHaveLength(3);
       expect(k.querySelectorAll('.sik.on')).toHaveLength(1);
       expect(k.innerHTML.indexOf('is-correct') < 0 && k.innerHTML.indexOf('is-wrong') < 0).toBeTruthy();
@@ -233,8 +233,8 @@ describe('C · AYS kartları', () => {
 
   it('oz-061 ders dengesi plan ve gerçeği alt alta, farkı tek rozetle', () => {
     const h = V().dersDengesi({ plan:[{ harf:'M', ad:'Mat', pay:35 }], gercek:[{ harf:'M', ad:'Mat', pay:44 }], not:'Matematik planın üstünde', fark:9 });
-    expect(h).toContain('PLAN');
-    expect(h).toContain('GERÇEK');
+    expect(h).toContain('Plan');
+    expect(h).toContain('Gerçek');
     expect(h).toContain('+9 puan');
   });
 
@@ -243,7 +243,7 @@ describe('C · AYS kartları', () => {
       expect(k.querySelectorAll('input')).toHaveLength(3);
       expect(k.querySelector('input').getAttribute('data-change')).toBe('test-num');
       expect(k.querySelector('.r:not(.bs) b').textContent).toBe('33');
-      expect(k.textContent).toContain('NETİ KOD HESAPLAR');
+      expect(k.textContent).toContain('Neti kod hesaplar');
     });
   });
 
@@ -251,14 +251,14 @@ describe('C · AYS kartları', () => {
     icinde(V().konuTablosu({ act:'topic-open', suzgecAct:'f', suzgec:[{ value:'TYT', label:'TYT', on:true }],
       konular:[{ ad:'Limit', p:null, son:'9 gün önce', onkosul:true }] }), k => {
       expect(k.querySelector('.sz .on').textContent).toBe('TYT');
-      expect(k.querySelector('.uy2').textContent).toBe('ÖNKOŞUL');
+      expect(k.querySelector('.uy2').textContent).toBe('Önkoşul');
       expect(k.querySelectorAll('.hl--yok')).toHaveLength(1);
     });
   });
 
   it('oz-064 hedef ayarı küçük ve geri alınır; toplam hesaplanmıştır', () => {
     const h = V().hedefAyari({ hedef:18, haftaToplam:126, act:'hedef-ayar', data:{ 'data-kind':'paragraph' } });
-    expect(h).toContain('KÜÇÜK · GERİ ALINIR');
+    expect(h).toContain('Küçük · geri alınır');
     expect(h).toContain('data-delta="-1"');
     expect(h).toContain('126');
   });
@@ -273,7 +273,7 @@ describe('C · AYS kartları', () => {
 
   it('oz-066 hedefe kalan: hedef tahminse etiket de tahmin', () => {
     const h = V().hedefeKalan({ simdi:82, hedef:90, kalanHafta:38, haftalik:0.21, birim:'net', kesinlik:'estimated' });
-    expect(h).toContain('38 HAFTA KALDI');
+    expect(h).toContain('38 hafta kaldı');
     expect(h).toContain('+0,21');
     expect(h).toContain('data-kesinlik="estimated"');
     expect(V().hedefeKalan({ simdi:null, hedef:90 })).toBe('');
@@ -308,7 +308,7 @@ describe('D · SPİ kartları', () => {
   it('oz-070 ham noktalar ve yedi günlük ortalama; eksik gün ne nokta ne ortalama', () => {
     icinde(V().hamOrtalama({ birim:'kg', noktalar:[{ deger:71 }, { deger:null }, { deger:72 }, { deger:71.5 }] }), k => {
       expect(k.querySelectorAll('circle')).toHaveLength(3);
-      expect(k.textContent).toContain('7 GÜN ORT. 71,5');
+      expect(k.textContent).toContain('7 gün ort. 71,5');
     });
     expect(V().hamOrtalama({ noktalar:[{ deger:71 }] })).toBe('');
   });
@@ -333,7 +333,7 @@ describe('D · SPİ kartları', () => {
     icinde(V().enerjiOlcegi({ deger:4, act:'set-soreness' }), k => {
       expect(k.querySelectorAll('.ol button')).toHaveLength(5);
       expect(k.querySelector('.ol .on').textContent).toBe('4');
-      expect(k.textContent).toContain('BEYAN');
+      expect(k.textContent).toContain('beyan');
     });
   });
   it('oz-075 set kutucukları: biten set dolu', () => {
@@ -346,7 +346,7 @@ describe('D · SPİ kartları', () => {
     const g = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map((ad, i) => ({ ad, p:50, yok:i === 2, gelecek:i > 3, bugun:i === 3 }));
     icinde(V().haftaHalkalari({ gunler:g }), k => {
       expect(k.querySelectorAll('.hl.yok')).toHaveLength(1);
-      expect(k.textContent).toContain('ÇAR · VERİ YOK');
+      expect(k.textContent).toContain('Çar · veri yok');
     });
   });
   it('oz-077 tuş takımı: büyük rakam, dünkü değer ve fark', () => {
@@ -358,7 +358,7 @@ describe('D · SPİ kartları', () => {
   });
   it('oz-078 sonraki kontrol hatırlatır, yorumlamaz', () => {
     const h = V().sonrakiKontrol({ tarih:'2026-10-15', ad:'Kan tahlili', ne:'3 hafta sonra' });
-    expect(h).toContain('EKİ');
+    expect(h).toContain('Eki');
     expect(h).toContain('SPİ yorumlamaz');
   });
   it('oz-079 harcama şeritleri: aşım yalnız çizgide; bilinmeyen tutar «—»', () => {
@@ -379,7 +379,7 @@ describe('D · SPİ kartları', () => {
     expect(V().uykuDuzeni({ geceler:[{ yatis:23 }] })).toBe('');
     expect(V().duzenliGiderler({ giderler:[] })).toBe('');
     expect(V().yogunlukBolgeleri({ bolgeler:[{ ad:'Z1', dk:8 }, { ad:'Z2', dk:18 }] })).toContain('26 dk');
-    expect(V().duzenliGiderler({ bugun:24, giderler:[{ gun:1, ad:'Kira', tutar:100 }, { gun:28, ad:'Salon', tutar:50 }] })).toContain('4 GÜN SONRA');
+    expect(V().duzenliGiderler({ bugun:24, giderler:[{ gun:1, ad:'Kira', tutar:100 }, { gun:28, ad:'Salon', tutar:50 }] })).toContain('4 gün sonra');
   });
   it('oz-084 tahlil karşılaştırması: aralık dışı yalnız çerçeve; ölçülmeyen «—»', () => {
     icinde(V().tahlilKarsilastirma({ onceAd:'Mar', sonraAd:'Eyl', satirlar:[{ ad:'D vitamini', once:18, sonra:null, ref:[30, 100] }] }), k => {
@@ -413,7 +413,7 @@ describe('E · ESP kartları', () => {
     icinde(V().desteYigini({ on:'resilient', kalan:3, act:'reveal-card' }), k => {
       expect(k.querySelector('[data-act="reveal-card"] b').textContent).toBe('resilient');
       expect(k.querySelectorAll('.kr:not(button)')).toHaveLength(2);
-      expect(k.textContent).toContain('3 KART');
+      expect(k.textContent).toContain('3 kart');
     });
   });
   it('oz-090 süreli cevap: her düğme sonraki görülme zamanını söyler', () => {
@@ -447,7 +447,7 @@ describe('E · ESP kartları', () => {
   it('oz-094 raf: okunan oranı bilinmeyen kitapta çizgi yok', () => {
     icinde(V().kutuphaneRafi({ kitaplar:[{ ad:'Denemeler', oran:null, on:true }, { ad:'Nutuk', oran:100 }] }), k => {
       expect(k.querySelectorAll('i.oransiz')).toHaveLength(1);
-      expect(k.textContent).toContain('2 KİTAP · 1 BİTTİ');
+      expect(k.textContent).toContain('2 kitap · 1 bitti');
     });
   });
   it('oz-095 oz-099 oz-103 oz-106 oz-107 oz-109 veri yoksa kart yok', () => {
@@ -458,7 +458,7 @@ describe('E · ESP kartları', () => {
     expect(V().metinliDinleme({ cumleler:[] })).toBe('');
     expect(V().ucMaddeOzet({ maddeler:[] })).toBe('');
     expect(V().ucMaddeOzet({ maddeler:['a', 'b', 'c'] })).toContain('data-kesinlik="estimated"');
-    expect(V().okumaIlerlemesi({ ad:'Denemeler', oran:42, kalanDk:12 })).toContain('TAHMİN');
+    expect(V().okumaIlerlemesi({ ad:'Denemeler', oran:42, kalanDk:12 })).toContain('tahmin');
   });
   it('oz-096 alıntı kartı kaynağıyla', () => {
     expect(V().alintiKarti({ metin:'Alışkanlık ikinci bir doğadır.', kaynak:'Denemeler' })).toContain('— Denemeler');
@@ -484,7 +484,7 @@ describe('E · ESP kartları', () => {
   it('oz-101 ajanlı ders kapağı: ajan ve tek cümle', () => {
     const h = V().dersKapagi({ ad:'Polyglot', alan:'Dil', cumle:'Bugün 12 kart vadeli.' });
     expect(h).toContain('Polyglot');
-    expect(h).toContain('DİL');
+    expect(h).toContain('Dil');
   });
   it('oz-102 oturum sonu: iyi + kolay oranı dağılımdan', () => {
     icinde(V().oturumSonu({ kart:10, dagilim:{ again:1, hard:1, good:6, easy:2 }, dk:9, yarin:38 }), k => {
@@ -496,7 +496,7 @@ describe('E · ESP kartları', () => {
   it('oz-104 bağlı notlar çip olarak', () => {
     icinde(V().bagliNotlar({ baslik:'Alışkanlık', baglar:['Denemeler', 'Etik'] }), k => {
       expect(k.querySelectorAll('.bg > div span')).toHaveLength(2);
-      expect(k.textContent).toContain('2 BAĞLI NOT');
+      expect(k.textContent).toContain('2 bağlı not');
     });
   });
   it('oz-105 deste durumu: yeni, öğreniliyor, oturmuş', () => {
@@ -698,7 +698,7 @@ describe('A · K · Gün ve güven kartları', () => {
     });
     icinde(V().gunPenceresi({ gunler:[{ gun:'9', kilitli:true, dolu:true, act:'day-go' }, { gun:'17', bugun:true, act:'day-go' }], kilitAd:'taralı · puan yok' }), k => {
       expect(k.querySelector('button.k.dl').textContent).toBe('9');
-      expect(k.querySelector('.alt .cap').textContent).toContain('TARALI · PUAN YOK');
+      expect(k.querySelector('.alt .cap').textContent).toContain('Taralı · puan yok');
     });
     expect(V().gunPenceresi({ gunler:[] })).toBe('');
   });
@@ -715,7 +715,7 @@ describe('A · K · Gün ve güven kartları', () => {
   it('oz-117 geri dönüş noktaları: nokta yoksa kart yok; her satır «Dön» eylemi', () => {
     expect(V().geriDonus({ noktalar:[] })).toBe('');
     icinde(V().geriDonus({ noktalar:[{ ad:'Plan baştan kuruldu · öncesi', not:'12 Eylül · büyük', act:'office-undo', data:{ 'data-id':'p1' } }] }), k => {
-      expect(k.querySelector('.r span').textContent).toBe('12 EYLÜL · BÜYÜK');
+      expect(k.querySelector('.r span').textContent).toBe('12 Eylül · büyük');
       expect(k.querySelector('[data-act="office-undo"]').getAttribute('data-id')).toBe('p1');
     });
   });
@@ -733,7 +733,7 @@ describe('A · K · Gün ve güven kartları', () => {
     icinde(V().disaAktar({ act:'export-data', sistem:'AYS', onizleme:'{ "data": { … } }', kayit:1208 }), k => {
       expect(k.querySelectorAll('.sg span')).toHaveLength(1);
       expect(k.querySelector('.sg .on').textContent).toBe('JSON');
-      expect(k.querySelector('.alt .cap').textContent).toBe('1.208 KAYIT');
+      expect(k.querySelector('.alt .cap').textContent).toBe('1.208 kayıt');
       expect(k.querySelector('[data-act="export-data"]')).toBeTruthy();
     });
   });
@@ -795,11 +795,11 @@ describe('Son parti · 020 125 134 136 143 157 161 122 180', () => {
   it('oz-157 bırakma alanı sırasını taşır', () => {
     icinde(V().birakmaAlani({ sira:2, metin:'Buraya bırak' }), k => {
       expect(k.querySelector('[data-birak]').getAttribute('data-birak')).toBe('2');
-      expect(k.querySelector('.bz2 .cap').textContent).toBe('BURAYA BIRAK');
+      expect(k.querySelector('.bz2 .cap').textContent).toBe('Buraya bırak');
     });
   });
   it('oz-161 kaydırma ipucu iki yönü söyler', () => {
-    icinde(V().kaydirIpucu(), k => expect(k.textContent).toContain('SOLA · ERTELE'));
+    icinde(V().kaydirIpucu(), k => expect(k.textContent).toContain('Sola · ertele'));
   });
   it('oz-122 sessiz saatler: bant gece yarısını geçer; bekleyen bildirim bitişte gelir', () => {
     icinde(V().sessizSaatler({ sessiz:{ acik:true, bas:'22:00', bit:'08:00' }, bekleyen:{ saat:'23:10' } }), k => {

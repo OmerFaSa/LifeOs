@@ -127,22 +127,25 @@ R.Screens.learn = (function(){
              + 'not konuya bağlanır ve oradan tekrar kartına dönüşür.',
           action:K.Button({ label:'İlk dersi ekle', icon:'plus', tone:'primary', act:'note-new' }) });
 
+    /* Kitaplık boşken süzgeç, arama ve üç «0» boş durumun tekrarıydı
+       (2026-10-07 tasarım turu): boşken yalnız boş durum durur. */
+    const bos = !S.videoNotes.length;
     return K.Grid([
       K.Span(8, K.Stack([
-        K.Row([
+        when(!bos, () => K.Row([
           K.Segmented({ items:FILTERS, value:filter, act:'learn-filter', aria:'Ders süzgeci' }),
           K.Input({ class:'input--search', placeholder:'Derslerde ve notlarda ara…',
             value:S.ui.learnQuery || '', aria:'derslerde ara',
             change:'learn-search', data:{ 'data-debounce':220 } }),
-        ], { between:true, wrap:true }),
+        ], { between:true, wrap:true })),
         K.Card({ body }),
       ])),
       K.Span(4, K.Stack([
-        K.Cols(3, [
+        when(!bos, () => K.Cols(3, [
           K.Stat({ label:'Ders', value:U.fmtNum(S.videoNotes.length) }),
           K.Stat({ label:'Not', value:U.fmtNum(totalSegs) }),
           K.Stat({ label:'Kart', value:U.fmtNum(noteCards), tone:noteCards ? 'ok' : null }),
-        ]),
+        ])),
         K.Card({ title:'Nasıl çalışır?', sub:'Dört adım, tek yolculuk', body:html`
           <ol class="bullets small muted">
             <li>Videoyu ekle, dersi ve konuyu bağla.</li>

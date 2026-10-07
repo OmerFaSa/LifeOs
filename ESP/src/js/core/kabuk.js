@@ -314,8 +314,7 @@ window.LIFEOS = window.LIFEOS || {};
           /* --i: sıra; açılışta bölümler yukarıdan aşağı tek tek gelir (kabuk.css «AYRAÇ»). */
           + c.bolumler.map((b, i) => '<button class="kenar__bolum' + (b.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(b.route) + '"'
             + ' style="--i:' + i + '"' + (b.on ? ' aria-current="page"' : '') + '>' + kac(b.ad)
-            + (b.rozet ? '<span class="kenar__rozet' + (b.rozet.quiet ? ' is-sessiz' : '') + '" aria-label="' + kac(b.rozet.text + ' bekleyen') + '">'
-              + kac(b.rozet.text) + '</span>' : '')
+            + rozetHtml(b.rozet, 'kenar__rozet')
             + '</button>').join('')
           + '</div>' : '';
       return '<div class="kenar__cekmece-kap">'
@@ -653,6 +652,16 @@ window.LIFEOS = window.LIFEOS || {};
     });
   }
 
+  /* Bölüm rozeti: sayı ya da sayısız uyarı. Sayısız rozet («!»: hafta
+     imza bekliyor) yazı değil küçük bir noktadır (2026-10-07 tasarım turu:
+     yalnız başına ünlem işareti yazım hatası gibi duruyordu). */
+  function rozetHtml(r, sinif){
+    if(!r) return '';
+    const nokta = r.text === '!';
+    return '<span class="' + sinif + (r.quiet ? ' is-sessiz' : '') + (nokta ? ' is-nokta' : '') + '"'
+      + ' aria-label="' + kac(nokta ? 'dikkat bekliyor' : r.text + ' bekleyen') + '">' + (nokta ? '' : kac(r.text)) + '</span>';
+  }
+
   /* o: { cekmece:'Plan', bolumler:[{ route, ad, on, rozet:{text, quiet} }], kabuk }
      Tek bölümlü çekmecede çizilmez: tek seçenekli bir şerit seçim değil
      gürültüdür. `kabuk:true`: sayfanın üstündeki tablet çubuğu — yalnız
@@ -665,8 +674,7 @@ window.LIFEOS = window.LIFEOS || {};
     return '<nav class="bolumcubugu' + (o.kabuk ? ' bolumcubugu--kabuk' : '') + '" data-oz="019" aria-label="' + kac((o.cekmece || '') + ' bölümleri') + '">'
       + b.map(x => '<button class="bolumcubugu__ad' + (x.on ? ' is-on' : '') + '" data-act="go" data-route="' + kac(x.route) + '"'
         + (x.on ? ' aria-current="page"' : '') + '>' + kac(x.ad)
-        + (x.rozet ? '<span class="bolumcubugu__rozet' + (x.rozet.quiet ? ' is-sessiz' : '') + '"'
-          + ' aria-label="' + kac(x.rozet.text + ' bekleyen') + '">' + kac(x.rozet.text) + '</span>' : '')
+        + rozetHtml(x.rozet, 'bolumcubugu__rozet')
         + '</button>').join('')
       + '</nav>';
   }

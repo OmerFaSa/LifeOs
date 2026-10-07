@@ -382,6 +382,13 @@
       expect(n.getAttribute('aria-label')).toBe('Plan bölümleri');
       expect(n.querySelector('[aria-current="page"]').textContent).toBe('Hafta');
       expect(n.querySelector('.bolumcubugu__rozet').classList.contains('is-sessiz')).toBe(true);
+      /* Sayısız rozet («!»: imza bekliyor) yazı değil, küçük bir noktadır
+         (2026-10-07: yalnız başına ünlem işareti yazım hatası gibi duruyordu). */
+      const r = n.querySelector('.bolumcubugu__rozet');
+      expect(r.textContent).toBe('');
+      expect(r.classList.contains('is-nokta')).toBe(true);
+      expect(r.getAttribute('aria-label')).toBe('dikkat bekliyor');
+      expect(getComputedStyle(r).width).toBe('6px');
       d.remove();
     });
 
@@ -650,8 +657,9 @@
 
     /* Kullanıcı (2026-10-02): «SPİ ve ESP'de AYS kadar sade olmayan, göz
        yoran şeyler var». Uyarı kutusu nötr gri (tonu simge söyler), grafik
-       okuma genişliğinden büyümez, seçim kartı çerçevesiz, vitrin serifi
-       gövde yazısında. Üç modülde aynı kural. */
+       boyu sınırlı, seçim kartı çerçevesiz, vitrin serifi gövde yazısında.
+       Üç modülde aynı kural. 2026-10-07: grafik artık kartın eninde (640 px'e
+       kısılıp ortalanınca yazının sol çizgisinden kopuyordu); sınır boydadır. */
     it('sakin içerik: nötr uyarı kutusu, sınırlı grafik, çerçevesiz seçim kartı, serifsiz vitrin', () => {
       const d = yerlestir('<div class="site--v5"><div class="kutu"><div class="notice notice--warn"><svg></svg><div>x</div></div>'
         + '<svg class="grafik" viewBox="0 0 560 120" preserveAspectRatio="none"></svg>'
@@ -659,9 +667,31 @@
       try{
         const n = d.querySelector('.notice');
         expect(getComputedStyle(n).backgroundColor).toBe(renk(kok('--surface-2')));
-        expect(getComputedStyle(d.querySelector('.grafik')).maxWidth).toBe('640px');
+        expect(getComputedStyle(d.querySelector('.grafik')).maxWidth).toBe('none');
+        expect(getComputedStyle(d.querySelector('.grafik')).maxHeight).toBe('150px');
         expect(getComputedStyle(d.querySelector('.pickcard')).borderTopColor).toBe('rgba(0, 0, 0, 0)');
         expect(/Newsreader/.test(getComputedStyle(d.querySelector('.vk .serif')).fontFamily)).toBe(false);
+      }finally{ d.remove(); }
+    });
+
+    /* 2026-10-07 tasarım turu: künye notun boyuna büzülüyor, eylem düğmesi
+       («Merdiven», «Yenile», «Profil ekle») notun altında kartın ortasında
+       tek başına kalıyordu. Künye kutunun eninde; eylem başlık satırında
+       sağda, not altta. */
+    it('kart başlığı: künye kutunun eninde, eylem başlık satırının sağında, not altta', () => {
+      const d = yerlestir('<div class="site--v5" style="display:block;width:900px"><div class="ledger"><section class="lrow lrow--wide">'
+        + '<div class="lrow__side"><div class="lrow__label">Günün reçetesi</div><div class="lrow__meta">45 dk</div>'
+        + '<p class="lrow__note">Reçeteyi koç yazar, sırayı planlayıcı verir.</p>'
+        + '<div class="lrow__act"><button class="btn btn--sm">Merdiven</button></div></div>'
+        + '<div class="lrow__main">x</div></section></div></div>');
+      try{
+        const satir = d.querySelector('.lrow').getBoundingClientRect();
+        const yan = d.querySelector('.lrow__side').getBoundingClientRect();
+        const dugme = d.querySelector('.lrow__act .btn').getBoundingClientRect();
+        const not = d.querySelector('.lrow__note').getBoundingClientRect();
+        expect(yan.width > satir.width * 0.8).toBe(true);
+        expect(dugme.bottom <= not.top + 1).toBe(true);
+        expect(dugme.right > satir.right - 80).toBe(true);
       }finally{ d.remove(); }
     });
 

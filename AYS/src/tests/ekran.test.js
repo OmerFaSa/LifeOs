@@ -143,6 +143,44 @@
         expect(out.indexOf('31 doğru') >= 0).toBe(true);
       });
     });
+
+    /* 2026-10-07 tasarım turu: ders kitaplığı boşken süzgeç, arama ve üç
+       «0» sayı boş durumun tekrarıydı; boşken yalnız boş durum durur. */
+    it('Ders notları boşken süzgeç ve sıfır sayılar çizilmez; ders varken gelir', async () => {
+      resetState();
+      R.S.videoNotes = [];
+      let out = String(await R.Screens.learn.render());
+      expect(out.indexOf('learn-filter') < 0).toBe(true);
+      expect(out.indexOf('>Kart<') < 0).toBe(true);
+      expect(out.indexOf('data-oz="010"') >= 0).toBe(true);
+      R.S.videoNotes = [{ id:'n1', title:'Türev', segments:[{ id:'s1', text:'tanım' }], createdAt:Date.now() }];
+      out = String(await R.Screens.learn.render());
+      expect(out.indexOf('learn-filter') >= 0).toBe(true);
+    });
+
+    /* Deneme net trendinin lejantı yalnız çizilen şeyi adlandırır: AYT
+       denemesi yokken «AYT tam deneme» lejantta boşta duruyordu. */
+    it('Deneme net trendi: AYT verisi yokken lejantta AYT yok, varken gelir', async () => {
+      resetState();
+      R.S.exams = [R.Test.examWithNet('2026-09-12', 40), R.Test.examWithNet('2026-09-19', 42)];
+      await withTodayAsync('2026-09-20', async () => {
+        let out = String(await R.Screens.progress.render());
+        expect(out.indexOf('TYT tam deneme') >= 0).toBe(true);
+        expect(out.indexOf('AYT tam deneme') < 0).toBe(true);
+        R.S.exams.push(R.Test.examWithNet('2026-09-19', 20, 'AYT'));
+        out = String(await R.Screens.progress.render());
+        expect(out.indexOf('AYT tam deneme') >= 0).toBe(true);
+      });
+    });
+
+    /* Toplantı gündeminde tur listesi «1. 1. Durum tespiti» diye iki kez
+       numaralanıyordu (<ol> + elle yazılan sayı); işleyiş açılır satırda. */
+    it('Toplantı gündemi: turlar bir kez numaralanır, işleyiş açılır satırda', async () => {
+      resetState();
+      const out = String(await R.Screens.meeting.render());
+      expect(/<li><b>\d+\./.test(out)).toBe(false);
+      expect(out.indexOf('<details class="meetplan') >= 0).toBe(true);
+    });
   });
 
   /* Kullanıcı kararı (2026-09-24): yıllık tatil sınırı değiştirilebilir.

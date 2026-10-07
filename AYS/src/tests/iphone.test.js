@@ -373,6 +373,12 @@
           expect(id + ':' + a.join(',') + ':' + (a.length <= 3)).toBe(id + ':' + a.join(',') + ':true');
           if(id === 'office'){ expect(kok.querySelector('.board')).toBeNull(); expect(R.Screens.office.kucukVarsayilan.indexOf('uzman-masaları') >= 0).toBe(true); }
           if(id === 'team') expect(kok.textContent.indexOf('Alan dışı soruyu sahibine sor')).toBe(-1);
+          /* 2026-10-07: sesli sohbet şerit; model kapalıyken Masalar'daki tek
+             satırlık gri şerit, iki cümlelik uyarı kutusu değil. */
+          if(id === 'team'){
+            expect(R.Screens.team.kucukVarsayilan.indexOf('sesli-sohbet') >= 0).toBe(true);
+            expect(kok.textContent.indexOf('Ücretsiz bir model bağlarsan')).toBe(-1);
+          }
         }finally{ kok.remove(); }
       });
     });

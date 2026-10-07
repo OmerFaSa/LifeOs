@@ -138,8 +138,8 @@ ESP.Screens.library = (function(){
               ${map(n.concepts, c => K.Button({ size:'sm', act:'filter-concept',
                 label:(ESP.CONCEPT_BY_ID[c] || {}).label || c, data:{ 'data-id':c } }))}
               <span class="tiny dim">${(n.links || []).length} bağ</span>
-              ${K.Button({ label:'Bağla', size:'sm', act:'open-link', data:{ 'data-id':n.id } })}
-              ${K.Button({ label:'Sil', size:'sm', act:'del-note', data:{ 'data-id':n.id } })}
+              ${K.Button({ label:'Bağla', size:'sm', tone:'ghost', act:'open-link', data:{ 'data-id':n.id } })}
+              ${K.Button({ label:'Sil', size:'sm', tone:'ghost', class:'noterow__sil', act:'del-note', data:{ 'data-id':n.id } })}
             </div>
             ${when(S.ui.linkFrom === n.id, () => linkForm(n))}
             ${when((n.links || []).length, () => html`

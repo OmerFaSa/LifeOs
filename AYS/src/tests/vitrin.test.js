@@ -149,7 +149,7 @@
       expect(g).toBeTruthy();
       expect(g.querySelectorAll('.r')).toHaveLength(1);
       expect(g.querySelector('[data-act="office-undo"]').getAttribute('data-id')).toBe('gd1');
-      expect(g.textContent).toContain('ORTA');
+      expect(g.textContent).toContain('orta');
       R.S.officeProposals = [];
     });
 
@@ -296,7 +296,7 @@
       await withTodayAsync('2026-10-12', async () => {
         await hazirla();
         const k = dom(await R.Screens.week.render());
-        expect(k.querySelector('[data-oz="051"]').textContent).toContain('/ ' + R.PLAN.totalWeeks + ' HAFTA');
+        expect(k.querySelector('[data-oz="051"]').textContent).toContain('/ ' + R.PLAN.totalWeeks + ' hafta');
         const iz = k.querySelector('[data-oz="052"]');
         expect(iz.querySelectorAll('.bk').length).toBeGreaterThan(0);
         expect(/\d\d:\d\d/.test(iz.textContent)).toBeFalsy();
@@ -311,7 +311,7 @@
         const gunDoc = R.S.days[R.U.todayISO()];
         gunDoc.blocks[0].subjectId = 'tyt-matematik'; gunDoc.blocks[0].status = 'done'; gunDoc.blocks[0].actualMin = 60;
         const k = dom(await R.Screens.week.render());
-        expect(k.querySelector('[data-oz="061"]').textContent).toContain('GERÇEK');
+        expect(k.querySelector('[data-oz="061"]').textContent).toContain('Gerçek');
         expect(k.querySelector('[data-oz="067"] .d2').textContent).toBe('M');
       });
     });

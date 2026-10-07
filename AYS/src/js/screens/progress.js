@@ -107,11 +107,14 @@ R.Screens.progress = (function(){
       hint:'median', title:'Deneme net trendi',       actions:html`<div class="row-sm">${delta('TYT', tyt)}${delta('AYT', ayt)}</div>`,
       body:html`
         ${raw(UI.lineChart([{ data:tyt.series }, { data:ayt.series, accent:true }],
-          { labels:C.fullExams('TYT').map(e => U.fmtShort(e.date)), band:gate ? gate.tyt : null, height:180 }))}
+          { labels:C.fullExams('TYT').map(e => U.fmtShort(e.date)), band:gate ? gate.tyt : null,
+            bandLabel:'bu ayın bandı', height:180 }))}
         ${raw(UI.legend([
           { label:'TYT tam deneme', color:'var(--primary)' },
-          { label:'AYT tam deneme', color:'var(--accent)' },
-          { label:'bu ayın gözlenen bandı', color:'var(--c-band)' },
+          /* Lejant yalnız çizilen şeyi adlandırır (2026-10-07): AYT verisi
+             yokken «AYT tam deneme» ve bandın adı grafikte yazarken gri
+             (görünmez) kareli ikinci adı boşta duruyordu. */
+          ...(ayt.series.some(v => v != null) ? [{ label:'AYT tam deneme', color:'var(--accent)' }] : []),
         ]))}
 `,
     });

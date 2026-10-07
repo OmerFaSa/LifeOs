@@ -69,6 +69,10 @@
 }
 [class*="cols-"] > .stat{ padding-left:18px; border-left:1px solid var(--border); }
 [class*="cols-"] > .stat:first-child{ padding-left:0; border-left:none; }
+/* Satırın ilk sayısı çizgisiz başlar (2026-10-07): iki sütunda dört sayı
+   (Sınama › Havuz) ikinci satırın başını içeri itip kıl çizgi çekiyordu. */
+.cols-2 > .stat:nth-child(2n+1), .cols-3 > .stat:nth-child(3n+1),
+.cols-4 > .stat:nth-child(4n+1){ padding-left:0; border-left:none; }
 
 @media (max-width:700px){
   [class*="cols-"] > .stat{
@@ -317,7 +321,9 @@ tbody tr:hover{ background:var(--surface-2); }
 
 .msg__warn svg{ width:13px; height:13px; flex:none; margin-top:2px; stroke:currentColor; fill:none; stroke-width:2; }
 
-.composer{ display:flex; gap:8px; align-items:flex-end; }
+/* Gönder düğmesi yazı kutusunun ortasında (2026-10-07: kutunun altına yapışık
+   düğme kutudan aşağı taşıyordu). */
+.composer{ display:flex; gap:8px; align-items:center; }
 
 .composer__input{ flex:1; min-height:52px; }
 

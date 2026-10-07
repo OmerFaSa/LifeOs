@@ -282,9 +282,12 @@ R.Screens.team = (function(){
 
         picker(),
 
-        when(ruleMode, () => K.Notice({ tone:'info', title:'Model bağlı değil.',
-          body:'Ajan yine de verine bakıp yanıtlıyor ama cümleleri kural motorundan geliyor. '
-             + 'Ücretsiz bir model bağlarsan kendi cümleleriyle konuşur.' })),
+        /* Model kapalıyken Masalar'daki tek satırlık gri şerit (139); iki
+           cümlelik uyarı kutusu sohbetin önünde duruyordu (2026-10-07). */
+        when(ruleMode, () => (window.LIFEOS || {}).SOZLUK
+          ? raw(window.LIFEOS.SOZLUK.seritHtml({ acik:false }))
+          : K.Notice({ tone:'info', title:'Model bağlı değil.',
+              body:'Ajan yine de verine bakıp yanıtlıyor ama cümleleri kural motorundan geliyor.' })),
 
         html`<div class="chat" id="chat-log">
           ${msgs.length
@@ -479,8 +482,9 @@ R.Screens.team = (function(){
 
   return {
     id:'team',
-    /* iPhone Faz 4: açık sohbet ve ajanın raporu; ekibin geri kalanı şerit. */
-    kucukVarsayilan:['ekipteki-diğerleri'],
+    /* iPhone Faz 4: açık sohbet ve ajanın raporu; ekibin geri kalanı şerit.
+       2026-10-07: sesli sohbet de şerit (ara sıra açılan araç). */
+    kucukVarsayilan:['ekipteki-diğerleri', 'sesli-sohbet'],
     title:'Ekip sohbeti',
     subtitle(){
       const agent = current();

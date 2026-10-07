@@ -119,7 +119,7 @@
       const k = dom2(await ESP.Screens.library.render());
       expect(k.querySelector('[data-oz="094"] .rf i')).toBeTruthy();
       expect(k.querySelector('[data-oz="096"] q').textContent).toContain('Alışkanlık');
-      expect(k.querySelector('[data-oz="104"]').textContent).toContain('1 BAĞLI NOT');
+      expect(k.querySelector('[data-oz="104"]').textContent).toContain('1 bağlı not');
     });
 
     it('oz-100 Tarih: yıllı olaylar şeritte', async () => {

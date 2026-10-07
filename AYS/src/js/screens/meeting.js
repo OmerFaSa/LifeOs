@@ -139,11 +139,12 @@ R.Screens.meeting = (function(){
           </div>`);
         })()}
 
-        <div class="meetplan mt-12">
-          <b class="small">Nasıl işleyecek?</b>
+        <details class="meetplan ayrinti ayrinti__ac mt-12">
+          <summary>Nasıl işler?</summary>
+          <div class="ayrinti__govde">
           <ol class="meetplan__list">
-            ${map(R.Office.ROUNDS.slice(0, maxRounds()), (r, i) =>
-              html`<li><b>${i+1}. ${r.title}</b> — ${R.MEETING_ORDER.length} uzman sırayla konuşur</li>`)}
+            ${map(R.Office.ROUNDS.slice(0, maxRounds()), r =>
+              html`<li><b>${r.title}</b> — ${R.MEETING_ORDER.length} uzman sırayla konuşur</li>`)}
           </ol>
           <p class="tiny dim">Toplantıyı <b>sen</b> bitirirsin; istediğin turda “Bitir ve rapor al”a bas.
             Araya girip söz de alabilirsin.</p>
@@ -158,7 +159,8 @@ R.Screens.meeting = (function(){
               ${maxRounds()} turda durur: ajanların elinde yalnızca kural motorunun raporu var,
               sonrasında söyleyecek yeni bir şeyleri olmaz.`)}
           </p>
-        </div>`,
+          </div>
+        </details>`,
     });
   }
 

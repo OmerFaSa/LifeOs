@@ -1229,7 +1229,8 @@ button.listitem.is-on{ background:var(--primary-soft); }
 /* Sabit nokta: yanıp sönmez — dikkat çekmek için animasyon kullanılmaz. */
 .meetbar__live{ width:8px; height:8px; border-radius:50%; background:var(--primary); flex:none; }
 
-.meetplan{ padding:12px 14px; border-radius:var(--r-sm); background:var(--surface-2); }
+/* İşleyiş açılır satırdır (2026-10-07): kartta gri kutu ve sabit açıklama durmaz. */
+.meetplan{ padding:0; }
 .meetplan__list{ margin:8px 0 8px 18px; padding:0; font-size:var(--fs-sm); color:var(--text-2); }
 .meetplan__list li{ margin:3px 0; }
 

@@ -167,6 +167,11 @@ const DOLDUR = {
         subject:'TYT Matematik', topic:'Türev', note:'Kök neden ' + i,
         closedAt:i % 3 ? new Date().toISOString() : null });
     }
+    /* Ders notları da en az bir satırla çizilir: kitaplık boşken süzgeç ve
+       arama çizilmez (2026-10-07), dolu profil onları bu dersle görür. */
+    R.S.videoNotes = R.S.videoNotes || [];
+    R.S.videoNotes.push(Object.assign(R.Model.newVideoNote({ title:'Paragrafta ana düşünce' }), {
+      segments:[{ id:'vs0', ts:95, text:'Ana düşünce çoğu zaman ilk ya da son cümlededir.', tag:'kural' }] }));
   },
   SPI: () => {
     const U = SP.U;
