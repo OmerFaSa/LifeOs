@@ -692,6 +692,30 @@
       }finally{ d.remove(); }
     });
 
+    /* RAFİNE (2026-10-07, kullanıcı önizlemeyi görüp seçti): ardışık
+       şeritler tek gruplu liste; aradaki gizli bölüm grubu bölmez. */
+    it('rafine: ardışık şeritler bitişik tek liste, köşe yalnız uçlarda; durum etiketi dolgusuz', () => {
+      const s = ad => '<section class="lrow gizle-kucuk" data-gizle-kucuk="' + ad + '"><div class="lrow__side">'
+        + '<div class="lrow__label">' + ad + '</div></div></section>';
+      const d = yerlestir('<div class="site--v5" style="display:block;width:1000px"><div class="ledger">'
+        + '<section class="lrow"><div class="lrow__side"><div class="lrow__label">Açık</div>'
+        + '<div class="lrow__meta"><span class="badge badge--warn">İmza bekliyor</span></div></div></section>'
+        + s('takvim') + s('bolumler') + '<section class="lrow" data-gizle-gizli hidden style="display:none"></section>'
+        + s('veri') + '</div></div>');
+      try{
+        const [a, b, c] = d.querySelectorAll('.gizle-kucuk');
+        const r = el => el.getBoundingClientRect();
+        const kap = r(d.querySelector('.ledger'));
+        [a, b, c].forEach(x => expect(Math.abs(r(x).width - kap.width) < 2).toBe(true));   // bütün en
+        expect(Math.abs(r(b).top - r(a).bottom) < 1.5).toBe(true);                          // bitişik
+        expect(Math.abs(r(c).top - r(b).bottom) < 1.5).toBe(true);                          // gizli araya girse de
+        expect(getComputedStyle(a).borderBottomLeftRadius).toBe('0px');
+        expect(getComputedStyle(b).borderTopLeftRadius).toBe('0px');
+        expect(getComputedStyle(c).borderBottomLeftRadius === '0px').toBe(false);           // grubun sonu yuvarlak
+        expect(getComputedStyle(d.querySelector('.badge--warn')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+      }finally{ d.remove(); }
+    });
+
     it('telefonda da sağ üst sade: zil ve sayfa düzeni çerçevesiz yuvarlak (kutucuk yok)', () => {
       /* Kaskatta SONUNCU kural geçerlidir: eski telefon kuralları önce gelir. */
       let r = null;

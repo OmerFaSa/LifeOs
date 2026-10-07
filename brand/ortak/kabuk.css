@@ -1925,3 +1925,47 @@ html .site--v5 > .kenar .kenar__arac:is(:hover, :focus-visible) .kenar__kisayol{
    sütunundan sonra gelen yazı sütunu nefes alır («0  7 Eki» yapışıyordu). */
 .site--v5 td{ vertical-align:middle; }
 .site--v5 :is(td, th).num + :is(td, th):not(.num){ padding-left:24px; }
+
+/* ================================================================
+   RAFİNE (2026-10-07, kullanıcı: «daha da sadeleşmeye ve
+   profesyonelleşmeye… geliştirebiliriz»). Önce/sonra önizlemesini
+   gerçek ekranlarda görüp iki parçayı seçti.
+   ================================================================ */
+
+/* 1 · ŞERİTLER GRUPLU LİSTE. Alt alta duran küçük bölümler (şerit) ayrı
+   ayrı kart değil, iOS Ayarlar'daki gibi tek kartın ince çizgiyle
+   ayrılmış satırlarıdır. DOM değişmez (Gizle'nin yer ve sıra kayıtları
+   bölümün kendi kabına bağlı): şerit rafın bütün enini alır (hareket.js
+   raf'ı onu geniş kutu sayar, yanında kalan yarım kutu tek kalır),
+   ardışık iki şerit arasındaki raf boşluğu negatif üst boşlukla kapanır,
+   köşeler yalnız grubun başında ve sonunda yuvarlaktır. Aradaki gizli
+   bölüm (en çok iki) grubu bölmez. */
+/* Raf satır aralığı tek değişkendir (aynı değerler: telefonda 16, genişte
+   20 — kart.css ve FERAH); negatif üst boşluk onu okur. `html` önekiyle:
+   test sayfasında CSS sırası farklı, aralık her yerde bu değişkenden gelir. */
+.site--v5 .ledger{ --raf-ara:16px; }
+@media (min-width:680px){ .site--v5 .ledger{ --raf-ara:20px; } }
+html .site--v5 .ledger:not(.ledger .ledger){ row-gap:var(--raf-ara); }
+.site--v5 .ledger .gizle-kucuk{ grid-column:1 / -1; }
+.site--v5 .ledger :is(.gizle-kucuk + .gizle-kucuk, .gizle-kucuk + [data-gizle-gizli] + .gizle-kucuk,
+  .gizle-kucuk + [data-gizle-gizli] + [data-gizle-gizli] + .gizle-kucuk){
+  margin-top:calc(-1 * var(--raf-ara)) !important;
+  border-top-left-radius:0; border-top-right-radius:0; border-top-color:transparent; }
+.site--v5 .ledger .gizle-kucuk:has(+ .gizle-kucuk, + [data-gizle-gizli] + .gizle-kucuk,
+  + [data-gizle-gizli] + [data-gizle-gizli] + .gizle-kucuk){
+  border-bottom-left-radius:0; border-bottom-right-radius:0; border-bottom-color:transparent; }
+/* Satır ayracı yazının hizasından başlar (iOS gibi): ok + boşluk kadar içeride. */
+.site--v5 .ledger :is(.gizle-kucuk + .gizle-kucuk, .gizle-kucuk + [data-gizle-gizli] + .gizle-kucuk,
+  .gizle-kucuk + [data-gizle-gizli] + [data-gizle-gizli] + .gizle-kucuk)::before{
+  content:''; position:absolute; top:0; right:0; left:calc(var(--kp, 20px) + 18px);
+  height:1px; background:var(--border-soft); pointer-events:none; }
+
+/* 2 · SAKİN DURUM ETİKETİ. Renkli dolgulu hap («İmza bekliyor», «veri
+   yok», «kural motoru») dolgusuz olur: tonu yazının rengi ve simgesi
+   söyler. Şeritteki «uyarı» hapı küçük kırmızı noktadır (yazısı ekran
+   okuyucu ve ipucu için durur). Rütbe olduğu gibi kalır. */
+.site--v5 .badge:not(#pane-rutbe .badge){
+  background:none; border-color:transparent; padding-left:0; padding-right:0; font-weight:500; }
+.site--v5 .gizle-uyari-rozet{
+  display:inline-block; width:7px; height:7px; min-width:0; padding:0; margin-left:8px;
+  border-radius:50%; background:var(--bad); font-size:0; line-height:0; vertical-align:middle; }
