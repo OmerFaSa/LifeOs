@@ -512,3 +512,123 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 @media (prefers-reduced-motion:reduce){
   .ust__hesap.is-esitlendi .kbk-ic path:last-child, .ust__hesap.is-esitlendi .ust__hesap-nokta{ animation:none; stroke-dashoffset:0; }
 }
+
+/* ---------- bağlantılar ve iki adım (hesap.js sözleri 17–20) ----------
+   Aynı dil: gruplu liste, 16 px köşe, --surface-2 zemin, ince çizgi simge.
+   Yeni olan yalnız: altı haneli kod alanı (büyük, aralıklı rakam), QR
+   kutusu (temadan bağımsız beyaz: okuyucular ters kodu okumaz), kopyala
+   satırı, numaralı adımlar ve güvenlik kontrolü özeti. */
+.hesap__alan input.hesap__kod{ min-height:56px; padding:0 10px 0 calc(10px + .32em); font-size:24px; font-weight:600;
+  letter-spacing:.32em; text-align:center; font-variant-numeric:tabular-nums; }
+.hesap__alan input.hesap__kod::placeholder{ letter-spacing:.32em; opacity:.35; }
+.hesap__alan input.hesap__kod--yedek{ padding-left:calc(10px + .18em); font-size:19px; letter-spacing:.18em; text-transform:uppercase; }
+.hesap__alan--kod > span{ text-align:center; }
+.hesap-kapi__rozet{ display:grid; place-items:center; width:56px; height:56px; margin-bottom:6px; border-radius:50%;
+  background:var(--surface-2); color:var(--text); }
+.hesap-kapi__rozet svg{ width:28px; height:28px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.hesap-kapi__kodla{ display:flex; align-items:center; justify-content:center; gap:8px; min-height:40px; margin-top:-2px; padding:0 14px;
+  border:0; border-radius:999px; background:none; color:var(--text-2); font:inherit; font-size:12.5px; cursor:pointer;
+  transition:background .2s ease, color .2s ease; }
+.hesap-kapi__kodla b{ font-weight:600; color:var(--text); }
+.hesap-kapi__kodla .hesap-ikon{ width:16px; height:16px; color:var(--text); }
+.hesap-kapi__kodla:hover{ background:var(--surface-2); }
+.hesap-kapi__kodla:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.hesap-kapi__kodla + .hesap-kapi__beta{ margin-top:-14px; }
+
+/* İki satırlı satır: ad + hangi uygulamalar */
+.hesap-satir--iki{ min-height:62px; padding-top:8px; padding-bottom:8px; }
+.hesap-satir--iki .hesap-oge__metin small{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* Güvenlik kontrolü özeti: zemin nötr (dolgusuz durum kararı, 2026-10-07);
+   durumu yalnız simgenin rengi söyler. */
+.hesap-kontrol{ display:flex; align-items:center; gap:14px; margin:0 0 20px; padding:16px; border-radius:16px;
+  background:var(--surface-2); }
+.hesap-kontrol__ikon{ flex:none; width:28px; height:28px; fill:none; stroke:var(--ok-ink, var(--ok)); stroke-width:1.7;
+  stroke-linecap:round; stroke-linejoin:round; }
+.hesap-kontrol.is-dikkat .hesap-kontrol__ikon{ stroke:var(--bad-ink, var(--bad)); }
+.hesap-kontrol__baslik{ margin:0; font-size:15px; font-weight:600; color:var(--text); }
+.hesap-kontrol__alt{ margin:2px 0 0; font-size:12.5px; color:var(--text-2); }
+.hesap-ac > .hesap-satir.is-dikkat .hesap-satir__detay{ color:var(--bad-ink, var(--bad)); font-weight:500; }
+
+/* Tanıtım: tek simge, tek başlık, tek cümle (boş durum da bu) */
+.hesap-tanit{ display:flex; flex-direction:column; align-items:center; gap:6px; margin:4px 8px 22px; text-align:center; }
+.hesap-tanit__ikon{ width:24px; height:24px; margin-bottom:6px; padding:12px; box-sizing:content-box; border-radius:50%;
+  background:var(--surface-2); fill:none; stroke:var(--text); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.hesap-tanit__baslik{ margin:0; font-size:17px; font-weight:650; letter-spacing:-.01em; color:var(--text); }
+.hesap-tanit__metin{ margin:0; max-width:380px; font-size:13.5px; line-height:1.5; color:var(--text-2); }
+
+/* Numaralı adımlar */
+.hesap-adimlar{ counter-reset:adim; display:flex; flex-direction:column; gap:18px; margin:0 0 22px; padding:0; list-style:none; }
+.hesap-adimlar > li{ counter-increment:adim; position:relative; display:flex; flex-direction:column; gap:6px; padding-left:38px;
+  font-size:13.5px; line-height:1.5; color:var(--text-2); }
+.hesap-adimlar > li::before{ content:counter(adim); position:absolute; left:0; top:-1px; width:26px; height:26px; border-radius:50%;
+  display:grid; place-items:center; background:var(--surface-2); color:var(--text); font-size:13px; font-weight:650; }
+.hesap-adimlar > li > b{ font-size:15px; font-weight:600; color:var(--text); }
+.hesap-adimlar > li > span{ display:block; }
+.hesap-adimlar .hesap__form{ margin-top:4px; }
+.hesap-adimlar__dugme{ align-self:flex-start; text-decoration:none; }
+.hesap-kutu .hesap-adimlar, .hesap-ac__ic .hesap-adimlar{ gap:8px; }
+.hesap-ac__ic .hesap-adimlar{ margin:6px 0 4px; gap:10px; }
+.hesap-kutu .hesap-adimlar > li, .hesap-ac__ic .hesap-adimlar > li{ padding-left:32px; }
+.hesap-kutu .hesap-adimlar > li::before, .hesap-ac__ic .hesap-adimlar > li::before{ width:22px; height:22px; font-size:12px; }
+.hesap-ac__ic .hesap-adimlar > li::before{ background:var(--surface); }
+
+/* QR: beyaz kutu, her temada aynı (okuyucular ters kodu okumaz) */
+.hesap-qr{ align-self:flex-start; width:min(208px, 100%); margin:6px 0 4px; padding:8px; box-sizing:border-box; border-radius:16px;
+  background:#fff; box-shadow:inset 0 0 0 1px rgba(0,0,0,.08); }
+.hesap-qr svg{ display:block; width:100%; height:auto; border-radius:8px; }
+.hesap-qr--kucuk{ align-self:center; width:min(168px, 100%); margin:18px auto 0; }
+
+/* Kopyalanacak metin */
+.hesap-kopya{ display:flex; align-items:center; gap:8px; min-width:0; padding:6px 6px 6px 12px; border-radius:12px; background:var(--surface-2); }
+.hesap-ac__ic .hesap-kopya{ background:var(--surface); }
+/* Eş aralıklı yazı yok (sade görsel kararı): adres ve anahtar sistemin yazısıyla. */
+.hesap-kopya__metin, .hesap-istek code, .hesap-kod-blok, .hesap-yedek__liste code, .hesap-adimlar code,
+.hesap-ac__ic .hesap__not code{ font-family:inherit; }
+.hesap-kopya__metin{ flex:1; min-width:0; font-size:13px; line-height:1.45; letter-spacing:.01em; color:var(--text);
+  overflow-wrap:anywhere; }
+.hesap__kucuk--duz{ display:inline-flex; align-items:center; gap:6px; }
+.hesap__kucuk .hesap-ikon, .hesap__ikinci .hesap-ikon, .hesap__ana .hesap-ikon{ width:15px; height:15px; }
+.hesap__ikinci .hesap-ikon{ margin-right:6px; }
+.hesap__kucuk.is-kopyalandi{ color:var(--ok-ink, var(--ok)); }
+
+/* Takvim bölümleri: başlığın altında tek kutu (kopyala satırı), açıklama
+   dışında — çerçeve içinde çerçeve yok. */
+.hesap-kutu{ margin:0 0 22px; }
+.hesap-kutu .hesap__not{ margin:10px 4px 0; }
+.hesap-kutu .hesap__ikinci{ margin-top:12px; }
+.hesap-kutu .hesap-adimlar{ margin:14px 4px 0; }
+.hesap__not--ilk, .hesap-kutu .hesap__not--ilk{ margin-top:0; }
+.hesap-istek{ display:flex; flex-direction:column; gap:10px; margin:10px 0 0; }
+.hesap-istek > div{ display:flex; flex-direction:column; gap:4px; }
+.hesap-istek dt{ font-size:12px; font-weight:500; color:var(--text-2); }
+.hesap-istek dd{ margin:0; font-size:12.5px; color:var(--text); overflow-wrap:anywhere; }
+.hesap-kod-blok{ margin:0; padding:12px 14px; border-radius:12px; background:var(--surface); font-size:12px; line-height:1.55;
+  color:var(--text); white-space:pre-wrap; overflow-wrap:anywhere; }
+
+/* Yedek kodlar: iki sütun, aralıklı yazı */
+.hesap-yedek .hesap-tanit{ margin-bottom:16px; }
+.hesap-yedek__liste{ display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; margin:0 0 14px; padding:14px;
+  border-radius:16px; background:var(--surface-2); list-style:none; }
+.hesap-yedek__liste code{ display:block; padding:6px 0; text-align:center; font-size:15px; font-weight:600; letter-spacing:.08em;
+  color:var(--text); font-variant-numeric:tabular-nums; }
+.hesap-yedek__eylem{ justify-content:center; margin-bottom:14px; }
+
+/* Az önce açılan anahtar: bir kez görünür. Kutu yok; yeşil onay ve tek satır. */
+.hesap-yeni{ margin:0 0 22px; }
+.hesap-yeni p{ display:flex; align-items:flex-start; gap:8px; margin:0 4px 10px; font-size:13.5px; line-height:1.45; color:var(--text); }
+.hesap-yeni p .hesap-ikon{ flex:none; width:17px; height:17px; margin-top:1px; color:var(--ok-ink, var(--ok)); stroke-width:2.2; }
+
+/* Yeni cihaz bağla: büyük kod, geri sayım, QR */
+.hesap-bag{ display:flex; flex-direction:column; align-items:center; margin:6px 0 26px; padding:8px 0 0; text-align:center; }
+.hesap-bag__kod{ display:flex; align-items:center; gap:14px; margin:0; font-size:42px; font-weight:650; letter-spacing:.06em;
+  color:var(--text); font-variant-numeric:tabular-nums; line-height:1.1; }
+.hesap-bag__kod span{ width:10px; height:3px; border-radius:2px; background:var(--border); }
+.hesap-bag__sure{ margin:8px 0 0; font-size:13px; color:var(--text-2); font-variant-numeric:tabular-nums; }
+
+.hesap-uygulamalar{ margin-bottom:18px; }
+.hesap-oge .hesap__kucuk{ background:var(--surface); }
+@media (max-width:679px){
+  .hesap-bag__kod{ font-size:36px; }
+  .hesap-qr{ width:min(196px, 100%); }
+}

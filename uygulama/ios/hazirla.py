@@ -95,8 +95,9 @@ def main():
     for anahtar in ("ays", "spi", "esp"):
         shutil.copy2(KOK.joinpath(*sunucu.LOGOLAR[anahtar]), giris / "logo" / (anahtar + ".png"))
     # Giris ekrani (hesap): secim sayfasinda bir kez giris (brand/ortak/hesap.*);
-    # animasyon.js: LifeOS'un kendi «Animasyonlar» ayari (sunucu.py giris_html).
-    for ad in ("hesap.js", "hesap.css", "animasyon.js"):
+    # animasyon.js: LifeOS'un kendi «Animasyonlar» ayari (sunucu.py giris_html);
+    # qr.js: hesap sayfasinin QR'i (iki adim, kodla baglama).
+    for ad in ("hesap.js", "hesap.css", "animasyon.js", "qr.js"):
         shutil.copy2(KOK / "brand" / "ortak" / ad, giris / ad)
 
     shutil.copy2(KOK / "brand" / "life" / "logo.png", SIMGE)

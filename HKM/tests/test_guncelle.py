@@ -353,9 +353,10 @@ def run():
             ok('href="http://127.0.0.1:%d/"' % port in h, a)
         no(any(x in h for x in ('/logo/hkm.png', 'data-hkm', 'id="guncel"', "<script>", "/api/")),
            "telefonda HKM, guncelleme ve bilgisayarin betigi yok")
-        eq(h.count("<script"), 2)                         # giris ekrani (hesap.js) + Animasyonlar ayari
+        eq(h.count("<script"), 3)                         # giris ekrani (hesap.js) + Animasyonlar ayari + QR
         ok('<script src="/hesap.js" data-giris></script>' in h)
         ok('<script src="/animasyon.js"></script>' in h)
+        ok('<script src="/qr.js"></script>' in h)         # hesap sayfasinin QR'i (2026-10-08)
         for y in ("__KARTLAR__", "__SURUM__", "__IKON__"):
             no(y in h)
         bas = sunucu.giris_html()

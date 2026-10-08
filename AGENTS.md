@@ -67,6 +67,13 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    gitmez. Admin yalnız PC'nin kendisinden kurulur; parola düz tutulmaz.
    Kayıt düzeyinde son yazan kazanır; bir cihazın ilk eşitlemesi
    sunucudakini ezmez. Fotoğraflar eşitlenmez (çekildiği cihazda kalır).
+   **Bağlantılar (2026-10-08, depo sahibinin isteği):** iki adımlı
+   doğrulama (TOTP, yedek kodlar), kodla cihaz bağlama, erişim anahtarıyla
+   gelen kutusu (iPhone Kısayollar, Home Assistant) ve takvim aboneliği de
+   aynı sunucudadır (`sistem/hesap.py` sözleri 14–17). Gelen satırı sunucu
+   anlamaz ve hiçbir modüle yazmaz; modül kendi koduyla öneri yapar (SPİ:
+   Onaylar, ölçüm onaysız yazılmaz). Takvimi modül üretir, sunucu yalnız
+   birleştirip sunar.
 5. **Sınırlar:** SPİ teşhis koymaz ve doz önermez; ESP/AYS sertifika
    vermez, yetenek yargısı kurmaz, sonuç garantisi etmez.
 6. **XP karar vermez.** Seviye sistemi (`brand/seviye/`) yalnızca

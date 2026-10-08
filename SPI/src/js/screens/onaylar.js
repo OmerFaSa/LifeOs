@@ -210,6 +210,25 @@ SP.Screens.onaylar = (function(){
   /* VİTRİN ÖNERİ KARTI (110 · 123 · 113): bekleyen kayıt ortak kartla
      çizilir; yazan yine yalnız SP.Proposals.approve'dur. Önizleme satırları
      (alan → sonra) kartın altında kalır: neyin yazılacağı onaydan önce görünür. */
+  /* KISAYOLLARDAN GELEN ÖNERİ (hesap gelen kutusu, Proposals.disaridan):
+     kartın altında nereden geldiği yazar; dün gönderilmiş satır «yalnız
+     bugün» diye görünmez, kendi gününü söyler. */
+  function gelenMi(o){ return (o.iz || []).some(x => x && x.tur === 'gelen'); }
+  function gunAd(iso){
+    const n = SP.U.diffDays(SP.U.todayISO(), iso);
+    return n === 0 ? 'bugün' : n === -1 ? 'dün' : SP.U.fmtShort(iso);
+  }
+  function kapsamOf(o, e){
+    if(e.level !== 'kucuk') return null;
+    const d = o.params && o.params.date;
+    return 'yalnız ' + (SP.U.isISO(d) ? gunAd(d) : 'bugün');
+  }
+  function kimOf(o, pv){
+    const l = pv.ok && pv.rows.length ? [pv.rows.map(r => r.alan + ' → ' + r.sonra).join(' · ')] : [];
+    if(gelenMi(o)) l.push('Kısayollar’dan' + (o.gelenKaynak ? ' (' + o.gelenKaynak + ')' : ''));
+    return l.join(' · ');
+  }
+
   function kopru(){
     const O = (window.LIFEOS || {}).ONERI;
     if(!O || !O.kopru || !SP.Proposals) return null;
@@ -220,7 +239,7 @@ SP.Screens.onaylar = (function(){
       satirlar:() => SP.Proposals.pending(),
       nesne:o => { const e = SP.Proposals.eylem(o.action) || {};
         return { id:o.id, eylem:o.action, level:o.level, baslik:e.label || o.action, kaynak:'modul',
-          kapsam:e.level === 'kucuk' ? 'yalnız bugün' : null,
+          kapsam:kapsamOf(o, e),
           cumle:o.reason ? { metin:o.reason, kaynak:o.source === 'llm' ? 'model' : 'kural' } : null }; },
       uygula:id => handle['bekleyen-onay']({ dataset:{ id } }),
       gec:async (id, kayit) => { await SP.Proposals.reject(id, kayit); UI.toast('Geçildi; kayıt yazılmadı.'); SP.App.render(); },
@@ -238,9 +257,9 @@ SP.Screens.onaylar = (function(){
     const kartlar = k ? liste.map(o => {
       const kart = k.kart(o);
       if(!kart) return null;
-      const pv = SP.Proposals.preview(o);
-      return html`<div class="okart-sar">${raw(kart)}${when(pv.ok && pv.rows.length, () => html`
-        <p class="okart__kim">${pv.rows.map(r => r.alan + ' → ' + r.sonra).join(' · ')}</p>`)}</div>`;
+      const pv = SP.Proposals.preview(o), kim = kimOf(o, pv);
+      return html`<div class="okart-sar">${raw(kart)}${when(kim, () => html`
+        <p class="okart__kim">${kim}</p>`)}</div>`;
     }) : [];
     if(k && kartlar.every(Boolean)) return html`<div class="stack-sm">${kartlar}</div>`;
     return K.Kutu({ ad:liste.length === 1 ? 'Bir kayıt onayını bekliyor'

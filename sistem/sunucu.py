@@ -247,6 +247,9 @@ class Sunucu(SimpleHTTPRequestHandler):
         status = str(args[1]) if len(args) > 1 else ""
         if status.startswith("2") or status.startswith("3"):
             return
+        # Takvim abonelik adresi bir anahtardir: gunluge yazilmaz (hesap soz 17).
+        if args and isinstance(args[0], str):
+            args = (hesap.gunluk_maskele(args[0]),) + args[1:]
         super().log_message(fmt, *args)
 
 
@@ -577,6 +580,7 @@ html.giris-hazir:not(.hesap-kapi-acik) :is(.kart__ust, .kart__ozet, .kart__alt){
   });
 })();
 </script>
+<script src="/qr.js"></script>
 <script src="/hesap.js" data-giris></script>
 </body></html>
 """
@@ -735,10 +739,11 @@ class Giris(SimpleHTTPRequestHandler):
         return self.send_error(405)
 
     def _hesap_dosyasi(self, ad):
-        """/hesap.js, /hesap.css, /animasyon.js — giris ve secim sayfasi
-        (brand/ortak); kapali liste."""
+        """/hesap.js, /hesap.css, /animasyon.js, /qr.js — giris ve secim
+        sayfasi (brand/ortak); kapali liste. qr.js: hesap sayfasinin iki
+        adim kurulumu ve kodla cihaz baglama QR'i (hesap.js soz 17-18)."""
         tur = {"hesap.js": "text/javascript; charset=utf-8", "hesap.css": "text/css; charset=utf-8",
-               "animasyon.js": "text/javascript; charset=utf-8"}[ad]
+               "animasyon.js": "text/javascript; charset=utf-8", "qr.js": "text/javascript; charset=utf-8"}[ad]
         with open(os.path.join(KOK, "brand", "ortak", ad), "rb") as f:
             govde = f.read()
         self.send_response(200)
@@ -771,7 +776,7 @@ class Giris(SimpleHTTPRequestHandler):
         yol = self.path.split("?", 1)[0]
         if yol.startswith("/api/hesap/"):
             return hesap.isle(self)
-        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js"):
+        if yol in ("/hesap.js", "/hesap.css", "/animasyon.js", "/qr.js"):
             return self._hesap_dosyasi(yol[1:])
         if yol == "/api/guncelleme":
             return self._json(200, guncelleme_durumu(taze="taze=1" in self.path))

@@ -529,6 +529,312 @@ def run():
             eq(d.etkinlik(k)[0]["tur"], "giris")
     test("surum 3 deposu kimlik, kisisel bilgi ve etkinlik tablosuna gocer", t_gocur_surum3)
 
+    # ------------------------------------------------ baglantilar (soz 14-17)
+
+    def _kod(r, sir, kayma=0):
+        return hesap.totp(sir, int(r.saat.t // hesap.KOD_ADIM) + kayma)
+
+    def _baska(kod):
+        return "123456" if kod != "123456" else "654321"
+
+    def _iki_adim_ac(r, k, parola="parola-123"):
+        v = r.d.iki_adim_baslat(k, parola)
+        return v["sir"], r.d.iki_adim_onayla(k, _kod(r, v["sir"]))["yedek"]
+
+    def t_totp_rfc():
+        sir = "GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ"         # RFC 6238 Ek B: «12345678901234567890»
+        for t, beklenen in ((59, "94287082"), (1111111109, "07081804"), (1234567890, "89005924"),
+                            (2000000000, "69279037"), (20000000000, "65353130")):
+            eq(hesap.totp(sir, t // 30, 8), beklenen)
+        eq(hesap.totp(sir, 1), "287082")                 # 6 hane: son alti basamak
+        s = hesap.sir_uret()
+        ok(hesap.SIR_RE.match(s) and len(s) == 32)
+        u = hesap.otpauth("Ömer Can", s)
+        ok(u.startswith("otpauth://totp/LifeOS:%C3%96mer%20Can?secret=" + s))
+        ok("issuer=LifeOS" in u and "digits=6" in u and "period=30" in u)
+    test("iki adim: TOTP RFC 6238 vektorleri, sir ve otpauth adresi", t_totp_rfc)
+
+    def t_iki_adim_kurulum():
+        with _Depo() as r:
+            k, j = _admin(r)
+            eq(r.d.iki_adim(k), {"acik": False, "olusturma": None, "yedek_kalan": 0})
+            _hata(lambda: r.d.iki_adim_baslat(k, "yanlis"), 401)          # sifre sorulur
+            v = r.d.iki_adim_baslat(k, "parola-123")
+            no(r.d.iki_adim(k)["acik"])                                   # kod gelmeden kapali
+            eq(set(r.d.giris("omer", "parola-123")), {"jeton", "kullanici"})   # kurulum yarimken giris eskisi gibi
+            _hata(lambda: r.d.iki_adim_onayla(k, _baska(_kod(r, v["sir"]))), 400)
+            kod = _kod(r, v["sir"])
+            y = r.d.iki_adim_onayla(k, " " + kod[:3] + " " + kod[3:])["yedek"]
+            eq(len(y), hesap.YEDEK_ADET)
+            ok(all(len(x) == 9 and x[4] == "-" and hesap.YEDEK_RE.match(x.replace("-", "")) for x in y))
+            eq(len(set(y)), hesap.YEDEK_ADET)
+            d = r.d.iki_adim(k)
+            eq((d["acik"], d["yedek_kalan"]), (True, hesap.YEDEK_ADET))
+            _hata(lambda: r.d.iki_adim_baslat(k, "parola-123"), 409)       # acikken yeniden kurulmaz
+            with r.d._islem() as c:
+                metin = json.dumps([list(x) for x in c.execute("SELECT * FROM yedek_kod")])
+            no(any(x.replace("-", "") in metin for x in y))                # yedek kod duz yazilmaz
+            eq(r.d.etkinlik(k)[0]["tur"], "iki-adim")
+    test("iki adim: sifreyle baslar, kod tutunca acilir, yedek kodlar bir kez ve ozetle", t_iki_adim_kurulum)
+
+    def t_iki_adim_giris():
+        with _Depo() as r:
+            k, _ = _admin(r)
+            sir, yedek = _iki_adim_ac(r, k)
+            r.saat.t += 90                                                # kurulum kodunun adimi gecsin
+            v = r.d.giris("omer", "parola-123", B, "iPhone", "192.168.0.23")
+            eq((v["iki_adim"], "jeton" in v), (True, False))              # sifre dogru ama oturum yok
+            _hata(lambda: r.d.giris_kod(v["bilet"], _baska(_kod(r, sir)), "192.168.0.23"), 401)
+            eq(r.d.etkinlik(k)[0]["tur"], "kod-yanlis")
+            kod = _kod(r, sir)
+            s = r.d.giris_kod(v["bilet"], kod, "192.168.0.23")
+            eq(r.d.oturum(s["jeton"])["ad"], "omer")
+            son = r.d.etkinlik(k)[0]
+            eq((son["tur"], son["ayrinti"], son["cihaz_ad"]), ("giris", "iki adımlı", "iPhone"))
+            _hata(lambda: r.d.giris_kod(v["bilet"], kod), 401)           # bilet tek kullanimlik
+            v2 = r.d.giris("omer", "parola-123")
+            _hata(lambda: r.d.giris_kod(v2["bilet"], kod), 401)          # ayni kod ikinci kez gecmez
+            r.d._deneme.clear()
+            s2 = r.d.giris_kod(v2["bilet"], yedek[0].lower())             # yedek kod (kucuk harf de olur)
+            ok(r.d.oturum(s2["jeton"]))
+            eq(r.d.etkinlik(k)[0]["ayrinti"], "yedek kod")
+            eq(r.d.iki_adim(k)["yedek_kalan"], hesap.YEDEK_ADET - 1)
+            v3 = r.d.giris("omer", "parola-123")
+            _hata(lambda: r.d.giris_kod(v3["bilet"], yedek[0]), 401)     # yedek kod bir kez
+            r.d._deneme.clear()
+            r.saat.t += 30
+            ok(r.d.giris_kod(v3["bilet"], _kod(r, sir, 1))["jeton"])      # bir adim ileri: saat kaymasi
+            v4 = r.d.giris("omer", "parola-123")
+            r.saat.t += hesap.BILET_SN + 1
+            _hata(lambda: r.d.giris_kod(v4["bilet"], _kod(r, sir)), 401)  # bilet suresi doldu
+            v5 = r.d.giris("omer", "parola-123")
+            for _ in range(hesap.BILET_DENEME):
+                r.d._deneme.clear()
+                _hata(lambda: r.d.giris_kod(v5["bilet"], _baska(_kod(r, sir))), 401)
+            r.d._deneme.clear()
+            _hata(lambda: r.d.giris_kod(v5["bilet"], _kod(r, sir)), 401)  # bes yanlistan sonra bilet gider
+            _hata(lambda: r.d.giris_kod("uydurma", "123456"), 401)
+    test("iki adim: giris bilet doner, kod oturum acar; kod ve yedek bir kez; bilet suresi ve deneme siniri",
+         t_iki_adim_giris)
+
+    def t_iki_adim_bekletme():
+        with _Depo() as r:
+            k, _ = _admin(r)
+            sir, _y = _iki_adim_ac(r, k)
+            r.saat.t += 90
+            for _ in range(hesap.DENEME_ESIK):
+                v = r.d.giris("omer", "parola-123")
+                _hata(lambda: r.d.giris_kod(v["bilet"], _baska(_kod(r, sir)), "10.0.0.9"), 401)
+            v = r.d.giris("omer", "parola-123")
+            _hata(lambda: r.d.giris_kod(v["bilet"], _kod(r, sir), "10.0.0.8"), 429)   # dogru kod da bekler
+            r.saat.t += hesap.DENEME_TAVAN_SN + 1
+            v = r.d.giris("omer", "parola-123")
+            ok(r.d.giris_kod(v["bilet"], _kod(r, sir), "10.0.0.8")["jeton"])
+    test("iki adim: yanlis kod hesap basina bekletir (yeni bilet de atlatamaz)", t_iki_adim_bekletme)
+
+    def t_iki_adim_kurtar():
+        with _Depo() as r:
+            v = r.d.kayit("omer", "parola-123", "Soru nedir?", "Cevap", True, A, "PC")
+            k, j = v["kullanici"], v["jeton"]
+            sir, _y = _iki_adim_ac(r, k)
+            r.saat.t += 90
+            b = r.d.kurtar("omer", "cevap", "yeni-sifre-1", B, "iPhone")
+            eq((b["iki_adim"], "jeton" in b), (True, False))
+            eq(r.d.giris("omer", "parola-123")["iki_adim"], True)         # kod gelmeden sifre degismez
+            ok(r.d.oturum(j))
+            s = r.d.giris_kod(b["bilet"], _kod(r, sir))
+            ok(r.d.oturum(s["jeton"]))
+            no(r.d.oturum(j))                                             # eski oturumlar kapandi
+            son = r.d.etkinlik(k)[0]
+            eq((son["tur"], son["ayrinti"]), ("kurtar", "iki adımlı"))
+            _hata(lambda: r.d.giris("omer", "parola-123"), 401)
+            eq(r.d.giris("omer", "yeni-sifre-1")["iki_adim"], True)
+    test("iki adim: sifremi unuttum da kodu ister; yeni sifre kodla yazilir", t_iki_adim_kurtar)
+
+    def t_iki_adim_kapat():
+        with _Depo() as r:
+            k, j = _admin(r)
+            r.d.kullanici_ekle(k, "anne", "parola-456")
+            sir, y = _iki_adim_ac(r, k)
+            r.saat.t += 90
+            _hata(lambda: r.d.iki_adim_kapat(k, "yanlis", _kod(r, sir)), 401)
+            _hata(lambda: r.d.iki_adim_kapat(k, "parola-123", _baska(_kod(r, sir))), 401)
+            y2 = r.d.yedek_yenile(k, "parola-123")["yedek"]
+            v = r.d.giris("omer", "parola-123")
+            _hata(lambda: r.d.giris_kod(v["bilet"], y[1]), 401)          # eski yedekler gecersiz
+            r.d._deneme.clear()
+            r.d.iki_adim_kapat(k, "parola-123", y2[0])
+            no(r.d.iki_adim(k)["acik"])
+            ok(r.d.giris("omer", "parola-123")["jeton"])                 # yeniden tek adim
+            eq([o["tur"] for o in r.d.etkinlik(k)[:3]], ["giris", "iki-adim-kapat", "kod-yanlis"])
+            # Uyenin telefonu kayboldu: admin kapatir; admin kendininkini buradan kapatamaz.
+            anne = r.d.oturum(r.d.giris("anne", "parola-456")["jeton"])
+            _iki_adim_ac(r, anne, "parola-456")
+            eq([u["iki_adim"] for u in r.d.kullanicilar(k)], [False, True])
+            _hata(lambda: r.d.yonet(anne, k["id"], iki_adim=False), 403)
+            _hata(lambda: r.d.yonet(k, k["id"], iki_adim=False), 409)
+            _hata(lambda: r.d.yonet(k, anne["id"], iki_adim=True), 400)
+            eq(r.d.yonet(k, anne["id"], iki_adim=False)["iki_adim"], False)
+            son = r.d.etkinlik(anne)[0]
+            eq((son["tur"], son["ayrinti"]), ("iki-adim-kapat", "admin: omer"))
+            # Bilgisayarin kendisinden (komut satiri).
+            _iki_adim_ac(r, k)
+            ok(r.d.iki_adim_sifirla("omer"))
+            no(r.d.iki_adim_sifirla("omer"))
+            _hata(lambda: r.d.iki_adim_sifirla("yok"), 404)
+    test("iki adim: kapatmak sifre ve kod ister; yedekler yenilenir; admin uyeninkini, PC herkesinkini kapatir",
+         t_iki_adim_kapat)
+
+    def t_bag():
+        with _Depo() as r:
+            k, _ = _admin(r)
+            _iki_adim_ac(r, k)                                            # iki adim acikken de kod yeter
+            v = r.d.bag_kodu_ac(k)
+            ok(len(v["kod"]) == 6 and v["kod"].isdigit())
+            eq(r.d.bag_durum(k, v["id"])["durum"], "bekliyor")
+            _hata(lambda: r.d.bagla(_baska(v["kod"]), B, "iPad", "192.168.0.30"), 401)
+            s = r.d.bagla(v["kod"][:3] + " " + v["kod"][3:], B, "iPad", "192.168.0.30")
+            eq((r.d.oturum(s["jeton"])["ad"], s["kullanici"]["ad"]), ("omer", "omer"))
+            eq(r.d.bag_durum(k, v["id"]), {"durum": "baglandi", "cihaz_ad": "iPad"})
+            son = r.d.etkinlik(k)[0]
+            eq((son["tur"], son["cihaz_ad"]), ("bag", "iPad"))
+            _hata(lambda: r.d.bagla(v["kod"], B, "iPad"), 401)          # tek kullanimlik
+            v1 = r.d.bag_kodu_ac(k)
+            v2 = r.d.bag_kodu_ac(k)                                       # yeni kod eskisini kapatir
+            if v1["kod"] != v2["kod"]:
+                r.d._deneme.clear()
+                _hata(lambda: r.d.bagla(v1["kod"], B, "iPad"), 401)
+            eq(r.d.bag_durum(k, v1["id"])["durum"], "yok")
+            r.d.bag_kodu_kapat(k, v2["id"])                               # vazgec
+            eq(r.d.bag_durum(k, v2["id"])["durum"], "yok")
+            v3 = r.d.bag_kodu_ac(k)
+            r.saat.t += hesap.BAG_SN + 1
+            eq(r.d.bag_durum(k, v3["id"])["durum"], "bitti")
+            r.d._deneme.clear()
+            _hata(lambda: r.d.bagla(v3["kod"], B, "iPad"), 401)          # suresi doldu
+            v4 = r.d.bag_kodu_ac(k)
+            r.d._deneme.clear()
+            for i in range(hesap.DENEME_ESIK):
+                _hata(lambda: r.d.bagla("12345", B, "x", "10.1.1.%d" % i), 401)
+            _hata(lambda: r.d.bagla(v4["kod"], B, "x", "10.1.1.99"), 429)  # toplamda da bekletilir
+            _hata(lambda: r.d.bag_durum(k, "1"), 400)
+            r.d.kullanici_ekle(k, "anne", "parola-456")
+            anne = r.d.oturum(r.d.giris("anne", "parola-456")["jeton"])
+            eq(r.d.bag_durum(anne, v4["id"])["durum"], "yok")            # baskasinin kodu gorunmez
+    test("kodla baglama: 6 hane, tek kullanimlik, 5 dk; yeni kod eskiyi kapatir; yanlista bekletilir", t_bag)
+
+    def t_anahtar_gelen():
+        with _Depo() as r:
+            k, j = _admin(r)
+            _hata(lambda: r.d.anahtar_ac(k, "yanlis", "iPhone Kısayollar"), 401)
+            _hata(lambda: r.d.anahtar_ac(k, "parola-123", ""), 400)
+            _hata(lambda: r.d.anahtar_ac(k, "parola-123", "x", "hepsi"), 400)
+            a = r.d.anahtar_ac(k, "parola-123", "  iPhone   Kısayollar ", jeton=j)
+            ok(a["anahtar"].startswith(hesap.ANAHTAR_ON) and len(a["anahtar"]) > 30)
+            eq(a["ad"], "iPhone Kısayollar")
+            l = r.d.anahtarlar(k)
+            eq([(x["ad"], x["yetki"], x["son"]) for x in l], [("iPhone Kısayollar", "kayit", None)])
+            no(a["anahtar"] in json.dumps(l))                             # anahtar bir kez gosterilir
+            eq(l[0]["on_ek"], a["anahtar"][:len(hesap.ANAHTAR_ON) + 4])
+            no(r.d.oturum(a["anahtar"]))                                  # oturum yerine gecmez
+            _hata(lambda: r.d.gelen_ekle(j, "su 250"), 401)              # oturum jetonu anahtar degil
+            _hata(lambda: r.d.gelen_ekle(a["anahtar"], ""), 400)
+            _hata(lambda: r.d.gelen_ekle(a["anahtar"], "x" * (hesap.GELEN_METIN_EN_UZUN + 1)), 400)
+            _hata(lambda: r.d.gelen_ekle(a["anahtar"], "su 250", "ays"), 400)
+            g = r.d.gelen_ekle(a["anahtar"], "  su   250 ", ip="192.168.0.23")
+            eq(g["durum"], "bekliyor")
+            ok(r.d.anahtarlar(k)[0]["son"])
+            eq(r.d.baglanti_ozet(k), {"anahtar": 1, "takvim": False, "gelen_bekleyen": 1})
+            # Bir cihaz alir; ayni satir oteki cihaza verilmez, sonucu gelmezse sonra verilir.
+            eq([(x["metin"], x["kaynak"]) for x in r.d.gelen_al(k, "spi", A)], [("su 250", "iPhone Kısayollar")])
+            eq(r.d.gelen_al(k, "spi", B), [])
+            no(r.d.gelen_sonuc(k, g["id"], "onayda", "x", B))           # almayan cihaz yazamaz
+            r.saat.t += hesap.GELEN_ALIM_SN + 1
+            eq(len(r.d.gelen_al(k, "spi", B)), 1)
+            ok(r.d.gelen_sonuc(k, g["id"], "onayda", "Onaylar’da bekliyor", B))
+            no(r.d.gelen_sonuc(k, g["id"], "onayda", "iki kez", B))
+            eq(r.d.gelen_al(k, "spi", A), [])
+            _hata(lambda: r.d.gelen_sonuc(k, g["id"], "yazildi", "", B), 400)
+            _hata(lambda: r.d.gelen_al(k, "esp", A), 400)
+            x = r.d.gelen_liste(k)[0]
+            eq((x["metin"], x["durum"], x["sonuc"], x["kaynak"]),
+               ("su 250", "onayda", "Onaylar’da bekliyor", "iPhone Kısayollar"))
+            eq(r.d.baglanti_ozet(k)["gelen_bekleyen"], 0)
+            r.d.kullanici_ekle(k, "anne", "parola-456")
+            anne = r.d.oturum(r.d.giris("anne", "parola-456")["jeton"])
+            eq((r.d.gelen_al(anne, "spi", A), r.d.gelen_liste(anne), r.d.anahtarlar(anne)), ([], [], []))
+            _hata(lambda: r.d.anahtar_sil(anne, a["id"]), 404)           # baskasinin anahtari silinmez
+            for _ in range(hesap.GELEN_SAAT_EN_COK - 1):
+                r.d.gelen_ekle(a["anahtar"], "su 100")
+            _hata(lambda: r.d.gelen_ekle(a["anahtar"], "su 100"), 429)   # dongudeki kisayol
+            ok(len(r.d.gelen_liste(k, 1000)) <= hesap.GELEN_EN_COK)
+            r.d.anahtar_sil(k, a["id"], j)
+            r.d._deneme.clear()
+            _hata(lambda: r.d.gelen_ekle(a["anahtar"], "su 250"), 401)
+            eq([o["tur"] for o in r.d.etkinlik(k)[:2]], ["anahtar-sil", "anahtar"])
+            for i in range(hesap.ANAHTAR_EN_COK):
+                r.d.anahtar_ac(k, "parola-123", "a%d" % i)
+            _hata(lambda: r.d.anahtar_ac(k, "parola-123", "fazla"), 409)
+            r.d._deneme.clear()
+            for _ in range(hesap.DENEME_ESIK):
+                _hata(lambda: r.d.gelen_ekle("lifeos_uydurma", "su 1", ip="10.9.9.9"), 401)
+            _hata(lambda: r.d.gelen_ekle("lifeos_uydurma", "su 1", ip="10.9.9.9"), 429)
+    test("anahtar ve gelen kutusu: anahtar bir kez, ozetle; satir anlasilmadan kutuya; tek cihaz alir",
+         t_anahtar_gelen)
+
+    def t_takvim():
+        with _Depo() as r:
+            k, j = _admin(r)
+            ics = ("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//LifeOS//AYS//TR\r\nX-WR-CALNAME:AYS\r\n"
+                   "BEGIN:VEVENT\r\nUID:ays-sinav-TYT@lifeos\r\nDTSTART;VALUE=DATE:20270619\r\n"
+                   "SUMMARY:TYT sınav günü ve çok uzun bir başlık ki satır katlansın diye yazıldı\r\n"
+                   " devamı\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n")
+            _hata(lambda: r.d.yayinla(k, "ays/baska", ics), 400)
+            _hata(lambda: r.d.yayinla(k, "ays/takvim", "merhaba"), 400)
+            _hata(lambda: r.d.yayinla(k, "ays/takvim", "BEGIN:VCALENDAR\n" + "x" * hesap.YAYIN_EN_BUYUK
+                                      + "\nEND:VCALENDAR"), 413)
+            r.d.yayinla(k, "ays/takvim", ics, 1)
+            t = r.d.takvim(k)
+            eq((t["acik"], t["yol"], [(y["ad"], y["adet"]) for y in t["yayinlar"]]),
+               (False, None, [("ays/takvim", 1)]))
+            t = r.d.takvim_ac(k, jeton=j)
+            m = hesap.TAKVIM_YOL_RE.match(t["yol"])
+            ok(m)
+            no(t["son"])
+            cal = r.d.takvim_ics(m.group(1))
+            ok(cal.startswith("BEGIN:VCALENDAR\r\n") and cal.endswith("END:VCALENDAR\r\n"))
+            eq(cal.count("BEGIN:VEVENT"), 1)
+            ok("SUMMARY:TYT sınav günü" in cal and "\r\n devamı\r\n" in cal)   # katlanmis satir korunur
+            ok("X-WR-CALNAME:LifeOS" in cal and "X-WR-CALNAME:AYS" not in cal)
+            ok(r.d.takvim(k)["son"])
+            eq(r.d.takvim_ac(k)["yol"], t["yol"])                         # acikken ayni adres
+            t2 = r.d.takvim_ac(k, yenile=True)
+            ok(t2["yol"] != t["yol"])
+            eq(r.d.takvim_ics(m.group(1)), None)                          # eski adres hemen kapanir
+            r.d.takvim_kapat(k)
+            eq(r.d.takvim_ics(hesap.TAKVIM_YOL_RE.match(t2["yol"]).group(1)), None)
+            eq([o["tur"] for o in r.d.etkinlik(k)[:3]], ["takvim-kapat", "takvim", "takvim"])
+            eq(hesap.gunluk_maskele('"GET /api/hesap/takvim/abcDEF_123-xyz456789012.ics HTTP/1.1"'),
+               '"GET /api/hesap/takvim/… HTTP/1.1"')
+    test("takvim aboneligi: modul yayinlar, sunucu anlamadan birlestirir; yenile eskiyi kapatir", t_takvim)
+
+    def t_baglanti_sil():
+        with _Depo() as r:
+            k, j = _admin(r)
+            r.d.kullanici_ekle(k, "anne", "parola-456")
+            anne = r.d.oturum(r.d.giris("anne", "parola-456")["jeton"])
+            _iki_adim_ac(r, anne, "parola-456")
+            a = r.d.anahtar_ac(anne, "parola-456", "Kısayol")["anahtar"]
+            r.d.gelen_ekle(a, "su 250")
+            r.d.yayinla(anne, "ays/takvim", "BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n")
+            r.d.takvim_ac(anne)
+            r.d.bag_kodu_ac(anne)
+            r.d.sil(anne, "parola-456")
+            with r.d._islem() as c:
+                for t in ("iki_adim", "yedek_kod", "bilet", "bag_kodu", "anahtar", "gelen", "yayin", "takvim"):
+                    eq(c.execute("SELECT COUNT(*) FROM %s WHERE kullanici=?" % t, (anne["id"],)).fetchone()[0], 0, t)
+    test("hesap silinince iki adim, anahtar, gelen, yayin ve takvim de gider", t_baglanti_sil)
+
     # -------------------------------------------------------------- HTTP
 
     import sunucu  # noqa: E402
@@ -701,6 +1007,9 @@ def run():
             # Secim sayfasi LifeOS'un kendi «Animasyonlar» ayarini izler (2026-10-06).
             with urllib.request.urlopen(adres + "/animasyon.js", timeout=10) as c:
                 ok(b"L.ANIMASYON = Object.freeze" in c.read() and "javascript" in c.headers.get("Content-Type"))
+            # QR (hesap sayfasi: iki adim kurulumu, kodla cihaz baglama; 2026-10-08).
+            with urllib.request.urlopen(adres + "/qr.js", timeout=10) as c:
+                ok(b"LIFEOS.QR" in c.read() and "javascript" in c.headers.get("Content-Type"))
             with urllib.request.urlopen(adres + "/api/hesap/durum", timeout=10) as c:
                 ok(json.loads(c.read())["kurulum"])
             q = urllib.request.Request(adres + "/api/hesap/kayit", method="POST", data=json.dumps(
@@ -724,3 +1033,84 @@ def run():
             eq(s.iste("/api/hesap/yok", {}, H)[0], 401)
             eq(s.iste("/baska", {}, H)[0], 405)       # API disi POST dosya sunumuna girmez
     test("HTTP: dosya sunumu bozulmaz, API disi POST reddedilir", t_http_dosya)
+
+    def t_http_baglantilar():
+        with _Srv() as s:
+            kod, _, v = s.iste("/api/hesap/kayit", {"ad": "omer", "parola": "parola-123", "soru": "Soru nedir?",
+                                                    "cevap": "Cevap", "cihaz": A, "cihaz_ad": "Windows PC"}, H)
+            y = dict(H, Authorization="Bearer " + v["jeton"])
+            # Iki adim: baslat -> onayla -> giris bilet -> giris-kod.
+            kod, _, v = s.iste("/api/hesap/iki-adim/baslat", {"parola": "parola-123"}, y)
+            eq(kod, 200)
+            sir = v["sir"]
+            ok(v["uri"].startswith("otpauth://totp/LifeOS:omer?secret=" + sir))
+            kod, _, v = s.iste("/api/hesap/iki-adim/onayla", {"kod": _kod(s.r, sir)}, y)
+            eq((kod, len(v["yedek"])), (200, hesap.YEDEK_ADET))
+            kod, _, v = s.iste("/api/hesap/ben", baslik=y)
+            eq((v["iki_adim"]["acik"], v["baglantilar"]), (True, {"anahtar": 0, "takvim": False, "gelen_bekleyen": 0}))
+            s.r.saat.t += 90
+            kod, _, v = s.iste("/api/hesap/giris", {"ad": "omer", "parola": "parola-123", "cihaz": B,
+                                                    "cihaz_ad": "iPhone"}, H)
+            eq((kod, v["iki_adim"], "jeton" in v), (200, True, False))
+            eq(s.iste("/api/hesap/giris-kod", {"bilet": v["bilet"], "kod": _kod(s.r, sir)})[0], 403)   # basliksiz
+            kod, _, v = s.iste("/api/hesap/giris-kod", {"bilet": v["bilet"], "kod": _kod(s.r, sir)}, H)
+            eq((kod, v["kullanici"]["ad"]), (200, "omer"))
+            # Kodla baglama.
+            kod, _, v = s.iste("/api/hesap/bag-kodu", {}, y)
+            eq(kod, 200)
+            kod, _, b = s.iste("/api/hesap/bagla", {"kod": v["kod"], "cihaz": B, "cihaz_ad": "iPad"}, H)
+            eq((kod, b["kullanici"]["ad"]), (200, "omer"))
+            eq(s.iste("/api/hesap/bag-durum", {"id": v["id"]}, y)[2]["durum"], "baglandi")
+            # Erisim anahtari: disaridan X-LifeOS'suz, yalniz anahtarla.
+            kod, _, v = s.iste("/api/hesap/anahtar", {"parola": "parola-123", "ad": "iPhone Kısayollar"}, y)
+            a = v["anahtar"]
+            kod, _, v = s.iste("/api/hesap/gelen", {"metin": "kilo 72,4"}, {"Authorization": "Bearer " + a})
+            eq((kod, v["durum"]), (200, "bekliyor"))
+            eq(s.iste("/api/hesap/gelen", {"metin": "su 1"}, {"Authorization": "Bearer " + y["Authorization"][7:]})[0],
+               401)                                                     # oturum jetonu anahtar degil
+            eq(s.iste("/api/hesap/ben", baslik={"Authorization": "Bearer " + a})[0], 401)  # anahtar oturum degil
+            kod, _, v = s.iste("/api/hesap/gelen-al", {"modul": "spi", "cihaz": A}, y)
+            eq([x["metin"] for x in v["gelen"]], ["kilo 72,4"])
+            kod, _, v = s.iste("/api/hesap/gelen-sonuc", {"id": v["gelen"][0]["id"], "durum": "onayda",
+                                                         "sonuc": "Onaylar’da", "cihaz": A}, y)
+            eq((kod, v["ok"]), (200, True))
+            # Takvim: modul yayinlar, takvim uygulamasi basliksiz ceker.
+            ics = "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:x@lifeos\r\nSUMMARY:TYT\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+            eq(s.iste("/api/hesap/yayin", {"ad": "ays/takvim", "icerik": ics, "adet": 1}, y)[0], 200)
+            kod, _, v = s.iste("/api/hesap/takvim", {}, y)
+            yol = v["takvim"]["yol"]
+            q = urllib.request.Request(s.adres + yol)
+            with urllib.request.urlopen(q, timeout=10) as c:
+                ok("text/calendar" in c.headers.get("Content-Type"))
+                ok(b"SUMMARY:TYT" in c.read())
+            eq(s.iste(yol.replace(".ics", "x.ics"))[0], 404)
+            kod, _, v = s.iste("/api/hesap/baglantilar", baslik=y)
+            eq((kod, len(v["anahtarlar"]), v["gelen"][0]["durum"], v["takvim"]["acik"], v["iki_adim"]["acik"]),
+               (200, 1, "onayda", True, True))
+            no(a in json.dumps(v))
+            kod, _, v = s.iste("/api/hesap/takvim-kapat", {}, y)
+            eq((kod, v["takvim"]["acik"]), (200, False))
+            eq(s.iste(yol)[0], 404)
+    test("HTTP: iki adim, kodla baglama, disaridan anahtarla satir, takvim adresi", t_http_baglantilar)
+
+    def t_http_gelen_ics_ayrinti():
+        with _Srv() as s:
+            kod, _, v = s.iste("/api/hesap/kayit", {"ad": "omer", "parola": "parola-123", "soru": "Soru nedir?",
+                                                    "cevap": "Cevap", "cihaz": A}, H)
+            y = dict(H, Authorization="Bearer " + v["jeton"])
+            a = s.iste("/api/hesap/anahtar", {"parola": "parola-123", "ad": "Kısayol"}, y)[2]["anahtar"]
+            q = urllib.request.Request(s.adres + "/api/hesap/gelen", data=b"su 250", method="POST",
+                                       headers={"Authorization": "Bearer " + a, "Content-Type": "text/plain"})
+            try:
+                urllib.request.urlopen(q, timeout=10)
+                raise AssertionError("400 bekleniyordu")
+            except urllib.error.HTTPError as e:
+                eq(e.code, 400)
+                ok("JSON" in json.loads(e.read())["hata"])          # ne beklendigi soylenir
+            yol = s.iste("/api/hesap/takvim", {}, y)[2]["takvim"]["yol"]
+            q = urllib.request.Request(s.adres + yol, headers={"Origin": "http://127.0.0.1:4183"})
+            with urllib.request.urlopen(q, timeout=10) as c:
+                eq((c.status, c.headers.get("Access-Control-Allow-Origin")), (200, "http://127.0.0.1:4183"))
+            kod, b, _ = s.iste(yol, baslik={"Origin": "http://kotu.example"})
+            eq((kod, b.get("Access-Control-Allow-Origin")), (403, None))  # yabanci koken
+    test("HTTP: duz metin govdede ne beklendigi soylenir; takvim telefon uygulamasina capraz izinli", t_http_gelen_ics_ayrinti)

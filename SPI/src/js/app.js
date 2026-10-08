@@ -1542,6 +1542,14 @@ SP.App = (function(){
       if(window.LIFEOS && window.LIFEOS.HESAP){
         const sihirbaz = () => !!document.querySelector('#sheet [data-act="setup-skip"]');
         window.LIFEOS.HESAP.kur({ modul:'spi', depo:SP.Store, ornek:ornekAcik, kesilebilir:sihirbaz,
+          /* Kısayollar'dan gelen satır (hesap.js söz 20): kural motoru okur,
+             Onaylar'a öneri olur; sayaç ve Bugün'ün öneri alanı cizIste ile. */
+          gelen:async oge => {
+            if(!SP.Proposals) return null;
+            const r = await SP.Proposals.disaridan(oge);
+            if(r && r.durum === 'onayda') window.LIFEOS.HESAP.cizIste(render);
+            return r;
+          },
           yukle:() => M.loadAll(),
           yenile:() => {
             /* Profil sunucudan geldiyse kurulum sihirbazının işi kalmadı. */

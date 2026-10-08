@@ -66,9 +66,43 @@
       acilan hesap eskisi sayilmaz; cihaz, bagli oldugu hesabin hala
       var olup olmadigini bu kimlikle sorar (hesap.js soz 13).
 
+   BAGLANTILAR (depo sahibi, 2026-10-08: «hesap ozelligini cok daha
+   profesyonel yap; bazi uygulamalari ucretsiz baglayabilelim»). Hicbiri
+   bir sirket hesabi, ucret ya da internet istemez; hepsi bu bilgisayarda.
+  14. IKI ADIMLI DOGRULAMA (TOTP, RFC 6238: SHA-1, 6 hane, 30 sn). Google
+      Authenticator, Microsoft Authenticator, iPhone Sifreler ayni kodu
+      uretir. Acikken sifre dogru olsa da oturum ACILMAZ: 5 dakikalik bir
+      bilet doner, kod (ya da tek kullanimlik yedek kod) bileti oturuma
+      cevirir. Ayni kod iki kez kullanilmaz (son adim saklanir); yanlis
+      kod girisle ayni bekletmeye tabidir. Sifremi unuttum da kodu ister:
+      yeni sifre ancak kod dogrulaninca yazilir. Sir, sunucunun kodu
+      dogrulayabilmesi icin bu depoda acik durur (her TOTP sunucusu gibi);
+      yedek kodlarin yalniz ozeti saklanir. Telefon da yedek kodlar da
+      kaybolursa bilgisayarin kendisinde:
+      `python sistem/hesap.py --iki-adim-kapat <ad>`.
+  15. KODLA CIHAZ BAGLAMA. Girisli bir cihaz 5 dakikalik, tek kullanimlik
+      6 haneli bir kod acar; yeni cihaz sifre yazmadan o kodla girer. Kod
+      girisli (iki adimi gecmis) bir oturumdan acildigi icin ikinci adim
+      sorulmaz. Yanlis kodda IP basina ve toplamda bekletilir.
+  16. ERISIM ANAHTARLARI ve GELEN KUTUSU. iPhone Kisayollar, Android HTTP
+      Shortcuts, Home Assistant gibi uygulamalar kullanicinin actigi bir
+      anahtarla «su 250», «kilo 72,4» gibi tek satir gonderir. Sunucu
+      satiri ANLAMAZ ve hicbir modulun kaydina yazmaz (AGENTS §1.1, §1.4):
+      gelen kutusuna koyar; modul (SPI) kendi ayristiricisiyla okur ve
+      Onaylar'a oneri olarak birakir — olcum onaysiz yazilmaz. Anahtar
+      bir kez gosterilir, yalniz ozeti saklanir; oturum jetonu yerine
+      gecmez (hesap API'sinin geri kalanina girmez).
+  17. TAKVIM ABONELIGI. Modul kendi takvimini (.ics) yayinlar; sunucu
+      onu ANLAMADAN birlestirir ve gizli bir adreste sunar (iPhone Takvim,
+      Thunderbird, klasik Outlook abone olur). Adres yalniz okumadir;
+      Google Takvim gibi internetten ceken takvimler ev agina ulasamaz,
+      bu ekranda soylenir. Adres yeniden gosterilebilsin diye jetonu acik
+      saklanir; «yenile» eskisini hemen gecersiz kilar.
+
    Yalniz Python standart kutuphanesi (AGENTS §1.3).
 """
 
+import base64
 import contextlib
 import hashlib
 import hmac
@@ -77,10 +111,13 @@ import os
 import re
 import secrets
 import sqlite3
+import struct
+import sys
 import threading
 import time
+import urllib.parse
 
-SURUM = 4
+SURUM = 5
 TUR = 600000                    # PBKDF2 tur sayisi (OWASP 2023, SHA-256)
 EN_KISA_PAROLA = 8
 EN_UZUN_PAROLA = 256
@@ -103,6 +140,36 @@ EPOSTA_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]{1,120}\.[^@\s]{2,24}$")
 KIMLIK_RE = re.compile(r"^[0-9a-f]{16}$")
 OLAY_EN_COK = 300                     # kullanici basina saklanan etkinlik
 OLAY_GOSTER = 80
+
+# Iki adimli dogrulama (soz 14)
+KOD_ADIM = 30                         # sn (RFC 6238 varsayilani)
+KOD_HANE = 6
+KOD_PENCERE = 1                       # +-1 adim: telefon saati biraz kaymis olabilir
+BILET_SN = 300
+BILET_DENEME = 5
+YEDEK_ADET = 10
+YEDEK_ABECE = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"   # 0/O, 1/I karismaz
+YEDEK_RE = re.compile(r"^[%s]{8}$" % YEDEK_ABECE)
+SIR_RE = re.compile(r"^[A-Z2-7]{16,64}$")
+# Kodla cihaz baglama (soz 15)
+BAG_SN = 300
+# Erisim anahtarlari ve gelen kutusu (soz 16)
+ANAHTAR_ON = "lifeos_"
+ANAHTAR_EN_COK = 20
+ANAHTAR_AD_EN_UZUN = 40
+YETKILER = ("kayit",)                 # disaridan tek yetki: gelen kutusuna satir birakmak
+GELEN_MODULLER = ("spi",)
+GELEN_METIN_EN_UZUN = 300
+GELEN_EN_COK = 200                    # kullanici basina saklanan
+GELEN_SAAT_EN_COK = 120               # bir anahtarla saatte (dongude kalan bir kisayol)
+GELEN_PARTI = 20
+GELEN_ALIM_SN = 600                   # alinip sonucu gelmeyen satir 10 dk sonra yeniden verilir
+GELEN_SONUC_EN_UZUN = 160
+GELEN_DURUMLAR = ("onayda", "anlasilmadi")
+# Takvim aboneligi (soz 17)
+YAYIN_RE = re.compile(r"^(ays|spi|esp)/takvim$")
+YAYIN_EN_BUYUK = 512 * 1024
+TAKVIM_YOL_RE = re.compile(r"^/api/hesap/takvim/([A-Za-z0-9_\-]{20,64})\.ics$")
 
 # Profil rengi: kapali liste (soz 8). Renklerin kendisi istemcide
 # (hesap.js RENK); burada yalniz kimlikler dogrulanir.
@@ -172,6 +239,77 @@ CREATE TABLE IF NOT EXISTS olay(
   zaman REAL NOT NULL
 );
 CREATE INDEX IF NOT EXISTS olay_kullanici ON olay(kullanici, id);
+CREATE TABLE IF NOT EXISTS iki_adim(
+  kullanici INTEGER PRIMARY KEY,
+  sir TEXT NOT NULL,
+  acik INTEGER NOT NULL DEFAULT 0,
+  son_adim INTEGER NOT NULL DEFAULT 0,
+  olusturma REAL NOT NULL
+);
+CREATE TABLE IF NOT EXISTS yedek_kod(
+  kullanici INTEGER NOT NULL,
+  ozet TEXT NOT NULL,
+  kullanildi REAL,
+  PRIMARY KEY(kullanici, ozet)
+);
+CREATE TABLE IF NOT EXISTS bilet(
+  ozet TEXT PRIMARY KEY,
+  kullanici INTEGER NOT NULL,
+  tur TEXT NOT NULL,
+  cihaz TEXT,
+  cihaz_ad TEXT,
+  bitis REAL NOT NULL,
+  deneme INTEGER NOT NULL DEFAULT 0,
+  bekleyen TEXT
+);
+CREATE TABLE IF NOT EXISTS bag_kodu(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  ozet TEXT NOT NULL UNIQUE,
+  kullanici INTEGER NOT NULL,
+  olusturma REAL NOT NULL,
+  bitis REAL NOT NULL,
+  kullanan TEXT,
+  kullanildi REAL
+);
+CREATE TABLE IF NOT EXISTS anahtar(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  kullanici INTEGER NOT NULL,
+  ad TEXT NOT NULL,
+  ozet TEXT NOT NULL UNIQUE,
+  on_ek TEXT NOT NULL,
+  yetki TEXT NOT NULL,
+  olusturma REAL NOT NULL,
+  son REAL
+);
+CREATE TABLE IF NOT EXISTS gelen(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  kullanici INTEGER NOT NULL,
+  modul TEXT NOT NULL,
+  metin TEXT NOT NULL,
+  kaynak TEXT,
+  anahtar INTEGER,
+  zaman REAL NOT NULL,
+  durum TEXT NOT NULL,
+  alan_cihaz TEXT,
+  alim REAL,
+  sonuc TEXT,
+  islenme REAL
+);
+CREATE INDEX IF NOT EXISTS gelen_kullanici ON gelen(kullanici, modul, id);
+CREATE TABLE IF NOT EXISTS yayin(
+  kullanici INTEGER NOT NULL,
+  ad TEXT NOT NULL,
+  icerik TEXT NOT NULL,
+  adet INTEGER,
+  zaman REAL NOT NULL,
+  PRIMARY KEY(kullanici, ad)
+);
+CREATE TABLE IF NOT EXISTS takvim(
+  kullanici INTEGER PRIMARY KEY,
+  jeton TEXT NOT NULL UNIQUE,
+  olusturma REAL NOT NULL,
+  son REAL
+);
 """
 
 
@@ -196,6 +334,47 @@ class Hata(Exception):
 
 def _jeton_ozeti(jeton):
     return hashlib.sha256(jeton.encode("utf-8")).hexdigest()
+
+
+# ------------------------------------------------------------ TOTP (soz 14)
+
+def sir_uret():
+    """160 bitlik rastgele sir, Base32 (dolgusuz) — dogrulayici uygulamalarin
+    QR'dan ya da elle okudugu bicim."""
+    return base64.b32encode(secrets.token_bytes(20)).decode("ascii").rstrip("=")
+
+
+def _sir_bayt(sir):
+    s = str(sir or "").upper()
+    return base64.b32decode(s + "=" * (-len(s) % 8))
+
+
+def totp(sir, adim, hane=KOD_HANE):
+    """RFC 6238 / RFC 4226: HMAC-SHA1(sir, adim) -> dinamik kesme -> hane."""
+    h = hmac.new(_sir_bayt(sir), struct.pack(">Q", int(adim)), hashlib.sha1).digest()
+    o = h[-1] & 0x0F
+    n = (struct.unpack(">I", h[o:o + 4])[0] & 0x7FFFFFFF) % (10 ** hane)
+    return str(n).zfill(hane)
+
+
+def otpauth(ad, sir):
+    """Dogrulayici uygulamanin okudugu adres (Key Uri Format)."""
+    etiket = urllib.parse.quote("LifeOS:" + ad, safe=":")
+    return "otpauth://totp/%s?secret=%s&issuer=LifeOS&algorithm=SHA1&digits=%d&period=%d" % (
+        etiket, sir, KOD_HANE, KOD_ADIM)
+
+
+def _kod_normal(kod):
+    """Bosluk ve tire atilir; yedek kodda harf buyutulur."""
+    return re.sub(r"[\s\-]", "", str(kod or "")).upper()
+
+
+def _yedek_uret():
+    return "".join(secrets.choice(YEDEK_ABECE) for _ in range(8))
+
+
+def _yedek_ozeti(kod):
+    return hashlib.sha256(("lifeos-yedek:" + kod).encode("utf-8")).hexdigest()
 
 
 class Depo:
@@ -413,8 +592,13 @@ class Depo:
                     for a in anahtarlar:
                         self._deneme.pop(a, None)
                 tuz = secrets.token_bytes(16)
+                ozet = self._ozet(yeni, tuz, self.tur)
+                if self._iki_adim_acik(c, r["id"]):
+                    # Soz 14: yeni sifre ancak kod dogrulaninca yazilir.
+                    return self._bilet_ac(c, r["id"], "kurtar", cihaz, cihaz_ad, json.dumps(
+                        {"tuz": tuz.hex(), "ozet": ozet.hex(), "tur": self.tur}))
                 c.execute("UPDATE kullanici SET tuz=?, ozet=?, tur=? WHERE id=?",
-                          (tuz, self._ozet(yeni, tuz, self.tur), self.tur, r["id"]))
+                          (tuz, ozet, self.tur, r["id"]))
                 c.execute("DELETE FROM oturum WHERE kullanici=?", (r["id"],))
                 self._olay(c, r["id"], "kurtar", cihaz_ad, ip)
                 return {"jeton": self._oturum_ac(c, r["id"], cihaz, cihaz_ad),
@@ -474,6 +658,8 @@ class Depo:
                 with self.kilit:
                     for a in anahtarlar:
                         self._deneme.pop(a, None)
+                if self._iki_adim_acik(c, r["id"]):
+                    return self._bilet_ac(c, r["id"], "giris", cihaz, cihaz_ad)     # soz 14
                 self._olay(c, r["id"], "giris", cihaz_ad, ip)
                 return {"jeton": self._oturum_ac(c, r["id"], cihaz, cihaz_ad),
                         "kullanici": self._kullanici(c, r["id"])}
@@ -538,6 +724,7 @@ class Depo:
             raise Hata(403, "Kullanıcı listesini yalnız admin görür.")
         with self._islem() as c:
             out = []
+            iki = {r["kullanici"] for r in c.execute("SELECT kullanici FROM iki_adim WHERE acik=1")}
             for r in c.execute(
                     "SELECT k.id, k.ad, k.rol, k.gorunen_ad, k.renk, k.plan, k.olusturma, "
                     "COUNT(o.ozet) AS cihaz, MAX(o.son) AS son FROM kullanici k "
@@ -545,6 +732,7 @@ class Depo:
                 p = self._profil(r, ozel=False)          # soz 12: baskasinin kisisel bilgisi yok
                 p["cihaz"] = r["cihaz"]
                 p["son"] = int(r["son"] * 1000) if r["son"] else None
+                p["iki_adim"] = r["id"] in iki
                 out.append(p)
             return out
 
@@ -648,7 +836,10 @@ class Depo:
 
     # ------------------------------------------------- yonetim (soz 10)
 
-    def yonet(self, yapan, kid, rol=None, plan=None):
+    def yonet(self, yapan, kid, rol=None, plan=None, iki_adim=None):
+        """iki_adim=False: uyenin iki adimli dogrulamasini kapatir (telefonunu
+        ve yedek kodlarini kaybetmis bir aile uyesi). Admin kendi iki adimini
+        buradan kapatamaz: kendi sayfasindan kodla ya da bilgisayardan."""
         if not yapan or yapan.get("rol") != "admin":
             raise Hata(403, "Kullanıcıları yalnız admin yönetir.")
         if not isinstance(kid, int) or isinstance(kid, bool):
@@ -657,7 +848,16 @@ class Depo:
             raise Hata(400, "Rol «admin» ya da «uye» olmalı.")
         if plan is not None and plan not in PLAN_IDS:
             raise Hata(400, "Bu plan katalogda yok.")
+        if iki_adim is not None and iki_adim is not False:
+            raise Hata(400, "İki adımlı doğrulamayı yalnız kullanıcının kendisi açar.")
+        if iki_adim is False and kid == yapan.get("id"):
+            raise Hata(409, "Kendi iki adımlı doğrulamanı Güvenlik sayfasından kapatırsın.")
         with self._islem() as c:
+            if iki_adim is False and c.execute("SELECT 1 FROM kullanici WHERE id=?", (kid,)).fetchone():
+                if c.execute("DELETE FROM iki_adim WHERE kullanici=?", (kid,)).rowcount:
+                    c.execute("DELETE FROM yedek_kod WHERE kullanici=?", (kid,))
+                    c.execute("DELETE FROM bilet WHERE kullanici=?", (kid,))
+                    self._olay(c, kid, "iki-adim-kapat", "", "", "admin: " + yapan.get("ad", ""))
             r = c.execute("SELECT rol FROM kullanici WHERE id=?", (kid,)).fetchone()
             if r is None:
                 raise Hata(404, "Bu kullanıcı yok.")
@@ -671,7 +871,9 @@ class Depo:
             if plan is not None:
                 c.execute("UPDATE kullanici SET plan=? WHERE id=?", (plan, kid))
                 self._olay(c, kid, "yonetim", "", "", "Plan: %s · %s" % (PLAN_AD[plan], yapan.get("ad", "")))
-            return self._kullanici(c, kid, ozel=(kid == yapan.get("id")))
+            p = self._kullanici(c, kid, ozel=(kid == yapan.get("id")))
+            p["iki_adim"] = self._iki_adim_acik(c, kid)
+            return p
 
     # ---------------------------------------------------------- esitleme
 
@@ -790,7 +992,8 @@ class Depo:
                 digerleri = c.execute("SELECT COUNT(*) FROM kullanici WHERE id<>?", (kullanici["id"],)).fetchone()[0]
                 if adminler <= 1 and digerleri:
                     raise Hata(409, "Son admin hesabını silemez; önce başka birini admin yap.")
-            for t in ("kayit", "oturum", "olay"):
+            for t in ("kayit", "oturum", "olay", "iki_adim", "yedek_kod", "bilet", "bag_kodu", "anahtar",
+                      "gelen", "yayin", "takvim"):
                 c.execute("DELETE FROM %s WHERE kullanici=?" % t, (kullanici["id"],))
             c.execute("DELETE FROM kullanici WHERE id=?", (kullanici["id"],))
 
@@ -800,6 +1003,452 @@ class Depo:
             raise Hata(400, "Geçersiz kimlik.")
         with self._islem() as c:
             return c.execute("SELECT 1 FROM kullanici WHERE kimlik=?", (kimlik,)).fetchone() is not None
+
+    # --------------------------------------------- iki adimli dogrulama (soz 14)
+
+    def _parola_bak(self, c, kid, parola, mesaj="Şifre yanlış."):
+        r = c.execute("SELECT tuz, ozet, tur FROM kullanici WHERE id=?", (kid,)).fetchone()
+        p = parola if isinstance(parola, str) else ""
+        if r is None or not hmac.compare_digest(self._ozet(p, r["tuz"], r["tur"]), r["ozet"]):
+            raise Hata(401, mesaj)
+
+    @staticmethod
+    def _iki_adim_acik(c, kid):
+        return c.execute("SELECT 1 FROM iki_adim WHERE kullanici=? AND acik=1", (kid,)).fetchone() is not None
+
+    def _totp_adim(self, sir, son_adim, kod):
+        """Kod pencerede ve daha once kullanilmamis bir adimdaysa o adim."""
+        if not re.match(r"^\d{%d}$" % KOD_HANE, kod):
+            return None
+        simdi = int(self.saat() // KOD_ADIM)
+        for a in range(simdi - KOD_PENCERE, simdi + KOD_PENCERE + 1):
+            if a > son_adim and hmac.compare_digest(totp(sir, a), kod):
+                return a
+        return None
+
+    def _kod_dogrula(self, c, kid, kod):
+        """'kod' (dogrulayici), 'yedek' (tek kullanimlik) ya da None. Dogru
+        kod kullanildi olarak isaretlenir: ayni kod ikinci kez gecmez."""
+        k = _kod_normal(kod)
+        r = c.execute("SELECT sir, son_adim FROM iki_adim WHERE kullanici=? AND acik=1", (kid,)).fetchone()
+        if r is None:
+            return None
+        adim = self._totp_adim(r["sir"], r["son_adim"], k)
+        if adim is not None:
+            c.execute("UPDATE iki_adim SET son_adim=? WHERE kullanici=?", (adim, kid))
+            return "kod"
+        if YEDEK_RE.match(k):
+            oz = _yedek_ozeti(k)
+            y = c.execute("SELECT kullanildi FROM yedek_kod WHERE kullanici=? AND ozet=?", (kid, oz)).fetchone()
+            if y is not None and y["kullanildi"] is None:
+                c.execute("UPDATE yedek_kod SET kullanildi=? WHERE kullanici=? AND ozet=?", (self.saat(), kid, oz))
+                return "yedek"
+        return None
+
+    def _yedek_yaz(self, c, kid):
+        c.execute("DELETE FROM yedek_kod WHERE kullanici=?", (kid,))
+        kodlar = []
+        while len(kodlar) < YEDEK_ADET:
+            k = _yedek_uret()
+            if k not in kodlar:
+                kodlar.append(k)
+                c.execute("INSERT INTO yedek_kod(kullanici, ozet) VALUES(?,?)", (kid, _yedek_ozeti(k)))
+        return [k[:4] + "-" + k[4:] for k in kodlar]
+
+    def iki_adim(self, kullanici):
+        with self._islem() as c:
+            r = c.execute("SELECT acik, olusturma FROM iki_adim WHERE kullanici=?", (kullanici["id"],)).fetchone()
+            kalan = c.execute("SELECT COUNT(*) FROM yedek_kod WHERE kullanici=? AND kullanildi IS NULL",
+                              (kullanici["id"],)).fetchone()[0]
+        acik = bool(r and r["acik"])
+        return {"acik": acik, "olusturma": int(r["olusturma"] * 1000) if acik else None,
+                "yedek_kalan": kalan if acik else 0}
+
+    def iki_adim_baslat(self, kullanici, parola):
+        """Kurulum adim 1: sifre sorulur, yeni sir uretilir (henuz kapali)."""
+        with self._islem() as c:
+            self._parola_bak(c, kullanici["id"], parola)
+            if self._iki_adim_acik(c, kullanici["id"]):
+                raise Hata(409, "İki adımlı doğrulama zaten açık.")
+            sir = sir_uret()
+            c.execute("INSERT INTO iki_adim(kullanici, sir, acik, son_adim, olusturma) VALUES(?,?,0,0,?) "
+                      "ON CONFLICT(kullanici) DO UPDATE SET sir=excluded.sir, acik=0, son_adim=0, "
+                      "olusturma=excluded.olusturma", (kullanici["id"], sir, self.saat()))
+        return {"sir": sir, "uri": otpauth(kullanici["ad"], sir)}
+
+    def iki_adim_onayla(self, kullanici, kod, jeton=None, ip=""):
+        """Kurulum adim 2: uygulamanin urettigi kod tutarsa acilir; yedek
+        kodlar BIR KEZ doner (yalniz ozetleri saklanir)."""
+        kid = kullanici["id"]
+        anahtarlar = [("kurulum", kid)]
+        with self.kilit:
+            self._deneme_bak(anahtarlar)
+        with self._islem() as c:
+            r = c.execute("SELECT sir, acik FROM iki_adim WHERE kullanici=?", (kid,)).fetchone()
+            if r is None or r["acik"]:
+                raise Hata(409, "Kurulum başlatılmadı ya da doğrulama zaten açık.")
+            adim = self._totp_adim(r["sir"], 0, _kod_normal(kod))
+            if adim is not None:
+                with self.kilit:
+                    self._deneme.pop(anahtarlar[0], None)
+                c.execute("UPDATE iki_adim SET acik=1, son_adim=?, olusturma=? WHERE kullanici=?",
+                          (adim, self.saat(), kid))
+                yedek = self._yedek_yaz(c, kid)
+                self._olay(c, kid, "iki-adim", self._oturum_cihaz(c, jeton), ip)
+                return {"yedek": yedek}
+        with self.kilit:
+            self._deneme_yanlis(anahtarlar)
+        raise Hata(400, "Kod tutmadı. Uygulamadaki güncel kodu yaz; telefonun saati otomatik ayarda olmalı.")
+
+    def iki_adim_kapat(self, kullanici, parola, kod, jeton=None, ip=""):
+        kid = kullanici["id"]
+        with self._islem() as c:
+            self._parola_bak(c, kid, parola)
+            if not self._iki_adim_acik(c, kid):
+                raise Hata(409, "İki adımlı doğrulama zaten kapalı.")
+            if self._kod_dogrula(c, kid, kod):
+                for t in ("iki_adim", "yedek_kod", "bilet"):
+                    c.execute("DELETE FROM %s WHERE kullanici=?" % t, (kid,))
+                self._olay(c, kid, "iki-adim-kapat", self._oturum_cihaz(c, jeton), ip)
+                return
+        raise Hata(401, "Kod yanlış.")
+
+    def yedek_yenile(self, kullanici, parola, jeton=None, ip=""):
+        kid = kullanici["id"]
+        with self._islem() as c:
+            self._parola_bak(c, kid, parola)
+            if not self._iki_adim_acik(c, kid):
+                raise Hata(409, "Önce iki adımlı doğrulamayı aç.")
+            yedek = self._yedek_yaz(c, kid)
+            self._olay(c, kid, "yedek", self._oturum_cihaz(c, jeton), ip)
+            return {"yedek": yedek}
+
+    def iki_adim_sifirla(self, ad):
+        """Bilgisayarin kendisinden (komut satiri): telefon da yedek kodlar
+        da kaybolduysa. Doner: kapatilacak bir sey var miydi."""
+        with self._islem() as c:
+            r = c.execute("SELECT id FROM kullanici WHERE ad=?", ((ad or "").strip(),)).fetchone()
+            if r is None:
+                raise Hata(404, "Bu kullanıcı yok.")
+            n = c.execute("DELETE FROM iki_adim WHERE kullanici=?", (r["id"],)).rowcount
+            c.execute("DELETE FROM yedek_kod WHERE kullanici=?", (r["id"],))
+            c.execute("DELETE FROM bilet WHERE kullanici=?", (r["id"],))
+            if n:
+                self._olay(c, r["id"], "iki-adim-kapat", "Bu bilgisayar", "", "komut satırından")
+            return bool(n)
+
+    def _bilet_ac(self, c, kid, tur, cihaz, cihaz_ad, bekleyen=None):
+        """Sifre (ya da kurtarma cevabi) dogru, kod bekleniyor."""
+        b = secrets.token_urlsafe(24)
+        simdi = self.saat()
+        c.execute("DELETE FROM bilet WHERE bitis < ?", (simdi,))
+        c.execute("INSERT INTO bilet(ozet, kullanici, tur, cihaz, cihaz_ad, bitis, deneme, bekleyen) "
+                  "VALUES(?,?,?,?,?,?,0,?)", (_jeton_ozeti(b), kid, tur, cihaz or "", (cihaz_ad or "")[:80],
+                                             simdi + BILET_SN, bekleyen))
+        return {"iki_adim": True, "bilet": b, "bitis": int((simdi + BILET_SN) * 1000)}
+
+    def giris_kod(self, bilet, kod, ip=""):
+        """Bilet + dogrulayici kodu (ya da yedek kod) -> oturum."""
+        suresi = Hata(401, "Doğrulama süresi doldu; yeniden giriş yap.")
+        if not isinstance(bilet, str) or not bilet or len(bilet) > 200:
+            raise suresi
+        oz = _jeton_ozeti(bilet)
+        with self._islem() as c:
+            b = c.execute("SELECT kullanici, bitis FROM bilet WHERE ozet=?", (oz,)).fetchone()
+        if b is None or b["bitis"] < self.saat():
+            raise suresi
+        kid = b["kullanici"]
+        anahtarlar = [("kod", kid), ("ip", ip)]
+        with self.kilit:
+            self._deneme_bak(anahtarlar)
+        with self._islem() as c:
+            b = c.execute("SELECT * FROM bilet WHERE ozet=?", (oz,)).fetchone()
+            if b is None:
+                raise suresi
+            tur = self._kod_dogrula(c, kid, kod)
+            if tur:
+                with self.kilit:
+                    for a in anahtarlar:
+                        self._deneme.pop(a, None)
+                c.execute("DELETE FROM bilet WHERE ozet=?", (oz,))
+                ayrinti = "yedek kod" if tur == "yedek" else "iki adımlı"
+                if b["tur"] == "kurtar" and b["bekleyen"]:
+                    y = json.loads(b["bekleyen"])
+                    c.execute("UPDATE kullanici SET tuz=?, ozet=?, tur=? WHERE id=?",
+                              (bytes.fromhex(y["tuz"]), bytes.fromhex(y["ozet"]), int(y["tur"]), kid))
+                    c.execute("DELETE FROM oturum WHERE kullanici=?", (kid,))
+                    self._olay(c, kid, "kurtar", b["cihaz_ad"], ip, ayrinti)
+                else:
+                    self._olay(c, kid, "giris", b["cihaz_ad"], ip, ayrinti)
+                return {"jeton": self._oturum_ac(c, kid, b["cihaz"], b["cihaz_ad"]),
+                        "kullanici": self._kullanici(c, kid)}
+            deneme = b["deneme"] + 1
+            if deneme >= BILET_DENEME:
+                c.execute("DELETE FROM bilet WHERE ozet=?", (oz,))
+            else:
+                c.execute("UPDATE bilet SET deneme=? WHERE ozet=?", (deneme, oz))
+            self._olay(c, kid, "kod-yanlis", b["cihaz_ad"], ip)
+        with self.kilit:
+            self._deneme_yanlis(anahtarlar)
+        if deneme >= BILET_DENEME:
+            raise Hata(401, "Kod üst üste yanlış; yeniden giriş yap.")
+        raise Hata(401, "Kod yanlış ya da az önce kullanıldı; uygulamadaki yeni kodu yaz.")
+
+    # ------------------------------------------------ kodla cihaz baglama (soz 15)
+
+    def bag_kodu_ac(self, kullanici):
+        kid, simdi = kullanici["id"], self.saat()
+        with self._islem() as c:
+            # Bir kullanicinin tek acik kodu olur; biten kodlar bir saat durum icin kalir.
+            c.execute("DELETE FROM bag_kodu WHERE bitis < ? OR (kullanici=? AND kullanildi IS NULL)",
+                      (simdi - 3600, kid))
+            for _ in range(50):
+                kod = str(secrets.randbelow(10 ** 6)).zfill(6)
+                oz = _jeton_ozeti("bag:" + kod)
+                if c.execute("SELECT 1 FROM bag_kodu WHERE ozet=?", (oz,)).fetchone() is None:
+                    break
+            else:
+                raise Hata(503, "Kod üretilemedi; yeniden dene.")
+            cur = c.execute("INSERT INTO bag_kodu(ozet, kullanici, olusturma, bitis) VALUES(?,?,?,?)",
+                            (oz, kid, simdi, simdi + BAG_SN))
+            return {"kod": kod, "id": cur.lastrowid, "bitis": int((simdi + BAG_SN) * 1000)}
+
+    def bag_durum(self, kullanici, bid):
+        if not isinstance(bid, int) or isinstance(bid, bool):
+            raise Hata(400, "Geçersiz kod.")
+        with self._islem() as c:
+            r = c.execute("SELECT bitis, kullanan, kullanildi FROM bag_kodu WHERE id=? AND kullanici=?",
+                          (bid, kullanici["id"])).fetchone()
+        if r is None:
+            return {"durum": "yok"}
+        if r["kullanildi"]:
+            return {"durum": "baglandi", "cihaz_ad": r["kullanan"] or "Cihaz"}
+        if r["bitis"] < self.saat():
+            return {"durum": "bitti"}
+        return {"durum": "bekliyor", "bitis": int(r["bitis"] * 1000)}
+
+    def bag_kodu_kapat(self, kullanici, bid):
+        if not isinstance(bid, int) or isinstance(bid, bool):
+            raise Hata(400, "Geçersiz kod.")
+        with self._islem() as c:
+            c.execute("DELETE FROM bag_kodu WHERE id=? AND kullanici=? AND kullanildi IS NULL",
+                      (bid, kullanici["id"]))
+
+    def bagla(self, kod, cihaz="", cihaz_ad="", ip=""):
+        """Yeni cihaz: 6 haneli kod -> oturum (ikinci adim sorulmaz, soz 15)."""
+        anahtarlar = [("ip", ip), ("bag", "*")]
+        with self.kilit:
+            self._deneme_bak(anahtarlar)
+        k = re.sub(r"\D", "", str(kod or ""))
+        simdi = self.saat()
+        with self._islem() as c:
+            r = None
+            if len(k) == 6:
+                r = c.execute("SELECT id, kullanici FROM bag_kodu WHERE ozet=? AND bitis>=? "
+                              "AND kullanildi IS NULL", (_jeton_ozeti("bag:" + k), simdi)).fetchone()
+            if r is not None:
+                with self.kilit:
+                    self._deneme.pop(anahtarlar[0], None)
+                c.execute("UPDATE bag_kodu SET kullanildi=?, kullanan=? WHERE id=?",
+                          (simdi, (cihaz_ad or "Cihaz")[:80], r["id"]))
+                self._olay(c, r["kullanici"], "bag", cihaz_ad, ip)
+                return {"jeton": self._oturum_ac(c, r["kullanici"], cihaz, cihaz_ad),
+                        "kullanici": self._kullanici(c, r["kullanici"])}
+        with self.kilit:
+            self._deneme_yanlis(anahtarlar)
+        raise Hata(401, "Kod yanlış ya da süresi doldu. Girişli cihazdan yeni kod al.")
+
+    # ------------------------------------- erisim anahtarlari ve gelen (soz 16)
+
+    def anahtar_ac(self, kullanici, parola, ad, yetki="kayit", jeton=None, ip=""):
+        ad = " ".join(str(ad or "").split())
+        if not ad or len(ad) > ANAHTAR_AD_EN_UZUN or any(ord(ch) < 32 for ch in ad):
+            raise Hata(400, "Anahtara 1–%d karakterlik bir ad ver (örnek: iPhone Kısayollar)." % ANAHTAR_AD_EN_UZUN)
+        if yetki not in YETKILER:
+            raise Hata(400, "Bu yetki tanımlı değil.")
+        kid = kullanici["id"]
+        with self._islem() as c:
+            self._parola_bak(c, kid, parola)
+            if c.execute("SELECT COUNT(*) FROM anahtar WHERE kullanici=?", (kid,)).fetchone()[0] >= ANAHTAR_EN_COK:
+                raise Hata(409, "En çok %d anahtar açılabilir; kullanmadığını sil." % ANAHTAR_EN_COK)
+            a = ANAHTAR_ON + secrets.token_urlsafe(24)
+            cur = c.execute("INSERT INTO anahtar(kullanici, ad, ozet, on_ek, yetki, olusturma) VALUES(?,?,?,?,?,?)",
+                            (kid, ad, _jeton_ozeti(a), a[:len(ANAHTAR_ON) + 4], yetki, self.saat()))
+            self._olay(c, kid, "anahtar", self._oturum_cihaz(c, jeton), ip, ad)
+            return {"anahtar": a, "id": cur.lastrowid, "ad": ad, "yetki": yetki}
+
+    def anahtarlar(self, kullanici):
+        with self._islem() as c:
+            return [{"id": r["id"], "ad": r["ad"], "yetki": r["yetki"], "on_ek": r["on_ek"],
+                     "olusturma": int(r["olusturma"] * 1000), "son": int(r["son"] * 1000) if r["son"] else None}
+                    for r in c.execute("SELECT id, ad, yetki, on_ek, olusturma, son FROM anahtar "
+                                       "WHERE kullanici=? ORDER BY id", (kullanici["id"],))]
+
+    def anahtar_sil(self, kullanici, aid, jeton=None, ip=""):
+        if not isinstance(aid, int) or isinstance(aid, bool):
+            raise Hata(400, "Geçersiz anahtar.")
+        with self._islem() as c:
+            r = c.execute("SELECT ad FROM anahtar WHERE id=? AND kullanici=?", (aid, kullanici["id"])).fetchone()
+            if r is None:
+                raise Hata(404, "Bu anahtar artık yok.")
+            c.execute("DELETE FROM anahtar WHERE id=?", (aid,))
+            self._olay(c, kullanici["id"], "anahtar-sil", self._oturum_cihaz(c, jeton), ip, r["ad"])
+
+    def gelen_ekle(self, anahtar, metin, modul="spi", ip=""):
+        """Disaridan (Kisayollar, Home Assistant) tek satir. Sunucu satiri
+        anlamaz; modul kendi koduyla okur (soz 16)."""
+        anahtarlar = [("ip", ip)]
+        with self.kilit:
+            self._deneme_bak(anahtarlar)
+        metin = " ".join(metin.split()) if isinstance(metin, str) else ""
+        simdi = self.saat()
+        with self._islem() as c:
+            r = None
+            if isinstance(anahtar, str) and anahtar.startswith(ANAHTAR_ON) and len(anahtar) <= 200:
+                r = c.execute("SELECT id, kullanici, ad, yetki FROM anahtar WHERE ozet=?",
+                              (_jeton_ozeti(anahtar),)).fetchone()
+            if r is not None:
+                if r["yetki"] != "kayit":
+                    raise Hata(403, "Bu anahtarın kayıt yetkisi yok.")
+                if not metin or any(ord(ch) < 32 for ch in metin):
+                    raise Hata(400, "Gönderilecek bir satır yok: gövdede «metin» olmalı (örnek: su 250).")
+                if len(metin) > GELEN_METIN_EN_UZUN:
+                    raise Hata(400, "Satır çok uzun (en çok %d karakter)." % GELEN_METIN_EN_UZUN)
+                if modul not in GELEN_MODULLER:
+                    raise Hata(400, "Bu modül gelen kutusu kabul etmiyor.")
+                if c.execute("SELECT COUNT(*) FROM gelen WHERE anahtar=? AND zaman>?",
+                             (r["id"], simdi - 3600)).fetchone()[0] >= GELEN_SAAT_EN_COK:
+                    raise Hata(429, "Bu anahtarla bir saatte çok fazla satır geldi; kısayolu denetle.")
+                cur = c.execute("INSERT INTO gelen(kullanici, modul, metin, kaynak, anahtar, zaman, durum) "
+                                "VALUES(?,?,?,?,?,?,'bekliyor')", (r["kullanici"], modul, metin, r["ad"], r["id"], simdi))
+                c.execute("UPDATE anahtar SET son=? WHERE id=?", (simdi, r["id"]))
+                c.execute("DELETE FROM gelen WHERE kullanici=? AND id <= (SELECT id FROM gelen WHERE kullanici=? "
+                          "ORDER BY id DESC LIMIT 1 OFFSET ?)", (r["kullanici"], r["kullanici"], GELEN_EN_COK))
+                return {"ok": True, "id": cur.lastrowid, "durum": "bekliyor",
+                        "mesaj": "Alındı. SPİ açılınca Onaylar’a düşer; sen onaylayınca yazılır."}
+        with self.kilit:
+            self._deneme_yanlis(anahtarlar)
+        raise Hata(401, "Anahtar geçersiz ya da silinmiş.")
+
+    def gelen_al(self, kullanici, modul, cihaz):
+        """Modul icin bekleyen satirlar. Alinan satir baska cihaza verilmez;
+        sonucu gelmezse GELEN_ALIM_SN sonra yeniden verilir."""
+        if modul not in GELEN_MODULLER:
+            raise Hata(400, "Bu modül gelen kutusu kabul etmiyor.")
+        if not isinstance(cihaz, str) or not CIHAZ_RE.match(cihaz):
+            raise Hata(400, "Geçersiz cihaz kimliği.")
+        simdi = self.saat()
+        with self._islem() as c:
+            l = c.execute("SELECT id, metin, kaynak, zaman FROM gelen WHERE kullanici=? AND modul=? AND "
+                          "(durum='bekliyor' OR (durum='alindi' AND alim<?)) ORDER BY id LIMIT ?",
+                          (kullanici["id"], modul, simdi - GELEN_ALIM_SN, GELEN_PARTI)).fetchall()
+            for r in l:
+                c.execute("UPDATE gelen SET durum='alindi', alan_cihaz=?, alim=? WHERE id=?", (cihaz, simdi, r["id"]))
+            return [{"id": r["id"], "metin": r["metin"], "kaynak": r["kaynak"] or "",
+                     "zaman": int(r["zaman"] * 1000)} for r in l]
+
+    def gelen_sonuc(self, kullanici, gid, durum, sonuc, cihaz):
+        if not isinstance(gid, int) or isinstance(gid, bool):
+            raise Hata(400, "Geçersiz satır.")
+        if durum not in GELEN_DURUMLAR:
+            raise Hata(400, "Geçersiz durum.")
+        sonuc = " ".join(str(sonuc or "").split())[:GELEN_SONUC_EN_UZUN]
+        with self._islem() as c:
+            return c.execute("UPDATE gelen SET durum=?, sonuc=?, islenme=? WHERE id=? AND kullanici=? "
+                             "AND durum='alindi' AND alan_cihaz=?",
+                             (durum, sonuc, self.saat(), gid, kullanici["id"], cihaz)).rowcount == 1
+
+    def gelen_liste(self, kullanici, sinir=30):
+        with self._islem() as c:
+            return [{"id": r["id"], "metin": r["metin"], "kaynak": r["kaynak"] or "", "modul": r["modul"],
+                     "zaman": int(r["zaman"] * 1000),
+                     "durum": "bekliyor" if r["durum"] == "alindi" else r["durum"], "sonuc": r["sonuc"] or "",
+                     "islenme": int(r["islenme"] * 1000) if r["islenme"] else None}
+                    for r in c.execute("SELECT * FROM gelen WHERE kullanici=? ORDER BY id DESC LIMIT ?",
+                                       (kullanici["id"], max(1, min(int(sinir), GELEN_EN_COK))))]
+
+    # ------------------------------------------------ takvim aboneligi (soz 17)
+
+    def yayinla(self, kullanici, ad, icerik, adet=None):
+        if not isinstance(ad, str) or not YAYIN_RE.match(ad):
+            raise Hata(400, "Geçersiz yayın.")
+        if not isinstance(icerik, str) or not icerik.lstrip().startswith("BEGIN:VCALENDAR") \
+                or "END:VCALENDAR" not in icerik:
+            raise Hata(400, "Takvim okunamadı.")
+        if len(icerik.encode("utf-8")) > YAYIN_EN_BUYUK:
+            raise Hata(413, "Takvim çok büyük.")
+        adet = adet if isinstance(adet, int) and not isinstance(adet, bool) and adet >= 0 else None
+        with self._islem() as c:
+            c.execute("INSERT INTO yayin(kullanici, ad, icerik, adet, zaman) VALUES(?,?,?,?,?) "
+                      "ON CONFLICT(kullanici, ad) DO UPDATE SET icerik=excluded.icerik, adet=excluded.adet, "
+                      "zaman=excluded.zaman", (kullanici["id"], ad, icerik, adet, self.saat()))
+
+    def takvim(self, kullanici):
+        with self._islem() as c:
+            r = c.execute("SELECT jeton, olusturma, son FROM takvim WHERE kullanici=?", (kullanici["id"],)).fetchone()
+            y = c.execute("SELECT ad, adet, zaman FROM yayin WHERE kullanici=? ORDER BY ad",
+                          (kullanici["id"],)).fetchall()
+        return {"acik": r is not None, "yol": "/api/hesap/takvim/%s.ics" % r["jeton"] if r else None,
+                "olusturma": int(r["olusturma"] * 1000) if r else None,
+                "son": int(r["son"] * 1000) if r and r["son"] else None,
+                "yayinlar": [{"ad": x["ad"], "adet": x["adet"], "zaman": int(x["zaman"] * 1000)} for x in y]}
+
+    def takvim_ac(self, kullanici, yenile=False, jeton=None, ip=""):
+        """Abonelik adresini acar; yenile: eskisi hemen gecersiz olur."""
+        with self._islem() as c:
+            var = c.execute("SELECT 1 FROM takvim WHERE kullanici=?", (kullanici["id"],)).fetchone() is not None
+            if not var or yenile:
+                c.execute("INSERT INTO takvim(kullanici, jeton, olusturma) VALUES(?,?,?) ON CONFLICT(kullanici) "
+                          "DO UPDATE SET jeton=excluded.jeton, olusturma=excluded.olusturma, son=NULL",
+                          (kullanici["id"], secrets.token_urlsafe(24), self.saat()))
+                self._olay(c, kullanici["id"], "takvim", self._oturum_cihaz(c, jeton), ip,
+                           "yenilendi" if var else "açıldı")
+        return self.takvim(kullanici)
+
+    def takvim_kapat(self, kullanici, jeton=None, ip=""):
+        with self._islem() as c:
+            if c.execute("DELETE FROM takvim WHERE kullanici=?", (kullanici["id"],)).rowcount:
+                self._olay(c, kullanici["id"], "takvim-kapat", self._oturum_cihaz(c, jeton), ip)
+
+    def takvim_ics(self, t):
+        """Abonelik adresi: modullerin yayinladigi etkinlikler tek takvimde.
+        Bilinmeyen adres None (404)."""
+        with self._islem() as c:
+            r = c.execute("SELECT kullanici FROM takvim WHERE jeton=?", (t,)).fetchone()
+            if r is None:
+                return None
+            c.execute("UPDATE takvim SET son=? WHERE kullanici=?", (self.saat(), r["kullanici"]))
+            return ics_birlestir([x["icerik"] for x in c.execute(
+                "SELECT icerik FROM yayin WHERE kullanici=? ORDER BY ad", (r["kullanici"],))])
+
+    def baglanti_ozet(self, kullanici):
+        """Hesap sayfasinin «Baglantilar» satiri icin sayilar."""
+        kid = kullanici["id"]
+        with self._islem() as c:
+            return {"anahtar": c.execute("SELECT COUNT(*) FROM anahtar WHERE kullanici=?", (kid,)).fetchone()[0],
+                    "takvim": c.execute("SELECT 1 FROM takvim WHERE kullanici=?", (kid,)).fetchone() is not None,
+                    "gelen_bekleyen": c.execute("SELECT COUNT(*) FROM gelen WHERE kullanici=? AND durum IN "
+                                                "('bekliyor', 'alindi')", (kid,)).fetchone()[0]}
+
+
+def ics_birlestir(icerikler):
+    """Yayinlarin VEVENT bloklari tek VCALENDAR'da. Satirlar ANLASILMAZ,
+    oldugu gibi tasinir (katlanmis satir da bozulmaz)."""
+    olaylar = []
+    for metin in icerikler:
+        ic = None
+        for s in str(metin or "").replace("\r\n", "\n").split("\n"):
+            if s == "BEGIN:VEVENT":
+                ic = [s]
+            elif ic is not None:
+                ic.append(s)
+                if s == "END:VEVENT":
+                    olaylar.append("\r\n".join(ic))
+                    ic = None
+    bas = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//LifeOS//Hesap//TR", "CALSCALE:GREGORIAN",
+           "METHOD:PUBLISH", "X-WR-CALNAME:LifeOS", "REFRESH-INTERVAL;VALUE=DURATION:PT1H",
+           "X-PUBLISHED-TTL:PT1H"]
+    return "\r\n".join(bas + olaylar + ["END:VCALENDAR"]) + "\r\n"
 
 
 # ================================================================ HTTP
@@ -866,6 +1515,27 @@ def _cevap(h, kod, veri):
     h.wfile.write(govde)
 
 
+def _ics_cevap(h, metin):
+    govde = metin.encode("utf-8")
+    h.send_response(200)
+    # Telefon uygulamasi «Dosyayi indir»i baska kokenden ister (_cevap gibi).
+    koken = h.headers.get("Origin")
+    if koken and UYGULAMA_KOKENLERI.match(koken):
+        h.send_header("Access-Control-Allow-Origin", koken)
+        h.send_header("Vary", "Origin")
+    h.send_header("Content-Type", "text/calendar; charset=utf-8")
+    h.send_header("Content-Disposition", 'inline; filename="lifeos.ics"')
+    h.send_header("Content-Length", str(len(govde)))
+    h.end_headers()
+    h.wfile.write(govde)
+
+
+def gunluk_maskele(satir):
+    """Sunucu gunlugune yazilacak istek satiri: takvim adresinin gizli
+    kismi atilir (soz 17; o adres bir anahtardir)."""
+    return re.sub(r"(/api/hesap/takvim/)[^\s?]+", r"\1…", str(satir))
+
+
 def _govde(h):
     try:
         n = int(h.headers.get("Content-Length") or 0)
@@ -913,6 +1583,25 @@ def isle(h):
         if yontem == "GET" and yol == "/api/hesap/durum":
             return _cevap(h, 200, {"surum": SURUM, "kurulum": d.kurulum_gerekli(), "kayit": d.kayit_acik(),
                                    "yerel": _yerel_mi(h), "ev_agi": ev_agi()})
+        if yontem == "GET":
+            m = TAKVIM_YOL_RE.match(yol)
+            if m:
+                # Soz 17: takvim uygulamasi baslik gonderemez; anahtar adresin kendisi.
+                ics = d.takvim_ics(m.group(1))
+                if ics is None:
+                    raise Hata(404, "Bu takvim adresi kapalı ya da yenilendi.")
+                return _ics_cevap(h, ics)
+        ip = (h.client_address or ("",))[0]
+        if yontem == "POST" and yol == "/api/hesap/gelen":
+            # Soz 16: Kisayollar, Home Assistant... Kimlik erisim anahtaridir
+            # (cerez ya da oturum degil): tarayicidaki bir site onu bilemez.
+            try:
+                v = _govde(h)
+            except Hata as e:
+                if e.kod != 400:
+                    raise
+                raise Hata(400, "Gövde JSON olmalı: {\"metin\": \"su 250\"}")
+            return _cevap(h, 200, d.gelen_ekle(_jeton(h), v.get("metin"), v.get("modul") or "spi", ip))
         if yontem == "POST":
             # Ozel baslik + JSON: baska bir site tarayicidan «basit istek»
             # gonderemez (on-kontrol ister, on-kontrol yalniz uygulamaya acik).
@@ -921,7 +1610,6 @@ def isle(h):
             v = _govde(h)
             cihaz = str(v.get("cihaz") or "")[:64]
             cihaz_ad = str(v.get("cihaz_ad") or "")[:80]
-            ip = (h.client_address or ("",))[0]
             if yol == "/api/hesap/kur":
                 return _cevap(h, 200, d.kur(v.get("ad"), v.get("parola"), _yerel_mi(h), cihaz, cihaz_ad, ip))
             if yol == "/api/hesap/kayit":
@@ -933,6 +1621,10 @@ def isle(h):
                 return _cevap(h, 200, d.kurtar(v.get("ad"), v.get("cevap"), v.get("yeni"), cihaz, cihaz_ad, ip))
             if yol == "/api/hesap/giris":
                 return _cevap(h, 200, d.giris(v.get("ad"), v.get("parola"), cihaz, cihaz_ad, ip))
+            if yol == "/api/hesap/giris-kod":
+                return _cevap(h, 200, d.giris_kod(v.get("bilet"), v.get("kod"), ip))
+            if yol == "/api/hesap/bagla":
+                return _cevap(h, 200, d.bagla(v.get("kod"), cihaz, cihaz_ad, ip))
             k = d.oturum(_jeton(h))
             if k is None:
                 raise Hata(401, "Oturum yok ya da süresi doldu; yeniden giriş yap.")
@@ -964,9 +1656,44 @@ def isle(h):
             if yol == "/api/hesap/otekilerden-cik":
                 return _cevap(h, 200, {"ok": True, "n": d.otekilerden_cik(k, _jeton(h), ip)})
             if yol == "/api/hesap/yonet":
-                return _cevap(h, 200, {"kullanici": d.yonet(k, v.get("id"), v.get("rol"), v.get("plan"))})
+                return _cevap(h, 200, {"kullanici": d.yonet(k, v.get("id"), v.get("rol"), v.get("plan"),
+                                                            v.get("iki_adim"))})
             if yol == "/api/hesap/ayar":
                 return _cevap(h, 200, {"kayit": d.kayit_ayarla(k, v.get("kayit"))})
+            j = _jeton(h)
+            if yol == "/api/hesap/iki-adim/baslat":
+                return _cevap(h, 200, d.iki_adim_baslat(k, v.get("parola")))
+            if yol == "/api/hesap/iki-adim/onayla":
+                return _cevap(h, 200, d.iki_adim_onayla(k, v.get("kod"), j, ip))
+            if yol == "/api/hesap/iki-adim/kapat":
+                d.iki_adim_kapat(k, v.get("parola"), v.get("kod"), j, ip)
+                return _cevap(h, 200, {"ok": True})
+            if yol == "/api/hesap/iki-adim/yedek":
+                return _cevap(h, 200, d.yedek_yenile(k, v.get("parola"), j, ip))
+            if yol == "/api/hesap/bag-kodu":
+                return _cevap(h, 200, d.bag_kodu_ac(k))
+            if yol == "/api/hesap/bag-durum":
+                return _cevap(h, 200, d.bag_durum(k, v.get("id")))
+            if yol == "/api/hesap/bag-kapat":
+                d.bag_kodu_kapat(k, v.get("id"))
+                return _cevap(h, 200, {"ok": True})
+            if yol == "/api/hesap/anahtar":
+                return _cevap(h, 200, d.anahtar_ac(k, v.get("parola"), v.get("ad"), v.get("yetki") or "kayit", j, ip))
+            if yol == "/api/hesap/anahtar-sil":
+                d.anahtar_sil(k, v.get("id"), j, ip)
+                return _cevap(h, 200, {"ok": True})
+            if yol == "/api/hesap/gelen-al":
+                return _cevap(h, 200, {"gelen": d.gelen_al(k, v.get("modul"), cihaz)})
+            if yol == "/api/hesap/gelen-sonuc":
+                return _cevap(h, 200, {"ok": d.gelen_sonuc(k, v.get("id"), v.get("durum"), v.get("sonuc"), cihaz)})
+            if yol == "/api/hesap/yayin":
+                d.yayinla(k, v.get("ad"), v.get("icerik"), v.get("adet"))
+                return _cevap(h, 200, {"ok": True})
+            if yol == "/api/hesap/takvim":
+                return _cevap(h, 200, {"takvim": d.takvim_ac(k, v.get("yenile") is True, j, ip)})
+            if yol == "/api/hesap/takvim-kapat":
+                d.takvim_kapat(k, j, ip)
+                return _cevap(h, 200, {"takvim": d.takvim(k)})
             raise Hata(404, "Böyle bir istek yok.")
         if yontem == "GET":
             k = d.oturum(_jeton(h))
@@ -975,7 +1702,11 @@ def isle(h):
             if yol == "/api/hesap/ben":
                 return _cevap(h, 200, {"kullanici": k, "ozet": d.ozet(k), "ayrinti": d.ayrinti(k),
                                        "soru_var": d.soru_var(k), "planlar": list(PLANLAR),
-                                       "renkler": list(RENKLER), "kayit": d.kayit_acik()})
+                                       "renkler": list(RENKLER), "kayit": d.kayit_acik(),
+                                       "iki_adim": d.iki_adim(k), "baglantilar": d.baglanti_ozet(k)})
+            if yol == "/api/hesap/baglantilar":
+                return _cevap(h, 200, {"anahtarlar": d.anahtarlar(k), "gelen": d.gelen_liste(k),
+                                       "takvim": d.takvim(k), "iki_adim": d.iki_adim(k)})
             if yol == "/api/hesap/etkinlik":
                 return _cevap(h, 200, {"olaylar": d.etkinlik(k)})
             if yol == "/api/hesap/disa":
@@ -989,3 +1720,28 @@ def isle(h):
         return _cevap(h, e.kod, {"hata": e.mesaj})
     except (sqlite3.Error, OSError) as e:
         return _cevap(h, 503, {"hata": "Hesap deposu açılamadı: %s" % e})
+
+
+def main(argv):
+    """Bilgisayarin kendisinden kurtarma (soz 14): telefon da yedek kodlar da
+    kaybolduysa iki adimli dogrulama buradan kapatilir. Hesap deposu bu
+    bilgisayarda oldugu icin bu kapi zaten bilgisayarin sahibinindir."""
+    if len(argv) == 3 and argv[1] == "--iki-adim-kapat":
+        try:
+            var = Depo().iki_adim_sifirla(argv[2])
+        except Hata as e:
+            print(e.mesaj)
+            return 1
+        print("İki adımlı doğrulama kapatıldı: %s" % argv[2] if var
+              else "Bu hesapta iki adımlı doğrulama zaten kapalı: %s" % argv[2])
+        return 0
+    print("Kullanım: python sistem/hesap.py --iki-adim-kapat <kullanıcı adı>")
+    return 2
+
+
+if __name__ == "__main__":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+    sys.exit(main(sys.argv))

@@ -1533,7 +1533,14 @@ R.App = (function(){
          ekran kullanıcı yazmıyorken çizilir (yazılan silinmez). */
       if(window.LIFEOS && window.LIFEOS.HESAP){
         window.LIFEOS.HESAP.kur({ modul:'ays', depo:R.Store, ornek:ornekAcik,
-          yukle:() => M.loadAll(), yenile:() => render() });
+          yukle:() => M.loadAll(), yenile:() => render(),
+          /* Takvim aboneliği (hesap.js söz 20): .ics'i AYS kendi kodu üretir
+             (core/takvim.js disa); sunucu yalnız birleştirip sunar. */
+          yayin:() => {
+            if(!R.Takvim) return {};
+            const d = R.Takvim.disa();
+            return { takvim:{ metin:d.metin, adet:d.adet } };
+          } });
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){

@@ -665,6 +665,41 @@ SP.Proposals = (function(){
     }
   }
 
+  /* DIŞARIDAN GELEN SATIR (hesap gelen kutusu; sistem/hesap.py söz 16,
+     brand/ortak/hesap.js söz 20). iPhone Kısayollar, Apple Sağlık
+     otomasyonu ya da Home Assistant «su 250» gönderir; sunucu satırı
+     ANLAMAZ, burada kural motoru okur (fromText) ve her parça Onaylar'a
+     ÖNERİ olur. Ölçüm olduğu için hiçbir ayarda sormadan yazılmaz
+     (otomatikMi); kullanıcı «Kaydet»e basınca approve yazar, geri alınır.
+
+     GÜN, satırın GÖNDERİLDİĞİ andır: 23:50'de gönderilip sabah işlenen su
+     dünün suyudur. Aynı satır iki kez öneri olmaz (anahtar): sunucu sonucu
+     alamayıp satırı yeniden verirse «zaten Onaylar'da» sayılır.
+     Dönüş hesap.js'e: { durum:'onayda'|'anlasilmadi', sonuc }. */
+  async function disaridan(oge){
+    const metin = String((oge && oge.metin) || '').trim();
+    if(!metin) return { durum:'anlasilmadi', sonuc:'Boş satır' };
+    const z = Number(oge.zaman), bugun = U.todayISO();
+    const gonderilen = isFinite(z) && z > 0 ? U.iso(new Date(z)) : bugun;
+    const v = fromText(metin, { date:gonderilen > bugun ? bugun : gonderilen });
+    let n = 0;
+    const neden = [];
+    for(let i = 0; i < v.oneriler.length; i++){
+      const x = v.oneriler[i], c = check(x);
+      if(!c.ok){ neden.push(c.why); continue; }
+      const anahtar = 'gelen:' + oge.id + ':' + i;
+      if(anahtarlar().indexOf(anahtar) >= 0){ n++; continue; }
+      const row = await propose({ action:x.action, params:x.params, source:'istek', kaynak:'rules', metin:x.metin,
+        reason:'Kısayollar’dan' + (oge.kaynak ? ' (' + oge.kaynak + ')' : '') + ': «' + metin + '»',
+        gelenKaynak:String(oge.kaynak || '').slice(0, 40),
+        anahtar, iz:[{ tur:'gelen', id:String(oge.id) }] });
+      if(row) n++;
+    }
+    if(n) return { durum:'onayda', sonuc:n === 1 ? 'SPİ › Onaylar’da bekliyor' : n + ' kayıt SPİ › Onaylar’da' };
+    const e = (v.engellenen || [])[0];
+    return { durum:'anlasilmadi', sonuc:neden[0] || (e && e.soru) || 'SPİ bu satırı anlamadı' };
+  }
+
   async function clearResolved(){
     SP.S.proposals = liste().filter(p => p.status === 'pending');
     await save();
@@ -685,7 +720,7 @@ SP.Proposals = (function(){
     KATALOG, eylem, katalogIdleri, catalogPrompt,
     check, preview,
     fromText, fromModel, yanCumleler, quickToAction,
-    propose, approve, reject, undo, clearResolved,
+    propose, approve, reject, undo, clearResolved, disaridan,
     talep, otomatikMi, ayar, turAyari, SEVIYELER, MODLAR,
     pending, all, load, save, MAX,
   };

@@ -807,4 +807,47 @@
       });
     });
   });
+
+  /* DIŞARIDAN GELEN SATIR (hesap gelen kutusu; sistem/hesap.py söz 16):
+     iPhone Kısayollar ya da Apple Sağlık otomasyonu «su 250» gönderir. */
+  describe('Öneri — dışarıdan gelen satır (Kısayollar)', () => {
+    it('satır Onaylar’a öneri olur, ONAYSIZ yazılmaz; gün gönderildiği gün; aynı satır iki kez öneri olmaz', async () => {
+      resetState();
+      await withTodayAsync('2026-03-02', async () => {
+        const dun = new Date(2026, 2, 1, 23, 50).getTime();
+        const r = await SP.Proposals.disaridan({ id:41, metin:'su 250', kaynak:'iPhone Kısayollar', zaman:dun });
+        expect(r.durum).toBe('onayda');
+        const p = SP.Proposals.pending();
+        expect(p).toHaveLength(1);
+        expect(p[0].params.date).toBe('2026-03-01');                    // 23:50'de gönderildi: dünün suyu
+        expect(p[0].params.value).toBe(250);
+        expect(p[0].reason).toContain('iPhone Kısayollar');
+        expect(p[0].otomatik).toBe(false);
+        const v = SP.Model.vitalsOf('2026-03-01');
+        expect(v == null || v.water == null).toBeTruthy();               // onaysız yazılmadı
+        const r2 = await SP.Proposals.disaridan({ id:41, metin:'su 250', kaynak:'iPhone Kısayollar', zaman:dun });
+        expect(r2.durum).toBe('onayda');
+        expect(SP.Proposals.pending()).toHaveLength(1);                  // yeniden verilen satır ikinci öneri olmaz
+        /* Onaylar kartı nereden geldiğini ve gününü söyler («yalnız bugün» değil). */
+        const on = String(await SP.Screens.onaylar.render());
+        expect(on.indexOf('Kısayollar’dan (iPhone Kısayollar)') >= 0).toBe(true);
+        expect(on.indexOf('yalnız dün') >= 0).toBe(true);
+        expect((await SP.Proposals.approve(p[0].id)).ok).toBeTruthy();
+        expect(SP.Model.vitalsOf('2026-03-01').water).toBe(250);
+      });
+    });
+
+    it('anlaşılmayan ya da ölçüm olmayan satır öneri olmaz, nedeni söylenir; ileri tarih bugüne iner', async () => {
+      resetState();
+      await withTodayAsync('2026-03-02', async () => {
+        expect((await SP.Proposals.disaridan({ id:42, metin:'merhaba dünya', zaman:Date.now() })).durum).toBe('anlasilmadi');
+        const r = await SP.Proposals.disaridan({ id:43, metin:'7 saat uyumadım', zaman:Date.now() });
+        expect(r.durum).toBe('anlasilmadi');
+        expect(r.sonuc.length > 0).toBeTruthy();
+        expect(SP.Proposals.pending()).toHaveLength(0);
+        await SP.Proposals.disaridan({ id:44, metin:'kilo 72,4', zaman:new Date(2026, 2, 9, 9).getTime() });
+        expect(SP.Proposals.pending()[0].params.date).toBe('2026-03-02');
+      });
+    });
+  });
 })();

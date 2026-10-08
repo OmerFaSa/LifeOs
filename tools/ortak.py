@@ -265,6 +265,10 @@ DOSYALAR = {
     "hesap.js":       "js/core",
     "hesap.css":      "css",
     "hesap.test.js":  "tests",
+    # QR — sifir bagimlilikli QR kodu (2026-10-08): hesap sayfasinin iki
+    # adim kurulumu ve kodla cihaz baglama. hesap.js'ten ONCE yuklenir.
+    "qr.js":          "js/core",
+    "qr.test.js":     "tests",
     # KING — her yerden sade sohbet (2026-10-05): ayni katalog, ayni isik,
     # ayni baloncuk uc arayuzde.
     "king.js":        "js/core",

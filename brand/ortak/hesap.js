@@ -83,7 +83,30 @@
       taşır, kartta «ne zamanın» özeti olduğu yazar; yedi günden eskisi
       gösterilmez. Eksik sayı yazılmaz (sıfır değildir). Örnek profil
       yazmaz (modül vermez). Çerez bu cihazdan yalnız kullanıcının kendi
-      LifeOS sunucusuna gider. */
+      LifeOS sunucusuna gider.
+
+   BAĞLANTILAR (depo sahibi, 2026-10-08: «hesap özelliğini çok daha
+   profesyonel yap; bazı uygulamaları ücretsiz bağlayabilelim»; sunucu
+   sözleri 14–17). Hiçbiri şirket hesabı, ücret ya da internet istemez.
+  17. İKİ ADIMLI DOĞRULAMA. Şifre doğru ve iki adım açıksa kapı «Doğrulama
+      kodu» adımına geçer; bilet yalnız bellekte durur (çereze, depoya
+      yazılmaz). Altı hane yazılınca kendiliğinden gönderilir; «Yedek kod
+      kullan» tek kullanımlık kodu alır. Kurulum hesap sayfasında: QR
+      (qr.js), elle yazılacak anahtar, sonra kod. Yedek kodlar BİR KEZ
+      gösterilir; sayfa kapanınca bellekten de silinir.
+  18. KODLA BAĞLAN. Girişli cihaz Cihazlar › Yeni cihaz bağla'da altı haneli
+      kod ve (ev ağı açıksa) tabletin kamerasıyla okunan QR gösterir; yeni
+      cihaz kapıda «Kodla bağlan»la girer. Adres satırındaki ?bagla=…
+      okunur ve hemen silinir: kod adres çubuğunda ve geçmişte kalmaz.
+  19. ERİŞİM ANAHTARI BİR KEZ GÖRÜNÜR. Kısayollar ve otomasyon sayfası
+      anahtarı yalnız açıldığı an gösterir (sunucu yalnız özetini tutar);
+      tarifler o anahtarla doldurulur, sayfadan çıkınca bellekten gider.
+  20. MODÜL KANCALARI SESSİZDİR. `gelen` (SPİ: Kısayollar'dan gelen satır
+      modülün kendi koduyla Onaylar'a öneri olur) ve `yayin` (AYS: takvim
+      aboneliği) başarılı bir eşitleme turundan sonra arkada koşar; hata
+      modülü bekletmez, bir sonraki turda yeniden denenir. Yalnız bu
+      cihazın alanı bu hesaba bağlıyken (söz 5) ve örnek profilde değilken
+      koşar. Yayın, içeriği değişmedikçe yeniden gönderilmez. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -105,6 +128,9 @@ window.LIFEOS.HESAP = (function(){
   const PARTI_KAYIT = 400;
   const PARTI_BAYT = 1500000;
   const TELEFON_KAPI = 5183;         // ev ağı https kapısı (sistem/telefon.py)
+  const PC_KOK = 'http://127.0.0.1:4180';   // bilgisayarın kendisindeki seçim sayfası (sunucu.py)
+  const EK_ARALIK = 30000;           // gelen kutusu ve yayın en çok yarım dakikada bir (söz 20)
+  const BAG_YOKLA = 2500;            // kodla bağlamada «bağlandı mı?» yoklaması
   const MODUL_AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
   /* Profil renkleri: kimlikler sunucudaki RENKLER ile aynı. Beyaz harf
      her birinde 4,5:1'in üstünde (küçük monogramda da okunur). */
@@ -134,11 +160,11 @@ window.LIFEOS.HESAP = (function(){
        sarar; seçim sayfasında da yüklüdür). */
     azalt:() => { try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return true; } },
     /* Dosya ver: uygulamada paylaşım sayfası (indirme yok), tarayıcıda indirme. */
-    indir:(ad, metin) => {
-      const blob = new Blob([metin], { type:'application/json' });
+    indir:(ad, metin, tur) => {
+      const blob = new Blob([metin], { type:tur || 'application/json' });
       try{
         if(window.LIFEOS_YEREL && navigator.canShare && typeof File === 'function'){
-          const f = new File([blob], ad, { type:'application/json' });
+          const f = new File([blob], ad, { type:tur || 'application/json' });
           if(navigator.canShare({ files:[f] })) return navigator.share({ files:[f] });
         }
       }catch(e){ /* paylaşılamadı: indirmeye düş */ }
@@ -152,6 +178,30 @@ window.LIFEOS.HESAP = (function(){
       if(typeof crypto !== 'undefined' && crypto.getRandomValues) crypto.getRandomValues(b);
       else for(let i = 0; i < n; i++) b[i] = Math.floor(Math.random() * 256);
       return b;
+    },
+    /* Panoya: önce Clipboard API (localhost ve https güvenli bağlamdır),
+       yoksa gizli alan + execCommand. Doner: kopyalandı mı. */
+    kopyala:async metin => {
+      try{
+        if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(metin); return true; }
+      }catch(e){ /* izin yok: eski yola düş */ }
+      try{
+        const t = document.createElement('textarea');
+        t.value = metin; t.setAttribute('readonly', ''); t.style.position = 'fixed'; t.style.opacity = '0';
+        document.body.appendChild(t); t.select();
+        const ok = document.execCommand('copy');
+        t.remove();
+        return !!ok;
+      }catch(e){ return false; }
+    },
+    /* ?bagla=… (söz 18): okunur ve adres çubuğundan hemen silinir. */
+    sorguSil:ad => {
+      try{
+        const u = new URL(window.location.href);
+        if(!u.searchParams.has(ad)) return;
+        u.searchParams.delete(ad);
+        window.history.replaceState(window.history.state, '', u.pathname + (u.search || '') + u.hash);
+      }catch(e){ /* adres değiştirilemedi */ }
     },
   };
 
@@ -442,6 +492,7 @@ window.LIFEOS.HESAP = (function(){
         ortam.zamanla(() => { onayBitis = 0; dugmeTazele(); }, ONAY_MS);
       }
       durumYaz('tamam', '');
+      ekTur(o, base);                                  // söz 20: arkada, beklenmez
     }catch(e){
       if(e.kod === 401){
         cerezSil(CEREZ);
@@ -455,6 +506,60 @@ window.LIFEOS.HESAP = (function(){
       if(uygulanan) yenileIste();
     }
     return hal;
+  }
+
+  /* ------------------------------------------------------- modül kancaları (söz 20)
+
+     `gelen(oge)` → { durum:'onayda'|'anlasilmadi', sonuc } ya da null
+     (null: satır bırakılır, sunucu sonra yeniden verir). `yayin()` →
+     { takvim:{ metin, adet } }. İkisi de başarılı bir turdan sonra, en çok
+     EK_ARALIK'ta bir, sırayla ve sessizce. */
+  let ekAktif = false, sonGelen = 0, sonYayin = 0, ekSon = null;
+  function ekTur(o, base){
+    if(ekAktif || !ayar || !o) return null;
+    const simdi = ortam.simdi();
+    const gelenVar = typeof ayar.gelen === 'function' && simdi - sonGelen >= EK_ARALIK;
+    const yayinVar = typeof ayar.yayin === 'function' && simdi - sonYayin >= EK_ARALIK;
+    if(!gelenVar && !yayinVar) return null;
+    ekAktif = true;
+    return (ekSon = (async () => {
+      try{
+        if(gelenVar){ sonGelen = simdi; await gelenIsle(o, base); }
+        if(yayinVar){ sonYayin = simdi; await yayinIsle(o, base); }
+      }catch(e){ /* sessiz: bir sonraki turda yeniden */ }
+      finally{ ekAktif = false; }
+    })());
+  }
+  async function gelenIsle(o, base){
+    const v = await istek(base, '/api/hesap/gelen-al', { modul:ayar.modul, cihaz:cihazKimligi(), cihaz_ad:cihazAdi() },
+      o.j, DURUM_ZAMAN_ASIMI);
+    for(const g of (Array.isArray(v.gelen) ? v.gelen : [])){
+      let r = null;
+      try{ r = await ayar.gelen(g); }catch(e){ console.error('Hesap: gelen satır', e); r = null; }
+      if(!r || (r.durum !== 'onayda' && r.durum !== 'anlasilmadi')) continue;
+      await istek(base, '/api/hesap/gelen-sonuc', { id:g.id, durum:r.durum, sonuc:String(r.sonuc || '').slice(0, 160),
+        cihaz:cihazKimligi() }, o.j, DURUM_ZAMAN_ASIMI);
+    }
+  }
+  /* İçerik imzası: takvim damgası (DTSTAMP, her üretimde değişir) sayılmaz. */
+  function imza(metin){
+    const s = String(metin).replace(/^DTSTAMP:.*$/gm, '');
+    let h = 0x811c9dc5;
+    for(let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    return s.length + ':' + h.toString(16);
+  }
+  async function yayinIsle(o, base){
+    const y = ayar.yayin() || {};
+    for(const ad of Object.keys(y)){
+      const x = y[ad];
+      if(!x || typeof x.metin !== 'string') continue;
+      const tam = ayar.modul + '/' + ad, k = anahtar('yayin', tam), kim = o.h || o.a;
+      const im = imza(x.metin), eski = ortam.depo.oku(k);
+      if(eski && eski.imza === im && eski.h === kim) continue;
+      await istek(base, '/api/hesap/yayin', { ad:tam, icerik:x.metin, adet:typeof x.adet === 'number' ? x.adet : null },
+        o.j, ZAMAN_ASIMI);
+      ortam.depo.yaz(k, { imza:im, h:kim });
+    }
   }
 
   /* Uzaktan gelen kayıtlar uygulamanın belleğine (model) ancak yeniden
@@ -632,9 +737,30 @@ window.LIFEOS.HESAP = (function(){
     return b;
   }
 
+  /* İki adım açıksa (söz 17) oturum açılmaz: { iki_adim:true, bilet } döner,
+     kapı kod adımına geçer. Bilet yalnız bellekte (kapı) durur. */
   async function girisYap(ad, parola, adres){
     const base = hedefAdres(adres);
     const v = await istek(base, '/api/hesap/giris', { ad, parola, cihaz:cihazKimligi(), cihaz_ad:cihazAdi() }, null, 30000);
+    if(v && v.iki_adim) return { iki_adim:true, bilet:v.bilet, adres:base };
+    oturumYaz(v, base);
+    sunucu = sunucu || { kurulum:false };
+    esitle();
+    return v.kullanici;
+  }
+  async function girisKod(bilet, kod, adres){
+    const base = adres || hedefAdres(null);
+    const v = await istek(base, '/api/hesap/giris-kod', { bilet, kod }, null, 30000);
+    oturumYaz(v, base);
+    sunucu = sunucu || { kurulum:false };
+    esitle();
+    return v.kullanici;
+  }
+  /* Kodla bağlan (söz 18): girişli cihazın açtığı altı haneli kod. */
+  async function baglaKod(kod, adres){
+    const base = hedefAdres(adres);
+    const v = await istek(base, '/api/hesap/bagla', { kod:String(kod || '').replace(/\D/g, ''),
+      cihaz:cihazKimligi(), cihaz_ad:cihazAdi() }, null, 30000);
     oturumYaz(v, base);
     sunucu = sunucu || { kurulum:false };
     esitle();
@@ -664,6 +790,7 @@ window.LIFEOS.HESAP = (function(){
     const base = hedefAdres(adres);
     const v = await istek(base, '/api/hesap/kurtar', { ad, cevap, yeni,
       cihaz:cihazKimligi(), cihaz_ad:cihazAdi() }, null, 30000);
+    if(v && v.iki_adim) return { iki_adim:true, bilet:v.bilet, adres:base };   // yeni şifre kodla yazılır
     oturumYaz(v, base);
     esitle();
     return v.kullanici;
@@ -849,6 +976,16 @@ window.LIFEOS.HESAP = (function(){
     uyari:'<path d="M12 4.5 20.5 19H3.5z"/><path d="M12 10v4M12 16.6v.2"/>',
     giris:'<path d="M10 4.5h7.5a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H10"/><path d="M3.5 12H14M10.5 8.5 14 12l-3.5 3.5"/>',
     cikis:'<path d="M14 4.5H6.5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2H14"/><path d="M10.5 12H20M16.5 8.5 20 12l-3.5 3.5"/>',
+    kalkan:'<path d="M12 3.5 5 6.2v5.3c0 4.3 2.9 7.6 7 9 4.1-1.4 7-4.7 7-9V6.2z"/><path d="M9 12.2l2.2 2.2 3.8-4.2"/>',
+    takvim:'<rect x="4" y="5.5" width="16" height="14.5" rx="2.4"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>',
+    kisayol:'<rect x="4" y="4" width="16" height="16" rx="4.5"/><path d="M13 7.5 9.5 12.5H14L10.5 17"/>',
+    gelen:'<path d="M4 13.5 6.4 6.6a1.6 1.6 0 0 1 1.5-1.1h8.2a1.6 1.6 0 0 1 1.5 1.1L20 13.5v4.4a1.6 1.6 0 0 1-1.6 1.6H5.6A1.6 1.6 0 0 1 4 17.9z"/><path d="M4 13.5h4.5l1.2 2h4.6l1.2-2H20"/>',
+    baglanti:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+    kalp:'<path d="M12 19.5s-7.5-4.4-7.5-9.6A4.1 4.1 0 0 1 12 7.6a4.1 4.1 0 0 1 7.5 2.3c0 5.2-7.5 9.6-7.5 9.6z"/>',
+    ev:'<path d="M4.5 11 12 4.5l7.5 6.5"/><path d="M6.5 9.5v10h11v-10"/><path d="M10 19.5v-5h4v5"/>',
+    kopyala:'<rect x="8.5" y="8.5" width="11" height="11" rx="2.2"/><path d="M15.5 8.5V6.2a1.7 1.7 0 0 0-1.7-1.7H6.2a1.7 1.7 0 0 0-1.7 1.7v7.6a1.7 1.7 0 0 0 1.7 1.7h2.3"/>',
+    yenile:'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4.2h-4.2"/>',
+    qr:'<rect x="4" y="4" width="6" height="6" rx="1.2"/><rect x="14" y="4" width="6" height="6" rx="1.2"/><rect x="4" y="14" width="6" height="6" rx="1.2"/><path d="M14 14h2.5v2.5H14zM17.5 17.5H20V20h-2.5zM14 19.5h1M19.5 14v1"/>',
   };
   function ikon(ad, sinif){
     return '<svg class="' + (sinif || 'hesap-ikon') + '" viewBox="0 0 24 24" aria-hidden="true">' + (IKON[ad] || '') + '</svg>';
@@ -906,6 +1043,11 @@ window.LIFEOS.HESAP = (function(){
     if(fark === 1) return 'dün ' + saatMetni(ms);
     return d.getDate() + ' ' + AYLAR[d.getMonth()] + (d.getFullYear() !== b.getFullYear() ? ' ' + d.getFullYear() : '');
   }
+  /* «4:32 kaldı» — bağlama kodunun süresi. */
+  function kalanMetni(bitis){
+    const s = Math.max(0, Math.ceil((Number(bitis) - ortam.simdi()) / 1000));
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + ' kaldı';
+  }
   function cihazTuru(ad){
     const s = String(ad || '');
     return /iPhone|telefon/i.test(s) ? 'telefon' : /iPad|tablet/i.test(s) ? 'tablet' : 'bilgisayar';
@@ -956,8 +1098,10 @@ window.LIFEOS.HESAP = (function(){
      dosyadan açılmış sayfa) hiç çıkmaz; telefon uygulamasında
      bilgisayarın adresini de sorar. Hata olunca kart yeniden çizilmez:
      yazılan kaybolmaz, yalnız mesaj. */
-  const KAPI_SIRA = { karsila:0, giris:1, kayit:1, unuttum:2 };
-  let kapi = { gorunum:'karsila', soru:null, ad:'', adres:null, secili:null, ilk:true };
+  const KAPI_SIRA = { karsila:0, giris:1, kayit:1, bagla:1, unuttum:2, kod:3 };
+  const KAPI_BOS = () => ({ gorunum:'karsila', soru:null, ad:'', adres:null, secili:null, ilk:true,
+    bilet:null, yedekKip:false, kod:'' });
+  let kapi = KAPI_BOS();
 
   function kapiGerekli(){
     if(oturum() || betaMi() || ornekMi()) return false;
@@ -1045,7 +1189,18 @@ window.LIFEOS.HESAP = (function(){
       + (not ? '<p class="hesap__not hesap-kapi__not">' + kac(not) + '</p>' : '')
       + hesaplar
       + (dugmeler.length ? '<div class="hesap-kapi__menu">' + dugmeler.join('') + '</div>' : '')
+      + (kurulum ? '' : '<button type="button" class="hesap-kapi__kodla" data-hesap="gorunum" data-gorunum="bagla">'
+        + ikon('qr', 'hesap-ikon') + '<span><b>Kodla bağlan</b> · girişli cihazından, şifre yazmadan</span></button>')
       + '<button type="button" class="hesap-kapi__beta" data-hesap="beta"><b>Beta girişi</b> · hesapsız, yalnız bu cihazda</button>';
+  }
+
+  /* Altı haneli kod alanı (doğrulayıcı ya da bağlama kodu): tek alan,
+     büyük rakam; telefon klavyesi rakamdır, SMS/anahtarlık önerisi gelir.
+     Altı hane yazılınca form kendiliğinden gönderilir (bagla(): data-kod). */
+  function kodAlani(id, etiket, deger){
+    return '<label class="hesap__alan hesap__alan--kod" for="' + id + '"><span>' + kac(etiket) + '</span>'
+      + '<input id="' + id + '" class="hesap__kod" type="text" inputmode="numeric" autocomplete="one-time-code"'
+      + ' maxlength="7" required data-kod="6" placeholder="000 000" spellcheck="false" value="' + kac(deger || '') + '"/></label>';
   }
 
   function kapiBaslik(baslik, alt, geri){
@@ -1061,6 +1216,32 @@ window.LIFEOS.HESAP = (function(){
     if(g === 'karsila' || !KAPI_SIRA[g]) return karsilaGovde();
     const mesaj = '<p class="hesap__mesaj" id="hesap-mesaj" role="alert" hidden></p>';
     const ana = metin => '<button type="submit" class="hesap__ana hesap__tam">' + metin + '</button>';
+    /* İKİNCİ ADIM (söz 17): şifre doğru, kod bekleniyor. */
+    if(g === 'kod'){
+      const s = kapi.secili, yedek = !!kapi.yedekKip;
+      return '<button type="button" class="hesap-kapi__geri" data-hesap="gorunum" data-gorunum="giris" aria-label="Girişe dön">'
+        + ikon('geri') + '</button>'
+        + '<div class="hesap-kapi__marka">'
+        + (s ? avatar(s.g || s.a, s.k, 56) : '<span class="hesap-kapi__rozet">' + ikon('kalkan') + '</span>')
+        + '<h1 class="hesap-kapi__baslik" id="hesap-kapi-baslik">' + (yedek ? 'Yedek kod' : 'Doğrulama kodu') + '</h1>'
+        + '<p class="hesap-kapi__alt">' + (yedek ? 'Kaydettiğin yedek kodlardan birini yaz; her biri bir kez geçer.'
+          : 'Doğrulayıcı uygulamandaki 6 haneli kodu yaz.') + '</p></div>'
+        + '<form class="hesap__form" data-hesap-form="kod" data-ayar-disi>'
+        + (yedek ? alanHtml('hesap-kod', 'Yedek kod', 'text', 'class="hesap__kod hesap__kod--yedek" autocomplete="off" '
+            + 'autocapitalize="characters" autocorrect="off" spellcheck="false" required minlength="8" maxlength="9" placeholder="XXXX-XXXX"')
+          : kodAlani('hesap-kod', 'Kod'))
+        + mesaj + ana('Doğrula') + '</form>'
+        + '<div class="hesap-kapi__baglar"><button type="button" class="hesap-kapi__bag" data-hesap="yedek-kip">'
+        + (yedek ? 'Uygulamadaki kodu kullan' : 'Telefonun yanında değil mi? Yedek kod kullan') + '</button></div>';
+    }
+    /* KODLA BAĞLAN (söz 18). Telefon uygulamasında bilgisayarın adresi de. */
+    if(g === 'bagla'){
+      return kapiBaslik('Kodla bağlan', 'Girişli cihazında Hesap › Cihazlar › Yeni cihaz bağla’ya dokun.')
+        + '<form class="hesap__form" data-hesap-form="bagla" data-ayar-disi>' + adresAlani()
+        + kodAlani('hesap-kod', 'Bağlama kodu', kapi.kod)
+        + mesaj + ana('Bağlan') + '</form>'
+        + '<p class="hesap__not hesap-kapi__not">Kod 5 dakika geçerli ve tek kullanımlık.</p>';
+    }
     if(g === 'kayit'){
       return kapiBaslik('Hesap oluştur', kurulumMu() ? kapiNotu() : '')
         + '<form class="hesap__form" data-hesap-form="kayit" data-ayar-disi>' + adresAlani()
@@ -1234,14 +1415,16 @@ window.LIFEOS.HESAP = (function(){
   }
   function kapiGit(g, ek){
     const once = kapi.gorunum;
-    kapi = Object.assign({ gorunum:g, soru:null, ad:'', adres:null, secili:null, ilk:false }, ek || {});
+    /* Koddan girişe dönerken seçili hesap kalır (ad yeniden sorulmaz). */
+    const kalan = once === 'kod' && g === 'giris' ? { secili:kapi.secili } : {};
+    kapi = Object.assign(KAPI_BOS(), { gorunum:g, ilk:false }, kalan, ek || {});
     kapiTazele((KAPI_SIRA[g] || 0) < (KAPI_SIRA[once] || 0) ? 'geri' : 'ileri');
   }
-  function kapiAc(g){
+  function kapiAc(g, ek){
     if(typeof document === 'undefined' || !document.body) return;
     if(L.KABUK && L.KABUK.katmanAcik(PANEL)) L.KABUK.katmanKapat();
     merkezKapat();
-    kapi = { gorunum:g || 'karsila', soru:null, ad:'', adres:null, secili:null, ilk:true };
+    kapi = Object.assign(KAPI_BOS(), { gorunum:g || 'karsila' }, ek || {});
     if(!kapiAcikMi()){
       const el = document.createElement('div');
       el.className = 'hesap-kapi';
@@ -1344,6 +1527,20 @@ window.LIFEOS.HESAP = (function(){
   }
   async function kullaniciEkle(ad, parola){ return api('/api/hesap/kullanici', { ad, parola }); }
 
+  /* BAĞLANTILAR (sözler 17–19; sunucu sözleri 14–17). */
+  async function baglantilar(){ return api('/api/hesap/baglantilar'); }
+  async function ikiAdimBaslat(parola){ return api('/api/hesap/iki-adim/baslat', { parola }); }
+  async function ikiAdimOnayla(kod){ return (await api('/api/hesap/iki-adim/onayla', { kod })).yedek || []; }
+  async function ikiAdimKapat(parola, kod){ return api('/api/hesap/iki-adim/kapat', { parola, kod }); }
+  async function yedekYenile(parola){ return (await api('/api/hesap/iki-adim/yedek', { parola })).yedek || []; }
+  async function bagKoduAc(){ return api('/api/hesap/bag-kodu', {}); }
+  async function bagDurum(id){ return api('/api/hesap/bag-durum', { id }); }
+  async function bagKapat(id){ return api('/api/hesap/bag-kapat', { id }); }
+  async function anahtarAc(parola, ad){ return api('/api/hesap/anahtar', { parola, ad, yetki:'kayit' }); }
+  async function anahtarSil(id){ return api('/api/hesap/anahtar-sil', { id }); }
+  async function takvimAc(yenile){ return (await api('/api/hesap/takvim', { yenile:!!yenile })).takvim; }
+  async function takvimKapat(){ return (await api('/api/hesap/takvim-kapat', {})).takvim; }
+
   /* Oturum sunucuda kapanmış (başka cihazdan çıkarıldı, süresi doldu). */
   function oturumKapandi(){
     cerezSil(CEREZ);
@@ -1361,17 +1558,119 @@ window.LIFEOS.HESAP = (function(){
      profil gösterilir ve bu söylenir. Sayfa [data-hesap-panel]'dir:
      içindeki alanlar modülün «yazıyor mu?» denetimine sayılmaz. */
   const SAYFA_AD = { kok:'Hesap', profil:'Profil', plan:'Plan', cihazlar:'Cihazlar', guvenlik:'Güvenlik',
-    esitleme:'Eşitleme', yonetim:'Yönetim', kisi:'Kullanıcı', etkinlik:'Etkinlik', verin:'Verin' };
+    esitleme:'Eşitleme', yonetim:'Yönetim', kisi:'Kullanıcı', etkinlik:'Etkinlik', verin:'Verin',
+    baglantilar:'Bağlantılar', ikiadim:'İki adımlı doğrulama', takvim:'Takvim aboneliği',
+    anahtarlar:'Kısayollar ve otomasyon', gelen:'Gelen kutusu', bagla:'Yeni cihaz bağla' };
 
-  /* Etkinlik defterindeki olay türleri (sunucu sözü 11). */
+  /* Etkinlik defterindeki olay türleri (sunucu sözleri 11, 14–17). */
   const OLAY = {
     giris:['giris', 'Giriş'], yanlis:['uyari', 'Yanlış şifre'], kayit:['ekle', 'Hesap açıldı'],
     kurtar:['soru', 'Şifre soruyla yenilendi'], 'kurtar-yanlis':['uyari', 'Kurtarma cevabı yanlış'],
     parola:['anahtar', 'Şifre değişti'], soru:['soru', 'Kurtarma sorusu değişti'], cikis:['cikis', 'Çıkış'],
     cihaz:['cihazlar', 'Cihazdan çıkıldı'], otekiler:['cihazlar', 'Öteki cihazlardan çıkıldı'],
     yonetim:['yonetim', 'Admin değişikliği'],
+    'iki-adim':['kalkan', 'İki adımlı doğrulama açıldı'], 'iki-adim-kapat':['kalkan', 'İki adımlı doğrulama kapandı'],
+    yedek:['anahtar', 'Yedek kodlar yenilendi'], 'kod-yanlis':['uyari', 'Yanlış doğrulama kodu'],
+    bag:['qr', 'Kodla cihaz bağlandı'], anahtar:['kisayol', 'Erişim anahtarı açıldı'],
+    'anahtar-sil':['kisayol', 'Erişim anahtarı silindi'], takvim:['takvim', 'Takvim aboneliği'],
+    'takvim-kapat':['takvim', 'Takvim aboneliği kapandı'],
   };
-  const YANLIS = { yanlis:1, 'kurtar-yanlis':1 };
+  const YANLIS = { yanlis:1, 'kurtar-yanlis':1, 'kod-yanlis':1 };
+  const AY_MS = 30 * 86400000;
+
+  /* GÜVENLİK KONTROLÜ: hesabın dört kilidi, her biri bir satır. Bilinmeyen
+     (sunucu cevabı gelmedi) «tamam» da «dikkat» de sayılmaz (AGENTS §1.7). */
+  function kontrol(m){
+    const ben = m.ben || {}, iki = ben.iki_adim, satirlar = [];
+    if(iki){
+      const az = iki.acik && iki.yedek_kalan <= 2;
+      satirlar.push({ ikon:'kalkan', ad:'İki adımlı doğrulama', sayfa:'ikiadim', dikkat:!iki.acik || az,
+        detay:!iki.acik ? 'Kapalı' : az ? iki.yedek_kalan + ' yedek kod kaldı' : 'Açık' });
+    }
+    if(typeof ben.soru_var === 'boolean'){
+      satirlar.push({ ikon:'soru', ad:'Kurtarma sorusu', ac:'soru', dikkat:!ben.soru_var && !(iki && iki.acik),
+        detay:ben.soru_var ? 'Ayarlı' : 'Ayarlı değil' });
+    }
+    if(m.cihazlar){
+      const eski = m.cihazlar.filter(c => !c.bu && ortam.simdi() - (Number(c.son) || 0) > AY_MS).length;
+      satirlar.push({ ikon:'cihazlar', ad:'Oturum açık cihazlar', sayfa:'cihazlar', dikkat:eski > 0,
+        detay:eski ? eski + ' cihaz 30 gündür görünmedi' : String(m.cihazlar.length) });
+    }
+    if(m.etkinlik){
+      const y = yanlisSayisi(m.etkinlik);
+      satirlar.push({ ikon:'etkinlik', ad:'Son 7 gün', sayfa:'etkinlik', dikkat:y > 0,
+        detay:y ? y + ' yanlış deneme' : 'Yanlış deneme yok' });
+    }
+    return satirlar;
+  }
+  /* Ana sayfadaki Güvenlik satırının sağı: iki adım açıksa «İki adım açık»,
+     değilse kaç öneri olduğu. */
+  function guvenlikKisa(m){
+    const l = kontrol(m), n = l.filter(x => x.dikkat).length;
+    const iki = m.ben && m.ben.iki_adim;
+    if(!l.length) return { detay:'' };
+    if(n) return { detay:n === 1 ? '1 öneri' : n + ' öneri', sinif:'is-dikkat' };
+    return { detay:iki && iki.acik ? 'İki adım açık' : 'Yolunda' };
+  }
+  function baglantiKisa(m){
+    const b = m.ben && m.ben.baglantilar;
+    if(!b) return '';
+    const l = [];
+    if(b.takvim) l.push('Takvim');
+    if(b.anahtar) l.push(b.anahtar + ' anahtar');
+    if(b.gelen_bekleyen) l.push(b.gelen_bekleyen + ' bekliyor');
+    return l.join(' · ');
+  }
+
+  /* Bu cihazdan bilgisayara giden adresler (takvim, tarifler). Ev ağı
+     (telefon, tablet) https kapısıdır; bilgisayarın kendisi 4180. Bu
+     sayfa telefondan açıldıysa kendi adresi bilinir. */
+  function evAdresleri(){
+    const base = sunucuAdresi();
+    if(base) return [base];
+    const k = ortam.konum();
+    if(base === '' && k.protocol === 'https:') return [k.origin || (k.protocol + '//' + k.host)];
+    return (sunucu && Array.isArray(sunucu.ev_agi) ? sunucu.ev_agi : []).map(ip => 'https://' + ip + ':' + TELEFON_KAPI);
+  }
+  const pcMi = () => !ortam.yerelUygulama() && !!(sunucu && sunucu.yerel);
+
+  /* Kopyalanacak bir adres ya da anahtar: tek satır, yanında «Kopyala». */
+  function kopyaKutusu(metin, etiket){
+    return '<div class="hesap-kopya"><code class="hesap-kopya__metin">' + kac(metin) + '</code>'
+      + '<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="kopyala" data-metin="' + kac(metin) + '"'
+      + ' aria-label="' + kac((etiket || 'Metni') + ' kopyala') + '">' + ikon('kopyala', 'hesap-ikon') + '<span>Kopyala</span></button></div>';
+  }
+  function tanit(ikonAd, baslik, metin){
+    return '<div class="hesap-tanit">' + ikon(ikonAd, 'hesap-tanit__ikon')
+      + '<p class="hesap-tanit__baslik">' + kac(baslik) + '</p><p class="hesap-tanit__metin">' + kac(metin) + '</p></div>';
+  }
+  function adimlar(l){
+    return '<ol class="hesap-adimlar">' + l.map(x => '<li>' + x + '</li>').join('') + '</ol>';
+  }
+  function yedekHtml(l){
+    return '<div class="hesap-yedek" role="status">'
+      + tanit('anahtar', 'Yedek kodların', 'Telefonun yanında değilken her biri girişi bir kez açar. Bir yere yaz ya da indir; bir daha gösterilmez.')
+      + '<ol class="hesap-yedek__liste">' + l.map(x => '<li><code>' + kac(x) + '</code></li>').join('') + '</ol>'
+      + '<div class="hesap__eylem hesap-yedek__eylem">'
+      + '<button type="button" class="hesap__ikinci" data-hesap="kopyala" data-metin="' + kac(l.join('\n')) + '">'
+      + ikon('kopyala', 'hesap-ikon') + 'Kopyala</button>'
+      + '<button type="button" class="hesap__ikinci" data-hesap="yedek-indir">' + ikon('indir', 'hesap-ikon') + 'İndir</button></div>'
+      + '<button type="button" class="hesap__ana hesap__tam" data-hesap="yedek-tamam">Kaydettim</button></div>';
+  }
+  /* Tariflerde kullanılan istek: adres, başlık, gövde. Anahtar az önce
+     açıldıysa (söz 19) içine yazılır, yoksa yer tutucu. */
+  function tarifIstek(m){
+    const a = m.yeniAnahtar ? m.yeniAnahtar.anahtar : 'lifeos_…';
+    const ev = evAdresleri()[0];
+    return { url:(ev || 'https://BİLGİSAYARIN-IP:' + TELEFON_KAPI) + '/api/hesap/gelen', pc:PC_KOK + '/api/hesap/gelen', a };
+  }
+  function istekKutusu(t){
+    return '<dl class="hesap-istek">'
+      + '<div><dt>Adres</dt><dd>' + kopyaKutusu(t.url, 'Adresi') + '</dd></div>'
+      + '<div><dt>Yöntem</dt><dd><code>POST</code></dd></div>'
+      + '<div><dt>Başlık</dt><dd><code>Authorization: Bearer ' + kac(t.a) + '</code></dd></div>'
+      + '<div><dt>Gövde (JSON)</dt><dd><code>{"metin": "su 250"}</code></dd></div></dl>';
+  }
   const HAFTA_MS = 7 * 86400000;
   function yanlisSayisi(l){
     const sinir = ortam.simdi() - HAFTA_MS;
@@ -1429,18 +1728,22 @@ window.LIFEOS.HESAP = (function(){
   }
   function yukleniyor(m){ return m.uyari ? '' : '<p class="hesap__not">Yükleniyor…</p>'; }
   function bilgi(dt, dd){ return '<div><dt>' + kac(dt) + '</dt><dd>' + kac(dd) + '</dd></div>'; }
+  /* o.alt: adın altında küçük açıklama (Bağlantılar'da hangi uygulamalar). */
   function satir(o){
     const veri = o.sayfa ? 'data-hesap="sayfa" data-sayfa="' + o.sayfa + '"' : 'data-hesap="' + o.eylem + '"';
-    return '<li><button type="button" class="hesap-satir' + (o.sinif ? ' ' + o.sinif : '') + '" ' + veri + '>'
+    return '<li><button type="button" class="hesap-satir' + (o.alt ? ' hesap-satir--iki' : '') + (o.sinif ? ' ' + o.sinif : '')
+      + '" ' + veri + '>'
       + (o.ikon ? ikon(o.ikon, 'hesap-satir__ikon') : '')
-      + '<span class="hesap-satir__ad">' + kac(o.ad) + '</span>'
+      + (o.alt ? '<span class="hesap-oge__metin"><b>' + kac(o.ad) + '</b><small>' + kac(o.alt) + '</small></span>'
+        : '<span class="hesap-satir__ad">' + kac(o.ad) + '</span>')
       + (o.detay != null ? '<span class="hesap-satir__detay"' + (o.detayId ? ' id="' + o.detayId + '"' : '') + '>'
         + kac(o.detay) + '</span>' : '')
       + (o.sayfa ? ikon('ileri', 'hesap-satir__ok') : '') + '</button></li>';
   }
-  function acilir(anahtar, ikonAd, ad, detay, govde){
+  function acilir(anahtar, ikonAd, ad, detay, govde, sinif){
     const acik = !!(merkez && merkez.acik && merkez.acik[anahtar]);
-    return '<details class="hesap-ac" data-ac="' + anahtar + '"' + (acik ? ' open' : '') + '><summary class="hesap-satir">'
+    return '<details class="hesap-ac" data-ac="' + anahtar + '"' + (acik ? ' open' : '') + '><summary class="hesap-satir'
+      + (sinif ? ' ' + sinif : '') + '">'
       + ikon(ikonAd, 'hesap-satir__ikon') + '<span class="hesap-satir__ad">' + kac(ad) + '</span>'
       + (detay ? '<span class="hesap-satir__detay">' + kac(detay) + '</span>' : '')
       + ikon('ileri', 'hesap-satir__ok') + '</summary><div class="hesap-ac__ic">' + govde + '</div></details>';
@@ -1473,9 +1776,10 @@ window.LIFEOS.HESAP = (function(){
         +   satir({ ikon:'cihazlar', ad:'Cihazlar', detay:m.cihazlar ? String(m.cihazlar.length) : '', sayfa:'cihazlar' })
         +   satir({ ikon:'etkinlik', ad:'Etkinlik', sayfa:'etkinlik', sinif:yanlis ? 'is-dikkat' : '',
               detay:yanlis ? yanlis + ' yanlış deneme' : sonGiris ? sonMetni(sonGiris.zaman) : '' })
-        +   satir({ ikon:'guvenlik', ad:'Güvenlik', sayfa:'guvenlik' })
+        +   satir(Object.assign({ ikon:'guvenlik', ad:'Güvenlik', sayfa:'guvenlik' }, guvenlikKisa(m)))
         + '</ul>'
         + '<ul class="hesap-liste">'
+        +   satir({ ikon:'baglanti', ad:'Bağlantılar', detay:baglantiKisa(m), sayfa:'baglantilar' })
         +   satir({ ikon:'esitleme', ad:'Eşitleme', detay:esitKisa(), detayId:'hesap-esit-kisa', sayfa:'esitleme' })
         +   satir({ ikon:'veri', ad:'Verin', detay:t && t.b ? boyut(t.b) : '', sayfa:'verin' })
         + '</ul>'
@@ -1535,7 +1839,8 @@ window.LIFEOS.HESAP = (function(){
       const l = m.cihazlar;
       if(!l) return yukleniyor(m);
       const oteki = l.filter(c => !c.bu).length;
-      return '<ul class="hesap-liste">' + l.map(c =>
+      return '<ul class="hesap-liste">' + satir({ ikon:'qr', ad:'Yeni cihaz bağla', alt:'Kodla, şifre yazmadan', sayfa:'bagla' }) + '</ul>'
+        + '<ul class="hesap-liste">' + l.map(c =>
           '<li class="hesap-oge">' + ikon(cihazTuru(c.cihaz_ad), 'hesap-satir__ikon')
           + '<span class="hesap-oge__metin"><b>' + kac(c.cihaz_ad) + '</b><small>'
           + (c.bu ? 'Bu cihaz' : 'Son görülme: ' + kac(sonMetni(c.son))) + '</small></span>'
@@ -1551,9 +1856,20 @@ window.LIFEOS.HESAP = (function(){
         + adresNotu();
     },
 
+    /* GÜVENLİK KONTROLÜ önce (kontrol()): her kilit bir satır, dikkat
+       isteyen kırmızı yazar; altında şifre ve kurtarma sorusu formları. */
     guvenlik(m){
       const soruVar = m.ben ? m.ben.soru_var : null;
-      return '<div class="hesap-liste hesap-liste--ac">'
+      const l = kontrol(m), n = l.filter(x => x.dikkat).length;
+      const ozet = !l.length ? '' : '<div class="hesap-kontrol' + (n ? ' is-dikkat' : '') + '" role="status">'
+        + ikon(n ? 'uyari' : 'kalkan', 'hesap-kontrol__ikon')
+        + '<div><p class="hesap-kontrol__baslik">' + (n ? (n === 1 ? 'Bir öneri var' : n + ' öneri var') : 'Hesabın iyi korunuyor')
+        + '</p><p class="hesap-kontrol__alt">' + (n ? 'Kırmızı satırlara bir bak.' : 'Kontrol listesindeki her şey yolunda.')
+        + '</p></div></div>';
+      return ozet
+        + (l.length ? '<ul class="hesap-liste">' + l.filter(x => x.sayfa).map(x => satir({ ikon:x.ikon, ad:x.ad,
+            detay:x.detay, sayfa:x.sayfa, sinif:x.dikkat ? 'is-dikkat' : '' })).join('') + '</ul>' : '')
+        + '<div class="hesap-liste hesap-liste--ac">'
         + acilir('parola', 'anahtar', 'Şifreyi değiştir', '',
             '<form class="hesap__form" data-hesap-form="parola" data-ayar-disi>'
             + sifreAlani('hesap-eski', 'Şimdiki şifre', 'current-password')
@@ -1565,11 +1881,222 @@ window.LIFEOS.HESAP = (function(){
             + alanHtml('hesap-yeni-soru', 'Soru (kendin yaz)', 'text', 'required minlength="4" maxlength="120" autocomplete="off"')
             + alanHtml('hesap-yeni-cevap', 'Cevabın', 'text', CEVAP_EK)
             + sifreAlani('hesap-soru-sifre', 'Şifren', 'current-password')
-            + CAPS + formMesaj + '<button type="submit" class="hesap__ana hesap__tam">Kaydet</button></form>')
+            + CAPS + formMesaj + '<button type="submit" class="hesap__ana hesap__tam">Kaydet</button></form>',
+            l.some(x => x.ac === 'soru' && x.dikkat) ? 'is-dikkat' : '')
         + '</div>'
-        + '<ul class="hesap-liste">' + satir({ ikon:'cihazlar', ad:'Oturum açık cihazlar',
-          detay:m.cihazlar ? String(m.cihazlar.length) : '', sayfa:'cihazlar' }) + '</ul>'
         + '<p class="hesap__not">Şifre değişince öteki cihazlarda yeniden giriş gerekir.</p>';
+    },
+
+    /* İKİ ADIMLI DOĞRULAMA (söz 17). Dört hâl: kapalı (şifreyle başlat),
+       kurulum (QR + anahtar + kod), yedek kodlar (bir kez), açık. */
+    ikiadim(m){
+      const d = m.ben && m.ben.iki_adim;
+      if(m.yedekler) return yedekHtml(m.yedekler);
+      if(m.ikiKurulum){
+        const k = m.ikiKurulum, qr = L.QR ? L.QR.svg(k.uri, { etiket:'Doğrulayıcı uygulama için QR kodu' }) : '';
+        const tel = /iPhone|iPad|Android/.test((typeof navigator !== 'undefined' && navigator.userAgent) || '');
+        return adimlar([
+          '<b>Doğrulayıcı uygulamayı aç</b><span>Google Authenticator, Microsoft Authenticator ya da iPhone’da Ayarlar › Şifreler. Hepsi ücretsiz.</span>',
+          '<b>' + (tel ? 'Ekle' : 'QR kodunu okut') + '</b>'
+            + (qr && !tel ? '<div class="hesap-qr">' + qr + '</div>' : '')
+            + (tel ? '<a class="hesap__ikinci hesap-adimlar__dugme" href="' + kac(k.uri) + '" target="_blank" rel="noopener">'
+              + ikon('kalkan', 'hesap-ikon') + 'Doğrulayıcıda aç</a>' : '')
+            + '<span>' + (tel ? 'Açılmazsa uygulamada «anahtarı elle gir» ile bunu yaz:' : 'Okutamıyorsan anahtarı elle yaz:') + '</span>'
+            + kopyaKutusu(k.sir.replace(/(.{4})(?=.)/g, '$1 '), 'Anahtarı'),
+          '<b>Uygulamadaki kodu yaz</b>'
+            + '<form class="hesap__form" data-hesap-form="iki-onayla" data-ayar-disi>' + kodAlani('hesap-iki-kod', 'Kod')
+            + formMesaj + '<button type="submit" class="hesap__ana hesap__tam">Doğrula ve aç</button></form>',
+        ])
+        + '<ul class="hesap-liste">' + satir({ ad:'Vazgeç', eylem:'iki-vazgec', sinif:'is-tehlike' }) + '</ul>';
+      }
+      if(!d) return yukleniyor(m);
+      if(!d.acik){
+        return tanit('kalkan', 'Şifreye ikinci bir kilit', 'Girişte şifreden sonra telefonundaki doğrulayıcı uygulamanın '
+            + '6 haneli kodu sorulur. Şifren başkasına geçse bile hesabın açılmaz.')
+          + '<ul class="hesap-liste hesap-liste--duz hesap-uygulamalar">'
+          + [['Google Authenticator', 'iPhone ve Android'], ['Microsoft Authenticator', 'iPhone ve Android'],
+            ['iPhone Şifreler', 'Ayarlar › Şifreler, iOS 15 ve sonrası']].map(([ad, alt]) =>
+            '<li class="hesap-oge">' + ikon('kalkan', 'hesap-satir__ikon') + '<span class="hesap-oge__metin"><b>' + kac(ad)
+            + '</b><small>' + kac(alt) + '</small></span><span class="hesap-satir__detay">Ücretsiz</span></li>').join('') + '</ul>'
+          + '<form class="hesap__form" data-hesap-form="iki-baslat" data-ayar-disi>'
+          + sifreAlani('hesap-iki-sifre', 'Başlamak için şifren', 'current-password') + CAPS + formMesaj
+          + '<button type="submit" class="hesap__ana hesap__tam">Kurulumu başlat</button></form>';
+      }
+      const az = d.yedek_kalan <= 2;
+      return '<ul class="hesap-liste hesap-liste--duz">'
+        + '<li class="hesap-oge">' + ikon('kalkan', 'hesap-satir__ikon') + '<span class="hesap-oge__metin"><b>Açık</b><small>'
+        + (d.olusturma ? sonMetni(d.olusturma) + ' kuruldu' : 'Girişte kod sorulur') + '</small></span></li>'
+        + '<li class="hesap-oge' + (az ? ' hesap-olay is-dikkat' : '') + '">' + ikon('anahtar', 'hesap-satir__ikon')
+        + '<span class="hesap-oge__metin"><b>Yedek kodlar</b><small>' + d.yedek_kalan + ' kod kaldı'
+        + (az ? ' · yenilerini al' : '') + '</small></span></li></ul>'
+        + '<div class="hesap-liste hesap-liste--ac">'
+        + acilir('yedek', 'anahtar', 'Yeni yedek kodlar', '',
+            '<form class="hesap__form" data-hesap-form="yedek-yenile" data-ayar-disi>'
+            + sifreAlani('hesap-yedek-sifre', 'Şifren', 'current-password') + CAPS + formMesaj
+            + '<p class="hesap__not hesap__not--form">Eski yedek kodlar hemen geçersiz olur.</p>'
+            + '<button type="submit" class="hesap__ana hesap__tam">Yeni kodları göster</button></form>')
+        + acilir('iki-kapat', 'kalkan', 'İki adımı kapat', '',
+            '<form class="hesap__form" data-hesap-form="iki-kapat" data-ayar-disi>'
+            + sifreAlani('hesap-kapat-sifre', 'Şifren', 'current-password')
+            + alanHtml('hesap-kapat-kod', 'Uygulamadaki kod ya da bir yedek kod', 'text',
+              'autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required minlength="6" maxlength="9"')
+            + CAPS + formMesaj + '<button type="submit" class="hesap__tehlike hesap__tam">Kapat</button></form>')
+        + '</div>'
+        + '<p class="hesap__not">Telefonunu ve yedek kodlarını birlikte kaybedersen: ' + (kim().r === 'admin'
+          ? 'bilgisayarda <code>python sistem/hesap.py --iki-adim-kapat ' + kac(kim().ad) + '</code>.'
+          : 'admin Yönetim’den kapatır.') + '</p>';
+    },
+
+    /* BAĞLANTILAR: ücretsiz uygulamalar, gruplu (iOS Ayarlar gibi). */
+    baglantilar(m){
+      const oz = (m.ben && m.ben.baglantilar) || {}, iki = m.ben && m.ben.iki_adim;
+      return '<p class="hesap-bolum">Takvim</p><ul class="hesap-liste">'
+        + satir({ ikon:'takvim', ad:'Takvim aboneliği', alt:'iPhone Takvim, Outlook, Thunderbird',
+          detay:m.ben ? (oz.takvim ? 'Açık' : 'Kapalı') : '', sayfa:'takvim' }) + '</ul>'
+        + '<p class="hesap-bolum">Kısayollar ve otomasyon</p><ul class="hesap-liste">'
+        + satir({ ikon:'kisayol', ad:'Erişim anahtarları', alt:'iPhone Kısayollar, Apple Sağlık, Home Assistant',
+          detay:oz.anahtar ? String(oz.anahtar) : '', sayfa:'anahtarlar' })
+        + satir({ ikon:'gelen', ad:'Gelen kutusu', alt:'Gelen satırlar SPİ › Onaylar’a düşer',
+          detay:oz.gelen_bekleyen ? oz.gelen_bekleyen + ' bekliyor' : '', sayfa:'gelen' }) + '</ul>'
+        + '<p class="hesap-bolum">Giriş</p><ul class="hesap-liste">'
+        + satir({ ikon:'kalkan', ad:'Doğrulayıcı uygulama', alt:'Google ve Microsoft Authenticator, iPhone Şifreler',
+          detay:iki ? (iki.acik ? 'Açık' : 'Kapalı') : '', sayfa:'ikiadim' })
+        + satir({ ikon:'qr', ad:'Kodla cihaz bağla', alt:'Tablet ya da telefon şifresiz girer', sayfa:'bagla' }) + '</ul>'
+        + '<p class="hesap__not">Hepsi bilgisayarındaki LifeOS’ta çalışır: şirket hesabı, ücret ya da internet gerekmez.</p>';
+    },
+
+    /* TAKVİM ABONELİĞİ (sunucu sözü 17). */
+    takvim(m){
+      const t = m.baglanti && m.baglanti.takvim;
+      if(!t) return yukleniyor(m);
+      const ays = (t.yayinlar || []).find(y => y.ad === 'ays/takvim');
+      const kaynak = '<p class="hesap-bolum">İçinde</p><ul class="hesap-liste hesap-liste--duz"><li class="hesap-oge">'
+        + ikon('takvim', 'hesap-satir__ikon') + '<span class="hesap-oge__metin"><b>AYS</b><small>Sınav günleri, istisnalar, hedef son günleri</small></span>'
+        + '<span class="hesap-satir__detay">' + (ays ? (ays.adet == null ? '' : ays.adet + ' etkinlik') : 'AYS’yi bir kez aç') + '</span></li></ul>';
+      if(!t.acik){
+        return tanit('takvim', 'Sınav günlerin takviminde', 'Takvim uygulaman bu adrese abone olur; AYS’de bir tarih '
+            + 'değişince takvimin de kendiliğinden güncellenir.')
+          + kaynak + '<button type="button" class="hesap__ana hesap__tam" data-hesap="takvim-ac">Aboneliği aç</button>';
+      }
+      const ev = evAdresleri().map(b => b + t.yol);
+      return kaynak
+        + '<p class="hesap-bolum">iPhone ve iPad</p>'
+        + (ev.length ? '<div class="hesap-kutu">' + kopyaKutusu(ev[0], 'Takvim adresini')
+            + adimlar(['Ayarlar › Takvim › Hesaplar › Hesap Ekle › Diğer', '«Abone Olunan Takvim Ekle»ye bu adresi yapıştır'])
+            + '<p class="hesap__not">Telefon evdeki Wi-Fi’dayken güncellenir; LifeOS kök sertifikası telefonda kurulu olmalı.</p></div>'
+          : '<p class="hesap__not hesap-kutu">Ev ağı kapalı. Bilgisayarda bir kez <code>python sistem/telefon.py</code> çalıştırıp LifeOS’u yeniden başlat.</p>')
+        + (pcMi() ? '<p class="hesap-bolum">Bu bilgisayar</p><div class="hesap-kutu">' + kopyaKutusu(PC_KOK + t.yol, 'Takvim adresini')
+            + '<p class="hesap__not">Thunderbird ya da klasik Outlook’ta «İnternet takvimi ekle».</p></div>' : '')
+        + '<p class="hesap-bolum">Google Takvim</p><div class="hesap-kutu"><p class="hesap__not hesap__not--ilk">Google adresi '
+        + 'internetten çeker; evdeki bilgisayarına ulaşamaz. Dosyayı indirip Google Takvim’de «İçe aktar»la bir kez ekleyebilirsin.</p>'
+        + '<button type="button" class="hesap__ikinci" data-hesap="takvim-indir">' + ikon('indir', 'hesap-ikon') + 'Dosyayı indir (.ics)</button></div>'
+        + (m.takvimOnay
+          ? '<div class="hesap-onay"><p>Eski adres hemen çalışmaz; takvim uygulamalarına yenisini eklemen gerekir.</p>'
+            + '<div class="hesap__eylem"><button type="button" class="hesap__tehlike" data-hesap="takvim-yenile">Adresi yenile</button>'
+            + '<button type="button" class="hesap__ikinci" data-hesap="takvim-vazgec">Vazgeç</button></div></div>'
+          : '<ul class="hesap-liste">' + satir({ ikon:'yenile', ad:'Adresi yenile', eylem:'takvim-yenile-sor' }) + '</ul>'
+            + '<ul class="hesap-liste">' + satir({ ad:'Aboneliği kapat', eylem:'takvim-kapat', sinif:'is-tehlike' }) + '</ul>')
+        + '<p class="hesap__not">' + (t.son ? 'Takvim en son ' + sonMetni(t.son) + ' baktı.' : 'Henüz hiçbir takvim bakmadı.')
+        + ' Adres bir anahtardır: yalnız kendi cihazlarına ekle.</p>';
+    },
+
+    /* KISAYOLLAR VE OTOMASYON (sunucu sözü 16, söz 19). */
+    anahtarlar(m){
+      const b = m.baglanti;
+      if(!b) return yukleniyor(m);
+      const y = m.yeniAnahtar, t = tarifIstek(m);
+      const l = b.anahtarlar || [];
+      return (y ? '<div class="hesap-yeni" role="status"><p>' + ikon('tamam') + '<span><b>«' + kac(y.ad) + '» hazır.</b> '
+            + 'Şimdi kopyala; bir daha gösterilmez.</span></p>'
+            + kopyaKutusu(y.anahtar, 'Anahtarı') + '</div>' : '')
+        + (l.length ? '<ul class="hesap-liste">' + l.map(x => '<li class="hesap-oge">' + ikon('kisayol', 'hesap-satir__ikon')
+            + '<span class="hesap-oge__metin"><b>' + kac(x.ad) + '</b><small>' + kac(x.on_ek) + '… · '
+            + (x.son ? 'son kullanım ' + kac(sonMetni(x.son)) : 'hiç kullanılmadı') + '</small></span>'
+            + '<button type="button" class="hesap__kucuk" data-hesap="anahtar-sil" data-id="' + Number(x.id) + '"'
+            + ' aria-label="' + kac('«' + x.ad + '» anahtarını sil') + '">Sil</button></li>').join('') + '</ul>'
+          : (y ? '' : tanit('kisayol', 'Telefonundan tek satır', 'iPhone Kısayollar, Android ya da Home Assistant «su 250», '
+            + '«kilo 72,4», «45 dk yürüyüş» gibi bir satır gönderir; SPİ onu Onaylar’a bırakır, sen onaylayınca yazılır.')))
+        + '<div class="hesap-liste hesap-liste--ac">' + acilir('anahtar-ekle', 'ekle', 'Anahtar oluştur', '',
+            '<form class="hesap__form" data-hesap-form="anahtar" data-ayar-disi>'
+            + alanHtml('hesap-anahtar-ad', 'Ad', 'text', 'required maxlength="40" autocomplete="off" placeholder="iPhone Kısayollar"')
+            + sifreAlani('hesap-anahtar-sifre', 'Şifren', 'current-password') + CAPS + formMesaj
+            + '<button type="submit" class="hesap__ana hesap__tam">Oluştur</button></form>') + '</div>'
+        + '<p class="hesap-bolum">Tarifler</p><div class="hesap-liste hesap-liste--ac">'
+        + acilir('t-istek', 'baglanti', 'İstek', '', '<p class="hesap__not hesap__not--ilk">Her tarif bu tek isteği gönderir.'
+            + (t.a === 'lifeos_…' ? ' Anahtar oluşturunca burada görünür.' : '') + '</p>' + istekKutusu(t)
+            + (pcMi() ? '<p class="hesap__not">Bu bilgisayardaki bir uygulama için adres: <code>' + kac(t.pc) + '</code></p>' : ''))
+        + acilir('t-ios', 'telefon', 'iPhone Kısayollar', '', adimlar([
+            'Kısayollar’da yeni kısayol › «Girdi İste» (Ask for Input) ekle.',
+            '«URL’nin İçeriğini Al» (Get Contents of URL) ekle; adres, POST, başlık ve gövde yukarıdaki «İstek»teki gibi; «metin» alanına «Sağlanan Girdi»yi koy.',
+            'Adını «LifeOS’a yaz» koy. Siri’ye «LifeOS’a yaz» deyip «su 250» söyle.']))
+        + acilir('t-saglik', 'kalp', 'Apple Sağlık’tan her sabah', '', adimlar([
+            'Kısayollar › Otomasyon › Günün Saati (ör. 08:00) › Hemen Çalıştır.',
+            '«Sağlık Örneklerini Bul» (Find Health Samples): Kilo, son 1 gün, en yeni 1 örnek.',
+            '«Metin»: <code>kilo</code> ve bulunan değer; sonra «URL’nin İçeriğini Al» ile gönder.',
+            'Uyku için «Uyku Analizi»nin süresi toplanır; SPİ <code>uyku 7,2</code> gibi saat bekler.'])
+          + '<p class="hesap__not">Gelenler SPİ › Onaylar’da bekler; tek dokunuşla kaydedersin. Ölçüm onaysız yazılmaz.</p>')
+        + acilir('t-android', 'telefon', 'Android: HTTP Shortcuts', '', adimlar([
+            'Ücretsiz «HTTP Shortcuts» uygulamasında yeni kısayol › Normal.',
+            'Yöntem POST, adres yukarıdaki; Başlıklar’a <code>Authorization</code> = <code>Bearer ' + kac(t.a) + '</code>.',
+            'Gövde: Özel metin, tür <code>application/json</code>, içerik <code>{"metin": "{metin}"}</code>; «metin»i soran bir değişken ekle.']))
+        + acilir('t-ha', 'ev', 'Home Assistant', '', '<pre class="hesap-kod-blok"><code>' + kac('rest_command:\n  lifeos_yaz:\n'
+            + '    url: "' + t.url + '"\n    method: POST\n    headers:\n      Authorization: "Bearer ' + t.a + '"\n'
+            + '    content_type: "application/json"\n    payload: \'{"metin": "{{ metin }}"}\'\n') + '</code></pre>'
+            + '<p class="hesap__not">Home Assistant LifeOS kök sertifikasını tanımazsa sertifikayı ona ekle.</p>')
+        + '</div>'
+        + '<p class="hesap__not">Anahtar yalnız satır bırakır; verini okuyamaz, hesabına giremez. Kaybolursa sil, yenisini aç.</p>';
+    },
+
+    /* GELEN KUTUSU: dışarıdan gelen satırlar ve SPİ'nin onlarla ne yaptığı. */
+    gelen(m){
+      const l = m.baglanti && m.baglanti.gelen;
+      if(!l) return yukleniyor(m);
+      if(!l.length){
+        return tanit('gelen', 'Henüz bir satır gelmedi', 'Kısayol ya da otomasyon bir satır gönderince burada görünür.')
+          + '<ul class="hesap-liste">' + satir({ ikon:'kisayol', ad:'Kısayollar ve otomasyon', sayfa:'anahtarlar' }) + '</ul>';
+      }
+      const DURUM = { bekliyor:['etkinlik', 'SPİ açılınca işlenir'], onayda:['tamam', 'SPİ › Onaylar’da'],
+        anlasilmadi:['uyari', 'Anlaşılmadı'] };
+      let gun = '', html = '';
+      l.forEach(o => {
+        const g = gunBasligi(o.zaman);
+        if(g !== gun){
+          if(gun) html += '</ul>';
+          html += '<p class="hesap-bolum">' + kac(g) + '</p><ul class="hesap-liste">';
+          gun = g;
+        }
+        const d = DURUM[o.durum] || DURUM.bekliyor;
+        html += '<li class="hesap-oge hesap-olay' + (o.durum === 'anlasilmadi' ? ' is-dikkat' : '') + '">' + ikon(d[0], 'hesap-satir__ikon')
+          + '<span class="hesap-oge__metin"><b>' + kac(o.metin) + '</b><small>' + kac([o.kaynak, o.sonuc || d[1]].filter(Boolean).join(' · '))
+          + '</small></span><span class="hesap-satir__detay">' + saatMetni(o.zaman) + '</span></li>';
+      });
+      return html + '</ul><p class="hesap__not">Son ' + l.length + ' satır. Ölçüm, sen Onaylar’da kaydedene dek yazılmaz.</p>';
+    },
+
+    /* YENİ CİHAZ BAĞLA (söz 18): altı haneli kod, QR, geri sayım. */
+    bagla(m){
+      const b = m.bag;
+      if(!b) return yukleniyor(m);
+      if(b.durum === 'baglandi'){
+        return tanit('tamam', (b.cihaz_ad || 'Cihaz') + ' bağlandı', 'Girdi; kayıtlar ilk eşitlemeyle iner.')
+          + '<button type="button" class="hesap__ana hesap__tam" data-hesap="geri">Tamam</button>';
+      }
+      if(b.durum === 'bitti'){
+        return tanit('etkinlik', 'Kodun süresi doldu', 'Güvenlik için kod 5 dakika geçerli.')
+          + '<button type="button" class="hesap__ana hesap__tam" data-hesap="bag-yeni">Yeni kod</button>';
+      }
+      const ev = evAdresleri()[0];
+      const adres = ev ? ev + '/?bagla=' + b.kod : '';
+      const qr = adres && L.QR && !ortam.yerelUygulama() ? L.QR.svg(adres, { etiket:'Tabletin kamerasıyla okutulacak bağlama kodu' }) : '';
+      return '<div class="hesap-bag">'
+        + '<p class="hesap-bag__kod" aria-label="' + kac('Bağlama kodu ' + b.kod.split('').join(' ')) + '">'
+        + kac(b.kod.slice(0, 3)) + '<span></span>' + kac(b.kod.slice(3)) + '</p>'
+        + '<p class="hesap-bag__sure" data-hesap-sure>' + kac(kalanMetni(b.bitis)) + '</p>'
+        + (qr ? '<div class="hesap-qr hesap-qr--kucuk">' + qr + '</div>' : '') + '</div>'
+        + adimlar(['Yeni cihazda LifeOS’u aç', '«Kodla bağlan»a dokun ve bu kodu yaz'
+          + (qr ? '<span>Tablette kamerayla QR’ı okutmak da olur.</span>' : '')])
+        + '<ul class="hesap-liste">' + satir({ ad:'Vazgeç', eylem:'bag-vazgec', sinif:'is-tehlike' }) + '</ul>'
+        + '<p class="hesap__not">Kod tek kullanımlık; bağlanan cihaz Cihazlar’da görünür, oradan çıkarılabilir.</p>';
     },
 
     esitleme(m){
@@ -1637,7 +2164,7 @@ window.LIFEOS.HESAP = (function(){
         const t = OLAY[o.tur] || ['etkinlik', o.tur];
         const alt = (o.tur === 'cihaz' ? [o.ayrinti, o.cihaz_ad ? 'ile: ' + o.cihaz_ad : ''] :
           o.tur === 'otekiler' ? [o.ayrinti + ' cihaz', o.cihaz_ad] :
-          o.tur === 'yonetim' ? [o.ayrinti] : [o.cihaz_ad, o.ip]).filter(Boolean).join(' · ');
+          o.tur === 'yonetim' ? [o.ayrinti] : [o.cihaz_ad, o.ip, o.ayrinti]).filter(Boolean).join(' · ');
         html += '<li class="hesap-oge hesap-olay' + (YANLIS[o.tur] ? ' is-dikkat' : '') + '">' + ikon(t[0], 'hesap-satir__ikon')
           + '<span class="hesap-oge__metin"><b>' + kac(t[1]) + '</b>' + (alt ? '<small>' + kac(alt) + '</small>' : '') + '</span>'
           + '<span class="hesap-satir__detay">' + saatMetni(o.zaman) + '</span></li>';
@@ -1683,6 +2210,11 @@ window.LIFEOS.HESAP = (function(){
         +   seg('rol', 'hesap-kisi-rol', [['uye', 'Üye'], ['admin', 'Admin']], u.rol) + '</div>'
         + (planlar.length ? '<div class="hesap-ayar"><p class="hesap-ayar__ad" id="hesap-kisi-plan">Plan</p>'
           + seg('plan', 'hesap-kisi-plan', planlar.map(p => [p.id, p.ad]), u.plan) + '</div>' : '')
+        /* Telefonunu ve yedek kodlarını kaybeden üye için (sunucu sözü 14). */
+        + (u.iki_adim && u.id !== (m.ben && m.ben.kullanici && m.ben.kullanici.id)
+          ? '<ul class="hesap-liste"><li class="hesap-oge">' + ikon('kalkan', 'hesap-satir__ikon')
+            + '<span class="hesap-oge__metin"><b>İki adımlı doğrulama açık</b><small>Telefonunu kaybettiyse kapat; sonra yeniden kurar.</small></span>'
+            + '<button type="button" class="hesap__kucuk" data-hesap="kisi-iki-kapat">Kapat</button></li></ul>' : '')
         + '<p class="hesap__mesaj" role="alert" hidden data-hesap-kisi-mesaj></p>'
         + '<dl class="hesap-bilgi">' + bilgi('Cihaz', String(u.cihaz || 0)) + bilgi('Son görülme', sonMetni(u.son))
         +   bilgi('Üyelik', tarihMetni(u.olusturma)) + '</dl>';
@@ -1758,8 +2290,10 @@ window.LIFEOS.HESAP = (function(){
     if(typeof document === 'undefined' || !document.body || !oturum()) return;
     if(L.KABUK && L.KABUK.katmanAcik && L.KABUK.katmanAcik(PANEL)) L.KABUK.katmanKapat();
     const once = document.activeElement;
+    bagDur();
     merkez = { yigin:['kok'], ben:null, cihazlar:null, kullanicilar:null, etkinlik:null, kayit:null, kisi:null,
-      mesaj:'', uyari:'', onay:false, silOnay:false, acik:{}, once };
+      mesaj:'', uyari:'', onay:false, silOnay:false, acik:{}, once,
+      baglanti:null, ikiKurulum:null, yedekler:null, yeniAnahtar:null, bag:null, takvimOnay:false };
     if(ilkSayfa && ilkSayfa !== 'kok' && SAYFA_AD[ilkSayfa]) merkez.yigin.push(ilkSayfa);
     if(!merkezAcikMi()){
       const el = document.createElement('div');
@@ -1776,13 +2310,16 @@ window.LIFEOS.HESAP = (function(){
     merkezTazele();
     const kart = document.querySelector('[data-hesap-merkez] .hesap-merkez__kart');
     try{ kart.focus({ preventScroll:true }); }catch(e){ /* odaklanamadı */ }
+    if(/^(takvim|anahtarlar|gelen|ikiadim|baglantilar|bagla)$/.test(ilkSayfa || '')) sayfaGir(ilkSayfa);
     return merkezYukle();
   }
   function merkezKapat(){
     if(typeof document === 'undefined') return;
     const el = document.querySelector('[data-hesap-merkez]');
     const once = merkez && merkez.once;
-    merkez = null;
+    sayfaCik(merkez ? sayfa() : '');
+    bagDur();
+    merkez = null;                                  // anahtar, yedek kodlar ve kurulum sırrı bellekten gider (söz 17, 19)
     if(!el) return;
     el.remove();
     document.documentElement.classList.remove('hesap-merkez-acik');
@@ -1790,19 +2327,103 @@ window.LIFEOS.HESAP = (function(){
   }
   function merkezGit(s, ek){
     if(!merkez) return;
-    Object.assign(merkez, { mesaj:'', onay:false, silOnay:false }, ek || {});
+    sayfaCik(sayfa());
+    Object.assign(merkez, { mesaj:'', onay:false, silOnay:false, takvimOnay:false }, ek || {});
     merkez.yigin.push(s);
     merkezTazele('ileri');
+    sayfaGir(s);
+  }
+  /* Sayfaya girerken verisi tazelenir (başka cihazdan değişmiş olabilir). */
+  function sayfaGir(s){
+    if(!merkez) return;
     if(s === 'etkinlik') sayfaVerisi(() => etkinlik().then(l => { merkez.etkinlik = l; }));
-    /* Listeler her girişte tazelenir (başka cihazdan değişmiş olabilir). */
     if(s === 'cihazlar') sayfaVerisi(() => cihazlar().then(l => { merkez.cihazlar = l; }));
     if(s === 'yonetim') sayfaVerisi(() => kullanicilar().then(v => { merkez.kullanicilar = v.kullanicilar || []; merkez.kayit = v.kayit; }));
+    if(s === 'guvenlik'){
+      sayfaVerisi(() => Promise.all([cihazlar(), etkinlik()]).then(([c, e]) => { merkez.cihazlar = c; merkez.etkinlik = e; }));
+    }
+    if(s === 'takvim' || s === 'anahtarlar' || s === 'gelen' || s === 'ikiadim' || s === 'baglantilar'){
+      sayfaVerisi(() => baglantilar().then(v => {
+        merkez.baglanti = v;
+        if(merkez.ben){
+          merkez.ben.iki_adim = v.iki_adim;
+          const g = (v.gelen || []).filter(x => x.durum === 'bekliyor').length;
+          merkez.ben.baglantilar = { anahtar:(v.anahtarlar || []).length, takvim:!!(v.takvim && v.takvim.acik), gelen_bekleyen:g };
+        }
+      }));
+    }
+    if(s === 'bagla') bagBasla();
+  }
+  /* Sayfadan çıkarken: yeni anahtar, yedek kodlar, yarım kurulum ve açık
+     bağlama kodu geride kalmaz (söz 17–19). */
+  function sayfaCik(s){
+    if(!merkez) return;
+    if(s === 'anahtarlar') merkez.yeniAnahtar = null;
+    if(s === 'ikiadim'){ merkez.yedekler = null; merkez.ikiKurulum = null; }
+    if(s === 'bagla'){
+      const b = merkez.bag;
+      bagDur();
+      merkez.bag = null;
+      if(b && b.id && b.durum === 'bekliyor') bagKapat(b.id).catch(() => { /* süresi zaten dolacak */ });
+    }
   }
   function merkezGeri(){
     if(!merkez || merkez.yigin.length < 2) return merkezKapat();
+    sayfaCik(sayfa());
     merkez.yigin.pop();
-    Object.assign(merkez, { mesaj:'', onay:false, silOnay:false });
+    Object.assign(merkez, { mesaj:'', onay:false, silOnay:false, takvimOnay:false });
     merkezTazele('geri');
+  }
+
+  /* KODLA BAĞLAMA (söz 18): kod açılır, saniyede bir geri sayım yalnız o
+     yazıyı tazeler (sayfa çizilmez), BAG_YOKLA'da bir «bağlandı mı?». */
+  let bagZaman = null, bagSaniye = null;
+  function bagDur(){
+    if(bagZaman != null){ ortam.iptal(bagZaman); bagZaman = null; }
+    if(bagSaniye != null){ clearInterval(bagSaniye); bagSaniye = null; }
+  }
+  function bagBasla(){
+    const m = merkez;
+    if(!m) return;
+    bagDur();
+    m.bag = null;
+    merkezTazele();
+    bagKoduAc().then(v => {
+      if(merkez !== m || sayfa() !== 'bagla') return bagKapat(v.id).catch(() => {});
+      m.bag = { kod:v.kod, id:v.id, bitis:v.bitis, durum:'bekliyor' };
+      merkezTazele();
+      if(typeof setInterval === 'function'){
+        bagSaniye = setInterval(() => {
+          const el = typeof document !== 'undefined' && document.querySelector('[data-hesap-sure]');
+          if(el && m.bag) el.textContent = kalanMetni(m.bag.bitis);
+        }, 1000);
+      }
+      bagYokla(m);
+    }, e => {
+      if(merkez !== m) return;
+      if(e && e.kod === 401) return oturumKapandi();
+      m.uyari = e && e.kod === 0 ? baglantiHatasi() : ((e && e.message) || 'Kod açılamadı.');
+      merkezTazele();
+    });
+  }
+  function bagYokla(m){
+    bagZaman = ortam.zamanla(async () => {
+      bagZaman = null;
+      if(merkez !== m || !m.bag || sayfa() !== 'bagla') return;
+      let v = null;
+      try{ v = await bagDurum(m.bag.id); }catch(e){ v = null; }
+      if(merkez !== m || !m.bag) return;
+      if(v && (v.durum === 'baglandi' || v.durum === 'bitti' || v.durum === 'yok')){
+        m.bag.durum = v.durum === 'yok' ? 'bitti' : v.durum;
+        m.bag.cihaz_ad = v.cihaz_ad || '';
+        bagDur();
+        if(v.durum === 'baglandi') cihazlar().then(l => { if(merkez === m) m.cihazlar = l; }, () => {});
+        merkezTazele();
+        return;
+      }
+      if(ortam.simdi() > m.bag.bitis + 1000){ m.bag.durum = 'bitti'; bagDur(); merkezTazele(); return; }
+      bagYokla(m);
+    }, BAG_YOKLA);
   }
   function sayfaVerisi(fn){
     const m = merkez;
@@ -1912,8 +2533,45 @@ window.LIFEOS.HESAP = (function(){
     let mesaj = '', ciz = false, hata = false;
     try{
       if(tur === 'giris'){
-        await girisYap(deger('hesap-ad').trim(), deger('hesap-parola'), adres());
+        const r = await girisYap(deger('hesap-ad').trim(), deger('hesap-parola'), adres());
+        if(r && r.iki_adim){
+          /* Söz 17: kod adımı; seçili hesap (monogram) kalır, şifre alanı gider. */
+          kapi = Object.assign(KAPI_BOS(), { gorunum:'kod', ilk:false, secili:kapi.secili, bilet:r.bilet, adres:r.adres });
+          ciz = true;
+        }else kapiKapat();
+      }else if(tur === 'kod'){
+        await girisKod(kapi.bilet, deger('hesap-kod'), kapi.adres);
         kapiKapat();
+      }else if(tur === 'bagla'){
+        await baglaKod(deger('hesap-kod'), adres());
+        kapiKapat();
+      }else if(tur === 'iki-baslat'){
+        const v = await ikiAdimBaslat(deger('hesap-iki-sifre'));
+        if(merkez) merkez.ikiKurulum = { sir:v.sir, uri:v.uri };
+      }else if(tur === 'iki-onayla'){
+        const y = await ikiAdimOnayla(deger('hesap-iki-kod'));
+        if(merkez){
+          merkez.ikiKurulum = null;
+          merkez.yedekler = y;
+          if(merkez.ben) merkez.ben.iki_adim = { acik:true, olusturma:ortam.simdi(), yedek_kalan:y.length };
+        }
+        mesaj = 'İki adımlı doğrulama açıldı.';
+      }else if(tur === 'yedek-yenile'){
+        const y = await yedekYenile(deger('hesap-yedek-sifre'));
+        if(merkez){
+          merkez.yedekler = y;
+          if(merkez.ben && merkez.ben.iki_adim) merkez.ben.iki_adim.yedek_kalan = y.length;
+        }
+      }else if(tur === 'iki-kapat'){
+        await ikiAdimKapat(deger('hesap-kapat-sifre'), deger('hesap-kapat-kod'));
+        if(merkez && merkez.ben) merkez.ben.iki_adim = { acik:false, olusturma:null, yedek_kalan:0 };
+        mesaj = 'İki adımlı doğrulama kapandı.';
+      }else if(tur === 'anahtar'){
+        const a = await anahtarAc(deger('hesap-anahtar-sifre'), deger('hesap-anahtar-ad'));
+        if(merkez){
+          merkez.yeniAnahtar = { anahtar:a.anahtar, ad:a.ad };
+          merkez.baglanti = await baglantilar();
+        }
       }else if(tur === 'kayit'){
         if(deger('hesap-parola') !== deger('hesap-parola2')) throw new Error('İki şifre aynı değil.');
         await kayitOl(deger('hesap-ad').trim(), deger('hesap-parola'), deger('hesap-soru'), deger('hesap-cevap'), adres());
@@ -1925,8 +2583,11 @@ window.LIFEOS.HESAP = (function(){
         ciz = true;
       }else if(tur === 'kurtar'){
         if(deger('hesap-parola') !== deger('hesap-parola2')) throw new Error('İki şifre aynı değil.');
-        await kurtar(kapi.ad, deger('hesap-cevap'), deger('hesap-parola'), kapi.adres);
-        kapiKapat();
+        const r = await kurtar(kapi.ad, deger('hesap-cevap'), deger('hesap-parola'), kapi.adres);
+        if(r && r.iki_adim){
+          kapi = Object.assign(KAPI_BOS(), { gorunum:'kod', ilk:false, bilet:r.bilet, adres:r.adres });
+          ciz = true;
+        }else kapiKapat();
       }else if(tur === 'parola'){
         if(deger('hesap-yeni') !== deger('hesap-yeni2')) throw new Error('İki şifre aynı değil.');
         await parolaDegistir(deger('hesap-eski'), deger('hesap-yeni'));
@@ -1959,7 +2620,12 @@ window.LIFEOS.HESAP = (function(){
     }
     if(kapida){
       if(ciz && !hata && kapiAcikMi()) kapiTazele('ileri');
-      else mesajYaz(mesaj);
+      else{
+        mesajYaz(mesaj);
+        /* Yanlış kod: alan seçili kalır, yenisi üstüne yazılır. */
+        const k = hata && document.getElementById('hesap-kod');
+        if(k){ try{ k.select(); }catch(e){ /* seçilemedi */ } }
+      }
     }else if(merkezde){
       if(hata){
         const el = form.querySelector('.hesap__mesaj');
@@ -2055,6 +2721,87 @@ window.LIFEOS.HESAP = (function(){
         if(merkez) merkez.kayit = v;
         return v ? 'Yeni hesap açma açık.' : 'Yeni hesap açma kapalı.';
       });
+    }else if(ad === 'yedek-kip'){
+      kapi.yedekKip = !kapi.yedekKip;
+      kapiTazele();
+    }else if(ad === 'kopyala'){
+      const metin = is.getAttribute('data-metin') || '';
+      Promise.resolve(ortam.kopyala(metin)).then(ok => {
+        const s = is.querySelector('span');
+        const eski = s ? s.textContent : '';
+        if(s) s.textContent = ok ? 'Kopyalandı' : 'Kopyalanamadı';
+        else is.setAttribute('aria-label', ok ? 'Kopyalandı' : 'Kopyalanamadı');
+        is.classList.toggle('is-kopyalandi', !!ok);
+        ortam.zamanla(() => { if(s) s.textContent = eski; is.classList.remove('is-kopyalandi'); }, 1600);
+      });
+    }else if(ad === 'yedek-indir'){
+      const y = merkez && merkez.yedekler;
+      if(!y) return;
+      const o = oturum() || {};
+      Promise.resolve(ortam.indir('lifeos-yedek-kodlar-' + String(o.a || 'hesap').replace(/[^0-9A-Za-zÇĞİÖŞÜçğıöşü_.-]/g, '') + '.txt',
+        'LifeOS yedek kodları (' + (o.a || '') + ')\r\nHer biri girişi bir kez açar.\r\n\r\n' + y.join('\r\n') + '\r\n', 'text/plain')).catch(() => {});
+    }else if(ad === 'yedek-tamam'){
+      if(merkez){ merkez.yedekler = null; merkez.mesaj = ''; merkezTazele(); }
+    }else if(ad === 'iki-vazgec'){
+      if(merkez){ merkez.ikiKurulum = null; merkezTazele(); }
+    }else if(ad === 'takvim-ac' || ad === 'takvim-yenile'){
+      is.disabled = true;
+      merkezIs(async () => {
+        const t = await takvimAc(ad === 'takvim-yenile');
+        if(merkez){
+          merkez.takvimOnay = false;
+          merkez.baglanti = Object.assign({}, merkez.baglanti, { takvim:t });
+          if(merkez.ben && merkez.ben.baglantilar) merkez.ben.baglantilar.takvim = true;
+        }
+        return ad === 'takvim-ac' ? 'Abonelik açık. Adresi takvim uygulamana ekle.' : 'Adres yenilendi; eskisi artık çalışmaz.';
+      });
+    }else if(ad === 'takvim-yenile-sor' || ad === 'takvim-vazgec'){
+      if(merkez){ merkez.takvimOnay = ad === 'takvim-yenile-sor'; merkez.mesaj = ''; merkezTazele(); }
+    }else if(ad === 'takvim-kapat'){
+      is.disabled = true;
+      merkezIs(async () => {
+        const t = await takvimKapat();
+        if(merkez){
+          merkez.baglanti = Object.assign({}, merkez.baglanti, { takvim:t });
+          if(merkez.ben && merkez.ben.baglantilar) merkez.ben.baglantilar.takvim = false;
+        }
+        return 'Abonelik kapandı; adres artık çalışmaz.';
+      });
+    }else if(ad === 'takvim-indir'){
+      const t = merkez && merkez.baglanti && merkez.baglanti.takvim, base = sunucuAdresi();
+      if(!t || !t.yol || base === null) return;
+      is.disabled = true;
+      merkezIs(async () => {
+        let r;
+        try{ r = await ortam.fetch(base + t.yol, { cache:'no-store', credentials:'omit' }); }
+        catch(e){ const h = new Error('Sunucuya ulaşılamadı.'); h.kod = 0; throw h; }
+        if(!r.ok) throw new Error('Takvim alınamadı (' + r.status + ').');
+        await ortam.indir('lifeos-takvim.ics', await r.text(), 'text/calendar');
+        return 'Takvim dosyası hazır. Google Takvim › Ayarlar › İçe aktar.';
+      });
+    }else if(ad === 'anahtar-sil'){
+      const id = Number(is.getAttribute('data-id'));
+      is.disabled = true;
+      merkezIs(async () => {
+        await anahtarSil(id);
+        if(merkez){ merkez.baglanti = await baglantilar(); merkez.yeniAnahtar = null; }
+        return 'Anahtar silindi; onu kullanan kısayol artık çalışmaz.';
+      });
+    }else if(ad === 'bag-vazgec'){
+      merkezGeri();
+    }else if(ad === 'bag-yeni'){
+      bagBasla();
+    }else if(ad === 'kisi-iki-kapat'){
+      if(!merkez) return;
+      const id = merkez.kisi;
+      is.disabled = true;
+      merkezIs(async () => {
+        const u = await yonet(id, { iki_adim:false });
+        if(merkez && merkez.kullanicilar){
+          merkez.kullanicilar = merkez.kullanicilar.map(x => (x.id === u.id ? Object.assign({}, x, u, { iki_adim:false }) : x));
+        }
+        return 'İki adımlı doğrulaması kapandı.';
+      }, '[data-hesap-kisi-mesaj]');
     }else if(ad === 'yonet'){
       const alan = is.getAttribute('data-alan'), d = is.getAttribute('data-deger');
       if(is.getAttribute('aria-pressed') === 'true' || !merkez) return;
@@ -2104,6 +2851,18 @@ window.LIFEOS.HESAP = (function(){
       if(t.hasAttribute && t.hasAttribute('data-sifre')) gucTazele(t);
       const f = t.closest('[data-hesap-form="profil"]');
       if(f) onizle(f);
+      /* Altı haneli kod: rakam dışı atılır, «123 456» biçimi; altı hane
+         tamamlanınca form kendiliğinden gönderilir (yapıştırmada da). */
+      if(e.type === 'input' && t.hasAttribute && t.hasAttribute('data-kod')){
+        const r = String(t.value || '').replace(/\D/g, '').slice(0, 6);
+        const bicim = r.length > 3 ? r.slice(0, 3) + ' ' + r.slice(3) : r;
+        if(t.value !== bicim) t.value = bicim;
+        const form = t.closest('form'), d = form && form.querySelector('button[type=submit]');
+        if(r.length === 6 && form && d && !d.disabled){
+          if(typeof form.requestSubmit === 'function') form.requestSubmit(d);
+          else d.click();
+        }
+      }
     };
     document.addEventListener('input', yazi);
     document.addEventListener('change', yazi);
@@ -2123,7 +2882,10 @@ window.LIFEOS.HESAP = (function(){
       if(!kok) return;
       if(e.key === 'Escape'){
         if(kok.hasAttribute('data-hesap-merkez')){ e.preventDefault(); e.stopPropagation(); merkezGeri(); }
-        else if(kapi.gorunum !== 'karsila'){ e.preventDefault(); e.stopPropagation(); kapiGit(kapi.gorunum === 'unuttum' ? 'giris' : 'karsila'); }
+        else if(kapi.gorunum !== 'karsila'){
+          e.preventDefault(); e.stopPropagation();
+          kapiGit(kapi.gorunum === 'unuttum' || kapi.gorunum === 'kod' ? 'giris' : 'karsila');
+        }
         return;
       }
       if(e.key !== 'Tab') return;
@@ -2145,11 +2907,31 @@ window.LIFEOS.HESAP = (function(){
     });
   }
 
+  /* ?bagla=482913 (söz 18): tabletin kamerası QR'ı açınca. Kod okunur ve
+     adres çubuğundan hemen silinir. */
+  function bagSorgu(){
+    let kod = '';
+    try{ kod = new URLSearchParams(ortam.konum().search || '').get('bagla') || ''; }catch(e){ kod = ''; }
+    if(!kod) return '';
+    ortam.sorguSil('bagla');
+    kod = kod.replace(/\D/g, '');
+    return kod.length === 6 ? kod : '';
+  }
+  function bagSorguAc(kod){
+    if(!kod || oturum() || typeof document === 'undefined') return;
+    if(kapiAcikMi()) kapiGit('bagla', { kod });
+    else kapiAc('bagla', { kod });
+    const f = document.querySelector('[data-hesap-kapi] [data-hesap-form="bagla"]');
+    const d = f && f.querySelector('button[type=submit]');
+    if(f && d && !document.getElementById('hesap-adres')) formIsle('bagla', f);
+  }
+
   /* Modülün tek çağrısı (app.js, model yüklendikten sonra). */
   function kur(o){
     ayar = Object.assign({ modul:'spi' }, o || {});
     if(ayar.depo) ayar.depo.onDegisim = degisti;
     bagla();
+    const bagKod = bagSorgu();
     if(ornekMi()){ durumYaz('ornek', 'Örnek profil eşitlenmez.'); return; }
     durumYaz('bilinmiyor', '');
     const giris = ayar.modul === 'giris';
@@ -2164,7 +2946,8 @@ window.LIFEOS.HESAP = (function(){
     }
     yokla().then(() => {
       cipTazele();
-      if(kapiGerekli()){
+      if(bagKod && !oturum() && (sunucu || ortam.yerelUygulama())) bagSorguAc(bagKod);
+      else if(kapiGerekli()){
         if(!kapiAcikMi()) kapiAc();
         else if(kapi.gorunum === 'karsila') kapiTazele();   // sunucunun durumu (kurulum, kayıt) çizilsin
       }else if(giris && kapiAcikMi()) kapiKapat(false);
@@ -2188,9 +2971,11 @@ window.LIFEOS.HESAP = (function(){
     ayar = null; hal = { durum:'bilinmiyor', mesaj:'' }; sunucu = null;
     aktif = null; siradaki = null; panelMesaj = ''; onayBitis = 0;
     modelBekliyor = false; ekranBekliyor = false; tazeleme = null; profilTazelendi = false;
-    kapi = { gorunum:'karsila', soru:null, ad:'', adres:null, secili:null, ilk:true };
+    ekAktif = false; sonGelen = 0; sonYayin = 0; ekSon = null;
+    kapi = KAPI_BOS();
     kapiKapat(false);
     merkezKapat();
+    bagDur();
     if(ozetId != null) ortam.iptal(ozetId);
     ozetId = null;
     if(typeof document !== 'undefined'){
@@ -2212,7 +2997,9 @@ window.LIFEOS.HESAP = (function(){
     ben, profilAyarla, cihazlar, cihazCikar, otekilerdenCik, kullanicilar, yonet, kayitAyarla, kullaniciEkle,
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
     ozetYaz, ozetOku, ozetCiz,
-    _ortam:ortam, _sifirla, _istek:istek,
+    girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
+    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat,
+    _ortam:ortam, _sifirla, _istek:istek, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,
   };
 })();

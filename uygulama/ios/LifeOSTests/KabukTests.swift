@@ -39,8 +39,9 @@ final class KabukTests: XCTestCase {
         // giden betik. Betikler bilerek vardir: giris ekrani (hesap.js, 020ae7ab)
         // ve LifeOS'un «Animasyonlar» ayari (animasyon.js, 2026-10-06). Bu satir
         // once «hic betik yok» diyordu; giris ekrani gelince 13. derlemeden beri
-        // kirmiziydi ve telefona hic guncelleme gitmedi.
-        XCTAssertEqual(jsDegerlendir(d.web, "!document.querySelector('[data-hkm], #guncel, .guncel') && Array.from(document.scripts).every(s => ['/hesap.js', '/animasyon.js'].some(x => (s.getAttribute('src') || '').endsWith(x)))").deger as? Bool, true,
+        // kirmiziydi ve telefona hic guncelleme gitmedi. qr.js (2026-10-08): hesap
+        // sayfasinin QR'i (iki adimli dogrulama, kodla cihaz baglama).
+        XCTAssertEqual(jsDegerlendir(d.web, "!document.querySelector('[data-hkm], #guncel, .guncel') && Array.from(document.scripts).every(s => ['/hesap.js', '/animasyon.js', '/qr.js'].some(x => (s.getAttribute('src') || '').endsWith(x)))").deger as? Bool, true,
                        "telefonun giriş sayfasında bilgisayara özgü parça var")
         XCTAssertEqual(bekle(d.web, "!!(window.LIFEOS && window.LIFEOS.HESAP)", sure: 10) as? Bool, true, "giriş ekranı (hesap.js) yüklenmedi")
         jsCalistir(d.web, "document.querySelectorAll('a.kart')[1].click()")
