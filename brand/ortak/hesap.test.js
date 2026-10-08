@@ -77,7 +77,8 @@
     const oturumAc = (ad, on, govde) => {
       const j = 'jeton-' + on + Object.keys(s.jetonlar).length + '-gizli';
       s.jetonlar[j] = ad;
-      s.oturumlar[j] = { id:++s.oturumSira, cihaz_ad:(govde && govde.cihaz_ad) || 'Cihaz', son:1700000000000 };
+      s.oturumlar[j] = { id:++s.oturumSira, cihaz_ad:(govde && govde.cihaz_ad) || 'Cihaz', son:1700000000000,
+        olusturma:1700000000000, yontem:on === 'b' ? 'kod' : on === 'i' ? 'iki-adim' : 'sifre', ip:'192.168.0.' + (20 + s.oturumSira) };
       return { jeton:j, kullanici:profil(ad) };
     };
     s.fetch = async (url, op) => {
@@ -153,6 +154,16 @@
           renkler:['mavi', 'turkuaz', 'mor'], kayit:s.kayitAcik, iki_adim:ikiAdim(ad),
           baglantilar:{ anahtar:(s.anahtarlar || []).length, takvim:!!(s.takvim && s.takvim.acik),
             gelen_bekleyen:(s.gelen || []).filter(x => x.durum !== 'onayda' && x.durum !== 'anlasilmadi').length } });
+      }
+      /* ---------- cihaz adı ve uyarılar (sunucu sözleri 18–19) ---------- */
+      if(yol === '/api/hesap/uyarilar') return cevap(200, { uyarilar:(s.uyarilar || []).map(u => Object.assign({}, u)) });
+      if(yol === '/api/hesap/cihaz-ad'){
+        const j = Object.keys(s.oturumlar).find(x => s.oturumlar[x].id === govde.id && s.jetonlar[x] === ad);
+        if(!j) return cevap(404, { hata:'Bu cihaz artık listede yok.' });
+        if(!String(govde.ad || '').trim()) return cevap(400, { hata:'Cihaz adı 1–40 karakter olmalı.' });
+        s.oturumlar[j].cihaz_ad = String(govde.ad).trim();
+        return cevap(200, { ad:s.oturumlar[j].cihaz_ad, cihazlar:Object.keys(s.oturumlar).filter(x => s.jetonlar[x] === ad)
+          .map(x => Object.assign({ bu:x === bu }, s.oturumlar[x])).sort((a, b) => b.bu - a.bu) });
       }
       /* ---------- bağlantılar (sunucu sözleri 14–17) ---------- */
       if(yol === '/api/hesap/baglantilar'){
@@ -1769,6 +1780,119 @@
       await hazir();
       expect(srv.kullanicilar.anne.ikiAdim).toBe(undefined);
       expect(merkez().textContent.indexOf('İki adımlı doğrulama açık') < 0).toBe(true);
+    }));
+  });
+
+  describe('Hesap — cihaz ayrıntısı ve yeni giriş uyarısı (sözler 21–22)', () => {
+    const merkez = () => document.querySelector('[data-hesap-merkez]');
+    const tikla = sel => merkez().querySelector(sel).click();
+    async function girisli(o){
+      const srv = sunucuKur(o), c = cihazKur(srv);
+      const h = sahne(c);
+      await hazir();
+      await h.girisYap('omer', 'parola-123');
+      return { srv, c, h };
+    }
+
+    it('cihaz ayrıntısı: satır açar; ad kaydedilir ve başlık olur; giriş yolu ve adres; öteki cihazın oturumu kapanır', () => sahneyle(async () => {
+      const { h, srv } = await girisli();
+      await srv.fetch('/api/hesap/giris', { method:'POST', body:JSON.stringify({ ad:'omer', parola:'parola-123', cihaz_ad:'iPad' }) });
+      await h.merkezAc('cihazlar');
+      await hazir();
+      expect(merkez().querySelectorAll('[data-hesap="cihaz"]').length).toBe(2);
+      merkez().querySelectorAll('[data-hesap="cihaz"]')[1].click();             // iPad
+      await hazir();
+      expect(merkez().querySelector('.hesap-merkez__baslik').textContent).toBe('iPad');
+      const m = merkez().textContent;
+      expect(m).toContain('Şifreyle');
+      expect(m).toContain('192.168.0.');
+      document.getElementById('hesap-cihaz-ad').value = 'Salon tableti';
+      merkez().querySelector('[data-hesap-form="cihaz-ad"]').requestSubmit();
+      await hazir();
+      expect(merkez().querySelector('.hesap-merkez__baslik').textContent).toBe('Salon tableti');
+      expect(merkez().textContent).toContain('Cihazın adı kaydedildi');
+      tikla('[data-hesap="cihaz-kapat"]');
+      await hazir();
+      expect(Object.keys(srv.jetonlar).length).toBe(1);
+      expect(merkez().textContent).toContain('«Salon tableti» oturumu kapatıldı');
+      expect(merkez().querySelectorAll('[data-hesap="cihaz"]').length).toBe(1);   // listeye döndü
+      expect(h.durum().oturum.ad).toBe('omer');                                  // bu cihaz girişli kalır
+    }));
+
+    it('yeni giriş uyarısı: ilk bakışta geçmiş görülmüş sayılır; sonra gelen giriş kartta ve avatarda; «Bendim» kapatır', () => sahneyle(async () => {
+      const { h, srv, c } = await girisli();
+      srv.uyarilar = [{ id:3, tur:'giris', cihaz_ad:'PC', ip:'127.0.0.1', zaman:1700000000000, bu:true, oturum:1 },
+        { id:2, tur:'giris', cihaz_ad:'Eski telefon', ip:'192.168.0.9', zaman:1690000000000, bu:false, oturum:null }];
+      await h.uyarilar();
+      await h.merkezAc();
+      await hazir();
+      expect(merkez().querySelector('.hesap-olaykart')).toBeNull();               // geçmiş için alarm yok
+      const ben = document.createElement('button');
+      ben.setAttribute('data-hesap-ben', '');
+      document.body.appendChild(ben);
+      try{
+        srv.uyarilar.unshift({ id:7, tur:'giris', cihaz_ad:'iPad', ip:'192.168.0.30', zaman:1700000500000, bu:false, oturum:9 },
+          { id:6, tur:'yanlis', cihaz_ad:'iPad', ip:'192.168.0.30', zaman:1700000400000, bu:false, oturum:null });
+        h.merkezKapat();
+        await h.merkezAc();
+        await hazir();
+        const k = merkez().querySelector('.hesap-olaykart');
+        expect(!!k).toBe(true);
+        expect(k.textContent).toContain('Yeni giriş: iPad');
+        expect(k.textContent).toContain('1 olay daha');
+        expect(ben.getAttribute('data-uyari')).toBe('2');
+        tikla('[data-hesap="uyari-gordum"]');
+        expect(merkez().querySelector('.hesap-olaykart')).toBeNull();
+        expect(ben.hasAttribute('data-uyari')).toBe(false);
+        /* Görülen bu cihazın kapıya bakmayan çerezinde: öteki modüller de bilir. */
+        expect(decodeURIComponent(c.jar.lifeos_gordu || '').indexOf(':7') >= 0).toBe(true);
+        h.merkezKapat();
+        await h.merkezAc();
+        await hazir();
+        expect(merkez().querySelector('.hesap-olaykart')).toBeNull();
+        /* Bu cihazın kendi olayı («bu») hiç uyarı değildir. */
+        srv.uyarilar.unshift({ id:8, tur:'giris', cihaz_ad:'PC', ip:'127.0.0.1', zaman:1700000600000, bu:true, oturum:1 });
+        await h.uyarilar();
+        expect(ben.hasAttribute('data-uyari')).toBe(false);
+      }finally{ ben.remove(); }
+    }));
+
+    it('yeni giriş uyarısı: «İncele» açık oturumun cihazına, kapanmışsa etkinliğe götürür', () => sahneyle(async () => {
+      const { h, srv } = await girisli();
+      srv.uyarilar = [];
+      await h.uyarilar();                                                          // ilk bakış: taban
+      await srv.fetch('/api/hesap/giris', { method:'POST', body:JSON.stringify({ ad:'omer', parola:'parola-123', cihaz_ad:'iPad' }) });
+      srv.uyarilar = [{ id:5, tur:'giris', cihaz_ad:'iPad', ip:'192.168.0.30', zaman:1700000500000, bu:false, oturum:2 }];
+      await h.merkezAc();
+      await hazir();
+      tikla('[data-hesap="uyari-incele"]');
+      await hazir();
+      expect(merkez().querySelector('.hesap-merkez__baslik').textContent).toBe('iPad');
+      h.merkezKapat();
+      srv.uyarilar.unshift({ id:6, tur:'yanlis', cihaz_ad:'Bilinmeyen', ip:'192.168.0.77', zaman:1700000600000, bu:false, oturum:null });
+      await h.merkezAc();
+      await hazir();
+      expect(merkez().querySelector('.hesap-olaykart').classList.contains('is-dikkat')).toBe(true);
+      tikla('[data-hesap="uyari-incele"]');
+      expect(merkez().querySelector('.hesap-merkez__baslik').textContent).toBe('Etkinlik');
+    }));
+
+    it('kimlik hapları: plan ve (açıksa) iki adım; yüklenirken iskelet satırlar ve ekran okuyucu metni', () => sahneyle(async () => {
+      const { h, srv } = await girisli();
+      srv.kullanicilar.omer.ikiAdim = '135790';
+      await h.merkezAc();
+      await hazir();
+      const hap = merkez().querySelectorAll('.hesap-haplar .hesap-hap');
+      expect(hap.length).toBe(2);
+      expect(hap[1].textContent).toContain('İki adım açık');
+      h.merkezKapat();
+      srv.kapali = true;
+      const ac = h.merkezAc('baglantilar');
+      h.merkezKapat();
+      h.merkezAc('takvim');                                                      // veri gelmeden çizilir
+      expect(merkez().querySelector('.hesap-iskelet[aria-busy="true"]')).toBeTruthy();
+      expect(merkez().textContent).toContain('Yükleniyor');
+      await ac; await hazir();
     }));
   });
 

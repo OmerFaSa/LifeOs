@@ -266,7 +266,156 @@ window.LIFEOS = window.LIFEOS || {};
     simdiki = oku();
   }
 
+  /* ---------------------------------------------------------- geçiş
+
+     SEÇİM SAYFASINDAN MODÜLE (kullanıcı, 2026-10-08: «Aç'a tıklayınca ani
+     geçiyor; modül animasyonla açılsın»). Modüller ayrı kapıdadır (köken):
+     tarayıcının sayfa geçişi (View Transitions) kökenler arasında çalışmaz.
+     Geçiş bu yüzden iki yarıdır ve ortadaki sayfa değişimi GÖRÜNMEZ:
+       1. Basılan kart (ya da kenardaki modül bağlantısı) yerinden büyüyüp
+          ekranı kaplar ve modülün MARKA PERDESİNE dönüşür: aynı buğulu cam,
+          aynı logo, aynı yerde ve boyda (brand/seviye/seviye.css
+          .perde--marka). Önce yer, sonra logo; 560 ms, sakin başlar.
+       2. Sayfa değişir. Varılan modül ilk karede perdeyi zaten gösterir;
+          kapıya bakmayan kısa ömürlü çerez (`lifeos_gecis`, 15 sn) «geçişle
+          geldin» der ve perdenin logosu yeniden belirmez — zaten yerinde.
+     Azaltılmış harekette (bu dosyanın kipi) oynamaz: bağlantı olağan
+     açılır. Ctrl/⌘/orta tık ve yeni sekme dokunulmadan geçer. Geri tuşuyla
+     dönülen sayfada (bfcache) perde kalmaz. Merkez'in (HKM) marka perdesi
+     yoktur: yeni sekmede açılır, kendi sayfası kısa bir girişle belirir. */
+
+  const GECIS_CEREZ = 'lifeos_gecis';
+  const GECIS_MS = 560;
+  const GECIS_OMUR = 15000;
+  const GECIS_MODUL = /^(ays|spi|esp|hkm)$/;
+  /* Perdenin ölçüsü ve camı seviye.css .perde--marka ile AYNIDIR; biri
+     değişirse geçişin sonu perdeye oturmaz. */
+  const GECIS_STIL = [
+    '.lifeos-gecis{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;pointer-events:auto;',
+    'overflow:hidden;--g-zemin:rgba(12,13,18,.72);--g-golge:rgba(0,0,0,.5);background:var(--g-zemin);',
+    '-webkit-backdrop-filter:blur(28px) saturate(1.35);backdrop-filter:blur(28px) saturate(1.35);',
+    'transition:clip-path .56s cubic-bezier(.32,.72,0,1),opacity .2s ease;}',
+    ':root[data-theme="light"] .lifeos-gecis{--g-zemin:rgba(244,244,248,.7);--g-golge:rgba(30,34,60,.16);}',
+    '@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .lifeos-gecis{--g-zemin:rgba(244,244,248,.7);',
+    '--g-golge:rgba(30,34,60,.16);}}',
+    '.lifeos-gecis__ortam{position:absolute;inset:18%;width:64%;height:64%;object-fit:contain;',
+    'filter:blur(72px) saturate(1.5);opacity:0;pointer-events:none;transition:opacity .56s ease .1s;}',
+    '.lifeos-gecis.is-tam .lifeos-gecis__ortam{opacity:.34;}',
+    '.lifeos-gecis__logo{position:relative;width:min(38vw,300px);height:auto;object-fit:contain;opacity:0;',
+    'filter:drop-shadow(0 22px 56px var(--g-golge));transform-origin:50% 50%;',
+    'transition:transform .56s cubic-bezier(.32,.72,0,1) .04s,opacity .32s ease .08s;}',
+    '.lifeos-gecis.is-tam .lifeos-gecis__logo{opacity:1;transform:none;}',
+    /* Varış: perde ilk karede durur; logosu yeniden gelmez, zaten yerinde. */
+    'html.gecis-gel .perde--marka .perde__logo,html.gecis-gel .perde--marka .perde__ortam{animation:none!important;}',
+  ].join('');
+
+  function gecisStil(){
+    if(typeof document === 'undefined' || document.getElementById('lifeos-gecis-stil')) return;
+    const s = document.createElement('style');
+    s.id = 'lifeos-gecis-stil';
+    s.textContent = GECIS_STIL;
+    (document.head || document.documentElement).appendChild(s);
+  }
+  function gecisCerezYaz(m, simdi){
+    try{
+      document.cookie = GECIS_CEREZ + '=' + m + '.' + (simdi || Date.now()) + '; Path=/; Max-Age=15; SameSite=Strict'
+        + (location.protocol === 'https:' ? '; Secure' : '');
+    }catch(e){ /* çerez kapalı: varışta logo yine gelir, geçiş bozulmaz */ }
+  }
+  /* Varılan sayfada: çerez taze mi? Döner: modül kimliği ya da null.
+     Çerez okunur okunmaz silinir: yenilenen sayfa ikinci kez «geçişle
+     geldi» sayılmaz. */
+  function gecisVaris(cerez, simdi){
+    const m = /(?:^|;\s*)lifeos_gecis=([a-z]{2,4})\.(\d{10,16})/.exec(String(cerez == null ? '' : cerez));
+    if(!m || !GECIS_MODUL.test(m[1])) return null;
+    if(Math.abs((simdi || Date.now()) - Number(m[2])) > GECIS_OMUR) return null;
+    return m[1];
+  }
+  function logoAdresi(modul, url){
+    try{ return new URL('img/marka/kimlik-' + modul + '.webp', url || location.href).href; }catch(e){ return ''; }
+  }
+  const onyuklenen = {};
+  function gecisOnyukle(modul, url){
+    const a = logoAdresi(modul, url);
+    if(!a || onyuklenen[a] || typeof Image !== 'function') return;
+    onyuklenen[a] = new Image();
+    onyuklenen[a].src = a;
+  }
+
+  /* o = { modul, url, kaynak:Element (büyüyen kart), logoKaynak:Element
+     (logonun çıktığı yer), git:Function, sure:ms (test) }. Döner: geçiş
+     oynadı mı (false: çağıran olağan yolu izler). */
+  let gecisAktif = false;
+  /* Sayfayı değiştiren tek yer; testler değiştirir (sayfa gitmesin). */
+  let yonlendir = h => { window.location.href = h; };
+  function gecisBitir(){
+    if(typeof document !== 'undefined') document.querySelectorAll('.lifeos-gecis').forEach(x => x.remove());
+    gecisAktif = false;
+  }
+  function gecis(o){
+    o = o || {};
+    if(typeof document === 'undefined' || !document.body || hareketAz() || gecisAktif) return false;
+    if(!GECIS_MODUL.test(o.modul || '') || typeof o.git !== 'function') return false;
+    gecisAktif = true;
+    gecisStil();
+    const vw = window.innerWidth, vh = window.innerHeight;
+    /* Görünmeyen kaynak (kapanmış pencere) ölçü vermez: perde ortadan açılır. */
+    const olc = el => {
+      const b = el && el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+      return b && b.width > 0 && b.height > 0 ? b : null;
+    };
+    const k = olc(o.kaynak);
+    const r = k ? Math.max(0, parseFloat(getComputedStyle(o.kaynak).borderTopLeftRadius) || 20) : 0;
+    const kap = document.createElement('div');
+    kap.className = 'lifeos-gecis';
+    kap.setAttribute('aria-hidden', 'true');
+    kap.style.clipPath = k ? 'inset(' + Math.max(0, k.top) + 'px ' + Math.max(0, vw - k.right) + 'px '
+      + Math.max(0, vh - k.bottom) + 'px ' + Math.max(0, k.left) + 'px round ' + r + 'px)' : 'inset(50% 50% 50% 50% round 24px)';
+    const adres = logoAdresi(o.modul, o.url);
+    const ortam = document.createElement('img'), logo = document.createElement('img');
+    ortam.className = 'lifeos-gecis__ortam'; logo.className = 'lifeos-gecis__logo';
+    ortam.alt = ''; logo.alt = '';
+    ortam.onerror = () => ortam.remove(); logo.onerror = () => logo.remove();
+    if(adres){ ortam.src = adres; logo.src = adres; }
+    kap.appendChild(ortam); kap.appendChild(logo);
+    document.body.appendChild(kap);
+    /* Logo kartın küçük işaretinden çıkar (FLIP): son yerine göre farkı
+       ve oranı başta verilir, sonra bırakılır. */
+    const lk = olc(o.logoKaynak) || k;
+    const son = Math.min(vw * 0.38, 300);
+    if(lk){
+      const dx = (lk.left + lk.width / 2) - vw / 2, dy = (lk.top + lk.height / 2) - vh / 2;
+      logo.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + Math.max(0.08, lk.width / son) + ')';
+    }else{
+      logo.style.transform = 'translateY(14px) scale(.94)';
+    }
+    void kap.offsetWidth;                            // başlangıç çizilsin, sonra geçiş
+    kap.classList.add('is-tam');
+    kap.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';
+    logo.style.transform = '';
+    const sure = typeof o.sure === 'number' ? o.sure : GECIS_MS + 40;
+    setTimeout(() => {
+      gecisCerezYaz(o.modul);
+      try{ o.git(); }catch(e){ console.error('Geçiş:', e); }
+      /* Sayfa değişmediyse (engellendi, hata) perde kendiliğinden kalkar. */
+      setTimeout(() => { if(kap.isConnected){ kap.remove(); gecisAktif = false; } }, 6000);
+    }, sure);
+    return true;
+  }
+
   /* ---------------------------------------------------------- kurulum */
+
+  if(typeof document !== 'undefined' && document.documentElement){
+    const gelen = gecisVaris(document.cookie);
+    if(/lifeos_gecis=/.test(document.cookie || '')){
+      try{ document.cookie = GECIS_CEREZ + '=; Path=/; Max-Age=0; SameSite=Strict'; }catch(e){}
+    }
+    if(gelen){
+      document.documentElement.classList.add('gecis-gel');
+      document.documentElement.setAttribute('data-gecis', gelen);
+      gecisStil();
+    }
+  }
 
   uygula(simdiki);
   if(typeof document !== 'undefined'){
@@ -279,6 +428,32 @@ window.LIFEOS = window.LIFEOS || {};
       e.preventDefault();
       ayarla(b.getAttribute('data-animasyon'));
     });
+    /* Seçim sayfasının kartı (sistem/sunucu.py giris_html): olağan tık
+       geçişle açılır. Merkez kartının kendi işleyicisi var (yeni sekme). */
+    const secimKarti = t => {
+      const a = t && t.closest ? t.closest('a.kart[data-modul]') : null;
+      return a && !a.hasAttribute('data-hkm') && /^(ays|spi|esp)$/.test(a.getAttribute('data-modul')) ? a : null;
+    };
+    document.addEventListener('click', e => {
+      if(e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = secimKarti(e.target);
+      if(!a || (a.target && a.target !== '_self')) return;
+      if(gecisAktif){ e.preventDefault(); return; }    // ikinci tık perdeyi kesip sayfayı ani açmasın
+      const href = a.href;
+      if(gecis({ modul:a.getAttribute('data-modul'), url:href, kaynak:a, logoKaynak:a.querySelector('.logo') || a,
+        git:() => yonlendir(href) })) e.preventDefault();
+    });
+    /* Logo, basılmadan önce gelsin: üzerine gelince ya da dokununca. */
+    const onyukle = e => {
+      const a = secimKarti(e.target);
+      if(a) gecisOnyukle(a.getAttribute('data-modul'), a.href);
+    };
+    document.addEventListener('pointerover', onyukle, { passive:true });
+    document.addEventListener('pointerdown', onyukle, { passive:true });
+  }
+  if(typeof window !== 'undefined' && window.addEventListener){
+    /* Geri tuşuyla dönülen sayfa (bfcache) perdeyle donmuş kalmasın. */
+    window.addEventListener('pageshow', e => { if(e.persisted) gecisBitir(); });
   }
   if(typeof window !== 'undefined' && window.addEventListener){
     window.addEventListener('storage', e => { if(e.key === ANAHTAR) yenile(); });
@@ -289,5 +464,7 @@ window.LIFEOS = window.LIFEOS || {};
     ANAHTAR, KIPLER, TASINAN,
     kip, ayarla, yenile, varsayilan, sistemAz, hareketAz,
     donustur, uygula, seciciHtml, tasimaEkle, tasimaAl,
+    gecis, gecisVaris, gecisOnyukle, gecisBitir, logoAdresi, GECIS_CEREZ, GECIS_MS,
+    _yonlendir:fn => { const eski = yonlendir; if(typeof fn === 'function') yonlendir = fn; return eski; },
   });
 })();

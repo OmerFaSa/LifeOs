@@ -70,6 +70,8 @@ verilen kararlar:
 | ESP'ye materyal | ESP `core/beacon.js` `materyalUygula`: BAM seti dil ve tarih destesine kart olarak | 2026-09-23 (b4026b81) |
 | Ortak sunucu ve senkron | `sistem/hesap.py`, `brand/ortak/hesap.js`: PC, telefon ve tablet aynı hesapla; veri kullanıcının PC'sinde | 2026-10-04 (e7972a6c) |
 | Hesap bağlantıları | `sistem/hesap.py` sözleri 14–17, `brand/ortak/hesap.js` sözleri 17–20, `brand/ortak/qr.js`: iki adımlı doğrulama (Google/Microsoft Authenticator, iPhone Şifreler), kodla cihaz bağlama, Kısayollar gelen kutusu (SPİ `Proposals.disaridan`), AYS takvim aboneliği | 2026-10-08 |
+| Cihaz ayrıntısı ve yeni giriş uyarısı | `sistem/hesap.py` sözleri 18–19, `brand/ortak/hesap.js` sözleri 21–22: cihaza ad, giriş yolu, son adres; başka cihazdan girişte «Bendim / İncele» | 2026-10-08 |
+| Modül açılış geçişi | `brand/ortak/animasyon.js` «geçiş»: seçim sayfasındaki kart (ve kenardaki modül bağlantısı) büyüyüp modülün marka perdesine dönüşür; HKM yüzü kendi sayfasında belirir | 2026-10-08 |
 
 ## 4. Değişmeyen sözler
 

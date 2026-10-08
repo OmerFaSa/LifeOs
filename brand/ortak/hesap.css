@@ -627,6 +627,46 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 .hesap-bag__sure{ margin:8px 0 0; font-size:13px; color:var(--text-2); font-variant-numeric:tabular-nums; }
 
 .hesap-uygulamalar{ margin-bottom:18px; }
+
+/* ---------- cihazlar, uyarılar, iskelet (hesap.js sözleri 21–22) ---------- */
+.hesap__gizli{ position:absolute; width:1px; height:1px; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+/* Satıra basınca hafifçe kararır (iOS gibi); kayma yok. */
+.hesap-satir:active, .hesap-oge__ac:active{ background:color-mix(in oklab, var(--text) 9%, transparent); }
+.hesap-oge__ac{ flex:1; min-width:0; display:flex; align-items:center; gap:14px; margin:-8px 0 -8px -14px; padding:8px 0 8px 14px;
+  min-height:58px; border:0; border-radius:16px 0 0 16px; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer;
+  transition:background .2s ease; }
+.hesap-oge__ac:hover{ background:color-mix(in oklab, var(--text) 4%, transparent); }
+.hesap-oge__ac:focus-visible{ outline:2px solid var(--primary); outline-offset:-2px; }
+.hesap-cihaz-simge{ display:grid; place-items:center; width:64px; height:64px; margin-bottom:8px; border-radius:20px;
+  background:var(--surface-2); color:var(--text); }
+.hesap-cihaz-simge .hesap-ikon{ width:30px; height:30px; stroke-width:1.5; }
+.hesap-haplar{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-top:10px; }
+.hesap-haplar .hesap-hap{ margin-top:0; }
+.hesap-hap--simge{ display:inline-flex; align-items:center; gap:6px; }
+.hesap-hap--simge .hesap-ikon{ width:14px; height:14px; color:var(--ok-ink, var(--ok)); stroke-width:2; }
+/* Yeni giriş uyarısı: nötr zemin, durumu simge söyler. */
+.hesap-olaykart{ display:flex; align-items:flex-start; gap:12px; margin:0 0 22px; padding:14px 16px; border-radius:16px;
+  background:var(--surface-2); animation:hesap-alttan .42s cubic-bezier(.32,.72,0,1) both; }
+.hesap-olaykart__ikon{ flex:none; width:22px; height:22px; margin-top:1px; fill:none; stroke:var(--text); stroke-width:1.8;
+  stroke-linecap:round; stroke-linejoin:round; }
+.hesap-olaykart.is-dikkat .hesap-olaykart__ikon{ stroke:var(--bad-ink, var(--bad)); }
+.hesap-olaykart__metin{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+.hesap-olaykart__metin b{ font-size:14.5px; font-weight:600; color:var(--text); }
+.hesap-olaykart__metin small{ font-size:12.5px; color:var(--text-2); }
+.hesap-olaykart__eylem{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.hesap-olaykart__eylem .hesap__ikinci{ min-height:32px; background:var(--surface); }
+/* Kenardaki avatar ve seçim sayfasının çipi: görülmemiş güvenlik olayı. */
+.kenar__arac--profil[data-uyari] .kenar__avatar::before, .hesap-cip.is-uyari::after{ content:''; position:absolute;
+  width:8px; height:8px; border-radius:50%; background:var(--bad); box-shadow:0 0 0 2px var(--surface); pointer-events:none; }
+.kenar__arac--profil[data-uyari] .kenar__avatar::before{ top:-2px; right:-2px; }
+.hesap-cip{ position:relative; }
+.hesap-cip.is-uyari::after{ top:1px; right:1px; }
+/* İskelet: durağan gri çizgiler (parlayan şerit yok). */
+.hesap-iskelet .hesap-oge{ min-height:58px; }
+.hesap-iskelet__daire{ flex:none; width:20px; height:20px; border-radius:6px; background:color-mix(in oklab, var(--text) 9%, transparent); }
+.hesap-iskelet__cizgi{ display:block; height:10px; border-radius:5px; background:color-mix(in oklab, var(--text) 9%, transparent); }
+.hesap-iskelet__cizgi.is-kisa{ width:34%; height:8px; margin-top:6px; opacity:.7; }
+@media (prefers-reduced-motion:reduce){ .hesap-olaykart{ animation:none; } }
 .hesap-oge .hesap__kucuk{ background:var(--surface); }
 @media (max-width:679px){
   .hesap-bag__kod{ font-size:36px; }

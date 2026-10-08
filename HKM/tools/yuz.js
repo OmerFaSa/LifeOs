@@ -390,6 +390,34 @@ async function main(){
         await page.close();
       }
     }
+    /* GİRİŞ GEÇİŞİ (2026-10-08): seçim sayfasından açılınca (çerez
+       lifeos_gecis=hkm) yüz yumuşakça belirir; çerez okunup silinir;
+       «Az» ayarında ve bayat çerezde oynamaz; doğrudan açılış etkilenmez. */
+    {
+      const ctx = await browser.newContext({ viewport:{ width:1280, height:900 } });
+      const sayfa = await ctx.newPage();
+      const kok = 'http://127.0.0.1:' + PORT + '/';
+      const dene = async cerez => {
+        await ctx.clearCookies();
+        if(cerez) await ctx.addCookies(cerez.map(([name, value]) => ({ name, value, url:kok })));
+        await sayfa.goto(kok, { waitUntil:'load' });
+        return sayfa.evaluate(() => ({ sinif:document.documentElement.classList.contains('gecis-gel'),
+          kaldi:/lifeos_gecis=/.test(document.cookie) }));
+      };
+      const simdi = Date.now();
+      const taze = await dene([['lifeos_gecis', 'hkm.' + simdi]]);
+      if(!taze.sinif) hatalar.push('giriş geçişi: seçim sayfasından açılınca yüz belirmedi');
+      if(taze.kaldi) hatalar.push('giriş geçişi: çerez okunduktan sonra silinmedi');
+      await wait(800);
+      const op = await sayfa.evaluate(() => getComputedStyle(document.body).opacity);
+      if(op !== '1') hatalar.push('giriş geçişi: yüz belirdikten sonra saydam kaldı (' + op + ')');
+      if((await dene(null)).sinif) hatalar.push('giriş geçişi: doğrudan açılışta oynadı');
+      if((await dene([['lifeos_gecis', 'hkm.' + (simdi - 60000)]])).sinif) hatalar.push('giriş geçişi: bayat çerezde oynadı');
+      if((await dene([['lifeos_gecis', 'hkm.' + Date.now()], ['lifeos_hareket', 'az']])).sinif) {
+        hatalar.push('giriş geçişi: «Az» animasyon ayarında oynadı');
+      }
+      await ctx.close();
+    }
   }catch(err){
     hatalar.push('kosum hatasi: ' + (err && err.message ? err.message : err));
   }finally{

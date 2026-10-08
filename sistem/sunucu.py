@@ -574,6 +574,8 @@ html.giris-hazir:not(.hesap-kapi-acik) :is(.kart__ust, .kart__ozet, .kart__alt){
     hkmDugme.disabled = true; hkmDugme.textContent = 'Açılıyor…';
     post('/api/hkm').then(function(s){
       hkmCiz(!!s.ok);
+      /* Gecis (animasyon.js): Merkez'in yuzu yeni sekmede yumusakca belirir. */
+      if(s.ok){ try{ document.cookie = 'lifeos_gecis=hkm.' + Date.now() + '; Path=/; Max-Age=15; SameSite=Strict'; }catch(e){} }
       if(s.ok){ if(sekme) sekme.location = s.adres; else location.href = s.adres; }
       else { if(sekme) sekme.close(); hkm.querySelector('.kart__acik').textContent = s.mesaj || 'HKM açılamadı.'; }
     }).catch(function(){ if(sekme) sekme.close(); hkmCiz(false); });

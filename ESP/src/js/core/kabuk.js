@@ -929,8 +929,10 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* Modül geçiş rengi (155): bağlantıya basılınca üst çizgi yeni sistemin
      rengine döner, ad kısa bir geçişle değişir, sonra sayfa açılır.
-     Azaltılmış harekette bekleme sıfırdır. */
-  function gecis(k, url){
+     Azaltılmış harekette bekleme sıfırdır. Modüle geçerken (2026-10-08)
+     basılan bağlantı büyüyüp varılan modülün marka perdesine dönüşür
+     (animasyon.js «geçiş»): seçim sayfasındaki kartla aynı dil. */
+  function gecis(k, url, kaynak){
     const m = MODULLER[k];
     const ust = document.querySelector('.kenar') || document.querySelector('.ust');
     const az = (() => { try{ return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){ return true; } })();
@@ -949,7 +951,10 @@ window.LIFEOS = window.LIFEOS || {};
       if(modul && S && S.devret) S.devret();
       window.location.href = modul && A && A.tasimaEkle ? A.tasimaEkle(url) : url;
     };
-    if(az) git(); else setTimeout(git, 320);
+    if(az) return git();
+    const A = L.ANIMASYON;
+    if(k !== 'mer' && A && A.gecis && A.gecis({ modul:k, url, kaynak, logoKaynak:kaynak, git })) return;
+    setTimeout(git, 320);
   }
 
   /* KENAR ÇUBUĞU AÇILIR/KAPANIR (depo sahibinin isteği, 2026-09-27: «hep
@@ -1025,7 +1030,7 @@ window.LIFEOS = window.LIFEOS || {};
       if(!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
       e.preventDefault();
       katmanKapat();
-      gecis(a.getAttribute('data-modul-gecis'), a.href);
+      gecis(a.getAttribute('data-modul-gecis'), a.href, a);
     });
     window.addEventListener('resize', () => { if(acikId && !telefonMu()) katmanKapat(); });
     document.addEventListener('keydown', e => { if(e.key === 'Escape'){ bilgiKapat(); modulPencereKapat(); } });

@@ -1114,3 +1114,109 @@ def run():
             kod, b, _ = s.iste(yol, baslik={"Origin": "http://kotu.example"})
             eq((kod, b.get("Access-Control-Allow-Origin")), (403, None))  # yabanci koken
     test("HTTP: duz metin govdede ne beklendigi soylenir; takvim telefon uygulamasina capraz izinli", t_http_gelen_ics_ayrinti)
+
+    # ------------------------------------------------ cihazlar ve uyarilar (soz 18-19)
+
+    def t_cihaz_adi_yontem():
+        with _Depo() as r:
+            k, j = _admin(r)
+            l = r.d.cihazlar(k, j)
+            eq((l[0]["yontem"], l[0]["ozel_ad"]), ("kur", False))
+            j2 = r.d.giris("omer", "parola-123", B, "iPad", "192.168.0.30")["jeton"]
+            ok(r.d.oturum(j2, "192.168.0.31"))                           # adres degisti
+            ipad = [c for c in r.d.cihazlar(k, j) if not c["bu"]][0]
+            eq((ipad["yontem"], ipad["ip"], ipad["cihaz_ad"]), ("sifre", "192.168.0.31", "iPad"))
+            _hata(lambda: r.d.cihaz_adlandir(k, ipad["id"], "  "), 400)
+            _hata(lambda: r.d.cihaz_adlandir(k, ipad["id"], "x" * 41), 400)
+            _hata(lambda: r.d.cihaz_adlandir(k, 9999, "x"), 404)
+            eq(r.d.cihaz_adlandir(k, ipad["id"], "  Ömer'in   iPad'i "), "Ömer'in iPad'i")
+            ipad = [c for c in r.d.cihazlar(k, j) if not c["bu"]][0]
+            eq((ipad["cihaz_ad"], ipad["ozel_ad"]), ("Ömer'in iPad'i", True))
+            # Cikip yeniden girince ad kalir (cihaz kimligine bagli).
+            r.d.cikis(j2)
+            r.d.giris("omer", "parola-123", B, "iPad", "192.168.0.30")
+            eq([c["cihaz_ad"] for c in r.d.cihazlar(k, j) if not c["bu"]], ["Ömer'in iPad'i"])
+            eq(r.d.etkinlik(k)[0]["cihaz_ad"], "Ömer'in iPad'i")          # olay da bu adla
+            r.d.kullanici_ekle(k, "anne", "parola-456")
+            anne = r.d.oturum(r.d.giris("anne", "parola-456", B, "iPad")["jeton"])
+            eq([c["cihaz_ad"] for c in r.d.cihazlar(anne, None)], ["iPad"])  # ad hesaba ozel
+            _hata(lambda: r.d.cihaz_adlandir(anne, ipad["id"], "x"), 404)    # baskasinin oturumu
+            # Kod ve iki adim yollari da yazilir.
+            v = r.d.bag_kodu_ac(k)
+            r.d.bagla(v["kod"], "cihazC-777777", "Tablet")
+            sir, y = _iki_adim_ac(r, k)
+            r.saat.t += 90
+            b = r.d.giris("omer", "parola-123", "cihazD-888888", "Telefon")
+            r.d.giris_kod(b["bilet"], y[0])
+            yol = {c["cihaz_ad"]: c["yontem"] for c in r.d.cihazlar(k, j)}
+            eq((yol["Tablet"], yol["Telefon"]), ("kod", "yedek"))
+    test("cihazlar: giris yolu ve son adres yazilir; ad cihaza baglidir, cikip girince kalir", t_cihaz_adi_yontem)
+
+    def t_uyarilar():
+        with _Depo() as r:
+            k, j = _admin(r)                                              # PC (A)
+            j2 = r.d.giris("omer", "parola-123", B, "iPad", "192.168.0.30")["jeton"]
+            _hata(lambda: r.d.giris("omer", "yanlis", B, "iPad", "192.168.0.30"), 401)
+            r.d.soru_ayarla(k, "parola-123", "Soru nedir?", "cevap", j)     # uyari turu degil
+            l = r.d.uyarilar(k, j)
+            eq([(u["tur"], u["bu"]) for u in l], [("yanlis", False), ("giris", False), ("kayit", True)][:2])
+            ipad = [u for u in l if u["tur"] == "giris"][0]
+            eq(ipad["oturum"], [c["id"] for c in r.d.cihazlar(k, j) if not c["bu"]][0])
+            eq([u["bu"] for u in r.d.uyarilar(k, j2)], [True, True])       # iPad kendi olaylarini «bu» gorur
+            r.d.cihaz_cikar(k, j, ipad["oturum"])
+            eq([u for u in r.d.uyarilar(k, j) if u["tur"] == "giris"][0]["oturum"], None)  # oturum kapandi
+            r.saat.t += hesap.UYARI_GUN * 86400 + 1
+            eq(r.d.uyarilar(k, j), [])                                    # eski olay uyari degil
+            no(json.dumps(l).count("parola-123"))
+    test("uyarilar: baska cihazin girisi ve yanlis denemesi; bu cihazinki «bu»; kapanan oturum bos", t_uyarilar)
+
+    def t_anahtar_dene():
+        with _Depo() as r:
+            k, j = _admin(r)
+            a = r.d.anahtar_ac(k, "parola-123", "Kısayol")["anahtar"]
+            v = r.d.anahtar_dene(a)
+            eq((v["ok"], v["anahtar"]), (True, "Kısayol"))
+            ok(r.d.anahtarlar(k)[0]["son"])
+            eq(r.d.gelen_liste(k), [])                                    # satir birakmaz
+            _hata(lambda: r.d.anahtar_dene(j), 401)
+            _hata(lambda: r.d.anahtar_dene("lifeos_yok"), 401)
+    test("anahtar denemesi: gecerli anahtar «tamam» der, satir birakmaz; yanlis 401", t_anahtar_dene)
+
+    def t_gocur_surum5():
+        klasor = tempfile.mkdtemp(prefix="lifeos-hesap-")
+        try:
+            import sqlite3
+            yol = os.path.join(klasor, "hesap.db")
+            c = sqlite3.connect(yol)
+            c.executescript("CREATE TABLE oturum(ozet TEXT PRIMARY KEY, kullanici INTEGER NOT NULL, cihaz TEXT NOT NULL, "
+                            "cihaz_ad TEXT, olusturma REAL NOT NULL, son REAL NOT NULL, esitleme REAL);"
+                            "CREATE TABLE olay(id INTEGER PRIMARY KEY, kullanici INTEGER NOT NULL, tur TEXT NOT NULL, "
+                            "cihaz_ad TEXT, ip TEXT, ayrinti TEXT, zaman REAL NOT NULL);"
+                            "INSERT INTO oturum VALUES('x', 1, 'c1', 'PC', 1, 1, NULL);")
+            c.commit(); c.close()
+            d = hesap.Depo(yol, tur=1000)
+            with d._islem() as c2:
+                eq({"yontem", "ip"} <= {r["name"] for r in c2.execute("PRAGMA table_info(oturum)")}, True)
+                eq({"cihaz", "oturum"} <= {r["name"] for r in c2.execute("PRAGMA table_info(olay)")}, True)
+                eq(c2.execute("SELECT cihaz_ad FROM oturum").fetchone()[0], "PC")
+        finally:
+            shutil.rmtree(klasor, ignore_errors=True)
+    test("surum 5 deposu giris yolu, adres ve olay baglarina gocer", t_gocur_surum5)
+
+    def t_http_cihaz_uyari():
+        with _Srv() as s:
+            kod, _, v = s.iste("/api/hesap/kayit", {"ad": "omer", "parola": "parola-123", "soru": "Soru nedir?",
+                                                    "cevap": "Cevap", "cihaz": A, "cihaz_ad": "Windows PC"}, H)
+            y = dict(H, Authorization="Bearer " + v["jeton"])
+            s.iste("/api/hesap/giris", {"ad": "omer", "parola": "parola-123", "cihaz": B, "cihaz_ad": "iPad"}, H)
+            kod, _, v = s.iste("/api/hesap/uyarilar", baslik=y)
+            eq((kod, [u["tur"] for u in v["uyarilar"]][:1], v["uyarilar"][0]["bu"]), (200, ["giris"], False))
+            oid = v["uyarilar"][0]["oturum"]
+            kod, _, v = s.iste("/api/hesap/cihaz-ad", {"id": oid, "ad": "Salon tableti"}, y)
+            eq((kod, v["ad"], [c["cihaz_ad"] for c in v["cihazlar"]]), (200, "Salon tableti", ["Windows PC", "Salon tableti"]))
+            eq(v["cihazlar"][0]["ip"], "127.0.0.1")
+            a = s.iste("/api/hesap/anahtar", {"parola": "parola-123", "ad": "Kısayol"}, y)[2]["anahtar"]
+            kod, _, v = s.iste("/api/hesap/gelen", baslik={"Authorization": "Bearer " + a})
+            eq((kod, v["ok"]), (200, True))
+            eq(s.iste("/api/hesap/gelen", baslik={"Authorization": "Bearer lifeos_yok"})[0], 401)
+    test("HTTP: uyarilar, cihaza ad verme ve anahtar denemesi", t_http_cihaz_uyari)
