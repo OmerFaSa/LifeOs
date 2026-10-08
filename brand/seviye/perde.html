@@ -67,7 +67,8 @@
   (function bekle(){
     if(window.__NS__ && __NS__.Perde){
       clearTimeout(kurtarma);
-      __NS__.Perde.baglan(el, { enAz:3000 });
+      /* Geçişle gelindiyse kısa (perde.js markaSuresi). */
+      __NS__.Perde.baglan(el, { enAz:__NS__.Perde.markaSuresi ? __NS__.Perde.markaSuresi() : 3000 });
       return;
     }
     if(++deneme > 400) return;   /* ~12 sn; kurtarma zamanlayicisi devrede */

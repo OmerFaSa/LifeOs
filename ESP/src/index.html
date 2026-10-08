@@ -118,7 +118,8 @@
   (function bekle(){
     if(window.ESP && ESP.Perde){
       clearTimeout(kurtarma);
-      ESP.Perde.baglan(el, { enAz:3000 });
+      /* Geçişle gelindiyse kısa (perde.js markaSuresi). */
+      ESP.Perde.baglan(el, { enAz:ESP.Perde.markaSuresi ? ESP.Perde.markaSuresi() : 3000 });
       return;
     }
     if(++deneme > 400) return;   /* ~12 sn; kurtarma zamanlayicisi devrede */

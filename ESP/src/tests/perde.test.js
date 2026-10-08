@@ -573,5 +573,15 @@
         expect(P.kutlamaTercihi()).toBe('perde');
       }finally{ P.kutlamaYaz(once); }
     });
+
+    /* «Daha hızlı açılış» (2026-10-08): geçişle gelindiyse logo kartın
+       büyümesinde zaten görüldü; marka girişi kısa durur. */
+    it('marka girişi: doğrudan açılışta üç saniye, geçişle gelindiyse kısa', () => {
+      const kok = document.createElement('div');
+      expect(P.markaSuresi(kok)).toBe(3000);
+      kok.classList.add('gecis-gel');
+      expect(P.markaSuresi(kok)).toBe(1200);
+      expect(P.markaSuresi() === 3000 || P.markaSuresi() === 1200).toBe(true);   // sayfanın kendisi
+    });
   });
 })();

@@ -991,8 +991,19 @@ SP.Perde = (function(){
     try{ document.documentElement.style.overflow = ''; }catch(e){}
   }
 
+  /* MARKA GİRİŞİNİN SÜRESİ (2026-10-08, «daha hızlı açılış»). Seçim
+     sayfasından ya da kenardaki modül bağlantısından geçişle gelindiyse
+     (brand/ortak/animasyon.js «geçiş», <html class="gecis-gel">) logo
+     kartın büyümesi sırasında zaten görüldü: perde kısa durur. Doğrudan
+     açılışta eskisi gibi üç saniye. */
+  var MARKA_MS = 3000, MARKA_GECIS_MS = 1200;
+  function markaSuresi(kok){
+    kok = kok || (typeof document !== 'undefined' ? document.documentElement : null);
+    return kok && kok.classList && kok.classList.contains('gecis-gel') ? MARKA_GECIS_MS : MARKA_MS;
+  }
+
   return {
-    ac:ac, baglan:baglan, kutla:kutla,
+    ac:ac, baglan:baglan, kutla:kutla, markaSuresi:markaSuresi,
     sesTercihi:sesTercihi, hepsiniKapat:hepsiniKapat,
     kutlamaTercihi:kutlamaTercihi, kutlamaYaz:kutlamaYaz,
     kendiliginenAcilsinMi:kendiliginenAcilsinMi,

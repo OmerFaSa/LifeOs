@@ -123,7 +123,8 @@
   (function bekle(){
     if(window.R && R.Perde){
       clearTimeout(kurtarma);
-      R.Perde.baglan(el, { enAz:3000 });
+      /* Geçişle gelindiyse kısa (perde.js markaSuresi). */
+      R.Perde.baglan(el, { enAz:R.Perde.markaSuresi ? R.Perde.markaSuresi() : 3000 });
       return;
     }
     if(++deneme > 400) return;   /* ~12 sn; kurtarma zamanlayicisi devrede */

@@ -14158,7 +14158,8 @@ html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
   (function bekle(){
     if(window.R && R.Perde){
       clearTimeout(kurtarma);
-      R.Perde.baglan(el, { enAz:3000 });
+      /* Geçişle gelindiyse kısa (perde.js markaSuresi). */
+      R.Perde.baglan(el, { enAz:R.Perde.markaSuresi ? R.Perde.markaSuresi() : 3000 });
       return;
     }
     if(++deneme > 400) return;   /* ~12 sn; kurtarma zamanlayicisi devrede */
@@ -15839,8 +15840,19 @@ R.Perde = (function(){
     try{ document.documentElement.style.overflow = ''; }catch(e){}
   }
 
+  /* MARKA GİRİŞİNİN SÜRESİ (2026-10-08, «daha hızlı açılış»). Seçim
+     sayfasından ya da kenardaki modül bağlantısından geçişle gelindiyse
+     (brand/ortak/animasyon.js «geçiş», <html class="gecis-gel">) logo
+     kartın büyümesi sırasında zaten görüldü: perde kısa durur. Doğrudan
+     açılışta eskisi gibi üç saniye. */
+  var MARKA_MS = 3000, MARKA_GECIS_MS = 1200;
+  function markaSuresi(kok){
+    kok = kok || (typeof document !== 'undefined' ? document.documentElement : null);
+    return kok && kok.classList && kok.classList.contains('gecis-gel') ? MARKA_GECIS_MS : MARKA_MS;
+  }
+
   return {
-    ac:ac, baglan:baglan, kutla:kutla,
+    ac:ac, baglan:baglan, kutla:kutla, markaSuresi:markaSuresi,
     sesTercihi:sesTercihi, hepsiniKapat:hepsiniKapat,
     kutlamaTercihi:kutlamaTercihi, kutlamaYaz:kutlamaYaz,
     kendiliginenAcilsinMi:kendiliginenAcilsinMi,
@@ -15860,7 +15872,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'ae5d9a72', at:'2026-10-08 18:22', dirty:true };
+R.BUILD = { id:'0e150aa9', at:'2026-10-08 20:13', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -26594,7 +26606,25 @@ window.LIFEOS.HESAP = (function(){
        (telefonda klavye kendiliğinden açılmasın diye gitmez). */
     const ilk = kapi.gorunum === 'karsila' ? null : kart.querySelector('input:not([type=hidden])');
     const tel = !!(L.KABUK && L.KABUK.telefonMu && L.KABUK.telefonMu());
-    try{ (ilk && !tel ? ilk : kart).focus({ preventScroll:true }); }catch(e){ /* odaklanamadı */ }
+    const odakla = () => { try{ (ilk && !tel ? ilk : kart).focus({ preventScroll:true }); }catch(e){ /* odaklanamadı */ } };
+    /* Marka perdesi açıkken odak onundur (aria-modal, «Geç»; seviye/perde.js):
+       kapı odağı perde kalkınca alır. Eskiden açılışta kapı odağı perdeden
+       çalıyordu ve kartın odak halkası buğulu camın arkasında beliriyordu. */
+    if(perdeAcik()) perdeBitince(() => { if(kapiAcikMi() && kart.isConnected) odakla(); });
+    else odakla();
+  }
+  function perdeAcik(){
+    return !!(typeof document !== 'undefined' && document.querySelector('.perde:not(.perde--kapaniyor)'));
+  }
+  let perdeBekleyen = null;
+  function perdeBitince(fn){
+    perdeBekleyen = fn;
+    const bitis = Date.now() + 20000;
+    (function bak(){
+      if(perdeBekleyen !== fn) return;                 // yenisi geldi
+      if(!perdeAcik() || Date.now() > bitis){ perdeBekleyen = null; fn(); return; }
+      setTimeout(bak, 150);
+    })();
   }
   function kapiGit(g, ek){
     const once = kapi.gorunum;

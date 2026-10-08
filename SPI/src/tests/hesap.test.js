@@ -392,7 +392,14 @@
   }
   async function sahneyle(fn){ try{ await fn(); } finally{ birak(); } }
   const bekle = () => new Promise(r => setTimeout(r, 0));
-  async function hazir(){ for(let i = 0; i < 20; i++) await bekle(); }
+  /* Sahte sunucunun söz zincirleri otursun: 20 görev turu. Tur
+     MessageChannel'dır, setTimeout değil: iç içe setTimeout tarayıcıda 4 ms'ye
+     yuvarlanır ve 145 çağrıda takımı ~9 sn uzatıyordu (SPİ takımı koşucunun
+     60 sn sınırına dayandı, 2026-10-08). Sonda bir setTimeout: sıfır
+     gecikmeli zamanlayıcılar da boşalsın. */
+  const tur = () => new Promise(r => { const c = new MessageChannel(); c.port1.onmessage = () => { c.port1.close(); r(); };
+    c.port2.postMessage(0); });
+  async function hazir(){ for(let i = 0; i < 20; i++) await tur(); await bekle(); }
   const esitleIstekleri = srv => srv.istekler.filter(x => /esitle$/.test(x.url));
 
   /* YAZILAN AMA KAYDEDİLMEYEN DEĞER (2026-10-05, aralıklı e2e kırmızısı).
@@ -1062,6 +1069,28 @@
       expect(kapi().textContent).toContain('Şifremi unuttum');
       git('karsila');
       expect(kapi().querySelector('form')).toBeNull();
+    }));
+
+    /* «Daha hızlı açılış» (2026-10-08): ilk açılışta kapı, marka perdesi
+       açıkken odağı perdeden çalıyordu; kartın odak halkası buğulu camın
+       arkasında beliriyordu. Odak perde kalkınca kapıya geçer. */
+    it('marka perdesi açıkken kapı odak almaz; perde kalkınca alır', () => sahneyle(async () => {
+      const perde = document.createElement('div');
+      perde.className = 'perde perde--marka';
+      const gec = document.createElement('button');
+      perde.appendChild(gec);
+      document.body.appendChild(perde);
+      try{
+        gec.focus();
+        const srv = sunucuKur(), c = cihazKur(srv);
+        sahne(c);
+        await hazir();
+        expect(!!kapi()).toBe(true);
+        expect(document.activeElement).toBe(gec);                               // odak perdede kaldı
+        perde.remove();
+        await new Promise(r => setTimeout(r, 400));
+        expect(kapi().contains(document.activeElement)).toBe(true);             // perde kalktı, kapıya geçti
+      }finally{ perde.remove(); }
     }));
 
     it('ana sayfa: dört sistem ve üç söz; form açılınca tanıtım çekilir', () => sahneyle(async () => {

@@ -1430,7 +1430,25 @@ window.LIFEOS.HESAP = (function(){
        (telefonda klavye kendiliğinden açılmasın diye gitmez). */
     const ilk = kapi.gorunum === 'karsila' ? null : kart.querySelector('input:not([type=hidden])');
     const tel = !!(L.KABUK && L.KABUK.telefonMu && L.KABUK.telefonMu());
-    try{ (ilk && !tel ? ilk : kart).focus({ preventScroll:true }); }catch(e){ /* odaklanamadı */ }
+    const odakla = () => { try{ (ilk && !tel ? ilk : kart).focus({ preventScroll:true }); }catch(e){ /* odaklanamadı */ } };
+    /* Marka perdesi açıkken odak onundur (aria-modal, «Geç»; seviye/perde.js):
+       kapı odağı perde kalkınca alır. Eskiden açılışta kapı odağı perdeden
+       çalıyordu ve kartın odak halkası buğulu camın arkasında beliriyordu. */
+    if(perdeAcik()) perdeBitince(() => { if(kapiAcikMi() && kart.isConnected) odakla(); });
+    else odakla();
+  }
+  function perdeAcik(){
+    return !!(typeof document !== 'undefined' && document.querySelector('.perde:not(.perde--kapaniyor)'));
+  }
+  let perdeBekleyen = null;
+  function perdeBitince(fn){
+    perdeBekleyen = fn;
+    const bitis = Date.now() + 20000;
+    (function bak(){
+      if(perdeBekleyen !== fn) return;                 // yenisi geldi
+      if(!perdeAcik() || Date.now() > bitis){ perdeBekleyen = null; fn(); return; }
+      setTimeout(bak, 150);
+    })();
   }
   function kapiGit(g, ek){
     const once = kapi.gorunum;
