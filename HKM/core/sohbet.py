@@ -385,6 +385,9 @@ def urunu_devret(con, cfg, metin, u, now=None, kanal=None, hedef=None, modul="hk
     g = {"tur": u["tur"], "konu": u["konu"][:200], "uzunluk": u["uzunluk"]}
     if u["kaynakli"]:
         g["kaynakli"] = True
+    for alan in ("ayrinti", "etiket"):
+        if u.get(alan):
+            g[alan] = u[alan]
     r = king.emir_ac(con, cfg, modul, "bam.urun", {"urun": g},
                      neden="Sohbetten: " + metin[:300], now=now, kanal=kanal, hedef=hedef)
     if not r.get("ok"):
@@ -397,15 +400,28 @@ def urunu_devret(con, cfg, metin, u, now=None, kanal=None, hedef=None, modul="hk
                             else "; bu konuda güncel araştırma varsa üretim ona dayanır"))
 
 
-def urun_modulden(con, cfg, modul, metin, now=None):
+def urun_modulden(con, cfg, modul, metin, now=None, istek=None):
     """Modul sohbetindeki urun istegi («türev hakkında özet hazırla»).
 
     Taniyici TEK YERDEDIR (bu dosya ve core/urunler.py): modul cumleyi
     buraya yollar, tanimazsak `tanindi: False` doner ve modul kendi
     sohbetine devam eder. Emir MODUL ADINA acilir; bitince urun o module
-    `urun.add` teklifi olarak doner (core/king.py `_teklif_urun`)."""
+    `urun.add` teklifi olarak doner (core/king.py `_teklif_urun`).
+
+    `istek` (2026-10-09, AYS konu ekrani «Bu konuyu öğren»): modul turu ve
+    konuyu ACIKCA verir {tur, konu, ayrinti?, etiket?}; cumle tanınmaya
+    calisilmaz. Govde urunler.temizle ile sinanir; etiket teklifle geri
+    doner ve modul urunu o konuya baglar."""
     if modul not in ("ays", "spi", "esp"):
         return {"ok": False, "note": "Modül AYS, SPİ ya da ESP olmalı."}
+    if istek is not None:
+        g, hata = urunler.temizle(istek if isinstance(istek, dict) else None)
+        if hata:
+            return {"ok": False, "note": "; ".join(hata)}
+        u = {"tur": g["tur"], "konu": g["konu"], "uzunluk": g["uzunluk"], "kaynakli": g["kaynakli"],
+             "ayrinti": g.get("ayrinti"), "etiket": g.get("etiket")}
+        return {"ok": True, "tanindi": True, "tur": u["tur"], "konu": u["konu"],
+                "metin": urunu_devret(con, cfg, str(metin or g["konu"])[:600], u, now=now, modul=modul)}
     u = urun_istegi(metin)
     if u is None:
         return {"ok": True, "tanindi": False}

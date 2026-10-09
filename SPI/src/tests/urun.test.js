@@ -12,7 +12,9 @@
         ürün isteği değildir. Kararı HKM verir.
      2. HKM'den gelen kayıt modülün KENDİ koduyla sınanır; tutmayan eklenmez.
      3. Ürün sandbox iframe'de açılır; betik çalışamaz.
-     4. HKM kapalıysa hiçbir şey olmaz ve söylenir; hiçbir şey fırlatmaz. */
+     4. HKM kapalıysa hiçbir şey olmaz ve söylenir; hiçbir şey fırlatmaz.
+     5. Açık istek tür, konu ve etiketi taşır; teklifle gelen etiket ürüne
+        yazılır, bekleyen istek kapanır; aynı istek ikinci kez gitmez. */
 
 (function(){
   const { describe, it, expect } = (window.R || window.SP || window.ESP).Test;
@@ -127,6 +129,38 @@
       const r = await kopuk.u.uygula({ kayit_id:12, urun:'ozet' });
       expect(r.ok).toBe(false);
       expect(r.error).toContain('alınamadı');
+    });
+
+    it('açık istek: tür, konu ve etiket gider; teklifle gelen ürün konuya bağlanır, bekleyen kapanır', async () => {
+      const ET = 'ays:konu:tyt-matematik/tm-01';
+      const a = kur(ACIK, (url, o) => (/\/api\/king\/urun$/.test(url)
+        ? { status:200, body:{ ok:true, tanindi:true, metin:'Üretim Bürosu’na verdim.' } } : HKM(kayit())(url, o)));
+      const r = await a.u.iste('', { tur:'ders_notu', konu:'Sayılar', ayrinti:'YKS', etiket:ET });
+      expect(r.ok).toBe(true);
+      expect(JSON.parse(a.giden[0].o.body)).toEqual({ modul:'spi', metin:'',
+        urun:{ tur:'ders_notu', konu:'Sayılar', ayrinti:'YKS', etiket:ET } });
+      expect(a.u.bekleyen(ET).map(x => x.tur)).toEqual(['ders_notu']);
+      /* Aynı istek ikinci kez gitmez. */
+      const iki = await a.u.iste('', { tur:'ders_notu', konu:'Sayılar', etiket:ET });
+      expect([iki.ok, a.giden.length]).toEqual([false, 1]);
+      expect(iki.metin).toContain('zaten istendi');
+      expect((await a.u.iste('', { tur:'sozluk', konu:'Sayılar', etiket:'Bozuk Etiket' })).ok).toBe(false);
+      /* Teklif gelir: etiket ürüne yazılır, bekleyen kapanır. */
+      const k = kayit();
+      k.govde.urun = 'ders_notu';
+      const b = kur(ACIK, (url, o) => (/\/api\/king\/urun$/.test(url)
+        ? { status:200, body:{ ok:true, tanindi:true, metin:'Verdim.' } } : HKM(k)(url, o)));
+      expect((await b.u.iste('', { tur:'ders_notu', konu:'Sayılar', etiket:ET })).ok).toBe(true);
+      expect(b.u.bekleyen(ET)).toHaveLength(1);
+      const u = await b.u.uygula({ kayit_id:12, urun:'ders_notu', etiket:ET });
+      expect(u.ok).toBe(true);
+      expect(b.u.etiketli(ET).map(x => x.id)).toEqual(['bam-12']);
+      expect(b.u.etiketli('ays:konu:baska/x')).toHaveLength(0);
+      expect(b.u.bekleyen(ET)).toHaveLength(0);
+      /* Bozuk etiket ürüne yazılmaz. */
+      expect(U().sina(kayit(), { kayit_id:12, urun:'ozet', etiket:'<b>' }, HTML).urun.etiket).toBeNull();
+      /* Süresi geçen istek unutulur (yeniden istenebilir). */
+      expect(a.u.bekleyen(ET, Date.now() + 15 * 86400000)).toHaveLength(0);
     });
 
     it('depodan yeniden yüklenir: HKM kapalıyken de okunur', async () => {

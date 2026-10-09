@@ -5,7 +5,9 @@
      3. Sıradaki adım ilk eksik adımdır; kilit yoktur.
      4. İkinci testin zamanı gelmediyse «bekle» denir; gelince sıradadır.
      5. Yeniden açılan konuda testler yapılmış sayılmaz.
-     6. Konu ekranı yolu, sıradaki adımı ve eşikleri gösterir. */
+     6. Konu ekranı yolu, sıradaki adımı ve eşikleri gösterir.
+     7. «Bu konuyu öğren» konu etiketiyle açık istek yollar; istenen tekrar
+        istenmez, gelen malzeme konunun yanında açılır (brand/ortak/urun.js). */
 
 (function(){
   const { describe, it, expect, resetState, withTodayAsync } = R.Test;
@@ -13,6 +15,14 @@
   const BUGUN = '2026-10-09';
   const konu = () => { const s = R.SUBJECTS[0]; return { s, t:s.topics[0] }; };
   const durum = (l, id) => l.find(a => a.id === id);
+
+  /* Sahte ürün modülü: ağ yok; istek yakalanır. */
+  function sahteUrunler(urunler, bekleyen){
+    const giden = [];
+    return { giden, etiketli:et => urunler.filter(u => u.etiket === et), bekleyen:et => bekleyen.filter(x => x.etiket === et),
+      bul:id => urunler.find(u => u.id === id) || null,
+      iste:async (metin, acik) => { giden.push({ metin, acik }); return { ok:true, metin:'Üretim Bürosu’na verdim.' }; } };
+  }
 
   describe('Öğrenme yolu', () => {
     it('yeni konu: sıradaki «Öğren»; yanlış kaydı yoksa düzeltme adımı öyle yazılır', async () => {
@@ -94,6 +104,43 @@
         const l = Y().adimlar(s.id, t.id, '2026-10-20');
         expect([durum(l, 'olc').tamam, durum(l, 'pekistir').tamam]).toEqual([false, false]);
         expect(durum(l, 'olc').ayrinti).toContain('yeniden açıldı');
+      });
+    });
+
+    it('«Bu konuyu öğren»: konu etiketiyle açık istek; istenen tekrar istenmez; gelen malzeme açılır', async () => {
+      await withTodayAsync(BUGUN, async () => {
+        resetState();
+        const { s, t } = konu();
+        const ET = 'ays:konu:' + s.id + '/' + t.id;
+        R.S.ui.topicSubject = s.id;
+        R.S.ui.topicOpen = t.id;
+        const eski = R.Urunler, eskiRender = R.App.render;
+        R.App.render = () => {};
+        try{
+          R.Urunler = sahteUrunler([], []);
+          let html = String(await R.Screens.topic.render());
+          expect(html).toContain('Konunun malzemeleri');
+          expect(html).toContain('data-act="konu-malzeme" data-tur="ders_notu"');
+          await R.Screens.topic.handle['konu-malzeme']({ dataset:{ tur:'ders_notu' } });
+          const a = R.Urunler.giden[0].acik;
+          expect([a.tur, a.etiket]).toEqual(['ders_notu', ET]);
+          expect(a.konu).toContain(t.name);
+          expect(a.ayrinti).toContain('YKS TYT hazırlığı');
+          /* İstendi: düğme yerine «istendi»; yolda «Ders notu ekle» birincil kalır. */
+          R.Urunler = sahteUrunler([], [{ etiket:ET, tur:'ders_notu', zaman:new Date().toISOString() }]);
+          html = String(await R.Screens.topic.render());
+          expect(html).toContain('Konu anlatımı · istendi');
+          expect(html.indexOf('data-act="konu-malzeme" data-tur="ders_notu"')).toBe(-1);
+          /* Geldi: konunun yanında «Aç», yolda «Anlatımı aç». Başka konunun malzemesi görünmez. */
+          R.Urunler = sahteUrunler([{ id:'bam-7', urun:'ders_notu', urunAd:'Ders notu', baslik:t.name, dogruluk:'kaynakli',
+            etiket:ET, html:'<html><body>x</body></html>' }, { id:'bam-8', urun:'sozluk', urunAd:'Kavram sözlüğü',
+            baslik:'Başka', dogruluk:'kaynakli', etiket:'ays:konu:baska/x' }], []);
+          html = String(await R.Screens.topic.render());
+          expect(html).toContain('data-act="konu-urun-ac" data-id="bam-7"');
+          expect(html).toContain('Anlatımı aç');
+          expect(html.indexOf('bam-8')).toBe(-1);
+          expect(html).toContain('data-act="konu-malzeme" data-tur="sozluk"');
+        }finally{ R.Urunler = eski; R.App.render = eskiRender; }
       });
     });
 

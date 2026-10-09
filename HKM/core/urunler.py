@@ -161,14 +161,23 @@ def tani(metin):
 
 # ---------------------------------------------------------- girdi
 
+# Modulun kendi kaydina bagi (ornek «ays:konu:tyt-matematik/tm-03»): HKM
+# ANLAMAZ, yalniz tasir; urun.add teklifiyle modul geri alir ve urunu o
+# konuya baglar (AYS konu ekrani). Kisa, ASCII, bosluksuz.
+ETIKET_RE = re.compile(r"^[a-z0-9][a-z0-9:/_.-]{2,79}$")
+
+
 def temizle(govde):
-    """Is emri govdesi: {tur, konu, ayrinti?, uzunluk?, kaynakli?}."""
+    """Is emri govdesi: {tur, konu, ayrinti?, uzunluk?, kaynakli?, etiket?}."""
     if not isinstance(govde, dict):
         return None, ["ürün isteği bir nesne olmalı"]
     hata = []
     for k in govde:
-        if k not in ("tur", "konu", "ayrinti", "uzunluk", "kaynakli"):
+        if k not in ("tur", "konu", "ayrinti", "uzunluk", "kaynakli", "etiket"):
             hata.append("ürün: bilinmeyen alan %s" % k)
+    etiket = govde.get("etiket")
+    if etiket is not None and not (isinstance(etiket, str) and ETIKET_RE.match(etiket)):
+        hata.append("ürün etiketi 3–80 karakter, küçük harf, rakam ve : / _ . - olmalı")
     tur = govde.get("tur")
     if tur not in URUNLER:
         hata.append("ürün türü şunlardan biri olmalı: %s" % ", ".join(URUNLER))
@@ -189,6 +198,8 @@ def temizle(govde):
     g = {"tur": tur, "konu": konu, "uzunluk": uz}
     if ayrinti:
         g["ayrinti"] = ayrinti
+    if etiket:
+        g["etiket"] = etiket
     # Kaynak istenmediyse turun varsayilani gecer (olgu agirlikli turler
     # arastirmayla kurulur); web kapaliysa arastirma zaten kaynaksiz duser.
     g["kaynakli"] = URUNLER[tur]["kaynak"] if kay is None else kay

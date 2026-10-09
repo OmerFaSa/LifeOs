@@ -102,7 +102,7 @@ KINDS = {
     "urun.add": {
         "modules": ("ays", "spi", "esp"),
         "required": ("kayit_id", "urun"),
-        "optional": ("baslik", "why"),
+        "optional": ("baslik", "why", "etiket"),
         "note": "BAM'ın ürettiği ürünü (özet, rapor, sunum, görsel…) materyal olarak ekleme teklifi.",
     },
     # Kullanicinin sohbette bildirdigi GUNUN KAYDI («2 saat matematik
@@ -187,6 +187,7 @@ FIELD_RULES = {
     "dil": ("str", 2, 2), "unite": ("int", 1, 4), "oge": ("int", 1, 80),
     "alan": ("str", 2, 20),
     "on": ("str", 1, 200), "arka": ("str", 1, 300),
+    "etiket": ("str", 3, 80),
 }
 
 

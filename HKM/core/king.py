@@ -961,6 +961,10 @@ def _teklif_urun(con, e, kayit_id, now=None):
     if e["modul"] == "hkm":
         return " HKM › Ofis’ten açılabilir ve indirilebilir."
     payload = {"kayit_id": int(kayit_id), "urun": g["urun"], "baslik": str(g.get("baslik"))[:120]}
+    # Modulun kendi bagi (urunler.ETIKET_RE): HKM anlamaz, geri tasir.
+    etiket = (((e.get("govde") or {}).get("urun")) or {}).get("etiket")
+    if etiket:
+        payload["etiket"] = etiket
     n = intents.create(con, e["modul"], "urun.add", payload, None, source="bam")
     if n.get("ok"):
         bam.iz_ekle(con, "kayit", kayit_id, "niyet", n["intent"]["id"], now=now)

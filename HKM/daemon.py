@@ -1425,10 +1425,11 @@ class Handler(BaseHTTPRequestHandler):
                 body = _nesne(ham)
             except ValueError:
                 return self._send(400, {"error": "govde bir JSON nesnesi olmali"})
-            if not isinstance(body, dict) or not str(body.get("metin") or "").strip():
+            istek = body.get("urun") if isinstance(body, dict) else None
+            if not isinstance(body, dict) or (not str(body.get("metin") or "").strip() and istek is None):
                 return self._send(400, {"error": "metin gerekli"})
             r = sohbet.urun_modulden(self.con, self.server.config, body.get("modul"),
-                                     str(body.get("metin")))
+                                     str(body.get("metin") or ""), istek=istek)
             return self._send(200 if r.get("ok") else 422, r)
         if u.path in ("/api/bildirim/ac", "/api/bildirim/sustur"):
             ham, hata = self._read_body()

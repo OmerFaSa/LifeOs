@@ -16,7 +16,9 @@
      7. Arastirma istenmese de depoda guncel arastirma varsa urun ona
         dayanir; her masanin ajani iz birakir.
      8. King sohbeti urun istegini emre cevirir; «özet» tek kelimesi ve
-        «rapor ver» brifing olarak kalir."""
+        «rapor ver» brifing olarak kalir.
+     9. Modul turu ve konuyu acikca isteyebilir (AYS «Bu konuyu öğren»);
+        modulun etiketi emirde saklanir ve `urun.add` teklifiyle geri doner."""
 import json
 
 from core import bam, cikti, db, editor, gelen, intents, king, outbox, sohbet, urunler
@@ -297,6 +299,30 @@ def run():
         no(sohbet.urun_modulden(con, cfg, "hkm", "türev özeti hazırla")["ok"])
         eq(len(king.emirler(con)), 1)
     test("modulden istenen urun King'e modul adina gider, teklif olarak doner", t_modulden_urun)
+
+    def t_modulden_acik_istek():
+        """AYS konu ekrani: tur ve konu acik; etiket emirde durur ve
+        teklifle geri doner. Bozuk etiket ve bilinmeyen tur emir acmaz."""
+        con = db.connect(":memory:")
+        cfg, m = _cfg(), _UrunModel()
+        istek = {"tur": "ders_notu", "konu": "Sayılar (TYT Temel Matematik)",
+                 "ayrinti": "YKS hazırlığı", "etiket": "ays:konu:tyt-matematik/tm-01"}
+        r = sohbet.urun_modulden(con, cfg, "ays", "", istek=istek, now=AN)
+        eq((r["ok"], r["tanindi"], r["tur"]), (True, True, "ders_notu"))
+        e = king.emirler(con)[0]
+        eq(e["govde"]["urun"]["etiket"], "ays:konu:tyt-matematik/tm-01")
+        eq(e["govde"]["urun"]["ayrinti"], "YKS hazırlığı")
+        king.teklif_onayla(con, cfg, e["id"], now=AN)
+        _tik(con, cfg, m, 3)
+        n = intents.take(con, "ays")["intents"]
+        eq([(x["kind"], x["payload"].get("etiket")) for x in n], [("urun.add", "ays:konu:tyt-matematik/tm-01")])
+        for bozuk in ({"tur": "ders_notu", "konu": "Sayılar", "etiket": "AYS konu"},
+                      {"tur": "uydurma", "konu": "Sayılar"},
+                      {"tur": "ders_notu", "konu": "x"}, "metin"):
+            no(sohbet.urun_modulden(con, cfg, "ays", "", istek=bozuk, now=AN)["ok"], bozuk)
+        eq(len(king.emirler(con)), 1)
+        ok(intents.validate("ays", "urun.add", {"kayit_id": 3, "urun": "ozet", "etiket": "ays:konu:a/b"})[0])
+    test("modul acik istekte etiket tasir, teklifle geri alir", t_modulden_acik_istek)
 
     def t_on_suzgec_ayni():
         """Modullerin on suzgeci (brand/ortak/urun.js) katalogla AYNI kelimeleri

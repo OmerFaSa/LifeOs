@@ -14851,7 +14851,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'60bd5723', at:'2026-10-09 14:38', dirty:true };
+SP.BUILD = { id:'33137a97', at:'2026-10-09 15:11', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -29633,7 +29633,13 @@ LIFEOS.Ofis = (function(){
       durur; kaynaksız ürün «doğrulanmadı»dır.
    5. TANIYICI TEK YERDEDİR. Burada yalnız ÖN SÜZGEÇ var (HKM
       core/urunler.py ile aynı kelimeler — HKM/tests/test_urun.py sınar);
-      hangi ürün ve hangi konu olduğuna HKM karar verir. */
+      hangi ürün ve hangi konu olduğuna HKM karar verir.
+   6. AÇIK İSTEK VE ETİKET (2026-10-09, AYS «Bu konuyu öğren»). Modül
+      türü ve konuyu açıkça isteyebilir (`iste(metin, { tur, konu,
+      ayrinti, etiket })`); etiket modülün kendi bağıdır (örn.
+      «ays:konu:tyt-matematik/tm-03»), HKM anlamaz, teklifle geri getirir.
+      Ürün o etiketle saklanır ve `etiketli` ile bulunur. Bekleyen istek
+      ürün gelene dek «istendi» diye hatırlanır; ikinci kez istenmez. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -29657,6 +29663,8 @@ LIFEOS.Urun = (function(){
   const HTML_SINIR = 300000;     // karakter — dokuz aylık yedek şişmesin
   const SURE = 6000;
   const ANAHTAR = 'meta/bamUrunleri';
+  const ETIKET_RE = /^[a-z0-9][a-z0-9:/_.-]{2,79}$/;     // HKM core/urunler.py ETIKET_RE
+  const ISTEK_GUN = 14;          // gelmeyen istek bu kadar gün sonra unutulur (yeniden istenebilir)
 
   function kucuk(s){
     return String(s || '').replace(/I/g, 'ı').replace(/İ/g, 'i').toLocaleLowerCase('tr');
@@ -29695,10 +29703,11 @@ LIFEOS.Urun = (function(){
     if(h.length > HTML_SINIR) return { ok:false, why:'Ürün saklanamayacak kadar büyük.' };
     const baslik = bosluk(g.baslik || kayit.baslik).slice(0, 160);
     if(baslik.length < 2) return { ok:false, why:'Ürünün başlığı yok.' };
+    const etiket = p && typeof p.etiket === 'string' && ETIKET_RE.test(p.etiket) ? p.etiket : null;
     return { ok:true, urun:{ id:'bam-' + kid, kayitId:kid, urun:String(g.urun || ''),
       urunAd:bosluk(g.urun_ad).slice(0, 60) || 'Ürün', aile:g.aile, baslik,
       dogruluk:DOGRULUK[kayit.dogruluk] ? kayit.dogruluk : 'dogrulanmadi',
-      kaynak:Array.isArray(g.kaynaklar) ? g.kaynaklar.length : 0, html:h } };
+      kaynak:Array.isArray(g.kaynaklar) ? g.kaynaklar.length : 0, etiket, html:h } };
   }
 
   /* Basılı hâl KUTUDA: sandbox="" betiği, formu, açılır pencereyi ve üst
@@ -29716,7 +29725,7 @@ LIFEOS.Urun = (function(){
 
   /* `kur({ store:() => Store, hkm:() => Beacon, fetch? })` */
   function kur(ortam){
-    let liste_ = [];
+    let liste_ = [], istekler_ = [];
 
     function baglanti(){
       const b = ortam.hkm ? ortam.hkm() : null;
@@ -29744,10 +29753,18 @@ LIFEOS.Urun = (function(){
       let ham = null;
       try{ ham = await ortam.store().get(ANAHTAR); }catch(e){ ham = null; }
       liste_ = (ham && Array.isArray(ham.items)) ? ham.items.filter(x => x && x.id && x.html) : [];
+      istekler_ = (ham && Array.isArray(ham.istekler)) ? ham.istekler.filter(x => x && x.etiket && x.tur) : [];
       return liste_;
     }
     async function yaz(){
-      try{ await ortam.store().set(ANAHTAR, { items:liste_ }); }catch(e){ /* yerel */ }
+      try{ await ortam.store().set(ANAHTAR, { items:liste_, istekler:istekler_ }); }catch(e){ /* yerel */ }
+    }
+    /* Söz 6: bu etiketin ürünleri ve gelmemiş istekleri (süresi geçen düşer). */
+    function etiketli(etiket){ return liste().filter(u => u.etiket === etiket); }
+    function bekleyen(etiket, simdi){
+      const sinir = (typeof simdi === 'number' ? simdi : Date.now()) - ISTEK_GUN * 86400000;
+      return istekler_.filter(x => x.etiket === etiket && Date.parse(x.zaman) > sinir)
+        .map(x => Object.assign({}, x));
     }
 
     function liste(){ return liste_.map(u => Object.assign({}, u, { html:undefined })); }
@@ -29760,16 +29777,23 @@ LIFEOS.Urun = (function(){
       return { ok:liste_.length < once };
     }
 
-    /* Sohbetteki ürün isteği → King'e iş emri (modül adına). */
-    async function iste(metin){
+    /* Sohbetteki ürün isteği → King'e iş emri (modül adına). `acik`
+       verilirse tür ve konu açıktır, cümle tanınmaya çalışılmaz (söz 6). */
+    async function iste(metin, acik){
       const k = baglanti();
       if(!k){
         return { ok:false, metin:'Bunu HKM’deki Üretim Bürosu hazırlar ama HKM bağlı değil. '
           + 'HKM’ye bağlanınca yeniden iste.' };
       }
+      if(acik && acik.etiket && !ETIKET_RE.test(acik.etiket)) return { ok:false, metin:'İstek etiketi geçersiz.' };
+      if(acik && acik.etiket && bekleyen(acik.etiket).some(x => x.tur === acik.tur)){
+        return { ok:false, metin:'Bu zaten istendi; hazır olunca Onaylar’a gelir.' };
+      }
       try{
-        const res = await cagir(k, '/api/king/urun', { method:'POST',
-          body:JSON.stringify({ modul:k.modul, metin:String(metin || '').slice(0, 600) }) });
+        const govde = { modul:k.modul, metin:String(metin || '').slice(0, 600) };
+        if(acik) govde.urun = { tur:acik.tur, konu:String(acik.konu || '').slice(0, 300),
+          ayrinti:acik.ayrinti ? String(acik.ayrinti).slice(0, 1000) : undefined, etiket:acik.etiket || undefined };
+        const res = await cagir(k, '/api/king/urun', { method:'POST', body:JSON.stringify(govde) });
         const g = await res.json();
         if(res.status !== 200 || !g || !g.ok){
           return { ok:false, metin:(g && (g.note || g.error)) || 'King iş emrini almadı.' };
@@ -29781,6 +29805,11 @@ LIFEOS.Urun = (function(){
         }
         /* King işi teklifte bekletir (onay kapısı): kart hemen tazelensin. */
         if(window.LIFEOS && LIFEOS.KingTeklif) LIFEOS.KingTeklif.haberVer();
+        if(acik && acik.etiket){
+          istekler_ = istekler_.filter(x => !(x.etiket === acik.etiket && x.tur === acik.tur))
+            .concat([{ etiket:acik.etiket, tur:acik.tur, zaman:new Date().toISOString() }]).slice(-60);
+          await yaz();
+        }
         return { ok:true, tanindi:true, metin:g.metin };
       }catch(e){
         return { ok:false, metin:'HKM’ye ulaşılamadı; iş emri açılmadı. HKM açıkken yeniden iste.' };
@@ -29809,13 +29838,14 @@ LIFEOS.Urun = (function(){
       if(!s.ok) return { ok:false, error:s.why };
       s.urun.eklenme = new Date().toISOString();
       liste_ = [s.urun].concat(liste_).slice(0, EN_COK);
+      if(s.urun.etiket) istekler_ = istekler_.filter(x => !(x.etiket === s.urun.etiket && x.tur === s.urun.urun));
       await yaz();
       return { ok:true, urun:s.urun, note:s.urun.urunAd + ' eklendi («' + s.urun.baslik.slice(0, 60)
         + '», BAM #' + kid + ', ' + etiketAdi(s.urun.dogruluk) + '). Ofis ekranındaki BAM '
         + 'ürünlerinden açarsın.' };
     }
 
-    return { yukle, liste, bul, sil, iste, uygula };
+    return { yukle, liste, bul, sil, iste, uygula, etiketli, bekleyen };
   }
 
   return { kur, istekMi, sina, cerceve, etiketAdi, KELIMELER, AILELER, EN_COK, HTML_SINIR };
