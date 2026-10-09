@@ -14,7 +14,7 @@
 (function(){
   const { describe, it, expect, resetState } = R.Test;
   /* Derinleştirmesi bitmiş dersler; yenisi bitince buraya eklenir. */
-  const TAM = ['tyt-matematik'];
+  const TAM = ['tyt-matematik', 'ayt-matematik'];
   const HARF = ['A', 'B', 'C', 'D', 'E'];
   const SEV = ['temel', 'orta', 'ileri'];
   const dizi = x => x == null ? [] : Array.isArray(x) ? x : [x];
