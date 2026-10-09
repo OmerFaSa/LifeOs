@@ -128,6 +128,8 @@ R.HINTS = {
     more:'Yüksek frekanslı ve kapanmamış bir konu, düşük frekanslı ve kapalı bir konudan daha risklidir. Skor bir emir değil öneri sırasıdır; imzalı haftalık sözleşme her zaman önce gelir.' },
   'estimate':{ t:'Tahmini sıra', b:'Son 3 denemenin medyanından üretilen bant — tek sayı değil.',
     more:'ÖSYM puanı ham netten değil, standartlaştırılmış puandan gelir ve aday dağılımı her yıl değişir. Bu yüzden sonuç aralık olarak verilir ve deneme sayısı arttıkça aralık daralır.' },
+  'ogren-bam':{ t:'Daha derin', b:'BAM bu konu için kaynaklı bir anlatım, kavram sözlüğü ya da çalışma kâğıdı yazar.',
+    more:'Uygulamanın içindeki anlatım elle yazıldı ve doğrulanmadı; BAM’ın yazdığı malzeme kaynağını taşır. Her istek önce King’in onayından geçer (model kotası harcar), sonra Onaylar’a gelir ve burada, konusunun yanında açılır. HKM kapalıyken gelmiş olanlar okunur. Kaynaksız malzeme «doğrulanmadı» yazar: karar vermeden önce bir kaynağa bak.' },
   'solve':{ t:'Soru çöz', b:'Sorunun fotoğrafını ya da metnini ver; model çözer ve anlatır.',
     more:'Fotoğraf üç yoldan girer: bırak, tıkla ya da Ctrl+V ile yapıştır. Notun isteğe bağlıdır: nerede takıldığını yazarsan çözüm oraya odaklanır. Model bağlı değilse çözüm üretilmez. Kaynaklarım’da zorluk etiketten değil, senin çözüm oranından çıkar.' },
   'quick-log':{ t:'Hızlı kayıt', b:'Ders, konu ve sonuç seç; Enter kaydeder.',

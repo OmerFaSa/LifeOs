@@ -94,7 +94,7 @@
 
     /* Kullanıcı (2026-10-03): «şu daha fazla kısmını da kaldır, bir işe
        yaramıyor». Sekiz çekmece kenarda düz listede; hiçbiri kalkmaz. */
-    it('sade: sekiz çekmece düz listede, «Daha fazla» yok; hiçbiri kalkmaz', () => {
+    it('sade: dokuz çekmece düz listede, «Daha fazla» yok; hiçbiri kalkmaz', () => {
       const cek = on => K.CEKMECELER.map(c => ({ id:c.id, ad:c.ad, route:c.id, on:c.id === on }));
       const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:cek('ofis') }) + '</div>');
       try{
@@ -111,9 +111,14 @@
       expect(K.kenarIlkDar('acik')).toBe(true);
     });
 
-    it('sekiz çekmece: ad ve sıra kullanıcı kararıyla aynı', () => {
+    /* «Öğren» 2026-10-09'da Çalışma'nın ardına girdi (kullanıcı: «konu
+       öğrenmek başlığı altında sol tarafa bölüm aç»). */
+    it('dokuz çekmece: ad ve sıra kullanıcı kararıyla aynı; Öğren çekmecesinin simgesi var', () => {
       expect(K.CEKMECELER.map(c => c.ad).join(' · '))
-        .toBe('Bugün · Plan · Çalışma · Analiz · Onaylar · Ofis · Kütüphanem · Ayarlar');
+        .toBe('Bugün · Plan · Çalışma · Öğren · Analiz · Onaylar · Ofis · Kütüphanem · Ayarlar');
+      const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays',
+        cekmeceler:[{ id:'ogren', ad:'Öğren', route:'ogren', on:true }] }) + '</div>');
+      try{ expect(!!d.querySelector('[data-cekmece="ogren"] svg path')).toBe(true); }finally{ d.remove(); }
     });
 
     it('oz-115 Onaylar sayacı yalnız bekleyen varken ve morda', () => {
@@ -384,11 +389,11 @@
       d.remove();
     });
 
-    it('Menü: sekiz çekmece ve bölümleri tek listede; kapatma düğmesi var', () => {
+    it('Menü: bütün çekmeceler ve bölümleri tek listede; kapatma düğmesi var', () => {
       const cek = K.CEKMECELER.map(c => ({ id:c.id, ad:c.ad, sayac:c.id === 'onaylar' ? 3 : 0,
         bolumler:[{ route:c.id + '-r', ad:c.ad, on:c.id === 'plan' }] }));
       const d = yerlestir(K.menuSayfasi({ cekmeceler:cek, ayak:'<p>ayak</p>' }));
-      expect(d.querySelectorAll('.menusayfa__cekmece').length).toBe(8);
+      expect(d.querySelectorAll('.menusayfa__cekmece').length).toBe(K.CEKMECELER.length);
       expect(d.querySelector('[aria-current="page"]').getAttribute('data-route')).toBe('plan-r');
       expect(d.querySelectorAll('.menusayfa .ust__sayac').length).toBe(1);
       expect(d.querySelector('.menusayfa__kapat').getAttribute('data-act')).toBe('toggle-sidebar');

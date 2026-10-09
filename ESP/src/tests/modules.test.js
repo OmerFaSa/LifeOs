@@ -198,7 +198,8 @@
       const K = window.LIFEOS && window.LIFEOS.KABUK;
       const sirali = ESP.Nav.all().map(s => s.id);
       expect(sirali).toEqual(['bugun', 'plan', 'calisma', 'analiz', 'onaylar', 'ofis', 'kutuphane', 'ayarlar']);
-      if(K && K.CEKMECELER) expect(sirali).toEqual(K.CEKMECELER.map(c => c.id));
+      /* «Öğren» (2026-10-09) şimdilik yalnız AYS'de; ESP'de bölümü yok. */
+      if(K && K.CEKMECELER) expect(sirali).toEqual(K.CEKMECELER.filter(c => c.id !== 'ogren').map(c => c.id));
       ESP.Nav.sections().forEach(s => expect(s.views.length > 0).toBeTruthy());
     });
   });

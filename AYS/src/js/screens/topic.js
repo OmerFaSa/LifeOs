@@ -61,113 +61,37 @@ R.Screens.topic = (function(){
 
   /* ÖĞRENME YOLU (core/ogrenyolu.js): altı adım, sıradaki adım ve eylemi.
      Adımlar kayıtlardan okunur; eşikler planın kuralıdır ve yazılır. */
-  /* KONUNUN MALZEMELERİ (BAM; brand/ortak/urun.js söz 6). «Bu konuyu
-     öğren» konu anlatımını ister; kavram sözlüğü ve çalışma kâğıdı ayrı.
-     Her istek King'in onay kapısından geçer (model kotası harcar); ürün
-     Onaylar'dan gelir ve burada, konusunun yanında açılır. HKM kapalıyken
-     gelmiş olanlar okunur. Etiket modülün kendi bağıdır; HKM anlamaz. */
-  const MALZEME = [
-    { tur:'ders_notu', ad:'Konu anlatımı' },
-    { tur:'sozluk', ad:'Kavram sözlüğü' },
-    { tur:'calisma_kagidi', ad:'Çalışma kâğıdı' },
-  ];
-  function etiketOf(subject, topic){ return 'ays:konu:' + subject.id + '/' + topic.id; }
-  function malzemeler(subject, topic){
-    const Ur = R.Urunler;
-    if(!Ur || !Ur.etiketli) return null;
-    const et = etiketOf(subject, topic);
-    return { urunler:Ur.etiketli(et), bekleyen:Ur.bekleyen(et) };
-  }
-  function malzemeCard(subject, topic){
-    const m = malzemeler(subject, topic);
-    if(!m) return null;
-    const var_ = tur => m.urunler.some(u => u.urun === tur);
-    const istendi = tur => m.bekleyen.some(x => x.tur === tur);
-    const eksik = MALZEME.filter(x => !var_(x.tur));
-    return K.Card({
-      title:'Konunun malzemeleri',
-      sub:m.urunler.length ? m.urunler.length + ' malzeme · internetsiz de açılır' : 'BAM bu konu için yazar',
-      body:html`
-        ${when(m.urunler.length, () => html`<div class="stack-xs">${map(m.urunler, u => html`
-          <div class="row between gap-8">
-            <span class="small minw0"><b>${u.urunAd}</b> <span class="dim">${u.baslik}</span>
-              <span class="tiny dim">· ${LIFEOS.Urun.etiketAdi(u.dogruluk)}</span></span>
-            ${K.Button({ label:'Aç', size:'sm', act:'konu-urun-ac', data:{ 'data-id':u.id } })}
-          </div>`)}</div>`)}
-        ${when(eksik.length, () => html`<div class="row wrap gap-6 ${m.urunler.length ? 'mt-12' : ''}">${map(eksik, x => istendi(x.tur)
-          ? K.Chip(x.ad + ' · istendi')
-          : K.Button({ label:x.tur === 'ders_notu' ? 'Bu konuyu öğren' : x.ad, icon:x.tur === 'ders_notu' ? 'book' : null,
-              size:'sm', tone:x.tur === 'ders_notu' ? 'primary' : null, act:'konu-malzeme', data:{ 'data-tur':x.tur } }))}</div>`)}
-        <p class="tiny dim mt-10">Her istek önce King’in onayından geçer (Bugün › King teklifi); BAM yazar, sonra Onaylar’a
-          gelir. Kaynaksız malzeme «doğrulanmadı» yazar: karar vermeden önce bir kaynağa bak.</p>`,
-    });
-  }
 
-  /* KISA ÖZET (data/ozetler.js): konunun uygulamada duran özü; internetsiz
-     ve modelsiz okunur. Elle yazıldı, doğrulanmadı: etiket yazılır. */
-  function ozetCard(subject, topic){
-    const o = (R.KONU_OZET || {})[topic.id];
-    if(!o) return null;
-    return K.Card({
-      title:'Kısa özet', sub:'elle yazıldı · doğrulanmadı · internetsiz', wide:true,
-      body:html`
-        <ul class="konuozet">${map(o.ana, m => html`<li>${m}</li>`)}</ul>
-        ${when(o.dikkat, () => html`<p class="small mt-10"><b>Dikkat:</b> ${o.dikkat}</p>`)}
-        ${when(o.ornek, () => html`<p class="small mt-6"><b>Örnek:</b> ${o.ornek}</p>`)}
-        <p class="tiny dim mt-10">Başlangıç özetidir; derin ve kaynaklı anlatım için «Bu konuyu öğren». Bir hata görürsen
-          kitabınla karşılaştır.</p>`,
-    });
+  /* ÖĞREN (screens/ogren.js, 2026-10-09): konunun anlatımı, örnek soruları,
+     kısa özeti, BAM malzemeleri ve koçu artık Öğren çekmecesinde. Burada
+     yalnız oraya giden tek kart durur: aynı şey iki yerde durmaz. */
+  function ogrenData(subject, topic, route){
+    return { 'data-route':route, 'data-subject':subject.id, 'data-topic':topic.id };
   }
-
-  /* ANLAMADIM, SOR (core/konusor.js): koçun modeli bu konunun bağlamında
-     anlatır; cevap «doğrulanmadı», kayda yazılmaz, istenirse karta döner. */
-  let sorBusy = false;
-  function sorCard(subject, topic){
-    const KS = R.KonuSor;
-    if(!KS) return null;
-    if(!KS.hazir()){
-      return K.Card({ title:'Anlamadım, sor',
-        body:K.Notice({ tone:'info', body:'Model bağlı değil. Ofis › Ofis ayarlarından ücretsiz bir sağlayıcı bağlarsan '
-          + 'anlamadığın yeri burada, bu konunun içinde anlatır.' }) });
-    }
-    const l = KS.konusmaOf(subject.id, topic.id);
-    const ciftler = [];
-    for(let i = 0; i + 1 < l.length; i += 2) ciftler.push({ soru:l[i].metin, cevap:l[i + 1].metin, i:i / 2 });
-    return K.Card({
-      title:'Anlamadım, sor', sub:'Koçun modeli bu konunun içinde anlatır',
-      body:html`
-        ${when(ciftler.length, () => html`<div class="stack-sm">${map(ciftler, c => html`
-          <div class="konusor__cift">
-            <p class="small"><b>Sen:</b> ${c.soru}</p>
-            <p class="small konusor__cevap">${c.cevap}</p>
-            <div class="row between gap-6"><span class="tiny dim">doğrulanmadı · modelin anlatımı</span>
-              ${K.Button({ label:'Karta çevir', icon:'cards', size:'sm', tone:'ghost', act:'konusor-kart', data:{ 'data-i':String(c.i) } })}</div>
-          </div>`)}</div>`)}
-        <div id="konusor-akis" class="small konusor__cevap" aria-live="polite"></div>
-        ${K.Field({ label:ciftler.length ? 'Devam et' : 'Neyi anlamadın?',
-          input:K.Textarea({ id:'konusor-soru', rows:3, aria:'Anlamadığın yer',
-            placeholder:'Anlamadığın yeri yaz ya da anlatımdan yapıştır…' }) })}
+  function ogrenCard(subject, topic){
+    const O = R.Ogren;
+    if(!O) return null;
+    const d = O.durum(subject.id, topic.id);
+    const parca = [d.anlatim ? 'ayrıntılı anlatım' : 'kısa özet'];
+    if(d.skor.toplam) parca.push(d.skor.toplam + ' örnek soru');
+    parca.push('koç');
+    const durum = [d.okundu ? 'okundu' : 'okunmadı'];
+    if(d.skor.cevaplanan) durum.push(d.skor.dogru + '/' + d.skor.toplam + ' örnek soru doğru (ölçüldü)');
+    return K.Card({ title:'Öğren', sub:parca.join(' · '),
+      body:html`<p class="small muted">${durum.join(' · ')}</p>
         <div class="row wrap gap-6 mt-10">
-          ${K.Button({ label:sorBusy ? 'Anlatıyor…' : 'Sor', icon:'zap', size:'sm', tone:'primary', act:'konusor-sor', disabled:sorBusy })}
-          ${when(ciftler.length, () => K.Button({ label:'Yeni konuşma', size:'sm', tone:'ghost', act:'konusor-unut' }))}
-        </div>
-        <p class="tiny dim mt-10">Cevap kaynaksızdır ve kaydedilmez; bir tanım ya da formül kritikse kitabınla karşılaştır.</p>`,
-    });
+          ${K.Button({ label:'Anlatımı aç', icon:'book', size:'sm', tone:'primary', act:'ogren-git', data:ogrenData(subject, topic, 'anlatim') })}
+          ${when(d.skor.toplam, () => K.Button({ label:'Sorular', icon:'check', size:'sm', act:'ogren-git', data:ogrenData(subject, topic, 'sorular') }))}
+          ${K.Button({ label:'Koça sor', icon:'zap', size:'sm', tone:'ghost', act:'ogren-git', data:ogrenData(subject, topic, 'koc') })}
+        </div>` });
   }
 
   const YOL_EYLEM = {
-    ogren:(subject, topic) => {
-      const m = malzemeler(subject, topic);
-      const anlatim = m && m.urunler.find(u => u.urun === 'ders_notu');
-      const istendi = m && m.bekleyen.some(x => x.tur === 'ders_notu');
-      return K.Row([
-        anlatim ? K.Button({ label:'Anlatımı aç', icon:'book', size:'sm', tone:'primary', act:'konu-urun-ac', data:{ 'data-id':anlatim.id } })
-          : m && !istendi ? K.Button({ label:'Bu konuyu öğren', icon:'book', size:'sm', tone:'primary', act:'konu-malzeme', data:{ 'data-tur':'ders_notu' } })
-          : null,
-        K.Button({ label:'Ders notu ekle', icon:'play', size:'sm', tone:anlatim || (m && !istendi) ? null : 'primary', act:'topic-add-note' }),
-        K.Button({ label:'Okudum', icon:'check', size:'sm', act:'yol-okundu' }),
-      ].filter(Boolean), { wrap:true });
-    },
+    ogren:(subject, topic) => K.Row([
+      K.Button({ label:'Anlatımı aç', icon:'book', size:'sm', tone:'primary', act:'ogren-git', data:ogrenData(subject, topic, 'anlatim') }),
+      K.Button({ label:'Ders notu ekle', icon:'play', size:'sm', act:'topic-add-note' }),
+      K.Button({ label:'Okudum', icon:'check', size:'sm', act:'yol-okundu' }),
+    ], { wrap:true }),
     kartla:() => K.Button({ label:'Kart ekle', icon:'cards', size:'sm', tone:'primary', act:'topic-add-card' }),
     coz:() => K.Button({ label:'Bugün ekranına git', icon:'today', size:'sm', tone:'primary', act:'go', data:{ 'data-route':'today' } }),
     duzelt:() => K.Button({ label:'Yanlış defteri', icon:'list', size:'sm', tone:'primary', act:'yol-yanlis' }),
@@ -175,7 +99,7 @@ R.Screens.topic = (function(){
     pekistir:() => K.Button({ label:'Testi gir', icon:'edit', size:'sm', tone:'primary', act:'topic-edit' }),
   };
   const YOL_NEDEN = {
-    ogren:'Önce konunun kendisi: kısa özeti ve anlatımı oku ya da bir ders izleyip not al; okuyunca «Okudum»a bas.',
+    ogren:'Önce konunun kendisi: Öğren › Anlatım’da oku ya da bir ders izleyip not al; okuyunca «Okudum»a bas.',
     kartla:'Öğrendiğini karta çevir: kart, unutmadan önce sana geri sorar.',
     coz:'Bugün ekranında bir bloğu bu konuya bağla; çözdüğün soru ve doğruluk buraya sayılır.',
     duzelt:'Bu konudan açık yanlış var: kök nedenini yaz, ilkesini çıkar, kapat.',
@@ -362,9 +286,7 @@ R.Screens.topic = (function(){
       K.Span(7, K.Stack([
         headerCard(subject, topic, st, risk),
         yolCard(subject, topic, st),
-        ozetCard(subject, topic),
-        malzemeCard(subject, topic),
-        sorCard(subject, topic),
+        ogrenCard(subject, topic),
         measureCard(subject, topic, st),
         practiceCard(subject, topic),
         notesCard(subject, topic),
@@ -416,58 +338,6 @@ R.Screens.topic = (function(){
       if(!subject || !topic) return;
       await R.OgrenYolu.okundu(subject.id, topic.id, false);
       UI.toast('«Okudum» işareti kaldırıldı');
-      R.App.render();
-    },
-    /* «Bu konuyu öğren» ve öteki malzemeler: açık istek, konu etiketiyle. */
-    async 'konu-malzeme'(el){
-      const { subject, topic } = ctx();
-      const m = MALZEME.find(x => x.tur === el.dataset.tur);
-      if(!subject || !topic || !m || !R.Urunler) return;
-      const sinav = subject.id.indexOf('ayt') === 0 ? 'AYT' : 'TYT';
-      const konu = topic.name + ' (' + subject.name + ')';
-      const ayrinti = 'YKS ' + sinav + ' hazırlığı: ' + subject.name + (topic.group ? ' › ' + topic.group : '')
-        + ' › ' + topic.name + '. Lise düzeyinde; tanımlar, adım adım çözülmüş örnekler, sık yapılan hatalar '
-        + 've ÖSYM soru tarzına uygun kısa alıştırmalar.';
-      const r = await R.Urunler.iste(m.ad + ': ' + konu, { tur:m.tur, konu, ayrinti, etiket:etiketOf(subject, topic) });
-      UI.toast(r.metin || (r.ok ? 'King’e iletildi.' : 'İletilemedi.'), { life:r.ok ? 5000 : 6000 });
-      R.App.render();
-    },
-    /* Malzeme KUTUDA açılır (brand/ortak/urun.js söz 2): betik çalışmaz. */
-    async 'konu-urun-ac'(el){
-      const u = R.Urunler && R.Urunler.bul(el.dataset.id);
-      if(!u) return;
-      UI.sheet({ title:u.baslik, wide:true,
-        subtitle:u.urunAd + ' · ' + LIFEOS.Urun.etiketAdi(u.dogruluk),
-        note:u.dogruluk === 'dogrulanmadi' ? 'Doğrulanmadı: kaynaksız, modelin bilgisidir. '
-          + 'Karar vermeden önce bir kaynağa bak.' : null,
-        body:LIFEOS.Urun.cerceve(u) });
-    },
-    async 'konusor-sor'(){
-      const { subject, topic } = ctx();
-      const kutu = document.getElementById('konusor-soru');
-      const soru = kutu ? kutu.value : '';
-      if(!subject || !topic || sorBusy || !R.KonuSor) return;
-      if(String(soru).trim().length < 3){ UI.toast('Neyi anlamadığını bir cümleyle yaz.'); return; }
-      sorBusy = true;
-      const akis = document.getElementById('konusor-akis');
-      if(akis) akis.textContent = 'Anlatıyor…';
-      let r = null;
-      try{
-        r = await R.KonuSor.sor(subject.id, topic.id, soru, { onText:t => { if(akis) akis.textContent = t; } });
-      }finally{ sorBusy = false; }
-      if(!r.ok) UI.toast(r.metin, { life:6000 });
-      R.App.render();
-    },
-    async 'konusor-kart'(el){
-      const { subject, topic } = ctx();
-      if(!subject || !topic) return;
-      const k = await R.KonuSor.kartYap(subject.id, topic.id, Number(el.dataset.i) || 0);
-      UI.toast(k ? 'Karta çevrildi · modelin anlatımı, yanlışsa düzelt' : 'Kart yapılamadı');
-      R.App.render();
-    },
-    async 'konusor-unut'(){
-      const { subject, topic } = ctx();
-      if(subject && topic) R.KonuSor.unut(subject.id, topic.id);
       R.App.render();
     },
     async 'yol-yanlis'(){

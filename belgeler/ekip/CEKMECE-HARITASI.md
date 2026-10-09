@@ -29,6 +29,12 @@ Tekrar eden örnekler: «Analiz» AYS'de ayrı grup, SPİ ve ESP'de Ofis'in içi
 Bugün'de (HKM teklifi, King teklifi), Ofis'te (öneriler) ve Danışma'da ayrı ayrı;
 «Kütüphane» ESP'de okuma notları, AYS'de BAM kitapları demek.
 
+> **Ek (2026-10-09, kullanıcı: «konu öğrenmek başlığı altında sol tarafa bölüm aç»):**
+> Çalışma'nın ardına dokuzuncu çekmece **Öğren** girdi: Konular · Anlatım · Sorular · Koç ·
+> Ders notları (Ders notları Çalışma'dan taşındı). Şimdilik yalnız AYS'de dolu; bölümü olmayan
+> modülde çekmece görünmez. Sıra: Bugün · Plan · Çalışma · Öğren · Analiz · Onaylar · Ofis ·
+> Kütüphanem · Ayarlar.
+
 ## Kurallar (DEVIR Part 9'dan)
 
 1. Üç modülde **aynı iskelet, aynı çekmece adları**.

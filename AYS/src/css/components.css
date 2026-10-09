@@ -2514,3 +2514,95 @@ body.is-dragging .drop.is-over{
 /* Kısa özet (data/ozetler.js). */
 .konuozet{ margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:14.5px; line-height:1.5; }
 .konuozet li::marker{ color:var(--text-3); }
+
+/* ÖĞREN çekmecesi (core/ogren.js, screens/ogren.js): konu çubuğu, okuma
+   düzeni, örnek soru ve koç sohbeti. Okunacak metin kutuya konmaz; dolgu
+   yalnız örnekte ve sohbette, nötr yüzeyle. Durum dolgusuz: renk yazıda
+   ve çizgide. */
+.ogr-cubuk{ display:flex; align-items:center; gap:8px; }
+.ogr-cubuk__secim{ flex:1; min-width:0; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); gap:8px; }
+.ogr-cubuk__secim .select{ width:100%; min-width:0; }
+.ogr-cubuk__bos{ flex:none; width:36px; height:36px; }
+@media (max-width:560px){ .ogr-cubuk__secim{ grid-template-columns:minmax(0,1fr); } }
+
+.ogr-grup + .ogr-grup{ margin-top:8px; }
+.ogr-grup__ad{ padding:0 10px 4px; font-weight:600; }
+.ogr-konu{ gap:12px; }
+.ogr-konu__no{ flex:none; width:26px; height:26px; display:grid; place-items:center; border-radius:50%;
+  font-size:12px; color:var(--text-2); box-shadow:inset 0 0 0 1.5px var(--border); }
+.ogr-konu__no svg{ width:13px; height:13px; }
+.ogr-konu.is-tamam .ogr-konu__no{ color:var(--ok); box-shadow:inset 0 0 0 1.5px currentColor; }
+.ogr-konu__ad, .ogr-konu .tiny{ display:block; }
+.ogr-konu__ok{ flex:none; color:var(--text-3); }
+.ogr-konu__ok svg{ width:14px; height:14px; }
+
+.ders-duzen{ display:grid; grid-template-columns:minmax(0,1fr); gap:48px; }
+@media (min-width:1100px){ .ders-duzen{ grid-template-columns:minmax(0,70ch) minmax(160px,220px); } }
+.ders__icindekiler{ display:none; }
+@media (min-width:1100px){
+  .ders__icindekiler{ display:flex; flex-direction:column; gap:2px; position:sticky; top:24px; align-self:start; }
+}
+.ders__git{ display:flex; gap:8px; align-items:baseline; width:100%; padding:6px 8px; border:none; border-radius:8px;
+  background:none; font:inherit; font-size:13px; line-height:1.35; color:var(--text-2); text-align:left; cursor:pointer; }
+.ders__git:hover{ background:var(--surface-2); color:var(--text); }
+.ders__git > span{ flex:none; min-width:12px; color:var(--text-3); font-size:12px; }
+.ders__bas{ margin-bottom:18px; }
+.ders__bas h2{ margin:0 0 4px; font-size:22px; font-weight:650; line-height:1.25; letter-spacing:-.01em; }
+.ders__bas p{ margin:0; }
+.ders__bolum{ scroll-margin-top:24px; }
+.ogr-devam .nextup{ margin:0; }
+.ders{ max-width:70ch; font-size:15.5px; line-height:1.65; }
+.ders p{ margin:0 0 10px; }
+.ders__giris{ font-size:16px; color:var(--text-2); }
+.ders__bolum{ margin-top:28px; }
+.ders__baslik{ display:flex; align-items:baseline; gap:10px; margin:0 0 10px; font-size:17px; font-weight:600; line-height:1.35; }
+.ders__no{ flex:none; font-size:13px; font-weight:600; color:var(--primary); }
+.ders__liste{ margin:0 0 10px; padding-left:20px; display:flex; flex-direction:column; gap:6px; }
+.ders__liste li::marker{ color:var(--text-3); }
+.ders__formul{ margin:4px 0 12px; padding:4px 0 4px 14px; border-left:2px solid var(--primary);
+  display:flex; flex-direction:column; gap:4px; font-variant-numeric:tabular-nums; font-weight:500; }
+.ders__ornek{ margin:12px 0; padding:14px 16px; border-radius:12px; background:var(--surface-2); }
+.ders__ornek p{ margin:0; }
+.ders__etiket{ display:block; margin-bottom:4px; font-weight:600; color:var(--text-3); letter-spacing:.01em; }
+.ders__adimlar{ margin:0; padding-left:20px; display:flex; flex-direction:column; gap:4px; }
+.ders__adimlar li::marker{ color:var(--text-3); font-variant-numeric:tabular-nums; }
+.ders__dikkat{ font-size:14.5px; color:var(--text-2); }
+.ders__dikkat b{ color:var(--danger); font-weight:600; }
+.ders sup, .ders sub, .ogr-soru sup, .ogr-soru sub{ font-size:.72em; line-height:0; }
+.ders__akilda{ max-width:70ch; margin-top:28px; padding-top:20px; border-top:1px solid var(--border); font-size:15px; line-height:1.6; }
+.ders__ayak{ margin-top:24px; }
+
+.ogr-noktalar{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+.ogr-nokta{ width:30px; height:30px; display:grid; place-items:center; border-radius:50%; border:none; padding:0;
+  background:none; font:inherit; font-size:12px; font-weight:600; color:var(--text-2); cursor:pointer;
+  box-shadow:inset 0 0 0 1.5px var(--border); }
+.ogr-nokta.is-dogru{ color:var(--ok); box-shadow:inset 0 0 0 1.5px currentColor; }
+.ogr-nokta.is-yanlis{ color:var(--danger); box-shadow:inset 0 0 0 1.5px currentColor; }
+.ogr-nokta.is-bakildi{ color:var(--text-3); box-shadow:inset 0 0 0 1.5px var(--border-strong); }
+.ogr-nokta.is-sirada{ outline:2px solid var(--primary); outline-offset:2px; }
+.ogr-soru{ max-width:70ch; }
+.ogr-soru__metin{ margin:0 0 14px; font-size:15.5px; line-height:1.6; white-space:pre-line; }
+.secenekler{ display:flex; flex-direction:column; gap:8px; }
+.secenek{ display:flex; align-items:center; gap:12px; width:100%; min-height:44px; padding:8px 12px; text-align:left;
+  border:1px solid var(--border); border-radius:12px; background:none; font:inherit; color:inherit; cursor:pointer;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease), opacity var(--dur) var(--ease); }
+.secenek:hover:not([disabled]){ background:var(--surface-2); }
+.secenek[disabled]{ cursor:default; }
+.secenek__harf{ flex:none; width:26px; height:26px; display:grid; place-items:center; border-radius:50%;
+  font-size:12.5px; font-weight:600; color:var(--text-2); box-shadow:inset 0 0 0 1.5px var(--border); }
+.secenek__metin{ flex:1; min-width:0; font-size:15px; line-height:1.45; }
+.secenek.is-dogru{ border-color:var(--ok); }
+.secenek.is-dogru .secenek__harf{ color:var(--ok); box-shadow:inset 0 0 0 1.5px currentColor; }
+.secenek.is-yanlis{ border-color:var(--danger); }
+.secenek.is-yanlis .secenek__harf{ color:var(--danger); box-shadow:inset 0 0 0 1.5px currentColor; }
+.secenek.is-soluk{ opacity:.55; }
+.ogr-sonuc{ margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
+.ogr-sonuc.is-dogru > p b{ color:var(--ok); }
+.ogr-sonuc.is-yanlis > p b{ color:var(--danger); }
+.ogr-sonuc.is-bakildi > p b{ color:var(--text-2); }
+
+.sohbet{ display:flex; flex-direction:column; gap:10px; }
+.sohbet p{ margin:0; }
+.sohbet__sen{ align-self:flex-end; max-width:85%; padding:8px 12px; border-radius:14px 14px 4px 14px; background:var(--primary-soft); }
+.sohbet__koc{ align-self:flex-start; max-width:92%; padding:10px 12px; border-radius:14px 14px 14px 4px; background:var(--surface-2); }
+.ogr-parca{ display:flex; align-items:center; gap:8px; }

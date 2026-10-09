@@ -4,8 +4,8 @@
         cümle noktalı biter).
      2. Hiçbir konunun özeti eksik değildir (bütün dersler; yeni konu
         eklenirse özeti de yazılmalıdır).
-     3. Konu ekranı özeti «elle yazıldı · doğrulanmadı» etiketiyle gösterir;
-        özeti olmayan konuda kart çizilmez. */
+     3. Öğren › Anlatım özeti «Akılda kalsın» olarak, «elle yazıldı ·
+        doğrulanmadı» etiketiyle gösterir; özeti olmayan konuda çizilmez. */
 
 (function(){
   const { describe, it, expect, resetState } = R.Test;
@@ -42,21 +42,20 @@
       expect(eksik).toEqual([]);
     });
 
-    it('konu ekranı özeti etiketiyle gösterir; özeti olmayan konuda kart yok', async () => {
+    it('Anlatım özeti «Akılda kalsın» olarak etiketiyle gösterir; özeti olmayan konuda yok', async () => {
       resetState();
       const s = R.SUBJECTS.find(x => x.id === 'tyt-matematik'), t = s.topics.find(x => x.id === 'tm-03');
-      R.S.ui.topicSubject = s.id;
-      R.S.ui.topicOpen = t.id;
-      let html = String(await R.Screens.topic.render());
-      expect(html).toContain('Kısa özet');
+      await R.Ogren.sec(s.id, t.id);
+      let html = String(await R.Screens.anlatim.render());
+      expect(html).toContain('Akılda kalsın');
       expect(html).toContain('elle yazıldı · doğrulanmadı');
       expect(html).toContain('Dikkat:');
       expect(html).toContain(R.KONU_OZET['tm-03'].ana[1].slice(0, 30));
       const eski = R.KONU_OZET['tm-03'];
       delete R.KONU_OZET['tm-03'];
       try{
-        html = String(await R.Screens.topic.render());
-        expect(html.indexOf('Kısa özet')).toBe(-1);
+        html = String(await R.Screens.anlatim.render());
+        expect(html.indexOf('Akılda kalsın')).toBe(-1);
       }finally{ R.KONU_OZET['tm-03'] = eski; }
     });
   });

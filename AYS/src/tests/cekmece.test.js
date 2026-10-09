@@ -1,6 +1,7 @@
 /* Çekmece düzeni — AYS (belgeler/ekip/EKIP-PLANI.md T2–T3, belgeler/ekip/CEKMECE-HARITASI.md).
 
-   Kanıtladığı sözler: menü sekiz çekmecedir ve adları ortak kaynaktan gelir;
+   Kanıtladığı sözler: menü dokuz çekmecedir (Öğren 2026-10-09'da girdi) ve
+   adları ortak kaynaktan gelir;
    iç içelik en çok iki kattır (çekmece › bölüm); her ekran yolunu söyler
    («Plan › Hafta»); onaylar tek çekmecededir — Bugün yalnız en öndeki kartı
    gösterir, fazlası Onaylar'a gönderir; «Kütüphane» yalnız Kütüphanem'dedir. */
@@ -15,7 +16,7 @@
   }
 
   describe('Çekmeceler (AYS)', () => {
-    it('menü sekiz çekmece; ad ve sıra ortak kaynaktan', () => {
+    it('menü dokuz çekmece; ad ve sıra ortak kaynaktan', () => {
       expect(R.App.NAV.map(g => g.id).join(',')).toBe(K().CEKMECELER.map(c => c.id).join(','));
       expect(R.App.NAV.map(g => g.label).join(',')).toBe(K().CEKMECELER.map(c => c.ad).join(','));
     });
@@ -34,6 +35,8 @@
       /* Menüde olmayan ayrıntı ekranı üst bölümünün altında durur. */
       expect(R.App.yolOf('topic').join(' › ')).toBe('Çalışma › Konu çalış › Konu');
       expect(R.App.yolOf('rutbe').join(' › ')).toBe('Ayarlar › Rütbe');
+      expect(R.App.yolOf('anlatim').join(' › ')).toBe('Öğren › Anlatım');
+      expect(R.App.yolOf('learn').join(' › ')).toBe('Öğren › Ders notları');
     });
 
     it('onaylar tek çekmecede: Bugün en öndeki kartı gösterir, fazlası Onaylar\'da', async () => {

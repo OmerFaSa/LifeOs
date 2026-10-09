@@ -3974,6 +3974,98 @@ body.is-dragging .drop.is-over{
 .konuozet{ margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:14.5px; line-height:1.5; }
 .konuozet li::marker{ color:var(--text-3); }
 
+/* ÖĞREN çekmecesi (core/ogren.js, screens/ogren.js): konu çubuğu, okuma
+   düzeni, örnek soru ve koç sohbeti. Okunacak metin kutuya konmaz; dolgu
+   yalnız örnekte ve sohbette, nötr yüzeyle. Durum dolgusuz: renk yazıda
+   ve çizgide. */
+.ogr-cubuk{ display:flex; align-items:center; gap:8px; }
+.ogr-cubuk__secim{ flex:1; min-width:0; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,2fr); gap:8px; }
+.ogr-cubuk__secim .select{ width:100%; min-width:0; }
+.ogr-cubuk__bos{ flex:none; width:36px; height:36px; }
+@media (max-width:560px){ .ogr-cubuk__secim{ grid-template-columns:minmax(0,1fr); } }
+
+.ogr-grup + .ogr-grup{ margin-top:8px; }
+.ogr-grup__ad{ padding:0 10px 4px; font-weight:600; }
+.ogr-konu{ gap:12px; }
+.ogr-konu__no{ flex:none; width:26px; height:26px; display:grid; place-items:center; border-radius:50%;
+  font-size:12px; color:var(--text-2); box-shadow:inset 0 0 0 1.5px var(--border); }
+.ogr-konu__no svg{ width:13px; height:13px; }
+.ogr-konu.is-tamam .ogr-konu__no{ color:var(--ok); box-shadow:inset 0 0 0 1.5px currentColor; }
+.ogr-konu__ad, .ogr-konu .tiny{ display:block; }
+.ogr-konu__ok{ flex:none; color:var(--text-3); }
+.ogr-konu__ok svg{ width:14px; height:14px; }
+
+.ders-duzen{ display:grid; grid-template-columns:minmax(0,1fr); gap:48px; }
+@media (min-width:1100px){ .ders-duzen{ grid-template-columns:minmax(0,70ch) minmax(160px,220px); } }
+.ders__icindekiler{ display:none; }
+@media (min-width:1100px){
+  .ders__icindekiler{ display:flex; flex-direction:column; gap:2px; position:sticky; top:24px; align-self:start; }
+}
+.ders__git{ display:flex; gap:8px; align-items:baseline; width:100%; padding:6px 8px; border:none; border-radius:8px;
+  background:none; font:inherit; font-size:13px; line-height:1.35; color:var(--text-2); text-align:left; cursor:pointer; }
+.ders__git:hover{ background:var(--surface-2); color:var(--text); }
+.ders__git > span{ flex:none; min-width:12px; color:var(--text-3); font-size:12px; }
+.ders__bas{ margin-bottom:18px; }
+.ders__bas h2{ margin:0 0 4px; font-size:22px; font-weight:650; line-height:1.25; letter-spacing:-.01em; }
+.ders__bas p{ margin:0; }
+.ders__bolum{ scroll-margin-top:24px; }
+.ogr-devam .nextup{ margin:0; }
+.ders{ max-width:70ch; font-size:15.5px; line-height:1.65; }
+.ders p{ margin:0 0 10px; }
+.ders__giris{ font-size:16px; color:var(--text-2); }
+.ders__bolum{ margin-top:28px; }
+.ders__baslik{ display:flex; align-items:baseline; gap:10px; margin:0 0 10px; font-size:17px; font-weight:600; line-height:1.35; }
+.ders__no{ flex:none; font-size:13px; font-weight:600; color:var(--primary); }
+.ders__liste{ margin:0 0 10px; padding-left:20px; display:flex; flex-direction:column; gap:6px; }
+.ders__liste li::marker{ color:var(--text-3); }
+.ders__formul{ margin:4px 0 12px; padding:4px 0 4px 14px; border-left:2px solid var(--primary);
+  display:flex; flex-direction:column; gap:4px; font-variant-numeric:tabular-nums; font-weight:500; }
+.ders__ornek{ margin:12px 0; padding:14px 16px; border-radius:12px; background:var(--surface-2); }
+.ders__ornek p{ margin:0; }
+.ders__etiket{ display:block; margin-bottom:4px; font-weight:600; color:var(--text-3); letter-spacing:.01em; }
+.ders__adimlar{ margin:0; padding-left:20px; display:flex; flex-direction:column; gap:4px; }
+.ders__adimlar li::marker{ color:var(--text-3); font-variant-numeric:tabular-nums; }
+.ders__dikkat{ font-size:14.5px; color:var(--text-2); }
+.ders__dikkat b{ color:var(--danger); font-weight:600; }
+.ders sup, .ders sub, .ogr-soru sup, .ogr-soru sub{ font-size:.72em; line-height:0; }
+.ders__akilda{ max-width:70ch; margin-top:28px; padding-top:20px; border-top:1px solid var(--border); font-size:15px; line-height:1.6; }
+.ders__ayak{ margin-top:24px; }
+
+.ogr-noktalar{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+.ogr-nokta{ width:30px; height:30px; display:grid; place-items:center; border-radius:50%; border:none; padding:0;
+  background:none; font:inherit; font-size:12px; font-weight:600; color:var(--text-2); cursor:pointer;
+  box-shadow:inset 0 0 0 1.5px var(--border); }
+.ogr-nokta.is-dogru{ color:var(--ok); box-shadow:inset 0 0 0 1.5px currentColor; }
+.ogr-nokta.is-yanlis{ color:var(--danger); box-shadow:inset 0 0 0 1.5px currentColor; }
+.ogr-nokta.is-bakildi{ color:var(--text-3); box-shadow:inset 0 0 0 1.5px var(--border-strong); }
+.ogr-nokta.is-sirada{ outline:2px solid var(--primary); outline-offset:2px; }
+.ogr-soru{ max-width:70ch; }
+.ogr-soru__metin{ margin:0 0 14px; font-size:15.5px; line-height:1.6; white-space:pre-line; }
+.secenekler{ display:flex; flex-direction:column; gap:8px; }
+.secenek{ display:flex; align-items:center; gap:12px; width:100%; min-height:44px; padding:8px 12px; text-align:left;
+  border:1px solid var(--border); border-radius:12px; background:none; font:inherit; color:inherit; cursor:pointer;
+  transition:border-color var(--dur) var(--ease), background var(--dur) var(--ease), opacity var(--dur) var(--ease); }
+.secenek:hover:not([disabled]){ background:var(--surface-2); }
+.secenek[disabled]{ cursor:default; }
+.secenek__harf{ flex:none; width:26px; height:26px; display:grid; place-items:center; border-radius:50%;
+  font-size:12.5px; font-weight:600; color:var(--text-2); box-shadow:inset 0 0 0 1.5px var(--border); }
+.secenek__metin{ flex:1; min-width:0; font-size:15px; line-height:1.45; }
+.secenek.is-dogru{ border-color:var(--ok); }
+.secenek.is-dogru .secenek__harf{ color:var(--ok); box-shadow:inset 0 0 0 1.5px currentColor; }
+.secenek.is-yanlis{ border-color:var(--danger); }
+.secenek.is-yanlis .secenek__harf{ color:var(--danger); box-shadow:inset 0 0 0 1.5px currentColor; }
+.secenek.is-soluk{ opacity:.55; }
+.ogr-sonuc{ margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
+.ogr-sonuc.is-dogru > p b{ color:var(--ok); }
+.ogr-sonuc.is-yanlis > p b{ color:var(--danger); }
+.ogr-sonuc.is-bakildi > p b{ color:var(--text-2); }
+
+.sohbet{ display:flex; flex-direction:column; gap:10px; }
+.sohbet p{ margin:0; }
+.sohbet__sen{ align-self:flex-end; max-width:85%; padding:8px 12px; border-radius:14px 14px 4px 14px; background:var(--primary-soft); }
+.sohbet__koc{ align-self:flex-start; max-width:92%; padding:10px 12px; border-radius:14px 14px 14px 4px; background:var(--surface-2); }
+.ogr-parca{ display:flex; align-items:center; gap:8px; }
+
 /* ==== css/temel.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/temel.css içine yazılır; burası bir sonraki
@@ -15928,7 +16020,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'27bdda0c', at:'2026-10-09 15:53', dirty:true };
+R.BUILD = { id:'313e63fb', at:'2026-10-09 16:37', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20618,11 +20710,15 @@ window.LIFEOS = window.LIFEOS || {};
 
   const L = window.LIFEOS;
 
-  /* Sekiz çekmece — ad ve sıra KULLANICI KARARIDIR (EKIP-PLANI §8-1). */
+  /* Çekmeceler — ad ve sıra KULLANICI KARARIDIR (EKIP-PLANI §8-1).
+     «Öğren» 2026-10-09'da eklendi (kullanıcı: «konu öğrenmek başlığı
+     altında sol tarafa bölüm aç»); şimdilik yalnız AYS'de dolu. Bölümü
+     olmayan modülde çekmece görünmez (her modül kendi listesini verir). */
   const CEKMECELER = Object.freeze([
     { id:'bugun',     ad:'Bugün' },
     { id:'plan',      ad:'Plan' },
     { id:'calisma',   ad:'Çalışma' },
+    { id:'ogren',     ad:'Öğren' },
     { id:'analiz',    ad:'Analiz' },
     { id:'onaylar',   ad:'Onaylar' },
     { id:'ofis',      ad:'Ofis' },
@@ -20649,6 +20745,8 @@ window.LIFEOS = window.LIFEOS || {};
     rutbe:'<circle cx="12" cy="14.6" r="5.4"/><path d="M9.2 9.9L6.6 3.6h3.8L12 7.3M14.8 9.9l2.6-6.3h-3.8L12 7.3"/>',
     plan:'<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
     calisma:'<path d="M14 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5z"/><path d="M14 3.5v5h5M9 13h6M9 16.5h4"/>',
+    /* Öğren: açık kitap, iki sayfa ve sırt. */
+    ogren:'<path d="M12 6.8c-1.9-1.4-4.4-2.1-7.5-2.1v12.6c3.1 0 5.6.7 7.5 2.1 1.9-1.4 4.4-2.1 7.5-2.1V4.7c-3.1 0-5.6.7-7.5 2.1z"/><path d="M12 6.8v12.6"/>',
     analiz:'<path d="M5 20v-8M12 20V5M19 20v-5"/>',
     onaylar:'<rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5.5"/>',
     ofis:'<circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19.5c.4-3 2.7-5 5.5-5s5.1 2 5.5 5"/><path d="M15.5 5.5a3.2 3.2 0 0 1 0 6.2M20.5 19.5c-.3-2.2-1.5-3.8-3.3-4.6"/>',
@@ -36158,6 +36256,617 @@ R.KONU_OZET = {
     ornek:'Göle karışan gübre alg patlamasına (ötrofikasyon) yol açar; sudaki oksijen azalır ve balıklar ölür.' },
 };
 
+/* ==== js/data/anlatim.js ==== */
+/* KONU ANLATIMI VE ÖRNEK SORULAR — her AYS konusunun uygulamanın İÇİNDE
+   duran ders notu (Öğren › Anlatım ve Öğren › Sorular).
+
+   Kullanıcı (2026-10-09): «daha çok ders notları olsun, örnek sorular olsun,
+   daha detaylı anlatım olsun; konuları teker teker uygulamanın içinde
+   öğreneyim». Kısa özet (data/ozetler.js) konunun özüydü; bu dosyalar onun
+   ayrıntılı hâlidir: tanım, kural, formül, çözülmüş örnek ve ÖSYM biçiminde
+   beş seçenekli sorular. Model kapalıyken, HKM yokken, internetsizken de
+   okunur.
+
+   KAYNAK VE DOĞRULUK
+   LifeOS'un geliştirme oturumu (Claude) elle yazdı. Kapsam MEB ortaöğretim
+   programlarının ve YKS'nin konu başlıklarıdır (R.SUBJECTS); metin bir
+   kitaptan alıntı DEĞİLDİR ve hiçbir kaynakla satır satır doğrulanmadı:
+   ekranda «elle yazıldı · doğrulanmadı» yazar. Sayılar yazılırken elle
+   hesaplandı. Bir hata bulunursa YALNIZ ilgili dosyada düzeltilir.
+
+   DOSYALAR: ders başına bir dosya, data/anlatim-<önek>.js (tr, tm, tf, ts,
+   am, af, ak, ab). Her biri R.KONU_ANLATIM'a kendi konularını ekler.
+
+   BİÇİM: R.KONU_ANLATIM[konuKimliği] = {
+     giris:    1–3 cümle; konu nedir, sınavda nerede durur,
+     bolumler: [{ baslik,
+                  metin:   paragraf ya da [paragraf, …],
+                  liste?:  [madde, …],
+                  formul?: [satır, …],
+                  ornek?:  { soru, cozum:[adım, …] },
+                  dikkat?: en sık yapılan hata }]          (2–6 bölüm),
+     sorular:  [{ soru, sec:[beş seçenek], dogru:'A'–'E',
+                  cozum:[adım, …] }]                       (3–6 soru) }
+   Metinde üç işaret açılır: **kalın**, x^{2} üst simge, H_{2}O alt simge.
+   Biçimi ve eksiksizliği tests/anlatim.test.js sınar.
+
+   BİLEREK YAPILMADI: hiçbir anlatıma «bu konudan kaç soru çıkar» ya da
+   «kaç günde biter» yazılmadı; frekans R.SUBJECTS'te, süre plandadır. Puan
+   ya da sıralama tahmini yoktur. */
+
+window.R = window.R || {};
+R.KONU_ANLATIM = R.KONU_ANLATIM || {};
+
+/* ==== js/data/anlatim-tr.js ==== */
+/* KONU ANLATIMI — TYT Türkçe (biçim ve kaynak: data/anlatim.js).
+
+   Elle yazıldı, doğrulanmadı. Örneklerdeki ve sorulardaki sayılar
+   yazılırken elle hesaplandı; bir hata bulunursa YALNIZ burada düzeltilir. */
+
+window.R = window.R || {};
+R.KONU_ANLATIM = R.KONU_ANLATIM || {};
+
+Object.assign(R.KONU_ANLATIM, {
+
+});
+
+/* ==== js/data/anlatim-tm.js ==== */
+/* KONU ANLATIMI — TYT Temel Matematik (biçim ve kaynak: data/anlatim.js).
+
+   Elle yazıldı, doğrulanmadı. Örneklerdeki ve sorulardaki sayılar
+   yazılırken elle hesaplandı; bir hata bulunursa YALNIZ burada düzeltilir. */
+
+window.R = window.R || {};
+R.KONU_ANLATIM = R.KONU_ANLATIM || {};
+
+Object.assign(R.KONU_ANLATIM, {
+
+  /* ================= SAYILAR ================= */
+  'tm-01': {
+    giris:'Rakam, sayı ve sayı kümeleri matematiğin alfabesidir. TYT’de hem doğrudan sorulur hem de problemlerin içinde «pozitif tam sayı», «ardışık» gibi gizli şartlar olarak karşına çıkar.',
+    bolumler:[
+      { baslik:'Rakam ve sayı kümeleri',
+        metin:'Rakam, sayıları yazmak için kullanılan on semboldür: 0, 1, 2, …, 9. Sayı ise rakamların bir araya gelmesiyle oluşan çokluk belirtir. Her kümenin bir adı vardır ve soru kökündeki küme adı cevabı değiştirir.',
+        liste:['**Doğal sayılar** N = {0, 1, 2, 3, …}: 0 dahildir.',
+          '**Sayma sayıları** N^{+} = {1, 2, 3, …}: 0 yoktur.',
+          '**Tam sayılar** Z = {…, −2, −1, 0, 1, 2, …}: negatifler, sıfır ve pozitifler.',
+          '**Rasyonel sayılar** Q: a/b biçiminde yazılabilen sayılar (a, b tam sayı, b ≠ 0). 0,25 = 1/4 ve −3 = −3/1 rasyoneldir.',
+          '**İrrasyonel sayılar**: kesir olarak yazılamayan sayılar; √2, √3, π gibi. Rasyonellerle birlikte **reel sayıları** oluştururlar.'],
+        dikkat:'0 ne pozitif ne negatiftir. «Pozitif tam sayı» 1’den başlar, «negatif olmayan tam sayı» 0’dan.' },
+      { baslik:'Tek ve çift sayılar',
+        metin:'2 ile tam bölünen tam sayılar çift (2k), bölünmeyenler tektir (2k + 1). Sonucun tek mi çift mi olduğunu bulmak için sayıları değil yalnızca tek–çift durumlarını işlemek yeterlidir.',
+        formul:['Ç ± Ç = Ç, T ± T = Ç, T ± Ç = T',
+          'Ç · (her sayı) = Ç, T · T = T',
+          'T^{n} = T, Ç^{n} = Ç (n pozitif tam sayı)'],
+        ornek:{ soru:'a ve b tam sayılardır. 3a + 2b tek olduğuna göre a tek mi çift mi?',
+          cozum:['2b her zaman çifttir.', '3a + çift = tek olduğundan 3a tektir.', '3 tek olduğuna göre 3a’nın tek olması için a tek olmalıdır.'] } },
+      { baslik:'Asal sayılar',
+        metin:['1’den büyük olup yalnızca 1’e ve kendisine bölünen doğal sayılara asal sayı denir: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, … Bir sayının asal olup olmadığını anlamak için kareköküne kadar olan asallara bölmeyi denemek yeterlidir.',
+          'Ortak böleni yalnızca 1 olan sayılara **aralarında asal** denir. 8 ve 15 asal değildir ama aralarında asaldır.'],
+        liste:['1 asal değildir.', '2 en küçük asal ve tek çift asal sayıdır.', 'Ardışık iki sayı her zaman aralarında asaldır.'],
+        ornek:{ soru:'91 asal mıdır?', cozum:['√91, 9 ile 10 arasındadır; 2, 3, 5 ve 7’ye bölmeyi denemek yeter.', '91 = 7 · 13 olduğundan asal değildir.'] } },
+      { baslik:'Ardışık sayılar ve toplamlar',
+        metin:'Belirli bir artışla sıralanan sayılara ardışık sayılar denir: ardışık tek sayılar 2’şer, 3’ün ardışık katları 3’er artar. Böyle bir dizide terim sayısını ve toplamı formülle bulursun.',
+        formul:['Terim sayısı = (son − ilk) / artış + 1',
+          'Toplam = (ilk + son) · terim sayısı / 2',
+          '1 + 2 + … + n = n(n + 1) / 2',
+          '1 + 3 + 5 + … + (2n − 1) = n^{2}'],
+        ornek:{ soru:'12 + 15 + 18 + … + 60 toplamı kaçtır?',
+          cozum:['Artış 3: terim sayısı (60 − 12) / 3 + 1 = 17.', 'Toplam (12 + 60) · 17 / 2 = 36 · 17 = 612.'] },
+        dikkat:'Terim sayısında «+1»i unutma: 5’ten 9’a kadar 4 değil 5 sayı vardır.' },
+    ],
+    sorular:[
+      { soru:'a, b ve c pozitif tam sayılardır. a · b tek ve b + c çift olduğuna göre, aşağıdakilerden hangisi kesinlikle çifttir?',
+        sec:['a · c', 'a + b + c', 'b · c + 2', 'a + c', 'a · b · c'], dogru:'D',
+        cozum:['a · b tek ise a ve b ikisi de tektir.', 'b tek ve b + c çift ise c de tektir.', 'Üçü de tek: tek + tek = çift olduğundan a + c çifttir; ötekilerin hepsi tektir.'] },
+      { soru:'1’den büyük ve 40’tan küçük kaç tane asal sayı vardır?',
+        sec:['12', '13', '11', '10', '14'], dogru:'A',
+        cozum:['Asallar: 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37.', 'Sayınca 12 tane.'] },
+      { soru:'7’den başlayıp 4’er artarak 79’a kadar giden sayıların (7 ve 79 dahil) toplamı kaçtır?',
+        sec:['774', '817', '836', '860', '903'], dogru:'B',
+        cozum:['Terim sayısı (79 − 7) / 4 + 1 = 19.', 'Toplam (7 + 79) · 19 / 2 = 43 · 19 = 817.'] },
+      { soru:'Aşağıdakilerden hangisi rasyonel sayı değildir?',
+        sec:['0,25', '−7', '√16', '√12', '3/8'], dogru:'D',
+        cozum:['0,25 = 1/4, −7 = −7/1, √16 = 4 ve 3/8 kesir olarak yazılır.', '√12 = 2√3 kesir olarak yazılamaz; irrasyoneldir.'] },
+    ],
+  },
+
+  'tm-02': {
+    giris:'Bir rakamın değeri bulunduğu basamağa bağlıdır. Basamak soruları, sayıyı basamaklarına ayırıp (çözümleyip) bir denkleme çevirmekle çözülür.',
+    bolumler:[
+      { baslik:'Basamak değeri ve sayı değeri',
+        metin:'4725 sayısında 7’nin sayı değeri 7, basamak değeri 700’dür. Sayıyı çözümlemek, her rakamı basamak değeriyle yazıp toplamaktır.',
+        formul:['ab = 10a + b', 'abc = 100a + 10b + c', 'abcd = 1000a + 100b + 10c + d'],
+        dikkat:'Sayının ilk rakamı 0 olamaz: abc üç basamaklı ise a ≠ 0.' },
+      { baslik:'Çözümleyerek denklem kurmak',
+        metin:'Rakamların yeri değişince oluşan farklar ve toplamlar hep aynı katsayılara çıkar; bunları ezberlemek işini hızlandırır.',
+        formul:['ab + ba = 11(a + b)', 'ab − ba = 9(a − b)', 'abc − cba = 99(a − c)'],
+        ornek:{ soru:'Rakamları toplamının 7 katına eşit olan kaç tane iki basamaklı sayı vardır?',
+          cozum:['10a + b = 7(a + b) → 3a = 6b → a = 2b.', 'b = 1, 2, 3, 4 için 21, 42, 63, 84 bulunur.', 'Cevap 4 tanedir.'] } },
+      { baslik:'En büyük, en küçük ve «rakamları farklı»',
+        metin:'En büyük sayıyı ararken en soldaki basamağa en büyük uygun rakamı, en küçüğü ararken en küçük uygun rakamı koy. «Rakamları farklı» şartı bir rakamı yalnızca bir kez kullanmana izin verir.',
+        liste:['Üç basamaklı en büyük sayı 999, rakamları farklı en büyük 987.',
+          'Üç basamaklı en küçük sayı 100, rakamları farklı en küçük 102.',
+          'Tek/çift şartı son basamağa, «5’e bölünür» şartı son basamağın 0 ya da 5 olmasına bakar.'],
+        ornek:{ soru:'Rakamları farklı dört basamaklı en büyük çift sayı kaçtır?',
+          cozum:['Baştan 9, 8, 7 koyulur.', 'Son basamak çift ve kullanılmamış en büyük rakam olmalı: 6.', 'Sayı 9876’dır.'] } },
+      { baslik:'Faktöriyel',
+        metin:'1’den n’ye kadar olan sayıların çarpımına n faktöriyel denir. Faktöriyelli ifadeleri sadeleştirirken büyük olanı küçüğe kadar açarsın: 7! / 5! = 7 · 6 = 42.',
+        formul:['n! = 1 · 2 · 3 · … · n', '0! = 1! = 1', '(n + 1)! = (n + 1) · n!',
+          'n!’in sonundaki sıfır sayısı = ⌊n/5⌋ + ⌊n/25⌋ + ⌊n/125⌋ + …'],
+        ornek:{ soru:'30! sayısının sonunda kaç tane sıfır vardır?', cozum:['⌊30/5⌋ = 6, ⌊30/25⌋ = 1.', 'Toplam 6 + 1 = 7 sıfır.'] } },
+    ],
+    sorular:[
+      { soru:'Rakamları farklı iki basamaklı ab ve ba sayıları için ab − ba = 54 olduğuna göre, ab sayısı en çok kaçtır?',
+        sec:['60', '71', '82', '93', '96'], dogru:'D',
+        cozum:['ab − ba = 9(a − b) = 54 → a − b = 6.', 'a en büyük 9 seçilirse b = 3; ab = 93.', '96’da a − b = 3 olduğu için uymaz.'] },
+      { soru:'Dört basamaklı 4a7b sayısında a ile b’nin yerleri değiştirilince sayı 297 artıyor. Buna göre b − a kaçtır?',
+        sec:['2', '3', '4', '5', '6'], dogru:'B',
+        cozum:['4b7a − 4a7b = (100b + a) − (100a + b) = 99(b − a).', '99(b − a) = 297 → b − a = 3.'] },
+      { soru:'25! sayısının sonunda kaç tane sıfır vardır?',
+        sec:['4', '5', '6', '7', '10'], dogru:'C',
+        cozum:['⌊25/5⌋ = 5 ve ⌊25/25⌋ = 1.', '25 iki tane 5 çarpanı taşır; toplam 5 + 1 = 6.'] },
+      { soru:'Rakamları farklı üç basamaklı en büyük tek sayı ile rakamları farklı üç basamaklı en küçük çift sayının farkı kaçtır?',
+        sec:['785', '845', '875', '880', '885'], dogru:'E',
+        cozum:['En büyük tek: 9 ve 8’den sonra son basamağa en büyük tek rakam 7 → 987.', 'En küçük çift: 1, 0 ve son basamağa en küçük kullanılmamış çift 2 → 102.', '987 − 102 = 885.'] },
+    ],
+  },
+
+  'tm-03': {
+    giris:'Bölme ve bölünebilme, sayıları bölmeden kalanı ve bölünüp bölünmediğini bulmanın kısa yollarıdır. Kalan soruları ve rakam bulma soruları bu kurallarla birkaç saniyede çözülür.',
+    bolumler:[
+      { baslik:'Bölme işlemi ve kalan',
+        metin:'Bölme işleminde kalan her zaman bölenden küçüktür. Kalanlarla toplama, çıkarma ve çarpma yapılabilir: bir sayının kalanını biliyorsan katlarının kalanını da bilirsin.',
+        formul:['Bölünen = Bölen · Bölüm + Kalan', '0 ≤ Kalan < Bölen'],
+        ornek:{ soru:'Bir sayının 7’ye bölümünden kalan 5’tir. Bu sayının 3 katının 7’ye bölümünden kalan kaçtır?',
+          cozum:['Kalan da 3 ile çarpılır: 3 · 5 = 15.', '15’in 7’ye bölümünden kalan 1’dir.'] } },
+      { baslik:'Bölünebilme kuralları',
+        metin:'Kurallar sayının tamamına değil belirli rakamlarına bakar.',
+        liste:['**2:** son rakam çift.', '**3:** rakamlar toplamı 3’ün katı. **9:** rakamlar toplamı 9’un katı.',
+          '**4:** son iki basamak 4’ün katı. **8:** son üç basamak 8’in katı.', '**5:** son rakam 0 ya da 5. **10:** son rakam 0.',
+          '**11:** sağdan başlayarak rakamlar +, −, +, − işaretiyle toplanır; sonuç 11’in katıysa bölünür.'],
+        dikkat:'3’e ve 9’a bölümden kalan, rakamlar toplamının kalanıdır; 4 ve 8 için bu doğru değildir.' },
+      { baslik:'Büyük üslerin kalanı',
+        metin:'Bir sayının kuvvetlerinin kalanları belli bir adımdan sonra tekrar eder. Kalanı 1 yapan kuvveti bul; üssü ona göre parçala.',
+        ornek:{ soru:'2^{10} sayısının 7’ye bölümünden kalan kaçtır?',
+          cozum:['2^{3} = 8 ve 8’in 7’ye bölümünden kalan 1’dir.', '2^{10} = (2^{3})^{3} · 2 olduğundan kalan 1 · 1 · 1 · 2 = 2’dir.'] } },
+      { baslik:'Bileşik sayılara bölünebilme',
+        metin:'Bir sayıya bölünebilmeyi, onu aralarında asal çarpanlara ayırıp her birine ayrı ayrı bakarak denetlersin: 6 = 2 · 3, 12 = 3 · 4, 15 = 3 · 5, 36 = 4 · 9, 45 = 5 · 9.',
+        ornek:{ soru:'Dört basamaklı 3a5b sayısı 45 ile tam bölünüyorsa a’nın alabileceği değerlerin toplamı kaçtır?',
+          cozum:['45 = 5 · 9: b = 0 ya da b = 5.', 'b = 0 ise 3 + a + 5 = 8 + a, 9’un katı → a = 1.', 'b = 5 ise 13 + a, 9’un katı → a = 5.', 'Toplam 1 + 5 = 6.'] },
+        dikkat:'12’ye bölünebilme için 2 ve 6 birlikte yetmez (6 sayısı ikisine de bölünür ama 12’ye bölünmez); aralarında asal olan 3 ve 4 aranır.' },
+    ],
+    sorular:[
+      { soru:'Bir doğal sayının 6 ile bölümünden kalan 4’tür. Bu sayının 5 katının 6 ile bölümünden kalan kaçtır?',
+        sec:['0', '1', '2', '3', '4'], dogru:'C',
+        cozum:['Kalan 5 ile çarpılır: 5 · 4 = 20.', '20’nin 6’ya bölümünden kalan 2’dir.'] },
+      { soru:'Beş basamaklı 7a35b sayısı 36 ile tam bölünebilmektedir. Buna göre a’nın alabileceği değerlerin toplamı kaçtır?',
+        sec:['5', '7', '9', '11', '13'], dogru:'B',
+        cozum:['36 = 4 · 9. Son iki basamak 5b, 4’e bölünmeli: b = 2 ya da b = 6.', 'Rakamlar toplamı 15 + a + b, 9’un katı olmalı.', 'b = 2 → 17 + a → a = 1; b = 6 → 21 + a → a = 6.', 'Toplam 1 + 6 = 7.'] },
+      { soru:'3^{26} sayısının 8 ile bölümünden kalan kaçtır?',
+        sec:['1', '2', '3', '5', '7'], dogru:'A',
+        cozum:['3^{2} = 9 ve 9’un 8’e bölümünden kalan 1’dir.', '3^{26} = (3^{2})^{13} olduğundan kalan 1^{13} = 1.'] },
+      { soru:'Dört basamaklı 5a84 sayısı 11 ile tam bölündüğüne göre a kaçtır?',
+        sec:['3', '5', '6', '8', '9'], dogru:'E',
+        cozum:['Sağdan +, −, +, −: 4 − 8 + a − 5 = a − 9.', 'a − 9 sayısı 11’in katı olmalı; rakam olarak yalnız a = 9 uyar.', 'Denetim: 5984 = 11 · 544.'] },
+    ],
+  },
+
+  'tm-04': {
+    giris:'EBOB sayıları ortak bölen en büyük sayı, EKOK ortak katların en küçüğüdür. Soru «parçala, böl, eşit aralık» diyorsa EBOB; «yeniden birlikte, en az kaç» diyorsa EKOK ister.',
+    bolumler:[
+      { baslik:'Asal çarpanlarla EBOB ve EKOK',
+        metin:'Sayıları asal çarpanlarına ayır. EBOB için yalnızca ortak çarpanları en küçük üsleriyle, EKOK için bütün çarpanları en büyük üsleriyle çarp.',
+        ornek:{ soru:'72 ve 120 sayılarının EBOB’u ve EKOK’u kaçtır?',
+          cozum:['72 = 2^{3} · 3^{2}, 120 = 2^{3} · 3 · 5.', 'EBOB = 2^{3} · 3 = 24.', 'EKOK = 2^{3} · 3^{2} · 5 = 360.'] } },
+      { baslik:'İki sayının çarpımı',
+        metin:'İki pozitif tam sayının çarpımı, EBOB’ları ile EKOK’larının çarpımına eşittir. Aralarında asal sayıların EBOB’u 1, EKOK’u çarpımlarıdır.',
+        formul:['a · b = EBOB(a, b) · EKOK(a, b)', 'a = EBOB · x, b = EBOB · y (x ile y aralarında asal)'],
+        dikkat:'Bu eşitlik yalnızca İKİ sayı için doğrudur; üç sayıda kullanma.' },
+      { baslik:'Problem tipleri',
+        liste:['**Eşit parçalar:** bir dikdörtgeni en büyük eş karelere bölmek, farklı uzunlukları en uzun eş parçalara kesmek → EBOB.',
+          '**Ağaç dikme:** kenarlara eşit aralıkla, köşelere de dikilerek en az ağaç → aralık EBOB; kapalı bir çevrede ağaç sayısı = çevre / aralık.',
+          '**Birlikte olma:** ziller, otobüsler, nöbetler yeniden ne zaman birlikte → EKOK.',
+          '**En küçük kare:** eş dikdörtgenlerden kare oluşturmak → kare kenarı EKOK.'],
+        metin:'Önce sorunun bölmeyi mi (küçülme) yoksa katlamayı mı (büyüme) istediğine karar ver.',
+        ornek:{ soru:'Kenarları 60 m ve 84 m olan dikdörtgen bir bahçenin çevresine, köşelere de gelecek şekilde eşit aralıklarla en az kaç ağaç dikilir?',
+          cozum:['En büyük aralık EBOB(60, 84) = 12 m.', 'Çevre 2 · (60 + 84) = 288 m.', 'Kapalı çevrede ağaç sayısı 288 / 12 = 24.'] } },
+      { baslik:'Kalanlı EKOK soruları',
+        metin:'Bir sayı farklı bölenlere bölündüğünde hep aynı kalanı veriyorsa sayı = EKOK · k + kalan. Kalanlar bölenden hep aynı miktar eksikse sayı = EKOK · k − eksik.',
+        ornek:{ soru:'3’e, 4’e ve 5’e bölündüğünde hep 2 kalanını veren en küçük üç basamaklı sayı kaçtır?',
+          cozum:['EKOK(3, 4, 5) = 60; sayı 60k + 2 biçimindedir.', 'k = 1 → 62 (iki basamaklı), k = 2 → 122.'] } },
+    ],
+    sorular:[
+      { soru:'EBOB(a, b) = 6 ve EKOK(a, b) = 90 olduğuna göre a · b kaçtır?',
+        sec:['96', '270', '360', '450', '540'], dogru:'E',
+        cozum:['İki sayının çarpımı EBOB · EKOK’tur.', 'a · b = 6 · 90 = 540.'] },
+      { soru:'Boyutları 48 cm ve 72 cm olan dikdörtgen bir karton, hiç artmayacak şekilde en büyük eş karelere bölünüyor. Kaç kare elde edilir?',
+        sec:['4', '6', '8', '12', '24'], dogru:'B',
+        cozum:['Karenin kenarı EBOB(48, 72) = 24 cm.', 'Kare sayısı (48 / 24) · (72 / 24) = 2 · 3 = 6.'] },
+      { soru:'İki zil sırasıyla 18 dakikada ve 24 dakikada bir çalıyor. İkisi saat 09.00’da birlikte çaldığına göre bir sonraki birlikte çalışları saat kaçtadır?',
+        sec:['09.42', '10.00', '10.12', '10.24', '10.36'], dogru:'C',
+        cozum:['18 = 2 · 3^{2}, 24 = 2^{3} · 3 → EKOK = 2^{3} · 3^{2} = 72 dakika.', '09.00 + 72 dakika = 10.12.'] },
+      { soru:'4’e, 6’ya ve 10’a bölündüğünde sırasıyla 3, 5 ve 9 kalanını veren en küçük pozitif tam sayının rakamları toplamı kaçtır?',
+        sec:['5', '9', '11', '14', '16'], dogru:'D',
+        cozum:['Kalanlar bölenlerden hep 1 eksik: sayı = EKOK − 1.', 'EKOK(4, 6, 10) = 60 → sayı 59.', 'Rakamları toplamı 5 + 9 = 14.'] },
+    ],
+  },
+
+  'tm-05': {
+    giris:'Rasyonel sayılar kesirler ve ondalık sayılardır. TYT’de işlem önceliği, sıralama ve devirli ondalık soruları sık gelir; hepsinde ilk adım kesri sadeleştirip ortak paydaya getirmektir.',
+    bolumler:[
+      { baslik:'Kesirlerde dört işlem',
+        metin:'Toplama ve çıkarmada paydalar eşitlenir; çarpmada pay payla, payda paydayla çarpılır; bölmede ikinci kesir ters çevrilip çarpılır. İşlem önceliği: parantez, üs, çarpma–bölme, toplama–çıkarma.',
+        formul:['a/b + c/d = (ad + bc) / bd', 'a/b · c/d = ac / bd', 'a/b ÷ c/d = a/b · d/c'],
+        ornek:{ soru:'(1/2 + 1/3) · 6/5 kaçtır?', cozum:['1/2 + 1/3 = 3/6 + 2/6 = 5/6.', '5/6 · 6/5 = 1.'] } },
+      { baslik:'Kesirleri sıralamak',
+        metin:'Paydalar eşitse payı büyük olan, paylar eşitse paydası küçük olan büyüktür. Pay ile payda arasındaki fark aynıysa 1’e olan uzaklığa bak: 1’den çıkarınca kalan küçük olan büyüktür.',
+        ornek:{ soru:'3/4, 5/6 ve 7/9 sayılarını küçükten büyüğe sırala.',
+          cozum:['1 − 3/4 = 1/4, 1 − 5/6 = 1/6, 1 − 7/9 = 2/9.', '1/6 < 2/9 < 1/4 olduğundan 1’e en yakın 5/6’dır.', 'Sıra: 3/4 < 7/9 < 5/6.'] },
+        dikkat:'Negatif kesirlerde sıra tersine döner: −1/2 < −1/3.' },
+      { baslik:'Ondalık sayılar',
+        metin:'Ondalık sayıyla çarpmada virgüllerden sonraki basamak sayıları toplanır; bölmede bölen tam sayı olana kadar iki sayının virgülü birlikte kaydırılır. Sık kullanılanları kesir olarak bilmek hız kazandırır.',
+        liste:['0,5 = 1/2, 0,25 = 1/4, 0,125 = 1/8, 0,2 = 1/5.', '0,12 / 0,003 = 120 / 3 = 40 (ikisinin virgülü üç basamak kaydı).'] },
+      { baslik:'Devirli ondalık sayılar',
+        metin:'Ondalık kısmında bir ya da birkaç rakamı sonsuza kadar tekrar eden sayılara devirli ondalık sayı denir; üstü çizili rakamlar devreder. Her devirli sayı bir kesre çevrilebilir.',
+        formul:['Devirli sayı = (sayının tamamı − devretmeyen kısım) / payda',
+          'Payda: devreden basamak kadar 9, devretmeyen ondalık basamak kadar 0'],
+        ornek:{ soru:'0,13̅ (yalnız 3 devreder) sayısını kesre çevir.',
+          cozum:['Sayının tamamı 13, devretmeyen kısım 1.', 'Bir devreden basamak (9), bir devretmeyen ondalık basamak (0): payda 90.', '(13 − 1) / 90 = 12/90 = 2/15.'] },
+        dikkat:'0,9̅ = 1’dir: (9 − 0) / 9 = 1.' },
+    ],
+    sorular:[
+      { soru:'(1/2 − 1/3) ÷ (1/4 + 1/12) işleminin sonucu kaçtır?',
+        sec:['1/4', '1/3', '1/2', '2/3', '3/2'], dogru:'C',
+        cozum:['1/2 − 1/3 = 1/6.', '1/4 + 1/12 = 3/12 + 1/12 = 1/3.', '1/6 ÷ 1/3 = 1/6 · 3 = 1/2.'] },
+      { soru:'a = 5/6, b = 7/8 ve c = 9/11 olduğuna göre aşağıdaki sıralamalardan hangisi doğrudur?',
+        sec:['a < b < c', 'c < a < b', 'c < b < a', 'b < a < c', 'a < c < b'], dogru:'B',
+        cozum:['1’e uzaklıklar: 1/6, 1/8 ve 2/11.', '1/8 < 1/6 < 2/11 olduğundan 1’e en yakın b, en uzak c’dir.', 'Sıra: c < a < b.'] },
+      { soru:'0,3̅ + 0,16̅ toplamı kaçtır? (Üstü çizili rakamlar devreder.)',
+        sec:['1/2', '5/9', '49/90', '4/9', '11/18'], dogru:'A',
+        cozum:['0,3̅ = 3/9 = 1/3.', '0,16̅ = (16 − 1)/90 = 15/90 = 1/6.', '1/3 + 1/6 = 2/6 + 1/6 = 1/2.'] },
+      { soru:'(2,4 · 0,5) / 0,012 işleminin sonucu kaçtır?',
+        sec:['0,1', '1', '10', '100', '1000'], dogru:'D',
+        cozum:['2,4 · 0,5 = 1,2.', '1,2 / 0,012 = 1200 / 12 = 100.'] },
+    ],
+  },
+
+  /* ================= CEBİR ================= */
+  'tm-06': {
+    giris:'Eşitsizlik bir bilinmeyenin tek değerini değil bir aralığını verir. TYT’de aralıkları birleştirme, en büyük–en küçük değer ve işaret soruları gelir.',
+    bolumler:[
+      { baslik:'Eşitsizliğin kuralları',
+        metin:'İki tarafa aynı sayı eklenip çıkarılabilir; pozitif bir sayıyla çarpıp bölmek yönü değiştirmez. Negatif bir sayıyla çarpınca ya da bölünce eşitsizliğin yönü döner.',
+        liste:['a < b ise a + c < b + c.', 'a < b ve c > 0 ise ac < bc; c < 0 ise ac > bc.',
+          'Aynı işaretli iki sayıyı ters çevirince yön değişir: 0 < a < b ise 1/a > 1/b.'],
+        ornek:{ soru:'−2x + 5 > 11 eşitsizliğini çöz.', cozum:['−2x > 6.', '−2’ye bölünce yön döner: x < −3.'] },
+        dikkat:'Negatifle çarpıp böldükten sonra işareti çevirmeyi unutmak en sık yapılan hatadır.' },
+      { baslik:'Aralıklar ve tam sayı değerleri',
+        metin:'a < x < b açık aralıktır, uçlar dahil değildir; ≤ işareti ucu dahil eder. Bir aralıktaki tam sayıları sayarken uçların dahil olup olmadığına bak.',
+        ornek:{ soru:'−3 ≤ x < 4 aralığında kaç tam sayı vardır?', cozum:['−3 dahil, 4 dahil değil: −3, −2, −1, 0, 1, 2, 3.', '7 tam sayı.'] } },
+      { baslik:'Eşitsizliklerle işlem',
+        metin:'Aynı yönlü eşitsizlikler taraf tarafa toplanabilir. Çıkarma doğrudan yapılmaz: çıkarılacak eşitsizlik −1 ile çarpılır, sonra toplanır. Çarpmada uç değerlerin dört çarpımına bakılır; en küçüğü ve en büyüğü aralığı verir.',
+        ornek:{ soru:'2 < x < 5 ve −3 < y < 1 ise x − y ve x · y hangi aralıktadır?',
+          cozum:['−y için: −1 < −y < 3. Topla: 1 < x − y < 8.', 'Uç çarpımlar: 2 · (−3) = −6, 2 · 1 = 2, 5 · (−3) = −15, 5 · 1 = 5.', 'En küçük −15, en büyük 5: −15 < x · y < 5.'] } },
+      { baslik:'0 ile 1 arasındaki sayılar',
+        metin:'Bir sayının kuvvetleri ve kökleri, sayı 0 ile 1 arasındaysa küçülür, 1’den büyükse büyür. Sıralama sorularında önce sayının hangi aralıkta olduğuna bak.',
+        formul:['0 < x < 1 ise x^{3} < x^{2} < x < √x < 1/x', 'x > 1 ise 1/x < √x < x < x^{2} < x^{3}'] },
+    ],
+    sorular:[
+      { soru:'3 − 2x ≥ −7 eşitsizliğini sağlayan en büyük tam sayı x kaçtır?',
+        sec:['4', '5', '6', '7', '10'], dogru:'B',
+        cozum:['−2x ≥ −10.', '−2’ye bölünce yön döner: x ≤ 5.', 'En büyük tam sayı 5.'] },
+      { soru:'−4 < x ≤ 3 ve −2 ≤ y < 5 olduğuna göre x − y ifadesinin alabileceği en büyük tam sayı değeri kaçtır?',
+        sec:['1', '3', '4', '5', '8'], dogru:'D',
+        cozum:['−y için: −5 < −y ≤ 2.', 'Topla: −9 < x − y ≤ 5.', 'x = 3 ve y = −2 iken 5 elde edilir (ikisi de dahil).'] },
+      { soru:'x ve y tam sayılardır. −3 < x < 4 ve −2 < y < 3 olduğuna göre x · y çarpımının alabileceği en küçük değer kaçtır?',
+        sec:['−9', '−6', '−4', '−3', '−2'], dogru:'C',
+        cozum:['x ∈ {−2, −1, 0, 1, 2, 3}, y ∈ {−1, 0, 1, 2}.', 'Negatif çarpım için işaretler zıt olmalı: (−2) · 2 = −4 ve 3 · (−1) = −3.', 'En küçük değer −4.'] },
+      { soru:'0 < a < 1 olduğuna göre a, a^{2}, √a ve 1/a sayılarının küçükten büyüğe sıralaması hangisidir?',
+        sec:['a < a^{2} < √a < 1/a', 'a^{2} < √a < a < 1/a', '1/a < a^{2} < a < √a', '√a < a < a^{2} < 1/a', 'a^{2} < a < √a < 1/a'], dogru:'E',
+        cozum:['0 ile 1 arasında kare küçültür, kök büyütür: a^{2} < a < √a.', '1/a ise 1’den büyüktür.', 'a = 1/4 ile denersen: 1/16 < 1/4 < 1/2 < 4.'] },
+    ],
+  },
+
+  'tm-07': {
+    giris:'Mutlak değer bir sayının sayı doğrusunda 0’a olan uzaklığıdır; uzaklık negatif olamayacağı için mutlak değer de hiçbir zaman negatif değildir.',
+    bolumler:[
+      { baslik:'Tanım ve özellikler',
+        metin:'İçi pozitif ya da sıfırsa mutlak değer olduğu gibi çıkar; içi negatifse işaret değiştirerek çıkar. |a − b|, a ile b arasındaki uzaklıktır.',
+        formul:['|x| = x (x ≥ 0), |x| = −x (x < 0)', '|a · b| = |a| · |b|, |a / b| = |a| / |b|', '|−a| = |a|, |x|^{2} = x^{2}'],
+        ornek:{ soru:'x < 0 < y ise |x − y| + |x| ifadesinin eşiti nedir?',
+          cozum:['x − y negatiftir: |x − y| = y − x.', 'x negatiftir: |x| = −x.', 'Toplam y − x − x = y − 2x.'] } },
+      { baslik:'Mutlak değerli denklemler',
+        metin:'|x − a| = b denkleminde b pozitifse iki durum yazılır: x − a = b ya da x − a = −b. b negatifse çözüm yoktur, b = 0 ise tek çözüm vardır.',
+        ornek:{ soru:'|2x − 3| = 7 denkleminin kökler toplamı kaçtır?',
+          cozum:['2x − 3 = 7 → x = 5.', '2x − 3 = −7 → x = −2.', 'Toplam 5 + (−2) = 3.'] },
+        dikkat:'|x + 4| = −2 gibi sağ tarafı negatif bir denklemin çözümü yoktur; işlem yapmadan önce sağ tarafa bak.' },
+      { baslik:'Mutlak değerli eşitsizlikler',
+        formul:['|x| < a ise −a < x < a (a > 0)', '|x| > a ise x > a ya da x < −a'],
+        metin:'«Küçüktür» bir aralık, «büyüktür» iki ayrı parça verir. |x − 2| ≤ 3, «x’in 2’ye uzaklığı en çok 3» demektir.',
+        ornek:{ soru:'|x − 2| ≤ 3 eşitsizliğini sağlayan kaç tam sayı vardır?', cozum:['−3 ≤ x − 2 ≤ 3 → −1 ≤ x ≤ 5.', 'Tam sayılar −1’den 5’e: 7 tane.'] } },
+      { baslik:'İki mutlak değerin toplamı',
+        metin:'İçleri sıfır yapan değerler sayı doğrusunu parçalara böler; her parçada mutlak değerler açılarak incelenir. İki uzaklığın toplamı, x iki noktanın arasındayken en küçüktür.',
+        formul:['|x − a| + |x − b| ifadesinin en küçük değeri |a − b|'],
+        ornek:{ soru:'|x − 1| + |x + 3| ifadesinin en küçük değeri kaçtır?', cozum:['Noktalar 1 ve −3.', 'x bu iki nokta arasındayken toplam, aralarındaki uzaklık olan 4’tür.'] } },
+    ],
+    sorular:[
+      { soru:'|3x − 6| = 12 denklemini sağlayan x değerlerinin toplamı kaçtır?',
+        sec:['−4', '2', '4', '6', '8'], dogru:'C',
+        cozum:['3x − 6 = 12 → x = 6.', '3x − 6 = −12 → x = −2.', 'Toplam 6 + (−2) = 4.'] },
+      { soru:'|2x + 1| < 7 eşitsizliğini sağlayan kaç tane x tam sayısı vardır?',
+        sec:['5', '6', '7', '8', '9'], dogru:'B',
+        cozum:['−7 < 2x + 1 < 7 → −8 < 2x < 6 → −4 < x < 3.', 'Tam sayılar −3, −2, −1, 0, 1, 2: 6 tane.'] },
+      { soru:'a < 0 < b olmak üzere |a − b| − |b| + |a| ifadesinin eşiti aşağıdakilerden hangisidir?',
+        sec:['−2a', '2b', '2a − 2b', '0', '−2b'], dogru:'A',
+        cozum:['a − b negatif: |a − b| = b − a.', '|b| = b ve |a| = −a.', '(b − a) − b + (−a) = −2a.'] },
+      { soru:'|x − 5| + |x + 1| ifadesinin alabileceği en küçük değer kaçtır?',
+        sec:['0', '4', '5', '6', '10'], dogru:'D',
+        cozum:['İçleri sıfır yapan noktalar 5 ve −1.', 'x bu iki nokta arasındayken toplam, aralarındaki uzaklık |5 − (−1)| = 6’dır.'] },
+    ],
+  },
+
+  'tm-08': {
+    giris:'Üslü sayılar tekrarlanan çarpmanın kısa yazılışıdır. Soruların çoğu tabanları aynı yapıp üslerle işlem yapmaya dayanır.',
+    bolumler:[
+      { baslik:'Tanım ve işaret',
+        metin:'a^{n}, a’nın n kez kendisiyle çarpımıdır. Negatif tabanın çift kuvveti pozitif, tek kuvveti negatiftir. Parantez önemlidir: (−2)^{4} = 16 ama −2^{4} = −16.',
+        formul:['a^{0} = 1 (a ≠ 0)', 'a^{−n} = 1 / a^{n}', '(a / b)^{−n} = (b / a)^{n}'] },
+      { baslik:'Üslerle işlem kuralları',
+        metin:'Tabanlar aynıysa çarpmada üsler toplanır, bölmede çıkarılır. Üssün üssü çarpılır. Üsler aynıysa tabanlar çarpılabilir.',
+        formul:['a^{m} · a^{n} = a^{m + n}', 'a^{m} / a^{n} = a^{m − n}', '(a^{m})^{n} = a^{m · n}', 'a^{n} · b^{n} = (a · b)^{n}'],
+        ornek:{ soru:'2^{5} · 4^{3} / 8^{2} kaçtır?', cozum:['Hepsini 2 tabanına çevir: 4^{3} = 2^{6}, 8^{2} = 2^{6}.', '2^{5} · 2^{6} / 2^{6} = 2^{5} = 32.'] },
+        dikkat:'a^{m} + a^{n} için kural yoktur: 2^{3} + 2^{3} = 2^{4} olur (ortak çarpan), 2^{6} değil.' },
+      { baslik:'Ortak çarpan parantezi',
+        metin:'Üsleri farklı ama tabanları aynı terimler toplanıyorsa en küçük kuvvet parantezine alınır.',
+        ornek:{ soru:'2^{x} + 2^{x + 1} + 2^{x + 2} = 56 ise x kaçtır?', cozum:['2^{x}(1 + 2 + 4) = 56 → 2^{x} · 7 = 56.', '2^{x} = 8 → x = 3.'] } },
+      { baslik:'Üslü denklemler',
+        metin:'Tabanlar eşitlenir, sonra üsler eşitlenir. Taban 1, 0 ya da −1 olamaz; bu durumlar ayrıca incelenir.',
+        ornek:{ soru:'9^{x + 1} = 27^{x − 1} ise x kaçtır?', cozum:['3^{2x + 2} = 3^{3x − 3}.', '2x + 2 = 3x − 3 → x = 5.'] } },
+      { baslik:'Büyüklük sıralaması',
+        metin:'Üsleri ortak bir sayıya indir ya da tabanları eşitle; sonra yalnız tabana ya da yalnız üsse bak.',
+        ornek:{ soru:'2^{30}, 3^{20} ve 5^{10} sayılarını sırala.', cozum:['Üsleri 10’a indir: 2^{30} = 8^{10}, 3^{20} = 9^{10}.', '5^{10} < 8^{10} < 9^{10} olduğundan 5^{10} < 2^{30} < 3^{20}.'] } },
+    ],
+    sorular:[
+      { soru:'(−2)^{3} − (−3)^{2} + 2^{0} işleminin sonucu kaçtır?',
+        sec:['−16', '−14', '−2', '0', '2'], dogru:'A',
+        cozum:['(−2)^{3} = −8, (−3)^{2} = 9, 2^{0} = 1.', '−8 − 9 + 1 = −16.'] },
+      { soru:'3^{x} = 5 olduğuna göre 9^{x + 1} kaçtır?',
+        sec:['45', '75', '125', '225', '405'], dogru:'D',
+        cozum:['9^{x + 1} = 9 · 9^{x} = 9 · (3^{x})^{2}.', '9 · 5^{2} = 9 · 25 = 225.'] },
+      { soru:'4^{x − 1} = 8^{x − 3} olduğuna göre x kaçtır?',
+        sec:['3', '5', '7', '9', '11'], dogru:'C',
+        cozum:['2^{2x − 2} = 2^{3x − 9}.', '2x − 2 = 3x − 9 → x = 7.'] },
+      { soru:'a = 2^{40}, b = 3^{30} ve c = 5^{20} sayılarının küçükten büyüğe sıralaması hangisidir?',
+        sec:['a < b < c', 'a < c < b', 'c < a < b', 'b < c < a', 'c < b < a'], dogru:'B',
+        cozum:['Üsleri 10’a indir: a = 16^{10}, b = 27^{10}, c = 25^{10}.', '16 < 25 < 27 olduğundan a < c < b.'] },
+    ],
+  },
+
+  'tm-09': {
+    giris:'Köklü sayılar üslü sayıların kesirli üslü hâlidir. Sorular genellikle kök dışına çıkarma, benzer kökleri toplama ve paydayı kökten kurtarma üzerinedir.',
+    bolumler:[
+      { baslik:'Tanım',
+        metin:'√a, karesi a olan negatif olmayan sayıdır. Çift dereceli kökün içi negatif olamaz; tek dereceli kökün içi olabilir: ³√(−8) = −2. Bir sayının karesinin karekökü o sayının mutlak değeridir.',
+        formul:['√(a^{2}) = |a|', 'ⁿ√(a^{m}) = a^{m/n}'] },
+      { baslik:'Kök dışına çıkarma ve toplama',
+        metin:'Kök içindeki sayı tam kare bir çarpana ayrılır, o çarpan dışarı çıkar. Yalnızca kök içi aynı olan (benzer) terimler toplanır.',
+        liste:['√72 = √(36 · 2) = 6√2', '3√2 = √(9 · 2) = √18 (içeri alırken kare alınır)', '√12 + √27 = 2√3 + 3√3 = 5√3'],
+        dikkat:'√a + √b ≠ √(a + b): √9 + √16 = 7, ama √25 = 5.' },
+      { baslik:'Çarpma ve bölme',
+        metin:'Aynı dereceli köklerde çarpma ve bölme kök içinde yapılır.',
+        formul:['√a · √b = √(a · b)', '√a / √b = √(a / b)'],
+        ornek:{ soru:'√8 · √18 kaçtır?', cozum:['√(8 · 18) = √144 = 12.'] } },
+      { baslik:'Paydayı kökten kurtarmak',
+        metin:'Payda √a ise pay ve payda √a ile çarpılır. Payda √a ± √b ise eşleniğiyle çarpılır; (√a − √b)(√a + √b) = a − b olduğundan kök kaybolur.',
+        ornek:{ soru:'4 / (√7 + √3) ifadesinin paydasını rasyonel yap.', cozum:['Eşlenik √7 − √3 ile çarp.', '4(√7 − √3) / (7 − 3) = √7 − √3.'] } },
+      { baslik:'Köklü sayıları sıralamak',
+        metin:'Katsayıları kök içine al, sonra yalnız kök içlerini karşılaştır.',
+        ornek:{ soru:'2√3, 3√2 ve √15 sayılarını sırala.', cozum:['2√3 = √12, 3√2 = √18.', '√12 < √15 < √18 → 2√3 < √15 < 3√2.'] } },
+    ],
+    sorular:[
+      { soru:'√50 + √18 − √32 işleminin sonucu kaçtır?',
+        sec:['2√2', '3√2', '4√2', '6√2', '8√2'], dogru:'C',
+        cozum:['√50 = 5√2, √18 = 3√2, √32 = 4√2.', '5√2 + 3√2 − 4√2 = 4√2.'] },
+      { soru:'√(0,16) + √(1,21) − √(0,04) işleminin sonucu kaçtır?',
+        sec:['0,9', '1', '1,1', '1,2', '1,3'], dogru:'E',
+        cozum:['√(0,16) = 0,4, √(1,21) = 1,1, √(0,04) = 0,2.', '0,4 + 1,1 − 0,2 = 1,3.'] },
+      { soru:'6 / (√5 − √2) ifadesinin eşiti aşağıdakilerden hangisidir?',
+        sec:['2√5 + 2√2', '√5 + √2', '2√5 − 2√2', '3√5 + 3√2', '6√5 − 6√2'], dogru:'A',
+        cozum:['Eşlenik √5 + √2 ile çarp: 6(√5 + √2) / (5 − 2).', '6 / 3 = 2 → 2√5 + 2√2.'] },
+      { soru:'a = 3√5, b = 4√3 ve c = 2√11 sayılarının küçükten büyüğe sıralaması hangisidir?',
+        sec:['a < b < c', 'c < a < b', 'a < c < b', 'b < c < a', 'c < b < a'], dogru:'B',
+        cozum:['Katsayıları içeri al: a = √45, b = √48, c = √44.', '44 < 45 < 48 olduğundan c < a < b.'] },
+    ],
+  },
+
+  'tm-10': {
+    giris:'Çarpanlara ayırma bir toplamı çarpım hâline getirmektir. Sadeleştirme, denklem çözme ve değer bulma sorularının neredeyse hepsi buna dayanır.',
+    bolumler:[
+      { baslik:'Ortak çarpan ve gruplama',
+        metin:'Her terimde bulunan çarpan parantez dışına alınır. Dört terimli ifadelerde ikişerli gruplanıp ortak parantez aranır.',
+        formul:['ax + ay = a(x + y)', 'ax + ay + bx + by = (a + b)(x + y)'],
+        ornek:{ soru:'x^{2} − 3x + 2x − 6 ifadesini çarpanlarına ayır.', cozum:['x(x − 3) + 2(x − 3).', '(x − 3)(x + 2).'] } },
+      { baslik:'Özdeşlikler',
+        metin:'Bu kalıpları iki yönde de tanımak gerekir: açarken ve toplarken.',
+        formul:['(a + b)^{2} = a^{2} + 2ab + b^{2}', '(a − b)^{2} = a^{2} − 2ab + b^{2}', 'a^{2} − b^{2} = (a − b)(a + b)',
+          'a^{3} − b^{3} = (a − b)(a^{2} + ab + b^{2})', 'a^{3} + b^{3} = (a + b)(a^{2} − ab + b^{2})'],
+        ornek:{ soru:'101^{2} − 99^{2} kaçtır?', cozum:['İki kare farkı: (101 − 99)(101 + 99).', '2 · 200 = 400.'] } },
+      { baslik:'Üç terimli ifadeler',
+        metin:'x^{2} + bx + c ifadesinde çarpımı c, toplamı b olan iki sayı aranır. ax^{2} + bx + c ifadesinde a ve c’nin çarpanları çapraz denenir.',
+        ornek:{ soru:'x^{2} − 5x − 14 ve 6x^{2} + x − 2 ifadelerini çarpanlarına ayır.',
+          cozum:['Çarpımı −14, toplamı −5 olan sayılar −7 ve 2: (x − 7)(x + 2).', '6x^{2} + x − 2 = (2x − 1)(3x + 2); açınca 6x^{2} + 4x − 3x − 2.'] } },
+      { baslik:'Rasyonel ifadeleri sadeleştirmek',
+        metin:'Pay ve payda ayrı ayrı çarpanlarına ayrılır; ortak çarpanlar sadeleşir. Toplam hâlindeki terimler sadeleşmez, yalnızca çarpanlar sadeleşir.',
+        ornek:{ soru:'(x^{2} − 9) / (x^{2} + x − 6) ifadesini sadeleştir.', cozum:['Pay (x − 3)(x + 3), payda (x + 3)(x − 2).', 'Sonuç (x − 3) / (x − 2).'] } },
+      { baslik:'Değer bulma kalıpları',
+        metin:'Toplam ve çarpım verilip kareler toplamı sorulursa açılım kullanılır; değişkenleri tek tek bulmaya çalışma.',
+        formul:['a^{2} + b^{2} = (a + b)^{2} − 2ab', '(a − b)^{2} = (a + b)^{2} − 4ab', 'x^{2} + 1/x^{2} = (x + 1/x)^{2} − 2'] },
+    ],
+    sorular:[
+      { soru:'x − y = 3 ve x · y = 10 olduğuna göre x^{2} + y^{2} kaçtır?',
+        sec:['19', '25', '27', '29', '39'], dogru:'D',
+        cozum:['(x − y)^{2} = x^{2} + y^{2} − 2xy.', '9 = x^{2} + y^{2} − 20 → x^{2} + y^{2} = 29.'] },
+      { soru:'x ≠ 2 ve x ≠ −2 olmak üzere [(x^{2} − 4x + 4) / (x^{2} − 4)] · [(x + 2) / (x − 2)] ifadesinin en sade hâli nedir?',
+        sec:['1', 'x − 2', 'x + 2', '1 / (x − 2)', '(x + 2) / (x − 2)'], dogru:'A',
+        cozum:['x^{2} − 4x + 4 = (x − 2)^{2}, x^{2} − 4 = (x − 2)(x + 2).', '(x − 2)^{2} / [(x − 2)(x + 2)] · (x + 2) / (x − 2) = 1.'] },
+      { soru:'a + 1/a = 4 olduğuna göre a^{2} + 1/a^{2} kaçtır?',
+        sec:['12', '14', '16', '18', '20'], dogru:'B',
+        cozum:['(a + 1/a)^{2} = a^{2} + 2 + 1/a^{2}.', '16 = a^{2} + 1/a^{2} + 2 → 14.'] },
+      { soru:'2023^{2} − 2022 · 2024 işleminin sonucu kaçtır?',
+        sec:['−1', '0', '1', '2', '4045'], dogru:'C',
+        cozum:['2022 · 2024 = (2023 − 1)(2023 + 1) = 2023^{2} − 1.', '2023^{2} − (2023^{2} − 1) = 1.'] },
+    ],
+  },
+
+  'tm-11': {
+    giris:'Oran iki çokluğun karşılaştırılması, orantı iki oranın eşitliğidir. Harita ölçeği, tarif, hız ve paylaştırma soruları hep bu yapıyla kurulur.',
+    bolumler:[
+      { baslik:'Oran ve orantı',
+        metin:'a/b = c/d orantısında içler çarpımı dışlar çarpımına eşittir. Birden fazla oran aynı sabite (k) eşitse payların toplamının paydaların toplamına oranı da k’dir.',
+        formul:['a/b = c/d ise a · d = b · c', 'a/b = c/d = e/f = k ise (a + c + e)/(b + d + f) = k'] },
+      { baslik:'Doğru orantı',
+        metin:'Biri kaç katına çıkarsa öteki de aynı kata çıkıyorsa doğru orantılıdır: y = k · x. Fiyat–miktar, ölçek, sabit hızla yol bu türdendir.',
+        ornek:{ soru:'3 kg elma 45 TL ise 7 kg elma kaç TL’dir?', cozum:['1 kg = 45 / 3 = 15 TL.', '7 kg = 7 · 15 = 105 TL.'] } },
+      { baslik:'Ters orantı',
+        metin:'Biri artarken öteki aynı oranda azalıyorsa ters orantılıdır: x · y = k. Aynı işi yapan işçi sayısı ile süre, sabit yolda hız ile süre böyledir.',
+        ornek:{ soru:'6 işçi bir işi 10 günde bitiriyor. Aynı hızdaki 4 işçi kaç günde bitirir?', cozum:['İş miktarı 6 · 10 = 60 işçi-gün.', '60 / 4 = 15 gün.'] } },
+      { baslik:'Paylaştırma',
+        metin:'Doğru orantılı paylaştırmada parçalar a·k, b·k, c·k olur. Ters orantılıda önce oranlar ters çevrilir, paydalar eşitlenir; paylar yeni orandır.',
+        ornek:{ soru:'60 sayısı 2, 3 ve 6 ile ters orantılı üç parçaya ayrılıyor. Parçalar nedir?',
+          cozum:['1/2 : 1/3 : 1/6 = 3/6 : 2/6 : 1/6 = 3 : 2 : 1.', 'k = 60 / 6 = 10 → 30, 20, 10.'] },
+        dikkat:'Ters orantıda oranı ters çevirmeden paylaştırırsan en büyük parçayı en küçük sanırsın.' },
+    ],
+    sorular:[
+      { soru:'a/3 = b/5 = c/7 ve a + b + c = 60 olduğuna göre b kaçtır?',
+        sec:['12', '16', '20', '24', '28'], dogru:'C',
+        cozum:['a = 3k, b = 5k, c = 7k → 15k = 60 → k = 4.', 'b = 5 · 4 = 20.'] },
+      { soru:'Bir haritada 4 cm, gerçekte 12 km’ye karşılık gelmektedir. Bu haritada 7 cm olan bir yol gerçekte kaç km’dir?',
+        sec:['18', '21', '24', '28', '36'], dogru:'B',
+        cozum:['1 cm = 12 / 4 = 3 km.', '7 cm = 21 km.'] },
+      { soru:'130 sayısı 2, 3 ve 4 ile ters orantılı üç parçaya ayrılıyor. En büyük parça kaçtır?',
+        sec:['30', '40', '52', '60', '65'], dogru:'D',
+        cozum:['1/2 : 1/3 : 1/4 oranını 12 ile genişlet: 6 : 4 : 3.', 'k = 130 / 13 = 10 → 60, 40, 30.', 'En büyük parça 60.'] },
+      { soru:'x ile y ters orantılıdır. x = 6 iken y = 8 olduğuna göre x = 16 iken y kaçtır?',
+        sec:['3', '4', '6', '12', '24'], dogru:'A',
+        cozum:['x · y = 6 · 8 = 48 sabittir.', '16 · y = 48 → y = 3.'] },
+    ],
+  },
+
+  'tm-12': {
+    giris:'Denklem, bilinmeyeni bulmak için kurulan eşitliktir. Problemlerin hepsi sonunda bir denkleme dönüşür; bu yüzden düzgün kurmak ve hızlı çözmek temel beceridir.',
+    bolumler:[
+      { baslik:'Birinci dereceden denklemler',
+        metin:'Kesirli denklemde paydaların EKOK’u ile her terim çarpılır, bilinmeyenler bir tarafa, sayılar öbür tarafa toplanır.',
+        ornek:{ soru:'(x − 2)/3 + (x + 1)/2 = 4 denklemini çöz.', cozum:['6 ile çarp: 2(x − 2) + 3(x + 1) = 24.', '2x − 4 + 3x + 3 = 24 → 5x − 1 = 24.', 'x = 5.'] },
+        dikkat:'Eksi işaretli kesri genişletirken parantezin tamamını eksiyle çarp: −(x − 2) = −x + 2.' },
+      { baslik:'Çözüm kümesinin özel durumları',
+        metin:'ax + b = 0 biçimindeki bir denklem:',
+        liste:['a ≠ 0 ise tek çözümü vardır: x = −b/a.', 'a = 0 ve b = 0 ise her sayı çözümdür (çözüm kümesi reel sayılar).', 'a = 0 ve b ≠ 0 ise çözümü yoktur.'],
+        ornek:{ soru:'(m − 2)x = m + 3 denkleminin çözümü olmadığına göre m kaçtır?', cozum:['Katsayı sıfır olmalı: m = 2.', 'Sağ taraf 5 ≠ 0; çözüm yoktur.'] } },
+      { baslik:'İki bilinmeyenli denklem sistemleri',
+        metin:'Yok etme yönteminde denklemler uygun sayılarla çarpılıp toplanır ve bir bilinmeyen kaybolur. Yerine koymada bir denklemden bilinmeyen çekilip ötekine yazılır.',
+        ornek:{ soru:'2x + 3y = 12 ve x − y = 1 ise x ve y kaçtır?', cozum:['İkinciden x = y + 1.', '2(y + 1) + 3y = 12 → 5y = 10 → y = 2.', 'x = 3.'] } },
+      { baslik:'Sözel ifadeyi denkleme çevirmek',
+        liste:['«Bir sayının 3 katının 5 fazlası» → 3x + 5', '«Bir sayının 5 fazlasının 3 katı» → 3(x + 5)', '«a, b’nin 4 katından 2 eksiktir» → a = 4b − 2', '«Ardışık üç çift sayı» → x, x + 2, x + 4'],
+        metin:'Kelimelerin sırası parantezin yerini belirler; «fazlasının katı» ile «katının fazlası» farklı denklemlerdir.' },
+    ],
+    sorular:[
+      { soru:'(2x − 1)/3 − (x − 2)/4 = 6 denklemini sağlayan x kaçtır?',
+        sec:['8', '10', '12', '14', '16'], dogru:'D',
+        cozum:['12 ile çarp: 4(2x − 1) − 3(x − 2) = 72.', '8x − 4 − 3x + 6 = 72 → 5x + 2 = 72.', 'x = 14.'] },
+      { soru:'(a − 3)x + 2 = 4x − b denkleminin çözüm kümesi bütün reel sayılar olduğuna göre a + b kaçtır?',
+        sec:['3', '5', '7', '9', '11'], dogru:'B',
+        cozum:['Hepsini bir tarafa topla: (a − 7)x + (2 + b) = 0.', 'Her x için sağlanması için a − 7 = 0 ve 2 + b = 0.', 'a = 7, b = −2 → a + b = 5.'] },
+      { soru:'3x + 2y = 19 ve 2x − y = 1 olduğuna göre x · y kaçtır?',
+        sec:['10', '12', '15', '18', '20'], dogru:'C',
+        cozum:['İkinciden y = 2x − 1.', '3x + 2(2x − 1) = 19 → 7x = 21 → x = 3.', 'y = 5 → x · y = 15.'] },
+      { soru:'Bir sayının 4 katının 7 eksiği, aynı sayının 2 katının 9 fazlasına eşittir. Bu sayı kaçtır?',
+        sec:['8', '9', '10', '12', '16'], dogru:'A',
+        cozum:['4x − 7 = 2x + 9.', '2x = 16 → x = 8.'] },
+    ],
+  },
+
+});
+
+/* ==== js/data/anlatim-tf.js ==== */
+/* KONU ANLATIMI — TYT Fen Bilimleri (biçim ve kaynak: data/anlatim.js).
+
+   Elle yazıldı, doğrulanmadı. Örneklerdeki ve sorulardaki sayılar
+   yazılırken elle hesaplandı; bir hata bulunursa YALNIZ burada düzeltilir. */
+
+window.R = window.R || {};
+R.KONU_ANLATIM = R.KONU_ANLATIM || {};
+
+Object.assign(R.KONU_ANLATIM, {
+
+});
+
+/* ==== js/data/anlatim-ts.js ==== */
+/* KONU ANLATIMI — TYT Sosyal Bilimler (biçim ve kaynak: data/anlatim.js).
+
+   Elle yazıldı, doğrulanmadı. Örneklerdeki ve sorulardaki sayılar
+   yazılırken elle hesaplandı; bir hata bulunursa YALNIZ burada düzeltilir. */
+
+window.R = window.R || {};
+R.KONU_ANLATIM = R.KONU_ANLATIM || {};
+
+Object.assign(R.KONU_ANLATIM, {
+
+});
+
+/* ==== js/data/anlatim-am.js ==== */
+/* KONU ANLATIMI — AYT Matematik (biçim ve kaynak: data/anlatim.js).
+
+   Elle yazıldı, doğrulanmadı. Örneklerdeki ve sorulardaki sayılar
+   yazılırken elle hesaplandı; bir hata bulunursa YALNIZ burada düzeltilir. */
+
+window.R = window.R || {};
+R.KONU_ANLATIM = R.KONU_ANLATIM || {};
+
+Object.assign(R.KONU_ANLATIM, {
+
+});
+
+/* ==== js/data/anlatim-af.js ==== */
+/* KONU ANLATIMI — AYT Fizik (biçim ve kaynak: data/anlatim.js).
+
+   Elle yazıldı, doğrulanmadı. Örneklerdeki ve sorulardaki sayılar
+   yazılırken elle hesaplandı; bir hata bulunursa YALNIZ burada düzeltilir. */
+
+window.R = window.R || {};
+R.KONU_ANLATIM = R.KONU_ANLATIM || {};
+
+Object.assign(R.KONU_ANLATIM, {
+
+});
+
+/* ==== js/data/anlatim-ak.js ==== */
+/* KONU ANLATIMI — AYT Kimya (biçim ve kaynak: data/anlatim.js).
+
+   Elle yazıldı, doğrulanmadı. Örneklerdeki ve sorulardaki sayılar
+   yazılırken elle hesaplandı; bir hata bulunursa YALNIZ burada düzeltilir. */
+
+window.R = window.R || {};
+R.KONU_ANLATIM = R.KONU_ANLATIM || {};
+
+Object.assign(R.KONU_ANLATIM, {
+
+});
+
+/* ==== js/data/anlatim-ab.js ==== */
+/* KONU ANLATIMI — AYT Biyoloji (biçim ve kaynak: data/anlatim.js).
+
+   Elle yazıldı, doğrulanmadı. Örneklerdeki ve sorulardaki sayılar
+   yazılırken elle hesaplandı; bir hata bulunursa YALNIZ burada düzeltilir. */
+
+window.R = window.R || {};
+R.KONU_ANLATIM = R.KONU_ANLATIM || {};
+
+Object.assign(R.KONU_ANLATIM, {
+
+});
+
 /* ==== js/data/reference.js ==== */
 /* Referans tablolari: esikler, hedefler, protokoller, kontrol listeleri.
    Kaynak: "Hemsirelik Hedefi — 9 Aylik Kocluk Plani" ve "YKS Kocluk Uygulamasi" belgeleri. */
@@ -37167,6 +37876,8 @@ R.HINTS = {
     more:'Yüksek frekanslı ve kapanmamış bir konu, düşük frekanslı ve kapalı bir konudan daha risklidir. Skor bir emir değil öneri sırasıdır; imzalı haftalık sözleşme her zaman önce gelir.' },
   'estimate':{ t:'Tahmini sıra', b:'Son 3 denemenin medyanından üretilen bant — tek sayı değil.',
     more:'ÖSYM puanı ham netten değil, standartlaştırılmış puandan gelir ve aday dağılımı her yıl değişir. Bu yüzden sonuç aralık olarak verilir ve deneme sayısı arttıkça aralık daralır.' },
+  'ogren-bam':{ t:'Daha derin', b:'BAM bu konu için kaynaklı bir anlatım, kavram sözlüğü ya da çalışma kâğıdı yazar.',
+    more:'Uygulamanın içindeki anlatım elle yazıldı ve doğrulanmadı; BAM’ın yazdığı malzeme kaynağını taşır. Her istek önce King’in onayından geçer (model kotası harcar), sonra Onaylar’a gelir ve burada, konusunun yanında açılır. HKM kapalıyken gelmiş olanlar okunur. Kaynaksız malzeme «doğrulanmadı» yazar: karar vermeden önce bir kaynağa bak.' },
   'solve':{ t:'Soru çöz', b:'Sorunun fotoğrafını ya da metnini ver; model çözer ve anlatır.',
     more:'Fotoğraf üç yoldan girer: bırak, tıkla ya da Ctrl+V ile yapıştır. Notun isteğe bağlıdır: nerede takıldığını yazarsan çözüm oraya odaklanır. Model bağlı değilse çözüm üretilmez. Kaynaklarım’da zorluk etiketten değil, senin çözüm oranından çıkar.' },
   'quick-log':{ t:'Hızlı kayıt', b:'Ders, konu ve sonuç seç; Enter kaydeder.',
@@ -39952,11 +40663,15 @@ R.Model = (function(){
     const cur = doc.states[topicId] || { state:'not_started', first:null, firstAt:null, second:null, secondAt:null, note:'' };
     const next = Object.assign({}, cur, patch);
 
-    // Kapanis kurali: ilk test >=75 ve 7 gun sonraki test >=70
+    // Kapanis kurali: ilk test >=75 ve 7 gun sonraki test >=70.
+    // Yalniz OLCUM degisince yeniden hesaplanir: «Okudum» ya da ornek soru
+    // cevabi gibi bir yama «yeniden acildi» durumunu sessizce «kapali»ya
+    // ceviriyordu (ogren.test.js).
     const rule = R.CLOSURE_RULE;
-    if(next.first != null && next.second != null){
+    const olcum = 'first' in patch || 'second' in patch;
+    if(olcum && next.first != null && next.second != null){
       next.state = (next.first >= rule.first && next.second >= rule.second) ? 'closed' : 'practicing';
-    }else if(next.first != null){
+    }else if(olcum && next.first != null){
       next.state = next.first >= rule.first ? 'provisional' : 'practicing';
     }
     if(patch.state) next.state = patch.state;   // acik secim onceliklidir
@@ -40755,6 +41470,8 @@ R.Model = (function(){
        kurarken aradaysa bos kurmali. */
     if(R.Istisna) await R.Istisna.yukle();
     if(R.Bolum) await R.Bolum.yukle();
+    /* Öğren'de son açılan konu (core/ogren.js söz 2). */
+    if(R.Ogren) await R.Ogren.yukle();
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
     if(R.Hedefler) await R.Hedefler.yukle();
     if(R.SinavProfil) await R.SinavProfil.yukle();
@@ -44236,8 +44953,11 @@ R.OgrenYolu = (function(){
         gösterilir; konuşma yalnız bu açılışta durur.
      2. MODEL YOKSA SÖYLENİR. Zincir boşsa hiçbir şey uydurulmaz; ekran
         Ofis ayarlarına yönlendirir (ücretsiz sağlayıcılar orada).
-     3. BAĞLAM YALNIZ KONUDUR: ders, bölüm, konu adı ve öğrencinin
-        yapıştırdığı parça. Ad, puan, sıralama gibi kişisel veri gitmez.
+     3. BAĞLAM YALNIZ KONUDUR: ders, bölüm, konu adı, uygulamanın kendi
+        kısa özeti (data/ozetler.js; anlatım aynı dili konuşsun) ve
+        öğrencinin yapıştırdığı parça (Öğren › Sorular'dan «Koça sor» o
+        sorunun metnini ve çözümünü verir). Ad, puan, sıralama gibi kişisel
+        veri gitmez.
      4. KART KULLANICININ. «Karta çevir» soruyu ön yüze, cevabın başını
         arka yüze yazar (kaynak «konusor»); kart düzeltilir ya da silinir.
    Çağrı soru çözümündeki koç zinciriyle yapılır (core/solver.js talk). */
@@ -44264,7 +44984,10 @@ R.KonuSor = (function(){
   function zincir(){ return R.Office && R.Office.chainFor ? R.Office.chainFor('koc') : []; }
   function hazir(){ return zincir().length > 0; }
   function baglam(subject, topic, parca){
+    const oz = (R.KONU_OZET || {})[topic.id];
+    const ozet = oz ? oz.ana.map(m => '- ' + m).join('\n').slice(0, 900) : '';
     return 'Ders: ' + subject.name + (topic.group ? '\nBölüm: ' + topic.group : '') + '\nKonu: ' + topic.name
+      + (ozet ? '\nUygulamadaki kısa özet (bununla aynı dili kullan):\n' + ozet : '')
       + (parca ? '\nAnlamadığım parça:\n«' + String(parca).slice(0, 1200) + '»' : '');
   }
 
@@ -44314,7 +45037,210 @@ R.KonuSor = (function(){
     return card;
   }
 
-  return { sor, hazir, konusmaOf, unut, kartYap, SISTEM };
+  return { sor, hazir, konusmaOf, unut, kartYap, baglam, SISTEM };
+})();
+
+/* ==== js/core/ogren.js ==== */
+/* ÖĞREN — konuyu uygulamanın içinde, teker teker öğrenmek.
+
+   Kullanıcı (2026-10-09): «konu öğrenmek başlığı altında sol tarafa bölüm
+   aç; ders notları, örnek sorular, daha detaylı anlatım olsun, koçla da
+   orada iletişim olsun; konuları teker teker uygulamanın içinde öğreneyim».
+   Sol kenarda «Öğren» çekmecesi: Konular · Anlatım · Sorular · Koç · Ders
+   notları. Bu dosya dört ekranın ortak çekirdeğidir; ekranlar
+   screens/ogren.js'te.
+
+   Sözler:
+     1. İÇERİK UYGULAMANIN İÇİNDE. Anlatım ve örnek sorular
+        data/anlatim-*.js'te durur (R.KONU_ANLATIM); internetsiz ve
+        modelsiz okunur. Elle yazıldı, doğrulanmadı: ekran bunu yazar.
+     2. SEÇİLİ KONU TEK. Dört bölüm aynı konuya bakar; son açılan konu
+        cihazda hatırlanır (meta/ogren) ki «Kaldığın yer» dönsün. Sıra
+        R.SUBJECTS sırasıdır; «sonraki» dersin sonunda öbür derse geçer.
+     3. CEVAP ÖLÇÜMDÜR, KARAR DEĞİLDİR. Örnek soruya verilen İLK cevap
+        konunun durumuna yazılır (topicState.ornek) ve «ölçüldü» etiketiyle
+        gösterilir. Cevap kilitlenir: çözümü gördükten sonra değiştirilen
+        cevap ölçüm olmaz; «Baştan çöz» hepsini birlikte siler. Hiçbir plan,
+        kapanış, risk ya da öğrenme yolu eşiği bu cevaplara bakmaz (yolun
+        «Soru çöz» adımı bloklardan ölçülür; dört örnek soru yirmi soruluk
+        eşiği şişirmesin).
+     4. YANLIŞ KULLANICININ. Yanlış cevap kendiliğinden yanlış defterine
+        yazılmaz; «Yanlış defterine ekle» kaydı kullanıcının eliyle açar. */
+
+window.R = window.R || {};
+
+R.Ogren = (function(){
+  const STORE = 'meta/ogren';
+  const HARFLER = ['A', 'B', 'C', 'D', 'E'];
+  let son = null;            // { ders, konu, at } — meta/ogren
+
+  /* Bütün konular, R.SUBJECTS sırasıyla tek dizi. */
+  function konular(){
+    const l = [];
+    (R.SUBJECTS || []).forEach(s => s.topics.forEach(t => l.push({ subject:s, topic:t })));
+    return l;
+  }
+  function bul(subjectId, topicId){
+    const subject = (R.SUBJECTS || []).find(s => s.id === subjectId) || null;
+    const topic = subject ? subject.topics.find(t => t.id === topicId) || null : null;
+    return { subject, topic };
+  }
+  /* Konu kimliği bütün derslerde tektir (tm-04, ab-11…). */
+  function konuyuBul(topicId){
+    return konular().find(x => x.topic.id === topicId) || { subject:null, topic:null };
+  }
+
+  /* Seçili konu: ekranın seçimi, yoksa son açılan, yoksa ilk konu. */
+  function secili(){
+    const ui = (R.S && R.S.ui) || {};
+    let x = bul(ui.ogrenDers, ui.ogrenKonu);
+    if(!x.topic && son) x = bul(son.ders, son.konu);
+    if(!x.topic){ const ilk = konular()[0]; x = ilk ? { subject:ilk.subject, topic:ilk.topic } : x; }
+    return x;
+  }
+  function sonAcilan(){
+    if(!son) return null;
+    const x = bul(son.ders, son.konu);
+    return x.topic ? Object.assign(x, { at:son.at }) : null;
+  }
+
+  async function yukle(){
+    let doc = null;
+    try{ doc = await R.Store.get(STORE); }catch(e){ doc = null; }
+    son = doc && typeof doc.ders === 'string' && typeof doc.konu === 'string' ? doc : null;
+    return son;
+  }
+
+  /* Konuyu seçer; değiştiyse son açılan olarak yazar. */
+  async function sec(subjectId, topicId){
+    const x = bul(subjectId, topicId);
+    if(!x.topic) return null;
+    const ui = R.S.ui;
+    if(ui.ogrenDers !== x.subject.id || ui.ogrenKonu !== x.topic.id){
+      /* Konu değişince o konuya ait geçici seçimler sıfırlanır. */
+      ui.ogrenSoru = 0; ui.kocParca = null; ui.kocTaslak = '';
+    }
+    ui.ogrenDers = x.subject.id;
+    ui.ogrenKonu = x.topic.id;
+    if(!son || son.ders !== x.subject.id || son.konu !== x.topic.id){
+      son = { ders:x.subject.id, konu:x.topic.id, at:new Date().toISOString() };
+      try{ await R.Store.set(STORE, son); }catch(e){ /* hatırlanmasa da seçim çalışır */ }
+    }
+    return x;
+  }
+
+  /* Önceki (-1) / sonraki (+1) konu; uçta null. */
+  function komsu(subjectId, topicId, yon){
+    const l = konular();
+    const i = l.findIndex(x => x.subject.id === subjectId && x.topic.id === topicId);
+    const k = i < 0 ? null : l[i + (yon < 0 ? -1 : 1)];
+    return k || null;
+  }
+
+  function anlatim(topicId){ return (R.KONU_ANLATIM || {})[topicId] || null; }
+  function sorular(topicId){ const a = anlatim(topicId); return a && Array.isArray(a.sorular) ? a.sorular : []; }
+
+  /* ---------- örnek soru cevapları (söz 3) ---------- */
+  function cevaplar(subjectId, topicId){
+    const o = R.Model.topicState(subjectId, topicId).ornek;
+    return o && typeof o === 'object' ? o : {};
+  }
+  /* i: sorunun sırası, harf: A–E. İlk cevap kalır. → { ok, dogru?, neden? } */
+  async function cevapla(subjectId, topicId, i, harf){
+    const l = sorular(topicId), q = l[i];
+    harf = String(harf || '').toUpperCase();
+    if(!q || HARFLER.indexOf(harf) < 0) return { ok:false, neden:'gecersiz' };
+    const eski = cevaplar(subjectId, topicId);
+    if(eski[i]) return { ok:false, neden:'kilitli', dogru:eski[i].d };
+    const kayit = { h:harf, d:harf === q.dogru, at:new Date().toISOString() };
+    await R.Model.setTopicState(subjectId, topicId, { ornek:Object.assign({}, eski, { [i]:kayit }) });
+    return { ok:true, dogru:kayit.d };
+  }
+  /* Cevaplamadan «Çözümü göster»: soru «çözüme bakıldı» diye kilitlenir;
+     sonra verilen cevap ölçüm olmazdı (söz 3). */
+  async function bak(subjectId, topicId, i){
+    const q = sorular(topicId)[i];
+    if(!q) return { ok:false, neden:'gecersiz' };
+    const eski = cevaplar(subjectId, topicId);
+    if(eski[i]) return { ok:false, neden:'kilitli' };
+    await R.Model.setTopicState(subjectId, topicId, {
+      ornek:Object.assign({}, eski, { [i]:{ h:null, d:false, bak:true, at:new Date().toISOString() } }) });
+    return { ok:true };
+  }
+  async function sifirla(subjectId, topicId){
+    await R.Model.setTopicState(subjectId, topicId, { ornek:{} });
+  }
+  /* { toplam, cevaplanan, dogru } — yalnız bugünkü sorulara bakılır. */
+  function skor(subjectId, topicId){
+    const l = sorular(topicId), c = cevaplar(subjectId, topicId);
+    let cevaplanan = 0, dogru = 0;
+    l.forEach((q, i) => { if(c[i]){ cevaplanan++; if(c[i].h === q.dogru) dogru++; } });
+    return { toplam:l.length, cevaplanan, dogru };
+  }
+
+  /* Konunun Öğren'deki durumu: anlatım var mı, okundu mu, sorular, yol. */
+  function durum(subjectId, topicId){
+    const st = R.Model.topicState(subjectId, topicId);
+    const a = anlatim(topicId);
+    return {
+      anlatim:!!a, ozet:!!(R.KONU_OZET || {})[topicId],
+      okundu:!!st.okunduAt, skor:skor(subjectId, topicId),
+      yol:R.OgrenYolu ? R.OgrenYolu.ozet(subjectId, topicId) : null,
+    };
+  }
+
+  /* Bir dersin ilerlemesi: kaç konu okundu, kaç örnek soru doğru. */
+  function dersOzeti(subjectId){
+    const s = (R.SUBJECTS || []).find(x => x.id === subjectId);
+    if(!s) return null;
+    let okunan = 0, soru = 0, dogru = 0, anlatimli = 0;
+    s.topics.forEach(t => {
+      const d = durum(s.id, t.id);
+      if(d.okundu) okunan++;
+      if(d.anlatim) anlatimli++;
+      soru += d.skor.cevaplanan; dogru += d.skor.dogru;
+    });
+    return { konu:s.topics.length, okunan, anlatimli, soru, dogru };
+  }
+
+  /* Kaldığın yerden sıradaki iş: okunmadıysa anlatım, sorular
+     bitmediyse sorular, ikisi de tamamsa sonraki konu. Kodla seçilir. */
+  function sirada(subjectId, topicId){
+    const d = durum(subjectId, topicId);
+    if(!d.okundu) return { route:'anlatim', ad:'Anlatımı oku' };
+    if(d.skor.cevaplanan < d.skor.toplam) return { route:'sorular', ad:'Örnek soruları çöz' };
+    const k = komsu(subjectId, topicId, 1);
+    return k ? { route:'anlatim', ad:'Sonraki konu: ' + k.topic.name, sonraki:k } : null;
+  }
+
+  /* Yanlış defteri kaydı (söz 4): kök neden ve etiket boş, kullanıcı
+     yazar (testkitabi.js ile aynı şema). Aynı soru iki kez eklenmez. */
+  function deftere(subjectId, topicId, i){
+    return (R.S.errors || []).find(e => e.kaynak && e.kaynak.tur === 'ogren'
+      && e.subjectId === subjectId && e.topicId === topicId && e.kaynak.i === i) || null;
+  }
+  async function yanlisaEkle(subjectId, topicId, i){
+    const { subject, topic } = bul(subjectId, topicId);
+    const q = sorular(topicId)[i];
+    const c = cevaplar(subjectId, topicId)[i];
+    if(!subject || !topic || !q) return null;
+    const var_ = deftere(subjectId, topicId, i);
+    if(var_) return var_;
+    const err = {
+      id:R.U.uid('r'), createdAt:new Date().toISOString(), closedAt:null, repairDoneAt:null,
+      examId:null, examDate:R.U.todayISO(), publisher:'Öğren',
+      testName:('Örnek soru · ' + topic.name).slice(0, 160), questionNo:String(i + 1),
+      status:'Yanlış', tag:null, seconds:null, rootCause:'', principle:'', similar:'',
+      recipe:'', topicRef:'', subjectId, topicId, topic:topic.name,
+      soru:String(q.soru).slice(0, 600), senin:c ? c.h : null, anahtar:q.dogru,
+      kaynak:{ tur:'ogren', i },
+    };
+    await R.Model.saveError(err);
+    return err;
+  }
+
+  return { HARFLER, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu,
+    anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle };
 })();
 
 /* ==== js/core/tatil.js ==== */
@@ -69176,113 +70102,37 @@ R.Screens.topic = (function(){
 
   /* ÖĞRENME YOLU (core/ogrenyolu.js): altı adım, sıradaki adım ve eylemi.
      Adımlar kayıtlardan okunur; eşikler planın kuralıdır ve yazılır. */
-  /* KONUNUN MALZEMELERİ (BAM; brand/ortak/urun.js söz 6). «Bu konuyu
-     öğren» konu anlatımını ister; kavram sözlüğü ve çalışma kâğıdı ayrı.
-     Her istek King'in onay kapısından geçer (model kotası harcar); ürün
-     Onaylar'dan gelir ve burada, konusunun yanında açılır. HKM kapalıyken
-     gelmiş olanlar okunur. Etiket modülün kendi bağıdır; HKM anlamaz. */
-  const MALZEME = [
-    { tur:'ders_notu', ad:'Konu anlatımı' },
-    { tur:'sozluk', ad:'Kavram sözlüğü' },
-    { tur:'calisma_kagidi', ad:'Çalışma kâğıdı' },
-  ];
-  function etiketOf(subject, topic){ return 'ays:konu:' + subject.id + '/' + topic.id; }
-  function malzemeler(subject, topic){
-    const Ur = R.Urunler;
-    if(!Ur || !Ur.etiketli) return null;
-    const et = etiketOf(subject, topic);
-    return { urunler:Ur.etiketli(et), bekleyen:Ur.bekleyen(et) };
-  }
-  function malzemeCard(subject, topic){
-    const m = malzemeler(subject, topic);
-    if(!m) return null;
-    const var_ = tur => m.urunler.some(u => u.urun === tur);
-    const istendi = tur => m.bekleyen.some(x => x.tur === tur);
-    const eksik = MALZEME.filter(x => !var_(x.tur));
-    return K.Card({
-      title:'Konunun malzemeleri',
-      sub:m.urunler.length ? m.urunler.length + ' malzeme · internetsiz de açılır' : 'BAM bu konu için yazar',
-      body:html`
-        ${when(m.urunler.length, () => html`<div class="stack-xs">${map(m.urunler, u => html`
-          <div class="row between gap-8">
-            <span class="small minw0"><b>${u.urunAd}</b> <span class="dim">${u.baslik}</span>
-              <span class="tiny dim">· ${LIFEOS.Urun.etiketAdi(u.dogruluk)}</span></span>
-            ${K.Button({ label:'Aç', size:'sm', act:'konu-urun-ac', data:{ 'data-id':u.id } })}
-          </div>`)}</div>`)}
-        ${when(eksik.length, () => html`<div class="row wrap gap-6 ${m.urunler.length ? 'mt-12' : ''}">${map(eksik, x => istendi(x.tur)
-          ? K.Chip(x.ad + ' · istendi')
-          : K.Button({ label:x.tur === 'ders_notu' ? 'Bu konuyu öğren' : x.ad, icon:x.tur === 'ders_notu' ? 'book' : null,
-              size:'sm', tone:x.tur === 'ders_notu' ? 'primary' : null, act:'konu-malzeme', data:{ 'data-tur':x.tur } }))}</div>`)}
-        <p class="tiny dim mt-10">Her istek önce King’in onayından geçer (Bugün › King teklifi); BAM yazar, sonra Onaylar’a
-          gelir. Kaynaksız malzeme «doğrulanmadı» yazar: karar vermeden önce bir kaynağa bak.</p>`,
-    });
-  }
 
-  /* KISA ÖZET (data/ozetler.js): konunun uygulamada duran özü; internetsiz
-     ve modelsiz okunur. Elle yazıldı, doğrulanmadı: etiket yazılır. */
-  function ozetCard(subject, topic){
-    const o = (R.KONU_OZET || {})[topic.id];
-    if(!o) return null;
-    return K.Card({
-      title:'Kısa özet', sub:'elle yazıldı · doğrulanmadı · internetsiz', wide:true,
-      body:html`
-        <ul class="konuozet">${map(o.ana, m => html`<li>${m}</li>`)}</ul>
-        ${when(o.dikkat, () => html`<p class="small mt-10"><b>Dikkat:</b> ${o.dikkat}</p>`)}
-        ${when(o.ornek, () => html`<p class="small mt-6"><b>Örnek:</b> ${o.ornek}</p>`)}
-        <p class="tiny dim mt-10">Başlangıç özetidir; derin ve kaynaklı anlatım için «Bu konuyu öğren». Bir hata görürsen
-          kitabınla karşılaştır.</p>`,
-    });
+  /* ÖĞREN (screens/ogren.js, 2026-10-09): konunun anlatımı, örnek soruları,
+     kısa özeti, BAM malzemeleri ve koçu artık Öğren çekmecesinde. Burada
+     yalnız oraya giden tek kart durur: aynı şey iki yerde durmaz. */
+  function ogrenData(subject, topic, route){
+    return { 'data-route':route, 'data-subject':subject.id, 'data-topic':topic.id };
   }
-
-  /* ANLAMADIM, SOR (core/konusor.js): koçun modeli bu konunun bağlamında
-     anlatır; cevap «doğrulanmadı», kayda yazılmaz, istenirse karta döner. */
-  let sorBusy = false;
-  function sorCard(subject, topic){
-    const KS = R.KonuSor;
-    if(!KS) return null;
-    if(!KS.hazir()){
-      return K.Card({ title:'Anlamadım, sor',
-        body:K.Notice({ tone:'info', body:'Model bağlı değil. Ofis › Ofis ayarlarından ücretsiz bir sağlayıcı bağlarsan '
-          + 'anlamadığın yeri burada, bu konunun içinde anlatır.' }) });
-    }
-    const l = KS.konusmaOf(subject.id, topic.id);
-    const ciftler = [];
-    for(let i = 0; i + 1 < l.length; i += 2) ciftler.push({ soru:l[i].metin, cevap:l[i + 1].metin, i:i / 2 });
-    return K.Card({
-      title:'Anlamadım, sor', sub:'Koçun modeli bu konunun içinde anlatır',
-      body:html`
-        ${when(ciftler.length, () => html`<div class="stack-sm">${map(ciftler, c => html`
-          <div class="konusor__cift">
-            <p class="small"><b>Sen:</b> ${c.soru}</p>
-            <p class="small konusor__cevap">${c.cevap}</p>
-            <div class="row between gap-6"><span class="tiny dim">doğrulanmadı · modelin anlatımı</span>
-              ${K.Button({ label:'Karta çevir', icon:'cards', size:'sm', tone:'ghost', act:'konusor-kart', data:{ 'data-i':String(c.i) } })}</div>
-          </div>`)}</div>`)}
-        <div id="konusor-akis" class="small konusor__cevap" aria-live="polite"></div>
-        ${K.Field({ label:ciftler.length ? 'Devam et' : 'Neyi anlamadın?',
-          input:K.Textarea({ id:'konusor-soru', rows:3, aria:'Anlamadığın yer',
-            placeholder:'Anlamadığın yeri yaz ya da anlatımdan yapıştır…' }) })}
+  function ogrenCard(subject, topic){
+    const O = R.Ogren;
+    if(!O) return null;
+    const d = O.durum(subject.id, topic.id);
+    const parca = [d.anlatim ? 'ayrıntılı anlatım' : 'kısa özet'];
+    if(d.skor.toplam) parca.push(d.skor.toplam + ' örnek soru');
+    parca.push('koç');
+    const durum = [d.okundu ? 'okundu' : 'okunmadı'];
+    if(d.skor.cevaplanan) durum.push(d.skor.dogru + '/' + d.skor.toplam + ' örnek soru doğru (ölçüldü)');
+    return K.Card({ title:'Öğren', sub:parca.join(' · '),
+      body:html`<p class="small muted">${durum.join(' · ')}</p>
         <div class="row wrap gap-6 mt-10">
-          ${K.Button({ label:sorBusy ? 'Anlatıyor…' : 'Sor', icon:'zap', size:'sm', tone:'primary', act:'konusor-sor', disabled:sorBusy })}
-          ${when(ciftler.length, () => K.Button({ label:'Yeni konuşma', size:'sm', tone:'ghost', act:'konusor-unut' }))}
-        </div>
-        <p class="tiny dim mt-10">Cevap kaynaksızdır ve kaydedilmez; bir tanım ya da formül kritikse kitabınla karşılaştır.</p>`,
-    });
+          ${K.Button({ label:'Anlatımı aç', icon:'book', size:'sm', tone:'primary', act:'ogren-git', data:ogrenData(subject, topic, 'anlatim') })}
+          ${when(d.skor.toplam, () => K.Button({ label:'Sorular', icon:'check', size:'sm', act:'ogren-git', data:ogrenData(subject, topic, 'sorular') }))}
+          ${K.Button({ label:'Koça sor', icon:'zap', size:'sm', tone:'ghost', act:'ogren-git', data:ogrenData(subject, topic, 'koc') })}
+        </div>` });
   }
 
   const YOL_EYLEM = {
-    ogren:(subject, topic) => {
-      const m = malzemeler(subject, topic);
-      const anlatim = m && m.urunler.find(u => u.urun === 'ders_notu');
-      const istendi = m && m.bekleyen.some(x => x.tur === 'ders_notu');
-      return K.Row([
-        anlatim ? K.Button({ label:'Anlatımı aç', icon:'book', size:'sm', tone:'primary', act:'konu-urun-ac', data:{ 'data-id':anlatim.id } })
-          : m && !istendi ? K.Button({ label:'Bu konuyu öğren', icon:'book', size:'sm', tone:'primary', act:'konu-malzeme', data:{ 'data-tur':'ders_notu' } })
-          : null,
-        K.Button({ label:'Ders notu ekle', icon:'play', size:'sm', tone:anlatim || (m && !istendi) ? null : 'primary', act:'topic-add-note' }),
-        K.Button({ label:'Okudum', icon:'check', size:'sm', act:'yol-okundu' }),
-      ].filter(Boolean), { wrap:true });
-    },
+    ogren:(subject, topic) => K.Row([
+      K.Button({ label:'Anlatımı aç', icon:'book', size:'sm', tone:'primary', act:'ogren-git', data:ogrenData(subject, topic, 'anlatim') }),
+      K.Button({ label:'Ders notu ekle', icon:'play', size:'sm', act:'topic-add-note' }),
+      K.Button({ label:'Okudum', icon:'check', size:'sm', act:'yol-okundu' }),
+    ], { wrap:true }),
     kartla:() => K.Button({ label:'Kart ekle', icon:'cards', size:'sm', tone:'primary', act:'topic-add-card' }),
     coz:() => K.Button({ label:'Bugün ekranına git', icon:'today', size:'sm', tone:'primary', act:'go', data:{ 'data-route':'today' } }),
     duzelt:() => K.Button({ label:'Yanlış defteri', icon:'list', size:'sm', tone:'primary', act:'yol-yanlis' }),
@@ -69290,7 +70140,7 @@ R.Screens.topic = (function(){
     pekistir:() => K.Button({ label:'Testi gir', icon:'edit', size:'sm', tone:'primary', act:'topic-edit' }),
   };
   const YOL_NEDEN = {
-    ogren:'Önce konunun kendisi: kısa özeti ve anlatımı oku ya da bir ders izleyip not al; okuyunca «Okudum»a bas.',
+    ogren:'Önce konunun kendisi: Öğren › Anlatım’da oku ya da bir ders izleyip not al; okuyunca «Okudum»a bas.',
     kartla:'Öğrendiğini karta çevir: kart, unutmadan önce sana geri sorar.',
     coz:'Bugün ekranında bir bloğu bu konuya bağla; çözdüğün soru ve doğruluk buraya sayılır.',
     duzelt:'Bu konudan açık yanlış var: kök nedenini yaz, ilkesini çıkar, kapat.',
@@ -69477,9 +70327,7 @@ R.Screens.topic = (function(){
       K.Span(7, K.Stack([
         headerCard(subject, topic, st, risk),
         yolCard(subject, topic, st),
-        ozetCard(subject, topic),
-        malzemeCard(subject, topic),
-        sorCard(subject, topic),
+        ogrenCard(subject, topic),
         measureCard(subject, topic, st),
         practiceCard(subject, topic),
         notesCard(subject, topic),
@@ -69533,58 +70381,6 @@ R.Screens.topic = (function(){
       UI.toast('«Okudum» işareti kaldırıldı');
       R.App.render();
     },
-    /* «Bu konuyu öğren» ve öteki malzemeler: açık istek, konu etiketiyle. */
-    async 'konu-malzeme'(el){
-      const { subject, topic } = ctx();
-      const m = MALZEME.find(x => x.tur === el.dataset.tur);
-      if(!subject || !topic || !m || !R.Urunler) return;
-      const sinav = subject.id.indexOf('ayt') === 0 ? 'AYT' : 'TYT';
-      const konu = topic.name + ' (' + subject.name + ')';
-      const ayrinti = 'YKS ' + sinav + ' hazırlığı: ' + subject.name + (topic.group ? ' › ' + topic.group : '')
-        + ' › ' + topic.name + '. Lise düzeyinde; tanımlar, adım adım çözülmüş örnekler, sık yapılan hatalar '
-        + 've ÖSYM soru tarzına uygun kısa alıştırmalar.';
-      const r = await R.Urunler.iste(m.ad + ': ' + konu, { tur:m.tur, konu, ayrinti, etiket:etiketOf(subject, topic) });
-      UI.toast(r.metin || (r.ok ? 'King’e iletildi.' : 'İletilemedi.'), { life:r.ok ? 5000 : 6000 });
-      R.App.render();
-    },
-    /* Malzeme KUTUDA açılır (brand/ortak/urun.js söz 2): betik çalışmaz. */
-    async 'konu-urun-ac'(el){
-      const u = R.Urunler && R.Urunler.bul(el.dataset.id);
-      if(!u) return;
-      UI.sheet({ title:u.baslik, wide:true,
-        subtitle:u.urunAd + ' · ' + LIFEOS.Urun.etiketAdi(u.dogruluk),
-        note:u.dogruluk === 'dogrulanmadi' ? 'Doğrulanmadı: kaynaksız, modelin bilgisidir. '
-          + 'Karar vermeden önce bir kaynağa bak.' : null,
-        body:LIFEOS.Urun.cerceve(u) });
-    },
-    async 'konusor-sor'(){
-      const { subject, topic } = ctx();
-      const kutu = document.getElementById('konusor-soru');
-      const soru = kutu ? kutu.value : '';
-      if(!subject || !topic || sorBusy || !R.KonuSor) return;
-      if(String(soru).trim().length < 3){ UI.toast('Neyi anlamadığını bir cümleyle yaz.'); return; }
-      sorBusy = true;
-      const akis = document.getElementById('konusor-akis');
-      if(akis) akis.textContent = 'Anlatıyor…';
-      let r = null;
-      try{
-        r = await R.KonuSor.sor(subject.id, topic.id, soru, { onText:t => { if(akis) akis.textContent = t; } });
-      }finally{ sorBusy = false; }
-      if(!r.ok) UI.toast(r.metin, { life:6000 });
-      R.App.render();
-    },
-    async 'konusor-kart'(el){
-      const { subject, topic } = ctx();
-      if(!subject || !topic) return;
-      const k = await R.KonuSor.kartYap(subject.id, topic.id, Number(el.dataset.i) || 0);
-      UI.toast(k ? 'Karta çevrildi · modelin anlatımı, yanlışsa düzelt' : 'Kart yapılamadı');
-      R.App.render();
-    },
-    async 'konusor-unut'(){
-      const { subject, topic } = ctx();
-      if(subject && topic) R.KonuSor.unut(subject.id, topic.id);
-      R.App.render();
-    },
     async 'yol-yanlis'(){
       S.ui.analyticsTab = 'errors';
       R.App.go('analytics');
@@ -69600,6 +70396,633 @@ R.Screens.topic = (function(){
     },
     actions(){ return ''; },
     render, handle,
+  };
+})();
+
+/* ==== js/screens/ogren.js ==== */
+/* ÖĞREN çekmecesi — Konular · Anlatım · Sorular · Koç (Ders notları
+   screens/learn.js'te, aynı çekmecede).
+
+   Kullanıcı (2026-10-09): «konu öğrenmek başlığı altında sol tarafa bölüm
+   aç; ders notları, örnek sorular, daha detaylı anlatım olsun, koçla da
+   orada iletişim olsun; daha anlaşılır bir ekran olsun».
+
+   Dört bölüm aynı konuya bakar (core/ogren.js söz 2); üstteki konu çubuğu
+   konuyu değiştirir, ‹ › bir önceki ya da sonraki konuya geçer. Her
+   bölümün tek işi var: Konular seçtirir, Anlatım okutur, Sorular
+   çözdürür, Koç anlatır. Ölçüm ve kapanış Çalışma › Konu çalış'tadır;
+   burada yalnız okunur.
+
+   Yazım biçimi: STIL.md. */
+
+window.R = window.R || {};
+R.Screens = R.Screens || {};
+
+(function(){
+  const U = R.U, UI = R.UI, S = R.S;
+  const { html, raw, when, map, cls } = R.h;
+  const K = R.C;
+  const O = () => R.Ogren;
+
+  /* ---------- ortak ---------- */
+
+  /* Metindeki küçük işaretler: **kalın**, x^{2} üst simge, H_{2}O alt
+     simge. Önce kaçırılır, sonra yalnız bu üç işaret açılır. */
+  function fmt(s){
+    const t = U.esc(String(s == null ? '' : s))
+      .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+      .replace(/\^\{([^}]*)\}/g, '<sup>$1</sup>')
+      .replace(/_\{([^}]*)\}/g, '<sub>$1</sub>');
+    return raw(t);
+  }
+  const dizi = x => x == null ? [] : Array.isArray(x) ? x : [x];
+  const kisaAd = s => s.name;
+
+  /* Konu çubuğu: ‹ ders · konu › — dört bölümde aynı. Uçta ok yerine boşluk. */
+  function konuCubugu(x){
+    const { subject, topic } = x;
+    const once = O().komsu(subject.id, topic.id, -1), sonra = O().komsu(subject.id, topic.id, 1);
+    const ok = (k, yon, ad) => k
+      ? K.IconButton({ icon:yon < 0 ? 'left' : 'right', plain:true, act:'ogren-komsu', data:{ 'data-yon':String(yon) },
+          aria:ad + ': ' + k.topic.name, title:ad + ': ' + k.topic.name })
+      : html`<span class="ogr-cubuk__bos" aria-hidden="true"></span>`;
+    return html`<div class="ogr-cubuk" role="group" aria-label="Konu seçimi">
+      ${ok(once, -1, 'Önceki konu')}
+      <span class="ogr-cubuk__secim">
+        ${K.Select({ id:'ogren-ders', options:R.SUBJECTS.map(s => ({ value:s.id, label:kisaAd(s) })),
+          value:subject.id, change:'ogren-ders', aria:'Ders' })}
+        ${K.Select({ id:'ogren-konu', options:subject.topics.map(t => ({ value:t.id, label:t.order + '. ' + t.name })),
+          value:topic.id, change:'ogren-konu', aria:'Konu' })}
+      </span>
+      ${ok(sonra, 1, 'Sonraki konu')}
+    </div>`;
+  }
+
+  /* Seçili konuyu bölüm açılırken kesinleştirir (son açılan yazılır). */
+  async function hazirla(){
+    const x = O().secili();
+    if(x.topic) await O().sec(x.subject.id, x.topic.id);
+    return x;
+  }
+
+  const ortakChange = {
+    async 'ogren-ders'(el){
+      const s = R.SUBJECTS.find(x => x.id === el.value);
+      if(!s) return;
+      const st = O().sonAcilan();
+      const t = st && st.subject.id === s.id ? st.topic : s.topics[0];
+      await O().sec(s.id, t.id);
+      R.App.render();
+    },
+    async 'ogren-konu'(el){
+      await O().sec(S.ui.ogrenDers, el.value);
+      R.App.render();
+    },
+  };
+  const ortakHandle = {
+    async 'ogren-komsu'(el){
+      const x = O().secili();
+      const k = x.topic && O().komsu(x.subject.id, x.topic.id, Number(el.dataset.yon) || 1);
+      if(!k) return;
+      await O().sec(k.subject.id, k.topic.id);
+      window.scrollTo(0, 0);
+      R.App.render();
+    },
+  };
+
+  /* ================================================================
+     KONULAR — hangi konudasın, sırada ne var; ders ders konu listesi.
+     ================================================================ */
+
+  function devamKarti(){
+    const son = O().sonAcilan();
+    const x = son || O().secili();
+    if(!x.topic) return null;
+    const s = O().sirada(x.subject.id, x.topic.id);
+    const hedef = s && s.sonraki ? s.sonraki : x;
+    return html`<div class="ogr-devam">${K.NextUp({ icon:'book', label:son ? 'Kaldığın yer' : 'Başla',
+      title:x.topic.name, why:x.subject.name + (s ? ' · sırada: ' + s.ad.toLocaleLowerCase('tr-TR') : ' · bütün adımlar tamam'),
+      action:K.Button({ label:son ? 'Devam et' : 'Başla', tone:'primary', size:'sm', act:'ogren-git',
+        data:{ 'data-route':s ? s.route : 'anlatim', 'data-subject':hedef.subject.id, 'data-topic':hedef.topic.id } }) })}</div>`;
+  }
+
+  function konuSatiri(subject, t){
+    const d = O().durum(subject.id, t.id);
+    const parca = [];
+    if(d.okundu) parca.push('okundu');
+    if(d.skor.cevaplanan) parca.push(d.skor.dogru + '/' + d.skor.toplam + ' soru doğru');
+    else if(d.skor.toplam) parca.push(d.skor.toplam + ' örnek soru');
+    if(!d.anlatim) parca.push('anlatım yazılıyor');
+    const tamam = d.okundu && d.skor.toplam && d.skor.cevaplanan === d.skor.toplam;
+    return html`<button class="${cls('listitem listitem--tap ogr-konu', tamam && 'is-tamam')}" data-act="ogren-git"
+        data-route="anlatim" data-subject="${subject.id}" data-topic="${t.id}">
+      <span class="ogr-konu__no num" aria-hidden="true">${tamam ? raw(UI.icon('check')) : t.order}</span>
+      <span class="grow minw0"><span class="small strong ogr-konu__ad">${t.name}</span>
+        ${when(parca.length, () => html`<span class="tiny dim">${parca.join(' · ')}</span>`)}</span>
+      <span class="ogr-konu__ok" aria-hidden="true">${raw(UI.icon('right'))}</span>
+    </button>`;
+  }
+
+  function konularKarti(){
+    const x = O().secili();
+    const sid = S.ui.ogrenListe || (x.subject ? x.subject.id : R.SUBJECTS[0].id);
+    const subject = R.SUBJECTS.find(s => s.id === sid) || R.SUBJECTS[0];
+    const oz = O().dersOzeti(subject.id);
+    const gruplar = [];
+    subject.topics.forEach(t => {
+      const k = t.group || '—';
+      let g = gruplar.find(y => y.ad === k);
+      if(!g){ g = { ad:k, l:[] }; gruplar.push(g); }
+      g.l.push(t);
+    });
+    return K.Card({ title:'Konular', wide:true,
+      sub:oz.konu + ' konu · ' + oz.okunan + ' okundu' + (oz.soru ? ' · ' + oz.dogru + '/' + oz.soru + ' örnek soru doğru' : ''),
+      actions:K.Select({ id:'ogren-liste', options:R.SUBJECTS.map(s => ({ value:s.id, label:kisaAd(s) })),
+        value:subject.id, change:'ogren-liste', aria:'Ders', size:'sm' }),
+      body:html`<div class="stack-sm" data-raf-tam>${map(gruplar, g => html`<div class="ogr-grup">
+        ${when(gruplar.length > 1, () => html`<div class="ogr-grup__ad tiny dim">${g.ad}</div>`)}
+        <div class="list list--sik">${map(g.l, t => konuSatiri(subject, t))}</div>
+      </div>`)}</div>` });
+  }
+
+  R.Screens.ogren = {
+    id:'ogren',
+    title:'Konular',
+    subtitle(){ return 'Konuyu seç; anlatım, örnek soru ve koç aynı konuya bakar'; },
+    actions(){ return ''; },
+    async render(){
+      return String(K.Grid([K.Span(12, K.Stack([devamKarti(), konularKarti()]))]));
+    },
+    handle:Object.assign({}, ortakHandle),
+    change:Object.assign({}, ortakChange, {
+      async 'ogren-liste'(el){ S.ui.ogrenListe = el.value; R.App.render(); },
+    }),
+  };
+
+  /* ================================================================
+     ANLATIM — konunun ayrıntılı ders notu, uygulamanın içinde.
+     ================================================================ */
+
+  function ornekHtml(o){
+    return html`<div class="ders__ornek">
+      <div class="ders__etiket tiny">Örnek</div>
+      <p>${fmt(o.soru)}</p>
+      <div class="ders__etiket tiny mt-10">Çözüm</div>
+      <ol class="ders__adimlar">${map(dizi(o.cozum), c => html`<li>${fmt(c)}</li>`)}</ol>
+    </div>`;
+  }
+
+  function dersHtml(a){
+    return html`<div class="ders__govde">
+      ${when(a.giris, () => html`<p class="ders__giris">${fmt(a.giris)}</p>`)}
+      ${map(a.bolumler, (b, i) => html`<section class="ders__bolum" id="${'ders-b' + (i + 1)}">
+        <h3 class="ders__baslik"><span class="ders__no num" aria-hidden="true">${i + 1}</span>${b.baslik}</h3>
+        ${map(dizi(b.metin), p => html`<p>${fmt(p)}</p>`)}
+        ${when(b.liste, () => html`<ul class="ders__liste">${map(b.liste, m => html`<li>${fmt(m)}</li>`)}</ul>`)}
+        ${when(b.formul, () => html`<div class="ders__formul">${map(b.formul, f => html`<div>${fmt(f)}</div>`)}</div>`)}
+        ${when(b.ornek, () => ornekHtml(b.ornek))}
+        ${when(b.dikkat, () => html`<p class="ders__dikkat"><b>Dikkat:</b> ${fmt(b.dikkat)}</p>`)}
+      </section>`)}
+    </div>`;
+  }
+
+  /* Geniş ekranda sağda «Bu konuda»: bölümler, özet ve sorular. Dar
+     ekranda gizlenir (sayfa zaten tek sütun). */
+  function icindekiler(x, a){
+    const n = O().sorular(x.topic.id).length;
+    return html`<nav class="ders__icindekiler" aria-label="Bu konuda">
+      <div class="ders__etiket tiny">Bu konuda</div>
+      ${map(a ? a.bolumler : [], (b, i) => html`<button type="button" class="ders__git" data-act="ders-git"
+        data-hedef="${'ders-b' + (i + 1)}"><span class="num">${i + 1}</span>${b.baslik}</button>`)}
+      ${when((R.KONU_OZET || {})[x.topic.id], () => html`<button type="button" class="ders__git" data-act="ders-git"
+        data-hedef="ders-akilda"><span aria-hidden="true">·</span>Akılda kalsın</button>`)}
+      ${when(n, () => html`<button type="button" class="ders__git" data-act="ogren-git" data-route="sorular"
+        data-subject="${x.subject.id}" data-topic="${x.topic.id}"><span aria-hidden="true">›</span>${n} örnek soru</button>`)}
+    </nav>`;
+  }
+
+  function akildaKarti(topic){
+    const o = (R.KONU_OZET || {})[topic.id];
+    if(!o) return '';
+    return html`<div class="ders__akilda" id="ders-akilda">
+      <div class="ders__etiket tiny">Akılda kalsın</div>
+      <ul class="ders__liste">${map(o.ana, m => html`<li>${fmt(m)}</li>`)}</ul>
+      ${when(o.dikkat, () => html`<p class="ders__dikkat"><b>Dikkat:</b> ${fmt(o.dikkat)}</p>`)}
+      ${when(o.ornek, () => html`<p class="small mt-6"><b>Örnek:</b> ${fmt(o.ornek)}</p>`)}
+    </div>`;
+  }
+
+  function anlatimKarti(x){
+    const { subject, topic } = x;
+    const a = O().anlatim(topic.id);
+    const d = O().durum(subject.id, topic.id);
+    const eylem = K.Row([
+      d.okundu
+        ? K.Button({ label:'Okundu', icon:'check', size:'sm', tone:'ghost', act:'ogren-okundu-geri', title:'İşareti kaldır' })
+        : K.Button({ label:'Okudum', icon:'check', size:'sm', tone:'primary', act:'ogren-okundu' }),
+      when(d.skor.toplam, () => K.Button({ label:'Sorulara geç', icon:'right', size:'sm', tone:d.okundu ? 'primary' : null,
+        act:'ogren-git', data:{ 'data-route':'sorular', 'data-subject':subject.id, 'data-topic':topic.id } })),
+      K.Button({ label:'Koça sor', icon:'zap', size:'sm', tone:'ghost', act:'ogren-git',
+        data:{ 'data-route':'koc', 'data-subject':subject.id, 'data-topic':topic.id } }),
+    ], { wrap:true });
+    /* Başlıksız geniş satır: konu adı gövdede büyük başlık olur. Uzun
+       anlatım raf düzeninde kısaltılmaz (data-raf-tam): okunacak metin. */
+    return K.Card({ wide:true,
+      body:html`<div class="ders-duzen">
+        <article class="ders" data-raf-tam aria-labelledby="ders-baslik">
+          <header class="ders__bas">
+            <h2 id="ders-baslik">${topic.name}</h2>
+            <p class="small dim">${subject.name + (topic.group ? ' · ' + topic.group : '')} · elle yazıldı · doğrulanmadı</p>
+          </header>
+          ${a ? dersHtml(a) : html`<div class="mb-10">${K.Notice({ tone:'info',
+            body:'Bu konunun ayrıntılı anlatımı henüz yazılmadı. Aşağıda kısa özeti var; derin anlatım için «Konu anlatımı iste» ya da koça sor.' })}</div>`}
+          ${akildaKarti(topic)}
+          <div class="ders__ayak">${eylem}
+            <p class="tiny dim mt-10">Ders kitabının yerini tutmaz: bir tanım ya da formül kritikse kitabınla karşılaştır.
+              «Okudum» bir beyandır; öğrenme yolunun ilk adımına sayılır.</p></div>
+        </article>
+        ${icindekiler(x, a)}
+      </div>`,
+    });
+  }
+
+  /* Bu konuya bağlı kendi ders notların (screens/learn.js'in kaydı). */
+  function notlarKarti(subject, topic){
+    const notlar = (S.videoNotes || []).filter(n => n.subjectId === subject.id && n.topicId === topic.id);
+    const seg = [];
+    notlar.forEach(n => (n.segments || []).forEach(s => seg.push({ n, s })));
+    return K.Card({ title:'Senin notların',
+      sub:seg.length ? U.plural(seg.length, 'not', 'not') + ' · ' + notlar.length + ' ders' : null,
+      actions:K.Button({ label:'Ders notu ekle', icon:'plus', size:'sm', tone:'ghost', act:'ogren-not' }),
+      body:seg.length ? html`<div class="stack-xs">${map(seg.slice(0, 8), y => html`<div class="row-top gap-8">
+          <a class="seg-row__ts num" href="${R.Model.tsUrl(y.n, y.s.ts)}" target="_blank" rel="noopener">${R.Model.fmtTs(y.s.ts)}</a>
+          <span class="small">${y.s.text}</span></div>`)}</div>`
+        : html`<p class="small muted">Bu konuya bağlı ders notun yok. Bir ders izlerken zaman damgalı not alırsan burada, anlatımın yanında durur.</p>` });
+  }
+
+  /* KONUNUN MALZEMELERİ (BAM; brand/ortak/urun.js söz 6). «Konu anlatımı
+     iste» kaynaklı derin anlatımı ister; kavram sözlüğü ve çalışma kâğıdı
+     ayrı. Her istek King'in onay kapısından geçer (model kotası harcar);
+     ürün Onaylar'dan gelir ve burada, konusunun yanında açılır. HKM
+     kapalıyken gelmiş olanlar okunur. Etiket modülün kendi bağıdır. */
+  const MALZEME = [
+    { tur:'ders_notu', ad:'Konu anlatımı' },
+    { tur:'sozluk', ad:'Kavram sözlüğü' },
+    { tur:'calisma_kagidi', ad:'Çalışma kâğıdı' },
+  ];
+  function etiketOf(subject, topic){ return 'ays:konu:' + subject.id + '/' + topic.id; }
+  function malzemeler(subject, topic){
+    const Ur = R.Urunler;
+    if(!Ur || !Ur.etiketli) return null;
+    const et = etiketOf(subject, topic);
+    return { urunler:Ur.etiketli(et), bekleyen:Ur.bekleyen(et) };
+  }
+  function malzemeKarti(subject, topic){
+    const m = malzemeler(subject, topic);
+    if(!m) return null;
+    const var_ = tur => m.urunler.some(u => u.urun === tur);
+    const istendi = tur => m.bekleyen.some(y => y.tur === tur);
+    const eksik = MALZEME.filter(y => !var_(y.tur));
+    return K.Card({ title:'Daha derin', hint:'ogren-bam',
+      sub:m.urunler.length ? m.urunler.length + ' malzeme · internetsiz de açılır' : 'BAM bu konu için kaynaklı yazar',
+      body:html`
+        ${when(m.urunler.length, () => html`<div class="stack-xs">${map(m.urunler, u => html`
+          <div class="row between gap-8">
+            <span class="small minw0"><b>${u.urunAd}</b> <span class="dim">${u.baslik}</span>
+              <span class="tiny dim">· ${LIFEOS.Urun.etiketAdi(u.dogruluk)}</span></span>
+            ${K.Button({ label:'Aç', size:'sm', act:'konu-urun-ac', data:{ 'data-id':u.id } })}
+          </div>`)}</div>`)}
+        ${when(eksik.length, () => html`<div class="row wrap gap-6 ${m.urunler.length ? 'mt-12' : ''}">${map(eksik, y => istendi(y.tur)
+          ? K.Chip(y.ad + ' · istendi')
+          : K.Button({ label:y.tur === 'ders_notu' ? 'Konu anlatımı iste' : y.ad, icon:y.tur === 'ders_notu' ? 'book' : null,
+              size:'sm', tone:'ghost', act:'konu-malzeme', data:{ 'data-tur':y.tur } }))}</div>`)}`,
+    });
+  }
+
+  R.Screens.anlatim = {
+    id:'anlatim',
+    title:'Anlatım',
+    subtitle(){ const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Konu anlatımı'; },
+    actions(){ return ''; },
+    async render(){
+      const x = await hazirla();
+      if(!x.topic) return String(K.Card({ body:K.Empty({ icon:'book', text:'Konu yok.' }) }));
+      return String(K.Grid([K.Span(12, K.Stack([
+        raw(konuCubugu(x)),
+        anlatimKarti(x),
+        notlarKarti(x.subject, x.topic),
+        malzemeKarti(x.subject, x.topic),
+      ]))]));
+    },
+    handle:Object.assign({}, ortakHandle, {
+      async 'ders-git'(el){
+        const h = document.getElementById(el.dataset.hedef);
+        if(h) h.scrollIntoView({ behavior:'smooth', block:'start' });
+      },
+      async 'ogren-okundu'(){
+        const x = O().secili();
+        if(!x.topic) return;
+        await R.OgrenYolu.okundu(x.subject.id, x.topic.id, true);
+        UI.toast('Okundu · ' + (O().skor(x.subject.id, x.topic.id).toplam ? 'sırada örnek sorular' : 'öğrenme yoluna sayıldı'));
+        R.App.render();
+      },
+      async 'ogren-okundu-geri'(){
+        const x = O().secili();
+        if(!x.topic) return;
+        await R.OgrenYolu.okundu(x.subject.id, x.topic.id, false);
+        UI.toast('«Okudum» işareti kaldırıldı');
+        R.App.render();
+      },
+      async 'ogren-not'(){
+        const x = O().secili();
+        S.ui.noteOpen = null;
+        R.App.go('learn');
+        setTimeout(() => R.Screens.learn.handle['note-new']({ dataset:{
+          subject:x.subject ? x.subject.id : '', topic:x.topic ? x.topic.id : '' } }), 80);
+      },
+      /* «Konu anlatımı iste» ve öteki malzemeler: açık istek, konu etiketiyle. */
+      async 'konu-malzeme'(el){
+        const { subject, topic } = O().secili();
+        const m = MALZEME.find(y => y.tur === el.dataset.tur);
+        if(!subject || !topic || !m || !R.Urunler) return;
+        const sinav = subject.id.indexOf('ayt') === 0 ? 'AYT' : 'TYT';
+        const konu = topic.name + ' (' + subject.name + ')';
+        const ayrinti = 'YKS ' + sinav + ' hazırlığı: ' + subject.name + (topic.group ? ' › ' + topic.group : '')
+          + ' › ' + topic.name + '. Lise düzeyinde; tanımlar, adım adım çözülmüş örnekler, sık yapılan hatalar '
+          + 've ÖSYM soru tarzına uygun kısa alıştırmalar.';
+        const r = await R.Urunler.iste(m.ad + ': ' + konu, { tur:m.tur, konu, ayrinti, etiket:etiketOf(subject, topic) });
+        UI.toast(r.metin || (r.ok ? 'King’e iletildi.' : 'İletilemedi.'), { life:r.ok ? 5000 : 6000 });
+        R.App.render();
+      },
+      /* Malzeme KUTUDA açılır (brand/ortak/urun.js söz 2): betik çalışmaz. */
+      async 'konu-urun-ac'(el){
+        const u = R.Urunler && R.Urunler.bul(el.dataset.id);
+        if(!u) return;
+        UI.sheet({ title:u.baslik, wide:true,
+          subtitle:u.urunAd + ' · ' + LIFEOS.Urun.etiketAdi(u.dogruluk),
+          note:u.dogruluk === 'dogrulanmadi' ? 'Doğrulanmadı: kaynaksız, modelin bilgisidir. '
+            + 'Karar vermeden önce bir kaynağa bak.' : null,
+          body:LIFEOS.Urun.cerceve(u) });
+      },
+    }),
+    change:Object.assign({}, ortakChange),
+    malzemeler, etiketOf,
+  };
+
+  /* ================================================================
+     SORULAR — örnek sorular, birer birer; ilk cevap ölçümdür.
+     ================================================================ */
+
+  function soruNo(x){
+    const l = O().sorular(x.topic.id);
+    const i = Math.max(0, Math.min(l.length - 1, Number(S.ui.ogrenSoru) || 0));
+    return { l, i };
+  }
+
+  function noktalar(x, l, i, c){
+    return html`<div class="ogr-noktalar" role="group" aria-label="Sorular">${map(l, (q, k) => {
+      const v = c[k];
+      const durum = !v ? 'bos' : v.bak ? 'bakildi' : v.h === q.dogru ? 'dogru' : 'yanlis';
+      const ad = { bos:'cevaplanmadı', bakildi:'çözüme bakıldı', dogru:'doğru', yanlis:'yanlış' }[durum];
+      return html`<button class="${cls('ogr-nokta', 'is-' + durum, k === i && 'is-sirada')}" data-act="soru-git"
+        data-i="${k}" aria-label="${'Soru ' + (k + 1) + ': ' + ad}" aria-current="${k === i ? 'true' : 'false'}">${k + 1}</button>`;
+    })}</div>`;
+  }
+
+  function soruKarti(x){
+    const { subject, topic } = x;
+    const { l, i } = soruNo(x);
+    if(!l.length){
+      return K.Card({ title:'Örnek sorular', wide:true,
+        body:K.Empty({ icon:'search', text:'Bu konunun örnek soruları henüz yazılmadı.',
+          action:K.Button({ label:'Koç bir soru sorsun', size:'sm', act:'ogren-git',
+            data:{ 'data-route':'koc', 'data-subject':subject.id, 'data-topic':topic.id } }) }) });
+    }
+    const q = l[i], c = O().cevaplar(subject.id, topic.id), v = c[i];
+    const sk = O().skor(subject.id, topic.id);
+    const acik = !!v;
+    const secenek = (metin, k) => {
+      const harf = O().HARFLER[k];
+      const durum = !acik ? '' : harf === q.dogru ? 'is-dogru' : v.h === harf ? 'is-yanlis' : 'is-soluk';
+      return html`<button class="${cls('secenek', durum)}" data-act="soru-cevap" data-harf="${harf}"
+          ${acik ? raw('disabled aria-disabled="true"') : ''}>
+        <span class="secenek__harf" aria-hidden="true">${harf}</span><span class="secenek__metin">${fmt(metin)}</span>
+        ${when(acik && harf === q.dogru, () => html`<span class="sr-only">doğru cevap</span>`)}
+        ${when(acik && v.h === harf && harf !== q.dogru, () => html`<span class="sr-only">senin cevabın</span>`)}
+      </button>`;
+    };
+    const sonuc = !v ? null : v.bak ? 'Çözüme bakıldı · doğru cevap ' + q.dogru
+      : v.h === q.dogru ? 'Doğru' : 'Yanlış · senin cevabın ' + v.h + ', doğrusu ' + q.dogru;
+    const ton = !v ? '' : v.bak ? 'bakildi' : v.h === q.dogru ? 'dogru' : 'yanlis';
+    const sonMu = i === l.length - 1;
+    const sonraki = O().komsu(subject.id, topic.id, 1);
+    const defterde = v && !v.bak && v.h !== q.dogru && O().deftere(subject.id, topic.id, i);
+    return K.Card({ title:'Örnek sorular', wide:true,
+      sub:sk.cevaplanan ? sk.dogru + ' / ' + sk.toplam + ' doğru · ölçüldü' : sk.toplam + ' soru · ilk cevabın sayılır',
+      actions:when(sk.cevaplanan, () => K.Button({ label:'Baştan çöz', icon:'refresh', size:'sm', tone:'ghost', act:'soru-sifirla' })),
+      body:html`
+        ${noktalar(x, l, i, c)}
+        <div class="ogr-soru" aria-live="polite" data-raf-tam>
+          <div class="ders__etiket tiny">Soru ${i + 1} / ${l.length}</div>
+          <p class="ogr-soru__metin">${fmt(q.soru)}</p>
+          <div class="secenekler">${map(q.sec, secenek)}</div>
+          ${when(!acik, () => html`<button type="button" class="linkbtn tiny mt-10" data-act="soru-bak">Cevaplamadan çözümü göster</button>`)}
+          ${when(acik, () => html`<div class="${cls('ogr-sonuc', 'is-' + ton)}">
+            <p class="small"><b>${sonuc}</b></p>
+            <div class="ders__etiket tiny mt-10">Çözüm</div>
+            <ol class="ders__adimlar">${map(dizi(q.cozum), s => html`<li>${fmt(s)}</li>`)}</ol>
+            <div class="row wrap gap-6 mt-10">
+              ${K.Button({ label:'Koça sor', icon:'zap', size:'sm', tone:'ghost', act:'soru-koca' })}
+              ${K.Button({ label:'Karta çevir', icon:'cards', size:'sm', tone:'ghost', act:'soru-kart' })}
+              ${when(v.h && v.h !== q.dogru, () => defterde
+                ? K.Chip('yanlış defterinde')
+                : K.Button({ label:'Yanlış defterine ekle', icon:'list', size:'sm', tone:'ghost', act:'soru-defter' }))}
+            </div>
+          </div>`)}
+        </div>
+        <div class="row between wrap gap-6 mt-16">
+          ${i > 0 ? K.Button({ label:'Önceki', icon:'left', size:'sm', tone:'ghost', act:'soru-git', data:{ 'data-i':String(i - 1) } }) : html`<span></span>`}
+          ${!sonMu ? K.Button({ label:'Sonraki soru', icon:'right', size:'sm', tone:acik ? 'primary' : null, act:'soru-git', data:{ 'data-i':String(i + 1) } })
+            : sonraki ? K.Button({ label:'Sonraki konu', icon:'right', size:'sm', tone:acik ? 'primary' : null, act:'ogren-git',
+                data:{ 'data-route':'anlatim', 'data-subject':sonraki.subject.id, 'data-topic':sonraki.topic.id } })
+            : html`<span></span>`}
+        </div>
+        <p class="tiny dim mt-12">Sorular elle yazıldı, doğrulanmadı. İlk cevabın bu konunun kaydına yazılır; hiçbir plan ya da kapanış
+          ona bakmaz — kapanış Konu çalış’taki testle ölçülür.</p>`,
+    });
+  }
+
+  R.Screens.sorular = {
+    id:'sorular',
+    title:'Sorular',
+    subtitle(){ const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Örnek sorular'; },
+    actions(){ return ''; },
+    async render(){
+      const x = await hazirla();
+      if(!x.topic) return String(K.Card({ body:K.Empty({ icon:'search', text:'Konu yok.' }) }));
+      return String(K.Grid([K.Span(12, K.Stack([raw(konuCubugu(x)), soruKarti(x)]))]));
+    },
+    handle:Object.assign({}, ortakHandle, {
+      async 'soru-git'(el){ S.ui.ogrenSoru = Number(el.dataset.i) || 0; R.App.render(); },
+      async 'soru-cevap'(el){
+        const x = O().secili(), { i } = soruNo(x);
+        await O().cevapla(x.subject.id, x.topic.id, i, el.dataset.harf);
+        R.App.render();
+      },
+      async 'soru-bak'(){
+        const x = O().secili(), { i } = soruNo(x);
+        await O().bak(x.subject.id, x.topic.id, i);
+        R.App.render();
+      },
+      async 'soru-sifirla'(){
+        const x = O().secili();
+        UI.confirmSheet('Baştan çöz', 'Bu konudaki örnek soru cevapların silinir; yeniden çözdüğünde yeni ilk cevabın sayılır.',
+          async () => { await O().sifirla(x.subject.id, x.topic.id); S.ui.ogrenSoru = 0; R.App.render(); }, false, 'Baştan çöz');
+      },
+      async 'soru-koca'(){
+        const x = O().secili(), { l, i } = soruNo(x), q = l[i];
+        if(!q) return;
+        S.ui.kocParca = { etiket:'Soru ' + (i + 1), metin:q.soru + '\n' + q.sec.map((m, k) => O().HARFLER[k] + ') ' + m).join('\n')
+          + '\nDoğru cevap: ' + q.dogru + '\nUygulamadaki çözüm: ' + dizi(q.cozum).join(' ') };
+        S.ui.kocTaslak = 'Bu sorunun çözümünü anlamadım; adım adım, başka bir yoldan anlat.';
+        R.App.go('koc');
+      },
+      async 'soru-kart'(){
+        const x = O().secili(), { l, i } = soruNo(x), q = l[i];
+        if(!q) return;
+        const dogru = q.sec[O().HARFLER.indexOf(q.dogru)];
+        const card = R.Model.newCard({ front:q.soru.slice(0, 200), back:(q.dogru + ') ' + dogru + ' — ' + dizi(q.cozum).join(' ')).slice(0, 300),
+          subjectId:x.subject.id, topic:x.topic.name, source:'ogren' });
+        await R.Model.saveCard(card);
+        UI.toast('Karta çevrildi · Tekrar’da sorar');
+      },
+      async 'soru-defter'(){
+        const x = O().secili(), { i } = soruNo(x);
+        const e = await O().yanlisaEkle(x.subject.id, x.topic.id, i);
+        UI.toast(e ? 'Yanlış defterine eklendi · kök nedenini orada yaz' : 'Eklenemedi');
+        R.App.render();
+      },
+    }),
+    change:Object.assign({}, ortakChange),
+  };
+
+  /* ================================================================
+     KOÇ — bu konunun içinde anlatan koç (core/konusor.js).
+     ================================================================ */
+
+  const HAZIR = [
+    { ad:'Daha basit anlat', metin:'Bu konuyu en baştan, çok basit bir dille ve günlük hayattan bir örnekle anlat.' },
+    { ad:'Bir örnek daha', metin:'Bu konudan ÖSYM tarzında bir örnek soru yaz ve adım adım çöz.' },
+    { ad:'Beni sına', metin:'Bana bu konudan tek bir kısa soru sor. Cevabı hemen söyleme; ben cevaplayınca söyle.' },
+    { ad:'Sık yapılan hatalar', metin:'Bu konuda en sık yapılan hataları ve onlardan nasıl kaçınacağımı söyle.' },
+    { ad:'Formülleri özetle', metin:'Bu konunun kurallarını ve formüllerini madde madde, kısa özetle.' },
+  ];
+  let kocBusy = false;
+
+  function kocKarti(x){
+    const { subject, topic } = x;
+    const KS = R.KonuSor;
+    if(!KS || !KS.hazir()){
+      return K.Card({ title:'Koç', wide:true,
+        body:html`${K.Notice({ tone:'info', title:'Model bağlı değil.',
+          body:'Ofis ayarlarından ücretsiz bir sağlayıcı bağlarsan koç bu konunun içinde, anlamadığın yeri anlatır. '
+            + 'Anlatım ve örnek sorular modelsiz de çalışır.' })}
+          <div class="row wrap gap-6 mt-12">
+            ${K.Button({ label:'Ofis ayarlarını aç', icon:'gear', size:'sm', tone:'primary', act:'koc-ayar' })}
+            ${K.Button({ label:'Anlatıma dön', size:'sm', tone:'ghost', act:'ogren-git',
+              data:{ 'data-route':'anlatim', 'data-subject':subject.id, 'data-topic':topic.id } })}
+          </div>` });
+    }
+    const l = KS.konusmaOf(subject.id, topic.id);
+    const ciftler = [];
+    for(let k = 0; k + 1 < l.length; k += 2) ciftler.push({ soru:l[k].metin, cevap:l[k + 1].metin, i:k / 2 });
+    const parca = S.ui.kocParca;
+    return K.Card({ title:'Koç', wide:true, sub:topic.name + ' · koçun modeli bu konunun içinde anlatır',
+      actions:when(ciftler.length, () => K.Button({ label:'Yeni konuşma', size:'sm', tone:'ghost', act:'konusor-unut' })),
+      body:html`
+        <div class="sohbet" aria-live="polite" data-raf-tam>
+          ${when(!ciftler.length, () => html`<p class="small muted">Anlamadığın yeri yaz ya da aşağıdan birini seç. Koç yalnız
+            bu konuyu, uygulamadaki özetle aynı dilde anlatır.</p>`)}
+          ${map(ciftler, c => html`
+            <div class="sohbet__sen"><p class="small">${c.soru}</p></div>
+            <div class="sohbet__koc">
+              <p class="small konusor__cevap">${c.cevap}</p>
+              <div class="row between gap-6 mt-6"><span class="tiny dim">doğrulanmadı · modelin anlatımı</span>
+                ${K.Button({ label:'Karta çevir', icon:'cards', size:'sm', tone:'ghost', act:'konusor-kart', data:{ 'data-i':String(c.i) } })}</div>
+            </div>`)}
+          <div id="konusor-akis" class="sohbet__koc small konusor__cevap"></div>
+        </div>
+        <div class="row wrap gap-6 mt-12" role="group" aria-label="Hazır sorular">${map(HAZIR, (h, k) =>
+          K.Chip({ label:h.ad, act:'koc-hazir', data:{ 'data-i':String(k) } }))}</div>
+        ${when(parca, () => html`<div class="ogr-parca mt-12"><span class="tiny dim">Bağlam: ${parca.etiket}</span>
+          <button type="button" class="linkbtn tiny" data-act="koc-parca-kaldir">kaldır</button></div>`)}
+        <div class="mt-12">${K.Field({ label:ciftler.length ? 'Devam et' : 'Neyi anlamadın?',
+          input:K.Textarea({ id:'konusor-soru', rows:3, aria:'Anlamadığın yer', value:S.ui.kocTaslak || '',
+            placeholder:'Anlamadığın yeri yaz ya da anlatımdan yapıştır…' }) })}</div>
+        <div class="row wrap gap-6 mt-10">
+          ${K.Button({ label:kocBusy ? 'Anlatıyor…' : 'Sor', icon:'zap', size:'sm', tone:'primary', act:'konusor-sor', disabled:kocBusy })}
+        </div>
+        <p class="tiny dim mt-10">Cevap kaynaksızdır ve kaydedilmez; konuşma bu açılışta durur. Bir tanım ya da formül kritikse
+          kitabınla karşılaştır.</p>`,
+    });
+  }
+
+  async function sor(metin){
+    const x = O().secili();
+    if(!x.topic || kocBusy || !R.KonuSor) return;
+    if(String(metin || '').trim().length < 3){ UI.toast('Neyi anlamadığını bir cümleyle yaz.'); return; }
+    kocBusy = true;
+    S.ui.kocTaslak = '';
+    const akis = document.getElementById('konusor-akis');
+    if(akis) akis.textContent = 'Anlatıyor…';
+    let r = null;
+    try{
+      r = await R.KonuSor.sor(x.subject.id, x.topic.id, metin, { parca:S.ui.kocParca ? S.ui.kocParca.metin : null,
+        onText:t => { if(akis) akis.textContent = t; } });
+    }finally{ kocBusy = false; }
+    if(r && !r.ok) UI.toast(r.metin, { life:6000 });
+    R.App.render();
+  }
+
+  R.Screens.koc = {
+    id:'koc',
+    title:'Koç',
+    subtitle(){ const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Konunun koçu'; },
+    actions(){ return ''; },
+    async render(){
+      const x = await hazirla();
+      if(!x.topic) return String(K.Card({ body:K.Empty({ icon:'zap', text:'Konu yok.' }) }));
+      return String(K.Grid([K.Span(12, K.Stack([raw(konuCubugu(x)), kocKarti(x)]))]));
+    },
+    handle:Object.assign({}, ortakHandle, {
+      async 'konusor-sor'(){
+        const kutu = document.getElementById('konusor-soru');
+        await sor(kutu ? kutu.value : '');
+      },
+      async 'koc-hazir'(el){
+        const h = HAZIR[Number(el.dataset.i) || 0];
+        if(h) await sor(h.metin);
+      },
+      async 'koc-parca-kaldir'(){ S.ui.kocParca = null; R.App.render(); },
+      async 'koc-ayar'(){
+        R.App.go('office');
+        setTimeout(() => R.Screens.office && R.Screens.office.handle['office-settings']({ dataset:{} }), 80);
+      },
+      async 'konusor-kart'(el){
+        const x = O().secili();
+        if(!x.topic) return;
+        const k = await R.KonuSor.kartYap(x.subject.id, x.topic.id, Number(el.dataset.i) || 0);
+        UI.toast(k ? 'Karta çevrildi · modelin anlatımı, yanlışsa düzelt' : 'Kart yapılamadı');
+        R.App.render();
+      },
+      async 'konusor-unut'(){
+        const x = O().secili();
+        if(x.topic) R.KonuSor.unut(x.subject.id, x.topic.id);
+        S.ui.kocParca = null;
+        R.App.render();
+      },
+    }),
+    change:Object.assign({}, ortakChange),
   };
 })();
 
@@ -76994,11 +78417,21 @@ R.App = (function(){
     ]},
     { id:'calisma', label:CEK('calisma'), items:[
       { id:'subjects', icon:'book',   label:'Konu çalış' },
-      { id:'learn',    icon:'play',   label:'Ders notları' },
       { id:'solve',    icon:'search', label:'Soru çöz' },
       { id:'exams',    icon:'exam',   label:'Deneme' },
       { id:'cards',    icon:'cards',  label:'Tekrar' },
       { id:'quiz',     icon:'zap',    label:'Sınama' },
+    ]},
+    /* ÖĞREN (kullanıcı, 2026-10-09: «konu öğrenmek başlığı altında sol
+       tarafa bölüm aç»): konuyu uygulamanın içinde teker teker öğrenmek.
+       Dört bölüm aynı konuya bakar (core/ogren.js); Ders notları
+       Çalışma'dan buraya taşındı — aynı şey iki yerde durmaz. */
+    { id:'ogren', label:CEK('ogren'), items:[
+      { id:'ogren',   icon:'list',  label:'Konular' },
+      { id:'anlatim', icon:'book',  label:'Anlatım' },
+      { id:'sorular', icon:'check', label:'Sorular' },
+      { id:'koc',     icon:'zap',   label:'Koç' },
+      { id:'learn',   icon:'play',  label:'Ders notları' },
     ]},
     { id:'analiz', label:CEK('analiz'), items:[
       { id:'progress',  icon:'chart',  label:'İlerleme' },
@@ -77743,6 +79176,13 @@ R.App = (function(){
       go(el.dataset.route);
       await render();
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.alanaGit(alan);
+    },
+    /* Öğren'e konuyla geç (core/ogren.js): Konular'dan, konu ekranından,
+       aramadan. Konu verilmezse seçili konu kalır. */
+    async 'ogren-git'(el){
+      if(R.Ogren && el.dataset.topic) await R.Ogren.sec(el.dataset.subject, el.dataset.topic);
+      if(window.LIFEOS && window.LIFEOS.HAREKET) window.LIFEOS.HAREKET.kaynak(el);
+      go(el.dataset.route || 'anlatim');
     },
     async go(el){
       if(el.dataset.tab) S.ui.cardTab = el.dataset.tab;

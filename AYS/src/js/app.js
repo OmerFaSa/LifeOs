@@ -25,11 +25,21 @@ R.App = (function(){
     ]},
     { id:'calisma', label:CEK('calisma'), items:[
       { id:'subjects', icon:'book',   label:'Konu çalış' },
-      { id:'learn',    icon:'play',   label:'Ders notları' },
       { id:'solve',    icon:'search', label:'Soru çöz' },
       { id:'exams',    icon:'exam',   label:'Deneme' },
       { id:'cards',    icon:'cards',  label:'Tekrar' },
       { id:'quiz',     icon:'zap',    label:'Sınama' },
+    ]},
+    /* ÖĞREN (kullanıcı, 2026-10-09: «konu öğrenmek başlığı altında sol
+       tarafa bölüm aç»): konuyu uygulamanın içinde teker teker öğrenmek.
+       Dört bölüm aynı konuya bakar (core/ogren.js); Ders notları
+       Çalışma'dan buraya taşındı — aynı şey iki yerde durmaz. */
+    { id:'ogren', label:CEK('ogren'), items:[
+      { id:'ogren',   icon:'list',  label:'Konular' },
+      { id:'anlatim', icon:'book',  label:'Anlatım' },
+      { id:'sorular', icon:'check', label:'Sorular' },
+      { id:'koc',     icon:'zap',   label:'Koç' },
+      { id:'learn',   icon:'play',  label:'Ders notları' },
     ]},
     { id:'analiz', label:CEK('analiz'), items:[
       { id:'progress',  icon:'chart',  label:'İlerleme' },
@@ -774,6 +784,13 @@ R.App = (function(){
       go(el.dataset.route);
       await render();
       if(window.LIFEOS && window.LIFEOS.AYAR) window.LIFEOS.AYAR.alanaGit(alan);
+    },
+    /* Öğren'e konuyla geç (core/ogren.js): Konular'dan, konu ekranından,
+       aramadan. Konu verilmezse seçili konu kalır. */
+    async 'ogren-git'(el){
+      if(R.Ogren && el.dataset.topic) await R.Ogren.sec(el.dataset.subject, el.dataset.topic);
+      if(window.LIFEOS && window.LIFEOS.HAREKET) window.LIFEOS.HAREKET.kaynak(el);
+      go(el.dataset.route || 'anlatim');
     },
     async go(el){
       if(el.dataset.tab) S.ui.cardTab = el.dataset.tab;

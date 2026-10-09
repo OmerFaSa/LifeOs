@@ -454,11 +454,15 @@ R.Model = (function(){
     const cur = doc.states[topicId] || { state:'not_started', first:null, firstAt:null, second:null, secondAt:null, note:'' };
     const next = Object.assign({}, cur, patch);
 
-    // Kapanis kurali: ilk test >=75 ve 7 gun sonraki test >=70
+    // Kapanis kurali: ilk test >=75 ve 7 gun sonraki test >=70.
+    // Yalniz OLCUM degisince yeniden hesaplanir: «Okudum» ya da ornek soru
+    // cevabi gibi bir yama «yeniden acildi» durumunu sessizce «kapali»ya
+    // ceviriyordu (ogren.test.js).
     const rule = R.CLOSURE_RULE;
-    if(next.first != null && next.second != null){
+    const olcum = 'first' in patch || 'second' in patch;
+    if(olcum && next.first != null && next.second != null){
       next.state = (next.first >= rule.first && next.second >= rule.second) ? 'closed' : 'practicing';
-    }else if(next.first != null){
+    }else if(olcum && next.first != null){
       next.state = next.first >= rule.first ? 'provisional' : 'practicing';
     }
     if(patch.state) next.state = patch.state;   // acik secim onceliklidir
@@ -1257,6 +1261,8 @@ R.Model = (function(){
        kurarken aradaysa bos kurmali. */
     if(R.Istisna) await R.Istisna.yukle();
     if(R.Bolum) await R.Bolum.yukle();
+    /* Öğren'de son açılan konu (core/ogren.js söz 2). */
+    if(R.Ogren) await R.Ogren.yukle();
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
     if(R.Hedefler) await R.Hedefler.yukle();
     if(R.SinavProfil) await R.SinavProfil.yukle();

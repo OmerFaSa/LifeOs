@@ -3,8 +3,11 @@
      2. Bağlam yalnız konudur (ders, bölüm, konu, yapıştırılan parça); ikinci
         soruda konuşma geri verilir.
      3. Cevap hiçbir kayda yazılmaz; «Karta çevir» kullanıcının kartını açar.
-     4. Konu ekranı kartı, cevabın «doğrulanmadı» etiketini ve karta çevirmeyi
-        gösterir. Model ağa çıkmaz: sahte zincir. */
+     4. Öğren › Koç cevabın «doğrulanmadı» etiketini ve karta çevirmeyi
+        gösterir; hazır soru tek dokunuşla sorulur; Sorular'dan gelen
+        «Koça sor» sorunun metnini bağlam olarak taşır. Model ağa çıkmaz:
+        sahte zincir.
+     5. Bağlama uygulamanın kendi kısa özeti girer (aynı dili konuşsun). */
 
 (function(){
   const { describe, it, expect, resetState } = R.Test;
@@ -50,6 +53,8 @@
         expect(ilk).toContain('Konu: ' + t.name);
         expect(ilk).toContain('Ders: ' + s.name);
         expect(ilk).toContain('«Örnek paragraf»');
+        expect(ilk).toContain('Uygulamadaki kısa özet');                       // söz 5
+        expect(ilk).toContain(R.KONU_OZET[t.id].ana[0].slice(0, 25));
         expect(ilk).toContain('Bu kural neden böyle?');
         expect(ilk.indexOf('Gizli Ad')).toBe(-1);                                 // kişisel veri gitmez
         expect(m.giden[0].system).toContain('uydurma');
@@ -76,28 +81,40 @@
       }finally{ m.birak(); }
     });
 
-    it('konu ekranı: soru kutusu; cevap «doğrulanmadı» etiketiyle ve «Karta çevir» ile', async () => {
+    it('Öğren › Koç: sohbet, «doğrulanmadı», karta çevir; hazır soru; Sorular’dan gelen bağlam', async () => {
       resetState();
       const { s, t } = konu();
       KS().unut(s.id, t.id);
-      R.S.ui.topicSubject = s.id;
-      R.S.ui.topicOpen = t.id;
-      const m = sahteModel(['Kısa anlatım.']);
+      await R.Ogren.sec(s.id, t.id);
+      const eskiRender = R.App.render;
+      R.App.render = () => {};
+      const m = sahteModel(['Kısa anlatım.', 'Basit anlatım.']);
       try{
-        let html = String(await R.Screens.topic.render());
-        expect(html).toContain('Anlamadım, sor');
+        let html = String(await R.Screens.koc.render());
         expect(html).toContain('id="konusor-soru"');
+        expect(html).toContain('data-act="koc-hazir"');
+        expect(html).toContain('Daha basit anlat');
         await KS().sor(s.id, t.id, 'Neden?');
-        html = String(await R.Screens.topic.render());
+        html = String(await R.Screens.koc.render());
         expect(html).toContain('Kısa anlatım.');
         expect(html).toContain('doğrulanmadı');
         expect(html).toContain('data-act="konusor-kart" data-i="0"');
-      }finally{ m.birak(); KS().unut(s.id, t.id); }
-      /* Model yoksa kutu yerine yönlendirme. */
+        /* Hazır soru: tek dokunuş, bağlamla. */
+        R.S.ui.kocParca = { etiket:'Soru 1', metin:'Örnek soru metni' };
+        await R.Screens.koc.handle['koc-hazir']({ dataset:{ i:'0' } });
+        const son = m.giden[1].messages;
+        expect(son[0].text).toContain('«Örnek soru metni»');
+        expect(son[son.length - 1].text).toContain('çok basit');
+        expect(String(await R.Screens.koc.render())).toContain('Bağlam: Soru 1');
+      }finally{ m.birak(); KS().unut(s.id, t.id); R.App.render = eskiRender; R.S.ui.kocParca = null; }
+      /* Model yoksa kutu yerine yönlendirme; anlatım modelsiz de çalışır. */
       const eski = R.Office.chainFor;
       R.Office.chainFor = () => [];
-      try{ expect(String(await R.Screens.topic.render())).toContain('Model bağlı değil'); }
-      finally{ R.Office.chainFor = eski; }
+      try{
+        const html = String(await R.Screens.koc.render());
+        expect(html).toContain('Model bağlı değil');
+        expect(html).toContain('data-act="koc-ayar"');
+      }finally{ R.Office.chainFor = eski; }
     });
   });
 })();

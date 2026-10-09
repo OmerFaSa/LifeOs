@@ -44,11 +44,15 @@ window.LIFEOS = window.LIFEOS || {};
 
   const L = window.LIFEOS;
 
-  /* Sekiz çekmece — ad ve sıra KULLANICI KARARIDIR (EKIP-PLANI §8-1). */
+  /* Çekmeceler — ad ve sıra KULLANICI KARARIDIR (EKIP-PLANI §8-1).
+     «Öğren» 2026-10-09'da eklendi (kullanıcı: «konu öğrenmek başlığı
+     altında sol tarafa bölüm aç»); şimdilik yalnız AYS'de dolu. Bölümü
+     olmayan modülde çekmece görünmez (her modül kendi listesini verir). */
   const CEKMECELER = Object.freeze([
     { id:'bugun',     ad:'Bugün' },
     { id:'plan',      ad:'Plan' },
     { id:'calisma',   ad:'Çalışma' },
+    { id:'ogren',     ad:'Öğren' },
     { id:'analiz',    ad:'Analiz' },
     { id:'onaylar',   ad:'Onaylar' },
     { id:'ofis',      ad:'Ofis' },
@@ -75,6 +79,8 @@ window.LIFEOS = window.LIFEOS || {};
     rutbe:'<circle cx="12" cy="14.6" r="5.4"/><path d="M9.2 9.9L6.6 3.6h3.8L12 7.3M14.8 9.9l2.6-6.3h-3.8L12 7.3"/>',
     plan:'<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
     calisma:'<path d="M14 3.5H7a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5z"/><path d="M14 3.5v5h5M9 13h6M9 16.5h4"/>',
+    /* Öğren: açık kitap, iki sayfa ve sırt. */
+    ogren:'<path d="M12 6.8c-1.9-1.4-4.4-2.1-7.5-2.1v12.6c3.1 0 5.6.7 7.5 2.1 1.9-1.4 4.4-2.1 7.5-2.1V4.7c-3.1 0-5.6.7-7.5 2.1z"/><path d="M12 6.8v12.6"/>',
     analiz:'<path d="M5 20v-8M12 20V5M19 20v-5"/>',
     onaylar:'<rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M8.5 12.5l2.5 2.5 4.5-5.5"/>',
     ofis:'<circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19.5c.4-3 2.7-5 5.5-5s5.1 2 5.5 5"/><path d="M15.5 5.5a3.2 3.2 0 0 1 0 6.2M20.5 19.5c-.3-2.2-1.5-3.8-3.3-4.6"/>',

@@ -25,9 +25,12 @@
   }
 
   describe('Çekmeceler (SPİ)', () => {
-    it('menü sekiz çekmece; ad ve sıra ortak kaynaktan', () => {
-      expect(SP.App.SECTIONS.map(g => g.id).join(',')).toBe(K().CEKMECELER.map(c => c.id).join(','));
-      expect(SP.App.SECTIONS.map(g => g.label).join(',')).toBe(K().CEKMECELER.map(c => c.ad).join(','));
+    /* «Öğren» (2026-10-09) şimdilik yalnız AYS'de dolu; SPİ'de bölümü
+       yok, çekmece görünmez. Öteki sekizi aynı ad ve sırayla durur. */
+    it('menü sekiz çekmece (Öğren henüz yok); ad ve sıra ortak kaynaktan', () => {
+      const ortak = K().CEKMECELER.filter(c => c.id !== 'ogren');
+      expect(SP.App.SECTIONS.map(g => g.id).join(',')).toBe(ortak.map(c => c.id).join(','));
+      expect(SP.App.SECTIONS.map(g => g.label).join(',')).toBe(ortak.map(c => c.ad).join(','));
     });
 
     it('iç içelik iki kat: bölüm başka bölüm taşımaz; Çalışma en çok altı bölüm', () => {

@@ -11,8 +11,11 @@
         gösterilir; konuşma yalnız bu açılışta durur.
      2. MODEL YOKSA SÖYLENİR. Zincir boşsa hiçbir şey uydurulmaz; ekran
         Ofis ayarlarına yönlendirir (ücretsiz sağlayıcılar orada).
-     3. BAĞLAM YALNIZ KONUDUR: ders, bölüm, konu adı ve öğrencinin
-        yapıştırdığı parça. Ad, puan, sıralama gibi kişisel veri gitmez.
+     3. BAĞLAM YALNIZ KONUDUR: ders, bölüm, konu adı, uygulamanın kendi
+        kısa özeti (data/ozetler.js; anlatım aynı dili konuşsun) ve
+        öğrencinin yapıştırdığı parça (Öğren › Sorular'dan «Koça sor» o
+        sorunun metnini ve çözümünü verir). Ad, puan, sıralama gibi kişisel
+        veri gitmez.
      4. KART KULLANICININ. «Karta çevir» soruyu ön yüze, cevabın başını
         arka yüze yazar (kaynak «konusor»); kart düzeltilir ya da silinir.
    Çağrı soru çözümündeki koç zinciriyle yapılır (core/solver.js talk). */
@@ -39,7 +42,10 @@ R.KonuSor = (function(){
   function zincir(){ return R.Office && R.Office.chainFor ? R.Office.chainFor('koc') : []; }
   function hazir(){ return zincir().length > 0; }
   function baglam(subject, topic, parca){
+    const oz = (R.KONU_OZET || {})[topic.id];
+    const ozet = oz ? oz.ana.map(m => '- ' + m).join('\n').slice(0, 900) : '';
     return 'Ders: ' + subject.name + (topic.group ? '\nBölüm: ' + topic.group : '') + '\nKonu: ' + topic.name
+      + (ozet ? '\nUygulamadaki kısa özet (bununla aynı dili kullan):\n' + ozet : '')
       + (parca ? '\nAnlamadığım parça:\n«' + String(parca).slice(0, 1200) + '»' : '');
   }
 
@@ -89,5 +95,5 @@ R.KonuSor = (function(){
     return card;
   }
 
-  return { sor, hazir, konusmaOf, unut, kartYap, SISTEM };
+  return { sor, hazir, konusmaOf, unut, kartYap, baglam, SISTEM };
 })();
