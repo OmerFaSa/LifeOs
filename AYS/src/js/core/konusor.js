@@ -43,7 +43,8 @@ R.KonuSor = (function(){
   function hazir(){ return zincir().length > 0; }
   function baglam(subject, topic, parca){
     const oz = (R.KONU_OZET || {})[topic.id];
-    const ozet = oz ? oz.ana.map(m => '- ' + m).join('\n').slice(0, 900) : '';
+    const duz = R.Ogren ? R.Ogren.duzMetin : String;
+    const ozet = oz ? oz.ana.map(m => '- ' + duz(m)).join('\n').slice(0, 900) : '';
     return 'Ders: ' + subject.name + (topic.group ? '\nBölüm: ' + topic.group : '') + '\nKonu: ' + topic.name
       + (ozet ? '\nUygulamadaki kısa özet (bununla aynı dili kullan):\n' + ozet : '')
       + (parca ? '\nAnlamadığım parça:\n«' + String(parca).slice(0, 1200) + '»' : '');

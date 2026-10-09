@@ -84,9 +84,9 @@ Object.assign(R.KONU_ANLATIM, {
         dikkat:'Soyağacında önce «çekinik mi baskın mı», sonra «otozomal mı X’e bağlı mı» sorusunu sor; iki adımı karıştırma.' },
     ],
     sorular:[
-      { soru:'Fenotipi normal olan bir anne ve babanın kalıtsal bir hastalığı taşıyan çocuğu oluyorsa bu hastalık için aşağıdakilerden hangisi kesindir?',
-        sec:['Hastalık çekiniktir ve anne ile baba taşıyıcıdır.', 'Hastalık baskındır.', 'Hastalık Y kromozomuna bağlıdır.', 'Yalnızca anne taşıyıcıdır.', 'Hastalık mitokondriyaldir.'], dogru:'A',
-        cozum:['Normal iki bireyden hasta çocuk olması özelliğin çekinik olduğunu gösterir.', 'Çocuk iki çekinik aleli anne ve babadan almıştır: ikisi de taşıyıcıdır.'] },
+      { soru:'Fenotipi normal olan bir anne ve babanın kalıtsal bir hastalığı gösteren bir kızı oluyorsa bu hastalık için aşağıdakilerden hangisi kesindir?',
+        sec:['Hastalık otozomal çekiniktir ve anne ile baba taşıyıcıdır.', 'Hastalık baskındır.', 'Hastalık Y kromozomuna bağlıdır.', 'Yalnızca anne taşıyıcıdır.', 'Hastalık X kromozomuna bağlı çekiniktir.'], dogru:'A',
+        cozum:['Normal iki bireyden hasta çocuk olması özelliğin çekinik olduğunu gösterir.', 'X’e bağlı çekinik olsaydı hasta kızın babası da hasta olurdu; baba normal olduğuna göre gen otozomdadır.', 'Kız iki çekinik aleli anne ve babadan almıştır: ikisi de taşıyıcıdır.'] },
       { soru:'Hemofili X kromozomuna bağlı çekinik bir hastalıktır. Taşıyıcı bir anne ile sağlıklı bir babanın erkek çocuklarının hemofili olma olasılığı kaçtır?',
         sec:['0', '1/4', '1/2', '3/4', '1'], dogru:'C',
         cozum:['Oğul X’ini anneden alır: X^{H} ya da X^{h}, eşit olasılıkla.', 'Hemofili olasılığı 1/2.'] },

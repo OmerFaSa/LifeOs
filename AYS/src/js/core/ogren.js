@@ -94,6 +94,61 @@ R.Ogren = (function(){
     return k || null;
   }
 
+  /* ---------- metin işaretleri ----------
+     Anlatım ve sorularda üç işaret var: **kalın**, x^{2} üst simge, H_{2}O
+     alt simge. İç içe gelebilir (5^{log_{5} 7}): süslü parantez derinlikle
+     eşlenir, ilk «}» ile değil. Tek ayrıştırıcı iki çıktı verir: ekrana
+     HTML (yazı önce kaçırılır) ve karta, yanlış defterine, koça giden düz
+     metin (x², H₂O, Na⁺). Unicode karşılığı olmayan simge düz metinde
+     şapkayla kalır: 5^(log₅ 7). Kapanmayan işaret yazı olarak kalır. */
+  function esBul(s, ac){
+    let d = 0;
+    for(let k = ac; k < s.length; k++){
+      if(s[k] === '{') d++;
+      else if(s[k] === '}' && --d === 0) return k;
+    }
+    return -1;
+  }
+  function ayristir(s){
+    s = String(s == null ? '' : s);
+    const l = [];
+    let yazi = '', i = 0;
+    const it = () => { if(yazi){ l.push({ t:'yazi', v:yazi }); yazi = ''; } };
+    while(i < s.length){
+      const c = s[i];
+      if((c === '^' || c === '_') && s[i + 1] === '{'){
+        const j = esBul(s, i + 1);
+        if(j > 0){ it(); l.push({ t:c === '^' ? 'ust' : 'alt', c:ayristir(s.slice(i + 2, j)) }); i = j + 1; continue; }
+      }
+      if(c === '*' && s[i + 1] === '*'){
+        const j = s.indexOf('**', i + 2);
+        if(j > i + 2){ it(); l.push({ t:'kalin', c:ayristir(s.slice(i + 2, j)) }); i = j + 2; continue; }
+      }
+      yazi += c; i++;
+    }
+    it();
+    return l;
+  }
+  const ETIKET = { kalin:'b', ust:'sup', alt:'sub' };
+  function htmlOf(l){
+    return l.map(d => d.t === 'yazi' ? R.U.esc(d.v) : '<' + ETIKET[d.t] + '>' + htmlOf(d.c) + '</' + ETIKET[d.t] + '>').join('');
+  }
+  function metinHtml(s){ return htmlOf(ayristir(s)); }
+  const UST = { 0:'⁰', 1:'¹', 2:'²', 3:'³', 4:'⁴', 5:'⁵', 6:'⁶', 7:'⁷', 8:'⁸', 9:'⁹',
+    '+':'⁺', '-':'⁻', '−':'⁻', '=':'⁼', '(':'⁽', ')':'⁾', n:'ⁿ' };
+  const ALT = { 0:'₀', 1:'₁', 2:'₂', 3:'₃', 4:'₄', 5:'₅', 6:'₆', 7:'₇', 8:'₈', 9:'₉',
+    '+':'₊', '-':'₋', '−':'₋', '=':'₌', '(':'₍', ')':'₎' };
+  function simge(ic, tablo, isaret){
+    const ch = Array.from(ic);
+    if(ch.length && ch.every(x => tablo[x])) return ch.map(x => tablo[x]).join('');
+    return isaret + (ch.length === 1 ? ic : '(' + ic + ')');
+  }
+  function duzOf(l){
+    return l.map(d => d.t === 'yazi' ? d.v : d.t === 'kalin' ? duzOf(d.c)
+      : simge(duzOf(d.c), d.t === 'ust' ? UST : ALT, d.t === 'ust' ? '^' : '_')).join('');
+  }
+  function duzMetin(s){ return duzOf(ayristir(s)); }
+
   function anlatim(topicId){ return (R.KONU_ANLATIM || {})[topicId] || null; }
   function sorular(topicId){ const a = anlatim(topicId); return a && Array.isArray(a.sorular) ? a.sorular : []; }
 
@@ -170,6 +225,29 @@ R.Ogren = (function(){
     return k ? { route:'anlatim', ad:'Sonraki konu: ' + k.topic.name, sonraki:k } : null;
   }
 
+  /* Örnek sorudan tekrar kartı: ön yüz düz metin (kart ekranı işaret
+     okumaz). Paragraflı soruda kök kesilmez; uzun paragraf kısalır. Şıklar
+     ön yüzde kalır: «hangisi» sorusu şıksız sorulamaz. */
+  function kisalt(s, n){
+    s = String(s || '');
+    if(s.length <= n) return s;
+    const k = s.lastIndexOf(' ', n - 1);
+    return s.slice(0, k > n * 0.6 ? k : n - 1).replace(/[\s,;:]+$/, '') + '…';
+  }
+  function kartYuzu(topicId, i){
+    const q = sorular(topicId)[i];
+    if(!q) return null;
+    const satir = duzMetin(q.soru).split('\n');
+    const kok = satir.pop();
+    const parca = satir.join(' ');
+    const sec = (q.sec || []).map((m, k) => HARFLER[k] + ') ' + kisalt(duzMetin(m), 80)).join('  ');
+    const dogru = (q.sec || [])[HARFLER.indexOf(q.dogru)];
+    return {
+      front:(parca ? kisalt(parca, 260) + ' ' : '') + kok + (sec ? '  ' + sec : ''),
+      back:kisalt(q.dogru + ') ' + duzMetin(dogru) + ' — ' + [].concat(q.cozum || []).map(duzMetin).join(' '), 400),
+    };
+  }
+
   /* Yanlış defteri kaydı (söz 4): kök neden ve etiket boş, kullanıcı
      yazar (testkitabi.js ile aynı şema). Aynı soru iki kez eklenmez. */
   function deftere(subjectId, topicId, i){
@@ -189,13 +267,13 @@ R.Ogren = (function(){
       testName:('Örnek soru · ' + topic.name).slice(0, 160), questionNo:String(i + 1),
       status:'Yanlış', tag:null, seconds:null, rootCause:'', principle:'', similar:'',
       recipe:'', topicRef:'', subjectId, topicId, topic:topic.name,
-      soru:String(q.soru).slice(0, 600), senin:c ? c.h : null, anahtar:q.dogru,
+      soru:kisalt(duzMetin(q.soru), 600), senin:c ? c.h : null, anahtar:q.dogru,
       kaynak:{ tur:'ogren', i },
     };
     await R.Model.saveError(err);
     return err;
   }
 
-  return { HARFLER, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu,
+  return { HARFLER, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
     anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle };
 })();

@@ -421,7 +421,7 @@ Object.assign(R.KONU_ANLATIM, {
         sec:['2', '3', '4', '5', '6'], dogru:'C',
         cozum:['göz (kök) + lük (yapım) + çü (yapım) + ler (çekim) + den (çekim).', 'Toplam dört ek.'] },
       { soru:'Aşağıdaki cümlelerin hangisinde isimden fiil yapım eki almış bir sözcük vardır?',
-        sec:['Çiçekleri her sabah suladı.', 'Gözlüğünü masada unuttu.', 'Bu yazıyı kim yazdı?', 'Bizi çok güldürdü.', 'Sevgiyle selamlıyorum.'], dogru:'A',
+        sec:['Çiçekleri her sabah suladı.', 'Gözlüğünü masada unuttu.', 'Bu yazıyı kim yazdı?', 'Bizi çok güldürdü.', 'Sevgiyle bize baktı.'], dogru:'A',
         cozum:['su (isim) + la → sula-: isimden fiil yapım eki.', 'gözlük isimden isim, yazı ve sevgi fiilden isim, güldür- fiilden fiil eki almıştır.'] },
       { soru:'Aşağıdaki sözcüklerden hangisi birleşik sözcüktür?',
         sec:['kitapçı', 'çiçekli', 'yolcu', 'hanımeli', 'gözlük'], dogru:'D',

@@ -24,15 +24,9 @@ R.Screens = R.Screens || {};
 
   /* ---------- ortak ---------- */
 
-  /* Metindeki küçük işaretler: **kalın**, x^{2} üst simge, H_{2}O alt
-     simge. Önce kaçırılır, sonra yalnız bu üç işaret açılır. */
-  function fmt(s){
-    const t = U.esc(String(s == null ? '' : s))
-      .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
-      .replace(/\^\{([^}]*)\}/g, '<sup>$1</sup>')
-      .replace(/_\{([^}]*)\}/g, '<sub>$1</sub>');
-    return raw(t);
-  }
+  /* Metindeki küçük işaretler (**kalın**, x^{2}, H_{2}O; iç içe olabilir)
+     tek ayrıştırıcıdan geçer: core/ogren.js metinHtml. */
+  const fmt = s => raw(O().metinHtml(s));
   const dizi = x => x == null ? [] : Array.isArray(x) ? x : [x];
   const kisaAd = s => s.name;
 
@@ -487,17 +481,16 @@ R.Screens = R.Screens || {};
       async 'soru-koca'(){
         const x = O().secili(), { l, i } = soruNo(x), q = l[i];
         if(!q) return;
-        S.ui.kocParca = { etiket:'Soru ' + (i + 1), metin:q.soru + '\n' + q.sec.map((m, k) => O().HARFLER[k] + ') ' + m).join('\n')
-          + '\nDoğru cevap: ' + q.dogru + '\nUygulamadaki çözüm: ' + dizi(q.cozum).join(' ') };
+        const d = O().duzMetin;
+        S.ui.kocParca = { etiket:'Soru ' + (i + 1), metin:d(q.soru) + '\n' + q.sec.map((m, k) => O().HARFLER[k] + ') ' + d(m)).join('\n')
+          + '\nDoğru cevap: ' + q.dogru + '\nUygulamadaki çözüm: ' + dizi(q.cozum).map(d).join(' ') };
         S.ui.kocTaslak = 'Bu sorunun çözümünü anlamadım; adım adım, başka bir yoldan anlat.';
         R.App.go('koc');
       },
       async 'soru-kart'(){
-        const x = O().secili(), { l, i } = soruNo(x), q = l[i];
-        if(!q) return;
-        const dogru = q.sec[O().HARFLER.indexOf(q.dogru)];
-        const card = R.Model.newCard({ front:q.soru.slice(0, 200), back:(q.dogru + ') ' + dogru + ' — ' + dizi(q.cozum).join(' ')).slice(0, 300),
-          subjectId:x.subject.id, topic:x.topic.name, source:'ogren' });
+        const x = O().secili(), { i } = soruNo(x), y = O().kartYuzu(x.topic.id, i);
+        if(!y) return;
+        const card = R.Model.newCard({ front:y.front, back:y.back, subjectId:x.subject.id, topic:x.topic.name, source:'ogren' });
         await R.Model.saveCard(card);
         UI.toast('Karta çevrildi · Tekrar’da sorar');
       },

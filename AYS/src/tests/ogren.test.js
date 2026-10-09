@@ -11,7 +11,9 @@
         hesaplıyordu.
      5. Ekranlar: Konular satırı Anlatım'a götürür; Anlatım okutur ve
         «Okudum»u yola yazar; Sorular cevabı gösterir; çekmece kenarda.
-     6. Palet (Ctrl+K) anlatımın içinde arar: bölüm başlığı da bulunur. */
+     6. Palet (Ctrl+K) anlatımın içinde arar: bölüm başlığı da bulunur.
+     7. İşaretler tek ayrıştırıcıdan geçer: iç içe simge bozulmaz; karta,
+        yanlış defterine ve koça ham işaret değil düz metin (x², H₂O) gider. */
 
 (function(){
   const { describe, it, expect, resetState } = R.Test;
@@ -164,6 +166,56 @@
           expect([R.S.ui.ogrenKonu, R.S.ui.ogrenSoru]).toEqual(['tm-06', 0]);
         });
       });
+    });
+
+    it('HATA: iç içe üst simge bozulmaz; karta, deftere ve koça düz metin gider', async () => {
+      const H = O().metinHtml, D = O().duzMetin;
+      /* Eski düzenli ifade ilk «}»de kapatıyordu: 5^{log_{5} 7} ekranda
+         «5<sup>log_{5</sup> 7}» olarak çıkıyordu (anlatim-am.js, logaritma). */
+      expect(H('5^{log_{5} 7} = 7')).toBe('5<sup>log<sub>5</sub> 7</sup> = 7');
+      expect(H('**a^{2}** < b')).toBe('<b>a<sup>2</sup></b> &lt; b');
+      expect(H('x^{2 ve **yarım')).toBe('x^{2 ve **yarım');                  // kapanmayan işaret yazı kalır
+      expect(D('H_{2}O, Na^{+}, Ca^{2+}, HCO_{3}^{−}, x^{n}')).toBe('H₂O, Na⁺, Ca²⁺, HCO₃⁻, xⁿ');
+      expect(D('5^{log_{5} 7} ve X^{H} ve **kalın**')).toBe('5^(log₅ 7) ve X^H ve kalın');
+      resetState();
+      const s = TM(), t = s.topics.find(x => x.id === 'tm-05');
+      const UST = { giris:'g', bolumler:SAHTE.bolumler, sorular:[
+        { soru:'Bir paragraf ki uzun.\n(−2)^{3} kaçtır?', sec:['−8', '8', '6', '−6', '9'], dogru:'A', cozum:['(−2)^{3} = −8.'] },
+        SAHTE.sorular[1], SAHTE.sorular[2]] };
+      const eski = R.KONU_ANLATIM[t.id];
+      R.KONU_ANLATIM[t.id] = UST;
+      try{
+        await sessiz(async () => {
+          await O().sec(s.id, t.id);
+          const y = O().kartYuzu(t.id, 0);
+          expect(y.front).toBe('Bir paragraf ki uzun. (−2)³ kaçtır?  A) −8  B) 8  C) 6  D) −6  E) 9');
+          expect(y.back).toBe('A) −8 — (−2)³ = −8.');
+          const n = R.S.cards.length;
+          await R.Screens.sorular.handle['soru-kart']();
+          expect(R.S.cards.length).toBe(n + 1);
+          expect(R.S.cards[n].front).toBe(y.front);
+          await O().cevapla(s.id, t.id, 0, 'B');
+          const e = await O().yanlisaEkle(s.id, t.id, 0);
+          expect(e.soru).toBe('Bir paragraf ki uzun.\n(−2)³ kaçtır?');
+          const git = R.App.go;
+          R.App.go = () => {};
+          try{ await R.Screens.sorular.handle['soru-koca'](); }finally{ R.App.go = git; }
+          expect(R.S.ui.kocParca.metin.indexOf('^{')).toBe(-1);
+          expect(R.S.ui.kocParca.metin).toContain('(−2)³ kaçtır?');
+        });
+      }finally{ if(eski) R.KONU_ANLATIM[t.id] = eski; else delete R.KONU_ANLATIM[t.id]; }
+    });
+
+    it('kart yüzü: uzun paragraf kısalır, soru kökü kesilmez', () => {
+      const t = 'tm-05', eski = R.KONU_ANLATIM[t];
+      const uzun = 'Kelime '.repeat(80).trim() + '.';
+      R.KONU_ANLATIM[t] = { sorular:[{ soru:uzun + '\nBu parçanın konusu nedir?', sec:['a', 'b', 'c', 'd', 'e'], dogru:'C', cozum:['x'] }] };
+      try{
+        const y = O().kartYuzu(t, 0);
+        expect(y.front).toContain('… Bu parçanın konusu nedir?  A) a');
+        expect(y.front.length < 340).toBe(true);
+        expect(O().kartYuzu(t, 5)).toBeNull();
+      }finally{ if(eski) R.KONU_ANLATIM[t] = eski; else delete R.KONU_ANLATIM[t]; }
     });
 
     it('palet: konu adı ve anlatımın bölüm başlığı aranınca Anlatım sonucu çıkar', () => {

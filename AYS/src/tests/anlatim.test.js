@@ -23,6 +23,9 @@
     if(/ {2,}/.test(s)) bozuk.push(k + ' ' + ad + ': çift boşluk');
     if((s.match(/\*\*/g) || []).length % 2) bozuk.push(k + ' ' + ad + ': kalın işareti kapanmamış');
     if(/[\^_]\{[^}]*$/.test(s)) bozuk.push(k + ' ' + ad + ': üst/alt simge kapanmamış');
+    /* Ekranın ayrıştırıcısı (core/ogren.js) her işareti açabilmeli: düz
+       metinde ham işaret kalırsa ekranda da kalır. */
+    if(/\*\*|[\^_]\{/.test(R.Ogren.duzMetin(s))) bozuk.push(k + ' ' + ad + ': işaret açılmadı');
   }
 
   describe('Konu anlatımı', () => {
@@ -81,6 +84,16 @@
         HARF.forEach(h => { if(say[h] / n > 0.4) yigin.push(s.id + ': ' + h + ' ' + say[h] + '/' + n); });
       });
       expect(yigin).toEqual([]);
+    });
+
+    it('kısa özetlerin işaretleri de kapalı ve açılabilir', () => {
+      const bozuk = [];
+      Object.keys(R.KONU_OZET || {}).forEach(k => {
+        const o = R.KONU_OZET[k];
+        dizi(o.ana).concat(o.dikkat ? [o.dikkat] : [], o.ornek ? [o.ornek] : [])
+          .forEach(m => metinDenetle(k, 'özet', m, bozuk));
+      });
+      expect(bozuk).toEqual([]);
     });
 
     it('bitmiş derslerde her konunun anlatımı ve en az üç sorusu var', () => {
