@@ -1414,6 +1414,19 @@ SP.Screens.today = (function(){
        karıştırıyordu: kullanıcı günlük sayfasını açıp tahlil cümlesi
        okuyordu. Hamle artık düğme olarak duruyor, başlık olarak değil. */
     headlineOz:'004',
+    /* Siri «Bugün ne var?» (hesap sunucu sözü 21): bugünün cümlesi ve
+       sıradaki hatırlatma. İlaç adı SÖYLENMEZ (hatirlat.js söz 3): yalnız
+       «ilaç ya da takviye». Kural metni, model yok. */
+    sesli(simdi){
+      const now = simdi || new Date();
+      const r = SP.Move.readiness(SP.U.todayISO());
+      let c = !r.ok ? 'Bugünün verisi henüz girilmedi.'
+        : (SP.Calc.minimumDay().complete ? 'Bugün tamam, toparlanma ' : 'Toparlanma ')
+          + r.band.label.toLocaleLowerCase('tr-TR') + '.';
+      const h = SP.Hatirlat ? SP.Hatirlat.bugun(now).find(x => x.durum === 'sonra') : null;
+      if(h) c += ' Sıradaki hatırlatma ' + h.saat + ', ' + (h.tur === 'ilac' ? 'ilaç ya da takviye' : h.ad.toLocaleLowerCase('tr-TR')) + '.';
+      return c;
+    },
     headline(){
       const d = shownDate();
       const r = SP.Move.readiness(d);

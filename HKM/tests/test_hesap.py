@@ -1491,3 +1491,88 @@ def run():
             kod, _, v = s.iste("/api/hesap/gelen-al", {"modul": "esp", "cihaz": A}, y)
             eq([x["metin"] for x in v["gelen"]], ["30 dk gitar"])
     test("HTTP: gelen satirinda modul (buyuk harf ve bosluk tolere edilir); bilinmeyen modul 400", t_http_gelen_modul)
+
+    # ------------------------------------------- Siri: bugun ne var? (soz 21)
+
+    def t_ozet():
+        with _Depo() as r:
+            k, j = _admin(r)
+            yaz = r.d.anahtar_ac(k, "parola-123", "Kısayol")["anahtar"]
+            oku = r.d.anahtar_ac(k, "parola-123", "Siri", ["kayit", "oku"])
+            yalniz_oku = r.d.anahtar_ac(k, "parola-123", "Yalnız okur", "oku")["anahtar"]
+            eq(oku["yetki"], "kayit,oku")
+            eq([x["yetki"] for x in r.d.anahtarlar(k)], ["kayit", "kayit,oku", "oku"])
+            _hata(lambda: r.d.anahtar_ac(k, "parola-123", "x", "hepsi"), 400)
+            _hata(lambda: r.d.anahtar_ac(k, "parola-123", "x", []), 400)
+            eq(r.d.anahtar_dene(oku["anahtar"])["yetkiler"], ["kayit", "oku"])
+            _hata(lambda: r.d.gun_ozeti(yaz), 403)                         # yalniz kayit: ozet okuyamaz
+            _hata(lambda: r.d.gelen_ekle(yalniz_oku, "su 250"), 403)        # yalniz oku: satir birakamaz
+            _hata(lambda: r.d.gun_ozeti("lifeos_yok"), 401)
+            v = r.d.gun_ozeti(oku["anahtar"])
+            eq((v["parcalar"], "Henüz özet yok" in v["metin"]), ([], True))
+            bugun = time.strftime("%Y-%m-%d", time.localtime(r.saat()))
+            dun = time.strftime("%Y-%m-%d", time.localtime(r.saat() - 86400))
+            _hata(lambda: r.d.yayinla(k, "spi/bugun", "Toparlanma iyi."), 400)               # gun yok
+            _hata(lambda: r.d.yayinla(k, "spi/bugun", "x" * 500, gun=bugun), 400)            # cok uzun
+            _hata(lambda: r.d.yayinla(k, "hkm/bugun", "x", gun=bugun), 400)
+            r.d.yayinla(k, "esp/bugun", "2 oturum, toplam 45 dk.", gun=bugun)
+            r.d.yayinla(k, "spi/bugun", "  Toparlanma   iyi.\n Sıradaki hatırlatma 16:00, su. ", gun=bugun)
+            r.d.yayinla(k, "ays/bugun", "3/5 blok bitti; sırada Türev.", gun=dun)
+            v = r.d.gun_ozeti(oku["anahtar"])
+            eq([p["modul"] for p in v["parcalar"]], ["ays", "spi", "esp"])                   # sabit sira
+            eq(v["metin"], "AYS bugün henüz açılmadı; son özet %s. SPİ: Toparlanma iyi. Sıradaki hatırlatma "
+                           "16:00, su. ESP: 2 oturum, toplam 45 dk." % dun)
+            no("3/5" in v["metin"])                                        # dunku sayi bugunmus gibi okunmaz
+            eq([p["bayat"] for p in v["parcalar"]], [True, False, False])
+            # Ozet takvime karismaz: takvim listesi ve .ics yalniz takvim yayinlari.
+            r.d.yayinla(k, "ays/takvim", "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:x\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n", 1)
+            eq([x["ad"] for x in r.d.takvim(k)["yayinlar"]], ["ays/takvim"])
+            t = r.d.takvim_ac(k)
+            ics = r.d.takvim_ics(t["yol"].split("/")[-1][:-4])
+            no("Toparlanma" in ics)
+            ok("UID:x" in ics)
+    test("Siri ozeti: «oku» yetkili anahtar; moduller sirayla; dunku ozet bugunmus gibi okunmaz; takvime karismaz",
+         t_ozet)
+
+    def t_gocur_surum7():
+        klasor = tempfile.mkdtemp(prefix="lifeos-hesap-")
+        try:
+            import sqlite3
+            yol = os.path.join(klasor, "hesap.db")
+            c = sqlite3.connect(yol)
+            c.executescript("CREATE TABLE yayin(kullanici INTEGER NOT NULL, ad TEXT NOT NULL, icerik TEXT NOT NULL, "
+                            "adet INTEGER, zaman REAL NOT NULL, PRIMARY KEY(kullanici, ad));"
+                            "INSERT INTO yayin VALUES(1, 'ays/takvim', 'BEGIN:VCALENDAR', 1, 1);")
+            c.commit()
+            c.close()
+            d = hesap.Depo(yol, tur=1000)
+            with d._islem() as c2:
+                ok("gun" in {r["name"] for r in c2.execute("PRAGMA table_info(yayin)")})
+                eq(tuple(c2.execute("SELECT ad, gun FROM yayin").fetchone()), ("ays/takvim", None))
+        finally:
+            shutil.rmtree(klasor, ignore_errors=True)
+    test("surum 7 deposu yayinin gunune gocer", t_gocur_surum7)
+
+    def t_http_ozet():
+        with _Srv() as s:
+            kod, _, v = s.iste("/api/hesap/kur", {"ad": "omer", "parola": "parola-123", "cihaz": A}, H)
+            y = dict(H, Authorization="Bearer " + v["jeton"])
+            a = s.iste("/api/hesap/anahtar", {"parola": "parola-123", "ad": "Siri", "yetki": ["kayit", "oku"]}, y)[2]["anahtar"]
+            bugun = time.strftime("%Y-%m-%d", time.localtime(s.r.saat()))
+            kod, _, _ = s.iste("/api/hesap/yayin", {"ad": "spi/bugun", "icerik": "Toparlanma iyi.", "gun": bugun}, y)
+            eq(kod, 200)
+            q = urllib.request.Request(s.adres + "/api/hesap/ozet.txt", headers={"Authorization": "Bearer " + a})
+            with urllib.request.urlopen(q, timeout=10) as c:
+                eq((c.status, c.headers.get("Content-Type"), c.read().decode("utf-8")),
+                   (200, "text/plain; charset=utf-8", "SPİ: Toparlanma iyi."))
+            kod, _, v = s.iste("/api/hesap/ozet", baslik={"Authorization": "Bearer " + a})
+            eq((kod, v["parcalar"][0]["bayat"]), (200, False))
+            eq(s.iste("/api/hesap/ozet")[0], 401)
+            try:
+                urllib.request.urlopen(s.adres + "/api/hesap/ozet.txt", timeout=10)
+                raise AssertionError("401 bekleniyordu")
+            except urllib.error.HTTPError as e:                          # Siri hatayi da cumle olarak okur
+                eq((e.code, e.headers.get("Content-Type"), "geçersiz" in e.read().decode("utf-8")),
+                   (401, "text/plain; charset=utf-8", True))
+            eq(s.iste("/api/hesap/ozet", baslik={"Authorization": "Bearer " + v.get("x", "lifeos_yok")})[0], 401)
+    test("HTTP: ozet.txt duz metin (Siri okur); ozet JSON; anahtarsiz 401", t_http_ozet)

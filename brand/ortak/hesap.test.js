@@ -223,8 +223,9 @@
         if(!parolaBak()) return cevap(401, { hata:'Şifre yanlış.' });
         s.anahtarlar = s.anahtarlar || [];
         const id = s.anahtarlar.length + 1;
-        s.anahtarlar.push({ id, ad:govde.ad, yetki:'kayit', on_ek:'lifeos_gIzL', olusturma:1700000000000, son:null });
-        return cevap(200, { anahtar:'lifeos_gIzLiAnAhTaR' + id, id, ad:govde.ad, yetki:'kayit' });
+        const yetki = Array.isArray(govde.yetki) ? govde.yetki.join(',') : String(govde.yetki || 'kayit');
+        s.anahtarlar.push({ id, ad:govde.ad, yetki, on_ek:'lifeos_gIzL', olusturma:1700000000000, son:null });
+        return cevap(200, { anahtar:'lifeos_gIzLiAnAhTaR' + id, id, ad:govde.ad, yetki });
       }
       if(yol === '/api/hesap/anahtar-sil'){
         s.anahtarlar = (s.anahtarlar || []).filter(x => x.id !== govde.id);
@@ -251,7 +252,7 @@
         return cevap(200, { ok:!!x });
       }
       if(yol === '/api/hesap/yayin'){
-        (s.yayinlar = s.yayinlar || []).push({ ad:govde.ad, adet:govde.adet, icerik:govde.icerik });
+        (s.yayinlar = s.yayinlar || []).push({ ad:govde.ad, adet:govde.adet, icerik:govde.icerik, gun:govde.gun });
         return cevap(200, { ok:true });
       }
       if(yol === '/api/hesap/profil'){
@@ -1823,6 +1824,45 @@
       await h._ekBekle();
       expect(srv.yayinlar.length).toBe(2);
       expect(srv.yayinlar[1].icerik).toContain('AYT');
+    }));
+
+    /* Siri «Bugün ne var?» (söz 25): günün özeti günüyle gider; aynı cümle
+       ertesi gün yeniden gider (gün değişti), aynı gün iki kez gitmez. */
+    it('bugün yayını: metin ve gün gider; aynı gün aynı metin gitmez; gün değişince aynı metin yine gider', () => sahneyle(async () => {
+      const srv = sunucuKur(), c = cihazKur(srv);
+      let t = 1700000000000, gun = '2026-10-09';
+      c.ortam.simdi = () => t;
+      const h = kancali(c, { yayin:() => ({ bugun:{ metin:'Toparlanma iyi.', gun } }) });
+      await hazir();
+      await h.girisYap('omer', 'parola-123');
+      await h.esitle();
+      await h._ekBekle();
+      expect((srv.yayinlar || []).map(x => [x.ad, x.icerik, x.gun])).toEqual([['spi/bugun', 'Toparlanma iyi.', '2026-10-09']]);
+      t += 31000;
+      await h.esitle();
+      await h._ekBekle();
+      expect(srv.yayinlar.length).toBe(1);
+      gun = '2026-10-10';
+      t += 31000;
+      await h.esitle();
+      await h._ekBekle();
+      expect(srv.yayinlar.map(x => x.gun)).toEqual(['2026-10-09', '2026-10-10']);
+    }));
+
+    it('anahtar «günün özetini de okuyabilsin» seçilince oku yetkisiyle açılır; listede yazar; Siri tarifi', () => sahneyle(async () => {
+      const { h, srv } = await girisli();
+      await h.merkezAc('anahtarlar');
+      await hazir();
+      merkez().querySelector('details[data-hesap-ac="anahtar-ekle"] summary').click();
+      document.getElementById('hesap-anahtar-ad').value = 'Siri';
+      document.getElementById('hesap-anahtar-sifre').value = 'parola-123';
+      document.getElementById('hesap-anahtar-oku').checked = true;
+      merkez().querySelector('[data-hesap-form="anahtar"]').requestSubmit();
+      await hazir();
+      expect(srv.anahtarlar[0].yetki).toBe('kayit,oku');
+      expect(merkez().textContent).toContain('özeti de okur');
+      expect(merkez().innerHTML).toContain('/api/hesap/ozet.txt');
+      expect(!!merkez().querySelector('details[data-hesap-ac="t-siri"]')).toBe(true);
     }));
 
     it('etkinlik: yeni olaylar adıyla; yanlış doğrulama kodu uyarıya sayılır', () => sahneyle(async () => {

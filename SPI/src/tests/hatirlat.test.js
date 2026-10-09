@@ -170,4 +170,25 @@
       }finally{ geri(); }
     });
   });
+
+  /* Siri «Bugün ne var?» (hesap sunucu sözü 21): sıradaki hatırlatma
+     söylenir; ilaç adı SÖYLENMEZ (yalnız «ilaç ya da takviye»). */
+  describe('Bugün — Siri özeti (sesli)', () => {
+    it('veri yoksa söyler; sıradaki hatırlatma saatiyle; ilaç adı geçmez', async () => {
+      resetState();
+      await withTodayAsync('2026-09-20', async () => {
+        expect(SP.Screens.today.sesli(saat('2026-09-20', '09:00'))).toBe('Bugünün verisi henüz girilmedi.');
+        const m = SP.Model.newMed();
+        m.name = 'Gizli İlaç'; m.startDate = '2026-09-01';
+        await SP.Model.saveMed(m);
+        await H().ekle({ tur:'ilac', medId:m.id, saatler:'08:00, 21:00' });
+        await H().ekle({ tur:'su', saatler:'16:00' });
+        const c = SP.Screens.today.sesli(saat('2026-09-20', '12:00'));
+        expect(c).toContain('Sıradaki hatırlatma 16:00, su.');
+        const a = SP.Screens.today.sesli(saat('2026-09-20', '17:00'));
+        expect(a).toContain('Sıradaki hatırlatma 21:00, ilaç ya da takviye.');
+        expect(a.indexOf('Gizli') < 0).toBe(true);
+      });
+    });
+  });
 })();

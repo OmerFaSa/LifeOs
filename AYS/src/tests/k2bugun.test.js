@@ -365,4 +365,18 @@
       });
     });
   });
+
+  /* Siri «Bugün ne var?» (hesap sunucu sözü 21): sesli özet günün cümlesidir;
+     gün belgesi yoksa «plan yok» denir, boş dize gitmez. */
+  describe('Bugün — Siri özeti (sesli)', () => {
+    it('günün cümlesi; plan yoksa söylenir', async () => {
+      await withTodayAsync('2026-11-10', async () => {
+        resetState();
+        expect(R.Screens.today.sesli()).toBe('Bugün için plan yok.');
+        const gun = await hazirla();
+        expect(R.Screens.today.sesli()).toBe(R.Screens.today.cumle(gun, R.U.todayISO()));
+        expect(R.Screens.today.sesli().length > 0).toBe(true);
+      });
+    });
+  });
 })();

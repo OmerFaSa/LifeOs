@@ -1130,6 +1130,17 @@ ESP.Screens.today = (function(){
       return s ? U.esc(s + ' günlük seri') : '';
     },
     headlineOz:'004',
+    /* Siri «Bugün ne var?» (hesap sunucu sözü 21): günün cümlesi ve bugüne
+       düşen hatırlatıcı sayısı (kapalı bölümünki sayılmaz). Kural metni. */
+    sesli(){
+      const rows = M.sessionsOf(U.todayISO());
+      const n = ESP.Planner.nextAction();
+      let c = !rows.length ? (n.rank ? 'Bugün henüz oturum yok; sıradaki iş hazır.' : 'Bugün için bekleyen bir iş yok.')
+        : rows.length + ' oturum, toplam ' + U.fmtMin(rows.reduce((a, s) => a + (s.minutes || 0), 0)) + '.';
+      const h = M.dueReminders(null, U.todayISO()).filter(r => ESP.Mod.isOn(r.disc)).length;
+      if(h) c += ' ' + h + ' hatırlatıcı bugün.';
+      return c;
+    },
     headline(){
       const rows = M.sessionsOf(gun());
       const n = ESP.Planner.nextAction();

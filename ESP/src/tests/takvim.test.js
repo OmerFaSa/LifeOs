@@ -129,4 +129,27 @@
       });
     });
   });
+
+  /* Siri «Bugün ne var?» (hesap sunucu sözü 21): günün cümlesi ve bugüne
+     düşen hatırlatıcı sayısı; kapalı bölümünki sayılmaz. */
+  describe('Bugün — Siri özeti (sesli)', () => {
+    it('oturum yoksa söylenir; oturum ve bugünkü hatırlatıcılar sayılır', async () => {
+      resetState();
+      await ESP.Test.withTodayAsync('2026-09-12', async () => {
+        const bos = ESP.Screens.today.sesli();
+        expect(/^Bugün (henüz oturum yok|için bekleyen bir iş yok)/.test(bos)).toBe(true);
+        await ESP.Model.addSession('2026-09-12', { disc:'music', minutes:30 });
+        await ESP.Model.addSession('2026-09-12', { disc:'lang', minutes:15 });
+        ESP.S.reminders = [
+          { id:'r1', text:'Metronom', disc:'music', due:'2026-09-12', repeat:'none', done:false },
+          { id:'r2', text:'Kelime', disc:'lang', due:'2026-09-10', repeat:'none', done:false },
+          { id:'r3', text:'Yarın', disc:'lang', due:'2026-09-13', repeat:'none', done:false },
+        ];
+        expect(ESP.Screens.today.sesli()).toBe('2 oturum, toplam ' + ESP.U.fmtMin(45) + '. 2 hatırlatıcı bugün.');
+        await ESP.Mod.set('music', false);
+        expect(ESP.Screens.today.sesli()).toContain('1 hatırlatıcı bugün.');
+        await ESP.Mod.set('music', true);
+      });
+    });
+  });
 })();

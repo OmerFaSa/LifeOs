@@ -125,6 +125,14 @@
       geri akar (hesap.js soz 23). Sunucu acilamazsa:
       `python sistem/hesap.py --yedekle | --yedekler | --geri-yukle <ad>`.
 
+  21. SIRI: «BUGUN NE VAR?» (2026-10-09). «Ozet okur» yetkili bir erisim
+      anahtariyla Kisayollar gunun kisa ozetini okur, Siri sesli soyler
+      (`GET /api/hesap/ozet.txt`). Ozeti her modul KENDI kuraliyla yazar ve
+      yayinlar (`<modul>/bugun`, hangi gunun oldugu ile); sunucu ANLAMAZ,
+      yalniz siraya dizer. Bugunun ozeti olmayan modul icin eski sayi
+      bugunmus gibi okunmaz: «bugun henuz acilmadi; son ozet <gun>» denir
+      (AGENTS §1.2). Anahtar yetkileri kapali bir listeden: kayit, oku.
+
    Yalniz Python standart kutuphanesi (AGENTS §1.3).
 """
 
@@ -145,7 +153,7 @@ import threading
 import time
 import urllib.parse
 
-SURUM = 7
+SURUM = 8
 TUR = 600000                    # PBKDF2 tur sayisi (OWASP 2023, SHA-256)
 EN_KISA_PAROLA = 8
 EN_UZUN_PAROLA = 256
@@ -185,7 +193,7 @@ BAG_SN = 300
 ANAHTAR_ON = "lifeos_"
 ANAHTAR_EN_COK = 20
 ANAHTAR_AD_EN_UZUN = 40
-YETKILER = ("kayit",)                 # disaridan tek yetki: gelen kutusuna satir birakmak
+YETKILER = ("kayit", "oku")           # satir birakmak; gunun ozetini okumak (soz 21)
 # 2026-10-09 (ucuncu tur): AYS «soru 40», ESP «30 dk gitar»; her modul kendi
 # ayristiricisiyla okur, satiri yalniz o modul alir.
 GELEN_MODULLER = ("ays", "spi", "esp")
@@ -199,6 +207,9 @@ GELEN_SONUC_EN_UZUN = 160
 GELEN_DURUMLAR = ("onayda", "anlasilmadi")
 # Takvim aboneligi (soz 17)
 YAYIN_RE = re.compile(r"^(ays|spi|esp)/takvim$")
+BUGUN_RE = re.compile(r"^(ays|spi|esp)/bugun$")      # soz 21: modulun gunluk ozeti
+BUGUN_EN_UZUN = 400
+GUN_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 YAYIN_EN_BUYUK = 512 * 1024
 TAKVIM_YOL_RE = re.compile(r"^/api/hesap/takvim/([A-Za-z0-9_\-]{20,64})\.ics$")
 # Cihazlar ve uyarilar (soz 18-19)
@@ -464,6 +475,10 @@ class Depo:
         for ad, tur in (("esitleme", "REAL"), ("yontem", "TEXT"), ("ip", "TEXT")):
             if ad not in var:
                 c.execute("ALTER TABLE oturum ADD COLUMN %s %s" % (ad, tur))
+        var = {r["name"] for r in c.execute("PRAGMA table_info(yayin)")}
+        # surum 8 (soz 21): gunluk ozetin hangi gune ait oldugu.
+        if "gun" not in var:
+            c.execute("ALTER TABLE yayin ADD COLUMN gun TEXT")
         var = {r["name"] for r in c.execute("PRAGMA table_info(olay)")}
         # surum 6 (soz 19): olayin cihazi ve actigi oturum (uyari «Bendim / Cikar»).
         for ad, tur in (("cihaz", "TEXT"), ("oturum", "INTEGER")):
@@ -1379,8 +1394,7 @@ class Depo:
         ad = " ".join(str(ad or "").split())
         if not ad or len(ad) > ANAHTAR_AD_EN_UZUN or any(ord(ch) < 32 for ch in ad):
             raise Hata(400, "Anahtara 1–%d karakterlik bir ad ver (örnek: iPhone Kısayollar)." % ANAHTAR_AD_EN_UZUN)
-        if yetki not in YETKILER:
-            raise Hata(400, "Bu yetki tanımlı değil.")
+        yetki = self._yetki_normal(yetki)
         kid = kullanici["id"]
         with self._islem() as c:
             self._parola_bak(c, kid, parola)
@@ -1423,7 +1437,7 @@ class Depo:
                 r = c.execute("SELECT id, kullanici, ad, yetki FROM anahtar WHERE ozet=?",
                               (_jeton_ozeti(anahtar),)).fetchone()
             if r is not None:
-                if r["yetki"] != "kayit":
+                if "kayit" not in str(r["yetki"]).split(","):
                     raise Hata(403, "Bu anahtarın kayıt yetkisi yok.")
                 if not metin or any(ord(ch) < 32 for ch in metin):
                     raise Hata(400, "Gönderilecek bir satır yok: gövdede «metin» olmalı (örnek: su 250).")
@@ -1453,10 +1467,10 @@ class Depo:
         with self._islem() as c:
             r = None
             if isinstance(anahtar, str) and anahtar.startswith(ANAHTAR_ON) and len(anahtar) <= 200:
-                r = c.execute("SELECT id, ad FROM anahtar WHERE ozet=?", (_jeton_ozeti(anahtar),)).fetchone()
+                r = c.execute("SELECT id, ad, yetki FROM anahtar WHERE ozet=?", (_jeton_ozeti(anahtar),)).fetchone()
             if r is not None:
                 c.execute("UPDATE anahtar SET son=? WHERE id=?", (self.saat(), r["id"]))
-                return {"ok": True, "anahtar": r["ad"],
+                return {"ok": True, "anahtar": r["ad"], "yetkiler": str(r["yetki"]).split(","),
                         "mesaj": "Bağlantı tamam. Satırı POST ile gönder: {\"metin\": \"su 250\"}"}
         with self.kilit:
             self._deneme_yanlis(anahtarlar)
@@ -1501,24 +1515,85 @@ class Depo:
 
     # ------------------------------------------------ takvim aboneligi (soz 17)
 
-    def yayinla(self, kullanici, ad, icerik, adet=None):
-        if not isinstance(ad, str) or not YAYIN_RE.match(ad):
+    def yayinla(self, kullanici, ad, icerik, adet=None, gun=None):
+        """Modulun yayini: takvim (.ics) ya da gunluk ozet (soz 21; duz
+        metin ve hangi gunun oldugu). Sunucu icerigi anlamaz."""
+        if not isinstance(ad, str) or not (YAYIN_RE.match(ad) or BUGUN_RE.match(ad)):
             raise Hata(400, "Geçersiz yayın.")
-        if not isinstance(icerik, str) or not icerik.lstrip().startswith("BEGIN:VCALENDAR") \
-                or "END:VCALENDAR" not in icerik:
-            raise Hata(400, "Takvim okunamadı.")
-        if len(icerik.encode("utf-8")) > YAYIN_EN_BUYUK:
-            raise Hata(413, "Takvim çok büyük.")
+        if BUGUN_RE.match(ad):
+            icerik = " ".join(icerik.split()) if isinstance(icerik, str) else ""
+            if not icerik or len(icerik) > BUGUN_EN_UZUN:
+                raise Hata(400, "Günün özeti boş ya da çok uzun.")
+            if not isinstance(gun, str) or not GUN_RE.match(gun):
+                raise Hata(400, "Özetin günü yazılmalı (YYYY-AA-GG).")
+        else:
+            gun = None
+            if not isinstance(icerik, str) or not icerik.lstrip().startswith("BEGIN:VCALENDAR") \
+                    or "END:VCALENDAR" not in icerik:
+                raise Hata(400, "Takvim okunamadı.")
+            if len(icerik.encode("utf-8")) > YAYIN_EN_BUYUK:
+                raise Hata(413, "Takvim çok büyük.")
         adet = adet if isinstance(adet, int) and not isinstance(adet, bool) and adet >= 0 else None
         with self._islem() as c:
-            c.execute("INSERT INTO yayin(kullanici, ad, icerik, adet, zaman) VALUES(?,?,?,?,?) "
+            c.execute("INSERT INTO yayin(kullanici, ad, icerik, adet, zaman, gun) VALUES(?,?,?,?,?,?) "
                       "ON CONFLICT(kullanici, ad) DO UPDATE SET icerik=excluded.icerik, adet=excluded.adet, "
-                      "zaman=excluded.zaman", (kullanici["id"], ad, icerik, adet, self.saat()))
+                      "zaman=excluded.zaman, gun=excluded.gun", (kullanici["id"], ad, icerik, adet, self.saat(), gun))
+
+    @staticmethod
+    def _yetki_normal(yetki):
+        """«kayit», «oku», «kayit,oku» ya da liste → kapali listeden, sirali."""
+        if isinstance(yetki, str):
+            parca = [x.strip() for x in yetki.split(",")]
+        elif isinstance(yetki, list):
+            parca = [x.strip() if isinstance(x, str) else "" for x in yetki]
+        else:
+            parca = []
+        parca = [x for x in parca if x]
+        if not parca or any(x not in YETKILER for x in parca):
+            raise Hata(400, "Bu yetki tanımlı değil.")
+        return ",".join(x for x in YETKILER if x in parca)
+
+    def gun_ozeti(self, anahtar, ip=""):
+        """Soz 21: «oku» yetkili anahtarla gunun ozeti. Moduller AYS, SPI,
+        ESP sirasiyla; bugunun ozeti olmayan icin eski metin okunmaz."""
+        anahtarlar = [("ip", ip)]
+        with self.kilit:
+            self._deneme_bak(anahtarlar)
+        bugun = time.strftime("%Y-%m-%d", time.localtime(self.saat()))
+        with self._islem() as c:
+            r = None
+            if isinstance(anahtar, str) and anahtar.startswith(ANAHTAR_ON) and len(anahtar) <= 200:
+                r = c.execute("SELECT id, kullanici, yetki FROM anahtar WHERE ozet=?",
+                              (_jeton_ozeti(anahtar),)).fetchone()
+            if r is not None:
+                if "oku" not in str(r["yetki"]).split(","):
+                    raise Hata(403, "Bu anahtar özet okuyamaz; Hesap › Kısayollar’da «özeti de okusun» diye yeni anahtar aç.")
+                c.execute("UPDATE anahtar SET son=? WHERE id=?", (self.saat(), r["id"]))
+                yayin = {x["ad"]: x for x in c.execute(
+                    "SELECT ad, icerik, gun FROM yayin WHERE kullanici=? AND ad LIKE '%/bugun'", (r["kullanici"],))}
+                parcalar = []
+                for modul in ("ays", "spi", "esp"):
+                    x = yayin.get(modul + "/bugun")
+                    if x is None:
+                        continue
+                    if x["gun"] == bugun:
+                        parcalar.append({"modul": modul, "gun": x["gun"], "bayat": False,
+                                         "metin": "%s: %s" % (MODUL_AD[modul], x["icerik"])})
+                    else:
+                        parcalar.append({"modul": modul, "gun": x["gun"], "bayat": True,
+                                         "metin": "%s bugün henüz açılmadı; son özet %s." % (
+                                             MODUL_AD[modul], x["gun"] or "bilinmiyor")})
+                metin = " ".join(p["metin"] for p in parcalar) or \
+                    "Henüz özet yok: AYS, SPİ ya da ESP’yi bir kez aç, özet kendiliğinden gelir."
+                return {"tarih": bugun, "metin": metin, "parcalar": parcalar}
+        with self.kilit:
+            self._deneme_yanlis(anahtarlar)
+        raise Hata(401, "Anahtar geçersiz ya da silinmiş.")
 
     def takvim(self, kullanici):
         with self._islem() as c:
             r = c.execute("SELECT jeton, olusturma, son FROM takvim WHERE kullanici=?", (kullanici["id"],)).fetchone()
-            y = c.execute("SELECT ad, adet, zaman FROM yayin WHERE kullanici=? ORDER BY ad",
+            y = c.execute("SELECT ad, adet, zaman FROM yayin WHERE kullanici=? AND ad LIKE '%/takvim' ORDER BY ad",
                           (kullanici["id"],)).fetchall()
         return {"acik": r is not None, "yol": "/api/hesap/takvim/%s.ics" % r["jeton"] if r else None,
                 "olusturma": int(r["olusturma"] * 1000) if r else None,
@@ -1551,7 +1626,7 @@ class Depo:
                 return None
             c.execute("UPDATE takvim SET son=? WHERE kullanici=?", (self.saat(), r["kullanici"]))
             return ics_birlestir([x["icerik"] for x in c.execute(
-                "SELECT icerik FROM yayin WHERE kullanici=? ORDER BY ad", (r["kullanici"],))])
+                "SELECT icerik FROM yayin WHERE kullanici=? AND ad LIKE '%/takvim' ORDER BY ad", (r["kullanici"],))])
 
     def baglanti_ozet(self, kullanici):
         """Hesap sayfasinin «Baglantilar» satiri icin sayilar."""
@@ -1993,6 +2068,20 @@ def _ics_cevap(h, metin):
     h.wfile.write(govde)
 
 
+def _metin_cevap(h, metin, kod=200):
+    """Duz metin (Siri «Metni Konus» dogrudan okur)."""
+    govde = str(metin).encode("utf-8")
+    h.send_response(kod)
+    koken = h.headers.get("Origin")
+    if koken and UYGULAMA_KOKENLERI.match(koken):
+        h.send_header("Access-Control-Allow-Origin", koken)
+        h.send_header("Vary", "Origin")
+    h.send_header("Content-Type", "text/plain; charset=utf-8")
+    h.send_header("Content-Length", str(len(govde)))
+    h.end_headers()
+    h.wfile.write(govde)
+
+
 def gunluk_maskele(satir):
     """Sunucu gunlugune yazilacak istek satiri: takvim adresinin gizli
     kismi atilir (soz 17; o adres bir anahtardir)."""
@@ -2056,6 +2145,14 @@ def isle(h):
                     raise Hata(404, "Bu takvim adresi kapalı ya da yenilendi.")
                 return _ics_cevap(h, ics)
         ip = (h.client_address or ("",))[0]
+        if yontem == "GET" and yol in ("/api/hesap/ozet", "/api/hesap/ozet.txt"):
+            # Soz 21: Kisayollar/Siri. Kimlik «oku» yetkili erisim anahtari.
+            if not yol.endswith(".txt"):
+                return _cevap(h, 200, d.gun_ozeti(_jeton(h), ip))
+            try:
+                return _metin_cevap(h, d.gun_ozeti(_jeton(h), ip)["metin"])
+            except Hata as e:                       # Siri hatayi da cumle olarak okusun (JSON degil)
+                return _metin_cevap(h, e.mesaj, e.kod)
         if yontem == "GET" and yol == "/api/hesap/gelen":
             # Kisayolun «dene» adimi: anahtar gecerli mi (satir birakmaz).
             return _cevap(h, 200, d.anahtar_dene(_jeton(h), ip))
@@ -2157,7 +2254,7 @@ def isle(h):
             if yol == "/api/hesap/gelen-sonuc":
                 return _cevap(h, 200, {"ok": d.gelen_sonuc(k, v.get("id"), v.get("durum"), v.get("sonuc"), cihaz)})
             if yol == "/api/hesap/yayin":
-                d.yayinla(k, v.get("ad"), v.get("icerik"), v.get("adet"))
+                d.yayinla(k, v.get("ad"), v.get("icerik"), v.get("adet"), v.get("gun"))
                 return _cevap(h, 200, {"ok": True})
             if yol == "/api/hesap/takvim":
                 return _cevap(h, 200, {"takvim": d.takvim_ac(k, v.get("yenile") is True, j, ip)})

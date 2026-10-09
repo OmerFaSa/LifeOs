@@ -138,7 +138,12 @@
       yalnız bilgisayarın kendisinden; geri yükleme büyük aksiyondur:
       önizleme (yedekte ve şimdi kaç kullanıcı, kaç kayıt), şifre, önce
       şimdiki hâlin yedeği. Sonra bu cihaz da çıkar, giriş ekranı gelir.
-      Herkes Verin'de son yedeğin zamanını görür. */
+      Herkes Verin'de son yedeğin zamanını görür.
+  25. SİRİ: «BUGÜN NE VAR?» (sunucu sözü 21). `yayin()` `bugun:{ metin, gun }`
+      da döndürebilir: modülün KENDİ kuralıyla yazdığı bir iki cümle ve hangi
+      günün olduğu. Gün değişince içerik aynı olsa da yeniden gider (imza
+      günü de kapsar). Erişim anahtarı «özeti de okusun» seçilerek açılırsa
+      Kısayollar `ozet.txt`'yi okur, Siri söyler. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -623,10 +628,11 @@ window.LIFEOS.HESAP = (function(){
       const x = y[ad];
       if(!x || typeof x.metin !== 'string') continue;
       const tam = ayar.modul + '/' + ad, k = anahtar('yayin', tam), kim = o.h || o.a;
-      const im = imza(x.metin), eski = ortam.depo.oku(k);
+      const gun = typeof x.gun === 'string' ? x.gun : null;
+      const im = imza(x.metin) + (gun ? '@' + gun : ''), eski = ortam.depo.oku(k);
       if(eski && eski.imza === im && eski.h === kim) continue;
-      await istek(base, '/api/hesap/yayin', { ad:tam, icerik:x.metin, adet:typeof x.adet === 'number' ? x.adet : null },
-        o.j, ZAMAN_ASIMI);
+      await istek(base, '/api/hesap/yayin', { ad:tam, icerik:x.metin, adet:typeof x.adet === 'number' ? x.adet : null,
+        gun }, o.j, ZAMAN_ASIMI);
       ortam.depo.yaz(k, { imza:im, h:kim });
     }
   }
@@ -1644,7 +1650,10 @@ window.LIFEOS.HESAP = (function(){
   async function bagKoduAc(){ return api('/api/hesap/bag-kodu', {}); }
   async function bagDurum(id){ return api('/api/hesap/bag-durum', { id }); }
   async function bagKapat(id){ return api('/api/hesap/bag-kapat', { id }); }
-  async function anahtarAc(parola, ad){ return api('/api/hesap/anahtar', { parola, ad, yetki:'kayit' }); }
+  /* oku: anahtar günün özetini de okuyabilsin (Siri, sunucu sözü 21). */
+  async function anahtarAc(parola, ad, oku){
+    return api('/api/hesap/anahtar', { parola, ad, yetki:oku ? ['kayit', 'oku'] : 'kayit' });
+  }
   async function anahtarSil(id){ return api('/api/hesap/anahtar-sil', { id }); }
   async function takvimAc(yenile){ return (await api('/api/hesap/takvim', { yenile:!!yenile })).takvim; }
   async function takvimKapat(){ return (await api('/api/hesap/takvim-kapat', {})).takvim; }
@@ -2265,6 +2274,7 @@ window.LIFEOS.HESAP = (function(){
             + kopyaKutusu(y.anahtar, 'Anahtarı') + '</div>' : '')
         + (l.length ? '<ul class="hesap-liste">' + l.map(x => '<li class="hesap-oge">' + ikon('kisayol', 'hesap-satir__ikon')
             + '<span class="hesap-oge__metin"><b>' + kac(x.ad) + '</b><small>' + kac(x.on_ek) + '… · '
+            + (String(x.yetki || '').split(',').indexOf('oku') >= 0 ? 'özeti de okur · ' : '')
             + (x.son ? 'son kullanım ' + kac(sonMetni(x.son)) : 'hiç kullanılmadı') + '</small></span>'
             + '<button type="button" class="hesap__kucuk" data-hesap="anahtar-sil" data-id="' + Number(x.id) + '"'
             + ' aria-label="' + kac('«' + x.ad + '» anahtarını sil') + '">Sil</button></li>').join('') + '</ul>'
@@ -2274,6 +2284,8 @@ window.LIFEOS.HESAP = (function(){
         + '<div class="hesap-liste hesap-liste--ac">' + acilir('anahtar-ekle', 'ekle', 'Anahtar oluştur', '',
             '<form class="hesap__form" data-hesap-form="anahtar" data-ayar-disi>'
             + alanHtml('hesap-anahtar-ad', 'Ad', 'text', 'required maxlength="40" autocomplete="off" placeholder="iPhone Kısayollar"')
+            + '<label class="hesap__secim" for="hesap-anahtar-oku"><input type="checkbox" id="hesap-anahtar-oku">'
+            + '<span>Günün özetini de okuyabilsin<small>Siri: «Bugün ne var?» — AYS, SPİ ve ESP’nin bugün cümlesi</small></span></label>'
             + sifreAlani('hesap-anahtar-sifre', 'Şifren', 'current-password') + CAPS + formMesaj
             + '<button type="submit" class="hesap__ana hesap__tam">Oluştur</button></form>') + '</div>'
         + '<p class="hesap-bolum">Tarifler</p><div class="hesap-liste hesap-liste--ac">'
@@ -2284,6 +2296,14 @@ window.LIFEOS.HESAP = (function(){
             'Kısayollar’da yeni kısayol › «Girdi İste» (Ask for Input) ekle.',
             '«URL’nin İçeriğini Al» (Get Contents of URL) ekle; adres, POST, başlık ve gövde yukarıdaki «İstek»teki gibi; «metin» alanına «Sağlanan Girdi»yi koy.',
             'Adını «LifeOS’a yaz» koy. Siri’ye «LifeOS’a yaz» deyip «su 250» söyle.']))
+        + acilir('t-siri', 'telefon', 'Siri: «Bugün ne var?»', '', adimlar([
+            'Anahtarı «Günün özetini de okuyabilsin» seçerek oluştur.',
+            'Kısayollar’da yeni kısayol › «URL’nin İçeriğini Al»: adres <code>' + kac(t.url.replace(/\/gelen$/, '/ozet.txt')) + '</code>, '
+              + 'yöntem GET, başlık <code>Authorization</code> = <code>Bearer ' + kac(t.a) + '</code>.',
+            '«Metni Konuş» (Speak Text) ekle; girdi önceki adımın sonucu.',
+            'Adını «Bugün ne var» koy. Siri’ye «Bugün ne var» de.'])
+          + '<p class="hesap__not">Özeti her sistem kendi kuralıyla yazar. Bugün hiç açılmamış bir sistemin dünkü sayısı '
+          + 'bugünmüş gibi okunmaz: «bugün henüz açılmadı» denir.</p>')
         + acilir('t-modul', 'baglanti', 'AYS ve ESP’ye', '', adimlar([
             'Aynı istek; gövdeye <code>"modul"</code> ekle: <code>{"metin": "paragraf 20", "modul": "ays"}</code>.',
             'AYS anlar: <code>soru 40 matematik</code>, <code>2 saat fizik</code>, <code>paragraf 20</code>, <code>uyku 7</code>.',
@@ -2898,7 +2918,8 @@ window.LIFEOS.HESAP = (function(){
         if(merkez) merkez.cihazlar = l;
         mesaj = 'Cihazın adı kaydedildi.';
       }else if(tur === 'anahtar'){
-        const a = await anahtarAc(deger('hesap-anahtar-sifre'), deger('hesap-anahtar-ad'));
+        const okuEl = document.getElementById('hesap-anahtar-oku');
+        const a = await anahtarAc(deger('hesap-anahtar-sifre'), deger('hesap-anahtar-ad'), !!(okuEl && okuEl.checked));
         if(merkez){
           merkez.yeniAnahtar = { anahtar:a.anahtar, ad:a.ad };
           merkez.baglanti = await baglantilar();

@@ -1809,6 +1809,12 @@ R.Screens.today = (function(){
       const d = S.days[U.todayISO()];
       return (d && bugunCumlesi(d, U.todayISO())) || 'Bugün';
     },
+    /* Siri «Bugün ne var?» (hesap sunucu sözü 21): günün cümlesi; kural
+       metni, model yok. Plan yoksa bu söylenir. */
+    sesli(){
+      const d = S.days[U.todayISO()];
+      return (d && bugunCumlesi(d, U.todayISO())) || 'Bugün için plan yok.';
+    },
     lede(){ return ''; },
     cumle:bugunCumlesi,
     ozetSayilari,

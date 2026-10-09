@@ -76,6 +76,9 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    onaysız yazılmaz. Takvimi modül üretir (AYS, ESP), sunucu yalnız
    birleştirip sunar. Hesap deposu her gün yedeklenir; geri yükleme büyük
    aksiyondur ve cihazların sonraki değişikliğini ezmez (sunucu sözü 20).
+   Siri «Bugün ne var?»: her modül günün cümlesini KENDİ kuralıyla yazıp
+   yayınlar; sunucu yalnız dizer, bugüne ait olmayanı «henüz açılmadı» der
+   (sunucu sözü 21).
 5. **Sınırlar:** SPİ teşhis koymaz ve doz önermez; ESP/AYS sertifika
    vermez, yetenek yargısı kurmaz, sonuç garantisi etmez.
 6. **XP karar vermez.** Seviye sistemi (`brand/seviye/`) yalnızca

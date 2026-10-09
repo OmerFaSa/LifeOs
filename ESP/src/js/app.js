@@ -1719,9 +1719,11 @@ ESP.App = (function(){
           /* Takvim aboneliği: hedeflerin son günü ve hatırlatıcılar
              (core/takvim.js); sunucu yalnız birleştirip sunar. */
           yayin:() => {
-            if(!ESP.Takvim) return {};
-            const d = ESP.Takvim.disa();
-            return { takvim:{ metin:d.metin, adet:d.adet } };
+            const y = {};
+            if(ESP.Takvim){ const d = ESP.Takvim.disa(); y.takvim = { metin:d.metin, adet:d.adet }; }
+            /* Siri «Bugün ne var?» (sunucu sözü 21): günün cümlesi ve günü. */
+            if(ESP.Screens && ESP.Screens.today && ESP.Screens.today.sesli) y.bugun = { metin:ESP.Screens.today.sesli(), gun:ESP.U.todayISO() };
+            return y;
           },
           yukle:() => M.loadAll(),
           yenile:() => {

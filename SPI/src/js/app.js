@@ -1544,6 +1544,9 @@ SP.App = (function(){
         window.LIFEOS.HESAP.kur({ modul:'spi', depo:SP.Store, ornek:ornekAcik, kesilebilir:sihirbaz,
           /* Kısayollar'dan gelen satır (hesap.js söz 20): kural motoru okur,
              Onaylar'a öneri olur; sayaç ve Bugün'ün öneri alanı cizIste ile. */
+          /* Siri «Bugün ne var?» (sunucu sözü 21): günün cümlesi ve günü. */
+          yayin:() => (SP.Screens && SP.Screens.today && SP.Screens.today.sesli
+            ? { bugun:{ metin:SP.Screens.today.sesli(), gun:SP.U.todayISO() } } : {}),
           gelen:async oge => {
             if(!SP.Proposals) return null;
             const r = await SP.Proposals.disaridan(oge);

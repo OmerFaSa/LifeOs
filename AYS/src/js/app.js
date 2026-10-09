@@ -1545,9 +1545,11 @@ R.App = (function(){
           /* Takvim aboneliği (hesap.js söz 20): .ics'i AYS kendi kodu üretir
              (core/takvim.js disa); sunucu yalnız birleştirip sunar. */
           yayin:() => {
-            if(!R.Takvim) return {};
-            const d = R.Takvim.disa();
-            return { takvim:{ metin:d.metin, adet:d.adet } };
+            const y = {};
+            if(R.Takvim){ const d = R.Takvim.disa(); y.takvim = { metin:d.metin, adet:d.adet }; }
+            /* Siri «Bugün ne var?» (sunucu sözü 21): günün cümlesi ve günü. */
+            if(R.Screens && R.Screens.today && R.Screens.today.sesli) y.bugun = { metin:R.Screens.today.sesli(), gun:U.todayISO() };
+            return y;
           } });
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
