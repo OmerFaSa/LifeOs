@@ -75,6 +75,9 @@
 .hesap__goster[aria-pressed="true"]{ color:var(--text); }
 .hesap__goster[aria-pressed="true"] svg{ stroke-width:2.1; }
 .hesap__goster:hover{ background:color-mix(in oklab, var(--text) 6%, transparent); color:var(--text); }
+/* Yedek satırında iki küçük eylem yan yana (indir simgesi, Geri yükle…). */
+.hesap-oge__eylem{ display:flex; gap:6px; align-items:center; flex:none; }
+.hesap-onay--notr{ background:var(--surface-2); }
 /* Formdaki tek seçim (anahtar «özeti de okusun»): yerel onay kutusu, uzun dokunma alanı. */
 .hesap__secim{ display:flex; align-items:flex-start; gap:10px; min-height:44px; padding:6px 2px; cursor:pointer; }
 .hesap__secim input{ flex:none; width:20px; height:20px; margin:2px 0 0; accent-color:var(--primary); }

@@ -1576,3 +1576,75 @@ def run():
                    (401, "text/plain; charset=utf-8", True))
             eq(s.iste("/api/hesap/ozet", baslik={"Authorization": "Bearer " + v.get("x", "lifeos_yok")})[0], 401)
     test("HTTP: ozet.txt duz metin (Siri okur); ozet JSON; anahtarsiz 401", t_http_ozet)
+
+    # --------------------------------------- yedek dosya olarak (soz 20, ek)
+
+    def t_kopya_dosya():
+        import io as _io
+        with _Depo() as r:
+            k, j = _admin(r)
+            r.d.esitle(k, "spi/ben", A, 0, [{"y": "v", "d": 1, "z": 5}])
+            x = r.d.kopya_al("elle")
+            r.d.kullanici_ekle(k, "anne", "parola-456")
+            uye = r.d.oturum(r.d.giris("anne", "parola-456", B, "iPad")["jeton"])
+            _hata(lambda: r.d.kopya_indir(uye, True, "parola-456", x["ad"]), 403)
+            _hata(lambda: r.d.kopya_indir(k, False, "parola-123", x["ad"]), 403)     # ev agindan olmaz
+            _hata(lambda: r.d.kopya_indir(k, True, "yanlis", x["ad"]), 401)
+            _hata(lambda: r.d.kopya_indir(k, True, "parola-123", "../hesap.db"), 400)
+            yol = r.d.kopya_indir(k, True, "parola-123", x["ad"], j)
+            with open(yol, "rb") as f:
+                veri = f.read()
+            ok(veri.startswith(b"SQLite format 3"))
+            ok(any(o["tur"] == "yedek-indir" for o in r.d.etkinlik(k)))
+            v = r.d.kopya_yukle(k, True, _io.BytesIO(veri), len(veri), j)
+            eq((v["kullanici"], v["kayit"]), (1, 1))
+            eq(hesap.KOPYA_RE.match(v["ad"]).group(1), "dis")
+            ok(v["ad"] in [y["ad"] for y in r.d.kopyalar()])
+            ok(any(o["tur"] == "yedek-yukle" for o in r.d.etkinlik(k)))
+            # Bozuk, yarim, bos, buyuk ya da yetkisiz: alinmaz; yarim dosya kalmaz.
+            _hata(lambda: r.d.kopya_yukle(k, True, _io.BytesIO(b"merhaba"), 7), 422)
+            _hata(lambda: r.d.kopya_yukle(k, True, _io.BytesIO(veri[:100]), len(veri)), 400)
+            _hata(lambda: r.d.kopya_yukle(k, True, _io.BytesIO(b""), 0), 400)
+            _hata(lambda: r.d.kopya_yukle(k, True, _io.BytesIO(b"x"), hesap.KOPYA_YUKLE_EN_BUYUK + 1), 413)
+            _hata(lambda: r.d.kopya_yukle(uye, True, _io.BytesIO(veri), len(veri)), 403)
+            _hata(lambda: r.d.kopya_yukle(k, False, _io.BytesIO(veri), len(veri)), 403)
+            no([a for a in os.listdir(r.d.kopya_klasoru()) if a.startswith(".yukleniyor")])
+            eq(len([y for y in r.d.kopyalar() if y["tur"] == "dis"]), 1)
+            # Yuklenen yedekten geri yukleme ayni buyuk aksiyondur.
+            eq(r.d.geri_yukle(k, True, "parola-123", v["ad"], j)["yedek"]["kullanici"], 1)
+            for _ in range(4):
+                r.saat.t += 1
+                r.d.kopya_yukle(k, True, _io.BytesIO(veri), len(veri))
+            eq(len([y for y in r.d.kopyalar() if y["tur"] == "dis"]), hesap.KOPYA_SAKLA["dis"])
+    test("yedek dosya olarak: admin, bilgisayardan, sifreyle indirilir; dosyadan yuklenen denetlenir, listeye girer",
+         t_kopya_dosya)
+
+    def t_http_kopya_dosya():
+        with _Srv() as s:
+            kod, _, v = s.iste("/api/hesap/kur", {"ad": "omer", "parola": "parola-123", "cihaz": A}, H)
+            y = dict(H, Authorization="Bearer " + v["jeton"])
+            ad = s.iste("/api/hesap/yedekle", {}, y)[2]["alinan"]
+            q = urllib.request.Request(s.adres + "/api/hesap/yedek-indir", method="POST",
+                                       data=json.dumps({"ad": ad, "parola": "parola-123"}).encode("utf-8"),
+                                       headers=dict(y, **{"Content-Type": "application/json"}))
+            with urllib.request.urlopen(q, timeout=10) as c:
+                veri = c.read()
+                eq(c.headers.get("Content-Type"), "application/octet-stream")
+                ok(("lifeos-" + ad) in c.headers.get("Content-Disposition"))
+            ok(veri.startswith(b"SQLite format 3"))
+            eq(s.iste("/api/hesap/yedek-indir", {"ad": ad, "parola": "yanlis"}, y)[0], 401)
+            q = urllib.request.Request(s.adres + "/api/hesap/yedek-yukle", data=veri, method="POST",
+                                       headers={"X-LifeOS": "hesap", "Authorization": y["Authorization"],
+                                                "Content-Type": "application/octet-stream"})
+            with urllib.request.urlopen(q, timeout=10) as c:
+                v = json.loads(c.read())
+            ok(v["eklenen"].startswith("hesap-dis-"))
+            ok(v["eklenen"] in [x["ad"] for x in v["yedekler"]])
+            q = urllib.request.Request(s.adres + "/api/hesap/yedek-yukle", data=veri, method="POST",
+                                       headers={"Authorization": y["Authorization"]})
+            try:
+                urllib.request.urlopen(q, timeout=10)
+                raise AssertionError("403 bekleniyordu")
+            except urllib.error.HTTPError as e:
+                eq(e.code, 403)                                           # ozel baslik olmadan olmaz
+    test("HTTP: yedek dosya olarak iner (octet-stream), ham govdeyle yuklenir; ozel basliksiz 403", t_http_kopya_dosya)

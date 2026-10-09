@@ -92,7 +92,7 @@
       if(s.kapali) throw new TypeError('Failed to fetch');
       const yol = url.replace(/^https?:\/\/[^/]+/, '');
       if(s.yok) return cevap(404, null);
-      const govde = op && op.body ? JSON.parse(op.body) : null;
+      const govde = op && typeof op.body === 'string' ? JSON.parse(op.body) : null;   // ham gövde (dosya) JSON değil
       if(yol === '/api/hesap/durum') return cevap(200, { surum:5, kurulum:s.kurulum, kayit:s.kayitAcik, yerel:true, ev_agi:s.evAgi || [] });
       if(yol === '/api/hesap/kayit'){
         if(s.kullanicilar[govde.ad]) return cevap(409, { hata:'Bu adla bir kullanıcı zaten var.' });
@@ -309,7 +309,7 @@
       }
       if(yol === '/api/hesap/ayar'){ s.kayitAcik = !!govde.kayit; return cevap(200, { kayit:s.kayitAcik }); }
       /* ---------- deponun yedeği (sunucu sözü 20) ---------- */
-      if(/^\/api\/hesap\/(yedekler|yedekle|yedek-ayar|yedek-onizle|geri-yukle)$/.test(yol) && !admin){
+      if(/^\/api\/hesap\/(yedekler|yedekle|yedek-ayar|yedek-onizle|geri-yukle|yedek-indir|yedek-yukle)$/.test(yol) && !admin){
         return cevap(403, { hata:'Bunu yalnız admin yapar.' });
       }
       if(yol === '/api/hesap/yedekler') return cevap(200, yedekDurum());
@@ -327,6 +327,17 @@
         const x = s.yedekler.find(y => y.ad === govde.ad);
         if(!x) return cevap(404, { hata:'Bu yedek yok.' });
         return cevap(200, Object.assign({}, x, { yedek:{ kullanici:2, kayit:10 }, simdi:{ kullanici:2, kayit:12 } }));
+      }
+      if(yol === '/api/hesap/yedek-indir'){
+        if(govde.parola !== s.kullanicilar[ad].parola) return cevap(401, { hata:'Şifre yanlış.' });
+        s.indirilenYedek = govde.ad;
+        return { ok:true, status:200, json:async () => null, arrayBuffer:async () => new Uint8Array([83, 81, 76]).buffer };
+      }
+      if(yol === '/api/hesap/yedek-yukle'){
+        s.yuklenen = op.body;
+        const x = { ad:'hesap-dis-20231115-090000.db', tur:'dis', zaman:1700038800000, bayt:op.body.size || 0 };
+        s.yedekler.unshift(x);
+        return cevap(200, Object.assign(yedekDurum(), { eklenen:x.ad }));
       }
       if(yol === '/api/hesap/geri-yukle'){
         if(s.uzak) return cevap(403, { hata:'Geri yükleme yalnız bu bilgisayardan yapılır.' });
@@ -2150,6 +2161,40 @@
       await hazir();
       expect(merkez().textContent).toContain('"modul": "ays"');
       expect(!!merkez().querySelector('details[data-hesap-ac="t-modul"]')).toBe(true);
+    }));
+
+    it('yedek dosya olarak: şifreyle iner, ne taşıdığı söylenir; dosyadan yüklenen listeye girer', () => sahneyle(async () => {
+      const { h, srv } = await girisli();
+      const inen = [];
+      h._ortam.indir = (ad, veri, tur) => { inen.push([ad, tur, veri.byteLength]); };
+      await h.merkezAc('yedek');
+      await hazir();
+      tikla('[data-hesap="kopya-indir-sor"]');
+      const onay = merkez().querySelector('.hesap-onay');
+      expect(onay.textContent).toContain('iki adım sırlarını');
+      expect(document.activeElement && document.activeElement.id).toBe('hesap-indir-sifre');
+      document.getElementById('hesap-indir-sifre').value = 'yanlis';
+      merkez().querySelector('[data-hesap-form="kopya-indir"]').requestSubmit();
+      await hazir();
+      expect(merkez().querySelector('[data-hesap-form="kopya-indir"] .hesap__mesaj').textContent).toContain('Şifre yanlış');
+      expect(inen.length).toBe(0);
+      document.getElementById('hesap-indir-sifre').value = 'parola-123';
+      merkez().querySelector('[data-hesap-form="kopya-indir"]').requestSubmit();
+      await hazir();
+      expect(inen).toEqual([['lifeos-hesap-gunluk-20231114-221320.db', 'application/octet-stream', 3]]);
+      expect(merkez().textContent).toContain('Güvendiğin bir yerde sakla');
+      expect(merkez().querySelector('.hesap-onay')).toBeNull();
+      /* Dosyadan yükle: seçilen dosya ham gövdeyle gider, listeye «Dosyadan yüklendi» olarak girer. */
+      const dosya = new File([new Uint8Array([1, 2, 3, 4])], 'lifeos-yedek.db', { type:'application/octet-stream' });
+      const giris = document.getElementById('hesap-yedek-dosya');
+      const dt = new DataTransfer();
+      dt.items.add(dosya);
+      giris.files = dt.files;
+      merkez().querySelector('[data-hesap-form="kopya-yukle"]').requestSubmit();
+      await hazir();
+      expect(srv.yuklenen && srv.yuklenen.size).toBe(4);
+      expect(merkez().textContent).toContain('Yedek eklendi');
+      expect(merkez().textContent).toContain('Dosyadan yüklendi');
     }));
 
     it('üye Verin’de yalnız son yedeğin zamanını görür; eski yedek adminde güvenlik önerisi; ev ağında geri yükleme yok', () => sahneyle(async () => {

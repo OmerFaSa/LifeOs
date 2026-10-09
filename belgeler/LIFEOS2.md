@@ -76,6 +76,7 @@ verilen kararlar:
 | Kısayollar üç modülde, ESP takvimi | `sistem/hesap.py` GELEN_MODULLER (ays, spi, esp), `AYS Proposals.disaridan` («paragraf 20», «soru 40 matematik»), `ESP Plans.disaridan` + teklif türü `oturum` (ölçüm, sormadan yazılmaz, geri alınır), `ESP/src/js/core/takvim.js` (hedef son günleri, tarihli hedefler, hatırlatıcılar → takvim aboneliği) | 2026-10-09 |
 | iPhone yerel bildirim | `uygulama/ios/LifeOS/BildirimKoprusu.swift`, `brand/ortak/bildirim.js`: SPİ hatırlatma saatleri ve ESP hatırlatıcıları uygulama kapalıyken de gelir (7 gün ileri kurulur); Apple Sağlık uygulamaya değil Kısayollar tarifine bağlı (`belgeler/UYGULAMA.md` aşama 4) | 2026-10-09 |
 | Siri: «Bugün ne var?» | `sistem/hesap.py` sözü 21 (`GET /api/hesap/ozet.txt`, anahtar yetkisi `oku`), `brand/ortak/hesap.js` sözü 25, modüllerin `Screens.today.sesli()`: Kısayollar günün özetini okur, Siri söyler; dünkü özet bugünmüş gibi okunmaz; SPİ ilaç adını söylemez | 2026-10-09 |
+| Yedek dosya olarak | `sistem/hesap.py` sözü 20 (ek): Hesap › Yedekler'den bir yedek şifreyle dosya olarak iner (`/yedek-indir`, admin + bilgisayar) ve dosyadan yüklenir (`/yedek-yukle`, ham gövde; SQLite denetimi; listeye «dis»); geri yükleme aynı büyük aksiyon | 2026-10-09 |
 
 ## 4. Değişmeyen sözler
 

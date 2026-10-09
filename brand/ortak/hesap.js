@@ -135,7 +135,10 @@
       yalnız bilgisayarın kendisinden; geri yükleme büyük aksiyondur:
       önizleme (yedekte ve şimdi kaç kullanıcı, kaç kayıt), şifre, önce
       şimdiki hâlin yedeği. Sonra bu cihaz da çıkar, giriş ekranı gelir.
-      Herkes Verin'de son yedeğin zamanını görür.
+      Herkes Verin'de son yedeğin zamanını görür. Bilgisayarda bir yedek
+      şifreyle DOSYA olarak indirilir (bulut, başka disk; ekran dosyanın ne
+      taşıdığını söyler) ve dosyadan yüklenir: yüklenen yedek listeye girer,
+      geri yükleme yine aynı onaydan geçer.
   25. SİRİ: «BUGÜN NE VAR?» (sunucu sözü 21). `yayin()` `bugun:{ metin, gun }`
       da döndürebilir: modülün KENDİ kuralıyla yazdığı bir iki cümle ve hangi
       günün olduğu. Gün değişince içerik aynı olsa da yeniden gider (imza
@@ -1615,6 +1618,37 @@ window.LIFEOS.HESAP = (function(){
   async function yedekle(){ return api('/api/hesap/yedekle', {}); }
   async function yedekAyar(ikinci){ return api('/api/hesap/yedek-ayar', { ikinci }); }
   async function yedekOnizle(ad){ return api('/api/hesap/yedek-onizle', { ad }); }
+  /* Yedek dosya olarak (sunucu sözü 20; admin, bilgisayar, şifre). Cevap
+     JSON değil, dosyanın kendisi; hata JSON gelir. */
+  async function hamIstek(yol, secenek){
+    const o = oturum(), base = sunucuAdresi();
+    if(!o || base === null){ const h = new Error('Önce giriş yap.'); h.kod = 401; throw h; }
+    let r;
+    try{
+      r = await ortam.fetch(base + yol, Object.assign({ method:'POST', cache:'no-store', credentials:'omit' }, secenek,
+        { headers:Object.assign({ 'X-LifeOS':'hesap', Authorization:'Bearer ' + o.j }, secenek.headers || {}) }));
+    }catch(e){ const h = new Error('Sunucuya ulaşılamadı.'); h.kod = 0; throw h; }
+    if(!r.ok){
+      let v = null;
+      try{ v = await r.json(); }catch(e){ v = null; }
+      const h = new Error((v && v.hata) || ('Sunucu cevap vermedi (' + r.status + ').'));
+      h.kod = r.status;
+      throw h;
+    }
+    return r;
+  }
+  async function yedekIndir(ad, parola){
+    const r = await hamIstek('/api/hesap/yedek-indir', { headers:{ 'Content-Type':'application/json' },
+      body:JSON.stringify({ ad, parola }) });
+    const veri = await r.arrayBuffer();
+    await ortam.indir('lifeos-' + ad, veri, 'application/octet-stream');
+    return { ad:'lifeos-' + ad, bayt:veri.byteLength };
+  }
+  async function yedekYukle(dosya){
+    if(!dosya || !dosya.size) throw new Error('Önce bir yedek dosyası seç.');
+    const r = await hamIstek('/api/hesap/yedek-yukle', { headers:{ 'Content-Type':'application/octet-stream' }, body:dosya });
+    return r.json();
+  }
   /* Geri yükleme bütün oturumları kapatır (bu cihazınki de): giriş ekranı
      gelir; cihazdaki kayıtlar yerinde, girince eşitlenir (söz 23). */
   async function geriYukle(ad, parola){
@@ -1763,6 +1797,7 @@ window.LIFEOS.HESAP = (function(){
     bag:['qr', 'Kodla cihaz bağlandı'], anahtar:['kisayol', 'Erişim anahtarı açıldı'],
     'anahtar-sil':['kisayol', 'Erişim anahtarı silindi'], takvim:['takvim', 'Takvim aboneliği'],
     'takvim-kapat':['takvim', 'Takvim aboneliği kapandı'], 'geri-yukle':['yedek', 'Depo yedekten geri yüklendi'],
+    'yedek-indir':['indir', 'Yedek dosya olarak indirildi'], 'yedek-yukle':['yedek', 'Yedek dosyadan yüklendi'],
   };
   const YANLIS = { yanlis:1, 'kurtar-yanlis':1, 'kod-yanlis':1 };
   const AY_MS = 30 * 86400000;
@@ -2491,6 +2526,17 @@ window.LIFEOS.HESAP = (function(){
       const v = m.yedek;
       if(!v) return yukleniyor(m);
       const l = v.yedekler || [], son = l[0], ik = v.ikinci || {}, pc = !!v.yerel;
+      const ind = m.indirOnay;
+      if(ind){
+        return '<div class="hesap-onay hesap-onay--notr"><p><b>' + kac(tarihSaat(ind.zaman)) + ' yedeğini indir</b></p>'
+          + '<ul class="hesap-onay__liste"><li>Dosya bütün hesapları, şifre özetlerini ve iki adım sırlarını taşır; '
+          + 'güvendiğin bir yerde sakla (şifreli disk, kendi bulutun).</li>'
+          + '<li>Geri yüklemek için bu sayfadaki «Dosyadan yükle»yi kullan.</li></ul>'
+          + '<form class="hesap__form" data-hesap-form="kopya-indir" data-ayar-disi>'
+          + sifreAlani('hesap-indir-sifre', 'Onay için şifren', 'current-password') + CAPS + formMesaj
+          + '<div class="hesap__eylem"><button type="submit" class="hesap__ana">İndir</button>'
+          + '<button type="button" class="hesap__ikinci" data-hesap="kopya-indir-vazgec">Vazgeç</button></div></form></div>';
+      }
       const g = m.geriOnay;
       if(g){
         const sayi = (x, ad) => Number(x || 0).toLocaleString('tr-TR') + ' ' + ad;
@@ -2507,7 +2553,7 @@ window.LIFEOS.HESAP = (function(){
           + '<div class="hesap__eylem"><button type="submit" class="hesap__tehlike">Geri yükle</button>'
           + '<button type="button" class="hesap__ikinci" data-hesap="geri-vazgec">Vazgeç</button></div></form></div>';
       }
-      const TUR = { gunluk:'Günlük', elle:'Elle alındı', once:'Geri yüklemeden önce' };
+      const TUR = { gunluk:'Günlük', elle:'Elle alındı', once:'Geri yüklemeden önce', dis:'Dosyadan yüklendi' };
       const ikinciAlt = !ik.acik ? 'Kapalı · başka bir disk ya da USB seç'
         : ik.hata ? ik.hata : (ik.son ? 'Son kopya ' + sonMetni(ik.son) : 'Henüz kopya yok') + (ik.yol ? ' · ' + ik.yol : '');
       return '<ul class="hesap-liste hesap-liste--duz">'
@@ -2526,11 +2572,20 @@ window.LIFEOS.HESAP = (function(){
               + (ik.yol ? ' value="' + kac(ik.yol) + '"' : ''))
             + formMesaj + '<button type="submit" class="hesap__ana hesap__tam">Kaydet ve kopyala</button>'
             + '<p class="hesap__not">Her yedek oraya da yazılır; son ' + 7 + ' kopya kalır. Bilgisayarın diski bozulursa geri dönüş buradan.</p>'
-            + '</form>') + '</div>' : '')
+            + '</form>')
+          + acilir('kopya-yukle', 'yedek', 'Dosyadan yükle', '',
+            '<form class="hesap__form" data-hesap-form="kopya-yukle" data-ayar-disi>'
+            + '<label class="hesap__alan" for="hesap-yedek-dosya"><span>Yedek dosyası (.db)</span>'
+            + '<input id="hesap-yedek-dosya" type="file" accept=".db,application/octet-stream" required/></label>'
+            + formMesaj + '<button type="submit" class="hesap__ana hesap__tam">Yükle</button>'
+            + '<p class="hesap__not">Dosya önce denetlenir; bozuksa ya da LifeOS yedeği değilse alınmaz. Yüklenen yedek listeye '
+            + 'girer; geri yüklemek için yanındaki «Geri yükle…».</p></form>') + '</div>' : '')
         + (l.length ? '<p class="hesap-bolum">Yedekler</p><ul class="hesap-liste">' + l.map(x =>
             '<li class="hesap-oge">' + ikon(x.tur === 'once' ? 'kalkan' : 'yedek', 'hesap-satir__ikon')
             + '<span class="hesap-oge__metin"><b>' + kac(tarihSaat(x.zaman)) + '</b><small>' + kac(TUR[x.tur] || x.tur) + ' · ' + boyut(x.bayt) + '</small></span>'
-            + (pc ? '<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="geri-sor" data-ad="' + kac(x.ad) + '">Geri yükle…</button>' : '')
+            + (pc ? '<span class="hesap-oge__eylem"><button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="kopya-indir-sor"'
+              + ' data-ad="' + kac(x.ad) + '" aria-label="' + kac(tarihSaat(x.zaman) + ' yedeğini indir') + '">' + ikon('indir', 'hesap-ikon') + '</button>'
+              + '<button type="button" class="hesap__kucuk hesap__kucuk--duz" data-hesap="geri-sor" data-ad="' + kac(x.ad) + '">Geri yükle…</button></span>' : '')
             + '</li>').join('') + '</ul>' : '')
         + '<p class="hesap__not">' + (pc
           ? 'Yedekler bu bilgisayarda: ' + kac(v.klasor) + '. Sunucu açılamazsa: python sistem/hesap.py --geri-yukle.'
@@ -2634,7 +2689,7 @@ window.LIFEOS.HESAP = (function(){
     bagDur();
     merkez = { yigin:['kok'], ben:null, cihazlar:null, kullanicilar:null, etkinlik:null, kayit:null, kisi:null,
       mesaj:'', uyari:'', onay:false, silOnay:false, acik:{}, once,
-      baglanti:null, ikiKurulum:null, yedekler:null, yeniAnahtar:null, bag:null, takvimOnay:false, yedek:null, geriOnay:null };
+      baglanti:null, ikiKurulum:null, yedekler:null, yeniAnahtar:null, bag:null, takvimOnay:false, yedek:null, geriOnay:null, indirOnay:null };
     if(ilkSayfa && ilkSayfa !== 'kok' && SAYFA_AD[ilkSayfa]) merkez.yigin.push(ilkSayfa);
     if(!merkezAcikMi()){
       const el = document.createElement('div');
@@ -2669,7 +2724,7 @@ window.LIFEOS.HESAP = (function(){
   function merkezGit(s, ek){
     if(!merkez) return;
     sayfaCik(sayfa());
-    Object.assign(merkez, { mesaj:'', onay:false, silOnay:false, takvimOnay:false, geriOnay:null }, ek || {});
+    Object.assign(merkez, { mesaj:'', onay:false, silOnay:false, takvimOnay:false, geriOnay:null, indirOnay:null }, ek || {});
     merkez.yigin.push(s);
     merkezTazele('ileri');
     sayfaGir(s);
@@ -2701,7 +2756,7 @@ window.LIFEOS.HESAP = (function(){
   function sayfaCik(s){
     if(!merkez) return;
     if(s === 'anahtarlar') merkez.yeniAnahtar = null;
-    if(s === 'yedek') merkez.geriOnay = null;
+    if(s === 'yedek'){ merkez.geriOnay = null; merkez.indirOnay = null; }
     if(s === 'ikiadim'){ merkez.yedekler = null; merkez.ikiKurulum = null; }
     if(s === 'bagla'){
       const b = merkez.bag;
@@ -2714,7 +2769,7 @@ window.LIFEOS.HESAP = (function(){
     if(!merkez || merkez.yigin.length < 2) return merkezKapat();
     sayfaCik(sayfa());
     merkez.yigin.pop();
-    Object.assign(merkez, { mesaj:'', onay:false, silOnay:false, takvimOnay:false, geriOnay:null });
+    Object.assign(merkez, { mesaj:'', onay:false, silOnay:false, takvimOnay:false, geriOnay:null, indirOnay:null });
     merkezTazele('geri');
   }
 
@@ -2964,6 +3019,16 @@ window.LIFEOS.HESAP = (function(){
         if(!merkez || !merkez.geriOnay) return;
         await geriYukle(merkez.geriOnay.ad, deger('hesap-geri-sifre'));
         return;                                         // oturum kapandı, giriş ekranı açık
+      }else if(tur === 'kopya-indir'){
+        if(!merkez || !merkez.indirOnay) return;
+        const x = await yedekIndir(merkez.indirOnay.ad, deger('hesap-indir-sifre'));
+        merkez.indirOnay = null;
+        mesaj = x.ad + ' hazır · ' + boyut(x.bayt) + '. Güvendiğin bir yerde sakla.';
+      }else if(tur === 'kopya-yukle'){
+        const el = document.getElementById('hesap-yedek-dosya');
+        const v = await yedekYukle(el && el.files && el.files[0]);
+        if(merkez) merkez.yedek = v;
+        mesaj = 'Yedek eklendi (' + v.eklenen + '). Geri yüklemek için listeden «Geri yükle…».';
       }else if(tur === 'yedek-ikinci'){
         const v = await yedekAyar(deger('hesap-ikinci').trim());
         if(merkez) merkez.yedek = v;
@@ -3143,6 +3208,16 @@ window.LIFEOS.HESAP = (function(){
         const f = document.getElementById('hesap-geri-sifre');
         if(f){ try{ f.focus(); }catch(e){ /* yok */ } }
       });
+    }else if(ad === 'kopya-indir-sor'){
+      const x = merkez && merkez.yedek && (merkez.yedek.yedekler || []).find(y => y.ad === is.getAttribute('data-ad'));
+      if(!x) return;
+      merkez.indirOnay = x;
+      merkez.mesaj = '';
+      merkezTazele();
+      const f = document.getElementById('hesap-indir-sifre');
+      if(f){ try{ f.focus(); }catch(e){ /* yok */ } }
+    }else if(ad === 'kopya-indir-vazgec'){
+      if(merkez){ merkez.indirOnay = null; merkezTazele(); }
     }else if(ad === 'geri-vazgec'){
       if(merkez){ merkez.geriOnay = null; merkez.mesaj = ''; merkezTazele(); }
     }else if(ad === 'ikinci-kapat'){
@@ -3412,7 +3487,7 @@ window.LIFEOS.HESAP = (function(){
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
     bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, cihazAdlandir, uyarilar, uyariGordum,
-    yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle,
+    yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
     _ortam:ortam, _sifirla, _istek:istek, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,
   };

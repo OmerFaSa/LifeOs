@@ -124,6 +124,11 @@
       yollar (son yazan kazanir): yedekten sonraki degisiklik cihazlardan
       geri akar (hesap.js soz 23). Sunucu acilamazsa:
       `python sistem/hesap.py --yedekle | --yedekler | --geri-yukle <ad>`.
+      DOSYA OLARAK (2026-10-09): admin, bilgisayardan, sifreyle bir yedegi
+      indirir (bulut, baska disk; dosya butun hesaplari, sifre ozetlerini ve
+      iki adim sirlarini tasir — ekran bunu soyler). Dosyadan yuklenen yedek
+      once SQLite denetiminden gecer, listeye «dis» olarak girer; geri
+      yukleme yine ayni buyuk aksiyondur. Indirme ve yukleme defterde.
 
   21. SIRI: «BUGUN NE VAR?» (2026-10-09). «Ozet okur» yetkili bir erisim
       anahtariyla Kisayollar gunun kisa ozetini okur, Siri sesli soyler
@@ -220,8 +225,9 @@ UYARI_GUN = 30
 UYARI_EN_COK = 20
 
 # Deponun yedegi (soz 20). Kodda «kopya»: «yedek» iki adimin yedek kodudur.
-KOPYA_SAKLA = {"gunluk": 7, "elle": 5, "once": 5}     # tur basina saklanan en yeni
-KOPYA_RE = re.compile(r"^hesap-(gunluk|elle|once)-(\d{8})-(\d{6})\.db$")
+KOPYA_SAKLA = {"gunluk": 7, "elle": 5, "once": 5, "dis": 3}     # tur basina saklanan en yeni
+KOPYA_RE = re.compile(r"^hesap-(gunluk|elle|once|dis)-(\d{8})-(\d{6})\.db$")
+KOPYA_YUKLE_EN_BUYUK = 256 * 1024 * 1024    # dosyadan yuklenen yedek (soz 20)
 IKINCI_RE = re.compile(r"^lifeos-hesap-(\d{8})-(\d{6})\.db$")
 IKINCI_SAKLA = 7
 IKINCI_YOL_EN_UZUN = 260
@@ -1898,6 +1904,55 @@ class Depo:
         x = next(x for x in self.kopyalar() if x["ad"] == ad)
         return dict(x, yedek=b, simdi=simdi)
 
+    def kopya_indir(self, yapan, yerel, parola, ad, jeton=None, ip=""):
+        """Yedegin dosya yolu (HTTP dosyayi akitir). Admin, bilgisayardan,
+        sifreyle: dosya butun hesaplari tasir."""
+        self._admin(yapan, "Yedeği yalnız admin indirir.")
+        if not yerel:
+            raise Hata(403, "Yedek yalnız bu bilgisayardan indirilir.")
+        yol = self._kopya_yolu(ad)
+        with self._islem() as c:
+            self._parola_bak(c, yapan["id"], parola)
+            self._olay(c, yapan["id"], "yedek-indir", self._oturum_cihaz(c, jeton), ip, ad)
+        return yol
+
+    def kopya_yukle(self, yapan, yerel, akis, uzunluk, jeton=None, ip=""):
+        """Dosyadan yedek: once yarim adla diske, SQLite denetimi, sonra
+        listeye «dis» olarak. Geri yuklemez (o ayri buyuk aksiyon)."""
+        self._admin(yapan, "Yedeği yalnız admin yükler.")
+        if not yerel:
+            raise Hata(403, "Yedek yalnız bu bilgisayardan yüklenir.")
+        if not isinstance(uzunluk, int) or uzunluk <= 0:
+            raise Hata(400, "Dosya boş.")
+        if uzunluk > KOPYA_YUKLE_EN_BUYUK:
+            raise Hata(413, "Dosya çok büyük.")
+        k = self.kopya_klasoru()
+        os.makedirs(k, exist_ok=True)
+        gecici = os.path.join(k, ".yukleniyor-%s" % secrets.token_hex(6))
+        try:
+            kalan = uzunluk
+            with open(gecici, "wb") as f:
+                while kalan > 0:
+                    parca = akis.read(min(65536, kalan))
+                    if not parca:
+                        break
+                    f.write(parca)
+                    kalan -= len(parca)
+            if kalan:
+                raise Hata(400, "Dosya yarım geldi.")
+            bilgi = self._kopya_bak(gecici)
+            with self._kopya_kilit:
+                ad = "hesap-dis-%s.db" % time.strftime("%Y%m%d-%H%M%S", time.localtime(self.saat()))
+                os.replace(gecici, os.path.join(k, ad))
+                self._kopya_buda()
+        except BaseException:
+            with contextlib.suppress(OSError):
+                os.remove(gecici)
+            raise
+        with self._islem() as c:
+            self._olay(c, yapan["id"], "yedek-yukle", self._oturum_cihaz(c, jeton), ip, ad)
+        return dict(bilgi, ad=ad)
+
     def geri_yukle(self, yapan, yerel, parola, ad, jeton=None, ip=""):
         """BUYUK AKSIYON (AGENTS §1.9): admin, bilgisayarin kendisinden,
         sifreyle; once simdiki halin yedegi alinir (geri donus noktasi)."""
@@ -2068,6 +2123,22 @@ def _ics_cevap(h, metin):
     h.wfile.write(govde)
 
 
+def _dosya_cevap(h, yol, ad):
+    """Dosyayi parca parca akitir (yedek indirme, soz 20)."""
+    n = os.path.getsize(yol)
+    h.send_response(200)
+    koken = h.headers.get("Origin")
+    if koken and UYGULAMA_KOKENLERI.match(koken):
+        h.send_header("Access-Control-Allow-Origin", koken)
+        h.send_header("Vary", "Origin")
+    h.send_header("Content-Type", "application/octet-stream")
+    h.send_header("Content-Disposition", 'attachment; filename="%s"' % ad)
+    h.send_header("Content-Length", str(n))
+    h.end_headers()
+    with open(yol, "rb") as f:
+        shutil.copyfileobj(f, h.wfile, 65536)
+
+
 def _metin_cevap(h, metin, kod=200):
     """Duz metin (Siri «Metni Konus» dogrudan okur)."""
     govde = str(metin).encode("utf-8")
@@ -2168,6 +2239,19 @@ def isle(h):
             modul = v.get("modul") or "spi"
             return _cevap(h, 200, d.gelen_ekle(_jeton(h), v.get("metin"),
                                                modul.strip().lower() if isinstance(modul, str) else modul, ip))
+        if yontem == "POST" and yol == "/api/hesap/yedek-yukle":
+            # Soz 20: dosyadan yedek; govde ham bayt (JSON degil).
+            if h.headers.get("X-LifeOS") != "hesap":
+                raise Hata(403, "İzin yok.")
+            k = d.oturum(_jeton(h), ip)
+            if k is None:
+                raise Hata(401, "Oturum yok ya da süresi doldu; yeniden giriş yap.")
+            try:
+                n = int(h.headers.get("Content-Length") or 0)
+            except ValueError:
+                raise Hata(400, "Geçersiz istek.")
+            x = d.kopya_yukle(k, _yerel_mi(h), h.rfile, n, _jeton(h), ip)
+            return _cevap(h, 200, dict(d.kopya_durum(k, True), eklenen=x["ad"]))
         if yontem == "POST":
             # Ozel baslik + JSON: baska bir site tarayicidan «basit istek»
             # gonderemez (on-kontrol ister, on-kontrol yalniz uygulamaya acik).
@@ -2272,6 +2356,9 @@ def isle(h):
                 return _cevap(h, 200, d.kopya_ayarla(k, _yerel_mi(h), v.get("ikinci")))
             if yol == "/api/hesap/yedek-onizle":
                 return _cevap(h, 200, d.kopya_onizle(k, v.get("ad")))
+            if yol == "/api/hesap/yedek-indir":
+                dosya = d.kopya_indir(k, _yerel_mi(h), v.get("parola"), v.get("ad"), j, ip)
+                return _dosya_cevap(h, dosya, "lifeos-" + os.path.basename(dosya))
             if yol == "/api/hesap/geri-yukle":
                 return _cevap(h, 200, d.geri_yukle(k, _yerel_mi(h), v.get("parola"), v.get("ad"), j, ip))
             raise Hata(404, "Böyle bir istek yok.")
