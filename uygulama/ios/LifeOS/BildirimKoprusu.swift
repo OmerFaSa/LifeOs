@@ -14,10 +14,17 @@
 //      uygulamaya en cok 64 bekleyen bildirim verir).
 //   3. IZIN yalniz sayfa isteyince (kullanici dugmeye basinca) sorulur.
 //   4. Bildirime dokununca o modul acilir (BildirimDokunusu).
+//   5. GELMISLER (2026-10-09): sayfa «kaldir» deyince o modulun bildirim
+//      ekranindaki gelmis bildirimleri kalkar (sayfa acilinca ve one her
+//      gelisinde ister); bekleyenlere ve oteki modullere dokunulmaz.
+//   6. ROZET: her modul kendi Onaylar sayisini soyler (karar 167); simge
+//      uc modulun toplamini gosterir. Sayilar kalici (UserDefaults): bir
+//      modul acilmasa da son soyledigi sayi toplama girer.
 // Cevap, konum koprusundeki gibi sayfaya JS cagrisiyla doner
 // (`LIFEOS.BILDIRIM._cevap(istek, {...})`). Yalniz Apple'in kitapliklari.
 
 import Foundation
+import UIKit
 import UserNotifications
 import WebKit
 
@@ -28,6 +35,11 @@ protocol BildirimMerkezi: AnyObject {
     func bekleyenler(_ tamam: @escaping ([String]) -> Void)
     func sil(_ kimlikler: [String])
     func ekle(_ istek: UNNotificationRequest)
+    /// Bildirim ekraninda duran (gelmis) bildirimlerin kimlikleri (soz 5).
+    func gelmisler(_ tamam: @escaping ([String]) -> Void)
+    func gelmisSil(_ kimlikler: [String])
+    /// Uygulama simgesindeki sayi (soz 6).
+    func rozet(_ n: Int)
 }
 
 final class SistemBildirimMerkezi: BildirimMerkezi {
@@ -62,6 +74,22 @@ final class SistemBildirimMerkezi: BildirimMerkezi {
     }
 
     func ekle(_ istek: UNNotificationRequest) { m.add(istek, withCompletionHandler: nil) }
+
+    func gelmisler(_ tamam: @escaping ([String]) -> Void) {
+        m.getDeliveredNotifications { l in tamam(l.map { $0.request.identifier }) }
+    }
+
+    func gelmisSil(_ kimlikler: [String]) {
+        if !kimlikler.isEmpty { m.removeDeliveredNotifications(withIdentifiers: kimlikler) }
+    }
+
+    func rozet(_ n: Int) {
+        if #available(iOS 16.0, *) {
+            m.setBadgeCount(n, withCompletionHandler: nil)
+        } else {
+            DispatchQueue.main.async { UIApplication.shared.applicationIconBadgeNumber = n }
+        }
+    }
 }
 
 final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
@@ -71,10 +99,15 @@ final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
     /// Toplam 62 < 64 (iOS siniri); brand/ortak/bildirim.js SINIR ile ayni.
     static let sinir: [String: Int] = ["spi": 30, "esp": 16, "ays": 16]
 
-    let merkez: BildirimMerkezi
+    /// Rozet sayilarinin kalici yeri (soz 6).
+    static let rozetAnahtari = "lifeos.rozet"
 
-    init(merkez: BildirimMerkezi = SistemBildirimMerkezi()) {
+    let merkez: BildirimMerkezi
+    let depo: UserDefaults
+
+    init(merkez: BildirimMerkezi = SistemBildirimMerkezi(), depo: UserDefaults = .standard) {
         self.merkez = merkez
+        self.depo = depo
         super.init()
     }
 
@@ -111,6 +144,10 @@ final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
         case "kur":
             let liste = g["liste"] as? [[String: Any]] ?? []
             kur(modul: modul, liste: liste, simdi: simdi) { n in ver(["kurulan": n]) }
+        case "kaldir":
+            kaldir(modul: modul, anahtarlar: g["anahtarlar"] as? [String]) { n in ver(["kaldirilan": n]) }
+        case "rozet":
+            ver(["toplam": rozet(modul: modul, sayi: (g["sayi"] as? NSNumber)?.intValue ?? 0)])
         default:
             ver(["hata": "bilinmeyen istek"])
         }
@@ -132,6 +169,33 @@ final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
             }
             tamam(n)
         }
+    }
+
+    /// Modulun gelmis bildirimlerini kaldirir (soz 5); anahtar verildiyse
+    /// yalniz onlari. Doner: kaldirilan sayisi.
+    func kaldir(modul: String, anahtarlar: [String]?, tamam: @escaping (Int) -> Void) {
+        let onEk = BildirimKoprusu.onEk(modul)
+        let merkez = self.merkez
+        merkez.gelmisler { l in
+            let sec = l.filter { k in
+                guard k.hasPrefix(onEk) else { return false }
+                guard let a = anahtarlar else { return true }
+                return a.contains(String(k.dropFirst(onEk.count)))
+            }
+            merkez.gelmisSil(sec)
+            tamam(sec.count)
+        }
+    }
+
+    /// Modulun rozet sayisini yazar, simgeye uc modulun toplamini koyar (soz 6).
+    func rozet(modul: String, sayi: Int) -> Int {
+        var d = depo.dictionary(forKey: BildirimKoprusu.rozetAnahtari) as? [String: Int] ?? [:]
+        d[modul] = max(0, min(999, sayi))
+        depo.set(d, forKey: BildirimKoprusu.rozetAnahtari)
+        let moduller = Set(BildirimKoprusu.kapilar.values)
+        let toplam = d.filter { moduller.contains($0.key) }.values.reduce(0, +)
+        merkez.rozet(toplam)
+        return toplam
     }
 
     /// Listenin bir satiri → bildirim istegi; eksik ya da gecmisse nil.

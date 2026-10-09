@@ -15880,7 +15880,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'c094e292', at:'2026-10-09 13:29', dirty:true };
+R.BUILD = { id:'47d6b33b', at:'2026-10-09 14:01', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -25203,6 +25203,14 @@ window.LIFEOS.QR = (function(){
         Geçmiş zaman kurulmaz.
      4. İZİN KULLANICININ. İzin yalnız kullanıcı bir düğmeye bastığında
         sorulur; reddedilirse bu söylenir (Ayarlar › LifeOS › Bildirimler).
+     5. AÇILINCA TEMİZLENİR (2026-10-09). Modül açıldığında ve öne her
+        gelişinde o modülün iPhone bildirim ekranında duran (gelmiş)
+        bildirimleri kalkar: kullanıcı zaten oradadır. Kurulu (bekleyen)
+        bildirimlere dokunulmaz; öteki modülünkilere de.
+     6. ROZET. Uygulama simgesindeki sayı Onaylar'ın bekleyenidir (karar
+        167, brand/ortak/pwa.js rozet). Kabuk tarayıcının Badging API'sini
+        (navigator.setAppBadge) burada sağlar, modül kodu değişmez; üç
+        modülün sayısını kabuk toplar.
    Model hiçbir aşamada yoktur; metin modülün kural metnidir. */
 
 window.LIFEOS = window.LIFEOS || {};
@@ -25278,13 +25286,52 @@ window.LIFEOS.BILDIRIM = (function(){
     return { ok:!!r.ok, kurulan:r.ok ? Number(r.kurulan) || 0 : 0, why:r.why };
   }
 
+  /* Gelmiş bildirimleri kaldır (söz 5). anahtarlar yoksa bu modülün
+     hepsi; kabuk modülü kapıdan bilir. Dönüş: { ok, kaldirilan }. */
+  async function kaldir(anahtarlar){
+    if(!var_()) return { ok:false, kaldirilan:0 };
+    const m = { tur:'kaldir' };
+    if(Array.isArray(anahtarlar)){
+      m.anahtarlar = anahtarlar.filter(x => typeof x === 'string' && x).map(x => x.slice(0, 120));
+    }
+    const r = await gonder(m);
+    return { ok:!!r.ok, kaldirilan:r.ok ? Number(r.kaldirilan) || 0 : 0 };
+  }
+
+  /* Bu modülün rozet sayısı (söz 6); kabuk üç modülünkini toplar. */
+  async function rozet(sayi){
+    if(!var_()) return { ok:false, toplam:0 };
+    const n = Math.max(0, Math.min(999, Math.floor(Number(sayi) || 0)));
+    const r = await gonder({ tur:'rozet', sayi:n });
+    return { ok:!!r.ok, toplam:r.ok ? Number(r.toplam) || 0 : 0 };
+  }
+
+  /* Uygulamada kurulum: Badging API köprüye bağlanır, açılışta ve öne her
+     gelişte gelmiş bildirimler kalkar. Tarayıcıda hiçbir şey yapmaz. */
+  function kurulum(doc, nav){
+    if(!var_()) return false;
+    const d = doc || document, n = nav || navigator;
+    /* Uygulamada simge kabuğundur: WKWebView'ın kendi setAppBadge'i (varsa)
+       simgeye ulaşmayabilir, köprü her zaman bağlanır. */
+    try{
+      n.setAppBadge = s => rozet(s == null ? 0 : s).then(() => undefined);
+      n.clearAppBadge = () => rozet(0).then(() => undefined);
+    }catch(e){ /* salt okunur gezgin: rozet yok, temizlik sürer */ }
+    kaldir();
+    d.addEventListener('visibilitychange', () => { if(!d.hidden) kaldir(); });
+    return true;
+  }
+
   /* Bir günün «HH:MM»i → ms (yerel saat). */
   function anOf(gunISO, hhmm){
     const g = String(gunISO).split('-').map(Number), s = String(hhmm).split(':').map(Number);
     return new Date(g[0], g[1] - 1, g[2], s[0] || 0, s[1] || 0, 0, 0).getTime();
   }
 
-  return { var:var_, durum, izin, sonDurum, kur, temizle, anOf, SINIR, AD, _cevap };
+  const api = { var:var_, durum, izin, sonDurum, kur, temizle, kaldir, rozet, anOf, SINIR, AD, _cevap,
+    _kurulum:kurulum };
+  kurulum();
+  return api;
 })();
 
 /* ==== js/core/hesap.js ==== */

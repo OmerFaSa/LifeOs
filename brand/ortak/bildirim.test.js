@@ -2,7 +2,9 @@
    köprü yoksa hiçbir şey yapılmaz; liste temizlenir (geçmiş, yinelenen,
    eksik atılır; en yakın SINIR kadarı gider); istek numarasıyla giden
    mesajın cevabı kendi sözüne döner; izin durumu hatırlanır; kabuğun
-   hatası «ok:false» olur. Gerçek kabuk uygulama/ios'ta CI'da sınanır. */
+   hatası «ok:false» olur; uygulamada açılışta ve öne gelişte gelmiş
+   bildirimler kaldırılır, Badging API köprüye bağlanır (söz 5, 6).
+   Gerçek kabuk uygulama/ios'ta CI'da sınanır. */
 
 (function(){
   const T = (window.R || window.SP || window.ESP).Test;
@@ -73,6 +75,44 @@
         expect(r.ok).toBe(false);
         expect(r.why).toBe('izin yok');
       }finally{ h.birak(); }
+    });
+
+    it('uygulamada: açılışta ve öne gelişte gelmişler kalkar; rozet Badging API ile köprüye gider', async () => {
+      const k = sahteKabuk(m => (m.tur === 'kaldir' ? { kaldirilan:2 } : m.tur === 'rozet' ? { toplam:m.sayi + 1 } : {}));
+      try{
+        const doc = new EventTarget();
+        doc.hidden = false;
+        const nav = {};
+        expect(B()._kurulum(doc, nav)).toBe(true);
+        expect(k.giden[k.giden.length - 1].tur).toBe('kaldir');
+        expect(k.giden[k.giden.length - 1].anahtarlar).toBeUndefined();          // bu modülün hepsi
+        const once = k.giden.length;
+        doc.hidden = true;
+        doc.dispatchEvent(new Event('visibilitychange'));                      // arka plana: dokunulmaz
+        expect(k.giden.length).toBe(once);
+        doc.hidden = false;
+        doc.dispatchEvent(new Event('visibilitychange'));                      // öne geldi: yine temizlik
+        expect(k.giden[k.giden.length - 1].tur).toBe('kaldir');
+        await nav.setAppBadge(3);
+        expect(k.giden[k.giden.length - 1]).toEqual({ tur:'rozet', sayi:3, istek:k.giden[k.giden.length - 1].istek });
+        await nav.clearAppBadge();
+        expect(k.giden[k.giden.length - 1].sayi).toBe(0);
+        /* Gezginin kendi setAppBadge'i olsa da köprü bağlanır (simge kabuğun). */
+        const yerel = { setAppBadge(){ return Promise.resolve('yerel'); } };
+        B()._kurulum(new EventTarget(), yerel);
+        await yerel.setAppBadge(5);
+        expect(k.giden[k.giden.length - 1].sayi).toBe(5);
+        const r = await B().kaldir(['a', '', 7, 'b']);
+        expect(r).toEqual({ ok:true, kaldirilan:2 });
+        expect(k.giden[k.giden.length - 1].anahtarlar).toEqual(['a', 'b']);
+        expect((await B().rozet(-4)).toplam).toBe(1);                           // eksi sayı 0 gider
+      }finally{ k.birak(); }
+      const eski = window.webkit;
+      delete window.webkit;
+      try{
+        expect(B()._kurulum(new EventTarget(), {})).toBe(false);               // tarayıcıda hiçbir şey
+        expect((await B().kaldir()).ok).toBe(false);
+      }finally{ if(eski !== undefined) window.webkit = eski; }
     });
 
     it('bir günün saati yerel saatle ms olur', () => {

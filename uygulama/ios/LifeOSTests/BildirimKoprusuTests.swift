@@ -20,6 +20,11 @@ final class SahteBildirimMerkezi: BildirimMerkezi {
     func bekleyenler(_ tamam: @escaping ([String]) -> Void) { kurSayisi += 1; tamam(bekleyen) }
     func sil(_ kimlikler: [String]) { bekleyen.removeAll { kimlikler.contains($0) } }
     func ekle(_ istek: UNNotificationRequest) { eklenen.append(istek); bekleyen.append(istek.identifier) }
+    var gelmis: [String] = []
+    var simge = -1
+    func gelmisler(_ tamam: @escaping ([String]) -> Void) { tamam(gelmis) }
+    func gelmisSil(_ kimlikler: [String]) { gelmis.removeAll { kimlikler.contains($0) } }
+    func rozet(_ n: Int) { simge = n }
 }
 
 final class BildirimKoprusuTests: XCTestCase {
@@ -88,6 +93,48 @@ final class BildirimKoprusuTests: XCTestCase {
         XCTAssertNotNil(cevap["hata"])
     }
 
+    /// Soz 5: yalniz bu modulun gelmisleri kalkar; anahtar verildiyse yalniz onlar.
+    func testGelmislerKalkar() {
+        let m = SahteBildirimMerkezi()
+        m.gelmis = ["lifeos.spi.a", "lifeos.spi.b", "lifeos.esp.a", "baska.uygulama"]
+        m.bekleyen = ["lifeos.spi.c"]
+        let k = BildirimKoprusu(merkez: m)
+        var n = -1
+        let bir = expectation(description: "anahtarli")
+        k.kaldir(modul: "spi", anahtarlar: ["b", "yok"]) { n = $0; bir.fulfill() }
+        wait(for: [bir], timeout: 5)
+        XCTAssertEqual(n, 1)
+        XCTAssertEqual(m.gelmis, ["lifeos.spi.a", "lifeos.esp.a", "baska.uygulama"])
+        var cevap: [String: Any] = [:]
+        let iki = expectation(description: "hepsi")
+        k.isle(["tur": "kaldir"], modul: "spi") { cevap = $0; iki.fulfill() }
+        wait(for: [iki], timeout: 5)
+        XCTAssertEqual((cevap["kaldirilan"] as? Int), 1)
+        XCTAssertEqual(m.gelmis, ["lifeos.esp.a", "baska.uygulama"])
+        XCTAssertEqual(m.bekleyen, ["lifeos.spi.c"])                          // bekleyene dokunulmaz
+    }
+
+    /// Soz 6: her modul kendi sayisini soyler, simge toplami gosterir; sayi kalici.
+    func testRozetToplam() {
+        let ad = "lifeos-test-\(UUID().uuidString)"
+        let depo = UserDefaults(suiteName: ad)!
+        defer { depo.removePersistentDomain(forName: ad) }
+        let m = SahteBildirimMerkezi()
+        let k = BildirimKoprusu(merkez: m, depo: depo)
+        XCTAssertEqual(k.rozet(modul: "spi", sayi: 2), 2)
+        XCTAssertEqual(k.rozet(modul: "ays", sayi: 3), 5)
+        XCTAssertEqual(k.rozet(modul: "spi", sayi: -7), 3)                    // eksi sayi 0
+        XCTAssertEqual(m.simge, 3)
+        // Yeni kopru ayni depoyu okur: ESP acilinca AYS'nin sayisi da sayilir.
+        let k2 = BildirimKoprusu(merkez: m, depo: depo)
+        var cevap: [String: Any] = [:]
+        let bitti = expectation(description: "rozet")
+        k2.isle(["tur": "rozet", "sayi": NSNumber(value: 1)], modul: "esp") { cevap = $0; bitti.fulfill() }
+        wait(for: [bitti], timeout: 5)
+        XCTAssertEqual(cevap["toplam"] as? Int, 4)
+        XCTAssertEqual(m.simge, 4)
+    }
+
     /// Gercek SPI sayfasi: bildirim.js koprüyü gorur, durum sorar, liste kurar;
     /// kimlikler sayfanin KAPISINDAN gelen modulun on ekini tasir.
     func testGercekSayfadanKurulur() throws {
@@ -114,5 +161,12 @@ final class BildirimKoprusuTests: XCTestCase {
         XCTAssertEqual(jsBekle(d.web, "window.__k === 1", sure: 10) as? Bool, true, "kurulmadı")
         // Sayfa «esp» dese de SPI kapisindan geldi: spi on eki.
         XCTAssertEqual(m.bekleyen, ["lifeos.spi.x"])
+        // Soz 5: sayfa acilinca bu modulun gelmisleri kalkar (oteki modulunkiler kalir).
+        m.gelmis = ["lifeos.spi.eski", "lifeos.esp.eski"]
+        jsCalistir(d.web, "window.__g = null; LIFEOS.BILDIRIM.kaldir().then(function(v){ window.__g = v.kaldirilan; })")
+        XCTAssertEqual(jsBekle(d.web, "window.__g === 1", sure: 10) as? Bool, true, "gelmişler kalkmadı")
+        XCTAssertEqual(m.gelmis, ["lifeos.esp.eski"])
+        // Soz 6: Badging API kopruye bagli.
+        XCTAssertEqual(jsBekle(d.web, "typeof navigator.setAppBadge === 'function'") as? Bool, true, "rozet bağlanmadı")
     }
 }
