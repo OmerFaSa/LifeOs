@@ -2,14 +2,15 @@
      1. Her özet gerçek bir konuya aittir; biçim tutar (3–5 ana madde,
         dikkat, isteğe bağlı örnek; uzunluk sınırı, çift boşluk yok,
         cümle noktalı biter).
-     2. Tamamlanan derslerde hiçbir konunun özeti eksik değildir (TAM her
-        partide genişler).
+     2. Hiçbir konunun özeti eksik değildir (bütün dersler; yeni konu
+        eklenirse özeti de yazılmalıdır).
      3. Konu ekranı özeti «elle yazıldı · doğrulanmadı» etiketiyle gösterir;
         özeti olmayan konuda kart çizilmez. */
 
 (function(){
   const { describe, it, expect, resetState } = R.Test;
-  const TAM = ['tyt-matematik', 'tyt-turkce', 'tyt-fen', 'tyt-sosyal', 'ayt-matematik', 'ayt-fizik'];
+  /* Bütün dersler tamam (2026-10-09): her konunun özeti var. */
+  const TAM = R.SUBJECTS.map(s => s.id);
 
   function metinler(o){ return o.ana.concat([o.dikkat], o.ornek ? [o.ornek] : []); }
 
@@ -34,7 +35,7 @@
       expect(bozuk).toEqual([]);
     });
 
-    it('tamamlanan derslerde her konunun özeti var', () => {
+    it('her konunun özeti var', () => {
       const eksik = [];
       TAM.forEach(sid => R.SUBJECTS.find(s => s.id === sid).topics
         .forEach(t => { if(!R.KONU_OZET[t.id]) eksik.push(t.id); }));
