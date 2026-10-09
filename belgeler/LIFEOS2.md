@@ -82,6 +82,7 @@ verilen kararlar:
 | Zilde ertele ve «gördüm» | `brand/ortak/kabuk.js` `zilDurumu`/`bildirimPaneli`: satır yarına ertelenir (acil olan ertelenemez), «Hepsini gördüm» noktayı söndürür, yeni ya da değişen satır yeniden yakar; işi yapılmış saymaz, kayda yazılmaz (bu cihaz, bu modül) | 2026-10-09 |
 | Bildirimde «Aldım / Ertele» | `brand/ortak/bildirim.js` söz 7 (`isaretci`, `yapildi`), `BildirimKoprusu.swift` söz 7 (kategoriler, işaret sırası, «~» ertelenmiş), `SPI Hatirlat.isaretUygula`, `ESP Takvim.isaretUygula`: işaret modülün kendi koduyla, basıldığı anla yazılır; uydurulmaz | 2026-10-09 |
 | Kurulu bildirimler, her modülde sessiz saat | `brand/ortak/bildirim.js` söz 8 (`liste`, `atla`, `geriAl`, `listeAc`; silinen `lifeos.telbildirim.atla`), `BildirimKoprusu.swift` söz 8 (`liste`, `sil`); ESP `Takvim.bildirimListesi` ve AYS telefon satırı sessiz saate ve tür ayarına uyar | 2026-10-09 |
+| AYS öğrenme yolu | `AYS/src/js/core/ogrenyolu.js` (`R.OgrenYolu`), konu ekranında «Öğrenme yolu»: öğren → kartla → soru çöz → yanlışları kapat → konu testi → tekrar test; her adım var olan kayıttan okunur ve etiketlenir (ölçüldü / hesaplandı / beyan), sıradaki adım ve eylemi kodla seçilir, eşikler yazılır | 2026-10-09 |
 
 ## 4. Değişmeyen sözler
 

@@ -59,6 +59,57 @@ R.Screens.topic = (function(){
     });
   }
 
+  /* ÖĞRENME YOLU (core/ogrenyolu.js): altı adım, sıradaki adım ve eylemi.
+     Adımlar kayıtlardan okunur; eşikler planın kuralıdır ve yazılır. */
+  const YOL_EYLEM = {
+    ogren:() => K.Row([
+      K.Button({ label:'Ders notu ekle', icon:'play', size:'sm', tone:'primary', act:'topic-add-note' }),
+      K.Button({ label:'Okudum', icon:'check', size:'sm', act:'yol-okundu' }),
+    ], { wrap:true }),
+    kartla:() => K.Button({ label:'Kart ekle', icon:'cards', size:'sm', tone:'primary', act:'topic-add-card' }),
+    coz:() => K.Button({ label:'Bugün ekranına git', icon:'today', size:'sm', tone:'primary', act:'go', data:{ 'data-route':'today' } }),
+    duzelt:() => K.Button({ label:'Yanlış defteri', icon:'list', size:'sm', tone:'primary', act:'yol-yanlis' }),
+    olc:() => K.Button({ label:'Testi gir', icon:'edit', size:'sm', tone:'primary', act:'topic-edit' }),
+    pekistir:() => K.Button({ label:'Testi gir', icon:'edit', size:'sm', tone:'primary', act:'topic-edit' }),
+  };
+  const YOL_NEDEN = {
+    ogren:'Önce konunun kendisi: bir ders izle ve not al, ya da kitaptan okuduysan işaretle.',
+    kartla:'Öğrendiğini karta çevir: kart, unutmadan önce sana geri sorar.',
+    coz:'Bugün ekranında bir bloğu bu konuya bağla; çözdüğün soru ve doğruluk buraya sayılır.',
+    duzelt:'Bu konudan açık yanlış var: kök nedenini yaz, ilkesini çıkar, kapat.',
+    olc:'Konu testi: ilk ölçüm kapanışın yarısıdır.',
+    pekistir:'Aynı konuyu bir hafta sonra yeniden ölç: tek ölçüm kapanış saymaz.',
+  };
+  function yolCard(subject, topic, st){
+    const Y = R.OgrenYolu;
+    if(!Y) return null;
+    const l = Y.adimlar(subject.id, topic.id);
+    const s = l.find(a => !a.tamam) || null;
+    const tamam = l.filter(a => a.tamam).length;
+    const k = Y.KURAL, rule = R.CLOSURE_RULE;
+    return K.Card({
+      title:'Öğrenme yolu', sub:tamam + ' / ' + l.length + ' adım', wide:true,
+      badge:when(!s, () => K.Badge({ label:'tamamlandı', tone:'ok' })),
+      body:html`
+        ${!s ? K.Notice({ tone:'ok', body:'Bütün adımlar tamam: konu iki ölçümle kapandı. Kartlar tekrar zamanında yine sorar.' })
+          : s.bekle ? K.NextUp({ icon:'clock', calm:true, label:'Sıradaki adım', title:s.ad + ' · ' + s.ayrinti,
+              why:'Bu arada kartlarını tekrar et; zamanı gelince burada «Testi gir» çıkar.' })
+          : K.NextUp({ icon:'target', label:'Sıradaki adım', title:s.ad, why:YOL_NEDEN[s.id] + ' ' + s.ayrinti,
+              action:YOL_EYLEM[s.id]() })}
+        <ol class="yol mt-12" aria-label="Öğrenme yolunun adımları">${map(l, a => html`
+          <li class="${'yol__adim' + (a.tamam ? ' is-tamam' : '') + (s && a.id === s.id ? ' is-sirada' : '')}">
+            <span class="yol__isaret" aria-hidden="true">${raw(UI.icon(a.tamam ? 'check' : 'clock'))}</span>
+            <span class="yol__metin"><b>${a.ad}</b> <span class="tiny dim">${a.ayrinti}</span></span>
+            ${when(a.etiket, () => html`<span class="yol__etiket tiny">${a.etiket}</span>`)}
+            <span class="sr-only">${a.tamam ? 'tamam' : 'eksik'}</span>
+          </li>`)}</ol>
+        ${when(st.okunduAt, () => html`<p class="tiny dim mt-10">«Okudum» bir beyandır; sistem doğrulayamaz.
+          <button type="button" class="linkbtn" data-act="yol-okundu-geri">İşareti kaldır</button></p>`)}
+        <p class="tiny dim mt-10">Eşikler planın kuralıdır: en az ${k.kartEnAz} kart, ${k.pratikEnAz} soru ve
+          %${k.pratikDogruluk} doğruluk; kapanış %${rule.first} ve ${rule.gapDays} gün sonra %${rule.second}.</p>`,
+    });
+  }
+
   function measureCard(subject, topic, st){
     const rule = R.CLOSURE_RULE;
     const first = st.first, second = st.second;
@@ -208,6 +259,7 @@ R.Screens.topic = (function(){
 
       K.Span(7, K.Stack([
         headerCard(subject, topic, st, risk),
+        yolCard(subject, topic, st),
         measureCard(subject, topic, st),
         practiceCard(subject, topic),
         notesCard(subject, topic),
@@ -245,6 +297,25 @@ R.Screens.topic = (function(){
     async 'topic-add-card'(){
       R.App.go('cards');
       setTimeout(() => R.Screens.cards.handle['new-card']({ dataset:{} }), 80);
+    },
+    /* Öğrenme yolu: «Okudum» bir beyandır (core/ogrenyolu.js söz 2). */
+    async 'yol-okundu'(){
+      const { subject, topic } = ctx();
+      if(!subject || !topic) return;
+      await R.OgrenYolu.okundu(subject.id, topic.id, true);
+      UI.toast('İşaretlendi · sıradaki adım: ' + ((R.OgrenYolu.siradaki(subject.id, topic.id) || {}).ad || 'yok'));
+      R.App.render();
+    },
+    async 'yol-okundu-geri'(){
+      const { subject, topic } = ctx();
+      if(!subject || !topic) return;
+      await R.OgrenYolu.okundu(subject.id, topic.id, false);
+      UI.toast('«Okudum» işareti kaldırıldı');
+      R.App.render();
+    },
+    async 'yol-yanlis'(){
+      S.ui.analyticsTab = 'errors';
+      R.App.go('analytics');
     },
   };
 
