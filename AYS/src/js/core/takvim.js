@@ -209,5 +209,70 @@ R.Takvim = (function(){
     return { metin:yaz(l, 'AYS — sınav takvimi'), adet:l.length };
   }
 
-  return { yaz, oku, onizle, iceAl, disa, turOner, katla, DURUM_ADI, TURLER, EN_UZUN_GUN };
+  /* ------------------------------------------------------------ telefon */
+
+  /* TELEFON BİLDİRİMİ (iOS kabuğu, brand/ortak/bildirim.js; 2026-10-09).
+     Ofis › Telefon bildirimi açıksa önümüzdeki PLAN_GUN gün içinde:
+       · her gün kullanıcının seçtiği saatte «Bugünün planı» — yükü sıfır
+         olan istisna günü (tatil, izin) atlanır; okul sınavı ve yoğun gün
+         planı küçültür, kaldırmaz;
+       · etkin hedefin son günü 09:00'da, bir gün önce 20:00'de (askıdaki
+         hedef dürtmez);
+       · sınav gününden bir gün önce 20:00'de — YALNIZ kullanıcı tarihi
+         profilde değiştirdiyse: planın varsayılan tarihi ÖSYM duyurusuna
+         kadar TAHMİNDİR (data/curriculum.js; screens/plan.js aynı kural),
+         tahmin edilmiş bir güne «yarın sınav» denmez (AGENTS §1.2).
+     Sessiz saat ve tür ayarı (brand/ortak/pwa.js) burada da geçerlidir.
+     Her seferinde listenin tamamı gider; kapalıysa boş liste (kabuk
+     bekleyenleri siler). */
+  const PLAN_GUN = 7;
+  const SAAT_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+  function bildirimAyari(){
+    const st = R.Office && R.Office.settings ? R.Office.settings() : {};
+    return { acik:!!(st && st.telefonBildirim),
+      saat:SAAT_RE.test((st && st.telefonSaat) || '') ? st.telefonSaat : '08:00' };
+  }
+  function bildirimListesi(simdi){
+    const b = (window.LIFEOS || {}).BILDIRIM;
+    if(!b) return [];
+    const now = simdi || new Date();
+    const a = bildirimAyari(), P = (window.LIFEOS || {}).Pwa;
+    const bugun = U.iso(now), gun = n => U.iso(U.addDays(now, n));
+    const sinir = b.anOf(gun(PLAN_GUN), '00:00');
+    const out = [];
+    const ekle = (anahtar, g, saat, baslik, govde) => {
+      const zaman = b.anOf(g, saat);
+      if(zaman <= now.getTime() || zaman >= sinir) return;
+      if(P && P.gonderilebilir && !P.gonderilebilir('ays', 'plan', new Date(zaman)).ok) return;
+      out.push({ anahtar, baslik, govde, zaman });
+    };
+    const K = (R.Model && R.Model.CALENDAR_KINDS) || {};
+    const bos = g => (R.S.calendar || []).some(c => c.from <= g && (c.to || c.from) >= g
+      && Number(c.load != null ? c.load : (K[c.kind] || {}).load) === 0);
+    for(let i = 0; i < PLAN_GUN; i++){
+      const g = gun(i);
+      if(!bos(g)) ekle('plan@' + g, g, a.saat, 'AYS · Bugünün planı', 'Günün blokları Bugün ekranında.');
+    }
+    ((R.Hedefler && R.Hedefler.aktifler()) || []).forEach(h => {
+      const t = h.son_tarih;
+      if(h.durum !== 'aktif' || !U.isISO(t) || t < bugun) return;
+      const ad = R.Hedefler.ozet(h);
+      ekle('hedef@' + h.id + '@' + t, t, '09:00', 'AYS · Hedefin son günü', ad);
+      ekle('hedef-once@' + h.id + '@' + t, U.iso(U.addDays(U.parse(t), -1)), '20:00', 'AYS · Hedefin son günü yarın', ad);
+    });
+    [['TYT', R.PLAN.examTytISO, R.PROGRAM.examTytISO], ['AYT', R.PLAN.examAytISO, R.PROGRAM.examAytISO]].forEach(x => {
+      if(!U.isISO(x[1]) || x[1] === x[2] || x[1] <= bugun) return;
+      ekle('sinav@' + x[0] + '@' + x[1], U.iso(U.addDays(U.parse(x[1]), -1)), '20:00',
+        'AYS · ' + x[0] + ' yarın', 'Sınav günü: ' + U.fmtDate(x[1]) + '.');
+    });
+    return out;
+  }
+  function planla(simdi){
+    const b = (window.LIFEOS || {}).BILDIRIM;
+    if(!b || !b.var()) return null;
+    return b.kur('ays', bildirimAyari().acik ? bildirimListesi(simdi) : []).catch(() => null);
+  }
+
+  return { yaz, oku, onizle, iceAl, disa, turOner, katla, DURUM_ADI, TURLER, EN_UZUN_GUN,
+    bildirimAyari, bildirimListesi, planla, PLAN_GUN };
 })();

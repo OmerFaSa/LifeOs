@@ -1552,6 +1552,14 @@ R.App = (function(){
             return y;
           } });
       }
+      /* Telefon bildirimi (core/takvim.js planla): açılışta ve arka plana
+         geçerken önümüzdeki günler yeniden kurulur. Uygulama dışında boş iş. */
+      if(R.Takvim && R.Takvim.planla){
+        R.Takvim.planla();
+        document.addEventListener('visibilitychange', () => {
+          if(document.hidden){ try{ R.Takvim.planla(); }catch(e){} }
+        });
+      }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'ays', hkm:() => R.Beacon, git:route => go(route),

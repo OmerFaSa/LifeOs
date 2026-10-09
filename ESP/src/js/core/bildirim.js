@@ -14,7 +14,7 @@
         hiçbir şey yapılmaz, hiçbir şey beklenmez.
      2. NE ZAMAN NE GELECEĞİNİ MODÜL SÖYLER. Kabuk içeriği anlamaz; modül
         kendi kuralıyla listeyi üretir (SPİ hatırlatma saatleri, ESP
-        hatırlatıcılar) ve her değişiklikte LİSTENİN TAMAMINI yollar: kabuk
+        hatırlatıcılar, AYS günün planı) ve her değişiklikte LİSTENİN TAMAMINI yollar: kabuk
         o modülün eskilerini siler, yenilerini kurar. Bir modül ötekinin
         bildirimine dokunamaz (kabuk modülü sayfanın kapısından bilir).
      3. SINIRLI VE YAKIN. iOS bir uygulamaya en çok 64 bekleyen bildirim
@@ -30,7 +30,7 @@ window.LIFEOS.BILDIRIM = (function(){
   'use strict';
 
   const AD = 'lifeosBildirim';
-  const SINIR = { spi:36, esp:20, ays:6 };          // toplam 62 < 64 (iOS)
+  const SINIR = { spi:30, esp:16, ays:16 };         // toplam 62 < 64 (iOS); Swift ile aynı
   const ZAMAN_ASIMI = 8000;
   let son = null;                                    // son bilinen izin durumu
 

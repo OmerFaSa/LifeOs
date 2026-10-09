@@ -69,7 +69,7 @@ final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
     /// Kapi → modul (soz 1).
     static let kapilar: [Int: String] = [4173: "ays", 4183: "spi", 4193: "esp"]
     /// Toplam 62 < 64 (iOS siniri); brand/ortak/bildirim.js SINIR ile ayni.
-    static let sinir: [String: Int] = ["spi": 36, "esp": 20, "ays": 6]
+    static let sinir: [String: Int] = ["spi": 30, "esp": 16, "ays": 16]
 
     let merkez: BildirimMerkezi
 

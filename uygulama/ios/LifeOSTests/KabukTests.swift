@@ -74,6 +74,17 @@ final class KabukTests: XCTestCase {
         jsBekle(w, ifade, sure: sure)
     }
 
+    /// Ana ekran kisayollari (2026-10-09): uc modul, dogru kapi; yabanci tur yok sayilir.
+    func testAnaEkranKisayollari() {
+        let l = Bundle(for: KabukDenetleyici.self).object(forInfoDictionaryKey: "UIApplicationShortcutItems") as? [[String: Any]] ?? []
+        XCTAssertEqual(l.compactMap { $0["UIApplicationShortcutItemType"] as? String },
+                       ["com.omerfasa.lifeos.ays", "com.omerfasa.lifeos.spi", "com.omerfasa.lifeos.esp"])
+        XCTAssertEqual(KabukDenetleyici.kisayolAdresi("com.omerfasa.lifeos.spi")?.absoluteString, "http://127.0.0.1:4183/")
+        XCTAssertEqual(KabukDenetleyici.kisayolAdresi("com.omerfasa.lifeos.ays")?.absoluteString, "http://127.0.0.1:4173/")
+        XCTAssertNil(KabukDenetleyici.kisayolAdresi("baska.uygulama.spi"))
+        XCTAssertNil(KabukDenetleyici.kisayolAdresi("com.omerfasa.lifeos.hkm"))
+    }
+
     func testKoyuMu() {
         XCTAssertTrue(KabukDenetleyici.koyuMu(0, 0, 0))
         XCTAssertTrue(KabukDenetleyici.koyuMu(18, 18, 20))         // grafit koyu tema (#121214)

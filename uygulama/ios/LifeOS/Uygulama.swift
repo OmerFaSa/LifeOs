@@ -27,6 +27,25 @@ final class Uygulama: UIResponder, UIApplicationDelegate {
         }
         w.makeKeyAndVisible()
         window = w
+        // Ana ekran kisayoluyla acildiysa o modul; false: iOS performActionFor'u
+        // bir daha cagirmasin.
+        if let k = launchOptions?[.shortcutItem] as? UIApplicationShortcutItem {
+            kisayol(k)
+            return false
+        }
+        return true
+    }
+
+    func application(_ application: UIApplication, performActionFor shortcutItem: UIApplicationShortcutItem,
+                     completionHandler: @escaping (Bool) -> Void) {
+        completionHandler(kisayol(shortcutItem))
+    }
+
+    @discardableResult
+    private func kisayol(_ k: UIApplicationShortcutItem) -> Bool {
+        guard let u = KabukDenetleyici.kisayolAdresi(k.type),
+              let d = window?.rootViewController as? KabukDenetleyici else { return false }
+        d.modulAc(u)
         return true
     }
 

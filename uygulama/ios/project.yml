@@ -58,6 +58,22 @@ targets:
         NSLocalNetworkUsageDescription: "Hesabını bilgisayarındaki LifeOS ile eşitlemek için ev ağındaki bilgisayara bağlanır. Veri yalnız senin bilgisayarına gider."
         UIBackgroundModes:
           - location
+        # Ana ekran kisayollari (simgeye basili tut, 2026-10-09): modulu
+        # dogrudan acar; alt satir kabuk.js MODULLER.not ile ayni. Yetki
+        # gerektirmez; AltStore izin karsilastirmasina girmez.
+        UIApplicationShortcutItems:
+          - UIApplicationShortcutItemType: com.omerfasa.lifeos.ays
+            UIApplicationShortcutItemTitle: AYS
+            UIApplicationShortcutItemSubtitle: Sınav hazırlığı
+            UIApplicationShortcutItemIconSymbolName: graduationcap
+          - UIApplicationShortcutItemType: com.omerfasa.lifeos.spi
+            UIApplicationShortcutItemTitle: SPİ
+            UIApplicationShortcutItemSubtitle: Uyku, beslenme, hareket
+            UIApplicationShortcutItemIconSymbolName: heart
+          - UIApplicationShortcutItemType: com.omerfasa.lifeos.esp
+            UIApplicationShortcutItemTitle: ESP
+            UIApplicationShortcutItemSubtitle: Dil, felsefe, müzik
+            UIApplicationShortcutItemIconSymbolName: book
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.omerfasa.lifeos

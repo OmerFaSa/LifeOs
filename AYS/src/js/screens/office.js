@@ -318,8 +318,26 @@ R.Screens.office = (function(){
     return q.usedToday + '/' + q.rpd + (q.full ? ' · doldu' : '');
   }
 
-  /* Bildirim izni — istenmeden bildirim gonderilmez. */
+  /* TELEFON BİLDİRİMİ (yalnız uygulamada; core/takvim.js planla). İzin
+     yalnız kullanıcı «Açık» deyince sorulur; reddedilirse ayar açılmaz. */
+  function telefonRow(){
+    const B = (window.LIFEOS || {}).BILDIRIM;
+    if(!B || !B.var() || !R.Takvim || !R.Takvim.bildirimAyari) return '';
+    const a = R.Takvim.bildirimAyari();
+    return html`<div class="mt-12">${K.Field({ label:'Telefon bildirimi',
+        hint:'Her gün seçtiğin saatte günün planı, hedefin son günü ve profilde yazdığın sınav gününden bir gün önce. '
+          + 'Önümüzdeki ' + R.Takvim.PLAN_GUN + ' gün kurulur, AYS kapalıyken de gelir.',
+        input:K.Select({ id:'office-telbildirim', value:a.acik ? 'acik' : 'kapali', change:'office-telbildirim', options:[
+          { value:'kapali', label:'Kapalı' }, { value:'acik', label:'Açık' } ] }) })}
+      ${when(a.acik, () => html`<div class="mt-10">${K.Field({ label:'Günün planı saati',
+        input:K.Input({ id:'office-telsaat', type:'time', value:a.saat, change:'office-telsaat' }) })}</div>`)}</div>`;
+  }
+
+  /* Bildirim izni — istenmeden bildirim gonderilmez. Uygulamada (WKWebView)
+     tarayici bildirimi yoktur; orada telefonRow konusur, bu satir susar. */
   function notifyRow(){
+    const B = (window.LIFEOS || {}).BILDIRIM;
+    if(B && B.var()) return '';
     const state = R.App.notifyState();
     if(state === 'unsupported'){
       return html`<p class="tiny dim">Bu tarayıcı bildirim desteklemiyor.</p>`;
@@ -537,6 +555,7 @@ R.Screens.office = (function(){
             Orta ve büyük türler kilitlidir.</p>
           ${raw(window.LIFEOS.ONERI.ayarHtml(R.ACTIONS, { mod:st.otomatikUygula || 'istek', turler:st.otomatikTurler || {} }))}</div>`)}`,
         html`<div id="office-notify">${notifyRow()}</div>`,
+        html`<div id="office-telefon">${telefonRow()}</div>`,
       ], 'sm'),
 
       html`<div id="llm-test"></div>`,
@@ -960,6 +979,30 @@ R.Screens.office = (function(){
   }
 
   const change = {
+    async 'office-telbildirim'(el){
+      const B = (window.LIFEOS || {}).BILDIRIM;
+      if(!B || !B.var()) return;
+      if(el.value === 'acik'){
+        const izin = await B.izin();
+        if(izin !== 'izin'){
+          el.value = 'kapali';
+          UI.toast(izin === 'red' ? 'Bildirim izni kapalı: iPhone Ayarlar › LifeOS › Bildirimler’den aç.'
+            : 'Bildirim izni alınamadı.', { life:5000 });
+          return;
+        }
+      }
+      await R.Office.saveSettings({ telefonBildirim:el.value === 'acik' });
+      const r = await R.Takvim.planla();
+      UI.toast(el.value === 'acik' ? 'Açık · ' + ((r && r.kurulan) || 0) + ' bildirim kuruldu' : 'Telefon bildirimi kapandı');
+      const box = document.getElementById('office-telefon');
+      if(box) box.innerHTML = String(telefonRow());
+    },
+    async 'office-telsaat'(el){
+      if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(el.value || '')) return;
+      await R.Office.saveSettings({ telefonSaat:el.value });
+      await R.Takvim.planla();
+      UI.toast('Günün planı saati: ' + el.value);
+    },
     async 'bildirim-saat'(el){ bildirimYenile(el, 'bildirim-saat'); },
     async 'office-provider'(el){
       const form = document.getElementById('llm-form');

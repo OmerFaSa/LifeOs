@@ -33,6 +33,13 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
         dokunus.ac = { [weak self] u in self?.modulAc(u) }
     }
 
+    /// Ana ekran kisayolu (Info.plist UIApplicationShortcutItems) → modul adresi.
+    static func kisayolAdresi(_ tur: String) -> URL? {
+        let on = "com.omerfasa.lifeos."
+        guard tur.hasPrefix(on) else { return nil }
+        return BildirimKoprusu.adres(modul: String(tur.dropFirst(on.count)))
+    }
+
     /// Bildirime dokunuldu: o modulun sayfasi (gorunum yoksa acilinca).
     func modulAc(_ u: URL) {
         guard KabukDenetleyici.icerde(u) else { return }

@@ -15880,7 +15880,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'c3986842', at:'2026-10-09 13:15', dirty:true };
+R.BUILD = { id:'c094e292', at:'2026-10-09 13:29', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -25195,7 +25195,7 @@ window.LIFEOS.QR = (function(){
         hiçbir şey yapılmaz, hiçbir şey beklenmez.
      2. NE ZAMAN NE GELECEĞİNİ MODÜL SÖYLER. Kabuk içeriği anlamaz; modül
         kendi kuralıyla listeyi üretir (SPİ hatırlatma saatleri, ESP
-        hatırlatıcılar) ve her değişiklikte LİSTENİN TAMAMINI yollar: kabuk
+        hatırlatıcılar, AYS günün planı) ve her değişiklikte LİSTENİN TAMAMINI yollar: kabuk
         o modülün eskilerini siler, yenilerini kurar. Bir modül ötekinin
         bildirimine dokunamaz (kabuk modülü sayfanın kapısından bilir).
      3. SINIRLI VE YAKIN. iOS bir uygulamaya en çok 64 bekleyen bildirim
@@ -25211,7 +25211,7 @@ window.LIFEOS.BILDIRIM = (function(){
   'use strict';
 
   const AD = 'lifeosBildirim';
-  const SINIR = { spi:36, esp:20, ays:6 };          // toplam 62 < 64 (iOS)
+  const SINIR = { spi:30, esp:16, ays:16 };         // toplam 62 < 64 (iOS); Swift ile aynı
   const ZAMAN_ASIMI = 8000;
   let son = null;                                    // son bilinen izin durumu
 
@@ -42312,7 +42312,72 @@ R.Takvim = (function(){
     return { metin:yaz(l, 'AYS — sınav takvimi'), adet:l.length };
   }
 
-  return { yaz, oku, onizle, iceAl, disa, turOner, katla, DURUM_ADI, TURLER, EN_UZUN_GUN };
+  /* ------------------------------------------------------------ telefon */
+
+  /* TELEFON BİLDİRİMİ (iOS kabuğu, brand/ortak/bildirim.js; 2026-10-09).
+     Ofis › Telefon bildirimi açıksa önümüzdeki PLAN_GUN gün içinde:
+       · her gün kullanıcının seçtiği saatte «Bugünün planı» — yükü sıfır
+         olan istisna günü (tatil, izin) atlanır; okul sınavı ve yoğun gün
+         planı küçültür, kaldırmaz;
+       · etkin hedefin son günü 09:00'da, bir gün önce 20:00'de (askıdaki
+         hedef dürtmez);
+       · sınav gününden bir gün önce 20:00'de — YALNIZ kullanıcı tarihi
+         profilde değiştirdiyse: planın varsayılan tarihi ÖSYM duyurusuna
+         kadar TAHMİNDİR (data/curriculum.js; screens/plan.js aynı kural),
+         tahmin edilmiş bir güne «yarın sınav» denmez (AGENTS §1.2).
+     Sessiz saat ve tür ayarı (brand/ortak/pwa.js) burada da geçerlidir.
+     Her seferinde listenin tamamı gider; kapalıysa boş liste (kabuk
+     bekleyenleri siler). */
+  const PLAN_GUN = 7;
+  const SAAT_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+  function bildirimAyari(){
+    const st = R.Office && R.Office.settings ? R.Office.settings() : {};
+    return { acik:!!(st && st.telefonBildirim),
+      saat:SAAT_RE.test((st && st.telefonSaat) || '') ? st.telefonSaat : '08:00' };
+  }
+  function bildirimListesi(simdi){
+    const b = (window.LIFEOS || {}).BILDIRIM;
+    if(!b) return [];
+    const now = simdi || new Date();
+    const a = bildirimAyari(), P = (window.LIFEOS || {}).Pwa;
+    const bugun = U.iso(now), gun = n => U.iso(U.addDays(now, n));
+    const sinir = b.anOf(gun(PLAN_GUN), '00:00');
+    const out = [];
+    const ekle = (anahtar, g, saat, baslik, govde) => {
+      const zaman = b.anOf(g, saat);
+      if(zaman <= now.getTime() || zaman >= sinir) return;
+      if(P && P.gonderilebilir && !P.gonderilebilir('ays', 'plan', new Date(zaman)).ok) return;
+      out.push({ anahtar, baslik, govde, zaman });
+    };
+    const K = (R.Model && R.Model.CALENDAR_KINDS) || {};
+    const bos = g => (R.S.calendar || []).some(c => c.from <= g && (c.to || c.from) >= g
+      && Number(c.load != null ? c.load : (K[c.kind] || {}).load) === 0);
+    for(let i = 0; i < PLAN_GUN; i++){
+      const g = gun(i);
+      if(!bos(g)) ekle('plan@' + g, g, a.saat, 'AYS · Bugünün planı', 'Günün blokları Bugün ekranında.');
+    }
+    ((R.Hedefler && R.Hedefler.aktifler()) || []).forEach(h => {
+      const t = h.son_tarih;
+      if(h.durum !== 'aktif' || !U.isISO(t) || t < bugun) return;
+      const ad = R.Hedefler.ozet(h);
+      ekle('hedef@' + h.id + '@' + t, t, '09:00', 'AYS · Hedefin son günü', ad);
+      ekle('hedef-once@' + h.id + '@' + t, U.iso(U.addDays(U.parse(t), -1)), '20:00', 'AYS · Hedefin son günü yarın', ad);
+    });
+    [['TYT', R.PLAN.examTytISO, R.PROGRAM.examTytISO], ['AYT', R.PLAN.examAytISO, R.PROGRAM.examAytISO]].forEach(x => {
+      if(!U.isISO(x[1]) || x[1] === x[2] || x[1] <= bugun) return;
+      ekle('sinav@' + x[0] + '@' + x[1], U.iso(U.addDays(U.parse(x[1]), -1)), '20:00',
+        'AYS · ' + x[0] + ' yarın', 'Sınav günü: ' + U.fmtDate(x[1]) + '.');
+    });
+    return out;
+  }
+  function planla(simdi){
+    const b = (window.LIFEOS || {}).BILDIRIM;
+    if(!b || !b.var()) return null;
+    return b.kur('ays', bildirimAyari().acik ? bildirimListesi(simdi) : []).catch(() => null);
+  }
+
+  return { yaz, oku, onizle, iceAl, disa, turOner, katla, DURUM_ADI, TURLER, EN_UZUN_GUN,
+    bildirimAyari, bildirimListesi, planla, PLAN_GUN };
 })();
 
 /* ==== js/core/tatil.js ==== */
@@ -72027,8 +72092,26 @@ R.Screens.office = (function(){
     return q.usedToday + '/' + q.rpd + (q.full ? ' · doldu' : '');
   }
 
-  /* Bildirim izni — istenmeden bildirim gonderilmez. */
+  /* TELEFON BİLDİRİMİ (yalnız uygulamada; core/takvim.js planla). İzin
+     yalnız kullanıcı «Açık» deyince sorulur; reddedilirse ayar açılmaz. */
+  function telefonRow(){
+    const B = (window.LIFEOS || {}).BILDIRIM;
+    if(!B || !B.var() || !R.Takvim || !R.Takvim.bildirimAyari) return '';
+    const a = R.Takvim.bildirimAyari();
+    return html`<div class="mt-12">${K.Field({ label:'Telefon bildirimi',
+        hint:'Her gün seçtiğin saatte günün planı, hedefin son günü ve profilde yazdığın sınav gününden bir gün önce. '
+          + 'Önümüzdeki ' + R.Takvim.PLAN_GUN + ' gün kurulur, AYS kapalıyken de gelir.',
+        input:K.Select({ id:'office-telbildirim', value:a.acik ? 'acik' : 'kapali', change:'office-telbildirim', options:[
+          { value:'kapali', label:'Kapalı' }, { value:'acik', label:'Açık' } ] }) })}
+      ${when(a.acik, () => html`<div class="mt-10">${K.Field({ label:'Günün planı saati',
+        input:K.Input({ id:'office-telsaat', type:'time', value:a.saat, change:'office-telsaat' }) })}</div>`)}</div>`;
+  }
+
+  /* Bildirim izni — istenmeden bildirim gonderilmez. Uygulamada (WKWebView)
+     tarayici bildirimi yoktur; orada telefonRow konusur, bu satir susar. */
   function notifyRow(){
+    const B = (window.LIFEOS || {}).BILDIRIM;
+    if(B && B.var()) return '';
     const state = R.App.notifyState();
     if(state === 'unsupported'){
       return html`<p class="tiny dim">Bu tarayıcı bildirim desteklemiyor.</p>`;
@@ -72246,6 +72329,7 @@ R.Screens.office = (function(){
             Orta ve büyük türler kilitlidir.</p>
           ${raw(window.LIFEOS.ONERI.ayarHtml(R.ACTIONS, { mod:st.otomatikUygula || 'istek', turler:st.otomatikTurler || {} }))}</div>`)}`,
         html`<div id="office-notify">${notifyRow()}</div>`,
+        html`<div id="office-telefon">${telefonRow()}</div>`,
       ], 'sm'),
 
       html`<div id="llm-test"></div>`,
@@ -72669,6 +72753,30 @@ R.Screens.office = (function(){
   }
 
   const change = {
+    async 'office-telbildirim'(el){
+      const B = (window.LIFEOS || {}).BILDIRIM;
+      if(!B || !B.var()) return;
+      if(el.value === 'acik'){
+        const izin = await B.izin();
+        if(izin !== 'izin'){
+          el.value = 'kapali';
+          UI.toast(izin === 'red' ? 'Bildirim izni kapalı: iPhone Ayarlar › LifeOS › Bildirimler’den aç.'
+            : 'Bildirim izni alınamadı.', { life:5000 });
+          return;
+        }
+      }
+      await R.Office.saveSettings({ telefonBildirim:el.value === 'acik' });
+      const r = await R.Takvim.planla();
+      UI.toast(el.value === 'acik' ? 'Açık · ' + ((r && r.kurulan) || 0) + ' bildirim kuruldu' : 'Telefon bildirimi kapandı');
+      const box = document.getElementById('office-telefon');
+      if(box) box.innerHTML = String(telefonRow());
+    },
+    async 'office-telsaat'(el){
+      if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(el.value || '')) return;
+      await R.Office.saveSettings({ telefonSaat:el.value });
+      await R.Takvim.planla();
+      UI.toast('Günün planı saati: ' + el.value);
+    },
     async 'bildirim-saat'(el){ bildirimYenile(el, 'bildirim-saat'); },
     async 'office-provider'(el){
       const form = document.getElementById('llm-form');
@@ -76238,6 +76346,14 @@ R.App = (function(){
             if(R.Screens && R.Screens.today && R.Screens.today.sesli) y.bugun = { metin:R.Screens.today.sesli(), gun:U.todayISO() };
             return y;
           } });
+      }
+      /* Telefon bildirimi (core/takvim.js planla): açılışta ve arka plana
+         geçerken önümüzdeki günler yeniden kurulur. Uygulama dışında boş iş. */
+      if(R.Takvim && R.Takvim.planla){
+        R.Takvim.planla();
+        document.addEventListener('visibilitychange', () => {
+          if(document.hidden){ try{ R.Takvim.planla(); }catch(e){} }
+        });
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
