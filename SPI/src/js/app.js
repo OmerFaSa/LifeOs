@@ -188,28 +188,28 @@ SP.App = (function(){
   function bildirimGruplari(){
     const spi = [];
     const bayrak = M.openFlags().filter(x => !x.ack).length;
-    if(bayrak) spi.push({ metin:bayrak + ' kırmızı bayrak açık', route:'today', acil:true });
+    if(bayrak) spi.push({ id:'bayrak', metin:bayrak + ' kırmızı bayrak açık', route:'today', acil:true });
     const gecen = SP.Bio.overdue().length;
-    if(gecen) spi.push({ metin:gecen + ' testin zamanı geçti', route:'labs' });
+    if(gecen) spi.push({ id:'test', metin:gecen + ' testin zamanı geçti', route:'labs' });
     const v = S.vitals[U.todayISO()];
-    if(!v || v.sleep == null) spi.push({ metin:'Bugünün ölçümü girilmedi', route:'today' });
-    if(SP.Money.basketTotal().over) spi.push({ metin:'Haftalık bütçe aşıldı', route:'basket', acil:true });
-    if(M.backupDue()) spi.push({ metin:'Yedek alma zamanı', route:'guide' });
-    if(S.storeHealth && S.storeHealth.error) spi.push({ metin:'Kayıt sorunu var', act:'show-store-error', acil:true });
+    if(!v || v.sleep == null) spi.push({ id:'olcum', metin:'Bugünün ölçümü girilmedi', route:'today' });
+    if(SP.Money.basketTotal().over) spi.push({ id:'butce', metin:'Haftalık bütçe aşıldı', route:'basket', acil:true });
+    if(M.backupDue()) spi.push({ id:'yedek', metin:'Yedek alma zamanı', route:'guide' });
+    if(S.storeHealth && S.storeHealth.error) spi.push({ id:'kayit', metin:'Kayıt sorunu var', act:'show-store-error', acil:true });
     const mer = [];
     const onay = onaySayisi();
-    if(onay) mer.push({ metin:onay + ' öneri Onaylar’da bekliyor', route:'onaylar' });
+    if(onay) mer.push({ id:'onay', metin:onay + ' öneri Onaylar’da bekliyor', route:'onaylar' });
     const king = (S.ui.hkmBildirim || []).length;
-    if(king) mer.push({ metin:king + ' King bildirimi', route:'today' });
+    if(king) mer.push({ id:'king', metin:king + ' King bildirimi', route:'today' });
     return [{ modul:'spi', satirlar:spi }, { modul:'mer', satirlar:mer }];
   }
 
   function ustCubukHtml(sc){
     const aktif = sectionOf(sc.id);
     const onay = onaySayisi();
-    const gruplar = safe(bildirimGruplari, []) || [];
-    const bil = gruplar.reduce((t, g) => t + g.satirlar.length, 0);
-    const acil = gruplar.some(g => g.satirlar.some(s => s.acil));
+    /* Zil (kabuk zilDurumu): bugün ertelenen sayılmaz; nokta görülmemiş
+       ya da acil satırla yanar. */
+    const zil = K.zilDurumu(safe(bildirimGruplari, []) || []);
     /* v5 (LifeOS Tasarım Dili sürüm 5): kenar çubuğu + ince üst şerit; açık
        çekmecenin bölümleri kenarda (bölüm çubuğunun yerini alır). */
     const r = UST[sc.id] || sc.id;
@@ -222,7 +222,7 @@ SP.App = (function(){
         bolumler:g.views.map(v => ({ route:v.route, ad:v.label, on:v.route === r,
           rozet:safe(() => badgeFor(v.route), null) || null })) })),
       onay:{ sayi:onay, route:'onaylar' },
-      bildirim:{ sayi:bil, acil },
+      bildirim:{ sayi:zil.sayi, acil:zil.acil, yeni:zil.yeni },
       baglanti:safe(baglantiVerisi, null) || { durum:'kapali' },
       rutbe:safe(rutbeVerisi, null) || null,
       profil:profilVerisi(),

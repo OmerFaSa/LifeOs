@@ -13,7 +13,8 @@
    adresini UYDURMAZ (08); bağlantı noktası kapalıyken «her şey çalışıyor»
    der (118); rütbe çipi bilinmeyen rütbeyi 0 diye çizmez (140); şimdi
    çizgisi saatin yerinde (151); modül şeridi (01); hafta (05); telefonda
-   etiket sabit (163); gruplu bildirimler (09); alt bant (169, 166). */
+   etiket sabit (163); gruplu bildirimler (09); alt bant (169, 166); zilde
+   ertele ve «gördüm» (2026-10-09). */
 
 (function(){
   const NS = window.R || window.SP || window.ESP;
@@ -301,6 +302,73 @@
         expect(r.width >= 340).toBe(true);
         expect(r.left >= d.querySelector('.kenar').getBoundingClientRect().left + 200).toBe(true);
       }finally{ K.katmanKapat(); d.remove(); }
+    });
+
+    /* Kullanıcı (2026-10-09): «bildirim temizleme silme gibi şeyler yok».
+       Satır kayıt değil: ertelemek ve görmek işi yapılmış saymaz. */
+    describe('Zil — ertele ve «gördüm»', () => {
+      const GR = () => [
+        { modul:'ays', satirlar:[{ id:'kart', metin:'12 kart bekliyor', route:'cards' },
+          { id:'kayit', metin:'Kayıt sorunu var', act:'show-store-error', acil:true }] },
+        { modul:'mer', satirlar:[{ id:'onay', metin:'2 öneri Onaylar’da bekliyor', route:'onaylar' }] },
+      ];
+      function sakla(){ let v = null; try{ v = localStorage.getItem('lifeos.zil'); localStorage.removeItem('lifeos.zil'); }catch(e){}
+        return () => { try{ if(v == null) localStorage.removeItem('lifeos.zil'); else localStorage.setItem('lifeos.zil', v); }catch(e){} }; }
+
+      it('ertelenen satır bugün sayılmaz, yarın döner; acil satır ertelenemez, noktayı hep yakar', () => {
+        const geri = sakla();
+        try{
+          let d = K.zilDurumu(GR());
+          expect([d.sayi, d.acil, d.yeni, d.ertelenen]).toEqual([3, true, true, 0]);
+          const dun = new Date(); dun.setDate(dun.getDate() - 1);
+          const g = x => x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0');
+          localStorage.setItem('lifeos.zil', JSON.stringify({ ertele:{ 'ays:kart':g(new Date()), 'ays:kayit':g(new Date()),
+            'mer:onay':g(dun) }, gordu:[] }));
+          d = K.zilDurumu(GR());
+          expect(d.ertelenen).toBe(1);                                         // yalnız bugünkü, acil değil
+          expect(d.gruplar[0].satirlar.map(s => s.id)).toEqual(['kayit']);
+          expect(d.gruplar[1].satirlar.map(s => s.id)).toEqual(['onay']);      // dünkü erteleme düştü
+          const ertesi = new Date(); ertesi.setDate(ertesi.getDate() + 1);
+          expect(K.zilDurumu(GR(), ertesi).ertelenen).toBe(0);
+        }finally{ geri(); }
+      });
+
+      it('panelde: ertele satırı kaldırır ve geri alınır; «Hepsini gördüm» noktayı söndürür, yeni satır yeniden yakar', () => {
+        const geri = sakla();
+        const d = yerlestir('<div class="site site--v5" style="position:fixed;inset:0;z-index:1">'
+          + K.kenarCubugu({ modul:'ays', cekmeceler:[], bildirim:{ sayi:2, acil:false, yeni:true } }) + '</div>');
+        try{
+          const gr = [{ modul:'ays', satirlar:[{ id:'kart', metin:'12 kart bekliyor', route:'cards' },
+            { id:'analiz', metin:'1 denemenin analizi eksik', route:'exams' }] }];
+          const btn = d.querySelector('[data-act="bildirim-ac"]');
+          expect(!!btn.querySelector('.ust__zil-nokta')).toBe(true);
+          let p = K.katmanAc('kt-zil', K.bildirimPaneli({ gruplar:gr }), btn);
+          expect(p.querySelectorAll('.bildirim__ertele').length).toBe(2);
+          expect(!!p.querySelector('.bildirim__gordu')).toBe(true);
+          p.querySelector('[data-zil-id="ays:kart"]').click();
+          p = document.getElementById('kt-zil');
+          expect(Array.from(p.querySelectorAll('.bildirim__metin')).map(x => x.textContent)).toEqual(['1 denemenin analizi eksik']);
+          expect(p.querySelector('.bildirim__sayi').textContent.trim()).toBe('1');
+          expect(p.querySelector('.bildirim__ertelenen').textContent).toContain('1 bildirim yarına ertelendi.');
+          expect(btn.getAttribute('aria-label')).toBe('Bildirimler, 1 tane');
+          p.querySelector('[data-zil="geri"]').click();
+          p = document.getElementById('kt-zil');
+          expect(p.querySelectorAll('.bildirim__metin').length).toBe(2);
+          expect(p.querySelector('.bildirim__ertelenen')).toBeNull();
+          p.querySelector('.bildirim__gordu').click();
+          p = document.getElementById('kt-zil');
+          expect(p.querySelector('.bildirim__gordu')).toBeNull();
+          expect(p.querySelectorAll('.bildirim__metin').length).toBe(2);       // iş yapılmadı: liste aynı
+          expect(btn.querySelector('.ust__zil-nokta')).toBeNull();
+          expect(K.zilDurumu(gr).yeni).toBe(false);
+          /* Sayı değişti (yeni kart): yeniden «yeni». */
+          gr[0].satirlar[0].metin = '13 kart bekliyor';
+          expect(K.zilDurumu(gr).yeni).toBe(true);
+          /* Eski çağıran «yeni» vermezse sayı noktayı yakar. */
+          expect(K.kenarCubugu({ modul:'ays', cekmeceler:[], bildirim:{ sayi:1 } })).toContain('ust__zil-nokta');
+          expect(K.kenarCubugu({ modul:'ays', cekmeceler:[], bildirim:{ sayi:1, yeni:false } }).indexOf('ust__zil-nokta')).toBe(-1);
+        }finally{ K.katmanKapat(); d.remove(); geri(); }
+      });
     });
 
     it('oz-169 oz-166 telefonda dört sekme ve sağ altta +', () => {

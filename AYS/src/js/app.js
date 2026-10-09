@@ -177,26 +177,26 @@ R.App = (function(){
   function bildirimGruplari(){
     const ays = [];
     const kart = C.dueCards().length;
-    if(kart) ays.push({ metin:kart + ' tekrar kartı bekliyor', route:'cards', acil:C.cardDebt() > 10 });
+    if(kart) ays.push({ id:'kart', metin:kart + ' tekrar kartı bekliyor', route:'cards', acil:C.cardDebt() > 10 });
     const analiz = C.analysisDebt().length;
-    if(analiz) ays.push({ metin:analiz + ' denemenin analizi eksik', route:'exams', acil:true });
+    if(analiz) ays.push({ id:'analiz', metin:analiz + ' denemenin analizi eksik', route:'exams', acil:true });
     const tetik = C.protocolTriggers().length;
-    if(tetik) ays.push({ metin:tetik + ' telafi protokolü tetiklendi', route:'protocols', acil:true });
+    if(tetik) ays.push({ id:'protokol', metin:tetik + ' telafi protokolü tetiklendi', route:'protocols', acil:true });
     const w = S.weeks[M.weekId(M.currentWeek())];
-    if(w && !w.signedAt) ays.push({ metin:'Bu haftanın sözleşmesi imzalanmadı', route:'week' });
-    if(S.storeHealth && S.storeHealth.error) ays.push({ metin:'Kayıt sorunu var', act:'show-store-error', acil:true });
+    if(w && !w.signedAt) ays.push({ id:'sozlesme', metin:'Bu haftanın sözleşmesi imzalanmadı', route:'week' });
+    if(S.storeHealth && S.storeHealth.error) ays.push({ id:'kayit', metin:'Kayıt sorunu var', act:'show-store-error', acil:true });
     const mer = [];
     const onay = onaySayisi();
-    if(onay) mer.push({ metin:onay + ' öneri Onaylar’da bekliyor', route:'onaylar' });
+    if(onay) mer.push({ id:'onay', metin:onay + ' öneri Onaylar’da bekliyor', route:'onaylar' });
     return [{ modul:'ays', satirlar:ays }, { modul:'mer', satirlar:mer }];
   }
 
   function ustCubukHtml(sc){
     const aktif = bolumOf(sc.id);
     const onay = onaySayisi();
-    const gruplar = safe(bildirimGruplari, []) || [];
-    const bil = gruplar.reduce((t, g) => t + g.satirlar.length, 0);
-    const acil = gruplar.some(g => g.satirlar.some(s => s.acil));
+    /* Zil (kabuk zilDurumu): bugün ertelenen sayılmaz; nokta görülmemiş
+       ya da acil satırla yanar. */
+    const zil = K.zilDurumu(safe(bildirimGruplari, []) || []);
     /* v5 (LifeOS Tasarım Dili sürüm 5): kenar çubuğu + ince üst şerit; açık
        çekmecenin bölümleri kenarda (bölüm çubuğunun yerini alır). */
     const r = UST[sc.id] || sc.id;
@@ -209,7 +209,7 @@ R.App = (function(){
         bolumler:g.items.map(v => ({ route:v.id, ad:v.label, on:v.id === r,
           rozet:safe(() => badgeFor(v.id), null) || null })) })),
       onay:{ sayi:onay, route:'onaylar' },
-      bildirim:{ sayi:bil, acil },
+      bildirim:{ sayi:zil.sayi, acil:zil.acil, yeni:zil.yeni },
       baglanti:safe(baglantiVerisi, null) || { durum:'kapali' },
       rutbe:safe(rutbeVerisi, null) || null,
       profil:profilVerisi(),

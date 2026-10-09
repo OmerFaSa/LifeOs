@@ -136,27 +136,27 @@ ESP.App = (function(){
   function bildirimGruplari(){
     const esp = [];
     const d = S.days[U.todayISO()];
-    if(!d || !ESP.Model.dayHasEntry(d)) esp.push({ metin:'Bugünün pratiği girilmedi', route:'today' });
+    if(!d || !ESP.Model.dayHasEntry(d)) esp.push({ id:'pratik', metin:'Bugünün pratiği girilmedi', route:'today' });
     if(routeOn('lang')){
       const due = safe(() => ESP.SRS.dueCards().length, 0) || 0;
-      if(due) esp.push({ metin:due + ' kartın vadesi geldi', route:'lang' });
+      if(due) esp.push({ id:'kart', metin:due + ' kartın vadesi geldi', route:'lang' });
     }
-    if(ESP.Model.backupDue && ESP.Model.backupDue()) esp.push({ metin:'Yedek alma zamanı', route:'profile' });
-    if(S.storeHealth && S.storeHealth.error) esp.push({ metin:'Kayıt sorunu var', act:'show-store-error', acil:true });
+    if(ESP.Model.backupDue && ESP.Model.backupDue()) esp.push({ id:'yedek', metin:'Yedek alma zamanı', route:'profile' });
+    if(S.storeHealth && S.storeHealth.error) esp.push({ id:'kayit', metin:'Kayıt sorunu var', act:'show-store-error', acil:true });
     const mer = [];
     const onay = onaySayisi();
-    if(onay) mer.push({ metin:onay + ' öneri Onaylar’da bekliyor', route:'onaylar' });
+    if(onay) mer.push({ id:'onay', metin:onay + ' öneri Onaylar’da bekliyor', route:'onaylar' });
     const king = (S.ui.hkmBildirim || []).length;
-    if(king) mer.push({ metin:king + ' King bildirimi', route:'today' });
+    if(king) mer.push({ id:'king', metin:king + ' King bildirimi', route:'today' });
     return [{ modul:'esp', satirlar:esp }, { modul:'mer', satirlar:mer }];
   }
 
   function ustCubukHtml(sc){
     const aktif = sectionOf(sc.id);
     const onay = onaySayisi();
-    const gruplar = safe(bildirimGruplari, []) || [];
-    const bil = gruplar.reduce((t, g) => t + g.satirlar.length, 0);
-    const acil = gruplar.some(g => g.satirlar.some(s => s.acil));
+    /* Zil (kabuk zilDurumu): bugün ertelenen sayılmaz; nokta görülmemiş
+       ya da acil satırla yanar. */
+    const zil = K.zilDurumu(safe(bildirimGruplari, []) || []);
     /* v5 (LifeOS Tasarım Dili sürüm 5): kenar çubuğu + ince üst şerit; açık
        çekmecenin bölümleri kenarda (bölüm çubuğunun yerini alır). */
     const r = UST[sc.id] || sc.id;
@@ -169,7 +169,7 @@ ESP.App = (function(){
         bolumler:g.views.map(v => ({ route:v.route, ad:v.label, on:v.route === r,
           rozet:safe(() => badgeFor(v.route), null) || null })) })),
       onay:{ sayi:onay, route:'onaylar' },
-      bildirim:{ sayi:bil, acil },
+      bildirim:{ sayi:zil.sayi, acil:zil.acil, yeni:zil.yeni },
       baglanti:safe(baglantiVerisi, null) || { durum:'kapali' },
       rutbe:safe(rutbeVerisi, null) || null,
       profil:profilVerisi(),

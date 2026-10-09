@@ -79,6 +79,7 @@ verilen kararlar:
 | Yedek dosya olarak | `sistem/hesap.py` sözü 20 (ek): Hesap › Yedekler'den bir yedek şifreyle dosya olarak iner (`/yedek-indir`, admin + bilgisayar) ve dosyadan yüklenir (`/yedek-yukle`, ham gövde; SQLite denetimi; listeye «dis»); geri yükleme aynı büyük aksiyon | 2026-10-09 |
 | AYS telefon bildirimi, ana ekran kısayolları | `AYS/src/js/core/takvim.js` `bildirimListesi`/`planla` (günün planı seçilen saatte, hedefin son günü, kullanıcının yazdığı sınav günü; tahmin edilen güne «yarın sınav» denmez), Ofis ayarları › Telefon bildirimi; `uygulama/ios/project.yml` `UIApplicationShortcutItems` + `Uygulama.swift`: simgeye basılı tutunca modül doğrudan açılır | 2026-10-09 |
 | Bildirim temizliği ve uygulama rozeti | `brand/ortak/bildirim.js` sözleri 5–6 (`kaldir`, `rozet`, açılışta kurulum), `BildirimKoprusu.swift` sözleri 5–6: modül açılınca gelmiş bildirimleri kalkar; simgede üç modülün Onaylar toplamı | 2026-10-09 |
+| Zilde ertele ve «gördüm» | `brand/ortak/kabuk.js` `zilDurumu`/`bildirimPaneli`: satır yarına ertelenir (acil olan ertelenemez), «Hepsini gördüm» noktayı söndürür, yeni ya da değişen satır yeniden yakar; işi yapılmış saymaz, kayda yazılmaz (bu cihaz, bu modül) | 2026-10-09 |
 
 ## 4. Değişmeyen sözler
 

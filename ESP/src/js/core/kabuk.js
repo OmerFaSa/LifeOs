@@ -386,7 +386,7 @@ window.LIFEOS = window.LIFEOS || {};
       + ustSes(true)
       + '<button class="ust__zil kenar__arac" type="button" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
       +   ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
-      +   simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + etiket('Bildirimler')
+      +   simge('zil') + (zilNoktaVar(bil) ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + etiket('Bildirimler')
       +   (bil.sayi ? '<span class="kenar__sayi' + (bil.acil ? ' is-acil' : '') + '" aria-hidden="true">' + kac(bil.sayi) + '</span>' : '')
       + '</button>'
       + '</div><div class="kenar__ben">'
@@ -441,7 +441,7 @@ window.LIFEOS = window.LIFEOS || {};
       +   ustHesap()
       +   '<button class="ust__zil" data-oz="009" data-act="bildirim-ac" aria-haspopup="dialog"'
       +     ' aria-label="' + kac(bil.sayi ? 'Bildirimler, ' + bil.sayi + ' tane' : 'Bildirimler, yok') + '">'
-      +     simge('zil') + (bil.acil || bil.sayi ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</button>'
+      +     simge('zil') + (zilNoktaVar(bil) ? '<i class="ust__zil-nokta" aria-hidden="true"></i>' : '') + '</button>'
       +   (r && r.etiket && r.etiket !== '—' ? '<button class="ust__madalya ust--telefon" data-act="go" data-route="' + kac(r.route || 'rutbe') + '"'
       +     ' aria-label="' + kac('Rütbe ' + (r.ad || '') + ' ' + r.etiket) + '">'
       +     simge('rutbe') + '</button>' : '')   /* SADE (2026-10-05): renkli daire değil, çizgi madalya */
@@ -763,7 +763,88 @@ window.LIFEOS = window.LIFEOS || {};
       + '</div>';
   }
 
-  /* Gruplu bildirimler (09). o: { gruplar:[{ modul, satirlar:[{ metin, route, act, data, acil }] }] }
+  /* ZİL: ERTELE VE «GÖRDÜM» (kullanıcı, 2026-10-09: «bildirim temizleme
+     silme gibi şeyler yok»). Zil satırları kayıt değildir: durumdan
+     hesaplanır, iş yapılınca kendiliğinden kalkar. Kullanıcı yine de:
+       · bir satırı YARINA ERTELER: bugün listede ve sayıda görünmez, yarın
+         (iş hâlâ duruyorsa) geri gelir. ACİL satır ertelenemez.
+       · «HEPSİNİ GÖRDÜM» der: satırlar listede kalır (iş yapılmadı), zilin
+         noktası söner; yeni bir satır ya da metni değişen bir satır gelince
+         yeniden yanar. Acil satır noktayı her zaman yakar.
+     Ertelemek de görmek de işi yapılmış saymaz, hiçbir kayda yazılmaz.
+     Tercih bu cihazda, bu modülde durur (localStorage; modüller ayrı köken).
+     Satır kimliği `id` (yoksa route/act); sayılı metin değişince «yeni». */
+  const ZIL = 'lifeos.zil';
+  function gunAnahtari(d){
+    d = d || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function zilOku(){
+    try{
+      const v = JSON.parse(localStorage.getItem(ZIL) || 'null') || {};
+      return { ertele:v.ertele && typeof v.ertele === 'object' ? v.ertele : {}, gordu:Array.isArray(v.gordu) ? v.gordu : [] };
+    }catch(e){ return { ertele:{}, gordu:[] }; }
+  }
+  function zilYaz(v){ try{ localStorage.setItem(ZIL, JSON.stringify(v)); }catch(e){ /* depo yok: yalnız bu açılış */ } }
+  function zilKimlik(g, s){ return g.modul + ':' + (s.id || s.route || s.act || s.metin); }
+  function zilIz(g, s){ return zilKimlik(g, s) + '|' + s.metin; }
+  /* Gruplar → bugün ertelenenler süzülmüş hâli; sayı, acil, yeni, ertelenen. */
+  function zilDurumu(gruplar, simdi){
+    const z = zilOku(), bugun = gunAnahtari(simdi), gor = new Set(z.gordu);
+    let ertelenen = 0, sayi = 0, acil = false, yeni = false;
+    const gr = (gruplar || []).filter(g => g && Array.isArray(g.satirlar)).map(g => Object.assign({}, g, {
+      satirlar:g.satirlar.filter(s => {
+        if(!s.acil && z.ertele[zilKimlik(g, s)] === bugun){ ertelenen++; return false; }
+        sayi++;
+        if(s.acil) acil = true;
+        else if(!gor.has(zilIz(g, s))) yeni = true;
+        return true;
+      }) }));
+    return { gruplar:gr, sayi, acil, yeni, ertelenen };
+  }
+  /* Eski çağıran «yeni» vermezse sayı noktayı yakar (önceki davranış). */
+  function zilNoktaVar(bil){ return !!(bil.acil || (bil.yeni == null ? bil.sayi : bil.yeni)); }
+  let zilSon = [];
+  /* Açık paneldeki eylem: ertele | geri | gordu. Paneli yerinde yeniden çizer,
+     zil düğmelerinin noktasını ve sayısını tazeler. */
+  function zilEylem(ad, id, panel){
+    const z = zilOku(), bugun = gunAnahtari();
+    Object.keys(z.ertele).forEach(k => { if(z.ertele[k] !== bugun) delete z.ertele[k]; });
+    if(ad === 'ertele' && id) z.ertele[id] = bugun;
+    else if(ad === 'geri') z.ertele = {};
+    else if(ad === 'gordu'){
+      const d = zilDurumu(zilSon);
+      z.gordu = [].concat(...d.gruplar.map(g => g.satirlar.filter(s => !s.acil).map(s => zilIz(g, s)))).slice(0, 200);
+    }else return false;
+    zilYaz(z);
+    if(panel && panel.id && katmanTazele(panel.id, bildirimPaneli({ gruplar:zilSon }))){
+      const yeni = document.getElementById(panel.id);
+      const ilk = yeni && (yeni.querySelector('.kmenu__bildirim, [data-zil]') || yeni.querySelector('button'));
+      if(ilk){ try{ ilk.focus({ preventScroll:true }); }catch(e){} }
+    }
+    zilTazele();
+    return true;
+  }
+  function zilTazele(){
+    if(typeof document === 'undefined') return;
+    const d = zilDurumu(zilSon);
+    document.querySelectorAll('[data-act="bildirim-ac"]').forEach(b => {
+      const nokta = b.querySelector('.ust__zil-nokta');
+      if(!(d.acil || d.yeni)){ if(nokta) nokta.remove(); }
+      else if(!nokta){
+        const i = document.createElement('i');
+        i.className = 'ust__zil-nokta';
+        i.setAttribute('aria-hidden', 'true');
+        const ic = b.querySelector('.kbk-ic');
+        if(ic) ic.after(i); else b.prepend(i);
+      }
+      const say = b.querySelector('.kenar__sayi');
+      if(say){ if(d.sayi) say.textContent = String(d.sayi); else say.remove(); }
+      b.setAttribute('aria-label', d.sayi ? 'Bildirimler, ' + d.sayi + ' tane' : 'Bildirimler, yok');
+    });
+  }
+
+  /* Gruplu bildirimler (09). o: { gruplar:[{ modul, satirlar:[{ id, metin, route, act, data, acil }] }] }
      Modül grupları önce, Merkez önerileri ayrı kümede en sonda.
      BİÇİM (kullanıcı, 2026-10-03: «bildirim kısmı sol altta sıkışmasın,
      daha güzel tasarla»): başlık, toplam sayı ve kapat; her bildirim bir
@@ -772,7 +853,9 @@ window.LIFEOS = window.LIFEOS || {};
      (.kmenu--yan, capaYerlestir); telefonda alttan açılır. */
   function bildirimPaneli(o){
     o = o || {};
-    const gr = (o.gruplar || []).filter(g => g && g.satirlar && g.satirlar.length);
+    zilSon = o.gruplar || [];
+    const z = zilDurumu(zilSon);
+    const gr = z.gruplar.filter(g => g.satirlar.length);
     const sirali = gr.filter(g => g.modul !== 'mer').concat(gr.filter(g => g.modul === 'mer'));
     const toplam = sirali.reduce((n, g) => n + g.satirlar.length, 0);
     const govde = sirali.length ? sirali.map(g => {
@@ -783,10 +866,15 @@ window.LIFEOS = window.LIFEOS || {};
         + g.satirlar.map(s => {
           const veri = Object.keys(s.data || {}).map(a => ' ' + kac(a) + '="' + kac(s.data[a]) + '"').join('');
           const hedef = s.route ? ' data-act="go" data-route="' + kac(s.route) + '"' : ' data-act="' + kac(s.act) + '"';
-          return '<button class="kmenu__bildirim' + (s.acil ? ' is-acil' : '') + '"' + hedef + veri + '>'
+          const satir = '<button class="kmenu__bildirim' + (s.acil ? ' is-acil' : '') + '"' + hedef + veri + '>'
             + '<span class="bildirim__metin">' + kac(s.metin) + '</span>'
             + (s.acil ? '<span class="bildirim__acil">Acil</span>' : '')
             + simge('ileri') + '</button>';
+          /* Acil satır ertelenemez. */
+          return '<div class="bildirim__satir">' + satir + (s.acil ? ''
+            : '<button type="button" class="bildirim__ertele" data-zil="ertele" data-zil-id="' + kac(zilKimlik(g, s)) + '"'
+              + ' aria-label="' + kac(s.metin + ': yarına ertele') + '" title="Yarına ertele">' + simge('bugun') + '</button>')
+            + '</div>';
         }).join('')
         + '</section>';
     }).join('') : '<div class="kmenu__bos bildirim__bos"><span class="bildirim__bos-simge" aria-hidden="true">' + simge('zil') + '</span>'
@@ -794,9 +882,13 @@ window.LIFEOS = window.LIFEOS || {};
     return '<div class="katman kmenu kmenu--bildirim kmenu--yan" role="dialog" aria-label="Bildirimler">'
       + '<header class="bildirim__bas"><b>Bildirimler</b>'
       +   (toplam ? '<span class="bildirim__sayi" aria-label="' + toplam + ' bildirim">' + toplam + '</span>' : '')
+      +   (z.yeni ? '<button type="button" class="bildirim__gordu" data-zil="gordu">Hepsini gördüm</button>' : '')
       +   '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Bildirimleri kapat">' + simge('kapat') + '</button>'
       + '</header>'
-      + '<div class="bildirim__liste">' + govde + '</div></div>';
+      + '<div class="bildirim__liste">' + govde + '</div>'
+      + (z.ertelenen ? '<p class="bildirim__ertelenen">' + z.ertelenen + ' bildirim yarına ertelendi.'
+        + '<button type="button" data-zil="geri">Geri al</button></p>' : '')
+      + '</div>';
   }
 
   /* Hızlı ekle yelpazesi (166). o: { modul, satirlar:[{ ad, act, data }], loc }
@@ -1002,6 +1094,9 @@ window.LIFEOS = window.LIFEOS || {};
     document.addEventListener('click', e => {
       /* Katmanın kendi kapat düğmesi (bildirimler). */
       if(e.target.closest && e.target.closest('[data-katman-kapat]')){ e.preventDefault(); katmanKapat(); return; }
+      /* Zil: ertele, geri al, hepsini gördüm (kabuğun kendi işi). */
+      const zb = e.target.closest && e.target.closest('[data-zil]');
+      if(zb){ e.preventDefault(); zilEylem(zb.getAttribute('data-zil'), zb.getAttribute('data-zil-id'), zb.closest('.katman')); return; }
       /* Sayfa başındaki bilgi kartı: düğme açar/kapatır, dışarısı kapatır. */
       const bd = e.target.closest && e.target.closest('.sayfabasi__bilgi-dugme');
       if(bd){
@@ -1133,7 +1228,7 @@ window.LIFEOS = window.LIFEOS || {};
     simge, modulIsareti, adres, simdiOrani, saatMetni,
     ustCubuk, kenarCubugu, ustSerit, iskeletV5, gunSeridi, haftaSeridi, sayfaBasi, railBilgiye, seciciHazirla, seciciKomsu,
     bolumCubugu, altBant, menuSayfasi,
-    modulMenusu, bildirimPaneli, hizliEkle,
+    modulMenusu, bildirimPaneli, hizliEkle, zilDurumu, _zilEylem:zilEylem,
     katmanAc, katmanKapat, katmanAcik, katmanTazele, telefonMu, gecis, kenarDar, kenarDarMi, kenarIlkDar,
     capaYerlestir, kenarBirak, kenarSakinlestir, kenarUyandir, SAKIN_MS,
   });
