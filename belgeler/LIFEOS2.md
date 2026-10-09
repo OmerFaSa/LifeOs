@@ -85,6 +85,7 @@ verilen kararlar:
 | AYS öğrenme yolu | `AYS/src/js/core/ogrenyolu.js` (`R.OgrenYolu`), konu ekranında «Öğrenme yolu»: öğren → kartla → soru çöz → yanlışları kapat → konu testi → tekrar test; her adım var olan kayıttan okunur ve etiketlenir (ölçüldü / hesaplandı / beyan), sıradaki adım ve eylemi kodla seçilir, eşikler yazılır | 2026-10-09 |
 | «Bu konuyu öğren» | AYS konu ekranı «Konunun malzemeleri»: konu anlatımı, kavram sözlüğü, çalışma kâğıdı BAM'dan açık istekle (`brand/ortak/urun.js` söz 6, `iste(metin, { tur, konu, ayrinti, etiket })`); `HKM/core/urunler.py` ETIKET_RE, `sohbet.urun_modulden(istek=)`, `king._teklif_urun` etiketi `urun.add` teklifine geri koyar; malzeme konunun yanında, internetsiz açılır; her istek King onayından geçer | 2026-10-09 |
 | Konuda «Anlamadım, sor» | `AYS/src/js/core/konusor.js` (`R.KonuSor`): koçun model zinciriyle bu konunun bağlamında (ders, bölüm, konu, yapıştırılan parça; kişisel veri yok) anlatır; cevap «doğrulanmadı», kaydedilmez, istenirse karta döner (kaynak `konusor`); model yoksa Ofis ayarlarına yönlendirir | 2026-10-09 |
+| Çekirdek konu özetleri | `AYS/src/js/data/ozetler.js` (`R.KONU_OZET`): her konunun uygulamada duran kısa özeti (3–5 madde, dikkat, sayıları elle hesaplanmış örnek); internetsiz ve modelsiz okunur, «elle yazıldı · doğrulanmadı» etiketli; konu ekranında «Kısa özet». Ders ders gelir: tamamlananlar `tests/ozetler.test.js` TAM listesinde | 2026-10-09 |
 
 ## 4. Değişmeyen sözler
 

@@ -2510,3 +2510,7 @@ body.is-dragging .drop.is-over{
 .konusor__cevap{ white-space:pre-wrap; line-height:1.5; }
 #konusor-akis:empty{ display:none; }
 #konusor-akis{ margin-bottom:10px; }
+
+/* Kısa özet (data/ozetler.js). */
+.konuozet{ margin:0; padding-left:20px; display:flex; flex-direction:column; gap:8px; font-size:14.5px; line-height:1.5; }
+.konuozet li::marker{ color:var(--text-3); }

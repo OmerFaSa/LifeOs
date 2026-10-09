@@ -103,6 +103,22 @@ R.Screens.topic = (function(){
     });
   }
 
+  /* KISA ÖZET (data/ozetler.js): konunun uygulamada duran özü; internetsiz
+     ve modelsiz okunur. Elle yazıldı, doğrulanmadı: etiket yazılır. */
+  function ozetCard(subject, topic){
+    const o = (R.KONU_OZET || {})[topic.id];
+    if(!o) return null;
+    return K.Card({
+      title:'Kısa özet', sub:'elle yazıldı · doğrulanmadı · internetsiz', wide:true,
+      body:html`
+        <ul class="konuozet">${map(o.ana, m => html`<li>${m}</li>`)}</ul>
+        ${when(o.dikkat, () => html`<p class="small mt-10"><b>Dikkat:</b> ${o.dikkat}</p>`)}
+        ${when(o.ornek, () => html`<p class="small mt-6"><b>Örnek:</b> ${o.ornek}</p>`)}
+        <p class="tiny dim mt-10">Başlangıç özetidir; derin ve kaynaklı anlatım için «Bu konuyu öğren». Bir hata görürsen
+          kitabınla karşılaştır.</p>`,
+    });
+  }
+
   /* ANLAMADIM, SOR (core/konusor.js): koçun modeli bu konunun bağlamında
      anlatır; cevap «doğrulanmadı», kayda yazılmaz, istenirse karta döner. */
   let sorBusy = false;
@@ -159,7 +175,7 @@ R.Screens.topic = (function(){
     pekistir:() => K.Button({ label:'Testi gir', icon:'edit', size:'sm', tone:'primary', act:'topic-edit' }),
   };
   const YOL_NEDEN = {
-    ogren:'Önce konunun kendisi: anlatımı oku ya da bir ders izleyip not al; okuyunca «Okudum»a bas.',
+    ogren:'Önce konunun kendisi: kısa özeti ve anlatımı oku ya da bir ders izleyip not al; okuyunca «Okudum»a bas.',
     kartla:'Öğrendiğini karta çevir: kart, unutmadan önce sana geri sorar.',
     coz:'Bugün ekranında bir bloğu bu konuya bağla; çözdüğün soru ve doğruluk buraya sayılır.',
     duzelt:'Bu konudan açık yanlış var: kök nedenini yaz, ilkesini çıkar, kapat.',
@@ -346,6 +362,7 @@ R.Screens.topic = (function(){
       K.Span(7, K.Stack([
         headerCard(subject, topic, st, risk),
         yolCard(subject, topic, st),
+        ozetCard(subject, topic),
         malzemeCard(subject, topic),
         sorCard(subject, topic),
         measureCard(subject, topic, st),
