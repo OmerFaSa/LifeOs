@@ -1220,3 +1220,242 @@ def run():
             eq((kod, v["ok"]), (200, True))
             eq(s.iste("/api/hesap/gelen", baslik={"Authorization": "Bearer lifeos_yok"})[0], 401)
     test("HTTP: uyarilar, cihaza ad verme ve anahtar denemesi", t_http_cihaz_uyari)
+
+    # ------------------------------------------------ deponun yedegi (soz 20)
+
+    def _gun(r, n=1):
+        r.saat.t += n * 86400
+
+    def t_kopya_gunluk():
+        with _Depo() as r:
+            eq(r.d.kopya_gunluk(), None)                                  # hesap yok: yedeklenecek bir sey yok
+            k, j = _admin(r)
+            r.d.esitle(k, "spi/ben", A, 0, [{"y": "v/1", "d": {"kilo": 72}, "z": 5}])
+            x = r.d.kopya_gunluk()
+            eq((x["tur"], x["kullanici"], x["kayit"]), ("gunluk", 1, 1))
+            ok(os.path.isfile(os.path.join(r.d.kopya_klasoru(), x["ad"])))
+            eq(r.d.kopya_gunluk(), None)                                  # ayni gun ikinci kez alinmaz
+            no([a for a in os.listdir(r.d.kopya_klasoru()) if not hesap.KOPYA_RE.match(a)])   # yarim/-wal kalmaz
+            for _ in range(9):
+                _gun(r)
+                ok(r.d.kopya_gunluk())
+            l = r.d.kopyalar()
+            eq(len(l), hesap.KOPYA_SAKLA["gunluk"])                       # son 7 gun
+            eq(l[0]["zaman"] > l[-1]["zaman"], True)                      # en yenisi once
+            for _ in range(7):
+                r.saat.t += 1
+                r.d.kopya_al("elle")
+            eq(len([x for x in r.d.kopyalar() if x["tur"] == "elle"]), hesap.KOPYA_SAKLA["elle"])
+            eq(len([x for x in r.d.kopyalar() if x["tur"] == "gunluk"]), hesap.KOPYA_SAKLA["gunluk"])
+            _hata(lambda: r.d.kopya_al("baska"), 400)
+    test("yedek: gunde bir, SQLite denetiminden gecer; son 7 gunluk ve 5 elle kalir", t_kopya_gunluk)
+
+    def t_kopya_bak():
+        with _Depo() as r:
+            _admin(r)
+            x = r.d.kopya_al("elle")
+            yol = os.path.join(r.d.kopya_klasoru(), x["ad"])
+            eq(hesap.Depo._kopya_bak(yol), {"kullanici": 1, "kayit": 0})
+            bozuk = os.path.join(r.klasor, "bozuk.db")
+            with open(yol, "rb") as f:
+                ham = bytearray(f.read())
+            ham[200:4096] = b"\xff" * (4096 - 200)                        # birinci sayfanin semasi bozuldu
+            with open(bozuk, "wb") as f:
+                f.write(bytes(ham))
+            _hata(lambda: hesap.Depo._kopya_bak(bozuk), 422)
+            import sqlite3
+            yabanci = os.path.join(r.klasor, "yabanci.db")
+            c = sqlite3.connect(yabanci)
+            c.execute("CREATE TABLE t(x)")
+            c.commit()
+            c.close()
+            e = _hata(lambda: hesap.Depo._kopya_bak(yabanci), 422)
+            ok("hesap yedeği değil" in e.mesaj)
+            metin = os.path.join(r.klasor, "metin.db")
+            with open(metin, "w") as f:
+                f.write("merhaba")
+            _hata(lambda: hesap.Depo._kopya_bak(metin), 422)
+    test("yedek: bozuk ya da hesap olmayan dosya yedek sayilmaz", t_kopya_bak)
+
+    def t_kopya_tetikle():
+        with _Depo() as r:
+            _admin(r)
+            no(r.d.kopya_tetikle())                                       # gecici depo: kendiliginden yedek yok
+            r.d.otomatik_kopya = True
+            ok(r.d.kopya_tetikle())
+            no(r.d.kopya_tetikle())                                       # bakis araligi dolmadan yeniden bakmaz
+            for t in threading.enumerate():
+                if t.name == "hesap-yedek":
+                    t.join(10)
+            eq([x["tur"] for x in r.d.kopyalar()], ["gunluk"])
+    test("yedek: istek yolunda arkada alinir, en cok on dakikada bir bakilir", t_kopya_tetikle)
+
+    def t_kopya_ikinci():
+        with _Depo() as r:
+            k, j = _admin(r)
+            r.d.kullanici_ekle(k, "anne", "parola-456")
+            uye = r.d.oturum(r.d.giris("anne", "parola-456", B, "iPad")["jeton"])
+            yer = os.path.join(r.klasor, "usb")
+            os.makedirs(yer)
+            _hata(lambda: r.d.kopya_ayarla(uye, True, yer), 403)          # uye ayarlayamaz
+            _hata(lambda: r.d.kopya_ayarla(k, False, yer), 403)           # ev agindan ayarlanmaz
+            _hata(lambda: r.d.kopya_ayarla(k, True, "goreli/yol"), 400)
+            _hata(lambda: r.d.kopya_ayarla(k, True, os.path.join(r.klasor, "yok")), 400)
+            os.makedirs(r.d.kopya_klasoru(), exist_ok=True)
+            _hata(lambda: r.d.kopya_ayarla(k, True, r.d.kopya_klasoru()), 400)   # asil klasorun kendisi
+            v = r.d.kopya_ayarla(k, True, yer)
+            eq((v["ikinci"]["acik"], v["ikinci"]["hata"], v["ikinci"]["yol"]), (True, "", os.path.abspath(yer)))
+            eq(len([a for a in os.listdir(yer) if hesap.IKINCI_RE.match(a)]), 1)   # hemen bir es
+            no([a for a in os.listdir(yer) if a.startswith(".lifeos-yazma")])
+            with open(os.path.join(yer, "benim.txt"), "w") as f:
+                f.write("x")
+            for _ in range(9):
+                _gun(r)
+                r.d.kopya_gunluk()
+            eq(len([a for a in os.listdir(yer) if hesap.IKINCI_RE.match(a)]), hesap.IKINCI_SAKLA)
+            ok(os.path.isfile(os.path.join(yer, "benim.txt")))            # yalniz kendi dosyalari budanir
+            shutil.rmtree(yer)                                            # USB cikti
+            _gun(r)
+            x = r.d.kopya_gunluk()
+            eq(x["ikinci"], False)                                        # yedek yine alindi
+            ok(os.path.isfile(os.path.join(r.d.kopya_klasoru(), x["ad"])))
+            o = r.d.kopya_ozet(k)
+            ok(o["ikinci"] and "İkinci yere yazılamadı" in o["ikinci_hata"])
+            eq(set(r.d.kopya_ozet(uye)), {"son", "adet"})                 # uye yalniz zamani gorur
+            eq(r.d.kopya_durum(k, False)["ikinci"]["yol"], "")            # yol yalniz bilgisayara
+            eq(r.d.kopya_durum(k, False)["klasor"], "")
+            _hata(lambda: r.d.kopya_durum(uye, True), 403)
+            eq(r.d.kopya_ayarla(k, True, "")["ikinci"]["acik"], False)
+    test("yedek: ikinci yer admin ve bilgisayardan; her yedegin esi, son 7; ulasilamazsa soylenir", t_kopya_ikinci)
+
+    def t_geri_yukle():
+        with _Depo() as r:
+            k, j = _admin(r)
+            r.d.esitle(k, "spi/ben", A, 0, [{"y": "v/1", "d": 1, "z": 5}, {"y": "v/2", "d": 2, "z": 5}])
+            eski = r.d.anahtar_ac(k, "parola-123", "Eski")
+            silinecek = r.d.anahtar_ac(k, "parola-123", "Silinecek")
+            r.d.takvim_ac(k)
+            donem = r.d.esitle(k, "spi/ben", A, 0, [])["donem"]
+            x = r.d.kopya_al("elle")
+            r.saat.t += 60
+            # Yedekten sonra: kayit degisti, yenisi eklendi, anahtar silindi/acildi, gelen satirlari geldi.
+            r.d.esitle(k, "spi/ben", A, 0, [{"y": "v/2", "d": 22, "z": 9}, {"y": "v/3", "d": 3, "z": 9}])
+            r.d.anahtar_sil(k, silinecek["id"])
+            yeni = r.d.anahtar_ac(k, "parola-123", "Yeni")
+            idler = [r.d.gelen_ekle(eski["anahtar"], "su 250")["id"] for _ in range(3)]
+            r.d.takvim_ac(k, yenile=True)
+            sira = r.d.esitle(k, "spi/ben", A, 0, [])["son"]
+            r.d.kullanici_ekle(k, "anne", "parola-456")
+            uye_k = r.d.oturum(r.d.giris("anne", "parola-456", B, "iPad")["jeton"])
+            _hata(lambda: r.d.geri_yukle(uye_k, True, "parola-456", x["ad"]), 403)
+            _hata(lambda: r.d.geri_yukle(k, False, "parola-123", x["ad"]), 403)     # ev agindan olmaz
+            _hata(lambda: r.d.geri_yukle(k, True, "yanlis", x["ad"]), 401)
+            _hata(lambda: r.d.geri_yukle(k, True, "parola-123", "../hesap.db"), 400)
+            _hata(lambda: r.d.geri_yukle(k, True, "parola-123", "hesap-elle-20000101-000000.db"), 404)
+            on = r.d.kopya_onizle(k, x["ad"])
+            eq((on["yedek"], on["simdi"]), ({"kullanici": 1, "kayit": 2}, {"kullanici": 2, "kayit": 3}))
+            v = r.d.geri_yukle(k, True, "parola-123", x["ad"], j)
+            eq(v["ok"], True)
+            eq(hesap.KOPYA_RE.match(v["once"]).group(1), "once")         # geri donus noktasi
+            eq(r.d.oturum(j), None)                                       # butun oturumlar kapandi
+            _hata(lambda: r.d.giris("anne", "parola-456", B, "iPad"), 401)   # yedekte yoktu
+            j2 = r.d.giris("omer", "parola-123", A, "PC")["jeton"]
+            k2 = r.d.oturum(j2)
+            c = r.d.esitle(k2, "spi/ben", B, 0, [])
+            eq(sorted((a["y"], a["d"]) for a in c["al"]), [("v/1", 1), ("v/2", 2)])
+            ok(c["donem"] != donem)                                       # cihazlar bastan esitler
+            eq(c["son"] >= sira, True)                                    # sira sayaci geri gitmez
+            eq([a["ad"] for a in r.d.anahtarlar(k2)], ["Eski"])           # silinen geri gelmez, yeni yedekte yok
+            _hata(lambda: r.d.anahtar_dene(silinecek["anahtar"]), 401)
+            _hata(lambda: r.d.anahtar_dene(yeni["anahtar"]), 401)
+            eq(r.d.takvim(k2)["acik"], False)                             # adres yenilenmisti: eskisi geri gelmez
+            eq(r.d.gelen_ekle(eski["anahtar"], "su 300")["id"], max(idler) + 1)   # numara yeniden verilmez
+            ok(any(o["tur"] == "geri-yukle" and "omer" in o["ayrinti"] for o in r.d.etkinlik(k2)))
+            eq(r.d.kopya_onizle(k2, v["once"])["yedek"]["kullanici"], 2)  # once-yedegi geri yuklemeden onceki hal
+    test("geri yukleme: admin, bilgisayardan, sifreyle; once yedek; oturumlar kapanir, silinen anahtar ve "
+         "eski takvim adresi geri gelmez, numara ve sira geri gitmez, donem degisir", t_geri_yukle)
+
+    def t_donem_tazele():
+        with _Depo() as r:
+            k, j = _admin(r)
+            r.d.esitle(k, "spi/ben", A, 0, [{"y": "a", "d": "eski", "z": 100}, {"y": "b", "d": "eski", "z": 100}])
+            x = r.d.kopya_al("elle")
+            # Telefon (B) yedekten sonra «a»yi degistirdi ve esitledi (son esitlemesi 500).
+            r.d.esitle(k, "spi/ben", B, 0, [{"y": "a", "d": "yeni", "z": 400}])
+            r.d.geri_yukle(k, True, "parola-123", x["ad"], j)
+            k2 = r.d.oturum(r.d.giris("omer", "parola-123", B, "Telefon")["jeton"])
+            d1 = r.d.esitle(k2, "spi/ben", B, 0, [])["donem"]
+            # Telefon donem degisikligini gorur: kayitlarini son esitleme zamaniyla yollar; hicbir sey inmez.
+            c = r.d.esitle(k2, "spi/ben", B, 7, [{"y": "a", "d": "yeni", "z": 500}, {"y": "b", "d": "eski", "z": 500}],
+                           yalniz_gonder=True)
+            eq((c["al"], c["son"], c["kabul"], c["donem"]), ([], 7, 2, d1))
+            # Yedekten once son kez esitlemis bir cihaz (50) eski «a»yi yollarsa kaybeder.
+            c = r.d.esitle(k2, "spi/ben", "cihazC-111111", 0, [{"y": "a", "d": "cok-eski", "z": 50}], yalniz_gonder=True)
+            eq((c["kabul"], c["red"]), (0, 1))
+            c = r.d.esitle(k2, "spi/ben", A, 0, [])
+            eq(dict((a["y"], a["d"]) for a in c["al"])["a"], "yeni")      # yedekten sonraki degisiklik geri geldi
+    test("geri yuklemeden sonra cihaz kendi kayitlarini yollar: yeni olan kalir, eski cihaz ezemez", t_donem_tazele)
+
+    def t_kopya_komut():
+        import contextlib
+        import io
+        klasor = tempfile.mkdtemp(prefix="lifeos-hesap-")
+        eski = os.environ.get("LIFEOS_HESAP_KLASOR")
+        os.environ["LIFEOS_HESAP_KLASOR"] = klasor
+        try:
+            d = hesap.Depo()
+            d.kur("omer", "parola-123", True, A, "PC")
+            ok(d.otomatik_kopya)                                          # asil depo kendiliginden yedekler
+            cikti = io.StringIO()
+            with contextlib.redirect_stdout(cikti):
+                eq(hesap.main(["hesap.py", "--yedekle"]), 0)
+                ad = d.kopyalar()[0]["ad"]
+                eq(hesap.main(["hesap.py", "--yedekler"]), 0)
+                eq(hesap.main(["hesap.py", "--geri-yukle", ad]), 2)       # once onizleme; --evet ister
+                eq(hesap.main(["hesap.py", "--geri-yukle", "yok.db"]), 1)
+                usb = os.path.join(klasor, "usb-lifeos-hesap-20270101-120000.db")
+                shutil.copyfile(os.path.join(d.kopya_klasoru(), ad), usb)
+                eq(hesap.main(["hesap.py", "--geri-yukle", usb, "--evet"]), 0)   # dosya yolundan da (USB)
+            ok(ad in cikti.getvalue() and "Geri yüklendi" in cikti.getvalue())
+            eq(len([x for x in d.kopyalar() if x["tur"] == "once"]), 1)
+            ok(any(o["tur"] == "geri-yukle" and "01.01.2027" in o["ayrinti"]
+                   for o in d.etkinlik(d.oturum(d.giris("omer", "parola-123", A, "PC")["jeton"]))))
+        finally:
+            if eski is None:
+                os.environ.pop("LIFEOS_HESAP_KLASOR", None)
+            else:
+                os.environ["LIFEOS_HESAP_KLASOR"] = eski
+            shutil.rmtree(klasor, ignore_errors=True)
+    test("yedek komut satirindan: al, listele, onaylatarak geri yukle (USB dosyasindan da)", t_kopya_komut)
+
+    def t_http_yedek():
+        with _Srv() as s:
+            kod, _, v = s.iste("/api/hesap/kur", {"ad": "omer", "parola": "parola-123", "cihaz": A}, H)
+            y = dict(H, Authorization="Bearer " + v["jeton"])
+            kod, _, v = s.iste("/api/hesap/ben", baslik=y)
+            eq((kod, v["yedek"]["son"], v["yedek"]["hata"]), (200, None, ""))
+            kod, _, v = s.iste("/api/hesap/yedekle", {}, y)
+            eq((kod, len(v["yedekler"]), v["yerel"]), (200, 1, True))
+            ad = v["alinan"]
+            ok(v["klasor"])
+            eq(s.iste("/api/hesap/yedekler", baslik=y)[2]["yedekler"][0]["ad"], ad)
+            ok(s.iste("/api/hesap/ben", baslik=y)[2]["yedek"]["son"])
+            kod, _, v = s.iste("/api/hesap/yedek-onizle", {"ad": ad}, y)
+            eq((kod, v["yedek"]["kullanici"]), (200, 1))
+            kod, _, v = s.iste("/api/hesap/esitle", {"alan": "spi/ben", "cihaz": A, "son": 0, "yalniz_gonder": True,
+                                                     "gonder": [{"y": "v", "d": 1, "z": 5}]}, y)
+            eq((kod, v["al"], v["kabul"], bool(v["donem"])), (200, [], 1, True))
+            eq(s.iste("/api/hesap/geri-yukle", {"ad": ad, "parola": "yanlis"}, y)[0], 401)
+            kod, _, v = s.iste("/api/hesap/geri-yukle", {"ad": ad, "parola": "parola-123"}, y)
+            eq((kod, v["ok"]), (200, True))
+            eq(s.iste("/api/hesap/ben", baslik=y)[0], 401)                # bu oturum da kapandi
+            kod, _, v = s.iste("/api/hesap/giris", {"ad": "omer", "parola": "parola-123", "cihaz": A}, H)
+            y = dict(H, Authorization="Bearer " + v["jeton"])
+            s.iste("/api/hesap/kullanici", {"ad": "anne", "parola": "parola-456"}, y)
+            kod, _, v = s.iste("/api/hesap/giris", {"ad": "anne", "parola": "parola-456", "cihaz": B}, H)
+            u = dict(H, Authorization="Bearer " + v["jeton"])
+            eq(s.iste("/api/hesap/yedekler", baslik=u)[0], 403)
+            eq(s.iste("/api/hesap/yedekle", {}, u)[0], 403)
+            eq(set(s.iste("/api/hesap/ben", baslik=u)[2]["yedek"]), {"son", "adet"})
+            eq(s.iste("/api/hesap/yedekler")[0], 401)
+    test("HTTP: yedekler, simdi yedekle, onizleme, yalniz gonder, geri yukleme; uye goremez", t_http_yedek)

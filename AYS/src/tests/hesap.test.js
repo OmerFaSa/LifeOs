@@ -34,6 +34,11 @@
         çereze iner; cihazlardan çıkılır, «hepsinden çık» onay ister; yönetim
         yalnız adminde; yazılan alan gelen veriyle silinmez; sunucu yoksa
         son bilinen gösterilir; oturum düşerse giriş ekranı gelir.
+    19. Deponun yedeği (sözler 23–24): dönem değişince cihaz önce kendi
+        kayıtlarını yollar (o adımda hiçbir şey inmez), sonra baştan
+        indirir; yeni olan kalır. Yedekler sayfası adminde: şimdi yedekle,
+        ikinci yer, geri yükleme önizleme ve şifreyle; sonra giriş ekranı.
+        Üye yalnız son yedeğin zamanını görür.
     18. Bağlantılar (sözler 17–20): iki adımda şifreden sonra kod adımı
         (bilet hiçbir depoya yazılmaz), yedek kod bir kez, kurtarma kodla;
         kodla bağlan ve ?bagla= (adresten silinir); güvenlik kontrolü;
@@ -57,7 +62,8 @@
   function sunucuKur(o){
     const s = Object.assign({ kullanicilar:{ omer:{ parola:'parola-123', rol:'admin' },
       anne:{ parola:'parola-456', rol:'uye' } }, jetonlar:{}, oturumlar:{}, kayit:{}, sira:0, oturumSira:0,
-      kurulum:false, kayitAcik:true, istekler:[], kapali:false, yok:false }, o || {});
+      kurulum:false, kayitAcik:true, istekler:[], kapali:false, yok:false, donem:'donem-1', yedekSira:0,
+      yedekler:[{ ad:'hesap-gunluk-20231114-221320.db', tur:'gunluk', zaman:1699996400000, bayt:184320 }] }, o || {});
     const cevap = (kod, v) => ({ ok:kod < 300, status:kod, json:async () => v });
     s.kimlikSira = s.kimlikSira || 0;
     const kimlik = k => k.kimlik || (k.kimlik = (++s.kimlikSira).toString(16).padStart(16, '0'));
@@ -152,8 +158,13 @@
       const admin = s.kullanicilar[ad].rol === 'admin';
       const sil = j => { delete s.jetonlar[j]; delete s.oturumlar[j]; };
       if(yol === '/api/hesap/cikis'){ sil(bu); return cevap(200, { ok:true }); }
+      const yedekOzet = () => Object.assign({ son:s.yedekler[0] ? s.yedekler[0].zaman : null, adet:s.yedekler.length },
+        admin ? { ikinci:!!(s.ikinci && s.ikinci.acik), ikinci_hata:(s.ikinci && s.ikinci.hata) || '', hata:s.yedekHata || '' } : {});
+      const yedekDurum = () => ({ yedekler:s.yedekler.slice(), yerel:!s.uzak, klasor:s.uzak ? '' : 'C:\\LifeOS\\hesap\\yedek',
+        ikinci:Object.assign({ acik:false, yol:'', son:null, hata:'', ayni_disk:false }, s.ikinci || {}),
+        hata:s.yedekHata || '', saklama:{ gunluk:7, elle:5, once:5 } });
       if(yol === '/api/hesap/ben'){
-        return cevap(200, { kullanici:profil(ad), ozet:s.ozet || {}, soru_var:!!s.kullanicilar[ad].soru, planlar:PLANLAR,
+        return cevap(200, { kullanici:profil(ad), ozet:s.ozet || {}, soru_var:!!s.kullanicilar[ad].soru, planlar:PLANLAR, yedek:yedekOzet(),
           renkler:['mavi', 'turkuaz', 'mor'], kayit:s.kayitAcik, iki_adim:ikiAdim(ad),
           baglantilar:{ anahtar:(s.anahtarlar || []).length, takvim:!!(s.takvim && s.takvim.acik),
             gelen_bekleyen:(s.gelen || []).filter(x => x.durum !== 'onayda' && x.durum !== 'anlasilmadi').length } });
@@ -299,6 +310,34 @@
         return cevap(200, { kullanici:Object.assign(profil(a), { iki_adim:!!s.kullanicilar[a].ikiAdim }) });
       }
       if(yol === '/api/hesap/ayar'){ s.kayitAcik = !!govde.kayit; return cevap(200, { kayit:s.kayitAcik }); }
+      /* ---------- deponun yedeği (sunucu sözü 20) ---------- */
+      if(/^\/api\/hesap\/(yedekler|yedekle|yedek-ayar|yedek-onizle|geri-yukle)$/.test(yol) && !admin){
+        return cevap(403, { hata:'Bunu yalnız admin yapar.' });
+      }
+      if(yol === '/api/hesap/yedekler') return cevap(200, yedekDurum());
+      if(yol === '/api/hesap/yedekle'){
+        const x = { ad:'hesap-elle-2023111' + (++s.yedekSira) + '-120000.db', tur:'elle', zaman:1700000900000 + s.yedekSira, bayt:204800 };
+        s.yedekler.unshift(x);
+        return cevap(200, Object.assign(yedekDurum(), { alinan:x.ad }));
+      }
+      if(yol === '/api/hesap/yedek-ayar'){
+        if(s.uzak) return cevap(403, { hata:'Yedeğin ikinci yeri yalnız bu bilgisayardan ayarlanır.' });
+        s.ikinci = govde.ikinci ? { acik:true, yol:govde.ikinci, son:1700000950000, hata:'' } : null;
+        return cevap(200, yedekDurum());
+      }
+      if(yol === '/api/hesap/yedek-onizle'){
+        const x = s.yedekler.find(y => y.ad === govde.ad);
+        if(!x) return cevap(404, { hata:'Bu yedek yok.' });
+        return cevap(200, Object.assign({}, x, { yedek:{ kullanici:2, kayit:10 }, simdi:{ kullanici:2, kayit:12 } }));
+      }
+      if(yol === '/api/hesap/geri-yukle'){
+        if(s.uzak) return cevap(403, { hata:'Geri yükleme yalnız bu bilgisayardan yapılır.' });
+        if(govde.parola !== s.kullanicilar[ad].parola) return cevap(401, { hata:'Şifre yanlış.' });
+        s.geriYuklenen = govde.ad;
+        Object.keys(s.jetonlar).forEach(sil);                 // bütün oturumlar kapanır
+        s.donem += '+';
+        return cevap(200, { ok:true, yedek:{ kullanici:2, kayit:10 }, once:'hesap-once-20231114-230000.db' });
+      }
       if(yol === '/api/hesap/kullanici'){
         s.kullanicilar[govde.ad] = { parola:govde.parola, rol:'uye' };
         return cevap(200, profil(govde.ad));
@@ -314,11 +353,12 @@
           t[g.y] = { d:g.d, z:g.z, c:govde.cihaz, s:s.sira };
           kabul++;
         });
+        if(govde.yalniz_gonder) return cevap(200, { al:[], son:govde.son, daha:false, kabul, red, donem:s.donem });
         const sinir = s.sinir || 1000;
         const satir = Object.entries(t).filter(([, r]) => r.s > govde.son).sort((a, b) => a[1].s - b[1].s);
         const daha = satir.length > sinir, parca = satir.slice(0, sinir);
         return cevap(200, { al:parca.filter(([, r]) => r.c !== govde.cihaz).map(([y, r]) => ({ y, d:r.d, z:r.z, s:r.s })),
-          son:daha ? parca[parca.length - 1][1].s : Math.max(govde.son, s.sira), daha, kabul, red });
+          son:daha ? parca[parca.length - 1][1].s : Math.max(govde.son, s.sira), daha, kabul, red, donem:s.donem });
       }
       return cevap(404, { hata:'Böyle bir istek yok.' });
     };
@@ -329,6 +369,10 @@
       t[y] = { d, z, c:cihaz || 'baska-cihaz-1', s:s.sira };
     };
     s.oku = (ad, alan, y) => { const r = (s.kayit[ad + '|' + alan] || {})[y]; return r ? r.d : undefined; };
+    /* Bilgisayarda yedekten geri yükleme: kayıtlar o anki hâline döner,
+       sıra sayacı geri gitmez, dönem değişir (sunucu sözü 20). */
+    s.anlik = () => JSON.parse(JSON.stringify(s.kayit));
+    s.geriYukle = anlik => { s.kayit = JSON.parse(JSON.stringify(anlik)); s.donem += '+'; };
     return s;
   }
 
@@ -1925,6 +1969,151 @@
       expect(merkez().querySelector('.hesap-iskelet[aria-busy="true"]')).toBeTruthy();
       expect(merkez().textContent).toContain('Yükleniyor');
       await ac; await hazir();
+    }));
+  });
+
+  describe('Hesap — deponun yedeği (sözler 23–24)', () => {
+    const merkez = () => document.querySelector('[data-hesap-merkez]');
+    const tikla = sel => merkez().querySelector(sel).click();
+    const gonderilen = (srv, n) => esitleIstekleri(srv).slice(n).map(x => JSON.parse(x.op.body));
+
+    it('dönem değişince cihaz önce kendi kayıtlarını yollar (hiçbir şey inmez), sonra baştan indirir; yeni olan kalır', () => sahneyle(async () => {
+      const srv = sunucuKur();
+      srv.yaz('omer', 'spi/ben', 'a', 'eski', 5);
+      srv.yaz('omer', 'spi/ben', 'b', 'eski', 5);
+      const c = cihazKur(srv);
+      const h = sahne(c);
+      await hazir();
+      await h.girisYap('omer', 'parola-123');
+      await h.esitle();
+      expect(c.depo.veri.a).toBe('eski');
+      const anlik = srv.anlik();                                   // bilgisayarda yedek burada alındı
+      c.depo.yaz('a', 'yeni');                                     // yedekten sonra değişti ve gitti
+      await h.esitle();
+      expect(srv.oku('omer', 'spi/ben', 'a')).toBe('yeni');
+      srv.geriYukle(anlik);
+      expect(srv.oku('omer', 'spi/ben', 'a')).toBe('eski');
+      c.depo.yaz('b', 'sırada');                                   // geri yüklemeden sonra, sırada
+      const n = esitleIstekleri(srv).length;
+      await h.esitle();
+      const g = gonderilen(srv, n);
+      expect(g.some(x => x.yalniz_gonder && x.son === 0 && x.gonder.some(y => y.y === 'a' && y.d === 'yeni' && y.z > 5))).toBe(true);
+      expect(g.filter(x => x.yalniz_gonder).every(x => !x.gonder.some(y => y.y === 'b'))).toBe(true);   // sıradaki kendi zamanıyla
+      expect(srv.oku('omer', 'spi/ben', 'a')).toBe('yeni');       // yedekten sonraki değişiklik geri geldi
+      expect(srv.oku('omer', 'spi/ben', 'b')).toBe('sırada');
+      expect(c.depo.veri.a).toBe('yeni');                          // eski sürüm cihaza inmedi
+      expect(c.depo.veri.b).toBe('sırada');
+      expect(h.durum().durum).toBe('tamam');
+      expect(h.durum().bekleyen).toBe(0);
+      const m = esitleIstekleri(srv).length;
+      await h.esitle();                                            // dönem aynı: bir daha baştan gönderilmez
+      expect(gonderilen(srv, m).some(x => x.yalniz_gonder)).toBe(false);
+    }));
+
+    it('dönem söylemeyen (eski) sunucuda baştan gönderim olmaz', () => sahneyle(async () => {
+      const srv = sunucuKur({ donem:undefined });
+      srv.yaz('omer', 'spi/ben', 'a', 'eski', 5);
+      const c = cihazKur(srv);
+      const h = sahne(c);
+      await hazir();
+      await h.girisYap('omer', 'parola-123');
+      await h.esitle();
+      c.depo.yaz('a', 'yeni');
+      await h.esitle();
+      await h.esitle();
+      expect(esitleIstekleri(srv).some(x => JSON.parse(x.op.body).yalniz_gonder)).toBe(false);
+      expect(srv.oku('omer', 'spi/ben', 'a')).toBe('yeni');
+    }));
+
+    async function girisli(o, ad, parola){
+      const srv = sunucuKur(o), c = cihazKur(srv);
+      const h = sahne(c);
+      await hazir();
+      await h.girisYap(ad || 'omer', parola || 'parola-123');
+      return { srv, c, h };
+    }
+
+    it('yedekler: adminde kökte satır; şimdi yedekle; ikinci yer; geri yükleme önizleme ve şifre ister, sonra giriş ekranı', () => sahneyle(async () => {
+      const { h, srv } = await girisli();
+      await h.merkezAc();
+      await hazir();
+      const satir = [...merkez().querySelectorAll('[data-hesap="sayfa"]')].find(b => b.getAttribute('data-sayfa') === 'yedek');
+      expect(!!satir).toBe(true);
+      satir.click();
+      await hazir();
+      expect(merkez().querySelector('.hesap-merkez__baslik').textContent).toBe('Yedekler');
+      expect(merkez().textContent).toContain('Günlük');
+      tikla('[data-hesap="yedekle"]');
+      await hazir();
+      expect(merkez().textContent).toContain('Yedek alındı');
+      expect(merkez().querySelectorAll('[data-hesap="geri-sor"]').length).toBe(2);
+      document.getElementById('hesap-ikinci').value = 'E:\\LifeOS-yedek';
+      merkez().querySelector('[data-hesap-form="yedek-ikinci"]').requestSubmit();
+      await hazir();
+      expect(srv.ikinci.yol).toBe('E:\\LifeOS-yedek');
+      expect(merkez().textContent).toContain('İkinci yer ayarlandı');
+      merkez().querySelectorAll('[data-hesap="geri-sor"]')[1].click();      // günlük yedek
+      await hazir();
+      const onay = merkez().querySelector('.hesap-onay');
+      expect(onay.textContent).toContain('10 kayıt');
+      expect(onay.textContent).toContain('yeniden giriş');
+      expect(onay.textContent).toContain('geri gelebilir');
+      expect(document.activeElement && document.activeElement.id).toBe('hesap-geri-sifre');
+      tikla('[data-hesap="geri-vazgec"]');
+      expect(merkez().querySelector('.hesap-onay')).toBeNull();
+      merkez().querySelectorAll('[data-hesap="geri-sor"]')[1].click();
+      await hazir();
+      document.getElementById('hesap-geri-sifre').value = 'yanlis';
+      merkez().querySelector('[data-hesap-form="geri-yukle"]').requestSubmit();
+      await hazir();
+      expect(merkez().querySelector('[data-hesap-form="geri-yukle"] .hesap__mesaj').textContent).toContain('Şifre yanlış');
+      expect(srv.geriYuklenen).toBeUndefined();
+      document.getElementById('hesap-geri-sifre').value = 'parola-123';
+      merkez().querySelector('[data-hesap-form="geri-yukle"]').requestSubmit();
+      await hazir();
+      expect(srv.geriYuklenen).toBe('hesap-gunluk-20231114-221320.db');
+      expect(merkez()).toBeNull();
+      expect(h.durum().oturum).toBeNull();
+      expect(h.durum().mesaj).toContain('geri yüklendi');
+    }));
+
+    /* 2026-10-09: modül sayfasında bölüm gizleme aracı (gizle.js) belgedeki
+       her [data-ac] tıklamasını yutuyordu; hesap sayfasının açılır bölümleri
+       (Şifre değiştir, Kullanıcı ekle, İkinci yer) modüllerde hiç açılmıyordu. */
+    it('açılır bölüm modül sayfasında da açılır: bölüm gizleme aracı tıklamayı yutmaz', () => sahneyle(async () => {
+      const kok = document.createElement('div');
+      document.body.appendChild(kok);
+      try{
+        if(window.LIFEOS.Gizle) window.LIFEOS.Gizle.uygula({ kok, modul:'hesap-ac-test', profil:'p', ekran:'x' });
+        const { h } = await girisli();
+        await h.merkezAc('yonetim');
+        await hazir();
+        const d = merkez().querySelector('details.hesap-ac');
+        d.querySelector('summary').click();
+        expect(d.open).toBe(true);
+      }finally{ kok.remove(); }
+    }));
+
+    it('üye Verin’de yalnız son yedeğin zamanını görür; eski yedek adminde güvenlik önerisi; ev ağında geri yükleme yok', () => sahneyle(async () => {
+      let { h } = await girisli(null, 'anne', 'parola-456');
+      await h.merkezAc('verin');
+      await hazir();
+      expect(merkez().textContent).toContain('Bilgisayardaki yedek');
+      expect(merkez().textContent).toContain('Her gün kendiliğinden');
+      expect(merkez().querySelector('[data-sayfa="yedek"]')).toBeNull();
+      h.merkezKapat();
+      birak();
+      ({ h } = await girisli({ uzak:true, yedekler:[{ ad:'hesap-gunluk-20231111-120000.db', tur:'gunluk',
+        zaman:1700000000000 - 3 * 86400000, bayt:1000 }] }));
+      await h.merkezAc('guvenlik');
+      await hazir();
+      expect(merkez().textContent).toContain('3 gündür yedek yok');
+      h.merkezKapat();
+      await h.merkezAc('yedek');
+      await hazir();
+      expect(merkez().querySelector('[data-hesap="geri-sor"]')).toBeNull();
+      expect(merkez().querySelector('[data-hesap-form="yedek-ikinci"]')).toBeNull();
+      expect(merkez().textContent).toContain('yalnız bilgisayarın kendisinden');
     }));
   });
 

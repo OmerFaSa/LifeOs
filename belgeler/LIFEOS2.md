@@ -72,6 +72,7 @@ verilen kararlar:
 | Hesap bağlantıları | `sistem/hesap.py` sözleri 14–17, `brand/ortak/hesap.js` sözleri 17–20, `brand/ortak/qr.js`: iki adımlı doğrulama (Google/Microsoft Authenticator, iPhone Şifreler), kodla cihaz bağlama, Kısayollar gelen kutusu (SPİ `Proposals.disaridan`), AYS takvim aboneliği | 2026-10-08 |
 | Cihaz ayrıntısı ve yeni giriş uyarısı | `sistem/hesap.py` sözleri 18–19, `brand/ortak/hesap.js` sözleri 21–22: cihaza ad, giriş yolu, son adres; başka cihazdan girişte «Bendim / İncele» | 2026-10-08 |
 | Modül açılış geçişi | `brand/ortak/animasyon.js` «geçiş»: seçim sayfasındaki kart (ve kenardaki modül bağlantısı) büyüyüp modülün marka perdesine dönüşür; HKM yüzü kendi sayfasında belirir | 2026-10-08 |
+| Hesap deposunun yedeği | `sistem/hesap.py` sözü 20, `brand/ortak/hesap.js` sözleri 23–24: her gün arkada SQLite yedeği (son 7 + elle + geri yüklemeden önce), ikinci yer (USB/başka disk), Hesap › Yedekler; geri yükleme büyük aksiyon (PC, şifre, önce yedek); dönem değişince cihazlar kendi kayıtlarını yeniden yollar; `python sistem/hesap.py --yedekle / --geri-yukle` | 2026-10-09 |
 
 ## 4. Değişmeyen sözler
 

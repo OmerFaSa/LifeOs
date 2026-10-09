@@ -108,6 +108,21 @@
       sayfasi baska bir cihazdan gelenleri «Bendim / Incele» diye sorar.
       Hangisinin goruldugu CIHAZDA tutulur (her cihaz kendisi gorur);
       sunucu yalniz son olaylari ve hangisinin bu cihazdan oldugunu verir.
+  20. DEPONUN YEDEGI (2026-10-08 ucuncu tur: «hesap deposunun yedegi»).
+      Her gun ilk istekte, ARKADA (istek beklemez) SQLite'in kendi
+      yedekleme yoluyla tutarli bir kopya alinir: <klasor>/yedek, son 7
+      gunluk + 5 elle + 5 «geri yuklemeden once». Her yedek yazildiktan
+      sonra SQLite denetiminden gecer; gecmeyen yedek sayilmaz. Admin
+      bilgisayardan bir IKINCI YER (baska disk, USB) secer: disk bozulursa
+      asil koruma odur; ulasilamazsa bu soylenir, yedek yine alinir.
+      Geri yukleme BUYUK aksiyondur (AGENTS §1.9): admin, yalniz bu
+      bilgisayardan, sifreyle, onizlemeden sonra; once simdiki halin
+      yedegi alinir (geri donus noktasi). Guvenlik geri gitmez: butun
+      oturumlar kapanir, simdi silinmis anahtar ve takvim adresi geri
+      gelmez. Deponun DONEMI degisir; cihazlar kendi kayitlarini yeniden
+      yollar (son yazan kazanir): yedekten sonraki degisiklik cihazlardan
+      geri akar (hesap.js soz 23). Sunucu acilamazsa:
+      `python sistem/hesap.py --yedekle | --yedekler | --geri-yukle <ad>`.
 
    Yalniz Python standart kutuphanesi (AGENTS §1.3).
 """
@@ -119,7 +134,9 @@ import hmac
 import json
 import os
 import re
+import pathlib
 import secrets
+import shutil
 import sqlite3
 import struct
 import sys
@@ -127,7 +144,7 @@ import threading
 import time
 import urllib.parse
 
-SURUM = 6
+SURUM = 7
 TUR = 600000                    # PBKDF2 tur sayisi (OWASP 2023, SHA-256)
 EN_KISA_PAROLA = 8
 EN_UZUN_PAROLA = 256
@@ -186,6 +203,15 @@ CIHAZ_AD_EN_UZUN = 40
 UYARI_TURLERI = ("giris", "bag", "kurtar", "yanlis", "kurtar-yanlis", "kod-yanlis", "parola", "iki-adim-kapat")
 UYARI_GUN = 30
 UYARI_EN_COK = 20
+
+# Deponun yedegi (soz 20). Kodda «kopya»: «yedek» iki adimin yedek kodudur.
+KOPYA_SAKLA = {"gunluk": 7, "elle": 5, "once": 5}     # tur basina saklanan en yeni
+KOPYA_RE = re.compile(r"^hesap-(gunluk|elle|once)-(\d{8})-(\d{6})\.db$")
+IKINCI_RE = re.compile(r"^lifeos-hesap-(\d{8})-(\d{6})\.db$")
+IKINCI_SAKLA = 7
+IKINCI_YOL_EN_UZUN = 260
+KOPYA_BAKIS_SN = 600                  # gunluk yedek en cok bu aralikla denetlenir
+KOPYA_TABLOLAR = ("kullanici", "oturum", "kayit")
 
 # Profil rengi: kapali liste (soz 8). Renklerin kendisi istemcide
 # (hesap.js RENK); burada yalniz kimlikler dogrulanir.
@@ -407,6 +433,12 @@ class Depo:
         self.tur = tur
         self.saat = saat
         self._deneme = {}               # anahtar -> [yanlis sayisi, bekleme bitisi]
+        # Soz 20: gunluk yedek yalniz asil depoda kendiliginden alinir (yol
+        # verilmediyse); testlerin gecici deposu elle ister.
+        self.otomatik_kopya = yol is None
+        self._kopya_kilit = threading.RLock()
+        self._kopya_bakis = float("-inf")
+        self._kopya_hata = ""
         with self._islem() as c:
             c.executescript(SEMA)
             self._gocur(c)
@@ -959,12 +991,14 @@ class Depo:
         r = c.execute("SELECT deger FROM sayac WHERE ad='sira'").fetchone()
         return r["deger"] if r else 0
 
-    def esitle(self, kullanici, alan, cihaz, son, gonder, sinir=SINIR, jeton=None):
+    def esitle(self, kullanici, alan, cihaz, son, gonder, sinir=SINIR, jeton=None, yalniz_gonder=False):
         """Cihazdan gelenleri uygular, cihazin gormedigi degisiklikleri dondurur.
 
         gonder: [{"y": yol, "d": deger | None (silme), "z": ms, "ilk": bool}]
+        yalniz_gonder: geri yuklemeden sonra cihaz once kendi kayitlarini
+        yollar (soz 20); bu turda bir sey dondurulmez, imlec ilerlemez.
         Doner: {"al": [{"y", "d", "z", "s"}], "son": imlec, "daha": bool,
-                "kabul": n, "red": n}"""
+                "kabul": n, "red": n, "donem": deponun donemi}"""
         if not isinstance(alan, str) or not ALAN_RE.match(alan):
             raise Hata(400, "Geçersiz alan.")
         if not isinstance(cihaz, str) or not CIHAZ_RE.match(cihaz):
@@ -1012,6 +1046,9 @@ class Depo:
                       "SET deger=excluded.deger", (sira,))
             if jeton:
                 c.execute("UPDATE oturum SET esitleme=? WHERE ozet=?", (self.saat(), _jeton_ozeti(jeton)))
+            donem = self._donem(c)
+            if yalniz_gonder:
+                return {"al": [], "son": son, "daha": False, "kabul": kabul, "red": red, "donem": donem}
             satirlar = c.execute(
                 "SELECT yol, deger, zaman, cihaz, sira FROM kayit WHERE kullanici=? AND alan=? "
                 "AND sira>? ORDER BY sira LIMIT ?", (kid, alan, son, sinir + 1)).fetchall()
@@ -1021,7 +1058,7 @@ class Depo:
         al = [{"y": s["yol"], "d": None if s["deger"] is None else json.loads(s["deger"]),
                "z": s["zaman"], "s": s["sira"]}
               for s in satirlar if s["cihaz"] != cihaz]
-        return {"al": al, "son": yeni_son, "daha": daha, "kabul": kabul, "red": red}
+        return {"al": al, "son": yeni_son, "daha": daha, "kabul": kabul, "red": red, "donem": donem}
 
     def ozet(self, kullanici):
         """Alan basina kayit sayisi (hesap panelindeki bilgi)."""
@@ -1521,6 +1558,337 @@ class Depo:
                     "gelen_bekleyen": c.execute("SELECT COUNT(*) FROM gelen WHERE kullanici=? AND durum IN "
                                                 "('bekliyor', 'alindi')", (kid,)).fetchone()[0]}
 
+    # ------------------------------------------------ deponun yedegi (soz 20)
+
+    def _ayar_yaz(self, c, ad, deger):
+        if deger is None:
+            c.execute("DELETE FROM ayar WHERE ad=?", (ad,))
+        else:
+            c.execute("INSERT INTO ayar(ad, deger) VALUES(?, ?) ON CONFLICT(ad) DO UPDATE SET deger=excluded.deger",
+                      (ad, deger))
+
+    def _donem(self, c):
+        """Deponun donemi: geri yuklemede degisir; cihaz bunu gorunce kendi
+        kayitlarini yeniden yollar ve bastan indirir (hesap.js soz 23)."""
+        d = self._ayar(c, "donem", None)
+        if d is None:
+            d = secrets.token_hex(8)
+            self._ayar_yaz(c, "donem", d)
+        return d
+
+    def kopya_klasoru(self):
+        return os.path.join(os.path.dirname(os.path.abspath(self.yol)), "yedek")
+
+    @staticmethod
+    def _kopya_bak(yol):
+        """Dosya saglam bir hesap deposu mu? SQLite'in kendi denetimi ve
+        hesap tablolari; salt okunur acilir. Doner: kac kullanici, kac kayit."""
+        try:
+            c = sqlite3.connect(pathlib.Path(os.path.abspath(yol)).as_uri() + "?mode=ro", uri=True, timeout=30)
+        except (sqlite3.Error, ValueError):
+            raise Hata(422, "Yedek dosyası açılamadı.")
+        try:
+            if c.execute("PRAGMA quick_check").fetchone()[0] != "ok":
+                raise Hata(422, "Yedek dosyası bozuk.")
+            tablolar = {r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            if not set(KOPYA_TABLOLAR) <= tablolar:
+                raise Hata(422, "Bu dosya bir LifeOS hesap yedeği değil.")
+            return {"kullanici": c.execute("SELECT COUNT(*) FROM kullanici").fetchone()[0],
+                    "kayit": c.execute("SELECT COUNT(*) FROM kayit WHERE deger IS NOT NULL").fetchone()[0]}
+        except sqlite3.Error:
+            raise Hata(422, "Yedek dosyası okunamadı (bozuk ya da hesap yedeği değil).")
+        finally:
+            c.close()
+
+    def _kopya_yaz(self, hedef):
+        """SQLite'in kendi yedekleme yolu: sunucu calisirken de tutarli bir an.
+        Once yarim adla yazilir ve denetlenir; yarim dosya hicbir zaman
+        yedek gibi gorunmez."""
+        yarim = hedef + ".yarim"
+        with contextlib.suppress(OSError):
+            os.remove(yarim)
+        kaynak = sqlite3.connect(self.yol, timeout=30)
+        try:
+            h = sqlite3.connect(yarim)
+            try:
+                kaynak.backup(h)
+                h.execute("PRAGMA journal_mode=DELETE")     # tek dosya: yaninda -wal/-shm kalmaz
+            finally:
+                h.close()
+        finally:
+            kaynak.close()
+        try:
+            bilgi = self._kopya_bak(yarim)
+        except Hata:
+            with contextlib.suppress(OSError):
+                os.remove(yarim)
+            raise
+        os.replace(yarim, hedef)
+        return bilgi
+
+    def kopyalar(self):
+        """Yedek klasorundeki yedekler, en yenisi once."""
+        k = self.kopya_klasoru()
+        try:
+            adlar = os.listdir(k)
+        except OSError:
+            return []
+        l = []
+        for ad in adlar:
+            m = KOPYA_RE.match(ad)
+            if not m:
+                continue
+            try:
+                bayt = os.path.getsize(os.path.join(k, ad))
+                zaman = time.mktime(time.strptime(m.group(2) + m.group(3), "%Y%m%d%H%M%S"))
+            except (OSError, ValueError, OverflowError):
+                continue
+            l.append({"ad": ad, "tur": m.group(1), "zaman": int(zaman * 1000), "bayt": bayt})
+        l.sort(key=lambda x: (x["zaman"], x["ad"]), reverse=True)
+        return l
+
+    def _kopya_buda(self):
+        say = {}
+        for x in self.kopyalar():
+            say[x["tur"]] = say.get(x["tur"], 0) + 1
+            if say[x["tur"]] > KOPYA_SAKLA[x["tur"]]:
+                with contextlib.suppress(OSError):
+                    os.remove(os.path.join(self.kopya_klasoru(), x["ad"]))
+
+    def _ikinci(self):
+        """Ikinci yerin ayari ve son durumu: {"yol", "son" (ms), "hata"}."""
+        with self._islem() as c:
+            yol = self._ayar(c, "kopya_ikinci", "")
+            try:
+                d = json.loads(self._ayar(c, "kopya_ikinci_durum", "{}"))
+            except ValueError:
+                d = {}
+        return {"yol": yol, "son": d.get("son") if yol else None, "hata": (d.get("hata") or "") if yol else ""}
+
+    def _ikinci_yaz(self, kaynak):
+        """Yedegin ikinci yerdeki esi (baska disk, USB). Ulasilamazsa bu
+        yazilir; yedek yine sayilir, asil kopya yerindedir."""
+        ik = self._ikinci()
+        if not ik["yol"]:
+            return None
+        son, hata = ik["son"], ""
+        try:
+            if not os.path.isdir(ik["yol"]):
+                raise OSError("yok")
+            ad = "lifeos-hesap-%s.db" % time.strftime("%Y%m%d-%H%M%S", time.localtime(self.saat()))
+            hedef = os.path.join(ik["yol"], ad)
+            shutil.copyfile(kaynak, hedef + ".yarim")
+            os.replace(hedef + ".yarim", hedef)
+            son = int(self.saat() * 1000)
+            eskiler = sorted(a for a in os.listdir(ik["yol"]) if IKINCI_RE.match(a))
+            for a in eskiler[:-IKINCI_SAKLA]:            # yalniz kendi adimizdaki dosyalar
+                with contextlib.suppress(OSError):
+                    os.remove(os.path.join(ik["yol"], a))
+        except OSError:
+            hata = "İkinci yere yazılamadı: klasör yok, disk takılı değil ya da yazma izni yok."
+        with self._islem() as c:
+            self._ayar_yaz(c, "kopya_ikinci_durum", json.dumps({"son": son, "hata": hata}))
+        return not hata
+
+    def kopya_al(self, tur="elle"):
+        """Simdi bir yedek. Doner: {ad, tur, zaman, bayt, kullanici, kayit, ikinci}."""
+        if tur not in KOPYA_SAKLA:
+            raise Hata(400, "Geçersiz yedek türü.")
+        with self._kopya_kilit:
+            k = self.kopya_klasoru()
+            os.makedirs(k, exist_ok=True)
+            zaman = self.saat()
+            ad = "hesap-%s-%s.db" % (tur, time.strftime("%Y%m%d-%H%M%S", time.localtime(zaman)))
+            hedef = os.path.join(k, ad)
+            try:
+                bilgi = self._kopya_yaz(hedef)
+            except (sqlite3.Error, OSError, Hata) as e:
+                self._kopya_hata = "Son yedek alınamadı: %s" % (e.mesaj if isinstance(e, Hata) else e)
+                raise
+            self._kopya_hata = ""
+            ikinci = self._ikinci_yaz(hedef) if tur != "once" else None
+            self._kopya_buda()
+            return dict(bilgi, ad=ad, tur=tur, zaman=int(zaman * 1000), bayt=os.path.getsize(hedef), ikinci=ikinci)
+
+    def kopya_gunluk(self):
+        """Bugunun yedegi yoksa alir. Hic hesap yoksa yedeklenecek bir sey yok."""
+        bugun = time.strftime("%Y%m%d", time.localtime(self.saat()))
+        if any(KOPYA_RE.match(x["ad"]).group(2) == bugun for x in self.kopyalar() if x["tur"] == "gunluk"):
+            return None
+        if self.kurulum_gerekli():
+            return None
+        return self.kopya_al("gunluk")
+
+    def kopya_tetikle(self):
+        """Istek yolunda cagrilir; en cok KOPYA_BAKIS_SN'de bir bakar, yedegi
+        ARKADA alir: istek beklemez, yedek alinamazsa sunucu durmaz (hata
+        yazilir, sonraki bakista yeniden denenir)."""
+        if not self.otomatik_kopya:
+            return False
+        simdi = time.monotonic()
+        with self.kilit:
+            if simdi - self._kopya_bakis < KOPYA_BAKIS_SN:
+                return False
+            self._kopya_bakis = simdi
+
+        def is_():
+            with contextlib.suppress(Exception):
+                self.kopya_gunluk()
+        threading.Thread(target=is_, daemon=True, name="hesap-yedek").start()
+        return True
+
+    @staticmethod
+    def _admin(yapan, mesaj="Bunu yalnız admin yapar."):
+        if not yapan or yapan.get("rol") != "admin":
+            raise Hata(403, mesaj)
+
+    def kopya_ozet(self, kullanici):
+        """Hesap sayfasi icin: son yedegin zamani (herkes); admin icin ikinci
+        yer ve son hata da."""
+        l = self.kopyalar()
+        o = {"son": l[0]["zaman"] if l else None, "adet": len(l)}
+        if kullanici and kullanici.get("rol") == "admin":
+            ik = self._ikinci()
+            o.update(ikinci=bool(ik["yol"]), ikinci_hata=ik["hata"], hata=self._kopya_hata)
+        return o
+
+    def kopya_durum(self, yapan, yerel):
+        """Yedekler sayfasi (admin). Klasor yollari yalniz bilgisayarin
+        kendisine gosterilir."""
+        self._admin(yapan)
+        ik = self._ikinci()
+        asil = self.kopya_klasoru()
+        ayni = bool(ik["yol"]) and (os.path.splitdrive(os.path.abspath(ik["yol"]))[0].lower()
+                                    == os.path.splitdrive(asil)[0].lower()) and os.name == "nt"
+        return {"yedekler": self.kopyalar(), "yerel": bool(yerel), "klasor": asil if yerel else "",
+                "ikinci": {"acik": bool(ik["yol"]), "yol": ik["yol"] if yerel else "", "son": ik["son"],
+                           "hata": ik["hata"], "ayni_disk": ayni},
+                "hata": self._kopya_hata, "saklama": dict(KOPYA_SAKLA)}
+
+    def kopya_ayarla(self, yapan, yerel, yol):
+        """Ikinci yer: baska bir disk ya da USB'deki klasor. Bos: kapali."""
+        self._admin(yapan)
+        if not yerel:
+            raise Hata(403, "Yedeğin ikinci yeri yalnız bu bilgisayardan ayarlanır.")
+        yol = str(yol or "").strip().strip('"')
+        if yol:
+            if len(yol) > IKINCI_YOL_EN_UZUN or any(ord(ch) < 32 for ch in yol):
+                raise Hata(400, "Klasör yolu geçersiz.")
+            if not os.path.isabs(yol):
+                raise Hata(400, "Tam bir klasör yolu yaz (örnek: E:\\LifeOS-yedek).")
+            if not os.path.isdir(yol):
+                raise Hata(400, "Bu klasör yok ya da disk şu an takılı değil.")
+            yol = os.path.abspath(yol)
+            if os.path.normcase(yol) == os.path.normcase(self.kopya_klasoru()):
+                raise Hata(400, "Bu zaten asıl yedek klasörü; başka bir disk seç.")
+            deneme = os.path.join(yol, ".lifeos-yazma-%s" % secrets.token_hex(4))
+            try:
+                with open(deneme, "wb") as f:
+                    f.write(b"lifeos")
+                os.remove(deneme)
+            except OSError:
+                raise Hata(400, "Bu klasöre yazılamıyor.")
+        with self._islem() as c:
+            self._ayar_yaz(c, "kopya_ikinci", yol or None)
+            self._ayar_yaz(c, "kopya_ikinci_durum", None)
+        if yol:
+            # Hemen bir es: ayar dogru mu, simdi gorulsun.
+            l = self.kopyalar()
+            if l:
+                self._ikinci_yaz(os.path.join(self.kopya_klasoru(), l[0]["ad"]))
+            else:
+                self.kopya_al("elle")
+        return self.kopya_durum(yapan, yerel)
+
+    def _kopya_yolu(self, ad):
+        if not isinstance(ad, str) or not KOPYA_RE.match(ad):
+            raise Hata(400, "Geçersiz yedek adı.")
+        yol = os.path.join(self.kopya_klasoru(), ad)
+        if not os.path.isfile(yol):
+            raise Hata(404, "Bu yedek yok (silinmiş ya da süresi dolmuş olabilir).")
+        return yol
+
+    def kopya_onizle(self, yapan, ad):
+        """Geri yukleme onizlemesi: yedekte ve simdi kac kullanici, kac kayit."""
+        self._admin(yapan)
+        yol = self._kopya_yolu(ad)
+        b = self._kopya_bak(yol)
+        with self._islem() as c:
+            simdi = {"kullanici": c.execute("SELECT COUNT(*) FROM kullanici").fetchone()[0],
+                     "kayit": c.execute("SELECT COUNT(*) FROM kayit WHERE deger IS NOT NULL").fetchone()[0]}
+        x = next(x for x in self.kopyalar() if x["ad"] == ad)
+        return dict(x, yedek=b, simdi=simdi)
+
+    def geri_yukle(self, yapan, yerel, parola, ad, jeton=None, ip=""):
+        """BUYUK AKSIYON (AGENTS §1.9): admin, bilgisayarin kendisinden,
+        sifreyle; once simdiki halin yedegi alinir (geri donus noktasi)."""
+        self._admin(yapan, "Geri yüklemeyi yalnız admin yapar.")
+        if not yerel:
+            raise Hata(403, "Geri yükleme yalnız bu bilgisayardan yapılır.")
+        with self._islem() as c:
+            self._parola_bak(c, yapan["id"], parola)
+            cihaz_ad = self._oturum_cihaz(c, jeton)
+        return self._geri_yukle(self._kopya_yolu(ad), yapan.get("ad", ""), cihaz_ad, ip)
+
+    def _geri_yukle(self, yol, yapan_ad="", cihaz_ad="", ip=""):
+        """Yedegi canli depoya yazar (SQLite yedekleme yolu, ters yonde).
+
+        Guvenlik geri gitmez: butun oturumlar kapanir (herkes yeniden
+        girer), simdi silinmis erisim anahtari ve takvim adresi geri gelmez.
+        Sira sayaci ve otomatik kimlikler geri gitmez (eski numara yeni bir
+        seye verilmez). Donem degisir: cihazlar kendi kayitlarini yeniden
+        yollar, son yazan kazanir; yedekten sonraki degisiklikler cihazlardan
+        geri akar."""
+        bilgi = self._kopya_bak(yol)
+        with self._kopya_kilit, self.kilit:
+            once = self.kopya_al("once")
+            with self._islem() as c:
+                tasi = {
+                    "anahtar": {r[0] for r in c.execute("SELECT ozet FROM anahtar")},
+                    "takvim": {r[0] for r in c.execute("SELECT jeton FROM takvim")},
+                    "sira": self._sira(c),
+                    "sekans": {r[0]: r[1] for r in c.execute("SELECT name, seq FROM sqlite_sequence")},
+                    "ayar": {a: self._ayar(c, a, None) for a in ("kopya_ikinci", "kopya_ikinci_durum")},
+                }
+            kaynak = sqlite3.connect(pathlib.Path(os.path.abspath(yol)).as_uri() + "?mode=ro", uri=True, timeout=30)
+            try:
+                hedef = sqlite3.connect(self.yol, timeout=30)
+                try:
+                    kaynak.backup(hedef)
+                finally:
+                    hedef.close()
+            finally:
+                kaynak.close()
+            with self._islem() as c:
+                c.executescript(SEMA)
+                self._gocur(c)
+                for t in ("oturum", "bilet", "bag_kodu"):
+                    c.execute("DELETE FROM %s" % t)
+                for r in c.execute("SELECT id, ozet FROM anahtar").fetchall():
+                    if r["ozet"] not in tasi["anahtar"]:
+                        c.execute("DELETE FROM anahtar WHERE id=?", (r["id"],))
+                for r in c.execute("SELECT kullanici, jeton FROM takvim").fetchall():
+                    if r["jeton"] not in tasi["takvim"]:
+                        c.execute("DELETE FROM takvim WHERE kullanici=?", (r["kullanici"],))
+                for ad, seq in tasi["sekans"].items():
+                    if c.execute("UPDATE sqlite_sequence SET seq=MAX(seq, ?) WHERE name=?", (seq, ad)).rowcount == 0:
+                        c.execute("INSERT INTO sqlite_sequence(name, seq) VALUES(?, ?)", (ad, seq))
+                c.execute("INSERT INTO sayac(ad, deger) VALUES('sira', ?) ON CONFLICT(ad) DO UPDATE "
+                          "SET deger=MAX(deger, excluded.deger)", (tasi["sira"],))
+                for a, v in tasi["ayar"].items():
+                    self._ayar_yaz(c, a, v)
+                self._ayar_yaz(c, "donem", secrets.token_hex(8))
+                m = re.search(r"(\d{8})-(\d{6})\.db$", os.path.basename(yol))
+                try:
+                    tarih = time.strftime("%d.%m.%Y %H:%M", time.strptime(m.group(1) + m.group(2), "%Y%m%d%H%M%S"))
+                except (AttributeError, ValueError):
+                    tarih = os.path.basename(yol)[:40]
+                for r in c.execute("SELECT id FROM kullanici WHERE rol='admin'").fetchall():
+                    self._olay(c, r["id"], "geri-yukle", cihaz_ad, ip,
+                               ("%s yedeği · %s" % (tarih, yapan_ad)) if yapan_ad else "%s yedeği" % tarih)
+            self._deneme.clear()
+        return {"ok": True, "yedek": bilgi, "once": once["ad"]}
+
 
 def ics_birlestir(icerikler):
     """Yayinlarin VEVENT bloklari tek VCALENDAR'da. Satirlar ANLASILMAZ,
@@ -1671,6 +2039,7 @@ def isle(h):
         if not _koken_izinli(h):
             raise Hata(403, "İzin yok.")
         d = depo()
+        d.kopya_tetikle()                       # soz 20: gunluk yedek, arkada
         if yontem == "GET" and yol == "/api/hesap/durum":
             return _cevap(h, 200, {"surum": SURUM, "kurulum": d.kurulum_gerekli(), "kayit": d.kayit_acik(),
                                    "yerel": _yerel_mi(h), "ev_agi": ev_agi()})
@@ -1725,7 +2094,8 @@ def isle(h):
             if yol == "/api/hesap/esitle":
                 son = v.get("son", 0)
                 return _cevap(h, 200, d.esitle(k, v.get("alan"), cihaz, son if isinstance(son, int) else -1,
-                                               v.get("gonder") or [], v.get("sinir") or SINIR, _jeton(h)))
+                                               v.get("gonder") or [], v.get("sinir") or SINIR, _jeton(h),
+                                               v.get("yalniz_gonder") is True))
             if yol == "/api/hesap/cikis":
                 d.cikis(_jeton(h), ip)
                 return _cevap(h, 200, {"ok": True})
@@ -1791,6 +2161,16 @@ def isle(h):
             if yol == "/api/hesap/takvim-kapat":
                 d.takvim_kapat(k, j, ip)
                 return _cevap(h, 200, {"takvim": d.takvim(k)})
+            if yol == "/api/hesap/yedekle":
+                d._admin(k, "Yedeği yalnız admin alır.")
+                x = d.kopya_al("elle")
+                return _cevap(h, 200, dict(d.kopya_durum(k, _yerel_mi(h)), alinan=x["ad"]))
+            if yol == "/api/hesap/yedek-ayar":
+                return _cevap(h, 200, d.kopya_ayarla(k, _yerel_mi(h), v.get("ikinci")))
+            if yol == "/api/hesap/yedek-onizle":
+                return _cevap(h, 200, d.kopya_onizle(k, v.get("ad")))
+            if yol == "/api/hesap/geri-yukle":
+                return _cevap(h, 200, d.geri_yukle(k, _yerel_mi(h), v.get("parola"), v.get("ad"), j, ip))
             raise Hata(404, "Böyle bir istek yok.")
         if yontem == "GET":
             k = d.oturum(_jeton(h), ip)
@@ -1800,7 +2180,8 @@ def isle(h):
                 return _cevap(h, 200, {"kullanici": k, "ozet": d.ozet(k), "ayrinti": d.ayrinti(k),
                                        "soru_var": d.soru_var(k), "planlar": list(PLANLAR),
                                        "renkler": list(RENKLER), "kayit": d.kayit_acik(),
-                                       "iki_adim": d.iki_adim(k), "baglantilar": d.baglanti_ozet(k)})
+                                       "iki_adim": d.iki_adim(k), "baglantilar": d.baglanti_ozet(k),
+                                       "yedek": d.kopya_ozet(k)})
             if yol == "/api/hesap/uyarilar":
                 return _cevap(h, 200, {"uyarilar": d.uyarilar(k, _jeton(h))})
             if yol == "/api/hesap/baglantilar":
@@ -1814,6 +2195,8 @@ def isle(h):
                 return _cevap(h, 200, {"cihazlar": d.cihazlar(k, _jeton(h))})
             if yol == "/api/hesap/kullanicilar":
                 return _cevap(h, 200, {"kullanicilar": d.kullanicilar(k), "kayit": d.kayit_acik()})
+            if yol == "/api/hesap/yedekler":
+                return _cevap(h, 200, d.kopya_durum(k, _yerel_mi(h)))
         raise Hata(404, "Böyle bir istek yok.")
     except Hata as e:
         return _cevap(h, e.kod, {"hata": e.mesaj})
@@ -1821,10 +2204,59 @@ def isle(h):
         return _cevap(h, 503, {"hata": "Hesap deposu açılamadı: %s" % e})
 
 
+def _boyut(n):
+    return "%.1f MB" % (n / 1048576.0) if n >= 1048576 else "%d KB" % max(1, n // 1024)
+
+
 def main(argv):
-    """Bilgisayarin kendisinden kurtarma (soz 14): telefon da yedek kodlar da
-    kaybolduysa iki adimli dogrulama buradan kapatilir. Hesap deposu bu
-    bilgisayarda oldugu icin bu kapi zaten bilgisayarin sahibinindir."""
+    """Bilgisayarin kendisinden kurtarma. Hesap deposu bu bilgisayarda
+    oldugu icin bu kapi zaten bilgisayarin sahibinindir.
+    --iki-adim-kapat: telefon da yedek kodlar da kaybolduysa (soz 14).
+    --yedekle / --yedekler / --geri-yukle: sunucu acilamazsa ya da yeni bir
+    bilgisayara ikinci yerdeki (USB) dosyadan donulecekse (soz 20)."""
+    if len(argv) == 2 and argv[1] == "--yedekle":
+        try:
+            x = Depo().kopya_al("elle")
+        except (Hata, sqlite3.Error, OSError) as e:
+            print("Yedek alınamadı: %s" % (e.mesaj if isinstance(e, Hata) else e))
+            return 1
+        print("Yedek alındı: %s · %d kullanıcı · %d kayıt · %s" % (x["ad"], x["kullanici"], x["kayit"], _boyut(x["bayt"])))
+        if x["ikinci"] is False:
+            print("İkinci yere yazılamadı (disk takılı mı?).")
+        return 0
+    if len(argv) == 2 and argv[1] == "--yedekler":
+        d = Depo()
+        l = d.kopyalar()
+        print("Klasör: %s" % d.kopya_klasoru())
+        for x in l:
+            print("  %s  %s" % (x["ad"], _boyut(x["bayt"])))
+        if not l:
+            print("  Henüz yedek yok.")
+        return 0
+    if len(argv) in (3, 4) and argv[1] == "--geri-yukle":
+        d = Depo()
+        yol = argv[2] if os.path.isfile(argv[2]) else os.path.join(d.kopya_klasoru(), argv[2])
+        if not os.path.isfile(yol):
+            print("Yedek bulunamadı: %s" % argv[2])
+            return 1
+        try:
+            b = d._kopya_bak(yol)
+        except Hata as e:
+            print(e.mesaj)
+            return 1
+        if argv[3:] != ["--evet"]:
+            print("Geri yüklenecek: %s · %d kullanıcı · %d kayıt" % (os.path.basename(yol), b["kullanici"], b["kayit"]))
+            print("Önce şimdiki hâlin yedeği alınır; bütün cihazlar yeniden giriş yapar; yedekten sonra")
+            print("cihazlarda yapılan değişiklikler eşitlemeyle geri gelir.")
+            print("Onaylıyorsan aynı komutu sonuna --evet ekleyerek yeniden çalıştır.")
+            return 2
+        try:
+            x = d._geri_yukle(yol, "bilgisayardan (komut satırı)")
+        except (Hata, sqlite3.Error, OSError) as e:
+            print("Geri yüklenemedi: %s" % (e.mesaj if isinstance(e, Hata) else e))
+            return 1
+        print("Geri yüklendi. Şimdiki hâlin yedeği: %s" % x["once"])
+        return 0
     if len(argv) == 3 and argv[1] == "--iki-adim-kapat":
         try:
             var = Depo().iki_adim_sifirla(argv[2])
@@ -1834,7 +2266,10 @@ def main(argv):
         print("İki adımlı doğrulama kapatıldı: %s" % argv[2] if var
               else "Bu hesapta iki adımlı doğrulama zaten kapalı: %s" % argv[2])
         return 0
-    print("Kullanım: python sistem/hesap.py --iki-adim-kapat <kullanıcı adı>")
+    print("Kullanım:")
+    print("  python sistem/hesap.py --iki-adim-kapat <kullanıcı adı>")
+    print("  python sistem/hesap.py --yedekle | --yedekler")
+    print("  python sistem/hesap.py --geri-yukle <yedek adı ya da dosya yolu> [--evet]")
     return 2
 
 
