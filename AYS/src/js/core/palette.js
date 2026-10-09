@@ -18,6 +18,7 @@ R.Palette = (function(){
 
     list.push(go('today','Bugün','today','Git'));
     list.push(go('week','Hafta — sözleşme ve değerlendirme','week','Git'));
+    list.push(go('ogren','Öğren — konu anlatımı, örnek soru, koç','book','Git'));
     list.push(go('learn','Öğrenme — video ve ders notu','play','Git'));
     list.push(go('exams','Deneme','exam','Git'));
     list.push(go('quiz','Sınama — kendini test et','zap','Git'));
@@ -147,6 +148,21 @@ R.Palette = (function(){
         }
       });
     });
+
+    /* Öğren (core/ogren.js): konunun adı ya da anlatımın bölüm başlığı,
+       formülü eşleşirse anlatım o konuda açılır; «Pisagor» tm-29’u bulur. */
+    if(R.Ogren && R.KONU_ANLATIM){
+      R.Ogren.konular().forEach(x => {
+        const a = R.KONU_ANLATIM[x.topic.id];
+        if(!a) return;
+        const b = hit(x.topic.name) ? null : (a.bolumler || []).find(b => hit(b.baslik)
+          || (b.formul || []).some(hit) || (b.liste || []).some(hit));
+        if(!hit(x.topic.name) && !b) return;
+        out.push({ group:'Anlatım', label:x.topic.name, sub:x.subject.name + (b ? ' · ' + b.baslik : ' · anlatım ve örnek sorular'),
+          icon:'book', weight:hit(x.topic.name) ? 5 : 4,
+          run(){ R.Ogren.sec(x.subject.id, x.topic.id).then(() => R.App.go('anlatim')); } });
+      });
+    }
 
     S2.exams.forEach(e => {
       if(hit(e.type) || hit(e.publisher) || hit(e.date)){
@@ -524,5 +540,5 @@ R.Palette = (function(){
   function isFocusOpen(){ return !!document.getElementById('focusmode'); }
 
   return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock,
-    veriKaydet, veriKomutu, commands };
+    veriKaydet, veriKomutu, commands, searchContent };
 })();

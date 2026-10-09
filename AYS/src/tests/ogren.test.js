@@ -10,7 +10,8 @@
         çevirmez — HATA: setTopicState her yamada kapanışı yeniden
         hesaplıyordu.
      5. Ekranlar: Konular satırı Anlatım'a götürür; Anlatım okutur ve
-        «Okudum»u yola yazar; Sorular cevabı gösterir; çekmece kenarda. */
+        «Okudum»u yola yazar; Sorular cevabı gösterir; çekmece kenarda.
+     6. Palet (Ctrl+K) anlatımın içinde arar: bölüm başlığı da bulunur. */
 
 (function(){
   const { describe, it, expect, resetState } = R.Test;
@@ -163,6 +164,15 @@
           expect([R.S.ui.ogrenKonu, R.S.ui.ogrenSoru]).toEqual(['tm-06', 0]);
         });
       });
+    });
+
+    it('palet: konu adı ve anlatımın bölüm başlığı aranınca Anlatım sonucu çıkar', () => {
+      const P = R.Palette;
+      const pisagor = P.searchContent('Pisagor').filter(x => x.group === 'Anlatım');
+      expect(pisagor.some(x => x.label === 'Dik ve özel üçgenler')).toBe(true);    // bölüm başlığından
+      const ebob = P.searchContent('EBOB').filter(x => x.group === 'Anlatım');
+      expect(ebob.some(x => x.label === 'EBOB – EKOK')).toBe(true);               // konu adından
+      expect(P.commands().some(c => c.route === 'ogren')).toBe(true);
     });
 
     it('anlatımı olmayan konu: kısa özet ve not; sorusu yoksa koça yönlendirir', async () => {

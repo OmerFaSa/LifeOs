@@ -11,8 +11,9 @@
 
 (function(){
   const { describe, it, expect } = R.Test;
-  /* Anlatımı bitmiş dersler (her bitişte buraya eklenir). */
-  const TAM = ['tyt-turkce', 'tyt-matematik', 'tyt-fen', 'tyt-sosyal', 'ayt-matematik', 'ayt-fizik', 'ayt-kimya'];
+  /* Bütün dersler tamam (2026-10-09): 184 konunun hepsinin anlatımı ve
+     soruları var. R.SUBJECTS'e yeni konu eklenirse anlatımı da yazılır. */
+  const TAM = R.SUBJECTS.map(s => s.id);
 
   const HARF = ['A', 'B', 'C', 'D', 'E'];
   const dizi = x => x == null ? [] : Array.isArray(x) ? x : [x];

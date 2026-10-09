@@ -16022,7 +16022,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'1fb93004', at:'2026-10-09 17:43', dirty:true };
+R.BUILD = { id:'df54017d', at:'2026-10-09 17:51', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -41770,6 +41770,586 @@ R.KONU_ANLATIM = R.KONU_ANLATIM || {};
 
 Object.assign(R.KONU_ANLATIM, {
 
+  /* ================= GENETİK ================= */
+  'ab-01': {
+    giris:'AYT’de hücre bölünmeleri hücre döngüsü, mitozun ve mayozun evreleri, DNA ve kromozom sayısındaki değişim ve kalıtsal çeşitliliğin kaynaklarıyla sorulur.',
+    bolumler:[
+      { baslik:'Hücre döngüsü',
+        liste:['**İnterfaz:** G1 (büyüme), S (DNA eşlenmesi), G2 (bölünmeye hazırlık).', '**Mitoz** ve **sitokinez**: çekirdek ve sitoplazma bölünmesi.',
+          'Döngü kontrol noktalarıyla denetlenir; denetim bozulursa hücre kontrolsüz bölünür (kanser).'] },
+      { baslik:'Mayoz I ve II',
+        liste:['**Profaz I:** homolog kromozomlar eşleşir (tetrat) ve aralarında parça değişimi (krossing over) olur.', '**Metafaz I:** homolog çiftler ekvatorda karşılıklı dizilir.',
+          '**Anafaz I:** HOMOLOG kromozomlar zıt kutuplara gider; kromozom sayısı yarıya iner.', '**Mayoz II:** kardeş kromatitler ayrılır; mitoza benzer.'],
+        dikkat:'Mitozun ve mayoz II’nin anafazında kardeş kromatitler, mayoz I’in anafazında homolog kromozomlar ayrılır.' },
+      { baslik:'Kalıtsal çeşitlilik',
+        liste:['Krossing over', 'Homolog kromozomların gametlere bağımsız dağılımı: n çift için 2^{n} farklı kombinasyon', 'Rastgele döllenme'],
+        ornek:{ soru:'2n = 6 olan bir canlıda krossing over olmadan bağımsız dağılımla kaç farklı gamet oluşabilir?', cozum:['n = 3 homolog çift.', '2^{3} = 8 gamet.'] } },
+    ],
+    sorular:[
+      { soru:'Hücre döngüsünde DNA’nın eşlendiği evre aşağıdakilerden hangisidir?',
+        sec:['G1', 'S', 'G2', 'Metafaz', 'Anafaz'], dogru:'B',
+        cozum:['DNA eşlenmesi interfazın S (sentez) evresinde olur.'] },
+      { soru:'Mayoz I’in anafaz evresinde zıt kutuplara çekilen yapılar aşağıdakilerden hangisidir?',
+        sec:['Kardeş kromatitler', 'Sentromerler', 'Çekirdekçikler', 'Homolog kromozomlar', 'Ribozomlar'], dogru:'D',
+        cozum:['Mayoz I’de homolog kromozomlar ayrılır; kardeş kromatitler mayoz II’de ayrılır.'] },
+      { soru:'2n = 6 kromozomlu bir canlıda krossing over olmadığı varsayılırsa homolog kromozomların bağımsız dağılımıyla kaç farklı gamet oluşabilir?',
+        sec:['3', '6', '8', '12', '64'], dogru:'C',
+        cozum:['n = 3 homolog çift.', '2^{3} = 8 farklı gamet.'] },
+      { soru:'Kanserin oluşmasındaki temel neden aşağıdakilerden hangisidir?',
+        sec:['Hücre döngüsünün denetiminin bozulması ve hücrelerin kontrolsüz bölünmesi', 'Hücrelerin bölünmeyi tamamen durdurması', 'Kromozom sayısının yarıya inmesi', 'Mayoz bölünmenin hızlanması', 'Ribozom sayısının azalması'], dogru:'A',
+        cozum:['Kontrol noktalarındaki bozulma hücrelerin sınırsız ve denetimsiz bölünmesine yol açar.'] },
+    ],
+  },
+
+  'ab-02': {
+    giris:'Kalıtımın genel ilkeleri Mendel’in yasalarıyla başlar; eksik ve eş baskınlık, çok alellilik ve poligenik kalıtım gibi Mendel dışı durumlarla genişler.',
+    bolumler:[
+      { baslik:'Mendel ilkeleri',
+        liste:['**Ayrılma ilkesi:** her birey bir karakter için iki alel taşır; gamet oluşurken aleller ayrılır.', '**Bağımsız dağılım:** farklı kromozomlardaki genler gametlere birbirinden bağımsız dağılır.'],
+        formul:['Gamet çeşidi = 2^{n} (n: heterozigot gen çifti sayısı)', 'AaBb × AaBb fenotip oranı 9 : 3 : 3 : 1'] },
+      { baslik:'Olasılıkla çaprazlama',
+        metin:'Her gen çifti ayrı ayrı çaprazlanır; istenen genotipin olasılıkları çarpılır.',
+        ornek:{ soru:'AaBb × Aabb çaprazlamasında aabb olasılığı nedir?', cozum:['Aa × Aa → aa: 1/4.', 'Bb × bb → bb: 1/2.', '1/4 · 1/2 = 1/8.'] } },
+      { baslik:'Mendel dışı kalıtım',
+        liste:['**Eksik baskınlık:** heterozigot ara fenotiptedir; kırmızı × beyaz → pembe, F2’de 1 : 2 : 1.', '**Eş baskınlık:** iki alel birlikte görünür; AB kan grubu.',
+          '**Çok alellilik:** bir gen için ikiden fazla alel (ABO kan grupları).', '**Poligenik kalıtım:** çok sayıda gen bir özelliği birlikte belirler; ten rengi, boy.'],
+        dikkat:'Aynı kromozom üzerindeki (bağlı) genler bağımsız dağılmaz; yalnızca krossing overla ayrılabilirler.' },
+    ],
+    sorular:[
+      { soru:'AaBbCc genotipli bir bireyin oluşturabileceği farklı gamet çeşidi kaçtır?',
+        sec:['8', '9', '12', '16', '27'], dogru:'A',
+        cozum:['Üç heterozigot gen çifti: 2^{3} = 8.'] },
+      { soru:'AaBb × AaBb çaprazlamasında aaBb genotipli bir birey oluşma olasılığı kaçtır?',
+        sec:['1/16', '1/8', '3/16', '1/4', '9/16'], dogru:'B',
+        cozum:['Aa × Aa → aa: 1/4.', 'Bb × Bb → Bb: 1/2.', '1/4 · 1/2 = 1/8.'] },
+      { soru:'Eksik baskınlık gösteren bir bitkide kırmızı (KK) × beyaz (BB) çaprazlamasından pembe F1 bireyleri elde ediliyor. F1 bireyleri kendi aralarında çaprazlanırsa pembe birey oluşma olasılığı kaçtır?',
+        sec:['1/4', '1/3', '1/2', '3/4', '1'], dogru:'C',
+        cozum:['KB × KB → 1 KK : 2 KB : 1 BB.', 'Pembe (KB) olasılığı 2/4 = 1/2.'] },
+      { soru:'Ten rengi ve boy uzunluğu gibi çok sayıda genin birlikte belirlediği kalıtım türü aşağıdakilerden hangisidir?',
+        sec:['Eksik baskınlık', 'Eş baskınlık', 'Çok alellilik', 'Eşeye bağlı kalıtım', 'Poligenik kalıtım'], dogru:'E',
+        cozum:['Çok sayıda genin katkısıyla oluşan, kademeli değişen özellikler poligeniktir.'] },
+    ],
+  },
+
+  'ab-03': {
+    giris:'Kalıtım problemleri ve soyağaçları, bir özelliğin baskın mı çekinik mi, otozomal mı eşeye bağlı mı olduğunu çözümlemeyi ister.',
+    bolumler:[
+      { baslik:'Soyağacı okumak',
+        liste:['Kare erkeği, daire dişiyi; içi dolu sembol özelliği gösteren bireyi belirtir.', 'Fenotipi normal anne ve babanın hasta çocuğu varsa özellik çekiniktir ve ebeveynler heterozigottur.',
+          'Baskın özellikte hasta çocuğun en az bir ebeveyni hastadır.'] },
+      { baslik:'X’e bağlı çekinik kalıtım',
+        metin:'Renk körlüğü ve hemofili X kromozomunda taşınır. Erkekler tek X taşıdığı için daha sık etkilenir.',
+        liste:['Hasta kızın babası kesinlikle hastadır.', 'Hasta annenin bütün oğulları hastadır.', 'Baba X’ini yalnızca kızlarına, Y’sini yalnızca oğullarına verir.'],
+        ornek:{ soru:'Taşıyıcı anne (X^{H}X^{h}) ile sağlıklı babanın (X^{H}Y) oğullarının hemofili olma olasılığı nedir?', cozum:['Oğul babadan Y, anneden X^{H} ya da X^{h} alır.', 'Hemofili olasılığı 1/2.'] } },
+      { baslik:'Öteki kalıtım biçimleri',
+        liste:['**Y’ye bağlı kalıtım:** babadan bütün oğullara geçer.', '**Mitokondriyal kalıtım:** mitokondri DNA’sı yalnızca anneden aktarılır.', 'Akraba evlilikleri çekinik hastalıkların ortaya çıkma olasılığını artırır.'],
+        dikkat:'Soyağacında önce «çekinik mi baskın mı», sonra «otozomal mı X’e bağlı mı» sorusunu sor; iki adımı karıştırma.' },
+    ],
+    sorular:[
+      { soru:'Fenotipi normal olan bir anne ve babanın kalıtsal bir hastalığı taşıyan çocuğu oluyorsa bu hastalık için aşağıdakilerden hangisi kesindir?',
+        sec:['Hastalık çekiniktir ve anne ile baba taşıyıcıdır.', 'Hastalık baskındır.', 'Hastalık Y kromozomuna bağlıdır.', 'Yalnızca anne taşıyıcıdır.', 'Hastalık mitokondriyaldir.'], dogru:'A',
+        cozum:['Normal iki bireyden hasta çocuk olması özelliğin çekinik olduğunu gösterir.', 'Çocuk iki çekinik aleli anne ve babadan almıştır: ikisi de taşıyıcıdır.'] },
+      { soru:'Hemofili X kromozomuna bağlı çekinik bir hastalıktır. Taşıyıcı bir anne ile sağlıklı bir babanın erkek çocuklarının hemofili olma olasılığı kaçtır?',
+        sec:['0', '1/4', '1/2', '3/4', '1'], dogru:'C',
+        cozum:['Oğul X’ini anneden alır: X^{H} ya da X^{h}, eşit olasılıkla.', 'Hemofili olasılığı 1/2.'] },
+      { soru:'Renk körü bir kızın babası için aşağıdakilerden hangisi kesindir?',
+        sec:['Fenotipi normaldir.', 'Taşıyıcıdır.', 'Renk körlüğü genini taşımaz.', 'Renk körüdür.', 'Oğullarının hepsi renk körüdür.'], dogru:'D',
+        cozum:['Renk körü kız iki çekinik X taşır; bunlardan biri babasındandır.', 'Babanın tek X’i çekinik alelli olduğundan baba renk körüdür.'] },
+      { soru:'Yalnızca anneden çocuklara aktarılan kalıtım materyali aşağıdakilerden hangisidir?',
+        sec:['X kromozomu', 'Mitokondri DNA’sı', 'Y kromozomu', 'Otozomal kromozomlar', 'Ribozomal RNA genleri'], dogru:'B',
+        cozum:['Döllenmede zigotun sitoplazması ve mitokondrileri yumurtadan gelir.'] },
+    ],
+  },
+
+  'ab-04': {
+    giris:'Nükleik asitler kalıtım bilgisini taşır ve proteine çevirir. DNA’nın yapısı, eşlenmesi, RNA türleri ve protein sentezi AYT’de her yıl sorulur.',
+    bolumler:[
+      { baslik:'DNA’nın yapısı',
+        metin:'DNA nükleotidlerden oluşan çift zincirli bir sarmaldır. Nükleotid; fosfat, deoksiriboz şekeri ve bir organik bazdan (A, T, G, C) oluşur. A ile T iki, G ile C üç hidrojen bağıyla eşleşir.',
+        formul:['A = T, G = C', 'Pürinler (A + G) = Pirimidinler (T + C)'],
+        ornek:{ soru:'Bir DNA’da adenin oranı %20 ise öteki bazların oranları nedir?', cozum:['T = %20.', 'G + C = %60 → G = C = %30.'] } },
+      { baslik:'DNA eşlenmesi',
+        metin:'Eşlenme yarı korunumludur: her yeni DNA bir eski bir yeni zincirden oluşur. Helikaz zincirleri ayırır, DNA polimeraz yeni nükleotidleri ekler.' },
+      { baslik:'RNA',
+        metin:'RNA tek zincirlidir; şekeri ribozdur ve timin yerine urasil (U) taşır. mRNA şifreyi taşır, tRNA amino asidi getirir, rRNA ribozomun yapısına katılır.' },
+      { baslik:'Protein sentezi',
+        liste:['**Transkripsiyon:** DNA’daki bilgi mRNA’ya yazılır (ökaryotlarda çekirdekte).', '**Translasyon:** ribozomda mRNA’nın üç bazlık kodonları okunur; her kodon bir amino aside karşılık gelir.',
+          'AUG başlama kodonudur; durdurma kodonları amino asit şifrelemez.', 'Genetik şifre neredeyse bütün canlılarda aynıdır.'],
+        dikkat:'mRNA, kalıp DNA zincirinin tamamlayıcısıdır ve T yerine U içerir: DNA’daki A’nın karşısına mRNA’da U gelir.' },
+    ],
+    sorular:[
+      { soru:'Bir DNA molekülünde adenin bazlarının oranı %30 olduğuna göre sitozin bazlarının oranı yüzde kaçtır?',
+        sec:['20', '30', '40', '60', '70'], dogru:'A',
+        cozum:['A = T = %30; toplam %60.', 'G + C = %40 → C = %20.'] },
+      { soru:'Aşağıdaki bazlardan hangisi DNA’da bulunup RNA’da bulunmaz?',
+        sec:['Adenin', 'Guanin', 'Sitozin', 'Timin', 'Urasil'], dogru:'D',
+        cozum:['RNA’da timin yerine urasil vardır.'] },
+      { soru:'Kalıp DNA zincirinin bir bölümü 3′-TAC GGA-5′ ise bu bölümden transkripsiyonla oluşan mRNA dizisi (5′→3′) aşağıdakilerden hangisidir?',
+        sec:['ATG CCT', 'UAC GGA', 'AUG CCU', 'TAC GGA', 'AUG GGU'], dogru:'C',
+        cozum:['T → A, A → U, C → G, G → C eşleşmesiyle: AUG CCU.', 'mRNA’da timin bulunmaz.'] },
+      { soru:'Protein sentezinde mRNA üzerinde bir amino asidi belirleyen üç bazlık birime ne ad verilir?',
+        sec:['Antikodon', 'Kodon', 'Gen', 'Nükleotid', 'Kromozom'], dogru:'B',
+        cozum:['mRNA’daki üçlü baz dizisi kodondur; tRNA’daki tamamlayıcısı antikodondur.'] },
+    ],
+  },
+
+  'ab-05': {
+    giris:'Biyoteknoloji, canlıları ya da onların parçalarını ürün ve hizmet üretmek için kullanır. Genetik mühendisliği bu alanda genlerin doğrudan değiştirilmesidir.',
+    bolumler:[
+      { baslik:'Rekombinant DNA',
+        liste:['**Restriksiyon enzimleri:** DNA’yı belirli dizilerden keser.', '**DNA ligaz:** kesilmiş parçaları birleştirir.', '**Vektör (plazmit):** geni hedef hücreye taşır.'],
+        metin:'İnsan insülin geni bakteri plazmitine eklenince bakteriler insan insülini üretir.' },
+      { baslik:'PCR ve DNA parmak izi',
+        metin:'PCR (polimeraz zincir tepkimesi) az miktardaki DNA’nın milyonlarca kopyasını çıkarır. Jel elektroforeziyle DNA parçaları büyüklüklerine göre ayrılır; bireye özgü bant deseni (DNA parmak izi) adli tıpta ve babalık testlerinde kullanılır.' },
+      { baslik:'Uygulamalar',
+        liste:['Klonlama (Dolly koyunu)', 'Kök hücre çalışmaları ve gen tedavisi', 'Genetiği değiştirilmiş organizmalar (GDO): zararlılara dayanıklı bitkiler', 'Aşı ve ilaç üretimi'] },
+      { baslik:'Biyoetik',
+        metin:'Genetik bilgilerin gizliliği, GDO’ların çevreye ve sağlığa etkileri, klonlama ve embriyo çalışmalarının sınırları biyoteknolojinin tartışılan konularıdır.',
+        dikkat:'Biyoteknoloji eski bir uğraştır: yoğurt, peynir ve ekmek yapımı da canlıları kullanan biyoteknolojik süreçlerdir.' },
+    ],
+    sorular:[
+      { soru:'DNA molekülünü belirli baz dizilerinden kesen enzimler aşağıdakilerden hangisidir?',
+        sec:['Ligaz', 'Restriksiyon enzimleri', 'DNA polimeraz', 'Amilaz', 'Helikaz'], dogru:'B',
+        cozum:['Restriksiyon enzimleri DNA’yı tanıdıkları özel dizilerden keser; ligaz birleştirir.'] },
+      { soru:'Az miktardaki bir DNA örneğinin laboratuvarda çok sayıda kopyasının çıkarılmasını sağlayan yöntem aşağıdakilerden hangisidir?',
+        sec:['Jel elektroforezi', 'Klonlama', 'Gen tedavisi', 'Fermantasyon', 'PCR'], dogru:'E',
+        cozum:['PCR, DNA’yı döngüler hâlinde çoğaltır.'] },
+      { soru:'İnsan insülin geninin bakterilere aktarılarak insülin üretilmesi aşağıdakilerden hangisine örnektir?',
+        sec:['Rekombinant DNA teknolojisi', 'DNA parmak izi', 'Doğal seçilim', 'Klonlama', 'Fermantasyon'], dogru:'A',
+        cozum:['Farklı canlıların DNA’ları birleştirilmiştir: rekombinant DNA.'] },
+      { soru:'Suç yerinde bulunan bir DNA örneğinin şüphelilerin DNA’sıyla karşılaştırılmasında kullanılan yöntem aşağıdakilerden hangisidir?',
+        sec:['Gen tedavisi', 'Aşılama', 'Kök hücre nakli', 'DNA parmak izi', 'Klonlama'], dogru:'D',
+        cozum:['Bireye özgü DNA bant desenleri karşılaştırılır.'] },
+    ],
+  },
+
+  /* ================= FİZYOLOJİ ================= */
+  'ab-06': {
+    giris:'Sinir sistemi uyarıları alır, değerlendirir ve tepki oluşturur. Nöronun yapısı, impuls iletimi, beynin bölümleri ve otonom sinir sistemi sorulur.',
+    bolumler:[
+      { baslik:'Nöron ve sinaps',
+        metin:'Nöron; dendrit, hücre gövdesi ve aksondan oluşur. Miyelin kılıf impulsun iletim hızını artırır. Nöronlar arasındaki bağlantı noktası sinapstır; burada nörotransmitterler (örneğin asetilkolin) salınır.',
+        liste:['Duyu nöronu uyarıyı merkeze, motor nöron merkezden kas ya da bezlere taşır; ara nöron ikisini bağlar.'] },
+      { baslik:'İmpuls iletimi',
+        liste:['**Dinlenme potansiyeli:** hücre içi dışına göre negatiftir (yaklaşık −70 mV).', '**Depolarizasyon:** Na^{+} kanalları açılır, Na^{+} hücre içine girer.',
+          '**Repolarizasyon:** K^{+} hücre dışına çıkar.', 'Na^{+}–K^{+} pompası ATP harcayarak iyon dağılımını eski hâline getirir.', 'Uyarı eşik değerini aşarsa impuls oluşur: «ya hep ya hiç».'] },
+      { baslik:'Merkezi sinir sistemi',
+        liste:['**Uç beyin:** düşünme, öğrenme, istemli hareketler.', '**Beyincik:** denge ve hareketlerin koordinasyonu.', '**Omurilik soğanı:** solunum, kalp atışı, yutkunma gibi hayati refleksler.',
+          '**Hipotalamus:** vücut sıcaklığı, açlık–susuzluk, hipofizin denetimi.', '**Talamus:** duyuların uç beyne aktarılması.', '**Omurilik:** refleks merkezi ve iletim yolu.'] },
+      { baslik:'Otonom sinir sistemi',
+        metin:'İç organları istemsiz olarak denetler. Sempatik sistem heyecan ve tehlike anında devreye girer (kalp hızlanır, göz bebeği büyür); parasempatik sistem dinlenme ve sindirimi yönetir.' },
+    ],
+    sorular:[
+      { soru:'Vücudun dengesini ve hareketlerin koordinasyonunu sağlayan beyin bölümü aşağıdakilerden hangisidir?',
+        sec:['Uç beyin', 'Beyincik', 'Omurilik soğanı', 'Hipotalamus', 'Talamus'], dogru:'B',
+        cozum:['Denge ve koordinasyon beyinciğin görevidir.'] },
+      { soru:'Solunum ve kalp atışının düzenlendiği merkez aşağıdakilerden hangisidir?',
+        sec:['Beyincik', 'Talamus', 'Omurilik soğanı', 'Uç beyin', 'Hipofiz'], dogru:'C',
+        cozum:['Hayati refleksler omurilik soğanında düzenlenir.'] },
+      { soru:'Nöronda impuls iletimi sırasında depolarizasyon evresinde hücre içine giren iyon aşağıdakilerden hangisidir?',
+        sec:['Na^{+}', 'K^{+}', 'Cl^{−}', 'Ca^{2+}', 'Mg^{2+}'], dogru:'A',
+        cozum:['Na^{+} kanalları açılır ve Na^{+} hücre içine girer; hücre içi pozitifleşir.'] },
+      { soru:'Heyecan ve tehlike anında kalp atışını hızlandırıp göz bebeğini büyüten sistem aşağıdakilerden hangisidir?',
+        sec:['Parasempatik sistem', 'Somatik sistem', 'Duyu sistemi', 'Merkezi sinir sistemi', 'Sempatik sistem'], dogru:'E',
+        cozum:['«Savaş ya da kaç» tepkilerini sempatik sinir sistemi oluşturur.'] },
+    ],
+  },
+
+  'ab-07': {
+    giris:'Endokrin sistem hormonlarla çalışır. Hangi bezin hangi hormonu salgıladığı, hormonların görevleri ve geri bildirimle düzenleme bu konunun özüdür.',
+    bolumler:[
+      { baslik:'Hormonların özellikleri',
+        metin:'Hormonlar kan yoluyla taşınır ve yalnızca reseptörü olan hedef hücreleri etkiler. Salgılarının çoğu negatif geri bildirimle düzenlenir: hormon düzeyi yükselince salgı azalır.' },
+      { baslik:'Başlıca bezler',
+        liste:['**Hipofiz:** büyüme hormonu, TSH, ACTH, FSH, LH, prolaktin; arka lobdan ADH ve oksitosin salınır (hipotalamusta üretilir).', '**Tiroit:** tiroksin (metabolizma hızı), kalsitonin (kan kalsiyumunu düşürür).',
+          '**Paratiroit:** parathormon (kan kalsiyumunu artırır).', '**Böbrek üstü bezi:** kabuk — kortizol, aldosteron; öz — adrenalin.', '**Pankreas:** insülin (kan şekerini düşürür), glukagon (yükseltir).',
+          '**Eşeysel bezler:** testosteron, östrojen, progesteron.', '**Epifiz:** melatonin (uyku–uyanıklık).'] },
+      { baslik:'Kan şekeri dengesi',
+        metin:'Yemekten sonra kan şekeri yükselince insülin salgılanır; glikoz hücrelere alınır ve karaciğerde glikojen olarak depolanır. Kan şekeri düşünce glukagon glikojeni yıkar. Bu iki hormon antagonisttir.',
+        dikkat:'İyot eksikliğinde tiroksin yapılamaz ve tiroit büyür: guatr. Bu yüzden sofra tuzuna iyot katılır.' },
+    ],
+    sorular:[
+      { soru:'Kan şekerini düşüren hormon aşağıdakilerden hangisidir?',
+        sec:['Glukagon', 'Adrenalin', 'İnsülin', 'Kortizol', 'Tiroksin'], dogru:'C',
+        cozum:['İnsülin glikozun hücrelere alınmasını ve glikojen olarak depolanmasını sağlar.'] },
+      { soru:'İyot eksikliğinde görülen guatr hastalığı hangi bezle ilgilidir?',
+        sec:['Tiroit', 'Hipofiz', 'Pankreas', 'Böbrek üstü bezi', 'Epifiz'], dogru:'A',
+        cozum:['Tiroit bezi tiroksin üretmek için iyot kullanır; iyot yetmezse bez büyür.'] },
+      { soru:'Kandaki kalsiyum düzeyini artıran hormon aşağıdakilerden hangisidir?',
+        sec:['Kalsitonin', 'İnsülin', 'Oksitosin', 'Parathormon', 'Melatonin'], dogru:'D',
+        cozum:['Parathormon kan kalsiyumunu artırır; kalsitonin azaltır.'] },
+      { soru:'Böbreklerde suyun geri emilimini artıran ADH hormonu hangi yapıdan kana salınır?',
+        sec:['Tiroit', 'Hipofizin arka lobu', 'Pankreas', 'Böbrek üstü bezi', 'Epifiz'], dogru:'B',
+        cozum:['ADH hipotalamusta üretilir, hipofizin arka lobunda depolanır ve oradan kana salınır.'] },
+    ],
+  },
+
+  'ab-08': {
+    giris:'Duyu organları çevreden gelen uyarıları algılar ve sinir impulsuna çevirir. Göz ve kulağın yapıları ile görevleri en çok sorulan başlıklardır.',
+    bolumler:[
+      { baslik:'Göz',
+        liste:['**Kornea:** ışığı kıran saydam tabaka.', '**İris ve göz bebeği:** göze giren ışık miktarını ayarlar.', '**Mercek:** uzaklığa göre kalınlığını değiştirerek görüntüyü odaklar (uyum).',
+          '**Retina:** çubuk hücreleri loş ışıkta siyah–beyaz, koni hücreleri parlak ışıkta renkli görmeyi sağlar.', '**Sarı benek:** en net görüntünün oluştuğu yer.', '**Kör nokta:** görme sinirinin çıktığı, reseptör bulunmayan yer.'],
+        dikkat:'Miyopi kalın kenarlı (ıraksak), hipermetropi ince kenarlı (yakınsak) mercekle düzeltilir.' },
+      { baslik:'Kulak',
+        liste:['**Dış kulak:** sesi toplar; kulak zarı titreşir.', '**Orta kulak:** çekiç, örs ve üzengi titreşimi iletir; östaki borusu yutakla bağlantı kurarak basıncı dengeler.',
+          '**İç kulak:** salyangoz (koklea) işitmeyi, yarım daire kanalları ve dehliz dengeyi sağlar.'] },
+      { baslik:'Burun, dil ve deri',
+        metin:'Koku reseptörleri burun boşluğunun üst kısmındadır. Dildeki tat tomurcukları tatlı, tuzlu, ekşi, acı ve umami tatlarını algılar. Deride dokunma, basınç, sıcak, soğuk ve ağrı reseptörleri bulunur.' },
+    ],
+    sorular:[
+      { soru:'Renkli görmeyi sağlayan reseptör hücreler aşağıdakilerden hangisidir?',
+        sec:['Çubuk hücreleri', 'Koni hücreleri', 'Kornea hücreleri', 'İris hücreleri', 'Mercek hücreleri'], dogru:'B',
+        cozum:['Koni hücreleri parlak ışıkta renkleri algılar; çubuklar loş ışıkta siyah–beyaz görmeyi sağlar.'] },
+      { soru:'İç kulakta dengeyi sağlayan yapı aşağıdakilerden hangisidir?',
+        sec:['Kulak zarı', 'Çekiç kemiği', 'Salyangoz', 'Yarım daire kanalları', 'Östaki borusu'], dogru:'D',
+        cozum:['Yarım daire kanalları ve dehliz denge organıdır; salyangoz işitmeyi sağlar.'] },
+      { soru:'Orta kulak ile yutak arasındaki bağlantıyı sağlayarak kulak zarının iki yanındaki basıncı dengeleyen yapı aşağıdakilerden hangisidir?',
+        sec:['Östaki borusu', 'Salyangoz', 'Kulak kepçesi', 'Üzengi kemiği', 'Yarım daire kanalları'], dogru:'A',
+        cozum:['Östaki borusu orta kulağı yutağa bağlar; uçakta kulak tıkanınca yutkunmak bu yüzden işe yarar.'] },
+      { soru:'Görme sinirinin gözden çıktığı ve reseptör hücre bulunmayan bölge aşağıdakilerden hangisidir?',
+        sec:['Sarı benek', 'Kornea', 'Kör nokta', 'İris', 'Mercek'], dogru:'C',
+        cozum:['Görme sinirinin çıktığı yerde çubuk ve koni yoktur: kör nokta.'] },
+    ],
+  },
+
+  'ab-09': {
+    giris:'Destek ve hareket sistemi kemikler, eklemler ve kaslardan oluşur. Kemiğin yapısı, kas türleri ve kasılma mekanizması sorulur.',
+    bolumler:[
+      { baslik:'Kemik ve kıkırdak',
+        metin:'Kemik doku sert ve canlıdır; kalsiyum ve fosfor depolar. Kırmızı kemik iliği kan hücrelerini üretir, sarı kemik iliği yağ depolar. Kıkırdak esnek bir destek dokusudur (kulak kepçesi, burun ucu, eklem yüzeyleri).',
+        liste:['Eklemler: oynamaz (kafatası kemikleri), yarı oynar (omurlar), oynar (diz, dirsek, omuz).'] },
+      { baslik:'Kas türleri',
+        liste:['**Çizgili (iskelet) kas:** istemli çalışır, çabuk kasılır ve yorulur.', '**Düz kas:** iç organların duvarında; istemsiz, yavaş ve uzun süre kasılır.',
+          '**Kalp kası:** çizgili görünür ama istemsiz çalışır; yorulmaz.'] },
+      { baslik:'Kasılma mekanizması',
+        metin:'Kas hücresinde aktin ve miyozin iplikleri birbirinin üzerinde kayar; sarkomer kısalır. Kasılma için Ca^{2+} iyonları ve ATP gerekir. Yoğun egzersizde oksijen yetmeyince oksijensiz solunum yapılır ve laktik asit birikir.' },
+      { baslik:'Sistem sağlığı',
+        metin:'D vitamini kalsiyumun emilimini sağlar; yetersizliğinde çocuklarda raşitizm görülür. Yaşla kemik yoğunluğunun azalmasına osteoporoz denir. Düzenli egzersiz kemik ve kas sağlığını korur.',
+        dikkat:'Kalp kası çizgili görünse de istemsizdir; «çizgili = istemli» genellemesi yanlıştır.' },
+    ],
+    sorular:[
+      { soru:'Kan hücrelerinin üretildiği yer aşağıdakilerden hangisidir?',
+        sec:['Sarı kemik iliği', 'Kırmızı kemik iliği', 'Kıkırdak', 'Kemik zarı', 'Eklem sıvısı'], dogru:'B',
+        cozum:['Kan hücreleri kırmızı kemik iliğinde üretilir; sarı kemik iliği yağ depolar.'] },
+      { soru:'Çizgili yapıda olduğu hâlde istemsiz çalışan kas türü aşağıdakilerden hangisidir?',
+        sec:['İskelet kası', 'Düz kas', 'Mide kası', 'Bağırsak kası', 'Kalp kası'], dogru:'E',
+        cozum:['Kalp kası mikroskopta çizgili görünür ama istemimiz dışında çalışır.'] },
+      { soru:'Kas kasılması sırasında birbiri üzerinde kayan protein iplikleri aşağıdakilerden hangisidir?',
+        sec:['Keratin ve kolajen', 'Hemoglobin ve miyoglobin', 'Aktin ve miyozin', 'Albümin ve globulin', 'Fibrin ve fibrinojen'], dogru:'C',
+        cozum:['Aktin ve miyozin ipliklerinin kayması sarkomeri kısaltır.'] },
+      { soru:'Omurlar arasındaki eklemler hangi tür ekleme örnektir?',
+        sec:['Yarı oynar eklem', 'Oynamaz eklem', 'Oynar eklem', 'Menteşe eklem', 'Bilyeli eklem'], dogru:'A',
+        cozum:['Omurlar arasında kıkırdak diskler vardır; sınırlı hareket sağlar: yarı oynar eklem.'] },
+    ],
+  },
+
+  'ab-10': {
+    giris:'Sindirim, büyük besin moleküllerinin hücre zarından geçebilecek küçük yapı taşlarına ayrılmasıdır. Hangi enzimin nerede, neyi sindirdiği ve emilimin yolu sorulur.',
+    bolumler:[
+      { baslik:'Ağız ve mide',
+        liste:['**Ağız:** mekanik sindirim (dişler) ve tükürük amilazıyla nişastanın kimyasal sindiriminin başlaması.', '**Mide:** HCl ortamı asitleştirir; pepsin proteinlerin kimyasal sindirimini başlatır.'] },
+      { baslik:'İnce bağırsak',
+        metin:'Sindirimin tamamlandığı yerdir.',
+        liste:['Pankreas özsuyu: amilaz (karbonhidrat), tripsin (protein), lipaz (yağ).', 'Bağırsak enzimleri: maltaz, sükraz, laktaz, peptidazlar.',
+          '**Safra:** karaciğerde üretilir, safra kesesinde depolanır; enzim içermez, yağları küçük damlacıklara ayırır (emülsiyon) ve lipazın işini kolaylaştırır.'] },
+      { baslik:'Emilim',
+        metin:'İnce bağırsak yüzeyi villuslarla genişlemiştir. Monosakkaritler, amino asitler, vitaminler ve mineraller villustaki kan kılcallarına; yağ asitleri ve gliserol ise lenf kılcallarına geçer.',
+        dikkat:'Yağlar ilk önce kana değil LENFE geçer; sonra lenf yoluyla kana karışır.' },
+      { baslik:'Kalın bağırsak ve karaciğer',
+        liste:['Kalın bağırsakta su ve minerallerin emilimi tamamlanır; buradaki bakteriler K ve bazı B vitaminlerini üretir.', 'Karaciğer: safra üretir, glikojen depolar, zehirli maddeleri etkisizleştirir, amonyaktan üre sentezler.'] },
+    ],
+    sorular:[
+      { soru:'Proteinlerin kimyasal sindirimi hangi organda başlar?',
+        sec:['Ağız', 'Mide', 'İnce bağırsak', 'Kalın bağırsak', 'Yemek borusu'], dogru:'B',
+        cozum:['Pepsin enzimi proteinlerin kimyasal sindirimini midede başlatır.'] },
+      { soru:'Safra ile ilgili aşağıdakilerden hangisi doğrudur?',
+        sec:['Pankreasta üretilir.', 'Proteinleri sindirir.', 'Nişastayı maltoza çevirir.', 'Enzim içermez; yağları küçük damlacıklara ayırır.', 'Midede salgılanır.'], dogru:'D',
+        cozum:['Safra karaciğerde üretilir, enzim değildir; yağları emülsiyon hâline getirerek lipazın etkisini artırır.'] },
+      { soru:'İnce bağırsakta emilen yağ asitleri ve gliserol ilk olarak nereye geçer?',
+        sec:['Lenf kılcallarına', 'Kan kılcallarına', 'Karaciğer toplardamarına', 'Kalın bağırsağa', 'Safra kesesine'], dogru:'A',
+        cozum:['Yağların sindirim ürünleri villuslardaki lenf kılcallarına geçer.'] },
+      { soru:'Amonyaktan üre sentezlenen organ aşağıdakilerden hangisidir?',
+        sec:['Böbrek', 'Pankreas', 'Karaciğer', 'Dalak', 'İnce bağırsak'], dogru:'C',
+        cozum:['Üre karaciğerde üretilir; böbrek onu kandan süzer.'] },
+    ],
+  },
+
+  'ab-11': {
+    giris:'Dolaşım sistemi maddeleri taşır, bağışıklık sistemi vücudu korur. Kalbin yapısı ve dolaşım yolları, kanın bileşenleri ve bağışıklık türleri sorulur.',
+    bolumler:[
+      { baslik:'Kalp ve dolaşım yolları',
+        metin:'Kalp dört odacıklıdır; sağ tarafında kirli (oksijeni az), sol tarafında temiz kan bulunur.',
+        liste:['**Küçük dolaşım:** sağ karıncık → akciğer atardamarı → akciğerler → akciğer toplardamarı → sol kulakçık.', '**Büyük dolaşım:** sol karıncık → aort → vücut → ana toplardamarlar → sağ kulakçık.'],
+        dikkat:'Akciğer atardamarı kirli, akciğer toplardamarı temiz kan taşır: adı kanın türüne değil, kalpten çıkıp çıkmadığına göre verilir.' },
+      { baslik:'Damarlar',
+        liste:['**Atardamar:** kalpten çıkan kanı taşır; duvarı kalın ve esnektir.', '**Toplardamar:** kanı kalbe getirir; kapakçıkları kanın geri akmasını önler.', '**Kılcal damar:** tek hücre kalınlığındadır; madde alışverişi burada olur.'] },
+      { baslik:'Kan',
+        liste:['**Alyuvar:** hemoglobinle oksijen taşır; olgun hâlde çekirdeksizdir.', '**Akyuvar:** savunma.', '**Kan pulcukları:** pıhtılaşma.', '**Plazma:** su, besin, hormon, atık taşır.'],
+        metin:'0 Rh(−) genel verici, AB Rh(+) genel alıcı kabul edilir.' },
+      { baslik:'Bağışıklık',
+        liste:['**Doğal savunma:** deri, mukus, mide asidi, fagositoz, ateş.', '**Kazanılmış savunma:** B lenfositleri antikor üretir, T lenfositleri enfekte hücreleri yok eder.',
+          '**Aktif bağışıklık:** vücut antikoru kendi üretir (hastalık geçirme, aşı); kalıcıdır.', '**Pasif bağışıklık:** hazır antikor alınır (serum, anne sütü); geçicidir.'] },
+    ],
+    sorular:[
+      { soru:'Akciğerlerden kalbe temiz kan getiren damar aşağıdakilerden hangisidir?',
+        sec:['Aort', 'Akciğer atardamarı', 'Akciğer toplardamarı', 'Üst ana toplardamar', 'Alt ana toplardamar'], dogru:'C',
+        cozum:['Akciğer toplardamarı oksijenlenmiş kanı sol kulakçığa getirir.'] },
+      { soru:'Genel verici olarak kabul edilen kan grubu aşağıdakilerden hangisidir?',
+        sec:['AB Rh(+)', 'A Rh(+)', 'B Rh(−)', 'AB Rh(−)', '0 Rh(−)'], dogru:'E',
+        cozum:['0 Rh(−) alyuvarlarında A, B ve Rh antijeni bulunmaz.'] },
+      { soru:'Aşı yaptırılarak kazanılan bağışıklık türü aşağıdakilerden hangisidir?',
+        sec:['Doğal pasif bağışıklık', 'Aktif bağışıklık', 'Pasif bağışıklık', 'Doğuştan bağışıklık', 'Fagositoz'], dogru:'B',
+        cozum:['Aşıyla vücut antikorları kendisi üretir: aktif bağışıklık.'] },
+      { soru:'Kanın pıhtılaşmasında görev alan yapı aşağıdakilerden hangisidir?',
+        sec:['Kan pulcukları', 'Alyuvarlar', 'Akyuvarlar', 'Plazma proteinlerinden albümin', 'Lenf'], dogru:'A',
+        cozum:['Kan pulcukları (trombositler) pıhtılaşmayı başlatır.'] },
+    ],
+  },
+
+  'ab-12': {
+    giris:'Solunum sistemi oksijeni alır, karbon dioksiti uzaklaştırır. Solunum yolu, soluk alıp verme, gazların taşınması ve solunumun düzenlenmesi sorulur.',
+    bolumler:[
+      { baslik:'Solunum yolu',
+        metin:'Hava burun, yutak, gırtlak, soluk borusu, bronşlar ve bronşçuklardan geçerek alveollere ulaşır. Alveoller ile kılcal damarlar arasında gaz değişimi difüzyonla olur.' },
+      { baslik:'Soluk alıp verme',
+        liste:['**Soluk alma:** diyafram ve kaburgalar arası kaslar kasılır; diyafram düzleşir, göğüs boşluğu genişler, basınç düşer ve hava içeri girer.', '**Soluk verme:** kaslar gevşer; göğüs boşluğu küçülür, hava dışarı çıkar.'] },
+      { baslik:'Gazların taşınması',
+        liste:['Oksijenin çoğu alyuvarlarda hemoglobine bağlanarak (oksihemoglobin) taşınır.', 'Karbon dioksitin çoğu plazmada bikarbonat (HCO_{3}^{−}) iyonu olarak taşınır; dönüşümü alyuvardaki karbonik anhidraz enzimi hızlandırır.'],
+        dikkat:'Karbon monoksit hemoglobine oksijenden çok daha güçlü bağlanır; oksijen taşınamaz ve zehirlenme olur.' },
+      { baslik:'Solunumun düzenlenmesi',
+        metin:'Solunum merkezi omurilik soğanındadır. Kandaki CO_{2} derişiminin artması (ve buna bağlı pH düşmesi) solunum hızını artıran en önemli uyarıdır.' },
+    ],
+    sorular:[
+      { soru:'Akciğerlerde gaz değişiminin gerçekleştiği yapı aşağıdakilerden hangisidir?',
+        sec:['Soluk borusu', 'Bronş', 'Gırtlak', 'Alveol', 'Yutak'], dogru:'D',
+        cozum:['Alveollerin ince duvarları ile kılcal damarlar arasında gazlar difüzyonla geçer.'] },
+      { soru:'Soluk alma sırasında diyaframda aşağıdakilerden hangisi gerçekleşir?',
+        sec:['Kasılır ve düzleşir.', 'Gevşer ve kubbeleşir.', 'Hiç hareket etmez.', 'Yukarı doğru itilir.', 'Göğüs boşluğunu daraltır.'], dogru:'A',
+        cozum:['Diyafram kasılınca düzleşir, göğüs boşluğu genişler ve hava içeri girer.'] },
+      { soru:'Karbon dioksitin kanda en fazla taşındığı biçim aşağıdakilerden hangisidir?',
+        sec:['Hemoglobine bağlı olarak', 'Plazmada çözünmüş gaz olarak', 'Bikarbonat (HCO_{3}^{−}) iyonu olarak', 'Karbon monoksit olarak', 'Glikoza bağlı olarak'], dogru:'C',
+        cozum:['CO_{2}’nin büyük kısmı karbonik anhidraz etkisiyle bikarbonata dönüşüp plazmada taşınır.'] },
+      { soru:'Solunum hızını artıran en önemli uyarı aşağıdakilerden hangisidir?',
+        sec:['Kandaki oksijenin artması', 'Kandaki CO_{2} derişiminin artması', 'Kan şekerinin artması', 'Vücut sıcaklığının düşmesi', 'Kan basıncının düşmesi'], dogru:'B',
+        cozum:['Omurilik soğanı kandaki CO_{2} artışına (ve pH düşüşüne) duyarlıdır; solunum hızlanır.'] },
+    ],
+  },
+
+  'ab-13': {
+    giris:'Üriner sistem kanı süzerek atıkları uzaklaştırır, su ve tuz dengesini korur. Nefronun yapısı ve idrar oluşumunun üç evresi bu konunun özüdür.',
+    bolumler:[
+      { baslik:'Nefron',
+        metin:'Böbreğin işlevsel birimi nefrondur: glomerulus ve Bowman kapsülü, kıvrımlı tüpler, Henle kulpu ve toplama kanalı.' },
+      { baslik:'İdrar oluşumu',
+        liste:['**Süzülme:** kan basıncıyla glomerulustan Bowman kapsülüne su, glikoz, amino asit, tuz ve üre geçer; kan hücreleri ve büyük proteinler geçmez.',
+          '**Geri emilim:** glikoz ve amino asitlerin tamamı, suyun ve tuzların çoğu tüplerden kana geri alınır.', '**Salgılama:** H^{+}, K^{+} ve bazı ilaçlar kandan tüplere aktarılır.'],
+        dikkat:'Sağlıklı bireyin idrarında glikoz ve protein bulunmaz; idrarda glikoz şeker hastalığının işaretidir.' },
+      { baslik:'Hormonal düzenleme',
+        liste:['**ADH:** toplama kanalından su geri emilimini artırır; idrar az ve yoğun olur.', '**Aldosteron:** Na^{+} geri emilimini artırır.'] },
+      { baslik:'İdrar yolu',
+        metin:'İdrar böbrekten üreterlerle idrar kesesine taşınır, üretrayla dışarı atılır. Böbrek yetmezliğinde kan diyaliz cihazıyla süzülür.' },
+    ],
+    sorular:[
+      { soru:'Nefronda kanın süzüldüğü yapı aşağıdakilerden hangisidir?',
+        sec:['Glomerulus ve Bowman kapsülü', 'Henle kulpu', 'Toplama kanalı', 'Üreter', 'İdrar kesesi'], dogru:'A',
+        cozum:['Süzülme glomerulustan Bowman kapsülüne olur.'] },
+      { soru:'Sağlıklı bir bireyin idrarında normalde bulunmayan madde aşağıdakilerden hangisidir?',
+        sec:['Su', 'Üre', 'Tuz', 'Glikoz', 'Ürik asit'], dogru:'D',
+        cozum:['Süzülen glikozun tamamı tüplerden geri emilir; idrara geçmez.'] },
+      { soru:'ADH hormonunun salgısı artarsa idrarla ilgili aşağıdakilerden hangisi gözlenir?',
+        sec:['İdrar miktarı artar, seyreltik olur.', 'İdrar miktarı azalır, yoğun olur.', 'İdrarda glikoz görülür.', 'İdrar oluşumu durur.', 'İdrarın rengi tamamen kaybolur.'], dogru:'B',
+        cozum:['ADH su geri emilimini artırır: daha az ve daha yoğun idrar oluşur.'] },
+      { soru:'İdrarı böbrekten idrar kesesine taşıyan kanal aşağıdakilerden hangisidir?',
+        sec:['Üretra', 'Toplama kanalı', 'Üreter', 'Henle kulpu', 'Böbrek atardamarı'], dogru:'C',
+        cozum:['Her böbrekten bir üreter çıkar ve idrarı keseye taşır; üretra keseden dışarıya açılır.'] },
+    ],
+  },
+
+  'ab-14': {
+    giris:'Üreme sistemi üreme hücrelerini oluşturur; döllenmeyle başlayan embriyonik gelişim yeni bireyi oluşturur. Hormonların döngüdeki rolü ve germ tabakaları sorulur.',
+    bolumler:[
+      { baslik:'Erkek üreme sistemi',
+        metin:'Testislerde sperm ve testosteron üretilir. Spermatogenezde mayozla bir ana hücreden dört sperm oluşur. Sperm epididimiste olgunlaşır, sperm kanalıyla taşınır.' },
+      { baslik:'Dişi üreme sistemi ve döngü',
+        liste:['Yumurtalıkta (ovaryum) yumurta, östrojen ve progesteron üretilir.', 'Oogenezde bir ana hücreden bir yumurta ve kutup hücreleri oluşur.',
+          'Döngüde FSH folikülü olgunlaştırır; LH artışı yumurtlamayı (ovulasyon) tetikler; progesteron rahim duvarını gebeliğe hazırlar.', 'Döllenme genellikle yumurta kanalında (fallop tüpü) olur.'] },
+      { baslik:'Embriyonik gelişim',
+        metin:'Zigot bölünerek morula ve blastulayı oluşturur; blastula rahim duvarına tutunur. Gastrulada üç germ tabakası oluşur:',
+        liste:['**Ektoderm:** sinir sistemi, deri, duyu organları.', '**Mezoderm:** kas, iskelet, dolaşım ve boşaltım sistemleri.', '**Endoderm:** sindirim ve solunum kanalının iç yüzeyi.'] },
+      { baslik:'İkizler ve plasenta',
+        metin:'Tek yumurta ikizleri aynı zigotun bölünmesinden oluşur; genetik yapıları ve cinsiyetleri aynıdır. Çift yumurta ikizleri ayrı yumurtaların ayrı spermlerle döllenmesinden oluşur. Plasenta anne ile bebek arasında madde alışverişini sağlar.',
+        dikkat:'Anne ve bebeğin kanı plasentada karışmaz; maddeler kılcallar arasında geçer.' },
+    ],
+    sorular:[
+      { soru:'İnsanda döllenme genellikle nerede gerçekleşir?',
+        sec:['Yumurtalık', 'Rahim (uterus)', 'Yumurta kanalı (fallop tüpü)', 'Vajina', 'Plasenta'], dogru:'C',
+        cozum:['Yumurta, yumurtalıktan atıldıktan sonra yumurta kanalında spermle karşılaşır.'] },
+      { soru:'Yumurtlamayı (ovulasyon) tetikleyen hormon aşağıdakilerden hangisidir?',
+        sec:['FSH', 'LH', 'Progesteron', 'Testosteron', 'Oksitosin'], dogru:'B',
+        cozum:['Döngünün ortasındaki LH artışı olgun folikülün yırtılmasına ve yumurtanın atılmasına yol açar.'] },
+      { soru:'Sinir sistemi embriyoda hangi germ tabakasından gelişir?',
+        sec:['Ektoderm', 'Mezoderm', 'Endoderm', 'Plasenta', 'Amniyon'], dogru:'A',
+        cozum:['Sinir sistemi, deri ve duyu organları ektodermden gelişir.'] },
+      { soru:'Tek yumurta ikizleri için aşağıdakilerden hangisi doğrudur?',
+        sec:['Farklı spermlerle döllenmişlerdir.', 'Cinsiyetleri farklı olabilir.', 'Genetik yapıları farklıdır.', 'İki ayrı yumurtadan oluşurlar.', 'Genetik yapıları ve cinsiyetleri aynıdır.'], dogru:'E',
+        cozum:['Tek bir zigotun ikiye ayrılmasıyla oluştukları için genetik yapıları aynıdır.'] },
+    ],
+  },
+
+  /* ================= ENERJİ ================= */
+  'ab-15': {
+    giris:'Fotosentez, ışık enerjisini glikozun kimyasal enerjisine çeviren süreçtir. Işığa bağımlı tepkimeler, Calvin döngüsü ve fotosentezi etkileyen etmenler sorulur.',
+    bolumler:[
+      { baslik:'Genel denklem ve yeri',
+        formul:['6CO_{2} + 6H_{2}O → (ışık, klorofil) → C_{6}H_{12}O_{6} + 6O_{2}'],
+        metin:'Fotosentez kloroplastta gerçekleşir: ışığa bağımlı tepkimeler tilakoit zarlarında, Calvin döngüsü stromada.' },
+      { baslik:'Işığa bağımlı tepkimeler',
+        metin:'Klorofil ışığı soğurur. Su parçalanır (fotoliz) ve açığa çıkan oksijen atmosfere verilir; ATP ve NADPH üretilir.',
+        dikkat:'Fotosentezde açığa çıkan oksijenin kaynağı CO_{2} değil SUDUR.' },
+      { baslik:'Calvin döngüsü',
+        metin:'Stromada CO_{2}, RuBP molekülüne bağlanır (rubisco enzimi). Işığa bağımlı tepkimelerden gelen ATP ve NADPH kullanılarak glikoz üretilir.' },
+      { baslik:'Fotosentez hızını etkileyen etmenler',
+        liste:['Işık şiddeti ve ışığın dalga boyu: kırmızı ve mavi ışık en etkili, yeşil ışık en az etkilidir (yansıtılır).', 'CO_{2} derişimi', 'Sıcaklık: enzimler için en uygun bir değer vardır.', 'Su ve mineral (Mg klorofilin yapısındadır).'],
+        metin:'Birden çok etmen olduğunda hızı en az bulunan etmen (sınırlayıcı faktör) belirler.' },
+    ],
+    sorular:[
+      { soru:'Fotosentezde açığa çıkan oksijen gazının kaynağı aşağıdakilerden hangisidir?',
+        sec:['Karbon dioksit', 'Su', 'Glikoz', 'Klorofil', 'ATP'], dogru:'B',
+        cozum:['Işığa bağımlı tepkimelerde su parçalanır (fotoliz) ve oksijen açığa çıkar.'] },
+      { soru:'Calvin döngüsü kloroplastın hangi bölümünde gerçekleşir?',
+        sec:['Tilakoit zarı', 'Dış zar', 'Grana boşluğu', 'Stroma', 'İç zar'], dogru:'D',
+        cozum:['CO_{2} bağlanması ve glikoz üretimi stromada olur.'] },
+      { soru:'Fotosentezde en az etkili olan ışık rengi aşağıdakilerden hangisidir?',
+        sec:['Kırmızı', 'Mavi', 'Mor', 'Turuncu', 'Yeşil'], dogru:'E',
+        cozum:['Klorofil yeşil ışığı büyük ölçüde yansıtır; bu yüzden yapraklar yeşil görünür.'] },
+      { soru:'Işığa bağımlı tepkimelerde üretilip Calvin döngüsünde kullanılan moleküller aşağıdakilerden hangisidir?',
+        sec:['ATP ve NADPH', 'Glikoz ve oksijen', 'CO_{2} ve su', 'Klorofil ve rubisco', 'Nişasta ve selüloz'], dogru:'A',
+        cozum:['Işığa bağımlı tepkimelerin ürünleri ATP ve NADPH, Calvin döngüsünde enerji ve elektron kaynağıdır.'] },
+    ],
+  },
+
+  'ab-16': {
+    giris:'Hücresel solunum, besinlerdeki enerjiyi ATP’ye çevirir. Oksijenli solunumun evreleri, oksijensiz solunum ve fermantasyon ile kemosentez bu konudadır.',
+    bolumler:[
+      { baslik:'Oksijenli solunum',
+        formul:['C_{6}H_{12}O_{6} + 6O_{2} → 6CO_{2} + 6H_{2}O + ATP'],
+        liste:['**Glikoliz:** sitoplazmada; glikoz iki pirüvata yıkılır, net 2 ATP.', '**Krebs döngüsü:** mitokondri matriksinde; CO_{2} açığa çıkar.',
+          '**Elektron taşıma sistemi:** mitokondri iç zarında; en çok ATP burada üretilir, son elektron alıcısı oksijendir ve su oluşur.'] },
+      { baslik:'Oksijensiz solunum ve fermantasyon',
+        liste:['**Etil alkol fermantasyonu:** maya hücrelerinde; CO_{2} ve etil alkol oluşur (ekmek hamurunun kabarması).', '**Laktik asit fermantasyonu:** yoğurt bakterilerinde ve oksijen yetmediğinde kas hücrelerinde.'],
+        metin:'Fermantasyonda glikoz tam yıkılmaz; yalnızca glikolizdeki 2 ATP kazanılır.' },
+      { baslik:'Kemosentez',
+        metin:'Bazı bakteriler (nitrifikasyon ve kükürt bakterileri) inorganik maddeleri yükseltgeyerek elde ettikleri enerjiyle organik madde üretir. Işık gerekmez.',
+        dikkat:'Kemosentez yapan canlılar da üreticidir; besin üretmek için ışık değil kimyasal enerji kullanırlar.' },
+    ],
+    sorular:[
+      { soru:'Hücresel solunumda glikolizin gerçekleştiği yer aşağıdakilerden hangisidir?',
+        sec:['Sitoplazma', 'Mitokondri matriksi', 'Mitokondri iç zarı', 'Kloroplast', 'Çekirdek'], dogru:'A',
+        cozum:['Glikoliz oksijen gerektirmez ve sitoplazmada gerçekleşir.'] },
+      { soru:'Oksijenli solunumda elektron taşıma sisteminin son elektron alıcısı aşağıdakilerden hangisidir?',
+        sec:['NAD^{+}', 'Pirüvat', 'Oksijen', 'Karbon dioksit', 'Glikoz'], dogru:'C',
+        cozum:['Elektronlar sonunda oksijene aktarılır ve su oluşur.'] },
+      { soru:'Ekmek hamurunun kabarmasına yol açan olay aşağıdakilerden hangisidir?',
+        sec:['Laktik asit fermantasyonunda oluşan laktik asit', 'Fotosentezde açığa çıkan oksijen', 'Kemosentez', 'Maya hücrelerinin etil alkol fermantasyonunda oluşturduğu CO_{2}', 'Unun suyu emmesi'], dogru:'D',
+        cozum:['Maya, hamurdaki şekeri fermente eder; açığa çıkan CO_{2} hamuru kabartır.'] },
+      { soru:'Işık kullanmadan, inorganik maddeleri yükseltgeyerek elde ettiği enerjiyle organik madde üreten canlılar aşağıdakilerden hangisidir?',
+        sec:['Mantarlar', 'Kemosentetik bakteriler', 'Yeşil bitkiler', 'Algler', 'Hayvanlar'], dogru:'B',
+        cozum:['Nitrifikasyon ve kükürt bakterileri gibi kemosentetik bakteriler bu yolla besin üretir.'] },
+    ],
+  },
+
+  /* ================= BİTKİ VE EKOLOJİ ================= */
+  'ab-17': {
+    giris:'Bitki biyolojisi bitki dokularını, su ve besin taşınmasını, bitki hormonlarını ve çiçekli bitkilerde üremeyi inceler.',
+    bolumler:[
+      { baslik:'Bitki dokuları',
+        liste:['**Meristem:** bölünebilen doku; uç meristem boyca, yanal meristem (kambiyum) enine büyümeyi sağlar.', '**Örtü doku:** epidermis ve gaz alışverişini sağlayan stomalar.',
+          '**Temel doku:** parankima (fotosentez, depo), kollenkima ve sklerenkima (destek).', '**İletim doku:** ksilem kökten yukarı su ve mineral taşır (ölü hücreler); floem organik besini iki yönde taşır (canlı hücreler).'] },
+      { baslik:'Suyun taşınması',
+        metin:'Su kökten yapraklara başlıca terleme çekimi (yapraklardan buharlaşan suyun oluşturduğu gerilim ve su moleküllerinin kohezyonu) ile taşınır; kök basıncı ve kılcallık da katkı sağlar.' },
+      { baslik:'Bitki hormonları ve tepkiler',
+        liste:['**Oksin:** hücre uzaması, ışığa yönelme (fototropizma), uç baskınlığı.', '**Sitokinin:** hücre bölünmesi.', '**Giberellin:** gövde uzaması, tohum çimlenmesi.',
+          '**Absisik asit:** kuraklıkta stomaların kapanması, tohum dormansisi.', '**Etilen:** gaz hâlinde; meyve olgunlaşması.'],
+        metin:'Uyaranın yönüne bağlı büyüme hareketleri tropizma (ışık, yer çekimi, dokunma), yönden bağımsız hareketler nastidir.' },
+      { baslik:'Çiçekli bitkilerde üreme',
+        metin:'Polenin dişi organın tepeciğine taşınmasına tozlaşma denir. Çift döllenmede bir sperm yumurtayı döller (zigot, 2n), öteki iki kutup çekirdeğiyle birleşerek besi dokusunu (endosperm, 3n) oluşturur. Yumurtalık meyveye, tohum taslağı tohuma dönüşür.' },
+    ],
+    sorular:[
+      { soru:'Kökten yapraklara su ve mineral taşıyan iletim dokusu aşağıdakilerden hangisidir?',
+        sec:['Floem', 'Ksilem', 'Epidermis', 'Parankima', 'Kollenkima'], dogru:'B',
+        cozum:['Ksilem su ve mineralleri kökten yukarı taşır; floem organik besin taşır.'] },
+      { soru:'Meyvelerin olgunlaşmasını hızlandıran ve gaz hâlinde bulunan bitki hormonu aşağıdakilerden hangisidir?',
+        sec:['Oksin', 'Sitokinin', 'Giberellin', 'Absisik asit', 'Etilen'], dogru:'E',
+        cozum:['Etilen gaz hâlinde bir hormondur ve meyve olgunlaşmasını hızlandırır.'] },
+      { soru:'Kurak koşullarda stomaların kapanmasını sağlayan bitki hormonu aşağıdakilerden hangisidir?',
+        sec:['Oksin', 'Etilen', 'Absisik asit', 'Giberellin', 'Sitokinin'], dogru:'C',
+        cozum:['Absisik asit su kaybını azaltmak için stomaları kapatır.'] },
+      { soru:'Bitki gövdesinin enine büyümesini (kalınlaşmasını) sağlayan doku aşağıdakilerden hangisidir?',
+        sec:['Kambiyum', 'Epidermis', 'Ksilem', 'Parankima', 'Sklerenkima'], dogru:'A',
+        cozum:['Kambiyum yanal meristemdir; bölünerek gövdenin kalınlaşmasını sağlar.'] },
+    ],
+  },
+
+  'ab-18': {
+    giris:'Komünite ve popülasyon ekolojisi; popülasyonların nasıl büyüdüğünü, türler arasındaki ilişkileri ve komünitelerin zamanla nasıl değiştiğini inceler.',
+    bolumler:[
+      { baslik:'Popülasyon büyümesi',
+        metin:'Popülasyon doğum ve göçle (dışarıdan gelen) artar, ölüm ve göçle (dışarı giden) azalır.',
+        liste:['**Üstel büyüme (J eğrisi):** sınırsız kaynakta hızla artış.', '**Lojistik büyüme (S eğrisi):** kaynaklar sınırlıyken artış yavaşlar ve taşıma kapasitesinde dengelenir.',
+          '**Taşıma kapasitesi:** ortamın bir popülasyonu sürekli destekleyebileceği en yüksek birey sayısı.'] },
+      { baslik:'Türler arası ilişkiler',
+        liste:['**Mutualizm (+/+):** iki tür de yararlanır; liken (mantar + alg), baklagil ile azot bağlayan bakteri.', '**Kommensalizm (+/0):** biri yararlanır, öteki etkilenmez.',
+          '**Parazitlik (+/−):** biri yararlanır, öteki zarar görür.', '**Rekabet (−/−):** aynı kaynak için.', '**Av–avcı:** avcı popülasyonu av popülasyonunu izleyerek dalgalanır.'] },
+      { baslik:'Ekolojik süksesyon',
+        metin:'Bir alandaki komünitenin zamanla değişmesidir. Birincil süksesyon çıplak kayada öncü canlılarla (likenler) başlar; ikincil süksesyon toprağı korunmuş bir alanda (yangın ya da terk edilmiş tarla sonrası) olur. Süreç dengeli bir klimaks komüniteyle sonuçlanır.',
+        dikkat:'Likenler kayayı aşındırarak ilk toprağı oluşturur; bu yüzden birincil süksesyonun öncüleridir.' },
+    ],
+    sorular:[
+      { soru:'İki türün de birbirinden yarar sağladığı ilişki aşağıdakilerden hangisidir?',
+        sec:['Kommensalizm', 'Parazitlik', 'Mutualizm', 'Rekabet', 'Av–avcı ilişkisi'], dogru:'C',
+        cozum:['Karşılıklı yarara dayanan ilişki mutualizmdir; liken bunun bilinen örneğidir.'] },
+      { soru:'Kaynakların sınırlı olduğu bir ortamda popülasyon büyümesi genellikle hangi eğriyi çizer?',
+        sec:['S (lojistik) eğrisi', 'J (üstel) eğrisi', 'Düz yatay çizgi', 'Sürekli azalan doğru', 'U eğrisi'], dogru:'A',
+        cozum:['Sınırlı kaynakta büyüme yavaşlar ve taşıma kapasitesinde dengelenir: S eğrisi.'] },
+      { soru:'Çıplak bir kayalık alanda birincil süksesyonu başlatan öncü canlılar aşağıdakilerden hangisidir?',
+        sec:['Ağaçlar', 'Çalılar', 'Otsu bitkiler', 'Likenler', 'Memeliler'], dogru:'D',
+        cozum:['Likenler kayayı aşındırarak ilk ince toprak tabakasını oluşturur.'] },
+      { soru:'Bir ortamın bir popülasyonu sürekli olarak destekleyebileceği en yüksek birey sayısına ne ad verilir?',
+        sec:['Biyotik potansiyel', 'Taşıma kapasitesi', 'Popülasyon yoğunluğu', 'Ekolojik niş', 'Klimaks'], dogru:'B',
+        cozum:['Ortamın kaynaklarının sürekli destekleyebileceği en yüksek birey sayısı taşıma kapasitesidir.'] },
+    ],
+  },
+
+  'ab-19': {
+    giris:'Canlılar ve çevre konusu madde döngülerini, insan etkinliklerinin yol açtığı çevre sorunlarını ve biyolojik çeşitliliğin korunmasını kapsar.',
+    bolumler:[
+      { baslik:'Madde döngüleri',
+        liste:['**Azot döngüsü:** azot bağlama (N_{2} → amonyak), amonifikasyon (organik atık → amonyak), nitrifikasyon (amonyak → nitrit → nitrat), denitrifikasyon (nitrat → N_{2}).',
+          '**Fosfor döngüsü:** kayaçlardan toprağa ve canlılara geçer; atmosfer evresi yoktur.', '**Karbon ve su döngüsü:** fotosentez, solunum, yanma; buharlaşma, yağış.'] },
+      { baslik:'Çevre sorunları',
+        liste:['**Ötrofikasyon:** tarım gübrelerindeki nitrat ve fosfatın göllere taşınmasıyla alglerin aşırı çoğalması, sonra ayrışmayla suyun oksijeninin tükenmesi.', '**Biyolojik birikim:** parçalanmayan zehirlerin besin zincirinin üst basamaklarında birikmesi.',
+          '**Küresel iklim değişikliği, ozon incelmesi, asit yağmuru, plastik kirliliği.**'] },
+      { baslik:'Biyoçeşitlilik ve koruma',
+        metin:'Yalnızca belirli bir bölgede doğal olarak yaşayan türlere endemik tür denir; Türkiye endemik bitki türleri bakımından zengindir. Yaşam alanlarının korunması, millî parklar, gen bankaları ve sürdürülebilir kaynak kullanımı biyoçeşitliliği korur.',
+        dikkat:'Ötrofikasyonda sorun alglerin kendisi değil, ölen alglerin ayrışırken suyun oksijenini tüketmesidir.' },
+    ],
+    sorular:[
+      { soru:'Tarım arazilerinden göle taşınan gübrelerin alglerin aşırı çoğalmasına ve sudaki oksijenin azalmasına yol açması olayına ne ad verilir?',
+        sec:['Biyolojik birikim', 'Ötrofikasyon', 'Süksesyon', 'Nitrifikasyon', 'Fotoliz'], dogru:'B',
+        cozum:['Besin tuzlarıyla aşırı zenginleşme ve ardından oksijen tükenmesi ötrofikasyondur.'] },
+      { soru:'Atmosfer evresi bulunmayan madde döngüsü aşağıdakilerden hangisidir?',
+        sec:['Azot döngüsü', 'Karbon döngüsü', 'Su döngüsü', 'Fosfor döngüsü', 'Oksijen döngüsü'], dogru:'D',
+        cozum:['Fosfor kayaç, toprak, su ve canlılar arasında döner; gaz hâlinde atmosfere geçmez.'] },
+      { soru:'Yalnızca belirli bir bölgede doğal olarak yaşayan türlere ne ad verilir?',
+        sec:['Endemik tür', 'İstilacı tür', 'Öncü tür', 'Kozmopolit tür', 'Nesli tükenmiş tür'], dogru:'A',
+        cozum:['Yayılışı belirli bir bölgeyle sınırlı türler endemiktir.'] },
+      { soru:'Azot döngüsünde topraktaki nitratın bakteriler tarafından tekrar azot gazına (N_{2}) dönüştürülmesine ne ad verilir?',
+        sec:['Azot bağlama', 'Amonifikasyon', 'Nitrifikasyon', 'Fotosentez', 'Denitrifikasyon'], dogru:'E',
+        cozum:['Nitratın N_{2} olarak atmosfere dönmesi denitrifikasyondur.'] },
+    ],
+  },
+
 });
 
 /* ==== js/data/reference.js ==== */
@@ -67472,6 +68052,7 @@ R.Palette = (function(){
 
     list.push(go('today','Bugün','today','Git'));
     list.push(go('week','Hafta — sözleşme ve değerlendirme','week','Git'));
+    list.push(go('ogren','Öğren — konu anlatımı, örnek soru, koç','book','Git'));
     list.push(go('learn','Öğrenme — video ve ders notu','play','Git'));
     list.push(go('exams','Deneme','exam','Git'));
     list.push(go('quiz','Sınama — kendini test et','zap','Git'));
@@ -67601,6 +68182,21 @@ R.Palette = (function(){
         }
       });
     });
+
+    /* Öğren (core/ogren.js): konunun adı ya da anlatımın bölüm başlığı,
+       formülü eşleşirse anlatım o konuda açılır; «Pisagor» tm-29’u bulur. */
+    if(R.Ogren && R.KONU_ANLATIM){
+      R.Ogren.konular().forEach(x => {
+        const a = R.KONU_ANLATIM[x.topic.id];
+        if(!a) return;
+        const b = hit(x.topic.name) ? null : (a.bolumler || []).find(b => hit(b.baslik)
+          || (b.formul || []).some(hit) || (b.liste || []).some(hit));
+        if(!hit(x.topic.name) && !b) return;
+        out.push({ group:'Anlatım', label:x.topic.name, sub:x.subject.name + (b ? ' · ' + b.baslik : ' · anlatım ve örnek sorular'),
+          icon:'book', weight:hit(x.topic.name) ? 5 : 4,
+          run(){ R.Ogren.sec(x.subject.id, x.topic.id).then(() => R.App.go('anlatim')); } });
+      });
+    }
 
     S2.exams.forEach(e => {
       if(hit(e.type) || hit(e.publisher) || hit(e.date)){
@@ -67978,7 +68574,7 @@ R.Palette = (function(){
   function isFocusOpen(){ return !!document.getElementById('focusmode'); }
 
   return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock,
-    veriKaydet, veriKomutu, commands };
+    veriKaydet, veriKomutu, commands, searchContent };
 })();
 
 /* ==== js/core/setup.js ==== */
