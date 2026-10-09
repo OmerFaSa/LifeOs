@@ -103,6 +103,42 @@ R.Screens.topic = (function(){
     });
   }
 
+  /* ANLAMADIM, SOR (core/konusor.js): koçun modeli bu konunun bağlamında
+     anlatır; cevap «doğrulanmadı», kayda yazılmaz, istenirse karta döner. */
+  let sorBusy = false;
+  function sorCard(subject, topic){
+    const KS = R.KonuSor;
+    if(!KS) return null;
+    if(!KS.hazir()){
+      return K.Card({ title:'Anlamadım, sor',
+        body:K.Notice({ tone:'info', body:'Model bağlı değil. Ofis › Ofis ayarlarından ücretsiz bir sağlayıcı bağlarsan '
+          + 'anlamadığın yeri burada, bu konunun içinde anlatır.' }) });
+    }
+    const l = KS.konusmaOf(subject.id, topic.id);
+    const ciftler = [];
+    for(let i = 0; i + 1 < l.length; i += 2) ciftler.push({ soru:l[i].metin, cevap:l[i + 1].metin, i:i / 2 });
+    return K.Card({
+      title:'Anlamadım, sor', sub:'Koçun modeli bu konunun içinde anlatır',
+      body:html`
+        ${when(ciftler.length, () => html`<div class="stack-sm">${map(ciftler, c => html`
+          <div class="konusor__cift">
+            <p class="small"><b>Sen:</b> ${c.soru}</p>
+            <p class="small konusor__cevap">${c.cevap}</p>
+            <div class="row between gap-6"><span class="tiny dim">doğrulanmadı · modelin anlatımı</span>
+              ${K.Button({ label:'Karta çevir', icon:'cards', size:'sm', tone:'ghost', act:'konusor-kart', data:{ 'data-i':String(c.i) } })}</div>
+          </div>`)}</div>`)}
+        <div id="konusor-akis" class="small konusor__cevap" aria-live="polite"></div>
+        ${K.Field({ label:ciftler.length ? 'Devam et' : 'Neyi anlamadın?',
+          input:K.Textarea({ id:'konusor-soru', rows:3, aria:'Anlamadığın yer',
+            placeholder:'Anlamadığın yeri yaz ya da anlatımdan yapıştır…' }) })}
+        <div class="row wrap gap-6 mt-10">
+          ${K.Button({ label:sorBusy ? 'Anlatıyor…' : 'Sor', icon:'zap', size:'sm', tone:'primary', act:'konusor-sor', disabled:sorBusy })}
+          ${when(ciftler.length, () => K.Button({ label:'Yeni konuşma', size:'sm', tone:'ghost', act:'konusor-unut' }))}
+        </div>
+        <p class="tiny dim mt-10">Cevap kaynaksızdır ve kaydedilmez; bir tanım ya da formül kritikse kitabınla karşılaştır.</p>`,
+    });
+  }
+
   const YOL_EYLEM = {
     ogren:(subject, topic) => {
       const m = malzemeler(subject, topic);
@@ -311,6 +347,7 @@ R.Screens.topic = (function(){
         headerCard(subject, topic, st, risk),
         yolCard(subject, topic, st),
         malzemeCard(subject, topic),
+        sorCard(subject, topic),
         measureCard(subject, topic, st),
         practiceCard(subject, topic),
         notesCard(subject, topic),
@@ -387,6 +424,34 @@ R.Screens.topic = (function(){
         note:u.dogruluk === 'dogrulanmadi' ? 'Doğrulanmadı: kaynaksız, modelin bilgisidir. '
           + 'Karar vermeden önce bir kaynağa bak.' : null,
         body:LIFEOS.Urun.cerceve(u) });
+    },
+    async 'konusor-sor'(){
+      const { subject, topic } = ctx();
+      const kutu = document.getElementById('konusor-soru');
+      const soru = kutu ? kutu.value : '';
+      if(!subject || !topic || sorBusy || !R.KonuSor) return;
+      if(String(soru).trim().length < 3){ UI.toast('Neyi anlamadığını bir cümleyle yaz.'); return; }
+      sorBusy = true;
+      const akis = document.getElementById('konusor-akis');
+      if(akis) akis.textContent = 'Anlatıyor…';
+      let r = null;
+      try{
+        r = await R.KonuSor.sor(subject.id, topic.id, soru, { onText:t => { if(akis) akis.textContent = t; } });
+      }finally{ sorBusy = false; }
+      if(!r.ok) UI.toast(r.metin, { life:6000 });
+      R.App.render();
+    },
+    async 'konusor-kart'(el){
+      const { subject, topic } = ctx();
+      if(!subject || !topic) return;
+      const k = await R.KonuSor.kartYap(subject.id, topic.id, Number(el.dataset.i) || 0);
+      UI.toast(k ? 'Karta çevrildi · modelin anlatımı, yanlışsa düzelt' : 'Kart yapılamadı');
+      R.App.render();
+    },
+    async 'konusor-unut'(){
+      const { subject, topic } = ctx();
+      if(subject && topic) R.KonuSor.unut(subject.id, topic.id);
+      R.App.render();
     },
     async 'yol-yanlis'(){
       S.ui.analyticsTab = 'errors';

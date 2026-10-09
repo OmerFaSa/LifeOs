@@ -2503,3 +2503,10 @@ body.is-dragging .drop.is-over{
 .yol__metin{ flex:1; min-width:0; font-size:14px; line-height:1.4; }
 .yol__metin b{ font-weight:600; }
 .yol__etiket{ flex:none; padding:1px 8px; border-radius:999px; background:var(--surface-2); color:var(--text-2); }
+
+/* Anlamadım, sor (core/konusor.js): soru ve modelin anlatımı. */
+.konusor__cift{ padding:10px 12px; border-radius:12px; background:var(--surface-2); }
+.konusor__cift p{ margin:0 0 6px; }
+.konusor__cevap{ white-space:pre-wrap; line-height:1.5; }
+#konusor-akis:empty{ display:none; }
+#konusor-akis{ margin-bottom:10px; }

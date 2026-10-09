@@ -84,6 +84,7 @@ verilen kararlar:
 | Kurulu bildirimler, her modülde sessiz saat | `brand/ortak/bildirim.js` söz 8 (`liste`, `atla`, `geriAl`, `listeAc`; silinen `lifeos.telbildirim.atla`), `BildirimKoprusu.swift` söz 8 (`liste`, `sil`); ESP `Takvim.bildirimListesi` ve AYS telefon satırı sessiz saate ve tür ayarına uyar | 2026-10-09 |
 | AYS öğrenme yolu | `AYS/src/js/core/ogrenyolu.js` (`R.OgrenYolu`), konu ekranında «Öğrenme yolu»: öğren → kartla → soru çöz → yanlışları kapat → konu testi → tekrar test; her adım var olan kayıttan okunur ve etiketlenir (ölçüldü / hesaplandı / beyan), sıradaki adım ve eylemi kodla seçilir, eşikler yazılır | 2026-10-09 |
 | «Bu konuyu öğren» | AYS konu ekranı «Konunun malzemeleri»: konu anlatımı, kavram sözlüğü, çalışma kâğıdı BAM'dan açık istekle (`brand/ortak/urun.js` söz 6, `iste(metin, { tur, konu, ayrinti, etiket })`); `HKM/core/urunler.py` ETIKET_RE, `sohbet.urun_modulden(istek=)`, `king._teklif_urun` etiketi `urun.add` teklifine geri koyar; malzeme konunun yanında, internetsiz açılır; her istek King onayından geçer | 2026-10-09 |
+| Konuda «Anlamadım, sor» | `AYS/src/js/core/konusor.js` (`R.KonuSor`): koçun model zinciriyle bu konunun bağlamında (ders, bölüm, konu, yapıştırılan parça; kişisel veri yok) anlatır; cevap «doğrulanmadı», kaydedilmez, istenirse karta döner (kaynak `konusor`); model yoksa Ofis ayarlarına yönlendirir | 2026-10-09 |
 
 ## 4. Değişmeyen sözler
 
