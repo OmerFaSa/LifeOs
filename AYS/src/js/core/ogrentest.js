@@ -12,7 +12,8 @@
         üstünden «hatırlıyor muyum» diye sorar ve cevabı sen puanlarsın.
         Burada cevap anahtarı var: doğru/yanlış kodla ölçülür.
      2. KAPSAM KODLA SEÇİLİR. Bir ders ya da bütün dersler; okuduğun
-        konular ya da hepsi; 10 ya da 20 soru. Seçim rastgeledir, aynı
+        konular ya da hepsi; bütün seviyeler ya da yalnız sınav tarzı
+        (orta ve ileri); 10 ya da 20 soru. Seçim rastgeledir, aynı
         konudan iki soru mümkünse ard arda gelmez; sıra test boyunca sabit.
         Havuzda 5'ten az soru varsa test kurulmaz, nedeni söylenir.
      3. TEST ÖLÇÜMDÜR, KARAR DEĞİLDİR. Her sorunun ilk cevabı kilitlenir
@@ -72,14 +73,17 @@ R.OgrenTest = (function(){
 
   /* ---------- havuz ve kurulum (söz 2) ---------- */
 
-  /* kapsam: { ders:'hepsi'|subjectId, konular:'okunan'|'hepsi' } */
+  /* kapsam: { ders:'hepsi'|subjectId, konular:'okunan'|'hepsi', seviye:'hepsi'|'sinav' } */
   function havuz(kapsam){
     const k = kapsam || {};
     const l = [];
     O().konular().forEach(x => {
       if(k.ders && k.ders !== 'hepsi' && x.subject.id !== k.ders) return;
       if(k.konular === 'okunan' && !R.Model.topicState(x.subject.id, x.topic.id).okunduAt) return;
-      O().sorular(x.topic.id).forEach((q, i) => l.push({ k:anahtar(x.topic.id, i), tid:x.topic.id }));
+      O().sorular(x.topic.id).forEach((q, i) => {
+        if(k.seviye === 'sinav' && O().seviye(x.topic.id, i) === 'temel') return;
+        l.push({ k:anahtar(x.topic.id, i), tid:x.topic.id });
+      });
     });
     return l;
   }
@@ -106,7 +110,8 @@ R.OgrenTest = (function(){
   }
 
   async function baslat(kapsam, boy){
-    const k = { ders:kapsam && kapsam.ders || 'hepsi', konular:kapsam && kapsam.konular === 'okunan' ? 'okunan' : 'hepsi' };
+    const k = { ders:kapsam && kapsam.ders || 'hepsi', konular:kapsam && kapsam.konular === 'okunan' ? 'okunan' : 'hepsi',
+      seviye:kapsam && kapsam.seviye === 'sinav' ? 'sinav' : 'hepsi' };
     const n = BOYLAR.indexOf(Number(boy)) >= 0 ? Number(boy) : BOYLAR[0];
     const h = havuz(k);
     if(h.length < EN_AZ){
@@ -136,13 +141,13 @@ R.OgrenTest = (function(){
     doc.aktif.sira = Math.max(0, Math.min(doc.aktif.sorular.length - 1, Number(sira) || 0));
     await yaz();
   }
-  async function cevapla(sira, harf){
+  async function cevapla(sira, harf, ip){
     const a = doc.aktif;
     harf = String(harf || '').toUpperCase();
     const s = a ? soruOf(a.sorular[sira]) : null;
     if(!s || O().HARFLER.indexOf(harf) < 0) return { ok:false, neden:'gecersiz' };
     if(a.cevaplar[sira]) return { ok:false, neden:'kilitli' };
-    a.cevaplar[sira] = { h:harf, at:simdi() };
+    a.cevaplar[sira] = ip ? { h:harf, ip:true, at:simdi() } : { h:harf, at:simdi() };
     await yaz();
     return { ok:true, dogru:harf === s.q.dogru };
   }
@@ -176,7 +181,7 @@ R.OgrenTest = (function(){
       id:a.id, at:simdi(), basladi:a.basladi, kapsam:a.kapsam,
       sorular:a.sorular.map((k, j) => {
         const v = a.cevaplar[j];
-        return v ? { k, h:v.h || null, bak:!!v.bak, at:v.at } : { k, h:null, bos:true };
+        return v ? Object.assign({ k, h:v.h || null, bak:!!v.bak, at:v.at }, v.ip ? { ip:true } : {}) : { k, h:null, bos:true };
       }),
     };
     doc.gecmis.unshift(sonuc);
@@ -239,11 +244,11 @@ R.OgrenTest = (function(){
   /* Yeniden çözüm: yeni bir deneme. İlk cevap kalır; aynı açılışta
      ikinci kez cevaplanmaz (ekran kilitler), sonraki açılışta yeniden
      denenebilir. */
-  async function tekrarCevapla(k, harf){
+  async function tekrarCevapla(k, harf, ip){
     const s = soruOf(k);
     harf = String(harf || '').toUpperCase();
     if(!s || O().HARFLER.indexOf(harf) < 0) return { ok:false, neden:'gecersiz' };
-    doc.tekrar[k] = { h:harf, at:simdi() };
+    doc.tekrar[k] = ip ? { h:harf, ip:true, at:simdi() } : { h:harf, at:simdi() };
     await yaz();
     return { ok:true, dogru:harf === s.q.dogru };
   }

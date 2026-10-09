@@ -150,21 +150,44 @@ R.Ogren = (function(){
   function duzMetin(s){ return duzOf(ayristir(s)); }
 
   function anlatim(topicId){ return (R.KONU_ANLATIM || {})[topicId] || null; }
-  function sorular(topicId){ const a = anlatim(topicId); return a && Array.isArray(a.sorular) ? a.sorular : []; }
+  /* Derinleştirme (data/derin-*.js): kazanımlar, ön koşullar, seviyeli
+     çözümlü örnekler, sınav kalıpları, sık hatalar ve orta/ileri sorular. */
+  function derin(topicId){ return (R.KONU_DERIN || {})[topicId] || null; }
+  function tabanSorular(topicId){ const a = anlatim(topicId); return a && Array.isArray(a.sorular) ? a.sorular : []; }
+  /* Konunun bütün soruları: önce temel sorular, ardından derin sorular.
+     Derin sorular SONA eklenir: kayıtlı cevaplar sıra numarasıyla
+     tutulur (topicState.ornek, karma test 'tm-05#2'); eski sıralar kaymaz. */
+  function sorular(topicId){
+    const d = derin(topicId);
+    const ek = d && Array.isArray(d.sorular) ? d.sorular : [];
+    const t = tabanSorular(topicId);
+    return ek.length ? t.concat(ek) : t;
+  }
+  const SEVIYE = { temel:'Temel', orta:'Orta', ileri:'İleri' };
+  /* Sorunun seviyesi yazarın değerlendirmesidir (ölçüm değil): temel
+     sorular «temel», derin sorular kendi seviyesini taşır. */
+  function seviye(topicId, i){
+    const n = tabanSorular(topicId).length;
+    if(i < n) return 'temel';
+    const q = sorular(topicId)[i];
+    return q && SEVIYE[q.seviye] ? q.seviye : 'orta';
+  }
 
   /* ---------- örnek soru cevapları (söz 3) ---------- */
   function cevaplar(subjectId, topicId){
     const o = R.Model.topicState(subjectId, topicId).ornek;
     return o && typeof o === 'object' ? o : {};
   }
-  /* i: sorunun sırası, harf: A–E. İlk cevap kalır. → { ok, dogru?, neden? } */
-  async function cevapla(subjectId, topicId, i, harf){
+  /* i: sorunun sırası, harf: A–E, ip: ipucu açıldıktan sonra mı. İlk
+     cevap kalır. → { ok, dogru?, neden? } */
+  async function cevapla(subjectId, topicId, i, harf, ip){
     const l = sorular(topicId), q = l[i];
     harf = String(harf || '').toUpperCase();
     if(!q || HARFLER.indexOf(harf) < 0) return { ok:false, neden:'gecersiz' };
     const eski = cevaplar(subjectId, topicId);
     if(eski[i]) return { ok:false, neden:'kilitli', dogru:eski[i].d };
     const kayit = { h:harf, d:harf === q.dogru, at:new Date().toISOString() };
+    if(ip) kayit.ip = true;
     await R.Model.setTopicState(subjectId, topicId, { ornek:Object.assign({}, eski, { [i]:kayit }) });
     return { ok:true, dogru:kayit.d };
   }
@@ -276,6 +299,7 @@ R.Ogren = (function(){
     return err;
   }
 
-  return { HARFLER, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
+  return { HARFLER, SEVIYE, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
+    derin, tabanSorular, seviye,
     anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle };
 })();

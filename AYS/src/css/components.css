@@ -929,6 +929,7 @@ kbd{
    Ölçeğin gerçek büyük adımı `--fs-hero`. */
 .exam-net--lg{ font-size:var(--fs-hero); }
 .exam-row__net{ width:54px; flex:none; text-align:center; }
+.mb-6{ margin-bottom:6px; }
 .mb-10{ margin-bottom:10px; }
 .input--search{ max-width:280px; }
 .is-late{ color:var(--danger); }
@@ -2577,6 +2578,25 @@ body.is-dragging .drop.is-over{
 .ders__dikkat{ font-size:14.5px; color:var(--text-2); }
 .ders__dikkat b{ color:var(--danger); font-weight:600; }
 .ders sup, .ders sub, .ogr-soru sup, .ogr-soru sub{ font-size:.72em; line-height:0; }
+/* Derin bloklar (data/derin-*.js): kazanım kutusu, ön koşul çipleri,
+   çözümü kapalı örnekler, sınav kalıpları, sık hatalar; seviye rozeti
+   renkte değil noktada (küçük yazının kontrastı bozulmasın). */
+.ders__kazanim{ margin:4px 0 14px; padding:12px 16px; border-radius:12px; background:var(--surface-2); }
+.ders__kazanim .ders__liste{ margin:0; }
+.ders__onkosul{ display:flex; flex-direction:column; gap:6px; margin:0 0 6px; }
+.ders__cozum{ margin-top:10px; }
+.ders__cozum > summary{ display:inline-flex; align-items:center; min-height:28px; cursor:pointer; font-size:14px; font-weight:600;
+  color:var(--text); list-style:none; text-decoration:underline; text-underline-offset:3px; text-decoration-color:var(--border-strong); }
+.ders__cozum > summary::-webkit-details-marker{ display:none; }
+.ders__cozum[open] > summary{ margin-bottom:8px; text-decoration:none; color:var(--text-2); }
+.ders__ek .ders__ornek .ogr-soru__metin{ margin-bottom:4px; font-size:15px; }
+.ders__hatalar .ders__liste li::marker{ color:var(--danger); }
+.ogr-seviye{ flex:none; display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--text-2);
+  padding:2px 9px; border-radius:999px; box-shadow:inset 0 0 0 1px var(--border); }
+.ogr-seviye::before{ content:''; width:6px; height:6px; border-radius:50%; background:var(--text-3); }
+.ogr-seviye.is-orta::before{ background:var(--accent); }
+.ogr-seviye.is-ileri::before{ background:var(--danger); }
+.ogr-ipucu{ margin:0 0 12px; padding:6px 12px; border-left:2px solid var(--primary); color:var(--text-2); max-width:70ch; }
 .ders__akilda{ max-width:70ch; margin-top:28px; padding-top:20px; border-top:1px solid var(--border); font-size:15px; line-height:1.6; }
 .ders__ayak{ margin-top:24px; }
 

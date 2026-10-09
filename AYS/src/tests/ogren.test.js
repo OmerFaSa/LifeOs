@@ -29,9 +29,13 @@
       { soru:'Üçüncü soru?', sec:['k', 'l', 'm', 'n', 'o'], dogru:'A', cozum:['Çözüm üç.'] },
     ] };
   function sahteIcerik(id, fn){
-    const eski = R.KONU_ANLATIM[id];
+    const eski = R.KONU_ANLATIM[id], eskiD = (R.KONU_DERIN || {})[id];
     R.KONU_ANLATIM[id] = SAHTE;
-    return Promise.resolve().then(fn).finally(() => { if(eski) R.KONU_ANLATIM[id] = eski; else delete R.KONU_ANLATIM[id]; });
+    if(R.KONU_DERIN) delete R.KONU_DERIN[id];
+    return Promise.resolve().then(fn).finally(() => {
+      if(eski) R.KONU_ANLATIM[id] = eski; else delete R.KONU_ANLATIM[id];
+      if(eskiD) R.KONU_DERIN[id] = eskiD;
+    });
   }
   async function sessiz(fn){
     const eski = R.App.render;
@@ -182,8 +186,9 @@
       const UST = { giris:'g', bolumler:SAHTE.bolumler, sorular:[
         { soru:'Bir paragraf ki uzun.\n(−2)^{3} kaçtır?', sec:['−8', '8', '6', '−6', '9'], dogru:'A', cozum:['(−2)^{3} = −8.'] },
         SAHTE.sorular[1], SAHTE.sorular[2]] };
-      const eski = R.KONU_ANLATIM[t.id];
+      const eski = R.KONU_ANLATIM[t.id], eskiD = R.KONU_DERIN[t.id];
       R.KONU_ANLATIM[t.id] = UST;
+      delete R.KONU_DERIN[t.id];
       try{
         await sessiz(async () => {
           await O().sec(s.id, t.id);
@@ -203,11 +208,12 @@
           expect(R.S.ui.kocParca.metin.indexOf('^{')).toBe(-1);
           expect(R.S.ui.kocParca.metin).toContain('(−2)³ kaçtır?');
         });
-      }finally{ if(eski) R.KONU_ANLATIM[t.id] = eski; else delete R.KONU_ANLATIM[t.id]; }
+      }finally{ if(eski) R.KONU_ANLATIM[t.id] = eski; else delete R.KONU_ANLATIM[t.id]; if(eskiD) R.KONU_DERIN[t.id] = eskiD; }
     });
 
     it('kart yüzü: uzun paragraf kısalır, soru kökü kesilmez', () => {
-      const t = 'tm-05', eski = R.KONU_ANLATIM[t];
+      const t = 'tm-05', eski = R.KONU_ANLATIM[t], eskiD = R.KONU_DERIN[t];
+      delete R.KONU_DERIN[t];
       const uzun = 'Kelime '.repeat(80).trim() + '.';
       R.KONU_ANLATIM[t] = { sorular:[{ soru:uzun + '\nBu parçanın konusu nedir?', sec:['a', 'b', 'c', 'd', 'e'], dogru:'C', cozum:['x'] }] };
       try{
@@ -215,7 +221,7 @@
         expect(y.front).toContain('… Bu parçanın konusu nedir?  A) a');
         expect(y.front.length < 340).toBe(true);
         expect(O().kartYuzu(t, 5)).toBeNull();
-      }finally{ if(eski) R.KONU_ANLATIM[t] = eski; else delete R.KONU_ANLATIM[t]; }
+      }finally{ if(eski) R.KONU_ANLATIM[t] = eski; else delete R.KONU_ANLATIM[t]; if(eskiD) R.KONU_DERIN[t] = eskiD; }
     });
 
     it('palet: konu adı ve anlatımın bölüm başlığı aranınca Anlatım sonucu çıkar', () => {
@@ -230,8 +236,9 @@
     it('anlatımı olmayan konu: kısa özet ve not; sorusu yoksa koça yönlendirir', async () => {
       resetState();
       const s = TM(), t = s.topics.find(x => x.id === 'tm-05');
-      const eski = R.KONU_ANLATIM[t.id];
+      const eski = R.KONU_ANLATIM[t.id], eskiD = R.KONU_DERIN[t.id];
       delete R.KONU_ANLATIM[t.id];
+      delete R.KONU_DERIN[t.id];
       try{
         await O().sec(s.id, t.id);
         let h = String(await R.Screens.anlatim.render());
@@ -240,7 +247,7 @@
         h = String(await R.Screens.sorular.render());
         expect(h).toContain('örnek soruları henüz yazılmadı');
         expect(h).toContain('data-route="koc"');
-      }finally{ if(eski) R.KONU_ANLATIM[t.id] = eski; }
+      }finally{ if(eski) R.KONU_ANLATIM[t.id] = eski; if(eskiD) R.KONU_DERIN[t.id] = eskiD; }
     });
   });
 })();

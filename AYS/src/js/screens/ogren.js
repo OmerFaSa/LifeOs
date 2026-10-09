@@ -220,9 +220,53 @@ R.Screens = R.Screens || {};
     </div>`;
   }
 
-  function dersHtml(a){
+  /* Seviye rozeti: yazarın değerlendirmesi (ölçüm değil). */
+  const seviyeRozeti = sv => html`<span class="${cls('ogr-seviye', 'is-' + (sv || 'temel'))}">${O().SEVIYE[sv] || 'Temel'}</span>`;
+
+  /* DERİN BLOKLAR (data/derin-*.js): kazanımlar ve ön koşullar başta;
+     çözümlü örnekler, sınav kalıpları ve sık hatalar anlatımın sonunda. */
+  function kazanimHtml(d){
+    return html`<div class="ders__kazanim" id="ders-kazanim">
+      <div class="ders__etiket tiny">Bu konunun sonunda</div>
+      <ul class="ders__liste">${map(d.kazanim, m => html`<li>${fmt(m)}</li>`)}</ul>
+    </div>`;
+  }
+  function onKosulHtml(d){
+    const l = (d.onKosul || []).map(id => O().konuyuBul(id)).filter(y => y.topic);
+    if(!l.length) return '';
+    return html`<div class="ders__onkosul"><span class="ders__etiket tiny">Önce bunları bil</span>
+      <div class="row wrap gap-6">${map(l, y => {
+        const ok = O().durum(y.subject.id, y.topic.id).okundu;
+        return K.Chip({ label:(ok ? '✓ ' : '') + y.topic.name, act:'ogren-git',
+          data:{ 'data-route':'anlatim', 'data-subject':y.subject.id, 'data-topic':y.topic.id,
+            'aria-label':y.topic.name + (ok ? ', okundu' : ', okunmadı') } });
+      })}</div></div>`;
+  }
+  function orneklerHtml(d){
+    return html`<section class="ders__bolum ders__ek" id="ders-ornekler">
+      <h3 class="ders__baslik">Çözümlü örnekler</h3>
+      <p class="small dim">Önce kâğıtta kendin dene; takılınca çözümü aç.</p>
+      ${map(d.ornekler, (o, i) => html`<div class="ders__ornek">
+        <div class="row between gap-8 mb-6"><span class="ders__etiket tiny">Örnek ${i + 1}</span>${seviyeRozeti(o.seviye)}</div>
+        ${soruMetni(o.soru)}
+        <details class="ders__cozum"><summary>Çözümü göster</summary>
+          <ol class="ders__adimlar">${map(dizi(o.cozum), c => html`<li>${fmt(c)}</li>`)}</ol>
+        </details>
+      </div>`)}
+    </section>`;
+  }
+  function listeBlogu(id, baslik, l, sinif){
+    return html`<section class="${cls('ders__bolum ders__ek', sinif)}" id="${id}">
+      <h3 class="ders__baslik">${baslik}</h3>
+      <ul class="ders__liste">${map(l, m => html`<li>${fmt(m)}</li>`)}</ul>
+    </section>`;
+  }
+
+  function dersHtml(a, d){
     return html`<div class="ders__govde">
       ${when(a.giris, () => html`<p class="ders__giris">${fmt(a.giris)}</p>`)}
+      ${when(d && d.kazanim, () => kazanimHtml(d))}
+      ${when(d && d.onKosul, () => onKosulHtml(d))}
       ${map(a.bolumler, (b, i) => html`<section class="ders__bolum" id="${'ders-b' + (i + 1)}">
         <h3 class="ders__baslik"><span class="ders__no num" aria-hidden="true">${i + 1}</span>${b.baslik}</h3>
         ${map(dizi(b.metin), p => html`<p>${fmt(p)}</p>`)}
@@ -231,6 +275,9 @@ R.Screens = R.Screens || {};
         ${when(b.ornek, () => ornekHtml(b.ornek))}
         ${when(b.dikkat, () => html`<p class="ders__dikkat"><b>Dikkat:</b> ${fmt(b.dikkat)}</p>`)}
       </section>`)}
+      ${when(d && d.ornekler && d.ornekler.length, () => orneklerHtml(d))}
+      ${when(d && d.kaliplar && d.kaliplar.length, () => listeBlogu('ders-kaliplar', 'Sınavda nasıl sorulur', d.kaliplar))}
+      ${when(d && d.hatalar && d.hatalar.length, () => listeBlogu('ders-hatalar', 'Sık yapılan hatalar', d.hatalar, 'ders__hatalar'))}
     </div>`;
   }
 
@@ -238,10 +285,14 @@ R.Screens = R.Screens || {};
      ekranda gizlenir (sayfa zaten tek sütun). */
   function icindekiler(x, a){
     const n = O().sorular(x.topic.id).length;
+    const d = O().derin(x.topic.id) || {};
+    const ek = [['ders-ornekler', 'Çözümlü örnekler', d.ornekler], ['ders-kaliplar', 'Sınavda nasıl sorulur', d.kaliplar],
+      ['ders-hatalar', 'Sık yapılan hatalar', d.hatalar]].filter(y => y[2] && y[2].length);
     return html`<nav class="ders__icindekiler" aria-label="Bu konuda">
       <div class="ders__etiket tiny">Bu konuda</div>
       ${map(a ? a.bolumler : [], (b, i) => html`<button type="button" class="ders__git" data-act="ders-git"
         data-hedef="${'ders-b' + (i + 1)}"><span class="num">${i + 1}</span>${b.baslik}</button>`)}
+      ${map(ek, y => html`<button type="button" class="ders__git" data-act="ders-git" data-hedef="${y[0]}"><span aria-hidden="true">·</span>${y[1]}</button>`)}
       ${when((R.KONU_OZET || {})[x.topic.id], () => html`<button type="button" class="ders__git" data-act="ders-git"
         data-hedef="ders-akilda"><span aria-hidden="true">·</span>Akılda kalsın</button>`)}
       ${when(n, () => html`<button type="button" class="ders__git" data-act="ogren-git" data-route="sorular"
@@ -282,7 +333,7 @@ R.Screens = R.Screens || {};
             <h2 id="ders-baslik">${topic.name}</h2>
             <p class="small dim">${subject.name + (topic.group ? ' · ' + topic.group : '')} · elle yazıldı · doğrulanmadı</p>
           </header>
-          ${a ? dersHtml(a) : html`<div class="mb-10">${K.Notice({ tone:'info',
+          ${a ? dersHtml(a, O().derin(topic.id)) : html`<div class="mb-10">${K.Notice({ tone:'info',
             body:'Bu konunun ayrıntılı anlatımı henüz yazılmadı. Aşağıda kısa özeti var; derin anlatım için «Konu anlatımı iste» ya da koça sor.' })}</div>`}
           ${akildaKarti(topic)}
           <div class="ders__ayak">${eylem}
@@ -461,10 +512,13 @@ R.Screens = R.Screens || {};
     return html`${map(l, p => html`<p class="ogr-soru__parca">${fmt(p)}</p>`)}<p class="ogr-soru__metin">${l.length ? html`<b>${fmt(kok)}</b>` : fmt(kok)}</p>`;
   }
 
-  /* Üç kipin ortak soru gövdesi. v: { h, bak } ya da null (cevapsız).
-     o: { etiket, cevapAct, bakAct?, ust?, eylemler } */
+  /* Üç kipin ortak soru gövdesi. v: { h, bak, ip? } ya da null (cevapsız).
+     o: { etiket, seviye?, ipucu?: anahtar, cevapAct, bakAct?, ust?, eylemler }
+     İpucu cevaptan önce açılır; açıldıktan sonra verilen cevap «ipucuyla»
+     diye yazılır (ölçüm dürüst kalsın). */
   function soruGovdesi(q, v, o){
     const acik = !!v;
+    const ipAcik = !!(o.ipucu && S.ui.ipucu === o.ipucu);
     const secenek = (metin, k) => {
       const harf = O().HARFLER[k];
       const durum = !acik ? '' : harf === q.dogru ? 'is-dogru' : v.h === harf ? 'is-yanlis' : 'is-soluk';
@@ -476,13 +530,17 @@ R.Screens = R.Screens || {};
       </button>`;
     };
     const d = durumOf(q, v);
-    const sonuc = d === 'bakildi' ? 'Çözüme bakıldı · doğru cevap ' + q.dogru
-      : d === 'dogru' ? 'Doğru' : 'Yanlış · senin cevabın ' + (v && v.h) + ', doğrusu ' + q.dogru;
+    const sonuc = (d === 'bakildi' ? 'Çözüme bakıldı · doğru cevap ' + q.dogru
+      : d === 'dogru' ? 'Doğru' : 'Yanlış · senin cevabın ' + (v && v.h) + ', doğrusu ' + q.dogru) + (v && v.ip ? ' · ipucuyla' : '');
     return html`<div class="ogr-soru" aria-live="polite" data-raf-tam>
-      <div class="ders__etiket tiny">${o.etiket}</div>
+      <div class="row between gap-8 mb-6"><span class="ders__etiket tiny">${o.etiket}</span>${when(o.seviye, () => seviyeRozeti(o.seviye))}</div>
       ${soruMetni(q.soru)}
+      ${when(q.ipucu && (ipAcik || (acik && v.ip)), () => html`<p class="ogr-ipucu small"><b>İpucu:</b> ${fmt(q.ipucu)}</p>`)}
       <div class="secenekler">${map(q.sec, secenek)}</div>
-      ${when(!acik && o.bakAct, () => html`<div class="mt-10">${K.Button({ label:'Cevaplamadan çözümü gör', size:'sm', tone:'ghost', act:o.bakAct })}</div>`)}
+      ${when(!acik && (o.bakAct || (q.ipucu && o.ipucu && !ipAcik)), () => html`<div class="row wrap gap-6 mt-10">
+        ${when(q.ipucu && o.ipucu && !ipAcik, () => K.Button({ label:'İpucu', icon:'info', size:'sm', tone:'ghost', act:'soru-ipucu', data:{ 'data-ip':o.ipucu } }))}
+        ${when(o.bakAct, () => K.Button({ label:'Cevaplamadan çözümü gör', size:'sm', tone:'ghost', act:o.bakAct }))}
+      </div>`)}
       ${when(acik, () => html`<div class="${cls('ogr-sonuc', 'is-' + d)}">
         <p class="small"><b>${sonuc}</b></p>
         ${o.ust || ''}
@@ -529,7 +587,8 @@ R.Screens = R.Screens || {};
         ${kartBasi('Örnek sorular', sk.cevaplanan ? sk.dogru + ' / ' + sk.toplam + ' doğru · ölçüldü' : sk.toplam + ' soru · ilk cevabın sayılır',
           when(sk.cevaplanan, () => K.Button({ label:'Baştan çöz', icon:'refresh', size:'sm', tone:'ghost', act:'soru-sifirla' })))}
         ${noktalar(l.length, i, k => durumOf(l[k], c[k]), 'soru-git')}
-        ${soruGovdesi(q, v, { etiket:'Soru ' + (i + 1) + ' / ' + l.length, cevapAct:'soru-cevap', bakAct:'soru-bak',
+        ${soruGovdesi(q, v, { etiket:'Soru ' + (i + 1) + ' / ' + l.length, seviye:O().seviye(topic.id, i),
+          ipucu:'konu:' + topic.id + '#' + i, cevapAct:'soru-cevap', bakAct:'soru-bak',
           eylemler:soruEylemleri({ subject, topic, i, q }, v, null) })}
         <div class="row between wrap gap-6 mt-16">
           ${i > 0 ? K.Button({ label:'Önceki', icon:'left', size:'sm', tone:'ghost', act:'soru-git', data:{ 'data-i':String(i - 1) } }) : html`<span></span>`}
@@ -547,7 +606,8 @@ R.Screens = R.Screens || {};
 
   function kapsamAdi(k){
     const s = R.SUBJECTS.find(x => x.id === (k && k.ders));
-    return (s ? s.name : 'Bütün dersler') + ' · ' + (k && k.konular === 'okunan' ? 'okuduğum konular' : 'bütün konular');
+    return (s ? s.name : 'Bütün dersler') + ' · ' + (k && k.konular === 'okunan' ? 'okuduğum konular' : 'bütün konular')
+      + (k && k.seviye === 'sinav' ? ' · sınav tarzı' : '');
   }
   const tarihAdi = iso => { try{ return U.fmtShort(String(iso).slice(0, 10)); }catch(e){ return String(iso).slice(0, 10); } };
   const DERSLER = () => [{ value:'hepsi', label:'Bütün dersler' }].concat(R.SUBJECTS.map(s => ({ value:s.id, label:s.name })));
@@ -555,7 +615,8 @@ R.Screens = R.Screens || {};
   function karmaKapsami(){
     const ders = S.ui.karmaDers || 'hepsi';
     const okunan = T().havuz({ ders, konular:'okunan' }).length;
-    return { ders, okunan, konular:S.ui.karmaKonular || (okunan >= T().EN_AZ ? 'okunan' : 'hepsi') };
+    return { ders, okunan, konular:S.ui.karmaKonular || (okunan >= T().EN_AZ ? 'okunan' : 'hepsi'),
+      seviye:S.ui.karmaSeviye === 'sinav' ? 'sinav' : 'hepsi' };
   }
 
   function karmaKurulum(){
@@ -568,6 +629,8 @@ R.Screens = R.Screens || {};
           ${K.Field({ label:'Ders', input:K.Select({ id:'karma-ders', options:DERSLER(), value:k.ders, change:'karma-ders', aria:'Ders' }) })}
           <div><span class="ders__etiket tiny">Konular</span>${K.Segmented({ act:'karma-konular', value:k.konular, aria:'Konular', items:[
             { value:'okunan', label:'Okuduklarım · ' + k.okunan }, { value:'hepsi', label:'Hepsi · ' + hepsi }] })}</div>
+          <div><span class="ders__etiket tiny">Seviye</span>${K.Segmented({ act:'karma-seviye', value:k.seviye, aria:'Seviye', items:[
+            { value:'hepsi', label:'Hepsi' }, { value:'sinav', label:'Sınav tarzı · ' + T().havuz({ ders:k.ders, konular:k.konular, seviye:'sinav' }).length }] })}</div>
           <div><span class="ders__etiket tiny">Soru sayısı</span>${K.Segmented({ act:'karma-boy', value:boy, aria:'Soru sayısı',
             items:T().BOYLAR.map(n => ({ value:n, label:String(n) })) })}</div>
         </div>
@@ -606,7 +669,8 @@ R.Screens = R.Screens || {};
     return K.Card({ wide:true,
       body:html`${bas}
         ${noktalar(y.toplam, y.sira, durum, 'test-git')}
-        ${soruGovdesi(y.s.q, y.v, { etiket:'Soru ' + (y.sira + 1) + ' / ' + y.toplam, cevapAct:'test-cevap', bakAct:'test-bak',
+        ${soruGovdesi(y.s.q, y.v, { etiket:'Soru ' + (y.sira + 1) + ' / ' + y.toplam, seviye:O().seviye(y.s.topic.id, y.s.i),
+          ipucu:'test:' + a.id + '#' + y.sira, cevapAct:'test-cevap', bakAct:'test-bak',
           ust, eylemler:soruEylemleri(y.s, y.v, y.s.k) })}
         ${nav}${erken}` });
   }
@@ -675,12 +739,12 @@ R.Screens = R.Screens || {};
     const t = S.ui.ogrTekrar;
     const s = t && T().soruOf(t.k);
     if(!s){ S.ui.ogrTekrar = null; return yanlisListesi(); }
-    const v = t.h ? { h:t.h } : null;
+    const v = t.h ? { h:t.h, ip:t.ip } : null;
     const kalan = T().yanlislar(S.ui.yanlisDers || 'hepsi').filter(y => y.k !== t.k);
     return K.Card({ wide:true,
       body:html`${kartBasi('Yeniden çöz', s.subject.name + ' · ' + s.topic.name + (kalan.length ? ' · ' + kalan.length + ' yanlış daha' : ''),
           K.Button({ label:'Listeye dön', size:'sm', tone:'ghost', act:'tekrar-kapat' }))}
-        ${soruGovdesi(s.q, v, { etiket:'Soru ' + (s.i + 1), cevapAct:'tekrar-cevap',
+        ${soruGovdesi(s.q, v, { etiket:'Soru ' + (s.i + 1), seviye:O().seviye(s.topic.id, s.i), ipucu:'tekrar:' + s.k, cevapAct:'tekrar-cevap',
           ust:v && v.h === s.q.dogru ? html`<p class="tiny dim mt-6">Doğru çözdün: Yanlışlarım’dan düştü.</p>` : '',
           eylemler:soruEylemleri(s, v, s.k) })}
         ${when(v, () => html`<div class="row between wrap gap-6 mt-16">
@@ -740,9 +804,10 @@ R.Screens = R.Screens || {};
       async 'soru-git'(el){ S.ui.ogrenSoru = Number(el.dataset.i) || 0; R.App.render(); },
       async 'soru-cevap'(el){
         const x = O().secili(), { i } = soruNo(x);
-        await O().cevapla(x.subject.id, x.topic.id, i, el.dataset.harf);
+        await O().cevapla(x.subject.id, x.topic.id, i, el.dataset.harf, S.ui.ipucu === 'konu:' + x.topic.id + '#' + i);
         R.App.render();
       },
+      async 'soru-ipucu'(el){ S.ui.ipucu = el.dataset.ip || null; R.App.render(); },
       async 'soru-bak'(){
         const x = O().secili(), { i } = soruNo(x);
         await O().bak(x.subject.id, x.topic.id, i);
@@ -780,17 +845,22 @@ R.Screens = R.Screens || {};
       },
       /* Karma test */
       async 'karma-konular'(el){ S.ui.karmaKonular = el.dataset.value; R.App.render(); },
+      async 'karma-seviye'(el){ S.ui.karmaSeviye = el.dataset.value; R.App.render(); },
       async 'karma-boy'(el){ S.ui.karmaBoy = Number(el.dataset.value) || T().BOYLAR[0]; R.App.render(); },
       async 'karma-baslat'(){
         const k = karmaKapsami();
-        const r = await T().baslat({ ders:k.ders, konular:k.konular }, S.ui.karmaBoy || T().BOYLAR[0]);
+        const r = await T().baslat({ ders:k.ders, konular:k.konular, seviye:k.seviye }, S.ui.karmaBoy || T().BOYLAR[0]);
         if(!r.ok){ UI.toast(r.metin, { life:6000 }); return; }
         S.ui.karmaSonuc = null;
         window.scrollTo(0, 0);
         R.App.render();
       },
       async 'test-git'(el){ await T().git(Number(el.dataset.i) || 0); R.App.render(); },
-      async 'test-cevap'(el){ const y = T().siradaki(); if(y) await T().cevapla(y.sira, el.dataset.harf); R.App.render(); },
+      async 'test-cevap'(el){
+        const y = T().siradaki(), a = T().aktif();
+        if(y) await T().cevapla(y.sira, el.dataset.harf, S.ui.ipucu === 'test:' + a.id + '#' + y.sira);
+        R.App.render();
+      },
       async 'test-bak'(){ const y = T().siradaki(); if(y) await T().bak(y.sira); R.App.render(); },
       async 'karma-bitir'(){
         const a = T().aktif();
@@ -812,8 +882,9 @@ R.Screens = R.Screens || {};
       async 'tekrar-cevap'(el){
         const t = S.ui.ogrTekrar;
         if(!t || t.h) return;
-        const r = await T().tekrarCevapla(t.k, el.dataset.harf);
-        if(r.ok) t.h = String(el.dataset.harf).toUpperCase();
+        const ip = S.ui.ipucu === 'tekrar:' + t.k;
+        const r = await T().tekrarCevapla(t.k, el.dataset.harf, ip);
+        if(r.ok){ t.h = String(el.dataset.harf).toUpperCase(); t.ip = ip; }
         R.App.render();
       },
     }),
