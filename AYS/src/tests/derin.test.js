@@ -4,7 +4,8 @@
         2–4 kalıp, 2–4 hata; işaretler kapalı, çift boşluk yok.
      2. Derin sorular ÖSYM biçimindedir: beş farklı seçenek, A–E tek doğru,
         orta ya da ileri seviye, ipucu ve çözüm; doğru harfler dağılır.
-     3. Bitmiş derslerde her konunun derin kaydı var: en az 3 örnek, 4 soru.
+     3. Sekiz dersin her konusunun derin kaydı var: en az 3 örnek, 4 soru.
+        Yeni bir konu derinleştirmesiz eklenirse bu söz kırmızı olur.
      4. Derin sorular konunun temel sorularının ARDINA eklenir; seviye
         temel/orta/ileri döner; kayıtlı cevapların sırası kaymaz.
      5. İpucu açıldıktan sonra verilen cevap «ipucuyla» yazılır; ekran
@@ -13,8 +14,6 @@
 
 (function(){
   const { describe, it, expect, resetState } = R.Test;
-  /* Derinleştirmesi bitmiş dersler; yenisi bitince buraya eklenir. */
-  const TAM = ['tyt-turkce', 'tyt-matematik', 'tyt-fen', 'ayt-matematik', 'ayt-fizik', 'ayt-kimya', 'ayt-biyoloji'];
   const HARF = ['A', 'B', 'C', 'D', 'E'];
   const SEV = ['temel', 'orta', 'ileri'];
   const dizi = x => x == null ? [] : Array.isArray(x) ? x : [x];
@@ -91,9 +90,9 @@
       expect(yigin).toEqual([]);
     });
 
-    it('bitmiş derslerde her konunun derin kaydı var', () => {
+    it('her dersin her konusunun derin kaydı var', () => {
       const eksik = [];
-      TAM.forEach(sid => R.SUBJECTS.find(s => s.id === sid).topics.forEach(t => {
+      R.SUBJECTS.forEach(s => s.topics.forEach(t => {
         const d = R.KONU_DERIN[t.id];
         if(!d || dizi(d.ornekler).length < 3 || dizi(d.sorular).length < 4) eksik.push(t.id);
       }));
