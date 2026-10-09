@@ -626,6 +626,17 @@ ESP.Parts = (function(){
     });
   }
 
+  /* Teklifin kaynağı: dışarıdan gelen oturum (Kısayollar) nereden geldiğini
+     ve günü bugün değilse gününü söyler; «senin isteğin» demez. */
+  function kimOf(p, a){
+    if(p.kind === 'oturum' && p.payload){
+      const g = p.payload.date, bugun = U.todayISO();
+      return (p.payload.note || 'Kısayollar') + (U.isISO(g) && g !== bugun
+        ? ' · ' + (U.diffDays(g, bugun) === 1 ? 'dün' : U.fmtShort(g)) : '');
+    }
+    return p.source === 'istek' ? 'senin isteğin' : (a.short || a.name || p.agentId);
+  }
+
   function proposalList(list, bos){
     if(!list.length) return K.Empty({ text:bos || 'Bekleyen teklif yok.' });
     const kk = kopru();
@@ -634,8 +645,7 @@ ESP.Parts = (function(){
       if(!kart) return null;
       const k = ESP.Plans.KIND_BY_ID[p.kind] || {};
       const a = ESP.AGENT_BY_ID[p.agentId] || {};
-      return html`<div class="okart-sar">${raw(kart)}<p class="okart__kim">${p.source === 'istek' ? 'senin isteğin'
-        : (a.short || a.name || p.agentId)} · ${k.note || ''}</p></div>`;
+      return html`<div class="okart-sar">${raw(kart)}<p class="okart__kim">${kimOf(p, a)} · ${k.note || ''}</p></div>`;
     }) : [];
     if(kk && kartlar.every(Boolean)) return html`<div class="stack-sm">${kartlar}</div>`;
     return html`<ul class="props">${map(list, p => {
@@ -646,7 +656,7 @@ ESP.Parts = (function(){
         <span class="prop__body">
           <b>${p.title}</b>
           <span class="prop__why">${p.why}</span>
-          <span class="tiny dim">${p.source === 'istek' ? 'senin isteğin' : (a.short || a.name || p.agentId)}
+          <span class="tiny dim">${kimOf(p, a)}
             · ${SEVIYE_ADI[k.level] || ''} · ${k.note || ''}</span>
         </span>
         ${K.Button({ label:'Onayla', size:'sm', act:'prop-accept',

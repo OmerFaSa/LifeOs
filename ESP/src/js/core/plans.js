@@ -68,6 +68,12 @@ ESP.Plans = (function(){
        türü kendiliğinden üretmez, model hiç öneremez. */
     { id:'hedefplan', level:'buyuk', label:'Hedef planı', scope:'coach', modelYok:true,
       note:'Hedefin disiplini odağa alınır, taban vakte göre yükselir, tarihli hedef ve kontrol noktaları kurulur.' },
+    /* Dışarıdan gelen oturum (hesap gelen kutusu: iPhone Kısayollar «30 dk
+       gitar»). ÖLÇÜMDÜR: küçük olsa da hiçbir ayarda sormadan yazılmaz
+       (AYS ve SPİ'deki olcum:true ile aynı kural, HATALAR KR-1). Yalnız
+       gelen satırdan doğar; ajan ve model öneremez. */
+    { id:'oturum', level:'kucuk', olcum:true, label:'Oturumu yaz', scope:'coach', modelYok:true,
+      note:'Dışarıdan gönderdiğin süre o günün oturumu olur; onaylayınca yazılır, geri alınır.' },
   ];
 
   const KIND_BY_ID = KINDS.reduce(function(m, k){ m[k.id] = k; return m; }, {});
@@ -246,6 +252,10 @@ ESP.Plans = (function(){
       return ESP.Coach.doneToday(p.disc).indexOf(p.payload.drillId) >= 0;
     }
     if(a.kind === 'weekplan') return !!plan();
+    if(a.kind === 'oturum'){
+      const g = (S.days || {})[a.date];
+      return !!(g && (g.sessions || []).some(function(s){ return s.id === a.sessionId; }));
+    }
     if(a.kind === 'base'){
       return (S.profile && S.profile.dailyMinutes) === a.minutes;
     }
@@ -319,6 +329,14 @@ ESP.Plans = (function(){
       if(!(ESP.DISCIPLINE_BY_ID || {})[y.focus]) return { ok:false, error:'Bilinmeyen bölüm.' };
       if(!ESP.Mod.isOn(y.focus)) return { ok:false, error:'Kapalı bir bölüm odak olamaz; önce aç.' };
     }
+    if(p.kind === 'oturum'){
+      const d = (ESP.DISCIPLINE_BY_ID || {})[y.disc];
+      if(!d) return { ok:false, error:'Bilinmeyen bölüm.' };
+      if(!ESP.Mod.isOn(y.disc)) return { ok:false, error:d.label + ' bölümü kapalı; önce aç.' };
+      const dk = Number(y.minutes);
+      if(!isFinite(dk) || dk < 1 || dk > 600) return { ok:false, error:'Süre 1–600 dakika arasında olmalı.' };
+      if(!U.isISO(y.date) || y.date > U.todayISO()) return { ok:false, error:'Oturum ancak bugüne ya da geçmiş bir güne yazılır.' };
+    }
     return { ok:true };
   }
 
@@ -328,7 +346,7 @@ ESP.Plans = (function(){
     if(!allowed(p.agentId, p.kind)){
       return { ok:false, error:'Bu masa bu teklifi veremez.' };
     }
-    if(p.kind === 'bolum' || p.kind === 'base' || p.kind === 'focus'){
+    if(p.kind === 'bolum' || p.kind === 'base' || p.kind === 'focus' || p.kind === 'oturum'){
       const v = dogrula(p);
       if(!v.ok) return v;
     }
@@ -365,6 +383,12 @@ ESP.Plans = (function(){
       if(!res.ok) return res;
       uygulanan = { kind:'drill', sessionId:res.session.id,
         date:res.session.date || U.todayISO() };
+
+    }else if(p.kind === 'oturum'){
+      const y = p.payload;
+      const s = await ESP.Model.addSession(y.date, { disc:y.disc, minutes:Math.round(Number(y.minutes)),
+        count:y.count == null ? null : y.count, countWhat:y.countWhat || null, note:y.note || 'Kısayollar' });
+      uygulanan = { kind:'oturum', sessionId:s.id, date:y.date };
 
     }else if(p.kind === 'base'){
       /* Geri alma icin ONCEKI deger saklanir. */
@@ -417,7 +441,7 @@ ESP.Plans = (function(){
     const a = p.applied;
     if(a.kind === 'reminder') await ESP.Model.deleteReminder(a.id);
     else if(a.kind === 'goal') await ESP.Model.deleteGoal(a.id);
-    else if(a.kind === 'drill') await ESP.Model.deleteSession(a.date || U.todayISO(), a.sessionId);
+    else if(a.kind === 'drill' || a.kind === 'oturum') await ESP.Model.deleteSession(a.date || U.todayISO(), a.sessionId);
     else if(a.kind === 'base') await ESP.Model.saveProfile({ dailyMinutes:a.onceki });
     else if(a.kind === 'focus') await ESP.Model.saveProfile({ focus:a.onceki });
     else if(a.kind === 'weekplan'){ if(a.oncekiPlan) await savePlan(a.oncekiPlan); else await clearPlan(); }
@@ -443,6 +467,8 @@ ESP.Plans = (function(){
 
   function otomatikMi(row, mod){
     if(!row || row.level !== 'kucuk') return false;
+    /* Ölçüm yazan tür hiçbir ayarda sormadan uygulanmaz (KR-1). */
+    if((KIND_BY_ID[row.kind] || {}).olcum) return false;
     /* Vitrin 116 — TÜR AYARI moddan önce gelir: kullanıcı bir küçük türü
        açık ya da kapalı işaretlediyse o geçerlidir (AGENTS §1.9: «hangi
        küçük türlerin sormadan uygulanacağını kullanıcı ayarlar»). */
@@ -473,6 +499,8 @@ ESP.Plans = (function(){
     if(kind === 'bolum') return (d.label || 'Bölüm') + ' bölümü ' + (y.on ? 'açılsın' : 'kapansın');
     if(kind === 'base') return 'Günlük taban ' + Math.round(Number(y.minutes)) + ' dakika olsun';
     if(kind === 'focus') return 'Odak ' + (d.label || y.focus) + ' olsun';
+    if(kind === 'oturum') return (d.label || 'Oturum') + ': ' + U.fmtMin(Number(y.minutes))
+      + (y.count != null ? ' · ' + U.fmtNum(y.count) + ' ' + (y.countWhat || '') : '');
     return (KIND_BY_ID[kind] || {}).label || kind;
   }
 
@@ -496,6 +524,50 @@ ESP.Plans = (function(){
     await write(Object.assign({}, p, { state:'proposed' }));
     if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
     return { row:record(p.id), otomatik:false, why:null };
+  }
+
+  /* DIŞARIDAN GELEN SATIR (hesap gelen kutusu; sistem/hesap.py söz 16,
+     hesap.js söz 20). iPhone Kısayollar «30 dk gitar», «45 dakika
+     felsefe okudum» gönderir; sunucu satırı ANLAMAZ, ESP'nin kendi
+     ayrıştırıcısı okur (core/parse.js) ve her oturum Onaylar'a TEKLİF
+     olur («oturum», ölçüm: sormadan yazılmaz). Süresi ya da disiplini
+     tanınmayan parça nedeniyle gelen kutusuna döner, uydurulmaz.
+
+     GÜN, satırın GÖNDERİLDİĞİ andır (23:50'de gönderilen dünün
+     oturumudur); ileri tarih bugüne iner. Aynı satır iki kez teklif olmaz
+     (anahtar). Dönüş hesap.js'e: { durum:'onayda'|'anlasilmadi', sonuc }. */
+  async function disaridan(oge){
+    const metin = String((oge && oge.metin) || '').trim();
+    if(!metin || !ESP.Parse) return { durum:'anlasilmadi', sonuc:'Boş satır' };
+    const z = Number(oge.zaman), bugun = U.todayISO();
+    const gonderilen = isFinite(z) && z > 0 ? U.iso(new Date(z)) : bugun;
+    const gun = gonderilen > bugun ? bugun : gonderilen;
+    /* «gitar çalışmadım» ölçüm değildir: yazılmaz, sorulur (KR-1). */
+    const O = window.LIFEOS && window.LIFEOS.Olumsuz;
+    const engel = O && O.olcumEngeli ? O.olcumEngeli(metin) : null;
+    if(engel) return { durum:'anlasilmadi', sonuc:engel.soru || 'Bu bir ölçüm değil; yazılmadı.' };
+    const r = ESP.Parse.parseSession(metin);
+    const kaynak = String(oge.kaynak || '').slice(0, 40);
+    let n = 0;
+    const neden = [];
+    for(let i = 0; i < r.rows.length; i++){
+      const x = r.rows[i], anahtar = 'gelen:' + oge.id + ':' + i;
+      if((S.proposals || []).some(function(q){ return q.payload && q.payload.key === anahtar; })){ n++; continue; }
+      const y = { disc:x.disc, minutes:x.minutes, count:x.count == null ? null : x.count,
+        countWhat:x.countWhat || null, date:gun, key:anahtar, note:'Kısayollar' + (kaynak ? ' (' + kaynak + ')' : '') };
+      const p = { id:'i:' + U.uid('t'), agentId:'patron', kind:'oturum', disc:x.disc, title:baslik('oturum', y),
+        why:'Kısayollar’dan' + (kaynak ? ' (' + kaynak + ')' : '') + ': «' + metin.slice(0, 120) + '»'
+          + (gun !== bugun ? ' · ' + gun : ''),
+        payload:y, at:bugun, source:'istek', level:'kucuk' };
+      const v = dogrula(p);
+      if(!v.ok){ neden.push(v.error); continue; }
+      await write(Object.assign({}, p, { state:'proposed' }));
+      n++;
+    }
+    if(n && ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+    if(n) return { durum:'onayda', sonuc:n === 1 ? 'ESP › Onaylar’da bekliyor' : n + ' oturum ESP › Onaylar’da' };
+    const u = (r.unmatched || [])[0];
+    return { durum:'anlasilmadi', sonuc:neden[0] || (u && u.why) || 'ESP bu satırı anlamadı' };
   }
 
   /* Onay bekleyen kullanıcı istekleri — teklif listesinde görünür. */
@@ -579,6 +651,6 @@ ESP.Plans = (function(){
 
   return { KINDS, KIND_BY_ID, allowed, discOf, stillApplied,
     proposalsFor, all, open:open_, record, accept, decline,
-    dogrula, geriAl, talep, istekler, otomatikMi, ayar, turAyari, MODLAR,
+    dogrula, geriAl, talep, istekler, disaridan, otomatikMi, ayar, turAyari, MODLAR,
     weekPlan, savePlan, plan, clearPlan, today };
 })();

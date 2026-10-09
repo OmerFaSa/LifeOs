@@ -88,7 +88,8 @@
       Shortcuts, Home Assistant gibi uygulamalar kullanicinin actigi bir
       anahtarla «su 250», «kilo 72,4» gibi tek satir gonderir. Sunucu
       satiri ANLAMAZ ve hicbir modulun kaydina yazmaz (AGENTS §1.1, §1.4):
-      gelen kutusuna koyar; modul (SPI) kendi ayristiricisiyla okur ve
+      gelen kutusuna koyar; modul (AYS, SPI, ESP; satirin «modul» alani,
+      yoksa SPI) kendi ayristiricisiyla okur ve
       Onaylar'a oneri olarak birakir — olcum onaysiz yazilmaz. Anahtar
       bir kez gosterilir, yalniz ozeti saklanir; oturum jetonu yerine
       gecmez (hesap API'sinin geri kalanina girmez).
@@ -185,7 +186,10 @@ ANAHTAR_ON = "lifeos_"
 ANAHTAR_EN_COK = 20
 ANAHTAR_AD_EN_UZUN = 40
 YETKILER = ("kayit",)                 # disaridan tek yetki: gelen kutusuna satir birakmak
-GELEN_MODULLER = ("spi",)
+# 2026-10-09 (ucuncu tur): AYS «soru 40», ESP «30 dk gitar»; her modul kendi
+# ayristiricisiyla okur, satiri yalniz o modul alir.
+GELEN_MODULLER = ("ays", "spi", "esp")
+MODUL_AD = {"ays": "AYS", "spi": "SPİ", "esp": "ESP"}
 GELEN_METIN_EN_UZUN = 300
 GELEN_EN_COK = 200                    # kullanici basina saklanan
 GELEN_SAAT_EN_COK = 120               # bir anahtarla saatte (dongude kalan bir kisayol)
@@ -1426,7 +1430,7 @@ class Depo:
                 if len(metin) > GELEN_METIN_EN_UZUN:
                     raise Hata(400, "Satır çok uzun (en çok %d karakter)." % GELEN_METIN_EN_UZUN)
                 if modul not in GELEN_MODULLER:
-                    raise Hata(400, "Bu modül gelen kutusu kabul etmiyor.")
+                    raise Hata(400, "Bu modül gelen kutusu kabul etmiyor (ays, spi ya da esp).")
                 if c.execute("SELECT COUNT(*) FROM gelen WHERE anahtar=? AND zaman>?",
                              (r["id"], simdi - 3600)).fetchone()[0] >= GELEN_SAAT_EN_COK:
                     raise Hata(429, "Bu anahtarla bir saatte çok fazla satır geldi; kısayolu denetle.")
@@ -1436,7 +1440,7 @@ class Depo:
                 c.execute("DELETE FROM gelen WHERE kullanici=? AND id <= (SELECT id FROM gelen WHERE kullanici=? "
                           "ORDER BY id DESC LIMIT 1 OFFSET ?)", (r["kullanici"], r["kullanici"], GELEN_EN_COK))
                 return {"ok": True, "id": cur.lastrowid, "durum": "bekliyor",
-                        "mesaj": "Alındı. SPİ açılınca Onaylar’a düşer; sen onaylayınca yazılır."}
+                        "mesaj": "Alındı. %s açılınca Onaylar’a düşer; sen onaylayınca yazılır." % MODUL_AD[modul]}
         with self.kilit:
             self._deneme_yanlis(anahtarlar)
         raise Hata(401, "Anahtar geçersiz ya da silinmiş.")
@@ -2064,7 +2068,9 @@ def isle(h):
                 if e.kod != 400:
                     raise
                 raise Hata(400, "Gövde JSON olmalı: {\"metin\": \"su 250\"}")
-            return _cevap(h, 200, d.gelen_ekle(_jeton(h), v.get("metin"), v.get("modul") or "spi", ip))
+            modul = v.get("modul") or "spi"
+            return _cevap(h, 200, d.gelen_ekle(_jeton(h), v.get("metin"),
+                                               modul.strip().lower() if isinstance(modul, str) else modul, ip))
         if yontem == "POST":
             # Ozel baslik + JSON: baska bir site tarayicidan «basit istek»
             # gonderemez (on-kontrol ister, on-kontrol yalniz uygulamaya acik).

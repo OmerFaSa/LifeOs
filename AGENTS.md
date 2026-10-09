@@ -71,9 +71,11 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    doğrulama (TOTP, yedek kodlar), kodla cihaz bağlama, erişim anahtarıyla
    gelen kutusu (iPhone Kısayollar, Home Assistant) ve takvim aboneliği de
    aynı sunucudadır (`sistem/hesap.py` sözleri 14–17). Gelen satırı sunucu
-   anlamaz ve hiçbir modüle yazmaz; modül kendi koduyla öneri yapar (SPİ:
-   Onaylar, ölçüm onaysız yazılmaz). Takvimi modül üretir, sunucu yalnız
-   birleştirip sunar.
+   anlamaz ve hiçbir modüle yazmaz; satırı yalnız gönderildiği modül
+   (AYS, SPİ, ESP) alır ve kendi koduyla Onaylar'a öneri yapar; ölçüm
+   onaysız yazılmaz. Takvimi modül üretir (AYS, ESP), sunucu yalnız
+   birleştirip sunar. Hesap deposu her gün yedeklenir; geri yükleme büyük
+   aksiyondur ve cihazların sonraki değişikliğini ezmez (sunucu sözü 20).
 5. **Sınırlar:** SPİ teşhis koymaz ve doz önermez; ESP/AYS sertifika
    vermez, yetenek yargısı kurmaz, sonuç garantisi etmez.
 6. **XP karar vermez.** Seviye sistemi (`brand/seviye/`) yalnızca

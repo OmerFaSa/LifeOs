@@ -1708,6 +1708,21 @@ ESP.App = (function(){
       if(window.LIFEOS && window.LIFEOS.HESAP){
         const sihirbaz = () => !!document.querySelector('#sheet [data-act="setup-skip"]');
         window.LIFEOS.HESAP.kur({ modul:'esp', depo:ESP.Store, ornek:ornekAcik, kesilebilir:sihirbaz,
+          /* Kısayollar'dan gelen satır (hesap.js söz 20): ESP'nin
+             ayrıştırıcısı okur, Onaylar'a teklif olur; ölçüm onaysız yazılmaz. */
+          gelen:async oge => {
+            if(!ESP.Plans || !ESP.Plans.disaridan) return null;
+            const r = await ESP.Plans.disaridan(oge);
+            if(r && r.durum === 'onayda') window.LIFEOS.HESAP.cizIste(render);
+            return r;
+          },
+          /* Takvim aboneliği: hedeflerin son günü ve hatırlatıcılar
+             (core/takvim.js); sunucu yalnız birleştirip sunar. */
+          yayin:() => {
+            if(!ESP.Takvim) return {};
+            const d = ESP.Takvim.disa();
+            return { takvim:{ metin:d.metin, adet:d.adet } };
+          },
           yukle:() => M.loadAll(),
           yenile:() => {
             /* Profil sunucudan geldiyse kurulum sihirbazının işi kalmadı. */

@@ -194,6 +194,14 @@ R.Screens.onaylar = (function(){
   }
 
   const KAYNAK_ADI = { istek:'senin isteğin', llm:'ajanın önerisi', kural:'kural motoru buldu' };
+  /* Kısayollar'dan gelen satır (hesap gelen kutusu): kaynağı «senin
+     isteğin» değil, oradan geldiği söylenir; günü dünse «yalnız dün». */
+  const gelenMi = p => (p.iz || []).some(x => x && x.tur === 'gelen');
+  function kapsamGun(p){
+    const g = p.params && p.params.date, bugun = U.todayISO();
+    if(!U.isISO(g) || g === bugun) return 'yalnız bugün';
+    return 'yalnız ' + (U.diffDays(g, bugun) === 1 ? 'dün' : U.fmtShort(g));
+  }
   const SEVIYE_ADI = { kucuk:'küçük değişiklik', orta:'orta değişiklik', buyuk:'büyük değişiklik' };
 
   /* VİTRİN ÖNERİ KARTI (110 · 114 · 121 · 123 · 113): ofisin önerisi ortak
@@ -226,7 +234,7 @@ R.Screens.onaylar = (function(){
         /* 127: süresi seçilebilen öneride kart seçili kapsamın seviyesini söyler. */
         const kp = R.Proposals.kapsamOf ? R.Proposals.kapsamOf(p) : null;
         return { id:p.id, eylem:p.action, level:p.level, kapsamId:kp, baslik:def.title, kaynak:'modul',
-          kapsam:def.level === 'kucuk' ? 'yalnız bugün' : null,
+          kapsam:def.level === 'kucuk' ? kapsamGun(p) : null,
           cumle:p.reason ? { metin:p.reason, kaynak:p.source === 'llm' ? 'model' : 'kural' } : null,
           gerekce:p.gerekce || null, kurallar:p.kurallar || [] };
       },
@@ -249,7 +257,7 @@ R.Screens.onaylar = (function(){
     const kapsam = O && O.kapsamHtml && R.Proposals.kapsamOf ? R.Proposals.kapsamOf(p) : null;
     return html`<div class="okart-sar">${raw(kart)}
       ${when(kapsam, () => raw(O.kapsamHtml({ id:p.id, eylem:p.action }, R.ACTIONS, kapsam)))}
-      <p class="okart__kim">${agent.name || 'Ofis'} · ${def.touches} · ${KAYNAK_ADI[p.source] || 'kural motoru buldu'}
+      <p class="okart__kim">${agent.name || 'Ofis'} · ${def.touches} · ${gelenMi(p) ? 'Kısayollar’dan' : KAYNAK_ADI[p.source] || 'kural motoru buldu'}
         ${when(def.route, () => c.Button({ label:'Yerini gör', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':def.route } }))}</p>
     </div>`;
   }

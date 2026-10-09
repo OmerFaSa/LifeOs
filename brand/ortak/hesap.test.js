@@ -180,7 +180,7 @@
       if(yol === '/api/hesap/baglantilar'){
         return cevap(200, { anahtarlar:s.anahtarlar || [], iki_adim:ikiAdim(ad),
           takvim:s.takvim || { acik:false, yol:null, son:null, yayinlar:s.yayinlar || [] },
-          gelen:(s.gelen || []).map(x => ({ id:x.id, metin:x.metin, kaynak:x.kaynak, zaman:x.zaman,
+          gelen:(s.gelen || []).map(x => ({ id:x.id, metin:x.metin, kaynak:x.kaynak, zaman:x.zaman, modul:x.modul || 'spi',
             durum:x.durum === 'alindi' ? 'bekliyor' : x.durum, sonuc:x.sonuc || '' })) });
       }
       const parolaBak = () => s.kullanicilar[ad].parola === govde.parola;
@@ -1969,7 +1969,7 @@
     }));
   });
 
-  describe('Hesap — deponun yedeği (sözler 23–24)', () => {
+  describe('Hesap — deponun yedeği ve üç modüllü gelen kutusu (sözler 20, 23–24)', () => {
     const merkez = () => document.querySelector('[data-hesap-merkez]');
     const tikla = sel => merkez().querySelector(sel).click();
     const gonderilen = (srv, n) => esitleIstekleri(srv).slice(n).map(x => JSON.parse(x.op.body));
@@ -2089,6 +2089,27 @@
         d.querySelector('summary').click();
         expect(d.open).toBe(true);
       }finally{ kok.remove(); }
+    }));
+
+    /* 2026-10-09: gelen kutusu üç modülde (sunucu GELEN_MODULLER). */
+    it('gelen kutusu satırın kendi sistemini söyler; tarif AYS ve ESP gövdesini gösterir', () => sahneyle(async () => {
+      const { h, srv } = await girisli();
+      srv.gelen = [
+        { id:3, metin:'30 dk gitar', modul:'esp', kaynak:'iPhone', zaman:1700000300000, durum:'bekliyor', sonuc:'' },
+        { id:2, metin:'paragraf 20', modul:'ays', kaynak:'iPhone', zaman:1700000200000, durum:'onayda', sonuc:'' },
+        { id:1, metin:'su 250', modul:'spi', kaynak:'iPhone', zaman:1700000100000, durum:'anlasilmadi', sonuc:'' },
+      ];
+      await h.merkezAc('gelen');
+      await hazir();
+      const t = merkez().textContent;
+      expect(t).toContain('ESP açılınca işlenir');
+      expect(t).toContain('AYS › Onaylar’da');
+      expect(t.indexOf('SPİ açılınca') < 0).toBe(true);
+      h.merkezKapat();
+      await h.merkezAc('anahtarlar');
+      await hazir();
+      expect(merkez().textContent).toContain('"modul": "ays"');
+      expect(!!merkez().querySelector('details[data-hesap-ac="t-modul"]')).toBe(true);
     }));
 
     it('üye Verin’de yalnız son yedeğin zamanını görür; eski yedek adminde güvenlik önerisi; ev ağında geri yükleme yok', () => sahneyle(async () => {

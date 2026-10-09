@@ -1534,6 +1534,14 @@ R.App = (function(){
       if(window.LIFEOS && window.LIFEOS.HESAP){
         window.LIFEOS.HESAP.kur({ modul:'ays', depo:R.Store, ornek:ornekAcik,
           yukle:() => M.loadAll(), yenile:() => render(),
+          /* Kısayollar'dan gelen satır (hesap.js söz 20): AYS'nin kural
+             motoru okur, Onaylar'a öneri olur; ölçüm onaysız yazılmaz. */
+          gelen:async oge => {
+            if(!R.Proposals || !R.Proposals.disaridan) return null;
+            const r = await R.Proposals.disaridan(oge);
+            if(r && r.durum === 'onayda') window.LIFEOS.HESAP.cizIste(render);
+            return r;
+          },
           /* Takvim aboneliği (hesap.js söz 20): .ics'i AYS kendi kodu üretir
              (core/takvim.js disa); sunucu yalnız birleştirip sunar. */
           yayin:() => {

@@ -15485,7 +15485,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'e8285a74', at:'2026-10-09 10:58', dirty:true };
+ESP.BUILD = { id:'bbecff5b', at:'2026-10-09 11:33', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -24890,9 +24890,10 @@ window.LIFEOS.QR = (function(){
   19. ERİŞİM ANAHTARI BİR KEZ GÖRÜNÜR. Kısayollar ve otomasyon sayfası
       anahtarı yalnız açıldığı an gösterir (sunucu yalnız özetini tutar);
       tarifler o anahtarla doldurulur, sayfadan çıkınca bellekten gider.
-  20. MODÜL KANCALARI SESSİZDİR. `gelen` (SPİ: Kısayollar'dan gelen satır
-      modülün kendi koduyla Onaylar'a öneri olur) ve `yayin` (AYS: takvim
-      aboneliği) başarılı bir eşitleme turundan sonra arkada koşar; hata
+  20. MODÜL KANCALARI SESSİZDİR. `gelen` (AYS, SPİ, ESP: Kısayollar'dan
+      gelen satırı yalnız gönderildiği modül alır, kendi koduyla Onaylar'a
+      öneri yapar) ve `yayin` (AYS, ESP: takvim aboneliği) başarılı bir
+      eşitleme turundan sonra arkada koşar; hata
       modülü bekletmez, bir sonraki turda yeniden denenir. Yalnız bu
       cihazın alanı bu hesaba bağlıyken (söz 5) ve örnek profilde değilken
       koşar. Yayın, içeriği değişmedikçe yeniden gönderilmez.
@@ -26661,7 +26662,8 @@ window.LIFEOS.HESAP = (function(){
       + '<div><dt>Adres</dt><dd>' + kopyaKutusu(t.url, 'Adresi') + '</dd></div>'
       + '<div><dt>Yöntem</dt><dd><code>POST</code></dd></div>'
       + '<div><dt>Başlık</dt><dd><code>Authorization: Bearer ' + kac(t.a) + '</code></dd></div>'
-      + '<div><dt>Gövde (JSON)</dt><dd><code>{"metin": "su 250"}</code></dd></div>'
+      + '<div><dt>Gövde (JSON)</dt><dd><code>{"metin": "su 250"}</code><small>AYS ya da ESP için '
+      +   '<code>"modul": "ays"</code> ya da <code>"esp"</code> ekle; yazılmazsa SPİ.</small></dd></div>'
       + '<div><dt>Önce dene</dt><dd>Aynı adrese aynı başlıkla gövdesiz <code>GET</code>: «Bağlantı tamam» döner, satır bırakmaz.</dd></div></dl>';
   }
   const HAFTA_MS = 7 * 86400000;
@@ -27052,8 +27054,9 @@ window.LIFEOS.HESAP = (function(){
             + (x.son ? 'son kullanım ' + kac(sonMetni(x.son)) : 'hiç kullanılmadı') + '</small></span>'
             + '<button type="button" class="hesap__kucuk" data-hesap="anahtar-sil" data-id="' + Number(x.id) + '"'
             + ' aria-label="' + kac('«' + x.ad + '» anahtarını sil') + '">Sil</button></li>').join('') + '</ul>'
-          : (y ? '' : tanit('kisayol', 'Telefonundan tek satır', 'iPhone Kısayollar, Android ya da Home Assistant «su 250», '
-            + '«kilo 72,4», «45 dk yürüyüş» gibi bir satır gönderir; SPİ onu Onaylar’a bırakır, sen onaylayınca yazılır.')))
+          : (y ? '' : tanit('kisayol', 'Telefonundan tek satır', 'iPhone Kısayollar, Android ya da Home Assistant tek satır '
+            + 'gönderir: SPİ’ye «su 250», AYS’ye «paragraf 20», ESP’ye «30 dk gitar». O sistem satırı Onaylar’a bırakır, '
+            + 'sen onaylayınca yazılır.')))
         + '<div class="hesap-liste hesap-liste--ac">' + acilir('anahtar-ekle', 'ekle', 'Anahtar oluştur', '',
             '<form class="hesap__form" data-hesap-form="anahtar" data-ayar-disi>'
             + alanHtml('hesap-anahtar-ad', 'Ad', 'text', 'required maxlength="40" autocomplete="off" placeholder="iPhone Kısayollar"')
@@ -27067,6 +27070,13 @@ window.LIFEOS.HESAP = (function(){
             'Kısayollar’da yeni kısayol › «Girdi İste» (Ask for Input) ekle.',
             '«URL’nin İçeriğini Al» (Get Contents of URL) ekle; adres, POST, başlık ve gövde yukarıdaki «İstek»teki gibi; «metin» alanına «Sağlanan Girdi»yi koy.',
             'Adını «LifeOS’a yaz» koy. Siri’ye «LifeOS’a yaz» deyip «su 250» söyle.']))
+        + acilir('t-modul', 'baglanti', 'AYS ve ESP’ye', '', adimlar([
+            'Aynı istek; gövdeye <code>"modul"</code> ekle: <code>{"metin": "paragraf 20", "modul": "ays"}</code>.',
+            'AYS anlar: <code>soru 40 matematik</code>, <code>2 saat fizik</code>, <code>paragraf 20</code>, <code>uyku 7</code>.',
+            'ESP anlar: <code>30 dk gitar</code>, <code>45 dakika felsefe okudum</code>, <code>20 dk diksiyon</code>.',
+            'Kısayollar’da her sistem için ayrı kısayol aç: «AYS’ye yaz», «ESP’ye yaz».'])
+          + '<p class="hesap__not">Her satırı yalnız kendi sistemi alır; o gün o dersin bloğu yoksa ya da süre yazılmadıysa '
+          + 'satır «anlaşılmadı» diye nedeniyle döner, uydurulmaz.</p>')
         + acilir('t-saglik', 'kalp', 'Apple Sağlık’tan her sabah', '', adimlar([
             'Kısayollar › Otomasyon › Günün Saati (ör. 08:00) › Hemen Çalıştır.',
             '«Sağlık Örneklerini Bul» (Find Health Samples): Kilo, son 1 gün, en yeni 1 örnek.',
@@ -27093,7 +27103,8 @@ window.LIFEOS.HESAP = (function(){
         return tanit('gelen', 'Henüz bir satır gelmedi', 'Kısayol ya da otomasyon bir satır gönderince burada görünür.')
           + '<ul class="hesap-liste">' + satir({ ikon:'kisayol', ad:'Kısayollar ve otomasyon', sayfa:'anahtarlar' }) + '</ul>';
       }
-      const DURUM = { bekliyor:['etkinlik', 'SPİ açılınca işlenir'], onayda:['tamam', 'SPİ › Onaylar’da'],
+      /* Satırı yalnız kendi sistemi alır (sunucu GELEN_MODULLER). */
+      const DURUM = { bekliyor:['etkinlik', ' açılınca işlenir'], onayda:['tamam', ' › Onaylar’da'],
         anlasilmadi:['uyari', 'Anlaşılmadı'] };
       let gun = '', html = '';
       l.forEach(o => {
@@ -27103,9 +27114,10 @@ window.LIFEOS.HESAP = (function(){
           html += '<p class="hesap-bolum">' + kac(g) + '</p><ul class="hesap-liste">';
           gun = g;
         }
-        const d = DURUM[o.durum] || DURUM.bekliyor;
+        const d = DURUM[o.durum] || DURUM.bekliyor, mod = MODUL_AD[o.modul] || 'SPİ';
+        const ne = o.sonuc || (o.durum === 'anlasilmadi' ? d[1] : mod + d[1]);
         html += '<li class="hesap-oge hesap-olay' + (o.durum === 'anlasilmadi' ? ' is-dikkat' : '') + '">' + ikon(d[0], 'hesap-satir__ikon')
-          + '<span class="hesap-oge__metin"><b>' + kac(o.metin) + '</b><small>' + kac([o.kaynak, o.sonuc || d[1]].filter(Boolean).join(' · '))
+          + '<span class="hesap-oge__metin"><b>' + kac(o.metin) + '</b><small>' + kac([o.kaynak, ne].filter(Boolean).join(' · '))
           + '</small></span><span class="hesap-satir__detay">' + saatMetni(o.zaman) + '</span></li>';
       });
       return html + '</ul><p class="hesap__not">Son ' + l.length + ' satır. Ölçüm, sen Onaylar’da kaydedene dek yazılmaz.</p>';
@@ -32480,6 +32492,105 @@ ESP.HedefPlan = (function(){
 
   return { KONTROL_HAFTA, kur, onizleme, uygula, geriAl, uygulaHedef, geriAlHedef, hedefKapandi,
     aktif, liste, yukle, kaydet, uygulamaOf, ilerleme, olculen, beklenenAt };
+})();
+
+/* ==== js/core/takvim.js ==== */
+/* TAKVİM — ESP'nin takvim aboneliğine yayını (sunucu sözü 17).
+
+   Hesap › Takvim aboneliği tek adreste bütün modüllerin takvimini sunar;
+   sunucu satırları ANLAMAZ, yalnız birleştirir. ESP'nin oraya koyduğu:
+
+     · etkin hedeflerin son günü (hedef motoru: son tarih ya da planın
+       bitişi) — «ESP hedefi son gün: …»
+     · tarihli hedefler (koçun «zamana bağlı hedef» teklifiyle kurulanlar)
+     · tamamlanmamış hatırlatıcılar, sıradaki günlerinde (gecikmiş olan
+       bugünde: ESP'de vadesi geçen hatırlatıcı tamamlanana dek bekler)
+
+   Değişmezler:
+     1. GEÇMİŞ YAZILMAZ: son günü geçmiş hedef ve hatırlatıcı takvime
+        girmez (takvimi kalabalıklaştırır, bir şey söylemez).
+     2. TÜM GÜN ETKİNLİĞİ: ESP saat kurmaz (rota öncelik söyler, takvim
+        değil); etkinlik o günün başlığıdır, meşgul göstermez (TRANSPARENT).
+     3. UID KALICIDIR: aynı hedef her yayında aynı UID'yi taşır; takvim
+        uygulaması onu yeni bir etkinlik sanmaz.
+     5. TEKRAR KURALI YAZILMAZ: ESP'de tekrarlı hatırlatıcının sonraki
+        günü TAMAMLANDIĞI günden sayılır (state.js completeReminder); bir
+        RRULE bunu yanlış söylerdi. Yalnız sıradaki gün yazılır, tamamlanınca
+        yayın yenisini taşır.
+     4. Satır 75 OKTETTE katlanır (karakter değil): Türkçe harf iki bayttır. */
+
+window.ESP = window.ESP || {};
+
+ESP.Takvim = (function(){
+  /* Tembel: sayfada bu dosya utils.js ve state.js'ten önce yüklenir. */
+  const U = () => ESP.U, S = () => ESP.S;
+
+  function kacir(s){
+    return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/;/g, '\\;')
+      .replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+  }
+  function katla(satir){
+    const enc = new TextEncoder();
+    const out = [];
+    let parca = '', boy = 0;
+    for(const ch of satir){
+      const b = enc.encode(ch).length;
+      if(boy + b > 75){ out.push(parca); parca = ' '; boy = 1; }
+      parca += ch;
+      boy += b;
+    }
+    out.push(parca);
+    return out.join('\r\n');
+  }
+  const gunYaz = iso => String(iso).replace(/-/g, '');
+  const sonrakiGun = iso => U().iso(U().addDays(U().parse(iso), 1));
+
+  /* etkinlikler: [{ uid, baslik, bas:'YYYY-MM-DD', aciklama? }] */
+  function yaz(etkinlikler, ad){
+    const damga = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
+    const s = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//LifeOS//ESP//TR', 'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH', 'X-WR-CALNAME:' + kacir(ad || 'ESP')];
+    (etkinlikler || []).forEach(e => {
+      if(!e || !U().isISO(e.bas)) return;
+      s.push('BEGIN:VEVENT', 'UID:' + kacir(e.uid), 'DTSTAMP:' + damga,
+        'DTSTART;VALUE=DATE:' + gunYaz(e.bas), 'DTEND;VALUE=DATE:' + gunYaz(sonrakiGun(e.bas)),
+        'SUMMARY:' + kacir(e.baslik));
+      if(e.aciklama) s.push('DESCRIPTION:' + kacir(e.aciklama));
+      s.push('TRANSP:TRANSPARENT', 'END:VEVENT');
+    });
+    s.push('END:VCALENDAR');
+    return s.map(katla).join('\r\n') + '\r\n';
+  }
+
+  function disa(bugunISO){
+    const bugun = bugunISO || U().todayISO();
+    const ad = id => ((ESP.DISCIPLINE_BY_ID || {})[id] || {}).label || '';
+    const l = [];
+    const H = ESP.Hedefler;
+    ((H && H.aktifler && H.aktifler()) || []).forEach(h => {
+      const p = ESP.HedefPlan && ESP.HedefPlan.aktif ? ESP.HedefPlan.aktif(h.id) : null;
+      const son = h.son_tarih || (p && p.bitis) || null;
+      if(U().isISO(son) && son >= bugun) l.push({ uid:'esp-hedef-' + h.id + '@lifeos', bas:son,
+        baslik:'ESP hedefi son gün: ' + H.ozet(h),
+        aciklama:h.son_tarih ? 'Hedefin son tarihi.' : 'Hedef planının bitişi.' });
+    });
+    (S().goals || []).forEach(g => {
+      if(g.done || !U().isISO(g.date) || g.date < bugun) return;
+      l.push({ uid:'esp-tarihli-' + g.id + '@lifeos', bas:g.date,
+        baslik:'ESP · ' + (g.label || 'Hedef') + (ad(g.disc) ? ' (' + ad(g.disc) + ')' : '') });
+    });
+    (S().reminders || []).forEach(r => {
+      if(r.done || !U().isISO(r.due)) return;
+      const gecikti = r.due < bugun;
+      l.push({ uid:'esp-hatirlatici-' + r.id + '@lifeos', bas:gecikti ? bugun : r.due,
+        baslik:'ESP · ' + (r.text || 'Hatırlatıcı') + (ad(r.disc) ? ' (' + ad(r.disc) + ')' : ''),
+        aciklama:gecikti ? 'Vadesi ' + r.due + ' idi; tamamlanana dek bekler.' : '' });
+    });
+    l.sort((a, b) => (a.bas < b.bas ? -1 : a.bas > b.bas ? 1 : 0));
+    return { metin:yaz(l, 'ESP — gelişim takvimi'), adet:l.length };
+  }
+
+  return { yaz, disa, katla };
 })();
 
 /* ==== js/core/tanitim.js ==== */
@@ -49440,6 +49551,12 @@ ESP.Plans = (function(){
        türü kendiliğinden üretmez, model hiç öneremez. */
     { id:'hedefplan', level:'buyuk', label:'Hedef planı', scope:'coach', modelYok:true,
       note:'Hedefin disiplini odağa alınır, taban vakte göre yükselir, tarihli hedef ve kontrol noktaları kurulur.' },
+    /* Dışarıdan gelen oturum (hesap gelen kutusu: iPhone Kısayollar «30 dk
+       gitar»). ÖLÇÜMDÜR: küçük olsa da hiçbir ayarda sormadan yazılmaz
+       (AYS ve SPİ'deki olcum:true ile aynı kural, HATALAR KR-1). Yalnız
+       gelen satırdan doğar; ajan ve model öneremez. */
+    { id:'oturum', level:'kucuk', olcum:true, label:'Oturumu yaz', scope:'coach', modelYok:true,
+      note:'Dışarıdan gönderdiğin süre o günün oturumu olur; onaylayınca yazılır, geri alınır.' },
   ];
 
   const KIND_BY_ID = KINDS.reduce(function(m, k){ m[k.id] = k; return m; }, {});
@@ -49618,6 +49735,10 @@ ESP.Plans = (function(){
       return ESP.Coach.doneToday(p.disc).indexOf(p.payload.drillId) >= 0;
     }
     if(a.kind === 'weekplan') return !!plan();
+    if(a.kind === 'oturum'){
+      const g = (S.days || {})[a.date];
+      return !!(g && (g.sessions || []).some(function(s){ return s.id === a.sessionId; }));
+    }
     if(a.kind === 'base'){
       return (S.profile && S.profile.dailyMinutes) === a.minutes;
     }
@@ -49691,6 +49812,14 @@ ESP.Plans = (function(){
       if(!(ESP.DISCIPLINE_BY_ID || {})[y.focus]) return { ok:false, error:'Bilinmeyen bölüm.' };
       if(!ESP.Mod.isOn(y.focus)) return { ok:false, error:'Kapalı bir bölüm odak olamaz; önce aç.' };
     }
+    if(p.kind === 'oturum'){
+      const d = (ESP.DISCIPLINE_BY_ID || {})[y.disc];
+      if(!d) return { ok:false, error:'Bilinmeyen bölüm.' };
+      if(!ESP.Mod.isOn(y.disc)) return { ok:false, error:d.label + ' bölümü kapalı; önce aç.' };
+      const dk = Number(y.minutes);
+      if(!isFinite(dk) || dk < 1 || dk > 600) return { ok:false, error:'Süre 1–600 dakika arasında olmalı.' };
+      if(!U.isISO(y.date) || y.date > U.todayISO()) return { ok:false, error:'Oturum ancak bugüne ya da geçmiş bir güne yazılır.' };
+    }
     return { ok:true };
   }
 
@@ -49700,7 +49829,7 @@ ESP.Plans = (function(){
     if(!allowed(p.agentId, p.kind)){
       return { ok:false, error:'Bu masa bu teklifi veremez.' };
     }
-    if(p.kind === 'bolum' || p.kind === 'base' || p.kind === 'focus'){
+    if(p.kind === 'bolum' || p.kind === 'base' || p.kind === 'focus' || p.kind === 'oturum'){
       const v = dogrula(p);
       if(!v.ok) return v;
     }
@@ -49737,6 +49866,12 @@ ESP.Plans = (function(){
       if(!res.ok) return res;
       uygulanan = { kind:'drill', sessionId:res.session.id,
         date:res.session.date || U.todayISO() };
+
+    }else if(p.kind === 'oturum'){
+      const y = p.payload;
+      const s = await ESP.Model.addSession(y.date, { disc:y.disc, minutes:Math.round(Number(y.minutes)),
+        count:y.count == null ? null : y.count, countWhat:y.countWhat || null, note:y.note || 'Kısayollar' });
+      uygulanan = { kind:'oturum', sessionId:s.id, date:y.date };
 
     }else if(p.kind === 'base'){
       /* Geri alma icin ONCEKI deger saklanir. */
@@ -49789,7 +49924,7 @@ ESP.Plans = (function(){
     const a = p.applied;
     if(a.kind === 'reminder') await ESP.Model.deleteReminder(a.id);
     else if(a.kind === 'goal') await ESP.Model.deleteGoal(a.id);
-    else if(a.kind === 'drill') await ESP.Model.deleteSession(a.date || U.todayISO(), a.sessionId);
+    else if(a.kind === 'drill' || a.kind === 'oturum') await ESP.Model.deleteSession(a.date || U.todayISO(), a.sessionId);
     else if(a.kind === 'base') await ESP.Model.saveProfile({ dailyMinutes:a.onceki });
     else if(a.kind === 'focus') await ESP.Model.saveProfile({ focus:a.onceki });
     else if(a.kind === 'weekplan'){ if(a.oncekiPlan) await savePlan(a.oncekiPlan); else await clearPlan(); }
@@ -49815,6 +49950,8 @@ ESP.Plans = (function(){
 
   function otomatikMi(row, mod){
     if(!row || row.level !== 'kucuk') return false;
+    /* Ölçüm yazan tür hiçbir ayarda sormadan uygulanmaz (KR-1). */
+    if((KIND_BY_ID[row.kind] || {}).olcum) return false;
     /* Vitrin 116 — TÜR AYARI moddan önce gelir: kullanıcı bir küçük türü
        açık ya da kapalı işaretlediyse o geçerlidir (AGENTS §1.9: «hangi
        küçük türlerin sormadan uygulanacağını kullanıcı ayarlar»). */
@@ -49845,6 +49982,8 @@ ESP.Plans = (function(){
     if(kind === 'bolum') return (d.label || 'Bölüm') + ' bölümü ' + (y.on ? 'açılsın' : 'kapansın');
     if(kind === 'base') return 'Günlük taban ' + Math.round(Number(y.minutes)) + ' dakika olsun';
     if(kind === 'focus') return 'Odak ' + (d.label || y.focus) + ' olsun';
+    if(kind === 'oturum') return (d.label || 'Oturum') + ': ' + U.fmtMin(Number(y.minutes))
+      + (y.count != null ? ' · ' + U.fmtNum(y.count) + ' ' + (y.countWhat || '') : '');
     return (KIND_BY_ID[kind] || {}).label || kind;
   }
 
@@ -49868,6 +50007,50 @@ ESP.Plans = (function(){
     await write(Object.assign({}, p, { state:'proposed' }));
     if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
     return { row:record(p.id), otomatik:false, why:null };
+  }
+
+  /* DIŞARIDAN GELEN SATIR (hesap gelen kutusu; sistem/hesap.py söz 16,
+     hesap.js söz 20). iPhone Kısayollar «30 dk gitar», «45 dakika
+     felsefe okudum» gönderir; sunucu satırı ANLAMAZ, ESP'nin kendi
+     ayrıştırıcısı okur (core/parse.js) ve her oturum Onaylar'a TEKLİF
+     olur («oturum», ölçüm: sormadan yazılmaz). Süresi ya da disiplini
+     tanınmayan parça nedeniyle gelen kutusuna döner, uydurulmaz.
+
+     GÜN, satırın GÖNDERİLDİĞİ andır (23:50'de gönderilen dünün
+     oturumudur); ileri tarih bugüne iner. Aynı satır iki kez teklif olmaz
+     (anahtar). Dönüş hesap.js'e: { durum:'onayda'|'anlasilmadi', sonuc }. */
+  async function disaridan(oge){
+    const metin = String((oge && oge.metin) || '').trim();
+    if(!metin || !ESP.Parse) return { durum:'anlasilmadi', sonuc:'Boş satır' };
+    const z = Number(oge.zaman), bugun = U.todayISO();
+    const gonderilen = isFinite(z) && z > 0 ? U.iso(new Date(z)) : bugun;
+    const gun = gonderilen > bugun ? bugun : gonderilen;
+    /* «gitar çalışmadım» ölçüm değildir: yazılmaz, sorulur (KR-1). */
+    const O = window.LIFEOS && window.LIFEOS.Olumsuz;
+    const engel = O && O.olcumEngeli ? O.olcumEngeli(metin) : null;
+    if(engel) return { durum:'anlasilmadi', sonuc:engel.soru || 'Bu bir ölçüm değil; yazılmadı.' };
+    const r = ESP.Parse.parseSession(metin);
+    const kaynak = String(oge.kaynak || '').slice(0, 40);
+    let n = 0;
+    const neden = [];
+    for(let i = 0; i < r.rows.length; i++){
+      const x = r.rows[i], anahtar = 'gelen:' + oge.id + ':' + i;
+      if((S.proposals || []).some(function(q){ return q.payload && q.payload.key === anahtar; })){ n++; continue; }
+      const y = { disc:x.disc, minutes:x.minutes, count:x.count == null ? null : x.count,
+        countWhat:x.countWhat || null, date:gun, key:anahtar, note:'Kısayollar' + (kaynak ? ' (' + kaynak + ')' : '') };
+      const p = { id:'i:' + U.uid('t'), agentId:'patron', kind:'oturum', disc:x.disc, title:baslik('oturum', y),
+        why:'Kısayollar’dan' + (kaynak ? ' (' + kaynak + ')' : '') + ': «' + metin.slice(0, 120) + '»'
+          + (gun !== bugun ? ' · ' + gun : ''),
+        payload:y, at:bugun, source:'istek', level:'kucuk' };
+      const v = dogrula(p);
+      if(!v.ok){ neden.push(v.error); continue; }
+      await write(Object.assign({}, p, { state:'proposed' }));
+      n++;
+    }
+    if(n && ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+    if(n) return { durum:'onayda', sonuc:n === 1 ? 'ESP › Onaylar’da bekliyor' : n + ' oturum ESP › Onaylar’da' };
+    const u = (r.unmatched || [])[0];
+    return { durum:'anlasilmadi', sonuc:neden[0] || (u && u.why) || 'ESP bu satırı anlamadı' };
   }
 
   /* Onay bekleyen kullanıcı istekleri — teklif listesinde görünür. */
@@ -49951,7 +50134,7 @@ ESP.Plans = (function(){
 
   return { KINDS, KIND_BY_ID, allowed, discOf, stillApplied,
     proposalsFor, all, open:open_, record, accept, decline,
-    dogrula, geriAl, talep, istekler, otomatikMi, ayar, turAyari, MODLAR,
+    dogrula, geriAl, talep, istekler, disaridan, otomatikMi, ayar, turAyari, MODLAR,
     weekPlan, savePlan, plan, clearPlan, today };
 })();
 
@@ -54888,6 +55071,17 @@ ESP.Parts = (function(){
     });
   }
 
+  /* Teklifin kaynağı: dışarıdan gelen oturum (Kısayollar) nereden geldiğini
+     ve günü bugün değilse gününü söyler; «senin isteğin» demez. */
+  function kimOf(p, a){
+    if(p.kind === 'oturum' && p.payload){
+      const g = p.payload.date, bugun = U.todayISO();
+      return (p.payload.note || 'Kısayollar') + (U.isISO(g) && g !== bugun
+        ? ' · ' + (U.diffDays(g, bugun) === 1 ? 'dün' : U.fmtShort(g)) : '');
+    }
+    return p.source === 'istek' ? 'senin isteğin' : (a.short || a.name || p.agentId);
+  }
+
   function proposalList(list, bos){
     if(!list.length) return K.Empty({ text:bos || 'Bekleyen teklif yok.' });
     const kk = kopru();
@@ -54896,8 +55090,7 @@ ESP.Parts = (function(){
       if(!kart) return null;
       const k = ESP.Plans.KIND_BY_ID[p.kind] || {};
       const a = ESP.AGENT_BY_ID[p.agentId] || {};
-      return html`<div class="okart-sar">${raw(kart)}<p class="okart__kim">${p.source === 'istek' ? 'senin isteğin'
-        : (a.short || a.name || p.agentId)} · ${k.note || ''}</p></div>`;
+      return html`<div class="okart-sar">${raw(kart)}<p class="okart__kim">${kimOf(p, a)} · ${k.note || ''}</p></div>`;
     }) : [];
     if(kk && kartlar.every(Boolean)) return html`<div class="stack-sm">${kartlar}</div>`;
     return html`<ul class="props">${map(list, p => {
@@ -54908,7 +55101,7 @@ ESP.Parts = (function(){
         <span class="prop__body">
           <b>${p.title}</b>
           <span class="prop__why">${p.why}</span>
-          <span class="tiny dim">${p.source === 'istek' ? 'senin isteğin' : (a.short || a.name || p.agentId)}
+          <span class="tiny dim">${kimOf(p, a)}
             · ${SEVIYE_ADI[k.level] || ''} · ${k.note || ''}</span>
         </span>
         ${K.Button({ label:'Onayla', size:'sm', act:'prop-accept',
@@ -69196,6 +69389,21 @@ ESP.App = (function(){
       if(window.LIFEOS && window.LIFEOS.HESAP){
         const sihirbaz = () => !!document.querySelector('#sheet [data-act="setup-skip"]');
         window.LIFEOS.HESAP.kur({ modul:'esp', depo:ESP.Store, ornek:ornekAcik, kesilebilir:sihirbaz,
+          /* Kısayollar'dan gelen satır (hesap.js söz 20): ESP'nin
+             ayrıştırıcısı okur, Onaylar'a teklif olur; ölçüm onaysız yazılmaz. */
+          gelen:async oge => {
+            if(!ESP.Plans || !ESP.Plans.disaridan) return null;
+            const r = await ESP.Plans.disaridan(oge);
+            if(r && r.durum === 'onayda') window.LIFEOS.HESAP.cizIste(render);
+            return r;
+          },
+          /* Takvim aboneliği: hedeflerin son günü ve hatırlatıcılar
+             (core/takvim.js); sunucu yalnız birleştirip sunar. */
+          yayin:() => {
+            if(!ESP.Takvim) return {};
+            const d = ESP.Takvim.disa();
+            return { takvim:{ metin:d.metin, adet:d.adet } };
+          },
           yukle:() => M.loadAll(),
           yenile:() => {
             /* Profil sunucudan geldiyse kurulum sihirbazının işi kalmadı. */

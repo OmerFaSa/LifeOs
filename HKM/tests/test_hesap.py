@@ -740,7 +740,7 @@ def run():
             _hata(lambda: r.d.gelen_ekle(j, "su 250"), 401)              # oturum jetonu anahtar degil
             _hata(lambda: r.d.gelen_ekle(a["anahtar"], ""), 400)
             _hata(lambda: r.d.gelen_ekle(a["anahtar"], "x" * (hesap.GELEN_METIN_EN_UZUN + 1)), 400)
-            _hata(lambda: r.d.gelen_ekle(a["anahtar"], "su 250", "ays"), 400)
+            _hata(lambda: r.d.gelen_ekle(a["anahtar"], "su 250", "hkm"), 400)    # gelen kutusu yalniz uc modulde
             g = r.d.gelen_ekle(a["anahtar"], "  su   250 ", ip="192.168.0.23")
             eq(g["durum"], "bekliyor")
             ok(r.d.anahtarlar(k)[0]["son"])
@@ -755,7 +755,7 @@ def run():
             no(r.d.gelen_sonuc(k, g["id"], "onayda", "iki kez", B))
             eq(r.d.gelen_al(k, "spi", A), [])
             _hata(lambda: r.d.gelen_sonuc(k, g["id"], "yazildi", "", B), 400)
-            _hata(lambda: r.d.gelen_al(k, "esp", A), 400)
+            _hata(lambda: r.d.gelen_al(k, "hkm", A), 400)
             x = r.d.gelen_liste(k)[0]
             eq((x["metin"], x["durum"], x["sonuc"], x["kaynak"]),
                ("su 250", "onayda", "Onaylar’da bekliyor", "iPhone Kısayollar"))
@@ -1459,3 +1459,35 @@ def run():
             eq(set(s.iste("/api/hesap/ben", baslik=u)[2]["yedek"]), {"son", "adet"})
             eq(s.iste("/api/hesap/yedekler")[0], 401)
     test("HTTP: yedekler, simdi yedekle, onizleme, yalniz gonder, geri yukleme; uye goremez", t_http_yedek)
+
+    # -------------------------------------- gelen kutusu uc modulde (2026-10-09)
+
+    def t_gelen_uc_modul():
+        with _Depo() as r:
+            k, j = _admin(r)
+            a = r.d.anahtar_ac(k, "parola-123", "Kısayol")["anahtar"]
+            s = r.d.gelen_ekle(a, "su 250")                               # modul yazilmazsa SPI (eski kisayollar)
+            y = r.d.gelen_ekle(a, "paragraf 20", "ays")
+            e = r.d.gelen_ekle(a, "30 dk gitar", "esp")
+            ok("SPİ" in s["mesaj"] and "AYS" in y["mesaj"] and "ESP" in e["mesaj"])
+            eq([x["metin"] for x in r.d.gelen_al(k, "ays", A)], ["paragraf 20"])   # satiri yalniz kendi modulu alir
+            eq([x["metin"] for x in r.d.gelen_al(k, "esp", A)], ["30 dk gitar"])
+            eq([x["metin"] for x in r.d.gelen_al(k, "spi", A)], ["su 250"])
+            eq({x["modul"] for x in r.d.gelen_liste(k)}, {"ays", "spi", "esp"})
+    test("gelen kutusu: AYS ve ESP de satir alir; satiri yalniz kendi modulu alir", t_gelen_uc_modul)
+
+    def t_http_gelen_modul():
+        with _Srv() as s:
+            kod, _, v = s.iste("/api/hesap/kur", {"ad": "omer", "parola": "parola-123", "cihaz": A}, H)
+            y = dict(H, Authorization="Bearer " + v["jeton"])
+            a = s.iste("/api/hesap/anahtar", {"parola": "parola-123", "ad": "Kısayol"}, y)[2]["anahtar"]
+            b = {"Authorization": "Bearer " + a}
+            kod, _, v = s.iste("/api/hesap/gelen", {"metin": "30 dk gitar", "modul": " ESP "}, b)
+            eq((kod, v["durum"]), (200, "bekliyor"))
+            ok("ESP" in v["mesaj"])
+            kod, _, v = s.iste("/api/hesap/gelen", {"metin": "x", "modul": "hkm"}, b)
+            eq(kod, 400)
+            ok("ays, spi ya da esp" in v["hata"])
+            kod, _, v = s.iste("/api/hesap/gelen-al", {"modul": "esp", "cihaz": A}, y)
+            eq([x["metin"] for x in v["gelen"]], ["30 dk gitar"])
+    test("HTTP: gelen satirinda modul (buyuk harf ve bosluk tolere edilir); bilinmeyen modul 400", t_http_gelen_modul)

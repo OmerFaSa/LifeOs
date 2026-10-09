@@ -1188,9 +1188,47 @@ R.Proposals = (function(){
     return { text:s.trim(), obj:null };
   }
 
+  /* DIŞARIDAN GELEN SATIR (hesap gelen kutusu; sistem/hesap.py söz 16,
+     hesap.js söz 20). iPhone Kısayollar «soru 40 matematik», «2 saat
+     fizik», «paragraf 20» gönderir; sunucu satırı ANLAMAZ, burada AYS'nin
+     kendi ayrıştırıcısı okur (core/entry.js) ve her parça Onaylar'a ÖNERİ
+     olur. Ölçüm olduğu için hiçbir ayarda sormadan yazılmaz (otomatikMi,
+     katalogda olcum:true); kullanıcı onaylayınca yazar, geri alınır.
+
+     GÜN, satırın GÖNDERİLDİĞİ andır (23:50'de gönderilen dünün kaydıdır);
+     ileri tarih bugüne iner. O gün o dersin bloğu yoksa öneri olmaz,
+     nedeni gelen kutusuna yazılır (uydurma blok açılmaz). Aynı satır iki
+     kez öneri olmaz (anahtar). Dönüş hesap.js'e: { durum, sonuc }. */
+  async function disaridan(oge){
+    const metin = String((oge && oge.metin) || '').trim();
+    if(!metin || !R.Entry) return { durum:'anlasilmadi', sonuc:'Boş satır' };
+    const z = Number(oge.zaman), bugun = U.todayISO();
+    const gonderilen = isFinite(z) && z > 0 ? U.iso(new Date(z)) : bugun;
+    const gun = gonderilen > bugun ? bugun : gonderilen;
+    await R.Model.ensureDay(gun);
+    const v = R.Entry.fromText(metin, { date:gun });
+    let n = 0;
+    const neden = [];
+    for(let i = 0; i < v.oneriler.length; i++){
+      const x = v.oneriler[i];
+      const p = { action:x.action, agent:'patron', source:'istek', params:x.params };
+      const c = check(p);
+      if(!c.ok){ neden.push(c.why); continue; }
+      const anahtar = 'gelen:' + oge.id + ':' + i;
+      if((S.officeProposalKeys || []).indexOf(anahtar) >= 0){ n++; continue; }
+      const row = await propose(Object.assign(p, { anahtar,
+        reason:'Kısayollar’dan' + (oge.kaynak ? ' (' + String(oge.kaynak).slice(0, 40) + ')' : '') + ': «' + metin + '»',
+        iz:[{ tur:'gelen', id:String(oge.id) }] }));
+      if(row) n++;
+    }
+    if(n) return { durum:'onayda', sonuc:n === 1 ? 'AYS › Onaylar’da bekliyor' : n + ' kayıt AYS › Onaylar’da' };
+    const e = (v.engellenen || [])[0];
+    return { durum:'anlasilmadi', sonuc:neden[0] || (e && e.soru) || 'AYS bu satırı anlamadı' };
+  }
+
   return {
     all, pending, applied, actionable, check, preview,
-    propose, approve, hemen, reject, undo, clearResolved,
+    propose, approve, hemen, reject, undo, clearResolved, disaridan,
     talep, otomatikMi, ayar, turAyari, SEVIYELER, MODLAR,
     suggest, refresh, fromModel, catalogPrompt, splitAction, stripTrailingJson,
     load, save, MAX, kapsamOf, kapsamla,

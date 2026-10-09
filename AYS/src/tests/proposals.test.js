@@ -839,4 +839,49 @@
       });
     });
   });
+
+  /* DIŞARIDAN GELEN SATIR (hesap gelen kutusu; sistem/hesap.py söz 16):
+     iPhone Kısayollar «paragraf 20» gönderir. Ölçümdür: onaysız yazılmaz. */
+  describe('Öneri — dışarıdan gelen satır (Kısayollar)', () => {
+    it('satır Onaylar’a öneri olur, ONAYSIZ yazılmaz; gün gönderildiği gün; aynı satır iki kez öneri olmaz', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const dun = '2026-11-09';
+        await M.ensureDay(dun);
+        S.days[dun].paragraphActual = 0;
+        const z = new Date(2026, 10, 9, 23, 50).getTime();
+        const r = await P.disaridan({ id:51, metin:'paragraf 20', kaynak:'iPhone Kısayollar', zaman:z });
+        expect(r.durum).toBe('onayda');
+        const p = P.pending();
+        expect(p).toHaveLength(1);
+        expect(p[0].action).toBe('paragraf-yaz');
+        expect(p[0].params.date).toBe(dun);                              // 23:50'de gönderildi: dünün kaydı
+        expect(p[0].reason).toContain('iPhone Kısayollar');
+        expect(p[0].otomatik).toBe(false);
+        expect(S.days[dun].paragraphActual || 0).toBe(0);                // onaysız yazılmadı
+        expect((await P.disaridan({ id:51, metin:'paragraf 20', kaynak:'iPhone Kısayollar', zaman:z })).durum).toBe('onayda');
+        expect(P.pending()).toHaveLength(1);                             // yeniden verilen satır ikinci öneri olmaz
+        /* Onaylar kartı nereden geldiğini ve gününü söyler («yalnız bugün» değil). */
+        const on = String(await R.Screens.onaylar.render());
+        expect(on.indexOf('Kısayollar’dan') >= 0).toBe(true);
+        expect(on.indexOf('yalnız dün') >= 0).toBe(true);
+        expect((await P.approve(p[0].id)).ok).toBe(true);
+        expect(S.days[dun].paragraphActual).toBe(20);
+      });
+    });
+
+    it('anlaşılmayan ya da ölçüm olmayan satır öneri olmaz, nedeni söylenir; ileri tarih bugüne iner', async () => {
+      await withTodayAsync(TODAY, async () => {
+        reset();
+        const z = new Date(2026, 10, 10, 9).getTime();
+        expect((await P.disaridan({ id:52, metin:'merhaba dünya', zaman:z })).durum).toBe('anlasilmadi');
+        const r = await P.disaridan({ id:53, metin:'40 soru çözmedim', zaman:z });
+        expect(r.durum).toBe('anlasilmadi');
+        expect(r.sonuc.length > 0).toBe(true);
+        expect(P.pending()).toHaveLength(0);
+        await P.disaridan({ id:54, metin:'paragraf 5', zaman:new Date(2026, 10, 20, 9).getTime() });
+        expect(P.pending()[0].params.date).toBe(TODAY);
+      });
+    });
+  });
 })();

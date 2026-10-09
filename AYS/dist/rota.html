@@ -15872,7 +15872,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'e8285a74', at:'2026-10-09 10:58', dirty:true };
+R.BUILD = { id:'bbecff5b', at:'2026-10-09 11:33', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -25277,9 +25277,10 @@ window.LIFEOS.QR = (function(){
   19. ERİŞİM ANAHTARI BİR KEZ GÖRÜNÜR. Kısayollar ve otomasyon sayfası
       anahtarı yalnız açıldığı an gösterir (sunucu yalnız özetini tutar);
       tarifler o anahtarla doldurulur, sayfadan çıkınca bellekten gider.
-  20. MODÜL KANCALARI SESSİZDİR. `gelen` (SPİ: Kısayollar'dan gelen satır
-      modülün kendi koduyla Onaylar'a öneri olur) ve `yayin` (AYS: takvim
-      aboneliği) başarılı bir eşitleme turundan sonra arkada koşar; hata
+  20. MODÜL KANCALARI SESSİZDİR. `gelen` (AYS, SPİ, ESP: Kısayollar'dan
+      gelen satırı yalnız gönderildiği modül alır, kendi koduyla Onaylar'a
+      öneri yapar) ve `yayin` (AYS, ESP: takvim aboneliği) başarılı bir
+      eşitleme turundan sonra arkada koşar; hata
       modülü bekletmez, bir sonraki turda yeniden denenir. Yalnız bu
       cihazın alanı bu hesaba bağlıyken (söz 5) ve örnek profilde değilken
       koşar. Yayın, içeriği değişmedikçe yeniden gönderilmez.
@@ -27048,7 +27049,8 @@ window.LIFEOS.HESAP = (function(){
       + '<div><dt>Adres</dt><dd>' + kopyaKutusu(t.url, 'Adresi') + '</dd></div>'
       + '<div><dt>Yöntem</dt><dd><code>POST</code></dd></div>'
       + '<div><dt>Başlık</dt><dd><code>Authorization: Bearer ' + kac(t.a) + '</code></dd></div>'
-      + '<div><dt>Gövde (JSON)</dt><dd><code>{"metin": "su 250"}</code></dd></div>'
+      + '<div><dt>Gövde (JSON)</dt><dd><code>{"metin": "su 250"}</code><small>AYS ya da ESP için '
+      +   '<code>"modul": "ays"</code> ya da <code>"esp"</code> ekle; yazılmazsa SPİ.</small></dd></div>'
       + '<div><dt>Önce dene</dt><dd>Aynı adrese aynı başlıkla gövdesiz <code>GET</code>: «Bağlantı tamam» döner, satır bırakmaz.</dd></div></dl>';
   }
   const HAFTA_MS = 7 * 86400000;
@@ -27439,8 +27441,9 @@ window.LIFEOS.HESAP = (function(){
             + (x.son ? 'son kullanım ' + kac(sonMetni(x.son)) : 'hiç kullanılmadı') + '</small></span>'
             + '<button type="button" class="hesap__kucuk" data-hesap="anahtar-sil" data-id="' + Number(x.id) + '"'
             + ' aria-label="' + kac('«' + x.ad + '» anahtarını sil') + '">Sil</button></li>').join('') + '</ul>'
-          : (y ? '' : tanit('kisayol', 'Telefonundan tek satır', 'iPhone Kısayollar, Android ya da Home Assistant «su 250», '
-            + '«kilo 72,4», «45 dk yürüyüş» gibi bir satır gönderir; SPİ onu Onaylar’a bırakır, sen onaylayınca yazılır.')))
+          : (y ? '' : tanit('kisayol', 'Telefonundan tek satır', 'iPhone Kısayollar, Android ya da Home Assistant tek satır '
+            + 'gönderir: SPİ’ye «su 250», AYS’ye «paragraf 20», ESP’ye «30 dk gitar». O sistem satırı Onaylar’a bırakır, '
+            + 'sen onaylayınca yazılır.')))
         + '<div class="hesap-liste hesap-liste--ac">' + acilir('anahtar-ekle', 'ekle', 'Anahtar oluştur', '',
             '<form class="hesap__form" data-hesap-form="anahtar" data-ayar-disi>'
             + alanHtml('hesap-anahtar-ad', 'Ad', 'text', 'required maxlength="40" autocomplete="off" placeholder="iPhone Kısayollar"')
@@ -27454,6 +27457,13 @@ window.LIFEOS.HESAP = (function(){
             'Kısayollar’da yeni kısayol › «Girdi İste» (Ask for Input) ekle.',
             '«URL’nin İçeriğini Al» (Get Contents of URL) ekle; adres, POST, başlık ve gövde yukarıdaki «İstek»teki gibi; «metin» alanına «Sağlanan Girdi»yi koy.',
             'Adını «LifeOS’a yaz» koy. Siri’ye «LifeOS’a yaz» deyip «su 250» söyle.']))
+        + acilir('t-modul', 'baglanti', 'AYS ve ESP’ye', '', adimlar([
+            'Aynı istek; gövdeye <code>"modul"</code> ekle: <code>{"metin": "paragraf 20", "modul": "ays"}</code>.',
+            'AYS anlar: <code>soru 40 matematik</code>, <code>2 saat fizik</code>, <code>paragraf 20</code>, <code>uyku 7</code>.',
+            'ESP anlar: <code>30 dk gitar</code>, <code>45 dakika felsefe okudum</code>, <code>20 dk diksiyon</code>.',
+            'Kısayollar’da her sistem için ayrı kısayol aç: «AYS’ye yaz», «ESP’ye yaz».'])
+          + '<p class="hesap__not">Her satırı yalnız kendi sistemi alır; o gün o dersin bloğu yoksa ya da süre yazılmadıysa '
+          + 'satır «anlaşılmadı» diye nedeniyle döner, uydurulmaz.</p>')
         + acilir('t-saglik', 'kalp', 'Apple Sağlık’tan her sabah', '', adimlar([
             'Kısayollar › Otomasyon › Günün Saati (ör. 08:00) › Hemen Çalıştır.',
             '«Sağlık Örneklerini Bul» (Find Health Samples): Kilo, son 1 gün, en yeni 1 örnek.',
@@ -27480,7 +27490,8 @@ window.LIFEOS.HESAP = (function(){
         return tanit('gelen', 'Henüz bir satır gelmedi', 'Kısayol ya da otomasyon bir satır gönderince burada görünür.')
           + '<ul class="hesap-liste">' + satir({ ikon:'kisayol', ad:'Kısayollar ve otomasyon', sayfa:'anahtarlar' }) + '</ul>';
       }
-      const DURUM = { bekliyor:['etkinlik', 'SPİ açılınca işlenir'], onayda:['tamam', 'SPİ › Onaylar’da'],
+      /* Satırı yalnız kendi sistemi alır (sunucu GELEN_MODULLER). */
+      const DURUM = { bekliyor:['etkinlik', ' açılınca işlenir'], onayda:['tamam', ' › Onaylar’da'],
         anlasilmadi:['uyari', 'Anlaşılmadı'] };
       let gun = '', html = '';
       l.forEach(o => {
@@ -27490,9 +27501,10 @@ window.LIFEOS.HESAP = (function(){
           html += '<p class="hesap-bolum">' + kac(g) + '</p><ul class="hesap-liste">';
           gun = g;
         }
-        const d = DURUM[o.durum] || DURUM.bekliyor;
+        const d = DURUM[o.durum] || DURUM.bekliyor, mod = MODUL_AD[o.modul] || 'SPİ';
+        const ne = o.sonuc || (o.durum === 'anlasilmadi' ? d[1] : mod + d[1]);
         html += '<li class="hesap-oge hesap-olay' + (o.durum === 'anlasilmadi' ? ' is-dikkat' : '') + '">' + ikon(d[0], 'hesap-satir__ikon')
-          + '<span class="hesap-oge__metin"><b>' + kac(o.metin) + '</b><small>' + kac([o.kaynak, o.sonuc || d[1]].filter(Boolean).join(' · '))
+          + '<span class="hesap-oge__metin"><b>' + kac(o.metin) + '</b><small>' + kac([o.kaynak, ne].filter(Boolean).join(' · '))
           + '</small></span><span class="hesap-satir__detay">' + saatMetni(o.zaman) + '</span></li>';
       });
       return html + '</ul><p class="hesap__not">Son ' + l.length + ' satır. Ölçüm, sen Onaylar’da kaydedene dek yazılmaz.</p>';
@@ -56885,9 +56897,47 @@ R.Proposals = (function(){
     return { text:s.trim(), obj:null };
   }
 
+  /* DIŞARIDAN GELEN SATIR (hesap gelen kutusu; sistem/hesap.py söz 16,
+     hesap.js söz 20). iPhone Kısayollar «soru 40 matematik», «2 saat
+     fizik», «paragraf 20» gönderir; sunucu satırı ANLAMAZ, burada AYS'nin
+     kendi ayrıştırıcısı okur (core/entry.js) ve her parça Onaylar'a ÖNERİ
+     olur. Ölçüm olduğu için hiçbir ayarda sormadan yazılmaz (otomatikMi,
+     katalogda olcum:true); kullanıcı onaylayınca yazar, geri alınır.
+
+     GÜN, satırın GÖNDERİLDİĞİ andır (23:50'de gönderilen dünün kaydıdır);
+     ileri tarih bugüne iner. O gün o dersin bloğu yoksa öneri olmaz,
+     nedeni gelen kutusuna yazılır (uydurma blok açılmaz). Aynı satır iki
+     kez öneri olmaz (anahtar). Dönüş hesap.js'e: { durum, sonuc }. */
+  async function disaridan(oge){
+    const metin = String((oge && oge.metin) || '').trim();
+    if(!metin || !R.Entry) return { durum:'anlasilmadi', sonuc:'Boş satır' };
+    const z = Number(oge.zaman), bugun = U.todayISO();
+    const gonderilen = isFinite(z) && z > 0 ? U.iso(new Date(z)) : bugun;
+    const gun = gonderilen > bugun ? bugun : gonderilen;
+    await R.Model.ensureDay(gun);
+    const v = R.Entry.fromText(metin, { date:gun });
+    let n = 0;
+    const neden = [];
+    for(let i = 0; i < v.oneriler.length; i++){
+      const x = v.oneriler[i];
+      const p = { action:x.action, agent:'patron', source:'istek', params:x.params };
+      const c = check(p);
+      if(!c.ok){ neden.push(c.why); continue; }
+      const anahtar = 'gelen:' + oge.id + ':' + i;
+      if((S.officeProposalKeys || []).indexOf(anahtar) >= 0){ n++; continue; }
+      const row = await propose(Object.assign(p, { anahtar,
+        reason:'Kısayollar’dan' + (oge.kaynak ? ' (' + String(oge.kaynak).slice(0, 40) + ')' : '') + ': «' + metin + '»',
+        iz:[{ tur:'gelen', id:String(oge.id) }] }));
+      if(row) n++;
+    }
+    if(n) return { durum:'onayda', sonuc:n === 1 ? 'AYS › Onaylar’da bekliyor' : n + ' kayıt AYS › Onaylar’da' };
+    const e = (v.engellenen || [])[0];
+    return { durum:'anlasilmadi', sonuc:neden[0] || (e && e.soru) || 'AYS bu satırı anlamadı' };
+  }
+
   return {
     all, pending, applied, actionable, check, preview,
-    propose, approve, hemen, reject, undo, clearResolved,
+    propose, approve, hemen, reject, undo, clearResolved, disaridan,
     talep, otomatikMi, ayar, turAyari, SEVIYELER, MODLAR,
     suggest, refresh, fromModel, catalogPrompt, splitAction, stripTrailingJson,
     load, save, MAX, kapsamOf, kapsamla,
@@ -74026,6 +74076,14 @@ R.Screens.onaylar = (function(){
   }
 
   const KAYNAK_ADI = { istek:'senin isteğin', llm:'ajanın önerisi', kural:'kural motoru buldu' };
+  /* Kısayollar'dan gelen satır (hesap gelen kutusu): kaynağı «senin
+     isteğin» değil, oradan geldiği söylenir; günü dünse «yalnız dün». */
+  const gelenMi = p => (p.iz || []).some(x => x && x.tur === 'gelen');
+  function kapsamGun(p){
+    const g = p.params && p.params.date, bugun = U.todayISO();
+    if(!U.isISO(g) || g === bugun) return 'yalnız bugün';
+    return 'yalnız ' + (U.diffDays(g, bugun) === 1 ? 'dün' : U.fmtShort(g));
+  }
   const SEVIYE_ADI = { kucuk:'küçük değişiklik', orta:'orta değişiklik', buyuk:'büyük değişiklik' };
 
   /* VİTRİN ÖNERİ KARTI (110 · 114 · 121 · 123 · 113): ofisin önerisi ortak
@@ -74058,7 +74116,7 @@ R.Screens.onaylar = (function(){
         /* 127: süresi seçilebilen öneride kart seçili kapsamın seviyesini söyler. */
         const kp = R.Proposals.kapsamOf ? R.Proposals.kapsamOf(p) : null;
         return { id:p.id, eylem:p.action, level:p.level, kapsamId:kp, baslik:def.title, kaynak:'modul',
-          kapsam:def.level === 'kucuk' ? 'yalnız bugün' : null,
+          kapsam:def.level === 'kucuk' ? kapsamGun(p) : null,
           cumle:p.reason ? { metin:p.reason, kaynak:p.source === 'llm' ? 'model' : 'kural' } : null,
           gerekce:p.gerekce || null, kurallar:p.kurallar || [] };
       },
@@ -74081,7 +74139,7 @@ R.Screens.onaylar = (function(){
     const kapsam = O && O.kapsamHtml && R.Proposals.kapsamOf ? R.Proposals.kapsamOf(p) : null;
     return html`<div class="okart-sar">${raw(kart)}
       ${when(kapsam, () => raw(O.kapsamHtml({ id:p.id, eylem:p.action }, R.ACTIONS, kapsam)))}
-      <p class="okart__kim">${agent.name || 'Ofis'} · ${def.touches} · ${KAYNAK_ADI[p.source] || 'kural motoru buldu'}
+      <p class="okart__kim">${agent.name || 'Ofis'} · ${def.touches} · ${gelenMi(p) ? 'Kısayollar’dan' : KAYNAK_ADI[p.source] || 'kural motoru buldu'}
         ${when(def.route, () => c.Button({ label:'Yerini gör', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':def.route } }))}</p>
     </div>`;
   }
@@ -75944,6 +76002,14 @@ R.App = (function(){
       if(window.LIFEOS && window.LIFEOS.HESAP){
         window.LIFEOS.HESAP.kur({ modul:'ays', depo:R.Store, ornek:ornekAcik,
           yukle:() => M.loadAll(), yenile:() => render(),
+          /* Kısayollar'dan gelen satır (hesap.js söz 20): AYS'nin kural
+             motoru okur, Onaylar'a öneri olur; ölçüm onaysız yazılmaz. */
+          gelen:async oge => {
+            if(!R.Proposals || !R.Proposals.disaridan) return null;
+            const r = await R.Proposals.disaridan(oge);
+            if(r && r.durum === 'onayda') window.LIFEOS.HESAP.cizIste(render);
+            return r;
+          },
           /* Takvim aboneliği (hesap.js söz 20): .ics'i AYS kendi kodu üretir
              (core/takvim.js disa); sunucu yalnız birleştirip sunar. */
           yayin:() => {

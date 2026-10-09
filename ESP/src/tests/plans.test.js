@@ -458,4 +458,63 @@
       });
     });
   });
+
+  /* DIŞARIDAN GELEN SATIR (hesap gelen kutusu; sistem/hesap.py söz 16):
+     iPhone Kısayollar «30 dk gitar» gönderir. Ölçümdür: onaysız yazılmaz. */
+  describe('teklif · dışarıdan gelen satır (Kısayollar)', () => {
+    const gun = g => (ESP.S.days[g] || {}).sessions || [];
+
+    it('satır Onaylar’a teklif olur, ONAYSIZ yazılmaz; gün gönderildiği gün; aynı satır iki kez olmaz; onay yazar, geri alınır', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        const dun = new Date(2026, 8, 11, 23, 50).getTime();
+        const r = await P().disaridan({ id:61, metin:'30 dk gitar', kaynak:'iPhone Kısayollar', zaman:dun });
+        expect(r.durum).toBe('onayda');
+        const l = P().istekler();
+        expect(l.length).toBe(1);
+        expect(l[0].kind).toBe('oturum');
+        expect(l[0].payload.date).toBe('2026-09-11');                  // 23:50'de gönderildi: dünün oturumu
+        expect(l[0].payload.minutes).toBe(30);
+        expect(l[0].payload.disc).toBe('music');
+        expect(l[0].why).toContain('iPhone Kısayollar');
+        expect(P().otomatikMi(l[0], 'hepsi')).toBe(false);             // ölçüm: hiçbir ayarda sormadan yazılmaz
+        expect(gun('2026-09-11').length).toBe(0);
+        expect((await P().disaridan({ id:61, metin:'30 dk gitar', zaman:dun })).durum).toBe('onayda');
+        expect(P().istekler().length).toBe(1);                         // yeniden verilen satır ikinci teklif olmaz
+        expect(P().all().some(p => p.id === l[0].id)).toBe(true);      // Onaylar listesinde
+        /* Kart nereden geldiğini ve gününü söyler; «senin isteğin» demez. */
+        const kart = String(ESP.Parts.proposalList([l[0]]));
+        expect(kart).toContain('Kısayollar (iPhone Kısayollar) · dün');
+        expect(kart.indexOf('senin isteğin') < 0).toBe(true);
+        expect((await P().accept(l[0].id)).ok).toBe(true);
+        expect(gun('2026-09-11').length).toBe(1);
+        expect(gun('2026-09-11')[0].minutes).toBe(30);
+        expect(P().stillApplied(P().record(l[0].id))).toBe(true);
+        expect((await P().geriAl(l[0].id)).ok).toBe(true);
+        expect(gun('2026-09-11').length).toBe(0);
+      });
+    });
+
+    it('anlaşılmayan, ölçüm olmayan ya da süresiz satır teklif olmaz, nedeni söylenir; kapalı bölüm yazılmaz; ileri tarih bugüne iner', async () => {
+      resetState();
+      await withTodayAsync('2026-09-12', async () => {
+        const z = new Date(2026, 8, 12, 9).getTime();
+        expect((await P().disaridan({ id:62, metin:'merhaba dünya', zaman:z })).durum).toBe('anlasilmadi');
+        const ol = await P().disaridan({ id:63, metin:'30 dk gitar çalışmadım', zaman:z });
+        expect(ol.durum).toBe('anlasilmadi');
+        expect(ol.sonuc.length > 0).toBe(true);
+        const sz = await P().disaridan({ id:64, metin:'gitar', zaman:z });
+        expect(sz.durum).toBe('anlasilmadi');
+        expect(sz.sonuc).toContain('süre');
+        await ESP.Mod.set('music', false);
+        const kp = await P().disaridan({ id:65, metin:'30 dk gitar', zaman:z });
+        expect(kp.durum).toBe('anlasilmadi');
+        expect(kp.sonuc).toContain('kapalı');
+        await ESP.Mod.set('music', true);
+        expect(P().istekler().length).toBe(0);
+        await P().disaridan({ id:66, metin:'45 dakika gitar', zaman:new Date(2026, 8, 20, 9).getTime() });
+        expect(P().istekler()[0].payload.date).toBe('2026-09-12');
+      });
+    });
+  });
 })();

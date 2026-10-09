@@ -101,9 +101,10 @@
   19. ERİŞİM ANAHTARI BİR KEZ GÖRÜNÜR. Kısayollar ve otomasyon sayfası
       anahtarı yalnız açıldığı an gösterir (sunucu yalnız özetini tutar);
       tarifler o anahtarla doldurulur, sayfadan çıkınca bellekten gider.
-  20. MODÜL KANCALARI SESSİZDİR. `gelen` (SPİ: Kısayollar'dan gelen satır
-      modülün kendi koduyla Onaylar'a öneri olur) ve `yayin` (AYS: takvim
-      aboneliği) başarılı bir eşitleme turundan sonra arkada koşar; hata
+  20. MODÜL KANCALARI SESSİZDİR. `gelen` (AYS, SPİ, ESP: Kısayollar'dan
+      gelen satırı yalnız gönderildiği modül alır, kendi koduyla Onaylar'a
+      öneri yapar) ve `yayin` (AYS, ESP: takvim aboneliği) başarılı bir
+      eşitleme turundan sonra arkada koşar; hata
       modülü bekletmez, bir sonraki turda yeniden denenir. Yalnız bu
       cihazın alanı bu hesaba bağlıyken (söz 5) ve örnek profilde değilken
       koşar. Yayın, içeriği değişmedikçe yeniden gönderilmez.
@@ -1872,7 +1873,8 @@ window.LIFEOS.HESAP = (function(){
       + '<div><dt>Adres</dt><dd>' + kopyaKutusu(t.url, 'Adresi') + '</dd></div>'
       + '<div><dt>Yöntem</dt><dd><code>POST</code></dd></div>'
       + '<div><dt>Başlık</dt><dd><code>Authorization: Bearer ' + kac(t.a) + '</code></dd></div>'
-      + '<div><dt>Gövde (JSON)</dt><dd><code>{"metin": "su 250"}</code></dd></div>'
+      + '<div><dt>Gövde (JSON)</dt><dd><code>{"metin": "su 250"}</code><small>AYS ya da ESP için '
+      +   '<code>"modul": "ays"</code> ya da <code>"esp"</code> ekle; yazılmazsa SPİ.</small></dd></div>'
       + '<div><dt>Önce dene</dt><dd>Aynı adrese aynı başlıkla gövdesiz <code>GET</code>: «Bağlantı tamam» döner, satır bırakmaz.</dd></div></dl>';
   }
   const HAFTA_MS = 7 * 86400000;
@@ -2263,8 +2265,9 @@ window.LIFEOS.HESAP = (function(){
             + (x.son ? 'son kullanım ' + kac(sonMetni(x.son)) : 'hiç kullanılmadı') + '</small></span>'
             + '<button type="button" class="hesap__kucuk" data-hesap="anahtar-sil" data-id="' + Number(x.id) + '"'
             + ' aria-label="' + kac('«' + x.ad + '» anahtarını sil') + '">Sil</button></li>').join('') + '</ul>'
-          : (y ? '' : tanit('kisayol', 'Telefonundan tek satır', 'iPhone Kısayollar, Android ya da Home Assistant «su 250», '
-            + '«kilo 72,4», «45 dk yürüyüş» gibi bir satır gönderir; SPİ onu Onaylar’a bırakır, sen onaylayınca yazılır.')))
+          : (y ? '' : tanit('kisayol', 'Telefonundan tek satır', 'iPhone Kısayollar, Android ya da Home Assistant tek satır '
+            + 'gönderir: SPİ’ye «su 250», AYS’ye «paragraf 20», ESP’ye «30 dk gitar». O sistem satırı Onaylar’a bırakır, '
+            + 'sen onaylayınca yazılır.')))
         + '<div class="hesap-liste hesap-liste--ac">' + acilir('anahtar-ekle', 'ekle', 'Anahtar oluştur', '',
             '<form class="hesap__form" data-hesap-form="anahtar" data-ayar-disi>'
             + alanHtml('hesap-anahtar-ad', 'Ad', 'text', 'required maxlength="40" autocomplete="off" placeholder="iPhone Kısayollar"')
@@ -2278,6 +2281,13 @@ window.LIFEOS.HESAP = (function(){
             'Kısayollar’da yeni kısayol › «Girdi İste» (Ask for Input) ekle.',
             '«URL’nin İçeriğini Al» (Get Contents of URL) ekle; adres, POST, başlık ve gövde yukarıdaki «İstek»teki gibi; «metin» alanına «Sağlanan Girdi»yi koy.',
             'Adını «LifeOS’a yaz» koy. Siri’ye «LifeOS’a yaz» deyip «su 250» söyle.']))
+        + acilir('t-modul', 'baglanti', 'AYS ve ESP’ye', '', adimlar([
+            'Aynı istek; gövdeye <code>"modul"</code> ekle: <code>{"metin": "paragraf 20", "modul": "ays"}</code>.',
+            'AYS anlar: <code>soru 40 matematik</code>, <code>2 saat fizik</code>, <code>paragraf 20</code>, <code>uyku 7</code>.',
+            'ESP anlar: <code>30 dk gitar</code>, <code>45 dakika felsefe okudum</code>, <code>20 dk diksiyon</code>.',
+            'Kısayollar’da her sistem için ayrı kısayol aç: «AYS’ye yaz», «ESP’ye yaz».'])
+          + '<p class="hesap__not">Her satırı yalnız kendi sistemi alır; o gün o dersin bloğu yoksa ya da süre yazılmadıysa '
+          + 'satır «anlaşılmadı» diye nedeniyle döner, uydurulmaz.</p>')
         + acilir('t-saglik', 'kalp', 'Apple Sağlık’tan her sabah', '', adimlar([
             'Kısayollar › Otomasyon › Günün Saati (ör. 08:00) › Hemen Çalıştır.',
             '«Sağlık Örneklerini Bul» (Find Health Samples): Kilo, son 1 gün, en yeni 1 örnek.',
@@ -2304,7 +2314,8 @@ window.LIFEOS.HESAP = (function(){
         return tanit('gelen', 'Henüz bir satır gelmedi', 'Kısayol ya da otomasyon bir satır gönderince burada görünür.')
           + '<ul class="hesap-liste">' + satir({ ikon:'kisayol', ad:'Kısayollar ve otomasyon', sayfa:'anahtarlar' }) + '</ul>';
       }
-      const DURUM = { bekliyor:['etkinlik', 'SPİ açılınca işlenir'], onayda:['tamam', 'SPİ › Onaylar’da'],
+      /* Satırı yalnız kendi sistemi alır (sunucu GELEN_MODULLER). */
+      const DURUM = { bekliyor:['etkinlik', ' açılınca işlenir'], onayda:['tamam', ' › Onaylar’da'],
         anlasilmadi:['uyari', 'Anlaşılmadı'] };
       let gun = '', html = '';
       l.forEach(o => {
@@ -2314,9 +2325,10 @@ window.LIFEOS.HESAP = (function(){
           html += '<p class="hesap-bolum">' + kac(g) + '</p><ul class="hesap-liste">';
           gun = g;
         }
-        const d = DURUM[o.durum] || DURUM.bekliyor;
+        const d = DURUM[o.durum] || DURUM.bekliyor, mod = MODUL_AD[o.modul] || 'SPİ';
+        const ne = o.sonuc || (o.durum === 'anlasilmadi' ? d[1] : mod + d[1]);
         html += '<li class="hesap-oge hesap-olay' + (o.durum === 'anlasilmadi' ? ' is-dikkat' : '') + '">' + ikon(d[0], 'hesap-satir__ikon')
-          + '<span class="hesap-oge__metin"><b>' + kac(o.metin) + '</b><small>' + kac([o.kaynak, o.sonuc || d[1]].filter(Boolean).join(' · '))
+          + '<span class="hesap-oge__metin"><b>' + kac(o.metin) + '</b><small>' + kac([o.kaynak, ne].filter(Boolean).join(' · '))
           + '</small></span><span class="hesap-satir__detay">' + saatMetni(o.zaman) + '</span></li>';
       });
       return html + '</ul><p class="hesap__not">Son ' + l.length + ' satır. Ölçüm, sen Onaylar’da kaydedene dek yazılmaz.</p>';
