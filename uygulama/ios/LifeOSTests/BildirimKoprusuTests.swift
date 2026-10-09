@@ -135,6 +135,62 @@ final class BildirimKoprusuTests: XCTestCase {
         XCTAssertEqual(m.simge, 4)
     }
 
+    /// Soz 7: eylemli satir kategori alir; bilinmeyen baslik dugmesiz.
+    func testDugmeKategorisi() {
+        var x = satir("a", dk: 10)
+        x["eylem"] = "Aldım"
+        XCTAssertEqual(BildirimKoprusu.istek(x, modul: "spi", simdi: simdi)?.content.categoryIdentifier, "lifeos.eylem.0")
+        x["eylem"] = "Uydurma"
+        XCTAssertEqual(BildirimKoprusu.istek(x, modul: "spi", simdi: simdi)?.content.categoryIdentifier, "")
+        let k = BildirimKoprusu.kategoriler()
+        XCTAssertEqual(k.count, BildirimKoprusu.eylemler.count)
+        XCTAssertTrue(k.allSatisfy { $0.actions.map { $0.identifier } == [BildirimKoprusu.isaretEylemi, BildirimKoprusu.erteleEylemi] })
+        XCTAssertEqual(k.first { $0.identifier == "lifeos.eylem.1" }?.actions.first?.title, "İçtim")
+    }
+
+    /// Soz 7: «Aldım» kuyruga girer (ertelenmisten de, «~» duser), sayfa alir, yazinca siler.
+    func testIsaretKuyrugu() {
+        let ad = "lifeos-test-\(UUID().uuidString)"
+        let depo = UserDefaults(suiteName: ad)!
+        defer { depo.removePersistentDomain(forName: ad) }
+        let k = BildirimKoprusu(merkez: SahteBildirimMerkezi(), depo: depo)
+        let icerik = UNMutableNotificationContent()
+        let r = UNNotificationRequest(identifier: "lifeos.spi.~2026-10-10|h1@08:00", content: icerik, trigger: nil)
+        k.eylem(BildirimKoprusu.isaretEylemi, istek: r, modul: "spi", simdi: simdi)
+        k.eylem(BildirimKoprusu.isaretEylemi, istek: r, modul: "spi", simdi: simdi)        // ayni isaret bir kez
+        k.eylem(BildirimKoprusu.isaretEylemi, istek: r, modul: "esp", simdi: simdi)        // baska modulun kimligi: yok
+        let l = k.isaretler(modul: "spi")
+        XCTAssertEqual(l.count, 1)
+        XCTAssertEqual(l.first?["anahtar"] as? String, "2026-10-10|h1@08:00")
+        XCTAssertEqual((l.first?["zaman"] as? NSNumber)?.doubleValue, simdi.timeIntervalSince1970 * 1000)
+        XCTAssertTrue(k.isaretler(modul: "esp").isEmpty)
+        var cevap: [String: Any] = [:]
+        let bitti = expectation(description: "isaretSil")
+        k.isle(["tur": "isaretSil", "anahtarlar": ["2026-10-10|h1@08:00"]], modul: "spi") { cevap = $0; bitti.fulfill() }
+        wait(for: [bitti], timeout: 5)
+        XCTAssertEqual(cevap["silinen"] as? Int, 1)
+        XCTAssertTrue(k.isaretler(modul: "spi").isEmpty)
+    }
+
+    /// Soz 7: ertele ayni icerigi 15 dk sonraya «~» ile kurar; «kur» silmez, «yapildi» siler.
+    func testErteleVeYapildi() {
+        let m = SahteBildirimMerkezi()
+        let k = BildirimKoprusu(merkez: m)
+        let icerik = UNMutableNotificationContent()
+        icerik.title = "SPİ · 08:00"
+        let r = UNNotificationRequest(identifier: "lifeos.spi.a", content: icerik, trigger: nil)
+        k.eylem(BildirimKoprusu.erteleEylemi, istek: r, modul: "spi")
+        XCTAssertEqual(m.bekleyen, ["lifeos.spi.~a"])
+        XCTAssertEqual(m.eklenen.last?.content.title, "SPİ · 08:00")
+        XCTAssertEqual((m.eklenen.last?.trigger as? UNTimeIntervalNotificationTrigger)?.timeInterval, 900)
+        XCTAssertEqual(kur(k, "spi", [satir("b", dk: 30)]), 1)
+        XCTAssertEqual(Set(m.bekleyen), ["lifeos.spi.~a", "lifeos.spi.b"])
+        m.gelmis = ["lifeos.spi.a", "lifeos.spi.c"]
+        k.yapildi(modul: "spi", anahtar: "a")
+        XCTAssertEqual(m.bekleyen, ["lifeos.spi.b"])
+        XCTAssertEqual(m.gelmis, ["lifeos.spi.c"])
+    }
+
     /// Gercek SPI sayfasi: bildirim.js koprüyü gorur, durum sorar, liste kurar;
     /// kimlikler sayfanin KAPISINDAN gelen modulun on ekini tasir.
     func testGercekSayfadanKurulur() throws {

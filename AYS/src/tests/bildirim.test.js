@@ -118,6 +118,34 @@
       }finally{ if(eski !== undefined) window.webkit = eski; }
     });
 
+    it('bildirimdeki düğme: sıra alınır, modül yazınca silinir; yazamazsa sırada kalır', async () => {
+      let sira = [{ anahtar:'a', zaman:1000 }, { anahtar:'b', zaman:2000 }, { anahtar:'c', zaman:3000 }];
+      const k = sahteKabuk(m => {
+        if(m.tur === 'isaretler') return { isaretler:sira.slice() };
+        if(m.tur === 'isaretSil'){ sira = sira.filter(x => m.anahtarlar.indexOf(x.anahtar) < 0); return { silinen:1 }; }
+        return { tamam:true };
+      });
+      try{
+        const gelen = [];
+        const n = await B().isaretci(async o => {
+          gelen.push(o);
+          if(o.anahtar === 'b') throw new Error('yazılamadı');                 // hata: sırada kalır
+          return o.anahtar === 'c' ? 'yok' : true;                              // «yok»: uygulanamaz, düşer
+        });
+        expect(n).toBe(2);
+        expect(gelen).toEqual([{ anahtar:'a', zaman:1000 }, { anahtar:'b', zaman:2000 }, { anahtar:'c', zaman:3000 }]);
+        expect(sira.map(x => x.anahtar)).toEqual(['b']);
+        expect(k.giden.filter(m => m.tur === 'isaretSil')[0].anahtarlar).toEqual(['a', 'c']);
+        await B().yapildi('2026-10-10|h1@08:00');
+        expect(k.giden[k.giden.length - 1]).toEqual({ tur:'yapildi', anahtar:'2026-10-10|h1@08:00', istek:k.giden[k.giden.length - 1].istek });
+        /* Kabuk dürterse (uygulama öndeyken «Aldım») sıra yeniden alınır. */
+        sira.push({ anahtar:'d', zaman:4000 });
+        await B()._isaretVar();
+        expect(gelen.map(x => x.anahtar).slice(-2)).toEqual(['b', 'd']);
+      }finally{ B().isaretci(null); k.birak(); }
+      expect((await B().yapildi('x')).ok).toBe(false);                         // tarayıcıda hiçbir şey
+    });
+
     it('bir günün saati yerel saatle ms olur', () => {
       expect(B().anOf('2026-10-09', '08:30')).toBe(new Date(2026, 9, 9, 8, 30).getTime());
     });

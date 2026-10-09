@@ -1043,6 +1043,7 @@ ESP.Model = (function(){
   async function completeReminder(id, todayISO){
     const r = S.reminders.find(x => x.id === id);
     if(!r) return { ok:false, error:'Hatırlatıcı bulunamadı.' };
+    const bildirimAnahtari = r.id + '@' + r.due;      // ESP.Takvim bildirimListesi
     const bugun = todayISO || U.todayISO();
     const adim = REPEATS[r.repeat] || 0;
     if(adim){
@@ -1057,6 +1058,11 @@ ESP.Model = (function(){
     }
     await ESP.Store.set('reminders/' + r.id, r);
     telefonPlanla();
+    /* Telefonda: bu hatırlatıcının ertelenmiş ve gelmiş bildirimi kalkar. */
+    try{
+      const B = (window.LIFEOS || {}).BILDIRIM;
+      if(B && B.var()) B.yapildi(bildirimAnahtari);
+    }catch(e){ /* bildirim yok: sessiz */ }
     return { ok:true, reminder:r };
   }
 

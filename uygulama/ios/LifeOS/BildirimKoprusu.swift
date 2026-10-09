@@ -20,6 +20,12 @@
 //   6. ROZET: her modul kendi Onaylar sayisini soyler (karar 167); simge
 //      uc modulun toplamini gosterir. Sayilar kalici (UserDefaults): bir
 //      modul acilmasa da son soyledigi sayi toplama girer.
+//   7. DUGMELER (2026-10-09): satir `eylem` tasirsa («Aldım», «İçtim»...)
+//      bildirimde o dugme ve «15 dk ertele» cikar. Isaret KUYRUGA girer
+//      (UserDefaults); kabuk icerigi anlamaz, hicbir kayda yazmaz. Modul
+//      sayfasi acilinca alir, KENDI koduyla yazar, sonra kuyruktan siler
+//      (`isaretSil`): isaret kaybolmaz. Ertelenen bildirimin kimligi «~»
+//      tasir: «kur» onu silmez, modul isi isaretleyince (`yapildi`) kalkar.
 // Cevap, konum koprusundeki gibi sayfaya JS cagrisiyla doner
 // (`LIFEOS.BILDIRIM._cevap(istek, {...})`). Yalniz Apple'in kitapliklari.
 
@@ -101,6 +107,12 @@ final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
 
     /// Rozet sayilarinin kalici yeri (soz 6).
     static let rozetAnahtari = "lifeos.rozet"
+    /// Bildirimdeki dugmeler (soz 7). Basliklar sabit; kategoriler acilista kaydedilir.
+    static let eylemler = ["Aldım", "İçtim", "Yaptım", "Ölçtüm", "Yapıldı"]
+    static let isaretEylemi = "lifeos.isaret"
+    static let erteleEylemi = "lifeos.ertele"
+    static let erteleDk = 15
+    static let isaretAnahtari = "lifeos.isaret"
 
     let merkez: BildirimMerkezi
     let depo: UserDefaults
@@ -148,6 +160,13 @@ final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
             kaldir(modul: modul, anahtarlar: g["anahtarlar"] as? [String]) { n in ver(["kaldirilan": n]) }
         case "rozet":
             ver(["toplam": rozet(modul: modul, sayi: (g["sayi"] as? NSNumber)?.intValue ?? 0)])
+        case "isaretler":
+            ver(["isaretler": isaretler(modul: modul)])
+        case "isaretSil":
+            ver(["silinen": isaretSil(modul: modul, anahtarlar: g["anahtarlar"] as? [String] ?? [])])
+        case "yapildi":
+            if let a = g["anahtar"] as? String, !a.isEmpty { yapildi(modul: modul, anahtar: String(a.prefix(120))) }
+            ver(["tamam": true])
         default:
             ver(["hata": "bilinmeyen istek"])
         }
@@ -159,7 +178,8 @@ final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
         let sinir = BildirimKoprusu.sinir[modul] ?? 6
         let merkez = self.merkez
         merkez.bekleyenler { eski in
-            merkez.sil(eski.filter { $0.hasPrefix(onEk) })
+            // Ertelenmis («~») kalir: kullanici istedi, modul isaretleyince kalkar (soz 7).
+            merkez.sil(eski.filter { $0.hasPrefix(onEk) && !$0.hasPrefix(onEk + "~") })
             var n = 0
             for x in liste {
                 if n >= sinir { break }
@@ -198,6 +218,74 @@ final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
         return toplam
     }
 
+    /// Dugme basliginin kategorisi; bilinmeyen baslik dugmesiz kalir (soz 7).
+    static func kategori(_ eylem: String) -> String? {
+        BildirimKoprusu.eylemler.firstIndex(of: eylem).map { "lifeos.eylem.\($0)" }
+    }
+
+    static func kategoriler() -> Set<UNNotificationCategory> {
+        Set(BildirimKoprusu.eylemler.enumerated().map { (i, ad) in
+            UNNotificationCategory(identifier: "lifeos.eylem.\(i)", actions: [
+                UNNotificationAction(identifier: BildirimKoprusu.isaretEylemi, title: ad, options: [.authenticationRequired]),
+                UNNotificationAction(identifier: BildirimKoprusu.erteleEylemi, title: "\(BildirimKoprusu.erteleDk) dk ertele", options: []),
+            ], intentIdentifiers: [], options: [])
+        })
+    }
+
+    /// Kimlikten modulun anahtari («~» duser); baska modulunse nil.
+    static func anahtar(_ kimlik: String, modul: String) -> String? {
+        let on = onEk(modul)
+        guard kimlik.hasPrefix(on) else { return nil }
+        var a = String(kimlik.dropFirst(on.count))
+        if a.hasPrefix("~") { a.removeFirst() }
+        return a.isEmpty ? nil : a
+    }
+
+    /// «15 dk ertele»: ayni icerik, kimligi «~» ile.
+    static func ertelenmis(_ r: UNNotificationRequest, modul: String) -> UNNotificationRequest? {
+        guard let a = anahtar(r.identifier, modul: modul),
+              let icerik = r.content.mutableCopy() as? UNMutableNotificationContent else { return nil }
+        let tetik = UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(erteleDk * 60), repeats: false)
+        return UNNotificationRequest(identifier: onEk(modul) + "~" + a, content: icerik, trigger: tetik)
+    }
+
+    /// Bildirimdeki dugme (soz 7): isaret kuyruga girer ya da bildirim ertelenir.
+    func eylem(_ kimlik: String, istek r: UNNotificationRequest, modul: String, simdi: Date = Date()) {
+        guard let a = BildirimKoprusu.anahtar(r.identifier, modul: modul) else { return }
+        if kimlik == BildirimKoprusu.isaretEylemi {
+            var l = depo.array(forKey: BildirimKoprusu.isaretAnahtari) as? [[String: Any]] ?? []
+            l.removeAll { ($0["modul"] as? String) == modul && ($0["anahtar"] as? String) == a }
+            l.append(["modul": modul, "anahtar": a, "zaman": NSNumber(value: simdi.timeIntervalSince1970 * 1000)])
+            depo.set(Array(l.suffix(100)), forKey: BildirimKoprusu.isaretAnahtari)
+        } else if kimlik == BildirimKoprusu.erteleEylemi, let y = BildirimKoprusu.ertelenmis(r, modul: modul) {
+            merkez.ekle(y)
+        }
+    }
+
+    /// Bu modulun kuyruktaki isaretleri (silinmez; sayfa yazinca isaretSil).
+    func isaretler(modul: String) -> [[String: Any]] {
+        let l = depo.array(forKey: BildirimKoprusu.isaretAnahtari) as? [[String: Any]] ?? []
+        return l.filter { ($0["modul"] as? String) == modul }.compactMap { x -> [String: Any]? in
+            guard let a = x["anahtar"] as? String else { return nil }
+            return ["anahtar": a, "zaman": (x["zaman"] as? NSNumber) ?? NSNumber(value: 0)]
+        }
+    }
+
+    func isaretSil(modul: String, anahtarlar: [String]) -> Int {
+        var l = depo.array(forKey: BildirimKoprusu.isaretAnahtari) as? [[String: Any]] ?? []
+        let once = l.count
+        l.removeAll { ($0["modul"] as? String) == modul && anahtarlar.contains(($0["anahtar"] as? String) ?? "") }
+        depo.set(l, forKey: BildirimKoprusu.isaretAnahtari)
+        return once - l.count
+    }
+
+    /// Modul isi isaretledi: o anahtarin ertelenmisi ve gelmisleri kalkar (soz 7).
+    func yapildi(modul: String, anahtar: String) {
+        let on = BildirimKoprusu.onEk(modul)
+        merkez.sil([on + "~" + anahtar])
+        merkez.gelmisSil([on + anahtar, on + "~" + anahtar])
+    }
+
     /// Listenin bir satiri → bildirim istegi; eksik ya da gecmisse nil.
     static func istek(_ x: [String: Any], modul: String, simdi: Date) -> UNNotificationRequest? {
         guard let anahtar = x["anahtar"] as? String, !anahtar.isEmpty,
@@ -211,6 +299,7 @@ final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
         icerik.sound = .default
         icerik.threadIdentifier = modul
         icerik.userInfo = ["modul": modul]
+        if let e = x["eylem"] as? String, let k = kategori(e) { icerik.categoryIdentifier = k }
         let bilesen = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: tarih)
         let tetik = UNCalendarNotificationTrigger(dateMatching: bilesen, repeats: false)
         return UNNotificationRequest(identifier: onEk(modul) + String(anahtar.prefix(120)),
@@ -228,6 +317,10 @@ final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
 /// sessizce yutar); dokununca o modul acilir.
 final class BildirimDokunusu: NSObject, UNUserNotificationCenterDelegate {
     var ac: ((URL) -> Void)?
+    /// Dugmeler (soz 7) koprunun deposuna ve merkezine yazar.
+    weak var kopru: BildirimKoprusu?
+    /// «Aldım» geldi: o modulun sayfasi aciksa hemen alsin.
+    var isaretVar: ((String) -> Void)?
 
     func userNotificationCenter(_ c: UNUserNotificationCenter, willPresent n: UNNotification,
                                 withCompletionHandler tamam: @escaping (UNNotificationPresentationOptions) -> Void) {
@@ -236,10 +329,24 @@ final class BildirimDokunusu: NSObject, UNUserNotificationCenterDelegate {
 
     func userNotificationCenter(_ c: UNUserNotificationCenter, didReceive r: UNNotificationResponse,
                                 withCompletionHandler tamam: @escaping () -> Void) {
-        let modul = r.notification.request.content.userInfo["modul"] as? String
-        if let modul = modul, let u = BildirimKoprusu.adres(modul: modul) {
-            let ac = self.ac
-            DispatchQueue.main.async { ac?(u) }
+        let istek = r.notification.request
+        let modul = istek.content.userInfo["modul"] as? String
+        switch r.actionIdentifier {
+        case BildirimKoprusu.isaretEylemi, BildirimKoprusu.erteleEylemi:
+            if let k = kopru, let modul = modul {
+                k.eylem(r.actionIdentifier, istek: istek, modul: modul)
+                if r.actionIdentifier == BildirimKoprusu.isaretEylemi {
+                    let bildir = isaretVar
+                    DispatchQueue.main.async { bildir?(modul) }
+                }
+            }
+        case UNNotificationDismissActionIdentifier:
+            break
+        default:
+            if let modul = modul, let u = BildirimKoprusu.adres(modul: modul) {
+                let ac = self.ac
+                DispatchQueue.main.async { ac?(u) }
+            }
         }
         tamam()
     }

@@ -1740,6 +1740,18 @@ ESP.App = (function(){
           if(document.hidden){ try{ ESP.Takvim.planla(); }catch(e){} }
         });
       }
+      /* Bildirimdeki «Yapıldı» (brand/ortak/bildirim.js söz 7): ESP kendi
+         tamamlama kuralıyla yazar, ekran sonra çizilir. */
+      if(window.LIFEOS && window.LIFEOS.BILDIRIM && ESP.Takvim && ESP.Takvim.isaretUygula){
+        window.LIFEOS.BILDIRIM.isaretci(async o => {
+          const r = await ESP.Takvim.isaretUygula(o);
+          if(r === true){
+            const H = window.LIFEOS.HESAP;
+            if(H && typeof H.cizIste === 'function') H.cizIste(render); else render();
+          }
+          return r;
+        });
+      }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'esp', hkm:() => ESP.Beacon, git:route => go(route),

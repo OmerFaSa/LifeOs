@@ -14844,7 +14844,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'52edfbb1', at:'2026-10-09 14:11', dirty:true };
+SP.BUILD = { id:'bae464a4', at:'2026-10-09 14:25', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -24270,6 +24270,15 @@ window.LIFEOS.QR = (function(){
         167, brand/ortak/pwa.js rozet). Kabuk tarayıcının Badging API'sini
         (navigator.setAppBadge) burada sağlar, modül kodu değişmez; üç
         modülün sayısını kabuk toplar.
+     7. BİLDİRİMDEKİ DÜĞME (2026-10-09). Liste satırı `eylem` taşırsa
+        («Aldım», «İçtim», «Yaptım», «Ölçtüm», «Yapıldı») bildirimde o düğme
+        ve «15 dk ertele» çıkar. Düğmeye basılınca kabuk işareti telefonda
+        SIRAYA koyar, hiçbir kayda yazmaz. Modül açılınca sırayı alır,
+        KENDİ koduyla yazar (`isaretci`) ve ancak yazdıktan sonra sıradan
+        siler: işaret kaybolmaz. İşleyici doğruysa (yazıldı ya da artık
+        uygulanamaz: «yok») silinir; yanlışsa ya da hata verirse sırada
+        kalır. Ertelenen bildirim kurulumda silinmez; modül işi işaretleyince
+        (`yapildi`) kalkar. İşaret bir kayıttır, ölçüm değil.
    Model hiçbir aşamada yoktur; metin modülün kural metnidir. */
 
 window.LIFEOS = window.LIFEOS || {};
@@ -24365,6 +24374,37 @@ window.LIFEOS.BILDIRIM = (function(){
     return { ok:!!r.ok, toplam:r.ok ? Number(r.toplam) || 0 : 0 };
   }
 
+  /* Bildirimdeki düğmenin işareti (söz 7). Modül bir kez işleyici verir;
+     sıra hemen ve öne her gelişte alınır. */
+  let isaretci = null, aliniyor = false;
+  function isaretciKur(fn){
+    isaretci = typeof fn === 'function' ? fn : null;
+    return isaretleriAl();
+  }
+  async function isaretleriAl(){
+    if(!var_() || !isaretci || aliniyor) return 0;
+    aliniyor = true;
+    try{
+      const r = await gonder({ tur:'isaretler' });
+      const l = r.ok && Array.isArray(r.isaretler) ? r.isaretler : [];
+      const biten = [];
+      for(const o of l){
+        if(!o || typeof o.anahtar !== 'string' || !o.anahtar) continue;
+        let sonuc = false;
+        try{ sonuc = await isaretci({ anahtar:o.anahtar, zaman:Number(o.zaman) || Date.now() }); }
+        catch(e){ sonuc = false; }
+        if(sonuc) biten.push(o.anahtar);
+      }
+      if(biten.length) await gonder({ tur:'isaretSil', anahtarlar:biten });
+      return biten.length;
+    }finally{ aliniyor = false; }
+  }
+  /* Modül işi işaretledi: o anahtarın ertelenmişi ve gelmişleri kalkar. */
+  function yapildi(anahtar){
+    if(!var_() || typeof anahtar !== 'string' || !anahtar) return Promise.resolve({ ok:false });
+    return gonder({ tur:'yapildi', anahtar:anahtar.slice(0, 120) });
+  }
+
   /* Uygulamada kurulum: Badging API köprüye bağlanır, açılışta ve öne her
      gelişte gelmiş bildirimler kalkar. Tarayıcıda hiçbir şey yapmaz. */
   function kurulum(doc, nav){
@@ -24377,7 +24417,7 @@ window.LIFEOS.BILDIRIM = (function(){
       n.clearAppBadge = () => rozet(0).then(() => undefined);
     }catch(e){ /* salt okunur gezgin: rozet yok, temizlik sürer */ }
     kaldir();
-    d.addEventListener('visibilitychange', () => { if(!d.hidden) kaldir(); });
+    d.addEventListener('visibilitychange', () => { if(!d.hidden){ kaldir(); isaretleriAl(); } });
     return true;
   }
 
@@ -24388,7 +24428,7 @@ window.LIFEOS.BILDIRIM = (function(){
   }
 
   const api = { var:var_, durum, izin, sonDurum, kur, temizle, kaldir, rozet, anOf, SINIR, AD, _cevap,
-    _kurulum:kurulum };
+    isaretci:isaretciKur, yapildi, _isaretVar:isaretleriAl, _kurulum:kurulum };
   kurulum();
   return api;
 })();
@@ -54621,13 +54661,29 @@ SP.Hatirlat = (function(){
     return out.sort((a, b) => a.saat < b.saat ? -1 : a.saat > b.saat ? 1 : 0);
   }
 
-  async function isaretle(anahtar, deger, gunISO){
+  async function isaretle(anahtar, deger, gunISO, zamanISO){
     const d = durum();
     const gun = gunISO || U().todayISO();
     d.yapildi[gun] = d.yapildi[gun] || {};
     if(deger === false) delete d.yapildi[gun][anahtar];
-    else d.yapildi[gun][anahtar] = new Date().toISOString();
+    else d.yapildi[gun][anahtar] = zamanISO || new Date().toISOString();
     await kaydet();
+    /* Telefonda: bu saatin ertelenmiş ve gelmiş bildirimi kalkar. */
+    if(deger !== false && telefonMu()) B().yapildi(gun + '|' + anahtar);
+  }
+
+  /* BİLDİRİMDEKİ DÜĞME (brand/ortak/bildirim.js söz 7): kabuk «Aldım»ı
+     sıraya koydu; burada SPİ'nin kendi koduyla, basıldığı anla yazılır.
+     Hatırlatma artık yoksa (silindi, ilaç bırakıldı) «yok»: uydurulmaz.
+     İşaret bir kayıttır, ölçüm değil (söz 4): «İçtim» mililitre yazmaz. */
+  async function isaretUygula(o){
+    const m = /^(\d{4}-\d{2}-\d{2})\|(.+)@(\d{2}:\d{2})$/.exec((o && o.anahtar) || '');
+    if(!m) return 'yok';
+    const h = durum().liste.find(x => x.id === m[2]);
+    if(!h || h.saatler.indexOf(m[3]) < 0 || !gecerli(h, m[1])) return 'yok';
+    const z = new Date(Number(o.zaman));
+    await isaretle(m[2] + '@' + m[3], true, m[1], isFinite(z.getTime()) ? z.toISOString() : null);
+    return true;
   }
 
   /* ------------------------------------------------ tarayıcı bildirimi */
@@ -54685,7 +54741,7 @@ SP.Hatirlat = (function(){
           const zaman = b.anOf(gun, saat);
           if(zaman <= now.getTime()) return;
           if(P && P.gonderilebilir && !P.gonderilebilir('spi', 'hatirlatma', new Date(zaman)).ok) return;
-          out.push({ anahtar:gun + '|' + anahtar, baslik:'SPİ · ' + saat, govde:adOf(h), zaman });
+          out.push({ anahtar:gun + '|' + anahtar, baslik:'SPİ · ' + saat, govde:adOf(h), zaman, eylem:TUR[h.tur].eylem });
         });
       });
     }
@@ -54744,7 +54800,7 @@ SP.Hatirlat = (function(){
   }
   function bildirimSorunu(){ return sorun; }
 
-  return { TUR, yukle, kaydet, saatOku, ekle, sil, geriKoy, bugun, isaretle, adOf, durum,
+  return { TUR, yukle, kaydet, saatOku, ekle, sil, geriKoy, bugun, isaretle, isaretUygula, adOf, durum,
     bildirimVar, bildirimIzinli, bildirimAc, bildirimKapat, bildirimSorunu, tik,
     telefonMu, planListesi, planla, planBekle, PLAN_GUN };
 })();
@@ -69592,6 +69648,18 @@ SP.App = (function(){
             if(sihirbaz() && SP.Setup && !SP.Setup.needed()) UI.closeSheet();
             return render();
           } });
+      }
+      /* Bildirimdeki «Aldım» (brand/ortak/bildirim.js söz 7): kabuk işareti
+         sıraya koydu; SPİ kendi koduyla yazar, ekran sonra çizilir. */
+      if(window.LIFEOS && window.LIFEOS.BILDIRIM && SP.Hatirlat && SP.Hatirlat.isaretUygula){
+        window.LIFEOS.BILDIRIM.isaretci(async o => {
+          const r = await SP.Hatirlat.isaretUygula(o);
+          if(r === true){
+            const H = window.LIFEOS.HESAP;
+            if(H && typeof H.cizIste === 'function') H.cizIste(render); else render();
+          }
+          return r;
+        });
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. Özet ve veri
          girişi bu modülün kendi koduyla (SP.Quick: önizleme, onayla kayıt). */

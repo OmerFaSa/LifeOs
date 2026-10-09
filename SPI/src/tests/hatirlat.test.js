@@ -120,6 +120,32 @@
       }); }finally{ k.birak(); }
     });
 
+    /* Bildirimdeki düğme (brand/ortak/bildirim.js söz 7): «İçtim» SPİ'nin
+       kendi koduyla, basıldığı anla yazılır; uydurma satır yazılmaz. */
+    it('bildirimdeki düğme: satır «İçtim» taşır; işaret basıldığı anla yazılır; olmayan saat «yok»; ertelenen kalkar', async () => {
+      resetState();
+      const k = sahteKabuk('izin');
+      try{ await withTodayAsync('2026-09-20', async () => {
+        await H().ekle({ tur:'su', saatler:'10:00, 16:00' });
+        await H().bildirimAc();
+        const su = H().durum().liste.find(h => h.tur === 'su');
+        const l = H().planListesi(saat('2026-09-20', '09:00'));
+        expect(l[0].eylem).toBe('İçtim');
+        const zaman = saat('2026-09-20', '10:03').getTime();
+        const anahtar = '2026-09-20|' + su.id + '@10:00';
+        expect(await H().isaretUygula({ anahtar, zaman })).toBe(true);
+        expect(H().durum().yapildi['2026-09-20'][su.id + '@10:00']).toBe(new Date(zaman).toISOString());
+        expect(k.giden.some(m => m.tur === 'yapildi' && m.anahtar === anahtar)).toBe(true);
+        expect(H().bugun(saat('2026-09-20', '10:30')).find(x => x.saat === '10:00').durum).toBe('yapildi');
+        expect(await H().isaretUygula({ anahtar:'2026-09-20|' + su.id + '@11:00', zaman })).toBe('yok');   // böyle saat yok
+        expect(await H().isaretUygula({ anahtar:'2026-09-20|silinmis@10:00', zaman })).toBe('yok');
+        expect(await H().isaretUygula({ anahtar:'bozuk', zaman })).toBe('yok');
+        /* İşaret ölçüm değil (söz 4): su alanına miktar yazılmaz. */
+        const v = SP.S.vitals['2026-09-20'];
+        expect(!v || v.water == null).toBe(true);
+      }); }finally{ k.birak(); }
+    });
+
     it('izin reddedilirse açılmaz ve nedeni söylenir', async () => {
       resetState();
       const k = sahteKabuk('red');

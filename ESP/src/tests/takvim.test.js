@@ -101,7 +101,7 @@
         const l = T().bildirimListesi(sabah);
         expect(l.map(x => x.anahtar)).toEqual(['r1@2026-09-12', 'r2@2026-09-14']);
         expect(l[0]).toEqual({ anahtar:'r1@2026-09-12', baslik:'ESP · ' + ESP.DISCIPLINE_BY_ID.music.label,
-          govde:'Metronom 80', zaman:new Date(2026, 8, 12, 9, 0).getTime() });
+          govde:'Metronom 80', zaman:new Date(2026, 8, 12, 9, 0).getTime(), eylem:'Yapıldı' });
         expect(T().bildirimListesi(oglen).map(x => x.anahtar)).toEqual(['r2@2026-09-14']);   // bugünün saati geçti
         await ESP.Mod.set('music', false);
         expect(T().bildirimListesi(sabah).map(x => x.anahtar)).toEqual(['r2@2026-09-14']);
@@ -116,6 +116,25 @@
         await T().planla();
         expect(giden[giden.length - 1].liste.map(x => x.anahtar)).toEqual(['r9@' + yarin]);
       }finally{ if(eski === undefined) delete window.webkit; else window.webkit = eski; }
+    });
+
+    /* Bildirimdeki «Yapıldı» (brand/ortak/bildirim.js söz 7): ESP'nin kendi
+       tamamlama kuralı; ikinci kez tamamlanmaz. */
+    it('bildirimdeki «Yapıldı»: tek seferlik kapanır, tekrarlı ileri taşınır; ikinci kez ve vadesi değişmişse «yok»', async () => {
+      resetState();
+      ESP.S.reminders = [
+        { id:'r1', text:'Metronom', disc:'music', due:'2026-09-12', repeat:'none', done:false },
+        { id:'r2', text:'Kelime', disc:'lang', due:'2026-09-12', repeat:'daily', done:false },
+      ];
+      const zaman = new Date(2026, 8, 12, 9, 5).getTime();
+      expect(await T().isaretUygula({ anahtar:'r1@2026-09-12', zaman })).toBe(true);
+      expect(ESP.S.reminders.find(r => r.id === 'r1').done).toBe(true);
+      expect(await T().isaretUygula({ anahtar:'r1@2026-09-12', zaman })).toBe('yok');      // zaten kapandı
+      expect(await T().isaretUygula({ anahtar:'r2@2026-09-12', zaman })).toBe(true);
+      expect(ESP.S.reminders.find(r => r.id === 'r2').due).toBe('2026-09-13');               // basıldığı günden sayılır
+      expect(await T().isaretUygula({ anahtar:'r2@2026-09-12', zaman })).toBe('yok');      // vade değişti
+      expect(await T().isaretUygula({ anahtar:'yok@2026-09-12', zaman })).toBe('yok');
+      expect(await T().isaretUygula({ anahtar:'bozuk', zaman })).toBe('yok');
     });
 
     it('hiçbir şey yoksa boş ama geçerli bir takvim', () => {

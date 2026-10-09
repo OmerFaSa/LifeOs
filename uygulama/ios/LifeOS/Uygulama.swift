@@ -23,6 +23,8 @@ final class Uygulama: UIResponder, UIApplicationDelegate {
             // Bildirim temsilcisi acilista baglanir: kapaliyken dokunulan
             // bildirim de uygulamayi o modulde acar.
             UNUserNotificationCenter.current().delegate = k.dokunus
+            // Bildirimdeki dugmeler (BildirimKoprusu soz 7) her acilista kaydedilir.
+            UNUserNotificationCenter.current().setNotificationCategories(BildirimKoprusu.kategoriler())
             w.rootViewController = k
         }
         w.makeKeyAndVisible()

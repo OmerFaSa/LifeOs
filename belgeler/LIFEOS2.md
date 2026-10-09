@@ -80,6 +80,7 @@ verilen kararlar:
 | AYS telefon bildirimi, ana ekran kısayolları | `AYS/src/js/core/takvim.js` `bildirimListesi`/`planla` (günün planı seçilen saatte, hedefin son günü, kullanıcının yazdığı sınav günü; tahmin edilen güne «yarın sınav» denmez), Ofis ayarları › Telefon bildirimi; `uygulama/ios/project.yml` `UIApplicationShortcutItems` + `Uygulama.swift`: simgeye basılı tutunca modül doğrudan açılır | 2026-10-09 |
 | Bildirim temizliği ve uygulama rozeti | `brand/ortak/bildirim.js` sözleri 5–6 (`kaldir`, `rozet`, açılışta kurulum), `BildirimKoprusu.swift` sözleri 5–6: modül açılınca gelmiş bildirimleri kalkar; simgede üç modülün Onaylar toplamı | 2026-10-09 |
 | Zilde ertele ve «gördüm» | `brand/ortak/kabuk.js` `zilDurumu`/`bildirimPaneli`: satır yarına ertelenir (acil olan ertelenemez), «Hepsini gördüm» noktayı söndürür, yeni ya da değişen satır yeniden yakar; işi yapılmış saymaz, kayda yazılmaz (bu cihaz, bu modül) | 2026-10-09 |
+| Bildirimde «Aldım / Ertele» | `brand/ortak/bildirim.js` söz 7 (`isaretci`, `yapildi`), `BildirimKoprusu.swift` söz 7 (kategoriler, işaret sırası, «~» ertelenmiş), `SPI Hatirlat.isaretUygula`, `ESP Takvim.isaretUygula`: işaret modülün kendi koduyla, basıldığı anla yazılır; uydurulmaz | 2026-10-09 |
 
 ## 4. Değişmeyen sözler
 

@@ -154,13 +154,29 @@ SP.Hatirlat = (function(){
     return out.sort((a, b) => a.saat < b.saat ? -1 : a.saat > b.saat ? 1 : 0);
   }
 
-  async function isaretle(anahtar, deger, gunISO){
+  async function isaretle(anahtar, deger, gunISO, zamanISO){
     const d = durum();
     const gun = gunISO || U().todayISO();
     d.yapildi[gun] = d.yapildi[gun] || {};
     if(deger === false) delete d.yapildi[gun][anahtar];
-    else d.yapildi[gun][anahtar] = new Date().toISOString();
+    else d.yapildi[gun][anahtar] = zamanISO || new Date().toISOString();
     await kaydet();
+    /* Telefonda: bu saatin ertelenmiş ve gelmiş bildirimi kalkar. */
+    if(deger !== false && telefonMu()) B().yapildi(gun + '|' + anahtar);
+  }
+
+  /* BİLDİRİMDEKİ DÜĞME (brand/ortak/bildirim.js söz 7): kabuk «Aldım»ı
+     sıraya koydu; burada SPİ'nin kendi koduyla, basıldığı anla yazılır.
+     Hatırlatma artık yoksa (silindi, ilaç bırakıldı) «yok»: uydurulmaz.
+     İşaret bir kayıttır, ölçüm değil (söz 4): «İçtim» mililitre yazmaz. */
+  async function isaretUygula(o){
+    const m = /^(\d{4}-\d{2}-\d{2})\|(.+)@(\d{2}:\d{2})$/.exec((o && o.anahtar) || '');
+    if(!m) return 'yok';
+    const h = durum().liste.find(x => x.id === m[2]);
+    if(!h || h.saatler.indexOf(m[3]) < 0 || !gecerli(h, m[1])) return 'yok';
+    const z = new Date(Number(o.zaman));
+    await isaretle(m[2] + '@' + m[3], true, m[1], isFinite(z.getTime()) ? z.toISOString() : null);
+    return true;
   }
 
   /* ------------------------------------------------ tarayıcı bildirimi */
@@ -218,7 +234,7 @@ SP.Hatirlat = (function(){
           const zaman = b.anOf(gun, saat);
           if(zaman <= now.getTime()) return;
           if(P && P.gonderilebilir && !P.gonderilebilir('spi', 'hatirlatma', new Date(zaman)).ok) return;
-          out.push({ anahtar:gun + '|' + anahtar, baslik:'SPİ · ' + saat, govde:adOf(h), zaman });
+          out.push({ anahtar:gun + '|' + anahtar, baslik:'SPİ · ' + saat, govde:adOf(h), zaman, eylem:TUR[h.tur].eylem });
         });
       });
     }
@@ -277,7 +293,7 @@ SP.Hatirlat = (function(){
   }
   function bildirimSorunu(){ return sorun; }
 
-  return { TUR, yukle, kaydet, saatOku, ekle, sil, geriKoy, bugun, isaretle, adOf, durum,
+  return { TUR, yukle, kaydet, saatOku, ekle, sil, geriKoy, bugun, isaretle, isaretUygula, adOf, durum,
     bildirimVar, bildirimIzinli, bildirimAc, bildirimKapat, bildirimSorunu, tik,
     telefonMu, planListesi, planla, planBekle, PLAN_GUN };
 })();

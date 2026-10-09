@@ -15509,7 +15509,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'52edfbb1', at:'2026-10-09 14:11', dirty:true };
+ESP.BUILD = { id:'bae464a4', at:'2026-10-09 14:22', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -24935,6 +24935,15 @@ window.LIFEOS.QR = (function(){
         167, brand/ortak/pwa.js rozet). Kabuk tarayıcının Badging API'sini
         (navigator.setAppBadge) burada sağlar, modül kodu değişmez; üç
         modülün sayısını kabuk toplar.
+     7. BİLDİRİMDEKİ DÜĞME (2026-10-09). Liste satırı `eylem` taşırsa
+        («Aldım», «İçtim», «Yaptım», «Ölçtüm», «Yapıldı») bildirimde o düğme
+        ve «15 dk ertele» çıkar. Düğmeye basılınca kabuk işareti telefonda
+        SIRAYA koyar, hiçbir kayda yazmaz. Modül açılınca sırayı alır,
+        KENDİ koduyla yazar (`isaretci`) ve ancak yazdıktan sonra sıradan
+        siler: işaret kaybolmaz. İşleyici doğruysa (yazıldı ya da artık
+        uygulanamaz: «yok») silinir; yanlışsa ya da hata verirse sırada
+        kalır. Ertelenen bildirim kurulumda silinmez; modül işi işaretleyince
+        (`yapildi`) kalkar. İşaret bir kayıttır, ölçüm değil.
    Model hiçbir aşamada yoktur; metin modülün kural metnidir. */
 
 window.LIFEOS = window.LIFEOS || {};
@@ -25030,6 +25039,37 @@ window.LIFEOS.BILDIRIM = (function(){
     return { ok:!!r.ok, toplam:r.ok ? Number(r.toplam) || 0 : 0 };
   }
 
+  /* Bildirimdeki düğmenin işareti (söz 7). Modül bir kez işleyici verir;
+     sıra hemen ve öne her gelişte alınır. */
+  let isaretci = null, aliniyor = false;
+  function isaretciKur(fn){
+    isaretci = typeof fn === 'function' ? fn : null;
+    return isaretleriAl();
+  }
+  async function isaretleriAl(){
+    if(!var_() || !isaretci || aliniyor) return 0;
+    aliniyor = true;
+    try{
+      const r = await gonder({ tur:'isaretler' });
+      const l = r.ok && Array.isArray(r.isaretler) ? r.isaretler : [];
+      const biten = [];
+      for(const o of l){
+        if(!o || typeof o.anahtar !== 'string' || !o.anahtar) continue;
+        let sonuc = false;
+        try{ sonuc = await isaretci({ anahtar:o.anahtar, zaman:Number(o.zaman) || Date.now() }); }
+        catch(e){ sonuc = false; }
+        if(sonuc) biten.push(o.anahtar);
+      }
+      if(biten.length) await gonder({ tur:'isaretSil', anahtarlar:biten });
+      return biten.length;
+    }finally{ aliniyor = false; }
+  }
+  /* Modül işi işaretledi: o anahtarın ertelenmişi ve gelmişleri kalkar. */
+  function yapildi(anahtar){
+    if(!var_() || typeof anahtar !== 'string' || !anahtar) return Promise.resolve({ ok:false });
+    return gonder({ tur:'yapildi', anahtar:anahtar.slice(0, 120) });
+  }
+
   /* Uygulamada kurulum: Badging API köprüye bağlanır, açılışta ve öne her
      gelişte gelmiş bildirimler kalkar. Tarayıcıda hiçbir şey yapmaz. */
   function kurulum(doc, nav){
@@ -25042,7 +25082,7 @@ window.LIFEOS.BILDIRIM = (function(){
       n.clearAppBadge = () => rozet(0).then(() => undefined);
     }catch(e){ /* salt okunur gezgin: rozet yok, temizlik sürer */ }
     kaldir();
-    d.addEventListener('visibilitychange', () => { if(!d.hidden) kaldir(); });
+    d.addEventListener('visibilitychange', () => { if(!d.hidden){ kaldir(); isaretleriAl(); } });
     return true;
   }
 
@@ -25053,7 +25093,7 @@ window.LIFEOS.BILDIRIM = (function(){
   }
 
   const api = { var:var_, durum, izin, sonDurum, kur, temizle, kaldir, rozet, anOf, SINIR, AD, _cevap,
-    _kurulum:kurulum };
+    isaretci:isaretciKur, yapildi, _isaretVar:isaretleriAl, _kurulum:kurulum };
   kurulum();
   return api;
 })();
@@ -32977,7 +33017,7 @@ ESP.Takvim = (function(){
     return (S().reminders || []).filter(r => !r.done && U().isISO(r.due) && r.due >= bugun && r.due <= son
         && (!ESP.Mod || !ESP.Mod.isOn || ESP.Mod.isOn(r.disc)))
       .map(r => ({ anahtar:r.id + '@' + r.due, baslik:'ESP · ' + (ad(r.disc) || 'Hatırlatıcı'),
-        govde:String(r.text || 'Hatırlatıcı'), zaman:b.anOf(r.due, BILDIRIM_SAAT) }))
+        govde:String(r.text || 'Hatırlatıcı'), zaman:b.anOf(r.due, BILDIRIM_SAAT), eylem:'Yapıldı' }))
       .filter(x => x.zaman > now.getTime());
   }
   function bildirimAcik(){
@@ -32990,7 +33030,22 @@ ESP.Takvim = (function(){
     return b.kur('esp', bildirimAcik() ? bildirimListesi(simdi) : []).catch(() => null);
   }
 
-  return { yaz, disa, katla, bildirimListesi, bildirimAcik, planla, BILDIRIM_SAAT, PLAN_GUN };
+  /* BİLDİRİMDEKİ «Yapıldı» (brand/ortak/bildirim.js söz 7): kabuk sıraya
+     koydu; ESP'nin kendi tamamlama kuralıyla yazılır (tekrarlı olan bir
+     sonraki tarihe taşınır). Hatırlatıcı yoksa, kapandıysa ya da vadesi
+     değiştiyse (zaten yapıldı) «yok»: ikinci kez tamamlanmaz. */
+  async function isaretUygula(o){
+    const a = String((o && o.anahtar) || ''), i = a.lastIndexOf('@');
+    if(i <= 0) return 'yok';
+    const id = a.slice(0, i), due = a.slice(i + 1);
+    const r = (S().reminders || []).find(x => x.id === id);
+    if(!r || r.done || r.due !== due) return 'yok';
+    const z = new Date(Number(o.zaman));
+    const res = await ESP.Model.completeReminder(id, isFinite(z.getTime()) ? U().iso(z) : undefined);
+    return res && res.ok ? true : 'yok';
+  }
+
+  return { yaz, disa, katla, bildirimListesi, bildirimAcik, planla, isaretUygula, BILDIRIM_SAAT, PLAN_GUN };
 })();
 
 /* ==== js/core/tanitim.js ==== */
@@ -40639,6 +40694,7 @@ ESP.Model = (function(){
   async function completeReminder(id, todayISO){
     const r = S.reminders.find(x => x.id === id);
     if(!r) return { ok:false, error:'Hatırlatıcı bulunamadı.' };
+    const bildirimAnahtari = r.id + '@' + r.due;      // ESP.Takvim bildirimListesi
     const bugun = todayISO || U.todayISO();
     const adim = REPEATS[r.repeat] || 0;
     if(adim){
@@ -40653,6 +40709,11 @@ ESP.Model = (function(){
     }
     await ESP.Store.set('reminders/' + r.id, r);
     telefonPlanla();
+    /* Telefonda: bu hatırlatıcının ertelenmiş ve gelmiş bildirimi kalkar. */
+    try{
+      const B = (window.LIFEOS || {}).BILDIRIM;
+      if(B && B.var()) B.yapildi(bildirimAnahtari);
+    }catch(e){ /* bildirim yok: sessiz */ }
     return { ok:true, reminder:r };
   }
 
@@ -69868,6 +69929,18 @@ ESP.App = (function(){
         ESP.Takvim.planla();
         document.addEventListener('visibilitychange', () => {
           if(document.hidden){ try{ ESP.Takvim.planla(); }catch(e){} }
+        });
+      }
+      /* Bildirimdeki «Yapıldı» (brand/ortak/bildirim.js söz 7): ESP kendi
+         tamamlama kuralıyla yazar, ekran sonra çizilir. */
+      if(window.LIFEOS && window.LIFEOS.BILDIRIM && ESP.Takvim && ESP.Takvim.isaretUygula){
+        window.LIFEOS.BILDIRIM.isaretci(async o => {
+          const r = await ESP.Takvim.isaretUygula(o);
+          if(r === true){
+            const H = window.LIFEOS.HESAP;
+            if(H && typeof H.cizIste === 'function') H.cizIste(render); else render();
+          }
+          return r;
         });
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */

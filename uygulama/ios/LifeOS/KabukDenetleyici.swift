@@ -31,6 +31,16 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
         self.bildirim = bildirim
         super.init(nibName: nil, bundle: nil)
         dokunus.ac = { [weak self] u in self?.modulAc(u) }
+        dokunus.kopru = bildirim
+        dokunus.isaretVar = { [weak self] modul in self?.isaretBildir(modul) }
+    }
+
+    /// Bildirimdeki «Aldım» (BildirimKoprusu soz 7): o modulun sayfasi
+    /// aciksa hemen alsin; degilse modul acilinca alir.
+    func isaretBildir(_ modul: String) {
+        guard isViewLoaded, let p = web.url?.port, BildirimKoprusu.kapilar[p] == modul else { return }
+        web.evaluateJavaScript("window.LIFEOS && LIFEOS.BILDIRIM && LIFEOS.BILDIRIM._isaretVar && LIFEOS.BILDIRIM._isaretVar()",
+                               completionHandler: nil)
     }
 
     /// Ana ekran kisayolu (Info.plist UIApplicationShortcutItems) → modul adresi.

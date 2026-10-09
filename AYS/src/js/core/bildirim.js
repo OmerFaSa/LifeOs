@@ -30,6 +30,15 @@
         167, brand/ortak/pwa.js rozet). Kabuk tarayıcının Badging API'sini
         (navigator.setAppBadge) burada sağlar, modül kodu değişmez; üç
         modülün sayısını kabuk toplar.
+     7. BİLDİRİMDEKİ DÜĞME (2026-10-09). Liste satırı `eylem` taşırsa
+        («Aldım», «İçtim», «Yaptım», «Ölçtüm», «Yapıldı») bildirimde o düğme
+        ve «15 dk ertele» çıkar. Düğmeye basılınca kabuk işareti telefonda
+        SIRAYA koyar, hiçbir kayda yazmaz. Modül açılınca sırayı alır,
+        KENDİ koduyla yazar (`isaretci`) ve ancak yazdıktan sonra sıradan
+        siler: işaret kaybolmaz. İşleyici doğruysa (yazıldı ya da artık
+        uygulanamaz: «yok») silinir; yanlışsa ya da hata verirse sırada
+        kalır. Ertelenen bildirim kurulumda silinmez; modül işi işaretleyince
+        (`yapildi`) kalkar. İşaret bir kayıttır, ölçüm değil.
    Model hiçbir aşamada yoktur; metin modülün kural metnidir. */
 
 window.LIFEOS = window.LIFEOS || {};
@@ -125,6 +134,37 @@ window.LIFEOS.BILDIRIM = (function(){
     return { ok:!!r.ok, toplam:r.ok ? Number(r.toplam) || 0 : 0 };
   }
 
+  /* Bildirimdeki düğmenin işareti (söz 7). Modül bir kez işleyici verir;
+     sıra hemen ve öne her gelişte alınır. */
+  let isaretci = null, aliniyor = false;
+  function isaretciKur(fn){
+    isaretci = typeof fn === 'function' ? fn : null;
+    return isaretleriAl();
+  }
+  async function isaretleriAl(){
+    if(!var_() || !isaretci || aliniyor) return 0;
+    aliniyor = true;
+    try{
+      const r = await gonder({ tur:'isaretler' });
+      const l = r.ok && Array.isArray(r.isaretler) ? r.isaretler : [];
+      const biten = [];
+      for(const o of l){
+        if(!o || typeof o.anahtar !== 'string' || !o.anahtar) continue;
+        let sonuc = false;
+        try{ sonuc = await isaretci({ anahtar:o.anahtar, zaman:Number(o.zaman) || Date.now() }); }
+        catch(e){ sonuc = false; }
+        if(sonuc) biten.push(o.anahtar);
+      }
+      if(biten.length) await gonder({ tur:'isaretSil', anahtarlar:biten });
+      return biten.length;
+    }finally{ aliniyor = false; }
+  }
+  /* Modül işi işaretledi: o anahtarın ertelenmişi ve gelmişleri kalkar. */
+  function yapildi(anahtar){
+    if(!var_() || typeof anahtar !== 'string' || !anahtar) return Promise.resolve({ ok:false });
+    return gonder({ tur:'yapildi', anahtar:anahtar.slice(0, 120) });
+  }
+
   /* Uygulamada kurulum: Badging API köprüye bağlanır, açılışta ve öne her
      gelişte gelmiş bildirimler kalkar. Tarayıcıda hiçbir şey yapmaz. */
   function kurulum(doc, nav){
@@ -137,7 +177,7 @@ window.LIFEOS.BILDIRIM = (function(){
       n.clearAppBadge = () => rozet(0).then(() => undefined);
     }catch(e){ /* salt okunur gezgin: rozet yok, temizlik sürer */ }
     kaldir();
-    d.addEventListener('visibilitychange', () => { if(!d.hidden) kaldir(); });
+    d.addEventListener('visibilitychange', () => { if(!d.hidden){ kaldir(); isaretleriAl(); } });
     return true;
   }
 
@@ -148,7 +188,7 @@ window.LIFEOS.BILDIRIM = (function(){
   }
 
   const api = { var:var_, durum, izin, sonDurum, kur, temizle, kaldir, rozet, anOf, SINIR, AD, _cevap,
-    _kurulum:kurulum };
+    isaretci:isaretciKur, yapildi, _isaretVar:isaretleriAl, _kurulum:kurulum };
   kurulum();
   return api;
 })();

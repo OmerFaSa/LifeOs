@@ -1560,6 +1560,18 @@ SP.App = (function(){
             return render();
           } });
       }
+      /* Bildirimdeki «Aldım» (brand/ortak/bildirim.js söz 7): kabuk işareti
+         sıraya koydu; SPİ kendi koduyla yazar, ekran sonra çizilir. */
+      if(window.LIFEOS && window.LIFEOS.BILDIRIM && SP.Hatirlat && SP.Hatirlat.isaretUygula){
+        window.LIFEOS.BILDIRIM.isaretci(async o => {
+          const r = await SP.Hatirlat.isaretUygula(o);
+          if(r === true){
+            const H = window.LIFEOS.HESAP;
+            if(H && typeof H.cizIste === 'function') H.cizIste(render); else render();
+          }
+          return r;
+        });
+      }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. Özet ve veri
          girişi bu modülün kendi koduyla (SP.Quick: önizleme, onayla kayıt). */
       if(window.LIFEOS && window.LIFEOS.KING){

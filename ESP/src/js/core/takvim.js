@@ -109,7 +109,7 @@ ESP.Takvim = (function(){
     return (S().reminders || []).filter(r => !r.done && U().isISO(r.due) && r.due >= bugun && r.due <= son
         && (!ESP.Mod || !ESP.Mod.isOn || ESP.Mod.isOn(r.disc)))
       .map(r => ({ anahtar:r.id + '@' + r.due, baslik:'ESP · ' + (ad(r.disc) || 'Hatırlatıcı'),
-        govde:String(r.text || 'Hatırlatıcı'), zaman:b.anOf(r.due, BILDIRIM_SAAT) }))
+        govde:String(r.text || 'Hatırlatıcı'), zaman:b.anOf(r.due, BILDIRIM_SAAT), eylem:'Yapıldı' }))
       .filter(x => x.zaman > now.getTime());
   }
   function bildirimAcik(){
@@ -122,5 +122,20 @@ ESP.Takvim = (function(){
     return b.kur('esp', bildirimAcik() ? bildirimListesi(simdi) : []).catch(() => null);
   }
 
-  return { yaz, disa, katla, bildirimListesi, bildirimAcik, planla, BILDIRIM_SAAT, PLAN_GUN };
+  /* BİLDİRİMDEKİ «Yapıldı» (brand/ortak/bildirim.js söz 7): kabuk sıraya
+     koydu; ESP'nin kendi tamamlama kuralıyla yazılır (tekrarlı olan bir
+     sonraki tarihe taşınır). Hatırlatıcı yoksa, kapandıysa ya da vadesi
+     değiştiyse (zaten yapıldı) «yok»: ikinci kez tamamlanmaz. */
+  async function isaretUygula(o){
+    const a = String((o && o.anahtar) || ''), i = a.lastIndexOf('@');
+    if(i <= 0) return 'yok';
+    const id = a.slice(0, i), due = a.slice(i + 1);
+    const r = (S().reminders || []).find(x => x.id === id);
+    if(!r || r.done || r.due !== due) return 'yok';
+    const z = new Date(Number(o.zaman));
+    const res = await ESP.Model.completeReminder(id, isFinite(z.getTime()) ? U().iso(z) : undefined);
+    return res && res.ok ? true : 'yok';
+  }
+
+  return { yaz, disa, katla, bildirimListesi, bildirimAcik, planla, isaretUygula, BILDIRIM_SAAT, PLAN_GUN };
 })();
