@@ -254,7 +254,9 @@ R.Ogren = (function(){
     return (R.S.errors || []).find(e => e.kaynak && e.kaynak.tur === 'ogren'
       && e.subjectId === subjectId && e.topicId === topicId && e.kaynak.i === i) || null;
   }
-  async function yanlisaEkle(subjectId, topicId, i){
+  /* senin: karma testte ya da yeniden çözümde verilen harf (core/ogrentest.js);
+     verilmezse konunun ilk cevabı. */
+  async function yanlisaEkle(subjectId, topicId, i, senin){
     const { subject, topic } = bul(subjectId, topicId);
     const q = sorular(topicId)[i];
     const c = cevaplar(subjectId, topicId)[i];
@@ -267,7 +269,7 @@ R.Ogren = (function(){
       testName:('Örnek soru · ' + topic.name).slice(0, 160), questionNo:String(i + 1),
       status:'Yanlış', tag:null, seconds:null, rootCause:'', principle:'', similar:'',
       recipe:'', topicRef:'', subjectId, topicId, topic:topic.name,
-      soru:kisalt(duzMetin(q.soru), 600), senin:c ? c.h : null, anahtar:q.dogru,
+      soru:kisalt(duzMetin(q.soru), 600), senin:senin || (c ? c.h : null), anahtar:q.dogru,
       kaynak:{ tur:'ogren', i },
     };
     await R.Model.saveError(err);

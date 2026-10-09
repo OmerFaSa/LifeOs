@@ -80,32 +80,82 @@ R.Screens = R.Screens || {};
       window.scrollTo(0, 0);
       R.App.render();
     },
+    /* Sorular'ın kipi (Bu konu · Karma test · Yanlışlarım); Öğren'in her
+       bölümünden açılabilir. */
+    async 'sorular-kip'(el){
+      S.ui.ogrenKip = el.dataset.tab || 'konu';
+      if(S.ui.ogrenKip !== 'yanlis') S.ui.ogrTekrar = null;
+      if(S.route !== 'sorular'){ R.App.go('sorular'); return; }
+      window.scrollTo(0, 0);
+      R.App.render();
+    },
   };
 
   /* ================================================================
-     KONULAR — hangi konudasın, sırada ne var; ders ders konu listesi.
+     KONULAR — hangi konudasın, sırada ne var; dersler ve konu listesi.
      ================================================================ */
 
-  function devamKarti(){
+  /* Konu konu açık yanlış sayısı (core/ogrentest.js söz 5). */
+  function acikYanlislar(){
+    const say = {};
+    if(R.OgrenTest) R.OgrenTest.yanlislar().forEach(y => { say[y.topic.id] = (say[y.topic.id] || 0) + 1; });
+    return say;
+  }
+  const tamamMi = d => !!(d.okundu && d.skor.toplam && d.skor.cevaplanan === d.skor.toplam);
+
+  function devamKarti(yanlisSay){
     const son = O().sonAcilan();
     const x = son || O().secili();
     if(!x.topic) return null;
     const s = O().sirada(x.subject.id, x.topic.id);
     const hedef = s && s.sonraki ? s.sonraki : x;
+    const a = R.OgrenTest && R.OgrenTest.aktif();
+    const y = Object.keys(yanlisSay).reduce((t, k) => t + yanlisSay[k], 0);
     return html`<div class="ogr-devam">${K.NextUp({ icon:'book', label:son ? 'Kaldığın yer' : 'Başla',
       title:x.topic.name, why:x.subject.name + (s ? ' · sırada: ' + s.ad.toLocaleLowerCase('tr-TR') : ' · bütün adımlar tamam'),
       action:K.Button({ label:son ? 'Devam et' : 'Başla', tone:'primary', size:'sm', act:'ogren-git',
-        data:{ 'data-route':s ? s.route : 'anlatim', 'data-subject':hedef.subject.id, 'data-topic':hedef.topic.id } }) })}</div>`;
+        data:{ 'data-route':s ? s.route : 'anlatim', 'data-subject':hedef.subject.id, 'data-topic':hedef.topic.id } }) })}
+      <div class="row wrap gap-6 mt-10">
+        ${K.Button({ label:a ? 'Karma teste dön' : 'Karma test', icon:'zap', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'karma' } })}
+        ${when(y, () => K.Button({ label:'Yanlışlarım · ' + y, icon:'list', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'yanlis' } }))}
+      </div></div>`;
   }
 
-  function konuSatiri(subject, t){
-    const d = O().durum(subject.id, t.id);
+  /* Sekiz ders yan yana: kaç konu okundu, örnek soruların kaçı doğru.
+     Ders seçici de budur: dokunulan dersin konuları aşağıda listelenir. */
+  function derslerKarti(secili){
+    const l = R.SUBJECTS.map(s => ({ s, oz:O().dersOzeti(s.id) }));
+    const top = l.reduce((a, y) => ({ konu:a.konu + y.oz.konu, okunan:a.okunan + y.oz.okunan, soru:a.soru + y.oz.soru, dogru:a.dogru + y.oz.dogru }),
+      { konu:0, okunan:0, soru:0, dogru:0 });
+    return K.Card({ title:'Dersler', wide:true,
+      sub:top.okunan + ' / ' + top.konu + ' konu okundu' + (top.soru ? ' · ' + top.dogru + ' / ' + top.soru + ' örnek soru doğru' : ''),
+      body:html`<div class="ogr-dersler" role="group" aria-label="Ders seç">${map(l, y => html`<button type="button"
+          class="${cls('ogr-ders', y.s.id === secili && 'is-on')}" data-act="ogren-liste-sec" data-subject="${y.s.id}"
+          aria-pressed="${y.s.id === secili ? 'true' : 'false'}">
+        <span class="small strong ogr-ders__ad">${kisaAd(y.s)}</span>
+        ${K.Bar({ value:y.oz.konu ? y.oz.okunan * 100 / y.oz.konu : 0 })}
+        <span class="tiny dim">${y.oz.okunan} / ${y.oz.konu} okundu${y.oz.soru ? ' · ' + y.oz.dogru + ' / ' + y.oz.soru + ' doğru' : ''}</span>
+      </button>`)}</div>` });
+  }
+
+  /* Konu süzgeci: kural kodda, adı ekranda. «Yanlışı olan» = konunun
+     Yanlışlarım'da en az bir sorusu var (son denemesi doğru değil). */
+  const SUZGEC = [
+    { id:'hepsi', ad:'Hepsi', f:() => true },
+    { id:'okunmadi', ad:'Okunmadı', f:d => !d.okundu },
+    { id:'soru', ad:'Soru bekliyor', f:d => d.okundu && d.skor.cevaplanan < d.skor.toplam },
+    { id:'yanlis', ad:'Yanlışı olan', f:(d, y) => y > 0 },
+    { id:'tamam', ad:'Tamam', f:d => tamamMi(d) },
+  ];
+
+  function konuSatiri(subject, t, d, yanlis){
     const parca = [];
     if(d.okundu) parca.push('okundu');
     if(d.skor.cevaplanan) parca.push(d.skor.dogru + '/' + d.skor.toplam + ' soru doğru');
     else if(d.skor.toplam) parca.push(d.skor.toplam + ' örnek soru');
+    if(yanlis) parca.push(yanlis + ' yanlış açık');
     if(!d.anlatim) parca.push('anlatım yazılıyor');
-    const tamam = d.okundu && d.skor.toplam && d.skor.cevaplanan === d.skor.toplam;
+    const tamam = tamamMi(d);
     return html`<button class="${cls('listitem listitem--tap ogr-konu', tamam && 'is-tamam')}" data-act="ogren-git"
         data-route="anlatim" data-subject="${subject.id}" data-topic="${t.id}">
       <span class="ogr-konu__no num" aria-hidden="true">${tamam ? raw(UI.icon('check')) : t.order}</span>
@@ -115,26 +165,27 @@ R.Screens = R.Screens || {};
     </button>`;
   }
 
-  function konularKarti(){
-    const x = O().secili();
-    const sid = S.ui.ogrenListe || (x.subject ? x.subject.id : R.SUBJECTS[0].id);
-    const subject = R.SUBJECTS.find(s => s.id === sid) || R.SUBJECTS[0];
+  function konularKarti(subject, yanlisSay){
     const oz = O().dersOzeti(subject.id);
+    const sz = SUZGEC.find(x => x.id === S.ui.ogrenSuzgec) || SUZGEC[0];
+    const satirlar = subject.topics.map(t => ({ t, d:O().durum(subject.id, t.id), y:yanlisSay[t.id] || 0 }));
     const gruplar = [];
-    subject.topics.forEach(t => {
-      const k = t.group || '—';
+    satirlar.filter(r => sz.f(r.d, r.y)).forEach(r => {
+      const k = r.t.group || '—';
       let g = gruplar.find(y => y.ad === k);
       if(!g){ g = { ad:k, l:[] }; gruplar.push(g); }
-      g.l.push(t);
+      g.l.push(r);
     });
-    return K.Card({ title:'Konular', wide:true,
+    return K.Card({ title:subject.name, wide:true,
       sub:oz.konu + ' konu · ' + oz.okunan + ' okundu' + (oz.soru ? ' · ' + oz.dogru + '/' + oz.soru + ' örnek soru doğru' : ''),
-      actions:K.Select({ id:'ogren-liste', options:R.SUBJECTS.map(s => ({ value:s.id, label:kisaAd(s) })),
-        value:subject.id, change:'ogren-liste', aria:'Ders', size:'sm' }),
-      body:html`<div class="stack-sm" data-raf-tam>${map(gruplar, g => html`<div class="ogr-grup">
-        ${when(gruplar.length > 1, () => html`<div class="ogr-grup__ad tiny dim">${g.ad}</div>`)}
-        <div class="list list--sik">${map(g.l, t => konuSatiri(subject, t))}</div>
-      </div>`)}</div>` });
+      body:html`<div class="row wrap gap-6 mb-10" role="group" aria-label="Konu süzgeci">${map(SUZGEC, x =>
+          K.Chip({ label:x.ad + ' · ' + satirlar.filter(r => x.f(r.d, r.y)).length, act:'ogren-suzgec', on:x.id === sz.id,
+            data:{ 'data-f':x.id, 'aria-pressed':x.id === sz.id ? 'true' : 'false' } }))}</div>
+        ${gruplar.length ? html`<div class="stack-sm" data-raf-tam>${map(gruplar, g => html`<div class="ogr-grup">
+          ${when(gruplar.length > 1, () => html`<div class="ogr-grup__ad tiny dim">${g.ad}</div>`)}
+          <div class="list list--sik">${map(g.l, r => konuSatiri(subject, r.t, r.d, r.y))}</div>
+        </div>`)}</div>`
+        : html`<p class="small muted">Bu süzgeçte konu yok.</p>`}` });
   }
 
   R.Screens.ogren = {
@@ -143,12 +194,17 @@ R.Screens = R.Screens || {};
     subtitle(){ return 'Konuyu seç; anlatım, örnek soru ve koç aynı konuya bakar'; },
     actions(){ return ''; },
     async render(){
-      return String(K.Grid([K.Span(12, K.Stack([devamKarti(), konularKarti()]))]));
+      const x = O().secili();
+      const sid = S.ui.ogrenListe || (x.subject ? x.subject.id : R.SUBJECTS[0].id);
+      const subject = R.SUBJECTS.find(s => s.id === sid) || R.SUBJECTS[0];
+      const y = acikYanlislar();
+      return String(K.Grid([K.Span(12, K.Stack([devamKarti(y), derslerKarti(subject.id), konularKarti(subject, y)]))]));
     },
-    handle:Object.assign({}, ortakHandle),
-    change:Object.assign({}, ortakChange, {
-      async 'ogren-liste'(el){ S.ui.ogrenListe = el.value; R.App.render(); },
+    handle:Object.assign({}, ortakHandle, {
+      async 'ogren-liste-sec'(el){ S.ui.ogrenListe = el.dataset.subject; R.App.render(); },
+      async 'ogren-suzgec'(el){ S.ui.ogrenSuzgec = el.dataset.f || 'hepsi'; R.App.render(); },
     }),
+    change:Object.assign({}, ortakChange),
   };
 
   /* ================================================================
@@ -362,8 +418,18 @@ R.Screens = R.Screens || {};
   };
 
   /* ================================================================
-     SORULAR — örnek sorular, birer birer; ilk cevap ölçümdür.
+     SORULAR — üç kip, aynı soru gövdesi:
+       Bu konu      örnek sorular birer birer; ilk cevap ölçümdür.
+       Karma test   konular karışık (core/ogrentest.js söz 1–4).
+       Yanlışlarım  son denemesi doğru olmayanları yeniden çöz (söz 5).
+     Soru kartları başlıksızdır: içinde soru çözülen bir kart gizlenip
+     küçültülecek bir bölüm değildir (core/gizle.js başlıklı kartı alır).
      ================================================================ */
+
+  const T = () => R.OgrenTest;
+  const DURUM_AD = { bos:'cevaplanmadı', bakildi:'çözüme bakıldı', dogru:'doğru', yanlis:'yanlış' };
+  const durumOf = (q, v) => !v ? 'bos' : v.bak ? 'bakildi' : v.h === q.dogru ? 'dogru' : 'yanlis';
+  const KAYNAK_AD = { konu:'konu sorusu', test:'karma test', tekrar:'yeniden çözüm' };
 
   function soruNo(x){
     const l = O().sorular(x.topic.id);
@@ -371,13 +437,20 @@ R.Screens = R.Screens || {};
     return { l, i };
   }
 
-  function noktalar(x, l, i, c){
-    return html`<div class="ogr-noktalar" role="group" aria-label="Sorular">${map(l, (q, k) => {
-      const v = c[k];
-      const durum = !v ? 'bos' : v.bak ? 'bakildi' : v.h === q.dogru ? 'dogru' : 'yanlis';
-      const ad = { bos:'cevaplanmadı', bakildi:'çözüme bakıldı', dogru:'doğru', yanlis:'yanlış' }[durum];
-      return html`<button class="${cls('ogr-nokta', 'is-' + durum, k === i && 'is-sirada')}" data-act="soru-git"
-        data-i="${k}" aria-label="${'Soru ' + (k + 1) + ': ' + ad}" aria-current="${k === i ? 'true' : 'false'}">${k + 1}</button>`;
+  /* Kartın kendi başlığı (başlıksız kartın gövdesinde). */
+  function kartBasi(ad, alt, eylem){
+    return html`<div class="ogr-bas"><div class="minw0"><h2 class="ogr-bas__ad">${ad}</h2>
+      ${when(alt, () => html`<p class="small dim">${alt}</p>`)}</div>${eylem || ''}</div>`;
+  }
+
+  /* n soru için numaralı noktalar; durum(k) → bos|bakildi|dogru|yanlis. */
+  function noktalar(n, i, durum, act){
+    const l = [];
+    for(let k = 0; k < n; k++) l.push(k);
+    return html`<div class="ogr-noktalar" role="group" aria-label="Sorular">${map(l, k => {
+      const d = durum(k);
+      return html`<button class="${cls('ogr-nokta', 'is-' + d, k === i && 'is-sirada')}" data-act="${act}"
+        data-i="${k}" aria-label="${'Soru ' + (k + 1) + ': ' + DURUM_AD[d]}" aria-current="${k === i ? 'true' : 'false'}">${k + 1}</button>`;
     })}</div>`;
   }
 
@@ -388,57 +461,76 @@ R.Screens = R.Screens || {};
     return html`${map(l, p => html`<p class="ogr-soru__parca">${fmt(p)}</p>`)}<p class="ogr-soru__metin">${l.length ? html`<b>${fmt(kok)}</b>` : fmt(kok)}</p>`;
   }
 
-  function soruKarti(x){
-    const { subject, topic } = x;
-    const { l, i } = soruNo(x);
-    if(!l.length){
-      return K.Card({ title:'Örnek sorular', wide:true,
-        body:K.Empty({ icon:'search', text:'Bu konunun örnek soruları henüz yazılmadı.',
-          action:K.Button({ label:'Koç bir soru sorsun', size:'sm', act:'ogren-git',
-            data:{ 'data-route':'koc', 'data-subject':subject.id, 'data-topic':topic.id } }) }) });
-    }
-    const q = l[i], c = O().cevaplar(subject.id, topic.id), v = c[i];
-    const sk = O().skor(subject.id, topic.id);
+  /* Üç kipin ortak soru gövdesi. v: { h, bak } ya da null (cevapsız).
+     o: { etiket, cevapAct, bakAct?, ust?, eylemler } */
+  function soruGovdesi(q, v, o){
     const acik = !!v;
     const secenek = (metin, k) => {
       const harf = O().HARFLER[k];
       const durum = !acik ? '' : harf === q.dogru ? 'is-dogru' : v.h === harf ? 'is-yanlis' : 'is-soluk';
-      return html`<button class="${cls('secenek', durum)}" data-act="soru-cevap" data-harf="${harf}"
+      return html`<button class="${cls('secenek', durum)}" data-act="${o.cevapAct}" data-harf="${harf}"
           ${acik ? raw('disabled aria-disabled="true"') : ''}>
         <span class="secenek__harf" aria-hidden="true">${harf}</span><span class="secenek__metin">${fmt(metin)}</span>
         ${when(acik && harf === q.dogru, () => html`<span class="sr-only">doğru cevap</span>`)}
         ${when(acik && v.h === harf && harf !== q.dogru, () => html`<span class="sr-only">senin cevabın</span>`)}
       </button>`;
     };
-    const sonuc = !v ? null : v.bak ? 'Çözüme bakıldı · doğru cevap ' + q.dogru
-      : v.h === q.dogru ? 'Doğru' : 'Yanlış · senin cevabın ' + v.h + ', doğrusu ' + q.dogru;
-    const ton = !v ? '' : v.bak ? 'bakildi' : v.h === q.dogru ? 'dogru' : 'yanlis';
+    const d = durumOf(q, v);
+    const sonuc = d === 'bakildi' ? 'Çözüme bakıldı · doğru cevap ' + q.dogru
+      : d === 'dogru' ? 'Doğru' : 'Yanlış · senin cevabın ' + (v && v.h) + ', doğrusu ' + q.dogru;
+    return html`<div class="ogr-soru" aria-live="polite" data-raf-tam>
+      <div class="ders__etiket tiny">${o.etiket}</div>
+      ${soruMetni(q.soru)}
+      <div class="secenekler">${map(q.sec, secenek)}</div>
+      ${when(!acik && o.bakAct, () => html`<div class="mt-10">${K.Button({ label:'Cevaplamadan çözümü gör', size:'sm', tone:'ghost', act:o.bakAct })}</div>`)}
+      ${when(acik, () => html`<div class="${cls('ogr-sonuc', 'is-' + d)}">
+        <p class="small"><b>${sonuc}</b></p>
+        ${o.ust || ''}
+        <div class="ders__etiket tiny mt-10">Çözüm</div>
+        <ol class="ders__adimlar">${map(dizi(q.cozum), s => html`<li>${fmt(s)}</li>`)}</ol>
+        <div class="row wrap gap-6 mt-10">${o.eylemler || ''}</div>
+      </div>`)}
+    </div>`;
+  }
+
+  /* Çözümden sonra: koça sor, karta çevir, yanlışsa deftere ekle. Karma
+     ve yeniden çözümde soru, kimliğiyle (data-k: tm-05#2) bilinir. */
+  function soruEylemleri(s, v, k){
+    const data = k ? { 'data-k':k } : {};
+    const yanlis = !!(v && !v.bak && v.h && v.h !== s.q.dogru);
+    const defterde = yanlis && O().deftere(s.subject.id, s.topic.id, s.i);
+    return html`
+      ${K.Button({ label:'Koça sor', icon:'zap', size:'sm', tone:'ghost', act:'soru-koca', data })}
+      ${K.Button({ label:'Karta çevir', icon:'cards', size:'sm', tone:'ghost', act:'soru-kart', data })}
+      ${when(yanlis, () => defterde
+        ? K.Chip('yanlış defterinde')
+        : K.Button({ label:'Yanlış defterine ekle', icon:'list', size:'sm', tone:'ghost', act:'soru-defter',
+            data:Object.assign({ 'data-h':v.h }, data) }))}`;
+  }
+
+  /* ---------- Bu konu ---------- */
+
+  function soruKarti(x){
+    const { subject, topic } = x;
+    const { l, i } = soruNo(x);
+    if(!l.length){
+      return K.Card({ wide:true,
+        body:html`${kartBasi('Örnek sorular')}${K.Empty({ icon:'search', text:'Bu konunun örnek soruları henüz yazılmadı.',
+          action:K.Button({ label:'Koç bir soru sorsun', size:'sm', act:'ogren-git',
+            data:{ 'data-route':'koc', 'data-subject':subject.id, 'data-topic':topic.id } }) })}` });
+    }
+    const q = l[i], c = O().cevaplar(subject.id, topic.id), v = c[i] || null;
+    const sk = O().skor(subject.id, topic.id);
+    const acik = !!v;
     const sonMu = i === l.length - 1;
     const sonraki = O().komsu(subject.id, topic.id, 1);
-    const defterde = v && !v.bak && v.h !== q.dogru && O().deftere(subject.id, topic.id, i);
-    return K.Card({ title:'Örnek sorular', wide:true,
-      sub:sk.cevaplanan ? sk.dogru + ' / ' + sk.toplam + ' doğru · ölçüldü' : sk.toplam + ' soru · ilk cevabın sayılır',
-      actions:when(sk.cevaplanan, () => K.Button({ label:'Baştan çöz', icon:'refresh', size:'sm', tone:'ghost', act:'soru-sifirla' })),
+    return K.Card({ wide:true,
       body:html`
-        ${noktalar(x, l, i, c)}
-        <div class="ogr-soru" aria-live="polite" data-raf-tam>
-          <div class="ders__etiket tiny">Soru ${i + 1} / ${l.length}</div>
-          ${soruMetni(q.soru)}
-          <div class="secenekler">${map(q.sec, secenek)}</div>
-          ${when(!acik, () => html`<div class="mt-10">${K.Button({ label:'Cevaplamadan çözümü gör', size:'sm', tone:'ghost', act:'soru-bak' })}</div>`)}
-          ${when(acik, () => html`<div class="${cls('ogr-sonuc', 'is-' + ton)}">
-            <p class="small"><b>${sonuc}</b></p>
-            <div class="ders__etiket tiny mt-10">Çözüm</div>
-            <ol class="ders__adimlar">${map(dizi(q.cozum), s => html`<li>${fmt(s)}</li>`)}</ol>
-            <div class="row wrap gap-6 mt-10">
-              ${K.Button({ label:'Koça sor', icon:'zap', size:'sm', tone:'ghost', act:'soru-koca' })}
-              ${K.Button({ label:'Karta çevir', icon:'cards', size:'sm', tone:'ghost', act:'soru-kart' })}
-              ${when(v.h && v.h !== q.dogru, () => defterde
-                ? K.Chip('yanlış defterinde')
-                : K.Button({ label:'Yanlış defterine ekle', icon:'list', size:'sm', tone:'ghost', act:'soru-defter' }))}
-            </div>
-          </div>`)}
-        </div>
+        ${kartBasi('Örnek sorular', sk.cevaplanan ? sk.dogru + ' / ' + sk.toplam + ' doğru · ölçüldü' : sk.toplam + ' soru · ilk cevabın sayılır',
+          when(sk.cevaplanan, () => K.Button({ label:'Baştan çöz', icon:'refresh', size:'sm', tone:'ghost', act:'soru-sifirla' })))}
+        ${noktalar(l.length, i, k => durumOf(l[k], c[k]), 'soru-git')}
+        ${soruGovdesi(q, v, { etiket:'Soru ' + (i + 1) + ' / ' + l.length, cevapAct:'soru-cevap', bakAct:'soru-bak',
+          eylemler:soruEylemleri({ subject, topic, i, q }, v, null) })}
         <div class="row between wrap gap-6 mt-16">
           ${i > 0 ? K.Button({ label:'Önceki', icon:'left', size:'sm', tone:'ghost', act:'soru-git', data:{ 'data-i':String(i - 1) } }) : html`<span></span>`}
           ${!sonMu ? K.Button({ label:'Sonraki soru', icon:'right', size:'sm', tone:acik ? 'primary' : null, act:'soru-git', data:{ 'data-i':String(i + 1) } })
@@ -451,17 +543,200 @@ R.Screens = R.Screens || {};
     });
   }
 
+  /* ---------- Karma test ---------- */
+
+  function kapsamAdi(k){
+    const s = R.SUBJECTS.find(x => x.id === (k && k.ders));
+    return (s ? s.name : 'Bütün dersler') + ' · ' + (k && k.konular === 'okunan' ? 'okuduğum konular' : 'bütün konular');
+  }
+  const tarihAdi = iso => { try{ return U.fmtShort(String(iso).slice(0, 10)); }catch(e){ return String(iso).slice(0, 10); } };
+  const DERSLER = () => [{ value:'hepsi', label:'Bütün dersler' }].concat(R.SUBJECTS.map(s => ({ value:s.id, label:s.name })));
+  /* Seçilmemişse kapsam: okuduğun konularda yeterli soru varsa onlar. */
+  function karmaKapsami(){
+    const ders = S.ui.karmaDers || 'hepsi';
+    const okunan = T().havuz({ ders, konular:'okunan' }).length;
+    return { ders, okunan, konular:S.ui.karmaKonular || (okunan >= T().EN_AZ ? 'okunan' : 'hepsi') };
+  }
+
+  function karmaKurulum(){
+    const k = karmaKapsami();
+    const hepsi = T().havuz({ ders:k.ders, konular:'hepsi' }).length;
+    const boy = T().BOYLAR.indexOf(Number(S.ui.karmaBoy)) >= 0 ? Number(S.ui.karmaBoy) : T().BOYLAR[0];
+    return K.Card({ wide:true,
+      body:html`${kartBasi('Karma test', 'Konular karışık gelir; her sorunun ilk cevabı sayılır')}
+        <div class="ogr-kurulum">
+          ${K.Field({ label:'Ders', input:K.Select({ id:'karma-ders', options:DERSLER(), value:k.ders, change:'karma-ders', aria:'Ders' }) })}
+          <div><span class="ders__etiket tiny">Konular</span>${K.Segmented({ act:'karma-konular', value:k.konular, aria:'Konular', items:[
+            { value:'okunan', label:'Okuduklarım · ' + k.okunan }, { value:'hepsi', label:'Hepsi · ' + hepsi }] })}</div>
+          <div><span class="ders__etiket tiny">Soru sayısı</span>${K.Segmented({ act:'karma-boy', value:boy, aria:'Soru sayısı',
+            items:T().BOYLAR.map(n => ({ value:n, label:String(n) })) })}</div>
+        </div>
+        <div class="mt-16">${K.Button({ label:'Testi başlat', icon:'right', tone:'primary', act:'karma-baslat' })}</div>
+        <p class="tiny dim mt-12">Seçeneklerdeki sayı havuzdaki soru sayısıdır. Sonuç yalnız burada ölçüm olarak durur: plan, kapanış
+          ve konunun örnek soru kaydı ona bakmaz. Yarım kalan test, uygulamayı kapatsan da kaldığın sorudan sürer.</p>` });
+  }
+
+  function gecmisKarti(){
+    const l = T().gecmis();
+    if(!l.length) return null;
+    return K.Card({ title:'Geçmiş testler', sub:U.plural(l.length, 'test', 'test') + ' · ölçüldü',
+      body:html`<div class="list list--sik">${map(l.slice(0, 8), t => html`<button class="listitem listitem--tap ogr-konu" data-act="karma-sonuc" data-id="${t.id}">
+        <span class="grow minw0"><span class="small strong">${t.dogru} / ${t.toplam} doğru</span>
+          <span class="tiny dim">${tarihAdi(t.at)} · ${kapsamAdi(t.kapsam)}${t.bos ? ' · ' + t.bos + ' boş' : ''}</span></span>
+        <span class="ogr-konu__ok" aria-hidden="true">${raw(UI.icon('right'))}</span></button>`)}</div>` });
+  }
+
+  function karmaSoruKarti(){
+    const a = T().aktif(), y = T().siradaki(), sy = T().say(a);
+    const sonMu = y.sira === y.toplam - 1;
+    const durum = k => { const s = T().soruOf(a.sorular[k]); return s ? durumOf(s.q, a.cevaplar[k]) : 'bos'; };
+    const bas = kartBasi('Karma test', kapsamAdi(a.kapsam) + ' · ' + sy.cevaplanan + ' / ' + sy.toplam + ' cevaplandı',
+      K.Button({ label:'Vazgeç', size:'sm', tone:'ghost', act:'karma-vazgec' }));
+    const nav = html`<div class="row between wrap gap-6 mt-16">
+      ${y.sira > 0 ? K.Button({ label:'Önceki', icon:'left', size:'sm', tone:'ghost', act:'test-git', data:{ 'data-i':String(y.sira - 1) } }) : html`<span></span>`}
+      ${!sonMu ? K.Button({ label:'Sonraki soru', icon:'right', size:'sm', tone:y.v ? 'primary' : null, act:'test-git', data:{ 'data-i':String(y.sira + 1) } })
+        : K.Button({ label:'Testi bitir', icon:'check', size:'sm', tone:'primary', act:'karma-bitir' })}
+    </div>`;
+    const erken = when(!sonMu, () => html`<div class="mt-10">${K.Button({ label:'Testi şimdi bitir', size:'sm', tone:'ghost', act:'karma-bitir' })}</div>`);
+    if(!y.s){
+      return K.Card({ wide:true, body:html`${bas}${noktalar(y.toplam, y.sira, durum, 'test-git')}
+        ${K.Notice({ tone:'info', body:'Bu soru içerikten kaldırıldı; boş sayılır.' })}${nav}${erken}` });
+    }
+    const ust = y.v ? html`<p class="tiny dim mt-6">Konu: ${y.s.subject.name} · ${y.s.topic.name}</p>` : '';
+    return K.Card({ wide:true,
+      body:html`${bas}
+        ${noktalar(y.toplam, y.sira, durum, 'test-git')}
+        ${soruGovdesi(y.s.q, y.v, { etiket:'Soru ' + (y.sira + 1) + ' / ' + y.toplam, cevapAct:'test-cevap', bakAct:'test-bak',
+          ust, eylemler:soruEylemleri(y.s, y.v, y.s.k) })}
+        ${nav}${erken}` });
+  }
+
+  function karmaSonucKarti(oz){
+    return K.Card({ wide:true,
+      body:html`${kartBasi('Test sonucu', tarihAdi(oz.at) + ' · ' + kapsamAdi(oz.kapsam) + ' · ölçüldü',
+          K.Button({ label:'Yeni test', size:'sm', tone:'ghost', act:'karma-yeni' }))}
+        <div class="ogr-sayilar">
+          ${K.Stat({ label:'Doğru', value:oz.dogru, unit:' / ' + oz.toplam })}
+          ${K.Stat({ label:'Yanlış', value:oz.yanlis })}
+          ${K.Stat({ label:'Boş', value:oz.bos })}
+          ${K.Stat({ label:'Çözüme bakıldı', value:oz.bakildi })}
+        </div>
+        ${when(oz.konular.length, () => html`<div class="ders__etiket tiny mt-16">Konu konu · yanlışı olan önce</div>
+          <div class="list list--sik" data-raf-tam>${map(oz.konular, k => html`<div class="listitem ogr-konu">
+            <span class="${cls('ogr-konu__no', k.dogru === k.n ? 'is-tamam' : 'is-eksik')}" aria-hidden="true">${raw(UI.icon(k.dogru === k.n ? 'check' : 'close'))}</span>
+            <span class="grow minw0"><span class="small strong ogr-konu__ad">${k.topic.name}</span>
+              <span class="tiny dim">${k.subject.name} · ${k.dogru} / ${k.n} doğru</span></span>
+            ${when(k.dogru < k.n, () => K.Button({ label:'Anlatım', size:'sm', tone:'ghost', act:'ogren-git',
+              data:{ 'data-route':'anlatim', 'data-subject':k.subject.id, 'data-topic':k.topic.id } }))}
+          </div>`)}</div>`)}
+        ${when(oz.yanlis + oz.bakildi, () => html`<div class="mt-16">${K.Button({ label:'Yanlışları yeniden çöz', icon:'right', tone:'primary', size:'sm',
+          act:'sorular-kip', data:{ 'data-tab':'yanlis' } })}</div>`)}
+        <p class="tiny dim mt-12">Bu sonuç bir ölçümdür; plan ve kapanış ona bakmaz. Boş bırakılan soru yanlış sayılmaz.</p>` });
+  }
+
+  function karmaKip(){
+    if(T().aktif()) return [karmaSoruKarti()];
+    const sid = S.ui.karmaSonuc;
+    const oz = sid ? T().gecmis().find(t => t.id === sid) : null;
+    return oz ? [karmaSonucKarti(oz), gecmisKarti()] : [karmaKurulum(), gecmisKarti()];
+  }
+
+  /* ---------- Yanlışlarım ---------- */
+
+  /* Sıradaki yanlış: en eski deneme önce — yeniden yanlış çözülen soru
+     en yeni olur ve sıranın sonuna gider, aynı iki soru arasında dönülmez. */
+  const enEski = l => l.reduce((a, b) => (b.son.at < a.son.at ? b : a), l[0]);
+  function kisaSoru(q){
+    const kok = O().duzMetin(q.soru).split('\n').pop();
+    return kok.length > 90 ? kok.slice(0, 89).replace(/\s+\S*$/, '') + '…' : kok;
+  }
+
+  function yanlisListesi(){
+    const ders = S.ui.yanlisDers || 'hepsi';
+    const l = T().yanlislar(ders);
+    const hepsi = ders === 'hepsi' ? l.length : T().yanlislar().length;
+    return K.Card({ title:'Yanlışlarım', wide:true,
+      sub:l.length ? U.plural(l.length, 'soru', 'soru') + ' · son denemesi doğru olmayanlar' : null,
+      actions:when(hepsi, () => K.Select({ id:'yanlis-ders', options:DERSLER(), value:ders, change:'yanlis-ders', aria:'Ders', size:'sm' })),
+      body:l.length ? html`<div class="stack-sm">
+          <div>${K.Button({ label:'Sırayla çöz', icon:'right', tone:'primary', size:'sm', act:'tekrar-ac', data:{ 'data-k':enEski(l).k } })}</div>
+          <div class="list list--sik" data-raf-tam>${map(l, y => html`<button class="listitem listitem--tap ogr-konu" data-act="tekrar-ac" data-k="${y.k}">
+            <span class="ogr-konu__no num" aria-hidden="true">${y.i + 1}</span>
+            <span class="grow minw0"><span class="small strong ogr-konu__ad">${y.topic.name}</span>
+              <span class="tiny ogr-konu__ad">${kisaSoru(y.q)}</span>
+              <span class="tiny dim">${y.subject.name} · ${y.son.bak ? 'çözüme bakıldı' : 'cevabın ' + y.son.h} · ${KAYNAK_AD[y.son.kaynak]} · ${tarihAdi(y.son.at)}</span></span>
+            <span class="ogr-konu__ok" aria-hidden="true">${raw(UI.icon('right'))}</span></button>`)}</div>
+          <p class="tiny dim">Bir soru yeniden doğru çözülünce listeden düşer; ilk ölçüm silinmez.</p></div>`
+        : K.Empty({ icon:'check', text:hepsi ? 'Bu derste yanlışın yok.'
+            : 'Yanlışın yok. Konu sorularında ya da karma testte yanlış çözdüğün, çözümüne baktığın sorular burada toplanır.' }) });
+  }
+
+  function tekrarKarti(){
+    const t = S.ui.ogrTekrar;
+    const s = t && T().soruOf(t.k);
+    if(!s){ S.ui.ogrTekrar = null; return yanlisListesi(); }
+    const v = t.h ? { h:t.h } : null;
+    const kalan = T().yanlislar(S.ui.yanlisDers || 'hepsi').filter(y => y.k !== t.k);
+    return K.Card({ wide:true,
+      body:html`${kartBasi('Yeniden çöz', s.subject.name + ' · ' + s.topic.name + (kalan.length ? ' · ' + kalan.length + ' yanlış daha' : ''),
+          K.Button({ label:'Listeye dön', size:'sm', tone:'ghost', act:'tekrar-kapat' }))}
+        ${soruGovdesi(s.q, v, { etiket:'Soru ' + (s.i + 1), cevapAct:'tekrar-cevap',
+          ust:v && v.h === s.q.dogru ? html`<p class="tiny dim mt-6">Doğru çözdün: Yanlışlarım’dan düştü.</p>` : '',
+          eylemler:soruEylemleri(s, v, s.k) })}
+        ${when(v, () => html`<div class="row between wrap gap-6 mt-16">
+          ${K.Button({ label:'Anlatım', icon:'book', size:'sm', tone:'ghost', act:'ogren-git',
+            data:{ 'data-route':'anlatim', 'data-subject':s.subject.id, 'data-topic':s.topic.id } })}
+          ${kalan.length ? K.Button({ label:'Sıradaki yanlış', icon:'right', size:'sm', tone:'primary', act:'tekrar-ac', data:{ 'data-k':enEski(kalan).k } })
+            : K.Button({ label:'Listeye dön', size:'sm', tone:'primary', act:'tekrar-kapat' })}
+        </div>`)}` });
+  }
+
+  function yanlisKip(){ return [S.ui.ogrTekrar ? tekrarKarti() : yanlisListesi()]; }
+
+  /* ---------- ekran ---------- */
+
+  function kipSekmeleri(kip){
+    const a = T().aktif(), n = T().yanlislar().length;
+    return K.Subtabs({ act:'sorular-kip', value:kip, aria:'Soru kipi', items:[
+      { id:'konu', label:'Bu konu' },
+      { id:'karma', label:'Karma test', count:a ? T().say(a).cevaplanan + '/' + a.sorular.length : null },
+      { id:'yanlis', label:'Yanlışlarım', count:n || null },
+    ] });
+  }
+  const kipOf = () => ['konu', 'karma', 'yanlis'].indexOf(S.ui.ogrenKip) >= 0 ? S.ui.ogrenKip : 'konu';
+
+  /* Bir sorunun kimliği: data-k varsa o (karma, yeniden çözüm), yoksa
+     bu konunun ekrandaki sorusu. */
+  function soruRef(el){
+    const k = el && el.dataset && el.dataset.k;
+    if(k){ const s = T().soruOf(k); return s ? { subject:s.subject, topic:s.topic, i:s.i, q:s.q } : null; }
+    const x = O().secili();
+    if(!x.topic) return null;
+    const { l, i } = soruNo(x);
+    return l[i] ? { subject:x.subject, topic:x.topic, i, q:l[i] } : null;
+  }
+
   R.Screens.sorular = {
     id:'sorular',
     title:'Sorular',
-    subtitle(){ const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Örnek sorular'; },
+    subtitle(){
+      const kip = kipOf();
+      if(kip === 'karma') return 'Konular karışık; sonuç konu konu';
+      if(kip === 'yanlis') return 'Yanlış çözdüklerini yeniden çöz';
+      const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Örnek sorular';
+    },
     actions(){ return ''; },
     async render(){
+      const kip = kipOf();
+      const sekme = raw(kipSekmeleri(kip));
+      if(kip === 'karma') return String(K.Grid([K.Span(12, K.Stack([sekme].concat(karmaKip())))]));
+      if(kip === 'yanlis') return String(K.Grid([K.Span(12, K.Stack([sekme].concat(yanlisKip())))]));
       const x = await hazirla();
       if(!x.topic) return String(K.Card({ body:K.Empty({ icon:'search', text:'Konu yok.' }) }));
-      return String(K.Grid([K.Span(12, K.Stack([raw(konuCubugu(x)), soruKarti(x)]))]));
+      return String(K.Grid([K.Span(12, K.Stack([sekme, raw(konuCubugu(x)), soruKarti(x)]))]));
     },
     handle:Object.assign({}, ortakHandle, {
+      /* Bu konu */
       async 'soru-git'(el){ S.ui.ogrenSoru = Number(el.dataset.i) || 0; R.App.render(); },
       async 'soru-cevap'(el){
         const x = O().secili(), { i } = soruNo(x);
@@ -478,30 +753,74 @@ R.Screens = R.Screens || {};
         UI.confirmSheet('Baştan çöz', 'Bu konudaki örnek soru cevapların silinir; yeniden çözdüğünde yeni ilk cevabın sayılır.',
           async () => { await O().sifirla(x.subject.id, x.topic.id); S.ui.ogrenSoru = 0; R.App.render(); }, false, 'Baştan çöz');
       },
-      async 'soru-koca'(){
-        const x = O().secili(), { l, i } = soruNo(x), q = l[i];
-        if(!q) return;
-        const d = O().duzMetin;
-        S.ui.kocParca = { etiket:'Soru ' + (i + 1), metin:d(q.soru) + '\n' + q.sec.map((m, k) => O().HARFLER[k] + ') ' + d(m)).join('\n')
+      /* Üç kipte ortak: soruyu koça, karta, deftere. */
+      async 'soru-koca'(el){
+        const r = soruRef(el);
+        if(!r) return;
+        const d = O().duzMetin, q = r.q;
+        await O().sec(r.subject.id, r.topic.id);
+        S.ui.kocParca = { etiket:'Soru ' + (r.i + 1), metin:d(q.soru) + '\n' + q.sec.map((m, k) => O().HARFLER[k] + ') ' + d(m)).join('\n')
           + '\nDoğru cevap: ' + q.dogru + '\nUygulamadaki çözüm: ' + dizi(q.cozum).map(d).join(' ') };
         S.ui.kocTaslak = 'Bu sorunun çözümünü anlamadım; adım adım, başka bir yoldan anlat.';
         R.App.go('koc');
       },
-      async 'soru-kart'(){
-        const x = O().secili(), { i } = soruNo(x), y = O().kartYuzu(x.topic.id, i);
+      async 'soru-kart'(el){
+        const r = soruRef(el), y = r && O().kartYuzu(r.topic.id, r.i);
         if(!y) return;
-        const card = R.Model.newCard({ front:y.front, back:y.back, subjectId:x.subject.id, topic:x.topic.name, source:'ogren' });
+        const card = R.Model.newCard({ front:y.front, back:y.back, subjectId:r.subject.id, topic:r.topic.name, source:'ogren' });
         await R.Model.saveCard(card);
         UI.toast('Karta çevrildi · Tekrar’da sorar');
       },
-      async 'soru-defter'(){
-        const x = O().secili(), { i } = soruNo(x);
-        const e = await O().yanlisaEkle(x.subject.id, x.topic.id, i);
+      async 'soru-defter'(el){
+        const r = soruRef(el);
+        if(!r) return;
+        const e = await O().yanlisaEkle(r.subject.id, r.topic.id, r.i, el.dataset.h || null);
         UI.toast(e ? 'Yanlış defterine eklendi · kök nedenini orada yaz' : 'Eklenemedi');
         R.App.render();
       },
+      /* Karma test */
+      async 'karma-konular'(el){ S.ui.karmaKonular = el.dataset.value; R.App.render(); },
+      async 'karma-boy'(el){ S.ui.karmaBoy = Number(el.dataset.value) || T().BOYLAR[0]; R.App.render(); },
+      async 'karma-baslat'(){
+        const k = karmaKapsami();
+        const r = await T().baslat({ ders:k.ders, konular:k.konular }, S.ui.karmaBoy || T().BOYLAR[0]);
+        if(!r.ok){ UI.toast(r.metin, { life:6000 }); return; }
+        S.ui.karmaSonuc = null;
+        window.scrollTo(0, 0);
+        R.App.render();
+      },
+      async 'test-git'(el){ await T().git(Number(el.dataset.i) || 0); R.App.render(); },
+      async 'test-cevap'(el){ const y = T().siradaki(); if(y) await T().cevapla(y.sira, el.dataset.harf); R.App.render(); },
+      async 'test-bak'(){ const y = T().siradaki(); if(y) await T().bak(y.sira); R.App.render(); },
+      async 'karma-bitir'(){
+        const a = T().aktif();
+        if(!a) return;
+        const bos = T().say(a).bos;
+        const bitir = async () => { const oz = await T().bitir(); S.ui.karmaSonuc = oz ? oz.id : null; window.scrollTo(0, 0); R.App.render(); };
+        if(!bos) return bitir();
+        UI.confirmSheet('Testi bitir', U.plural(bos, 'soru', 'soru') + ' cevapsız: boş sayılır, yanlış sayılmaz.', bitir, false, 'Bitir');
+      },
+      async 'karma-vazgec'(){
+        UI.confirmSheet('Testten vazgeç', 'Bu test silinir; geçmişe hiçbir şey yazılmaz.',
+          async () => { await T().vazgec(); R.App.render(); }, true, 'Vazgeç');
+      },
+      async 'karma-sonuc'(el){ S.ui.karmaSonuc = el.dataset.id; window.scrollTo(0, 0); R.App.render(); },
+      async 'karma-yeni'(){ S.ui.karmaSonuc = null; R.App.render(); },
+      /* Yanlışlarım */
+      async 'tekrar-ac'(el){ S.ui.ogrTekrar = { k:el.dataset.k, h:null }; window.scrollTo(0, 0); R.App.render(); },
+      async 'tekrar-kapat'(){ S.ui.ogrTekrar = null; R.App.render(); },
+      async 'tekrar-cevap'(el){
+        const t = S.ui.ogrTekrar;
+        if(!t || t.h) return;
+        const r = await T().tekrarCevapla(t.k, el.dataset.harf);
+        if(r.ok) t.h = String(el.dataset.harf).toUpperCase();
+        R.App.render();
+      },
     }),
-    change:Object.assign({}, ortakChange),
+    change:Object.assign({}, ortakChange, {
+      async 'karma-ders'(el){ S.ui.karmaDers = el.value; S.ui.karmaKonular = null; R.App.render(); },
+      async 'yanlis-ders'(el){ S.ui.yanlisDers = el.value; R.App.render(); },
+    }),
   };
 
   /* ================================================================

@@ -1263,6 +1263,8 @@ R.Model = (function(){
     if(R.Bolum) await R.Bolum.yukle();
     /* Öğren'de son açılan konu (core/ogren.js söz 2). */
     if(R.Ogren) await R.Ogren.yukle();
+    /* Karma test, geçmişi ve yeniden çözümler (core/ogrentest.js söz 4). */
+    if(R.OgrenTest) await R.OgrenTest.yukle();
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
     if(R.Hedefler) await R.Hedefler.yukle();
     if(R.SinavProfil) await R.SinavProfil.yukle();
