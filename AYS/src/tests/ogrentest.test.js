@@ -230,6 +230,17 @@
       });
     });
 
+    it('palet: «Karma test» ve «Yanlışlarım» Sorular’ı o kipte açar', async () => {
+      await temiz();
+      await sessiz(async () => {
+        const c = R.Palette.commands();
+        c.find(x => x.label.indexOf('Karma test') === 0).run();
+        expect(R.S.ui.ogrenKip).toBe('karma');
+        c.find(x => x.label.indexOf('Yanlışlarım') === 0).run();
+        expect(R.S.ui.ogrenKip).toBe('yanlis');
+      });
+    });
+
     it('Konular: dersler kartı ders seçer; «Yanlışı olan» süzgeci konuyu bulur', async () => {
       await temiz();
       const q = O().sorular('tm-06')[0];

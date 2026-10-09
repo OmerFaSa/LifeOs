@@ -19,6 +19,11 @@ R.Palette = (function(){
     list.push(go('today','Bugün','today','Git'));
     list.push(go('week','Hafta — sözleşme ve değerlendirme','week','Git'));
     list.push(go('ogren','Öğren — konu anlatımı, örnek soru, koç','book','Git'));
+    /* Öğren › Sorular'ın iki kipi (core/ogrentest.js). */
+    const kip = (tab, label, icon) => ({ group:'Git', label, icon, route:'sorular', run(){
+      R.S.ui.ogrenKip = tab; R.S.ui.ogrTekrar = null; R.App.go('sorular'); } });
+    list.push(kip('karma', 'Karma test — konular karışık', 'zap'));
+    list.push(kip('yanlis', 'Yanlışlarım — yeniden çöz', 'list'));
     list.push(go('learn','Öğrenme — video ve ders notu','play','Git'));
     list.push(go('exams','Deneme','exam','Git'));
     list.push(go('quiz','Sınama — kendini test et','zap','Git'));
