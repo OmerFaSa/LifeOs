@@ -17,6 +17,7 @@ uygulama/ios/
   LifeOS/KabukDenetleyici.swift  tek web görünümü, izinler, indirme
   LifeOS/KonumKoprusu.swift      ekran kapalıyken konum (CoreLocation)
   LifeOS/KaliciTampon.swift      sayfanın yazmadığı noktalar diskte
+  LifeOS/BildirimKoprusu.swift   yerel bildirim (SPİ hatırlatmaları, ESP hatırlatıcıları)
   LifeOSTests/               simülatörde koşan testler
 .github/workflows/ios.yml    macOS'ta derle → sına → imzasız IPA → sürüm sayfası
 ```
@@ -48,6 +49,8 @@ uygulama/ios/
 | 2b | yazıldı | **Nokta kaybolmaz:** izlenen her nokta diske de yazılır (`KaliciTampon.swift`); SPİ taslağını depoya yazınca «buraya kadar yazdım» der (`yazildi`), o kısım silinir. **iOS web sürecini öldürürse** GPS durmaz, noktalar diske akmaya devam eder; yeniden açılan sayfa sorar (`kurtar`) ve kayıt kaldığı yerden sürer (süre ve yol kesilmez). **Uygulamanın kendisi kapanırsa** noktalar diskte kalır; SPİ açılınca kayda eklenir, kayıt duraklatılmış gelir, süre son noktaya dek sayılır. Önceden bu iki durumda ekran kapalı kısım kayboluyordu. |
 | 2c | yazıldı | **Konum neden gelmiyor, ekran söyler:** köprü durumunu sayfaya bildirir (izin soruldu mu · Konum Servisleri · Kesin Konum · GPS · gelen konum sayısı); SPİ «Konum bekleniyor…» yerine nedenini yazar. Durum hiç gelmezse «konum servisi cevap vermedi» der: istek köprüye ulaşmamıştır. Kullanıcının ilk telefon denemesinde (2026-10-05) ekranda yalnız «Konum bekleniyor…» vardı ve Ayarlar › LifeOS'ta Konum satırı yoktu; neden henüz görülmedi. |
 | 3 | yapılmayacak (2026-10-07) | Android: telefon iPhone, tablet tarayıcıdan açar (`LIFEOS2.md` §3). |
+| 4 | yazıldı (2026-10-09) | **Yerel bildirim:** WKWebView'da tarayıcı bildirimi yok; SPİ hatırlatmaları uygulamada hiç gelmiyordu. `BildirimKoprusu.swift` sayfanın isteğini iOS'un yerel bildirimine çevirir (`brand/ortak/bildirim.js`): SPİ hatırlatma saatleri ve ESP hatırlatıcıları (vade günü 09:00) önümüzdeki 7 güne kurulur, uygulama kapalıyken de gelir; her açılış ve arka plana geçiş pencereyi ileri taşır. Modül sayfanın kapısından bilinir, biri ötekinin bildirimine dokunamaz; iOS'un 64 sınırının altında modül başına üst sınır. İzin yalnız kullanıcı açınca sorulur. Bildirime dokununca o modül açılır. |
+| — | yapılmadı (2026-10-09) | **Apple Sağlık'ı uygulamanın kendisi okumaz:** HealthKit bir yetki (entitlement) ister; ücretsiz Apple kimliğiyle AltStore'un bu yetkiyi verdiği doğrulanamadı ve yetki tutmazsa AltStore kurmayı reddeder (güncelleme yolu kırılır). Yerine Hesap › Kısayollar › «Apple Sağlık’tan her sabah» tarifi: Kısayollar otomasyonu Sağlık örneğini okur, gelen kutusuna yollar, SPİ Onaylar'a bırakır. |
 
 ## Kurulum (Windows + iPhone, ücretsiz — AltStore)
 
@@ -89,6 +92,7 @@ yenileme derdi yok).
 `.github/workflows/ios.yml` her `uygulama/ios/` ya da `dist/` değişikliğinde:
 simülatörde `YerelSunucuTests` (sayfa, MIME, parça isteği, kökün dışı, gizli
 dosya, yöntem), `KabukTests` (üç modül uygulamada açılır, `isSecureContext`,
-konum arayüzü) ve `KonumKoprusuTests` (arka planda birikme, diskteki tampon;
+konum arayüzü), `BildirimKoprusuTests` (kapıdan modül, yalnız kendi bildirimi,
+üst sınır, geçmiş kurulmaz; gerçek SPİ sayfasından istek) ve `KonumKoprusuTests` (arka planda birikme, diskteki tampon;
 gerçek SPİ sayfasında web süreci ölünce kaydın sürmesi, uygulama kapanınca
 noktaların kayda eklenmesi). Telefonda deneme kullanıcıdadır: kurulum, kamera izni, konum.

@@ -9,8 +9,11 @@
      3. SPİ'DE KALIR. İlaç adı HKM'ye hiçbir seviyede gitmez (core/beacon.js
         klinik sınır); bu yüzden hatırlatma Telegram'dan değil, SPİ açıkken
         Bugün ekranından ve — kullanıcı izin verdiyse — tarayıcı
-        bildiriminden gelir. SPİ kapalıyken hatırlatma YOKTUR; ekran bunu
-        söyler.
+        bildiriminden gelir. Tarayıcıda SPİ kapalıyken hatırlatma YOKTUR;
+        ekran bunu söyler. TELEFON UYGULAMASINDA (2026-10-09) saatler iOS'un
+        yerel bildirimi olarak önümüzdeki PLAN_GUN güne kurulur
+        (brand/ortak/bildirim.js): SPİ kapalıyken de gelir; işaretlenen saat
+        o gün düşer; uygulama bir hafta açılmazsa susar ve bu söylenir.
      4. «YAPILDI» BİR KAYITTIR, ÖLÇÜM DEĞİL. Su hatırlatmasına «İçtim» demek
         mililitre yazmaz: miktar uydurulmaz, su alanı ayrıca girilir.
         İşaretlenmemiş bir saat «alınmadı» sayılmaz — «işaretlenmedi»dir;
@@ -24,6 +27,7 @@ SP.Hatirlat = (function(){
   const SAKLA_GUN = 14;
   const EN_COK_SAAT = 8;
   const BILDIRIM_PENCERE_DK = 15;
+  const PLAN_GUN = 7;                       // telefonda kaç günün saati kurulur
 
   const TUR = {
     ilac:{ ad:'İlaç / takviye', eylem:'Aldım' },
@@ -45,6 +49,9 @@ SP.Hatirlat = (function(){
     SP.S.hatirlat = Object.assign(bos(), d);
     if(!Array.isArray(SP.S.hatirlat.liste)) SP.S.hatirlat.liste = [];
     if(!SP.S.hatirlat.yapildi || typeof SP.S.hatirlat.yapildi !== 'object') SP.S.hatirlat.yapildi = {};
+    /* Telefonda: izin durumu öğrenilir, önümüzdeki günler yeniden kurulur
+       (her açılış pencereyi ileri taşır). Beklenmez. */
+    if(telefonMu()) B().durum().then(() => planla(), () => null);
     return SP.S.hatirlat;
   }
 
@@ -53,6 +60,7 @@ SP.Hatirlat = (function(){
     const sinir = U().iso(U().addDays(U().today(), -SAKLA_GUN));
     Object.keys(d.yapildi).forEach(g => { if(g < sinir) delete d.yapildi[g]; });
     await SP.Store.set(KEY, d);
+    planla();
     return d;
   }
 
@@ -157,10 +165,28 @@ SP.Hatirlat = (function(){
 
   /* ------------------------------------------------ tarayıcı bildirimi */
 
-  function bildirimVar(){ return typeof window.Notification === 'function'; }
-  function bildirimIzinli(){ return bildirimVar() && window.Notification.permission === 'granted'; }
+  /* Telefon uygulamasının yerel bildirimi (brand/ortak/bildirim.js). */
+  function B(){ const b = (window.LIFEOS || {}).BILDIRIM; return b && b.var() ? b : null; }
+  function telefonMu(){ return !!B(); }
+
+  function bildirimVar(){ return telefonMu() || typeof window.Notification === 'function'; }
+  function bildirimIzinli(){
+    if(telefonMu()) return B().sonDurum() === 'izin';
+    return bildirimVar() && window.Notification.permission === 'granted';
+  }
 
   async function bildirimAc(){
+    if(telefonMu()){
+      const izin = await B().izin();
+      if(izin !== 'izin'){
+        return { ok:false, why:izin === 'red'
+          ? 'Bildirim izni kapalı: iPhone Ayarlar › LifeOS › Bildirimler’den aç.'
+          : 'Bildirim izni alınamadı; hatırlatmalar yalnız Bugün ekranında görünür.' };
+      }
+      durum().bildirim = true;
+      await kaydet();
+      return { ok:true, telefon:true };
+    }
     if(!bildirimVar()) return { ok:false, why:'Bu tarayıcı bildirim göstermiyor.' };
     let izin = window.Notification.permission;
     if(izin !== 'granted') izin = await window.Notification.requestPermission();
@@ -171,11 +197,47 @@ SP.Hatirlat = (function(){
   }
   async function bildirimKapat(){ durum().bildirim = false; await kaydet(); }
 
+  /* TELEFONDA: önümüzdeki PLAN_GUN günün saatleri yerel bildirim olarak
+     (her kaydetmede listenin tamamı; kabuk eskileri siler). İşaretlenmiş
+     saat, ilacın etkin olmadığı gün, kapalı tür ve sessiz saat kurulmaz.
+     Bildirim kapalıysa boş liste gider: bekleyenler silinir. */
+  function planListesi(simdi){
+    const now = simdi || new Date();
+    const d = durum(), b = (window.LIFEOS || {}).BILDIRIM;
+    if(!d.bildirim || !b) return [];
+    const P = (window.LIFEOS || {}).Pwa;
+    const out = [];
+    for(let i = 0; i < PLAN_GUN; i++){
+      const gun = U().iso(U().addDays(now, i));
+      const yap = d.yapildi[gun] || {};
+      d.liste.forEach(h => {
+        if(!gecerli(h, gun)) return;
+        h.saatler.forEach(saat => {
+          const anahtar = h.id + '@' + saat;
+          if(yap[anahtar]) return;
+          const zaman = b.anOf(gun, saat);
+          if(zaman <= now.getTime()) return;
+          if(P && P.gonderilebilir && !P.gonderilebilir('spi', 'hatirlatma', new Date(zaman)).ok) return;
+          out.push({ anahtar:gun + '|' + anahtar, baslik:'SPİ · ' + saat, govde:adOf(h), zaman });
+        });
+      });
+    }
+    return out;
+  }
+  let planSon = null;
+  function planla(simdi){
+    if(!telefonMu()) return null;
+    return (planSon = B().kur('spi', planListesi(simdi)).catch(() => null));
+  }
+  function planBekle(){ return planSon || Promise.resolve(null); }
+
   /* Dakikada bir çağrılır. Saati son 15 dakikada gelmiş, işaretlenmemiş
      ve bu oturumda gösterilmemiş satır için bir bildirim. Kaçan saat
-     KOVALANMAZ: iki saat önceki hatırlatma bildirim değil gürültüdür. */
+     KOVALANMAZ: iki saat önceki hatırlatma bildirim değil gürültüdür.
+     Telefonda bildirimi kabuk gösterir (planla); burada ikinci kez değil. */
   const gosterildi = {};
   function tik(simdi){
+    if(telefonMu()) return 0;
     if(!durum().bildirim || !bildirimIzinli()) return 0;
     const now = simdi || new Date();
     /* 180/122: tür kapalıysa ya da sessiz saatteyse gösterilmez; satır
@@ -216,5 +278,6 @@ SP.Hatirlat = (function(){
   function bildirimSorunu(){ return sorun; }
 
   return { TUR, yukle, kaydet, saatOku, ekle, sil, geriKoy, bugun, isaretle, adOf, durum,
-    bildirimVar, bildirimIzinli, bildirimAc, bildirimKapat, bildirimSorunu, tik };
+    bildirimVar, bildirimIzinli, bildirimAc, bildirimKapat, bildirimSorunu, tik,
+    telefonMu, planListesi, planla, planBekle, PLAN_GUN };
 })();

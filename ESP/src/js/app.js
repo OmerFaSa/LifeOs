@@ -1730,6 +1730,14 @@ ESP.App = (function(){
             return render();
           } });
       }
+      /* Telefon bildirimi (core/takvim.js planla): açılışta ve arka plana
+         geçerken hatırlatıcılar yeniden kurulur. Uygulama dışında boş iş. */
+      if(ESP.Takvim && ESP.Takvim.planla){
+        ESP.Takvim.planla();
+        document.addEventListener('visibilitychange', () => {
+          if(document.hidden){ try{ ESP.Takvim.planla(); }catch(e){} }
+        });
+      }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'esp', hkm:() => ESP.Beacon, git:route => go(route),

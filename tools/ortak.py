@@ -269,6 +269,10 @@ DOSYALAR = {
     # adim kurulumu ve kodla cihaz baglama. hesap.js'ten ONCE yuklenir.
     "qr.js":          "js/core",
     "qr.test.js":     "tests",
+    # BILDIRIM — telefon uygulamasinda yerel bildirim (iOS kabugu, 2026-10-09):
+    # SPI hatirlatmalari ve ESP hatirlaticilari uygulama kapaliyken de gelir.
+    "bildirim.js":      "js/core",
+    "bildirim.test.js": "tests",
     # KING — her yerden sade sohbet (2026-10-05): ayni katalog, ayni isik,
     # ayni baloncuk uc arayuzde.
     "king.js":        "js/core",

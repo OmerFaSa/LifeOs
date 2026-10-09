@@ -80,6 +80,44 @@
       expect(sahte.ESP.Takvim.disa('2026-09-12').adet).toBe(1);
     });
 
+    /* TELEFON BİLDİRİMİ (2026-10-09): açıksa hatırlatıcı vade günü
+       BILDIRIM_SAAT'te; gecikmiş ve biten çaldırılmaz; kapalı bölümünki yok. */
+    it('telefon bildirimi: vade günü sabahı, önümüzdeki günler; gecikmiş, biten ve kapalı bölüm yok; kapalıysa boş liste', async () => {
+      resetState();
+      const giden = [], eski = window.webkit;
+      window.webkit = { messageHandlers:{ lifeosBildirim:{ postMessage(m){
+        giden.push(JSON.parse(JSON.stringify(m)));
+        setTimeout(() => window.LIFEOS.BILDIRIM._cevap(m.istek, m.tur === 'kur' ? { kurulan:m.liste.length } : { durum:'izin' }), 0);
+      } } } };
+      try{
+        ESP.S.reminders = [
+          { id:'r1', text:'Metronom 80', disc:'music', due:'2026-09-12', repeat:'none', done:false },
+          { id:'r2', text:'Kelime', disc:'lang', due:'2026-09-14', repeat:'daily', done:false },
+          { id:'r3', text:'Gecikmiş', disc:'lang', due:'2026-09-10', repeat:'none', done:false },
+          { id:'r4', text:'Biten', disc:'lang', due:'2026-09-13', repeat:'none', done:true },
+          { id:'r5', text:'Uzak', disc:'lang', due:'2026-10-30', repeat:'none', done:false },
+        ];
+        const sabah = new Date(2026, 8, 12, 8, 0), oglen = new Date(2026, 8, 12, 12, 0);
+        const l = T().bildirimListesi(sabah);
+        expect(l.map(x => x.anahtar)).toEqual(['r1@2026-09-12', 'r2@2026-09-14']);
+        expect(l[0]).toEqual({ anahtar:'r1@2026-09-12', baslik:'ESP · ' + ESP.DISCIPLINE_BY_ID.music.label,
+          govde:'Metronom 80', zaman:new Date(2026, 8, 12, 9, 0).getTime() });
+        expect(T().bildirimListesi(oglen).map(x => x.anahtar)).toEqual(['r2@2026-09-14']);   // bugünün saati geçti
+        await ESP.Mod.set('music', false);
+        expect(T().bildirimListesi(sabah).map(x => x.anahtar)).toEqual(['r2@2026-09-14']);
+        await ESP.Mod.set('music', true);
+        await ESP.Office.saveSettings({ telefonBildirim:false });
+        await T().planla(sabah);
+        expect(giden[giden.length - 1]).toEqual({ tur:'kur', modul:'esp', istek:giden[giden.length - 1].istek, liste:[] });
+        await ESP.Office.saveSettings({ telefonBildirim:true });
+        /* Köprü geçmişi GERÇEK saate göre eler: gerçek yarının hatırlatıcısı gider. */
+        const yarin = ESP.U.iso(ESP.U.addDays(new Date(), 1));
+        ESP.S.reminders = [{ id:'r9', text:'Yarın', disc:'lang', due:yarin, repeat:'none', done:false }];
+        await T().planla();
+        expect(giden[giden.length - 1].liste.map(x => x.anahtar)).toEqual(['r9@' + yarin]);
+      }finally{ if(eski === undefined) delete window.webkit; else window.webkit = eski; }
+    });
+
     it('hiçbir şey yoksa boş ama geçerli bir takvim', () => {
       resetState();
       withToday('2026-09-12', () => {

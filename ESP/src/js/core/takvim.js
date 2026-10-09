@@ -93,5 +93,34 @@ ESP.Takvim = (function(){
     return { metin:yaz(l, 'ESP — gelişim takvimi'), adet:l.length };
   }
 
-  return { yaz, disa, katla };
+  /* TELEFON BİLDİRİMİ (iOS kabuğu, brand/ortak/bildirim.js; 2026-10-09).
+     Açıksa (Profil › «Hatırlatıcılar telefonda bildirim olsun») tamamlanmamış
+     hatırlatıcı vade gününün BILDIRIM_SAAT'inde bildirim olur, önümüzdeki
+     PLAN_GUN gün için. Gecikmiş hatırlatıcı yeniden çaldırılmaz (Bugün
+     ekranında durur; borç yazmaz). Her değişiklikte listenin tamamı gider. */
+  const BILDIRIM_SAAT = '09:00';
+  const PLAN_GUN = 7;
+  function bildirimListesi(simdi){
+    const b = (window.LIFEOS || {}).BILDIRIM;
+    const now = simdi || new Date();
+    if(!b) return [];
+    const bugun = U().iso(now), son = U().iso(U().addDays(now, PLAN_GUN - 1));
+    const ad = id => ((ESP.DISCIPLINE_BY_ID || {})[id] || {}).label || '';
+    return (S().reminders || []).filter(r => !r.done && U().isISO(r.due) && r.due >= bugun && r.due <= son
+        && (!ESP.Mod || !ESP.Mod.isOn || ESP.Mod.isOn(r.disc)))
+      .map(r => ({ anahtar:r.id + '@' + r.due, baslik:'ESP · ' + (ad(r.disc) || 'Hatırlatıcı'),
+        govde:String(r.text || 'Hatırlatıcı'), zaman:b.anOf(r.due, BILDIRIM_SAAT) }))
+      .filter(x => x.zaman > now.getTime());
+  }
+  function bildirimAcik(){
+    const st = ESP.Office && ESP.Office.settings ? ESP.Office.settings() : {};
+    return !!(st && st.telefonBildirim);
+  }
+  function planla(simdi){
+    const b = (window.LIFEOS || {}).BILDIRIM;
+    if(!b || !b.var()) return null;
+    return b.kur('esp', bildirimAcik() ? bildirimListesi(simdi) : []).catch(() => null);
+  }
+
+  return { yaz, disa, katla, bildirimListesi, bildirimAcik, planla, BILDIRIM_SAAT, PLAN_GUN };
 })();

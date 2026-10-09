@@ -72,14 +72,17 @@ SP.HatirlatUI = (function(){
         html`<div id="ht-hata" class="small" role="alert"></div>`,
         when(!ilaclar.length, () => html`<p class="tiny dim">İlaç hatırlatması için önce
           Testler › İlaç sekmesinden kullandığın şeyi kaydet.</p>`),
-        K.Notice({ tone:'info', body:'Hatırlatma yalnız SPİ açıkken gelir: Bugün ekranında görünür, '
-          + 'izin verirsen tarayıcı bildirimi de olur. İlaç adı HKM\'ye gitmediği için Telegram\'dan '
+        K.Notice({ tone:'info', body:(H().telefonMu()
+            ? 'Telefon bildirimi açıksa saatler önümüzdeki ' + H().PLAN_GUN + ' güne kurulur: SPİ kapalıyken de gelir. '
+              + 'Uygulamayı bir hafta açmazsan susar. '
+            : 'Hatırlatma yalnız SPİ açıkken gelir: Bugün ekranında görünür, izin verirsen tarayıcı bildirimi de olur. ')
+          + 'İlaç adı HKM\'ye gitmediği için Telegram\'dan '
           + 'hatırlatılmaz. «Aldım» bir işarettir; işaretlenmeyen saat «alınmadı» sayılmaz.' }),
         when(H().bildirimSorunu(), () => K.Notice({ tone:'warn', body:H().bildirimSorunu() })),
         when(H().bildirimVar(), () => html`<div class="row wrap gap-6">
           ${d.bildirim && H().bildirimIzinli()
-            ? K.Button({ label:'Tarayıcı bildirimini kapat', size:'sm', act:'ht-bildirim', data:{ 'data-v':'0' } })
-            : K.Button({ label:'Tarayıcı bildirimini aç', size:'sm', act:'ht-bildirim', data:{ 'data-v':'1' } })}</div>`),
+            ? K.Button({ label:(H().telefonMu() ? 'Telefon' : 'Tarayıcı') + ' bildirimini kapat', size:'sm', act:'ht-bildirim', data:{ 'data-v':'0' } })
+            : K.Button({ label:(H().telefonMu() ? 'Telefon' : 'Tarayıcı') + ' bildirimini aç', size:'sm', act:'ht-bildirim', data:{ 'data-v':'1' } })}</div>`),
         /* 180/122: tür anahtarı ve sessiz saatler (brand/ortak/pwa.js). */
         when(d.bildirim && H().bildirimIzinli() && VT() && VT().bildirimKutusu, () => raw(VT().bildirimKutusu({ modul:'spi',
           turler:[{ id:'hatirlatma', ad:'SPİ · hatırlatma' }] }))),
@@ -127,7 +130,8 @@ SP.HatirlatUI = (function(){
     async 'ht-bildirim'(el){
       if(el.dataset.v === '1'){
         const r = await H().bildirimAc();
-        UI.toast(r.ok ? 'Bildirim açık · SPİ açıkken saatinde gelir' : r.why, { life:r.ok ? 2000 : 5000 });
+        UI.toast(r.ok ? (r.telefon ? 'Bildirim açık · saatinde gelir, SPİ kapalıyken de' : 'Bildirim açık · SPİ açıkken saatinde gelir')
+          : r.why, { life:r.ok ? 2000 : 5000 });
       }else{
         await H().bildirimKapat();
         UI.toast('Bildirim kapatıldı');

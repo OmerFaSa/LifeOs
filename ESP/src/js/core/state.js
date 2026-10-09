@@ -1022,12 +1022,21 @@ ESP.Model = (function(){
     if(i >= 0) S.reminders[i] = r; else S.reminders.unshift(r);
     const w = await write('reminders/' + r.id, r);
     if(!w.ok) return w;
+    telefonPlanla();
     return { ok:true, reminder:r };
+  }
+
+  /* Telefon uygulamasında hatırlatıcı bildirimi (core/takvim.js planla):
+     her değişiklikten sonra listenin tamamı. Beklenmez; uygulama dışında
+     hiçbir şey yapmaz. */
+  function telefonPlanla(){
+    try{ if(ESP.Takvim && ESP.Takvim.planla) ESP.Takvim.planla(); }catch(e){ /* bildirim kurulamadı: sessiz */ }
   }
 
   async function deleteReminder(id){
     S.reminders = S.reminders.filter(r => r.id !== id);
     await ESP.Store.remove('reminders/' + id);
+    telefonPlanla();
   }
 
   /* Tamamla. Tekrarlı olan bir sonraki tarihe taşınır ve AÇIK KALIR. */
@@ -1047,6 +1056,7 @@ ESP.Model = (function(){
       r.doneAt = new Date().toISOString();
     }
     await ESP.Store.set('reminders/' + r.id, r);
+    telefonPlanla();
     return { ok:true, reminder:r };
   }
 

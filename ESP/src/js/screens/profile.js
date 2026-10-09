@@ -148,7 +148,16 @@ ESP.Screens.profile = (function(){
               <p class="small muted">Tür tür: açtığın küçük tür sormadan uygulanır, kapattığın her zaman sorar.
                 Orta ve büyük türler kilitlidir.</p>
               ${raw(window.LIFEOS.ONERI.ayarHtml(ESP.Plans.KINDS.map(k => Object.assign({ title:k.label }, k)),
-                { mod:ESP.Office.settings().otomatikUygula || 'istek', turler:ESP.Office.settings().otomatikTurler || {} }))}</div>`)}`,
+                { mod:ESP.Office.settings().otomatikUygula || 'istek', turler:ESP.Office.settings().otomatikTurler || {} }))}</div>`)}
+            ${when(window.LIFEOS && window.LIFEOS.BILDIRIM && window.LIFEOS.BILDIRIM.var(), () => html`<div class="mt-12">${K.Field({
+              label:'Hatırlatıcılar telefonda bildirim olsun mu?',
+              hint:'Vade günü saat ' + ESP.Takvim.BILDIRIM_SAAT + '’da, ESP kapalıyken de. Önümüzdeki '
+                + ESP.Takvim.PLAN_GUN + ' gün kurulur; uygulamayı bir hafta açmazsan susar.',
+              input:K.Select({ id:'pf-telbildirim', value:ESP.Office.settings().telefonBildirim ? 'acik' : 'kapali',
+                change:'pick-telbildirim', options:[
+                  { value:'kapali', label:'Hayır' },
+                  { value:'acik', label:'Evet, telefon bildirimi' },
+                ] }) })}</div>`)}`,
         }),
 
         hafizaEntry(),
@@ -481,6 +490,25 @@ ESP.Screens.profile = (function(){
   };
 
   const change = {
+    /* Telefon bildirimi (iOS kabuğu): izin yalnız burada, kullanıcı
+       «Evet» deyince sorulur; reddedilirse ayar açılmaz ve nedeni söylenir. */
+    async 'pick-telbildirim'(el){
+      const B = window.LIFEOS && window.LIFEOS.BILDIRIM;
+      if(!B || !B.var()) return;
+      if(el.value === 'acik'){
+        const izin = await B.izin();
+        if(izin !== 'izin'){
+          el.value = 'kapali';
+          ESP.UI.toast(izin === 'red' ? 'Bildirim izni kapalı: iPhone Ayarlar › LifeOS › Bildirimler’den aç.'
+            : 'Bildirim izni alınamadı.', { life:5000 });
+          return;
+        }
+      }
+      await ESP.Office.saveSettings({ telefonBildirim:el.value === 'acik' });
+      const r = await ESP.Takvim.planla();
+      ESP.UI.toast(el.value === 'acik' ? 'Açık · ' + ((r && r.kurulan) || 0) + ' hatırlatıcı kuruldu' : 'Telefon bildirimi kapandı');
+    },
+
     async 'pick-otomatik'(el){
       const v = el.value === 'hicbiri' ? 'hicbiri' : 'istek';
       await ESP.Office.saveSettings({ otomatikUygula:v });

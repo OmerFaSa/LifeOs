@@ -1648,6 +1648,11 @@ SP.App = (function(){
       if(SP.Hatirlat){
         SP.Hatirlat.tik();
         setInterval(() => { try{ SP.Hatirlat.tik(); }catch(e){} }, 60000);
+        /* Telefon uygulamasında (brand/ortak/bildirim.js): arka plana
+           geçerken kurulan günler ileri taşınır; uzaktan gelen değişiklik de. */
+        document.addEventListener('visibilitychange', () => {
+          if(document.hidden){ try{ SP.Hatirlat.planla(); }catch(e){} }
+        });
       }
 
       /* Seviye kutlaması. İki yol da buraya çıkar:

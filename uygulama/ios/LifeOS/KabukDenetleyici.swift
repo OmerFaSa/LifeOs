@@ -16,13 +16,27 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
     private(set) var web: WKWebView!
     /// Ekran kapaliyken rota (asama 2): navigator.geolocation → CoreLocation.
     let kopru: KonumKoprusu
+    /// Yerel bildirim (SPI hatirlatmalari, ESP hatirlaticilari; 2026-10-09).
+    let bildirim: BildirimKoprusu
+    /// Bildirime dokununca o modul acilir; Uygulama merkezin temsilcisi yapar.
+    let dokunus = BildirimDokunusu()
+    /// Gorunum hazir degilken dokunulan bildirimin adresi.
+    private var bekleyenAdres: URL?
     private var indirilen: URL?
     /// Sayfanin en ustteki rengi (durum cubugunun zemini); gelmeden nil.
     private(set) var ustRenk: (r: Int, g: Int, b: Int)?
 
-    init(kopru: KonumKoprusu = KonumKoprusu()) {
+    init(kopru: KonumKoprusu = KonumKoprusu(), bildirim: BildirimKoprusu = BildirimKoprusu()) {
         self.kopru = kopru
+        self.bildirim = bildirim
         super.init(nibName: nil, bundle: nil)
+        dokunus.ac = { [weak self] u in self?.modulAc(u) }
+    }
+
+    /// Bildirime dokunuldu: o modulun sayfasi (gorunum yoksa acilinca).
+    func modulAc(_ u: URL) {
+        guard KabukDenetleyici.icerde(u) else { return }
+        if isViewLoaded { web.load(URLRequest(url: u)) } else { bekleyenAdres = u }
     }
 
     required init?(coder: NSCoder) { fatalError("kullanilmaz") }
@@ -44,6 +58,7 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
         ayar.userContentController.add(ZayifDinleyici(self), name: KabukDenetleyici.renkAdi)
         ayar.userContentController.addUserScript(KabukDenetleyici.yazdirBetigi)
         ayar.userContentController.add(ZayifDinleyici(self), name: KabukDenetleyici.yazdirAdi)
+        ayar.userContentController.add(bildirim, name: BildirimKoprusu.ad)
         let w = WKWebView(frame: .zero, configuration: ayar)
         kopru.web = w
         w.navigationDelegate = self
@@ -213,7 +228,8 @@ final class KabukDenetleyici: UIViewController, WKNavigationDelegate, WKUIDelega
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        web.load(URLRequest(url: KabukDenetleyici.baslangic))
+        web.load(URLRequest(url: bekleyenAdres ?? KabukDenetleyici.baslangic))
+        bekleyenAdres = nil
     }
 
     /// Uygulamanin kendi sayfasi mi? (127.0.0.1; giris ya da uc modul kapisi)

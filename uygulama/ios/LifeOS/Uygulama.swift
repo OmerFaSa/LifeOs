@@ -5,6 +5,7 @@
 // kapatabilir).
 
 import UIKit
+import UserNotifications
 
 @main
 final class Uygulama: UIResponder, UIApplicationDelegate {
@@ -18,7 +19,11 @@ final class Uygulama: UIResponder, UIApplicationDelegate {
         if let h = sunucular.hata {
             w.rootViewController = HataDenetleyici(metin: h)
         } else {
-            w.rootViewController = KabukDenetleyici()
+            let k = KabukDenetleyici()
+            // Bildirim temsilcisi acilista baglanir: kapaliyken dokunulan
+            // bildirim de uygulamayi o modulde acar.
+            UNUserNotificationCenter.current().delegate = k.dokunus
+            w.rootViewController = k
         }
         w.makeKeyAndVisible()
         window = w

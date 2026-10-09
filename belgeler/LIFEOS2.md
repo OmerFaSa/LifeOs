@@ -74,6 +74,7 @@ verilen kararlar:
 | Modül açılış geçişi | `brand/ortak/animasyon.js` «geçiş»: seçim sayfasındaki kart (ve kenardaki modül bağlantısı) büyüyüp modülün marka perdesine dönüşür; HKM yüzü kendi sayfasında belirir | 2026-10-08 |
 | Hesap deposunun yedeği | `sistem/hesap.py` sözü 20, `brand/ortak/hesap.js` sözleri 23–24: her gün arkada SQLite yedeği (son 7 + elle + geri yüklemeden önce), ikinci yer (USB/başka disk), Hesap › Yedekler; geri yükleme büyük aksiyon (PC, şifre, önce yedek); dönem değişince cihazlar kendi kayıtlarını yeniden yollar; `python sistem/hesap.py --yedekle / --geri-yukle` | 2026-10-09 |
 | Kısayollar üç modülde, ESP takvimi | `sistem/hesap.py` GELEN_MODULLER (ays, spi, esp), `AYS Proposals.disaridan` («paragraf 20», «soru 40 matematik»), `ESP Plans.disaridan` + teklif türü `oturum` (ölçüm, sormadan yazılmaz, geri alınır), `ESP/src/js/core/takvim.js` (hedef son günleri, tarihli hedefler, hatırlatıcılar → takvim aboneliği) | 2026-10-09 |
+| iPhone yerel bildirim | `uygulama/ios/LifeOS/BildirimKoprusu.swift`, `brand/ortak/bildirim.js`: SPİ hatırlatma saatleri ve ESP hatırlatıcıları uygulama kapalıyken de gelir (7 gün ileri kurulur); Apple Sağlık uygulamaya değil Kısayollar tarifine bağlı (`belgeler/UYGULAMA.md` aşama 4) | 2026-10-09 |
 
 ## 4. Değişmeyen sözler
 
