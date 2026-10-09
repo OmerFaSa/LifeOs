@@ -1,6 +1,7 @@
 /* Konu anlatımı ve örnek sorular (data/anlatim-*.js). Kanıtladığı sözler:
      1. Her anlatım gerçek bir konuya aittir ve biçimi tutar: giriş, 2–6
-        bölüm, bölümde başlık ve metin; çift boşluk yok, işaretler kapalı.
+        bölüm, bölümde başlık ve metin, liste ya da formülden en az biri;
+        çift boşluk yok, işaretler kapalı.
      2. Her soru ÖSYM biçimindedir: beş farklı seçenek, A–E arası tek doğru,
         boş olmayan çözüm.
      3. Doğru cevaplar harflere dağılır: yazarın «hep C» alışkanlığı sınavda
@@ -11,7 +12,7 @@
 (function(){
   const { describe, it, expect } = R.Test;
   /* Anlatımı bitmiş dersler (her bitişte buraya eklenir). */
-  const TAM = [];
+  const TAM = ['tyt-matematik'];
 
   const HARF = ['A', 'B', 'C', 'D', 'E'];
   const dizi = x => x == null ? [] : Array.isArray(x) ? x : [x];
@@ -36,7 +37,7 @@
         (a.bolumler || []).forEach((b, i) => {
           const ad = 'bölüm ' + (i + 1);
           metinDenetle(k, ad + ' başlık', b.baslik, bozuk);
-          if(!dizi(b.metin).length) bozuk.push(k + ' ' + ad + ': metin yok');
+          if(!dizi(b.metin).length && !dizi(b.liste).length && !dizi(b.formul).length) bozuk.push(k + ' ' + ad + ': içerik yok');
           dizi(b.metin).concat(dizi(b.liste), dizi(b.formul), b.dikkat ? [b.dikkat] : [])
             .forEach(m => metinDenetle(k, ad, m, bozuk));
           if(b.ornek){
