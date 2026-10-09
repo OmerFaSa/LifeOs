@@ -1723,6 +1723,13 @@ html .site--v5 > .kenar .kenar__arac:is(:hover, :focus-visible) .kenar__kisayol{
 .bildirim__gordu + .bildirim__kapat{ margin-left:0; }
 .bildirim__ertelenen{ flex:none; margin:0; padding:10px 20px 16px; display:flex; align-items:center; gap:8px;
   font-size:12.5px; color:var(--text-3); }
+/* Telefonda kurulu bildirimler (brand/ortak/bildirim.js söz 8): zil panelinin kalıbı. */
+.kmenu--bildirim .tb__oge{ cursor:default; }
+.bildirim__sayi--notr{ background:var(--surface-2); color:var(--text-2); }
+.kmenu--bildirim .tb__oge:active{ transform:none; }
+.tb__oge b{ font-weight:600; font-variant-numeric:tabular-nums; }
+.tb__oge small{ display:block; margin-top:2px; font-size:12.5px; color:var(--text-3); }
+.tb__not{ flex:none; margin:0; padding:0 20px 16px; font-size:12.5px; line-height:1.4; color:var(--text-3); }
 .bildirim__ertelenen button{ min-height:30px; padding:0 4px; border:0; background:none; cursor:pointer;
   font:inherit; font-weight:600; color:var(--text-2); text-decoration:underline; text-underline-offset:3px; }
 .kmenu--bildirim .kmenu__bildirim.is-acil{ font-weight:600; box-shadow:inset 3px 0 0 var(--now, #E5484D); }

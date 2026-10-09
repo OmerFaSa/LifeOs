@@ -26,6 +26,10 @@
 //      sayfasi acilinca alir, KENDI koduyla yazar, sonra kuyruktan siler
 //      (`isaretSil`): isaret kaybolmaz. Ertelenen bildirimin kimligi «~»
 //      tasir: «kur» onu silmez, modul isi isaretleyince (`yapildi`) kalkar.
+//   8. LISTE (2026-10-09): sayfa «liste» deyince bu modulun kurulu
+//      bildirimleri (baslik, govde, saat) doner; «sil» verilen anahtarlarin
+//      bekleyenini (ertelenmisi de) siler. Neyin yeniden kurulmayacagini
+//      sayfa tutar (brand/ortak/bildirim.js soz 8).
 // Cevap, konum koprusundeki gibi sayfaya JS cagrisiyla doner
 // (`LIFEOS.BILDIRIM._cevap(istek, {...})`). Yalniz Apple'in kitapliklari.
 
@@ -39,6 +43,8 @@ protocol BildirimMerkezi: AnyObject {
     func yetki(_ tamam: @escaping (String) -> Void)
     func izinIste(_ tamam: @escaping (String) -> Void)
     func bekleyenler(_ tamam: @escaping ([String]) -> Void)
+    /// Bekleyenlerin kendisi (soz 8: liste).
+    func bekleyenIstekler(_ tamam: @escaping ([UNNotificationRequest]) -> Void)
     func sil(_ kimlikler: [String])
     func ekle(_ istek: UNNotificationRequest)
     /// Bildirim ekraninda duran (gelmis) bildirimlerin kimlikleri (soz 5).
@@ -73,6 +79,10 @@ final class SistemBildirimMerkezi: BildirimMerkezi {
 
     func bekleyenler(_ tamam: @escaping ([String]) -> Void) {
         m.getPendingNotificationRequests { l in tamam(l.map { $0.identifier }) }
+    }
+
+    func bekleyenIstekler(_ tamam: @escaping ([UNNotificationRequest]) -> Void) {
+        m.getPendingNotificationRequests { l in tamam(l) }
     }
 
     func sil(_ kimlikler: [String]) {
@@ -167,6 +177,13 @@ final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
         case "yapildi":
             if let a = g["anahtar"] as? String, !a.isEmpty { yapildi(modul: modul, anahtar: String(a.prefix(120))) }
             ver(["tamam": true])
+        case "liste":
+            liste(modul: modul) { l in ver(["liste": l]) }
+        case "sil":
+            let a = (g["anahtarlar"] as? [String] ?? []).filter { !$0.isEmpty }.map { String($0.prefix(120)) }
+            let on = BildirimKoprusu.onEk(modul)
+            merkez.sil(a.flatMap { [on + $0, on + "~" + $0] })
+            ver(["silinen": a.count])
         default:
             ver(["hata": "bilinmeyen istek"])
         }
@@ -277,6 +294,22 @@ final class BildirimKoprusu: NSObject, WKScriptMessageHandler {
         l.removeAll { ($0["modul"] as? String) == modul && anahtarlar.contains(($0["anahtar"] as? String) ?? "") }
         depo.set(l, forKey: BildirimKoprusu.isaretAnahtari)
         return once - l.count
+    }
+
+    /// Bu modulun kurulu bildirimleri, saat sirasiyla (soz 8).
+    func liste(modul: String, tamam: @escaping ([[String: Any]]) -> Void) {
+        let on = BildirimKoprusu.onEk(modul)
+        merkez.bekleyenIstekler { l in
+            let s: [(Double, [String: Any])] = l.compactMap { r in
+                guard let a = BildirimKoprusu.anahtar(r.identifier, modul: modul) else { return nil }
+                let t = (r.trigger as? UNCalendarNotificationTrigger)?.nextTriggerDate()
+                    ?? (r.trigger as? UNTimeIntervalNotificationTrigger)?.nextTriggerDate()
+                let ms = (t?.timeIntervalSince1970 ?? 0) * 1000
+                return (ms, ["anahtar": a, "baslik": r.content.title, "govde": r.content.body,
+                             "zaman": NSNumber(value: ms), "ertelendi": r.identifier.hasPrefix(on + "~")])
+            }
+            tamam(s.sorted { $0.0 < $1.0 }.map { $0.1 })
+        }
     }
 
     /// Modul isi isaretledi: o anahtarin ertelenmisi ve gelmisleri kalkar (soz 7).

@@ -18,6 +18,9 @@ final class SahteBildirimMerkezi: BildirimMerkezi {
     func yetki(_ tamam: @escaping (String) -> Void) { tamam(durum) }
     func izinIste(_ tamam: @escaping (String) -> Void) { izinSoruldu += 1; tamam(durum) }
     func bekleyenler(_ tamam: @escaping ([String]) -> Void) { kurSayisi += 1; tamam(bekleyen) }
+    func bekleyenIstekler(_ tamam: @escaping ([UNNotificationRequest]) -> Void) {
+        tamam(eklenen.filter { bekleyen.contains($0.identifier) })
+    }
     func sil(_ kimlikler: [String]) { bekleyen.removeAll { kimlikler.contains($0) } }
     func ekle(_ istek: UNNotificationRequest) { eklenen.append(istek); bekleyen.append(istek.identifier) }
     var gelmis: [String] = []
@@ -189,6 +192,29 @@ final class BildirimKoprusuTests: XCTestCase {
         k.yapildi(modul: "spi", anahtar: "a")
         XCTAssertEqual(m.bekleyen, ["lifeos.spi.b"])
         XCTAssertEqual(m.gelmis, ["lifeos.spi.c"])
+    }
+
+    /// Soz 8: liste yalniz bu modulun kurulularini saat sirasiyla verir; sil ertelenmisi de siler.
+    func testListeVeSil() {
+        let m = SahteBildirimMerkezi()
+        let k = BildirimKoprusu(merkez: m)
+        XCTAssertEqual(kur(k, "spi", [satir("b", dk: 60), satir("a", dk: 10)]), 2)
+        XCTAssertEqual(kur(k, "esp", [satir("e", dk: 5)]), 1)
+        let icerik = UNMutableNotificationContent()
+        icerik.title = "SPİ · 08:00"
+        k.eylem(BildirimKoprusu.erteleEylemi, istek: UNNotificationRequest(identifier: "lifeos.spi.b", content: icerik, trigger: nil), modul: "spi")
+        var l: [[String: Any]] = []
+        let bitti = expectation(description: "liste")
+        k.isle(["tur": "liste"], modul: "spi") { v in l = v["liste"] as? [[String: Any]] ?? []; bitti.fulfill() }
+        wait(for: [bitti], timeout: 5)
+        // Ertelenmis gercek saatten 15 dk sonra; satirlar 2027'de: once ertelenmis gelir.
+        XCTAssertEqual(l.map { $0["anahtar"] as? String ?? "" }, ["b", "a", "b"])
+        XCTAssertEqual(l.map { $0["ertelendi"] as? Bool ?? false }, [true, false, false])
+        XCTAssertEqual(l[1]["govde"] as? String, "Su")
+        let iki = expectation(description: "sil")
+        k.isle(["tur": "sil", "anahtarlar": ["b"]], modul: "spi") { _ in iki.fulfill() }
+        wait(for: [iki], timeout: 5)
+        XCTAssertEqual(Set(m.bekleyen), ["lifeos.spi.a", "lifeos.esp.e"])
     }
 
     /// Gercek SPI sayfasi: bildirim.js koprüyü gorur, durum sorar, liste kurar;

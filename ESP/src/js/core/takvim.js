@@ -97,7 +97,8 @@ ESP.Takvim = (function(){
      Açıksa (Profil › «Hatırlatıcılar telefonda bildirim olsun») tamamlanmamış
      hatırlatıcı vade gününün BILDIRIM_SAAT'inde bildirim olur, önümüzdeki
      PLAN_GUN gün için. Gecikmiş hatırlatıcı yeniden çaldırılmaz (Bugün
-     ekranında durur; borç yazmaz). Her değişiklikte listenin tamamı gider. */
+     ekranında durur; borç yazmaz). Her değişiklikte listenin tamamı gider.
+     Sessiz saat ve tür ayarı (brand/ortak/pwa.js, Profil) geçerlidir. */
   const BILDIRIM_SAAT = '09:00';
   const PLAN_GUN = 7;
   function bildirimListesi(simdi){
@@ -110,7 +111,9 @@ ESP.Takvim = (function(){
         && (!ESP.Mod || !ESP.Mod.isOn || ESP.Mod.isOn(r.disc)))
       .map(r => ({ anahtar:r.id + '@' + r.due, baslik:'ESP · ' + (ad(r.disc) || 'Hatırlatıcı'),
         govde:String(r.text || 'Hatırlatıcı'), zaman:b.anOf(r.due, BILDIRIM_SAAT), eylem:'Yapıldı' }))
-      .filter(x => x.zaman > now.getTime());
+      .filter(x => x.zaman > now.getTime())
+      .filter(x => { const P = (window.LIFEOS || {}).Pwa;
+        return !(P && P.gonderilebilir) || P.gonderilebilir('esp', 'hatirlatici', new Date(x.zaman)).ok; });
   }
   function bildirimAcik(){
     const st = ESP.Office && ESP.Office.settings ? ESP.Office.settings() : {};

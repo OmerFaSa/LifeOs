@@ -36,6 +36,13 @@
         uygulanamaz: «yok») silinir; yanlışsa ya da hata verirse sırada
         kalır. Ertelenen bildirim kurulumda silinmez; modül işi işaretleyince
         (`yapildi`) kalkar. İşaret bir kayıttır, ölçüm değil.
+     8. NE KURULU, GÖRÜLÜR (2026-10-09). `listeAc` bu modülün telefonda
+        kurulu bildirimlerini saatiyle gösterir. «Bunu sil» o tek bildirimi
+        siler ve modülün sonraki kurulumunda da kurmaz (bu cihazda, o
+        bildirimin zamanı geçene dek); «Hepsini sil» şu an kurulu olanların
+        hepsini siler — yeni günlerinki yine kurulur, tamamen kapatmak
+        modülün kendi anahtarıdır (ekran bunu söyler). «Geri al» silineni
+        geri kurar. Silmek işi yapılmış saymaz; hiçbir kayda yazılmaz.
    Model hiçbir aşamada yoktur; metin modülün kural metnidir. */
 
 window.LIFEOS = window.LIFEOS || {};
@@ -46,7 +53,10 @@ window.LIFEOS.BILDIRIM = (function(){
   const AD = 'lifeosBildirim';
   const SINIR = { spi:30, esp:16, ays:16 };         // toplam 62 < 64 (iOS); Swift ile aynı
   const ZAMAN_ASIMI = 8000;
+  const ATLA = 'lifeos.telbildirim.atla';           // söz 8: { anahtar: bitiş ms } (pwa.js lifeos.bildirim.<modül> değil)
+  const GUN_MS = 86400000;
   let son = null;                                    // son bilinen izin durumu
+  let sonKur = null;                                 // { modul, liste } — geri almada yeniden kurulur
 
   function kopru(){
     try{ return window.webkit.messageHandlers[AD] || null; }catch(e){ return null; }
@@ -92,12 +102,23 @@ window.LIFEOS.BILDIRIM = (function(){
   /* liste: [{ anahtar, baslik, govde, zaman (ms) }] — bu modülün bütün
      bildirimleri. Geçmiş atılır, en yakın SINIR kadarı gider. Boş liste
      bu modülün bekleyenlerini siler. Dönüş: { ok, kurulan }. */
+  /* Söz 8: silinen (atlanan) bildirimler; süresi geçen düşer. */
+  function atlaOku(simdi){
+    const n = typeof simdi === 'number' ? simdi : Date.now();
+    let v = null;
+    try{ v = JSON.parse(localStorage.getItem(ATLA) || 'null'); }catch(e){ v = null; }
+    const out = {};
+    if(v && typeof v === 'object') Object.keys(v).forEach(k => { if(typeof v[k] === 'number' && v[k] > n) out[k] = v[k]; });
+    return out;
+  }
+  function atlaYaz(v){ try{ localStorage.setItem(ATLA, JSON.stringify(v)); }catch(e){ /* depo yok: yalnız bu açılış */ } }
+
   function temizle(modul, liste, simdi){
     const n = typeof simdi === 'number' ? simdi : Date.now();
-    const gor = {};
+    const gor = {}, atla = atlaOku(n);
     return (Array.isArray(liste) ? liste : [])
       .filter(x => x && typeof x.anahtar === 'string' && x.anahtar && typeof x.baslik === 'string'
-        && typeof x.zaman === 'number' && isFinite(x.zaman) && x.zaman > n)
+        && typeof x.zaman === 'number' && isFinite(x.zaman) && x.zaman > n && !atla[x.anahtar])
       .filter(x => (gor[x.anahtar] ? false : (gor[x.anahtar] = true)))
       .sort((a, b) => a.zaman - b.zaman)
       .slice(0, SINIR[modul] || 6)
@@ -106,6 +127,7 @@ window.LIFEOS.BILDIRIM = (function(){
   }
   async function kur(modul, liste){
     if(!var_()) return { ok:false, kurulan:0 };
+    sonKur = { modul, liste:Array.isArray(liste) ? liste : [] };
     const t = temizle(modul, liste);
     const r = await gonder({ tur:'kur', modul, liste:t });
     return { ok:!!r.ok, kurulan:r.ok ? Number(r.kurulan) || 0 : 0, why:r.why };
@@ -162,6 +184,98 @@ window.LIFEOS.BILDIRIM = (function(){
     return gonder({ tur:'yapildi', anahtar:anahtar.slice(0, 120) });
   }
 
+  /* Söz 8: bu modülün telefonda kurulu bildirimleri, saat sırasıyla. */
+  async function liste(){
+    if(!var_()) return { ok:false, liste:[] };
+    const r = await gonder({ tur:'liste' });
+    const l = r.ok && Array.isArray(r.liste) ? r.liste : [];
+    return { ok:!!r.ok, liste:l.filter(x => x && typeof x.anahtar === 'string' && x.anahtar)
+      .map(x => ({ anahtar:x.anahtar, baslik:String(x.baslik || ''), govde:String(x.govde || ''),
+        zaman:Number(x.zaman) || 0, ertelendi:!!x.ertelendi }))
+      .sort((a, b) => a.zaman - b.zaman) };
+  }
+  /* ogeler: [{ anahtar, zaman }] — silinir ve zamanı geçene dek yeniden kurulmaz. */
+  async function atla(ogeler){
+    const v = atlaOku();
+    const l = (Array.isArray(ogeler) ? ogeler : []).filter(o => o && typeof o.anahtar === 'string' && o.anahtar);
+    l.forEach(o => { v[o.anahtar] = Math.max(Number(o.zaman) || 0, Date.now()) + GUN_MS; });
+    atlaYaz(v);
+    if(!var_() || !l.length) return { ok:false, silinen:0 };
+    const r = await gonder({ tur:'sil', anahtarlar:l.map(o => o.anahtar.slice(0, 120)) });
+    return { ok:!!r.ok, silinen:r.ok ? Number(r.silinen) || 0 : 0 };
+  }
+  /* Silineni geri koy: atlananlar unutulur, son liste yeniden kurulur. */
+  async function geriAl(){
+    atlaYaz({});
+    if(!var_() || !sonKur) return { ok:false, kurulan:0 };
+    return kur(sonKur.modul, sonKur.liste);
+  }
+
+  /* Liste paneli (zil panelinin kalıbı: brand/ortak/kabuk.css). */
+  const GUNLER = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+  const AYLAR = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  function kac(t){
+    return String(t == null ? '' : t).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+  function zamanYaz(ms, simdi){
+    const d = new Date(ms), n = simdi ? new Date(simdi) : new Date();
+    const gun = x => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+    const fark = Math.round((gun(d) - gun(n)) / GUN_MS);
+    const saat = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    if(fark === 0) return 'Bugün ' + saat;
+    if(fark === 1) return 'Yarın ' + saat;
+    return GUNLER[d.getDay()] + ' ' + d.getDate() + ' ' + AYLAR[d.getMonth()] + ' ' + saat;
+  }
+  const PANEL = 'tel-bildirim';
+  let panelNot = '';
+  function panelHtml(l, simdi){
+    const K = (window.LIFEOS || {}).KABUK, s = ad => (K && K.simge ? K.simge(ad) : '');
+    const silinen = Object.keys(atlaOku()).length;
+    const govde = l.length ? l.map(x => '<div class="bildirim__satir">'
+        + '<div class="kmenu__bildirim tb__oge"><span class="bildirim__metin"><b>' + kac(zamanYaz(x.zaman, simdi))
+        + (x.ertelendi ? ' · ertelendi' : '') + '</b> ' + kac(x.baslik)
+        + (x.govde ? '<small>' + kac(x.govde) + '</small>' : '') + '</span></div>'
+        + '<button type="button" class="bildirim__ertele" data-tb="atla" data-tb-a="' + kac(x.anahtar) + '" data-tb-z="' + kac(x.zaman) + '"'
+        + ' aria-label="' + kac(zamanYaz(x.zaman, simdi) + ', ' + x.baslik + ': bunu sil') + '" title="Bunu sil">' + s('kapat') + '</button></div>').join('')
+      : '<div class="kmenu__bos bildirim__bos"><span class="bildirim__bos-simge" aria-hidden="true">' + s('zil') + '</span>'
+        + '<b>Kurulu bildirim yok.</b><small>Bu modül telefonda şu an hiçbir şey hatırlatmayacak.</small></div>';
+    return '<div class="katman kmenu kmenu--bildirim kmenu--yan" role="dialog" aria-label="Telefonda kurulu bildirimler">'
+      + '<header class="bildirim__bas"><b>Kurulu bildirimler</b>'
+      +   (l.length ? '<span class="bildirim__sayi bildirim__sayi--notr" aria-label="' + l.length + ' bildirim">' + l.length + '</span>'
+          + '<button type="button" class="bildirim__gordu" data-tb="hepsi">Hepsini sil</button>' : '')
+      +   '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Kapat">' + s('kapat') + '</button>'
+      + '</header>'
+      + '<div class="bildirim__liste">' + govde + '</div>'
+      + (silinen ? '<p class="bildirim__ertelenen">' + silinen + ' bildirim silindi.<button type="button" data-tb="geri">Geri al</button></p>' : '')
+      + '<p class="tb__not">Yeni günlerin bildirimleri yine kurulur.' + (panelNot ? ' ' + kac(panelNot) : '') + '</p>'
+      + '</div>';
+  }
+  async function listeAc(capa, not){
+    const K = (window.LIFEOS || {}).KABUK;
+    if(!K || !var_()) return false;
+    panelNot = typeof not === 'string' ? not : '';
+    const r = await liste();
+    K.katmanAc(PANEL, panelHtml(r.liste), capa);
+    return true;
+  }
+  /* Paneldeki eylem: atla (tek) | hepsi | geri. Sonra panel yerinde tazelenir. */
+  async function panelEylem(t, anahtar, zaman){
+    if(t === 'atla' && anahtar) await atla([{ anahtar, zaman }]);
+    else if(t === 'hepsi') await atla((await liste()).liste);
+    else if(t === 'geri') await geriAl();
+    else return false;
+    const K = (window.LIFEOS || {}).KABUK;
+    if(K && K.katmanAcik && K.katmanAcik(PANEL)){
+      const r = await liste();
+      K.katmanTazele(PANEL, panelHtml(r.liste));
+      const p = document.getElementById(PANEL);
+      const ilk = p && (p.querySelector('[data-tb]') || p.querySelector('button'));
+      if(ilk){ try{ ilk.focus({ preventScroll:true }); }catch(e){} }
+    }
+    return true;
+  }
+
   /* Uygulamada kurulum: Badging API köprüye bağlanır, açılışta ve öne her
      gelişte gelmiş bildirimler kalkar. Tarayıcıda hiçbir şey yapmaz. */
   function kurulum(doc, nav){
@@ -175,6 +289,15 @@ window.LIFEOS.BILDIRIM = (function(){
     }catch(e){ /* salt okunur gezgin: rozet yok, temizlik sürer */ }
     kaldir();
     d.addEventListener('visibilitychange', () => { if(!d.hidden){ kaldir(); isaretleriAl(); } });
+    /* Söz 8: «Kurulu bildirimler» düğmesi (modül çizer) ve panelin eylemleri. */
+    d.addEventListener('click', e => {
+      const t = e.target && e.target.closest ? e.target : null;
+      if(!t) return;
+      const ac = t.closest('[data-tb-ac]');
+      if(ac){ e.preventDefault(); listeAc(ac, ac.getAttribute('data-tb-not') || ''); return; }
+      const b = t.closest('[data-tb]');
+      if(b){ e.preventDefault(); panelEylem(b.getAttribute('data-tb'), b.getAttribute('data-tb-a'), Number(b.getAttribute('data-tb-z'))); }
+    });
     return true;
   }
 
@@ -185,7 +308,8 @@ window.LIFEOS.BILDIRIM = (function(){
   }
 
   const api = { var:var_, durum, izin, sonDurum, kur, temizle, kaldir, rozet, anOf, SINIR, AD, _cevap,
-    isaretci:isaretciKur, yapildi, _isaretVar:isaretleriAl, _kurulum:kurulum };
+    isaretci:isaretciKur, yapildi, _isaretVar:isaretleriAl, liste, atla, geriAl, listeAc, zamanYaz,
+    _panelHtml:panelHtml, _panelEylem:panelEylem, _kurulum:kurulum };
   kurulum();
   return api;
 })();

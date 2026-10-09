@@ -247,6 +247,9 @@
           expect(R.Office.settings().telefonBildirim).toBe(true);
           expect(k.giden.some(m => m.tur === 'kur' && m.modul === 'ays' && m.liste.length > 0)).toBe(true);
           expect(!!document.getElementById('office-telsaat')).toBeTruthy();
+          /* Açıkken: kurulu bildirimler düğmesi (bildirim.js söz 8) ve sessiz saat. */
+          expect(!!document.querySelector('#office-telefon [data-tb-ac]')).toBe(true);
+          expect(!!document.querySelector('#office-telefon [data-act="bildirim-sessiz"]')).toBe(true);
           const saat = document.createElement('input');
           saat.value = '06:45';
           await R.Screens.office.change['office-telsaat'](saat);

@@ -143,6 +143,57 @@
       expect((await B().yapildi('x')).ok).toBe(false);                         // tarayıcıda hiçbir şey
     });
 
+    it('kurulu bildirimler: liste saat sırasıyla; tek ve hepsi silinir, yeniden kurulmaz; geri al yeniden kurar', async () => {
+      let eskiAtla = null;
+      try{ eskiAtla = localStorage.getItem('lifeos.telbildirim.atla'); localStorage.removeItem('lifeos.telbildirim.atla'); }catch(e){}
+      const simdi = Date.now();
+      let kurulu = [{ anahtar:'b', baslik:'SPİ · 20:00', govde:'Su', zaman:simdi + 7200000 },
+        { anahtar:'a', baslik:'SPİ · 18:00', govde:'Demir', zaman:simdi + 3600000, ertelendi:true }];
+      const k = sahteKabuk(m => {
+        if(m.tur === 'liste') return { liste:kurulu.slice() };
+        if(m.tur === 'sil'){ kurulu = kurulu.filter(x => m.anahtarlar.indexOf(x.anahtar) < 0); return { silinen:m.anahtarlar.length }; }
+        if(m.tur === 'kur'){ kurulu = m.liste.slice(); return { kurulan:m.liste.length }; }
+        return {};
+      });
+      try{
+        const ilk = await B().liste();
+        expect(ilk.liste.map(x => x.anahtar)).toEqual(['a', 'b']);
+        expect(ilk.liste[0].ertelendi).toBe(true);
+        /* Modül iki satır kurar; biri silinir ve bir sonraki kurulumda gelmez. */
+        await B().kur('spi', [{ anahtar:'a', baslik:'SPİ · 18:00', zaman:simdi + 3600000 },
+          { anahtar:'b', baslik:'SPİ · 20:00', zaman:simdi + 7200000 }]);
+        const r = await B().atla([{ anahtar:'a', zaman:simdi + 3600000 }]);
+        expect(r.silinen).toBe(1);
+        expect(k.giden[k.giden.length - 1]).toEqual({ tur:'sil', anahtarlar:['a'], istek:k.giden[k.giden.length - 1].istek });
+        await B().kur('spi', [{ anahtar:'a', baslik:'SPİ · 18:00', zaman:simdi + 3600000 },
+          { anahtar:'b', baslik:'SPİ · 20:00', zaman:simdi + 7200000 }]);
+        expect(kurulu.map(x => x.anahtar)).toEqual(['b']);
+        /* Panel: saat, «Bunu sil», «Hepsini sil», silinen sayısı ve geri al. */
+        const html = B()._panelHtml((await B().liste()).liste, simdi);
+        expect(html).toContain('Kurulu bildirimler');
+        expect(html).toContain('data-tb="atla"');
+        expect(html).toContain('Hepsini sil');
+        expect(html).toContain('1 bildirim silindi.');
+        expect(html).toContain('Yeni günlerin bildirimleri yine kurulur.');
+        expect(await B()._panelEylem('hepsi')).toBe(true);
+        expect(kurulu).toEqual([]);
+        expect(B()._panelHtml([], simdi)).toContain('Kurulu bildirim yok.');
+        await B()._panelEylem('geri');
+        expect(kurulu.map(x => x.anahtar)).toEqual(['a', 'b']);              // son liste yeniden kuruldu
+        expect(B()._panelHtml(kurulu, simdi).indexOf('silindi')).toBe(-1);
+      }finally{
+        k.birak();
+        try{ if(eskiAtla == null) localStorage.removeItem('lifeos.telbildirim.atla'); else localStorage.setItem('lifeos.telbildirim.atla', eskiAtla); }catch(e){}
+      }
+    });
+
+    it('saat okunur yazılır: bugün, yarın, sonra gün adıyla', () => {
+      const n = new Date(2026, 9, 9, 16, 0).getTime();
+      expect(B().zamanYaz(new Date(2026, 9, 9, 20, 5).getTime(), n)).toBe('Bugün 20:05');
+      expect(B().zamanYaz(new Date(2026, 9, 10, 8, 0).getTime(), n)).toBe('Yarın 08:00');
+      expect(B().zamanYaz(new Date(2026, 9, 12, 9, 0).getTime(), n)).toBe('Pzt 12 Eki 09:00');
+    });
+
     it('bir günün saati yerel saatle ms olur', () => {
       expect(B().anOf('2026-10-09', '08:30')).toBe(new Date(2026, 9, 9, 8, 30).getTime());
     });

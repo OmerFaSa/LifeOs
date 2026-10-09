@@ -137,6 +137,25 @@
       expect(await T().isaretUygula({ anahtar:'bozuk', zaman })).toBe('yok');
     });
 
+    /* Sessiz saat ve tür (Profil, brand/ortak/pwa.js) telefon bildirimine de uyar. */
+    it('telefon bildirimi sessiz saate ve tür ayarına uyar', () => {
+      resetState();
+      const P = window.LIFEOS.Pwa, anahtar = 'lifeos.bildirim.esp';
+      let eski = null;
+      try{ eski = localStorage.getItem(anahtar); localStorage.removeItem(anahtar); }catch(e){}
+      try{
+        ESP.S.reminders = [{ id:'r1', text:'Metronom', disc:'music', due:'2026-09-12', repeat:'none', done:false }];
+        const sabah = new Date(2026, 8, 12, 8, 0);
+        expect(T().bildirimListesi(sabah)).toHaveLength(1);
+        P.bildirimAyariYaz('esp', { sessiz:{ acik:true, bas:'08:30', bit:'10:00' } });
+        expect(T().bildirimListesi(sabah)).toHaveLength(0);                    // 09:00 sessiz saatte
+        P.bildirimAyariYaz('esp', { sessiz:{ acik:false }, turler:{ hatirlatici:false } });
+        expect(T().bildirimListesi(sabah)).toHaveLength(0);                    // tür kapalı
+        P.bildirimAyariYaz('esp', { turler:{ hatirlatici:true } });
+        expect(T().bildirimListesi(sabah)).toHaveLength(1);
+      }finally{ try{ if(eski == null) localStorage.removeItem(anahtar); else localStorage.setItem(anahtar, eski); }catch(e){} }
+    });
+
     it('hiçbir şey yoksa boş ama geçerli bir takvim', () => {
       resetState();
       withToday('2026-09-12', () => {

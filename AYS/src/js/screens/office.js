@@ -324,13 +324,18 @@ R.Screens.office = (function(){
     const B = (window.LIFEOS || {}).BILDIRIM;
     if(!B || !B.var() || !R.Takvim || !R.Takvim.bildirimAyari) return '';
     const a = R.Takvim.bildirimAyari();
+    const V = (window.LIFEOS || {}).VITRIN;
     return html`<div class="mt-12">${K.Field({ label:'Telefon bildirimi',
         hint:'Her gün seçtiğin saatte günün planı, hedefin son günü ve profilde yazdığın sınav gününden bir gün önce. '
           + 'Önümüzdeki ' + R.Takvim.PLAN_GUN + ' gün kurulur, AYS kapalıyken de gelir.',
         input:K.Select({ id:'office-telbildirim', value:a.acik ? 'acik' : 'kapali', change:'office-telbildirim', options:[
           { value:'kapali', label:'Kapalı' }, { value:'acik', label:'Açık' } ] }) })}
       ${when(a.acik, () => html`<div class="mt-10">${K.Field({ label:'Günün planı saati',
-        input:K.Input({ id:'office-telsaat', type:'time', value:a.saat, change:'office-telsaat' }) })}</div>`)}</div>`;
+        input:K.Input({ id:'office-telsaat', type:'time', value:a.saat, change:'office-telsaat' }) })}</div>
+        <div class="mt-10">${K.Button({ label:'Kurulu bildirimler', size:'sm',
+          data:{ 'data-tb-ac':'1', 'data-tb-not':'Tamamen kapatmak için «Telefon bildirimi»ni Kapalı yap.' } })}</div>
+        ${when(V && V.bildirimKutusu, () => raw('<div class="mt-10">' + V.bildirimKutusu({ modul:'ays',
+          turler:[{ id:'plan', ad:'AYS · günün planı ve son günler' }] }) + '</div>'))}`)}</div>`;
   }
 
   /* Bildirim izni — istenmeden bildirim gonderilmez. Uygulamada (WKWebView)
@@ -976,6 +981,10 @@ R.Screens.office = (function(){
     const box = document.getElementById('office-notify');
     if(box) box.innerHTML = String(notifyRow());
     else R.App.render();
+    /* Uygulamada: sessiz saat ve tür telefon bildirimine de uyar. */
+    const tel = document.getElementById('office-telefon');
+    if(tel) tel.innerHTML = String(telefonRow());
+    if(R.Takvim && R.Takvim.planla) R.Takvim.planla();
   }
 
   const change = {

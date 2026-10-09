@@ -157,7 +157,11 @@ ESP.Screens.profile = (function(){
                 change:'pick-telbildirim', options:[
                   { value:'kapali', label:'Hayır' },
                   { value:'acik', label:'Evet, telefon bildirimi' },
-                ] }) })}</div>`)}`,
+                ] }) })}
+              ${when(ESP.Office.settings().telefonBildirim, () => html`<div class="mt-10">${K.Button({ label:'Kurulu bildirimler', size:'sm',
+                data:{ 'data-tb-ac':'1', 'data-tb-not':'Tamamen kapatmak için yukarıda «Hayır» seç.' } })}</div>
+                ${when(window.LIFEOS.VITRIN && window.LIFEOS.VITRIN.bildirimKutusu, () => raw('<div class="mt-10">'
+                  + window.LIFEOS.VITRIN.bildirimKutusu({ modul:'esp', turler:[{ id:'hatirlatici', ad:'ESP · hatırlatıcı' }] }) + '</div>'))}`)}</div>`)}`,
         }),
 
         hafizaEntry(),
@@ -358,7 +362,20 @@ ESP.Screens.profile = (function(){
 
   function val(id){ const el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
+  /* Telefon bildiriminin türü ve sessiz saati (brand/ortak/pwa.js): küçük
+     tercih, anında; kurulu bildirimler hemen yeniden kurulur. */
+  function bildirimYenile(el, ad){
+    const V = window.LIFEOS && window.LIFEOS.VITRIN;
+    if(!V || !V.bildirimEylem) return;
+    const r = V.bildirimEylem('esp', ad, el);
+    if(r.metin) ESP.UI.toast(r.metin);
+    ESP.App.render();
+    if(ESP.Takvim && ESP.Takvim.planla) ESP.Takvim.planla();
+  }
+
   const handle = {
+    async 'bildirim-tur'(el){ bildirimYenile(el, 'bildirim-tur'); },
+    async 'bildirim-sessiz'(el){ bildirimYenile(el, 'bildirim-sessiz'); },
     /* Vitrin 116: tek bir küçük türün sormadan uygulanıp uygulanmayacağı. */
     async 'otomatik-tur'(el){
       const turler = Object.assign({}, ESP.Office.settings().otomatikTurler || {}, { [el.dataset.eylem]:!!el.checked });
@@ -507,7 +524,10 @@ ESP.Screens.profile = (function(){
       await ESP.Office.saveSettings({ telefonBildirim:el.value === 'acik' });
       const r = await ESP.Takvim.planla();
       ESP.UI.toast(el.value === 'acik' ? 'Açık · ' + ((r && r.kurulan) || 0) + ' hatırlatıcı kuruldu' : 'Telefon bildirimi kapandı');
+      ESP.App.render();
     },
+    /* Sessiz saatin bitişi ve başlangıcı (brand/ortak/vitrin.js bildirimKutusu). */
+    async 'bildirim-saat'(el){ bildirimYenile(el, 'bildirim-saat'); },
 
     async 'pick-otomatik'(el){
       const v = el.value === 'hicbiri' ? 'hicbiri' : 'istek';

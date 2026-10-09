@@ -83,6 +83,9 @@ SP.HatirlatUI = (function(){
           ${d.bildirim && H().bildirimIzinli()
             ? K.Button({ label:(H().telefonMu() ? 'Telefon' : 'Tarayıcı') + ' bildirimini kapat', size:'sm', act:'ht-bildirim', data:{ 'data-v':'0' } })
             : K.Button({ label:(H().telefonMu() ? 'Telefon' : 'Tarayıcı') + ' bildirimini aç', size:'sm', act:'ht-bildirim', data:{ 'data-v':'1' } })}</div>`),
+        /* Telefonda kurulu bildirimler (brand/ortak/bildirim.js söz 8). */
+        when(H().telefonMu() && d.bildirim, () => html`<div class="row wrap gap-6">${K.Button({ label:'Kurulu bildirimler', size:'sm',
+          data:{ 'data-tb-ac':'1', 'data-tb-not':'Tamamen kapatmak için «Telefon bildirimini kapat».' } })}</div>`),
         /* 180/122: tür anahtarı ve sessiz saatler (brand/ortak/pwa.js). */
         when(d.bildirim && H().bildirimIzinli() && VT() && VT().bildirimKutusu, () => raw(VT().bildirimKutusu({ modul:'spi',
           turler:[{ id:'hatirlatma', ad:'SPİ · hatırlatma' }] }))),
@@ -144,6 +147,8 @@ SP.HatirlatUI = (function(){
     const r = VT() && VT().bildirimEylem ? VT().bildirimEylem('spi', ad, el) : null;
     if(r && r.metin) UI.toast(r.metin);
     sayfa();
+    /* Telefonda: sessiz saat ve tür kurulu bildirimlere hemen uyar. */
+    if(H().telefonMu()) H().planla();
   }
 
   const change = {
