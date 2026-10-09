@@ -12,7 +12,7 @@
 (function(){
   const { describe, it, expect } = R.Test;
   /* Anlatımı bitmiş dersler (her bitişte buraya eklenir). */
-  const TAM = ['tyt-matematik'];
+  const TAM = ['tyt-turkce', 'tyt-matematik'];
 
   const HARF = ['A', 'B', 'C', 'D', 'E'];
   const dizi = x => x == null ? [] : Array.isArray(x) ? x : [x];

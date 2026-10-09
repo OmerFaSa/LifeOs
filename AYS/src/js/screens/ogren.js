@@ -387,6 +387,13 @@ R.Screens = R.Screens || {};
     })}</div>`;
   }
 
+  /* Paragraflı soruda son satır soru köküdür: paragraf ayrı, kök kalın. */
+  function soruMetni(metin){
+    const l = String(metin || '').split('\n');
+    const kok = l.pop();
+    return html`${map(l, p => html`<p class="ogr-soru__parca">${fmt(p)}</p>`)}<p class="ogr-soru__metin">${l.length ? html`<b>${fmt(kok)}</b>` : fmt(kok)}</p>`;
+  }
+
   function soruKarti(x){
     const { subject, topic } = x;
     const { l, i } = soruNo(x);
@@ -422,9 +429,9 @@ R.Screens = R.Screens || {};
         ${noktalar(x, l, i, c)}
         <div class="ogr-soru" aria-live="polite" data-raf-tam>
           <div class="ders__etiket tiny">Soru ${i + 1} / ${l.length}</div>
-          <p class="ogr-soru__metin">${fmt(q.soru)}</p>
+          ${soruMetni(q.soru)}
           <div class="secenekler">${map(q.sec, secenek)}</div>
-          ${when(!acik, () => html`<button type="button" class="linkbtn tiny mt-10" data-act="soru-bak">Cevaplamadan çözümü göster</button>`)}
+          ${when(!acik, () => html`<div class="mt-10">${K.Button({ label:'Cevaplamadan çözümü gör', size:'sm', tone:'ghost', act:'soru-bak' })}</div>`)}
           ${when(acik, () => html`<div class="${cls('ogr-sonuc', 'is-' + ton)}">
             <p class="small"><b>${sonuc}</b></p>
             <div class="ders__etiket tiny mt-10">Çözüm</div>
