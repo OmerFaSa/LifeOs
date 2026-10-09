@@ -9,7 +9,7 @@
 
 (function(){
   const { describe, it, expect, resetState } = R.Test;
-  const TAM = ['tyt-matematik'];
+  const TAM = ['tyt-matematik', 'tyt-turkce'];
 
   function metinler(o){ return o.ana.concat([o.dikkat], o.ornek ? [o.ornek] : []); }
 
