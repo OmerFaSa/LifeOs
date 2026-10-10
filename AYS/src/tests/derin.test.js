@@ -4,8 +4,16 @@
         2–4 kalıp, 2–4 hata; işaretler kapalı, çift boşluk yok.
      2. Derin sorular ÖSYM biçimindedir: beş farklı seçenek, A–E tek doğru,
         orta ya da ileri seviye, ipucu ve çözüm; doğru harfler dağılır.
-     3. Sekiz dersin her konusunun derin kaydı var: en az 3 örnek, 4 soru.
+     3. Sekiz dersin her konusunun derin kaydı var: en az 3 örnek, 6 soru.
         Yeni bir konu derinleştirmesiz eklenirse bu söz kırmızı olur.
+     3a. Derin soru, konusunun çözümlü örneğinin cevabını tekrar sormaz
+        (soru örnekle örtüşür, sayılar aynı, doğru seçenek örneğin
+        soru ve çözümünde hazır). Gözden geçirilmiş, farklı kavramı
+        sorduğu bilinen istisnalar gerekçesiyle listelenir; listedeki bir
+        istisna artık gerekmiyorsa liste de kırmızı olur.
+     3b. Aynı soru iki kez sorulmaz: derin sorular, Anlatım soruları ve
+        günlük paragraf havuzu arasında kökü birebir aynı iki soru ancak
+        doğru cevapları farklı ve en çok üç seçeneği ortaksa kalır.
      4. Derin sorular konunun temel sorularının ARDINA eklenir; seviye
         temel/orta/ileri döner; kayıtlı cevapların sırası kaymaz.
      5. İpucu açıldıktan sonra verilen cevap «ipucuyla» yazılır; ekran
@@ -94,9 +102,77 @@
       const eksik = [];
       R.SUBJECTS.forEach(s => s.topics.forEach(t => {
         const d = R.KONU_DERIN[t.id];
-        if(!d || dizi(d.ornekler).length < 3 || dizi(d.sorular).length < 4) eksik.push(t.id);
+        if(!d || dizi(d.ornekler).length < 3 || dizi(d.sorular).length < 6) eksik.push(t.id);
       }));
       expect(eksik).toEqual([]);
+    });
+
+    /* Söz 3a. Ölçüt (2026-10-10 taramasıyla aynı): soru, örneğin sorusuyla
+       sözcükçe en az %50 örtüşür ve sayıları aynıdır; doğru seçeneğin
+       sözcüklerinin en az %60'ı (sayısalsa sayıları) örneğin soru +
+       çözümünde geçer. Örnekler: derin örnekler + Anlatım bölüm örnekleri. */
+    const DUR = new Set(('ve ile bir bu şu o da de mi ne için gibi kaç hangi hangisi aşağıdakilerden aşağıdaki nedir olur olan ise '
+      + 'göre buna cümlesinde cümledeki ilgili doğrudur yanlıştır neden nasıl kadar daha en çok az her hiç').split(' '));
+    const temiz = s => String(s).toLocaleLowerCase('tr').replace(/\*\*|[\^_]\{|\}/g, ' ');
+    const sozler = s => temiz(s).replace(/[^a-zçğıöşüâîû]+/g, ' ').split(' ').filter(w => w.length > 2 && !DUR.has(w)).map(w => w.slice(0, 5));
+    const sayilar = s => temiz(s).match(/\d+(?:[.,]\d+)?/g) || [];
+    function ortusme(a, b){ const A = new Set(a), B = new Set(b); let k = 0; A.forEach(x => { if(B.has(x)) k++; }); return A.size ? k / A.size : 0; }
+    /* Gözden geçirildi: sözcükler örtüşüyor ama farklı kavram ya da farklı cevap soruluyor. */
+    const BILINCLI = {
+      'tm-22#4': 'başka bir bileşik önerme; ortak olan yalnız «p ve q’nun doğruluk değerleri» kalıbı',
+      'af-15#2': 'örnek basit sarkaçta ip boyunu, soru yay sarkacında kütleyi değiştiriyor',
+      'af-18#2': 'örnek ışık şiddetini, soru frekansı değiştiriyor',
+      'ab-02#1': 'örnek olasılık, soru gamet çeşidi soruyor (AaBbCC)',
+      'ab-11#2': 'örnek A Rh−, soru B Rh− alıcı; cevap örnekte yok',
+    };
+    it('derin soru, konusunun çözümlü örneğindeki cevabı tekrar sormaz', () => {
+      const H = HARF, isaret = [];
+      Object.keys(R.KONU_DERIN).forEach(t => {
+        const d = R.KONU_DERIN[t], a = (R.KONU_ANLATIM || {})[t] || { bolumler:[] };
+        const ornek = dizi(d.ornekler).concat(dizi(a.bolumler).filter(b => b.ornek).map(b => b.ornek));
+        dizi(d.sorular).forEach((q, i) => {
+          const dogru = q.sec[H.indexOf(q.dogru)], ds = sozler(dogru), dn = sayilar(dogru);
+          const tekrar = ornek.some(o => {
+            const os = o.soru + ' ' + dizi(o.cozum).join(' ');
+            if(ortusme(sozler(q.soru), sozler(o.soru)) < 0.5) return false;
+            if(sayilar(q.soru).join(' ') !== sayilar(o.soru).join(' ')) return false;
+            const s2 = ds.length ? ortusme(ds, sozler(os)) : (dn.length && dn.every(x => sayilar(os).indexOf(x) >= 0) ? 1 : 0);
+            return s2 >= 0.6;
+          });
+          if(tekrar) isaret.push(t + '#' + (i + 1));
+        });
+      });
+      expect(isaret.filter(k => !BILINCLI[k])).toEqual([]);
+      expect(Object.keys(BILINCLI).filter(k => isaret.indexOf(k) < 0)).toEqual([]);
+    });
+
+    /* 2026-10-10: ab-08'de mercek türleri tersti («ince kenarlı (ıraksak)»,
+       «kalın kenarlı (yakınsak)»); doğrusu tersidir. Bütün içerikte tutarlılık. */
+    it('mercek türleri tutarlı: ince kenarlı yakınsak, kalın kenarlı ıraksaktır', () => {
+      const ters = /kalın kenarlı \((yakınsak|toplayıcı)|ince kenarlı \((ıraksak|dağıtıcı)/i;
+      const bozuk = [];
+      const tara = (ad, x) => { const m = JSON.stringify(x).match(ters); if(m) bozuk.push(ad + ': ' + m[0]); };
+      Object.keys(R.KONU_DERIN).forEach(t => tara(t + ' derin', R.KONU_DERIN[t]));
+      Object.keys(R.KONU_ANLATIM || {}).forEach(t => tara(t + ' anlatım', R.KONU_ANLATIM[t]));
+      expect(bozuk).toEqual([]);
+    });
+
+    it('aynı soru iki kez sorulmaz: derin, Anlatım ve paragraf havuzu', () => {
+      const H = HARF, gor = {}, cakisma = [];
+      const ekle = (ad, q) => { const k = String(q.soru).replace(/\s+/g, ' ').trim(); (gor[k] = gor[k] || []).push([ad, q]); };
+      Object.keys(R.KONU_DERIN).forEach(t => dizi(R.KONU_DERIN[t].sorular).forEach((q, i) => ekle(t + '#' + (i + 1), q)));
+      Object.keys(R.KONU_ANLATIM || {}).forEach(t => dizi(R.KONU_ANLATIM[t].sorular).forEach((q, i) => ekle(t + ' anlatım ' + (i + 1), q)));
+      dizi(R.PARAGRAF_HAVUZU).forEach(q => ekle(q.id, q));
+      const norm = x => String(x).replace(/\s+/g, ' ').trim();
+      Object.keys(gor).forEach(k => {
+        const l = gor[k];
+        for(let i = 0; i < l.length; i++) for(let j = i + 1; j < l.length; j++){
+          const a = l[i][1], b = l[j][1];
+          const ortak = a.sec.filter(x => b.sec.map(norm).indexOf(norm(x)) >= 0).length;
+          if(norm(a.sec[H.indexOf(a.dogru)]) === norm(b.sec[H.indexOf(b.dogru)]) || ortak > 3) cakisma.push(l[i][0] + ' = ' + l[j][0]);
+        }
+      });
+      expect(cakisma).toEqual([]);
     });
 
     it('derin sorular temel soruların ardına eklenir; seviye temel/orta/ileri', () => {

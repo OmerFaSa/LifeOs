@@ -22,11 +22,26 @@
      ornekler: [{ seviye, soru, cozum:[adım, …] }]   2–4; çözüm ekranda kapalı gelir
      kaliplar: [madde, …]                  2–4; sınavda bu konu nasıl sorulur
      hatalar:  [madde, …]                  2–4; sık yapılan hatalar
-     sorular:  [{ seviye, soru, sec:[beş seçenek], dogru:'A'–'E', ipucu, cozum:[adım, …] }]
+     sorular:  [{ seviye, soru, sec:[beş seçenek], dogru:'A'–'E', ipucu, cozum:[adım, …],
+                  sekil?, tablo?, yenilendi? }]
    }
    seviye: 'temel' | 'orta' | 'ileri'. Sorular konunun temel sorularının
    ARDINA eklenir (core/ogren.js sorular): kayıtlı cevaplar sıra numarasıyla
    tutulduğu için yeni soru hep sona yazılır, araya girmez.
+
+   SEVİYE ÖLÇÜTÜ (yazar böyle değerlendirir; ölçüm değildir):
+     orta  — tek kavram ya da tek adımlı işlem; örneklerdeki yolu doğrudan
+             uygular, bilgiyi tanır.
+     ileri — iki ya da daha çok adım, kavramları birleştirme, şekilden ya da
+             tablodan veri okuyup yorumlama, ya da tuzak seçeneği ayırt etme
+             (ör. «kesinlikle», «olamaz», «yanlıştır» kökleri) gerektirir.
+   ŞEKİL VE TABLO: sekil ve tablo tarifleri core/sekil.js'in kapalı
+   kataloğuyla yazılır; ekran okuyucu ve düz metin için alt cümlesi zorunlu.
+   YENİLENDİ: yerinde düzeltilen soruya o anın ISO zamanı yazılır; ondan
+   önceki cevaplar ve deneme kayıtları sayılmaz (core/ogren.js söz 5).
+   TEKRAR YOK: soru, kendi konusunun çözümlü örneğinin cevabını yeniden
+   sormaz; Anlatım ve paragraf havuzundaki bir sorunun aynısı olmaz
+   (tests/derin.test.js söz 3a–3b).
    Biçimi ve eksiksizliği tests/derin.test.js sınar. */
 
 window.R = window.R || {};

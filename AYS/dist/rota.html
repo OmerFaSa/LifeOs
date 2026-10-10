@@ -16089,7 +16089,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'9c27203d', at:'2026-10-10 15:45', dirty:true };
+R.BUILD = { id:'14ac6520', at:'2026-10-10 15:54', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -42444,11 +42444,26 @@ Object.assign(R.KONU_ANLATIM, {
      ornekler: [{ seviye, soru, cozum:[adım, …] }]   2–4; çözüm ekranda kapalı gelir
      kaliplar: [madde, …]                  2–4; sınavda bu konu nasıl sorulur
      hatalar:  [madde, …]                  2–4; sık yapılan hatalar
-     sorular:  [{ seviye, soru, sec:[beş seçenek], dogru:'A'–'E', ipucu, cozum:[adım, …] }]
+     sorular:  [{ seviye, soru, sec:[beş seçenek], dogru:'A'–'E', ipucu, cozum:[adım, …],
+                  sekil?, tablo?, yenilendi? }]
    }
    seviye: 'temel' | 'orta' | 'ileri'. Sorular konunun temel sorularının
    ARDINA eklenir (core/ogren.js sorular): kayıtlı cevaplar sıra numarasıyla
    tutulduğu için yeni soru hep sona yazılır, araya girmez.
+
+   SEVİYE ÖLÇÜTÜ (yazar böyle değerlendirir; ölçüm değildir):
+     orta  — tek kavram ya da tek adımlı işlem; örneklerdeki yolu doğrudan
+             uygular, bilgiyi tanır.
+     ileri — iki ya da daha çok adım, kavramları birleştirme, şekilden ya da
+             tablodan veri okuyup yorumlama, ya da tuzak seçeneği ayırt etme
+             (ör. «kesinlikle», «olamaz», «yanlıştır» kökleri) gerektirir.
+   ŞEKİL VE TABLO: sekil ve tablo tarifleri core/sekil.js'in kapalı
+   kataloğuyla yazılır; ekran okuyucu ve düz metin için alt cümlesi zorunlu.
+   YENİLENDİ: yerinde düzeltilen soruya o anın ISO zamanı yazılır; ondan
+   önceki cevaplar ve deneme kayıtları sayılmaz (core/ogren.js söz 5).
+   TEKRAR YOK: soru, kendi konusunun çözümlü örneğinin cevabını yeniden
+   sormaz; Anlatım ve paragraf havuzundaki bir sorunun aynısı olmaz
+   (tests/derin.test.js söz 3a–3b).
    Biçimi ve eksiksizliği tests/derin.test.js sınar. */
 
 window.R = window.R || {};
@@ -44917,10 +44932,10 @@ Object.assign(R.KONU_DERIN, {
         sec:['48', '52', '54', '56', '60'], dogru:'B',
         ipucu:'Bütün üçlülerden aynı doğrudaki 4 noktanın oluşturduğu üçlüleri çıkar.',
         cozum:['C(8, 3) = 56.', 'Doğrusal üçlüler C(4, 3) = 4.', '56 − 4 = 52.'] },
-      { seviye:'orta', soru:'(x + 2)^{6} açılımında x^{4}’lü terimin katsayısı kaçtır?',
-        sec:['15', '24', '48', '60', '120'], dogru:'D',
-        ipucu:'Genel terim: C(6, r) · x^{6 − r} · 2^{r}.',
-        cozum:['x^{4} için r = 2: C(6, 2) · 2^{2}.', '15 · 4 = 60.'] },
+      { seviye:'orta', yenilendi:'2026-10-10T15:50:24Z', soru:'6 kişi yuvarlak bir masanın çevresine kaç farklı biçimde oturabilir? (Yalnızca kişilerin birbirine göre konumu önemlidir.)',
+        sec:['20', '60', '90', '120', '720'], dogru:'D',
+        ipucu:'Dairesel sıralamada bir kişi sabitlenir, öbürleri ona göre dizilir.',
+        cozum:['Bir kişiyi sabitle; kalan 5 kişi 5! biçimde dizilir.', '(6 − 1)! = 120; 720 = 6! düz sıra için geçerlidir.'] },
       { seviye:'ileri', soru:'Birbirinden farklı 5 matematik ve 4 fizik kitabı bir rafa, matematik kitapları bir arada olmak koşuluyla kaç farklı biçimde dizilebilir?',
         sec:['5! · 4!', '5! · 5!', '6! · 4!', '9!', '4! · 4!'], dogru:'B',
         ipucu:'Matematik kitaplarını tek bir blok say.',
@@ -47252,7 +47267,7 @@ Object.assign(R.KONU_DERIN, {
     onKosul:['ab-06'],
     ornekler:[
       { seviye:'orta', soru:'Miyop bir gözde görüntü nerede oluşur ve hangi mercekle düzeltilir?',
-        cozum:['Göz küresi uzun ya da mercek fazla kırıcı: görüntü retinanın önüne düşer.', 'İnce kenarlı (ıraksak) mercekle düzeltilir.'] },
+        cozum:['Göz küresi uzun ya da mercek fazla kırıcı: görüntü retinanın önüne düşer.', 'Işığı dağıtan kalın kenarlı (ıraksak) mercekle düzeltilir; görüntü retinaya taşınır.'] },
       { seviye:'orta', soru:'Sesin kulak kepçesinden beyne ulaşana kadar izlediği yolu sırala.',
         cozum:['Kulak kepçesi → kulak yolu → kulak zarı.', 'Çekiç → örs → üzengi → oval pencere.', 'Salyangozdaki Corti organı → işitme siniri → beynin şakak lobu.'] },
       { seviye:'ileri', soru:'Karanlık bir odadan güneşli bir yere çıkıldığında gözde neler olur?',
@@ -47261,14 +47276,14 @@ Object.assign(R.KONU_DERIN, {
     kaliplar:['Görme ve işitme yolu sıralaması.',
       'Göz kusurları ve düzeltici mercekler.',
       'Uyum, denge ve reseptör türleri.'],
-    hatalar:['Miyopiyi kalın kenarlı mercekle düzeltmek; miyopi ince kenarlı mercekle düzeltilir.',
+    hatalar:['Miyopinin ince kenarlı mercekle düzeltildiğini sanmak; miyopi ışığı dağıtan kalın kenarlı (ıraksak), hipermetropi ince kenarlı (yakınsak) mercekle düzeltilir.',
       'Kör noktada çok sayıda reseptör bulunduğunu sanmak; hiç reseptör yoktur.',
       'Dengenin salyangozda sağlandığını sanmak; yarım daire kanalları ve dehliz sağlar.'],
     sorular:[
-      { seviye:'orta', soru:'Hipermetrop bir gözle ilgili aşağıdakilerden hangisi doğrudur?',
-        sec:['Görüntü retinanın arkasına düşer ve kalın kenarlı mercekle düzeltilir.', 'Görüntü retinanın önüne düşer.', 'İnce kenarlı mercekle düzeltilir.', 'Korneanın düzensiz yapısından kaynaklanır.', 'Yalnız renkleri ayırt edemez.'], dogru:'A',
-        ipucu:'Hipermetropide göz küresi kısadır ya da mercek yeterince kırmaz.',
-        cozum:['Işınlar retinanın arkasında odaklanır; yakını göremez.', 'Kalın kenarlı (yakınsak) mercek kırılmayı artırır.'] },
+      { seviye:'orta', yenilendi:'2026-10-10T15:50:24Z', soru:'Yaşlandıkça göz merceğinin esnekliğini yitirmesi sonucu yakındaki nesneleri net görmenin zorlaşması hangi göz kusurudur ve hangi mercekle düzeltilir?',
+        sec:['Presbitlik (yaşlı gözü) – ince kenarlı (yakınsak) mercek', 'Miyopluk – kalın kenarlı mercek', 'Astigmatizma – silindirik mercek', 'Hipermetropluk – kalın kenarlı mercek', 'Renk körlüğü – renkli mercek'], dogru:'A',
+        ipucu:'Yakına bakarken merceğin kalınlaşması (uyum) gerekir; esneklik azalınca bu yapılamaz.',
+        cozum:['Merceğin esnekliğini yitirmesiyle yakına uyum yapılamaz: presbitlik (yaşlı gözü).', 'Işığı toplayan ince kenarlı (yakınsak) mercekle düzeltilir; kalın kenarlı mercek ışığı dağıtır ve miyopide kullanılır.'] },
       { seviye:'orta', soru:'İşitmede ses titreşimlerinin sinirsel uyarıya dönüştüğü yapı aşağıdakilerden hangisidir?',
         sec:['Kulak zarı', 'Çekiç kemiği', 'Östaki borusu', 'Salyangozdaki Corti organı', 'Yarım daire kanalları'], dogru:'D',
         ipucu:'Reseptör hücreler iç kulakta, salyangozdadır.',
@@ -47868,10 +47883,10 @@ Object.assign(R.KONU_DERIN, {
         sec:['Aynı türdendirler.', 'Aynı cinstedirler.', 'Aynı şubededirler.', 'Aynı ailededirler.', 'Çiftleşip verimli döl verirler.'], dogru:'C',
         ipucu:'Bir basamakta ortak olanlar, üstündeki bütün basamaklarda da ortaktır.',
         cozum:['Sınıfın üstündeki basamaklar şube ve âlemdir.', 'Aynı sınıftakiler aynı şubededir.'] },
-      { seviye:'orta', yenilendi:'2026-10-10T11:56:29Z', soru:'Aşağıdakilerden hangisi bütün canlıların ortak özelliklerinden biri değildir?',
-        sec:['Hücresel yapıya sahip olma', 'Oksijenli solunum yapma', 'Metabolizma faaliyetleri gösterme', 'Uyarılara tepki verme', 'Üreyerek neslini sürdürme'], dogru:'B',
-        ipucu:'Bazı bakteriler ve mayalar oksijensiz ortamda da enerji üretir.',
-        cozum:['Bütün canlılar hücreden oluşur, metabolizma gösterir, uyarılara tepki verir ve ürer.', 'Oksijenli solunum ortak değildir: bazı bakteriler yalnız oksijensiz solunum ya da fermantasyon yapar.'] },
+      { seviye:'orta', yenilendi:'2026-10-10T15:50:24Z', soru:'Aşağıdakilerden hangisi homeostaziye (iç dengenin korunmasına) örnektir?',
+        sec:['Bir bitkinin ışığa doğru büyümesi', 'Sıcak havada terleyerek vücut sıcaklığının sabit tutulması', 'Bir hücrenin bölünerek çoğalması', 'Bir yavrunun büyüyüp gelişmesi', 'Besinlerin sindirilerek küçük moleküllere ayrılması'], dogru:'B',
+        ipucu:'Homeostazi, dış koşullar değişse de iç ortamın (sıcaklık, su, şeker) sabit tutulmasıdır.',
+        cozum:['Terleme, sıcakta vücut sıcaklığını sabit tutar: homeostazi.', 'Işığa yönelme uyarıya tepki, bölünme üreme, büyüme gelişme, sindirim beslenmenin bir aşamasıdır.'] },
       { seviye:'ileri', soru:'Canlılarla ilgili; I. Bütün canlılar hücreden oluşur. II. Bütün canlılar fotosentez yapar. III. Bütün canlılar enerji için ATP kullanır. ifadelerinden hangileri doğrudur?',
         sec:['Yalnız I', 'Yalnız II', 'I ve II', 'I ve III', 'II ve III'], dogru:'D',
         ipucu:'Fotosentez yalnız üreticilere özgüdür.',
@@ -48158,10 +48173,10 @@ Object.assign(R.KONU_DERIN, {
       'Simyacıların hiçbir katkı yapmadığını sanmak; damıtma, süzme gibi teknikleri geliştirdiler.',
       'Aşındırıcı işaretiyle yanıcı işaretini karıştırmak.'],
     sorular:[
-      { seviye:'orta', yenilendi:'2026-10-10T11:56:29Z', soru:'Aşağıdaki element–sembol eşleştirmelerinden hangisi yanlıştır?',
-        sec:['Sodyum – Na', 'Potasyum – K', 'Demir – Fe', 'Kalsiyum – Ca', 'Fosfor – F'], dogru:'E',
-        ipucu:'Bazı sembollerin kaynağı elementin Latince adıdır (Natrium, Kalium, Ferrum).',
-        cozum:['Fosforun sembolü P’dir; F flor elementinin sembolüdür.', 'Na (natrium), K (kalium) ve Fe (ferrum) Latince adlardan gelir.'] },
+      { seviye:'orta', yenilendi:'2026-10-10T15:50:24Z', soru:'Aşağıdaki laboratuvar malzemesi–kullanım amacı eşleştirmelerinden hangisi yanlıştır?',
+        sec:['Dereceli silindir – sıvı hacmi ölçmek', 'Bunsen beki – ısıtmak', 'Erlenmeyer – çözelti hazırlamak ve karıştırmak', 'Huni – süzme yapmak', 'Termometre – kütle ölçmek'], dogru:'E',
+        ipucu:'Kütle terazi ile ölçülür.',
+        cozum:['Termometre sıcaklık ölçer; kütle terazi ile ölçülür.', 'Öteki eşleştirmeler doğrudur.'] },
       { seviye:'orta', soru:'Canlıların yapısındaki kimyasal maddeleri ve canlılarda gerçekleşen kimyasal olayları inceleyen alt dal aşağıdakilerden hangisidir?',
         sec:['Biyokimya', 'Analitik kimya', 'Fizikokimya', 'Polimer kimyası', 'Anorganik kimya'], dogru:'A',
         ipucu:'Canlı + kimya.',
@@ -48432,10 +48447,10 @@ Object.assign(R.KONU_DERIN, {
         sec:['10', '12,5', '15', '20', '30'], dogru:'C',
         ipucu:'Buharlaşan yalnız sudur; tuzun kütlesi değişmez.',
         cozum:['Tuz: 300 · 0,10 = 30 g.', 'Yeni çözelti 300 − 100 = 200 g: 30 / 200 · 100 = %15.'] },
-      { seviye:'orta', soru:'Aşağıdakilerden hangisi homojen bir karışımdır?',
-        sec:['Ayran', 'Tuzlu su', 'Kum–su', 'Zeytinyağı–su', 'Sis'], dogru:'B',
-        ipucu:'Homojen karışımın her yerinde özellik aynıdır; bileşenleri ayırt edilemez.',
-        cozum:['Tuz suda tamamen çözünür: tuzlu su homojen bir karışımdır (çözelti).', 'Ayran ve kum–su süspansiyon, zeytinyağı–su emülsiyon, sis aerosoldür; hepsi heterojendir.'] },
+      { seviye:'orta', yenilendi:'2026-10-10T15:50:24Z', soru:'Aşağıdakilerden hangisi süspansiyondur?',
+        sec:['Kolonya', 'Çamurlu su', 'Mayonez', 'Sis', 'Hava'], dogru:'B',
+        ipucu:'Süspansiyon, bir katının bir sıvı içinde çözünmeden dağılmasıyla oluşan heterojen karışımdır.',
+        cozum:['Çamurlu suda toprak tanecikleri suda çözünmeden dağılmıştır; bekletilince dibe çöker: süspansiyon.', 'Kolonya ve hava çözelti, mayonez emülsiyon, sis aerosoldür.'] },
     ],
   },
 
@@ -49085,10 +49100,10 @@ Object.assign(R.KONU_DERIN, {
         sec:['Yalnız I', 'Yalnız II', 'I ve II', 'II ve III', 'I, II ve III'], dogru:'E',
         ipucu:'Elektromanyetik dalgalar ortam gerektirmez; boşlukta hepsi ışık hızıyla gider.',
         cozum:['I ve II doğrudur.', 'III doğrudur: morötesi, spektrumda radyo dalgalarından çok daha yüksek frekanslıdır.'] },
-      { seviye:'orta', soru:'Ses dalgalarıyla ilgili aşağıdakilerden hangisi yanlıştır?',
-        sec:['Ses mekanik bir dalgadır.', 'Ses boşlukta da yayılabilir.', 'Ses katılarda genellikle gazlardakinden hızlı yayılır.', 'Sesin inceliği (yüksekliği) frekansına bağlıdır.', 'Sesin şiddeti genliğine bağlıdır.'], dogru:'B',
-        ipucu:'Mekanik dalgaların yayılması için madde gerekir.',
-        cozum:['Ses mekanik bir dalgadır; maddesel ortamda yayılır, boşlukta yayılamaz.', 'Katılarda tanecikler daha sıkı olduğundan ses genellikle daha hızlı yayılır.'] },
+      { seviye:'orta', yenilendi:'2026-10-10T15:50:24Z', soru:'Bir sesin şiddeti (sesin ne kadar güçlü duyulduğu) aşağıdakilerden hangisine bağlıdır?',
+        sec:['Frekansına', 'Genliğine', 'Dalga boyuna', 'Periyoduna', 'Yayıldığı ortamın sıcaklığına'], dogru:'B',
+        ipucu:'Sesin yüksekliği (inceliği) frekansa bağlıdır; şiddeti başka bir özelliğe bağlıdır.',
+        cozum:['Sesin şiddeti dalganın genliğine bağlıdır: genlik büyüdükçe ses daha güçlü duyulur.', 'Frekans (ve ona bağlı periyot, dalga boyu) sesin inceliğini–kalınlığını belirler.'] },
       { seviye:'orta', soru:'Frekansı 50 Hz olan bir dalganın periyodu kaç saniyedir?',
         sec:['0,002', '0,005', '0,01', '0,02', '0,2'], dogru:'D',
         ipucu:'Periyot, frekansın tersidir: T = 1/f.',
@@ -50782,10 +50797,10 @@ Object.assign(R.KONU_DERIN, {
         sec:['Fay hatlarının yoğun olması ve sıcak suların yüzeye yaklaşması', 'Akarsuların akımının düzenli olması', 'Güneşlenme süresinin uzun olması', 'Kıyı uzunluğunun fazla olması', 'Rüzgârların sürekli esmesi'], dogru:'A',
         ipucu:'Jeotermal enerji yer altındaki sıcak sudan ve buhardan elde edilir.',
         cozum:['Ege’de horst–graben yapısı ve fay hatları boyunca sıcak sular yüzeye yaklaşır; Denizli ve Aydın önde gelir.', 'B hidroelektrik, C güneş, E rüzgâr enerjisiyle ilgilidir.'] },
-      { seviye:'orta', soru:'Aşağıdakilerden hangisi birincil ekonomik faaliyettir?',
-        sec:['Bankacılık', 'Otomobil üretimi', 'Balıkçılık', 'Eğitim', 'Un fabrikasında üretim'], dogru:'C',
-        ipucu:'Birincil faaliyetler doğadan doğrudan yararlanmayı kapsar.',
-        cozum:['Balıkçılık doğal kaynaktan doğrudan ürün elde etmektir: birincil faaliyet.', 'Otomobil ve un üretimi ikincil (sanayi), bankacılık ve eğitim üçüncül (hizmet) faaliyettir.'] },
+      { seviye:'orta', yenilendi:'2026-10-10T15:50:24Z', soru:'Türkiye’nin dünya üretiminde ilk sırada yer aldığı tarım ürünü aşağıdakilerden hangisidir?',
+        sec:['Pirinç', 'Kahve', 'Fındık', 'Muz', 'Soya fasulyesi'], dogru:'C',
+        ipucu:'Bu ürün en çok Karadeniz kıyılarında yetiştirilir.',
+        cozum:['Türkiye dünya fındık üretiminin büyük bölümünü karşılar; fındık en çok Karadeniz kıyılarında yetiştirilir.', 'Kahve ve muz tropikal iklim ister; Türkiye pirinç ve soyada dünyada ilk sırada değildir.'] },
       { seviye:'orta', soru:'Türkiye’de çay tarımının Doğu Karadeniz kıyılarında yapılmasının temel nedeni aşağıdakilerden hangisidir?',
         sec:['Kışların soğuk ve karlı geçmesi', 'Her mevsimin yağışlı geçmesi ve toprakların asitli olması', 'Yazların sıcak ve kurak geçmesi', 'Geniş düzlüklerin bulunması', 'Sulama olanaklarının fazla olması'], dogru:'B',
         ipucu:'Çay bitkisi bol ve düzenli yağış ister.',
@@ -50833,10 +50848,10 @@ Object.assign(R.KONU_DERIN, {
         sec:['Ağaçlandırma yapmak', 'Eğimli arazilerde taraça (seki) yapmak', 'Meralarda aşırı otlatmayı önlemek', 'Rüzgâr perdesi oluşturmak', 'Eğimli arazilerde eğim yönünde sürüm yapmak'], dogru:'E',
         ipucu:'Suyun yamaç boyunca hızla akmasını kolaylaştıran uygulama erozyonu artırır.',
         cozum:['Eğim yönünde sürüm, suyun açılan izlerde hızla akıp toprağı taşımasına yol açar; doğrusu eğime dik (yatay) sürümdür.', 'Ağaçlandırma, taraça, otlatmanın denetimi ve rüzgâr perdeleri erozyonu azaltır.'] },
-      { seviye:'orta', soru:'Türkiye’de heyelanın en sık görüldüğü bölge aşağıdakilerden hangisidir?',
-        sec:['Akdeniz Bölgesi', 'Ege Bölgesi', 'Karadeniz Bölgesi', 'İç Anadolu Bölgesi', 'Güneydoğu Anadolu Bölgesi'], dogru:'C',
-        ipucu:'Heyelan eğimli ve bol yağış alan yamaçlarda görülür.',
-        cozum:['Karadeniz Bölgesi’nde yamaçlar dik, yağış fazla, toprak killidir: heyelan en sık burada görülür.'] },
+      { seviye:'orta', yenilendi:'2026-10-10T15:50:24Z', soru:'Deniz tabanında meydana gelen güçlü depremler ya da volkanik patlamalar sonucu oluşan dev dalgalara ne ad verilir?',
+        sec:['Heyelan', 'Hortum', 'Tsunami', 'Çığ', 'Erozyon'], dogru:'C',
+        ipucu:'Bu dalgalar açık denizde fark edilmez, kıyıya yaklaştıkça yükselir.',
+        cozum:['Deniz tabanındaki ani hareketlerin oluşturduğu dev dalgalara tsunami denir.', 'Heyelan ve çığ kütle hareketleri, hortum meteorolojik bir olay, erozyon toprak aşınmasıdır.'] },
     ],
   },
 });
