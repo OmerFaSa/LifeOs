@@ -1265,6 +1265,10 @@ R.Model = (function(){
     if(R.Ogren) await R.Ogren.yukle();
     /* Karma test, geçmişi ve yeniden çözümler (core/ogrentest.js söz 4). */
     if(R.OgrenTest) await R.OgrenTest.yukle();
+    /* Günlük paragraf setleri (core/paragraf.js söz 2). */
+    if(R.Paragraf) await R.Paragraf.yukle();
+    /* Konuya bağlı çıkmış soru kayıtları (core/cikmis.js). */
+    if(R.Cikmis) await R.Cikmis.yukle();
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
     if(R.Hedefler) await R.Hedefler.yukle();
     if(R.SinavProfil) await R.SinavProfil.yukle();

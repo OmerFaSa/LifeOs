@@ -30,7 +30,14 @@
         testler ve buradaki yeniden çözümler. En son deneme yanlışsa ya da
         çözüme bakıldıysa soru listededir; yeniden doğru çözülünce düşer.
         Eski ölçüm silinmez. Doğruluk her okumada bugünkü cevap anahtarıyla
-        hesaplanır: düzeltilen bir soru eski «doğru»yu taşımaz. */
+        hesaplanır: düzeltilen bir soru eski «doğru»yu taşımaz. Yerinde
+        yeniden yazılan sorunun (`yenilendi`) eski denemeleri bu soruya
+        sayılmaz (core/ogren.js söz 5).
+     6. HATA BİLDİRİMİ KULLANICININ NOTUDUR. «Bu soruda hata var» cevap
+        anahtarını değiştirmez (kod otoritedir). İşaretli soru karma test
+        ve günlük paragraf havuzundan çıkar, Yanlışlarım'ın altında
+        «Bildirdiğin hatalar» olarak durur, kopyalanıp iletilebilir. Soru
+        sonradan yenilenirse işaret kendiliğinden kapanır. */
 
 window.R = window.R || {};
 
@@ -41,7 +48,7 @@ R.OgrenTest = (function(){
   const GECMIS = 30;
   let doc = bos();
 
-  function bos(){ return { aktif:null, gecmis:[], tekrar:{} }; }
+  function bos(){ return { aktif:null, gecmis:[], tekrar:{}, isaret:{} }; }
   const O = () => R.Ogren;
   const anahtar = (tid, i) => tid + '#' + i;
   const simdi = () => new Date().toISOString();
@@ -53,6 +60,7 @@ R.OgrenTest = (function(){
     if(d && typeof d === 'object'){
       if(Array.isArray(d.gecmis)) doc.gecmis = d.gecmis.filter(t => t && Array.isArray(t.sorular)).slice(0, GECMIS);
       if(d.tekrar && typeof d.tekrar === 'object') doc.tekrar = d.tekrar;
+      if(d.isaret && typeof d.isaret === 'object') doc.isaret = d.isaret;
       if(d.aktif && Array.isArray(d.aktif.sorular) && d.aktif.sorular.length) doc.aktif = d.aktif;
     }
     return doc;
@@ -61,13 +69,24 @@ R.OgrenTest = (function(){
     try{ await R.Store.set(STORE, doc); }catch(e){ /* yazılamasa da bu açılışta çalışır */ }
   }
 
-  /* 'tm-05#2' → { k, subject, topic, i, q }; soru artık yoksa null. */
-  function soruOf(k){
+  /* 'tm-05#2' → { k, subject, topic, i, q }; soru artık yoksa null.
+     Günlük paragraf havuzunun soruları 'tr-09#p014' biçimindedir
+     (core/paragraf.js): i sayı değil havuz kimliğidir. at verilirse o
+     anda verilen bir cevap için bakılır: soru sonradan yenilendiyse null. */
+  function soruOf(k, at){
     const p = String(k || '').split('#');
-    const i = Number(p[1]);
     const x = O().konuyuBul(p[0]);
-    const q = x.topic ? O().sorular(x.topic.id)[i] : null;
-    return q ? { k, subject:x.subject, topic:x.topic, i, q } : null;
+    if(!x.topic) return null;
+    let q = null, i = null;
+    if(/^p\d+$/.test(p[1] || '')){
+      q = R.Paragraf ? R.Paragraf.bul(p[1], x.topic.id) : null;
+      i = p[1];
+    }else{
+      i = Number(p[1]);
+      q = O().sorular(x.topic.id)[i] || null;
+    }
+    if(!q || (at && !O().gecerli(q, at))) return null;
+    return { k, subject:x.subject, topic:x.topic, i, q, havuz:typeof i === 'string' };
   }
   const dogruMu = (q, v) => !!(v && !v.bak && v.h && v.h === q.dogru);
 
@@ -82,7 +101,14 @@ R.OgrenTest = (function(){
       if(k.konular === 'okunan' && !R.Model.topicState(x.subject.id, x.topic.id).okunduAt) return;
       O().sorular(x.topic.id).forEach((q, i) => {
         if(k.seviye === 'sinav' && O().seviye(x.topic.id, i) === 'temel') return;
-        l.push({ k:anahtar(x.topic.id, i), tid:x.topic.id });
+        const ak = anahtar(x.topic.id, i);
+        if(!isaretOf(ak)) l.push({ k:ak, tid:x.topic.id });
+      });
+      /* Günlük paragraf havuzu konusunun sorusudur (söz 1). */
+      if(R.Paragraf) R.Paragraf.konuSorulari(x.topic.id).forEach(q => {
+        if(k.seviye === 'sinav' && q.seviye === 'temel') return;
+        const ak = anahtar(x.topic.id, q.id);
+        if(!isaretOf(ak)) l.push({ k:ak, tid:x.topic.id });
       });
     });
     return l;
@@ -195,11 +221,13 @@ R.OgrenTest = (function(){
   /* Biten testin özeti: sayılar ve konu konu sonuç (yanlışı çok olan önce).
      Doğruluk bugünkü cevap anahtarıyla hesaplanır (söz 5). */
   function ozet(t){
-    const r = { id:t.id, at:t.at, kapsam:t.kapsam, toplam:t.sorular.length, dogru:0, yanlis:0, bakildi:0, bos:0, konular:[] };
+    const r = { id:t.id, at:t.at, kapsam:t.kapsam, toplam:0, dogru:0, yanlis:0, bakildi:0, bos:0, konular:[] };
     const kon = {};
     t.sorular.forEach(x => {
-      const s = soruOf(x.k);
+      /* Yenilenmiş ya da kalkmış soru bu testin sonucuna sayılmaz. */
+      const s = soruOf(x.k, x.at || t.at);
       if(!s) return;
+      r.toplam++;
       const v = x.bos ? null : x;
       const d = v && dogruMu(s.q, v);
       if(!v) r.bos++; else if(v.bak) r.bakildi++; else if(d) r.dogru++; else r.yanlis++;
@@ -222,6 +250,7 @@ R.OgrenTest = (function(){
     const son = {};
     const koy = (k, v, kaynak) => {
       if(!v || !v.at || (!v.h && !v.bak)) return;
+      if(!soruOf(k, v.at)) return;
       if(!son[k] || son[k].at <= v.at) son[k] = { h:v.h || null, bak:!!v.bak, at:v.at, kaynak };
     };
     O().konular().forEach(x => {
@@ -229,6 +258,7 @@ R.OgrenTest = (function(){
       Object.keys(c).forEach(i => koy(anahtar(x.topic.id, i), c[i], 'konu'));
     });
     doc.gecmis.slice().reverse().forEach(t => t.sorular.forEach(x => koy(x.k, x, 'test')));
+    if(R.Paragraf) R.Paragraf.denemeler().forEach(x => koy(x.k, x, 'paragraf'));
     Object.keys(doc.tekrar).forEach(k => koy(k, doc.tekrar[k], 'tekrar'));
     return son;
   }
@@ -253,6 +283,46 @@ R.OgrenTest = (function(){
     return { ok:true, dogru:harf === s.q.dogru };
   }
 
+  /* ---------- hata bildirimi (söz 6) ---------- */
+
+  /* Geçerli işaret ya da null: soru kalktıysa ya da işaretten sonra
+     yenilendiyse işaret kapanmıştır. */
+  function isaretOf(k){
+    const v = doc.isaret[k];
+    if(!v || !v.at) return null;
+    const s = soruOf(k);
+    if(!s || (s.q.yenilendi && String(s.q.yenilendi) > String(v.at))) return null;
+    return v;
+  }
+  async function isaretle(k, not){
+    if(!soruOf(k)) return { ok:false, neden:'gecersiz' };
+    doc.isaret[k] = { at:simdi(), not:String(not || '').replace(/\s+/g, ' ').trim().slice(0, 300) };
+    await yaz();
+    return { ok:true };
+  }
+  async function isaretKaldir(k){
+    if(!doc.isaret[k]) return { ok:false };
+    delete doc.isaret[k];
+    await yaz();
+    return { ok:true };
+  }
+  /* Geçerli işaretler, en yenisi önce: [{ k, subject, topic, i, q, isaret }]. */
+  function isaretliler(){
+    return Object.keys(doc.isaret).map(k => {
+      const v = isaretOf(k), s = v ? soruOf(k) : null;
+      return s ? Object.assign(s, { isaret:v }) : null;
+    }).filter(Boolean).sort((a, b) => b.isaret.at.localeCompare(a.isaret.at));
+  }
+  /* İletmek için düz metin: konu, soru, doğru cevap, kullanıcının notu. */
+  function isaretMetni(){
+    const d = O().duzMetin;
+    return isaretliler().map((x, j) => (j + 1) + '. ' + x.subject.name + ' · ' + x.topic.name + ' · ' + x.k + '\n'
+      + d(x.q.soru).replace(/\n/g, ' ') + (O().ekMetni(x.q) ? ' ' + O().ekMetni(x.q) : '') + '\n'
+      + x.q.sec.map((m, i) => O().HARFLER[i] + ') ' + d(m)).join('  ') + '\n'
+      + 'Uygulamadaki cevap: ' + x.q.dogru + (x.isaret.not ? '\nNot: ' + x.isaret.not : '')).join('\n\n');
+  }
+
   return { STORE, BOYLAR, EN_AZ, yukle, soruOf, havuz, baslat, aktif, siradaki, git, cevapla, bak, say,
-    bitir, vazgec, ozet, gecmis, sonDenemeler, yanlislar, tekrarCevapla };
+    bitir, vazgec, ozet, gecmis, sonDenemeler, yanlislar, tekrarCevapla,
+    isaretOf, isaretle, isaretKaldir, isaretliler, isaretMetni };
 })();

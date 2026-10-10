@@ -2621,6 +2621,36 @@ body.is-dragging .drop.is-over{
 .ogr-soru__metin{ margin:0 0 14px; font-size:15.5px; line-height:1.6; white-space:pre-line; }
 .ogr-soru__metin b{ font-weight:600; }
 .ogr-soru__parca{ margin:0 0 12px; font-size:15.5px; line-height:1.65; color:var(--text-2); }
+/* Şekil ve tablo (core/sekil.js). Çizgi ve yazı currentColor'dır: tema ve
+   paletlerle birlikte döner; vurgu --accent. Şekil kendi genişliğinin 1,4
+   katına kadar büyür, dar ekranda sığana kadar küçülür. */
+.sekil{ margin:4px 0 14px; color:var(--text); --sk-zemin:var(--surface); }
+.ders__ornek .sekil{ --sk-zemin:var(--surface-2); }
+.sekil__svg{ display:block; max-width:100%; height:auto; overflow:visible; }
+.sk{ fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.sk-i{ stroke-width:1; }
+.sk-k{ stroke-dasharray:5 4; }
+.sk-g{ fill:currentColor; fill-opacity:.12; }
+.sk-f, .sk-uc{ fill:currentColor; }
+.sk-uc{ stroke:none; }
+.sk-zemin{ fill:var(--sk-zemin); }
+.sk-v{ stroke:var(--accent); }
+.sk-v.sk-g, .sk-v.sk-f, .sk-uc.sk-v{ fill:var(--accent); }
+.sk-t{ fill:currentColor; stroke:none; font-size:12px; font-family:inherit; }
+.sk-tk{ font-size:10.5px; fill:var(--text-2); }
+.sk-tb{ font-weight:700; }
+.sk-tv{ fill:var(--accent); }
+.sekil--kusur{ margin:4px 0 12px; }
+.ogr-tablo-kap{ max-width:100%; overflow-x:auto; margin:4px 0 14px; }
+.ogr-tablo{ border-collapse:collapse; font-size:14px; line-height:1.4; }
+.ogr-tablo caption{ caption-side:top; text-align:left; padding:0 0 6px; font-size:13px; color:var(--text-2); }
+.ogr-tablo th, .ogr-tablo td{ border:1px solid var(--border); padding:6px 12px; text-align:center; }
+.ogr-tablo thead th{ background:var(--surface-2); font-weight:600; }
+.ogr-tablo tbody th{ font-weight:600; text-align:left; }
+/* Çıkmış soru satırı: künye, durum ve harfler alt alta. */
+.cikmis .grow > span{ display:block; }
+.cikmis.is-dogru .strong{ color:var(--ok); }
+.cikmis.is-yanlis .strong{ color:var(--danger); }
 .secenekler{ display:flex; flex-direction:column; gap:8px; }
 .secenek{ display:flex; align-items:center; gap:12px; width:100%; min-height:44px; padding:8px 12px; text-align:left;
   border:1px solid var(--border); border-radius:12px; background:none; font:inherit; color:inherit; cursor:pointer;

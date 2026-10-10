@@ -22,7 +22,12 @@
         «Soru çöz» adımı bloklardan ölçülür; dört örnek soru yirmi soruluk
         eşiği şişirmesin).
      4. YANLIŞ KULLANICININ. Yanlış cevap kendiliğinden yanlış defterine
-        yazılmaz; «Yanlış defterine ekle» kaydı kullanıcının eliyle açar. */
+        yazılmaz; «Yanlış defterine ekle» kaydı kullanıcının eliyle açar.
+     5. YENİLENEN SORU ESKİ CEVABI TAŞIMAZ. Cevaplar sıra numarasıyla
+        tutulur; bir soru yerinde yeniden yazılırsa içerik ona
+        `yenilendi` (ISO zaman) yazar. O andan önce verilmiş cevap, yanlış
+        defteri kaydı ya da test denemesi başka bir soruya aittir: ölçüm
+        sayılmaz, silinmez de (gecerli()). */
 
 window.R = window.R || {};
 
@@ -150,6 +155,8 @@ R.Ogren = (function(){
   function duzMetin(s){ return duzOf(ayristir(s)); }
 
   function anlatim(topicId){ return (R.KONU_ANLATIM || {})[topicId] || null; }
+  /* Söz 5: `at` anında verilen cevap bugünkü soruya mı ait? */
+  function gecerli(q, at){ return !q || !q.yenilendi || !at || String(at) >= String(q.yenilendi); }
   /* Derinleştirme (data/derin-*.js): kazanımlar, ön koşullar, seviyeli
      çözümlü örnekler, sınav kalıpları, sık hatalar ve orta/ileri sorular. */
   function derin(topicId){ return (R.KONU_DERIN || {})[topicId] || null; }
@@ -163,20 +170,32 @@ R.Ogren = (function(){
     const t = tabanSorular(topicId);
     return ek.length ? t.concat(ek) : t;
   }
+  /* Tek soru: i sayıysa konunun sırası, 'p014' gibi bir kimlikse günlük
+     paragraf havuzunun sorusu (core/paragraf.js). */
+  function soru(topicId, i){
+    if(typeof i === 'string') return R.Paragraf ? R.Paragraf.bul(i, topicId) : null;
+    return sorular(topicId)[i] || null;
+  }
   const SEVIYE = { temel:'Temel', orta:'Orta', ileri:'İleri' };
   /* Sorunun seviyesi yazarın değerlendirmesidir (ölçüm değil): temel
      sorular «temel», derin sorular kendi seviyesini taşır. */
   function seviye(topicId, i){
-    const n = tabanSorular(topicId).length;
-    if(i < n) return 'temel';
-    const q = sorular(topicId)[i];
+    if(typeof i !== 'string' && i < tabanSorular(topicId).length) return 'temel';
+    const q = soru(topicId, i);
     return q && SEVIYE[q.seviye] ? q.seviye : 'orta';
   }
 
   /* ---------- örnek soru cevapları (söz 3) ---------- */
   function cevaplar(subjectId, topicId){
     const o = R.Model.topicState(subjectId, topicId).ornek;
-    return o && typeof o === 'object' ? o : {};
+    if(!o || typeof o !== 'object') return {};
+    const l = sorular(topicId);
+    /* Yenilenmiş sorunun eski cevabı süzülür (söz 5); yeni bir cevap
+       yazıldığında kayıttan da düşer. */
+    if(!l.some(q => q && q.yenilendi)) return o;
+    const out = {};
+    Object.keys(o).forEach(i => { if(gecerli(l[i], o[i] && o[i].at)) out[i] = o[i]; });
+    return out;
   }
   /* i: sorunun sırası, harf: A–E, ip: ipucu açıldıktan sonra mı. İlk
      cevap kalır. → { ok, dogru?, neden? } */
@@ -257,12 +276,14 @@ R.Ogren = (function(){
     const k = s.lastIndexOf(' ', n - 1);
     return s.slice(0, k > n * 0.6 ? k : n - 1).replace(/[\s,;:]+$/, '') + '…';
   }
+  /* Şekil ve tablonun düz metni (core/sekil.js söz 3); yoksa ''. */
+  function ekMetni(q){ return R.Sekil ? R.Sekil.ekMetni(q) : ''; }
   function kartYuzu(topicId, i){
-    const q = sorular(topicId)[i];
+    const q = soru(topicId, i);
     if(!q) return null;
     const satir = duzMetin(q.soru).split('\n');
     const kok = satir.pop();
-    const parca = satir.join(' ');
+    const parca = [satir.join(' '), ekMetni(q)].filter(Boolean).join(' ');
     const sec = (q.sec || []).map((m, k) => HARFLER[k] + ') ' + kisalt(duzMetin(m), 80)).join('  ');
     const dogru = (q.sec || [])[HARFLER.indexOf(q.dogru)];
     return {
@@ -274,25 +295,28 @@ R.Ogren = (function(){
   /* Yanlış defteri kaydı (söz 4): kök neden ve etiket boş, kullanıcı
      yazar (testkitabi.js ile aynı şema). Aynı soru iki kez eklenmez. */
   function deftere(subjectId, topicId, i){
+    const q = soru(topicId, i);
     return (R.S.errors || []).find(e => e.kaynak && e.kaynak.tur === 'ogren'
-      && e.subjectId === subjectId && e.topicId === topicId && e.kaynak.i === i) || null;
+      && e.subjectId === subjectId && e.topicId === topicId && e.kaynak.i === i && gecerli(q, e.createdAt)) || null;
   }
   /* senin: karma testte ya da yeniden çözümde verilen harf (core/ogrentest.js);
      verilmezse konunun ilk cevabı. */
   async function yanlisaEkle(subjectId, topicId, i, senin){
     const { subject, topic } = bul(subjectId, topicId);
-    const q = sorular(topicId)[i];
-    const c = cevaplar(subjectId, topicId)[i];
+    const q = soru(topicId, i);
+    const havuz = typeof i === 'string';
+    const c = havuz ? null : cevaplar(subjectId, topicId)[i];
     if(!subject || !topic || !q) return null;
     const var_ = deftere(subjectId, topicId, i);
     if(var_) return var_;
     const err = {
       id:R.U.uid('r'), createdAt:new Date().toISOString(), closedAt:null, repairDoneAt:null,
       examId:null, examDate:R.U.todayISO(), publisher:'Öğren',
-      testName:('Örnek soru · ' + topic.name).slice(0, 160), questionNo:String(i + 1),
+      testName:((havuz ? 'Günlük paragraf · ' : 'Örnek soru · ') + topic.name).slice(0, 160),
+      questionNo:havuz ? 'P' + Number(i.slice(1)) : String(i + 1),
       status:'Yanlış', tag:null, seconds:null, rootCause:'', principle:'', similar:'',
       recipe:'', topicRef:'', subjectId, topicId, topic:topic.name,
-      soru:kisalt(duzMetin(q.soru), 600), senin:senin || (c ? c.h : null), anahtar:q.dogru,
+      soru:kisalt([duzMetin(q.soru), ekMetni(q)].filter(Boolean).join(' '), 600), senin:senin || (c ? c.h : null), anahtar:q.dogru,
       kaynak:{ tur:'ogren', i },
     };
     await R.Model.saveError(err);
@@ -300,6 +324,6 @@ R.Ogren = (function(){
   }
 
   return { HARFLER, SEVIYE, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
-    derin, tabanSorular, seviye,
+    derin, tabanSorular, seviye, gecerli, ekMetni, soru,
     anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle };
 })();

@@ -379,7 +379,12 @@ R.Screens.learn = (function(){
       R.App.render();
     },
 
-    async 'note-new'(){
+    /* Öğren › Anlatım «Ders notu ekle» seçili konuyu dataset ile verir
+       (screens/ogren.js ogren-not): ders ve konu seçili gelir. */
+    async 'note-new'(el){
+      const ds = (el && el.dataset) || {};
+      const onDers = R.SUBJECTS.some(x => x.id === ds.subject) ? ds.subject : '';
+      const onKonu = onDers && (R.SUBJECTS.find(x => x.id === onDers).topics || []).some(t => t.id === ds.topic) ? ds.topic : '';
       UI.sheet({
         title:'Ders ekle', subtitle:'Video bağlantısı isteğe bağlı — not almaya hemen başlayabilirsin',
         body:String(K.Stack([
@@ -387,8 +392,8 @@ R.Screens.learn = (function(){
           K.Field({ label:'Video bağlantısı', hint:'YouTube bağlantısı gömülü açılır',
             input:K.Input({ id:'nn-url', placeholder:'https://www.youtube.com/watch?v=…' }) }),
           K.Cols(2, [
-            K.Field({ label:'Ders', input:K.Select({ id:'nn-subject', options:subjectOptions(), value:'' }) }),
-            K.Field({ label:'Konu', input:K.Select({ id:'nn-topic', options:topicOptions(null), value:'' }) }),
+            K.Field({ label:'Ders', input:K.Select({ id:'nn-subject', options:subjectOptions(), value:onDers }) }),
+            K.Field({ label:'Konu', input:K.Select({ id:'nn-topic', options:topicOptions(onDers || null), value:onKonu }) }),
           ]),
           K.Notice({ tone:'info', body:'Transcript otomatik çekilmez. İzlerken durakla, '
             + 'zaman damgası ve tek cümle notla ilerle.' }),
@@ -411,6 +416,7 @@ R.Screens.learn = (function(){
         topicId: val('nn-topic') || null,
       });
       if(!note.title && !note.url){ UI.toast('Başlık veya bağlantı gir'); return; }
+      if(note.url && !/^https?:\/\//i.test(note.url)){ UI.toast('Bağlantı http:// ya da https:// ile başlamalı'); return; }
       await M.saveVideoNote(note);
       UI.closeSheet();
       S.ui.noteOpen = note.id;

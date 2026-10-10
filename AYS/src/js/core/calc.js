@@ -522,6 +522,14 @@ R.Calc = (function(){
      (kart ~1 dk, paragraf ~3 dk, reçete ~10 dk). Öncelik: gecikmiş kart >
      açık yanlışın reçetesi > paragraf/problem eksiği > vadesi gelen kart >
      sıradaki bloğun ilk dakikaları. */
+  /* Paragraf çıpası önerisinin «Başla»sı: Öğren'de bugünün paragraf seti
+     açıksa (kurulmamış ya da bitmemiş) oraya gider (core/paragraf.js).
+     Set bittiyse öneri eskisi gibi yalnız hatırlatır; kitaptan çözülür. */
+  function paragrafSeti(){
+    if(!R.Paragraf || !R.Paragraf.acikMi || !R.Paragraf.acikMi()) return { yol:{}, not:'' };
+    return { yol:{ route:'sorular', act:'par-ac' }, not:' Öğren’de bugünün paragraf seti hazır.' };
+  }
+
   function onbesDakika(dk){
     const sure = dk || 15;
     const day = S.days[U.todayISO()];
@@ -543,10 +551,10 @@ R.Calc = (function(){
     }
     if(day && day.paragraphActual < day.paragraphTarget){
       const n = Math.min(day.paragraphTarget - day.paragraphActual, Math.floor(sure / 3));
-      return { key:'onbes-paragraf', icon:'book', label:sure + ' dakikam var',
+      return Object.assign({ key:'onbes-paragraf', icon:'book', label:sure + ' dakikam var',
         title:n + ' paragraf sorusu çöz', dk:n * 3,
         why:'Günün paragraf çıpasından ' + (day.paragraphTarget - day.paragraphActual)
-          + ' kaldı; soru başı ~3 dakika (tahmin).', tone:'normal' };
+          + ' kaldı; soru başı ~3 dakika (tahmin).' + paragrafSeti().not, tone:'normal' }, paragrafSeti().yol);
     }
     if(day && day.problemActual < day.problemTarget){
       const n = Math.min(day.problemTarget - day.problemActual, Math.floor(sure / 3));
@@ -639,10 +647,10 @@ R.Calc = (function(){
           act:'timer-start', blockId:next.id, tone:'normal' };
       }
       if(day.paragraphActual < day.paragraphTarget){
-        return { key:'anchor', icon:'book', label:'Günlük çıpa',
+        return Object.assign({ key:'anchor', icon:'book', label:'Günlük çıpa',
           title:'Paragraf çıpasını tamamla',
-          why:(day.paragraphTarget - day.paragraphActual)+' paragraf kaldı — çıpa konudan bağımsız düşmez.',
-          tone:'normal' };
+          why:(day.paragraphTarget - day.paragraphActual)+' paragraf kaldı — çıpa konudan bağımsız düşmez.' + paragrafSeti().not,
+          tone:'normal' }, paragrafSeti().yol);
       }
       if(day.problemActual < day.problemTarget){
         return { key:'anchor2', icon:'chart', label:'Günlük çıpa',

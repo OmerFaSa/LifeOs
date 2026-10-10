@@ -4080,6 +4080,36 @@ body.is-dragging .drop.is-over{
 .ogr-soru__metin{ margin:0 0 14px; font-size:15.5px; line-height:1.6; white-space:pre-line; }
 .ogr-soru__metin b{ font-weight:600; }
 .ogr-soru__parca{ margin:0 0 12px; font-size:15.5px; line-height:1.65; color:var(--text-2); }
+/* Şekil ve tablo (core/sekil.js). Çizgi ve yazı currentColor'dır: tema ve
+   paletlerle birlikte döner; vurgu --accent. Şekil kendi genişliğinin 1,4
+   katına kadar büyür, dar ekranda sığana kadar küçülür. */
+.sekil{ margin:4px 0 14px; color:var(--text); --sk-zemin:var(--surface); }
+.ders__ornek .sekil{ --sk-zemin:var(--surface-2); }
+.sekil__svg{ display:block; max-width:100%; height:auto; overflow:visible; }
+.sk{ fill:none; stroke:currentColor; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+.sk-i{ stroke-width:1; }
+.sk-k{ stroke-dasharray:5 4; }
+.sk-g{ fill:currentColor; fill-opacity:.12; }
+.sk-f, .sk-uc{ fill:currentColor; }
+.sk-uc{ stroke:none; }
+.sk-zemin{ fill:var(--sk-zemin); }
+.sk-v{ stroke:var(--accent); }
+.sk-v.sk-g, .sk-v.sk-f, .sk-uc.sk-v{ fill:var(--accent); }
+.sk-t{ fill:currentColor; stroke:none; font-size:12px; font-family:inherit; }
+.sk-tk{ font-size:10.5px; fill:var(--text-2); }
+.sk-tb{ font-weight:700; }
+.sk-tv{ fill:var(--accent); }
+.sekil--kusur{ margin:4px 0 12px; }
+.ogr-tablo-kap{ max-width:100%; overflow-x:auto; margin:4px 0 14px; }
+.ogr-tablo{ border-collapse:collapse; font-size:14px; line-height:1.4; }
+.ogr-tablo caption{ caption-side:top; text-align:left; padding:0 0 6px; font-size:13px; color:var(--text-2); }
+.ogr-tablo th, .ogr-tablo td{ border:1px solid var(--border); padding:6px 12px; text-align:center; }
+.ogr-tablo thead th{ background:var(--surface-2); font-weight:600; }
+.ogr-tablo tbody th{ font-weight:600; text-align:left; }
+/* Çıkmış soru satırı: künye, durum ve harfler alt alta. */
+.cikmis .grow > span{ display:block; }
+.cikmis.is-dogru .strong{ color:var(--ok); }
+.cikmis.is-yanlis .strong{ color:var(--danger); }
 .secenekler{ display:flex; flex-direction:column; gap:8px; }
 .secenek{ display:flex; align-items:center; gap:12px; width:100%; min-height:44px; padding:8px 12px; text-align:left;
   border:1px solid var(--border); border-radius:12px; background:none; font:inherit; color:inherit; cursor:pointer;
@@ -16059,7 +16089,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'e769d4a0', at:'2026-10-09 23:21', dirty:true };
+R.BUILD = { id:'5d85f566', at:'2026-10-10 10:46', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -49685,6 +49715,171 @@ Object.assign(R.KONU_DERIN, {
   },
 });
 
+/* ==== js/data/paragraf.js ==== */
+/* GÜNLÜK PARAGRAF HAVUZU — core/paragraf.js'in soruları.
+
+   Kullanıcı (2026-10-10): «paragrafta soru sayısı az; soru sayısını
+   arttır». Konu soruları (data/anlatim-tr.js, data/derin-tr.js) her
+   paragraf konusunda sekiz soruyla sınırlı; paragraf ise dokuz ay her gün
+   çalışılan bir beceri. Bu havuz günlük setin kaynağıdır.
+
+   KAYNAK VE DOĞRULUK: anlatım dosyalarıyla aynı. Paragrafların hepsi
+   LifeOS'un geliştirme oturumunda (Claude) özgün olarak yazıldı; bir
+   kitaptan ya da ÖSYM'den alıntı değildir. Her soru yazılırken çözüldü,
+   sonra dökülüp yeniden çözüldü. Ekranda «elle yazıldı · doğrulanmadı»
+   yazar. Tanık gösterme sorularında yalnız kaynağı bilinen gerçek sözler
+   kullanıldı.
+
+   BİÇİM: R.PARAGRAF_HAVUZU = [{
+     id:     'p001'…   kalıcı kimlik; bir kez verilir, başka soruya verilmez
+     konu:   'tr-05'…'tr-09'
+     seviye: 'orta' | 'ileri'      yazarın değerlendirmesi, ölçüm değil
+     soru:   paragraf + '\n' + kök (sıralama sorusunda cümleler + '\n' + kök)
+     sec:    [beş seçenek], dogru:'A'–'E', ipucu, cozum:[adım, …]
+     yenilendi?: ISO zaman — soru yerinde düzeltildiyse (core/ogren.js söz 5)
+   }]
+   Biçimi, harf dağılımını ve kimliklerin tekliğini tests/paragraf.test.js
+   sınar. */
+
+window.R = window.R || {};
+
+R.PARAGRAF_HAVUZU = [
+  /* ---------- tr-05 · konu, ana düşünce, başlık ---------- */
+  { id:'p001', konu:'tr-05', seviye:'orta',
+    soru:'Bir şehirde yaşlı ağaçlar kesildiğinde yalnızca gölge kaybolmaz. O ağacın altında buluşan komşular, dallarına salıncak kuran çocuklar, her bahar aynı çiçeği bekleyen yaşlılar da bir alışkanlığını yitirir. Yeni dikilen fidanlar yıllar sonra boy atsa bile kesilen ağacın biriktirdiği anılar geri gelmez. Bu yüzden şehirlerde ağaç, bir süs öğesi değil, ortak hafızanın bir parçası olarak korunmalıdır.\nBu parçada asıl anlatılmak istenen aşağıdakilerden hangisidir?',
+    sec:['Şehirlerdeki yaşlı ağaçlar ortak hafızanın parçası olarak korunmalıdır.', 'Yeni dikilen fidanlar kısa sürede büyür.', 'Ağaçlar yalnızca gölge sağladıkları için değerlidir.', 'Çocuklar parklarda daha çok vakit geçirmelidir.', 'Şehir planlamasında yeşil alanlar ikinci plandadır.'], dogru:'A',
+    ipucu:'«Bu yüzden» ile başlayan son cümleye bak.',
+    cozum:['Paragraf kesilen ağacın gölgeyle birlikte anıları da götürdüğünü anlatır.', 'Son cümle «bu yüzden» ile asıl düşünceyi verir: ağaç ortak hafızanın parçasıdır.', 'C paragrafın karşı çıktığı görüştür; B ona aykırıdır, D ve E parçada yoktur.'] },
+  { id:'p002', konu:'tr-05', seviye:'orta',
+    soru:'Kuşlar göç ederken yollarını nasıl bulur? Araştırmalar bazı türlerin Güneş’in konumundan, bazılarının yıldızlardan yararlandığını gösteriyor. Güvercinler gibi kimi kuşlar ise Dünya’nın manyetik alanını algılayabiliyor. Genç kuşlar ilk göçlerinde deneyimli kuşları izleyerek rotayı öğreniyor. Yani kuşların yön bulması tek bir yeteneğe değil, birkaç yöntemin birlikte kullanılmasına dayanıyor.\nBu parçaya en uygun başlık aşağıdakilerden hangisidir?',
+    sec:['Güvercinlerin Yaşamı', 'Yıldızların Hareketi', 'Göçün Nedenleri', 'Kuşlar Yollarını Nasıl Bulur?', 'Dünya’nın Manyetik Alanı'], dogru:'D',
+    ipucu:'Başlık bütün cümleleri kapsamalı; tek bir yöntemi değil.',
+    cozum:['Paragraf kuşların göç sırasında yön bulma yollarını sıralar ve bunların birlikte kullanıldığını söyler.', 'A ve E tek bir ayrıntıya dayanır, B ilgisizdir; C’deki «nedenler» parçada anlatılmaz.'] },
+  { id:'p003', konu:'tr-05', seviye:'orta',
+    soru:'Birçok insan yeteneği doğuştan gelen ve değişmeyen bir şey sanır: ya vardır ya yoktur. Bu yüzden ilk denemede başaramadığı bir işi «bana göre değil» diyerek bırakır. Oysa usta bir piyanistin parmakları da bir satranç ustasının hamleleri de binlerce saatlik çalışmanın ürünüdür. Yetenek bir başlangıç noktası olabilir ama ustalığı belirleyen, düzenli ve bilinçli çalışmadır.\nBu parçada vurgulanmak istenen düşünce aşağıdakilerden hangisidir?',
+    sec:['Piyano çalmak satranç oynamaktan zordur.', 'Yetenek doğuştan gelir ve değiştirilemez.', 'Ustalık, yetenekten çok düzenli ve bilinçli çalışmayla kazanılır.', 'İlk denemede başaramayan kişi o işi bırakmalıdır.', 'Ustalar çalışmadan da başarılı olur.'], dogru:'C',
+    ipucu:'«Oysa»dan sonra gelen yazarın görüşüdür.',
+    cozum:['İlk iki cümle yaygın bir yanlış inancı aktarır.', '«Oysa» ile yazar kendi görüşünü verir: ustalığı çalışma belirler.', 'B ve D yazarın eleştirdiği görüşlerdir; A ve E parçada yoktur.'] },
+  { id:'p004', konu:'tr-05', seviye:'orta',
+    soru:'Eskiden bir fotoğraf çekmeden önce uzun uzun düşünülürdü; makinedeki film sınırlıydı ve her karenin bir bedeli vardı. Basılan fotoğraflar albümlere yerleştirilir, yıllar sonra bile aile toplantılarında elden ele dolaşırdı. Bugün ise telefonlarımızda binlerce fotoğraf var ama çoğuna bir daha bakmıyoruz. Görüntü bolluğu, tek tek görüntülerin değerini azalttı.\nBu parçanın konusu aşağıdakilerden hangisidir?',
+    sec:['Fotoğraf makinelerinin teknik gelişimi', 'Aile albümlerinin düzenlenmesi', 'Telefonların bellek kapasitesi', 'Film banyosu yöntemleri', 'Fotoğraf sayısının artmasının fotoğraflara verilen değere etkisi'], dogru:'E',
+    ipucu:'Paragraf eski ve yeni durumu neden karşılaştırıyor?',
+    cozum:['Paragraf film dönemini bugünkü telefon fotoğrafçılığıyla karşılaştırır.', 'Son cümle varılan yeri söyler: bolluk, tek tek fotoğrafların değerini azalttı.', 'A ve C teknik ayrıntıdır; B ve D parçada anlatılmaz.'] },
+  { id:'p005', konu:'tr-05', seviye:'ileri',
+    soru:'İyi bir dinleyici olmak, iyi bir konuşmacı olmaktan daha zordur. Konuşurken sözü biz yönetiriz; dinlerken ise kendi düşüncemizi bir kenara bırakıp karşımızdakini anlamaya çalışırız. Çoğumuz karşımızdaki konuşurken aslında ona ne cevap vereceğimizi düşünürüz. Gerçek dinleme, sabır ve dikkat isteyen, öğrenilmesi gereken bir beceridir.\nBu parçada asıl anlatılmak istenen aşağıdakilerden hangisidir?',
+    sec:['İyi konuşmacılar her zaman iyi dinleyicidir.', 'Gerçek dinleme, konuşmaktan zor ve öğrenilmesi gereken bir beceridir.', 'Konuşurken karşımızdakinin sözünü kesmemeliyiz.', 'Sabırlı insanlar az konuşur.', 'Herkes doğuştan iyi bir dinleyicidir.'], dogru:'B',
+    ipucu:'İlk ve son cümle aynı düşünceyi iki uçtan söylüyor.',
+    cozum:['İlk cümle dinlemenin konuşmaktan zor olduğunu, son cümle öğrenilmesi gereken bir beceri olduğunu söyler.', 'B ikisini birlikte karşılar; A, C, D ve E parçada yoktur ya da ona aykırıdır.'] },
+
+  /* ---------- tr-06 · yardımcı düşünce ---------- */
+  { id:'p006', konu:'tr-06', seviye:'orta',
+    soru:'Van Gölü, Türkiye’nin en büyük gölüdür. Suyu sodalı olduğu için içilemez ve tarımda kullanılamaz. Bu sert koşullara uyum sağlamış tek balık türü inci kefalidir; her ilkbaharda göle dökülen akarsulara geçerek yumurtlar. Göldeki Akdamar Adası’nda 10. yüzyıldan kalma bir kilise bulunur.\nBu parçada Van Gölü ile ilgili aşağıdakilerden hangisine değinilmemiştir?',
+    sec:['Suyunun özelliğine', 'Gölde yaşayan balık türüne', 'Gölün derinliğine', 'Göldeki bir adaya', 'Türkiye’deki göller arasındaki yerine'], dogru:'C',
+    ipucu:'Her seçeneği parçada bir cümleyle eşleştir.',
+    cozum:['A: sodalı su; B: inci kefali; D: Akdamar Adası; E: en büyük göl.', 'Gölün derinliğinden hiç söz edilmez.'] },
+  { id:'p007', konu:'tr-06', seviye:'orta',
+    soru:'Bal arıları kovanda iş bölümüyle yaşar. Genç işçi arılar önce kovanın içinde temizlik yapar, larvaları besler; büyüdükçe kovanın girişini korumaya, en sonunda da çiçeklerden nektar ve polen toplamaya başlar. Kovanda tek bir kraliçe arı bulunur ve onun tek görevi yumurtlamaktır. Erkek arılar ise bal yapımına katılmaz.\nBu parçaya göre bal arılarıyla ilgili aşağıdakilerden hangisi söylenemez?',
+    sec:['İşçi arıların görevleri yaşlarına göre değişir.', 'Kovanda bir kraliçe arı bulunur.', 'Kraliçe arının görevi yumurtlamaktır.', 'Erkek arılar bal yapımına katılmaz.', 'Kraliçe arı nektar toplamaya da katılır.'], dogru:'E',
+    ipucu:'«Tek görevi» sözüne dikkat et.',
+    cozum:['A, B, C ve D parçada açıkça yer alır.', 'Kraliçenin tek görevinin yumurtlamak olduğu söylenir; E bununla çelişir.'] },
+  { id:'p008', konu:'tr-06', seviye:'orta',
+    soru:'Lale, Osmanlı’da o kadar sevilmişti ki 18. yüzyılın başındaki bir döneme adını verdi. Ancak lale aslında Orta Asya’nın dağlık bölgelerinde yabani olarak yetişen bir çiçektir. Avrupa’ya 16. yüzyılda İstanbul’dan götürüldü; Hollanda’da öyle rağbet gördü ki bazı lale soğanları bir ev fiyatına satıldı.\nBu parçaya göre aşağıdakilerden hangisi doğrudur?',
+    sec:['Lale, Avrupa’ya İstanbul üzerinden ulaşmıştır.', 'Lalenin anavatanı Hollanda’dır.', 'Lale Devri 16. yüzyılda yaşanmıştır.', 'Lale yalnızca saray bahçelerinde yetiştirilmiştir.', 'Hollanda’da lale soğanları ucuza satılmıştır.'], dogru:'A',
+    ipucu:'Seçeneklerdeki yer ve yüzyılları parçayla karşılaştır.',
+    cozum:['Parça lalenin Avrupa’ya 16. yüzyılda İstanbul’dan götürüldüğünü söyler: A doğrudur.', 'B anavatanla (Orta Asya), C yüzyılla (18.), E fiyatla çelişir; D parçada yoktur.'] },
+  { id:'p009', konu:'tr-06', seviye:'orta',
+    soru:'Kardeşim her akşam yemekten sonra masasına oturur, gün içinde öğrendiklerini kısa notlar hâlinde deftere geçirir. Hafta sonları bu notları baştan okur, anlamadığı yerlerin yanına soru işareti koyar. Pazartesi sabahı ilk iş, o soru işaretlerini öğretmenine sorar.\nBu parçadan kardeşle ilgili aşağıdakilerden hangisine ulaşılabilir?',
+    sec:['Derslerinde hiç zorlanmaz.', 'Öğretmenini sık sık eleştirir.', 'Hafta sonları ders çalışmayı sevmez.', 'Öğrendiklerini düzenli olarak tekrar eder ve eksiklerini giderir.', 'Notlarını bilgisayarda tutar.'], dogru:'D',
+    ipucu:'Kardeşin her akşam, her hafta sonu ve her pazartesi yaptıklarını bir araya getir.',
+    cozum:['Her akşam not alması, hafta sonu tekrar etmesi, pazartesi sorularını sorması düzenli tekrar ve eksik gidermeyi gösterir.', 'A soru işaretleriyle çelişir; B, C ve E parçada dayanağı olmayan yargılardır.'] },
+  { id:'p010', konu:'tr-06', seviye:'orta',
+    soru:'Yazar, son kitabında küçük bir kıyı kasabasında geçen bir hikâye anlatıyor. Kitabın dili sade ve akıcı; diyaloglar gerçek hayattan alınmış gibi doğal. Karakterlerin geçmişi olaylar ilerledikçe parça parça açığa çıkıyor ve okuru sona kadar meraklı tutuyor. Kitabın sonunda yazar, kasabanın gerçekte var olmadığını, birkaç yerden esinlenerek kurgulandığını söylüyor.\nBu parçada kitapla ilgili aşağıdakilerden hangisine değinilmemiştir?',
+    sec:['Hikâyenin geçtiği yere', 'Kitabın kaç sayfa olduğuna', 'Dilinin özelliğine', 'Karakterlerin geçmişinin nasıl anlatıldığına', 'Kasabanın gerçek olup olmadığına'], dogru:'B',
+    ipucu:'Parçada bir sayı ya da uzunluk bilgisi geçiyor mu?',
+    cozum:['A: kıyı kasabası; C: sade ve akıcı dil; D: parça parça açığa çıkan geçmiş; E: kasabanın kurgu olması.', 'Kitabın uzunluğundan söz edilmez.'] },
+
+  /* ---------- tr-07 · yapı ve akış ---------- */
+  { id:'p011', konu:'tr-07', seviye:'orta',
+    soru:'(I) Türk kahvesi, cezvede kısık ateşte pişirilen ve telvesiyle birlikte sunulan bir içecektir. (II) Kahvenin köpüğü ustalığın en önemli göstergesi sayılır. (III) Yanında genellikle bir bardak su ve lokum ikram edilir. (IV) Kahve bitkisi en iyi tropikal iklimlerde, yüksek yamaçlarda yetişir. (V) 2013’te UNESCO, Türk kahvesi kültürünü ve geleneğini İnsanlığın Somut Olmayan Kültürel Mirası listesine aldı.\nBu parçada numaralanmış cümlelerden hangisi düşüncenin akışını bozmaktadır?',
+    sec:['I', 'II', 'III', 'IV', 'V'], dogru:'D',
+    ipucu:'Paragraf Türk kahvesinin hazırlanışını ve kültürünü anlatıyor.',
+    cozum:['I, II, III ve V Türk kahvesinin pişirilmesi, sunumu ve kültürel değeriyle ilgilidir.', 'IV konuyu kahve bitkisinin yetiştiği iklime kaydırır.'] },
+  { id:'p012', konu:'tr-07', seviye:'orta',
+    soru:'(I) Kutup ayıları, Kuzey Kutbu’nun buzlarla kaplı denizlerinde yaşayan en büyük kara yırtıcılarıdır. (II) Kalın yağ tabakaları ve yoğun kürkleri onları dondurucu soğuğa karşı korur. (III) Ancak iklim değişikliği bu hayvanların yaşamını giderek zorlaştırıyor. (IV) Deniz buzları her yıl daha geç oluşup daha erken eridiği için avlanmak için buza muhtaç olan ayılar uzun süre aç kalıyor. (V) Bilim insanları bu gidişin sürmesi hâlinde bazı toplulukların yüzyılın sonuna kadar yok olabileceğini belirtiyor.\nBu parça iki paragrafa ayrılmak istense ikinci paragraf hangi cümleyle başlar?',
+    sec:['II', 'III', 'IV', 'V', 'Bölünemez'], dogru:'B',
+    ipucu:'Konunun tanıtımdan soruna geçtiği cümleyi ara.',
+    cozum:['I ve II kutup ayılarını ve soğuğa uyumlarını tanıtır.', 'III «ancak» ile konuyu iklim değişikliğinin yarattığı soruna çevirir; IV ve V bu sorunu sürdürür.'] },
+  { id:'p013', konu:'tr-07', seviye:'orta',
+    soru:'Bir köprü inşa edilirken mühendisler yalnızca üzerinden geçecek araçların ağırlığını hesaplamaz. ---- Bu yüzden köprüler, beklenen en ağır yükün birkaç katını taşıyabilecek biçimde tasarlanır.\nBu parçada boş bırakılan yere aşağıdakilerden hangisi getirilmelidir?',
+    sec:['Köprülerin çoğu çelikten yapılır.', 'İstanbul’daki köprüler dünyanın en uzunları arasındadır.', 'Köprü inşaatı yıllarca sürebilir.', 'Mühendislik fakültelerinde köprü tasarımı ayrı bir derstir.', 'Rüzgâr, deprem ve sıcaklık değişimi gibi beklenmedik yükleri de göz önünde bulundurur.'], dogru:'E',
+    ipucu:'«Yalnızca … değil» diye başlayan düşünceyi tamamlayan ve «bu yüzden»e gerekçe olan cümle.',
+    cozum:['Önceki cümle «yalnızca araçların ağırlığını hesaplamaz» der; boşluğa başka hangi yüklerin hesaplandığı gelmeli.', 'Sonraki cümle «bu yüzden» ile yükün katlarını taşıyacak tasarımı açıklar: E iki bağı da kurar.'] },
+  { id:'p014', konu:'tr-07', seviye:'ileri',
+    soru:'I. Bu sorunu çözmek için bazı şehirler, okul bahçelerini hafta sonları halka açmaya başladı. II. Büyük şehirlerde çocukların oynayabileceği açık alanlar her geçen yıl azalıyor. III. Böylece hem boş duran alanlar değerlendirildi hem de mahalleli yeni bir buluşma yeri kazandı. IV. Arsalar binalarla doluyor, parklar ise kalabalık ve uzak kalıyor.\nBu cümlelerle anlamlı bir paragraf oluşturulmak istendiğinde sıralama nasıl olmalıdır?',
+    sec:['II – IV – I – III', 'II – I – IV – III', 'IV – II – I – III', 'II – IV – III – I', 'I – II – IV – III'], dogru:'A',
+    ipucu:'Bağlayıcısız cümle başa; «bu sorunu» ve «böylece» önceki cümleye bağlanır.',
+    cozum:['II konuyu açar; IV sorunu ayrıntılandırır.', 'I «bu sorunu» ile çözümü, III «böylece» ile sonucu verir: II – IV – I – III.'] },
+  { id:'p015', konu:'tr-07', seviye:'ileri',
+    soru:'Hayatımızı hızlandıran pek çok araç kullanıyoruz: yemeği dakikalar içinde hazırlıyor, mesajı saniyeler içinde gönderiyor, şehirler arasını birkaç saatte geçiyoruz. Ne var ki kazandığımız zamanı çoğu zaman yeni işlerle dolduruyor, hiçbir şeyin tadına varamıyoruz. Yürürken çevreye bakmak, yemeği acele etmeden yemek, bir kitabı yavaş yavaş okumak bize unuttuğumuz bir şeyi hatırlatıyor. ----\nBu parçanın sonuna düşüncenin akışına göre aşağıdakilerden hangisi getirilmelidir?',
+    sec:['Örneğin hızlı trenler şehirler arasındaki mesafeyi kısalttı.', 'Teknoloji her geçen gün daha da gelişiyor.', 'Kısacası yavaşlamak, hayatı daha derinden yaşamanın yoludur.', 'Bu yüzden daha çok işi aynı anda yapmayı öğrenmeliyiz.', 'Mesajlaşma uygulamaları iletişimi kolaylaştırdı.'], dogru:'C',
+    ipucu:'Sonuç cümlesi paragrafın vardığı yeri özetler; «kısacası, demek ki» gibi sözlerle gelebilir.',
+    cozum:['Paragraf hızın kazandırdığı zamanın tadını çıkaramadığımızı ve yavaşlamanın değerini anlatır.', 'C bu düşünceyi özetler; D paragrafın tersini savunur; A, B ve E ayrıntıya ya da başka konuya kayar.'] },
+
+  /* ---------- tr-08 · anlatım biçimleri ve düşünceyi geliştirme ---------- */
+  { id:'p016', konu:'tr-08', seviye:'orta',
+    soru:'Bir toplumun ilerlemesi, bilime verdiği değerle doğru orantılıdır. Atatürk’ün «Hayatta en hakiki mürşit ilimdir.» sözü de bu düşünceyi dile getirir. Bilimsel düşünceyi benimseyen toplumlar sorunlarına kanıta dayalı çözümler üretirken, bilimi önemsemeyenler aynı hataları tekrarlamaktan kurtulamaz.\nBu parçada düşünceyi desteklemek için aşağıdakilerden hangisine başvurulmuştur?',
+    sec:['Sayısal verilere', 'Benzetmeye', 'Örneklendirmeye', 'Tanımlamaya', 'Tanık göstermeye'], dogru:'E',
+    ipucu:'Paragrafta birinin sözü aktarılıyor mu?',
+    cozum:['Düşünceyi güçlendirmek için Atatürk’ün sözü aktarılmıştır: tanık gösterme.', 'Sayı, benzetme, örnek ya da tanım kullanılmamıştır.'] },
+  { id:'p017', konu:'tr-08', seviye:'orta',
+    soru:'Kapıyı araladığında içerideki sessizlik onu ürküttü. Ayakkabılarını çıkarıp parmak uçlarında koridora ilerledi. Mutfaktan gelen ince bir ışığa doğru yürüdü, kapının önünde bir an durdu. Derin bir nefes aldı ve kapıyı itti: masada, üzerinde mumlar yanan bir pasta duruyordu.\nBu parçada ağır basan anlatım biçimi aşağıdakilerden hangisidir?',
+    sec:['Açıklama', 'Öyküleme', 'Tartışma', 'Betimleme', 'Tanımlama'], dogru:'B',
+    ipucu:'Zaman içinde ilerleyen eylemler mi var, durağan bir görüntü mü?',
+    cozum:['Parçada art arda eylemler vardır: araladı, ilerledi, yürüdü, durdu, itti.', 'Olay zaman içinde ilerlediği için öyküleme ağır basar; küçük betimleme ayrıntıları olaya hizmet eder.'] },
+  { id:'p018', konu:'tr-08', seviye:'ileri',
+    soru:'Bir araştırmaya göre düzenli kitap okuyan öğrencilerin okuduğunu anlama puanları, okumayanlarınkinden ortalama yüzde yirmi daha yüksek. Okumak beyni bir kas gibi çalıştırır: kullandıkça güçlenir, ihmal edildikçe zayıflar. Örneğin her gün yarım saat okuyan bir öğrenci, bir yıl içinde onlarca kitabın dünyasına girmiş olur. Ekran başında geçirilen saatler ise çoğu zaman bu kası dinlendirmekten öteye geçmez.\nBu parçada aşağıdaki düşünceyi geliştirme yollarından hangisi kullanılmamıştır?',
+    sec:['Sayısal verilerden yararlanma', 'Benzetme', 'Karşılaştırma', 'Tanık gösterme', 'Örneklendirme'], dogru:'D',
+    ipucu:'Her yolu bir cümleyle eşleştir; birinin sözü aktarılmış mı?',
+    cozum:['«Yüzde yirmi»: sayısal veri; «beyni bir kas gibi»: benzetme; «Örneğin…»: örneklendirme; okuyan–okumayan ve kitap–ekran: karşılaştırma.', 'Kimsenin sözü aktarılmamıştır: tanık gösterme yoktur.'] },
+  { id:'p019', konu:'tr-08', seviye:'orta',
+    soru:'Biyoçeşitlilik, bir bölgede yaşayan canlı türlerinin, bu türlerin genetik farklılıklarının ve oluşturdukları ekosistemlerin bütünüdür. Bir ormandaki ağaçlardan topraktaki mikroskobik canlılara kadar her tür bu zenginliğin bir parçasıdır.\nBu parçada ağırlıklı olarak hangi düşünceyi geliştirme yolu kullanılmıştır?',
+    sec:['Tanımlama', 'Tanık gösterme', 'Sayısal verilerden yararlanma', 'Karşılaştırma', 'Benzetme'], dogru:'A',
+    ipucu:'İlk cümle bir kavramın ne olduğunu mu söylüyor?',
+    cozum:['İlk cümle biyoçeşitliliğin ne olduğunu açıklar: tanımlama.', 'İkinci cümle tanımı somutlaştırır; sayı, aktarılan söz, karşılaştırma ya da benzetme yoktur.'] },
+  { id:'p020', konu:'tr-08', seviye:'ileri',
+    soru:'Bazıları ödevlerin öğrencilerin serbest zamanını çaldığını ve kaldırılması gerektiğini savunuyor. Oysa iyi tasarlanmış bir ödev, sınıfta öğrenilenin pekişmesini sağlar ve öğrenciye kendi başına çalışma alışkanlığı kazandırır. Sorun ödevin kendisi değil, niteliksiz ve aşırı ödevdir. Bu yüzden ödevler kaldırılmamalı, azaltılıp anlamlı hâle getirilmelidir.\nBu parçanın anlatımıyla ilgili aşağıdakilerden hangisi söylenebilir?',
+    sec:['Bir olay zaman sırasıyla anlatılmıştır.', 'Bir yer, duyulara seslenen ayrıntılarla betimlenmiştir.', 'Karşı görüşe yer verilip bu görüş çürütülmeye çalışılmıştır.', 'Bilimsel bir kavram tanımlanmıştır.', 'Bir kişinin anıları aktarılmıştır.'], dogru:'C',
+    ipucu:'«Bazıları … savunuyor. Oysa …» kalıbı neyi gösterir?',
+    cozum:['Yazar önce ödevlerin kaldırılmasını savunan görüşü aktarır, «oysa» ile karşı çıkar.', 'Kendi görüşünü gerekçelendirip bir sonuca bağlar: tartışmacı anlatım.'] },
+
+  /* ---------- tr-09 · çıkarım ve yorum ---------- */
+  { id:'p021', konu:'tr-09', seviye:'orta',
+    soru:'Kasabanın tek sinemasında film gösterilen akşamlarda salon tıklım tıklım dolardı. Gösterimden sonra insanlar sokaklarda gruplar hâlinde yürür, filmi saatlerce tartışırdı. Sinema kapandıktan sonra kasabanın akşamları sessizleşti; herkes evine erken çekilmeye başladı.\nBu parçadan aşağıdakilerden hangisi çıkarılabilir?',
+    sec:['Kasabada birden çok sinema vardı.', 'Sinema, kasaba halkının bir araya gelmesinde önemli bir rol oynuyordu.', 'Sinemada yalnızca yabancı filmler gösterilirdi.', 'Kasaba halkı sinemanın kapanmasını istemişti.', 'Sinema kapandıktan sonra kasabaya yeni bir sinema açıldı.'], dogru:'B',
+    ipucu:'Sinemanın kapanmasından sonra kasabada ne değişti?',
+    cozum:['Gösterimden sonraki tartışmalar ve kapanıştan sonra akşamların sessizleşmesi, sinemanın insanları bir araya getirdiğini gösterir.', 'A «tek sinema» ile çelişir; C, D ve E dayanaksızdır.'] },
+  { id:'p022', konu:'tr-09', seviye:'ileri',
+    soru:'Belediyenin «yeşil şehir» projesi kapsamında caddeye dikilen fidanların yarısı daha ilk yaz bitmeden kurudu. Sulama planı yapılmamış, fidanların yerleri bile asfaltın ortasında, dar beton kutuların içinde seçilmişti. Açılış töreninde çekilen fotoğraflar ise hâlâ belediyenin internet sitesinde, özenle seçilmiş bir başlıkla duruyor.\nBu parçanın yazarının belediyenin projesine karşı tutumu aşağıdakilerden hangisidir?',
+    sec:['Övgü dolu', 'Kayıtsız', 'Umutlu', 'Tarafsız ve bilgilendirici', 'Eleştirel ve alaycı'], dogru:'E',
+    ipucu:'Son cümledeki «özenle seçilmiş bir başlık» ayrıntısı neden verilmiş?',
+    cozum:['Yazar projenin plansızlığını (sulama yok, beton kutular) eleştirir.', 'Kuruyan fidanlara karşın fotoğrafların «özenle» sergilenmesini vurgulaması alay içerir: eleştirel ve alaycı.'] },
+  { id:'p023', konu:'tr-09', seviye:'ileri',
+    soru:'Dokuma tezgâhında çalışan usta, ipliğin rengini seçerken pencereden gelen gün ışığına bakardı. Akşam lambası altında seçilen renklerin sabah bambaşka görünebileceğini çıraklarına sık sık söylerdi. Bu yüzden atölyede renk işleri hep öğleden önce yapılırdı.\nBu parçadan aşağıdakilerden hangisi çıkarılamaz?',
+    sec:['Usta akşamları çalışmayı sevmezdi.', 'Usta, rengin ışığa göre farklı görünebileceğini biliyordu.', 'Atölyede renk seçimi için gün ışığı tercih edilirdi.', 'Usta deneyimlerini çıraklarıyla paylaşırdı.', 'Atölyedeki bazı işler günün belli saatlerine göre düzenlenirdi.'], dogru:'A',
+    ipucu:'Ustanın akşam çalışmakla ilgili bir duygusu parçada söyleniyor mu?',
+    cozum:['B, C, D ve E parçadaki renk–ışık ilişkisinden ve öğleden önceki düzenden çıkar.', 'Ustanın akşam çalışmayı sevip sevmediğine dair bir bilgi yoktur: A çıkarılamaz.'] },
+  { id:'p024', konu:'tr-09', seviye:'ileri',
+    soru:'Bir okulda öğrencilerin yarısından her derse başlamadan önce iki dakika boyunca o gün işlenecek konuyla ilgili ne bildiklerini yazmaları istendi; öbür yarısı derse doğrudan başladı. Dönem sonunda yapılan sınavda ders öncesi yazan grubun başarısı belirgin biçimde daha yüksek çıktı. İki grubun ders saatleri, öğretmenleri ve kitapları aynıydı.\nBu parçadan aşağıdakilerden hangisi çıkarılabilir?',
+    sec:['Öğretmenler ders öncesi yazan gruba daha çok ödev vermiştir.', 'Sınav, ders öncesi yazan grup için daha kolay hazırlanmıştır.', 'Derse başlamadan önce konuyla ilgili bilinenleri hatırlamak öğrenmeyi olumlu etkileyebilir.', 'Ders kitapları başarıyı hiç etkilemez.', 'Bütün öğrenciler yazarak daha iyi öğrenir.'], dogru:'C',
+    ipucu:'İki grup arasındaki tek fark neydi?',
+    cozum:['Ders saati, öğretmen ve kitap aynı olduğuna göre fark, ders öncesi yazma etkinliğinden kaynaklanmış olabilir.', 'A ve B dayanaksızdır; D ve E aşırı genellemedir.'] },
+  { id:'p025', konu:'tr-09', seviye:'orta',
+    soru:'Gençliğimde bir şeyi bilmediğimi söylemek bana küçük düşmek gibi gelirdi; anlamadığım konularda bile başımı sallar, anlamış gibi yapardım. Yıllar içinde fark ettim ki «bilmiyorum» demek, öğrenmeye açılan ilk kapıdır. Şimdi bir konuyu bilmediğimde bunu rahatça söylüyor, karşımdakine soru sormaktan çekinmiyorum.\nBu parçanın yazarıyla ilgili aşağıdakilerden hangisi söylenebilir?',
+    sec:['Gençliğinde çok kitap okumuştur.', 'Bildiklerini başkalarına öğretmeyi sever.', 'Hiçbir zaman yanılmadığını düşünür.', 'Zamanla bilmediğini kabul etmeyi öğrenmiştir.', 'Soru soran insanlardan hoşlanmaz.'], dogru:'D',
+    ipucu:'Yazarın gençliğindeki ve bugünkü tutumunu karşılaştır.',
+    cozum:['Gençken bilmediğini saklayan yazar, yıllar içinde «bilmiyorum» demenin değerini fark etmiş ve bugün rahatça söylüyor.', 'A, B ve E dayanaksızdır; C yazarın anlattığına aykırıdır.'] },
+];
+
 /* ==== js/data/reference.js ==== */
 /* Referans tablolari: esikler, hedefler, protokoller, kontrol listeleri.
    Kaynak: "Hemsirelik Hedefi — 9 Aylik Kocluk Plani" ve "YKS Kocluk Uygulamasi" belgeleri. */
@@ -54292,6 +54487,10 @@ R.Model = (function(){
     if(R.Ogren) await R.Ogren.yukle();
     /* Karma test, geçmişi ve yeniden çözümler (core/ogrentest.js söz 4). */
     if(R.OgrenTest) await R.OgrenTest.yukle();
+    /* Günlük paragraf setleri (core/paragraf.js söz 2). */
+    if(R.Paragraf) await R.Paragraf.yukle();
+    /* Konuya bağlı çıkmış soru kayıtları (core/cikmis.js). */
+    if(R.Cikmis) await R.Cikmis.yukle();
     /* Hedefler ve planlari (core/hedefler.js, core/hedefplan.js). */
     if(R.Hedefler) await R.Hedefler.yukle();
     if(R.SinavProfil) await R.SinavProfil.yukle();
@@ -57759,6 +57958,659 @@ R.OgrenYolu = (function(){
   return { KURAL, ADLAR, adimlar, siradaki, ozet, okundu };
 })();
 
+/* ==== js/core/sekil.js ==== */
+/* ŞEKİL VE TABLO — Öğren'in sorularında, örneklerinde ve anlatımında çizim.
+
+   Kullanıcı (2026-10-10): «şekilli soru yok; hepsini çok profesyonel
+   şekilde çöz». Geometri, grafik, devre, optik, soyağacı, nüfus piramidi
+   gibi konularda sınav sorusu şekilsiz sorulmaz. Bu dosya içerik
+   dosyalarındaki (data/anlatim-*.js, data/derin-*.js, data/paragraf.js)
+   küçük bir çizim tarifini SVG'ye, tablo tarifini HTML tabloya çevirir.
+
+   Sözler:
+     1. İÇERİKTE İŞARETLEME YOK, TARİF VAR. Veri dosyası SVG ya da HTML
+        yazmaz; kapalı bir öğe kataloğundan (TUR) diziler yazar. Bütün
+        yazılar kaçırılır, sayılar sonlu ve sınırlı olmak zorundadır.
+        İçerikten ekrana betik ya da öznitelik sızamaz (denetle()).
+     2. TEMA KODDA. Çizgi ve yazı currentColor'dır, vurgu --accent'tir;
+        koyu ve açık temada, bütün paletlerde aynı çizim okunur.
+     3. ŞEKLİN METNİ VAR. Her şeklin zorunlu bir «alt» cümlesi vardır:
+        ekran okuyucu onu okur; kart, yanlış defteri ve koç gibi düz metin
+        giden yerler de şekli bu cümleyle anlatır (metni()). Tablo da düz
+        metne satır satır çevrilir.
+     4. KOORDİNAT SVG'NİN. (0,0) sol üst; y aşağı doğru artar. Yalnız yay
+        açıları matematik yönündedir: 0° sağ, 90° yukarı.
+
+   Öğe kataloğu — her öğe bir dizi: [tür, …sayılar, (yazı), (bayrak)]
+     ['c',  x1,y1,x2,y2, b]          doğru parçası
+     ['ok', x1,y1,x2,y2, b]          ok (uçta ok başı; b'de 'ç' ise iki uç)
+     ['p',  [x,y,…], b]              kapalı çokgen
+     ['y',  [x,y,…], b]              açık kırık çizgi / grafik eğrisi
+     ['d',  cx,cy,r, b]              çember (g: gölgeli, f: dolu)
+     ['n',  x,y, b]                  nokta
+     ['t',  x,y,'yazı', b]           yazı (s: sola, e: sağa yaslı; k: küçük; b: kalın)
+     ['a',  cx,cy,r,a1,a2, b]        yay (a1'den a2'ye, saat yönünün tersine)
+     ['dk', x,y, x1,y1, x2,y2]       dik açı işareti (köşe, iki kol üstünde birer nokta)
+     ['r',  x,y,w,h, b]              dikdörtgen
+     ['e',  x0,y0, x1,y1, 'x','y']   eksen takımı: başlangıç, x ucu, y ucu, etiketler
+     ['tr', x1,y1,x2,y2]             taralı yüzey (ayna, duvar, zemin): soldaki yana tarama
+     ['dr', x1,y1,x2,y2,'R']         direnç (yatay ya da dikey kablo üstünde)
+     ['pil',x,y,'y'|'d','ε']         üreteç (yatay ya da dikey kabloda; uzun levha +)
+     ['mr', x,y,h,'ince'|'kalin']    mercek (dikey; ince kenarlı yakınsak, kalın kenarlı ıraksak)
+   Bayraklar (b, isteğe bağlı yazı): k kesik, v vurgu, i ince, g gölge, f dolu. */
+
+window.R = window.R || {};
+
+R.Sekil = (function(){
+  /* Tür → { n: sayı argümanı adedi, d: dizi argümanı mı, y: yazı argümanı adedi } */
+  const TUR = {
+    c:{ n:4 }, ok:{ n:4 }, p:{ d:true }, y:{ d:true }, d:{ n:3 }, n:{ n:2 }, t:{ n:2, y:1 },
+    a:{ n:5 }, dk:{ n:6 }, r:{ n:4 }, e:{ n:4, y:2 }, tr:{ n:4 }, dr:{ n:4, y:1 }, pil:{ n:2, y:2 }, mr:{ n:3, y:1 },
+  };
+  const SINIR = 2000;
+  const esc = s => (R.U && R.U.esc ? R.U.esc(s) : String(s).replace(/[&<>"']/g, c => '&#' + c.charCodeAt(0) + ';'));
+  const sayi = v => Math.round(Number(v) * 10) / 10;
+  const bayrak = (o, i) => typeof o[i] === 'string' ? o[i] : '';
+
+  /* ---------- denetim (söz 1) ---------- */
+
+  /* Bir şekil tarifinin kusurları; boş dizi = temiz. */
+  function denetle(s){
+    const h = [];
+    if(!s || typeof s !== 'object') return ['şekil nesne değil'];
+    const w = Number(s.w), hh = Number(s.h);
+    if(!(w >= 80 && w <= 480)) h.push('genişlik 80–480 olmalı');
+    if(!(hh >= 40 && hh <= 360)) h.push('yükseklik 40–360 olmalı');
+    const alt = String(s.alt || '');
+    if(alt.trim().length < 15) h.push('alt cümlesi yok ya da çok kısa');
+    if(alt.length > 400) h.push('alt cümlesi çok uzun');
+    if(/[<>]|\*\*|[\^_]\{/.test(alt)) h.push('alt cümlesinde işaret');
+    if(!Array.isArray(s.o) || !s.o.length) h.push('öğe yok');
+    else s.o.forEach((o, k) => {
+      const ad = 'öğe ' + (k + 1);
+      if(!Array.isArray(o) || !TUR[o[0]]){ h.push(ad + ': bilinmeyen tür'); return; }
+      const t = TUR[o[0]];
+      let i = 1;
+      if(t.d){
+        const l = o[1];
+        if(!Array.isArray(l) || l.length < 4 || l.length % 2) h.push(ad + ': nokta dizisi bozuk');
+        else if(l.some(v => !isFinite(v) || Math.abs(v) > SINIR)) h.push(ad + ': sayı sınır dışı');
+        i = 2;
+      }else{
+        for(let j = 0; j < t.n; j++){
+          const v = o[1 + j];
+          if(typeof v !== 'number' || !isFinite(v) || Math.abs(v) > SINIR) h.push(ad + ': ' + (j + 1) + '. sayı geçersiz');
+        }
+        i = 1 + t.n;
+      }
+      for(let j = 0; j < (t.y || 0); j++){
+        const v = o[i + j];
+        if(v != null && (typeof v !== 'string' || v.length > 40 || /[<>]|\*\*|[\^_]\{/.test(v))) h.push(ad + ': yazı geçersiz');
+      }
+      const b = o[i + (t.y || 0)];
+      if(b != null && (typeof b !== 'string' || !/^[kvigfçsebo]*$/.test(b))) h.push(ad + ': bayrak geçersiz');
+      if(o.length > i + (t.y || 0) + 1) h.push(ad + ': fazla argüman');
+    });
+    return h;
+  }
+  function tabloDenetle(t){
+    const h = [];
+    if(!t || typeof t !== 'object') return ['tablo nesne değil'];
+    if(!Array.isArray(t.bas) || t.bas.length < 2 || t.bas.length > 8) h.push('başlık 2–8 sütun olmalı');
+    if(!Array.isArray(t.satir) || !t.satir.length || t.satir.length > 14) h.push('satır 1–14 olmalı');
+    else t.satir.forEach((r, k) => {
+      if(!Array.isArray(r) || r.length !== (t.bas || []).length) h.push((k + 1) + '. satır sütun sayısı tutmuyor');
+      else if(r.some(v => typeof v !== 'string' && typeof v !== 'number')) h.push((k + 1) + '. satırda geçersiz hücre');
+    });
+    if(t.baslik != null && (typeof t.baslik !== 'string' || t.baslik.length > 120)) h.push('tablo başlığı geçersiz');
+    return h;
+  }
+
+  /* ---------- çizim (söz 2, 4) ---------- */
+
+  function sinif(b, ek){
+    const l = ['sk', ek || 'sk-c'];
+    if(b.indexOf('k') >= 0) l.push('sk-k');
+    if(b.indexOf('v') >= 0) l.push('sk-v');
+    if(b.indexOf('i') >= 0) l.push('sk-i');
+    if(b.indexOf('g') >= 0) l.push('sk-g');
+    if(b.indexOf('f') >= 0) l.push('sk-f');
+    return l.join(' ');
+  }
+  function okBasi(x1, y1, x2, y2, b){
+    const a = Math.atan2(y2 - y1, x2 - x1), L = 8, W = 3.6;
+    const bx = x2 - L * Math.cos(a), by = y2 - L * Math.sin(a);
+    const p = [x2, y2, bx + W * Math.sin(a), by - W * Math.cos(a), bx - W * Math.sin(a), by + W * Math.cos(a)];
+    return '<polygon class="' + sinif(b.replace(/[gk]/g, ''), 'sk-uc') + '" points="' + p.map(sayi).join(' ') + '"/>';
+  }
+  function cizgi(x1, y1, x2, y2, b){
+    return '<line class="' + sinif(b) + '" x1="' + sayi(x1) + '" y1="' + sayi(y1) + '" x2="' + sayi(x2) + '" y2="' + sayi(y2) + '"/>';
+  }
+  function yazi(x, y, m, b){
+    const anchor = b.indexOf('s') >= 0 ? 'start' : b.indexOf('e') >= 0 ? 'end' : 'middle';
+    const l = ['sk-t'];
+    if(b.indexOf('k') >= 0) l.push('sk-tk');
+    if(b.indexOf('b') >= 0) l.push('sk-tb');
+    if(b.indexOf('v') >= 0) l.push('sk-tv');
+    return '<text class="' + l.join(' ') + '" x="' + sayi(x) + '" y="' + sayi(y) + '" text-anchor="' + anchor
+      + '" dominant-baseline="central">' + esc(m) + '</text>';
+  }
+  const OGE = {
+    c(o){ return cizgi(o[1], o[2], o[3], o[4], bayrak(o, 5)); },
+    ok(o){
+      const b = bayrak(o, 5);
+      return cizgi(o[1], o[2], o[3], o[4], b) + okBasi(o[1], o[2], o[3], o[4], b)
+        + (b.indexOf('ç') >= 0 ? okBasi(o[3], o[4], o[1], o[2], b) : '');
+    },
+    p(o){ return '<polygon class="' + sinif(bayrak(o, 2)) + '" points="' + o[1].map(sayi).join(' ') + '"/>'; },
+    y(o){ return '<polyline class="' + sinif(bayrak(o, 2)) + '" points="' + o[1].map(sayi).join(' ') + '"/>'; },
+    d(o){ return '<circle class="' + sinif(bayrak(o, 4)) + '" cx="' + sayi(o[1]) + '" cy="' + sayi(o[2]) + '" r="' + sayi(o[3]) + '"/>'; },
+    n(o){ return '<circle class="' + sinif(bayrak(o, 3) + 'f', 'sk-c') + '" cx="' + sayi(o[1]) + '" cy="' + sayi(o[2]) + '" r="2.6"/>'; },
+    t(o){ return yazi(o[1], o[2], o[3], bayrak(o, 4)); },
+    a(o){
+      const [cx, cy, r, a1, a2] = o.slice(1, 6), b = bayrak(o, 6);
+      const rad = d => d * Math.PI / 180;
+      const x1 = cx + r * Math.cos(rad(a1)), y1 = cy - r * Math.sin(rad(a1));
+      const x2 = cx + r * Math.cos(rad(a2)), y2 = cy - r * Math.sin(rad(a2));
+      let fark = ((a2 - a1) % 360 + 360) % 360;
+      const buyuk = fark > 180 ? 1 : 0;
+      return '<path class="' + sinif(b) + '" d="M' + sayi(x1) + ' ' + sayi(y1) + ' A' + sayi(r) + ' ' + sayi(r) + ' 0 ' + buyuk + ' 0 '
+        + sayi(x2) + ' ' + sayi(y2) + '"/>';
+    },
+    dk(o){
+      const [x, y, x1, y1, x2, y2] = o.slice(1, 7), s = 8;
+      const birim = (dx, dy) => { const L = Math.hypot(dx, dy) || 1; return [dx / L, dy / L]; };
+      const u = birim(x1 - x, y1 - y), v = birim(x2 - x, y2 - y);
+      const p = [x + u[0] * s, y + u[1] * s, x + u[0] * s + v[0] * s, y + u[1] * s + v[1] * s, x + v[0] * s, y + v[1] * s];
+      return '<polyline class="sk sk-c sk-i" points="' + p.map(sayi).join(' ') + '"/>';
+    },
+    r(o){ return '<rect class="' + sinif(bayrak(o, 5)) + '" x="' + sayi(o[1]) + '" y="' + sayi(o[2]) + '" width="' + sayi(o[3])
+      + '" height="' + sayi(o[4]) + '"/>'; },
+    e(o){
+      const [x0, y0, x1, y1] = o.slice(1, 5);
+      const ex = o[5] || '', ey = o[6] || '';
+      return cizgi(x0, y0, x1, y0, '') + okBasi(x0, y0, x1, y0, '') + cizgi(x0, y0, x0, y1, '') + okBasi(x0, y0, x0, y1, '')
+        + (ex ? yazi(x1, y0 + 12, ex, 'k') : '') + (ey ? yazi(x0 - 4, y1, ey, 'ke') : '');
+    },
+    tr(o){
+      const [x1, y1, x2, y2] = o.slice(1, 5);
+      const L = Math.hypot(x2 - x1, y2 - y1) || 1, ux = (x2 - x1) / L, uy = (y2 - y1) / L;
+      /* Sol normal (yön vektörünün solu): (uy, -ux) SVG'de görsel olarak sol. */
+      const nx = uy, ny = -ux;
+      let s = cizgi(x1, y1, x2, y2, '');
+      for(let d = 4; d < L; d += 7){
+        const px = x1 + ux * d, py = y1 + uy * d;
+        s += cizgi(px, py, px + (nx - ux) * 4.5, py + (ny - uy) * 4.5, 'i');
+      }
+      return s;
+    },
+    dr(o){
+      const [x1, y1, x2, y2] = o.slice(1, 5), et = o[5] || '';
+      const L = Math.hypot(x2 - x1, y2 - y1) || 1, ux = (x2 - x1) / L, uy = (y2 - y1) / L;
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, yw = 13, yh = 5;
+      const a = [mx - ux * yw, my - uy * yw], b2 = [mx + ux * yw, my + uy * yw];
+      const kose = [a[0] - uy * yh, a[1] + ux * yh, b2[0] - uy * yh, b2[1] + ux * yh, b2[0] + uy * yh, b2[1] - ux * yh, a[0] + uy * yh, a[1] - ux * yh];
+      return cizgi(x1, y1, a[0], a[1], '') + cizgi(b2[0], b2[1], x2, y2, '')
+        + '<polygon class="sk sk-c sk-zemin" points="' + kose.map(sayi).join(' ') + '"/>'
+        + (et ? yazi(mx + uy * 14, my - ux * 14, et, 'k') : '');
+    },
+    pil(o){
+      const [x, y] = o.slice(1, 3), yon = o[3] === 'd' ? 'd' : 'y', et = o[4] || '';
+      if(yon === 'y'){
+        return cizgi(x - 3, y - 10, x - 3, y + 10, '') + cizgi(x + 3, y - 5, x + 3, y + 5, '')
+          + (et ? yazi(x, y - 17, et, 'k') : '');
+      }
+      return cizgi(x - 10, y - 3, x + 10, y - 3, '') + cizgi(x - 5, y + 3, x + 5, y + 3, '')
+        + (et ? yazi(x + 18, y, et, 'ks') : '');
+    },
+    mr(o){
+      const [x, y, h] = o.slice(1, 4), ince = o[4] !== 'kalin';
+      const ust = y - h / 2, alt = y + h / 2;
+      return cizgi(x, ust, x, alt, '') + (ince
+        ? okBasi(x, ust + 8, x, ust, '') + okBasi(x, alt - 8, x, alt, '')
+        : okBasi(x, ust, x, ust + 8, '') + okBasi(x, alt, x, alt - 8, ''));
+    },
+  };
+
+  /* Şekil tarifi → <figure><svg>…</svg></figure>. Kusurlu tarif çizilmez;
+     yerine alt cümlesi yazılır (ekran boş kalmasın, kusur gizlenmesin). */
+  function svg(s){
+    if(!s) return '';
+    const kusur = denetle(s);
+    if(kusur.length) return '<p class="sekil sekil--kusur small dim">' + esc('Şekil çizilemedi: ' + String((s && s.alt) || kusur[0])) + '</p>';
+    const ic = s.o.map(o => OGE[o[0]](o)).join('');
+    return '<figure class="sekil"><svg class="sekil__svg" viewBox="0 0 ' + sayi(s.w) + ' ' + sayi(s.h) + '" width="' + sayi(s.w * 1.4)
+      + '" role="img" aria-label="' + esc(s.alt) + '" focusable="false">' + ic + '</svg></figure>';
+  }
+
+  /* Tablo tarifi → <table>. Hücreler metin işaretlerini (**kalın**, x^{2})
+     tek ayrıştırıcıdan alır (core/ogren.js metinHtml). */
+  function tablo(t){
+    if(!t || tabloDenetle(t).length) return '';
+    const f = v => (R.Ogren && R.Ogren.metinHtml ? R.Ogren.metinHtml(String(v)) : esc(String(v)));
+    return '<div class="ogr-tablo-kap"><table class="ogr-tablo">'
+      + (t.baslik ? '<caption>' + f(t.baslik) + '</caption>' : '')
+      + '<thead><tr>' + t.bas.map(b => '<th scope="col">' + f(b) + '</th>').join('') + '</tr></thead>'
+      + '<tbody>' + t.satir.map(r => '<tr>' + r.map((v, k) => k === 0 ? '<th scope="row">' + f(v) + '</th>' : '<td>' + f(v) + '</td>').join('') + '</tr>').join('')
+      + '</tbody></table></div>';
+  }
+
+  /* ---------- düz metin karşılığı (söz 3) ---------- */
+  function metni(s){ return s && s.alt ? '[Şekil: ' + String(s.alt).trim() + ']' : ''; }
+  function tabloMetni(t){
+    if(!t || tabloDenetle(t).length) return '';
+    const d = v => (R.Ogren && R.Ogren.duzMetin ? R.Ogren.duzMetin(String(v)) : String(v));
+    return '[Tablo' + (t.baslik ? ' — ' + d(t.baslik) : '') + ': ' + t.bas.map(d).join(' | ') + '; '
+      + t.satir.map(r => r.map(d).join(' | ')).join('; ') + ']';
+  }
+  /* Bir sorunun (ya da örneğin) şekil ve tablosunun düz metni, boşsa ''. */
+  function ekMetni(q){
+    if(!q) return '';
+    return [metni(q.sekil), tabloMetni(q.tablo)].filter(Boolean).join(' ');
+  }
+
+  return { TUR, denetle, tabloDenetle, svg, tablo, metni, tabloMetni, ekMetni };
+})();
+
+/* ==== js/core/cikmis.js ==== */
+/* ÇIKMIŞ SORULAR — konuya bağlı ÖSYM soru kayıtları.
+
+   Kullanıcı (2026-10-10): «internetten çıkmış soruları da ekle konulara».
+   ÖSYM'nin soruları ÖSYM'nindir: soru metni bu depoya ve uygulamaya
+   KOPYALANMAZ (izinsiz çoğaltma yasak; depo GitHub'a gider). Bunun yerine
+   konuya bir KAYIT bağlanır: sınav, yıl, soru numarası, resmî kitapçığın
+   bağlantısı ve (biliniyorsa) yayımlanmış cevap anahtarındaki harf. Soru
+   kitapçıktan çözülür, cevap burada girilir.
+
+   Sözler:
+     1. METİN YOK, KAYIT VAR. Kayıt yalnız künyedir; bağlantı yalnız http(s)
+        olabilir (javascript: gibi şemalar reddedilir).
+     2. DOĞRULUK ANAHTARLA ÖLÇÜLÜR. Doğru harf girilmişse ilk cevap kodla
+        doğru/yanlış diye yazılır ve kilitlenir («ölçüldü»). Anahtar yoksa
+        cevap yalnız «işaretlendi» olarak durur: doğru ya da yanlış
+        denmez (AGENTS §1.2: ölçülmemiş şey sayılmaz).
+     3. YANLIŞ DEFTERE KULLANICININ ELİYLE. Yanlış çözülen kayıt «Yanlış
+        defterine ekle» ile deftere yazılır (yayıncı ÖSYM, test «2023 TYT»,
+        soru no); oradan Tamir kuyruğuna ve tekrara geçer.
+     4. HİÇBİR KARAR BAKMAZ. Plan, kapanış, yol ve risk bu cevaplara bakmaz. */
+
+window.R = window.R || {};
+
+R.Cikmis = (function(){
+  const STORE = 'meta/ogren-cikmis';
+  const SINAVLAR = ['TYT', 'AYT'];
+  let doc = { kayitlar:[] };
+  const simdi = () => new Date().toISOString();
+  const HARF = ['A', 'B', 'C', 'D', 'E'];
+
+  async function yukle(){
+    let d = null;
+    try{ d = await R.Store.get(STORE); }catch(e){ d = null; }
+    doc = { kayitlar:Array.isArray(d && d.kayitlar) ? d.kayitlar.filter(k => k && k.id && k.konu) : [] };
+    return doc;
+  }
+  async function yaz(){
+    try{ await R.Store.set(STORE, doc); }catch(e){ /* yazılamasa da bu açılışta çalışır */ }
+  }
+
+  /* Bağlantı yalnız http(s); boş olabilir. Geçersizse null. */
+  function baglanti(u){
+    const s = String(u == null ? '' : u).trim();
+    if(!s) return '';
+    return /^https?:\/\/[^\s<>"']+$/i.test(s) ? s.slice(0, 500) : null;
+  }
+
+  /* Girdiyi doğrular: { ok, kayit } ya da { ok:false, neden }. */
+  function dogrula(g){
+    const konu = String(g.konu || '');
+    if(!R.Ogren || !R.Ogren.konuyuBul(konu).topic) return { ok:false, neden:'Konu bulunamadı.' };
+    const sinav = SINAVLAR.indexOf(g.sinav) >= 0 ? g.sinav : null;
+    if(!sinav) return { ok:false, neden:'Sınav TYT ya da AYT olmalı.' };
+    const yil = Number(g.yil);
+    if(!(yil >= 1990 && yil <= new Date().getFullYear() + 1)) return { ok:false, neden:'Yıl anlaşılmadı.' };
+    const no = String(g.soruNo || '').trim();
+    if(!/^\d{1,3}$/.test(no)) return { ok:false, neden:'Soru numarası sayı olmalı.' };
+    const url = baglanti(g.url);
+    if(url === null) return { ok:false, neden:'Bağlantı http:// ya da https:// ile başlamalı.' };
+    const dogru = g.dogru ? String(g.dogru).toUpperCase() : null;
+    if(dogru && HARF.indexOf(dogru) < 0) return { ok:false, neden:'Doğru cevap A–E olmalı.' };
+    return { ok:true, kayit:{ konu, sinav, yil, soruNo:no, url, dogru,
+      test:String(g.test || '').trim().slice(0, 60), not:String(g.not || '').trim().slice(0, 200) } };
+  }
+
+  async function ekle(g){
+    const r = dogrula(g || {});
+    if(!r.ok) return r;
+    const ayni = doc.kayitlar.find(k => k.konu === r.kayit.konu && k.sinav === r.kayit.sinav && k.yil === r.kayit.yil
+      && k.soruNo === r.kayit.soruNo && (k.test || '') === r.kayit.test);
+    if(ayni) return { ok:false, neden:'Bu soru bu konuya zaten bağlı.' };
+    const k = Object.assign({ id:R.U.uid('ck'), at:simdi(), cevap:null }, r.kayit);
+    doc.kayitlar.push(k);
+    await yaz();
+    return { ok:true, kayit:k };
+  }
+  async function sil(id){
+    const n = doc.kayitlar.length;
+    doc.kayitlar = doc.kayitlar.filter(k => k.id !== id);
+    if(doc.kayitlar.length === n) return { ok:false };
+    await yaz();
+    return { ok:true };
+  }
+  function bul(id){ return doc.kayitlar.find(k => k.id === id) || null; }
+  /* Konunun kayıtları: yeni yıl önce, sonra soru numarası. */
+  function konununki(konu){
+    return doc.kayitlar.filter(k => k.konu === konu)
+      .sort((a, b) => b.yil - a.yil || a.sinav.localeCompare(b.sinav) || Number(a.soruNo) - Number(b.soruNo));
+  }
+  /* Doğru harf sonradan girilebilir (anahtar yayımlanınca); cevap varsa
+     doğruluk yeniden hesaplanır — ilk harf değişmez. */
+  async function anahtarYaz(id, harf){
+    const k = bul(id);
+    harf = harf ? String(harf).toUpperCase() : null;
+    if(!k || (harf && HARF.indexOf(harf) < 0)) return { ok:false };
+    k.dogru = harf;
+    await yaz();
+    return { ok:true };
+  }
+  /* İlk cevap kilitli (söz 2). → { ok, durum:'dogru'|'yanlis'|'isaretlendi' } */
+  async function cevapla(id, harf){
+    const k = bul(id);
+    harf = String(harf || '').toUpperCase();
+    if(!k || HARF.indexOf(harf) < 0) return { ok:false, neden:'gecersiz' };
+    if(k.cevap) return { ok:false, neden:'kilitli' };
+    k.cevap = { h:harf, at:simdi() };
+    await yaz();
+    return { ok:true, durum:durum(k) };
+  }
+  async function cevapSil(id){
+    const k = bul(id);
+    if(!k || !k.cevap) return { ok:false };
+    k.cevap = null;
+    await yaz();
+    return { ok:true };
+  }
+  function durum(k){
+    if(!k || !k.cevap) return 'bos';
+    if(!k.dogru) return 'isaretlendi';
+    return k.cevap.h === k.dogru ? 'dogru' : 'yanlis';
+  }
+  const kunye = k => k.yil + ' ' + k.sinav + (k.test ? ' ' + k.test : '') + ' · Soru ' + k.soruNo;
+
+  /* Yanlış defteri kaydı (söz 3); aynı kayıt iki kez eklenmez. */
+  function defterde(k){
+    return (R.S.errors || []).find(e => e.kaynak && e.kaynak.tur === 'cikmis' && e.kaynak.id === k.id) || null;
+  }
+  async function deftereEkle(id){
+    const k = bul(id);
+    if(!k || durum(k) !== 'yanlis') return null;
+    const var_ = defterde(k);
+    if(var_) return var_;
+    const x = R.Ogren.konuyuBul(k.konu);
+    const err = {
+      id:R.U.uid('r'), createdAt:simdi(), closedAt:null, repairDoneAt:null,
+      examId:null, examDate:R.U.todayISO(), publisher:'ÖSYM',
+      testName:(k.yil + ' ' + k.sinav + (k.test ? ' ' + k.test : '')).slice(0, 160), questionNo:k.soruNo,
+      status:'Yanlış', tag:null, seconds:null, rootCause:'', principle:'', similar:'', recipe:'', topicRef:'',
+      subjectId:x.subject.id, topicId:x.topic.id, topic:x.topic.name,
+      soru:'Çıkmış soru: ' + kunye(k) + (k.url ? ' — ' + k.url : '') + (k.not ? ' — ' + k.not : ''),
+      senin:k.cevap.h, anahtar:k.dogru, kaynak:{ tur:'cikmis', id:k.id },
+    };
+    await R.Model.saveError(err);
+    return err;
+  }
+
+  /* Konunun çıkmış soru özeti: { toplam, cevaplanan, dogru, yanlis }. */
+  function ozet(konu){
+    const r = { toplam:0, cevaplanan:0, dogru:0, yanlis:0 };
+    konununki(konu).forEach(k => { r.toplam++; const d = durum(k); if(d !== 'bos') r.cevaplanan++; if(d === 'dogru') r.dogru++; if(d === 'yanlis') r.yanlis++; });
+    return r;
+  }
+
+  return { STORE, SINAVLAR, yukle, baglanti, dogrula, ekle, sil, bul, konununki, anahtarYaz, cevapla, cevapSil, durum, kunye,
+    defterde, deftereEkle, ozet };
+})();
+
+/* ==== js/core/paragraf.js ==== */
+/* GÜNLÜK PARAGRAF — paragraf çıpasının uygulama içindeki hâli.
+
+   Kullanıcı (2026-10-10): «paragrafta soru sayısı az; soru sayısını
+   arttır, sistemin içindeki özelliklerle entegre et». Paragraf dokuz ay
+   her gün çalışılan bir beceridir (tr-09, «9 ay rutin»); Bugün'de bunun
+   bir çıpası zaten var (day.paragraphTarget / paragraphActual). Bu dosya
+   o çıpayı uygulamanın içinde çözülebilir kılar: her gün birkaç paragraf
+   sorusu, ayrı bir havuzdan (data/paragraf.js).
+
+   Sözler:
+     1. HAVUZ AYRI, KONUSU BELLİ. Her soru bir paragraf konusuna (tr-05…
+        tr-09) bağlıdır ve kalıcı bir kimlik taşır (p001…). Kimlik bir kez
+        verilir, başka soruya verilmez; soru düzeltilirse `yenilendi` yazılır
+        (core/ogren.js söz 5). Sorunun kimliği her yerde 'tr-07#p012'dir:
+        karma test, Yanlışlarım, yanlış defteri ve hata bildirimi bu
+        kimlikle aynı soruyu bulur.
+     2. GÜNÜN SETİ KODLA SEÇİLİR, GÜN BOYUNCA SABİTTİR. İlk açılışta kurulur
+        ve o güne yazılır. Sıra: önce son denemesi doğru olmayan ve en az
+        iki gün önce denenmiş sorular (setin en çok yarısı), sonra hiç
+        görülmemişler (konular sırayla serpiştirilmiş sabit düzende), en son
+        en uzun süredir görülmeyenler. Hata bildirilmiş soru seçilmez.
+        Cevap verilmeden önce set boyu değiştirilebilir; sonra değişmez.
+     3. İLK CEVAP KİLİTLİ, ÖLÇÜMDÜR. Karma testteki gibi; konunun örnek soru
+        kaydına yazılmaz; hiçbir plan, kapanış ya da yol eşiği bakmaz.
+        Yanlışlarım'a «günlük paragraf» kaynağıyla girer.
+     4. GÜN KAYDINA YAZMAK KULLANICININ İŞİ. Set bitince «Günün paragraf
+        sayısına ekle» önerilir; dokunulursa katalogdaki 'paragraf-yaz'
+        eylemiyle (core/proposals.js hemen) yazılır: doğrulama, önizleme
+        ve Onaylar'da geri alma aynı yoldan. Sayılan, harf verilerek
+        çözülen sorudur (çözümüne bakılan sayılmaz). Uygulanmış bir yazım
+        varken aynı gün ikinci kez yazılmaz; Onaylar'dan geri alınırsa
+        yazım düşer ve yeniden yazılabilir (her yazımın öneri anahtarı
+        ayrıdır: 'ogren-paragraf:<gün>:<setin kurulduğu an>:<sıra>'). */
+
+window.R = window.R || {};
+
+R.Paragraf = (function(){
+  const STORE = 'meta/ogren-paragraf';
+  const BOYLAR = [3, 5, 10];
+  const KONULAR = ['tr-05', 'tr-06', 'tr-07', 'tr-08', 'tr-09'];
+  const SAKLA_GUN = 400;
+  let doc = bos();
+
+  function bos(){ return { boy:5, gunler:{} }; }
+  const HAVUZ = () => R.PARAGRAF_HAVUZU || [];
+  const simdi = () => new Date().toISOString();
+  const bugunISO = () => R.U.todayISO();
+  const anahtar = q => q.konu + '#' + q.id;
+
+  async function yukle(){
+    let d = null;
+    try{ d = await R.Store.get(STORE); }catch(e){ d = null; }
+    doc = bos();
+    if(d && typeof d === 'object'){
+      if(BOYLAR.indexOf(d.boy) >= 0) doc.boy = d.boy;
+      if(d.gunler && typeof d.gunler === 'object') doc.gunler = d.gunler;
+    }
+    return doc;
+  }
+  async function yaz(){
+    try{ await R.Store.set(STORE, doc); }catch(e){ /* yazılamasa da bu açılışta çalışır */ }
+  }
+
+  /* ---------- havuz (söz 1) ---------- */
+  function bul(id, konu){
+    const q = HAVUZ().find(x => x.id === id) || null;
+    return q && (!konu || q.konu === konu) ? q : null;
+  }
+  function konuSorulari(konu){ return HAVUZ().filter(q => q.konu === konu); }
+
+  /* Sabit serpiştirilmiş sıra: konular sırayla, her konuda kimlik sırası. */
+  function sabitSira(){
+    const kuyruk = KONULAR.map(k => HAVUZ().filter(q => q.konu === k).sort((a, b) => a.id.localeCompare(b.id)));
+    const out = [];
+    let kaldi = true;
+    while(kaldi){
+      kaldi = false;
+      kuyruk.forEach(l => { if(l.length){ out.push(l.shift()); kaldi = true; } });
+    }
+    return out;
+  }
+
+  /* Bütün denemeler, düz liste: { k, id, h, bak, ip?, at, gun }. */
+  function denemeler(){
+    const l = [];
+    Object.keys(doc.gunler).forEach(gun => {
+      const g = doc.gunler[gun];
+      Object.keys(g.cevaplar || {}).forEach(id => {
+        const v = g.cevaplar[id], q = bul(id);
+        if(q && v && v.at) l.push(Object.assign({ k:anahtar(q), id, gun }, v));
+      });
+    });
+    return l;
+  }
+  /* Her sorunun en son geçerli denemesi: { id: deneme }. */
+  function sonlar(){
+    const son = {};
+    denemeler().forEach(x => {
+      const q = bul(x.id);
+      if(!R.Ogren.gecerli(q, x.at)) return;
+      if(!son[x.id] || son[x.id].at <= x.at) son[x.id] = x;
+    });
+    return son;
+  }
+  const dogruMu = (q, v) => !!(v && !v.bak && v.h && v.h === q.dogru);
+  const isaretli = q => !!(R.OgrenTest && R.OgrenTest.isaretOf && R.OgrenTest.isaretOf(anahtar(q)));
+
+  /* ---------- günün seti (söz 2) ---------- */
+  function gunFarki(a, b){ return Math.round((Date.parse(b + 'T12:00:00Z') - Date.parse(a + 'T12:00:00Z')) / 86400000); }
+  function sec(gun, boy){
+    const son = sonlar();
+    const aday = HAVUZ().filter(q => !isaretli(q));
+    const secilen = [];
+    const al = q => { if(secilen.length < boy && secilen.indexOf(q.id) < 0) secilen.push(q.id); };
+    /* 1. Yanlışı olan ve en az iki gün önce denenmiş; en eskisi önce. */
+    aday.filter(q => son[q.id] && !dogruMu(q, son[q.id]) && gunFarki(son[q.id].gun, gun) >= 2)
+      .sort((a, b) => son[a.id].at.localeCompare(son[b.id].at))
+      .slice(0, Math.floor(boy / 2)).forEach(al);
+    /* 2. Hiç görülmemiş, sabit serpiştirilmiş sırayla. */
+    const gorulen = id => Object.keys(doc.gunler).some(g => g !== gun && (doc.gunler[g].sorular || []).indexOf(id) >= 0);
+    sabitSira().filter(q => !isaretli(q) && !gorulen(q.id)).forEach(al);
+    /* 3. En uzun süredir görülmeyen. */
+    aday.filter(q => son[q.id]).sort((a, b) => son[a.id].at.localeCompare(son[b.id].at)).forEach(al);
+    return secilen;
+  }
+  function gunu(gun){ return doc.gunler[gun || bugunISO()] || null; }
+  /* Günün setini kurar (yoksa) ve döndürür. Havuz boşsa null. */
+  async function hazirla(gun){
+    gun = gun || bugunISO();
+    if(doc.gunler[gun]) return doc.gunler[gun];
+    const l = sec(gun, doc.boy);
+    if(!l.length) return null;
+    doc.gunler[gun] = { sorular:l, cevaplar:{}, kuruldu:simdi(), yazildi:null };
+    budama();
+    await yaz();
+    return doc.gunler[gun];
+  }
+  /* Çok eski günler silinir; Yanlışlarım ve «görüldü» bilgisi son
+     SAKLA_GUN günden okunur (dokuz aylık ufkun rahatça üstü). */
+  function budama(){
+    const bugun = bugunISO();
+    Object.keys(doc.gunler).forEach(g => { if(gunFarki(g, bugun) > SAKLA_GUN) delete doc.gunler[g]; });
+  }
+  /* Set boyu (tercih): bugünün setine henüz cevap yoksa set yeniden kurulur. */
+  async function boyAyarla(n){
+    n = Number(n);
+    if(BOYLAR.indexOf(n) < 0) return { ok:false, neden:'gecersiz' };
+    doc.boy = n;
+    const g = gunu();
+    if(g && !Object.keys(g.cevaplar || {}).length && !g.yazildi){ delete doc.gunler[bugunISO()]; }
+    await yaz();
+    await hazirla();
+    return { ok:true };
+  }
+
+  /* ---------- cevap (söz 3) ---------- */
+  async function cevapla(id, harf, ip){
+    const g = gunu(), q = bul(id);
+    harf = String(harf || '').toUpperCase();
+    if(!g || !q || g.sorular.indexOf(id) < 0 || R.Ogren.HARFLER.indexOf(harf) < 0) return { ok:false, neden:'gecersiz' };
+    if(g.cevaplar[id]) return { ok:false, neden:'kilitli' };
+    g.cevaplar[id] = ip ? { h:harf, ip:true, at:simdi() } : { h:harf, at:simdi() };
+    await yaz();
+    return { ok:true, dogru:harf === q.dogru };
+  }
+  async function bak(id){
+    const g = gunu();
+    if(!g || g.sorular.indexOf(id) < 0 || !bul(id)) return { ok:false, neden:'gecersiz' };
+    if(g.cevaplar[id]) return { ok:false, neden:'kilitli' };
+    g.cevaplar[id] = { h:null, bak:true, at:simdi() };
+    await yaz();
+    return { ok:true };
+  }
+  /* { toplam, cevaplanan, cozulen, dogru, yanlis, bakildi, bitti } */
+  function ozet(gun){
+    const g = gunu(gun);
+    const r = { toplam:0, cevaplanan:0, cozulen:0, dogru:0, yanlis:0, bakildi:0, bitti:false };
+    if(!g) return r;
+    g.sorular.forEach(id => {
+      const q = bul(id);
+      if(!q) return;
+      r.toplam++;
+      const v = g.cevaplar[id];
+      if(!v) return;
+      r.cevaplanan++;
+      if(v.bak) r.bakildi++;
+      else{ r.cozulen++; if(v.h === q.dogru) r.dogru++; else r.yanlis++; }
+    });
+    r.bitti = r.toplam > 0 && r.cevaplanan === r.toplam;
+    return r;
+  }
+  /* Bugünün seti açık mı (kurulmamış ya da bitmemiş)? Bugün'ün önerisi
+     buna bakar (core/calc.js): bitmiş setin «Başla»sı olmaz. */
+  function acikMi(){
+    if(!HAVUZ().length) return false;
+    const g = gunu();
+    return !g || !ozet().bitti;
+  }
+
+  /* ---------- gün kaydına yazma (söz 4) ---------- */
+  /* Uygulanmış (geri alınmamış) yazım ya da null. Öneri satırı Onaylar'da
+     geri alındıysa yazım düşmüştür. */
+  function yazim(gun){
+    const g = gunu(gun);
+    const y = g && g.yazildi;
+    if(!y) return null;
+    const row = y.row && R.Proposals && R.Proposals.all ? R.Proposals.all().find(r => r.id === y.row) : null;
+    if(row && row.status !== 'applied') return null;
+    return y;
+  }
+  async function gunKaydinaYaz(){
+    const gun = bugunISO(), g = gunu(gun), o = ozet(gun);
+    if(!g || !o.bitti) return { ok:false, why:'Set bitmeden yazılmaz.' };
+    if(yazim(gun)) return { ok:false, why:'Bugünün seti zaten yazıldı.' };
+    if(!o.cozulen) return { ok:false, why:'Çözülen soru yok: çözümüne bakılan sorular sayılmaz.' };
+    if(!R.Proposals || !R.Proposals.hemen) return { ok:false, why:'Öneri sistemi yok.' };
+    if(R.Model.ensureDay) await R.Model.ensureDay(R.U.today());
+    const sira = (Number(g.yazimSayisi) || 0) + 1;
+    const r = await R.Proposals.hemen({ action:'paragraf-yaz', params:{ count:o.cozulen, date:gun },
+      anahtar:'ogren-paragraf:' + gun + ':' + (g.kuruldu || '') + ':' + sira, reason:'Öğren › Günlük paragraf: ' + o.cozulen + ' soru çözüldü (ölçüldü)',
+      iz:[{ tur:'ogren-paragraf', id:gun }] });
+    if(!r || !r.ok) return { ok:false, why:(r && r.why) || 'Yazılamadı.' };
+    g.yazimSayisi = sira;
+    g.yazildi = { at:simdi(), n:o.cozulen, row:r.row && r.row.id };
+    await yaz();
+    return { ok:true, n:o.cozulen, row:r.row };
+  }
+
+  /* Havuzun durumu: kaç soru, kaçı hiç görülmedi. */
+  function durum(){
+    const gorulen = new Set();
+    Object.keys(doc.gunler).forEach(g => (doc.gunler[g].sorular || []).forEach(id => gorulen.add(id)));
+    const toplam = HAVUZ().length;
+    return { toplam, gorulen:gorulen.size, yeni:Math.max(0, toplam - HAVUZ().filter(q => gorulen.has(q.id)).length), boy:doc.boy };
+  }
+
+  return { STORE, BOYLAR, KONULAR, get HAVUZ(){ return HAVUZ(); }, yukle, bul, konuSorulari, anahtar, denemeler,
+    gunu, hazirla, boyAyarla, cevapla, bak, ozet, acikMi, yazim, gunKaydinaYaz, durum, sec };
+})();
+
 /* ==== js/core/konusor.js ==== */
 /* KONUNUN İÇİNDE «ANLAMADIM / SORU SOR».
 
@@ -57886,7 +58738,12 @@ R.KonuSor = (function(){
         «Soru çöz» adımı bloklardan ölçülür; dört örnek soru yirmi soruluk
         eşiği şişirmesin).
      4. YANLIŞ KULLANICININ. Yanlış cevap kendiliğinden yanlış defterine
-        yazılmaz; «Yanlış defterine ekle» kaydı kullanıcının eliyle açar. */
+        yazılmaz; «Yanlış defterine ekle» kaydı kullanıcının eliyle açar.
+     5. YENİLENEN SORU ESKİ CEVABI TAŞIMAZ. Cevaplar sıra numarasıyla
+        tutulur; bir soru yerinde yeniden yazılırsa içerik ona
+        `yenilendi` (ISO zaman) yazar. O andan önce verilmiş cevap, yanlış
+        defteri kaydı ya da test denemesi başka bir soruya aittir: ölçüm
+        sayılmaz, silinmez de (gecerli()). */
 
 window.R = window.R || {};
 
@@ -58014,6 +58871,8 @@ R.Ogren = (function(){
   function duzMetin(s){ return duzOf(ayristir(s)); }
 
   function anlatim(topicId){ return (R.KONU_ANLATIM || {})[topicId] || null; }
+  /* Söz 5: `at` anında verilen cevap bugünkü soruya mı ait? */
+  function gecerli(q, at){ return !q || !q.yenilendi || !at || String(at) >= String(q.yenilendi); }
   /* Derinleştirme (data/derin-*.js): kazanımlar, ön koşullar, seviyeli
      çözümlü örnekler, sınav kalıpları, sık hatalar ve orta/ileri sorular. */
   function derin(topicId){ return (R.KONU_DERIN || {})[topicId] || null; }
@@ -58027,20 +58886,32 @@ R.Ogren = (function(){
     const t = tabanSorular(topicId);
     return ek.length ? t.concat(ek) : t;
   }
+  /* Tek soru: i sayıysa konunun sırası, 'p014' gibi bir kimlikse günlük
+     paragraf havuzunun sorusu (core/paragraf.js). */
+  function soru(topicId, i){
+    if(typeof i === 'string') return R.Paragraf ? R.Paragraf.bul(i, topicId) : null;
+    return sorular(topicId)[i] || null;
+  }
   const SEVIYE = { temel:'Temel', orta:'Orta', ileri:'İleri' };
   /* Sorunun seviyesi yazarın değerlendirmesidir (ölçüm değil): temel
      sorular «temel», derin sorular kendi seviyesini taşır. */
   function seviye(topicId, i){
-    const n = tabanSorular(topicId).length;
-    if(i < n) return 'temel';
-    const q = sorular(topicId)[i];
+    if(typeof i !== 'string' && i < tabanSorular(topicId).length) return 'temel';
+    const q = soru(topicId, i);
     return q && SEVIYE[q.seviye] ? q.seviye : 'orta';
   }
 
   /* ---------- örnek soru cevapları (söz 3) ---------- */
   function cevaplar(subjectId, topicId){
     const o = R.Model.topicState(subjectId, topicId).ornek;
-    return o && typeof o === 'object' ? o : {};
+    if(!o || typeof o !== 'object') return {};
+    const l = sorular(topicId);
+    /* Yenilenmiş sorunun eski cevabı süzülür (söz 5); yeni bir cevap
+       yazıldığında kayıttan da düşer. */
+    if(!l.some(q => q && q.yenilendi)) return o;
+    const out = {};
+    Object.keys(o).forEach(i => { if(gecerli(l[i], o[i] && o[i].at)) out[i] = o[i]; });
+    return out;
   }
   /* i: sorunun sırası, harf: A–E, ip: ipucu açıldıktan sonra mı. İlk
      cevap kalır. → { ok, dogru?, neden? } */
@@ -58121,12 +58992,14 @@ R.Ogren = (function(){
     const k = s.lastIndexOf(' ', n - 1);
     return s.slice(0, k > n * 0.6 ? k : n - 1).replace(/[\s,;:]+$/, '') + '…';
   }
+  /* Şekil ve tablonun düz metni (core/sekil.js söz 3); yoksa ''. */
+  function ekMetni(q){ return R.Sekil ? R.Sekil.ekMetni(q) : ''; }
   function kartYuzu(topicId, i){
-    const q = sorular(topicId)[i];
+    const q = soru(topicId, i);
     if(!q) return null;
     const satir = duzMetin(q.soru).split('\n');
     const kok = satir.pop();
-    const parca = satir.join(' ');
+    const parca = [satir.join(' '), ekMetni(q)].filter(Boolean).join(' ');
     const sec = (q.sec || []).map((m, k) => HARFLER[k] + ') ' + kisalt(duzMetin(m), 80)).join('  ');
     const dogru = (q.sec || [])[HARFLER.indexOf(q.dogru)];
     return {
@@ -58138,25 +59011,28 @@ R.Ogren = (function(){
   /* Yanlış defteri kaydı (söz 4): kök neden ve etiket boş, kullanıcı
      yazar (testkitabi.js ile aynı şema). Aynı soru iki kez eklenmez. */
   function deftere(subjectId, topicId, i){
+    const q = soru(topicId, i);
     return (R.S.errors || []).find(e => e.kaynak && e.kaynak.tur === 'ogren'
-      && e.subjectId === subjectId && e.topicId === topicId && e.kaynak.i === i) || null;
+      && e.subjectId === subjectId && e.topicId === topicId && e.kaynak.i === i && gecerli(q, e.createdAt)) || null;
   }
   /* senin: karma testte ya da yeniden çözümde verilen harf (core/ogrentest.js);
      verilmezse konunun ilk cevabı. */
   async function yanlisaEkle(subjectId, topicId, i, senin){
     const { subject, topic } = bul(subjectId, topicId);
-    const q = sorular(topicId)[i];
-    const c = cevaplar(subjectId, topicId)[i];
+    const q = soru(topicId, i);
+    const havuz = typeof i === 'string';
+    const c = havuz ? null : cevaplar(subjectId, topicId)[i];
     if(!subject || !topic || !q) return null;
     const var_ = deftere(subjectId, topicId, i);
     if(var_) return var_;
     const err = {
       id:R.U.uid('r'), createdAt:new Date().toISOString(), closedAt:null, repairDoneAt:null,
       examId:null, examDate:R.U.todayISO(), publisher:'Öğren',
-      testName:('Örnek soru · ' + topic.name).slice(0, 160), questionNo:String(i + 1),
+      testName:((havuz ? 'Günlük paragraf · ' : 'Örnek soru · ') + topic.name).slice(0, 160),
+      questionNo:havuz ? 'P' + Number(i.slice(1)) : String(i + 1),
       status:'Yanlış', tag:null, seconds:null, rootCause:'', principle:'', similar:'',
       recipe:'', topicRef:'', subjectId, topicId, topic:topic.name,
-      soru:kisalt(duzMetin(q.soru), 600), senin:senin || (c ? c.h : null), anahtar:q.dogru,
+      soru:kisalt([duzMetin(q.soru), ekMetni(q)].filter(Boolean).join(' '), 600), senin:senin || (c ? c.h : null), anahtar:q.dogru,
       kaynak:{ tur:'ogren', i },
     };
     await R.Model.saveError(err);
@@ -58164,7 +59040,7 @@ R.Ogren = (function(){
   }
 
   return { HARFLER, SEVIYE, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
-    derin, tabanSorular, seviye,
+    derin, tabanSorular, seviye, gecerli, ekMetni, soru,
     anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle };
 })();
 
@@ -58201,7 +59077,14 @@ R.Ogren = (function(){
         testler ve buradaki yeniden çözümler. En son deneme yanlışsa ya da
         çözüme bakıldıysa soru listededir; yeniden doğru çözülünce düşer.
         Eski ölçüm silinmez. Doğruluk her okumada bugünkü cevap anahtarıyla
-        hesaplanır: düzeltilen bir soru eski «doğru»yu taşımaz. */
+        hesaplanır: düzeltilen bir soru eski «doğru»yu taşımaz. Yerinde
+        yeniden yazılan sorunun (`yenilendi`) eski denemeleri bu soruya
+        sayılmaz (core/ogren.js söz 5).
+     6. HATA BİLDİRİMİ KULLANICININ NOTUDUR. «Bu soruda hata var» cevap
+        anahtarını değiştirmez (kod otoritedir). İşaretli soru karma test
+        ve günlük paragraf havuzundan çıkar, Yanlışlarım'ın altında
+        «Bildirdiğin hatalar» olarak durur, kopyalanıp iletilebilir. Soru
+        sonradan yenilenirse işaret kendiliğinden kapanır. */
 
 window.R = window.R || {};
 
@@ -58212,7 +59095,7 @@ R.OgrenTest = (function(){
   const GECMIS = 30;
   let doc = bos();
 
-  function bos(){ return { aktif:null, gecmis:[], tekrar:{} }; }
+  function bos(){ return { aktif:null, gecmis:[], tekrar:{}, isaret:{} }; }
   const O = () => R.Ogren;
   const anahtar = (tid, i) => tid + '#' + i;
   const simdi = () => new Date().toISOString();
@@ -58224,6 +59107,7 @@ R.OgrenTest = (function(){
     if(d && typeof d === 'object'){
       if(Array.isArray(d.gecmis)) doc.gecmis = d.gecmis.filter(t => t && Array.isArray(t.sorular)).slice(0, GECMIS);
       if(d.tekrar && typeof d.tekrar === 'object') doc.tekrar = d.tekrar;
+      if(d.isaret && typeof d.isaret === 'object') doc.isaret = d.isaret;
       if(d.aktif && Array.isArray(d.aktif.sorular) && d.aktif.sorular.length) doc.aktif = d.aktif;
     }
     return doc;
@@ -58232,13 +59116,24 @@ R.OgrenTest = (function(){
     try{ await R.Store.set(STORE, doc); }catch(e){ /* yazılamasa da bu açılışta çalışır */ }
   }
 
-  /* 'tm-05#2' → { k, subject, topic, i, q }; soru artık yoksa null. */
-  function soruOf(k){
+  /* 'tm-05#2' → { k, subject, topic, i, q }; soru artık yoksa null.
+     Günlük paragraf havuzunun soruları 'tr-09#p014' biçimindedir
+     (core/paragraf.js): i sayı değil havuz kimliğidir. at verilirse o
+     anda verilen bir cevap için bakılır: soru sonradan yenilendiyse null. */
+  function soruOf(k, at){
     const p = String(k || '').split('#');
-    const i = Number(p[1]);
     const x = O().konuyuBul(p[0]);
-    const q = x.topic ? O().sorular(x.topic.id)[i] : null;
-    return q ? { k, subject:x.subject, topic:x.topic, i, q } : null;
+    if(!x.topic) return null;
+    let q = null, i = null;
+    if(/^p\d+$/.test(p[1] || '')){
+      q = R.Paragraf ? R.Paragraf.bul(p[1], x.topic.id) : null;
+      i = p[1];
+    }else{
+      i = Number(p[1]);
+      q = O().sorular(x.topic.id)[i] || null;
+    }
+    if(!q || (at && !O().gecerli(q, at))) return null;
+    return { k, subject:x.subject, topic:x.topic, i, q, havuz:typeof i === 'string' };
   }
   const dogruMu = (q, v) => !!(v && !v.bak && v.h && v.h === q.dogru);
 
@@ -58253,7 +59148,14 @@ R.OgrenTest = (function(){
       if(k.konular === 'okunan' && !R.Model.topicState(x.subject.id, x.topic.id).okunduAt) return;
       O().sorular(x.topic.id).forEach((q, i) => {
         if(k.seviye === 'sinav' && O().seviye(x.topic.id, i) === 'temel') return;
-        l.push({ k:anahtar(x.topic.id, i), tid:x.topic.id });
+        const ak = anahtar(x.topic.id, i);
+        if(!isaretOf(ak)) l.push({ k:ak, tid:x.topic.id });
+      });
+      /* Günlük paragraf havuzu konusunun sorusudur (söz 1). */
+      if(R.Paragraf) R.Paragraf.konuSorulari(x.topic.id).forEach(q => {
+        if(k.seviye === 'sinav' && q.seviye === 'temel') return;
+        const ak = anahtar(x.topic.id, q.id);
+        if(!isaretOf(ak)) l.push({ k:ak, tid:x.topic.id });
       });
     });
     return l;
@@ -58366,11 +59268,13 @@ R.OgrenTest = (function(){
   /* Biten testin özeti: sayılar ve konu konu sonuç (yanlışı çok olan önce).
      Doğruluk bugünkü cevap anahtarıyla hesaplanır (söz 5). */
   function ozet(t){
-    const r = { id:t.id, at:t.at, kapsam:t.kapsam, toplam:t.sorular.length, dogru:0, yanlis:0, bakildi:0, bos:0, konular:[] };
+    const r = { id:t.id, at:t.at, kapsam:t.kapsam, toplam:0, dogru:0, yanlis:0, bakildi:0, bos:0, konular:[] };
     const kon = {};
     t.sorular.forEach(x => {
-      const s = soruOf(x.k);
+      /* Yenilenmiş ya da kalkmış soru bu testin sonucuna sayılmaz. */
+      const s = soruOf(x.k, x.at || t.at);
       if(!s) return;
+      r.toplam++;
       const v = x.bos ? null : x;
       const d = v && dogruMu(s.q, v);
       if(!v) r.bos++; else if(v.bak) r.bakildi++; else if(d) r.dogru++; else r.yanlis++;
@@ -58393,6 +59297,7 @@ R.OgrenTest = (function(){
     const son = {};
     const koy = (k, v, kaynak) => {
       if(!v || !v.at || (!v.h && !v.bak)) return;
+      if(!soruOf(k, v.at)) return;
       if(!son[k] || son[k].at <= v.at) son[k] = { h:v.h || null, bak:!!v.bak, at:v.at, kaynak };
     };
     O().konular().forEach(x => {
@@ -58400,6 +59305,7 @@ R.OgrenTest = (function(){
       Object.keys(c).forEach(i => koy(anahtar(x.topic.id, i), c[i], 'konu'));
     });
     doc.gecmis.slice().reverse().forEach(t => t.sorular.forEach(x => koy(x.k, x, 'test')));
+    if(R.Paragraf) R.Paragraf.denemeler().forEach(x => koy(x.k, x, 'paragraf'));
     Object.keys(doc.tekrar).forEach(k => koy(k, doc.tekrar[k], 'tekrar'));
     return son;
   }
@@ -58424,8 +59330,48 @@ R.OgrenTest = (function(){
     return { ok:true, dogru:harf === s.q.dogru };
   }
 
+  /* ---------- hata bildirimi (söz 6) ---------- */
+
+  /* Geçerli işaret ya da null: soru kalktıysa ya da işaretten sonra
+     yenilendiyse işaret kapanmıştır. */
+  function isaretOf(k){
+    const v = doc.isaret[k];
+    if(!v || !v.at) return null;
+    const s = soruOf(k);
+    if(!s || (s.q.yenilendi && String(s.q.yenilendi) > String(v.at))) return null;
+    return v;
+  }
+  async function isaretle(k, not){
+    if(!soruOf(k)) return { ok:false, neden:'gecersiz' };
+    doc.isaret[k] = { at:simdi(), not:String(not || '').replace(/\s+/g, ' ').trim().slice(0, 300) };
+    await yaz();
+    return { ok:true };
+  }
+  async function isaretKaldir(k){
+    if(!doc.isaret[k]) return { ok:false };
+    delete doc.isaret[k];
+    await yaz();
+    return { ok:true };
+  }
+  /* Geçerli işaretler, en yenisi önce: [{ k, subject, topic, i, q, isaret }]. */
+  function isaretliler(){
+    return Object.keys(doc.isaret).map(k => {
+      const v = isaretOf(k), s = v ? soruOf(k) : null;
+      return s ? Object.assign(s, { isaret:v }) : null;
+    }).filter(Boolean).sort((a, b) => b.isaret.at.localeCompare(a.isaret.at));
+  }
+  /* İletmek için düz metin: konu, soru, doğru cevap, kullanıcının notu. */
+  function isaretMetni(){
+    const d = O().duzMetin;
+    return isaretliler().map((x, j) => (j + 1) + '. ' + x.subject.name + ' · ' + x.topic.name + ' · ' + x.k + '\n'
+      + d(x.q.soru).replace(/\n/g, ' ') + (O().ekMetni(x.q) ? ' ' + O().ekMetni(x.q) : '') + '\n'
+      + x.q.sec.map((m, i) => O().HARFLER[i] + ') ' + d(m)).join('  ') + '\n'
+      + 'Uygulamadaki cevap: ' + x.q.dogru + (x.isaret.not ? '\nNot: ' + x.isaret.not : '')).join('\n\n');
+  }
+
   return { STORE, BOYLAR, EN_AZ, yukle, soruOf, havuz, baslat, aktif, siradaki, git, cevapla, bak, say,
-    bitir, vazgec, ozet, gecmis, sonDenemeler, yanlislar, tekrarCevapla };
+    bitir, vazgec, ozet, gecmis, sonDenemeler, yanlislar, tekrarCevapla,
+    isaretOf, isaretle, isaretKaldir, isaretliler, isaretMetni };
 })();
 
 /* ==== js/core/tatil.js ==== */
@@ -59357,6 +60303,14 @@ R.Calc = (function(){
      (kart ~1 dk, paragraf ~3 dk, reçete ~10 dk). Öncelik: gecikmiş kart >
      açık yanlışın reçetesi > paragraf/problem eksiği > vadesi gelen kart >
      sıradaki bloğun ilk dakikaları. */
+  /* Paragraf çıpası önerisinin «Başla»sı: Öğren'de bugünün paragraf seti
+     açıksa (kurulmamış ya da bitmemiş) oraya gider (core/paragraf.js).
+     Set bittiyse öneri eskisi gibi yalnız hatırlatır; kitaptan çözülür. */
+  function paragrafSeti(){
+    if(!R.Paragraf || !R.Paragraf.acikMi || !R.Paragraf.acikMi()) return { yol:{}, not:'' };
+    return { yol:{ route:'sorular', act:'par-ac' }, not:' Öğren’de bugünün paragraf seti hazır.' };
+  }
+
   function onbesDakika(dk){
     const sure = dk || 15;
     const day = S.days[U.todayISO()];
@@ -59378,10 +60332,10 @@ R.Calc = (function(){
     }
     if(day && day.paragraphActual < day.paragraphTarget){
       const n = Math.min(day.paragraphTarget - day.paragraphActual, Math.floor(sure / 3));
-      return { key:'onbes-paragraf', icon:'book', label:sure + ' dakikam var',
+      return Object.assign({ key:'onbes-paragraf', icon:'book', label:sure + ' dakikam var',
         title:n + ' paragraf sorusu çöz', dk:n * 3,
         why:'Günün paragraf çıpasından ' + (day.paragraphTarget - day.paragraphActual)
-          + ' kaldı; soru başı ~3 dakika (tahmin).', tone:'normal' };
+          + ' kaldı; soru başı ~3 dakika (tahmin).' + paragrafSeti().not, tone:'normal' }, paragrafSeti().yol);
     }
     if(day && day.problemActual < day.problemTarget){
       const n = Math.min(day.problemTarget - day.problemActual, Math.floor(sure / 3));
@@ -59474,10 +60428,10 @@ R.Calc = (function(){
           act:'timer-start', blockId:next.id, tone:'normal' };
       }
       if(day.paragraphActual < day.paragraphTarget){
-        return { key:'anchor', icon:'book', label:'Günlük çıpa',
+        return Object.assign({ key:'anchor', icon:'book', label:'Günlük çıpa',
           title:'Paragraf çıpasını tamamla',
-          why:(day.paragraphTarget - day.paragraphActual)+' paragraf kaldı — çıpa konudan bağımsız düşmez.',
-          tone:'normal' };
+          why:(day.paragraphTarget - day.paragraphActual)+' paragraf kaldı — çıpa konudan bağımsız düşmez.' + paragrafSeti().not,
+          tone:'normal' }, paragrafSeti().yol);
       }
       if(day.problemActual < day.problemTarget){
         return { key:'anchor2', icon:'chart', label:'Günlük çıpa',
@@ -75756,6 +76710,7 @@ R.Palette = (function(){
     /* Öğren › Sorular'ın iki kipi (core/ogrentest.js). */
     const kip = (tab, label, icon) => ({ group:'Git', label, icon, route:'sorular', run(){
       R.S.ui.ogrenKip = tab; R.S.ui.ogrTekrar = null; R.App.go('sorular'); } });
+    list.push(kip('paragraf', 'Günlük paragraf — bugünün seti', 'book'));
     list.push(kip('karma', 'Karma test — konular karışık', 'zap'));
     list.push(kip('yanlis', 'Yanlışlarım — yeniden çöz', 'list'));
     list.push(go('learn','Öğrenme — video ve ders notu','play','Git'));
@@ -80984,7 +81939,12 @@ R.Screens.learn = (function(){
       R.App.render();
     },
 
-    async 'note-new'(){
+    /* Öğren › Anlatım «Ders notu ekle» seçili konuyu dataset ile verir
+       (screens/ogren.js ogren-not): ders ve konu seçili gelir. */
+    async 'note-new'(el){
+      const ds = (el && el.dataset) || {};
+      const onDers = R.SUBJECTS.some(x => x.id === ds.subject) ? ds.subject : '';
+      const onKonu = onDers && (R.SUBJECTS.find(x => x.id === onDers).topics || []).some(t => t.id === ds.topic) ? ds.topic : '';
       UI.sheet({
         title:'Ders ekle', subtitle:'Video bağlantısı isteğe bağlı — not almaya hemen başlayabilirsin',
         body:String(K.Stack([
@@ -80992,8 +81952,8 @@ R.Screens.learn = (function(){
           K.Field({ label:'Video bağlantısı', hint:'YouTube bağlantısı gömülü açılır',
             input:K.Input({ id:'nn-url', placeholder:'https://www.youtube.com/watch?v=…' }) }),
           K.Cols(2, [
-            K.Field({ label:'Ders', input:K.Select({ id:'nn-subject', options:subjectOptions(), value:'' }) }),
-            K.Field({ label:'Konu', input:K.Select({ id:'nn-topic', options:topicOptions(null), value:'' }) }),
+            K.Field({ label:'Ders', input:K.Select({ id:'nn-subject', options:subjectOptions(), value:onDers }) }),
+            K.Field({ label:'Konu', input:K.Select({ id:'nn-topic', options:topicOptions(onDers || null), value:onKonu }) }),
           ]),
           K.Notice({ tone:'info', body:'Transcript otomatik çekilmez. İzlerken durakla, '
             + 'zaman damgası ve tek cümle notla ilerle.' }),
@@ -81016,6 +81976,7 @@ R.Screens.learn = (function(){
         topicId: val('nn-topic') || null,
       });
       if(!note.title && !note.url){ UI.toast('Başlık veya bağlantı gir'); return; }
+      if(note.url && !/^https?:\/\//i.test(note.url)){ UI.toast('Bağlantı http:// ya da https:// ile başlamalı'); return; }
       await M.saveVideoNote(note);
       UI.closeSheet();
       S.ui.noteOpen = note.id;
@@ -83635,6 +84596,8 @@ R.Screens = R.Screens || {};
   /* Metindeki küçük işaretler (**kalın**, x^{2}, H_{2}O; iç içe olabilir)
      tek ayrıştırıcıdan geçer: core/ogren.js metinHtml. */
   const fmt = s => raw(O().metinHtml(s));
+  /* Şekil ve tablo (core/sekil.js): tarif yoksa boş. */
+  const sekilHtml = x => x && (x.sekil || x.tablo) && R.Sekil ? raw(R.Sekil.svg(x.sekil) + R.Sekil.tablo(x.tablo)) : '';
   const dizi = x => x == null ? [] : Array.isArray(x) ? x : [x];
   const kisaAd = s => s.name;
 
@@ -83724,6 +84687,11 @@ R.Screens = R.Screens || {};
       action:K.Button({ label:son ? 'Devam et' : 'Başla', tone:'primary', size:'sm', act:'ogren-git',
         data:{ 'data-route':s ? s.route : 'anlatim', 'data-subject':hedef.subject.id, 'data-topic':hedef.topic.id } }) })}
       <div class="row wrap gap-6 mt-10">
+        ${when(R.Paragraf && R.Paragraf.HAVUZ.length, () => {
+          const g = R.Paragraf.gunu(), o = g ? R.Paragraf.ozet() : null;
+          return K.Button({ label:'Günlük paragraf' + (o ? ' · ' + o.cevaplanan + '/' + o.toplam : ''), icon:'book', size:'sm', tone:'ghost',
+            act:'sorular-kip', data:{ 'data-tab':'paragraf' } });
+        })}
         ${K.Button({ label:a ? 'Karma teste dön' : 'Karma test', icon:'zap', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'karma' } })}
         ${when(y, () => K.Button({ label:'Yanlışlarım · ' + y, icon:'list', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'yanlis' } }))}
       </div></div>`;
@@ -83822,7 +84790,7 @@ R.Screens = R.Screens || {};
   function ornekHtml(o){
     return html`<div class="ders__ornek">
       <div class="ders__etiket tiny">Örnek</div>
-      <p>${fmt(o.soru)}</p>
+      ${soruMetni(o.soru, o)}
       <div class="ders__etiket tiny mt-10">Çözüm</div>
       <ol class="ders__adimlar">${map(dizi(o.cozum), c => html`<li>${fmt(c)}</li>`)}</ol>
     </div>`;
@@ -83856,7 +84824,7 @@ R.Screens = R.Screens || {};
       <p class="small dim">Önce kâğıtta kendin dene; takılınca çözümü aç.</p>
       ${map(d.ornekler, (o, i) => html`<div class="ders__ornek">
         <div class="row between gap-8 mb-6"><span class="ders__etiket tiny">Örnek ${i + 1}</span>${seviyeRozeti(o.seviye)}</div>
-        ${soruMetni(o.soru)}
+        ${soruMetni(o.soru, o)}
         <details class="ders__cozum"><summary>Çözümü göster</summary>
           <ol class="ders__adimlar">${map(dizi(o.cozum), c => html`<li>${fmt(c)}</li>`)}</ol>
         </details>
@@ -83878,6 +84846,7 @@ R.Screens = R.Screens || {};
       ${map(a.bolumler, (b, i) => html`<section class="ders__bolum" id="${'ders-b' + (i + 1)}">
         <h3 class="ders__baslik"><span class="ders__no num" aria-hidden="true">${i + 1}</span>${b.baslik}</h3>
         ${map(dizi(b.metin), p => html`<p>${fmt(p)}</p>`)}
+        ${sekilHtml(b)}
         ${when(b.liste, () => html`<ul class="ders__liste">${map(b.liste, m => html`<li>${fmt(m)}</li>`)}</ul>`)}
         ${when(b.formul, () => html`<div class="ders__formul">${map(b.formul, f => html`<div>${fmt(f)}</div>`)}</div>`)}
         ${when(b.ornek, () => ornekHtml(b.ornek))}
@@ -83953,18 +84922,82 @@ R.Screens = R.Screens || {};
     });
   }
 
-  /* Bu konuya bağlı kendi ders notların (screens/learn.js'in kaydı). */
+  /* VİDEOLAR VE NOTLAR — bu konuya bağlı dersler (screens/learn.js'in
+     kaydı, S.videoNotes). Kullanıcı (2026-10-10): «o konuya video URL'si
+     koyabilelim». Video burada bağlanır, Öğrenme'de gömülü oynatıcıyla
+     açılır ve zaman damgalı notlar orada alınır; ikinci bir video kaydı
+     kurulmaz. Bağlantı yalnız http(s) olabilir (core/cikmis.js baglanti). */
+  function videoAdi(n){
+    if(n.title) return n.title;
+    try{ return new URL(n.url).hostname.replace(/^www\./, ''); }catch(e){ return 'Video'; }
+  }
   function notlarKarti(subject, topic){
     const notlar = (S.videoNotes || []).filter(n => n.subjectId === subject.id && n.topicId === topic.id);
     const seg = [];
     notlar.forEach(n => (n.segments || []).forEach(s => seg.push({ n, s })));
-    return K.Card({ title:'Senin notların',
-      sub:seg.length ? U.plural(seg.length, 'not', 'not') + ' · ' + notlar.length + ' ders' : null,
-      actions:K.Button({ label:'Ders notu ekle', icon:'plus', size:'sm', tone:'ghost', act:'ogren-not' }),
-      body:seg.length ? html`<div class="stack-xs">${map(seg.slice(0, 8), y => html`<div class="row-top gap-8">
-          <a class="seg-row__ts num" href="${R.Model.tsUrl(y.n, y.s.ts)}" target="_blank" rel="noopener">${R.Model.fmtTs(y.s.ts)}</a>
-          <span class="small">${y.s.text}</span></div>`)}</div>`
-        : html`<p class="small muted">Bu konuya bağlı ders notun yok. Bir ders izlerken zaman damgalı not alırsan burada, anlatımın yanında durur.</p>` });
+    const guvenli = u => R.Cikmis && R.Cikmis.baglanti(u) ? u : null;
+    return K.Card({ title:'Videolar ve notların',
+      sub:notlar.length ? U.plural(notlar.length, 'video', 'video') + (seg.length ? ' · ' + U.plural(seg.length, 'not', 'not') : '') : null,
+      actions:html`${K.Button({ label:'Video ekle', icon:'play', size:'sm', tone:'ghost', act:'ogren-video-ekle' })}
+        ${K.Button({ label:'Ders notu ekle', icon:'plus', size:'sm', tone:'ghost', act:'ogren-not' })}`,
+      body:notlar.length ? html`<div class="stack-sm">
+          <div class="list list--sik">${map(notlar, n => html`<div class="listitem">
+            <span class="grow minw0"><span class="small strong">${videoAdi(n)}</span>
+              <span class="tiny dim">${n.provider === 'youtube' ? 'YouTube · uygulamada açılır' : 'bağlantı'}${(n.segments || []).length ? ' · ' + n.segments.length + ' not' : ''}</span></span>
+            ${K.Button({ label:'Aç', icon:'play', size:'sm', tone:'ghost', act:'ogren-video-ac', data:{ 'data-id':n.id } })}
+            ${when(guvenli(n.url), () => html`<a class="btn btn--sm btn--ghost" href="${n.url}" target="_blank" rel="noopener noreferrer">Tarayıcıda</a>`)}
+          </div>`)}</div>
+          ${when(seg.length, () => html`<div class="stack-xs">${map(seg.slice(0, 8), y => html`<div class="row-top gap-8">
+            <a class="seg-row__ts num" href="${R.Model.tsUrl(y.n, y.s.ts)}" target="_blank" rel="noopener">${R.Model.fmtTs(y.s.ts)}</a>
+            <span class="small">${y.s.text}</span></div>`)}</div>`)}</div>`
+        : html`<p class="small muted">Bu konuya bağlı video yok. «Video ekle» ile bir YouTube ya da başka bir ders bağlantısı koy;
+            Öğrenme’de gömülü açılır, izlerken zaman damgalı not alırsın, notlar burada anlatımın yanında durur.</p>` });
+  }
+
+  /* ÇIKMIŞ SORULAR (core/cikmis.js): konuya bağlı ÖSYM soru künyeleri.
+     Soru metni kopyalanmaz; resmî kitapçık bağlantısı ve soru numarası
+     durur, cevap burada girilir, anahtar varsa kodla ölçülür. */
+  const CIKMIS_DURUM = { bos:'cevaplanmadı', isaretlendi:'cevabın girildi · anahtar yok', dogru:'doğru · ölçüldü', yanlis:'yanlış · ölçüldü' };
+  function cikmisKarti(subject, topic){
+    if(!R.Cikmis) return null;
+    const l = R.Cikmis.konununki(topic.id), oz = R.Cikmis.ozet(topic.id);
+    return K.Card({ title:'Çıkmış sorular',
+      sub:l.length ? U.plural(l.length, 'soru', 'soru') + (oz.cevaplanan ? ' · ' + oz.dogru + ' doğru, ' + oz.yanlis + ' yanlış' : '') : 'resmî kitapçıktan çöz, cevabını burada gir',
+      actions:K.Button({ label:'Soru bağla', icon:'plus', size:'sm', tone:'ghost', act:'cikmis-ekle' }),
+      body:html`${l.length ? html`<div class="list list--sik">${map(l, k => {
+          const d = R.Cikmis.durum(k);
+          return html`<div class="${cls('listitem cikmis', 'is-' + d)}">
+            <span class="grow minw0"><span class="small strong">${R.Cikmis.kunye(k)}</span>
+              <span class="tiny dim">${CIKMIS_DURUM[d]}${k.cevap ? ' · cevabın ' + k.cevap.h : ''}${k.dogru && k.cevap ? ', anahtar ' + k.dogru : ''}${k.not ? ' · ' + k.not : ''}</span>
+              ${when(d === 'bos', () => html`<span class="row wrap gap-6 mt-6" role="group" aria-label="${R.Cikmis.kunye(k) + ' cevabın'}">${map(O().HARFLER, h =>
+                K.Button({ label:h, size:'sm', tone:'ghost', act:'cikmis-cevap', data:{ 'data-id':k.id, 'data-harf':h } }))}</span>`)}</span>
+            <span class="row wrap gap-6">
+              ${when(k.url, () => html`<a class="btn btn--sm btn--ghost" href="${k.url}" target="_blank" rel="noopener noreferrer">Kitapçık</a>`)}
+              ${when(d === 'yanlis', () => R.Cikmis.defterde(k) ? K.Chip('yanlış defterinde')
+                : K.Button({ label:'Yanlış defterine ekle', icon:'list', size:'sm', tone:'ghost', act:'cikmis-defter', data:{ 'data-id':k.id } }))}
+              ${when(!k.dogru, () => K.Button({ label:'Anahtarı gir', size:'sm', tone:'ghost', act:'cikmis-anahtar', data:{ 'data-id':k.id } }))}
+              ${K.Button({ label:'Kaldır', size:'sm', tone:'ghost', act:'cikmis-sil', data:{ 'data-id':k.id } })}
+            </span></div>`;
+        })}</div>` : html`<p class="small muted">Bu konudan çıkmış bir ÖSYM sorusunu bağla: sınav, yıl, soru numarası ve resmî kitapçığın bağlantısı.
+          Soruyu kitapçıktan çöz, harfini burada gir; cevap anahtarını girdiysen doğru ya da yanlış diye ölçülür.</p>`}
+        <div class="row between wrap gap-6 mt-10"><p class="tiny dim minw0">Soru metinleri ÖSYM’ye aittir ve uygulamaya kopyalanmaz;
+          resmî kitapçıklar ve cevap anahtarları ÖSYM’nin sitesinde yayımlanır.</p>
+          <a class="btn btn--sm btn--ghost" href="https://www.osym.gov.tr/" target="_blank" rel="noopener noreferrer">osym.gov.tr</a></div>`,
+    });
+  }
+
+  /* Paragraf konularında günlük paragrafın bu konudaki havuzu (core/paragraf.js). */
+  function parAnlatimKarti(topic){
+    const P_ = R.Paragraf;
+    if(!P_ || P_.KONULAR.indexOf(topic.id) < 0) return null;
+    const n = P_.konuSorulari(topic.id).length;
+    if(!n) return null;
+    const g = P_.gunu(), o = g ? P_.ozet() : null;
+    return K.Card({ title:'Günlük paragraf', sub:'bu konudan havuzda ' + n + ' soru',
+      body:html`<p class="small">Paragraf her gün çalışılan bir beceridir. Günlük paragraf her gün birkaç soru getirir;
+          bitince çözdüğün sayı Bugün’deki paragraf çıpasına yazılabilir.</p>
+        <div class="row wrap gap-6 mt-10">${K.Button({ label:o && o.bitti ? 'Bugünün seti bitti' : o && o.cevaplanan ? 'Sete devam et · ' + o.cevaplanan + '/' + o.toplam : 'Bugünün setini çöz',
+          icon:'book', size:'sm', tone:o && o.bitti ? 'ghost' : 'primary', act:'sorular-kip', data:{ 'data-tab':'paragraf' } })}</div>` });
   }
 
   /* KONUNUN MALZEMELERİ (BAM; brand/ortak/urun.js söz 6). «Konu anlatımı
@@ -84017,6 +85050,8 @@ R.Screens = R.Screens || {};
       return String(K.Grid([K.Span(12, K.Stack([
         raw(konuCubugu(x)),
         anlatimKarti(x),
+        parAnlatimKarti(x.topic),
+        cikmisKarti(x.subject, x.topic),
         notlarKarti(x.subject, x.topic),
         malzemeKarti(x.subject, x.topic),
       ]))]));
@@ -84039,6 +85074,93 @@ R.Screens = R.Screens || {};
         await R.OgrenYolu.okundu(x.subject.id, x.topic.id, false);
         UI.toast('«Okudum» işareti kaldırıldı');
         R.App.render();
+      },
+      async 'ogren-video-ekle'(){
+        const x = O().secili();
+        if(!x.topic) return;
+        UI.sheet({ title:'Konuya video ekle', subtitle:x.subject.name + ' · ' + x.topic.name,
+          body:String(K.Stack([
+            K.Field({ label:'Video bağlantısı', hint:'YouTube bağlantısı Öğrenme’de gömülü açılır',
+              input:K.Input({ id:'ov-url', placeholder:'https://www.youtube.com/watch?v=…' }) }),
+            K.Field({ label:'Başlık (isteğe bağlı)', input:K.Input({ id:'ov-title', placeholder:'ör. ' + x.topic.name + ' konu anlatımı' }) }),
+          ])),
+          footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+            ${K.Button({ label:'Ekle', tone:'primary', act:'ogren-video-kaydet' })}`) });
+      },
+      async 'ogren-video-kaydet'(){
+        const x = O().secili();
+        const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+        const url = val('ov-url');
+        if(!url || !R.Cikmis.baglanti(url)){ UI.toast('Bağlantı http:// ya da https:// ile başlamalı'); return; }
+        const note = R.Model.newVideoNote({ title:val('ov-title'), url, subjectId:x.subject.id, topicId:x.topic.id });
+        await R.Model.saveVideoNote(note);
+        UI.closeSheet();
+        UI.toast('Video konuya bağlandı · Öğrenme’de de görünür');
+        R.App.render();
+      },
+      async 'ogren-video-ac'(el){
+        S.ui.noteOpen = el.dataset.id;
+        R.App.go('learn');
+      },
+      /* Çıkmış sorular */
+      async 'cikmis-ekle'(){
+        const x = O().secili();
+        if(!x.topic) return;
+        const sinav = x.subject.id.indexOf('ayt') === 0 ? 'AYT' : 'TYT';
+        UI.sheet({ title:'Çıkmış soru bağla', subtitle:x.subject.name + ' · ' + x.topic.name,
+          body:String(K.Stack([
+            K.Cols(3, [
+              K.Field({ label:'Sınav', input:K.Select({ id:'ck-sinav', value:sinav, options:R.Cikmis.SINAVLAR.map(v => ({ value:v, label:v })) }) }),
+              K.Field({ label:'Yıl', input:K.Input({ id:'ck-yil', type:'number', min:1990, max:2100, placeholder:String(new Date().getFullYear() - 1) }) }),
+              K.Field({ label:'Soru no', input:K.Input({ id:'ck-no', type:'number', min:1, max:200, placeholder:'12' }) }),
+            ]),
+            K.Field({ label:'Test (isteğe bağlı)', input:K.Input({ id:'ck-test', placeholder:'ör. Temel Matematik' }) }),
+            K.Field({ label:'Resmî kitapçık bağlantısı (isteğe bağlı)', input:K.Input({ id:'ck-url', placeholder:'https://…' }) }),
+            K.Field({ label:'Cevap anahtarındaki harf (biliyorsan)', input:K.Select({ id:'ck-dogru', value:'',
+              options:[{ value:'', label:'— bilmiyorum —' }].concat(O().HARFLER.map(h => ({ value:h, label:h }))) }) }),
+            K.Field({ label:'Not (isteğe bağlı)', input:K.Input({ id:'ck-not', placeholder:'ör. şekilli soru, ikinci oturum' }) }),
+            K.Notice({ tone:'info', body:'Soru metni kopyalanmaz: soruyu kitapçıktan çözersin, harfini burada girersin.' }),
+          ])),
+          footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+            ${K.Button({ label:'Bağla', tone:'primary', act:'cikmis-kaydet' })}`) });
+      },
+      async 'cikmis-kaydet'(){
+        const x = O().secili();
+        const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+        const r = await R.Cikmis.ekle({ konu:x.topic && x.topic.id, sinav:val('ck-sinav'), yil:val('ck-yil'), soruNo:val('ck-no'),
+          test:val('ck-test'), url:val('ck-url'), dogru:val('ck-dogru') || null, not:val('ck-not') });
+        if(!r.ok){ UI.toast(r.neden); return; }
+        UI.closeSheet();
+        UI.toast('Bağlandı · ' + R.Cikmis.kunye(r.kayit));
+        R.App.render();
+      },
+      async 'cikmis-cevap'(el){
+        const r = await R.Cikmis.cevapla(el.dataset.id, el.dataset.harf);
+        if(r.ok) UI.toast(r.durum === 'dogru' ? 'Doğru · ölçüldü' : r.durum === 'yanlis' ? 'Yanlış · ölçüldü' : 'Cevabın girildi · anahtar girilince ölçülür');
+        R.App.render();
+      },
+      async 'cikmis-anahtar'(el){
+        const k = R.Cikmis.bul(el.dataset.id);
+        if(!k) return;
+        UI.sheet({ title:'Cevap anahtarı', subtitle:R.Cikmis.kunye(k),
+          body:String(html`<p class="small">Yayımlanmış cevap anahtarındaki harf:</p>
+            <div class="row wrap gap-6 mt-10">${map(O().HARFLER, h => K.Button({ label:h, act:'cikmis-anahtar-yaz', data:{ 'data-id':k.id, 'data-harf':h } }))}</div>`) });
+      },
+      async 'cikmis-anahtar-yaz'(el){
+        await R.Cikmis.anahtarYaz(el.dataset.id, el.dataset.harf);
+        UI.closeSheet();
+        R.App.render();
+      },
+      async 'cikmis-defter'(el){
+        const e = await R.Cikmis.deftereEkle(el.dataset.id);
+        UI.toast(e ? 'Yanlış defterine eklendi · kök nedenini orada yaz' : 'Eklenemedi');
+        R.App.render();
+      },
+      async 'cikmis-sil'(el){
+        const k = R.Cikmis.bul(el.dataset.id);
+        if(!k) return;
+        UI.confirmSheet('Kaldır', R.Cikmis.kunye(k) + ' bu konudan kaldırılsın mı? Yanlış defterine eklenmişse oradaki kayıt kalır.',
+          async () => { await R.Cikmis.sil(k.id); UI.closeSheet(); R.App.render(); }, true, 'Kaldır');
       },
       async 'ogren-not'(){
         const x = O().secili();
@@ -84090,6 +85212,10 @@ R.Screens = R.Screens || {};
   const durumOf = (q, v) => !v ? 'bos' : v.bak ? 'bakildi' : v.h === q.dogru ? 'dogru' : 'yanlis';
   const KAYNAK_AD = { konu:'konu sorusu', test:'karma test', tekrar:'yeniden çözüm' };
 
+  /* Sorunun ekrandaki adı: konu sorusu «Soru 3», günlük paragraf
+     havuzunun sorusu «Paragraf 14» (core/paragraf.js). */
+  function soruAdi(s){ return typeof s.i === 'string' ? 'Paragraf ' + Number(String(s.i).slice(1)) : 'Soru ' + (Number(s.i) + 1); }
+
   function soruNo(x){
     const l = O().sorular(x.topic.id);
     const i = Math.max(0, Math.min(l.length - 1, Number(S.ui.ogrenSoru) || 0));
@@ -84113,11 +85239,15 @@ R.Screens = R.Screens || {};
     })}</div>`;
   }
 
-  /* Paragraflı soruda son satır soru köküdür: paragraf ayrı, kök kalın. */
-  function soruMetni(metin){
+  /* Paragraflı soruda son satır soru köküdür: paragraf ayrı, kök kalın.
+     Şekil ve tablo (core/sekil.js) paragrafla kök arasına girer: sınav
+     kitapçığındaki gibi önce metin, sonra çizim, en son soru. ek: soru ya
+     da örnek nesnesi (sekil, tablo alanları). */
+  function soruMetni(metin, ek){
     const l = String(metin || '').split('\n');
     const kok = l.pop();
-    return html`${map(l, p => html`<p class="ogr-soru__parca">${fmt(p)}</p>`)}<p class="ogr-soru__metin">${l.length ? html`<b>${fmt(kok)}</b>` : fmt(kok)}</p>`;
+    const sekilli = !!(ek && (ek.sekil || ek.tablo));
+    return html`${map(l, p => html`<p class="ogr-soru__parca">${fmt(p)}</p>`)}${sekilHtml(ek)}<p class="ogr-soru__metin">${l.length || sekilli ? html`<b>${fmt(kok)}</b>` : fmt(kok)}</p>`;
   }
 
   /* Üç kipin ortak soru gövdesi. v: { h, bak, ip? } ya da null (cevapsız).
@@ -84142,7 +85272,7 @@ R.Screens = R.Screens || {};
       : d === 'dogru' ? 'Doğru' : 'Yanlış · senin cevabın ' + (v && v.h) + ', doğrusu ' + q.dogru) + (v && v.ip ? ' · ipucuyla' : '');
     return html`<div class="ogr-soru" aria-live="polite" data-raf-tam>
       <div class="row between gap-8 mb-6"><span class="ders__etiket tiny">${o.etiket}</span>${when(o.seviye, () => seviyeRozeti(o.seviye))}</div>
-      ${soruMetni(q.soru)}
+      ${soruMetni(q.soru, q)}
       ${when(q.ipucu && (ipAcik || (acik && v.ip)), () => html`<p class="ogr-ipucu small"><b>İpucu:</b> ${fmt(q.ipucu)}</p>`)}
       <div class="secenekler">${map(q.sec, secenek)}</div>
       ${when(!acik && (o.bakAct || (q.ipucu && o.ipucu && !ipAcik)), () => html`<div class="row wrap gap-6 mt-10">
@@ -84165,13 +85295,18 @@ R.Screens = R.Screens || {};
     const data = k ? { 'data-k':k } : {};
     const yanlis = !!(v && !v.bak && v.h && v.h !== s.q.dogru);
     const defterde = yanlis && O().deftere(s.subject.id, s.topic.id, s.i);
+    /* Hata bildirimi (core/ogrentest.js söz 6): kimlik her kipte aynı. */
+    const ak = k || (s.topic.id + '#' + s.i), isaret = T().isaretOf(ak);
     return html`
       ${K.Button({ label:'Koça sor', icon:'zap', size:'sm', tone:'ghost', act:'soru-koca', data })}
       ${K.Button({ label:'Karta çevir', icon:'cards', size:'sm', tone:'ghost', act:'soru-kart', data })}
       ${when(yanlis, () => defterde
         ? K.Chip('yanlış defterinde')
         : K.Button({ label:'Yanlış defterine ekle', icon:'list', size:'sm', tone:'ghost', act:'soru-defter',
-            data:Object.assign({ 'data-h':v.h }, data) }))}`;
+            data:Object.assign({ 'data-h':v.h }, data) }))}
+      ${isaret
+        ? html`${K.Chip('hata bildirdin')}${K.Button({ label:'Bildirimi geri al', size:'sm', tone:'ghost', act:'soru-isaret-kaldir', data:{ 'data-k':ak } })}`
+        : K.Button({ label:'Hata bildir', icon:'flag', size:'sm', tone:'ghost', act:'soru-isaret', data:{ 'data-k':ak } })}`;
   }
 
   /* ---------- Bu konu ---------- */
@@ -84333,7 +85468,7 @@ R.Screens = R.Screens || {};
       body:l.length ? html`<div class="stack-sm">
           <div>${K.Button({ label:'Sırayla çöz', icon:'right', tone:'primary', size:'sm', act:'tekrar-ac', data:{ 'data-k':enEski(l).k } })}</div>
           <div class="list list--sik" data-raf-tam>${map(l, y => html`<button class="listitem listitem--tap ogr-konu" data-act="tekrar-ac" data-k="${y.k}">
-            <span class="ogr-konu__no num" aria-hidden="true">${y.i + 1}</span>
+            <span class="ogr-konu__no num" aria-hidden="true">${typeof y.i === 'string' ? 'P' : y.i + 1}</span>
             <span class="grow minw0"><span class="small strong ogr-konu__ad">${y.topic.name}</span>
               <span class="tiny ogr-konu__ad">${kisaSoru(y.q)}</span>
               <span class="tiny dim">${y.subject.name} · ${y.son.bak ? 'çözüme bakıldı' : 'cevabın ' + y.son.h} · ${KAYNAK_AD[y.son.kaynak]} · ${tarihAdi(y.son.at)}</span></span>
@@ -84352,7 +85487,7 @@ R.Screens = R.Screens || {};
     return K.Card({ wide:true,
       body:html`${kartBasi('Yeniden çöz', s.subject.name + ' · ' + s.topic.name + (kalan.length ? ' · ' + kalan.length + ' yanlış daha' : ''),
           K.Button({ label:'Listeye dön', size:'sm', tone:'ghost', act:'tekrar-kapat' }))}
-        ${soruGovdesi(s.q, v, { etiket:'Soru ' + (s.i + 1), seviye:O().seviye(s.topic.id, s.i), ipucu:'tekrar:' + s.k, cevapAct:'tekrar-cevap',
+        ${soruGovdesi(s.q, v, { etiket:soruAdi(s), seviye:O().seviye(s.topic.id, s.i), ipucu:'tekrar:' + s.k, cevapAct:'tekrar-cevap',
           ust:v && v.h === s.q.dogru ? html`<p class="tiny dim mt-6">Doğru çözdün: Yanlışlarım’dan düştü.</p>` : '',
           eylemler:soruEylemleri(s, v, s.k) })}
         ${when(v, () => html`<div class="row between wrap gap-6 mt-16">
@@ -84363,19 +85498,89 @@ R.Screens = R.Screens || {};
         </div>`)}` });
   }
 
-  function yanlisKip(){ return [S.ui.ogrTekrar ? tekrarKarti() : yanlisListesi()]; }
+  /* Bildirdiğin hatalar: işaretli sorular, notlarıyla; liste kopyalanıp
+     iletilebilir. Cevap anahtarı değişmez (core/ogrentest.js söz 6). */
+  function isaretKarti(){
+    const l = T().isaretliler();
+    if(!l.length) return '';
+    return K.Card({ title:'Bildirdiğin hatalar', wide:true,
+      sub:U.plural(l.length, 'soru', 'soru') + ' · karma testten çıkarıldı',
+      actions:K.Button({ label:'Listeyi kopyala', icon:'file', size:'sm', tone:'ghost', act:'isaret-kopyala' }),
+      body:html`<div class="list list--sik" data-raf-tam>${map(l, y => html`<div class="listitem ogr-konu">
+          <span class="grow minw0"><span class="small strong ogr-konu__ad">${y.topic.name}</span>
+            <span class="tiny ogr-konu__ad">${kisaSoru(y.q)}</span>
+            <span class="tiny dim">${y.subject.name} · ${tarihAdi(y.isaret.at)}${y.isaret.not ? ' · «' + y.isaret.not + '»' : ''}</span></span>
+          ${K.Button({ label:'Aç', size:'sm', tone:'ghost', act:'tekrar-ac', data:{ 'data-k':y.k } })}
+          ${K.Button({ label:'Kaldır', size:'sm', tone:'ghost', act:'soru-isaret-kaldir', data:{ 'data-k':y.k } })}</div>`)}</div>
+        <p class="tiny dim">Uygulamadaki cevap değişmez; soru düzeltilip yenilenince bildirimin kendiliğinden kapanır.</p>` });
+  }
+
+  function yanlisKip(){ return [S.ui.ogrTekrar ? tekrarKarti() : yanlisListesi(), isaretKarti()]; }
+
+  /* ---------- Günlük paragraf (core/paragraf.js) ----------
+     Paragraf çıpasının uygulama içindeki hâli: günün seti kodla seçilir,
+     ilk cevap kilitlidir; set bitince çözülen sayı kullanıcının dokunuşuyla
+     katalogdaki 'paragraf-yaz' eylemiyle gün kaydına yazılır. */
+  const P = () => R.Paragraf;
+  function parKarti(){
+    const g = P() && P().gunu();
+    const l = g ? g.sorular.map(id => P().bul(id)).filter(Boolean) : [];
+    if(!l.length){
+      return K.Card({ wide:true, body:html`${kartBasi('Günlük paragraf')}${K.Empty({ icon:'book', text:'Paragraf havuzu henüz boş.' })}` });
+    }
+    const i = Math.max(0, Math.min(l.length - 1, Number(S.ui.parSira) || 0));
+    const q = l[i], v = g.cevaplar[q.id] || null, o = P().ozet(), du = P().durum(), yazim = P().yazim();
+    const x = O().konuyuBul(q.konu), ak = P().anahtar(q);
+    const day = S.days[U.todayISO()];
+    const cipa = day && Number(day.paragraphTarget) > 0
+      ? 'Bugünün paragraf çıpası: ' + (Number(day.paragraphActual) || 0) + ' / ' + day.paragraphTarget : null;
+    const sonMu = i === l.length - 1;
+    return K.Card({ wide:true,
+      body:html`
+        ${kartBasi('Günlük paragraf', (o.cevaplanan ? o.dogru + ' / ' + o.toplam + ' doğru · ölçüldü' : o.toplam + ' soru · ilk cevabın sayılır')
+          + (cipa ? ' · ' + cipa : ''))}
+        ${when(!o.cevaplanan && !yazim, () => html`<div class="row wrap gap-6 mb-10" role="group" aria-label="Günlük soru sayısı">
+          <span class="tiny dim">Günde</span>
+          ${map(P().BOYLAR, n => K.Button({ label:n + ' soru', size:'sm', tone:n === du.boy ? 'primary' : 'ghost', act:'par-boy',
+            data:{ 'data-n':String(n), 'aria-pressed':n === du.boy ? 'true' : 'false' } }))}</div>`)}
+        ${noktalar(l.length, i, k => durumOf(l[k], g.cevaplar[l[k].id]), 'par-git')}
+        ${soruGovdesi(q, v, { etiket:'Paragraf ' + (i + 1) + ' / ' + l.length + ' · ' + (x.topic ? x.topic.name : ''), seviye:q.seviye || 'orta',
+          ipucu:'par:' + q.id, cevapAct:'par-cevap', bakAct:'par-bak',
+          eylemler:x.topic ? soruEylemleri({ subject:x.subject, topic:x.topic, i:q.id, q }, v, ak) : '' })}
+        <div class="row between wrap gap-6 mt-16">
+          ${i > 0 ? K.Button({ label:'Önceki', icon:'left', size:'sm', tone:'ghost', act:'par-git', data:{ 'data-i':String(i - 1) } }) : html`<span></span>`}
+          ${!sonMu ? K.Button({ label:'Sonraki paragraf', icon:'right', size:'sm', tone:v ? 'primary' : null, act:'par-git', data:{ 'data-i':String(i + 1) } }) : html`<span></span>`}
+        </div>
+        ${when(o.bitti, () => html`<div class="ogr-sonuc is-${o.yanlis || o.bakildi ? 'yanlis' : 'dogru'} mt-16">
+          <p class="small"><b>Bugünün seti bitti: ${o.dogru} / ${o.toplam} doğru</b>${o.bakildi ? ' · ' + o.bakildi + ' sorunun çözümüne bakıldı' : ''} · ölçüldü</p>
+          ${yazim
+            ? html`<div class="row wrap gap-6 mt-10">${K.Chip('gün kaydına yazıldı · +' + yazim.n)}</div>
+                <p class="tiny dim mt-6">Geri almak istersen Onaylar’dan geri alabilirsin.</p>`
+            : o.cozulen
+              ? html`<div class="row wrap gap-6 mt-10">${K.Button({ label:'Günün paragraf sayısına ekle (+' + o.cozulen + ')', icon:'plus',
+                  size:'sm', tone:'primary', act:'par-yaz' })}</div>
+                <p class="tiny dim mt-6">Bugün’deki paragraf çıpasına yazılır; Onaylar’dan geri alınabilir. Çözümüne baktığın sorular sayılmaz.</p>`
+              : html`<p class="tiny dim mt-6">Bütün soruların çözümüne bakıldı; gün kaydına yazılacak çözülmüş soru yok.</p>`}
+        </div>`)}
+        <p class="tiny dim mt-12">Havuzda ${du.toplam} paragraf sorusu var; ${du.yeni} tanesi henüz sana gelmedi. Set her gün kodla seçilir:
+          önce iki gün önce yanlış yaptıkların, sonra yeniler. Sorular elle yazıldı, doğrulanmadı; hiçbir plan ya da kapanış bu cevaplara bakmaz.</p>`,
+    });
+  }
+  function parKip(){ return [parKarti()]; }
 
   /* ---------- ekran ---------- */
 
   function kipSekmeleri(kip){
     const a = T().aktif(), n = T().yanlislar().length;
+    const po = P() && P().gunu() ? P().ozet() : null;
     return K.Subtabs({ act:'sorular-kip', value:kip, aria:'Soru kipi', items:[
       { id:'konu', label:'Bu konu' },
+      { id:'paragraf', label:'Günlük paragraf', count:po && po.toplam ? po.cevaplanan + '/' + po.toplam : null },
       { id:'karma', label:'Karma test', count:a ? T().say(a).cevaplanan + '/' + a.sorular.length : null },
       { id:'yanlis', label:'Yanlışlarım', count:n || null },
     ] });
   }
-  const kipOf = () => ['konu', 'karma', 'yanlis'].indexOf(S.ui.ogrenKip) >= 0 ? S.ui.ogrenKip : 'konu';
+  const kipOf = () => ['konu', 'paragraf', 'karma', 'yanlis'].indexOf(S.ui.ogrenKip) >= 0 ? S.ui.ogrenKip : 'konu';
 
   /* Bir sorunun kimliği: data-k varsa o (karma, yeniden çözüm), yoksa
      bu konunun ekrandaki sorusu. */
@@ -84395,6 +85600,7 @@ R.Screens = R.Screens || {};
       const kip = kipOf();
       if(kip === 'karma') return 'Konular karışık; sonuç konu konu';
       if(kip === 'yanlis') return 'Yanlış çözdüklerini yeniden çöz';
+      if(kip === 'paragraf') return 'Her gün birkaç paragraf; bitince gün kaydına';
       const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Örnek sorular';
     },
     actions(){ return ''; },
@@ -84403,6 +85609,10 @@ R.Screens = R.Screens || {};
       const sekme = raw(kipSekmeleri(kip));
       if(kip === 'karma') return String(K.Grid([K.Span(12, K.Stack([sekme].concat(karmaKip())))]));
       if(kip === 'yanlis') return String(K.Grid([K.Span(12, K.Stack([sekme].concat(yanlisKip())))]));
+      if(kip === 'paragraf'){
+        if(P()) await P().hazirla();
+        return String(K.Grid([K.Span(12, K.Stack([raw(kipSekmeleri(kip))].concat(parKip())))]));
+      }
       const x = await hazirla();
       if(!x.topic) return String(K.Card({ body:K.Empty({ icon:'search', text:'Konu yok.' }) }));
       return String(K.Grid([K.Span(12, K.Stack([sekme, raw(konuCubugu(x)), soruKarti(x)]))]));
@@ -84432,7 +85642,8 @@ R.Screens = R.Screens || {};
         if(!r) return;
         const d = O().duzMetin, q = r.q;
         await O().sec(r.subject.id, r.topic.id);
-        S.ui.kocParca = { etiket:'Soru ' + (r.i + 1), metin:d(q.soru) + '\n' + q.sec.map((m, k) => O().HARFLER[k] + ') ' + d(m)).join('\n')
+        S.ui.kocParca = { etiket:soruAdi(r), metin:d(q.soru) + (O().ekMetni(q) ? '\n' + O().ekMetni(q) : '') + '\n'
+          + q.sec.map((m, k) => O().HARFLER[k] + ') ' + d(m)).join('\n')
           + '\nDoğru cevap: ' + q.dogru + '\nUygulamadaki çözüm: ' + dizi(q.cozum).map(d).join(' ') };
         S.ui.kocTaslak = 'Bu sorunun çözümünü anlamadım; adım adım, başka bir yoldan anlat.';
         R.App.go('koc');
@@ -84443,6 +85654,39 @@ R.Screens = R.Screens || {};
         const card = R.Model.newCard({ front:y.front, back:y.back, subjectId:r.subject.id, topic:r.topic.name, source:'ogren' });
         await R.Model.saveCard(card);
         UI.toast('Karta çevrildi · Tekrar’da sorar');
+      },
+      async 'soru-isaret'(el){
+        const k = el.dataset.k, s = k && T().soruOf(k);
+        if(!s) return;
+        UI.sheet({ title:'Bu soruda hata var', subtitle:s.subject.name + ' · ' + s.topic.name,
+          body:String(K.Stack([
+            K.Field({ label:'Ne yanlış? (isteğe bağlı)', input:K.Textarea({ id:'isaret-not', rows:3,
+              placeholder:'ör. B de doğru; çözümde 2. adım hatalı; şekil soruyla uyuşmuyor' }) }),
+            K.Notice({ tone:'info', body:'Uygulamadaki cevap değişmez. Soru karma testten çıkar ve Yanlışlarım’ın altında '
+              + '«Bildirdiğin hatalar»da durur; oradan listeyi kopyalayıp iletebilirsin.' }),
+          ])),
+          footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+            ${K.Button({ label:'Bildir', tone:'primary', act:'soru-isaret-kaydet', data:{ 'data-k':k } })}`) });
+      },
+      async 'soru-isaret-kaydet'(el){
+        const n = document.getElementById('isaret-not');
+        const r = await T().isaretle(el.dataset.k, n ? n.value : '');
+        UI.closeSheet();
+        UI.toast(r.ok ? 'Bildirildi · soru karma testten çıktı' : 'Bildirilemedi');
+        R.App.render();
+      },
+      async 'soru-isaret-kaldir'(el){
+        await T().isaretKaldir(el.dataset.k);
+        UI.toast('Bildirim geri alındı');
+        R.App.render();
+      },
+      async 'isaret-kopyala'(){
+        const metin = T().isaretMetni();
+        let ok = false;
+        try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(metin); ok = true; } }catch(e){ ok = false; }
+        if(ok){ UI.toast('Liste kopyalandı'); return; }
+        UI.sheet({ title:'Bildirdiğin hatalar', subtitle:'Kopyalanamadı; metni seçip kopyala',
+          body:String(K.Textarea({ id:'isaret-metin', rows:12, value:metin })) });
       },
       async 'soru-defter'(el){
         const r = soruRef(el);
@@ -84470,6 +85714,25 @@ R.Screens = R.Screens || {};
         R.App.render();
       },
       async 'test-bak'(){ const y = T().siradaki(); if(y) await T().bak(y.sira); R.App.render(); },
+      /* Günlük paragraf */
+      async 'par-ac'(){ S.ui.ogrenKip = 'paragraf'; S.ui.ogrTekrar = null; R.App.render(); },
+      async 'par-git'(el){ S.ui.parSira = Number(el.dataset.i) || 0; R.App.render(); },
+      async 'par-cevap'(el){
+        const g = P().gunu(), i = Math.max(0, Number(S.ui.parSira) || 0), id = g && g.sorular[i];
+        if(id) await P().cevapla(id, el.dataset.harf, S.ui.ipucu === 'par:' + id);
+        R.App.render();
+      },
+      async 'par-bak'(){
+        const g = P().gunu(), id = g && g.sorular[Math.max(0, Number(S.ui.parSira) || 0)];
+        if(id) await P().bak(id);
+        R.App.render();
+      },
+      async 'par-boy'(el){ await P().boyAyarla(Number(el.dataset.n)); S.ui.parSira = 0; R.App.render(); },
+      async 'par-yaz'(){
+        const r = await P().gunKaydinaYaz();
+        UI.toast(r.ok ? 'Bugünün paragraf sayısına +' + r.n + ' yazıldı · Onaylar’dan geri alınabilir' : r.why);
+        R.App.render();
+      },
       async 'karma-bitir'(){
         const a = T().aktif();
         if(!a) return;

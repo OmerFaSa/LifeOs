@@ -27,6 +27,8 @@ R.Screens = R.Screens || {};
   /* Metindeki küçük işaretler (**kalın**, x^{2}, H_{2}O; iç içe olabilir)
      tek ayrıştırıcıdan geçer: core/ogren.js metinHtml. */
   const fmt = s => raw(O().metinHtml(s));
+  /* Şekil ve tablo (core/sekil.js): tarif yoksa boş. */
+  const sekilHtml = x => x && (x.sekil || x.tablo) && R.Sekil ? raw(R.Sekil.svg(x.sekil) + R.Sekil.tablo(x.tablo)) : '';
   const dizi = x => x == null ? [] : Array.isArray(x) ? x : [x];
   const kisaAd = s => s.name;
 
@@ -116,6 +118,11 @@ R.Screens = R.Screens || {};
       action:K.Button({ label:son ? 'Devam et' : 'Başla', tone:'primary', size:'sm', act:'ogren-git',
         data:{ 'data-route':s ? s.route : 'anlatim', 'data-subject':hedef.subject.id, 'data-topic':hedef.topic.id } }) })}
       <div class="row wrap gap-6 mt-10">
+        ${when(R.Paragraf && R.Paragraf.HAVUZ.length, () => {
+          const g = R.Paragraf.gunu(), o = g ? R.Paragraf.ozet() : null;
+          return K.Button({ label:'Günlük paragraf' + (o ? ' · ' + o.cevaplanan + '/' + o.toplam : ''), icon:'book', size:'sm', tone:'ghost',
+            act:'sorular-kip', data:{ 'data-tab':'paragraf' } });
+        })}
         ${K.Button({ label:a ? 'Karma teste dön' : 'Karma test', icon:'zap', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'karma' } })}
         ${when(y, () => K.Button({ label:'Yanlışlarım · ' + y, icon:'list', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'yanlis' } }))}
       </div></div>`;
@@ -214,7 +221,7 @@ R.Screens = R.Screens || {};
   function ornekHtml(o){
     return html`<div class="ders__ornek">
       <div class="ders__etiket tiny">Örnek</div>
-      <p>${fmt(o.soru)}</p>
+      ${soruMetni(o.soru, o)}
       <div class="ders__etiket tiny mt-10">Çözüm</div>
       <ol class="ders__adimlar">${map(dizi(o.cozum), c => html`<li>${fmt(c)}</li>`)}</ol>
     </div>`;
@@ -248,7 +255,7 @@ R.Screens = R.Screens || {};
       <p class="small dim">Önce kâğıtta kendin dene; takılınca çözümü aç.</p>
       ${map(d.ornekler, (o, i) => html`<div class="ders__ornek">
         <div class="row between gap-8 mb-6"><span class="ders__etiket tiny">Örnek ${i + 1}</span>${seviyeRozeti(o.seviye)}</div>
-        ${soruMetni(o.soru)}
+        ${soruMetni(o.soru, o)}
         <details class="ders__cozum"><summary>Çözümü göster</summary>
           <ol class="ders__adimlar">${map(dizi(o.cozum), c => html`<li>${fmt(c)}</li>`)}</ol>
         </details>
@@ -270,6 +277,7 @@ R.Screens = R.Screens || {};
       ${map(a.bolumler, (b, i) => html`<section class="ders__bolum" id="${'ders-b' + (i + 1)}">
         <h3 class="ders__baslik"><span class="ders__no num" aria-hidden="true">${i + 1}</span>${b.baslik}</h3>
         ${map(dizi(b.metin), p => html`<p>${fmt(p)}</p>`)}
+        ${sekilHtml(b)}
         ${when(b.liste, () => html`<ul class="ders__liste">${map(b.liste, m => html`<li>${fmt(m)}</li>`)}</ul>`)}
         ${when(b.formul, () => html`<div class="ders__formul">${map(b.formul, f => html`<div>${fmt(f)}</div>`)}</div>`)}
         ${when(b.ornek, () => ornekHtml(b.ornek))}
@@ -345,18 +353,82 @@ R.Screens = R.Screens || {};
     });
   }
 
-  /* Bu konuya bağlı kendi ders notların (screens/learn.js'in kaydı). */
+  /* VİDEOLAR VE NOTLAR — bu konuya bağlı dersler (screens/learn.js'in
+     kaydı, S.videoNotes). Kullanıcı (2026-10-10): «o konuya video URL'si
+     koyabilelim». Video burada bağlanır, Öğrenme'de gömülü oynatıcıyla
+     açılır ve zaman damgalı notlar orada alınır; ikinci bir video kaydı
+     kurulmaz. Bağlantı yalnız http(s) olabilir (core/cikmis.js baglanti). */
+  function videoAdi(n){
+    if(n.title) return n.title;
+    try{ return new URL(n.url).hostname.replace(/^www\./, ''); }catch(e){ return 'Video'; }
+  }
   function notlarKarti(subject, topic){
     const notlar = (S.videoNotes || []).filter(n => n.subjectId === subject.id && n.topicId === topic.id);
     const seg = [];
     notlar.forEach(n => (n.segments || []).forEach(s => seg.push({ n, s })));
-    return K.Card({ title:'Senin notların',
-      sub:seg.length ? U.plural(seg.length, 'not', 'not') + ' · ' + notlar.length + ' ders' : null,
-      actions:K.Button({ label:'Ders notu ekle', icon:'plus', size:'sm', tone:'ghost', act:'ogren-not' }),
-      body:seg.length ? html`<div class="stack-xs">${map(seg.slice(0, 8), y => html`<div class="row-top gap-8">
-          <a class="seg-row__ts num" href="${R.Model.tsUrl(y.n, y.s.ts)}" target="_blank" rel="noopener">${R.Model.fmtTs(y.s.ts)}</a>
-          <span class="small">${y.s.text}</span></div>`)}</div>`
-        : html`<p class="small muted">Bu konuya bağlı ders notun yok. Bir ders izlerken zaman damgalı not alırsan burada, anlatımın yanında durur.</p>` });
+    const guvenli = u => R.Cikmis && R.Cikmis.baglanti(u) ? u : null;
+    return K.Card({ title:'Videolar ve notların',
+      sub:notlar.length ? U.plural(notlar.length, 'video', 'video') + (seg.length ? ' · ' + U.plural(seg.length, 'not', 'not') : '') : null,
+      actions:html`${K.Button({ label:'Video ekle', icon:'play', size:'sm', tone:'ghost', act:'ogren-video-ekle' })}
+        ${K.Button({ label:'Ders notu ekle', icon:'plus', size:'sm', tone:'ghost', act:'ogren-not' })}`,
+      body:notlar.length ? html`<div class="stack-sm">
+          <div class="list list--sik">${map(notlar, n => html`<div class="listitem">
+            <span class="grow minw0"><span class="small strong">${videoAdi(n)}</span>
+              <span class="tiny dim">${n.provider === 'youtube' ? 'YouTube · uygulamada açılır' : 'bağlantı'}${(n.segments || []).length ? ' · ' + n.segments.length + ' not' : ''}</span></span>
+            ${K.Button({ label:'Aç', icon:'play', size:'sm', tone:'ghost', act:'ogren-video-ac', data:{ 'data-id':n.id } })}
+            ${when(guvenli(n.url), () => html`<a class="btn btn--sm btn--ghost" href="${n.url}" target="_blank" rel="noopener noreferrer">Tarayıcıda</a>`)}
+          </div>`)}</div>
+          ${when(seg.length, () => html`<div class="stack-xs">${map(seg.slice(0, 8), y => html`<div class="row-top gap-8">
+            <a class="seg-row__ts num" href="${R.Model.tsUrl(y.n, y.s.ts)}" target="_blank" rel="noopener">${R.Model.fmtTs(y.s.ts)}</a>
+            <span class="small">${y.s.text}</span></div>`)}</div>`)}</div>`
+        : html`<p class="small muted">Bu konuya bağlı video yok. «Video ekle» ile bir YouTube ya da başka bir ders bağlantısı koy;
+            Öğrenme’de gömülü açılır, izlerken zaman damgalı not alırsın, notlar burada anlatımın yanında durur.</p>` });
+  }
+
+  /* ÇIKMIŞ SORULAR (core/cikmis.js): konuya bağlı ÖSYM soru künyeleri.
+     Soru metni kopyalanmaz; resmî kitapçık bağlantısı ve soru numarası
+     durur, cevap burada girilir, anahtar varsa kodla ölçülür. */
+  const CIKMIS_DURUM = { bos:'cevaplanmadı', isaretlendi:'cevabın girildi · anahtar yok', dogru:'doğru · ölçüldü', yanlis:'yanlış · ölçüldü' };
+  function cikmisKarti(subject, topic){
+    if(!R.Cikmis) return null;
+    const l = R.Cikmis.konununki(topic.id), oz = R.Cikmis.ozet(topic.id);
+    return K.Card({ title:'Çıkmış sorular',
+      sub:l.length ? U.plural(l.length, 'soru', 'soru') + (oz.cevaplanan ? ' · ' + oz.dogru + ' doğru, ' + oz.yanlis + ' yanlış' : '') : 'resmî kitapçıktan çöz, cevabını burada gir',
+      actions:K.Button({ label:'Soru bağla', icon:'plus', size:'sm', tone:'ghost', act:'cikmis-ekle' }),
+      body:html`${l.length ? html`<div class="list list--sik">${map(l, k => {
+          const d = R.Cikmis.durum(k);
+          return html`<div class="${cls('listitem cikmis', 'is-' + d)}">
+            <span class="grow minw0"><span class="small strong">${R.Cikmis.kunye(k)}</span>
+              <span class="tiny dim">${CIKMIS_DURUM[d]}${k.cevap ? ' · cevabın ' + k.cevap.h : ''}${k.dogru && k.cevap ? ', anahtar ' + k.dogru : ''}${k.not ? ' · ' + k.not : ''}</span>
+              ${when(d === 'bos', () => html`<span class="row wrap gap-6 mt-6" role="group" aria-label="${R.Cikmis.kunye(k) + ' cevabın'}">${map(O().HARFLER, h =>
+                K.Button({ label:h, size:'sm', tone:'ghost', act:'cikmis-cevap', data:{ 'data-id':k.id, 'data-harf':h } }))}</span>`)}</span>
+            <span class="row wrap gap-6">
+              ${when(k.url, () => html`<a class="btn btn--sm btn--ghost" href="${k.url}" target="_blank" rel="noopener noreferrer">Kitapçık</a>`)}
+              ${when(d === 'yanlis', () => R.Cikmis.defterde(k) ? K.Chip('yanlış defterinde')
+                : K.Button({ label:'Yanlış defterine ekle', icon:'list', size:'sm', tone:'ghost', act:'cikmis-defter', data:{ 'data-id':k.id } }))}
+              ${when(!k.dogru, () => K.Button({ label:'Anahtarı gir', size:'sm', tone:'ghost', act:'cikmis-anahtar', data:{ 'data-id':k.id } }))}
+              ${K.Button({ label:'Kaldır', size:'sm', tone:'ghost', act:'cikmis-sil', data:{ 'data-id':k.id } })}
+            </span></div>`;
+        })}</div>` : html`<p class="small muted">Bu konudan çıkmış bir ÖSYM sorusunu bağla: sınav, yıl, soru numarası ve resmî kitapçığın bağlantısı.
+          Soruyu kitapçıktan çöz, harfini burada gir; cevap anahtarını girdiysen doğru ya da yanlış diye ölçülür.</p>`}
+        <div class="row between wrap gap-6 mt-10"><p class="tiny dim minw0">Soru metinleri ÖSYM’ye aittir ve uygulamaya kopyalanmaz;
+          resmî kitapçıklar ve cevap anahtarları ÖSYM’nin sitesinde yayımlanır.</p>
+          <a class="btn btn--sm btn--ghost" href="https://www.osym.gov.tr/" target="_blank" rel="noopener noreferrer">osym.gov.tr</a></div>`,
+    });
+  }
+
+  /* Paragraf konularında günlük paragrafın bu konudaki havuzu (core/paragraf.js). */
+  function parAnlatimKarti(topic){
+    const P_ = R.Paragraf;
+    if(!P_ || P_.KONULAR.indexOf(topic.id) < 0) return null;
+    const n = P_.konuSorulari(topic.id).length;
+    if(!n) return null;
+    const g = P_.gunu(), o = g ? P_.ozet() : null;
+    return K.Card({ title:'Günlük paragraf', sub:'bu konudan havuzda ' + n + ' soru',
+      body:html`<p class="small">Paragraf her gün çalışılan bir beceridir. Günlük paragraf her gün birkaç soru getirir;
+          bitince çözdüğün sayı Bugün’deki paragraf çıpasına yazılabilir.</p>
+        <div class="row wrap gap-6 mt-10">${K.Button({ label:o && o.bitti ? 'Bugünün seti bitti' : o && o.cevaplanan ? 'Sete devam et · ' + o.cevaplanan + '/' + o.toplam : 'Bugünün setini çöz',
+          icon:'book', size:'sm', tone:o && o.bitti ? 'ghost' : 'primary', act:'sorular-kip', data:{ 'data-tab':'paragraf' } })}</div>` });
   }
 
   /* KONUNUN MALZEMELERİ (BAM; brand/ortak/urun.js söz 6). «Konu anlatımı
@@ -409,6 +481,8 @@ R.Screens = R.Screens || {};
       return String(K.Grid([K.Span(12, K.Stack([
         raw(konuCubugu(x)),
         anlatimKarti(x),
+        parAnlatimKarti(x.topic),
+        cikmisKarti(x.subject, x.topic),
         notlarKarti(x.subject, x.topic),
         malzemeKarti(x.subject, x.topic),
       ]))]));
@@ -431,6 +505,93 @@ R.Screens = R.Screens || {};
         await R.OgrenYolu.okundu(x.subject.id, x.topic.id, false);
         UI.toast('«Okudum» işareti kaldırıldı');
         R.App.render();
+      },
+      async 'ogren-video-ekle'(){
+        const x = O().secili();
+        if(!x.topic) return;
+        UI.sheet({ title:'Konuya video ekle', subtitle:x.subject.name + ' · ' + x.topic.name,
+          body:String(K.Stack([
+            K.Field({ label:'Video bağlantısı', hint:'YouTube bağlantısı Öğrenme’de gömülü açılır',
+              input:K.Input({ id:'ov-url', placeholder:'https://www.youtube.com/watch?v=…' }) }),
+            K.Field({ label:'Başlık (isteğe bağlı)', input:K.Input({ id:'ov-title', placeholder:'ör. ' + x.topic.name + ' konu anlatımı' }) }),
+          ])),
+          footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+            ${K.Button({ label:'Ekle', tone:'primary', act:'ogren-video-kaydet' })}`) });
+      },
+      async 'ogren-video-kaydet'(){
+        const x = O().secili();
+        const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+        const url = val('ov-url');
+        if(!url || !R.Cikmis.baglanti(url)){ UI.toast('Bağlantı http:// ya da https:// ile başlamalı'); return; }
+        const note = R.Model.newVideoNote({ title:val('ov-title'), url, subjectId:x.subject.id, topicId:x.topic.id });
+        await R.Model.saveVideoNote(note);
+        UI.closeSheet();
+        UI.toast('Video konuya bağlandı · Öğrenme’de de görünür');
+        R.App.render();
+      },
+      async 'ogren-video-ac'(el){
+        S.ui.noteOpen = el.dataset.id;
+        R.App.go('learn');
+      },
+      /* Çıkmış sorular */
+      async 'cikmis-ekle'(){
+        const x = O().secili();
+        if(!x.topic) return;
+        const sinav = x.subject.id.indexOf('ayt') === 0 ? 'AYT' : 'TYT';
+        UI.sheet({ title:'Çıkmış soru bağla', subtitle:x.subject.name + ' · ' + x.topic.name,
+          body:String(K.Stack([
+            K.Cols(3, [
+              K.Field({ label:'Sınav', input:K.Select({ id:'ck-sinav', value:sinav, options:R.Cikmis.SINAVLAR.map(v => ({ value:v, label:v })) }) }),
+              K.Field({ label:'Yıl', input:K.Input({ id:'ck-yil', type:'number', min:1990, max:2100, placeholder:String(new Date().getFullYear() - 1) }) }),
+              K.Field({ label:'Soru no', input:K.Input({ id:'ck-no', type:'number', min:1, max:200, placeholder:'12' }) }),
+            ]),
+            K.Field({ label:'Test (isteğe bağlı)', input:K.Input({ id:'ck-test', placeholder:'ör. Temel Matematik' }) }),
+            K.Field({ label:'Resmî kitapçık bağlantısı (isteğe bağlı)', input:K.Input({ id:'ck-url', placeholder:'https://…' }) }),
+            K.Field({ label:'Cevap anahtarındaki harf (biliyorsan)', input:K.Select({ id:'ck-dogru', value:'',
+              options:[{ value:'', label:'— bilmiyorum —' }].concat(O().HARFLER.map(h => ({ value:h, label:h }))) }) }),
+            K.Field({ label:'Not (isteğe bağlı)', input:K.Input({ id:'ck-not', placeholder:'ör. şekilli soru, ikinci oturum' }) }),
+            K.Notice({ tone:'info', body:'Soru metni kopyalanmaz: soruyu kitapçıktan çözersin, harfini burada girersin.' }),
+          ])),
+          footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+            ${K.Button({ label:'Bağla', tone:'primary', act:'cikmis-kaydet' })}`) });
+      },
+      async 'cikmis-kaydet'(){
+        const x = O().secili();
+        const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+        const r = await R.Cikmis.ekle({ konu:x.topic && x.topic.id, sinav:val('ck-sinav'), yil:val('ck-yil'), soruNo:val('ck-no'),
+          test:val('ck-test'), url:val('ck-url'), dogru:val('ck-dogru') || null, not:val('ck-not') });
+        if(!r.ok){ UI.toast(r.neden); return; }
+        UI.closeSheet();
+        UI.toast('Bağlandı · ' + R.Cikmis.kunye(r.kayit));
+        R.App.render();
+      },
+      async 'cikmis-cevap'(el){
+        const r = await R.Cikmis.cevapla(el.dataset.id, el.dataset.harf);
+        if(r.ok) UI.toast(r.durum === 'dogru' ? 'Doğru · ölçüldü' : r.durum === 'yanlis' ? 'Yanlış · ölçüldü' : 'Cevabın girildi · anahtar girilince ölçülür');
+        R.App.render();
+      },
+      async 'cikmis-anahtar'(el){
+        const k = R.Cikmis.bul(el.dataset.id);
+        if(!k) return;
+        UI.sheet({ title:'Cevap anahtarı', subtitle:R.Cikmis.kunye(k),
+          body:String(html`<p class="small">Yayımlanmış cevap anahtarındaki harf:</p>
+            <div class="row wrap gap-6 mt-10">${map(O().HARFLER, h => K.Button({ label:h, act:'cikmis-anahtar-yaz', data:{ 'data-id':k.id, 'data-harf':h } }))}</div>`) });
+      },
+      async 'cikmis-anahtar-yaz'(el){
+        await R.Cikmis.anahtarYaz(el.dataset.id, el.dataset.harf);
+        UI.closeSheet();
+        R.App.render();
+      },
+      async 'cikmis-defter'(el){
+        const e = await R.Cikmis.deftereEkle(el.dataset.id);
+        UI.toast(e ? 'Yanlış defterine eklendi · kök nedenini orada yaz' : 'Eklenemedi');
+        R.App.render();
+      },
+      async 'cikmis-sil'(el){
+        const k = R.Cikmis.bul(el.dataset.id);
+        if(!k) return;
+        UI.confirmSheet('Kaldır', R.Cikmis.kunye(k) + ' bu konudan kaldırılsın mı? Yanlış defterine eklenmişse oradaki kayıt kalır.',
+          async () => { await R.Cikmis.sil(k.id); UI.closeSheet(); R.App.render(); }, true, 'Kaldır');
       },
       async 'ogren-not'(){
         const x = O().secili();
@@ -482,6 +643,10 @@ R.Screens = R.Screens || {};
   const durumOf = (q, v) => !v ? 'bos' : v.bak ? 'bakildi' : v.h === q.dogru ? 'dogru' : 'yanlis';
   const KAYNAK_AD = { konu:'konu sorusu', test:'karma test', tekrar:'yeniden çözüm' };
 
+  /* Sorunun ekrandaki adı: konu sorusu «Soru 3», günlük paragraf
+     havuzunun sorusu «Paragraf 14» (core/paragraf.js). */
+  function soruAdi(s){ return typeof s.i === 'string' ? 'Paragraf ' + Number(String(s.i).slice(1)) : 'Soru ' + (Number(s.i) + 1); }
+
   function soruNo(x){
     const l = O().sorular(x.topic.id);
     const i = Math.max(0, Math.min(l.length - 1, Number(S.ui.ogrenSoru) || 0));
@@ -505,11 +670,15 @@ R.Screens = R.Screens || {};
     })}</div>`;
   }
 
-  /* Paragraflı soruda son satır soru köküdür: paragraf ayrı, kök kalın. */
-  function soruMetni(metin){
+  /* Paragraflı soruda son satır soru köküdür: paragraf ayrı, kök kalın.
+     Şekil ve tablo (core/sekil.js) paragrafla kök arasına girer: sınav
+     kitapçığındaki gibi önce metin, sonra çizim, en son soru. ek: soru ya
+     da örnek nesnesi (sekil, tablo alanları). */
+  function soruMetni(metin, ek){
     const l = String(metin || '').split('\n');
     const kok = l.pop();
-    return html`${map(l, p => html`<p class="ogr-soru__parca">${fmt(p)}</p>`)}<p class="ogr-soru__metin">${l.length ? html`<b>${fmt(kok)}</b>` : fmt(kok)}</p>`;
+    const sekilli = !!(ek && (ek.sekil || ek.tablo));
+    return html`${map(l, p => html`<p class="ogr-soru__parca">${fmt(p)}</p>`)}${sekilHtml(ek)}<p class="ogr-soru__metin">${l.length || sekilli ? html`<b>${fmt(kok)}</b>` : fmt(kok)}</p>`;
   }
 
   /* Üç kipin ortak soru gövdesi. v: { h, bak, ip? } ya da null (cevapsız).
@@ -534,7 +703,7 @@ R.Screens = R.Screens || {};
       : d === 'dogru' ? 'Doğru' : 'Yanlış · senin cevabın ' + (v && v.h) + ', doğrusu ' + q.dogru) + (v && v.ip ? ' · ipucuyla' : '');
     return html`<div class="ogr-soru" aria-live="polite" data-raf-tam>
       <div class="row between gap-8 mb-6"><span class="ders__etiket tiny">${o.etiket}</span>${when(o.seviye, () => seviyeRozeti(o.seviye))}</div>
-      ${soruMetni(q.soru)}
+      ${soruMetni(q.soru, q)}
       ${when(q.ipucu && (ipAcik || (acik && v.ip)), () => html`<p class="ogr-ipucu small"><b>İpucu:</b> ${fmt(q.ipucu)}</p>`)}
       <div class="secenekler">${map(q.sec, secenek)}</div>
       ${when(!acik && (o.bakAct || (q.ipucu && o.ipucu && !ipAcik)), () => html`<div class="row wrap gap-6 mt-10">
@@ -557,13 +726,18 @@ R.Screens = R.Screens || {};
     const data = k ? { 'data-k':k } : {};
     const yanlis = !!(v && !v.bak && v.h && v.h !== s.q.dogru);
     const defterde = yanlis && O().deftere(s.subject.id, s.topic.id, s.i);
+    /* Hata bildirimi (core/ogrentest.js söz 6): kimlik her kipte aynı. */
+    const ak = k || (s.topic.id + '#' + s.i), isaret = T().isaretOf(ak);
     return html`
       ${K.Button({ label:'Koça sor', icon:'zap', size:'sm', tone:'ghost', act:'soru-koca', data })}
       ${K.Button({ label:'Karta çevir', icon:'cards', size:'sm', tone:'ghost', act:'soru-kart', data })}
       ${when(yanlis, () => defterde
         ? K.Chip('yanlış defterinde')
         : K.Button({ label:'Yanlış defterine ekle', icon:'list', size:'sm', tone:'ghost', act:'soru-defter',
-            data:Object.assign({ 'data-h':v.h }, data) }))}`;
+            data:Object.assign({ 'data-h':v.h }, data) }))}
+      ${isaret
+        ? html`${K.Chip('hata bildirdin')}${K.Button({ label:'Bildirimi geri al', size:'sm', tone:'ghost', act:'soru-isaret-kaldir', data:{ 'data-k':ak } })}`
+        : K.Button({ label:'Hata bildir', icon:'flag', size:'sm', tone:'ghost', act:'soru-isaret', data:{ 'data-k':ak } })}`;
   }
 
   /* ---------- Bu konu ---------- */
@@ -725,7 +899,7 @@ R.Screens = R.Screens || {};
       body:l.length ? html`<div class="stack-sm">
           <div>${K.Button({ label:'Sırayla çöz', icon:'right', tone:'primary', size:'sm', act:'tekrar-ac', data:{ 'data-k':enEski(l).k } })}</div>
           <div class="list list--sik" data-raf-tam>${map(l, y => html`<button class="listitem listitem--tap ogr-konu" data-act="tekrar-ac" data-k="${y.k}">
-            <span class="ogr-konu__no num" aria-hidden="true">${y.i + 1}</span>
+            <span class="ogr-konu__no num" aria-hidden="true">${typeof y.i === 'string' ? 'P' : y.i + 1}</span>
             <span class="grow minw0"><span class="small strong ogr-konu__ad">${y.topic.name}</span>
               <span class="tiny ogr-konu__ad">${kisaSoru(y.q)}</span>
               <span class="tiny dim">${y.subject.name} · ${y.son.bak ? 'çözüme bakıldı' : 'cevabın ' + y.son.h} · ${KAYNAK_AD[y.son.kaynak]} · ${tarihAdi(y.son.at)}</span></span>
@@ -744,7 +918,7 @@ R.Screens = R.Screens || {};
     return K.Card({ wide:true,
       body:html`${kartBasi('Yeniden çöz', s.subject.name + ' · ' + s.topic.name + (kalan.length ? ' · ' + kalan.length + ' yanlış daha' : ''),
           K.Button({ label:'Listeye dön', size:'sm', tone:'ghost', act:'tekrar-kapat' }))}
-        ${soruGovdesi(s.q, v, { etiket:'Soru ' + (s.i + 1), seviye:O().seviye(s.topic.id, s.i), ipucu:'tekrar:' + s.k, cevapAct:'tekrar-cevap',
+        ${soruGovdesi(s.q, v, { etiket:soruAdi(s), seviye:O().seviye(s.topic.id, s.i), ipucu:'tekrar:' + s.k, cevapAct:'tekrar-cevap',
           ust:v && v.h === s.q.dogru ? html`<p class="tiny dim mt-6">Doğru çözdün: Yanlışlarım’dan düştü.</p>` : '',
           eylemler:soruEylemleri(s, v, s.k) })}
         ${when(v, () => html`<div class="row between wrap gap-6 mt-16">
@@ -755,19 +929,89 @@ R.Screens = R.Screens || {};
         </div>`)}` });
   }
 
-  function yanlisKip(){ return [S.ui.ogrTekrar ? tekrarKarti() : yanlisListesi()]; }
+  /* Bildirdiğin hatalar: işaretli sorular, notlarıyla; liste kopyalanıp
+     iletilebilir. Cevap anahtarı değişmez (core/ogrentest.js söz 6). */
+  function isaretKarti(){
+    const l = T().isaretliler();
+    if(!l.length) return '';
+    return K.Card({ title:'Bildirdiğin hatalar', wide:true,
+      sub:U.plural(l.length, 'soru', 'soru') + ' · karma testten çıkarıldı',
+      actions:K.Button({ label:'Listeyi kopyala', icon:'file', size:'sm', tone:'ghost', act:'isaret-kopyala' }),
+      body:html`<div class="list list--sik" data-raf-tam>${map(l, y => html`<div class="listitem ogr-konu">
+          <span class="grow minw0"><span class="small strong ogr-konu__ad">${y.topic.name}</span>
+            <span class="tiny ogr-konu__ad">${kisaSoru(y.q)}</span>
+            <span class="tiny dim">${y.subject.name} · ${tarihAdi(y.isaret.at)}${y.isaret.not ? ' · «' + y.isaret.not + '»' : ''}</span></span>
+          ${K.Button({ label:'Aç', size:'sm', tone:'ghost', act:'tekrar-ac', data:{ 'data-k':y.k } })}
+          ${K.Button({ label:'Kaldır', size:'sm', tone:'ghost', act:'soru-isaret-kaldir', data:{ 'data-k':y.k } })}</div>`)}</div>
+        <p class="tiny dim">Uygulamadaki cevap değişmez; soru düzeltilip yenilenince bildirimin kendiliğinden kapanır.</p>` });
+  }
+
+  function yanlisKip(){ return [S.ui.ogrTekrar ? tekrarKarti() : yanlisListesi(), isaretKarti()]; }
+
+  /* ---------- Günlük paragraf (core/paragraf.js) ----------
+     Paragraf çıpasının uygulama içindeki hâli: günün seti kodla seçilir,
+     ilk cevap kilitlidir; set bitince çözülen sayı kullanıcının dokunuşuyla
+     katalogdaki 'paragraf-yaz' eylemiyle gün kaydına yazılır. */
+  const P = () => R.Paragraf;
+  function parKarti(){
+    const g = P() && P().gunu();
+    const l = g ? g.sorular.map(id => P().bul(id)).filter(Boolean) : [];
+    if(!l.length){
+      return K.Card({ wide:true, body:html`${kartBasi('Günlük paragraf')}${K.Empty({ icon:'book', text:'Paragraf havuzu henüz boş.' })}` });
+    }
+    const i = Math.max(0, Math.min(l.length - 1, Number(S.ui.parSira) || 0));
+    const q = l[i], v = g.cevaplar[q.id] || null, o = P().ozet(), du = P().durum(), yazim = P().yazim();
+    const x = O().konuyuBul(q.konu), ak = P().anahtar(q);
+    const day = S.days[U.todayISO()];
+    const cipa = day && Number(day.paragraphTarget) > 0
+      ? 'Bugünün paragraf çıpası: ' + (Number(day.paragraphActual) || 0) + ' / ' + day.paragraphTarget : null;
+    const sonMu = i === l.length - 1;
+    return K.Card({ wide:true,
+      body:html`
+        ${kartBasi('Günlük paragraf', (o.cevaplanan ? o.dogru + ' / ' + o.toplam + ' doğru · ölçüldü' : o.toplam + ' soru · ilk cevabın sayılır')
+          + (cipa ? ' · ' + cipa : ''))}
+        ${when(!o.cevaplanan && !yazim, () => html`<div class="row wrap gap-6 mb-10" role="group" aria-label="Günlük soru sayısı">
+          <span class="tiny dim">Günde</span>
+          ${map(P().BOYLAR, n => K.Button({ label:n + ' soru', size:'sm', tone:n === du.boy ? 'primary' : 'ghost', act:'par-boy',
+            data:{ 'data-n':String(n), 'aria-pressed':n === du.boy ? 'true' : 'false' } }))}</div>`)}
+        ${noktalar(l.length, i, k => durumOf(l[k], g.cevaplar[l[k].id]), 'par-git')}
+        ${soruGovdesi(q, v, { etiket:'Paragraf ' + (i + 1) + ' / ' + l.length + ' · ' + (x.topic ? x.topic.name : ''), seviye:q.seviye || 'orta',
+          ipucu:'par:' + q.id, cevapAct:'par-cevap', bakAct:'par-bak',
+          eylemler:x.topic ? soruEylemleri({ subject:x.subject, topic:x.topic, i:q.id, q }, v, ak) : '' })}
+        <div class="row between wrap gap-6 mt-16">
+          ${i > 0 ? K.Button({ label:'Önceki', icon:'left', size:'sm', tone:'ghost', act:'par-git', data:{ 'data-i':String(i - 1) } }) : html`<span></span>`}
+          ${!sonMu ? K.Button({ label:'Sonraki paragraf', icon:'right', size:'sm', tone:v ? 'primary' : null, act:'par-git', data:{ 'data-i':String(i + 1) } }) : html`<span></span>`}
+        </div>
+        ${when(o.bitti, () => html`<div class="ogr-sonuc is-${o.yanlis || o.bakildi ? 'yanlis' : 'dogru'} mt-16">
+          <p class="small"><b>Bugünün seti bitti: ${o.dogru} / ${o.toplam} doğru</b>${o.bakildi ? ' · ' + o.bakildi + ' sorunun çözümüne bakıldı' : ''} · ölçüldü</p>
+          ${yazim
+            ? html`<div class="row wrap gap-6 mt-10">${K.Chip('gün kaydına yazıldı · +' + yazim.n)}</div>
+                <p class="tiny dim mt-6">Geri almak istersen Onaylar’dan geri alabilirsin.</p>`
+            : o.cozulen
+              ? html`<div class="row wrap gap-6 mt-10">${K.Button({ label:'Günün paragraf sayısına ekle (+' + o.cozulen + ')', icon:'plus',
+                  size:'sm', tone:'primary', act:'par-yaz' })}</div>
+                <p class="tiny dim mt-6">Bugün’deki paragraf çıpasına yazılır; Onaylar’dan geri alınabilir. Çözümüne baktığın sorular sayılmaz.</p>`
+              : html`<p class="tiny dim mt-6">Bütün soruların çözümüne bakıldı; gün kaydına yazılacak çözülmüş soru yok.</p>`}
+        </div>`)}
+        <p class="tiny dim mt-12">Havuzda ${du.toplam} paragraf sorusu var; ${du.yeni} tanesi henüz sana gelmedi. Set her gün kodla seçilir:
+          önce iki gün önce yanlış yaptıkların, sonra yeniler. Sorular elle yazıldı, doğrulanmadı; hiçbir plan ya da kapanış bu cevaplara bakmaz.</p>`,
+    });
+  }
+  function parKip(){ return [parKarti()]; }
 
   /* ---------- ekran ---------- */
 
   function kipSekmeleri(kip){
     const a = T().aktif(), n = T().yanlislar().length;
+    const po = P() && P().gunu() ? P().ozet() : null;
     return K.Subtabs({ act:'sorular-kip', value:kip, aria:'Soru kipi', items:[
       { id:'konu', label:'Bu konu' },
+      { id:'paragraf', label:'Günlük paragraf', count:po && po.toplam ? po.cevaplanan + '/' + po.toplam : null },
       { id:'karma', label:'Karma test', count:a ? T().say(a).cevaplanan + '/' + a.sorular.length : null },
       { id:'yanlis', label:'Yanlışlarım', count:n || null },
     ] });
   }
-  const kipOf = () => ['konu', 'karma', 'yanlis'].indexOf(S.ui.ogrenKip) >= 0 ? S.ui.ogrenKip : 'konu';
+  const kipOf = () => ['konu', 'paragraf', 'karma', 'yanlis'].indexOf(S.ui.ogrenKip) >= 0 ? S.ui.ogrenKip : 'konu';
 
   /* Bir sorunun kimliği: data-k varsa o (karma, yeniden çözüm), yoksa
      bu konunun ekrandaki sorusu. */
@@ -787,6 +1031,7 @@ R.Screens = R.Screens || {};
       const kip = kipOf();
       if(kip === 'karma') return 'Konular karışık; sonuç konu konu';
       if(kip === 'yanlis') return 'Yanlış çözdüklerini yeniden çöz';
+      if(kip === 'paragraf') return 'Her gün birkaç paragraf; bitince gün kaydına';
       const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Örnek sorular';
     },
     actions(){ return ''; },
@@ -795,6 +1040,10 @@ R.Screens = R.Screens || {};
       const sekme = raw(kipSekmeleri(kip));
       if(kip === 'karma') return String(K.Grid([K.Span(12, K.Stack([sekme].concat(karmaKip())))]));
       if(kip === 'yanlis') return String(K.Grid([K.Span(12, K.Stack([sekme].concat(yanlisKip())))]));
+      if(kip === 'paragraf'){
+        if(P()) await P().hazirla();
+        return String(K.Grid([K.Span(12, K.Stack([raw(kipSekmeleri(kip))].concat(parKip())))]));
+      }
       const x = await hazirla();
       if(!x.topic) return String(K.Card({ body:K.Empty({ icon:'search', text:'Konu yok.' }) }));
       return String(K.Grid([K.Span(12, K.Stack([sekme, raw(konuCubugu(x)), soruKarti(x)]))]));
@@ -824,7 +1073,8 @@ R.Screens = R.Screens || {};
         if(!r) return;
         const d = O().duzMetin, q = r.q;
         await O().sec(r.subject.id, r.topic.id);
-        S.ui.kocParca = { etiket:'Soru ' + (r.i + 1), metin:d(q.soru) + '\n' + q.sec.map((m, k) => O().HARFLER[k] + ') ' + d(m)).join('\n')
+        S.ui.kocParca = { etiket:soruAdi(r), metin:d(q.soru) + (O().ekMetni(q) ? '\n' + O().ekMetni(q) : '') + '\n'
+          + q.sec.map((m, k) => O().HARFLER[k] + ') ' + d(m)).join('\n')
           + '\nDoğru cevap: ' + q.dogru + '\nUygulamadaki çözüm: ' + dizi(q.cozum).map(d).join(' ') };
         S.ui.kocTaslak = 'Bu sorunun çözümünü anlamadım; adım adım, başka bir yoldan anlat.';
         R.App.go('koc');
@@ -835,6 +1085,39 @@ R.Screens = R.Screens || {};
         const card = R.Model.newCard({ front:y.front, back:y.back, subjectId:r.subject.id, topic:r.topic.name, source:'ogren' });
         await R.Model.saveCard(card);
         UI.toast('Karta çevrildi · Tekrar’da sorar');
+      },
+      async 'soru-isaret'(el){
+        const k = el.dataset.k, s = k && T().soruOf(k);
+        if(!s) return;
+        UI.sheet({ title:'Bu soruda hata var', subtitle:s.subject.name + ' · ' + s.topic.name,
+          body:String(K.Stack([
+            K.Field({ label:'Ne yanlış? (isteğe bağlı)', input:K.Textarea({ id:'isaret-not', rows:3,
+              placeholder:'ör. B de doğru; çözümde 2. adım hatalı; şekil soruyla uyuşmuyor' }) }),
+            K.Notice({ tone:'info', body:'Uygulamadaki cevap değişmez. Soru karma testten çıkar ve Yanlışlarım’ın altında '
+              + '«Bildirdiğin hatalar»da durur; oradan listeyi kopyalayıp iletebilirsin.' }),
+          ])),
+          footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+            ${K.Button({ label:'Bildir', tone:'primary', act:'soru-isaret-kaydet', data:{ 'data-k':k } })}`) });
+      },
+      async 'soru-isaret-kaydet'(el){
+        const n = document.getElementById('isaret-not');
+        const r = await T().isaretle(el.dataset.k, n ? n.value : '');
+        UI.closeSheet();
+        UI.toast(r.ok ? 'Bildirildi · soru karma testten çıktı' : 'Bildirilemedi');
+        R.App.render();
+      },
+      async 'soru-isaret-kaldir'(el){
+        await T().isaretKaldir(el.dataset.k);
+        UI.toast('Bildirim geri alındı');
+        R.App.render();
+      },
+      async 'isaret-kopyala'(){
+        const metin = T().isaretMetni();
+        let ok = false;
+        try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(metin); ok = true; } }catch(e){ ok = false; }
+        if(ok){ UI.toast('Liste kopyalandı'); return; }
+        UI.sheet({ title:'Bildirdiğin hatalar', subtitle:'Kopyalanamadı; metni seçip kopyala',
+          body:String(K.Textarea({ id:'isaret-metin', rows:12, value:metin })) });
       },
       async 'soru-defter'(el){
         const r = soruRef(el);
@@ -862,6 +1145,25 @@ R.Screens = R.Screens || {};
         R.App.render();
       },
       async 'test-bak'(){ const y = T().siradaki(); if(y) await T().bak(y.sira); R.App.render(); },
+      /* Günlük paragraf */
+      async 'par-ac'(){ S.ui.ogrenKip = 'paragraf'; S.ui.ogrTekrar = null; R.App.render(); },
+      async 'par-git'(el){ S.ui.parSira = Number(el.dataset.i) || 0; R.App.render(); },
+      async 'par-cevap'(el){
+        const g = P().gunu(), i = Math.max(0, Number(S.ui.parSira) || 0), id = g && g.sorular[i];
+        if(id) await P().cevapla(id, el.dataset.harf, S.ui.ipucu === 'par:' + id);
+        R.App.render();
+      },
+      async 'par-bak'(){
+        const g = P().gunu(), id = g && g.sorular[Math.max(0, Number(S.ui.parSira) || 0)];
+        if(id) await P().bak(id);
+        R.App.render();
+      },
+      async 'par-boy'(el){ await P().boyAyarla(Number(el.dataset.n)); S.ui.parSira = 0; R.App.render(); },
+      async 'par-yaz'(){
+        const r = await P().gunKaydinaYaz();
+        UI.toast(r.ok ? 'Bugünün paragraf sayısına +' + r.n + ' yazıldı · Onaylar’dan geri alınabilir' : r.why);
+        R.App.render();
+      },
       async 'karma-bitir'(){
         const a = T().aktif();
         if(!a) return;

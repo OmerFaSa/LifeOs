@@ -22,6 +22,7 @@ R.Palette = (function(){
     /* Öğren › Sorular'ın iki kipi (core/ogrentest.js). */
     const kip = (tab, label, icon) => ({ group:'Git', label, icon, route:'sorular', run(){
       R.S.ui.ogrenKip = tab; R.S.ui.ogrTekrar = null; R.App.go('sorular'); } });
+    list.push(kip('paragraf', 'Günlük paragraf — bugünün seti', 'book'));
     list.push(kip('karma', 'Karma test — konular karışık', 'zap'));
     list.push(kip('yanlis', 'Yanlışlarım — yeniden çöz', 'list'));
     list.push(go('learn','Öğrenme — video ve ders notu','play','Git'));
