@@ -110,6 +110,17 @@ yanlış ve boş için konu, etiket ve kök neden yazılır; her hata kaydı bir
 tekrar kartı açar. Yayın merdiveni, yayınlar arasındaki zorluk farkını
 hesaba katar.
 
+**Deneme soru analizi.** Cevap anahtarını ve kendi cevaplarını yazarsan
+(harfler yan yana ya da yayının sayfasından «1-A 2-C …» diye yapıştırarak)
+sorular tek tek karşılaştırılır; kayıttaki sayılarla fark varsa gösterilir,
+kayıt kendiliğinden değişmez. Yanlış ve boş soruların fotoğrafını kendi
+kitapçığından çekersin; fotoğraf cihazında kalır. «Çöz» deyince model soruyu
+**anahtarı görmeden** çözer, verdiği şıkkı anahtarla kod karşılaştırır ve
+tutmayan çözüm uyarıyla gösterilir. Sorunun konusu kapalı katalogdan
+«tahmin» etiketiyle gelir, elle düzeltebilirsin; tek dokunuşla hata kaydı ve
+tekrar kartı açılır, konu Öğren'de açılır. **Yayın karnesi** her yayında en
+çok kaçırdığın konuları ve bunların öteki yayınlara göre payını gösterir.
+
 **Ofis ve koç.** Ajanlar ücretsiz dil modeli uçlarına (kendi anahtarınla)
 bağlanabilir; model yokken de sohbet edilir. Ajanlar sayı uydurmaz: her sayı
 kural motorundan gelir ve kesinlik etiketi taşır.

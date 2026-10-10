@@ -304,7 +304,7 @@ R.Screens.exams = (function(){
           <div class="row-sm wrap">
             <b class="num">${x.no}.</b>
             ${K.Badge({ label:x.durum === 'bos' ? 'boş' : 'yanlış', tone:x.durum === 'bos' ? 'muted' : 'danger' })}
-            <span class="small">${x.durum === 'bos' ? 'boş bıraktın' : 'senin: ' + x.cevap} · doğru: <b>${x.anahtar}</b></span>
+            <span class="small">${when(x.durum !== 'bos', () => 'senin: ' + x.cevap + ' · ')}doğru: <b>${x.anahtar}</b></span>
           </div>
           <div class="row-sm wrap">
             ${when(foto, () => html`<a class="dsoru__foto" href="${foto}" target="_blank" rel="noopener"
@@ -376,11 +376,11 @@ R.Screens.exams = (function(){
             <span class="small">${U.plural(liste.length, 'yanlış ya da boş soru', 'yanlış ya da boş soru')}</span>
             ${when(eksikHata, () => K.Button({ label:'Hepsini hata kaydına ekle (' + eksikHata + ')', size:'sm', act:'da-hepsi', data:{ 'data-id':exam.id } }))}
           </div>
-          ${map(gruplar.filter(g => g.sorular.length), g => html`
+          <div data-raf-tam>${map(gruplar.filter(g => g.sorular.length), g => html`
             <details class="dsoru__grup mt-8" ${raw('open')}>
               <summary class="small strong">${g.t.ad} · ${g.sorular.length}</summary>
               <div class="stack-sm mt-8">${map(g.sorular, x => SoruSatiri(exam, x, hazir))}</div>
-            </details>`)}`
+            </details>`)}</div>`
           : html`<p class="small mt-12">Yanlış ya da boş soru yok.</p>`}`,
     });
   }
@@ -1027,6 +1027,70 @@ R.Screens.exams = (function(){
       UI.toast('Hata silindi');
       R.App.render();
     },
+
+    /* ---------- soru analizi (core/denemeanaliz.js) ---------- */
+    async 'da-giris'(el){
+      const exam = S.exams.find(e => e.id === el.dataset.id);
+      if(exam) anahtarSheet(exam);
+    },
+    async 'da-kaydet'(el){
+      const A = R.DenemeAnaliz, exam = S.exams.find(e => e.id === el.dataset.id);
+      if(!exam) return;
+      const deger = id => { const x = document.getElementById(id); return x ? x.value : ''; };
+      const r = await A.girdileriYaz(exam, exam.tests.map((t, i) => ({ test:t.name, anahtar:deger('da-a-' + i), cevap:deger('da-c-' + i) })));
+      if(!r.ok){
+        const not = document.getElementById('da-not');
+        if(not) not.textContent = 'Kaydedilmedi — ' + r.hatalar.join(' · ');
+        return;
+      }
+      UI.closeSheet();
+      UI.toast(A.ozet(exam).analizli ? U.plural(A.yanlislar(exam).length, 'yanlış ya da boş soru', 'yanlış ya da boş soru') + ' listelendi'
+        : 'Anahtar kaydedildi; cevaplarını da yazınca sorular listelenir');
+      R.App.render();
+    },
+    async 'da-guncelle'(el){
+      const exam = S.exams.find(e => e.id === el.dataset.id);
+      if(!exam) return;
+      const n = await R.DenemeAnaliz.kaydiGuncelle(exam);
+      UI.toast(n ? n + ' testin sayıları anahtara göre güncellendi · geri alabilirsin' : 'Güncellenecek fark yok');
+      R.App.render();
+    },
+    async 'da-geri'(el){
+      const exam = S.exams.find(e => e.id === el.dataset.id);
+      if(!exam) return;
+      UI.toast(await R.DenemeAnaliz.geriAl(exam) ? 'Önceki sayılar geri geldi' : 'Geri alınacak güncelleme yok');
+      R.App.render();
+    },
+    async 'da-coz'(el){
+      const A = R.DenemeAnaliz, exam = S.exams.find(e => e.id === S.ui.examOpen);
+      if(!exam) return;
+      const r = await UI.withBusy('Soru çözülüyor', 'model anahtarı görmeden çözer; tutup tutmadığına kod bakar',
+        () => A.coz(exam, el.dataset.key));
+      if(!r.ok){ UI.toast(r.note); R.App.render(); return; }
+      const konu = r.topicRef ? A.konuBul(r.topicRef) : null;
+      const parca = [r.tutar === true ? 'Çözüm anahtarla tutuyor'
+        : r.tutar === false ? 'Modelin cevabı (' + r.harf + ') anahtarla (' + r.dogru + ') tutmuyor'
+        : 'Model şık bildirmedi; karşılaştırılamadı'];
+      if(konu) parca.push('konu: ' + konu.topic.name);
+      if(r.konuNotu) parca.push(r.konuNotu);
+      UI.toast(parca.join(' · '));
+      R.App.render();
+    },
+    async 'da-hata'(el){
+      const exam = S.exams.find(e => e.id === S.ui.examOpen);
+      if(!exam) return;
+      const r = await R.DenemeAnaliz.hatayaEkle(exam, el.dataset.key);
+      UI.toast(!r.ok ? r.note : r.vardi ? 'Bu soru zaten hata kaydında'
+        : 'Hata ve tekrar kartı kaydedildi · etiketini ve kök nedenini Hata analizinden yaz');
+      R.App.render();
+    },
+    async 'da-hepsi'(el){
+      const exam = S.exams.find(e => e.id === el.dataset.id);
+      if(!exam) return;
+      const n = await R.DenemeAnaliz.hepsiniEkle(exam);
+      UI.toast(n ? n + ' hata ve tekrar kartı kaydedildi' : 'Eklenecek soru yok');
+      R.App.render();
+    },
   };
 
   const change = {
@@ -1064,6 +1128,21 @@ R.Screens.exams = (function(){
       const exam = S.exams.find(e => e.id === S.ui.examOpen);
       exam.tests[Number(el.dataset.i)].minutes = el.value === '' ? null : Number(el.value);
       await M.saveExam(exam);
+    },
+    async 'da-foto'(el){
+      const exam = S.exams.find(e => e.id === S.ui.examOpen);
+      const f = el.files && el.files[0];
+      if(!exam || !f || !R.SoruFoto) return;
+      const r = await R.SoruFoto.kaydet(R.DenemeAnaliz.sahip(exam, el.dataset.key), f);
+      UI.toast(r.ok ? 'Fotoğraf bu cihaza kaydedildi' : r.why);
+      R.App.render();
+    },
+    async 'da-konu'(el){
+      const exam = S.exams.find(e => e.id === S.ui.examOpen);
+      if(!exam) return;
+      const r = await R.DenemeAnaliz.konuYaz(exam, el.dataset.key, el.value, 'elle');
+      if(!r.ok) UI.toast(r.note);
+      R.App.render();
     },
   };
 

@@ -2675,3 +2675,15 @@ body.is-dragging .drop.is-over{
 .sohbet__sen{ align-self:flex-end; max-width:85%; padding:8px 12px; border-radius:14px 14px 4px 14px; background:var(--primary-soft); }
 .sohbet__koc{ align-self:flex-start; max-width:92%; padding:10px 12px; border-radius:14px 14px 14px 4px; background:var(--surface-2); }
 .ogr-parca{ display:flex; align-items:center; gap:8px; }
+
+/* Deneme soru analizi (core/denemeanaliz.js, screens/exams.js): yanlış ve
+   boş sorular; 40 piksellik fotoğraf karesi dokununca büyür, çözüm açılır. */
+.dsoru{ padding:10px 12px; border:1px solid var(--border); border-radius:var(--r); background:var(--surface); }
+.dsoru__foto{ display:inline-flex; width:40px; height:40px; border-radius:var(--r-sm); overflow:hidden; border:1px solid var(--border); }
+.dsoru__foto img{ width:100%; height:100%; object-fit:cover; display:block; }
+.dsoru__dosya{ position:relative; cursor:pointer; }
+.dsoru__dosya input{ position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; }
+.dsoru__dosya:focus-within{ outline:2px solid var(--accent); outline-offset:2px; }
+.dsoru__metin{ white-space:pre-wrap; overflow-wrap:anywhere; }
+.dsoru__cozum summary, .dsoru__grup summary{ cursor:pointer; display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-height:24px; }
+.dsoru .select{ max-width:100%; }
