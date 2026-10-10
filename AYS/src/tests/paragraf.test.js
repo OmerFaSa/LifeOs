@@ -56,7 +56,7 @@
   describe('Günlük paragraf havuzu', () => {
     it('biçim: tek kimlik, paragraf konusu, ÖSYM biçimi; harfler dağılır', () => {
       const l = P().HAVUZ, bozuk = [], kim = new Set(), say = { A:0, B:0, C:0, D:0, E:0 };
-      expect(l.length >= 25).toBe(true);
+      expect(l.length >= 100).toBe(true);
       l.forEach(q => {
         const ad = q.id || '?';
         if(!/^p\d{3}$/.test(q.id || '') || kim.has(q.id)) bozuk.push(ad + ': kimlik');
