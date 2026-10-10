@@ -276,6 +276,162 @@ R.Screens.exams = (function(){
       n:errs.filter(e => e.tag === k).length })).sort((a, b) => b.n - a.n) });
   }
 
+  /* SORU ANALİZİ (core/denemeanaliz.js): anahtar + cevaplar → soru soru
+     sonuç; yanlış/boş soruların fotoğrafı, konusu, çözümü, hata kaydı. */
+  let fotoIstendi = false;
+  function fotoUrl(exam, key){
+    if(!R.SoruFoto) return null;
+    if(!R.SoruFoto.var() && !fotoIstendi){
+      fotoIstendi = true;
+      R.SoruFoto.hazirla().then(ok => { if(ok) R.App.render(); });
+    }
+    return R.SoruFoto.url(R.DenemeAnaliz.sahip(exam, key));
+  }
+
+  function cozumRozeti(a){
+    if(a.tutar === true) return K.Badge({ label:'anahtarla tutuyor', tone:'ok' });
+    if(a.tutar === false) return K.Badge({ label:'anahtarla tutmuyor — güvenme', tone:'danger' });
+    return K.Badge({ label:'karşılaştırılamadı', tone:'warn' });
+  }
+
+  function SoruSatiri(exam, x, hazir){
+    const a = x.analiz || {};
+    const foto = fotoUrl(exam, x.key);
+    const konu = a.topicRef ? R.DenemeAnaliz.konuBul(a.topicRef) : null;
+    return html`
+      <div class="dsoru">
+        <div class="row between wrap gap-8">
+          <div class="row-sm wrap">
+            <b class="num">${x.no}.</b>
+            ${K.Badge({ label:x.durum === 'bos' ? 'boş' : 'yanlış', tone:x.durum === 'bos' ? 'muted' : 'danger' })}
+            <span class="small">${x.durum === 'bos' ? 'boş bıraktın' : 'senin: ' + x.cevap} · doğru: <b>${x.anahtar}</b></span>
+          </div>
+          <div class="row-sm wrap">
+            ${when(foto, () => html`<a class="dsoru__foto" href="${foto}" target="_blank" rel="noopener"
+              aria-label="${x.test + ' ' + x.no + '. sorunun fotoğrafını büyüt'}"><img src="${foto}" alt=""/></a>`)}
+            <label class="btn btn--sm dsoru__dosya">
+              <span class="btn__label">${foto ? 'Fotoğrafı değiştir' : 'Fotoğraf ekle'}</span>
+              <input type="file" accept="image/*" capture="environment" data-change="da-foto" data-key="${x.key}"
+                aria-label="${x.test + ' ' + x.no + '. sorunun fotoğrafı'}"/>
+            </label>
+            ${when(foto, () => K.Button({ label:a.cozum ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'da-coz',
+              disabled:!hazir, title:hazir ? '' : 'Görüntü okuyabilen bir model gerekir (Ayarlar › Model)', data:{ 'data-key':x.key } }))}
+            ${x.hata ? K.Badge({ label:'hata kaydında', tone:'ok' })
+              : K.Button({ label:'Hata kaydına ekle', size:'sm', act:'da-hata', data:{ 'data-key':x.key } })}
+          </div>
+        </div>
+        <div class="row-sm wrap mt-8">
+          ${K.Select({ size:'sm', options:R.DenemeAnaliz.konuSecenekleri(exam, x.test), value:a.topicRef || '',
+            change:'da-konu', aria:x.test + ' ' + x.no + '. sorunun konusu', data:{ 'data-key':x.key } })}
+          ${when(konu, () => K.Badge({ label:a.konuKaynak === 'elle' ? 'elle' : 'tahmin', tone:'muted' }))}
+          ${when(konu, () => K.Button({ label:'Konuyu aç', size:'sm', tone:'ghost', act:'ogren-git',
+            data:{ 'data-route':'anlatim', 'data-subject':konu.subject.id, 'data-topic':konu.topic.id } }))}
+        </div>
+        ${when(a.cozum, () => html`
+          <details class="dsoru__cozum mt-8">
+            <summary class="small">Çözüm ${cozumRozeti(a)}${when(a.modelCevap, () => html` <span class="tiny dim">model: ${a.modelCevap}</span>`)}</summary>
+            ${when(a.tutar === false, () => html`<p class="small mt-8">Modelin cevabı (${a.modelCevap}) anahtardaki ${x.anahtar} şıkkına varmadı. Ya model yanılıyor ya anahtar; bu çözümü doğru sanma.</p>`)}
+            <div class="small dsoru__metin mt-8">${a.cozum}</div>
+          </details>`)}
+      </div>`;
+  }
+
+  function soruAnalizi(exam){
+    const A = R.DenemeAnaliz;
+    if(!A) return '';
+    const oz = A.ozet(exam);
+    const giris = K.Button({ label:oz.analizli ? 'Anahtarı düzenle' : 'Cevap anahtarını gir', icon:oz.analizli ? 'edit' : 'plus',
+      size:'sm', tone:oz.analizli ? 'ghost' : 'primary', act:'da-giris', data:{ 'data-id':exam.id } });
+    if(!oz.analizli){
+      const yalnizAnahtar = oz.testler.some(t => t.anahtarVar);
+      return K.Card({ title:'Soru analizi', sub:'cevap anahtarıyla soru soru', actions:giris,
+        body:K.Empty({ icon:'list', text:yalnizAnahtar
+          ? 'Anahtar girildi; kendi cevaplarını da yazınca yanlış ve boş sorular tek tek listelenir.'
+          : 'Cevap anahtarını ve kendi cevaplarını girersen yanlış ve boş sorular tek tek listelenir: fotoğrafını ekleyip çözdürebilir, konusunu bulup hata kaydına atabilirsin.' }) });
+    }
+    const liste = A.yanlislar(exam);
+    const hazir = A.hazir();
+    const eksikHata = liste.filter(x => !x.hata).length;
+    const gruplar = oz.testler.filter(t => t.sonuc).map(t => ({ t, sorular:liste.filter(x => x.test === t.ad) }));
+    const ozetSatiri = t => {
+      const s = t.sonuc;
+      return html`<div class="row between wrap gap-8 small">
+        <span><b>${t.ad}</b> · ${s.d} D · ${s.y} Y · ${s.b} B${s.iptal ? ' · ' + s.iptal + ' iptal' : ''}</span>
+        <span class="num">net ${U.fmtNet(s.net)}${when(t.fark, () => html` <span class="tiny dim">· kayıtta ${t.kayit.d}/${t.kayit.y}/${t.kayit.b == null ? '—' : t.kayit.b}</span>`)}</span>
+      </div>`;
+    };
+    return K.Card({
+      title:'Soru analizi', sub:'cevap anahtarından hesaplandı', actions:giris,
+      body:html`
+        <div class="stack-xs">${map(oz.testler.filter(t => t.sonuc), ozetSatiri)}</div>
+        ${when(oz.testler.some(t => t.anahtarVar && !t.cevapVar), () => html`<p class="tiny dim mt-8">Cevapları girilmeyen testler: ${oz.testler.filter(t => t.anahtarVar && !t.cevapVar).map(t => t.ad).join(', ')}.</p>`)}
+        ${when(oz.fark, () => html`<div class="mt-12">${K.Notice({ tone:'warn',
+          body:'Anahtardan hesaplanan sonuç kayıttaki sayılardan farklı. Kayıt kendiliğinden değişmez; istersen anahtara göre güncelle.' })}
+          <div class="row-sm mt-8">${K.Button({ label:'Kaydı anahtara göre güncelle', size:'sm', act:'da-guncelle', data:{ 'data-id':exam.id } })}</div></div>`)}
+        ${when(exam.anahtarOncesi, () => html`<div class="row-sm mt-8">${K.Button({ label:'Güncellemeyi geri al', size:'sm', tone:'ghost',
+          act:'da-geri', data:{ 'data-id':exam.id } })}<span class="tiny dim">önceki sayılar saklı</span></div>`)}
+        ${when(!hazir, () => html`<p class="tiny dim mt-12">Fotoğraftaki soruyu çözdürmek için görüntü okuyabilen bir model gerekir (Ayarlar › Model); fotoğraf ekleyip konuyu elle seçebilirsin.</p>`)}
+        ${liste.length ? html`
+          <div class="row between wrap gap-8 mt-12">
+            <span class="small">${U.plural(liste.length, 'yanlış ya da boş soru', 'yanlış ya da boş soru')}</span>
+            ${when(eksikHata, () => K.Button({ label:'Hepsini hata kaydına ekle (' + eksikHata + ')', size:'sm', act:'da-hepsi', data:{ 'data-id':exam.id } }))}
+          </div>
+          ${map(gruplar.filter(g => g.sorular.length), g => html`
+            <details class="dsoru__grup mt-8" ${raw('open')}>
+              <summary class="small strong">${g.t.ad} · ${g.sorular.length}</summary>
+              <div class="stack-sm mt-8">${map(g.sorular, x => SoruSatiri(exam, x, hazir))}</div>
+            </details>`)}`
+          : html`<p class="small mt-12">Yanlış ya da boş soru yok.</p>`}`,
+    });
+  }
+
+  function anahtarSheet(exam){
+    const A = R.DenemeAnaliz;
+    const alanlar = exam.tests.map((t, i) => {
+      const q = A.soruSayisi(exam, t.name);
+      return html`
+        <div class="card card--flat card--pad-sm stack-sm">
+          <b class="small">${t.name}${q ? ' · ' + q + ' soru' : ''}</b>
+          ${K.Field({ label:'Cevap anahtarı', input:K.Textarea({ id:'da-a-' + i, rows:2, value:(exam.anahtar || {})[t.name] || '',
+            placeholder:'ABCDE… ya da 1-A 2-C 3-E …', aria:t.name + ' cevap anahtarı' }) })}
+          ${K.Field({ label:'Senin cevapların', input:K.Textarea({ id:'da-c-' + i, rows:2, value:(exam.cevaplar || {})[t.name] || '',
+            placeholder:'boş bıraktığın soru için nokta (.)', aria:t.name + ' cevapların' }) })}
+        </div>`;
+    });
+    UI.sheet({
+      title:'Cevap anahtarı ve cevapların', subtitle:exam.type + (exam.publisher ? ' · ' + exam.publisher : ''), wide:true,
+      body:String(K.Stack([
+        K.Notice({ tone:'info', body:'Harfleri yan yana yaz ya da yayının sayfasından «1-A 2-C …» biçiminde yapıştır; boşluklar yok sayılır. '
+          + 'Boş bıraktığın soru için nokta (.), iptal edilen soru için anahtara yıldız (*) yaz. Bir testte hata varsa hiçbir test kaydedilmez ve nedeni yazılır.' }),
+        html`<div class="stack-sm">${map(alanlar, x => x)}</div>`,
+        raw('<div id="da-not" class="small" role="status"></div>'),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'da-kaydet', data:{ 'data-id':exam.id } })}`),
+    });
+  }
+
+  function yayinKarnesi(exam){
+    const A = R.DenemeAnaliz;
+    if(!A || !String(exam.publisher || '').trim()) return '';
+    const k = A.yayinKarnesi(exam.publisher);
+    if(!k) return '';
+    const testSatiri = t => html`<div class="row between small"><span>${t.ad}</span>
+      <span class="num">${t.d + t.y ? 'doğruluk %' + U.pct(t.d, t.d + t.y) : '—'} <span class="tiny dim">· ${t.deneme} deneme</span></span></div>`;
+    return K.Card({
+      title:'Yayın karnesi', sub:k.yayin + ' · hesaplandı',
+      body:html`
+        <p class="tiny dim">${k.deneme} deneme · ${k.hata} hata kaydı (${k.konulu} tanesinin konusu belli)</p>
+        ${when(k.testler.length, () => html`<div class="stack-xs mt-8">${map(k.testler, testSatiri)}</div>`)}
+        ${k.yeterli ? html`
+          <div class="mono-label mt-12">En çok kaçırdığın konular</div>
+          <div class="stack-xs mt-8">${map(k.konular, x => html`<div class="small">
+            <b>${x.ad}</b> — ${x.n} hata · bu yayındaki hatalarının %${x.pay}${x.otekiPay != null ? ' (öteki yayınlarda %' + x.otekiPay + ')' : ''}</div>`)}</div>
+          <p class="tiny dim mt-8">Yalnız yanlış ve boş sorular kayda girdiği için «o konudan kaç soru soruldu» bilinmez; pay, hatalarının dağılımıdır.</p>`
+          : html`<p class="small mt-8">Konu karnesi için bu yayında konusu belli en az ${A.ESIK} hata gerekir.</p>`}`,
+    });
+  }
+
   function detailView(id){
     const exam = S.exams.find(e => e.id === id);
     if(!exam) return K.Empty({ text:'Deneme bulunamadı.',
@@ -304,6 +460,7 @@ R.Screens.exams = (function(){
             <div class="tiny dim">toplam net</div></div>`,
           body:testTable(exam),
         }),
+        soruAnalizi(exam),
         karsilastirma(exam),
         K.Card({
           title:'Hata analizi', sub:U.plural(errs.length, 'kayıt', 'kayıt'),
@@ -319,6 +476,7 @@ R.Screens.exams = (function(){
 
       K.Span(4, K.Stack([
         karne(exam),
+        yayinKarnesi(exam),
         hizSeridi(exam),
         K.Card({
           title:'Analiz protokolü', hint:'analysis-protocol', sub:'24 saat içinde',
@@ -786,6 +944,8 @@ R.Screens.exams = (function(){
       const bagli = S.errors.filter(e => e.examId === id).length;
       UI.confirmSheet('Denemeyi sil', 'Bu deneme ve bağlı hata kayıtları silinecek. Bu işlem geri alınamaz.', async () => {
         await M.deleteExam(id);
+        /* Soru fotoğrafları da cihazdan gider (core/sorufoto.js). */
+        if(R.SoruFoto) await R.SoruFoto.onekSil('deneme:' + id + ':');
         S.ui.examOpen = null;
         UI.closeSheet();
         UI.toast('Deneme silindi');
