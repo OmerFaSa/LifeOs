@@ -108,7 +108,8 @@
     });
 
     /* Söz 3a. Ölçüt (2026-10-10 taramasıyla aynı): soru, örneğin sorusuyla
-       sözcükçe en az %50 örtüşür ve sayıları aynıdır; doğru seçeneğin
+       sözcükçe en az %50 örtüşür ve sayıları aynıdır (sırası önemsiz:
+       «40 m/s, 30°» ile «30°, 40 m/s» aynı kurgudur); doğru seçeneğin
        sözcüklerinin en az %60'ı (sayısalsa sayıları) örneğin soru +
        çözümünde geçer. Örnekler: derin örnekler + Anlatım bölüm örnekleri. */
     const DUR = new Set(('ve ile bir bu şu o da de mi ne için gibi kaç hangi hangisi aşağıdakilerden aşağıdaki nedir olur olan ise '
@@ -120,10 +121,11 @@
     /* Gözden geçirildi: sözcükler örtüşüyor ama farklı kavram ya da farklı cevap soruluyor. */
     const BILINCLI = {
       'tm-22#4': 'başka bir bileşik önerme; ortak olan yalnız «p ve q’nun doğruluk değerleri» kalıbı',
-      'af-15#2': 'örnek basit sarkaçta ip boyunu, soru yay sarkacında kütleyi değiştiriyor',
       'af-18#2': 'örnek ışık şiddetini, soru frekansı değiştiriyor',
       'ab-02#1': 'örnek olasılık, soru gamet çeşidi soruyor (AaBbCC)',
-      'ab-11#2': 'örnek A Rh−, soru B Rh− alıcı; cevap örnekte yok',
+      'tm-24#3': 'sayılar rastlantıyla aynı (1, 2, 3, 3, 4); örnek (x + 1) ile, soru x² − 1 ile bölünmeyi soruyor',
+      'tf-k3#1': 'sayılar iyon yükleri (2, 3, 4); örnek Al³⁺ ile SO₄²⁻, soru Ca²⁺ ile PO₄³⁻',
+      'ab-11#2': 'örnek A Rh− alıcıyı, soru B Rh− alıcıyı soruyor; «0 Rh−» örnekte geçiyor ama soru başka bir alıcının bütün vericilerini istiyor',
     };
     it('derin soru, konusunun çözümlü örneğindeki cevabı tekrar sormaz', () => {
       const H = HARF, isaret = [];
@@ -135,7 +137,7 @@
           const tekrar = ornek.some(o => {
             const os = o.soru + ' ' + dizi(o.cozum).join(' ');
             if(ortusme(sozler(q.soru), sozler(o.soru)) < 0.5) return false;
-            if(sayilar(q.soru).join(' ') !== sayilar(o.soru).join(' ')) return false;
+            if(sayilar(q.soru).slice().sort().join(' ') !== sayilar(o.soru).slice().sort().join(' ')) return false;
             const s2 = ds.length ? ortusme(ds, sozler(os)) : (dn.length && dn.every(x => sayilar(os).indexOf(x) >= 0) ? 1 : 0);
             return s2 >= 0.6;
           });
@@ -144,6 +146,82 @@
       });
       expect(isaret.filter(k => !BILINCLI[k])).toEqual([]);
       expect(Object.keys(BILINCLI).filter(k => isaret.indexOf(k) < 0)).toEqual([]);
+    });
+
+    /* Söz 3a'nın iki açığı (denetim 2026-10-11). Kısa adlı cevap (terim,
+       kişi, belge) örneğin soru + çözümünde geçiyor ve derin sorunun
+       sözcüklerinin en az %60'ı oradaysa soru örnekteki cümleyi geri
+       soruyordur: «Descartes … sözüne nasıl ulaştı?» örneğinden sonra
+       «… diyen filozof hangisidir?». Kılık değiştirmiş tekrar da (aynı
+       cevap, sözcükler iki yönde en az %50 örtüşüyor ya da sayılar sırasız
+       aynı) Anlatım'ın temel sorularıyla karşılaştırılır; 3a onlara hiç
+       bakmıyordu. */
+    const kel = s => temiz(s).replace(/[^a-zçğıöşüâîû0-9]+/g, ' ').trim();
+    const kisaAd = s => { const k = kel(s); return /[a-zçğıöşü]{4,}/.test(k) && k.split(' ').length <= 4 ? k : ''; };
+    const kokVar = (ad, metin) => new RegExp(' ' + ad.split(' ').map(w => w.slice(0, Math.max(4, Math.min(6, w.length - 1))) + '[a-zçğıöşüâîû]*').join(' ') + ' ')
+      .test(' ' + kel(metin) + ' ');
+    const BILINCLI_ORNEK = {
+      'tr-16#6': 'örnek «gelecek zaman» der; soru gelecek zamanın hikâyesini (-ecekti) soruyor',
+    };
+    it('derin soru, örneğin çözümünde yazan cümleyi geri sormaz', () => {
+      const isaret = [];
+      Object.keys(R.KONU_DERIN).forEach(t => {
+        const d = R.KONU_DERIN[t], a = (R.KONU_ANLATIM || {})[t] || { bolumler:[] };
+        const ornek = dizi(d.ornekler).concat(dizi(a.bolumler).filter(b => b.ornek).map(b => b.ornek));
+        dizi(d.sorular).forEach((q, i) => {
+          const ad = kisaAd(q.sec[HARF.indexOf(q.dogru)]);
+          if(!ad) return;
+          const geri = ornek.some(o => {
+            const metin = o.soru + ' ' + dizi(o.cozum).join(' ');
+            return kokVar(ad, metin) && ortusme(sozler(q.soru), sozler(metin)) >= 0.6;
+          });
+          if(geri) isaret.push(t + '#' + (i + 1));
+        });
+      });
+      expect(isaret.filter(k => !BILINCLI_ORNEK[k])).toEqual([]);
+      expect(Object.keys(BILINCLI_ORNEK).filter(k => isaret.indexOf(k) < 0)).toEqual([]);
+    });
+
+    const BILINCLI_TEMEL = {
+      'tf-f2#3': 'temel soru küpün ayrıtını, derin soru silindirin yalnız yüksekliğini değiştiriyor; aynı ilke başka cisimde',
+    };
+    it('derin soru, Anlatım’ın temel sorusunu kılık değiştirip tekrar sormaz', () => {
+      const isaret = [];
+      Object.keys(R.KONU_DERIN).forEach(t => {
+        const temel = dizi(((R.KONU_ANLATIM || {})[t] || {}).sorular);
+        dizi(R.KONU_DERIN[t].sorular).forEach((q, i) => {
+          const qd = kel(q.sec[HARF.indexOf(q.dogru)]), qs = sozler(q.soru), qn = sayilar(q.soru).slice().sort().join(' ');
+          const tekrar = temel.some(o => {
+            if(!o.sec || kel(o.sec[HARF.indexOf(o.dogru)]) !== qd) return false;
+            const os = sozler(o.soru), on = sayilar(o.soru).slice().sort().join(' ');
+            if(/[a-zçğıöşü]{3,}/.test(qd)) return Math.min(ortusme(qs, os), ortusme(os, qs)) >= 0.5;
+            return !!qn && qn === on;
+          });
+          if(tekrar) isaret.push(t + '#' + (i + 1));
+        });
+      });
+      expect(isaret.filter(k => !BILINCLI_TEMEL[k])).toEqual([]);
+      expect(Object.keys(BILINCLI_TEMEL).filter(k => isaret.indexOf(k) < 0)).toEqual([]);
+    });
+
+    /* «Hangisi yanlıştır?» diye sorulan eşleştirmenin öteki dört seçeneği
+       DOĞRU bilgidir: «Sümerler – çivi yazısı» seçeneği, aynı konuda «çivi
+       yazısını bulan uygarlık hangisidir?» sorusunun cevabını verir. */
+    it('olumsuz eşleştirme sorusu, aynı konudaki başka bir sorunun cevabını doğru seçenek olarak vermez', () => {
+      const isaret = [];
+      Object.keys(R.KONU_DERIN).forEach(t => {
+        const S = dizi(R.KONU_DERIN[t].sorular);
+        S.forEach((n, i) => {
+          if(!/yanlış|değildir|olamaz|yoktur|söylenemez/i.test(n.soru)) return;
+          const yanlar = [];
+          n.sec.forEach((x, k) => { if(HARF[k] !== n.dogru && /\s[–-]\s/.test(x)) x.split(/\s[–-]\s/).forEach(y => yanlar.push(kel(y))); });
+          S.forEach((q, j) => {
+            const ad = kisaAd(q.sec[HARF.indexOf(q.dogru)]);
+            if(i !== j && ad && yanlar.indexOf(ad) >= 0) isaret.push(t + '#' + (j + 1) + ' ← #' + (i + 1));
+          });
+        });
+      });
+      expect(isaret).toEqual([]);
     });
 
     /* 2026-10-10: ab-08'de mercek türleri tersti («ince kenarlı (ıraksak)»,
