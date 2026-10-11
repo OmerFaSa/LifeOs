@@ -13,11 +13,19 @@
         («hesaplandı»). Net formülü tek yerdedir (R.Model.testNet).
      2. KAYIT KENDİLİĞİNDEN DEĞİŞMEZ. Anahtardan hesaplanan D/Y/B kayıttakinden
         farklıysa fark gösterilir; kaydı güncellemek kullanıcının eylemidir
-        ve önceki sayılar saklanıp geri alınabilir.
+        ve önceki sayılar saklanıp geri alınabilir. Saklanan, kullanıcının
+        İLK yazdığı sayılardır: ikinci bir güncelleme onları ezmez. Geri alma
+        yalnız güncellemenin yazdığı sayıları hâlâ taşıyan testi geri getirir;
+        sonradan elle düzeltilen test olduğu gibi kalır ve adı söylenir.
      3. BELİRSİZ GİRDİ TAHMİN EDİLMEZ (AGENTS §1.7). Soru sayısı tutmayan,
         A–E dışında harf içeren, numarası eksik ya da iki kez yazılmış anahtar
         kaydedilmez; nedeni söylenir. İptal soru anahtara «*» ile yazılır ve
-        D/Y/B'ye girmez. Cevapta boş soru «.» ile yazılır.
+        D/Y/B'ye girmez. Cevapta boş soru «.» ile yazılır. Numaralı biçimde
+        sayı–harf çiftlerinden başka yazı (yapıştırılan başlık: «Deneme 3 A
+        kitapçığı») kabul edilmez: «3 A» bir soru sanılıp boş soru sessizce
+        A olmasın. Testin soru sayısı şablondan gelir; test adı değiştirilmişse
+        şablondaki aynı sıradaki test sayılır. Aynı adlı iki testin anahtarı
+        karışacağı için hiçbiri yazılmaz.
      4. KONU TAHMİNDİR VE KAPALI KATALOGDAN GELİR. Model sorunun konusunu
         söyler, R.Solver kapalı katalogla eşler; eşleşmeyen ya da testin
         dersinden olmayan konu yazılmaz. Modelin konusu «tahmin», kullanıcının
@@ -25,23 +33,34 @@
      5. DOĞRU CEVABI ANAHTAR BELİRLER. Model soruyu ANAHTARI GÖRMEDEN çözer;
         şıkkı anahtarla kod karşılaştırır: «tutuyor», «tutmuyor» ya da model
         şık bildirmediyse «karşılaştırılamadı». Tutmayan çözüm uyarıyla
-        gösterilir, tekrar kartının arkasına yazılmaz.
+        gösterilir, tekrar kartının arkasına yazılmaz. «Tutuyor» SAKLANMAZ,
+        her okumada modelin şıkkı o anki anahtarla karşılaştırılır: anahtar
+        düzeltilince eski karar kalmasın. Kartın arkasına çözümün kendisi
+        değil, doğru şık ve «Nereden başlanır?» bölümünün özü yazılır (tam
+        çözüm kopyalanmaz; solve.js'teki kural). Çözüm metni defterde değil,
+        fotoğrafın yanında durur (core/sorufoto.js söz 6).
      6. FOTOĞRAF CİHAZDAN ÇIKMAZ (core/sorufoto.js). Modele yalnız «Çöz»
         denince o tek fotoğraf gider.
      7. HATA KAYDI TEKTİR. Aynı deneme + test + soru için ikinci hata kaydı
-        açılmaz; var olana bağlanır. Etiketi ve kök nedeni kullanıcı yazar
+        açılmaz; var olana bağlanır («05» ile «5» aynı sorudur). Etiketi ve kök nedeni kullanıcı yazar
         (etiket boş başlar; etiketsiz hata dağılıma girmez).
      8. YAYIN KARNESİ HESAPLANIR, YETERSİZ VERİDE SUSAR. Konusu belli en az
         ESIK hata yoksa sayı değil cümle gösterilir. Yalnız yanlış ve boş
         sorular fotoğraflandığı için «o konudan kaç soru soruldu» bilinmez;
-        karne bunu iddia etmez, hataların konu payını söyler. */
+        karne bunu iddia etmez, hataların konu payını söyler. Karneye yalnız
+        DENEMEYE bağlı hatalar girer ve yayın, hatanın değil denemenin
+        yayınıdır: Öğren, çıkmış soru ve test kitabı hataları ne bu yayına ne
+        «öteki yayınlar»a karışır (bir denemenin yayını «ÖSYM» yazılsa bile). */
 
 window.R = window.R || {};
 
 R.DenemeAnaliz = (function(){
   const HARF = 'ABCDE';
   const ESIK = 5;
-  const COZUM_SINIR = 4000;
+  /* Çözüm cihazda durur (söz 5); sınır yalnız taşkına karşı. Bütçe 2 200
+     token × en çok 3 parça (llm.js) ≈ 20 000 karakter. */
+  const COZUM_SINIR = 20000;
+  const KART_FIKIR = 240;
 
   const norm = s => (R.U && R.U.norm ? R.U.norm(s) : String(s || '').toLowerCase());
   const M = () => R.Model;
@@ -86,16 +105,23 @@ R.DenemeAnaliz = (function(){
      ya da numaralı («1-A 2-C», «1) A», «1.A»). */
   function ayristir(metin, q, tur){
     const cevap = tur === 'cevap';
-    const s = String(metin == null ? '' : metin).toUpperCase();
+    const ham = String(metin == null ? '' : metin);
+    const s = ham.toUpperCase();
     if(!s.trim()) return { ok:false, hata:'boş' };
+    const CIFT = /(\d{1,3})\s*[-.):=]?\s*([A-E*.\-_])(?![A-ZÇĞİÖŞÜ])/g;
     const cifts = [];
-    const re = /(\d{1,3})\s*[-.):=]?\s*([A-E*.\-_])(?![A-ZÇĞİÖŞÜ])/g;
     let m;
-    while((m = re.exec(s)) !== null) cifts.push([Number(m[1]), m[2]]);
-    const beklenen = Number(q) || 0;
-    const numarali = cifts.length >= Math.max(3, Math.ceil(beklenen / 2));
+    while((m = CIFT.exec(s)) !== null) cifts.push([Number(m[1]), m[2]]);
+    let beklenen = Number(q) || 0;
     let dizi;
-    if(numarali){
+    /* Rakam varsa biçim numaralıdır: yan yana biçimde rakam zaten geçersiz. */
+    if(/\d/.test(s)){
+      const artik = s.replace(CIFT, ' ').replace(/[\s,;|/]+/g, ' ').trim();
+      if(!cifts.length || /[A-Z0-9ÇĞİÖŞÜ*]/.test(artik)){
+        const parca = artik.split(' ').filter(x => /[A-Z0-9ÇĞİÖŞÜ*]/.test(x)).slice(0, 3).join(' ');
+        return { ok:false, hata:'numaralı yazımda yalnız «1-A 2-C» gibi çiftler olmalı; şu kısım okunmadı: «' + parca + '»' };
+      }
+      if(!beklenen && !cevap) beklenen = Math.max.apply(null, cifts.map(c => c[0]));
       if(!beklenen) return { ok:false, hata:'soru sayısı bilinmiyor' };
       const l = new Array(beklenen).fill(null);
       for(const [no, h] of cifts){
@@ -107,14 +133,16 @@ R.DenemeAnaliz = (function(){
       if(eksik.length && !cevap) return { ok:false, hata:'şu soruların harfi yok: ' + eksik.slice(0, 6).join(', ') + (eksik.length > 6 ? '…' : '') };
       dizi = l.map(h => h == null ? '.' : h).join('');
     }else{
-      dizi = s.replace(/[\s,;|]+/g, '');
+      const sade = ham.replace(/[\s,;|]+/g, '');
       const izinli = cevap ? /^[A-E.\-_]$/ : /^[A-E*]$/;
-      const kotu = Array.from(dizi).find(c => !izinli.test(c));
+      /* Hata metni kullanıcının yazdığı harfi gösterir: «ı» büyütülünce «I» olur. */
+      const kotu = Array.from(sade).find(c => !izinli.test(c.toUpperCase()));
       if(kotu){
         const neden = !cevap && /[.\-_]/.test(kotu) ? 'anahtarda boş olmaz; iptal soru için * yaz'
           : cevap && kotu === '*' ? 'cevapta * olmaz; boş için nokta yaz' : '«' + kotu + '» geçersiz';
         return { ok:false, hata:neden };
       }
+      dizi = sade.toUpperCase();
       if(beklenen && dizi.length !== beklenen) return { ok:false, hata:beklenen + ' soru bekleniyordu, ' + dizi.length + ' harf yazıldı' };
     }
     if(cevap) dizi = dizi.replace(/[\-_]/g, '.');
@@ -139,10 +167,16 @@ R.DenemeAnaliz = (function(){
     return { sorular, d, y, b, iptal, net:M().testNet({ correct:d, wrong:y }) };
   }
 
-  /* Testin soru sayısı: şablondan; şablonda yoksa yazılmış anahtarın boyu. */
+  /* Testin soru sayısı: şablondan (ad tutmazsa aynı sıradaki şablon testi;
+     kullanıcı testin adını değiştirebilir); şablonda yoksa yazılmış
+     anahtarın boyu. */
   function soruSayisi(exam, testAdi){
     const tmpl = (R.EXAM_TEMPLATES || []).find(t => t.id === exam.templateId);
-    const t = tmpl && tmpl.tests.find(x => x.name === testAdi);
+    let t = tmpl && tmpl.tests.find(x => x.name === testAdi);
+    if(!t && tmpl && (exam.tests || []).length === tmpl.tests.length){
+      const i = exam.tests.findIndex(x => x.name === testAdi);
+      if(i >= 0) t = tmpl.tests[i];
+    }
     if(t) return t.q;
     const a = (exam.anahtar || {})[testAdi];
     return a ? a.length : null;
@@ -176,7 +210,15 @@ R.DenemeAnaliz = (function(){
 
   /* Bütün testleri önce doğrular; biri bozuksa HİÇBİRİ yazılmaz.
      girdiler: [{ test, anahtar, cevap }]. Döner: { ok, hatalar:[…] }. */
+  function ayniAdlar(exam){
+    const adlar = (exam.tests || []).map(t => t.name);
+    return adlar.filter((a, i) => adlar.indexOf(a) !== i).filter((a, i, l) => l.indexOf(a) === i);
+  }
+
   async function girdileriYaz(exam, girdiler){
+    const ayni = ayniAdlar(exam);
+    if(ayni.length) return { ok:false, hatalar:['İki testin adı aynı (' + ayni.map(a => '«' + a + '»').join(', ')
+      + '); anahtarları karışır. Denemeyi düzenleyip test adlarını ayır.'] };
     const sonuc = (girdiler || []).map(g => Object.assign({ test:g.test }, dogrula(exam, g.test, g.anahtar, g.cevap)));
     const hatalar = sonuc.filter(x => !x.ok).map(x => x.hata);
     if(hatalar.length) return { ok:false, hatalar };
@@ -193,30 +235,46 @@ R.DenemeAnaliz = (function(){
 
   /* ---------- kaydı güncelleme (söz 2) ---------- */
 
+  const sayilar = t => ({ correct:t.correct, wrong:t.wrong, blank:t.blank, blankCert:t.blankCert });
+  const ayniSayi = (t, w) => Number(t.correct) === Number(w.correct) && Number(t.wrong) === Number(w.wrong)
+    && String(t.blank) === String(w.blank);
+
   async function kaydiGuncelle(exam){
     const oz = ozet(exam);
     const degisen = oz.testler.filter(t => t.fark);
     if(!degisen.length) return 0;
-    exam.anahtarOncesi = { at:new Date().toISOString(),
-      tests:exam.tests.map(t => ({ name:t.name, correct:t.correct, wrong:t.wrong, blank:t.blank, blankCert:t.blankCert })) };
+    /* İlk güncelleme kullanıcının yazdığını saklar; sonrakiler onu ezmez. */
+    if(!exam.anahtarOncesi) exam.anahtarOncesi = { at:new Date().toISOString(),
+      tests:exam.tests.map(t => Object.assign({ name:t.name }, sayilar(t))), yazilan:{} };
+    exam.anahtarOncesi.yazilan = exam.anahtarOncesi.yazilan || {};
     degisen.forEach(x => {
       const t = exam.tests.find(z => z.name === x.ad);
       t.correct = x.sonuc.d; t.wrong = x.sonuc.y; t.blank = x.sonuc.b; t.blankCert = 'measured';
+      exam.anahtarOncesi.yazilan[x.ad] = sayilar(t);
     });
     await M().saveExam(exam);
     return degisen.length;
   }
 
+  /* Döner: { ok, atlanan:[test adı] }. Güncellemeden sonra elle düzeltilen
+     test geri alınmaz (söz 2). Eski kayıtta «yazilan» yoksa hepsi geri gelir. */
   async function geriAl(exam){
     const o = exam.anahtarOncesi;
-    if(!o) return false;
+    if(!o) return { ok:false, atlanan:[] };
+    const atlanan = [];
     o.tests.forEach(x => {
       const t = exam.tests.find(z => z.name === x.name);
-      if(t){ t.correct = x.correct; t.wrong = x.wrong; t.blank = x.blank; t.blankCert = x.blankCert; }
+      if(!t) return;
+      if(o.yazilan){
+        const w = o.yazilan[x.name];
+        if(!w) return;
+        if(!ayniSayi(t, w)){ atlanan.push(x.name); return; }
+      }
+      t.correct = x.correct; t.wrong = x.wrong; t.blank = x.blank; t.blankCert = x.blankCert;
     });
     delete exam.anahtarOncesi;
     await M().saveExam(exam);
-    return true;
+    return { ok:true, atlanan };
   }
 
   /* ---------- yanlış ve boş sorular ---------- */
@@ -228,8 +286,11 @@ R.DenemeAnaliz = (function(){
   }
   const sahip = (exam, key) => 'deneme:' + exam.id + ':' + key;
 
+  /* «05», « 5» ve 5 aynı sorudur (elle girilen hata kaydı yazıldığı gibi saklanır). */
+  const noNorm = v => /^\s*\d+\s*$/.test(String(v == null ? '' : v)) ? String(Number(v)) : String(v == null ? '' : v).trim();
+
   function hataOf(exam, test, no){
-    return (R.S.errors || []).find(e => e.examId === exam.id && e.testName === test && String(e.questionNo) === String(no)) || null;
+    return (R.S.errors || []).find(e => e.examId === exam.id && e.testName === test && noNorm(e.questionNo) === noNorm(no)) || null;
   }
 
   function yanlislar(exam){
@@ -298,6 +359,44 @@ R.DenemeAnaliz = (function(){
 
   function hazir(){ return !!(R.Solver && R.Solver.ready && R.Solver.ready(true)); }
 
+  /* Söz 5: modelin şıkkı O ANKİ anahtarla. true / false / null (şık yok,
+     çözülmedi ya da iptal soru). */
+  function tutarOf(exam, key){
+    const a = (exam.soruAnaliz || {})[key];
+    const h = a && /^[A-E]$/.test(String(a.modelCevap || '')) ? a.modelCevap : null;
+    const [test, no] = bol(key);
+    const dogru = anahtarHarfi(exam, test, no);
+    return h && dogru && dogru !== '*' ? h === dogru : null;
+  }
+
+  /* Çözüm metni: cihazdaki kayıt; eski sürümün deftere yazdığı da okunur. */
+  function cozumOf(exam, key){
+    const t = R.SoruFoto && R.SoruFoto.metin ? R.SoruFoto.metin(sahip(exam, key)) : null;
+    const a = (exam.soruAnaliz || {})[key];
+    return t || (a && a.cozum) || null;
+  }
+
+  /* Kartın arkası için çözümün «Nereden başlanır?» bölümü (data/solver.js
+     biçimi), cümle sonunda kesilmiş. Bulunmazsa ''. Sorunun yazılı metni
+     («Soru: …») hiçbir zaman alınmaz. */
+  function baslangicFikri(cozum){
+    const t = String(cozum || '').replace(/\r/g, '');
+    const m = t.match(/Nereden başlanır\??[\s*_#"”»:—–-]*([\s\S]*?)(?=\n[\s*_#"“«]*(?:Adım\s*\d|Cevap\b|Kontrol\b|Tuzak\b|Kısayol\b|\d\)\s)|$)/i);
+    if(!m) return '';
+    let f = m[1].replace(/[*_#`]/g, '').replace(/\s+/g, ' ').trim();
+    if(f.length > KART_FIKIR){
+      const kes = f.slice(0, KART_FIKIR);
+      const son = Math.max(kes.lastIndexOf('. '), kes.lastIndexOf('! '), kes.lastIndexOf('? '));
+      f = son > 60 ? kes.slice(0, son + 1) : kes.replace(/\s+\S*$/, '') + '…';
+    }
+    return f;
+  }
+
+  function kartArkasi(exam, key, dogru){
+    const fikir = tutarOf(exam, key) === true ? baslangicFikri(cozumOf(exam, key)) : '';
+    return 'Doğru cevap: ' + dogru + '. ' + (fikir ? 'Nereden başlanır: ' + fikir : 'Çözümü ve ilkeyi hata kaydına yaz.');
+  }
+
   async function coz(exam, key, opts){
     const o = opts || {};
     const [test, no] = bol(key);
@@ -322,9 +421,11 @@ R.DenemeAnaliz = (function(){
     const tutar = harf && dogru && dogru !== '*' ? harf.toUpperCase() === dogru : null;
     const a = analizAl(exam, key, true);
     const eski = a.topicRef || '';
-    a.cozum = String((r && r.text) || '').slice(0, COZUM_SINIR);
+    const kayit = await R.SoruFoto.metinKaydet(sahip(exam, key), String((r && r.text) || '').slice(0, COZUM_SINIR));
+    if(!kayit.ok) return { ok:false, note:kayit.why };
+    delete a.cozum; delete a.tutar;
+    a.cozuldu = true;
     a.modelCevap = harf ? harf.toUpperCase() : String(m.answer || '').slice(0, 40);
-    a.tutar = tutar;
     a.model = (r && r.model) || '';
     a.cozumAt = new Date().toISOString();
     let konuNotu = '';
@@ -365,8 +466,7 @@ R.DenemeAnaliz = (function(){
     await M().saveError(err);
     const card = M().newCard({
       front:(err.topic || test) + ' — ' + test + ' ' + no + '. soru' + (exam.publisher ? ' (' + exam.publisher + ')' : ''),
-      back:a.tutar === true && a.cozum ? a.cozum.slice(0, 400)
-        : 'Doğru cevap: ' + satir.anahtar + '. Çözümü ve ilkeyi hata kaydına yaz.',
+      back:kartArkasi(exam, key, satir.anahtar),
       topic:err.topic || test, subjectId:err.subjectId, source:'error', sourceRef:err.id,
     });
     await M().saveCard(card);
@@ -392,10 +492,14 @@ R.DenemeAnaliz = (function(){
   function yayinKarnesi(yayin){
     const n = yayinAd(yayin);
     if(!n) return null;
-    const denemeler = (R.S.exams || []).filter(e => yayinAd(e.publisher) === n);
-    const hatalar = (R.S.errors || []).filter(e => yayinAd(e.publisher) === n);
+    /* Söz 8: yayın denemeden gelir; denemeye bağlı olmayan hata karneye girmez. */
+    const yayinOf = {};
+    (R.S.exams || []).forEach(e => { yayinOf[e.id] = yayinAd(e.publisher); });
+    const denemeler = (R.S.exams || []).filter(e => yayinOf[e.id] === n);
+    const bagli = (R.S.errors || []).filter(e => e.examId && yayinOf[e.examId] != null);
+    const hatalar = bagli.filter(e => yayinOf[e.examId] === n);
     const konulu = hatalar.filter(e => e.topicId);
-    const oteki = (R.S.errors || []).filter(e => e.topicId && yayinAd(e.publisher) !== n);
+    const oteki = bagli.filter(e => e.topicId && yayinOf[e.examId] && yayinOf[e.examId] !== n);
     const say = {};
     konulu.forEach(e => {
       const k = e.subjectId + '::' + e.topicId;
@@ -418,5 +522,5 @@ R.DenemeAnaliz = (function(){
 
   return { ESIK, dersler, konuSecenekleri, konuBul, ayristir, karsilastir, soruSayisi, ozet,
     dogrula, girdileriYaz, kaydiGuncelle, geriAl, yanlislar, sahip, bol, hataOf, konuYaz,
-    hazir, coz, hatayaEkle, hepsiniEkle, yayinKarnesi };
+    hazir, tutarOf, cozumOf, baslangicFikri, coz, hatayaEkle, hepsiniEkle, yayinKarnesi };
 })();

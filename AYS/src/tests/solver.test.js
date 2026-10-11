@@ -548,6 +548,13 @@
     it('şık harfi ve sayı çıkarıcıları tek başına da doğru çalışır', () => {
       expect(Q.optionLetter('D şıkkı')).toBe('d');
       expect(Q.optionLetter('cevap 12')).toBeNull();
+      /* Olumsuz cümle harf uydurmaz (denetim 2026-10-11). */
+      expect(Q.optionLetter('12, C şıkkı değil')).toBeNull();
+      expect(Q.optionLetter('A şıkkı değil, D')).toBeNull();
+      expect(Q.optionLetter('Cevap: 12 (C şıkkı değil)')).toBeNull();
+      expect(Q.optionLetter('B şıkkı ya da D şıkkı')).toBeNull();
+      expect(Q.optionLetter('(C) şıkkı')).toBe('c');
+      expect(Q.optionLetter('cevap: E')).toBe('e');
       expect(Q.numbersOf('x = -3,5 ve y = 1.200')).toEqual([-3.5, 1200]);
     });
   });

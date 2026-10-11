@@ -278,7 +278,14 @@ R.Screens.exams = (function(){
 
   /* SORU ANALİZİ (core/denemeanaliz.js): anahtar + cevaplar → soru soru
      sonuç; yanlış/boş soruların fotoğrafı, konusu, çözümü, hata kaydı. */
-  let fotoIstendi = false;
+  let fotoIstendi = false, sahipsizBakildi = false;
+  /* Başka cihazda silinen denemenin fotoğrafları (core/sorufoto.js söz 7);
+     oturumda bir kez, defter yüklüyken ve boş değilken. */
+  function sahipsizTemizle(){
+    if(sahipsizBakildi || !R.SoruFoto || !R.SoruFoto.sahipsizTemizle || !(S.exams || []).length) return;
+    sahipsizBakildi = true;
+    R.SoruFoto.sahipsizTemizle(S.exams.map(e => e.id)).catch(() => {});
+  }
   function fotoUrl(exam, key){
     if(!R.SoruFoto) return null;
     if(!R.SoruFoto.var() && !fotoIstendi){
@@ -288,9 +295,9 @@ R.Screens.exams = (function(){
     return R.SoruFoto.url(R.DenemeAnaliz.sahip(exam, key));
   }
 
-  function cozumRozeti(a){
-    if(a.tutar === true) return K.Badge({ label:'anahtarla tutuyor', tone:'ok' });
-    if(a.tutar === false) return K.Badge({ label:'anahtarla tutmuyor — güvenme', tone:'danger' });
+  function cozumRozeti(tutar){
+    if(tutar === true) return K.Badge({ label:'anahtarla tutuyor', tone:'ok' });
+    if(tutar === false) return K.Badge({ label:'anahtarla tutmuyor — güvenme', tone:'danger' });
     return K.Badge({ label:'karşılaştırılamadı', tone:'warn' });
   }
 
@@ -298,6 +305,9 @@ R.Screens.exams = (function(){
     const a = x.analiz || {};
     const foto = fotoUrl(exam, x.key);
     const konu = a.topicRef ? R.DenemeAnaliz.konuBul(a.topicRef) : null;
+    /* «Tutuyor» o anki anahtarla hesaplanır (denemeanaliz söz 5). */
+    const cozum = R.DenemeAnaliz.cozumOf(exam, x.key);
+    const tutar = R.DenemeAnaliz.tutarOf(exam, x.key);
     return html`
       <div class="dsoru">
         <div class="row between wrap gap-8">
@@ -314,7 +324,7 @@ R.Screens.exams = (function(){
               <input type="file" accept="image/*" capture="environment" data-change="da-foto" data-key="${x.key}"
                 aria-label="${x.test + ' ' + x.no + '. sorunun fotoğrafı'}"/>
             </label>
-            ${when(foto, () => K.Button({ label:a.cozum ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'da-coz',
+            ${when(foto, () => K.Button({ label:a.cozuldu || cozum ? 'Yeniden çöz' : 'Çöz', size:'sm', act:'da-coz',
               disabled:!hazir, title:hazir ? '' : 'Görüntü okuyabilen bir model gerekir (Ayarlar › Model)', data:{ 'data-key':x.key } }))}
             ${x.hata ? K.Badge({ label:'hata kaydında', tone:'ok' })
               : K.Button({ label:'Hata kaydına ekle', size:'sm', act:'da-hata', data:{ 'data-key':x.key } })}
@@ -327,12 +337,13 @@ R.Screens.exams = (function(){
           ${when(konu, () => K.Button({ label:'Konuyu aç', size:'sm', tone:'ghost', act:'ogren-git',
             data:{ 'data-route':'anlatim', 'data-subject':konu.subject.id, 'data-topic':konu.topic.id } }))}
         </div>
-        ${when(a.cozum, () => html`
+        ${when(cozum, () => html`
           <details class="dsoru__cozum mt-8">
-            <summary class="small">Çözüm ${cozumRozeti(a)}${when(a.modelCevap, () => html` <span class="tiny dim">model: ${a.modelCevap}</span>`)}</summary>
-            ${when(a.tutar === false, () => html`<p class="small mt-8">Modelin cevabı (${a.modelCevap}) anahtardaki ${x.anahtar} şıkkına varmadı. Ya model yanılıyor ya anahtar; bu çözümü doğru sanma.</p>`)}
-            <div class="small dsoru__metin mt-8">${a.cozum}</div>
+            <summary class="small">Çözüm ${cozumRozeti(tutar)}${when(a.modelCevap, () => html` <span class="tiny dim">model: ${a.modelCevap}</span>`)}</summary>
+            ${when(tutar === false, () => html`<p class="small mt-8">Modelin cevabı (${a.modelCevap}) anahtardaki ${x.anahtar} şıkkına varmadı. Ya model yanılıyor ya anahtar; bu çözümü doğru sanma.</p>`)}
+            <div class="small dsoru__metin mt-8">${cozum}</div>
           </details>`)}
+        ${when(!cozum && a.cozuldu, () => html`<p class="tiny dim mt-8">Bu soru başka bir cihazda çözüldü; çözüm orada duruyor.</p>`)}
       </div>`;
   }
 
@@ -822,6 +833,7 @@ R.Screens.exams = (function(){
 
   function afterRender(){
     if(R.ExamRun.active()) startTick(); else stopTick();
+    sahipsizTemizle();
   }
 
   const handle = {
@@ -1058,7 +1070,10 @@ R.Screens.exams = (function(){
     async 'da-geri'(el){
       const exam = S.exams.find(e => e.id === el.dataset.id);
       if(!exam) return;
-      UI.toast(await R.DenemeAnaliz.geriAl(exam) ? 'Önceki sayılar geri geldi' : 'Geri alınacak güncelleme yok');
+      const r = await R.DenemeAnaliz.geriAl(exam);
+      UI.toast(!r.ok ? 'Geri alınacak güncelleme yok'
+        : r.atlanan.length ? 'Önceki sayılar geri geldi; elle düzelttiğin ' + r.atlanan.join(', ') + ' olduğu gibi kaldı'
+        : 'Önceki sayılar geri geldi');
       R.App.render();
     },
     async 'da-coz'(el){

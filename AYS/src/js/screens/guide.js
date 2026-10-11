@@ -796,6 +796,14 @@ R.Screens.guide = (function(){
       bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}</div>`);
   }
 
+  /* «Bütün veriyi sil»: defter VE bu cihazdaki soru fotoğrafları ile çözümleri
+     (core/sorufoto.js). Fotoğraf IndexedDB'dedir; yalnız defteri silmek onları
+     cihazda bırakıyordu (denetim 2026-10-11). */
+  async function tumunuSil(){
+    await R.Store.clear();
+    if(R.SoruFoto) await R.SoruFoto.temizle();
+  }
+
   const handle = {
     async 'hafiza-ekle'(){
       const el = document.getElementById('hafiza-yeni');
@@ -1105,13 +1113,13 @@ R.Screens.guide = (function(){
         const yedek = R.Store.exportAll();
         G.kapiAc({ baslik:'Tüm veriyi sıfırla', not:(window.LIFEOS && window.LIFEOS.HESAP ? window.LIFEOS.HESAP.silmeNotu() : null), nesne:'kaydı', sayi:Object.keys(yedek.data || {}).length,
           sheet:o => UI.sheet(o), yedekAl:() => handle['export-data'](),
-          sil:async () => { await R.Store.clear(); UI.closeSheet(); location.reload(); } });
+          sil:async () => { await tumunuSil(); UI.closeSheet(); location.reload(); } });
         return;
       }
       UI.confirmSheet('Tüm veriyi sıfırla',
         'Tüm haftalar, günler, denemeler, hatalar ve kartlar silinecek. Bu işlem geri alınamaz — önce yedek al.',
         async () => {
-          await R.Store.clear();
+          await tumunuSil();
           UI.closeSheet();
           location.reload();
         }, true, 'Bütün veriyi sil');
@@ -1146,6 +1154,6 @@ R.Screens.guide = (function(){
     title:'Genel ayarlar',
     subtitle(){ return 'Ayarlar, takvim ve protokoller — alt alta'; },
     actions(){ return ''; },
-    render, handle, change,
+    render, handle, change, tumunuSil,
   };
 })();

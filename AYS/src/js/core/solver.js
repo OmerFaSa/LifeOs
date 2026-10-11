@@ -164,9 +164,16 @@ R.Solver = (function(){
     /* 1) Cevabin TAMAMI tek harf: "c", "C)", "(c)", "c." */
     let m = t.match(/^\(?\s*([a-e])\s*[)\].:\-]?\s*$/);
     if(m) return m[1];
-    /* 2) "c sikki", "d secenegi" */
-    m = t.match(/(?:^|\s)([a-e])\s*[).]?\s*(?:sik|sikki|secenek|secenegi)\b/);
-    if(m) return m[1];
+    /* Olumsuz cumle ("c sikki degil", "a sikki olamaz") harf UYDURMAZ:
+       once "12, C sikki degil" c okunuyordu (denetim 2026-10-11). Olumsuz
+       bir sik gecen cevap taninmaz; karsilastirma sayilara duser. */
+    if(/(?:^|[\s(])[a-e]\s*[).]?\s*(?:sik|sikki|secenek|secenegi)?\s*(?:degil|olamaz|yanlis)\b/.test(t)) return null;
+    /* 2) "c sikki", "d secenegi" — tek bir sik adi gecmeli. */
+    const siklar = [];
+    const re2 = /(?:^|[\s(])([a-e])\s*[).]?\s*(?:sik|sikki|secenek|secenegi)\b/g;
+    while((m = re2.exec(t)) !== null) if(siklar.indexOf(m[1]) < 0) siklar.push(m[1]);
+    if(siklar.length === 1) return siklar[0];
+    if(siklar.length > 1) return null;
     /* 3) "cevap: c", "yanit d" — sonda. */
     m = t.match(/\b(?:cevap|yanit|dogru)\s*[:=\-]?\s*\(?([a-e])\)?\s*$/);
     return m ? m[1] : null;

@@ -15,6 +15,16 @@
         karışmaz: anahtar profil kimliğiyle başlar.
      5. DEPO YOKSA SÖYLENİR. IndexedDB açılamazsa (gizli pencere) kaydetmeye
         çalışan eylem nedenini söyler; başka hiçbir işlev bozulmaz.
+     6. ÇÖZÜM METNİ FOTOĞRAFIN YANINDA DURUR. Modelin çözümü birkaç bin
+        karakterdir; ana deftere yazılınca (localStorage, tek anahtar) elli
+        denemede kotanın çoğunu yiyordu (denetim 2026-10-11). Çözüm,
+        fotoğrafı olan cihazda üretilir; fotoğraf gibi orada kalır ve
+        fotoğrafla birlikte silinir. Açılışta belleğe alınır, ekran onu
+        beklemeden okur.
+     7. SAHİPSİZ KALAN SİLİNİR, ACELE EDİLMEDEN. Deneme başka bir cihazda
+        silinip eşitlemeyle giderse buradaki fotoğrafı sahipsiz kalır.
+        Deneme defterde yoksa ve kayıt en az 30 günlükse silinir; bekleme,
+        geri yükleme gibi geçici bir boşlukta fotoğrafın gitmemesi içindir.
 
    SPİ'nin core/foto.js kalıbı; AYS'de soru okunabilirliği için daha büyük
    kenar ve önekle toplu silme (deneme silinince fotoğrafları da gider). */
@@ -32,6 +42,9 @@ R.SoruFoto = (function(){
 
   let db = null, hazir = null, yok = false;
   const adres = new Map();        /* anahtar → blob URL */
+  const metinler = new Map();     /* anahtar → çözüm metni (söz 6) */
+  const METIN = '|cozum';
+  const SAHIPSIZ_GUN = 30;
 
   function profil(){
     try{ return localStorage.getItem('rota.activeProfile') || 'main'; }catch(e){ return 'main'; }
@@ -69,7 +82,9 @@ R.SoruFoto = (function(){
         const hepsi = await islem('readonly', s => s.getAll());
         const on = profil() + '|';
         (hepsi || []).forEach(r => {
-          if(r && r.k && r.k.indexOf(on) === 0 && r.blob) adres.set(r.k, URL.createObjectURL(r.blob));
+          if(!r || !r.k || r.k.indexOf(on) !== 0) return;
+          if(r.blob) adres.set(r.k, URL.createObjectURL(r.blob));
+          else if(typeof r.metin === 'string') metinler.set(r.k, r.metin);
         });
       }catch(e){
         yok = true;
@@ -151,6 +166,20 @@ R.SoruFoto = (function(){
     adres.delete(k);
   }
 
+  /* Çözüm metni (söz 6). Boş metin kaydı siler. Döner: { ok } ya da { ok:false, why }. */
+  async function metinKaydet(sahip, metin){
+    await hazirla();
+    if(!var_()) return { ok:false, why:'Bu tarayıcı çözüm saklayamıyor (gizli pencere olabilir).' };
+    const k = anahtar(sahip) + METIN, m = String(metin || '');
+    try{
+      if(m) await islem('readwrite', s => s.put({ k, metin:m, at:new Date().toISOString() }));
+      else await islem('readwrite', s => s.delete(k));
+    }catch(e){ return { ok:false, why:'Çözüm kaydedilemedi (depo dolu olabilir).' }; }
+    if(m) metinler.set(k, m); else metinler.delete(k);
+    return { ok:true };
+  }
+  function metin(sahip){ return metinler.get(anahtar(sahip) + METIN) || null; }
+
   /* Bir önekin bütün fotoğrafları (ör. silinen bir denemenin). Döner: sayı. */
   async function onekSil(onek){
     await hazirla();
@@ -159,8 +188,27 @@ R.SoruFoto = (function(){
     const anahtarlar = ((await islem('readonly', s => s.getAllKeys())) || [])
       .filter(k => String(k).indexOf(on) === 0);
     if(anahtarlar.length) await islem('readwrite', s => { anahtarlar.forEach(k => s.delete(k)); });
-    anahtarlar.forEach(k => { const u = adres.get(k); if(u) URL.revokeObjectURL(u); adres.delete(k); });
+    anahtarlar.forEach(k => { const u = adres.get(k); if(u) URL.revokeObjectURL(u); adres.delete(k); metinler.delete(k); });
     return anahtarlar.length;
+  }
+
+  /* Söz 7: defterde olmayan denemelerin en az SAHIPSIZ_GUN günlük kayıtları.
+     varOlan: deneme kimlikleri. Döner: silinen kayıt sayısı. */
+  async function sahipsizTemizle(varOlan, o){
+    const opt = o || {};
+    await hazirla();
+    if(!var_()) return 0;
+    const ids = new Set(varOlan || []);
+    const sinir = (opt.simdi || Date.now()) - (opt.gun == null ? SAHIPSIZ_GUN : opt.gun) * 864e5;
+    const on = anahtar('deneme:');
+    const silinecek = ((await islem('readonly', s => s.getAll())) || []).filter(r => {
+      if(!r || String(r.k).indexOf(on) !== 0) return false;
+      const id = String(r.k).slice(on.length).split(':')[0];
+      return !ids.has(id) && Date.parse(r.at || 0) < sinir;
+    }).map(r => r.k);
+    if(silinecek.length) await islem('readwrite', s => { silinecek.forEach(k => s.delete(k)); });
+    silinecek.forEach(k => { const u = adres.get(k); if(u) URL.revokeObjectURL(u); adres.delete(k); metinler.delete(k); });
+    return silinecek.length;
   }
 
   /* Bu profilin BÜTÜN fotoğrafları — «Bütün veriyi sil». */
@@ -171,9 +219,10 @@ R.SoruFoto = (function(){
     if(db){ try{ db.close(); }catch(e){ /* kapalı */ } }
     adres.forEach(u => URL.revokeObjectURL(u));
     adres.clear();
+    metinler.clear();
     db = null; hazir = null; yok = false;
   }
 
-  return { hazirla, var:var_, url, kaydet, al, sil, onekSil, temizle, kucult,
+  return { hazirla, var:var_, url, kaydet, al, sil, metinKaydet, metin, onekSil, sahipsizTemizle, temizle, kucult,
     EN_UZUN, _ortam:ortam, _sifirla };
 })();
