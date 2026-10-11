@@ -57,6 +57,54 @@
       expect(bozuk).toEqual([]);
     });
 
+    it('şekilli içerik yüzeyi temaya bağlı renkle anmaz («koyu renkli» koyu temada açık görünür)', () => {
+      const yerler = [];
+      const bak = (yer, x) => {
+        if(!x || !x.sekil) return;
+        const metin = [x.soru, x.metin, x.sekil.alt, x.ipucu].concat(x.cozum || []).join(' ');
+        if(/\bkoyu\b|\bkoyu renk|açık renk|\bsiyah\b|\bbeyaz\b/i.test(metin)) yerler.push(yer);
+      };
+      Object.keys(R.KONU_ANLATIM || {}).forEach(k => {
+        const a = R.KONU_ANLATIM[k];
+        (a.bolumler || []).forEach((b, i) => { bak(k + ' bölüm ' + (i + 1), b); bak(k + ' bölüm örneği ' + (i + 1), b.ornek); });
+        (a.sorular || []).forEach((q, i) => bak(k + ' temel soru ' + (i + 1), q));
+      });
+      Object.keys(R.KONU_DERIN || {}).forEach(k => {
+        const d = R.KONU_DERIN[k];
+        (d.ornekler || []).forEach((o, i) => bak(k + ' örnek ' + (i + 1), o));
+        (d.sorular || []).forEach((q, i) => bak(k + ' derin soru ' + (i + 1), q));
+      });
+      ((R.Paragraf && R.Paragraf.HAVUZ) || []).forEach(q => bak('paragraf ' + q.id, q));
+      expect(yerler).toEqual([]);
+    });
+
+    it('şekil yazıları çizim alanından taşmaz ve birbirinin üstüne binmez', () => {
+      /* Denetim 2026-10-11: eksen adları kutudan taşıyor, «400» ile «L» gibi
+         yazılar üst üste biniyordu. Ölçü tarayıcının kendisinden (getBBox). */
+      const kap = document.createElement('div');
+      kap.className = 'sekil';
+      kap.style.cssText = 'position:absolute;left:-9999px;top:0;width:600px;';
+      document.body.appendChild(kap);
+      const sorun = [];
+      try{
+        butunTarifler().filter(x => x.tur === 'sekil').forEach(x => {
+          kap.innerHTML = SK().svg(x.v);
+          const kutular = Array.from(kap.querySelectorAll('text')).map(t => ({ m:t.textContent, b:t.getBBox() }));
+          kutular.forEach(k => {
+            if(k.b.x < -1 || k.b.y < -1 || k.b.x + k.b.width > x.v.w + 1 || k.b.y + k.b.height > x.v.h + 1)
+              sorun.push(x.yer + ': «' + k.m + '» çizim alanından taşıyor');
+          });
+          for(let i = 0; i < kutular.length; i++) for(let j = i + 1; j < kutular.length; j++){
+            const a = kutular[i].b, b = kutular[j].b;
+            const w = Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x);
+            const h = Math.min(a.y + a.height, b.y + b.height) - Math.max(a.y, b.y);
+            if(w > 1 && h > 3) sorun.push(x.yer + ': «' + kutular[i].m + '» ile «' + kutular[j].m + '» üst üste');
+          }
+        });
+      }finally{ kap.remove(); }
+      expect(sorun).toEqual([]);
+    });
+
     it('çizim: rol, etiket, viewBox; yazı kaçırılır; kusurlu tarif çizilmez', () => {
       const svg = SK().svg(UCGEN);
       expect(SK().denetle(UCGEN)).toEqual([]);

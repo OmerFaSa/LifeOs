@@ -12,7 +12,12 @@
         yazılar kaçırılır, sayılar sonlu ve sınırlı olmak zorundadır.
         İçerikten ekrana betik ya da öznitelik sızamaz (denetle()).
      2. TEMA KODDA. Çizgi ve yazı currentColor'dır, vurgu --accent'tir;
-        koyu ve açık temada, bütün paletlerde aynı çizim okunur.
+        koyu ve açık temada, bütün paletlerde aynı çizim okunur. Bu yüzden
+        dolu (f) ve gölgeli (g) yüzey koyu temada AÇIK görünür: içerik bir
+        yüzeyi «koyu/açık renkli» diye anmaz, «içi dolu», «taralı», «içi
+        boş» der ya da yüzeye yazı koyar. Denetim 2026-10-11: «koyu renkli
+        birey hastadır» diyen soyağacı koyu temada tersten okunuyordu
+        (sekil.test.js bunu bütün içerikte arar).
      3. ŞEKLİN METNİ VAR. Her şeklin zorunlu bir «alt» cümlesi vardır:
         ekran okuyucu onu okur; kart, yanlış defteri ve koç gibi düz metin
         giden yerler de şekli bu cümleyle anlatır (metni()). Tablo da düz
@@ -191,7 +196,13 @@ R.Sekil = (function(){
       const kose = [a[0] - uy * yh, a[1] + ux * yh, b2[0] - uy * yh, b2[1] + ux * yh, b2[0] + uy * yh, b2[1] - ux * yh, a[0] + uy * yh, a[1] - ux * yh];
       return cizgi(x1, y1, a[0], a[1], '') + cizgi(b2[0], b2[1], x2, y2, '')
         + '<polygon class="sk sk-c sk-zemin" points="' + kose.map(sayi).join(' ') + '"/>'
-        + (et ? yazi(mx + uy * 14, my - ux * 14, et, 'k') : '');
+        + (et ? (() => {
+          /* Yazı kutunun yanına, kutuya değmeden: dikey dirençte yarım yazı
+             genişliği, yatayda yarım satır yüksekliği kadar ötede (denetim
+             2026-10-11: «3 Ω» kutuya yapışıyordu). */
+          const d = yh + 4 + Math.abs(uy) * String(et).length * 3.1 + Math.abs(ux) * 6;
+          return yazi(mx + uy * d, my - ux * d, et, 'k');
+        })() : '');
     },
     pil(o){
       const [x, y] = o.slice(1, 3), yon = o[3] === 'd' ? 'd' : 'y', et = o[4] || '';

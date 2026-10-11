@@ -2647,6 +2647,14 @@ body.is-dragging .drop.is-over{
 .ogr-tablo th, .ogr-tablo td{ border:1px solid var(--border); padding:6px 12px; text-align:center; }
 .ogr-tablo thead th{ background:var(--surface-2); font-weight:600; }
 .ogr-tablo tbody th{ font-weight:600; text-align:left; }
+/* Genel tablo kuralları (th 10,5 px gri, son satırın alt çizgisi yok;
+   .site--v5 th 12 px soluk) veri tablosu içindir; soru tablosunda başlık
+   sütunu veridir ve kutu kapalı olmalı (denetim 2026-10-11). */
+.ogr-tablo th, .site--v5 .ogr-tablo th{ font-size:inherit; letter-spacing:0; text-transform:none; white-space:normal;
+  padding:6px 12px; color:var(--text); border-bottom-color:var(--border); }
+.ogr-tablo thead th, .site--v5 .ogr-tablo thead th{ font-weight:600; }
+.ogr-tablo tbody tr:last-child :is(td, th){ border-bottom:1px solid var(--border); }
+.ogr-tablo tbody tr:hover :is(td, th){ background:none; }
 /* Çıkmış soru satırı: künye, durum ve harfler alt alta. */
 .cikmis .grow > span{ display:block; }
 .cikmis.is-dogru .strong{ color:var(--ok); }

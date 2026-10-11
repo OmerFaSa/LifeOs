@@ -4106,6 +4106,14 @@ body.is-dragging .drop.is-over{
 .ogr-tablo th, .ogr-tablo td{ border:1px solid var(--border); padding:6px 12px; text-align:center; }
 .ogr-tablo thead th{ background:var(--surface-2); font-weight:600; }
 .ogr-tablo tbody th{ font-weight:600; text-align:left; }
+/* Genel tablo kuralları (th 10,5 px gri, son satırın alt çizgisi yok;
+   .site--v5 th 12 px soluk) veri tablosu içindir; soru tablosunda başlık
+   sütunu veridir ve kutu kapalı olmalı (denetim 2026-10-11). */
+.ogr-tablo th, .site--v5 .ogr-tablo th{ font-size:inherit; letter-spacing:0; text-transform:none; white-space:normal;
+  padding:6px 12px; color:var(--text); border-bottom-color:var(--border); }
+.ogr-tablo thead th, .site--v5 .ogr-tablo thead th{ font-weight:600; }
+.ogr-tablo tbody tr:last-child :is(td, th){ border-bottom:1px solid var(--border); }
+.ogr-tablo tbody tr:hover :is(td, th){ background:none; }
 /* Çıkmış soru satırı: künye, durum ve harfler alt alta. */
 .cikmis .grow > span{ display:block; }
 .cikmis.is-dogru .strong{ color:var(--ok); }
@@ -16101,7 +16109,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'92f0dcb0', at:'2026-10-11 01:19', dirty:true };
+R.BUILD = { id:'eebe7165', at:'2026-10-11 01:36', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -43487,7 +43495,7 @@ Object.assign(R.KONU_DERIN, {
         cozum:['s(A ∩ B) = 30 − 12 − 8 = 10.', 's(A) = 22, s(B) = 18 ⇒ toplam 40.'] },
       { seviye:'orta', soru:'Şekildeki Venn şemasında A ve B kümelerinin bölgelerindeki eleman sayıları verilmiştir. s(A ∪ B) = 30 olduğuna göre x kaçtır?',
         sekil:{ w:260, h:150, alt:'Venn şeması: yalnız A bölgesinde 2x, A ile B’nin kesişiminde x + 2, yalnız B bölgesinde 10 eleman.',
-          o:[['r', 10, 10, 240, 130], ['d', 100, 75, 55], ['d', 160, 75, 55], ['t', 58, 30, 'A', 'b'], ['t', 202, 30, 'B', 'b'],
+          o:[['r', 10, 10, 240, 130], ['d', 100, 75, 55], ['d', 160, 75, 55], ['t', 46, 24, 'A', 'b'], ['t', 214, 24, 'B', 'b'],
             ['t', 74, 78, '2x'], ['t', 130, 78, 'x + 2', 'k'], ['t', 186, 78, '10']] },
         sec:['4', '5', '6', '7', '8'], dogru:'C',
         ipucu:'Üç bölgenin eleman sayıları toplamı s(A ∪ B)’dir.',
@@ -43982,7 +43990,7 @@ Object.assign(R.KONU_DERIN, {
         cozum:['1,5/6 = s/(s + 4) ⇒ 6s = 1,5s + 6.', '4,5s = 6 ⇒ s = 4/3 m.'] },
       { seviye:'orta', soru:'Şekildeki ABC üçgeninde DE ∥ BC, AD = 4, DB = 6, DE = x + 1 ve BC = 3x’tir. Buna göre x kaçtır?',
         sekil:{ w:250, h:190, alt:'ABC üçgeni; D, AB üzerinde, E, AC üzerinde ve DE, BC’ye paralel. AD = 4, DB = 6, DE = x + 1, BC = 3x.',
-          o:[['p', [120, 15, 30, 170, 230, 170]], ['c', 84, 77, 164, 77, 'v'], ['t', 120, 5, 'A', 'b'], ['t', 20, 178, 'B', 'b'], ['t', 240, 178, 'C', 'b'],
+          o:[['p', [120, 15, 30, 170, 230, 170]], ['c', 84, 77, 164, 77, 'v'], ['t', 120, 7, 'A', 'b'], ['t', 20, 178, 'B', 'b'], ['t', 240, 178, 'C', 'b'],
             ['t', 72, 73, 'D', 'b'], ['t', 177, 73, 'E', 'b'], ['t', 124, 66, 'x + 1', 'k'], ['t', 130, 182, '3x', 'k'], ['t', 92, 42, '4', 'k'], ['t', 48, 125, '6', 'k']] },
         sec:['3', '4', '5', '6', '8'], dogru:'C',
         ipucu:'Temel orantı: AD / AB = DE / BC.',
@@ -44134,7 +44142,7 @@ Object.assign(R.KONU_DERIN, {
       { seviye:'orta', soru:'Şekildeki d doğrusu y eksenini (0, 4) noktasında, x eksenini (6, 0) noktasında kesmektedir. d doğrusunun denklemi aşağıdakilerden hangisidir?',
         sekil:{ w:220, h:160, alt:'Koordinat düzlemi; d doğrusu y eksenini (0, 4) noktasında, x eksenini (6, 0) noktasında kesiyor.',
           o:[['e', 30, 140, 205, 15, 'x', 'y'], ['c', 15, 50, 165, 150, 'v'], ['n', 30, 60], ['n', 150, 140],
-            ['t', 38, 54, '(0, 4)', 'ks'], ['t', 150, 153, '(6, 0)', 'k'], ['t', 118, 100, 'd', 'kv'], ['t', 23, 150, 'O', 'k']] },
+            ['t', 38, 54, '(0, 4)', 'ks'], ['t', 156, 130, '(6, 0)', 'ks'], ['t', 118, 100, 'd', 'kv'], ['t', 23, 150, 'O', 'k']] },
         sec:['2x + 3y = 12', '3x + 2y = 12', '2x − 3y = 12', 'x + y = 10', '3x + 2y = 24'], dogru:'A',
         ipucu:'Eksenleri a ve b’de kesen doğru: x/a + y/b = 1.',
         cozum:['x/6 + y/4 = 1.', 'Her iki taraf 12 ile çarpılırsa 2x + 3y = 12.'] },
@@ -44247,7 +44255,7 @@ Object.assign(R.KONU_DERIN, {
       { seviye:'orta', soru:'Grafikte [−3, 4] aralığında tanımlı y = f(x) fonksiyonu verilmiştir. f(x) = 0 denkleminin kaç farklı gerçel kökü vardır?',
         sekil:{ w:230, h:170, alt:'f grafiği: (−3, 1), (−1, 3), (1, −1), (3, 2) ve (4, 2) noktalarını birleştiren kırık çizgi.',
           o:[['ok', 20, 110, 225, 110], ['ok', 105, 162, 105, 12], ['y', [30, 85, 80, 35, 130, 135, 180, 60, 205, 60], 'v'], ['n', 30, 85], ['n', 205, 60],
-            ['t', 30, 124, '−3', 'k'], ['t', 80, 124, '−1', 'k'], ['t', 130, 124, '1', 'k'], ['t', 180, 124, '3', 'k'], ['t', 205, 124, '4', 'k'],
+            ['t', 30, 124, '−3', 'k'], ['t', 77, 124, '−1', 'k'], ['t', 130, 99, '1', 'k'], ['t', 180, 124, '3', 'k'], ['t', 205, 124, '4', 'k'],
             ['t', 97, 85, '1', 'ke'], ['t', 113, 60, '2', 'ks'], ['t', 97, 35, '3', 'ke'], ['t', 97, 135, '−1', 'ke'], ['t', 221, 122, 'x', 'k'], ['t', 115, 14, 'y', 'k']] },
         sec:['1', '2', '3', '4', '5'], dogru:'B',
         ipucu:'f(x) = 0’ın kökleri, grafiğin x eksenini kestiği noktalardır.',
@@ -44542,7 +44550,7 @@ Object.assign(R.KONU_DERIN, {
           o:[['ok', 20, 90, 208, 90], ['ok', 30, 165, 30, 14], ['c', 30, 30, 67.5, 30, 'ki'], ['c', 30, 150, 142.5, 150, 'ki'],
             ['y', [30, 90, 36.25, 74.5, 42.5, 60, 48.75, 47.6, 55, 38, 61.25, 32, 67.5, 30, 73.75, 32, 80, 38, 86.25, 47.6, 92.5, 60, 98.75, 74.5, 105, 90,
               111.25, 105.5, 117.5, 120, 123.75, 132.4, 130, 142, 136.25, 148, 142.5, 150, 148.75, 148, 155, 142, 161.25, 132.4, 167.5, 120, 173.75, 105.5, 180, 90], 'v'],
-            ['t', 22, 30, '3', 'ke'], ['t', 22, 150, '−3', 'ke'], ['t', 105, 102, 'π/2', 'k'], ['t', 180, 102, 'π', 'k'], ['t', 205, 102, 'x', 'k'], ['t', 40, 14, 'y', 'k']] },
+            ['t', 22, 30, '3', 'ke'], ['t', 22, 150, '−3', 'ke'], ['t', 94, 102, 'π/2', 'k'], ['t', 180, 102, 'π', 'k'], ['t', 205, 102, 'x', 'k'], ['t', 40, 14, 'y', 'k']] },
         sec:['1', '2', '3', '4', '5'], dogru:'E',
         ipucu:'Genlik a’dır; periyot 2π/b’dir.',
         cozum:['En büyük değer 3: a = 3.', 'Bir tam dalga π uzunluğunda: 2π/b = π → b = 2. a + b = 5.'] },
@@ -44597,7 +44605,7 @@ Object.assign(R.KONU_DERIN, {
         sekil:{ w:215, h:182, alt:'y = log_a(x + b) grafiği: x = −2 doğrusu kesik çizgiyle düşey asimptot; eğri (−1, 0) ve (2, 2) noktalarından geçiyor ve artan.',
           o:[['ok', 20, 110, 210, 110], ['ok', 90, 178, 90, 14], ['c', 50, 176, 50, 20, 'k'],
             ['y', [52.5, 170, 55, 150, 60, 130, 70, 110, 90, 90, 110, 78.3, 130, 70, 150, 63.6, 170, 58.3, 190, 53.9], 'v'],
-            ['n', 70, 110, 'v'], ['n', 130, 70, 'v'], ['t', 70, 123, '−1', 'k'], ['t', 136, 84, '(2, 2)', 'ks'], ['t', 46, 22, 'x = −2', 'ke'],
+            ['n', 70, 110, 'v'], ['n', 130, 70, 'v'], ['t', 80, 122, '−1', 'k'], ['t', 136, 84, '(2, 2)', 'ks'], ['t', 46, 22, 'x = −2', 'ke'],
             ['t', 206, 122, 'x', 'k'], ['t', 100, 14, 'y', 'k']] },
         sec:['2', '4', '5', '6', '8'], dogru:'B',
         ipucu:'Grafiğin geçtiği noktaları denklemde yerine koy.',
@@ -44745,7 +44753,7 @@ Object.assign(R.KONU_DERIN, {
           o:[['ok', 15, 130, 200, 130], ['ok', 60, 172, 60, 10],
             ['y', [60, 135, 72.5, 109.4, 85, 87.5, 97.5, 69.4, 110, 55, 122.5, 44.4, 135, 37.5, 147.5, 34.4, 160, 35, 172.5, 39.4]],
             ['c', 25, 140, 147.5, 17.5, 'v'], ['n', 110, 55], ['n', 35, 130], ['t', 120, 64, 'A(2, 3)', 'ks'], ['t', 35, 143, '−1', 'k'],
-            ['t', 176, 50, 'y = f(x)', 'ks'], ['t', 196, 142, 'x', 'k'], ['t', 70, 10, 'y', 'k']] },
+            ['t', 200, 52, 'y = f(x)', 'ke'], ['t', 196, 142, 'x', 'k'], ['t', 70, 10, 'y', 'k']] },
         sec:['1', '2', '3', '4', '5'], dogru:'E',
         ipucu:'Teğetin eğimi f′(2)’dir; (x · f(x))′ = f(x) + x · f′(x).',
         cozum:['Teğet (−1, 0) ve (2, 3) noktalarından geçer: eğim 3/3 = 1 = f′(2).', 'g′(x) = f(x) + x f′(x) → g′(2) = 3 + 2 · 1 = 5.'] },
@@ -44798,7 +44806,7 @@ Object.assign(R.KONU_DERIN, {
         sekil:{ w:200, h:170, alt:'y = f′(x) grafiği: aşağı açılan bir parabol; x eksenini −1 ve 3 noktalarında kesiyor, bu iki nokta arasında pozitif, dışında negatif.',
           o:[['ok', 15, 100, 195, 100], ['ok', 70, 165, 70, 14],
             ['y', [30, 150, 40, 122.5, 50, 100, 60, 82.5, 70, 70, 80, 62.5, 90, 60, 100, 62.5, 110, 70, 120, 82.5, 130, 100, 140, 122.5, 150, 150], 'v'],
-            ['n', 50, 100], ['n', 130, 100], ['t', 56, 112, '−1', 'ks'], ['t', 124, 112, '3', 'ke'], ['t', 156, 140, 'y = f′(x)', 'ks'], ['t', 191, 112, 'x', 'k'], ['t', 80, 14, 'y', 'k']] },
+            ['n', 50, 100], ['n', 130, 100], ['t', 46, 89, '−1', 'ke'], ['t', 124, 112, '3', 'ke'], ['t', 156, 140, 'y = f′(x)', 'ks'], ['t', 191, 112, 'x', 'k'], ['t', 80, 14, 'y', 'k']] },
         sec:['−3', '−1', '0', '1', '3'], dogru:'E',
         ipucu:'Yerel maksimumda f′ işaret değiştirir: artıdan eksiye.',
         cozum:['f′, x = −1’de eksiden artıya geçer: orada yerel minimum vardır.', 'x = 3’te artıdan eksiye geçer: yerel maksimumun apsisi 3.'] },
@@ -45092,7 +45100,7 @@ Object.assign(R.KONU_DERIN, {
       { seviye:'orta', soru:'Şekilde d_{1}: y = x + 2 ve d_{2}: y = −2x + 8 doğruları verilmiştir. Bu iki doğru ile x ekseni arasında kalan taralı üçgenin alanı kaç birimkaredir?',
         sekil:{ w:215, h:186, alt:'d₁: y = x + 2 ve d₂: y = −2x + 8 doğruları; x eksenini sırasıyla −2 ve 4 noktalarında kesiyor, (2, 4) noktasında kesişiyorlar; aralarında ve x ekseninin üstünde kalan üçgen taralı.',
           o:[['p', [50, 140, 170, 140, 130, 60], 'g'], ['ok', 20, 140, 210, 140], ['ok', 90, 182, 90, 14], ['c', 34, 156, 150, 40, 'v'], ['c', 120, 40, 182, 164, 'v'],
-            ['t', 157, 36, 'd₁', 'ks'], ['t', 113, 36, 'd₂', 'ke'], ['t', 50, 153, '−2', 'k'], ['t', 170, 153, '4', 'k'], ['t', 206, 152, 'x', 'k'], ['t', 100, 14, 'y', 'k']] },
+            ['t', 157, 36, 'd₁', 'ks'], ['t', 113, 36, 'd₂', 'ke'], ['t', 50, 153, '−2', 'k'], ['t', 163, 153, '4', 'k'], ['t', 206, 152, 'x', 'k'], ['t', 100, 14, 'y', 'k']] },
         sec:['6', '8', '9', '10', '12'], dogru:'E',
         ipucu:'Taban, x eksenindeki iki kesişim noktası arası; yükseklik, doğruların kesişim noktasının ordinatı.',
         cozum:['d₁ x eksenini −2’de, d₂ 4’te keser: taban 6.', 'x + 2 = −2x + 8 → x = 2, y = 4: yükseklik 4.', 'Alan 6 · 4 / 2 = 12.'] },
@@ -45358,7 +45366,7 @@ Object.assign(R.KONU_DERIN, {
             ['c', 20, 20, 180, 20, 'ki'], ['c', 20, 40, 180, 40, 'ki'], ['c', 20, 60, 180, 60, 'ki'], ['c', 20, 80, 180, 80, 'ki'], ['c', 20, 100, 180, 100, 'ki'],
             ['c', 20, 120, 180, 120, 'ki'], ['c', 20, 140, 180, 140, 'ki'],
             ['ok', 40, 120, 80, 60, 'v'], ['ok', 120, 100, 100, 120, 'v'], ['ok', 140, 120, 180, 80, 'v'],
-            ['t', 50, 84, 'K', 'b'], ['t', 100, 104, 'L', 'b'], ['t', 166, 108, 'M', 'bs']] },
+            ['t', 50, 90, 'K', 'b'], ['t', 130, 110, 'L', 'b'], ['t', 166, 108, 'M', 'bs']] },
         sec:['1', '2', '3', '4', '5'], dogru:'E',
         ipucu:'Vektörleri bileşenlerine ayırıp topla.',
         cozum:['K = (2, 3), L = (−1, −1), M = (2, 2).', 'Toplam (3, 4); büyüklüğü √(9 + 16) = 5 birim.'] },
@@ -45503,8 +45511,8 @@ Object.assign(R.KONU_DERIN, {
         ipucu:'Yer değiştirme hız–zaman grafiğinin altındaki alandır.',
         cozum:['0–4 s: (10 + 30)/2 · 4 = 80 m.', '4–10 s: 30 · 6 / 2 = 90 m.', 'Ortalama hız 170 / 10 = 17 m/s.'] },
       { seviye:'orta', soru:'Grafikte doğrusal bir yolda hareket eden aracın hız–zaman grafiği verilmiştir. Aracın 0–8 s aralığındaki ortalama hızı kaç m/s’dir?',
-        sekil:{ w:235, h:160, alt:'Hız–zaman grafiği: 0–2 s arasında hız 0’dan 10 m/s’ye düzgün artıyor, 2–6 s arasında 10 m/s sabit, 6–8 s arasında 0’a düzgün azalıyor.',
-          o:[['p', [30, 130, 74, 50, 162, 50, 206, 130], 'g'], ['e', 30, 130, 228, 14, 't (s)', 'v (m/s)'], ['y', [30, 130, 74, 50, 162, 50, 206, 130], 'v'],
+        sekil:{ w:235, h:168, alt:'Hız–zaman grafiği: 0–2 s arasında hız 0’dan 10 m/s’ye düzgün artıyor, 2–6 s arasında 10 m/s sabit, 6–8 s arasında 0’a düzgün azalıyor.',
+          o:[['p', [30, 130, 74, 50, 162, 50, 206, 130], 'g'], ['e', 30, 130, 228, 14, '', ''], ['t', 36, 12, 'v (m/s)', 'ks'], ['t', 228, 160, 't (s)', 'ke'], ['y', [30, 130, 74, 50, 162, 50, 206, 130], 'v'],
             ['c', 30, 50, 74, 50, 'ki'], ['t', 24, 50, '10', 'ke'], ['t', 74, 143, '2', 'k'], ['t', 162, 143, '6', 'k'], ['t', 206, 143, '8', 'k']] },
         sec:['5', '6', '6,5', '7', '7,5'], dogru:'E',
         ipucu:'Önce grafiğin altındaki alandan yolu bul; ortalama hız = yol / süre.',
@@ -45656,8 +45664,8 @@ Object.assign(R.KONU_DERIN, {
         ipucu:'Eşit kütleli esnek merkezî çarpışmada cisimler hızlarını değiş tokuş eder.',
         cozum:['Momentum ve kinetik enerji birlikte korunur.', 'Eşit kütlelerde ilk cisim durur, ikincisi 4 m/s ile gider.'] },
       { seviye:'orta', soru:'Grafikte durgun hâldeki 2 kg’lık bir cisme etki eden net kuvvetin zamana göre değişimi verilmiştir. Cismin 6. saniyenin sonundaki hızı kaç m/s’dir?',
-        sekil:{ w:235, h:160, alt:'Kuvvet–zaman grafiği: 0–2 s arasında kuvvet 0’dan 10 N’a düzgün artıyor, 2–4 s arasında 10 N sabit, 4–6 s arasında 0’a düzgün azalıyor.',
-          o:[['p', [30, 130, 90, 50, 150, 50, 210, 130], 'g'], ['e', 30, 130, 228, 14, 't (s)', 'F (N)'], ['y', [30, 130, 90, 50, 150, 50, 210, 130], 'v'],
+        sekil:{ w:235, h:168, alt:'Kuvvet–zaman grafiği: 0–2 s arasında kuvvet 0’dan 10 N’a düzgün artıyor, 2–4 s arasında 10 N sabit, 4–6 s arasında 0’a düzgün azalıyor.',
+          o:[['p', [30, 130, 90, 50, 150, 50, 210, 130], 'g'], ['e', 30, 130, 228, 14, '', ''], ['t', 36, 12, 'F (N)', 'ks'], ['t', 228, 160, 't (s)', 'ke'], ['y', [30, 130, 90, 50, 150, 50, 210, 130], 'v'],
             ['c', 30, 50, 90, 50, 'ki'], ['t', 24, 50, '10', 'ke'], ['t', 90, 143, '2', 'k'], ['t', 150, 143, '4', 'k'], ['t', 210, 143, '6', 'k']] },
         sec:['10', '15', '20', '25', '40'], dogru:'C',
         ipucu:'Kuvvet–zaman grafiğinin altındaki alan itmedir; itme = momentum değişimi.',
@@ -45914,8 +45922,8 @@ Object.assign(R.KONU_DERIN, {
         ipucu:'Çubuk sağa gittikçe devrenin alanı, dolayısıyla içeri yönlü akı artar; akım bu artışa karşı koyar.',
         cozum:['Akının artışına karşı koymak için akım, devrenin içinde dışarı yönlü alan oluşturmalıdır: saat yönünün tersine dolanır.', 'Bu dolanımda akım çubukta aşağıdan yukarı, R’de K’den L’ye akar.', 'Yukarı akım taşıyan çubuğa içeri yönlü alanda sola kuvvet etkir; kuvvet hareketi zorlaştırır (Lenz).'] },
       { seviye:'orta', soru:'Grafikte 50 sarımlı bir bobinden geçen manyetik akının zamana göre değişimi verilmiştir. Bobinde 0–2 s, 2–4 s ve 4–5 s aralıklarında oluşan emk’ların büyüklükleri sırasıyla ε_{1}, ε_{2} ve ε_{3} olduğuna göre bunlar arasındaki ilişki nedir?',
-        sekil:{ w:235, h:160, alt:'Akı–zaman grafiği: 0–2 s arasında akı 0’dan 0,4 Wb’ye düzgün artıyor, 2–4 s arasında 0,4 Wb sabit, 4–5 s arasında 0’a düzgün azalıyor.',
-          o:[['e', 30, 130, 228, 14, 't (s)', 'Φ (Wb)'], ['y', [30, 130, 102, 50, 174, 50, 210, 130], 'v'],
+        sekil:{ w:235, h:168, alt:'Akı–zaman grafiği: 0–2 s arasında akı 0’dan 0,4 Wb’ye düzgün artıyor, 2–4 s arasında 0,4 Wb sabit, 4–5 s arasında 0’a düzgün azalıyor.',
+          o:[['e', 30, 130, 228, 14, '', ''], ['t', 36, 12, 'Φ (Wb)', 'ks'], ['t', 228, 160, 't (s)', 'ke'], ['y', [30, 130, 102, 50, 174, 50, 210, 130], 'v'],
             ['c', 30, 50, 102, 50, 'ki'], ['c', 174, 50, 174, 130, 'ki'], ['t', 24, 50, '0,4', 'ke'],
             ['t', 102, 143, '2', 'k'], ['t', 174, 143, '4', 'k'], ['t', 210, 143, '5', 'k']] },
         sec:['ε_{1} > ε_{2} > ε_{3}', 'ε_{1} = ε_{3} > ε_{2}', 'ε_{2} > ε_{1} > ε_{3}', 'ε_{1} = ε_{2} = ε_{3}', 'ε_{3} > ε_{1} > ε_{2}'], dogru:'E',
@@ -47021,8 +47029,8 @@ Object.assign(R.KONU_DERIN, {
       '«Erkek çocuğun hasta olma olasılığı» ile «hasta bir erkek çocuk doğma olasılığı»nı karıştırmak.',
       'Normal fenotipli bireyin genotipini kesin homozigot saymak.'],
     sorular:[
-      { seviye:'orta', yenilendi:'2026-10-10T11:41:44Z', soru:'Şekildeki soyağacında koyu renkli birey belirli bir özelliği göstermektedir. Tek genle belirlenen bu özelliğin kalıtımı aşağıdakilerden hangisidir?',
-        sekil:{ w:240, h:120, alt:'Soyağacı: özelliği göstermeyen bir baba ve annenin üç çocuğu var; ortadaki kız özelliği gösteriyor (koyu), iki oğul göstermiyor.',
+      { seviye:'orta', yenilendi:'2026-10-11T10:00:00Z', soru:'Şekildeki soyağacında içi dolu sembolle gösterilen birey belirli bir özelliği göstermektedir. Tek genle belirlenen bu özelliğin kalıtımı aşağıdakilerden hangisidir?',
+        sekil:{ w:240, h:120, alt:'Soyağacı: özelliği göstermeyen bir baba ve annenin üç çocuğu var; ortadaki kız özelliği gösteriyor (içi dolu daire), iki oğul göstermiyor (içi boş kare).',
           o:[['r', 58, 18, 24, 24], ['d', 150, 30, 12], ['c', 82, 30, 138, 30], ['c', 110, 30, 110, 60], ['c', 60, 60, 160, 60],
             ['c', 60, 60, 60, 72], ['c', 110, 60, 110, 74], ['c', 160, 60, 160, 72],
             ['r', 48, 72, 24, 24], ['d', 110, 86, 12, 'f'], ['r', 148, 72, 24, 24], ['t', 20, 30, 'I', 'b'], ['t', 20, 86, 'II', 'b']] },
@@ -47033,8 +47041,8 @@ Object.assign(R.KONU_DERIN, {
         sec:['0', '1/8', '1/4', '1/2', '3/4'], dogru:'C',
         ipucu:'Çocuğun erkek olma (1/2) ve annesinden X^{h} alma (1/2) olasılıkları çarpılır.',
         cozum:['Olası çocuklar: X^{H}X^{H}, X^{H}X^{h}, X^{H}Y, X^{h}Y — eşit olasılıklı.', 'Hasta erkek X^{h}Y: 1/4.'] },
-      { seviye:'ileri', yenilendi:'2026-10-10T11:41:44Z', soru:'Şekildeki soyağacında koyu renkli birey hemofili (X’e bağlı çekinik) hastasıdır. 4 numaralı kadın ile sağlıklı 5 numaralı erkeğin doğacak bir çocuğunun hemofili hastası bir erkek olma olasılığı kaçtır?',
-        sekil:{ w:250, h:140, alt:'Soyağacı: sağlıklı baba (1) ve anne (2); çocukları hemofili hastası oğul (3, koyu) ve sağlıklı kız (4). Kız (4) sağlıklı bir erkekle (5) evli; doğacak çocukları soru işaretiyle gösterilmiş.',
+      { seviye:'ileri', yenilendi:'2026-10-11T10:00:00Z', soru:'Şekildeki soyağacında içi dolu sembolle gösterilen birey hemofili (X’e bağlı çekinik) hastasıdır. 4 numaralı kadın ile sağlıklı 5 numaralı erkeğin doğacak bir çocuğunun hemofili hastası bir erkek olma olasılığı kaçtır?',
+        sekil:{ w:250, h:140, alt:'Soyağacı: sağlıklı baba (1) ve anne (2); çocukları hemofili hastası oğul (3, içi dolu kare) ve sağlıklı kız (4). Kız (4) sağlıklı bir erkekle (5) evli; doğacak çocukları soru işaretiyle gösterilmiş.',
           o:[['r', 58, 18, 24, 24], ['d', 150, 30, 12], ['c', 82, 30, 138, 30], ['c', 110, 30, 110, 60], ['c', 70, 60, 150, 60],
             ['c', 70, 60, 70, 72], ['c', 150, 60, 150, 72],
             ['r', 58, 72, 24, 24, 'f'], ['d', 150, 84, 12], ['r', 198, 72, 24, 24], ['c', 162, 84, 198, 84],
@@ -47044,8 +47052,8 @@ Object.assign(R.KONU_DERIN, {
         sec:['0', '1/32', '1/16', '1/8', '1/4'], dogru:'D',
         ipucu:'Önce 2 numaralı annenin genotipini, sonra 4 numaralı kızın taşıyıcı olma olasılığını bul.',
         cozum:['Sağlıklı babanın (X^{H}Y) hasta oğlu var: oğul X^{h}’yi anneden almıştır, anne taşıyıcıdır (X^{H}X^{h}).', '4 numaralı kız babasından X^{H}, anneden 1/2 olasılıkla X^{h} alır: taşıyıcı olma olasılığı 1/2.', 'Taşıyıcıysa hasta erkek çocuk olasılığı 1/4: 1/2 · 1/4 = 1/8.'] },
-      { seviye:'ileri', yenilendi:'2026-10-10T11:41:44Z', soru:'Şekildeki soyağacında koyu renkli bireyler belirli bir özelliği göstermektedir. Bu özellik aşağıdaki kalıtım türlerinden hangisiyle kesinlikle açıklanamaz?',
-        sekil:{ w:220, h:120, alt:'Soyağacı: özelliği gösteren baba (koyu) ve göstermeyen anne; çocuklarından kız özelliği göstermiyor, oğul gösteriyor (koyu).',
+      { seviye:'ileri', yenilendi:'2026-10-11T10:00:00Z', soru:'Şekildeki soyağacında içi dolu sembollerle gösterilen bireyler belirli bir özelliği göstermektedir. Bu özellik aşağıdaki kalıtım türlerinden hangisiyle kesinlikle açıklanamaz?',
+        sekil:{ w:220, h:120, alt:'Soyağacı: özelliği gösteren baba (içi dolu kare) ve göstermeyen anne; çocuklarından kız özelliği göstermiyor, oğul gösteriyor (içi dolu kare).',
           o:[['r', 58, 18, 24, 24, 'f'], ['d', 150, 30, 12], ['c', 82, 30, 138, 30], ['c', 110, 30, 110, 60], ['c', 80, 60, 140, 60],
             ['c', 80, 60, 80, 74], ['c', 140, 60, 140, 72], ['d', 80, 86, 12], ['r', 128, 72, 24, 24, 'f'], ['t', 20, 30, 'I', 'b'], ['t', 20, 86, 'II', 'b']] },
         sec:['Otozomal baskın', 'Otozomal çekinik', 'X’e bağlı baskın', 'X’e bağlı çekinik', 'Y’ye bağlı'], dogru:'C',
@@ -47205,9 +47213,9 @@ Object.assign(R.KONU_DERIN, {
         sekil:{ w:240, h:165, alt:'Zar potansiyeli–zaman grafiği: dinlenme potansiyeli −70 mV; K noktasında (−55 mV, eşik) potansiyel hızla yükselip L noktasında +30 mV’a ulaşıyor, sonra −80 mV’a kadar inip yeniden −70 mV’a dönüyor.',
           o:[['e', 40, 140, 230, 14, '', ''], ['c', 40, 56, 222, 56, 'ki'], ['c', 40, 111, 222, 111, 'ki'],
             ['y', [40, 126, 80, 126, 88, 119, 94, 111, 100, 68, 106, 26, 112, 46, 120, 96, 126, 130, 132, 136, 145, 132, 160, 127, 222, 126], 'v'],
-            ['n', 94, 111, 'v'], ['n', 106, 26, 'v'], ['t', 85, 103, 'K', 'b'], ['t', 117, 24, 'L', 'b'],
+            ['n', 94, 111, 'v'], ['n', 106, 26, 'v'], ['t', 85, 103, 'K', 'b'], ['t', 118, 28, 'L', 'b'],
             ['t', 34, 26, '+30', 'ke'], ['t', 34, 56, '0', 'ke'], ['t', 34, 111, '−55', 'ke'], ['t', 34, 126, '−70', 'ke'],
-            ['t', 46, 12, 'Zar potansiyeli (mV)', 'ks'], ['t', 228, 153, 'Zaman', 'ke']] },
+            ['t', 46, 10, 'Zar potansiyeli (mV)', 'ks'], ['t', 228, 153, 'Zaman', 'ke']] },
         sec:['K^{+} iyonlarının hücre dışına çıkması', 'Na^{+}–K^{+} pompasının Na^{+} iyonlarını dışarı atması', 'Cl^{−} iyonlarının hücre içine girmesi', 'Ca^{2+} iyonlarının sinaptik keseciklerden salınması', 'Na^{+} kanallarının açılıp Na^{+} iyonlarının hücre içine girmesi'], dogru:'E',
         ipucu:'Eşik değer aşılınca zarın içi hızla pozitifleşir (depolarizasyon).',
         cozum:['K noktası eşik değerdir (−55 mV); K–L aralığında zar depolarize olur, potansiyel +30 mV’a çıkar.', 'Bunun nedeni voltaja bağlı Na^{+} kanallarının açılıp Na^{+} iyonlarının hücre içine akmasıdır.', 'L’den sonraki düşüş (repolarizasyon) K^{+} iyonlarının dışarı çıkmasıyla olur.'] },
@@ -47259,7 +47267,7 @@ Object.assign(R.KONU_DERIN, {
         ipucu:'“Savaş ya da kaç” tepkisinin hormonu, sempatik sinirlerle uyarılan bir bezden salgılanır.',
         cozum:['Adrenalin böbrek üstü bezinin öz (medulla) bölgesinden salgılanır; kalp atımını, kan şekerini ve solunumu artırır.', 'Kortizol böbrek üstü bezinin kabuk bölgesinden, glukagon pankreastan salgılanır.'] },
       { seviye:'orta', soru:'Grafikte sağlıklı bir kişinin yemekten sonraki kan glikozu ve insülin düzeylerinin zamanla değişimi verilmiştir. Grafiğe göre aşağıdakilerden hangisi söylenebilir?',
-        sekil:{ w:240, h:170, alt:'Yemekten sonra kan glikozu hızla yükselip yaklaşık 50. dakikada en yüksek düzeye çıkıyor, sonra normale dönüyor; insülin glikozu biraz geriden izleyerek yükseliyor ve yaklaşık 70. dakikada en yüksek düzeye ulaşıyor.',
+        sekil:{ w:240, h:170, alt:'Yemekten sonra kan glikozu hızla yükselip yaklaşık 55. dakikada en yüksek düzeye çıkıyor, sonra normale dönüyor; insülin glikozu biraz geriden izleyerek yükseliyor ve yaklaşık 75. dakikada en yüksek düzeye ulaşıyor.',
           o:[['e', 40, 135, 230, 14, '', ''],
             ['y', [40, 100, 55, 96, 70, 70, 85, 48, 95, 45, 110, 52, 130, 70, 150, 86, 170, 96, 190, 100, 222, 100], 'v'],
             ['y', [40, 120, 60, 119, 75, 108, 90, 85, 105, 64, 115, 61, 130, 68, 150, 88, 170, 106, 190, 116, 222, 120], 'k'],
@@ -47346,7 +47354,7 @@ Object.assign(R.KONU_DERIN, {
             ['c', 145, 40, 230, 40], ['c', 145, 60, 230, 60], ['c', 145, 80, 230, 80], ['c', 145, 100, 230, 100],
             ['r', 55, 47, 140, 6, 'g'], ['r', 55, 67, 140, 6, 'g'], ['r', 55, 87, 140, 6, 'g'],
             ['t', 20, 16, 'Z', 'b'], ['t', 230, 16, 'Z', 'b'], ['ok', 55, 120, 195, 120, 'ç'], ['t', 125, 131, 'A bandı', 'k'],
-            ['t', 37, 120, 'I', 'k'], ['t', 212, 120, 'I', 'k']] },
+            ['t', 37, 120, 'I', 'b'], ['t', 212, 120, 'I', 'b']] },
         sec:['0,1', '0,2', '0,3', '0,4', '0,8'], dogru:'D',
         ipucu:'Kasılmada miyozin iplikleri kısalmaz: A bandı sabit kalır.',
         cozum:['A bandı miyozinin boyudur ve kasılmada değişmez: 1,6 µm.', 'Sarkomer = A bandı + iki yarım I bandı: I_{toplam} = 2,0 − 1,6 = 0,4 µm (kasılmadan önce 0,8 µm idi).'] },
@@ -47504,11 +47512,11 @@ Object.assign(R.KONU_DERIN, {
         ipucu:'Böbreklerden salgılanan eritropoietin kırmızı kemik iliğini uyarır.',
         cozum:['Az oksijene yanıt olarak alyuvar üretimi artar.', 'Havanın oksijen basıncı ise rakımla düşüktür, değişmez.'] },
       { seviye:'ileri', soru:'Grafikte hemoglobinin O_{2} ile doygunluk yüzdesinin O_{2} kısmi basıncına göre değişimi verilmiştir. Akciğerlerde O_{2} kısmi basıncı 100 mmHg, dinlenen bir dokuda 40 mmHg olduğuna göre aşağıdakilerden hangisi söylenebilir?',
-        sekil:{ w:240, h:170, alt:'Hemoglobin O₂ doygunluk eğrisi S biçiminde: 40 mmHg’de doygunluk yaklaşık %75, 100 mmHg’de yaklaşık %98.',
+        sekil:{ w:240, h:178, alt:'Hemoglobin O₂ doygunluk eğrisi S biçiminde: 40 mmHg’de doygunluk yaklaşık %75, 100 mmHg’de yaklaşık %98.',
           o:[['e', 40, 140, 230, 14, '', ''], ['y', [40, 140, 56, 130, 72, 108, 88, 83, 104, 65, 120, 56, 136, 51, 152, 47, 168, 45, 184, 43, 200, 42, 216, 41.5], 'v'],
             ['c', 104, 65, 104, 140, 'ki'], ['c', 40, 65, 104, 65, 'ki'], ['c', 200, 42, 200, 140, 'ki'], ['c', 40, 42, 200, 42, 'ki'],
             ['t', 34, 65, '75', 'ke'], ['t', 34, 42, '98', 'ke'], ['t', 104, 153, '40', 'k'], ['t', 200, 153, '100', 'k'],
-            ['t', 110, 76, 'doku', 'ks'], ['t', 194, 30, 'akciğer', 'ke'], ['t', 46, 12, 'O₂ doygunluğu (%)', 'ks'], ['t', 230, 164, 'PO₂ (mmHg)', 'ke']] },
+            ['t', 110, 76, 'doku', 'ks'], ['t', 194, 30, 'akciğer', 'ke'], ['t', 46, 12, 'O₂ doygunluğu (%)', 'ks'], ['t', 230, 170, 'PO₂ (mmHg)', 'ke']] },
         sec:['Hemoglobinin O_{2} doygunluğu O_{2} kısmi basıncıyla doğrusal olarak artar.', 'O_{2} kısmi basıncı arttıkça hemoglobinin O_{2} doygunluğu azalır.', 'Akciğerlerde hemoglobinin O_{2} doygunluğu yaklaşık %75’tir.', 'Hemoglobin dinlenen dokuda taşıdığı O_{2}’nin tamamını bırakır.', 'Kan dinlenen dokudan geçerken hemoglobin taşıdığı O_{2}’nin yaklaşık dörtte birini bırakır.'], dogru:'E',
         ipucu:'Grafikten akciğer ve doku basınçlarındaki doygunluk değerlerini oku.',
         cozum:['Akciğerde (100 mmHg) doygunluk ≈ %98, dokuda (40 mmHg) ≈ %75.', 'Fark ≈ 23 puan: hemoglobin taşıdığı O_{2}’nin yaklaşık dörtte birini dokuya bırakır; kalanı yedek olarak kanda kalır.', 'Eğri doğrusal değil, S biçimlidir.'] },
@@ -47795,7 +47803,7 @@ Object.assign(R.KONU_DERIN, {
         ipucu:'S (lojistik) eğrisini düşün.',
         cozum:['I ve II S eğrisini anlatır.', 'III yanlış: sayı taşıma kapasitesi çevresinde dengelenir.'] },
       { seviye:'orta', soru:'Grafikte aynı ortamda yaşayan bir av ve bir avcı popülasyonunun birey sayılarının zamanla değişimi verilmiştir. Buna göre aşağıdakilerden hangisi söylenebilir?',
-        sekil:{ w:240, h:160, alt:'Av ve avcı popülasyonlarının birey sayıları dalgalanıyor; avcı sayısındaki her yükseliş, av sayısındaki yükselişi gecikmeyle izliyor; av sayısı avcı sayısından fazla.',
+        sekil:{ w:240, h:160, alt:'Av ve avcı popülasyonlarının birey sayıları dalgalanıyor; avcı sayısındaki her yükseliş, av sayısındaki yükselişi gecikmeyle izliyor; av sayısı çoğu zaman avcı sayısından fazla, av en azken ikisi birbirine yaklaşıyor.',
           o:[['e', 30, 140, 230, 14, '', ''],
             ['y', [40, 80, 49, 56.5, 58, 42, 67, 42, 76, 56.5, 85, 80, 94, 103.5, 103, 118, 112, 118, 121, 103.5, 130, 80, 139, 56.5, 148, 42, 157, 42, 166, 56.5, 175, 80, 184, 103.5, 193, 118, 202, 118, 211, 103.5], 'v'],
             ['y', [40, 125, 49, 121.2, 58, 111.2, 67, 98.8, 76, 88.8, 85, 85, 94, 88.8, 103, 98.8, 112, 111.2, 121, 121.2, 130, 125, 139, 121.2, 148, 111.2, 157, 98.8, 166, 88.8, 175, 85, 184, 88.8, 193, 98.8, 202, 111.2, 211, 121.2], 'k'],
@@ -47949,7 +47957,7 @@ Object.assign(R.KONU_DERIN, {
         cozum:['D vitamini yağda çözünür; C ve B grubu suda çözünür.'] },
       { seviye:'orta', yenilendi:'2026-10-10T11:56:29Z', soru:'Grafikte X ve Y enzimlerinin etkinliğinin pH’a göre değişimi verilmiştir. Buna göre aşağıdakilerden hangisi söylenebilir?',
         sekil:{ w:240, h:160, alt:'Enzim etkinliği–pH grafiği: X enziminin etkinliği pH 2 dolayında, Y enziminin etkinliği pH 8 dolayında en yüksek; iki eğri de çan biçiminde.',
-          o:[['e', 30, 140, 230, 14, 'pH', ''],
+          o:[['e', 30, 140, 230, 14, '', ''], ['t', 230, 130, 'pH', 'ke'],
             ['y', [30, 120, 40, 80, 48, 52, 56, 40, 64, 52, 74, 85, 85, 125, 95, 140], 'v'], ['y', [95, 140, 105, 125, 116, 90, 126, 55, 134, 42, 142, 55, 152, 90, 163, 125, 173, 140], 'k'],
             ['t', 56, 30, 'X', 'b'], ['t', 134, 32, 'Y', 'b'], ['t', 56, 153, '2', 'k'], ['t', 134, 153, '8', 'k'], ['t', 212, 153, '14', 'k'], ['t', 36, 12, 'Etkinlik', 'ks']] },
         sec:['İki enzimin de en uygun pH’ı aynıdır.', 'pH 8’de X’in etkinliği en yüksektir.', 'Y asidik ortamda en hızlı çalışır.', 'Enzimlerin etkinliği pH’tan etkilenmez.', 'X midede (asidik ortamda), Y ince bağırsakta (bazik ortamda) çalışan bir enzim olabilir.'], dogru:'E',
@@ -48348,7 +48356,7 @@ Object.assign(R.KONU_DERIN, {
           o:[['e', 30, 140, 230, 14, '', ''], ['y', [30, 132, 55, 116, 95, 116, 135, 52, 190, 52, 215, 30], 'v'],
             ['c', 30, 116, 55, 116, 'ki'], ['c', 30, 52, 135, 52, 'ki'], ['t', 24, 116, '−20', 'ke'], ['t', 24, 52, '60', 'ke'],
             ['t', 46, 133, 'I', 'k'], ['t', 75, 107, 'II', 'k'], ['t', 125, 96, 'III', 'k'], ['t', 162, 43, 'IV', 'k'], ['t', 196, 36, 'V', 'k'],
-            ['t', 36, 12, 'Sıcaklık (°C)', 'ks'], ['t', 228, 152, 'Zaman', 'ke']] },
+            ['t', 36, 12, 'Sıcaklık (°C)', 'ks'], ['t', 228, 131, 'Zaman', 'ke']] },
         sec:['Katı', 'Sıvı', 'Gaz', 'Katı ve sıvı bir arada', 'Sıvı ve gaz bir arada'], dogru:'B',
         ipucu:'Sıcaklığın sabit kaldığı aralıklar erime ve kaynama noktalarını gösterir.',
         cozum:['II. aralık erime (−20 °C), IV. aralık kaynama (60 °C) noktasıdır.', '25 °C erime noktasının üstünde, kaynama noktasının altındadır: X sıvıdır.'] },
@@ -48650,12 +48658,12 @@ Object.assign(R.KONU_DERIN, {
         ipucu:'Sıvı, yüzeyi kendi taneciklerinden daha çok çekiyorsa yüzeye yayılır ve kılcal yolla yükselir.',
         cozum:['Su ile peçete lifleri arasındaki adezyon, su tanecikleri arasındaki kohezyondan büyüktür: su yükselir.', 'Ötekilerde kohezyon baskındır.'] },
       { seviye:'ileri', soru:'Grafikte X, Y ve Z maddelerinin kütle–hacim grafikleri verilmiştir. X ve Z’den eşit kütlelerde alınarak homojen bir karışım hazırlanırsa karışımın özkütlesi kaç g/cm^{3} olur?',
-        sekil:{ w:240, h:170, alt:'Kütle–hacim grafiği: X doğrusu 20 cm³’te 60 g’a, Y doğrusu 30 cm³’te 60 g’a, Z doğrusu 30 cm³’te 30 g’a ulaşıyor; üçü de başlangıç noktasından geçiyor.',
+        sekil:{ w:240, h:178, alt:'Kütle–hacim grafiği: X doğrusu 20 cm³’te 60 g’a, Y doğrusu 30 cm³’te 60 g’a, Z doğrusu 30 cm³’te 30 g’a ulaşıyor; üçü de başlangıç noktasından geçiyor.',
           o:[['e', 40, 140, 230, 14, '', ''], ['c', 40, 20, 190, 20, 'ki'], ['c', 40, 80, 190, 80, 'ki'], ['c', 90, 80, 90, 140, 'ki'], ['c', 140, 20, 140, 140, 'ki'], ['c', 190, 20, 190, 140, 'ki'],
             ['c', 40, 140, 140, 20, 'v'], ['c', 40, 140, 190, 20], ['c', 40, 140, 190, 80, 'k'],
             ['t', 110, 42, 'X', 'b'], ['t', 196, 26, 'Y', 'bs'], ['t', 196, 86, 'Z', 'bs'],
             ['t', 90, 153, '10', 'k'], ['t', 140, 153, '20', 'k'], ['t', 190, 153, '30', 'k'], ['t', 34, 80, '30', 'ke'], ['t', 34, 20, '60', 'ke'],
-            ['t', 46, 12, 'Kütle (g)', 'ks'], ['t', 230, 164, 'Hacim (cm³)', 'ke']] },
+            ['t', 46, 12, 'Kütle (g)', 'ks'], ['t', 230, 170, 'Hacim (cm³)', 'ke']] },
         sec:['1,2', '1,5', '2', '2,5', '3'], dogru:'B',
         ipucu:'Eşit kütleli karışımda hacimleri topla: V = m/d.',
         cozum:['d_{X} = 60/20 = 3, d_{Y} = 60/30 = 2, d_{Z} = 30/30 = 1 g/cm^{3}.', 'Eşit kütleler (m): V = m/3 + m/1 = 4m/3.', 'd_{karışım} = 2m / (4m/3) = 1,5 g/cm^{3}.'] },
@@ -48703,8 +48711,8 @@ Object.assign(R.KONU_DERIN, {
         ipucu:'Küçük pistonun ittiği sıvı hacmi büyük pistonun altına geçer.',
         cozum:['Hacim: 20 · 60 = 1200 cm^{3}.', 'Büyük pistonda 1200 / 400 = 3 cm.', 'Kuvvet kazanılır, yoldan kaybedilir.'] },
       { seviye:'orta', soru:'Şekildeki U borusunda birbirine karışmayan su ve X sıvısı dengededir. Ayrılma yüzeyinin hizasından ölçülen sıvı yükseklikleri X için 15 cm, su için 12 cm olduğuna göre X’in özkütlesi kaç g/cm^{3}’tür? (d_{su} = 1 g/cm^{3})',
-        sekil:{ w:250, h:150, alt:'U borusu: sol kolda suyun üstünde X sıvısı var; ayrılma yüzeyinden itibaren X sütunu 15 cm, sağ koldaki su sütunu aynı hizadan 12 cm yüksekliktedir.',
-          o:[['p', [70, 95, 100, 95, 100, 110, 160, 110, 160, 47, 190, 47, 190, 140, 70, 140], 'g'], ['y', [70, 20, 70, 140, 190, 140, 190, 20]], ['y', [100, 20, 100, 110, 160, 110, 160, 20]],
+        sekil:{ w:250, h:150, alt:'U borusu: sol kolda suyun üstünde X sıvısı var (renkli taralı), su gri taralı; ayrılma yüzeyinden itibaren X sütunu 15 cm, sağ koldaki su sütunu aynı hizadan 12 cm yüksekliktedir.',
+          o:[['p', [70, 95, 100, 95, 100, 110, 160, 110, 160, 47, 190, 47, 190, 140, 70, 140], 'g'], ['p', [70, 35, 100, 35, 100, 95, 70, 95], 'gvi'], ['y', [70, 20, 70, 140, 190, 140, 190, 20]], ['y', [100, 20, 100, 110, 160, 110, 160, 20]],
             ['c', 70, 35, 100, 35], ['c', 70, 95, 100, 95], ['c', 160, 47, 190, 47], ['c', 100, 95, 215, 95, 'ki'],
             ['ok', 55, 35, 55, 95, 'ç'], ['t', 50, 65, '15 cm', 'ke'], ['ok', 205, 47, 205, 95, 'ç'], ['t', 210, 71, '12 cm', 'ks'],
             ['t', 85, 65, 'X', 'b'], ['t', 130, 125, 'su', 'k']] },
@@ -50504,9 +50512,9 @@ Object.assign(R.KONU_DERIN, {
           o:[['p', [215.0, 75.0, 211.8, 89.2, 202.3, 102.5, 187.2, 113.9, 167.5, 122.6, 144.6, 128.1, 120.0, 130.0, 95.4, 128.1, 72.5, 122.6, 52.8, 113.9, 37.7, 102.5, 28.2, 89.2, 25.0, 75.0, 28.2, 60.8, 37.7, 47.5, 52.8, 36.1, 72.5, 27.4, 95.4, 21.9, 120.0, 20.0, 144.6, 21.9, 167.5, 27.4, 187.2, 36.1, 202.3, 47.5, 211.8, 60.8]],
             ['p', [210.0, 75.0, 207.6, 85.9, 200.6, 96.0, 189.5, 104.7, 175.0, 111.4, 158.1, 115.6, 140.0, 117.0, 121.9, 115.6, 105.0, 111.4, 90.5, 104.7, 79.4, 96.0, 72.4, 85.9, 70.0, 75.0, 72.4, 64.1, 79.4, 54.0, 90.5, 45.3, 105.0, 38.6, 121.9, 34.4, 140.0, 33.0, 158.1, 34.4, 175.0, 38.6, 189.5, 45.3, 200.6, 54.0, 207.6, 64.1]],
             ['p', [200.0, 75.0, 198.5, 82.2, 194.0, 89.0, 186.8, 94.8, 177.5, 99.2, 166.6, 102.0, 155.0, 103.0, 143.4, 102.0, 132.5, 99.2, 123.2, 94.8, 116.0, 89.0, 111.5, 82.2, 110.0, 75.0, 111.5, 67.8, 116.0, 61.0, 123.2, 55.2, 132.5, 50.8, 143.4, 48.0, 155.0, 47.0, 166.6, 48.0, 177.5, 50.8, 186.8, 55.2, 194.0, 61.0, 198.5, 67.8]],
-            ['p', [185.0, 75.0, 184.3, 78.4, 182.3, 81.5, 179.1, 84.2, 175.0, 86.3, 170.2, 87.6, 165.0, 88.0, 159.8, 87.6, 155.0, 86.3, 150.9, 84.2, 147.7, 81.5, 145.7, 78.4, 145.0, 75.0, 145.7, 71.6, 147.7, 68.5, 150.9, 65.8, 155.0, 63.7, 159.8, 62.4, 165.0, 62.0, 170.2, 62.4, 175.0, 63.7, 179.1, 65.8, 182.3, 68.5, 184.3, 71.6], 'g'],
-            ['t', 47, 75, '100', 'k'], ['t', 90, 75, '200', 'k'], ['t', 128, 75, '300', 'k'], ['t', 165, 83, '400', 'k'],
-            ['n', 72.5, 122.6, 'v'], ['t', 64, 133, 'K', 'b'], ['n', 157, 71, 'v'], ['t', 164, 71, 'L', 'bs']] },
+            ['p', [186, 75, 185.3, 79.1, 183.2, 83, 179.8, 86.3, 175.5, 88.9, 170.4, 90.5, 165, 91, 159.6, 90.5, 154.5, 88.9, 150.2, 86.3, 146.8, 83, 144.7, 79.1, 144, 75, 144.7, 70.9, 146.8, 67, 150.2, 63.7, 154.5, 61.1, 159.6, 59.5, 165, 59, 170.4, 59.5, 175.5, 61.1, 179.8, 63.7, 183.2, 67, 185.3, 70.9], 'g'],
+            ['t', 47, 75, '100', 'k'], ['t', 90, 75, '200', 'k'], ['t', 128, 75, '300', 'k'], ['t', 169, 82, '400', 'k'],
+            ['n', 72.5, 122.6, 'v'], ['t', 64, 133, 'K', 'b'], ['n', 155, 68, 'v'], ['t', 161, 68, 'L', 'bs']] },
         sec:['Tepenin doğu yamacının eğimi batı yamacınınkinden fazladır.', 'K noktasının yükseltisi L’ninkinden fazladır.', 'Eş yükselti aralığı 50 m’dir.', 'Tepenin en yüksek noktası 300 m’den alçaktır.', 'Batı yamacında eğriler seyrek olduğundan eğim fazladır.'], dogru:'A',
         ipucu:'Eş yükselti eğrilerinin sıklaştığı yerde eğim artar.',
         cozum:['Doğu yamaçta eğriler birbirine çok yakın: eğim fazla; batıda seyrek: eğim az.', 'K 100 m’de, L 400 m’nin üzerinde; eş yükselti aralığı 100 m’dir.'] },
@@ -50600,13 +50608,13 @@ Object.assign(R.KONU_DERIN, {
         sec:['Yıl boyunca değişmez.', '21 Haziran’da en uzun olur.', '21 Mart’ta en kısa olur.', 'Gölge hiçbir zaman kuzeye düşmez.', '21 Aralık’ta en uzun, 21 Haziran’da en kısa olur.'], dogru:'E',
         ipucu:'Türkiye Yengeç Dönencesi’nin kuzeyindedir; ışınlar en dik ne zaman gelir?',
         cozum:['Işınlar 21 Haziran’da en dik, 21 Aralık’ta en eğik gelir.', 'Gölge 21 Aralık’ta en uzun, 21 Haziran’da en kısadır; Türkiye’de öğle gölgesi her zaman kuzeye düşer.'] },
-      { seviye:'orta', soru:'Şekilde Dünya’nın Güneş ışınlarını aldığı bir tarihteki aydınlanma durumu verilmiştir. Bu tarih ve o tarihte yaşananlar için aşağıdakilerden hangisi doğrudur?',
-        sekil:{ w:245, h:160, alt:'Aydınlanma çizimi: Güneş ışınları sağdan geliyor; Dünya’nın ekseni kuzey ucu Güneş’e doğru eğik; Kuzey Kutup Dairesi’nin içi tamamen aydınlık, Güney Kutup Dairesi’nin içi tamamen karanlık.',
+      { seviye:'orta', soru:'Şekilde Dünya’nın Güneş ışınlarını aldığı bir tarihteki aydınlanma durumu verilmiştir (taralı yarı gece). Bu tarih ve o tarihte yaşananlar için aşağıdakilerden hangisi doğrudur?',
+        sekil:{ w:245, h:160, alt:'Aydınlanma çizimi: Güneş ışınları sağdan geliyor; Dünya’nın ekseni kuzey ucu Güneş’e doğru eğik; Kuzey Kutup Dairesi’nin içi tamamen aydınlık, Güney Kutup Dairesi’nin içi tamamen karanlık. Sol yarı taralı ve yanında «gece», sağ yarının yanında «gündüz» yazılı.',
           o:[['p', [120.0, 25.0, 105.8, 26.9, 92.5, 32.4, 81.1, 41.1, 72.4, 52.5, 66.9, 65.8, 65.0, 80.0, 66.9, 94.2, 72.4, 107.5, 81.1, 118.9, 92.5, 127.6, 105.8, 133.1, 120.0, 135.0], 'g'],
             ['d', 120, 80, 55], ['c', 120, 25, 120, 135], ['c', 92.1, 144.2, 147.9, 15.8, 'k'], ['c', 69.6, 58.1, 170.4, 101.9, 'v'],
             ['c', 82.5, 39.8, 174.9, 80.0, 'ki'], ['c', 65.1, 80.0, 157.5, 120.2, 'ki'], ['c', 120.0, 25.1, 160.2, 42.5, 'ki'], ['c', 79.8, 117.5, 120.0, 134.9, 'ki'],
-            ['ok', 238, 45, 192, 45, 'v'], ['ok', 238, 80, 192, 80, 'v'], ['ok', 238, 115, 192, 115, 'v'], ['t', 214, 30, 'Güneş ışınları', 'k'],
-            ['t', 154, 9, 'K', 'b'], ['t', 86, 152, 'G', 'b']] },
+            ['ok', 238, 45, 192, 45, 'v'], ['ok', 238, 80, 192, 80, 'v'], ['ok', 238, 115, 192, 115, 'v'], ['t', 205, 30, 'Güneş ışınları', 'k'],
+            ['t', 154, 9, 'K', 'b'], ['t', 86, 152, 'G', 'b'], ['t', 42, 80, 'gece', 'k'], ['t', 198, 140, 'gündüz', 'k']] },
         sec:['21 Haziran; Kuzey Yarım Küre’de en uzun gündüz yaşanır.', '21 Aralık; Kuzey Yarım Küre’de en uzun gündüz yaşanır.', '21 Mart; bütün yeryüzünde gece ile gündüz eşittir.', '23 Eylül; Güney Yarım Küre’de ilkbahar başlar.', '21 Haziran; Güney Yarım Küre’de yaz mevsimi başlar.'], dogru:'A',
         ipucu:'Hangi kutup Güneş’e dönük, hangi kutup dairesinin içi sürekli aydınlık?',
         cozum:['Kuzey ucu Güneş’e eğik, Kuzey Kutup Dairesi’nin içi tamamen aydınlık: 21 Haziran.', 'Bu tarihte ışınlar Yengeç Dönencesi’ne dik gelir; Kuzey Yarım Küre’de en uzun gündüz yaşanır, yaz başlar; Güney Yarım Küre’de kış başlar.'] },
@@ -60260,7 +60268,12 @@ R.OgrenYolu = (function(){
         yazılar kaçırılır, sayılar sonlu ve sınırlı olmak zorundadır.
         İçerikten ekrana betik ya da öznitelik sızamaz (denetle()).
      2. TEMA KODDA. Çizgi ve yazı currentColor'dır, vurgu --accent'tir;
-        koyu ve açık temada, bütün paletlerde aynı çizim okunur.
+        koyu ve açık temada, bütün paletlerde aynı çizim okunur. Bu yüzden
+        dolu (f) ve gölgeli (g) yüzey koyu temada AÇIK görünür: içerik bir
+        yüzeyi «koyu/açık renkli» diye anmaz, «içi dolu», «taralı», «içi
+        boş» der ya da yüzeye yazı koyar. Denetim 2026-10-11: «koyu renkli
+        birey hastadır» diyen soyağacı koyu temada tersten okunuyordu
+        (sekil.test.js bunu bütün içerikte arar).
      3. ŞEKLİN METNİ VAR. Her şeklin zorunlu bir «alt» cümlesi vardır:
         ekran okuyucu onu okur; kart, yanlış defteri ve koç gibi düz metin
         giden yerler de şekli bu cümleyle anlatır (metni()). Tablo da düz
@@ -60439,7 +60452,13 @@ R.Sekil = (function(){
       const kose = [a[0] - uy * yh, a[1] + ux * yh, b2[0] - uy * yh, b2[1] + ux * yh, b2[0] + uy * yh, b2[1] - ux * yh, a[0] + uy * yh, a[1] - ux * yh];
       return cizgi(x1, y1, a[0], a[1], '') + cizgi(b2[0], b2[1], x2, y2, '')
         + '<polygon class="sk sk-c sk-zemin" points="' + kose.map(sayi).join(' ') + '"/>'
-        + (et ? yazi(mx + uy * 14, my - ux * 14, et, 'k') : '');
+        + (et ? (() => {
+          /* Yazı kutunun yanına, kutuya değmeden: dikey dirençte yarım yazı
+             genişliği, yatayda yarım satır yüksekliği kadar ötede (denetim
+             2026-10-11: «3 Ω» kutuya yapışıyordu). */
+          const d = yh + 4 + Math.abs(uy) * String(et).length * 3.1 + Math.abs(ux) * 6;
+          return yazi(mx + uy * d, my - ux * d, et, 'k');
+        })() : '');
     },
     pil(o){
       const [x, y] = o.slice(1, 3), yon = o[3] === 'd' ? 'd' : 'y', et = o[4] || '';
