@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Ürün</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+:root{--bg:#FAFAFA;--y:#FFFFFF;--h:#EAEAEA;--h2:#F2F2F2;--ink:#111113;--ink2:#56565C;--ink3:#8B8B92;--r:#2B59E8;--rt:#EEF2FE;--iyi:#15803D;--kotu:#D93636;--mor:#6D55E0}
+body{background:#EDEEF1;font:13px/1.5 "Geist",system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;padding:56px 80px;width:1440px}
+.tab{font-variant-numeric:tabular-nums}
+.ekran{width:1280px;height:820px;border-radius:14px;background:var(--bg);overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04),0 30px 60px -30px rgba(20,24,40,.28);display:flex;flex-direction:column}
+svg.i{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+.ust{height:56px;background:var(--y);border-bottom:1px solid var(--h);display:flex;align-items:center;padding:0 20px;gap:18px;flex:none}
+.logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:14px;padding-right:6px}
+.logo span{width:24px;height:24px;border-radius:7px;background:var(--r);color:#fff;display:grid;place-items:center;font-size:12px;font-weight:600}
+.nav{display:flex;gap:2px}
+.nav a{height:32px;padding:0 10px;border-radius:8px;display:flex;align-items:center;gap:7px;color:var(--ink2);font-weight:500}
+.nav a svg{color:var(--ink3)}
+.nav a.on{background:var(--h2);color:var(--ink)}
+.nav a.on svg{color:var(--ink)}
+.sag{margin-left:auto;display:flex;align-items:center;gap:10px}
+.ara{height:32px;width:220px;border:1px solid var(--h);border-radius:8px;display:flex;align-items:center;gap:8px;padding:0 10px;color:var(--ink3)}
+.ara kbd{margin-left:auto;font:500 11px "Geist",sans-serif;color:var(--ink3)}
+.ik{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--ink2);position:relative}
+.ik i{position:absolute;top:7px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--kotu);box-shadow:0 0 0 2px #fff}
+.rk{height:32px;padding:0 10px 0 6px;border:1px solid var(--h);border-radius:8px;display:flex;align-items:center;gap:8px;font-weight:500}
+.rk b{width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#E9A86A,#B87333 75%)}
+.rk small{color:var(--ink3);font-size:12px}
+.av{width:30px;height:30px;border-radius:50%;background:#E4E7EE;display:grid;place-items:center;font-weight:600;font-size:12px;color:var(--ink2)}
+
+.bas{display:flex;align-items:flex-end;padding:26px 32px 20px}
+.bas h1{font-size:22px;font-weight:600;letter-spacing:-.015em}
+.bas p{color:var(--ink3);margin-top:2px}
+.bas .eyl{margin-left:auto;display:flex;gap:8px;align-items:center}
+.seg{display:flex;border:1px solid var(--h);border-radius:8px;background:var(--y);padding:2px}
+.seg span{height:26px;padding:0 10px;border-radius:6px;display:flex;align-items:center;color:var(--ink3);font-weight:500}
+.seg span.on{background:var(--h2);color:var(--ink)}
+.btn{height:32px;padding:0 12px;border-radius:8px;display:inline-flex;align-items:center;gap:6px;font-weight:500;white-space:nowrap}
+.btn.a{background:var(--ink);color:#fff}
+.btn.r{background:var(--r);color:#fff}
+.btn.b{background:var(--y);border:1px solid var(--h);color:var(--ink)}
+.btn.c{color:var(--ink2)}
+
+.izg{flex:1;display:grid;grid-template-columns:1fr 352px;gap:16px;padding:0 32px 28px;min-height:0}
+.sol,.sagk{display:flex;flex-direction:column;gap:16px;min-height:0}
+.p{background:var(--y);border:1px solid var(--h);border-radius:12px}
+.pb{display:flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-bottom:1px solid var(--h)}
+.pb h3{font-size:13px;font-weight:600}
+.pb .s{margin-left:auto;color:var(--ink3);font-size:12px}
+
+.sira{padding:18px 18px 0}
+.sira .u{display:flex;align-items:center;gap:8px;color:var(--r);font-weight:500;font-size:12px}
+.sira .u i{width:6px;height:6px;border-radius:50%;background:var(--r);box-shadow:0 0 0 3px var(--rt)}
+.sira .ana{display:flex;align-items:center;gap:16px;margin-top:8px}
+.sira h2{font-size:18px;font-weight:600;letter-spacing:-.01em}
+.sira .m{color:var(--ink3);margin-top:1px}
+.sira .d{margin-left:auto;display:flex;gap:8px}
+.adim{display:grid;grid-template-columns:repeat(3,1fr);margin-top:16px;border-top:1px solid var(--h)}
+.adim div{padding:12px 0 14px;border-left:1px solid var(--h);padding-left:14px}
+.adim div:first-child{border-left:0;padding-left:0}
+.adim b{display:block;font-weight:500}
+.adim span{color:var(--ink3);font-size:12px}
+
+.akis{padding:4px 0}
+.sat{display:grid;grid-template-columns:52px 10px 1fr 90px 92px;align-items:center;gap:12px;height:40px;padding:0 16px}
+.sat time{color:var(--ink3)}
+.sat .n{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.sat .t{font-weight:500}
+.sat .mod{color:var(--ink3);font-size:12px}
+.sat .dr{justify-self:end;font-size:12px;font-weight:500;display:inline-flex;align-items:center;gap:5px}
+.sat .dr.ok{color:var(--iyi)}
+.sat .dr.sr{color:var(--r);background:var(--rt);height:22px;padding:0 8px;border-radius:6px}
+.sat .dr.bk{color:var(--ink3)}
+.sat.bitti .t{color:var(--ink3)}
+.sat.bitti .n{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
+.simdi{display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:center;height:18px;padding:0 16px;color:var(--kotu);font-size:11px;font-weight:600}
+.simdi i{height:1px;background:var(--kotu);opacity:.5}
+
+.ozet{display:grid;grid-template-columns:1fr 1fr}
+.ozet div{padding:14px 16px;border-top:1px solid var(--h);border-left:1px solid var(--h)}
+.ozet div:nth-child(-n+2){border-top:0}
+.ozet div:nth-child(odd){border-left:0}
+.ozet>div>span{color:var(--ink3);font-size:12px;display:flex;align-items:center;gap:6px}
+.ozet b{display:block;font-size:22px;font-weight:600;letter-spacing:-.02em;margin-top:2px}
+.ozet b small{font-size:12px;color:var(--ink3);font-weight:500;margin-left:3px;letter-spacing:0}
+.ozet em{font-style:normal;font-size:12px;color:var(--ink3)}
+.ozet em.i{color:var(--iyi)}.ozet em.k{color:var(--kotu)}
+.tah{text-decoration:underline dotted #B9B9C0 2px;text-underline-offset:4px}
+.bil{width:14px;height:14px;border-radius:50%;border:1px solid #D4D4D8;display:inline-grid;place-items:center;font-size:9px;font-weight:600;color:var(--ink3)}
+
+.sayac{padding:6px 16px 14px}
+.sayac>div{padding-top:10px}
+.sayac .u{display:flex;justify-content:space-between;font-weight:500}
+.sayac .u span{color:var(--ink3);font-weight:400}
+.bar{height:6px;border-radius:3px;background:var(--h2);margin-top:6px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:3px;background:var(--r)}
+
+.merkez{padding:14px 16px}
+.merkez .u{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--mor);font-weight:500}
+.merkez .u i{width:6px;height:6px;border-radius:50%;background:var(--mor)}
+.merkez b{display:block;font-weight:500;margin-top:6px}
+.merkez p{color:var(--ink3);font-size:12px}
+.merkez .d{display:flex;gap:6px;margin-top:12px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="gun" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1.5"/></symbol>
+  <symbol id="plan" viewBox="0 0 16 16"><rect x="2.5" y="3" width="11" height="10.5" rx="2"/><path d="M2.5 6.5h11M5.5 1.5v3M10.5 1.5v3"/></symbol>
+  <symbol id="soru" viewBox="0 0 16 16"><path d="M3 13V3h7l3 3v7z"/><path d="M5.5 8.5h5M5.5 11h3"/></symbol>
+  <symbol id="den" viewBox="0 0 16 16"><path d="M3 13V9M8 13V4M13 13V7"/></symbol>
+  <symbol id="tek" viewBox="0 0 16 16"><rect x="2" y="4" width="10" height="9" rx="1.5"/><path d="M5 2.5h8.5V11"/></symbol>
+  <symbol id="ofis" viewBox="0 0 16 16"><circle cx="6" cy="6" r="2.3"/><circle cx="11.5" cy="7" r="1.8"/><path d="M2 13c.5-2.3 2-3.5 4-3.5s3.5 1.2 4 3.5M10 10.2c1.8-.3 3.4.7 4 2.8"/></symbol>
+  <symbol id="ara" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></symbol>
+  <symbol id="zil" viewBox="0 0 16 16"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3zM6.5 14h3"/></symbol>
+  <symbol id="arti" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10"/></symbol>
+  <symbol id="oyn" viewBox="0 0 16 16"><path d="M5 3v10l8-5z" fill="currentColor"/></symbol>
+  <symbol id="tik" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7"/></symbol>
+</svg>
+
+<div class="ekran" id="ays">
+  <header class="ust">
+    <div class="logo"><span>A</span>AYS</div>
+    <nav class="nav">
+      <a class="on"><svg class="i"><use href="#gun"/></svg>Bugün</a>
+      <a><svg class="i"><use href="#plan"/></svg>Program</a>
+      <a><svg class="i"><use href="#soru"/></svg>Soru çöz</a>
+      <a><svg class="i"><use href="#den"/></svg>Denemeler</a>
+      <a><svg class="i"><use href="#tek"/></svg>Tekrar</a>
+      <a><svg class="i"><use href="#ofis"/></svg>Ofis</a>
+    </nav>
+    <div class="sag">
+      <span class="ara"><svg class="i"><use href="#ara"/></svg>Ara veya komut yaz<kbd>⌘K</kbd></span>
+      <span class="ik"><svg class="i"><use href="#zil"/></svg><i></i></span>
+      <span class="rk"><b></b>Bronz 1.1<small class="tab">180/430</small></span>
+      <span class="av">Ö</span>
+    </div>
+  </header>
+
+  <div class="bas">
+    <div><h1>Bugün</h1><p>Perşembe, 24 Eylül · Hafta 2/40</p></div>
+    <div class="eyl"><div class="seg"><span class="on">Gün</span><span>Hafta</span></div><span class="btn a"><svg class="i"><use href="#arti"/></svg>Soru ekle</span></div>
+  </div>
+
+  <div class="izg">
+    <div class="sol">
+      <section class="p">
+        <div class="sira">
+          <div class="u"><i></i>Sıradaki · 20:30</div>
+          <div class="ana">
+            <div><h2>Paragraf</h2><div class="m">Akşam bloğu · 30 soru · 70 dakika</div></div>
+            <div class="d"><span class="btn b">Ertele</span><span class="btn r"><svg class="i" style="width:12px;height:12px"><use href="#oyn"/></svg>Başla</span></div>
+          </div>
+          <div class="adim">
+            <div><b>Isınma seti</b><span class="tab">10 soru · 10 dk</span></div>
+            <div><b>Ana set</b><span class="tab">30 soru · 50 dk</span></div>
+            <div><b>Yanlış notu</b><span class="tab">5 dk</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="p" style="flex:1">
+        <div class="pb"><h3>Günün akışı</h3><span class="s tab">7 iş · 3 bitti</span></div>
+        <div class="akis">
+          <div class="sat bitti" style="--c:#C97400"><time class="tab">08:00</time><i class="n"></i><span class="t">Tarih · yüzyıl eşlemesi</span><span class="mod">ESP</span><span class="dr ok"><svg class="i" style="width:13px;height:13px"><use href="#tik"/></svg>Bitti</span></div>
+          <div class="sat bitti" style="--c:#0F8F7E"><time class="tab">08:40</time><i class="n"></i><span class="t">Sabah ölçümü</span><span class="mod">SPİ</span><span class="dr ok"><svg class="i" style="width:13px;height:13px"><use href="#tik"/></svg>Bitti</span></div>
+          <div class="sat bitti" style="--c:#2B59E8"><time class="tab">09:30</time><i class="n"></i><span class="t">TYT Matematik · 24 soru, 18 doğru</span><span class="mod">AYS</span><span class="dr ok"><svg class="i" style="width:13px;height:13px"><use href="#tik"/></svg>Bitti</span></div>
+          <div class="simdi"><span class="tab">14:10</span><i></i></div>
+          <div class="sat" style="--c:#C97400"><time class="tab">14:30</time><i class="n"></i><span class="t">Yabancı Dil · kelime tekrarı</span><span class="mod">ESP</span><span class="dr bk tab">30 dk</span></div>
+          <div class="sat" style="--c:#0F8F7E"><time class="tab">17:30</time><i class="n"></i><span class="t">Antrenman · üst gövde</span><span class="mod">SPİ</span><span class="dr bk tab">45 dk</span></div>
+          <div class="sat" style="--c:#2B59E8"><time class="tab">20:30</time><i class="n"></i><span class="t">Paragraf · akşam bloğu</span><span class="mod">AYS</span><span class="dr sr">Sıradaki</span></div>
+          <div class="sat" style="--c:#0F8F7E"><time class="tab">23:00</time><i class="n"></i><span class="t">Uyku · hedef 7,5 saat</span><span class="mod">SPİ</span><span class="dr bk">—</span></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="sagk">
+      <section class="p">
+        <div class="pb"><h3>Özet</h3><span class="s">bugün</span></div>
+        <div class="ozet">
+          <div><span>Sınava kalan <span class="bil">?</span></span><b class="tab"><span class="tah">268</span><small>gün</small></b><em>tahmin</em></div>
+          <div><span>Son net</span><b class="tab">82</b><em class="i">+3 önceki</em></div>
+          <div><span>Tekrar kartı</span><b class="tab">432</b><em class="k">+41 dünden</em></div>
+          <div><span>Seri</span><b class="tab">11<small>gün</small></b><em>en uzun 14</em></div>
+        </div>
+      </section>
+      <section class="p">
+        <div class="pb"><h3>Günlük sayaç</h3><span class="s">hedef 18</span></div>
+        <div class="sayac">
+          <div><div class="u">Paragraf<span class="tab">15 / 18</span></div><div class="bar"><i style="width:83%"></i></div></div>
+          <div><div class="u">Problem<span class="tab">16 / 18</span></div><div class="bar"><i style="width:89%"></i></div></div>
+        </div>
+      </section>
+      <section class="p merkez">
+        <div class="u"><i></i>Merkez önerisi</div>
+        <b>Akşam bloğu tekrara ayrılsın</b>
+        <p>Tekrar borcu %34 · eşik %10 · yalnız bugün</p>
+        <div class="d"><span class="btn b">Uygula</span><span class="btn c">Geç</span></div>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>AYS · SPİ · ESP</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#E9ECF1;font:15px/1.4 "Geist",system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:48px;width:1500px}
+.sira{display:grid;grid-template-columns:repeat(3,440px);gap:40px;justify-content:center}
+.ek{height:900px;border-radius:40px;padding:36px 32px;display:flex;flex-direction:column;gap:22px;box-shadow:0 40px 80px -40px rgba(0,0,0,.4)}
+.ust{display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.ust b{font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
+.ust b i{width:10px;height:10px;border-radius:50%}
+.mono{font-family:"Geist Mono",monospace}
+.etk{font-size:13px}
+.buyuk{font-size:96px;font-weight:600;letter-spacing:-.05em;line-height:.9}
+.buyuk small{font-size:24px;font-weight:500;letter-spacing:-.01em;margin-left:6px}
+.kart{border-radius:22px;padding:18px 20px}
+.satir{display:flex;justify-content:space-between;align-items:center;padding:13px 0}
+.dugme{height:44px;padding:0 20px;border-radius:12px;font-weight:600;display:inline-flex;align-items:center}
+.ucl{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ucl div{border-radius:16px;padding:14px}
+.ucl b{display:block;font-size:24px;font-weight:600;letter-spacing:-.02em}
+.ucl span{font-size:12px}
+.alt{margin-top:auto;display:flex;justify-content:space-between;font-size:12px}
+
+/* AYS — acik, mavi */
+.ays{background:#FFFFFF;color:#0D1117}
+.ays .ust{color:#838C9B}
+.ays .ust b{color:#0D1117}
+.ays .etk,.ays .buyuk small{color:#838C9B}
+.ays .kart{background:#F2F6FF}
+.ays .kart .k{font-size:13px;color:#2F6FEB;font-weight:600}
+.ays .kart h3{font-size:24px;font-weight:600;letter-spacing:-.02em;margin-top:6px}
+.ays .kart .m{font-size:13px;color:#6B7483;margin-top:2px}
+.ays .dugme{background:#2F6FEB;color:#fff;margin-top:14px}
+.ays .satir{border-bottom:1px solid #EEF0F3}
+.ays .satir span{color:#838C9B;font-size:13px}
+.ays .ok{color:#1F8A5B;font-weight:600;font-size:13px}
+.ays .ucl div{background:#F5F6F8}
+.ays .ucl span{color:#838C9B}
+.ays .alt{color:#838C9B}
+
+/* SPI — koyu, turkuaz */
+.spi{background:#0B1113;color:#EAF2F1}
+.spi .ust{color:#6E7F7E}
+.spi .etk,.spi .buyuk small{color:#6E7F7E}
+.spi .halka{display:flex;align-items:center;gap:22px}
+.spi .halka svg{width:150px;height:150px;transform:rotate(-90deg);flex:none}
+.spi .kart{background:#131C1E}
+.spi .kh{font-size:13px;color:#6E7F7E;margin-bottom:4px}
+.spi .satir{border-bottom:1px solid #1C2628}
+.spi .satir:last-child{border:0}
+.spi .tik{width:20px;height:20px;border-radius:6px;display:inline-grid;place-items:center;margin-right:10px;vertical-align:middle}
+.spi .tik.on{background:#1FB39C;color:#0B1113}
+.spi .tik.off{box-shadow:inset 0 0 0 1.5px #3A4A4B}
+.spi .satir em{font-style:normal;font-size:13px;color:#6E7F7E}
+.spi .olc{display:grid;grid-template-columns:70px 1fr 50px;gap:12px;align-items:center;padding:10px 0;font-size:14px}
+.spi .iz{position:relative;height:6px;border-radius:3px;background:#1C2628}
+.spi .iz i{position:absolute;top:0;bottom:0;border-radius:3px;background:rgba(31,179,156,.35)}
+.spi .iz b{position:absolute;top:50%;width:12px;height:12px;border-radius:50%;transform:translate(-50%,-50%);background:#EAF2F1;box-shadow:0 0 0 2px #131C1E}
+.spi .iz b.d{background:#F07A7A}
+.spi .olc span:last-child{text-align:right;font-weight:600}
+.spi .alt{color:#6E7F7E}
+
+/* ESP — beyaz zemin, amber, serif sayilar yok: agir grotesk */
+.esp{background:#FFF7EC;color:#1B1510}
+.esp .ust{color:#9A8B78}
+.esp .ust b{color:#1B1510}
+.esp .etk,.esp .buyuk small{color:#9A8B78}
+.esp .buyuk{color:#1B1510}
+.esp .cubuk{height:10px;border-radius:5px;background:#F3E2C8;overflow:hidden;display:flex;gap:3px}
+.esp .cubuk i{display:block;height:100%;background:#D98309;border-radius:5px}
+.esp .adim{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid #F1E4D2}
+.esp .adim time{font-size:13px;color:#9A8B78}
+.esp .adim b{font-weight:600}
+.esp .adim.bitti b{color:#B7A893;text-decoration:line-through}
+.esp .adim .dugme{height:36px;padding:0 14px;border-radius:10px;background:#1B1510;color:#FFF7EC;font-size:13px}
+.esp .adim span{font-size:13px;color:#9A8B78}
+.esp .merdiven{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;align-items:end;height:120px}
+.esp .merdiven div{display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.esp .merdiven i{width:100%;border-radius:8px 8px 3px 3px;background:#D98309}
+.esp .merdiven span{font-size:11px;color:#9A8B78}
+.esp .alt{color:#9A8B78}
+.baslik{text-align:center;margin-top:28px;font-size:13px;color:#7B8494;display:grid;grid-template-columns:repeat(3,440px);gap:40px;justify-content:center}
+.baslik b{display:block;color:#0D1117;font-size:16px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="sira">
+
+  <!-- AYS -->
+  <section class="ek ays">
+    <div class="ust"><b><i style="background:#2F6FEB"></i>AYS</b><span class="mono">Per 24 Eyl</span></div>
+    <div>
+      <div class="etk">Sınava kalan</div>
+      <div class="buyuk">268<small>gün</small></div>
+    </div>
+    <div class="kart">
+      <div class="k">Sıradaki · 20:30</div>
+      <h3>Paragraf</h3>
+      <div class="m mono">70 dk · 30 soru</div>
+      <span class="dugme">Başla</span>
+    </div>
+    <div>
+      <div class="satir"><div><b>Sabah · Matematik</b><br><span>24 soru · 18 doğru</span></div><span class="ok">✓ Bitti</span></div>
+      <div class="satir"><div><b>Akşam · Paragraf</b><br><span>30 soru</span></div><span>20:30</span></div>
+    </div>
+    <div class="ucl">
+      <div><b>82</b><span>son net</span></div>
+      <div><b>432</b><span>tekrar</span></div>
+      <div><b>11</b><span>gün seri</span></div>
+    </div>
+    <div class="alt"><span>Hafta 2/40</span><span>Bronz 1.1</span></div>
+  </section>
+
+  <!-- SPI -->
+  <section class="ek spi">
+    <div class="ust"><b><i style="background:#1FB39C"></i>SPİ</b><span class="mono">Per 24 Eyl</span></div>
+    <div class="halka">
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#1C2628" stroke-width="10"/><circle cx="50" cy="50" r="42" fill="none" stroke="#1FB39C" stroke-width="10" stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="73.9"/></svg>
+      <div><div class="etk">Toparlanma</div><div class="buyuk" style="font-size:80px">72</div></div>
+    </div>
+    <div class="kart">
+      <div class="kh">Asgari gün · 2/4</div>
+      <div class="satir"><span><span class="tik on">✓</span>Uyku</span><em>7,0 sa</em></div>
+      <div class="satir"><span><span class="tik on">✓</span>Hareket</span><em>8.400 adım</em></div>
+      <div class="satir"><span><span class="tik off"></span>Protein</span><em>38 g kaldı</em></div>
+      <div class="satir"><span><span class="tik off"></span>Su</span><em>1,2 L kaldı</em></div>
+    </div>
+    <div class="kart">
+      <div class="kh">Tahlil · 12 Eylül</div>
+      <div class="olc"><span>Ferritin</span><span class="iz"><i style="left:15%;width:60%"></i><b class="d" style="left:13%"></b></span><span>26</span></div>
+      <div class="olc"><span>B12</span><span class="iz"><i style="left:11%;width:78%"></i><b style="left:21%"></b></span><span>288</span></div>
+      <div class="olc"><span>TSH</span><span class="iz"><i style="left:7%;width:60%"></i><b style="left:43%"></b></span><span>2,6</span></div>
+    </div>
+    <div class="alt"><span>Kalori — veri yok</span><span>Bronz 1.1</span></div>
+  </section>
+
+  <!-- ESP -->
+  <section class="ek esp">
+    <div class="ust"><b><i style="background:#D98309"></i>ESP</b><span class="mono">Per 24 Eyl</span></div>
+    <div>
+      <div class="etk">Günün reçetesi</div>
+      <div class="buyuk">20<small>/ 50 dk</small></div>
+    </div>
+    <div class="cubuk"><i style="width:40%"></i></div>
+    <div>
+      <div class="adim bitti"><time class="mono">08:00</time><b>Tarih</b><span>20 dk</span></div>
+      <div class="adim"><time class="mono">14:30</time><div><b>Yabancı Dil</b><br><span>ısınma · tekrar · yeni kart</span></div><span class="dugme">Başla</span></div>
+    </div>
+    <div>
+      <div class="etk" style="margin-bottom:12px">Merdiven</div>
+      <div class="merdiven">
+        <div><i style="height:60%"></i><span>Dil</span></div>
+        <div><i style="height:60%"></i><span>Okuma</span></div>
+        <div><i style="height:40%"></i><span>Felsefe</span></div>
+        <div><i style="height:40%"></i><span>Müzik</span></div>
+        <div><i style="height:40%"></i><span>Yazı</span></div>
+        <div><i style="height:40%"></i><span>Tarih</span></div>
+        <div><i style="height:12%;opacity:.35"></i><span>Diksiyon</span></div>
+      </div>
+    </div>
+    <div class="alt"><span>Retansiyon %50 · 797 kart</span><span>Gümüş 2.1</span></div>
+  </section>
+</div>
+<div class="baslik">
+  <div><b>AYS · açık, mavi</b>tek büyük sayı, sıradaki blok</div>
+  <div><b>SPİ · koyu, turkuaz</b>halka, dört adım, üç tahlil</div>
+  <div><b>ESP · sıcak, amber</b>reçete ve merdiven</div>
+</div>
+</body>
+</html>

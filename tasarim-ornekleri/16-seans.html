@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>16 · Seans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Tek dunya: odak icin karanlik. Renk, calisilan modulun rengidir. */
+:root{
+  --bg:#07080C; --yuzey:rgba(255,255,255,.06); --yuzey2:rgba(255,255,255,.1); --ink:#F3F4F7; --ink2:#A9AEBC; --ink3:#666C7B;
+  --r:#4F86F2; --r2:#8DB2FF;
+  --sans:"Sora",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:radial-gradient(800px 600px at 50% 38%,color-mix(in oklab,var(--r) 22%,transparent),transparent 70%),var(--bg);background-color:var(--bg);
+  color:var(--ink);font:15px/1.45 var(--sans);-webkit-font-smoothing:antialiased;padding-inline:24px}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--r2);outline-offset:3px;border-radius:14px}
+.kap{max-width:560px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-block:24px 28px}
+.ust{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--ink2)}
+.ust .etk{display:flex;align-items:center;gap:8px;font-weight:500}
+.ust .etk i{width:8px;height:8px;border-radius:50%;background:var(--r)}
+.ust button{height:34px;padding:0 14px;border-radius:999px;background:var(--yuzey);font-size:13px}
+h1{text-align:center;margin:36px 0 0;font-size:28px;font-weight:600;letter-spacing:-.02em}
+.alt-b{text-align:center;color:var(--ink3);margin-top:4px;font-size:14px}
+
+.saat{position:relative;width:min(340px,78vw);aspect-ratio:1;margin:28px auto 0}
+.saat svg{width:100%;height:100%;transform:rotate(-90deg)}
+.saat .ic{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.saat b{font-size:clamp(56px,15vw,76px);font-weight:300;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.saat span{font-size:13px;color:var(--ink3);margin-top:10px}
+.saat.dur b{opacity:.45}
+
+.sayac{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:32px}
+.sy{background:var(--yuzey);border-radius:22px;padding:16px 16px 16px 20px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:0 12px}
+.sy .ad{font-size:13px;color:var(--ink2);grid-column:1}
+.sy .v{font-size:40px;font-weight:600;letter-spacing:-.03em;grid-column:1;line-height:1.1;font-variant-numeric:tabular-nums}
+.sy .v small{font-size:15px;color:var(--ink3);font-weight:400;margin-left:4px}
+.sy .artir{grid-row:1/3;grid-column:2;width:60px;height:60px;border-radius:18px;background:var(--r);color:#fff;font-size:28px;font-weight:400;display:grid;place-items:center}
+.sy .artir:active{transform:scale(.96)}
+.sy .azalt{grid-column:1;justify-self:start;font-size:12px;color:var(--ink3);padding:4px 0}
+.bolun{margin:14px auto 0;height:36px;padding:0 16px;border-radius:999px;background:var(--yuzey);font-size:13px;color:var(--ink2);display:inline-flex;align-items:center;gap:8px}
+.bolun b{color:var(--ink);font-weight:600}
+.orta{text-align:center}
+.alt{margin-top:auto;padding-top:28px;display:flex;gap:10px}
+.alt button{height:60px;border-radius:20px;font-weight:600;font-size:16px}
+.alt .dur{flex:1;background:var(--yuzey2)}
+.alt .bitir{flex:1.4;background:var(--ink);color:var(--bg)}
+.tus{text-align:center;font-size:12px;color:var(--ink3);margin-top:14px}
+.tus kbd{font:inherit;color:var(--ink2);background:var(--yuzey);border-radius:5px;padding:1px 6px}
+
+.ozet{position:fixed;inset:0;background:rgba(4,5,8,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:grid;place-items:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .25s}
+.ozet.acik{opacity:1;pointer-events:auto}
+.ozet .k{width:min(420px,100%);background:#12141B;border-radius:28px;padding:28px;box-shadow:0 30px 80px -30px #000}
+.ozet h2{margin:0;font-size:22px;font-weight:600}
+.ozet .satir{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:22px}
+.ozet .satir div{background:var(--yuzey);border-radius:16px;padding:14px}
+.ozet .satir b{display:block;font-size:26px;font-weight:600}
+.ozet .satir span{font-size:12px;color:var(--ink3)}
+.ozet .d{display:flex;gap:8px;margin-top:22px}
+.ozet .d button{flex:1;height:52px;border-radius:16px;font-weight:600}
+.ozet .d .evet{background:var(--r);color:#fff}
+.ozet .d .hayir{background:var(--yuzey)}
+.ozet p{margin:12px 0 0;color:var(--ink3);font-size:13px}
+@media (max-width:420px){ body{padding-inline:16px} .sy .v{font-size:34px} .sy .artir{width:54px;height:54px} }
+@media (prefers-reduced-motion:reduce){ .ozet{transition:none} }
+</style>
+</head>
+<body>
+<div class="kap">
+  <div class="ust"><span class="etk"><i></i>Sınav · Akşam bloğu</span><button>Küçült</button></div>
+  <h1>Paragraf</h1>
+  <p class="alt-b">30 soru hedefi · 70 dakika</p>
+
+  <div class="saat" id="saat" role="timer" aria-live="off">
+    <svg viewBox="0 0 200 200" aria-hidden="true">
+      <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="6"/>
+      <circle id="yay" cx="100" cy="100" r="90" fill="none" stroke="var(--r)" stroke-width="6" stroke-linecap="round" stroke-dasharray="565.49" stroke-dashoffset="0"/>
+    </svg>
+    <div class="ic"><b id="kalan">42:18</b><span id="durum">kalan</span></div>
+  </div>
+
+  <div class="sayac">
+    <div class="sy"><span class="ad">Soru</span><span class="v" id="soru">12<small>/30</small></span><button class="artir" id="s-art" aria-label="Soru artır">+</button><button class="azalt" id="s-az">− geri al</button></div>
+    <div class="sy"><span class="ad">Doğru</span><span class="v" id="dogru">10</span><button class="artir" id="d-art" aria-label="Doğru artır">+</button><button class="azalt" id="d-az">− geri al</button></div>
+  </div>
+  <div class="orta"><button class="bolun" id="bolun">Bölündüm <b id="bol">0</b></button></div>
+
+  <div class="alt">
+    <button class="dur" id="dur">Duraklat</button>
+    <button class="bitir" id="bitir">Bloğu bitir</button>
+  </div>
+  <p class="tus"><kbd>Boşluk</kbd> duraklat · <kbd>S</kbd> soru · <kbd>D</kbd> doğru</p>
+</div>
+
+<div class="ozet" id="ozet" role="dialog" aria-modal="true" aria-label="Blok özeti">
+  <div class="k">
+    <h2>Blok bitti</h2>
+    <div class="satir"><div><b id="o-soru">12</b><span>soru</span></div><div><b id="o-dogru">10</b><span>doğru</span></div><div><b id="o-oran">%83</b><span>oran</span></div></div>
+    <p id="o-not">27 dk 42 sn çalışıldı · ölçüldü</p>
+    <div class="d"><button class="evet" id="kaydet">Kaydet</button><button class="hayir" id="devam">Devam et</button></div>
+  </div>
+</div>
+<script>
+(function(){
+  var TOPLAM = 70 * 60, kalan = 42 * 60 + 18, soru = 12, dogru = 10, bol = 0, dur = false;
+  var yay = document.getElementById('yay'), L = 565.49;
+  function yaz(){
+    var m = Math.floor(kalan / 60), s = kalan % 60;
+    document.getElementById('kalan').textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    yay.setAttribute('stroke-dashoffset', (L * (1 - kalan / TOPLAM)).toFixed(2));
+    document.getElementById('soru').innerHTML = soru + '<small>/30</small>';
+    document.getElementById('dogru').textContent = dogru;
+    document.getElementById('bol').textContent = bol;
+  }
+  setInterval(function(){ if(!dur && kalan > 0){ kalan--; yaz(); } }, 1000);
+  function durdur(){
+    dur = !dur;
+    document.getElementById('dur').textContent = dur ? 'Sürdür' : 'Duraklat';
+    document.getElementById('durum').textContent = dur ? 'duraklatıldı' : 'kalan';
+    document.getElementById('saat').classList.toggle('dur', dur);
+  }
+  document.getElementById('dur').onclick = durdur;
+  document.getElementById('s-art').onclick = function(){ soru++; yaz(); };
+  document.getElementById('d-art').onclick = function(){ if(dogru < soru) dogru++; yaz(); };
+  document.getElementById('s-az').onclick = function(){ if(soru > 0) soru--; if(dogru > soru) dogru = soru; yaz(); };
+  document.getElementById('d-az').onclick = function(){ if(dogru > 0) dogru--; yaz(); };
+  document.getElementById('bolun').onclick = function(){ bol++; yaz(); };
+  var oz = document.getElementById('ozet');
+  document.getElementById('bitir').onclick = function(){
+    if(!dur) durdur();
+    var gecen = TOPLAM - kalan;
+    document.getElementById('o-soru').textContent = soru;
+    document.getElementById('o-dogru').textContent = dogru;
+    document.getElementById('o-oran').textContent = soru ? '%' + Math.round(dogru / soru * 100) : '—';
+    document.getElementById('o-not').textContent = Math.floor(gecen / 60) + ' dk ' + (gecen % 60) + ' sn çalışıldı · ' + bol + ' bölünme · ölçüldü';
+    oz.classList.add('acik'); document.getElementById('kaydet').focus();
+  };
+  document.getElementById('devam').onclick = function(){ oz.classList.remove('acik'); durdur(); };
+  document.getElementById('kaydet').onclick = function(){ this.textContent = 'Kaydedildi · Geri al'; };
+  document.addEventListener('keydown', function(e){
+    if(oz.classList.contains('acik')){ if(e.key === 'Escape') document.getElementById('devam').click(); return; }
+    if(e.key === ' '){ e.preventDefault(); durdur(); }
+    if(e.key === 's' || e.key === 'S'){ soru++; yaz(); }
+    if(e.key === 'd' || e.key === 'D'){ if(dogru < soru) dogru++; yaz(); }
+  });
+  yaz();
+})();
+</script>
+</body>
+</html>

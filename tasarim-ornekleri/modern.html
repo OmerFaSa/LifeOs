@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AYS · SPİ · ESP</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+:root{--ink:#0B0D12;--ink2:#4B5262;--ink3:#8E95A3;--cizgi:#EEF0F3;--zemin:#F6F7F9;--r:#2F6FEB;--r2:#7FA6FF;--rs:47,111,235}
+body{background:#fff;color:var(--ink);font:14px/1.45 "Geist",system-ui,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;
+  background-image:radial-gradient(900px 500px at 85% -10%,rgba(var(--rs),.10),transparent 70%),radial-gradient(700px 400px at -10% 110%,rgba(var(--rs),.05),transparent 70%)}
+.mono{font-family:"Geist Mono",monospace}
+.kap{width:1240px;margin:0 auto;padding:22px 0 120px}
+
+/* ust bar */
+.ust{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.marka{display:flex;align-items:center;gap:10px}
+.marka .lg{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,var(--r2),var(--r));color:#fff;display:grid;place-items:center;font-weight:700;box-shadow:0 8px 18px -8px rgba(var(--rs),.8)}
+.marka b{font-size:15px;font-weight:600;display:block;line-height:1.1}
+.marka span{font-size:12px;color:var(--ink3)}
+.nav{display:flex;gap:2px;padding:4px;border-radius:999px;background:rgba(243,244,246,.8);box-shadow:inset 0 0 0 1px rgba(0,0,0,.03)}
+.nav span{height:36px;padding:0 16px;border-radius:999px;display:inline-flex;align-items:center;font-weight:500;color:var(--ink2)}
+.nav span.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06),0 6px 16px -8px rgba(0,0,0,.18)}
+.nav span.on::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--r);margin-right:8px}
+.sagu{display:flex;justify-content:flex-end;align-items:center;gap:10px}
+.yuv{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--ink2);background:#fff;box-shadow:0 0 0 1px var(--cizgi);position:relative}
+.yuv .n{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:50%;background:#E5484D;box-shadow:0 0 0 2px #fff}
+.rutbe{display:flex;align-items:center;gap:10px;height:40px;padding:0 14px 0 5px;border-radius:999px;background:#fff;box-shadow:0 0 0 1px var(--cizgi),0 6px 18px -10px rgba(0,0,0,.2)}
+.rutbe .md{width:30px;height:30px;border-radius:50%;position:relative;display:grid;place-items:center}
+.rutbe .md svg{position:absolute;inset:0;transform:rotate(-90deg)}
+.rutbe .md i{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--k1),var(--k2) 72%)}
+.rutbe b{font-size:13px;font-weight:600}
+.rutbe span{font-size:11px;color:var(--ink3);margin-left:2px}
+
+/* bilgi isareti */
+.bi{width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;font:600 11px "Geist",sans-serif;color:var(--ink3);box-shadow:inset 0 0 0 1.3px #D3D7DE;vertical-align:middle;position:relative;cursor:help;flex:none}
+.bi.acik{color:#fff;background:var(--ink);box-shadow:none}
+.ipucu{position:absolute;z-index:5;left:calc(100% + 14px);top:50%;transform:translateY(-50%);width:250px;padding:12px 14px;border-radius:14px;background:var(--ink);color:#fff;font:400 12.5px/1.45 "Geist",sans-serif;text-align:left;box-shadow:0 20px 40px -12px rgba(0,0,0,.4);animation:ip .5s .9s both}
+.ipucu b{display:block;font-weight:600;margin-bottom:3px}
+.ipucu em{font-style:normal;display:inline-block;margin-top:6px;font:11px "Geist Mono",monospace;color:#A9B0BE}
+.ipucu::after{content:"";position:absolute;right:100%;top:50%;transform:translateY(-50%);border:7px solid transparent;border-right-color:var(--ink)}
+@keyframes ip{from{opacity:0;transform:translate(-6px,-50%)}}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.15fr 1fr;gap:48px;align-items:center;margin-top:56px}
+.tarih{font:500 12px "Geist Mono",monospace;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.tarih::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--r);box-shadow:0 0 0 4px rgba(var(--rs),.15)}
+.dev{display:flex;align-items:flex-end;gap:14px;margin-top:14px}
+.dev>b{font-size:168px;font-weight:600;letter-spacing:-.06em;line-height:.8;background:linear-gradient(180deg,var(--ink) 40%,#3A4150);-webkit-background-clip:text;background-clip:text;color:transparent}
+.dev .yan{padding-bottom:10px;display:flex;flex-direction:column;gap:6px}
+.dev .yan>span:not(.bi){font-size:26px;font-weight:500;color:var(--ink3);letter-spacing:-.02em;line-height:1}
+.alt-b{margin-top:18px;font-size:16px;color:var(--ink2)}
+.cizelge{margin-top:26px;display:flex;gap:4px;max-width:520px}
+.cizelge i{flex:1;height:6px;border-radius:3px;background:var(--cizgi)}
+.cizelge i.on{background:var(--r)}
+.cizelge i.su{background:linear-gradient(90deg,var(--r),var(--r2));box-shadow:0 0 0 3px rgba(var(--rs),.15)}
+.cz-et{display:flex;justify-content:space-between;max-width:520px;margin-top:8px;font:11px "Geist Mono",monospace;color:var(--ink3)}
+
+.sira{position:relative;border-radius:30px;padding:26px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.04),0 2px 4px rgba(0,0,0,.03),0 40px 80px -30px rgba(var(--rs),.45);overflow:hidden}
+.sira::before{content:"";position:absolute;width:320px;height:320px;right:-120px;top:-160px;border-radius:50%;background:radial-gradient(closest-side,rgba(var(--rs),.18),transparent)}
+.sira>*{position:relative}
+.cip{display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;border-radius:999px;background:rgba(var(--rs),.1);color:var(--r);font-weight:600;font-size:12px}
+.cip i{width:6px;height:6px;border-radius:50%;background:var(--r);animation:nabiz 1.8s ease-in-out infinite}
+@keyframes nabiz{50%{box-shadow:0 0 0 5px rgba(var(--rs),.0),0 0 0 3px rgba(var(--rs),.25)}}
+.sira h2{font-size:38px;font-weight:600;letter-spacing:-.035em;margin-top:14px;line-height:1}
+.sira .m{margin-top:6px;color:var(--ink3);font-size:15px}
+.adim{display:flex;gap:8px;margin-top:20px}
+.adim div{flex:var(--f);padding:10px 12px;border-radius:14px;background:var(--zemin)}
+.adim b{display:block;font-size:13px;font-weight:600}
+.adim span{font:11px "Geist Mono",monospace;color:var(--ink3)}
+.basla{margin-top:20px;height:56px;border-radius:18px;background:linear-gradient(135deg,var(--r2),var(--r) 55%);color:#fff;font-weight:600;font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 14px 30px -12px rgba(var(--rs),.8),inset 0 1px 0 rgba(255,255,255,.25)}
+
+/* olcu karolari */
+.karolar{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:64px}
+.karo{border-radius:24px;padding:20px 22px;background:var(--zemin);position:relative;transition:transform .3s,box-shadow .3s}
+.karo.one{background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.04),0 24px 48px -24px rgba(0,0,0,.22);transform:translateY(-6px)}
+.karo .u{display:flex;justify-content:space-between;align-items:center;color:var(--ink2);font-weight:500}
+.karo .d{display:flex;align-items:baseline;gap:8px;margin-top:12px}
+.karo .d b{font-size:40px;font-weight:600;letter-spacing:-.035em;line-height:1}
+.karo .d small{font-size:15px;color:var(--ink3)}
+.fark{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;font:500 11px "Geist Mono",monospace}
+.fark.iyi{background:#E8F6EF;color:#1A7F52}.fark.kotu{background:#FDECEC;color:#C23A3A}.fark.not{background:#EEF0F3;color:#6B7280}
+.karo svg{display:block;width:100%;height:46px;margin-top:14px}
+
+/* alt bolumler */
+.alt{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-top:16px}
+.bolum{border-radius:24px;padding:22px;background:#fff;box-shadow:0 0 0 1px var(--cizgi)}
+.bolum .u{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.bolum .u h3{font-size:15px;font-weight:600}
+.bolum .u span.s{margin-left:auto;font:12px "Geist Mono",monospace;color:var(--ink3)}
+.akis{display:flex;align-items:center}
+.akis .ad{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;position:relative}
+.akis .ad::after{content:"";position:absolute;top:17px;left:calc(50% + 24px);right:calc(-50% + 24px);height:2px;border-radius:1px;background:var(--cizgi)}
+.akis .ad:last-child::after{display:none}
+.akis .ad.bitti::after{background:var(--r)}
+.akis .n{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--zemin);color:var(--ink3);font-weight:600;font-size:13px}
+.akis .bitti .n{background:var(--r);color:#fff}
+.akis .simdi .n{background:#fff;color:var(--r);box-shadow:0 0 0 2px var(--r),0 0 0 7px rgba(var(--rs),.14)}
+.akis b{font-size:13px;font-weight:600}
+.akis span{font:11px "Geist Mono",monospace;color:var(--ink3)}
+.akis .bitti b{color:var(--ink3)}
+.liste{display:flex;flex-direction:column}
+.liste div{display:grid;grid-template-columns:1fr auto;gap:10px 12px;align-items:center;padding:10px 0;border-top:1px solid var(--cizgi)}
+.liste div:first-child{border-top:0;padding-top:0}
+.liste b{font-weight:500}
+.liste .v{font:500 13px "Geist Mono",monospace}
+.bar{height:6px;border-radius:3px;background:var(--cizgi);overflow:hidden;grid-column:1/-1;margin-top:-4px}
+.bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--r2),var(--r));animation:dol 1.2s .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes dol{from{width:0!important}}
+.durum{font:600 11px "Geist",sans-serif;padding:3px 8px;border-radius:999px}
+.durum.dk{background:#FDECEC;color:#C23A3A}.durum.du{background:#FDF3E3;color:#9A5B00}.durum.di{background:#E8F6EF;color:#1A7F52}
+
+/* merkez: yuzen oneri */
+.yuzen{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);display:flex;align-items:center;gap:16px;padding:10px 10px 10px 18px;border-radius:999px;
+  background:rgba(255,255,255,.78);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
+  box-shadow:0 0 0 1px rgba(0,0,0,.05),0 24px 60px -18px rgba(40,30,90,.35);animation:yuk .7s 1.1s cubic-bezier(.2,.8,.2,1) both;white-space:nowrap}
+@keyframes yuk{from{opacity:0;transform:translate(-50%,20px)}}
+.yuzen .mk{width:30px;height:30px;border-radius:50%;background:linear-gradient(145deg,#A48BFF,#7A5CF0);display:grid;place-items:center;color:#fff;box-shadow:0 6px 14px -6px rgba(122,92,240,.9)}
+.yuzen b{font-weight:600}
+.yuzen span.s{color:var(--ink3);font-size:13px}
+.yuzen .ev{height:38px;padding:0 18px;border-radius:999px;background:#7A5CF0;color:#fff;font-weight:600;display:inline-flex;align-items:center}
+.yuzen .ha{height:38px;padding:0 14px;border-radius:999px;color:var(--ink2);font-weight:500;display:inline-flex;align-items:center}
+
+/* giris animasyonu */
+.g{animation:gir .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes gir{from{opacity:0;transform:translateY(14px)}}
+.karo.one.g{animation-name:girOne}
+@keyframes girOne{from{opacity:0;transform:translateY(8px)}to{transform:translateY(-6px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="kap" id="kap"></div>
+<div class="yuzen" id="yuzen"></div>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="ara" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="zil" viewBox="0 0 16 16"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3zM6.5 14h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  <symbol id="oyn" viewBox="0 0 16 16"><path d="M5 3v10l8-5z" fill="currentColor"/></symbol>
+  <symbol id="tik" viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="yil" viewBox="0 0 16 16"><path d="M8 2l1.5 4.5L14 8l-4.5 1.5L8 14l-1.5-4.5L2 8l4.5-1.5z" fill="currentColor"/></symbol>
+</svg>
+<script>
+var S = {
+  ays:{ r:'#2F6FEB', r2:'#7FA6FF', rs:'47,111,235', h:'A', ad:'AYS', alt:'Akademik Yol',
+    nav:['Bugün','Program','Denemeler','Tekrar','Analiz','Ofis'], rk:['Bronz 1.1','180/430','#E9A86A','#B87333',.42],
+    dev:'268', dy:['gün','kaldı'], ip:['Tahmin','Resmî sınav takvimi açıklanınca kesinleşir.','kaynak · ÖSYM takvimi bekleniyor'],
+    ab:'TYT · Hafta 2/40 · Sınava kalan süre', cz:40, czs:2, cze:['Eyl','Haziran'],
+    sira:{ k:'Sıradaki · 20:30', h:'Paragraf', m:'Akşam bloğu · 70 dk · 30 soru', a:[['Isınma','10 soru',10],['Ana set','30 soru',30],['Yanlış notu','5 dk',8]] },
+    k:[['Son net','82','',['+3','iyi'],[50,43,45,36,38,27,22,14]],['Bugün soru','24','/ 18 doğru',['%75','not'],[30,34,26,40,33,38,28,24]],['Tekrar kartı','432','vadeli',['+41','kotu'],[40,38,36,33,30,24,20,12]]],
+    b1:['Bugünün blokları','2 blok',[['bitti','Matematik','09:30 · 24/18'],['simdi','Paragraf','20:30'],['','Tekrar','akşam']]],
+    b2:['Günlük sayaç','hedef 18',[['Paragraf','15/18',83],['Problem','16/18',89],['Deneme analizi','0/11',4]]],
+    oner:['Akşam bloğu tekrara ayrılsın','tekrar borcu %34 · eşik %10'] },
+  spi:{ r:'#0E9888', r2:'#4FD8BF', rs:'14,152,136', h:'S', ad:'SPİ', alt:'Sağlık Performans',
+    nav:['Bugün','Tahliller','Beslenme','Hareket','Harcama','Ofis'], rk:['Bronz 1.1','150/410','#E9A86A','#B87333',.37],
+    dev:'72', dy:['/100','toparlanma'], ip:['Hesaplandı','Uyku, dinlenik nabız ve dünkü yükten türetilir. Teşhis değildir.','kaynak · 3 ölçüm'],
+    ab:'Planlanan yük uygun · asgari gün 2/4', cz:14, czs:13, cze:['14 gün önce','bugün'],
+    sira:{ k:'Sıradaki · 17:30', h:'Antrenman', m:'Üst gövde · 45 dk', a:[['Isınma','8 dk',8],['Ana set','30 dk',30],['Soğuma','7 dk',8]] },
+    k:[['Uyku','7,0','sa · hedef 7,5',['−0,5','kotu'],[30,22,40,14,26,30,28]],['Asgari gün','2','/ 4 adım',['seri 4','iyi'],[20,30,26,34,28,36,30]],['Kalori','—','veri yok',['hedef 2.285','not'],null]],
+    b1:['Asgari gün','2 kaldı',[['bitti','Uyku','7,0 sa'],['bitti','Hareket','8.400'],['simdi','Protein','38 g'],['','Su','1,2 L']]],
+    b2:['Tahliller','12 Eylül',[['Ferritin','26',13,'k','ref. altı'],['B12','288',21,'u','hedef altı'],['LDL','128',55,'u','hedef üstü'],['TSH','2,6',43,'i','hedefte']]],
+    oner:['Bu akşam yük hafif kalsın','toparlanma dünden 4 puan düşük'] },
+  esp:{ r:'#D98309', r2:'#FFBE5C', rs:'217,131,9', h:'E', ad:'ESP', alt:'Entelektüel Seviye',
+    nav:['Bugün','Merdiven','Dil','Kütüphane','Yazı','Ofis'], rk:['Gümüş 2.1','120/420','#FFFFFF','#A9AFB8',.29],
+    dev:'20', dy:['/ 50 dk','reçete'], ip:['Reçete','Koç günün işini yazar, planlayıcı sırayı verir. Süre ölçülür.','kaynak · sayaç'],
+    ab:'Kalan: Yabancı Dil, 30 dakika', cz:50, czs:20, cze:['0 dk','50 dk'],
+    sira:{ k:'Sıradaki · 14:30', h:'Yabancı Dil', m:'Kelime · İngilizce · 30 dk', a:[['Isınma','5 dk',5],['Tekrar','15 dk',15],['Yeni kart','10 dk',10]] },
+    k:[['Retansiyon','%50','taban %60',['−8','kotu'],[14,17,20,24,30,34,38,42]],['Vadeli kart','797','bugün',['+41','kotu'],[40,36,34,30,28,22,18,12]],['Seri','23','gün',['en uzun','iyi'],[30,28,26,24,20,16,12,8]]],
+    b1:['Günün reçetesi','2 disiplin',[['bitti','Tarih','08:00 · 20 dk'],['simdi','Yabancı Dil','14:30 · 30 dk']]],
+    b2:['Merdiven','7 disiplin',[['Yabancı Dil','Çırak',40],['Okuma','Çırak',40],['Felsefe','Acemi',20],['Müzik','Acemi',20],['Diksiyon','Temas',4]]],
+    oner:['Yeni kartı bu hafta yarıya indir','retansiyon tabanın altında'] }
+};
+var id = (location.hash || '#ays').slice(1), s = S[id] || S.ays, R = document.documentElement.style;
+R.setProperty('--r', s.r); R.setProperty('--r2', s.r2); R.setProperty('--rs', s.rs);
+function bi(m, acik){ return '<span class="bi' + (acik ? ' acik' : '') + '">i' + (acik ? '<span class="ipucu"><b>' + m[0] + '</b>' + m[1] + '<br><em>' + m[2] + '</em></span>' : '') + '</span>'; }
+function spark(v){
+  if(!v) return '<svg viewBox="0 0 300 46"><path d="M0 40 H300" stroke="#E3E6EB" stroke-width="2" stroke-dasharray="3 5"/></svg>';
+  var n = v.length, d = v.map(function(y, i){ return (i ? 'L' : 'M') + (i * 300 / (n - 1)).toFixed(1) + ' ' + (y + 2); }).join(' ');
+  return '<svg viewBox="0 0 300 46" preserveAspectRatio="none"><path d="' + d + ' L300 46 L0 46Z" fill="' + s.r + '" opacity=".08"/><path d="' + d + '" fill="none" stroke="' + s.r + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
+}
+var cz = ''; for(var i = 0; i < s.cz; i++) cz += '<i class="' + (i < s.czs - 1 ? 'on' : i === s.czs - 1 ? 'su' : '') + '"></i>';
+var rk = s.rk, L = 2 * Math.PI * 13;
+var h =
+  '<header class="ust g">' +
+    '<div class="marka"><span class="lg">' + s.h + '</span><div><b>' + s.ad + '</b><span>' + s.alt + '</span></div></div>' +
+    '<nav class="nav">' + s.nav.map(function(n, i){ return '<span class="' + (i ? '' : 'on') + '">' + n + '</span>'; }).join('') + '</nav>' +
+    '<div class="sagu"><span class="yuv"><svg width="16" height="16"><use href="#ara"/></svg></span><span class="yuv"><svg width="16" height="16"><use href="#zil"/></svg><i class="n"></i></span>' +
+    '<span class="rutbe" style="--k1:' + rk[2] + ';--k2:' + rk[3] + '"><span class="md"><svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="13" fill="none" stroke="#EEF0F3" stroke-width="2.5"/><circle cx="15" cy="15" r="13" fill="none" stroke="' + s.r + '" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="' + L + '" stroke-dashoffset="' + (L * (1 - rk[4])) + '"/></svg><i></i></span><b>' + rk[0] + '</b><span class="mono">' + rk[1] + '</span></span></div>' +
+  '</header>' +
+  '<section class="hero">' +
+    '<div class="g" style="animation-delay:.08s"><div class="tarih">Perşembe · 24 Eylül · 14:10</div>' +
+      '<div class="dev"><b>' + s.dev + '</b><div class="yan">' + bi(s.ip, true) + '<span>' + s.dy[0] + '</span><span style="font-size:17px">' + s.dy[1] + '</span></div></div>' +
+      '<p class="alt-b">' + s.ab + '</p><div class="cizelge">' + cz + '</div><div class="cz-et"><span>' + s.cze[0] + '</span><span>' + s.cze[1] + '</span></div></div>' +
+    '<div class="sira g" style="animation-delay:.18s"><span class="cip"><i></i>' + s.sira.k + '</span><h2>' + s.sira.h + '</h2><div class="m">' + s.sira.m + '</div>' +
+      '<div class="adim">' + s.sira.a.map(function(a){ return '<div style="--f:' + a[2] + '"><b>' + a[0] + '</b><span>' + a[1] + '</span></div>'; }).join('') + '</div>' +
+      '<div class="basla"><svg width="14" height="14"><use href="#oyn"/></svg>Başla</div></div>' +
+  '</section>' +
+  '<section class="karolar">' + s.k.map(function(k, i){
+    return '<div class="karo g' + (i === 0 ? ' one' : '') + '" style="animation-delay:' + (.28 + i * .07) + 's"><div class="u">' + k[0] + bi(['', '', ''], false) + '</div>' +
+      '<div class="d"><b>' + k[1] + '</b><small>' + k[2] + '</small><span class="fark ' + k[3][1] + '" style="margin-left:auto">' + k[3][0] + '</span></div>' + spark(k[4]) + '</div>';
+  }).join('') + '</section>' +
+  '<section class="alt">' +
+    '<div class="bolum g" style="animation-delay:.5s"><div class="u"><h3>' + s.b1[0] + '</h3>' + bi(['', '', ''], false) + '<span class="s">' + s.b1[1] + '</span></div><div class="akis">' +
+      s.b1[2].map(function(a, i){ return '<div class="ad ' + a[0] + '"><span class="n">' + (a[0] === 'bitti' ? '<svg width="14" height="14"><use href="#tik"/></svg>' : i + 1) + '</span><b>' + a[1] + '</b><span>' + a[2] + '</span></div>'; }).join('') + '</div></div>' +
+    '<div class="bolum g" style="animation-delay:.58s"><div class="u"><h3>' + s.b2[0] + '</h3>' + bi(['', '', ''], false) + '<span class="s">' + s.b2[1] + '</span></div><div class="liste">' +
+      s.b2[2].map(function(a){ return '<div><b>' + a[0] + '</b><span style="display:flex;gap:8px;align-items:center"><span class="v">' + a[1] + '</span>' + (a[3] ? '<span class="durum d' + a[3] + '">' + a[4] + '</span>' : '') + '</span><span class="bar"><i style="width:' + a[2] + '%"></i></span></div>'; }).join('') + '</div></div>' +
+  '</section>';
+document.getElementById('kap').innerHTML = h;
+document.getElementById('yuzen').innerHTML = '<span class="mk"><svg width="13" height="13"><use href="#yil"/></svg></span><span><b>' + s.oner[0] + '</b> <span class="s">· ' + s.oner[1] + '</span></span><span class="ev">Uygula</span><span class="ha">Geç</span>';
+</script>
+</body>
+</html>
