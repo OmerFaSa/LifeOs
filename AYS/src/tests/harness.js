@@ -168,6 +168,7 @@ R.Test = (function(){
     S.profile = R.Model.defaultProfile();
     S.weeks = {}; S.days = {}; S.reviews = {}; S.decisions = {}; S.topics = {};
     S.exams = []; S.errors = []; S.cards = []; S.protocols = [];
+    S.solved = [];   // çözülen sorular da (sorucoz.test.js: önceki testin kaydı sızıyordu)
     S.prefs = R.Model.defaultPrefs();
     S.videoNotes = []; S.activities = []; S.mood = {}; S.breaks = []; S.plan = null;
     S.calendar = []; S.sessions = []; S.profiles = []; S.istisnalar = [];
