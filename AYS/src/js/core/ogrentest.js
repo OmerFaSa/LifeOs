@@ -167,21 +167,25 @@ R.OgrenTest = (function(){
     doc.aktif.sira = Math.max(0, Math.min(doc.aktif.sorular.length - 1, Number(sira) || 0));
     await yaz();
   }
-  async function cevapla(sira, harf, ip){
+  async function cevapla(sira, harf, ip, sure){
     const a = doc.aktif;
     harf = String(harf || '').toUpperCase();
     const s = a ? soruOf(a.sorular[sira]) : null;
     if(!s || O().HARFLER.indexOf(harf) < 0) return { ok:false, neden:'gecersiz' };
     if(a.cevaplar[sira]) return { ok:false, neden:'kilitli' };
-    a.cevaplar[sira] = ip ? { h:harf, ip:true, at:simdi() } : { h:harf, at:simdi() };
+    const kayit = ip ? { h:harf, ip:true, at:simdi() } : { h:harf, at:simdi() };
+    if(typeof sure === 'number' && sure > 0) kayit.sure = Math.round(sure);
+    a.cevaplar[sira] = kayit;
     await yaz();
     return { ok:true, dogru:harf === s.q.dogru };
   }
-  async function bak(sira){
+  async function bak(sira, sure){
     const a = doc.aktif;
     if(!a || !soruOf(a.sorular[sira])) return { ok:false, neden:'gecersiz' };
     if(a.cevaplar[sira]) return { ok:false, neden:'kilitli' };
-    a.cevaplar[sira] = { h:null, bak:true, at:simdi() };
+    const kayit = { h:null, bak:true, at:simdi() };
+    if(typeof sure === 'number' && sure > 0) kayit.sure = Math.round(sure);
+    a.cevaplar[sira] = kayit;
     await yaz();
     return { ok:true };
   }
@@ -207,7 +211,7 @@ R.OgrenTest = (function(){
       id:a.id, at:simdi(), basladi:a.basladi, kapsam:a.kapsam,
       sorular:a.sorular.map((k, j) => {
         const v = a.cevaplar[j];
-        return v ? Object.assign({ k, h:v.h || null, bak:!!v.bak, at:v.at }, v.ip ? { ip:true } : {}) : { k, h:null, bos:true };
+        return v ? Object.assign({ k, h:v.h || null, bak:!!v.bak, at:v.at }, v.ip ? { ip:true } : {}, v.sure ? { sure:v.sure } : {}) : { k, h:null, bos:true };
       }),
     };
     doc.gecmis.unshift(sonuc);
@@ -221,8 +225,9 @@ R.OgrenTest = (function(){
   /* Biten testin özeti: sayılar ve konu konu sonuç (yanlışı çok olan önce).
      Doğruluk bugünkü cevap anahtarıyla hesaplanır (söz 5). */
   function ozet(t){
-    const r = { id:t.id, at:t.at, kapsam:t.kapsam, toplam:0, dogru:0, yanlis:0, bakildi:0, bos:0, konular:[] };
+    const r = { id:t.id, at:t.at, kapsam:t.kapsam, toplam:0, dogru:0, yanlis:0, bakildi:0, bos:0, konular:[], ortSure:null };
     const kon = {};
+    let topSure = 0, saySure = 0;
     t.sorular.forEach(x => {
       /* Yenilenmiş ya da kalkmış soru bu testin sonucuna sayılmaz. */
       const s = soruOf(x.k, x.at || t.at);
@@ -231,9 +236,11 @@ R.OgrenTest = (function(){
       const v = x.bos ? null : x;
       const d = v && dogruMu(s.q, v);
       if(!v) r.bos++; else if(v.bak) r.bakildi++; else if(d) r.dogru++; else r.yanlis++;
+      if(v && v.sure){ topSure += v.sure; saySure++; }
       const y = kon[s.topic.id] || (kon[s.topic.id] = { subject:s.subject, topic:s.topic, n:0, dogru:0 });
       y.n++; if(d) y.dogru++;
     });
+    r.ortSure = saySure ? Math.round(topSure / saySure) : null;
     r.konular = Object.values(kon).sort((a, b) => (a.dogru / a.n) - (b.dogru / b.n) || b.n - a.n
       || a.topic.name.localeCompare(b.topic.name, 'tr'));
     return r;
@@ -274,11 +281,13 @@ R.OgrenTest = (function(){
   /* Yeniden çözüm: yeni bir deneme. İlk cevap kalır; aynı açılışta
      ikinci kez cevaplanmaz (ekran kilitler), sonraki açılışta yeniden
      denenebilir. */
-  async function tekrarCevapla(k, harf, ip){
+  async function tekrarCevapla(k, harf, ip, sure){
     const s = soruOf(k);
     harf = String(harf || '').toUpperCase();
     if(!s || O().HARFLER.indexOf(harf) < 0) return { ok:false, neden:'gecersiz' };
-    doc.tekrar[k] = ip ? { h:harf, ip:true, at:simdi() } : { h:harf, at:simdi() };
+    const kayit = ip ? { h:harf, ip:true, at:simdi() } : { h:harf, at:simdi() };
+    if(typeof sure === 'number' && sure > 0) kayit.sure = Math.round(sure);
+    doc.tekrar[k] = kayit;
     await yaz();
     return { ok:true, dogru:harf === s.q.dogru };
   }

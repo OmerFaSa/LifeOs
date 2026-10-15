@@ -160,6 +160,12 @@ R.Ogren = (function(){
   /* Derinleştirme (data/derin-*.js): kazanımlar, ön koşullar, seviyeli
      çözümlü örnekler, sınav kalıpları, sık hatalar ve orta/ileri sorular. */
   function derin(topicId){ return (R.KONU_DERIN || {})[topicId] || null; }
+  /* Akıllı öğrenme, kavramlar, resmi kaynaklar ve stratejiler (data/akilli.js). */
+  function kavramlar(topicId){ return (R.KONU_KAVRAMLAR || {})[topicId] || []; }
+  function akilliNot(topicId){ return (R.AKILLI_NOTLAR || {})[topicId] || null; }
+  function kaynaklar(topicId){ return (R.KONU_KAYNAKLAR || {})[topicId] || []; }
+  function stratejiler(){ return R.OGRENME_STRATEJILERI || []; }
+  function zengin(topicId){ return (R.KONU_ZENGIN || {})[topicId] || null; }
   function tabanSorular(topicId){ const a = anlatim(topicId); return a && Array.isArray(a.sorular) ? a.sorular : []; }
   /* Konunun bütün soruları: önce temel sorular, ardından derin sorular.
      Derin sorular SONA eklenir: kayıtlı cevaplar sıra numarasıyla
@@ -197,9 +203,9 @@ R.Ogren = (function(){
     Object.keys(o).forEach(i => { if(gecerli(l[i], o[i] && o[i].at)) out[i] = o[i]; });
     return out;
   }
-  /* i: sorunun sırası, harf: A–E, ip: ipucu açıldıktan sonra mı. İlk
-     cevap kalır. → { ok, dogru?, neden? } */
-  async function cevapla(subjectId, topicId, i, harf, ip){
+  /* i: sorunun sırası, harf: A–E, ip: ipucu açıldıktan sonra mı, sure: geçen saniye.
+     İlk cevap kalır. → { ok, dogru?, neden? } */
+  async function cevapla(subjectId, topicId, i, harf, ip, sure){
     const l = sorular(topicId), q = l[i];
     harf = String(harf || '').toUpperCase();
     if(!q || HARFLER.indexOf(harf) < 0) return { ok:false, neden:'gecersiz' };
@@ -207,18 +213,21 @@ R.Ogren = (function(){
     if(eski[i]) return { ok:false, neden:'kilitli', dogru:eski[i].d };
     const kayit = { h:harf, d:harf === q.dogru, at:new Date().toISOString() };
     if(ip) kayit.ip = true;
+    if(typeof sure === 'number' && sure > 0) kayit.sure = Math.round(sure);
     await R.Model.setTopicState(subjectId, topicId, { ornek:Object.assign({}, eski, { [i]:kayit }) });
     return { ok:true, dogru:kayit.d };
   }
   /* Cevaplamadan «Çözümü göster»: soru «çözüme bakıldı» diye kilitlenir;
      sonra verilen cevap ölçüm olmazdı (söz 3). */
-  async function bak(subjectId, topicId, i){
+  async function bak(subjectId, topicId, i, sure){
     const q = sorular(topicId)[i];
     if(!q) return { ok:false, neden:'gecersiz' };
     const eski = cevaplar(subjectId, topicId);
     if(eski[i]) return { ok:false, neden:'kilitli' };
+    const kayit = { h:null, d:false, bak:true, at:new Date().toISOString() };
+    if(typeof sure === 'number' && sure > 0) kayit.sure = Math.round(sure);
     await R.Model.setTopicState(subjectId, topicId, {
-      ornek:Object.assign({}, eski, { [i]:{ h:null, d:false, bak:true, at:new Date().toISOString() } }) });
+      ornek:Object.assign({}, eski, { [i]:kayit }) });
     return { ok:true };
   }
   async function sifirla(subjectId, topicId){
@@ -325,5 +334,6 @@ R.Ogren = (function(){
 
   return { HARFLER, SEVIYE, konular, bul, konuyuBul, secili, sonAcilan, yukle, sec, komsu, metinHtml, duzMetin, kartYuzu,
     derin, tabanSorular, seviye, gecerli, ekMetni, soru,
-    anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle };
+    anlatim, sorular, cevaplar, cevapla, bak, sifirla, skor, durum, dersOzeti, sirada, deftere, yanlisaEkle,
+    kavramlar, akilliNot, kaynaklar, stratejiler, zengin };
 })();

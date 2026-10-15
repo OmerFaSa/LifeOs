@@ -114,11 +114,20 @@
 .king__nokta{ flex:none; width:7px; height:7px; border-radius:50%; background:var(--mer); }
 .king__nokta--ays{ background:var(--ays); } .king__nokta--spi{ background:var(--spi); }
 .king__nokta--esp{ background:var(--esp); } .king__nokta--mer{ background:var(--mer); }
-.king__kapat{ margin-left:auto; width:32px; height:32px; display:grid; place-items:center; padding:0; border:0;
+.king__ses{ margin-left:auto; width:30px; height:30px; display:grid; place-items:center; padding:0; border:0;
+  border-radius:50%; background:none; color:var(--text-2); cursor:pointer;
+  transition:background .2s ease, transform .15s ease, color .2s ease; }
+.king__ses:hover{ background:var(--surface-2); color:var(--text); transform:scale(1.08); }
+.king__ses svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.king__ses:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.king__kapat{ width:32px; height:32px; display:grid; place-items:center; padding:0; border:0;
   border-radius:50%; background:none; color:var(--text-2); cursor:pointer; transition:background .2s ease, color .2s ease; }
 .king__kapat:hover{ background:var(--surface-2); color:var(--text); }
 .king__kapat svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
 .king__kapat:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
+.king__balon--king[data-king-oku]{ cursor:pointer; }
+.king__balon--king[data-king-oku]:hover p{ text-decoration:underline; text-decoration-color:color-mix(in oklab, var(--text) 30%, transparent); text-underline-offset:3px; }
 
 /* Cevap belirir: bulanıktan netleşir, satırlar sırayla. */
 @keyframes king-belir{ from{ opacity:0; filter:blur(6px); transform:translateY(4px); } }
@@ -184,3 +193,45 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__dusun i:nth-child(3){ animation-delay:.32s; }
 @keyframes king-dusun{ 0%, 80%, 100%{ opacity:.25; transform:translateY(0); } 40%{ opacity:1; transform:translateY(-3px); } }
 @media (prefers-reduced-motion:reduce){ .king__dusun i{ animation:none; opacity:.6; } }
+
+/* Mikrofon butonu & Siri Ses Dinleme/Konuşma Animasyonları */
+.king__mikrofon{ flex:none; width:40px; height:40px; display:grid; place-items:center; padding:0; border:0;
+  border-radius:50%; background:var(--surface-2); color:var(--text); cursor:pointer;
+  transition:background .2s ease, transform .2s ease, color .2s ease; }
+.king__mikrofon svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.king__mikrofon:hover{ background:var(--surface); color:var(--primary); }
+.king__mikrofon:active{ transform:scale(.94); }
+.king[data-state="listening"] .king__mikrofon{ background:var(--primary); color:#fff; animation:king-mic-pulse 1.2s ease-in-out infinite; }
+@keyframes king-mic-pulse{ 50%{ transform:scale(1.08); box-shadow:0 0 16px var(--primary); } }
+
+/* Siri Vibe: Minimalist Audio Halo / Glow Orb Animation */
+.king[data-state="listening"] .king__kure{
+  animation: king-halo-listen 1.2s ease-in-out infinite alternate !important;
+}
+@keyframes king-halo-listen{
+  0%{ transform:scale(1.05); box-shadow:0 0 12px #2EC4A9, 0 0 24px rgba(46,196,169,.5); filter:saturate(1.4); }
+  100%{ transform:scale(1.24); box-shadow:0 0 24px #4F86FF, 0 0 44px rgba(79,134,255,.7); filter:saturate(1.8); }
+}
+
+.king[data-state="speaking"] .king__kure{
+  animation: king-halo-speak 1.5s ease-in-out infinite alternate !important;
+}
+@keyframes king-halo-speak{
+  0%{ transform:scale(1.08); box-shadow:0 0 14px #9A86FF, 0 0 28px rgba(154,134,255,.5); filter:hue-rotate(0deg) saturate(1.5); }
+  100%{ transform:scale(1.26); box-shadow:0 0 28px #E9A6C1, 0 0 54px rgba(233,166,193,.7); filter:hue-rotate(60deg) saturate(1.8); }
+}
+
+.king[data-state="listening"] .king-isik::after{ opacity:.55; animation-duration:4s; }
+.king[data-state="speaking"] .king-isik::after{ opacity:.65; animation-duration:3.5s; }
+
+/* Toplantı ve arayüz içi aktif konuşma ışık halkası */
+[data-state="speaking"]{ position:relative; }
+[data-state="speaking"]::after{
+  content:''; position:absolute; inset:-2px; border-radius:inherit; pointer-events:none;
+  box-shadow:0 0 16px rgba(79,134,255,.4), inset 0 0 12px rgba(154,134,255,.25);
+  animation:halo-pulse 1.8s ease-in-out infinite alternate;
+}
+@keyframes halo-pulse{
+  0%{ opacity:.4; }
+  100%{ opacity:1; }
+}

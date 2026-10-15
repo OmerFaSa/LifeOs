@@ -506,14 +506,17 @@ window.LIFEOS = window.LIFEOS || {};
     ac:   [[0, 180, 168, 0.035, 0.035, 0.003], [0.055, 240, 224, 0.035, 0.035, 0.003]],
     kapa: [[0, 240, 224, 0.035, 0.035, 0.003], [0.055, 180, 168, 0.035, 0.035, 0.003]],
     tamam:[[0, 392, 386, 0.2, 0.03, 0.014]],
+    /* King Siri-Grade Velvet Earcons (Apple akustiği: kayma yok, saf sıcak armonik çan) */
+    king_dinle_basla: [[0, 587.33, 587.33, 0.10, 0.024, 0.006], [0.085, 880.00, 880.00, 0.18, 0.028, 0.006]],
+    king_dinle_bitir: [[0, 880.00, 880.00, 0.08, 0.022, 0.005], [0.075, 587.33, 587.33, 0.16, 0.020, 0.006]],
   });
   let baglam = null;
   let sonBitis = 0;
 
   /* kur: AudioContext yoksa kurulsun mu? Yalnız kullanıcının dokunuşunda
-     kurulur (tarayıcı başka türlü askıda başlatır). */
-  function sesBaglami(kur){
-    if(!tercih.tik) return null;
+     kurulur (tarayıcı başka türlü askıda başlatır). zorla: yapay zeka kulaklığı/chime için. */
+  function sesBaglami(kur, zorla){
+    if(!zorla && !tercih.tik) return null;
     if(!baglam){
       if(!kur) return null;
       const C = ortam.AudioContext || (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext));
@@ -541,7 +544,8 @@ window.LIFEOS = window.LIFEOS || {};
   function tik(tur, kur){
     const plan = SESLER[tur];
     if(!plan) return false;
-    const c = sesBaglami(kur !== false);
+    const zorla = String(tur).startsWith('king_');
+    const c = sesBaglami(kur !== false, zorla);
     if(!c) return false;
     try{
       const simdi = c.currentTime || 0;
@@ -550,6 +554,24 @@ window.LIFEOS = window.LIFEOS || {};
       plan.forEach(n => nota(c, bas + n[0], n[1], n[2], n[3], n[4], n[5]));
       const son = plan[plan.length - 1];
       sonBitis = Math.max(sonBitis, bas + son[0] + son[3]);
+      return true;
+    }catch(e){ return false; }
+  }
+
+  /* Siri-tarzı mikrofon açılış ve söz devretme tınıları (chimes) */
+  function chime(tur){
+    const ad = (tur === 'basla' || tur === 'start' || tur === 'king_dinle_basla') ? 'king_dinle_basla'
+      : (tur === 'bitir' || tur === 'end' || tur === 'stop' || tur === 'king_dinle_bitir') ? 'king_dinle_bitir'
+      : tur;
+    const plan = SESLER[ad];
+    if(!plan) return false;
+    const c = sesBaglami(true, true);
+    if(!c) return false;
+    try{
+      const simdi = c.currentTime || 0;
+      plan.forEach(n => nota(c, simdi + n[0], n[1], n[2], n[3], n[4], n[5]));
+      const son = plan[plan.length - 1];
+      sonBitis = Math.max(sonBitis, simdi + son[0] + son[3]);
       return true;
     }catch(e){ return false; }
   }
@@ -688,12 +710,13 @@ window.LIFEOS = window.LIFEOS || {};
 
   bagla();
   L.SES = Object.freeze({
-    ANAHTAR, TURLER,
+    ANAHTAR, TURLER, SESLER,
     tercih:() => JSON.parse(JSON.stringify(tercih)),
     durum, dugme, panelHtml,
-    cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, devret,
+    cal, durdur, sonraki, turSec, sesAyarla, tikAc, tik, chime, devret,
     _ortam, _sifirla, _acilis:acilis, _sayfadanCik:sayfadanCik,
   });
+  L.Ses = L.SES;
   /* Başka modülde çalıyorduysa: gövde hazır olunca sürdürmeyi dene. */
   if(typeof document !== 'undefined'){
     const basla = () => { try{ acilis(); }catch(e){} };

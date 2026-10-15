@@ -207,6 +207,43 @@ SP.EXERCISES = [
     levels:[{ id:'temel', name:'4-6 nefes, 5 dakika', to:'günde 1' }] },
 ];
 
+/* Pilot egzersiz kartlarını (57 kart) ana SP.EXERCISES kataloğuna kalıplarıyla bağla. */
+if(SP.PILOT_EGZERSIZLER && Array.isArray(SP.PILOT_EGZERSIZLER)){
+  var seenIds = {};
+  SP.EXERCISES.forEach(function(e){ seenIds[e.id] = true; });
+  var patMap = {
+    'yatay_itme':'push', 'dikey_itme':'push',
+    'yatay_cekme':'pull', 'dikey_cekme':'pull',
+    'diz_baskin':'squat', 'kalca_baskin':'hinge',
+    'merkez':'core', 'tasima':'carry'
+  };
+  SP.PILOT_EGZERSIZLER.forEach(function(c){
+    if(!seenIds[c.id]){
+      seenIds[c.id] = true;
+      var pat = patMap[c.pattern] || (c.pattern === 'kardiyo' ? null : 'core');
+      var kind = (c.pattern === 'kardiyo' || (c.name_tr && c.name_tr.toLowerCase().indexOf('koşu') >= 0)) ? 'cardio' : 'strength';
+      SP.EXERCISES.push({
+        id: c.id,
+        name: c.name_tr,
+        name_en: c.name_en,
+        kind: kind,
+        pattern: pat,
+        met: c.met || (kind === 'cardio' ? 7.0 : 4.5),
+        equip: c.equipment_tr || 'vücut ağırlığı',
+        muscles: (c.primary_muscles_tr || []).concat(c.secondary_muscles_tr || []),
+        cue: c.summary || (c.steps_tr && c.steps_tr[0]) || '',
+        steps: c.steps_tr || [],
+        setup: c.setup_check || '',
+        aliases: [c.name_tr, c.name_en].concat(c.aliases || []).filter(Boolean),
+        levels: [
+          { id:'temel', name:c.name_tr + ' (temel)', to:'3×10' },
+          { id:'ileri', name:c.name_tr + ' (kontrollü)', to:'3×15' }
+        ]
+      });
+    }
+  });
+}
+
 SP.EX_BY_ID = SP.EXERCISES.reduce(function(acc, e){ acc[e.id] = e; return acc; }, {});
 
 /* Takma ad indeksi. Ayristirici uzun once ISIM ariyordu ama insanlar
@@ -218,11 +255,37 @@ SP.EX_BY_ID = SP.EXERCISES.reduce(function(acc, e){ acc[e.id] = e; return acc; }
    sonra. Kisa olan once denenseydi ozgul ad hic eslesmezdi. */
 SP.EX_ALIASES = (function(){
   var out = [];
+  var seen = {};
   SP.EXERCISES.forEach(function(e){
     (e.aliases || []).concat([e.name]).forEach(function(a){
-      out.push({ alias:a, ex:e });
+      var k = String(a).toLowerCase();
+      if(!seen[k]){ seen[k] = true; out.push({ alias:a, ex:e }); }
     });
   });
+  if(SP.PILOT_EGZERSIZLER){
+    SP.PILOT_EGZERSIZLER.forEach(function(c){
+      var matchingEx = SP.EX_BY_ID[c.id] || SP.EX_BY_ID[c.name_tr.toLowerCase()] || null;
+      var cAliases = [c.name_tr, c.name_en].concat(c.aliases || []).filter(Boolean);
+      cAliases.forEach(function(a){
+        var k = String(a).toLowerCase();
+        if(!seen[k]){
+          seen[k] = true;
+          out.push({
+            alias: a,
+            ex: matchingEx || {
+              id: c.id,
+              name: c.name_tr,
+              kind: (c.pattern && c.pattern.indexOf('kardiyo') >= 0) ? 'cardio' : 'strength',
+              pattern: c.pattern || null,
+              met: c.met || 4.5,
+              equip: c.equipment_tr || 'yok',
+              cue: c.summary || (c.steps_tr && c.steps_tr[0]) || ''
+            }
+          });
+        }
+      });
+    });
+  }
   return out.sort(function(a, b){ return b.alias.length - a.alias.length; });
 })();
 

@@ -210,7 +210,7 @@ R.Screens.today = (function(){
       /* Yalniz sakin halde cizilir: AYS'nin isi hedeftir. */
       sanat:'hedef',
       action:html`${when(clickable, () => c.Button({ label:'Başla', tone:'primary', act:'next-action',
-        data:{ 'data-route':a.route || '', 'data-next':a.act || '', 'data-block':a.blockId || '' } }))}
+        data:{ 'data-route':a.route || '', 'data-next':a.act || '', 'data-block':a.blockId || '', 'data-tab':a.tab || '' } }))}
         ${c.Button({ label:kisa ? 'Tam plan' : '15 dakikam var', size:'sm', tone:'ghost', act:'onbes-dk' })}`,
     });
   }
@@ -1188,6 +1188,16 @@ R.Screens.today = (function(){
       ayak:vadeli ? c.Button({ label:'Tekrara git', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'cards' } }) : null });
   }
 
+  function HafizaKutusu(){
+    const yanlislar = R.OgrenTest ? R.OgrenTest.yanlislar() : [];
+    const n = yanlislar.length;
+    return c.Kutu({ ad:'Hafıza yoklaması', yuva:n ? n + ' soru bekliyor' : 'temiz', class:'durumkart',
+      govde:html`<div class="durumkart__sayi">${sayiH({ deger:n, birim:'soru', kesinlik:'measured' })}
+          ${when(n > 0, () => html`<span class="durumkart__fark is-azaldi">tekrar bekliyor</span>`)}</div>
+        <p class="durumkart__not">${n ? 'Unutma eğrisi: yanlış çözülen soruları aralıklı tekrarla kalıcılaştır.' : 'Açık yanlış soru yok; hafıza taze.'}</p>`,
+      ayak:n ? c.Button({ label:'Yanlışları çöz', size:'sm', tone:'ghost', act:'go', data:{ 'data-route':'sorular', 'data-tab':'yanlis' } }) : null });
+  }
+
   /* DÖNEN DURUM (kullanıcı, 2026-10-02: «çok daha az yer kaplayan, modern
      ve minimal küçük widget'lar»). Durum'un dört kartı (sayaç, son deneme,
      tekrar borcu, özet) Bugün'de TEK küçük dönen karttır; kartların kendisi
@@ -1240,6 +1250,13 @@ R.Screens.today = (function(){
       m.push({ ust:'Tekrar borcu', cumle:'Tekrar kartı yok.', vurgu:'Borç ilk kartla ölçülür.', sistem:'ays' });
     }
 
+    const yanlislar = R.OgrenTest ? R.OgrenTest.yanlislar() : [];
+    if(yanlislar.length){
+      m.push({ ust:'Hafıza yoklaması', sayi:sayi({ deger:yanlislar.length, birim:'soru', kesinlik:'measured' }),
+        cumle:'tekrar bekliyor.', vurgu:'Aralıklı tekrar: yanlış çözülen soruları zihinde pekiştir.', sistem:'ays',
+        dugme:{ label:'Soruları çöz', act:'go', data:{ 'data-route':'sorular', 'data-tab':'yanlis' } } });
+    }
+
     const z = ozetSayilari(day, dateISO);
     m.push({ ust:'Sınav', sayi:sayi(z.kalan), cumle:'kaldı.', vurgu:z.kalan.kesinlik === 'estimated' ? 'TYT, tahmini tarih.' : 'TYT.',
       sistem:'ays', dugme:git('Plana bak', 'plan') });
@@ -1248,7 +1265,7 @@ R.Screens.today = (function(){
 
     /* İki küçük widget yan yana (iOS gibi): «Bugün» günün kendisi, «Gidişat»
        haftaların toplamı. Her biri kendi başına döner. */
-    const bugunAd = ['Günlük sayaç', 'Seri'];
+    const bugunAd = ['Günlük sayaç', 'Seri', 'Hafıza yoklaması'];
     /* Seçim sayfasının minik özeti (hesap.js söz 16); örnek profil yazmaz. */
     const ozet = R.Ornek && R.Ornek.acik() ? null : 'ays';
     return raw(V.donen({ id:'ays-bugun', ad:'Bugün', ozet, maddeler:m.filter(x => bugunAd.indexOf(x.ust) >= 0) })
@@ -1358,7 +1375,7 @@ R.Screens.today = (function(){
       ${when(banners.length, () => c.Span(12, html`<div class="stack-sm">${banners}</div>`))}
       ${/* Bugün'deki dönen kartın açık hâli: dört Durum kartı burada. */''}
       ${c.Span(12, html`<section class="bugun__alan" aria-label="Durum">
-        ${SayacKutusu(day, dateISO)}${SonDenemeKutusu()}${TekrarBorcuKutusu()}${OzetKutusu(day, dateISO)}</section>`)}
+        ${SayacKutusu(day, dateISO)}${SonDenemeKutusu()}${TekrarBorcuKutusu()}${HafizaKutusu()}${OzetKutusu(day, dateISO)}</section>`)}
       ${c.Span(12, HkmSerit())}
       ${when(gunUcuHtml(day, true), () => c.Span(12, raw(gunUcuHtml(day, true))))}
 

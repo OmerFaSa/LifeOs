@@ -240,6 +240,9 @@ window.LIFEOS.KING = (function(){
     akis.push({ kim:'king', metin, satirlar, onizleme, yeni:true });
     akis = akis.slice(-4);
     ciz();
+    if(sesAyar && metin){
+      kingKonus(metin);
+    }
   }
 
   async function isle(metin){
@@ -329,6 +332,108 @@ window.LIFEOS.KING = (function(){
   const KURE = '<span class="king__kure" aria-hidden="true"></span>';
   const NOKTA = m => '<i class="king__nokta king__nokta--' + (m || 'mer') + '" aria-hidden="true"></i>';
 
+  const SES_KEY = 'lifeos_king_ses';
+  let sesAyar = true;
+  try{
+    const s = localStorage.getItem(SES_KEY);
+    if(s !== null) sesAyar = (s === '1' || s === 'true');
+  }catch(e){}
+
+  const SVG_SES_ACIK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>';
+  const SVG_SES_KAPALI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>';
+
+  let sonSoruSesli = false;
+  let dinliyor = false;
+  let tanima = null;
+
+  async function kingKonus(metin){
+    if(!sesAyar || !metin) return;
+    const k = document.querySelector('[data-king]');
+    if(k) k.setAttribute('data-state', 'speaking');
+    try{
+      const Spk = (window.SP && SP.Speak) || (window.ESP && ESP.Speak);
+      if(Spk && Spk.say){
+        if(Spk.stop) Spk.stop();
+        await Spk.say(metin, { agent:'king' });
+      } else if(window.R && R.Voice && R.Voice.speak){
+        if(R.Voice.cancel) R.Voice.cancel();
+        if(R.Voice.load) await R.Voice.load();
+        const prof = R.Voice.profileFor ? R.Voice.profileFor('king') : { agent:'king' };
+        await R.Voice.speak(metin, prof);
+      }
+    }catch(e){}
+    if(k && k.getAttribute('data-state') === 'speaking') k.removeAttribute('data-state');
+  }
+
+  function mikrofonTikla(){
+    if(dinliyor){ mikrofonBitir(false); return; }
+    mikrofonBaslat();
+  }
+
+  function mikrofonBaslat(){
+    const Rec = (typeof window !== 'undefined') && (window.webkitSpeechRecognition || window.SpeechRecognition);
+    if(!Rec){
+      if(window.SP && SP.UI && SP.UI.toast) SP.UI.toast('Tarayıcıda konuşma tanıma desteklenmiyor');
+      return;
+    }
+    try{
+      tanima = new Rec();
+      tanima.lang = 'tr-TR';
+      tanima.continuous = false;
+      tanima.interimResults = false;
+
+      tanima.onstart = () => {
+        dinliyor = true;
+        const k = document.querySelector('[data-king]');
+        if(k) k.setAttribute('data-state', 'listening');
+        const b = document.querySelector('.king__mikrofon');
+        if(b) b.classList.add('is-dinliyor');
+        if(L.SES && L.SES.chime) L.SES.chime('king_dinle_basla');
+        else if(L.Ses && L.Ses.tik) L.Ses.tik('king_dinle_basla');
+      };
+
+      tanima.onresult = ev => {
+        const text = ev.results && ev.results[0] && ev.results[0][0] && ev.results[0][0].transcript;
+        if(text){
+          sonSoruSesli = true;
+          const g = document.querySelector('.king__girdi');
+          if(g) g.value = text;
+          mikrofonBitir(false);
+          isle(text);
+        }
+      };
+
+      tanima.onerror = () => {
+        mikrofonBitir(true);
+      };
+
+      tanima.onend = () => {
+        mikrofonBitir(false);
+      };
+
+      tanima.start();
+    }catch(e){
+      mikrofonBitir(true);
+    }
+  }
+
+  function mikrofonBitir(hata){
+    if(!dinliyor && !tanima) return;
+    dinliyor = false;
+    const k = document.querySelector('[data-king]');
+    if(k && k.getAttribute('data-state') === 'listening') k.removeAttribute('data-state');
+    const b = document.querySelector('.king__mikrofon');
+    if(b) b.classList.remove('is-dinliyor');
+    if(!hata){
+      if(L.SES && L.SES.chime) L.SES.chime('king_dinle_bitir');
+      else if(L.Ses && L.Ses.tik) L.Ses.tik('king_dinle_bitir');
+    }
+    if(tanima){
+      try{ tanima.abort(); }catch(e){}
+      tanima = null;
+    }
+  }
+
   /* PROFESYONEL (kullanıcı, 2026-10-05: «Apple Intelligence gibi olan King'i
      profesyonelleştir»): baloncuğun başında King ve bulunulan modül, sağda
      kapat; King'in cevabı avatar balonu değil düz yazı ve yalnız EN YENİSİ
@@ -338,6 +443,8 @@ window.LIFEOS.KING = (function(){
     const satirlar = akis.length ? akis : [{ kim:'king', metin:selam(), yeni:true }];
     const bas = '<div class="king__bas">' + KURE + '<b>King</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + '</span>'
+      + '<button type="button" class="king__ses" data-king="ses-gecis" aria-label="' + (sesAyar ? 'Sesi kapat' : 'Sesi aç') + '" title="' + (sesAyar ? 'Sesi kapat' : 'Sesi aç') + '">'
+      + (sesAyar ? SVG_SES_ACIK : SVG_SES_KAPALI) + '</button>'
       + '<button type="button" class="king__kapat" data-king="kapat" aria-label="Kapat" title="Kapat (Esc)">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>';
     const balonlar = satirlar.map(m => m.kim === 'sen'
@@ -345,7 +452,7 @@ window.LIFEOS.KING = (function(){
       : m.bekliyor
       ? '<div class="king__balon king__balon--king is-bekliyor" role="status" aria-label="King düşünüyor">'
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
-      : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + '"><div><p>' + kac(m.metin) + '</p>'
+      : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + '" data-king-oku role="button" tabindex="0" title="Dinlemek için tıkla" aria-label="Mesajı dinle"><div><p>' + kac(m.metin) + '</p>'
         + (m.onizleme
           ? '<div class="king__onizle"><span class="king__onizle-ad">Kaydedilecek</span><b>' + kac(m.onizleme.metin) + '</b>'
             + (m.onizleme.ipucu ? '<small>' + kac(m.onizleme.ipucu) + '</small>' : '') + '</div>'
@@ -359,7 +466,9 @@ window.LIFEOS.KING = (function(){
     return bas + '<div class="king__akis" aria-live="polite">' + balonlar + '</div>'
       + '<div class="king__cipler" role="group" aria-label="Hazır cevaplar">' + cip + '</div>'
       + '<form class="king__yaz" data-king-form data-ayar-disi>'
-      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="King\'e yaz…" autocomplete="off" enterkeyhint="send"/>'
+      + '<button type="button" class="king__mikrofon' + (dinliyor ? ' is-dinliyor' : '') + '" data-king="mikrofon" aria-label="Mikrofonla konuş" title="Mikrofonla konuş">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg></button>'
+      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinliyor ? 'Dinliyor…' : 'King\'e yaz ya da mikrofonla konuş…') + '" autocomplete="off" enterkeyhint="send"/>'
       + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>'
       + '<p class="king__ipucu" aria-hidden="true">Enter gönderir · Esc kapatır</p>';
@@ -397,10 +506,27 @@ window.LIFEOS.KING = (function(){
     ciz();
     /* Bir kare sonra: geçiş başlasın (ışık süzülür, baloncuk yükselir). */
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-acik')));
+
+    const sel = selam();
+    if(sesAyar){
+      if(L.Ses && L.Ses.chime) L.Ses.chime('king_dinle_basla');
+      else if(L.SES && L.SES.chime) L.SES.chime('king_dinle_basla');
+      else if(L.Ses && L.Ses.tik) L.Ses.tik('king_dinle_basla');
+      /* Chime bitmeden ses başlamasın: 260 ms sonra berrak konuşma */
+      ortam.zamanla(() => { if(acik) kingKonus(sel); }, 260);
+    }
   }
 
   function kapat(){
     if(!acik || typeof document === 'undefined') return;
+    mikrofonBitir(true);
+    try{
+      const Spk = (window.SP && SP.Speak) || (window.ESP && ESP.Speak);
+      if(Spk && Spk.stop) Spk.stop();
+      if(window.R && R.Voice && R.Voice.cancel) R.Voice.cancel();
+      if(window.R && R.Voice && R.Voice.stop) R.Voice.stop();
+      if(window.speechSynthesis) window.speechSynthesis.cancel();
+    }catch(e){}
     acik = false;
     const el = document.querySelector('[data-king]');
     if(!el) return;
@@ -432,6 +558,33 @@ window.LIFEOS.KING = (function(){
       if(t.closest('.king-perde')){ e.preventDefault(); e.stopPropagation(); kapat(); return; }
       const k = t.closest('[data-king]');
       if(!k){ if(acik) kapat(); return; }
+      if(t.closest('[data-king="mikrofon"]')){ e.preventDefault(); e.stopPropagation(); mikrofonTikla(); return; }
+      if(t.closest('[data-king="ses-gecis"]')){
+        e.preventDefault(); e.stopPropagation();
+        sesAyar = !sesAyar;
+        try{ localStorage.setItem(SES_KEY, sesAyar ? '1' : '0'); }catch(err){}
+        if(!sesAyar){
+          try{
+            const Spk = (window.SP && SP.Speak) || (window.ESP && ESP.Speak);
+            if(Spk && Spk.stop) Spk.stop();
+            if(window.R && R.Voice && R.Voice.cancel) R.Voice.cancel();
+            if(window.speechSynthesis) window.speechSynthesis.cancel();
+          }catch(err){}
+        }else{
+          if(L.Ses && L.Ses.chime) L.Ses.chime('king_dinle_basla');
+          else if(L.SES && L.SES.chime) L.SES.chime('king_dinle_basla');
+        }
+        ciz(false);
+        return;
+      }
+      const oku = t.closest('[data-king-oku]');
+      if(oku){
+        e.preventDefault(); e.stopPropagation();
+        const p = oku.querySelector('p');
+        const mMetin = p ? p.textContent : '';
+        if(mMetin) kingKonus(mMetin);
+        return;
+      }
       const h = t.closest('[data-king-hazir]');
       if(h){ hazirSec(Number(h.getAttribute('data-king-hazir'))); return; }
       const c = t.closest('[data-king]:not(.king)');
@@ -446,6 +599,7 @@ window.LIFEOS.KING = (function(){
       const f = e.target && e.target.closest ? e.target.closest('[data-king-form]') : null;
       if(!f) return;
       e.preventDefault();
+      sonSoruSesli = false;
       const g = f.querySelector('.king__girdi');
       const m = g ? g.value : '';
       if(g) g.value = '';
@@ -496,6 +650,7 @@ window.LIFEOS.KING = (function(){
   return {
     kur, ac, kapat, yorumla, isle, hazirSec, kaydet,
     acikMi:() => acik, akis:() => akis.slice(),
+    sesAyar:() => sesAyar, kingKonus,
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla,
   };
 })();

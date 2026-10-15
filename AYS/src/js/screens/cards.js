@@ -169,6 +169,8 @@ R.Screens.cards = (function(){
       ${when(e.principle, () => html`<div class="small"><span class="dim">Doğru ilke:</span> ${e.principle}</div>`)}
       ${when(not, () => html`<div class="row-sm">${K.Button({ label:'Konunun notu: ' + not.title,
         size:'sm', tone:'ghost', act:'note-goto', data:{ 'data-id':not.id } })}</div>`)}
+      ${when(e.topicRef || e.topicId, () => html`<div class="row-sm">${K.Button({ label:'Konuyu Çalış',
+        icon:'book', size:'sm', tone:'ghost', act:'study-topic', data:{ 'data-id':e.id } })}</div>`)}
       ${K.Row([
         K.Chip('Reçete: ' + (e.recipe || '—')),
         when(e.similar, () => K.Chip('Benzer: ' + e.similar)),
@@ -408,6 +410,26 @@ R.Screens.cards = (function(){
       R.App.render();
     },
     async 'note-goto'(el){ S.ui.noteOpen = el.dataset.id; R.App.go('learn'); },
+    async 'study-topic'(el){
+      const err = S.errors.find(e => e.id === el.dataset.id);
+      const topicKey = err ? (err.topicRef || err.topicId) : null;
+      if(!topicKey) return;
+      if(R.Ogren){
+        let sId = (err && err.subjectId) || null;
+        let tId = topicKey;
+        if(R.Ogren.konuyuBul){
+          const found = R.Ogren.konuyuBul(topicKey);
+          if(found && found.subject && found.topic){
+            sId = found.subject.id;
+            tId = found.topic.id;
+          }
+        }
+        if(sId && tId){
+          await R.Ogren.sec(sId, tId);
+        }
+      }
+      R.App.go('ogren');
+    },
     async 'repair-done'(el){
       const err = S.errors.find(e => e.id === el.dataset.id);
       err.repairDoneAt = new Date().toISOString();

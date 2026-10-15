@@ -45,8 +45,29 @@ ESP.Speak = (function(){
     try{ return API.getVoices() || []; }catch(e){ return []; }
   }
 
+  /* Doğal / sinirsel ses önceliği (Siri / Natural / Neural kalitesi):
+     Edge ve Chrome'un Natural / Neural / Google / Apple / Siri sesleri
+     eski metalik sistem seslerinden (espeak, vb.) katbekat doğaldır. */
+  function scoreVoice(v){
+    const name = String(v.name || '').toLowerCase();
+    const uri = String(v.voiceURI || '').toLowerCase();
+    const full = name + ' ' + uri;
+    let n = 0;
+    if(/natural|neural/i.test(full)) n += 80;
+    if(/google/i.test(full)) n += 50;
+    if(/apple|siri/i.test(full)) n += 45;
+    if(/online/i.test(full)) n += 30;
+    if(/microsoft/i.test(full)) n += 25;
+    if(v.localService === false) n += 20;
+    if(/espeak|festival|pico|compact|klatt/i.test(full)) n -= 80;
+    if(v.default) n += 5;
+    return n;
+  }
+
   function turkishVoices(){
-    return voices().filter(v => /^tr([-_]|$)/i.test(v.lang || ''));
+    return voices()
+      .filter(v => /^tr([-_]|$)/i.test(v.lang || ''))
+      .sort((a, b) => scoreVoice(b) - scoreVoice(a));
   }
 
   /* Türkçe ses yoksa katman yine çalışır ama bunu SÖYLER: yabancı bir
@@ -75,7 +96,8 @@ ESP.Speak = (function(){
        Aristoteles — en yavaşı: derin okuma acele kaldırmaz
        Montaigne   — nötr-düşünceli: deneme yazarı sakinliği
        Herodot     — alçak ve anlatıcı: tarih aktarıyor
-       Mnemosyne   — nötre en yakını: ölçüm okuyor, yorum katmıyor */
+       Mnemosyne   — nötre en yakını: ölçüm okuyor, yorum katmıyor
+       King        — Siri prosodisi (rate: 1.02, pitch: 1.02): akıcı, dengeli */
   const KIMLIK = {
     patron:     { rate:0.90, pitch:0.88 },
     polyglot:   { rate:1.05, pitch:1.06 },
@@ -86,6 +108,7 @@ ESP.Speak = (function(){
     montaigne:  { rate:0.98, pitch:0.96 },
     herodot:    { rate:0.93, pitch:0.86 },
     mnemosyne:  { rate:1.00, pitch:0.98 },
+    king:       { rate:0.98, pitch:1.00 },
   };
 
   /* Ses ataması KARARLI olmalı: aynı ajan her seferinde aynı sesle
@@ -93,10 +116,22 @@ ESP.Speak = (function(){
      kendi sırası kullanılır, ses listesinin sırası değil. */
   function voiceFor(agentId){
     const tr = turkishVoices();
-    const havuz = tr.length ? tr : voices();
+    const havuz = tr.length ? tr : voices().sort((a, b) => scoreVoice(b) - scoreVoice(a));
     if(!havuz.length) return null;
     const sira = ESP.AGENTS.findIndex(a => a.id === agentId);
     return havuz[(sira < 0 ? 0 : sira) % havuz.length];
+  }
+
+  function voiceForLang(lang){
+    if(!lang) return null;
+    const all = voices();
+    const prefix = lang.split(/[-_]/)[0].toLowerCase();
+    const exact = all.filter(v => (v.lang || '').toLowerCase() === lang.toLowerCase())
+      .sort((a, b) => scoreVoice(b) - scoreVoice(a));
+    if(exact.length) return exact[0];
+    const pref = all.filter(v => (v.lang || '').toLowerCase().startsWith(prefix))
+      .sort((a, b) => scoreVoice(b) - scoreVoice(a));
+    return pref[0] || null;
   }
 
   function styleFor(agentId){
@@ -215,10 +250,16 @@ ESP.Speak = (function(){
       try{ u = new Utter(metin); }
       catch(e){ return bitir('hata'); }
 
-      if(ayar.voice){ u.voice = ayar.voice; u.lang = ayar.voice.lang; }
-      else u.lang = ayar.lang || 'tr-TR';
-      u.rate = ayar.rate;
-      u.pitch = ayar.pitch;
+      if(ayar.voice){
+        u.voice = ayar.voice;
+        u.lang = ayar.voice.lang || ayar.lang || 'tr-TR';
+      } else {
+        u.lang = ayar.lang || 'tr-TR';
+      }
+      const vName = (u.voice && u.voice.name) ? String(u.voice.name).toLowerCase() : '';
+      const isDesktop = /desktop|sapi|tolga|espeak/.test(vName);
+      u.rate = isDesktop && ayar.rate > 1 ? 0.98 : (ayar.rate || 0.98);
+      u.pitch = isDesktop ? 1.0 : (ayar.pitch || 1.0);
       u.volume = ayar.volume;
 
       u.onend = () => bitir('bitti');
@@ -251,9 +292,18 @@ ESP.Speak = (function(){
     stop();
 
     const stil = styleFor(o.agent);
+    let seciliSes = o.voice || null;
+    if(!seciliSes){
+      if(o.lang && !/^tr([-_]|$)/i.test(o.lang)){
+        seciliSes = voiceForLang(o.lang);
+      } else {
+        seciliSes = voiceFor(o.agent);
+      }
+    }
+
     const ayar = {
-      voice:o.voice || voiceFor(o.agent),
-      lang:o.lang,
+      voice:seciliSes,
+      lang:o.lang || (seciliSes ? seciliSes.lang : 'tr-TR'),
       rate:o.rate != null ? o.rate : stil.rate,
       pitch:o.pitch != null ? o.pitch : stil.pitch,
       volume:o.volume != null ? o.volume : 1,
@@ -311,7 +361,7 @@ ESP.Speak = (function(){
 
   return {
     supported, ready, hasTurkish, voices, turkishVoices,
-    voiceFor, styleFor, konusulacak,
+    voiceFor, voiceForLang, styleFor, konusulacak,
     say, sequence, stop, isSpeaking, speakingAgent, onVoicesReady,
     parcala, cumleler, emniyetMs,
     KIMLIK, PARCA,

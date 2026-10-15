@@ -41,17 +41,28 @@ window.SP = window.SP || {};
 
 SP.Talk = (function(){
 
-  /* Kullanıcı sustu mu? Tanıyıcı bunu kendi söylemiyor; son metin
+  /* Kullanıcı sustu mu? Tanıyıcı bunu söylemiyor; son metin
      değişiminden bu yana geçen süreyle karar veriyoruz.
-
-     1.400 ms bilerek uzun: cümle ortasında düşünmek için bir saniye
-     yetmiyor, iki saniye ise sohbeti ağırlaştırıyor. */
-  const SESSIZLIK_MS = 1400;
+     Adaptif bekleme: Cümle yarım kalmış gibi duruyorsa (ve, ama, çünkü, virgülden sonra)
+     veya kullanıcı nefes alıyorsa 2.400 ms; soru veya net bitişse 1.500 ms; normalde 1.900 ms. */
+  const SESSIZLIK_TABAN_MS = 1900;
+  function sessizlikMs(metin){
+    const s = String(metin || '').trim();
+    if(!s) return SESSIZLIK_TABAN_MS;
+    if(/[,;\-—]\s*$/.test(s) || /\b(ve|veya|çünkü|ama|fakat|lakin|yani|için|ile|de|da|ki)$/i.test(s)){
+      return 2400;
+    }
+    if(/[.!?]\s*$/.test(s) || /\b(mı|mi|mu|mü|misin|musun|nedir|nasıl|kaç|hangi)\s*[?]?$/i.test(s)){
+      return 1500;
+    }
+    return SESSIZLIK_TABAN_MS;
+  }
 
   /* Ajan sustuktan sonra mikrofonu açmadan önceki bekleme. Sıfır
      olursa tarayıcı bazen konuşmanın son hecesini mikrofona
-     düşürüyor. */
-  const SIRA_GECIS_MS = 260;
+     düşürüyor.
+     350 ms: Windows/Chromium ses aygıtı kilidini tamamen bırakması için emniyetli eşik. */
+  const SIRA_GECIS_MS = 350;
 
   let oturum = null;
 
@@ -99,15 +110,21 @@ SP.Talk = (function(){
   function sessizlikSay(){
     if(!oturum) return;
     clearTimeout(oturum.sessizlikSaat);
+    const ms = sessizlikMs(oturum.metin);
     oturum.sessizlikSaat = setTimeout(() => {
       if(!oturum || oturum.durum !== 'dinliyor') return;
       SP.Voice.stop();          /* onEnd tetiklenir, tur orada kapanır */
-    }, SESSIZLIK_MS);
+    }, ms);
   }
 
   function dinle(){
     if(!oturum || oturum.kapandi) return;
     durumaGec('dinliyor', { metin:'', hata:null });
+
+    /* Siri-tarzı mikrofon açılış tınısı */
+    if(window.LIFEOS && LIFEOS.SES && LIFEOS.SES.chime){
+      try{ LIFEOS.SES.chime('king_dinle_basla'); }catch(e){}
+    }
 
     SP.Voice.start({
       continuous:true,
@@ -125,6 +142,10 @@ SP.Talk = (function(){
           /* Hiç konuşulmadı: döngü ölmez, yeniden dinler. */
           setTimeout(() => { if(oturum && !oturum.kapandi) dinle(); }, SIRA_GECIS_MS);
           return;
+        }
+        /* Siri-tarzı söz devretme / kapanış tınısı */
+        if(window.LIFEOS && LIFEOS.SES && LIFEOS.SES.chime){
+          try{ LIFEOS.SES.chime('king_dinle_bitir'); }catch(e){}
         }
         cevapla(soru);
       },
@@ -222,6 +243,6 @@ SP.Talk = (function(){
   return {
     supported, sesliCevapVar,
     start, stop, kes, isActive, durum, agent,
-    SESSIZLIK_MS, SIRA_GECIS_MS,
+    SESSIZLIK_TABAN_MS, sessizlikMs, SIRA_GECIS_MS,
   };
 })();

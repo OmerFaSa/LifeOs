@@ -61,7 +61,7 @@ SP.GOALS = [
 
 SP.NUTRIENTS = [
   { id:'iron', name:'Demir', unit:'mg', panel:'mineral',
-    rda:{ male:8, female:18, female50:8, teenM:11, teenF:15 }, ul:45,
+    rda:{ male:8, female:18, female51:8, female50:8, teenM:11, teenF:15 }, ul:45,
     marker:'ferritin',
     absorb:{ factor:0.15, boost:['vitc','protein'], block:['calcium','tannin','phytate'],
       note:'Bitkisel demir (non-hem) tek başına yaklaşık %5 emilir. Aynı öğünde C vitamini '
@@ -76,7 +76,7 @@ SP.NUTRIENTS = [
     note:'Bitkisel demirin emilimini açan anahtar. Depolanmaz, her gün gerekir.' },
 
   { id:'calcium', name:'Kalsiyum', unit:'mg', panel:'mineral',
-    rda:{ male:1000, female:1000, over50:1200, teen:1300 }, ul:2500,
+    rda:{ male:1000, female:1000, female51:1200, over50:1200, over70:1200, teen:1300, teenM:1300, teenF:1300 }, ul:2500,
     marker:'ca',
     absorb:{ factor:0.3, boost:['vitd'], block:['phytate','oxalate'],
       note:'D vitamini olmadan emilim %10-15\'e düşer. Demir takviyesiyle aynı öğünde alınmaz.' },

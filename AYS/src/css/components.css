@@ -2599,6 +2599,22 @@ body.is-dragging .drop.is-over{
 .ogr-ipucu{ margin:0 0 12px; padding:6px 12px; border-left:2px solid var(--primary); color:var(--text-2); max-width:70ch; }
 .ders__akilda{ max-width:70ch; margin-top:28px; padding-top:20px; border-top:1px solid var(--border); font-size:15px; line-height:1.6; }
 .ders__ayak{ margin-top:24px; }
+/* Akıllı Öğrenme, Kavramlar ve Karar Blokları (veri seti 2026-10-12) */
+.ders__kavramlar{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.ogr-kavram{ display:inline-flex; align-items:center; padding:2px 8px; border-radius:6px; font-size:12px; font-weight:500;
+  background:var(--surface-2); color:var(--text-2); box-shadow:inset 0 0 0 1px var(--border); }
+.ders__git--akilli{ color:var(--accent); font-weight:600; }
+.ders__taktik-kutu{ padding:14px 16px; border-radius:12px; background:var(--surface-2); border-left:3px solid var(--accent); margin:12px 0; }
+.ders__taktik-baslik{ margin:0 0 8px; font-size:15.5px; font-weight:650; color:var(--text); line-height:1.35; }
+.ders__taktik-vurgu{ font-size:14.5px; color:var(--text); line-height:1.5; margin:0 0 6px; }
+.ders__taktik-vurgu b{ color:var(--accent); font-weight:600; }
+.ders__taktik-madde{ line-height:1.5; color:var(--text-2); margin-top:6px; }
+.ders__taktik-tuzak{ padding:8px 12px; border-radius:8px; background:var(--surface-3);
+  color:var(--text-2); border-left:2px solid var(--danger); line-height:1.5; margin-top:8px; }
+.ders__taktik-tuzak b{ color:var(--danger); }
+.ders__mini-govde{ font-size:14px; color:var(--text-2); line-height:1.5; }
+.ders__kaynak-satir{ display:flex; justify-content:space-between; align-items:center; gap:8px; padding:10px 14px;
+  border-radius:10px; background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--border); }
 
 /* Başlıksız soru kartının kendi başı: sağdaki düğme başlığa yaslanır. */
 .ogr-bas{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
@@ -2677,6 +2693,11 @@ body.is-dragging .drop.is-over{
 .ogr-sonuc.is-dogru > p b{ color:var(--ok); }
 .ogr-sonuc.is-yanlis > p b{ color:var(--danger); }
 .ogr-sonuc.is-bakildi > p b{ color:var(--text-2); }
+.ogr-tempo{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:999px; font-weight:600; font-size:12px; }
+.ogr-tempo--ideal{ background:var(--ok-t, rgba(30,138,85,0.12)); color:var(--ok); }
+.ogr-tempo--makul{ background:var(--accent-t, rgba(230,138,0,0.12)); color:var(--accent); }
+.ogr-tempo--yavas{ background:rgba(211,47,47,0.12); color:var(--danger); }
+.ogr-sayac{ font-variant-numeric:tabular-nums; font-family:monospace; font-size:12px; color:var(--text-3); }
 
 .sohbet{ display:flex; flex-direction:column; gap:10px; }
 .sohbet p{ margin:0; }

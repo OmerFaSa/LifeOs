@@ -16,6 +16,7 @@ SP.Screens.analytics = (function(){
     { id:'capraz', label:'Çapraz bağlar',  icon:'layers' },
     { id:'hafta',  label:'Haftalık rapor', icon:'list' },
     { id:'seri',   label:'Seriler',        icon:'chart' },
+    { id:'kavramlar', label:'Fizyoloji & Kavramlar', icon:'book' },
     { id:'denetim', label:'Denetim',      icon:'list' },
     { id:'durust', label:'Dürüstlük',      icon:'shield' },
   ];
@@ -370,6 +371,75 @@ SP.Screens.analytics = (function(){
     });
   }
 
+  function derinAnalizCard(){
+    const list = SP.DERIN_ANALIZLER || [];
+    return K.Card({
+      title:'Derin Fizyoloji Analizleri',
+      sub:'Yük, adaptasyon ve toparlanma mekanizmaları',
+      badge:K.Badge({ label:list.length + ' analiz', tone:'info' }),
+      body:html`<div class="stack-sm">${map(list, a => html`
+        <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+          <div class="row between gap-8 mb-4">
+            <b class="small" style="color:var(--text)">${U.esc(a.title)}</b>
+            <span class="tiny dim">${a.category || 'Fizyoloji'}</span>
+          </div>
+          <p class="small mb-6" style="line-height:1.45">${U.esc(a.summary || '')}</p>
+          ${when(a.key_points && a.key_points.length, () => html`
+            <ul class="tiny dim pl-14 mb-0" style="line-height:1.4">
+              ${map(a.key_points, p => html`<li>${U.esc(p)}</li>`)}
+            </ul>`)}
+        </div>`)}</div>`,
+    });
+  }
+
+  function kavramlarCard(){
+    const tab = S.ui.anKavramTab || 'all';
+    let list = SP.OGRENME_KAVRAMLAR || [];
+    if(tab !== 'all') list = list.filter(c => c.content_depth === tab);
+    const filterTabs = [
+      { id:'all', label:'Tümü (' + (SP.OGRENME_KAVRAMLAR || []).length + ')' },
+      { id:'basit', label:'Temel' },
+      { id:'orta', label:'Orta' },
+      { id:'ileri', label:'İleri' },
+    ];
+    return K.Card({
+      title:'Sağlık & Egzersiz Kavramları',
+      sub:'30 temel fizyoloji, antrenman ve kayıt kavramı',
+      body:html`
+        <div class="row wrap gap-6 mb-12">
+          ${map(filterTabs, t => K.Chip({ label:t.label, act:'an-kavram-tab', on:t.id === tab,
+            data:{ 'data-tab':t.id } }))}
+        </div>
+        <div class="stack-xs" style="max-height:360px;overflow-y:auto">
+          ${map(list, c => html`
+            <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+              <div class="row between gap-6 mb-2">
+                <b class="small">${U.esc(c.title)}</b>
+                <span class="badge badge--muted tiny">${c.content_depth}</span>
+              </div>
+              <p class="small mb-4" style="line-height:1.4">${U.esc(c.definition)}</p>
+              ${when(c.watch, () => html`<p class="tiny dim mb-0"><b>Dikkat:</b> ${U.esc(c.watch)}</p>`)}
+            </div>`)}
+        </div>`,
+    });
+  }
+
+  function kanitCard(){
+    const list = SP.KANIT_KARTLARI || [];
+    return K.Card({
+      title:'Bilimsel Kanıt ve Referans Kartları',
+      sub:'ACSM, NSCA, WHO ve CDC araştırma dayanakları',
+      body:html`<div class="stack-xs" style="max-height:300px;overflow-y:auto">${map(list, k => html`
+        <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+          <div class="row between gap-6 mb-2">
+            <b class="small">${U.esc(k.title)}</b>
+            <span class="tiny dim">${k.source || 'Araştırma'}</span>
+          </div>
+          <p class="small mb-0" style="line-height:1.4">${U.esc(k.summary || k.evidence || '')}</p>
+        </div>`)}</div>`,
+    });
+  }
+
   /* Sekme yok (EKIP-PLANI §1.2): beş okuma alt alta durur, üstteki bölüm
      çubuğu sayfa içinde o okumaya kaydırır. Bir bölüm çizilemezse yalnız o
      bölüm sakin bir notla düşer; öteki dördü durur. */
@@ -386,6 +456,7 @@ SP.Screens.analytics = (function(){
       <div class="mt-24">${raw(UI.rail(['grounding', 'decision', 'minimum-day']))}</div>`,
     seri:() => html`${K.Ledger(() => [seriesCard()])}
       <div class="mt-24">${raw(UI.rail(['trend', 'ref-range', 'certainty']))}</div>`,
+    kavramlar:() => html`${K.Ledger(() => [derinAnalizCard(), kavramlarCard(), kanitCard()])}`,
     denetim:() => html`${K.Ledger(() => [denetimCard()])}
       <div class="mt-24">${raw(UI.rail(['audit', 'certainty', 'red-flag']))}</div>`,
     durust:() => html`${K.Ledger(() => [signalLedgerCard(), frictionCard(), goodhartCard(), calibCard()])}
@@ -458,6 +529,7 @@ SP.Screens.analytics = (function(){
 
   const handle = {
     async 'an-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'an-kavram-tab'(el){ S.ui.anKavramTab = el.dataset.tab; SP.App.render(); },
 
     /* Tahmin KÖR açılır: gerçek değer burada hesaplanmaz. */
     async 'calib-open'(){

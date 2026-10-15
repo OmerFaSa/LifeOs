@@ -793,7 +793,10 @@ R.App = (function(){
       go(el.dataset.route || 'anlatim');
     },
     async go(el){
-      if(el.dataset.tab) S.ui.cardTab = el.dataset.tab;
+      if(el.dataset.tab){
+        S.ui.cardTab = el.dataset.tab;
+        if(el.dataset.route === 'sorular') S.ui.ogrenKip = el.dataset.tab;
+      }
       if(window.LIFEOS && window.LIFEOS.HAREKET) window.LIFEOS.HAREKET.kaynak(el);
       go(el.dataset.route);
     },
@@ -872,6 +875,11 @@ R.App = (function(){
     async 'next-action'(el){
       const act = el.dataset.next;
       const route = el.dataset.route;
+      const tab = el.dataset.tab;
+      if(tab){
+        S.ui.cardTab = tab;
+        if(route === 'sorular') S.ui.ogrenKip = tab;
+      }
       if(route && route !== S.route){ go(route); }
       if(!act) return;
       setTimeout(async () => {
@@ -883,6 +891,41 @@ R.App = (function(){
     async 'sheet-close'(){ UI.closeSheet(); },
     /* Paletten gelen veri girisi onayi — bkz. core/palette.js */
     async 'veri-kaydet'(){ await R.Palette.veriKaydet(); },
+    /* ---- dikte ----
+       Mikrofon düğmesi bir anahtardır: açıkken basınca kapanır. Metin
+       alana canlı yazılır; kullanıcı konuştuğunu görür. */
+    async dictate(el){
+      const id = el.dataset.target;
+      const field = document.getElementById(id);
+      if(!field){ UI.toast('Yazılacak alan bulunamadı'); return; }
+
+      const L = R.Listen || R.Voice;
+      if(!L) return;
+
+      if(L.isActive && L.isActive() && L.activeTarget && L.activeTarget() === id){
+        L.stop();
+        el.classList.remove('is-on');
+        el.setAttribute('aria-pressed', 'false');
+        return;
+      }
+
+      const started = L.dictateInto(field, {
+        onEnd(){
+          el.classList.remove('is-on');
+          el.setAttribute('aria-pressed', 'false');
+        },
+        onError(code){
+          el.classList.remove('is-on');
+          el.setAttribute('aria-pressed', 'false');
+          UI.toast(L.message(code));
+        },
+      });
+      if(started){
+        el.classList.add('is-on');
+        el.setAttribute('aria-pressed', 'true');
+        field.focus({ preventScroll:true });
+      }
+    },
     async reload(){ location.reload(); },
     /* Herhangi bir ekrandan bir ajana soru sormak icin. */
     async 'ask-agent'(el){

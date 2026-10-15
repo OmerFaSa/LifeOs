@@ -26,6 +26,55 @@ ESP.Screens.lang = (function(){
     { id:'ilerleme', label:'İlerleme' },
   ];
 
+  const BCP = {
+    en: 'en-US',
+    de: 'de-DE',
+    fr: 'fr-FR',
+    es: 'es-ES',
+    ar: 'ar-SA',
+    ru: 'ru-RU',
+    it: 'it-IT',
+    la: 'la',
+    tr: 'tr-TR'
+  };
+
+  function levenshtein(a, b){
+    const m = a.length, n = b.length;
+    if(!m) return n;
+    if(!n) return m;
+    const row = [];
+    for(let j = 0; j <= n; j++) row[j] = j;
+    for(let i = 1; i <= m; i++){
+      let prev = i;
+      for(let j = 1; j <= n; j++){
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        const val = Math.min(row[j] + 1, prev + 1, row[j - 1] + cost);
+        row[j - 1] = prev;
+        prev = val;
+      }
+      row[n] = prev;
+    }
+    return row[n];
+  }
+
+  function cleanSpeech(s){
+    return String(s || '')
+      .toLocaleLowerCase('tr-TR')
+      .replace(/[.,/#!$%^&*;:{}=\-_`~()?"'«»]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function speechMatchScore(target, heard){
+    const t = cleanSpeech(target);
+    const h = cleanSpeech(heard);
+    if(!t && !h) return 100;
+    const max = Math.max(t.length, h.length);
+    if(!max) return 100;
+    const dist = levenshtein(t, h);
+    return Math.max(0, Math.min(100, Math.round((1 - dist / max) * 100)));
+  }
+
   function aktifDil(){
     return S.ui.langDeck && S.ui.langDeck !== 'all'
       ? S.ui.langDeck
@@ -110,6 +159,33 @@ ESP.Screens.lang = (function(){
     }
 
     const gecikme = ESP.SRS.overdueDays(kart);
+    const st = S.ui.speechTest && S.ui.speechTest.cardId === kart.id ? S.ui.speechTest : null;
+    const telaffuzBar = html`
+      <div class="row wrap gap-8 align-center mt-12 pt-8" style="border-top:1px solid var(--border-subtle, rgba(255,255,255,0.06));">
+        ${K.Button({
+          label:'Telaffuzu Dinle',
+          size:'sm',
+          tone:'ghost',
+          act:'speak-card-front',
+          title:'Polyglot telaffuzu dinle'
+        })}
+        ${K.Button({
+          label:st && st.status === 'listening' ? 'Durdur' : 'Telaffuzumu Sına',
+          size:'sm',
+          tone:st && st.status === 'listening' ? 'warn' : 'ghost',
+          act:st && st.status === 'listening' ? 'speech-test-stop' : 'test-pronunciation',
+          title:'Sesinizi dinleyerek telaffuz benzerliğini ölçer'
+        })}
+        ${when(st && st.status === 'listening', () => K.Badge({ label:'Dinleniyor… Konuşun', tone:'warn' }))}
+        ${when(st && st.status === 'done', () => html`
+          ${K.Badge({
+            label:'%' + st.score + ' Doğruluk',
+            tone:st.score >= 80 ? 'ok' : (st.score >= 50 ? 'warn' : 'danger')
+          })}
+          <span class="small muted">Duyulan: «${st.heardText || '(ses algılanmadı)'}»</span>
+        `)}
+      </div>`;
+
     return [K.Entry({
       label:'Kart ' + (q.pos + 1) + '/' + q.ids.length,
       meta:(ESP.LANG_BY_ID[kart.lang] || {}).label || kart.lang,
@@ -131,6 +207,7 @@ ESP.Screens.lang = (function(){
             ? html`<div class="srscard__back">${kart.back}</div>`
             : html`<button class="srscard__reveal" data-act="reveal-card">Karşılığı göster</button>`}
         </div>`}
+        ${telaffuzBar}
         ${when(q.shown, () => html`
           ${VT() ? html`<div class="mt-12">${raw(VT().sureliCevap({ act:'grade-card',
             /* 090 SÜRELİ CEVAP: her düğme kartın sonraki görülme zamanını
@@ -448,13 +525,52 @@ ESP.Screens.lang = (function(){
             input:K.Input({ id:'er-wrong', aria:'Yanlış hâli' }) })}
           ${K.Field({ label:'Doğrusu',
             input:K.Input({ id:'er-right', aria:'Doğru hâli' }) })}
-        </div>
         ${K.Button({ label:'Karta çevir', act:'add-error', class:'mt-10' })}
         ${K.Table({ tight:true, headers:['Tür', 'Ne olur'],
           rows:ESP.PRODUCTION_ERRORS.map(e => [e.label, e.note]) })}`,
     }));
 
+    rows.push(parallelSentencesEntry());
+
     return rows;
+  }
+
+  function parallelSentencesEntry(){
+    const dil = aktifDil();
+    const l = ESP.LANG_BY_ID[dil] || { label:dil };
+    const all = ESP.PARALEL_CUMLELER || [];
+    const list = all.filter(g => g.texts && (g.texts[dil] || dil === 'en'));
+    const q = (S.ui.paralelQ || '').trim().toLowerCase();
+    const matched = q
+      ? list.filter(g => {
+          const t1 = (g.texts[dil] || g.texts['en'] || '').toLowerCase();
+          const tr = (g.texts['tr'] || '').toLowerCase();
+          return t1.indexOf(q) >= 0 || tr.indexOf(q) >= 0;
+        })
+      : list.slice(0, 8);
+
+    return K.Entry({
+      label:'8 Dilli Paralel Cümleler (Universal Dependencies)', hint:'parallel',
+      meta:(matched.length) + '/' + list.length + ' cümle · ' + (l.label || dil),
+      wide:true,
+      body:html`
+        <p class="small muted mb-8">PUD araştırma derlemlerinden Türkçe ve hedef dilde karşılıklı gerçek cümle bağlamları.</p>
+        <div class="mb-10">
+          ${K.Input({ id:'paralel-search', placeholder:'Cümlede ara (kelime, deyim...)', value:S.ui.paralelQ || '',
+            change:'paralel-search', size:'sm' })}
+        </div>
+        <div class="stack-xs" style="max-height:360px;overflow-y:auto">
+          ${map(matched, g => {
+            const tr = g.texts['tr'] || '';
+            const target = g.texts[dil] || g.texts['en'] || '';
+            return html`
+              <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+                <div class="small mb-2"><b>${l.label || dil}:</b> ${target}</div>
+                <div class="small text-2 dim"><b>TR:</b> ${tr}</div>
+              </div>`;
+          })}
+        </div>`,
+    });
   }
 
   /* ------------------------------------------------------------------ öğren
@@ -648,10 +764,13 @@ ESP.Screens.lang = (function(){
     },
     async 'tab-ekle'(){ S.ui.langTab = 'ekle'; ESP.App.render(); },
 
-    async 'start-review'(){ S.ui.reviewQueue = queueStart(); ESP.App.render(); },
+    async 'start-review'(){ S.ui.speechTest = null; S.ui.reviewQueue = queueStart(); ESP.App.render(); },
     async 'reveal-card'(){ if(S.ui.reviewQueue) S.ui.reviewQueue.shown = true; ESP.App.render(); },
 
     async 'grade-card'(el){
+      if(ESP.Voice) ESP.Voice.stop();
+      if(ESP.Speak) ESP.Speak.stop();
+      S.ui.speechTest = null;
       const q = S.ui.reviewQueue;
       if(!q) return;
       const res = await ESP.SRS.answer(q.ids[q.pos], el.dataset.grade);
@@ -664,7 +783,92 @@ ESP.Screens.lang = (function(){
       ESP.App.render();
     },
 
-    async 'end-review'(){ S.ui.reviewQueue = null; ESP.App.render(); },
+    async 'end-review'(){
+      if(ESP.Voice) ESP.Voice.stop();
+      if(ESP.Speak) ESP.Speak.stop();
+      S.ui.speechTest = null;
+      S.ui.reviewQueue = null;
+      ESP.App.render();
+    },
+
+    async 'speak-card-front'(){
+      const q = S.ui.reviewQueue;
+      if(!q) return;
+      const kart = S.cards.find(c => c.id === q.ids[q.pos]);
+      if(!kart || !kart.front) return;
+      const bcp = (ESP.LANG_BY_ID[kart.lang] || {}).bcp || BCP[kart.lang] || kart.lang || 'en-US';
+      if(ESP.Speak && ESP.Speak.isSpeaking()){
+        ESP.Speak.stop();
+      } else if(ESP.Speak){
+        ESP.Speak.say(kart.front, { lang:bcp, agent:'polyglot' });
+      }
+    },
+
+    async 'test-pronunciation'(){
+      const q = S.ui.reviewQueue;
+      if(!q) return;
+      const kart = S.cards.find(c => c.id === q.ids[q.pos]);
+      if(!kart) return;
+      if(!ESP.Voice || !ESP.Voice.supported()){
+        ESP.UI.toast('Tarayıcınız ses tanımayı desteklemiyor.');
+        return;
+      }
+      if(ESP.Voice.isActive()){
+        ESP.Voice.stop();
+        S.ui.speechTest = null;
+        ESP.App.render();
+        return;
+      }
+      const bcp = (ESP.LANG_BY_ID[kart.lang] || {}).bcp || BCP[kart.lang] || kart.lang || 'en-US';
+      S.ui.speechTest = { cardId:kart.id, status:'listening', heardText:'', score:null };
+      ESP.App.render();
+
+      ESP.Voice.start({
+        lang: bcp,
+        continuous: false,
+        onText(text, final){
+          if(final && text){
+            const score = speechMatchScore(kart.front, text);
+            S.ui.speechTest = {
+              cardId: kart.id,
+              status: 'done',
+              heardText: text,
+              score: score
+            };
+            ESP.Voice.stop();
+            ESP.App.render();
+          }
+        },
+        onEnd(finalText){
+          if(S.ui.speechTest && S.ui.speechTest.status === 'listening'){
+            const score = speechMatchScore(kart.front, finalText || '');
+            S.ui.speechTest = {
+              cardId: kart.id,
+              status: 'done',
+              heardText: finalText || '',
+              score: score
+            };
+            ESP.App.render();
+          }
+        },
+        onError(err){
+          ESP.Voice.stop();
+          if(err !== 'no-speech' && err !== 'aborted'){
+            ESP.UI.toast(ESP.Voice.message(err));
+          }
+          S.ui.speechTest = null;
+          ESP.App.render();
+        }
+      });
+    },
+
+    async 'speech-test-stop'(){
+      if(ESP.Voice) ESP.Voice.stop();
+      if(S.ui.speechTest && S.ui.speechTest.status === 'listening'){
+        S.ui.speechTest = null;
+      }
+      ESP.App.render();
+    },
 
     async 'log-review'(el){
       const n = Number(el.dataset.count) || 0;
@@ -784,6 +988,7 @@ ESP.Screens.lang = (function(){
     async 'card-query'(el){ S.ui.cardQuery = el.value; ESP.App.render(); },
     async 'deck-lang'(el){ S.ui.langDeck = el.value; S.ui.reviewQueue = null; ESP.App.render(); },
     async 'pick-lang'(){ /* form içi seçim; kaydetme anında okunur */ },
+    async 'paralel-search'(el){ S.ui.paralelQ = el.value; ESP.App.render(); },
   };
 
   return {

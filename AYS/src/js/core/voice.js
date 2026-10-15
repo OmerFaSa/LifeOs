@@ -49,6 +49,7 @@ R.Voice = (function(){
     analist:{ pitch:1.00, rate:1.05 },
     koc:    { pitch:0.88, rate:1.03 },
     aday:   { pitch:1.04, rate:1.00 },
+    king:   { pitch:1.00, rate:0.98 },
   };
 
   /* Okuma hizi: kelime/saniye. Sesli degilken turlar arasindaki mola
@@ -154,19 +155,22 @@ R.Voice = (function(){
      bu yuzden puan sirasi bir TERCIH sirasidir, filtre degil. */
   function score(v){
     const name = String(v.name || '').toLowerCase();
+    const uri = String(v.voiceURI || '').toLowerCase();
+    const full = name + ' ' + uri;
     const lang = String(v.lang || '');
     let n = 0;
     /* Turkce olmak her seyden onemli: iyi bir Ingilizce ses Turkce metni
        okuyamaz. */
     if(/^tr\b|^tr[-_]/i.test(lang)) n += 200;
     /* Sinirsel/bulut sesler yerel gomulu seslerden belirgin iyidir. */
-    if(/natural|neural/.test(name)) n += 60;
-    if(/google/.test(name)) n += 45;
-    if(/microsoft/.test(name)) n += 25;
-    if(/online/.test(name)) n += 20;
+    if(/natural|neural/.test(full)) n += 80;
+    if(/google/.test(full)) n += 50;
+    if(/apple|siri/.test(full)) n += 45;
+    if(/microsoft/.test(full)) n += 25;
+    if(/online/.test(full)) n += 20;
     if(v.localService === false) n += 30;
     /* Bilinen robotik motorlar geriye atilir. */
-    if(/espeak|festival|pico|compact|klatt/.test(name)) n -= 80;
+    if(/espeak|festival|pico|compact|klatt/.test(full)) n -= 80;
     if(v.default) n += 3;
     return n;
   }
@@ -417,8 +421,10 @@ R.Voice = (function(){
 
       u.lang = LANG;
       if(profile && profile.voice) u.voice = profile.voice;
-      u.pitch = (profile && profile.pitch) || 1;
-      u.rate = (profile && profile.rate) || 1;
+      const vName = (u.voice && u.voice.name) ? String(u.voice.name).toLowerCase() : '';
+      const isDesktop = /desktop|sapi|tolga|espeak/.test(vName);
+      u.pitch = isDesktop ? 1.0 : ((profile && profile.pitch) || 1.0);
+      u.rate = isDesktop && profile && profile.rate > 1 ? 0.98 : ((profile && profile.rate) || 0.98);
       u.onend = () => finish('end');
       u.onerror = () => finish('error');
 
@@ -439,6 +445,19 @@ R.Voice = (function(){
   async function speak(text, profile, opts){
     const o = opts || {};
     if(!available()) return 'unavailable';
+
+    if(typeof profile === 'string' || (profile && profile.agent && !profile.voice)){
+      if(!cached || !cached.length) await load();
+      profile = profileFor(profile.agent || profile);
+    } else if(!profile || !profile.voice){
+      if(!cached || !cached.length) await load();
+      profile = profileFor('king');
+    }
+    if(profile && !profile.voice){
+      const vList = voices();
+      if(vList.length) profile.voice = vList[0];
+    }
+
     /* Metin KONUSMA icin donusturulur; ekranda gorunen degismez. */
     const parts = chunks(o.raw ? text : speechText(text));
     if(!parts.length) return 'empty';
@@ -456,7 +475,7 @@ R.Voice = (function(){
   }
 
   return {
-    available, load, voices, voiceCount, assign, profileFor, speak, cancel,
+    available, load, voices, voiceCount, assign, profileFor, speak, cancel, stop: cancel,
     readMs, holdMs, chunks, sentences, budgetMs,
     score, quality, byURI, speechText, overrides,
     PROFILES, PACE, PACE_ORDER, paceOf, LANG, CHUNK, MIN_HOLD, SPELL,

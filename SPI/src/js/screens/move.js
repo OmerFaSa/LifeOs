@@ -96,6 +96,8 @@ SP.Screens.move = (function(){
     return K.Entry({
       label:'Seans seç', hint:'session-pick',
       meta:SP.SESSION_TEMPLATES.length + ' şablon',
+      action:html`${K.Button({ label:'Programlar (20)', act:'open-programs', size:'sm', tone:'ghost' })}
+        ${K.Button({ label:'MET Kalori', act:'open-met-calc', size:'sm', tone:'ghost' })}`,
       body:html`<div class="picks">${map(SP.SESSION_TEMPLATES, t => html`
         <button class="${cls('pickcard', suggested[0] === t.id && 'is-on')}"
           data-act="start-session" data-id="${t.id}">
@@ -183,6 +185,7 @@ SP.Screens.move = (function(){
         <div class="ladderblk__foot">
           <span class="small dim">${pr.note}</span>
           <span class="row-sm">
+            ${K.Button({ label:'Teknik & İpuçları', size:'sm', tone:'ghost', act:'open-ex-detail', data:{ 'data-id':ex.id } })}
             ${when(pr.ready, () => K.Button({ label:'Üst basamağa geç', size:'sm',
               act:'advance', data:{ 'data-id':ex.id } }))}
             ${K.Button({ label:'Basamak seç', size:'sm', act:'pick-level', data:{ 'data-id':ex.id } })}
@@ -689,6 +692,144 @@ SP.Screens.move = (function(){
       ${when(dl.due, () => K.Notice({ tone:'warn', body:dl.note }))}`;
   }
 
+  let bodyPhotoFile = null;
+  let lastBodyAnalysis = null;
+
+  function bodyPhotoSheet(){
+    UI.sheet({
+      title:'Fotoğraftan beden & duruş analizi',
+      subtitle:'Boydan fotoğraf ile BKİ, duruş (postür) ve tahmini kompozisyon',
+      wide:true,
+      body:String(K.Stack([
+        when(!SP.Extract.modelReady(), () => K.Notice({ tone:'warn',
+          title:'Model bağlı değil.',
+          body:'Fotoğraftan analiz yapmak için Ayarlar → Rehber → Model bölümünden '
+            + 'görüntü destekleyen bir sağlayıcı seç.' })),
+        K.Drop({ act:'body-photo-file', label:'Boydan vücut fotoğrafı', icon:'camera',
+          accept:'image/*', hint:'Fotoğrafı buraya bırak ya da seçmek için tıkla' }),
+        html`<div id="body-photo-name" class="small dim">${bodyPhotoFile ? bodyPhotoFile.name : ''}</div>`,
+        html`<div class="cols-2">
+          ${K.Field({ label:'Boyun (cm)', hint:'isteğe bağlı',
+            input:K.Input({ id:'bp-height', type:'number', placeholder:'178', value:S.profile && S.profile.height ? S.profile.height : '' }) })}
+          ${K.Field({ label:'Kilon (kg)', hint:'isteğe bağlı',
+            input:K.Input({ id:'bp-weight', type:'number', placeholder:'74', value:S.profile && S.profile.weight ? S.profile.weight : '' }) })}
+        </div>`,
+        K.Field({ label:'Ek not / odaklanılacak alan', hint:'örn: omuz düşüklüğü, boyun duruşu vb.',
+          input:K.Input({ id:'bp-note', placeholder:'Öne doğru hafif kambur duruş hissediyorum…' }) }),
+        K.Notice({ tone:'info', body:'Bu analiz tıbbi bir teşhis değildir; fotoğraftan çıkarılan değerler '
+          + 'her zaman «tahmin» olarak etiketlenir.' }),
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Analiz et', tone:'primary', act:'run-body-photo',
+          disabled:!bodyPhotoFile || !SP.Extract.modelReady() })}`),
+      noFocus:true,
+    });
+  }
+
+  function bodyPhotoResultSheet(res){
+    lastBodyAnalysis = res;
+    const bk = res.biyometrikKompozisyon || res.kompozisyon || {};
+    const ps = res.posturSegmentasyonu || (typeof res.postur === 'object' ? res.postur : {}) || {};
+    const dh = res.duzelticiHareketRecetesi || res.duzelticiHareket || {};
+    const bh = res.beslenmeHidrasyonKoprusu || res.beslenme || {};
+    const tg = res.tibbiGuvenlikKalkani || res.guvenlik || {};
+
+    const egzersizList = Array.isArray(dh.egzersizler) && dh.egzersizler.length ? dh.egzersizler
+      : [dh.esneme2dk, dh.guclendirme].filter(Boolean);
+
+    UI.sheet({
+      title:'Beden & Duruş Analizi (5 Bölüt)',
+      subtitle:'Fotoğraftan tahmini biyometri ve düzeltici hareket reçetesi',
+      wide:true,
+      body:String(K.Stack([
+        /* 1. Bölüt: Biyometrik Kompozisyon */
+        html`<div class="card p-12 bg-surface-2" style="border:1px solid var(--border)">
+          <div class="row between items-center mb-6">
+            <b class="small" style="color:var(--text)">1. Biyometrik Kompozisyon</b>
+            <span class="badge badge--info">cert: estimated · photo</span>
+          </div>
+          <div class="cols-2 mb-8">
+            <div class="p-8 radius-sm bg-surface">
+              <span class="tiny dim" style="display:block">Tahmini BKİ</span>
+              <div class="h2" style="margin:2px 0">${bk.bki != null ? bk.bki : (res.bki != null ? res.bki : '—')} <small class="small">${bk.kategori || res.kategori || ''}</small></div>
+              <span class="tiny dim">Beden Tipi: <b>${bk.bedenTipi || res.bedenTipi || 'Dengeli'}</b></span>
+            </div>
+            <div class="p-8 radius-sm bg-surface">
+              <span class="tiny dim" style="display:block">Tahmini Yağ Oranı Aralığı</span>
+              <div class="h2" style="margin:2px 0">${bk.yagAralik || res.yagAralik || '—'}</div>
+              ${when(bk.belKalca, () => html`<span class="tiny dim">Bel/Kalça: <b>${bk.belKalca}</b></span>`)}
+            </div>
+          </div>
+          <div class="row justify-end">
+            <button type="button" class="btn btn--xs btn--ghost" data-act="save-body-vitals">
+              Bu ölçümleri bugünün günlüğüne yaz
+            </button>
+          </div>
+        </div>`,
+
+        /* 2. Bölüt: Postür Segmentasyonu */
+        html`<div class="card p-12 bg-surface-2" style="border:1px solid var(--border)">
+          <div class="row between items-center mb-6">
+            <b class="small" style="color:var(--text)">2. Postür Segmentasyonu</b>
+            <span class="badge badge--muted">bölgesel analiz</span>
+          </div>
+          <div class="stack-xs small">
+            ${when(ps.basBoyun, () => html`<div><span class="tiny dim" style="display:block">BAŞ & BOYUN</span>${U.esc(ps.basBoyun)}</div>`)}
+            ${when(ps.omuzSimetri, () => html`<div><span class="tiny dim" style="display:block">OMUZ SİMETRİSİ</span>${U.esc(ps.omuzSimetri)}</div>`)}
+            ${when(ps.omurga, () => html`<div><span class="tiny dim" style="display:block">OMURGA HATTI</span>${U.esc(ps.omurga)}</div>`)}
+            ${when(ps.pelvis, () => html`<div><span class="tiny dim" style="display:block">PELVİS HİZASI</span>${U.esc(ps.pelvis)}</div>`)}
+            ${when(typeof res.postur === 'string' && !ps.basBoyun, () => html`<div>${U.esc(res.postur)}</div>`)}
+          </div>
+        </div>`,
+
+        /* 3. Bölüt: Düzeltici Hareket Reçetesi */
+        html`<div class="card p-12 bg-surface-2" style="border:1px solid var(--border)">
+          <div class="row between items-center mb-6">
+            <b class="small" style="color:var(--text)">3. Düzeltici Hareket Reçetesi</b>
+            <span class="badge badge--ok">mobilite & güç</span>
+          </div>
+          <div class="stack-xs small mb-8">
+            ${when(dh.esneme2dk, () => html`<div><b>2 Dk Esneme:</b> <span class="dim">${U.esc(dh.esneme2dk)}</span></div>`)}
+            ${when(dh.guclendirme, () => html`<div><b>Güçlendirme:</b> <span class="dim">${U.esc(dh.guclendirme)}</span></div>`)}
+            ${when(dh.adimHedefi, () => html`<div><b>Günlük Mola:</b> <span class="dim">${U.esc(dh.adimHedefi)}</span></div>`)}
+          </div>
+          ${when(egzersizList && egzersizList.length, () => html`
+            <div class="row wrap gap-4 mb-8">
+              ${map(egzersizList, eg => html`<span class="badge badge--muted">${U.esc(eg)}</span>`)}
+            </div>`)}
+          <div class="row justify-end">
+            <button type="button" class="btn btn--xs btn--primary" data-act="save-corrective-session">
+              Düzeltici rutini seanslara ekle (15 dk)
+            </button>
+          </div>
+        </div>`,
+
+        /* 4. Bölüt: Beslenme & Hidrasyon Köprüsü */
+        html`<div class="card p-12 bg-surface-2" style="border:1px solid var(--border)">
+          <div class="row between items-center mb-6">
+            <b class="small" style="color:var(--text)">4. Beslenme & Hidrasyon Köprüsü</b>
+            <span class="badge badge--muted">doku onarımı</span>
+          </div>
+          <div class="row wrap gap-8 mb-6">
+            ${when(bh.proteinAralik, () => html`<span class="badge badge--info">Protein: ${U.esc(bh.proteinAralik)}</span>`)}
+            ${when(bh.suHedefi, () => html`<span class="badge badge--info">Su: ${U.esc(bh.suHedefi)}</span>`)}
+          </div>
+          ${when(bh.oneri, () => html`<p class="small dim mb-0">${U.esc(bh.oneri)}</p>`)}
+        </div>`,
+
+        /* 5. Bölüt: Tıbbi Güvenlik Kalkanı */
+        K.Notice({
+          tone:'warn',
+          title:'5. Tıbbi Güvenlik Kalkanı (cert: estimated · source: photo)',
+          body: tg.uyari || 'Bu analiz tıbbi bir teşhis değildir; fotoğraftan çıkarılan değerler tahmindir. Tanı ve tedavi için hekiminize danışınız.'
+        }),
+      ])),
+      footer:String(html`${K.Button({ label:'Kapat', act:'sheet-close' })}
+        ${when(bodyPhotoFile, () => K.Button({ label:'Fotoğrafı bugüne kaydet', tone:'primary', act:'save-body-photo-today' }))}`),
+      noFocus:true,
+    });
+  }
+
   /* Vücut fotoğrafları: kendini zaman içinde görmek için tek satır minik
      kare; ilki bugünündür. Fotoğraftan SAYI ÜRETİLMEZ — kilo, yağ oranı,
      endeks ölçülür, fotoğraftan tahmin edilmez (AGENTS §1.1). */
@@ -702,6 +843,9 @@ SP.Screens.move = (function(){
       body:html`<div class="foto-serit">
         <span class="foto-serit__ge">${kare(bugun)}<span class="tiny dim">Bugün</span></span>
         ${map(gunler.slice(0, 12), g => html`<span class="foto-serit__ge">${kare(g)}<span class="tiny dim">${U.fmtShort(g)}</span></span>`)}
+      </div>
+      <div class="row mt-8">
+        ${K.Button({ label:'Fotoğraftan beden & duruş analizi', icon:'camera', size:'sm', act:'body-photo-open' })}
       </div>`,
     });
   }
@@ -755,6 +899,136 @@ SP.Screens.move = (function(){
       footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
         ${K.Button({ label:'Kaydet', tone:'primary', act:'save-session', data:{ 'data-id':rec.id } })}`),
       noFocus:true,
+    });
+  }
+
+  function exerciseDetailSheet(id){
+    const ex = SP.EX_BY_ID[id];
+    if(!ex) return;
+    const card = (SP.EXERCISE_CARD_BY_ID || {})[id] || {};
+    const muscles = (ex.muscles && ex.muscles.length) ? ex.muscles.join(', ') : 'Tüm vücut';
+    const steps = (ex.steps && ex.steps.length) ? ex.steps : (card.steps_tr || []);
+    const setup = ex.setup || card.setup_check || '';
+    const summary = ex.cue || card.summary || '';
+
+    UI.sheet({
+      title: ex.name,
+      subtitle: (ex.name_en ? ex.name_en + ' · ' : '') + (ex.equip || 'Ekipmansız'),
+      wide: true,
+      body: String(K.Stack([
+        html`<div class="row wrap gap-6 mb-8">
+          <span class="badge badge--info">${ex.pattern ? ('Kalıp: ' + ex.pattern) : (ex.kind === 'cardio' ? 'Kardiyo' : 'Mobilite')}</span>
+          <span class="badge badge--muted">Hedef kaslar: ${U.esc(muscles)}</span>
+          ${when(ex.met, () => html`<span class="badge badge--muted">MET: ${ex.met}</span>`)}
+        </div>`,
+        when(summary, () => html`<p class="small mb-12"><b>Özet:</b> ${U.esc(summary)}</p>`),
+        when(steps && steps.length, () => html`
+          <div class="mb-12">
+            <h4 class="small mb-4">Uygulama Adımları</h4>
+            <ol class="small dim pl-16 mb-0" style="line-height:1.5">
+              ${map(steps, s => html`<li>${U.esc(s)}</li>`)}
+            </ol>
+          </div>`),
+        when(setup, () => html`
+          <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+            <b class="tiny dim" style="display:block;margin-bottom:2px">KURULUM VE GÜVENLİK KONTROLÜ</b>
+            <p class="small mb-0">${U.esc(setup)}</p>
+          </div>`),
+      ])),
+      footer: String(html`
+        ${K.Button({ label:'Kapat', act:'sheet-close' })}
+        ${K.Button({ label:'Bu hareketle seans başlat', tone:'primary', act:'quick-add-session-ex', data:{ 'data-id':ex.id } })}
+      `),
+      noFocus: true,
+    });
+  }
+
+  function programsSheet(){
+    const list = SP.PROGRAMLAR || [];
+    UI.sheet({
+      title: 'Eğitim Programları',
+      subtitle: list.length + ' hazır hedef ve takip şablonu',
+      wide: true,
+      body: String(html`
+        <div class="stack-sm">
+          ${map(list, prog => html`
+            <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+              <div class="row between gap-8 mb-4">
+                <b class="small" style="color:var(--text)">${U.esc(prog.title)}</b>
+                <span class="tiny dim">${prog.focus || 'Genel kondisyon'}</span>
+              </div>
+              <p class="small dim mb-8" style="line-height:1.4">${U.esc(prog.description || '')}</p>
+              ${when(prog.exercises && prog.exercises.length, () => html`
+                <div class="row wrap gap-4 mb-8">
+                  ${map(prog.exercises, exId => {
+                    const e = SP.EX_BY_ID[exId] || (SP.EXERCISE_CARD_BY_ID || {})[exId];
+                    return html`<span class="badge badge--muted">${e ? e.name_tr || e.name : exId}</span>`;
+                  })}
+                </div>`)}
+              <div class="row justify-end">
+                <button type="button" class="btn btn--xs btn--primary" data-act="load-program-session" data-id="${prog.id}">
+                  Bu programla seans başlat
+                </button>
+              </div>
+            </div>`)}
+        </div>
+      `),
+      footer: String(K.Button({ label:'Kapat', act:'sheet-close' })),
+      noFocus: true,
+    });
+  }
+
+  let metQ = '', metMin = 30, metCat = 'all';
+  function metCalcSheet(){
+    const weight = (S.profile && S.profile.weightKg) ? Number(S.profile.weightKg) : 70;
+    let list = SP.MET_REFS || [];
+    if(metCat !== 'all') list = list.filter(r => r.category === metCat);
+    if(metQ.trim()){
+      const n = U.norm(metQ.trim());
+      list = list.filter(r => U.norm(r.description + ' ' + (r.category || '')).indexOf(n) >= 0);
+    }
+    const cats = [{ id:'all', label:'Tümü' }].concat(Object.keys(SP.MET_CATS || {}).map(k => ({ id:k, label:SP.MET_CATS[k] })));
+
+    UI.sheet({
+      title: 'MET Aktivite & Kalori Hesabı',
+      subtitle: '2024 Adult Compendium · 1.111 Fiziksel Aktivite Referansı',
+      wide: true,
+      body: String(K.Stack([
+        html`<div class="cols-2">
+          ${K.Field({ label:'Aktivite ara',
+            input:K.Input({ id:'met-search-input', value:metQ, placeholder:'örn: bisiklet, yüzme, bahçe, koşu…',
+              change:'met-search-change' }) })}
+          ${K.Field({ label:'Süre (dakika)',
+            input:K.Input({ id:'met-min-input', type:'number', min:5, step:5, value:String(metMin),
+              change:'met-min-change' }) })}
+        </div>`,
+        html`<div class="row wrap gap-4 mb-8">
+          ${map(cats.slice(0, 8), c => K.Chip({ label:c.label, act:'met-pick-cat', on:c.id === metCat,
+            data:{ 'data-cat':c.id } }))}
+        </div>`,
+        html`<div class="stack-xs" style="max-height:280px;overflow-y:auto">
+          ${map(list.slice(0, 15), r => {
+            const kcal = Math.round(r.met * weight * (metMin / 60));
+            return html`
+              <div class="row between gap-8 p-6 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+                <div class="minw0 grow">
+                  <b class="small" style="display:block">${U.esc(r.description)}</b>
+                  <span class="tiny dim">${(SP.MET_CATS || {})[r.category] || r.category} · MET ${r.met}</span>
+                </div>
+                <div class="row items-center gap-8">
+                  <span class="num small" style="color:var(--accent);font-weight:600">${kcal} kcal</span>
+                  <button type="button" class="btn btn--xs btn--ghost" data-act="add-met-workout"
+                    data-desc="${U.esc(r.description)}" data-met="${r.met}" data-min="${metMin}">
+                    Seansa ekle
+                  </button>
+                </div>
+              </div>`;
+          })}
+          ${when(!list.length, () => html`<p class="small dim">Eşleşen aktivite bulunamadı.</p>`)}
+        </div>`,
+      ])),
+      footer: String(K.Button({ label:'Kapat', act:'sheet-close' })),
+      noFocus: true,
     });
   }
 
@@ -927,9 +1201,73 @@ SP.Screens.move = (function(){
       rotaTaslak = { rota:sonuc.rota, tur:sonuc.tur, turYazi:sonuc.turYazi };
       onizleme();
     },
+    async 'body-photo-file'(el){
+      bodyPhotoFile = (el.files && el.files[0]) || null;
+      const n = document.getElementById('body-photo-name');
+      if(n) n.textContent = bodyPhotoFile ? bodyPhotoFile.name : '';
+      const run = document.querySelector('[data-act="run-body-photo"]');
+      if(run) run.disabled = !bodyPhotoFile || !SP.Extract.modelReady();
+    },
   };
 
   const handle = {
+    async 'body-photo-open'(){ bodyPhotoFile = null; bodyPhotoSheet(); },
+    async 'run-body-photo'(){
+      const hEl = document.getElementById('bp-height');
+      const wEl = document.getElementById('bp-weight');
+      const nEl = document.getElementById('bp-note');
+      const hints = {
+        boy: hEl ? hEl.value.trim() : '',
+        kilo: wEl ? wEl.value.trim() : '',
+        not: nEl ? nEl.value.trim() : '',
+        cinsiyet: S.profile && S.profile.gender ? S.profile.gender : '',
+      };
+      UI.toast('Beden ve duruş analiz ediliyor…');
+      const res = await SP.Extract.fromBodyPhoto(bodyPhotoFile, hints);
+      if(!res.ok){ UI.toast(res.note || 'Analiz başarısız'); return; }
+      bodyPhotoResultSheet(res);
+    },
+    async 'save-body-photo-today'(){
+      if(!bodyPhotoFile) return;
+      const r = await SP.Foto.kaydet('vucut:' + U.todayISO(), bodyPhotoFile);
+      UI.closeSheet();
+      UI.toast(r.ok ? 'Fotoğraf bugünün kaydına eklendi' : (r.why || 'Kaydedilemedi'));
+      SP.App.render();
+    },
+    async 'save-body-vitals'(){
+      if(!lastBodyAnalysis) return;
+      const bk = lastBodyAnalysis.biyometrikKompozisyon || lastBodyAnalysis.kompozisyon || {};
+      const patch = {};
+      if(bk.yagAralik){
+        const nums = bk.yagAralik.match(/(\d+(?:\.\d+)?)/g);
+        if(nums && nums.length){
+          const sum = nums.reduce((a, b) => a + Number(b), 0);
+          patch.bodyfat = U.round(sum / nums.length, 1);
+        }
+      }
+      const bugun = U.todayISO();
+      await M.saveVitals(bugun, patch);
+      UI.toast('Tahmini ölçüm bugünün günlüğüne yazıldı');
+      SP.App.render();
+    },
+    async 'save-corrective-session'(){
+      if(!lastBodyAnalysis) return;
+      const dh = lastBodyAnalysis.duzelticiHareketRecetesi || lastBodyAnalysis.duzelticiHareket || {};
+      const bugun = U.todayISO();
+      const egList = Array.isArray(dh.egzersizler) && dh.egzersizler.length ? dh.egzersizler : ['Düzeltici Mobilite'];
+      const w = {
+        id: U.uid(),
+        date: bugun,
+        name: 'Duruş Düzeltici Mobilite',
+        minutes: 15,
+        rpe: 4,
+        items: egList.map(ad => ({ exId:'corrective', name:ad, minutes:5 })),
+        note: [dh.esneme2dk, dh.guclendirme, dh.adimHedefi].filter(Boolean).join(' · '),
+      };
+      await M.saveWorkout(w);
+      UI.toast('Düzeltici hareket seansı bugüne eklendi');
+      SP.App.render();
+    },
     async 'move-tab'(el){ K.bolumeGit(el.dataset.tab); },
     async 'rota-ac'(el){
       const w = S.workouts.find(x => x.id === el.dataset.id && x.rota);
@@ -1085,6 +1423,63 @@ SP.Screens.move = (function(){
       UI.closeSheet();
       UI.toast('Basamak güncellendi');
       SP.App.render();
+    },
+    async 'open-programs'(){ programsSheet(); },
+    async 'open-met-calc'(){ metCalcSheet(); },
+    async 'open-ex-detail'(el){ exerciseDetailSheet(el.dataset.id); },
+    async 'met-search-change'(el){ metQ = el.value || ''; metCalcSheet(); },
+    async 'met-min-change'(el){ metMin = Number(el.value) || 30; metCalcSheet(); },
+    async 'met-pick-cat'(el){ metCat = el.dataset.cat; metCalcSheet(); },
+    async 'add-met-workout'(el){
+      const desc = el.dataset.desc;
+      const met = Number(el.dataset.met) || 4.5;
+      const min = Number(el.dataset.min) || 30;
+      const rpe = Math.min(10, Math.max(1, Math.round(met)));
+      const w = {
+        id: U.uid(),
+        date: U.todayISO(),
+        name: desc,
+        minutes: min,
+        rpe: rpe,
+        items: [{ exId:'met', name:desc, met:met, minutes:min }],
+        note: 'MET: ' + met + ' (2024 Adult Compendium)'
+      };
+      await M.addWorkout(U.todayISO(), w);
+      UI.closeSheet();
+      UI.toast(desc + ' (' + min + ' dk) seans olarak eklendi');
+      SP.App.render();
+    },
+    async 'load-program-session'(el){
+      const progId = el.dataset.id;
+      const prog = (SP.PROGRAMLAR || []).find(p => p.id === progId);
+      if(!prog) return;
+      UI.closeSheet();
+      draft = {
+        id: U.uid(),
+        date: U.todayISO(),
+        name: prog.title,
+        minutes: 45,
+        rpe: 6,
+        items: (prog.exercises || []).map(exId => ({ exId: exId, levelId:M.currentLevel(exId), sets: 3, reps: 10 })),
+        note: prog.focus || ''
+      };
+      sessionSheet(draft);
+    },
+    async 'quick-add-session-ex'(el){
+      const exId = el.dataset.id;
+      const ex = SP.EX_BY_ID[exId];
+      if(!ex) return;
+      UI.closeSheet();
+      draft = {
+        id: U.uid(),
+        date: U.todayISO(),
+        name: ex.name + ' Seansı',
+        minutes: 30,
+        rpe: 6,
+        items: [{ exId: ex.id, levelId:M.currentLevel(ex.id), sets: 3, reps: 10 }],
+        note: ex.cue || ''
+      };
+      sessionSheet(draft);
     },
   };
 

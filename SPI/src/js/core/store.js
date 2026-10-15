@@ -204,6 +204,13 @@ SP.Store = (function(){
       health.cloud = 'error';
       report('cloud-init', e, 'Hesaba bağlı senkronizasyon açılamadı; uygulama bu cihazda çalışmaya devam ediyor.');
     }
+    try{
+      if(typeof navigator !== 'undefined' && navigator.storage && typeof navigator.storage.persist === 'function'){
+        navigator.storage.persist().then(function(granted){
+          health.persisted = !!granted;
+        }).catch(function(){});
+      }
+    }catch(e){}
     return mode;
   }
 

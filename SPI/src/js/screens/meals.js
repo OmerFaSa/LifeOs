@@ -29,6 +29,42 @@ SP.Screens.meals = (function(){
 
   /* ---------------------------------------------------------- giris */
 
+  /* Akıllı tahmin & hızlı besin önerileri — aradıkça canlı daralır, boşken yuvaya göre önerir. */
+  function mealSuggestionChips(){
+    const slot = S.ui.mealSlot || guessSlot();
+    const q = (S.ui.mealDraftQuery || '').trim();
+    let list = [];
+    if(q.length >= 2){
+      const n = U.norm(q);
+      list = SP.FOODS.filter(f => U.norm(f.name + ' ' + (f.aliases || []).join(' ')).indexOf(n) >= 0).slice(0, 6);
+    } else {
+      const slotMap = {
+        kahvalti: ['yumurta', 'lor-peyniri', 'beyaz-peynir', 'yulaf', 'zeytin-siyah', 'omlet'],
+        ara1:     ['muz', 'elma', 'badem', 'kefir', 'cilek'],
+        ogle:     ['tavuk-gogsu', 'bulgur-pilavi', 'mercimek-corbasi', 'salatalik', 'ayran'],
+        ara2:     ['protein-bar', 'fistik-ezmesi', 'ceviz', 'kuru-kayisi'],
+        aksam:    ['somon', 'kofte', 'kuru-fasulye-etli', 'haslanmis-patates', 'suzme-yogurt'],
+        gece:     ['kazein-protein', 'suzme-yogurt', 'yesil-cay', 'maden-suyu'],
+      };
+      const ids = slotMap[slot] || ['yumurta', 'tavuk-gogsu', 'yulaf', 'muz'];
+      list = ids.map(id => SP.FOOD_BY_ID[id]).filter(Boolean);
+    }
+    if(!list.length) return '';
+    return html`
+      <div class="meal-suggs row wrap gap-6 mt-8 pt-6" style="border-top:1px dashed var(--border)" aria-label="Akıllı besin önerileri">
+        <span class="tiny dim self-center mr-2" style="letter-spacing:0.04em">⚡ Akıllı öneri:</span>
+        ${map(list, f => {
+          const p = (f.portions || [])[0];
+          const pName = p ? p.label : '100g';
+          return html`<button type="button" class="btn btn--xs btn--ghost chip-sugg"
+            data-act="quick-add-food" data-id="${f.id}" data-g="${p ? p.g : 100}" data-label="${pName}"
+            title="${f.name} · ${f.kcal} kcal · P ${f.p}g">
+            + ${f.name} <span class="tiny dim">(${pName})</span>
+          </button>`;
+        })}
+      </div>`;
+  }
+
   /* iPhone Faz 2b: ev ölçüsü listesi ve «tarttıysan gramı yaz» ⓘ'de
      (hints: portion); alanın örnek metni biçimi zaten gösteriyor. */
   function quickEntry(){
@@ -43,9 +79,10 @@ SP.Screens.meals = (function(){
             options:SP.MEAL_SLOTS.map(s => ({ value:s.id, label:s.label })), change:'pick-slot' })}
           ${K.Mic({ target:'meal-text' })}
           ${K.Input({ id:'meal-text', placeholder:'1 tabak etli kuru fasulye, 2 dilim ekmek, 1 bardak ayran',
-            aria:'Öğün metni' })}
+            aria:'Öğün metni', value:S.ui.mealDraftText || '' })}
           ${K.Button({ label:'Ekle', tone:'primary', act:'add-meal' })}
-        </div>`,
+        </div>
+        ${mealSuggestionChips()}`,
     });
   }
 
@@ -725,6 +762,23 @@ SP.Screens.meals = (function(){
       </section>`;
   }
 
+  function akilliBeslenmeKutusu(){
+    const list = (SP.SPOR_BESLENME || []).slice(0, 6);
+    if(!list.length) return '';
+    return K.Card({
+      title:'Akıllı Beslenme & Emilim Notları',
+      sub:'Kanıta dayalı sporcu beslenmesi ve biyoyararlanım senaryoları',
+      body:html`<div class="stack-sm">${map(list, s => html`
+        <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+          <div class="row between gap-6 mb-2">
+            <b class="small" style="color:var(--text)">${s.situation}</b>
+            <span class="tiny dim">Akıllı İlke</span>
+          </div>
+          <p class="small mb-0" style="line-height:1.4">${s.editor_action}</p>
+        </div>`)}</div>`,
+    });
+  }
+
   /* Sekme yok (EKIP-PLANI §1.2): üç bölüm alt alta; bölüm çubuğu kaydırır,
      günün öğün sayısı çubukta rozet. Bir bölüm çizilemezse yalnız o bölüm
      sakin bir notla düşer. */
@@ -734,7 +788,7 @@ SP.Screens.meals = (function(){
        ikişer dizer. Telefonda tek sütun: önce yazma alanı. */
     gunluk:() => html`${K.Ledger(() => [quickEntry(), DonenOgun(), dayCard(), sablonKutusu(), cizelgeKutusu(), targetCard(), tabakKutusu()])}
       <div class="mt-24">${raw(UI.rail(['portion', 'bioavailability', 'macro-target']))}</div>`,
-    oneri:() => html`${K.Ledger(() => [energyCard(), labLinkCard(), suggestCard()])}
+    oneri:() => html`${K.Ledger(() => [energyCard(), labLinkCard(), suggestCard(), akilliBeslenmeKutusu()])}
       <div class="mt-24">${raw(UI.rail(['macro-target', 'lab-linked-food', 'nutri-gap']))}</div>`,
     deger:() => html`${K.Ledger(() => [microCard(), gapCard()])}
       <div class="mt-24">${raw(UI.rail(['bioavailability', 'nutri-gap']))}</div>`,
@@ -761,6 +815,36 @@ SP.Screens.meals = (function(){
     const t = S.ui.mealTab;
     S.ui.mealTab = null;
     if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
+
+    const mt = document.getElementById('meal-text');
+    if(mt && !mt._hasAutoListener){
+      mt._hasAutoListener = true;
+      mt.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        S.ui.mealDraftQuery = val;
+        S.ui.mealDraftText = e.target.value;
+        const cont = document.querySelector('.meal-suggs');
+        if(cont){
+          let list = [];
+          if(val.length >= 2){
+            const n = U.norm(val);
+            list = SP.FOODS.filter(f => U.norm(f.name + ' ' + (f.aliases || []).join(' ')).indexOf(n) >= 0).slice(0, 6);
+          }
+          if(list.length){
+            cont.innerHTML = '<span class="tiny dim self-center mr-2" style="letter-spacing:0.04em">⚡ Akıllı öneri:</span>' +
+              list.map(f => {
+                const p = (f.portions || [])[0];
+                const pName = p ? p.label : '100g';
+                return `<button type="button" class="btn btn--xs btn--ghost chip-sugg"
+                  data-act="quick-add-food" data-id="${f.id}" data-g="${p ? p.g : 100}" data-label="${pName}"
+                  title="${f.name} · ${f.kcal} kcal · P ${f.p}g">
+                  + ${f.name} <span class="tiny dim">(${pName})</span>
+                </button>`;
+              }).join('');
+          }
+        }
+      });
+    }
   }
 
   /* Metinden gelen kalemleri secili ogune yazar. */
@@ -823,6 +907,18 @@ SP.Screens.meals = (function(){
       const el = document.getElementById('meal-text');
       if(el) el.focus();
     },
+    async 'quick-add-food'(el){
+      const foodId = el.dataset.id;
+      const f = SP.FOOD_BY_ID[foodId];
+      if(!f) return;
+      const g = Number(el.dataset.g) || 100;
+      const portion = el.dataset.label || '1 porsiyon';
+      await pushItems([{ foodId:f.id, g:g, cert:'estimated', portion:portion }], f.name);
+      S.ui.mealDraftText = '';
+      S.ui.mealDraftQuery = '';
+      UI.toast(f.name + ' (' + portion + ') eklendi · tahmin');
+      SP.App.render();
+    },
     async 'add-meal'(){
       const el = document.getElementById('meal-text');
       if(!el || !el.value.trim()) return;
@@ -831,6 +927,8 @@ SP.Screens.meals = (function(){
       await pushItems(parsed.items.map(i => ({ foodId:i.foodId, g:i.g, cert:i.cert, portion:i.portion })),
         el.value.trim());
       el.value = '';
+      S.ui.mealDraftText = '';
+      S.ui.mealDraftQuery = '';
       UI.toast(parsed.note);
       SP.App.render();
     },

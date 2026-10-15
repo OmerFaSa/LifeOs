@@ -505,7 +505,23 @@ SP.Screens.team = (function(){
       UI.toast('Sohbet temizlendi');
       SP.App.render();
     },
-  };
+  function onKey(e){
+    /* Boşluk tuşuyla ajanın sözünü anında kes (barge-in): metin yazmıyorken */
+    if(e.key === ' ' && sesli.acik && sesli.durum === 'konuşuyor'){
+      const tag = (document.activeElement && document.activeElement.tagName) || '';
+      if(tag !== 'INPUT' && tag !== 'TEXTAREA'){
+        e.preventDefault();
+        SP.Talk.kes();
+        return;
+      }
+    }
+    if(e.key !== 'Enter' || !(e.ctrlKey || e.metaKey)) return;
+    const el = document.getElementById('chat-text');
+    if(el && document.activeElement === el){
+      e.preventDefault();
+      handle['send-chat']();
+    }
+  }
 
   return {
     id:'team',
@@ -517,6 +533,6 @@ SP.Screens.team = (function(){
       return a.name + ' · ' + a.title;
     },
     actions(){ return ''; },
-    render, handle,
+    render, handle, onKey,
   };
 })();
