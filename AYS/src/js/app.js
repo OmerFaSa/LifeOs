@@ -1623,9 +1623,22 @@ R.App = (function(){
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'ays', hkm:() => R.Beacon, git:route => go(route),
-          ozet:() => [R.Screens.today.headline()],
-          /* «not: …» önizlenir, «Kaydet»le seçili konunun notuna eklenir (core/konunotu.js). */
-          veri:{ onizle:t => (R.KonuNotu ? R.KonuNotu.onizle(t) : null) } });
+          /* Özet: bugünün cümlesi, tekrar borcu ve Öğren'de sıradaki adım —
+             hepsi kodun sayısı (King yalnız okur). */
+          ozet:() => {
+            const s = [R.Screens.today.headline()];
+            try{
+              const vade = R.Calc.dueCards(R.U.todayISO()).length;
+              s.push(vade ? vade + ' tekrar kartı bugün vadeli' : 'Bugün vadeli tekrar kartı yok');
+              const x = R.Ogren.sonAcilan();
+              const sr = x ? R.Ogren.sirada(x.subject.id, x.topic.id) : null;
+              if(sr) s.push('Öğren: ' + x.topic.name + ' — ' + sr.ad);
+            }catch(e){ /* özetin ek satırları düşer, ilk cümle kalır */ }
+            return s;
+          },
+          /* Önce «not: …» (core/konunotu.js), sonra veri cümlesi (paletle aynı
+             ayrıştırıcı): ikisi de önizlenir, «Kaydet»le yazılır. */
+          veri:{ onizle:t => (R.KonuNotu && R.KonuNotu.onizle(t)) || (R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null) } });
       }
 
       /* YARIM KALMIŞ SÜRELİ OTURUM — diskten geri alınır.

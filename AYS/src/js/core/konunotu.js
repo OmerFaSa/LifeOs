@@ -109,5 +109,16 @@ R.KonuNotu = (function(){
       } };
   }
 
-  return { SINIR, oku, yaz, ekle, kartAdaylari, kartlaraCevir, hedef, onizle, paletKomutu };
+  /* Notu olan bütün konular, en uzun not önce değil SON yazılan önce
+     bilinmediği için katalog sırasıyla (ders, konu). */
+  function hepsi(){
+    const l = [];
+    (R.SUBJECTS || []).forEach(s => s.topics.forEach(t => {
+      const n = oku(s.id, t.id).trim();
+      if(n) l.push({ subject:s, topic:t, not:n, satir:n.split('\n').length, kart:kartAdaylari(n).length });
+    }));
+    return l;
+  }
+
+  return { SINIR, oku, yaz, ekle, kartAdaylari, kartlaraCevir, hedef, onizle, paletKomutu, hepsi };
 })();

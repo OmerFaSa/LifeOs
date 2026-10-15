@@ -314,6 +314,43 @@ R.Palette = (function(){
     'uyku-yaz':'Uyku', 'sure-yaz':'Çalışma süresi',
   };
 
+  /* King'in veri önizlemesi (brand/ortak/king.js söz 3). Paletle AYNI
+     ayrıştırıcı (core/komut.js) ve aynı onay yolu: King'e «matematikten 40
+     soru çözdüm» yazmak (ya da söylemek) önizlenir, «Kaydet»le yazılır.
+     Kullanıcı (2026-10-15): «veri girmeyi çok daha kolaylaştıralım». */
+  function kingOnizle(q){
+    const t = String(q || '').trim();
+    if(t.length < 4 || !R.Komut) return null;
+    let r;
+    try{ r = R.Komut.anla(t, { date:R.U.todayISO() }); }catch(e){ return null; }
+    r.sorular = r.sorular || [];
+    r.anlasilmayan = r.anlasilmayan || [];
+    if(!r.oneriler.length) return null;
+    const satirlar = r.oneriler.map(o => {
+      const ad = ETIKET[o.action] || (R.ACTION_BY_ID[o.action] || {}).title || o.action;
+      let pv = null;
+      try{ pv = R.Proposals.preview({ action:o.action, agent:'patron', params:o.params }); }catch(e){ pv = null; }
+      const deg = pv && pv.ok ? (pv.rows || []).map(x => x.label + ' ' + x.before + ' → ' + x.after).join(', ')
+        : pv && pv.why ? pv.why : '';
+      return ad + (deg ? ': ' + deg : '');
+    });
+    const notlar = [];
+    if(r.sorular.length) notlar.push('Sormam gereken: ' + r.sorular.map(s => s.soru).join(' '));
+    if(r.anlasilmayan.length) notlar.push('Kaydedilmeyecek: «' + r.anlasilmayan.join('», «') + '»');
+    return {
+      metin:satirlar.join(' · '),
+      ipucu:notlar.join(' · ') || 'Kaydet deyince yazılır; her biri geri alınabilir.',
+      async kaydet(){
+        const islem = await R.Komut.isle(r, { metin:t });
+        const onay = await R.Komut.onayla(islem.bekleyen.map(k => k.row.id));
+        const n = islem.yapilan.length + onay.n;
+        const dusen = islem.dusen.length + (islem.bekleyen.length - onay.n);
+        if(R.App && R.App.render) R.App.render();
+        return dusen ? n + ' kayıt yazıldı, ' + dusen + ' tanesi yazılamadı.' : n === 1 ? 'Kaydedildi.' : n + ' kayıt yazıldı.';
+      },
+    };
+  }
+
   /* Onizleme: NE anlasildi ve ne degisecek. Kaydedilmeden once
      gorunur — onaysiz hicbir sey yazilmaz. */
   function onizle(r, metin){
@@ -548,6 +585,6 @@ R.Palette = (function(){
   }
   function isFocusOpen(){ return !!document.getElementById('focusmode'); }
 
-  return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock,
+  return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock, kingOnizle,
     veriKaydet, veriKomutu, commands, searchContent };
 })();

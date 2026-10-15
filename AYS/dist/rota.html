@@ -16161,7 +16161,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'881ffeae', at:'2026-10-15 19:34', dirty:true };
+R.BUILD = { id:'5879637b', at:'2026-10-15 19:54', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -67346,7 +67346,18 @@ R.KonuNotu = (function(){
       } };
   }
 
-  return { SINIR, oku, yaz, ekle, kartAdaylari, kartlaraCevir, hedef, onizle, paletKomutu };
+  /* Notu olan bütün konular, en uzun not önce değil SON yazılan önce
+     bilinmediği için katalog sırasıyla (ders, konu). */
+  function hepsi(){
+    const l = [];
+    (R.SUBJECTS || []).forEach(s => s.topics.forEach(t => {
+      const n = oku(s.id, t.id).trim();
+      if(n) l.push({ subject:s, topic:t, not:n, satir:n.split('\n').length, kart:kartAdaylari(n).length });
+    }));
+    return l;
+  }
+
+  return { SINIR, oku, yaz, ekle, kartAdaylari, kartlaraCevir, hedef, onizle, paletKomutu, hepsi };
 })();
 
 /* ==== js/core/ogrentest.js ==== */
@@ -86122,6 +86133,43 @@ R.Palette = (function(){
     'uyku-yaz':'Uyku', 'sure-yaz':'Çalışma süresi',
   };
 
+  /* King'in veri önizlemesi (brand/ortak/king.js söz 3). Paletle AYNI
+     ayrıştırıcı (core/komut.js) ve aynı onay yolu: King'e «matematikten 40
+     soru çözdüm» yazmak (ya da söylemek) önizlenir, «Kaydet»le yazılır.
+     Kullanıcı (2026-10-15): «veri girmeyi çok daha kolaylaştıralım». */
+  function kingOnizle(q){
+    const t = String(q || '').trim();
+    if(t.length < 4 || !R.Komut) return null;
+    let r;
+    try{ r = R.Komut.anla(t, { date:R.U.todayISO() }); }catch(e){ return null; }
+    r.sorular = r.sorular || [];
+    r.anlasilmayan = r.anlasilmayan || [];
+    if(!r.oneriler.length) return null;
+    const satirlar = r.oneriler.map(o => {
+      const ad = ETIKET[o.action] || (R.ACTION_BY_ID[o.action] || {}).title || o.action;
+      let pv = null;
+      try{ pv = R.Proposals.preview({ action:o.action, agent:'patron', params:o.params }); }catch(e){ pv = null; }
+      const deg = pv && pv.ok ? (pv.rows || []).map(x => x.label + ' ' + x.before + ' → ' + x.after).join(', ')
+        : pv && pv.why ? pv.why : '';
+      return ad + (deg ? ': ' + deg : '');
+    });
+    const notlar = [];
+    if(r.sorular.length) notlar.push('Sormam gereken: ' + r.sorular.map(s => s.soru).join(' '));
+    if(r.anlasilmayan.length) notlar.push('Kaydedilmeyecek: «' + r.anlasilmayan.join('», «') + '»');
+    return {
+      metin:satirlar.join(' · '),
+      ipucu:notlar.join(' · ') || 'Kaydet deyince yazılır; her biri geri alınabilir.',
+      async kaydet(){
+        const islem = await R.Komut.isle(r, { metin:t });
+        const onay = await R.Komut.onayla(islem.bekleyen.map(k => k.row.id));
+        const n = islem.yapilan.length + onay.n;
+        const dusen = islem.dusen.length + (islem.bekleyen.length - onay.n);
+        if(R.App && R.App.render) R.App.render();
+        return dusen ? n + ' kayıt yazıldı, ' + dusen + ' tanesi yazılamadı.' : n === 1 ? 'Kaydedildi.' : n + ' kayıt yazıldı.';
+      },
+    };
+  }
+
   /* Onizleme: NE anlasildi ve ne degisecek. Kaydedilmeden once
      gorunur — onaysiz hicbir sey yazilmaz. */
   function onizle(r, metin){
@@ -86356,7 +86404,7 @@ R.Palette = (function(){
   }
   function isFocusOpen(){ return !!document.getElementById('focusmode'); }
 
-  return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock,
+  return { open, close, isOpen, openFocus, closeFocus, isFocusOpen, showShortcuts, runningBlock, kingOnizle,
     veriKaydet, veriKomutu, commands, searchContent };
 })();
 
@@ -94180,6 +94228,19 @@ R.Screens = R.Screens || {};
         : html`<p class="small muted">Bu süzgeçte konu yok.</p>`}` });
   }
 
+  /* NOTLARIM (core/konunotu.js): notu olan konular tek yerde; dokununca
+     konunun Anlatım'ı (Notum kutusu orada). Not yoksa kart çizilmez. */
+  function notlarimKarti(){
+    const l = R.KonuNotu ? R.KonuNotu.hepsi() : [];
+    if(!l.length) return '';
+    const kisalt = s => { const t = s.replace(/\s+/g, ' '); return t.length > 120 ? t.slice(0, 117) + '…' : t; };
+    return K.Card({ title:'Notlarım', sub:U.plural(l.length, 'konuda not', 'konuda not') + ' · Anlatım’daki «Notum»dan',
+      body:html`<div class="stack-xs">${map(l, x => html`<button type="button" class="listitem listitem--tap" data-act="ogren-git"
+          data-route="anlatim" data-subject="${x.subject.id}" data-topic="${x.topic.id}">
+          <span class="grow minw0"><b class="small">${x.topic.name}</b> <span class="tiny dim">· ${x.subject.name}${x.kart ? ' · ' + x.kart + ' kart satırı' : ''}</span>
+          <span class="small dim block">${kisalt(x.not)}</span></span></button>`)}</div>` });
+  }
+
   R.Screens.ogren = {
     id:'ogren',
     title:'Konular',
@@ -94190,7 +94251,7 @@ R.Screens = R.Screens || {};
       const sid = S.ui.ogrenListe || (x.subject ? x.subject.id : R.SUBJECTS[0].id);
       const subject = R.SUBJECTS.find(s => s.id === sid) || R.SUBJECTS[0];
       const y = acikYanlislar();
-      return String(K.Grid([K.Span(12, K.Stack([devamKarti(y), derslerKarti(subject.id), konularKarti(subject, y)]))]));
+      return String(K.Grid([K.Span(12, K.Stack([devamKarti(y), notlarimKarti(), derslerKarti(subject.id), konularKarti(subject, y)]))]));
     },
     handle:Object.assign({}, ortakHandle, {
       async 'ogren-liste-sec'(el){ S.ui.ogrenListe = el.dataset.subject; R.App.render(); },
@@ -104589,9 +104650,22 @@ R.App = (function(){
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'ays', hkm:() => R.Beacon, git:route => go(route),
-          ozet:() => [R.Screens.today.headline()],
-          /* «not: …» önizlenir, «Kaydet»le seçili konunun notuna eklenir (core/konunotu.js). */
-          veri:{ onizle:t => (R.KonuNotu ? R.KonuNotu.onizle(t) : null) } });
+          /* Özet: bugünün cümlesi, tekrar borcu ve Öğren'de sıradaki adım —
+             hepsi kodun sayısı (King yalnız okur). */
+          ozet:() => {
+            const s = [R.Screens.today.headline()];
+            try{
+              const vade = R.Calc.dueCards(R.U.todayISO()).length;
+              s.push(vade ? vade + ' tekrar kartı bugün vadeli' : 'Bugün vadeli tekrar kartı yok');
+              const x = R.Ogren.sonAcilan();
+              const sr = x ? R.Ogren.sirada(x.subject.id, x.topic.id) : null;
+              if(sr) s.push('Öğren: ' + x.topic.name + ' — ' + sr.ad);
+            }catch(e){ /* özetin ek satırları düşer, ilk cümle kalır */ }
+            return s;
+          },
+          /* Önce «not: …» (core/konunotu.js), sonra veri cümlesi (paletle aynı
+             ayrıştırıcı): ikisi de önizlenir, «Kaydet»le yazılır. */
+          veri:{ onizle:t => (R.KonuNotu && R.KonuNotu.onizle(t)) || (R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null) } });
       }
 
       /* YARIM KALMIŞ SÜRELİ OTURUM — diskten geri alınır.

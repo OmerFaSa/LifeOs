@@ -195,6 +195,19 @@ R.Screens = R.Screens || {};
         : html`<p class="small muted">Bu süzgeçte konu yok.</p>`}` });
   }
 
+  /* NOTLARIM (core/konunotu.js): notu olan konular tek yerde; dokununca
+     konunun Anlatım'ı (Notum kutusu orada). Not yoksa kart çizilmez. */
+  function notlarimKarti(){
+    const l = R.KonuNotu ? R.KonuNotu.hepsi() : [];
+    if(!l.length) return '';
+    const kisalt = s => { const t = s.replace(/\s+/g, ' '); return t.length > 120 ? t.slice(0, 117) + '…' : t; };
+    return K.Card({ title:'Notlarım', sub:U.plural(l.length, 'konuda not', 'konuda not') + ' · Anlatım’daki «Notum»dan',
+      body:html`<div class="stack-xs">${map(l, x => html`<button type="button" class="listitem listitem--tap" data-act="ogren-git"
+          data-route="anlatim" data-subject="${x.subject.id}" data-topic="${x.topic.id}">
+          <span class="grow minw0"><b class="small">${x.topic.name}</b> <span class="tiny dim">· ${x.subject.name}${x.kart ? ' · ' + x.kart + ' kart satırı' : ''}</span>
+          <span class="small dim block">${kisalt(x.not)}</span></span></button>`)}</div>` });
+  }
+
   R.Screens.ogren = {
     id:'ogren',
     title:'Konular',
@@ -205,7 +218,7 @@ R.Screens = R.Screens || {};
       const sid = S.ui.ogrenListe || (x.subject ? x.subject.id : R.SUBJECTS[0].id);
       const subject = R.SUBJECTS.find(s => s.id === sid) || R.SUBJECTS[0];
       const y = acikYanlislar();
-      return String(K.Grid([K.Span(12, K.Stack([devamKarti(y), derslerKarti(subject.id), konularKarti(subject, y)]))]));
+      return String(K.Grid([K.Span(12, K.Stack([devamKarti(y), notlarimKarti(), derslerKarti(subject.id), konularKarti(subject, y)]))]));
     },
     handle:Object.assign({}, ortakHandle, {
       async 'ogren-liste-sec'(el){ S.ui.ogrenListe = el.dataset.subject; R.App.render(); },

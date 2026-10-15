@@ -75,5 +75,30 @@
         expect(k.querySelector('#konu-notu-kart').textContent).toContain('(1)');
       }finally{ k.remove(); }
     });
+    /* Kullanıcı (2026-10-15): «veri girmeyi kolaylaştıralım». King AYS'de veri
+       giremiyordu (SPİ'de giriyordu); artık paletle aynı ayrıştırıcı. */
+    it('King AYS veri cümlesini önizler ve Kaydet ile yazar; anlamadığını uydurmaz', async () => {
+      resetState();
+      expect(R.Palette.kingOnizle('merhaba nasılsın')).toBe(null);
+      const p = R.Palette.kingOnizle('bugün matematikten 40 soru çözdüm');
+      expect(!!p).toBe(true);
+      expect(p.metin).toContain('soru');
+      const eski = R.App.render; R.App.render = () => {};
+      let r;
+      try{ r = await p.kaydet(); }finally{ R.App.render = eski; }
+      expect(/Kaydedildi|kayıt yazıldı/.test(r)).toBe(true);
+      expect(/yazılamadı/.test(r)).toBe(false);
+    });
+
+    it('Notlarım: notu olan konular Öğren › Konular’da listelenir; not yoksa kart yok', async () => {
+      await hazir();
+      let h = String(await R.Screens.ogren.render());
+      expect(h.indexOf('Notlarım') < 0).toBe(true);
+      await N().yaz(TM, TID, 'payda eşitle\nkesir :: pay / payda');
+      expect(N().hepsi().map(x => [x.topic.id, x.kart])).toEqual([[TID, 1]]);
+      h = String(await R.Screens.ogren.render());
+      expect(h).toContain('Notlarım');
+      expect(h).toContain('data-route="anlatim" data-subject="' + TM + '" data-topic="' + TID + '"');
+    });
   });
 })();
