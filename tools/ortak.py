@@ -287,6 +287,10 @@ DOSYALAR = {
     "notum.js":       "js/core",
     "notum.css":      "css",
     "notum.test.js":  "tests",
+    # KISAYOL — uc arayuzde ayni klavye kisayollari (N, Shift+N, /, G+harf) (2026-10-16).
+    "kisayol.js":      "js/core",
+    "kisayol.css":     "css",
+    "kisayol.test.js": "tests",
     # SORU KARTI — Bugun'deki «Bir soru», uc arayuzde ayni sade kart (2026-10-16).
     "sorukart.js":    "js/core",
     "sorukart.css":   "css",

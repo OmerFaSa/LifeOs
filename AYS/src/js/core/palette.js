@@ -518,7 +518,8 @@ R.Palette = (function(){
     UI.sheet({
       title:'Klavye kısayolları',
       body:String(K.Table({ tight:true, headers:['Tuş', 'İşlev'],
-        rows:SHORTCUTS.map(s => [map(s[0], k => html`<kbd>${k}</kbd> `), s[1]]) })),
+        rows:SHORTCUTS.concat(window.LIFEOS && window.LIFEOS.KISAYOL ? window.LIFEOS.KISAYOL.satirlar() : [])
+          .map(s => [map(s[0], k => html`<kbd>${k}</kbd> `), s[1]]) })),
       noFocus:true,
       footer:String(K.Button({ label:'Kapat', act:'sheet-close' })),
     });

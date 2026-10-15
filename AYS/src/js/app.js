@@ -1654,6 +1654,20 @@ R.App = (function(){
           ornekler:['matematikten 40 soru çözdüm', '12 paragraf yaptım', '7 saat uyudum', 'not: üslülerde tabanlar aynıysa üsler toplanır'] });
       }
 
+      /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).
+         Harita çekmecelerden türetilir; her çekmecenin ilk ekranı. */
+      if(window.LIFEOS && window.LIFEOS.KISAYOL){
+        window.LIFEOS.KISAYOL.kur({ modul:'ays', git:r => go(r), palet:() => R.Palette.open(),
+          dugmeler:() => [
+            { ad:'Tekrar', rota:'cards', sayi:C.dueCards().length },
+            { ad:'Soru çöz', rota:'solve' },
+            { ad:'Sıradaki konu', rota:'ogren' },
+            { ad:'Deneme', rota:'exams' },
+            { ad:'Not al', doldur:'not: ' },
+          ],
+          cekmeceler:() => NAV.filter(g => (g.items || []).length).map(g => ({ id:g.id, rota:g.items[0].id })) });
+      }
+
       /* YARIM KALMIŞ SÜRELİ OTURUM — diskten geri alınır.
 
          165 dakikalık TYT provası bir modül değişkeninde duruyordu ve

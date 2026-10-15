@@ -1792,6 +1792,17 @@ ESP.App = (function(){
           ornekler:['45 dk gitar', '20 dakika kelime', '30 dk felsefe okuması'] });
       }
 
+      /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).
+         Harita çekmecelerden türetilir; her çekmecenin ilk ekranı. */
+      if(window.LIFEOS && window.LIFEOS.KISAYOL){
+        window.LIFEOS.KISAYOL.kur({ modul:'esp', git:r => go(r), palet:() => ESP.Palette.open(),
+          /* Açık disiplinlerin tezgâhları: kapalı disiplin düğme olmaz. */
+          dugmeler:() => ((ESP.Nav.sections().find(s => s.id === 'calisma') || {}).views || [])
+            .slice(0, 4).map(v => ({ ad:v.label, rota:v.route }))
+            .concat([{ ad:'Merdiven', rota:'ladder' }]),
+          cekmeceler:() => ESP.Nav.sections().map(s => ({ id:s.id, rota:s.views[0].route })) });
+      }
+
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).
 
          Yükleme çizimden önce yapılır: rozet bir kare «veri yok» gösterip

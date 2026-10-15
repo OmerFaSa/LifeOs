@@ -320,7 +320,7 @@ SP.Palette = (function(){
         ['j / k', 'Listede satır satır gez'],
         ['Enter', 'Odaktaki satırı aç'],
         ['ferritin 26', 'Palete veri de yazabilirsin'],
-      ] })),
+      ].concat(window.LIFEOS && window.LIFEOS.KISAYOL ? window.LIFEOS.KISAYOL.metinSatirlari() : []) })),
       footer:String(SP.C.Button({ label:'Kapat', act:'sheet-close' })),
       noFocus:true,
     });

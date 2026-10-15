@@ -1606,6 +1606,20 @@ SP.App = (function(){
           ornekler:['uyku 7,5', '45 dk yürüyüş', '2 yumurta 1 çay', 'kilo 72'] });
       }
 
+      /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).
+         Harita çekmecelerden türetilir; her çekmecenin ilk ekranı. */
+      if(window.LIFEOS && window.LIFEOS.KISAYOL){
+        window.LIFEOS.KISAYOL.kur({ modul:'spi', git:r => go(r), palet:() => SP.Palette.open(),
+          dugmeler:() => [
+            { ad:'Uyku', doldur:'uyku ' },
+            { ad:'Kilo', doldur:'kilo ' },
+            { ad:'Öğün', rota:'meals' },
+            { ad:'Hareket', rota:'move' },
+            { ad:'Testler', rota:'labs' },
+          ],
+          cekmeceler:() => SECTIONS.filter(s => s.views.length).map(s => ({ id:s.id, rota:s.views[0].route })) });
+      }
+
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).
 
          Yükleme çizimden önce yapılır: rozet bir kare «veri yok» gösterip

@@ -1043,6 +1043,7 @@ SP.Screens.today = (function(){
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '')}
+          ${raw(window.LIFEOS && window.LIFEOS.KISAYOL ? window.LIFEOS.KISAYOL.seritHtml() : '')}
           ${when(acil, () => acil.kart)}
           ${when(vakti, () => K.Ledger([vakti]))}
           ${raw(soruKart)}

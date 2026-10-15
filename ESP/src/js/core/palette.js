@@ -251,7 +251,7 @@ ESP.Palette = (function(){
         ['Enter', 'Seçili komutu çalıştır'],
         ['j / k', 'Listede satır satır gez'],
         ['45 dk gitar', 'Palete oturum da yazabilirsin'],
-      ] })),
+      ].concat(window.LIFEOS && window.LIFEOS.KISAYOL ? window.LIFEOS.KISAYOL.metinSatirlari() : []) })),
       footer:String(ESP.C.Button({ label:'Kapat', act:'sheet-close' })),
       noFocus:true,
     });
