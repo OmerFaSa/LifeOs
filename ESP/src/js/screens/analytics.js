@@ -22,7 +22,7 @@ ESP.Screens.analytics = (function(){
     { id:'seriler',   label:'Seriler' },
     { id:'rapor',     label:'Rapor' },
     { id:'durust',    label:'Dürüstlük' },
-    { id:'rubrikler', label:'Rubrik & Analiz' },
+    { id:'rubrikler', label:'Rubrik ve analiz' },
   ];
 
   /* ------------------------------------------------------------------ radar */
@@ -459,7 +459,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'Derin Alan Analizleri', hint:'deep-analysis',
+        label:'Derin alan analizleri', hint:'deep-analysis',
         meta:derinler.length + ' derin analiz',
         wide:true,
         body:html`
@@ -486,7 +486,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'Değerlendirme Rubrikleri & Boyutlar', hint:'rubric',
+        label:'Değerlendirme rubrikleri ve boyutlar', hint:'rubric',
         meta:rubler.length + ' rubrik · 22 boyut',
         wide:true,
         body:html`
@@ -513,7 +513,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       when(kademeler.length, () => K.Entry({
-        label:'Kademeli Geri Bildirim İpuçları', hint:'feedback',
+        label:'Kademeli geri bildirim ipuçları', hint:'feedback',
         meta:kademeler.length + ' ipucu akışı',
         wide:true,
         body:html`<div class="stack-sm">${map(kademeler, kf => html`

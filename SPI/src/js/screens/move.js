@@ -185,7 +185,7 @@ SP.Screens.move = (function(){
         <div class="ladderblk__foot">
           <span class="small dim">${pr.note}</span>
           <span class="row-sm">
-            ${K.Button({ label:'Teknik & İpuçları', size:'sm', tone:'ghost', act:'open-ex-detail', data:{ 'data-id':ex.id } })}
+            ${K.Button({ label:'Teknik ve ipuçları', size:'sm', tone:'ghost', act:'open-ex-detail', data:{ 'data-id':ex.id } })}
             ${when(pr.ready, () => K.Button({ label:'Üst basamağa geç', size:'sm',
               act:'advance', data:{ 'data-id':ex.id } }))}
             ${K.Button({ label:'Basamak seç', size:'sm', act:'pick-level', data:{ 'data-id':ex.id } })}
@@ -697,7 +697,7 @@ SP.Screens.move = (function(){
 
   function bodyPhotoSheet(){
     UI.sheet({
-      title:'Fotoğraftan beden & duruş analizi',
+      title:'Fotoğraftan beden ve duruş analizi',
       subtitle:'Boydan fotoğraf ile BKİ, duruş (postür) ve tahmini kompozisyon',
       wide:true,
       body:String(K.Stack([
@@ -738,7 +738,7 @@ SP.Screens.move = (function(){
       : [dh.esneme2dk, dh.guclendirme].filter(Boolean);
 
     UI.sheet({
-      title:'Beden & Duruş Analizi (5 Bölüt)',
+      title:'Beden ve duruş analizi (5 bölüt)',
       subtitle:'Fotoğraftan tahmini biyometri ve düzeltici hareket reçetesi',
       wide:true,
       body:String(K.Stack([
@@ -820,7 +820,7 @@ SP.Screens.move = (function(){
         /* 5. Bölüt: Tıbbi Güvenlik Kalkanı */
         K.Notice({
           tone:'warn',
-          title:'5. Tıbbi Güvenlik Kalkanı (cert: estimated · source: photo)',
+          title:'5. Tıbbi güvenlik uyarısı (tahmin · fotoğraftan)',
           body: tg.uyari || 'Bu analiz tıbbi bir teşhis değildir; fotoğraftan çıkarılan değerler tahmindir. Tanı ve tedavi için hekiminize danışınız.'
         }),
       ])),
@@ -845,7 +845,7 @@ SP.Screens.move = (function(){
         ${map(gunler.slice(0, 12), g => html`<span class="foto-serit__ge">${kare(g)}<span class="tiny dim">${U.fmtShort(g)}</span></span>`)}
       </div>
       <div class="row mt-8">
-        ${K.Button({ label:'Fotoğraftan beden & duruş analizi', icon:'camera', size:'sm', act:'body-photo-open' })}
+        ${K.Button({ label:'Fotoğraftan beden ve duruş analizi', icon:'camera', size:'sm', act:'body-photo-open' })}
       </div>`,
     });
   }
@@ -990,8 +990,8 @@ SP.Screens.move = (function(){
     const cats = [{ id:'all', label:'Tümü' }].concat(Object.keys(SP.MET_CATS || {}).map(k => ({ id:k, label:SP.MET_CATS[k] })));
 
     UI.sheet({
-      title: 'MET Aktivite & Kalori Hesabı',
-      subtitle: '2024 Adult Compendium · 1.111 Fiziksel Aktivite Referansı',
+      title: 'MET ile aktivite ve kalori hesabı',
+      subtitle: '2024 Adult Compendium · 1.111 fiziksel aktivite',
       wide: true,
       body: String(K.Stack([
         html`<div class="cols-2">

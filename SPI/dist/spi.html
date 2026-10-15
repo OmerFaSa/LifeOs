@@ -14978,7 +14978,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'06e0dabe', at:'2026-10-15 21:59', dirty:true };
+SP.BUILD = { id:'15625736', at:'2026-10-15 23:12', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -69036,7 +69036,7 @@ SP.Screens.meals = (function(){
     const list = (SP.SPOR_BESLENME || []).slice(0, 6);
     if(!list.length) return '';
     return K.Card({
-      title:'Akıllı Beslenme & Emilim Notları',
+      title:'Beslenme ve emilim notları',
       sub:'Kanıta dayalı sporcu beslenmesi ve biyoyararlanım senaryoları',
       body:html`<div class="stack-sm">${map(list, s => html`
         <div class="ogrenme">
@@ -69282,7 +69282,7 @@ SP.Screens.meals = (function(){
   return {
     id:'meals',
     /* Sadelik (açık en çok üç): başvuru notları küçük başlar. */
-    kucukVarsayilan:['akıllı-beslenme-emilim-notları'],
+    kucukVarsayilan:['beslenme-ve-emilim-notları'],
     title:'Öğünler',
     headline(){
       const tg = SP.Nutri.targets();
@@ -69897,7 +69897,7 @@ SP.Screens.move = (function(){
         <div class="ladderblk__foot">
           <span class="small dim">${pr.note}</span>
           <span class="row-sm">
-            ${K.Button({ label:'Teknik & İpuçları', size:'sm', tone:'ghost', act:'open-ex-detail', data:{ 'data-id':ex.id } })}
+            ${K.Button({ label:'Teknik ve ipuçları', size:'sm', tone:'ghost', act:'open-ex-detail', data:{ 'data-id':ex.id } })}
             ${when(pr.ready, () => K.Button({ label:'Üst basamağa geç', size:'sm',
               act:'advance', data:{ 'data-id':ex.id } }))}
             ${K.Button({ label:'Basamak seç', size:'sm', act:'pick-level', data:{ 'data-id':ex.id } })}
@@ -70409,7 +70409,7 @@ SP.Screens.move = (function(){
 
   function bodyPhotoSheet(){
     UI.sheet({
-      title:'Fotoğraftan beden & duruş analizi',
+      title:'Fotoğraftan beden ve duruş analizi',
       subtitle:'Boydan fotoğraf ile BKİ, duruş (postür) ve tahmini kompozisyon',
       wide:true,
       body:String(K.Stack([
@@ -70450,7 +70450,7 @@ SP.Screens.move = (function(){
       : [dh.esneme2dk, dh.guclendirme].filter(Boolean);
 
     UI.sheet({
-      title:'Beden & Duruş Analizi (5 Bölüt)',
+      title:'Beden ve duruş analizi (5 bölüt)',
       subtitle:'Fotoğraftan tahmini biyometri ve düzeltici hareket reçetesi',
       wide:true,
       body:String(K.Stack([
@@ -70532,7 +70532,7 @@ SP.Screens.move = (function(){
         /* 5. Bölüt: Tıbbi Güvenlik Kalkanı */
         K.Notice({
           tone:'warn',
-          title:'5. Tıbbi Güvenlik Kalkanı (cert: estimated · source: photo)',
+          title:'5. Tıbbi güvenlik uyarısı (tahmin · fotoğraftan)',
           body: tg.uyari || 'Bu analiz tıbbi bir teşhis değildir; fotoğraftan çıkarılan değerler tahmindir. Tanı ve tedavi için hekiminize danışınız.'
         }),
       ])),
@@ -70557,7 +70557,7 @@ SP.Screens.move = (function(){
         ${map(gunler.slice(0, 12), g => html`<span class="foto-serit__ge">${kare(g)}<span class="tiny dim">${U.fmtShort(g)}</span></span>`)}
       </div>
       <div class="row mt-8">
-        ${K.Button({ label:'Fotoğraftan beden & duruş analizi', icon:'camera', size:'sm', act:'body-photo-open' })}
+        ${K.Button({ label:'Fotoğraftan beden ve duruş analizi', icon:'camera', size:'sm', act:'body-photo-open' })}
       </div>`,
     });
   }
@@ -70702,8 +70702,8 @@ SP.Screens.move = (function(){
     const cats = [{ id:'all', label:'Tümü' }].concat(Object.keys(SP.MET_CATS || {}).map(k => ({ id:k, label:SP.MET_CATS[k] })));
 
     UI.sheet({
-      title: 'MET Aktivite & Kalori Hesabı',
-      subtitle: '2024 Adult Compendium · 1.111 Fiziksel Aktivite Referansı',
+      title: 'MET ile aktivite ve kalori hesabı',
+      subtitle: '2024 Adult Compendium · 1.111 fiziksel aktivite',
       wide: true,
       body: String(K.Stack([
         html`<div class="cols-2">
@@ -71961,7 +71961,7 @@ SP.Screens.analytics = (function(){
     { id:'capraz', label:'Çapraz bağlar',  icon:'layers' },
     { id:'hafta',  label:'Haftalık rapor', icon:'list' },
     { id:'seri',   label:'Seriler',        icon:'chart' },
-    { id:'kavramlar', label:'Fizyoloji & Kavramlar', icon:'book' },
+    { id:'kavramlar', label:'Fizyoloji ve kavramlar', icon:'book' },
     { id:'denetim', label:'Denetim',      icon:'list' },
     { id:'durust', label:'Dürüstlük',      icon:'shield' },
   ];
@@ -72319,7 +72319,7 @@ SP.Screens.analytics = (function(){
   function derinAnalizCard(){
     const list = SP.DERIN_ANALIZLER || [];
     return K.Card({
-      title:'Derin Fizyoloji Analizleri',
+      title:'Derin fizyoloji analizleri',
       sub:'Yük, adaptasyon ve toparlanma mekanizmaları',
       badge:K.Badge({ label:list.length + ' analiz', tone:'info' }),
       body:html`<div class="stack-sm">${map(list, a => html`
@@ -72348,7 +72348,7 @@ SP.Screens.analytics = (function(){
       { id:'ileri', label:'İleri' },
     ];
     return K.Card({
-      title:'Sağlık & Egzersiz Kavramları',
+      title:'Sağlık ve egzersiz kavramları',
       sub:'30 temel fizyoloji, antrenman ve kayıt kavramı',
       body:html`
         <div class="row wrap gap-6 mb-12">
@@ -72374,7 +72374,7 @@ SP.Screens.analytics = (function(){
   function kanitCard(){
     const list = SP.KANIT_KARTLARI || [];
     return K.Card({
-      title:'Bilimsel Kanıt ve Referans Kartları',
+      title:'Bilimsel kanıt ve kaynak kartları',
       sub:'ACSM, NSCA, WHO ve CDC araştırma dayanakları',
       body:html`<div class="stack-xs" style="max-height:300px;overflow-y:auto">${map(list, k => html`
         <div class="ogrenme">

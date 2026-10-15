@@ -320,7 +320,7 @@ ESP.Screens.ladder = (function(){
                 </div>
                 <p class="small text-2 mb-8" style="line-height:1.4">${U.esc(p.scenario.text)}</p>
                 <div class="row end">
-                  ${K.Button({ label:'Projeyi & Görevleri İncele', size:'sm', act:'open-project',
+                  ${K.Button({ label:'Projeyi ve görevleri incele', size:'sm', act:'open-project',
                     data:{ 'data-id':p.id } })}
                 </div>
               </div>`;
@@ -328,7 +328,7 @@ ESP.Screens.ladder = (function(){
       }),
 
       K.Entry({
-        label:'Derinlikli Öğretim Örnekleri', hint:'depth',
+        label:'Derinlikli öğretim örnekleri', hint:'depth',
         meta:ornekler.length + ' somut örnek',
         wide:true,
         body:html`

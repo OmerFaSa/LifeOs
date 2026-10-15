@@ -16,7 +16,7 @@ SP.Screens.analytics = (function(){
     { id:'capraz', label:'Çapraz bağlar',  icon:'layers' },
     { id:'hafta',  label:'Haftalık rapor', icon:'list' },
     { id:'seri',   label:'Seriler',        icon:'chart' },
-    { id:'kavramlar', label:'Fizyoloji & Kavramlar', icon:'book' },
+    { id:'kavramlar', label:'Fizyoloji ve kavramlar', icon:'book' },
     { id:'denetim', label:'Denetim',      icon:'list' },
     { id:'durust', label:'Dürüstlük',      icon:'shield' },
   ];
@@ -374,7 +374,7 @@ SP.Screens.analytics = (function(){
   function derinAnalizCard(){
     const list = SP.DERIN_ANALIZLER || [];
     return K.Card({
-      title:'Derin Fizyoloji Analizleri',
+      title:'Derin fizyoloji analizleri',
       sub:'Yük, adaptasyon ve toparlanma mekanizmaları',
       badge:K.Badge({ label:list.length + ' analiz', tone:'info' }),
       body:html`<div class="stack-sm">${map(list, a => html`
@@ -403,7 +403,7 @@ SP.Screens.analytics = (function(){
       { id:'ileri', label:'İleri' },
     ];
     return K.Card({
-      title:'Sağlık & Egzersiz Kavramları',
+      title:'Sağlık ve egzersiz kavramları',
       sub:'30 temel fizyoloji, antrenman ve kayıt kavramı',
       body:html`
         <div class="row wrap gap-6 mb-12">
@@ -429,7 +429,7 @@ SP.Screens.analytics = (function(){
   function kanitCard(){
     const list = SP.KANIT_KARTLARI || [];
     return K.Card({
-      title:'Bilimsel Kanıt ve Referans Kartları',
+      title:'Bilimsel kanıt ve kaynak kartları',
       sub:'ACSM, NSCA, WHO ve CDC araştırma dayanakları',
       body:html`<div class="stack-xs" style="max-height:300px;overflow-y:auto">${map(list, k => html`
         <div class="ogrenme">

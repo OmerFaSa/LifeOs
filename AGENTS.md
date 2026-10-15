@@ -117,6 +117,7 @@ python3 tools/vitrin.py --denetle    # vitrin.css vitrinle ayni mi (CI de kosar)
 python3 tools/rutbe.py <klasor>      # rutbe gorsellerini medya/'ya isler (kayipsiz)
 python3 tools/rutbe.py --liste       # medya/ altinda ne var
 python3 tools/rutbe.py --eksik       # katalog ne bekliyor da yok (node ile)
+python3 tools/yazi.py --denetle      # ekran basliklari: cumle duzeni, «&» yok, emoji ve ic terim yok
 
 # her sistem kendi dizininde
 node tools/runtests.js      # birim testleri

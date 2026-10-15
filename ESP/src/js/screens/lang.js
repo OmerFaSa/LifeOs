@@ -550,7 +550,7 @@ ESP.Screens.lang = (function(){
       : list.slice(0, 8);
 
     return K.Entry({
-      label:'8 Dilli Paralel Cümleler (Universal Dependencies)', hint:'parallel',
+      label:'8 dilde paralel cümleler (Universal Dependencies)', hint:'parallel',
       meta:(matched.length) + '/' + list.length + ' cümle · ' + (l.label || dil),
       wide:true,
       body:html`
@@ -997,7 +997,7 @@ ESP.Screens.lang = (function(){
        araçlar (konuşma, cümle kurma, dinleme, ünite isteği, tohum deste) ve
        başvuru (konu haritası, kutu dağılımı, shadowing kaynakları) şerit. */
     kucukVarsayilan:['tohum-deste', 'konuşma-pratiği', 'cümle-kur', 'dinle-ve-oku', 'konular', 'ünite-iste',
-      'kutu-dağılımı', 'shadowing', 'dilli-paralel-cümleler-universal-dependencies'],
+      'kutu-dağılımı', 'shadowing', 'dilde-paralel-cümleler-universal-dependencies'],
     title:'Dil Stüdyosu',
     headline(){
       const d = ESP.SRS.deckStatus(aktifDil());

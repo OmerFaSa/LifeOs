@@ -288,7 +288,7 @@ ESP.Screens.studio = (function(){
     const rootTr = (ESP.NOTE_TR || {})[root] || root;
 
     return K.Entry({
-      label:'Gam & Mod Cetveli', hint:'scale',
+      label:'Gam ve mod cetveli', hint:'scale',
       meta:rootTr + ' ' + (scaleObj.label || scaleId),
       wide:true,
       body:html`
@@ -678,7 +678,7 @@ ESP.Screens.studio = (function(){
     /* iPhone Faz 2c: parça ekleme ara sıra; Diksiyon'da kural listesi ve
        geçmiş kayıtlar, Kulak'ta üç başvuru tablosu şerit. */
     kucukVarsayilan:['kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları', 'parça-ekle',
-      'telaffuz-kuralları', 'son-kayıtlar', 'aralıklar', 'caged', 'deşifre', 'gam-mod-cetveli'],
+      'telaffuz-kuralları', 'son-kayıtlar', 'aralıklar', 'caged', 'deşifre', 'gam-ve-mod-cetveli'],
     title:'Stüdyo',
     headline(){
       const plato = ESP.Acoustic.plateaus();

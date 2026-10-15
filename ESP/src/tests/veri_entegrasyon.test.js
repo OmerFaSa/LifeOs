@@ -85,7 +85,7 @@
     it('Stüdyo ekranı gam cetveli içerir', async () => {
       expect(typeof ESP.Screens.studio.render).toBe('function');
       const htmlStudio = String(await ESP.Screens.studio.render());
-      expect(htmlStudio.includes('Gam & Mod Cetveli') || htmlStudio.includes('scale-root-sel')).toBeTruthy();
+      expect(htmlStudio.includes('Gam ve mod cetveli') || htmlStudio.includes('scale-root-sel')).toBeTruthy();
     });
 
     it('Analiz ekranı rubrik & analiz sekmesi içerir', async () => {

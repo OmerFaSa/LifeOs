@@ -275,11 +275,16 @@ R.Screens = R.Screens || {};
       </div>`)}
     </section>`;
   }
+  /* SADE ANLATIM (kullanıcı, 2026-10-16: «öğrenme kısmını minimalleştir,
+     sadeleştir»): ek bloklar (sınav kalıpları, sık hatalar, kaynaklar)
+     başlık olarak KAPALI durur, dokununca açılır; hiçbiri kalkmadı. Asıl
+     anlatım ve çözümlü örnekler açık kalır. «Bu konuda» bağlantısı kapalı
+     bloğu açarak oraya gider. */
   function listeBlogu(id, baslik, l, sinif){
-    return html`<section class="${cls('ders__bolum ders__ek', sinif)}" id="${id}">
-      <h3 class="ders__baslik">${baslik}</h3>
+    return html`<details class="${cls('ders__bolum ders__ek ders__katlanir', sinif)}" id="${id}">
+      <summary><h3 class="ders__baslik">${baslik}</h3><span class="ders__say tiny dim">${l.length}</span></summary>
       <ul class="ders__liste">${map(l, m => html`<li>${fmt(m)}</li>`)}</ul>
-    </section>`;
+    </details>`;
   }
 
   /* Akıllı Karar & Taktik Notu (data/akilli.js) */
@@ -332,12 +337,12 @@ R.Screens = R.Screens || {};
   }
   function kaynaklarHtml(kr){
     const resmi = kr.filter(resmiMi), ek = kr.filter(k => !resmiMi(k));
-    return html`<section class="ders__bolum ders__ek ders__kaynaklar" id="ders-kaynaklar">
-      <h3 class="ders__baslik"><span class="ders__no num" aria-hidden="true">§</span>Kaynaklar</h3>
+    return html`<details class="ders__bolum ders__ek ders__kaynaklar ders__katlanir" id="ders-kaynaklar">
+      <summary><h3 class="ders__baslik">Kaynaklar</h3><span class="ders__say tiny dim">${kr.length}</span></summary>
       <p class="small dim mb-10">Bağlantılar dersin tamamı içindir, bu konuya özel değildir; elle doğrulanmadı.</p>
       ${when(resmi.length, () => html`<div class="ders__etiket tiny mb-6">Resmî (MEB)</div><div class="stack-xs">${map(resmi, kaynakSatiri)}</div>`)}
       ${when(ek.length, () => html`<div class="ders__etiket tiny mt-12 mb-6">Ek kaynak · resmî değil, İngilizce</div><div class="stack-xs">${map(ek, kaynakSatiri)}</div>`)}
-    </section>`;
+    </details>`;
   }
 
   function dersHtml(a, d, topic){
@@ -433,8 +438,7 @@ R.Screens = R.Screens || {};
             body:'Bu konunun ayrıntılı anlatımı henüz yazılmadı. Aşağıda kısa özeti var; derin anlatım için «Konu anlatımı iste» ya da koça sor.' })}</div>`}
           ${akildaKarti(topic)}
           <div class="ders__ayak">${eylem}
-            <p class="tiny dim mt-10">Ders kitabının yerini tutmaz: bir tanım ya da formül kritikse kitabınla karşılaştır.
-              «Okudum» bir beyandır; öğrenme yolunun ilk adımına sayılır.</p></div>
+            <p class="tiny dim mt-10">Ders kitabının yerini tutmaz; kritik tanım ve formülü kitabınla karşılaştır.</p></div>
         </article>
         ${icindekiler(x, a)}
       </div>`,
@@ -634,6 +638,8 @@ R.Screens = R.Screens || {};
 
   R.Screens.anlatim = {
     id:'anlatim',
+    /* Sade anlatım: sayfa «Notum»da biter; ara sıra açılan kartlar küçük başlar. */
+    kucukVarsayilan:['çıkmış-sorular', 'videolar-ve-notların', 'daha-derin'],
     title:'Anlatım',
     subtitle(){ const x = O().secili(); return x.topic ? x.subject.name + ' · ' + x.topic.name : 'Konu anlatımı'; },
     actions(){ return ''; },
@@ -653,7 +659,11 @@ R.Screens = R.Screens || {};
     handle:Object.assign({}, ortakHandle, {
       async 'ders-git'(el){
         const h = document.getElementById(el.dataset.hedef);
-        if(h) h.scrollIntoView({ behavior:'smooth', block:'start' });
+        if(!h) return;
+        /* Kapalı blok (sade anlatım) açılarak gidilir. */
+        const d = h.tagName === 'DETAILS' ? h : h.closest('details');
+        if(d) d.open = true;
+        h.scrollIntoView({ behavior:'smooth', block:'start' });
       },
       async 'ogren-okundu'(){
         const x = O().secili();

@@ -41,7 +41,7 @@
     it('oz-019 Analiz: altı okuma alt alta, sekme yok', async () => {
       resetState();
       const d = await bolumlu('analytics', 'an-tab',
-        ['Çapraz bağlar', 'Haftalık rapor', 'Seriler', 'Fizyoloji & Kavramlar', 'Denetim', 'Dürüstlük']);
+        ['Çapraz bağlar', 'Haftalık rapor', 'Seriler', 'Fizyoloji ve kavramlar', 'Denetim', 'Dürüstlük']);
       d.remove();
     });
 

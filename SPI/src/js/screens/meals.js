@@ -766,7 +766,7 @@ SP.Screens.meals = (function(){
     const list = (SP.SPOR_BESLENME || []).slice(0, 6);
     if(!list.length) return '';
     return K.Card({
-      title:'Akıllı Beslenme & Emilim Notları',
+      title:'Beslenme ve emilim notları',
       sub:'Kanıta dayalı sporcu beslenmesi ve biyoyararlanım senaryoları',
       body:html`<div class="stack-sm">${map(list, s => html`
         <div class="ogrenme">
@@ -1012,7 +1012,7 @@ SP.Screens.meals = (function(){
   return {
     id:'meals',
     /* Sadelik (açık en çok üç): başvuru notları küçük başlar. */
-    kucukVarsayilan:['akıllı-beslenme-emilim-notları'],
+    kucukVarsayilan:['beslenme-ve-emilim-notları'],
     title:'Öğünler',
     headline(){
       const tg = SP.Nutri.targets();

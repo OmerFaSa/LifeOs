@@ -2675,6 +2675,15 @@ body.is-dragging .drop.is-over{
 .ogr-tablo thead th, .site--v5 .ogr-tablo thead th{ font-weight:600; }
 .ogr-tablo tbody tr:last-child :is(td, th){ border-bottom:1px solid var(--border); }
 .ogr-tablo tbody tr:hover :is(td, th){ background:none; }
+/* Sade anlatım: kapalı ek bloklar (sınav kalıpları, sık hatalar, kaynaklar). */
+.ders__katlanir > summary{ display:flex; align-items:baseline; gap:8px; list-style:none; cursor:pointer; }
+.ders__katlanir > summary::-webkit-details-marker{ display:none; }
+.ders__katlanir > summary .ders__baslik{ margin:0; }
+.ders__katlanir > summary::after{ content:'›'; margin-left:auto; color:var(--text-2); transition:transform .2s ease; }
+.ders__katlanir[open] > summary::after{ transform:rotate(90deg); }
+.ders__katlanir[open] > summary{ margin-bottom:10px; }
+.ders__katlanir > summary:focus-visible{ outline:2px solid var(--primary); outline-offset:4px; border-radius:6px; }
+
 /* Notum (core/konunotu.js) ve seçili metinden «Nota ekle». */
 .konu-notu{ width:100%; min-height:96px; resize:vertical; font:inherit; font-size:15px; line-height:1.55; }
 .nota-ekle{ position:fixed; z-index:60; padding:7px 12px; border:0; border-radius:999px; font:inherit; font-size:13px; font-weight:600;
