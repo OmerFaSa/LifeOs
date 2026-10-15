@@ -235,6 +235,15 @@
       expect(bozuk).toEqual([]);
     });
 
+    /* Denetim 2026-10-11/15: Cu ve Ag «soy» deniyordu (MEB: yarı soy; soy
+       olan Au, Pt); Atatürk'ün sözü kısaltılmış alıntılanıyordu. */
+    it('Cu ve Ag yarı soydur; Atatürk’ün ilim sözü tam alıntılanır', () => {
+      const metin = JSON.stringify(R.KONU_DERIN) + JSON.stringify(R.KONU_ANLATIM || {}) + JSON.stringify(R.PARAGRAF_HAVUZU || []);
+      const soyCu = metin.match(/(Cu|Ag|[Bb]akır|[Gg]ümüş)[^.;«»"]{0,12}(?<!yarı )soy metal/g) || [];
+      expect(soyCu).toEqual([]);
+      expect(/Hayatta en hakiki mürşit/.test(metin)).toBe(false);
+    });
+
     it('aynı soru iki kez sorulmaz: derin, Anlatım ve paragraf havuzu', () => {
       const H = HARF, gor = {}, cakisma = [];
       const ekle = (ad, q) => { const k = String(q.soru).replace(/\s+/g, ' ').trim(); (gor[k] = gor[k] || []).push([ad, q]); };

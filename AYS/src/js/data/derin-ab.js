@@ -330,7 +330,7 @@ Object.assign(R.KONU_DERIN, {
     onKosul:['ab-06'],
     ornekler:[
       { seviye:'orta', soru:'Kandaki tiroksin düzeyi düşünce hipotalamus–hipofiz–tiroit ekseninde ne olur?',
-        cozum:['Hipotalamus TRH salgılar; hipofiz TSH salgılar; tiroit tiroksin üretir.', 'Tiroksin yükselince TRH ve TSH salgısı baskılanır: negatif geri bildirim.'] },
+        cozum:['Hipotalamus TRH salgılar; hipofiz TSH salgılar; tiroit tiroksin üretir.', 'Tiroksin yükselince TRH ve TSH salgısı baskılanır: negatif geri bildirim.', 'Tiroksin düşünce bu baskı kalkar: hipotalamus daha çok TRH, hipofiz daha çok TSH salgılar; tiroit uyarılır ve tiroksin üretimi artar.'] },
       { seviye:'orta', soru:'Açlıkta kan şekeri düşünce hangi hormonlar devreye girer?',
         cozum:['Pankreastan glukagon: karaciğerde glikojen glikoza yıkılır.', 'Böbrek üstü bezinden adrenalin ve kortizol de kan şekerini yükseltir.'] },
       { seviye:'ileri', soru:'ADH eksikliğinde (diyabet insipitus) hangi belirtiler görülür?',

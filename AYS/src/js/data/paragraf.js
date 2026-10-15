@@ -109,7 +109,7 @@ R.PARAGRAF_HAVUZU = [
 
   /* ---------- tr-08 · anlatım biçimleri ve düşünceyi geliştirme ---------- */
   { id:'p016', konu:'tr-08', seviye:'orta',
-    soru:'Bir toplumun ilerlemesi, bilime verdiği değerle doğru orantılıdır. Atatürk’ün «Hayatta en hakiki mürşit ilimdir.» sözü de bu düşünceyi dile getirir. Bilimsel düşünceyi benimseyen toplumlar sorunlarına kanıta dayalı çözümler üretirken, bilimi önemsemeyenler aynı hataları tekrarlamaktan kurtulamaz.\nBu parçada düşünceyi desteklemek için aşağıdakilerden hangisine başvurulmuştur?',
+    soru:'Bir toplumun ilerlemesi, bilime verdiği değerle doğru orantılıdır. Atatürk’ün «Dünyada her şey için, medeniyet için, hayat için, muvaffakiyet için en hakiki mürşit ilimdir, fendir.» sözü de bu düşünceyi dile getirir. Bilimsel düşünceyi benimseyen toplumlar sorunlarına kanıta dayalı çözümler üretirken, bilimi önemsemeyenler aynı hataları tekrarlamaktan kurtulamaz.\nBu parçada düşünceyi desteklemek için aşağıdakilerden hangisine başvurulmuştur?',
     sec:['Sayısal verilere', 'Benzetmeye', 'Örneklendirmeye', 'Tanımlamaya', 'Tanık göstermeye'], dogru:'E',
     ipucu:'Paragrafta birinin sözü aktarılıyor mu?',
     cozum:['Düşünceyi güçlendirmek için Atatürk’ün sözü aktarılmıştır: tanık gösterme.', 'Sayı, benzetme, örnek ya da tanım kullanılmamıştır.'] },
