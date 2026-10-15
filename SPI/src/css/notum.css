@@ -1,0 +1,39 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/notum.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* NOTUM ve ÖĞRENME YÜZEYİ (brand/ortak/notum.js). Tek kaynak; üç arayüze
+   `tools/ortak.py --yay` ile kopyalanır.
+
+   Öğrenme içeriği (kavram, konu kartı, örnek, dikkat, pratik) üç modülde
+   AYNI sınıflarla çizilir: önce satır içi stiller, CSS'te karşılığı olmayan
+   yardımcı sınıflar (p-8, radius-sm, bg-surface-2) ve emoji simgelerle
+   yazılmıştı; görünüm modülden modüle değişiyordu (denetim 2026-10-16). */
+
+.notum{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+.notum__bas{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.notum__bas b{ font-size:13.5px; }
+.notum__durum{ font-size:12px; color:var(--text-2); }
+.notum__metin{ width:100%; min-height:76px; resize:vertical; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text); font:inherit; font-size:14.5px; line-height:1.55; }
+.notum__metin:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent); }
+.notum-ekle{ position:fixed; z-index:60; padding:7px 12px; border:0; border-radius:999px; font:inherit; font-size:13px; font-weight:600;
+  color:#fff; background:var(--text); box-shadow:0 6px 18px rgba(0,0,0,.18); cursor:pointer; }
+.notum-ekle:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
+/* Öğrenme yüzeyi */
+.ogrenme{ display:flex; flex-direction:column; gap:8px; padding:12px 14px; border-radius:12px; background:var(--surface-2);
+  box-shadow:inset 0 0 0 1px var(--border); }
+.ogrenme__bas{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.ogrenme__bas b{ font-size:14px; }
+.ogrenme__etiket{ font-size:11.5px; color:var(--text-2); white-space:nowrap; }
+.ogrenme p{ margin:0; font-size:14px; line-height:1.55; }
+.ogrenme__ornek{ font-size:13.5px; line-height:1.5; }
+.ogrenme__ornek b, .ogrenme__pratik b, .ogrenme__aktarim b{ font-weight:600; }
+.ogrenme__dikkat{ padding:8px 10px; border-radius:8px; background:var(--surface); border-left:3px solid var(--primary);
+  font-size:13px; line-height:1.5; color:var(--text-2); }
+.ogrenme__pratik{ padding-top:8px; border-top:1px dashed var(--border); font-size:13.5px; line-height:1.5; }
+.ogrenme__pratik details{ margin-top:4px; font-size:13px; color:var(--text-2); }
+.ogrenme__aktarim{ font-size:13px; line-height:1.5; color:var(--text-2); }
+.ogrenme-liste{ display:flex; flex-direction:column; gap:8px; }
+.ogrenme-liste--kaydir{ max-height:420px; overflow-y:auto; padding-right:2px; }
+.ogrenme__kutu{ padding:8px 10px; border-radius:8px; background:var(--surface); }

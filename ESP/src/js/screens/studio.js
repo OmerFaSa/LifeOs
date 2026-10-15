@@ -304,7 +304,7 @@ ESP.Screens.studio = (function(){
               options:ESP.SCALES.map(s => ({ value:s.id, label:s.label })) })}
           </div>
         </div>
-        <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+        <div class="ogrenme">
           <div class="row between gap-8 mb-6">
             <div>
               <b class="text-1">${rootTr} (${root}) ${scaleObj.label}</b>
@@ -314,7 +314,7 @@ ESP.Screens.studio = (function(){
           </div>
           <div class="row wrap gap-6 my-8">
             ${map(notlar, (n, idx) => html`
-              <div class="text-center p-6 radius-sm bg-surface-1" style="min-width:44px;border:1px solid var(--border)">
+              <div class="text-center ogrenme__kutu" style="min-width:44px">
                 <div class="tiny dim mb-2">${idx === 0 ? 'Kök (I)' : (idx + 1) + '. der'}</div>
                 <b class="small" style="color:var(--primary)">${n}</b>
                 <div class="tiny dim">${ESP.NOTE_TR[n] || n}</div>

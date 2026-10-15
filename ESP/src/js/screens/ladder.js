@@ -259,13 +259,13 @@ ESP.Screens.ladder = (function(){
       subtitle: d.label + ' · ' + (p.tasks || []).length + ' uygulama görevi',
       wide: true,
       body: String(K.Stack([
-        html`<div class="p-10 radius-md bg-surface-2 mb-10" style="border:1px solid var(--border)">
+        html`<div class="ogrenme mb-10">
           <div class="tiny bold text-1 mb-4">📋 Kurgusal Senaryo:</div>
           <p class="small mb-4" style="line-height:1.5">${U.esc(p.scenario.text)}</p>
           <div class="tiny dim">${U.esc(p.scenario.origin)}</div>
         </div>`,
         html`<div class="stack-sm">${map(p.tasks, (t, idx) => html`
-          <div class="p-10 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+          <div class="ogrenme">
             <div class="row between gap-6 mb-4">
               <b class="small">Görev ${idx + 1}: ${U.esc(t.question)}</b>
             </div>
@@ -278,7 +278,7 @@ ESP.Screens.ladder = (function(){
               </div>`)}
             ${when(t.sample_answer, () => html`
               <details class="tiny dim"><summary>Örnek Çözüm & Cevap</summary>
-                <div class="p-6 mt-4 radius-xs bg-surface-1 text-1">${U.esc(t.sample_answer)}</div>
+                <div class="ogrenme__kutu mt-4">${U.esc(t.sample_answer)}</div>
               </details>`)}
           </div>`)}</div>`,
       ])),
@@ -313,7 +313,7 @@ ESP.Screens.ladder = (function(){
           <div class="stack-sm">${map(projs, p => {
             const d = discOf(p.discipline) || { label:p.discipline };
             return html`
-              <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+              <div class="ogrenme">
                 <div class="row between gap-8 mb-4">
                   <b class="small">${U.esc(p.title)}</b>
                   <span class="badge badge--muted tiny">${d.label} · ${(p.tasks || []).length} görev</span>
@@ -337,7 +337,7 @@ ESP.Screens.ladder = (function(){
             const d = discOf(o.discipline) || { label:o.discipline };
             const tone = o.depth === 'basit' ? 'ok' : (o.depth === 'orta' ? 'warn' : 'danger');
             return html`
-              <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+              <div class="ogrenme">
                 <div class="row between gap-6 mb-2">
                   <b class="small">${U.esc(o.title)}: ${U.esc(o.focus || '')}</b>
                   <span class="badge tiny badge--${tone}">${o.depth} · ${d.label}</span>

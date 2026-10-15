@@ -1694,6 +1694,11 @@ ESP.App = (function(){
 
       wireStoreErrors();
       await M.loadAll();
+      /* NOTUM (brand/ortak/notum.js): öğrenme ekranlarında kendi notun; modülün deposunda. */
+      if(window.LIFEOS && window.LIFEOS.NOTUM){
+        window.LIFEOS.NOTUM.kur({ modul:'esp', store:{ set:(p, d) => ESP.Store.set(p, d), list:c => ESP.Store.list(c) } });
+        try{ await window.LIFEOS.NOTUM.yukle(); }catch(e){ /* notlar yüklenemedi; kutu boş başlar */ }
+      }
       /* «Üç sistemi bağla» (HKM yüzü): gizli çerçevede yalnız eşle ve dön;
          ekran çizilmez (core/beacon.js hkmBagla). */
       if(ESP.Beacon && ESP.Beacon.bagCagrisiMi()){ await ESP.Beacon.hkmBagla(); return; }
@@ -1725,7 +1730,7 @@ ESP.App = (function(){
             if(ESP.Screens && ESP.Screens.today && ESP.Screens.today.sesli) y.bugun = { metin:ESP.Screens.today.sesli(), gun:ESP.U.todayISO() };
             return y;
           },
-          yukle:() => M.loadAll(),
+          yukle:async () => { await M.loadAll(); if(window.LIFEOS && window.LIFEOS.NOTUM) await window.LIFEOS.NOTUM.yukle(); },
           yenile:() => {
             /* Profil sunucudan geldiyse kurulum sihirbazının işi kalmadı. */
             if(sihirbaz() && ESP.Setup && !ESP.Setup.needed()) UI.closeSheet();

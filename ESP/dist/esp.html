@@ -13608,6 +13608,47 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .giris__mesaj--uyari{ color:var(--text-2); }
 @media (prefers-reduced-motion:reduce){ .giris__gonder, .giris__mik{ transition:none; } }
 
+/* ==== css/notum.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/notum.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* NOTUM ve ÖĞRENME YÜZEYİ (brand/ortak/notum.js). Tek kaynak; üç arayüze
+   `tools/ortak.py --yay` ile kopyalanır.
+
+   Öğrenme içeriği (kavram, konu kartı, örnek, dikkat, pratik) üç modülde
+   AYNI sınıflarla çizilir: önce satır içi stiller, CSS'te karşılığı olmayan
+   yardımcı sınıflar (p-8, radius-sm, bg-surface-2) ve emoji simgelerle
+   yazılmıştı; görünüm modülden modüle değişiyordu (denetim 2026-10-16). */
+
+.notum{ display:flex; flex-direction:column; gap:6px; margin-top:12px; }
+.notum__bas{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.notum__bas b{ font-size:13.5px; }
+.notum__durum{ font-size:12px; color:var(--text-2); }
+.notum__metin{ width:100%; min-height:76px; resize:vertical; padding:10px 12px; border-radius:10px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text); font:inherit; font-size:14.5px; line-height:1.55; }
+.notum__metin:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent); }
+.notum-ekle{ position:fixed; z-index:60; padding:7px 12px; border:0; border-radius:999px; font:inherit; font-size:13px; font-weight:600;
+  color:#fff; background:var(--text); box-shadow:0 6px 18px rgba(0,0,0,.18); cursor:pointer; }
+.notum-ekle:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
+/* Öğrenme yüzeyi */
+.ogrenme{ display:flex; flex-direction:column; gap:8px; padding:12px 14px; border-radius:12px; background:var(--surface-2);
+  box-shadow:inset 0 0 0 1px var(--border); }
+.ogrenme__bas{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.ogrenme__bas b{ font-size:14px; }
+.ogrenme__etiket{ font-size:11.5px; color:var(--text-2); white-space:nowrap; }
+.ogrenme p{ margin:0; font-size:14px; line-height:1.55; }
+.ogrenme__ornek{ font-size:13.5px; line-height:1.5; }
+.ogrenme__ornek b, .ogrenme__pratik b, .ogrenme__aktarim b{ font-weight:600; }
+.ogrenme__dikkat{ padding:8px 10px; border-radius:8px; background:var(--surface); border-left:3px solid var(--primary);
+  font-size:13px; line-height:1.5; color:var(--text-2); }
+.ogrenme__pratik{ padding-top:8px; border-top:1px dashed var(--border); font-size:13.5px; line-height:1.5; }
+.ogrenme__pratik details{ margin-top:4px; font-size:13px; color:var(--text-2); }
+.ogrenme__aktarim{ font-size:13px; line-height:1.5; color:var(--text-2); }
+.ogrenme-liste{ display:flex; flex-direction:column; gap:8px; }
+.ogrenme-liste--kaydir{ max-height:420px; overflow-y:auto; padding-right:2px; }
+.ogrenme__kutu{ padding:8px 10px; border-radius:8px; background:var(--surface); }
+
 /* ==== css/zemin.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/zemin.css içine yazılır; burası bir sonraki
@@ -15577,7 +15618,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'0ebf5b84', at:'2026-10-15 21:03', dirty:true };
+ESP.BUILD = { id:'ba7833b3', at:'2026-10-15 21:38', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -29028,6 +29069,169 @@ window.LIFEOS.GIRIS = (function(){
   return { kur, kaynak, onizle, kutuHtml, gonder, kaydet, kuruluMu:() => !!ayar,
     durum:() => ({ bekleyen:bekleyen ? bekleyen.p.metin : null, mesaj:mesaj ? mesaj.metin : null }),
     _ortam:ortam, _sifirla };
+})();
+
+/* ==== js/core/notum.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/notum.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* NOTUM — öğrenme ekranlarında kendi notun; üç arayüzde aynı kutu.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/notum.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Biçimi `notum.css`.
+   ==================================================================
+
+   Depo sahibi (2026-10-15/16): «öğrenmeyi ve not etmeyi kolaylaştır;
+   anlaşılır, profesyonel yap; bütün modüllere uygula». AYS'nin Anlatım
+   ekranındaki «Notum» (core/konunotu.js) burada genelleşti: SPİ'nin
+   kavramları ve ESP'nin konu kartları aynı kutuyu kullanır.
+
+   Sözler:
+     1. BAĞLAM BAŞINA BİR NOT. Not bir bağlama bağlıdır («konu:l-ses»,
+        «kavramlar»); modülün KENDİ deposunda `notum/<bağlam>` olarak durur
+        (eşitleme ve yedek o depoyla gelir). Kayıt kaynağı modül isterse
+        kendi alanını verebilir (kaynak: { oku, yaz }).
+     2. YAZINCA KAYDOLUR; EKLEMEK EZMEZ. Kutu gecikmeli kaydeder; «Nota ekle»
+        (seçili metin) notun SONUNA yeni satır ekler. En çok SINIR karakter.
+     3. NOT ÖLÇÜM DEĞİLDİR. Hiçbir sayıyı, kapıyı, seviyeyi değiştirmez.
+     4. SEÇİP EKLE YALNIZ İŞARETLİ METİNDE. `data-notum-kaynak="<bağlam>"`
+        taşıyan öğenin içinde seçilen metin o bağlamın notuna eklenir.
+     5. MODÜL ONSUZ DA ÇALIŞIR. Kurulmadıysa kutu çizilmez. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.NOTUM = (function(){
+  'use strict';
+
+  const SINIR = 4000;
+  let ayar = null;            // { modul, store:{ set, list }, kaynak? }
+  const notlar = new Map();   // bağlam → metin
+  let bagli = false;
+  const zaman = new Map();
+
+  function kac(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+  const yolu = b => 'notum/' + String(b).toLocaleLowerCase('tr-TR').replace(/[^a-z0-9çğıöşü_-]+/g, '-').slice(0, 80);
+
+  function oku(baglam){
+    if(ayar && ayar.kaynak && ayar.kaynak.oku) return String(ayar.kaynak.oku(baglam) || '');
+    return notlar.get(String(baglam)) || '';
+  }
+
+  async function yaz(baglam, metin){
+    const m = String(metin == null ? '' : metin).replace(/\r\n/g, '\n').slice(0, SINIR);
+    if(ayar && ayar.kaynak && ayar.kaynak.yaz){ await ayar.kaynak.yaz(baglam, m); return m; }
+    notlar.set(String(baglam), m);
+    if(ayar && ayar.store && ayar.store.set){
+      await ayar.store.set(yolu(baglam), { baglam:String(baglam), metin:m, at:new Date().toISOString() });
+    }
+    return m;
+  }
+
+  async function ekle(baglam, satir){
+    const s = String(satir || '').replace(/\s+/g, ' ').trim();
+    if(!s) return null;
+    const eski = oku(baglam).replace(/\s+$/, '');
+    return yaz(baglam, eski ? eski + '\n' + s : s);
+  }
+
+  async function yukle(){
+    if(!ayar || !ayar.store || !ayar.store.list) return 0;
+    let rows = [];
+    try{ rows = (await ayar.store.list('notum')) || []; }catch(e){ rows = []; }
+    notlar.clear();
+    rows.forEach(r => { if(r && r.baglam != null) notlar.set(String(r.baglam), String(r.metin || '')); });
+    return notlar.size;
+  }
+
+  function hepsi(){
+    return Array.from(notlar.entries()).filter(x => x[1].trim()).map(x => ({ baglam:x[0], metin:x[1] }));
+  }
+
+  /* Kutu. o: { baslik, ipucu } */
+  function kutuHtml(baglam, o){
+    if(!ayar) return '';
+    bagla();
+    o = o || {};
+    const b = String(baglam);
+    const m = oku(b);
+    return '<div class="notum" data-notum-kutu="' + kac(b) + '">'
+      + '<div class="notum__bas"><b>' + kac(o.baslik || 'Notum') + '</b>'
+      + '<span class="notum__durum" data-notum-durum aria-live="polite">' + (m ? m.length + ' / ' + SINIR : 'kendiliğinden kaydedilir') + '</span></div>'
+      + '<textarea class="notum__metin" rows="' + Math.min(10, Math.max(3, m.split('\n').length + 1)) + '" maxlength="' + SINIR + '"'
+      + ' data-notum="' + kac(b) + '" aria-label="' + kac(o.baslik || 'Notum') + '"'
+      + ' placeholder="' + kac(o.ipucu || 'Kendi cümlelerinle yaz. Metinde bir yeri seçip «Nota ekle»ye basarak da ekleyebilirsin.') + '">'
+      + kac(m) + '</textarea></div>';
+  }
+
+  function durumYaz(baglam, metin){
+    if(typeof document === 'undefined') return;
+    document.querySelectorAll('[data-notum-kutu]').forEach(k => {
+      if(k.getAttribute('data-notum-kutu') !== String(baglam)) return;
+      const d = k.querySelector('[data-notum-durum]');
+      if(d) d.textContent = metin ? metin.length + ' / ' + SINIR + ' · kaydedildi' : 'kendiliğinden kaydedilir';
+      const t = k.querySelector('textarea');
+      if(t && t.value !== metin && document.activeElement !== t) t.value = metin;
+    });
+  }
+
+  function secimGoster(){
+    const d0 = document.getElementById('notum-ekle');
+    const sel = window.getSelection ? window.getSelection() : null;
+    const metin = sel ? String(sel).replace(/\s+/g, ' ').trim() : '';
+    const kap = sel && sel.anchorNode ? (sel.anchorNode.nodeType === 1 ? sel.anchorNode : sel.anchorNode.parentElement) : null;
+    const kaynak = kap && kap.closest ? kap.closest('[data-notum-kaynak]') : null;
+    if(!kaynak || metin.length < 3 || metin.length > 500 || sel.rangeCount === 0){ if(d0) d0.remove(); return; }
+    const r = sel.getRangeAt(0).getBoundingClientRect();
+    let d = d0;
+    if(!d){
+      d = document.createElement('button');
+      d.type = 'button'; d.id = 'notum-ekle'; d.className = 'notum-ekle'; d.textContent = 'Nota ekle';
+      d.addEventListener('mousedown', e => e.preventDefault());
+      d.addEventListener('click', async () => {
+        const b = d.dataset.baglam, s = d.dataset.metin;
+        d.remove();
+        const yeni = await ekle(b, '«' + s + '»');
+        if(yeni != null){
+          document.querySelectorAll('[data-notum="' + (window.CSS && CSS.escape ? CSS.escape(b) : b) + '"]').forEach(t => { t.value = yeni; });
+          durumYaz(b, yeni);
+        }
+        if(window.getSelection) window.getSelection().removeAllRanges();
+      });
+      document.body.appendChild(d);
+    }
+    d.dataset.baglam = kaynak.getAttribute('data-notum-kaynak');
+    d.dataset.metin = metin;
+    d.style.left = Math.max(8, Math.min(window.innerWidth - 120, r.left + r.width / 2 - 50)) + 'px';
+    d.style.top = Math.max(8, r.top - 44) + 'px';
+  }
+
+  function bagla(){
+    if(bagli || typeof document === 'undefined') return;
+    bagli = true;
+    document.addEventListener('input', e => {
+      const t = e.target && e.target.closest ? e.target.closest('[data-notum]') : null;
+      if(!t) return;
+      const b = t.getAttribute('data-notum');
+      clearTimeout(zaman.get(b));
+      zaman.set(b, setTimeout(async () => { const m = await yaz(b, t.value); durumYaz(b, m); }, 600));
+    });
+    document.addEventListener('mouseup', () => setTimeout(secimGoster, 0));
+    document.addEventListener('touchend', () => setTimeout(secimGoster, 250));
+    window.addEventListener('scroll', () => { const d = document.getElementById('notum-ekle'); if(d) d.remove(); }, { passive:true, capture:true });
+  }
+
+  function kur(o){
+    ayar = Object.assign({ modul:'' }, o || {});
+    bagla();
+  }
+
+  function _sifirla(){ ayar = null; notlar.clear(); }
+
+  return { SINIR, kur, yukle, oku, yaz, ekle, hepsi, kutuHtml, kuruluMu:() => !!ayar, _sifirla };
 })();
 
 /* ==== js/core/king.js ==== */
@@ -66447,19 +66651,19 @@ ESP.Parts = (function(){
           ${when(on, () => html`
             <div class="topic__detail">
               ${when(card && card.explanation, () => html`
-                <div class="p-8 mb-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+                <div class="ogrenme mb-8" data-notum-kaynak="${'konu:' + t.id}">
                   <p class="small mb-6" style="line-height:1.45">${card.explanation}</p>
                   ${when(card.worked_example && card.worked_example.text, () => html`
                     <div class="small text-2 mb-4">
                       <b>Örnek:</b> <i>${card.worked_example.text}</i>
                     </div>`)}
                   ${when(card.common_misinterpretation, () => html`
-                    <div class="tiny dim p-6 radius-xs" style="background:var(--surface-1);border-left:3px solid var(--primary)">
-                      <b>👁️ Dikkat / Yanlış Yorum:</b> ${card.common_misinterpretation}
+                    <div class="ogrenme__dikkat">
+                      <b>Sık yanlış yorum:</b> ${card.common_misinterpretation}
                     </div>`)}
                   ${when(card.practice && card.practice.prompt, () => html`
                     <div class="mt-6 pt-6" style="border-top:1px dashed var(--border)">
-                      <div class="tiny bold mb-2">✍️ Sınama & Pratik:</div>
+                      <b class="block mb-2">Pratik</b>
                       <p class="small mb-4">${card.practice.prompt}</p>
                       ${when(card.practice.expected_answer, () => html`
                         <details class="tiny dim"><summary>Beklenen yanıt ve ölçüt</summary>
@@ -66468,7 +66672,7 @@ ESP.Parts = (function(){
                     </div>`)}
                   ${when(card.transfer && card.transfer.prompt, () => html`
                     <div class="tiny dim mt-6">
-                      <b>🔄 Aktarım Görevi:</b> ${card.transfer.prompt}
+                      <b>Aktarım:</b> ${card.transfer.prompt}
                     </div>`)}
                 </div>`)}
               ${map(t.items, (it, i) => html`
@@ -66482,6 +66686,7 @@ ESP.Parts = (function(){
                   kademeyi değiştirmez.</span>
               </div>
               ${when(t.source, () => html`<p class="tiny dim mt-8">Kaynak: ${t.source}</p>`)}
+              ${raw(window.LIFEOS && window.LIFEOS.NOTUM ? window.LIFEOS.NOTUM.kutuHtml('konu:' + t.id, { baslik:'Bu konu için notum' }) : '')}
             </div>`)}
         </div>`;
     })}</div>`;
@@ -71743,7 +71948,7 @@ ESP.Screens.lang = (function(){
             const tr = g.texts['tr'] || '';
             const target = g.texts[dil] || g.texts['en'] || '';
             return html`
-              <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+              <div class="ogrenme">
                 <div class="small mb-2"><b>${l.label || dil}:</b> ${target}</div>
                 <div class="small text-2 dim"><b>TR:</b> ${tr}</div>
               </div>`;
@@ -73863,13 +74068,13 @@ ESP.Screens.ladder = (function(){
       subtitle: d.label + ' · ' + (p.tasks || []).length + ' uygulama görevi',
       wide: true,
       body: String(K.Stack([
-        html`<div class="p-10 radius-md bg-surface-2 mb-10" style="border:1px solid var(--border)">
+        html`<div class="ogrenme mb-10">
           <div class="tiny bold text-1 mb-4">📋 Kurgusal Senaryo:</div>
           <p class="small mb-4" style="line-height:1.5">${U.esc(p.scenario.text)}</p>
           <div class="tiny dim">${U.esc(p.scenario.origin)}</div>
         </div>`,
         html`<div class="stack-sm">${map(p.tasks, (t, idx) => html`
-          <div class="p-10 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+          <div class="ogrenme">
             <div class="row between gap-6 mb-4">
               <b class="small">Görev ${idx + 1}: ${U.esc(t.question)}</b>
             </div>
@@ -73882,7 +74087,7 @@ ESP.Screens.ladder = (function(){
               </div>`)}
             ${when(t.sample_answer, () => html`
               <details class="tiny dim"><summary>Örnek Çözüm & Cevap</summary>
-                <div class="p-6 mt-4 radius-xs bg-surface-1 text-1">${U.esc(t.sample_answer)}</div>
+                <div class="ogrenme__kutu mt-4">${U.esc(t.sample_answer)}</div>
               </details>`)}
           </div>`)}</div>`,
       ])),
@@ -73917,7 +74122,7 @@ ESP.Screens.ladder = (function(){
           <div class="stack-sm">${map(projs, p => {
             const d = discOf(p.discipline) || { label:p.discipline };
             return html`
-              <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+              <div class="ogrenme">
                 <div class="row between gap-8 mb-4">
                   <b class="small">${U.esc(p.title)}</b>
                   <span class="badge badge--muted tiny">${d.label} · ${(p.tasks || []).length} görev</span>
@@ -73941,7 +74146,7 @@ ESP.Screens.ladder = (function(){
             const d = discOf(o.discipline) || { label:o.discipline };
             const tone = o.depth === 'basit' ? 'ok' : (o.depth === 'orta' ? 'warn' : 'danger');
             return html`
-              <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+              <div class="ogrenme">
                 <div class="row between gap-6 mb-2">
                   <b class="small">${U.esc(o.title)}: ${U.esc(o.focus || '')}</b>
                   <span class="badge tiny badge--${tone}">${o.depth} · ${d.label}</span>
@@ -74370,7 +74575,7 @@ ESP.Screens.studio = (function(){
               options:ESP.SCALES.map(s => ({ value:s.id, label:s.label })) })}
           </div>
         </div>
-        <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+        <div class="ogrenme">
           <div class="row between gap-8 mb-6">
             <div>
               <b class="text-1">${rootTr} (${root}) ${scaleObj.label}</b>
@@ -74380,7 +74585,7 @@ ESP.Screens.studio = (function(){
           </div>
           <div class="row wrap gap-6 my-8">
             ${map(notlar, (n, idx) => html`
-              <div class="text-center p-6 radius-sm bg-surface-1" style="min-width:44px;border:1px solid var(--border)">
+              <div class="text-center ogrenme__kutu" style="min-width:44px">
                 <div class="tiny dim mb-2">${idx === 0 ? 'Kök (I)' : (idx + 1) + '. der'}</div>
                 <b class="small" style="color:var(--primary)">${n}</b>
                 <div class="tiny dim">${ESP.NOTE_TR[n] || n}</div>
@@ -76960,14 +77165,14 @@ ESP.Screens.analytics = (function(){
           <div class="stack-sm">${map(derinler, da => {
             const discName = (ESP.DISCIPLINE_BY_ID[da.discipline] || {}).label || da.discipline;
             return html`
-              <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+              <div class="ogrenme">
                 <div class="row between gap-8 mb-4">
                   <b class="small">${U.esc(da.title)}</b>
                   <span class="badge badge--muted tiny">${discName}</span>
                 </div>
                 <div class="small mb-6"><b>Karar Sırası:</b> ${(da.decision_order || []).join(' → ')}</div>
                 <div class="stack-xs mb-6">${map(da.cases || [], c => html`
-                  <div class="p-6 radius-xs bg-surface-1">
+                  <div class="ogrenme__kutu">
                     <div class="tiny bold text-1">${U.esc(c.name)}:</div>
                     <div class="tiny dim">${U.esc(c.condition)} → <span class="text-2">${U.esc(c.decision)}</span></div>
                   </div>`)}</div>
@@ -76987,14 +77192,14 @@ ESP.Screens.analytics = (function(){
           <div class="stack-sm">${map(rubler, rub => {
             const discName = (ESP.DISCIPLINE_BY_ID[rub.discipline] || {}).label || rub.discipline;
             return html`
-              <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+              <div class="ogrenme">
                 <div class="row between gap-8 mb-4">
                   <b class="small">${discName} Değerlendirme Rubriği</b>
                   <span class="badge badge--muted tiny">${(rub.dimensions || []).length} boyut</span>
                 </div>
                 <p class="tiny dim mb-6">${U.esc(rub.rule)}</p>
                 <div class="stack-xs">${map(rub.dimensions || [], dim => html`
-                  <div class="p-6 radius-xs bg-surface-1 mb-4">
+                  <div class="ogrenme__kutu mb-4">
                     <b class="tiny text-1">${U.esc(dim.name)}</b>
                     <div class="stack-xs mt-4">${map(dim.anchors || [], a => html`
                       <div class="tiny dim">
@@ -77010,7 +77215,7 @@ ESP.Screens.analytics = (function(){
         meta:kademeler.length + ' ipucu akışı',
         wide:true,
         body:html`<div class="stack-sm">${map(kademeler, kf => html`
-          <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+          <div class="ogrenme">
             <b class="small block mb-4">${U.esc(kf.title)}</b>
             <div class="tiny dim mb-2"><b>1. Seviye (Soru):</b> ${U.esc(kf.level_1_question)}</div>
             <div class="tiny dim mb-2"><b>2. Seviye (Kural):</b> ${U.esc(kf.level_2_rule)}</div>
@@ -81518,6 +81723,11 @@ ESP.App = (function(){
 
       wireStoreErrors();
       await M.loadAll();
+      /* NOTUM (brand/ortak/notum.js): öğrenme ekranlarında kendi notun; modülün deposunda. */
+      if(window.LIFEOS && window.LIFEOS.NOTUM){
+        window.LIFEOS.NOTUM.kur({ modul:'esp', store:{ set:(p, d) => ESP.Store.set(p, d), list:c => ESP.Store.list(c) } });
+        try{ await window.LIFEOS.NOTUM.yukle(); }catch(e){ /* notlar yüklenemedi; kutu boş başlar */ }
+      }
       /* «Üç sistemi bağla» (HKM yüzü): gizli çerçevede yalnız eşle ve dön;
          ekran çizilmez (core/beacon.js hkmBagla). */
       if(ESP.Beacon && ESP.Beacon.bagCagrisiMi()){ await ESP.Beacon.hkmBagla(); return; }
@@ -81549,7 +81759,7 @@ ESP.App = (function(){
             if(ESP.Screens && ESP.Screens.today && ESP.Screens.today.sesli) y.bugun = { metin:ESP.Screens.today.sesli(), gun:ESP.U.todayISO() };
             return y;
           },
-          yukle:() => M.loadAll(),
+          yukle:async () => { await M.loadAll(); if(window.LIFEOS && window.LIFEOS.NOTUM) await window.LIFEOS.NOTUM.yukle(); },
           yenile:() => {
             /* Profil sunucudan geldiyse kurulum sihirbazının işi kalmadı. */
             if(sihirbaz() && ESP.Setup && !ESP.Setup.needed()) UI.closeSheet();

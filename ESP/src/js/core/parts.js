@@ -483,19 +483,19 @@ ESP.Parts = (function(){
           ${when(on, () => html`
             <div class="topic__detail">
               ${when(card && card.explanation, () => html`
-                <div class="p-8 mb-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+                <div class="ogrenme mb-8" data-notum-kaynak="${'konu:' + t.id}">
                   <p class="small mb-6" style="line-height:1.45">${card.explanation}</p>
                   ${when(card.worked_example && card.worked_example.text, () => html`
                     <div class="small text-2 mb-4">
                       <b>Örnek:</b> <i>${card.worked_example.text}</i>
                     </div>`)}
                   ${when(card.common_misinterpretation, () => html`
-                    <div class="tiny dim p-6 radius-xs" style="background:var(--surface-1);border-left:3px solid var(--primary)">
-                      <b>👁️ Dikkat / Yanlış Yorum:</b> ${card.common_misinterpretation}
+                    <div class="ogrenme__dikkat">
+                      <b>Sık yanlış yorum:</b> ${card.common_misinterpretation}
                     </div>`)}
                   ${when(card.practice && card.practice.prompt, () => html`
                     <div class="mt-6 pt-6" style="border-top:1px dashed var(--border)">
-                      <div class="tiny bold mb-2">✍️ Sınama & Pratik:</div>
+                      <b class="block mb-2">Pratik</b>
                       <p class="small mb-4">${card.practice.prompt}</p>
                       ${when(card.practice.expected_answer, () => html`
                         <details class="tiny dim"><summary>Beklenen yanıt ve ölçüt</summary>
@@ -504,7 +504,7 @@ ESP.Parts = (function(){
                     </div>`)}
                   ${when(card.transfer && card.transfer.prompt, () => html`
                     <div class="tiny dim mt-6">
-                      <b>🔄 Aktarım Görevi:</b> ${card.transfer.prompt}
+                      <b>Aktarım:</b> ${card.transfer.prompt}
                     </div>`)}
                 </div>`)}
               ${map(t.items, (it, i) => html`
@@ -518,6 +518,7 @@ ESP.Parts = (function(){
                   kademeyi değiştirmez.</span>
               </div>
               ${when(t.source, () => html`<p class="tiny dim mt-8">Kaynak: ${t.source}</p>`)}
+              ${raw(window.LIFEOS && window.LIFEOS.NOTUM ? window.LIFEOS.NOTUM.kutuHtml('konu:' + t.id, { baslik:'Bu konu için notum' }) : '')}
             </div>`)}
         </div>`;
     })}</div>`;

@@ -743,18 +743,18 @@ SP.Screens.move = (function(){
       wide:true,
       body:String(K.Stack([
         /* 1. Bölüt: Biyometrik Kompozisyon */
-        html`<div class="card p-12 bg-surface-2" style="border:1px solid var(--border)">
+        html`<div class="ogrenme">
           <div class="row between items-center mb-6">
             <b class="small" style="color:var(--text)">1. Biyometrik Kompozisyon</b>
             <span class="badge badge--info">cert: estimated · photo</span>
           </div>
           <div class="cols-2 mb-8">
-            <div class="p-8 radius-sm bg-surface">
+            <div class="ogrenme__kutu">
               <span class="tiny dim" style="display:block">Tahmini BKİ</span>
               <div class="h2" style="margin:2px 0">${bk.bki != null ? bk.bki : (res.bki != null ? res.bki : '—')} <small class="small">${bk.kategori || res.kategori || ''}</small></div>
               <span class="tiny dim">Beden Tipi: <b>${bk.bedenTipi || res.bedenTipi || 'Dengeli'}</b></span>
             </div>
-            <div class="p-8 radius-sm bg-surface">
+            <div class="ogrenme__kutu">
               <span class="tiny dim" style="display:block">Tahmini Yağ Oranı Aralığı</span>
               <div class="h2" style="margin:2px 0">${bk.yagAralik || res.yagAralik || '—'}</div>
               ${when(bk.belKalca, () => html`<span class="tiny dim">Bel/Kalça: <b>${bk.belKalca}</b></span>`)}
@@ -768,7 +768,7 @@ SP.Screens.move = (function(){
         </div>`,
 
         /* 2. Bölüt: Postür Segmentasyonu */
-        html`<div class="card p-12 bg-surface-2" style="border:1px solid var(--border)">
+        html`<div class="ogrenme">
           <div class="row between items-center mb-6">
             <b class="small" style="color:var(--text)">2. Postür Segmentasyonu</b>
             <span class="badge badge--muted">bölgesel analiz</span>
@@ -783,7 +783,7 @@ SP.Screens.move = (function(){
         </div>`,
 
         /* 3. Bölüt: Düzeltici Hareket Reçetesi */
-        html`<div class="card p-12 bg-surface-2" style="border:1px solid var(--border)">
+        html`<div class="ogrenme">
           <div class="row between items-center mb-6">
             <b class="small" style="color:var(--text)">3. Düzeltici Hareket Reçetesi</b>
             <span class="badge badge--ok">mobilite & güç</span>
@@ -805,7 +805,7 @@ SP.Screens.move = (function(){
         </div>`,
 
         /* 4. Bölüt: Beslenme & Hidrasyon Köprüsü */
-        html`<div class="card p-12 bg-surface-2" style="border:1px solid var(--border)">
+        html`<div class="ogrenme">
           <div class="row between items-center mb-6">
             <b class="small" style="color:var(--text)">4. Beslenme & Hidrasyon Köprüsü</b>
             <span class="badge badge--muted">doku onarımı</span>
@@ -930,7 +930,7 @@ SP.Screens.move = (function(){
             </ol>
           </div>`),
         when(setup, () => html`
-          <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+          <div class="ogrenme">
             <b class="tiny dim" style="display:block;margin-bottom:2px">KURULUM VE GÜVENLİK KONTROLÜ</b>
             <p class="small mb-0">${U.esc(setup)}</p>
           </div>`),
@@ -952,7 +952,7 @@ SP.Screens.move = (function(){
       body: String(html`
         <div class="stack-sm">
           ${map(list, prog => html`
-            <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+            <div class="ogrenme">
               <div class="row between gap-8 mb-4">
                 <b class="small" style="color:var(--text)">${U.esc(prog.title)}</b>
                 <span class="tiny dim">${prog.focus || 'Genel kondisyon'}</span>
@@ -1010,7 +1010,7 @@ SP.Screens.move = (function(){
           ${map(list.slice(0, 15), r => {
             const kcal = Math.round(r.met * weight * (metMin / 60));
             return html`
-              <div class="row between gap-8 p-6 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+              <div class="row between gap-8 ogrenme__kutu">
                 <div class="minw0 grow">
                   <b class="small" style="display:block">${U.esc(r.description)}</b>
                   <span class="tiny dim">${(SP.MET_CATS || {})[r.category] || r.category} · MET ${r.met}</span>

@@ -769,7 +769,7 @@ SP.Screens.meals = (function(){
       title:'Akıllı Beslenme & Emilim Notları',
       sub:'Kanıta dayalı sporcu beslenmesi ve biyoyararlanım senaryoları',
       body:html`<div class="stack-sm">${map(list, s => html`
-        <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+        <div class="ogrenme">
           <div class="row between gap-6 mb-2">
             <b class="small" style="color:var(--text)">${s.situation}</b>
             <span class="tiny dim">Akıllı İlke</span>

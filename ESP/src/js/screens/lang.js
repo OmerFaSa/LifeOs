@@ -564,7 +564,7 @@ ESP.Screens.lang = (function(){
             const tr = g.texts['tr'] || '';
             const target = g.texts[dil] || g.texts['en'] || '';
             return html`
-              <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+              <div class="ogrenme">
                 <div class="small mb-2"><b>${l.label || dil}:</b> ${target}</div>
                 <div class="small text-2 dim"><b>TR:</b> ${tr}</div>
               </div>`;

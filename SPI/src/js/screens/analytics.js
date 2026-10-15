@@ -378,7 +378,7 @@ SP.Screens.analytics = (function(){
       sub:'Yük, adaptasyon ve toparlanma mekanizmaları',
       badge:K.Badge({ label:list.length + ' analiz', tone:'info' }),
       body:html`<div class="stack-sm">${map(list, a => html`
-        <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+        <div class="ogrenme">
           <div class="row between gap-8 mb-4">
             <b class="small" style="color:var(--text)">${U.esc(a.title)}</b>
             <span class="tiny dim">${a.category || 'Fizyoloji'}</span>
@@ -410,17 +410,19 @@ SP.Screens.analytics = (function(){
           ${map(filterTabs, t => K.Chip({ label:t.label, act:'an-kavram-tab', on:t.id === tab,
             data:{ 'data-tab':t.id } }))}
         </div>
-        <div class="stack-xs" style="max-height:360px;overflow-y:auto">
+        <div class="ogrenme-liste ogrenme-liste--kaydir" data-notum-kaynak="kavramlar">
           ${map(list, c => html`
-            <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+            <div class="ogrenme">
               <div class="row between gap-6 mb-2">
                 <b class="small">${U.esc(c.title)}</b>
-                <span class="badge badge--muted tiny">${c.content_depth}</span>
+                <span class="ogrenme__etiket">${({ basit:'Temel', orta:'Orta', ileri:'İleri' })[c.content_depth] || c.content_depth}</span>
               </div>
               <p class="small mb-4" style="line-height:1.4">${U.esc(c.definition)}</p>
               ${when(c.watch, () => html`<p class="tiny dim mb-0"><b>Dikkat:</b> ${U.esc(c.watch)}</p>`)}
             </div>`)}
-        </div>`,
+        </div>
+        ${raw(window.LIFEOS && window.LIFEOS.NOTUM ? window.LIFEOS.NOTUM.kutuHtml('kavramlar', { baslik:'Kavram notlarım',
+          ipucu:'Kendi cümlelerinle yaz. Yukarıda bir tanımı seçip «Nota ekle»ye basarak da ekleyebilirsin.' }) : '')}`,
     });
   }
 
@@ -430,7 +432,7 @@ SP.Screens.analytics = (function(){
       title:'Bilimsel Kanıt ve Referans Kartları',
       sub:'ACSM, NSCA, WHO ve CDC araştırma dayanakları',
       body:html`<div class="stack-xs" style="max-height:300px;overflow-y:auto">${map(list, k => html`
-        <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+        <div class="ogrenme">
           <div class="row between gap-6 mb-2">
             <b class="small">${U.esc(k.title)}</b>
             <span class="tiny dim">${k.source || 'Araştırma'}</span>

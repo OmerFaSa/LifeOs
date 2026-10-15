@@ -1528,6 +1528,11 @@ SP.App = (function(){
          kareler ilk çizimde hazır olsun. Açılamazsa kareler çizilmez. */
       const fotoHazir = SP.Foto ? SP.Foto.hazirla() : null;
       await M.loadAll();
+      /* NOTUM (brand/ortak/notum.js): öğrenme ekranlarında kendi notun; modülün deposunda. */
+      if(window.LIFEOS && window.LIFEOS.NOTUM){
+        window.LIFEOS.NOTUM.kur({ modul:'spi', store:{ set:(p, d) => SP.Store.set(p, d), list:c => SP.Store.list(c) } });
+        try{ await window.LIFEOS.NOTUM.yukle(); }catch(e){ /* notlar yüklenemedi; kutu boş başlar */ }
+      }
       /* «Üç sistemi bağla» (HKM yüzü): gizli çerçevede yalnız eşle ve dön;
          ekran çizilmez (core/beacon.js hkmBagla). */
       if(SP.Beacon && SP.Beacon.bagCagrisiMi()){ await SP.Beacon.hkmBagla(); return; }
@@ -1553,7 +1558,7 @@ SP.App = (function(){
             if(r && r.durum === 'onayda') window.LIFEOS.HESAP.cizIste(render);
             return r;
           },
-          yukle:() => M.loadAll(),
+          yukle:async () => { await M.loadAll(); if(window.LIFEOS && window.LIFEOS.NOTUM) await window.LIFEOS.NOTUM.yukle(); },
           yenile:() => {
             /* Profil sunucudan geldiyse kurulum sihirbazının işi kalmadı. */
             if(sihirbaz() && SP.Setup && !SP.Setup.needed()) UI.closeSheet();

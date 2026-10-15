@@ -467,14 +467,14 @@ ESP.Screens.analytics = (function(){
           <div class="stack-sm">${map(derinler, da => {
             const discName = (ESP.DISCIPLINE_BY_ID[da.discipline] || {}).label || da.discipline;
             return html`
-              <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+              <div class="ogrenme">
                 <div class="row between gap-8 mb-4">
                   <b class="small">${U.esc(da.title)}</b>
                   <span class="badge badge--muted tiny">${discName}</span>
                 </div>
                 <div class="small mb-6"><b>Karar Sırası:</b> ${(da.decision_order || []).join(' → ')}</div>
                 <div class="stack-xs mb-6">${map(da.cases || [], c => html`
-                  <div class="p-6 radius-xs bg-surface-1">
+                  <div class="ogrenme__kutu">
                     <div class="tiny bold text-1">${U.esc(c.name)}:</div>
                     <div class="tiny dim">${U.esc(c.condition)} → <span class="text-2">${U.esc(c.decision)}</span></div>
                   </div>`)}</div>
@@ -494,14 +494,14 @@ ESP.Screens.analytics = (function(){
           <div class="stack-sm">${map(rubler, rub => {
             const discName = (ESP.DISCIPLINE_BY_ID[rub.discipline] || {}).label || rub.discipline;
             return html`
-              <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+              <div class="ogrenme">
                 <div class="row between gap-8 mb-4">
                   <b class="small">${discName} Değerlendirme Rubriği</b>
                   <span class="badge badge--muted tiny">${(rub.dimensions || []).length} boyut</span>
                 </div>
                 <p class="tiny dim mb-6">${U.esc(rub.rule)}</p>
                 <div class="stack-xs">${map(rub.dimensions || [], dim => html`
-                  <div class="p-6 radius-xs bg-surface-1 mb-4">
+                  <div class="ogrenme__kutu mb-4">
                     <b class="tiny text-1">${U.esc(dim.name)}</b>
                     <div class="stack-xs mt-4">${map(dim.anchors || [], a => html`
                       <div class="tiny dim">
@@ -517,7 +517,7 @@ ESP.Screens.analytics = (function(){
         meta:kademeler.length + ' ipucu akışı',
         wide:true,
         body:html`<div class="stack-sm">${map(kademeler, kf => html`
-          <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+          <div class="ogrenme">
             <b class="small block mb-4">${U.esc(kf.title)}</b>
             <div class="tiny dim mb-2"><b>1. Seviye (Soru):</b> ${U.esc(kf.level_1_question)}</div>
             <div class="tiny dim mb-2"><b>2. Seviye (Kural):</b> ${U.esc(kf.level_2_rule)}</div>

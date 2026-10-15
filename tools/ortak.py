@@ -283,6 +283,10 @@ DOSYALAR = {
     "giris.js":       "js/core",
     "giris.css":      "css",
     "giris.test.js":  "tests",
+    # NOTUM — ogrenme ekranlarinda kendi notun ve ortak ogrenme yuzeyi (2026-10-16).
+    "notum.js":       "js/core",
+    "notum.css":      "css",
+    "notum.test.js":  "tests",
     # ZEMIN (kullanici, 2026-10-02) — yumusak renk zemini ve icerigin
     # arkasinda buzlu yuzey; <head>'de animasyon.js'ten SONRA (tasinan
     # tercihi okur), ilk cizimden once <html data-zemin> koyar.
