@@ -1872,6 +1872,9 @@ html .site--v5 > .kenar .kenar__arac:is(:hover, :focus-visible) .kenar__kisayol{
     transition-duration:1.2s; transition-timing-function:cubic-bezier(.32,.72,0,1); }
 }
 @media (prefers-reduced-motion:reduce){ .site--v5 > .kenar > *{ transition:none; } }
+/* King açılırken kenar HAREKETSİZ (king.js açar açmaz sakinleştirir): daralma
+   ve solma animasyonsuz olur; arkada kıpırdayan bir şey odağı dağıtmaz. */
+html.king-acik .site--v5 > .kenar, html.king-acik .site--v5 > .kenar *{ transition:none !important; animation:none !important; }
 
 /* ================================================================
    TASARIM TURU (2026-10-07, kullanıcı: «tasarımda geride kalan yerleri

@@ -844,6 +844,25 @@
       }finally{ K.kenarUyandir(); d.remove(); }
     });
 
+    /* Kullanıcı (2026-10-15): «King'e tıklıyorum, soldaki ayraç kapanıyor;
+       sistem bunu hareket sanıp odak kipinden çıkıyor». */
+    it('King açıkken kenar uyanmaz: fare kenarda gezse ve odak kenarda kalsa da sakin kalır', () => {
+      const d = yerlestir('<div class="site--v5">' + K.kenarCubugu({ modul:'ays', cekmeceler:[], profil:{ ad:'Ömer' } }) + '</div>');
+      const kok = document.documentElement;
+      try{
+        kok.classList.add('king-acik');
+        const dugme = d.querySelector('.kenar button');
+        dugme.focus();
+        expect(K.kenarSakinlestir()).toBe(true);                       // King'i açan düğmenin odağı sayılmaz
+        document.dispatchEvent(new PointerEvent('pointermove', { clientX:4, clientY:200, pointerType:'mouse', bubbles:true }));
+        dugme.dispatchEvent(new FocusEvent('focusin', { bubbles:true }));
+        expect(kok.classList.contains('kenar-sakin')).toBe(true);
+        kok.classList.remove('king-acik');
+        document.dispatchEvent(new PointerEvent('pointermove', { clientX:4, clientY:200, pointerType:'mouse', bubbles:true }));
+        expect(kok.classList.contains('kenar-sakin')).toBe(false);      // King kapanınca eski davranış
+      }finally{ kok.classList.remove('king-acik'); K.kenarUyandir(); d.remove(); }
+    });
+
     /* Tablet incelemesi (2026-10-05): dokunmatik tablette fare yok, «yaklaşınca
        netleşir» hiç olmaz; kenar birkaç saniye sonra kalıcı olarak soluk ve
        bulanık kalıyor, gezinme devre dışıymış gibi görünüyordu. Solma yalnız

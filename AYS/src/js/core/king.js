@@ -531,6 +531,9 @@ window.LIFEOS.KING = (function(){
     document.body.appendChild(el);
     document.documentElement.classList.add('king-acik');
     ciz();
+    /* Odak katmanı: soldaki kenar King'i açan tıkla uyanmış olabilir;
+       hareketsiz ve sakin kalır (kabuk.js «sakin kenar»). */
+    if(L.KABUK && typeof L.KABUK.kenarSakinlestir === 'function'){ try{ L.KABUK.kenarSakinlestir(); }catch(e){ /* kabuk yok */ } }
     /* Bir kare sonra: geçiş başlasın (ışık süzülür, baloncuk yükselir). */
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-acik')));
   }

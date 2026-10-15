@@ -1182,8 +1182,13 @@ window.LIFEOS = window.LIFEOS || {};
     });
     /* SAKİN KENAR: fare yaklaşınca, kenara odak gelince ya da klavyeyle
        gezinilince uyanır; kenardan ayrılınca SAKIN_MS sonra sakinleşir. */
+    /* King açıkken (html.king-acik) kenar UYANMAZ (kullanıcı, 2026-10-15:
+       «King'e tıklıyorum, soldaki ayraç kapanıyor; sistem bunu hareket
+       sanıp odak kipinden çıkıyor»). King bir odak katmanıdır: King'i
+       açan tık ve kenarın kapanışı «fare kenara geldi» sayılmaz. */
     document.addEventListener('pointermove', e => {
       if(e.pointerType && e.pointerType !== 'mouse') return;
+      if(kingAcik()) return;
       const k = document.querySelector('.site--v5 > .kenar');
       if(!k) return;
       const sag = k.getBoundingClientRect().right;
@@ -1191,6 +1196,7 @@ window.LIFEOS = window.LIFEOS || {};
       else if(sakinZaman == null && !document.documentElement.classList.contains('kenar-sakin')) sakinZamanla();
     }, { passive:true });
     document.addEventListener('focusin', e => {
+      if(kingAcik()) return;
       if(e.target && e.target.closest && e.target.closest('.kenar')) kenarUyandir();
     });
     document.addEventListener('focusout', e => {
@@ -1207,8 +1213,10 @@ window.LIFEOS = window.LIFEOS || {};
      Durum <html>'de: kenar her çizimde yeniden kurulur, işaret kaybolmaz. */
   const SAKIN_MS = 6000;
   let sakinZaman = null;
+  const kingAcik = () => typeof document !== 'undefined' && document.documentElement.classList.contains('king-acik');
+  /* King açıkken kenardaki eski fare/odak izi (King'i açan düğme) meşguliyet sayılmaz. */
   function kenarMesgul(){
-    return typeof document !== 'undefined'
+    return typeof document !== 'undefined' && !kingAcik()
       && !!document.querySelector('.kenar:hover, .kenar:focus-within, .kenar.kenar--tutulu');
   }
   function kenarSakinlestir(){
