@@ -69,7 +69,7 @@ kenardaki çekmeceler günün işine göre sıralanır:
 
 | Çekmece | Ekranlar | Ne işe yarar |
 |---|---|---|
-| **Bugün** | Bugün | Günün planı, sıradaki iş ve günün kaydı tek sayfada |
+| **Bugün** | Genel bakış | Günün planı, sıradaki iş ve günün kaydı tek sayfada |
 | **Plan** | Hafta · Program · Hedefler | Haftalık plan, bütün programın zaman çizgisi, hedef netler ve hedefe giden plan |
 | **Çalışma** | Konu çalış · Soru çöz · Deneme · Tekrar · Sınama | Konu takibi, fotoğraftan soru çözdürme, deneme kaydı ve analizi, aralıklı tekrar kartları, öz değerlendirme |
 | **Öğren** | Konular · Anlatım · Sorular · Koç · Ders notları | Konuları uygulamanın içinde öğrenme (aşağıda) |
@@ -119,7 +119,9 @@ kitapçığından çekersin; fotoğraf cihazında kalır. «Çöz» deyince mode
 tutmayan çözüm uyarıyla gösterilir. Sorunun konusu kapalı katalogdan
 «tahmin» etiketiyle gelir, elle düzeltebilirsin; tek dokunuşla hata kaydı ve
 tekrar kartı açılır, konu Öğren'de açılır. **Yayın karnesi** her yayında en
-çok kaçırdığın konuları ve bunların öteki yayınlara göre payını gösterir.
+çok kaçırdığın konuları ve bunların öteki yayınların denemelerine göre payını
+gösterir; karneye yalnız denemeye bağlı hatalar girer (Öğren, çıkmış soru ve
+test kitabı hataları karışmaz).
 
 **Ofis ve koç.** Ajanlar ücretsiz dil modeli uçlarına (kendi anahtarınla)
 bağlanabilir; model yokken de sohbet edilir. Ajanlar sayı uydurmaz: her sayı
@@ -128,17 +130,18 @@ kural motorundan gelir ve kesinlik etiketi taşır.
 ## SPİ — Sağlık Performans İzleyicisi
 
 Sağlığı ölçen, ölçüme göre öneren ve bunun bedelini hesaplayan sistem.
-Yedi bölüm:
+Çekmeceler:
 
-| Bölüm | Ne yapar |
-|---|---|
-| **Günlük** | Günün verisi girilir (uyku, öğün, hareket, ruh hâli); karşılığı aynı sayfada görünür |
-| **Testler** | Kapsamlı bir hastane testi tek seferde girilir; sonuçlar tek düz listede durur |
-| **Besin** | Öğünler ve Mutfak: bazal metabolizma, hedef ve tahlile bağlı öğün önerisi |
-| **Hareket** | Kardiyo, kuvvet, esneklik ve dinlenme ayrı alanlar; telefonda rota haritası ve canlı kayıt |
-| **Finans** | Koçların önerilerinden çıkan sağlık bütçesi |
-| **Ofis** | Patron ve dört koç: birbirleriyle konuşur, çelişkiyi patron çözer |
-| **Ayarlar** | Hane, profil, görünüm, veri, sınırlar |
+| Çekmece | Ekranlar | Ne yapar |
+|---|---|---|
+| **Bugün** | Genel bakış | Günün verisi girilir (uyku, öğün, hareket, ruh hâli); karşılığı aynı sayfada görünür |
+| **Plan** | Hedefler | Sağlık hedefleri ve hedefe giden plan |
+| **Çalışma** | Testler · Öğün · Mutfak · Hareket · Bütçe | Hastane testi tek seferde girilir; bazal metabolizma, hedef ve tahlile bağlı öğün önerisi; kardiyo, kuvvet, esneklik ve dinlenme ayrı alanlar (telefonda rota haritası ve canlı kayıt); koç önerilerinden çıkan sağlık bütçesi |
+| **Analiz** | Analiz | Ölçümlerin gidişatı ve kararın dayanağı |
+| **Onaylar** | Bekleyen | Koçların önerdiği değişiklikler; onaylanınca kod uygular |
+| **Ofis** | Masalar · Danışma · Toplantı | Patron ve dört koç: birbirleriyle konuşur, çelişkiyi patron çözer |
+| **Kütüphanem** | Bilgi ve ürünler | BAM'ın ürettikleri |
+| **Ayarlar** | Profil · Genel · Rütbe | Hane, profil, görünüm, veri, sınırlar |
 
 Kayıtlara küçük fotoğraflar eklenebilir; fotoğraflar çekildiği cihazda
 kalır. **SPİ teşhis koymaz ve ilaç dozu önermez**; eşiklerin nereden geldiği
@@ -146,19 +149,18 @@ kanıt katmanında yazılıdır.
 
 ## ESP — Entelektüel Seviye Planlayıcı
 
-Kişisel gelişimi disiplin disiplin planlayan sistem. Bölümler:
+Kişisel gelişimi disiplin disiplin planlayan sistem. Çekmeceler:
 
-| Bölüm | Ne yapar |
-|---|---|
-| **Günlük** | Bugün ve Merdiven: günün reçetesi, sayaç, seviye tespiti |
-| **Dil** | Dil Stüdyosu: aralıklı tekrar kartları, dilbilgisi, öğrenme |
-| **Felsefe** | Sempozyum: açık ve kapalı sorular, metinler, düşünce deneyleri |
-| **Ses** | Stüdyo: müzik, diksiyon, kulak eğitimi |
-| **Okuma** | Kütüphane: notlar, okuma matrisi, kaynaklar |
-| **Yazı** | Yazı Laboratuvarı: taslaklar, ölçüm, araçlar |
-| **Tarih** | Kronoloji: zaman şeridi, olaylar, kaynaklar, öğrenme |
-| **Ofis** | Dokuz ajanlı ekip: masalar, danışma, toplantı, analiz |
-| **Ayarlar** | Profil ve Rehber |
+| Çekmece | Ekranlar | Ne yapar |
+|---|---|---|
+| **Bugün** | Genel bakış | Günün pratiği girilir, karşılığı görünür |
+| **Plan** | Merdiven | Her disiplinde bir sonraki basamak, seviye tespiti |
+| **Çalışma** | Dil · Felsefe · Tarih · Ses · Okuma · Yazı | Dil Stüdyosu (aralıklı tekrar, dilbilgisi), Sempozyum (sorular, metinler, düşünce deneyleri), Kronoloji (zaman şeridi), Stüdyo (müzik, diksiyon, kulak eğitimi), Kütüphane (notlar, okuma matrisi), Yazı Laboratuvarı (taslak, ölçüm) |
+| **Analiz** | Analiz | Kararın dayanağı |
+| **Onaylar** | Bekleyen | Bekleyen öneriler |
+| **Ofis** | Masalar · Danışma · Toplantı | Patron, yedi uzman ve bir koç (dokuz ajan) |
+| **Kütüphanem** | Kütüphanem | BAM'ın ürettikleri |
+| **Ayarlar** | Profil · Genel · Rütbe | Profil, görünüm, veri ve rehber |
 
 Her disiplinin altında bir tezgâh durur: koç (yazılı ve sesli), harita,
 ekler, hatırlatma ve plan. Sistem kendini de denetler: kalibrasyon defteri
@@ -175,7 +177,7 @@ kütüphane). Kendi yüzü ve veritabanı vardır.
   etiketiyle; içerik gönderilmez.
 - **Çapraz bulgu:** hiçbir sistemin tek başına göremeyeceği bağlantılar (ör.
   uyku saati ile ertesi günün çözülen soru sayısı).
-- **Sohbet:** üst patron «King» ile konuşma.
+- **Sohbet:** üst patron «King» ile konuşma; her modülden Ctrl'e iki kez basınca açılır, yazarak ya da mikrofonla konuşulur, sesle sorulana cihazdaki Türkçe sesle cevap verir.
 - **Niyet kuyruğu:** HKM hiçbir modüle doğrudan yazmaz; teklif yazar, modül
   kendi koduyla uygular ya da reddeder.
 - **Yedek:** bağlıysa her modülün verisinin günde bir yedeği.
@@ -233,7 +235,7 @@ etkilemez**: plan, reçete, uyarı ya da öneri ona bakmaz; yalnız görünürl�
 ### Tasarım
 
 Üç arayüz aynı tasarım dilini kullanır: aynı kart, düğme ve tablo
-bileşenleri, altı renk paleti, açık ve koyu tema. Telefon (390 piksel) ve
+bileşenleri, tek renk paleti (kâğıt), açık ve koyu tema. Telefon (390 piksel) ve
 tablet düzeni, dokunma hedeflerinin boyu ve bütün paletlerde metin kontrastı
 denetim araçlarıyla ölçülür.
 
@@ -263,7 +265,7 @@ denetim araçlarıyla ölçülür.
   (`%LOCALAPPDATA%\LifeOS\hesap\`), HKM'ninki `HKM/db/` altında durur.
 - Hiçbiri git deposuna girmez; güncelleme verine dokunmaz.
 - Yedek almak için her sistemin ayarlarında (AYS'de **Genel**, SPİ'de
-  **Rehber**, ESP'de **Profil**): «Yedek al» · «Yedekten yükle». Hesap sayfasından bilgisayardaki kopyanın tamamı tek
+  **Genel**, ESP'de **Profil**): «Yedek al» · «Yedekten yükle». Hesap sayfasından bilgisayardaki kopyanın tamamı tek
   dosya olarak indirilebilir.
 
 ## Klasör düzeni
