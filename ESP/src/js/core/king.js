@@ -166,9 +166,12 @@ window.LIFEOS.KING = (function(){
       const s = sayfaBul(t);
       if(s) return { tur:'git', hedef:s, cevap:'Tamam.', kaynak:'komut' };
     }
-    if(ayar && ayar.veri && typeof ayar.veri.onizle === 'function'){
+    /* Veri kapısı: modülün verdiği, yoksa ortak giriş kapısı (giris.js). */
+    const veri = ayar && ayar.veri && typeof ayar.veri.onizle === 'function' ? ayar.veri
+      : (L.GIRIS && L.GIRIS.kaynak ? L.GIRIS.kaynak() : null);
+    if(veri){
       let p = null;
-      try{ p = ayar.veri.onizle(String(metin).trim()); }catch(e){ p = null; }
+      try{ p = veri.onizle(String(metin).trim()); }catch(e){ p = null; }
       if(p) return { tur:'veri', onizleme:p };
     }
     for(const n of NIYET){

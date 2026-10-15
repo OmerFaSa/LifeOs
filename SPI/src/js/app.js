@@ -1585,11 +1585,18 @@ SP.App = (function(){
                 v.water != null ? 'Su ' + U.fmtNum(Math.round(v.water / 100) / 10) + ' L' : null,
                 og ? og + ' öğün' : 'Öğün yok', dk ? dk + ' dk hareket' : null].filter(Boolean).join(' · ')];
           },
-          veri:{ onizle:t => {
+          /* Veri kapısı ortak giriş kapısıdır (aşağıda GIRIS.kur). */ });
+      }
+      /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
+         kapıyı kullanır; ayrıştırıcı SP.Quick (ölçüm, tahlil, hareket, öğün). */
+      if(window.LIFEOS && window.LIFEOS.GIRIS){
+        window.LIFEOS.GIRIS.kur({ modul:'spi',
+          onizle:t => {
             const p = SP.Quick && SP.Quick.parse(t);
             return p ? { metin:p.label, ipucu:p.hint, kaydet:async () => {
               const r = await SP.Quick.apply(p); render(); return r && r.text; } } : null;
-          } } });
+          },
+          ornekler:['uyku 7,5', '45 dk yürüyüş', '2 yumurta 1 çay', 'kilo 72'] });
       }
 
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).

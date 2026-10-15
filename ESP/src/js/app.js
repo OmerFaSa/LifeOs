@@ -1757,6 +1757,30 @@ ESP.App = (function(){
         window.LIFEOS.KING.kur({ modul:'esp', hkm:() => ESP.Beacon, git:route => go(route),
           ozet:() => [ESP.Screens.today.headline()] });
       }
+      /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
+         kapıyı kullanır; ayrıştırıcı ESP.Parse.parseSession («45 dk gitar»).
+         Önce Bugün'de ayrı bir «Konuşarak gir» formu vardı; King veri giremiyordu. */
+      if(window.LIFEOS && window.LIFEOS.GIRIS){
+        window.LIFEOS.GIRIS.kur({ modul:'esp',
+          onizle:t => {
+            const res = ESP.Parse.parseSession(t);
+            if(!res || !res.rows.length) return null;
+            const ad = r => (ESP.DISCIPLINE_BY_ID[r.disc] || {}).label || r.disc;
+            return {
+              metin:res.rows.map(r => ad(r) + ' ' + U.fmtMin(r.minutes)
+                + (r.count != null ? ' · ' + U.fmtNum(r.count) + ' ' + (r.countWhat || '') : '')).join(' · '),
+              ipucu:res.unmatched.length ? 'Kaydedilmeyecek: «' + res.unmatched.map(u => u.text).join('», «') + '»'
+                : 'Bugünün oturumu olarak yazılır.',
+              async kaydet(){
+                for(const r of res.rows) await ESP.Model.addSession(U.todayISO(), { disc:r.disc, minutes:r.minutes, count:r.count, note:'' });
+                if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
+                render();
+                return res.rows.length === 1 ? 'Oturum kaydedildi.' : res.rows.length + ' oturum kaydedildi.';
+              },
+            };
+          },
+          ornekler:['45 dk gitar', '20 dakika kelime', '30 dk felsefe okuması'] });
+      }
 
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).
 

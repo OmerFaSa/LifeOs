@@ -1,0 +1,38 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/giris.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GİRİŞ — tek satırda veri girme kutusu (brand/ortak/giris.js). Tek kaynak;
+   üç arayüze `tools/ortak.py --yay` ile kopyalanır. King'in yazı satırıyla
+   aynı dil: yuvarlak girdi, sağda mikrofon ve gönder; altında örnek çipleri,
+   önizleme kutunun içinde açılır. */
+.giris{ display:flex; flex-direction:column; gap:10px; padding:16px 18px; border-radius:16px;
+  background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); margin-bottom:14px; }
+.giris__satir{ display:flex; align-items:center; gap:8px; margin:0; flex-wrap:wrap; }
+.giris__etiket{ flex:0 0 100%; font-size:13px; font-weight:600; color:var(--text-2); }
+.giris__girdi{ flex:1 1 200px; min-width:0; height:44px; padding:0 16px; border-radius:22px; border:1px solid var(--border);
+  background:var(--surface-2); color:var(--text); font:inherit; font-size:15px; }
+.giris__girdi:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent); }
+.giris__gonder, .giris__mik{ flex:none; width:44px; height:44px; display:grid; place-items:center; padding:0; border:0; border-radius:50%; cursor:pointer;
+  transition:background .2s ease, transform .2s ease, color .2s ease; }
+.giris__gonder{ background:var(--text); color:var(--bg, #fff); }
+.giris__mik{ background:transparent; color:var(--text-2); }
+.giris__mik:hover{ background:var(--surface-2); color:var(--text); }
+.giris__mik.is-acik{ color:#fff; background:var(--danger, #e5484d); }
+.giris__gonder svg, .giris__mik svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:2.1; stroke-linecap:round; stroke-linejoin:round; }
+.giris__gonder:active, .giris__mik:active{ transform:scale(.94); }
+.giris__gonder:focus-visible, .giris__mik:focus-visible, .giris__ornek:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.giris__ornekler{ display:flex; flex-wrap:wrap; gap:6px; }
+.giris__ornek{ min-height:28px; padding:4px 11px; border-radius:999px; border:0; background:var(--surface-2); color:var(--text-2);
+  font:inherit; font-size:12.5px; cursor:pointer; }
+.giris__ornek:hover{ color:var(--text); }
+.giris__sonuc:empty{ display:none; }
+.giris__onizle{ display:flex; flex-direction:column; gap:4px; padding:12px 14px; border-radius:12px; background:var(--surface-2);
+  border-left:3px solid var(--primary); }
+.giris__onizle-ad{ font-size:12px; color:var(--text-2); }
+.giris__onizle b{ font-size:15px; line-height:1.45; }
+.giris__onizle small{ font-size:12.5px; color:var(--text-2); line-height:1.45; }
+.giris__dugmeler{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+.giris__mesaj{ margin:0; font-size:13.5px; line-height:1.5; }
+.giris__mesaj--ok{ color:var(--ok, var(--text)); }
+.giris__mesaj--uyari{ color:var(--text-2); }
+@media (prefers-reduced-motion:reduce){ .giris__gonder, .giris__mik{ transition:none; } }

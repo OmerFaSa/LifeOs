@@ -278,6 +278,11 @@ DOSYALAR = {
     "king.js":        "js/core",
     "king.css":       "css",
     "king.test.js":   "tests",
+    # GIRIS — tek satirda veri girme kapisi (2026-10-15): ayni kutu, ayni
+    # onizleme, ayni Kaydet/Vazgec uc arayuzde; King de bu kapiyi kullanir.
+    "giris.js":       "js/core",
+    "giris.css":      "css",
+    "giris.test.js":  "tests",
     # ZEMIN (kullanici, 2026-10-02) — yumusak renk zemini ve icerigin
     # arkasinda buzlu yuzey; <head>'de animasyon.js'ten SONRA (tasinan
     # tercihi okur), ilk cizimden once <html data-zemin> koyar.

@@ -14189,6 +14189,46 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 @keyframes king-dusun{ 0%, 80%, 100%{ opacity:.25; transform:translateY(0); } 40%{ opacity:1; transform:translateY(-3px); } }
 @media (prefers-reduced-motion:reduce){ .king__dusun i{ animation:none; opacity:.6; } }
 
+/* ==== css/giris.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/giris.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GİRİŞ — tek satırda veri girme kutusu (brand/ortak/giris.js). Tek kaynak;
+   üç arayüze `tools/ortak.py --yay` ile kopyalanır. King'in yazı satırıyla
+   aynı dil: yuvarlak girdi, sağda mikrofon ve gönder; altında örnek çipleri,
+   önizleme kutunun içinde açılır. */
+.giris{ display:flex; flex-direction:column; gap:10px; padding:16px 18px; border-radius:16px;
+  background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); margin-bottom:14px; }
+.giris__satir{ display:flex; align-items:center; gap:8px; margin:0; flex-wrap:wrap; }
+.giris__etiket{ flex:0 0 100%; font-size:13px; font-weight:600; color:var(--text-2); }
+.giris__girdi{ flex:1 1 200px; min-width:0; height:44px; padding:0 16px; border-radius:22px; border:1px solid var(--border);
+  background:var(--surface-2); color:var(--text); font:inherit; font-size:15px; }
+.giris__girdi:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent); }
+.giris__gonder, .giris__mik{ flex:none; width:44px; height:44px; display:grid; place-items:center; padding:0; border:0; border-radius:50%; cursor:pointer;
+  transition:background .2s ease, transform .2s ease, color .2s ease; }
+.giris__gonder{ background:var(--text); color:var(--bg, #fff); }
+.giris__mik{ background:transparent; color:var(--text-2); }
+.giris__mik:hover{ background:var(--surface-2); color:var(--text); }
+.giris__mik.is-acik{ color:#fff; background:var(--danger, #e5484d); }
+.giris__gonder svg, .giris__mik svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:2.1; stroke-linecap:round; stroke-linejoin:round; }
+.giris__gonder:active, .giris__mik:active{ transform:scale(.94); }
+.giris__gonder:focus-visible, .giris__mik:focus-visible, .giris__ornek:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.giris__ornekler{ display:flex; flex-wrap:wrap; gap:6px; }
+.giris__ornek{ min-height:28px; padding:4px 11px; border-radius:999px; border:0; background:var(--surface-2); color:var(--text-2);
+  font:inherit; font-size:12.5px; cursor:pointer; }
+.giris__ornek:hover{ color:var(--text); }
+.giris__sonuc:empty{ display:none; }
+.giris__onizle{ display:flex; flex-direction:column; gap:4px; padding:12px 14px; border-radius:12px; background:var(--surface-2);
+  border-left:3px solid var(--primary); }
+.giris__onizle-ad{ font-size:12px; color:var(--text-2); }
+.giris__onizle b{ font-size:15px; line-height:1.45; }
+.giris__onizle small{ font-size:12.5px; color:var(--text-2); line-height:1.45; }
+.giris__dugmeler{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+.giris__mesaj{ margin:0; font-size:13.5px; line-height:1.5; }
+.giris__mesaj--ok{ color:var(--ok, var(--text)); }
+.giris__mesaj--uyari{ color:var(--text-2); }
+@media (prefers-reduced-motion:reduce){ .giris__gonder, .giris__mik{ transition:none; } }
+
 /* ==== css/zemin.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/zemin.css içine yazılır; burası bir sonraki
@@ -16161,7 +16201,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'5879637b', at:'2026-10-15 19:54', dirty:true };
+R.BUILD = { id:'0ebf5b84', at:'2026-10-15 21:00', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -29387,6 +29427,233 @@ window.LIFEOS.HESAP = (function(){
   };
 })();
 
+/* ==== js/core/giris.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/giris.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* GİRİŞ — üç arayüzde tek satırda veri girme kapısı.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/giris.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Biçimi `giris.css`.
+   ==================================================================
+
+   Depo sahibi (2026-10-15): «veri girme, öğrenme yerleri gibi şeyleri de
+   daha kolay, daha anlaşılır arayüzler yap; genel sistem mimarisi
+   açısından, bütün modüllere uygula».
+
+   ÖNCE: her modülün kendi tek satır ayrıştırıcısı vardı (AYS core/komut.js,
+   SPİ core/quickentry.js, ESP core/parse.js) ama her biri başka bir yerden
+   ve başka biçimde açılıyordu: AYS'de yalnız Ctrl+K, SPİ'de Ctrl+K ve
+   yalnız öğün kutusu, ESP'de Bugün'de ayrı bir form; King de üçünde farklı.
+
+   ŞİMDİ TEK SÖZLEŞME: modül ayrıştırıcısını BİR KEZ bağlar —
+       GIRIS.kur({ modul, onizle(metin) → { metin, ipucu, kaydet() } | null, ornekler })
+   ve aynı kapıyı üç yer kullanır: Bugün'deki kutu (kutuHtml), King
+   (kaynak) ve modülün paleti. Kutu, önizleme kartı ve Kaydet/Vazgeç her
+   modülde AYNI görünür ve aynı davranır.
+
+   Sözler:
+     1. HİÇBİR ŞEY DOĞRUDAN KAYDEDİLMEZ. Yazılan önizlenir; «Kaydet»
+        denmeden depoya gitmez (modülün kaydet'i kendi koduyla yazar).
+     2. ANLAŞILMAYAN UYDURULMAZ (AGENTS §1.7). Ayrıştırıcı null dönerse
+        «anlayamadım» denir ve örnekler gösterilir; tahminle kayıt yok.
+     3. AYRIŞTIRICI MODÜLÜNDÜR. Bu dosya cümle anlamaz; yalnız kapıdır.
+        Sayıyı ve kararı modülün kodu üretir.
+     4. YAZARKEN ODAK KAYBOLMAZ. Önizleme ve sonuç kutunun içinde güncellenir;
+        sayfa baştan çizilmez. Mikrofon varsa söylenen kutuya yazılır.
+     5. MODÜL ONSUZ DA ÇALIŞIR. Kurulmadıysa kutu hiç çizilmez; King ve
+        palet kendi yollarıyla sürer. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.GIRIS = (function(){
+  'use strict';
+
+  const ortam = {
+    tanima:() => (typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition)) || null,
+  };
+
+  let ayar = null;           // { modul, onizle, ornekler }
+  let bekleyen = null;       // { yazilan, p }
+  let mesaj = null;          // { tur:'ok'|'uyari', metin }
+  let dinleyen = null;
+  let bagli = false;
+
+  function kac(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+
+  function onizle(metin){
+    if(!ayar || typeof ayar.onizle !== 'function') return null;
+    const t = String(metin || '').trim();
+    if(!t) return null;
+    try{
+      const p = ayar.onizle(t);
+      return p && typeof p.kaydet === 'function' ? p : null;
+    }catch(e){ console.error('Giriş: önizleme', e); return null; }
+  }
+
+  /* King ve palet için (söz 3): modülün kapısı. */
+  function kaynak(){ return ayar && typeof ayar.onizle === 'function' ? { onizle } : null; }
+
+  function sonucHtml(){
+    if(bekleyen){
+      const p = bekleyen.p;
+      return '<div class="giris__onizle" role="group" aria-label="Kaydedilecek">'
+        + '<span class="giris__onizle-ad">Şunu kaydedeyim mi?</span>'
+        + '<b>' + kac(p.metin) + '</b>'
+        + (p.ipucu ? '<small>' + kac(p.ipucu) + '</small>' : '')
+        + '<div class="giris__dugmeler">'
+        + '<button type="button" class="btn btn--sm btn--primary" data-giris="kaydet"><span class="btn__label">Kaydet</span></button>'
+        + '<button type="button" class="btn btn--sm btn--ghost" data-giris="vazgec"><span class="btn__label">Vazgeç</span></button>'
+        + '</div></div>';
+    }
+    if(mesaj) return '<p class="giris__mesaj giris__mesaj--' + mesaj.tur + '" role="status">' + kac(mesaj.metin) + '</p>';
+    return '';
+  }
+
+  function ornekHtml(){
+    const l = (ayar && ayar.ornekler) || [];
+    if(!l.length) return '';
+    return '<div class="giris__ornekler" role="group" aria-label="Örnekler">'
+      + l.map(o => '<button type="button" class="giris__ornek" data-giris-ornek="' + kac(o) + '">' + kac(o) + '</button>').join('')
+      + '</div>';
+  }
+
+  /* Bugün'deki kutu. Kurulmadıysa boş (söz 5). */
+  function kutuHtml(){
+    if(!ayar) return '';
+    bagla();
+    const mik = ortam.tanima()
+      ? '<button type="button" class="giris__mik' + (dinleyen ? ' is-acik' : '') + '" data-giris="mik" aria-pressed="'
+        + (dinleyen ? 'true' : 'false') + '" aria-label="Söyleyerek gir" title="Söyleyerek gir · tanımayı tarayıcı yapar">'
+        + '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3.5" width="6" height="11" rx="3"/>'
+        + '<path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>'
+      : '';
+    return '<div class="giris" data-giris-kutu data-modul="' + kac(ayar.modul || '') + '">'
+      + '<form class="giris__satir" data-giris-form data-ayar-disi>'
+      + '<label class="giris__etiket" for="giris-girdi">Ne yaptın?</label>'
+      + '<input class="giris__girdi" id="giris-girdi" type="text" autocomplete="off" enterkeyhint="send"'
+      + ' placeholder="Yaz ya da söyle; önce gösteririm, onaylarsan kaydederim"/>'
+      + mik
+      + '<button type="submit" class="giris__gonder" aria-label="Önizle"><svg viewBox="0 0 24 24" aria-hidden="true">'
+      + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button>'
+      + '</form>'
+      + ornekHtml()
+      + '<div class="giris__sonuc" data-giris-sonuc aria-live="polite">' + sonucHtml() + '</div>'
+      + '</div>';
+  }
+
+  function tazele(){
+    if(typeof document === 'undefined') return;
+    document.querySelectorAll('[data-giris-sonuc]').forEach(el => { el.innerHTML = sonucHtml(); });
+    document.querySelectorAll('.giris__mik').forEach(m => {
+      m.classList.toggle('is-acik', !!dinleyen);
+      m.setAttribute('aria-pressed', dinleyen ? 'true' : 'false');
+    });
+  }
+
+  function gonder(metin){
+    const t = String(metin || '').trim();
+    if(!t) return null;
+    const p = onizle(t);
+    if(p){ bekleyen = { yazilan:t, p }; mesaj = null; }
+    else{
+      bekleyen = null;
+      const o = (ayar && ayar.ornekler) || [];
+      mesaj = { tur:'uyari', metin:'Bunu anlayamadım; tahminle kaydetmiyorum.'
+        + (o.length ? ' Şöyle yazabilirsin: «' + o.slice(0, 3).join('», «') + '».' : '') };
+    }
+    tazele();
+    return p;
+  }
+
+  async function kaydet(){
+    const b = bekleyen;
+    if(!b) return null;
+    bekleyen = null;
+    let r = null;
+    try{
+      r = await b.p.kaydet();
+      mesaj = { tur:'ok', metin:(r && String(r)) || 'Kaydedildi.' };
+      const g = typeof document !== 'undefined' ? document.getElementById('giris-girdi') : null;
+      if(g) g.value = '';
+    }catch(e){
+      mesaj = { tur:'uyari', metin:'Kaydedilemedi: ' + ((e && e.message) || 'bilinmeyen hata') };
+    }
+    tazele();
+    return mesaj.metin;
+  }
+
+  function dinle(){
+    if(dinleyen){ try{ dinleyen.stop(); }catch(e){ /* kapalı */ } return; }
+    const T = ortam.tanima();
+    if(!T) return;
+    let r;
+    try{ r = new T(); }catch(e){ return; }
+    r.lang = 'tr-TR'; r.interimResults = true; r.continuous = false;
+    let son = '';
+    r.onresult = e => {
+      let t = '';
+      for(let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      son = t.trim();
+      const g = document.getElementById('giris-girdi');
+      if(g) g.value = son;
+    };
+    r.onerror = e => {
+      if(e && (e.error === 'not-allowed' || e.error === 'service-not-allowed')){
+        mesaj = { tur:'uyari', metin:'Mikrofon izni verilmedi; yazarak da girebilirsin.' };
+      }
+    };
+    r.onend = () => { dinleyen = null; tazele(); if(son) gonder(son); };
+    dinleyen = r;
+    try{ r.start(); }catch(e){ dinleyen = null; }
+    tazele();
+  }
+
+  function bagla(){
+    if(bagli || typeof document === 'undefined') return;
+    bagli = true;
+    document.addEventListener('submit', e => {
+      const f = e.target && e.target.closest ? e.target.closest('[data-giris-form]') : null;
+      if(!f) return;
+      e.preventDefault();
+      const g = f.querySelector('.giris__girdi');
+      gonder(g ? g.value : '');
+    });
+    document.addEventListener('click', e => {
+      const t = e.target && e.target.closest ? e.target : null;
+      if(!t) return;
+      const o = t.closest('[data-giris-ornek]');
+      if(o){
+        const g = document.getElementById('giris-girdi');
+        if(g){ g.value = o.getAttribute('data-giris-ornek'); try{ g.focus(); }catch(err){ /* odak yok */ } }
+        return;
+      }
+      const d = t.closest('[data-giris]');
+      if(!d) return;
+      const is = d.getAttribute('data-giris');
+      if(is === 'kaydet'){ e.preventDefault(); kaydet(); }
+      else if(is === 'vazgec'){ e.preventDefault(); bekleyen = null; mesaj = null; tazele(); }
+      else if(is === 'mik'){ e.preventDefault(); dinle(); }
+    });
+  }
+
+  /* Modülün tek çağrısı (app.js). */
+  function kur(o){
+    ayar = Object.assign({ modul:'', ornekler:[] }, o || {});
+    bagla();
+  }
+
+  function _sifirla(){ ayar = null; bekleyen = null; mesaj = null; dinleyen = null; }
+
+  return { kur, kaynak, onizle, kutuHtml, gonder, kaydet, kuruluMu:() => !!ayar,
+    durum:() => ({ bekleyen:bekleyen ? bekleyen.p.metin : null, mesaj:mesaj ? mesaj.metin : null }),
+    _ortam:ortam, _sifirla };
+})();
+
 /* ==== js/core/king.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/king.js içine yazılır; burası bir sonraki
@@ -29556,9 +29823,12 @@ window.LIFEOS.KING = (function(){
       const s = sayfaBul(t);
       if(s) return { tur:'git', hedef:s, cevap:'Tamam.', kaynak:'komut' };
     }
-    if(ayar && ayar.veri && typeof ayar.veri.onizle === 'function'){
+    /* Veri kapısı: modülün verdiği, yoksa ortak giriş kapısı (giris.js). */
+    const veri = ayar && ayar.veri && typeof ayar.veri.onizle === 'function' ? ayar.veri
+      : (L.GIRIS && L.GIRIS.kaynak ? L.GIRIS.kaynak() : null);
+    if(veri){
       let p = null;
-      try{ p = ayar.veri.onizle(String(metin).trim()); }catch(e){ p = null; }
+      try{ p = veri.onizle(String(metin).trim()); }catch(e){ p = null; }
       if(p) return { tur:'veri', onizleme:p };
     }
     for(const n of NIYET){
@@ -88131,6 +88401,7 @@ R.Screens.today = (function(){
     return html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
+          ${raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '')}
           ${when(acil, () => acil.kart)}
           ${R.Setup.needed() ? raw(R.Setup.card()) : html`<div class="kahraman" data-oz="042">${NextUpCard()}</div>`}
           ${when(runningBlock(), () => html`<div id="geri-sayim" class="bugun__vitrin">${raw(geriSayimHtml(runningBlock()))}</div>`)}
@@ -104663,9 +104934,15 @@ R.App = (function(){
             }catch(e){ /* özetin ek satırları düşer, ilk cümle kalır */ }
             return s;
           },
-          /* Önce «not: …» (core/konunotu.js), sonra veri cümlesi (paletle aynı
-             ayrıştırıcı): ikisi de önizlenir, «Kaydet»le yazılır. */
-          veri:{ onizle:t => (R.KonuNotu && R.KonuNotu.onizle(t)) || (R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null) } });
+          /* Veri kapısı ortak giriş kapısıdır (aşağıda GIRIS.kur). */ });
+      }
+      /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
+         kapıyı kullanır. Önce «not: …» (core/konunotu.js), sonra veri cümlesi
+         (core/komut.js; paletle aynı): önizlenir, «Kaydet»le yazılır. */
+      if(window.LIFEOS && window.LIFEOS.GIRIS){
+        window.LIFEOS.GIRIS.kur({ modul:'ays',
+          onizle:t => (R.KonuNotu && R.KonuNotu.onizle(t)) || (R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null),
+          ornekler:['matematikten 40 soru çözdüm', '12 paragraf yaptım', '7 saat uyudum', 'not: üslülerde tabanlar aynıysa üsler toplanır'] });
       }
 
       /* YARIM KALMIŞ SÜRELİ OTURUM — diskten geri alınır.

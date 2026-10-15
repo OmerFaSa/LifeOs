@@ -1636,9 +1636,15 @@ R.App = (function(){
             }catch(e){ /* özetin ek satırları düşer, ilk cümle kalır */ }
             return s;
           },
-          /* Önce «not: …» (core/konunotu.js), sonra veri cümlesi (paletle aynı
-             ayrıştırıcı): ikisi de önizlenir, «Kaydet»le yazılır. */
-          veri:{ onizle:t => (R.KonuNotu && R.KonuNotu.onizle(t)) || (R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null) } });
+          /* Veri kapısı ortak giriş kapısıdır (aşağıda GIRIS.kur). */ });
+      }
+      /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
+         kapıyı kullanır. Önce «not: …» (core/konunotu.js), sonra veri cümlesi
+         (core/komut.js; paletle aynı): önizlenir, «Kaydet»le yazılır. */
+      if(window.LIFEOS && window.LIFEOS.GIRIS){
+        window.LIFEOS.GIRIS.kur({ modul:'ays',
+          onizle:t => (R.KonuNotu && R.KonuNotu.onizle(t)) || (R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null),
+          ornekler:['matematikten 40 soru çözdüm', '12 paragraf yaptım', '7 saat uyudum', 'not: üslülerde tabanlar aynıysa üsler toplanır'] });
       }
 
       /* YARIM KALMIŞ SÜRELİ OTURUM — diskten geri alınır.

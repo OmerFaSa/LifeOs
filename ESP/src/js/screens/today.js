@@ -848,8 +848,9 @@ ESP.Screens.today = (function(){
     return html`<div class="bugun" data-oz="003">
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
+          ${raw(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu() ? window.LIFEOS.GIRIS.kutuHtml() : '')}
           ${nextCard()}
-          ${K.Ledger(() => [quickForm(), signalRow()].filter(Boolean))}
+          ${K.Ledger(() => [(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu()) ? null : quickForm(), signalRow()].filter(Boolean))}
         </section>
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
           ${K.Ledger(() => [sessionList(), planRowToday()].filter(Boolean))}

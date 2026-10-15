@@ -252,10 +252,11 @@ async function walkFlows(page, base, errors){
   /* 1 — serbest metinden oturum. Iki disiplin, tek cumle. */
   await page.evaluate(() => ESP.App.go('today'));
   await wait(300);
-  await page.fill('#quick-text', '45 dakika gitar çalıştım ve 20 dakika kelime tekrarı yaptım');
-  await page.click('[data-act="parse-quick"]');
+  /* Ortak tek satır kutusu (brand/ortak/giris.js): önizle, sonra Kaydet. */
+  await page.fill('#giris-girdi', '45 dakika gitar çalıştım ve 20 dakika kelime tekrarı yaptım');
+  await page.click('.giris__gonder');
   await wait(300);
-  await page.click('[data-act="save-quick"]');
+  await page.click('[data-giris="kaydet"]');
   await wait(400);
   const oturum = await page.evaluate(() => ESP.Model.sessionsOf(ESP.U.todayISO()).length);
   if(oturum !== 2) errors.push('oturum akışı: 2 oturum bekleniyordu, ' + oturum + ' geldi');
