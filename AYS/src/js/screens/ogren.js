@@ -428,6 +428,80 @@ R.Screens = R.Screens || {};
     });
   }
 
+  /* NOTUM (core/konunotu.js): konuyu okurken kendi notun. Konu durumunun
+     `note` alanıdır; yazınca kendiliğinden kaydolur. Anlatımda bir cümleyi
+     seçince çıkan «Nota ekle» onu sona ekler; «ön :: arka» satırları
+     «Kartlara çevir» ile tekrar kartı olur. */
+  function kartDugmeEtiketi(n){ return n ? 'Kartlara çevir (' + n + ')' : 'Kartlara çevir'; }
+  function notumKarti(subject, topic){
+    const N = R.KonuNotu;
+    if(!N) return '';
+    const metin = N.oku(subject.id, topic.id);
+    const n = N.kartAdaylari(metin).length;
+    return K.Card({ title:'Notum', sub:'kendiliğinden kaydedilir · Dersler › konuda da görünür',
+      actions:K.Button({ label:kartDugmeEtiketi(n), icon:'cards', size:'sm', tone:'ghost', act:'konu-notu-kart',
+        data:{ id:'konu-notu-kart' }, disabled:!n, title:'«ön :: arka» biçimindeki satırlar tekrar kartı olur' }),
+      body:html`<textarea class="input konu-notu" id="konu-notu" rows="${Math.min(14, Math.max(4, metin.split('\n').length + 1))}"
+          maxlength="${N.SINIR}" data-change="konu-notu" data-debounce="600" aria-label="${topic.name + ' konusu için notum'}"
+          placeholder="Kendi cümlelerinle yaz. İpucu: anlatımda bir cümleyi seç, «Nota ekle»ye bas. «Zincir kuralı :: dıştakinin türevi × içtekinin türevi» gibi satırlar tekrar kartı olur.">${metin}</textarea>
+        <p class="tiny dim mt-6 mb-0" id="konu-notu-durum" aria-live="polite">${metin ? metin.length + ' / ' + N.SINIR + ' karakter' : 'Henüz not yok.'}</p>` });
+  }
+
+  /* Anlatımda seçili metin → «Nota ekle» (belge düzeyinde BİR KEZ bağlanır). */
+  let secimBagli = false;
+  function secimiBagla(){
+    if(secimBagli || typeof document === 'undefined') return;
+    secimBagli = true;
+    const dugme = () => document.getElementById('nota-ekle');
+    const gizle = () => { const d = dugme(); if(d) d.remove(); };
+    const goster = () => {
+      const sel = window.getSelection ? window.getSelection() : null;
+      const metin = sel ? String(sel).replace(/\s+/g, ' ').trim() : '';
+      const ders = document.querySelector('article.ders');
+      if(!sel || sel.rangeCount === 0 || metin.length < 3 || metin.length > 500 || !ders
+        || !ders.contains(sel.anchorNode) || !document.getElementById('konu-notu')){ gizle(); return; }
+      const r = sel.getRangeAt(0).getBoundingClientRect();
+      let d = dugme();
+      if(!d){
+        d = document.createElement('button');
+        d.type = 'button'; d.id = 'nota-ekle'; d.className = 'nota-ekle';
+        d.textContent = 'Nota ekle';
+        d.addEventListener('mousedown', e => e.preventDefault());   // seçim kaybolmasın
+        d.addEventListener('click', async () => {
+          const x = O().secili();
+          const s = d.dataset.metin || '';
+          gizle();
+          if(!x.topic || !s) return;
+          const yeni = await R.KonuNotu.ekle(x.subject.id, x.topic.id, '«' + s + '»');
+          const kutu = document.getElementById('konu-notu');
+          if(kutu && yeni != null){ kutu.value = yeni; notDurumu(yeni); }
+          if(window.getSelection) window.getSelection().removeAllRanges();
+          UI.toast('Nota eklendi');
+        });
+        document.body.appendChild(d);
+      }
+      d.dataset.metin = metin;
+      d.style.left = Math.max(8, Math.min(window.innerWidth - 120, r.left + r.width / 2 - 50)) + 'px';
+      d.style.top = Math.max(8, r.top - 44) + 'px';
+    };
+    document.addEventListener('mouseup', () => setTimeout(goster, 0));
+    document.addEventListener('touchend', () => setTimeout(goster, 250));
+    document.addEventListener('keyup', e => { if(e.shiftKey || e.key === 'Shift') goster(); });
+    window.addEventListener('scroll', gizle, { passive:true, capture:true });
+  }
+  function notDurumu(metin){
+    const N = R.KonuNotu;
+    const p = document.getElementById('konu-notu-durum');
+    if(p) p.textContent = metin ? metin.length + ' / ' + N.SINIR + ' karakter · kaydedildi' : 'Henüz not yok.';
+    const b = document.getElementById('konu-notu-kart');
+    if(b){
+      const n = N.kartAdaylari(metin).length;
+      b.disabled = !n;
+      const e = b.querySelector('.btn__label') || b;
+      e.textContent = kartDugmeEtiketi(n);
+    }
+  }
+
   /* VİDEOLAR VE NOTLAR — bu konuya bağlı dersler (screens/learn.js'in
      kaydı, S.videoNotes). Kullanıcı (2026-10-10): «o konuya video URL'si
      koyabilelim». Video burada bağlanır, Öğrenme'de gömülü oynatıcıyla
@@ -556,6 +630,7 @@ R.Screens = R.Screens || {};
       return String(K.Grid([K.Span(12, K.Stack([
         raw(konuCubugu(x)),
         anlatimKarti(x),
+        notumKarti(x.subject, x.topic),
         parAnlatimKarti(x.topic),
         cikmisKarti(x.subject, x.topic),
         notlarKarti(x.subject, x.topic),
@@ -718,8 +793,26 @@ R.Screens = R.Screens || {};
           footer:String(K.Button({ label:'Kapat', act:'sheet-close' }))
         });
       },
+      async 'konu-notu-kart'(){
+        const x = O().secili();
+        if(!x.topic) return;
+        /* Bekleyen yazım (gecikmeli kayıt) önce diske: kart son metinden açılır. */
+        const kutu = document.getElementById('konu-notu');
+        if(kutu) await R.KonuNotu.yaz(x.subject.id, x.topic.id, kutu.value);
+        const r = await R.KonuNotu.kartlaraCevir(x.subject.id, x.topic.id);
+        UI.toast(r.acilan ? r.acilan + ' tekrar kartı açıldı' + (r.vardi ? ' · ' + r.vardi + ' tanesi zaten vardı' : '')
+          : r.vardi ? 'Bu satırların kartı zaten var' : '«ön :: arka» biçiminde satır yok');
+      },
     }),
-    change:Object.assign({}, ortakChange),
+    change:Object.assign({}, ortakChange, {
+      async 'konu-notu'(el){
+        const x = O().secili();
+        if(!x.topic) return;
+        const m = await R.KonuNotu.yaz(x.subject.id, x.topic.id, el.value);
+        notDurumu(m);
+      },
+    }),
+    afterRender(){ secimiBagla(); },
     malzemeler, etiketOf,
   };
 

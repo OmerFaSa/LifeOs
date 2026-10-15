@@ -2675,6 +2675,12 @@ body.is-dragging .drop.is-over{
 .ogr-tablo thead th, .site--v5 .ogr-tablo thead th{ font-weight:600; }
 .ogr-tablo tbody tr:last-child :is(td, th){ border-bottom:1px solid var(--border); }
 .ogr-tablo tbody tr:hover :is(td, th){ background:none; }
+/* Notum (core/konunotu.js) ve seçili metinden «Nota ekle». */
+.konu-notu{ width:100%; min-height:96px; resize:vertical; font:inherit; font-size:15px; line-height:1.55; }
+.nota-ekle{ position:fixed; z-index:60; padding:7px 12px; border:0; border-radius:999px; font:inherit; font-size:13px; font-weight:600;
+  color:#fff; background:var(--text); box-shadow:0 6px 18px rgba(0,0,0,.18); cursor:pointer; }
+.nota-ekle:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
 /* Çıkmış soru satırı: künye, durum ve harfler alt alta. */
 .cikmis .grow > span{ display:block; }
 .cikmis.is-dogru .strong{ color:var(--ok); }

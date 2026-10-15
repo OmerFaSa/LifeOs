@@ -405,6 +405,9 @@ R.Palette = (function(){
     /* Veri girisi HER ZAMAN en ustte: Enter'a basan onu bekler. */
     const veri = veriKomutu(q);
     if(veri) items = [veri].concat(items).slice(0, 40);
+    /* «not: …» — Öğren'de seçili konunun notuna (core/konunotu.js). */
+    const not = R.KonuNotu ? R.KonuNotu.paletKomutu(q) : null;
+    if(not) items = [not].concat(items).slice(0, 40);
     active = Math.min(active, Math.max(0, items.length-1));
 
     const list = document.getElementById('cmdk-list');

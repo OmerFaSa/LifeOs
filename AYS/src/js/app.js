@@ -1623,7 +1623,9 @@ R.App = (function(){
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'ays', hkm:() => R.Beacon, git:route => go(route),
-          ozet:() => [R.Screens.today.headline()] });
+          ozet:() => [R.Screens.today.headline()],
+          /* «not: …» önizlenir, «Kaydet»le seçili konunun notuna eklenir (core/konunotu.js). */
+          veri:{ onizle:t => (R.KonuNotu ? R.KonuNotu.onizle(t) : null) } });
       }
 
       /* YARIM KALMIŞ SÜRELİ OTURUM — diskten geri alınır.

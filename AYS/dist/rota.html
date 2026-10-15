@@ -4135,6 +4135,12 @@ body.is-dragging .drop.is-over{
 .ogr-tablo thead th, .site--v5 .ogr-tablo thead th{ font-weight:600; }
 .ogr-tablo tbody tr:last-child :is(td, th){ border-bottom:1px solid var(--border); }
 .ogr-tablo tbody tr:hover :is(td, th){ background:none; }
+/* Notum (core/konunotu.js) ve seçili metinden «Nota ekle». */
+.konu-notu{ width:100%; min-height:96px; resize:vertical; font:inherit; font-size:15px; line-height:1.55; }
+.nota-ekle{ position:fixed; z-index:60; padding:7px 12px; border:0; border-radius:999px; font:inherit; font-size:13px; font-weight:600;
+  color:#fff; background:var(--text); box-shadow:0 6px 18px rgba(0,0,0,.18); cursor:pointer; }
+.nota-ekle:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
 /* Çıkmış soru satırı: künye, durum ve harfler alt alta. */
 .cikmis .grow > span{ display:block; }
 .cikmis.is-dogru .strong{ color:var(--ok); }
@@ -16155,7 +16161,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'ac18086b', at:'2026-10-15 18:20', dirty:true };
+R.BUILD = { id:'881ffeae', at:'2026-10-15 19:34', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -67228,6 +67234,121 @@ R.Ogren = (function(){
     kavramlar, akilliNot, kaynaklar, stratejiler };
 })();
 
+/* ==== js/core/konunotu.js ==== */
+/* KONU NOTU — konuyu okurken kendi notun (topics.states[konu].note).
+
+   Kullanıcı (2026-10-15): «öğrenmeyi, not etmeyi ve her şeyi daha kolay
+   yapabilmek için sistemi geliştir». Konu notu alanı zaten vardı ama
+   yalnız Dersler › konu penceresinde, ayrı bir formla yazılıyordu. Bu dosya
+   AYNI alanı her yerden kolay kılar; yeni bir kayıt türü açmaz.
+
+   Sözler:
+     1. TEK ALAN. Not, konu durumunun `note` alanıdır (core/state.js); konu
+        penceresi, Anlatım, King ve komut paleti aynı metni yazar ve okur.
+        Eşitleme ve yedek o alanla zaten gelir.
+     2. EKLEMEK EZMEZ. «Nota ekle» (seçili cümle, King, palet) metnin SONUNA
+        yeni satır ekler; var olan not silinmez. Not en çok SINIR karakter.
+     3. HEDEF SÖYLENİR. King ve palet notu hangi konuya ekleyeceğini önizlemede
+        yazar (Öğren'de seçili konu); kullanıcı görmeden yazılmaz.
+     4. KART YALNIZ İSTENİNCE. «ön :: arka» satırları tekrar kartı ADAYIdır;
+        «Kartlara çevir» denince açılır. Aynı konudan aynı ön yüzlü kart ikinci
+        kez açılmaz. Not bir ölçüm değildir; hiçbir sayıyı değiştirmez. */
+
+window.R = window.R || {};
+
+R.KonuNotu = (function(){
+  const SINIR = 4000;
+  const KAYNAK = 'konunotu';
+  const O = () => R.Ogren;
+  const M = () => R.Model;
+
+  function oku(subjectId, topicId){
+    return String((M().topicState(subjectId, topicId) || {}).note || '');
+  }
+
+  async function yaz(subjectId, topicId, metin){
+    const m = String(metin == null ? '' : metin).replace(/\r\n/g, '\n').slice(0, SINIR);
+    await M().setTopicState(subjectId, topicId, { note:m });
+    return m;
+  }
+
+  /* Söz 2: sona yeni satır. Döner: yeni metin ya da null (boş satır). */
+  async function ekle(subjectId, topicId, satir){
+    const s = String(satir || '').replace(/\s+/g, ' ').trim();
+    if(!s) return null;
+    const eski = oku(subjectId, topicId).replace(/\s+$/, '');
+    return yaz(subjectId, topicId, eski ? eski + '\n' + s : s);
+  }
+
+  /* Söz 4: «ön :: arka» satırları. */
+  function kartAdaylari(metin){
+    return String(metin || '').split('\n').map(l => {
+      const m = l.match(/^\s*(.+?)\s*::\s*(.+?)\s*$/);
+      return m ? { on:m[1].slice(0, 300), arka:m[2].slice(0, 600) } : null;
+    }).filter(Boolean);
+  }
+
+  function mevcutOnler(topicId){
+    const ref = KAYNAK + ':' + topicId;
+    return new Set((R.S.cards || []).filter(c => c.sourceRef === ref).map(c => String(c.front).trim()));
+  }
+
+  /* Döner: { acilan, vardi }. */
+  async function kartlaraCevir(subjectId, topicId){
+    const k = O().bul(subjectId, topicId);
+    const ad = k && k.topic ? k.topic.name : '';
+    const var_ = mevcutOnler(topicId);
+    let acilan = 0, vardi = 0;
+    for(const a of kartAdaylari(oku(subjectId, topicId))){
+      if(var_.has(a.on)){ vardi++; continue; }
+      await M().saveCard(M().newCard({ front:a.on, back:a.arka, topic:ad, subjectId,
+        source:KAYNAK, sourceRef:KAYNAK + ':' + topicId }));
+      var_.add(a.on);
+      acilan++;
+    }
+    return { acilan, vardi };
+  }
+
+  /* Söz 3: Öğren'de seçili konu. */
+  function hedef(){
+    const x = O() && O().secili ? O().secili() : null;
+    return x && x.topic ? x : null;
+  }
+
+  const NOT_KALIBI = /^\s*not\s*[:：]\s*(.+)$/i;
+
+  /* King'in veri önizlemesi (brand/ortak/king.js söz 3). */
+  function onizle(metin){
+    const m = String(metin || '').match(NOT_KALIBI);
+    if(!m) return null;
+    const h = hedef();
+    if(!h) return null;
+    const satir = m[1].trim();
+    return {
+      metin:'Not: ' + satir,
+      ipucu:'«' + h.topic.name + '» konusunun notuna eklenir',
+      async kaydet(){
+        await ekle(h.subject.id, h.topic.id, satir);
+        return 'Not «' + h.topic.name + '» konusuna eklendi.';
+      },
+    };
+  }
+
+  /* Komut paleti satırı (core/palette.js). */
+  function paletKomutu(q){
+    const p = onizle(q);
+    if(!p) return null;
+    return { group:'Not', icon:'plus', label:p.metin, sub:p.ipucu, hint:'Enter',
+      async run(){
+        const r = await p.kaydet();
+        if(R.UI && R.UI.toast) R.UI.toast(r);
+        if(R.App && R.App.render) R.App.render();
+      } };
+  }
+
+  return { SINIR, oku, yaz, ekle, kartAdaylari, kartlaraCevir, hedef, onizle, paletKomutu };
+})();
+
 /* ==== js/core/ogrentest.js ==== */
 /* ÖĞREN › KARMA TEST ve YANLIŞLARIM.
 
@@ -86092,6 +86213,9 @@ R.Palette = (function(){
     /* Veri girisi HER ZAMAN en ustte: Enter'a basan onu bekler. */
     const veri = veriKomutu(q);
     if(veri) items = [veri].concat(items).slice(0, 40);
+    /* «not: …» — Öğren'de seçili konunun notuna (core/konunotu.js). */
+    const not = R.KonuNotu ? R.KonuNotu.paletKomutu(q) : null;
+    if(not) items = [not].concat(items).slice(0, 40);
     active = Math.min(active, Math.max(0, items.length-1));
 
     const list = document.getElementById('cmdk-list');
@@ -94289,6 +94413,80 @@ R.Screens = R.Screens || {};
     });
   }
 
+  /* NOTUM (core/konunotu.js): konuyu okurken kendi notun. Konu durumunun
+     `note` alanıdır; yazınca kendiliğinden kaydolur. Anlatımda bir cümleyi
+     seçince çıkan «Nota ekle» onu sona ekler; «ön :: arka» satırları
+     «Kartlara çevir» ile tekrar kartı olur. */
+  function kartDugmeEtiketi(n){ return n ? 'Kartlara çevir (' + n + ')' : 'Kartlara çevir'; }
+  function notumKarti(subject, topic){
+    const N = R.KonuNotu;
+    if(!N) return '';
+    const metin = N.oku(subject.id, topic.id);
+    const n = N.kartAdaylari(metin).length;
+    return K.Card({ title:'Notum', sub:'kendiliğinden kaydedilir · Dersler › konuda da görünür',
+      actions:K.Button({ label:kartDugmeEtiketi(n), icon:'cards', size:'sm', tone:'ghost', act:'konu-notu-kart',
+        data:{ id:'konu-notu-kart' }, disabled:!n, title:'«ön :: arka» biçimindeki satırlar tekrar kartı olur' }),
+      body:html`<textarea class="input konu-notu" id="konu-notu" rows="${Math.min(14, Math.max(4, metin.split('\n').length + 1))}"
+          maxlength="${N.SINIR}" data-change="konu-notu" data-debounce="600" aria-label="${topic.name + ' konusu için notum'}"
+          placeholder="Kendi cümlelerinle yaz. İpucu: anlatımda bir cümleyi seç, «Nota ekle»ye bas. «Zincir kuralı :: dıştakinin türevi × içtekinin türevi» gibi satırlar tekrar kartı olur.">${metin}</textarea>
+        <p class="tiny dim mt-6 mb-0" id="konu-notu-durum" aria-live="polite">${metin ? metin.length + ' / ' + N.SINIR + ' karakter' : 'Henüz not yok.'}</p>` });
+  }
+
+  /* Anlatımda seçili metin → «Nota ekle» (belge düzeyinde BİR KEZ bağlanır). */
+  let secimBagli = false;
+  function secimiBagla(){
+    if(secimBagli || typeof document === 'undefined') return;
+    secimBagli = true;
+    const dugme = () => document.getElementById('nota-ekle');
+    const gizle = () => { const d = dugme(); if(d) d.remove(); };
+    const goster = () => {
+      const sel = window.getSelection ? window.getSelection() : null;
+      const metin = sel ? String(sel).replace(/\s+/g, ' ').trim() : '';
+      const ders = document.querySelector('article.ders');
+      if(!sel || sel.rangeCount === 0 || metin.length < 3 || metin.length > 500 || !ders
+        || !ders.contains(sel.anchorNode) || !document.getElementById('konu-notu')){ gizle(); return; }
+      const r = sel.getRangeAt(0).getBoundingClientRect();
+      let d = dugme();
+      if(!d){
+        d = document.createElement('button');
+        d.type = 'button'; d.id = 'nota-ekle'; d.className = 'nota-ekle';
+        d.textContent = 'Nota ekle';
+        d.addEventListener('mousedown', e => e.preventDefault());   // seçim kaybolmasın
+        d.addEventListener('click', async () => {
+          const x = O().secili();
+          const s = d.dataset.metin || '';
+          gizle();
+          if(!x.topic || !s) return;
+          const yeni = await R.KonuNotu.ekle(x.subject.id, x.topic.id, '«' + s + '»');
+          const kutu = document.getElementById('konu-notu');
+          if(kutu && yeni != null){ kutu.value = yeni; notDurumu(yeni); }
+          if(window.getSelection) window.getSelection().removeAllRanges();
+          UI.toast('Nota eklendi');
+        });
+        document.body.appendChild(d);
+      }
+      d.dataset.metin = metin;
+      d.style.left = Math.max(8, Math.min(window.innerWidth - 120, r.left + r.width / 2 - 50)) + 'px';
+      d.style.top = Math.max(8, r.top - 44) + 'px';
+    };
+    document.addEventListener('mouseup', () => setTimeout(goster, 0));
+    document.addEventListener('touchend', () => setTimeout(goster, 250));
+    document.addEventListener('keyup', e => { if(e.shiftKey || e.key === 'Shift') goster(); });
+    window.addEventListener('scroll', gizle, { passive:true, capture:true });
+  }
+  function notDurumu(metin){
+    const N = R.KonuNotu;
+    const p = document.getElementById('konu-notu-durum');
+    if(p) p.textContent = metin ? metin.length + ' / ' + N.SINIR + ' karakter · kaydedildi' : 'Henüz not yok.';
+    const b = document.getElementById('konu-notu-kart');
+    if(b){
+      const n = N.kartAdaylari(metin).length;
+      b.disabled = !n;
+      const e = b.querySelector('.btn__label') || b;
+      e.textContent = kartDugmeEtiketi(n);
+    }
+  }
+
   /* VİDEOLAR VE NOTLAR — bu konuya bağlı dersler (screens/learn.js'in
      kaydı, S.videoNotes). Kullanıcı (2026-10-10): «o konuya video URL'si
      koyabilelim». Video burada bağlanır, Öğrenme'de gömülü oynatıcıyla
@@ -94417,6 +94615,7 @@ R.Screens = R.Screens || {};
       return String(K.Grid([K.Span(12, K.Stack([
         raw(konuCubugu(x)),
         anlatimKarti(x),
+        notumKarti(x.subject, x.topic),
         parAnlatimKarti(x.topic),
         cikmisKarti(x.subject, x.topic),
         notlarKarti(x.subject, x.topic),
@@ -94579,8 +94778,26 @@ R.Screens = R.Screens || {};
           footer:String(K.Button({ label:'Kapat', act:'sheet-close' }))
         });
       },
+      async 'konu-notu-kart'(){
+        const x = O().secili();
+        if(!x.topic) return;
+        /* Bekleyen yazım (gecikmeli kayıt) önce diske: kart son metinden açılır. */
+        const kutu = document.getElementById('konu-notu');
+        if(kutu) await R.KonuNotu.yaz(x.subject.id, x.topic.id, kutu.value);
+        const r = await R.KonuNotu.kartlaraCevir(x.subject.id, x.topic.id);
+        UI.toast(r.acilan ? r.acilan + ' tekrar kartı açıldı' + (r.vardi ? ' · ' + r.vardi + ' tanesi zaten vardı' : '')
+          : r.vardi ? 'Bu satırların kartı zaten var' : '«ön :: arka» biçiminde satır yok');
+      },
     }),
-    change:Object.assign({}, ortakChange),
+    change:Object.assign({}, ortakChange, {
+      async 'konu-notu'(el){
+        const x = O().secili();
+        if(!x.topic) return;
+        const m = await R.KonuNotu.yaz(x.subject.id, x.topic.id, el.value);
+        notDurumu(m);
+      },
+    }),
+    afterRender(){ secimiBagla(); },
     malzemeler, etiketOf,
   };
 
@@ -104372,7 +104589,9 @@ R.App = (function(){
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'ays', hkm:() => R.Beacon, git:route => go(route),
-          ozet:() => [R.Screens.today.headline()] });
+          ozet:() => [R.Screens.today.headline()],
+          /* «not: …» önizlenir, «Kaydet»le seçili konunun notuna eklenir (core/konunotu.js). */
+          veri:{ onizle:t => (R.KonuNotu ? R.KonuNotu.onizle(t) : null) } });
       }
 
       /* YARIM KALMIŞ SÜRELİ OTURUM — diskten geri alınır.
