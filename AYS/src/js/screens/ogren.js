@@ -269,7 +269,67 @@ R.Screens = R.Screens || {};
     </section>`;
   }
 
-  function dersHtml(a, d){
+  /* Akıllı Karar & Taktik Notu (data/akilli.js) */
+  function akilliNotHtml(an){
+    return html`<section class="ders__bolum ders__ek ders__akilli" id="ders-akilli">
+      <div class="row between gap-8 mb-8">
+        <h3 class="ders__baslik mb-0"><span class="ders__no num" aria-hidden="true">★</span>Akıllı Karar & Taktik Notu</h3>
+        ${seviyeRozeti(an.duzey)}
+      </div>
+      <p class="tiny dim mb-8">elle yazıldı · doğrulanmadı</p>
+      <div class="ders__taktik-kutu">
+        <h4 class="ders__taktik-baslik">${an.baslik}</h4>
+        <p class="ders__taktik-vurgu"><b>Taktik:</b> ${fmt(an.taktik)}</p>
+        <p class="small dim mt-6">${fmt(an.kisa_not)}</p>
+        <div class="ders__taktik-madde small mt-8"><b>Neden çalışır?</b> ${fmt(an.neden)}</div>
+        ${when(an.karsi_ornek, () => html`<div class="ders__taktik-madde small mt-4"><b>Karşı örnek:</b> ${fmt(an.karsi_ornek)}</div>`)}
+        ${when(an.tuzak, () => html`<div class="ders__taktik-tuzak small mt-6">
+          <b>Sık düşülen tuzak:</b> ${fmt(an.tuzak)}
+          ${when(an.ayirt_edici, () => html`<span class="dim block mt-2">Ayırt edici soru: ${fmt(an.ayirt_edici)}</span>`)}
+        </div>`)}
+        ${when(an.mini, () => html`<details class="ders__cozum mt-10">
+          <summary>Kendin dene: ${fmt(an.mini.soru)}</summary>
+          <div class="ders__mini-govde pt-8">
+            ${when(an.mini.ipucu, () => html`<p class="small dim mb-6"><b>İpucu:</b> ${fmt(an.mini.ipucu)}</p>`)}
+            <div class="small"><b>Cevap:</b> ${fmt(an.mini.cevap)}</div>
+          </div>
+        </details>`)}
+        ${when(an.kontroller && an.kontroller.length, () => html`<details class="ders__cozum mt-6">
+          <summary>Hızlı kontrol soruları (${an.kontroller.length} soru)</summary>
+          <ul class="ders__liste small mt-8">
+            ${map(an.kontroller, c => html`<li><b>${fmt(c.soru)}</b> → <span class="dim">${fmt(c.cevap)}</span></li>`)}
+          </ul>
+        </details>`)}
+        ${when(an.sinir, () => html`<p class="tiny dim mt-10 mb-0"><b>Sınır:</b> ${fmt(an.sinir)}</p>`)}
+      </div>
+    </section>`;
+  }
+
+  /* Kaynaklar (data/akilli.js). Bağlantılar DERS düzeyindedir (aynı özet
+     o dersin bütün konularında tekrar eder) ve elle doğrulanmadı; ekran
+     «bu konunun özeti» demez. Resmî olan yalnız MEB'in kendi yayınıdır;
+     OpenStax gibi yabancı ders kitapları ayrı ve «ek kaynak» olarak durur
+     (denetim 2026-10-15). */
+  const resmiMi = k => /\bMEB\b/.test(String(k.kurum || ''));
+  function kaynakSatiri(k){
+    return html`<div class="ders__kaynak-satir">
+      <div class="small minw0"><b>${k.baslik || k.id}</b> <span class="dim">· ${k.kurum || 'kurum belirtilmedi'}</span></div>
+      ${when(k.url, () => html`<a href="${k.url}" target="_blank" rel="noopener noreferrer" class="btn btn--sm btn--ghost ders__kaynak-ac">Aç ↗</a>`)}
+    </div>`;
+  }
+  function kaynaklarHtml(kr){
+    const resmi = kr.filter(resmiMi), ek = kr.filter(k => !resmiMi(k));
+    return html`<section class="ders__bolum ders__ek ders__kaynaklar" id="ders-kaynaklar">
+      <h3 class="ders__baslik"><span class="ders__no num" aria-hidden="true">§</span>Kaynaklar</h3>
+      <p class="small dim mb-10">Bağlantılar dersin tamamı içindir, bu konuya özel değildir; elle doğrulanmadı.</p>
+      ${when(resmi.length, () => html`<div class="ders__etiket tiny mb-6">Resmî (MEB)</div><div class="stack-xs">${map(resmi, kaynakSatiri)}</div>`)}
+      ${when(ek.length, () => html`<div class="ders__etiket tiny mt-12 mb-6">Ek kaynak · resmî değil, İngilizce</div><div class="stack-xs">${map(ek, kaynakSatiri)}</div>`)}
+    </section>`;
+  }
+
+  function dersHtml(a, d, topic){
+    const an = topic ? O().akilliNot(topic.id) : null;
+    const kr = topic ? O().kaynaklar(topic.id) : [];
     return html`<div class="ders__govde">
       ${when(a.giris, () => html`<p class="ders__giris">${fmt(a.giris)}</p>`)}
       ${when(d && d.kazanim, () => kazanimHtml(d))}
@@ -283,9 +343,11 @@ R.Screens = R.Screens || {};
         ${when(b.ornek, () => ornekHtml(b.ornek))}
         ${when(b.dikkat, () => html`<p class="ders__dikkat"><b>Dikkat:</b> ${fmt(b.dikkat)}</p>`)}
       </section>`)}
+      ${when(an, () => akilliNotHtml(an))}
       ${when(d && d.ornekler && d.ornekler.length, () => orneklerHtml(d))}
       ${when(d && d.kaliplar && d.kaliplar.length, () => listeBlogu('ders-kaliplar', 'Sınavda nasıl sorulur', d.kaliplar))}
       ${when(d && d.hatalar && d.hatalar.length, () => listeBlogu('ders-hatalar', 'Sık yapılan hatalar', d.hatalar, 'ders__hatalar'))}
+      ${when(kr && kr.length, () => kaynaklarHtml(kr))}
     </div>`;
   }
 
@@ -294,13 +356,20 @@ R.Screens = R.Screens || {};
   function icindekiler(x, a){
     const n = O().sorular(x.topic.id).length;
     const d = O().derin(x.topic.id) || {};
-    const ek = [['ders-ornekler', 'Çözümlü örnekler', d.ornekler], ['ders-kaliplar', 'Sınavda nasıl sorulur', d.kaliplar],
-      ['ders-hatalar', 'Sık yapılan hatalar', d.hatalar]].filter(y => y[2] && y[2].length);
+    const an = O().akilliNot(x.topic.id);
+    const kr = O().kaynaklar(x.topic.id);
+    const ek = [
+      ['ders-akilli', 'Akıllı Taktik', an ? [1] : null],
+      ['ders-ornekler', 'Çözümlü örnekler', d.ornekler],
+      ['ders-kaliplar', 'Sınavda nasıl sorulur', d.kaliplar],
+      ['ders-hatalar', 'Sık yapılan hatalar', d.hatalar],
+      ['ders-kaynaklar', 'Kaynaklar', kr && kr.length ? [1] : null],
+    ].filter(y => y[2] && y[2].length);
     return html`<nav class="ders__icindekiler" aria-label="Bu konuda">
       <div class="ders__etiket tiny">Bu konuda</div>
       ${map(a ? a.bolumler : [], (b, i) => html`<button type="button" class="ders__git" data-act="ders-git"
         data-hedef="${'ders-b' + (i + 1)}"><span class="num">${i + 1}</span>${b.baslik}</button>`)}
-      ${map(ek, y => html`<button type="button" class="ders__git" data-act="ders-git" data-hedef="${y[0]}"><span aria-hidden="true">·</span>${y[1]}</button>`)}
+      ${map(ek, y => html`<button type="button" class="${cls('ders__git', y[0] === 'ders-akilli' && 'ders__git--akilli')}" data-act="ders-git" data-hedef="${y[0]}"><span aria-hidden="true">${y[0] === 'ders-akilli' ? '★' : '·'}</span>${y[1]}</button>`)}
       ${when((R.KONU_OZET || {})[x.topic.id], () => html`<button type="button" class="ders__git" data-act="ders-git"
         data-hedef="ders-akilda"><span aria-hidden="true">·</span>Akılda kalsın</button>`)}
       ${when(n, () => html`<button type="button" class="ders__git" data-act="ogren-git" data-route="sorular"
@@ -323,12 +392,14 @@ R.Screens = R.Screens || {};
     const { subject, topic } = x;
     const a = O().anlatim(topic.id);
     const d = O().durum(subject.id, topic.id);
+    const kavramlar = O().kavramlar(topic.id);
     const eylem = K.Row([
       d.okundu
         ? K.Button({ label:'Okundu', icon:'check', size:'sm', tone:'ghost', act:'ogren-okundu-geri', title:'İşareti kaldır' })
         : K.Button({ label:'Okudum', icon:'check', size:'sm', tone:'primary', act:'ogren-okundu' }),
       when(d.skor.toplam, () => K.Button({ label:'Sorulara geç', icon:'right', size:'sm', tone:d.okundu ? 'primary' : null,
         act:'ogren-git', data:{ 'data-route':'sorular', 'data-subject':subject.id, 'data-topic':topic.id } })),
+      K.Button({ label:'Stratejiler', icon:'book', size:'sm', tone:'ghost', act:'ogren-strateji', title:'Bilimsel öğrenme yöntemleri' }),
       K.Button({ label:'Koça sor', icon:'zap', size:'sm', tone:'ghost', act:'ogren-git',
         data:{ 'data-route':'koc', 'data-subject':subject.id, 'data-topic':topic.id } }),
     ], { wrap:true });
@@ -340,8 +411,12 @@ R.Screens = R.Screens || {};
           <header class="ders__bas">
             <h2 id="ders-baslik">${topic.name}</h2>
             <p class="small dim">${subject.name + (topic.group ? ' · ' + topic.group : '')} · elle yazıldı · doğrulanmadı</p>
+            ${when(kavramlar && kavramlar.length, () => html`<div class="ders__kavramlar mt-8 mb-6" role="list" aria-label="Konu kavramları">
+              <span class="tiny dim mr-4">Kavramlar:</span>
+              ${map(kavramlar, k => html`<span class="ogr-kavram" role="listitem">${fmt(k)}</span>`)}
+            </div>`)}
           </header>
-          ${a ? dersHtml(a, O().derin(topic.id)) : html`<div class="mb-10">${K.Notice({ tone:'info',
+          ${a ? dersHtml(a, O().derin(topic.id), topic) : html`<div class="mb-10">${K.Notice({ tone:'info',
             body:'Bu konunun ayrıntılı anlatımı henüz yazılmadı. Aşağıda kısa özeti var; derin anlatım için «Konu anlatımı iste» ya da koça sor.' })}</div>`}
           ${akildaKarti(topic)}
           <div class="ders__ayak">${eylem}
@@ -624,6 +699,25 @@ R.Screens = R.Screens || {};
             + 'Karar vermeden önce bir kaynağa bak.' : null,
           body:LIFEOS.Urun.cerceve(u) });
       },
+      async 'ogren-strateji'(){
+        const l = O().stratejiler();
+        UI.sheet({
+          title:'Öğrenme Stratejileri',
+          subtitle:'Kanıta dayalı çalışma ve pekiştirme yöntemleri (Dunlosky 2013 / IES 2007)',
+          body:String(K.Stack([
+            html`<p class="small dim">Bu yöntemler zihinsel kavrayışı derinleştirmek ve öğrenmeyi kalıcı kılmak için bilimsel rehberlerden derlenmiştir:</p>`,
+            html`<div class="stack-sm">${map(l, y => html`<div class="ogr-strateji">
+              <div class="row between gap-8 mb-4">
+                <b class="small">${y.ad}</b>
+                <span class="tiny dim">${y.dayanak === 'ogrenme-dunlosky-2013' ? 'Dunlosky 2013' : 'IES 2007'}</span>
+              </div>
+              <p class="small mb-6">${y.kullanim}</p>
+              <p class="tiny dim mb-0"><b>Kontrol:</b> ${y.kontrol}</p>
+            </div>`)}</div>`
+          ])),
+          footer:String(K.Button({ label:'Kapat', act:'sheet-close' }))
+        });
+      },
     }),
     change:Object.assign({}, ortakChange),
     malzemeler, etiketOf,
@@ -688,6 +782,7 @@ R.Screens = R.Screens || {};
   function soruGovdesi(q, v, o){
     const acik = !!v;
     const ipAcik = !!(o.ipucu && S.ui.ipucu === o.ipucu);
+    const tkAcik = !!(o.taktik && S.ui.taktik === o.taktik);
     const secenek = (metin, k) => {
       const harf = O().HARFLER[k];
       const durum = !acik ? '' : harf === q.dogru ? 'is-dogru' : v.h === harf ? 'is-yanlis' : 'is-soluk';
@@ -705,9 +800,14 @@ R.Screens = R.Screens || {};
       <div class="row between gap-8 mb-6"><span class="ders__etiket tiny">${o.etiket}</span>${when(o.seviye, () => seviyeRozeti(o.seviye))}</div>
       ${soruMetni(q.soru, q)}
       ${when(q.ipucu && (ipAcik || (acik && v.ip)), () => html`<p class="ogr-ipucu small"><b>İpucu:</b> ${fmt(q.ipucu)}</p>`)}
+      ${when(o.taktikNot && (tkAcik || (acik && d === 'yanlis')), () => html`<div class="ders__taktik-kutu small mt-8 mb-8">
+        <div class="row between gap-6"><b class="small" style="color:var(--accent)">${o.taktikNot.baslik}</b><span class="tiny dim">Akıllı Taktik</span></div>
+        <p class="small mb-0 mt-4">${fmt(o.taktikNot.taktik)}</p>
+      </div>`)}
       <div class="secenekler">${map(q.sec, secenek)}</div>
-      ${when(!acik && (o.bakAct || (q.ipucu && o.ipucu && !ipAcik)), () => html`<div class="row wrap gap-6 mt-10">
+      ${when(!acik && (o.bakAct || (q.ipucu && o.ipucu && !ipAcik) || (o.taktikNot && o.taktik && !tkAcik)), () => html`<div class="row wrap gap-6 mt-10">
         ${when(q.ipucu && o.ipucu && !ipAcik, () => K.Button({ label:'İpucu', icon:'info', size:'sm', tone:'ghost', act:'soru-ipucu', data:{ 'data-ip':o.ipucu } }))}
+        ${when(o.taktikNot && o.taktik && !tkAcik, () => K.Button({ label:'Taktik', icon:'zap', size:'sm', tone:'ghost', act:'soru-taktik', data:{ 'data-tk':o.taktik } }))}
         ${when(o.bakAct, () => K.Button({ label:'Cevaplamadan çözümü gör', size:'sm', tone:'ghost', act:o.bakAct }))}
       </div>`)}
       ${when(acik, () => html`<div class="${cls('ogr-sonuc', 'is-' + d)}">
@@ -762,7 +862,8 @@ R.Screens = R.Screens || {};
           when(sk.cevaplanan, () => K.Button({ label:'Baştan çöz', icon:'refresh', size:'sm', tone:'ghost', act:'soru-sifirla' })))}
         ${noktalar(l.length, i, k => durumOf(l[k], c[k]), 'soru-git')}
         ${soruGovdesi(q, v, { etiket:'Soru ' + (i + 1) + ' / ' + l.length, seviye:O().seviye(topic.id, i),
-          ipucu:'konu:' + topic.id + '#' + i, cevapAct:'soru-cevap', bakAct:'soru-bak',
+          ipucu:'konu:' + topic.id + '#' + i, taktik:'konu:' + topic.id, taktikNot:O().akilliNot(topic.id),
+          cevapAct:'soru-cevap', bakAct:'soru-bak',
           eylemler:soruEylemleri({ subject, topic, i, q }, v, null) })}
         <div class="row between wrap gap-6 mt-16">
           ${i > 0 ? K.Button({ label:'Önceki', icon:'left', size:'sm', tone:'ghost', act:'soru-git', data:{ 'data-i':String(i - 1) } }) : html`<span></span>`}
@@ -1057,6 +1158,7 @@ R.Screens = R.Screens || {};
         R.App.render();
       },
       async 'soru-ipucu'(el){ S.ui.ipucu = el.dataset.ip || null; R.App.render(); },
+      async 'soru-taktik'(el){ S.ui.taktik = S.ui.taktik === el.dataset.tk ? null : el.dataset.tk; R.App.render(); },
       async 'soru-bak'(){
         const x = O().secili(), { i } = soruNo(x);
         await O().bak(x.subject.id, x.topic.id, i);
