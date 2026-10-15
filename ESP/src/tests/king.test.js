@@ -9,7 +9,11 @@
      2. Anlaşılmayan istek tahmin edilmez: hiçbir yere götürülmez.
      3. Veri önce önizlenir; kayıt yalnız «Kaydet»le, «Vazgeç» kaydetmez.
      4. Başka modülden gelinen #king= hedefi yalnız katalogdaysa uygulanır.
-     5. Ctrl iki kez açar, Esc kapatır; ışık ve baloncuk tek katmandadır. */
+     5. Ctrl iki kez açar, Esc kapatır; ışık ve baloncuk tek katmandadır.
+     6. Ses (söz 7): mikrofon yalnız tanıma varsa çizilir; sesle sorulana
+        sesle cevap, yazıyla sorulana yazıyla; yalnız cihazdaki Türkçe ses
+        seçilir (bulut «Online» ses asla); izin yoksa söyler, King sürer;
+        eylem cümlesi gidilecek sayfayı adıyla söyler. */
 
 (function(){
   const { describe, it, expect } = (window.R || window.SP || window.ESP).Test;
@@ -62,6 +66,69 @@
     it('eşit adda bulunulan modülün sayfası seçilir', () => sahneyle(async () => {
       expect(sahne({ modul:'esp' }).k.yorumla('bugün sayfasına git').hedef.modul).toBe('esp');
       expect(sahne({ modul:'ays' }).k.yorumla('bugün sayfasına git').hedef.modul).toBe('ays');
+    }));
+  });
+
+  describe('King — ses', () => {
+    function sahteSes(){
+      const okunan = [];
+      const sentez = { okunan, iptal:0, getVoices:() => [
+        { name:'Microsoft Emel Online (Natural) - Turkish', lang:'tr-TR', localService:false },
+        { name:'Google Türkçe', lang:'tr-TR', localService:false },
+        { name:'Microsoft Tolga', lang:'tr-TR', localService:true },
+        { name:'Yelda (Gelişmiş)', lang:'tr-TR', localService:true },
+        { name:'Samantha', lang:'en-US', localService:true, default:true }],
+        speak:u => { okunan.push(u); }, cancel(){ this.iptal++; } };
+      let son = null;
+      function Tanima(){ son = this; this.start = () => {}; this.stop = () => { this.onend && this.onend(); }; this.abort = this.stop; }
+      return { sentez, okunan, tanimaSinifi:Tanima, son:() => son };
+    }
+    it('yalnız cihazdaki Türkçe ses seçilir; bulut sesi asla', () => {
+      const k = K();
+      const l = sahteSes().sentez.getVoices();
+      expect(k.sesSec(l).name).toBe('Yelda (Gelişmiş)');
+      expect(k.sesSec(l.filter(v => !/Yelda|Tolga/.test(v.name)))).toBe(null);
+    });
+    it('sesle sorulana sesle, yazıyla sorulana yazıyla; eylem cümlesi sayfayı söyler', () => sahneyle(async () => {
+      const ss = sahteSes();
+      const { k, gidilen } = sahne();
+      Object.assign(k._ortam, { tanima:() => ss.tanimaSinifi, sentez:() => ss.sentez, soz:m => ({ metin:m }) });
+      k.ac();
+      expect(document.querySelector('.king__mik') !== null).toBe(true);
+      k.dinle();
+      expect(document.querySelector('[data-king]').classList.contains('is-dinliyor')).toBe(true);
+      const r = ss.son();
+      r.onresult({ results:[Object.assign([{ transcript:'antrenman yapacağım' }], { isFinal:true })] });
+      r.onend();
+      await new Promise(ok => setTimeout(ok, 0));
+      expect(gidilen).toEqual([['move', { sekme:'kuvvet' }]]);
+      expect(ss.okunan.length > 0).toBe(true);
+      expect(ss.okunan[0].voice.name).toBe('Yelda (Gelişmiş)');
+      expect(ss.okunan.map(u => u.metin).join(' ')).toContain('Hareket açılıyor');
+      /* Yazıyla sorulan sesle cevaplanmaz. */
+      k.ac();
+      const once = ss.okunan.length;
+      const f = document.querySelector('[data-king-form]');
+      f.querySelector('.king__girdi').value = 'bugünün özeti';
+      f.dispatchEvent(new Event('submit', { bubbles:true, cancelable:true }));
+      await new Promise(ok => setTimeout(ok, 0));
+      expect(ss.okunan.length).toBe(once);
+    }));
+    it('mikrofon izni yoksa söyler ve King yazıyla sürer; tanıma yoksa düğme çizilmez', () => sahneyle(async () => {
+      const ss = sahteSes();
+      const { k } = sahne();
+      Object.assign(k._ortam, { tanima:() => ss.tanimaSinifi, sentez:() => ss.sentez, soz:m => ({ metin:m }) });
+      k.ac();
+      k.dinle();
+      const r = ss.son();
+      r.onerror({ error:'not-allowed' });
+      r.onend();
+      expect(k.akis().some(m => /Mikrofon izni verilmedi/.test(m.metin))).toBe(true);
+      expect(document.querySelector('[data-king]').classList.contains('is-dinliyor')).toBe(false);
+      k.kapat();
+      Object.assign(k._ortam, { tanima:() => null });
+      k.ac();
+      expect(document.querySelector('.king__mik')).toBe(null);
     }));
   });
 

@@ -37,7 +37,16 @@
       devamıdır. Yerelde kalan: «… git/aç» komutu, niyet cümlesi («antrenman
       yapacağım») ve kayıt önizlemesi — HKM modüle yazmaz (§1.4). Soru
       cümlesi, içinde sayfa adına benzeyen bir sözcük var diye sayfaya
-      götürülmez. */
+      götürülmez.
+   7. SES (depo sahibi, 2026-10-15: «ücretsiz ve uğraştırmadan King'i Apple
+      Intelligence'a benzet, daha eylemsel, daha profesyonel»). Mikrofonla
+      konuşulur, sesle sorulana sesle cevap verilir; kenar ışığı dinlerken
+      ve konuşurken nabız gibi atar. Kurulum yok, ücret yok: tanıma ve ses
+      tarayıcının kendisinindir. Seslendirmede yalnız CİHAZDAKİ Türkçe ses
+      kullanılır; buluttaki «Online» sesler seçilmez (cevabın metni hiçbir
+      şirkete gitmez). Tanımayı tarayıcı yapar; Chrome bunu kendi
+      sunucusunda yapar, düğmenin açıklaması bunu söyler. Ses yoksa ya da
+      izin verilmezse King yazıyla aynen sürer; ses BİLGİ taşımaz. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -108,6 +117,11 @@ window.LIFEOS.KING = (function(){
     hashSil:() => { try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){ /* eski tarayıcı */ } },
     adres:k => (L.KABUK && L.KABUK.adres ? L.KABUK.adres(k) : null),
     fetch:(u, o) => fetch(u, o),
+    /* Ses (söz 7). Testler sahte tanıma ve sentez koyar. */
+    tanima:() => (typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition)) || null,
+    sentez:() => (typeof window !== 'undefined' && window.speechSynthesis && typeof window.SpeechSynthesisUtterance === 'function')
+      ? window.speechSynthesis : null,
+    soz:m => new window.SpeechSynthesisUtterance(m),
   };
   /* HKM'deki King'in modelli cevabı yerel modelde saniyeler sürebilir. */
   const MERKEZ_ZAMAN_ASIMI = 60000;
@@ -117,6 +131,9 @@ window.LIFEOS.KING = (function(){
   let akis = [];             // [{ kim:'king'|'sen', metin, satirlar? }]
   let cipler = null;         // null = hazır cevaplar; ya da [{ ad, is }]
   let bekleyen = null;       // veri önizlemesi
+  let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
+  let dinleyen = null;       // çalışan tanıma oturumu
+  let konusuyor = 0;         // okunmayı bekleyen parça sayısı
 
   function kac(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
@@ -235,11 +252,110 @@ window.LIFEOS.KING = (function(){
     return (Array.isArray(s) ? s : [s]).filter(Boolean).map(String);
   }
 
+  /* ------------------------------------------------------- ses (söz 7) */
+
+  /* Cihazdaki en iyi Türkçe ses. Buluttaki ses (localService false,
+     «Online») hiç seçilmez. Saf: testler sınar. */
+  function sesSec(liste){
+    const tr = (liste || []).filter(v => v && /^tr([-_]|$)/i.test(v.lang || '') && v.localService !== false
+      && !/online/i.test(v.name || ''));
+    if(!tr.length) return null;
+    const puan = v => (/premium|enhanced|gelişmiş|natural|neural/i.test(v.name || '') ? 4 : 0)
+      + (/siri|yelda/i.test(v.name || '') ? 2 : 0) + (v.default ? 1 : 0);
+    return tr.slice().sort((a, b) => puan(b) - puan(a))[0];
+  }
+  /* Kısa parçalar: uzun metinde Chrome okumayı yarıda sessizce keser. */
+  function parcala(metin){
+    return String(metin || '').replace(/\s+/g, ' ').split(/(?<=[.!?…])\s+/).reduce((l, p) => {
+      if(!p) return l;
+      if(l.length && (l[l.length - 1] + ' ' + p).length <= 180) l[l.length - 1] += ' ' + p; else l.push(p);
+      return l;
+    }, []);
+  }
+  function durum(){
+    if(typeof document === 'undefined') return;
+    const el = document.querySelector('[data-king]');
+    if(!el) return;
+    el.classList.toggle('is-dinliyor', !!dinleyen);
+    el.classList.toggle('is-konusuyor', konusuyor > 0);
+    const m = el.querySelector('.king__mik');
+    if(m){
+      m.classList.toggle('is-acik', !!dinleyen);
+      m.setAttribute('aria-pressed', dinleyen ? 'true' : 'false');
+      m.setAttribute('aria-label', dinleyen ? 'Dinlemeyi bitir' : 'Konuşarak sor');
+    }
+  }
+  function sus(){
+    const sz = ortam.sentez();
+    if(sz) try{ sz.cancel(); }catch(e){ /* yok */ }
+    konusuyor = 0;
+    durum();
+  }
+  function seslendir(metin){
+    const sz = ortam.sentez();
+    if(!sz || !metin) return;
+    try{ sz.cancel(); }catch(e){ /* yok */ }
+    const ses = sesSec(sz.getVoices ? sz.getVoices() : []);
+    const parcalar = parcala(metin);
+    konusuyor = parcalar.length;
+    parcalar.forEach(p => {
+      const u = ortam.soz(p);
+      u.lang = 'tr-TR';
+      if(ses) u.voice = ses;
+      u.rate = 1.03;
+      u.onend = u.onerror = () => { konusuyor = Math.max(0, konusuyor - 1); durum(); };
+      try{ sz.speak(u); }catch(e){ konusuyor = 0; }
+    });
+    durum();
+  }
+
+  function dinle(){
+    if(dinleyen){ try{ dinleyen.stop(); }catch(e){ /* kapalı */ } return; }
+    const T = ortam.tanima();
+    if(!T) return;
+    sus();
+    let r;
+    try{ r = new T(); }catch(e){ return; }
+    r.lang = 'tr-TR';
+    r.interimResults = true;
+    r.continuous = false;
+    let son = '', hata = '';
+    r.onresult = e => {
+      let ara = '', kesin = '';
+      for(let i = 0; i < e.results.length; i++){
+        const x = e.results[i];
+        if(x.isFinal) kesin += x[0].transcript; else ara += x[0].transcript;
+      }
+      son = (kesin || ara).trim();
+      const g = typeof document !== 'undefined' ? document.querySelector('.king__girdi') : null;
+      if(g) g.value = (kesin + ara).trim();
+    };
+    r.onerror = e => { hata = (e && e.error) || 'hata'; };
+    r.onend = () => {
+      dinleyen = null;
+      durum();
+      const g = typeof document !== 'undefined' ? document.querySelector('.king__girdi') : null;
+      if(son){
+        if(g) g.value = '';
+        sesli = true;
+        isle(son);
+      }else if(hata === 'not-allowed' || hata === 'service-not-allowed'){
+        soyle('Mikrofon izni verilmedi. Tarayıcının adres çubuğundan izin verebilir ya da yazabilirsin.');
+      }else if(hata && hata !== 'aborted'){
+        soyle(hata === 'no-speech' ? 'Bir şey duyamadım. Yeniden dener misin?' : 'Ses tanınamadı; yazarak da sorabilirsin.');
+      }
+    };
+    dinleyen = r;
+    try{ r.start(); }catch(e){ dinleyen = null; }
+    durum();
+  }
+
   function soyle(metin, satirlar, onizleme){
     akis.forEach(m => { m.yeni = false; });
     akis.push({ kim:'king', metin, satirlar, onizleme, yeni:true });
     akis = akis.slice(-4);
     ciz();
+    if(sesli) seslendir([metin].concat(satirlar || []).join('. ').replace(/\.\.+/g, '.'));
   }
 
   async function isle(metin){
@@ -273,8 +389,8 @@ window.LIFEOS.KING = (function(){
       const s = ozetSatirlari();
       soyle(s.length ? (MODUL_AD[ayar.modul] || '') + '’de bugün:' : 'Bugün için henüz bir şey yok.', s);
     }else if(y.tur === 'git'){
-      soyle(y.cevap || 'Kolay gelsin.');
-      ortam.zamanla(() => git(y.hedef), 650);
+      soyle(eylemCumlesi(y.hedef, y.cevap));
+      ortam.zamanla(() => git(y.hedef), sesli ? 1100 : 650);
     }else if(y.tur === 'veri'){
       bekleyen = y.onizleme;
       cipler = [{ ad:'Kaydet', is:'kaydet' }, { ad:'Vazgeç', is:'vazgec' }];
@@ -307,8 +423,15 @@ window.LIFEOS.KING = (function(){
     if(!h) return;
     akis.push({ kim:'sen', metin:h.ad });
     if(h.ozet){ cipler = null; const s = ozetSatirlari(); soyle(s.length ? (MODUL_AD[ayar.modul] || '') + '’de bugün:' : 'Bugün için henüz bir şey yok.', s); return; }
-    soyle(h.cevap || 'Kolay gelsin.');
-    ortam.zamanla(() => git(h), 650);
+    soyle(eylemCumlesi(h, h.cevap));
+    ortam.zamanla(() => git(h), sesli ? 1100 : 650);
+  }
+
+  /* «Kolay gelsin. Hareket’i açıyorum.» — ne yapılacağını söyler (eylemsel). */
+  function eylemCumlesi(h, cevap){
+    const s = h && SAYFALAR.find(x => x.modul === h.modul && x.route === h.route);
+    const yer = s ? s.ad + (h.modul !== (ayar && ayar.modul) ? ' (' + MODUL_AD[h.modul] + ')' : '') : '';
+    return (cevap || 'Kolay gelsin.') + (yer ? ' ' + yer + ' açılıyor.' : '');
   }
 
   /* ------------------------------------------------------- görünüm */
@@ -354,15 +477,24 @@ window.LIFEOS.KING = (function(){
     const cip = cipler
       ? cipler.map(c => '<button type="button" class="king__cip' + (c.is === 'kaydet' ? ' king__cip--ana' : '')
           + '" data-king="' + c.is + '">' + kac(c.ad) + '</button>').join('')
-      : HAZIR.map((h, i) => '<button type="button" class="king__cip" data-king-hazir="' + i + '">'
+      : HAZIR.map((h, i) => ({ h, i })).sort((a, b) => (a.h.ozet - b.h.ozet)
+          || ((b.h.modul === (ayar && ayar.modul)) - (a.h.modul === (ayar && ayar.modul))) || a.i - b.i)
+          .map(({ h, i }) => '<button type="button" class="king__cip" data-king-hazir="' + i + '">'
           + NOKTA(h.ozet ? (ayar && ayar.modul) : h.modul) + kac(h.ad) + '</button>').join('');
+    const mik = ortam.tanima()
+      ? '<button type="button" class="king__mik' + (dinleyen ? ' is-acik' : '') + '" data-king="dinle" aria-pressed="'
+        + (dinleyen ? 'true' : 'false') + '" aria-label="' + (dinleyen ? 'Dinlemeyi bitir' : 'Konuşarak sor')
+        + '" title="Konuşarak sor · tanımayı tarayıcı yapar"><svg viewBox="0 0 24 24" aria-hidden="true">'
+        + '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>'
+      : '';
     return bas + '<div class="king__akis" aria-live="polite">' + balonlar + '</div>'
       + '<div class="king__cipler" role="group" aria-label="Hazır cevaplar">' + cip + '</div>'
       + '<form class="king__yaz" data-king-form data-ayar-disi>'
-      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="King\'e yaz…" autocomplete="off" enterkeyhint="send"/>'
+      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : 'King\'e yaz ya da konuş…') + '" autocomplete="off" enterkeyhint="send"/>'
+      + mik
       + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>'
-      + '<p class="king__ipucu" aria-hidden="true">Enter gönderir · Esc kapatır</p>';
+      + '<p class="king__ipucu" aria-hidden="true">' + (ortam.tanima() ? 'Mikrofona dokun ve konuş · ' : '') + 'Enter gönderir · Esc kapatır</p>';
   }
 
   function ciz(odak){
@@ -375,6 +507,7 @@ window.LIFEOS.KING = (function(){
     const akisEl = kutu.querySelector('.king__akis');
     if(akisEl) akisEl.scrollTop = akisEl.scrollHeight;
     akis.forEach(m => { m.yeni = false; });
+    durum();
     if(odak !== false && g && !(L.KABUK && L.KABUK.telefonMu && L.KABUK.telefonMu())){
       try{ g.focus({ preventScroll:true }); }catch(e){ /* odak yok */ }
     }
@@ -385,7 +518,7 @@ window.LIFEOS.KING = (function(){
     if(L.KABUK && L.KABUK.katmanAcik && L.KABUK.katmanAcik()) L.KABUK.katmanKapat();
     if(acik){ const g = document.querySelector('.king__girdi'); if(g) try{ g.focus(); }catch(e){} return; }
     acik = true;
-    akis = []; cipler = null; bekleyen = null;
+    akis = []; cipler = null; bekleyen = null; sesli = false;
     const el = document.createElement('div');
     el.className = 'king';
     el.setAttribute('data-king', '');
@@ -402,6 +535,9 @@ window.LIFEOS.KING = (function(){
   function kapat(){
     if(!acik || typeof document === 'undefined') return;
     acik = false;
+    if(dinleyen){ try{ dinleyen.abort ? dinleyen.abort() : dinleyen.stop(); }catch(e){ /* kapalı */ } dinleyen = null; }
+    /* Sayfaya giderken söylenen cümle yarıda kesilmesin; elle kapatınca susar. */
+    if(!sesli) sus();
     const el = document.querySelector('[data-king]');
     if(!el) return;
     el.classList.remove('is-acik');
@@ -417,7 +553,7 @@ window.LIFEOS.KING = (function(){
     if(bagli || typeof document === 'undefined') return;
     bagli = true;
     document.addEventListener('keydown', e => {
-      if(e.key === 'Escape' && acik){ e.preventDefault(); kapat(); return; }
+      if(e.key === 'Escape' && acik){ e.preventDefault(); sesli = false; kapat(); return; }
       if(e.key !== 'Control'){ baskaTus = true; return; }
       if(e.repeat) return;
       const s = Date.now();
@@ -437,7 +573,8 @@ window.LIFEOS.KING = (function(){
       const c = t.closest('[data-king]:not(.king)');
       if(c){
         const is = c.getAttribute('data-king');
-        if(is === 'kapat'){ kapat(); return; }
+        if(is === 'kapat'){ sesli = false; kapat(); return; }
+        if(is === 'dinle'){ dinle(); return; }
         if(is === 'kaydet') kaydet();
         else if(is === 'vazgec'){ bekleyen = null; cipler = null; soyle('Tamam, kaydetmedim.'); }
       }
@@ -449,6 +586,8 @@ window.LIFEOS.KING = (function(){
       const g = f.querySelector('.king__girdi');
       const m = g ? g.value : '';
       if(g) g.value = '';
+      sesli = false;            // yazıyla sorulana yazıyla
+      sus();
       isle(m);
     });
     /* Telefonda «+»ya basılı tutmak: King. */
@@ -491,10 +630,11 @@ window.LIFEOS.KING = (function(){
       document.documentElement.classList.remove('king-acik');
     }
     ayar = null; acik = false; akis = []; cipler = null; bekleyen = null;
+    sesli = false; dinleyen = null; konusuyor = 0;
   }
 
   return {
-    kur, ac, kapat, yorumla, isle, hazirSec, kaydet,
+    kur, ac, kapat, yorumla, isle, hazirSec, kaydet, dinle, sesSec,
     acikMi:() => acik, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla,
   };
