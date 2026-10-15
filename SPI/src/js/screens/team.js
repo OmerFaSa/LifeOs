@@ -507,6 +507,24 @@ SP.Screens.team = (function(){
     },
   };
 
+  function onKey(e){
+    /* Boşluk tuşuyla ajanın sözünü anında kes (barge-in): metin yazmıyorken */
+    if(e.key === ' ' && sesli.acik && sesli.durum === 'konuşuyor'){
+      const tag = (document.activeElement && document.activeElement.tagName) || '';
+      if(tag !== 'INPUT' && tag !== 'TEXTAREA'){
+        e.preventDefault();
+        SP.Talk.kes();
+        return;
+      }
+    }
+    if(e.key !== 'Enter' || !(e.ctrlKey || e.metaKey)) return;
+    const el = document.getElementById('chat-text');
+    if(el && document.activeElement === el){
+      e.preventDefault();
+      handle['send-chat']();
+    }
+  }
+
   return {
     id:'team',
     /* iPhone Faz 4: açık sohbet ve ajanın kartı; ajanın tanıtımı, örnek sorular ve brifing şerit. */
@@ -517,6 +535,6 @@ SP.Screens.team = (function(){
       return a.name + ' · ' + a.title;
     },
     actions(){ return ''; },
-    render, handle,
+    render, handle, onKey,
   };
 })();

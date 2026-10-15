@@ -16,14 +16,14 @@
 window.ESP = window.ESP || {};
 
 ESP.LANGS = [
-  { id:'en', label:'İngilizce', native:'English' },
-  { id:'de', label:'Almanca',   native:'Deutsch' },
-  { id:'fr', label:'Fransızca', native:'Français' },
-  { id:'es', label:'İspanyolca', native:'Español' },
-  { id:'ar', label:'Arapça',    native:'العربية', rtl:true },
-  { id:'ru', label:'Rusça',     native:'Русский' },
-  { id:'it', label:'İtalyanca', native:'Italiano' },
-  { id:'la', label:'Latince',   native:'Latina' },
+  { id:'en', label:'İngilizce', native:'English', bcp:'en-US' },
+  { id:'de', label:'Almanca',   native:'Deutsch', bcp:'de-DE' },
+  { id:'fr', label:'Fransızca', native:'Français', bcp:'fr-FR' },
+  { id:'es', label:'İspanyolca', native:'Español', bcp:'es-ES' },
+  { id:'ar', label:'Arapça',    native:'العربية', rtl:true, bcp:'ar-SA' },
+  { id:'ru', label:'Rusça',     native:'Русский', bcp:'ru-RU' },
+  { id:'it', label:'İtalyanca', native:'Italiano', bcp:'it-IT' },
+  { id:'la', label:'Latince',   native:'Latina', bcp:'la' },
 ];
 
 ESP.LANG_BY_ID = ESP.LANGS.reduce(function(m, l){ m[l.id] = l; return m; }, {});

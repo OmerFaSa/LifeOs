@@ -140,7 +140,7 @@ SP.Nutri = (function(){
     return out;
   }
 
-  /* Mikro besin taban hedefi — yasa ve cinsiyete gore. */
+  /* Mikro besin taban hedefi — yasa ve cinsiyete gore (NIH ODS referans kalibrasyonu). */
   function baseRda(nutrientId, profile){
     const n = SP.NUTRI_BY_ID[nutrientId];
     if(!n || !n.rda) return null;
@@ -148,11 +148,15 @@ SP.Nutri = (function(){
     const sex = p.sex === 'female' ? 'female' : 'male';
     const age = SP.Model.ageOf(p);
     const r = n.rda;
-    if(age != null && age >= 50 && sex === 'female' && r.female50 != null) return r.female50;
-    if(age != null && age >= 50 && r.over50 != null) return r.over50;
-    if(age != null && age >= 70 && r.over70 != null) return r.over70;
-    if(age != null && age < 19 && r[sex === 'male' ? 'teenM' : 'teenF'] != null){
-      return r[sex === 'male' ? 'teenM' : 'teenF'];
+    if(age != null && age >= 51 && sex === 'female' && (r.female51 != null || r.female50 != null)){
+      return r.female51 != null ? r.female51 : r.female50;
+    }
+    if(age != null && age >= 51 && sex === 'female' && r.over50 != null) return r.over50;
+    if(age != null && age > 70 && r.over70 != null) return r.over70;
+    if(age != null && age >= 51 && sex === 'male' && r.over50 != null && nutrientId !== 'calcium') return r.over50;
+    if(age != null && age < 19){
+      if(r[sex === 'male' ? 'teenM' : 'teenF'] != null) return r[sex === 'male' ? 'teenM' : 'teenF'];
+      if(r.teen != null) return r.teen;
     }
     return r[sex] != null ? r[sex] : null;
   }

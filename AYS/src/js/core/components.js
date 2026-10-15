@@ -430,8 +430,9 @@ R.C = (function(){
      dosyasi modelsiz de okunur. Calismayan bir dugme gostermek
      kullaniciya secenek degil, hayal kirikligi verir. */
   function Mic(o){
-    if(!R.Voice || !R.Voice.supported()) return raw('');
-    const on = R.Voice.isActive() && R.Voice.activeTarget() === o.target;
+    const L = R.Listen || R.Voice;
+    if(!L || !L.supported()) return raw('');
+    const on = L.isActive && L.isActive() && L.activeTarget && L.activeTarget() === o.target;
     return html`<button type="button"
       class="${cls('mic', on && 'is-on', o.size === 'sm' && 'mic--sm')}"
       data-act="dictate" data-target="${o.target}"

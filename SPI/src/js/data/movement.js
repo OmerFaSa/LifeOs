@@ -207,6 +207,13 @@ SP.EXERCISES = [
     levels:[{ id:'temel', name:'4-6 nefes, 5 dakika', to:'günde 1' }] },
 ];
 
+/* Pilot egzersiz kartları (data/egzersizkatalog.js, 57 kart) ana kataloğa
+   KATILMAZ (denetim 2026-10-15): kartlara set/tekrar ve tahmini MET
+   uyduruluyordu (kataloğun kendi sözü: «reçete atanmamıştır»; SPİ doz
+   önermez) ve takma adları ana hareketlerle çakışıp hızlı kaydı
+   («şınav 20») yanlış harekete götürüyordu. Atlas Hareket ekranında ayrı
+   durur; kayıt ve öneri yalnız bu kataloğu kullanır. */
+
 SP.EX_BY_ID = SP.EXERCISES.reduce(function(acc, e){ acc[e.id] = e; return acc; }, {});
 
 /* Takma ad indeksi. Ayristirici uzun once ISIM ariyordu ama insanlar
@@ -218,11 +225,37 @@ SP.EX_BY_ID = SP.EXERCISES.reduce(function(acc, e){ acc[e.id] = e; return acc; }
    sonra. Kisa olan once denenseydi ozgul ad hic eslesmezdi. */
 SP.EX_ALIASES = (function(){
   var out = [];
+  var seen = {};
   SP.EXERCISES.forEach(function(e){
     (e.aliases || []).concat([e.name]).forEach(function(a){
-      out.push({ alias:a, ex:e });
+      var k = String(a).toLowerCase();
+      if(!seen[k]){ seen[k] = true; out.push({ alias:a, ex:e }); }
     });
   });
+  if(SP.PILOT_EGZERSIZLER){
+    SP.PILOT_EGZERSIZLER.forEach(function(c){
+      var matchingEx = SP.EX_BY_ID[c.id] || SP.EX_BY_ID[c.name_tr.toLowerCase()] || null;
+      var cAliases = [c.name_tr, c.name_en].concat(c.aliases || []).filter(Boolean);
+      cAliases.forEach(function(a){
+        var k = String(a).toLowerCase();
+        if(!seen[k]){
+          seen[k] = true;
+          out.push({
+            alias: a,
+            ex: matchingEx || {
+              id: c.id,
+              name: c.name_tr,
+              kind: (c.pattern && c.pattern.indexOf('kardiyo') >= 0) ? 'cardio' : 'strength',
+              pattern: c.pattern || null,
+              met: c.met || 4.5,
+              equip: c.equipment_tr || 'yok',
+              cue: c.summary || (c.steps_tr && c.steps_tr[0]) || ''
+            }
+          });
+        }
+      });
+    });
+  }
   return out.sort(function(a, b){ return b.alias.length - a.alias.length; });
 })();
 

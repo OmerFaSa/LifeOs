@@ -60,6 +60,9 @@ ESP.Test = (function(){
       toBeUndefined(){
         if(actual !== undefined) throw new Error('undefined bekleniyordu, gelen '+fmt(actual));
       },
+      toBeDefined(){
+        if(actual === undefined) throw new Error('tanimli bir deger bekleniyordu, gelen undefined');
+      },
       toBeTruthy(){
         if(!actual) throw new Error('dogru (truthy) bekleniyordu, gelen '+fmt(actual));
       },

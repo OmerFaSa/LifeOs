@@ -45,8 +45,29 @@ SP.Speak = (function(){
     try{ return API.getVoices() || []; }catch(e){ return []; }
   }
 
+  /* Doğal / sinirsel ses önceliği (Siri / Natural / Neural kalitesi):
+     Edge ve Chrome'un Natural / Neural / Google / Apple / Siri sesleri
+     eski metalik sistem seslerinden (espeak, vb.) katbekat doğaldır. */
+  function scoreVoice(v){
+    const name = String(v.name || '').toLowerCase();
+    const uri = String(v.voiceURI || '').toLowerCase();
+    const full = name + ' ' + uri;
+    let n = 0;
+    if(/natural|neural/i.test(full)) n += 80;
+    if(/google/i.test(full)) n += 50;
+    if(/apple|siri/i.test(full)) n += 45;
+    if(/online/i.test(full)) n += 30;
+    if(/microsoft/i.test(full)) n += 25;
+    if(v.localService === false) n += 20;
+    if(/espeak|festival|pico|compact|klatt/i.test(full)) n -= 80;
+    if(v.default) n += 5;
+    return n;
+  }
+
   function turkishVoices(){
-    return voices().filter(v => /^tr([-_]|$)/i.test(v.lang || ''));
+    return voices()
+      .filter(v => /^tr([-_]|$)/i.test(v.lang || ''))
+      .sort((a, b) => scoreVoice(b) - scoreVoice(a));
   }
 
   /* Türkçe ses yoksa katman yine çalışır ama bunu SÖYLER: yabancı bir
@@ -71,13 +92,15 @@ SP.Speak = (function(){
        Kerem   — nötr: ölçüm okuyor, yorum katmıyor
        Nesrin  — biraz daha canlı: mutfakta anlatıyor
        Barış   — hızlı: antrenman veriyor
-       Sedef   — ölçülü: para konuşuyor, abartmıyor */
+       Sedef   — ölçülü: para konuşuyor, abartmıyor
+       King    — Siri prosodisi (rate: 1.02, pitch: 1.02): akıcı, doğal */
   const KIMLIK = {
     patron:{ rate:0.94, pitch:0.92 },
     lab:   { rate:1.00, pitch:1.00 },
     nutri: { rate:1.02, pitch:1.08 },
     move:  { rate:1.10, pitch:1.04 },
     money: { rate:0.98, pitch:0.96 },
+    king:  { rate:0.98, pitch:1.00 },
   };
 
   /* Ses ataması KARARLI olmalı: aynı ajan her seferinde aynı sesle
@@ -85,7 +108,7 @@ SP.Speak = (function(){
      kendi sırası kullanılır, ses listesinin sırası değil. */
   function voiceFor(agentId){
     const tr = turkishVoices();
-    const havuz = tr.length ? tr : voices();
+    const havuz = tr.length ? tr : voices().sort((a, b) => scoreVoice(b) - scoreVoice(a));
     if(!havuz.length) return null;
     const sira = SP.AGENTS.findIndex(a => a.id === agentId);
     return havuz[(sira < 0 ? 0 : sira) % havuz.length];
@@ -209,8 +232,10 @@ SP.Speak = (function(){
 
       if(ayar.voice){ u.voice = ayar.voice; u.lang = ayar.voice.lang; }
       else u.lang = ayar.lang || 'tr-TR';
-      u.rate = ayar.rate;
-      u.pitch = ayar.pitch;
+      const vName = (u.voice && u.voice.name) ? String(u.voice.name).toLowerCase() : '';
+      const isDesktop = /desktop|sapi|tolga|espeak/.test(vName);
+      u.rate = isDesktop && ayar.rate > 1 ? 0.98 : (ayar.rate || 0.98);
+      u.pitch = isDesktop ? 1.0 : (ayar.pitch || 1.0);
       u.volume = ayar.volume;
 
       u.onend = () => bitir('bitti');

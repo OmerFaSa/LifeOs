@@ -36,10 +36,12 @@
   }
 
   describe('T3 SPİ — sekmeler bölüm oldu', () => {
-    it('oz-019 Analiz: beş okuma alt alta, sekme yok', async () => {
+    /* 2026-10-15: Öğrenme ve kanıt katmanı (data/ogrenme.js) «Fizyoloji &
+       Kavramlar» bölümünü ekledi; okumalar artık altı. */
+    it('oz-019 Analiz: altı okuma alt alta, sekme yok', async () => {
       resetState();
       const d = await bolumlu('analytics', 'an-tab',
-        ['Çapraz bağlar', 'Haftalık rapor', 'Seriler', 'Denetim', 'Dürüstlük']);
+        ['Çapraz bağlar', 'Haftalık rapor', 'Seriler', 'Fizyoloji & Kavramlar', 'Denetim', 'Dürüstlük']);
       d.remove();
     });
 

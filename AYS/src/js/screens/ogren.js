@@ -775,8 +775,67 @@ R.Screens = R.Screens || {};
     return html`${map(l, p => html`<p class="ogr-soru__parca">${fmt(p)}</p>`)}${sekilHtml(ek)}<p class="ogr-soru__metin">${l.length || sekilli ? html`<b>${fmt(kok)}</b>` : fmt(kok)}</p>`;
   }
 
+  /* ---------- soru bazlı kronometre ve tempo (ölçüm) ---------- */
+  let soruTimerId = null;
+  function baslatSoruSayac(){
+    if(typeof window === 'undefined') return;
+    if(soruTimerId){ clearInterval(soruTimerId); soruTimerId = null; }
+    const el = document.getElementById('ogr-soru-sayac');
+    if(!el) return;
+    if(!S.ui.soruGiris) S.ui.soruGiris = Date.now();
+    const guncelle = () => {
+      const g = document.getElementById('ogr-soru-sayac');
+      if(!g){ if(soruTimerId){ clearInterval(soruTimerId); soruTimerId = null; } return; }
+      const sn = Math.max(0, Math.floor((Date.now() - (S.ui.soruGiris || Date.now())) / 1000));
+      const dk = Math.floor(sn / 60);
+      const s = sn % 60;
+      g.textContent = (dk < 10 ? '0' : '') + dk + ':' + (s < 10 ? '0' : '') + s;
+    };
+    guncelle();
+    soruTimerId = setInterval(guncelle, 1000);
+  }
+
+  function gecenSure(){
+    const bas = S.ui.soruGiris || Date.now();
+    const sn = Math.max(1, Math.min(1800, Math.round((Date.now() - bas) / 1000)));
+    S.ui.soruGiris = Date.now();
+    return sn;
+  }
+  function soruSifirlaSure(){
+    S.ui.soruGiris = Date.now();
+  }
+
+  function tempoRozeti(sn, dersId){
+    if(!sn || sn <= 0) return '';
+    const aytMi = dersId && String(dersId).indexOf('ayt') === 0;
+    const ideal = aytMi ? 120 : 75;
+    const makul = aytMi ? 165 : 105;
+    let rozetCls = 'ogr-tempo--ideal';
+    let ikon = '⚡';
+    let yorum = 'ideal tempo (sınav ritmi)';
+    if(sn <= ideal){
+      rozetCls = 'ogr-tempo--ideal';
+      ikon = '⚡';
+      yorum = 'seri tempo';
+    } else if(sn <= makul){
+      rozetCls = 'ogr-tempo--makul';
+      ikon = '⏱️';
+      yorum = 'dengeli tempo';
+    } else {
+      rozetCls = 'ogr-tempo--yavas';
+      ikon = '⏳';
+      yorum = 'süre aşımı (derinleş / hızlan)';
+    }
+    const dk = Math.floor(sn / 60);
+    const artanSn = sn % 60;
+    const sureStr = dk > 0 ? dk + ' dk ' + (artanSn ? artanSn + ' sn' : '') : sn + ' sn';
+    return html`<div class="ogr-tempo ${rozetCls} mt-4 mb-6">
+      <span>${ikon} <b>${sureStr}</b> · ${yorum}</span>
+    </div>`;
+  }
+
   /* Üç kipin ortak soru gövdesi. v: { h, bak, ip? } ya da null (cevapsız).
-     o: { etiket, seviye?, ipucu?: anahtar, cevapAct, bakAct?, ust?, eylemler }
+     o: { etiket, seviye?, ipucu?: anahtar, cevapAct, bakAct?, ust?, eylemler, ders? }
      İpucu cevaptan önce açılır; açıldıktan sonra verilen cevap «ipucuyla»
      diye yazılır (ölçüm dürüst kalsın). */
   function soruGovdesi(q, v, o){
@@ -797,7 +856,13 @@ R.Screens = R.Screens || {};
     const sonuc = (d === 'bakildi' ? 'Çözüme bakıldı · doğru cevap ' + q.dogru
       : d === 'dogru' ? 'Doğru' : 'Yanlış · senin cevabın ' + (v && v.h) + ', doğrusu ' + q.dogru) + (v && v.ip ? ' · ipucuyla' : '');
     return html`<div class="ogr-soru" aria-live="polite" data-raf-tam>
-      <div class="row between gap-8 mb-6"><span class="ders__etiket tiny">${o.etiket}</span>${when(o.seviye, () => seviyeRozeti(o.seviye))}</div>
+      <div class="row between gap-8 mb-6">
+        <span class="ders__etiket tiny">${o.etiket}</span>
+        <span class="row gap-6 align-center">
+          ${when(!acik, () => html`<span class="ogr-sayac tiny dim" title="Bu soruda geçen süre" id="ogr-soru-sayac">00:00</span>`)}
+          ${when(o.seviye, () => seviyeRozeti(o.seviye))}
+        </span>
+      </div>
       ${soruMetni(q.soru, q)}
       ${when(q.ipucu && (ipAcik || (acik && v.ip)), () => html`<p class="ogr-ipucu small"><b>İpucu:</b> ${fmt(q.ipucu)}</p>`)}
       ${when(o.taktikNot && (tkAcik || (acik && d === 'yanlis')), () => html`<div class="ders__taktik-kutu small mt-8 mb-8">
@@ -812,6 +877,7 @@ R.Screens = R.Screens || {};
       </div>`)}
       ${when(acik, () => html`<div class="${cls('ogr-sonuc', 'is-' + d)}">
         <p class="small"><b>${sonuc}</b></p>
+        ${when(v && v.sure, () => tempoRozeti(v.sure, o.ders))}
         ${o.ust || ''}
         <div class="ders__etiket tiny mt-10">Çözüm</div>
         <ol class="ders__adimlar">${map(dizi(q.cozum), s => html`<li>${fmt(s)}</li>`)}</ol>
@@ -863,6 +929,7 @@ R.Screens = R.Screens || {};
         ${noktalar(l.length, i, k => durumOf(l[k], c[k]), 'soru-git')}
         ${soruGovdesi(q, v, { etiket:'Soru ' + (i + 1) + ' / ' + l.length, seviye:O().seviye(topic.id, i),
           ipucu:'konu:' + topic.id + '#' + i, taktik:'konu:' + topic.id, taktikNot:O().akilliNot(topic.id),
+          ders:subject.id,
           cevapAct:'soru-cevap', bakAct:'soru-bak',
           eylemler:soruEylemleri({ subject, topic, i, q }, v, null) })}
         <div class="row between wrap gap-6 mt-16">
@@ -946,6 +1013,7 @@ R.Screens = R.Screens || {};
         ${noktalar(y.toplam, y.sira, durum, 'test-git')}
         ${soruGovdesi(y.s.q, y.v, { etiket:'Soru ' + (y.sira + 1) + ' / ' + y.toplam, seviye:O().seviye(y.s.topic.id, y.s.i),
           ipucu:'test:' + a.id + '#' + y.sira, cevapAct:'test-cevap', bakAct:'test-bak',
+          ders:y.s.subject.id,
           ust, eylemler:soruEylemleri(y.s, y.v, y.s.k) })}
         ${nav}${erken}` });
   }
@@ -960,6 +1028,10 @@ R.Screens = R.Screens || {};
           ${K.Stat({ label:'Boş', value:oz.bos })}
           ${K.Stat({ label:'Çözüme bakıldı', value:oz.bakildi })}
         </div>
+        ${when(oz.ortSure, () => html`<div class="mt-10 row gap-6 align-center">
+          ${K.Chip({ label:'Ortalama ' + oz.ortSure + ' sn / soru', tone:oz.ortSure <= 80 ? 'ok' : oz.ortSure <= 120 ? 'warn' : 'danger' })}
+          <span class="tiny dim">${oz.ortSure <= 80 ? '⚡ seri tempo (sınav ritmi)' : oz.ortSure <= 120 ? '⏱️ dengeli tempo' : '⏳ yavaş tempo'}</span>
+        </div>`)}
         ${when(oz.konular.length, () => html`<div class="ders__etiket tiny mt-16">Konu konu · yanlışı olan önce</div>
           <div class="list list--sik" data-raf-tam>${map(oz.konular, k => html`<div class="listitem ogr-konu">
             <span class="${cls('ogr-konu__no', k.dogru === k.n ? 'is-tamam' : 'is-eksik')}" aria-hidden="true">${raw(UI.icon(k.dogru === k.n ? 'check' : 'close'))}</span>
@@ -1014,12 +1086,13 @@ R.Screens = R.Screens || {};
     const t = S.ui.ogrTekrar;
     const s = t && T().soruOf(t.k);
     if(!s){ S.ui.ogrTekrar = null; return yanlisListesi(); }
-    const v = t.h ? { h:t.h, ip:t.ip } : null;
+    const v = t.h ? { h:t.h, ip:t.ip, sure:t.sure } : null;
     const kalan = T().yanlislar(S.ui.yanlisDers || 'hepsi').filter(y => y.k !== t.k);
     return K.Card({ wide:true,
       body:html`${kartBasi('Yeniden çöz', s.subject.name + ' · ' + s.topic.name + (kalan.length ? ' · ' + kalan.length + ' yanlış daha' : ''),
           K.Button({ label:'Listeye dön', size:'sm', tone:'ghost', act:'tekrar-kapat' }))}
         ${soruGovdesi(s.q, v, { etiket:soruAdi(s), seviye:O().seviye(s.topic.id, s.i), ipucu:'tekrar:' + s.k, cevapAct:'tekrar-cevap',
+          ders:s.subject.id,
           ust:v && v.h === s.q.dogru ? html`<p class="tiny dim mt-6">Doğru çözdün: Yanlışlarım’dan düştü.</p>` : '',
           eylemler:soruEylemleri(s, v, s.k) })}
         ${when(v, () => html`<div class="row between wrap gap-6 mt-16">
@@ -1078,6 +1151,7 @@ R.Screens = R.Screens || {};
         ${noktalar(l.length, i, k => durumOf(l[k], g.cevaplar[l[k].id]), 'par-git')}
         ${soruGovdesi(q, v, { etiket:'Paragraf ' + (i + 1) + ' / ' + l.length + ' · ' + (x.topic ? x.topic.name : ''), seviye:q.seviye || 'orta',
           ipucu:'par:' + q.id, cevapAct:'par-cevap', bakAct:'par-bak',
+          ders:'tyt-turkce',
           eylemler:x.topic ? soruEylemleri({ subject:x.subject, topic:x.topic, i:q.id, q }, v, ak) : '' })}
         <div class="row between wrap gap-6 mt-16">
           ${i > 0 ? K.Button({ label:'Önceki', icon:'left', size:'sm', tone:'ghost', act:'par-git', data:{ 'data-i':String(i - 1) } }) : html`<span></span>`}
@@ -1139,6 +1213,7 @@ R.Screens = R.Screens || {};
     async render(){
       const kip = kipOf();
       const sekme = raw(kipSekmeleri(kip));
+      setTimeout(baslatSoruSayac, 30);
       if(kip === 'karma') return String(K.Grid([K.Span(12, K.Stack([sekme].concat(karmaKip())))]));
       if(kip === 'yanlis') return String(K.Grid([K.Span(12, K.Stack([sekme].concat(yanlisKip())))]));
       if(kip === 'paragraf'){
@@ -1151,23 +1226,25 @@ R.Screens = R.Screens || {};
     },
     handle:Object.assign({}, ortakHandle, {
       /* Bu konu */
-      async 'soru-git'(el){ S.ui.ogrenSoru = Number(el.dataset.i) || 0; R.App.render(); },
+      async 'soru-git'(el){ S.ui.ogrenSoru = Number(el.dataset.i) || 0; soruSifirlaSure(); R.App.render(); },
       async 'soru-cevap'(el){
         const x = O().secili(), { i } = soruNo(x);
-        await O().cevapla(x.subject.id, x.topic.id, i, el.dataset.harf, S.ui.ipucu === 'konu:' + x.topic.id + '#' + i);
+        const sure = gecenSure();
+        await O().cevapla(x.subject.id, x.topic.id, i, el.dataset.harf, S.ui.ipucu === 'konu:' + x.topic.id + '#' + i, sure);
         R.App.render();
       },
       async 'soru-ipucu'(el){ S.ui.ipucu = el.dataset.ip || null; R.App.render(); },
       async 'soru-taktik'(el){ S.ui.taktik = S.ui.taktik === el.dataset.tk ? null : el.dataset.tk; R.App.render(); },
       async 'soru-bak'(){
         const x = O().secili(), { i } = soruNo(x);
-        await O().bak(x.subject.id, x.topic.id, i);
+        const sure = gecenSure();
+        await O().bak(x.subject.id, x.topic.id, i, sure);
         R.App.render();
       },
       async 'soru-sifirla'(){
         const x = O().secili();
         UI.confirmSheet('Baştan çöz', 'Bu konudaki örnek soru cevapların silinir; yeniden çözdüğünde yeni ilk cevabın sayılır.',
-          async () => { await O().sifirla(x.subject.id, x.topic.id); S.ui.ogrenSoru = 0; R.App.render(); }, false, 'Baştan çöz');
+          async () => { await O().sifirla(x.subject.id, x.topic.id); S.ui.ogrenSoru = 0; soruSifirlaSure(); R.App.render(); }, false, 'Baştan çöz');
       },
       /* Üç kipte ortak: soruyu koça, karta, deftere. */
       async 'soru-koca'(el){
@@ -1237,30 +1314,39 @@ R.Screens = R.Screens || {};
         const r = await T().baslat({ ders:k.ders, konular:k.konular, seviye:k.seviye }, S.ui.karmaBoy || T().BOYLAR[0]);
         if(!r.ok){ UI.toast(r.metin, { life:6000 }); return; }
         S.ui.karmaSonuc = null;
+        soruSifirlaSure();
         window.scrollTo(0, 0);
         R.App.render();
       },
-      async 'test-git'(el){ await T().git(Number(el.dataset.i) || 0); R.App.render(); },
+      async 'test-git'(el){ await T().git(Number(el.dataset.i) || 0); soruSifirlaSure(); R.App.render(); },
       async 'test-cevap'(el){
         const y = T().siradaki(), a = T().aktif();
-        if(y) await T().cevapla(y.sira, el.dataset.harf, S.ui.ipucu === 'test:' + a.id + '#' + y.sira);
+        const sure = gecenSure();
+        if(y) await T().cevapla(y.sira, el.dataset.harf, S.ui.ipucu === 'test:' + a.id + '#' + y.sira, sure);
         R.App.render();
       },
-      async 'test-bak'(){ const y = T().siradaki(); if(y) await T().bak(y.sira); R.App.render(); },
+      async 'test-bak'(){
+        const y = T().siradaki();
+        const sure = gecenSure();
+        if(y) await T().bak(y.sira, sure);
+        R.App.render();
+      },
       /* Günlük paragraf */
-      async 'par-ac'(){ S.ui.ogrenKip = 'paragraf'; S.ui.ogrTekrar = null; R.App.render(); },
-      async 'par-git'(el){ S.ui.parSira = Number(el.dataset.i) || 0; R.App.render(); },
+      async 'par-ac'(){ S.ui.ogrenKip = 'paragraf'; S.ui.ogrTekrar = null; soruSifirlaSure(); R.App.render(); },
+      async 'par-git'(el){ S.ui.parSira = Number(el.dataset.i) || 0; soruSifirlaSure(); R.App.render(); },
       async 'par-cevap'(el){
         const g = P().gunu(), i = Math.max(0, Number(S.ui.parSira) || 0), id = g && g.sorular[i];
-        if(id) await P().cevapla(id, el.dataset.harf, S.ui.ipucu === 'par:' + id);
+        const sure = gecenSure();
+        if(id) await P().cevapla(id, el.dataset.harf, S.ui.ipucu === 'par:' + id, sure);
         R.App.render();
       },
       async 'par-bak'(){
         const g = P().gunu(), id = g && g.sorular[Math.max(0, Number(S.ui.parSira) || 0)];
-        if(id) await P().bak(id);
+        const sure = gecenSure();
+        if(id) await P().bak(id, sure);
         R.App.render();
       },
-      async 'par-boy'(el){ await P().boyAyarla(Number(el.dataset.n)); S.ui.parSira = 0; R.App.render(); },
+      async 'par-boy'(el){ await P().boyAyarla(Number(el.dataset.n)); S.ui.parSira = 0; soruSifirlaSure(); R.App.render(); },
       async 'par-yaz'(){
         const r = await P().gunKaydinaYaz();
         UI.toast(r.ok ? 'Bugünün paragraf sayısına +' + r.n + ' yazıldı · Onaylar’dan geri alınabilir' : r.why);
@@ -1279,16 +1365,17 @@ R.Screens = R.Screens || {};
           async () => { await T().vazgec(); R.App.render(); }, true, 'Vazgeç');
       },
       async 'karma-sonuc'(el){ S.ui.karmaSonuc = el.dataset.id; window.scrollTo(0, 0); R.App.render(); },
-      async 'karma-yeni'(){ S.ui.karmaSonuc = null; R.App.render(); },
+      async 'karma-yeni'(){ S.ui.karmaSonuc = null; soruSifirlaSure(); R.App.render(); },
       /* Yanlışlarım */
-      async 'tekrar-ac'(el){ S.ui.ogrTekrar = { k:el.dataset.k, h:null }; window.scrollTo(0, 0); R.App.render(); },
+      async 'tekrar-ac'(el){ S.ui.ogrTekrar = { k:el.dataset.k, h:null }; soruSifirlaSure(); window.scrollTo(0, 0); R.App.render(); },
       async 'tekrar-kapat'(){ S.ui.ogrTekrar = null; R.App.render(); },
       async 'tekrar-cevap'(el){
         const t = S.ui.ogrTekrar;
         if(!t || t.h) return;
         const ip = S.ui.ipucu === 'tekrar:' + t.k;
-        const r = await T().tekrarCevapla(t.k, el.dataset.harf, ip);
-        if(r.ok){ t.h = String(el.dataset.harf).toUpperCase(); t.ip = ip; }
+        const sure = gecenSure();
+        const r = await T().tekrarCevapla(t.k, el.dataset.harf, ip, sure);
+        if(r.ok){ t.h = String(el.dataset.harf).toUpperCase(); t.ip = ip; t.sure = sure; }
         R.App.render();
       },
     }),

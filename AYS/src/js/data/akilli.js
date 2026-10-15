@@ -1393,8 +1393,8 @@ R.AKILLI_NOTLAR = {
         "cevap": "2 mol NH₃; 3 mol H₂ artar."
       },
       {
-        "soru": "Aynı denklemde 2 mol N₂ ve 3 mol H₂ ile ideal tam tepkimede?",
-        "cevap": "2 mol NH₃; 1 mol N₂ artar. Molü daha çok olan H₂ sınırlayıcıdır."
+        "soru": "N₂ + 3H₂ → 2NH₃ tepkimesine 3 mol N₂ ve 6 mol H₂ giriyor. İdeal tam tepkimede kaç mol NH₃ oluşur, hangi maddeden ne kadar artar?",
+        "cevap": "N₂ için 3/1=3, H₂ için 6/3=2; H₂ sınırlayıcıdır. 4 mol NH₃ oluşur ve 1 mol N₂ artar."
       }
     ]
   },
@@ -1421,8 +1421,8 @@ R.AKILLI_NOTLAR = {
         "cevap": "2 mol NH₃; 3 mol H₂ artar."
       },
       {
-        "soru": "Aynı denklemde 2 mol N₂ ve 3 mol H₂ ile ideal tam tepkimede?",
-        "cevap": "2 mol NH₃; 1 mol N₂ artar. Molü daha çok olan H₂ sınırlayıcıdır."
+        "soru": "N₂ + 3H₂ → 2NH₃ tepkimesine 3 mol N₂ ve 6 mol H₂ giriyor. İdeal tam tepkimede kaç mol NH₃ oluşur, hangi maddeden ne kadar artar?",
+        "cevap": "N₂ için 3/1=3, H₂ için 6/3=2; H₂ sınırlayıcıdır. 4 mol NH₃ oluşur ve 1 mol N₂ artar."
       }
     ]
   },
@@ -1518,7 +1518,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-02": [
@@ -1526,7 +1528,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-03": [
@@ -1534,7 +1538,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-04": [
@@ -1542,7 +1548,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-05": [
@@ -1550,7 +1558,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-06": [
@@ -1558,7 +1568,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-07": [
@@ -1566,7 +1578,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-08": [
@@ -1574,7 +1588,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-09": [
@@ -1582,7 +1598,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-10": [
@@ -1590,7 +1608,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-11": [
@@ -1598,19 +1618,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "tdk-yazim",
       "baslik": "Yazım Kılavuzu",
       "kurum": "Türk Dil Kurumu",
-      "url": "https://yazim.tdk.gov.tr/"
+      "url": "https://yazim.tdk.gov.tr/",
+      "kaynak_rolu": "resmî_dil_başvurusu",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "tdk-ekler",
       "baslik": "Bazı kelime ve eklerin yazılışı",
       "kurum": "Türk Dil Kurumu",
-      "url": "https://yazim.tdk.gov.tr/content/03-bazi-kelime-ve-eklerin-yazilisi.html"
+      "url": "https://yazim.tdk.gov.tr/content/03-bazi-kelime-ve-eklerin-yazilisi.html",
+      "kaynak_rolu": "resmî_dil_başvurusu",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-12": [
@@ -1618,19 +1644,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "tdk-yazim",
       "baslik": "Yazım Kılavuzu",
       "kurum": "Türk Dil Kurumu",
-      "url": "https://yazim.tdk.gov.tr/"
+      "url": "https://yazim.tdk.gov.tr/",
+      "kaynak_rolu": "resmî_dil_başvurusu",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "tdk-noktalama",
       "baslik": "Noktalama işaretleri",
       "kurum": "Türk Dil Kurumu",
-      "url": "https://yazim.tdk.gov.tr/content/09-noktalama-isaretleri.html"
+      "url": "https://yazim.tdk.gov.tr/content/09-noktalama-isaretleri.html",
+      "kaynak_rolu": "resmî_dil_başvurusu",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-13": [
@@ -1638,7 +1670,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-14": [
@@ -1646,7 +1680,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-15": [
@@ -1654,7 +1690,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-16": [
@@ -1662,7 +1700,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-17": [
@@ -1670,7 +1710,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-18": [
@@ -1678,7 +1720,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-19": [
@@ -1686,7 +1730,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-20": [
@@ -1694,7 +1740,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tr-21": [
@@ -1702,7 +1750,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-turkce",
       "baslik": "TYT Türkçe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-turkce/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-01": [
@@ -1710,13 +1760,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-02": [
@@ -1724,13 +1778,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-03": [
@@ -1738,13 +1796,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-04": [
@@ -1752,13 +1814,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-05": [
@@ -1766,19 +1832,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "phet-kesir",
-      "baslik": "Kesirler: Giriş",
+      "baslik": "Yardımcı kaynak — Kesirler: Giriş",
       "kurum": "University of Colorado Boulder / PhET",
-      "url": "https://phet.colorado.edu/tr/simulations/fractions-intro"
+      "url": "https://phet.colorado.edu/tr/simulations/fractions-intro",
+      "kaynak_rolu": "yardımcı_simülasyon",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-06": [
@@ -1786,13 +1858,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-07": [
@@ -1800,13 +1876,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-08": [
@@ -1814,13 +1894,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-09": [
@@ -1828,13 +1912,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-10": [
@@ -1842,13 +1930,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-11": [
@@ -1856,13 +1948,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-12": [
@@ -1870,13 +1966,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-13": [
@@ -1884,19 +1984,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "phet-kesir",
-      "baslik": "Kesirler: Giriş",
+      "baslik": "Yardımcı kaynak — Kesirler: Giriş",
       "kurum": "University of Colorado Boulder / PhET",
-      "url": "https://phet.colorado.edu/tr/simulations/fractions-intro"
+      "url": "https://phet.colorado.edu/tr/simulations/fractions-intro",
+      "kaynak_rolu": "yardımcı_simülasyon",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-14": [
@@ -1904,13 +2010,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-15": [
@@ -1918,13 +2028,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-16": [
@@ -1932,13 +2046,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-17": [
@@ -1946,13 +2064,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-18": [
@@ -1960,13 +2082,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-19": [
@@ -1974,13 +2100,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-20": [
@@ -1988,13 +2118,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-21": [
@@ -2002,13 +2136,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-22": [
@@ -2016,13 +2154,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-23": [
@@ -2030,13 +2172,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-24": [
@@ -2044,13 +2190,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-25": [
@@ -2058,13 +2208,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-26": [
@@ -2072,13 +2226,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-27": [
@@ -2086,13 +2244,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-28": [
@@ -2100,13 +2262,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-29": [
@@ -2114,13 +2280,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-30": [
@@ -2128,13 +2298,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-31": [
@@ -2142,13 +2316,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-32": [
@@ -2156,13 +2334,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-33": [
@@ -2170,13 +2352,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-34": [
@@ -2184,13 +2370,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tm-35": [
@@ -2198,13 +2388,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-b1": [
@@ -2212,19 +2406,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-biyoloji",
       "baslik": "TYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-b2": [
@@ -2232,19 +2432,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-biyoloji",
       "baslik": "TYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-b3": [
@@ -2252,19 +2458,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-biyoloji",
       "baslik": "TYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-b4": [
@@ -2272,19 +2484,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-biyoloji",
       "baslik": "TYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-b5": [
@@ -2292,19 +2510,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-biyoloji",
       "baslik": "TYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-b6": [
@@ -2312,19 +2536,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-biyoloji",
       "baslik": "TYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-k1": [
@@ -2332,19 +2562,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-kimya",
       "baslik": "TYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-k2": [
@@ -2352,19 +2588,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-kimya",
       "baslik": "TYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-k3": [
@@ -2372,19 +2614,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-kimya",
       "baslik": "TYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-k4": [
@@ -2392,19 +2640,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-kimya",
       "baslik": "TYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-k5": [
@@ -2412,19 +2666,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-kimya",
       "baslik": "TYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-k6": [
@@ -2432,19 +2692,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-kimya",
       "baslik": "TYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-k7": [
@@ -2452,25 +2718,33 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-kimya",
       "baslik": "TYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "phet-asit-baz",
-      "baslik": "Asit–Baz Çözeltileri",
+      "baslik": "Yardımcı kaynak — Asit–Baz Çözeltileri",
       "kurum": "University of Colorado Boulder / PhET",
-      "url": "https://phet.colorado.edu/tr/simulations/acid-base-solutions"
+      "url": "https://phet.colorado.edu/tr/simulations/acid-base-solutions",
+      "kaynak_rolu": "yardımcı_simülasyon",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-k8": [
@@ -2478,19 +2752,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-kimya",
       "baslik": "TYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-f1": [
@@ -2498,19 +2778,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-fizik",
       "baslik": "TYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-f2": [
@@ -2518,19 +2804,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-fizik",
       "baslik": "TYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-f3": [
@@ -2538,19 +2830,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-fizik",
       "baslik": "TYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-f4": [
@@ -2558,19 +2856,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-fizik",
       "baslik": "TYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-f5": [
@@ -2578,19 +2882,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-fizik",
       "baslik": "TYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-f6": [
@@ -2598,19 +2908,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-fizik",
       "baslik": "TYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-f7": [
@@ -2618,19 +2934,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-fizik",
       "baslik": "TYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-f8": [
@@ -2638,19 +2960,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-fizik",
       "baslik": "TYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-f9": [
@@ -2658,25 +2986,33 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-fizik",
       "baslik": "TYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "phet-devre",
-      "baslik": "Devre Kurulum Aracı: DC",
+      "baslik": "Yardımcı kaynak — Devre Kurulum Aracı: DC",
       "kurum": "University of Colorado Boulder / PhET",
-      "url": "https://phet.colorado.edu/tr/simulations/circuit-construction-kit-dc"
+      "url": "https://phet.colorado.edu/tr/simulations/circuit-construction-kit-dc",
+      "kaynak_rolu": "yardımcı_simülasyon",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-f10": [
@@ -2684,19 +3020,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-fizik",
       "baslik": "TYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-f11": [
@@ -2704,19 +3046,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-fizik",
       "baslik": "TYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "tf-f12": [
@@ -2724,19 +3072,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-fizik",
       "baslik": "TYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-d1": [
@@ -2744,7 +3098,9 @@ R.KONU_KAYNAKLAR = {
       "id": "meb-din",
       "baslik": "Din Kültürü ve Ahlak Bilgisi 9–12 programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=319"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=319",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-d2": [
@@ -2752,7 +3108,9 @@ R.KONU_KAYNAKLAR = {
       "id": "meb-din",
       "baslik": "Din Kültürü ve Ahlak Bilgisi 9–12 programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=319"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=319",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-d3": [
@@ -2760,7 +3118,9 @@ R.KONU_KAYNAKLAR = {
       "id": "meb-din",
       "baslik": "Din Kültürü ve Ahlak Bilgisi 9–12 programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=319"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=319",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-d4": [
@@ -2768,7 +3128,9 @@ R.KONU_KAYNAKLAR = {
       "id": "meb-din",
       "baslik": "Din Kültürü ve Ahlak Bilgisi 9–12 programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=319"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=319",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-d5": [
@@ -2776,7 +3138,9 @@ R.KONU_KAYNAKLAR = {
       "id": "meb-din",
       "baslik": "Din Kültürü ve Ahlak Bilgisi 9–12 programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=319"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=319",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-c1": [
@@ -2784,13 +3148,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-cografya",
       "baslik": "TYT Coğrafya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-cografya",
       "baslik": "Coğrafya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-c2": [
@@ -2798,13 +3166,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-cografya",
       "baslik": "TYT Coğrafya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-cografya",
       "baslik": "Coğrafya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-c3": [
@@ -2812,13 +3184,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-cografya",
       "baslik": "TYT Coğrafya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-cografya",
       "baslik": "Coğrafya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-c4": [
@@ -2826,13 +3202,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-cografya",
       "baslik": "TYT Coğrafya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-cografya",
       "baslik": "Coğrafya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-c5": [
@@ -2840,13 +3220,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-cografya",
       "baslik": "TYT Coğrafya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-cografya",
       "baslik": "Coğrafya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-c6": [
@@ -2854,13 +3238,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-cografya",
       "baslik": "TYT Coğrafya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-cografya",
       "baslik": "Coğrafya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-c7": [
@@ -2868,13 +3256,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-cografya",
       "baslik": "TYT Coğrafya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-cografya",
       "baslik": "Coğrafya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-c8": [
@@ -2882,13 +3274,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-cografya",
       "baslik": "TYT Coğrafya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-cografya",
       "baslik": "Coğrafya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-c9": [
@@ -2896,13 +3292,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-cografya",
       "baslik": "TYT Coğrafya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-cografya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-cografya",
       "baslik": "Coğrafya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=336",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-f1": [
@@ -2910,13 +3310,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-ayt-felsefe",
       "baslik": "TYT Felsefe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-ayt-felsefe/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-ayt-felsefe/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-felsefe",
       "baslik": "Felsefe önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=338"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=338",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-f2": [
@@ -2924,13 +3328,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-ayt-felsefe",
       "baslik": "TYT Felsefe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-ayt-felsefe/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-ayt-felsefe/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-felsefe",
       "baslik": "Felsefe önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=338"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=338",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-f3": [
@@ -2938,13 +3346,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-ayt-felsefe",
       "baslik": "TYT Felsefe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-ayt-felsefe/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-ayt-felsefe/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-felsefe",
       "baslik": "Felsefe önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=338"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=338",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-f4": [
@@ -2952,13 +3364,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-ayt-felsefe",
       "baslik": "TYT Felsefe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-ayt-felsefe/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-ayt-felsefe/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-felsefe",
       "baslik": "Felsefe önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=338"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=338",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-f5": [
@@ -2966,13 +3382,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-ayt-felsefe",
       "baslik": "TYT Felsefe Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-ayt-felsefe/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-ayt-felsefe/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-felsefe",
       "baslik": "Felsefe önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=338"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=338",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-f6": [
@@ -2980,7 +3400,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-psikoloji",
       "baslik": "AYT Psikoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-psikoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-psikoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-f7": [
@@ -2988,7 +3410,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-sosyoloji",
       "baslik": "AYT Sosyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-sosyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-sosyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-f8": [
@@ -2996,7 +3420,9 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-mantik",
       "baslik": "AYT Mantık Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-mantik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-mantik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-t1": [
@@ -3004,13 +3430,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-tarih",
       "baslik": "TYT Tarih Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-programlar",
       "baslik": "Öğretim programları dizini",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/Programlar.aspx"
+      "url": "https://mufredat.meb.gov.tr/Programlar.aspx",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-t2": [
@@ -3018,13 +3448,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-tarih",
       "baslik": "TYT Tarih Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-programlar",
       "baslik": "Öğretim programları dizini",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/Programlar.aspx"
+      "url": "https://mufredat.meb.gov.tr/Programlar.aspx",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-t3": [
@@ -3032,13 +3466,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-tarih",
       "baslik": "TYT Tarih Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-programlar",
       "baslik": "Öğretim programları dizini",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/Programlar.aspx"
+      "url": "https://mufredat.meb.gov.tr/Programlar.aspx",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-t4": [
@@ -3046,13 +3484,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-tarih",
       "baslik": "TYT Tarih Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-programlar",
       "baslik": "Öğretim programları dizini",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/Programlar.aspx"
+      "url": "https://mufredat.meb.gov.tr/Programlar.aspx",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-t5": [
@@ -3060,13 +3502,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-tarih",
       "baslik": "TYT Tarih Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-programlar",
       "baslik": "Öğretim programları dizini",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/Programlar.aspx"
+      "url": "https://mufredat.meb.gov.tr/Programlar.aspx",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-t6": [
@@ -3074,13 +3520,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-tarih",
       "baslik": "TYT Tarih Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-programlar",
       "baslik": "Öğretim programları dizini",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/Programlar.aspx"
+      "url": "https://mufredat.meb.gov.tr/Programlar.aspx",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-t7": [
@@ -3088,13 +3538,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-tarih",
       "baslik": "TYT Tarih Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-programlar",
       "baslik": "Öğretim programları dizini",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/Programlar.aspx"
+      "url": "https://mufredat.meb.gov.tr/Programlar.aspx",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ts-t8": [
@@ -3102,13 +3556,17 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-tyt-tarih",
       "baslik": "TYT Tarih Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-tarih/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-programlar",
       "baslik": "Öğretim programları dizini",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/Programlar.aspx"
+      "url": "https://mufredat.meb.gov.tr/Programlar.aspx",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-01": [
@@ -3116,19 +3574,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-02": [
@@ -3136,19 +3600,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-03": [
@@ -3156,19 +3626,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-04": [
@@ -3176,19 +3652,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-05": [
@@ -3196,19 +3678,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-06": [
@@ -3216,19 +3704,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-07": [
@@ -3236,19 +3730,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-08": [
@@ -3256,19 +3756,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-09": [
@@ -3276,19 +3782,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-10": [
@@ -3296,19 +3808,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-11": [
@@ -3316,19 +3834,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-12": [
@@ -3336,19 +3860,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-13": [
@@ -3356,19 +3886,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-14": [
@@ -3376,19 +3912,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-15": [
@@ -3396,19 +3938,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-16": [
@@ -3416,19 +3964,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-17": [
@@ -3436,19 +3990,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-18": [
@@ -3456,19 +4016,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-19": [
@@ -3476,19 +4042,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-20": [
@@ -3496,19 +4068,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-21": [
@@ -3516,19 +4094,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "am-22": [
@@ -3536,19 +4120,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-matematik",
       "baslik": "AYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-matematik",
       "baslik": "Matematik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=343",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "ogm-tyt-matematik",
       "baslik": "TYT Matematik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/tyt-matematik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-01": [
@@ -3556,25 +4146,33 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "phet-atis",
-      "baslik": "Atış hareketi",
+      "baslik": "Yardımcı kaynak — Atış hareketi",
       "kurum": "University of Colorado Boulder / PhET",
-      "url": "https://phet.colorado.edu/tr/simulations/projectile-motion"
+      "url": "https://phet.colorado.edu/tr/simulations/projectile-motion",
+      "kaynak_rolu": "yardımcı_simülasyon",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-02": [
@@ -3582,19 +4180,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-03": [
@@ -3602,19 +4206,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-04": [
@@ -3622,19 +4232,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-05": [
@@ -3642,25 +4258,33 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "phet-atis",
-      "baslik": "Atış hareketi",
+      "baslik": "Yardımcı kaynak — Atış hareketi",
       "kurum": "University of Colorado Boulder / PhET",
-      "url": "https://phet.colorado.edu/tr/simulations/projectile-motion"
+      "url": "https://phet.colorado.edu/tr/simulations/projectile-motion",
+      "kaynak_rolu": "yardımcı_simülasyon",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-06": [
@@ -3668,19 +4292,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-07": [
@@ -3688,19 +4318,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-08": [
@@ -3708,19 +4344,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-09": [
@@ -3728,19 +4370,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-10": [
@@ -3748,19 +4396,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-11": [
@@ -3768,19 +4422,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-12": [
@@ -3788,19 +4448,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-13": [
@@ -3808,19 +4474,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-14": [
@@ -3828,19 +4500,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-15": [
@@ -3848,19 +4526,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-16": [
@@ -3868,19 +4552,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-17": [
@@ -3888,19 +4578,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "af-18": [
@@ -3908,19 +4604,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-fizik",
       "baslik": "AYT Fizik Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-fizik/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-fizik",
       "baslik": "Fizik önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=351",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-fizik",
-      "baslik": "College Physics 2e",
+      "baslik": "Yardımcı kaynak — College Physics 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/college-physics-2e/pages/preface"
+      "url": "https://openstax.org/books/college-physics-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-01": [
@@ -3928,19 +4630,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-02": [
@@ -3948,19 +4656,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-03": [
@@ -3968,19 +4682,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-04": [
@@ -3988,19 +4708,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-05": [
@@ -4008,19 +4734,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-06": [
@@ -4028,19 +4760,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-07": [
@@ -4048,19 +4786,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-08": [
@@ -4068,25 +4812,33 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "phet-asit-baz",
-      "baslik": "Asit–Baz Çözeltileri",
+      "baslik": "Yardımcı kaynak — Asit–Baz Çözeltileri",
       "kurum": "University of Colorado Boulder / PhET",
-      "url": "https://phet.colorado.edu/tr/simulations/acid-base-solutions"
+      "url": "https://phet.colorado.edu/tr/simulations/acid-base-solutions",
+      "kaynak_rolu": "yardımcı_simülasyon",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-09": [
@@ -4094,19 +4846,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-10": [
@@ -4114,19 +4872,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-11": [
@@ -4134,19 +4898,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-12": [
@@ -4154,19 +4924,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ak-13": [
@@ -4174,19 +4950,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-kimya",
       "baslik": "AYT Kimya Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-kimya/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-kimya",
       "baslik": "Kimya önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=350",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-kimya",
-      "baslik": "Chemistry 2e",
+      "baslik": "Yardımcı kaynak — Chemistry 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/chemistry-2e/pages/preface"
+      "url": "https://openstax.org/books/chemistry-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-01": [
@@ -4194,19 +4976,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-02": [
@@ -4214,19 +5002,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-03": [
@@ -4234,19 +5028,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-04": [
@@ -4254,19 +5054,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-05": [
@@ -4274,19 +5080,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-06": [
@@ -4294,25 +5106,33 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "phet-noron",
-      "baslik": "Nöron",
+      "baslik": "Yardımcı kaynak — Nöron",
       "kurum": "University of Colorado Boulder / PhET",
-      "url": "https://phet.colorado.edu/tr/simulations/neuron"
+      "url": "https://phet.colorado.edu/tr/simulations/neuron",
+      "kaynak_rolu": "yardımcı_simülasyon",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-07": [
@@ -4320,19 +5140,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-08": [
@@ -4340,19 +5166,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-09": [
@@ -4360,19 +5192,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-10": [
@@ -4380,19 +5218,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-11": [
@@ -4400,19 +5244,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-12": [
@@ -4420,19 +5270,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-13": [
@@ -4440,19 +5296,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-14": [
@@ -4460,19 +5322,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-15": [
@@ -4480,19 +5348,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-16": [
@@ -4500,19 +5374,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-17": [
@@ -4520,19 +5400,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-18": [
@@ -4540,19 +5426,25 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ],
   "ab-19": [
@@ -4560,25 +5452,33 @@ R.KONU_KAYNAKLAR = {
       "id": "ogm-ayt-biyoloji",
       "baslik": "AYT Biyoloji Konu Özeti",
       "kurum": "MEB OGM / MEBİ",
-      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html"
+      "url": "https://ogm-large-cdn.eba.gov.tr/ogm-materyal/mebi-konu-ozetleri/ayt-biyoloji/index.html",
+      "kaynak_rolu": "resmî_konu_özeti",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "meb-biyoloji",
       "baslik": "Biyoloji önceki öğretim programı",
       "kurum": "MEB TTKB",
-      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361"
+      "url": "https://mufredat.meb.gov.tr/ProgramDetay.aspx?PID=361",
+      "kaynak_rolu": "resmî_program_adayı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "openstax-biyoloji",
-      "baslik": "Biology 2e",
+      "baslik": "Yardımcı kaynak — Biology 2e",
       "kurum": "OpenStax / Rice University",
-      "url": "https://openstax.org/books/biology-2e/pages/preface"
+      "url": "https://openstax.org/books/biology-2e/pages/preface",
+      "kaynak_rolu": "yardımcı_kavram_kaynağı",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     },
     {
       "id": "phet-secilim",
-      "baslik": "Doğal seçilim",
+      "baslik": "Yardımcı kaynak — Doğal seçilim",
       "kurum": "University of Colorado Boulder / PhET",
-      "url": "https://phet.colorado.edu/tr/simulations/natural-selection"
+      "url": "https://phet.colorado.edu/tr/simulations/natural-selection",
+      "kaynak_rolu": "yardımcı_simülasyon",
+      "kapsam_notu": "Bağlantı bulunması bu konunun bütün içeriğini veya belirli YKS yılını doğrulamaz."
     }
   ]
 };
@@ -4589,41 +5489,119 @@ R.OGRENME_STRATEJILERI = [
     "ad": "Notu kapatıp hatırla",
     "kullanim": "Kısa anlatım bittikten sonra tek kavramı veya çözüm yolunu yardım almadan üret.",
     "kontrol": "Ardından doğru açıklamayla karşılaştır; yanlış öğrenmeyi düzelt.",
-    "dayanak": "ogrenme-dunlosky-2013"
+    "dayanak": "ogrenme-dunlosky-2013",
+    "dayanak_kunye": {
+      "id": "ogrenme-dunlosky-2013",
+      "baslik": "Improving Students’ Learning With Effective Learning Techniques",
+      "kurum": "Dunlosky ve diğerleri / Psychological Science in the Public Interest",
+      "year": 2013,
+      "url": "https://www.psychologicalscience.org/journals/pspi/1529100612453266/",
+      "role": "araştırma_derlemesi",
+      "access_this_version": "Yayıncı özeti okundu; bütün çalışmalara ait bağımsız yeniden analiz yapılmadı.",
+      "limit": "Yöntemlerin genel bulguları AYS içeriğinin özel etki ölçümü değildir."
+    },
+    "kanit_siniri": "Kaynak genel yöntem desteği sağlar; bu uygulamadaki içerik ve zamanlamanın etkisi ölçülmedi.",
+    "uygulama_turu": "editör_uyarlaması",
+    "ays_etki_testi": false
   },
   {
     "id": "oy-02",
     "ad": "Gecikmeli yeniden dene",
     "kullanim": "Aynı beceriyi farklı bir oturumda, farklı bir örnekle yokla.",
     "kontrol": "Takvimde sabit bir gün aralığını herkes için en iyi diye sunma; hedef süre ve performansı kaydet.",
-    "dayanak": "ogrenme-dunlosky-2013"
+    "dayanak": "ogrenme-dunlosky-2013",
+    "dayanak_kunye": {
+      "id": "ogrenme-dunlosky-2013",
+      "baslik": "Improving Students’ Learning With Effective Learning Techniques",
+      "kurum": "Dunlosky ve diğerleri / Psychological Science in the Public Interest",
+      "year": 2013,
+      "url": "https://www.psychologicalscience.org/journals/pspi/1529100612453266/",
+      "role": "araştırma_derlemesi",
+      "access_this_version": "Yayıncı özeti okundu; bütün çalışmalara ait bağımsız yeniden analiz yapılmadı.",
+      "limit": "Yöntemlerin genel bulguları AYS içeriğinin özel etki ölçümü değildir."
+    },
+    "kanit_siniri": "Kaynak genel yöntem desteği sağlar; bu uygulamadaki içerik ve zamanlamanın etkisi ölçülmedi.",
+    "uygulama_turu": "editör_uyarlaması",
+    "ays_etki_testi": false
   },
   {
     "id": "oy-03",
     "ad": "Örnekten bağımsız çözüme geç",
     "kullanim": "İlk örneği gerekçeleriyle oku; sonraki örnekte eksik adımı tamamla; ardından kendi başına çöz.",
     "kontrol": "İpucu miktarı öğrencinin ön bilgisine göre azaltılır. Üç aşamalı sıra editör tasarımıdır.",
-    "dayanak": "ogrenme-ies-2007"
+    "dayanak": "ogrenme-ies-2007",
+    "dayanak_kunye": {
+      "id": "ogrenme-ies-2007",
+      "baslik": "Organizing Instruction and Study to Improve Student Learning",
+      "kurum": "IES / What Works Clearinghouse",
+      "year": 2007,
+      "url": "https://ies.ed.gov/ncee/wwc/PracticeGuide/1",
+      "role": "öğretim_uygulama_rehberi",
+      "access_this_version": "Resmî öneri ve kanıt düzeyi listesi okundu.",
+      "limit": "Rehberin öneri düzeyleri AYS görevi için doğrulama veya başarı garantisi değildir."
+    },
+    "kanit_siniri": "Kaynak genel yöntem desteği sağlar; bu uygulamadaki içerik ve zamanlamanın etkisi ölçülmedi.",
+    "uygulama_turu": "editör_uyarlaması",
+    "ays_etki_testi": false
   },
   {
     "id": "oy-04",
     "ad": "Bu adımı neden yaptım?",
     "kullanim": "Orta ve ileri çözümde kritik yöntem seçimini bir cümleyle gerekçelendir.",
     "kontrol": "Basit işlemde her satırı uzun açıklamaya dönüştürme.",
-    "dayanak": "ogrenme-dunlosky-2013"
+    "dayanak": "ogrenme-dunlosky-2013",
+    "dayanak_kunye": {
+      "id": "ogrenme-dunlosky-2013",
+      "baslik": "Improving Students’ Learning With Effective Learning Techniques",
+      "kurum": "Dunlosky ve diğerleri / Psychological Science in the Public Interest",
+      "year": 2013,
+      "url": "https://www.psychologicalscience.org/journals/pspi/1529100612453266/",
+      "role": "araştırma_derlemesi",
+      "access_this_version": "Yayıncı özeti okundu; bütün çalışmalara ait bağımsız yeniden analiz yapılmadı.",
+      "limit": "Yöntemlerin genel bulguları AYS içeriğinin özel etki ölçümü değildir."
+    },
+    "kanit_siniri": "Kaynak genel yöntem desteği sağlar; bu uygulamadaki içerik ve zamanlamanın etkisi ölçülmedi.",
+    "uygulama_turu": "editör_uyarlaması",
+    "ays_etki_testi": false
   },
   {
     "id": "oy-05",
     "ad": "Benzer yöntemleri ayır",
     "kullanim": "Temel alıştırmadan sonra yakın iki problem türünü karıştır; işlemden önce yöntemi seç.",
     "kontrol": "Ön koşul eksikken rastgele konu değiştirme. Yöntem seçiminin doğruluğunu sonuçtan ayrı izle.",
-    "dayanak": "ogrenme-dunlosky-2013"
+    "dayanak": "ogrenme-dunlosky-2013",
+    "dayanak_kunye": {
+      "id": "ogrenme-dunlosky-2013",
+      "baslik": "Improving Students’ Learning With Effective Learning Techniques",
+      "kurum": "Dunlosky ve diğerleri / Psychological Science in the Public Interest",
+      "year": 2013,
+      "url": "https://www.psychologicalscience.org/journals/pspi/1529100612453266/",
+      "role": "araştırma_derlemesi",
+      "access_this_version": "Yayıncı özeti okundu; bütün çalışmalara ait bağımsız yeniden analiz yapılmadı.",
+      "limit": "Yöntemlerin genel bulguları AYS içeriğinin özel etki ölçümü değildir."
+    },
+    "kanit_siniri": "Kaynak genel yöntem desteği sağlar; bu uygulamadaki içerik ve zamanlamanın etkisi ölçülmedi.",
+    "uygulama_turu": "editör_uyarlaması",
+    "ays_etki_testi": false
   },
   {
     "id": "oy-06",
     "ad": "Şekilden cümleye, cümleden şekle",
     "kullanim": "Grafik veya şemadaki tek ilişkiyi cümleyle açıkla; ardından ters yönde çiz.",
     "kontrol": "Dekoratif görsel yerine etiketli, birimli ve anlam taşıyan çizim kullan.",
-    "dayanak": "ogrenme-ies-2007"
+    "dayanak": "ogrenme-ies-2007",
+    "dayanak_kunye": {
+      "id": "ogrenme-ies-2007",
+      "baslik": "Organizing Instruction and Study to Improve Student Learning",
+      "kurum": "IES / What Works Clearinghouse",
+      "year": 2007,
+      "url": "https://ies.ed.gov/ncee/wwc/PracticeGuide/1",
+      "role": "öğretim_uygulama_rehberi",
+      "access_this_version": "Resmî öneri ve kanıt düzeyi listesi okundu.",
+      "limit": "Rehberin öneri düzeyleri AYS görevi için doğrulama veya başarı garantisi değildir."
+    },
+    "kanit_siniri": "Kaynak genel yöntem desteği sağlar; bu uygulamadaki içerik ve zamanlamanın etkisi ölçülmedi.",
+    "uygulama_turu": "editör_uyarlaması",
+    "ays_etki_testi": false
   }
 ];

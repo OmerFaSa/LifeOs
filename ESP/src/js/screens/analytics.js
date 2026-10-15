@@ -18,10 +18,11 @@ ESP.Screens.analytics = (function(){
   const K = ESP.C, P = ESP.Parts;
 
   const TABS = [
-    { id:'radar',   label:'Radar' },
-    { id:'seriler', label:'Seriler' },
-    { id:'rapor',   label:'Rapor' },
-    { id:'durust',  label:'Dürüstlük' },
+    { id:'radar',     label:'Radar' },
+    { id:'seriler',   label:'Seriler' },
+    { id:'rapor',     label:'Rapor' },
+    { id:'durust',    label:'Dürüstlük' },
+    { id:'rubrikler', label:'Rubrik & Analiz' },
   ];
 
   /* ------------------------------------------------------------------ radar */
@@ -433,10 +434,103 @@ ESP.Screens.analytics = (function(){
     ];
   }
 
+  /* ---------------------------------------------------------------- rubrikler */
+
+  function rubriklerRows(){
+    const discFilter = S.ui.anRubDisc || 'all';
+    let derinler = ESP.DERIN_ANALIZLER || [];
+    let rubler = ESP.RUBRIKLER || [];
+    let kademeler = ESP.KADEMELI_GERI_BILDIRIM || [];
+
+    if(discFilter !== 'all'){
+      derinler = derinler.filter(d => d.discipline === discFilter);
+      rubler = rubler.filter(r => r.discipline === discFilter);
+      kademeler = kademeler.filter(k => k.discipline === discFilter);
+    }
+
+    const discOptions = [{ value:'all', label:'Tüm disiplinler (7 alan)' }]
+      .concat(ESP.Mod.active().map(d => ({ value:d.id, label:d.label })));
+
+    return [
+      K.Entry({
+        label:'Disiplin Filtresi',
+        action:K.Select({ id:'an-rub-disc', value:discFilter, change:'an-rub-disc', size:'sm',
+          options:discOptions }),
+      }),
+
+      K.Entry({
+        label:'Derin Alan Analizleri', hint:'deep-analysis',
+        meta:derinler.length + ' derin analiz',
+        wide:true,
+        body:html`
+          <p class="small muted mb-10">Her disiplin için karar sıraları, 3 durum senaryosu, karşı örnekler ve veri sınırları.</p>
+          <div class="stack-sm">${map(derinler, da => {
+            const discName = (ESP.DISCIPLINE_BY_ID[da.discipline] || {}).label || da.discipline;
+            return html`
+              <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+                <div class="row between gap-8 mb-4">
+                  <b class="small">${U.esc(da.title)}</b>
+                  <span class="badge badge--muted tiny">${discName}</span>
+                </div>
+                <div class="small mb-6"><b>Karar Sırası:</b> ${(da.decision_order || []).join(' → ')}</div>
+                <div class="stack-xs mb-6">${map(da.cases || [], c => html`
+                  <div class="p-6 radius-xs bg-surface-1">
+                    <div class="tiny bold text-1">${U.esc(c.name)}:</div>
+                    <div class="tiny dim">${U.esc(c.condition)} → <span class="text-2">${U.esc(c.decision)}</span></div>
+                  </div>`)}</div>
+                ${when(da.counter_example, () => html`
+                  <div class="tiny dim mb-4"><b>Karşı Örnek:</b> ${U.esc(da.counter_example.text)}</div>`)}
+                <div class="tiny dim"><b>Veri Sınırı:</b> ${U.esc(da.data_boundary)}</div>
+              </div>`;
+          })}</div>`,
+      }),
+
+      K.Entry({
+        label:'Değerlendirme Rubrikleri & Boyutlar', hint:'rubric',
+        meta:rubler.length + ' rubrik · 22 boyut',
+        wide:true,
+        body:html`
+          <p class="small muted mb-10">0–3 puanlama skalası, gözlenebilir davranış çapaları ve değerlendirme kuralları.</p>
+          <div class="stack-sm">${map(rubler, rub => {
+            const discName = (ESP.DISCIPLINE_BY_ID[rub.discipline] || {}).label || rub.discipline;
+            return html`
+              <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+                <div class="row between gap-8 mb-4">
+                  <b class="small">${discName} Değerlendirme Rubriği</b>
+                  <span class="badge badge--muted tiny">${(rub.dimensions || []).length} boyut</span>
+                </div>
+                <p class="tiny dim mb-6">${U.esc(rub.rule)}</p>
+                <div class="stack-xs">${map(rub.dimensions || [], dim => html`
+                  <div class="p-6 radius-xs bg-surface-1 mb-4">
+                    <b class="tiny text-1">${U.esc(dim.name)}</b>
+                    <div class="stack-xs mt-4">${map(dim.anchors || [], a => html`
+                      <div class="tiny dim">
+                        <span class="bold" style="color:var(--primary)">${a.score} Puan:</span> ${U.esc(a.description)}
+                      </div>`)}</div>
+                  </div>`)}</div>
+              </div>`;
+          })}</div>`,
+      }),
+
+      when(kademeler.length, () => K.Entry({
+        label:'Kademeli Geri Bildirim İpuçları', hint:'feedback',
+        meta:kademeler.length + ' ipucu akışı',
+        wide:true,
+        body:html`<div class="stack-sm">${map(kademeler, kf => html`
+          <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+            <b class="small block mb-4">${U.esc(kf.title)}</b>
+            <div class="tiny dim mb-2"><b>1. Seviye (Soru):</b> ${U.esc(kf.level_1_question)}</div>
+            <div class="tiny dim mb-2"><b>2. Seviye (Kural):</b> ${U.esc(kf.level_2_rule)}</div>
+            <div class="tiny dim"><b>3. Seviye (Örnek):</b> ${U.esc(kf.level_3_worked)}</div>
+          </div>`)}</div>`,
+      })),
+    ];
+  }
+
   /* ------------------------------------------------------------------ çizim */
 
-  /* Sekme yok (EKIP-PLANI §1.2): dört okuma alt alta. */
-  const GOVDE = { radar:radarRows, seriler:seriesRows, rapor:reportRows, durust:honestyRows };
+  /* Sekme yok (EKIP-PLANI §1.2): okumalar alt alta. */
+  const GOVDE = { radar:radarRows, seriler:seriesRows, rapor:reportRows, durust:honestyRows, rubrikler:rubriklerRows };
 
   /* ANALİZ BAŞI (vitrin): 041 veri doluluğu, günlük dakika çizgisi (027,
      girilmemiş gün boşluk), 037 güvenli eğilim, 034 grafiğin cümlesi. */
@@ -519,6 +613,7 @@ ESP.Screens.analytics = (function(){
     async 'radar-window'(el){ S.ui.radarWindow = Number(el.value) || 14; ESP.App.render(); },
     async 'series-disc'(el){ S.ui.seriesDisc = el.value; ESP.App.render(); },
     async 'calib-kind'(el){ S.ui.calibKind = el.value; ESP.App.render(); },
+    async 'an-rub-disc'(el){ S.ui.anRubDisc = el.value; ESP.App.render(); },
   };
 
   return {
@@ -529,7 +624,7 @@ ESP.Screens.analytics = (function(){
       const G = (window.LIFEOS || {}).Gizle;
       const bayrak = G && ESP.Goodhart ? ESP.Goodhart.flags().map(p => G.anahtar(p.effortLabel.toUpperCase())) : [];
       return ['denge', 'haftalık-rota', 'seri', 'çapraz-bulgular', 'günün-brifingi',
-        'denetim-defteri', 'sürtünme', 'gösterge-ayrışması'].concat(bayrak);
+        'denetim-defteri', 'sürtünme', 'gösterge-ayrışması', 'derin-alan-analizleri', 'kademeli-geri-bildirim-ipuçları'].concat(bayrak);
     },
     title:'Analiz',
     headline(){

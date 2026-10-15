@@ -96,6 +96,38 @@
       expect(tfSoru.soru.includes('ortalama ivmesi')).toBe(true);
       expect(tfSoru.dogru).toBe('C');
       expect(!!tfSoru.yenilendi).toBe(true);
+
+      const tfNet = tf[2];
+      expect(!!tfNet).toBe(true);
+      expect(tfNet.soru.includes('işaretli (net) alan')).toBe(true);
+      expect(tfNet.dogru).toBe('E');
+      expect(!!tfNet.yenilendi).toBe(true);
+
+      const af = ((R.KONU_DERIN || {})['af-01'] || {}).sorular || [];
+      const afSoru = af[1];
+      if (afSoru) {
+        expect(afSoru.soru.includes('sin 53° ≈ 0,8')).toBe(true);
+        expect(afSoru.dogru).toBe('B');
+        expect(!!afSoru.yenilendi).toBe(true);
+      }
+
+      const ts = ((R.KONU_DERIN || {})['ts-c2'] || {}).sorular || [];
+      const tsSoru = ts[1];
+      if (tsSoru) {
+        expect(tsSoru.soru.includes('Aynı büyüklükte kâğıtlara çizilen')).toBe(true);
+        expect(tsSoru.dogru).toBe('C');
+        expect(!!tsSoru.yenilendi).toBe(true);
+      }
+    });
+
+    it('an-06 akıllı notunun ikinci kontrolü güncel oranları içerir', () => {
+      ['tf-k5', 'ak-02'].forEach(id => {
+        const n = O().akilliNot(id);
+        expect(!!n).toBe(true);
+        expect(n.kontroller.length).toBe(2);
+        expect(n.kontroller[1].soru.includes('3 mol N₂ ve 6 mol H₂')).toBe(true);
+        expect(n.kontroller[1].cevap.includes('4 mol NH₃')).toBe(true);
+      });
     });
 
     it('ekran dürüst: doğrulanmadı etiketi, ders düzeyi kaynak, resmî olmayan ayrı; strateji kartı biçimli', async () => {

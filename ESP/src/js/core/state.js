@@ -1098,6 +1098,7 @@ ESP.Model = (function(){
       kind:'siyasi',              // ESP.EVENT_KINDS
       region:'dunya',             // ESP.REGIONS
       why:'', note:'',
+      voiceNote:'',
       sourceIds:[],
       createdAt:new Date().toISOString(),
     }, patch || {});
@@ -1117,6 +1118,7 @@ ESP.Model = (function(){
     const e = obj(doc);
     return Object.assign(newEvent(), e, {
       sourceIds:arr(e.sourceIds),
+      voiceNote:typeof e.voiceNote === 'string' ? e.voiceNote : '',
       year:typeof e.year === 'number' && isFinite(e.year) ? e.year : null,
       era:(typeof e.year === 'number' && isFinite(e.year))
         ? ((ESP.eraOf(e.year) || {}).id || null) : null,

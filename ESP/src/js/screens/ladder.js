@@ -248,12 +248,117 @@ ESP.Screens.ladder = (function(){
     ];
   }
 
+  /* ------------------------------------------------------------- projeler */
+
+  function projectSheet(id){
+    const p = (ESP.PROJE_BY_ID || {})[id];
+    if(!p) return;
+    const d = discOf(p.discipline) || { label:p.discipline };
+    ESP.UI.sheet({
+      title: p.title,
+      subtitle: d.label + ' · ' + (p.tasks || []).length + ' uygulama görevi',
+      wide: true,
+      body: String(K.Stack([
+        html`<div class="p-10 radius-md bg-surface-2 mb-10" style="border:1px solid var(--border)">
+          <div class="tiny bold text-1 mb-4">📋 Kurgusal Senaryo:</div>
+          <p class="small mb-4" style="line-height:1.5">${U.esc(p.scenario.text)}</p>
+          <div class="tiny dim">${U.esc(p.scenario.origin)}</div>
+        </div>`,
+        html`<div class="stack-sm">${map(p.tasks, (t, idx) => html`
+          <div class="p-10 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+            <div class="row between gap-6 mb-4">
+              <b class="small">Görev ${idx + 1}: ${U.esc(t.question)}</b>
+            </div>
+            ${when(t.criteria && t.criteria.length, () => html`
+              <div class="tiny dim mb-6">
+                <b>Ölçütler:</b>
+                <ul class="pl-14 mb-0 mt-2">
+                  ${map(t.criteria, c => html`<li>${U.esc(c)}</li>`)}
+                </ul>
+              </div>`)}
+            ${when(t.sample_answer, () => html`
+              <details class="tiny dim"><summary>Örnek Çözüm & Cevap</summary>
+                <div class="p-6 mt-4 radius-xs bg-surface-1 text-1">${U.esc(t.sample_answer)}</div>
+              </details>`)}
+          </div>`)}</div>`,
+      ])),
+      footer: String(html`<div class="row between gap-8">
+        ${K.Button({ label:'Kapat', act:'sheet-close' })}
+        ${when(d.route, () => K.Button({ label:'Masaya Git (' + d.label + ')', tone:'primary', act:'go',
+          data:{ 'data-route':d.route } }))}
+      </div>`),
+    });
+  }
+
+  function projelerRows(disc){
+    const filter = S.ui.projDisc || 'all';
+    let projs = ESP.PROJELER || [];
+    if(filter !== 'all') projs = projs.filter(p => p.discipline === filter);
+
+    let ornekler = ESP.DERINLIKLI_ORNEKLER || [];
+    if(filter !== 'all') ornekler = ornekler.filter(o => o.discipline === filter);
+
+    const filterOptions = [{ value:'all', label:'Tüm disiplinler (14 proje)' }]
+      .concat(ESP.Mod.active().map(d => ({ value:d.id, label:d.label })));
+
+    return [
+      K.Entry({
+        label:'Uygulama Projeleri', hint:'project',
+        meta:projs.length + ' proje',
+        wide:true,
+        action:K.Select({ id:'proj-disc', value:filter, change:'pick-proj-disc', size:'sm',
+          aria:'Proje disiplini', options:filterOptions }),
+        body:html`
+          <p class="small muted mb-10">7 disipline dağıtılmış 14 gerçekçi senaryo ve 70 görev. Her proje, teorik bilgiyi somut bir bağlamda işletmeyi ölçer.</p>
+          <div class="stack-sm">${map(projs, p => {
+            const d = discOf(p.discipline) || { label:p.discipline };
+            return html`
+              <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+                <div class="row between gap-8 mb-4">
+                  <b class="small">${U.esc(p.title)}</b>
+                  <span class="badge badge--muted tiny">${d.label} · ${(p.tasks || []).length} görev</span>
+                </div>
+                <p class="small text-2 mb-8" style="line-height:1.4">${U.esc(p.scenario.text)}</p>
+                <div class="row end">
+                  ${K.Button({ label:'Projeyi & Görevleri İncele', size:'sm', act:'open-project',
+                    data:{ 'data-id':p.id } })}
+                </div>
+              </div>`;
+          })}</div>`,
+      }),
+
+      K.Entry({
+        label:'Derinlikli Öğretim Örnekleri', hint:'depth',
+        meta:ornekler.length + ' somut örnek',
+        wide:true,
+        body:html`
+          <p class="small muted mb-10">Basit, orta ve ileri kademelerde somut çözümlü örnekler, karar gerekçeleri ve yaygın hatalar.</p>
+          <div class="stack-sm" style="max-height:420px;overflow-y:auto">${map(ornekler, o => {
+            const d = discOf(o.discipline) || { label:o.discipline };
+            const tone = o.depth === 'basit' ? 'ok' : (o.depth === 'orta' ? 'warn' : 'danger');
+            return html`
+              <div class="p-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+                <div class="row between gap-6 mb-2">
+                  <b class="small">${U.esc(o.title)}: ${U.esc(o.focus || '')}</b>
+                  <span class="badge tiny badge--${tone}">${o.depth} · ${d.label}</span>
+                </div>
+                <div class="small mb-4"><b>İstem:</b> ${U.esc(o.prompt)}</div>
+                <div class="small text-2 mb-4"><b>Çözüm:</b> <i>${U.esc(o.worked_solution)}</i></div>
+                <div class="tiny dim mb-2"><b>Gerekçe:</b> ${U.esc(o.reasoning)}</div>
+                ${when(o.common_error, () => html`<div class="tiny dim"><b>Hata:</b> ${U.esc(o.common_error)}</div>`)}
+              </div>`;
+          })}</div>`,
+      }),
+    ];
+  }
+
   /* ----------------------------------------------------------------- çizim */
 
   const TABS = [
-    { id:'ozet',   label:'Genel' },
-    { id:'yol',    label:'Yol' },
-    { id:'tespit', label:'Seviye tespiti' },
+    { id:'ozet',     label:'Genel' },
+    { id:'yol',      label:'Yol' },
+    { id:'projeler', label:'Projeler (14)' },
+    { id:'tespit',   label:'Seviye tespiti' },
   ];
 
   /* Sekme yok (EKIP-PLANI §1.2): genel, yol ve seviye tespiti alt alta;
@@ -263,7 +368,7 @@ ESP.Screens.ladder = (function(){
     /* disiplin seçici sayfa başındadır (actions), bölümlerin üstünde asılı durmaz */
     return K.Grid(html`
       ${K.Span(12, ESP.Parts.bolumler(null, { act:'pick-tab', aria:'Merdiven bölümleri', tabs:TABS,
-        govde:{ ozet:ozetRows, yol:() => yolRows(disc), tespit:tespitRows } }))}`);
+        govde:{ ozet:ozetRows, yol:() => yolRows(disc), projeler:() => projelerRows(disc), tespit:tespitRows } }))}`);
   }
 
   function afterRender(){ ESP.Parts.bolumIstegi('ladderTab', TABS[0].id); }
@@ -275,6 +380,10 @@ ESP.Screens.ladder = (function(){
       S.ui.curDisc = el.dataset.id;
       S.ui.ladderTab = 'yol';
       ESP.App.render();
+    },
+
+    async 'open-project'(el){
+      projectSheet(el.dataset.id);
     },
 
     async 'save-placement'(el){
@@ -296,6 +405,7 @@ ESP.Screens.ladder = (function(){
 
   const change = {
     async 'pick-disc-sel'(el){ S.ui.curDisc = el.value; ESP.App.render(); },
+    async 'pick-proj-disc'(el){ S.ui.projDisc = el.value; ESP.App.render(); },
   };
 
   return {

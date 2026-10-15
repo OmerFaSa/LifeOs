@@ -467,6 +467,7 @@ ESP.Parts = (function(){
     return html`<div class="topics">${map(list, t => {
       const p = ESP.Lesson.topicProgress(t);
       const on = acik === t.id;
+      const card = (ESP.OGRENME_KARTI_BY_TOPIC || {})[t.id];
       return html`
         <div class="${cls('topic', on && 'is-open')}">
           <button class="topic__head" data-act="topic-open" data-id="${t.id}"
@@ -481,6 +482,31 @@ ESP.Parts = (function(){
           </button>
           ${when(on, () => html`
             <div class="topic__detail">
+              ${when(card && card.explanation, () => html`
+                <div class="p-8 mb-8 radius-sm bg-surface-2" style="border:1px solid var(--border)">
+                  <p class="small mb-6" style="line-height:1.45">${card.explanation}</p>
+                  ${when(card.worked_example && card.worked_example.text, () => html`
+                    <div class="small text-2 mb-4">
+                      <b>Örnek:</b> <i>${card.worked_example.text}</i>
+                    </div>`)}
+                  ${when(card.common_misinterpretation, () => html`
+                    <div class="tiny dim p-6 radius-xs" style="background:var(--surface-1);border-left:3px solid var(--primary)">
+                      <b>👁️ Dikkat / Yanlış Yorum:</b> ${card.common_misinterpretation}
+                    </div>`)}
+                  ${when(card.practice && card.practice.prompt, () => html`
+                    <div class="mt-6 pt-6" style="border-top:1px dashed var(--border)">
+                      <div class="tiny bold mb-2">✍️ Sınama & Pratik:</div>
+                      <p class="small mb-4">${card.practice.prompt}</p>
+                      ${when(card.practice.expected_answer, () => html`
+                        <details class="tiny dim"><summary>Beklenen yanıt ve ölçüt</summary>
+                          <p class="mt-4 mb-0">${card.practice.expected_answer}</p>
+                        </details>`)}
+                    </div>`)}
+                  ${when(card.transfer && card.transfer.prompt, () => html`
+                    <div class="tiny dim mt-6">
+                      <b>🔄 Aktarım Görevi:</b> ${card.transfer.prompt}
+                    </div>`)}
+                </div>`)}
               ${map(t.items, (it, i) => html`
                 <div class="topicrow">
                   ${K.Checkbox({ label:it, checked:!!(isaret[t.id] || {})[i],

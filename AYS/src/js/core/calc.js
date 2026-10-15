@@ -666,6 +666,14 @@ R.Calc = (function(){
         why:'Günün son işi: due kartlar.', route:'cards', tone:'normal' };
     }
 
+    const yanlislar = R.OgrenTest ? R.OgrenTest.yanlislar() : [];
+    if(yanlislar.length){
+      return { key:'hafiza', icon:'refresh', label:'Hafıza yoklaması',
+        title:yanlislar.length + ' yanlış soruyu yeniden çöz',
+        why:'Aralıklı tekrar (Dunlosky 2013): Yanlış çözülen soruları zihinde kalıcılaştır.',
+        route:'sorular', tab:'yanlis', tone:'normal' };
+    }
+
     return { key:'done', icon:'check', label:'Bugün', title:'Günün işi tamam',
       why:'Bloklar, çıpalar ve kartlar kapandı. Erken uyku bugünün son maddesi.', tone:'calm' };
   }

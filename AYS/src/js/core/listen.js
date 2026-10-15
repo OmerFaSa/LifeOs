@@ -84,6 +84,7 @@ R.Listen = (function(){
   }
 
   function isActive(){ return !!aktif; }
+  function activeTarget(){ return aktif ? aktif.target : null; }
 
   /* Bir metin alanına bağlanan dikte. Alandaki mevcut metin KORUNUR:
      yarım yazıp sonra konuşmaya başlayabilirsin. */
@@ -114,5 +115,5 @@ R.Listen = (function(){
   };
   function message(kod){ return MESAJ[kod] || 'Ses tanıma çalışmadı.'; }
 
-  return { supported, start, stop, isActive, dictateInto, message };
+  return { supported, start, stop, isActive, activeTarget, dictateInto, message };
 })();

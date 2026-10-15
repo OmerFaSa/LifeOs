@@ -472,6 +472,15 @@ R.Screens.team = (function(){
   };
 
   function onKey(e){
+    /* Boşluk tuşuyla ajanın sözünü anında kes (barge-in): metin yazmıyorken */
+    if(e.key === ' ' && sesli.acik && sesli.durum === 'konuşuyor'){
+      const tag = (document.activeElement && document.activeElement.tagName) || '';
+      if(tag !== 'INPUT' && tag !== 'TEXTAREA'){
+        e.preventDefault();
+        R.Talk.kes();
+        return;
+      }
+    }
     if(e.key !== 'Enter' || !(e.ctrlKey || e.metaKey)) return;
     const el = document.getElementById('team-input');
     if(el && document.activeElement === el){

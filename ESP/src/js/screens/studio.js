@@ -275,7 +275,56 @@ ESP.Screens.studio = (function(){
       </div>`,
     }));
 
+    rows.push(scaleCalculatorEntry());
+
     return rows;
+  }
+
+  function scaleCalculatorEntry(){
+    const root = S.ui.scaleRoot || 'C';
+    const scaleId = S.ui.scaleId || 'major';
+    const notlar = ESP.scaleNotes ? ESP.scaleNotes(root, scaleId) : [];
+    const scaleObj = (ESP.SCALE_BY_ID || {})[scaleId] || {};
+    const rootTr = (ESP.NOTE_TR || {})[root] || root;
+
+    return K.Entry({
+      label:'Gam & Mod Cetveli', hint:'scale',
+      meta:rootTr + ' ' + (scaleObj.label || scaleId),
+      wide:true,
+      body:html`
+        <div class="row wrap gap-8 mb-10">
+          <div class="grow" style="min-width:140px">
+            <span class="tiny dim block mb-2">Kök Ses (Tonalite):</span>
+            ${K.Select({ id:'scale-root-sel', value:root, change:'pick-scale-root',
+              options:ESP.NOTES.map(n => ({ value:n, label:n + ' (' + (ESP.NOTE_TR[n] || n) + ')' })) })}
+          </div>
+          <div class="grow" style="min-width:180px">
+            <span class="tiny dim block mb-2">Gam / Mod (12 Örüntü):</span>
+            ${K.Select({ id:'scale-mode-sel', value:scaleId, change:'pick-scale-mode',
+              options:ESP.SCALES.map(s => ({ value:s.id, label:s.label })) })}
+          </div>
+        </div>
+        <div class="p-10 radius-md bg-surface-2" style="border:1px solid var(--border)">
+          <div class="row between gap-8 mb-6">
+            <div>
+              <b class="text-1">${rootTr} (${root}) ${scaleObj.label}</b>
+              <span class="tiny dim block mt-2">${scaleObj.mood || ''}</span>
+            </div>
+            <span class="badge badge--muted tiny">${(scaleObj.steps || []).length} perde</span>
+          </div>
+          <div class="row wrap gap-6 my-8">
+            ${map(notlar, (n, idx) => html`
+              <div class="text-center p-6 radius-sm bg-surface-1" style="min-width:44px;border:1px solid var(--border)">
+                <div class="tiny dim mb-2">${idx === 0 ? 'Kök (I)' : (idx + 1) + '. der'}</div>
+                <b class="small" style="color:var(--primary)">${n}</b>
+                <div class="tiny dim">${ESP.NOTE_TR[n] || n}</div>
+              </div>`)}
+          </div>
+          <div class="tiny dim pt-6 mt-6" style="border-top:1px dashed var(--border)">
+            <b>Yarım Ses Adımları:</b> ${(scaleObj.steps || []).join(' – ')} · 144 modülasyon permütasyonu hazırdır.
+          </div>
+        </div>`,
+    });
   }
 
   /* --------------------------------------------------------------- diksiyon */
@@ -617,6 +666,8 @@ ESP.Screens.studio = (function(){
     },
     async 'pick-piece'(el){ S.ui.pieceOpen = el.value; ESP.App.render(); },
     async 'pick-twister'(el){ S.ui.twister = el.value; ESP.App.render(); },
+    async 'pick-scale-root'(el){ S.ui.scaleRoot = el.value; ESP.App.render(); },
+    async 'pick-scale-mode'(el){ S.ui.scaleId = el.value; ESP.App.render(); },
   };
 
   return {
@@ -627,7 +678,7 @@ ESP.Screens.studio = (function(){
     /* iPhone Faz 2c: parça ekleme ara sıra; Diksiyon'da kural listesi ve
        geçmiş kayıtlar, Kulak'ta üç başvuru tablosu şerit. */
     kucukVarsayilan:['kulak-egzersizleri', 'müzik-konuları', 'diksiyon-konuları', 'parça-ekle',
-      'telaffuz-kuralları', 'son-kayıtlar', 'aralıklar', 'caged', 'deşifre'],
+      'telaffuz-kuralları', 'son-kayıtlar', 'aralıklar', 'caged', 'deşifre', 'gam-mod-cetveli'],
     title:'Stüdyo',
     headline(){
       const plato = ESP.Acoustic.plateaus();

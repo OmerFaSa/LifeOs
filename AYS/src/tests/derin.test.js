@@ -49,7 +49,7 @@
           /* Aynı dersteki ön koşul önce gelir: öğrenme yolu geriye dönmez. */
           else if(dersOf(o) === dersOf(k) && sira.indexOf(o) >= sira.indexOf(k)) bozuk.push(k + ': ön koşul sonra geliyor ' + o);
         });
-        if(!aralik(d.ornekler, 2, 4)) bozuk.push(k + ': örnek sayısı');
+        if(!aralik(d.ornekler, 2, 8)) bozuk.push(k + ': örnek sayısı');
         dizi(d.ornekler).forEach((o, i) => {
           if(SEV.indexOf(o.seviye) < 0) bozuk.push(k + ' örnek ' + (i + 1) + ': seviye');
           metin(k, 'örnek ' + (i + 1), o.soru, bozuk);

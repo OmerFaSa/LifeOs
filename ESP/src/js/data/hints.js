@@ -244,6 +244,13 @@ ESP.HINTS = {
    açılır ya da var olanın «more»una eklenir. */
 (function(H){
   [
+    ['deep-analysis', 'Derin alan analizleri', 'Her disiplinde bir konunun nasıl derinleştiğini gösteren hazır örnekler; senin ölçümün değil, başvuru içeriğidir.'],
+    ['rubric', 'Değerlendirme rubrikleri', 'Bir ürünü (yazı, konuşma, çeviri) boyut boyut değerlendirmek için ölçüt. Sistem not vermez ve yetenek yargısı kurmaz; boyutları kendin işaretlersin.'],
+    ['feedback', 'Kademeli geri bildirim', 'Önce ipucu, sonra yönlendirme, en son çözüm: geri bildirim adım adım açılır ki düşünme işini sen yap.'],
+    ['parallel', 'Paralel cümleler', 'Aynı cümlenin iki dildeki karşılığı ve öge çözümlemesi (Universal Dependencies). Çeviri ezberi değil, yapı karşılaştırmasıdır.'],
+    ['scale', 'Gam ve mod cetveli', 'Seçtiğin kök sesten gam ve modların notaları hesaplanır; kulak eğitimi ve doğaçlama için başvuru tablosudur.'],
+    ['project', 'Uygulama projeleri', 'Bir disiplini gerçek bir ürünle (kısa yazı, kayıt, sunum) pekiştiren görev dizisi. Görevler öneridir; hangisini yapacağını sen seçersin.'],
+    ['depth', 'Derinlikli örnekler', 'Aynı konunun temel, orta ve ileri düzeyde nasıl işlendiğini gösteren çözümlü örnekler; başvuru içeriğidir, senin ölçümün değildir.'],
     ['not-denge', 'Denge', 'Yoğunlaşma kasıtlı olabilir; sistem yalnızca görünür kılar, suçlamaz.'],
     ['not-haftalik-rota', 'Haftalık rota', 'Rota bir takvim değildir: hangi disiplinin öne geçtiğini söyler, «salı 19:00» demez. Odak yalnızca eşitliği bozar.'],
     ['not-gunluk-sure', 'Günlük süre', 'Girilmemiş gün grafikte boşluktur, sıfır değildir. Ortalama yalnızca kayıtlı günlerden hesaplanır.'],

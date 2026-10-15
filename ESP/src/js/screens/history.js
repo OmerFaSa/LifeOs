@@ -245,6 +245,7 @@ ESP.Screens.history = (function(){
             <div class="evrow__body">
               <b>${e.title}</b>
               ${when(e.why, () => html`<p class="small muted">${e.why}</p>`)}
+              ${when(e.voiceNote, () => html`<div class="row items-center gap-6 mt-4"><span class="badge badge--muted">Sesli not</span><span class="small">${e.voiceNote}</span></div>`)}
               <div class="evrow__meta">
                 ${when(era, () => K.Badge({ label:era.label, tone:'muted', icon:false }))}
                 ${K.Badge({ label:(ESP.EVENT_KIND_BY_ID[e.kind] || {}).label || e.kind,
@@ -252,6 +253,10 @@ ESP.Screens.history = (function(){
                 ${K.Badge({ label:a.state === 'balanced' ? 'dengeli zincir'
                     : (a.state === 'thin' ? 'zayıf zincir' : 'zincirsiz'),
                   tone:a.state === 'balanced' ? 'ok' : (a.state === 'thin' ? 'warn' : 'muted') })}
+                ${when(e.voiceNote, () => K.Button({ label:'Dinle', size:'sm', act:'listen-voice-note',
+                  data:{ 'data-id':e.id } }))}
+                ${K.Button({ label:e.voiceNote ? 'Düzenle' : 'Sesli Not', size:'sm', act:'edit-voice-note',
+                  data:{ 'data-id':e.id } })}
                 ${K.Button({ label:'Eşzamanlı', size:'sm', act:'contemp',
                   data:{ 'data-id':e.id } })}
                 ${K.Button({ label:'Zincir kur', size:'sm', act:'new-chain',
@@ -597,6 +602,78 @@ ESP.Screens.history = (function(){
       ESP.Memo.bitir();
       ESP.UI.toast('Olay kronolojiye girdi');
       ESP.App.render();
+    },
+
+    async 'edit-voice-note'(el){
+      const e = eventOf(el.dataset.id);
+      if(!e) return;
+      ESP.UI.sheet({
+        title:'Sesli Not · ' + e.title,
+        subtitle:ESP.yearLabel(e.year),
+        body:String(html`
+          <div class="stack">
+            <div class="row between align-center mb-6">
+              <label for="ev-voice-text" class="small muted">Sesli not metni (mikrofonla dikte veya klavye):</label>
+              ${K.Mic({ target:'ev-voice-text' })}
+            </div>
+            ${K.Textarea({ id:'ev-voice-text', rows:4, value:e.voiceNote || '',
+              placeholder:'Tarihî olayla ilgili sesli notunuz…', aria:'Sesli Not' })}
+            <div class="row wrap gap-8 mt-10">
+              ${K.Button({ label:'Kaydet', tone:'primary', size:'sm', act:'save-voice-note', data:{ 'data-id':e.id } })}
+              ${when(e.voiceNote, () => K.Button({ label:'Dinle (Herodot)', size:'sm', act:'speak-voice-note', data:{ 'data-id':e.id } }))}
+              ${when(e.voiceNote, () => K.Button({ label:'Notu Sil', tone:'ghost', size:'sm', act:'clear-voice-note', data:{ 'data-id':e.id } }))}
+            </div>
+          </div>`),
+        footer:String(K.Button({ label:'Kapat', act:'sheet-close' }))
+      });
+    },
+
+    async 'save-voice-note'(el){
+      const e = eventOf(el.dataset.id);
+      if(!e) return;
+      const text = val('ev-voice-text');
+      await M.saveEvent(Object.assign({}, e, { voiceNote:text }));
+      ESP.Memo.bitir();
+      ESP.UI.closeSheet();
+      ESP.UI.toast(text ? 'Sesli not kaydedildi' : 'Sesli not temizlendi');
+      ESP.App.render();
+    },
+
+    async 'clear-voice-note'(el){
+      const e = eventOf(el.dataset.id);
+      if(!e) return;
+      await M.saveEvent(Object.assign({}, e, { voiceNote:'' }));
+      ESP.Memo.bitir();
+      ESP.UI.closeSheet();
+      ESP.UI.toast('Sesli not silindi');
+      ESP.App.render();
+    },
+
+    async 'speak-voice-note'(el){
+      const e = eventOf(el.dataset.id);
+      const text = (document.getElementById('ev-voice-text') ? val('ev-voice-text') : '') || (e ? e.voiceNote : '');
+      if(!text){
+        ESP.UI.toast('Seslendirilecek sesli not yok');
+        return;
+      }
+      if(ESP.Speak && ESP.Speak.isSpeaking()){
+        ESP.Speak.stop();
+      } else if(ESP.Speak){
+        ESP.Speak.say(text, { agent:'herodot' });
+      }
+    },
+
+    async 'listen-voice-note'(el){
+      const e = eventOf(el.dataset.id);
+      if(!e || !e.voiceNote){
+        ESP.UI.toast('Sesli not bulunamadı');
+        return;
+      }
+      if(ESP.Speak && ESP.Speak.isSpeaking()){
+        ESP.Speak.stop();
+      } else if(ESP.Speak){
+        ESP.Speak.say(e.voiceNote, { agent:'herodot' });
+      }
     },
 
     async 'del-event'(el){

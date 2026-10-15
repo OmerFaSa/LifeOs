@@ -252,6 +252,157 @@ SP.Extract = (function(){
     };
   }
 
+  /* ------------------------------------------------------------ vucut
+     Vücut fotoğrafından beden kompozisyonu ve duruş (postür) tahmini.
+     5 Bölütlü Granüler Yapı (LO-Domain-Lead şartnamesi):
+       1. biyometrikKompozisyon: bki, kategori, yagAralik, bedenTipi, belKalca
+       2. posturSegmentasyonu: basBoyun, omuzSimetri, omurga, pelvis
+       3. duzelticiHareketRecetesi: esneme2dk, guclendirme, adimHedefi, egzersizler
+       4. beslenmeHidrasyonKoprusu: proteinAralik, suHedefi, oneri
+       5. tibbiGuvenlikKalkani: cert, source, uyari
+     Sözler:
+       1. Tıbbi teşhis koymaz (AGENTS §1.2).
+       2. Sayı her zaman 'estimated' (tahmin) olarak işaretlenir.
+       3. Kullanıcının boy/kilo girdisi varsa onu referans alır. */
+  function bodyPrompt(hints){
+    let p = 'Bu bir vücut / boy fotoğrafı. Fotoğraftaki duruşu (postür) ve tahmini beden kompozisyonunu 5 bölüt halinde incele. '
+      + 'Asla tıbbi teşhis koyma. '
+      + 'Yalnız ve kesinlikle aşağıdaki şemaya uyan geçerli bir JSON nesnesi döndür: '
+      + '{\n'
+      + '  "biyometrikKompozisyon": {\n'
+      + '    "bki": 23.4,\n'
+      + '    "kategori": "Normal",\n'
+      + '    "yagAralik": "18-22%",\n'
+      + '    "bedenTipi": "Mezomorf / Atletik",\n'
+      + '    "belKalca": "0.82 (dengeli)"\n'
+      + '  },\n'
+      + '  "posturSegmentasyonu": {\n'
+      + '    "basBoyun": "Hafif ileri baş duruşu (forward head)",\n'
+      + '    "omuzSimetri": "Omuz hizası dengeli, sağ skapula hafif kalkık",\n'
+      + '    "omurga": "Doğal torakal ve lomber eğrilikler korunmuş",\n'
+      + '    "pelvis": "Nötr pelvis açısı"\n'
+      + '  },\n'
+      + '  "duzelticiHareketRecetesi": {\n'
+      + '    "esneme2dk": "Kapı eşiği göğüs açma ve boyun trapezius esnetme (2 dk)",\n'
+      + '    "guclendirme": "Y-T-W kürek kemiği aktivasyonu ve glute bridge (3 set x 10 tekrar)",\n'
+      + '    "adimHedefi": "Masa başı molalarında her 45 dakikada 2 dk omuz geriye yuvarlama",\n'
+      + '    "egzersizler": ["Kapı Eşiği Pektoral Açma", "Y-T-W Skapular Aktivasyon", "Glute Bridge"]\n'
+      + '  },\n'
+      + '  "beslenmeHidrasyonKoprusu": {\n'
+      + '    "proteinAralik": "1.4 - 1.8 g/kg (yaklaşık 105-135 g/gün)",\n'
+      + '    "suHedefi": "2.5 - 3.0 L/gün",\n'
+      + '    "oneri": "Duruş ve kas dengesini desteklemek için kaliteli protein ve yeterli hidrasyon."\n'
+      + '  },\n'
+      + '  "tibbiGuvenlikKalkani": {\n'
+      + '    "cert": "estimated",\n'
+      + '    "source": "photo",\n'
+      + '    "uyari": "Bu analiz tıbbi bir teşhis veya klinik muayene değildir. Fotoğraftan çıkarılan tüm değerler gözlemsel tahmindir; duruş veya omurga şikayetleri için uzman hekime danışınız."\n'
+      + '  }\n'
+      + '}';
+    const h = [];
+    if(hints && hints.boy) h.push('Kullanıcı boyu: ' + hints.boy + ' cm.');
+    if(hints && hints.kilo) h.push('Kullanıcı kilosu: ' + hints.kilo + ' kg.');
+    if(hints && hints.cinsiyet) h.push('Cinsiyet: ' + hints.cinsiyet + '.');
+    if(hints && hints.not) h.push('Kullanıcı notu: ' + hints.not + '.');
+    if(h.length) p += '\n\nKullanıcı bilgileri: ' + h.join(' ');
+    return p;
+  }
+
+  async function fromBodyPhoto(file, hints){
+    if(!file) return { ok:false, note:'Fotoğraf seçilmedi.' };
+    if(file.size > MAX_BYTES){
+      return { ok:false, note:'Fotoğraf çok büyük (en fazla 8 MB).' };
+    }
+    if(!isImage(file)){
+      return { ok:false, note:'Bu bir görüntü dosyası değil.' };
+    }
+    if(!modelReady()){
+      return { ok:false,
+        note:'Fotoğraftan beden analizi için Ayarlar → Rehber → Model bölümünden görüntü destekleyen bir model bağlaman gerekiyor.' };
+    }
+
+    const parts = splitDataUrl(await readDataUrl(file));
+    if(!parts) return { ok:false, note:'Fotoğraf okunamadı.' };
+
+    let out;
+    try{
+      out = await send({
+        system:'Sen bir spor ve duruş analizi gözlemcisisin. Tıbbi teşhis koymazsın. Yalnız JSON döndürürsün.',
+        messages:[{ role:'user', text:bodyPrompt(hints), images:[parts] }],
+      });
+    }catch(e){
+      return { ok:false, note:'Model yanıt vermedi: ' + (e && e.message ? e.message : 'bilinmeyen hata') };
+    }
+
+    const res = parseJson(out && out.text);
+    if(!res || typeof res !== 'object'){
+      return { ok:false, note:'Görüntüden beden analizi çıkarılamadı.' };
+    }
+
+    /* 5 Bölütlü Granüler Şema Normalizasyonu */
+    const bk = res.biyometrikKompozisyon || res.kompozisyon || {};
+    const ps = res.posturSegmentasyonu || (typeof res.postur === 'object' ? res.postur : {}) || {};
+    const dh = res.duzelticiHareketRecetesi || res.duzelticiHareket || res.duzeltici_hareket || {};
+    const bh = res.beslenmeHidrasyonKoprusu || res.beslenme || {};
+    const tg = res.tibbiGuvenlikKalkani || res.guvenlik || {};
+
+    const bki = Number(bk.bki || res.bki_tahmin || res.bki) || null;
+    const kategori = String(bk.kategori || res.bki_kategori || 'Normal');
+    const yagAralik = String(bk.yagAralik || bk.yag_orani_tahmin_aralik || res.yag_orani_tahmin_aralik || res.yagAralik || '');
+    const bedenTipi = String(bk.bedenTipi || bk.beden_tipi || res.beden_tipi || 'Dengeli');
+    const belKalca = String(bk.belKalca || bk.bel_kalca || '');
+
+    const basBoyun = String(ps.basBoyun || ps.bas_boyun || '');
+    const omuzSimetri = String(ps.omuzSimetri || ps.omuz_simetri || '');
+    const omurga = String(ps.omurga || '');
+    const pelvis = String(ps.pelvis || '');
+    const posturMetin = typeof res.postur === 'string' ? res.postur
+      : String(res.postur_gozlem || [basBoyun, omuzSimetri, omurga, pelvis].filter(Boolean).join('. '));
+
+    const esneme2dk = String(dh.esneme2dk || dh.esneme || '');
+    const guclendirme = String(dh.guclendirme || '');
+    const adimHedefi = String(dh.adimHedefi || dh.adim || '');
+    const egzersizler = Array.isArray(dh.egzersizler) ? dh.egzersizler.map(String)
+      : [esneme2dk, guclendirme].filter(Boolean);
+
+    const proteinAralik = String(bh.proteinAralik || bh.protein_aralik || '');
+    const suHedefi = String(bh.suHedefi || bh.su_hedefi || '');
+    const oneriBeslenme = String(bh.oneri || res.oneriler || res.oneri || '');
+
+    const uyari = String(tg.uyari || 'Bu analiz tıbbi bir teşhis değildir; fotoğraftan çıkarılan değerler tahmindir.');
+
+    const biyometrikKompozisyon = { bki, kategori, yagAralik, bedenTipi, belKalca };
+    const posturSegmentasyonu = { basBoyun, omuzSimetri, omurga, pelvis };
+    const duzelticiHareketRecetesi = { esneme2dk, guclendirme, adimHedefi, egzersizler };
+    const beslenmeHidrasyonKoprusu = { proteinAralik, suHedefi, oneri:oneriBeslenme };
+    const tibbiGuvenlikKalkani = { cert:'estimated', source:'photo', uyari };
+
+    return {
+      ok:true,
+      /* 5 Temel Bölüt */
+      biyometrikKompozisyon,
+      posturSegmentasyonu,
+      duzelticiHareketRecetesi,
+      beslenmeHidrasyonKoprusu,
+      tibbiGuvenlikKalkani,
+
+      /* Alan Adı ve Geriye Dönük Uyumluluk */
+      kompozisyon: biyometrikKompozisyon,
+      postur: posturMetin,
+      duzelticiHareket: duzelticiHareketRecetesi,
+      beslenme: beslenmeHidrasyonKoprusu,
+      guvenlik: tibbiGuvenlikKalkani,
+
+      bki,
+      kategori,
+      yagAralik,
+      bedenTipi,
+      oneri: [esneme2dk, guclendirme, oneriBeslenme].filter(Boolean).join(' · '),
+      cert:'estimated',
+      source:'photo',
+    };
+  }
+
   /* -------------------------------------------------------------- fis
 
      Market fisi fiyat tablosunun curumesini cozer: tohum tahminler
@@ -422,7 +573,7 @@ SP.Extract = (function(){
     supported:modelReady, modelReady,
     isImage, isPdf, isText,
     readText, readDataUrl,
-    fromLabFile, fromMealPhoto, fromReceipt, fromFoodLabel,
+    fromLabFile, fromMealPhoto, fromBodyPhoto, fromReceipt, fromFoodLabel,
     parseJson, send, MAX_BYTES,
   };
 })();

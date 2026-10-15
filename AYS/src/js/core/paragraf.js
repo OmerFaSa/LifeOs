@@ -154,20 +154,24 @@ R.Paragraf = (function(){
   }
 
   /* ---------- cevap (söz 3) ---------- */
-  async function cevapla(id, harf, ip){
+  async function cevapla(id, harf, ip, sure){
     const g = gunu(), q = bul(id);
     harf = String(harf || '').toUpperCase();
     if(!g || !q || g.sorular.indexOf(id) < 0 || R.Ogren.HARFLER.indexOf(harf) < 0) return { ok:false, neden:'gecersiz' };
     if(g.cevaplar[id]) return { ok:false, neden:'kilitli' };
-    g.cevaplar[id] = ip ? { h:harf, ip:true, at:simdi() } : { h:harf, at:simdi() };
+    const kayit = ip ? { h:harf, ip:true, at:simdi() } : { h:harf, at:simdi() };
+    if(typeof sure === 'number' && sure > 0) kayit.sure = Math.round(sure);
+    g.cevaplar[id] = kayit;
     await yaz();
     return { ok:true, dogru:harf === q.dogru };
   }
-  async function bak(id){
+  async function bak(id, sure){
     const g = gunu();
     if(!g || g.sorular.indexOf(id) < 0 || !bul(id)) return { ok:false, neden:'gecersiz' };
     if(g.cevaplar[id]) return { ok:false, neden:'kilitli' };
-    g.cevaplar[id] = { h:null, bak:true, at:simdi() };
+    const kayit = { h:null, bak:true, at:simdi() };
+    if(typeof sure === 'number' && sure > 0) kayit.sure = Math.round(sure);
+    g.cevaplar[id] = kayit;
     await yaz();
     return { ok:true };
   }
