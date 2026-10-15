@@ -23,7 +23,11 @@
      3. NOT ÖLÇÜM DEĞİLDİR. Hiçbir sayıyı, kapıyı, seviyeyi değiştirmez.
      4. SEÇİP EKLE YALNIZ İŞARETLİ METİNDE. `data-notum-kaynak="<bağlam>"`
         taşıyan öğenin içinde seçilen metin o bağlamın notuna eklenir.
-     5. MODÜL ONSUZ DA ÇALIŞIR. Kurulmadıysa kutu çizilmez. */
+     5. MODÜL ONSUZ DA ÇALIŞIR. Kurulmadıysa kutu çizilmez.
+     6. NOTLARIM TEK YERDE. panelAc() modülün bütün notlarını (kendi
+        deposundakiler + modülün ek kaynağı, ör. AYS konu notları) tek
+        pencerede listeler; arama yazdıkça süzer; nota dokununca modülün
+        `ac(bağlam)`ı o ekranı açar. Paletten ve King'den («notlarım») açılır. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -150,6 +154,71 @@ window.LIFEOS.NOTUM = (function(){
     window.addEventListener('scroll', () => { const d = document.getElementById('notum-ekle'); if(d) d.remove(); }, { passive:true, capture:true });
   }
 
+  /* Söz 6: bütün notlar — { baglam, metin, ad, ust, ac? }. */
+  function liste(){
+    const l = [];
+    const et = b => (ayar && ayar.etiket ? (ayar.etiket(b) || {}) : {});
+    hepsi().forEach(x => { const e = et(x.baglam); l.push({ baglam:x.baglam, metin:x.metin, ad:e.ad || x.baglam, ust:e.ust || '' }); });
+    if(ayar && ayar.ekKaynak){
+      try{ (ayar.ekKaynak() || []).forEach(x => { if(x && String(x.metin || '').trim()) l.push(x); }); }catch(e){ /* ek kaynak düşer */ }
+    }
+    return l;
+  }
+
+  function panelListeHtml(ara){
+    const q = String(ara || '').toLocaleLowerCase('tr-TR').trim();
+    const l = liste().filter(x => !q || (x.ad + ' ' + x.ust + ' ' + x.metin).toLocaleLowerCase('tr-TR').indexOf(q) >= 0);
+    if(!liste().length) return '<p class="notlar__bos">Henüz not yok. Öğrenme ekranlarındaki «Notum» kutularına yazdıkların burada toplanır.</p>';
+    if(!l.length) return '<p class="notlar__bos">«' + kac(ara) + '» geçen not yok.</p>';
+    return l.map((x, i) => {
+      const m = String(x.metin).replace(/\s+/g, ' ');
+      return '<button type="button" class="notlar__satir" data-notlar-ac="' + kac(x.baglam) + '">'
+        + '<span class="notlar__ad">' + kac(x.ad) + (x.ust ? ' <small>' + kac(x.ust) + '</small>' : '') + '</span>'
+        + '<span class="notlar__ozet">' + kac(m.length > 160 ? m.slice(0, 157) + '…' : m) + '</span></button>';
+    }).join('');
+  }
+
+  function panelKapat(){
+    const el = typeof document !== 'undefined' ? document.getElementById('notlar-panel') : null;
+    if(el) el.remove();
+  }
+
+  function panelAc(){
+    if(typeof document === 'undefined' || !ayar) return false;
+    panelKapat();
+    const el = document.createElement('div');
+    el.id = 'notlar-panel';
+    el.className = 'notlar';
+    el.innerHTML = '<div class="notlar__perde" data-notlar-kapat></div>'
+      + '<div class="notlar__kutu" role="dialog" aria-modal="true" aria-label="Notlarım">'
+      + '<div class="notlar__bas"><b>Notlarım</b><span class="notlar__say">' + liste().length + ' not</span>'
+      + '<button type="button" class="notlar__kapat" data-notlar-kapat aria-label="Kapat">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>'
+      + '<input class="notlar__ara" type="search" placeholder="Notlarında ara" aria-label="Notlarında ara" autocomplete="off"/>'
+      + '<div class="notlar__liste" data-notlar-liste>' + panelListeHtml('') + '</div></div>';
+    document.body.appendChild(el);
+    const ara = el.querySelector('.notlar__ara');
+    ara.addEventListener('input', () => { el.querySelector('[data-notlar-liste]').innerHTML = panelListeHtml(ara.value); });
+    el.addEventListener('keydown', e => { if(e.key === 'Escape'){ e.preventDefault(); panelKapat(); } });
+    el.addEventListener('click', e => {
+      const t = e.target && e.target.closest ? e.target : null;
+      if(!t) return;
+      if(t.closest('[data-notlar-kapat]')){ panelKapat(); return; }
+      const s = t.closest('[data-notlar-ac]');
+      if(s){
+        const b = s.getAttribute('data-notlar-ac');
+        const x = liste().find(y => y.baglam === b);
+        panelKapat();
+        try{
+          if(x && typeof x.ac === 'function') x.ac();
+          else if(ayar.ac) ayar.ac(b);
+        }catch(err){ console.error('Notlarım: aç', err); }
+      }
+    });
+    try{ ara.focus(); }catch(e){ /* odak yok */ }
+    return true;
+  }
+
   function kur(o){
     ayar = Object.assign({ modul:'' }, o || {});
     bagla();
@@ -157,5 +226,5 @@ window.LIFEOS.NOTUM = (function(){
 
   function _sifirla(){ ayar = null; notlar.clear(); }
 
-  return { SINIR, kur, yukle, oku, yaz, ekle, hepsi, kutuHtml, kuruluMu:() => !!ayar, _sifirla };
+  return { SINIR, kur, yukle, oku, yaz, ekle, hepsi, liste, kutuHtml, panelAc, panelKapat, kuruluMu:() => !!ayar, _sifirla };
 })();

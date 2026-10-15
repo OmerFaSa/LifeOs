@@ -14270,6 +14270,31 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .ogrenme-liste--kaydir{ max-height:420px; overflow-y:auto; padding-right:2px; }
 .ogrenme__kutu{ padding:8px 10px; border-radius:8px; background:var(--surface); }
 
+/* NOTLARIM paneli (notum.js söz 6): King'in baloncuğuyla aynı dil. */
+.notlar{ position:fixed; inset:0; z-index:70; display:grid; place-items:start center; padding:8vh 16px 16px; }
+.notlar__perde{ position:absolute; inset:0; background:color-mix(in srgb, var(--bg, #fff) 55%, transparent); backdrop-filter:blur(6px); }
+.notlar__kutu{ position:relative; width:min(640px, 100%); max-height:80vh; display:flex; flex-direction:column; gap:10px; padding:16px 18px;
+  border-radius:18px; background:var(--surface); box-shadow:0 18px 48px rgba(0,0,0,.18), inset 0 0 0 1px var(--border); }
+.notlar__bas{ display:flex; align-items:center; gap:8px; }
+.notlar__bas b{ font-size:16px; }
+.notlar__say{ font-size:12.5px; color:var(--text-2); }
+.notlar__kapat{ margin-left:auto; width:32px; height:32px; display:grid; place-items:center; padding:0; border:0; border-radius:50%;
+  background:none; color:var(--text-2); cursor:pointer; }
+.notlar__kapat:hover{ background:var(--surface-2); color:var(--text); }
+.notlar__kapat svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; }
+.notlar__ara{ height:40px; padding:0 14px; border-radius:20px; border:1px solid var(--border); background:var(--surface-2); color:var(--text);
+  font:inherit; font-size:14.5px; }
+.notlar__ara:focus{ outline:none; border-color:var(--primary); }
+.notlar__liste{ display:flex; flex-direction:column; gap:6px; overflow-y:auto; min-height:0; }
+.notlar__satir{ display:flex; flex-direction:column; gap:3px; width:100%; padding:10px 12px; text-align:left; border:0; border-radius:12px;
+  background:var(--surface-2); color:var(--text); font:inherit; cursor:pointer; }
+.notlar__satir:hover{ box-shadow:inset 0 0 0 1px var(--border); }
+.notlar__satir:focus-visible, .notlar__kapat:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.notlar__ad{ font-size:14px; font-weight:600; }
+.notlar__ad small{ font-weight:400; font-size:12px; color:var(--text-2); }
+.notlar__ozet{ font-size:13px; line-height:1.45; color:var(--text-2); }
+.notlar__bos{ margin:8px 0; font-size:13.5px; color:var(--text-2); }
+
 /* ==== css/zemin.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/zemin.css içine yazılır; burası bir sonraki
@@ -16242,7 +16267,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'ba7833b3', at:'2026-10-15 21:35', dirty:true };
+R.BUILD = { id:'06e0dabe', at:'2026-10-15 21:59', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -29721,7 +29746,11 @@ window.LIFEOS.GIRIS = (function(){
      3. NOT ÖLÇÜM DEĞİLDİR. Hiçbir sayıyı, kapıyı, seviyeyi değiştirmez.
      4. SEÇİP EKLE YALNIZ İŞARETLİ METİNDE. `data-notum-kaynak="<bağlam>"`
         taşıyan öğenin içinde seçilen metin o bağlamın notuna eklenir.
-     5. MODÜL ONSUZ DA ÇALIŞIR. Kurulmadıysa kutu çizilmez. */
+     5. MODÜL ONSUZ DA ÇALIŞIR. Kurulmadıysa kutu çizilmez.
+     6. NOTLARIM TEK YERDE. panelAc() modülün bütün notlarını (kendi
+        deposundakiler + modülün ek kaynağı, ör. AYS konu notları) tek
+        pencerede listeler; arama yazdıkça süzer; nota dokununca modülün
+        `ac(bağlam)`ı o ekranı açar. Paletten ve King'den («notlarım») açılır. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -29848,6 +29877,71 @@ window.LIFEOS.NOTUM = (function(){
     window.addEventListener('scroll', () => { const d = document.getElementById('notum-ekle'); if(d) d.remove(); }, { passive:true, capture:true });
   }
 
+  /* Söz 6: bütün notlar — { baglam, metin, ad, ust, ac? }. */
+  function liste(){
+    const l = [];
+    const et = b => (ayar && ayar.etiket ? (ayar.etiket(b) || {}) : {});
+    hepsi().forEach(x => { const e = et(x.baglam); l.push({ baglam:x.baglam, metin:x.metin, ad:e.ad || x.baglam, ust:e.ust || '' }); });
+    if(ayar && ayar.ekKaynak){
+      try{ (ayar.ekKaynak() || []).forEach(x => { if(x && String(x.metin || '').trim()) l.push(x); }); }catch(e){ /* ek kaynak düşer */ }
+    }
+    return l;
+  }
+
+  function panelListeHtml(ara){
+    const q = String(ara || '').toLocaleLowerCase('tr-TR').trim();
+    const l = liste().filter(x => !q || (x.ad + ' ' + x.ust + ' ' + x.metin).toLocaleLowerCase('tr-TR').indexOf(q) >= 0);
+    if(!liste().length) return '<p class="notlar__bos">Henüz not yok. Öğrenme ekranlarındaki «Notum» kutularına yazdıkların burada toplanır.</p>';
+    if(!l.length) return '<p class="notlar__bos">«' + kac(ara) + '» geçen not yok.</p>';
+    return l.map((x, i) => {
+      const m = String(x.metin).replace(/\s+/g, ' ');
+      return '<button type="button" class="notlar__satir" data-notlar-ac="' + kac(x.baglam) + '">'
+        + '<span class="notlar__ad">' + kac(x.ad) + (x.ust ? ' <small>' + kac(x.ust) + '</small>' : '') + '</span>'
+        + '<span class="notlar__ozet">' + kac(m.length > 160 ? m.slice(0, 157) + '…' : m) + '</span></button>';
+    }).join('');
+  }
+
+  function panelKapat(){
+    const el = typeof document !== 'undefined' ? document.getElementById('notlar-panel') : null;
+    if(el) el.remove();
+  }
+
+  function panelAc(){
+    if(typeof document === 'undefined' || !ayar) return false;
+    panelKapat();
+    const el = document.createElement('div');
+    el.id = 'notlar-panel';
+    el.className = 'notlar';
+    el.innerHTML = '<div class="notlar__perde" data-notlar-kapat></div>'
+      + '<div class="notlar__kutu" role="dialog" aria-modal="true" aria-label="Notlarım">'
+      + '<div class="notlar__bas"><b>Notlarım</b><span class="notlar__say">' + liste().length + ' not</span>'
+      + '<button type="button" class="notlar__kapat" data-notlar-kapat aria-label="Kapat">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>'
+      + '<input class="notlar__ara" type="search" placeholder="Notlarında ara" aria-label="Notlarında ara" autocomplete="off"/>'
+      + '<div class="notlar__liste" data-notlar-liste>' + panelListeHtml('') + '</div></div>';
+    document.body.appendChild(el);
+    const ara = el.querySelector('.notlar__ara');
+    ara.addEventListener('input', () => { el.querySelector('[data-notlar-liste]').innerHTML = panelListeHtml(ara.value); });
+    el.addEventListener('keydown', e => { if(e.key === 'Escape'){ e.preventDefault(); panelKapat(); } });
+    el.addEventListener('click', e => {
+      const t = e.target && e.target.closest ? e.target : null;
+      if(!t) return;
+      if(t.closest('[data-notlar-kapat]')){ panelKapat(); return; }
+      const s = t.closest('[data-notlar-ac]');
+      if(s){
+        const b = s.getAttribute('data-notlar-ac');
+        const x = liste().find(y => y.baglam === b);
+        panelKapat();
+        try{
+          if(x && typeof x.ac === 'function') x.ac();
+          else if(ayar.ac) ayar.ac(b);
+        }catch(err){ console.error('Notlarım: aç', err); }
+      }
+    });
+    try{ ara.focus(); }catch(e){ /* odak yok */ }
+    return true;
+  }
+
   function kur(o){
     ayar = Object.assign({ modul:'' }, o || {});
     bagla();
@@ -29855,7 +29949,7 @@ window.LIFEOS.NOTUM = (function(){
 
   function _sifirla(){ ayar = null; notlar.clear(); }
 
-  return { SINIR, kur, yukle, oku, yaz, ekle, hepsi, kutuHtml, kuruluMu:() => !!ayar, _sifirla };
+  return { SINIR, kur, yukle, oku, yaz, ekle, hepsi, liste, kutuHtml, panelAc, panelKapat, kuruluMu:() => !!ayar, _sifirla };
 })();
 
 /* ==== js/core/king.js ==== */
@@ -30022,6 +30116,8 @@ window.LIFEOS.KING = (function(){
     const t = kucuk(metin);
     if(!t) return { tur:'bos' };
     if(/(özet|nasıl gid|bugün ne|durumum|durum ne)/.test(t)) return { tur:'ozet' };
+    /* «notlarım», «notlarımı aç», «bütün notlar»: ortak Notlarım paneli (notum.js). */
+    if(/^(bütün |tüm )?notlar(ım|ımı|ımı aç|ımı göster)?( aç| göster)?$/.test(t) && L.NOTUM && L.NOTUM.kuruluMu && L.NOTUM.kuruluMu()) return { tur:'notlar' };
     const gitMi = new RegExp(B + '(git|aç|götür|geç|gidelim)').test(t);
     if(gitMi){
       const s = sayfaBul(t);
@@ -30252,6 +30348,11 @@ window.LIFEOS.KING = (function(){
 
   /* Yerel King (HKM yoksa ya da cevap veremediyse; sayfa ve kayıt hep burada). */
   function yerel(y, neden){
+    if(y.tur === 'notlar'){
+      kapat();
+      if(L.NOTUM && L.NOTUM.panelAc) L.NOTUM.panelAc();
+      return y;
+    }
     if(y.tur === 'ozet'){
       const s = ozetSatirlari();
       soyle(s.length ? (MODUL_AD[ayar.modul] || '') + '’de bugün:' : 'Bugün için henüz bir şey yok.', s);
@@ -86319,6 +86420,7 @@ R.Palette = (function(){
     list.push(kip('karma', 'Karma test — konular karışık', 'zap'));
     list.push(kip('yanlis', 'Yanlışlarım — yeniden çöz', 'list'));
     list.push(go('learn','Öğrenme — video ve ders notu','play','Git'));
+    list.push({ group:'Git', label:'Notlarım — bütün notların', icon:'list', run(){ if(window.LIFEOS && window.LIFEOS.NOTUM) window.LIFEOS.NOTUM.panelAc(); } });
     list.push(go('exams','Deneme','exam','Git'));
     list.push(go('quiz','Sınama — kendini test et','zap','Git'));
     list.push(go('cards','Tekrar ve yanlış defteri','cards','Git'));
@@ -105143,6 +105245,13 @@ R.App = (function(){
       /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
          kapıyı kullanır. Önce «not: …» (core/konunotu.js), sonra veri cümlesi
          (core/komut.js; paletle aynı): önizlenir, «Kaydet»le yazılır. */
+      /* NOTLARIM (brand/ortak/notum.js): AYS'nin notları konu notlarıdır
+         (core/konunotu.js); panel onları ek kaynak olarak listeler. */
+      if(window.LIFEOS && window.LIFEOS.NOTUM && R.KonuNotu){
+        window.LIFEOS.NOTUM.kur({ modul:'ays',
+          ekKaynak:() => R.KonuNotu.hepsi().map(x => ({ baglam:'konu:' + x.topic.id, metin:x.not, ad:x.topic.name, ust:x.subject.name,
+            ac:async () => { await R.Ogren.sec(x.subject.id, x.topic.id); R.App.go('anlatim'); } })) });
+      }
       if(window.LIFEOS && window.LIFEOS.GIRIS){
         window.LIFEOS.GIRIS.kur({ modul:'ays',
           onizle:t => (R.KonuNotu && R.KonuNotu.onizle(t)) || (R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null),

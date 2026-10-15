@@ -158,6 +158,8 @@ window.LIFEOS.KING = (function(){
     const t = kucuk(metin);
     if(!t) return { tur:'bos' };
     if(/(özet|nasıl gid|bugün ne|durumum|durum ne)/.test(t)) return { tur:'ozet' };
+    /* «notlarım», «notlarımı aç», «bütün notlar»: ortak Notlarım paneli (notum.js). */
+    if(/^(bütün |tüm )?notlar(ım|ımı|ımı aç|ımı göster)?( aç| göster)?$/.test(t) && L.NOTUM && L.NOTUM.kuruluMu && L.NOTUM.kuruluMu()) return { tur:'notlar' };
     const gitMi = new RegExp(B + '(git|aç|götür|geç|gidelim)').test(t);
     if(gitMi){
       const s = sayfaBul(t);
@@ -388,6 +390,11 @@ window.LIFEOS.KING = (function(){
 
   /* Yerel King (HKM yoksa ya da cevap veremediyse; sayfa ve kayıt hep burada). */
   function yerel(y, neden){
+    if(y.tur === 'notlar'){
+      kapat();
+      if(L.NOTUM && L.NOTUM.panelAc) L.NOTUM.panelAc();
+      return y;
+    }
     if(y.tur === 'ozet'){
       const s = ozetSatirlari();
       soyle(s.length ? (MODUL_AD[ayar.modul] || '') + '’de bugün:' : 'Bugün için henüz bir şey yok.', s);

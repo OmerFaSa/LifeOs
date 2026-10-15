@@ -1696,7 +1696,12 @@ ESP.App = (function(){
       await M.loadAll();
       /* NOTUM (brand/ortak/notum.js): öğrenme ekranlarında kendi notun; modülün deposunda. */
       if(window.LIFEOS && window.LIFEOS.NOTUM){
-        window.LIFEOS.NOTUM.kur({ modul:'esp', store:{ set:(p, d) => ESP.Store.set(p, d), list:c => ESP.Store.list(c) } });
+        /* Konu notunun ekranı: konunun disiplini (öğrenme kartı) → o disiplinin sayfası, konu açık. */
+        const DISC_ROTA = { lang:'lang', philo:'symposium', history:'history', music:'studio', diction:'studio', reading:'library', writing:'writing' };
+        const konuKarti = b => (ESP.OGRENME_KARTI_BY_TOPIC || {})[String(b).replace(/^konu:/, '')] || null;
+        window.LIFEOS.NOTUM.kur({ modul:'esp', store:{ set:(p, d) => ESP.Store.set(p, d), list:c => ESP.Store.list(c) },
+          etiket:b => { const k = konuKarti(b); return k ? { ad:k.title, ust:((ESP.DISCIPLINE_BY_ID || {})[k.discipline] || {}).label || '' } : { ad:b }; },
+          ac:b => { const k = konuKarti(b); S.ui.topicOpen = String(b).replace(/^konu:/, ''); go((k && DISC_ROTA[k.discipline]) || 'today'); } });
         try{ await window.LIFEOS.NOTUM.yukle(); }catch(e){ /* notlar yüklenemedi; kutu boş başlar */ }
       }
       /* «Üç sistemi bağla» (HKM yüzü): gizli çerçevede yalnız eşle ve dön;

@@ -1530,7 +1530,9 @@ SP.App = (function(){
       await M.loadAll();
       /* NOTUM (brand/ortak/notum.js): öğrenme ekranlarında kendi notun; modülün deposunda. */
       if(window.LIFEOS && window.LIFEOS.NOTUM){
-        window.LIFEOS.NOTUM.kur({ modul:'spi', store:{ set:(p, d) => SP.Store.set(p, d), list:c => SP.Store.list(c) } });
+        window.LIFEOS.NOTUM.kur({ modul:'spi', store:{ set:(p, d) => SP.Store.set(p, d), list:c => SP.Store.list(c) },
+          etiket:b => b === 'kavramlar' ? { ad:'Kavram notlarım', ust:'Analiz › Kavramlar' } : { ad:b },
+          ac:() => go('analytics') });
         try{ await window.LIFEOS.NOTUM.yukle(); }catch(e){ /* notlar yüklenemedi; kutu boş başlar */ }
       }
       /* «Üç sistemi bağla» (HKM yüzü): gizli çerçevede yalnız eşle ve dön;

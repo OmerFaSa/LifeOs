@@ -1641,6 +1641,13 @@ R.App = (function(){
       /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı
          kapıyı kullanır. Önce «not: …» (core/konunotu.js), sonra veri cümlesi
          (core/komut.js; paletle aynı): önizlenir, «Kaydet»le yazılır. */
+      /* NOTLARIM (brand/ortak/notum.js): AYS'nin notları konu notlarıdır
+         (core/konunotu.js); panel onları ek kaynak olarak listeler. */
+      if(window.LIFEOS && window.LIFEOS.NOTUM && R.KonuNotu){
+        window.LIFEOS.NOTUM.kur({ modul:'ays',
+          ekKaynak:() => R.KonuNotu.hepsi().map(x => ({ baglam:'konu:' + x.topic.id, metin:x.not, ad:x.topic.name, ust:x.subject.name,
+            ac:async () => { await R.Ogren.sec(x.subject.id, x.topic.id); R.App.go('anlatim'); } })) });
+      }
       if(window.LIFEOS && window.LIFEOS.GIRIS){
         window.LIFEOS.GIRIS.kur({ modul:'ays',
           onizle:t => (R.KonuNotu && R.KonuNotu.onizle(t)) || (R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null),

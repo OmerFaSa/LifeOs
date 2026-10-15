@@ -51,6 +51,44 @@
       }finally{ N()._sifirla(); }
     });
 
+    it('Notlarım paneli: kendi notları ve ek kaynak tek listede; arama süzer; dokununca açar', async () => {
+      const { store } = sahteDepo();
+      const acilan = [];
+      N()._sifirla();
+      N().kur({ modul:'deneme', store, etiket:b => ({ ad:'Ad:' + b, ust:'Üst' }), ac:b => acilan.push(b),
+        ekKaynak:() => [{ baglam:'konu:tm-05', metin:'üslü sayılar', ad:'Üslü sayılar', ust:'Matematik', ac:() => acilan.push('ek') }] });
+      try{
+        await N().yaz('kavramlar', 'kalp hızı rezervi');
+        expect(N().liste().map(x => x.ad)).toEqual(['Ad:kavramlar', 'Üslü sayılar']);
+        expect(N().panelAc()).toBe(true);
+        const p = document.getElementById('notlar-panel');
+        expect(p.querySelectorAll('[data-notlar-ac]').length).toBe(2);
+        const ara = p.querySelector('.notlar__ara');
+        ara.value = 'üslü'; ara.dispatchEvent(new Event('input', { bubbles:true }));
+        expect(p.querySelectorAll('[data-notlar-ac]').length).toBe(1);
+        p.querySelector('[data-notlar-ac]').dispatchEvent(new MouseEvent('click', { bubbles:true }));
+        expect(acilan).toEqual(['ek']);
+        expect(document.getElementById('notlar-panel')).toBe(null);
+        N().panelAc();
+        document.querySelector('[data-notlar-ac="kavramlar"]').dispatchEvent(new MouseEvent('click', { bubbles:true }));
+        expect(acilan).toEqual(['ek', 'kavramlar']);
+      }finally{ N().panelKapat(); N()._sifirla(); }
+    });
+
+    it('King «notlarım» paneli açar', () => {
+      const K = window.LIFEOS.KING;
+      const { store } = sahteDepo();
+      N()._sifirla();
+      N().kur({ modul:'deneme', store });
+      try{
+        K._sifirla();
+        K.kur({ modul:'spi', git:() => {}, ozet:() => [] });
+        expect(K.yorumla('notlarım').tur).toBe('notlar');
+        expect(K.yorumla('notlarımı aç').tur).toBe('notlar');
+        expect(K.yorumla('not: deneme').tur === 'notlar').toBe(false);
+      }finally{ K._sifirla(); N().panelKapat(); N()._sifirla(); }
+    });
+
     it('öğrenme yüzeyi sınıfları CSS’te tanımlı', () => {
       const d = document.createElement('div'); d.className = 'ogrenme';
       const k = document.createElement('div'); k.className = 'ogrenme__kutu';

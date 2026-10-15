@@ -25,6 +25,8 @@ SP.Palette = (function(){
     });
 
     /* hizli eylemler */
+    out.push({ id:'act:notlar', kind:'Eylem', label:'Notlarım — bütün notların', hint:'Notum',
+      run:() => { if(window.LIFEOS && window.LIFEOS.NOTUM) window.LIFEOS.NOTUM.panelAc(); } });
     out.push({ id:'act:paste', kind:'Eylem', label:'Tahlil raporu yapıştır',
       hint:'Modül 1', run:() => { SP.App.go('labs'); setTimeout(() => {
         const fn = SP.Screens.labs.handle['open-paste']; if(fn) fn({ dataset:{} }); }, 120); } });

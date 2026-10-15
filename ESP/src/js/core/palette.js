@@ -31,6 +31,8 @@ ESP.Palette = (function(){
     });
 
     /* hizli eylemler */
+    out.push({ id:'act:notlar', kind:'Eylem', label:'Notlarım — bütün notların', hint:'Notum',
+      run:() => { if(window.LIFEOS && window.LIFEOS.NOTUM) window.LIFEOS.NOTUM.panelAc(); } });
     out.push({ id:'act:review', kind:'Eylem', label:'Kart çalışmasına başla',
       hint:'Dil', run:() => { ESP.S.ui.langTab = 'calis'; ESP.App.go('lang'); } });
     out.push({ id:'act:card', kind:'Eylem', label:'Kelime listesi yapıştır',
