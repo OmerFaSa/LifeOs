@@ -212,7 +212,7 @@ window.LIFEOS = window.LIFEOS || {};
       const k = kalip({ eylem:x.id }, liste);
       const sev = k.seviye;
       let kilit = null;
-      if(sev !== 'kucuk') kilit = SEVIYE_AD[sev] + ' aksiyon: her zaman sorar';
+      if(sev !== 'kucuk') kilit = SEVIYE_AD[sev] + ' değişiklik: her zaman sorar';
       else if(x.olcum) kilit = 'ölçüm yazar: her zaman sorar';
       const acik = !kilit && sormadanMi({ eylem:x.id }, liste, a, { kaynak:'istek' })
         && (Object.prototype.hasOwnProperty.call(a.turler, x.id) ? a.turler[x.id] === true : a.mod === 'hepsi');
@@ -323,19 +323,22 @@ window.LIFEOS = window.LIFEOS || {};
         data:{ oneri:oneri.id, seviye:k.seviye } })
         + dugme({ etiket:'Geç', ton:'ghost', act:'oneri-gec', data:{ oneri:oneri.id } });
     }
-    const alt = [SEVIYE_AD[k.seviye] + ' aksiyon'];
+    /* SADE KART (kullanıcı, 2026-10-16: «her yeri anlaşılır ve minimalist
+       yap»): seviye TEK yerde (rozette); alt satır yalnız kapsam ve geri
+       alınabilirlik. Modül önerisinde «Öneri» etiketi yok (kartın kendisi
+       öneri); «Merkez önerisi» kaynağı söylediği için kalır. */
+    const alt = [];
     if(oneri.kapsam) alt.push(oneri.kapsam);
     if(k.geriAl) alt.push('geri alınabilir');
     return '<article class="kutu okart ' + (merkez ? 'okart--merkez' : 'okart--modul') + '" data-oz="110"'
       + ' data-seviye="' + k.seviye + '" data-oneri="' + kac(oneri.id || '') + '" aria-labelledby="' + kid + '">'
-      + '<div class="okart__bas"><span class="okart__kaynak">' + (merkez ? 'Merkez önerisi' : 'Öneri') + '</span>'
-      + seviyeRozeti(k.seviye) + '</div>'
+      + '<div class="okart__bas">' + (merkez ? '<span class="okart__kaynak">Merkez önerisi</span>' : '') + seviyeRozeti(k.seviye) + '</div>'
       + (oneri.capraz ? caprazHtml(oneri.capraz) : '')
       /* Başlık seviyesi kartın durduğu yere göre: kutu içinde h3 (kutunun
          adı h2), doğrudan sayfada h2 (h1 → h3 atlaması erişilebilirlik hatası). */
       + (oneri.hSeviye === 2 ? '<h2' : '<h3') + ' class="okart__baslik" id="' + kid + '">' + kac(oneri.baslik)
       + (oneri.hSeviye === 2 ? '</h2>' : '</h3>')
-      + '<p class="okart__alt">' + kac(alt.join(' · ')) + '</p>'
+      + (alt.length ? '<p class="okart__alt">' + kac(alt.join(' · ')) + '</p>' : '')
       + (oneri.gerekce ? gerekceHtml(oneri.gerekce, oneri.cumle) : '')
       + kuralIziHtml(oneri.kurallar)
       + '<div class="okart__eylem">' + eylem + '</div></article>';
@@ -514,7 +517,7 @@ window.LIFEOS = window.LIFEOS || {};
         return '<label class="kapsam__s" for="' + id + '"><input type="radio" name="' + ad + '" id="' + id + '"'
           + ' value="' + kp.id + '" data-act="oneri-kapsam" data-seviye="' + sev + '"' + (secili === kp.id ? ' checked' : '') + '>'
           + '<span class="kapsam__ad">' + kac(kp.ad) + '</span>'
-          + '<span class="kapsam__seviye">' + kac(SEVIYE_AD[sev] + ' aksiyon · ' + KALIP_OZET[sev]) + '</span></label>';
+          + '<span class="kapsam__seviye">' + kac(SEVIYE_AD[sev] + ' değişiklik · ' + KALIP_OZET[sev]) + '</span></label>';
       }).join('') + '</fieldset>';
   }
 

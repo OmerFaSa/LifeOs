@@ -59,7 +59,7 @@ try{
 function waitForServer(url, tries){
   return new Promise((resolve, reject) => {
     const attempt = n => {
-      fetch(url).then(() => resolve()).catch(() => {
+      fetch(url).then(r => r.arrayBuffer()).then(() => resolve()).catch(() => {
         if(n <= 0) return reject(new Error('sunucu acilmadi: ' + url));
         setTimeout(() => attempt(n - 1), 200);
       });

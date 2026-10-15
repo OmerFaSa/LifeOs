@@ -84,7 +84,7 @@ describe('110 · Mor öneri kartı', () => {
       expect(a.classList.contains('kutu')).toBeTruthy();
       expect(k.querySelector('#' + a.getAttribute('aria-labelledby')).textContent)
         .toBe('Akşam bloğu tekrara ayrılsın');
-      expect(k.querySelector('.okart__alt').textContent).toBe('küçük aksiyon · yalnız bugün · geri alınabilir');
+      expect(k.querySelector('.okart__alt').textContent).toBe('yalnız bugün · geri alınabilir');   // seviye rozette, tekrar yok
     }finally{ k.remove(); }
   });
 });
@@ -198,8 +198,8 @@ describe('116 · Otomatik uygula ayarı', () => {
       expect(a['meal-log'].disabled).toBeTruthy();
       expect(a['veri-sil'].disabled).toBeTruthy();
       const neden = k.querySelectorAll('.otoayar__neden');
-      expect(neden[0].textContent).toBe('orta aksiyon: her zaman sorar');
-      expect(neden[1].textContent).toBe('büyük aksiyon: her zaman sorar');
+      expect(neden[0].textContent).toBe('orta değişiklik: her zaman sorar');
+      expect(neden[1].textContent).toBe('büyük değişiklik: her zaman sorar');
       expect(neden[2].textContent).toBe('ölçüm yazar: her zaman sorar');
       /* Her anahtarın adı var (etiketle bağlı). */
       Object.keys(a).forEach(id => expect(k.querySelector('label[for="' + a[id].id + '"]')).toBeTruthy());
@@ -453,9 +453,9 @@ describe('P2 · Öneri ekleri (113 123 124 127)', () => {
       const f = k.querySelector('[data-oz="127"]');
       expect(f.tagName).toBe('FIELDSET');
       const s = f.querySelectorAll('.kapsam__seviye');
-      expect(s[0].textContent).toBe('küçük aksiyon · tek dokunuş, «Geri al» kalır');
-      expect(s[1].textContent).toBe('orta aksiyon · önizleme ve tek onay');
-      expect(s[2].textContent).toBe('büyük aksiyon · önce/sonra, onay ve dönüş noktası');
+      expect(s[0].textContent).toBe('küçük değişiklik · tek dokunuş, «Geri al» kalır');
+      expect(s[1].textContent).toBe('orta değişiklik · önizleme ve tek onay');
+      expect(s[2].textContent).toBe('büyük değişiklik · önce/sonra, onay ve dönüş noktası');
       expect(f.querySelector('input:checked').value).toBe('bugun');
       f.querySelectorAll('input').forEach(i => expect(k.querySelector('label[for="' + i.id + '"]')).toBeTruthy());
     }finally{ k.remove(); }

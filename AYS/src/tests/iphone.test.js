@@ -511,7 +511,9 @@
 
     /* Tablet incelemesi: «Bir soru» defter satırı tek başına çiziliyordu;
        arka plansız, kartların arasında yüzüyordu (SPİ'de defterin içinde). */
-    it('Bugün: «Bir soru» satırı defterin (kartın) içinde; alt yazı sade', async () => {
+    /* 2026-10-16: «Bir soru» üç modülde ortak sade karttır (brand/ortak/sorukart.js):
+       soru görünür, iç gösterge adı yalnız ipucunda (title), alt yazı sade. */
+    it('Bugün: «Bir soru» sade kartta; iç gösterge adı görünmez, ipucunda durur', async () => {
       R.Test.resetState();
       R.S.profile.setupDone = true;
       await R.Model.ensurePlan(true);
@@ -524,10 +526,13 @@
       try{
         d.innerHTML = String(await R.Screens.today.render());
         document.body.appendChild(d);
-        const satir = Array.from(d.querySelectorAll('.lrow')).find(x => /Bir soru/.test(x.textContent));
-        expect(!!satir).toBe(true);
-        expect(!!satir.closest('.ledger')).toBe(true);
-        expect(/nöbetçisi/.test(satir.textContent)).toBe(false);
+        const kart = d.querySelector('.sorukart');
+        expect(!!kart).toBe(true);
+        expect(kart.textContent).toContain('Süre artıyor ama konu kapanmıyor?');
+        expect(/çalışma dakikası/.test(kart.textContent)).toBe(false);
+        expect(kart.querySelector('[title]').getAttribute('title')).toContain('çalışma dakikası');
+        expect(/nöbetçisi/.test(kart.textContent)).toBe(false);
+        expect(kart.querySelector('#sig-answer') !== null).toBe(true);
       }finally{ R.Signals.current = eski; d.remove(); }
     });
 

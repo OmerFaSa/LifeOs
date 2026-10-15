@@ -175,7 +175,7 @@ SP.Screens.meals = (function(){
         <div class="mealcard__head">
           ${raw(UI.icon(slot ? slot.icon : 'meal'))}
           <span class="mealcard__slot">${slot ? slot.label : meal.slot}</span>
-          <span class="mealcard__kcal num">${Math.round(a.raw.kcal)} kcal</span>
+          <span class="mealcard__kcal num">${(meal.items || []).some(it => Number(it.g) > 0) ? Math.round(a.raw.kcal) + ' kcal' : '— kcal'}</span>
           ${raw(String(SP.FotoUI.kutu({ sahip:'ogun:' + meal.id, sinif:'foto-kutu--sm',
             ad:(slot ? slot.label : meal.slot) + ' · ' + U.fmtShort(shownDate()) })))}
           ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Öğünü sil',
@@ -185,7 +185,7 @@ SP.Screens.meals = (function(){
           const f = SP.FOOD_BY_ID[it.foodId];
           if(!f) return '';
           return html`<div class="mealitem">
-            <span class="mealitem__g num">${it.g} g</span>
+            <span class="mealitem__g num">${Number(it.g) > 0 ? it.g + ' g' : '—'}</span>
             <span class="mealitem__name">${f.name}
               ${when(it.portion, () => html`<span class="tiny dim"> · ${it.portion}</span>`)}</span>
             ${P.cert(it.cert)}
@@ -194,9 +194,16 @@ SP.Screens.meals = (function(){
           </div>`;
         })}
         <div class="row wrap mt-8">
-          <span class="tiny dim">Protein ${Math.round(a.raw.protein)} g ·
-            yağ ${Math.round(a.raw.fat)} g · karbonhidrat ${Math.round(a.raw.carb)} g ·
-            lif ${Math.round(a.raw.fiber)} g</span>
+          ${(() => {
+            /* Eksik veri sıfır değildir (AGENTS §1.2): gramı girilmemiş kalem
+               «Protein 0 g» diye gösterilmez; hesaba girmediği söylenir. */
+            const gramli = (meal.items || []).filter(it => Number(it.g) > 0).length;
+            const eksik = (meal.items || []).length - gramli;
+            if(!gramli) return html`<span class="tiny dim">Besin değeri için kalemlerin gramı gerekli.</span>`;
+            return html`<span class="tiny dim">Protein ${Math.round(a.raw.protein)} g ·
+              yağ ${Math.round(a.raw.fat)} g · karbonhidrat ${Math.round(a.raw.carb)} g ·
+              lif ${Math.round(a.raw.fiber)} g${eksik ? ' · ' + eksik + ' kalemin gramı yok, hesaba girmedi' : ''}</span>`;
+          })()}
         </div>
         ${map(a.notes, P.absorbNote)}
       </div>`;

@@ -89,6 +89,15 @@ ESP.Screens.today = (function(){
     });
   }
 
+  /* «Bir soru»: ortak sade kart (brand/ortak/sorukart.js). */
+  function soruKartHtml(){
+    if(!(window.LIFEOS && window.LIFEOS.SORUKART) || !ESP.Signals) return '';
+    const sig = ESP.Signals.current();
+    if(!sig) return '';
+    if(!sig.seenAt) ESP.Signals.markSeen(sig.id);
+    return window.LIFEOS.SORUKART.kartHtml(sig);
+  }
+
   /* ------------------------------------------------------------ oturum girisi */
 
   function entryForm(){
@@ -850,7 +859,9 @@ ESP.Screens.today = (function(){
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${raw(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu() ? window.LIFEOS.GIRIS.kutuHtml() : '')}
           ${nextCard()}
-          ${K.Ledger(() => [(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu()) ? null : quickForm(), signalRow()].filter(Boolean))}
+          ${raw(soruKartHtml())}
+          ${K.Ledger(() => [(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu()) ? null : quickForm(),
+            window.LIFEOS && window.LIFEOS.SORUKART ? null : signalRow()].filter(Boolean))}
         </section>
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
           ${K.Ledger(() => [sessionList(), planRowToday()].filter(Boolean))}

@@ -158,8 +158,9 @@ R.Screens = R.Screens || {};
   function konuSatiri(subject, t, d, yanlis){
     const parca = [];
     if(d.okundu) parca.push('okundu');
+    /* Sade liste (2026-10-16): başlanmamış konunun altında her satırda
+       aynı «10 örnek soru» tekrar ediyordu; yalnız durum yazılır. */
     if(d.skor.cevaplanan) parca.push(d.skor.dogru + '/' + d.skor.toplam + ' soru doğru');
-    else if(d.skor.toplam) parca.push(d.skor.toplam + ' örnek soru');
     if(yanlis) parca.push(yanlis + ' yanlış açık');
     if(!d.anlatim) parca.push('anlatım yazılıyor');
     const tamam = tamamMi(d);

@@ -1,287 +1,102 @@
-#!/usr/bin/env node
-/* SADELIK — ekranlar sade mi, OLCULUR.
- *
- * ------------------------------------------------------------------
- * NEDEN BU ARAC VAR
- *
- * Kullanicinin tek tasarimdan istedigi iki sey var: hicbir ozellik
- * kaybolmasin (`envanter.js` olcer) ve ekran sade, anlasilir olsun.
- * Ikincisi «bence sade oldu» ile kanitlanamaz. `belgeler/ekip/EKIP-PLANI.md`
- * §1.2 bir SADELIK BUTCESI yaziyor; bu arac o butceyi her ekranda
- * olcer ve asani soyler.
- *
- * Olculer `envanter.js`'in gezintisinden gelir (tek gezgin, iki
- * denetim): dolu profil, 1440 piksel. Kaynak taramasi ayrica ham renk
- * sayar.
- *
- * ------------------------------------------------------------------
- * BUTCE (plan §1.2)
- *
- *   her ekran   ekran ici sekme 0 · sekme grubu 0 · 30 kelimeyi asan tek
- *               parca yazi 0 · dolu (birincil) dugme en cok 1 · halka en
- *               cok 1 · resimsi simge (emoji) 0 · XP yazisi 0 (Rutbe haric) ·
- *               kesinligi olmayan sayi 0 (`.sayi[data-etiketsiz]`, katalog 024)
- *   Bugun       sayfa boyu en cok 1800 px · gorunen dugme en cok 14
- *   kaynak      ekran ve kart dosyalarinda jeton disi ham renk 0
- *
- * ------------------------------------------------------------------
- * NE ZAMAN KIRMIZI
- *
- * Bugunku uygulama butcenin cok ustunde (Bugun 4 482 px, 52 dugme);
- * butce ancak bir modul yeni iskelete gecince anlam kazanir. Bu yuzden
- * arac bir modulu yalniz TESLIM EDILMISSE denetler: `belgeler/ekip/EKIP-DURUM.md`
- * teslim tablosunda o modulun satiri ✅ ise. Digerleri icin olcer ve
- * yazar, cikis kodunu etkilemez. `--denetle AYS` ile elle de istenir.
- *
- *   node tools/sadelik.js                      # olc; teslim edilenleri denetle
- *   node tools/sadelik.js --denetle AYS SPI    # bu modulleri denetle
- *   node tools/sadelik.js --gezinti g.json     # envanter.js --json ciktisini kullan
- *   node tools/sadelik.js AYS                  # tek modul
- *   node tools/sadelik.js --onay               # yalniz 022 kaynak kurali (tarayicisiz)
- *
- * Cikis kodu: 0 butcede (ya da yalniz olcum), 1 denetlenen bir modul
- * butceyi asti, 2 kosum hatasi.
- */
-'use strict';
+/* SADELİK ÖLÇÜMÜ — üç arayüzün bütün ekranlarında kalabalık ölçülür.
+
+   Depo sahibi (2026-10-16): «yüzeysel değil, çok daha derin; sistemin her
+   yerini çok daha anlaşılır ve minimalist yap». Kalabalık tahminle değil
+   ÖLÇÜLEREK bulunur: her ekran gerçek tarayıcıda açılır ve şunlar sayılır:
+
+     açık     — açık (küçültülmemiş, gizlenmemiş) kart sayısı; bölümlü
+                ekranda EN KALABALIK bölümünkü (gizle.js bolumler)
+     söz      — ekranda görünen sözcük sayısı
+     düğme    — görünen düğme sayısı
+     boy      — sayfanın piksel boyu (1280 genişlikte)
+
+   KURAL (sadelik sözleşmesi): bir ekranın (bölümlü ekranda her bölümün)
+   açık kartı en çok ESIK_ACIK'tır; ara sıra kullanılan kart küçük başlar
+   (ekranın kucukVarsayilan listesi), hiçbir kart kaldırılmaz.
+
+     node tools/sadelik.js              # tablo, en kalabalık ekran önce
+     node tools/sadelik.js --denetle    # kuralı aşan ekran varsa çıkış 1
+     node tools/sadelik.js AYS          # yalnız bir modül
+     node tools/sadelik.js --ornek      # örnek veri kipinde (dolu hesap)
+
+   Sunucu gerekmez: modülün derlenmiş tek dosyası (dist/*.html) açılır;
+   sabit port yoktur, öteki denetimlerle çakışmaz. Önce build.py koşar. */
 
 const path = require('path');
-const fs = require('fs');
-const ENV = require('./envanter.js');
+const { chromium } = require(path.join(__dirname, '..', 'ESP', 'node_modules', 'playwright'));
 
-const KOK = path.resolve(__dirname, '..');
+const ESIK_ACIK = 3;
+const KOK = path.join(__dirname, '..');
+const MODULLER = {
+  AYS:{ dosya:'AYS/dist/rota.html', ns:'R', profil:'rota.activeProfile',
+    rotalar:'(R.App.NAV || []).reduce((l, g) => l.concat((g.items || []).map(i => i.id)), [])', git:'r => R.App.go(r)' },
+  SPI:{ dosya:'SPI/dist/spi.html', ns:'SP', profil:'spi.activeProfile',
+    rotalar:'(SP.App.SECTIONS || []).reduce((l, s) => l.concat(s.views.map(v => v.route)), [])', git:'r => SP.App.go(r)' },
+  ESP:{ dosya:'ESP/dist/esp.html', ns:'ESP', profil:'esp.activeProfile',
+    rotalar:'(ESP.Nav.sections() || []).reduce((l, s) => l.concat(s.views.map(v => v.route)), [])', git:'r => ESP.App.go(r)' },
+};
 
-const KURAL = [
-  { ad:'sekme',        olcu:'sekme',        en:0, yazi:'ekran içi sekme' },
-  { ad:'sekmeGrubu',   olcu:'sekmeGrubu',   en:0, yazi:'sekme grubu' },
-  { ad:'uzunParagraf', olcu:'uzunParagraf', en:0, yazi:'30+ kelimelik tek parça yazı' },
-  { ad:'dolu',         olcu:'dolu',         en:1, yazi:'dolu (birincil) düğme' },
-  { ad:'halka',        olcu:'halka',        en:1, yazi:'halka grafiği' },
-  { ad:'simge',        olcu:'simge',        en:0, yazi:'resimsi simge (emoji)' },
-  { ad:'xp',           olcu:'xp',           en:0, yazi:'XP yazısı', haric:['rutbe'] },
-  { ad:'etiketsiz',    olcu:'etiketsiz',    en:0, yazi:'kesinliği olmayan sayı (024)' },
-  /* Asagidaki iki kural once OLCUMDU (`olcum:true`: kirmizi yapmaz,
-     sayar). K'nin istegiyle sifira inince zorunlu oldular (2026-09-25:
-     uc modulde ikisi de 0). Yeni bir olcu once `olcum:true` ile gelir. */
-  { ad:'mor',          olcu:'mor',          en:0, yazi:'Merkez dışında mor (110)' },
-  { ad:'evetTamam',    olcu:'evetTamam',    en:0, yazi:'«Evet/Tamam» onay düğmesi (022)' },
-  /* TEKRAR (2026-10-01, kullanici: «her sey her yerde»): ayni ekranda iki
-     kez gorunen baslik ya da 6+ kelimelik cumle. Ayni gun olcum olarak
-     geldi, uc modulde 0'a inince (2026-10-01) kullanicinin istegiyle
-     zorunlu oldu. */
-  { ad:'tekrar',       olcu:'tekrar',       en:0, yazi:'aynı ekranda tekrarlanan başlık/cümle' },
-  /* iPhone planı (belgeler/ekip/IPHONE-PLANI.md §5, 2026-10-02): önce ölçüm;
-     üç modülde üçü aşan ekran sıfıra inince (Faz 6) açık kart ZORUNLU oldu
-     (Faz 7). Sayfa boyu hâlâ ölçümdür: aşan sayfalar planın §8'inde.
-     Rütbe ekranları kullanıcı kararıyla olduğu gibi kalır. */
-  { ad:'acikKart',     olcu:'acikKart',     en:3, yazi:'açık kart (iPhone §2.2)', haric:['rutbe'] },
-  { ad:'boyHepsi',     olcu:'boy',          en:1200, yazi:'sayfa boyu px (iPhone §2.3)', olcum:true, haric:['rutbe'] },
-  { ad:'boy',          olcu:'boy',          en:1800, yazi:'sayfa boyu (px)', yalniz:['today'] },
-  { ad:'dugme',        olcu:'dugme',        en:14, yazi:'görünen düğme', yalniz:['today'] },
-];
+/* --ornek: modülün örnek veri kipi (brand/ortak/ornekkip.js) — boş profil
+   kalabalığı gizler; dolu bir hesapta ekran nasıl görünür, o ölçülür. */
+const ORNEK = process.argv.includes('--ornek');
 
-/* Jeton disi ham renk: ekran dosyalarinda ve K'nin kart dosyalarinda.
-   Jetonlarin kendisi (jeton.css, tokens.css, palettes.css) sayilmaz. */
-function hamRenk(ad){
-  /* Renk sayilan: 6/8 haneli hex, ya da icinde rakam olan / #fff gibi 3
-     haneli hex. `#add`, `#bad` gibi harfli kimlik secicileri renk
-     sayilmaz; yorumlar sayilmaz. */
-  const RENK = /#([0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g;
-  const renkMi = h => h.length !== 3 || /[0-9]/.test(h) || /^(fff|FFF)$/.test(h);
-  const say = t => {
-    const temiz = t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"])\/\/.*$/gm, '$1');
-    let n = 0, m;
-    RENK.lastIndex = 0;
-    while((m = RENK.exec(temiz))) if(renkMi(m[1])) n++;
-    return n;
-  };
-  const out = {};
-  const ekran = path.join(KOK, ad, 'src', 'js', 'screens');
-  if(fs.existsSync(ekran)){
-    fs.readdirSync(ekran).filter(f => /\.js$/.test(f)).forEach(f => {
-      const n = say(fs.readFileSync(path.join(ekran, f), 'utf8'));
-      if(n) out['screens/' + f] = n;
+async function olc(ad, m){
+  const b = await chromium.launch();
+  const p = await b.newPage({ viewport:{ width:1280, height:900 } });
+  if(ORNEK) await p.addInitScript(k => { try{ localStorage.setItem(k, 'ornek'); }catch(e){} }, m.profil);
+  const hata = [];
+  p.on('pageerror', e => hata.push(e.message));
+  await p.goto('file:///' + path.join(KOK, m.dosya).replace(/\\/g, '/'));
+  await p.waitForFunction(ns => window[ns] && window[ns].App && window.LIFEOS && window.LIFEOS.Gizle, m.ns, { timeout:30000 });
+  await p.waitForTimeout(2500);
+  for(const t of ['Escape', 'Escape']){ await p.keyboard.press(t); await p.waitForTimeout(150); }
+  const rotalar = [...new Set(await p.evaluate(m.rotalar))];
+  const sonuc = [];
+  for(const r of rotalar){
+    try{ await p.evaluate(`(${m.git})(${JSON.stringify(r)})`); }
+    catch(e){ sonuc.push({ ad, r, hata:'açılamadı' }); continue; }
+    await p.waitForTimeout(500);
+    const o = await p.evaluate(() => {
+      const kok = document.getElementById('app') || document.body;
+      const G = window.LIFEOS.Gizle;
+      const gorunur = el => { const s = getComputedStyle(el); return s.display !== 'none' && s.visibility !== 'hidden' && el.offsetParent !== null; };
+      const bl = Array.from(kok.querySelectorAll('section.sayfabolum'));
+      const parca = bl.length ? bl : [kok];
+      const bolumAcik = parca.map(b => ({ id:b.id || '', acik:G.bolumler(b).filter(x => !x.el.classList.contains('gizle-kucuk')
+        && !x.el.classList.contains('gizle-gizli') && gorunur(x.el)).map(x => x.anahtar) }));
+      const en = bolumAcik.reduce((a, x) => x.acik.length > a.acik.length ? x : a, { id:'', acik:[] });
+      const metin = (kok.innerText || '').replace(/\s+/g, ' ').trim();
+      return {
+        acik:en.acik.length, acikBolum:en.id, acikKartlar:en.acik,
+        soz:metin ? metin.split(' ').length : 0,
+        dugme:Array.from(kok.querySelectorAll('button, a.btn')).filter(gorunur).length,
+        boy:document.documentElement.scrollHeight,
+      };
     });
+    sonuc.push(Object.assign({ ad, r }, o));
   }
-  ['kart.css', 'sayi.js', 'grafik.js', 'oneri.js', 'sozluk.js', 'guven.js'].forEach(f => {
-    const p = path.join(KOK, 'brand', 'ortak', f);
-    if(!fs.existsSync(p)) return;
-    const n = say(fs.readFileSync(p, 'utf8'));
-    if(n) out['brand/ortak/' + f] = n;
-  });
-  return out;
+  await b.close();
+  return { sonuc, hata };
 }
 
-/* VARSAYILAN ETIKETLI ONAY (katalog 022, statik). `confirmSheet(baslik,
-   mesaj, fn, tehlikeli, onay)` besinci arguman verilmezse dugme «Evet,
-   devam et» yazar. Gezinti pencereleri acmaz; bu yuzden cagrilar kaynakta
-   sayilir: ust duzey virgulleri sayan kucuk bir tarayici (dize, sablon ve
-   yorum atlanir). */
-/* Bir kaynak metinde besinci argumani (etiketi) olmayan confirmSheet
-   cagrilarinin satir numaralari. Tanimin kendisi sayilmaz. */
-function onaySay(t){
-  const out = [];
-  const re = /confirmSheet\s*\(/g;
-  let m;
-  while((m = re.exec(t))){
-    const once = t.slice(Math.max(0, m.index - 12), m.index);
-    if(/function\s+$/.test(once)) continue;         // tanimin kendisi
-    let i = re.lastIndex, derin = 0, virgul = 0, bos = true;
-    for(; i < t.length; i++){
-      const c = t[i];
-      if(c === '"' || c === "'" || c === '`'){
-        const q = c; i++;
-        while(i < t.length && t[i] !== q){ if(t[i] === '\\') i++; i++; }
-        bos = false; continue;
-      }
-      if(c === '/' && t[i + 1] === '*'){ i = t.indexOf('*/', i + 2) + 1; continue; }
-      if(c === '/' && t[i + 1] === '/'){ i = t.indexOf('\n', i); continue; }
-      if('([{'.indexOf(c) >= 0){ derin++; bos = false; continue; }
-      if(')]}'.indexOf(c) >= 0){ if(derin === 0) break; derin--; continue; }
-      if(c === ',' && derin === 0) virgul++;
-      else if(!/\s/.test(c)) bos = false;
-    }
-    const arguman = bos ? 0 : virgul + 1;
-    if(arguman < 5) out.push(t.slice(0, m.index).split('\n').length);
+(async () => {
+  const sec = process.argv.slice(2).filter(a => !a.startsWith('--'));
+  const denetle = process.argv.includes('--denetle');
+  const hepsi = [], hatalar = [];
+  for(const ad of Object.keys(MODULLER)){
+    if(sec.length && sec.indexOf(ad) < 0) continue;
+    const r = await olc(ad, MODULLER[ad]);
+    hepsi.push(...r.sonuc);
+    r.hata.forEach(h => hatalar.push(ad + ': ' + h));
   }
-  return out;
-}
-
-function varsayilanOnaylar(ad){
-  const kok = path.join(KOK, ad, 'src', 'js');
-  const out = [];
-  const gez = d => fs.readdirSync(d, { withFileTypes:true }).forEach(e => {
-    const p = path.join(d, e.name);
-    if(e.isDirectory()) return gez(p);
-    if(!/\.js$/.test(e.name)) return;
-    onaySay(fs.readFileSync(p, 'utf8'))
-      .forEach(satir => out.push(path.relative(path.join(KOK, ad), p) + ':' + satir));
-  });
-  gez(kok);
-  return out;
-}
-
-/* Teslim tablosunda ✅ olan moduller (T yazar). */
-function teslimEdilenler(){
-  const p = path.join(KOK, 'belgeler', 'ekip', 'EKIP-DURUM.md');
-  if(!fs.existsSync(p)) return [];
-  const t = fs.readFileSync(p, 'utf8');
-  const out = [];
-  t.split('\n').forEach(satir => {
-    const m = satir.match(/^\|\s*(AYS|SPİ|SPI|ESP)\s*\|\s*✅/);
-    if(m) out.push(m[1] === 'SPİ' ? 'SPI' : m[1]);
-  });
-  return out;
-}
-
-function degerlendir(ad, olcu, taban){
-  const ihlal = [];
-  Object.keys(olcu).forEach(rota => {
-    const o = olcu[rota];
-    KURAL.forEach(k => {
-      if(k.yalniz && k.yalniz.indexOf(rota) < 0) return;
-      if(k.haric && k.haric.indexOf(rota) >= 0) return;
-      const v = o[k.olcu];
-      if(v == null || v <= k.en) return;
-      const t = taban && taban[rota] ? taban[rota][k.olcu] : null;
-      ihlal.push({ rota, kural:k.yazi, deger:v, en:k.en, taban:t, olcum:!!k.olcum,
-        ornek:k.ad === 'tekrar' ? (o.tekrarlar || []) : null });
-    });
-  });
-  return ihlal;
-}
-
-async function main(){
-  const argv = process.argv.slice(2);
-  const di = argv.indexOf('--denetle');
-  const zorunlu = new Set(di >= 0 ? argv.slice(di + 1).filter(a => ENV.MODUL[a]) : teslimEdilenler());
-  const gi = argv.indexOf('--gezinti');
-  const secilen = argv.filter((a, i) => ENV.MODUL[a] && !(di >= 0 && i > di));
-  const moduller = secilen.length ? secilen : Object.keys(ENV.MODUL);
-
-  let gezinti;
-  if(gi >= 0){
-    gezinti = JSON.parse(fs.readFileSync(argv[gi + 1], 'utf8')).moduller;
-  }else{
-    console.log('Sadelik — gezinti (' + moduller.join(', ') + ')');
-    gezinti = await ENV.gez(moduller);
-  }
-
-  const tabanYol = ENV.sonTaban();
-  const taban = tabanYol ? JSON.parse(fs.readFileSync(tabanYol, 'utf8')).moduller : {};
-
-  let kirmizi = 0;
-  console.log('');
-  moduller.forEach(ad => {
-    if(!gezinti[ad]){ console.log(ad + ': gezintide yok'); return; }
-    const olcu = ((gezinti[ad].olcu || {}).dolu || {})['1440'] || {};
-    const tb = taban[ad] ? ((taban[ad].olcu || {}).dolu || {})['1440'] : null;
-    let ihlal = degerlendir(ad, olcu, tb);
-    const renk = hamRenk(ad);
-    const renkToplam = Object.values(renk).reduce((a, b) => a + b, 0);
-    const denetlenir = zorunlu.has(ad);
-    const olcumler = ihlal.filter(x => x.olcum);
-    ihlal = ihlal.filter(x => !x.olcum);
-    const onay = varsayilanOnaylar(ad);
-    const n = ihlal.length + (renkToplam ? 1 : 0);
-    if(denetlenir && n) kirmizi += n;
-    console.log(ad + (denetlenir ? ' (DENETLENİR — teslim edildi)' : ' (yalnız ölçüm)') + ': '
-      + (n ? n + ' bütçe aşımı' : 'bütçede') + ' · ' + Object.keys(olcu).length + ' ekran');
-    /* iPhone planı §5: açık kart toplamı ve 3'ü aşan ekran sayısı (Rütbe hariç). */
-    const rotalar = Object.keys(olcu).filter(r => r !== 'rutbe');
-    const acikToplam = rotalar.reduce((t, r) => t + (olcu[r].acikKart || 0), 0);
-    const asan = rotalar.filter(r => (olcu[r].acikKart || 0) > 3).length;
-    console.log('   iPhone · açık kart ' + acikToplam + ' · üçü aşan ekran ' + asan + ' / ' + rotalar.length);
-    ihlal.forEach(x => {
-      console.log('   ' + (denetlenir ? '✕' : '·') + ' ' + x.rota + ' · ' + x.kural
-        + ' ' + x.deger + ' (en çok ' + x.en + (x.taban != null ? ', taban ' + x.taban : '') + ')');
-      (x.ornek || []).forEach(o => console.log('       ' + o));
-    });
-    if(renkToplam){
-      console.log('   ' + (denetlenir ? '✕' : '·') + ' jeton dışı ham renk ' + renkToplam + ': '
-        + Object.keys(renk).map(f => f + ' ' + renk[f]).join(', '));
-    }
-    /* Olcum (kirmizi yapmaz): `olcum:true` tasiyan kural varsa yazilir. */
-    olcumler.forEach(x => {
-      console.log('   ölçüm · ' + x.rota + ' · ' + x.kural + ' ' + x.deger);
-      (x.ornek || []).forEach(o => console.log('       ' + o));
-    });
-    /* 022 ZORUNLU (2026-09-25): 35 cagrinin hepsi sonucu soyleyen
-       etiketi tasiyor; yeni bir varsayilan etiketli onay her modulde
-       kirmizidir (teslim beklemez: kaynak kurali, ekran olcusu degil). */
-    if(onay.length){
-      kirmizi += onay.length;
-      console.log('   ✕ varsayılan «Evet, devam et» onayı (katalog 022) ' + onay.length + ': ' + onay.join(', '));
-    }
-  });
-
-  if(kirmizi){
-    console.log('\n' + kirmizi + ' aşım (teslim edilmiş modülde ya da kaynak kuralında). Eşik ancak gerekçesi '
-      + 'EKIP-DURUM\'a yazılıp kullanıcı onay verince değişir (plan §1.2).');
-    return 1;
-  }
-  console.log('\nTeslim edilen modüller bütçede'
-    + (zorunlu.size ? ' (' + Array.from(zorunlu).join(', ') + ').' : ' (henüz teslim yok; yalnız ölçüm).'));
-  return 0;
-}
-
-/* `--onay`: yalniz kaynak kurali (tarayici acmaz; saniyenin altinda). */
-function yalnizOnay(){
-  let n = 0;
-  Object.keys(ENV.MODUL).forEach(ad => {
-    const onay = varsayilanOnaylar(ad);
-    n += onay.length;
-    console.log(ad + ': ' + (onay.length ? '✕ ' + onay.length + ' varsayılan etiketli onay: ' + onay.join(', ')
-      : 'her onay sonucu söylüyor'));
-  });
-  return n ? 1 : 0;
-}
-
-module.exports = { onaySay };
-
-if(require.main === module){
-  (process.argv.indexOf('--onay') >= 0 ? Promise.resolve(yalnizOnay()) : main())
-    .then(k => process.exit(k)).catch(e => {
-      console.error('Koşum hatası:', e && e.stack || e);
-      process.exit(2);
-    });
-}
+  hepsi.sort((a, b) => (b.acik - a.acik) || (b.soz - a.soz));
+  const pad = (s, n) => String(s).padEnd(n);
+  console.log(pad('modül', 6) + pad('ekran', 14) + pad('açık', 6) + pad('söz', 7) + pad('düğme', 7) + pad('boy', 7) + 'açık kartlar');
+  hepsi.forEach(x => console.log(pad(x.ad, 6) + pad(x.r, 14) + pad(x.hata ? '—' : x.acik, 6) + pad(x.soz || '', 7) + pad(x.dugme || '', 7)
+    + pad(x.boy || '', 7) + (x.hata || ((x.acikBolum ? '[' + x.acikBolum + '] ' : '') + (x.acikKartlar || []).join(', ')))));
+  const asan = hepsi.filter(x => x.acik > ESIK_ACIK);
+  console.log('\n' + hepsi.length + ' ekran · kuralı aşan (açık > ' + ESIK_ACIK + '): ' + asan.length
+    + (hatalar.length ? ' · sayfa hatası: ' + hatalar.length : ''));
+  hatalar.slice(0, 5).forEach(h => console.log('  ' + h));
+  process.exit(denetle && (asan.length || hatalar.length) ? 1 : 0);
+})();

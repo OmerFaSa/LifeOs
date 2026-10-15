@@ -533,6 +533,8 @@ R.Screens.today = (function(){
     const sig = R.Signals.current();
     if(!sig) return '';
     if(!sig.seenAt) R.Signals.markSeen(sig.id);
+    /* Ortak sade kart (brand/ortak/sorukart.js); yoksa eski kart. */
+    if(window.LIFEOS && window.LIFEOS.SORUKART) return raw(window.LIFEOS.SORUKART.kartHtml(sig));
 
     return c.Card({ title:'Bir soru', hint:'signal',
       sub:sig.kind === 'friction' ? 'sürtünme' : 'gösterge',
@@ -1345,7 +1347,7 @@ R.Screens.today = (function(){
           ${R.Setup.needed() ? raw(R.Setup.card()) : html`<div class="kahraman" data-oz="042">${NextUpCard()}</div>`}
           ${when(runningBlock(), () => html`<div id="geri-sayim" class="bugun__vitrin">${raw(geriSayimHtml(runningBlock()))}</div>`)}
           ${when(!R.Setup.needed(), () => raw(gunUcuHtml(day) + blokBitisHtml(day)))}
-          ${when(R.Signals && R.Signals.current(), () => c.Ledger([SignalCard()]))}
+          ${when(R.Signals && R.Signals.current(), () => window.LIFEOS && window.LIFEOS.SORUKART ? SignalCard() : c.Ledger([SignalCard()]))}
         </section>
         <section class="bugun__alan" aria-label="Durum"><h2 class="bugun__etiket" aria-hidden="true">Durum</h2>
           ${DonenKutu(day, dateISO)}

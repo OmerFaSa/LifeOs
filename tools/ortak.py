@@ -287,6 +287,9 @@ DOSYALAR = {
     "notum.js":       "js/core",
     "notum.css":      "css",
     "notum.test.js":  "tests",
+    # SORU KARTI — Bugun'deki «Bir soru», uc arayuzde ayni sade kart (2026-10-16).
+    "sorukart.js":    "js/core",
+    "sorukart.css":   "css",
     # ZEMIN (kullanici, 2026-10-02) — yumusak renk zemini ve icerigin
     # arkasinda buzlu yuzey; <head>'de animasyon.js'ten SONRA (tasinan
     # tercihi okur), ilk cizimden once <html data-zemin> koyar.

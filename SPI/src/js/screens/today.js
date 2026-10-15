@@ -1031,7 +1031,11 @@ SP.Screens.today = (function(){
   async function render(){
     const acil = bugunUyarisi();
     const vakti = SP.HatirlatUI ? SP.HatirlatUI.vaktiRow() : '';
-    const soru = signalEntry();
+    /* «Bir soru»: ortak sade kart (brand/ortak/sorukart.js). */
+    const sig = SP.Signals ? SP.Signals.current() : null;
+    if(sig && !sig.seenAt) SP.Signals.markSeen(sig.id);
+    const soruKart = sig && window.LIFEOS && window.LIFEOS.SORUKART ? window.LIFEOS.SORUKART.kartHtml(sig) : '';
+    const soru = soruKart ? null : signalEntry();
     /* Onaylar tek çekmecede: burada yalnız en öndeki kart (screens/onaylar.js). */
     const oneri = SP.Screens.onaylar && SP.Screens.onaylar.bekleyen() ? SP.Screens.onaylar.oneriAlani() : '';
 
@@ -1041,6 +1045,7 @@ SP.Screens.today = (function(){
           ${raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '')}
           ${when(acil, () => acil.kart)}
           ${when(vakti, () => K.Ledger([vakti]))}
+          ${raw(soruKart)}
           ${when(soru, () => K.Ledger([soru]))}
           ${OlcumKutusu()}
           <div class="bugun__cift">${EnerjiKutusu()}${SuKutusu()}</div>

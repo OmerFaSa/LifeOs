@@ -72,7 +72,7 @@ function waitForServer(url, tries){
   return new Promise((resolve, reject) => {
     let n = tries || 40;
     const dene = () => {
-      fetch(url).then(() => resolve()).catch(() => {
+      fetch(url).then(r => r.arrayBuffer()).then(() => resolve()).catch(() => {
         if(n-- <= 0) return reject(new Error('sunucu açılmadı: ' + url));
         setTimeout(dene, 250);
       });

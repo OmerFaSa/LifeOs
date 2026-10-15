@@ -1,0 +1,14 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/sorukart.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* SORU KARTI (brand/ortak/sorukart.js). Tek kaynak; üç arayüze kopyalanır. */
+.sorukart{ display:flex; flex-direction:column; gap:8px; padding:14px 18px; border-radius:16px; background:var(--surface);
+  box-shadow:inset 0 0 0 1px var(--border); margin-bottom:14px; }
+.sorukart__bas{ font-size:12.5px; font-weight:600; color:var(--text-2); cursor:help; align-self:flex-start; }
+.sorukart__soru{ margin:0; font-size:15px; line-height:1.5; color:var(--text); }
+.sorukart__satir{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.sorukart__girdi{ flex:1 1 220px; min-width:0; height:38px; padding:0 14px; border-radius:19px; border:1px solid var(--border);
+  background:var(--surface-2); color:var(--text); font:inherit; font-size:14px; }
+.sorukart__girdi:focus{ outline:none; border-color:var(--primary); }
+.sorukart__cevap{ margin:0; font-size:14px; color:var(--text); }
+.sorukart__not{ margin:0; font-size:12.5px; color:var(--text-2); }
