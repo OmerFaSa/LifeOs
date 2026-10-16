@@ -1092,6 +1092,14 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
 .btn--sm, .btn--lg{ border-radius:var(--r-pill); }
 .btn--ghost:hover{ background:var(--surface-2); }
 @media (prefers-reduced-motion:reduce){ .btn:active:not(:disabled){ transform:none; } }
+/* BASINCA (2026-10-17, «arayüz canlı hissettirsin»): seçim kartı, çip ve
+   tek dokunuşluk satır da düğme gibi hafifçe içe basar; bırakınca yerine
+   döner. Yalnız basılıyken: süs değil, dokunuşun cevabı. */
+:is(.pickcard, .king__cip, .giris__kisa, .giris__ornek, .temasec__secenek, .vt .ls2 > button, .ls2 > button){
+  transition:transform var(--dur-press, 120ms) var(--ease, ease); }
+:is(.pickcard, .king__cip, .giris__kisa, .giris__ornek, .temasec__secenek, .ls2 > button):active:not(:disabled){ transform:scale(.98); }
+@media (prefers-reduced-motion:reduce){
+  :is(.pickcard, .king__cip, .giris__kisa, .giris__ornek, .temasec__secenek, .ls2 > button):active:not(:disabled){ transform:none; } }
 
 .input, .select, .textarea{ border-color:transparent; background:var(--surface-2); border-radius:12px; }
 .input:hover, .select:hover, .textarea:hover{ border-color:transparent; background:color-mix(in oklab, var(--surface-3) 60%, var(--surface-2)); }

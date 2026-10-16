@@ -181,3 +181,53 @@ html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
     background:var(--kenar-cam-acik); border-radius:0 20px 20px 0;
     box-shadow:var(--cam-isik, none), var(--shadow-lg); }
 }
+
+/* CANLI ZEMİN (kullanıcı, 2026-10-17: «arayüz cansız; arkadaki buzlu efekt
+   nefes alıyor gibi hareket etse»). Üç dokunuş, üçü de ÇOK hafif:
+
+   · NEFES. Lekeler 46 sn'de bir çok yavaş genişleyip kayar. Yalnız
+     transform: yeni boyama yok, levha ve kartlar durur. Katman hep en az
+     %5 büyük çizilir: kayarken kenarı görünmez.
+   · DERİNLİK. Sayfa kayarken zemin içerikten yavaş kayar (kaydırmaya
+     bağlı CSS animasyonu; betik yok). Tanımayan tarayıcıda yalnız nefes.
+   · KAYIT IŞIĞI. Bir kayıt GERÇEKTEN yazıldığında (zemin.js `nabiz`)
+     üstten modül renginde bir ışık bir kez yayılıp söner. Süs değil: olay
+     yoksa oynamaz (efekt yalnız gerçek olayda, 2026-10-05).
+
+   Görünüm › Animasyonlar «Az» ya da işletim sisteminin «hareketi azalt»ı
+   üçünü de durdurur (animasyon.js bu sorguyu kullanıcının seçimine göre
+   yeniden yazar). Sade zeminde hiçbiri yok. */
+@media (prefers-reduced-motion:no-preference){
+  html[data-zemin="yumusak"] body::before{
+    transform:scale(1.05); will-change:transform;
+    animation:zemin-nefes 46s ease-in-out infinite alternate;
+  }
+  @supports (animation-timeline: scroll()){
+    html[data-zemin="yumusak"] body::before{
+      animation:zemin-nefes 46s ease-in-out infinite alternate, zemin-derinlik linear both;
+      animation-timeline:auto, scroll(root block);
+    }
+  }
+}
+@keyframes zemin-nefes{
+  0%{ transform:translate3d(0, 0, 0) scale(1.05); }
+  50%{ transform:translate3d(1.1%, -.6%, 0) scale(1.08); }
+  100%{ transform:translate3d(-.9%, .6%, 0) scale(1.065); }
+}
+@keyframes zemin-derinlik{ from{ translate:0 0; } to{ translate:0 -1.4vh; } }
+
+.zemin-isik{ position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:0;
+  background:radial-gradient(70% 55% at 50% 0%, color-mix(in oklab, var(--mod, var(--ays)) 34%, transparent), transparent 72%); }
+:root[data-theme="dark"] .zemin-isik{
+  background:radial-gradient(70% 55% at 50% 0%, color-mix(in oklab, var(--mod, var(--ays)) 26%, transparent), transparent 72%); }
+html:not([data-zemin="yumusak"]) .zemin-isik{ display:none; }
+@media (prefers-reduced-motion:no-preference){
+  .zemin-isik.is-nabiz{ animation:zemin-nabiz 1.7s cubic-bezier(.32,.72,0,1) both; }
+}
+@keyframes zemin-nabiz{ 0%{ opacity:0; } 22%{ opacity:1; } 100%{ opacity:0; } }
+/* Günün ilk açılışı: aynı katman, saatin tonuyla, daha yavaş (zemin.js gunIlk). */
+.zemin-isik.is-gunaydin{
+  background:radial-gradient(80% 60% at 50% 0%, color-mix(in oklab, var(--zemin-gunaydin, var(--mod, var(--ays))) 30%, transparent), transparent 75%); }
+@media (prefers-reduced-motion:no-preference){
+  .zemin-isik.is-gunaydin{ animation:zemin-nabiz 2.8s cubic-bezier(.32,.72,0,1) both; }
+}

@@ -235,6 +235,9 @@ window.LIFEOS.GIRIS = (function(){
       r = await b.p.kaydet();
       sonGeriAl = geriAlOf(r);
       mesaj = { tur:'ok', metin:metinOf(r) || 'Kaydedildi.' };
+      /* Kayıt yazıldı: zeminde tek seferlik ışık (zemin.js nabiz). */
+      const Z = window.LIFEOS.ZEMIN;
+      if(Z && typeof Z.nabiz === 'function'){ try{ Z.nabiz(); }catch(e){ /* süs */ } }
       const g = typeof document !== 'undefined' ? document.getElementById('giris-girdi') : null;
       if(g){ g.value = ''; try{ g.focus(); }catch(err){ /* odak yok */ } }
     }catch(e){

@@ -250,4 +250,38 @@
       }
     }));
   });
+
+  describe('Zemin — günün ilk açılışı (2026-10-17)', () => {
+    it('gün içinde bir kez oynar; ertesi gün yeniden', () => {
+      const Z = window.LIFEOS.ZEMIN;
+      let eski = null;
+      try{ eski = localStorage.getItem(Z.GUN_ANAHTAR); localStorage.removeItem(Z.GUN_ANAHTAR); }catch(e){}
+      try{
+        expect(Z.gunIlk(new Date(2026, 9, 17, 7, 30))).toBe(true);
+        expect(document.querySelector('.zemin-isik').classList.contains('is-gunaydin')).toBe(true);
+        expect(Z.gunIlk(new Date(2026, 9, 17, 21, 0))).toBe(false);
+        expect(Z.gunIlk(new Date(2026, 9, 18, 6, 0))).toBe(true);
+      }finally{
+        try{ if(eski == null) localStorage.removeItem(Z.GUN_ANAHTAR); else localStorage.setItem(Z.GUN_ANAHTAR, eski); }catch(e){}
+        const e = document.querySelector('.zemin-isik'); if(e){ clearTimeout(e._zaman); e.remove(); }
+      }
+    });
+  });
+
+  describe('Zemin — kayıt ışığı (2026-10-17)', () => {
+    it('nabiz tek ışık katmanı kurar, gövdenin ilk çocuğu yapar ve oynatır', () => {
+      const Z = window.LIFEOS.ZEMIN;
+      const eski = document.querySelector('.zemin-isik');
+      if(eski) eski.remove();
+      try{
+        const a = Z.nabiz();
+        const b = Z.nabiz();
+        expect(a === b).toBe(true);
+        expect(document.querySelectorAll('.zemin-isik').length).toBe(1);
+        expect(document.body.firstChild === a).toBe(true);
+        expect(a.classList.contains('is-nabiz')).toBe(true);
+        expect(a.getAttribute('aria-hidden')).toBe('true');
+      }finally{ const e = document.querySelector('.zemin-isik'); if(e){ clearTimeout(e._zaman); e.remove(); } }
+    });
+  });
 })();

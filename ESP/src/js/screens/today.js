@@ -931,6 +931,7 @@ ESP.Screens.today = (function(){
       const r = await ESP.Dunku.sikEkle(bugun, el.dataset.disc, el.dataset.dk);
       if(!r.ok){ ESP.UI.toast(r.why); return; }
       ESP.App.render();
+      { const Z = (window.LIFEOS || {}).ZEMIN; if(Z && Z.nabiz) Z.nabiz(); }
       ESP.UI.toast(r.ad + ' ' + U.fmtMin(r.dk) + ' bugüne eklendi', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
     },
     async 'dunku-oturum'(el){

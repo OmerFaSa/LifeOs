@@ -11720,6 +11720,14 @@ html{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
 .btn--sm, .btn--lg{ border-radius:var(--r-pill); }
 .btn--ghost:hover{ background:var(--surface-2); }
 @media (prefers-reduced-motion:reduce){ .btn:active:not(:disabled){ transform:none; } }
+/* BASINCA (2026-10-17, «arayüz canlı hissettirsin»): seçim kartı, çip ve
+   tek dokunuşluk satır da düğme gibi hafifçe içe basar; bırakınca yerine
+   döner. Yalnız basılıyken: süs değil, dokunuşun cevabı. */
+:is(.pickcard, .king__cip, .giris__kisa, .giris__ornek, .temasec__secenek, .vt .ls2 > button, .ls2 > button){
+  transition:transform var(--dur-press, 120ms) var(--ease, ease); }
+:is(.pickcard, .king__cip, .giris__kisa, .giris__ornek, .temasec__secenek, .ls2 > button):active:not(:disabled){ transform:scale(.98); }
+@media (prefers-reduced-motion:reduce){
+  :is(.pickcard, .king__cip, .giris__kisa, .giris__ornek, .temasec__secenek, .ls2 > button):active:not(:disabled){ transform:none; } }
 
 .input, .select, .textarea{ border-color:transparent; background:var(--surface-2); border-radius:12px; }
 .input:hover, .select:hover, .textarea:hover{ border-color:transparent; background:color-mix(in oklab, var(--surface-3) 60%, var(--surface-2)); }
@@ -14746,6 +14754,56 @@ html[data-zemin="yumusak"].kenar-dar .site--v5 .bolumcubugu--kabuk{
     background:var(--kenar-cam-acik); border-radius:0 20px 20px 0;
     box-shadow:var(--cam-isik, none), var(--shadow-lg); }
 }
+
+/* CANLI ZEMİN (kullanıcı, 2026-10-17: «arayüz cansız; arkadaki buzlu efekt
+   nefes alıyor gibi hareket etse»). Üç dokunuş, üçü de ÇOK hafif:
+
+   · NEFES. Lekeler 46 sn'de bir çok yavaş genişleyip kayar. Yalnız
+     transform: yeni boyama yok, levha ve kartlar durur. Katman hep en az
+     %5 büyük çizilir: kayarken kenarı görünmez.
+   · DERİNLİK. Sayfa kayarken zemin içerikten yavaş kayar (kaydırmaya
+     bağlı CSS animasyonu; betik yok). Tanımayan tarayıcıda yalnız nefes.
+   · KAYIT IŞIĞI. Bir kayıt GERÇEKTEN yazıldığında (zemin.js `nabiz`)
+     üstten modül renginde bir ışık bir kez yayılıp söner. Süs değil: olay
+     yoksa oynamaz (efekt yalnız gerçek olayda, 2026-10-05).
+
+   Görünüm › Animasyonlar «Az» ya da işletim sisteminin «hareketi azalt»ı
+   üçünü de durdurur (animasyon.js bu sorguyu kullanıcının seçimine göre
+   yeniden yazar). Sade zeminde hiçbiri yok. */
+@media (prefers-reduced-motion:no-preference){
+  html[data-zemin="yumusak"] body::before{
+    transform:scale(1.05); will-change:transform;
+    animation:zemin-nefes 46s ease-in-out infinite alternate;
+  }
+  @supports (animation-timeline: scroll()){
+    html[data-zemin="yumusak"] body::before{
+      animation:zemin-nefes 46s ease-in-out infinite alternate, zemin-derinlik linear both;
+      animation-timeline:auto, scroll(root block);
+    }
+  }
+}
+@keyframes zemin-nefes{
+  0%{ transform:translate3d(0, 0, 0) scale(1.05); }
+  50%{ transform:translate3d(1.1%, -.6%, 0) scale(1.08); }
+  100%{ transform:translate3d(-.9%, .6%, 0) scale(1.065); }
+}
+@keyframes zemin-derinlik{ from{ translate:0 0; } to{ translate:0 -1.4vh; } }
+
+.zemin-isik{ position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:0;
+  background:radial-gradient(70% 55% at 50% 0%, color-mix(in oklab, var(--mod, var(--ays)) 34%, transparent), transparent 72%); }
+:root[data-theme="dark"] .zemin-isik{
+  background:radial-gradient(70% 55% at 50% 0%, color-mix(in oklab, var(--mod, var(--ays)) 26%, transparent), transparent 72%); }
+html:not([data-zemin="yumusak"]) .zemin-isik{ display:none; }
+@media (prefers-reduced-motion:no-preference){
+  .zemin-isik.is-nabiz{ animation:zemin-nabiz 1.7s cubic-bezier(.32,.72,0,1) both; }
+}
+@keyframes zemin-nabiz{ 0%{ opacity:0; } 22%{ opacity:1; } 100%{ opacity:0; } }
+/* Günün ilk açılışı: aynı katman, saatin tonuyla, daha yavaş (zemin.js gunIlk). */
+.zemin-isik.is-gunaydin{
+  background:radial-gradient(80% 60% at 50% 0%, color-mix(in oklab, var(--zemin-gunaydin, var(--mod, var(--ays))) 30%, transparent), transparent 75%); }
+@media (prefers-reduced-motion:no-preference){
+  .zemin-isik.is-gunaydin{ animation:zemin-nabiz 2.8s cubic-bezier(.32,.72,0,1) both; }
+}
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -15503,8 +15561,56 @@ window.LIFEOS = window.LIFEOS || {};
   saatUygula();
   if(typeof setInterval === 'function') setInterval(saatUygula, 5 * 60 * 1000);
 
+  /* KAYIT IŞIĞI (2026-10-17, zemin.css «CANLI ZEMİN»): bir kayıt gerçekten
+     yazıldığında çağrılır; üstten bir ışık bir kez yayılıp söner. Işık
+     katmanı gövdenin İLK çocuğudur: içerik sütununun buzlu levhası onun
+     üstünde kalır. Azaltılmış harekette CSS oynatmaz; çağrı yine zararsız.
+     Döner: ışık katmanı (yoksa null). */
+  function nabiz(o){
+    if(typeof document === 'undefined' || !document.body) return null;
+    let el = document.querySelector('.zemin-isik');
+    if(!el){
+      el = document.createElement('div');
+      el.className = 'zemin-isik';
+      el.setAttribute('aria-hidden', 'true');
+      document.body.insertBefore(el, document.body.firstChild);
+    }
+    el.classList.remove('is-nabiz', 'is-gunaydin');
+    void el.offsetWidth;                 // aynı sınıf yeniden eklenince animasyon baştan oynasın
+    const gunaydin = !!(o && o.gunaydin);
+    el.classList.add(gunaydin ? 'is-gunaydin' : 'is-nabiz');
+    clearTimeout(el._zaman);
+    el._zaman = setTimeout(() => el.classList.remove('is-nabiz', 'is-gunaydin'), gunaydin ? 3000 : 1800);
+    return el;
+  }
+
+  /* GÜNÜN İLK AÇILIŞI (2026-10-17): modül o gün ilk kez açılınca zemin
+     o saatin tonuyla bir kez, yavaşça aydınlanır (sabah sıcak, akşam
+     altın, gece serin; gün ortası modül rengi). Gün bu cihazın yerel
+     tarihidir; aynı gün ikinci açılışta oynamaz. Döner: oynadı mı. */
+  const GUN_ANAHTAR = 'lifeos.zemin.gun';
+  function gunIlk(tarih){
+    const d = tarih || saatSimdi();
+    const gun = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+    let son = null;
+    try{ son = localStorage.getItem(GUN_ANAHTAR); }catch(e){ return false; }
+    if(son === gun) return false;
+    try{ localStorage.setItem(GUN_ANAHTAR, gun); }catch(e){ return false; }
+    const z = saatTonu(d);
+    if(typeof document !== 'undefined') document.documentElement.style.setProperty('--zemin-gunaydin',
+      z.guc > 0 ? z.renk : 'var(--mod, var(--ays))');
+    nabiz({ gunaydin:true });
+    return true;
+  }
+
   L.ZEMIN = Object.freeze({ ANAHTAR, KIPLER, TEMA, kip, ayarla, yenile, seciciHtml, temaIlk, _temaKaydet,
-    saatTonu, saatUygula, _saatSaglayici });
+    saatTonu, saatUygula, _saatSaglayici, nabiz, gunIlk, GUN_ANAHTAR });
+  /* Gövde hazır olunca, ilk çizimden biraz sonra: açılış animasyonuyla çakışmasın. */
+  if(typeof document !== 'undefined' && typeof setTimeout === 'function'
+      && !/\/tests\//.test(String(location.pathname || ''))){   // test sayfasında kendiliğinden oynamaz
+    const bas = () => setTimeout(() => { try{ if(oku() === 'yumusak') gunIlk(); }catch(e){ /* süs */ } }, 900);
+    if(document.readyState === 'complete') bas(); else window.addEventListener('load', bas);
+  }
 })();
 
 /* ==== js/core/perde.js ==== */
@@ -16533,7 +16639,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'92c686ba', at:'2026-10-16 21:58', dirty:true };
+R.BUILD = { id:'4f474ae6', at:'2026-10-16 22:56', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -30011,6 +30117,9 @@ window.LIFEOS.GIRIS = (function(){
       r = await b.p.kaydet();
       sonGeriAl = geriAlOf(r);
       mesaj = { tur:'ok', metin:metinOf(r) || 'Kaydedildi.' };
+      /* Kayıt yazıldı: zeminde tek seferlik ışık (zemin.js nabiz). */
+      const Z = window.LIFEOS.ZEMIN;
+      if(Z && typeof Z.nabiz === 'function'){ try{ Z.nabiz(); }catch(e){ /* süs */ } }
       const g = typeof document !== 'undefined' ? document.getElementById('giris-girdi') : null;
       if(g){ g.value = ''; try{ g.focus(); }catch(err){ /* odak yok */ } }
     }catch(e){
@@ -32323,6 +32432,8 @@ window.LIFEOS.KING = (function(){
       sonGeriAl = r && typeof r === 'object' && typeof r.geriAl === 'function' ? r.geriAl : null;
       const m = String((metinR && String(metinR)) || 'Ekledim').trim().replace(/[.!]*$/, '.');
       if(sonGeriAl) cipler = [{ ad:'Geri al', is:'geri-al' }];
+      /* Kayıt yazıldı: zeminde tek seferlik ışık (zemin.js nabiz). */
+      if(L.ZEMIN && typeof L.ZEMIN.nabiz === 'function'){ try{ L.ZEMIN.nabiz(); }catch(e){ /* süs */ } }
       soyle(m + ' Başka bir şey var mı?');
     }catch(e){
       soyle('Kaydedilemedi: ' + ((e && e.message) || 'bilinmeyen hata'));

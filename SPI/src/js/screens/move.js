@@ -1451,6 +1451,7 @@ SP.Screens.move = (function(){
       const r = await SP.Hazir.antrenmanEkle(el.dataset.id, U.todayISO());
       if(!r.ok){ UI.toast(r.why); return; }
       SP.App.render();
+      { const Z = (window.LIFEOS || {}).ZEMIN; if(Z && Z.nabiz) Z.nabiz(); }
       UI.toast('«' + r.ad + '» bugüne eklendi', { undo:async () => { await r.geriAl(); SP.App.render(); } });
     },
     'hazir-antrenman-duzen'(){ S.ui.hazirAntDuzen = !S.ui.hazirAntDuzen; SP.App.render(); },

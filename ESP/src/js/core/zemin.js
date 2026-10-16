@@ -179,6 +179,54 @@ window.LIFEOS = window.LIFEOS || {};
   saatUygula();
   if(typeof setInterval === 'function') setInterval(saatUygula, 5 * 60 * 1000);
 
+  /* KAYIT IŞIĞI (2026-10-17, zemin.css «CANLI ZEMİN»): bir kayıt gerçekten
+     yazıldığında çağrılır; üstten bir ışık bir kez yayılıp söner. Işık
+     katmanı gövdenin İLK çocuğudur: içerik sütununun buzlu levhası onun
+     üstünde kalır. Azaltılmış harekette CSS oynatmaz; çağrı yine zararsız.
+     Döner: ışık katmanı (yoksa null). */
+  function nabiz(o){
+    if(typeof document === 'undefined' || !document.body) return null;
+    let el = document.querySelector('.zemin-isik');
+    if(!el){
+      el = document.createElement('div');
+      el.className = 'zemin-isik';
+      el.setAttribute('aria-hidden', 'true');
+      document.body.insertBefore(el, document.body.firstChild);
+    }
+    el.classList.remove('is-nabiz', 'is-gunaydin');
+    void el.offsetWidth;                 // aynı sınıf yeniden eklenince animasyon baştan oynasın
+    const gunaydin = !!(o && o.gunaydin);
+    el.classList.add(gunaydin ? 'is-gunaydin' : 'is-nabiz');
+    clearTimeout(el._zaman);
+    el._zaman = setTimeout(() => el.classList.remove('is-nabiz', 'is-gunaydin'), gunaydin ? 3000 : 1800);
+    return el;
+  }
+
+  /* GÜNÜN İLK AÇILIŞI (2026-10-17): modül o gün ilk kez açılınca zemin
+     o saatin tonuyla bir kez, yavaşça aydınlanır (sabah sıcak, akşam
+     altın, gece serin; gün ortası modül rengi). Gün bu cihazın yerel
+     tarihidir; aynı gün ikinci açılışta oynamaz. Döner: oynadı mı. */
+  const GUN_ANAHTAR = 'lifeos.zemin.gun';
+  function gunIlk(tarih){
+    const d = tarih || saatSimdi();
+    const gun = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+    let son = null;
+    try{ son = localStorage.getItem(GUN_ANAHTAR); }catch(e){ return false; }
+    if(son === gun) return false;
+    try{ localStorage.setItem(GUN_ANAHTAR, gun); }catch(e){ return false; }
+    const z = saatTonu(d);
+    if(typeof document !== 'undefined') document.documentElement.style.setProperty('--zemin-gunaydin',
+      z.guc > 0 ? z.renk : 'var(--mod, var(--ays))');
+    nabiz({ gunaydin:true });
+    return true;
+  }
+
   L.ZEMIN = Object.freeze({ ANAHTAR, KIPLER, TEMA, kip, ayarla, yenile, seciciHtml, temaIlk, _temaKaydet,
-    saatTonu, saatUygula, _saatSaglayici });
+    saatTonu, saatUygula, _saatSaglayici, nabiz, gunIlk, GUN_ANAHTAR });
+  /* Gövde hazır olunca, ilk çizimden biraz sonra: açılış animasyonuyla çakışmasın. */
+  if(typeof document !== 'undefined' && typeof setTimeout === 'function'
+      && !/\/tests\//.test(String(location.pathname || ''))){   // test sayfasında kendiliğinden oynamaz
+    const bas = () => setTimeout(() => { try{ if(oku() === 'yumusak') gunIlk(); }catch(e){ /* süs */ } }, 900);
+    if(document.readyState === 'complete') bas(); else window.addEventListener('load', bas);
+  }
 })();

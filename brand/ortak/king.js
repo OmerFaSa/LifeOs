@@ -1079,6 +1079,8 @@ window.LIFEOS.KING = (function(){
       sonGeriAl = r && typeof r === 'object' && typeof r.geriAl === 'function' ? r.geriAl : null;
       const m = String((metinR && String(metinR)) || 'Ekledim').trim().replace(/[.!]*$/, '.');
       if(sonGeriAl) cipler = [{ ad:'Geri al', is:'geri-al' }];
+      /* Kayıt yazıldı: zeminde tek seferlik ışık (zemin.js nabiz). */
+      if(L.ZEMIN && typeof L.ZEMIN.nabiz === 'function'){ try{ L.ZEMIN.nabiz(); }catch(e){ /* süs */ } }
       soyle(m + ' Başka bir şey var mı?');
     }catch(e){
       soyle('Kaydedilemedi: ' + ((e && e.message) || 'bilinmeyen hata'));

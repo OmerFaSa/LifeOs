@@ -980,6 +980,7 @@ SP.Screens.meals = (function(){
       const r = await SP.Hazir.ogunEkle(el.dataset.id, d, guessSlot());
       if(!r.ok){ UI.toast(r.why); return; }
       SP.App.render();
+      { const Z = (window.LIFEOS || {}).ZEMIN; if(Z && Z.nabiz) Z.nabiz(); }
       UI.toast('«' + r.ad + '» eklendi', { undo:async () => { await r.geriAl(); SP.App.render(); } });
     },
     'hazir-ogun-duzen'(){ S.ui.hazirOgunDuzen = !S.ui.hazirOgunDuzen; SP.App.render(); },
