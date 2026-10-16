@@ -299,6 +299,60 @@
       expect(k.akis().slice(-1)[0].metin).toContain('fotoğrafla yapılan bir iş yok');
     }));
 
+    /* Söz 18 (depo sahibi, 2026-10-16: «AYS'den SPİ'ye geçerken sağ üstteki King
+       kayboluyor»). King açıkken durumu animasyon.js taşımasıyla karşı modüle gider. */
+    it('modül değişince King açık kalır: durum taşınır, karşı modülde küçük kutu ve sohbetle açılır', () => sahneyle(async () => {
+      const A = window.LIFEOS.ANIMASYON;
+      if(!A){ expect('animasyon.js').toBe('yüklü'); return; }
+      expect(A.TASINAN.indexOf(K().TASIMA) >= 0).toBe(true);
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      let { k } = sahne({ modul:'ays', veri });
+      k.ac();
+      await k.isle('uyku 7');
+      const t = JSON.parse(localStorage.getItem(k.TASIMA));
+      expect([t.acik, t.kaynak]).toEqual([true, 'ays']);
+      expect(t.akis.some(m => m.metin === 'uyku 7')).toBe(true);
+      /* karşı modül: aynı anahtar, başka kaynak → küçük kutu, sohbet geri gelir, anahtar tüketilir */
+      const tasinan = localStorage.getItem(k.TASIMA);
+      ({ k } = sahne({ modul:'spi' }));
+      localStorage.setItem(k.TASIMA, tasinan);
+      k.kur({ modul:'spi', git:() => {}, ozet:() => [] });
+      await new Promise(r => setTimeout(r, 0));
+      expect(k.acikMi() && k.miniMi()).toBe(true);
+      expect(k.akis().some(m => m.metin === 'uyku 7')).toBe(true);
+      /* gelen taşıma tüketildi; artık SPİ'nin kendi açık King'i yazılı */
+      expect(JSON.parse(localStorage.getItem(k.TASIMA)).kaynak).toBe('spi');
+      /* kapatınca taşınacak bir şey kalmaz */
+      k.kapat();
+      expect(localStorage.getItem(k.TASIMA)).toBe(null);
+    }));
+    it('King açıkken öteki modüle kendisi geçerse sohbet ve hedef sayfa taşınır', () => sahneyle(async () => {
+      if(!window.LIFEOS.ANIMASYON) return;
+      let { k, giden } = sahne({ modul:'spi' });
+      k.ac();
+      await k.isle('dil çalışacağım');
+      expect(giden[0].indexOf('http://127.0.0.1:4193/#lifeos=')).toBe(0);
+      const veri = JSON.parse(decodeURIComponent(giden[0].split('#lifeos=')[1]));
+      const t = JSON.parse(veri[k.TASIMA]);
+      expect(t.git).toEqual({ route:'lang', sekme:null });
+      const tasinan = veri[k.TASIMA];
+      let gidilen;
+      ({ k, gidilen } = sahne({ modul:'esp' }));
+      localStorage.setItem(k.TASIMA, tasinan);
+      k.kur({ modul:'esp', git:(r, ek) => gidilen.push([r, ek || {}]), ozet:() => [] });
+      expect(gidilen).toEqual([['lang', {}]]);
+      expect(k.acikMi() && k.miniMi()).toBe(true);
+      expect(k.akis().some(m => m.metin === 'dil çalışacağım')).toBe(true);
+    }));
+    it('kendi modülünün eski taşıması açılışta silinir, King kendiliğinden açılmaz', () => sahneyle(async () => {
+      let { k } = sahne({ modul:'ays' });
+      localStorage.setItem(k.TASIMA, JSON.stringify({ acik:true, mini:true, kaynak:'ays', akis:[], zaman:Date.now() }));
+      k.kur({ modul:'ays', git:() => {}, ozet:() => [] });
+      await new Promise(r => setTimeout(r, 0));
+      expect(k.acikMi()).toBe(false);
+      expect(localStorage.getItem(k.TASIMA)).toBe(null);
+    }));
+
     /* Söz 16–17: «ekran paylaşmaktan kastım PC, telefon ya da başka bir ekran». */
     function sahteModel(cevap){
       const istek = [];

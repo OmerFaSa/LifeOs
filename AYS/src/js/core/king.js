@@ -110,7 +110,17 @@
   17. GÖRÜNTÜYÜ YORUMLA. Fotoğraf ve ekran karesi için model talimatı sabittir:
       Türkçe, kısa; görmediği sayıyı uydurmaz, emin değilse söyler; sağlıkta
       teşhis koymaz, doz önermez (AGENTS §1.5). Cevap modelin OKUMASIDIR,
-      ölçüm değildir: hiçbir kayda kendiliğinden yazılmaz. */
+      ölçüm değildir: hiçbir kayda kendiliğinden yazılmaz.
+  18. MODÜL DEĞİŞİNCE KAYBOLMAZ (depo sahibi, 2026-10-16: «AYS'den SPİ'ye
+      geçerken sağ üstteki King kayboluyor»). Modüller ayrı köken: depoları
+      ayrı. King açıkken durumu (küçük mü, son mesajlar, kaynak modül)
+      TASIMA anahtarında tutulur; animasyon.js'in modüller arası taşıması onu
+      adresle karşı kapıya götürür (kenar çubuğundan, seçiciden, King'in
+      kendisinden — hangi yoldan geçilirse). Karşı modül anahtarı okur,
+      SİLER ve King'i küçük kutu olarak sohbetiyle açar. Kendi modülünün
+      eski anahtarı (sekme kapanmış, King açık kalmıştı) açılışta silinir;
+      King kendiliğinden açılmaz. King kapanınca anahtar kalkar. Ekran
+      paylaşımı taşınmaz (tarayıcı her sayfada yeniden izin ister). */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -239,6 +249,7 @@ window.LIFEOS.KING = (function(){
     + 'okuyamadığın ya da emin olmadığın yeri açıkça söyle. Sağlıkla ilgili görüntülerde teşhis koyma, ilaç ya da doz önerme. '
     + 'Yardımcı olabileceğin sonraki adımı tek cümleyle öner.';
   let paylasim = null;       // söz 16: { kare() → { mime, data }, bitir() }
+  const TASIMA = 'lifeos.king';   // söz 18; animasyon.js TASINAN listesinde
   const FOTO_EN_BUYUK = 15 * 1024 * 1024;
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
@@ -593,6 +604,12 @@ window.LIFEOS.KING = (function(){
       soyle(MODUL_AD[h.modul] + ' bu sayfadan açılamıyor; LifeOS panelinden aç.');
       return false;
     }
+    const A = L && L.ANIMASYON;
+    if(acik && A && typeof A.tasimaEkle === 'function'){
+      tasimaYaz(null, { route:h.route, sekme:(h.ek && h.ek.sekme) || null });
+      ortam.git(A.tasimaEkle(url));
+      return true;
+    }
     ortam.git(url + '#king=' + h.route + (h.ek && h.ek.sekme ? ':' + h.ek.sekme : ''));
     return true;
   }
@@ -718,6 +735,15 @@ window.LIFEOS.KING = (function(){
     const l = akis.filter(m => !m.bekliyor).slice(-8).map(m => ({ kim:m.kim, metin:m.foto ? '(fotoğraf)' : (m.metin || ''),
       satirlar:m.satirlar || null, son:m.son || null }));
     ortam.depo.yaz(depoAnahtar(), { gun:bugunISO(), akis:l });
+    tasimaYaz(l);
+  }
+  /* Söz 18: açıkken taşınacak durum; kapalıyken yok. */
+  function tasimaYaz(l, git){
+    if(!ayar) return;
+    if(!acik){ ortam.depo.sil(TASIMA); return; }
+    const liste = (l || akis.filter(m => !m.bekliyor).slice(-6).map(m => ({ kim:m.kim, metin:m.foto ? '(fotoğraf)' : (m.metin || '') })))
+      .slice(-6).map(m => ({ kim:m.kim, metin:String(m.metin || '').slice(0, 200) }));
+    ortam.depo.yaz(TASIMA, { acik:true, mini:true, kaynak:ayar.modul, akis:liste, zaman:Date.now(), git:git || null });
   }
   function geriGetir(){
     const v = ortam.depo.oku(depoAnahtar());
@@ -1027,7 +1053,10 @@ window.LIFEOS.KING = (function(){
     if(acik){ if(mini && !(o && o.mini)) buyut(); const g = document.querySelector('.king__girdi'); if(g) try{ g.focus(); }catch(e){} return; }
     acik = true;
     mini = !!(o && o.mini);
-    akis = geriGetir(); cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; sesli = false;
+    akis = (o && Array.isArray(o.onceki) && o.onceki.length)
+      ? o.onceki.filter(m => m && m.metin).map(m => ({ kim:m.kim === 'sen' ? 'sen' : 'king', metin:String(m.metin) }))
+      : geriGetir();
+    cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; sesli = false;
     if(o && o.mesaj) akis.push({ kim:'king', metin:o.mesaj });
     const el = document.createElement('div');
     el.className = 'king';
@@ -1037,6 +1066,7 @@ window.LIFEOS.KING = (function(){
       + '<div class="king__kutu" role="dialog" aria-modal="false" aria-label="King ile konuş"></div>';
     if(mini) el.classList.add('is-mini');
     document.body.appendChild(el);
+    tasimaYaz();
     document.documentElement.classList.add(mini ? 'king-mini' : 'king-acik');
     ciz(mini ? false : undefined);
     /* Odak katmanı: soldaki kenar King'i açan tıkla uyanmış olabilir;
@@ -1056,6 +1086,7 @@ window.LIFEOS.KING = (function(){
     document.documentElement.classList.remove('king-acik');
     document.documentElement.classList.add('king-mini');
     ciz(false);
+    tasimaYaz();
   }
   function buyut(){
     if(!acik || !mini || typeof document === 'undefined') return;
@@ -1074,6 +1105,7 @@ window.LIFEOS.KING = (function(){
     acik = false;
     mini = false;
     sesliSohbet = false; bekleyenFoto = null;
+    ortam.depo.sil(TASIMA);
     if(paylasim){ const p = paylasim; paylasim = null; try{ p.bitir(); }catch(e){ /* durmuş */ } }
     if(dinleyen){ try{ dinleyen.abort ? dinleyen.abort() : dinleyen.stop(); }catch(e){ /* kapalı */ } dinleyen = null; }
     /* Sayfaya giderken söylenen cümle yarıda kesilmesin; elle kapatınca susar. */
@@ -1189,18 +1221,27 @@ window.LIFEOS.KING = (function(){
   function kur(o){
     ayar = Object.assign({ modul:'spi' }, o || {});
     bagla();
+    /* Söz 18: başka modülden King açık gelindiyse burada küçük kutu olarak
+       sohbetiyle açılır; kendi modülünün eski taşıması yalnız silinir. */
+    const ts = ortam.depo.oku(TASIMA);
+    if(ts) ortam.depo.sil(TASIMA);
+    const tasindi = !!(ts && ts.acik && ts.kaynak && ts.kaynak !== ayar.modul
+      && Date.now() - (Number(ts.zaman) || 0) < 12 * 3600 * 1000);
+    const onceki = tasindi && Array.isArray(ts.akis) ? ts.akis : null;
+    let hedef = null;
     const m = String(ortam.hash() || '').match(/^#king=([a-z]+)(?::([a-z]+))?$/);
-    if(m){
-      ortam.hashSil();
-      if(gecerliRota(ayar.modul, m[1])){
-        ortam.zamanla(() => {
-          try{ ayar.git(m[1], m[2] ? { sekme:m[2] } : {}); }catch(e){ console.error('King:', e); }
-          /* Söz 9: King'le gelindi; burada küçük kutu olarak açık kalır. */
-          const s = SAYFALAR.find(x => x.modul === ayar.modul && x.route === m[1]);
-          ac({ mini:true, mesaj:'Buradayım. ' + (s ? s.ad + ' açık; ' : '') + 'yaptığını yaz, kaydedeyim.' });
-        }, 60);
-      }
+    if(m){ ortam.hashSil(); hedef = { route:m[1], sekme:m[2] || null }; }
+    else if(tasindi && ts.git && typeof ts.git.route === 'string') hedef = { route:ts.git.route, sekme:ts.git.sekme || null };
+    if(hedef && gecerliRota(ayar.modul, hedef.route)){
+      ortam.zamanla(() => {
+        try{ ayar.git(hedef.route, hedef.sekme ? { sekme:hedef.sekme } : {}); }catch(e){ console.error('King:', e); }
+        /* Söz 9: King'le gelindi; burada küçük kutu olarak açık kalır. */
+        const s = SAYFALAR.find(x => x.modul === ayar.modul && x.route === hedef.route);
+        ac({ mini:true, onceki, mesaj:'Buradayım. ' + (s ? s.ad + ' açık; ' : '') + 'yaptığını yaz, kaydedeyim.' });
+      }, 60);
+      return;
     }
+    if(tasindi) ortam.zamanla(() => ac({ mini:true, onceki, mesaj:MODUL_AD[ayar.modul] + '’ye geçtik, buradayım.' }), 60);
   }
 
   function _sifirla(){
@@ -1211,6 +1252,7 @@ window.LIFEOS.KING = (function(){
       document.documentElement.classList.remove('king-mini');
     }
     if(ayar) ortam.depo.sil(depoAnahtar());
+    ortam.depo.sil(TASIMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
     sesli = false; dinleyen = null; konusuyor = 0;
   }
@@ -1218,7 +1260,7 @@ window.LIFEOS.KING = (function(){
   return {
     kur, ac, kapat, kucult, buyut, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,
-    paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, fotoYorumla, GORSEL_SISTEM,
+    paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, fotoYorumla, GORSEL_SISTEM, TASIMA,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla,
   };

@@ -236,7 +236,9 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* ---------------------------------------------------------- modüller arası */
 
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin']);
+  /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
+     sağ üstteki kutu kaybolmasın. */
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
