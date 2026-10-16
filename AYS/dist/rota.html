@@ -4196,6 +4196,11 @@ body.is-dragging .drop.is-over{
 .dsoru__cozum summary, .dsoru__grup summary{ cursor:pointer; display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-height:24px; }
 .dsoru .select{ max-width:100%; }
 
+/* Sınama: ara sıra değişen ayarlar katlı (screens/quiz.js). */
+.qz-dahasi > summary{ cursor:pointer; min-height:28px; display:inline-flex; align-items:center; color:var(--text-2); }
+.qz-dahasi > summary:hover{ color:var(--text); }
+.qz-dahasi[open] > summary{ margin-bottom:8px; }
+
 /* ==== css/temel.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/temel.css içine yazılır; burası bir sonraki
@@ -16364,7 +16369,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'c2c3ca3d', at:'2026-10-16 10:21', dirty:true };
+R.BUILD = { id:'ef0f7814', at:'2026-10-16 10:52', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -30467,7 +30472,7 @@ window.LIFEOS.KING = (function(){
     { modul:'ays', route:'today',     ad:'Bugün',      es:['bugün', 'genel bakış'] },
     { modul:'ays', route:'week',      ad:'Hafta',      es:['hafta'] },
     { modul:'ays', route:'plan',      ad:'Program',    es:['program'] },
-    { modul:'ays', route:'subjects',  ad:'Konu çalış', es:['konu', 'ders'] },
+    { modul:'ays', route:'subjects',  ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] },
     { modul:'ays', route:'solve',     ad:'Soru çöz',   es:['soru çöz', 'soru', 'test çöz'] },
     { modul:'ays', route:'exams',     ad:'Deneme',     es:['deneme', 'sınav'] },
     { modul:'ays', route:'cards',     ad:'Tekrar',     es:['tekrar', 'kart'] },
@@ -92823,6 +92828,10 @@ R.Screens.quiz = (function(){
                   items:Object.keys(Q.FORMATS).map(k => ({ value:k, label:Q.FORMATS[k].name })),
                   aria:'Sınama biçimi' }) }),
             ])}
+            ${/* Sade (2026-10-16): süre ve sesli okuma ara sıra değişir;
+                 seçili değerleriyle tek satırda katlı durur. */ ''}
+            <details class="qz-dahasi mt-8"${(S.ui.quizSeconds || S.ui.quizVoice) ? ' open' : ''}>
+              <summary class="qz-dahasi__bas small">Diğer ayarlar · ${S.ui.quizSeconds ? S.ui.quizSeconds + ' sn' : 'süresiz'} · ${S.ui.quizVoice ? 'sesli' : 'sessiz'}</summary>
             ${K.Cols(2, [
               K.Field({ label:'Soru başına süre', hint:'süre baskısı hızını ölçer',
                 input:K.Segmented({ act:'quiz-timer', value:S.ui.quizSeconds || 0,
@@ -92833,6 +92842,7 @@ R.Screens.quiz = (function(){
                   items:[{ value:'0', label:'Sessiz' }, { value:'1', label:'Sesli' }],
                   aria:'Sesli okuma' }) }),
             ])}
+            </details>
             ${ready
               ? K.Button({ label:'Sınamayı başlat', icon:'play', tone:'primary', block:true,
                   class:'mt-12', act:'quiz-start' })
@@ -93357,13 +93367,19 @@ R.Screens.solve = (function(){
     /* iPhone Faz 2c: «fotoğrafını yapıştır ya da metnini yaz» bırakma
        kutusunun ve metin alanının kendi yazısında; notun ne işe yaradığı ⓘ'de
        (hints: solve). */
+    /* Sade (2026-10-16): model yokken «Çöz ve anlat» çalışmaz; fotoğraf
+       kutusu, metin alanı ve not ekranı boşuna kaplıyordu. Yalnız ne
+       gerektiği ve çözdüğün soruyu nereden kaydedeceğin söylenir. */
+    if(!canText) return K.Card({
+      title:'Soruyu ver', hint:'solve',
+      body:K.Notice({ tone:'info', title:'Yapay zekâ bağlı değil.',
+        body:html`Fotoğraftan ya da metinden soru çözmek için Ofis ayarlarından ücretsiz bir sağlayıcı bağla.
+          Çözdüğün soruları aşağıdaki «Hızlı kayıt» ile girebilirsin.
+          ${K.Button({ label:'Ofis ayarlarını aç', size:'sm', act:'go', data:{ 'data-route':'office' } })}` }),
+    });
     return K.Card({
       title:'Soruyu ver', hint:'solve',
       body:K.Stack([
-        when(!canText, () => K.Notice({ tone:'warn', title:'Model bağlı değil.',
-          body:html`Soru çözmek için bir model gerekiyor.
-            ${K.Button({ label:'Ofis ayarlarını aç', size:'sm', act:'go',
-              data:{ 'data-route':'office' } })}` })),
 
         /* --- fotoğraf --- */
         html`<div class="${cls('qdrop', image && 'is-full')}" id="q-drop"
@@ -95274,15 +95290,13 @@ R.Screens = R.Screens || {};
       title:x.topic.name, why:x.subject.name + (s ? ' · sırada: ' + s.ad.toLocaleLowerCase('tr-TR') : ' · bütün adımlar tamam'),
       action:K.Button({ label:son ? 'Devam et' : 'Başla', tone:'primary', size:'sm', act:'ogren-git',
         data:{ 'data-route':s ? s.route : 'anlatim', 'data-subject':hedef.subject.id, 'data-topic':hedef.topic.id } }) })}
-      <div class="row wrap gap-6 mt-10">
-        ${when(R.Paragraf && R.Paragraf.HAVUZ.length, () => {
-          const g = R.Paragraf.gunu(), o = g ? R.Paragraf.ozet() : null;
-          return K.Button({ label:'Günlük paragraf' + (o ? ' · ' + o.cevaplanan + '/' + o.toplam : ''), icon:'book', size:'sm', tone:'ghost',
-            act:'sorular-kip', data:{ 'data-tab':'paragraf' } });
-        })}
-        ${K.Button({ label:a ? 'Karma teste dön' : 'Karma test', icon:'zap', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'karma' } })}
+      ${when(a || y, () => html`<div class="row wrap gap-6 mt-10">
+        ${/* Sade (2026-10-16): «Günlük paragraf» ve «Karma test» düğmeleri
+             Sorular sekmesinin içindekileri tekrar ediyordu; burada yalnız
+             DURUM kalır: süren bir karma test ve açık yanlışlar. */ ''}
+        ${when(a, () => K.Button({ label:'Karma teste dön', icon:'zap', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'karma' } }))}
         ${when(y, () => K.Button({ label:'Yanlışlarım · ' + y, icon:'list', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'yanlis' } }))}
-      </div></div>`;
+      </div>`)}</div>`;
   }
 
   /* Sekiz ders yan yana: kaç konu okundu, örnek soruların kaçı doğru.
@@ -95343,9 +95357,14 @@ R.Screens = R.Screens || {};
     });
     return K.Card({ title:subject.name, wide:true,
       sub:oz.konu + ' konu · ' + oz.okunan + ' okundu' + (oz.soru ? ' · ' + oz.dogru + '/' + oz.soru + ' örnek soru doğru' : ''),
-      body:html`<div class="row wrap gap-6 mb-10" role="group" aria-label="Konu süzgeci">${map(SUZGEC, x =>
-          K.Chip({ label:x.ad + ' · ' + satirlar.filter(r => x.f(r.d, r.y)).length, act:'ogren-suzgec', on:x.id === sz.id,
-            data:{ 'data-f':x.id, 'aria-pressed':x.id === sz.id ? 'true' : 'false' } }))}</div>
+      /* Sade (2026-10-16): sayısı 0 olan süzgeç çizilmez («Tamam · 0»,
+         «Yanlışı olan · 0» beş çipi gürültüye çeviriyordu); Hepsi ve seçili
+         süzgeç her zaman durur. */
+      body:html`<div class="row wrap gap-6 mb-10" role="group" aria-label="Konu süzgeci">${map(SUZGEC
+          .map(x => ({ x, n:satirlar.filter(r => x.f(r.d, r.y)).length }))
+          .filter(o => o.n > 0 || o.x.id === 'hepsi' || o.x.id === sz.id), o =>
+          K.Chip({ label:o.x.ad + ' · ' + o.n, act:'ogren-suzgec', on:o.x.id === sz.id,
+            data:{ 'data-f':o.x.id, 'aria-pressed':o.x.id === sz.id ? 'true' : 'false' } }))}</div>
         ${gruplar.length ? html`<div class="stack-sm" data-raf-tam>${map(gruplar, g => html`<div class="ogr-grup">
           ${when(gruplar.length > 1, () => html`<div class="ogr-grup__ad tiny dim">${g.ad}</div>`)}
           <div class="list list--sik">${map(g.l, r => konuSatiri(subject, r.t, r.d, r.y))}</div>
@@ -96216,7 +96235,7 @@ R.Screens = R.Screens || {};
             : html`<span></span>`}
         </div>
         <p class="tiny dim mt-12">Sorular elle yazıldı, doğrulanmadı. İlk cevabın bu konunun kaydına yazılır; hiçbir plan ya da kapanış
-          ona bakmaz — kapanış Konu çalış’taki testle ölçülür.</p>`,
+          ona bakmaz — kapanış Çalışma › Konu kapanışı’ndaki testle ölçülür.</p>`,
     });
   }
 
@@ -97768,6 +97787,20 @@ R.Screens.analytics = (function(){
     { id:'durust',  label:'Dürüstlük' },
   ];
 
+  /* Sade sekme (2026-10-16, «AYS'de çok şey iç içe, göz kalabalığı»):
+     sekiz sekme yan yana duruyordu. Yakın okumalar tek sekmede alt alta:
+     sıra ve hız birlikte, kendi verini denetleyen üç okuma birlikte. Hiçbir
+     okuma kalkmadı; başka ekrandan eski kimlikle gelen (örn. 'speed')
+     içinde bulunduğu sekmeye açılır. */
+  const GRUPLAR = [
+    { id:'compare', label:'Karşılaştırma', ic:['compare'] },
+    { id:'errors',  label:'Hata haritası', ic:['errors'] },
+    { id:'rank',    label:'Sıra ve hız', ic:['rank', 'speed'] },
+    { id:'value',   label:'Konu değeri', ic:['value'] },
+    { id:'habits',  label:'Alışkanlık ve denetim', ic:['habits', 'denetim', 'durust'] },
+  ];
+  const grupOf = id => GRUPLAR.find(g => g.ic.indexOf(id) >= 0) || null;
+
   function empty(text, action){
     return K.Card({ body:K.Empty({ icon:'chart', text, action }) });
   }
@@ -98375,7 +98408,7 @@ R.Screens.analytics = (function(){
 
   async function render(){
     return String(html`${analizBasi()}${K.SayfaBolumleri({ act:'analytics-tab', aria:'Analiz bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}`);
+      bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) })}`);
   }
 
   /* Açılışta istenen bölüm (başka ekrandan «Hata haritası»na gelmek gibi)
@@ -98383,11 +98416,12 @@ R.Screens.analytics = (function(){
   function afterRender(){
     const t = S.ui.analyticsTab;
     S.ui.analyticsTab = null;
-    if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
+    const g = t ? grupOf(t) : null;
+    if(g && g.id !== GRUPLAR[0].id) K.bolumeGit(g.id);
   }
 
   const handle = {
-    async 'analytics-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'analytics-tab'(el){ const g = grupOf(el.dataset.tab); K.bolumeGit(g ? g.id : el.dataset.tab); },
 
     /* Tahmin KÖR açılır: gerçek değer burada hesaplanmaz. */
     async 'calib-open'(){
@@ -98436,7 +98470,9 @@ R.Screens.analytics = (function(){
       /* Denetim'de özet açık; beş alanın bulgu kartları şerit. */
       const alanlar = G && R.Audit ? R.Audit.AREAS.map(a => G.anahtar(a.label)) : [];
       return ['boş-bırakma-stratejisi', 'boş-bırakma', 'yayın-zorluk-farkı', 'yayın-etkisi', 'yapışkan-kartlar',
-        'bant-tablosu', 'unutma-eğrisi', 'dikkat-dağılması', 'denetim-defteri', 'sürtünme', 'gösterge-ayrışması'].concat(alanlar);
+        'bant-tablosu', 'unutma-eğrisi', 'dikkat-dağılması', 'denetim-defteri', 'sürtünme', 'gösterge-ayrışması',
+        /* Alışkanlık ve denetim tek sekme (2026-10-16): açık en çok üç kalsın diye. */
+        'bakım-borcu'].concat(alanlar);
     },
     title:'Ayrıntılı analiz',
     subtitle(){ return 'Denemelerden ve kayıtlardan türetilen okumalar'; },
@@ -99685,6 +99721,17 @@ R.Screens.guide = (function(){
     { id:'kanit',     label:'Eşiklerin dayanağı' },
   ];
 
+  /* Sade sekme (2026-10-16, «AYS'de çok şey iç içe»): «Ayarlar › Genel ›
+     Ayarlar» ve yanında yedi sekme vardı. Üç sekme: ayarların kendisi,
+     takvimle ilgili üçü, başvuru metinleri. Hiçbir bölüm kalkmadı; eski
+     kimlikle gelen bağlantı içinde bulunduğu sekmeye açılır. */
+  const GRUPLAR = [
+    { id:'settings',  label:'Ayarlar',  ic:['settings'] },
+    { id:'istisna',   label:'Takvim',   ic:['istisna', 'calendar', 'examweek'] },
+    { id:'checklist', label:'Başvuru',  ic:['checklist', 'analysis', 'kanit'] },
+  ];
+  const grupOf = id => GRUPLAR.find(g => g.ic.indexOf(id) >= 0) || null;
+
   /* ---------- analiz protokolu ---------- */
 
   function Steps(list){
@@ -100452,7 +100499,7 @@ R.Screens.guide = (function(){
 
   async function render(){
     return String(html`<div id="pane-guide">${K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}</div>`);
+      bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) })}</div>`);
   }
 
   /* «Bütün veriyi sil»: defter VE bu cihazdaki soru fotoğrafları ile çözümleri
@@ -100492,7 +100539,7 @@ R.Screens.guide = (function(){
       UI.toast(ok ? ad + (acik ? ' açıldı' : ' gizlendi — verisi duruyor') : (t.why || 'Değiştirilemedi'));
       R.App.render();
     },
-    async 'guide-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'guide-tab'(el){ const g = grupOf(el.dataset.tab); K.bolumeGit(g ? g.id : el.dataset.tab); },
 
     /* Budama. Motor kullanicinin girdigi veriyi reddeder; ekran da
        yalnizca izinli olanlari sunar. */
@@ -104187,12 +104234,16 @@ R.App = (function(){
       { id:'plan',   icon:'map',    label:'Program' },
       { id:'target', icon:'target', label:'Hedefler' },
     ]},
+    /* Sade çekmece (2026-10-16, «AYS'de çok şey iç içe girmiş»): «Konu
+       çalış» adı Öğren › Konular ile karışıyordu; ikisi de ders ve konu
+       listesi. Bu ekran konunun TESTLE kapanışını izler — adı bu oldu ve
+       sona geçti; Çalışma «Soru çöz» ile açılır. Rota kimliği aynı. */
     { id:'calisma', label:CEK('calisma'), items:[
-      { id:'subjects', icon:'book',   label:'Konu çalış' },
       { id:'solve',    icon:'search', label:'Soru çöz' },
       { id:'exams',    icon:'exam',   label:'Deneme' },
       { id:'cards',    icon:'cards',  label:'Tekrar' },
       { id:'quiz',     icon:'zap',    label:'Sınama' },
+      { id:'subjects', icon:'book',   label:'Konu kapanışı' },
     ]},
     /* ÖĞREN (kullanıcı, 2026-10-09: «konu öğrenmek başlığı altında sol
        tarafa bölüm aç»): konuyu uygulamanın içinde teker teker öğrenmek.

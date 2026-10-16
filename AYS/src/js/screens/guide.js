@@ -26,6 +26,17 @@ R.Screens.guide = (function(){
     { id:'kanit',     label:'Eşiklerin dayanağı' },
   ];
 
+  /* Sade sekme (2026-10-16, «AYS'de çok şey iç içe»): «Ayarlar › Genel ›
+     Ayarlar» ve yanında yedi sekme vardı. Üç sekme: ayarların kendisi,
+     takvimle ilgili üçü, başvuru metinleri. Hiçbir bölüm kalkmadı; eski
+     kimlikle gelen bağlantı içinde bulunduğu sekmeye açılır. */
+  const GRUPLAR = [
+    { id:'settings',  label:'Ayarlar',  ic:['settings'] },
+    { id:'istisna',   label:'Takvim',   ic:['istisna', 'calendar', 'examweek'] },
+    { id:'checklist', label:'Başvuru',  ic:['checklist', 'analysis', 'kanit'] },
+  ];
+  const grupOf = id => GRUPLAR.find(g => g.ic.indexOf(id) >= 0) || null;
+
   /* ---------- analiz protokolu ---------- */
 
   function Steps(list){
@@ -793,7 +804,7 @@ R.Screens.guide = (function(){
 
   async function render(){
     return String(html`<div id="pane-guide">${K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}</div>`);
+      bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) })}</div>`);
   }
 
   /* «Bütün veriyi sil»: defter VE bu cihazdaki soru fotoğrafları ile çözümleri
@@ -833,7 +844,7 @@ R.Screens.guide = (function(){
       UI.toast(ok ? ad + (acik ? ' açıldı' : ' gizlendi — verisi duruyor') : (t.why || 'Değiştirilemedi'));
       R.App.render();
     },
-    async 'guide-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'guide-tab'(el){ const g = grupOf(el.dataset.tab); K.bolumeGit(g ? g.id : el.dataset.tab); },
 
     /* Budama. Motor kullanicinin girdigi veriyi reddeder; ekran da
        yalnizca izinli olanlari sunar. */

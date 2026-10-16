@@ -100,13 +100,19 @@ R.Screens.solve = (function(){
     /* iPhone Faz 2c: «fotoğrafını yapıştır ya da metnini yaz» bırakma
        kutusunun ve metin alanının kendi yazısında; notun ne işe yaradığı ⓘ'de
        (hints: solve). */
+    /* Sade (2026-10-16): model yokken «Çöz ve anlat» çalışmaz; fotoğraf
+       kutusu, metin alanı ve not ekranı boşuna kaplıyordu. Yalnız ne
+       gerektiği ve çözdüğün soruyu nereden kaydedeceğin söylenir. */
+    if(!canText) return K.Card({
+      title:'Soruyu ver', hint:'solve',
+      body:K.Notice({ tone:'info', title:'Yapay zekâ bağlı değil.',
+        body:html`Fotoğraftan ya da metinden soru çözmek için Ofis ayarlarından ücretsiz bir sağlayıcı bağla.
+          Çözdüğün soruları aşağıdaki «Hızlı kayıt» ile girebilirsin.
+          ${K.Button({ label:'Ofis ayarlarını aç', size:'sm', act:'go', data:{ 'data-route':'office' } })}` }),
+    });
     return K.Card({
       title:'Soruyu ver', hint:'solve',
       body:K.Stack([
-        when(!canText, () => K.Notice({ tone:'warn', title:'Model bağlı değil.',
-          body:html`Soru çözmek için bir model gerekiyor.
-            ${K.Button({ label:'Ofis ayarlarını aç', size:'sm', act:'go',
-              data:{ 'data-route':'office' } })}` })),
 
         /* --- fotoğraf --- */
         html`<div class="${cls('qdrop', image && 'is-full')}" id="q-drop"

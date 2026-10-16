@@ -68,6 +68,10 @@ R.Screens.quiz = (function(){
                   items:Object.keys(Q.FORMATS).map(k => ({ value:k, label:Q.FORMATS[k].name })),
                   aria:'Sınama biçimi' }) }),
             ])}
+            ${/* Sade (2026-10-16): süre ve sesli okuma ara sıra değişir;
+                 seçili değerleriyle tek satırda katlı durur. */ ''}
+            <details class="qz-dahasi mt-8"${(S.ui.quizSeconds || S.ui.quizVoice) ? ' open' : ''}>
+              <summary class="qz-dahasi__bas small">Diğer ayarlar · ${S.ui.quizSeconds ? S.ui.quizSeconds + ' sn' : 'süresiz'} · ${S.ui.quizVoice ? 'sesli' : 'sessiz'}</summary>
             ${K.Cols(2, [
               K.Field({ label:'Soru başına süre', hint:'süre baskısı hızını ölçer',
                 input:K.Segmented({ act:'quiz-timer', value:S.ui.quizSeconds || 0,
@@ -78,6 +82,7 @@ R.Screens.quiz = (function(){
                   items:[{ value:'0', label:'Sessiz' }, { value:'1', label:'Sesli' }],
                   aria:'Sesli okuma' }) }),
             ])}
+            </details>
             ${ready
               ? K.Button({ label:'Sınamayı başlat', icon:'play', tone:'primary', block:true,
                   class:'mt-12', act:'quiz-start' })

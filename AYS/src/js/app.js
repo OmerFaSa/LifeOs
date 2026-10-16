@@ -23,12 +23,16 @@ R.App = (function(){
       { id:'plan',   icon:'map',    label:'Program' },
       { id:'target', icon:'target', label:'Hedefler' },
     ]},
+    /* Sade çekmece (2026-10-16, «AYS'de çok şey iç içe girmiş»): «Konu
+       çalış» adı Öğren › Konular ile karışıyordu; ikisi de ders ve konu
+       listesi. Bu ekran konunun TESTLE kapanışını izler — adı bu oldu ve
+       sona geçti; Çalışma «Soru çöz» ile açılır. Rota kimliği aynı. */
     { id:'calisma', label:CEK('calisma'), items:[
-      { id:'subjects', icon:'book',   label:'Konu çalış' },
       { id:'solve',    icon:'search', label:'Soru çöz' },
       { id:'exams',    icon:'exam',   label:'Deneme' },
       { id:'cards',    icon:'cards',  label:'Tekrar' },
       { id:'quiz',     icon:'zap',    label:'Sınama' },
+      { id:'subjects', icon:'book',   label:'Konu kapanışı' },
     ]},
     /* ÖĞREN (kullanıcı, 2026-10-09: «konu öğrenmek başlığı altında sol
        tarafa bölüm aç»): konuyu uygulamanın içinde teker teker öğrenmek.

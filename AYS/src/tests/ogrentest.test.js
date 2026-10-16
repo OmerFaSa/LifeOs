@@ -253,6 +253,9 @@
         expect(h).toContain('Yanlışı olan · 1');
         expect(h).toContain('Yanlışlarım · 1');
         expect(h).toContain('1 yanlış açık');
+        /* Sade: sayısı 0 olan süzgeç yok; Sorular sekmesini tekrar eden sabit düğmeler yok. */
+        expect(h.indexOf('Tamam · 0') < 0).toBe(true);
+        expect(h.indexOf('data-tab="paragraf"') < 0).toBe(true);
         await KS.handle['ogren-suzgec']({ dataset:{ f:'yanlis' } });
         h = String(await KS.render());
         expect(h).toContain('data-topic="tm-06"');

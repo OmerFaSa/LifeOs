@@ -16,7 +16,8 @@
     resetState();
     const kap = document.createElement('div');
     document.body.appendChild(kap);
-    const eski = { render:R.App.render, solve:R.Solver.solve, toast:R.UI.toast };
+    const eski = { render:R.App.render, solve:R.Solver.solve, toast:R.UI.toast, ready:R.Solver.ready };
+    R.Solver.ready = () => true;      /* form yalnız model bağlıyken çizilir */
     const tost = [];
     R.App.render = async () => { kap.innerHTML = String(await E().render()); };
     R.UI.toast = m => { tost.push(m); };
@@ -27,10 +28,25 @@
       await fn({ kap, tost, deger:(id, v) => { const e = document.getElementById(id); if(v !== undefined) e.value = v; return e ? e.value : null; } });
     }finally{
       try{ await E().handle['q-reset'](); }catch(e){ /* durum */ }
-      Object.assign(R.App, { render:eski.render }); R.Solver.solve = eski.solve; R.UI.toast = eski.toast;
+      Object.assign(R.App, { render:eski.render }); R.Solver.solve = eski.solve; R.UI.toast = eski.toast; R.Solver.ready = eski.ready;
       kap.remove();
     }
   }
+
+  describe('Soru çöz — model yokken', () => {
+    it('model bağlı değilken boş form çizilmez; ayar ve Hızlı kayıt söylenir', async () => {
+      resetState();
+      const eski = R.Solver.ready;
+      R.Solver.ready = () => false;
+      try{
+        const h = String(await E().render());
+        expect(h.indexOf('id="q-text"') < 0).toBe(true);
+        expect(h.indexOf('id="q-drop"') < 0).toBe(true);
+        expect(h).toContain('Yapay zekâ bağlı değil.');
+        expect(h).toContain('Hızlı kayıt');
+      }finally{ R.Solver.ready = eski; }
+    });
+  });
 
   describe('Soru çöz — uçtan uca', () => {
     it('çöz → konu ara ve seç → kaydet: kayıt konuya, zorluğa, sonuca bağlanır', () => sahne(async ({ kap, deger }) => {

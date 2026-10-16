@@ -117,15 +117,13 @@ R.Screens = R.Screens || {};
       title:x.topic.name, why:x.subject.name + (s ? ' · sırada: ' + s.ad.toLocaleLowerCase('tr-TR') : ' · bütün adımlar tamam'),
       action:K.Button({ label:son ? 'Devam et' : 'Başla', tone:'primary', size:'sm', act:'ogren-git',
         data:{ 'data-route':s ? s.route : 'anlatim', 'data-subject':hedef.subject.id, 'data-topic':hedef.topic.id } }) })}
-      <div class="row wrap gap-6 mt-10">
-        ${when(R.Paragraf && R.Paragraf.HAVUZ.length, () => {
-          const g = R.Paragraf.gunu(), o = g ? R.Paragraf.ozet() : null;
-          return K.Button({ label:'Günlük paragraf' + (o ? ' · ' + o.cevaplanan + '/' + o.toplam : ''), icon:'book', size:'sm', tone:'ghost',
-            act:'sorular-kip', data:{ 'data-tab':'paragraf' } });
-        })}
-        ${K.Button({ label:a ? 'Karma teste dön' : 'Karma test', icon:'zap', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'karma' } })}
+      ${when(a || y, () => html`<div class="row wrap gap-6 mt-10">
+        ${/* Sade (2026-10-16): «Günlük paragraf» ve «Karma test» düğmeleri
+             Sorular sekmesinin içindekileri tekrar ediyordu; burada yalnız
+             DURUM kalır: süren bir karma test ve açık yanlışlar. */ ''}
+        ${when(a, () => K.Button({ label:'Karma teste dön', icon:'zap', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'karma' } }))}
         ${when(y, () => K.Button({ label:'Yanlışlarım · ' + y, icon:'list', size:'sm', tone:'ghost', act:'sorular-kip', data:{ 'data-tab':'yanlis' } }))}
-      </div></div>`;
+      </div>`)}</div>`;
   }
 
   /* Sekiz ders yan yana: kaç konu okundu, örnek soruların kaçı doğru.
@@ -186,9 +184,14 @@ R.Screens = R.Screens || {};
     });
     return K.Card({ title:subject.name, wide:true,
       sub:oz.konu + ' konu · ' + oz.okunan + ' okundu' + (oz.soru ? ' · ' + oz.dogru + '/' + oz.soru + ' örnek soru doğru' : ''),
-      body:html`<div class="row wrap gap-6 mb-10" role="group" aria-label="Konu süzgeci">${map(SUZGEC, x =>
-          K.Chip({ label:x.ad + ' · ' + satirlar.filter(r => x.f(r.d, r.y)).length, act:'ogren-suzgec', on:x.id === sz.id,
-            data:{ 'data-f':x.id, 'aria-pressed':x.id === sz.id ? 'true' : 'false' } }))}</div>
+      /* Sade (2026-10-16): sayısı 0 olan süzgeç çizilmez («Tamam · 0»,
+         «Yanlışı olan · 0» beş çipi gürültüye çeviriyordu); Hepsi ve seçili
+         süzgeç her zaman durur. */
+      body:html`<div class="row wrap gap-6 mb-10" role="group" aria-label="Konu süzgeci">${map(SUZGEC
+          .map(x => ({ x, n:satirlar.filter(r => x.f(r.d, r.y)).length }))
+          .filter(o => o.n > 0 || o.x.id === 'hepsi' || o.x.id === sz.id), o =>
+          K.Chip({ label:o.x.ad + ' · ' + o.n, act:'ogren-suzgec', on:o.x.id === sz.id,
+            data:{ 'data-f':o.x.id, 'aria-pressed':o.x.id === sz.id ? 'true' : 'false' } }))}</div>
         ${gruplar.length ? html`<div class="stack-sm" data-raf-tam>${map(gruplar, g => html`<div class="ogr-grup">
           ${when(gruplar.length > 1, () => html`<div class="ogr-grup__ad tiny dim">${g.ad}</div>`)}
           <div class="list list--sik">${map(g.l, r => konuSatiri(subject, r.t, r.d, r.y))}</div>
@@ -1059,7 +1062,7 @@ R.Screens = R.Screens || {};
             : html`<span></span>`}
         </div>
         <p class="tiny dim mt-12">Sorular elle yazıldı, doğrulanmadı. İlk cevabın bu konunun kaydına yazılır; hiçbir plan ya da kapanış
-          ona bakmaz — kapanış Konu çalış’taki testle ölçülür.</p>`,
+          ona bakmaz — kapanış Çalışma › Konu kapanışı’ndaki testle ölçülür.</p>`,
     });
   }
 

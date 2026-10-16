@@ -26,6 +26,20 @@ R.Screens.analytics = (function(){
     { id:'durust',  label:'Dürüstlük' },
   ];
 
+  /* Sade sekme (2026-10-16, «AYS'de çok şey iç içe, göz kalabalığı»):
+     sekiz sekme yan yana duruyordu. Yakın okumalar tek sekmede alt alta:
+     sıra ve hız birlikte, kendi verini denetleyen üç okuma birlikte. Hiçbir
+     okuma kalkmadı; başka ekrandan eski kimlikle gelen (örn. 'speed')
+     içinde bulunduğu sekmeye açılır. */
+  const GRUPLAR = [
+    { id:'compare', label:'Karşılaştırma', ic:['compare'] },
+    { id:'errors',  label:'Hata haritası', ic:['errors'] },
+    { id:'rank',    label:'Sıra ve hız', ic:['rank', 'speed'] },
+    { id:'value',   label:'Konu değeri', ic:['value'] },
+    { id:'habits',  label:'Alışkanlık ve denetim', ic:['habits', 'denetim', 'durust'] },
+  ];
+  const grupOf = id => GRUPLAR.find(g => g.ic.indexOf(id) >= 0) || null;
+
   function empty(text, action){
     return K.Card({ body:K.Empty({ icon:'chart', text, action }) });
   }
@@ -633,7 +647,7 @@ R.Screens.analytics = (function(){
 
   async function render(){
     return String(html`${analizBasi()}${K.SayfaBolumleri({ act:'analytics-tab', aria:'Analiz bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}`);
+      bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) })}`);
   }
 
   /* Açılışta istenen bölüm (başka ekrandan «Hata haritası»na gelmek gibi)
@@ -641,11 +655,12 @@ R.Screens.analytics = (function(){
   function afterRender(){
     const t = S.ui.analyticsTab;
     S.ui.analyticsTab = null;
-    if(t && t !== TABS[0].id && TABS.some(x => x.id === t)) K.bolumeGit(t);
+    const g = t ? grupOf(t) : null;
+    if(g && g.id !== GRUPLAR[0].id) K.bolumeGit(g.id);
   }
 
   const handle = {
-    async 'analytics-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'analytics-tab'(el){ const g = grupOf(el.dataset.tab); K.bolumeGit(g ? g.id : el.dataset.tab); },
 
     /* Tahmin KÖR açılır: gerçek değer burada hesaplanmaz. */
     async 'calib-open'(){
@@ -694,7 +709,9 @@ R.Screens.analytics = (function(){
       /* Denetim'de özet açık; beş alanın bulgu kartları şerit. */
       const alanlar = G && R.Audit ? R.Audit.AREAS.map(a => G.anahtar(a.label)) : [];
       return ['boş-bırakma-stratejisi', 'boş-bırakma', 'yayın-zorluk-farkı', 'yayın-etkisi', 'yapışkan-kartlar',
-        'bant-tablosu', 'unutma-eğrisi', 'dikkat-dağılması', 'denetim-defteri', 'sürtünme', 'gösterge-ayrışması'].concat(alanlar);
+        'bant-tablosu', 'unutma-eğrisi', 'dikkat-dağılması', 'denetim-defteri', 'sürtünme', 'gösterge-ayrışması',
+        /* Alışkanlık ve denetim tek sekme (2026-10-16): açık en çok üç kalsın diye. */
+        'bakım-borcu'].concat(alanlar);
     },
     title:'Ayrıntılı analiz',
     subtitle(){ return 'Denemelerden ve kayıtlardan türetilen okumalar'; },

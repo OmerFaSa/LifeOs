@@ -2735,3 +2735,8 @@ body.is-dragging .drop.is-over{
 .dsoru__metin{ white-space:pre-wrap; overflow-wrap:anywhere; }
 .dsoru__cozum summary, .dsoru__grup summary{ cursor:pointer; display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-height:24px; }
 .dsoru .select{ max-width:100%; }
+
+/* Sınama: ara sıra değişen ayarlar katlı (screens/quiz.js). */
+.qz-dahasi > summary{ cursor:pointer; min-height:28px; display:inline-flex; align-items:center; color:var(--text-2); }
+.qz-dahasi > summary:hover{ color:var(--text); }
+.qz-dahasi[open] > summary{ margin-bottom:8px; }

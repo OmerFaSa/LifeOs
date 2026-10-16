@@ -33,7 +33,7 @@
       expect(R.App.yolOf('today').join(' › ')).toBe('Bugün');
       expect(R.App.yolOf('onaylar').join(' › ')).toBe('Onaylar');
       /* Menüde olmayan ayrıntı ekranı üst bölümünün altında durur. */
-      expect(R.App.yolOf('topic').join(' › ')).toBe('Çalışma › Konu çalış › Konu');
+      expect(R.App.yolOf('topic').join(' › ')).toBe('Çalışma › Konu kapanışı › Konu');
       expect(R.App.yolOf('rutbe').join(' › ')).toBe('Ayarlar › Rütbe');
       expect(R.App.yolOf('anlatim').join(' › ')).toBe('Öğren › Anlatım');
       expect(R.App.yolOf('learn').join(' › ')).toBe('Öğren › Ders notları');
@@ -115,6 +115,36 @@
         expect(!!NS.Screens[id]).toBe(true);
         har[id].forEach(a => expect(G.anahtar(a)).toBe(a));
       });
+    });
+  });
+
+  /* 2026-10-16 (depo sahibi: «AYS'de çok şey iç içe girmiş, göz kalabalığı»). */
+  describe('Sade AYS — iç içelik', () => {
+    it('Çalışma «Soru çöz» ile açılır; konu listesinin adı Öğren › Konular ile karışmaz', () => {
+      const c = R.App.NAV.find(g => g.id === 'calisma');
+      expect(c.items[0].id).toBe('solve');
+      const sub = c.items.find(i => i.id === 'subjects');
+      expect(sub.label).toBe('Konu kapanışı');
+      const og = R.App.NAV.find(g => g.id === 'ogren').items.find(i => i.id === 'ogren');
+      expect(og.label === sub.label).toBe(false);
+    });
+    it('Ayrıntılı analiz beş sekme; hiçbir okuma kalkmaz', async () => {
+      R.Test.resetState();
+      const k = document.createElement('div');
+      k.innerHTML = String(await R.Screens.analytics.render());
+      const sekme = k.querySelectorAll('.bolumcubugu__ad');
+      expect(sekme.length).toBe(5);
+      expect(k.textContent).toContain('Sıra ve hız');
+      expect(k.textContent).toContain('Alışkanlık ve denetim');
+      /* eski sekmelerin okumaları hâlâ sayfada */
+      ['Kalibrasyon', 'Sürtünme', 'Uyku ve net'].forEach(t => expect(k.textContent).toContain(t));
+    });
+    it('Ayarlar › Genel üç sekme (Ayarlar, Takvim, Başvuru); yedi bölümün hepsi sayfada', async () => {
+      R.Test.resetState();
+      const k = document.createElement('div');
+      k.innerHTML = String(await R.Screens.guide.render());
+      expect(Array.from(k.querySelectorAll('.bolumcubugu__ad')).map(b => b.textContent.trim())).toEqual(['Ayarlar', 'Takvim', 'Başvuru']);
+      expect(k.textContent).toContain('Sınav haftası ve sınav günü');
     });
   });
 })();
