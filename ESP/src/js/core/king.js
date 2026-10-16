@@ -142,7 +142,19 @@
       ayrıntılı önizleme + «Onaylıyorum» (ya da düğme) + önce dönüş noktası.
       «evet» büyük eylemi uygulamaz. Hesap işi yapılmaz, söylenir. Sayfanın
       yeniden yüklenmesi gereken eylemden sonra King aynı sayfada küçük
-      kutu olarak yeniden açılır. */
+      kutu olarak yeniden açılır.
+  21. YAZARAK GELİR (depo sahibi, 2026-10-17: «King yazarken tıkı tıkı, çok
+      olmayan, açıp kapatabildiğimiz yazı yazma olsun; tüm metni tek seferde
+      yazmasın»). Yeni cevap harf harf belirir: kısa cevap yavaş, uzun
+      cevap hızlı (toplam en çok ~2,2 sn). Yazarken çok hafif, seyrek bir
+      tık (en çok 14 kez/sn) çalar. «Daha fazla» menüsünde ikisi ayrı ayrı
+      açılıp kapanır (modüller arasında taşınır). Balona dokunmak ya da
+      yeni bir şey yazmak yazmayı bitirir. Görünüm › Animasyonlar «Az»da
+      yazma yok, metin tek seferde. Ekran okuyucu metnin tamamını alır
+      (aria-label), harf harf değil.
+      Ek: King'in her cevabında «Kopyala» düğmesi (balonun köşesinde);
+      boş kutuda ↑ son yazdığını geri getirir (düzeltip yeniden gönder);
+      King konuşurken küreye dokunmak susturur. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -211,6 +223,31 @@ window.LIFEOS.KING = (function(){
     zamanla:(fn, ms) => setTimeout(fn, ms),
     simdi:() => new Date(),
     yenile:() => { try{ location.reload(); }catch(e){ /* yok */ } },
+    /* Söz 21: yazma efekti etkin mi (testte kapatılır) ve kare zamanlayıcı. */
+    yazmaEtkin:() => !(L.hareketAz && L.hareketAz()),
+    kare:fn => (typeof requestAnimationFrame === 'function' ? requestAnimationFrame(fn) : setTimeout(() => fn(Date.now()), 16)),
+    /* Söz 21: yazma tıkı — kendi küçük ses bağlamı; çok kısa, çok kısık. */
+    tikla:(() => {
+      let c = null;
+      return () => {
+        try{
+          const C = window.AudioContext || window.webkitAudioContext;
+          if(!C) return false;
+          if(!c) c = new C();
+          if(c.state === 'suspended' && c.resume) c.resume();
+          const t = c.currentTime;
+          const o = c.createOscillator(), g = c.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(1700 + Math.random() * 500, t);
+          g.gain.setValueAtTime(0.0001, t);
+          g.gain.exponentialRampToValueAtTime(0.018, t + 0.003);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+          o.connect(g); g.connect(c.destination);
+          o.start(t); o.stop(t + 0.04);
+          return true;
+        }catch(e){ return false; }
+      };
+    })(),
     hash:() => (typeof location !== 'undefined' ? location.hash : ''),
     hashSil:() => { try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){ /* eski tarayıcı */ } },
     adres:k => (L.KABUK && L.KABUK.adres ? L.KABUK.adres(k) : null),
@@ -293,6 +330,8 @@ window.LIFEOS.KING = (function(){
   let silOnay = null;         // söz 19: silinmek üzere seçilen kayıt
   let silinen = null;         // söz 19: temizlenen sohbet («Geri getir»)
   let bekleyenYetki = null;   // söz 20: onay bekleyen orta/büyük eylem
+  const YAZMA = 'lifeos.king.yazma';   // söz 21: { yaz, ses }; TASINAN'da
+  let yazici = null;          // söz 21: süren yazma { bitir() }
   const FOTO_EN_BUYUK = 15 * 1024 * 1024;
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
@@ -794,6 +833,76 @@ window.LIFEOS.KING = (function(){
   }
 
   /* ---------- söz 19: cevap biçimi ve sohbet kayıtları ---------- */
+  /* ---------- söz 21: yazarak gelir ---------- */
+  function yazmaAyar(){
+    const v = ortam.depo.oku(YAZMA) || {};
+    return { yaz:v.yaz !== false, ses:v.ses !== false };
+  }
+  function yazmaSec(alan, deger){
+    if(alan !== 'yaz' && alan !== 'ses') return false;
+    const a = yazmaAyar();
+    a[alan] = !!deger;
+    if(a.yaz && a.ses) ortam.depo.sil(YAZMA); else ortam.depo.yaz(YAZMA, a);
+    ciz(false);
+    return true;
+  }
+  function yazmayiBitir(){ if(yazici){ const y = yazici; yazici = null; y.bitir(); } }
+  /* Balonun metin düğümleri boşaltılır, sırayla geri yazılır. Hız metnin
+     boyuna göre: 30 karakter ~0,9 sn, 600 karakter ~2,2 sn. */
+  function yazdir(el){
+    yazmayiBitir();
+    if(!el || !ortam.yazmaEtkin() || !yazmaAyar().yaz) return null;
+    const dugumler = [];
+    const gez = n => {
+      n.childNodes.forEach(c => {
+        if(c.nodeType === 3){ if(c.nodeValue.trim()) dugumler.push({ n:c, tam:c.nodeValue }); }
+        else if(c.nodeType === 1 && !c.matches('button, .king__kopyala')) gez(c);
+      });
+    };
+    gez(el);
+    const toplam = dugumler.reduce((a, d) => a + d.tam.length, 0);
+    if(!toplam) return null;
+    el.setAttribute('aria-label', dugumler.map(d => d.tam).join(' '));
+    el.classList.add('is-yaziyor');
+    dugumler.forEach(d => { d.n.nodeValue = ''; });
+    const sure = Math.max(700, Math.min(2200, 600 + toplam * 9));
+    const ses = yazmaAyar().ses;
+    let bas = null, yazilan = 0, sonTik = 0, bitti = false;
+    function koy(n){
+      let kalan = n;
+      dugumler.forEach(d => {
+        const k = Math.max(0, Math.min(d.tam.length, kalan));
+        d.n.nodeValue = d.tam.slice(0, k);
+        kalan -= d.tam.length;
+      });
+    }
+    function bitir(){
+      if(bitti) return;
+      bitti = true;
+      koy(toplam);
+      el.classList.remove('is-yaziyor');
+      el.removeAttribute('aria-label');
+      if(yazici === y) yazici = null;
+    }
+    function adim(z){
+      if(bitti) return;
+      if(bas == null) bas = z;
+      const n = Math.min(toplam, Math.ceil(toplam * Math.min(1, (z - bas) / sure)));
+      if(n > yazilan){
+        /* Tık seyrek: en az 70 ms arayla ve yalnız harf eklenince. */
+        if(ses && z - sonTik > 70 && /\S/.test(dugumler.map(d => d.tam).join('').slice(yazilan, n))){ ortam.tikla(); sonTik = z; }
+        yazilan = n;
+        koy(n);
+      }
+      if(n >= toplam){ bitir(); return; }
+      ortam.kare(adim);
+    }
+    const y = { bitir };
+    yazici = y;
+    ortam.kare(adim);
+    return y;
+  }
+
   function cevapBicimi(){ const v = ortam.depo.oku(CEVAP); return v === 'ses' || v === 'yazi' ? v : 'oto'; }
   function cevapSec(v){
     if(['oto', 'ses', 'yazi'].indexOf(v) < 0) return false;
@@ -898,6 +1007,14 @@ window.LIFEOS.KING = (function(){
         + sec('oto', 'Otomatik', 'Konuşarak sorduğuna sesli, yazarak sorduğuna yazılı cevap')
         + sec('ses', 'Sesli', 'Yazsan da cevabı sesli okur; yazı da görünür')
         + sec('yazi', 'Yazılı', 'Konuşsan da cevap yalnız yazılı gelir') + '</div></div>'
+        + (() => {
+          const y = yazmaAyar();
+          const anahtar = (alan, ad, acik, ip) => '<button type="button" class="king__menu-is king__menu-anahtar" role="switch" aria-checked="'
+            + (acik ? 'true' : 'false') + '" data-king="yazma:' + alan + ':' + (acik ? '0' : '1') + '" title="' + ip + '">' + ad
+            + '<span class="king__anahtar' + (acik ? ' is-acik' : '') + '" aria-hidden="true"><i></i></span></button>';
+          return anahtar('yaz', 'Yazarak göster', y.yaz, 'Cevap harf harf belirir; kapalıyken tek seferde')
+            + (y.yaz ? anahtar('ses', 'Yazma sesi', y.ses, 'Yazarken çok hafif, seyrek tık') : '');
+        })()
         + '<button type="button" class="king__menu-is" data-king="sohbet-kaydet">Sohbeti kaydet</button>'
         + '<button type="button" class="king__menu-is" data-king="kayitlar">Kayıtlı sohbetler<span class="king__menu-say">' + n + '</span></button>'
         + '<button type="button" class="king__menu-is king__menu-is--tehlike" data-king="temizle">Sohbeti temizle</button>'
@@ -1239,7 +1356,8 @@ window.LIFEOS.KING = (function(){
       + '<button type="button" class="king__kapat" data-king="kapat" aria-label="Kapat" title="Kapat (Esc)">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>';
     const panel = menuHtml();
-    const balonlar = satirlar.map(m => m.kim === 'sen'
+    const ilkSira = akis.length - satirlar.length;
+    const balonlar = satirlar.map((m, i) => m.kim === 'sen'
       ? (m.foto ? '<div class="king__balon king__balon--sen king__balon--foto"><img class="king__foto" src="' + kac(m.foto) + '" alt="Gönderdiğin fotoğraf"/></div>'
         : '<div class="king__balon king__balon--sen"><p>' + kac(m.metin) + '</p></div>')
       : m.bekliyor
@@ -1253,7 +1371,9 @@ window.LIFEOS.KING = (function(){
             + (m.onizleme.ipucu ? '<small>' + kac(m.onizleme.ipucu) + '</small>' : '') + '</div>'
           : (m.satirlar && m.satirlar.length ? '<ul>' + m.satirlar.map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>' : ''))
         + (m.son ? '<p class="king__son">' + kac(m.son) + '</p>' : '')
-        + '</div></div>').join('');
+        + '</div>' + (akis.length ? '<button type="button" class="king__kopyala" data-king="kopyala-mesaj:' + (ilkSira + i)
+          + '" aria-label="Cevabı kopyala" title="Kopyala"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/>'
+          + '<path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg></button>' : '') + '</div>').join('');
     const cip = cipler
       ? cipler.map(c => '<button type="button" class="king__cip' + (c.is === 'kaydet' || c.is === 'ilet' || /^foto:0$/.test(c.is) || (c.is === 'foto-yorum' && !/foto:0/.test(JSON.stringify(cipler))) ? ' king__cip--ana' : '')
           + '" data-king="' + c.is + '">' + kac(c.ad) + '</button>').join('')
@@ -1289,11 +1409,18 @@ window.LIFEOS.KING = (function(){
     const k = document.querySelector('[data-king]');
     if(!k) return;
     const kutu = k.querySelector('.king__kutu');
+    yazmayiBitir();
+    const yeniVar = akis.some(m => m.yeni && m.kim === 'king' && !m.bekliyor);
     kutu.innerHTML = govde();
     const g = kutu.querySelector('.king__girdi');
     const akisEl = kutu.querySelector('.king__akis');
     if(akisEl) akisEl.scrollTop = akisEl.scrollHeight;
     akis.forEach(m => { m.yeni = false; });
+    /* Söz 21: yeni cevap harf harf. */
+    if(yeniVar && !menu){
+      const hedef = mini ? kutu.querySelector('.king__mini-son:not(.is-bekliyor)') : Array.from(kutu.querySelectorAll('.king__balon--king.is-yeni')).pop();
+      if(hedef) yazdir(hedef.firstElementChild && !mini ? hedef.firstElementChild : hedef);
+    }
     durum();
     if(odak !== false && g && !(mini && odak !== true) && !(L.KABUK && L.KABUK.telefonMu && L.KABUK.telefonMu())){
       try{ g.focus({ preventScroll:true }); }catch(e){ /* odak yok */ }
@@ -1379,6 +1506,12 @@ window.LIFEOS.KING = (function(){
     if(bagli || typeof document === 'undefined') return;
     bagli = true;
     document.addEventListener('keydown', e => {
+      /* Söz 21 ek: boş kutuda ↑ son mesajı geri getirir. */
+      if(e.key === 'ArrowUp' && acik && e.target && e.target.matches && e.target.matches('.king__girdi') && !e.target.value){
+        const son = akis.filter(m => m.kim === 'sen' && !m.foto && m.metin).slice(-1)[0];
+        if(son){ e.preventDefault(); e.target.value = son.metin; try{ e.target.setSelectionRange(son.metin.length, son.metin.length); }catch(er){ /* yok */ } }
+        return;
+      }
       if(e.key === 'Escape' && acik && menu){ e.preventDefault(); menu = null; silOnay = null; ciz(false); return; }
       if(e.key === 'Escape' && acik){ e.preventDefault(); sesli = false; kapat(); return; }
       if(e.key !== 'Control'){ baskaTus = true; return; }
@@ -1396,6 +1529,8 @@ window.LIFEOS.KING = (function(){
       if(t.closest('.king-perde')){ e.preventDefault(); e.stopPropagation(); kucult(); return; }
       const k = t.closest('[data-king]');
       if(!k){ if(acik && !mini) kucult(); return; }
+      if(yazici && t.closest('.is-yaziyor')){ yazmayiBitir(); return; }
+      if(konusuyor > 0 && t.closest('.king__kure')){ sus(); return; }
       const h = t.closest('[data-king-hazir]');
       if(h){ hazirSec(Number(h.getAttribute('data-king-hazir'))); return; }
       const c = t.closest('[data-king]:not(.king)');
@@ -1412,6 +1547,19 @@ window.LIFEOS.KING = (function(){
         if(is === 'foto-yorum'){ fotoYorumla(); return; }
         if(is === 'sohbet'){ sesliSohbetAc(); ciz(false); return; }
         if(is === 'geri-al'){ geriAlYap(); return; }
+        if(/^yazma:(yaz|ses):[01]$/.test(is)){ const p = is.split(':'); yazmaSec(p[1], p[2] === '1'); return; }
+        if(/^kopyala-mesaj:\d+$/.test(is)){
+          const m = akis[Number(is.split(':')[1])];
+          if(m){
+            const metin = [m.metin].concat(m.satirlar || [], m.onizleme ? [m.onizleme.metin] : [], m.son ? [m.son] : []).filter(Boolean).join('\n');
+            Promise.resolve(ortam.kopyala(metin)).then(ok => {
+              if(!ok) return;
+              c.classList.add('is-kopyalandi'); c.setAttribute('aria-label', 'Kopyalandı');
+              setTimeout(() => { c.classList.remove('is-kopyalandi'); c.setAttribute('aria-label', 'Cevabı kopyala'); }, 1400);
+            });
+          }
+          return;
+        }
         if(is === 'yetki-onay'){ yetkiUygula(); return; }
         if(is === 'yetki-hepsi'){ const Y = yetkiKatalog(); const n = Y && Y.anla('hepsini onayla'); if(n && n.tur === 'eylem') yetkiUygula(n); return; }
         if(is === 'menu'){ menuAc('menu'); return; }
@@ -1461,6 +1609,7 @@ window.LIFEOS.KING = (function(){
       if(g) g.value = '';
       sesli = false;            // yazıyla sorulana yazıyla
       sus();
+      yazmayiBitir();
       isle(m);
     });
     /* Telefonda «+»ya basılı tutmak: King. */
@@ -1523,6 +1672,7 @@ window.LIFEOS.KING = (function(){
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP);
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null;
+    yazmayiBitir(); ortam.depo.sil(YAZMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
     sesli = false; dinleyen = null; konusuyor = 0;
   }
@@ -1532,6 +1682,7 @@ window.LIFEOS.KING = (function(){
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,
     paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, fotoYorumla, GORSEL_SISTEM, TASIMA,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
+    YAZMA, yazmaAyar, yazmaSec, yazdir, yazmayiBitir, yaziyorMu:() => !!yazici,
     CEVAP, cevapBicimi, cevapSec, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),

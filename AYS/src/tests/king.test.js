@@ -33,6 +33,7 @@
       hashSil:() => { giden.push('hash-silindi'); },
       adres:m => ({ ays:'http://127.0.0.1:4173/', spi:'http://127.0.0.1:4183/', esp:'http://127.0.0.1:4193/' })[m],
       simdi:() => new Date(2026, 9, 5, 9, 0),
+      yazmaEtkin:() => !!o.yazma,               // söz 21: yazma efekti yalnız kendi testinde
     }, o.fetch ? { fetch:o.fetch } : {});
     k.kur({ modul:o.modul || 'spi', git:(r, ek) => gidilen.push([r, ek || {}]),
       ozet:o.ozet || (() => ['Toparlanma iyi.', 'Uyku 7 sa · 2 öğün']), veri:o.veri, hkm:o.hkm });
@@ -354,6 +355,70 @@
       await new Promise(r => setTimeout(r, 0));
       expect(k.acikMi()).toBe(false);
       expect(localStorage.getItem(k.TASIMA)).toBe(null);
+    }));
+
+    /* Söz 21 (2026-10-17): «King yazarken tıkı tıkı, açıp kapatabildiğimiz yazı yazma». */
+    it('yeni cevap harf harf yazılır, seyrek tıklar; dokununca biter; kapatılınca tek seferde', () => sahneyle(async () => {
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri, yazma:true });
+      const kareler = [];
+      let tik = 0;
+      Object.assign(k._ortam, { kare:fn => { kareler.push(fn); }, tikla:() => { tik++; return true; } });
+      k.ac();
+      await k.isle('uyku 7');
+      const balon = () => Array.from(document.querySelectorAll('.king__balon--king')).pop();
+      expect(k.yaziyorMu()).toBe(true);
+      expect(balon().textContent.trim()).toBe('');
+      const tam = k.akis().slice(-1)[0].metin;
+      expect(balon().querySelector('.is-yaziyor').getAttribute('aria-label')).toContain(tam);
+      /* zaman ilerler: yarısı yazılır, tık sayısı karakterden çok az */
+      let z = 0;
+      const ilerle = ms => { z += ms; const l = kareler.splice(0); l.forEach(f => f(z)); };
+      ilerle(0); ilerle(400);
+      const yarim = balon().textContent.trim().length;
+      expect(yarim > 0 && yarim < tam.length).toBe(true);
+      for(let i = 0; i < 200 && k.yaziyorMu(); i++) ilerle(16);
+      expect(k.yaziyorMu()).toBe(false);
+      expect(balon().textContent).toContain(tam);
+      expect(tik > 0 && tik < balon().textContent.trim().length / 2).toBe(true);
+      /* dokununca biter */
+      await k.isle('uyku 8');
+      ilerle(0);
+      balon().querySelector('.is-yaziyor').click();
+      expect(k.yaziyorMu()).toBe(false);
+      expect(balon().textContent).toContain(k.akis().slice(-1)[0].metin);
+      /* kapalıyken tek seferde; ses ayrı kapanır */
+      k.yazmaSec('ses', false);
+      expect(k.yazmaAyar()).toEqual({ yaz:true, ses:false });
+      k.yazmaSec('yaz', false);
+      await k.isle('uyku 9');
+      expect(k.yaziyorMu()).toBe(false);
+      expect(balon().textContent).toContain(k.akis().slice(-1)[0].metin);
+      if(window.LIFEOS.ANIMASYON) expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(k.YAZMA) >= 0).toBe(true);
+    }));
+    it('boş kutuda ↑ son yazdığını geri getirir', () => sahneyle(async () => {
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri });
+      k.ac();
+      await k.isle('uyku 7');
+      const g = document.querySelector('.king__girdi');
+      g.value = '';
+      g.dispatchEvent(new KeyboardEvent('keydown', { key:'ArrowUp', bubbles:true }));
+      expect(g.value).toBe('uyku 7');
+      g.value = 'başka';
+      g.dispatchEvent(new KeyboardEvent('keydown', { key:'ArrowUp', bubbles:true }));
+      expect(g.value).toBe('başka');            // dolu kutuya dokunmaz
+    }));
+    it('King cevabı kopyalanır', () => sahneyle(async () => {
+      const kopyalanan = [];
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri });
+      k._ortam.kopyala = async m => { kopyalanan.push(m); return true; };
+      k.ac();
+      await k.isle('uyku 7');
+      Array.from(document.querySelectorAll('.king__kopyala')).pop().click();
+      await new Promise(r => setTimeout(r, 0));
+      expect(kopyalanan[0]).toContain(k.akis().slice(-1)[0].metin);
     }));
 
     /* Söz 20 (2026-10-17): «King'in her şeye yetkisi olsun; hesabım hariç». */

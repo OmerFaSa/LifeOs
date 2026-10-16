@@ -293,3 +293,20 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__kayit p{ margin:2px 0 0; font-size:14px; line-height:1.45; }
 .king__kayit ul{ margin:4px 0 0; padding-left:18px; font-size:13px; }
 .king__cip--tehlike{ color:var(--danger, #e5484d); }
+
+/* Söz 21: yazarak gelir — yazarken imleç; balonun köşesinde Kopyala. */
+.king .is-yaziyor{ cursor:pointer; }
+.king__balon--king{ position:relative; }
+.king__kopyala{ position:absolute; right:-6px; bottom:-6px; width:26px; height:26px; display:grid; place-items:center;
+  padding:0; border:0; border-radius:999px; background:var(--surface); color:var(--text-2); cursor:pointer;
+  box-shadow:0 1px 3px rgba(0,0,0,.12); opacity:0; transition:opacity .15s ease; }
+.king__kopyala svg{ width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.king__balon--king:hover .king__kopyala, .king__kopyala:focus-visible, .king__kopyala.is-kopyalandi{ opacity:1; }
+.king__kopyala.is-kopyalandi{ color:var(--primary); }
+@media (hover:none){ .king__balon--king:last-of-type .king__kopyala{ opacity:.8; } }
+.king__menu-anahtar{ gap:12px; }
+.king__anahtar{ position:relative; width:38px; height:22px; flex:none; border-radius:999px; background:var(--surface-3, rgba(0,0,0,.15)); transition:background .2s ease; }
+.king__anahtar i{ position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.2); transition:transform .2s cubic-bezier(.32,.72,0,1); }
+.king__anahtar.is-acik{ background:var(--primary); }
+.king__anahtar.is-acik i{ transform:translateX(16px); }
