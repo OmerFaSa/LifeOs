@@ -1589,7 +1589,7 @@ SP.App = (function(){
       /* KING (brand/ortak/king.js): her yerden sade sohbet. Özet ve veri
          girişi bu modülün kendi koduyla (SP.Quick: önizleme, onayla kayıt). */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'spi', ekran:() => S.route,
+        window.LIFEOS.KING.kur({ modul:'spi', ekran:() => S.route, model:() => SP.LLM,
           /* King'e gelen fotoğraf (king.js söz 11): Fotoğraftan öğün akışına. */
           foto:[{ ad:'Öğün olarak oku', is:async f => {
             go('meals');

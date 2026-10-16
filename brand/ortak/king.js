@@ -93,7 +93,21 @@
       (giris.js söz 8); «geri al» yazmak ya da düğmesi.
   15. SOHBET KALIR. Kapatıp açınca aynı günün son mesajları geri gelir
       (yalnız bu cihazda; fotoğraf saklanmaz). Başlıkta yapay zekâ bağlı mı
-      yazar: «yapay zekâ» ya da «yerel». */
+      yazar: «yapay zekâ» ya da «yerel».
+  16. EKRANIMI PAYLAŞ (depo sahibi, 2026-10-16: «ekran paylaşmaktan kastım PC,
+      telefon ya da başka bir ekran»). Bilgisayarda tarayıcının kendi seçicisi
+      (getDisplayMedia): bir ekran, pencere ya da sekme. Paylaşım SÜREKLİ YAYIN
+      DEĞİLDİR: yalnız kullanıcı soru sorduğunda o anın TEK karesi soruyla
+      birlikte görüntü okuyan modele (modülün model katmanı, `ayar.model`)
+      gider; kare saklanmaz. Veri cümlesi («40 soru çözdüm») paylaşım sürerken
+      de yerel ayrıştırıcıya gider. Paylaşım sürerken kutuda «Ekran paylaşılıyor
+      · Durdur» durur; tarayıcının çubuğundan durdurmak da biter. Telefonda
+      tarayıcı ekran paylaşamaz: bu söylenir, ekran görüntüsünü fotoğraf
+      olarak göndermek önerilir (söz 11). Görüntü okuyan model yoksa söylenir.
+  17. GÖRÜNTÜYÜ YORUMLA. Fotoğraf ve ekran karesi için model talimatı sabittir:
+      Türkçe, kısa; görmediği sayıyı uydurmaz, emin değilse söyler; sağlıkta
+      teşhis koymaz, doz önermez (AGENTS §1.5). Cevap modelin OKUMASIDIR,
+      ölçüm değildir: hiçbir kayda kendiliğinden yazılmaz. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -171,6 +185,28 @@ window.LIFEOS.KING = (function(){
       sil:k => { try{ localStorage.removeItem(k); }catch(e){ /* yok */ } },
     },
     nesneUrl:f => { try{ return URL.createObjectURL(f); }catch(e){ return ''; } },
+    /* Söz 16: tarayıcının ekran seçicisi. Desteklenmiyorsa null. */
+    ekranDestek:() => !!(typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia),
+    ekranBaslat:async bitince => {
+      const akis = await navigator.mediaDevices.getDisplayMedia({ video:{ frameRate:{ ideal:2, max:5 } }, audio:false });
+      const v = document.createElement('video');
+      v.muted = true; v.playsInline = true; v.srcObject = akis;
+      try{ await v.play(); }catch(e){ /* kare yine alınabilir */ }
+      const iz = akis.getVideoTracks()[0];
+      if(iz) iz.addEventListener('ended', () => bitince());
+      return {
+        kare:() => kareCiz(v, v.videoWidth, v.videoHeight),
+        bitir:() => { try{ akis.getTracks().forEach(t => t.stop()); }catch(e){ /* durmuş */ } v.srcObject = null; },
+      };
+    },
+    /* Dosyadan küçültülmüş JPEG (söz 17). */
+    dosyaKare:file => new Promise((ok, ret) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { try{ ok(kareCiz(img, img.naturalWidth, img.naturalHeight)); }catch(e){ ret(e); } finally{ URL.revokeObjectURL(url); } };
+      img.onerror = () => { URL.revokeObjectURL(url); ret(new Error('Görsel okunamadı')); };
+      img.src = url;
+    }),
     fetch:(u, o) => fetch(u, o),
     /* Ses (söz 7). Testler sahte tanıma ve sentez koyar. */
     tanima:() => (typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition)) || null,
@@ -194,10 +230,26 @@ window.LIFEOS.KING = (function(){
   let sesliSohbet = false;   // söz 13
   let sessizSay = 0;
   const EKRAN_EN_COK = 2500;
+  const KARE_EN_GENIS = 1280;
+  const GORSEL_SISTEM = 'Sen LifeOS\'un asistanı King\'sin. Kullanıcı sana ekranını ya da bir fotoğrafı gösteriyor. '
+    + 'Türkçe, kısa ve net cevap ver (en çok beş cümle). Görüntüde görmediğin bir sayıyı ya da bilgiyi uydurma; '
+    + 'okuyamadığın ya da emin olmadığın yeri açıkça söyle. Sağlıkla ilgili görüntülerde teşhis koyma, ilaç ya da doz önerme. '
+    + 'Yardımcı olabileceğin sonraki adımı tek cümleyle öner.';
+  let paylasim = null;       // söz 16: { kare() → { mime, data }, bitir() }
   const FOTO_EN_BUYUK = 15 * 1024 * 1024;
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
   let konusuyor = 0;         // okunmayı bekleyen parça sayısı
+
+  function kareCiz(kaynak, g, y){
+    if(!g || !y) throw new Error('Ekran görüntüsü henüz hazır değil');
+    const o = Math.min(1, KARE_EN_GENIS / g);
+    const c = document.createElement('canvas');
+    c.width = Math.round(g * o); c.height = Math.round(y * o);
+    c.getContext('2d').drawImage(kaynak, 0, 0, c.width, c.height);
+    const d = c.toDataURL('image/jpeg', 0.72);
+    return { mime:'image/jpeg', data:d.slice(d.indexOf(',') + 1) };
+  }
 
   function kac(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
@@ -316,14 +368,17 @@ window.LIFEOS.KING = (function(){
     if(file.size > FOTO_EN_BUYUK){ soyle('Fotoğraf çok büyük (en çok 15 MB). Daha küçük bir kırpma dener misin?'); return false; }
     akis.push({ kim:'sen', foto:ortam.nesneUrl(file), metin:'(fotoğraf)' });
     const l = fotoIsleri();
+    const gorur = gorselZincir().length > 0;
     bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
-    if(!l.length){
+    if(!l.length && !gorur){
       bekleyenFoto = null; cipler = null;
       soyle('Fotoğrafı aldım ama ' + (MODUL_AD[ayar.modul] || 'bu modül') + '’de fotoğrafla yapılan bir iş yok. AYS’de soru çözdürebilir, SPİ’de öğün okutabilirim.');
       return true;
     }
     bekleyenFoto = file;
-    cipler = l.map((x, i) => ({ ad:x.ad, is:'foto:' + i })).concat([{ ad:'Vazgeç', is:'vazgec' }]);
+    cipler = l.map((x, i) => ({ ad:x.ad, is:'foto:' + i }))
+      .concat(gorur ? [{ ad:'Ne gördüğünü söyle', is:'foto-yorum' }] : [])
+      .concat([{ ad:'Vazgeç', is:'vazgec' }]);
     soyle('Fotoğrafı aldım; bu cihazda kalıyor. Ne yapalım?');
     return true;
   }
@@ -367,6 +422,66 @@ window.LIFEOS.KING = (function(){
     soyle((e.ad ? e.ad + ' ekranındasın.' : 'Bu ekranda:') + (e.basliklar.length ? ' Gördüklerim:' : ' Okuyabildiğim bir başlık yok.'),
       e.basliklar.slice(0, 8));
     return e;
+  }
+
+  /* ---------- söz 16–17: ekranı paylaş, görüntüyü yorumla ---------- */
+  function modelKatmani(){ try{ return ayar && ayar.model ? ayar.model() : null; }catch(e){ return null; } }
+  function gorselZincir(){
+    const M = modelKatmani();
+    try{ return M && M.visionChain ? M.visionChain(null) : []; }catch(e){ return []; }
+  }
+  const GORSEL_YOK = 'Görüntüyü anlamak için görüntü okuyan bir yapay zekâ gerekiyor. Ayarlar’dan (Ofis › Model) ücretsiz '
+    + 'Google AI Studio (Gemini) bağlarsan ekranını ve fotoğraflarını yorumlayabilirim.';
+  async function gorselCevap(soru, resim){
+    const zincir = gorselZincir();
+    if(!zincir.length){ soyle(GORSEL_YOK); return null; }
+    const bek = { kim:'king', bekliyor:true, metin:'' };
+    akis.push(bek); ciz(false);
+    try{
+      const M = modelKatmani();
+      const r = await M.complete(zincir, { system:GORSEL_SISTEM, temperature:0.3, maxTokens:700,
+        messages:[{ role:'user', text:String(soru || 'Bu görüntüde ne var?'), images:[resim] }] });
+      akis = akis.filter(m => m !== bek);
+      soyle(String((r && r.text) || '').trim() || 'Görüntüden bir şey okuyamadım.');
+      return r;
+    }catch(e){
+      akis = akis.filter(m => m !== bek);
+      const M = modelKatmani();
+      soyle('Görüntüyü yorumlayamadım: ' + ((M && M.errorText && e && e.code) ? M.errorText(e.code) : ((e && e.message) || 'model yanıt vermedi')));
+      return null;
+    }
+  }
+  async function paylasimBaslat(){
+    if(paylasim){ paylasimBitir(); return false; }
+    if(!ortam.ekranDestek()){
+      soyle('Bu cihazda tarayıcı ekran paylaşamıyor (telefonda tarayıcılar buna izin vermiyor). Ekran görüntüsü alıp '
+        + 'fotoğraf olarak gönderirsen ne gördüğümü söylerim.');
+      return false;
+    }
+    if(!gorselZincir().length){ soyle(GORSEL_YOK); return false; }
+    try{
+      paylasim = await ortam.ekranBaslat(() => { if(paylasim){ paylasim = null; soyle('Ekran paylaşımı bitti.'); } });
+    }catch(e){
+      paylasim = null;
+      soyle(e && e.name === 'NotAllowedError' ? 'Ekran paylaşımı iptal edildi.' : 'Ekran paylaşılamadı: ' + ((e && e.message) || 'bilinmeyen hata'));
+      return false;
+    }
+    soyle('Ekranını görüyorum. Ne sorarsan o anki ekranı yorumlarım; görüntü yalnız sorduğunda yapay zekâya gider, saklanmaz.');
+    return true;
+  }
+  function paylasimBitir(){
+    const p = paylasim;
+    paylasim = null;
+    if(p) try{ p.bitir(); }catch(e){ /* durmuş */ }
+    if(acik) soyle('Ekran paylaşımını durdurdum.');
+  }
+  async function fotoYorumla(){
+    const f = bekleyenFoto;
+    bekleyenFoto = null; cipler = null;
+    if(!f) return null;
+    let resim = null;
+    try{ resim = await ortam.dosyaKare(f); }catch(e){ soyle('Fotoğraf okunamadı.'); return null; }
+    return gorselCevap('Bu fotoğrafta ne var? Kısaca söyle; LifeOS’ta işime yarayacak bir şey (soru, öğün, ölçüm, plan) varsa belirt.', resim);
   }
 
   /* ---------- söz 13: sesli sohbet ---------- */
@@ -634,6 +749,15 @@ window.LIFEOS.KING = (function(){
     }
     const y = yorumla(metin);
     if(y.tur === 'bos') return y;
+    /* Söz 16: paylaşım sürerken soru o anın karesiyle; veri cümlesi yerelde. */
+    if(paylasim && y.tur !== 'veri' && !(y.tur === 'git' && y.kaynak === 'komut')){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      bekleyen = null; bekleyenGit = null; bekleyenIlet = null; cipler = null;
+      let kare = null;
+      try{ kare = paylasim.kare(); }catch(e){ soyle('Ekranın karesi alınamadı: ' + ((e && e.message) || 'bilinmeyen hata')); return { tur:'ekran' }; }
+      await gorselCevap(String(metin).trim(), kare);
+      return { tur:'ekran' };
+    }
     akis.push({ kim:'sen', metin:String(metin).trim() });
     bekleyen = null;
     bekleyenGit = null;
@@ -797,12 +921,13 @@ window.LIFEOS.KING = (function(){
         + (son && son.onizleme ? '<b class="king__mini-oz">' + kac(son.onizleme.metin) + '</b>' : '')
         + (son && son.son ? '<p class="king__mini-soru">' + kac(son.son) + '</p>' : '') + '</div>';
     const cip = cipler ? '<div class="king__cipler" role="group" aria-label="Cevaplar">' + cipler.map(c => '<button type="button" class="king__cip'
-      + (c.is === 'kaydet' || c.is === 'ilet' || /^foto:0$/.test(c.is) ? ' king__cip--ana' : '') + '" data-king="' + c.is + '">' + kac(c.ad) + '</button>').join('') + '</div>' : '';
+      + (c.is === 'kaydet' || c.is === 'ilet' || /^foto:0$/.test(c.is) || (c.is === 'foto-yorum' && !/foto:0/.test(JSON.stringify(cipler))) ? ' king__cip--ana' : '') + '" data-king="' + c.is + '">' + kac(c.ad) + '</button>').join('') + '</div>' : '';
     const mik = ortam.tanima()
       ? '<button type="button" class="king__mik' + (dinleyen ? ' is-acik' : '') + '" data-king="dinle" aria-pressed="' + (dinleyen ? 'true' : 'false')
         + '" aria-label="' + (dinleyen ? 'Dinlemeyi bitir' : 'Konuşarak sor') + '"><svg viewBox="0 0 24 24" aria-hidden="true">'
         + '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>' : '';
-    return bas + govdeM + cip
+    return bas + (paylasim ? '<div class="king__paylasim" role="status"><i class="king__canli" aria-hidden="true"></i>Ekran paylaşılıyor · sorduğunda görürüm'
+      + '<button type="button" class="king__paylasim-dur" data-king="paylasim-bitir">Durdur</button></div>' : '') + govdeM + cip
       + '<form class="king__yaz" data-king-form data-ayar-disi>'
       + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
       + '<label class="king__foto-dugme" title="Fotoğraf gönder (Ctrl+V ile yapıştır, sürükleyip bırak da olur)" aria-label="Fotoğraf gönder">'
@@ -816,11 +941,17 @@ window.LIFEOS.KING = (function(){
     const satirlar = akis.length ? akis : [{ kim:'king', metin:selam(), yeni:true }];
     const bas = '<div class="king__bas">' + KURE + '<b>King</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + '</span>'
-      + '<span class="king__durum" title="' + (baglanti() ? 'Sorular Merkez’deki King’e (yapay zekâ) gider' : 'Merkez bağlı değil: King yerel kurallarla cevaplar') + '">'
-      + (baglanti() ? 'yapay zekâ' : 'yerel') + '</span>'
-      + '<button type="button" class="king__kapat king__ekran" data-king="ekran" aria-label="Ekranı göster" title="Ekranı göster: King bulunduğun ekranı okur'
-      + (baglanti() ? '; ekrandaki yazılar Merkez’deki King’e gider' : '') + '">'
-      + '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="11.5" rx="2"/><path d="M9 20h6M12 16.5V20"/></svg></button>'
+      + '<span class="king__durum" title="' + (baglanti() ? 'Sorular Merkez’deki King’e (yapay zekâ) gider'
+        : gorselZincir().length ? 'Merkez bağlı değil; sorulara yerel kurallarla, ekran ve fotoğrafa görüntü okuyan modelle cevap verir'
+        : 'Merkez bağlı değil: King yerel kurallarla cevaplar') + '">'
+      + (baglanti() ? 'yapay zekâ' : gorselZincir().length ? 'görüntü açık' : 'yerel') + '</span>'
+      + '<button type="button" class="king__kapat king__ekran' + (paylasim ? ' is-acik' : '') + '" data-king="' + (paylasim ? 'paylasim-bitir' : 'paylas')
+      + '" aria-pressed="' + (paylasim ? 'true' : 'false') + '" aria-label="' + (paylasim ? 'Ekran paylaşımını durdur' : 'Ekranımı paylaş')
+      + '" title="' + (paylasim ? 'Ekran paylaşımını durdur' : 'Ekranımı paylaş: bir ekran, pencere ya da sekme seç; sorduğunda King o anki ekranı görür') + '">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="11.5" rx="2"/><path d="M9 20h6M12 16.5V20M12 13.5V8M9.5 10.5L12 8l2.5 2.5"/></svg></button>'
+      + '<button type="button" class="king__kapat king__sayfa" data-king="ekran" aria-label="Bu sayfayı göster" title="Bu sayfayı göster: King bulunduğun LifeOS sayfasını okur'
+      + (baglanti() ? '; sayfadaki yazılar Merkez’deki King’e gider' : '') + '">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg></button>'
       + (ortam.tanima() ? '<button type="button" class="king__kapat king__sohbet' + (sesliSohbet ? ' is-acik' : '') + '" data-king="sohbet" aria-pressed="'
         + (sesliSohbet ? 'true' : 'false') + '" aria-label="Sesli sohbet" title="Sesli sohbet: King konuşunca yeniden dinler; «tamam» de, biter">'
         + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg></button>' : '')
@@ -844,9 +975,11 @@ window.LIFEOS.KING = (function(){
         + (m.son ? '<p class="king__son">' + kac(m.son) + '</p>' : '')
         + '</div></div>').join('');
     const cip = cipler
-      ? cipler.map(c => '<button type="button" class="king__cip' + (c.is === 'kaydet' || c.is === 'ilet' || /^foto:0$/.test(c.is) ? ' king__cip--ana' : '')
+      ? cipler.map(c => '<button type="button" class="king__cip' + (c.is === 'kaydet' || c.is === 'ilet' || /^foto:0$/.test(c.is) || (c.is === 'foto-yorum' && !/foto:0/.test(JSON.stringify(cipler))) ? ' king__cip--ana' : '')
           + '" data-king="' + c.is + '">' + kac(c.ad) + '</button>').join('')
-      : HAZIR.map((h, i) => ({ h, i })).sort((a, b) => (a.h.ozet - b.h.ozet)
+      /* Profesyonel (2026-10-16): hazır cevaplar yalnız boş sohbette; konuşma
+         başlayınca gürültü olmasın. */
+      : akis.length ? '' : HAZIR.map((h, i) => ({ h, i })).sort((a, b) => (a.h.ozet - b.h.ozet)
           || ((b.h.modul === (ayar && ayar.modul)) - (a.h.modul === (ayar && ayar.modul))) || a.i - b.i)
           .map(({ h, i }) => '<button type="button" class="king__cip" data-king-hazir="' + i + '">'
           + NOKTA(h.ozet ? (ayar && ayar.modul) : h.modul) + kac(h.ad) + '</button>').join('');
@@ -856,7 +989,8 @@ window.LIFEOS.KING = (function(){
         + '" title="Konuşarak sor · tanımayı tarayıcı yapar"><svg viewBox="0 0 24 24" aria-hidden="true">'
         + '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>'
       : '';
-    return bas + '<div class="king__akis" aria-live="polite">' + balonlar + '</div>'
+    return bas + (paylasim ? '<div class="king__paylasim" role="status"><i class="king__canli" aria-hidden="true"></i>Ekran paylaşılıyor · sorduğunda görürüm'
+      + '<button type="button" class="king__paylasim-dur" data-king="paylasim-bitir">Durdur</button></div>' : '') + '<div class="king__akis" aria-live="polite">' + balonlar + '</div>'
       + '<div class="king__cipler" role="group" aria-label="Hazır cevaplar">' + cip + '</div>'
       + '<form class="king__yaz" data-king-form data-ayar-disi>'
       + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : 'King\'e yaz ya da konuş…') + '" autocomplete="off" enterkeyhint="send"/>'
@@ -937,6 +1071,7 @@ window.LIFEOS.KING = (function(){
     acik = false;
     mini = false;
     sesliSohbet = false; bekleyenFoto = null;
+    if(paylasim){ const p = paylasim; paylasim = null; try{ p.bitir(); }catch(e){ /* durmuş */ } }
     if(dinleyen){ try{ dinleyen.abort ? dinleyen.abort() : dinleyen.stop(); }catch(e){ /* kapalı */ } dinleyen = null; }
     /* Sayfaya giderken söylenen cümle yarıda kesilmesin; elle kapatınca susar. */
     if(!sesli) sus();
@@ -983,6 +1118,9 @@ window.LIFEOS.KING = (function(){
         if(is === 'buyut'){ buyut(); return; }
         if(is === 'ilet'){ ilet(); return; }
         if(is === 'ekran'){ ekranGoster(); return; }
+        if(is === 'paylas'){ paylasimBaslat(); return; }
+        if(is === 'paylasim-bitir'){ paylasimBitir(); return; }
+        if(is === 'foto-yorum'){ fotoYorumla(); return; }
         if(is === 'sohbet'){ sesliSohbetAc(); ciz(false); return; }
         if(is === 'geri-al'){ geriAlYap(); return; }
         if(/^foto:\d+$/.test(is)){ fotoIsle(Number(is.slice(5))); return; }
@@ -1077,6 +1215,7 @@ window.LIFEOS.KING = (function(){
   return {
     kur, ac, kapat, kucult, buyut, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,
+    paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, fotoYorumla, GORSEL_SISTEM,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla,
   };

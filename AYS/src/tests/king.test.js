@@ -302,6 +302,65 @@
       expect(k.akis().slice(-1)[0].metin).toContain('fotoğrafla yapılan bir iş yok');
     }));
 
+    /* Söz 16–17: «ekran paylaşmaktan kastım PC, telefon ya da başka bir ekran». */
+    function sahteModel(cevap){
+      const istek = [];
+      return { istek, M:{ visionChain:() => [{ provider:'gemini', model:'g' }], errorText:() => 'hata',
+        complete:async (zincir, req) => { istek.push(req); return { text:cevap }; } } };
+    }
+    it('ekranımı paylaş: soru o anın tek karesiyle görüntü modeline gider; veri cümlesi yerelde kalır; Durdur biter', () => sahneyle(async () => {
+      const sm = sahteModel('Ekranda bir deneme sonucu görüyorum: 42,5 net.');
+      let bitti = 0, kare = 0;
+      const veri = { onizle:t => /soru çözdüm/.test(t) ? { tur:'calisma', metin:'40 soru', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri });
+      k.kur({ modul:'ays', git:() => {}, ozet:() => [], veri, model:() => sm.M });
+      Object.assign(k._ortam, { ekranDestek:() => true,
+        ekranBaslat:async () => ({ kare:() => { kare++; return { mime:'image/jpeg', data:'QUJD' }; }, bitir:() => { bitti++; } }) });
+      k.ac();
+      expect(await k.paylasimBaslat()).toBe(true);
+      expect(k.paylasimVar()).toBe(true);
+      expect(!!document.querySelector('[data-king] .king__paylasim')).toBe(true);
+      await k.isle('bu ekranda ne var?');
+      expect(kare).toBe(1);
+      expect(sm.istek.length).toBe(1);
+      expect(sm.istek[0].messages[0].images[0].data).toBe('QUJD');
+      expect(sm.istek[0].system).toContain('teşhis koyma');
+      expect(sm.istek[0].system).toContain('uydurma');
+      expect(k.akis().slice(-1)[0].metin).toContain('42,5 net');
+      await k.isle('40 soru çözdüm');                       /* veri: görüntüye gitmez */
+      expect(sm.istek.length).toBe(1);
+      expect(k.akis().slice(-1)[0].onizleme.metin).toBe('40 soru');
+      document.querySelector('[data-king="paylasim-bitir"]').click();
+      expect(bitti).toBe(1);
+      expect(k.paylasimVar()).toBe(false);
+    }));
+
+    it('telefonda paylaşım yok, söylenir; görüntü modeli yoksa söylenir', () => sahneyle(async () => {
+      const { k } = sahne();
+      k.kur({ modul:'spi', git:() => {}, ozet:() => [], model:() => ({ visionChain:() => [] }) });
+      Object.assign(k._ortam, { ekranDestek:() => false });
+      k.ac();
+      expect(await k.paylasimBaslat()).toBe(false);
+      expect(k.akis().slice(-1)[0].metin).toContain('ekran paylaşamıyor');
+      Object.assign(k._ortam, { ekranDestek:() => true });
+      expect(await k.paylasimBaslat()).toBe(false);
+      expect(k.akis().slice(-1)[0].metin).toContain('görüntü okuyan bir yapay zekâ');
+    }));
+
+    it('fotoğrafı yorumla: görüntü modeli varsa «Ne gördüğünü söyle»; cevap okumadır, kayda yazılmaz', () => sahneyle(async () => {
+      const sm = sahteModel('Bir tabak kuru fasulye ve pilav görüyorum.');
+      const { k } = sahne();
+      k.kur({ modul:'esp', git:() => {}, ozet:() => [], model:() => sm.M });
+      Object.assign(k._ortam, { nesneUrl:() => 'blob:x', dosyaKare:async () => ({ mime:'image/jpeg', data:'WFla' }) });
+      k.ac();
+      k.fotoAl(new File([new Uint8Array([1, 2])], 'ekran.png', { type:'image/png' }));
+      document.querySelector('[data-king="foto-yorum"]').click();
+      await new Promise(r => setTimeout(r, 0));
+      await new Promise(r => setTimeout(r, 0));
+      expect(sm.istek[0].messages[0].images[0].data).toBe('WFla');
+      expect(k.akis().slice(-1)[0].metin).toContain('kuru fasulye');
+    }));
+
     it('ekranı göster: Merkez yokken başlıkları okur; uydurmaz', () => sahneyle(async () => {
       const { k } = sahne();
       const app = document.getElementById('app');

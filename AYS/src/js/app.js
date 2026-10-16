@@ -1633,7 +1633,7 @@ R.App = (function(){
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route,
+        window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route, model:() => R.LLM,
           /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
           foto:[{ ad:'Soruyu çöz', is:async f => {
             go('solve');
