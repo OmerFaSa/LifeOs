@@ -350,7 +350,11 @@ R.Palette = (function(){
         const n = islem.yapilan.length + onay.n;
         const dusen = islem.dusen.length + (islem.bekleyen.length - onay.n);
         if(R.App && R.App.render) R.App.render();
-        return dusen ? n + ' kayıt yazıldı, ' + dusen + ' tanesi yazılamadı.' : n === 1 ? 'Kaydedildi.' : n + ' kayıt yazıldı.';
+        /* Geri alma (giris.js söz 8): uygulanan öneriler sondan başa geri alınır. */
+        const ids = islem.yapilan.concat(islem.bekleyen).map(k => k.row && k.row.id).filter(id =>
+          id && (R.S.officeProposals || []).some(p => p.id === id && p.status === 'applied'));
+        const geriAl = ids.length ? async () => { for(const id of ids.slice().reverse()) await R.Proposals.undo(id); if(R.App && R.App.render) R.App.render(); } : null;
+        return { metin:dusen ? n + ' kayıt yazıldı, ' + dusen + ' tanesi yazılamadı.' : n === 1 ? 'Kaydedildi.' : n + ' kayıt yazıldı.', geriAl };
       },
     };
   }

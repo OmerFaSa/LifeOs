@@ -1633,7 +1633,16 @@ R.App = (function(){
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route, hkm:() => R.Beacon, git:route => go(route),
+        window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route,
+          /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
+          foto:[{ ad:'Soruyu çöz', is:async f => {
+            go('solve');
+            await new Promise(r => setTimeout(r, 80));
+            const ok = R.Screens.solve.fotoKoy ? await R.Screens.solve.fotoKoy(f) : false;
+            if(!ok) return 'Fotoğraf okunamadı; daha küçük ya da net bir kırpma dener misin?';
+            return R.Solver.ready(true) ? 'Soru çöz’e koydum. «Çöz ve anlat»a bas.'
+              : 'Soru çöz’e koydum, ama fotoğraf okuyan bir yapay zekâ bağlı değil. Ofis ayarlarından ücretsiz bir sağlayıcı bağlayınca çözebilirim.';
+          } }], hkm:() => R.Beacon, git:route => go(route),
           /* Özet: bugünün cümlesi, tekrar borcu ve Öğren'de sıradaki adım —
              hepsi kodun sayısı (King yalnız okur). */
           ozet:() => {

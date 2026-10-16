@@ -274,6 +274,99 @@
       expect(k.acikMi()).toBe(false);
     }));
 
+    /* Söz 11–15 (2026-10-16: «King'e o an fotoğraf yükleyip gönderebilelim, ekranı
+       açabilelim, sesli konuşabilelim; söylemediğim eksikleri de bul»). */
+    it('fotoğraf modülün kendi akışına teslim edilir; işi olmayan modülde söylenir', () => sahneyle(async () => {
+      const teslim = [];
+      const { k } = sahne();
+      k.kur({ modul:'ays', git:() => {}, ozet:() => [], foto:[{ ad:'Soruyu çöz', is:async f => { teslim.push(f.name); return 'Soru çöz’e koydum.'; } }] });
+      k._ortam.nesneUrl = () => 'blob:sahte';
+      k.ac();
+      const dosya = new File([new Uint8Array([137, 80, 78, 71])], 'soru.png', { type:'image/png' });
+      expect(k.fotoAl(dosya)).toBe(true);
+      expect(!!document.querySelector('[data-king] .king__foto')).toBe(true);
+      expect(k.akis().slice(-1)[0].metin).toContain('bu cihazda kalıyor');
+      document.querySelector('[data-king="foto:0"]').click();
+      await new Promise(r => setTimeout(r, 0));
+      expect(teslim).toEqual(['soru.png']);
+      expect(k.miniMi()).toBe(true);
+      expect(k.akis().slice(-1)[0].metin).toContain('Soru çöz’e koydum');
+      /* görsel olmayan dosya alınmaz */
+      expect(k.fotoAl(new File(['x'], 'a.txt', { type:'text/plain' }))).toBe(false);
+      /* fotoğraf işi olmayan modül */
+      k.kur({ modul:'esp', git:() => {}, ozet:() => [] });
+      k.fotoAl(dosya);
+      expect(k.akis().slice(-1)[0].metin).toContain('fotoğrafla yapılan bir iş yok');
+    }));
+
+    it('ekranı göster: Merkez yokken başlıkları okur; uydurmaz', () => sahneyle(async () => {
+      const { k } = sahne();
+      const app = document.getElementById('app');
+      const kutu = document.createElement('section');
+      kutu.innerHTML = '<h2>Günün ölçümü</h2><h3>Su</h3>';
+      (app || document.body).appendChild(kutu);
+      try{
+        k.ac();
+        const e = k.ekranOku();
+        expect(e.basliklar.indexOf('Günün ölçümü') >= 0).toBe(true);
+        await k.ekranGoster();
+        const son = k.akis().slice(-1)[0];
+        expect(son.satirlar.indexOf('Su') >= 0).toBe(true);
+        expect(document.querySelector('[data-king] .king__durum').textContent).toBe('yerel');
+      }finally{ kutu.remove(); }
+    }));
+
+    it('sohbette «geri al»: son kayıt modülün kendi işleviyle geri alınır; yoksa söylenir', () => sahneyle(async () => {
+      let kayit = 0;
+      const veri = { onizle:t => /uyku/.test(t) ? { tur:'uyku', metin:'Uyku 7 sa',
+        kaydet:async () => { kayit++; return { metin:'Uyku kaydedildi', geriAl:async () => { kayit--; } }; } } : null };
+      const { k } = sahne({ veri });
+      k.ac();
+      await k.isle('uyku 7');
+      await k.isle('evet');
+      expect(kayit).toBe(1);
+      expect(!!document.querySelector('[data-king="geri-al"]')).toBe(true);
+      await k.isle('geri al');
+      expect(kayit).toBe(0);
+      expect(k.akis().slice(-1)[0].metin).toBe('Geri aldım.');
+      await k.isle('geri al');
+      expect(k.akis().slice(-1)[0].metin).toBe('Geri alınacak bir kayıt yok.');
+    }));
+
+    it('sohbet kapatıp açınca kalır (aynı gün, bu cihaz)', () => sahneyle(async () => {
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri });
+      k.ac();
+      await k.isle('uyku 7');
+      k.kapat();
+      await new Promise(r => setTimeout(r, 400));
+      k.ac();
+      expect(k.akis().some(m => m.metin === 'uyku 7')).toBe(true);
+    }));
+
+    it('sesli sohbet: King konuşunca yeniden dinler; «tamam» bitirir', () => sahneyle(async () => {
+      const ss = (() => {
+        const okunan = [];
+        const sentez = { getVoices:() => [{ name:'Yelda', lang:'tr-TR', localService:true }], speak:u => { okunan.push(u); }, cancel(){} };
+        let son = null;
+        function Tanima(){ son = this; this.start = () => {}; this.stop = () => { this.onend && this.onend(); }; this.abort = this.stop; }
+        return { sentez, okunan, tanimaSinifi:Tanima, son:() => son };
+      })();
+      const { k } = sahne();
+      Object.assign(k._ortam, { tanima:() => ss.tanimaSinifi, sentez:() => ss.sentez, soz:m => ({ metin:m }) });
+      k.ac();
+      expect(k.sesliSohbetAc()).toBe(true);
+      expect(k.sesliSohbetMi()).toBe(true);
+      /* King'in cümlesi bitince dinleme başlar */
+      ss.okunan.forEach(u => u.onend && u.onend());
+      expect(document.querySelector('[data-king]').classList.contains('is-dinliyor')).toBe(true);
+      const r = ss.son();
+      r.onresult({ results:[Object.assign([{ transcript:'tamam' }], { isFinal:true })] });
+      r.onend();
+      expect(k.sesliSohbetMi()).toBe(false);
+      expect(k.akis().slice(-1)[0].metin).toContain('bitirdim');
+    }));
+
     it('öteki modülün verisi tahmin edilmez, iletilir (sunucu sözü 23); giriş yoksa yalnız «aç»', () => sahneyle(async () => {
       const H = window.LIFEOS.HESAP;
       if(!H){ expect('hesap.js').toBe('yüklü'); return; }

@@ -1787,10 +1787,13 @@ ESP.App = (function(){
               ipucu:res.unmatched.length ? 'Kaydedilmeyecek: «' + res.unmatched.map(u => u.text).join('», «') + '»'
                 : 'Bugünün oturumu olarak yazılır.',
               async kaydet(){
-                for(const r of res.rows) await ESP.Model.addSession(U.todayISO(), { disc:r.disc, minutes:r.minutes, count:r.count, note:'' });
+                const gun = U.todayISO(), ids = [];
+                for(const r of res.rows){ const s = await ESP.Model.addSession(gun, { disc:r.disc, minutes:r.minutes, count:r.count, note:'' }); if(s && s.id) ids.push(s.id); }
+                /* Geri alma (giris.js söz 8): yalnız bu cümlenin oturumları. */
+                const geriAl = async () => { for(const id of ids) await ESP.Model.deleteSession(gun, id); render(); };
                 if(ESP.Memo && ESP.Memo.bitir) ESP.Memo.bitir();
                 render();
-                return res.rows.length === 1 ? 'Oturum kaydedildi.' : res.rows.length + ' oturum kaydedildi.';
+                return { metin:res.rows.length === 1 ? 'Oturum kaydedildi.' : res.rows.length + ' oturum kaydedildi.', geriAl };
               },
             };
           },

@@ -86,8 +86,9 @@
       const eski = R.App.render; R.App.render = () => {};
       let r;
       try{ r = await p.kaydet(); }finally{ R.App.render = eski; }
-      expect(/Kaydedildi|kayıt yazıldı/.test(r)).toBe(true);
-      expect(/yazılamadı/.test(r)).toBe(false);
+      expect(/Kaydedildi|kayıt yazıldı/.test(r.metin)).toBe(true);
+      expect(typeof r.geriAl).toBe("function");      /* giris.js söz 8 */
+      expect(/yazılamadı/.test(r.metin)).toBe(false);
     });
 
     it('Notlarım: notu olan konular Öğren › Konular’da listelenir; not yoksa kart yok', async () => {

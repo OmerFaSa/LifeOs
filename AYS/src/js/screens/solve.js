@@ -982,8 +982,13 @@ R.Screens.solve = (function(){
     },
   };
 
+  /* King'den gelen fotoğraf (king.js söz 11): soru kutusuna konur; çözüm
+     yine kullanıcının «Çöz ve anlat»ıyla, model bağlıysa. */
+  async function fotoKoy(file){ await useFile(file); return !!image; }
+
   return {
     id:'solve',
+    fotoKoy,
     sureSuphesi,
     /* iPhone Faz 2: iş soruyu vermek ve kaydetmek; kaynaklar, konu başına
        oran ve son kayıtlar şerit (dokununca açılır). */

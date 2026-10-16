@@ -1013,7 +1013,12 @@ SP.Screens.meals = (function(){
     },
   };
 
+  /* King'den gelen fotoğraf (king.js söz 11): «Fotoğraftan öğün» penceresi
+     bu fotoğrafla açılır; okuma yine kullanıcının «Oku»suyla, model bağlıysa. */
+  function fotoKoy(file){ photoFile = file || null; photoRes = null; photoSheet(); return !!photoFile; }
+
   return {
+    fotoKoy,
     id:'meals',
     /* Sadelik (açık en çok üç): başvuru notları küçük başlar. */
     kucukVarsayilan:['beslenme-ve-emilim-notları'],

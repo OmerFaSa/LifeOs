@@ -1589,7 +1589,16 @@ SP.App = (function(){
       /* KING (brand/ortak/king.js): her yerden sade sohbet. Özet ve veri
          girişi bu modülün kendi koduyla (SP.Quick: önizleme, onayla kayıt). */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'spi', ekran:() => S.route, hkm:() => SP.Beacon,
+        window.LIFEOS.KING.kur({ modul:'spi', ekran:() => S.route,
+          /* King'e gelen fotoğraf (king.js söz 11): Fotoğraftan öğün akışına. */
+          foto:[{ ad:'Öğün olarak oku', is:async f => {
+            go('meals');
+            await new Promise(r => setTimeout(r, 80));
+            const ok = SP.Screens.meals.fotoKoy ? SP.Screens.meals.fotoKoy(f) : false;
+            if(!ok) return 'Fotoğraf açılamadı.';
+            return 'Fotoğraftan öğün penceresini bu fotoğrafla açtım; «Oku»ya bas.'
+              + (SP.Extract && SP.Extract.modelReady && SP.Extract.modelReady() ? '' : ' Görüntü okuyan bir yapay zekâ bağlı değil; bağlayınca okuyabilirim.');
+          } }], hkm:() => SP.Beacon,
           git:(route, ek) => { if(route === 'move' && ek && ek.sekme) S.ui.moveTab = ek.sekme; go(route); },
           ozet:() => {
             const d = U.todayISO(), v = M.vitalsOf(d) || {}, og = (M.mealsOf(d) || []).length;
@@ -1611,7 +1620,27 @@ SP.App = (function(){
             const tur = !p ? '' : p.kind === 'meal' ? 'ogun' : p.kind === 'move' ? 'hareket' : p.kind === 'lab' ? 'tahlil'
               : p.data.field.id === 'sleep' ? 'uyku' : p.data.field.id === 'water' ? 'su' : 'olcum';
             return p ? { tur, metin:p.label, ipucu:p.hint, kaydet:async () => {
-              const r = await SP.Quick.apply(p); render(); return r && r.text; } } : null;
+              /* Geri alma (giris.js söz 8): ne eklendiyse yalnız o kalkar;
+                 ölçüm önceki değerine döner (önce yoksa «girilmedi»). Tahlil
+                 aynı günün kaydıyla birleştiği için geri alınmaz. */
+              const t = SP.U.todayISO();
+              const once = { v:Object.assign({}, SP.S.vitals[t] || {}), ogun:(SP.S.meals[t] || []).map(m => m.id),
+                seans:(SP.S.workouts || []).map(w => w.id) };
+              const r = await SP.Quick.apply(p);
+              render();
+              let geriAl = null;
+              if(p.kind === 'vital'){
+                const f = p.data.field.id, eski = once.v[f];
+                geriAl = async () => { const pt = {}; pt[f] = eski == null ? null : eski; await SP.Model.saveVitals(t, pt); render(); };
+              }else if(p.kind === 'meal'){
+                const yeni = (SP.S.meals[t] || []).filter(m => once.ogun.indexOf(m.id) < 0).map(m => m.id);
+                geriAl = async () => { for(const id of yeni) await SP.Model.deleteMeal(t, id); render(); };
+              }else if(p.kind === 'move'){
+                const yeni = (SP.S.workouts || []).filter(w => once.seans.indexOf(w.id) < 0).map(w => w.id);
+                geriAl = async () => { for(const id of yeni) await SP.Model.deleteWorkout(id); render(); };
+              }
+              return { metin:r && r.text, geriAl };
+            } } : null;
           },
           ornekler:['7 saat uyudum, 2 yumurta yedim', '45 dk yürüyüş', '2 yumurta 1 çay', 'kilo 72'] });
       }

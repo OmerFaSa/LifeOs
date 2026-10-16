@@ -106,12 +106,32 @@
         expect(p.parcalar.length).toBe(2);
         expect(p.parcalar[1].metin).toBe('Öğün: 2 yumurta, 1 çay');   /* aynı tür tek kayıt */
         expect(p.ipucu).toContain('«falan filan»');
-        expect(await p.kaydet()).toBe('2 kayıt eklendi.');
+        const kr = await p.kaydet();
+        expect(kr.metin).toBe('2 kayıt eklendi.');
+        expect(typeof kr.geriAl).toBe('object');           /* parçaların geri alması yoksa null */
         expect(yazilan).toEqual(['uyku 7', '2 yumurta, 1 çay']);
         /* ondalık virgül bölünmez; tek türden cümle bütün olarak */
         expect(G().onizle('uyku 7,5')).toBe(null);
         expect(G().onizle('2 yumurta, 1 çay').metin).toBe('Öğün: 2 yumurta, 1 çay');
       }finally{ G()._sifirla(); }
+    });
+
+    it('kaydet {metin, geriAl} dönerse «Geri al» durur ve geri alır (söz 8)', async () => {
+      let n = 0;
+      G()._sifirla();
+      G().kur({ modul:'deneme', ornekler:[], onizle:t => /^uyku/.test(t) ? { metin:'Uyku', kaydet:async () => { n++; return { metin:'Kaydedildi.', geriAl:async () => { n--; } }; } } : null });
+      const k = document.createElement('div');
+      try{
+        k.innerHTML = G().kutuHtml();
+        document.body.appendChild(k);
+        G().gonder('uyku 7');
+        await G().kaydet();
+        expect(n).toBe(1);
+        expect(!!k.querySelector('[data-giris="geri-al"]')).toBe(true);
+        expect(await G().geriAl()).toBe(true);
+        expect(n).toBe(0);
+        expect(k.querySelector('[data-giris-sonuc]').textContent).toContain('Geri alındı');
+      }finally{ k.remove(); G()._sifirla(); }
     });
 
     it('King kendi veri kapısı yoksa bu kapıyı kullanır', () => {

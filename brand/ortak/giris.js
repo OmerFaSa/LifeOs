@@ -45,7 +45,11 @@
         yeniden birleştirilip tek kayıt olur. Önizleme liste gösterir,
         tek «Kaydet» hepsini yazar. Anlaşılmayan parça uydurulmaz:
         «yazılmayacak» diye adıyla söylenir. Tek türden bir cümle eskisi
-        gibi bütün olarak ayrıştırılır. */
+        gibi bütün olarak ayrıştırılır.
+     8. GERİ ALINIR (2026-10-16). Modülün kaydet'i metin ya da
+        { metin, geriAl() } döndürebilir. geriAl varsa sonuçta «Geri al»
+        durur (küçük aksiyon, AGENTS §1.9); King de aynı işlevi kullanır.
+        Çok kayıtlı cümlede her parçanın geri alması sondan başa koşar. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -61,6 +65,10 @@ window.LIFEOS.GIRIS = (function(){
   let mesaj = null;          // { tur:'ok'|'uyari', metin }
   let dinleyen = null;
   let bagli = false;
+  let sonGeriAl = null;      // söz 8
+
+  const metinOf = r => r && typeof r === 'object' ? String(r.metin || '') : (r ? String(r) : '');
+  const geriAlOf = r => r && typeof r === 'object' && typeof r.geriAl === 'function' ? r.geriAl : null;
 
   function kac(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
@@ -112,8 +120,10 @@ window.LIFEOS.GIRIS = (function(){
         : (parcalar.length > 1 ? parcalar.length + ' kayıt birlikte yazılır.' : (parcalar[0].ipucu || '')),
       async kaydet(){
         let n = 0;
-        for(const p of parcalar){ await p.kaydet(); n++; }
-        return n > 1 ? n + ' kayıt eklendi.' : 'Kaydedildi.';
+        const geri = [];
+        for(const p of parcalar){ const g = geriAlOf(await p.kaydet()); if(g) geri.push(g); n++; }
+        return { metin:n > 1 ? n + ' kayıt eklendi.' : 'Kaydedildi.',
+          geriAl:geri.length === parcalar.length ? async () => { for(const g of geri.slice().reverse()) await g(); } : null };
       },
     };
   }
@@ -136,7 +146,9 @@ window.LIFEOS.GIRIS = (function(){
         + '<span class="giris__kisa">ya da yeniden Enter</span>'
         + '</div></div>';
     }
-    if(mesaj) return '<p class="giris__mesaj giris__mesaj--' + mesaj.tur + '" role="status">' + kac(mesaj.kisa || mesaj.metin) + '</p>'
+    if(mesaj) return '<p class="giris__mesaj giris__mesaj--' + mesaj.tur + '" role="status">' + kac(mesaj.kisa || mesaj.metin)
+      + (mesaj.tur === 'ok' && sonGeriAl ? ' <button type="button" class="btn btn--sm btn--ghost giris__geri" data-giris="geri-al"><span class="btn__label">Geri al</span></button>' : '')
+      + '</p>'
       + (mesaj.tur === 'uyari' && mesaj.ornekli ? ornekHtml() : '');
     return '';
   }
@@ -218,7 +230,8 @@ window.LIFEOS.GIRIS = (function(){
     let r = null;
     try{
       r = await b.p.kaydet();
-      mesaj = { tur:'ok', metin:(r && String(r)) || 'Kaydedildi.' };
+      sonGeriAl = geriAlOf(r);
+      mesaj = { tur:'ok', metin:metinOf(r) || 'Kaydedildi.' };
       const g = typeof document !== 'undefined' ? document.getElementById('giris-girdi') : null;
       if(g){ g.value = ''; try{ g.focus(); }catch(err){ /* odak yok */ } }
     }catch(e){
@@ -279,6 +292,7 @@ window.LIFEOS.GIRIS = (function(){
       if(is === 'kaydet'){ e.preventDefault(); kaydet(); }
       else if(is === 'vazgec'){ e.preventDefault(); bekleyen = null; mesaj = null; tazele(); }
       else if(is === 'mik'){ e.preventDefault(); dinle(); }
+      else if(is === 'geri-al'){ e.preventDefault(); geriAl(); }
     });
   }
 
@@ -288,9 +302,19 @@ window.LIFEOS.GIRIS = (function(){
     bagla();
   }
 
-  function _sifirla(){ ayar = null; bekleyen = null; mesaj = null; dinleyen = null; }
+  async function geriAl(){
+    const g = sonGeriAl;
+    sonGeriAl = null;
+    if(!g){ mesaj = { tur:'uyari', metin:'Geri alınacak bir kayıt yok.' }; tazele(); return false; }
+    try{ await g(); mesaj = { tur:'ok', metin:'Geri alındı.' }; }
+    catch(e){ mesaj = { tur:'uyari', metin:'Geri alınamadı: ' + ((e && e.message) || 'bilinmeyen hata') }; }
+    tazele();
+    return true;
+  }
 
-  return { kur, kaynak, onizle, kutuHtml, gonder, kaydet, kuruluMu:() => !!ayar,
+  function _sifirla(){ ayar = null; bekleyen = null; mesaj = null; dinleyen = null; sonGeriAl = null; }
+
+  return { kur, kaynak, onizle, kutuHtml, gonder, kaydet, geriAl, metinOf, geriAlOf, kuruluMu:() => !!ayar,
     durum:() => ({ bekleyen:bekleyen ? bekleyen.p.metin : null, mesaj:mesaj ? mesaj.metin : null }),
     _ortam:ortam, _sifirla };
 })();
