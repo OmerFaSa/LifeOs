@@ -119,6 +119,44 @@ SP.Screens.move = (function(){
     });
   }
 
+  /* HAZIR ANTRENMANLAR (core/hazir.js, 2026-10-17): «bugün onu yaptım»
+     tek dokunuş. Liste boşsa kutu yok; seans satırındaki işaret saklar. */
+  function hazirAntrenmanEntry(){
+    if(!SP.Hazir) return null;
+    const l = SP.Hazir.antrenmanlar();
+    if(!l.length) return null;
+    const d = U.todayISO();
+    const duzen = !!S.ui.hazirAntDuzen;
+    return K.Entry({
+      label:'Hazır antrenmanlar', meta:duzen ? 'düzenle' : 'tek dokunuşla bugüne',
+      action:K.Button({ label:duzen ? 'Bitti' : 'Düzenle', size:'sm', tone:'ghost', act:'hazir-antrenman-duzen' }),
+      body:html`<div class="picks">${map(l, h => {
+        const yapildi = SP.Hazir.bugunVar(h, d);
+        return duzen
+          ? html`<div class="pickcard"><span class="pickcard__body"><span class="pickcard__name">${h.ad}</span>
+              <span class="pickcard__meta">${SP.Hazir.antrenmanOzet(h)}</span></span>
+              ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'hazir-antrenman-sil', data:{ 'data-id':h.id } })}</div>`
+          : html`<button class="${cls('pickcard', yapildi && 'is-on')}" data-act="hazir-antrenman-ekle" data-id="${h.id}"
+              aria-label="${h.ad + (yapildi ? ': bugün eklendi, bir daha ekle' : ': bugün yaptım')}">
+              <span class="pickcard__box" aria-hidden="true">${yapildi ? raw(UI.icon('check')) : raw(UI.icon('plus'))}</span>
+              <span class="pickcard__body"><span class="pickcard__name">${h.ad}</span>
+                <span class="pickcard__meta">${SP.Hazir.antrenmanOzet(h)}${yapildi ? ' · bugün eklendi' : ''}</span></span>
+            </button>`;
+      })}</div>`,
+    });
+  }
+  function hazirAntrenmanSheet(w){
+    UI.sheet({
+      title:'Hazır antrenman yap', subtitle:'Hareket sayfasında «bugün yaptım» diye tek dokunuşla eklenir',
+      body:String(K.Stack([
+        K.Field({ label:'Adı', input:K.Input({ id:'hazir-antrenman-ad', value:w.name || 'Antrenman' }) }),
+        html`<p class="tiny dim">Zorlanma puanı ve not saklanmaz; her gün yeniden sorulur.</p>`,
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Sakla', tone:'primary', act:'hazir-antrenman-kaydet', data:{ 'data-id':w.id } })}`),
+    });
+  }
+
   function todaySessionsEntry(){
     const d = U.todayISO();
     const rows = M.workoutsOf(d);
@@ -139,6 +177,8 @@ SP.Screens.move = (function(){
               · ${(w.items || []).length} hareket</div>
           </div>
           ${K.Button({ label:'Düzenle', size:'sm', act:'edit-session', data:{ 'data-id':w.id } })}
+          ${when(SP.Hazir, () => K.IconButton({ icon:'bookmark', size:'sm', plain:true, aria:'Hazır antrenman yap',
+            act:'hazir-antrenman-sakla', data:{ 'data-id':w.id } }))}
           ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Sil',
             act:'del-session', data:{ 'data-id':w.id } })}
         </div>`)}</div>`,
@@ -1146,7 +1186,7 @@ SP.Screens.move = (function(){
      dengesi» eskiden üç sekmede ayrı ayrı çiziliyordu; alt alta durunca
      aynı kart üç kez görünürdü — yalnız Kuvvet'te, kalıpların yanında. */
   const BODIES = {
-    bugun:() => html`${K.Ledger([DonenHareket(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), orderEntry(), halkaKutusu(), haftaKutusu()])}
+    bugun:() => html`${K.Ledger([DonenHareket(), hazirAntrenmanEntry(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), orderEntry(), halkaKutusu(), haftaKutusu()])}
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
     ilerleme:() => html`${K.Ledger([
         vucutKutusu(),
@@ -1394,6 +1434,33 @@ SP.Screens.move = (function(){
       UI.closeSheet();
       UI.toast('Seans kaydedildi');
       SP.App.render();
+    },
+    'hazir-antrenman-sakla'(el){
+      const w = M.workoutsOf(U.todayISO()).find(x => x.id === el.dataset.id) || (SP.S.workouts || []).find(x => x.id === el.dataset.id);
+      if(w && SP.Hazir) hazirAntrenmanSheet(w);
+    },
+    async 'hazir-antrenman-kaydet'(el){
+      const w = (SP.S.workouts || []).find(x => x.id === el.dataset.id);
+      const g = document.getElementById('hazir-antrenman-ad');
+      const r = w ? await SP.Hazir.antrenmanSakla(w, g ? g.value : '') : { ok:false, why:'Seans bulunamadı.' };
+      UI.closeSheet();
+      UI.toast(r.ok ? '«' + r.kayit.ad + '» hazır antrenmanlara eklendi' : r.why);
+      SP.App.render();
+    },
+    async 'hazir-antrenman-ekle'(el){
+      const r = await SP.Hazir.antrenmanEkle(el.dataset.id, U.todayISO());
+      if(!r.ok){ UI.toast(r.why); return; }
+      SP.App.render();
+      UI.toast('«' + r.ad + '» bugüne eklendi', { undo:async () => { await r.geriAl(); SP.App.render(); } });
+    },
+    'hazir-antrenman-duzen'(){ S.ui.hazirAntDuzen = !S.ui.hazirAntDuzen; SP.App.render(); },
+    async 'hazir-antrenman-sil'(el){
+      const h = SP.Hazir.antrenmanlar().find(x => x.id === el.dataset.id);
+      const r = await SP.Hazir.antrenmanSil(el.dataset.id);
+      if(!SP.Hazir.antrenmanlar().length) S.ui.hazirAntDuzen = false;
+      SP.App.render();
+      if(r.ok && h) UI.toast('«' + h.ad + '» silindi', { undo:async () => {
+        await M.saveProfile({ hazirAntrenmanlar:[h].concat(SP.Hazir.antrenmanlar()) }); SP.App.render(); } });
     },
     async 'del-session'(el){
       const id = el.dataset.id;

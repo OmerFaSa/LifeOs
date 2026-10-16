@@ -2506,3 +2506,10 @@ body.is-dragging .drop.is-over{
   .mealitem > :last-child{ opacity:0; transition:opacity .15s ease; }
   .mealitem:hover > :last-child, .mealitem > :last-child:focus-visible, .mealitem:focus-within > :last-child{ opacity:1; }
 }
+
+/* Hazır öğünler (screens/meals.js, core/hazir.js): Düzenle sağda; silme listesi. */
+.hazir__ust{ display:flex; justify-content:flex-end; margin:-4px 0 4px; }
+.hazir__liste{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.hazir__liste li{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 12px; border-radius:12px; background:var(--surface-2); }
+.hazir__liste li > span{ display:flex; flex-direction:column; min-width:0; }
+.hazir__liste small{ color:var(--text-2); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }

@@ -1630,6 +1630,20 @@ SP.App = (function(){
       if(window.LIFEOS && window.LIFEOS.GIRIS){
         window.LIFEOS.GIRIS.kur({ modul:'spi',
           onizle:t => {
+            /* Hazır öğün / antrenman adıyla (core/hazir.js söz 5): «menemen
+               tabağımı yedim», «bacak günümü yaptım». Önizleme + onay. */
+            const hz = SP.Hazir && SP.Hazir.bul(t);
+            if(hz){
+              const ogun = hz.tur === 'ogun';
+              return { tur:ogun ? 'ogun' : 'hareket', metin:hz.hazir.ad + (ogun ? ' · hazır öğün' : ' · hazır antrenman'),
+                ipucu:ogun ? SP.Hazir.ogunOzet(hz.hazir) : SP.Hazir.antrenmanOzet(hz.hazir),
+                kaydet:async () => {
+                  const gun = SP.U.todayISO();
+                  const r = ogun ? await SP.Hazir.ogunEkle(hz.hazir.id, gun) : await SP.Hazir.antrenmanEkle(hz.hazir.id, gun);
+                  render();
+                  return r.ok ? { metin:'«' + r.ad + '» bugüne eklendi.', geriAl:async () => { await r.geriAl(); render(); } } : r.why;
+                } };
+            }
             const p = SP.Quick && SP.Quick.parse(t);
             /* tur: King'in sohbet karşılığı için (king.js söz 8). */
             const tur = !p ? '' : p.kind === 'meal' ? 'ogun' : p.kind === 'move' ? 'hareket' : p.kind === 'lab' ? 'tahlil'

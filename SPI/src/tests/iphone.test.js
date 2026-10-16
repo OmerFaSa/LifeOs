@@ -71,7 +71,7 @@
     it('Öğün: açık öğün ekle, sık öğünler ve günün öğünleri; hedef dönen kartta, ayrıntısı şerit', async () => {
       await withTodayAsync('2026-10-02', async () => {
         resetState();
-        /* aynı öğün iki günde: «Sık öğünler» ancak o zaman çizilir */
+        /* aynı öğün iki günde: «Hazır öğünler»in sık kısmı ancak o zaman çizilir */
         pushMeal('2026-10-01', 'ogle', [['yumurta', 100]]);
         pushMeal('2026-10-02', 'ogle', [['yumurta', 100]]);
         const b = await bolumle('meals', 'gunluk');
@@ -87,7 +87,7 @@
           expect(b.var.indexOf('tabak') >= 0).toBe(true);
           ['tabak', 'öğün-çizelgesi'].filter(a => b.var.indexOf(a) >= 0)
             .forEach(a => expect(b.gizli.indexOf(a) >= 0).toBe(true));
-          expect(b.acik.indexOf('öğün-ekle') >= 0 && b.acik.indexOf('sık-öğünler') >= 0).toBe(true);
+          expect(b.acik.indexOf('öğün-ekle') >= 0 && b.acik.indexOf('hazır-öğünler') >= 0).toBe(true);   // 2026-10-17: «Sık öğünler» → «Hazır öğünler»
           expect(b.acik.length <= 3).toBe(true);
           /* ev ölçüsü açıklaması ekranda değil ⓘ'de */
           expect(b.alan.textContent.indexOf('Ev ölçüsü tanınır')).toBe(-1);

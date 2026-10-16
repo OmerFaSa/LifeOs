@@ -176,6 +176,8 @@ SP.Screens.meals = (function(){
           <span class="mealcard__kcal num">${(meal.items || []).some(it => Number(it.g) > 0) ? Math.round(a.raw.kcal) + ' kcal' : '— kcal'}</span>
           ${raw(String(SP.FotoUI.kutu({ sahip:'ogun:' + meal.id, sinif:'foto-kutu--sm',
             ad:(slot ? slot.label : meal.slot) + ' · ' + U.fmtShort(shownDate()) })))}
+          ${when(SP.Hazir && (meal.items || []).length, () => K.IconButton({ icon:'bookmark', size:'sm', plain:true,
+            aria:'Hazır öğün yap', act:'hazir-ogun-sakla', data:{ 'data-id':meal.id } }))}
           ${K.IconButton({ icon:'trash', size:'sm', plain:true, aria:'Öğünü sil',
             act:'del-meal', data:{ 'data-id':meal.id } })}
         </div>
@@ -274,16 +276,41 @@ SP.Screens.meals = (function(){
     }
     return Object.keys(say).map(k => say[k]).filter(x => x.n >= 2).sort((a, b) => b.n - a.n).slice(0, 3);
   }
+  /* HAZIR ÖĞÜNLER (core/hazir.js, 2026-10-17): kullanıcının adını koyduğu
+     öğünler üstte, son 30 günün sık öğünleri altta; ikisi de tek dokunuş.
+     «Düzenle» yalnız silme listesini açar. */
   function sablonKutusu(){
     if(!VT()) return '';
     const bugun = M.mealsOf(shownDate()).map(m => (m.items || []).map(x => x.foodId).sort().join('+'));
-    /* Bileşenin kendi künyesi kutunun adını («Sık öğünler · tek dokunuş»)
-       ikinci kez yazıyordu; yerine pencerenin kendisi. */
-    return vkutu('Sık öğünler', '', VT().ogunSablonlari({ act:'sablon-ekle', baslik:'son 30 gün', sablonlar:sablonlar().map(x => {
+    const anahtar = items => (items || []).map(x => x.foodId).sort().join('+');
+    const hazir = SP.Hazir ? SP.Hazir.ogunler() : [];
+    const sik = sablonlar().filter(x => !hazir.some(h => anahtar(h.items) === x.anahtar));
+    if(!hazir.length && !sik.length) return '';
+    const duzen = !!S.ui.hazirOgunDuzen && hazir.length;
+    const ust = hazir.length ? '<div class="hazir__ust">'
+      + String(K.Button({ label:duzen ? 'Bitti' : 'Düzenle', size:'sm', tone:'ghost', act:'hazir-ogun-duzen' })) + '</div>' : '';
+    const liste = duzen
+      ? '<ul class="hazir__liste">' + hazir.map(h => '<li><span><b>' + U.esc(h.ad) + '</b><small>' + U.esc(SP.Hazir.ogunOzet(h)) + '</small></span>'
+        + String(K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'hazir-ogun-sil', data:{ 'data-id':h.id } })) + '</li>').join('') + '</ul>'
+      : hazir.length ? VT().ogunSablonlari({ act:'hazir-ogun-ekle', baslik:'senin hazırladıkların · tek dokunuş', sablonlar:hazir.map(h => ({ ad:h.ad,
+        icerik:SP.Hazir.ogunOzet(h), on:bugun.indexOf(anahtar(h.items)) >= 0, data:{ 'data-id':h.id } })) }) : '';
+    const sikHtml = sik.length && !duzen ? VT().ogunSablonlari({ act:'sablon-ekle', baslik:'sık öğünler · son 30 gün', sablonlar:sik.map(x => {
       const sl = SP.MEAL_SLOTS.find(y => y.id === x.slot);
       return { ad:sl ? sl.label : x.slot, icerik:x.ids.map(id => SP.FOOD_BY_ID[id].name.toLocaleLowerCase('tr-TR')).join(' · '),
         on:bugun.indexOf(x.anahtar) >= 0, data:{ 'data-date':x.ornek.date, 'data-id':x.ornek.id } };
-    }) }));
+    }) }) : '';
+    return vkutu('Hazır öğünler', '', ust + liste + sikHtml);
+  }
+  function hazirOgunSheet(meal){
+    UI.sheet({
+      title:'Hazır öğün yap', subtitle:'Öğün sayfasında tek dokunuşla bugüne eklenir',
+      body:String(K.Stack([
+        K.Field({ label:'Adı', input:K.Input({ id:'hazir-ogun-ad', value:SP.Hazir.ogunVarsayilanAd(meal) }) }),
+        html`<p class="tiny dim">${SP.Hazir.ogunOzet(meal)}</p>`,
+      ])),
+      footer:String(html`${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Sakla', tone:'primary', act:'hazir-ogun-kaydet', data:{ 'data-id':meal.id } })}`),
+    });
   }
 
   /* ---------------------------------------------------------- hedefler */
@@ -935,6 +962,35 @@ SP.Screens.meals = (function(){
       S.ui.mealDraftQuery = '';
       UI.toast(parsed.note);
       SP.App.render();
+    },
+    'hazir-ogun-sakla'(el){
+      const meal = M.mealsOf(shownDate()).find(m => m.id === el.dataset.id);
+      if(meal && SP.Hazir) hazirOgunSheet(meal);
+    },
+    async 'hazir-ogun-kaydet'(el){
+      const meal = M.mealsOf(shownDate()).find(m => m.id === el.dataset.id);
+      const g = document.getElementById('hazir-ogun-ad');
+      const r = meal ? await SP.Hazir.ogunSakla(meal, g ? g.value : '') : { ok:false, why:'Öğün bulunamadı.' };
+      UI.closeSheet();
+      UI.toast(r.ok ? '«' + r.kayit.ad + '» hazır öğünlere eklendi' : r.why);
+      SP.App.render();
+    },
+    async 'hazir-ogun-ekle'(el){
+      const d = shownDate();
+      const r = await SP.Hazir.ogunEkle(el.dataset.id, d, guessSlot());
+      if(!r.ok){ UI.toast(r.why); return; }
+      SP.App.render();
+      UI.toast('«' + r.ad + '» eklendi', { undo:async () => { await r.geriAl(); SP.App.render(); } });
+    },
+    'hazir-ogun-duzen'(){ S.ui.hazirOgunDuzen = !S.ui.hazirOgunDuzen; SP.App.render(); },
+    async 'hazir-ogun-sil'(el){
+      const h = SP.Hazir.ogunler().find(x => x.id === el.dataset.id);
+      const r = await SP.Hazir.ogunSil(el.dataset.id);
+      if(!SP.Hazir.ogunler().length) S.ui.hazirOgunDuzen = false;
+      SP.App.render();
+      /* Silme geri alınır: kayıt aynen geri saklanır (küçük aksiyon). */
+      if(r.ok && h) UI.toast('«' + h.ad + '» silindi', { undo:async () => {
+        await M.saveProfile({ hazirOgunler:[h].concat(SP.Hazir.ogunler()) }); SP.App.render(); } });
     },
     async 'sablon-ekle'(el){
       const kaynak = M.mealsOf(el.dataset.date).find(m => m.id === el.dataset.id);
