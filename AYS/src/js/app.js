@@ -47,6 +47,9 @@ R.App = (function(){
     ]},
     { id:'analiz', label:CEK('analiz'), items:[
       { id:'progress',  icon:'chart',  label:'İlerleme' },
+      /* Gelecek simülatörü (2026-10-16): sınav gününe kadar «bu gidişle»
+         ve «ne olursa» (core/gelecek.js). */
+      { id:'gelecek',   icon:'target', label:'Gelecek' },
       { id:'analytics', icon:'search', label:'Ayrıntı' },
       { id:'protocols', icon:'shield', label:'Telafi' },
     ]},

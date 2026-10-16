@@ -81,6 +81,7 @@ window.LIFEOS.KING = (function(){
     { modul:'ays', route:'today',     ad:'Bugün',      es:['bugün', 'genel bakış'] },
     { modul:'ays', route:'week',      ad:'Hafta',      es:['hafta'] },
     { modul:'ays', route:'plan',      ad:'Program',    es:['program'] },
+    { modul:'ays', route:'gelecek',   ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] },
     { modul:'ays', route:'subjects',  ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] },
     { modul:'ays', route:'solve',     ad:'Soru çöz',   es:['soru çöz', 'soru', 'test çöz'] },
     { modul:'ays', route:'exams',     ad:'Deneme',     es:['deneme', 'sınav'] },

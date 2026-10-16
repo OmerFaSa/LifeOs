@@ -4201,6 +4201,21 @@ body.is-dragging .drop.is-over{
 .qz-dahasi > summary:hover{ color:var(--text); }
 .qz-dahasi[open] > summary{ margin-bottom:8px; }
 
+/* Gelecek simülatörü (screens/gelecek.js). */
+.gel-cumle{ margin:0 0 8px; font-size:15px; line-height:1.5; }
+.gel-g{ width:100%; height:auto; display:block; }
+.gel-g__izgara{ stroke:var(--border); stroke-width:1; }
+.gel-g__yazi{ fill:var(--text-2); font-size:11px; font-variant-numeric:tabular-nums; }
+.gel-g__yelpaze{ fill:color-mix(in srgb, var(--primary) 16%, transparent); stroke:none; }
+.gel-g__yelpaze--once{ fill:color-mix(in srgb, var(--text-2) 10%, transparent); }
+.gel-g__olasi{ stroke:var(--primary); stroke-width:2; stroke-dasharray:5 4; }
+.gel-g__sinav{ stroke:var(--text-2); stroke-width:1; stroke-dasharray:2 3; }
+.gel-g__nokta{ fill:var(--primary); stroke:var(--surface); stroke-width:1.5; }
+.gel-surgu{ display:flex; flex-direction:column; gap:8px; }
+.gel-surgu input[type=range]{ width:100%; accent-color:var(--primary); min-height:24px; }
+.gel-yontem{ margin:0; padding-left:18px; display:grid; gap:6px; line-height:1.5; }
+.gel-uyari{ margin:0 0 10px; padding:10px 12px; border-radius:10px; background:var(--surface-2); color:var(--text-2); line-height:1.5; }
+
 /* ==== css/temel.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/temel.css içine yazılır; burası bir sonraki
@@ -16415,7 +16430,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'2a989449', at:'2026-10-16 12:54', dirty:true };
+R.BUILD = { id:'4cac9fb2', at:'2026-10-16 13:34', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -30772,6 +30787,7 @@ window.LIFEOS.KING = (function(){
     { modul:'ays', route:'today',     ad:'Bugün',      es:['bugün', 'genel bakış'] },
     { modul:'ays', route:'week',      ad:'Hafta',      es:['hafta'] },
     { modul:'ays', route:'plan',      ad:'Program',    es:['program'] },
+    { modul:'ays', route:'gelecek',   ad:'Gelecek', es:['gelecek', 'simülatör', 'bu gidişle', 'sınav günü'] },
     { modul:'ays', route:'subjects',  ad:'Konu kapanışı', es:['konu kapanış', 'kapanış', 'konu', 'ders'] },
     { modul:'ays', route:'solve',     ad:'Soru çöz',   es:['soru çöz', 'soru', 'test çöz'] },
     { modul:'ays', route:'exams',     ad:'Deneme',     es:['deneme', 'sınav'] },
@@ -60381,6 +60397,9 @@ R.HINTS = {
     more:'Tek denemede yüksek net ödüllendirilmez. Düzen, analizin zamanında bitmesi ve uyku saatine uyum ödüllendirilir.' },
   'next-action':{ t:'Sıradaki hamle', b:'Ne yapacağını düşünmeden başlaman için tek öncelik gösterilir.',
     more:'Sıra sabittir: analiz borcu → gecikmiş kart → haftanın ritüeli → gecikmiş 2. ölçüm → bekleyen blok → çıpalar.' },
+  /* Gelecek simülatörü (core/gelecek.js, 2026-10-16). */
+  'gelecek':{ t:'Sınav günü', b:'Geçmiş tam denemelerinin gidişi sınav gününe uzatılır; sonuç tek sayı değil aralıktır ve tahmindir.',
+    more:'En az 4 tam deneme ve 14 günlük yayılım gerekir. Gidiş, denemelerin ikişer ikişer eğimlerinin ortancasıdır; tek kötü deneme çizgiyi sürüklemez. «Ne olursa» sürgüsü yalnız senin verinden ölçülen etkiyle açılır. Sonuç garantisi değildir.' },
   'sleep':{ t:'Uyku', b:'7–8 saat hedeflenir; uyku bellek pekişmesinin aktif parçasıdır.',
     more:'Son dört haftada kalkış saati sınav sabahına göre kademeli ayarlanır. Haziranda gece çalışmasıyla borç kapatılmaz.' },
 
@@ -70635,6 +70654,211 @@ R.Calc = (function(){
     topicRisk, riskRanking, topicPractice,
     dailyFlow, suggestBreak, todayReward, examWeekMode, rewardTier,
   };
+})();
+
+/* ==== js/core/gelecek.js ==== */
+/* GELECEK — sınav gününe kadar «bu gidişle» ve «ne olursa» (Gelecek simülatörü).
+
+   Depo sahibi (2026-10-16): «çok daha devrimsel» → sistem yalnız kayıt
+   tutmasın, geleceği SENİN verinden göstersin. Bugünkü tahmin (Calc.
+   estimateScore) şimdiki düzeyi söyler; bu dosya o düzeyin sınav gününe
+   nereye gittiğini ve senin elindeki bir değişkenin onu nasıl kaydırdığını.
+
+   Sözler:
+     1. KOD HESAPLAR, MODEL YOK (AGENTS §1.1). Gidiş Theil–Sen eğimidir:
+        bütün deneme çiftlerinin eğimlerinin medyanı — tek kötü deneme
+        çizgiyi sürüklemez. Aralık eğimlerin çeyreklerinden ve artıkların
+        sağlam sapmasından gelir; ufka doğru genişler.
+     2. TEK SAYI YOK, HEP ARALIK VE ETİKET. Sonuç «tahmin»dir; en olası
+        değer aralığın içinde durur. Garanti verilmez (AGENTS §1.5).
+     3. EKSİK VERİ SIFIR DEĞİLDİR (AGENTS §1.2). En az MIN_DENEME tam
+        deneme ve MIN_GUN güne yayılmış ölçüm yoksa gidiş ÇİZİLMEZ; neden
+        söylenir. Kaydı olmayan gün soru sayısına sıfır diye girmez.
+     4. «NE OLURSA» YALNIZ ÖLÇÜLEN ETKİYLE. Haftalık soru sürgüsünün etkisi
+        senin denemeleri arasındaki aralıklardan ölçülür (haftalık soru →
+        haftalık net değişimi). Aralık sayısı azsa ya da bağ tutarsızsa
+        (eğim aralığı sıfırın iki yanında) sürgü KAPALIDIR: genel bir
+        «soru çöz net artar» katsayısı uydurulmaz. Uyku gibi öteki
+        değişkenler, kişisel deney motoru ölçünce açılır.
+     5. NET SINIR İÇİNDE. TYT 0–120, AYT 0–80; doğrusal gidiş sınırı aşmaz.
+        Öğrenme yavaşlayabilir: üst uç bu yüzden iyimserdir ve ekran bunu
+        söyler.
+     6. KISA VERİ UZAK UFKA TAŞINMAZ. Gidiş ölçülen sürenin en çok UFUK_KAT
+        katı kadar uzatılır: üç haftalık bir düşüş sekiz ay uzatılıp «0 net»
+        denmez (ilk sürümde örnek veri tam bunu gösterdi). Sınav bu ufkun
+        ötesindeyse sınav günü için sayı VERİLMEZ; ufuk tarihindeki aralık
+        ve sınava ulaşmak için yaklaşık kaç gün daha ölçüm gerektiği söylenir.
+     7. SIFIR GENİŞLİK YOK. Az denemede kusursuz bir doğru da belirsizdir:
+        aralığın en dar hâli bugünkü sıra tahmininin bandıdır
+        (R.SCORING.bandHalfWidth, puan; nete net başına puanla çevrilir).
+        İki tahmin birbirini yalanlamaz. */
+
+window.R = window.R || {};
+
+R.Gelecek = (function(){
+  const MIN_DENEME = 4;
+  const MIN_GUN = 14;
+  const MIN_ARALIK = 5;
+  const MIN_ARALIK_GUN = 5;
+  const MAX_NET = { TYT:120, AYT:80 };
+  const UFUK_KAT = 3;
+  const U = () => R.U;
+
+  function gun(a, b){ return U().diffDays(a, b); }          // b - a, gün
+  function ceyrek(l, q){
+    const s = l.filter(v => isFinite(v)).sort((a, b) => a - b);
+    if(!s.length) return null;
+    const i = (s.length - 1) * q, lo = Math.floor(i), hi = Math.ceil(i);
+    return s[lo] + (s[hi] - s[lo]) * (i - lo);
+  }
+  function theilSen(nokta){
+    const e = [];
+    for(let i = 0; i < nokta.length; i++){
+      for(let j = i + 1; j < nokta.length; j++){
+        const dx = nokta[j].x - nokta[i].x;
+        if(dx) e.push((nokta[j].y - nokta[i].y) / dx);
+      }
+    }
+    if(!e.length) return null;
+    return { egim:ceyrek(e, .5), alt:ceyrek(e, .25), ust:ceyrek(e, .75), n:e.length };
+  }
+  function sapma(l){
+    const m = ceyrek(l, .5);
+    return 1.4826 * ceyrek(l.map(v => Math.abs(v - m)), .5);
+  }
+  const yuvarla = (v, b) => U().round(v, b == null ? 1 : b);
+
+  /* SAF. seri: [{ tarih:'YYYY-AA-GG', net }] tarihe göre. Söz 1, 3, 5. */
+  function izdusum(seri, aile, bugunISO, sinavISO){
+    const n = seri.length;
+    if(n < MIN_DENEME){
+      return { ok:false, aile, n, why:'Gidiş için en az ' + MIN_DENEME + ' tam ' + aile + ' denemesi gerekir (şu an ' + n + ').' };
+    }
+    const ilk = seri[0].tarih;
+    const yayilim = gun(ilk, seri[n - 1].tarih);
+    if(yayilim < MIN_GUN){
+      return { ok:false, aile, n, why:aile + ' denemeleri en az ' + MIN_GUN + ' güne yayılmalı (şu an ' + yayilim + ' gün).' };
+    }
+    const kalan = gun(bugunISO, sinavISO);
+    if(!(kalan > 0)) return { ok:false, aile, n, why:'Sınav tarihi geçmiş ya da bilinmiyor.' };
+    const nokta = seri.map(s => ({ x:gun(ilk, s.tarih), y:Number(s.net) }));
+    const ts = theilSen(nokta);
+    /* Şimdiki düzey: son üç denemenin medyanı (Calc.estimateScore ile aynı
+       ilke); gidiş o noktadan uzatılır. */
+    const son = nokta.slice(-3);
+    const duzey = ceyrek(son.map(p => p.y), .5);
+    const tDuzey = ceyrek(son.map(p => p.x), .5);
+    const hSinav = gun(ilk, sinavISO) - tDuzey;
+    /* Söz 6: ufuk ölçülen sürenin en çok UFUK_KAT katı. */
+    const h = Math.min(hSinav, UFUK_KAT * yayilim);
+    const sinavaKadar = h >= hSinav;
+    const ufukTarih = sinavaKadar ? sinavISO : U().iso(U().addDays(U().parse(ilk), Math.round(tDuzey + h)));
+    const gerekGun = sinavaKadar ? 0 : Math.ceil((hSinav - UFUK_KAT * yayilim) / (UFUK_KAT + 1));
+    const s = sapma(nokta.map(p => p.y - (duzey + ts.egim * (p.x - tDuzey)))) || 0;
+    const max = MAX_NET[aile] || 120;
+    const kis = v => Math.max(0, Math.min(max, v));
+    /* Söz 7: en dar yarım genişlik (net). */
+    const SC = R.SCORING || {}, bw = SC.bandHalfWidth || {};
+    const yarim = (n >= 8 ? bw.many : n >= 5 ? bw.some : bw.few) || 0;
+    const taban = yarim / (((SC[aile === 'AYT' ? 'ayt' : 'tyt']) || {}).perNet || 3.33);
+    const olasi0 = duzey + ts.egim * h;
+    const alt0 = Math.min(duzey + ts.alt * h - 1.5 * s, olasi0 - taban);
+    const ust0 = Math.max(duzey + ts.ust * h + 1.5 * s, olasi0 + taban);
+    return {
+      ok:true, aile, n, yayilim, kalanGun:kalan, h, ufukGun:h, sinavaKadar, ufukTarih, gerekGun, etiket:'tahmin',
+      duzey:yuvarla(duzey), egimHafta:yuvarla(ts.egim * 7, 2), sapma:yuvarla(s),
+      egim:ts.egim, egimAlt:ts.alt, egimUst:ts.ust,
+      alt:yuvarla(kis(alt0)), olasi:yuvarla(kis(olasi0)), ust:yuvarla(kis(ust0)),
+      max,
+      nokta:seri.map(x => ({ tarih:x.tarih, net:yuvarla(Number(x.net)) })),
+    };
+  }
+
+  /* SAF. aralik: [{ haftaSoru, haftaNet }] — ardışık iki tam deneme arası:
+     haftada çözülen soru ve haftada net değişimi. Söz 4. */
+  function hacimEtkisi(aralik){
+    const n = aralik.length;
+    if(n < MIN_ARALIK){
+      return { ok:false, n, why:'Soru sayısının nete etkisini senin verinden ölçmek için en az ' + MIN_ARALIK
+        + ' deneme aralığı gerekir (şu an ' + n + '). Ölçülmeden etki uydurulmaz.' };
+    }
+    const ts = theilSen(aralik.map(a => ({ x:a.haftaSoru, y:a.haftaNet })));
+    if(!ts) return { ok:false, n, why:'Aralıklarda haftalık soru sayısı hep aynı; etkisi ayırt edilemiyor.' };
+    if(ts.alt <= 0 && ts.ust >= 0){
+      return { ok:false, n, belirsiz:true, why:'Verinde haftalık soru ile net değişimi arasında tutarlı bir bağ yok '
+        + '(ölçülen aralık sıfırın iki yanında); etkisi uydurulmaz.' };
+    }
+    return { ok:true, n, egim:ts.egim, alt:ts.alt, ust:ts.ust, etiket:'hesaplandı' };
+  }
+
+  /* SAF. «Ne olursa»: haftada ekSoru fazla (ya da eksik) soru. */
+  function senaryo(iz, etki, ekSoru){
+    if(!iz || !iz.ok || !etki || !etki.ok || !ekSoru) return iz;
+    const hafta = iz.h / 7;
+    const kis = v => Math.max(0, Math.min(iz.max, v));
+    const kay = e => e * ekSoru * hafta;
+    const uc = [kay(etki.alt), kay(etki.ust)].sort((a, b) => a - b);
+    return Object.assign({}, iz, { ekSoru,
+      olasi:yuvarla(kis(iz.olasi + kay(etki.egim))),
+      alt:yuvarla(kis(iz.alt + uc[0])), ust:yuvarla(kis(iz.ust + uc[1])) });
+  }
+
+  /* Net aralığı → puan ve sıra (Calc'ın tablosu ve OBP'si). Yüksek puan
+     küçük sıradır: iyi uç üst netten gelir. */
+  function siraya(tyt, ayt){
+    const C = R.Calc, o = C.obp();
+    const a = ayt && ayt.ok ? ayt : null;
+    const puan = (t, y) => yuvarla(C.rawScore(t, y).value + o.contribution);
+    const p = { alt:puan(tyt.alt, a ? a.alt : null), olasi:puan(tyt.olasi, a ? a.olasi : null), ust:puan(tyt.ust, a ? a.ust : null) };
+    return { puan:p, sira:{ iyi:C.rankForScore(p.ust), olasi:C.rankForScore(p.olasi), kotu:C.rankForScore(p.alt) }, yalnizTyt:!a };
+  }
+
+  /* ---------- defterden ---------- */
+
+  function seri(aile){
+    return R.Calc.fullExams(aile).map(e => ({ tarih:String(e.date).slice(0, 10), net:R.Model.examNet(e) }));
+  }
+
+  /* Ardışık tam TYT denemeleri arası: kayıtlı günlerin sorusu. Aralığın
+     günlerinin yarısından azı kayıtlıysa aralık sayılmaz (söz 3). */
+  function araliklar(){
+    const S = R.S, C = R.Calc, l = seri('TYT'), out = [];
+    for(let i = 1; i < l.length; i++){
+      const a = l[i - 1], b = l[i], g = gun(a.tarih, b.tarih);
+      if(g < MIN_ARALIK_GUN) continue;
+      let soru = 0, kayitli = 0;
+      for(let k = 1; k <= g; k++){
+        const t = U().iso(U().addDays(U().parse(a.tarih), k));
+        const d = S.days[t];
+        const q = d ? C.gunSorusu(d) : 0;
+        if(q > 0){ soru += q; kayitli++; }
+      }
+      if(kayitli < g / 2) continue;
+      const hafta = g / 7;
+      out.push({ haftaSoru:(soru / kayitli) * 7, haftaNet:(b.net - a.net) / hafta });
+    }
+    return out;
+  }
+
+  function hesapla(o){
+    const x = o || {};
+    const bugun = x.bugun || U().todayISO();
+    /* R.PLAN profildeki sınav tarihini önceler (data/curriculum.js). */
+    const P = R.PLAN || R.PROGRAM || {};
+    const tyt0 = izdusum(seri('TYT'), 'TYT', bugun, P.examTytISO);
+    const ayt = izdusum(seri('AYT'), 'AYT', bugun, P.examAytISO || P.examTytISO);
+    const etki = hacimEtkisi(araliklar());
+    const tyt = senaryo(tyt0, etki, Number(x.ekSoru) || 0);
+    const sira = tyt.ok ? siraya(tyt, ayt) : null;
+    const hedef = (R.S.profile && R.S.profile.targetRank) || (R.PROGRAM && R.PROGRAM.refRank) || null;
+    let konum = null;
+    if(sira && hedef && sira.sira.iyi != null && sira.sira.kotu != null){
+      konum = sira.sira.kotu <= hedef ? 'icinde' : sira.sira.iyi <= hedef ? 'bantta' : 'disinda';
+    }
+    return { bugun, sinav:P.examTytISO, tyt, tyt0, ayt, etki, sira, hedef, konum };
+  }
+
+  return { MIN_DENEME, MIN_GUN, MIN_ARALIK, MAX_NET, UFUK_KAT, theilSen, izdusum, hacimEtkisi, senaryo, siraya, araliklar, hesapla };
 })();
 
 /* ==== js/core/analytics.js ==== */
@@ -98977,6 +99201,156 @@ R.Screens.protocols = (function(){
   };
 })();
 
+/* ==== js/screens/gelecek.js ==== */
+/* Gelecek — sınav gününe kadar «bu gidişle» ve «ne olursa» (core/gelecek.js).
+
+   Analiz çekmecesinin bölümü. Üç kart: sınav günü aralığı (net, puan,
+   sıra, hedefe göre), gidiş grafiği (geçmiş denemeler ve sınav gününe
+   genişleyen aralık), «ne olursa» sürgüsü (yalnız senin verinden ölçülen
+   etkiyle). «Nasıl hesaplandı» küçük başlar. Sayıların hepsi kodun;
+   ekran yalnız çizer. */
+
+window.R = window.R || {};
+R.Screens = R.Screens || {};
+
+R.Screens.gelecek = (function(){
+  const U = R.U, S = R.S;
+  const { html, raw, when } = R.h;
+  const K = R.C;
+  const G = () => (window.LIFEOS || {}).GRAFIK;
+  const SURGU = { min:-100, max:300, adim:25 };
+
+  const sayi = v => v == null || !isFinite(v) ? '—' : U.fmtNum(Math.round(v));
+  const net = v => v == null || !isFinite(v) ? '—' : U.fmtNet(v);
+
+  function aralik(a){
+    return G() && G().aralikHtml ? raw(G().aralikHtml(a)) : '';
+  }
+
+  /* ---------- sınav günü ---------- */
+  function sinavKarti(r){
+    const t = r.tyt;
+    if(!t.ok){
+      return K.Card({ title:'Sınav günü', hint:'gelecek',
+        body:K.Empty({ icon:'chart', text:t.why + ' Denemeler eklendikçe gidiş kendiliğinden çizilir.' }) });
+    }
+    const s = r.sira;
+    const konum = r.konum === 'icinde' ? 'Bu gidişle aralığın tamamı hedefinin içinde.'
+      : r.konum === 'bantta' ? 'Hedefin bu aralığın içinde: iyi uçta tutuyor, kötü uçta kaçıyor.'
+      : r.konum === 'disinda' ? 'Bu gidişle hedefin aralığın dışında; «Ne olursa» neyin kaydırdığını gösterir.' : '';
+    /* Söz 6 (core/gelecek.js): sınav ufkun ötesindeyse sınav günü için
+       sayı verilmez; ufuk tarihindeki aralık söylenir. */
+    const ne = t.sinavaKadar ? 'Sınav günü' : U.fmtDate(t.ufukTarih) + ' itibarıyla';
+    return K.Card({ title:'Sınav günü', hint:'gelecek', sub:U.fmtDate(r.sinav) + ' · ' + t.kalanGun + ' gün · tahmin',
+      body:html`
+        <div class="gel-ana">
+          ${when(!t.sinavaKadar, () => html`<p class="small gel-uyari">Sınav gününe kadar çizmek için daha uzun ölçüm gerekir: gidiş, ölçülen sürenin
+            (${t.yayilim} gün) en çok ${R.Gelecek.UFUK_KAT} katı kadar uzatılır. Yaklaşık ${t.gerekGun} gün daha deneme girdikçe ufuk sınav gününe uzanır.</p>`)}
+          <p class="gel-cumle">${ne} bu gidişle TYT netin <b>${net(t.alt)}–${net(t.ust)}</b>, en olası <b>${net(t.olasi)}</b>.</p>
+          ${aralik({ alt:t.alt, ust:t.ust, olasi:t.olasi, min:0, max:t.max, dayanak:t.n, dayanakBirim:'deneme', birim:'net', ondalik:1, etiket:'TYT net' })}
+          ${when(s, () => html`
+            <p class="gel-cumle mt-12">${t.sinavaKadar ? 'Sıralama aralığı' : 'O düzey sıralamada'} <b>${sayi(s.sira.iyi)}–${sayi(s.sira.kotu)}</b>, en olası <b>${sayi(s.sira.olasi)}</b>.</p>
+            ${aralik({ alt:s.sira.iyi, ust:s.sira.kotu, olasi:s.sira.olasi, ters:true, dayanak:t.n, dayanakBirim:'deneme', etiket:'Sıra' })}
+            ${when(r.hedef, () => html`<p class="small mt-8">Hedefin ${sayi(r.hedef)}. ${konum}</p>`)}
+            ${when(s.yalnizTyt, () => html`<p class="tiny dim mt-4">AYT denemesi yeterli değil: puan yalnız TYT gidişinden; AYT'nin aynı düzeyde geleceği varsayıldı.</p>`)}`)}
+          ${when(r.tyt.ekSoru, () => html`<p class="tiny dim mt-8">Bu aralık «Ne olursa»daki seçimle: haftada ${r.tyt.ekSoru > 0 ? '+' : ''}${r.tyt.ekSoru} soru.</p>`)}
+        </div>` });
+  }
+
+  /* ---------- gidiş grafiği ---------- */
+  function grafik(r){
+    const t = r.tyt, t0 = r.tyt0;
+    if(!t.ok) return '';
+    const W = 640, H = 200, P = { l:34, r:12, t:12, b:22 };
+    const ilk = t.nokta[0].tarih;
+    const xGun = d => U.diffDays(ilk, d);
+    const bitis = t.sinavaKadar ? r.sinav : t.ufukTarih;
+    const xMax = Math.max(1, xGun(bitis));
+    const yv = t.nokta.map(n => n.net).concat([t.alt, t.ust, t0.alt, t0.ust]);
+    const yMin = Math.max(0, Math.floor(Math.min.apply(null, yv) / 5) * 5 - 5);
+    const yMax = Math.min(t.max, Math.ceil(Math.max.apply(null, yv) / 5) * 5 + 5);
+    const X = g => P.l + (W - P.l - P.r) * g / xMax;
+    const Y = v => P.t + (H - P.t - P.b) * (1 - (v - yMin) / Math.max(1, yMax - yMin));
+    const son = t.nokta.slice(-3).map(n => xGun(n.tarih)).sort((a, b) => a - b)[1] || xGun(t.nokta[t.nokta.length - 1].tarih);
+    const yelpaze = (z, sinif) => '<polygon class="' + sinif + '" points="' + X(son).toFixed(1) + ',' + Y(z.duzey).toFixed(1) + ' '
+      + X(xMax).toFixed(1) + ',' + Y(z.ust).toFixed(1) + ' ' + X(xMax).toFixed(1) + ',' + Y(z.alt).toFixed(1) + '"/>';
+    const izgara = [yMin, Math.round((yMin + yMax) / 2), yMax].map(v =>
+      '<line class="gel-g__izgara" x1="' + P.l + '" x2="' + (W - P.r) + '" y1="' + Y(v).toFixed(1) + '" y2="' + Y(v).toFixed(1) + '"/>'
+      + '<text class="gel-g__yazi" x="' + (P.l - 6) + '" y="' + (Y(v) + 4).toFixed(1) + '" text-anchor="end">' + v + '</text>').join('');
+    const noktalar = t.nokta.map(n => '<circle class="gel-g__nokta" r="3.5" cx="' + X(xGun(n.tarih)).toFixed(1) + '" cy="' + Y(n.net).toFixed(1) + '"><title>'
+      + U.fmtShort(n.tarih) + ' · ' + U.fmtNet(n.net) + ' net (ölçüldü)</title></circle>').join('');
+    const svg = '<svg class="gel-g" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="TYT net gidişi: '
+      + t.n + ' deneme ölçüldü; ' + (t.sinavaKadar ? 'sınav gününe' : U.fmtShort(bitis)) + ' kadar ' + U.fmtNet(t.alt) + '–' + U.fmtNet(t.ust) + ' net tahmini">'
+      + izgara
+      + (t.ekSoru ? yelpaze(t0, 'gel-g__yelpaze gel-g__yelpaze--once') : '')
+      + yelpaze(t, 'gel-g__yelpaze')
+      + '<line class="gel-g__olasi" x1="' + X(son).toFixed(1) + '" y1="' + Y(t.duzey).toFixed(1) + '" x2="' + X(xMax).toFixed(1) + '" y2="' + Y(t.olasi).toFixed(1) + '"/>'
+      + '<line class="gel-g__sinav" x1="' + X(xMax).toFixed(1) + '" x2="' + X(xMax).toFixed(1) + '" y1="' + P.t + '" y2="' + (H - P.b) + '"/>'
+      + '<text class="gel-g__yazi" x="' + X(xMax).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="end">' + (t.sinavaKadar ? 'sınav' : U.fmtShort(bitis)) + '</text>'
+      + '<text class="gel-g__yazi" x="' + P.l + '" y="' + (H - 6) + '">' + U.fmtShort(ilk) + '</text>'
+      + noktalar + '</svg>';
+    return K.Card({ title:'Gidiş', sub:'noktalar ölçüldü · aralık tahmin',
+      body:html`${raw(svg)}<p class="tiny dim mt-8">Haftada ${t.egimHafta > 0 ? '+' : ''}${U.fmtNet(t.egimHafta)} net gidiyorsun (${t.n} denemeden hesaplandı). Öğrenme zamanla yavaşlayabilir; üst uç bu yüzden iyimserdir.</p>` });
+  }
+
+  /* ---------- ne olursa ---------- */
+  function neOlursa(r){
+    const e = r.etki, ek = Number(S.ui.gelecekEkSoru) || 0;
+    if(!r.tyt0.ok) return '';
+    if(!e.ok){
+      return K.Card({ title:'Ne olursa', sub:'haftalık soru',
+        body:html`<p class="small">${e.why}</p>
+          <p class="tiny dim mt-8">Uyku gibi öteki değişkenlerin etkisi, kişisel deneyler ölçünce burada açılır.</p>` });
+    }
+    const d = r.tyt0.olasi == null ? null : r.tyt.olasi - r.tyt0.olasi;
+    return K.Card({ title:'Ne olursa', sub:'senin verinden ölçülen etkiyle',
+      body:html`
+        <label class="gel-surgu">
+          <span class="small">Haftada <b>${ek > 0 ? '+' : ''}${ek}</b> soru ${ek ? (ek > 0 ? 'fazla' : 'az') : '(bugünkü tempo)'}</span>
+          <input type="range" min="${SURGU.min}" max="${SURGU.max}" step="${SURGU.adim}" value="${ek}"
+            data-change="gelecek-ek" aria-label="Haftalık ek soru"/>
+        </label>
+        ${when(ek, () => html`<p class="small mt-8">En olası TYT net ${d > 0 ? '+' : ''}${U.fmtNet(d)} kayar: ${U.fmtNet(r.tyt0.olasi)} → <b>${U.fmtNet(r.tyt.olasi)}</b> (tahmin).</p>`)}
+        <p class="tiny dim mt-8">Etki ${e.n} deneme aralığından hesaplandı: senin verinde haftada 100 soru fazlası, haftalık net değişimini
+          ${U.fmtNet(e.alt * 100)}–${U.fmtNet(e.ust * 100)} kaydırıyor. Bu bir ilişkidir; kesin neden-sonuç değildir.</p>` });
+  }
+
+  /* ---------- nasıl hesaplandı ---------- */
+  function yontem(r){
+    const k = R.Calc.buHizla ? R.Calc.buHizla() : null;
+    return K.Card({ title:'Nasıl hesaplandı', body:html`<ul class="small gel-yontem">
+      <li>Gidiş: bütün tam TYT denemelerin ikişer ikişer eğimlerinin ortancası (tek kötü deneme çizgiyi sürüklemez).</li>
+      <li>Şimdiki düzey son üç denemenin ortancası; aralık eğimlerin çeyreklerinden ve denemelerin dağınıklığından gelir, sınava doğru genişler.</li>
+      <li>Puan ve sıra, bugünkü sıra tahminiyle aynı tablodan ve diploma notu katkısıyla hesaplanır.</li>
+      <li>En az ${R.Gelecek.MIN_DENEME} tam deneme ve ${R.Gelecek.MIN_GUN} günlük yayılım yoksa gidiş çizilmez; kaydı olmayan gün sıfır sayılmaz.</li>
+      <li>Bu bir koçluk aralığıdır, sonuç garantisi değildir.</li>
+      ${when(k && k.metin, () => html`<li>Konu kapanışı: ${k.metin}</li>`)}
+    </ul>` });
+  }
+
+  async function render(){
+    const r = R.Gelecek.hesapla({ ekSoru:Number(S.ui.gelecekEkSoru) || 0 });
+    return String(html`${sinavKarti(r)}${raw(String(grafik(r)))}${neOlursa(r)}${yontem(r)}`);
+  }
+
+  const change = {
+    async 'gelecek-ek'(el){
+      const v = Math.max(SURGU.min, Math.min(SURGU.max, Number(el.value) || 0));
+      S.ui.gelecekEkSoru = v;
+      R.App.render();
+    },
+  };
+
+  return {
+    id:'gelecek',
+    kucukVarsayilan:['nasıl-hesaplandı'],
+    title:'Gelecek',
+    subtitle(){ return 'Sınav gününe kadar bu gidişle, ve ne olursa'; },
+    actions(){ return ''; },
+    render, handle:{}, change,
+  };
+})();
+
 /* ==== js/screens/rutbe.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/rutbe.js içine yazılır; burası bir sonraki
@@ -104559,6 +104933,9 @@ R.App = (function(){
     ]},
     { id:'analiz', label:CEK('analiz'), items:[
       { id:'progress',  icon:'chart',  label:'İlerleme' },
+      /* Gelecek simülatörü (2026-10-16): sınav gününe kadar «bu gidişle»
+         ve «ne olursa» (core/gelecek.js). */
+      { id:'gelecek',   icon:'target', label:'Gelecek' },
       { id:'analytics', icon:'search', label:'Ayrıntı' },
       { id:'protocols', icon:'shield', label:'Telafi' },
     ]},

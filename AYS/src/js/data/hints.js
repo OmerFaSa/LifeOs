@@ -40,6 +40,9 @@ R.HINTS = {
     more:'Tek denemede yüksek net ödüllendirilmez. Düzen, analizin zamanında bitmesi ve uyku saatine uyum ödüllendirilir.' },
   'next-action':{ t:'Sıradaki hamle', b:'Ne yapacağını düşünmeden başlaman için tek öncelik gösterilir.',
     more:'Sıra sabittir: analiz borcu → gecikmiş kart → haftanın ritüeli → gecikmiş 2. ölçüm → bekleyen blok → çıpalar.' },
+  /* Gelecek simülatörü (core/gelecek.js, 2026-10-16). */
+  'gelecek':{ t:'Sınav günü', b:'Geçmiş tam denemelerinin gidişi sınav gününe uzatılır; sonuç tek sayı değil aralıktır ve tahmindir.',
+    more:'En az 4 tam deneme ve 14 günlük yayılım gerekir. Gidiş, denemelerin ikişer ikişer eğimlerinin ortancasıdır; tek kötü deneme çizgiyi sürüklemez. «Ne olursa» sürgüsü yalnız senin verinden ölçülen etkiyle açılır. Sonuç garantisi değildir.' },
   'sleep':{ t:'Uyku', b:'7–8 saat hedeflenir; uyku bellek pekişmesinin aktif parçasıdır.',
     more:'Son dört haftada kalkış saati sınav sabahına göre kademeli ayarlanır. Haziranda gece çalışmasıyla borç kapatılmaz.' },
 

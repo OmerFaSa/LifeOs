@@ -2740,3 +2740,18 @@ body.is-dragging .drop.is-over{
 .qz-dahasi > summary{ cursor:pointer; min-height:28px; display:inline-flex; align-items:center; color:var(--text-2); }
 .qz-dahasi > summary:hover{ color:var(--text); }
 .qz-dahasi[open] > summary{ margin-bottom:8px; }
+
+/* Gelecek simülatörü (screens/gelecek.js). */
+.gel-cumle{ margin:0 0 8px; font-size:15px; line-height:1.5; }
+.gel-g{ width:100%; height:auto; display:block; }
+.gel-g__izgara{ stroke:var(--border); stroke-width:1; }
+.gel-g__yazi{ fill:var(--text-2); font-size:11px; font-variant-numeric:tabular-nums; }
+.gel-g__yelpaze{ fill:color-mix(in srgb, var(--primary) 16%, transparent); stroke:none; }
+.gel-g__yelpaze--once{ fill:color-mix(in srgb, var(--text-2) 10%, transparent); }
+.gel-g__olasi{ stroke:var(--primary); stroke-width:2; stroke-dasharray:5 4; }
+.gel-g__sinav{ stroke:var(--text-2); stroke-width:1; stroke-dasharray:2 3; }
+.gel-g__nokta{ fill:var(--primary); stroke:var(--surface); stroke-width:1.5; }
+.gel-surgu{ display:flex; flex-direction:column; gap:8px; }
+.gel-surgu input[type=range]{ width:100%; accent-color:var(--primary); min-height:24px; }
+.gel-yontem{ margin:0; padding-left:18px; display:grid; gap:6px; line-height:1.5; }
+.gel-uyari{ margin:0 0 10px; padding:10px 12px; border-radius:10px; background:var(--surface-2); color:var(--text-2); line-height:1.5; }
