@@ -1586,6 +1586,21 @@ SP.App = (function(){
           return r;
         });
       }
+      /* YETKİ (brand/ortak/yetki.js): King'in kapalı kataloğu; eylemi bu
+         modülün kendi kodu uygular. Hesap dışarıda. */
+      if(window.LIFEOS && window.LIFEOS.YETKI){
+        window.LIFEOS.YETKI.kur({ modul:'spi',
+          tema:{ oku:() => (S.profile && S.profile.theme) || 'system', yaz:async v => { await M.saveProfile({ theme:v }); applyTheme(); refreshAppearance(); render(); } },
+          onaylar:{
+            bekleyen:() => SP.Proposals.pending().map(p => ({ id:p.id,
+              metin:(SP.Proposals.eylem(p.action) || {}).label || p.reason || p.action })),
+            onayla:async id => { const r = await SP.Proposals.approve(id); render(); return r; },
+            reddet:async id => { const r = await SP.Proposals.reject(id); render(); return r; },
+          },
+          donus:{ al:() => SP.Store.exportAll(), yukle:v => SP.Store.importAll(v), sil:() => SP.Store.clear(),
+            sayi:() => Object.keys(SP.Store.exportAll().data || {}).length,
+            foto:'Bu cihazdaki öğün ve vücut fotoğraflarına dokunulmaz.' } });
+      }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. Özet ve veri
          girişi bu modülün kendi koduyla (SP.Quick: önizleme, onayla kayıt). */
       if(window.LIFEOS && window.LIFEOS.KING){

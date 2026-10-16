@@ -15889,7 +15889,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'99be6d3c', at:'2026-10-16 21:37', dirty:true };
+ESP.BUILD = { id:'92c686ba', at:'2026-10-16 21:59', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -30129,6 +30129,318 @@ window.LIFEOS.TEKGUN = (function(){
     _ortam:ortam, _sifirla, _onbellek:v => { onbellek = v; } };
 })();
 
+/* ==== js/core/yetki.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/yetki.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* YETKİ — King'in sistem içindeki değişiklikleri yaptığı kapalı katalog.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/yetki.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   ==================================================================
+
+   Depo sahibinin kararı (2026-10-17): «King'in her şeye yetkisi olsun:
+   onaylama, değiştirme, bir modülü sıfırdan başlatma gibi en köklü
+   değişiklikler bile; kişinin kendi hesabı hariç.»
+
+   Sözler:
+   1. KAPALI KATALOG (AGENTS §1.1). King cümleyi buradaki tipli bir eyleme
+      çevirir; eylemi modülün KENDİ kodu uygular (öneri kapısı, kayıt
+      deposu, profil). Katalogda olmayan iş yapılmaz; model eylem uyduramaz.
+   2. SEVİYEYİ KATALOG BELİRLER (§1.9).
+        küçük  hemen uygulanır, «Geri al» kalır
+        orta   önizleme + tek onay
+        büyük  ayrıntılı önizleme + açık onay + ÖNCE dönüş noktası.
+      Büyük eylem «evet» ile değil, yalnız «onaylıyorum» ya da düğmeyle
+      uygulanır.
+   3. HESAP DIŞARIDA. Parola, iki adım, cihazlar, yönetici, e-posta, hesap
+      silme, oturum: King bunlara dokunmaz; söyler, kullanıcı Hesap
+      sayfasından yapar.
+   4. ÖLÇÜM UYDURULMAZ (§1.1–1.2). Hiçbir eylem ölçülmüş ya da hesaplanmış
+      bir sayıyı kendiliğinden değiştirmez. Sıfırlama kaydı siler, sayı
+      üretmez; dönüş noktasıyla geri gelir.
+   5. DÖNÜŞ NOKTASI. Büyük eylemden önce modülün bütün kaydı
+      (`donus.al()`, modülde Store.exportAll) bu cihazda DONUS anahtarına
+      yazılır. «Dönüş noktasına dön» onu modülün kendi içe aktarmasıyla
+      geri koyar. Fotoğraflar dönüş noktasına girmez; önizleme söyler.
+      Yazılamazsa (yer yok) sıfırlama yapılmaz.
+   6. OLUMSUZ İSTEK EYLEM DEĞİLDİR. «verileri sıfırlama», «temayı
+      değiştirme» hiçbir şey yapmaz (LIFEOS.Olumsuz, eylemEngeli).
+   7. BAŞKA MODÜLÜN İŞİ ORADA YAPILIR. «SPİ'yi sıfırla» AYS'de istenirse
+      AYS bunu yapmaz; King o modüle geçmeyi önerir (kayıtlar ayrı
+      kökende, ayrı depoda). */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.YETKI = (function(){
+  const L = window.LIFEOS;
+  const DONUS = 'lifeos.king.donus';
+  const MODUL_AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+  const SEVIYE_AD = { kucuk:'küçük', orta:'orta', buyuk:'büyük' };
+
+  let ayar = null;
+
+  const ortam = {
+    depo:{
+      oku:k => { try{ return JSON.parse(localStorage.getItem(k) || 'null'); }catch(e){ return null; } },
+      yaz:(k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } },
+      sil:k => { try{ localStorage.removeItem(k); }catch(e){ /* yok */ } },
+    },
+    simdi:() => new Date(),
+  };
+
+  const kucult = s => String(s || '').toLocaleLowerCase('tr').replace(/[’']/g, '\'').trim();
+  const B = '(?<![a-zçğıöşü])';
+
+  /* Hesap: King'in dokunmadığı tek alan (söz 3). */
+  const HESAP_RE = new RegExp(B + '(parola|şifre|iki adım|2fa|doğrulama kodu|yedek kod|hesab(?:ım|ımı|ımın|ı sil)|e-?posta(?:mı)?|kullanıcı adı|'
+    + 'cihaz(?:ı|ları|larımı) (?:çıkar|sil|kaldır|bağla)|yönetici|admin|oturumu? kapat|çıkış yap|kurtarma sorusu)');
+
+  /* Modül adı geçiyor mu: «spi'yi sıfırla». */
+  const MODUL_RE = { ays:/(?<![a-zçğıöşü])ays|sınav sistemi/, spi:/(?<![a-zçğıöşü])sp[iı]|sağlık sistemi/, esp:/(?<![a-zçğıöşü])esp|gelişim sistemi/ };
+  function anilanModul(t){
+    return Object.keys(MODUL_RE).filter(m => MODUL_RE[m].test(t));
+  }
+
+  /* Katalog fiillerinin olumsuz emri; Olumsuz süzgecinin sözlüğüne ek. */
+  const OLUMSUZ_RE = new RegExp(B + '(?:geçme|yapma|değiştirme|kapatma|açma|silme|sıfırlama|onaylama|reddetme|durdurma|başlatma|istemiyorum|etme)(?![a-zçğıöşü])');
+  function olumsuz(metin){
+    if(OLUMSUZ_RE.test(kucult(metin))) return true;
+    const O = L.Olumsuz;
+    try{ return !!(O && O.eylemEngeli && O.eylemEngeli(metin)); }catch(e){ return false; }
+  }
+
+  /* ------------------------------------------------------------ katalog */
+
+  function temaSec(t){
+    if(/(koyu|karanlık|gece) (tema|mod|görünüm)|temayı (koyu|karanlık)|karanlık moda/.test(t)) return 'dark';
+    if(/(açık|aydınlık|gündüz) (tema|mod|görünüm)|temayı (açık|aydınlık)/.test(t)) return 'light';
+    if(/(sistem(?:e uy)?|otomatik) (tema|görünüm)|temayı (sisteme|otomatiğe)/.test(t)) return 'system';
+    return null;
+  }
+  const TEMA_AD = { dark:'koyu', light:'açık', system:'sisteme uyan' };
+  const ANIM_AD = { tam:'tam', az:'az', sistem:'sisteme uyan' };
+  const ZEMIN_AD = { yumusak:'canlı', sade:'sade' };
+
+  const EYLEMLER = [
+    {
+      id:'tema', seviye:'kucuk', ad:'Tema',
+      anla:t => { const v = temaSec(t); return v && ayar.tema ? { v } : null; },
+      onizle:p => ({ metin:'Tema ' + TEMA_AD[p.v] + ' olacak.' }),
+      async uygula(p){
+        const eski = ayar.tema.oku();
+        await ayar.tema.yaz(p.v);
+        return { metin:'Temayı ' + TEMA_AD[p.v] + ' yaptım.', geriAl:async () => { await ayar.tema.yaz(eski); } };
+      },
+    },
+    {
+      id:'animasyon', seviye:'kucuk', ad:'Animasyonlar',
+      anla:t => {
+        if(!L.ANIMASYON || !/animasyon|hareket(ler)?i/.test(t)) return null;
+        if(/kapat|azalt|kıs|az olsun|sakin/.test(t)) return { v:'az' };
+        if(/aç|tam|artır|geri getir/.test(t)) return { v:'tam' };
+        if(/sistem/.test(t)) return { v:'sistem' };
+        return null;
+      },
+      onizle:p => ({ metin:'Animasyonlar ' + ANIM_AD[p.v] + ' olacak.' }),
+      async uygula(p){
+        const A = L.ANIMASYON, eski = A.kip();
+        A.ayarla(p.v);
+        return { metin:'Animasyonları ' + ANIM_AD[p.v] + ' yaptım.', geriAl:async () => { A.ayarla(eski); } };
+      },
+    },
+    {
+      id:'zemin', seviye:'kucuk', ad:'Zemin',
+      anla:t => {
+        if(!L.ZEMIN || !/zemin|arka ?plan/.test(t)) return null;
+        if(/sade|düz|sakin/.test(t)) return { v:'sade' };
+        if(/canlı|renkli|yumuşak/.test(t)) return { v:'yumusak' };
+        return null;
+      },
+      onizle:p => ({ metin:'Zemin ' + ZEMIN_AD[p.v] + ' olacak.' }),
+      async uygula(p){
+        const Z = L.ZEMIN, eski = Z.kip();
+        Z.ayarla(p.v);
+        return { metin:'Zemini ' + ZEMIN_AD[p.v] + ' yaptım.', geriAl:async () => { Z.ayarla(eski); } };
+      },
+    },
+    {
+      id:'muzik', seviye:'kucuk', ad:'Müzik',
+      anla:t => {
+        if(!L.SES || !/müzi[kğ]|radyo|şarkı/.test(t)) return null;
+        if(/durdur|kapat|kes|sustur/.test(t)) return { v:'dur' };
+        if(/aç|çal|başlat/.test(t)) return { v:'cal' };
+        return null;
+      },
+      onizle:p => ({ metin:p.v === 'dur' ? 'Müzik duracak.' : 'Müzik çalacak.' }),
+      async uygula(p){
+        const S = L.SES;
+        if(p.v === 'dur'){ S.durdur(); return { metin:'Müziği durdurdum.', geriAl:async () => { S.cal(); } }; }
+        S.cal();
+        return { metin:'Müziği açtım.', geriAl:async () => { S.durdur(); } };
+      },
+    },
+    {
+      id:'onay-liste', seviye:null, ad:'Bekleyen onaylar',
+      anla:t => ayar.onaylar && /bekleyen/.test(t)
+        && !/(?<![a-zçğıöşü])(?:onayla|reddet|geç)(?![a-zçğıöşü])|onaylayabilir|onaylar mısın/.test(t) ? {} : null,
+      onizle:() => null,
+    },
+    {
+      id:'onay-hepsi', seviye:'orta', ad:'Bekleyenleri onayla',
+      anla:t => ayar.onaylar && /(hepsini|tümünü|bütün(?:ünü)?|bekleyen(?:ler)?(?:i)?|önerileri|teklifleri) (de )?onayla(?:r mısın|yabilirsin)?(?![a-zçğıöşü])|onayla hepsini/.test(t) ? {} : null,
+      onizle:() => {
+        const l = bekleyenler();
+        return l.length ? { metin:l.length + ' öneri onaylanacak; her biri modülün kendi kodundan geçer.', satirlar:l.slice(0, 8).map(x => x.metin) } : null;
+      },
+      async uygula(){
+        const l = bekleyenler();
+        let n = 0; const dusen = [];
+        for(const x of l){
+          let r = null;
+          try{ r = await ayar.onaylar.onayla(x.id); }catch(e){ r = { ok:false, why:(e && e.message) || 'hata' }; }
+          if(r && r.ok) n++; else dusen.push(x.metin + (r && r.why ? ': ' + r.why : ''));
+        }
+        return { metin:n + ' öneri onaylandı' + (dusen.length ? ', ' + dusen.length + ' tanesi uygulanamadı.' : '.'), satirlar:dusen };
+      },
+    },
+    {
+      id:'red-hepsi', seviye:'orta', ad:'Bekleyenleri geç',
+      anla:t => ayar.onaylar && ayar.onaylar.reddet && /(hepsini|tümünü|bekleyen(?:ler)?(?:i)?|önerileri|teklifleri) (reddet|geç)(?![a-zçğıöşü])/.test(t) ? {} : null,
+      onizle:() => {
+        const l = bekleyenler();
+        return l.length ? { metin:l.length + ' öneri geçilecek; hiçbiri uygulanmaz.', satirlar:l.slice(0, 8).map(x => x.metin) } : null;
+      },
+      async uygula(){
+        const l = bekleyenler();
+        let n = 0;
+        for(const x of l){ try{ const r = await ayar.onaylar.reddet(x.id); if(!r || r.ok !== false) n++; }catch(e){ /* kart durur */ } }
+        return { metin:n + ' öneri geçildi.' };
+      },
+    },
+    {
+      id:'sifirdan', seviye:'buyuk', ad:'Sıfırdan başlat',
+      anla:t => ayar.donus && new RegExp('(sıfırdan başla(?:t|yalım|mak istiyorum)?|baştan başla(?:t|yalım)?|sıfırla(?:yalım)?(?![a-zçğıöşü])|'
+        + '(?:bütün|tüm|tüm bu) (?:veri(?:ler)?(?:i|imi)?|kayıt(?:lar)?(?:ı|ımı)?) (?:sil|sıfırla)(?![a-zçğıöşü])|verileri sil(?![a-zçğıöşü])|her şeyi sil(?![a-zçğıöşü]))').test(t) ? {} : null,
+      onizle:() => {
+        const n = ayar.donus.sayi ? ayar.donus.sayi() : null;
+        return { metin:MODUL_AD[ayar.modul] + ' sıfırdan başlayacak: bütün kayıtlar bu cihazdan ve hesaptan silinecek.',
+          satirlar:[(n != null ? n + ' kayıt grubu silinecek.' : 'Bütün kayıtlar silinecek.'),
+            'Önce dönüş noktası alınır; «Dönüş noktasına dön» dersen her şey geri gelir.',
+            ayar.donus.foto || 'Bu cihazdaki fotoğraflar dönüş noktasına girmez.',
+            'Hesabın, öteki modüller ve LifeOS ayarların değişmez.'] };
+      },
+      async uygula(){
+        const kopya = ayar.donus.al();
+        const nokta = { zaman:ortam.simdi().toISOString(), modul:ayar.modul, neden:'sifirdan', veri:kopya };
+        /* Önce yazmayı dene; yer yoksa silme sonrası boşalan yere yaz, o da
+           olmazsa kaydı geri koy ve dur (söz 5). */
+        let yazildi = ortam.depo.yaz(DONUS, nokta);
+        await ayar.donus.sil();
+        if(!yazildi) yazildi = ortam.depo.yaz(DONUS, nokta);
+        if(!yazildi){
+          await ayar.donus.yukle(kopya);
+          return { ok:false, metin:'Dönüş noktası bu cihaza yazılamadı (yer yok); hiçbir şeyi silmedim. Önce yedek alıp yer aç.' };
+        }
+        return { metin:MODUL_AD[ayar.modul] + ' sıfırdan başladı. Dönüş noktası bu cihazda duruyor.', yenile:true };
+      },
+    },
+    {
+      id:'donus', seviye:'buyuk', ad:'Dönüş noktasına dön',
+      anla:t => ayar.donus && /(dönüş noktasına (?:dön|geri dön)|sıfırlamayı geri al|eski haline (?:getir|döndür|dön)|silineni geri getir|verilerimi geri (?:getir|yükle))/.test(t) ? {} : null,
+      onizle:() => {
+        const d = donusNoktasi();
+        if(!d) return { yok:true, metin:'Bu cihazda dönüş noktası yok; geri koyacak bir şey bulamadım.' };
+        return { metin:MODUL_AD[ayar.modul] + ' ' + tarihYaz(d.zaman) + ' anına dönecek.',
+          satirlar:['O andan sonra girilen kayıtlar bu dönüşle silinir.', 'Modülün içe aktarması kendi geri alma yuvasını bırakır.'] };
+      },
+      async uygula(){
+        const d = donusNoktasi();
+        if(!d) return { ok:false, metin:'Bu cihazda dönüş noktası yok.' };
+        await ayar.donus.yukle(d.veri);
+        ortam.depo.sil(DONUS);
+        return { metin:MODUL_AD[ayar.modul] + ' dönüş noktasına döndü.', yenile:true };
+      },
+    },
+  ];
+
+  function iki(n){ return (n < 10 ? '0' : '') + n; }
+  function tarihYaz(iso){
+    const d = new Date(iso);
+    return isNaN(d) ? '' : iki(d.getDate()) + '.' + iki(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + iki(d.getHours()) + ':' + iki(d.getMinutes());
+  }
+  function bekleyenler(){
+    try{ return ((ayar && ayar.onaylar && ayar.onaylar.bekleyen()) || []).filter(x => x && x.id != null).map(x => ({ id:x.id, metin:String(x.metin || 'Öneri') })); }
+    catch(e){ return []; }
+  }
+  function donusNoktasi(){
+    const d = ortam.depo.oku(DONUS);
+    return d && ayar && d.modul === ayar.modul && d.veri ? d : null;
+  }
+
+  /* ------------------------------------------------------------- arayüz */
+
+  function kur(o){
+    ayar = Object.assign({ modul:'spi' }, o || {});
+    return api;
+  }
+
+  /* Cümle → niyet. Dönüş:
+       null                         katalogda yok (King kendi yoluna devam eder)
+       { tur:'hesap', metin }       hesap işi; yapılmaz (söz 3)
+       { tur:'olumsuz' }            olumsuz istek; hiçbir şey yapılmaz (söz 6)
+       { tur:'baska', modul, metin} başka modülün işi (söz 7)
+       { tur:'liste', satirlar, metin }
+       { tur:'eylem', id, seviye, ad, param, onizle:{ metin, satirlar } } */
+  function anla(metin){
+    if(!ayar) return null;
+    const t = kucult(metin);
+    if(!t) return null;
+    if(HESAP_RE.test(t)) return { tur:'hesap', metin:'Hesabına (parola, iki adım, cihazlar, yönetici, e-posta) dokunamam; onu yalnız sen Hesap sayfasından değiştirirsin.' };
+    for(const e of EYLEMLER){
+      let p = null;
+      try{ p = e.anla(t); }catch(err){ p = null; }
+      if(!p) continue;
+      if(olumsuz(metin)) return { tur:'olumsuz' };
+      const obur = anilanModul(t).filter(m => m !== ayar.modul);
+      if(e.seviye === 'buyuk' && obur.length && anilanModul(t).indexOf(ayar.modul) < 0){
+        return { tur:'baska', modul:obur[0], metin:MODUL_AD[obur[0]] + '’nin kayıtları kendi içinde durur; bunu ' + MODUL_AD[obur[0]] + '’de yapabilirim.' };
+      }
+      if(e.id === 'onay-liste'){
+        const l = bekleyenler();
+        return { tur:'liste', metin:l.length ? l.length + ' öneri onay bekliyor:' : 'Onay bekleyen öneri yok.', satirlar:l.slice(0, 8).map(x => x.metin), sayi:l.length };
+      }
+      const oz = e.onizle(p);
+      if(!oz) return { tur:'liste', metin:'Onay bekleyen öneri yok.', satirlar:[], sayi:0 };
+      if(oz.yok) return { tur:'liste', metin:oz.metin, satirlar:[], sayi:0 };
+      return { tur:'eylem', id:e.id, seviye:e.seviye, seviyeAd:SEVIYE_AD[e.seviye], ad:e.ad, param:p, onizle:oz };
+    }
+    return null;
+  }
+
+  async function uygula(niyet){
+    if(!ayar || !niyet || niyet.tur !== 'eylem') return { ok:false, metin:'Uygulanacak bir şey yok.' };
+    const e = EYLEMLER.find(x => x.id === niyet.id);
+    if(!e) return { ok:false, metin:'Bu iş katalogda yok.' };
+    try{
+      const r = await e.uygula(niyet.param);
+      return Object.assign({ ok:true }, r);
+    }catch(err){
+      return { ok:false, metin:'Uygulanamadı: ' + ((err && err.message) || 'bilinmeyen hata') };
+    }
+  }
+
+  function katalog(){
+    return EYLEMLER.filter(e => e.seviye).map(e => ({ id:e.id, ad:e.ad, seviye:e.seviye }));
+  }
+
+  function _sifirla(){ ayar = null; }
+
+  const api = { kur, anla, uygula, katalog, donusNoktasi, DONUS, HESAP_RE, kuruluMu:() => !!ayar, _ortam:ortam, _sifirla };
+  return api;
+})();
+
 /* ==== js/core/pusula.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/pusula.js içine yazılır; burası bir sonraki
@@ -30419,7 +30731,15 @@ window.LIFEOS.SORUKART = (function(){
         Temizle    ekrandaki ve bu cihazdaki günün sohbeti silinir; «Geri
                    getir» kalır (küçük aksiyon, AGENTS §1.9).
       Ekranda son altı mesaj görünür; günün tamamı (en çok 120) saklanır,
-      kayda o girer. */
+      kayda o girer.
+  20. YETKİ (depo sahibi, 2026-10-17: «King'in her şeye yetkisi olsun;
+      kişinin kendi hesabı hariç»). Sistem içindeki değişiklik cümlesi
+      LIFEOS.YETKI kataloğuna gider (brand/ortak/yetki.js): küçük eylem
+      hemen uygulanır ve «Geri al» kalır; orta önizleme + «Onayla»; büyük
+      ayrıntılı önizleme + «Onaylıyorum» (ya da düğme) + önce dönüş noktası.
+      «evet» büyük eylemi uygulamaz. Hesap işi yapılmaz, söylenir. Sayfanın
+      yeniden yüklenmesi gereken eylemden sonra King aynı sayfada küçük
+      kutu olarak yeniden açılır. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -30487,6 +30807,7 @@ window.LIFEOS.KING = (function(){
     git:url => { window.location.href = url; },
     zamanla:(fn, ms) => setTimeout(fn, ms),
     simdi:() => new Date(),
+    yenile:() => { try{ location.reload(); }catch(e){ /* yok */ } },
     hash:() => (typeof location !== 'undefined' ? location.hash : ''),
     hashSil:() => { try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){ /* eski tarayıcı */ } },
     adres:k => (L.KABUK && L.KABUK.adres ? L.KABUK.adres(k) : null),
@@ -30568,6 +30889,7 @@ window.LIFEOS.KING = (function(){
   let menu = null;            // söz 19: null | 'menu' | 'kayitlar' | { id }
   let silOnay = null;         // söz 19: silinmek üzere seçilen kayıt
   let silinen = null;         // söz 19: temizlenen sohbet («Geri getir»)
+  let bekleyenYetki = null;   // söz 20: onay bekleyen orta/büyük eylem
   const FOTO_EN_BUYUK = 15 * 1024 * 1024;
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
@@ -31221,6 +31543,22 @@ window.LIFEOS.KING = (function(){
   async function isle(metin){
     /* Söz 8: bekleyen soruya yazıyla cevap («evet», «hayır»). */
     const t0 = kucuk(metin);
+    /* Söz 20: büyük eylem yalnız açık onayla. */
+    if(bekleyenYetki && /^onayl[ıi]yorum[.!]?$/.test(t0)){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      await yetkiUygula();
+      return { tur:'yetki' };
+    }
+    if(bekleyenYetki && (EVET.test(t0) || HAYIR.test(t0))){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      if(HAYIR.test(t0)){ vazgec(); return { tur:'hayir' }; }
+      if(bekleyenYetki.seviye === 'buyuk'){
+        soyle('Bu büyük bir değişiklik; «evet» yetmez. «Onaylıyorum» yaz ya da düğmeye dokun.');
+        return { tur:'yetki-bekliyor' };
+      }
+      await yetkiUygula();
+      return { tur:'yetki' };
+    }
     if((bekleyen || bekleyenGit || bekleyenIlet) && (EVET.test(t0) || HAYIR.test(t0))){
       akis.push({ kim:'sen', metin:String(metin).trim() });
       if(EVET.test(t0)){ if(bekleyen) await kaydet(); else if(bekleyenIlet) await ilet(); else gitOnayla(); }
@@ -31232,6 +31570,27 @@ window.LIFEOS.KING = (function(){
       akis.push({ kim:'sen', metin:String(metin).trim() });
       await geriAlYap();
       return { tur:'geri-al' };
+    }
+    /* Söz 20: sistem içindeki değişiklik kataloğa (yetki.js). */
+    const Y = yetkiKatalog();
+    const yn = Y && !paylasim ? Y.anla(metin) : null;
+    if(yn){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenYetki = null; cipler = null;
+      if(yn.tur === 'hesap'){ soyle(yn.metin); return { tur:'yetki-hesap' }; }
+      if(yn.tur === 'olumsuz'){ soyle('Olumsuz bir istek; hiçbir şeyi değiştirmedim. Ne istediğini olumlu söylersen yaparım.'); return { tur:'yetki-olumsuz' }; }
+      if(yn.tur === 'baska'){ soyle(yn.metin); return { tur:'yetki-baska', modul:yn.modul }; }
+      if(yn.tur === 'liste'){
+        cipler = yn.sayi ? [{ is:'yetki-hepsi', ad:'Hepsini onayla' }] : null;
+        soyle(yn.metin, yn.satirlar && yn.satirlar.length ? yn.satirlar : null);
+        return { tur:'yetki-liste' };
+      }
+      if(yn.seviye === 'kucuk'){ await yetkiUygula(yn); return { tur:'yetki', seviye:'kucuk' }; }
+      bekleyenYetki = yn;
+      cipler = [{ is:'yetki-onay', ad:yn.seviye === 'buyuk' ? 'Dönüş noktası al ve uygula' : 'Onayla' }, { is:'vazgec', ad:'Vazgeç' }];
+      soyle(yn.onizle.metin, yn.onizle.satirlar || null, null,
+        yn.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?');
+      return { tur:'yetki-bekliyor', seviye:yn.seviye };
     }
     const y = yorumla(metin);
     if(y.tur === 'bos') return y;
@@ -31329,8 +31688,34 @@ window.LIFEOS.KING = (function(){
   function vazgec(){
     const git0 = !!bekleyenGit;
     const foto0 = !!bekleyenFoto;
-    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; cipler = null;
-    soyle(git0 || foto0 ? 'Tamam, buradayım.' : 'Tamam, eklemedim.');
+    const yetki0 = !!bekleyenYetki;
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; bekleyenYetki = null; cipler = null;
+    soyle(yetki0 ? 'Tamam, hiçbir şeyi değiştirmedim.' : git0 || foto0 ? 'Tamam, buradayım.' : 'Tamam, eklemedim.');
+  }
+
+  /* ---------- söz 20: yetki ---------- */
+  function yetkiKatalog(){
+    const Y = L.YETKI;
+    return Y && typeof Y.kuruluMu === 'function' && Y.kuruluMu() ? Y : null;
+  }
+  async function yetkiUygula(n){
+    n = n || bekleyenYetki;
+    bekleyenYetki = null; cipler = null;
+    const Y = yetkiKatalog();
+    if(!Y || !n) return null;
+    const bek = { kim:'king', bekliyor:true, metin:'' };
+    akis.push(bek);
+    ciz(false);
+    const r = await Y.uygula(n);
+    akis = akis.filter(m => m !== bek);
+    if(r.ok && typeof r.geriAl === 'function'){ sonGeriAl = r.geriAl; cipler = [{ is:'geri-al', ad:'Geri al' }]; }
+    soyle(r.metin, r.satirlar && r.satirlar.length ? r.satirlar : null);
+    if(r.ok && r.yenile){
+      /* Sayfa yeniden yüklenince King aynı sayfada küçük kutu olarak açılır. */
+      ortam.depo.yaz(TASIMA, Object.assign({}, ortam.depo.oku(TASIMA) || {}, { acik:true, mini:true, kaynak:ayar.modul, yenile:true, zaman:Date.now() }));
+      ortam.zamanla(() => ortam.yenile(), 1400);
+    }
+    return r;
   }
   function gitOnayla(){
     const h = bekleyenGit;
@@ -31622,6 +32007,8 @@ window.LIFEOS.KING = (function(){
         if(is === 'foto-yorum'){ fotoYorumla(); return; }
         if(is === 'sohbet'){ sesliSohbetAc(); ciz(false); return; }
         if(is === 'geri-al'){ geriAlYap(); return; }
+        if(is === 'yetki-onay'){ yetkiUygula(); return; }
+        if(is === 'yetki-hepsi'){ const Y = yetkiKatalog(); const n = Y && Y.anla('hepsini onayla'); if(n && n.tur === 'eylem') yetkiUygula(n); return; }
         if(is === 'menu'){ menuAc('menu'); return; }
         if(is === 'kayitlar'){ menuAc('kayitlar'); return; }
         if(is === 'sohbet-kaydet'){ menu = null; sohbetiKaydet(); return; }
@@ -31699,7 +32086,7 @@ window.LIFEOS.KING = (function(){
        sohbetiyle açılır; kendi modülünün eski taşıması yalnız silinir. */
     const ts = ortam.depo.oku(TASIMA);
     if(ts) ortam.depo.sil(TASIMA);
-    const tasindi = !!(ts && ts.acik && ts.kaynak && ts.kaynak !== ayar.modul
+    const tasindi = !!(ts && ts.acik && ts.kaynak && (ts.kaynak !== ayar.modul || (ts.yenile && Date.now() - (Number(ts.zaman) || 0) < 60 * 1000))
       && Date.now() - (Number(ts.zaman) || 0) < 12 * 3600 * 1000);
     const onceki = tasindi && Array.isArray(ts.akis) ? ts.akis : null;
     let hedef = null;
@@ -31715,7 +32102,8 @@ window.LIFEOS.KING = (function(){
       }, 60);
       return;
     }
-    if(tasindi) ortam.zamanla(() => ac({ mini:true, onceki, mesaj:MODUL_AD[ayar.modul] + '’ye geçtik, buradayım.' }), 60);
+    if(tasindi) ortam.zamanla(() => ac({ mini:true, onceki,
+      mesaj:ts.yenile && ts.kaynak === ayar.modul ? 'Tamam, sayfa yenilendi; buradayım.' : MODUL_AD[ayar.modul] + '’ye geçtik, buradayım.' }), 60);
   }
 
   function _sifirla(){
@@ -31729,7 +32117,7 @@ window.LIFEOS.KING = (function(){
     ortam.depo.sil(TASIMA);
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP);
-    menu = null; silOnay = null; silinen = null;
+    menu = null; silOnay = null; silinen = null; bekleyenYetki = null;
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
     sesli = false; dinleyen = null; konusuyor = 0;
   }
@@ -31738,6 +32126,7 @@ window.LIFEOS.KING = (function(){
     kur, ac, kapat, kucult, buyut, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,
     paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, fotoYorumla, GORSEL_SISTEM, TASIMA,
+    yetkiUygula, bekleyenYetki:() => bekleyenYetki,
     CEVAP, cevapBicimi, cevapSec, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
@@ -83696,6 +84085,33 @@ ESP.App = (function(){
           }
           return r;
         });
+      }
+      /* YETKİ (brand/ortak/yetki.js): King'in kapalı kataloğu; eylemi bu
+         modülün kendi kodu uygular. ESP'nin onayları Merkez'den gelen
+         tekliflerdir (yalnız uygulanabilenler). Hesap dışarıda. */
+      if(window.LIFEOS && window.LIFEOS.YETKI){
+        const teklifler = () => (S.ui.hkmIntents || []).filter(n => ESP.Beacon.canApply(n));
+        window.LIFEOS.YETKI.kur({ modul:'esp',
+          tema:{ oku:() => (S.profile && S.profile.theme) || 'system', yaz:async v => { await M.saveProfile({ theme:v }); applyTheme(); refreshAppearance(); render(); } },
+          onaylar:{
+            bekleyen:() => teklifler().map(n => ({ id:String(n.id), metin:n.note || n.kind })),
+            onayla:async id => {
+              const n = teklifler().find(x => String(x.id) === String(id));
+              const r = n ? await ESP.Beacon.resolveIntent(n, 'apply') : { ok:false, error:'Teklif bulunamadı.' };
+              if(r.ok) S.ui.hkmIntents = (S.ui.hkmIntents || []).filter(x => String(x.id) !== String(id));
+              render();
+              return { ok:!!r.ok, why:r.error };
+            },
+            reddet:async id => {
+              const n = (S.ui.hkmIntents || []).find(x => String(x.id) === String(id));
+              const r = n ? await ESP.Beacon.resolveIntent(n, 'dismiss') : { ok:false };
+              if(r.ok) S.ui.hkmIntents = (S.ui.hkmIntents || []).filter(x => String(x.id) !== String(id));
+              render();
+              return { ok:!!r.ok };
+            },
+          },
+          donus:{ al:() => ESP.Store.exportAll(), yukle:v => ESP.Store.importAll(v), sil:() => ESP.Store.clear(),
+            sayi:() => Object.keys(ESP.Store.exportAll().data || {}).length } });
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){

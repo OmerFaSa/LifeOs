@@ -1766,6 +1766,33 @@ ESP.App = (function(){
           return r;
         });
       }
+      /* YETKİ (brand/ortak/yetki.js): King'in kapalı kataloğu; eylemi bu
+         modülün kendi kodu uygular. ESP'nin onayları Merkez'den gelen
+         tekliflerdir (yalnız uygulanabilenler). Hesap dışarıda. */
+      if(window.LIFEOS && window.LIFEOS.YETKI){
+        const teklifler = () => (S.ui.hkmIntents || []).filter(n => ESP.Beacon.canApply(n));
+        window.LIFEOS.YETKI.kur({ modul:'esp',
+          tema:{ oku:() => (S.profile && S.profile.theme) || 'system', yaz:async v => { await M.saveProfile({ theme:v }); applyTheme(); refreshAppearance(); render(); } },
+          onaylar:{
+            bekleyen:() => teklifler().map(n => ({ id:String(n.id), metin:n.note || n.kind })),
+            onayla:async id => {
+              const n = teklifler().find(x => String(x.id) === String(id));
+              const r = n ? await ESP.Beacon.resolveIntent(n, 'apply') : { ok:false, error:'Teklif bulunamadı.' };
+              if(r.ok) S.ui.hkmIntents = (S.ui.hkmIntents || []).filter(x => String(x.id) !== String(id));
+              render();
+              return { ok:!!r.ok, why:r.error };
+            },
+            reddet:async id => {
+              const n = (S.ui.hkmIntents || []).find(x => String(x.id) === String(id));
+              const r = n ? await ESP.Beacon.resolveIntent(n, 'dismiss') : { ok:false };
+              if(r.ok) S.ui.hkmIntents = (S.ui.hkmIntents || []).filter(x => String(x.id) !== String(id));
+              render();
+              return { ok:!!r.ok };
+            },
+          },
+          donus:{ al:() => ESP.Store.exportAll(), yukle:v => ESP.Store.importAll(v), sil:() => ESP.Store.clear(),
+            sayi:() => Object.keys(ESP.Store.exportAll().data || {}).length } });
+      }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'esp', ekran:() => S.route, model:() => ESP.LLM, hkm:() => ESP.Beacon, git:route => go(route),

@@ -353,6 +353,85 @@
       expect(localStorage.getItem(k.TASIMA)).toBe(null);
     }));
 
+    /* Söz 20 (2026-10-17): «King'in her şeye yetkisi olsun; hesabım hariç». */
+    function yetkiSahnesi(){
+      const Y = window.LIFEOS.YETKI;
+      const durum = { tema:'system', kayit:{ a:1 }, bekleyen:[{ id:'p1', metin:'Uyku 7 sa' }], onaylanan:[] };
+      Y.kur({ modul:'spi',
+        tema:{ oku:() => durum.tema, yaz:async v => { durum.tema = v; } },
+        onaylar:{ bekleyen:() => durum.bekleyen, onayla:async id => { durum.onaylanan.push(id); durum.bekleyen = []; return { ok:true }; } },
+        donus:{ al:() => ({ data:durum.kayit }), yukle:async v => { durum.kayit = v.data; }, sil:async () => { durum.kayit = {}; } } });
+      return durum;
+    }
+    it('küçük eylem hemen; «geri al» geri alır', () => sahneyle(async () => {
+      if(!window.LIFEOS.YETKI) return;
+      try{
+        const durum = yetkiSahnesi();
+        const { k } = sahne();
+        k.ac();
+        await k.isle('koyu tema yap');
+        expect(durum.tema).toBe('dark');
+        expect(!!document.querySelector('[data-king="geri-al"]')).toBe(true);
+        await k.isle('geri al');
+        expect(durum.tema).toBe('system');
+      }finally{ window.LIFEOS.YETKI._sifirla(); }
+    }));
+    it('orta eylem önizleme + onay; «evet» de onaylar', () => sahneyle(async () => {
+      if(!window.LIFEOS.YETKI) return;
+      try{
+        const durum = yetkiSahnesi();
+        const { k } = sahne();
+        k.ac();
+        await k.isle('bekleyenleri onayla');
+        expect(durum.onaylanan).toHaveLength(0);
+        expect(k.akis().slice(-1)[0].satirlar).toEqual(['Uyku 7 sa']);
+        await k.isle('evet');
+        expect(durum.onaylanan).toEqual(['p1']);
+      }finally{ window.LIFEOS.YETKI._sifirla(); }
+    }));
+    it('büyük eylem «evet»le olmaz; «Onaylıyorum» ile dönüş noktası alınır, sayfa yenilenir', () => sahneyle(async () => {
+      if(!window.LIFEOS.YETKI) return;
+      const Y = window.LIFEOS.YETKI;
+      try{
+        const durum = yetkiSahnesi();
+        const { k } = sahne();
+        let yenilendi = 0;
+        k._ortam.yenile = () => { yenilendi++; };
+        k.ac();
+        await k.isle('sıfırdan başlayalım');
+        expect(!!document.querySelector('[data-king="yetki-onay"]')).toBe(true);
+        await k.isle('evet');
+        expect(durum.kayit).toEqual({ a:1 });
+        expect(k.akis().slice(-1)[0].metin).toContain('«evet» yetmez');
+        await k.isle('Onaylıyorum');
+        expect(durum.kayit).toEqual({});
+        expect(!!Y.donusNoktasi()).toBe(true);
+        expect(yenilendi).toBe(1);
+        expect(JSON.parse(localStorage.getItem(k.TASIMA)).yenile).toBe(true);
+        /* yenilenen sayfada King küçük kutu olarak açılır */
+        const tasinan = localStorage.getItem(k.TASIMA);
+        const s2 = sahne();
+        localStorage.setItem(k.TASIMA, tasinan);
+        s2.k.kur({ modul:'spi', git:() => {}, ozet:() => [] });
+        expect(s2.k.acikMi() && s2.k.miniMi()).toBe(true);
+        expect(s2.k.akis().slice(-1)[0].metin).toContain('sayfa yenilendi');
+      }finally{ localStorage.removeItem(Y.DONUS); Y._sifirla(); }
+    }));
+    it('hesap işi yapılmaz; vazgeç hiçbir şeyi değiştirmez', () => sahneyle(async () => {
+      if(!window.LIFEOS.YETKI) return;
+      try{
+        const durum = yetkiSahnesi();
+        const { k } = sahne();
+        k.ac();
+        await k.isle('parolamı değiştir');
+        expect(k.akis().slice(-1)[0].metin).toContain('Hesap sayfasından');
+        await k.isle('hepsini onayla');
+        await k.isle('hayır');
+        expect(durum.onaylanan).toHaveLength(0);
+        expect(k.akis().slice(-1)[0].metin).toBe('Tamam, hiçbir şeyi değiştirmedim.');
+      }finally{ window.LIFEOS.YETKI._sifirla(); }
+    }));
+
     /* Söz 19 (2026-10-17): cevap biçimi, sohbeti temizle / kaydet / kayıtlar. */
     it('cevap biçimi: Sesli yazana da okur, Yazılı konuşana da susar; seçim taşınır', () => sahneyle(async () => {
       const okunan = [];

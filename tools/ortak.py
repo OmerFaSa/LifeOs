@@ -295,6 +295,8 @@ DOSYALAR = {
     "tekgun.js":       "js/core",
     "tekgun.css":      "css",
     "tekgun.test.js":  "tests",
+    "yetki.js":        "js/core",
+    "yetki.test.js":   "tests",
     # PUSULA — Kolay LifeOS planinin iki sayisi (KOLAY-PLANI §1, Faz 0, 2026-10-16).
     "pusula.js":       "js/core",
     "pusula.css":      "css",

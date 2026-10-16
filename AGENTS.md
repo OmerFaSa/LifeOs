@@ -30,6 +30,13 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    bölümler, üslup) — ama yalnız kapalı bir katalogdan tipli bir aksiyonla
    ve kodun doğrulamasından geçerek. **Ölçülmüş ya da hesaplanmış** bir
    sayıyı (net, uyku ortalaması, sıralama tahmini) hiçbir ajan değiştiremez.
+   **King'in yetkisi (2026-10-17, depo sahibinin kararı):** King, kişinin
+   kendi hesabı (parola, iki adım, cihazlar, yönetici, e-posta) HARİÇ
+   sistem içindeki her değişikliği kullanıcının açık isteğiyle yapabilir:
+   onaylamak, ayar değiştirmek, bir modülü sıfırdan başlatmak dahil. Yol
+   yine kapalı katalogdur (`brand/ortak/yetki.js`); eylemi modülün kendi
+   kodu uygular, seviyeyi katalog belirler (§1.9) ve büyük eylemden önce
+   dönüş noktası alınır. King hiçbir sayıyı uydurmaz.
 2. **Eksik veri sıfır değildir.** Dört etiket: `ölçüldü / tahmin /
    hesaplandı / veri yok`. Etiketsiz sayı hiçbir katmana girmez.
 3. **Sıfır çalışma zamanı bağımlılığı.** Üç arayüzde çerçeve, paket,

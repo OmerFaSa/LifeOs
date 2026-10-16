@@ -131,7 +131,15 @@
         Temizle    ekrandaki ve bu cihazdaki günün sohbeti silinir; «Geri
                    getir» kalır (küçük aksiyon, AGENTS §1.9).
       Ekranda son altı mesaj görünür; günün tamamı (en çok 120) saklanır,
-      kayda o girer. */
+      kayda o girer.
+  20. YETKİ (depo sahibi, 2026-10-17: «King'in her şeye yetkisi olsun;
+      kişinin kendi hesabı hariç»). Sistem içindeki değişiklik cümlesi
+      LIFEOS.YETKI kataloğuna gider (brand/ortak/yetki.js): küçük eylem
+      hemen uygulanır ve «Geri al» kalır; orta önizleme + «Onayla»; büyük
+      ayrıntılı önizleme + «Onaylıyorum» (ya da düğme) + önce dönüş noktası.
+      «evet» büyük eylemi uygulamaz. Hesap işi yapılmaz, söylenir. Sayfanın
+      yeniden yüklenmesi gereken eylemden sonra King aynı sayfada küçük
+      kutu olarak yeniden açılır. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -199,6 +207,7 @@ window.LIFEOS.KING = (function(){
     git:url => { window.location.href = url; },
     zamanla:(fn, ms) => setTimeout(fn, ms),
     simdi:() => new Date(),
+    yenile:() => { try{ location.reload(); }catch(e){ /* yok */ } },
     hash:() => (typeof location !== 'undefined' ? location.hash : ''),
     hashSil:() => { try{ history.replaceState(null, '', location.pathname + location.search); }catch(e){ /* eski tarayıcı */ } },
     adres:k => (L.KABUK && L.KABUK.adres ? L.KABUK.adres(k) : null),
@@ -280,6 +289,7 @@ window.LIFEOS.KING = (function(){
   let menu = null;            // söz 19: null | 'menu' | 'kayitlar' | { id }
   let silOnay = null;         // söz 19: silinmek üzere seçilen kayıt
   let silinen = null;         // söz 19: temizlenen sohbet («Geri getir»)
+  let bekleyenYetki = null;   // söz 20: onay bekleyen orta/büyük eylem
   const FOTO_EN_BUYUK = 15 * 1024 * 1024;
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
@@ -933,6 +943,22 @@ window.LIFEOS.KING = (function(){
   async function isle(metin){
     /* Söz 8: bekleyen soruya yazıyla cevap («evet», «hayır»). */
     const t0 = kucuk(metin);
+    /* Söz 20: büyük eylem yalnız açık onayla. */
+    if(bekleyenYetki && /^onayl[ıi]yorum[.!]?$/.test(t0)){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      await yetkiUygula();
+      return { tur:'yetki' };
+    }
+    if(bekleyenYetki && (EVET.test(t0) || HAYIR.test(t0))){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      if(HAYIR.test(t0)){ vazgec(); return { tur:'hayir' }; }
+      if(bekleyenYetki.seviye === 'buyuk'){
+        soyle('Bu büyük bir değişiklik; «evet» yetmez. «Onaylıyorum» yaz ya da düğmeye dokun.');
+        return { tur:'yetki-bekliyor' };
+      }
+      await yetkiUygula();
+      return { tur:'yetki' };
+    }
     if((bekleyen || bekleyenGit || bekleyenIlet) && (EVET.test(t0) || HAYIR.test(t0))){
       akis.push({ kim:'sen', metin:String(metin).trim() });
       if(EVET.test(t0)){ if(bekleyen) await kaydet(); else if(bekleyenIlet) await ilet(); else gitOnayla(); }
@@ -944,6 +970,27 @@ window.LIFEOS.KING = (function(){
       akis.push({ kim:'sen', metin:String(metin).trim() });
       await geriAlYap();
       return { tur:'geri-al' };
+    }
+    /* Söz 20: sistem içindeki değişiklik kataloğa (yetki.js). */
+    const Y = yetkiKatalog();
+    const yn = Y && !paylasim ? Y.anla(metin) : null;
+    if(yn){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenYetki = null; cipler = null;
+      if(yn.tur === 'hesap'){ soyle(yn.metin); return { tur:'yetki-hesap' }; }
+      if(yn.tur === 'olumsuz'){ soyle('Olumsuz bir istek; hiçbir şeyi değiştirmedim. Ne istediğini olumlu söylersen yaparım.'); return { tur:'yetki-olumsuz' }; }
+      if(yn.tur === 'baska'){ soyle(yn.metin); return { tur:'yetki-baska', modul:yn.modul }; }
+      if(yn.tur === 'liste'){
+        cipler = yn.sayi ? [{ is:'yetki-hepsi', ad:'Hepsini onayla' }] : null;
+        soyle(yn.metin, yn.satirlar && yn.satirlar.length ? yn.satirlar : null);
+        return { tur:'yetki-liste' };
+      }
+      if(yn.seviye === 'kucuk'){ await yetkiUygula(yn); return { tur:'yetki', seviye:'kucuk' }; }
+      bekleyenYetki = yn;
+      cipler = [{ is:'yetki-onay', ad:yn.seviye === 'buyuk' ? 'Dönüş noktası al ve uygula' : 'Onayla' }, { is:'vazgec', ad:'Vazgeç' }];
+      soyle(yn.onizle.metin, yn.onizle.satirlar || null, null,
+        yn.seviye === 'buyuk' ? 'Büyük değişiklik: «Onaylıyorum» yaz ya da düğmeye dokun.' : 'Onaylıyor musun?');
+      return { tur:'yetki-bekliyor', seviye:yn.seviye };
     }
     const y = yorumla(metin);
     if(y.tur === 'bos') return y;
@@ -1041,8 +1088,34 @@ window.LIFEOS.KING = (function(){
   function vazgec(){
     const git0 = !!bekleyenGit;
     const foto0 = !!bekleyenFoto;
-    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; cipler = null;
-    soyle(git0 || foto0 ? 'Tamam, buradayım.' : 'Tamam, eklemedim.');
+    const yetki0 = !!bekleyenYetki;
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; bekleyenYetki = null; cipler = null;
+    soyle(yetki0 ? 'Tamam, hiçbir şeyi değiştirmedim.' : git0 || foto0 ? 'Tamam, buradayım.' : 'Tamam, eklemedim.');
+  }
+
+  /* ---------- söz 20: yetki ---------- */
+  function yetkiKatalog(){
+    const Y = L.YETKI;
+    return Y && typeof Y.kuruluMu === 'function' && Y.kuruluMu() ? Y : null;
+  }
+  async function yetkiUygula(n){
+    n = n || bekleyenYetki;
+    bekleyenYetki = null; cipler = null;
+    const Y = yetkiKatalog();
+    if(!Y || !n) return null;
+    const bek = { kim:'king', bekliyor:true, metin:'' };
+    akis.push(bek);
+    ciz(false);
+    const r = await Y.uygula(n);
+    akis = akis.filter(m => m !== bek);
+    if(r.ok && typeof r.geriAl === 'function'){ sonGeriAl = r.geriAl; cipler = [{ is:'geri-al', ad:'Geri al' }]; }
+    soyle(r.metin, r.satirlar && r.satirlar.length ? r.satirlar : null);
+    if(r.ok && r.yenile){
+      /* Sayfa yeniden yüklenince King aynı sayfada küçük kutu olarak açılır. */
+      ortam.depo.yaz(TASIMA, Object.assign({}, ortam.depo.oku(TASIMA) || {}, { acik:true, mini:true, kaynak:ayar.modul, yenile:true, zaman:Date.now() }));
+      ortam.zamanla(() => ortam.yenile(), 1400);
+    }
+    return r;
   }
   function gitOnayla(){
     const h = bekleyenGit;
@@ -1334,6 +1407,8 @@ window.LIFEOS.KING = (function(){
         if(is === 'foto-yorum'){ fotoYorumla(); return; }
         if(is === 'sohbet'){ sesliSohbetAc(); ciz(false); return; }
         if(is === 'geri-al'){ geriAlYap(); return; }
+        if(is === 'yetki-onay'){ yetkiUygula(); return; }
+        if(is === 'yetki-hepsi'){ const Y = yetkiKatalog(); const n = Y && Y.anla('hepsini onayla'); if(n && n.tur === 'eylem') yetkiUygula(n); return; }
         if(is === 'menu'){ menuAc('menu'); return; }
         if(is === 'kayitlar'){ menuAc('kayitlar'); return; }
         if(is === 'sohbet-kaydet'){ menu = null; sohbetiKaydet(); return; }
@@ -1411,7 +1486,7 @@ window.LIFEOS.KING = (function(){
        sohbetiyle açılır; kendi modülünün eski taşıması yalnız silinir. */
     const ts = ortam.depo.oku(TASIMA);
     if(ts) ortam.depo.sil(TASIMA);
-    const tasindi = !!(ts && ts.acik && ts.kaynak && ts.kaynak !== ayar.modul
+    const tasindi = !!(ts && ts.acik && ts.kaynak && (ts.kaynak !== ayar.modul || (ts.yenile && Date.now() - (Number(ts.zaman) || 0) < 60 * 1000))
       && Date.now() - (Number(ts.zaman) || 0) < 12 * 3600 * 1000);
     const onceki = tasindi && Array.isArray(ts.akis) ? ts.akis : null;
     let hedef = null;
@@ -1427,7 +1502,8 @@ window.LIFEOS.KING = (function(){
       }, 60);
       return;
     }
-    if(tasindi) ortam.zamanla(() => ac({ mini:true, onceki, mesaj:MODUL_AD[ayar.modul] + '’ye geçtik, buradayım.' }), 60);
+    if(tasindi) ortam.zamanla(() => ac({ mini:true, onceki,
+      mesaj:ts.yenile && ts.kaynak === ayar.modul ? 'Tamam, sayfa yenilendi; buradayım.' : MODUL_AD[ayar.modul] + '’ye geçtik, buradayım.' }), 60);
   }
 
   function _sifirla(){
@@ -1441,7 +1517,7 @@ window.LIFEOS.KING = (function(){
     ortam.depo.sil(TASIMA);
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP);
-    menu = null; silOnay = null; silinen = null;
+    menu = null; silOnay = null; silinen = null; bekleyenYetki = null;
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
     sesli = false; dinleyen = null; konusuyor = 0;
   }
@@ -1450,6 +1526,7 @@ window.LIFEOS.KING = (function(){
     kur, ac, kapat, kucult, buyut, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,
     paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, fotoYorumla, GORSEL_SISTEM, TASIMA,
+    yetkiUygula, bekleyenYetki:() => bekleyenYetki,
     CEVAP, cevapBicimi, cevapSec, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),

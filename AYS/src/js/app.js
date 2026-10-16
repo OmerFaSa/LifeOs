@@ -1631,6 +1631,21 @@ R.App = (function(){
           if(document.hidden){ try{ R.Takvim.planla(); }catch(e){} }
         });
       }
+      /* YETKİ (brand/ortak/yetki.js): King'in kapalı kataloğu; eylemi bu
+         modülün kendi kodu uygular. Hesap dışarıda. */
+      if(window.LIFEOS && window.LIFEOS.YETKI){
+        window.LIFEOS.YETKI.kur({ modul:'ays',
+          tema:{ oku:() => S.profile.theme || 'system', yaz:async v => { S.profile.theme = v; await M.saveProfile(); applyTheme(); render(); } },
+          onaylar:{
+            bekleyen:() => R.Proposals.pending().map(p => ({ id:p.id,
+              metin:((R.ACTIONS || []).find(a => a.id === p.action) || {}).title || p.reason || p.action })),
+            onayla:async id => { const r = await R.Proposals.approve(id); render(); return r; },
+            reddet:async id => { const r = await R.Proposals.reject(id); render(); return r; },
+          },
+          donus:{ al:() => R.Store.exportAll(), yukle:v => R.Store.importAll(v), sil:() => R.Store.clear(),
+            sayi:() => Object.keys(R.Store.exportAll().data || {}).length,
+            foto:'Bu cihazdaki soru fotoğraflarına dokunulmaz.' } });
+      }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route, model:() => R.LLM,
