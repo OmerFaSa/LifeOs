@@ -2,6 +2,9 @@
    üç arayüze `tools/ortak.py --yay` ile kopyalanır. «Ne yaptın?» kutusunun
    örnek çipleriyle aynı dil: yuvarlak, sakin, tek sıra; dar ekranda sarılır. */
 .kisayol{ display:flex; flex-wrap:wrap; gap:8px; margin:-4px 0 16px; }
+.giris .kisayol{ margin:0; gap:6px; }
+.giris .kisayol__d{ min-height:32px; padding:4px 12px; font-size:13px; background:var(--surface-2); box-shadow:none; }
+.giris .kisayol__d:hover{ color:var(--text); background:color-mix(in srgb, var(--surface-2) 70%, var(--border)); }
 .kisayol__d{ display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:6px 14px; border-radius:999px;
   border:0; background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); color:var(--text);
   font:inherit; font-size:13.5px; font-weight:500; cursor:pointer; transition:background .2s ease, transform .2s ease; }

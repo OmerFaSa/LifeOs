@@ -1998,3 +1998,11 @@ html .site--v5 .ledger:not(.ledger .ledger){ row-gap:var(--raf-ara); }
 .site--v5 .gizle-uyari-rozet{
   display:inline-block; width:7px; height:7px; min-width:0; padding:0; margin-left:8px;
   border-radius:50%; background:var(--bad); font-size:0; line-height:0; vertical-align:middle; }
+
+/* Sade Bugün (2026-10-16): «Ne yaptın?» kutusu varken telefondaki yüzen
+   «Hızlı ekle» düğmesi aynı işi tekrar ediyor ve içeriğin üstüne biniyordu;
+   o ekranda gizlenir (King, kutudaki «King'e sor» ile açılır). Öteki
+   ekranlarda yerinde. */
+@media (max-width:679px){
+  body:has(.giris) .hizliekle{ display:none; }
+}

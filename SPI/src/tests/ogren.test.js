@@ -166,7 +166,10 @@
       expect(typeof SP.Screens.meals.render).toBe('function');
       const htmlMeals = await SP.Screens.meals.render();
       expect(typeof htmlMeals).toBe('string');
-      expect(htmlMeals.includes('Akıllı öneri')).toBeTruthy();
+      expect(htmlMeals.includes('Besin önerileri')).toBeTruthy();
+      /* Sade (2026-10-16): en çok dört öneri çipi, «⚡ Akıllı öneri:» etiketi yok. */
+      expect(htmlMeals.includes('Akıllı öneri:')).toBe(false);
+      expect((htmlMeals.match(/data-act="quick-add-food"/g) || []).length <= 4).toBe(true);
       expect(htmlMeals.includes('quick-add-food')).toBeTruthy();
     });
 

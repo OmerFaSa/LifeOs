@@ -51,9 +51,8 @@ SP.Screens.meals = (function(){
     }
     if(!list.length) return '';
     return html`
-      <div class="meal-suggs row wrap gap-6 mt-8 pt-6" style="border-top:1px dashed var(--border)" aria-label="Akıllı besin önerileri">
-        <span class="tiny dim self-center mr-2" style="letter-spacing:0.04em">⚡ Akıllı öneri:</span>
-        ${map(list, f => {
+      <div class="meal-suggs row wrap gap-6 mt-8" aria-label="Besin önerileri">
+        ${map(list.slice(0, 4), f => {
           const p = (f.portions || [])[0];
           const pName = p ? p.label : '100g';
           return html`<button type="button" class="btn btn--xs btn--ghost chip-sugg"
@@ -70,7 +69,6 @@ SP.Screens.meals = (function(){
   function quickEntry(){
     return K.Entry({
       label:'Öğün ekle', hint:'portion',
-      meta:'tek satır, tek Enter',
       action:html`${K.Button({ label:'Besin ara', act:'open-search' })}
         ${K.Button({ label:'Fotoğraftan', icon:'camera', act:'open-photo' })}`,
       body:html`
@@ -281,7 +279,7 @@ SP.Screens.meals = (function(){
     const bugun = M.mealsOf(shownDate()).map(m => (m.items || []).map(x => x.foodId).sort().join('+'));
     /* Bileşenin kendi künyesi kutunun adını («Sık öğünler · tek dokunuş»)
        ikinci kez yazıyordu; yerine pencerenin kendisi. */
-    return vkutu('Sık öğünler', 'tek dokunuş', VT().ogunSablonlari({ act:'sablon-ekle', baslik:'son 30 gün', sablonlar:sablonlar().map(x => {
+    return vkutu('Sık öğünler', '', VT().ogunSablonlari({ act:'sablon-ekle', baslik:'son 30 gün', sablonlar:sablonlar().map(x => {
       const sl = SP.MEAL_SLOTS.find(y => y.id === x.slot);
       return { ad:sl ? sl.label : x.slot, icerik:x.ids.map(id => SP.FOOD_BY_ID[id].name.toLocaleLowerCase('tr-TR')).join(' · '),
         on:bugun.indexOf(x.anahtar) >= 0, data:{ 'data-date':x.ornek.date, 'data-id':x.ornek.id } };
@@ -838,8 +836,7 @@ SP.Screens.meals = (function(){
             list = SP.FOODS.filter(f => U.norm(f.name + ' ' + (f.aliases || []).join(' ')).indexOf(n) >= 0).slice(0, 6);
           }
           if(list.length){
-            cont.innerHTML = '<span class="tiny dim self-center mr-2" style="letter-spacing:0.04em">⚡ Akıllı öneri:</span>' +
-              list.map(f => {
+            cont.innerHTML = list.slice(0, 4).map(f => {
                 const p = (f.portions || [])[0];
                 const pName = p ? p.label : '100g';
                 return `<button type="button" class="btn btn--xs btn--ghost chip-sugg"

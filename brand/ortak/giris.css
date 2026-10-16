@@ -28,7 +28,9 @@
 .giris__onizle-ad{ font-size:12px; color:var(--text-2); }
 .giris__onizle b{ font-size:15px; line-height:1.45; }
 .giris__onizle small{ font-size:12.5px; color:var(--text-2); line-height:1.45; }
-.giris__dugmeler{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+.giris__dugmeler{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; align-items:center; }
+.giris__kisa{ font-size:12px; color:var(--text-2); }
+.giris__sonuc .giris__ornekler{ margin-top:8px; }
 .giris__mesaj{ margin:0; font-size:13.5px; line-height:1.5; }
 .giris__mesaj--ok{ color:var(--ok, var(--text)); }
 .giris__mesaj--uyari{ color:var(--text-2); }

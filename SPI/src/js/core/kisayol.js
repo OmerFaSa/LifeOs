@@ -11,8 +11,8 @@
    Depo sahibi (2026-10-16): «bir sürü kullanım kolaylığı, kısa yollar koy»;
    sonra: «klavyeden ziyade ekranda kısa yollar».
 
-   EKRANDA (asıl yüz): Bugün'de «Ne yaptın?» kutusunun altında tek sıra
-   düğme. Modül kendi düğmelerini verir (`dugmeler()`), sonuna her modülde
+   EKRANDA (asıl yüz): Bugün'de «Ne yaptın?» kutusunun İÇİNDE, girdinin
+   altında tek sıra düğme (giris.js söz 6: örnek çiplerinin yerinde). Modül kendi düğmelerini verir (`dugmeler()`), sonuna her modülde
    aynı iki düğme eklenir: Notlarım ve King'e sor. Bir düğme üç şeyden
    birini yapar: bir ekrana gider (rota), «Ne yaptın?» kutusunu başlangıç
    sözüyle doldurur (doldur — yazmaz, kullanıcı tamamlayıp önizler) ya da

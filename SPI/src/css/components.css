@@ -2499,3 +2499,10 @@ body.is-dragging .drop.is-over{
 @container satir (max-width:620px){
   .panelgrid{ grid-template-columns:minmax(0,1fr); }
 }
+
+/* SAKİN YÜZ (2026-10-16): öğün satırının «Çıkar» düğmesi fareli cihazda
+   satırın üstüne gelince görünür; dokunmatikte ve klavye odağında hep görünür. */
+@media (hover:hover){
+  .mealitem > :last-child{ opacity:0; transition:opacity .15s ease; }
+  .mealitem:hover > :last-child, .mealitem > :last-child:focus-visible, .mealitem:focus-within > :last-child{ opacity:1; }
+}

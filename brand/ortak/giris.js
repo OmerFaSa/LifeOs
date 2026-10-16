@@ -30,7 +30,14 @@
      4. YAZARKEN ODAK KAYBOLMAZ. Önizleme ve sonuç kutunun içinde güncellenir;
         sayfa baştan çizilmez. Mikrofon varsa söylenen kutuya yazılır.
      5. MODÜL ONSUZ DA ÇALIŞIR. Kurulmadıysa kutu hiç çizilmez; King ve
-        palet kendi yollarıyla sürer. */
+        palet kendi yollarıyla sürer.
+     6. AZ SÜRTÜNME (2026-10-16, «veri sürtünmesini azalt, kalabalık
+        olmasın»). Önizleme görünürken aynı satırda yeniden Enter «Kaydet»
+        demektir (açık onay; metin değiştiyse yeniden önizlenir). Kayıttan
+        sonra imleç kutuda kalır, sıradaki giriş hemen yazılır. Kutunun
+        altında tek sıra çip durur: modülün kısa yolları (kisayol.js) varsa
+        onlar, yoksa örnekler; örnek her zaman yer tutucuda ve «anlayamadım»
+        mesajının altında. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -75,9 +82,11 @@ window.LIFEOS.GIRIS = (function(){
         + '<div class="giris__dugmeler">'
         + '<button type="button" class="btn btn--sm btn--primary" data-giris="kaydet"><span class="btn__label">Kaydet</span></button>'
         + '<button type="button" class="btn btn--sm btn--ghost" data-giris="vazgec"><span class="btn__label">Vazgeç</span></button>'
+        + '<span class="giris__kisa">ya da yeniden Enter</span>'
         + '</div></div>';
     }
-    if(mesaj) return '<p class="giris__mesaj giris__mesaj--' + mesaj.tur + '" role="status">' + kac(mesaj.metin) + '</p>';
+    if(mesaj) return '<p class="giris__mesaj giris__mesaj--' + mesaj.tur + '" role="status">' + kac(mesaj.kisa || mesaj.metin) + '</p>'
+      + (mesaj.tur === 'uyari' && mesaj.ornekli ? ornekHtml() : '');
     return '';
   }
 
@@ -87,6 +96,16 @@ window.LIFEOS.GIRIS = (function(){
     return '<div class="giris__ornekler" role="group" aria-label="Örnekler">'
       + l.map(o => '<button type="button" class="giris__ornek" data-giris-ornek="' + kac(o) + '">' + kac(o) + '</button>').join('')
       + '</div>';
+  }
+
+  function yerTutucu(){
+    const o = (ayar && ayar.ornekler) || [];
+    return o.length ? 'Örneğin: ' + o[0] : 'Yaz ya da söyle; önce gösteririm, onaylarsan kaydederim';
+  }
+  /* Kısa yollar (kisayol.js) kutunun içinde, örneklerin yerinde (söz 6). */
+  function seritHtml(){
+    const K = window.LIFEOS.KISAYOL;
+    return K && K.kuruluMu && K.kuruluMu() && K.seritHtml ? K.seritHtml() : '';
   }
 
   /* Bugün'deki kutu. Kurulmadıysa boş (söz 5). */
@@ -103,12 +122,12 @@ window.LIFEOS.GIRIS = (function(){
       + '<form class="giris__satir" data-giris-form data-ayar-disi>'
       + '<label class="giris__etiket" for="giris-girdi">Ne yaptın?</label>'
       + '<input class="giris__girdi" id="giris-girdi" type="text" autocomplete="off" enterkeyhint="send"'
-      + ' placeholder="Yaz ya da söyle; önce gösteririm, onaylarsan kaydederim"/>'
+      + ' placeholder="' + kac(yerTutucu()) + '"/>'
       + mik
       + '<button type="submit" class="giris__gonder" aria-label="Önizle"><svg viewBox="0 0 24 24" aria-hidden="true">'
       + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button>'
       + '</form>'
-      + ornekHtml()
+      + (seritHtml() || ornekHtml())
       + '<div class="giris__sonuc" data-giris-sonuc aria-live="polite">' + sonucHtml() + '</div>'
       + '</div>';
   }
@@ -125,13 +144,17 @@ window.LIFEOS.GIRIS = (function(){
   function gonder(metin){
     const t = String(metin || '').trim();
     if(!t) return null;
+    /* Söz 6: önizlenen metinde yeniden Enter = Kaydet. */
+    if(bekleyen && bekleyen.yazilan === t){ const p0 = bekleyen.p; kaydet(); return p0; }
     const p = onizle(t);
     if(p){ bekleyen = { yazilan:t, p }; mesaj = null; }
     else{
       bekleyen = null;
       const o = (ayar && ayar.ornekler) || [];
-      mesaj = { tur:'uyari', metin:'Bunu anlayamadım; tahminle kaydetmiyorum.'
-        + (o.length ? ' Şöyle yazabilirsin: «' + o.slice(0, 3).join('», «') + '».' : '') };
+      const bas = 'Bunu anlayamadım; tahminle kaydetmiyorum.';
+      /* metin tam cümle (durum() okuyanlar için); ekranda örnekler çip olur */
+      mesaj = { tur:'uyari', ornekli:o.length > 0, kisa:o.length ? bas + ' Şöyle yazabilirsin:' : bas,
+        metin:bas + (o.length ? ' Şöyle yazabilirsin: «' + o.slice(0, 3).join('», «') + '».' : '') };
     }
     tazele();
     return p;
@@ -146,7 +169,7 @@ window.LIFEOS.GIRIS = (function(){
       r = await b.p.kaydet();
       mesaj = { tur:'ok', metin:(r && String(r)) || 'Kaydedildi.' };
       const g = typeof document !== 'undefined' ? document.getElementById('giris-girdi') : null;
-      if(g) g.value = '';
+      if(g){ g.value = ''; try{ g.focus(); }catch(err){ /* odak yok */ } }
     }catch(e){
       mesaj = { tur:'uyari', metin:'Kaydedilemedi: ' + ((e && e.message) || 'bilinmeyen hata') };
     }

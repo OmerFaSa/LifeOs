@@ -216,7 +216,6 @@ SP.Screens.today = (function(){
   function quickEntry(){
     return K.Entry({
       label:'Öğün ekle', hint:'portion',
-      meta:'tek satır, tek Enter',
       note:'Ev ölçüsünden gelen gramaj «tahmin» olarak işaretlenir. '
         + 'Tarttıysan «150 g tavuk» yaz, «ölçüldü» olur.',
       action:K.Button({ label:'Bütün öğünler', act:'go', data:{ 'data-route':'meals' } }),
@@ -832,8 +831,11 @@ SP.Screens.today = (function(){
         </div>` });
   }
 
+  /* Sade Bugün (2026-10-16): öğün de «Ne yaptın?» kutusundan girilir
+     («2 yumurta 1 çay»); bu kutu yalnız ortak kapı kurulmadıysa çizilir.
+     Öğün ekranındaki ayrıntılı giriş yerinde. */
   function OgunKutusu(){
-    return K.Kutu({ ad:'Öğün ekle', yuva:'tek satır, tek Enter',
+    return K.Kutu({ ad:'Öğün ekle',
       govde:html`<div class="quick">
           ${K.Mic({ target:'quick-meal' })}
           ${K.Input({ id:'quick-meal', placeholder:'1 tabak etli kuru fasulye, 1 bardak ayran',
@@ -1043,14 +1045,13 @@ SP.Screens.today = (function(){
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '')}
-          ${raw(window.LIFEOS && window.LIFEOS.KISAYOL ? window.LIFEOS.KISAYOL.seritHtml() : '')}
           ${when(acil, () => acil.kart)}
           ${when(vakti, () => K.Ledger([vakti]))}
           ${raw(soruKart)}
           ${when(soru, () => K.Ledger([soru]))}
           ${OlcumKutusu()}
           <div class="bugun__cift">${EnerjiKutusu()}${SuKutusu()}</div>
-          ${OgunKutusu()}
+          ${(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu()) ? '' : OgunKutusu()}
         </section>
       </div>
       <div class="bugun__sag">

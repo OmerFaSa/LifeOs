@@ -1343,7 +1343,6 @@ R.Screens.today = (function(){
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${raw(window.LIFEOS && window.LIFEOS.GIRIS ? window.LIFEOS.GIRIS.kutuHtml() : '')}
-          ${raw(window.LIFEOS && window.LIFEOS.KISAYOL ? window.LIFEOS.KISAYOL.seritHtml() : '')}
           ${when(acil, () => acil.kart)}
           ${R.Setup.needed() ? raw(R.Setup.card()) : html`<div class="kahraman" data-oz="042">${NextUpCard()}</div>`}
           ${when(runningBlock(), () => html`<div id="geri-sayim" class="bugun__vitrin">${raw(geriSayimHtml(runningBlock()))}</div>`)}

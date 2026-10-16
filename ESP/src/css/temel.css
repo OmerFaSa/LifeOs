@@ -169,3 +169,18 @@
 .sayfabasi__ozet{ font-size:14px; color:var(--text-2); }
 /* Tablo satırları: ince çizgi, tablo hizalı rakam. */
 .table td, .table th{ border-bottom:1px solid var(--border); }
+
+/* SAKİN YÜZ (2026-10-16, depo sahibi: «göz kirliliğini kaldır»).
+   Bilgi düğmeleri (ⓘ) ve dönen kartın noktaları her an tam görünür
+   durunca ekran noktalı bir gürültüye dönüyordu. Fareli cihazda soluk
+   durur, üstüne gelince ya da klavyeyle odaklanınca tam görünür; dokunmatik
+   ekranda (hover yok) olduğu gibi kalır, hiçbir düğme kalkmaz. */
+@media (hover:hover){
+  .hint, .sayfabasi__bilgi-dugme, .donen__noktalar{ opacity:.4; transition:opacity .2s ease; }
+  :hover > .hint, .hint:focus-visible,
+  .sayfabasi:hover .sayfabasi__bilgi-dugme, .sayfabasi__bilgi-dugme:focus-visible, .sayfabasi__bilgi.is-acik .sayfabasi__bilgi-dugme,
+  .donen:hover .donen__noktalar, .donen:focus-within .donen__noktalar{ opacity:1; }
+}
+@media (hover:hover) and (prefers-reduced-motion:reduce){
+  .hint, .sayfabasi__bilgi-dugme, .donen__noktalar{ transition:none; }
+}

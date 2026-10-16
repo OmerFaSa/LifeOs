@@ -66,6 +66,33 @@
       }finally{ k.remove(); G()._sifirla(); }
     });
 
+    it('önizlenen metinde yeniden Enter kaydeder; metin değiştiyse yeniden önizler', async () => {
+      const { yazilan } = sahteKur();
+      try{
+        G().gonder('uyku 7');
+        expect(yazilan.length).toBe(0);
+        G().gonder('uyku 8');            /* değişti: yeni önizleme, kayıt yok */
+        expect(yazilan.length).toBe(0);
+        expect(G().durum().bekleyen).toBe('Uyku: 8 sa');
+        G().gonder('uyku 8');            /* aynı metin: açık onay */
+        await new Promise(r => setTimeout(r, 0));
+        expect(yazilan).toEqual(['uyku 8']);
+        expect(G().durum().bekleyen).toBe(null);
+      }finally{ G()._sifirla(); }
+    });
+
+    it('anlaşılmayınca örnek çipleri mesajın altında; yer tutucu ilk örnek', () => {
+      sahteKur();
+      const k = document.createElement('div');
+      try{
+        k.innerHTML = G().kutuHtml();
+        document.body.appendChild(k);
+        expect(k.querySelector('#giris-girdi').getAttribute('placeholder')).toBe('Örneğin: uyku 7');
+        G().gonder('falan filan');
+        expect(!!k.querySelector('[data-giris-sonuc] [data-giris-ornek]')).toBe(true);
+      }finally{ k.remove(); G()._sifirla(); }
+    });
+
     it('King kendi veri kapısı yoksa bu kapıyı kullanır', () => {
       const K = window.LIFEOS.KING;
       sahteKur();
