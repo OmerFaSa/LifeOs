@@ -23,7 +23,6 @@ SP.Screens.meeting = (function(){
     const sel = Math.min(S.ui.meetingAgenda, rows.length - 1);
     return K.Card({
       title:'Gündem',
-      sub:'Puanlama kural motorundan gelir; model gündem seçmez',
       body:html`<div class="list">${map(rows, (a, i) => html`
         <button class="${cls('listitem', 'listitem--tap', i === sel && 'is-on')}"
           data-act="pick-agenda" data-i="${i}">
@@ -38,8 +37,7 @@ SP.Screens.meeting = (function(){
         </button>`)}</div>`,
       foot:html`${K.Button({ label:running ? 'Toplantı sürüyor…' : 'Toplantıyı başlat',
         tone:'primary', size:'sm', act:'run-meeting', disabled:running })}
-        <span class="small dim">Beş çağrı harcanır: dört uzman ve kapanış.
-          Model kapalıysa hepsi kural motoru cümlesidir.</span>`,
+        <span class="small dim">Dört uzman konuşur, Patron kapatır.</span>`,
     });
   }
 
@@ -213,6 +211,10 @@ SP.Screens.meeting = (function(){
 
   return {
     id:'meeting',
+    /* Sade (2026-10-16): öncelik tablosu sabit bir kuraldır, her açılışta
+       açık durmaz; başlığına dokununca açılır. Gündem ve modelin rolü
+       ekranın ⓘ kartında (office, no-model ipuçları). */
+    kucukVarsayilan:['çelişki-nasıl-çözülür'],
     title:'Toplantı',
     subtitle(){
       if(running) return 'Toplantı sürüyor…';

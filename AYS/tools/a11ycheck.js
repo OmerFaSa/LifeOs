@@ -69,8 +69,15 @@ async function portMuhafizi(portlar, ipucu){
   await portMuhafizi([PORT], 'node tools/a11ycheck.js <port>');
   const srv = spawn('python3', ['-m', 'http.server', String(PORT)],
     { cwd:ROOT, stdio:'ignore' });
-  await wait(900);
   const base = 'http://localhost:' + PORT;
+  /* Sabit 900 ms yerine sunucu cevap verene kadar dene (2026-10-16): yuklu
+     makinede python3 gec kalkiyor, goto ERR_CONNECTION_REFUSED veriyordu.
+     Govde tuketilir; tuketilmezse Node 24 undici koşucuyu düşürüyordu. */
+  for(let i = 0; i < 60; i++){
+    const ok = await fetch(base + '/src/index.html').then(r => r.arrayBuffer().then(() => r.ok)).catch(() => false);
+    if(ok) break;
+    await wait(250);
+  }
   const problems = [];
   const browser = await chromium.launch({
     executablePath:process.env.CHROMIUM_PATH || undefined });

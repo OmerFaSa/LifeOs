@@ -6202,6 +6202,15 @@ body.is-dragging .drop.is-over{
 .okart__baslik{ margin:0; font-size:var(--fs-md); font-weight:600; letter-spacing:-.01em; }
 .okart__alt{ margin:0; font-size:var(--fs-sm); color:var(--text-2); }
 .okart__eylem{ display:flex; flex-wrap:wrap; gap:var(--sp-2); margin-top:var(--sp-1); }
+/* Sıkı kart (2026-10-16, «kalabalık, göz kirliliği»): seviye rozeti kendi
+   satırında yalnız başına durmaz, başlığın sağına oturur; kart iki satır
+   kısalır. Sırayı değiştirmez: ekran okuyucu yine rozet → başlık okur. */
+.okart{ grid-template-columns:minmax(0,1fr) auto; column-gap:var(--sp-3); }
+.okart > *{ grid-column:1 / -1; }
+.okart > .okart__bas{ grid-column:2; grid-row:1; align-self:start; }
+.okart > .okart__baslik{ grid-column:1; grid-row:1; }
+.okart > .okart__bas:has(.okart__kaynak){ grid-column:1 / -1; grid-row:auto; }
+.okart > .okart__bas:has(.okart__kaynak) ~ .okart__baslik{ grid-row:auto; }
 
 /* ================================================================
    114 · GEREKÇE ÇUBUĞU — sayı ve eşik koddan; modelin cümlesi ayrı
@@ -6975,7 +6984,12 @@ body.is-dragging .drop.is-over{
 /* Onaylar rafı (pano 36): bekleyenler solda, «Son kararlar» sağda. */
 .onaylar-raf{ display:grid; grid-template-columns:minmax(0,1fr); gap:16px; align-items:start; }
 @media (min-width:1100px){ .onaylar-raf{ grid-template-columns:minmax(0,1fr) 340px; } }
-.okart-sar{ display:flex; flex-direction:column; gap:6px; }
+.okart-sar{ display:flex; flex-direction:column; gap:4px; }
+/* Onaylar listesi: kartlar arası ince çizgi, iç boşluk dar; «kim · neden»
+   satırı kartın hemen altında, ayrı bir blok gibi durmaz. */
+.okart-sar + .okart-sar{ border-top:1px solid var(--border); padding-top:var(--sp-3); margin-top:var(--sp-1); }
+.okart-sar > .okart{ padding:var(--sp-2) 0 0; border:0; background:none; box-shadow:none; gap:6px; }
+.okart-sar > .okart__kim{ padding-bottom:var(--sp-2); }
 .okart__kim{ margin:0; font-size:12.5px; color:var(--text-2); display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 
 /* Son ölçümler (015 · 026): ad solda, değer ve yaşı sağda. */
@@ -16343,7 +16357,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'c089d57e', at:'2026-10-16 00:19', dirty:true };
+R.BUILD = { id:'a853ee82', at:'2026-10-16 00:26', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -95425,13 +95439,15 @@ R.Screens = R.Screens || {};
     if(!N) return '';
     const metin = N.oku(subject.id, topic.id);
     const n = N.kartAdaylari(metin).length;
-    return K.Card({ title:'Notum', sub:'kendiliğinden kaydedilir · Dersler › konuda da görünür',
+    /* Sade (2026-10-16): «kendiliğinden kaydedilir» alttaki durum satırında,
+       kart sözdizimi («::») ⓘ'de değil yer tutucuda tek örnekle. */
+    return K.Card({ title:'Notum',
       actions:K.Button({ label:kartDugmeEtiketi(n), icon:'cards', size:'sm', tone:'ghost', act:'konu-notu-kart',
         data:{ id:'konu-notu-kart' }, disabled:!n, title:'«ön :: arka» biçimindeki satırlar tekrar kartı olur' }),
       body:html`<textarea class="input konu-notu" id="konu-notu" rows="${Math.min(14, Math.max(4, metin.split('\n').length + 1))}"
           maxlength="${N.SINIR}" data-change="konu-notu" data-debounce="600" aria-label="${topic.name + ' konusu için notum'}"
-          placeholder="Kendi cümlelerinle yaz. İpucu: anlatımda bir cümleyi seç, «Nota ekle»ye bas. «Zincir kuralı :: dıştakinin türevi × içtekinin türevi» gibi satırlar tekrar kartı olur.">${metin}</textarea>
-        <p class="tiny dim mt-6 mb-0" id="konu-notu-durum" aria-live="polite">${metin ? metin.length + ' / ' + N.SINIR + ' karakter' : 'Henüz not yok.'}</p>` });
+          placeholder="Kendi cümlelerinle yaz. «soru :: cevap» satırı tekrar kartı olur.">${metin}</textarea>
+        <p class="tiny dim mt-6 mb-0" id="konu-notu-durum" aria-live="polite">${metin ? metin.length + ' / ' + N.SINIR + ' karakter' : 'Yazdığın kendiliğinden kaydedilir.'}</p>` });
   }
 
   /* Anlatımda seçili metin → «Nota ekle» (belge düzeyinde BİR KEZ bağlanır). */

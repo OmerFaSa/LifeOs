@@ -456,13 +456,15 @@ R.Screens = R.Screens || {};
     if(!N) return '';
     const metin = N.oku(subject.id, topic.id);
     const n = N.kartAdaylari(metin).length;
-    return K.Card({ title:'Notum', sub:'kendiliğinden kaydedilir · Dersler › konuda da görünür',
+    /* Sade (2026-10-16): «kendiliğinden kaydedilir» alttaki durum satırında,
+       kart sözdizimi («::») ⓘ'de değil yer tutucuda tek örnekle. */
+    return K.Card({ title:'Notum',
       actions:K.Button({ label:kartDugmeEtiketi(n), icon:'cards', size:'sm', tone:'ghost', act:'konu-notu-kart',
         data:{ id:'konu-notu-kart' }, disabled:!n, title:'«ön :: arka» biçimindeki satırlar tekrar kartı olur' }),
       body:html`<textarea class="input konu-notu" id="konu-notu" rows="${Math.min(14, Math.max(4, metin.split('\n').length + 1))}"
           maxlength="${N.SINIR}" data-change="konu-notu" data-debounce="600" aria-label="${topic.name + ' konusu için notum'}"
-          placeholder="Kendi cümlelerinle yaz. İpucu: anlatımda bir cümleyi seç, «Nota ekle»ye bas. «Zincir kuralı :: dıştakinin türevi × içtekinin türevi» gibi satırlar tekrar kartı olur.">${metin}</textarea>
-        <p class="tiny dim mt-6 mb-0" id="konu-notu-durum" aria-live="polite">${metin ? metin.length + ' / ' + N.SINIR + ' karakter' : 'Henüz not yok.'}</p>` });
+          placeholder="Kendi cümlelerinle yaz. «soru :: cevap» satırı tekrar kartı olur.">${metin}</textarea>
+        <p class="tiny dim mt-6 mb-0" id="konu-notu-durum" aria-live="polite">${metin ? metin.length + ' / ' + N.SINIR + ' karakter' : 'Yazdığın kendiliğinden kaydedilir.'}</p>` });
   }
 
   /* Anlatımda seçili metin → «Nota ekle» (belge düzeyinde BİR KEZ bağlanır). */
