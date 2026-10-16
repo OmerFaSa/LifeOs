@@ -101,7 +101,11 @@ SP.Quick = (function(){
           if(ml == null || ml < f.min || ml > f.max) continue;
           return { field:f, value:ml };
         }
-        const kuyruk = text.slice(Math.min(text.length, at + a.length));
+        /* SAYI KENDİ PARÇASINDAN (2026-10-16): «7 saat uyudum, 2 yumurta
+           yedim» uykuyu 2 okuyordu. Kuyruk ilk ayıraçta (virgül — ondalık
+           değil —, noktalı virgül, «ve», satır sonu) kesilir. */
+        const kuyruk = text.slice(Math.min(text.length, at + a.length))
+          .split(/(?<!\d),|,(?!\d)|;|\n|\s+ve\s+|\+/i)[0];
         let m = kuyruk.match(/(\d+(?:[.,]\d+)?)/);
         /* SAYI KELIMEDEN ONCE DE GELIR: «7 saat uyudum». Yalniz ardinda
            aranirsa bu cumle «7 saat» sureli bir ANTRENMAN oluyordu (420

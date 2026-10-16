@@ -1606,7 +1606,7 @@ SP.App = (function(){
             return p ? { tur, metin:p.label, ipucu:p.hint, kaydet:async () => {
               const r = await SP.Quick.apply(p); render(); return r && r.text; } } : null;
           },
-          ornekler:['uyku 7,5', '45 dk yürüyüş', '2 yumurta 1 çay', 'kilo 72'] });
+          ornekler:['7 saat uyudum, 2 yumurta yedim', '45 dk yürüyüş', '2 yumurta 1 çay', 'kilo 72'] });
       }
 
       /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).

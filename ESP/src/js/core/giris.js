@@ -40,7 +40,15 @@
         sonra imleç kutuda kalır, sıradaki giriş hemen yazılır. Kutunun
         altında tek sıra çip durur: modülün kısa yolları (kisayol.js) varsa
         onlar, yoksa örnekler; örnek her zaman yer tutucuda ve «anlayamadım»
-        mesajının altında. */
+        mesajının altında.
+     7. BİR CÜMLE, BİRÇOK KAYIT (2026-10-16, «bir sürü veri girişi yapmamız
+        lazım»). «7 saat uyudum, 2 yumurta yedim, 45 dk koştum» parçalara
+        ayrılır (virgül, noktalı virgül, «ve», satır sonu); her parça
+        modülün ayrıştırıcısına gider, aynı türdekiler («2 yumurta, 1 çay»)
+        yeniden birleştirilip tek kayıt olur. Önizleme liste gösterir,
+        tek «Kaydet» hepsini yazar. Anlaşılmayan parça uydurulmaz:
+        «yazılmayacak» diye adıyla söylenir. Tek türden bir cümle eskisi
+        gibi bütün olarak ayrıştırılır. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -62,14 +70,55 @@ window.LIFEOS.GIRIS = (function(){
       ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
   }
 
-  function onizle(metin){
-    if(!ayar || typeof ayar.onizle !== 'function') return null;
-    const t = String(metin || '').trim();
-    if(!t) return null;
+  function tekOnizle(t){
     try{
       const p = ayar.onizle(t);
       return p && typeof p.kaydet === 'function' ? p : null;
     }catch(e){ console.error('Giriş: önizleme', e); return null; }
+  }
+
+  /* Söz 7. Ondalık virgül («7,5») ayıraç değildir. */
+  function parcala(t){
+    return String(t).split(/(?<!\d),|,(?!\d)|;|\n|\s+ve\s+|\s+sonra\s+/i).map(x => x.trim()).filter(Boolean);
+  }
+
+  function onizle(metin){
+    if(!ayar || typeof ayar.onizle !== 'function') return null;
+    const t = String(metin || '').trim();
+    if(!t) return null;
+    const parca = parcala(t);
+    if(parca.length < 2) return tekOnizle(t);
+    const tek = parca.map(x => ({ x, p:tekOnizle(x) }));
+    const anlasilan = tek.filter(o => o.p);
+    const tur = o => o.p.tur || '?';
+    const turler = anlasilan.map(tur).filter((v, i, l) => l.indexOf(v) === i);
+    /* Tek türden cümle: eskisi gibi bütün olarak (modül kendisi birleştirir). */
+    if(turler.length < 2){
+      const butun = tekOnizle(t);
+      if(butun) return butun;
+      if(!anlasilan.length) return null;
+    }
+    /* Aynı türdekiler yeniden birleştirilir: «2 yumurta, 1 çay» tek öğün. */
+    const parcalar = [];
+    turler.forEach(k => {
+      const g = anlasilan.filter(o => tur(o) === k);
+      const j = g.length > 1 ? tekOnizle(g.map(o => o.x).join(', ')) : null;
+      if(j) parcalar.push(j); else g.forEach(o => parcalar.push(o.p));
+    });
+    const kalan = tek.filter(o => !o.p).map(o => o.x);
+    if(parcalar.length === 1 && !kalan.length) return parcalar[0];
+    return {
+      tur:turler.length === 1 ? turler[0] : 'veri',
+      parcalar,
+      metin:parcalar.map(p => p.metin).join(' · '),
+      ipucu:kalan.length ? 'Anlaşılmadı, yazılmayacak: «' + kalan.join('», «') + '»'
+        : (parcalar.length > 1 ? parcalar.length + ' kayıt birlikte yazılır.' : (parcalar[0].ipucu || '')),
+      async kaydet(){
+        let n = 0;
+        for(const p of parcalar){ await p.kaydet(); n++; }
+        return n > 1 ? n + ' kayıt eklendi.' : 'Kaydedildi.';
+      },
+    };
   }
 
   /* King ve palet için (söz 3): modülün kapısı. */
@@ -80,7 +129,9 @@ window.LIFEOS.GIRIS = (function(){
       const p = bekleyen.p;
       return '<div class="giris__onizle" role="group" aria-label="Kaydedilecek">'
         + '<span class="giris__onizle-ad">Şunu kaydedeyim mi?</span>'
-        + '<b>' + kac(p.metin) + '</b>'
+        + (p.parcalar && p.parcalar.length > 1
+          ? '<ul class="giris__liste">' + p.parcalar.map(x => '<li><b>' + kac(x.metin) + '</b></li>').join('') + '</ul>'
+          : '<b>' + kac(p.metin) + '</b>')
         + (p.ipucu ? '<small>' + kac(p.ipucu) + '</small>' : '')
         + '<div class="giris__dugmeler">'
         + '<button type="button" class="btn btn--sm btn--primary" data-giris="kaydet"><span class="btn__label">Kaydet</span></button>'

@@ -30,6 +30,9 @@
   border-left:3px solid var(--primary); }
 .giris__onizle-ad{ font-size:12px; color:var(--text-2); }
 .giris__onizle b{ font-size:15px; line-height:1.45; }
+.giris__liste{ margin:2px 0 0; padding:0; list-style:none; display:grid; gap:4px; }
+.giris__liste li{ display:flex; gap:8px; align-items:baseline; }
+.giris__liste li::before{ content:''; flex:none; width:6px; height:6px; border-radius:50%; background:var(--primary); transform:translateY(-2px); }
 .giris__onizle small{ font-size:12.5px; color:var(--text-2); line-height:1.45; }
 .giris__dugmeler{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; align-items:center; }
 .giris__kisa{ font-size:12px; color:var(--text-2); }

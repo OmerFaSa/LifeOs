@@ -1790,7 +1790,7 @@ ESP.App = (function(){
               },
             };
           },
-          ornekler:['45 dk gitar', '20 dakika kelime', '30 dk felsefe okuması'] });
+          ornekler:['45 dk gitar, 20 dakika kelime', '30 dk felsefe okuması', '20 dakika kelime'] });
       }
 
       /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).

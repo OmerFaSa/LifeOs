@@ -501,7 +501,8 @@ window.LIFEOS.KING = (function(){
       const s = y.sohbet || sohbet(y.onizleme, '', !!y.gelecek);
       cipler = [{ ad:'Evet, ekle', is:'kaydet' }, { ad:'Hayır', is:'vazgec' }];
       soyle(s.selam, null,
-        { metin:y.onizleme.metin, ipucu:y.gelecek ? 'Henüz yapmadıysan, yaptıktan sonra da söyleyebilirsin.' : (y.onizleme.ipucu || '') },
+        { metin:y.onizleme.metin, liste:(y.onizleme.parcalar || []).length > 1 ? y.onizleme.parcalar.map(x => x.metin) : null,
+          ipucu:y.gelecek ? 'Henüz yapmadıysan, yaptıktan sonra da söyleyebilirsin.' : (y.onizleme.ipucu || '') },
         s.soru);
     }else{
       const on = neden === 'yok' ? 'King’in modeli şu an kapalı. '
@@ -591,7 +592,9 @@ window.LIFEOS.KING = (function(){
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
       : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + '"><div><p>' + kac(m.metin) + '</p>'
         + (m.onizleme
-          ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span><b>' + kac(m.onizleme.metin) + '</b>'
+          ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span>'
+            + (m.onizleme.liste ? '<ul class="king__liste">' + m.onizleme.liste.map(x => '<li><b>' + kac(x) + '</b></li>').join('') + '</ul>'
+              : '<b>' + kac(m.onizleme.metin) + '</b>')
             + (m.onizleme.ipucu ? '<small>' + kac(m.onizleme.ipucu) + '</small>' : '') + '</div>'
           : (m.satirlar && m.satirlar.length ? '<ul>' + m.satirlar.map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>' : ''))
         + (m.son ? '<p class="king__son">' + kac(m.son) + '</p>' : '')

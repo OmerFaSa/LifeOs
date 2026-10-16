@@ -268,8 +268,17 @@ SP.Parse = (function(){
        iki rakam arasindaki virgul gecici olarak korunur. */
     const GUARD = '\u0000';
     const guarded = raw.replace(/(\d),(\d)/g, '$1' + GUARD + '$2');
-    const chunks = guarded.split(/\s*(?:,|;|\+|\bve\b|\n)\s*/i)
+    const chunks0 = guarded.split(/\s*(?:,|;|\+|\bve\b|\n)\s*/i)
       .map(s => s.split(GUARD).join(',').trim()).filter(Boolean);
+    /* AYIRAÇSIZ LİSTE (2026-10-16): «2 yumurta 1 çay» çayı düşürüyordu.
+       Harften sonra gelen sayıda bölünür — YALNIZ her parça bir gıdaysa;
+       «yumurta 2 adet» bölünmez (miktar yumurtanındır). */
+    const chunks = [];
+    chunks0.forEach(c => {
+      const parca = c.split(/(?<=[a-zçğıöşü)])\s+(?=\d)/i).map(x => x.trim()).filter(Boolean);
+      if(parca.length > 1 && parca.every(x => matchFood(x))) chunks.push(...parca);
+      else chunks.push(c);
+    });
 
     const items = [], unmatched = [];
 

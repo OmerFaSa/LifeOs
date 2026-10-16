@@ -270,4 +270,30 @@
       expect(rec.values.homa).toBeTruthy();
     });
   });
+
+  /* 2026-10-16 bulgusu: tek satırda birden çok şey yazınca yanlış değer
+     ya da sessiz kayıp. «7 saat uyudum, 2 yumurta yedim» → «Uyku 2 saat»
+     (sayıyı sonraki parçadan alıyordu); «2 yumurta 1 çay» → çay düşüyordu. */
+  describe('Parse — tek satırda birden çok şey', () => {
+    it('uyku sayısı virgülden sonraki parçadan alınmaz', () => {
+      const p = SP.Quick.parse('uyku, 2 yumurta yedim');
+      expect(!!p && p.kind === 'vital').toBe(false);
+      const q = SP.Quick.parse('uyku 7 ve kilo 72');
+      expect(q.kind).toBe('vital');
+      expect(q.data.value).toBe(7);
+    });
+    it('«7 saat uyudum, 2 yumurta yedim» uykuyu 7 okur, 2 değil', () => {
+      const p = SP.Quick.parse('7 saat uyudum, 2 yumurta yedim');
+      expect(!(p && p.kind === 'vital' && p.data.value === 2)).toBe(true);
+    });
+    it('«2 yumurta 1 çay» iki gıda; «yumurta 2 adet» tek gıda, miktar 2', () => {
+      const r = SP.Parse.parseMeal('2 yumurta 1 çay');
+      expect(r.items.length).toBe(2);
+      expect(r.items[0].qty).toBe(2);
+      const t = SP.Parse.parseMeal('yumurta 2 adet');
+      expect(t.items.length).toBe(1);
+      expect(t.items[0].qty).toBe(2);
+      expect(SP.Parse.parseMeal('0,2 kg tavuk').items.length).toBe(1);
+    });
+  });
 })();

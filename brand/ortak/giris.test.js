@@ -90,6 +90,27 @@
       }finally{ k.remove(); G()._sifirla(); }
     });
 
+    it('bir cümle birçok kayıt: parçalar ayrı önizlenir, tek Kaydet hepsini yazar; anlaşılmayan söylenir', async () => {
+      const yazilan = [];
+      G()._sifirla();
+      G().kur({ modul:'deneme', ornekler:[], onizle:t => {
+        if(/^uyku \d+$/.test(t)) return { tur:'uyku', metin:'Uyku ' + t.split(' ')[1], kaydet:async () => { yazilan.push(t); } };
+        if(/^(\d+ (yumurta|çay)(, )?)+$/.test(t)) return { tur:'ogun', metin:'Öğün: ' + t, kaydet:async () => { yazilan.push(t); } };
+        return null;
+      } });
+      try{
+        const p = G().onizle('uyku 7, 2 yumurta ve 1 çay; falan filan');
+        expect(p.parcalar.length).toBe(2);
+        expect(p.parcalar[1].metin).toBe('Öğün: 2 yumurta, 1 çay');   /* aynı tür tek kayıt */
+        expect(p.ipucu).toContain('«falan filan»');
+        expect(await p.kaydet()).toBe('2 kayıt eklendi.');
+        expect(yazilan).toEqual(['uyku 7', '2 yumurta, 1 çay']);
+        /* ondalık virgül bölünmez; tek türden cümle bütün olarak */
+        expect(G().onizle('uyku 7,5')).toBe(null);
+        expect(G().onizle('2 yumurta, 1 çay').metin).toBe('Öğün: 2 yumurta, 1 çay');
+      }finally{ G()._sifirla(); }
+    });
+
     it('King kendi veri kapısı yoksa bu kapıyı kullanır', () => {
       const K = window.LIFEOS.KING;
       sahteKur();
