@@ -1686,6 +1686,12 @@ window.LIFEOS.HESAP = (function(){
     return api('/api/hesap/anahtar', { parola, ad, yetki:oku ? ['kayit', 'oku'] : 'kayit' });
   }
   async function anahtarSil(id){ return api('/api/hesap/anahtar-sil', { id }); }
+  /* TEK GÜN (sunucu sözü 22; brand/ortak/tekgun.js): üç modülün bugünkü
+     planı. Giriş yoksa null; sunucu cevap vermezse hata (ekran söyler). */
+  async function tekGun(){
+    try{ return await api('/api/hesap/tekgun'); }
+    catch(e){ if(e && e.kod === 401) return null; throw e; }
+  }
   async function takvimAc(yenile){ return (await api('/api/hesap/takvim', { yenile:!!yenile })).takvim; }
   async function takvimKapat(){ return (await api('/api/hesap/takvim-kapat', {})).takvim; }
   /* Cihaza ad (söz 21); döner: tazelenmiş cihaz listesi. */
@@ -3486,7 +3492,7 @@ window.LIFEOS.HESAP = (function(){
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
-    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, cihazAdlandir, uyarilar, uyariGordum,
+    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
     _ortam:ortam, _sifirla, _istek:istek, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,

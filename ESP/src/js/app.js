@@ -1733,6 +1733,8 @@ ESP.App = (function(){
             if(ESP.Takvim){ const d = ESP.Takvim.disa(); y.takvim = { metin:d.metin, adet:d.adet }; }
             /* Siri «Bugün ne var?» (sunucu sözü 21): günün cümlesi ve günü. */
             if(ESP.Screens && ESP.Screens.today && ESP.Screens.today.sesli) y.bugun = { metin:ESP.Screens.today.sesli(), gun:ESP.U.todayISO() };
+            /* Tek gün (sunucu sözü 22): bugünün blokları. */
+            if(window.LIFEOS.TEKGUN && window.LIFEOS.TEKGUN.kuruluMu()) y.gun = window.LIFEOS.TEKGUN.parca();
             return y;
           },
           yukle:async () => { await M.loadAll(); if(window.LIFEOS && window.LIFEOS.NOTUM) await window.LIFEOS.NOTUM.yukle(); },
@@ -1791,6 +1793,32 @@ ESP.App = (function(){
             };
           },
           ornekler:['45 dk gitar, 20 dakika kelime', '30 dk felsefe okuması', '20 dakika kelime'] });
+      }
+
+      /* TEK GÜN (brand/ortak/tekgun.js): bugünün blokları ESP'in KENDİ
+         kuralıyla; öteki modüller hesap sunucusundan (sunucu sözü 22). */
+      if(window.LIFEOS && window.LIFEOS.TEKGUN){
+        window.LIFEOS.TEKGUN.kur({ modul:'esp', git:r => go(r), bloklar:() => {
+          const t = ESP.U.todayISO();
+          const gun = ((S.days[t] || {}).sessions) || [];
+          const dak = id => gun.filter(s => s.disc === id).reduce((a, s) => a + (Number(s.minutes) || 0), 0);
+          const DB = ESP.DISCIPLINE_BY_ID || {};
+          const l = [];
+          const p = ESP.Plans && ESP.Plans.plan();
+          const bu = p && (p.days || []).find(x => x.date === t);
+          if(bu) l.push({ id:'plan-' + bu.disc, ad:bu.label, alt:bu.minutes ? bu.minutes + ' dk' : '',
+            durum:bu.minutes && dak(bu.disc) >= bu.minutes ? 'bitti' : 'bekliyor', rota:bu.route });
+          else{
+            const n = ESP.Planner && ESP.Planner.nextAction(t);
+            if(n && n.id !== 'none') l.push({ id:'sira', ad:n.title, durum:'bekliyor', rota:n.route });
+          }
+          /* Yapılan oturumlar (planda olmayanlar da): ölçülen dakikasıyla. */
+          gun.map(s => s.disc).filter((v, i, a) => v && a.indexOf(v) === i && (!bu || v !== bu.disc)).forEach(id => {
+            const d = DB[id] || {};
+            l.push({ id:'s-' + id, ad:d.label || id, alt:dak(id) + ' dk', durum:'bitti', rota:d.route || 'today' });
+          });
+          return l;
+        } });
       }
 
       /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).

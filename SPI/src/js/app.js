@@ -1552,8 +1552,13 @@ SP.App = (function(){
           /* Kısayollar'dan gelen satır (hesap.js söz 20): kural motoru okur,
              Onaylar'a öneri olur; sayaç ve Bugün'ün öneri alanı cizIste ile. */
           /* Siri «Bugün ne var?» (sunucu sözü 21): günün cümlesi ve günü. */
-          yayin:() => (SP.Screens && SP.Screens.today && SP.Screens.today.sesli
-            ? { bugun:{ metin:SP.Screens.today.sesli(), gun:SP.U.todayISO() } } : {}),
+          yayin:() => {
+            const y = SP.Screens && SP.Screens.today && SP.Screens.today.sesli
+              ? { bugun:{ metin:SP.Screens.today.sesli(), gun:SP.U.todayISO() } } : {};
+            /* Tek gün (sunucu sözü 22): bugünün saatli işleri ve öğünleri. */
+            if(window.LIFEOS.TEKGUN && window.LIFEOS.TEKGUN.kuruluMu()) y.gun = window.LIFEOS.TEKGUN.parca();
+            return y;
+          },
           gelen:async oge => {
             if(!SP.Proposals) return null;
             const r = await SP.Proposals.disaridan(oge);
@@ -1621,6 +1626,26 @@ SP.App = (function(){
             { ad:'Testler', rota:'labs' },
           ],
           cekmeceler:() => SECTIONS.filter(s => s.views.length).map(s => ({ id:s.id, rota:s.views[0].route })) });
+      }
+
+      /* TEK GÜN (brand/ortak/tekgun.js): bugünün blokları SPİ'in KENDİ
+         kuralıyla; öteki modüller hesap sunucusundan (sunucu sözü 22). */
+      if(window.LIFEOS && window.LIFEOS.TEKGUN){
+        window.LIFEOS.TEKGUN.kur({ modul:'spi', git:r => go(r), bloklar:() => {
+          /* Saatli hatırlatmalar ve bugün girilen öğünler. İlaç adı yayınlanmaz
+             (core/hatirlat.js söz 3): yalnız «İlaç / takviye». */
+          const l = (SP.Hatirlat ? SP.Hatirlat.bugun() : []).map(h => ({ id:h.anahtar,
+            ad:h.tur === 'ilac' ? 'İlaç / takviye' : h.ad, saat:h.saat,
+            durum:h.durum === 'yapildi' ? 'bitti' : h.durum === 'vakti' ? 'vakti' : 'bekliyor', rota:'today' }));
+          const DL = { kahvalti:'sabah', ara1:'sabah', ogle:'ogle', ara2:'ogle', aksam:'aksam', gece:'gece' };
+          (SP.S.meals[SP.U.todayISO()] || []).forEach(o => {
+            const s = (SP.MEAL_SLOTS || []).find(x => x.id === o.slot);
+            l.push({ id:'ogun-' + o.id, ad:s ? s.label : 'Öğün', dilim:DL[o.slot] || null,
+              alt:(o.items || []).map(it => (SP.FOOD_BY_ID[it.foodId] || {}).name).filter(Boolean).slice(0, 3).join(', '),
+              durum:'bitti', rota:'meals' });
+          });
+          return l;
+        } });
       }
 
       /* SEVİYE DEFTERİ — bu sistemin KENDİ seviyesi (core/xp.js).

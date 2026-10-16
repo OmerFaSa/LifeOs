@@ -1534,6 +1534,30 @@ def run():
     test("Siri ozeti: «oku» yetkili anahtar; moduller sirayla; dunku ozet bugunmus gibi okunmaz; takvime karismaz",
          t_ozet)
 
+    # ------------------------------------------- Tek gun (soz 22)
+
+    def t_tek_gun():
+        with _Depo() as r:
+            k, j = _admin(r)
+            bugun = time.strftime("%Y-%m-%d", time.localtime(r.saat()))
+            dun = time.strftime("%Y-%m-%d", time.localtime(r.saat() - 86400))
+            eq(r.d.tek_gun(k), {"tarih": bugun, "moduller": []})
+            _hata(lambda: r.d.yayinla(k, "spi/gun", '{"bloklar":[]}'), 400)                 # gun yok
+            _hata(lambda: r.d.yayinla(k, "spi/gun", "duz metin", gun=bugun), 400)          # JSON degil
+            _hata(lambda: r.d.yayinla(k, "spi/gun", "[1,2]", gun=bugun), 400)              # nesne degil
+            _hata(lambda: r.d.yayinla(k, "spi/gun", '{"x":"' + "a" * 70000 + '"}', gun=bugun), 400)
+            _hata(lambda: r.d.yayinla(k, "hkm/gun", "{}", gun=bugun), 400)
+            r.d.yayinla(k, "esp/gun", '{"bloklar":[{"ad":"Dil"}]}', gun=bugun)
+            r.d.yayinla(k, "ays/gun", '{"bloklar":[{"ad":"Türev"}]}', gun=dun)
+            v = r.d.tek_gun(k)
+            eq([m["modul"] for m in v["moduller"]], ["ays", "esp"])                         # sabit sira
+            eq([m["bayat"] for m in v["moduller"]], [True, False])                          # dunku plan bayat
+            eq(v["moduller"][1]["icerik"], '{"bloklar":[{"ad":"Dil"}]}')                    # oldugu gibi
+            # Plan ozete ve takvime karismaz.
+            no(any(x["ad"].endswith("/gun") for x in r.d.takvim(k)["yayinlar"]))
+    test("Tek gun: modulun JSON plani; bicim ve boyut denetlenir, icerik anlasilmaz; dunku plan bayat; sabit sira",
+         t_tek_gun)
+
     def t_gocur_surum7():
         klasor = tempfile.mkdtemp(prefix="lifeos-hesap-")
         try:

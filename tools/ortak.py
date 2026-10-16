@@ -291,6 +291,10 @@ DOSYALAR = {
     "kisayol.js":      "js/core",
     "kisayol.css":     "css",
     "kisayol.test.js": "tests",
+    # TEK GUN — uc modulun bugunu tek cizelgede (Otopilot Gun 1. asama, 2026-10-16).
+    "tekgun.js":       "js/core",
+    "tekgun.css":      "css",
+    "tekgun.test.js":  "tests",
     # SORU KARTI — Bugun'deki «Bir soru», uc arayuzde ayni sade kart (2026-10-16).
     "sorukart.js":    "js/core",
     "sorukart.css":   "css",

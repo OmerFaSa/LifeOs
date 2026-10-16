@@ -1613,6 +1613,8 @@ R.App = (function(){
             if(R.Takvim){ const d = R.Takvim.disa(); y.takvim = { metin:d.metin, adet:d.adet }; }
             /* Siri «Bugün ne var?» (sunucu sözü 21): günün cümlesi ve günü. */
             if(R.Screens && R.Screens.today && R.Screens.today.sesli) y.bugun = { metin:R.Screens.today.sesli(), gun:U.todayISO() };
+            /* Tek gün (sunucu sözü 22): bugünün blokları. */
+            if(window.LIFEOS.TEKGUN && window.LIFEOS.TEKGUN.kuruluMu()) y.gun = window.LIFEOS.TEKGUN.parca();
             return y;
           } });
       }
@@ -1674,6 +1676,17 @@ R.App = (function(){
             { ad:'Not al', doldur:'not: ' },
           ],
           cekmeceler:() => NAV.filter(g => (g.items || []).length).map(g => ({ id:g.id, rota:g.items[0].id })) });
+      }
+
+      /* TEK GÜN (brand/ortak/tekgun.js): bugünün blokları AYS'in KENDİ
+         kuralıyla; öteki modüller hesap sunucusundan (sunucu sözü 22). */
+      if(window.LIFEOS && window.LIFEOS.TEKGUN){
+        window.LIFEOS.TEKGUN.kur({ modul:'ays', git:r => go(r), bloklar:() => {
+          const d = R.S.days[U.todayISO()];
+          return ((d && d.blocks) || []).map(b => ({ id:b.id, ad:b.topic || b.subject || b.slot,
+            alt:[b.slot, b.targetMin ? b.targetMin + ' dk' : '', b.targetQ ? b.targetQ + ' soru' : ''].filter(Boolean).join(' · '),
+            durum:b.status === 'done' ? 'bitti' : b.status === 'skipped' ? 'atlandi' : 'bekliyor', rota:'today' }));
+        } });
       }
 
       /* YARIM KALMIŞ SÜRELİ OTURUM — diskten geri alınır.

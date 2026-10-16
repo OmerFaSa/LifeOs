@@ -13750,6 +13750,52 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
   background:var(--primary); color:#fff; font-size:11.5px; font-weight:600; font-variant-numeric:tabular-nums; }
 @media (prefers-reduced-motion:reduce){ .kisayol__d{ transition:none; } }
 
+/* ==== css/tekgun.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/tekgun.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* TEK GÜN — üç modülün bugünü tek çizelgede (brand/ortak/tekgun.js). Tek
+   kaynak; üç arayüze `tools/ortak.py --yay` ile kopyalanır. Sakin liste:
+   dilim başlığı, satırda modülün noktası, saat (varsa), iş ve durum. */
+.tekgun{ display:flex; flex-direction:column; gap:10px; padding:16px 18px; border-radius:16px;
+  background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); margin-bottom:14px; }
+.tekgun__bas{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
+.tekgun__baslik{ margin:0; font-size:15px; font-weight:650; letter-spacing:-.01em; color:var(--text); }
+.tekgun__ozet{ font-size:12.5px; color:var(--text-2); font-variant-numeric:tabular-nums; }
+.tekgun__grup{ display:flex; flex-direction:column; }
+.tekgun__dilim{ font-size:11.5px; font-weight:600; color:var(--text-2); letter-spacing:.02em; margin:6px 0 2px; }
+.tekgun__is{ display:grid; grid-template-columns:10px 44px minmax(0,1fr) auto 16px; align-items:center; gap:10px;
+  width:100%; min-height:40px; padding:6px 8px; margin:0 -8px; border:0; border-radius:10px; background:none;
+  color:var(--text); font:inherit; text-align:left; cursor:pointer; transition:background .15s ease; }
+.tekgun__is:hover{ background:var(--surface-2); }
+.tekgun__is:focus-visible{ outline:2px solid var(--primary); outline-offset:1px; }
+.tekgun__nokta{ width:8px; height:8px; border-radius:50%; background:var(--text-2); }
+.tekgun__nokta--ays{ background:var(--ays, #3b6cf5); }
+.tekgun__nokta--spi{ background:var(--spi, #149c86); }
+.tekgun__nokta--esp{ background:var(--esp, #b8652a); }
+.tekgun__saat{ font-size:12.5px; color:var(--text-2); font-variant-numeric:tabular-nums; }
+.tekgun__ad{ display:flex; flex-direction:column; min-width:0; }
+.tekgun__ad b{ font-size:14px; font-weight:550; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tekgun__ad small{ font-size:12px; color:var(--text-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tekgun__mod{ display:inline-flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-2); }
+.tekgun__mod em{ font-style:normal; font-weight:600; color:var(--primary); }
+.tekgun__isaret{ font-size:13px; color:var(--text-2); text-align:center; }
+.tekgun__is.is-bitti .tekgun__ad b{ color:var(--text-2); text-decoration:line-through; text-decoration-thickness:1px; }
+.tekgun__is.is-atlandi .tekgun__ad b{ color:var(--text-2); }
+.tekgun__is.is-siradaki{ background:color-mix(in srgb, var(--primary) 8%, transparent); }
+.tekgun__is.is-vakti .tekgun__saat{ color:var(--warn, #b26b00); font-weight:600; }
+.tekgun__bos{ margin:0; font-size:13.5px; color:var(--text-2); }
+.tekgun__not{ margin:2px 0 0; font-size:12px; color:var(--text-2); line-height:1.5; }
+@media (max-width:480px){
+  .tekgun__is{ grid-template-columns:10px 40px minmax(0,1fr) 16px; }
+  .tekgun__mod{ display:none; }
+}
+@media (prefers-reduced-motion:reduce){ .tekgun__is{ transition:none; } }
+.tekgun[hidden]{ display:none; }
+.tekgun--saatsiz .tekgun__is{ grid-template-columns:10px minmax(0,1fr) auto 16px; }
+.tekgun--saatsiz .tekgun__saat{ display:none; }
+@media (max-width:480px){ .tekgun--saatsiz .tekgun__is{ grid-template-columns:10px minmax(0,1fr) 16px; } }
+
 /* ==== css/sorukart.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/sorukart.css içine yazılır; burası bir sonraki
@@ -15740,7 +15786,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'ef0f7814', at:'2026-10-16 10:44', dirty:true };
+ESP.BUILD = { id:'2a989449', at:'2026-10-16 12:54', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -27162,6 +27208,12 @@ window.LIFEOS.HESAP = (function(){
     return api('/api/hesap/anahtar', { parola, ad, yetki:oku ? ['kayit', 'oku'] : 'kayit' });
   }
   async function anahtarSil(id){ return api('/api/hesap/anahtar-sil', { id }); }
+  /* TEK GÜN (sunucu sözü 22; brand/ortak/tekgun.js): üç modülün bugünkü
+     planı. Giriş yoksa null; sunucu cevap vermezse hata (ekran söyler). */
+  async function tekGun(){
+    try{ return await api('/api/hesap/tekgun'); }
+    catch(e){ if(e && e.kod === 401) return null; throw e; }
+  }
   async function takvimAc(yenile){ return (await api('/api/hesap/takvim', { yenile:!!yenile })).takvim; }
   async function takvimKapat(){ return (await api('/api/hesap/takvim-kapat', {})).takvim; }
   /* Cihaza ad (söz 21); döner: tazelenmiş cihaz listesi. */
@@ -28962,7 +29014,7 @@ window.LIFEOS.HESAP = (function(){
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
-    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, cihazAdlandir, uyarilar, uyariGordum,
+    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
     _ortam:ortam, _sifirla, _istek:istek, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,
@@ -29695,6 +29747,254 @@ window.LIFEOS.KISAYOL = (function(){
   function _sifirla(){ ayar = null; sabitHarita = null; gBekliyor = 0; }
 
   return { kur, tus, satirlar, seritHtml, dugmeCalistir, dugmeListesi, metinSatirlari, harita, HARF, ADLAR, kuruluMu:() => !!ayar, _sifirla, _ayar:() => ayar };
+})();
+
+/* ==== js/core/tekgun.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/tekgun.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* TEK GÜN — üç modülün bugünü tek çizelgede («Otopilot Gün» 1. aşama).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/tekgun.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Biçimi `tekgun.css`.
+   ==================================================================
+
+   Depo sahibi (2026-10-16): «devrimsel bir güncelleme» → LifeOS günü tek
+   yerden yönetsin. 1. aşama salt okunurdur: AYS'nin blokları, SPİ'nin
+   saatli hatırlatmaları ve öğünleri, ESP'nin bugünkü disiplini — hangi
+   modülde olursan ol aynı çizelge.
+
+   Sözler:
+     1. BLOĞU MODÜL YAZAR. Her modül bugününü KENDİ kuralıyla verir
+        (`bloklar()`); bu dosya karar üretmez, yalnız dizer.
+     2. SAAT UYDURULMAZ (AGENTS §1.7). Saati olan blok saatiyle, yalnız
+        dilimi olan (öğle, akşam) diliminde, ikisi de olmayan «Gün içinde»
+        durur. Sıralama için bile saat tahmin edilmez.
+     3. ÖTEKİ MODÜL SUNUCUDAN, BAYAT OLAN GÖSTERİLMEZ. Kendi bloklar canlı;
+        öteki modüllerinki hesap sunucusundan (sunucu sözü 22). Bugüne ait
+        olmayan plan bugünmüş gibi çizilmez: «bugün henüz açılmadı» denir
+        (AGENTS §1.2).
+     4. SUNUCU YOKSA BOZULMAZ (AGENTS §1.4). Giriş yoksa ya da sunucu
+        cevap vermezse ekran beklemez, hata vermez. Öteki modüllerden tek
+        iş bile gelmediyse kart ÇİZİLMEZ (gizli yer tutucu): yalnız kendi
+        işlerini gösteren kart, modülün kendi Bugün kartının tekrarı olurdu
+        (AYS «Günün akışı»). Veri gelince kart kendiliğinden belirir.
+     5. ADRES KATALOGDAN. Öteki modülün bloğuna dokunmak o modülü
+        `#king=<rota>` ile açar; rota King'in sayfa kataloğunda yoksa
+        modülün Bugün'ü açılır (king.js söz 5).
+     6. MAHREMİYET. Modül yalnız ekranda görünmesi uygun adı yazar: SPİ
+        ilaç adını YAYINLAMAZ («İlaç / takviye»). */
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.TEKGUN = (function(){
+  'use strict';
+
+  const L = window.LIFEOS;
+  const MODUL_AD = { ays:'AYS', spi:'SPİ', esp:'ESP' };
+  const SIRA = ['ays', 'spi', 'esp'];
+  const DILIM = [
+    { id:'sabah', ad:'Sabah' }, { id:'ogle', ad:'Öğle' }, { id:'aksam', ad:'Akşam' },
+    { id:'gece', ad:'Gece' }, { id:'gun', ad:'Gün içinde' },
+  ];
+  const TAZE_MS = 60000;
+  const SURUM = 1;
+
+  const ortam = {
+    simdi:() => new Date(),
+    tekGun:() => (L.HESAP && L.HESAP.tekGun) ? L.HESAP.tekGun() : Promise.resolve(null),
+    girisVar:() => !!(L.HESAP && L.HESAP.durum && L.HESAP.durum().oturum),
+    adres:m => (L.KABUK && L.KABUK.adres) ? L.KABUK.adres(m) : null,
+    git:u => { location.href = u; },
+  };
+
+  let ayar = null;          // { modul, bloklar(), git(rota) }
+  let onbellek = null;      // sunucunun son cevabı { tarih, moduller:[...] }
+  let sonCekme = 0, cekiliyor = false, hata = null;
+
+  function kac(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+  const SAAT_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+  function iso(d){
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function dk(s){ return Number(s.slice(0, 2)) * 60 + Number(s.slice(3)); }
+  function dilimOf(b){
+    if(b.saat && SAAT_RE.test(b.saat)){
+      const m = dk(b.saat);
+      return m < 720 ? 'sabah' : m < 1020 ? 'ogle' : m < 1320 ? 'aksam' : 'gece';
+    }
+    return DILIM.some(x => x.id === b.dilim && x.id !== 'gun') ? b.dilim : 'gun';
+  }
+
+  /* Modülün bloğu temizlenir: bilinmeyen alan düşer, saat biçimi denetlenir. */
+  function temizle(b){
+    if(!b || typeof b !== 'object' || !b.ad) return null;
+    const durum = ['bekliyor', 'bitti', 'atlandi', 'vakti'].indexOf(b.durum) >= 0 ? b.durum : 'bekliyor';
+    return {
+      id:String(b.id || b.ad).slice(0, 60), ad:String(b.ad).slice(0, 80),
+      alt:b.alt ? String(b.alt).slice(0, 80) : '',
+      saat:SAAT_RE.test(b.saat || '') ? b.saat : null,
+      dilim:typeof b.dilim === 'string' ? b.dilim : null,
+      durum, rota:typeof b.rota === 'string' && /^[a-z]+$/.test(b.rota) ? b.rota : null,
+    };
+  }
+
+  function kendiBloklar(){
+    if(!ayar || typeof ayar.bloklar !== 'function') return [];
+    let l = [];
+    try{ l = ayar.bloklar() || []; }catch(e){ console.error('Tek gün: bloklar', e); l = []; }
+    return l.map(temizle).filter(Boolean);
+  }
+
+  /* Hesap kancası (hesap.js `yayin()`): { metin, gun }. */
+  function parca(){
+    if(!ayar) return null;
+    return { metin:JSON.stringify({ s:SURUM, bloklar:kendiBloklar() }), gun:iso(ortam.simdi()) };
+  }
+
+  /* SAF: kendi bloklar + sunucu cevabı → çizilecek satırlar ve notlar.
+     Testler doğrudan çağırır. */
+  function birlestir(kendi, sunucu, simdi, modul){
+    const bugun = iso(simdi);
+    const satir = [], notlar = [];
+    const ekle = (m, l) => l.forEach((b, i) => satir.push(Object.assign({ modul:m, i, dl:dilimOf(b) }, b)));
+    ekle(modul, (kendi || []).map(temizle).filter(Boolean));
+    const gelen = (sunucu && Array.isArray(sunucu.moduller)) ? sunucu.moduller : null;
+    SIRA.filter(m => m !== modul).forEach(m => {
+      if(!gelen){ return; }
+      const x = gelen.find(y => y.modul === m);
+      if(!x){ notlar.push(MODUL_AD[m] + ' henüz plan yayınlamadı; bir kez açınca gelir.'); return; }
+      if(x.bayat || x.gun !== bugun){ notlar.push(MODUL_AD[m] + ' bugün henüz açılmadı.'); return; }
+      let v = null;
+      try{ v = JSON.parse(x.icerik); }catch(e){ v = null; }
+      const l = (v && Array.isArray(v.bloklar) ? v.bloklar : []).map(temizle).filter(Boolean);
+      ekle(m, l);
+    });
+    const di = id => DILIM.findIndex(x => x.id === id);
+    satir.sort((a, b) => (di(a.dl) - di(b.dl))
+      || ((a.saat ? dk(a.saat) : 9999) - (b.saat ? dk(b.saat) : 9999))
+      || (SIRA.indexOf(a.modul) - SIRA.indexOf(b.modul)) || (a.i - b.i));
+    /* Sıradaki: önce saati geçmiş ve işaretlenmemiş iş (modül «vakti»
+       dedi), sonra yaklaşan ilk açık saatli iş, yoksa saatsiz ilk açık iş.
+       Saat uydurulmaz, yalnız var olana bakılır. */
+    const n = simdi.getHours() * 60 + simdi.getMinutes();
+    const acik = b => b.durum === 'bekliyor' || b.durum === 'vakti';
+    let sira = satir.find(b => b.durum === 'vakti');           // saati geçti, işaretlenmedi
+    if(!sira) sira = satir.find(b => acik(b) && b.saat && dk(b.saat) >= n - 30);
+    if(!sira) sira = satir.find(b => acik(b) && !b.saat);
+    if(sira) sira.siradaki = true;
+    return { satir, notlar };
+  }
+
+  function ozetMetni(satir){
+    const m = satir.map(b => b.modul).filter((v, i, l) => l.indexOf(v) === i).length;
+    const bitti = satir.filter(b => b.durum === 'bitti').length;
+    return satir.length ? satir.length + ' iş · ' + bitti + ' bitti' + (m > 1 ? ' · ' + m + ' modül' : '') : '';
+  }
+
+  function satirHtml(b){
+    const isaret = b.durum === 'bitti' ? '✓' : b.durum === 'atlandi' ? '–' : '';
+    return '<button type="button" class="tekgun__is is-' + b.durum + (b.siradaki ? ' is-siradaki' : '')
+      + '" data-tekgun-git="' + kac(b.modul + '|' + (b.rota || '')) + '">'
+      + '<i class="tekgun__nokta tekgun__nokta--' + b.modul + '" aria-hidden="true"></i>'
+      + '<span class="tekgun__saat num">' + (b.saat ? kac(b.saat) : '') + '</span>'
+      + '<span class="tekgun__ad"><b>' + kac(b.ad) + '</b>' + (b.alt ? '<small>' + kac(b.alt) + '</small>' : '') + '</span>'
+      + '<span class="tekgun__mod">' + (b.siradaki ? '<em>Sıradaki</em>' : '') + kac(MODUL_AD[b.modul]) + '</span>'
+      + '<span class="tekgun__isaret" aria-hidden="true">' + isaret + '</span>'
+      + '<span class="sr-only">' + (b.durum === 'bitti' ? 'bitti' : b.durum === 'atlandi' ? 'atlandı' : 'açık') + '</span>'
+      + '</button>';
+  }
+
+  function sonuc(){ return birlestir(kendiBloklar(), onbellek, ortam.simdi(), ayar.modul); }
+  const otekiVar = r => r.satir.some(b => b.modul !== ayar.modul);
+
+  function govdeHtml(r){
+    r = r || sonuc();
+    const notlar = r.notlar.slice();
+    const gruplar = DILIM.map(d => ({ d, l:r.satir.filter(b => b.dl === d.id) })).filter(g => g.l.length);
+    return '<div class="tekgun__bas"><h2 class="tekgun__baslik">Tek gün</h2><span class="tekgun__ozet">' + kac(ozetMetni(r.satir)) + '</span></div>'
+      + (gruplar.length
+        ? gruplar.map(g => '<div class="tekgun__grup"><div class="tekgun__dilim">' + kac(g.d.ad) + '</div>'
+            + g.l.map(satirHtml).join('') + '</div>').join('')
+        : '<p class="tekgun__bos">Bugün için planlanmış bir iş yok.</p>')
+      + (notlar.length ? '<p class="tekgun__not">' + notlar.map(kac).join(' ') + '</p>' : '');
+  }
+
+  /* Bugün ekranındaki kart. Kurulmadıysa boş. */
+  function kartHtml(){
+    if(!ayar) return '';
+    bagla();
+    tazeleIste();
+    const r = sonuc();
+    if(!otekiVar(r)) return '<section class="tekgun" data-tekgun hidden aria-label="Tek gün: bütün modüllerin bugünü"></section>';
+    return '<section class="' + sinif(r) + '" data-tekgun aria-label="Tek gün: bütün modüllerin bugünü">' + govdeHtml(r) + '</section>';
+  }
+  const sinif = r => 'tekgun' + (r.satir.some(b => b.saat) ? '' : ' tekgun--saatsiz');
+
+  function yerindeCiz(){
+    if(typeof document === 'undefined' || !ayar) return;
+    const r = sonuc(), var_ = otekiVar(r);
+    document.querySelectorAll('[data-tekgun]').forEach(el => {
+      el.hidden = !var_;
+      el.className = sinif(r);
+      el.innerHTML = var_ ? govdeHtml(r) : '';
+    });
+  }
+
+  async function tazele(){
+    if(!ayar || cekiliyor || !ortam.girisVar()) return onbellek;
+    cekiliyor = true;
+    sonCekme = Date.now();
+    try{
+      const v = await ortam.tekGun();
+      if(v && Array.isArray(v.moduller)){ onbellek = v; hata = null; }
+    }catch(e){ hata = e; }
+    finally{ cekiliyor = false; }
+    yerindeCiz();
+    return onbellek;
+  }
+  function tazeleIste(){
+    if(Date.now() - sonCekme < TAZE_MS) return;
+    Promise.resolve().then(tazele);
+  }
+
+  function git(modul, rota){
+    if(!ayar) return false;
+    if(modul === ayar.modul){
+      if(rota && ayar.git){ try{ ayar.git(rota); }catch(e){ console.error('Tek gün: git', e); } }
+      return true;
+    }
+    const url = ortam.adres(modul);
+    if(!url) return false;
+    const K = L.KING;
+    const katalogda = rota && K && Array.isArray(K.SAYFALAR) && K.SAYFALAR.some(s => s.modul === modul && s.route === rota);
+    ortam.git(url + '#king=' + (katalogda ? rota : 'today'));
+    return true;
+  }
+
+  let bagli = false;
+  function bagla(){
+    if(bagli || typeof document === 'undefined') return;
+    bagli = true;
+    document.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-tekgun-git]') : null;
+      if(!b) return;
+      e.preventDefault();
+      const p = String(b.getAttribute('data-tekgun-git')).split('|');
+      git(p[0], p[1] || null);
+    });
+    document.addEventListener('visibilitychange', () => { if(!document.hidden){ sonCekme = 0; tazeleIste(); } });
+  }
+
+  function kur(o){ ayar = Object.assign({ modul:'' }, o || {}); }
+  function _sifirla(){ ayar = null; onbellek = null; sonCekme = 0; cekiliyor = false; hata = null; }
+
+  return { kur, parca, kartHtml, birlestir, tazele, git, kuruluMu:() => !!ayar,
+    _ortam:ortam, _sifirla, _onbellek:v => { onbellek = v; } };
 })();
 
 /* ==== js/core/sorukart.js ==== */
@@ -71701,6 +72001,7 @@ ESP.Screens.today = (function(){
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${raw(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu() ? window.LIFEOS.GIRIS.kutuHtml() : '')}
+          ${raw(window.LIFEOS && window.LIFEOS.TEKGUN ? window.LIFEOS.TEKGUN.kartHtml() : '')}
           ${nextCard()}
           ${raw(soruKartHtml())}
           ${K.Ledger(() => [(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu()) ? null : quickForm(),
@@ -82440,6 +82741,8 @@ ESP.App = (function(){
             if(ESP.Takvim){ const d = ESP.Takvim.disa(); y.takvim = { metin:d.metin, adet:d.adet }; }
             /* Siri «Bugün ne var?» (sunucu sözü 21): günün cümlesi ve günü. */
             if(ESP.Screens && ESP.Screens.today && ESP.Screens.today.sesli) y.bugun = { metin:ESP.Screens.today.sesli(), gun:ESP.U.todayISO() };
+            /* Tek gün (sunucu sözü 22): bugünün blokları. */
+            if(window.LIFEOS.TEKGUN && window.LIFEOS.TEKGUN.kuruluMu()) y.gun = window.LIFEOS.TEKGUN.parca();
             return y;
           },
           yukle:async () => { await M.loadAll(); if(window.LIFEOS && window.LIFEOS.NOTUM) await window.LIFEOS.NOTUM.yukle(); },
@@ -82498,6 +82801,32 @@ ESP.App = (function(){
             };
           },
           ornekler:['45 dk gitar, 20 dakika kelime', '30 dk felsefe okuması', '20 dakika kelime'] });
+      }
+
+      /* TEK GÜN (brand/ortak/tekgun.js): bugünün blokları ESP'in KENDİ
+         kuralıyla; öteki modüller hesap sunucusundan (sunucu sözü 22). */
+      if(window.LIFEOS && window.LIFEOS.TEKGUN){
+        window.LIFEOS.TEKGUN.kur({ modul:'esp', git:r => go(r), bloklar:() => {
+          const t = ESP.U.todayISO();
+          const gun = ((S.days[t] || {}).sessions) || [];
+          const dak = id => gun.filter(s => s.disc === id).reduce((a, s) => a + (Number(s.minutes) || 0), 0);
+          const DB = ESP.DISCIPLINE_BY_ID || {};
+          const l = [];
+          const p = ESP.Plans && ESP.Plans.plan();
+          const bu = p && (p.days || []).find(x => x.date === t);
+          if(bu) l.push({ id:'plan-' + bu.disc, ad:bu.label, alt:bu.minutes ? bu.minutes + ' dk' : '',
+            durum:bu.minutes && dak(bu.disc) >= bu.minutes ? 'bitti' : 'bekliyor', rota:bu.route });
+          else{
+            const n = ESP.Planner && ESP.Planner.nextAction(t);
+            if(n && n.id !== 'none') l.push({ id:'sira', ad:n.title, durum:'bekliyor', rota:n.route });
+          }
+          /* Yapılan oturumlar (planda olmayanlar da): ölçülen dakikasıyla. */
+          gun.map(s => s.disc).filter((v, i, a) => v && a.indexOf(v) === i && (!bu || v !== bu.disc)).forEach(id => {
+            const d = DB[id] || {};
+            l.push({ id:'s-' + id, ad:d.label || id, alt:dak(id) + ' dk', durum:'bitti', rota:d.route || 'today' });
+          });
+          return l;
+        } });
       }
 
       /* KISAYOLLAR — N, Shift+N, /, G + harf (brand/ortak/kisayol.js).
