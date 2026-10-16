@@ -101,6 +101,10 @@
       r.onresult({ results:[Object.assign([{ transcript:'antrenman yapacağım' }], { isFinal:true })] });
       r.onend();
       await new Promise(ok => setTimeout(ok, 0));
+      /* Söz 8: niyet sorar («açayım mı»), sesle; «evet» deyince gider. */
+      expect(gidilen).toEqual([]);
+      expect(ss.okunan.map(u => u.metin).join(' ')).toContain('açayım');
+      await k.isle('evet');
       expect(gidilen).toEqual([['move', { sekme:'kuvvet' }]]);
       expect(ss.okunan.length > 0).toBe(true);
       expect(ss.okunan[0].voice.name).toBe('Yelda (Gelişmiş)');
@@ -145,6 +149,8 @@
     it('öteki modüle adresle geçer (#king=rota)', () => sahneyle(async () => {
       const { k, giden, gidilen } = sahne();
       await k.isle('dil çalışacağım');
+      expect(giden).toEqual([]);                            /* söz 8: önce sorar */
+      document.querySelector('[data-king="git-onay"]') ? document.querySelector('[data-king="git-onay"]').click() : await k.isle('evet');
       expect(giden).toEqual(['http://127.0.0.1:4193/#king=lang']);
       expect(gidilen).toHaveLength(0);
     }));
@@ -172,14 +178,87 @@
       k.ac();
       await k.isle('uyku 7');
       expect(kayit).toBe(0);
-      expect(k.akis().slice(-1)[0].satirlar[0]).toContain('Uyku 7 sa');
+      expect(k.akis().slice(-1)[0].onizleme.metin).toContain('Uyku 7 sa');
       document.querySelector('[data-king="vazgec"]').click();
       expect(kayit).toBe(0);
       await k.isle('uyku 7');
       document.querySelector('[data-king="kaydet"]').click();
       await new Promise(r => setTimeout(r, 0));
       expect(kayit).toBe(1);
-      expect(k.akis().slice(-1)[0].metin).toBe('Uyku kaydedildi');
+      expect(k.akis().slice(-1)[0].metin).toBe('Uyku kaydedildi. Başka bir şey var mı?');
+      expect(k.acikMi()).toBe(true);                       /* söz 8: sohbette kalır */
+    }));
+  });
+
+  /* Söz 8 (depo sahibi, 2026-10-16): «fasulye yiyeceğim bir tabak» → «Afiyet
+     olsun», sonda «ekleyeyim mi?»; bütün sistemler; sohbette kalınır. */
+  describe('King — sohbette kalır', () => {
+    function ogunVeri(sayac){
+      return { onizle:t => /fasulye/.test(t) && !/yiyeceğim|yedim değil/.test(t)
+        ? { tur:'ogun', metin:'Etli kuru fasulye', ipucu:'1 gıda', kaydet:async () => { sayac.n++; return 'Öğün kaydedildi'; } } : null };
+    }
+    it('yemekte «Afiyet olsun», sonda «Öğünlerine ekleyeyim mi?»; «evet» yazınca ekler', () => sahneyle(async () => {
+      const sayac = { n:0 };
+      const { k, gidilen } = sahne({ veri:ogunVeri(sayac) });
+      k.ac();
+      await k.isle('bir tabak kuru fasulye yedim');
+      const son = k.akis().slice(-1)[0];
+      expect(son.metin).toContain('Afiyet');
+      expect(son.son).toBe('Öğünlerine ekleyeyim mi?');
+      expect(document.querySelector('[data-king] .king__son').textContent).toBe('Öğünlerine ekleyeyim mi?');
+      expect(sayac.n).toBe(0);
+      await k.isle('evet');
+      expect(sayac.n).toBe(1);
+      expect(gidilen.length).toBe(0);
+      expect(k.acikMi()).toBe(true);
+    }));
+    it('gelecek zaman: fiil çıkarılır, kendiliğinden yazılmaz; «hayır» eklemez', () => sahneyle(async () => {
+      if(!window.LIFEOS.Olumsuz) return;
+      const sayac = { n:0 };
+      const { k } = sahne({ veri:ogunVeri(sayac) });
+      k.ac();
+      const y = k.yorumla('fasulye yiyeceğim bir tabak');
+      expect(y.tur).toBe('veri');
+      expect(y.gelecek).toBe(true);
+      expect(y.sohbet.selam).toBe('Şimdiden afiyet olsun!');
+      await k.isle('fasulye yiyeceğim bir tabak');
+      expect(k.akis().slice(-1)[0].onizleme.ipucu).toContain('yaptıktan sonra');
+      await k.isle('hayır');
+      expect(sayac.n).toBe(0);
+      expect(k.akis().slice(-1)[0].metin).toBe('Tamam, eklemedim.');
+    }));
+    it('olumsuz cümle hiç önizlenmez', () => sahneyle(async () => {
+      if(!window.LIFEOS.Olumsuz) return;
+      const { k } = sahne({ veri:{ onizle:t => window.LIFEOS.Olumsuz.olcumEngeli(t) ? null : { metin:'x', kaydet:async () => 'k' } } });
+      expect(k.yorumla('kuru fasulye yemedim').tur === 'veri').toBe(false);
+    }));
+    it('her sistemin karşılığı: antrenman, çalışma, uyku, oturum', () => sahneyle(async () => {
+      const tur = t => ({ onizle:() => ({ tur:t, metin:'x', kaydet:async () => 'k' }) });
+      let { k } = sahne({ veri:tur('hareket') });
+      expect(k.yorumla('45 dk koştum').sohbet.selam).toContain('Eline sağlık');
+      expect(k.yorumla('45 dk koştum').sohbet.soru).toBe('Antrenmanlarına ekleyeyim mi?');
+      ({ k } = sahne({ veri:tur('calisma') }));
+      expect(k.yorumla('40 soru çözdüm').sohbet.soru).toBe('Çalışma kaydına ekleyeyim mi?');
+      ({ k } = sahne({ veri:tur('oturum') }));
+      expect(k.yorumla('45 dk gitar').sohbet.soru).toBe('Bugünün oturumlarına ekleyeyim mi?');
+      ({ k } = sahne({ veri:tur('uyku') }));
+      expect(k.yorumla('7 saat uyudum').sohbet.soru).toBe('Uyku kaydına ekleyeyim mi?');
+      /* aynı cümle, aynı karşılık (rastgele değil) */
+      expect(k.yorumla('7 saat uyudum').sohbet.selam).toBe(k.yorumla('7 saat uyudum').sohbet.selam);
+    }));
+    it('niyet cümlesi sayfaya kendiliğinden götürmez; «evet» deyince açar', () => sahneyle(async () => {
+      const { k, gidilen } = sahne();
+      k.ac();
+      await k.isle('antrenman yapacağım');
+      expect(gidilen.length).toBe(0);
+      expect(k.akis().slice(-1)[0].son).toContain('açayım');
+      await k.isle('evet');
+      expect(gidilen.map(x => x[0])).toEqual(['move']);
+    }));
+    it('açık komut ve hazır cevap doğrudan gider', () => sahneyle(async () => {
+      const { k, gidilen } = sahne();
+      await k.isle('hareket sayfasına git');
+      expect(gidilen.map(x => x[0])).toEqual(['move']);
     }));
   });
 
@@ -326,6 +405,7 @@
         ? { metin:'Uyku 7 sa', kaydet:async () => { kaydedildi++; return 'Kaydedildi.'; } } : null } });
       await k.isle('hareket sayfasına git');
       await k.isle('antrenman yapacağım');
+      await k.isle('evet');
       await k.isle('uyku 7');
       expect(m.istekler.length).toBe(0);
       expect(gidilen.map(g => g[0])).toEqual(['move', 'move']);

@@ -1777,6 +1777,7 @@ ESP.App = (function(){
             if(!res || !res.rows.length) return null;
             const ad = r => (ESP.DISCIPLINE_BY_ID[r.disc] || {}).label || r.disc;
             return {
+              tur:'oturum',
               metin:res.rows.map(r => ad(r) + ' ' + U.fmtMin(r.minutes)
                 + (r.count != null ? ' · ' + U.fmtNum(r.count) + ' ' + (r.countWhat || '') : '')).join(' · '),
               ipucu:res.unmatched.length ? 'Kaydedilmeyecek: «' + res.unmatched.map(u => u.text).join('», «') + '»'

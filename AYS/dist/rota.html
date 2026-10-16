@@ -14167,6 +14167,8 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 .king__onizle-ad{ font-size:11.5px; font-weight:600; color:var(--text-2); }
 .king__onizle b{ font-size:17px; font-weight:650; letter-spacing:-.015em; color:var(--text); }
 .king__onizle small{ font-size:12.5px; color:var(--text-2); }
+.king__son{ margin-top:10px; }
+.king__balon--king.is-yeni .king__son{ animation-delay:.18s; }
 
 /* Hazır cevaplar: modülün noktası; sıra sağda solarak biter. */
 .king__cip{ display:inline-flex; align-items:center; gap:7px; }
@@ -16357,7 +16359,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'a853ee82', at:'2026-10-16 00:26', dirty:true };
+R.BUILD = { id:'ac445c6b', at:'2026-10-16 00:49', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -30374,7 +30376,21 @@ window.LIFEOS.SORUKART = (function(){
       kullanılır; buluttaki «Online» sesler seçilmez (cevabın metni hiçbir
       şirkete gitmez). Tanımayı tarayıcı yapar; Chrome bunu kendi
       sunucusunda yapar, düğmenin açıklaması bunu söyler. Ses yoksa ya da
-      izin verilmezse King yazıyla aynen sürer; ses BİLGİ taşımaz. */
+      izin verilmezse King yazıyla aynen sürer; ses BİLGİ taşımaz.
+   8. SOHBETTE KALIR (depo sahibi, 2026-10-16: «King'e "fasulye yiyeceğim bir
+      tabak" yazınca afiyet olsun desin, sohbet etsin, sonda "verilere
+      ekleyeyim mi?" diye sorsun; yalnız yemek değil bütün sistemler; sohbette
+      kalalım»). Veri cümlesine önce insan gibi karşılık verilir (yemekte
+      «Afiyet olsun», antrenmanda «Eline sağlık», çalışmada «Kolay gelsin»),
+      sonra önizleme ve «… ekleyeyim mi?». Cevap düğmeyle ya da yazıyla
+      («evet», «ekle», «hayır») verilir; kayıttan sonra King açık kalır.
+      Gelecek zamanlı cümle («yiyeceğim») kendiliğinden ölçüm olmaz
+      (olumsuz.js, KR-1): King fiili çıkarıp kalanını modülün ayrıştırıcısına
+      verir ve YALNIZ sorarak, «evet» denirse yazar. Olumsuz cümle («yemedim»)
+      hiç yazılmaz. Niyet cümlesi («antrenman yapacağım») sayfaya kendiliğinden
+      götürmez: sohbet cümlesi ve «açayım mı?»; açık «… git/aç» komutu ve hazır
+      cevap çipi doğrudan gider. Karşılık cümleleri sabit bir tablodur
+      (SOHBET); sayı ve karar yine modülün kodundadır. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -30459,6 +30475,7 @@ window.LIFEOS.KING = (function(){
   let akis = [];             // [{ kim:'king'|'sen', metin, satirlar? }]
   let cipler = null;         // null = hazır cevaplar; ya da [{ ad, is }]
   let bekleyen = null;       // veri önizlemesi
+  let bekleyenGit = null;    // «açayım mı?» diye sorulan sayfa (söz 8)
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
   let konusuyor = 0;         // okunmayı bekleyen parça sayısı
@@ -30497,9 +30514,12 @@ window.LIFEOS.KING = (function(){
     const veri = ayar && ayar.veri && typeof ayar.veri.onizle === 'function' ? ayar.veri
       : (L.GIRIS && L.GIRIS.kaynak ? L.GIRIS.kaynak() : null);
     if(veri){
-      let p = null;
-      try{ p = veri.onizle(String(metin).trim()); }catch(e){ p = null; }
-      if(p) return { tur:'veri', onizleme:p };
+      const dene = m => { try{ return veri.onizle(String(m).trim()); }catch(e){ return null; } };
+      const g = gelecekMi(metin);
+      let p = dene(metin);
+      /* Söz 8: «fasulye yiyeceğim bir tabak» — fiil çıkar, kalanı anlaşılır mı? */
+      if(!p && g){ const t2 = gelecekSiz(metin); if(t2) p = dene(t2); }
+      if(p) return { tur:'veri', onizleme:p, gelecek:!!g, sohbet:sohbet(p, metin, !!g) };
     }
     for(const n of NIYET){
       if(n.es.test(t)) return { tur:'git', hedef:n, cevap:n.cevap, kaynak:'niyet' };
@@ -30508,6 +30528,63 @@ window.LIFEOS.KING = (function(){
     if(s) return { tur:'git', hedef:s, cevap:'Tamam.', kaynak:'sayfa' };
     return { tur:'bilinmiyor' };
   }
+
+  /* ------------------------------------------------------- sohbet (söz 8) */
+
+  /* Gelecek zaman: olumsuz.js'in kapısı söyler; başka engel varsa (olumsuz,
+     soru, belirsiz) gelecek sayılmaz, cümle olduğu gibi kalır. */
+  function gelecekMi(metin){
+    const O = L.Olumsuz;
+    if(!O || !O.olcumEngeli) return null;
+    const e = O.olcumEngeli(String(metin || ''));
+    return e && e.neden === 'gelecek' ? e : null;
+  }
+  const yalin = w => kucuk(w).replace(/[.,!?;:]+/g, '');
+  function gelecekSiz(metin){
+    let t = String(metin || '');
+    for(let i = 0; i < 3; i++){
+      const e = gelecekMi(t);
+      if(!e) break;
+      const k = yalin(e.kelime);
+      if(!k) return null;
+      t = t.split(/\s+/).filter(w => yalin(w) !== k).join(' ');
+    }
+    if(L.Olumsuz && L.Olumsuz.olcumEngeli(t)) return null;   // başka bir engel kaldıysa yazılmaz
+    return t.trim() || null;
+  }
+
+  /* Karşılık tablosu. tur modülün önizlemesinden gelir (p.tur); yoksa
+     cümleden tahmin edilir. Seçim cümleye göre sabittir (aynı cümle, aynı
+     karşılık): rastgele değil, testle sınanır. */
+  const SOHBET = {
+    ogun:    { gecti:['Afiyet olsun!', 'Afiyet şeker olsun!'], gelecek:['Şimdiden afiyet olsun!'], soru:'Öğünlerine ekleyeyim mi?' },
+    su:      { gecti:['Afiyet olsun!'], gelecek:['Afiyet olsun!'], soru:'Bugünün suyuna ekleyeyim mi?' },
+    hareket: { gecti:['Eline sağlık, helal olsun!', 'Eline sağlık, güzel iş!'], gelecek:['Kolay gelsin, iyi antrenmanlar!'], soru:'Antrenmanlarına ekleyeyim mi?' },
+    uyku:    { gecti:['Günaydın! Uykunu not edelim.', 'Tamam, uykunu not edelim.'], gelecek:['İyi uykular!'], soru:'Uyku kaydına ekleyeyim mi?' },
+    olcum:   { gecti:['Tamam, gördüm.'], gelecek:['Tamam.'], soru:'Günlük ölçümüne ekleyeyim mi?' },
+    tahlil:  { gecti:['Geçmiş olsun, sonuçları gördüm.'], gelecek:['Tamam.'], soru:'Tahlillerine ekleyeyim mi?' },
+    calisma: { gecti:['Eline sağlık, emeğine sağlık!', 'Helal olsun, güzel çalışma!'], gelecek:['Kolay gelsin, başarılar!'], soru:'Çalışma kaydına ekleyeyim mi?' },
+    oturum:  { gecti:['Eline sağlık, güzel çalışma!', 'Emeğine sağlık!'], gelecek:['Kolay gelsin, keyifli çalışmalar!'], soru:'Bugünün oturumlarına ekleyeyim mi?' },
+    not:     { gecti:['Güzel bir not.'], gelecek:['Güzel bir not.'], soru:'Notlarına ekleyeyim mi?' },
+    veri:    { gecti:['Eline sağlık!'], gelecek:['Kolay gelsin!'], soru:'Verilerine ekleyeyim mi?' },
+  };
+  function turTahmin(t){
+    if(/(ye(dim|di|yeceğim|rim)|iç(tim|eceğim)|kahvaltı|öğle yemeği|akşam yemeği|yemek|tabak|porsiyon)/.test(t)) return 'ogun';
+    if(/(uyu(dum|yacağım)|uyku)/.test(t)) return 'uyku';
+    if(/(koş|yürü|antrenman|idman|spor|egzersiz|bisiklet|yüz(düm|eceğim))/.test(t)) return 'hareket';
+    if(/(soru|paragraf|problem|deneme|ders|konu)/.test(t)) return 'calisma';
+    return 'veri';
+  }
+  function sohbet(p, metin, gelecek){
+    const tur = SOHBET[p && p.tur] ? p.tur : turTahmin(kucuk(metin));
+    const s = SOHBET[tur] || SOHBET.veri;
+    const l = gelecek ? s.gelecek : s.gecti;
+    let h = 0;
+    String(metin || '').split('').forEach(c => { h = (h * 31 + c.charCodeAt(0)) >>> 0; });
+    return { tur, selam:l[h % l.length], soru:s.soru };
+  }
+  const EVET = /^(evet|ekle|ekleyebilirsin|olur|tamam|kaydet|yaz|ok|okey|aç|açabilirsin|e|tabii|tabi|lütfen)( |$|[.,!])/;
+  const HAYIR = /^(hayır|hayir|yok|vazgeç|gerek yok|ekleme|istemem|boşver|boş ver|açma|sonra)( |$|[.,!])/;
 
   /* Soru cümlesi mi (soru işareti ya da soru sözcüğü/eki)? Sözcük başı (^|\s). */
   const SORU = new RegExp('\\?|' + B + '(ne|neden|niye|nasıl|hangi|kaç|kim|nerede|nereye|niçin|m[ıiuü](?:s[ıiuü]n(?:[ıiuü]z)?|y[ıiuü][mz]|d[ıiuü]r)?)(?=$|\\s|[.,!])');
@@ -30683,19 +30760,29 @@ window.LIFEOS.KING = (function(){
     durum();
   }
 
-  function soyle(metin, satirlar, onizleme){
+  function soyle(metin, satirlar, onizleme, son){
     akis.forEach(m => { m.yeni = false; });
-    akis.push({ kim:'king', metin, satirlar, onizleme, yeni:true });
-    akis = akis.slice(-4);
+    akis.push({ kim:'king', metin, satirlar, onizleme, son, yeni:true });
+    /* Söz 8: sohbet görünür kalsın; son altı satır. */
+    akis = akis.slice(-6);
     ciz();
-    if(sesli) seslendir([metin].concat(satirlar || []).join('. ').replace(/\.\.+/g, '.'));
+    if(sesli) seslendir([metin].concat(satirlar || [], onizleme ? [onizleme.metin] : [], son ? [son] : []).join('. ').replace(/\.\.+/g, '.').replace(/([!?])\./g, '$1'));
   }
 
   async function isle(metin){
+    /* Söz 8: bekleyen soruya yazıyla cevap («evet», «hayır»). */
+    const t0 = kucuk(metin);
+    if((bekleyen || bekleyenGit) && (EVET.test(t0) || HAYIR.test(t0))){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      if(EVET.test(t0)){ if(bekleyen) await kaydet(); else gitOnayla(); }
+      else vazgec();
+      return { tur:EVET.test(t0) ? 'evet' : 'hayir' };
+    }
     const y = yorumla(metin);
     if(y.tur === 'bos') return y;
     akis.push({ kim:'sen', metin:String(metin).trim() });
     bekleyen = null;
+    bekleyenGit = null;
     cipler = null;
     /* Söz 6: soru, özet ve anlaşılmayan istek HKM'deki King'e. */
     const merkeze = !!baglanti() && (y.tur === 'bilinmiyor' || y.tur === 'ozet'
@@ -30726,14 +30813,23 @@ window.LIFEOS.KING = (function(){
     if(y.tur === 'ozet'){
       const s = ozetSatirlari();
       soyle(s.length ? (MODUL_AD[ayar.modul] || '') + '’de bugün:' : 'Bugün için henüz bir şey yok.', s);
+    }else if(y.tur === 'git' && y.kaynak === 'niyet'){
+      /* Söz 8: niyet cümlesi sayfaya kendiliğinden götürmez; sohbette sorar. */
+      const s = SAYFALAR.find(x => x.modul === y.hedef.modul && x.route === y.hedef.route);
+      const yer = s ? s.ad + (y.hedef.modul !== (ayar && ayar.modul) ? ' (' + MODUL_AD[y.hedef.modul] + ')' : '') : 'sayfayı';
+      bekleyenGit = y.hedef;
+      cipler = [{ ad:(s ? s.ad : 'Sayfa') + ' aç', is:'git-onay' }, { ad:'Gerek yok', is:'vazgec' }];
+      soyle((y.cevap || 'Kolay gelsin.').replace(/\.$/, '!'), null, null, 'İstersen ' + yer + ' açayım; yaptıktan sonra yazarsan da kaydederim.');
     }else if(y.tur === 'git'){
       soyle(eylemCumlesi(y.hedef, y.cevap));
       ortam.zamanla(() => git(y.hedef), sesli ? 1100 : 650);
     }else if(y.tur === 'veri'){
       bekleyen = y.onizleme;
-      cipler = [{ ad:'Kaydet', is:'kaydet' }, { ad:'Vazgeç', is:'vazgec' }];
-      soyle('Şunu kaydedeyim mi?', [y.onizleme.metin + (y.onizleme.ipucu ? ' · ' + y.onizleme.ipucu : '')],
-        { metin:y.onizleme.metin, ipucu:y.onizleme.ipucu || '' });
+      const s = y.sohbet || sohbet(y.onizleme, '', !!y.gelecek);
+      cipler = [{ ad:'Evet, ekle', is:'kaydet' }, { ad:'Hayır', is:'vazgec' }];
+      soyle(s.selam, null,
+        { metin:y.onizleme.metin, ipucu:y.gelecek ? 'Henüz yapmadıysan, yaptıktan sonra da söyleyebilirsin.' : (y.onizleme.ipucu || '') },
+        s.soru);
     }else{
       const on = neden === 'yok' ? 'King’in modeli şu an kapalı. '
         : neden === 'baglanti' ? 'Merkeze (HKM) şu an ulaşılamadı. ' : '';
@@ -30750,10 +30846,24 @@ window.LIFEOS.KING = (function(){
     if(!p) return;
     try{
       const r = await p.kaydet();
-      soyle((r && String(r)) || 'Kaydedildi.');
+      const m = String((r && String(r)) || 'Ekledim').trim().replace(/[.!]*$/, '.');
+      soyle(m + ' Başka bir şey var mı?');
     }catch(e){
       soyle('Kaydedilemedi: ' + ((e && e.message) || 'bilinmeyen hata'));
     }
+  }
+
+  function vazgec(){
+    const git0 = !!bekleyenGit;
+    bekleyen = null; bekleyenGit = null; cipler = null;
+    soyle(git0 ? 'Tamam, buradayım.' : 'Tamam, eklemedim.');
+  }
+  function gitOnayla(){
+    const h = bekleyenGit;
+    bekleyenGit = null; cipler = null;
+    if(!h) return;
+    soyle(eylemCumlesi(h, 'Tamam.'));
+    ortam.zamanla(() => git(h), sesli ? 1100 : 650);
   }
 
   function hazirSec(i){
@@ -30808,9 +30918,10 @@ window.LIFEOS.KING = (function(){
         + '<div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
       : '<div class="king__balon king__balon--king' + (m.yeni ? ' is-yeni' : '') + '"><div><p>' + kac(m.metin) + '</p>'
         + (m.onizleme
-          ? '<div class="king__onizle"><span class="king__onizle-ad">Kaydedilecek</span><b>' + kac(m.onizleme.metin) + '</b>'
+          ? '<div class="king__onizle"><span class="king__onizle-ad">Eklenecek</span><b>' + kac(m.onizleme.metin) + '</b>'
             + (m.onizleme.ipucu ? '<small>' + kac(m.onizleme.ipucu) + '</small>' : '') + '</div>'
           : (m.satirlar && m.satirlar.length ? '<ul>' + m.satirlar.map(x => '<li>' + kac(x) + '</li>').join('') + '</ul>' : ''))
+        + (m.son ? '<p class="king__son">' + kac(m.son) + '</p>' : '')
         + '</div></div>').join('');
     const cip = cipler
       ? cipler.map(c => '<button type="button" class="king__cip' + (c.is === 'kaydet' ? ' king__cip--ana' : '')
@@ -30856,7 +30967,7 @@ window.LIFEOS.KING = (function(){
     if(L.KABUK && L.KABUK.katmanAcik && L.KABUK.katmanAcik()) L.KABUK.katmanKapat();
     if(acik){ const g = document.querySelector('.king__girdi'); if(g) try{ g.focus(); }catch(e){} return; }
     acik = true;
-    akis = []; cipler = null; bekleyen = null; sesli = false;
+    akis = []; cipler = null; bekleyen = null; bekleyenGit = null; sesli = false;
     const el = document.createElement('div');
     el.className = 'king';
     el.setAttribute('data-king', '');
@@ -30917,7 +31028,8 @@ window.LIFEOS.KING = (function(){
         if(is === 'kapat'){ sesli = false; kapat(); return; }
         if(is === 'dinle'){ dinle(); return; }
         if(is === 'kaydet') kaydet();
-        else if(is === 'vazgec'){ bekleyen = null; cipler = null; soyle('Tamam, kaydetmedim.'); }
+        else if(is === 'git-onay') gitOnayla();
+        else if(is === 'vazgec') vazgec();
       }
     }, true);
     document.addEventListener('submit', e => {
@@ -30970,7 +31082,7 @@ window.LIFEOS.KING = (function(){
       if(el) el.remove();
       document.documentElement.classList.remove('king-acik');
     }
-    ayar = null; acik = false; akis = []; cipler = null; bekleyen = null;
+    ayar = null; acik = false; akis = []; cipler = null; bekleyen = null; bekleyenGit = null;
     sesli = false; dinleyen = null; konusuyor = 0;
   }
 
@@ -87102,7 +87214,10 @@ R.Palette = (function(){
     const notlar = [];
     if(r.sorular.length) notlar.push('Sormam gereken: ' + r.sorular.map(s => s.soru).join(' '));
     if(r.anlasilmayan.length) notlar.push('Kaydedilmeyecek: «' + r.anlasilmayan.join('», «') + '»');
+    /* tur: King'in sohbet karşılığı (king.js söz 8). */
+    const tur = r.oneriler.every(o => o.action === 'uyku-yaz') ? 'uyku' : 'calisma';
     return {
+      tur,
       metin:satirlar.join(' · '),
       ipucu:notlar.join(' · ') || 'Kaydet deyince yazılır; her biri geri alınabilir.',
       async kaydet(){
@@ -105640,7 +105755,11 @@ R.App = (function(){
       }
       if(window.LIFEOS && window.LIFEOS.GIRIS){
         window.LIFEOS.GIRIS.kur({ modul:'ays',
-          onizle:t => (R.KonuNotu && R.KonuNotu.onizle(t)) || (R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null),
+          onizle:t => {
+            const n = R.KonuNotu && R.KonuNotu.onizle(t);
+            if(n) return Object.assign(n, { tur:'not' });
+            return R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null;
+          },
           ornekler:['matematikten 40 soru çözdüm', '12 paragraf yaptım', '7 saat uyudum', 'not: üslülerde tabanlar aynıysa üsler toplanır'] });
       }
 

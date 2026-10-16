@@ -1600,7 +1600,10 @@ SP.App = (function(){
         window.LIFEOS.GIRIS.kur({ modul:'spi',
           onizle:t => {
             const p = SP.Quick && SP.Quick.parse(t);
-            return p ? { metin:p.label, ipucu:p.hint, kaydet:async () => {
+            /* tur: King'in sohbet karşılığı için (king.js söz 8). */
+            const tur = !p ? '' : p.kind === 'meal' ? 'ogun' : p.kind === 'move' ? 'hareket' : p.kind === 'lab' ? 'tahlil'
+              : p.data.field.id === 'sleep' ? 'uyku' : p.data.field.id === 'water' ? 'su' : 'olcum';
+            return p ? { tur, metin:p.label, ipucu:p.hint, kaydet:async () => {
               const r = await SP.Quick.apply(p); render(); return r && r.text; } } : null;
           },
           ornekler:['uyku 7,5', '45 dk yürüyüş', '2 yumurta 1 çay', 'kilo 72'] });

@@ -1650,7 +1650,11 @@ R.App = (function(){
       }
       if(window.LIFEOS && window.LIFEOS.GIRIS){
         window.LIFEOS.GIRIS.kur({ modul:'ays',
-          onizle:t => (R.KonuNotu && R.KonuNotu.onizle(t)) || (R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null),
+          onizle:t => {
+            const n = R.KonuNotu && R.KonuNotu.onizle(t);
+            if(n) return Object.assign(n, { tur:'not' });
+            return R.Palette.kingOnizle ? R.Palette.kingOnizle(t) : null;
+          },
           ornekler:['matematikten 40 soru çözdüm', '12 paragraf yaptım', '7 saat uyudum', 'not: üslülerde tabanlar aynıysa üsler toplanır'] });
       }
 
