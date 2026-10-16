@@ -98,11 +98,9 @@
       r.onresult({ results:[Object.assign([{ transcript:'antrenman yapacağım' }], { isFinal:true })] });
       r.onend();
       await new Promise(ok => setTimeout(ok, 0));
-      /* Söz 8: niyet sorar («açayım mı»), sesle; «evet» deyince gider. */
-      expect(gidilen).toEqual([]);
-      expect(ss.okunan.map(u => u.metin).join(' ')).toContain('açayım');
-      await k.isle('evet');
+      /* Söz 9: niyet sayfayı hemen açar; King küçük kutu olarak açık kalır. */
       expect(gidilen).toEqual([['move', { sekme:'kuvvet' }]]);
+      expect(k.acikMi() && k.miniMi()).toBe(true);
       expect(ss.okunan.length > 0).toBe(true);
       expect(ss.okunan[0].voice.name).toBe('Yelda (Gelişmiş)');
       expect(ss.okunan.map(u => u.metin).join(' ')).toContain('Hareket açılıyor');
@@ -140,14 +138,15 @@
       k.hazirSec(0);                                     // Antrenman yapacağım
       expect(k.akis().some(m => m.kim === 'king' && /Kolay gelsin/.test(m.metin))).toBe(true);
       expect(gidilen).toEqual([['move', { sekme:'kuvvet' }]]);
-      expect(k.acikMi()).toBe(false);
+      /* Söz 9: kapanmaz, küçülür. */
+      expect(k.acikMi()).toBe(true);
+      expect(k.miniMi()).toBe(true);
+      expect(document.querySelector('[data-king]').classList.contains('is-mini')).toBe(true);
     }));
 
     it('öteki modüle adresle geçer (#king=rota)', () => sahneyle(async () => {
       const { k, giden, gidilen } = sahne();
       await k.isle('dil çalışacağım');
-      expect(giden).toEqual([]);                            /* söz 8: önce sorar */
-      document.querySelector('[data-king="git-onay"]') ? document.querySelector('[data-king="git-onay"]').click() : await k.isle('evet');
       expect(giden).toEqual(['http://127.0.0.1:4193/#king=lang']);
       expect(gidilen).toHaveLength(0);
     }));
@@ -243,14 +242,63 @@
       /* aynı cümle, aynı karşılık (rastgele değil) */
       expect(k.yorumla('7 saat uyudum').sohbet.selam).toBe(k.yorumla('7 saat uyudum').sohbet.selam);
     }));
-    it('niyet cümlesi sayfaya kendiliğinden götürmez; «evet» deyince açar', () => sahneyle(async () => {
+    it('niyet cümlesi sayfayı açar; King kapanmaz, sağ üstte küçük kutu olur ve ekranın adını bilir', () => sahneyle(async () => {
       const { k, gidilen } = sahne();
+      let ekran = 'today';
+      k.kur({ modul:'spi', git:(r, ek) => { gidilen.push([r, ek || {}]); ekran = r; }, ekran:() => ekran, ozet:() => [] });
       k.ac();
       await k.isle('antrenman yapacağım');
-      expect(gidilen.length).toBe(0);
-      expect(k.akis().slice(-1)[0].son).toContain('açayım');
-      await k.isle('evet');
       expect(gidilen.map(x => x[0])).toEqual(['move']);
+      expect(k.acikMi() && k.miniMi()).toBe(true);
+      const el = document.querySelector('[data-king]');
+      expect(el.querySelector('.king__yer').textContent).toContain('Hareket');
+      expect(!!el.querySelector('.king__girdi')).toBe(true);           /* yazmaya devam */
+      expect(!!el.querySelector('.king-perde') && getComputedStyle(el.querySelector('.king-perde')).display === 'none').toBe(true);
+    }));
+
+    it('küçükken dışarı tıklamak kapatmaz; büyüt büyütür; ✕ kapatır; Ctrl iki kez küçükken büyütür', () => sahneyle(async () => {
+      const { k } = sahne();
+      k.ac();
+      document.body.click();                                         /* büyükken dışarısı: küçültür */
+      expect(k.acikMi() && k.miniMi()).toBe(true);
+      document.body.click();                                         /* küçükken dışarısı: dokunmaz */
+      expect(k.acikMi() && k.miniMi()).toBe(true);
+      document.querySelector('[data-king="buyut"]').click();
+      expect(k.acikMi() && !k.miniMi()).toBe(true);
+      k.kucult();
+      const tus = key => document.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles:true }));
+      tus('Control'); tus('Control');
+      expect(k.acikMi() && !k.miniMi()).toBe(true);
+      k.kucult();
+      document.querySelector('[data-king="kapat"]').click();
+      expect(k.acikMi()).toBe(false);
+    }));
+
+    it('öteki modülün verisi tahmin edilmez, iletilir (sunucu sözü 23); giriş yoksa yalnız «aç»', () => sahneyle(async () => {
+      const H = window.LIFEOS.HESAP;
+      if(!H){ expect('hesap.js').toBe('yüklü'); return; }
+      const eski = { durum:H.durum, gelenBirak:H.gelenBirak };
+      const giden = [];
+      try{
+        H.durum = () => ({ oturum:{ ad:'omer' } });
+        H.gelenBirak = async (modul, metin) => { giden.push([modul, metin]); return { ok:true, mesaj:'SPİ açılınca Onaylar’a düşer.' }; };
+        const { k, gidilen } = sahne({ modul:'ays', veri:{ onizle:() => null } });
+        k.ac();
+        await k.isle('bir tabak kuru fasulye yedim');
+        expect(gidilen.length).toBe(0);
+        expect(k.akis().slice(-1)[0].son).toContain('SPİ’ye ileteyim mi?');
+        document.querySelector('[data-king="ilet"]').click();
+        await new Promise(r => setTimeout(r, 0));
+        expect(giden).toEqual([['spi', 'bir tabak kuru fasulye yedim']]);
+        expect(k.akis().slice(-1)[0].metin).toContain('İlettim');
+        /* niyet (veri değil) iletilmez, açılır */
+        expect(k.veriGibi('antrenman yapacağım')).toBe(false);
+        expect(k.veriGibi('45 dk koştum')).toBe(true);
+        H.durum = () => ({ oturum:null });
+        await k.isle('bir tabak kuru fasulye yedim');
+        expect(!!document.querySelector('[data-king="ilet"]')).toBe(false);
+        expect(!!document.querySelector('[data-king="git-onay"]')).toBe(true);
+      }finally{ H.durum = eski.durum; H.gelenBirak = eski.gelenBirak; }
     }));
     it('açık komut ve hazır cevap doğrudan gider', () => sahneyle(async () => {
       const { k, gidilen } = sahne();
@@ -263,6 +311,9 @@
     it('başka modülden gelinen #king= hedefi yalnız katalogdaysa uygulanır', () => sahneyle(async () => {
       let s = sahne({ hash:'#king=move:kardiyo' });
       expect(s.gidilen).toEqual([['move', { sekme:'kardiyo' }]]);
+      /* Söz 9: King'le gelindi; burada küçük kutu olarak açık. */
+      expect(s.k.acikMi() && s.k.miniMi()).toBe(true);
+      expect(s.k.akis()[0].metin).toContain('Buradayım');
       expect(s.giden).toContain('hash-silindi');
       s = sahne({ hash:'#king=evil' });
       expect(s.gidilen).toHaveLength(0);
@@ -286,7 +337,9 @@
       tus('Control'); tus('Control');
       const perde = document.querySelector('[data-king] .king-perde');
       expect(!!perde).toBe(true);
-      perde.click();
+      perde.click();                                          /* söz 9: perde kapatmaz, küçültür */
+      expect(k.acikMi() && k.miniMi()).toBe(true);
+      tus('Escape');                                          /* yalnız Esc ya da ✕ kapatır */
       expect(k.acikMi()).toBe(false);
       tus('Control'); tus('c'); tus('Control');               // Ctrl+C sonrası açmaz
       expect(k.acikMi()).toBe(false);
@@ -402,7 +455,6 @@
         ? { metin:'Uyku 7 sa', kaydet:async () => { kaydedildi++; return 'Kaydedildi.'; } } : null } });
       await k.isle('hareket sayfasına git');
       await k.isle('antrenman yapacağım');
-      await k.isle('evet');
       await k.isle('uyku 7');
       expect(m.istekler.length).toBe(0);
       expect(gidilen.map(g => g[0])).toEqual(['move', 'move']);

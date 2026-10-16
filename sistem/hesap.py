@@ -144,6 +144,13 @@
       verir (`GET /api/hesap/tekgun`, oturumla). Bugune ait olmayan plan
       «bayat» isaretlenir, bugunmus gibi sunulmaz (AGENTS §1.2). Sunucu
       hicbir module yazmaz; plani birlestiren de modulun ekranidir.
+  23. KING'IN ILETTIGI SATIR (2026-10-16, «King sohbet arasinda butun
+      verileri girsin»). Bir modulde King'e yazilan satir baska modulun
+      isiyse (AYS'de «fasulye yedim»), King onu OTURUMLA o modulun gelen
+      kutusuna birakir (`POST /api/hesap/gelen-birak`). Soz 16'nin butun
+      kurallari gecerli: sunucu satiri ANLAMAZ, hicbir module yazmaz; satiri
+      yalniz hedef modul alir, kendi koduyla okur ve Onaylar'a oneri yapar.
+      Kaynak «King · <modul>» yazilir; kullanici basina saatte GELEN_SAAT_EN_COK.
 
    Yalniz Python standart kutuphanesi (AGENTS §1.3).
 """
@@ -1474,6 +1481,31 @@ class Depo:
             self._deneme_yanlis(anahtarlar)
         raise Hata(401, "Anahtar geçersiz ya da silinmiş.")
 
+    def gelen_birak(self, kullanici, metin, modul, kaynak_modul=None):
+        """Soz 23: King'in oturumla biraktigi satir. Soz 16 ile ayni sinirlar;
+        anahtar yerine oturumun kullanicisi."""
+        metin = " ".join(metin.split()) if isinstance(metin, str) else ""
+        modul = str(modul or "").strip().lower()
+        if not metin or any(ord(ch) < 32 for ch in metin):
+            raise Hata(400, "İletilecek bir satır yok.")
+        if len(metin) > GELEN_METIN_EN_UZUN:
+            raise Hata(400, "Satır çok uzun (en çok %d karakter)." % GELEN_METIN_EN_UZUN)
+        if modul not in GELEN_MODULLER:
+            raise Hata(400, "Bu modül gelen kutusu kabul etmiyor (ays, spi ya da esp).")
+        kaynak_modul = str(kaynak_modul or "").strip().lower()
+        kaynak = "King · " + MODUL_AD.get(kaynak_modul, "LifeOS")
+        simdi = self.saat()
+        with self._islem() as c:
+            if c.execute("SELECT COUNT(*) FROM gelen WHERE kullanici=? AND anahtar IS NULL AND zaman>?",
+                         (kullanici["id"], simdi - 3600)).fetchone()[0] >= GELEN_SAAT_EN_COK:
+                raise Hata(429, "Bir saatte çok fazla satır iletildi; biraz sonra yeniden dene.")
+            cur = c.execute("INSERT INTO gelen(kullanici, modul, metin, kaynak, anahtar, zaman, durum) "
+                            "VALUES(?,?,?,?,NULL,?,'bekliyor')", (kullanici["id"], modul, metin, kaynak, simdi))
+            c.execute("DELETE FROM gelen WHERE kullanici=? AND id <= (SELECT id FROM gelen WHERE kullanici=? "
+                      "ORDER BY id DESC LIMIT 1 OFFSET ?)", (kullanici["id"], kullanici["id"], GELEN_EN_COK))
+        return {"ok": True, "id": cur.lastrowid, "durum": "bekliyor",
+                "mesaj": "%s açılınca Onaylar’a düşer; sen onaylayınca yazılır." % MODUL_AD[modul]}
+
     def anahtar_dene(self, anahtar, ip=""):
         """Kisayolun ilk adimi: anahtar gecerli mi? Satir birakmaz (soz 16)."""
         anahtarlar = [("ip", ip)]
@@ -2371,6 +2403,8 @@ def isle(h):
                 return _cevap(h, 200, {"ok": True})
             if yol == "/api/hesap/gelen-al":
                 return _cevap(h, 200, {"gelen": d.gelen_al(k, v.get("modul"), cihaz)})
+            if yol == "/api/hesap/gelen-birak":
+                return _cevap(h, 200, d.gelen_birak(k, v.get("metin"), v.get("modul"), v.get("kaynak")))
             if yol == "/api/hesap/gelen-sonuc":
                 return _cevap(h, 200, {"ok": d.gelen_sonuc(k, v.get("id"), v.get("durum"), v.get("sonuc"), cihaz)})
             if yol == "/api/hesap/yayin":

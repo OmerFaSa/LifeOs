@@ -205,3 +205,28 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__dusun i:nth-child(3){ animation-delay:.32s; }
 @keyframes king-dusun{ 0%, 80%, 100%{ opacity:.25; transform:translateY(0); } 40%{ opacity:1; transform:translateY(-3px); } }
 @media (prefers-reduced-motion:reduce){ .king__dusun i{ animation:none; opacity:.6; } }
+
+/* ---------- küçük kutu (king.js söz 9) ----------
+   Sağ üstte; perde ve ışık yok, sayfa kullanılır. Ekranın adı, son cevap,
+   yazı alanı ve mikrofon. Yalnız ✕ ya da Esc kapatır. */
+.king.is-mini .king-perde, .king.is-mini .king-isik{ display:none; }
+.king.is-mini .king__kutu, .king.is-mini.is-acik .king__kutu{ left:auto; right:16px; top:16px; bottom:auto;
+  width:min(340px, calc(100vw - 32px)); max-height:min(52vh, 440px); gap:8px; padding:10px 12px; border-radius:20px;
+  opacity:1; transform:none; }
+.king.is-mini.is-kapaniyor .king__kutu{ opacity:0; transform:translateY(-6px) scale(.985); }
+.king.is-mini .king__bas{ min-height:28px; }
+.king.is-mini .king__yer{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.king__buyut, .king__kucult{ margin-left:auto; }
+.king__buyut + .king__kapat, .king__kucult + .king__kapat{ margin-left:2px; }
+.king__buyut svg, .king__kucult svg{ fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.king__mini-son{ display:flex; flex-direction:column; gap:3px; padding:2px 4px; font-size:14px; line-height:1.45; color:var(--text); overflow-y:auto; min-height:0; }
+.king__mini-son p{ margin:0; }
+.king__mini-oz{ font-size:14px; font-weight:650; }
+.king__mini-soru{ color:var(--text); font-weight:550; }
+.king.is-mini .king__cipler{ gap:6px; }
+.king.is-mini .king__cip{ min-height:30px; font-size:12.5px; }
+.king.is-mini .king__ipucu{ display:none; }
+@media (max-width:679px){
+  .king.is-mini .king__kutu, .king.is-mini.is-acik .king__kutu{ top:calc(var(--ust-h, 56px) + 8px + env(safe-area-inset-top, 0px));
+    right:12px; width:calc(100vw - 24px); max-height:44vh; }
+}

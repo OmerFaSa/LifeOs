@@ -1558,6 +1558,24 @@ def run():
     test("Tek gun: modulun JSON plani; bicim ve boyut denetlenir, icerik anlasilmaz; dunku plan bayat; sabit sira",
          t_tek_gun)
 
+    # ------------------------------------------- King'in ilettigi satir (soz 23)
+
+    def t_gelen_birak():
+        with _Depo() as r:
+            k, j = _admin(r)
+            v = r.d.gelen_birak(k, "  1 tabak   kuru fasulye  ", "SPI", "ays")
+            eq((v["ok"], v["durum"]), (True, "bekliyor"))
+            ok("SPİ" in v["mesaj"])
+            _hata(lambda: r.d.gelen_birak(k, "", "spi", "ays"), 400)
+            _hata(lambda: r.d.gelen_birak(k, "x" * 400, "spi", "ays"), 400)
+            _hata(lambda: r.d.gelen_birak(k, "su 250", "hkm", "ays"), 400)
+            _hata(lambda: r.d.gelen_birak(k, "a\x01b", "spi", "ays"), 400)
+            g = r.d.gelen_al(k, "spi", "cihaz-x")
+            eq([x["metin"] for x in g], ["1 tabak kuru fasulye"])      # sunucu anlamaz, yalniz bosluk
+            ok(not r.d.gelen_al(k, "ays", "cihaz-x"))                  # yalniz hedef modul alir
+    test("King'in ilettigi satir: oturumla; soz 16'nin sinirlari; yalniz hedef modul alir; sunucu anlamaz",
+         t_gelen_birak)
+
     def t_gocur_surum7():
         klasor = tempfile.mkdtemp(prefix="lifeos-hesap-")
         try:

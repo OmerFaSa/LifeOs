@@ -736,6 +736,8 @@ SP.App = (function(){
     /* Gizlenmis bolumun adresi Bugun'e doner. */
     if(gizliMi(route)) route = 'today';
     S.route = route;
+    /* King küçük kutusu hangi ekranda olduğunu bilir (king.js söz 9). */
+    if(window.LIFEOS && window.LIFEOS.KING && window.LIFEOS.KING.ekranDegisti) setTimeout(() => window.LIFEOS.KING.ekranDegisti(), 0);
     S.sidebarOpen = false;
     rotaDegisti = true;
     window.scrollTo(0, 0);
@@ -1587,7 +1589,7 @@ SP.App = (function(){
       /* KING (brand/ortak/king.js): her yerden sade sohbet. Özet ve veri
          girişi bu modülün kendi koduyla (SP.Quick: önizleme, onayla kayıt). */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'spi', hkm:() => SP.Beacon,
+        window.LIFEOS.KING.kur({ modul:'spi', ekran:() => S.route, hkm:() => SP.Beacon,
           git:(route, ek) => { if(route === 'move' && ek && ek.sekme) S.ui.moveTab = ek.sekme; go(route); },
           ozet:() => {
             const d = U.todayISO(), v = M.vitalsOf(d) || {}, og = (M.mealsOf(d) || []).length;

@@ -675,6 +675,8 @@ ESP.App = (function(){
     }
     K.katmanKapat();
     S.route = route;
+    /* King küçük kutusu hangi ekranda olduğunu bilir (king.js söz 9). */
+    if(window.LIFEOS && window.LIFEOS.KING && window.LIFEOS.KING.ekranDegisti) setTimeout(() => window.LIFEOS.KING.ekranDegisti(), 0);
     S.sidebarOpen = false;
     window.scrollTo(0, 0);
     render();
@@ -1766,7 +1768,7 @@ ESP.App = (function(){
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'esp', hkm:() => ESP.Beacon, git:route => go(route),
+        window.LIFEOS.KING.kur({ modul:'esp', ekran:() => S.route, hkm:() => ESP.Beacon, git:route => go(route),
           ozet:() => [ESP.Screens.today.headline()] });
       }
       /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı

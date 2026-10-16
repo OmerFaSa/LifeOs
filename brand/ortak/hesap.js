@@ -1688,6 +1688,11 @@ window.LIFEOS.HESAP = (function(){
   async function anahtarSil(id){ return api('/api/hesap/anahtar-sil', { id }); }
   /* TEK GÜN (sunucu sözü 22; brand/ortak/tekgun.js): üç modülün bugünkü
      planı. Giriş yoksa null; sunucu cevap vermezse hata (ekran söyler). */
+  /* KING'İN İLETTİĞİ SATIR (sunucu sözü 23; king.js söz 10): öteki modülün
+     gelen kutusuna, oturumla. Satırı yalnız o modül okur ve Onaylar'a koyar. */
+  async function gelenBirak(modul, metin){
+    return api('/api/hesap/gelen-birak', { modul, metin, kaynak:ayar ? ayar.modul : null });
+  }
   async function tekGun(){
     try{ return await api('/api/hesap/tekgun'); }
     catch(e){ if(e && e.kod === 401) return null; throw e; }
@@ -3492,7 +3497,7 @@ window.LIFEOS.HESAP = (function(){
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
-    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, cihazAdlandir, uyarilar, uyariGordum,
+    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
     _ortam:ortam, _sifirla, _istek:istek, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,

@@ -63,7 +63,23 @@
       hiç yazılmaz. Niyet cümlesi («antrenman yapacağım») sayfaya kendiliğinden
       götürmez: sohbet cümlesi ve «açayım mı?»; açık «… git/aç» komutu ve hazır
       cevap çipi doğrudan gider. Karşılık cümleleri sabit bir tablodur
-      (SOHBET); sayı ve karar yine modülün kodundadır. */
+      (SOHBET); sayı ve karar yine modülün kodundadır.
+   9. KÜÇÜK KUTU, KENDİLİĞİNDEN KAPANMAZ (depo sahibi, 2026-10-16: «King'e
+      antrenman yapacağım diyorum, beni atıyor, kendini kapatıyor; istemiyorum.
+      Sağ üstte küçük bir kutu olarak bizi dinlesin, görsün; biz kapatana kadar
+      oradan yazayım, sesle konuşayım»). Sayfaya götürmek, dışarı tıklamak ya da
+      perdeye dokunmak King'i KAPATMAZ, küçültür: sağ üstte ekranın adını,
+      son cevabı, yazı alanını ve mikrofonu taşıyan bir kutu; altındaki sayfa
+      kullanılır. Yalnız ✕ ya da Esc kapatır; Ctrl×2 küçükken büyütür. Niyet
+      cümlesi («antrenman yapacağım») sayfayı hemen açar (8'deki «açayım mı?»
+      sorusu kalktı: King açık kaldığı için sormak gereksiz). Öteki modüle
+      geçince sayfa yenilenir; King orada küçük kutu olarak yeniden açılır.
+      King hangi ekranda olduğunu bilir (modül `ekranDegisti()` der).
+  10. ÖTEKİ MODÜLÜN İŞİ İLETİLİR (sunucu sözü 23). AYS'de «fasulye yedim» gibi
+      başka modülün verisi yerelde anlaşılmaz; King onu tahmin etmez,
+      «SPİ'ye ileteyim mi?» der. «İlet» satırı OTURUMLA o modülün gelen
+      kutusuna bırakır; satırı yalnız o modül okur ve Onaylar'a öneri yapar
+      (ölçüm onaysız yazılmaz). Giriş yoksa yalnız «SPİ'yi aç» kalır. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -150,6 +166,8 @@ window.LIFEOS.KING = (function(){
   let cipler = null;         // null = hazır cevaplar; ya da [{ ad, is }]
   let bekleyen = null;       // veri önizlemesi
   let bekleyenGit = null;    // «açayım mı?» diye sorulan sayfa (söz 8)
+  let bekleyenIlet = null;   // { modul, metin } öteki modüle iletilecek satır (söz 10)
+  let mini = false;          // küçük kutu (söz 9)
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
   let konusuyor = 0;         // okunmayı bekleyen parça sayısı
@@ -196,7 +214,7 @@ window.LIFEOS.KING = (function(){
       if(p) return { tur:'veri', onizleme:p, gelecek:!!g, sohbet:sohbet(p, metin, !!g) };
     }
     for(const n of NIYET){
-      if(n.es.test(t)) return { tur:'git', hedef:n, cevap:n.cevap, kaynak:'niyet' };
+      if(n.es.test(t)) return { tur:'git', hedef:n, cevap:n.cevap, kaynak:'niyet', metin:String(metin).trim() };
     }
     const s = sayfaBul(t);
     if(s) return { tur:'git', hedef:s, cevap:'Tamam.', kaynak:'sayfa' };
@@ -257,6 +275,24 @@ window.LIFEOS.KING = (function(){
     String(metin || '').split('').forEach(c => { h = (h * 31 + c.charCodeAt(0)) >>> 0; });
     return { tur, selam:l[h % l.length], soru:s.soru };
   }
+  /* Söz 10: cümle bir VERİ mi (sayı ya da geçmiş zaman: «yedim», «koştum»),
+     yoksa niyet mi («antrenman yapacağım»)? Yalnız iletme sorusu için. */
+  function veriGibi(m){
+    const t = kucuk(m);
+    return /\d/.test(t) || /(?:d|t)(?:ı|i|u|ü)m(?=$|\s|[.,!])/.test(t);
+  }
+  async function ilet(){
+    const x = bekleyenIlet;
+    bekleyenIlet = null; bekleyenGit = null; cipler = null;
+    if(!x) return;
+    try{
+      const r = await L.HESAP.gelenBirak(x.modul, x.metin);
+      soyle('İlettim. ' + ((r && r.mesaj) || ''));
+    }catch(e){
+      soyle('İletemedim: ' + ((e && e.message) || 'sunucuya ulaşılamadı') + '. ' + MODUL_AD[x.modul] + '’yi açıp orada yazabilirsin.');
+    }
+  }
+
   const EVET = /^(evet|ekle|ekleyebilirsin|olur|tamam|kaydet|yaz|ok|okey|aç|açabilirsin|e|tabii|tabi|lütfen)( |$|[.,!])/;
   const HAYIR = /^(hayır|hayir|yok|vazgeç|gerek yok|ekleme|istemem|boşver|boş ver|açma|sonra)( |$|[.,!])/;
 
@@ -317,8 +353,9 @@ window.LIFEOS.KING = (function(){
   function git(h){
     if(!ayar || !h) return false;
     if(h.modul === ayar.modul){
-      kapat();
+      kucult();                                    // söz 9: kapanmaz, küçülür
       try{ ayar.git(h.route, h.ek || {}); }catch(e){ console.error('King: git', e); }
+      ekranDegisti();
       return true;
     }
     const url = ortam.adres(h.modul);
@@ -446,9 +483,9 @@ window.LIFEOS.KING = (function(){
   async function isle(metin){
     /* Söz 8: bekleyen soruya yazıyla cevap («evet», «hayır»). */
     const t0 = kucuk(metin);
-    if((bekleyen || bekleyenGit) && (EVET.test(t0) || HAYIR.test(t0))){
+    if((bekleyen || bekleyenGit || bekleyenIlet) && (EVET.test(t0) || HAYIR.test(t0))){
       akis.push({ kim:'sen', metin:String(metin).trim() });
-      if(EVET.test(t0)){ if(bekleyen) await kaydet(); else gitOnayla(); }
+      if(EVET.test(t0)){ if(bekleyen) await kaydet(); else if(bekleyenIlet) await ilet(); else gitOnayla(); }
       else vazgec();
       return { tur:EVET.test(t0) ? 'evet' : 'hayir' };
     }
@@ -457,6 +494,7 @@ window.LIFEOS.KING = (function(){
     akis.push({ kim:'sen', metin:String(metin).trim() });
     bekleyen = null;
     bekleyenGit = null;
+    bekleyenIlet = null;
     cipler = null;
     /* Söz 6: soru, özet ve anlaşılmayan istek HKM'deki King'e. */
     const merkeze = !!baglanti() && (y.tur === 'bilinmiyor' || y.tur === 'ozet'
@@ -487,13 +525,17 @@ window.LIFEOS.KING = (function(){
     if(y.tur === 'ozet'){
       const s = ozetSatirlari();
       soyle(s.length ? (MODUL_AD[ayar.modul] || '') + '’de bugün:' : 'Bugün için henüz bir şey yok.', s);
-    }else if(y.tur === 'git' && y.kaynak === 'niyet'){
-      /* Söz 8: niyet cümlesi sayfaya kendiliğinden götürmez; sohbette sorar. */
+    }else if(y.tur === 'git' && y.kaynak === 'niyet' && y.hedef.modul !== ayar.modul && veriGibi(y.metin)){
+      /* Söz 10: öteki modülün VERİSİ («fasulye yedim») tahmin edilmez; iletilir. */
       const s = SAYFALAR.find(x => x.modul === y.hedef.modul && x.route === y.hedef.route);
-      const yer = s ? s.ad + (y.hedef.modul !== (ayar && ayar.modul) ? ' (' + MODUL_AD[y.hedef.modul] + ')' : '') : 'sayfayı';
+      const ad = MODUL_AD[y.hedef.modul];
       bekleyenGit = y.hedef;
-      cipler = [{ ad:(s ? s.ad : 'Sayfa') + ' aç', is:'git-onay' }, { ad:'Gerek yok', is:'vazgec' }];
-      soyle((y.cevap || 'Kolay gelsin.').replace(/\.$/, '!'), null, null, 'İstersen ' + yer + ' açayım; yaptıktan sonra yazarsan da kaydederim.');
+      const giris = !!(L.HESAP && L.HESAP.durum && L.HESAP.durum().oturum && L.HESAP.gelenBirak);
+      bekleyenIlet = giris ? { modul:y.hedef.modul, metin:y.metin } : null;
+      cipler = (giris ? [{ ad:ad + '’ye ilet', is:'ilet' }] : []).concat([{ ad:(s ? s.ad : ad) + ' aç', is:'git-onay' }, { ad:'Gerek yok', is:'vazgec' }]);
+      soyle(sohbet({ tur:null }, y.metin, false).selam, null, null,
+        giris ? 'Bu ' + ad + '’nin işi. ' + ad + '’ye ileteyim mi? ' + ad + ' açılınca Onaylar’a düşer, sen onaylayınca yazılır.'
+          : 'Bu ' + ad + '’nin işi; buradan kaydedemem. ' + ad + '’yi açayım mı? (İletmek için hesaba giriş gerekir.)');
     }else if(y.tur === 'git'){
       soyle(eylemCumlesi(y.hedef, y.cevap));
       ortam.zamanla(() => git(y.hedef), sesli ? 1100 : 650);
@@ -530,12 +572,12 @@ window.LIFEOS.KING = (function(){
 
   function vazgec(){
     const git0 = !!bekleyenGit;
-    bekleyen = null; bekleyenGit = null; cipler = null;
+    bekleyen = null; bekleyenGit = null; bekleyenIlet = null; cipler = null;
     soyle(git0 ? 'Tamam, buradayım.' : 'Tamam, eklemedim.');
   }
   function gitOnayla(){
     const h = bekleyenGit;
-    bekleyenGit = null; cipler = null;
+    bekleyenGit = null; bekleyenIlet = null; cipler = null;
     if(!h) return;
     soyle(eylemCumlesi(h, 'Tamam.'));
     ortam.zamanla(() => git(h), sesli ? 1100 : 650);
@@ -580,10 +622,52 @@ window.LIFEOS.KING = (function(){
      kapat; King'in cevabı avatar balonu değil düz yazı ve yalnız EN YENİSİ
      hafif bulanıktan netleşerek belirir; veri önizlemesi ayrı kart; hazır
      cevapta gideceği modülün noktası. */
+  /* Söz 9: King hangi ekranda? Modülün rotası; adı katalogdan, yoksa sayfa başlığından. */
+  function ekranAdi(){
+    let r = null;
+    try{ r = ayar && ayar.ekran ? ayar.ekran() : null; }catch(e){ r = null; }
+    const s = r && SAYFALAR.find(x => x.modul === (ayar && ayar.modul) && x.route === r);
+    if(s) return s.ad;
+    const h = typeof document !== 'undefined' ? document.querySelector('#app h1, main h1') : null;
+    return h ? String(h.textContent || '').trim().slice(0, 30) : '';
+  }
+
+  const SVG_BUYUT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5h5v5M10 19H5v-5M19 5l-6 6M5 19l6-6"/></svg>';
+  const SVG_KAPAT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>';
+
+  function miniGovde(){
+    const son = akis.filter(m => m.kim === 'king' && !m.bekliyor).slice(-1)[0];
+    const bekliyor = akis.some(m => m.bekliyor);
+    const ekran = ekranAdi();
+    const bas = '<div class="king__bas">' + KURE + '<b>King</b>'
+      + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + (ekran ? ' · ' + kac(ekran) : '') + '</span>'
+      + '<button type="button" class="king__kapat king__buyut" data-king="buyut" aria-label="Büyüt" title="Büyüt (Ctrl iki kez)">' + SVG_BUYUT + '</button>'
+      + '<button type="button" class="king__kapat" data-king="kapat" aria-label="Kapat" title="Kapat (Esc)">' + SVG_KAPAT + '</button></div>';
+    const govdeM = bekliyor
+      ? '<div class="king__mini-son is-bekliyor" role="status" aria-label="King düşünüyor"><div class="king__dusun" aria-hidden="true"><i></i><i></i><i></i></div></div>'
+      : '<div class="king__mini-son" aria-live="polite"><p>' + kac(son ? son.metin : 'Buradayım. Yaz ya da konuş.') + '</p>'
+        + (son && son.onizleme ? '<b class="king__mini-oz">' + kac(son.onizleme.metin) + '</b>' : '')
+        + (son && son.son ? '<p class="king__mini-soru">' + kac(son.son) + '</p>' : '') + '</div>';
+    const cip = cipler ? '<div class="king__cipler" role="group" aria-label="Cevaplar">' + cipler.map(c => '<button type="button" class="king__cip'
+      + (c.is === 'kaydet' || c.is === 'ilet' ? ' king__cip--ana' : '') + '" data-king="' + c.is + '">' + kac(c.ad) + '</button>').join('') + '</div>' : '';
+    const mik = ortam.tanima()
+      ? '<button type="button" class="king__mik' + (dinleyen ? ' is-acik' : '') + '" data-king="dinle" aria-pressed="' + (dinleyen ? 'true' : 'false')
+        + '" aria-label="' + (dinleyen ? 'Dinlemeyi bitir' : 'Konuşarak sor') + '"><svg viewBox="0 0 24 24" aria-hidden="true">'
+        + '<rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg></button>' : '';
+    return bas + govdeM + cip
+      + '<form class="king__yaz" data-king-form data-ayar-disi>'
+      + '<input class="king__girdi" type="text" aria-label="King\'e yaz" placeholder="' + (dinleyen ? 'Dinliyorum…' : 'King\'e yaz…') + '" autocomplete="off" enterkeyhint="send"/>'
+      + mik + '<button type="submit" class="king__gonder" aria-label="Gönder"><svg viewBox="0 0 24 24" aria-hidden="true">'
+      + '<path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button></form>';
+  }
+
   function govde(){
+    if(mini) return miniGovde();
     const satirlar = akis.length ? akis : [{ kim:'king', metin:selam(), yeni:true }];
     const bas = '<div class="king__bas">' + KURE + '<b>King</b>'
       + '<span class="king__yer">' + NOKTA(ayar && ayar.modul) + kac(MODUL_AD[ayar && ayar.modul] || '') + '</span>'
+      + '<button type="button" class="king__kapat king__kucult" data-king="kucult" aria-label="Küçült" title="Küçült: sayfayı kullanırken açık kalır">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 5l-6 6M14 11h-3V8M5 19l6-6M10 13h3v3"/></svg></button>'
       + '<button type="button" class="king__kapat" data-king="kapat" aria-label="Kapat" title="Kapat (Esc)">'
       + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>';
     const balonlar = satirlar.map(m => m.kim === 'sen'
@@ -601,7 +685,7 @@ window.LIFEOS.KING = (function(){
         + (m.son ? '<p class="king__son">' + kac(m.son) + '</p>' : '')
         + '</div></div>').join('');
     const cip = cipler
-      ? cipler.map(c => '<button type="button" class="king__cip' + (c.is === 'kaydet' ? ' king__cip--ana' : '')
+      ? cipler.map(c => '<button type="button" class="king__cip' + (c.is === 'kaydet' || c.is === 'ilet' ? ' king__cip--ana' : '')
           + '" data-king="' + c.is + '">' + kac(c.ad) + '</button>').join('')
       : HAZIR.map((h, i) => ({ h, i })).sort((a, b) => (a.h.ozet - b.h.ozet)
           || ((b.h.modul === (ayar && ayar.modul)) - (a.h.modul === (ayar && ayar.modul))) || a.i - b.i)
@@ -634,26 +718,29 @@ window.LIFEOS.KING = (function(){
     if(akisEl) akisEl.scrollTop = akisEl.scrollHeight;
     akis.forEach(m => { m.yeni = false; });
     durum();
-    if(odak !== false && g && !(L.KABUK && L.KABUK.telefonMu && L.KABUK.telefonMu())){
+    if(odak !== false && g && !(mini && odak !== true) && !(L.KABUK && L.KABUK.telefonMu && L.KABUK.telefonMu())){
       try{ g.focus({ preventScroll:true }); }catch(e){ /* odak yok */ }
     }
   }
 
-  function ac(){
+  function ac(o){
     if(typeof document === 'undefined' || !document.body || !ayar) return;
     if(L.KABUK && L.KABUK.katmanAcik && L.KABUK.katmanAcik()) L.KABUK.katmanKapat();
-    if(acik){ const g = document.querySelector('.king__girdi'); if(g) try{ g.focus(); }catch(e){} return; }
+    if(acik){ if(mini && !(o && o.mini)) buyut(); const g = document.querySelector('.king__girdi'); if(g) try{ g.focus(); }catch(e){} return; }
     acik = true;
-    akis = []; cipler = null; bekleyen = null; bekleyenGit = null; sesli = false;
+    mini = !!(o && o.mini);
+    akis = []; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null; sesli = false;
+    if(o && o.mesaj) akis.push({ kim:'king', metin:o.mesaj });
     const el = document.createElement('div');
     el.className = 'king';
     el.setAttribute('data-king', '');
     /* Perde: arka plan hafifçe kararır (odak baloncukta); dokununca kapanır. */
     el.innerHTML = '<div class="king-perde" aria-hidden="true"></div><div class="king-isik" aria-hidden="true"></div>'
       + '<div class="king__kutu" role="dialog" aria-modal="false" aria-label="King ile konuş"></div>';
+    if(mini) el.classList.add('is-mini');
     document.body.appendChild(el);
-    document.documentElement.classList.add('king-acik');
-    ciz();
+    document.documentElement.classList.add(mini ? 'king-mini' : 'king-acik');
+    ciz(mini ? false : undefined);
     /* Odak katmanı: soldaki kenar King'i açan tıkla uyanmış olabilir;
        hareketsiz ve sakin kalır (kabuk.js «sakin kenar»). */
     if(L.KABUK && typeof L.KABUK.kenarSakinlestir === 'function'){ try{ L.KABUK.kenarSakinlestir(); }catch(e){ /* kabuk yok */ } }
@@ -661,9 +748,33 @@ window.LIFEOS.KING = (function(){
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-acik')));
   }
 
+  /* Söz 9: küçük kutu. Perde ve ışık yok, sayfa kullanılır; kabuğun
+     «King açık» kilidi (king-acik) kalkar. */
+  function kucult(){
+    if(!acik || mini || typeof document === 'undefined') return;
+    mini = true;
+    const el = document.querySelector('[data-king]');
+    if(el) el.classList.add('is-mini');
+    document.documentElement.classList.remove('king-acik');
+    document.documentElement.classList.add('king-mini');
+    ciz(false);
+  }
+  function buyut(){
+    if(!acik || !mini || typeof document === 'undefined') return;
+    mini = false;
+    const el = document.querySelector('[data-king]');
+    if(el) el.classList.remove('is-mini');
+    document.documentElement.classList.remove('king-mini');
+    document.documentElement.classList.add('king-acik');
+    ciz();
+  }
+  /* Modül: ekran değişti (go). Küçük kutunun başlığı tazelenir; odak çalınmaz. */
+  function ekranDegisti(){ if(acik && mini) ciz(false); }
+
   function kapat(){
     if(!acik || typeof document === 'undefined') return;
     acik = false;
+    mini = false;
     if(dinleyen){ try{ dinleyen.abort ? dinleyen.abort() : dinleyen.stop(); }catch(e){ /* kapalı */ } dinleyen = null; }
     /* Sayfaya giderken söylenen cümle yarıda kesilmesin; elle kapatınca susar. */
     if(!sesli) sus();
@@ -672,6 +783,7 @@ window.LIFEOS.KING = (function(){
     el.classList.remove('is-acik');
     el.classList.add('is-kapaniyor');
     document.documentElement.classList.remove('king-acik');
+    document.documentElement.classList.remove('king-mini');
     setTimeout(() => el.remove(), 360);
   }
 
@@ -686,7 +798,7 @@ window.LIFEOS.KING = (function(){
       if(e.key !== 'Control'){ baskaTus = true; return; }
       if(e.repeat) return;
       const s = Date.now();
-      if(!baskaTus && s - sonCtrl < 400){ sonCtrl = 0; acik ? kapat() : ac(); return; }
+      if(!baskaTus && s - sonCtrl < 400){ sonCtrl = 0; !acik ? ac() : mini ? buyut() : kapat(); return; }
       sonCtrl = s;
       baskaTus = false;
     }, true);
@@ -694,9 +806,10 @@ window.LIFEOS.KING = (function(){
       const t = e.target && e.target.closest ? e.target : null;
       if(!t) return;
       if(t.closest('[data-king-ac]')){ e.preventDefault(); e.stopPropagation(); ac(); return; }
-      if(t.closest('.king-perde')){ e.preventDefault(); e.stopPropagation(); kapat(); return; }
+      /* Söz 9: perde ve dışarısı KAPATMAZ, küçültür; küçükken sayfa serbest. */
+      if(t.closest('.king-perde')){ e.preventDefault(); e.stopPropagation(); kucult(); return; }
       const k = t.closest('[data-king]');
-      if(!k){ if(acik) kapat(); return; }
+      if(!k){ if(acik && !mini) kucult(); return; }
       const h = t.closest('[data-king-hazir]');
       if(h){ hazirSec(Number(h.getAttribute('data-king-hazir'))); return; }
       const c = t.closest('[data-king]:not(.king)');
@@ -704,6 +817,9 @@ window.LIFEOS.KING = (function(){
         const is = c.getAttribute('data-king');
         if(is === 'kapat'){ sesli = false; kapat(); return; }
         if(is === 'dinle'){ dinle(); return; }
+        if(is === 'kucult'){ kucult(); return; }
+        if(is === 'buyut'){ buyut(); return; }
+        if(is === 'ilet'){ ilet(); return; }
         if(is === 'kaydet') kaydet();
         else if(is === 'git-onay') gitOnayla();
         else if(is === 'vazgec') vazgec();
@@ -748,7 +864,12 @@ window.LIFEOS.KING = (function(){
     if(m){
       ortam.hashSil();
       if(gecerliRota(ayar.modul, m[1])){
-        ortam.zamanla(() => { try{ ayar.git(m[1], m[2] ? { sekme:m[2] } : {}); }catch(e){ console.error('King:', e); } }, 60);
+        ortam.zamanla(() => {
+          try{ ayar.git(m[1], m[2] ? { sekme:m[2] } : {}); }catch(e){ console.error('King:', e); }
+          /* Söz 9: King'le gelindi; burada küçük kutu olarak açık kalır. */
+          const s = SAYFALAR.find(x => x.modul === ayar.modul && x.route === m[1]);
+          ac({ mini:true, mesaj:'Buradayım. ' + (s ? s.ad + ' açık; ' : '') + 'yaptığını yaz, kaydedeyim.' });
+        }, 60);
       }
     }
   }
@@ -758,14 +879,15 @@ window.LIFEOS.KING = (function(){
       const el = document.querySelector('[data-king]');
       if(el) el.remove();
       document.documentElement.classList.remove('king-acik');
+      document.documentElement.classList.remove('king-mini');
     }
-    ayar = null; acik = false; akis = []; cipler = null; bekleyen = null; bekleyenGit = null;
+    ayar = null; acik = false; mini = false; akis = []; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
     sesli = false; dinleyen = null; konusuyor = 0;
   }
 
   return {
-    kur, ac, kapat, yorumla, isle, hazirSec, kaydet, dinle, sesSec,
-    acikMi:() => acik, akis:() => akis.slice(),
+    kur, ac, kapat, kucult, buyut, ekranDegisti, yorumla, isle, hazirSec, kaydet, dinle, sesSec, veriGibi,
+    acikMi:() => acik, miniMi:() => mini, akis:() => akis.slice(),
     SAYFALAR, HAZIR, _ortam:ortam, _sifirla,
   };
 })();

@@ -709,6 +709,8 @@ R.App = (function(){
        doner: gizlenen bolum «acilmayan bos ekran» olarak gorunmemeli. */
     if(gizliMi(route)) route = 'today';
     S.route = route;
+    /* King küçük kutusu hangi ekranda olduğunu bilir (king.js söz 9). */
+    if(window.LIFEOS && window.LIFEOS.KING && window.LIFEOS.KING.ekranDegisti) setTimeout(() => window.LIFEOS.KING.ekranDegisti(), 0);
     rotaDegisti = true;
     S.sidebarOpen = false;
     /* Açık deneme ayrıntısı gezinmede KAPANMAZ: Deneme'ye dönen kişi
@@ -1631,7 +1633,7 @@ R.App = (function(){
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'ays', hkm:() => R.Beacon, git:route => go(route),
+        window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route, hkm:() => R.Beacon, git:route => go(route),
           /* Özet: bugünün cümlesi, tekrar borcu ve Öğren'de sıradaki adım —
              hepsi kodun sayısı (King yalnız okur). */
           ozet:() => {

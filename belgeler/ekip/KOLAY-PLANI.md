@@ -95,6 +95,8 @@ Döngünün altında, her ayağı kolaylaştıran iki **kolaylık katmanı** var
 | AYS sade: iç içelik azaldı (8→5, 7→3 sekme) | `2a989449` | Ekran |
 | **Otopilot Gün 1 · Tek gün** (sunucu sözü 22) | `4cac9fb2` | Plan |
 | **Gelecek simülatörü** (AYS Analiz › Gelecek) | `98f3e6be` | Ölç |
+| Pusula (Faz 0) | `73f84e06` | Ölç |
+| King küçük kutu: kapanmaz, ekranı bilir; öteki modülün verisini iletir (sunucu sözü 23) | (bu commit) | Yap |
 
 ## 5. Fazlar
 
@@ -241,7 +243,7 @@ korunur ama kolaylık fazlarının arkasına geçer; simülatör yapıldı.
 |---|---|---|---|
 | Tek gün (Otopilot 1) | yapıldı | `4cac9fb2` | Bugün'de, öteki modülden iş gelince görünür |
 | Gelecek simülatörü | yapıldı | `98f3e6be` | AYS Analiz › Gelecek; ufuk ≤ 3× ölçülen süre |
-| 0 · Pusula | yapıldı | (bu commit) | başlangıç değerleri aşağıda; uygulamada Ayarlar › Genel'de pusula satırı |
+| 0 · Pusula | yapıldı | `73f84e06` | başlangıç değerleri aşağıda; uygulamada Ayarlar › Genel'de pusula satırı |
 | 1 · Günü kapat | sırada | — | |
 | 2 · Basit görünüm | bekliyor | — | |
 | 3 · Telefonda tek dokunuş | bekliyor | — | |
