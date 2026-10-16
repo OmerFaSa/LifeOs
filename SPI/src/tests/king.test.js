@@ -356,6 +356,78 @@
       expect(localStorage.getItem(k.TASIMA)).toBe(null);
     }));
 
+    /* Söz 19 (2026-10-17): cevap biçimi, sohbeti temizle / kaydet / kayıtlar. */
+    it('cevap biçimi: Sesli yazana da okur, Yazılı konuşana da susar; seçim taşınır', () => sahneyle(async () => {
+      const okunan = [];
+      const sentez = { getVoices:() => [], speak:u => okunan.push(u.metin), cancel(){} };
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri });
+      Object.assign(k._ortam, { sentez:() => sentez, soz:m => ({ metin:m }) });
+      k.ac();
+      expect(k.cevapBicimi()).toBe('oto');
+      await k.isle('uyku 7');
+      expect(okunan).toHaveLength(0);            // otomatik: yazana yazıyla
+      k.cevapSec('ses');
+      await k.isle('uyku 7');
+      expect(okunan.length > 0).toBe(true);
+      expect(k.akis().slice(-1)[0].metin.length > 0).toBe(true);   // yazı da görünür
+      okunan.length = 0;
+      k.cevapSec('yazi');
+      k.sesliSohbetAc();                         // sesle konuşuyor
+      okunan.length = 0;
+      await k.isle('uyku 7');
+      expect(okunan).toHaveLength(0);
+      if(window.LIFEOS.ANIMASYON) expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(k.CEVAP) >= 0).toBe(true);
+      expect(k.cevapSec('saçma')).toBe(false);
+    }));
+    it('sohbeti temizle: ekrandan ve cihazdan gider, «Geri getir» geri koyar', () => sahneyle(async () => {
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri });
+      k.ac();
+      await k.isle('uyku 7');
+      expect(k.sohbetiTemizle()).toBe(true);
+      expect(k.akis().some(m => m.metin === 'uyku 7')).toBe(false);
+      expect(!!document.querySelector('[data-king="geri-getir"]')).toBe(true);
+      expect(k.sohbetiGeriGetir()).toBe(true);
+      expect(k.akis().some(m => m.metin === 'uyku 7')).toBe(true);
+    }));
+    it('sohbeti kaydet: kayıtlarda listelenir, açılır, indirilir, iki adımda silinir', () => sahneyle(async () => {
+      const inen = [];
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri, modul:'spi' });
+      Object.assign(k._ortam, { indir:(ad, metin) => { inen.push([ad, metin]); return true; } });
+      k.ac();
+      expect(k.sohbetiKaydet()).toBe(null);      // boş sohbet kaydedilmez
+      await k.isle('uyku 7');
+      const kayit = k.sohbetiKaydet();
+      expect(k.kayitlar()).toHaveLength(1);
+      expect(k.akis().slice(-1)[0].metin).toContain('bu cihazda, SPİ içinde');
+      /* menü: Daha fazla → Kayıtlı sohbetler → kayıt */
+      document.querySelector('[data-king="menu"]').click();
+      expect(document.querySelector('.king__menu-say').textContent).toBe('1');
+      document.querySelector('[data-king="kayitlar"]').click();
+      expect(document.querySelectorAll('.king__kayitlar li')).toHaveLength(1);
+      document.querySelector('[data-king="kayit:' + kayit.id + '"]').click();
+      expect(document.querySelector('.king__kayit').textContent).toContain('uyku 7');
+      document.querySelector('[data-king="indir:' + kayit.id + '"]').click();
+      expect(/^king-spi-2026-10-05-\d{4}\.txt$/.test(inen[0][0])).toBe(true);
+      expect(inen[0][1]).toContain('Sen: uyku 7');
+      /* sil: ilk dokunuş sorar, ikincisi siler */
+      k.menuAc({ id:kayit.id });
+      expect(k.kayitSil(kayit.id)).toBe(false);
+      expect(document.querySelector('[data-king="sil:' + kayit.id + '"]').textContent).toBe('Emin misin? Sil');
+      expect(k.kayitSil(kayit.id)).toBe(true);
+      expect(k.kayitlar()).toHaveLength(0);
+    }));
+    it('ekranda son altı mesaj; günün tamamı saklanır', () => sahneyle(async () => {
+      const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri });
+      k.ac();
+      for(let i = 0; i < 6; i++) await k.isle('uyku ' + (i + 5));
+      expect(k.akis().length > 6).toBe(true);
+      expect(document.querySelectorAll('.king__akis .king__balon').length).toBe(6);
+    }));
+
     /* Söz 16–17: «ekran paylaşmaktan kastım PC, telefon ya da başka bir ekran». */
     function sahteModel(cevap){
       const istek = [];

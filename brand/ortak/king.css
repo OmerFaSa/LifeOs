@@ -257,3 +257,39 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__ekran.is-acik{ color:#fff; background:var(--danger, #e5484d); }
 .king__sayfa svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 @media (prefers-reduced-motion:reduce){ .king__canli{ animation:none; } }
+
+/* Söz 19: «Daha fazla» — cevap biçimi, sohbeti kaydet, kayıtlar, temizle. */
+.king__menu-dugme svg{ width:18px; height:18px; fill:currentColor; stroke:none; }
+.king__menu-dugme.is-acik{ color:var(--text); background:var(--surface-2); }
+.king__akis--panel{ gap:0; }
+.king__menu{ display:flex; flex-direction:column; gap:8px; padding:4px 2px 2px; }
+.king__menu-satir{ display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:4px 0 8px; }
+.king__menu-ad{ font-size:13px; font-weight:600; color:var(--text-2); }
+.king__secici{ display:inline-flex; padding:3px; border-radius:999px; background:var(--surface-2); gap:2px; }
+.king__secim{ min-height:30px; padding:0 12px; border:0; border-radius:999px; background:transparent; color:var(--text-2);
+  font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.king__secim.is-secili{ background:var(--surface); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,.12); }
+.king__secim:focus-visible, .king__menu-is:focus-visible, .king__kayit-ac:focus-visible, .king__geri:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.king__menu-is{ display:flex; align-items:center; justify-content:space-between; min-height:44px; padding:0 14px; border:0; border-radius:12px;
+  background:var(--surface-2); color:var(--text); font:inherit; font-size:14px; font-weight:600; text-align:left; cursor:pointer; }
+.king__menu-is:hover{ filter:brightness(.97); }
+.king__menu-is--tehlike{ color:var(--danger, #e5484d); }
+.king__menu-say{ min-width:24px; padding:1px 8px; border-radius:999px; background:var(--surface); color:var(--text-2); font-size:12px; text-align:center; }
+.king__menu-not{ margin:2px 2px 0; font-size:12px; line-height:1.45; color:var(--text-2); }
+.king__menu-ust{ display:flex; align-items:center; gap:10px; }
+.king__menu-ust b{ font-size:14px; }
+.king__geri{ min-height:32px; padding:0 10px; border:0; border-radius:999px; background:var(--surface-2); color:var(--text); font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.king__kayitlar{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.king__kayit-ac{ width:100%; display:grid; grid-template-columns:1fr auto; gap:2px 10px; padding:10px 14px; border:0; border-radius:12px;
+  background:var(--surface-2); color:var(--text); font:inherit; text-align:left; cursor:pointer; }
+.king__kayit-ac b{ font-size:13px; }
+.king__kayit-ac span{ grid-column:1; font-size:13px; color:var(--text-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.king__kayit-ac small{ grid-column:2; grid-row:1 / span 2; align-self:center; font-size:12px; color:var(--text-2); }
+.king__menu-bos{ margin:8px 2px; font-size:13px; color:var(--text-2); }
+.king__kayit{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.king__kayit > li{ padding:8px 12px; border-radius:12px; background:var(--surface-2); }
+.king__kayit > li.is-sen{ background:transparent; border:1px solid var(--line, rgba(0,0,0,.08)); }
+.king__kayit b{ font-size:12px; color:var(--text-2); }
+.king__kayit p{ margin:2px 0 0; font-size:14px; line-height:1.45; }
+.king__kayit ul{ margin:4px 0 0; padding-left:18px; font-size:13px; }
+.king__cip--tehlike{ color:var(--danger, #e5484d); }
