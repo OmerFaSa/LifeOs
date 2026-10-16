@@ -2474,3 +2474,12 @@ body.is-dragging .drop.is-over{
 @container satir (max-width:620px){
   .panelgrid{ grid-template-columns:minmax(0,1fr); }
 }
+
+/* Onaylar: uzman önerileri disipline göre (screens/onaylar.js AjanKart). */
+.oneri-gruplar{ display:grid; gap:18px; }
+.oneri-grup + .oneri-grup{ border-top:1px solid var(--border); padding-top:16px; }
+.oneri-grup__ad{ margin:0 0 6px; font-size:12.5px; font-weight:600; color:var(--text-2); letter-spacing:.01em; }
+.oneri-grup__dahasi{ margin-top:6px; }
+.oneri-grup__dahasi > summary{ cursor:pointer; min-height:28px; display:inline-flex; align-items:center; font-size:13px; color:var(--text-2); }
+.oneri-grup__dahasi > summary:hover{ color:var(--text); }
+.oneri-grup__dahasi[open] > summary{ margin-bottom:8px; }

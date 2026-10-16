@@ -130,8 +130,8 @@ ESP.Plans = (function(){
          ölçmek; ölçüm bir kez yapılır ve unutulur, hatırlatıcı tam da bunun
          içindir. */
       if(kapi && kapi.action === 'measure'){
-        ekle('reminder', d.label + ': «' + kapi.gate.label + '» ölçülsün',
-          'Bu basamak ölçülemiyor; ölçüm yapılmadan kademe kanıtlanmaz.',
+        ekle('reminder', d.label + ': «' + kapi.gate.label + '» için hatırlatıcı',
+          'Bu hedef henüz ölçülmedi; ölçüm olmadan kademe kanıtlanmaz.',
           { key:'gate', text:kapi.gate.label + ' için ölçüm gir',
             due:U.iso(U.addDays(U.parse(bugun), 1)), repeat:'none' });
       }

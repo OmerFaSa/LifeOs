@@ -549,10 +549,11 @@ ESP.Curriculum = (function(){
     return {
       disc:discId, rank:lv.next.rank, step:lv.next.step, gate:hedef,
       action:hedef.status === 'unknown' ? 'measure' : 'work',
-      title:hedef.status === 'unknown'
-        ? hedef.label + ' — önce bunu ölç'
-        : hedef.label,
-      why:hedef.why || 'Bu basamak henüz ölçülmedi.',
+      /* Sade dil (2026-10-16): «Son 14 günün 5'inde çalışıldı — önce bunu
+         ölç» yeni kullanıcıya olmuş bir şey gibi okunuyordu. Şart HEDEF
+         olarak söylenir; ölçülmediği ayrıca. */
+      title:'Hedef: ' + hedef.label,
+      why:hedef.why || (hedef.status === 'unknown' ? 'Henüz ölçülmedi; kayıt girdikçe görünür.' : 'Bu basamak henüz ölçülmedi.'),
     };
   }
 

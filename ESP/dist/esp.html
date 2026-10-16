@@ -3911,6 +3911,15 @@ body.is-dragging .drop.is-over{
   .panelgrid{ grid-template-columns:minmax(0,1fr); }
 }
 
+/* Onaylar: uzman önerileri disipline göre (screens/onaylar.js AjanKart). */
+.oneri-gruplar{ display:grid; gap:18px; }
+.oneri-grup + .oneri-grup{ border-top:1px solid var(--border); padding-top:16px; }
+.oneri-grup__ad{ margin:0 0 6px; font-size:12.5px; font-weight:600; color:var(--text-2); letter-spacing:.01em; }
+.oneri-grup__dahasi{ margin-top:6px; }
+.oneri-grup__dahasi > summary{ cursor:pointer; min-height:28px; display:inline-flex; align-items:center; font-size:13px; color:var(--text-2); }
+.oneri-grup__dahasi > summary:hover{ color:var(--text); }
+.oneri-grup__dahasi[open] > summary{ margin-bottom:8px; }
+
 /* ==== css/temel.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/temel.css içine yazılır; burası bir sonraki
@@ -15731,7 +15740,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'c2c3ca3d', at:'2026-10-16 10:22', dirty:true };
+ESP.BUILD = { id:'de746ebd', at:'2026-10-16 10:32', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -38032,7 +38041,7 @@ ESP.LADDERS = {
                'Sayılar, saat, yön, temel fiiller'],
         gates:[
           { metric:'lang.cards', min:100, label:'100 kart destede' },
-          { metric:'lang.days14', min:5, label:'Son 14 günün 5\'inde çalışıldı' },
+          { metric:'lang.days14', min:5, label:'14 günün en az 5\'inde çalışmak' },
         ],
         proof:'Kendini üç cümleyle tanıtan bir kayıt.' },
 
@@ -38093,7 +38102,7 @@ ESP.LADDERS = {
         study:['Felsefenin dört ana sorusu', 'Sokratik diyalog okuma',
                'Kavram sözlüğü kurma'],
         gates:[
-          { metric:'philo.concepts', min:5, label:'5 kavram not edildi' },
+          { metric:'philo.concepts', min:5, label:'5 kavram notu' },
           { metric:'philo.minutes30', min:180, label:'30 günde 180 dakika' },
         ],
         proof:'Bir kavramı kendi cümlenle tanımlamak.' },
@@ -38101,7 +38110,7 @@ ESP.LADDERS = {
       { rank:2, title:'İlk tez',
         study:['Öncül–sonuç ayrımı', 'Safsata kataloğu', 'Primer metin okuma'],
         gates:[
-          { metric:'philo.args', min:3, label:'3 tez yazıldı' },
+          { metric:'philo.args', min:3, label:'3 yazılmış tez' },
           { metric:'philo.primaryBooks', min:1, label:'1 primer metin' },
         ],
         proof:'Bir teze kendi itirazını yazıp cevaplamak.' },
@@ -38110,7 +38119,7 @@ ESP.LADDERS = {
         study:['Karşıt konumu en güçlü hâliyle kurma', 'Düşünce deneyleri',
                'Kavramlar arası bağ'],
         gates:[
-          { metric:'philo.closedArgs', min:5, label:'5 tez kapatıldı' },
+          { metric:'philo.closedArgs', min:5, label:'5 kapanmış tez' },
           { metric:'philo.primaryBooks', min:3, label:'3 primer metin' },
           { metric:'philo.minutes30', min:400, label:'30 günde 400 dakika' },
         ],
@@ -38120,15 +38129,15 @@ ESP.LADDERS = {
         study:['İki geleneği karşılaştırma', 'Tarihsel bağlam',
                'Kendi konumunu bir geleneğe yerleştirme'],
         gates:[
-          { metric:'philo.closedArgs', min:12, label:'12 tez kapatıldı' },
-          { metric:'philo.traditions', min:3, label:'3 gelenek okundu' },
+          { metric:'philo.closedArgs', min:12, label:'12 kapanmış tez' },
+          { metric:'philo.traditions', min:3, label:'3 gelenekten okuma' },
         ],
         proof:'İki geleneği aynı soru üzerinden karşılaştıran bir metin.' },
 
       { rank:5, title:'Kendi sorusu',
         study:['Özgün soru üretme', 'Sistematik konum kurma', 'Yazarak savunma'],
         gates:[
-          { metric:'philo.closedArgs', min:25, label:'25 tez kapatıldı' },
+          { metric:'philo.closedArgs', min:25, label:'25 kapanmış tez' },
           { metric:'philo.traditions', min:5, label:'5 gelenek' },
         ],
         proof:'Kimsenin sormadığı bir soruyu kurup savunmak.' },
@@ -38379,7 +38388,7 @@ ESP.LADDERS = {
                'Neden–sonuç zinciri', 'Dönem içi süreklilik ve kırılma'],
         gates:[
           { metric:'history.events', min:60, label:'60 olay' },
-          { metric:'history.eras', min:4, label:'4 dönem kapsandı' },
+          { metric:'history.eras', min:4, label:'4 dönemi kapsamak' },
           { metric:'history.retention', min:0.70, label:'Tarih kartları retansiyonu ≥ %70' },
         ],
         proof:'Bir olayın üç nedenini ve iki sonucunu kaynakla yazmak.' },
@@ -38388,7 +38397,7 @@ ESP.LADDERS = {
         study:['Birincil–ikincil ayrımı', 'Yazarın konumu ve çıkarı',
                'İç ve dış tutarlılık', 'Suskunluk kanıtı değildir'],
         gates:[
-          { metric:'history.sources', min:15, label:'15 kaynak değerlendirildi' },
+          { metric:'history.sources', min:15, label:'15 kaynak değerlendirmesi' },
           { metric:'history.primaryRatio', min:0.30, label:'Kaynakların %30\'u birincil' },
           { metric:'history.causal', min:10, label:'10 nedensellik zinciri' },
         ],
@@ -57132,10 +57141,11 @@ ESP.Curriculum = (function(){
     return {
       disc:discId, rank:lv.next.rank, step:lv.next.step, gate:hedef,
       action:hedef.status === 'unknown' ? 'measure' : 'work',
-      title:hedef.status === 'unknown'
-        ? hedef.label + ' — önce bunu ölç'
-        : hedef.label,
-      why:hedef.why || 'Bu basamak henüz ölçülmedi.',
+      /* Sade dil (2026-10-16): «Son 14 günün 5'inde çalışıldı — önce bunu
+         ölç» yeni kullanıcıya olmuş bir şey gibi okunuyordu. Şart HEDEF
+         olarak söylenir; ölçülmediği ayrıca. */
+      title:'Hedef: ' + hedef.label,
+      why:hedef.why || (hedef.status === 'unknown' ? 'Henüz ölçülmedi; kayıt girdikçe görünür.' : 'Bu basamak henüz ölçülmedi.'),
     };
   }
 
@@ -61907,8 +61917,8 @@ ESP.Plans = (function(){
          ölçmek; ölçüm bir kez yapılır ve unutulur, hatırlatıcı tam da bunun
          içindir. */
       if(kapi && kapi.action === 'measure'){
-        ekle('reminder', d.label + ': «' + kapi.gate.label + '» ölçülsün',
-          'Bu basamak ölçülemiyor; ölçüm yapılmadan kademe kanıtlanmaz.',
+        ekle('reminder', d.label + ': «' + kapi.gate.label + '» için hatırlatıcı',
+          'Bu hedef henüz ölçülmedi; ölçüm olmadan kademe kanıtlanmaz.',
           { key:'gate', text:kapi.gate.label + ' için ölçüm gir',
             due:U.iso(U.addDays(U.parse(bugun), 1)), repeat:'none' });
       }
@@ -62932,12 +62942,14 @@ ESP.Planner = (function(){
       const taban = aday.cert === 'missing'
         ? 'Son ' + BALANCE_WINDOW + ' günde hiç girilmemiş.'
         : 'Son ' + BALANCE_WINDOW + ' günde ' + U.fmtMin(aday.minutes) + '.';
+      /* Hiç kayıt yoksa «temel sağlam» bir iddia olurdu (2026-10-16). */
+      const hicKayit = denge.rows.every(r => r.cert === 'missing');
       return {
         rank:5, id:'expand:' + d.id, agent:d.agent, disc:d.id,
         title:kapi ? (d.label + ' — ' + kapi.title)
           : (d.label + ' bu hafta en az çalışılan alan'),
-        detail:taban + ' Temel sağlam; şimdi genişletme zamanı.'
-          + (kapi ? ' ' + kapi.why : ''),
+        detail:(hicKayit ? 'Henüz oturum kaydı yok; ilk oturumla başlar.'
+          : taban + ' Temel sağlam; şimdi genişletme zamanı.' + (kapi ? ' ' + kapi.why : '')),
         route:d.route, tab:null,
         why:kapi && kapi.action === 'measure'
           ? 'Yeni içerik: bu basamak henüz ölçülmedi; önce kısa bir ölçüm yap.'
@@ -62948,7 +62960,7 @@ ESP.Planner = (function(){
     return {
       rank:0, id:'none', agent:'patron', disc:null,
       title:'Bugün için bekleyen bir iş yok',
-      detail:'Vadesi gelen kart yok, tıkanma yok, açık sentez önerisi yok. '
+      detail:'Sırası gelen kart yok, tıkanma yok, açık sentez önerisi yok. '
            + 'Asgari günü yapıp bırakmak da bir seçenektir.',
       route:'today', tab:null,
       why:'Öncelik sırasındaki beş kuralın hiçbiri tetiklenmedi.',
@@ -80462,8 +80474,28 @@ ESP.Screens.onaylar = (function(){
   function AjanKart(){
     const l = ESP.Plans ? ESP.Plans.all() : [];
     if(!l.length) return '';
-    return K.Entry({ label:'Uzman önerileri', hint:'proposal', meta:l.length + ' öneri', wide:true,
-      body:ESP.Parts.proposalList(l, 'Bekleyen teklif yok.') });
+    /* Disipline göre (2026-10-16, «yeni kullanıcı için çok kalabalık»): boş
+       profilde altı disiplin × dört öneri = 24 kart alt alta duruyordu. Her
+       disiplinin EN ÖNDEKİ önerisi görünür, kalanı «N öneri daha» altında
+       katlı; hiçbiri silinmez, sıra plans.js'in sırasıdır. */
+    const gruplar = [];
+    l.forEach(p => {
+      const d = p.disc || '';
+      let g = gruplar.find(x => x.disc === d);
+      if(!g){ g = { disc:d, l:[] }; gruplar.push(g); }
+      g.l.push(p);
+    });
+    const ad = d => ((ESP.DISCIPLINE_BY_ID || {})[d] || {}).label || 'Genel';
+    const govde = gruplar.length < 2 ? ESP.Parts.proposalList(l, 'Bekleyen teklif yok.')
+      : html`<div class="oneri-gruplar">${map(gruplar, g => html`<section class="oneri-grup" data-disc="${g.disc}">
+          <h2 class="oneri-grup__ad">${ad(g.disc)}</h2>
+          ${ESP.Parts.proposalList(g.l.slice(0, 1))}
+          ${when(g.l.length > 1, () => html`<details class="oneri-grup__dahasi">
+            <summary>${g.l.length - 1} öneri daha</summary>
+            ${ESP.Parts.proposalList(g.l.slice(1))}
+          </details>`)}
+        </section>`)}</div>`;
+    return K.Entry({ label:'Uzman önerileri', hint:'proposal', meta:l.length + ' öneri', wide:true, body:govde });
   }
 
   /* Bekleyen: King + HKM (belirsizler dahil) + ajan teklifleri. Kabuğun

@@ -81,7 +81,7 @@ ESP.LADDERS = {
                'Sayılar, saat, yön, temel fiiller'],
         gates:[
           { metric:'lang.cards', min:100, label:'100 kart destede' },
-          { metric:'lang.days14', min:5, label:'Son 14 günün 5\'inde çalışıldı' },
+          { metric:'lang.days14', min:5, label:'14 günün en az 5\'inde çalışmak' },
         ],
         proof:'Kendini üç cümleyle tanıtan bir kayıt.' },
 
@@ -142,7 +142,7 @@ ESP.LADDERS = {
         study:['Felsefenin dört ana sorusu', 'Sokratik diyalog okuma',
                'Kavram sözlüğü kurma'],
         gates:[
-          { metric:'philo.concepts', min:5, label:'5 kavram not edildi' },
+          { metric:'philo.concepts', min:5, label:'5 kavram notu' },
           { metric:'philo.minutes30', min:180, label:'30 günde 180 dakika' },
         ],
         proof:'Bir kavramı kendi cümlenle tanımlamak.' },
@@ -150,7 +150,7 @@ ESP.LADDERS = {
       { rank:2, title:'İlk tez',
         study:['Öncül–sonuç ayrımı', 'Safsata kataloğu', 'Primer metin okuma'],
         gates:[
-          { metric:'philo.args', min:3, label:'3 tez yazıldı' },
+          { metric:'philo.args', min:3, label:'3 yazılmış tez' },
           { metric:'philo.primaryBooks', min:1, label:'1 primer metin' },
         ],
         proof:'Bir teze kendi itirazını yazıp cevaplamak.' },
@@ -159,7 +159,7 @@ ESP.LADDERS = {
         study:['Karşıt konumu en güçlü hâliyle kurma', 'Düşünce deneyleri',
                'Kavramlar arası bağ'],
         gates:[
-          { metric:'philo.closedArgs', min:5, label:'5 tez kapatıldı' },
+          { metric:'philo.closedArgs', min:5, label:'5 kapanmış tez' },
           { metric:'philo.primaryBooks', min:3, label:'3 primer metin' },
           { metric:'philo.minutes30', min:400, label:'30 günde 400 dakika' },
         ],
@@ -169,15 +169,15 @@ ESP.LADDERS = {
         study:['İki geleneği karşılaştırma', 'Tarihsel bağlam',
                'Kendi konumunu bir geleneğe yerleştirme'],
         gates:[
-          { metric:'philo.closedArgs', min:12, label:'12 tez kapatıldı' },
-          { metric:'philo.traditions', min:3, label:'3 gelenek okundu' },
+          { metric:'philo.closedArgs', min:12, label:'12 kapanmış tez' },
+          { metric:'philo.traditions', min:3, label:'3 gelenekten okuma' },
         ],
         proof:'İki geleneği aynı soru üzerinden karşılaştıran bir metin.' },
 
       { rank:5, title:'Kendi sorusu',
         study:['Özgün soru üretme', 'Sistematik konum kurma', 'Yazarak savunma'],
         gates:[
-          { metric:'philo.closedArgs', min:25, label:'25 tez kapatıldı' },
+          { metric:'philo.closedArgs', min:25, label:'25 kapanmış tez' },
           { metric:'philo.traditions', min:5, label:'5 gelenek' },
         ],
         proof:'Kimsenin sormadığı bir soruyu kurup savunmak.' },
@@ -428,7 +428,7 @@ ESP.LADDERS = {
                'Neden–sonuç zinciri', 'Dönem içi süreklilik ve kırılma'],
         gates:[
           { metric:'history.events', min:60, label:'60 olay' },
-          { metric:'history.eras', min:4, label:'4 dönem kapsandı' },
+          { metric:'history.eras', min:4, label:'4 dönemi kapsamak' },
           { metric:'history.retention', min:0.70, label:'Tarih kartları retansiyonu ≥ %70' },
         ],
         proof:'Bir olayın üç nedenini ve iki sonucunu kaynakla yazmak.' },
@@ -437,7 +437,7 @@ ESP.LADDERS = {
         study:['Birincil–ikincil ayrımı', 'Yazarın konumu ve çıkarı',
                'İç ve dış tutarlılık', 'Suskunluk kanıtı değildir'],
         gates:[
-          { metric:'history.sources', min:15, label:'15 kaynak değerlendirildi' },
+          { metric:'history.sources', min:15, label:'15 kaynak değerlendirmesi' },
           { metric:'history.primaryRatio', min:0.30, label:'Kaynakların %30\'u birincil' },
           { metric:'history.causal', min:10, label:'10 nedensellik zinciri' },
         ],

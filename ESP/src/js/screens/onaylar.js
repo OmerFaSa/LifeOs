@@ -195,8 +195,28 @@ ESP.Screens.onaylar = (function(){
   function AjanKart(){
     const l = ESP.Plans ? ESP.Plans.all() : [];
     if(!l.length) return '';
-    return K.Entry({ label:'Uzman önerileri', hint:'proposal', meta:l.length + ' öneri', wide:true,
-      body:ESP.Parts.proposalList(l, 'Bekleyen teklif yok.') });
+    /* Disipline göre (2026-10-16, «yeni kullanıcı için çok kalabalık»): boş
+       profilde altı disiplin × dört öneri = 24 kart alt alta duruyordu. Her
+       disiplinin EN ÖNDEKİ önerisi görünür, kalanı «N öneri daha» altında
+       katlı; hiçbiri silinmez, sıra plans.js'in sırasıdır. */
+    const gruplar = [];
+    l.forEach(p => {
+      const d = p.disc || '';
+      let g = gruplar.find(x => x.disc === d);
+      if(!g){ g = { disc:d, l:[] }; gruplar.push(g); }
+      g.l.push(p);
+    });
+    const ad = d => ((ESP.DISCIPLINE_BY_ID || {})[d] || {}).label || 'Genel';
+    const govde = gruplar.length < 2 ? ESP.Parts.proposalList(l, 'Bekleyen teklif yok.')
+      : html`<div class="oneri-gruplar">${map(gruplar, g => html`<section class="oneri-grup" data-disc="${g.disc}">
+          <h2 class="oneri-grup__ad">${ad(g.disc)}</h2>
+          ${ESP.Parts.proposalList(g.l.slice(0, 1))}
+          ${when(g.l.length > 1, () => html`<details class="oneri-grup__dahasi">
+            <summary>${g.l.length - 1} öneri daha</summary>
+            ${ESP.Parts.proposalList(g.l.slice(1))}
+          </details>`)}
+        </section>`)}</div>`;
+    return K.Entry({ label:'Uzman önerileri', hint:'proposal', meta:l.length + ' öneri', wide:true, body:govde });
   }
 
   /* Bekleyen: King + HKM (belirsizler dahil) + ajan teklifleri. Kabuğun

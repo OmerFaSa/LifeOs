@@ -9,6 +9,20 @@
     pushSession, pushCard, pushPiece, pushNote, pushBook } = ESP.Test;
   const P = ESP.Planner, M = ESP.Model, S = ESP.S;
 
+  /* 2026-10-16: hiç kaydı olmayan kullanıcıya «Temel sağlam; şimdi
+     genişletme zamanı» deniyordu — veri yokken sağlamlık iddiası uydurmadır
+     (AGENTS §1.2, §1.7). */
+  describe('bos profil', () => {
+    it('hic kayit yokken «temel saglam» denmez; ilk oturum soylenir', () => {
+      withToday('2026-09-12', () => {
+        resetState();
+        const n = P.nextAction('2026-09-12');
+        expect(String(n.detail).indexOf('Temel sağlam') < 0).toBe(true);
+        expect(String(n.detail)).toContain('Henüz oturum kaydı yok');
+      });
+    });
+  });
+
   describe('oncelik sirasi', () => {
 
     it('tikanmis temel her seyin onunde gelir', () => {

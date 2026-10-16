@@ -267,12 +267,14 @@ ESP.Planner = (function(){
       const taban = aday.cert === 'missing'
         ? 'Son ' + BALANCE_WINDOW + ' günde hiç girilmemiş.'
         : 'Son ' + BALANCE_WINDOW + ' günde ' + U.fmtMin(aday.minutes) + '.';
+      /* Hiç kayıt yoksa «temel sağlam» bir iddia olurdu (2026-10-16). */
+      const hicKayit = denge.rows.every(r => r.cert === 'missing');
       return {
         rank:5, id:'expand:' + d.id, agent:d.agent, disc:d.id,
         title:kapi ? (d.label + ' — ' + kapi.title)
           : (d.label + ' bu hafta en az çalışılan alan'),
-        detail:taban + ' Temel sağlam; şimdi genişletme zamanı.'
-          + (kapi ? ' ' + kapi.why : ''),
+        detail:(hicKayit ? 'Henüz oturum kaydı yok; ilk oturumla başlar.'
+          : taban + ' Temel sağlam; şimdi genişletme zamanı.' + (kapi ? ' ' + kapi.why : '')),
         route:d.route, tab:null,
         why:kapi && kapi.action === 'measure'
           ? 'Yeni içerik: bu basamak henüz ölçülmedi; önce kısa bir ölçüm yap.'
@@ -283,7 +285,7 @@ ESP.Planner = (function(){
     return {
       rank:0, id:'none', agent:'patron', disc:null,
       title:'Bugün için bekleyen bir iş yok',
-      detail:'Vadesi gelen kart yok, tıkanma yok, açık sentez önerisi yok. '
+      detail:'Sırası gelen kart yok, tıkanma yok, açık sentez önerisi yok. '
            + 'Asgari günü yapıp bırakmak da bir seçenektir.',
       route:'today', tab:null,
       why:'Öncelik sırasındaki beş kuralın hiçbiri tetiklenmedi.',
