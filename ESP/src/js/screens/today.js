@@ -468,6 +468,17 @@ ESP.Screens.today = (function(){
         ${K.Button({ label:'Bugüne ekle', size:'sm', act:'dunku-oturum', data:{ 'data-id':o.id } })}</div>`)}` });
   }
 
+  /* SIK OTURUMLAR (core/dunku.js, 2026-10-17): giriş kutusunun altında
+     ince bir şerit; kart değil. Geçmiş yoksa hiç çizilmez. */
+  function sikSerit(){
+    const VT = (window.LIFEOS || {}).VITRIN;
+    if(!ESP.Dunku || !ESP.Dunku.sik || !VT || gun() !== U.todayISO()) return '';
+    const l = ESP.Dunku.sik(U.todayISO());
+    if(!l.length) return '';
+    return VT.ogunSablonlari({ act:'sik-oturum', baslik:'sık oturumların · tek dokunuş', sablonlar:l.map(x => ({
+      ad:x.ad, icerik:U.fmtMin(x.dk), on:x.bugun, data:{ 'data-disc':x.disc, 'data-dk':x.dk } })) });
+  }
+
   /* Seri satiri Giris sekmesinde: «Bugün hastayım» ve «Tatil modu» aranmaz. */
   function seriRow(){
     if(!ESP.Seri) return null;
@@ -858,6 +869,7 @@ ESP.Screens.today = (function(){
       <div class="bugun__sol">
         <section class="bugun__alan" aria-label="Şimdi"><h2 class="bugun__etiket" aria-hidden="true">Şimdi</h2>
           ${raw(window.LIFEOS && window.LIFEOS.GIRIS && window.LIFEOS.GIRIS.kuruluMu() ? window.LIFEOS.GIRIS.kutuHtml() : '')}
+          ${raw(sikSerit())}
           ${raw(window.LIFEOS && window.LIFEOS.TEKGUN ? window.LIFEOS.TEKGUN.kartHtml() : '')}
           ${nextCard()}
           ${raw(soruKartHtml())}
@@ -914,6 +926,13 @@ ESP.Screens.today = (function(){
     'oneri-uygula', 'oneri-gec', 'oneri-gec-neden', 'oneri-onizle'];
 
   const handle = {
+    async 'sik-oturum'(el){
+      const bugun = U.todayISO();
+      const r = await ESP.Dunku.sikEkle(bugun, el.dataset.disc, el.dataset.dk);
+      if(!r.ok){ ESP.UI.toast(r.why); return; }
+      ESP.App.render();
+      ESP.UI.toast(r.ad + ' ' + U.fmtMin(r.dk) + ' bugüne eklendi', { undo:async () => { await ESP.Dunku.geriAl(bugun, r.id); ESP.App.render(); } });
+    },
     async 'dunku-oturum'(el){
       const bugun = U.todayISO();
       const r = await ESP.Dunku.kopyala(bugun, el.dataset.id);
