@@ -481,12 +481,12 @@ ESP.Screens.history = (function(){
 
     rows.push(K.Entry({
       label:'Tarih destesi', hint:'srs',
-      meta:due.length ? due.length + ' kart vadeli' : 'vadesi gelen yok',
+      meta:due.length ? due.length + ' kartın sırası geldi' : 'vadesi gelen yok',
       body:html`
         ${r.cert === 'missing'
-          ? K.Notice({ tone:'info', body:'Retansiyon henüz ölçülemedi: taban için '
+          ? K.Notice({ tone:'info', body:'Kart hatırlama henüz ölçülemedi: taban için '
               + 'en az ' + ESP.Planner.RETENTION_MIN_CARDS + ' cevaplanmış kart gerekir.' })
-          : K.Meter({ label:'Retansiyon', value:Math.round(r.value * 100),
+          : K.Meter({ label:'Kart hatırlama', value:Math.round(r.value * 100),
               text:'%' + Math.round(r.value * 100),
               tone:r.value < ESP.Planner.RETENTION_FLOOR ? 'danger' : 'ok',
               note:r.n + ' karttan hesaplandı' })}

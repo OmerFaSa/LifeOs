@@ -325,7 +325,7 @@ SP.Screens.basket = (function(){
 
           <div class="span-5"><div class="stack">
             ${K.Card({ title:'Sedef\'in notu', hint:'budget-rank',
-              badge:K.Badge({ label:'kural motoru', tone:'muted', icon:false }),
+              badge:K.Badge({ label:'hazır kurallar', tone:'muted', icon:false }),
               body:html`<p class="small">${st.text}</p>`,
               foot:K.Button({ label:'Sedef\'e sor', size:'sm',
                 act:'ask-agent', data:{ 'data-agent':'money' } }) })}

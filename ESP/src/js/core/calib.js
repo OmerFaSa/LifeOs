@@ -62,7 +62,7 @@ ESP.Calib = (function(){
      Böylece defter, neyi ölçtüğünden bağımsız kalır. */
   ESP.CALIB_KINDS = [
     { id:'retention', type:'number', unit:'puan', err:'abs', bands:[5, 12, 25],
-      label:'Kart retansiyonun', ask:'Son 30 günde kartlarının yüzde kaçını ilk denemede hatırladın?' },
+      label:'Kart hatırlama oranın', ask:'Son 30 günde kartlarının yüzde kaçını ilk denemede hatırladın?' },
     { id:'minutes', type:'number', unit:'dk', err:'ape',
       label:'Haftalık çalışma süren', ask:'Bu hafta toplam kaç dakika çalıştın?' },
     { id:'sessions', type:'number', unit:'oturum', err:'abs', bands:[1, 2, 4],

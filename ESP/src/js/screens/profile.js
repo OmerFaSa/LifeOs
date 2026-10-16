@@ -101,7 +101,7 @@ ESP.Screens.profile = (function(){
                 input:K.Select({ id:'pf-lang', value:(p.langs && p.langs[0]) || 'en',
                   options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }) })}
               ${K.Field({ label:'Günlük pratik tabanı (dakika)',
-                hint:'hedef değil ölçüt',
+                hint:'alt sınır, hedef değil',
                 input:K.Input({ id:'pf-minutes', type:'number', numeric:true, min:10, max:600,
                   value:p.dailyMinutes || 60 }) })}
             </div>

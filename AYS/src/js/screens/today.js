@@ -1178,7 +1178,7 @@ R.Screens.today = (function(){
     const borc = kartVar ? C.cardDebt() : null;
     const cubuk = borc != null && L.GRAFIK
       ? raw(L.GRAFIK.esikCubukHtml({ etiket:'Tekrar borcu', deger:borc, esik, olcek:Math.max(50, borc), birim:'%', yon:'azalis-iyi' })) : '';
-    return c.Kutu({ ad:terim('tekrar-borcu', 'Tekrar borcu'), yuva:!kartVar ? 'veri yok' : vadeli ? 'hesaplandı' : 'vadeli kart yok', class:'durumkart',
+    return c.Kutu({ ad:terim('tekrar-borcu', 'Tekrar borcu'), yuva:!kartVar ? 'veri yok' : vadeli ? 'hesaplandı' : 'sırası gelen kart yok', class:'durumkart',
       govde:html`<div class="durumkart__sayi">${sayiH({ deger:borc, birim:'%', kesinlik:kartVar ? 'computed' : 'missing',
           formul:'geciken kart ÷ vadeli kart', girdiler:kartVar ? [{ ad:'geciken', deger:geciken, kesinlik:'measured' },
             { ad:'vadeli', deger:vadeli, kesinlik:'measured' }] : [] })}

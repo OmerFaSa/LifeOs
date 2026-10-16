@@ -196,7 +196,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(durum.acik) return '';
     return '<div class="modelsiz" data-oz="139" role="status">'
       + '<b class="modelsiz__bas">Dil modeli kapalı</b>'
-      + '<span class="modelsiz__metin">Ajanlar hazır cümlelerle konuşuyor; sayılar ve kararlar aynen duruyor.'
+      + '<span class="modelsiz__metin">Uzmanlar hazır cümlelerle konuşuyor; sayılar ve kararlar aynen duruyor.'
       + (durum.neden ? ' Neden: ' + kac(durum.neden) + '.' : '') + '</span></div>';
   }
 

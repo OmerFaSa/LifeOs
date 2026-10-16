@@ -87,7 +87,7 @@ SP.Parts = (function(){
   function sourceBadge(source){
     return source === 'model'
       ? K.Badge({ label:'model', tone:'info' })
-      : K.Badge({ label:'kural motoru', tone:'muted', icon:false });
+      : K.Badge({ label:'hazır kurallar', tone:'muted', icon:false });
   }
 
   /* Besin ogesi hucresi — hedefe gore doluluk.

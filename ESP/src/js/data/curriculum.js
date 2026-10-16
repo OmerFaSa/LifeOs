@@ -90,7 +90,7 @@ ESP.LADDERS = {
                'Haftada bir 5 dakikalık dinleme günlüğü'],
         gates:[
           { metric:'lang.cards', min:400, label:'400 kart' },
-          { metric:'lang.retention', min:0.70, label:'Retansiyon ≥ %70' },
+          { metric:'lang.retention', min:0.70, label:'Kart hatırlama ≥ %70' },
           { metric:'lang.minutes30', min:600, label:'30 günde 600 dakika' },
         ],
         proof:'Sözlüğe bakmadan yazılmış 150 kelimelik bir metin.' },
@@ -100,7 +100,7 @@ ESP.LADDERS = {
                'Yazılı üretimde hata günlüğü', 'Deyim ve eşdizim (collocation)'],
         gates:[
           { metric:'lang.cards', min:1200, label:'1200 kart' },
-          { metric:'lang.retention', min:0.78, label:'Retansiyon ≥ %78' },
+          { metric:'lang.retention', min:0.78, label:'Kart hatırlama ≥ %78' },
           { metric:'lang.minutes30', min:900, label:'30 günde 900 dakika' },
           { metric:'lang.streakDays', min:10, label:'10 günlük zincir' },
         ],
@@ -111,7 +111,7 @@ ESP.LADDERS = {
                'Üslup farkları: gazete / akademik / konuşma'],
         gates:[
           { metric:'lang.cards', min:2500, label:'2500 kart' },
-          { metric:'lang.retention', min:0.82, label:'Retansiyon ≥ %82' },
+          { metric:'lang.retention', min:0.82, label:'Kart hatırlama ≥ %82' },
           { metric:'lang.minutes30', min:1200, label:'30 günde 1200 dakika' },
         ],
         proof:'Hedef dilde 800 kelimelik özgün bir deneme.' },
@@ -120,7 +120,7 @@ ESP.LADDERS = {
         study:['Çeviri ve geri çeviri', 'İkinci dile geçiş', 'Başkasına öğretme'],
         gates:[
           { metric:'lang.cards', min:4000, label:'4000 kart' },
-          { metric:'lang.retention', min:0.85, label:'Retansiyon ≥ %85' },
+          { metric:'lang.retention', min:0.85, label:'Kart hatırlama ≥ %85' },
           { metric:'lang.langs', min:2, label:'İki dil aktif' },
         ],
         proof:'Bir metni çevirip geri çevirerek kayıp analizini yazmak.' },
@@ -449,7 +449,7 @@ ESP.LADDERS = {
         gates:[
           { metric:'history.schools', min:4, label:'4 tarih yazımı okulu' },
           { metric:'history.events', min:150, label:'150 olay' },
-          { metric:'history.retention', min:0.78, label:'Retansiyon ≥ %78' },
+          { metric:'history.retention', min:0.78, label:'Kart hatırlama ≥ %78' },
         ],
         proof:'Aynı olayı iki okulun gözünden yazmak.' },
 

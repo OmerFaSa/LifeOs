@@ -16364,7 +16364,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'49577612', at:'2026-10-16 10:04', dirty:true };
+R.BUILD = { id:'c2c3ca3d', at:'2026-10-16 10:21', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20662,7 +20662,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(durum.acik) return '';
     return '<div class="modelsiz" data-oz="139" role="status">'
       + '<b class="modelsiz__bas">Dil modeli kapalı</b>'
-      + '<span class="modelsiz__metin">Ajanlar hazır cümlelerle konuşuyor; sayılar ve kararlar aynen duruyor.'
+      + '<span class="modelsiz__metin">Uzmanlar hazır cümlelerle konuşuyor; sayılar ve kararlar aynen duruyor.'
       + (durum.neden ? ' Neden: ' + kac(durum.neden) + '.' : '') + '</span></div>';
   }
 
@@ -35872,7 +35872,7 @@ R.PLAN = {
 R.PHASES = [
   { key:'eylul',   label:'Eylül 2026',   theme:'Kalibrasyon ve TYT temel',   weeks:[1,3] },
   { key:'ekim',    label:'Ekim 2026',    theme:'TYT çekirdek',              weeks:[4,7] },
-  { key:'kasim',   label:'Kasım 2026',   theme:'Problem ve karar kapısı',   weeks:[8,12] },
+  { key:'kasim',   label:'Kasım 2026',   theme:'Problem ve aylık değerlendirme',   weeks:[8,12] },
   { key:'aralik',  label:'Aralık 2026',  theme:'AYT köprüsü',               weeks:[13,16] },
   { key:'ocak',    label:'Ocak 2027',    theme:'Çift kulvar',               weeks:[17,20] },
   { key:'subat',   label:'Şubat 2027',   theme:'Yoğunlaştırma ve başvuru',  weeks:[21,24] },
@@ -59445,7 +59445,7 @@ R.CHECKLISTS = {
     'Kart borcu ve uyku düzeni kontrol edildi.',
     'Yeni haftaya yalnız en yüksek etkili iki eksik taşındı.',
   ]},
-  monthly:{ label:'Aylık karar kapısında', items:[
+  monthly:{ label:'Aylık değerlendirmede', items:[
     'Net matrisi "gözlenen / güvenli" bantla karşılaştırıldı.',
     'Konu kapanış yüzdesi ve hata dağılımı çıkarıldı.',
     'Tek bir ana süreç müdahalesi seçildi.',
@@ -69488,7 +69488,7 @@ R.Calc = (function(){
     out.push({
       id:'gate-rule',
       text:gate.note,
-      why:'Bu ayın kapı kuralı' + (tytStatus === 'below' ? ' — TYT medyanı gözlenen bandın altında.' : '.'),
+      why:'Bu ayın değerlendirme kuralı' + (tytStatus === 'below' ? ' — TYT medyanı gözlenen bandın altında.' : '.'),
     });
 
     const tags = topTags(2);
@@ -80880,8 +80880,8 @@ R.Office = (function(){
     }
 
     if(gate && !decided){
-      out.push({ score:95, topic:'Bu ayın karar kapısı',
-        why:'Ayda bir medyanın bandın neresinde olduğuna bakılır ve tek müdahale seçilir.',
+      out.push({ score:95, topic:'Bu ayın değerlendirmesi',
+        why:'Ayda bir, netlerinin ortası hedef aralığın neresinde ona bakılır ve tek bir değişiklik seçilir.',
         data:{ ay:gate.month, tytBant:gate.tyt, tytGuvenli:gate.tytSafe, aytBant:gate.ayt,
           kural:gate.note, tytMedyan:num(tyt.last3), aytMedyan:num(ayt.last3) } });
     }
@@ -86968,7 +86968,7 @@ R.Palette = (function(){
     list.push(go('subjects','Dersler — konu kapanışı','book','Git'));
     list.push(go('plan','40 haftalık plan','map','Git'));
     list.push(go('target','Hedef, net matrisi, tercih','target','Git'));
-    list.push(go('progress','İlerleme — KPI ve karar kapısı','chart','Git'));
+    list.push(go('progress','İlerleme — göstergeler ve aylık değerlendirme','chart','Git'));
     list.push(go('analytics','Analiz — karşılaştırma, sıra geçmişi, alışkanlık','search','Git'));
     list.push(go('profiles','Profiller ve gözetmen özeti','shield','Git'));
     list.push(go('coach','Koç — verine bakarak yanıtlar','zap','Git'));
@@ -87748,7 +87748,7 @@ R.Setup = (function(){
         K.Stat({ label:'Hafta', value:m.total }),
         K.Stat({ label:'Haftada konu', value:m.perWeek }),
         K.Stat({ label:'Kapsama', value:'%'+m.coverage, tone:m.coverage >= 80 ? 'ok' : 'warn' }),
-        K.Stat({ label:'Karar kapısı', value:(m.gates || []).length }),
+        K.Stat({ label:'Aylık değerlendirme', value:(m.gates || []).length }),
       ])}
       <p class="tiny dim mt-8">İlk hafta: ${plan.weeks[0].topics.join(' · ')}</p>` });
   }
@@ -89090,7 +89090,7 @@ R.Screens.today = (function(){
     const borc = kartVar ? C.cardDebt() : null;
     const cubuk = borc != null && L.GRAFIK
       ? raw(L.GRAFIK.esikCubukHtml({ etiket:'Tekrar borcu', deger:borc, esik, olcek:Math.max(50, borc), birim:'%', yon:'azalis-iyi' })) : '';
-    return c.Kutu({ ad:terim('tekrar-borcu', 'Tekrar borcu'), yuva:!kartVar ? 'veri yok' : vadeli ? 'hesaplandı' : 'vadeli kart yok', class:'durumkart',
+    return c.Kutu({ ad:terim('tekrar-borcu', 'Tekrar borcu'), yuva:!kartVar ? 'veri yok' : vadeli ? 'hesaplandı' : 'sırası gelen kart yok', class:'durumkart',
       govde:html`<div class="durumkart__sayi">${sayiH({ deger:borc, birim:'%', kesinlik:kartVar ? 'computed' : 'missing',
           formul:'geciken kart ÷ vadeli kart', girdiler:kartVar ? [{ ad:'geciken', deger:geciken, kesinlik:'measured' },
             { ad:'vadeli', deger:vadeli, kesinlik:'measured' }] : [] })}
@@ -97553,7 +97553,7 @@ R.Screens.progress = (function(){
         ${K.Button({ label:'Ana müdahaleyi kaydet', tone:'primary', act:'save-decision' })}`;
 
     return K.Card({
-      hint:'gate', title:'Aylık karar kapısı — '+gate.month,
+      hint:'gate', title:'Aylık değerlendirme — '+gate.month,
       badge:decision ? K.Badge({ label:'karar verildi', tone:'ok' }) : K.Badge({ label:'karar bekliyor', tone:'warn' }),
       body:K.Stack([
         meter('TYT', g.tytStatus, g.tyt.last3, gate.tyt, gate.tytSafe),
@@ -97726,7 +97726,7 @@ R.Screens.progress = (function(){
       const gate = C.currentGate();
       const verildi = gate && S.decisions[U.monthKey(U.today())];
       return ['test-bazlı-trend', 'plan-tamamlama-son-hafta', 'hata-paretosu']
-        .concat(G && verildi ? [G.anahtar('Aylık karar kapısı — ' + gate.month)] : []);
+        .concat(G && verildi ? [G.anahtar('Aylık değerlendirme — ' + gate.month)] : []);
     },
     title:'İlerleme',
     subtitle(){
@@ -101165,7 +101165,7 @@ R.Screens.office = (function(){
   function deskStatus(agent){
     const q = O.agentQuota(agent.id);
     if(O.mode() !== 'llm'){
-      return { text:'kural motoruyla çalışıyor', short:'kural motoru', tone:'muted' };
+      return { text:'hazır kurallarla çalışıyor', short:'hazır kurallar', tone:'muted' };
     }
     if(q && q.full) return { text:'günlük hakkı doldu', short:'hak doldu', tone:'danger' };
     if(q && q.waitMs > 1500){
@@ -101264,7 +101264,7 @@ R.Screens.office = (function(){
     const b = O.briefingOf();
     const notes = O.notes();
     return K.Card({
-      title:'Bugünün brifingi',
+      title:'Bugünün özeti',
       sub:b ? new Date(b.at).toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' })
             + ' · günde bir kez üretilir'
             : 'Patron masaları henüz özetlemedi',
@@ -101313,7 +101313,7 @@ R.Screens.office = (function(){
             <b class="desk__name">Patron’un masası</b>
             <span class="desk__role">Uzmanların raporunu birleştirir; günün tek işini o söyler</span>
           </div>
-          ${K.Badge({ label:O.mode() === 'llm' ? 'model bağlı' : 'kural motoru',
+          ${K.Badge({ label:O.mode() === 'llm' ? 'yapay zekâ bağlı' : 'hazır kurallar',
             tone:O.mode() === 'llm' ? 'ok' : 'info' })}
         </div>
 
@@ -102254,7 +102254,7 @@ R.Screens.team = (function(){
       <div class="msg msg--agent">
         <div class="msg__who">${Avatar(agent)}<b>${agent.name}</b>
           <span class="dim">${agent.role}</span>
-          ${when(m.mode === 'kural', () => K.Badge({ label:'kural motoru', tone:'info' }))}
+          ${when(m.mode === 'kural', () => K.Badge({ label:'hazır kural', tone:'info' }))}
         </div>
         <div class="msg__body">${raw(U.esc(m.text).replace(/\n/g, '<br/>'))}${OnayDugmeleri(m)}</div>
         ${when(m.warnings && m.warnings.length, () => html`
@@ -102511,7 +102511,7 @@ R.Screens.team = (function(){
           ${msgs.length
             ? map(msgs, m => Bubble(agent, m))
             : html`<div class="chat__empty">${raw(UI.icon('guide'))}
-                <p>${agent.name} masasındaki raporu okudu. Sor ya da brifing iste.</p></div>`}
+                <p>${agent.name} masasındaki raporu okudu. Sor ya da özet iste.</p></div>`}
           <div id="chat-pending"></div>
         </div>`,
 
@@ -102532,7 +102532,7 @@ R.Screens.team = (function(){
            kotudur. */
         voiceCard(),
         K.Card({
-          hint:'not-masasindaki-rapor', title:'Masasındaki rapor',           actions:K.Button({ label:'Brifing', icon:'refresh', size:'sm', act:'team-brief' }),
+          hint:'not-masasindaki-rapor', title:'Masasındaki rapor',           actions:K.Button({ label:'Özet iste', icon:'refresh', size:'sm', act:'team-brief' }),
           body:html`
             <div class="stack-xs">${map(O.brief(agent.id).findings, f => html`
               <div class="finding">
@@ -102798,7 +102798,7 @@ R.Screens.meeting = (function(){
           ${when(t.roundTitle, () => html`<span class="meetturn__round">${t.roundTitle}</span>`)}
           ${when(t.vote, () => K.Badge({ label:t.vote + '. fikre oy', tone:'info' }))}
           ${when(t.closing, () => K.Badge({ label:'karar', tone:'ok' }))}
-          ${when(t.mode === 'kural', () => K.Badge({ label:'kural motoru', tone:'info' }))}
+          ${when(t.mode === 'kural', () => K.Badge({ label:'hazır kural', tone:'info' }))}
         </div>
         <div class="meetturn__body">${raw(body(t.text))}</div>
         ${when(t.warnings && t.warnings.length, () => html`
@@ -102827,8 +102827,8 @@ R.Screens.meeting = (function(){
     const roundMs = O.roundEstimateMs('patron');
 
     return K.Card({
-      title:'Gündem', sub:'Kural motoru en yüksek öncelikli başlığı seçti',
-      badge:K.Badge({ label:O.mode() === 'llm' ? 'model bağlı' : 'kural motoru',
+      title:'Gündem', sub:'Sistem en öncelikli başlığı seçti',
+      badge:K.Badge({ label:O.mode() === 'llm' ? 'yapay zekâ bağlı' : 'hazır kurallar',
         tone:O.mode() === 'llm' ? 'ok' : 'info' }),
       body:html`
         ${K.Notice({ tone:'info', title:picked.topic + '.', body:picked.why })}
@@ -105793,7 +105793,7 @@ R.App = (function(){
             const s = [R.Screens.today.headline()];
             try{
               const vade = R.Calc.dueCards(R.U.todayISO()).length;
-              s.push(vade ? vade + ' tekrar kartı bugün vadeli' : 'Bugün vadeli tekrar kartı yok');
+              s.push(vade ? vade + ' tekrar kartının bugün sırası geldi' : 'Bugün sırası gelen tekrar kartı yok');
               const x = R.Ogren.sonAcilan();
               const sr = x ? R.Ogren.sirada(x.subject.id, x.topic.id) : null;
               if(sr) s.push('Öğren: ' + x.topic.name + ' — ' + sr.ad);

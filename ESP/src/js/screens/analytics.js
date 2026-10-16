@@ -155,7 +155,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'Retansiyon', hint:'retention',
+        label:'Kart hatırlama', hint:'retention',
         meta:(function(){
           const r = ESP.SRS.retention();
           return r.cert === 'missing' ? 'veri yok' : '%' + Math.round(r.value * 100);

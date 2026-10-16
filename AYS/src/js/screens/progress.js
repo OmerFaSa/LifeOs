@@ -150,7 +150,7 @@ R.Screens.progress = (function(){
         ${K.Button({ label:'Ana müdahaleyi kaydet', tone:'primary', act:'save-decision' })}`;
 
     return K.Card({
-      hint:'gate', title:'Aylık karar kapısı — '+gate.month,
+      hint:'gate', title:'Aylık değerlendirme — '+gate.month,
       badge:decision ? K.Badge({ label:'karar verildi', tone:'ok' }) : K.Badge({ label:'karar bekliyor', tone:'warn' }),
       body:K.Stack([
         meter('TYT', g.tytStatus, g.tyt.last3, gate.tyt, gate.tytSafe),
@@ -323,7 +323,7 @@ R.Screens.progress = (function(){
       const gate = C.currentGate();
       const verildi = gate && S.decisions[U.monthKey(U.today())];
       return ['test-bazlı-trend', 'plan-tamamlama-son-hafta', 'hata-paretosu']
-        .concat(G && verildi ? [G.anahtar('Aylık karar kapısı — ' + gate.month)] : []);
+        .concat(G && verildi ? [G.anahtar('Aylık değerlendirme — ' + gate.month)] : []);
     },
     title:'İlerleme',
     subtitle(){

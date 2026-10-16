@@ -326,7 +326,7 @@ ESP.Curriculum = (function(){
     const o = measure(gate.metric);
     if(o.value == null){
       return { gate:gate, status:'unknown', value:null, cert:'missing',
-        label:gate.label, why:'Bu kapı için henüz ölçüm yok.' };
+        label:gate.label, why:'Bu basamak henüz ölçülmedi.' };
     }
 
     /* Asgari sinyal: beyana dayalı bir kapı, arkasında yeterli kayıt
@@ -552,7 +552,7 @@ ESP.Curriculum = (function(){
       title:hedef.status === 'unknown'
         ? hedef.label + ' — önce bunu ölç'
         : hedef.label,
-      why:hedef.why || 'Bu kapı için henüz ölçüm yok.',
+      why:hedef.why || 'Bu basamak henüz ölçülmedi.',
     };
   }
 

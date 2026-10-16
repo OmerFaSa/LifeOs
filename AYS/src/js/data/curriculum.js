@@ -54,7 +54,7 @@ R.PLAN = {
 R.PHASES = [
   { key:'eylul',   label:'Eylül 2026',   theme:'Kalibrasyon ve TYT temel',   weeks:[1,3] },
   { key:'ekim',    label:'Ekim 2026',    theme:'TYT çekirdek',              weeks:[4,7] },
-  { key:'kasim',   label:'Kasım 2026',   theme:'Problem ve karar kapısı',   weeks:[8,12] },
+  { key:'kasim',   label:'Kasım 2026',   theme:'Problem ve aylık değerlendirme',   weeks:[8,12] },
   { key:'aralik',  label:'Aralık 2026',  theme:'AYT köprüsü',               weeks:[13,16] },
   { key:'ocak',    label:'Ocak 2027',    theme:'Çift kulvar',               weeks:[17,20] },
   { key:'subat',   label:'Şubat 2027',   theme:'Yoğunlaştırma ve başvuru',  weeks:[21,24] },

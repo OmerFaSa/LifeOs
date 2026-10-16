@@ -15731,7 +15731,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'49577612', at:'2026-10-16 10:05', dirty:true };
+ESP.BUILD = { id:'c2c3ca3d', at:'2026-10-16 10:22', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20029,7 +20029,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(durum.acik) return '';
     return '<div class="modelsiz" data-oz="139" role="status">'
       + '<b class="modelsiz__bas">Dil modeli kapalı</b>'
-      + '<span class="modelsiz__metin">Ajanlar hazır cümlelerle konuşuyor; sayılar ve kararlar aynen duruyor.'
+      + '<span class="modelsiz__metin">Uzmanlar hazır cümlelerle konuşuyor; sayılar ve kararlar aynen duruyor.'
       + (durum.neden ? ' Neden: ' + kac(durum.neden) + '.' : '') + '</span></div>';
   }
 
@@ -36195,7 +36195,7 @@ ESP.PRIVACY = {
    "Hicbir sey yapma" demek degildir. */
 ESP.PRECEDENCE = [
   { rank:1, id:'blocked-core', label:'Tıkanmış temel',
-    note:'Retansiyon %50\'nin altına indiyse ya da bir teknik 14+ gündür ilerlemiyorsa. '
+    note:'Kart hatırlama %50\'nin altına indiyse ya da bir teknik 14+ gündür ilerlemiyorsa. '
        + 'Yeni içerik, eskiyi çökertmeden eklenmez.' },
   { rank:2, id:'deadline', label:'Zamana bağlı hedef',
     note:'Yaklaşan sunum, konser ya da sınav. Dış dünyanın takvimi iç plandan önce gelir.' },
@@ -36372,7 +36372,7 @@ ESP.AGENTS = [
     notScope:'Felsefi tez tartışmaz, müzik teorisi konuşmaz, üslup düzeltmez.',
     brief:'langBrief',
     opening:'Kelimeyi öğrendiğin gün değil, unutmaya başladığın gün önemli. '
-          + 'Retansiyon eğrine bakıyorum.',
+          + 'Kart hatırlama eğrisine bakıyorum.',
     redirect:'Bu bir argüman sorusu; Socrates\'e bağlıyorum.',
     owns:['lang'] },
 
@@ -36519,7 +36519,7 @@ ESP.AGENT_BY_ID = ESP.AGENTS.reduce(function(m, a){ m[a.id] = a; return m; }, {}
 ESP.AGENDA_TYPES = [
   { id:'blocked', label:'Tıkanmış temel',
     lead:'Bir disiplin 14+ gündür ilerlemiyor. Sebebini ve çıkışı konuşuyoruz.' },
-  { id:'retention', label:'Retansiyon düşüşü',
+  { id:'retention', label:'Kart hatırlama düşüşü',
     lead:'Aralıklı tekrar geriliyor. Yeni içerik eklemeden önce bu kapanmalı.' },
   { id:'balance', label:'Dağılım dengesizliği',
     lead:'Haftanın pratiği bir disipline yığılmış, biri hiç açılmamış.' },
@@ -36527,9 +36527,9 @@ ESP.AGENDA_TYPES = [
     lead:'Okunan çok, bağlanan az. Not yığını sermaye değildir.' },
   { id:'deadline', label:'Yaklaşan hedef',
     lead:'Takvimde tarihi olan bir hedef var; plan ona göre daralıyor.' },
-  { id:'gate', label:'Kapıda bekleyen kademe',
+  { id:'gate', label:'Sıradaki kademe',
     lead:'Bir disiplinde merdivenin bir sonraki kapısına çok az kaldı ya da '
-       + 'kapı ölçülemiyor.' },
+       + 'basamak ölçülemiyor.' },
   { id:'coverage', label:'Tarihte kör nokta',
     lead:'Kronolojide kapsanmayan dönem, bölge ya da alan var.' },
   { id:'review', label:'Haftalık gözden geçirme',
@@ -38041,7 +38041,7 @@ ESP.LADDERS = {
                'Haftada bir 5 dakikalık dinleme günlüğü'],
         gates:[
           { metric:'lang.cards', min:400, label:'400 kart' },
-          { metric:'lang.retention', min:0.70, label:'Retansiyon ≥ %70' },
+          { metric:'lang.retention', min:0.70, label:'Kart hatırlama ≥ %70' },
           { metric:'lang.minutes30', min:600, label:'30 günde 600 dakika' },
         ],
         proof:'Sözlüğe bakmadan yazılmış 150 kelimelik bir metin.' },
@@ -38051,7 +38051,7 @@ ESP.LADDERS = {
                'Yazılı üretimde hata günlüğü', 'Deyim ve eşdizim (collocation)'],
         gates:[
           { metric:'lang.cards', min:1200, label:'1200 kart' },
-          { metric:'lang.retention', min:0.78, label:'Retansiyon ≥ %78' },
+          { metric:'lang.retention', min:0.78, label:'Kart hatırlama ≥ %78' },
           { metric:'lang.minutes30', min:900, label:'30 günde 900 dakika' },
           { metric:'lang.streakDays', min:10, label:'10 günlük zincir' },
         ],
@@ -38062,7 +38062,7 @@ ESP.LADDERS = {
                'Üslup farkları: gazete / akademik / konuşma'],
         gates:[
           { metric:'lang.cards', min:2500, label:'2500 kart' },
-          { metric:'lang.retention', min:0.82, label:'Retansiyon ≥ %82' },
+          { metric:'lang.retention', min:0.82, label:'Kart hatırlama ≥ %82' },
           { metric:'lang.minutes30', min:1200, label:'30 günde 1200 dakika' },
         ],
         proof:'Hedef dilde 800 kelimelik özgün bir deneme.' },
@@ -38071,7 +38071,7 @@ ESP.LADDERS = {
         study:['Çeviri ve geri çeviri', 'İkinci dile geçiş', 'Başkasına öğretme'],
         gates:[
           { metric:'lang.cards', min:4000, label:'4000 kart' },
-          { metric:'lang.retention', min:0.85, label:'Retansiyon ≥ %85' },
+          { metric:'lang.retention', min:0.85, label:'Kart hatırlama ≥ %85' },
           { metric:'lang.langs', min:2, label:'İki dil aktif' },
         ],
         proof:'Bir metni çevirip geri çevirerek kayıp analizini yazmak.' },
@@ -38400,7 +38400,7 @@ ESP.LADDERS = {
         gates:[
           { metric:'history.schools', min:4, label:'4 tarih yazımı okulu' },
           { metric:'history.events', min:150, label:'150 olay' },
-          { metric:'history.retention', min:0.78, label:'Retansiyon ≥ %78' },
+          { metric:'history.retention', min:0.78, label:'Kart hatırlama ≥ %78' },
         ],
         proof:'Aynı olayı iki okulun gözünden yazmak.' },
 
@@ -38601,7 +38601,7 @@ ESP.EVIDENCE = [
   /* ---------------------------------------------------- kendi olcumun */
   { rule:'srs.retention', sourceType:'personal_data', certainty:'moderate',
     applicability:'local',
-    cite:'Retansiyon — kendi kart geçmişinden hesaplanan hatırlama tahmini',
+    cite:'Kart hatırlama — kendi kart geçmişinden hesaplanan hatırlama tahmini',
     population:'yalnızca bu kullanıcı',
     note:'Bir ÖLÇÜM değil bir HESAPTIR: kartın kararlılığı ve son tekrardan '
        + 'bu yana geçen süreden türetilir. Kesinlik etiketi bu yüzden '
@@ -50012,7 +50012,7 @@ ESP.HINTS = {
   /* --- dil --- */
   'srs':{ t:'Aralıklı tekrar', b:'Bir kartı tam unutmadan hemen önce sorar; aralık her doğru cevapta uzar.',
     more:'Leitner kutularının SM-2 ile yumuşatılmış hâli. Kolay bulduğun kart daha uzun süre görünmez, zorlandığın kart başa döner. Amaç tekrar sayısını azaltmak değil, aynı hatırlamayı daha az tekrarla elde etmektir. Her disiplinin destesi ayrı ölçülür — tarih destesi dil destesinden AYRI: birinin iyi olması ötekinin çöküşünü gizlememeli. Aralıklı tekrarın amacı her gün çalışmak değil, doğru günde çalışmaktır: sırası gelen kart yoksa çalışılacak kart da yoktur. Erken çalışmak aralığı kısaltır ve tekrar sayısını artırır — kazanç getirmez. Oturum başladığında liste dondurulur: cevapladığın kartın vadesi ileri gitse de kuyruktan düşmez, ilerlemeyi görürsün.' },
-  'retention':{ t:'Retansiyon', b:'Bugün sorulsa hatırlama olasılığının ortalaması. R(t) = e^(−t/S).',
+  'retention':{ t:'Kart hatırlama', b:'Bugün sorulsa hatırlama olasılığının ortalaması. R(t) = e^(−t/S).',
     more:'S kartın kendi kararlılığıdır ve her doğru cevapta büyür. Hiç çalışılmamış kart bu ortalamaya girmez: «veri yok» sıfır sayılmaz, yoksa bir gün ara vermek retansiyonu çökmüş gibi gösterirdi.' },
   'shadowing':{ t:'Shadowing', b:'Duyduğun konuşmayı birkaç kelime geriden, aynı tonlamayla tekrarlama.',
     more:'Süre ölçülür, kalite ölçülmez — sistem sesini dinlemez. Kendi işaretlediğin zorluk «tahmin» etiketiyle durur ve hiçbir skoru tek başına belirlemez.' },
@@ -50091,7 +50091,7 @@ ESP.HINTS = {
     more:'Sürekli yeni taslak açıp hiçbirini revize etmemek en yaygın yazı tıkanmasıdır. Oran bir hedef değil bir aynadır; Montaigne yalnızca sayıyı söyler.' },
 
   /* --- ofis --- */
-  'brief':{ t:'Brifing', b:'Ajanın gördüğü tek şey: ölçülmüş metrikler ve durum etiketleri.',
+  'brief':{ t:'Özet', b:'Uzmanın gördüğü tek şey: ölçülmüş metrikler ve durum etiketleri.',
     more:'Ham ses kaydı, tam metin taslak ve kişisel not brifinge girmez. Ham JSON\'u Danışma ekranından açabilirsin: ajanın görmediği bir şeye dayanarak konuşmadığını görmen gerekir.' },
   'rule-engine':{ t:'Kural motoru', b:'Sayıyı ve kararı üreten katman. Model yalnızca cümleye çevirir.',
     more:'Model kapalıyken ofis kapanmaz: brifing doğrudan kural cümlesine çevrilir ve ajanlar «kural motoru» rozetiyle konuşur. Rozet süs değildir; bir cümleye ne kadar güveneceğini belirler.' },
@@ -50129,7 +50129,7 @@ ESP.HINTS = {
   /* --- merdiven ve koç --- */
   'level':{ t:'Kademe', b:'Ölçülmüş üretimin merdivende karşıladığı basamak.',
     more:'Kademe kişiye değil ÜRETİME verilir: «Kalfa\'sın» denmez, «son 30 günün ölçülmüş üretimi Kalfa kapılarını karşılıyor» denir. Üretim durursa kademe de durur. Genel kademe disiplinlerin ortalaması değildir; ortalama ile en düşüğün arasıdır.' },
-  'unknown-gate':{ t:'Ölçülemeyen kapı', b:'Ne geçilmiş ne kalınmış: o kapı için henüz ölçüm yok.',
+  'unknown-gate':{ t:'Ölçülemeyen basamak', b:'Ne geçilmiş ne kalınmış: o basamak henüz ölçülmedi.',
     more:'Üçüncü durum sistemin dürüstlüğüdür. Ölçülmemiş bir kapıyı «kalındı» saymak da «geçildi» saymak da yalan olurdu. Burada istenen şey çalışmak değil ölçmek — ve bu sistemde ölçmek çoğu zaman işin kendisidir: retansiyonu ölçmek kart cevaplamak, temiz BPM\'i ölçmek metronomla çalmaktır.' },
   'placement':{ t:'Seviye tespiti', b:'Sıfırdan başlamayanlar için bir başlangıç TAHMİNİ.',
     more:'Sınav bir kademe VERMEZ ve hiçbir kapıyı açmaz. Verdiği şey «tahmin» etiketiyle durur; ilk ölçümler geldiğinde ölçülmüş kademe tahmini her zaman yener.' },
@@ -50222,8 +50222,8 @@ ESP.HINTS = {
     more:'Ajan doğrudan yazmaz — teklif eder, sen onaylarsın, uygulamayı kural motoru yapar. Bir dil modelinin verine doğrudan yazması, halüsinasyon riskini kalıcı hâle getirirdi: yanlış bir çıkarım bir cümle olarak kalmaz, bir hatırlatıcıya ya da bir hedefe dönüşürdü. Her teklif ajanın KENDİ alanındadır: Maestro hatırlatıcı kurabilir, dil ünitesi ekleyemez. Reddedilen teklif tekrar sorulmaz ama kaydı silinmez.' },
   'weekplan':{ t:'Haftalık plan', b:'Haftanın günlerine disiplin dağıtımı.',
     more:'Takvim DEĞİLDİR: «salı 19:00\'da gitar» demek sistemin işi değil. Sırayı haftalık rota verir, plan onu güne dağıtır — yeni bir karar üretmez. Saatini sen seçersin.' },
-  'ladder':{ t:'Merdiven', b:'Sıfırdan üstatlığa beş kademe ve ölçülebilir kapılar.',
-    more:'Kademe kişiye değil ÜRETİME verilir; üretim durursa kademe de durur. Merdiven ardışıktır: alttaki kapı atlanarak üsttekine geçilmez, çünkü atlanan kapı ileride üstüne kurulan her şeyi çökertir. Süre tahmini yoktur — «üç ayda usta olursun» sonuç garantisi yasağına girer.' },
+  'ladder':{ t:'Merdiven', b:'Sıfırdan üstatlığa beş kademe ve ölçülebilir basamaklar.',
+    more:'Kademe kişiye değil ÜRETİME verilir; üretim durursa kademe de durur. Merdiven ardışıktır: alttaki basamak atlanarak üsttekine geçilmez, çünkü atlanan kapı ileride üstüne kurulan her şeyi çökertir. Süre tahmini yoktur — «üç ayda usta olursun» sonuç garantisi yasağına girer.' },
   'topic':{ t:'Konu haritası', b:'Bu bölümde nelerin çalışılacağı.',
     more:'Ünite KARTA döner, konu dönmez: bir dil ünitesi on kelimeyi desteye ekler ve ilerlemesi SRS\'ten okunur; «barre akorlar» ya da «kaynak eleştirisi» ise çalışılacak bir konudur ve ölçüsü kart değildir. Bu yüzden konu işaretleri ÖLÇÜM DEĞİL BEYANDIR: hiçbir kapıyı açmaz, kademeyi değiştirmez, hiçbir hesaba girmez. Çerçeveler uydurulmadı — CEFR (2020 Companion Volume), klasik retoriğin beş kanonu, Türkçe diksiyon başlıkları, yaygın gitar müfredatı ve Adler\'in okuma düzeyleri. Kaynağı olan konuda kaynak satırı yazar.' },
 };
@@ -55336,7 +55336,7 @@ ESP.Intellect = (function(){
       if(r.cert === 'missing') return yok;
       /* %80 retansiyon notrdur: SRS'in hedefledigi bant odur. */
       return { k:clampK(0.85 + (r.value - 0.5) * 0.6), cert:'derived',
-        why:'Retansiyon %' + Math.round(r.value * 100) + ' (' + r.n + ' karttan).' };
+        why:'Kart hatırlama %' + Math.round(r.value * 100) + ' (' + r.n + ' karttan).' };
     }
 
     if(discId === 'reading'){
@@ -56909,7 +56909,7 @@ ESP.Curriculum = (function(){
     const o = measure(gate.metric);
     if(o.value == null){
       return { gate:gate, status:'unknown', value:null, cert:'missing',
-        label:gate.label, why:'Bu kapı için henüz ölçüm yok.' };
+        label:gate.label, why:'Bu basamak henüz ölçülmedi.' };
     }
 
     /* Asgari sinyal: beyana dayalı bir kapı, arkasında yeterli kayıt
@@ -57135,7 +57135,7 @@ ESP.Curriculum = (function(){
       title:hedef.status === 'unknown'
         ? hedef.label + ' — önce bunu ölç'
         : hedef.label,
-      why:hedef.why || 'Bu kapı için henüz ölçüm yok.',
+      why:hedef.why || 'Bu basamak henüz ölçülmedi.',
     };
   }
 
@@ -57477,7 +57477,7 @@ ESP.Chrono = (function(){
     }
     if(st.retention.cert !== 'missing' && st.retention.value < ESP.Planner.RETENTION_FLOOR){
       out.push({ tone:'danger', label:'Tarih kartları geriliyor',
-        text:'Retansiyon %' + Math.round(st.retention.value * 100)
+        text:'Kart hatırlama %' + Math.round(st.retention.value * 100)
           + ' — yeni olay eklemeden önce tekrar.' });
     }
     return out;
@@ -58027,7 +58027,7 @@ ESP.Calib = (function(){
      Böylece defter, neyi ölçtüğünden bağımsız kalır. */
   ESP.CALIB_KINDS = [
     { id:'retention', type:'number', unit:'puan', err:'abs', bands:[5, 12, 25],
-      label:'Kart retansiyonun', ask:'Son 30 günde kartlarının yüzde kaçını ilk denemede hatırladın?' },
+      label:'Kart hatırlama oranın', ask:'Son 30 günde kartlarının yüzde kaçını ilk denemede hatırladın?' },
     { id:'minutes', type:'number', unit:'dk', err:'ape',
       label:'Haftalık çalışma süren', ask:'Bu hafta toplam kaç dakika çalıştın?' },
     { id:'sessions', type:'number', unit:'oturum', err:'abs', bands:[1, 2, 4],
@@ -60342,13 +60342,13 @@ ESP.Audit = (function(){
       if(r.value < 0.70){
         out.push(bul('lang-rate-' + l, { severity:'warn', route:'lang',
           title:'Yeni kart hızını düşür (' + l + ')',
-          note:'Retansiyon %' + Math.round(r.value * 100) + '. Bu düzeyde '
+          note:'Kart hatırlama %' + Math.round(r.value * 100) + '. Bu düzeyde '
              + 'yeni kart eklemek, hatırlanmayan kartların üstüne yenisini '
              + 'koymaktır. Önce mevcut deste toparlansın.' }));
       } else if(r.value > 0.90 && aktif >= 50){
         out.push(bul('lang-rate-up-' + l, { severity:'info', route:'lang',
           title:'Yeni kart için yer var (' + l + ')',
-          note:'Retansiyon %' + Math.round(r.value * 100) + ' ve deste '
+          note:'Kart hatırlama %' + Math.round(r.value * 100) + ' ve deste '
              + 'rahat. Bu, hız artırmak için bir İZİNDİR, bir hedef değil.' }));
       }
     });
@@ -60966,7 +60966,7 @@ ESP.Coach = (function(){
       items:secilen, minutes:toplam, budget:butce,
       why:kapi
         ? (kapi.action === 'measure'
-            ? 'Sıradaki kapı ölçülemiyor: «' + kapi.gate.label + '». '
+            ? 'Sıradaki basamak ölçülemiyor: «' + kapi.gate.label + '». '
               + 'Bu reçete o ölçümü üretir.'
             : 'Sıradaki kapı: «' + kapi.gate.label + '». Reçete oraya çalışıyor.')
         : 'Bu merdivenin bütün kapıları geçilmiş görünüyor; reçete korumaya çalışıyor.',
@@ -61299,7 +61299,7 @@ ESP.Desk = (function(){
     if(r.due) return r.due + ' hatırlatma bugüne düştü.';
     const kapi = ESP.Curriculum.nextGate(discId);
     if(kapi) return kapi.action === 'measure'
-      ? 'Sıradaki kapı ölçülemiyor: ' + kapi.gate.label + '.'
+      ? 'Sıradaki basamak ölçülemiyor: ' + kapi.gate.label + '.'
       : 'Sıradaki kapı: ' + kapi.gate.label + '.';
     return 'Bu merdivenin bütün kapıları geçilmiş görünüyor.';
   }
@@ -61833,7 +61833,7 @@ ESP.Plans = (function(){
     { id:'focus', level:'kucuk', label:'Odağı değiştir', scope:'coach',
       note:'Eşit skorlu iki iş çıkarsa hangisinin öne geçeceğini değiştirir.' },
     { id:'base', level:'orta', label:'Günlük tabanı değiştir', scope:'coach',
-      note:'Reçetenin sığdığı dakika. Hedef değil ölçüt.' },
+      note:'Planın sığdığı dakika: alt sınır, hedef değil.' },
     /* Bölüm açma–kapama (core/modules.js). Orta seviye: bir disiplinin
        bütün ekranlarını, masasını ve denge hesabını etkiler. Veri silinmez. */
     { id:'bolum', level:'orta', label:'Bölümü aç / kapat', scope:'coach',
@@ -61908,7 +61908,7 @@ ESP.Plans = (function(){
          içindir. */
       if(kapi && kapi.action === 'measure'){
         ekle('reminder', d.label + ': «' + kapi.gate.label + '» ölçülsün',
-          'Bu kapı ölçülemiyor; ölçüm yapılmadan kademe kanıtlanmaz.',
+          'Bu basamak ölçülemiyor; ölçüm yapılmadan kademe kanıtlanmaz.',
           { key:'gate', text:kapi.gate.label + ' için ölçüm gir',
             due:U.iso(U.addDays(U.parse(bugun), 1)), repeat:'none' });
       }
@@ -62713,7 +62713,7 @@ ESP.Planner = (function(){
     if(r.cert !== 'missing' && r.n >= RETENTION_MIN_CARDS && r.value < RETENTION_FLOOR){
       out.push({
         id:'retention', disc:'lang', agent:'polyglot',
-        label:'Retansiyon tabanın altında',
+        label:'Kartları hatırlama oranı düşük',
         detail:'Kartların hatırlanma olasılığı ortalaması %' + Math.round(r.value * 100)
              + ' (' + r.n + ' karttan hesaplandı; taban için en az '
              + RETENTION_MIN_CARDS + ' ölçüm gerekir). Yeni kelime eklemek bu '
@@ -62730,7 +62730,7 @@ ESP.Planner = (function(){
     if(rh.cert !== 'missing' && rh.n >= RETENTION_MIN_CARDS && rh.value < RETENTION_FLOOR){
       out.push({
         id:'retention-history', disc:'history', agent:'herodot',
-        label:'Tarih kartları tabanın altında',
+        label:'Tarih kartlarını hatırlama oranı düşük',
         detail:'Tarih destesinin hatırlanma olasılığı ortalaması %'
              + Math.round(rh.value * 100) + ' (' + rh.n + ' karttan). '
              + 'Kronolojiye yeni olay eklemek bu tabanı daha da düşürür.',
@@ -62936,11 +62936,11 @@ ESP.Planner = (function(){
         rank:5, id:'expand:' + d.id, agent:d.agent, disc:d.id,
         title:kapi ? (d.label + ' — ' + kapi.title)
           : (d.label + ' bu hafta en az çalışılan alan'),
-        detail:taban + ' Temel sağlam; genişleme sırası burada.'
+        detail:taban + ' Temel sağlam; şimdi genişletme zamanı.'
           + (kapi ? ' ' + kapi.why : ''),
         route:d.route, tab:null,
         why:kapi && kapi.action === 'measure'
-          ? 'Yeni içerik: bu kapı henüz ölçülmedi, istenen şey çalışmak değil ölçmek.'
+          ? 'Yeni içerik: bu basamak henüz ölçülmedi; önce kısa bir ölçüm yap.'
           : 'Yeni içerik: temel sağlamken genişleme sistemin asıl amacıdır.',
       };
     }
@@ -69700,8 +69700,8 @@ ESP.Office = (function(){
       else if(brf.due.value) cumle.push(brf.due.value + ' kart bugün vadeli.');
       else cumle.push('Bugün vadesi gelen kart yok.');
       cumle.push(brf.retention.cert === 'missing'
-        ? 'Retansiyon henüz ölçülemedi: hiç cevaplanmış kart yok.'
-        : 'Retansiyon ' + pct(brf.retention.value) + ' (' + brf.retention.n + ' karttan hesaplandı).');
+        ? 'Kart hatırlama henüz ölçülemedi: hiç cevaplanmış kart yok.'
+        : 'Kart hatırlama ' + pct(brf.retention.value) + ' (' + brf.retention.n + ' karttan hesaplandı).');
       return cumle.join(' ') + tezgah();
     }
 
@@ -69796,7 +69796,7 @@ ESP.Office = (function(){
       cumle.push('Ölçülmüş üretim genel olarak «' + brf.overall.label + '» kademesinde '
         + '(merdivenin %' + brf.overall.mastery + '\'i).');
       if(brf.due.overdue) cumle.push(brf.due.overdue + ' kartın vadesi geçti.');
-      if(brf.unmeasured) cumle.push(brf.unmeasured + ' kapı ölçülemiyor: '
+      if(brf.unmeasured) cumle.push(brf.unmeasured + ' basamak ölçülemiyor: '
         + 'orada istenen şey çalışmak değil ölçmek.');
       const yakin = (brf.gates || []).filter(g => g.gate && g.gate.action === 'work')[0];
       if(yakin) cumle.push(yakin.label + ' tarafında sıradaki kapı: ' + yakin.gate.label + '.');
@@ -70061,7 +70061,7 @@ ESP.Office = (function(){
        && d.retention.n >= ESP.Planner.RETENTION_MIN_CARDS
        && d.retention.value < ESP.Planner.RETENTION_FLOOR){
       add('polyglot', 'blocked',
-        'Retansiyon ' + pct(d.retention.value) + ' — tabanın altında. Yeni kelime eklemek bunu daha da düşürür.', 'lang');
+        'Kart hatırlama ' + pct(d.retention.value) + ' — olması gerekenin altında. Yeni kelime eklemek bunu daha da düşürür.', 'lang');
     }
     if(d.total && !d.due && d.retention.cert !== 'missing' && d.retention.value >= 0.8){
       add('polyglot', 'win', 'Vadesi gelen kart yok ve retansiyon ' + pct(d.retention.value) + '.', 'lang');
@@ -70213,7 +70213,7 @@ ESP.Office = (function(){
     const r = ESP.SRS.retention();
     if(r.cert !== 'missing' && r.n >= ESP.Planner.RETENTION_MIN_CARDS
        && r.value < ESP.Planner.RETENTION_FLOOR){
-      add('retention', 90, 'Retansiyon ' + pct(r.value) + ' (' + r.n + ' karttan).');
+      add('retention', 90, 'Kart hatırlama ' + pct(r.value) + ' (' + r.n + ' karttan).');
     }
 
     const acil = ESP.Planner.deadlines().filter(x => x.urgent);
@@ -70228,7 +70228,7 @@ ESP.Office = (function(){
     const kapi = ESP.Mod.active()
       .map(x => ESP.Curriculum.nextGate(x.id))
       .filter(g => g && g.action === 'measure');
-    if(kapi.length) add('gate', 55, kapi.length + ' kapı ölçülemiyor.');
+    if(kapi.length) add('gate', 55, kapi.length + ' basamak ölçülemiyor.');
 
     const tarih = ESP.Chrono.status();
     if(tarih.cert !== 'missing'
@@ -70694,7 +70694,7 @@ ESP.Setup = (function(){
             <li><b>Aralıklı tekrar</b> — kart eklediğinde retansiyon ölçülmeye başlar</li>
             <li><b>Haftalık rota</b> — hiç açılmayan disiplin öne alınır</li>
             <li><b>Dokuz ajanlı ofis</b> — her masa yalnızca kendi ölçümüne bakar</li>
-            <li><b>Merdiven</b> — her bölümde sıfırdan üstatlığa ölçülebilir kapılar</li>
+            <li><b>Merdiven</b> — her bölümde sıfırdan üstatlığa ölçülebilir basamaklar</li>
           </ul>
         </div>
 
@@ -70737,7 +70737,7 @@ ESP.Setup = (function(){
             input:K.Input({ id:'su-instrument', value:p.instrument || 'gitar',
               placeholder:'gitar' }) })}
           ${K.Field({ label:'Günlük pratik tabanı (dakika)',
-            hint:'hedef değil ölçüt: rota bunu taban alır',
+            hint:'alt sınır, hedef değil: plan bunu en az sayar',
             input:K.Input({ id:'su-minutes', type:'number', numeric:true,
               min:10, max:600, value:p.dailyMinutes || 60, placeholder:'60' }) })}
         </div>
@@ -71626,7 +71626,7 @@ ESP.Screens.today = (function(){
        dakikası» halkasında ve oturum tablosunda; seri üst satırda zaten var
        (sadelik, 2026-10-01: aynı sayı dört yerde yazıyordu). */
     return K.Kutu({ ad:'Bekleyen iş', yuva:'bugün', bitisik:true, govde:html`<div class="ozet">
-      ${hucre('Vadeli kart', d.due, '', 'tekrar bekliyor')}
+      ${hucre('Sırası gelen kart', d.due, '', 'tekrar bekliyor')}
       ${hucre('Açık disiplin', ESP.Mod.active().length, '', 'Çalışma’da')}
     </div>` });
   }
@@ -71641,7 +71641,7 @@ ESP.Screens.today = (function(){
     const ic = V.dakikaHalkasi({ hedef, toplam:rows.reduce((a, s) => a + (s.minutes || 0), 0),
       satirlar:ESP.Mod.active().slice(0, 4).map(d => ({ ad:(ESP.DISCIPLINE_BY_ID[d.id || d] || {}).short || (d.id || d),
         dk:M.minutesOf(gun(), d.id || d) })) });
-    return ic ? K.Kutu({ ad:'Günün dakikası', yuva:'ölçüt ' + hedef + ' dk', class:'vkutu', govde:raw(ic) }) : '';
+    return ic ? K.Kutu({ ad:'Günün dakikası', yuva:'günlük en az ' + hedef + ' dk', class:'vkutu', govde:raw(ic) }) : '';
   }
 
   /* DÖNEN DURUM (kullanıcı, 2026-10-02: «çok daha az yer kaplayan küçük
@@ -71662,8 +71662,8 @@ ESP.Screens.today = (function(){
     const bugun = [];
     bugun.push(rows.length
       ? { ust:'Günün dakikası', sayi:sayi({ deger:toplam, birim:'dk', kesinlik:'measured' }), cumle:'çalışıldı.',
-          vurgu:rows.length + ' oturum' + (hedef ? ' · ölçüt ' + hedef + ' dk' : '') + '.', sistem:'esp', dugme:git('Oturumlar', 'gun') }
-      : { ust:'Günün dakikası', cumle:'Bugün oturum yok.', vurgu:hedef ? 'Ölçüt ' + hedef + ' dk.' : 'İlk oturumla başlar.', sistem:'esp', dugme:git('Oturum gir', 'gun') });
+          vurgu:rows.length + ' oturum' + (hedef ? ' · günlük en az ' + hedef + ' dk' : '') + '.', sistem:'esp', dugme:git('Oturumlar', 'gun') }
+      : { ust:'Günün dakikası', cumle:'Bugün oturum yok.', vurgu:hedef ? 'Günlük en az ' + hedef + ' dk.' : 'İlk oturumla başlar.', sistem:'esp', dugme:git('Oturum gir', 'gun') });
     const seri = M.streak();
     bugun.push({ ust:'Seri', sayi:sayi({ deger:seri, birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
       cumle:'seri.', vurgu:'Asgari gün seriyi sürdürür.', sistem:'esp' });
@@ -71672,8 +71672,8 @@ ESP.Screens.today = (function(){
     const d = ESP.SRS.deckStatus();
     calisma.push(d.due
       ? { ust:'Tekrar', sayi:sayi({ deger:d.due, birim:'kart', kesinlik:'computed', formul:'vadesi bugün ya da geçmiş kart' }),
-          cumle:'bekliyor.', vurgu:'Vadeli kelime kartları.', sistem:'esp', dugme:git('Çalış', 'lang') }
-      : { ust:'Tekrar', cumle:'Vadeli kart yok.', vurgu:'Deste bugün temiz.', sistem:'esp' });
+          cumle:'bekliyor.', vurgu:'Sırası gelen kelime kartları.', sistem:'esp', dugme:git('Çalış', 'lang') }
+      : { ust:'Tekrar', cumle:'Sırası gelen kart yok.', vurgu:'Deste bugün temiz.', sistem:'esp' });
     calisma.push({ ust:'Disiplinler', sayi:sayi({ deger:ESP.Mod.active().length, kesinlik:'measured' }), cumle:'açık disiplin.',
       vurgu:'Çalışma çekmecesinde.', sistem:'esp' });
 
@@ -72139,7 +72139,7 @@ ESP.Screens.lang = (function(){
     if(!a) return '';
     const yeni = ESP.SRS.dueCards().filter(c => c.lang === aktifDil() && !c.reps).length;
     return VT().dersKapagi({ ad:a.name, harf:a.initial, alan:disc.short, gorsel:'',
-      cumle:'Bugün ' + d.due + ' kart vadeli' + (yeni ? '; ' + yeni + '\'i hiç sorulmadı.' : '.') });
+      cumle:'Bugün ' + d.due + ' kartın sırası geldi' + (yeni ? '; ' + yeni + '\'i hiç sorulmadı.' : '.') });
   }
 
   /* 098 BAĞLAMDA KELİME: örnek cümlesinde geçen kart, cümlenin içinde. */
@@ -72174,7 +72174,7 @@ ESP.Screens.lang = (function(){
       }
       return [K.Entry({
         label:'Çalışma', hint:'srs',
-        meta:d.due + ' kart vadeli' + (d.overdue ? ' · ' + d.overdue + ' gecikmiş' : ''),
+        meta:d.due + ' kartın sırası geldi' + (d.overdue ? ' · ' + d.overdue + ' gecikmiş' : ''),
         /* Gecikme yoksa künye («N kart vadeli») yeter; not yalnız gecikmeyi söyler. */
         note:d.overdue ? 'En çok geciken kart ' + d.maxOverdueDays + ' gündür bekliyor.' : null,
         body:html`
@@ -72424,7 +72424,7 @@ ESP.Screens.lang = (function(){
 
     return [
       K.Entry({
-        label:'Retansiyon', hint:'retention',
+        label:'Kart hatırlama', hint:'retention',
         meta:d.retention.cert === 'missing' ? 'veri yok'
           : '%' + Math.round(d.retention.value * 100),
         note:d.retention.cert === 'missing'
@@ -72460,7 +72460,7 @@ ESP.Screens.lang = (function(){
           ${K.Notice({ tone:bant.band ? 'info' : 'warn',
             body:bant.text || bant.why })}
           ${K.Table({ tight:true,
-            headers:['Bant', { label:'Aktif kelime', num:true }, { label:'Retansiyon', num:true }, 'Ne yapabilir'],
+            headers:['Bant', { label:'Aktif kelime', num:true }, { label:'Kart hatırlama', num:true }, 'Ne yapabilir'],
             rows:ESP.CEFR.map(b => [
               b.label, U.fmtNum(b.activeWords), '%' + Math.round(b.retention * 100), b.can,
             ]) })}
@@ -74082,12 +74082,12 @@ ESP.Screens.history = (function(){
 
     rows.push(K.Entry({
       label:'Tarih destesi', hint:'srs',
-      meta:due.length ? due.length + ' kart vadeli' : 'vadesi gelen yok',
+      meta:due.length ? due.length + ' kartın sırası geldi' : 'vadesi gelen yok',
       body:html`
         ${r.cert === 'missing'
-          ? K.Notice({ tone:'info', body:'Retansiyon henüz ölçülemedi: taban için '
+          ? K.Notice({ tone:'info', body:'Kart hatırlama henüz ölçülemedi: taban için '
               + 'en az ' + ESP.Planner.RETENTION_MIN_CARDS + ' cevaplanmış kart gerekir.' })
-          : K.Meter({ label:'Retansiyon', value:Math.round(r.value * 100),
+          : K.Meter({ label:'Kart hatırlama', value:Math.round(r.value * 100),
               text:'%' + Math.round(r.value * 100),
               tone:r.value < ESP.Planner.RETENTION_FLOOR ? 'danger' : 'ok',
               note:r.n + ' karttan hesaplandı' })}
@@ -74468,7 +74468,7 @@ ESP.Screens.history = (function(){
      Tek puan.      Yedi disiplin tek sayıya toplanmaz — toplanan sayı,
                     hangi disiplinin çöktüğünü gizler.
 
-   Ölçülemeyen kapı üçüncü bir renkle durur: ne geçilmiş ne kalınmış.
+   Ölçülemeyen basamak üçüncü bir renkle durur: ne geçilmiş ne kalınmış.
    Orada istenen şey çalışmak değil ÖLÇMEKTİR. */
 
 window.ESP = window.ESP || {};
@@ -74555,7 +74555,7 @@ ESP.Screens.ladder = (function(){
     const olcum = ESP.Mod.active().map(d => C().nextGate(d.id))
       .filter(g => g && g.action === 'measure');
     rows.push(K.Entry({
-      label:'Ölçülemeyen kapılar', hint:'unknown-gate',
+      label:'Ölçülemeyen basamaklar', hint:'unknown-gate',
       meta:olcum.length ? olcum.length + ' kapı' : 'yok',
       body:olcum.length
         ? K.Table({ tight:true, headers:['Disiplin', 'Kapı', ''],
@@ -74875,7 +74875,7 @@ ESP.Screens.ladder = (function(){
       const yol = G ? C().roadmap(S.ui.curDisc || 'lang') : null;
       const kademeler = (yol ? yol.steps : []).filter(st => st.state !== 'current')
         .map(st => G.anahtar('Kademe ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short));
-      return ['ölçülemeyen-kapılar', 'bu-merdivenin-göremediği'].concat(kademeler);
+      return ['ölçülemeyen-basamaklar', 'bu-merdivenin-göremediği'].concat(kademeler);
     },
     title:'Merdiven',
     headline(){
@@ -76825,7 +76825,7 @@ ESP.Screens.office = (function(){
         }),
 
         /* Teklifler Onaylar çekmecesinde (tek yer, CEKMECE-HARITASI). */
-        K.Entry({ label:'Teklifler', hint:'proposal', meta:ESP.Plans.all().length + ' teklif',
+        K.Entry({ label:'Öneriler', hint:'proposal', meta:ESP.Plans.all().length + ' öneri',
           body:K.Button({ label:'Onaylar’da gör', size:'sm', act:'go', data:{ 'data-route':'onaylar' } }) }),
 
 
@@ -76981,7 +76981,7 @@ ESP.Screens.team = (function(){
         }),
 
         K.Entry({
-          label:'Kural motorunun cümlesi', hint:'rule-engine',
+          label:'Sistemin cümlesi', hint:'rule-engine',
           meta:'model olmadan',
           body:html`<p class="rulesay">${ESP.Office.ruleText(a.id, brf)}</p>`,
         }),
@@ -77009,7 +77009,7 @@ ESP.Screens.team = (function(){
               ${mesajlar.length
                 ? map(mesajlar.slice(-20), msgRow)
                 : html`<p class="small muted">Henüz konuşma yok.
-                    ${hazir ? '' : 'Model bağlı değil: cevaplar kural motorundan gelir.'}</p>`}
+                    ${hazir ? '' : 'Yapay zekâ bağlı değil: cevaplar sistemin hazır kurallarından gelir.'}</p>`}
             </div>
             ${raw(mentionYeri())}
             <div class="composer mt-10">
@@ -77021,8 +77021,8 @@ ESP.Screens.team = (function(){
         }),
 
         K.Entry({
-          label:'Brifing', hint:'brief',
-          meta:'ajanın gördüğü tek şey',
+          label:'Özet', hint:'brief',
+          meta:'uzmanın gördüğü tek şey',
           wide:true,
           body:K.Collapsible({
             title:'Ham brifing (JSON)',
@@ -77077,7 +77077,7 @@ ESP.Screens.team = (function(){
   return {
     id:'team',
     /* iPhone Faz 4: açık masa ve konuşma; kural cümlesi, defter ve brifing şerit. */
-    kucukVarsayilan:['kural-motorunun-cümlesi', 'bu-masanın-defteri', 'brifing'],
+    kucukVarsayilan:['sistemin-cümlesi', 'bu-masanın-defteri', 'özet'],
     title:'Danışma',
     headline(){
       const a = agent();
@@ -77499,7 +77499,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       K.Entry({
-        label:'Retansiyon', hint:'retention',
+        label:'Kart hatırlama', hint:'retention',
         meta:(function(){
           const r = ESP.SRS.retention();
           return r.cert === 'missing' ? 'veri yok' : '%' + Math.round(r.value * 100);
@@ -78107,7 +78107,7 @@ ESP.Screens.profile = (function(){
                 input:K.Select({ id:'pf-lang', value:(p.langs && p.langs[0]) || 'en',
                   options:ESP.LANGS.map(l => ({ value:l.id, label:l.label })) }) })}
               ${K.Field({ label:'Günlük pratik tabanı (dakika)',
-                hint:'hedef değil ölçüt',
+                hint:'alt sınır, hedef değil',
                 input:K.Input({ id:'pf-minutes', type:'number', numeric:true, min:10, max:600,
                   value:p.dailyMinutes || 60 }) })}
             </div>
@@ -79669,14 +79669,14 @@ ESP.Screens.guide = (function(){
         label:'Merdiven', hint:'ladder',
         meta:ESP.LEVELS.length - 1 + ' kademe',
         note:'Her bölümde sıfırdan üstatlığa beş basamak ve her basamakta '
-           + 'ölçülebilir kapılar. Kademe kişiye değil ÜRETİME verilir: '
+           + 'ölçülebilir basamaklar. Kademe kişiye değil ÜRETİME verilir: '
            + 'üretim durursa kademe de durur.',
         wide:true,
         body:html`
           ${K.Table({ tight:true, headers:['Kademe', 'Ne demek'],
             rows:ESP.LEVELS.map(l => [l.short + ' · ' + l.label, l.note]) })}
-          <p class="small muted mt-8">Merdiven ardışıktır: alttaki kapı
-            atlanarak üsttekine geçilmez. Ölçülemeyen kapı üçüncü bir
+          <p class="small muted mt-8">Merdiven ardışıktır: alttaki basamak
+            atlanarak üsttekine geçilmez. Ölçülemeyen basamak üçüncü bir
             durumdur — ne geçildi ne kalındı; orada istenen şey çalışmak
             değil ölçmek.</p>`,
       }),
@@ -79983,7 +79983,7 @@ ESP.Screens.guide = (function(){
      Merdivenin butun esiklerinin nereden geldigi tek tabloda.
 
      Varlik sebebi tek cumle: deterministik olmak, pedagojik olarak dogru
-     olmak anlamina gelmez. "Retansiyon >= 0,75" kodda kesindir; 0,75'in
+     olmak anlamina gelmez. "Kart hatırlama >= 0,75" kodda kesindir; 0,75'in
      kendisi bu sistemin secimidir ve bunu gizlemek, bir tasarim tercihini
      bulgu gibi sunmak olurdu. */
   /* Madde 11: hedef paketlerinin tahmin tabloları ve dayanağı. «Kaynağa
@@ -80332,7 +80332,7 @@ ESP.Screens.onaylar = (function(){
     const supheli = S.ui.hkmDoubts || [];
     if(!liste.length && !supheli.length) return '';
     return K.Entry({ label:'HKM teklifi', hint:'hkm',
-      meta:liste.length ? liste.length + ' teklif'
+      meta:liste.length ? liste.length + ' öneri'
         : supheli.length + ' belirsiz', wide:true,
       body:html`
         ${/* Uygulama yarida kalmis teklif: uydurmak yerine BILMEDIGIMIZI
@@ -80462,7 +80462,7 @@ ESP.Screens.onaylar = (function(){
   function AjanKart(){
     const l = ESP.Plans ? ESP.Plans.all() : [];
     if(!l.length) return '';
-    return K.Entry({ label:'Ajan teklifleri', hint:'proposal', meta:l.length + ' teklif', wide:true,
+    return K.Entry({ label:'Uzman önerileri', hint:'proposal', meta:l.length + ' öneri', wide:true,
       body:ESP.Parts.proposalList(l, 'Bekleyen teklif yok.') });
   }
 

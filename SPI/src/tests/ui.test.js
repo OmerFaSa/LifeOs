@@ -122,7 +122,7 @@
 
     it('kaynak rozeti model ile kural motorunu ayırır', () => {
       expect(String(P.sourceBadge('model'))).toContain('model');
-      expect(String(P.sourceBadge('rules'))).toContain('kural motoru');
+      expect(String(P.sourceBadge('rules'))).toContain('hazır kurallar');
     });
 
     it('bayrak kartı yönlendirme metnini içerir', () => {

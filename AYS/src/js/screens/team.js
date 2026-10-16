@@ -36,7 +36,7 @@ R.Screens.team = (function(){
       <div class="msg msg--agent">
         <div class="msg__who">${Avatar(agent)}<b>${agent.name}</b>
           <span class="dim">${agent.role}</span>
-          ${when(m.mode === 'kural', () => K.Badge({ label:'kural motoru', tone:'info' }))}
+          ${when(m.mode === 'kural', () => K.Badge({ label:'hazır kural', tone:'info' }))}
         </div>
         <div class="msg__body">${raw(U.esc(m.text).replace(/\n/g, '<br/>'))}${OnayDugmeleri(m)}</div>
         ${when(m.warnings && m.warnings.length, () => html`
@@ -293,7 +293,7 @@ R.Screens.team = (function(){
           ${msgs.length
             ? map(msgs, m => Bubble(agent, m))
             : html`<div class="chat__empty">${raw(UI.icon('guide'))}
-                <p>${agent.name} masasındaki raporu okudu. Sor ya da brifing iste.</p></div>`}
+                <p>${agent.name} masasındaki raporu okudu. Sor ya da özet iste.</p></div>`}
           <div id="chat-pending"></div>
         </div>`,
 
@@ -314,7 +314,7 @@ R.Screens.team = (function(){
            kotudur. */
         voiceCard(),
         K.Card({
-          hint:'not-masasindaki-rapor', title:'Masasındaki rapor',           actions:K.Button({ label:'Brifing', icon:'refresh', size:'sm', act:'team-brief' }),
+          hint:'not-masasindaki-rapor', title:'Masasındaki rapor',           actions:K.Button({ label:'Özet iste', icon:'refresh', size:'sm', act:'team-brief' }),
           body:html`
             <div class="stack-xs">${map(O.brief(agent.id).findings, f => html`
               <div class="finding">

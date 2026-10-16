@@ -140,7 +140,7 @@ ESP.Screens.office = (function(){
         }),
 
         /* Teklifler Onaylar çekmecesinde (tek yer, CEKMECE-HARITASI). */
-        K.Entry({ label:'Teklifler', hint:'proposal', meta:ESP.Plans.all().length + ' teklif',
+        K.Entry({ label:'Öneriler', hint:'proposal', meta:ESP.Plans.all().length + ' öneri',
           body:K.Button({ label:'Onaylar’da gör', size:'sm', act:'go', data:{ 'data-route':'onaylar' } }) }),
 
 

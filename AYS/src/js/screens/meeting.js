@@ -69,7 +69,7 @@ R.Screens.meeting = (function(){
           ${when(t.roundTitle, () => html`<span class="meetturn__round">${t.roundTitle}</span>`)}
           ${when(t.vote, () => K.Badge({ label:t.vote + '. fikre oy', tone:'info' }))}
           ${when(t.closing, () => K.Badge({ label:'karar', tone:'ok' }))}
-          ${when(t.mode === 'kural', () => K.Badge({ label:'kural motoru', tone:'info' }))}
+          ${when(t.mode === 'kural', () => K.Badge({ label:'hazır kural', tone:'info' }))}
         </div>
         <div class="meetturn__body">${raw(body(t.text))}</div>
         ${when(t.warnings && t.warnings.length, () => html`
@@ -98,8 +98,8 @@ R.Screens.meeting = (function(){
     const roundMs = O.roundEstimateMs('patron');
 
     return K.Card({
-      title:'Gündem', sub:'Kural motoru en yüksek öncelikli başlığı seçti',
-      badge:K.Badge({ label:O.mode() === 'llm' ? 'model bağlı' : 'kural motoru',
+      title:'Gündem', sub:'Sistem en öncelikli başlığı seçti',
+      badge:K.Badge({ label:O.mode() === 'llm' ? 'yapay zekâ bağlı' : 'hazır kurallar',
         tone:O.mode() === 'llm' ? 'ok' : 'info' }),
       body:html`
         ${K.Notice({ tone:'info', title:picked.topic + '.', body:picked.why })}

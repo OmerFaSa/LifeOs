@@ -152,7 +152,7 @@ ESP.EVIDENCE = [
   /* ---------------------------------------------------- kendi olcumun */
   { rule:'srs.retention', sourceType:'personal_data', certainty:'moderate',
     applicability:'local',
-    cite:'Retansiyon — kendi kart geçmişinden hesaplanan hatırlama tahmini',
+    cite:'Kart hatırlama — kendi kart geçmişinden hesaplanan hatırlama tahmini',
     population:'yalnızca bu kullanıcı',
     note:'Bir ÖLÇÜM değil bir HESAPTIR: kartın kararlılığı ve son tekrardan '
        + 'bu yana geçen süreden türetilir. Kesinlik etiketi bu yüzden '

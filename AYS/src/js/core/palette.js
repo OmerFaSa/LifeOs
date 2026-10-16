@@ -33,7 +33,7 @@ R.Palette = (function(){
     list.push(go('subjects','Dersler — konu kapanışı','book','Git'));
     list.push(go('plan','40 haftalık plan','map','Git'));
     list.push(go('target','Hedef, net matrisi, tercih','target','Git'));
-    list.push(go('progress','İlerleme — KPI ve karar kapısı','chart','Git'));
+    list.push(go('progress','İlerleme — göstergeler ve aylık değerlendirme','chart','Git'));
     list.push(go('analytics','Analiz — karşılaştırma, sıra geçmişi, alışkanlık','search','Git'));
     list.push(go('profiles','Profiller ve gözetmen özeti','shield','Git'));
     list.push(go('coach','Koç — verine bakarak yanıtlar','zap','Git'));

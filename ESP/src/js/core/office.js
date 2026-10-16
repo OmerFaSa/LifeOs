@@ -355,8 +355,8 @@ ESP.Office = (function(){
       else if(brf.due.value) cumle.push(brf.due.value + ' kart bugün vadeli.');
       else cumle.push('Bugün vadesi gelen kart yok.');
       cumle.push(brf.retention.cert === 'missing'
-        ? 'Retansiyon henüz ölçülemedi: hiç cevaplanmış kart yok.'
-        : 'Retansiyon ' + pct(brf.retention.value) + ' (' + brf.retention.n + ' karttan hesaplandı).');
+        ? 'Kart hatırlama henüz ölçülemedi: hiç cevaplanmış kart yok.'
+        : 'Kart hatırlama ' + pct(brf.retention.value) + ' (' + brf.retention.n + ' karttan hesaplandı).');
       return cumle.join(' ') + tezgah();
     }
 
@@ -451,7 +451,7 @@ ESP.Office = (function(){
       cumle.push('Ölçülmüş üretim genel olarak «' + brf.overall.label + '» kademesinde '
         + '(merdivenin %' + brf.overall.mastery + '\'i).');
       if(brf.due.overdue) cumle.push(brf.due.overdue + ' kartın vadesi geçti.');
-      if(brf.unmeasured) cumle.push(brf.unmeasured + ' kapı ölçülemiyor: '
+      if(brf.unmeasured) cumle.push(brf.unmeasured + ' basamak ölçülemiyor: '
         + 'orada istenen şey çalışmak değil ölçmek.');
       const yakin = (brf.gates || []).filter(g => g.gate && g.gate.action === 'work')[0];
       if(yakin) cumle.push(yakin.label + ' tarafında sıradaki kapı: ' + yakin.gate.label + '.');
@@ -716,7 +716,7 @@ ESP.Office = (function(){
        && d.retention.n >= ESP.Planner.RETENTION_MIN_CARDS
        && d.retention.value < ESP.Planner.RETENTION_FLOOR){
       add('polyglot', 'blocked',
-        'Retansiyon ' + pct(d.retention.value) + ' — tabanın altında. Yeni kelime eklemek bunu daha da düşürür.', 'lang');
+        'Kart hatırlama ' + pct(d.retention.value) + ' — olması gerekenin altında. Yeni kelime eklemek bunu daha da düşürür.', 'lang');
     }
     if(d.total && !d.due && d.retention.cert !== 'missing' && d.retention.value >= 0.8){
       add('polyglot', 'win', 'Vadesi gelen kart yok ve retansiyon ' + pct(d.retention.value) + '.', 'lang');
@@ -868,7 +868,7 @@ ESP.Office = (function(){
     const r = ESP.SRS.retention();
     if(r.cert !== 'missing' && r.n >= ESP.Planner.RETENTION_MIN_CARDS
        && r.value < ESP.Planner.RETENTION_FLOOR){
-      add('retention', 90, 'Retansiyon ' + pct(r.value) + ' (' + r.n + ' karttan).');
+      add('retention', 90, 'Kart hatırlama ' + pct(r.value) + ' (' + r.n + ' karttan).');
     }
 
     const acil = ESP.Planner.deadlines().filter(x => x.urgent);
@@ -883,7 +883,7 @@ ESP.Office = (function(){
     const kapi = ESP.Mod.active()
       .map(x => ESP.Curriculum.nextGate(x.id))
       .filter(g => g && g.action === 'measure');
-    if(kapi.length) add('gate', 55, kapi.length + ' kapı ölçülemiyor.');
+    if(kapi.length) add('gate', 55, kapi.length + ' basamak ölçülemiyor.');
 
     const tarih = ESP.Chrono.status();
     if(tarih.cert !== 'missing'

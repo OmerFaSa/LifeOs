@@ -40,7 +40,7 @@ R.Screens.office = (function(){
   function deskStatus(agent){
     const q = O.agentQuota(agent.id);
     if(O.mode() !== 'llm'){
-      return { text:'kural motoruyla çalışıyor', short:'kural motoru', tone:'muted' };
+      return { text:'hazır kurallarla çalışıyor', short:'hazır kurallar', tone:'muted' };
     }
     if(q && q.full) return { text:'günlük hakkı doldu', short:'hak doldu', tone:'danger' };
     if(q && q.waitMs > 1500){
@@ -139,7 +139,7 @@ R.Screens.office = (function(){
     const b = O.briefingOf();
     const notes = O.notes();
     return K.Card({
-      title:'Bugünün brifingi',
+      title:'Bugünün özeti',
       sub:b ? new Date(b.at).toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' })
             + ' · günde bir kez üretilir'
             : 'Patron masaları henüz özetlemedi',
@@ -188,7 +188,7 @@ R.Screens.office = (function(){
             <b class="desk__name">Patron’un masası</b>
             <span class="desk__role">Uzmanların raporunu birleştirir; günün tek işini o söyler</span>
           </div>
-          ${K.Badge({ label:O.mode() === 'llm' ? 'model bağlı' : 'kural motoru',
+          ${K.Badge({ label:O.mode() === 'llm' ? 'yapay zekâ bağlı' : 'hazır kurallar',
             tone:O.mode() === 'llm' ? 'ok' : 'info' })}
         </div>
 

@@ -266,7 +266,7 @@ R.Calc = (function(){
     out.push({
       id:'gate-rule',
       text:gate.note,
-      why:'Bu ayın kapı kuralı' + (tytStatus === 'below' ? ' — TYT medyanı gözlenen bandın altında.' : '.'),
+      why:'Bu ayın değerlendirme kuralı' + (tytStatus === 'below' ? ' — TYT medyanı gözlenen bandın altında.' : '.'),
     });
 
     const tags = topTags(2);

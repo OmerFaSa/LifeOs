@@ -216,7 +216,7 @@ R.Setup = (function(){
         K.Stat({ label:'Hafta', value:m.total }),
         K.Stat({ label:'Haftada konu', value:m.perWeek }),
         K.Stat({ label:'Kapsama', value:'%'+m.coverage, tone:m.coverage >= 80 ? 'ok' : 'warn' }),
-        K.Stat({ label:'Karar kapısı', value:(m.gates || []).length }),
+        K.Stat({ label:'Aylık değerlendirme', value:(m.gates || []).length }),
       ])}
       <p class="tiny dim mt-8">İlk hafta: ${plan.weeks[0].topics.join(' · ')}</p>` });
   }

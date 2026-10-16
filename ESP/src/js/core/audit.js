@@ -111,13 +111,13 @@ ESP.Audit = (function(){
       if(r.value < 0.70){
         out.push(bul('lang-rate-' + l, { severity:'warn', route:'lang',
           title:'Yeni kart hızını düşür (' + l + ')',
-          note:'Retansiyon %' + Math.round(r.value * 100) + '. Bu düzeyde '
+          note:'Kart hatırlama %' + Math.round(r.value * 100) + '. Bu düzeyde '
              + 'yeni kart eklemek, hatırlanmayan kartların üstüne yenisini '
              + 'koymaktır. Önce mevcut deste toparlansın.' }));
       } else if(r.value > 0.90 && aktif >= 50){
         out.push(bul('lang-rate-up-' + l, { severity:'info', route:'lang',
           title:'Yeni kart için yer var (' + l + ')',
-          note:'Retansiyon %' + Math.round(r.value * 100) + ' ve deste '
+          note:'Kart hatırlama %' + Math.round(r.value * 100) + ' ve deste '
              + 'rahat. Bu, hız artırmak için bir İZİNDİR, bir hedef değil.' }));
       }
     });

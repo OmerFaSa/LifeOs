@@ -13,7 +13,7 @@
      Tek puan.      Yedi disiplin tek sayıya toplanmaz — toplanan sayı,
                     hangi disiplinin çöktüğünü gizler.
 
-   Ölçülemeyen kapı üçüncü bir renkle durur: ne geçilmiş ne kalınmış.
+   Ölçülemeyen basamak üçüncü bir renkle durur: ne geçilmiş ne kalınmış.
    Orada istenen şey çalışmak değil ÖLÇMEKTİR. */
 
 window.ESP = window.ESP || {};
@@ -100,7 +100,7 @@ ESP.Screens.ladder = (function(){
     const olcum = ESP.Mod.active().map(d => C().nextGate(d.id))
       .filter(g => g && g.action === 'measure');
     rows.push(K.Entry({
-      label:'Ölçülemeyen kapılar', hint:'unknown-gate',
+      label:'Ölçülemeyen basamaklar', hint:'unknown-gate',
       meta:olcum.length ? olcum.length + ' kapı' : 'yok',
       body:olcum.length
         ? K.Table({ tight:true, headers:['Disiplin', 'Kapı', ''],
@@ -420,7 +420,7 @@ ESP.Screens.ladder = (function(){
       const yol = G ? C().roadmap(S.ui.curDisc || 'lang') : null;
       const kademeler = (yol ? yol.steps : []).filter(st => st.state !== 'current')
         .map(st => G.anahtar('Kademe ' + (ESP.LEVEL_BY_RANK[st.rank] || {}).short));
-      return ['ölçülemeyen-kapılar', 'bu-merdivenin-göremediği'].concat(kademeler);
+      return ['ölçülemeyen-basamaklar', 'bu-merdivenin-göremediği'].concat(kademeler);
     },
     title:'Merdiven',
     headline(){

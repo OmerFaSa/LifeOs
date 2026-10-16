@@ -88,7 +88,7 @@ ESP.Screens.team = (function(){
         }),
 
         K.Entry({
-          label:'Kural motorunun cümlesi', hint:'rule-engine',
+          label:'Sistemin cümlesi', hint:'rule-engine',
           meta:'model olmadan',
           body:html`<p class="rulesay">${ESP.Office.ruleText(a.id, brf)}</p>`,
         }),
@@ -116,7 +116,7 @@ ESP.Screens.team = (function(){
               ${mesajlar.length
                 ? map(mesajlar.slice(-20), msgRow)
                 : html`<p class="small muted">Henüz konuşma yok.
-                    ${hazir ? '' : 'Model bağlı değil: cevaplar kural motorundan gelir.'}</p>`}
+                    ${hazir ? '' : 'Yapay zekâ bağlı değil: cevaplar sistemin hazır kurallarından gelir.'}</p>`}
             </div>
             ${raw(mentionYeri())}
             <div class="composer mt-10">
@@ -128,8 +128,8 @@ ESP.Screens.team = (function(){
         }),
 
         K.Entry({
-          label:'Brifing', hint:'brief',
-          meta:'ajanın gördüğü tek şey',
+          label:'Özet', hint:'brief',
+          meta:'uzmanın gördüğü tek şey',
           wide:true,
           body:K.Collapsible({
             title:'Ham brifing (JSON)',
@@ -184,7 +184,7 @@ ESP.Screens.team = (function(){
   return {
     id:'team',
     /* iPhone Faz 4: açık masa ve konuşma; kural cümlesi, defter ve brifing şerit. */
-    kucukVarsayilan:['kural-motorunun-cümlesi', 'bu-masanın-defteri', 'brifing'],
+    kucukVarsayilan:['sistemin-cümlesi', 'bu-masanın-defteri', 'özet'],
     title:'Danışma',
     headline(){
       const a = agent();

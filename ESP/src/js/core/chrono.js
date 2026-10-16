@@ -270,7 +270,7 @@ ESP.Chrono = (function(){
     }
     if(st.retention.cert !== 'missing' && st.retention.value < ESP.Planner.RETENTION_FLOOR){
       out.push({ tone:'danger', label:'Tarih kartları geriliyor',
-        text:'Retansiyon %' + Math.round(st.retention.value * 100)
+        text:'Kart hatırlama %' + Math.round(st.retention.value * 100)
           + ' — yeni olay eklemeden önce tekrar.' });
     }
     return out;

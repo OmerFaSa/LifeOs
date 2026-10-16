@@ -1384,8 +1384,8 @@ R.Office = (function(){
     }
 
     if(gate && !decided){
-      out.push({ score:95, topic:'Bu ayın karar kapısı',
-        why:'Ayda bir medyanın bandın neresinde olduğuna bakılır ve tek müdahale seçilir.',
+      out.push({ score:95, topic:'Bu ayın değerlendirmesi',
+        why:'Ayda bir, netlerinin ortası hedef aralığın neresinde ona bakılır ve tek bir değişiklik seçilir.',
         data:{ ay:gate.month, tytBant:gate.tyt, tytGuvenli:gate.tytSafe, aytBant:gate.ayt,
           kural:gate.note, tytMedyan:num(tyt.last3), aytMedyan:num(ayt.last3) } });
     }

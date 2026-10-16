@@ -198,7 +198,7 @@ ESP.Desk = (function(){
     if(r.due) return r.due + ' hatırlatma bugüne düştü.';
     const kapi = ESP.Curriculum.nextGate(discId);
     if(kapi) return kapi.action === 'measure'
-      ? 'Sıradaki kapı ölçülemiyor: ' + kapi.gate.label + '.'
+      ? 'Sıradaki basamak ölçülemiyor: ' + kapi.gate.label + '.'
       : 'Sıradaki kapı: ' + kapi.gate.label + '.';
     return 'Bu merdivenin bütün kapıları geçilmiş görünüyor.';
   }

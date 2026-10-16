@@ -49,7 +49,7 @@ ESP.Intellect = (function(){
       if(r.cert === 'missing') return yok;
       /* %80 retansiyon notrdur: SRS'in hedefledigi bant odur. */
       return { k:clampK(0.85 + (r.value - 0.5) * 0.6), cert:'derived',
-        why:'Retansiyon %' + Math.round(r.value * 100) + ' (' + r.n + ' karttan).' };
+        why:'Kart hatırlama %' + Math.round(r.value * 100) + ' (' + r.n + ' karttan).' };
     }
 
     if(discId === 'reading'){

@@ -23,7 +23,7 @@ ESP.HINTS = {
   /* --- dil --- */
   'srs':{ t:'Aralıklı tekrar', b:'Bir kartı tam unutmadan hemen önce sorar; aralık her doğru cevapta uzar.',
     more:'Leitner kutularının SM-2 ile yumuşatılmış hâli. Kolay bulduğun kart daha uzun süre görünmez, zorlandığın kart başa döner. Amaç tekrar sayısını azaltmak değil, aynı hatırlamayı daha az tekrarla elde etmektir. Her disiplinin destesi ayrı ölçülür — tarih destesi dil destesinden AYRI: birinin iyi olması ötekinin çöküşünü gizlememeli. Aralıklı tekrarın amacı her gün çalışmak değil, doğru günde çalışmaktır: sırası gelen kart yoksa çalışılacak kart da yoktur. Erken çalışmak aralığı kısaltır ve tekrar sayısını artırır — kazanç getirmez. Oturum başladığında liste dondurulur: cevapladığın kartın vadesi ileri gitse de kuyruktan düşmez, ilerlemeyi görürsün.' },
-  'retention':{ t:'Retansiyon', b:'Bugün sorulsa hatırlama olasılığının ortalaması. R(t) = e^(−t/S).',
+  'retention':{ t:'Kart hatırlama', b:'Bugün sorulsa hatırlama olasılığının ortalaması. R(t) = e^(−t/S).',
     more:'S kartın kendi kararlılığıdır ve her doğru cevapta büyür. Hiç çalışılmamış kart bu ortalamaya girmez: «veri yok» sıfır sayılmaz, yoksa bir gün ara vermek retansiyonu çökmüş gibi gösterirdi.' },
   'shadowing':{ t:'Shadowing', b:'Duyduğun konuşmayı birkaç kelime geriden, aynı tonlamayla tekrarlama.',
     more:'Süre ölçülür, kalite ölçülmez — sistem sesini dinlemez. Kendi işaretlediğin zorluk «tahmin» etiketiyle durur ve hiçbir skoru tek başına belirlemez.' },
@@ -102,7 +102,7 @@ ESP.HINTS = {
     more:'Sürekli yeni taslak açıp hiçbirini revize etmemek en yaygın yazı tıkanmasıdır. Oran bir hedef değil bir aynadır; Montaigne yalnızca sayıyı söyler.' },
 
   /* --- ofis --- */
-  'brief':{ t:'Brifing', b:'Ajanın gördüğü tek şey: ölçülmüş metrikler ve durum etiketleri.',
+  'brief':{ t:'Özet', b:'Uzmanın gördüğü tek şey: ölçülmüş metrikler ve durum etiketleri.',
     more:'Ham ses kaydı, tam metin taslak ve kişisel not brifinge girmez. Ham JSON\'u Danışma ekranından açabilirsin: ajanın görmediği bir şeye dayanarak konuşmadığını görmen gerekir.' },
   'rule-engine':{ t:'Kural motoru', b:'Sayıyı ve kararı üreten katman. Model yalnızca cümleye çevirir.',
     more:'Model kapalıyken ofis kapanmaz: brifing doğrudan kural cümlesine çevrilir ve ajanlar «kural motoru» rozetiyle konuşur. Rozet süs değildir; bir cümleye ne kadar güveneceğini belirler.' },
@@ -140,7 +140,7 @@ ESP.HINTS = {
   /* --- merdiven ve koç --- */
   'level':{ t:'Kademe', b:'Ölçülmüş üretimin merdivende karşıladığı basamak.',
     more:'Kademe kişiye değil ÜRETİME verilir: «Kalfa\'sın» denmez, «son 30 günün ölçülmüş üretimi Kalfa kapılarını karşılıyor» denir. Üretim durursa kademe de durur. Genel kademe disiplinlerin ortalaması değildir; ortalama ile en düşüğün arasıdır.' },
-  'unknown-gate':{ t:'Ölçülemeyen kapı', b:'Ne geçilmiş ne kalınmış: o kapı için henüz ölçüm yok.',
+  'unknown-gate':{ t:'Ölçülemeyen basamak', b:'Ne geçilmiş ne kalınmış: o basamak henüz ölçülmedi.',
     more:'Üçüncü durum sistemin dürüstlüğüdür. Ölçülmemiş bir kapıyı «kalındı» saymak da «geçildi» saymak da yalan olurdu. Burada istenen şey çalışmak değil ölçmek — ve bu sistemde ölçmek çoğu zaman işin kendisidir: retansiyonu ölçmek kart cevaplamak, temiz BPM\'i ölçmek metronomla çalmaktır.' },
   'placement':{ t:'Seviye tespiti', b:'Sıfırdan başlamayanlar için bir başlangıç TAHMİNİ.',
     more:'Sınav bir kademe VERMEZ ve hiçbir kapıyı açmaz. Verdiği şey «tahmin» etiketiyle durur; ilk ölçümler geldiğinde ölçülmüş kademe tahmini her zaman yener.' },
@@ -233,8 +233,8 @@ ESP.HINTS = {
     more:'Ajan doğrudan yazmaz — teklif eder, sen onaylarsın, uygulamayı kural motoru yapar. Bir dil modelinin verine doğrudan yazması, halüsinasyon riskini kalıcı hâle getirirdi: yanlış bir çıkarım bir cümle olarak kalmaz, bir hatırlatıcıya ya da bir hedefe dönüşürdü. Her teklif ajanın KENDİ alanındadır: Maestro hatırlatıcı kurabilir, dil ünitesi ekleyemez. Reddedilen teklif tekrar sorulmaz ama kaydı silinmez.' },
   'weekplan':{ t:'Haftalık plan', b:'Haftanın günlerine disiplin dağıtımı.',
     more:'Takvim DEĞİLDİR: «salı 19:00\'da gitar» demek sistemin işi değil. Sırayı haftalık rota verir, plan onu güne dağıtır — yeni bir karar üretmez. Saatini sen seçersin.' },
-  'ladder':{ t:'Merdiven', b:'Sıfırdan üstatlığa beş kademe ve ölçülebilir kapılar.',
-    more:'Kademe kişiye değil ÜRETİME verilir; üretim durursa kademe de durur. Merdiven ardışıktır: alttaki kapı atlanarak üsttekine geçilmez, çünkü atlanan kapı ileride üstüne kurulan her şeyi çökertir. Süre tahmini yoktur — «üç ayda usta olursun» sonuç garantisi yasağına girer.' },
+  'ladder':{ t:'Merdiven', b:'Sıfırdan üstatlığa beş kademe ve ölçülebilir basamaklar.',
+    more:'Kademe kişiye değil ÜRETİME verilir; üretim durursa kademe de durur. Merdiven ardışıktır: alttaki basamak atlanarak üsttekine geçilmez, çünkü atlanan kapı ileride üstüne kurulan her şeyi çökertir. Süre tahmini yoktur — «üç ayda usta olursun» sonuç garantisi yasağına girer.' },
   'topic':{ t:'Konu haritası', b:'Bu bölümde nelerin çalışılacağı.',
     more:'Ünite KARTA döner, konu dönmez: bir dil ünitesi on kelimeyi desteye ekler ve ilerlemesi SRS\'ten okunur; «barre akorlar» ya da «kaynak eleştirisi» ise çalışılacak bir konudur ve ölçüsü kart değildir. Bu yüzden konu işaretleri ÖLÇÜM DEĞİL BEYANDIR: hiçbir kapıyı açmaz, kademeyi değiştirmez, hiçbir hesaba girmez. Çerçeveler uydurulmadı — CEFR (2020 Companion Volume), klasik retoriğin beş kanonu, Türkçe diksiyon başlıkları, yaygın gitar müfredatı ve Adler\'in okuma düzeyleri. Kaynağı olan konuda kaynak satırı yazar.' },
 };

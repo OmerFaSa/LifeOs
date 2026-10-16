@@ -126,7 +126,7 @@ ESP.Coach = (function(){
       items:secilen, minutes:toplam, budget:butce,
       why:kapi
         ? (kapi.action === 'measure'
-            ? 'Sıradaki kapı ölçülemiyor: «' + kapi.gate.label + '». '
+            ? 'Sıradaki basamak ölçülemiyor: «' + kapi.gate.label + '». '
               + 'Bu reçete o ölçümü üretir.'
             : 'Sıradaki kapı: «' + kapi.gate.label + '». Reçete oraya çalışıyor.')
         : 'Bu merdivenin bütün kapıları geçilmiş görünüyor; reçete korumaya çalışıyor.',

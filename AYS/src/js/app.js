@@ -1629,7 +1629,7 @@ R.App = (function(){
             const s = [R.Screens.today.headline()];
             try{
               const vade = R.Calc.dueCards(R.U.todayISO()).length;
-              s.push(vade ? vade + ' tekrar kartı bugün vadeli' : 'Bugün vadeli tekrar kartı yok');
+              s.push(vade ? vade + ' tekrar kartının bugün sırası geldi' : 'Bugün sırası gelen tekrar kartı yok');
               const x = R.Ogren.sonAcilan();
               const sr = x ? R.Ogren.sirada(x.subject.id, x.topic.id) : null;
               if(sr) s.push('Öğren: ' + x.topic.name + ' — ' + sr.ad);

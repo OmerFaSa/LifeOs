@@ -106,7 +106,7 @@ SP.Screens.office = (function(){
           ${when(notes.length, () => K.Badge({ label:String(notes.length),
             tone:notes.some(n => n.tone === 'danger') ? 'danger' : 'warn' }))}
           ${SP.Office.ready(agent.id) ? K.Badge({ label:'model açık', tone:'info' })
-            : K.Badge({ label:'kural motoru', tone:'muted', icon:false })}
+            : K.Badge({ label:'hazır kurallar', tone:'muted', icon:false })}
         </div>
         ${K.Katmanli({ metin:line, sinif:'desk__line' })}
         ${when(notes.length, () => html`<div class="notes mt-10">
@@ -207,7 +207,7 @@ SP.Screens.office = (function(){
     const d = U.todayISO();
     const b = S.officeBriefings[d];
     return K.Card({
-      title:'Günün brifingi', hint:'office',
+      title:'Günün özeti', hint:'office',
       sub:U.fmtDate(d),
       badge:b ? P.sourceBadge(b.source) : K.Badge({ label:'üretilmedi', tone:'muted' }),
       body:html`

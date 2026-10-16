@@ -67,14 +67,14 @@ ESP.Screens.guide = (function(){
         label:'Merdiven', hint:'ladder',
         meta:ESP.LEVELS.length - 1 + ' kademe',
         note:'Her bölümde sıfırdan üstatlığa beş basamak ve her basamakta '
-           + 'ölçülebilir kapılar. Kademe kişiye değil ÜRETİME verilir: '
+           + 'ölçülebilir basamaklar. Kademe kişiye değil ÜRETİME verilir: '
            + 'üretim durursa kademe de durur.',
         wide:true,
         body:html`
           ${K.Table({ tight:true, headers:['Kademe', 'Ne demek'],
             rows:ESP.LEVELS.map(l => [l.short + ' · ' + l.label, l.note]) })}
-          <p class="small muted mt-8">Merdiven ardışıktır: alttaki kapı
-            atlanarak üsttekine geçilmez. Ölçülemeyen kapı üçüncü bir
+          <p class="small muted mt-8">Merdiven ardışıktır: alttaki basamak
+            atlanarak üsttekine geçilmez. Ölçülemeyen basamak üçüncü bir
             durumdur — ne geçildi ne kalındı; orada istenen şey çalışmak
             değil ölçmek.</p>`,
       }),
@@ -381,7 +381,7 @@ ESP.Screens.guide = (function(){
      Merdivenin butun esiklerinin nereden geldigi tek tabloda.
 
      Varlik sebebi tek cumle: deterministik olmak, pedagojik olarak dogru
-     olmak anlamina gelmez. "Retansiyon >= 0,75" kodda kesindir; 0,75'in
+     olmak anlamina gelmez. "Kart hatırlama >= 0,75" kodda kesindir; 0,75'in
      kendisi bu sistemin secimidir ve bunu gizlemek, bir tasarim tercihini
      bulgu gibi sunmak olurdu. */
   /* Madde 11: hedef paketlerinin tahmin tabloları ve dayanağı. «Kaynağa

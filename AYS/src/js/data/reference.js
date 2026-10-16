@@ -287,7 +287,7 @@ R.CHECKLISTS = {
     'Kart borcu ve uyku düzeni kontrol edildi.',
     'Yeni haftaya yalnız en yüksek etkili iki eksik taşındı.',
   ]},
-  monthly:{ label:'Aylık karar kapısında', items:[
+  monthly:{ label:'Aylık değerlendirmede', items:[
     'Net matrisi "gözlenen / güvenli" bantla karşılaştırıldı.',
     'Konu kapanış yüzdesi ve hata dağılımı çıkarıldı.',
     'Tek bir ana süreç müdahalesi seçildi.',

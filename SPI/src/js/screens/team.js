@@ -167,7 +167,7 @@ SP.Screens.team = (function(){
     return K.Card({
       title:a.name, sub:a.role,
       badge:SP.Office.ready(a.id) ? K.Badge({ label:'model açık', tone:'info' })
-        : K.Badge({ label:'kural motoru', tone:'muted', icon:false }),
+        : K.Badge({ label:'hazır kurallar', tone:'muted', icon:false }),
       body:chatBody(a),
       foot:html`${raw(mentionYeri())}
         <div class="quick">
@@ -181,7 +181,7 @@ SP.Screens.team = (function(){
   function scopeCard(){
     const a = current();
     return K.Card({
-      title:'Bu ajan neye bakar?',
+      title:'Bu uzman neye bakar?',
       body:html`
         ${K.Table({ tight:true, headers:['Alan', 'Kapsam'], rows:[
           ['Bakar', a.scope],
@@ -198,7 +198,7 @@ SP.Screens.team = (function(){
     const a = current();
     const b = SP.Office.brief(a.id);
     return K.Collapsible({
-      title:'Ajanın gördüğü brifing', meta:'JSON', act:'toggle-brief',
+      title:'Uzmanın gördüğü özet', meta:'JSON', act:'toggle-brief',
       open:!!S.ui.briefOpen,
       body:html`<pre class="codeblock">${JSON.stringify(b, null, 2)}</pre>
         <p class="small muted mt-8">Ajan hesap yapmaz: bütün sayılar bu brifingden gelir.
@@ -528,7 +528,7 @@ SP.Screens.team = (function(){
   return {
     id:'team',
     /* iPhone Faz 4: açık sohbet ve ajanın kartı; ajanın tanıtımı, örnek sorular ve brifing şerit. */
-    kucukVarsayilan:['bu-ajan-neye-bakar', 'sorabileceklerin', 'ajanın-gördüğü-brifing'],
+    kucukVarsayilan:['bu-uzman-neye-bakar', 'sorabileceklerin', 'uzmanın-gördüğü-özet'],
     title:'Danışma',
     subtitle(){
       const a = current();

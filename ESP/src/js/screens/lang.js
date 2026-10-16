@@ -109,7 +109,7 @@ ESP.Screens.lang = (function(){
     if(!a) return '';
     const yeni = ESP.SRS.dueCards().filter(c => c.lang === aktifDil() && !c.reps).length;
     return VT().dersKapagi({ ad:a.name, harf:a.initial, alan:disc.short, gorsel:'',
-      cumle:'Bugün ' + d.due + ' kart vadeli' + (yeni ? '; ' + yeni + '\'i hiç sorulmadı.' : '.') });
+      cumle:'Bugün ' + d.due + ' kartın sırası geldi' + (yeni ? '; ' + yeni + '\'i hiç sorulmadı.' : '.') });
   }
 
   /* 098 BAĞLAMDA KELİME: örnek cümlesinde geçen kart, cümlenin içinde. */
@@ -144,7 +144,7 @@ ESP.Screens.lang = (function(){
       }
       return [K.Entry({
         label:'Çalışma', hint:'srs',
-        meta:d.due + ' kart vadeli' + (d.overdue ? ' · ' + d.overdue + ' gecikmiş' : ''),
+        meta:d.due + ' kartın sırası geldi' + (d.overdue ? ' · ' + d.overdue + ' gecikmiş' : ''),
         /* Gecikme yoksa künye («N kart vadeli») yeter; not yalnız gecikmeyi söyler. */
         note:d.overdue ? 'En çok geciken kart ' + d.maxOverdueDays + ' gündür bekliyor.' : null,
         body:html`
@@ -394,7 +394,7 @@ ESP.Screens.lang = (function(){
 
     return [
       K.Entry({
-        label:'Retansiyon', hint:'retention',
+        label:'Kart hatırlama', hint:'retention',
         meta:d.retention.cert === 'missing' ? 'veri yok'
           : '%' + Math.round(d.retention.value * 100),
         note:d.retention.cert === 'missing'
@@ -430,7 +430,7 @@ ESP.Screens.lang = (function(){
           ${K.Notice({ tone:bant.band ? 'info' : 'warn',
             body:bant.text || bant.why })}
           ${K.Table({ tight:true,
-            headers:['Bant', { label:'Aktif kelime', num:true }, { label:'Retansiyon', num:true }, 'Ne yapabilir'],
+            headers:['Bant', { label:'Aktif kelime', num:true }, { label:'Kart hatırlama', num:true }, 'Ne yapabilir'],
             rows:ESP.CEFR.map(b => [
               b.label, U.fmtNum(b.activeWords), '%' + Math.round(b.retention * 100), b.can,
             ]) })}

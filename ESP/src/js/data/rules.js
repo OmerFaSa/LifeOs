@@ -147,7 +147,7 @@ ESP.PRIVACY = {
    "Hicbir sey yapma" demek degildir. */
 ESP.PRECEDENCE = [
   { rank:1, id:'blocked-core', label:'Tıkanmış temel',
-    note:'Retansiyon %50\'nin altına indiyse ya da bir teknik 14+ gündür ilerlemiyorsa. '
+    note:'Kart hatırlama %50\'nin altına indiyse ya da bir teknik 14+ gündür ilerlemiyorsa. '
        + 'Yeni içerik, eskiyi çökertmeden eklenmez.' },
   { rank:2, id:'deadline', label:'Zamana bağlı hedef',
     note:'Yaklaşan sunum, konser ya da sınav. Dış dünyanın takvimi iç plandan önce gelir.' },

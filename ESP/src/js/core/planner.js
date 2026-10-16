@@ -48,7 +48,7 @@ ESP.Planner = (function(){
     if(r.cert !== 'missing' && r.n >= RETENTION_MIN_CARDS && r.value < RETENTION_FLOOR){
       out.push({
         id:'retention', disc:'lang', agent:'polyglot',
-        label:'Retansiyon tabanın altında',
+        label:'Kartları hatırlama oranı düşük',
         detail:'Kartların hatırlanma olasılığı ortalaması %' + Math.round(r.value * 100)
              + ' (' + r.n + ' karttan hesaplandı; taban için en az '
              + RETENTION_MIN_CARDS + ' ölçüm gerekir). Yeni kelime eklemek bu '
@@ -65,7 +65,7 @@ ESP.Planner = (function(){
     if(rh.cert !== 'missing' && rh.n >= RETENTION_MIN_CARDS && rh.value < RETENTION_FLOOR){
       out.push({
         id:'retention-history', disc:'history', agent:'herodot',
-        label:'Tarih kartları tabanın altında',
+        label:'Tarih kartlarını hatırlama oranı düşük',
         detail:'Tarih destesinin hatırlanma olasılığı ortalaması %'
              + Math.round(rh.value * 100) + ' (' + rh.n + ' karttan). '
              + 'Kronolojiye yeni olay eklemek bu tabanı daha da düşürür.',
@@ -271,11 +271,11 @@ ESP.Planner = (function(){
         rank:5, id:'expand:' + d.id, agent:d.agent, disc:d.id,
         title:kapi ? (d.label + ' — ' + kapi.title)
           : (d.label + ' bu hafta en az çalışılan alan'),
-        detail:taban + ' Temel sağlam; genişleme sırası burada.'
+        detail:taban + ' Temel sağlam; şimdi genişletme zamanı.'
           + (kapi ? ' ' + kapi.why : ''),
         route:d.route, tab:null,
         why:kapi && kapi.action === 'measure'
-          ? 'Yeni içerik: bu kapı henüz ölçülmedi, istenen şey çalışmak değil ölçmek.'
+          ? 'Yeni içerik: bu basamak henüz ölçülmedi; önce kısa bir ölçüm yap.'
           : 'Yeni içerik: temel sağlamken genişleme sistemin asıl amacıdır.',
       };
     }

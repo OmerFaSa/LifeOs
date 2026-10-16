@@ -65,7 +65,7 @@ ESP.Screens.onaylar = (function(){
     const supheli = S.ui.hkmDoubts || [];
     if(!liste.length && !supheli.length) return '';
     return K.Entry({ label:'HKM teklifi', hint:'hkm',
-      meta:liste.length ? liste.length + ' teklif'
+      meta:liste.length ? liste.length + ' öneri'
         : supheli.length + ' belirsiz', wide:true,
       body:html`
         ${/* Uygulama yarida kalmis teklif: uydurmak yerine BILMEDIGIMIZI
@@ -195,7 +195,7 @@ ESP.Screens.onaylar = (function(){
   function AjanKart(){
     const l = ESP.Plans ? ESP.Plans.all() : [];
     if(!l.length) return '';
-    return K.Entry({ label:'Ajan teklifleri', hint:'proposal', meta:l.length + ' teklif', wide:true,
+    return K.Entry({ label:'Uzman önerileri', hint:'proposal', meta:l.length + ' öneri', wide:true,
       body:ESP.Parts.proposalList(l, 'Bekleyen teklif yok.') });
   }
 

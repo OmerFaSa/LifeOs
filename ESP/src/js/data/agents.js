@@ -54,7 +54,7 @@ ESP.AGENTS = [
     notScope:'Felsefi tez tartışmaz, müzik teorisi konuşmaz, üslup düzeltmez.',
     brief:'langBrief',
     opening:'Kelimeyi öğrendiğin gün değil, unutmaya başladığın gün önemli. '
-          + 'Retansiyon eğrine bakıyorum.',
+          + 'Kart hatırlama eğrisine bakıyorum.',
     redirect:'Bu bir argüman sorusu; Socrates\'e bağlıyorum.',
     owns:['lang'] },
 
@@ -201,7 +201,7 @@ ESP.AGENT_BY_ID = ESP.AGENTS.reduce(function(m, a){ m[a.id] = a; return m; }, {}
 ESP.AGENDA_TYPES = [
   { id:'blocked', label:'Tıkanmış temel',
     lead:'Bir disiplin 14+ gündür ilerlemiyor. Sebebini ve çıkışı konuşuyoruz.' },
-  { id:'retention', label:'Retansiyon düşüşü',
+  { id:'retention', label:'Kart hatırlama düşüşü',
     lead:'Aralıklı tekrar geriliyor. Yeni içerik eklemeden önce bu kapanmalı.' },
   { id:'balance', label:'Dağılım dengesizliği',
     lead:'Haftanın pratiği bir disipline yığılmış, biri hiç açılmamış.' },
@@ -209,9 +209,9 @@ ESP.AGENDA_TYPES = [
     lead:'Okunan çok, bağlanan az. Not yığını sermaye değildir.' },
   { id:'deadline', label:'Yaklaşan hedef',
     lead:'Takvimde tarihi olan bir hedef var; plan ona göre daralıyor.' },
-  { id:'gate', label:'Kapıda bekleyen kademe',
+  { id:'gate', label:'Sıradaki kademe',
     lead:'Bir disiplinde merdivenin bir sonraki kapısına çok az kaldı ya da '
-       + 'kapı ölçülemiyor.' },
+       + 'basamak ölçülemiyor.' },
   { id:'coverage', label:'Tarihte kör nokta',
     lead:'Kronolojide kapsanmayan dönem, bölge ya da alan var.' },
   { id:'review', label:'Haftalık gözden geçirme',

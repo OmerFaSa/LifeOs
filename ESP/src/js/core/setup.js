@@ -82,7 +82,7 @@ ESP.Setup = (function(){
             <li><b>Aralıklı tekrar</b> — kart eklediğinde retansiyon ölçülmeye başlar</li>
             <li><b>Haftalık rota</b> — hiç açılmayan disiplin öne alınır</li>
             <li><b>Dokuz ajanlı ofis</b> — her masa yalnızca kendi ölçümüne bakar</li>
-            <li><b>Merdiven</b> — her bölümde sıfırdan üstatlığa ölçülebilir kapılar</li>
+            <li><b>Merdiven</b> — her bölümde sıfırdan üstatlığa ölçülebilir basamaklar</li>
           </ul>
         </div>
 
@@ -125,7 +125,7 @@ ESP.Setup = (function(){
             input:K.Input({ id:'su-instrument', value:p.instrument || 'gitar',
               placeholder:'gitar' }) })}
           ${K.Field({ label:'Günlük pratik tabanı (dakika)',
-            hint:'hedef değil ölçüt: rota bunu taban alır',
+            hint:'alt sınır, hedef değil: plan bunu en az sayar',
             input:K.Input({ id:'su-minutes', type:'number', numeric:true,
               min:10, max:600, value:p.dailyMinutes || 60, placeholder:'60' }) })}
         </div>

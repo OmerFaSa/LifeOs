@@ -25,7 +25,7 @@
         const G = window.LIFEOS.Gizle;
         const var_ = G.bolumler(d).map(b => b.anahtar);
         const kucuk = ESP.Screens.ladder.kucukVarsayilan;
-        expect(kucuk.indexOf('ölçülemeyen-kapılar') >= 0).toBe(true);
+        expect(kucuk.indexOf('ölçülemeyen-basamaklar') >= 0).toBe(true);
         expect(kucuk.indexOf('bu-merdivenin-göremediği') >= 0).toBe(true);
         kucuk.forEach(a => expect(var_.indexOf(a) >= 0).toBe(true));
         const yol = ESP.Curriculum.roadmap('lang');

@@ -795,7 +795,7 @@ ESP.Screens.today = (function(){
        dakikası» halkasında ve oturum tablosunda; seri üst satırda zaten var
        (sadelik, 2026-10-01: aynı sayı dört yerde yazıyordu). */
     return K.Kutu({ ad:'Bekleyen iş', yuva:'bugün', bitisik:true, govde:html`<div class="ozet">
-      ${hucre('Vadeli kart', d.due, '', 'tekrar bekliyor')}
+      ${hucre('Sırası gelen kart', d.due, '', 'tekrar bekliyor')}
       ${hucre('Açık disiplin', ESP.Mod.active().length, '', 'Çalışma’da')}
     </div>` });
   }
@@ -810,7 +810,7 @@ ESP.Screens.today = (function(){
     const ic = V.dakikaHalkasi({ hedef, toplam:rows.reduce((a, s) => a + (s.minutes || 0), 0),
       satirlar:ESP.Mod.active().slice(0, 4).map(d => ({ ad:(ESP.DISCIPLINE_BY_ID[d.id || d] || {}).short || (d.id || d),
         dk:M.minutesOf(gun(), d.id || d) })) });
-    return ic ? K.Kutu({ ad:'Günün dakikası', yuva:'ölçüt ' + hedef + ' dk', class:'vkutu', govde:raw(ic) }) : '';
+    return ic ? K.Kutu({ ad:'Günün dakikası', yuva:'günlük en az ' + hedef + ' dk', class:'vkutu', govde:raw(ic) }) : '';
   }
 
   /* DÖNEN DURUM (kullanıcı, 2026-10-02: «çok daha az yer kaplayan küçük
@@ -831,8 +831,8 @@ ESP.Screens.today = (function(){
     const bugun = [];
     bugun.push(rows.length
       ? { ust:'Günün dakikası', sayi:sayi({ deger:toplam, birim:'dk', kesinlik:'measured' }), cumle:'çalışıldı.',
-          vurgu:rows.length + ' oturum' + (hedef ? ' · ölçüt ' + hedef + ' dk' : '') + '.', sistem:'esp', dugme:git('Oturumlar', 'gun') }
-      : { ust:'Günün dakikası', cumle:'Bugün oturum yok.', vurgu:hedef ? 'Ölçüt ' + hedef + ' dk.' : 'İlk oturumla başlar.', sistem:'esp', dugme:git('Oturum gir', 'gun') });
+          vurgu:rows.length + ' oturum' + (hedef ? ' · günlük en az ' + hedef + ' dk' : '') + '.', sistem:'esp', dugme:git('Oturumlar', 'gun') }
+      : { ust:'Günün dakikası', cumle:'Bugün oturum yok.', vurgu:hedef ? 'Günlük en az ' + hedef + ' dk.' : 'İlk oturumla başlar.', sistem:'esp', dugme:git('Oturum gir', 'gun') });
     const seri = M.streak();
     bugun.push({ ust:'Seri', sayi:sayi({ deger:seri, birim:'gün', kesinlik:'computed', formul:'asgari günün tutulduğu ardışık gün' }),
       cumle:'seri.', vurgu:'Asgari gün seriyi sürdürür.', sistem:'esp' });
@@ -841,8 +841,8 @@ ESP.Screens.today = (function(){
     const d = ESP.SRS.deckStatus();
     calisma.push(d.due
       ? { ust:'Tekrar', sayi:sayi({ deger:d.due, birim:'kart', kesinlik:'computed', formul:'vadesi bugün ya da geçmiş kart' }),
-          cumle:'bekliyor.', vurgu:'Vadeli kelime kartları.', sistem:'esp', dugme:git('Çalış', 'lang') }
-      : { ust:'Tekrar', cumle:'Vadeli kart yok.', vurgu:'Deste bugün temiz.', sistem:'esp' });
+          cumle:'bekliyor.', vurgu:'Sırası gelen kelime kartları.', sistem:'esp', dugme:git('Çalış', 'lang') }
+      : { ust:'Tekrar', cumle:'Sırası gelen kart yok.', vurgu:'Deste bugün temiz.', sistem:'esp' });
     calisma.push({ ust:'Disiplinler', sayi:sayi({ deger:ESP.Mod.active().length, kesinlik:'measured' }), cumle:'açık disiplin.',
       vurgu:'Çalışma çekmecesinde.', sistem:'esp' });
 

@@ -78,7 +78,7 @@
       ESP.S.cards = [kart(1), kart(2, { reps:2, box:3, interval:3, due:ESP.U.todayISO() })];
       ESP.S.ui.reviewQueue = null;
       let k = dom2(await ESP.Screens.lang.render());
-      expect(k.querySelector('[data-oz="101"]').textContent).toContain('vadeli');
+      expect(k.querySelector('[data-oz="101"]').textContent).toContain('sırası geldi');
       ESP.S.ui.reviewQueue = { ids:['vk1', 'vk2'], pos:0, shown:false, correct:0, again:0, dagilim:{}, basladi:Date.now() };
       k = dom2(await ESP.Screens.lang.render());
       expect(k.querySelector('[data-oz="089"] [data-act="reveal-card"]')).toBeTruthy();

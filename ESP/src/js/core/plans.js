@@ -56,7 +56,7 @@ ESP.Plans = (function(){
     { id:'focus', level:'kucuk', label:'Odağı değiştir', scope:'coach',
       note:'Eşit skorlu iki iş çıkarsa hangisinin öne geçeceğini değiştirir.' },
     { id:'base', level:'orta', label:'Günlük tabanı değiştir', scope:'coach',
-      note:'Reçetenin sığdığı dakika. Hedef değil ölçüt.' },
+      note:'Planın sığdığı dakika: alt sınır, hedef değil.' },
     /* Bölüm açma–kapama (core/modules.js). Orta seviye: bir disiplinin
        bütün ekranlarını, masasını ve denge hesabını etkiler. Veri silinmez. */
     { id:'bolum', level:'orta', label:'Bölümü aç / kapat', scope:'coach',
@@ -131,7 +131,7 @@ ESP.Plans = (function(){
          içindir. */
       if(kapi && kapi.action === 'measure'){
         ekle('reminder', d.label + ': «' + kapi.gate.label + '» ölçülsün',
-          'Bu kapı ölçülemiyor; ölçüm yapılmadan kademe kanıtlanmaz.',
+          'Bu basamak ölçülemiyor; ölçüm yapılmadan kademe kanıtlanmaz.',
           { key:'gate', text:kapi.gate.label + ' için ölçüm gir',
             due:U.iso(U.addDays(U.parse(bugun), 1)), repeat:'none' });
       }

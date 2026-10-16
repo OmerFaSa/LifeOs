@@ -15073,7 +15073,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'49577612', at:'2026-10-16 10:05', dirty:true };
+SP.BUILD = { id:'c2c3ca3d', at:'2026-10-16 10:21', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -19371,7 +19371,7 @@ window.LIFEOS = window.LIFEOS || {};
     if(durum.acik) return '';
     return '<div class="modelsiz" data-oz="139" role="status">'
       + '<b class="modelsiz__bas">Dil modeli kapalı</b>'
-      + '<span class="modelsiz__metin">Ajanlar hazır cümlelerle konuşuyor; sayılar ve kararlar aynen duruyor.'
+      + '<span class="modelsiz__metin">Uzmanlar hazır cümlelerle konuşuyor; sayılar ve kararlar aynen duruyor.'
       + (durum.neden ? ' Neden: ' + kac(durum.neden) + '.' : '') + '</span></div>';
   }
 
@@ -59757,7 +59757,7 @@ SP.Parts = (function(){
   function sourceBadge(source){
     return source === 'model'
       ? K.Badge({ label:'model', tone:'info' })
-      : K.Badge({ label:'kural motoru', tone:'muted', icon:false });
+      : K.Badge({ label:'hazır kurallar', tone:'muted', icon:false });
   }
 
   /* Besin ogesi hucresi — hedefe gore doluluk.
@@ -72132,7 +72132,7 @@ SP.Screens.basket = (function(){
 
           <div class="span-5"><div class="stack">
             ${K.Card({ title:'Sedef\'in notu', hint:'budget-rank',
-              badge:K.Badge({ label:'kural motoru', tone:'muted', icon:false }),
+              badge:K.Badge({ label:'hazır kurallar', tone:'muted', icon:false }),
               body:html`<p class="small">${st.text}</p>`,
               foot:K.Button({ label:'Sedef\'e sor', size:'sm',
                 act:'ask-agent', data:{ 'data-agent':'money' } }) })}
@@ -73213,7 +73213,7 @@ SP.Screens.office = (function(){
           ${when(notes.length, () => K.Badge({ label:String(notes.length),
             tone:notes.some(n => n.tone === 'danger') ? 'danger' : 'warn' }))}
           ${SP.Office.ready(agent.id) ? K.Badge({ label:'model açık', tone:'info' })
-            : K.Badge({ label:'kural motoru', tone:'muted', icon:false })}
+            : K.Badge({ label:'hazır kurallar', tone:'muted', icon:false })}
         </div>
         ${K.Katmanli({ metin:line, sinif:'desk__line' })}
         ${when(notes.length, () => html`<div class="notes mt-10">
@@ -73314,7 +73314,7 @@ SP.Screens.office = (function(){
     const d = U.todayISO();
     const b = S.officeBriefings[d];
     return K.Card({
-      title:'Günün brifingi', hint:'office',
+      title:'Günün özeti', hint:'office',
       sub:U.fmtDate(d),
       badge:b ? P.sourceBadge(b.source) : K.Badge({ label:'üretilmedi', tone:'muted' }),
       body:html`
@@ -73727,7 +73727,7 @@ SP.Screens.team = (function(){
     return K.Card({
       title:a.name, sub:a.role,
       badge:SP.Office.ready(a.id) ? K.Badge({ label:'model açık', tone:'info' })
-        : K.Badge({ label:'kural motoru', tone:'muted', icon:false }),
+        : K.Badge({ label:'hazır kurallar', tone:'muted', icon:false }),
       body:chatBody(a),
       foot:html`${raw(mentionYeri())}
         <div class="quick">
@@ -73741,7 +73741,7 @@ SP.Screens.team = (function(){
   function scopeCard(){
     const a = current();
     return K.Card({
-      title:'Bu ajan neye bakar?',
+      title:'Bu uzman neye bakar?',
       body:html`
         ${K.Table({ tight:true, headers:['Alan', 'Kapsam'], rows:[
           ['Bakar', a.scope],
@@ -73758,7 +73758,7 @@ SP.Screens.team = (function(){
     const a = current();
     const b = SP.Office.brief(a.id);
     return K.Collapsible({
-      title:'Ajanın gördüğü brifing', meta:'JSON', act:'toggle-brief',
+      title:'Uzmanın gördüğü özet', meta:'JSON', act:'toggle-brief',
       open:!!S.ui.briefOpen,
       body:html`<pre class="codeblock">${JSON.stringify(b, null, 2)}</pre>
         <p class="small muted mt-8">Ajan hesap yapmaz: bütün sayılar bu brifingden gelir.
@@ -74088,7 +74088,7 @@ SP.Screens.team = (function(){
   return {
     id:'team',
     /* iPhone Faz 4: açık sohbet ve ajanın kartı; ajanın tanıtımı, örnek sorular ve brifing şerit. */
-    kucukVarsayilan:['bu-ajan-neye-bakar', 'sorabileceklerin', 'ajanın-gördüğü-brifing'],
+    kucukVarsayilan:['bu-uzman-neye-bakar', 'sorabileceklerin', 'uzmanın-gördüğü-özet'],
     title:'Danışma',
     subtitle(){
       const a = current();
