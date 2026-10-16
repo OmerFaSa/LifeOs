@@ -17,6 +17,15 @@
       expect(r.rows[0].minutes).toBe(45);
     });
 
+    /* Kolay LifeOS Faz 0 bulgusu (2026-10-16): en dogal cumle «45 dk ingilizce»
+       anlasilmiyordu; yalniz «ingilizce çalıştım» taniniyordu. */
+    it('yalniz dil adi da dil oturumudur: «45 dk ingilizce», «20 dakika Almanca»', () => {
+      ['45 dk ingilizce', '20 dakika Almanca', '30 dk fransızca', '15 dk ispanyolca'].forEach(c => {
+        const r = P.parseSession(c);
+        expect([c, r.rows.length, r.rows[0] && r.rows[0].disc]).toEqual([c, 1, 'lang']);
+      });
+    });
+
     it('«ve» ile ayrilan iki cumle IKI oturum uretir', () => {
       const r = P.parseSession('45 dakika gitar çalıştım ve 20 dakika kelime tekrarı yaptım');
       expect(r.rows.length).toBe(2);

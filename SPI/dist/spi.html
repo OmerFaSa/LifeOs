@@ -12890,6 +12890,19 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .tekgun--saatsiz .tekgun__saat{ display:none; }
 @media (max-width:480px){ .tekgun--saatsiz .tekgun__is{ grid-template-columns:10px minmax(0,1fr) 16px; } }
 
+/* ==== css/pusula.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/pusula.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* PUSULA — iki sayı tek satırda (brand/ortak/pusula.js). Tek kaynak; üç
+   arayüze `tools/ortak.py --yay` ile kopyalanır. Yargısız: renk yok. */
+.pusula{ display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 18px; padding:12px 16px; margin-bottom:14px;
+  border-radius:14px; background:var(--surface); box-shadow:inset 0 0 0 1px var(--border); font-size:13.5px; color:var(--text); }
+.pusula__ad{ font-size:12px; font-weight:650; color:var(--text-2); letter-spacing:.02em; }
+.pusula__s b{ font-variant-numeric:tabular-nums; }
+.pusula__s small{ color:var(--text-2); font-size:12px; }
+.pusula__h{ margin-left:4px; }
+
 /* ==== css/sorukart.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/sorukart.css içine yazılır; burası bir sonraki
@@ -15119,7 +15132,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'4cac9fb2', at:'2026-10-16 13:35', dirty:true };
+SP.BUILD = { id:'37b4b56e', at:'2026-10-16 15:14', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -29328,6 +29341,100 @@ window.LIFEOS.TEKGUN = (function(){
 
   return { kur, parca, kartHtml, birlestir, tazele, git, kuruluMu:() => !!ayar,
     _ortam:ortam, _sifirla, _onbellek:v => { onbellek = v; } };
+})();
+
+/* ==== js/core/pusula.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/pusula.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* PUSULA — Kolay LifeOS planının iki sayısı (belgeler/ekip/KOLAY-PLANI.md §1).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/pusula.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Biçimi `pusula.css`.
+   ==================================================================
+
+   P1 · Yönetim süresi: günde uygulamada etkileşimle geçen dakika. Kaynağı
+        modülün var olan sürtünme ölçerinin gün kaydıdır (core/friction.js,
+        `S.usage.days[gün].adminMs`): uygulama görünürken ve son bir dakikada
+        etkileşim varken duvar saati. YALNIZ kullanım kaydı olan gün sayılır;
+        kaydı olmayan gün «0 dk» değildir (Faz 0 bulgusu).
+        Öğrenme ekranlarında geçen süre de bu sayıya girer (ölçer ekranı
+        ayırmaz); plan bunu söyler, sayı yön içindir.
+   P2 · Veri doluluğu: son PENCERE gün içinde «girildi» sayılan günlerin
+        oranı. Ne «girildi» sayılır, modül KENDİ kuralıyla söyler. Payda
+        yalnız ilk etkinlikten bu yana geçen günlerdir: henüz kullanılmayan
+        gün eksik sayılmaz.
+
+   Sözler:
+     1. SAYILAR ÖLÇÜLÜR (AGENTS §1.2). Ölçüm yoksa sayı yok, «veri yok».
+     2. HEDEF YAZILIR, YARGI YOK. «Hedef ≤ 2 dk · ≥ %90» yanında durur;
+        renk ya da uyarı yoktur — pusula yön gösterir, azarlamaz.
+     3. MODÜL ONSUZ DA ÇALIŞIR. Kurulmadıysa satır boş. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+window.LIFEOS.PUSULA = (function(){
+  'use strict';
+
+  const PENCERE = 14;
+  const HEDEF = { p1:2, p2:0.9 };
+  const ortam = { simdi:() => new Date() };
+  let ayar = null;   // { modul, kullanim() → { iso:{ adminMs } }, girildi(iso) → bool, ilkGun() → iso|null }
+
+  function iso(d){
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function gunOnce(n){ const d = ortam.simdi(); d.setDate(d.getDate() - n); return iso(d); }
+
+  /* SAF sayılabilir hâl: { p1:{ dk, gun }|null, p2:{ oran, girilen, gun }|null } */
+  function olc(){
+    if(!ayar) return null;
+    let p1 = null, p2 = null;
+    try{
+      const k = (ayar.kullanim && ayar.kullanim()) || {};
+      let ms = 0, gun = 0;
+      for(let i = 0; i < PENCERE; i++){
+        const g = k[gunOnce(i)];
+        const v = g ? Number(g.adminMs) : NaN;
+        if(isFinite(v) && v >= 0){ ms += v; gun++; }
+      }
+      if(gun > 0) p1 = { dk:Math.round(ms / 60000 / gun), gun };
+    }catch(e){ p1 = null; }
+    try{
+      const ilk = ayar.ilkGun ? ayar.ilkGun() : null;
+      const bugun = iso(ortam.simdi());
+      let gun = 0, girilen = 0;
+      for(let i = 0; i < PENCERE; i++){
+        const t = gunOnce(i);
+        if(ilk && t < ilk) break;
+        if(!ilk) break;
+        gun++;
+        if(ayar.girildi(t)) girilen++;
+      }
+      /* Bugün henüz bitmedi: girilmediyse paydaya katılmaz (sabah sıfır görünmez). */
+      if(gun && !ayar.girildi(bugun)) gun--;
+      if(gun > 0) p2 = { oran:girilen / gun, girilen:Math.min(girilen, gun), gun };
+    }catch(e){ p2 = null; }
+    return { p1, p2, hedef:HEDEF, pencere:PENCERE };
+  }
+
+  function satirHtml(){
+    const o = olc();
+    if(!o) return '';
+    const p1 = o.p1 ? '<b>' + o.p1.dk + ' dk/gün</b> <small>(' + o.p1.gun + ' günden ölçüldü)</small>' : '<b>veri yok</b>';
+    const p2 = o.p2 ? '<b>%' + Math.round(o.p2.oran * 100) + '</b> <small>(' + o.p2.gun + ' günün ' + o.p2.girilen + '’i)</small>' : '<b>veri yok</b>';
+    return '<div class="pusula" data-pusula role="group" aria-label="Pusula">'
+      + '<span class="pusula__ad">Pusula</span>'
+      + '<span class="pusula__s">Yönetim ' + p1 + ' <small class="pusula__h">hedef ≤ ' + HEDEF.p1 + ' dk</small></span>'
+      + '<span class="pusula__s">Doluluk ' + p2 + ' <small class="pusula__h">hedef ≥ %' + Math.round(HEDEF.p2 * 100) + '</small></span>'
+      + '</div>';
+  }
+
+  function kur(o){ ayar = Object.assign({ modul:'' }, o || {}); }
+  function _sifirla(){ ayar = null; }
+
+  return { kur, olc, satirHtml, PENCERE, HEDEF, kuruluMu:() => !!ayar, _ortam:ortam, _sifirla, _ayar:() => ayar };
 })();
 
 /* ==== js/core/sorukart.js ==== */
@@ -76487,8 +76594,9 @@ SP.Screens.guide = (function(){
   }
 
   async function render(){
-    return String(K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) }));
+    /* Pusula (KOLAY-PLANI §1) sayfanın başında. */
+    return String(html`${raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '')}${K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}`);
   }
 
   /* Başka yerden istenen bölüm (komut paletinin «Veri»si gibi) çizimden
@@ -78965,6 +79073,18 @@ SP.App = (function(){
           cekmeceler:() => SECTIONS.filter(s => s.views.length).map(s => ({ id:s.id, rota:s.views[0].route })) });
       }
 
+      /* PUSULA (brand/ortak/pusula.js; KOLAY-PLANI §1): P1 sürtünme ölçerinden,
+         P2 «girildi» kuralı bu modülün. */
+      if(window.LIFEOS && window.LIFEOS.PUSULA && SP.Friction){
+        const girildi = t => { const v = SP.S.vitals[t]; const olcum = !!v && Object.keys(v).some(k => k !== 'date' && v[k] != null && v[k] !== '');
+          return olcum || ((SP.S.meals || {})[t] || []).length > 0; };
+        window.LIFEOS.PUSULA.kur({ modul:'spi', kullanim:() => (SP.S.usage && SP.S.usage.days) || {}, girildi,
+          ilkGun:() => {
+            const l = Object.keys(Object.assign({}, SP.S.vitals, SP.S.meals) || {}).filter(girildi)
+              .concat(Object.keys((SP.S.usage && SP.S.usage.days) || {})).sort();
+            return l[0] || null;
+          } });
+      }
       /* TEK GÜN (brand/ortak/tekgun.js): bugünün blokları SPİ'in KENDİ
          kuralıyla; öteki modüller hesap sunucusundan (sunucu sözü 22). */
       if(window.LIFEOS && window.LIFEOS.TEKGUN){

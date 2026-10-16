@@ -497,7 +497,9 @@ ESP.Screens.guide = (function(){
   const GOVDE = { kullanim:usageRows, model:modelRows, veri:dataRows, sinirlar:limitRows, kanit:evidenceRows };
 
   function render(){
+    /* Pusula (KOLAY-PLANI §1) sayfanın başında. */
     return K.Grid(html`
+      ${K.Span(12, html`${raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '')}`)}
       ${K.Span(12, ESP.Parts.bolumler(null, { act:'guide-tab', aria:'Rehber bölümleri', tabs:TABS, govde:GOVDE }))}`);
   }
 

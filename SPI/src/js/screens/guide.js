@@ -575,8 +575,9 @@ SP.Screens.guide = (function(){
   }
 
   async function render(){
-    return String(K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
-      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) }));
+    /* Pusula (KOLAY-PLANI §1) sayfanın başında. */
+    return String(html`${raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '')}${K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
+      bolumler:TABS.map(t => ({ id:t.id, ad:t.label, govde:govde(t) })) })}`);
   }
 
   /* Başka yerden istenen bölüm (komut paletinin «Veri»si gibi) çizimden

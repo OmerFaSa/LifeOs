@@ -295,6 +295,10 @@ DOSYALAR = {
     "tekgun.js":       "js/core",
     "tekgun.css":      "css",
     "tekgun.test.js":  "tests",
+    # PUSULA — Kolay LifeOS planinin iki sayisi (KOLAY-PLANI §1, Faz 0, 2026-10-16).
+    "pusula.js":       "js/core",
+    "pusula.css":      "css",
+    "pusula.test.js":  "tests",
     # SORU KARTI — Bugun'deki «Bir soru», uc arayuzde ayni sade kart (2026-10-16).
     "sorukart.js":    "js/core",
     "sorukart.css":   "css",

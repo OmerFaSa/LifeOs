@@ -1681,6 +1681,18 @@ R.App = (function(){
           cekmeceler:() => NAV.filter(g => (g.items || []).length).map(g => ({ id:g.id, rota:g.items[0].id })) });
       }
 
+      /* PUSULA (brand/ortak/pusula.js; KOLAY-PLANI §1): P1 sürtünme ölçerinden,
+         P2 «girildi» kuralı bu modülün. */
+      if(window.LIFEOS && window.LIFEOS.PUSULA && R.Friction){
+        const girildi = t => { const d = R.S.days[t]; return !!d && (R.Calc.gunSorusu(d) > 0 || d.sleepHours != null
+          || (d.blocks || []).some(b => b.status && b.status !== 'pending')); };
+        window.LIFEOS.PUSULA.kur({ modul:'ays', kullanim:() => (R.S.usage && R.S.usage.days) || {}, girildi,
+          ilkGun:() => {
+            const l = Object.keys(R.S.days || {}).filter(girildi)
+              .concat(Object.keys((R.S.usage && R.S.usage.days) || {})).sort();
+            return l[0] || null;
+          } });
+      }
       /* TEK GÜN (brand/ortak/tekgun.js): bugünün blokları AYS'in KENDİ
          kuralıyla; öteki modüller hesap sunucusundan (sunucu sözü 22). */
       if(window.LIFEOS && window.LIFEOS.TEKGUN){

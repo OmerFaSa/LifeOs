@@ -803,7 +803,7 @@ R.Screens.guide = (function(){
   }
 
   async function render(){
-    return String(html`<div id="pane-guide">${K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
+    return String(html`<div id="pane-guide">${raw(window.LIFEOS && window.LIFEOS.PUSULA ? window.LIFEOS.PUSULA.satirHtml() : '')}${K.SayfaBolumleri({ act:'guide-tab', aria:'Rehber bölümleri',
       bolumler:GRUPLAR.map(g => ({ id:g.id, ad:g.label, govde:html`${map(g.ic, id => govde({ id }))}` })) })}</div>`);
   }
 

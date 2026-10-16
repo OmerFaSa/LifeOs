@@ -32,7 +32,11 @@ ESP.Parse = (function(){
   const ALIASES = {
     lang:['dil çalıştım', 'kelime çalıştım', 'shadowing yaptım', 'shadowing',
       'kart çözdüm', 'tekrar yaptım', 'ingilizce çalıştım', 'almanca çalıştım',
-      'fransızca çalıştım', 'dil', 'kelime'],
+      'fransızca çalıştım', 'dil', 'kelime',
+      /* Kolay LifeOS Faz 0 (2026-10-16): yalniz dil adi da dil oturumudur
+         («45 dk ingilizce»); en dogal cumle duşuyordu. */
+      'ingilizce', 'almanca', 'fransızca', 'ispanyolca', 'italyanca', 'rusça',
+      'arapça', 'japonca', 'korece', 'çince', 'portekizce'],
     philo:['felsefe okudum', 'felsefe çalıştım', 'tez yazdım', 'argüman kurdum',
       'primer metin okudum', 'felsefe', 'argüman', 'tez'],
     music:['gitar çalıştım', 'gitar çaldım', 'metronomla çalıştım', 'gam çalıştım',

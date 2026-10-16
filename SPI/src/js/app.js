@@ -1628,6 +1628,18 @@ SP.App = (function(){
           cekmeceler:() => SECTIONS.filter(s => s.views.length).map(s => ({ id:s.id, rota:s.views[0].route })) });
       }
 
+      /* PUSULA (brand/ortak/pusula.js; KOLAY-PLANI §1): P1 sürtünme ölçerinden,
+         P2 «girildi» kuralı bu modülün. */
+      if(window.LIFEOS && window.LIFEOS.PUSULA && SP.Friction){
+        const girildi = t => { const v = SP.S.vitals[t]; const olcum = !!v && Object.keys(v).some(k => k !== 'date' && v[k] != null && v[k] !== '');
+          return olcum || ((SP.S.meals || {})[t] || []).length > 0; };
+        window.LIFEOS.PUSULA.kur({ modul:'spi', kullanim:() => (SP.S.usage && SP.S.usage.days) || {}, girildi,
+          ilkGun:() => {
+            const l = Object.keys(Object.assign({}, SP.S.vitals, SP.S.meals) || {}).filter(girildi)
+              .concat(Object.keys((SP.S.usage && SP.S.usage.days) || {})).sort();
+            return l[0] || null;
+          } });
+      }
       /* TEK GÜN (brand/ortak/tekgun.js): bugünün blokları SPİ'in KENDİ
          kuralıyla; öteki modüller hesap sunucusundan (sunucu sözü 22). */
       if(window.LIFEOS && window.LIFEOS.TEKGUN){

@@ -1795,6 +1795,17 @@ ESP.App = (function(){
           ornekler:['45 dk gitar, 20 dakika kelime', '30 dk felsefe okuması', '20 dakika kelime'] });
       }
 
+      /* PUSULA (brand/ortak/pusula.js; KOLAY-PLANI §1): P1 sürtünme ölçerinden,
+         P2 «girildi» kuralı bu modülün. */
+      if(window.LIFEOS && window.LIFEOS.PUSULA && ESP.Friction){
+        const girildi = t => (((ESP.S.days[t] || {}).sessions) || []).length > 0;
+        window.LIFEOS.PUSULA.kur({ modul:'esp', kullanim:() => (ESP.S.usage && ESP.S.usage.days) || {}, girildi,
+          ilkGun:() => {
+            const l = Object.keys(ESP.S.days || {}).filter(girildi)
+              .concat(Object.keys((ESP.S.usage && ESP.S.usage.days) || {})).sort();
+            return l[0] || null;
+          } });
+      }
       /* TEK GÜN (brand/ortak/tekgun.js): bugünün blokları ESP'in KENDİ
          kuralıyla; öteki modüller hesap sunucusundan (sunucu sözü 22). */
       if(window.LIFEOS && window.LIFEOS.TEKGUN){

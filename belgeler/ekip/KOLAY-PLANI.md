@@ -241,8 +241,8 @@ korunur ama kolaylık fazlarının arkasına geçer; simülatör yapıldı.
 |---|---|---|---|
 | Tek gün (Otopilot 1) | yapıldı | `4cac9fb2` | Bugün'de, öteki modülden iş gelince görünür |
 | Gelecek simülatörü | yapıldı | `98f3e6be` | AYS Analiz › Gelecek; ufuk ≤ 3× ölçülen süre |
-| 0 · Pusula | sırada | — | başlangıç değerleri buraya |
-| 1 · Günü kapat | bekliyor | — | |
+| 0 · Pusula | yapıldı | (bu commit) | başlangıç değerleri aşağıda; uygulamada Ayarlar › Genel'de pusula satırı |
+| 1 · Günü kapat | sırada | — | |
 | 2 · Basit görünüm | bekliyor | — | |
 | 3 · Telefonda tek dokunuş | bekliyor | — | |
 | 4 · Otopilot 2–3 | bekliyor | — | |
@@ -251,10 +251,36 @@ korunur ama kolaylık fazlarının arkasına geçer; simülatör yapıldı.
 | 7 · Görünmez giriş, hayat pusulası | bekliyor | — | |
 | 8 · Haftalık değerlendirme | bekliyor | — | |
 
+### Faz 0 başlangıç değerleri (2026-10-16, `node tools/pusula.js`, boş profil, 1280 × 900)
+
+| Modül | Y1 eylem | Yazılan karakter | Y2 Bugün kartı | Y3 menü | İyi gün senaryosu (doğrulandı) |
+|---|---|---|---|---|---|
+| AYS | **12** | 13 | 1 | **9** | Günü düzenle › 3 blok «Tamamlandı» + soru + doğru; «Öbür kayıtlar»ı aç; uyku |
+| SPİ | **22** | 73 | 2 | **8** | 4 ölçüm alanı + Kaydet; 8 × bir bardak su; 3 öğün (Ne yaptın? + 2 Enter) |
+| ESP | 3 | 15 | 1 | **8** | Ne yaptın? «45 dk ingilizce» + 2 Enter |
+
+Hedef: Y1 ≤ 3, Y2 ≤ 3, Y3 ≤ 4. **Faz 1'in işi AYS 12 → ≤ 3 ve SPİ 22 → ≤ 3; Faz 2'nin işi
+Y3 9/8/8 → 4.** Y2 bugün hedefte (sadelik kuralıyla sayılan açık bölüm), ama Bugün'ün gerçek
+yoğunluğu kart başına değil öğe başına; Faz 2'de Y2 «Bugün'de görünen bağımsız iş» olarak
+yeniden tanımlanıp ölçülecek. P1 ve P2 kullanıcının cihazında ölçülür (Ayarlar › Genel).
+
+**Faz 0 bulguları (düzeltildi, testli):**
+- ESP «45 dk ingilizce» anlaşılmıyordu; yalnız «ingilizce çalıştım» tanınıyordu. Dil adları
+  takma ada eklendi (`ESP/src/js/core/parse.js`, `parse.test.js`).
+- Pusula P1, kullanım kaydı olmayan günü «0 dk ölçüldü» sayıyordu (sürtünme ölçeri kaydı olan
+  her günü ölçülmüş sayar). P1 artık yalnız kullanım kaydı olan günlerden (`pusula.test.js`).
+
+**Faz 0 gözlemleri (Faz 1–2'nin girdisi):**
+- AYS'de uyku «Günü düzenle › Öbür kayıtlar» kapalı kartının içinde: iyi bir günde her gün
+  girilen bir değer en derin yerde.
+- SPİ'de su sekiz ayrı dokunuş; «hedefe ulaştım» tek dokunuşu yok.
+- SPİ'de üç öğün üç ayrı cümle; aynı öğünler her gün tekrar ediyorsa «her zamanki gibi» yok.
+
 ## 9. Devir notu — sıradaki oturum buradan başlar
 
-- Sıradaki iş **Faz 0**: `tools/pusula.js` ve `brand/ortak/pusula.js`. Ölçüm önce, değişiklik
-  sonra; başlangıç değerleri §8'e.
+- Sıradaki iş **Faz 1 · Günü kapat**. Başarı ölçüsü: `node tools/pusula.js` ile AYS ve SPİ
+  Y1 ≤ 3 (başlangıç 12 ve 22). Senaryolar `tools/pusula.js` içinde; Faz 1 yeni yolu senaryoya
+  ekler, eski yolu silmez.
 - Önce okunacaklar: bu dosya, `AGENTS.md`, `IPHONE-PLANI.md` §2 (sadelik sözleşmesi),
   `brand/ortak/tekgun.js` (Faz 4'ün temeli), `AYS/src/js/core/gelecek.js` (Faz 5'in bağlanacağı yer).
 - Denetim seti: üç modülde `runtests`, `smoke`, `layoutcheck`, `a11ycheck`; `tools/sadelik.js`;
