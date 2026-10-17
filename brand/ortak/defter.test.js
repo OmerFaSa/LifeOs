@@ -45,6 +45,41 @@
     });
   });
 
+  describe('Defter — Faz 1b: vurgu, alıntı, biçim komutları, şablon, sayım', () => {
+    it('==vurgu==, ~~üstü çizili~~, > alıntı', () => {
+      const h = D().md('==önemli== ~~eski~~\n> bir söz');
+      expect(h).toContain('<mark>önemli</mark>');
+      expect(h).toContain('<del>eski</del>');
+      expect(h).toContain('<blockquote>bir söz</blockquote>');
+    });
+    it('seçimi sar ve satır öneki: kalın, başlık; yeniden basınca kalkar', () => {
+      const r = D().sar('a b c', 2, 3, '**', '**', 'kalın');
+      expect([r.metin, r.bas, r.son]).toEqual(['a **b** c', 4, 5]);
+      expect(D().sar('ab', 1, 1, '==', '==', 'vurgu').metin).toBe('a==vurgu==b');
+      const b = D().satirOnek('bir\niki', 0, 7, '## ');
+      expect(b.metin).toBe('## bir\n## iki');
+      expect(D().satirOnek(b.metin, 0, b.metin.length, '## ').metin).toBe('bir\niki');
+    });
+    it('şablonlar ve kelime sayımı', () => {
+      expect(D().SABLONLAR.map(t => t.id)).toEqual(['ders', 'gunluk', 'kitap', 'plan']);
+      expect(D().sayim('bir iki üç ![[medya:mabc1]] **dört**')).toEqual({ kelime:4, dakika:1 });
+    });
+    it('pencere: şablonla başla, Oku | Yaz seçici', () => ile(async () => {
+      D().ac();
+      const el = document.getElementById('defter');
+      el.querySelector('[data-defter="yeni"]').click();
+      await new Promise(r => setTimeout(r, 0));
+      el.querySelector('[data-defter-sablon="ders"]').click();
+      await new Promise(r => setTimeout(r, 0));
+      const n = D().notlar()[0];
+      expect([n.baslik, n.govde.indexOf('## Önemli noktalar') >= 0]).toEqual(['Ders notu', true]);
+      el.querySelector('[data-defter="oku"]').click();
+      await new Promise(r => setTimeout(r, 0));
+      expect(!!el.querySelector('[data-defter-oku] h3')).toBe(true);
+      expect(el.querySelector('.defter__alt').textContent).toContain('kelime');
+    }));
+  });
+
   describe('Defter — notlar ve medya', () => {
     it('ekle, kaydet, depodan yükle, sil (gömülü medya da silinir)', () => ile(async s => {
       const n = await D().yeni('Fizik', 'Newton');

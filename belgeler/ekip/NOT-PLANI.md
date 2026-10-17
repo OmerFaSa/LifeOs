@@ -53,5 +53,13 @@ dosya, bağlantı, etiket yok.
   ses kaydı (MediaRecorder) ya da ses dosyası, herhangi bir dosya (indir);
   .md dışa aktarma. Eski bağlam notları «Ekran notları»nda. King, kısayol
   çipi ve AYS paleti «Notlarım»da Defter'i açar.
-- Sıradaki (Faz 2): klasör ve şablon, bağlantı ağı görünümü, King'in notları
-  okuyup nota eklemesi.
+- 2026-10-17: **Faz 1b** («temayla uyumlu, sade ama daha zengin; kalemle yazma,
+  vurgulama»): dış kap King paneliyle aynı cam, yazı alanı opak kâğıt kartı;
+  Oku | Yaz seçici; simge araç çubuğu (kalın, italik, başlık, vurgu kalemi,
+  alıntı, liste, yapılacak, kod, bağlantı | resim, kalem, video, ses, dosya) ve
+  Ctrl+B/I/K, Ctrl+Shift+H; `==vurgu==`, `~~üstü çizili~~`, `> alıntı`;
+  kalemle yazma tuvali (kalem basınçlı, fosforlu kalem tek parça, silgi kâğıdı
+  silmez; düz/çizgili/kareli kâğıt; geri al/ileri al); şablonlar (ders notu,
+  günlük, kitap notu, plan); kelime sayısı ve okuma süresi.
+- Sıradaki (Faz 2): klasör, bağlantı ağı görünümü, King'in notları okuyup nota
+  eklemesi.
