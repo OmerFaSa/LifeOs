@@ -179,7 +179,16 @@
         Doğru   → senin onayınla hafızaya («sohbetten», kaynak sen)
         Kısmen  → «nasıl düzelteyim?»; senin cümlen «senin sözün» olur
         Yanlış  → bir daha sorulmaz
-      Serbest cevap («felsefe değil, tarih») düzeltme sayılır. */
+      Serbest cevap («felsefe değil, tarih») düzeltme sayılır.
+  24. SORMA / SOR (depo sahibi, 2026-10-17: «AYS'de şu verileri alırken artık
+      bana sorma, SPİ'de sor gibi tercihler»). Kendi yazdığın veriyi King
+      «ekleyeyim mi?» diye sorar; «SPİ'de uyku için artık sorma», «AYS'de
+      veri alırken bana sorma» dersen o modülün o türünde (ya da hepsinde)
+      doğrudan kaydeder ve «Geri al» bırakır (AGENTS §1.9: hangi küçük
+      türlerin sormadan uygulanacağını kullanıcı ayarlar). «… için sor»
+      geri alır. Modül söylenmezse bulunduğun modül. Tercih modüller arasında
+      taşınır (lifeos.king.sorma, animasyon.js TASINAN). Gelecek zamanlı
+      cümle («yiyeceğim») yine sorulur: yapılmamış iş kaydedilmez. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -366,6 +375,7 @@ window.LIFEOS.KING = (function(){
   const CIKARIM_KARAR = 'lifeos.king.cikarim';   // söz 23: { id:'dogru'|'kismen'|'yanlis' }
   let bekleyenCikarim = null;  // söz 23: soru sorulmuş aday
   let bekleyenDuzeltme = null; // söz 23: «Kısmen» sonrası düzeltme bekleniyor
+  const SORMA = 'lifeos.king.sorma';           // söz 24: { ays:{ '*':true, uyku:false }, spi:{…} }
   const FOTO_EN_BUYUK = 15 * 1024 * 1024;
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
@@ -922,6 +932,54 @@ window.LIFEOS.KING = (function(){
     }else soyle(r && r.why ? r.why : 'Not edemedim.');
   }
 
+  /* ---------- söz 24: sorma / sor ---------- */
+  const SORMA_TUR = [
+    [/uyku/, 'uyku'], [/(?<![a-zçğıöşü])su(?![a-zçğıöşü])/, 'su'], [/kilo|ölçüm|nabız|tansiyon|hrv/, 'olcum'],
+    [/öğün|yemek|beslen/, 'ogun'], [/hareket|antrenman|spor|egzersiz/, 'hareket'], [/tahlil/, 'tahlil'],
+    [/soru|çalışma|deneme|blok/, 'calisma'], [/oturum|pratik/, 'oturum'],
+  ];
+  const SORMA_AD = { '*':'bütün veriler', uyku:'uyku', su:'su', olcum:'ölçümler', ogun:'öğünler', hareket:'hareket',
+    tahlil:'tahliller', calisma:'çalışma ve sorular', oturum:'oturumlar' };
+  function sormaOku(){ const v = ortam.depo.oku(SORMA); return v && typeof v === 'object' ? v : {}; }
+  function sormaMi(tur){
+    const m = sormaOku()[ayar && ayar.modul] || {};
+    if(tur && m[tur] === false) return false;
+    return (tur && m[tur] === true) || m['*'] === true;
+  }
+  /* «SPİ'de uyku için artık sorma» → { modul, tur, sorma } ya da null. */
+  function sormaKomutu(metin){
+    const t = kucuk(metin);
+    const sorma = /(sorma(dan|yı bırak|yacaksın)?|onay isteme|direkt (ekle|kaydet)|doğrudan (ekle|kaydet))(?![a-zçğıöşü])/.test(t)
+      && !/sorma(mı|lı)/.test(t);
+    const sor = !sorma && /(bana |yine |tekrar |her seferinde )?(sor|onay iste|sorarak ekle)(?![a-zçğıöşü])/.test(t);
+    if(!sorma && !sor) return null;
+    const tur = (SORMA_TUR.find(([re]) => re.test(t)) || [])[1] || null;
+    const modul = /(?<![a-zçğıöşü])ays|sınav/.test(t) ? 'ays' : /(?<![a-zçğıöşü])sp[iı]|sağlık/.test(t) ? 'spi'
+      : /(?<![a-zçğıöşü])esp|gelişim/.test(t) ? 'esp' : null;
+    /* Yalnız «sor» kelimesi yetmez: tür, modül ya da «veri / kayıt / ekle» geçmeli. */
+    if(!tur && !modul && !/veri|kayıt|ekle|kaydet/.test(t)) return null;
+    return { modul:modul || (ayar && ayar.modul), tur:tur || '*', sorma };
+  }
+  function sormaUygula(k){
+    const v = sormaOku();
+    const m = Object.assign({}, v[k.modul] || {});
+    if(k.tur === '*'){ Object.keys(m).forEach(x => { delete m[x]; }); if(k.sorma) m['*'] = true; }
+    else if(k.sorma) m[k.tur] = true;
+    else if(m['*']) m[k.tur] = false; else delete m[k.tur];
+    v[k.modul] = m;
+    if(!Object.keys(m).length) delete v[k.modul];
+    if(Object.keys(v).length) ortam.depo.yaz(SORMA, v); else ortam.depo.sil(SORMA);
+    const ad = MODUL_AD[k.modul] + '’de ' + SORMA_AD[k.tur];
+    return k.sorma
+      ? 'Tamam: ' + ad + ' için artık sormadan ekleyeceğim; her kaydın yanında «Geri al» olacak. Tekrar sormamı istersen «' + MODUL_AD[k.modul] + '’de ' + SORMA_AD[k.tur] + ' için sor» de.'
+      : 'Tamam: ' + ad + ' için yine soracağım.';
+  }
+  function sormaListesi(){
+    const v = sormaOku(), l = [];
+    Object.keys(v).forEach(mod => Object.keys(v[mod]).forEach(t => { if(v[mod][t] === true) l.push(MODUL_AD[mod] + ' · ' + SORMA_AD[t]); }));
+    return l;
+  }
+
   /* ---------- söz 23: çıkarım sorar ---------- */
   function cikarimAdaylari(){
     const C = L.CIKARIM;
@@ -1166,6 +1224,8 @@ window.LIFEOS.KING = (function(){
         })()
         + (hafiza() && KISI() ? '<button type="button" class="king__menu-is" data-king="kisi">Beni nasıl tanıyorsun<span class="king__menu-say">'
           + kisiKayitlari().length + '</span></button>' : '')
+        + (sormaListesi().length ? '<div class="king__menu-satir"><span class="king__menu-ad">Sormadan ekler: ' + kac(sormaListesi().join(', '))
+          + '</span><button type="button" class="king__geri" data-king="sorma-sifirla">Hepsini sor</button></div>' : '')
         + '<button type="button" class="king__menu-is" data-king="sohbet-kaydet">Sohbeti kaydet</button>'
         + '<button type="button" class="king__menu-is" data-king="kayitlar">Kayıtlı sohbetler<span class="king__menu-say">' + n + '</span></button>'
         + '<button type="button" class="king__menu-is king__menu-is--tehlike" data-king="temizle">Sohbeti temizle</button>'
@@ -1263,6 +1323,14 @@ window.LIFEOS.KING = (function(){
       akis.push({ kim:'sen', metin:String(metin).trim() });
       await geriAlYap();
       return { tur:'geri-al' };
+    }
+    /* Söz 24: «… artık sorma / sor». */
+    const SK = sormaKomutu(metin);
+    if(SK && !veriGibi(metin)){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      bekleyen = null; cipler = null;
+      soyle(sormaUygula(SK));
+      return { tur:'sorma', sorma:SK.sorma };
     }
     /* Söz 22: hafıza komutları. */
     const HK = L.Hafiza && hafiza() ? L.Hafiza.komut(metin) : null;
@@ -1419,6 +1487,8 @@ window.LIFEOS.KING = (function(){
     }else if(y.tur === 'veri'){
       bekleyen = y.onizleme;
       const s = y.sohbet || sohbet(y.onizleme, '', !!y.gelecek);
+      /* Söz 24: bu tür için «sorma» dendiyse doğrudan kaydet («Geri al» kalır). */
+      if(!y.gelecek && sormaMi(y.onizleme.tur)) return kaydet(s.selam).then(() => y);
       cipler = [{ ad:'Evet, ekle', is:'kaydet' }, { ad:'Hayır', is:'vazgec' }];
       soyle(s.selam, null,
         { metin:y.onizleme.metin, liste:(y.onizleme.parcalar || []).length > 1 ? y.onizleme.parcalar.map(x => x.metin) : null,
@@ -1433,7 +1503,7 @@ window.LIFEOS.KING = (function(){
     return y;
   }
 
-  async function kaydet(){
+  async function kaydet(onEk){
     const p = bekleyen;
     bekleyen = null;
     cipler = null;
@@ -1446,7 +1516,7 @@ window.LIFEOS.KING = (function(){
       if(sonGeriAl) cipler = [{ ad:'Geri al', is:'geri-al' }];
       /* Kayıt yazıldı: zeminde tek seferlik ışık (zemin.js nabiz). */
       if(L.ZEMIN && typeof L.ZEMIN.nabiz === 'function'){ try{ L.ZEMIN.nabiz(); }catch(e){ /* süs */ } }
-      soyle(m + ' Başka bir şey var mı?');
+      soyle((onEk ? String(onEk).trim() + ' ' : '') + m + ' Başka bir şey var mı?');
     }catch(e){
       soyle('Kaydedilemedi: ' + ((e && e.message) || 'bilinmeyen hata'));
     }
@@ -1812,6 +1882,7 @@ window.LIFEOS.KING = (function(){
           cikarimKarar(d);
           return;
         }
+        if(is === 'sorma-sifirla'){ ortam.depo.sil(SORMA); ciz(false); return; }
         if(is === 'tanisma-atla'){ bekleyenTanisma = null; cipler = null; soyle('Tamam, başka zaman.'); return; }
         if(is === 'kisi'){ menuAc('kisi'); disKisiTazele().then(() => { if(acik && menu === 'kisi') ciz(false); }); return; }
         if(/^kisi-sil:/.test(is)){ const H = hafiza(); if(H) H.unut(is.slice(9)).then(() => ciz(false)); return; }
@@ -1936,7 +2007,7 @@ window.LIFEOS.KING = (function(){
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP);
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
-    bekleyenCikarim = null; bekleyenDuzeltme = null; ortam.depo.sil(CIKARIM_KARAR);
+    bekleyenCikarim = null; bekleyenDuzeltme = null; ortam.depo.sil(CIKARIM_KARAR); ortam.depo.sil(SORMA);
     ortam.depo.sil(TANISMA);
     yazmayiBitir(); ortam.depo.sil(YAZMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
@@ -1948,7 +2019,7 @@ window.LIFEOS.KING = (function(){
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,
     paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, fotoYorumla, GORSEL_SISTEM, TASIMA,
     kisiKayitlari, kisiOzeti, disKisiTazele, tanismaVar:() => !!bekleyenTanisma,
-    cikarimAdaylari, cikarimVar:() => !!bekleyenCikarim,
+    cikarimAdaylari, cikarimVar:() => !!bekleyenCikarim, SORMA, sormaKomutu, sormaMi, sormaListesi,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
     YAZMA, yazmaAyar, yazmaSec, yazdir, yazmayiBitir, yaziyorMu:() => !!yazici,
     CEVAP, cevapBicimi, cevapSec, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,

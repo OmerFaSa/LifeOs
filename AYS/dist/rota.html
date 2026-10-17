@@ -15173,7 +15173,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.yazma']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.yazma', 'lifeos.king.sorma']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -16669,7 +16669,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'5ffdf63e', at:'2026-10-17 10:49', dirty:true };
+R.BUILD = { id:'80e3e5bd', at:'2026-10-17 11:17', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -31426,7 +31426,10 @@ LIFEOS.KISI = (function(){
      1. ÖLÇÜLENDEN, KANITIYLA. Her çıkarım modülün kayıtlı verisinden bir
         KURALLA çıkar ve kanıtını taşır («30 günde 12 saatin 7'si felsefe»).
         Model çıkarım üretmez; cümleyi kod yazar (AGENTS §1.1).
-     2. EŞİĞİN ALTINDA SUSAR. Az veride çıkarım yoktur (§1.7).
+     2. EŞİĞİN ALTINDA SUSAR. Az veride çıkarım yoktur (§1.7). Eşikler
+        bilerek düşük (depo sahibi, 2026-10-17: «o kadar sıkı tutulmasın,
+        her şeyden çıkarım yapılsın»): çıkarım zaten sorulur; yanlışsa
+        «Yanlış» bir daha sordurmaz.
      3. SORU OLARAK SORULUR. Hiçbir çıkarım kendiliğinden hafızaya girmez:
         «Doğru» dersen senin onayınla yazılır, «Yanlış» dersen bir daha
         sorulmaz, «Kısmen» dersen kendi cümlen yazılır.
@@ -31480,10 +31483,10 @@ LIFEOS.CIKARIM = (function(){
       if(!d) return null;
       const ids = Object.keys(d.dakika || {});
       const toplam = ids.reduce((a, k) => a + (d.dakika[k] || 0), 0);
-      if((d.gun || 0) < 8 || toplam < 240) return null;
+      if((d.gun || 0) < 5 || toplam < 120) return null;
       const ust = ids.sort((a, b) => d.dakika[b] - d.dakika[a])[0];
       const pay = yuzde(d.dakika[ust], toplam);
-      if(pay < 40) return null;
+      if(pay < 30) return null;
       const ad = (d.adlar && d.adlar[ust]) || ust;
       const eg = DISIPLIN_EGILIM[ust] || 'bu alan senin için önemli görünüyor';
       return { id:'esp-disiplin:' + ust, alan:'gelisim',
@@ -31495,13 +31498,13 @@ LIFEOS.CIKARIM = (function(){
     function espKitapBitirme(v){
       const k = (v.esp && v.esp.kitaplar) || [];
       const baslanan = k.filter(b => b.startedAt);
-      if(baslanan.length < 4) return null;
+      if(baslanan.length < 3) return null;
       const biten = baslanan.filter(b => b.finishedAt).length;
       const oran = biten / baslanan.length;
       if(oran >= 0.75) return { id:'esp-kitap:bitiren', alan:'kisilik',
         soru:'Başladığın ' + baslanan.length + ' kitaptan ' + biten + ' tanesini bitirmişsin. Başladığı işi sonuna kadar götüren biri gibisin.',
         kanit:biten + '/' + baslanan.length + ' kitap', kayit:'Başladığı kitabı bitirir; işi sonuna götürür (onayladı)' };
-      if(baslanan.length >= 5 && oran <= 0.3) return { id:'esp-kitap:merakli', alan:'kisilik',
+      if(baslanan.length >= 4 && oran <= 0.34) return { id:'esp-kitap:merakli', alan:'kisilik',
         soru:'Birçok kitaba başlayıp ara vermişsin (' + biten + '/' + baslanan.length + ' bitti). Merakın geniş, ama odağın kolay dağılıyor olabilir mi?',
         kanit:biten + '/' + baslanan.length + ' kitap', kayit:'Merakı geniş; birçok kitaba başlar, odağı dağılabilir (onayladı)' };
       return null;
@@ -31512,7 +31515,7 @@ LIFEOS.CIKARIM = (function(){
       const say = {};
       k.forEach(b => { const a = String(b.author || '').trim(); if(a) say[a] = (say[a] || 0) + 1; });
       const ust = Object.keys(say).sort((a, b) => say[b] - say[a])[0];
-      if(!ust || say[ust] < 3) return null;
+      if(!ust || say[ust] < 2) return null;
       return { id:'esp-yazar:' + ust.toLocaleLowerCase('tr'), alan:'sevgi',
         soru:'En çok ' + ust + ' okumuşsun (' + say[ust] + ' kitap). Onun düşünceleri sana yakın geliyor olabilir mi?',
         kanit:say[ust] + ' kitap', kayit:ust + ' okumayı seviyor; düşünceleri ona yakın (onayladı)' };
@@ -31520,7 +31523,7 @@ LIFEOS.CIKARIM = (function(){
     /* ESP: müzik çalma düzeni. */
     function espMuzik(v){
       const g = v.esp && v.esp.muzikGun;
-      if(!(g >= 10)) return null;
+      if(!(g >= 6)) return null;
       return { id:'esp-muzik:duzenli', alan:'hobi',
         soru:'Son 30 günde ' + g + ' gün müzik çalışmışsın. Müzik hayatının düzenli bir parçası; seni dinlendiren bir şey gibi görünüyor.',
         kanit:g + ' gün', kayit:'Müzik çalmak hayatının düzenli bir parçası; onu dinlendirir (onayladı)' };
@@ -31529,9 +31532,9 @@ LIFEOS.CIKARIM = (function(){
     function aysDers(v){
       const l = ((v.ays && v.ays.dersler) || []).filter(d => d.solved > 0);
       const toplam = l.reduce((a, d) => a + d.solved, 0);
-      if(toplam < 300) return null;
+      if(toplam < 150) return null;
       const cok = l.slice().sort((a, b) => b.solved - a.solved)[0];
-      const isabetli = l.filter(d => d.solved >= 100).sort((a, b) => (b.correct / b.solved) - (a.correct / a.solved))[0];
+      const isabetli = l.filter(d => d.solved >= 60).sort((a, b) => (b.correct / b.solved) - (a.correct / a.solved))[0];
       if(!isabetli) return null;
       const ib = yuzde(isabetli.correct, isabetli.solved);
       if(cok.id === isabetli.id) return { id:'ays-ders:' + cok.id, alan:'ogrenme',
@@ -31544,12 +31547,12 @@ LIFEOS.CIKARIM = (function(){
     /* SPİ: yatış saatinden kronotip. */
     function spiKronotip(v){
       const y = ((v.spi && v.spi.yatis) || []).filter(x => typeof x === 'number');
-      if(y.length < 10) return null;
+      if(y.length < 6) return null;
       const m = medyan(y);
-      if(m >= 24.75) return { id:'spi-kronotip:gece', alan:'ritim',
+      if(m >= 24.5) return { id:'spi-kronotip:gece', alan:'ritim',
         soru:'Son gecelerinde yatış saatin genelde ' + saatYaz(m) + '. Gece insanı gibisin; akşamları zihnin daha mı açık oluyor?',
         kanit:y.length + ' gece, ortanca ' + saatYaz(m), kayit:'Gece insanı; geç yatar (onayladı)' };
-      if(m <= 23) return { id:'spi-kronotip:sabah', alan:'ritim',
+      if(m <= 23.25) return { id:'spi-kronotip:sabah', alan:'ritim',
         soru:'Son gecelerinde yatış saatin genelde ' + saatYaz(m) + '. Sabah insanı gibisin; günün ilk saatleri sana daha verimli mi geliyor?',
         kanit:y.length + ' gece, ortanca ' + saatYaz(m), kayit:'Sabah insanı; erken yatar (onayladı)' };
       return null;
@@ -31558,10 +31561,10 @@ LIFEOS.CIKARIM = (function(){
     function spiYemek(v){
       const k = (v.spi && v.spi.yemekKat) || {};
       const toplam = Object.keys(k).reduce((a, x) => a + k[x], 0);
-      if(toplam < 30) return null;
+      if(toplam < 15) return null;
       const sira = Object.keys(k).filter(x => YEMEK_EGILIM[x]).sort((a, b) => k[b] - k[a]);
       const tatliPay = yuzde(k.tatli || 0, toplam);
-      const sec = tatliPay >= 18 ? 'tatli' : sira.find(x => yuzde(k[x], toplam) >= 25);
+      const sec = tatliPay >= 15 ? 'tatli' : sira.find(x => yuzde(k[x], toplam) >= 20);
       if(!sec) return null;
       const ad = (v.spi.katAd && v.spi.katAd[sec]) || sec;
       return { id:'spi-yemek:' + sec, alan:'sevgi',
@@ -31571,10 +31574,106 @@ LIFEOS.CIKARIM = (function(){
     /* SPİ: hareket düzeni. */
     function spiHareket(v){
       const n = v.spi && v.spi.antrenman30;
-      if(!(n >= 8)) return null;
+      if(!(n >= 5)) return null;
       return { id:'spi-hareket:duzenli', alan:'fizyoloji',
         soru:'Son 30 günde ' + n + ' antrenman yapmışsın. Hareket senin için bir alışkanlık ve düzen; bedenini önemsiyorsun gibi görünüyor.',
         kanit:n + ' antrenman', kayit:'Düzenli hareket eder; bedenini önemser (onayladı)' };
+    },
+    /* ESP: ikinci büyük ilgi. */
+    function espIkinci(v){
+      const d = v.esp && v.esp.disiplin;
+      if(!d || (d.gun || 0) < 5) return null;
+      const ids = Object.keys(d.dakika || {}).sort((a, b) => d.dakika[b] - d.dakika[a]);
+      const toplam = ids.reduce((a, k) => a + d.dakika[k], 0);
+      if(ids.length < 2 || toplam < 120 || yuzde(d.dakika[ids[1]], toplam) < 20) return null;
+      const ad = (d.adlar && d.adlar[ids[1]]) || ids[1];
+      const eg = DISIPLIN_EGILIM[ids[1]] || 'bu alan da senin için önemli görünüyor';
+      return { id:'esp-ikinci:' + ids[1], alan:'hobi',
+        soru:'İkinci büyük ilgin ' + ad + ' görünüyor (payı %' + yuzde(d.dakika[ids[1]], toplam) + '). ' + eg.charAt(0).toLocaleUpperCase('tr') + eg.slice(1) + '.',
+        kanit:d.gun + ' gün', kayit:ad + ' da ilgisini çekiyor (onayladı)' };
+    },
+    /* ESP: çok yönlülük. */
+    function espCesit(v){
+      const d = v.esp && v.esp.disiplin;
+      if(!d) return null;
+      const n = Object.keys(d.dakika || {}).filter(k => d.dakika[k] > 0).length;
+      if(n < 4) return null;
+      return { id:'esp-cesit:' + n, alan:'kisilik',
+        soru:'Son 30 günde ' + n + ' ayrı alanda çalışmışsın. Çok yönlü ve meraklı birisin gibi; tek bir şeyle yetinmiyorsun.',
+        kanit:n + ' alan', kayit:'Çok yönlü ve meraklı; birçok alanla ilgilenir (onayladı)' };
+    },
+    /* AYS: seni zorlayan ders. */
+    function aysZor(v){
+      const l = ((v.ays && v.ays.dersler) || []).filter(d => d.solved >= 40);
+      if(l.length < 2) return null;
+      const zor = l.slice().sort((a, b) => (a.correct / a.solved) - (b.correct / b.solved))[0];
+      const z = yuzde(zor.correct, zor.solved);
+      if(z >= 65) return null;
+      return { id:'ays-zor:' + zor.id, alan:'ogrenme',
+        soru:zor.ad + ' seni en çok zorlayan ders gibi görünüyor (doğru oranı %' + z + '). Bu derse oturmak sana ağır mı geliyor?',
+        kanit:zor.solved + ' soru', kayit:zor.ad + ' dersi onu zorluyor (onayladı)' };
+    },
+    /* AYS: hata tiplerinin ağırlığı. */
+    function aysHata(v){
+      const h = (v.ays && v.ays.hatalar) || {};
+      const toplam = Object.keys(h).reduce((a, k) => a + h[k].n, 0);
+      if(toplam < 8) return null;
+      const ust = Object.keys(h).sort((a, b) => h[b].n - h[a].n)[0];
+      const pay = yuzde(h[ust].n, toplam);
+      if(pay < 35) return null;
+      const yorum = { D:'acele ediyor ya da yorgunken çalışıyor olabilir misin?', 'İ':'işlem yaparken hızlanıyor olabilir misin?',
+        Y:'soruyu okurken aceleci davranıyor olabilir misin?', S:'süre baskısı seni geriyor olabilir mi?', K:'bazı konular henüz eksik; sırayla tamamlamayı seviyor musun?' }[ust]
+        || 'bunun bir nedeni var mı?';
+      return { id:'ays-hata:' + ust, alan:'ogrenme',
+        soru:'Hatalarının içinde en büyük pay «' + h[ust].ad + '» türünde: %' + pay + '. Buradan şunu düşündüm: ' + yorum,
+        kanit:toplam + ' hata kaydı', kayit:'Hatalarının çoğu ' + h[ust].ad.toLocaleLowerCase('tr') + ' (onayladı)' };
+    },
+    /* AYS: deneme gidişi. */
+    function aysGidis(v){
+      const n = ((v.ays && v.ays.denemeNet) || []).filter(x => typeof x === 'number');
+      if(n.length < 4) return null;
+      const ilk = medyan(n.slice(0, Math.floor(n.length / 2))), son = medyan(n.slice(-Math.floor(n.length / 2)));
+      if(son - ilk >= 3) return { id:'ays-gidis:yukari', alan:'kisilik',
+        soru:'Denemelerin istikrarla yükseliyor (ilk yarıdan son yarıya +' + Math.round(son - ilk) + ' net). Sabırlı ve kararlı birisin gibi.',
+        kanit:n.length + ' deneme', kayit:'Sabırlı ve kararlı; denemeleri istikrarla yükselir (onayladı)' };
+      if(ilk - son >= 3) return { id:'ays-gidis:asagi', alan:'ruh',
+        soru:'Son denemelerin öncekilerden biraz düşük (' + Math.round(ilk - son) + ' net). Son zamanlarda yorgun ya da kafan dolu olabilir mi?',
+        kanit:n.length + ' deneme', kayit:'Son zamanlarda yorgun ya da kafası dolu (onayladı)' };
+      return null;
+    },
+    /* SPİ: uyku süresi. */
+    function spiUyku(v){
+      const u = ((v.spi && v.spi.uyku) || []).filter(x => typeof x === 'number' && x > 0);
+      if(u.length < 6) return null;
+      const m = medyan(u);
+      if(m >= 8) return { id:'spi-uyku:uzun', alan:'fizyoloji',
+        soru:'Gecelerin genelde ' + (Math.round(m * 10) / 10) + ' saat. Uykunu önemsiyorsun; dinlenmiş olmak senin için öncelik gibi.',
+        kanit:u.length + ' gece', kayit:'Uykusunu önemser; uzun uyur (onayladı)' };
+      if(m <= 6.25) return { id:'spi-uyku:kisa', alan:'ruh',
+        soru:'Gecelerin genelde ' + (Math.round(m * 10) / 10) + ' saat. Yoğun ya da stresli bir dönemden geçiyor olabilir misin?',
+        kanit:u.length + ' gece', kayit:'Yoğun bir dönemde; az uyuyor (onayladı)' };
+      return null;
+    },
+    /* SPİ: uyku ile günün hissi (birliktelik, neden değil). */
+    function spiHisUyku(v){
+      const p = ((v.spi && v.spi.hisUyku) || []).filter(x => x && typeof x.his === 'number' && typeof x.uyku === 'number');
+      if(p.length < 6) return null;
+      const mu = medyan(p.map(x => x.uyku));
+      const iyi = p.filter(x => x.uyku >= mu).map(x => x.his), kotu = p.filter(x => x.uyku < mu).map(x => x.his);
+      if(iyi.length < 2 || kotu.length < 2) return null;
+      const fark = medyan(iyi) - medyan(kotu);
+      if(fark < 0.5) return null;
+      return { id:'spi-his-uyku:pozitif', alan:'ruh',
+        soru:'İyi uyuduğun günlerde kendini belirgin şekilde daha zinde işaretlemişsin. Uyku senin ruh hâlinin anahtarı gibi; sence de öyle mi?',
+        kanit:p.length + ' gün (birliktelik, neden değil)', kayit:'İyi uyuduğunda kendini daha zinde hisseder (onayladı)' };
+    },
+    /* SPİ: kahve. */
+    function spiKahve(v){
+      const k = v.spi && v.spi.kahveGun;
+      if(!(k >= 8)) return null;
+      return { id:'spi-kahve:sik', alan:'sevgi',
+        soru:'Son 30 günde ' + k + ' gün kahve içmişsin. Kahvesiz bir gün sana eksik gibi mi geliyor?',
+        kanit:k + ' gün', kayit:'Kahveyi sever; neredeyse her gün içer (onayladı)' };
     },
     /* Radyo: çalışırken dinlenen tür (zayıf kanıt: soru olarak). */
     function sesTur(v){
@@ -31956,7 +32055,16 @@ window.LIFEOS.SORUKART = (function(){
         Doğru   → senin onayınla hafızaya («sohbetten», kaynak sen)
         Kısmen  → «nasıl düzelteyim?»; senin cümlen «senin sözün» olur
         Yanlış  → bir daha sorulmaz
-      Serbest cevap («felsefe değil, tarih») düzeltme sayılır. */
+      Serbest cevap («felsefe değil, tarih») düzeltme sayılır.
+  24. SORMA / SOR (depo sahibi, 2026-10-17: «AYS'de şu verileri alırken artık
+      bana sorma, SPİ'de sor gibi tercihler»). Kendi yazdığın veriyi King
+      «ekleyeyim mi?» diye sorar; «SPİ'de uyku için artık sorma», «AYS'de
+      veri alırken bana sorma» dersen o modülün o türünde (ya da hepsinde)
+      doğrudan kaydeder ve «Geri al» bırakır (AGENTS §1.9: hangi küçük
+      türlerin sormadan uygulanacağını kullanıcı ayarlar). «… için sor»
+      geri alır. Modül söylenmezse bulunduğun modül. Tercih modüller arasında
+      taşınır (lifeos.king.sorma, animasyon.js TASINAN). Gelecek zamanlı
+      cümle («yiyeceğim») yine sorulur: yapılmamış iş kaydedilmez. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -32143,6 +32251,7 @@ window.LIFEOS.KING = (function(){
   const CIKARIM_KARAR = 'lifeos.king.cikarim';   // söz 23: { id:'dogru'|'kismen'|'yanlis' }
   let bekleyenCikarim = null;  // söz 23: soru sorulmuş aday
   let bekleyenDuzeltme = null; // söz 23: «Kısmen» sonrası düzeltme bekleniyor
+  const SORMA = 'lifeos.king.sorma';           // söz 24: { ays:{ '*':true, uyku:false }, spi:{…} }
   const FOTO_EN_BUYUK = 15 * 1024 * 1024;
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
@@ -32699,6 +32808,54 @@ window.LIFEOS.KING = (function(){
     }else soyle(r && r.why ? r.why : 'Not edemedim.');
   }
 
+  /* ---------- söz 24: sorma / sor ---------- */
+  const SORMA_TUR = [
+    [/uyku/, 'uyku'], [/(?<![a-zçğıöşü])su(?![a-zçğıöşü])/, 'su'], [/kilo|ölçüm|nabız|tansiyon|hrv/, 'olcum'],
+    [/öğün|yemek|beslen/, 'ogun'], [/hareket|antrenman|spor|egzersiz/, 'hareket'], [/tahlil/, 'tahlil'],
+    [/soru|çalışma|deneme|blok/, 'calisma'], [/oturum|pratik/, 'oturum'],
+  ];
+  const SORMA_AD = { '*':'bütün veriler', uyku:'uyku', su:'su', olcum:'ölçümler', ogun:'öğünler', hareket:'hareket',
+    tahlil:'tahliller', calisma:'çalışma ve sorular', oturum:'oturumlar' };
+  function sormaOku(){ const v = ortam.depo.oku(SORMA); return v && typeof v === 'object' ? v : {}; }
+  function sormaMi(tur){
+    const m = sormaOku()[ayar && ayar.modul] || {};
+    if(tur && m[tur] === false) return false;
+    return (tur && m[tur] === true) || m['*'] === true;
+  }
+  /* «SPİ'de uyku için artık sorma» → { modul, tur, sorma } ya da null. */
+  function sormaKomutu(metin){
+    const t = kucuk(metin);
+    const sorma = /(sorma(dan|yı bırak|yacaksın)?|onay isteme|direkt (ekle|kaydet)|doğrudan (ekle|kaydet))(?![a-zçğıöşü])/.test(t)
+      && !/sorma(mı|lı)/.test(t);
+    const sor = !sorma && /(bana |yine |tekrar |her seferinde )?(sor|onay iste|sorarak ekle)(?![a-zçğıöşü])/.test(t);
+    if(!sorma && !sor) return null;
+    const tur = (SORMA_TUR.find(([re]) => re.test(t)) || [])[1] || null;
+    const modul = /(?<![a-zçğıöşü])ays|sınav/.test(t) ? 'ays' : /(?<![a-zçğıöşü])sp[iı]|sağlık/.test(t) ? 'spi'
+      : /(?<![a-zçğıöşü])esp|gelişim/.test(t) ? 'esp' : null;
+    /* Yalnız «sor» kelimesi yetmez: tür, modül ya da «veri / kayıt / ekle» geçmeli. */
+    if(!tur && !modul && !/veri|kayıt|ekle|kaydet/.test(t)) return null;
+    return { modul:modul || (ayar && ayar.modul), tur:tur || '*', sorma };
+  }
+  function sormaUygula(k){
+    const v = sormaOku();
+    const m = Object.assign({}, v[k.modul] || {});
+    if(k.tur === '*'){ Object.keys(m).forEach(x => { delete m[x]; }); if(k.sorma) m['*'] = true; }
+    else if(k.sorma) m[k.tur] = true;
+    else if(m['*']) m[k.tur] = false; else delete m[k.tur];
+    v[k.modul] = m;
+    if(!Object.keys(m).length) delete v[k.modul];
+    if(Object.keys(v).length) ortam.depo.yaz(SORMA, v); else ortam.depo.sil(SORMA);
+    const ad = MODUL_AD[k.modul] + '’de ' + SORMA_AD[k.tur];
+    return k.sorma
+      ? 'Tamam: ' + ad + ' için artık sormadan ekleyeceğim; her kaydın yanında «Geri al» olacak. Tekrar sormamı istersen «' + MODUL_AD[k.modul] + '’de ' + SORMA_AD[k.tur] + ' için sor» de.'
+      : 'Tamam: ' + ad + ' için yine soracağım.';
+  }
+  function sormaListesi(){
+    const v = sormaOku(), l = [];
+    Object.keys(v).forEach(mod => Object.keys(v[mod]).forEach(t => { if(v[mod][t] === true) l.push(MODUL_AD[mod] + ' · ' + SORMA_AD[t]); }));
+    return l;
+  }
+
   /* ---------- söz 23: çıkarım sorar ---------- */
   function cikarimAdaylari(){
     const C = L.CIKARIM;
@@ -32943,6 +33100,8 @@ window.LIFEOS.KING = (function(){
         })()
         + (hafiza() && KISI() ? '<button type="button" class="king__menu-is" data-king="kisi">Beni nasıl tanıyorsun<span class="king__menu-say">'
           + kisiKayitlari().length + '</span></button>' : '')
+        + (sormaListesi().length ? '<div class="king__menu-satir"><span class="king__menu-ad">Sormadan ekler: ' + kac(sormaListesi().join(', '))
+          + '</span><button type="button" class="king__geri" data-king="sorma-sifirla">Hepsini sor</button></div>' : '')
         + '<button type="button" class="king__menu-is" data-king="sohbet-kaydet">Sohbeti kaydet</button>'
         + '<button type="button" class="king__menu-is" data-king="kayitlar">Kayıtlı sohbetler<span class="king__menu-say">' + n + '</span></button>'
         + '<button type="button" class="king__menu-is king__menu-is--tehlike" data-king="temizle">Sohbeti temizle</button>'
@@ -33040,6 +33199,14 @@ window.LIFEOS.KING = (function(){
       akis.push({ kim:'sen', metin:String(metin).trim() });
       await geriAlYap();
       return { tur:'geri-al' };
+    }
+    /* Söz 24: «… artık sorma / sor». */
+    const SK = sormaKomutu(metin);
+    if(SK && !veriGibi(metin)){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      bekleyen = null; cipler = null;
+      soyle(sormaUygula(SK));
+      return { tur:'sorma', sorma:SK.sorma };
     }
     /* Söz 22: hafıza komutları. */
     const HK = L.Hafiza && hafiza() ? L.Hafiza.komut(metin) : null;
@@ -33196,6 +33363,8 @@ window.LIFEOS.KING = (function(){
     }else if(y.tur === 'veri'){
       bekleyen = y.onizleme;
       const s = y.sohbet || sohbet(y.onizleme, '', !!y.gelecek);
+      /* Söz 24: bu tür için «sorma» dendiyse doğrudan kaydet («Geri al» kalır). */
+      if(!y.gelecek && sormaMi(y.onizleme.tur)) return kaydet(s.selam).then(() => y);
       cipler = [{ ad:'Evet, ekle', is:'kaydet' }, { ad:'Hayır', is:'vazgec' }];
       soyle(s.selam, null,
         { metin:y.onizleme.metin, liste:(y.onizleme.parcalar || []).length > 1 ? y.onizleme.parcalar.map(x => x.metin) : null,
@@ -33210,7 +33379,7 @@ window.LIFEOS.KING = (function(){
     return y;
   }
 
-  async function kaydet(){
+  async function kaydet(onEk){
     const p = bekleyen;
     bekleyen = null;
     cipler = null;
@@ -33223,7 +33392,7 @@ window.LIFEOS.KING = (function(){
       if(sonGeriAl) cipler = [{ ad:'Geri al', is:'geri-al' }];
       /* Kayıt yazıldı: zeminde tek seferlik ışık (zemin.js nabiz). */
       if(L.ZEMIN && typeof L.ZEMIN.nabiz === 'function'){ try{ L.ZEMIN.nabiz(); }catch(e){ /* süs */ } }
-      soyle(m + ' Başka bir şey var mı?');
+      soyle((onEk ? String(onEk).trim() + ' ' : '') + m + ' Başka bir şey var mı?');
     }catch(e){
       soyle('Kaydedilemedi: ' + ((e && e.message) || 'bilinmeyen hata'));
     }
@@ -33589,6 +33758,7 @@ window.LIFEOS.KING = (function(){
           cikarimKarar(d);
           return;
         }
+        if(is === 'sorma-sifirla'){ ortam.depo.sil(SORMA); ciz(false); return; }
         if(is === 'tanisma-atla'){ bekleyenTanisma = null; cipler = null; soyle('Tamam, başka zaman.'); return; }
         if(is === 'kisi'){ menuAc('kisi'); disKisiTazele().then(() => { if(acik && menu === 'kisi') ciz(false); }); return; }
         if(/^kisi-sil:/.test(is)){ const H = hafiza(); if(H) H.unut(is.slice(9)).then(() => ciz(false)); return; }
@@ -33713,7 +33883,7 @@ window.LIFEOS.KING = (function(){
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP);
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
-    bekleyenCikarim = null; bekleyenDuzeltme = null; ortam.depo.sil(CIKARIM_KARAR);
+    bekleyenCikarim = null; bekleyenDuzeltme = null; ortam.depo.sil(CIKARIM_KARAR); ortam.depo.sil(SORMA);
     ortam.depo.sil(TANISMA);
     yazmayiBitir(); ortam.depo.sil(YAZMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
@@ -33725,7 +33895,7 @@ window.LIFEOS.KING = (function(){
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,
     paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, fotoYorumla, GORSEL_SISTEM, TASIMA,
     kisiKayitlari, kisiOzeti, disKisiTazele, tanismaVar:() => !!bekleyenTanisma,
-    cikarimAdaylari, cikarimVar:() => !!bekleyenCikarim,
+    cikarimAdaylari, cikarimVar:() => !!bekleyenCikarim, SORMA, sormaKomutu, sormaMi, sormaListesi,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
     YAZMA, yazmaAyar, yazmaSec, yazdir, yazmayiBitir, yaziyorMu:() => !!yazici,
     CEVAP, cevapBicimi, cevapSec, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
@@ -108857,9 +109027,15 @@ R.App = (function(){
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route, model:() => R.LLM, hafiza:() => R.Hafizam,
           /* King'in çıkarımları için (cikarim.js): son 45 günde ders ders çözülen ve doğru soru. */
-          cikarimVeri:() => ({ ays:{ dersler:(R.SUBJECTS || []).map(s => {
-            const p = R.Calc.topicPractice(s.id, null, 45);
-            return { id:s.id, ad:s.name, solved:p.solved || 0, correct:p.correct || 0 }; }) } }),
+          cikarimVeri:() => {
+            const hatalar = {};
+            (S.errors || []).forEach(e => { const t = R.ERROR_TAGS[e.tag]; if(t) (hatalar[e.tag] = hatalar[e.tag] || { ad:t.name, n:0 }).n++; });
+            return { ays:{
+              dersler:(R.SUBJECTS || []).map(s => {
+                const p = R.Calc.topicPractice(s.id, null, 45);
+                return { id:s.id, ad:s.name, solved:p.solved || 0, correct:p.correct || 0 }; }),
+              hatalar, denemeNet:R.Calc.fullExams('TYT').map(M.examNet) } };
+          },
           /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
           foto:[{ ad:'Soruyu çöz', is:async f => {
             go('solve');

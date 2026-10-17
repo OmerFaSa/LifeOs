@@ -422,6 +422,32 @@
       expect(H.etkin().some(x => x.metin === 'sabahları daha verimliyim' && x.katman === 'soz')).toBe(true);
     }));
 
+    /* Söz 24 (2026-10-17): «… artık bana sorma / sor». */
+    it('«SPİ’de uyku için artık sorma»: o tür doğrudan kaydedilir, «Geri al» kalır; «sor» geri alır', () => sahneyle(async () => {
+      let kayit = 0;
+      const veri = { onizle:t => /uyku/.test(t) ? { tur:'uyku', metin:'Uyku 7 sa',
+        kaydet:async () => { kayit++; return { metin:'Uyku kaydedildi', geriAl:async () => { kayit--; } }; } }
+        : /su/.test(t) ? { tur:'su', metin:'Su 250 ml', kaydet:async () => { kayit++; return 'Su kaydedildi'; } } : null };
+      const { k } = sahne({ veri, modul:'spi' });
+      k.ac({ mini:true });
+      expect(k.sormaKomutu('sor bakalım')).toBe(null);                 // yalnız «sor» yetmez
+      await k.isle('SPİ’de uyku için artık sorma');
+      expect(k.sormaListesi()).toEqual(['SPİ · uyku']);
+      await k.isle('uyku 7');
+      expect(kayit).toBe(1);                                             // sormadan
+      expect(!!document.querySelector('[data-king="geri-al"]')).toBe(true);
+      await k.isle('su 250');
+      expect(kayit).toBe(1);                                             // su için yine soruyor
+      expect(!!document.querySelector('[data-king="kaydet"]')).toBe(true);
+      await k.isle('uyku için yine sor');
+      await k.isle('uyku 8');
+      expect(kayit).toBe(1);
+      /* modül geneli ve taşınma */
+      await k.isle('AYS’de veri alırken bana sorma');
+      expect(JSON.parse(localStorage.getItem(k.SORMA)).ays).toEqual({ '*':true });
+      if(window.LIFEOS.ANIMASYON) expect(window.LIFEOS.ANIMASYON.TASINAN.indexOf(k.SORMA) >= 0).toBe(true);
+    }));
+
     /* Söz 23 (2026-10-17): çıkarım sohbetle sorulur; doğruysa kaydedilir. */
     const ESP_VERI = () => ({ esp:{ disiplin:{ gun:12, dakika:{ philo:500, lang:100 }, adlar:{ philo:'Felsefe' } } } });
     it('çıkarım: «Doğru» onayla hafızaya; aynı çıkarım bir daha sorulmaz', () => sahneyle(async () => {

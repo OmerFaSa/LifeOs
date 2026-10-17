@@ -1655,9 +1655,15 @@ R.App = (function(){
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route, model:() => R.LLM, hafiza:() => R.Hafizam,
           /* King'in çıkarımları için (cikarim.js): son 45 günde ders ders çözülen ve doğru soru. */
-          cikarimVeri:() => ({ ays:{ dersler:(R.SUBJECTS || []).map(s => {
-            const p = R.Calc.topicPractice(s.id, null, 45);
-            return { id:s.id, ad:s.name, solved:p.solved || 0, correct:p.correct || 0 }; }) } }),
+          cikarimVeri:() => {
+            const hatalar = {};
+            (S.errors || []).forEach(e => { const t = R.ERROR_TAGS[e.tag]; if(t) (hatalar[e.tag] = hatalar[e.tag] || { ad:t.name, n:0 }).n++; });
+            return { ays:{
+              dersler:(R.SUBJECTS || []).map(s => {
+                const p = R.Calc.topicPractice(s.id, null, 45);
+                return { id:s.id, ad:s.name, solved:p.solved || 0, correct:p.correct || 0 }; }),
+              hatalar, denemeNet:R.Calc.fullExams('TYT').map(M.examNet) } };
+          },
           /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
           foto:[{ ad:'Soruyu çöz', is:async f => {
             go('solve');

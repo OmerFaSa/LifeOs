@@ -24,6 +24,17 @@
         'spi-kronotip:gece', 'spi-yemek:tatli', 'spi-hareket:duzenli'].forEach(x => expect(id.indexOf(x) >= 0).toBe(true));
       l.forEach(a => { expect(!!(a.kanit && a.alan && a.kayit)).toBe(true); expect(window.LIFEOS.KISI.BY_ID[a.alan] != null).toBe(true); });
     });
+    it('yeni kaynaklar: zorlayan ders, hata tipi, deneme gidişi, uyku süresi, his–uyku, kahve, çok yönlülük', () => {
+      const v = {
+        ays:{ dersler:[{ id:'mat', ad:'Matematik', solved:100, correct:50 }, { id:'tr', ad:'Türkçe', solved:100, correct:85 }],
+          hatalar:{ D:{ ad:'Dikkat', n:6 }, K:{ ad:'Konu eksiği', n:3 } }, denemeNet:[40, 41, 46, 48] },
+        spi:{ uyku:[5.5, 6, 6, 5.8, 6.1, 6], hisUyku:[{ uyku:8, his:5 }, { uyku:8, his:4 }, { uyku:7.5, his:5 }, { uyku:5, his:2 }, { uyku:5.5, his:2 }, { uyku:6, his:3 }], kahveGun:12 },
+        esp:{ disiplin:{ gun:6, dakika:{ philo:60, lang:50, music:40, history:30 }, adlar:{} } },
+      };
+      const id = C().uret(v, {}).map(a => a.id);
+      ['ays-zor:mat', 'ays-hata:D', 'ays-gidis:yukari', 'spi-uyku:kisa', 'spi-his-uyku:pozitif', 'spi-kahve:sik', 'esp-cesit:4']
+        .forEach(x => expect(id.indexOf(x) >= 0).toBe(true));
+    });
     it('eşiğin altında susar', () => {
       expect(C().uret({}, {})).toHaveLength(0);
       const az = { esp:{ disiplin:{ gun:3, dakika:{ philo:500 } }, kitaplar:[{ startedAt:'x', finishedAt:'y', author:'A' }], muzikGun:4 },
