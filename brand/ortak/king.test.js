@@ -422,6 +422,31 @@
       expect(H.etkin().some(x => x.metin === 'sabahları daha verimliyim' && x.katman === 'soz')).toBe(true);
     }));
 
+    /* Söz 25 (2026-10-17): kişilik envanteri sohbetle. */
+    it('«kişilik testi»: 20 madde tek tek; bitince beş boyut kişilik alanına; yeniden yapılınca eskisinin yerine', () => sahneyle(async () => {
+      if(!window.LIFEOS.ENVANTER || !window.LIFEOS.Hafiza) return;
+      const { k } = sahne();
+      k._ortam.kisiSunucu = async () => null;
+      const H = hafizali(k);
+      k.ac({ mini:true });
+      await k.isle('kişilik testi');
+      expect(k.envanterVar()).toBe(true);
+      expect(!!document.querySelector('[data-king="env:5"]')).toBe(true);
+      await k.isle('bunu bilmiyorum');                        // geçersiz cevap ilerletmez
+      expect(k.akis().slice(-1)[0].metin).toContain('1 ile 5');
+      for(let i = 0; i < 20; i++) await k.isle(String(1 + (i % 5)));
+      expect(k.envanterVar()).toBe(false);
+      const kay = H.etkin().filter(x => x.alan === 'kisilik');
+      expect(kay).toHaveLength(5);
+      expect(kay.every(x => x.katman === 'soz')).toBe(true);
+      await k.isle('kişilik testi');
+      for(let i = 0; i < 20; i++) await k.isle('3');
+      expect(H.etkin().filter(x => x.alan === 'kisilik')).toHaveLength(5);
+      await k.isle('kişilik testi');
+      await k.isle('bırak');
+      expect(k.envanterVar()).toBe(false);
+    }));
+
     /* Söz 24 (2026-10-17): «… artık bana sorma / sor». */
     it('«SPİ’de uyku için artık sorma»: o tür doğrudan kaydedilir, «Geri al» kalır; «sor» geri alır', () => sahneyle(async () => {
       let kayit = 0;

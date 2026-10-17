@@ -188,7 +188,14 @@
       türlerin sormadan uygulanacağını kullanıcı ayarlar). «… için sor»
       geri alır. Modül söylenmezse bulunduğun modül. Tercih modüller arasında
       taşınır (lifeos.king.sorma, animasyon.js TASINAN). Gelecek zamanlı
-      cümle («yiyeceğim») yine sorulur: yapılmamış iş kaydedilmez. */
+      cümle («yiyeceğim») yine sorulur: yapılmamış iş kaydedilmez.
+  25. KİŞİLİK ENVANTERİ VE ÜSLUP (KISI-PLANI Faz 4, envanter.js). «Kişilik
+      testi» dersen King 20 maddelik Mini-IPIP'i (kamu malı) sohbet içinde
+      tek tek sorar (1–5 düğmeleri ya da yazarak); «Bırak» her an. Bitince
+      beş boyut yargısız dille kişilik alanına «senin sözün» olarak yazılır;
+      yeniden yapılırsa eskisinin yerine geçer. Yazdığın her mesaj üslup
+      sayacını artırır (yalnız sayı, metin saklanmaz); King üslubunu
+      çıkarım olarak sorar, onaylarsan model istemine girer. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -375,7 +382,9 @@ window.LIFEOS.KING = (function(){
   const CIKARIM_KARAR = 'lifeos.king.cikarim';   // söz 23: { id:'dogru'|'kismen'|'yanlis' }
   let bekleyenCikarim = null;  // söz 23: soru sorulmuş aday
   let bekleyenDuzeltme = null; // söz 23: «Kısmen» sonrası düzeltme bekleniyor
-  const SORMA = 'lifeos.king.sorma';           // söz 24: { ays:{ '*':true, uyku:false }, spi:{…} }
+  const SORMA = 'lifeos.king.sorma';
+  const USLUP = 'lifeos.king.uslup';           // söz 25: üslup sayacı
+  let envanter = null;                          // söz 25: { i, cevaplar }           // söz 24: { ays:{ '*':true, uyku:false }, spi:{…} }
   const FOTO_EN_BUYUK = 15 * 1024 * 1024;
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
@@ -932,6 +941,45 @@ window.LIFEOS.KING = (function(){
     }else soyle(r && r.why ? r.why : 'Not edemedim.');
   }
 
+  /* ---------- söz 25: kişilik envanteri ---------- */
+  const ENV = () => L.ENVANTER || null;
+  const ENV_BASLA = /(kişilik (testi|envanteri|testimi)|kişiliğimi (ölç|test et|analiz et)|beni test et|beş faktör)/;
+  function envanterSor(){
+    const E = ENV(), i = envanter.i;
+    cipler = E.CEVAPLAR.map((ad, k) => ({ is:'env:' + (k + 1), ad:(k + 1) + ' · ' + ad })).concat([{ is:'env-dur', ad:'Bırak' }]);
+    soyle('(' + (i + 1) + '/' + E.MADDELER.length + ') ' + E.MADDELER[i][0], null, null, 'Sana ne kadar uyuyor?');
+  }
+  function envanterBasla(){
+    if(!ENV() || !hafiza()) return false;
+    envanter = { i:0, cevaplar:[] };
+    akis.push({ kim:'king', metin:'Kısa bir kişilik envanteri yapalım: 20 cümle, her biri için 1 (hiç katılmıyorum) ile 5 (tamamen katılıyorum) arasında seç. '
+      + 'Doğru ya da yanlış cevap yok; istediğin an «Bırak».' });
+    envanterSor();
+    return true;
+  }
+  function envanterCevap(metin){
+    const E = ENV();
+    const t = kucuk(metin).replace(/[.!]+$/, '');
+    let c = /^[1-5]$/.test(t) ? Number(t) : null;
+    if(c == null){ const k = E.CEVAPLAR.findIndex(x => x.toLocaleLowerCase('tr') === t); if(k >= 0) c = k + 1; }
+    return c;
+  }
+  async function envanterIlerle(c){
+    const E = ENV(), H = hafiza();
+    envanter.cevaplar[envanter.i] = c;
+    envanter.i++;
+    if(envanter.i < E.MADDELER.length){ envanterSor(); return; }
+    const sonuc = E.puanla(envanter.cevaplar);
+    envanter = null; cipler = null;
+    const satir = E.satirlar(sonuc.puan);
+    if(H){
+      for(const k of H.etkin().filter(x => /Kaynak: kişilik envanteri/.test(x.metin))) await H.unut(k.id);
+      for(const m of satir) await H.ekle(m, { katman:'soz', kaynak:'kullanici', alan:'kisilik' });
+    }
+    soyle('Bitti, teşekkürler. Cevaplarına göre:', satir.map(x => x.split(' Kaynak:')[0]),
+      null, 'Bunlar test günü cevaplarındır; zamanla değişebilir. «Beni nasıl tanıyorsun»da görebilir, silebilirsin.');
+  }
+
   /* ---------- söz 24: sorma / sor ---------- */
   const SORMA_TUR = [
     [/uyku/, 'uyku'], [/(?<![a-zçğıöşü])su(?![a-zçğıöşü])/, 'su'], [/kilo|ölçüm|nabız|tansiyon|hrv/, 'olcum'],
@@ -988,6 +1036,8 @@ window.LIFEOS.KING = (function(){
     try{ v = (ayar.cikarimVeri ? ayar.cikarimVeri() : {}) || {}; }catch(e){ v = {}; }
     const ses = C.sesVerisi ? C.sesVerisi() : null;
     if(ses && !v.ses) v = Object.assign({}, v, { ses });
+    const us = ENV() ? ENV().uslupOzeti(ortam.depo.oku(USLUP)) : null;
+    if(us) v = Object.assign({}, v, { uslup:us });
     return C.uret(v, ortam.depo.oku(CIKARIM_KARAR) || {});
   }
   function cikarimBalonu(a){
@@ -1323,6 +1373,22 @@ window.LIFEOS.KING = (function(){
       akis.push({ kim:'sen', metin:String(metin).trim() });
       await geriAlYap();
       return { tur:'geri-al' };
+    }
+    /* Söz 25: üslup sayacı (yalnız sayı) ve envanter. */
+    if(ENV() && hafiza()) ortam.depo.yaz(USLUP, ENV().uslupGuncelle(ortam.depo.oku(USLUP), metin));
+    if(envanter){
+      const c = envanterCevap(metin);
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      if(c != null){ await envanterIlerle(c); return { tur:'envanter' }; }
+      if(/^(bırak|dur|vazgeç|sonra)/.test(t0)){ envanter = null; cipler = null; soyle('Tamam, envanteri bıraktım; istediğin zaman «kişilik testi» de.'); return { tur:'envanter-dur' }; }
+      soyle('1 ile 5 arasında bir sayı seç ya da «Bırak» de.'); return { tur:'envanter' };
+    }
+    if(ENV_BASLA.test(t0) && hafiza() && ENV()){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      bekleyenTanisma = null; bekleyenCikarim = null; cipler = null;
+      envanterBasla();
+      ciz(false);
+      return { tur:'envanter' };
     }
     /* Söz 24: «… artık sorma / sor». */
     const SK = sormaKomutu(metin);
@@ -1882,6 +1948,8 @@ window.LIFEOS.KING = (function(){
           cikarimKarar(d);
           return;
         }
+        if(/^env:[1-5]$/.test(is) && envanter){ akis.push({ kim:'sen', metin:is.slice(4) }); envanterIlerle(Number(is.slice(4))); return; }
+        if(is === 'env-dur'){ envanter = null; cipler = null; soyle('Tamam, envanteri bıraktım; istediğin zaman «kişilik testi» de.'); return; }
         if(is === 'sorma-sifirla'){ ortam.depo.sil(SORMA); ciz(false); return; }
         if(is === 'tanisma-atla'){ bekleyenTanisma = null; cipler = null; soyle('Tamam, başka zaman.'); return; }
         if(is === 'kisi'){ menuAc('kisi'); disKisiTazele().then(() => { if(acik && menu === 'kisi') ciz(false); }); return; }
@@ -2008,6 +2076,7 @@ window.LIFEOS.KING = (function(){
     ortam.depo.sil(CEVAP);
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
     bekleyenCikarim = null; bekleyenDuzeltme = null; ortam.depo.sil(CIKARIM_KARAR); ortam.depo.sil(SORMA);
+    envanter = null; ortam.depo.sil(USLUP);
     ortam.depo.sil(TANISMA);
     yazmayiBitir(); ortam.depo.sil(YAZMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
@@ -2020,6 +2089,7 @@ window.LIFEOS.KING = (function(){
     paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, fotoYorumla, GORSEL_SISTEM, TASIMA,
     kisiKayitlari, kisiOzeti, disKisiTazele, tanismaVar:() => !!bekleyenTanisma,
     cikarimAdaylari, cikarimVar:() => !!bekleyenCikarim, SORMA, sormaKomutu, sormaMi, sormaListesi,
+    USLUP, envanterVar:() => !!envanter,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
     YAZMA, yazmaAyar, yazmaSec, yazdir, yazmayiBitir, yaziyorMu:() => !!yazici,
     CEVAP, cevapBicimi, cevapSec, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,

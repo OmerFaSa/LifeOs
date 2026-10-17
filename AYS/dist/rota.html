@@ -16669,7 +16669,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'bf7e382b', at:'2026-10-17 11:41', dirty:true };
+R.BUILD = { id:'4d0c9cb3', at:'2026-10-17 11:50', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -31686,6 +31686,15 @@ LIFEOS.CIKARIM = (function(){
         kanit:'model tabandan %' + m.kazanc + ' iyi; birliktelik, neden değil',
         kayit:x.ad + ' ruh hâlini etkiliyor: ' + yon.replace('hissediyorsun', 'hissediyor') + ' (onayladı)' };
     },
+    /* King'e yazış biçimi (envanter.js üslup sayacı). */
+    function uslup(v){
+      const u = v.uslup;
+      if(!u) return null;
+      return { id:'uslup:' + (u.kisa ? 'kisa' : 'uzun') + ':' + (u.samimi ? 'samimi' : 'olculu'), alan:'uslup',
+        soru:'Bana genelde ' + u.ozet + ' yazıyorsun. Benimle de böyle konuşmamı ister misin?',
+        kanit:'mesaj başına ortalama ' + u.ort + ' karakter',
+        kayit:'İletişim üslubu: ' + u.ozet + '; King de böyle konuşsun (onayladı)' };
+    },
     /* Radyo: çalışırken dinlenen tür (zayıf kanıt: soru olarak). */
     function sesTur(v){
       const s = v.ses;
@@ -31729,6 +31738,122 @@ LIFEOS.CIKARIM = (function(){
   }
 
   return { KURALLAR, uret, sesVerisi, cevapOku, yone, DISIPLIN_EGILIM, YEMEK_EGILIM };
+})();
+
+/* ==== js/core/envanter.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/envanter.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* ENVANTER — kısa Beş Faktör kişilik envanteri ve üslup gözlemi (KISI-PLANI Faz 4).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/envanter.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   ==================================================================
+
+   KİŞİLİK: Mini-IPIP (Donnellan, Oswald, Baird ve Lucas, 2006), 20 madde,
+   Uluslararası Kişilik Madde Havuzu'ndan (IPIP, ipip.ori.org) — maddeler
+   KAMU MALIDIR. Türkçesi bu depoda yapılmıştır; Türkçe sürümün norm
+   çalışması yoktur: puanlar yalnız SENİN cevaplarının ortalamasıdır,
+   başkalarıyla karşılaştırılmaz.
+
+   Sözler:
+     1. KENDİ CEVABIN. Sonuç «senin sözün» katmanına, kişilik alanına
+        yazılır; tahmin değil, beyandır — ama bir test sonucu olduğu ve
+        günden güne değişebileceği yazılır.
+     2. YARGI YOK (AGENTS §1.5). Puan «düşük / orta / yüksek» betimlemesidir;
+        hiçbir uç «kötü» değildir. Nörotiklik yerine tersinden «duygusal
+        denge» denir; hiçbir sonuç teşhis değildir.
+     3. SOHBETLE. King maddeleri tek tek sorar (1–5); istediğin an bırakılır.
+
+   ÜSLUP: King'e yazdığın mesajlardan sayılır (uzunluk, samimi sözler,
+   emoji, soru işareti). Yalnız sayaçtır; metin saklanmaz. King üslubu
+   çıkarım olarak SORAR (cikarim.js); onaylarsan model istemine girer. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.ENVANTER = (function(){
+  /* [metin, boyut, yön] — yön −1: ters puanlanır. */
+  const MADDELER = Object.freeze([
+    ['Bir ortamın neşesi olurum.', 'E', 1],
+    ['Kendi duygularımdan çok başkalarının duygularını önemserim.', 'A', 1],
+    ['İşlerimi hemen hallederim.', 'C', 1],
+    ['Ruh hâlim sık sık değişir.', 'N', 1],
+    ['Canlı bir hayal gücüm var.', 'O', 1],
+    ['Çok konuşmam.', 'E', -1],
+    ['Başkalarının sorunları beni pek ilgilendirmez.', 'A', -1],
+    ['Eşyaları çoğu zaman yerine koymayı unuturum.', 'C', -1],
+    ['Çoğu zaman rahatımdır.', 'N', -1],
+    ['Soyut fikirler beni pek ilgilendirmez.', 'O', -1],
+    ['Toplantılarda ve davetlerde birçok farklı insanla konuşurum.', 'E', 1],
+    ['Başkalarının duygularını hissederim.', 'A', 1],
+    ['Düzeni severim.', 'C', 1],
+    ['Kolay üzülürüm.', 'N', 1],
+    ['Soyut fikirleri anlamakta zorlanırım.', 'O', -1],
+    ['Arka planda kalmayı tercih ederim.', 'E', -1],
+    ['Başkalarıyla pek ilgilenmem.', 'A', -1],
+    ['İşleri sık sık dağıtırım.', 'C', -1],
+    ['Nadiren hüzünlenirim.', 'N', -1],
+    ['Hayal gücüm pek güçlü değildir.', 'O', -1],
+  ]);
+  const CEVAPLAR = Object.freeze(['Hiç katılmıyorum', 'Katılmıyorum', 'Kararsızım', 'Katılıyorum', 'Tamamen katılıyorum']);
+  const BOYUT = {
+    E:{ ad:'Dışadönüklük', yuksek:'insanlarla olmaktan enerji alıyorsun', dusuk:'sakin ve kendi içine dönük ortamlarda daha rahatsın' },
+    A:{ ad:'Uyumluluk', yuksek:'başkalarının duygularını önemseyen, anlayışlı birisin', dusuk:'doğrudan ve kendi yolunu izleyen birisin' },
+    C:{ ad:'Sorumluluk', yuksek:'düzenli ve işini zamanında bitiren birisin', dusuk:'esnek ve kendiliğinden davranmayı seviyorsun' },
+    D:{ ad:'Duygusal denge', yuksek:'çoğu zaman sakin ve dengelisin', dusuk:'duyguların yoğun ve hızlı değişebiliyor' },
+    O:{ ad:'Deneyime açıklık', yuksek:'hayal gücü güçlü, fikirlere meraklı birisin', dusuk:'somut ve pratik olanı seviyorsun' },
+  };
+
+  /* cevaplar: 20 elemanlı, 1–5 (eksik: null). Döner: boyut puanları. */
+  function puanla(cevaplar){
+    const top = { E:[], A:[], C:[], N:[], O:[] };
+    MADDELER.forEach(([, b, yon], i) => {
+      const c = cevaplar && cevaplar[i];
+      if(typeof c !== 'number' || c < 1 || c > 5) return;
+      top[b].push(yon > 0 ? c : 6 - c);
+    });
+    const ort = l => l.length ? l.reduce((a, b) => a + b, 0) / l.length : null;
+    const p = { E:ort(top.E), A:ort(top.A), C:ort(top.C), O:ort(top.O) };
+    const n = ort(top.N);
+    p.D = n == null ? null : 6 - n;            // duygusal denge = nörotikliğin tersi
+    const eksik = (cevaplar || []).filter(c => typeof c !== 'number').length + Math.max(0, 20 - (cevaplar || []).length);
+    return { puan:p, tam:eksik === 0 };
+  }
+  function seviye(v){ return v == null ? null : v >= 3.67 ? 'yüksek' : v <= 2.33 ? 'düşük' : 'orta'; }
+  const vg = v => String(Math.round(v * 10) / 10).replace('.', ',');
+  /* Hafızaya girecek satırlar (kişilik alanı). */
+  function satirlar(p){
+    return ['E', 'A', 'C', 'D', 'O'].filter(k => p[k] != null).map(k => {
+      const s = seviye(p[k]), b = BOYUT[k];
+      const ac = s === 'yüksek' ? b.yuksek : s === 'düşük' ? b.dusuk : 'iki ucun ortasındasın';
+      return b.ad + ': ' + s + ' (' + vg(p[k]) + '/5) — ' + ac + '. Kaynak: kişilik envanteri (Mini-IPIP), kendi cevapların.';
+    });
+  }
+
+  /* -------------------------------------------------------------- üslup */
+  const SAMIMI = /(?<![a-zçğıöşü])(kanka|abi|abla|hocam|reis|kardeşim|ya|valla|harbiden|lan|moruk)(?![a-zçğıöşü])/;
+  const EMOJI = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
+  function uslupGuncelle(s, metin){
+    const o = Object.assign({ n:0, uzunluk:0, samimi:0, emoji:0, soru:0 }, s || {});
+    const t = String(metin || '').trim();
+    if(!t) return o;
+    o.n++; o.uzunluk += t.length;
+    if(SAMIMI.test(t.toLocaleLowerCase('tr'))) o.samimi++;
+    if(EMOJI.test(t)) o.emoji++;
+    if(/\?\s*$/.test(t)) o.soru++;
+    return o;
+  }
+  /* En az 15 mesaj; döner: { kisa, samimi, emoji, ozet } ya da null. */
+  function uslupOzeti(s){
+    if(!s || s.n < 15) return null;
+    const ort = s.uzunluk / s.n;
+    const kisa = ort <= 45, samimi = s.samimi / s.n >= 0.15, emoji = s.emoji / s.n >= 0.15;
+    const parca = [kisa ? 'kısa' : 'uzun ve ayrıntılı', samimi ? 'samimi (arkadaşça)' : 'ölçülü', emoji ? 'emojili' : null].filter(Boolean);
+    return { kisa, samimi, emoji, ort:Math.round(ort), ozet:parca.join(', ') };
+  }
+
+  return { MADDELER, CEVAPLAR, BOYUT, puanla, seviye, satirlar, uslupGuncelle, uslupOzeti };
 })();
 
 /* ==== js/core/pusula.js ==== */
@@ -32075,7 +32200,14 @@ window.LIFEOS.SORUKART = (function(){
       türlerin sormadan uygulanacağını kullanıcı ayarlar). «… için sor»
       geri alır. Modül söylenmezse bulunduğun modül. Tercih modüller arasında
       taşınır (lifeos.king.sorma, animasyon.js TASINAN). Gelecek zamanlı
-      cümle («yiyeceğim») yine sorulur: yapılmamış iş kaydedilmez. */
+      cümle («yiyeceğim») yine sorulur: yapılmamış iş kaydedilmez.
+  25. KİŞİLİK ENVANTERİ VE ÜSLUP (KISI-PLANI Faz 4, envanter.js). «Kişilik
+      testi» dersen King 20 maddelik Mini-IPIP'i (kamu malı) sohbet içinde
+      tek tek sorar (1–5 düğmeleri ya da yazarak); «Bırak» her an. Bitince
+      beş boyut yargısız dille kişilik alanına «senin sözün» olarak yazılır;
+      yeniden yapılırsa eskisinin yerine geçer. Yazdığın her mesaj üslup
+      sayacını artırır (yalnız sayı, metin saklanmaz); King üslubunu
+      çıkarım olarak sorar, onaylarsan model istemine girer. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -32262,7 +32394,9 @@ window.LIFEOS.KING = (function(){
   const CIKARIM_KARAR = 'lifeos.king.cikarim';   // söz 23: { id:'dogru'|'kismen'|'yanlis' }
   let bekleyenCikarim = null;  // söz 23: soru sorulmuş aday
   let bekleyenDuzeltme = null; // söz 23: «Kısmen» sonrası düzeltme bekleniyor
-  const SORMA = 'lifeos.king.sorma';           // söz 24: { ays:{ '*':true, uyku:false }, spi:{…} }
+  const SORMA = 'lifeos.king.sorma';
+  const USLUP = 'lifeos.king.uslup';           // söz 25: üslup sayacı
+  let envanter = null;                          // söz 25: { i, cevaplar }           // söz 24: { ays:{ '*':true, uyku:false }, spi:{…} }
   const FOTO_EN_BUYUK = 15 * 1024 * 1024;
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
@@ -32819,6 +32953,45 @@ window.LIFEOS.KING = (function(){
     }else soyle(r && r.why ? r.why : 'Not edemedim.');
   }
 
+  /* ---------- söz 25: kişilik envanteri ---------- */
+  const ENV = () => L.ENVANTER || null;
+  const ENV_BASLA = /(kişilik (testi|envanteri|testimi)|kişiliğimi (ölç|test et|analiz et)|beni test et|beş faktör)/;
+  function envanterSor(){
+    const E = ENV(), i = envanter.i;
+    cipler = E.CEVAPLAR.map((ad, k) => ({ is:'env:' + (k + 1), ad:(k + 1) + ' · ' + ad })).concat([{ is:'env-dur', ad:'Bırak' }]);
+    soyle('(' + (i + 1) + '/' + E.MADDELER.length + ') ' + E.MADDELER[i][0], null, null, 'Sana ne kadar uyuyor?');
+  }
+  function envanterBasla(){
+    if(!ENV() || !hafiza()) return false;
+    envanter = { i:0, cevaplar:[] };
+    akis.push({ kim:'king', metin:'Kısa bir kişilik envanteri yapalım: 20 cümle, her biri için 1 (hiç katılmıyorum) ile 5 (tamamen katılıyorum) arasında seç. '
+      + 'Doğru ya da yanlış cevap yok; istediğin an «Bırak».' });
+    envanterSor();
+    return true;
+  }
+  function envanterCevap(metin){
+    const E = ENV();
+    const t = kucuk(metin).replace(/[.!]+$/, '');
+    let c = /^[1-5]$/.test(t) ? Number(t) : null;
+    if(c == null){ const k = E.CEVAPLAR.findIndex(x => x.toLocaleLowerCase('tr') === t); if(k >= 0) c = k + 1; }
+    return c;
+  }
+  async function envanterIlerle(c){
+    const E = ENV(), H = hafiza();
+    envanter.cevaplar[envanter.i] = c;
+    envanter.i++;
+    if(envanter.i < E.MADDELER.length){ envanterSor(); return; }
+    const sonuc = E.puanla(envanter.cevaplar);
+    envanter = null; cipler = null;
+    const satir = E.satirlar(sonuc.puan);
+    if(H){
+      for(const k of H.etkin().filter(x => /Kaynak: kişilik envanteri/.test(x.metin))) await H.unut(k.id);
+      for(const m of satir) await H.ekle(m, { katman:'soz', kaynak:'kullanici', alan:'kisilik' });
+    }
+    soyle('Bitti, teşekkürler. Cevaplarına göre:', satir.map(x => x.split(' Kaynak:')[0]),
+      null, 'Bunlar test günü cevaplarındır; zamanla değişebilir. «Beni nasıl tanıyorsun»da görebilir, silebilirsin.');
+  }
+
   /* ---------- söz 24: sorma / sor ---------- */
   const SORMA_TUR = [
     [/uyku/, 'uyku'], [/(?<![a-zçğıöşü])su(?![a-zçğıöşü])/, 'su'], [/kilo|ölçüm|nabız|tansiyon|hrv/, 'olcum'],
@@ -32875,6 +33048,8 @@ window.LIFEOS.KING = (function(){
     try{ v = (ayar.cikarimVeri ? ayar.cikarimVeri() : {}) || {}; }catch(e){ v = {}; }
     const ses = C.sesVerisi ? C.sesVerisi() : null;
     if(ses && !v.ses) v = Object.assign({}, v, { ses });
+    const us = ENV() ? ENV().uslupOzeti(ortam.depo.oku(USLUP)) : null;
+    if(us) v = Object.assign({}, v, { uslup:us });
     return C.uret(v, ortam.depo.oku(CIKARIM_KARAR) || {});
   }
   function cikarimBalonu(a){
@@ -33210,6 +33385,22 @@ window.LIFEOS.KING = (function(){
       akis.push({ kim:'sen', metin:String(metin).trim() });
       await geriAlYap();
       return { tur:'geri-al' };
+    }
+    /* Söz 25: üslup sayacı (yalnız sayı) ve envanter. */
+    if(ENV() && hafiza()) ortam.depo.yaz(USLUP, ENV().uslupGuncelle(ortam.depo.oku(USLUP), metin));
+    if(envanter){
+      const c = envanterCevap(metin);
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      if(c != null){ await envanterIlerle(c); return { tur:'envanter' }; }
+      if(/^(bırak|dur|vazgeç|sonra)/.test(t0)){ envanter = null; cipler = null; soyle('Tamam, envanteri bıraktım; istediğin zaman «kişilik testi» de.'); return { tur:'envanter-dur' }; }
+      soyle('1 ile 5 arasında bir sayı seç ya da «Bırak» de.'); return { tur:'envanter' };
+    }
+    if(ENV_BASLA.test(t0) && hafiza() && ENV()){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      bekleyenTanisma = null; bekleyenCikarim = null; cipler = null;
+      envanterBasla();
+      ciz(false);
+      return { tur:'envanter' };
     }
     /* Söz 24: «… artık sorma / sor». */
     const SK = sormaKomutu(metin);
@@ -33769,6 +33960,8 @@ window.LIFEOS.KING = (function(){
           cikarimKarar(d);
           return;
         }
+        if(/^env:[1-5]$/.test(is) && envanter){ akis.push({ kim:'sen', metin:is.slice(4) }); envanterIlerle(Number(is.slice(4))); return; }
+        if(is === 'env-dur'){ envanter = null; cipler = null; soyle('Tamam, envanteri bıraktım; istediğin zaman «kişilik testi» de.'); return; }
         if(is === 'sorma-sifirla'){ ortam.depo.sil(SORMA); ciz(false); return; }
         if(is === 'tanisma-atla'){ bekleyenTanisma = null; cipler = null; soyle('Tamam, başka zaman.'); return; }
         if(is === 'kisi'){ menuAc('kisi'); disKisiTazele().then(() => { if(acik && menu === 'kisi') ciz(false); }); return; }
@@ -33895,6 +34088,7 @@ window.LIFEOS.KING = (function(){
     ortam.depo.sil(CEVAP);
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
     bekleyenCikarim = null; bekleyenDuzeltme = null; ortam.depo.sil(CIKARIM_KARAR); ortam.depo.sil(SORMA);
+    envanter = null; ortam.depo.sil(USLUP);
     ortam.depo.sil(TANISMA);
     yazmayiBitir(); ortam.depo.sil(YAZMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
@@ -33907,6 +34101,7 @@ window.LIFEOS.KING = (function(){
     paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, fotoYorumla, GORSEL_SISTEM, TASIMA,
     kisiKayitlari, kisiOzeti, disKisiTazele, tanismaVar:() => !!bekleyenTanisma,
     cikarimAdaylari, cikarimVar:() => !!bekleyenCikarim, SORMA, sormaKomutu, sormaMi, sormaListesi,
+    USLUP, envanterVar:() => !!envanter,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
     YAZMA, yazmaAyar, yazmaSec, yazdir, yazmayiBitir, yaziyorMu:() => !!yazici,
     CEVAP, cevapBicimi, cevapSec, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,

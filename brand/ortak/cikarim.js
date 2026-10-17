@@ -275,6 +275,15 @@ LIFEOS.CIKARIM = (function(){
         kanit:'model tabandan %' + m.kazanc + ' iyi; birliktelik, neden değil',
         kayit:x.ad + ' ruh hâlini etkiliyor: ' + yon.replace('hissediyorsun', 'hissediyor') + ' (onayladı)' };
     },
+    /* King'e yazış biçimi (envanter.js üslup sayacı). */
+    function uslup(v){
+      const u = v.uslup;
+      if(!u) return null;
+      return { id:'uslup:' + (u.kisa ? 'kisa' : 'uzun') + ':' + (u.samimi ? 'samimi' : 'olculu'), alan:'uslup',
+        soru:'Bana genelde ' + u.ozet + ' yazıyorsun. Benimle de böyle konuşmamı ister misin?',
+        kanit:'mesaj başına ortalama ' + u.ort + ' karakter',
+        kayit:'İletişim üslubu: ' + u.ozet + '; King de böyle konuşsun (onayladı)' };
+    },
     /* Radyo: çalışırken dinlenen tür (zayıf kanıt: soru olarak). */
     function sesTur(v){
       const s = v.ses;
