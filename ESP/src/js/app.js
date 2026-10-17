@@ -1801,6 +1801,22 @@ ESP.App = (function(){
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'esp', ekran:() => S.route, model:() => ESP.LLM, hkm:() => ESP.Beacon, git:route => go(route), hafiza:() => ESP.Hafizam,
+          /* King'in çıkarımları için (cikarim.js): son 30 günün disiplin dakikaları, kitaplar, müzik günleri. */
+          cikarimVeri:() => {
+            const dakika = {};
+            let gun = 0, muzikGun = 0;
+            for(let i = 0; i < 30; i++){
+              const d = U.iso(U.addDays(U.today(), -i));
+              const ss = M.sessionsOf(d).filter(s => s.minutes > 0);
+              if(ss.length) gun++;
+              if(ss.some(s => s.disc === 'music')) muzikGun++;
+              ss.forEach(s => { dakika[s.disc] = (dakika[s.disc] || 0) + s.minutes; });
+            }
+            const adlar = {};
+            Object.keys(ESP.DISCIPLINE_BY_ID).forEach(k => { adlar[k] = ESP.DISCIPLINE_BY_ID[k].label; });
+            return { esp:{ disiplin:{ gun, dakika, adlar }, muzikGun,
+              kitaplar:(S.books || []).map(b => ({ author:b.author, startedAt:b.startedAt, finishedAt:b.finishedAt })) } };
+          },
           ozet:() => [ESP.Screens.today.headline()] });
       }
       /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı

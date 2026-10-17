@@ -1654,6 +1654,10 @@ R.App = (function(){
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route, model:() => R.LLM, hafiza:() => R.Hafizam,
+          /* King'in çıkarımları için (cikarim.js): son 45 günde ders ders çözülen ve doğru soru. */
+          cikarimVeri:() => ({ ays:{ dersler:(R.SUBJECTS || []).map(s => {
+            const p = R.Calc.topicPractice(s.id, null, 45);
+            return { id:s.id, ad:s.name, solved:p.solved || 0, correct:p.correct || 0 }; }) } }),
           /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
           foto:[{ ad:'Soruyu çöz', is:async f => {
             go('solve');

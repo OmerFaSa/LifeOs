@@ -1610,6 +1610,22 @@ SP.App = (function(){
          girişi bu modülün kendi koduyla (SP.Quick: önizleme, onayla kayıt). */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'spi', ekran:() => S.route, model:() => SP.LLM, hafiza:() => SP.Hafizam,
+          /* King'in çıkarımları için (cikarim.js): son 30 günün yatış saatleri, yemek kategorileri, antrenman sayısı. */
+          cikarimVeri:() => {
+            const yatis = [], kat = {};
+            let ant = 0;
+            for(let i = 0; i < 30; i++){
+              const d = SP.U.iso(SP.U.addDays(SP.U.today(), -i));
+              const v = SP.S.vitals[d];
+              if(v && v.yatis != null && isFinite(Number(v.yatis))) yatis.push(Number(v.yatis));
+              (SP.Model.mealsOf(d) || []).forEach(m => (m.items || []).forEach(it => {
+                const f = SP.FOOD_BY_ID[it.foodId]; if(f && f.cat) kat[f.cat] = (kat[f.cat] || 0) + 1; }));
+              ant += SP.Model.workoutsOf(d).length;
+            }
+            const katAd = {};
+            (SP.FOOD_CATS || []).forEach(c => { katAd[c.id] = c.label; });
+            return { spi:{ yatis, yemekKat:kat, katAd, antrenman30:ant } };
+          },
           /* King'e gelen fotoğraf (king.js söz 11): Fotoğraftan öğün akışına. */
           foto:[{ ad:'Öğün olarak oku', is:async f => {
             go('meals');

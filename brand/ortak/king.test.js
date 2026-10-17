@@ -422,6 +422,45 @@
       expect(H.etkin().some(x => x.metin === 'sabahları daha verimliyim' && x.katman === 'soz')).toBe(true);
     }));
 
+    /* Söz 23 (2026-10-17): çıkarım sohbetle sorulur; doğruysa kaydedilir. */
+    const ESP_VERI = () => ({ esp:{ disiplin:{ gun:12, dakika:{ philo:500, lang:100 }, adlar:{ philo:'Felsefe' } } } });
+    it('çıkarım: «Doğru» onayla hafızaya; aynı çıkarım bir daha sorulmaz', () => sahneyle(async () => {
+      if(!window.LIFEOS.CIKARIM || !window.LIFEOS.Hafiza) return;
+      const { k } = sahne();
+      k._ortam.kisiSunucu = async () => null;
+      const H = hafizali(k, { cikarimVeri:ESP_VERI });
+      k.ac();
+      expect(k.cikarimVar()).toBe(true);
+      expect(k.akis()[0].metin).toContain('Felsefe');
+      expect(k.akis()[0].son).toBe('Sence doğru mu?');
+      document.querySelector('[data-king="cikarim:dogru"]').click();
+      await new Promise(r => setTimeout(r, 0));
+      const kay = H.etkin();
+      expect([kay.length, kay[0].alan, kay[0].katman, kay[0].kaynak]).toEqual([1, 'gelisim', 'sohbet', 'kullanici']);
+      expect(kay[0].metin).toContain('onayladı');
+      expect(k.cikarimAdaylari().some(a => a.id === 'esp-disiplin:philo')).toBe(false);
+    }));
+    it('çıkarım: «Yanlış» bir daha sormaz; serbest cevap düzeltme olarak senin sözün', () => sahneyle(async () => {
+      if(!window.LIFEOS.CIKARIM || !window.LIFEOS.Hafiza) return;
+      const { k } = sahne();
+      k._ortam.kisiSunucu = async () => null;
+      const H = hafizali(k, { cikarimVeri:ESP_VERI });
+      k.ac({ mini:true });
+      await k.isle('beni yorumla');
+      expect(k.cikarimVar()).toBe(true);
+      await k.isle('hayır');
+      expect(H.etkin()).toHaveLength(0);
+      expect(k.cikarimAdaylari()).toHaveLength(0);
+      await k.isle('beni yorumla');
+      expect(k.akis().slice(-1)[0].metin).toContain('yeni bir çıkarımım yok');
+      /* düzeltme */
+      k._ortam.depo.sil('lifeos.king.cikarim');
+      await k.isle('beni yorumla');
+      await k.isle('felsefe değil, tarih seviyorum');
+      const kay = H.etkin();
+      expect([kay.length, kay[0].katman, kay[0].alan]).toEqual([1, 'soz', 'gelisim']);
+    }));
+
     /* Söz 21 (2026-10-17): «King yazarken tıkı tıkı, açıp kapatabildiğimiz yazı yazma». */
     it('yeni cevap harf harf yazılır, seyrek tıklar; dokununca biter; kapatılınca tek seferde', () => sahneyle(async () => {
       const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };

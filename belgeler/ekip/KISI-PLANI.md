@@ -114,6 +114,14 @@ onu besleyen öğrenme yolları, King'in onu kullanması ve senin onu görmen.
   tanıyorsun», King'de hafıza komutları, görüntü modeline kişi özeti),
   sunucu sözü 24 (`<modul>/kisi` yayını + `GET /api/hesap/kisi`: bir modülde
   öğrenilen öbüründeki King'e ulaşır).
-- Sıradaki: Faz 3 (ölçülen veriden gözlemler), sonra 4 (envanter + üslup).
+- 2026-10-17: **Faz 3 yapıldı (sohbetle).** Depo sahibi: «King ‹senin üzerine
+  böyle bir çıkarım yaptım, sence doğru mu?› desin; doğruysa kaydedilsin.»
+  `brand/ortak/cikarim.js`: dokuz kural (ESP disiplin payı, kitap bitirme,
+  yazar, müzik düzeni; AYS en çok çalışılan / en isabetli ders; SPİ
+  kronotip, yemek ağırlığı, hareket; radyo türü), hepsi eşikli ve kanıtlı.
+  King söz 23: günde en çok bir soru (çıkarım varsa o, yoksa tanışma),
+  «beni yorumla» ile hemen; Doğru → onayınla hafıza, Kısmen/serbest cevap →
+  senin cümlen, Yanlış → bir daha sorulmaz.
+- Sıradaki: Faz 4 (kişilik envanteri + üslup), sonra 5 (ajan izinleri, HKM alanı).
 - Açık: HKM'deki King (Merkez) `alan`ı henüz kullanmıyor; hafıza metni
   zaten eşitleniyor, alan bilgisi Faz 5'te HKM tarafına taşınacak.

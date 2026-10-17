@@ -16025,7 +16025,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'26f543d1', at:'2026-10-17 10:32', dirty:true };
+ESP.BUILD = { id:'5ffdf63e', at:'2026-10-17 10:51', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -30761,6 +30761,222 @@ LIFEOS.KISI = (function(){
   return { ALANLAR, BY_ID, beyan, grupla, ozet, tanismaSorusu, cevapMetni };
 })();
 
+/* ==== js/core/cikarim.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/cikarim.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* ÇIKARIM — King'in senin hakkında kurduğu tahminler; sana sorulur.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/cikarim.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır.
+   ==================================================================
+
+   Depo sahibinin isteği (2026-10-17, KISI-PLANI Faz 3): «Okuduğum
+   kitaplardan, dinlediğim ve çaldığım müzikten, sevdiğim dersten, sağlığımdan,
+   yediklerimden, hedeflerimden psikolojik çıkarım yapsın. Birazcık sohbet
+   ederek: King ‹senin üzerine böyle bir çıkarım yaptım, sence doğru mu?›
+   desin; doğruysa sistem kaydetsin.»
+
+   Sözler:
+     1. ÖLÇÜLENDEN, KANITIYLA. Her çıkarım modülün kayıtlı verisinden bir
+        KURALLA çıkar ve kanıtını taşır («30 günde 12 saatin 7'si felsefe»).
+        Model çıkarım üretmez; cümleyi kod yazar (AGENTS §1.1).
+     2. EŞİĞİN ALTINDA SUSAR. Az veride çıkarım yoktur (§1.7).
+     3. SORU OLARAK SORULUR. Hiçbir çıkarım kendiliğinden hafızaya girmez:
+        «Doğru» dersen senin onayınla yazılır, «Yanlış» dersen bir daha
+        sorulmaz, «Kısmen» dersen kendi cümlen yazılır.
+     4. TEŞHİS VE YARGI YOK (§1.5). Dil «gibi görünüyor», «olabilir mi?»;
+        «yeteneksiz», «bağımlı», «depresif» gibi hüküm kurulmaz.
+     5. KİMLİK VERİYE BAĞLI. Çıkarımın kimliği kuralı ve vardığı sonucu
+        taşır («esp-disiplin:philo»): veri değişip sonuç değişirse yeni
+        çıkarım olur; aynı sonuç ikinci kez sorulmaz. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.CIKARIM = (function(){
+  const yuzde = (a, b) => b ? Math.round(100 * a / b) : 0;
+  const saatYaz = h => { const t = ((h % 24) + 24) % 24; const s = Math.floor(t), d = Math.round((t - s) * 60); return String(s).padStart(2, '0') + ':' + String(d === 60 ? 0 : d).padStart(2, '0'); };
+  /* Yönelme eki ünlü uyumuyla: Felsefe'ye, Gitar'a, Derin Okuma'ya, Tarih'e. */
+  function yone(ad){
+    const a = String(ad || '').trim();
+    const sesli = (a.toLocaleLowerCase('tr').match(/[aıoueiöü]/g) || []).pop() || 'e';
+    const kalin = 'aıou'.indexOf(sesli) >= 0;
+    const sonSesli = /[aıoueiöü]$/i.test(a);
+    return a + '\'' + (sonSesli ? 'y' : '') + (kalin ? 'a' : 'e');
+  }
+  const medyan = l => { const s = l.slice().sort((a, b) => a - b); const n = s.length; return n ? (n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2) : null; };
+
+  /* ESP disiplininden eğilim cümlesi. */
+  const DISIPLIN_EGILIM = {
+    philo:'soyut ve derin düşünmeyi seviyor gibisin',
+    music:'müzik senin için bir ifade ve dinlenme yolu gibi',
+    lang:'yeni kültürlere ve insanlara açılmayı önemsiyor gibisin',
+    history:'geçmişi anlayarak bugünü yorumlamayı seviyor gibisin',
+    diction:'kendini iyi ifade etmek senin için önemli görünüyor',
+    reading:'derinlemesine okumak sana iyi geliyor gibi',
+    writing:'düşüncelerini yazarak düzenlemeyi seviyor gibisin',
+  };
+  /* SPİ yemek kategorisinden cümle (yalnız belirgin olanlar). */
+  const YEMEK_EGILIM = {
+    tatli:'tatlıya düşkün gibisin; yorgun ya da stresli günlerde artıyor olabilir mi?',
+    et:'protein ağırlıklı besleniyorsun; güç ve dayanıklılık senin için önemli görünüyor',
+    sebze:'sebzeyi seviyorsun; sağlığına dikkat eden biri gibisin',
+    meyve:'meyveyi seviyorsun; sağlığına dikkat eden biri gibisin',
+    yemek:'ev yemeğini seviyorsun; düzenli ve tanıdık olan sana iyi geliyor gibi',
+    tahil:'beslenmende tahıl ve ekmek ağır basıyor; doyurucu ve pratik olanı seviyor gibisin',
+  };
+
+  /* Her kural: veri → aday ya da null.
+     Aday: { id, alan, soru (sana sorulan cümle), kanit, kayit (onaylanınca hafızaya giden) } */
+  const KURALLAR = [
+    /* ESP: zamanın en çok gittiği disiplin. */
+    function espDisiplin(v){
+      const d = v.esp && v.esp.disiplin;
+      if(!d) return null;
+      const ids = Object.keys(d.dakika || {});
+      const toplam = ids.reduce((a, k) => a + (d.dakika[k] || 0), 0);
+      if((d.gun || 0) < 8 || toplam < 240) return null;
+      const ust = ids.sort((a, b) => d.dakika[b] - d.dakika[a])[0];
+      const pay = yuzde(d.dakika[ust], toplam);
+      if(pay < 40) return null;
+      const ad = (d.adlar && d.adlar[ust]) || ust;
+      const eg = DISIPLIN_EGILIM[ust] || 'bu alan senin için önemli görünüyor';
+      return { id:'esp-disiplin:' + ust, alan:'gelisim',
+        soru:'Son 30 günde gelişim zamanının en büyük payı ' + ad + ': %' + pay + '. Buradan şunu çıkardım: ' + eg + '.',
+        kanit:d.gun + ' gün, toplam ' + Math.round(toplam / 60) + ' saat',
+        kayit:yone(ad) + ' çok zaman ayırıyor; ' + eg.replace(/ gibisin$/, '') + ' (onayladı)' };
+    },
+    /* ESP: başladığı kitabı bitirme. */
+    function espKitapBitirme(v){
+      const k = (v.esp && v.esp.kitaplar) || [];
+      const baslanan = k.filter(b => b.startedAt);
+      if(baslanan.length < 4) return null;
+      const biten = baslanan.filter(b => b.finishedAt).length;
+      const oran = biten / baslanan.length;
+      if(oran >= 0.75) return { id:'esp-kitap:bitiren', alan:'kisilik',
+        soru:'Başladığın ' + baslanan.length + ' kitaptan ' + biten + ' tanesini bitirmişsin. Başladığı işi sonuna kadar götüren biri gibisin.',
+        kanit:biten + '/' + baslanan.length + ' kitap', kayit:'Başladığı kitabı bitirir; işi sonuna götürür (onayladı)' };
+      if(baslanan.length >= 5 && oran <= 0.3) return { id:'esp-kitap:merakli', alan:'kisilik',
+        soru:'Birçok kitaba başlayıp ara vermişsin (' + biten + '/' + baslanan.length + ' bitti). Merakın geniş, ama odağın kolay dağılıyor olabilir mi?',
+        kanit:biten + '/' + baslanan.length + ' kitap', kayit:'Merakı geniş; birçok kitaba başlar, odağı dağılabilir (onayladı)' };
+      return null;
+    },
+    /* ESP: en çok okunan yazar. */
+    function espYazar(v){
+      const k = (v.esp && v.esp.kitaplar) || [];
+      const say = {};
+      k.forEach(b => { const a = String(b.author || '').trim(); if(a) say[a] = (say[a] || 0) + 1; });
+      const ust = Object.keys(say).sort((a, b) => say[b] - say[a])[0];
+      if(!ust || say[ust] < 3) return null;
+      return { id:'esp-yazar:' + ust.toLocaleLowerCase('tr'), alan:'sevgi',
+        soru:'En çok ' + ust + ' okumuşsun (' + say[ust] + ' kitap). Onun düşünceleri sana yakın geliyor olabilir mi?',
+        kanit:say[ust] + ' kitap', kayit:ust + ' okumayı seviyor; düşünceleri ona yakın (onayladı)' };
+    },
+    /* ESP: müzik çalma düzeni. */
+    function espMuzik(v){
+      const g = v.esp && v.esp.muzikGun;
+      if(!(g >= 10)) return null;
+      return { id:'esp-muzik:duzenli', alan:'hobi',
+        soru:'Son 30 günde ' + g + ' gün müzik çalışmışsın. Müzik hayatının düzenli bir parçası; seni dinlendiren bir şey gibi görünüyor.',
+        kanit:g + ' gün', kayit:'Müzik çalmak hayatının düzenli bir parçası; onu dinlendirir (onayladı)' };
+    },
+    /* AYS: en çok çalışılan ve en isabetli ders. */
+    function aysDers(v){
+      const l = ((v.ays && v.ays.dersler) || []).filter(d => d.solved > 0);
+      const toplam = l.reduce((a, d) => a + d.solved, 0);
+      if(toplam < 300) return null;
+      const cok = l.slice().sort((a, b) => b.solved - a.solved)[0];
+      const isabetli = l.filter(d => d.solved >= 100).sort((a, b) => (b.correct / b.solved) - (a.correct / a.solved))[0];
+      if(!isabetli) return null;
+      const ib = yuzde(isabetli.correct, isabetli.solved);
+      if(cok.id === isabetli.id) return { id:'ays-ders:' + cok.id, alan:'ogrenme',
+        soru:'Son 45 günde en çok ' + cok.ad + ' çalışmışsın (' + cok.solved + ' soru) ve en isabetli olduğun ders de bu (%' + ib + '). Bu dersi seviyor gibisin.',
+        kanit:cok.solved + ' soru, %' + ib + ' doğru', kayit:cok.ad + ' dersini seviyor ve bu derste güçlü (onayladı)' };
+      return { id:'ays-isabet:' + isabetli.id, alan:'ogrenme',
+        soru:'En çok ' + cok.ad + ' çalışıyorsun ama en isabetli olduğun ders ' + isabetli.ad + ' (%' + ib + '). ' + yone(isabetli.ad) + ' yatkın, belki onu daha çok seviyor olabilir misin?',
+        kanit:isabetli.solved + ' soru, %' + ib + ' doğru', kayit:yone(isabetli.ad) + ' yatkın; o dersi seviyor (onayladı)' };
+    },
+    /* SPİ: yatış saatinden kronotip. */
+    function spiKronotip(v){
+      const y = ((v.spi && v.spi.yatis) || []).filter(x => typeof x === 'number');
+      if(y.length < 10) return null;
+      const m = medyan(y);
+      if(m >= 24.75) return { id:'spi-kronotip:gece', alan:'ritim',
+        soru:'Son gecelerinde yatış saatin genelde ' + saatYaz(m) + '. Gece insanı gibisin; akşamları zihnin daha mı açık oluyor?',
+        kanit:y.length + ' gece, ortanca ' + saatYaz(m), kayit:'Gece insanı; geç yatar (onayladı)' };
+      if(m <= 23) return { id:'spi-kronotip:sabah', alan:'ritim',
+        soru:'Son gecelerinde yatış saatin genelde ' + saatYaz(m) + '. Sabah insanı gibisin; günün ilk saatleri sana daha verimli mi geliyor?',
+        kanit:y.length + ' gece, ortanca ' + saatYaz(m), kayit:'Sabah insanı; erken yatar (onayladı)' };
+      return null;
+    },
+    /* SPİ: yediklerinde ağır basan kategori. */
+    function spiYemek(v){
+      const k = (v.spi && v.spi.yemekKat) || {};
+      const toplam = Object.keys(k).reduce((a, x) => a + k[x], 0);
+      if(toplam < 30) return null;
+      const sira = Object.keys(k).filter(x => YEMEK_EGILIM[x]).sort((a, b) => k[b] - k[a]);
+      const tatliPay = yuzde(k.tatli || 0, toplam);
+      const sec = tatliPay >= 18 ? 'tatli' : sira.find(x => yuzde(k[x], toplam) >= 25);
+      if(!sec) return null;
+      const ad = (v.spi.katAd && v.spi.katAd[sec]) || sec;
+      return { id:'spi-yemek:' + sec, alan:'sevgi',
+        soru:'Son 30 günde yediklerin içinde ' + ad.toLocaleLowerCase('tr') + ' payı %' + yuzde(k[sec], toplam) + '. Buradan şunu çıkardım: ' + YEMEK_EGILIM[sec],
+        kanit:k[sec] + '/' + toplam + ' kalem', kayit:ad + ' ağırlıklı besleniyor; ' + YEMEK_EGILIM[sec].split(';')[0].replace(/ gibisin$/, '') + ' (onayladı)' };
+    },
+    /* SPİ: hareket düzeni. */
+    function spiHareket(v){
+      const n = v.spi && v.spi.antrenman30;
+      if(!(n >= 8)) return null;
+      return { id:'spi-hareket:duzenli', alan:'fizyoloji',
+        soru:'Son 30 günde ' + n + ' antrenman yapmışsın. Hareket senin için bir alışkanlık ve düzen; bedenini önemsiyorsun gibi görünüyor.',
+        kanit:n + ' antrenman', kayit:'Düzenli hareket eder; bedenini önemser (onayladı)' };
+    },
+    /* Radyo: çalışırken dinlenen tür (zayıf kanıt: soru olarak). */
+    function sesTur(v){
+      const s = v.ses;
+      if(!s || !s.tur || !s.dinlendi) return null;
+      const sakin = /chill|lofi|klasik|jazz|piyano|ambient/i.test(s.tur);
+      return { id:'ses-tur:' + s.tur, alan:'sevgi',
+        soru:'Çalışırken genelde ' + s.turAd + ' açıyorsun. ' + (sakin ? 'Sakin bir ortam odaklanmana yardım ediyor olabilir mi?' : 'Ritimli bir ortam seni canlı tutuyor olabilir mi?'),
+        kanit:'radyo tercihi', kayit:'Çalışırken ' + s.turAd + ' dinler (onayladı)' };
+    },
+  ];
+
+  /* Veri → adaylar (sorulmuş olanlar `karar` ile süzülür: { id:'dogru'|'yanlis'|'kismen' }). */
+  function uret(veri, karar){
+    const k = karar || {};
+    const out = [];
+    KURALLAR.forEach(f => {
+      let a = null;
+      try{ a = f(veri || {}); }catch(e){ a = null; }
+      if(a && !k[a.id]) out.push(a);
+    });
+    return out;
+  }
+
+  /* Radyo tercihinden veri (her modülde aynı; LIFEOS.SES). */
+  function sesVerisi(){
+    const S = (window.LIFEOS || {}).SES;
+    if(!S || typeof S.tercih !== 'function') return null;
+    try{
+      const t = S.tercih(), d = S.durum ? S.durum() : {};
+      return { tur:t.tur, turAd:d.turAd || t.tur, dinlendi:!!(t.son && t.son[t.tur]) };
+    }catch(e){ return null; }
+  }
+
+  /* Cevap metni → karar (sohbetle cevap). */
+  function cevapOku(metin){
+    const t = String(metin || '').toLocaleLowerCase('tr').replace(/[.!]+$/, '').trim();
+    if(/^(doğru|evet|aynen|kesinlikle|çok doğru|tam olarak|öyle|evet doğru|bence de)( |$|[,!])/.test(t)) return 'dogru';
+    if(/^(yanlış|hayır|değil|hiç değil|alakası yok|yok)( |$|[,!])/.test(t)) return 'yanlis';
+    if(/^(kısmen|biraz|bazen|yarı yarıya|tam değil|pek değil)( |$|[,!])/.test(t)) return 'kismen';
+    return null;
+  }
+
+  return { KURALLAR, uret, sesVerisi, cevapOku, yone, DISIPLIN_EGILIM, YEMEK_EGILIM };
+})();
+
 /* ==== js/core/pusula.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/pusula.js içine yazılır; burası bir sonraki
@@ -31086,7 +31302,17 @@ window.LIFEOS.SORUKART = (function(){
         · Hafıza komutları King'de de çalışır («hatırla: …», «3 unut»;
           «hafızam» ve «benim hakkımda ne biliyorsun» paneli açar).
         · Görüntü okuyan modele kişi özeti gider (depo sahibinin kararı:
-          hassas alanlar dahil); teşhis ve yargı yasak istemde yazılı. */
+          hassas alanlar dahil); teşhis ve yargı yasak istemde yazılı.
+  23. ÇIKARIM SORAR (depo sahibi, 2026-10-17: «okuduğum kitaptan, müzikten,
+      dersten, yemekten, sağlığımdan çıkarım yapsın; birazcık sohbet ederek
+      ‹senin üzerine böyle bir çıkarım yaptım, sence doğru mu?› desin;
+      doğruysa sistem kaydetsin»). Kurallar cikarim.js'te, veri modülden
+      (`ayar.cikarimVeri`). King günde en çok bir soru sorar (çıkarım varsa
+      o, yoksa tanışma); «beni yorumla» dersen hemen. Cevap:
+        Doğru   → senin onayınla hafızaya («sohbetten», kaynak sen)
+        Kısmen  → «nasıl düzelteyim?»; senin cümlen «senin sözün» olur
+        Yanlış  → bir daha sorulmaz
+      Serbest cevap («felsefe değil, tarih») düzeltme sayılır. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -31270,6 +31496,9 @@ window.LIFEOS.KING = (function(){
   let disKisi = [];           // söz 22: öbür modüllerin kişi kayıtları [{ modul, kayitlar }]
   let kisiYeni = { alan:'sevgi', metin:'' };   // söz 22: paneldeki ekleme formu
   const TANISMA = 'lifeos.king.tanisma';
+  const CIKARIM_KARAR = 'lifeos.king.cikarim';   // söz 23: { id:'dogru'|'kismen'|'yanlis' }
+  let bekleyenCikarim = null;  // söz 23: soru sorulmuş aday
+  let bekleyenDuzeltme = null; // söz 23: «Kısmen» sonrası düzeltme bekleniyor
   const FOTO_EN_BUYUK = 15 * 1024 * 1024;
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
@@ -31826,6 +32055,66 @@ window.LIFEOS.KING = (function(){
     }else soyle(r && r.why ? r.why : 'Not edemedim.');
   }
 
+  /* ---------- söz 23: çıkarım sorar ---------- */
+  function cikarimAdaylari(){
+    const C = L.CIKARIM;
+    if(!C || !hafiza()) return [];
+    let v = {};
+    try{ v = (ayar.cikarimVeri ? ayar.cikarimVeri() : {}) || {}; }catch(e){ v = {}; }
+    const ses = C.sesVerisi ? C.sesVerisi() : null;
+    if(ses && !v.ses) v = Object.assign({}, v, { ses });
+    return C.uret(v, ortam.depo.oku(CIKARIM_KARAR) || {});
+  }
+  function cikarimBalonu(a){
+    bekleyenCikarim = a;
+    cipler = [{ is:'cikarim:dogru', ad:'Doğru' }, { is:'cikarim:kismen', ad:'Kısmen' }, { is:'cikarim:yanlis', ad:'Yanlış' }];
+    return { metin:'Senin üzerine bir çıkarım yaptım. ' + a.soru, satirlar:['Dayanağı: ' + a.kanit], son:'Sence doğru mu?' };
+  }
+  /* Açılışta (günde bir): akışa doğrudan konur. */
+  function cikarimHazirla(){
+    if(akis.length || ortam.depo.oku(TANISMA) === bugunISO()) return false;
+    const a = cikarimAdaylari()[0];
+    if(!a) return false;
+    ortam.depo.yaz(TANISMA, bugunISO());
+    const b = cikarimBalonu(a);
+    akis.push({ kim:'king', metin:b.metin, satirlar:b.satirlar, son:b.son });
+    return true;
+  }
+  function cikarimKararYaz(id, durum){
+    const k = ortam.depo.oku(CIKARIM_KARAR) || {};
+    k[id] = durum;
+    ortam.depo.yaz(CIKARIM_KARAR, k);
+  }
+  async function cikarimKarar(durum){
+    const a = bekleyenCikarim, H = hafiza();
+    bekleyenCikarim = null; cipler = null;
+    if(!a) return;
+    cikarimKararYaz(a.id, durum);
+    if(durum === 'dogru' && H){
+      const r = await H.ekle(a.kayit, { katman:'sohbet', kaynak:'kullanici', alan:a.alan });
+      if(r && r.ok){ sonGeriAl = async () => { await H.unut(r.kayit.id); }; cipler = [{ is:'geri-al', ad:'Geri al' }]; }
+      soyle('Güzel, not ettim. Seni biraz daha iyi tanıyorum.');
+      return;
+    }
+    if(durum === 'kismen'){
+      bekleyenDuzeltme = a;
+      soyle('Nasıl düzelteyim? Kendi cümlenle yaz, öyle not edeyim.');
+      return;
+    }
+    soyle('Tamam, bu çıkarımı bıraktım; bir daha sormayacağım.');
+  }
+  async function cikarimDuzelt(a, metin){
+    const H = hafiza();
+    bekleyenDuzeltme = null; bekleyenCikarim = null; cipler = null;
+    cikarimKararYaz(a.id, 'kismen');
+    const m = String(metin || '').replace(/\s+/g, ' ').trim();
+    if(!H || !m){ soyle('Tamam.'); return; }
+    const r = await H.ekle(m, { katman:'soz', kaynak:'kullanici', alan:a.alan });
+    if(r && r.ok){ sonGeriAl = async () => { await H.unut(r.kayit.id); }; cipler = [{ is:'geri-al', ad:'Geri al' }]; }
+    soyle(r && r.ok ? 'Anladım, senin cümlenle not ettim.' : (r && r.why) || 'Not edemedim.');
+  }
+  const YORUMLA = /^(beni (yorumla|analiz et|tanı|oku)|benim hakkımda (bir )?(çıkarım|yorum) yap|hakkımda ne düşünüyorsun|beni nasıl görüyorsun|beni ne kadar tanıyorsun)/;
+
   /* ---------- söz 21: yazarak gelir ---------- */
   function yazmaAyar(){
     const v = ortam.depo.oku(YAZMA) || {};
@@ -32117,6 +32406,40 @@ window.LIFEOS.KING = (function(){
       const r = await hafiza().komutIsle(metin);
       soyle(r ? r.text : 'Anlayamadım.');
       return { tur:'hafiza' };
+    }
+    /* Söz 23: çıkarım cevabı ve düzeltme. */
+    if(bekleyenDuzeltme){
+      const y0 = yorumla(metin);
+      if(!(y0.tur === 'veri' || (y0.tur === 'git' && y0.kaynak === 'komut'))){
+        akis.push({ kim:'sen', metin:String(metin).trim() });
+        await cikarimDuzelt(bekleyenDuzeltme, metin);
+        return { tur:'cikarim-duzelt' };
+      }
+      bekleyenDuzeltme = null;
+    }
+    if(bekleyenCikarim){
+      const karar = L.CIKARIM ? L.CIKARIM.cevapOku(metin) : null;
+      const y0 = yorumla(metin);
+      if(karar){
+        akis.push({ kim:'sen', metin:String(metin).trim() });
+        await cikarimKarar(karar);
+        return { tur:'cikarim', karar };
+      }
+      if(!(y0.tur === 'veri' || (y0.tur === 'git' && y0.kaynak === 'komut'))){
+        akis.push({ kim:'sen', metin:String(metin).trim() });
+        await cikarimDuzelt(bekleyenCikarim, metin);
+        return { tur:'cikarim-duzelt' };
+      }
+      bekleyenCikarim = null;
+    }
+    if(YORUMLA.test(t0) && hafiza() && L.CIKARIM){
+      akis.push({ kim:'sen', metin:String(metin).trim() });
+      bekleyenTanisma = null; cipler = null;
+      const a = cikarimAdaylari()[0];
+      if(a){ const b = cikarimBalonu(a); soyle(b.metin, b.satirlar, null, b.son); return { tur:'cikarim-soru' }; }
+      bekleyenTanisma = null;
+      soyle('Şimdilik sana sorabileceğim yeni bir çıkarımım yok; kayıtların arttıkça olacak. «Beni nasıl tanıyorsun»da bildiklerimi görebilirsin.');
+      return { tur:'cikarim-yok' };
     }
     /* Söz 22: tanışma sorusunun cevabı (komut ya da veri değilse). */
     if(bekleyenTanisma){
@@ -32493,7 +32816,7 @@ window.LIFEOS.KING = (function(){
       : geriGetir();
     cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null; bekleyenFoto = null; sesli = false;
     if(o && o.mesaj) akis.push({ kim:'king', metin:o.mesaj });
-    else if(!mini) tanismaHazirla();             // söz 22: günde en çok bir soru
+    else if(!mini) cikarimHazirla() || tanismaHazirla();   // söz 22–23: günde en çok bir soru
     const el = document.createElement('div');
     el.className = 'king';
     el.setAttribute('data-king', '');
@@ -32614,6 +32937,12 @@ window.LIFEOS.KING = (function(){
               setTimeout(() => { c.classList.remove('is-kopyalandi'); c.setAttribute('aria-label', 'Cevabı kopyala'); }, 1400);
             });
           }
+          return;
+        }
+        if(/^cikarim:(dogru|kismen|yanlis)$/.test(is)){
+          const d = is.slice(8);
+          akis.push({ kim:'sen', metin:{ dogru:'Doğru', kismen:'Kısmen', yanlis:'Yanlış' }[d] });
+          cikarimKarar(d);
           return;
         }
         if(is === 'tanisma-atla'){ bekleyenTanisma = null; cipler = null; soyle('Tamam, başka zaman.'); return; }
@@ -32740,6 +33069,7 @@ window.LIFEOS.KING = (function(){
     if(ayar) ortam.depo.sil(arsivAnahtar());
     ortam.depo.sil(CEVAP);
     menu = null; silOnay = null; silinen = null; bekleyenYetki = null; bekleyenTanisma = null; disKisi = [];
+    bekleyenCikarim = null; bekleyenDuzeltme = null; ortam.depo.sil(CIKARIM_KARAR);
     ortam.depo.sil(TANISMA);
     yazmayiBitir(); ortam.depo.sil(YAZMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
@@ -32751,6 +33081,7 @@ window.LIFEOS.KING = (function(){
     fotoAl, fotoIsle, ekranOku, ekranGoster, sesliSohbetAc, geriAlYap, sesliSohbetMi:() => sesliSohbet,
     paylasimBaslat, paylasimBitir, paylasimVar:() => !!paylasim, fotoYorumla, GORSEL_SISTEM, TASIMA,
     kisiKayitlari, kisiOzeti, disKisiTazele, tanismaVar:() => !!bekleyenTanisma,
+    cikarimAdaylari, cikarimVar:() => !!bekleyenCikarim,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
     YAZMA, yazmaAyar, yazmaSec, yazdir, yazmayiBitir, yaziyorMu:() => !!yazici,
     CEVAP, cevapBicimi, cevapSec, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
@@ -84799,6 +85130,22 @@ ESP.App = (function(){
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
         window.LIFEOS.KING.kur({ modul:'esp', ekran:() => S.route, model:() => ESP.LLM, hkm:() => ESP.Beacon, git:route => go(route), hafiza:() => ESP.Hafizam,
+          /* King'in çıkarımları için (cikarim.js): son 30 günün disiplin dakikaları, kitaplar, müzik günleri. */
+          cikarimVeri:() => {
+            const dakika = {};
+            let gun = 0, muzikGun = 0;
+            for(let i = 0; i < 30; i++){
+              const d = U.iso(U.addDays(U.today(), -i));
+              const ss = M.sessionsOf(d).filter(s => s.minutes > 0);
+              if(ss.length) gun++;
+              if(ss.some(s => s.disc === 'music')) muzikGun++;
+              ss.forEach(s => { dakika[s.disc] = (dakika[s.disc] || 0) + s.minutes; });
+            }
+            const adlar = {};
+            Object.keys(ESP.DISCIPLINE_BY_ID).forEach(k => { adlar[k] = ESP.DISCIPLINE_BY_ID[k].label; });
+            return { esp:{ disiplin:{ gun, dakika, adlar }, muzikGun,
+              kitaplar:(S.books || []).map(b => ({ author:b.author, startedAt:b.startedAt, finishedAt:b.finishedAt })) } };
+          },
           ozet:() => [ESP.Screens.today.headline()] });
       }
       /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı

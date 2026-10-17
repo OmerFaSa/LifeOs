@@ -299,6 +299,8 @@ DOSYALAR = {
     "yetki.test.js":   "tests",
     "kisi.js":         "js/core",
     "kisi.test.js":    "tests",
+    "cikarim.js":      "js/core",
+    "cikarim.test.js": "tests",
     # PUSULA — Kolay LifeOS planinin iki sayisi (KOLAY-PLANI §1, Faz 0, 2026-10-16).
     "pusula.js":       "js/core",
     "pusula.css":      "css",
