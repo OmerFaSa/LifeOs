@@ -774,7 +774,10 @@ window.LIFEOS = window.LIFEOS || {};
        · «HEPSİNİ GÖRDÜM» der: satırlar listede kalır (iş yapılmadı), zilin
          noktası söner; yeni bir satır ya da metni değişen bir satır gelince
          yeniden yanar. Acil satır noktayı her zaman yakar.
-     Ertelemek de görmek de işi yapılmış saymaz, hiçbir kayda yazılmaz.
+       · «TEMİZLE» der (2026-10-17, kullanıcı: «bildirimleri temizle»):
+         acil olmayan her satır gizlenir; metni değişene ya da yeni satır
+         gelene dek dönmez. Acil satır temizlenmez. «Geri al» hepsini döndürür.
+     Ertelemek, görmek, temizlemek işi yapılmış saymaz, hiçbir kayda yazılmaz.
      Tercih bu cihazda, bu modülde durur (localStorage; modüller ayrı köken).
      Satır kimliği `id` (yoksa route/act); sayılı metin değişince «yeni». */
   const ZIL = 'lifeos.zil';
@@ -785,36 +788,42 @@ window.LIFEOS = window.LIFEOS || {};
   function zilOku(){
     try{
       const v = JSON.parse(localStorage.getItem(ZIL) || 'null') || {};
-      return { ertele:v.ertele && typeof v.ertele === 'object' ? v.ertele : {}, gordu:Array.isArray(v.gordu) ? v.gordu : [] };
-    }catch(e){ return { ertele:{}, gordu:[] }; }
+      return { ertele:v.ertele && typeof v.ertele === 'object' ? v.ertele : {}, gordu:Array.isArray(v.gordu) ? v.gordu : [],
+        temiz:Array.isArray(v.temiz) ? v.temiz : [] };
+    }catch(e){ return { ertele:{}, gordu:[], temiz:[] }; }
   }
   function zilYaz(v){ try{ localStorage.setItem(ZIL, JSON.stringify(v)); }catch(e){ /* depo yok: yalnız bu açılış */ } }
   function zilKimlik(g, s){ return g.modul + ':' + (s.id || s.route || s.act || s.metin); }
   function zilIz(g, s){ return zilKimlik(g, s) + '|' + s.metin; }
   /* Gruplar → bugün ertelenenler süzülmüş hâli; sayı, acil, yeni, ertelenen. */
   function zilDurumu(gruplar, simdi){
-    const z = zilOku(), bugun = gunAnahtari(simdi), gor = new Set(z.gordu);
-    let ertelenen = 0, sayi = 0, acil = false, yeni = false;
+    const z = zilOku(), bugun = gunAnahtari(simdi), gor = new Set(z.gordu), temiz = new Set(z.temiz);
+    let ertelenen = 0, temizlenen = 0, sayi = 0, acil = false, yeni = false;
     const gr = (gruplar || []).filter(g => g && Array.isArray(g.satirlar)).map(g => Object.assign({}, g, {
       satirlar:g.satirlar.filter(s => {
+        if(!s.acil && temiz.has(zilIz(g, s))){ temizlenen++; return false; }
         if(!s.acil && z.ertele[zilKimlik(g, s)] === bugun){ ertelenen++; return false; }
         sayi++;
         if(s.acil) acil = true;
         else if(!gor.has(zilIz(g, s))) yeni = true;
         return true;
       }) }));
-    return { gruplar:gr, sayi, acil, yeni, ertelenen };
+    return { gruplar:gr, sayi, acil, yeni, ertelenen, temizlenen };
   }
   /* Eski çağıran «yeni» vermezse sayı noktayı yakar (önceki davranış). */
   function zilNoktaVar(bil){ return !!(bil.acil || (bil.yeni == null ? bil.sayi : bil.yeni)); }
   let zilSon = [];
-  /* Açık paneldeki eylem: ertele | geri | gordu. Paneli yerinde yeniden çizer,
+  /* Açık paneldeki eylem: ertele | geri | gordu | temizle. Paneli yerinde yeniden çizer,
      zil düğmelerinin noktasını ve sayısını tazeler. */
   function zilEylem(ad, id, panel){
     const z = zilOku(), bugun = gunAnahtari();
     Object.keys(z.ertele).forEach(k => { if(z.ertele[k] !== bugun) delete z.ertele[k]; });
     if(ad === 'ertele' && id) z.ertele[id] = bugun;
-    else if(ad === 'geri') z.ertele = {};
+    else if(ad === 'geri'){ z.ertele = {}; z.temiz = []; }
+    else if(ad === 'temizle'){
+      const d = zilDurumu(zilSon);
+      z.temiz = z.temiz.concat(...d.gruplar.map(g => g.satirlar.filter(s => !s.acil).map(s => zilIz(g, s)))).slice(-200);
+    }
     else if(ad === 'gordu'){
       const d = zilDurumu(zilSon);
       z.gordu = [].concat(...d.gruplar.map(g => g.satirlar.filter(s => !s.acil).map(s => zilIz(g, s)))).slice(0, 200);
@@ -886,10 +895,12 @@ window.LIFEOS = window.LIFEOS || {};
       + '<header class="bildirim__bas"><b>Bildirimler</b>'
       +   (toplam ? '<span class="bildirim__sayi" aria-label="' + toplam + ' bildirim">' + toplam + '</span>' : '')
       +   (z.yeni ? '<button type="button" class="bildirim__gordu" data-zil="gordu">Hepsini gördüm</button>' : '')
+      +   (sirali.some(g => g.satirlar.some(s => !s.acil)) ? '<button type="button" class="bildirim__temizle" data-zil="temizle">Temizle</button>' : '')
       +   '<button type="button" class="bildirim__kapat" data-katman-kapat aria-label="Bildirimleri kapat">' + simge('kapat') + '</button>'
       + '</header>'
       + '<div class="bildirim__liste">' + govde + '</div>'
-      + (z.ertelenen ? '<p class="bildirim__ertelenen">' + z.ertelenen + ' bildirim yarına ertelendi.'
+      + (z.ertelenen || z.temizlenen ? '<p class="bildirim__ertelenen">'
+        + [z.temizlenen ? z.temizlenen + ' bildirim temizlendi.' : '', z.ertelenen ? z.ertelenen + ' bildirim yarına ertelendi.' : ''].filter(Boolean).join(' ')
         + '<button type="button" data-zil="geri">Geri al</button></p>' : '')
       + '</div>';
   }

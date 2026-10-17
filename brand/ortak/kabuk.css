@@ -1726,6 +1726,12 @@ html .site--v5 > .kenar .kenar__arac:is(:hover, :focus-visible) .kenar__kisayol{
   background:var(--surface-2); color:var(--text-2); font:inherit; font-size:12.5px; font-weight:550; }
 .bildirim__gordu:hover{ background:var(--surface-3, var(--surface-2)); color:var(--text); }
 .bildirim__gordu + .bildirim__kapat{ margin-left:0; }
+/* Temizle (2026-10-17): «Hepsini gördüm»ün yanında, zeminsiz ikinci düğme. */
+.bildirim__temizle{ margin-left:auto; min-height:30px; padding:0 10px; border:0; border-radius:999px; cursor:pointer;
+  background:transparent; color:var(--text-2); font:inherit; font-size:12.5px; font-weight:550;
+  transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.bildirim__temizle:hover{ background:var(--surface-2); color:var(--text); }
+.bildirim__gordu + .bildirim__temizle, .bildirim__temizle + .bildirim__kapat{ margin-left:0; }
 .bildirim__ertelenen{ flex:none; margin:0; padding:10px 20px 16px; display:flex; align-items:center; gap:8px;
   font-size:12.5px; color:var(--text-3); }
 /* Telefonda kurulu bildirimler (brand/ortak/bildirim.js söz 8): zil panelinin kalıbı. */

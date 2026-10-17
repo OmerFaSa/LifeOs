@@ -374,6 +374,33 @@
           expect(K.kenarCubugu({ modul:'ays', cekmeceler:[], bildirim:{ sayi:1, yeni:false } }).indexOf('ust__zil-nokta')).toBe(-1);
         }finally{ K.katmanKapat(); d.remove(); geri(); }
       });
+
+      /* Kullanıcı (2026-10-17): «bildirim kısmına bildirimleri temizle».
+         Temizle acil olmayan her satırı gizler; satır metni değişene (ya da
+         yeni satır gelene) dek dönmez. Acil satır temizlenmez. Geri alınır.
+         İş yapılmış sayılmaz, hiçbir kayda yazılmaz (ertelemeyle aynı). */
+      it('«Temizle» acil olmayanları gizler, değişen satır döner, acil kalır; geri alınır', () => {
+        const geri = sakla();
+        const d = yerlestir('<div class="site site--v5" style="position:fixed;inset:0;z-index:1">'
+          + K.kenarCubugu({ modul:'ays', cekmeceler:[], bildirim:{ sayi:3, acil:true, yeni:true } }) + '</div>');
+        try{
+          const gr = GR();
+          const btn = d.querySelector('[data-act="bildirim-ac"]');
+          let p = K.katmanAc('kt-zil', K.bildirimPaneli({ gruplar:gr }), btn);
+          p.querySelector('[data-zil="temizle"]').click();
+          p = document.getElementById('kt-zil');
+          expect(Array.from(p.querySelectorAll('.bildirim__metin')).map(x => x.textContent)).toEqual(['Kayıt sorunu var']);
+          expect(p.querySelector('.bildirim__ertelenen').textContent).toContain('2 bildirim temizlendi.');
+          expect(K.zilDurumu(gr).temizlenen).toBe(2);
+          expect(p.querySelector('[data-zil="temizle"]')).toBeNull();            // temizlenecek acil olmayan kalmadı
+          gr[0].satirlar[0].metin = '13 kart bekliyor';                          // iş değişti: döner
+          expect(K.zilDurumu(gr).gruplar[0].satirlar.map(s => s.id)).toEqual(['kart', 'kayit']);
+          p = K.katmanAc('kt-zil', K.bildirimPaneli({ gruplar:GR() }), btn);
+          p.querySelector('[data-zil="geri"]').click();
+          expect(K.zilDurumu(GR()).temizlenen).toBe(0);
+          expect(K.zilDurumu(GR()).sayi).toBe(3);
+        }finally{ K.katmanKapat(); d.remove(); geri(); }
+      });
     });
 
     it('oz-169 oz-166 telefonda dört sekme ve sağ altta +', () => {
