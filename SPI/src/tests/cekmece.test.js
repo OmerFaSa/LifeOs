@@ -47,7 +47,9 @@
       expect(SP.App.yolOf('family').join(' › ')).toBe('Ayarlar › Profil');
       expect(SP.App.yolOf('today').join(' › ')).toBe('Bugün');
       expect(SP.App.yolOf('onaylar').join(' › ')).toBe('Onaylar');
-      expect(SP.App.yolOf('hedefler').join(' › ')).toBe('Plan');
+      /* 2026-10-17: Plan iki bölümlü (Planlar · Hedefler). */
+      expect(SP.App.yolOf('hedefler').join(' › ')).toBe('Plan › Hedefler');
+      expect(SP.App.yolOf('planlar').join(' › ')).toBe('Plan › Planlar');
     });
 
     it('onaylar tek çekmecede: Bugün en öndeki kartı gösterir, fazlası Onaylar\'da', async () => {

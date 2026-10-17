@@ -3950,6 +3950,37 @@ body.is-dragging .drop.is-over{
 .hazir__liste li > span{ display:flex; flex-direction:column; min-width:0; }
 .hazir__liste small{ color:var(--text-2); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
+/* ---------- Plan › Planlar (2026-10-17) ----------
+   iOS gruplu liste: simge, ad, bugünün satırı, son 7 günün uyumu; sağda tek
+   düğme. Alışkanlık maddeleri satırın altında tek dokunuşla işaretlenir. */
+.hp-liste{ display:flex; flex-direction:column; }
+.hp-satir{ display:grid; grid-template-columns:36px 1fr auto; column-gap:14px; align-items:start; padding:14px 0; }
+.hp-satir + .hp-satir{ border-top:1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+.hp-satir > .btn{ align-self:center; }
+.hp-satir__simge{ width:36px; height:36px; display:grid; place-items:center; border-radius:11px; background:var(--surface-2); color:var(--primary); }
+.hp-satir__simge svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.hp-satir--bos .hp-satir__simge{ color:var(--text-3); }
+.hp-satir__metin{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.hp-satir__metin b{ font-size:15px; font-weight:600; }
+.hp-satir__metin span{ font-size:14px; color:var(--text); }
+.hp-satir--bos .hp-satir__metin span{ color:var(--text-3); font-size:13px; }
+.hp-satir__metin small{ font-size:12.5px; color:var(--text-3); }
+.hp-satir__metin .hp-etiket{ margin-left:4px; font-size:11px; color:var(--text-3); white-space:nowrap; }
+.hp-satir__metin .hp-etiket::before{ content:'· '; }
+.hp-maddeler{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.hp-madde, .hp-gun{ min-height:30px; padding:0 12px; border:1px solid var(--border); border-radius:999px; background:none;
+  color:var(--text-2); font:inherit; font-size:13px; cursor:pointer; transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.hp-madde.is-on, .hp-gun.is-on{ background:var(--sec); border-color:var(--sec); color:var(--primary-ink); }
+.hp-madde.is-on::before{ content:'✓ '; }
+.hp-madde-satir{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.hp-madde-satir > .input{ flex:1 1 180px; }
+.hp-gunler{ display:flex; flex-wrap:wrap; gap:4px; }
+.hp-gun{ min-height:28px; padding:0 8px; font-size:12px; }
+.hp-hareket .field:first-child{ flex:1 1 200px; }
+.hp-hareket .field:last-child{ flex:0 0 110px; }
+.hp-hata{ color:var(--danger); margin-top:12px; }
+@media (max-width:520px){ .hp-satir{ grid-template-columns:32px 1fr; } .hp-satir > .btn{ grid-column:2; justify-self:start; margin-top:8px; } }
+
 /* ==== css/temel.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/temel.css içine yazılır; burası bir sonraki
@@ -15577,7 +15608,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'b9dcf35c', at:'2026-10-17 22:47', dirty:true };
+SP.BUILD = { id:'f93623d1', at:'2026-10-17 23:36', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -37927,6 +37958,283 @@ SP.Plan = (function(){
     programUygula, buHafta, istek };
 })();
 
+/* ==== js/core/haftaplan.js ==== */
+/* SPİ HAFTALIK PLANLAR — Plan çekmecesinin «Planlar» bölümü.
+
+   Kullanıcı (2026-10-17): «Plan kısmına plan ekle gibi türlü türlü şeyler
+   koy: yemek planı …; SPİ'yi profesyonelleştir, minimalistlikten kaçma».
+   Seçimi: beslenme, hareket, uyku, su ve alışkanlık + kendi adlandırdığı
+   serbest plan.
+
+   Sözler:
+     1. PLAN TERCİHTİR, ÖLÇÜM DEĞİL. Kullanıcı yazar; kod hiçbir sayıyı
+        önermez (SPİ doz önermez, teşhis koymaz — AGENTS §1.5). Tür kapalı
+        katalogdur; bozuk değer (saat, dakika, su) yazılmaz.
+     2. UYUM KAYITTAN SAYILIR. Antrenman, uyku, su ve öğün SPİ'nin kendi
+        kaydından okunur. Kaydı olmayan gün «yapılmadı» değil «kayıt yok»tur
+        (§1.2). Pencere dünden geriye yedi gündür: bugün bitmedi.
+     3. UYKU SÜRESİ HESAPLANIR. Yatış–kalkıştan; gece yarısını geçer. Bir
+        gece hedefe en çok 30 dakika eksikse «tuttu» sayılır (iş kuralı).
+     4. İŞARET KULLANICININDIR. Alışkanlık ve serbest plan maddeleri günlük
+        işaretle sayılır; ikinci dokunuş kaldırır. İşaret ölçüm yazmaz.
+     5. KAYIT GERİ ALINIR. kaydet() önceki hâli döndürür; «Geri al» onu yazar.
+
+   Depo: `haftaplan/<id>`. Yerleşik dört tür tektir; serbest plan çoğalır. */
+
+window.SP = window.SP || {};
+
+SP.HaftaPlan = (function(){
+  const STORE = 'haftaplan';
+  const GUN_KISA = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+  const GUN_AD = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
+  const OGUNLER = [['kahvalti', 'Kahvaltı'], ['ogle', 'Öğle'], ['aksam', 'Akşam'], ['ara', 'Ara öğün']];
+  const TURLER = Object.freeze([
+    { id:'beslenme', ad:'Beslenme planı', not:'Haftanın öğünleri', tek:true },
+    { id:'hareket',  ad:'Hareket planı',  not:'Hangi gün ne kadar', tek:true },
+    { id:'uyku',     ad:'Uyku planı',     not:'Yatış ve kalkış saatin', tek:true },
+    { id:'su',       ad:'Su ve alışkanlık', not:'Günlük su ve küçük alışkanlıklar', tek:true },
+    { id:'serbest',  ad:'Kendi planın',   not:'Adını sen koy', tek:false },
+  ]);
+  const TUR_BY_ID = {};
+  TURLER.forEach(t => { TUR_BY_ID[t.id] = t; });
+  const PENCERE = 7, UYKU_PAY = 30;
+  const EN_COK_MADDE = 20, EN_UZUN_METIN = 80;
+  const SAAT = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+  const U = () => SP.U;
+  const S = () => SP.S;
+  const kac = s => String(s == null ? '' : s);
+  const binlik = n => Number(n).toLocaleString('tr-TR');
+  function gunEkle(iso, n){ return U().iso(U().addDays(U().parse(iso), n)); }
+  function gunNo(iso){ return (U().parse(iso).getDay() + 6) % 7; }
+  function uid(){ return 'hp' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function bugunISO(){ return U().todayISO(); }
+
+  /* ------------------------------------------------------------ biçim */
+
+  function yeni(tur, ad){
+    const t = TUR_BY_ID[tur];
+    const p = { id:uid(), tur:t ? tur : String(tur || ''), ad:String(ad || (t ? t.ad : '')).slice(0, EN_UZUN_METIN), at:null, guncel:null };
+    if(tur === 'beslenme') p.gunler = GUN_KISA.map(() => ({ kahvalti:'', ogle:'', aksam:'', ara:'' }));
+    if(tur === 'hareket') p.gunler = GUN_KISA.map(() => null);
+    if(tur === 'uyku'){ p.haftaici = { yat:'', kalk:'' }; p.haftasonu = { yat:'', kalk:'' }; }
+    if(tur === 'su'){ p.suMl = null; p.maddeler = []; p.isaret = {}; }
+    if(tur === 'serbest'){ p.maddeler = []; p.isaret = {}; }
+    return p;
+  }
+  function kopya(p){ return JSON.parse(JSON.stringify(p)); }
+
+  function dogrula(p){
+    const h = [];
+    if(!p || !TUR_BY_ID[p.tur]) return ['Bilinmeyen plan türü.'];
+    const metin = (x, ad) => { if(String(x || '').length > EN_UZUN_METIN) h.push(ad + ' en çok ' + EN_UZUN_METIN + ' harf olur.'); };
+    if(p.tur === 'serbest' && !String(p.ad || '').trim()) h.push('Plana bir ad ver.');
+    if(p.tur === 'beslenme'){
+      if(!Array.isArray(p.gunler) || p.gunler.length !== 7) h.push('Haftanın yedi günü olmalı.');
+      else p.gunler.forEach(g => OGUNLER.forEach(([k, ad]) => metin(g && g[k], ad)));
+    }
+    if(p.tur === 'hareket'){
+      if(!Array.isArray(p.gunler) || p.gunler.length !== 7) h.push('Haftanın yedi günü olmalı.');
+      else p.gunler.forEach((g, i) => {
+        if(!g) return;
+        metin(g.ne, 'Hareket');
+        if(!String(g.ne || '').trim()) h.push(GUN_AD[i] + ': ne yapacağını yaz.');
+        if(!(Number.isFinite(g.dk) && g.dk > 0 && g.dk <= 600)) h.push(GUN_AD[i] + ': süre 1 ile 600 dakika arası olur.');
+      });
+    }
+    if(p.tur === 'uyku'){
+      [['haftaici', 'Hafta içi'], ['haftasonu', 'Hafta sonu']].forEach(([k, ad]) => {
+        const x = p[k] || {};
+        if(!SAAT.test(x.yat || '') || !SAAT.test(x.kalk || '')) h.push(ad + ': saatler 00:00–23:59 biçiminde olur.');
+        else if(uykuDakika(x.yat, x.kalk) == null) h.push(ad + ': yatış ile kalkış aynı olamaz.');
+      });
+    }
+    if(p.tur === 'su' && p.suMl != null && !(Number.isFinite(p.suMl) && p.suMl > 0 && p.suMl <= 10000)) h.push('Su hedefi 1 ile 10.000 ml arası olur.');
+    if(p.tur === 'su' || p.tur === 'serbest'){
+      const l = p.maddeler || [];
+      if(l.length > EN_COK_MADDE) h.push('En çok ' + EN_COK_MADDE + ' madde olur.');
+      l.forEach(m => { metin(m && m.metin, 'Madde'); if(!m || !String(m.metin || '').trim()) h.push('Boş madde olmaz.'); });
+    }
+    return h;
+  }
+
+  /* Yatış–kalkış → dakika (hesaplandı). Aynı saat: süre yok. */
+  function uykuDakika(yat, kalk){
+    if(!SAAT.test(yat || '') || !SAAT.test(kalk || '')) return null;
+    const dk = s => Number(s.slice(0, 2)) * 60 + Number(s.slice(3, 5));
+    const f = (dk(kalk) - dk(yat) + 1440) % 1440;
+    return f === 0 ? null : f;
+  }
+  function sureYaz(dk){
+    if(dk == null) return '—';
+    const s = Math.floor(dk / 60), d = dk % 60;
+    return (s ? s + ' sa' : '') + (s && d ? ' ' : '') + (d ? d + ' dk' : '');
+  }
+  function uykuOf(p, iso){ return gunNo(iso) >= 5 ? p.haftasonu : p.haftaici; }
+
+  /* ------------------------------------------------------------ bugün */
+
+  function bugunMaddeleri(p, iso){
+    const g = gunNo(iso);
+    return (p.maddeler || []).filter(m => !(m.gunler && m.gunler.length) || m.gunler.indexOf(g) >= 0);
+  }
+  function isaretli(p, iso){ return ((p.isaret || {})[iso] || []).slice(); }
+  function isaretle(p, maddeId, iso){
+    p.isaret = p.isaret || {};
+    const l = p.isaret[iso] || [];
+    p.isaret[iso] = l.indexOf(maddeId) >= 0 ? l.filter(x => x !== maddeId) : l.concat([maddeId]);
+    if(!p.isaret[iso].length) delete p.isaret[iso];
+    /* Yalnız son 60 gün tutulur: işaret bir günlüktür, arşiv değil. */
+    const sinir = gunEkle(iso, -60);
+    Object.keys(p.isaret).forEach(k => { if(k < sinir) delete p.isaret[k]; });
+    return p;
+  }
+
+  function bugun(p, iso){
+    iso = iso || bugunISO();
+    const g = gunNo(iso);
+    if(p.tur === 'beslenme'){
+      const d = (p.gunler || [])[g] || {};
+      const l = OGUNLER.filter(([k]) => String(d[k] || '').trim()).map(([k, ad]) => ad + ': ' + d[k].trim());
+      return { metin:l.length ? l.join(' · ') : 'Bugün için öğün yazılmamış', etiket:null };
+    }
+    if(p.tur === 'hareket'){
+      const d = (p.gunler || [])[g];
+      return { metin:d ? d.ne + ' · ' + d.dk + ' dk' : 'Bugün dinlenme günü', etiket:null };
+    }
+    if(p.tur === 'uyku'){
+      const x = uykuOf(p, iso) || {};
+      const dk = uykuDakika(x.yat, x.kalk);
+      return { metin:dk == null ? 'Saatler yazılmamış' : x.yat + ' yat · ' + x.kalk + ' kalk (' + sureYaz(dk) + ')', etiket:dk == null ? null : 'hesaplandı' };
+    }
+    if(p.tur === 'su'){
+      const v = S().vitals && S().vitals[iso];
+      const ml = v && v.water != null ? Number(v.water) : null;
+      const hedef = p.suMl;
+      let metin;
+      if(hedef == null) metin = ml == null ? 'Su hedefi yazılmamış' : 'Su ' + binlik(ml) + ' ml';
+      else metin = ml == null ? 'Su: bugün kayıt yok · hedef ' + binlik(hedef) + ' ml' : 'Su ' + binlik(ml) + ' / ' + binlik(hedef) + ' ml';
+      const m = bugunMaddeleri(p, iso);
+      if(m.length) metin += ' · ' + isaretli(p, iso).filter(id => m.some(x => x.id === id)).length + ' / ' + m.length + ' alışkanlık';
+      return { metin, etiket:ml == null ? 'veri yok' : 'ölçüldü' };
+    }
+    const m = bugunMaddeleri(p, iso);
+    return { metin:m.length ? 'Bugün ' + isaretli(p, iso).filter(id => m.some(x => x.id === id)).length + ' / ' + m.length + ' madde' : 'Bugün madde yok', etiket:null };
+  }
+
+  /* ------------------------------------------------------------ uyum */
+
+  function pencere(iso){
+    const l = [];
+    for(let i = PENCERE; i >= 1; i--) l.push(gunEkle(iso, -i));
+    return l;
+  }
+  function uyum(p, iso){
+    iso = iso || bugunISO();
+    const gunler = pencere(iso);
+    if(p.tur === 'hareket'){
+      let planli = 0, tuttu = 0, eksik = 0, kayitYok = 0;
+      gunler.forEach(d => {
+        const plan = (p.gunler || [])[gunNo(d)];
+        if(!plan) return;
+        planli++;
+        const w = (S().workouts || []).filter(x => x && x.date === d);
+        if(!w.length){ kayitYok++; return; }
+        const dk = w.reduce((a, x) => a + (Number(x.minutes) || 0), 0);
+        if(dk >= plan.dk) tuttu++; else eksik++;
+      });
+      if(!planli) return { planli, tuttu, eksik, kayitYok, metin:'Son 7 günde planlı gün yok', etiket:'veri yok' };
+      /* Sayıya ek getirilmez («0’ında», «4’ünde» sayıya göre değişir): parçalı yazılır. */
+      const parca = [planli + ' planlı gün', tuttu + ' tuttu'];
+      if(eksik) parca.push(eksik + ' gün eksik');
+      if(kayitYok) parca.push(kayitYok + ' gün kayıt yok');
+      return { planli, tuttu, eksik, kayitYok, metin:'Son 7 gün: ' + parca.join(' · '), etiket:planli > kayitYok ? 'ölçüldü' : 'veri yok' };
+    }
+    if(p.tur === 'uyku'){
+      let kayitli = 0, tuttu = 0;
+      gunler.forEach(d => {
+        const v = S().vitals && S().vitals[d];
+        if(!v || v.sleep == null) return;
+        const x = uykuOf(p, d) || {};
+        const hedef = uykuDakika(x.yat, x.kalk);
+        if(hedef == null) return;
+        kayitli++;
+        if(Number(v.sleep) * 60 >= hedef - UYKU_PAY) tuttu++;
+      });
+      return kayitli ? { kayitli, tuttu, metin:'Son 7 gün: ' + kayitli + ' gece kayıtlı · ' + tuttu + ' gece hedefte', etiket:'ölçüldü' }
+        : { kayitli, tuttu, metin:'Son 7 günde uyku kaydı yok', etiket:'veri yok' };
+    }
+    if(p.tur === 'su'){
+      let kayitli = 0, tuttu = 0;
+      gunler.forEach(d => {
+        const v = S().vitals && S().vitals[d];
+        if(!v || v.water == null) return;
+        kayitli++;
+        if(p.suMl != null && Number(v.water) >= p.suMl) tuttu++;
+      });
+      if(!kayitli) return { kayitli, tuttu, metin:'Son 7 günde su kaydı yok', etiket:'veri yok' };
+      return { kayitli, tuttu, metin:p.suMl == null ? 'Son 7 gün: ' + kayitli + ' günde su kaydı var'
+        : 'Son 7 gün: ' + kayitli + ' gün kayıtlı · ' + tuttu + ' gün hedefte', etiket:'ölçüldü' };
+    }
+    if(p.tur === 'beslenme'){
+      /* Yemeğin adı kayıtla eşleştirilmez (tahmin olurdu); yalnız öğün kaydı olan gün sayılır. */
+      const kayitli = gunler.filter(d => ((S().meals || {})[d] || []).length).length;
+      return { kayitli, metin:kayitli ? 'Son 7 gün: ' + kayitli + ' günde öğün kaydı var' : 'Son 7 günde öğün kaydı yok', etiket:kayitli ? 'ölçüldü' : 'veri yok' };
+    }
+    let toplam = 0, yapilan = 0;
+    gunler.forEach(d => {
+      const m = bugunMaddeleri(p, d);
+      toplam += m.length;
+      yapilan += isaretli(p, d).filter(id => m.some(x => x.id === id)).length;
+    });
+    return { toplam, yapilan, metin:toplam ? 'Son 7 gün: ' + yapilan + ' / ' + toplam + ' işaretli' : 'Son 7 günde madde yok', etiket:toplam ? 'ölçüldü' : 'veri yok' };
+  }
+
+  /* ------------------------------------------------------------ depo */
+
+  function liste(){ return S().haftaplan || (S().haftaplan = []); }
+  function bul(tur){ return liste().find(p => p.tur === tur) || null; }
+  function bulId(id){ return liste().find(p => p.id === id) || null; }
+  async function yukle(){
+    S().haftaplan = ((await SP.Store.list(STORE)) || []).filter(p => p && p.id && TUR_BY_ID[p.tur]);
+    return S().haftaplan;
+  }
+  async function kaydet(p){
+    const h = dogrula(p);
+    if(h.length) return { ok:false, why:h[0], hatalar:h };
+    const l = liste();
+    const t = TUR_BY_ID[p.tur];
+    /* Yerleşik tür tektir: aynı türün öteki kaydının yerine geçer. */
+    const eski = t.tek ? l.find(x => x.tur === p.tur) || null : l.find(x => x.id === p.id) || null;
+    const yeniP = kopya(p);
+    if(eski) yeniP.id = eski.id;
+    yeniP.at = (eski && eski.at) || new Date().toISOString();
+    yeniP.guncel = new Date().toISOString();
+    S().haftaplan = l.filter(x => x.id !== yeniP.id).concat([yeniP]);
+    await SP.Store.set(STORE + '/' + yeniP.id, yeniP);
+    return { ok:true, plan:yeniP, onceki:eski ? kopya(eski) : null };
+  }
+  /* Geri al: önceki hâl yazılır; önceki yoksa kayıt silinir. */
+  async function geriAl(r){
+    if(!r || !r.plan) return false;
+    if(r.onceki){
+      S().haftaplan = liste().filter(x => x.id !== r.onceki.id).concat([kopya(r.onceki)]);
+      await SP.Store.set(STORE + '/' + r.onceki.id, r.onceki);
+    }else await sil(r.plan.id);
+    return true;
+  }
+  async function sil(id){
+    const p = bulId(id);
+    if(!p) return null;
+    S().haftaplan = liste().filter(x => x.id !== id);
+    if(SP.Store.remove) await SP.Store.remove(STORE + '/' + id);
+    return p;
+  }
+
+  return { TURLER, TUR_BY_ID, GUN_KISA, GUN_AD, OGUNLER, STORE, yeni, dogrula, uykuDakika, sureYaz, gunNo,
+    bugun, bugunMaddeleri, isaretle, isaretli, uyum, liste, bul, bulId, yukle, kaydet, geriAl, sil, kopya };
+})();
+
 /* ==== js/core/tanitim.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/tanitim.js içine yazılır; burası bir sonraki
@@ -51393,6 +51701,8 @@ SP.Model = (function(){
     /* Hedefler ve hekim talimatlari (core/hedefler.js). */
     if(SP.Hedefler) await SP.Hedefler.yukle();
     if(SP.Plan) await SP.Plan.yukle();
+    /* Haftalık planlar (core/haftaplan.js). */
+    if(SP.HaftaPlan) await SP.HaftaPlan.yukle();
     /* Hafiza: senin sozun, sohbetten, cikarim — core/hafiza.js (ortak). */
     if(window.LIFEOS && LIFEOS.Hafiza){
       SP.Hafizam = SP.Hafizam || LIFEOS.Hafiza.kur({ store:() => SP.Store, durum:() => SP.S,
@@ -71876,6 +72186,232 @@ SP.Screens.today = (function(){
 SP.Screens.gun = SP.Screens.today.ayrinti;
 SP.Screens.hedefler = SP.Screens.today.hedefler;
 
+/* ==== js/screens/planlar.js ==== */
+/* Plan › Planlar — haftalık planlar (core/haftaplan.js).
+
+   Kullanıcı (2026-10-17): «Plan kısmına plan ekle gibi türlü türlü şeyler
+   koy: yemek planı …; SPİ'yi profesyonelleştir, minimalistlikten kaçma».
+
+   Tek kutu, iOS gruplu liste: her plan bir satır — adı, bugüne düşen kısmı
+   ve son yedi günün kayıttan sayılan uyumu (etiketiyle). Alışkanlık ve
+   kendi planının bugünkü maddeleri satırda tek dokunuşla işaretlenir.
+   Düzenleme sağdan açılan sayfada; kayıt «Geri al»ı bırakır. Kod hiçbir
+   sayı önermez: su, uyku ve süre kullanıcının kendi tercihidir. */
+
+window.SP = window.SP || {};
+SP.Screens = SP.Screens || {};
+
+SP.Screens.planlar = (function(){
+  const S = SP.S, UI = SP.UI;
+  const { html, raw, when, map } = SP.h;
+  const K = SP.C;
+  const HP = () => SP.HaftaPlan;
+
+  const SIMGE = {
+    beslenme:'<path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10"/><path d="M17 3c-2 2-2 6 0 8v10"/>',
+    hareket:'<circle cx="13" cy="4.5" r="1.8"/><path d="M8 21l3-6 3 2v4M10.5 15l1-5 4 2 2 3M11.5 10l-3 2-2-1"/>',
+    uyku:'<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+    su:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+    serbest:'<path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6l1 1 1.5-2M4 12l1 1 1.5-2M4 18l1 1 1.5-2"/>',
+  };
+  const simge = tur => raw('<span class="hp-satir__simge hp-satir__simge--' + tur + '" aria-hidden="true"><svg viewBox="0 0 24 24">' + SIMGE[tur] + '</svg></span>');
+  const etiket = e => e ? raw(' <span class="hp-etiket" data-kesinlik="' + e + '">' + e + '</span>') : '';
+
+  /* ---------------------------------------------------------- liste */
+
+  function maddeCipleri(p, iso){
+    const m = HP().bugunMaddeleri(p, iso);
+    if(!m.length) return '';
+    const isa = HP().isaretli(p, iso);
+    return html`<div class="hp-maddeler" role="group" aria-label="${p.ad}: bugünün maddeleri">${map(m, x => html`<button type="button"
+      class="${'hp-madde' + (isa.indexOf(x.id) >= 0 ? ' is-on' : '')}" data-act="hp-isaret" data-id="${p.id}" data-madde="${x.id}"
+      aria-pressed="${isa.indexOf(x.id) >= 0 ? 'true' : 'false'}">${x.metin}</button>`)}</div>`;
+  }
+  function satir(tur, p){
+    const t = HP().TUR_BY_ID[tur];
+    const iso = SP.U.todayISO();
+    if(!p) return html`<div class="hp-satir hp-satir--bos">
+      ${simge(tur)}
+      <div class="hp-satir__metin"><b>${t.ad}</b><span>${t.not}</span></div>
+      ${K.Button({ label:'Kur', size:'sm', act:'hp-ac', data:{ 'data-tur':tur } })}
+    </div>`;
+    const b = HP().bugun(p, iso), u = HP().uyum(p, iso);
+    return html`<div class="hp-satir">
+      ${simge(tur)}
+      <div class="hp-satir__metin"><b>${p.ad || t.ad}</b><span>${b.metin}${etiket(b.etiket)}</span>
+        <small>${u.metin}${etiket(u.etiket)}</small>
+        ${when(tur === 'su' || tur === 'serbest', () => maddeCipleri(p, iso))}</div>
+      ${K.Button({ label:'Düzenle', size:'sm', tone:'ghost', act:'hp-ac', data:{ 'data-tur':tur, 'data-id':p.id } })}
+    </div>`;
+  }
+
+  function render(){
+    if(!HP()) return String(K.Kutu({ ad:'Planlar', govde:raw('<p class="small muted">Plan modülü yüklenemedi.</p>') }));
+    const yerlesik = HP().TURLER.filter(t => t.tek).map(t => satir(t.id, HP().bul(t.id)));
+    const serbest = HP().liste().filter(p => p.tur === 'serbest').map(p => satir('serbest', p));
+    return String(K.Kutu({ ad:'Planların',
+      govde:html`<div class="hp-liste" data-raf-tam>${yerlesik}${serbest}</div>`,
+      ayak:K.Button({ label:'Plan ekle', icon:'plus', size:'sm', tone:'ghost', act:'hp-ac', data:{ 'data-tur':'serbest' } }) }));
+  }
+
+  /* ---------------------------------------------------------- düzenleyici */
+
+  function taslak(){ return S.ui.hpTaslak || null; }
+  const alan = (ad, input) => K.Field({ label:ad, input });
+  const metinAlan = (yol, deger, yer, aria) => K.Input({ value:deger || '', placeholder:yer, aria, data:{ 'data-hp':yol } });
+
+  function gunSecici(gun){
+    return K.Segmented({ items:HP().GUN_KISA.map((g, i) => ({ value:i, label:g })), value:gun, act:'hp-gun', aria:'Gün', block:true });
+  }
+  function govdeBeslenme(p, gun){
+    const g = p.gunler[gun];
+    return html`${gunSecici(gun)}
+      <div class="stack-sm mt-12">${map(HP().OGUNLER, ([k, ad]) => alan(ad, metinAlan('g.' + k, g[k], ad === 'Ara öğün' ? 'Ceviz, yoğurt' : 'Yaz…', HP().GUN_AD[gun] + ' ' + ad)))}</div>
+      <p class="mt-10">${K.Button({ label:'Bu günü bütün haftaya kopyala', size:'sm', tone:'ghost', act:'hp-kopyala' })}</p>`;
+  }
+  function govdeHareket(p, gun){
+    const g = p.gunler[gun];
+    return html`${gunSecici(gun)}
+      <div class="row wrap gap-8 mt-12 hp-hareket">
+        ${alan('Ne yapacaksın', metinAlan('g.ne', g && g.ne, 'Yürüyüş, koşu, salon…', HP().GUN_AD[gun] + ' hareket'))}
+        ${alan('Dakika', K.Input({ type:'number', numeric:true, min:1, max:600, value:g ? g.dk : '', placeholder:'dk', aria:HP().GUN_AD[gun] + ' dakika', data:{ 'data-hp':'g.dk' } }))}
+      </div>
+      <p class="mt-10">${K.Button({ label:'Dinlenme günü yap', size:'sm', tone:'ghost', act:'hp-dinlen' })}</p>`;
+  }
+  function govdeUyku(p){
+    const blok = (k, ad) => {
+      const x = p[k] || {};
+      const dk = HP().uykuDakika(x.yat, x.kalk);
+      return html`<div class="stack-xs"><b class="small">${ad}</b>
+        <div class="row wrap gap-8">
+          ${alan('Yatış', K.Input({ type:'time', value:x.yat || '', aria:ad + ' yatış', data:{ 'data-hp':k + '.yat' } }))}
+          ${alan('Kalkış', K.Input({ type:'time', value:x.kalk || '', aria:ad + ' kalkış', data:{ 'data-hp':k + '.kalk' } }))}
+        </div>
+        <p class="tiny muted">${dk == null ? 'Süre saatler girilince hesaplanır.' : 'Süre ' + HP().sureYaz(dk) + ' (hesaplandı)'}</p></div>`;
+    };
+    return html`<div class="stack">${blok('haftaici', 'Hafta içi')}${blok('haftasonu', 'Hafta sonu (Cumartesi, Pazar)')}</div>`;
+  }
+  function maddeListesi(p, gunlu){
+    return html`<div class="stack-sm">${map(p.maddeler, (m, i) => html`<div class="hp-madde-satir">
+        ${metinAlan('m.' + i, m.metin, 'Sabah esneme', 'Madde ' + (i + 1))}
+        ${when(gunlu, () => html`<div class="hp-gunler" role="group" aria-label="Hangi günler">${map(HP().GUN_KISA, (g, j) => html`<button type="button"
+          class="${'hp-gun' + ((m.gunler || []).indexOf(j) >= 0 ? ' is-on' : '')}" data-act="hp-madde-gun" data-i="${i}" data-gun="${j}"
+          aria-pressed="${(m.gunler || []).indexOf(j) >= 0 ? 'true' : 'false'}">${g}</button>`)}</div>`)}
+        ${K.Button({ label:'Sil', size:'sm', tone:'ghost', act:'hp-madde-sil', data:{ 'data-i':String(i) } })}
+      </div>`)}
+      <p>${K.Button({ label:'Madde ekle', icon:'plus', size:'sm', tone:'ghost', act:'hp-madde-ekle' })}</p>
+      ${when(gunlu, () => html`<p class="tiny muted">Gün seçmezsen madde her gün sorulur.</p>`)}</div>`;
+  }
+  function govdeSu(p){
+    return html`<div class="stack">
+      ${alan('Günlük su hedefin (ml)', K.Input({ type:'number', numeric:true, min:1, max:10000, step:50, value:p.suMl == null ? '' : p.suMl, placeholder:'Kendi hedefin', aria:'Günlük su hedefi', data:{ 'data-hp':'suMl' } }))}
+      <div><b class="small">Küçük alışkanlıklar</b>${maddeListesi(p, false)}</div></div>`;
+  }
+  function govdeSerbest(p){
+    return html`<div class="stack">
+      ${alan('Planın adı', metinAlan('ad', p.ad, 'Sabah rutini', 'Planın adı'))}
+      <div><b class="small">Maddeler</b>${maddeListesi(p, true)}</div></div>`;
+  }
+
+  function sayfa(){
+    const t = taslak();
+    if(!t) return;
+    const p = t.plan, tur = HP().TUR_BY_ID[p.tur];
+    const govde = { beslenme:() => govdeBeslenme(p, t.gun), hareket:() => govdeHareket(p, t.gun), uyku:() => govdeUyku(p),
+      su:() => govdeSu(p), serbest:() => govdeSerbest(p) }[p.tur]();
+    UI.sheet({ title:p.tur === 'serbest' ? (p.ad || 'Yeni plan') : tur.ad, subtitle:tur.not,
+      body:String(html`<div data-hp-kok>${govde}${when(t.hata, () => html`<p class="small hp-hata" role="alert">${t.hata}</p>`)}</div>`),
+      footer:String(html`${when(t.varMi, () => K.Button({ label:'Planı sil', tone:'ghost', act:'hp-sil' }))}
+        ${K.Button({ label:'Vazgeç', act:'sheet-close' })}
+        ${K.Button({ label:'Kaydet', tone:'primary', act:'hp-kaydet' })}`), noFocus:true });
+  }
+
+  /* Formdaki alanlar taslağa yazılır (gün değişirken ve kaydederken). */
+  function formuOku(){
+    const t = taslak(), kok = document.querySelector('[data-hp-kok]');
+    if(!t || !kok) return;
+    const p = t.plan;
+    kok.querySelectorAll('[data-hp]').forEach(el => {
+      const yol = el.getAttribute('data-hp'), v = String(el.value || '').trim();
+      if(yol.indexOf('g.') === 0){
+        const k = yol.slice(2);
+        if(p.tur === 'beslenme') p.gunler[t.gun][k] = v;
+        if(p.tur === 'hareket'){
+          const g = p.gunler[t.gun] || { ne:'', dk:null };
+          if(k === 'ne') g.ne = v; else g.dk = v === '' ? null : Number(v.replace(',', '.'));
+          p.gunler[t.gun] = !g.ne && g.dk == null ? null : g;
+        }
+      }else if(yol.indexOf('m.') === 0) p.maddeler[Number(yol.slice(2))].metin = v;
+      else if(yol === 'suMl') p.suMl = v === '' ? null : Number(v.replace(',', '.'));
+      else if(yol === 'ad') p.ad = v;
+      else { const [a, b] = yol.split('.'); p[a] = Object.assign({}, p[a], { [b]:v }); }
+    });
+  }
+  function yenidenCiz(){ formuOku(); sayfa(); }
+
+  const handle = {
+    'hp-ac'(el){
+      const tur = el.dataset.tur, var_ = el.dataset.id ? HP().bulId(el.dataset.id) : (tur !== 'serbest' ? HP().bul(tur) : null);
+      S.ui.hpTaslak = { plan:var_ ? HP().kopya(var_) : HP().yeni(tur, tur === 'serbest' ? '' : undefined),
+        gun:HP().gunNo(SP.U.todayISO()), varMi:!!var_, hata:null };
+      sayfa();
+    },
+    'hp-gun'(el){ formuOku(); taslak().gun = Number(el.dataset.value); sayfa(); },
+    'hp-kopyala'(){
+      formuOku();
+      const t = taslak(), g = t.plan.gunler[t.gun];
+      t.plan.gunler = t.plan.gunler.map(() => g ? Object.assign({}, g) : null);
+      UI.toast('Bu gün bütün haftaya kopyalandı; kaydedince yazılır.');
+      sayfa();
+    },
+    'hp-dinlen'(){ formuOku(); const t = taslak(); t.plan.gunler[t.gun] = null; sayfa(); },
+    'hp-madde-ekle'(){ formuOku(); const p = taslak().plan; p.maddeler = (p.maddeler || []).concat([{ id:'m' + Date.now().toString(36), metin:'', gunler:[] }]); sayfa(); },
+    'hp-madde-sil'(el){ formuOku(); const p = taslak().plan; p.maddeler.splice(Number(el.dataset.i), 1); sayfa(); },
+    'hp-madde-gun'(el){
+      formuOku();
+      const m = taslak().plan.maddeler[Number(el.dataset.i)], g = Number(el.dataset.gun);
+      m.gunler = (m.gunler || []).indexOf(g) >= 0 ? m.gunler.filter(x => x !== g) : (m.gunler || []).concat([g]).sort();
+      sayfa();
+    },
+    async 'hp-kaydet'(){
+      formuOku();
+      const t = taslak();
+      const r = await HP().kaydet(t.plan);
+      if(!r.ok){ t.hata = r.why; sayfa(); return; }
+      S.ui.hpTaslak = null;
+      UI.closeSheet();
+      UI.toast((r.plan.ad || 'Plan') + ' kaydedildi', { undo:async () => { await HP().geriAl(r); UI.toast('Geri alındı'); SP.App.render(); } });
+      SP.App.render();
+    },
+    async 'hp-sil'(el){
+      const t = taslak();
+      if(!t || !t.varMi) return;
+      if(el.dataset.onay !== '1'){ el.dataset.onay = '1'; el.textContent = 'Emin misin? Sil'; return; }
+      const eski = await HP().sil(t.plan.id);
+      S.ui.hpTaslak = null;
+      UI.closeSheet();
+      UI.toast((eski && eski.ad || 'Plan') + ' silindi', { undo:async () => { await HP().kaydet(eski); SP.App.render(); } });
+      SP.App.render();
+    },
+    async 'hp-isaret'(el){
+      const p = HP().bulId(el.dataset.id);
+      if(!p) return;
+      const r = await HP().kaydet(HP().isaretle(HP().kopya(p), el.dataset.madde, SP.U.todayISO()));
+      if(!r.ok) UI.toast(r.why);
+      SP.App.render();
+    },
+  };
+
+  return {
+    id:'planlar',
+    title:'Planlar',
+    subtitle(){ const n = HP() ? HP().liste().length : 0; return n ? n + ' plan' : 'henüz plan yok'; },
+    lede(){ return ''; },
+    actions(){ return ''; },
+    render, handle, _formuOku:formuOku,
+  };
+})();
+
 /* ==== js/screens/labs.js ==== */
 /* Testler — Modül 1'in ekranı.
 
@@ -82067,6 +82603,8 @@ SP.App = (function(){
       { route:'today', label:'Genel bakış' },
     ]},
     { id:'plan', label:CEK('plan'), views:[
+      /* Planlar (2026-10-17): beslenme, hareket, uyku, su ve alışkanlık, kendi planın. */
+      { route:'planlar', label:'Planlar' },
       { route:'hedefler', label:'Hedefler' },
     ]},
     { id:'calisma', label:CEK('calisma'), views:[

@@ -930,6 +930,8 @@ SP.Model = (function(){
     /* Hedefler ve hekim talimatlari (core/hedefler.js). */
     if(SP.Hedefler) await SP.Hedefler.yukle();
     if(SP.Plan) await SP.Plan.yukle();
+    /* Haftalık planlar (core/haftaplan.js). */
+    if(SP.HaftaPlan) await SP.HaftaPlan.yukle();
     /* Hafiza: senin sozun, sohbetten, cikarim — core/hafiza.js (ortak). */
     if(window.LIFEOS && LIFEOS.Hafiza){
       SP.Hafizam = SP.Hafizam || LIFEOS.Hafiza.kur({ store:() => SP.Store, durum:() => SP.S,

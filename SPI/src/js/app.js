@@ -30,6 +30,8 @@ SP.App = (function(){
       { route:'today', label:'Genel bakış' },
     ]},
     { id:'plan', label:CEK('plan'), views:[
+      /* Planlar (2026-10-17): beslenme, hareket, uyku, su ve alışkanlık, kendi planın. */
+      { route:'planlar', label:'Planlar' },
       { route:'hedefler', label:'Hedefler' },
     ]},
     { id:'calisma', label:CEK('calisma'), views:[

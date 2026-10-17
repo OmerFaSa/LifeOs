@@ -2513,3 +2513,34 @@ body.is-dragging .drop.is-over{
 .hazir__liste li{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 12px; border-radius:12px; background:var(--surface-2); }
 .hazir__liste li > span{ display:flex; flex-direction:column; min-width:0; }
 .hazir__liste small{ color:var(--text-2); font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ---------- Plan › Planlar (2026-10-17) ----------
+   iOS gruplu liste: simge, ad, bugünün satırı, son 7 günün uyumu; sağda tek
+   düğme. Alışkanlık maddeleri satırın altında tek dokunuşla işaretlenir. */
+.hp-liste{ display:flex; flex-direction:column; }
+.hp-satir{ display:grid; grid-template-columns:36px 1fr auto; column-gap:14px; align-items:start; padding:14px 0; }
+.hp-satir + .hp-satir{ border-top:1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+.hp-satir > .btn{ align-self:center; }
+.hp-satir__simge{ width:36px; height:36px; display:grid; place-items:center; border-radius:11px; background:var(--surface-2); color:var(--primary); }
+.hp-satir__simge svg{ width:19px; height:19px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.hp-satir--bos .hp-satir__simge{ color:var(--text-3); }
+.hp-satir__metin{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.hp-satir__metin b{ font-size:15px; font-weight:600; }
+.hp-satir__metin span{ font-size:14px; color:var(--text); }
+.hp-satir--bos .hp-satir__metin span{ color:var(--text-3); font-size:13px; }
+.hp-satir__metin small{ font-size:12.5px; color:var(--text-3); }
+.hp-satir__metin .hp-etiket{ margin-left:4px; font-size:11px; color:var(--text-3); white-space:nowrap; }
+.hp-satir__metin .hp-etiket::before{ content:'· '; }
+.hp-maddeler{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.hp-madde, .hp-gun{ min-height:30px; padding:0 12px; border:1px solid var(--border); border-radius:999px; background:none;
+  color:var(--text-2); font:inherit; font-size:13px; cursor:pointer; transition:background var(--dur) var(--ease), color var(--dur) var(--ease); }
+.hp-madde.is-on, .hp-gun.is-on{ background:var(--sec); border-color:var(--sec); color:var(--primary-ink); }
+.hp-madde.is-on::before{ content:'✓ '; }
+.hp-madde-satir{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.hp-madde-satir > .input{ flex:1 1 180px; }
+.hp-gunler{ display:flex; flex-wrap:wrap; gap:4px; }
+.hp-gun{ min-height:28px; padding:0 8px; font-size:12px; }
+.hp-hareket .field:first-child{ flex:1 1 200px; }
+.hp-hareket .field:last-child{ flex:0 0 110px; }
+.hp-hata{ color:var(--danger); margin-top:12px; }
+@media (max-width:520px){ .hp-satir{ grid-template-columns:32px 1fr; } .hp-satir > .btn{ grid-column:2; justify-self:start; margin-top:8px; } }
