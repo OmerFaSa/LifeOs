@@ -603,4 +603,38 @@ describe('Öneri köprüsü (110 ailesi → modül kapısı)', () => {
   });
 });
 
+/* ONAY TÜRLERİ (kullanıcı, 2026-10-17: «onaylar kısmını daha profesyonel,
+   kategorilere ayır»). Onaylar'daki her satır kapalı bir türe ve kataloğun
+   seviyesine düşer; seçici yalnız dolu türleri sayısıyla gösterir. */
+describe('Onay türleri — seçici ve seviye', () => {
+  it('HKM teklif türü kapalı tablodan tür ve seviye alır; bilinmeyen tür sistem/orta', () => {
+    expect(O().hkmTur('kayit.add')).toEqual({ tur:'kayit', seviye:'kucuk' });
+    expect(O().hkmTur('load.reduce').tur).toBe('plan');
+    expect(O().hkmTur('plan.apply').seviye).toBe('orta');
+    expect(O().hkmTur('mufredat.add')).toEqual({ tur:'sistem', seviye:'orta' });
+    expect(O().hkmTur('bilinmez.tur')).toEqual({ tur:'sistem', seviye:'orta' });   // küçük sayılmaz
+    expect(O().ONAY_TURLERI.map(t => t.id)).toEqual(['kayit', 'plan', 'king', 'sistem']);
+  });
+  it('gruplar sabit sırada; boş tür düşer', () => {
+    const g = O().turlereAyir([{ tur:'sistem', x:1 }, { tur:'kayit', x:2 }, { tur:'plan', x:3 }, { tur:'kayit', x:4 }, { tur:'garip', x:5 }]);
+    expect(g.map(x => [x.id, x.satirlar.map(s => s.x)])).toEqual([['kayit', [2, 4]], ['plan', [3]], ['sistem', [1, 5]]]);
+  });
+  it('seçici: Tümü hep, tür yalnız doluysa, Geçmiş yalnız istenince; seçili olan basılı', () => {
+    const h = O().turSeciciHtml({ secili:'plan', sayilar:{ kayit:2, plan:3, king:0, sistem:1 }, act:'onay-tur' });
+    expect(h.indexOf('data-value="gecmis"') < 0).toBeTruthy();
+    expect(O().turSeciciHtml({ sayilar:{ kayit:1 }, gecmis:true })).toContain('data-value="gecmis"');
+    ['data-value="hepsi"', 'data-value="kayit"', 'data-value="plan"', 'data-value="sistem"', '>Plan<']
+      .forEach(x => expect(h).toContain(x));
+    expect(h.indexOf('data-value="king"') < 0).toBeTruthy();
+    expect(h).toContain('data-value="plan" aria-pressed="true"');
+    expect(h).toContain('data-value="hepsi" aria-pressed="false"');
+    expect(h).toContain('>6<');                                                       // Tümü sayısı
+  });
+  it('seviye etiketi: üç seviye adıyla; seviyesiz satır etiketsiz', () => {
+    expect(O().seviyeEtiketi('buyuk')).toContain('büyük');
+    expect(O().seviyeEtiketi('kucuk')).toContain('data-seviye="kucuk"');
+    expect(O().seviyeEtiketi(null)).toBe('');
+  });
+});
+
 })();

@@ -669,8 +669,68 @@ window.LIFEOS = window.LIFEOS || {};
     return { kart:kart, onizleHtml:onizleHtml, bul:bul, handle:handle, EYLEMLER:Object.keys(handle) };
   }
 
+  /* ------------------------------------------------ ONAY TÜRLERİ
+     Kullanıcı (2026-10-17): «onaylar kısmını daha profesyonel,
+     kategorilere ayır». Onaylar'daki her satır kapalı bir TÜRE düşer ve
+     seviyesi katalogdan gelir (AGENTS §1.9: seviyeyi katalog belirler,
+     model değil). Ofis önerisinin seviyesi modülün kataloğundadır; HKM
+     teklif türlerininki burada yazılır. Bilinmeyen tür «sistem, orta»
+     sayılır: tanımadığımız bir şey sormadan uygulanabilir sayılmaz. */
+  const ONAY_TURLERI = Object.freeze([
+    { id:'kayit',  ad:'Kayıt' },
+    { id:'plan',   ad:'Plan ve ayar', kisa:'Plan' },
+    { id:'king',   ad:'King' },
+    { id:'sistem', ad:'Sistem' },
+  ]);
+  const HKM_TUR = Object.freeze({
+    'kayit.add':    { tur:'kayit',  seviye:'kucuk' },
+    'plan.add':     { tur:'plan',   seviye:'kucuk' },
+    'focus.set':    { tur:'plan',   seviye:'kucuk' },
+    'load.reduce':  { tur:'plan',   seviye:'kucuk' },
+    'plan.apply':   { tur:'plan',   seviye:'orta' },
+    'material.add': { tur:'sistem', seviye:'kucuk' },
+    'kitap.add':    { tur:'sistem', seviye:'kucuk' },
+    'urun.add':     { tur:'sistem', seviye:'kucuk' },
+    'mufredat.add': { tur:'sistem', seviye:'orta' },
+    /* SPİ: BAM bilgisi (core/bilgi.js) · ESP: ünite, belge, kart — hepsi geri alınır. */
+    'besin.add':    { tur:'sistem', seviye:'kucuk' },
+    'fiyat.add':    { tur:'sistem', seviye:'kucuk' },
+    'yer.add':      { tur:'sistem', seviye:'kucuk' },
+    'unite.add':    { tur:'sistem', seviye:'kucuk' },
+    'belge.add':    { tur:'sistem', seviye:'kucuk' },
+    'kart.add':     { tur:'sistem', seviye:'kucuk' },
+  });
+  function hkmTur(kind){
+    const t = HKM_TUR[kind];
+    return t ? { tur:t.tur, seviye:t.seviye } : { tur:'sistem', seviye:'orta' };
+  }
+  /* Satırlar ([{ tur, … }]) → [{ id, ad, satirlar }] sabit sırada; boş tür
+     düşer, tanınmayan tür «sistem»e katılır. */
+  function turlereAyir(satirlar){
+    const kova = {};
+    ONAY_TURLERI.forEach(t => { kova[t.id] = []; });
+    (satirlar || []).forEach(s => { (kova[s && kova[s.tur] ? s.tur : 'sistem']).push(s); });
+    return ONAY_TURLERI.filter(t => kova[t.id].length).map(t => ({ id:t.id, ad:t.ad, satirlar:kova[t.id] }));
+  }
+  /* Bölümlü seçici: Tümü · dolu türler (sayısıyla) · istenirse Geçmiş. Modülün `.seg`
+     biçimini kullanır; eylem modülün işleyicisine gider (data-act). */
+  function turSeciciHtml(o){
+    o = o || {};
+    const say = o.sayilar || {}, secili = o.secili || 'hepsi', act = o.act || 'onay-tur';
+    const toplam = ONAY_TURLERI.reduce((n, t) => n + (say[t.id] || 0), 0);
+    const dugme = (deger, ad, n) => '<button type="button" class="' + (deger === secili ? 'is-on' : '') + '" data-act="' + kac(act)
+      + '" data-value="' + deger + '" aria-pressed="' + (deger === secili ? 'true' : 'false') + '">' + kac(ad)
+      + (n ? '<span class="onay-turleri__sayi">' + n + '</span>' : '') + '</button>';
+    return '<div class="seg onay-turleri" role="group" aria-label="Onay türü">'
+      + dugme('hepsi', 'Tümü', toplam)
+      + ONAY_TURLERI.filter(t => say[t.id]).map(t => dugme(t.id, t.kisa || t.ad, say[t.id])).join('')
+      + (o.gecmis ? dugme('gecmis', 'Geçmiş', 0) : '') + '</div>';
+  }
+  function seviyeEtiketi(sev){ return sev && SEVIYE_AD[sev] ? seviyeRozeti(sev) : ''; }
+
   L.ONERI = {
     kopru:kopru,
+    ONAY_TURLERI:ONAY_TURLERI, hkmTur:hkmTur, turlereAyir:turlereAyir, turSeciciHtml:turSeciciHtml, seviyeEtiketi:seviyeEtiketi,
     SEVIYELER:SEVIYELER,
     SEVIYE_AD:SEVIYE_AD,
     KALIPLAR:KALIPLAR,

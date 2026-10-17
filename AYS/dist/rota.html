@@ -7299,6 +7299,20 @@ body.is-dragging .drop.is-over{
 .ornek-filigran::before{ content:"ÖRNEK"; font-size:min(22vw, 200px); font-weight:800; letter-spacing:.08em;
   color:var(--text); opacity:.05; transform:rotate(-24deg); white-space:nowrap; }
 
+/* ---------- Onaylar türe göre (2026-10-17) ----------
+   Üstte bölümlü seçici (sayılar küçük ve sakin), altında tür kutuları;
+   kutu içinde satırlar ince ayraçla ayrılır, seviye etiketi başlığın sağında. */
+.onaylar > .onay-turleri{ display:flex; width:max-content; max-width:100%; margin:0 auto 20px; overflow-x:auto; scrollbar-width:none; }
+.onaylar > .onay-turleri::-webkit-scrollbar{ display:none; }
+.onay-turleri button{ white-space:nowrap; }
+.onay-turleri__sayi{ margin-left:6px; font-size:11.5px; font-weight:600; color:var(--text-3); font-variant-numeric:tabular-nums; }
+.onay-turleri .is-on .onay-turleri__sayi{ color:inherit; opacity:.65; }
+.onay-liste{ display:flex; flex-direction:column; }
+.onay-liste > * + *{ margin-top:16px; padding-top:16px; border-top:1px solid color-mix(in oklab, var(--border) 70%, transparent); }
+.onay-satir__bas{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.onay-satir__ad{ font-size:15px; font-weight:600; line-height:1.35; min-width:0; }
+.onay-satir__ust{ margin:2px 0 0; font-size:12.5px; color:var(--text-3); }
+
 /* ==== css/seviye.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/seviye/seviye.css içine yazılır; burası bir sonraki
@@ -16874,7 +16888,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'00d314cb', at:'2026-10-17 21:08', dirty:true };
+R.BUILD = { id:'b9dcf35c', at:'2026-10-17 22:46', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -20927,8 +20941,68 @@ window.LIFEOS = window.LIFEOS || {};
     return { kart:kart, onizleHtml:onizleHtml, bul:bul, handle:handle, EYLEMLER:Object.keys(handle) };
   }
 
+  /* ------------------------------------------------ ONAY TÜRLERİ
+     Kullanıcı (2026-10-17): «onaylar kısmını daha profesyonel,
+     kategorilere ayır». Onaylar'daki her satır kapalı bir TÜRE düşer ve
+     seviyesi katalogdan gelir (AGENTS §1.9: seviyeyi katalog belirler,
+     model değil). Ofis önerisinin seviyesi modülün kataloğundadır; HKM
+     teklif türlerininki burada yazılır. Bilinmeyen tür «sistem, orta»
+     sayılır: tanımadığımız bir şey sormadan uygulanabilir sayılmaz. */
+  const ONAY_TURLERI = Object.freeze([
+    { id:'kayit',  ad:'Kayıt' },
+    { id:'plan',   ad:'Plan ve ayar', kisa:'Plan' },
+    { id:'king',   ad:'King' },
+    { id:'sistem', ad:'Sistem' },
+  ]);
+  const HKM_TUR = Object.freeze({
+    'kayit.add':    { tur:'kayit',  seviye:'kucuk' },
+    'plan.add':     { tur:'plan',   seviye:'kucuk' },
+    'focus.set':    { tur:'plan',   seviye:'kucuk' },
+    'load.reduce':  { tur:'plan',   seviye:'kucuk' },
+    'plan.apply':   { tur:'plan',   seviye:'orta' },
+    'material.add': { tur:'sistem', seviye:'kucuk' },
+    'kitap.add':    { tur:'sistem', seviye:'kucuk' },
+    'urun.add':     { tur:'sistem', seviye:'kucuk' },
+    'mufredat.add': { tur:'sistem', seviye:'orta' },
+    /* SPİ: BAM bilgisi (core/bilgi.js) · ESP: ünite, belge, kart — hepsi geri alınır. */
+    'besin.add':    { tur:'sistem', seviye:'kucuk' },
+    'fiyat.add':    { tur:'sistem', seviye:'kucuk' },
+    'yer.add':      { tur:'sistem', seviye:'kucuk' },
+    'unite.add':    { tur:'sistem', seviye:'kucuk' },
+    'belge.add':    { tur:'sistem', seviye:'kucuk' },
+    'kart.add':     { tur:'sistem', seviye:'kucuk' },
+  });
+  function hkmTur(kind){
+    const t = HKM_TUR[kind];
+    return t ? { tur:t.tur, seviye:t.seviye } : { tur:'sistem', seviye:'orta' };
+  }
+  /* Satırlar ([{ tur, … }]) → [{ id, ad, satirlar }] sabit sırada; boş tür
+     düşer, tanınmayan tür «sistem»e katılır. */
+  function turlereAyir(satirlar){
+    const kova = {};
+    ONAY_TURLERI.forEach(t => { kova[t.id] = []; });
+    (satirlar || []).forEach(s => { (kova[s && kova[s.tur] ? s.tur : 'sistem']).push(s); });
+    return ONAY_TURLERI.filter(t => kova[t.id].length).map(t => ({ id:t.id, ad:t.ad, satirlar:kova[t.id] }));
+  }
+  /* Bölümlü seçici: Tümü · dolu türler (sayısıyla) · istenirse Geçmiş. Modülün `.seg`
+     biçimini kullanır; eylem modülün işleyicisine gider (data-act). */
+  function turSeciciHtml(o){
+    o = o || {};
+    const say = o.sayilar || {}, secili = o.secili || 'hepsi', act = o.act || 'onay-tur';
+    const toplam = ONAY_TURLERI.reduce((n, t) => n + (say[t.id] || 0), 0);
+    const dugme = (deger, ad, n) => '<button type="button" class="' + (deger === secili ? 'is-on' : '') + '" data-act="' + kac(act)
+      + '" data-value="' + deger + '" aria-pressed="' + (deger === secili ? 'true' : 'false') + '">' + kac(ad)
+      + (n ? '<span class="onay-turleri__sayi">' + n + '</span>' : '') + '</button>';
+    return '<div class="seg onay-turleri" role="group" aria-label="Onay türü">'
+      + dugme('hepsi', 'Tümü', toplam)
+      + ONAY_TURLERI.filter(t => say[t.id]).map(t => dugme(t.id, t.kisa || t.ad, say[t.id])).join('')
+      + (o.gecmis ? dugme('gecmis', 'Geçmiş', 0) : '') + '</div>';
+  }
+  function seviyeEtiketi(sev){ return sev && SEVIYE_AD[sev] ? seviyeRozeti(sev) : ''; }
+
   L.ONERI = {
     kopru:kopru,
+    ONAY_TURLERI:ONAY_TURLERI, hkmTur:hkmTur, turlereAyir:turlereAyir, turSeciciHtml:turSeciciHtml, seviyeEtiketi:seviyeEtiketi,
     SEVIYELER:SEVIYELER,
     SEVIYE_AD:SEVIYE_AD,
     KALIPLAR:KALIPLAR,
@@ -108606,21 +108680,73 @@ R.Screens.onaylar = (function(){
       </div>`;
   }
 
-  function ofisKarti(){
-    const list = R.Proposals.actionable();
-    const done = R.Proposals.applied().slice(-3).reverse();
-    if(!list.length && !done.length) return '';
+  /* ---------- TÜRE GÖRE (kullanıcı, 2026-10-17: «onaylar kısmını daha
+     profesyonel, kategorilere ayır») ----------
+     Kaynağa göre üç kart (King, HKM, ofis) yerine her satır bir TÜRE düşer
+     (brand/ortak/oneri.js ONAY_TURLERI: Kayıt · Plan ve ayar · King ·
+     Sistem) ve seviyesi katalogdan gelir. Üstte bölümlü seçici; uygulananlar
+     ve son kararlar «Geçmiş» sekmesinde. Bugün'ün öneri alanı aynı kalır. */
+  const ON = () => (window.LIFEOS || {}).ONERI;
+  const HKM_AD = { 'kayit.add':'Günün kaydı', 'plan.add':'Çalışma bloğu', 'focus.set':'Günün odağı',
+    'load.reduce':'Günü hafiflet', 'material.add':'BAM materyali', 'kitap.add':'Test kitabı',
+    'urun.add':'BAM ürünü', 'mufredat.add':'Müfredat' };
 
-    return c.Card({
-      title:'Ofisin önerileri',
-      sub:'Ajanlar değişiklik önerir; uygulanıp uygulanmayacağına sen karar verirsin',
-      badge:when(list.length, () => c.Badge({ label:String(list.length), tone:'warn' })),
-      body:html`
-        ${when(list.length, () => html`<div class="props">${map(list, oneriKarti)}</div>`)}
-        ${when(done.length, () => html`
-          <div class="mt-12">${c.SectionTitle('Uygulananlar')}</div>
-          <div class="props">${map(done, appliedRow)}</div>`)}`,
-    });
+  function onaySatir(o){
+    return html`<div class="onay-satir">
+      <div class="onay-satir__bas"><b class="onay-satir__ad">${o.baslik}</b>${raw(ON().seviyeEtiketi(o.seviye))}</div>
+      ${when(o.ust, () => html`<p class="onay-satir__ust">${o.ust}</p>`)}
+      ${o.govde || ''}
+      ${when(o.eylem, () => html`<div class="row wrap gap-8 mt-10">${o.eylem}</div>`)}
+    </div>`;
+  }
+  /* King'in işi para harcar: geri alınamaz, küçük sayılmaz (orta). */
+  function kingSatir(t){
+    if(t.durum === 'ara_onay') return onaySatir({ baslik:t.konu, seviye:'orta', ust:'İş emri #' + t.id + ' · yarıda, devam onayı bekliyor',
+      govde:html`<p class="small mt-6">${t.metin}</p>`,
+      eylem:html`${c.Button({ label:'Devam', size:'sm', tone:'primary', act:'king-parca', data:{ 'data-id':String(t.id), 'data-karar':'devam' } })}
+        ${c.Button({ label:'Dur ve bitir', size:'sm', act:'king-parca', data:{ 'data-id':String(t.id), 'data-karar':'dur' } })}` });
+    return onaySatir({ baslik:t.konu, seviye:'orta', ust:'İş emri #' + t.id + ' · ücretli iş',
+      govde:html`${map(t.secenekler, (x, i) => html`<p class="small mt-6">${i + 1}) ${x.metin}</p>`)}
+        ${when(t.neden, () => c.Notice({ tone:'info', class:'mt-8',
+          body:'Önerim: ' + ((t.secenekler.find(x => x.id === t.oneri) || {}).ad || t.oneri) + ' — ' + t.neden + '.' }))}`,
+      eylem:html`${map(t.secenekler, (x, i) => c.Button({ label:(i + 1) + '. seçeneği onayla', size:'sm',
+          tone:x.id === (t.oneri || 'tam') ? 'primary' : undefined, act:'king-onayla', data:{ 'data-id':String(t.id), 'data-secenek':x.id } }))}
+        ${c.Button({ label:'İptal', size:'sm', act:'king-iptal', data:{ 'data-id':String(t.id) } })}` });
+  }
+  function hkmSatir(n, seviye){
+    return onaySatir({ baslik:HKM_AD[n.kind] || 'Merkez teklifi', seviye, ust:'Merkez teklifi',
+      govde:html`<p class="small mt-6">${n.note}</p>${when(n.kind === 'kayit.add', () => KayitOkuma(n))}`,
+      eylem:html`${when(R.Beacon.canApply(n), () => c.Button({
+          label:({ 'kayit.add':'Kaydet', 'urun.add':'Ekle', 'load.reduce':'Hafiflet' })[n.kind] || 'Uygula',
+          size:'sm', tone:'primary', act:'hkm-intent-yes', data:{ 'data-id':String(n.id) } }))}
+        ${when(!R.Beacon.canApply(n), () => c.Button({ label:'Gördüm', size:'sm', tone:'primary', act:'hkm-intent-seen', data:{ 'data-id':String(n.id) } }))}
+        ${c.Button({ label:'İstemiyorum', size:'sm', act:'hkm-intent-no', data:{ 'data-id':String(n.id) } })}` });
+  }
+  /* Yarıda kalan teklif: seviyesi yok, uydurulmaz; yalnız «bilinmiyor». */
+  function supheSatir(d){
+    return onaySatir({ baslik:'Sonucu belirsiz teklif', ust:'Uygulanırken yarıda kaldı',
+      govde:html`<p class="small mt-6">Plana yazılıp yazılmadığı bilinmiyor; planına bakıp doğrula. Bu satır, olmamış bir işi olmuş göstermemek için duruyor.</p>`,
+      eylem:c.Button({ label:'Kontrol ettim', size:'sm', act:'hkm-doubt-ok', data:{ 'data-id':String(d.id) } }) });
+  }
+  function onaySatirlari(){
+    const l = [];
+    (S.ui.kingTeklifler || []).forEach(t => l.push({ tur:'king', html:kingSatir(t) }));
+    (S.ui.hkmIntents || []).forEach(n => { const k = ON().hkmTur(n.kind); l.push({ tur:k.tur, html:hkmSatir(n, k.seviye) }); });
+    (S.ui.hkmDoubts || []).forEach(d => l.push({ tur:'sistem', html:supheSatir(d) }));
+    try{ R.Proposals.actionable().forEach(p => l.push({ tur:gelenMi(p) ? 'kayit' : 'plan', html:oneriKarti(p) })); }catch(e){ console.error(e); }
+    return l;
+  }
+  function grupKutusu(g){
+    const toplu = g.id === 'kayit' ? topluKayitlar().length : 0;
+    return c.Kutu({ ad:g.ad, ipucu:g.id === 'king' || g.id === 'sistem' ? 'hkm' : undefined,
+      yuva:toplu >= 2 ? c.Button({ label:'Hepsini kaydet (' + toplu + ')', size:'sm', tone:'primary', act:'hkm-toplu' }) : String(g.satirlar.length),
+      govde:html`<div class="onay-liste" data-raf-tam>${map(g.satirlar, s => s.html)}</div>` });
+  }
+  /* Uygulananlar: son üç, «Geri al» ile (eskiden ofis kartının altındaydı). */
+  function uygulananlar(){
+    const done = R.Proposals ? R.Proposals.applied().slice(-3).reverse() : [];
+    return done.length ? c.Kutu({ ad:'Uygulananlar', yuva:String(done.length),
+      govde:html`<div class="props">${map(done, appliedRow)}</div>` }) : '';
   }
 
   /* Bekleyen: King + HKM (belirsizler dahil) + ofis önerisi. Kabuğun
@@ -108682,19 +108808,26 @@ R.Screens.onaylar = (function(){
       govde:html`<div data-oz="119">${raw(G.gecmisHtml(olay.slice(0, 40)))}</div>` });
   }
 
+  /* Seçici yalnız bekleyen varken (boş Onaylar tek eylemdir, 010); «Son
+     kararlar» sağ sütunda hep görünür (119), ayrı sekmeye gizlenmez. */
   async function render(){
-    const kartlar = [KingTeklifKart(), HkmTeklifKart(), ofisKarti()].filter(Boolean);
+    const l = onaySatirlari();
     const gecmis = sonKararlar();
-    if(!kartlar.length){
-      /* Boş durum (10): tek eylem. Geçmiş varsa yanında durur (119):
-         «dün neyi geçmiştim?» sorusu tam bekleyen yokken sorulur. */
+    if(!l.length){
       const bos = c.Kutu({ ad:'Bekleyen öneri yok', govde:html`
         <p class="small muted">Merkez, King ve ofis bir şey önerdiğinde burada durur; sen
           onaylamadan hiçbiri uygulanmaz.</p>
         <div class="mt-10">${c.Button({ label:'Masaları tara', icon:'refresh', size:'sm', act:'office-scan' })}</div>` });
-      return String(gecmis ? c.Grid([c.Span(8, bos), c.Span(4, gecmis)]) : c.Grid([c.Span(12, bos)]));
+      const ana = c.Stack([bos, uygulananlar()].filter(Boolean));
+      return String(gecmis ? c.Grid([c.Span(8, ana), c.Span(4, gecmis)]) : c.Grid([c.Span(12, ana)]));
     }
-    return String(c.Grid([c.Span(8, c.Stack(kartlar)), c.Span(4, gecmis)]));
+    const say = {};
+    l.forEach(x => { say[x.tur] = (say[x.tur] || 0) + 1; });
+    let sec = S.ui.onayTur || 'hepsi';
+    if(sec !== 'hepsi' && !say[sec]) sec = 'hepsi';
+    const gruplar = ON().turlereAyir(l).filter(g => sec === 'hepsi' || g.id === sec).map(grupKutusu);
+    const ana = html`<div class="onaylar">${raw(ON().turSeciciHtml({ secili:sec, sayilar:say, act:'onay-tur' }))}${c.Stack(gruplar.concat(uygulananlar() || []).filter(Boolean))}</div>`;
+    return String(gecmis ? c.Grid([c.Span(8, ana), c.Span(4, gecmis)]) : c.Grid([c.Span(12, ana)]));
   }
 
   /* ---------- eylemler ---------- */
@@ -108734,6 +108867,7 @@ R.Screens.onaylar = (function(){
       S.ui.kingTeklifler = R.KingTeklif.liste();
       R.App.render();
     },
+    'onay-tur'(el){ S.ui.onayTur = el.dataset.value; R.App.render(); },
     async 'hkm-toplu'(){ await hkmToplu(); },
     async 'hkm-intent-yes'(el){ await hkmCevap(el.dataset.id, 'apply'); },
     async 'hkm-intent-seen'(el){ await hkmCevap(el.dataset.id, 'seen'); },

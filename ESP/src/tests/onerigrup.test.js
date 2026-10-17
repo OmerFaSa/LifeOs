@@ -31,7 +31,8 @@
       expect(dahasi[0].hasAttribute('open')).toBe(false);
       expect(dahasi[0].querySelector('summary').textContent).toContain('2 öneri daha');
       ['a1', 'a2', 'a3', 'b1', 'b2'].forEach(id => expect(k.textContent).toContain('Öneri ' + id));
-      expect(k.textContent).toContain('5 öneri');
+      /* 2026-10-17: türe göre Onaylar — uzman önerileri «Plan ve ayar» kutusunda, sayısı kutunun başında. */
+      expect(k.querySelector('.onay-turleri [data-value="plan"]').textContent).toContain('5');
     });
 
     it('tek disiplin varsa gruplama yok', async () => {
