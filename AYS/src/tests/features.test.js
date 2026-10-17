@@ -65,8 +65,11 @@
       const p = A.publisherAdjust('TYT');
       expect(p.ok).toBeTruthy();
       expect(p.rows).toHaveLength(2);
-      expect(p.spread).toBeGreaterThan(10);
-      expect(p.note).toContain('tek yayın');
+      /* Analiz denetimi (2026-10-17): ham fark (>10) gidişle karışıktı; A erken,
+         B geç çözüldü. Ham sapma ayrıca durur, sapma gidişten arındırılmıştır. */
+      expect(Math.abs(p.rows.find(r => r.publisher === 'B').hamOffset - p.rows.find(r => r.publisher === 'A').hamOffset)).toBeGreaterThan(10);
+      expect(p.spread < 5).toBe(true);
+      expect(p.note).toContain('arındırınca');
     });
   });
 
@@ -116,7 +119,7 @@
       expect(row.cert).toBe('missing');
     });
 
-    it('en az bir kez çözülen konu "measured" taşır', function(){
+    it('en az bir kez çözülen konu "derived" (hesaplandı) taşır', function(){
       resetState();
       const sub = R.SUBJECTS[0], top = sub.topics[0];
       const iso = U.todayISO();
@@ -127,7 +130,8 @@
           targetMin:40, targetQ:20, status:'done',
           actualMin:40, actualQ:20, correctQ:14, skipReason:null, startedAt:null }] };
       const row = A.topicValue().find(r => r.subjectId === sub.id && r.topicId === top.id);
-      expect(row.cert).toBe('measured');
+      /* Kazanılan frekans payı × pratik doğruluğundan hesaplanır (2026-10-17). */
+      expect(row.cert).toBe('derived');
     });
   });
 
@@ -220,6 +224,41 @@
       const r = A.sleepImpact();
       expect(r.ok).toBeFalsy();
       expect(r.why).toContain('en az iki');
+    });
+    it('hız eşiği teste özgü: Matematik 80 sn yavaş değil, Türkçe 80 sn yavaş', function(){
+      expect(R.Analytics.hedefSure('Temel Matematik', 'TYT')).toBe(75);
+      expect(R.Analytics.hedefSure('Türkçe', 'TYT')).toBe(60);
+      expect(R.Analytics.hedefSure('Matematik', 'AYT')).toBe(112.5);
+      resetState();
+      const ex = (i, test, dakika) => ({ id:'h' + i, date:'2026-09-1' + i, family:'TYT', kind:'full', type:'Tam TYT',
+        tests:[{ name:test, correct:36, wrong:4, blank:0, minutes:dakika }] });
+      S.exams = [ex(1, 'Temel Matematik', 53), ex(2, 'Temel Matematik', 53), ex(3, 'Türkçe', 53), ex(4, 'Türkçe', 53)];
+      const r = R.Analytics.speedAccuracy('TYT').rows;
+      expect(r.find(x => x.test === 'Temel Matematik').profile).toBe('mixed');      // 80/75: kabul
+      expect(r.find(x => x.test === 'Türkçe').profile).toBe('slow-right');          // 80/60: yavaş
+    });
+    it('yayın farkı zamandan arındırılır: ilerleyen adayda ilk yayın «zor» görünmez', function(){
+      resetState();
+      const ex = (i, net, pub) => Object.assign(examWithNet('2026-09-' + String(10 + i), net, 'TYT'), { id:'p' + i, publisher:pub });
+      S.exams = [ex(1, 40, 'A'), ex(2, 44, 'A'), ex(3, 48, 'A'), ex(4, 52, 'B'), ex(5, 56, 'B'), ex(6, 60, 'B')];
+      const p = R.Analytics.publisherAdjust('TYT');
+      expect(Math.abs(p.rows.find(r => r.publisher === 'A').offset) < 0.01).toBe(true);
+      expect(p.rows.find(r => r.publisher === 'A').hamOffset < -5).toBe(true);
+      expect(p.spread < 0.01).toBe(true);
+    });
+    it('konu katkısı hesaplanmış etiket taşır; ders ders deneme: bırakılan net ve gidiş', function(){
+      resetState();
+      expect(R.Analytics.topicValue().some(r => r.cert === 'measured')).toBe(false);
+      expect(R.Analytics.dersAnalizi('TYT').ok).toBe(false);
+      const ex = (i, tr, mat) => ({ id:'d' + i, date:'2026-09-1' + i, family:'TYT', kind:'full', type:'Tam TYT',
+        tests:[{ name:'Türkçe', correct:tr, wrong:0, blank:40 - tr }, { name:'Temel Matematik', correct:mat, wrong:4, blank:36 - mat }] });
+      S.exams = [ex(1, 30, 10), ex(2, 31, 14), ex(3, 32, 18), ex(4, 33, 22)];
+      const d = R.Analytics.dersAnalizi('TYT');
+      const mat = d.rows.find(r => r.test === 'Temel Matematik'), tr = d.rows.find(r => r.test === 'Türkçe');
+      expect([mat.sonMedyan, mat.kayip, mat.egim]).toEqual([17, 23, 4]);
+      expect([tr.sonMedyan, tr.kayip, tr.egim]).toEqual([32, 8, 1]);
+      expect(d.rows[0].test).toBe('Temel Matematik');                       // en çok bırakılan önde
+      expect(d.note).toContain('Temel Matematik');
     });
     it('uyku kaydı yetersizse çalışmaz', async function(){
       await seedExams([['2026-10-01', 30], ['2026-10-08', 32], ['2026-10-15', 34], ['2026-10-22', 36]]);

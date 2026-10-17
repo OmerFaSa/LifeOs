@@ -16669,7 +16669,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'80e3e5bd', at:'2026-10-17 11:17', dirty:true };
+R.BUILD = { id:'2697f2ed', at:'2026-10-17 11:37', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -73331,6 +73331,29 @@ R.Analytics = (function(){
   const U = R.U, M = R.Model, S = R.S;
   const C = () => R.Calc;
 
+  /* Theil–Sen eğimi (ikili eğimlerin ortancası); tek aykırı deneme sürüklemez. */
+  function ts(n){
+    const e = [];
+    for(let i = 0; i < n.length; i++) for(let j = i + 1; j < n.length; j++){
+      if(n[j].x !== n[i].x) e.push((n[j].y - n[i].y) / (n[j].x - n[i].x));
+    }
+    return e.length ? U.median(e) : 0;
+  }
+
+  /* Teste özgü hedef süre (sn/soru): sistemin KENDİ branş şablonlarından
+     (data/reference.js: Türkçe 40 soru / 40 dk, AYT Matematik 40 / 75 dk…);
+     branşı olmayan test (Sosyal) tam denemenin soru başı ortalamasını alır.
+     Analiz denetimi (2026-10-17): önce her test için aynı eşik (60 sn)
+     vardı; Matematik'te 80 sn «yavaş», Sosyal'de 40 sn «ideal» sayılıyordu. */
+  function hedefSure(test, family){
+    const T = R.EXAM_TEMPLATES || [];
+    const br = T.find(t => t.kind === 'branch' && t.family === family && (t.tests || []).length === 1 && t.tests[0].name === test);
+    if(br && br.duration && br.tests[0].q) return br.duration * 60 / br.tests[0].q;
+    const tam = T.find(t => t.kind === 'full' && t.family === family && (t.tests || []).some(x => x.name === test));
+    const q = tam ? U.sum(tam.tests.map(x => x.q || 0)) : 0;
+    return tam && tam.duration && q ? tam.duration * 60 / q : 75;
+  }
+
   /* ---------- deneme karşılaştırma ---------- */
   function compareExams(idA, idB){
     const a = S.exams.find(e => e.id === idA);
@@ -73492,30 +73515,39 @@ R.Analytics = (function(){
 
     const nets = list.map(M.examNet);
     const overall = U.median(nets);
+    /* ZAMANDAN ARINDIRILIR (analiz denetimi, 2026-10-17): önce A yayınını,
+       sonra B'yi çözüp ilerleyen adayda A «zor yayın» görünüyordu. Gidiş
+       (Theil–Sen, deneme sırasına göre) çıkarılır; yayının sapması kalanın
+       ortancasıdır. */
+    const egim = ts(nets.map((y, i) => ({ x:i, y })));
+    const kesit = U.median(nets.map((y, i) => y - egim * i));
+    const kalan = nets.map((y, i) => y - (kesit + egim * i));
     const byPub = {};
     list.forEach((e, i) => {
       const key = e.publisher || 'belirtilmedi';
-      byPub[key] = byPub[key] || { publisher:key, nets:[] };
+      byPub[key] = byPub[key] || { publisher:key, nets:[], kalan:[] };
       byPub[key].nets.push(nets[i]);
+      byPub[key].kalan.push(kalan[i]);
     });
 
     const rows = Object.keys(byPub).map(k => {
       const med = U.median(byPub[k].nets);
       return {
         publisher:k, count:byPub[k].nets.length,
-        median:U.round(med, 2), offset:U.round(med - overall, 2),
+        median:U.round(med, 2), offset:U.round(U.median(byPub[k].kalan), 2), hamOffset:U.round(med - overall, 2),
       };
     }).sort((a, b) => b.count - a.count);
 
     const spread = rows.length > 1
-      ? U.round(Math.max.apply(null, rows.map(r => r.median)) - Math.min.apply(null, rows.map(r => r.median)), 2)
+      ? U.round(Math.max.apply(null, rows.map(r => r.offset)) - Math.min.apply(null, rows.map(r => r.offset)), 2)
       : 0;
 
     return {
       ok:true, overall:U.round(overall, 2), rows, spread,
       note:spread >= 6
-        ? 'Yayınlar arası fark ' + U.fmtNet(spread) + ' net. Trendi tek yayın içinde okumak daha güvenilir.'
-        : 'Yayınlar arası fark küçük; netler karşılaştırılabilir.',
+        ? 'Gidişten arındırınca yayınlar arası fark ' + U.fmtNet(spread) + ' net. Trendi tek yayın içinde okumak daha güvenilir.'
+        : 'Gidişten arındırınca yayınlar arası fark küçük; netler karşılaştırılabilir.',
+      egimDeneme:U.round(egim, 2),
     };
   }
 
@@ -73542,12 +73574,14 @@ R.Analytics = (function(){
     const rows = keys.map(k => {
       const sec = U.median(byTest[k].sec);
       const acc = U.median(byTest[k].acc);
-      const profile = acc >= 75 && sec <= 60 ? 'ideal'
-        : acc < 65 && sec <= 45 ? 'fast-wrong'
-        : acc >= 75 && sec > 75 ? 'slow-right'
+      const hedef = hedefSure(k, family || 'TYT');
+      const oran = sec / hedef;
+      const profile = acc >= 75 && oran <= 1.05 ? 'ideal'
+        : acc < 65 && oran <= 0.8 ? 'fast-wrong'
+        : acc >= 75 && oran > 1.2 ? 'slow-right'
         : 'mixed';
       return {
-        test:k, secPerQ:U.round(sec, 1), accuracy:Math.round(acc), profile,
+        test:k, secPerQ:U.round(sec, 1), hedefSn:Math.round(hedef), accuracy:Math.round(acc), profile,
         note:profile === 'fast-wrong' ? 'Hızlı ama isabetsiz — okuma ve kontrol adımı ekle.'
           : profile === 'slow-right' ? 'Doğru ama yavaş — süre baskısı altında çalış.'
           : profile === 'ideal' ? 'Hız ve isabet dengede.'
@@ -73582,7 +73616,8 @@ R.Analytics = (function(){
           : 0;
         out.push({
           subjectId:sub.id, subjectName:sub.name, topicId:t.id, topicName:t.name,
-          freq:t.freq, state:st.state, cert:dokunuldu ? 'measured' : 'missing',
+          /* Kazanılan, frekans payı ve pratik doğruluğundan HESAPLANIR (ölçülmez). */
+          freq:t.freq, state:st.state, cert:dokunuldu ? 'derived' : 'missing',
           potential, earned, gap:U.round(potential - earned, 2),
         });
       });
@@ -73768,7 +73803,57 @@ R.Analytics = (function(){
     };
   }
 
+  /* ---------- ders ders deneme (Kişi planı Faz 7) ----------
+
+     Her testte: son üç denemenin ortanca neti, gidiş (Theil–Sen, net /
+     deneme), soru sayısına göre bıraktığın net (soru − ortanca net),
+     doğru oranı ve boş oranı (boşu bilinen denemelerden). En az üç tam
+     deneme gerekir; bir testte üçten az kayıt varsa o test «az veri». */
+  function dersAnalizi(family){
+    const fam = family || 'TYT';
+    const list = C().fullExams(fam);
+    if(list.length < 3) return { ok:false, why:'Ders ders okuma için en az 3 tam ' + fam + ' denemesi gerekir.' };
+    const tpl = (R.EXAM_TEMPLATES || []).find(t => t.kind === 'full' && t.family === fam);
+    const soruSay = ad => { const x = tpl && (tpl.tests || []).find(t => t.name === ad); return x ? x.q : null; };
+    const by = {};
+    list.forEach((e, i) => (e.tests || []).forEach(t => {
+      const r = by[t.name] = by[t.name] || { test:t.name, net:[], dogru:0, yanlis:0, bos:0, bosBilinen:0, soruBos:0 };
+      r.net.push({ x:i, y:M.testNet(t) });
+      r.dogru += Number(t.correct) || 0;
+      r.yanlis += Number(t.wrong) || 0;
+      if(t.blank != null && t.blankCert !== 'missing'){
+        r.bos += Number(t.blank) || 0;
+        r.bosBilinen++;
+        r.soruBos += (Number(t.correct) || 0) + (Number(t.wrong) || 0) + (Number(t.blank) || 0);
+      }
+    }));
+    const rows = Object.keys(by).map(k => {
+      const r = by[k];
+      const az = r.net.length < 3;
+      const son = U.median(r.net.slice(-3).map(p => p.y));
+      const q = soruSay(k);
+      return {
+        test:k, deneme:r.net.length, az,
+        sonMedyan:U.round(son, 2),
+        egim:az ? null : U.round(ts(r.net), 2),
+        kayip:q != null ? U.round(q - son, 2) : null, soru:q,
+        dogruOrani:r.dogru + r.yanlis ? U.pct(r.dogru, r.dogru + r.yanlis) : null,
+        bosOrani:r.bosBilinen && r.soruBos ? U.pct(r.bos, r.soruBos) : null,
+      };
+    }).sort((a, b) => (b.kayip == null ? -1 : b.kayip) - (a.kayip == null ? -1 : a.kayip));
+    const en = rows.find(r => r.kayip != null);
+    const yukselen = rows.filter(r => r.egim != null && r.egim >= 0.5).map(r => r.test);
+    const dusen = rows.filter(r => r.egim != null && r.egim <= -0.5).map(r => r.test);
+    return {
+      ok:true, rows, deneme:list.length,
+      note:(en ? 'En çok net bıraktığın ders ' + en.test + ' (son denemelerde ~' + U.fmtNet(en.kayip) + ' net).' : '')
+        + (yukselen.length ? ' Yükselen: ' + yukselen.join(', ') + '.' : '')
+        + (dusen.length ? ' Düşen: ' + dusen.join(', ') + '.' : ''),
+    };
+  }
+
   return {
+    dersAnalizi, hedefSure,
     compareExams, blankStrategy, errorHeatmap, rankHistory, publisherAdjust,
     speedAccuracy, topicValue, forgettingCurve, sleepImpact, capacityReality,
     leechCards, warmup, distractionTrend,
@@ -100859,9 +100944,34 @@ R.Screens.analytics = (function(){
                 html`<span class="num dim">${r.blankA == null ? '—' : r.blankA} → ${r.blankB == null ? '—' : r.blankB}</span>`,
               ]) })}
             <div class="mt-12">${K.Notice({ tone:'info', body:cmp.note })}</div>` })),
+        dersCard(),
       ])),
       K.Span(4, K.Stack([blankCard(), publisherCard(), raw(UI.rail(['median', 'base-score', 'net']))])),
     ]);
+  }
+
+  /* Ders ders deneme (core/analytics.js dersAnalizi, Kişi planı Faz 7). */
+  function dersCard(){
+    const d = A().dersAnalizi('TYT');
+    if(!d.ok) return K.Card({ title:'Ders ders deneme', body:K.Notice({ tone:'info', body:d.why }) });
+    const ok = e => e == null ? html`<span class="num dim">—</span>`
+      : html`<span class="${e >= 0.5 ? 'num is-up' : e <= -0.5 ? 'num is-down' : 'num dim'}">${(e > 0 ? '+' : '') + U.fmtNet(e)}</span>`;
+    return K.Card({
+      title:'Ders ders deneme', sub:d.deneme + ' tam TYT denemesinden',
+      body:html`
+        ${K.Table({ tight:true,
+          headers:['Test', { label:'Son net', num:true }, { label:'Gidiş', num:true }, { label:'Bırakılan', num:true },
+            { label:'Doğru', num:true }, { label:'Boş', num:true }],
+          rows:d.rows.map(r => [
+            r.test + (r.az ? ' · az veri' : ''),
+            html`<span class="num">${U.fmtNet(r.sonMedyan)}</span>`,
+            ok(r.egim),
+            html`<b class="num ${r.kayip != null && r.kayip >= 8 ? 'is-down' : ''}">${r.kayip == null ? '—' : U.fmtNet(r.kayip)}</b>`,
+            html`<span class="num dim">${r.dogruOrani == null ? '—' : '%' + r.dogruOrani}</span>`,
+            html`<span class="num dim">${r.bosOrani == null ? '—' : '%' + r.bosOrani}</span>`,
+          ]) })}
+        <p class="tiny dim mt-8">${d.note} Son net: son üç denemenin ortancası; gidiş: deneme başına net (Theil–Sen); bırakılan: soru sayısı − son net.</p>`,
+    });
   }
 
   function blankCard(){
@@ -101011,11 +101121,12 @@ R.Screens.analytics = (function(){
       K.Span(7, K.Stack([
         sp.ok
           ? K.Card({ hint:'not-hiz-isabet-dengesi', title:'Hız–isabet dengesi',               body:html`
-                ${K.Table({ tight:true, headers:['Test', { label:'sn/soru', num:true },
+                ${K.Table({ tight:true, headers:['Test', { label:'sn/soru', num:true }, { label:'Hedef', num:true },
                   { label:'Doğruluk', num:true }, 'Profil'],
                   rows:sp.rows.map(r => [
                     r.test,
                     html`<span class="num">${r.secPerQ}</span>`,
+                    html`<span class="num dim">${r.hedefSn}</span>`,
                     html`<span class="${r.accuracy >= 70 ? 'num' : 'num is-down'}">%${r.accuracy}</span>`,
                     K.Badge({ label:r.profile === 'ideal' ? 'dengede'
                         : r.profile === 'fast-wrong' ? 'hızlı–isabetsiz'
@@ -101071,7 +101182,7 @@ R.Screens.analytics = (function(){
        toplama giriyordu ve rozet bunu kesin bir sayiymis gibi
        sunuyordu. Artik yalnizca DOKUNULMUS konular toplama girer;
        dokunulmamis olanlarin sayisi ayrica soylenir. */
-    const dokunulmus = rows.filter(r => r.cert === 'measured');
+    const dokunulmus = rows.filter(r => r.cert !== 'missing');
     const dokunulmamis = rows.length - dokunulmus.length;
     const totalGap = U.round(U.sum(dokunulmus.map(r => r.gap)), 1);
     return K.Grid([

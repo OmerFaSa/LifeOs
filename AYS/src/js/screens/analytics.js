@@ -87,9 +87,34 @@ R.Screens.analytics = (function(){
                 html`<span class="num dim">${r.blankA == null ? '—' : r.blankA} → ${r.blankB == null ? '—' : r.blankB}</span>`,
               ]) })}
             <div class="mt-12">${K.Notice({ tone:'info', body:cmp.note })}</div>` })),
+        dersCard(),
       ])),
       K.Span(4, K.Stack([blankCard(), publisherCard(), raw(UI.rail(['median', 'base-score', 'net']))])),
     ]);
+  }
+
+  /* Ders ders deneme (core/analytics.js dersAnalizi, Kişi planı Faz 7). */
+  function dersCard(){
+    const d = A().dersAnalizi('TYT');
+    if(!d.ok) return K.Card({ title:'Ders ders deneme', body:K.Notice({ tone:'info', body:d.why }) });
+    const ok = e => e == null ? html`<span class="num dim">—</span>`
+      : html`<span class="${e >= 0.5 ? 'num is-up' : e <= -0.5 ? 'num is-down' : 'num dim'}">${(e > 0 ? '+' : '') + U.fmtNet(e)}</span>`;
+    return K.Card({
+      title:'Ders ders deneme', sub:d.deneme + ' tam TYT denemesinden',
+      body:html`
+        ${K.Table({ tight:true,
+          headers:['Test', { label:'Son net', num:true }, { label:'Gidiş', num:true }, { label:'Bırakılan', num:true },
+            { label:'Doğru', num:true }, { label:'Boş', num:true }],
+          rows:d.rows.map(r => [
+            r.test + (r.az ? ' · az veri' : ''),
+            html`<span class="num">${U.fmtNet(r.sonMedyan)}</span>`,
+            ok(r.egim),
+            html`<b class="num ${r.kayip != null && r.kayip >= 8 ? 'is-down' : ''}">${r.kayip == null ? '—' : U.fmtNet(r.kayip)}</b>`,
+            html`<span class="num dim">${r.dogruOrani == null ? '—' : '%' + r.dogruOrani}</span>`,
+            html`<span class="num dim">${r.bosOrani == null ? '—' : '%' + r.bosOrani}</span>`,
+          ]) })}
+        <p class="tiny dim mt-8">${d.note} Son net: son üç denemenin ortancası; gidiş: deneme başına net (Theil–Sen); bırakılan: soru sayısı − son net.</p>`,
+    });
   }
 
   function blankCard(){
@@ -239,11 +264,12 @@ R.Screens.analytics = (function(){
       K.Span(7, K.Stack([
         sp.ok
           ? K.Card({ hint:'not-hiz-isabet-dengesi', title:'Hız–isabet dengesi',               body:html`
-                ${K.Table({ tight:true, headers:['Test', { label:'sn/soru', num:true },
+                ${K.Table({ tight:true, headers:['Test', { label:'sn/soru', num:true }, { label:'Hedef', num:true },
                   { label:'Doğruluk', num:true }, 'Profil'],
                   rows:sp.rows.map(r => [
                     r.test,
                     html`<span class="num">${r.secPerQ}</span>`,
+                    html`<span class="num dim">${r.hedefSn}</span>`,
                     html`<span class="${r.accuracy >= 70 ? 'num' : 'num is-down'}">%${r.accuracy}</span>`,
                     K.Badge({ label:r.profile === 'ideal' ? 'dengede'
                         : r.profile === 'fast-wrong' ? 'hızlı–isabetsiz'
@@ -299,7 +325,7 @@ R.Screens.analytics = (function(){
        toplama giriyordu ve rozet bunu kesin bir sayiymis gibi
        sunuyordu. Artik yalnizca DOKUNULMUS konular toplama girer;
        dokunulmamis olanlarin sayisi ayrica soylenir. */
-    const dokunulmus = rows.filter(r => r.cert === 'measured');
+    const dokunulmus = rows.filter(r => r.cert !== 'missing');
     const dokunulmamis = rows.length - dokunulmus.length;
     const totalGap = U.round(U.sum(dokunulmus.map(r => r.gap)), 1);
     return K.Grid([
