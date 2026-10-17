@@ -163,4 +163,59 @@
       expect(!!document.getElementById('defter')).toBe(false);
     }));
   });
+
+  /* Kullanıcı (2026-10-17): «kütüphanenin içinde yeni not oluşturma, belge
+     oluşturma, dosya ekleme olsun; yazdığımız şeyleri oraya yazacağız».
+     Kütüphanem'in Notlar bölümü Defter'in rafıdır: üç eylem, en yeni beş
+     kayıt, fazlası Tümü. Dosya cihazda kalır (söz 1), kaydın metni eşitlenir. */
+  describe('Defter — Kütüphanem rafı', () => {
+    it('tür saklanır: not, belge, dosya; bilinmeyen tür not sayılır', () => ile(async s => {
+      const a = await D().yeni('Hızlı', 'x');
+      const b = await D().belgeOlustur();
+      expect(a.tur).toBe('not');
+      expect(b.tur).toBe('belge');
+      expect(b.govde).toContain('## ');
+      s.depo['defter/zz'] = { id:'zz', baslik:'Eski', govde:'', tur:'garip' };
+      await D().yukle();
+      expect(D().notlar().find(n => n.id === b.id).tur).toBe('belge');
+      expect(D().notlar().find(n => n.id === 'zz').tur).toBe('not');
+    }));
+    it('dosya eklemek her dosya için bir kayıt açar; dosyanın kendisi depoya yazılmaz', () => ile(async s => {
+      const l = await D().dosyalarEkle([new File(['%PDF-gizli'], 'ders.pdf', { type:'application/pdf' }),
+        new File(['abc'], 'liste.txt', { type:'text/plain' })]);
+      expect(l.map(n => [n.tur, n.baslik])).toEqual([['dosya', 'ders.pdf'], ['dosya', 'liste.txt']]);
+      expect(l[0].govde).toContain('![[medya:');
+      expect(Object.keys(s.m).length).toBe(2);
+      expect(JSON.stringify(s.depo).indexOf('%PDF-gizli') < 0).toBeTruthy();
+    }));
+    it('raf: üç eylem, en yeni beş kayıt, fazlası Tümü; boşken sakin cümle', () => ile(async () => {
+      let h = D().rafHtml();
+      ['data-defter-raf="not"', 'data-defter-raf="belge"', 'data-defter-raf="dosya"', 'Henüz not yok'].forEach(x => expect(h).toContain(x));
+      for(let i = 0; i < 7; i++) await D().yeni('Not ' + i, '');
+      h = D().rafHtml();
+      expect((h.match(/data-defter-ac=/g) || []).length).toBe(5);
+      expect(h).toContain('data-defter-raf="tumu"');
+      expect(h.indexOf('Not 6') < h.indexOf('Not 2')).toBeTruthy();
+      expect(h.indexOf('Not 1') < 0).toBeTruthy();
+      await D().yeni('', '## **Türev** kuralları\nçarpım', 'not');
+      expect(D().rafHtml()).toContain('<b>Türev kuralları</b>');            // başlıksızsa ilk satır
+    }));
+    it('raf bağlanır: satır Defter\'i o notta açar; Yeni not yazma kipinde açar', () => ile(async () => {
+      const n = await D().yeni('Bul beni', 'içerik');
+      const el = document.createElement('div');
+      el.innerHTML = D().rafHtml();
+      document.body.appendChild(el);
+      try{
+        D().rafBagla(el);
+        el.querySelector('[data-defter-ac="' + n.id + '"]').click();
+        await new Promise(r => setTimeout(r, 20));
+        expect(document.getElementById('defter').textContent).toContain('Bul beni');
+        D().kapat();
+        el.querySelector('[data-defter-raf="not"]').click();
+        await new Promise(r => setTimeout(r, 20));
+        expect(D().notlar().length).toBe(2);
+        expect(!!document.querySelector('#defter [data-defter-govde]')).toBe(true);
+      }finally{ D().kapat(); el.remove(); }
+    }));
+  });
 })();

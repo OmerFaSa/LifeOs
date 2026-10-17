@@ -20,8 +20,9 @@
     it('Onaylar ve Kütüphanem menüde bir ekrana gider', () => {
       const gor = id => ESP.App.SECTIONS().find(g => g.id === id);
       expect(gor('onaylar').views.map(v => v.route).join(',')).toBe('onaylar');
-      expect(gor('kutuphane').views.map(v => v.route).join(',')).toBe('kutuphane');
-      expect(!!ESP.Screens.onaylar && !!ESP.Screens.kutuphane).toBe(true);
+      /* 2026-10-17: Kütüphanem notlarla açılır (kullanıcı: «yeni not, belge, dosya»). */
+      expect(gor('kutuphane').views.map(v => v.route).join(',')).toBe('notlar,kutuphane');
+      expect(!!ESP.Screens.onaylar && !!ESP.Screens.kutuphane && !!ESP.Screens.notlar).toBe(true);
     });
 
     it('onaylar tek çekmecede: Bugün en öndeki kartı gösterir, fazlası Onaylar\'da', async () => {

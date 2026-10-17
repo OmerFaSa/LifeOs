@@ -14738,6 +14738,36 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
   .defter.is-not .defter__sol{ display:none; }
 }
 
+/* ---------- Kütüphanem rafı (2026-10-17) ----------
+   Üç eylem yan yana sakin hap; altında iOS gruplu liste: simge, ad, tür ·
+   tarih. Kartın içinde çerçeve yok; satırlar ince ayraçla ayrılır. */
+.defter-raf{ display:flex; flex-direction:column; gap:14px; }
+.defter-raf__eylemler{ display:flex; flex-wrap:wrap; gap:8px; }
+.defter-raf__eylem{ display:inline-flex; align-items:center; gap:7px; min-height:36px; padding:0 14px 0 11px; border:0; border-radius:999px;
+  background:var(--surface-2); color:var(--text); font:inherit; font-size:13.5px; font-weight:550; cursor:pointer;
+  transition:background var(--dur, .16s) var(--ease, ease), transform 120ms ease; }
+.defter-raf__eylem:hover{ background:var(--surface-3, var(--surface-2)); }
+.defter-raf__eylem:active{ transform:scale(.97); }
+.defter-raf__eylem svg, .defter-raf__simge svg{ width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.defter-raf__eylem:first-child{ background:var(--sec, var(--primary)); color:var(--primary-ink, #fff); }
+.defter-raf__eylem:first-child:hover{ background:color-mix(in srgb, var(--sec, var(--primary)) 86%, #000); }
+.defter-raf__liste{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+.defter-raf__liste li + li{ border-top:1px solid color-mix(in oklab, var(--border, #ddd) 70%, transparent); }
+.defter-raf__oge{ width:100%; display:grid; grid-template-columns:32px 1fr; grid-template-rows:auto auto; column-gap:12px; align-items:center;
+  padding:10px 4px; border:0; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer; border-radius:10px;
+  transition:background var(--dur, .16s) var(--ease, ease); }
+.defter-raf__oge:hover{ background:color-mix(in oklab, var(--surface-2) 70%, transparent); }
+.defter-raf__simge{ grid-row:1 / 3; width:32px; height:32px; display:grid; place-items:center; border-radius:9px;
+  background:var(--surface-2); color:var(--text-2); }
+.defter-raf__simge--belge{ color:var(--primary); }
+.defter-raf__oge b{ font-size:14.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.defter-raf__oge small{ grid-column:2; font-size:12.5px; color:var(--text-3); }
+.defter-raf__bos{ margin:0; font-size:13.5px; color:var(--text-2); }
+.defter-raf__tumu{ align-self:flex-start; min-height:30px; padding:0 4px; border:0; background:none; color:var(--primary);
+  font:inherit; font-size:13.5px; font-weight:550; cursor:pointer; }
+.defter-raf__hata{ margin:0; font-size:13px; color:var(--danger, #c0392b); }
+@media (prefers-reduced-motion:reduce){ .defter-raf__eylem, .defter-raf__oge{ transition:none; } .defter-raf__eylem:active{ transform:none; } }
+
 /* ==== css/pusula.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/pusula.css içine yazılır; burası bir sonraki
@@ -16844,7 +16874,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'3ce36511', at:'2026-10-17 20:53', dirty:true };
+R.BUILD = { id:'00d314cb', at:'2026-10-17 21:08', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -32122,7 +32152,16 @@ LIFEOS.ENVANTER = (function(){
        yedeklenir ve geri yüklenir (var olan not ezilmez).
      · KALICI DEPOLAMA: ilk medyada tarayıcıdan kalıcı depolama istenir
        (navigator.storage.persist): tarayıcı yer açarken medyayı silmesin.
-       Kullanılan alan Defter'de yazar. */
+       Kullanılan alan Defter'de yazar.
+
+   Kütüphanem rafı (2026-10-17, «kütüphanenin içinde yeni not, belge
+   oluşturma, dosya ekleme olsun; yazdıklarımızı oraya yazacağız»):
+     · TÜR: her kayıt not | belge | dosya (eski ve bilinmeyen = not).
+     · `rafHtml()` + `rafBagla(el)`: üç eylem (Yeni not, Yeni belge, Dosya
+       ekle), en yeni beş kayıt, fazlası «Tümü». Satır Defter'i o kayıtta
+       açar; yeni kayıt yazma kipinde açılır. Defter kapanınca raf tazelenir.
+     · DOSYA: her dosya kendi kaydını açar; dosya cihazda kalır (söz 1),
+       kaydın adı ve gömmesi eşitlenir. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -32360,7 +32399,7 @@ LIFEOS.DEFTER = (function(){
     let rows = [];
     try{ rows = (await ayar.store.list(KOK)) || []; }catch(e){ rows = []; }
     notlar = rows.filter(r => r && r.id).map(r => ({ id:r.id, baslik:String(r.baslik || ''), govde:String(r.govde || ''),
-      at:r.at || simdi(), guncel:r.guncel || r.at || simdi(), sabit:!!r.sabit }));
+      at:r.at || simdi(), guncel:r.guncel || r.at || simdi(), sabit:!!r.sabit, tur:turBul(r.tur) }));
     return notlar;
   }
   async function kaydet(n){
@@ -32371,8 +32410,23 @@ LIFEOS.DEFTER = (function(){
     if(ayar && ayar.store && ayar.store.set) await ayar.store.set(KOK + '/' + n.id, n);
     return n;
   }
-  async function yeni(baslik, govde){
-    return kaydet({ id:uid(), baslik:String(baslik || '').slice(0, 120), govde:govde || '', at:simdi(), guncel:simdi(), sabit:false });
+  const TURLER = ['not', 'belge', 'dosya'];
+  const turBul = t => TURLER.indexOf(t) >= 0 ? t : 'not';
+  async function yeni(baslik, govde, tur){
+    return kaydet({ id:uid(), baslik:String(baslik || '').slice(0, 120), govde:govde || '', at:simdi(), guncel:simdi(), sabit:false, tur:turBul(tur) });
+  }
+  /* Belge: başlıklı, bölümlü uzun yazı. Not hızlı ve serbesttir. */
+  const BELGE = '## Amaç\n\n## İçerik\n\n## Kaynaklar\n- \n';
+  async function belgeOlustur(baslik){ return yeni(baslik || 'Yeni belge', BELGE, 'belge'); }
+  /* Her dosya kendi kaydı: ad başlık olur, dosya gömülür (cihazda kalır). */
+  async function dosyalarEkle(dosyalar){
+    const l = [];
+    for(const f of Array.from(dosyalar || [])){
+      if(!f) continue;
+      const r = await medyaEkle(f, { ad:f.name });
+      l.push(await yeni(String(f.name || 'Dosya').slice(0, 120), r.gomme, 'dosya'));
+    }
+    return l;
   }
   async function sil(id){
     const n = notlar.find(x => x.id === id);
@@ -32510,11 +32564,83 @@ LIFEOS.DEFTER = (function(){
     document.body.appendChild(el);
     bagla(el);
     if(o && o.id) secili = o.id;
+    if(o && o.duzen) duzen = true;
     ciz();
     alanYaz(el);
     return true;
   }
-  function kapat(){ const el = document.getElementById('defter'); if(el) el.remove(); }
+  function kapat(){
+    const el = document.getElementById('defter');
+    if(!el) return;
+    el.remove();
+    try{ document.dispatchEvent(new CustomEvent('lifeos:defter-kapandi')); }catch(e){ /* eski tarayıcı */ }
+  }
+
+  /* ------------------------------------------------- Kütüphanem rafı */
+  const RAF_EN_COK = 5;
+  const TUR_AD = { not:'Not', belge:'Belge', dosya:'Dosya' };
+  const TUR_SIMGE = { not:'ciz', belge:'sablon', dosya:'dosya' };
+  /* Başlıksız kaydın adı ilk dolu satırıdır (biçim işaretleri ve gömme
+     atılır); o da yoksa «Adsız». */
+  function rafAdi(n){
+    if(n.baslik) return n.baslik;
+    const ilk = String(n.govde || '').replace(/!\[\[medya:[^\]]+\]\]/g, '').split('\n')
+      .map(x => x.replace(/^(#{1,3}\s+|>\s*|[-*]\s+(\[[ x]\]\s+)?|\d+\.\s+)/i, '').replace(/[*=~`]/g, '').trim()).find(Boolean);
+    return ilk ? ilk.slice(0, 80) : 'Adsız';
+  }
+  function rafHtml(){
+    const sirali = notlar.slice().sort((a, b) => String(b.guncel || '').localeCompare(String(a.guncel || '')));
+    const ilk = sirali.slice(0, RAF_EN_COK);
+    const eylem = (is, ikon, ad) => '<button type="button" class="defter-raf__eylem" data-defter-raf="' + is + '">' + svg(ikon) + '<span>' + ad + '</span></button>';
+    return '<div class="defter-raf">'
+      + '<div class="defter-raf__eylemler" role="group" aria-label="Yeni">'
+      +   eylem('not', 'yeni', 'Yeni not') + eylem('belge', 'sablon', 'Yeni belge') + eylem('dosya', 'dosya', 'Dosya ekle')
+      +   '<input type="file" multiple class="sr-only" data-defter-raf-dosya aria-label="Eklenecek dosyalar" tabindex="-1"/>'
+      + '</div>'
+      + (ilk.length ? '<ul class="defter-raf__liste">' + ilk.map(n => {
+          const t = turBul(n.tur);
+          return '<li><button type="button" class="defter-raf__oge" data-defter-ac="' + kac(n.id) + '">'
+            + '<span class="defter-raf__simge defter-raf__simge--' + t + '" aria-hidden="true">' + svg(TUR_SIMGE[t]) + '</span>'
+            + '<b>' + kac(rafAdi(n)) + '</b>'
+            + '<small>' + TUR_AD[t] + ' · ' + kac(tarihYaz(n.guncel || n.at)) + '</small></button></li>';
+        }).join('') + '</ul>'
+        : '<p class="defter-raf__bos">Henüz not yok. Yazdıkların, belgelerin ve eklediğin dosyalar burada durur.</p>')
+      + (sirali.length > RAF_EN_COK ? '<button type="button" class="defter-raf__tumu" data-defter-raf="tumu">Tümü (' + sirali.length + ')</button>' : '')
+      + '</div>';
+  }
+  function rafBagla(el){
+    if(!el || el.__defterRaf) return;
+    el.__defterRaf = true;
+    const tazele = () => { if(document.contains(el)) el.innerHTML = rafHtml(); };
+    const kapaninca = () => { if(!document.contains(el)){ document.removeEventListener('lifeos:defter-kapandi', kapaninca); return; } tazele(); };
+    document.addEventListener('lifeos:defter-kapandi', kapaninca);
+    el.addEventListener('click', async e => {
+      const t = e.target && e.target.closest ? e.target : null;
+      if(!t) return;
+      const ac_ = t.closest('[data-defter-ac]');
+      if(ac_){ ac({ id:ac_.getAttribute('data-defter-ac') }); return; }
+      const b = t.closest('[data-defter-raf]');
+      if(!b) return;
+      const is = b.getAttribute('data-defter-raf');
+      if(is === 'tumu'){ ac(); return; }
+      if(is === 'dosya'){ const g = el.querySelector('[data-defter-raf-dosya]'); if(g) g.click(); return; }
+      const n = is === 'belge' ? await belgeOlustur() : await yeni('', '', 'not');
+      ac({ id:n.id, duzen:true });
+    });
+    el.addEventListener('change', async e => {
+      const g = e.target && e.target.matches && e.target.matches('[data-defter-raf-dosya]') ? e.target : null;
+      if(!g || !g.files || !g.files.length) return;
+      try{
+        const l = await dosyalarEkle(g.files);
+        tazele();
+        if(l.length === 1) ac({ id:l[0].id });
+      }catch(er){
+        const p = document.createElement('p'); p.className = 'defter-raf__hata'; p.setAttribute('role', 'alert');
+        p.textContent = (er && er.message) || 'Dosya eklenemedi.';
+        el.appendChild(p);
+      }
+    });
+  }
   async function alanYaz(el){
     const a = await alan(), y = el.querySelector('[data-defter-alan]');
     if(!y) return;
@@ -32792,7 +32918,7 @@ LIFEOS.DEFTER = (function(){
   function kur(o){ ayar = Object.assign({ modul:'' }, o || {}); db = null; }
   function _sifirla(){ ayar = null; notlar = []; secili = null; duzen = false; arama = ''; db = null; kapat(); }
 
-  return { kur, yukle, ac, kapat, yeni, kaydet, sil, md, baglantilar, etiketler, geriBaglantilar, ara, kutuCevir,
+  return { kur, yukle, ac, kapat, yeni, belgeOlustur, dosyalarEkle, rafHtml, rafBagla, kaydet, sil, md, baglantilar, etiketler, geriBaglantilar, ara, kutuCevir,
     medyaEkle, medya, disaAktarMetni, SABLONLAR, sayim, sar, satirOnek, tuval, notOlustur, yedekNesnesi, yedekYukle, yedekAl, alan, kac, notlar:() => notlar.slice(), sec:id => { secili = id; }, duzenle:v => { duzen = !!v; },
     kuruluMu:() => !!ayar, _ortam:ortam, _sifirla, _db:v => { db = v; } };
 })();
@@ -108755,6 +108881,34 @@ R.Screens.kutuphane = (function(){
   };
 })();
 
+/* Notlar — Kütüphanem'in ilk bölümü (kullanıcı, 2026-10-17: «kütüphanenin
+   içinde yeni not, belge oluşturma, dosya ekleme olsun; yazdıklarımızı
+   oraya yazacağız»). Defter'in rafı (brand/ortak/defter.js rafHtml):
+   Yeni not, Yeni belge, Dosya ekle; en yeni beş kayıt; satır Defter'i
+   o kayıtta açar. Dosya cihazda kalır, kaydın metni eşitlenir. */
+R.Screens.notlar = (function(){
+  const K = R.C;
+  const { raw } = R.h;
+  const D = () => (window.LIFEOS || {}).DEFTER;
+  const hazir = () => !!(D() && D().kuruluMu && D().kuruluMu());
+  function render(){
+    if(!hazir()) return String(K.Kutu({ ad:'Notlar', govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') }));
+    return String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') }));
+  }
+  function afterRender(){
+    const el = document.querySelector('[data-defter-raf-yer]');
+    if(el && hazir()) D().rafBagla(el);
+  }
+  return {
+    id:'notlar',
+    title:'Kütüphanem',
+    subtitle(){ const n = hazir() ? D().notlar().length : 0; return n ? n + ' kayıt' : 'henüz not yok'; },
+    lede(){ return ''; },
+    actions(){ return ''; },
+    render, afterRender, handle:{},
+  };
+})();
+
 /* ==== js/app.js ==== */
 /* Uygulama kabugu: gezinme, yonlendirme, olay dagitimi ve acilis. */
 
@@ -108820,6 +108974,7 @@ R.App = (function(){
       { id:'meeting', icon:'list',  label:'Toplantı' },
     ]},
     { id:'kutuphane', label:CEK('kutuphane'), items:[
+      { id:'notlar', icon:'edit', label:'Notlar' },
       { id:'kutuphane', icon:'book', label:'Kitaplar' },
     ]},
     /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de

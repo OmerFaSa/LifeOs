@@ -141,3 +141,31 @@ SP.Screens.kutuphane = (function(){
     render, handle, change,
   };
 })();
+
+/* Notlar — Kütüphanem'in ilk bölümü (kullanıcı, 2026-10-17: «kütüphanenin
+   içinde yeni not, belge oluşturma, dosya ekleme olsun; yazdıklarımızı
+   oraya yazacağız»). Defter'in rafı (brand/ortak/defter.js rafHtml):
+   Yeni not, Yeni belge, Dosya ekle; en yeni beş kayıt; satır Defter'i
+   o kayıtta açar. Dosya cihazda kalır, kaydın metni eşitlenir. */
+SP.Screens.notlar = (function(){
+  const K = SP.C;
+  const { raw } = SP.h;
+  const D = () => (window.LIFEOS || {}).DEFTER;
+  const hazir = () => !!(D() && D().kuruluMu && D().kuruluMu());
+  function render(){
+    if(!hazir()) return String(K.Kutu({ ad:'Notlar', govde:raw('<p class="small muted">Defter bu açılışta yüklenemedi.</p>') }));
+    return String(K.Kutu({ ad:'Notlar ve belgeler', govde:raw('<div data-defter-raf-yer>' + D().rafHtml() + '</div>') }));
+  }
+  function afterRender(){
+    const el = document.querySelector('[data-defter-raf-yer]');
+    if(el && hazir()) D().rafBagla(el);
+  }
+  return {
+    id:'notlar',
+    title:'Kütüphanem',
+    subtitle(){ const n = hazir() ? D().notlar().length : 0; return n ? n + ' kayıt' : 'henüz not yok'; },
+    lede(){ return ''; },
+    actions(){ return ''; },
+    render, afterRender, handle:{},
+  };
+})();

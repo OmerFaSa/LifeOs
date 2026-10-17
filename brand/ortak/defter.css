@@ -142,3 +142,33 @@
 @media (max-width:760px){
   .defter.is-not .defter__sol{ display:none; }
 }
+
+/* ---------- Kütüphanem rafı (2026-10-17) ----------
+   Üç eylem yan yana sakin hap; altında iOS gruplu liste: simge, ad, tür ·
+   tarih. Kartın içinde çerçeve yok; satırlar ince ayraçla ayrılır. */
+.defter-raf{ display:flex; flex-direction:column; gap:14px; }
+.defter-raf__eylemler{ display:flex; flex-wrap:wrap; gap:8px; }
+.defter-raf__eylem{ display:inline-flex; align-items:center; gap:7px; min-height:36px; padding:0 14px 0 11px; border:0; border-radius:999px;
+  background:var(--surface-2); color:var(--text); font:inherit; font-size:13.5px; font-weight:550; cursor:pointer;
+  transition:background var(--dur, .16s) var(--ease, ease), transform 120ms ease; }
+.defter-raf__eylem:hover{ background:var(--surface-3, var(--surface-2)); }
+.defter-raf__eylem:active{ transform:scale(.97); }
+.defter-raf__eylem svg, .defter-raf__simge svg{ width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.defter-raf__eylem:first-child{ background:var(--sec, var(--primary)); color:var(--primary-ink, #fff); }
+.defter-raf__eylem:first-child:hover{ background:color-mix(in srgb, var(--sec, var(--primary)) 86%, #000); }
+.defter-raf__liste{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; }
+.defter-raf__liste li + li{ border-top:1px solid color-mix(in oklab, var(--border, #ddd) 70%, transparent); }
+.defter-raf__oge{ width:100%; display:grid; grid-template-columns:32px 1fr; grid-template-rows:auto auto; column-gap:12px; align-items:center;
+  padding:10px 4px; border:0; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer; border-radius:10px;
+  transition:background var(--dur, .16s) var(--ease, ease); }
+.defter-raf__oge:hover{ background:color-mix(in oklab, var(--surface-2) 70%, transparent); }
+.defter-raf__simge{ grid-row:1 / 3; width:32px; height:32px; display:grid; place-items:center; border-radius:9px;
+  background:var(--surface-2); color:var(--text-2); }
+.defter-raf__simge--belge{ color:var(--primary); }
+.defter-raf__oge b{ font-size:14.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; }
+.defter-raf__oge small{ grid-column:2; font-size:12.5px; color:var(--text-3); }
+.defter-raf__bos{ margin:0; font-size:13.5px; color:var(--text-2); }
+.defter-raf__tumu{ align-self:flex-start; min-height:30px; padding:0 4px; border:0; background:none; color:var(--primary);
+  font:inherit; font-size:13.5px; font-weight:550; cursor:pointer; }
+.defter-raf__hata{ margin:0; font-size:13px; color:var(--danger, #c0392b); }
+@media (prefers-reduced-motion:reduce){ .defter-raf__eylem, .defter-raf__oge{ transition:none; } .defter-raf__eylem:active{ transform:none; } }

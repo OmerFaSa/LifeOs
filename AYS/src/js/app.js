@@ -62,6 +62,7 @@ R.App = (function(){
       { id:'meeting', icon:'list',  label:'Toplantı' },
     ]},
     { id:'kutuphane', label:CEK('kutuphane'), items:[
+      { id:'notlar', icon:'edit', label:'Notlar' },
       { id:'kutuphane', icon:'book', label:'Kitaplar' },
     ]},
     /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de

@@ -51,6 +51,7 @@ SP.App = (function(){
       { route:'meeting', label:'Toplantı' },
     ]},
     { id:'kutuphane', label:CEK('kutuphane'), views:[
+      { route:'notlar', label:'Notlar' },
       { route:'kutuphane', label:'Bilgi ve ürünler' },
     ]},
     /* Rütbe burada bir bölümdür (karar §8-2); üst çubuktaki çip de

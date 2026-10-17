@@ -44,7 +44,16 @@
        yedeklenir ve geri yüklenir (var olan not ezilmez).
      · KALICI DEPOLAMA: ilk medyada tarayıcıdan kalıcı depolama istenir
        (navigator.storage.persist): tarayıcı yer açarken medyayı silmesin.
-       Kullanılan alan Defter'de yazar. */
+       Kullanılan alan Defter'de yazar.
+
+   Kütüphanem rafı (2026-10-17, «kütüphanenin içinde yeni not, belge
+   oluşturma, dosya ekleme olsun; yazdıklarımızı oraya yazacağız»):
+     · TÜR: her kayıt not | belge | dosya (eski ve bilinmeyen = not).
+     · `rafHtml()` + `rafBagla(el)`: üç eylem (Yeni not, Yeni belge, Dosya
+       ekle), en yeni beş kayıt, fazlası «Tümü». Satır Defter'i o kayıtta
+       açar; yeni kayıt yazma kipinde açılır. Defter kapanınca raf tazelenir.
+     · DOSYA: her dosya kendi kaydını açar; dosya cihazda kalır (söz 1),
+       kaydın adı ve gömmesi eşitlenir. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -282,7 +291,7 @@ LIFEOS.DEFTER = (function(){
     let rows = [];
     try{ rows = (await ayar.store.list(KOK)) || []; }catch(e){ rows = []; }
     notlar = rows.filter(r => r && r.id).map(r => ({ id:r.id, baslik:String(r.baslik || ''), govde:String(r.govde || ''),
-      at:r.at || simdi(), guncel:r.guncel || r.at || simdi(), sabit:!!r.sabit }));
+      at:r.at || simdi(), guncel:r.guncel || r.at || simdi(), sabit:!!r.sabit, tur:turBul(r.tur) }));
     return notlar;
   }
   async function kaydet(n){
@@ -293,8 +302,23 @@ LIFEOS.DEFTER = (function(){
     if(ayar && ayar.store && ayar.store.set) await ayar.store.set(KOK + '/' + n.id, n);
     return n;
   }
-  async function yeni(baslik, govde){
-    return kaydet({ id:uid(), baslik:String(baslik || '').slice(0, 120), govde:govde || '', at:simdi(), guncel:simdi(), sabit:false });
+  const TURLER = ['not', 'belge', 'dosya'];
+  const turBul = t => TURLER.indexOf(t) >= 0 ? t : 'not';
+  async function yeni(baslik, govde, tur){
+    return kaydet({ id:uid(), baslik:String(baslik || '').slice(0, 120), govde:govde || '', at:simdi(), guncel:simdi(), sabit:false, tur:turBul(tur) });
+  }
+  /* Belge: başlıklı, bölümlü uzun yazı. Not hızlı ve serbesttir. */
+  const BELGE = '## Amaç\n\n## İçerik\n\n## Kaynaklar\n- \n';
+  async function belgeOlustur(baslik){ return yeni(baslik || 'Yeni belge', BELGE, 'belge'); }
+  /* Her dosya kendi kaydı: ad başlık olur, dosya gömülür (cihazda kalır). */
+  async function dosyalarEkle(dosyalar){
+    const l = [];
+    for(const f of Array.from(dosyalar || [])){
+      if(!f) continue;
+      const r = await medyaEkle(f, { ad:f.name });
+      l.push(await yeni(String(f.name || 'Dosya').slice(0, 120), r.gomme, 'dosya'));
+    }
+    return l;
   }
   async function sil(id){
     const n = notlar.find(x => x.id === id);
@@ -432,11 +456,83 @@ LIFEOS.DEFTER = (function(){
     document.body.appendChild(el);
     bagla(el);
     if(o && o.id) secili = o.id;
+    if(o && o.duzen) duzen = true;
     ciz();
     alanYaz(el);
     return true;
   }
-  function kapat(){ const el = document.getElementById('defter'); if(el) el.remove(); }
+  function kapat(){
+    const el = document.getElementById('defter');
+    if(!el) return;
+    el.remove();
+    try{ document.dispatchEvent(new CustomEvent('lifeos:defter-kapandi')); }catch(e){ /* eski tarayıcı */ }
+  }
+
+  /* ------------------------------------------------- Kütüphanem rafı */
+  const RAF_EN_COK = 5;
+  const TUR_AD = { not:'Not', belge:'Belge', dosya:'Dosya' };
+  const TUR_SIMGE = { not:'ciz', belge:'sablon', dosya:'dosya' };
+  /* Başlıksız kaydın adı ilk dolu satırıdır (biçim işaretleri ve gömme
+     atılır); o da yoksa «Adsız». */
+  function rafAdi(n){
+    if(n.baslik) return n.baslik;
+    const ilk = String(n.govde || '').replace(/!\[\[medya:[^\]]+\]\]/g, '').split('\n')
+      .map(x => x.replace(/^(#{1,3}\s+|>\s*|[-*]\s+(\[[ x]\]\s+)?|\d+\.\s+)/i, '').replace(/[*=~`]/g, '').trim()).find(Boolean);
+    return ilk ? ilk.slice(0, 80) : 'Adsız';
+  }
+  function rafHtml(){
+    const sirali = notlar.slice().sort((a, b) => String(b.guncel || '').localeCompare(String(a.guncel || '')));
+    const ilk = sirali.slice(0, RAF_EN_COK);
+    const eylem = (is, ikon, ad) => '<button type="button" class="defter-raf__eylem" data-defter-raf="' + is + '">' + svg(ikon) + '<span>' + ad + '</span></button>';
+    return '<div class="defter-raf">'
+      + '<div class="defter-raf__eylemler" role="group" aria-label="Yeni">'
+      +   eylem('not', 'yeni', 'Yeni not') + eylem('belge', 'sablon', 'Yeni belge') + eylem('dosya', 'dosya', 'Dosya ekle')
+      +   '<input type="file" multiple class="sr-only" data-defter-raf-dosya aria-label="Eklenecek dosyalar" tabindex="-1"/>'
+      + '</div>'
+      + (ilk.length ? '<ul class="defter-raf__liste">' + ilk.map(n => {
+          const t = turBul(n.tur);
+          return '<li><button type="button" class="defter-raf__oge" data-defter-ac="' + kac(n.id) + '">'
+            + '<span class="defter-raf__simge defter-raf__simge--' + t + '" aria-hidden="true">' + svg(TUR_SIMGE[t]) + '</span>'
+            + '<b>' + kac(rafAdi(n)) + '</b>'
+            + '<small>' + TUR_AD[t] + ' · ' + kac(tarihYaz(n.guncel || n.at)) + '</small></button></li>';
+        }).join('') + '</ul>'
+        : '<p class="defter-raf__bos">Henüz not yok. Yazdıkların, belgelerin ve eklediğin dosyalar burada durur.</p>')
+      + (sirali.length > RAF_EN_COK ? '<button type="button" class="defter-raf__tumu" data-defter-raf="tumu">Tümü (' + sirali.length + ')</button>' : '')
+      + '</div>';
+  }
+  function rafBagla(el){
+    if(!el || el.__defterRaf) return;
+    el.__defterRaf = true;
+    const tazele = () => { if(document.contains(el)) el.innerHTML = rafHtml(); };
+    const kapaninca = () => { if(!document.contains(el)){ document.removeEventListener('lifeos:defter-kapandi', kapaninca); return; } tazele(); };
+    document.addEventListener('lifeos:defter-kapandi', kapaninca);
+    el.addEventListener('click', async e => {
+      const t = e.target && e.target.closest ? e.target : null;
+      if(!t) return;
+      const ac_ = t.closest('[data-defter-ac]');
+      if(ac_){ ac({ id:ac_.getAttribute('data-defter-ac') }); return; }
+      const b = t.closest('[data-defter-raf]');
+      if(!b) return;
+      const is = b.getAttribute('data-defter-raf');
+      if(is === 'tumu'){ ac(); return; }
+      if(is === 'dosya'){ const g = el.querySelector('[data-defter-raf-dosya]'); if(g) g.click(); return; }
+      const n = is === 'belge' ? await belgeOlustur() : await yeni('', '', 'not');
+      ac({ id:n.id, duzen:true });
+    });
+    el.addEventListener('change', async e => {
+      const g = e.target && e.target.matches && e.target.matches('[data-defter-raf-dosya]') ? e.target : null;
+      if(!g || !g.files || !g.files.length) return;
+      try{
+        const l = await dosyalarEkle(g.files);
+        tazele();
+        if(l.length === 1) ac({ id:l[0].id });
+      }catch(er){
+        const p = document.createElement('p'); p.className = 'defter-raf__hata'; p.setAttribute('role', 'alert');
+        p.textContent = (er && er.message) || 'Dosya eklenemedi.';
+        el.appendChild(p);
+      }
+    });
+  }
   async function alanYaz(el){
     const a = await alan(), y = el.querySelector('[data-defter-alan]');
     if(!y) return;
@@ -714,7 +810,7 @@ LIFEOS.DEFTER = (function(){
   function kur(o){ ayar = Object.assign({ modul:'' }, o || {}); db = null; }
   function _sifirla(){ ayar = null; notlar = []; secili = null; duzen = false; arama = ''; db = null; kapat(); }
 
-  return { kur, yukle, ac, kapat, yeni, kaydet, sil, md, baglantilar, etiketler, geriBaglantilar, ara, kutuCevir,
+  return { kur, yukle, ac, kapat, yeni, belgeOlustur, dosyalarEkle, rafHtml, rafBagla, kaydet, sil, md, baglantilar, etiketler, geriBaglantilar, ara, kutuCevir,
     medyaEkle, medya, disaAktarMetni, SABLONLAR, sayim, sar, satirOnek, tuval, notOlustur, yedekNesnesi, yedekYukle, yedekAl, alan, kac, notlar:() => notlar.slice(), sec:id => { secili = id; }, duzenle:v => { duzen = !!v; },
     kuruluMu:() => !!ayar, _ortam:ortam, _sifirla, _db:v => { db = v; } };
 })();

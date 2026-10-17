@@ -55,7 +55,7 @@ ESP.SECTIONS_ALL = [
       ] },
 
     { id:'kutuphane', icon:'book', label:'Kütüphanem', note:'BAM\'ın ürettikleri',
-      views:[{ route:'kutuphane', label:'Kütüphanem' }] },
+      views:[{ route:'notlar', label:'Notlar' }, { route:'kutuphane', label:'Ürünler' }] },
 
     /* Rütbe burada bir bölümdür (karar §8-2); `disc` taşımaz, kapatılan
        bir disiplinle birlikte kaybolmaz. */
