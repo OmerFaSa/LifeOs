@@ -61,6 +61,14 @@
     });
     it('puan tabanın altına düşmez', function(){
       expect(C.rawScore(-50, null).value).toBe(R.SCORING.base);
+      /* Analiz denetimi (2026-10-17): AYT TYT ile aynı düzeyde gelince SAY
+         puanı yalnız-TYT tahminiyle tutarlı; tam net ~500. */
+      expect(Math.abs(C.rawScore(90, 60).value - C.rawScore(90, null).value) < 1).toBe(true);
+      expect(Math.round(C.rawScore(120, 80).value)).toBe(500);
+      /* Sıra tablosu 2025 dayanaklarıyla tutarlı (İÜC Bilgisayar 455,7 → 41.051). */
+      const r455 = C.rankForScore(455.7);
+      expect(r455 > 36000 && r455 < 46000).toBe(true);
+      expect(C.rankForScore(530)).toBe(1900);
     });
     it('hedefe net farkı yön verir', async function(){
       await withTodayAsync('2026-11-20', async () => {

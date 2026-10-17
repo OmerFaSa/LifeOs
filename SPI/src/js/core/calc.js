@@ -193,7 +193,20 @@ SP.Calc = (function(){
     }
     if(!dx || !dy) return { ok:false, n, note:'Serilerden biri hiç değişmiyor.' };
     const r = num / Math.sqrt(dx * dy);
-    return { ok:true, n, r:U.round(r, 2), strength:Math.abs(r) };
+    /* BELİRGİNLİK GÜN SAYISINA BAĞLI (analiz denetimi, 2026-10-17). Eşik
+       sabit 0,3 idi: birbirinden bağımsız iki ölçümde |r| ≥ 0,3, 10 günde
+       %39, 20 günde %20 olasılıkla rastlantıyla çıkar (simülasyon). Eşik
+       artık max(0,3; 2/√n): yaklaşık %5 yanılma (10 gün 0,63 · 20 gün 0,45
+       · 30 gün 0,37 · 45+ gün 0,3). */
+    const esik = Math.max(0.3, 2 / Math.sqrt(n));
+    return { ok:true, n, r:U.round(r, 2), strength:Math.abs(r), esik:U.round(esik, 2), belirgin:Math.abs(r) >= esik };
+  }
+
+  /* Toparlanma skoru bu ölçümlerden HESAPLANIR (core/move.js readiness):
+     ikisinin bağı hesabın kendisidir, bulgu değil. */
+  const TURETEN = { readiness:['sleep', 'hrv', 'rhr'] };
+  function turetilmis(a, b){
+    return (TURETEN[a] || []).indexOf(b) >= 0 || (TURETEN[b] || []).indexOf(a) >= 0;
   }
 
   /* Gunluk seri ureticiler — korelasyon icin ortak arayuz. */
@@ -211,13 +224,15 @@ SP.Calc = (function(){
     sodium:d => { const t = SP.Nutri.dayTotals(d); return t.empty ? null : t.micro.sodium; },
   };
 
-  function pairsFor(aKey, bKey, days){
+  /* `gecikme`: ikinci ölçüm kaç gün SONRA okunur (yük → ertesi gün toparlanma). */
+  function pairsFor(aKey, bKey, days, gecikme){
     const n = days || 60;
+    const g = gecikme || 0;
     const out = [];
-    for(let i = 0; i < n; i++){
+    for(let i = g; i < n; i++){
       const d = U.iso(U.addDays(U.today(), -i));
       const a = SERIES[aKey] ? SERIES[aKey](d) : null;
-      const b = SERIES[bKey] ? SERIES[bKey](d) : null;
+      const b = SERIES[bKey] ? SERIES[bKey](g ? U.iso(U.addDays(U.parse(d), g)) : d) : null;
       if(a != null && b != null) out.push([Number(a), Number(b)]);
     }
     return out;
@@ -230,7 +245,9 @@ SP.Calc = (function(){
       title:'Uyku ve toparlanma',
       pos:'Uzun uyuduğun günlerde HRV yükseliyor.',
       neg:'Uyku süresiyle HRV ters hareket ediyor; ölçüm saatini kontrol et.' },
-    { id:'load-readiness', a:'load', b:'readiness', expect:'-',
+    /* gecikme 1: başlık «ertesi gün» diyor; önce aynı günün toparlanması
+       (sabah, yükten ÖNCE ölçülen) ile o günün yükü karşılaştırılıyordu. */
+    { id:'load-readiness', a:'load', b:'readiness', expect:'-', gecikme:1,
       title:'Yük ve ertesi gün toparlanması',
       pos:'Ağır yüklenilen günlerde toparlanma skoru da yüksek — yük taşınıyor.',
       neg:'Ağır günlerde toparlanma belirgin düşüyor; yük bandın üstünde.' },
@@ -259,17 +276,18 @@ SP.Calc = (function(){
 
   function crossFindingsHam(days){
     return LINKS.map(link => {
-      const pairs = pairsFor(link.a, link.b, days || 60);
+      const pairs = pairsFor(link.a, link.b, days || 60, link.gecikme);
       const c = correlate(pairs);
       if(!c.ok){
         return { link, ok:false, n:c.n,
           note:'Ortak gün sayısı yetersiz (' + c.n + '/' + MIN_PAIRS + '). '
              + 'İki ölçüm de aynı günlerde girilmeli.' };
       }
-      /* Zayif katsayi bulgu sayilmaz. */
-      if(c.strength < 0.3){
+      /* Zayif ya da gun sayisina gore rastlanti duzeyindeki katsayi bulgu sayilmaz. */
+      if(!c.belirgin){
         return { link, ok:true, weak:true, r:c.r, n:c.n,
-          tone:'muted', text:'Belirgin bir birliktelik yok (r=' + U.fmtNet(c.r) + ', ' + c.n + ' gün).' };
+          tone:'muted', text:'Belirgin bir birliktelik yok (r=' + U.fmtNet(c.r) + ', ' + c.n + ' gün; '
+            + c.n + ' günde rastlantıdan ayırmak için |r| ≥ ' + U.fmtNet(c.esik) + ' gerekir).' };
       }
       const matches = link.expect === '+' ? c.r > 0 : c.r < 0;
       return {
@@ -349,7 +367,7 @@ SP.Calc = (function(){
 
   return {
     minimumDay, streak, dayStatus, nextAction,
-    correlate, pairsFor, crossFindings, SERIES, LINKS, MIN_PAIRS,
+    correlate, pairsFor, crossFindings, SERIES, LINKS, MIN_PAIRS, turetilmis,
     weeklyReport, headline,
   };
 })();

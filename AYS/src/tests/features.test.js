@@ -188,6 +188,39 @@
       expect(A.leechCards(4)).toHaveLength(1);
       expect(A.leechCards(5)).toHaveLength(0);
     });
+    /* Analiz denetimi (2026-10-17). */
+    it('boş bırakma yönü tek denemeden çıkmaz; iki grup ve 2 net fark gerekir', function(){
+      resetState();
+      const yap = (i, net, bos) => ({ id:'b' + i, date:'2026-09-1' + i, type:'Tam TYT', templateId:'tyt-full',
+        family:'TYT', kind:'full', tests:[{ name:'Türkçe', correct:net, wrong:0, blank:bos, blankCert:'measured' }] });
+      /* en iyi deneme çok boşlu ama az boşlu iki deneme de iyi: eskiden «boş bırakmak yarıyor» */
+      S.exams = [yap(1, 60, 30), yap(2, 59, 5), yap(3, 50, 6)];
+      expect(R.Analytics.blankStrategy('TYT').dir).toBe('az-veri');
+      S.exams = [yap(1, 60, 5), yap(2, 58, 6), yap(3, 50, 25), yap(4, 48, 28)];
+      const r = R.Analytics.blankStrategy('TYT');
+      expect([r.dir, r.fark]).toEqual(['less', 10]);
+      S.exams = [yap(1, 50, 5), yap(2, 51, 6), yap(3, 50, 25), yap(4, 51, 28)];
+      expect(R.Analytics.blankStrategy('TYT').dir).toBe('same');
+    });
+    it('unutma eğrisi beşten az tekrarlı aralıktan hüküm vermez', function(){
+      resetState();
+      S.cards = [{ id:'k', history:[{ result:'forgot', gapDays:1 }] }];
+      const f = A.forgettingCurve();
+      expect(f.rows[0].az).toBe(true);
+      expect(f.note).toContain('beşten az');
+    });
+    it('uyku etkisi her grupta en az iki deneme ister', async function(){
+      resetState();
+      const nets = [[1, 50, 8], [2, 52, 8], [3, 54, 8], [4, 40, 5]];
+      for(const [i, net, uyku] of nets){
+        const d = '2026-09-1' + i;
+        await M.saveExam(Object.assign(examWithNet(d, net, 'TYT'), { id:'u' + i }));
+        S.days[U.iso(U.addDays(U.parse(d), -1))] = { sleepHours:uyku };
+      }
+      const r = A.sleepImpact();
+      expect(r.ok).toBeFalsy();
+      expect(r.why).toContain('en az iki');
+    });
     it('uyku kaydı yetersizse çalışmaz', async function(){
       await seedExams([['2026-10-01', 30], ['2026-10-08', 32], ['2026-10-15', 34], ['2026-10-22', 36]]);
       expect(A.sleepImpact().ok).toBeFalsy();

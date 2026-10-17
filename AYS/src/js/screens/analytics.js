@@ -102,7 +102,7 @@ R.Screens.analytics = (function(){
           K.Stat({ label:'En iyi deneme', value:U.fmtNet(b.best.net), note:b.best.blank+' boş' }),
           K.Stat({ label:'En düşük', value:U.fmtNet(b.worst.net), note:b.worst.blank+' boş' }),
         ])}
-        <div class="mt-12">${K.Notice({ tone:b.dir === 'same' ? 'info' : 'ok', body:b.note })}</div>
+        <div class="mt-12">${K.Notice({ tone:b.dir === 'same' || b.dir === 'az-veri' ? 'info' : 'ok', body:b.note })}</div>
         <p class="tiny dim mt-8">${b.kapsam}</p>`,
     });
   }

@@ -101,7 +101,11 @@ R.Gelecek = (function(){
     /* Söz 7: en dar yarım genişlik (net). */
     const SC = R.SCORING || {}, bw = SC.bandHalfWidth || {};
     const yarim = (n >= 8 ? bw.many : n >= 5 ? bw.some : bw.few) || 0;
-    const taban = yarim / (((SC[aile === 'AYT' ? 'ayt' : 'tyt']) || {}).perNet || 3.33);
+    /* Puanın bir nete duyarlılığı: TYT puanında 3,33; SAY'da AYT neti
+       0,6 x 5 = 3,0 (data/scoring.js). */
+    const ay = SC.ayt || {};
+    const duyarlilik = aile === 'AYT' ? ((ay.perNet || 5) * (ay.aytWeight || 0.6)) : ((SC.tyt || {}).perNet || 3.33);
+    const taban = yarim / duyarlilik;
     const olasi0 = duzey + ts.egim * h;
     const alt0 = Math.min(duzey + ts.alt * h - 1.5 * s, olasi0 - taban);
     const ust0 = Math.max(duzey + ts.ust * h + 1.5 * s, olasi0 + taban);

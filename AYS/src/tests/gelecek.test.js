@@ -54,6 +54,12 @@
       expect(uzun.sinavaKadar).toBe(true);
     });
 
+    it('AYT bandının tabanı puanın AYT netine duyarlılığından (0,6 × 5 = 3,0 puan/net)', () => {
+      /* Kusursuz doğru: bant yalnız tabandan gelir. 5 deneme → yarım genişlik «some». */
+      const z = Gl().izdusum(seri([40, 42, 44, 46, 48]), 'AYT', '2026-10-01', '2026-10-15');
+      const beklenen = R.SCORING.bandHalfWidth.some / (R.SCORING.ayt.perNet * R.SCORING.ayt.aytWeight);
+      expect(Math.abs((z.ust - z.olasi) - beklenen) < 0.11).toBe(true);
+    });
     it('net sınırı aşmaz', () => {
       const z = Gl().izdusum(seri([100, 105, 110, 115, 118]), 'TYT', '2026-10-01', '2027-06-19');
       expect(z.ust <= 120 && z.olasi <= 120).toBe(true);

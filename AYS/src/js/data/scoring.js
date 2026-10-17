@@ -27,10 +27,18 @@ R.SCORING = {
   },
 
   /* AYT SAY ham puan yaklasimi: 40 Matematik + 14 Fizik + 13 Kimya + 13 Biyoloji = 80 soru.
-     SAY puani TYT'nin %40'i + AYT'nin %60'i agirligiyla olusur. */
+     SAY puani TYT'nin %40'i + AYT'nin %60'i agirligiyla olusur.
+
+     perNet 5: 0,6 x 5 = AYT neti basina 3,0 puan (OSYM SAY katsayilari
+     AYT Mat 3,0 · Fizik 2,85 · Kimya/Biyoloji 3,07); 0,4 x 3,33 = TYT neti
+     basina 1,33 (OSYM 1,32–1,36). Tam net (120 + 80) ~500 eder.
+     Duzeltme (2026-10-17, analiz denetimi): perNet 3,75 idi; AYT neti basina
+     2,25 puan veriyordu, tam net 440'ta kaliyordu ve AYT denemesi EKLEMEK
+     ayni duzeydeki adayin tahminini dusuruyordu (TYT 90 yalniz: 400; TYT 90
+     + AYT 60: 355 → sira ~21 bin yerine ~75 bin). */
   ayt: {
     questions: 80,
-    perNet: 3.75,
+    perNet: 5,
     tytWeight: 0.40,
     aytWeight: 0.60,
   },
@@ -43,24 +51,34 @@ R.SCORING = {
     many: 8,      // 8+
   },
 
-  /* Sıra referans noktaları — SAY sıralaması (yaklaşık, 2024–2026 ortalaması).
-     Aradaki değerler log-lineer aradeğerleme ile bulunur; uçlarda kırpılır. */
+  /* Sıra referans noktaları — SAY YERLEŞTİRME puanı (OBP dahil) → kümülatif
+     başarı sırası, 2025-YKS yaklaşık değerleri. Aradaki değerler log-lineer
+     aradeğerleme ile bulunur; uçlarda kırpılır.
+     Kaynak (analiz denetimi, 2026-10-17): 2025 yerleştirme taban puanı/sıra
+     eşleşmeleri — ykskocum.com «sayısal puan yığılması» ve testyurdu.com
+     sıralama tablosu (birbiriyle tutarlı; ör. İÜC Bilgisayar 455,7 → 41.051).
+     310'un altı kaynakta yok: 290–200 arası eğimin UZATMASIDIR (tahmin).
+     Eski tablo bu değerlerin ~20 katı iyimserdi (480 → 200, 440 → 4.000);
+     eski AYT katsayısı hatası ile birbirini kısmen örtüyordu.
+     Her yıl değişir: yeni yılın verisiyle tazelenmeli. */
   sayRankTable: [
-    { score: 500, rank: 1 },
-    { score: 480, rank: 200 },
-    { score: 460, rank: 1200 },
-    { score: 440, rank: 4000 },
-    { score: 420, rank: 10000 },
-    { score: 400, rank: 21000 },
-    { score: 380, rank: 40000 },
-    { score: 360, rank: 68000 },
-    { score: 340, rank: 105000 },
-    { score: 320, rank: 155000 },
-    { score: 300, rank: 220000 },
-    { score: 280, rank: 305000 },
-    { score: 260, rank: 410000 },
-    { score: 240, rank: 540000 },
-    { score: 220, rank: 700000 },
+    { score: 560, rank: 1 },
+    { score: 550, rank: 60 },
+    { score: 530, rank: 1900 },
+    { score: 510, rank: 7000 },
+    { score: 490, rank: 16000 },
+    { score: 470, rank: 29000 },
+    { score: 450, rank: 46000 },
+    { score: 430, rank: 64000 },
+    { score: 410, rank: 87000 },
+    { score: 390, rank: 111000 },
+    { score: 370, rank: 139000 },
+    { score: 350, rank: 174000 },
+    { score: 330, rank: 217000 },
+    { score: 310, rank: 274000 },
+    { score: 290, rank: 345000 },
+    { score: 270, rank: 435000 },
+    { score: 250, rank: 545000 },
     { score: 200, rank: 900000 },
   ],
 

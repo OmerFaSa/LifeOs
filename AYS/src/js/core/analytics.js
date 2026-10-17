@@ -85,8 +85,18 @@ R.Analytics = (function(){
     const sorted = points.slice().sort((a, b) => b.net - a.net);
     const best = sorted[0], worst = sorted[sorted.length-1];
 
-    const dir = best.blank < avgBlank - 1 ? 'less'
-      : best.blank > avgBlank + 1 ? 'more' : 'same';
+    /* YÖN TEK DENEMEDEN ÇIKMAZ (analiz denetimi, 2026-10-17). Önce yalnız
+       EN İYİ denemenin boşu ortalamayla karşılaştırılıyordu: üç denemeden
+       biri yüksek netle çok boş bıraktıysa «boş bırakmak sana yarıyor»
+       deniyordu, öteki ikisi ne derse desin. Şimdi denemeler boş sayısına
+       göre ikiye bölünür (az boş / çok boş); her grupta en az iki deneme
+       ve medyan netler arasında en az 2 net fark yoksa yön söylenmez. */
+    const bosSira = points.slice().sort((a, b) => a.blank - b.blank);
+    const yari = Math.floor(bosSira.length / 2);
+    const az = bosSira.slice(0, yari), cok = bosSira.slice(bosSira.length - yari);
+    const yeterli = az.length >= 2 && cok.length >= 2 && cok[0].blank > az[az.length - 1].blank;
+    const fark = yeterli ? U.round(U.median(az.map(p => p.net)) - U.median(cok.map(p => p.net)), 2) : null;
+    const dir = !yeterli ? 'az-veri' : fark >= 2 ? 'less' : fark <= -2 ? 'more' : 'same';
 
     return {
       ok:true, points, avgBlank, best, worst, dir,
@@ -95,10 +105,13 @@ R.Analytics = (function(){
         ? list.length + ' denemeden hesaplandı; ' + disarida
           + ' denemede boş alanı doldurulmadığı için dışarıda kaldı.'
         : list.length + ' denemeden hesaplandı.',
+      fark,
       note:dir === 'less'
-        ? 'En iyi denemende ortalamadan az boş bıraktın. Daha çok soruya girmek sana net kazandırıyor.'
+        ? 'Az boş bıraktığın denemelerde medyan netin ' + U.fmtNet(fark) + ' net yüksek. Daha çok soruya girmek sana net kazandırıyor olabilir.'
         : dir === 'more'
-        ? 'En iyi denemende ortalamadan çok boş bıraktın. Emin olmadığını boş bırakmak sana yarıyor.'
+        ? 'Çok boş bıraktığın denemelerde medyan netin ' + U.fmtNet(-fark) + ' net yüksek. Emin olmadığını boş bırakmak sana yarıyor olabilir.'
+        : dir === 'az-veri'
+        ? 'Yön söylemek için boş sayısı farklı en az dört deneme gerekir; şimdilik yalnız ortalama.'
         : 'Boş sayısı ile net arasında belirgin ilişki yok; sorun hızda ya da isabette olabilir.',
     };
   }
@@ -276,15 +289,20 @@ R.Analytics = (function(){
     const order = ['1g', '3g', '1h', '1a', '1a+'];
     const rows = order.filter(k => buckets[k]).map(k => ({
       gap:k, total:buckets[k].total, rate:U.pct(buckets[k].remembered, buckets[k].total),
+      az:buckets[k].total < 5,
     }));
-    const weak = rows.find(r => r.rate < 70);
+    /* Beşten az tekrarlı aralık hüküm vermez (analiz denetimi): tek bir
+       unutuş «%0, kartlar yeniden yazılmalı» cümlesi kuruyordu. */
+    const weak = rows.find(r => !r.az && r.rate < 70);
     return {
       ok:rows.length > 0, rows,
       note:!rows.length
         ? 'Yeterli tekrar geçmişi yok; birkaç hafta sonra anlamlı olur.'
         : weak
-        ? weak.gap + ' aralığında hatırlama %' + weak.rate + '. Bu aralıktaki kartlar yeniden yazılmalı olabilir.'
-        : 'Tüm aralıklarda hatırlama %70 üzerinde; tekrar takvimi sana uyuyor.',
+        ? weak.gap + ' aralığında hatırlama %' + weak.rate + ' (' + weak.total + ' tekrar). Bu aralıktaki kartlar yeniden yazılmalı olabilir.'
+        : rows.every(r => r.az)
+        ? 'Her aralıkta beşten az tekrar var; hüküm için birkaç hafta daha gerek.'
+        : 'Yeterli tekrarı olan aralıklarda hatırlama %70 üzerinde; tekrar takvimi sana uyuyor.',
     };
   }
 
@@ -304,8 +322,11 @@ R.Analytics = (function(){
     const target = (S.profile && S.profile.sleepTarget) || 7.5;
     const good = points.filter(p => p.sleep >= target - 0.5);
     const bad = points.filter(p => p.sleep < target - 0.5);
-    if(!good.length || !bad.length){
-      return { ok:false, why:'Karşılaştırma için hem yeterli hem yetersiz uyku günü gerekir.' };
+    /* Her grupta en az iki deneme (analiz denetimi): tek denemelik grubun
+       «medyanı» o denemenin kendisidir; 3'e 1'lik bir karşılaştırma
+       «bu senin verin» diye sunuluyordu. */
+    if(good.length < 2 || bad.length < 2){
+      return { ok:false, why:'Karşılaştırma için en az iki yeterli ve iki yetersiz uykulu deneme gerekir.' };
     }
 
     const gm = U.median(good.map(p => p.net));

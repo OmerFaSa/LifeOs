@@ -235,6 +235,38 @@
       });
     });
 
+    /* Analiz denetimi (2026-10-17). */
+    it('belirginlik gün sayısına bağlı: 10 günde r=0,5 rastlantı, 60 günde değil', () => {
+      const yap = (n, r) => {
+        /* x doğrusal, y = r*x + gürültü (sabit desenle) */
+        const p = [];
+        for(let i = 0; i < n; i++){ const x = i - n / 2; p.push([x, x * r + (i % 2 ? 1 : -1) * n * 0.45]); }
+        return p;
+      };
+      const k10 = SP.Calc.correlate(yap(10, 1));
+      const k60 = SP.Calc.correlate(yap(60, 1));
+      expect(k10.esik).toBe(0.63);
+      expect(k60.esik).toBe(0.3);
+      expect(k10.belirgin).toBe(Math.abs(k10.r) >= 0.63);
+      expect(k60.belirgin).toBe(Math.abs(k60.r) >= 0.3);
+    });
+    it('yük ertesi günün toparlanmasıyla eşlenir', () => {
+      resetState();
+      withToday('2026-03-30', () => {
+        /* gecikme 1: bugünkü yük yarınki toparlanmayla */
+        const p0 = SP.Calc.pairsFor('sleep', 'hrv', 5, 0).length;
+        pushVitals('2026-03-28', { sleep:7 });
+        pushVitals('2026-03-29', { hrv:55 });
+        expect(SP.Calc.pairsFor('sleep', 'hrv', 30, 1)).toEqual([[7, 55]]);
+        expect(SP.Calc.pairsFor('sleep', 'hrv', 30)).toHaveLength(p0);
+        expect(SP.Calc.LINKS.find(l => l.id === 'load-readiness').gecikme).toBe(1);
+      });
+    });
+    it('toparlanma ile kendi girdilerinin bağı türetilmiş sayılır', () => {
+      expect(SP.Calc.turetilmis('sleep', 'readiness')).toBe(true);
+      expect(SP.Calc.turetilmis('readiness', 'hrv')).toBe(true);
+      expect(SP.Calc.turetilmis('protein', 'readiness')).toBe(false);
+    });
     it('ortak gün sayısı yetersizse bulgu üretilmez', () => {
       resetState();
       withToday('2026-03-10', () => {

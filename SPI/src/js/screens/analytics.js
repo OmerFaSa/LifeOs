@@ -48,7 +48,10 @@ SP.Screens.analytics = (function(){
 
   function pairCard(){
     const a = S.ui.pairA || 'sleep';
-    const b = S.ui.pairB || 'readiness';
+    const b = S.ui.pairB || 'hrv';
+    /* Analiz denetimi (2026-10-17): varsayılan çift uyku × toparlanmaydı;
+       toparlanma uykudan hesaplandığı için «güçlü» çıkması kaçınılmazdı. */
+    const turev = SP.Calc.turetilmis(a, b);
     const pairs = SP.Calc.pairsFor(a, b, 90);
     const c = SP.Calc.correlate(pairs);
     const opts = Object.keys(SP.Calc.SERIES).map(id => ({ value:id, label:seriesLabel(id) }));
@@ -61,9 +64,12 @@ SP.Screens.analytics = (function(){
           ${K.Field({ label:'İkinci ölçüm', input:K.Select({ value:b, change:'pair-b', options:opts }) })}
         </div>
         <div class="mt-12">
-          ${when(c.ok, () => html`
+          ${when(turev, () => K.Notice({ tone:'info',
+            body:'Toparlanma skoru uyku, HRV ve istirahat nabzından hesaplanır; bu ikisinin bağı hesabın kendisidir, bulgu değil.' }))}
+          ${when(c.ok && !turev, () => html`
             ${K.Stat({ label:'Katsayı', value:U.fmtNet(c.r),
-              note:c.n + ' ortak gün · ' + (c.strength >= 0.6 ? 'güçlü' : c.strength >= 0.3 ? 'orta' : 'zayıf') })}
+              note:c.n + ' ortak gün · ' + (!c.belirgin ? 'rastlantı düzeyinde (|r| ≥ ' + U.fmtNet(c.esik) + ' gerekir)'
+                : c.strength >= 0.6 ? 'güçlü' : 'orta') })}
             ${raw(UI.lineChart([
               { data:pairs.map(p => p[0]) },
               { data:pairs.map(p => p[1]), accent:true },
