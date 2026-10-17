@@ -16125,7 +16125,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'4debe49e', at:'2026-10-17 12:15', dirty:true };
+ESP.BUILD = { id:'f151083b', at:'2026-10-17 12:43', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -27563,6 +27563,11 @@ window.LIFEOS.HESAP = (function(){
     try{ return await api('/api/hesap/kisi'); }
     catch(e){ if(e && e.kod === 401) return null; throw e; }
   }
+  /* Sunucu sözü 25: üç modülün günlük sayısal özeti (SPİ'nin ruh hâli modeli için). */
+  async function gunluk(){
+    try{ return await api('/api/hesap/gunluk'); }
+    catch(e){ if(e && e.kod === 401) return null; throw e; }
+  }
   async function takvimAc(yenile){ return (await api('/api/hesap/takvim', { yenile:!!yenile })).takvim; }
   async function takvimKapat(){ return (await api('/api/hesap/takvim-kapat', {})).takvim; }
   /* Cihaza ad (söz 21); döner: tazelenmiş cihaz listesi. */
@@ -29363,7 +29368,7 @@ window.LIFEOS.HESAP = (function(){
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
-    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
+    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
     _ortam:ortam, _sifirla, _istek:istek, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,
@@ -86053,6 +86058,17 @@ ESP.App = (function(){
               const k = ESP.Hafizam.etkin().slice(-150).map(x => ({ id:x.id, alan:x.alan || null, metin:x.metin, katman:x.katman, at:x.at }));
               y.kisi = { metin:JSON.stringify({ kayitlar:k }) };
             }
+            /* Günlük özet (sunucu sözü 25): son 90 günün disiplin dakikaları; SPİ'nin ruh hâli modeline. */
+            const gunler = {};
+            for(let i = 0; i < 90; i++){
+              const d = ESP.U.iso(ESP.U.addDays(ESP.U.today(), -i));
+              const ss = M.sessionsOf(d).filter(s => s.minutes > 0);
+              if(!ss.length) continue;
+              const g = { toplam:0 };
+              ss.forEach(s => { g[s.disc] = (g[s.disc] || 0) + s.minutes; g.toplam += s.minutes; });
+              gunler[d] = g;
+            }
+            y.gunluk = { metin:JSON.stringify({ gunler }) };
             return y;
           },
           yukle:async () => { await M.loadAll(); if(window.LIFEOS && window.LIFEOS.NOTUM) await window.LIFEOS.NOTUM.yukle(); },

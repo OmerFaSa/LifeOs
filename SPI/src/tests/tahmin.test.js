@@ -34,6 +34,28 @@
       const m = T().egit(sentetik(80, false, 11));
       expect(m.iyi).toBe(false);
     });
+    it('öbür modüllerin günü girdi olur; yayın yoksa sütun hiç girmez', () => {
+      const U = SP.U, eskiV = SP.S.vitals;
+      try{
+        SP.S.vitals = {};
+        const gunler = {};
+        for(let i = 0; i < 40; i++){
+          const d = U.iso(U.addDays(U.today(), -i));
+          const muz = (i * 7) % 60;
+          SP.S.vitals[d] = { soreness:Math.max(1, Math.min(5, Math.round(1 + muz / 15))) };
+          gunler[d] = { toplam:muz, music:muz };
+        }
+        T()._dis({});
+        const x0 = T().gunOzellik(U.todayISO());
+        expect(x0.espMuzik).toBe(null);
+        T()._dis({ esp:gunler });
+        expect(T().gunOzellik(U.todayISO()).espMuzik).toBe(0);
+        const m = T().egit(T().veriSeti(60));
+        expect(m.ok && m.iyi).toBe(true);
+        expect(m.kaynaklar).toEqual(['SPİ', 'ESP']);
+        expect(['espMuzik', 'espToplam'].indexOf(m.onem[0].ozellik) >= 0).toBe(true);
+      }finally{ SP.S.vitals = eskiV; T()._dis({}); }
+    });
     it('tohumlu eğitim tekrarlanabilir', () => {
       const a = T().egit(sentetik(40, true)), b = T().egit(sentetik(40, true));
       expect(a.maeModel).toBe(b.maeModel);

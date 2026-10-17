@@ -1747,6 +1747,17 @@ ESP.App = (function(){
               const k = ESP.Hafizam.etkin().slice(-150).map(x => ({ id:x.id, alan:x.alan || null, metin:x.metin, katman:x.katman, at:x.at }));
               y.kisi = { metin:JSON.stringify({ kayitlar:k }) };
             }
+            /* Günlük özet (sunucu sözü 25): son 90 günün disiplin dakikaları; SPİ'nin ruh hâli modeline. */
+            const gunler = {};
+            for(let i = 0; i < 90; i++){
+              const d = ESP.U.iso(ESP.U.addDays(ESP.U.today(), -i));
+              const ss = M.sessionsOf(d).filter(s => s.minutes > 0);
+              if(!ss.length) continue;
+              const g = { toplam:0 };
+              ss.forEach(s => { g[s.disc] = (g[s.disc] || 0) + s.minutes; g.toplam += s.minutes; });
+              gunler[d] = g;
+            }
+            y.gunluk = { metin:JSON.stringify({ gunler }) };
             return y;
           },
           yukle:async () => { await M.loadAll(); if(window.LIFEOS && window.LIFEOS.NOTUM) await window.LIFEOS.NOTUM.yukle(); },

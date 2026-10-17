@@ -1625,6 +1625,15 @@ R.App = (function(){
               const k = R.Hafizam.etkin().slice(-150).map(x => ({ id:x.id, alan:x.alan || null, metin:x.metin, katman:x.katman, at:x.at }));
               y.kisi = { metin:JSON.stringify({ kayitlar:k }) };
             }
+            /* Günlük özet (sunucu sözü 25): son 90 günün soru, dakika, doğru oranı; SPİ'nin ruh hâli modeline. */
+            const gunler = {};
+            for(let i = 0; i < 90; i++){
+              const d = U.iso(U.addDays(U.today(), -i)), g = S.days[d];
+              if(!g || !(g.blocks || []).some(b => b.actualQ || b.actualMin)) continue;
+              const soru = U.sum(g.blocks.map(b => b.actualQ || 0)), dogru = U.sum(g.blocks.map(b => b.correctQ || 0));
+              gunler[d] = { soru, dakika:U.sum(g.blocks.map(b => b.actualMin || 0)), dogru:soru ? Math.round(100 * dogru / soru) : null };
+            }
+            y.gunluk = { metin:JSON.stringify({ gunler }) };
             return y;
           } });
       }

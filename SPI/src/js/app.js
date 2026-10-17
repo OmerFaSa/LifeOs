@@ -1537,6 +1537,8 @@ SP.App = (function(){
           ac:() => go('analytics') });
         try{ await window.LIFEOS.NOTUM.yukle(); }catch(e){ /* notlar yüklenemedi; kutu boş başlar */ }
       }
+      /* Ruh hâli modeli öbür modüllerin gününü de alır (sunucu sözü 25); beklenmez. */
+      if(SP.Tahmin && SP.Tahmin.disYukle) SP.Tahmin.disYukle();
       /* DEFTER (brand/ortak/defter.js, NOT-PLANI): resimli, çizimli, sesli notlar. */
       if(window.LIFEOS && window.LIFEOS.DEFTER){
         window.LIFEOS.DEFTER.kur({ modul:'spi', store:{ set:(p, d) => SP.Store.set(p, d), list:c => SP.Store.list(c), remove:p => SP.Store.remove(p) } });

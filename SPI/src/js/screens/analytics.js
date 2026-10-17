@@ -54,7 +54,7 @@ SP.Screens.analytics = (function(){
       body:K.Notice({ tone:'info', body:m.why + ' Bugün ekranındaki «Günün hissi»ni işaretledikçe öğrenir.' }) });
     const vg = x => String(x).replace('.', ',');
     return K.Card({
-      title:'Ruh hâli modeli', sub:m.n + ' gün · ' + m.ozellikSayisi + ' özellik · ' + m.parametre + ' parametre',
+      title:'Ruh hâli modeli', sub:m.n + ' gün · ' + m.ozellikSayisi + ' özellik · ' + m.parametre + ' parametre · ' + (m.kaynaklar || ['SPİ']).join(' + '),
       badge:K.Badge({ label:m.iyi ? 'tabandan %' + m.kazanc + ' iyi' : 'henüz tabanı geçmedi', tone:m.iyi ? 'ok' : 'muted' }),
       body:html`
         ${when(m.iyi && m.bugun != null, () => K.Stat({ label:'Bugün için tahmin', value:vg(m.bugun) + ' / 5', note:'tahmin · ölçüm değil' }))}
@@ -63,7 +63,11 @@ SP.Screens.analytics = (function(){
         ${when(m.onem.length, () => html`<div class="list mt-8">${map(m.onem.slice(0, 4), x => html`
           <div class="listitem"><div class="grow"><b class="small">${x.ad}</b>
             <div class="tiny dim">${x.yon > 0 ? 'arttıkça hissin yükseliyor' : x.yon < 0 ? 'arttıkça hissin düşüyor' : 'yönü belirsiz'} · birliktelik, neden değil</div></div>
-            ${P.cert('estimated')}</div>`)}</div>`)}`,
+            ${P.cert('estimated')}</div>`)}</div>`)}
+        ${when(m.iyi && (m.neDegisirse || []).length, () => html`<p class="small mt-12"><b>Tipik bir günde</b></p>
+          <div class="list">${map(m.neDegisirse, x => html`<div class="listitem"><div class="grow"><span class="small">${x.ad}</span></div>
+            <span class="num small is-up">+${vg(x.fark)}</span>${P.cert('estimated')}</div>`)}</div>
+          <p class="tiny dim mt-4">Modelin tahmini; birliktelikten öğrenildi, neden değildir.</p>`)}`,
     });
   }
 

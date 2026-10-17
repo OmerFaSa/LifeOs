@@ -43,11 +43,28 @@ SP.Tahmin = (function(){
     uyku:'Uyku süresi', uyku3:'Son üç gecenin uykusu', yatis:'Yatış saati', hrv:'HRV', rhr:'İstirahat nabzı',
     su:'Su', antrenman:'Antrenman', antrenmanDun:'Dünkü antrenman', kcal:'Kalori', protein:'Protein',
     tatli:'Tatlı', kahve:'Kahve', ogun:'Öğün sayısı', sebze:'Sebze ve meyve', kiloFark:'Kilo değişimi',
+    aysSoru:'Çözülen soru (AYS)', aysDakika:'Çalışma süresi (AYS)', aysDogru:'Doğru oranı (AYS)',
+    espToplam:'Gelişim süresi (ESP)', espMuzik:'Müzik (ESP)', espFelsefe:'Felsefe (ESP)', espDil:'Yabancı dil (ESP)',
+    espOkuma:'Derin okuma (ESP)', espYazi:'Yazı (ESP)', espTarih:'Tarih (ESP)',
     haftasonu:'Hafta sonu', pzt:'Pazartesi', sali:'Salı', car:'Çarşamba', per:'Perşembe', cum:'Cuma', cmt:'Cumartesi', paz:'Pazar',
   };
   const GUN_KEY = ['paz', 'pzt', 'sali', 'car', 'per', 'cum', 'cmt'];
 
-  /* Bir günün özellik vektörü (eksik: null). Kaynak SPİ'nin kendi kaydı. */
+  /* ÖBÜR MODÜLLER (sunucu sözü 25): AYS ve ESP günlerini sunucuya yayınlar;
+     SPİ okur. Sunucu kapalıysa ya da oturum yoksa bu özellikler hiç
+     girmez (sütun tümden boşsa model onu kullanmaz; §1.2). */
+  let dis = {};
+  async function disYukle(){
+    try{
+      const H = window.LIFEOS && window.LIFEOS.HESAP;
+      const r = H && typeof H.gunluk === 'function' ? await H.gunluk() : null;
+      if(r && Array.isArray(r.moduller)){ const o = {}; r.moduller.forEach(m => { o[m.modul] = m.gunler || {}; }); dis = o; }
+    }catch(e){ /* sunucu kapalı: SPİ verisiyle devam (AGENTS §1.4) */ }
+    return dis;
+  }
+  function _dis(v){ dis = v || {}; }
+
+  /* Bir günün özellik vektörü (eksik: null). Kaynak SPİ'nin kendi kaydı + öbür modüllerin yayını. */
   function gunOzellik(d){
     const U = SP.U, M = SP.Model;
     const v = SP.S.vitals[d] || {};
@@ -75,6 +92,16 @@ SP.Tahmin = (function(){
       haftasonu:dow === 0 || dow === 6 ? 1 : 0,
     };
     GUN_KEY.forEach((k, i) => { o[k] = dow === i ? 1 : 0; });
+    const a = (dis.ays || {})[d], e = (dis.esp || {})[d];
+    /* Kaydı olmayan gün: modül yayın yapıyorsa o gün çalışılmamıştır (0);
+       hiç yayın yoksa null (girmez). */
+    const aysVar = !!dis.ays, espVar = !!dis.esp;
+    o.aysSoru = a ? num(a.soru) : aysVar ? 0 : null;
+    o.aysDakika = a ? num(a.dakika) : aysVar ? 0 : null;
+    o.aysDogru = a ? num(a.dogru) : null;
+    o.espToplam = e ? num(e.toplam) : espVar ? 0 : null;
+    [['espMuzik', 'music'], ['espFelsefe', 'philo'], ['espDil', 'lang'], ['espOkuma', 'reading'], ['espYazi', 'writing'], ['espTarih', 'history']]
+      .forEach(([k, id]) => { o[k] = e ? (num(e[id]) || 0) : espVar ? 0 : null; });
     return o;
   }
   /* Etiketli günler: Günün hissi (soreness 1–5, senin beyanın). */
@@ -181,12 +208,30 @@ SP.Tahmin = (function(){
       const Xp = Xs.map((x, i) => { const z = x.slice(); z[j] = Xs[(i + 1) % Xs.length][j]; return z; });
       return { ozellik:k, ad:OZELLIK_AD[k] || k, artis:mae(topluluk, Xp, ys) - maeModel, yon:Math.sign(lin.w[j]) };
     }).filter(x => x.artis > 0.01).sort((a, b) => b.artis - a.artis);
+    /* NE DEĞİŞİRSE (tahmin, birliktelik): tipik bir günde (özelliklerin
+       ortancası) değiştirilebilir bir özellik bir adım oynayınca modelin
+       tahmini ne kadar değişiyor. «Neden» değildir; doz da değildir. */
+    const ADIM = { uyku:[1, '1 saat daha uyku'], su:[500, '500 ml daha su'], antrenman:[1, 'bir antrenman'], tatli:[-1, 'bir kalem daha az tatlı'],
+      kahve:[-1, 'bir fincan daha az kahve'], sebze:[1, 'bir kalem daha sebze/meyve'], yatis:[-1, '1 saat erken yatmak'],
+      aysDakika:[60, '1 saat daha ders'], espMuzik:[30, '30 dk müzik'], espToplam:[30, '30 dk daha gelişim çalışması'], espOkuma:[30, '30 dk derin okuma'] };
+    const tipik = {};
+    adlar.forEach(k => { const v = l.map(r => r.x[k]).filter(x => x != null); tipik[k] = v.length ? ortanca(v) : null; });
+    const ne = [];
+    /* tam veriyle kurulan modeli kullanmak için aşağıda doldurulur */
+    const neDegisirse = f => Object.keys(ADIM).filter(k => adlar.indexOf(k) >= 0 && tipik[k] != null).map(k => {
+      const y0 = f(tipik), x1 = Object.assign({}, tipik); x1[k] = tipik[k] + ADIM[k][0];
+      return { ozellik:k, ad:ADIM[k][1], fark:Math.round((f(x1) - y0) * 100) / 100 };
+    }).filter(x => Math.abs(x.fark) >= 0.1).sort((a, b) => b.fark - a.fark);
     /* Son model tüm veriyle (tahmin için). */
     const hzT = hazirla(l, adlar);
     const XT = l.map(r => hzT.vek(r.x)), yT = l.map(r => r.y);
     const linT = dogrusal(XT, yT, 0.05), agT = sinirAgi(XT, yT, opt.gizli || 12, 0.01, opt.tohum || 7);
+    const tamTahmin = x => sinirla((linT.tahmin(hzT.vek(x)) + agT.tahmin(hzT.vek(x))) / 2);
+    ne.push.apply(ne, neDegisirse(tamTahmin));
+    const kaynaklar = ['SPİ'].concat(adlar.some(k => /^ays/.test(k)) ? ['AYS'] : [], adlar.some(k => /^esp/.test(k)) ? ['ESP'] : []);
     return {
       ok:true, n:l.length, egitim:egitim.length, sinav:sinav.length, ozellikSayisi:adlar.length, parametre:ag.parametre + adlar.length + 1,
+      neDegisirse:ne.filter(x => x.fark > 0).slice(0, 3), kaynaklar,
       maeModel:Math.round(maeModel * 100) / 100, maeTaban:Math.round(maeTaban * 100) / 100, iyi,
       kazanc:maeTaban ? Math.round(100 * (1 - maeModel / maeTaban)) : 0,
       onem:onem.slice(0, 6),
@@ -200,7 +245,7 @@ SP.Tahmin = (function(){
   function durum(){
     const veri = veriSeti(365);
     const imza = SP.U.todayISO() + '|' + veri.length + '|' + veri.map(r => r.tarih + r.y).join(',').length
-      + '|' + veri.reduce((a, r) => a + r.y, 0);
+      + '|' + veri.reduce((a, r) => a + r.y, 0) + '|' + Object.keys(dis).map(k => k + Object.keys(dis[k]).length).join(',');
     if(onbellek && onbellek.imza === imza) return onbellek.sonuc;
     const m = egit(veri);
     const sonuc = m.ok ? Object.assign({}, m, { bugun:m.iyi ? m.tahminEt(gunOzellik(SP.U.todayISO())) : null }) : m;
@@ -208,5 +253,5 @@ SP.Tahmin = (function(){
     return sonuc;
   }
 
-  return { egit, durum, veriSeti, gunOzellik, sinirAgi, dogrusal, rng, OZELLIK_AD, ASGARI_GUN };
+  return { egit, durum, veriSeti, gunOzellik, sinirAgi, dogrusal, rng, OZELLIK_AD, ASGARI_GUN, disYukle, _dis };
 })();

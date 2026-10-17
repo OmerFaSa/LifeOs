@@ -1579,6 +1579,21 @@ def run():
     test("Kisi modeli: modulun JSON kayitlari; bicim ve boyut denetlenir, icerik anlasilmaz; sabit sira",
          t_kisi)
 
+    def t_gunluk():
+        with _Depo() as r:
+            k, j = _admin(r)
+            eq(r.d.gunluk(k), {"moduller": []})
+            _hata(lambda: r.d.yayinla(k, "ays/gunluk", '{"gunler":[]}'), 400)            # sozluk degil
+            _hata(lambda: r.d.yayinla(k, "ays/gunluk", "duz"), 400)
+            _hata(lambda: r.d.yayinla(k, "ays/gunluk", '{"gunler":{"x":"' + "a" * 270000 + '"}}'), 400)
+            r.d.yayinla(k, "esp/gunluk", '{"gunler":{"2026-10-16":{"muzik":30}}}')
+            r.d.yayinla(k, "ays/gunluk", '{"gunler":{"2026-10-16":{"soru":120}}}')
+            v = r.d.gunluk(k)
+            eq([m["modul"] for m in v["moduller"]], ["ays", "esp"])
+            eq(v["moduller"][1]["gunler"], {"2026-10-16": {"muzik": 30}})
+            eq(r.d.kisi(k)["moduller"], [])                                           # kisiye karismaz
+    test("Gunluk ozet: modulun JSON gunleri; bicim ve boyut denetlenir; sabit sira", t_gunluk)
+
     # ------------------------------------------- King'in ilettigi satir (soz 23)
 
     def t_gelen_birak():

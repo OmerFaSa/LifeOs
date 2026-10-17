@@ -16769,7 +16769,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'4debe49e', at:'2026-10-17 12:14', dirty:true };
+R.BUILD = { id:'f151083b', at:'2026-10-17 12:42', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -28207,6 +28207,11 @@ window.LIFEOS.HESAP = (function(){
     try{ return await api('/api/hesap/kisi'); }
     catch(e){ if(e && e.kod === 401) return null; throw e; }
   }
+  /* Sunucu sözü 25: üç modülün günlük sayısal özeti (SPİ'nin ruh hâli modeli için). */
+  async function gunluk(){
+    try{ return await api('/api/hesap/gunluk'); }
+    catch(e){ if(e && e.kod === 401) return null; throw e; }
+  }
   async function takvimAc(yenile){ return (await api('/api/hesap/takvim', { yenile:!!yenile })).takvim; }
   async function takvimKapat(){ return (await api('/api/hesap/takvim-kapat', {})).takvim; }
   /* Cihaza ad (söz 21); döner: tazelenmiş cihaz listesi. */
@@ -30007,7 +30012,7 @@ window.LIFEOS.HESAP = (function(){
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
-    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
+    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gunluk, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
     _ortam:ortam, _sifirla, _istek:istek, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,
@@ -109915,6 +109920,15 @@ R.App = (function(){
               const k = R.Hafizam.etkin().slice(-150).map(x => ({ id:x.id, alan:x.alan || null, metin:x.metin, katman:x.katman, at:x.at }));
               y.kisi = { metin:JSON.stringify({ kayitlar:k }) };
             }
+            /* Günlük özet (sunucu sözü 25): son 90 günün soru, dakika, doğru oranı; SPİ'nin ruh hâli modeline. */
+            const gunler = {};
+            for(let i = 0; i < 90; i++){
+              const d = U.iso(U.addDays(U.today(), -i)), g = S.days[d];
+              if(!g || !(g.blocks || []).some(b => b.actualQ || b.actualMin)) continue;
+              const soru = U.sum(g.blocks.map(b => b.actualQ || 0)), dogru = U.sum(g.blocks.map(b => b.correctQ || 0));
+              gunler[d] = { soru, dakika:U.sum(g.blocks.map(b => b.actualMin || 0)), dogru:soru ? Math.round(100 * dogru / soru) : null };
+            }
+            y.gunluk = { metin:JSON.stringify({ gunler }) };
             return y;
           } });
       }
