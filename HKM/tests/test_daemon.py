@@ -95,6 +95,28 @@ class _Server(object):
         istek = SahteIstek(self.srv)
         return daemon.Handler._read_body(istek)
 
+    def sahte_post(self, yol, govde, basliklar, uzunluk=None):
+        """Handler'i soketsiz surer: (durum kodu, okunan govde bayti).
+
+        Gercek soketle «govde okundu mu» deterministik olculemez: okunmamis
+        govdeyle kapanan soket Windows'ta RST yollar, ama istemcinin bunu
+        cevaptan once mi sonra mi gordugu makinenin yukune baglidir."""
+        import io
+        from email.message import Message
+        h = daemon.Handler.__new__(daemon.Handler)
+        h.server = self.srv
+        h.command, h.path, h.request_version = "POST", yol, "HTTP/1.0"
+        h.requestline = "POST %s HTTP/1.0" % yol
+        h.client_address = ("127.0.0.1", 0)
+        h.headers = Message()
+        h.headers["Content-Length"] = str(len(govde) if uzunluk is None else uzunluk)
+        for k, v in basliklar.items():
+            h.headers[k] = v
+        h.rfile, h.wfile = io.BytesIO(govde), io.BytesIO()
+        h.log_message = lambda *a: None
+        h.do_POST()
+        return int(h.wfile.getvalue().split(b" ")[1]), h.rfile.tell()
+
     def close(self):
         self.srv.shutdown()
         self.srv.server_close()
@@ -374,6 +396,33 @@ def _run():
                 S.srv.pair["until"] = 0.0          # zamani geriye al
             eq(S.call("/api/pair", body={}, token=None)[0], 403)
         test("suresi dolan pencere kapanir", t_pair_expires)
+
+        def t_rejected_body_is_drained():
+            """Erken reddedilen istegin govdesi de OKUNUR. /api/pair 403 ya
+            da 401 donup govdeye hic dokunmuyordu; okunmamis veriyle kapanan
+            soket Windows'ta RST yollar ve makine yukluyken istemci cevabi
+            degil WinError 10053 gorur (2026-10-17: paralel kosuda uc esleme
+            testi bu yuzden aralikli kirmiziydi). Sinirdan BUYUK govde ise
+            yine okunmaz: okunup reddedilen govde zaten bellege alinmistir."""
+            govde = b'{"seconds": 30}'
+            S.srv.rate = {}
+            kod, okunan = S.sahte_post("/api/pair", govde, {
+                "Origin": "https://baska-site.example.com"})
+            eq(kod, 403)
+            eq(okunan, len(govde), "yabanci koken")
+            with S.srv.pair_lock:
+                S.srv.pair["until"] = 0.0
+            kod, okunan = S.sahte_post("/api/pair", govde, {})
+            eq(kod, 403)
+            eq(okunan, len(govde), "kapali pencere")
+            kod, okunan = S.sahte_post("/api/pair/open", govde, {})
+            eq(kod, 401)
+            eq(okunan, len(govde), "bearer yok")
+            kod, okunan = S.sahte_post("/api/pair/open", b"", {},
+                                       uzunluk=daemon.MAX_BODY + 1)
+            eq(kod, 401)
+            eq(okunan, 0, "sinirdan buyuk govde okunmaz")
+        test("reddedilen istegin govdesi bosaltilir", t_rejected_body_is_drained)
 
         def t_local_message_endpoint():
             kod, r = S.call("/api/message", body={"text": "yardim", "date": BUGUN})

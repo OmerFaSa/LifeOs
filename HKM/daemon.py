@@ -445,6 +445,7 @@ class Handler(BaseHTTPRequestHandler):
         Content-Length'e guvenmek yetmez: sinirdan buyuk bir govde HIC
         okunmaz — okunup sonra reddedilen bir govde, zaten bellege
         alinmistir."""
+        self._govde_okundu = True
         try:
             n = int(self.headers.get("Content-Length") or 0)
         except ValueError:
@@ -850,7 +851,28 @@ class Handler(BaseHTTPRequestHandler):
     # beklenmeyen hata sayilir (/api/tani «beklenmeyen_hata»).
     def send_response(self, code, message=None):
         self._yanitlandi = True
+        self._govdeyi_bosalt()
         super().send_response(code, message)
+
+    def _govdeyi_bosalt(self):
+        """Cevaptan once okunmamis govde okunup atilir.
+
+        Govdeye dokunmadan donen yol (403, 401, 429) okunmamis veriyle
+        soketi kapatir; Windows o zaman RST yollar ve makine yukluyken
+        istemci cevabi degil «baglanti kesildi» gorur. Sinirdan buyuk
+        govde yine okunmaz (_read_body ile ayni kural)."""
+        if getattr(self, "_govde_okundu", True):
+            return
+        self._govde_okundu = True
+        try:
+            n = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            return
+        if 0 < n <= getattr(self, "_body_limit", MAX_BODY):
+            try:
+                self.rfile.read(n)
+            except OSError:
+                pass
 
     def do_GET(self):
         self._korumali(self._get)
@@ -860,6 +882,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def _korumali(self, is_):
         self._yanitlandi = False
+        self._govde_okundu = False
         try:
             is_()
         except (BrokenPipeError, ConnectionResetError):
