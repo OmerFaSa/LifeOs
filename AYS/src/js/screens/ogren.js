@@ -960,6 +960,15 @@ R.Screens = R.Screens || {};
      o: { etiket, seviye?, ipucu?: anahtar, cevapAct, bakAct?, ust?, eylemler, ders? }
      İpucu cevaptan önce açılır; açıldıktan sonra verilen cevap «ipucuyla»
      diye yazılır (ölçüm dürüst kalsın). */
+  /* KARALAMA (2026-10-17, «soru çözümünde yazarak, çizerek not alma»): soru
+     metni üstte, kareli kâğıtta kalemle; o sorunun Defter notuna eklenir
+     (aynı soru için yeniden karalanırsa aynı notun sonuna). */
+  const KARALA = new Map();
+  function karalaKaydi(k, q){
+    const id = 'k' + (KARALA.size + 1);
+    KARALA.set(id, { baslik:k.baslik, soru:String(q.soru || ''), sec:(q.sec || []).slice() });
+    return id;
+  }
   function soruGovdesi(q, v, o){
     const acik = !!v;
     const ipAcik = !!(o.ipucu && S.ui.ipucu === o.ipucu);
@@ -981,6 +990,8 @@ R.Screens = R.Screens || {};
       <div class="row between gap-8 mb-6">
         <span class="ders__etiket tiny">${o.etiket}</span>
         <span class="row gap-6 align-center">
+          ${when(o.karala && window.LIFEOS && window.LIFEOS.DEFTER && window.LIFEOS.DEFTER.kuruluMu(), () => K.Button({ label:'Karala', icon:'edit', size:'sm', tone:'ghost',
+            act:'soru-karala', data:{ 'data-karala':karalaKaydi(o.karala, q) } }))}
           ${when(!acik, () => html`<span class="ogr-sayac tiny dim" title="Bu soruda geçen süre" id="ogr-soru-sayac">00:00</span>`)}
           ${when(o.seviye, () => seviyeRozeti(o.seviye))}
         </span>
@@ -1051,7 +1062,7 @@ R.Screens = R.Screens || {};
         ${noktalar(l.length, i, k => durumOf(l[k], c[k]), 'soru-git')}
         ${soruGovdesi(q, v, { etiket:'Soru ' + (i + 1) + ' / ' + l.length, seviye:O().seviye(topic.id, i),
           ipucu:'konu:' + topic.id + '#' + i, taktik:'konu:' + topic.id, taktikNot:O().akilliNot(topic.id),
-          ders:subject.id,
+          ders:subject.id, karala:{ baslik:'Soru notu · ' + topic.name + ' · ' + (i + 1) + '. soru' },
           cevapAct:'soru-cevap', bakAct:'soru-bak',
           eylemler:soruEylemleri({ subject, topic, i, q }, v, null) })}
         <div class="row between wrap gap-6 mt-16">
@@ -1356,6 +1367,17 @@ R.Screens = R.Screens || {};
         R.App.render();
       },
       async 'soru-ipucu'(el){ S.ui.ipucu = el.dataset.ip || null; R.App.render(); },
+      async 'soru-karala'(el){
+        const D = window.LIFEOS && window.LIFEOS.DEFTER, k = KARALA.get(el.dataset.karala);
+        if(!D || !k) return;
+        const H = O().HARFLER;
+        const ust = U.esc(k.soru) + (k.sec.length ? '<br/>' + k.sec.map((s, j) => '<b>' + H[j] + ')</b> ' + U.esc(s)).join(' · ') : '');
+        D.tuval({ baslik:k.baslik, ust, kagit:'kareli', dugme:'Deftere ekle', kaydet:async b => {
+          const n = await D.notOlustur({ baslik:k.baslik, ekle:true,
+            govde:'> ' + k.soru.replace(/\s+/g, ' ').slice(0, 400) + '\n{{ekler}}\n\n#soru', ekler:[{ blob:b, ad:'karalama.png', tur:'cizim' }] });
+          UI.toast('Karalaman deftere eklendi · Notlarım’da', { undo:async () => { /* not birikir; yalnız tek karalamalıysa sil */ if((n.govde.match(/medya:/g) || []).length === 1) await D.sil(n.id); } });
+        } });
+      },
       async 'soru-taktik'(el){ S.ui.taktik = S.ui.taktik === el.dataset.tk ? null : el.dataset.tk; R.App.render(); },
       async 'soru-bak'(){
         const x = O().secili(), { i } = soruNo(x);

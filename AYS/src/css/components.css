@@ -2755,3 +2755,10 @@ body.is-dragging .drop.is-over{
 .gel-surgu input[type=range]{ width:100%; accent-color:var(--primary); min-height:24px; }
 .gel-yontem{ margin:0; padding-left:18px; display:grid; gap:6px; line-height:1.5; }
 .gel-uyari{ margin:0 0 10px; padding:10px 12px; border-radius:10px; background:var(--surface-2); color:var(--text-2); line-height:1.5; }
+
+/* Soru çöz › karalama (2026-10-17): kalem karalamalarının küçük resimleri. */
+.qkarala{ display:flex; flex-direction:column; gap:8px; }
+.qkarala__liste{ display:flex; flex-wrap:wrap; gap:8px; }
+.qkarala__oge{ position:relative; width:120px; height:78px; border-radius:12px; overflow:hidden; background:var(--surface-2); box-shadow:var(--kart-golge, none); }
+.qkarala__oge img{ width:100%; height:100%; object-fit:cover; display:block; }
+.qkarala__sil{ position:absolute; top:4px; right:4px; width:24px; height:24px; border:0; border-radius:999px; background:rgba(0,0,0,.55); color:#fff; font-size:14px; line-height:1; cursor:pointer; }

@@ -30,7 +30,10 @@
 .defter svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; flex:none; }
 
 .defter__govdeler{ flex:1; min-height:0; display:grid; grid-template-columns:290px 1fr; gap:12px; padding:0 12px 12px; }
-.defter__liste{ overflow-y:auto; padding:6px; display:flex; flex-direction:column; gap:2px; }
+.defter__sol{ min-height:0; display:flex; flex-direction:column; }
+.defter__liste{ flex:1; min-height:0; overflow-y:auto; padding:6px; display:flex; flex-direction:column; gap:2px; }
+.defter__depo{ display:flex; flex-direction:column; gap:2px; padding:8px 12px 2px; font-size:11.5px; color:var(--text-2); }
+.defter__depo > span:last-of-type{ display:flex; gap:12px; }
 .defter__oge{ display:grid; grid-template-columns:1fr auto; gap:2px 8px; width:100%; padding:10px 12px; border:0; border-radius:14px; background:transparent;
   color:var(--text); font:inherit; text-align:left; cursor:pointer; transition:background .15s ease; }
 .defter__oge:hover{ background:color-mix(in oklab, var(--surface) 55%, transparent); }
@@ -131,4 +134,11 @@
   .defter__grup + .defter__grup{ padding-left:6px; }
   .defter__simge{ width:32px; height:32px; }
   .defter__govde, .defter__oku{ padding:14px 16px 18px; }
+}
+/* Tuvalin üstünde soru (Faz 1c). */
+.defter-ciz__ust{ display:flex; flex-direction:column; gap:4px; padding:2px 4px; max-height:22vh; overflow-y:auto; }
+.defter-ciz__ust b{ font-size:14px; }
+.defter-ciz__soru{ font-size:13.5px; line-height:1.5; color:var(--text-2); }
+@media (max-width:760px){
+  .defter.is-not .defter__sol{ display:none; }
 }

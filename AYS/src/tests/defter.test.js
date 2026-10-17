@@ -83,6 +83,46 @@
     }));
   });
 
+  describe('Defter — Faz 1c: tuval, hazır not, yedek', () => {
+    it('hazır not: ekler gömülür; aynı başlıkla «ekle» sonuna ekler', () => ile(async s => {
+      const b = new Blob(['x'], { type:'image/png' });
+      const n = await D().notOlustur({ baslik:'Soru notu · Türev · 1. soru', govde:'> soru\n{{ekler}}\n#soru', ekler:[{ blob:b, ad:'k.png', tur:'cizim' }] });
+      expect((n.govde.match(/!\[\[medya:/g) || []).length).toBe(1);
+      expect(n.govde.indexOf('{{ekler}}') < 0).toBe(true);
+      await D().notOlustur({ baslik:'Soru notu · Türev · 1. soru', ekle:true, govde:'{{ekler}}', ekler:[{ blob:b, ad:'k2.png', tur:'cizim' }] });
+      expect(D().notlar()).toHaveLength(1);
+      expect((D().notlar()[0].govde.match(/!\[\[medya:/g) || []).length).toBe(2);
+    }));
+    it('yedek: medya dahil nesne; geri yükleme eksikleri ekler, var olanı ezmez', () => ile(async s => {
+      const n = await D().notOlustur({ baslik:'A', govde:'metin\n{{ekler}}', ekler:[{ blob:new Blob(['merhaba'], { type:'text/plain' }), ad:'m.txt' }] });
+      const y = await D().yedekNesnesi();
+      expect([y.app, y.notlar.length, y.medya.length]).toEqual(['lifeos-defter', 1, 1]);
+      expect(y.medya[0].veri).toBe(btoa('merhaba'));
+      /* temiz bir cihaz gibi */
+      Object.keys(s.m).forEach(k => delete s.m[k]);
+      await D().sil(n.id);
+      const r = await D().yedekYukle(y);
+      expect([r.not, r.medya]).toEqual([1, 1]);
+      expect(D().notlar()[0].govde).toContain('metin');
+      expect(await (await D().medya.al(y.medya[0].id)).blob.text()).toBe('merhaba');
+      const r2 = await D().yedekYukle(y);
+      expect([r2.not, r2.medya]).toEqual([0, 0]);                 // ezmez, iki kez eklemez
+      let hata = null; try{ await D().yedekYukle({ app:'baska' }); }catch(e){ hata = e.message; }
+      expect(hata).toContain('Defter yedeği değil');
+    }));
+    it('tuval: başlık ve soru üstte; «ekle» kaydeti çağırır', () => ile(async () => {
+      let gelen = null;
+      D().tuval({ baslik:'Kâğıtta çöz', ust:'f(x)=x²', kagit:'kareli', dugme:'Karalamayı ekle', kaydet:async b => { gelen = b; } });
+      const k = document.querySelector('.defter-ciz');
+      expect(k.textContent).toContain('f(x)=x²');
+      expect(k.querySelector('[data-kagit="kareli"]').classList.contains('is-secili')).toBe(true);
+      k.querySelector('[data-ciz="kaydet"]').click();
+      for(let i = 0; i < 40 && !gelen; i++) await new Promise(r => setTimeout(r, 25));
+      expect(!!gelen && gelen.type === 'image/png').toBe(true);
+      expect(!!document.querySelector('.defter-ciz')).toBe(false);
+    }));
+  });
+
   describe('Defter — notlar ve medya', () => {
     it('ekle, kaydet, depodan yükle, sil (gömülü medya da silinir)', () => ile(async s => {
       const n = await D().yeni('Fizik', 'Newton');

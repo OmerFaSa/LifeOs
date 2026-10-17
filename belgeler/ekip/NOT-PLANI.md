@@ -61,5 +61,12 @@ dosya, bağlantı, etiket yok.
   kalemle yazma tuvali (kalem basınçlı, fosforlu kalem tek parça, silgi kâğıdı
   silmez; düz/çizgili/kareli kâğıt; geri al/ileri al); şablonlar (ders notu,
   günlük, kitap notu, plan); kelime sayısı ve okuma süresi.
+- 2026-10-17: **Faz 1c** («soru çözümünde yazarak, çizerek not alma; saklanan
+  verinin sistemini artır»): Defter tuvali paylaşılır (arkada soru fotoğrafı ya
+  da üstte soru metni); AYS Soru çöz «Soru üstünde karala», «Kâğıtta çöz»,
+  karalama küçük resimleri, «Deftere kaydet» (soru + karalama + not + çözüm
+  özeti + #soru #ders #konu); Öğren'de her soruda «Karala» (o sorunun notuna
+  birikir); Defter yedeği medyasıyla tek dosya, geri yükleme ezmez; kalıcı
+  depolama isteği ve kullanılan alan.
 - Sıradaki (Faz 2): klasör, bağlantı ağı görünümü, King'in notları okuyup nota
   eklemesi.

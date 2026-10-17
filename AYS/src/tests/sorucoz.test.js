@@ -48,6 +48,41 @@
     });
   });
 
+  /* Karalama ve Defter (2026-10-17): «soru çözümünde yazarak, çizerek not alma». */
+  describe('Soru çöz — karalama ve defter', () => {
+    it('kâğıtta çöz → karalama küçük resim → deftere kaydet: soru, karalama, not ve etiketler tek notta', () => sahne(async ({ kap, tost, deger }) => {
+      const D = window.LIFEOS.DEFTER;
+      if(!D) return;
+      const depo = {}, m = {};
+      D._sifirla();
+      D.kur({ modul:'test', store:{ set:async (p, d) => { depo[p] = d; }, list:async () => [], remove:async p => { delete depo[p]; } } });
+      const M = D.medya, eski = { koy:M.koy, al:M.al, sil:M.sil };
+      M.koy = async k => { m[k.id] = k; return k; }; M.al = async id => m[id] || null; M.sil = async id => { delete m[id]; return true; };
+      try{
+        await R.App.render();
+        expect(kap.innerHTML).toContain('data-act="q-karala"');
+        deger('q-text', '2^3 · 2^2 işleminin sonucu kaçtır?');
+        await E().handle['q-solve']();
+        deger('q-note', 'üsleri topladım');
+        await E().handle['q-karala']({ dataset:{ arka:'0' } });
+        const t = document.querySelector('.defter-ciz');
+        expect(t.textContent).toContain('2^3');                       // soru tuvalin üstünde
+        t.querySelector('[data-ciz="kaydet"]').click();
+        for(let i = 0; i < 40 && !kap.querySelector('.qkarala__oge'); i++) await new Promise(r => setTimeout(r, 25));
+        expect(kap.querySelectorAll('.qkarala__oge').length).toBe(1);
+        await E().handle['q-defter']();
+        const n = D.notlar()[0];
+        expect(n.baslik.indexOf('Soru · ') === 0).toBe(true);
+        expect(n.govde).toContain('2^3');
+        expect(n.govde).toContain('## Notum\nüsleri topladım');
+        expect(n.govde).toContain('## Çözüm özeti');
+        expect(n.govde).toContain('#soru');
+        expect((n.govde.match(/!\[\[medya:/g) || []).length).toBe(1);
+        expect(tost.some(x => /Deftere kaydedildi/.test(x))).toBe(true);
+      }finally{ Object.assign(M, eski); D._sifirla(); }
+    }));
+  });
+
   describe('Soru çöz — uçtan uca', () => {
     it('çöz → konu ara ve seç → kaydet: kayıt konuya, zorluğa, sonuca bağlanır', () => sahne(async ({ kap, deger }) => {
       deger('q-text', '2^3 · 2^2 işleminin sonucu kaçtır?');

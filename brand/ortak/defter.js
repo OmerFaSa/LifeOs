@@ -31,7 +31,20 @@
    vurgulama»): dış kap King paneliyle aynı cam, yazı alanı opak kâğıt kartı;
    Oku | Yaz seçici; simge araç çubuğu (biçim + ekle) ve kısayollar;
    kalemle yazma tuvali (kalem, fosforlu kalem, silgi, çizgili/kareli kâğıt,
-   geri al/ileri al, basınç); şablonlar; kelime sayısı. */
+   geri al/ileri al, basınç); şablonlar; kelime sayısı.
+
+   Faz 1c (2026-10-17, «soru çözümünde yazarak, çizerek not alma; saklanan
+   verinin sistemini artır, daha kaliteli yap»):
+     · TUVAL PAYLAŞILIR: `tuval({ baslik, ust, arka, kagit, dugme, kaydet })`
+       — arkada soru fotoğrafı ya da üstte soru metni; AYS Soru çöz ve Öğren
+       bunu kullanır.
+     · HAZIR NOT: `notOlustur({ baslik, govde, ekler, ekle })` resimli notu
+       tek çağrıyla kurar; aynı başlıklı not varsa `ekle` ile sonuna ekler.
+     · YEDEK: Defter medyasıyla birlikte tek dosyaya (.json, medya base64)
+       yedeklenir ve geri yüklenir (var olan not ezilmez).
+     · KALICI DEPOLAMA: ilk medyada tarayıcıdan kalıcı depolama istenir
+       (navigator.storage.persist): tarayıcı yer açarken medyayı silmesin.
+       Kullanılan alan Defter'de yazar. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -97,6 +110,7 @@ LIFEOS.DEFTER = (function(){
     const k = { id:'m' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), notId:opt.notId || null,
       tur:opt.tur || turOf(blob.type || '', ad), ad, mime:blob.type || 'application/octet-stream', boyut:blob.size, blob, at:simdi() };
     await medya.koy(k);
+    kaliciIste();
     return { kayit:k, gomme:'![[medya:' + k.id + ']]' };
   }
 
@@ -207,6 +221,61 @@ LIFEOS.DEFTER = (function(){
     return '# ' + (n.baslik || 'Adsız not') + '\n\n' + g + '\n';
   }
 
+  /* ---------------------------------------------- kalıcı depolama ve alan */
+  let kaliciIstendi = false;
+  async function kaliciIste(){
+    if(kaliciIstendi) return null;
+    kaliciIstendi = true;
+    try{ return navigator.storage && navigator.storage.persist ? await navigator.storage.persist() : null; }catch(e){ return null; }
+  }
+  async function alan(){
+    const o = { kullanilan:null, kota:null, kalici:null };
+    try{
+      if(navigator.storage && navigator.storage.estimate){ const e = await navigator.storage.estimate(); o.kullanilan = e.usage; o.kota = e.quota; }
+      if(navigator.storage && navigator.storage.persisted) o.kalici = await navigator.storage.persisted();
+    }catch(e){ /* tarayıcı söylemiyor */ }
+    return o;
+  }
+  const mbYaz = b => b == null ? '?' : b >= 1073741824 ? (Math.round(b / 107374182.4) / 10) + ' GB' : (Math.round(b / 104857.6) / 10) + ' MB';
+
+  /* ------------------------------------------------------------- yedek */
+  function blobBase64(b){ return new Promise((ok, red) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(',')[1] || ''); r.onerror = () => red(r.error); r.readAsDataURL(b); }); }
+  function base64Blob(s, mime){ const ikili = atob(s); const u = new Uint8Array(ikili.length); for(let i = 0; i < ikili.length; i++) u[i] = ikili.charCodeAt(i); return new Blob([u], { type:mime || 'application/octet-stream' }); }
+  /* Döner: yedek nesnesi { app, surum, at, notlar, medya:[{…, veri}] }. */
+  async function yedekNesnesi(){
+    const ids = new Set();
+    notlar.forEach(n => { const re = /!\[\[medya:([a-z0-9]{4,40})\]\]/g; let m; while((m = re.exec(n.govde))) ids.add(m[1]); });
+    const md = [];
+    for(const id of ids){
+      let k = null; try{ k = await medya.al(id); }catch(e){ k = null; }
+      if(k && k.blob) md.push({ id:k.id, notId:k.notId, tur:k.tur, ad:k.ad, mime:k.mime, boyut:k.boyut, at:k.at, veri:await blobBase64(k.blob) });
+    }
+    return { app:'lifeos-defter', modul:(ayar && ayar.modul) || '', surum:1, at:simdi(), notlar:notlar.map(n => Object.assign({}, n)), medya:md };
+  }
+  async function yedekAl(){
+    const y = await yedekNesnesi();
+    const ad = 'defter-' + y.modul + '-' + y.at.slice(0, 10) + '.json';
+    ortam.indir(ad, new Blob([JSON.stringify(y)], { type:'application/json' }));
+    return { ad, not:y.notlar.length, medya:y.medya.length };
+  }
+  /* Var olan not ve medya EZİLMEZ; yalnız eksikler eklenir. */
+  async function yedekYukle(y){
+    if(!y || y.app !== 'lifeos-defter' || !Array.isArray(y.notlar)) throw new Error('Bu dosya bir Defter yedeği değil.');
+    let not = 0, md = 0;
+    for(const m of (y.medya || [])){
+      let var_ = null; try{ var_ = await medya.al(m.id); }catch(e){ var_ = null; }
+      if(var_ || !m.veri) continue;
+      await medya.koy({ id:m.id, notId:m.notId || null, tur:m.tur, ad:m.ad, mime:m.mime, boyut:m.boyut, at:m.at, blob:base64Blob(m.veri, m.mime) });
+      md++;
+    }
+    for(const n of y.notlar){
+      if(!n || !n.id || notBul(n.id)) continue;
+      await kaydet({ id:n.id, baslik:String(n.baslik || ''), govde:String(n.govde || ''), at:n.at || simdi(), guncel:n.guncel || simdi(), sabit:!!n.sabit });
+      not++;
+    }
+    return { not, medya:md };
+  }
+
   /* ------------------------------------------------------------- notlar */
   async function yukle(){
     if(!ayar || !ayar.store || !ayar.store.list) return notlar;
@@ -238,6 +307,22 @@ LIFEOS.DEFTER = (function(){
   }
   const notBul = id => notlar.find(x => x.id === id) || null;
   const baslikBul = b => notlar.find(x => kucuk(x.baslik) === kucuk(b)) || null;
+  /* Hazır not: ekler [{ blob, ad, tur }] gömülür. `ekle` true ve aynı başlıklı
+     not varsa sonuna eklenir (soru notları biriksin). Döner: not. */
+  async function notOlustur(o){
+    const opt = o || {};
+    const gomme = [];
+    for(const e of (opt.ekler || [])){
+      if(!e || !e.blob) continue;
+      const r = await medyaEkle(e.blob, { ad:e.ad, tur:e.tur });
+      gomme.push(r.gomme);
+    }
+    const parca = String(opt.govde || '').replace(/\{\{ekler\}\}/g, () => gomme.join('\n'));
+    const tam = parca.indexOf('![[medya:') < 0 && gomme.length ? parca + (parca ? '\n' : '') + gomme.join('\n') : parca;
+    const var_ = opt.ekle && opt.baslik ? baslikBul(opt.baslik) : null;
+    if(var_){ var_.govde = (var_.govde ? var_.govde.replace(/\n*$/, '\n\n---\n') : '') + tam; return kaydet(var_); }
+    return yeni(opt.baslik || 'Adsız not', tam);
+  }
 
   /* ------------------------------------------------------------- arayüz */
   const S = {
@@ -338,14 +423,26 @@ LIFEOS.DEFTER = (function(){
       + '<input class="defter__ara" type="search" data-defter-ara placeholder="Ara ya da #etiket" aria-label="Notlarda ara" autocomplete="off"/>'
       + '<button type="button" class="defter__yeni" data-defter="yeni" aria-label="Yeni not">' + svg('yeni') + '<span>Yeni not</span></button>'
       + '<button type="button" class="defter__kapat" data-defter="kapat" aria-label="Kapat">' + svg('kapat') + '</button></div>'
-      + '<div class="defter__govdeler"><nav class="defter__liste" data-defter-liste aria-label="Notlar"></nav><section class="defter__sag" data-defter-sag></section></div></div>';
+      + '<div class="defter__govdeler"><div class="defter__sol"><nav class="defter__liste" data-defter-liste aria-label="Notlar"></nav>'
+      + '<div class="defter__depo"><span data-defter-alan>Bu cihazda medya alanı ölçülüyor…</span>'
+      + '<span><button type="button" class="defter__metin" data-defter="yedek-al">Yedekle</button>'
+      + '<button type="button" class="defter__metin" data-defter="yedek-yukle">Yedekten yükle</button></span>'
+      + '<input type="file" accept="application/json,.json" class="sr-only" data-defter-yedek/></div></div>'
+      + '<section class="defter__sag" data-defter-sag></section></div></div>';
     document.body.appendChild(el);
     bagla(el);
     if(o && o.id) secili = o.id;
     ciz();
+    alanYaz(el);
     return true;
   }
   function kapat(){ const el = document.getElementById('defter'); if(el) el.remove(); }
+  async function alanYaz(el){
+    const a = await alan(), y = el.querySelector('[data-defter-alan]');
+    if(!y) return;
+    y.textContent = a.kullanilan == null ? 'Medya bu cihazda saklanır.'
+      : 'Bu cihazda ' + mbYaz(a.kullanilan) + ' kullanılıyor' + (a.kalici === true ? ' · kalıcı depolama açık' : a.kalici === false ? ' · kalıcı değil: yedek al' : '');
+  }
 
   /* Araç çubuğu ve kısayol: seçimi biçimle, imleci koru, kaydet. */
   function bicimle(tur){
@@ -395,6 +492,15 @@ LIFEOS.DEFTER = (function(){
      kâğıt (el yazısı için); geri al ve ileri al. Çizgiler ayrı bir katmanda
      tutulur, kâğıt deseni kaydederken altına basılır: silgi kâğıdı silmez. */
   function cizimAc(){
+    return tuval({ kaydet:async b => {
+      const r = await medyaEkle(b, { notId:secili, tur:'cizim', ad:'kalem-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.png' });
+      govdeyeEkle(r.gomme); ciz();
+    } });
+  }
+  /* Paylaşılan tuval. o: { baslik, ust (güvenli HTML), arka (Blob|URL),
+     kagit:'duz'|'cizgili'|'kareli', dugme, kaydet:async blob => {} }. */
+  function tuval(o){
+    const opt = o || {};
     const k = document.createElement('div');
     k.className = 'defter-ciz';
     const st = getComputedStyle(document.documentElement);
@@ -402,23 +508,37 @@ LIFEOS.DEFTER = (function(){
     const RENK = ['#1d1d1f', tok('--primary', '#2f7cf6'), '#e5484d', '#30a46c', '#f5a524', '#8e4ec6'];
     const ARAC = [['kalem', 'Kalem'], ['fosfor', 'Fosforlu'], ['silgi', 'Silgi']];
     const KAGIT = [['duz', 'Düz'], ['cizgili', 'Çizgili'], ['kareli', 'Kareli']];
-    k.innerHTML = '<div class="defter-ciz__kutu" role="dialog" aria-modal="true" aria-label="Kalemle yaz ve çiz">'
+    const ilkKagit = opt.kagit || (opt.arka ? 'duz' : 'cizgili');
+    k.innerHTML = '<div class="defter-ciz__kutu" role="dialog" aria-modal="true" aria-label="' + kac(opt.baslik || 'Kalemle yaz ve çiz') + '">'
+      + (opt.baslik || opt.ust ? '<div class="defter-ciz__ust">' + (opt.baslik ? '<b>' + kac(opt.baslik) + '</b>' : '') + (opt.ust ? '<div class="defter-ciz__soru">' + opt.ust + '</div>' : '') + '</div>' : '')
       + '<div class="defter-ciz__arac">'
       + '<span class="defter-ciz__grup" role="radiogroup" aria-label="Araç">' + ARAC.map((a, i) => '<button type="button" data-arac="' + a[0] + '" role="radio" aria-checked="' + (i ? 'false' : 'true') + '" class="' + (i ? '' : 'is-secili') + '">' + a[1] + '</button>').join('') + '</span>'
       + '<span class="defter-ciz__grup" aria-label="Renk">' + RENK.map((r, i) => '<button type="button" class="defter-ciz__renk' + (i ? '' : ' is-secili') + '" data-renk="' + r + '" style="background:' + r + '" aria-label="Renk ' + (i + 1) + '"></button>').join('') + '</span>'
       + '<span class="defter-ciz__grup" aria-label="Kalınlık">' + [[2, 'İnce'], [5, 'Orta'], [10, 'Kalın']].map((x, i) => '<button type="button" data-kalin="' + x[0] + '" class="' + (i ? '' : 'is-secili') + '">' + x[1] + '</button>').join('') + '</span>'
-      + '<span class="defter-ciz__grup" aria-label="Kâğıt">' + KAGIT.map((x, i) => '<button type="button" data-kagit="' + x[0] + '" class="' + (i === 1 ? 'is-secili' : '') + '">' + x[1] + '</button>').join('') + '</span>'
+      + '<span class="defter-ciz__grup" aria-label="Kâğıt">' + KAGIT.map(x => '<button type="button" data-kagit="' + x[0] + '" class="' + (x[0] === ilkKagit ? 'is-secili' : '') + '">' + x[1] + '</button>').join('') + '</span>'
       + '<span class="defter-ciz__grup"><button type="button" data-ciz="geri" aria-label="Geri al">↶</button><button type="button" data-ciz="ileri" aria-label="İleri al">↷</button><button type="button" data-ciz="temizle">Temizle</button></span></div>'
       + '<div class="defter-ciz__alan"><canvas class="defter-ciz__kagit" width="1400" height="900" aria-hidden="true"></canvas>'
       + '<canvas class="defter-ciz__tuval" width="1400" height="900" aria-label="Yazı ve çizim alanı"></canvas></div>'
-      + '<div class="defter-ciz__alt"><button type="button" data-ciz="vazgec">Vazgeç</button><button type="button" class="is-ana" data-ciz="kaydet">Nota ekle</button></div></div>';
+      + '<div class="defter-ciz__alt"><button type="button" data-ciz="vazgec">Vazgeç</button><button type="button" class="is-ana" data-ciz="kaydet">' + kac(opt.dugme || 'Nota ekle') + '</button></div></div>';
     document.body.appendChild(k);
     const kv = k.querySelector('.defter-ciz__kagit'), tv = k.querySelector('.defter-ciz__tuval');
     const kc = kv.getContext('2d'), c = tv.getContext('2d');
-    let kagit = 'cizgili', renk = RENK[0], kalin = 2, arac = 'kalem', cizer = false, son = null;
+    let kagit = ilkKagit, renk = RENK[0], kalin = 2, arac = 'kalem', cizer = false, son = null;
     const geri = [], ileri = [];
+    /* Arka resim (soru fotoğrafı): kâğıda sığdırılır, ortalanır; silgi silmez. */
+    let arkaResim = null;
+    if(opt.arka){
+      const im = new Image();
+      im.onload = () => { arkaResim = im; kagitCiz(kc); };
+      im.src = typeof opt.arka === 'string' ? opt.arka : ortam.nesneUrl(opt.arka);
+    }
     function kagitCiz(hedef){
       hedef.fillStyle = '#fffdf8'; hedef.fillRect(0, 0, kv.width, kv.height);
+      if(arkaResim){
+        const o2 = Math.min((kv.width - 40) / arkaResim.width, (kv.height - 40) / arkaResim.height);
+        const w = arkaResim.width * o2, h = arkaResim.height * o2;
+        hedef.drawImage(arkaResim, (kv.width - w) / 2, (kv.height - h) / 2, w, h);
+      }
       hedef.strokeStyle = 'rgba(80,110,160,.18)'; hedef.lineWidth = 1.2;
       if(kagit === 'cizgili') for(let y = 72; y < kv.height; y += 44){ hedef.beginPath(); hedef.moveTo(0, y); hedef.lineTo(kv.width, y); hedef.stroke(); }
       if(kagit === 'kareli'){ for(let y = 40; y < kv.height; y += 40){ hedef.beginPath(); hedef.moveTo(0, y); hedef.lineTo(kv.width, y); hedef.stroke(); }
@@ -475,9 +595,8 @@ LIFEOS.DEFTER = (function(){
         const s = document.createElement('canvas'); s.width = tv.width; s.height = tv.height;
         const sc = s.getContext('2d'); kagitCiz(sc); sc.drawImage(tv, 0, 0);
         s.toBlob(async b => {
-          try{ const r = await medyaEkle(b, { notId:secili, tur:'cizim', ad:'kalem-' + new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-') + '.png' });
-            govdeyeEkle(r.gomme); }catch(er){ uyar((er && er.message) || 'Çizim eklenemedi.'); }
-          k.remove(); ciz();
+          try{ if(opt.kaydet) await opt.kaydet(b); }catch(er){ uyar((er && er.message) || 'Çizim eklenemedi.'); }
+          k.remove();
         }, 'image/png');
       }
     });
@@ -531,6 +650,13 @@ LIFEOS.DEFTER = (function(){
     el.addEventListener('change', e => {
       const t = e.target;
       if(t.matches('[data-defter-dosya]')){ dosyalariEkle(t.files); t.value = ''; t.removeAttribute('accept'); return; }
+      if(t.matches('[data-defter-yedek]')){
+        const f = t.files && t.files[0]; t.value = '';
+        if(!f) return;
+        f.text().then(m => yedekYukle(JSON.parse(m))).then(r => { ciz(); const y = el.querySelector('[data-defter-alan]'); if(y) y.textContent = r.not + ' not, ' + r.medya + ' medya geri yüklendi; var olanlar ezilmedi.'; })
+          .catch(er => { const y = el.querySelector('[data-defter-alan]'); if(y) y.textContent = (er && er.message) || 'Yedek okunamadı.'; });
+        return;
+      }
       if(t.matches('[data-defter-kutu]')){ const n = notBul(secili); if(n){ n.govde = kutuCevir(n.govde, Number(t.getAttribute('data-defter-kutu'))); kaydet(n).then(ciz); } }
     });
     el.addEventListener('paste', e => {
@@ -565,6 +691,8 @@ LIFEOS.DEFTER = (function(){
       if(!d) return;
       const is = d.getAttribute('data-defter'), n = notBul(secili);
       if(is === 'kapat'){ kapat(); return; }
+      if(is === 'yedek-al'){ const r = await yedekAl(); const y = el.querySelector('[data-defter-alan]'); if(y) y.textContent = r.not + ' not ve ' + r.medya + ' medya «' + r.ad + '» dosyasına yedeklendi.'; return; }
+      if(is === 'yedek-yukle'){ const f = el.querySelector('[data-defter-yedek]'); if(f) f.click(); return; }
       if(is === 'yeni'){ const x = await yeni('', ''); secili = x.id; duzen = true; ciz(); const b = el.querySelector('[data-defter-baslik]'); if(b) try{ b.focus(); }catch(er){} return; }
       if(is === 'liste'){ secili = null; ciz(); return; }
       if(!n) return;
@@ -587,6 +715,6 @@ LIFEOS.DEFTER = (function(){
   function _sifirla(){ ayar = null; notlar = []; secili = null; duzen = false; arama = ''; db = null; kapat(); }
 
   return { kur, yukle, ac, kapat, yeni, kaydet, sil, md, baglantilar, etiketler, geriBaglantilar, ara, kutuCevir,
-    medyaEkle, medya, disaAktarMetni, SABLONLAR, sayim, sar, satirOnek, notlar:() => notlar.slice(), sec:id => { secili = id; }, duzenle:v => { duzen = !!v; },
+    medyaEkle, medya, disaAktarMetni, SABLONLAR, sayim, sar, satirOnek, tuval, notOlustur, yedekNesnesi, yedekYukle, yedekAl, alan, kac, notlar:() => notlar.slice(), sec:id => { secili = id; }, duzenle:v => { duzen = !!v; },
     kuruluMu:() => !!ayar, _ortam:ortam, _sifirla, _db:v => { db = v; } };
 })();

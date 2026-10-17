@@ -5,7 +5,15 @@
 
    Ekranın işi çözüm ÜRETMEK değil, çözümü KAYDA bağlamak: her çözülen soru
    bir konuya, bir zorluğa ve bir sonuca (kendim çözdüm / çözüme baktım)
-   oturur. Konu takibi ve kaynak zorluğu bu kayıtlardan beslenir. */
+   oturur. Konu takibi ve kaynak zorluğu bu kayıtlardan beslenir.
+
+   KARALAMA VE DEFTER (2026-10-17, depo sahibi: «soru çözümünde yazarak,
+   çizerek not alma gibi akıllı yerler olsun»): «Soru üstünde karala» soru
+   fotoğrafının üstüne, «Kâğıtta çöz» kareli kâğıda kalemle yazdırır
+   (LIFEOS.DEFTER.tuval). Karalamalar kartta küçük resim olarak durur.
+   «Deftere kaydet» soruyu, karalamaları, notunu ve çözümün kısa özetini
+   konusunun etiketiyle tek Defter notunda toplar (medya cihazda kalır).
+   Model yokken de çalışır: kâğıtta çözer, deftere kaydedersin. */
 
 window.R = window.R || {};
 R.Screens = R.Screens || {};
@@ -35,6 +43,7 @@ R.Screens.solve = (function(){
      silinir. O ana kadar `questionText()` metin yoksa çözümün kendi
      metnine düşüyordu — ikinci modele soru yerine ÇÖZÜM gönderiliyor,
      geçmişe de soru yerine çözüm kaydediliyordu. */
+  let karalamalar = [];     // [{ blob, url }] — bu sorunun kalem karalamaları (kaydedilmez, deftere gider)
   let submittedQuestion = '';
   let submittedByImage = false;
   /* Hata EKRAN DURUMUNDA tutulur, DOM'a yazılmaz: #q-out'a yazılan uyarı,
@@ -105,10 +114,13 @@ R.Screens.solve = (function(){
        gerektiği ve çözdüğün soruyu nereden kaydedeceğin söylenir. */
     if(!canText) return K.Card({
       title:'Soruyu ver', hint:'solve',
-      body:K.Notice({ tone:'info', title:'Yapay zekâ bağlı değil.',
-        body:html`Fotoğraftan ya da metinden soru çözmek için Ofis ayarlarından ücretsiz bir sağlayıcı bağla.
-          Çözdüğün soruları aşağıdaki «Hızlı kayıt» ile girebilirsin.
-          ${K.Button({ label:'Ofis ayarlarını aç', size:'sm', act:'go', data:{ 'data-route':'office' } })}` }),
+      body:K.Stack([
+        K.Notice({ tone:'info', title:'Yapay zekâ bağlı değil.',
+          body:html`Fotoğraftan ya da metinden soru çözmek için Ofis ayarlarından ücretsiz bir sağlayıcı bağla.
+            Çözdüğün soruları aşağıdaki «Hızlı kayıt» ile girebilirsin.
+            ${K.Button({ label:'Ofis ayarlarını aç', size:'sm', act:'go', data:{ 'data-route':'office' } })}` }),
+        karalamaAlani(true),
+      ], 'sm'),
     });
     return K.Card({
       title:'Soruyu ver', hint:'solve',
@@ -133,6 +145,8 @@ R.Screens.solve = (function(){
         when(image, () => K.Row([
           K.Button({ label:'Fotoğrafı kaldır', size:'sm', tone:'ghost', act:'q-clear-image' }),
         ], { wrap:true })),
+
+        karalamaAlani(false),
 
         when(image && !canImage, () => K.Notice({ tone:'warn',
           title:'Bağlı model görsel okuyamıyor.',
@@ -161,6 +175,31 @@ R.Screens.solve = (function(){
         html`<div id="q-out"></div>`,
       ], 'sm'),
     });
+  }
+
+  /* Yeniden çizim yazılanı silmesin: soru metni ve not karalama eklenip
+     çıkarılırken korunur (textarea değer taşımadan çizilir; bkz. yukarı). */
+  async function koruyarakCiz(){
+    const al = id => { const e = document.getElementById(id); return e ? e.value : null; };
+    const metin = al('q-text'), not = al('q-note');
+    await R.App.render();
+    const koy = (id, v) => { const e = document.getElementById(id); if(e && v != null && !e.value) e.value = v; };
+    koy('q-text', metin); koy('q-note', not);
+  }
+
+  /* Karalama: soru üstünde ya da kâğıtta kalemle; küçük resimler; deftere. */
+  function karalamaAlani(modelYok){
+    if(!(window.LIFEOS && window.LIFEOS.DEFTER && window.LIFEOS.DEFTER.kuruluMu())) return '';
+    return html`<div class="qkarala">
+      <div class="row wrap gap-6">
+        ${when(image, () => K.Button({ label:'Soru üstünde karala', icon:'edit', size:'sm', tone:'ghost', act:'q-karala', data:{ 'data-arka':'1' } }))}
+        ${K.Button({ label:'Kâğıtta çöz', icon:'edit', size:'sm', tone:'ghost', act:'q-karala', data:{ 'data-arka':'0' } })}
+        ${when(modelYok && karalamalar.length, () => K.Button({ label:'Deftere kaydet', icon:'book', size:'sm', act:'q-defter' }))}
+      </div>
+      ${when(karalamalar.length, () => html`<div class="qkarala__liste">${map(karalamalar, (k, i) => html`
+        <span class="qkarala__oge"><img src="${k.url}" alt="Karalama ${i + 1}"/>
+          <button type="button" class="qkarala__sil" data-act="q-karala-sil" data-i="${i}" aria-label="Karalama ${i + 1}’i kaldır">×</button></span>`)}</div>`)}
+    </div>`;
   }
 
   /* Çözüm metni — düz metin, satır sonları korunur.
@@ -207,6 +246,9 @@ R.Screens.solve = (function(){
 
         <div class="qmeta mt-12">
           ${K.SectionTitle('Kayda geçir')}
+          ${when(window.LIFEOS && window.LIFEOS.DEFTER && window.LIFEOS.DEFTER.kuruluMu(), () => html`<div class="row wrap gap-6 mb-8">
+            ${K.Button({ label:'Deftere kaydet', icon:'book', size:'sm', act:'q-defter' })}
+            <span class="tiny dim">Soru, karalamaların, notun ve çözüm özeti tek notta.</span></div>`)}
           ${when(!m.matched && m.rawTopic, () => K.Notice({ tone:'warn',
             body:'Model konuyu “' + m.rawTopic + '” diye yazdı ama bu ders listende yok. '
                + 'Aşağıdan doğru konuyu seç — yanlış konu, konu takibini sessizce bozar.' }))}
@@ -664,7 +706,46 @@ R.Screens.solve = (function(){
 
     async 'q-clear-image'(){ image = null; await R.App.render(); },
 
+    async 'q-karala'(el){
+      const D = window.LIFEOS && window.LIFEOS.DEFTER;
+      if(!D) return;
+      const arka = el.dataset.arka === '1' && image ? image.previewUrl : null;
+      D.tuval({ baslik:arka ? 'Soru üstünde çöz' : 'Kâğıtta çöz', arka, kagit:arka ? 'duz' : 'kareli', dugme:'Karalamayı ekle',
+        ust:!arka && questionText() ? U.esc(questionText()).slice(0, 600) : '',
+        kaydet:async b => { karalamalar.push({ blob:b, url:URL.createObjectURL(b) }); await koruyarakCiz(); } });
+    },
+    async 'q-karala-sil'(el){
+      const k = karalamalar.splice(Number(el.dataset.i), 1)[0];
+      if(k) try{ URL.revokeObjectURL(k.url); }catch(e){}
+      await koruyarakCiz();
+    },
+    async 'q-defter'(){
+      const D = window.LIFEOS && window.LIFEOS.DEFTER;
+      if(!D) return;
+      const val = id => { const e = document.getElementById(id); return e ? String(e.value).trim() : ''; };
+      const guess = result && result.meta && result.meta.topicId ? result.meta.subjectId + '::' + result.meta.topicId : '';
+      const ref = topicRef || guess;
+      const [sid, tid] = ref ? ref.split('::') : [null, null];
+      const subject = sid ? R.SUBJECTS.find(s => s.id === sid) : null;
+      const topic = subject ? subject.topics.find(t => t.id === tid) : null;
+      const ekler = [];
+      if(image && image.previewUrl){ try{ ekler.push({ blob:await (await fetch(image.previewUrl)).blob(), ad:'soru.jpg', tur:'resim' }); }catch(e){ /* foto okunamadı */ } }
+      karalamalar.forEach((k, i) => ekler.push({ blob:k.blob, ad:'karalama-' + (i + 1) + '.png', tur:'cizim' }));
+      const metin = submittedQuestion || questionText();
+      const not = val('q-note');
+      const ozet = result && result.text ? result.text.split('\n').filter(Boolean).slice(0, 6).map(x => '> ' + x).join('\n') : '';
+      const etiket = s => '#' + String(s || '').toLocaleLowerCase('tr').replace(/[^a-zçğıöşü0-9]+/g, '-').replace(/^-|-$/g, '');
+      const govde = '## Soru' + (metin ? '\n' + metin : '') + '\n{{ekler}}'
+        + (not ? '\n\n## Notum\n' + not : '')
+        + (ozet ? '\n\n## Çözüm özeti\n' + ozet : '')
+        + '\n\n#soru' + (subject ? ' ' + etiket(subject.name) : '') + (topic ? ' ' + etiket(topic.name) : '');
+      const n = await D.notOlustur({ baslik:'Soru · ' + (topic ? topic.name : subject ? subject.name : 'konu seçilmedi') + ' · ' + U.fmtShort(U.todayISO()), govde, ekler });
+      UI.toast('Deftere kaydedildi · Notlarım’da', { undo:async () => { await D.sil(n.id); } });
+    },
+
     async 'q-reset'(){
+      karalamalar.forEach(k => { try{ URL.revokeObjectURL(k.url); }catch(e){} });
+      karalamalar = [];
       image = null; result = null; failure = null;
       thread = []; check = null; topicRef = ''; topicQuery = '';
       submittedQuestion = ''; submittedByImage = false;
