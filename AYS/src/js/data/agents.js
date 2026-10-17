@@ -372,7 +372,7 @@ R.OFFICE_PROMPTS = {
       kurallar:R.PROMPTS.houseRules, kurallarAdi:'OFİS KURALLARI', uslup,
       /* HAFIZA (brand/ortak/hafiza.js): etiketli; ajan dikkate alir,
          degistiremez, yazamaz. */
-      hafiza:R.Hafizam ? R.Hafizam.baglam() : '',
+      hafiza:R.Hafizam ? R.Hafizam.baglam({ ajan:'ays' }) : '',
     });
   },
 

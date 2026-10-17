@@ -122,6 +122,22 @@ onu besleyen öğrenme yolları, King'in onu kullanması ve senin onu görmen.
   King söz 23: günde en çok bir soru (çıkarım varsa o, yoksa tanışma),
   «beni yorumla» ile hemen; Doğru → onayınla hafıza, Kısmen/serbest cevap →
   senin cümlen, Yanlış → bir daha sorulmaz.
-- Sıradaki: Faz 4 (kişilik envanteri + üslup), sonra 5 (ajan izinleri, HKM alanı).
+- 2026-10-17: depo sahibi «çıkarımlar o kadar sıkı tutulmasın; her şeyden
+  çıkarım» → eşikler düştü, yeni kaynaklar (44ee56ab); «artık bana sorma / sor»
+  tercihi King söz 24.
+- 2026-10-17: **Faz 6** SPİ vücut analizi (2697f2ed); **Faz 7** AYS ders ders
+  deneme, teste özgü hız, arındırılmış yayın farkı (bf7e382b).
+- 2026-10-17: **Kişisel tahmin ağı** (4d0c9cb3): ruh hâli (Günün hissi) SPİ
+  verisinden; doğrusal + küçük sinir ağı topluluğu, zamana göre sınama,
+  tabanı geçmezse tahmin yok; en etkili etken King çıkarımı olur.
+- 2026-10-17: **Faz 4** Mini-IPIP envanteri sohbetle + üslup (0fae8e0c).
+- 2026-10-17: **Faz 5** ajan izinleri: alan başına AYS/SPİ/ESP ajanı
+  görür/görmez (panelde düğme, `lifeos.kisi.izin`); hafıza ajan istemine
+  izinle; HKM `memories.alan/gorenler`, görevli ajan yalnız izinliyi görür,
+  King hepsini.
+- Açık: tahmin ağına öbür modüllerin verisi (AYS çalışma yükü, ESP disiplin)
+  henüz girmiyor; sunucu üzerinden günlük özet yayınıyla eklenebilir.
+- Sıradaki iş kolu: **Notlar** (Obsidian benzeri) — ayrı plan:
+  belgeler/ekip/NOT-PLANI.md.
 - Açık: HKM'deki King (Merkez) `alan`ı henüz kullanmıyor; hafıza metni
   zaten eşitleniyor, alan bilgisi Faz 5'te HKM tarafına taşınacak.

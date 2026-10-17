@@ -501,7 +501,7 @@ ESP.Office = (function(){
       uslup:'Türkçe, kısa, somut. En fazla üç cümle. Kötü haberi iyi haberin arkasına saklama.\n'
         + 'Soru sorabilirsin ama aynı anda en fazla bir tane.',
       /* Hafiza ETIKETIYLE gelir (LIFEOS.Hafiza.baglam); bos ise bolum yok. */
-      hafiza:ESP.Hafizam ? ESP.Hafizam.baglam() : '',
+      hafiza:ESP.Hafizam ? ESP.Hafizam.baglam({ ajan:'esp' }) : '',
       brifing:JSON.stringify(b || brief(agentId)),
     });
   }

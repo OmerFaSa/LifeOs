@@ -14,8 +14,15 @@ halusinasyonu kalici yapmak olurdu (AGENTS.md §1.1).
 
 Kapsam: her gorevli kendi modulunun hafizasini + «all»u gorur; King
 ust patrondur ve HEPSINI gorur. Modullerden gelen kayitlar `esitle` ile
-gelir ve kendi modulunun kapsamina yazilir."""
+gelir ve kendi modulunun kapsamina yazilir.
+
+Kisi modeli (2026-10-17, belgeler/ekip/KISI-PLANI.md Faz 5): moduller
+kaydin `alan`ini (inanc, maddiyat…) ve onu GOREBILEN modul ajanlarini
+(`gorenler`) yollar; izin haritasinin tek kaynagi moduldur (kisi.js).
+King hepsini gorur; gorevli ajan yalniz kendi modulu `gorenler`de olan
+kaydi gorur. Alani olmayan ya da eski (gorenler NULL) kayit eskisi gibi."""
 import datetime
+import re
 
 from core import goruntu
 
@@ -76,12 +83,16 @@ def _kapsamlar(scope):
 def list_active(con, user="ben", scope=None, now=None, limit=50):
     args = [user, _simdi(now)]
     q = ("SELECT id,scope,text,source,created_at,expires_at,last_used_at,"
-         "COALESCE(katman,'soz') AS katman,modul,dis_id,onaylandi_at FROM memories "
+         "COALESCE(katman,'soz') AS katman,modul,dis_id,onaylandi_at,alan,gorenler FROM memories "
          "WHERE user=? AND state='active' AND (expires_at IS NULL OR expires_at>?)")
     kapsam = _kapsamlar(scope)
     if kapsam:
         q += " AND scope IN (?,?)"
         args.extend(kapsam)
+        # Kisi modeli izni: gorevli yalniz kendi modulu `gorenler`de olan
+        # alanli kaydi gorur (NULL = eski kayit, eskisi gibi gorunur).
+        q += " AND (gorenler IS NULL OR instr(',' || gorenler || ',', ',' || ? || ',') > 0)"
+        args.append(kapsam[1])
     q += " ORDER BY id DESC LIMIT ?"
     args.append(max(1, min(int(limit), 200)))
     return [dict(r) for r in con.execute(q, args).fetchall()]
@@ -265,7 +276,13 @@ def _gecerli_kayit(k):
     if not metin or len(metin) > MAX_TEXT or _izin(katman, kaynak):
         return None
     at = k.get("at") if isinstance(k.get("at"), str) and len(k.get("at")) <= 40 else None
-    return {"dis_id": dis_id, "metin": metin, "katman": katman, "kaynak": kaynak, "at": at}
+    alan = k.get("alan") if isinstance(k.get("alan"), str) and re.match(r"^[a-z]{2,16}$", k.get("alan")) else None
+    g = k.get("gorenler")
+    gorenler = None
+    if isinstance(g, list):
+        gorenler = ",".join(sorted(set(x for x in g if x in MODULLER)))
+    return {"dis_id": dis_id, "metin": metin, "katman": katman, "kaynak": kaynak, "at": at,
+            "alan": alan, "gorenler": gorenler}
 
 
 def esitle(con, modul, kayitlar, user="ben", now=None, oturum=None, sira=None):
@@ -311,7 +328,7 @@ def esitle(con, modul, kayitlar, user="ben", now=None, oturum=None, sira=None):
             return {"ok": True, "modul": modul, "eski": True, "eklenen": 0,
                     "guncellenen": 0, "dusen": 0, "dirilen": 0, "reddedilen": 0}
         var = {r["dis_id"]: dict(r) for r in con.execute(
-            "SELECT id,dis_id,text,COALESCE(katman,'soz') AS katman,state FROM memories "
+            "SELECT id,dis_id,text,COALESCE(katman,'soz') AS katman,state,alan,gorenler FROM memories "
             "WHERE user=? AND modul=? AND dis_id IS NOT NULL", (user, modul)).fetchall()}
         eklenen = guncellenen = reddedilen = dusen = dirilen = 0
         gelen = set()
@@ -324,19 +341,21 @@ def esitle(con, modul, kayitlar, user="ben", now=None, oturum=None, sira=None):
             onceki = var.get(k["dis_id"])
             if onceki is None:
                 con.execute("INSERT INTO memories(user,scope,text,source,state,created_at,"
-                            "katman,modul,dis_id) VALUES (?,?,?,?, 'active',?,?,?,?)",
+                            "katman,modul,dis_id,alan,gorenler) VALUES (?,?,?,?, 'active',?,?,?,?,?,?)",
                             (user, modul, k["metin"], k["kaynak"], k["at"] or at,
-                             k["katman"], modul, k["dis_id"]))
+                             k["katman"], modul, k["dis_id"], k["alan"], k["gorenler"]))
                 eklenen += 1
             elif onceki["state"] == "dustu":
                 con.execute("UPDATE memories SET state='active',forgotten_at=NULL,"
-                            "text=?,katman=? WHERE id=?",
-                            (k["metin"], k["katman"], onceki["id"]))
+                            "text=?,katman=?,alan=?,gorenler=? WHERE id=?",
+                            (k["metin"], k["katman"], k["alan"], k["gorenler"], onceki["id"]))
                 dirilen += 1
             elif onceki["state"] == "active" and (onceki["text"] != k["metin"]
-                                                  or onceki["katman"] != k["katman"]):
-                con.execute("UPDATE memories SET text=?,katman=? WHERE id=?",
-                            (k["metin"], k["katman"], onceki["id"]))
+                                                  or onceki["katman"] != k["katman"]
+                                                  or onceki["alan"] != k["alan"]
+                                                  or onceki["gorenler"] != k["gorenler"]):
+                con.execute("UPDATE memories SET text=?,katman=?,alan=?,gorenler=? WHERE id=?",
+                            (k["metin"], k["katman"], k["alan"], k["gorenler"], onceki["id"]))
                 guncellenen += 1
         for dis_id, r in var.items():
             if r["state"] == "active" and dis_id not in gelen:

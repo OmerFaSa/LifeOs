@@ -471,7 +471,7 @@ SP.Office = (function(){
       ],
       uslup:'Türkçe yaz. Kısa cümle kur. En fazla 4 cümle.',
       /* Hafiza ETIKETIYLE gelir (LIFEOS.Hafiza.baglam); bos ise bolum yok. */
-      hafiza:SP.Hafizam ? SP.Hafizam.baglam() : '',
+      hafiza:SP.Hafizam ? SP.Hafizam.baglam({ ajan:'spi' }) : '',
       brifing:JSON.stringify(b),
     });
   }

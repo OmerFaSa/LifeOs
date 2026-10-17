@@ -12844,6 +12844,13 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__liste-kisi li > span{ display:flex; flex-direction:column; min-width:0; }
 .king__liste-kisi b{ font-size:13.5px; font-weight:600; }
 .king__liste-kisi small{ font-size:11.5px; color:var(--text-2); }
+/* Faz 5: alan başına ajan izni. */
+.king__kisi-alan h3{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.king__izin{ display:inline-flex; gap:4px; }
+.king__izin-dugme{ min-height:24px; padding:0 8px; border:0; border-radius:999px; background:var(--surface-2); color:var(--text-2);
+  font:inherit; font-size:11px; font-weight:600; cursor:pointer; }
+.king__izin-dugme.is-acik{ background:color-mix(in oklab, var(--primary) 18%, var(--surface)); color:var(--text); }
+.king__izin-dugme:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 
 /* ==== css/giris.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -13869,7 +13876,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.yazma', 'lifeos.king.sorma']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.yazma', 'lifeos.king.sorma', 'lifeos.kisi.izin']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -15365,7 +15372,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'4d0c9cb3', at:'2026-10-17 11:50', dirty:true };
+SP.BUILD = { id:'0fae8e0c', at:'2026-10-17 11:59', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -30098,7 +30105,29 @@ LIFEOS.KISI = (function(){
     return temiz(String(soru).replace(/\?$/, '')) + ' → ' + c;
   }
 
-  return { ALANLAR, BY_ID, beyan, grupla, ozet, tanismaSorusu, cevapMetni };
+  /* ---------------------------------------------------------- izinler (Faz 5)
+     King hepsini görür. Modül ajanı yalnız izinli alanı görür: varsayılan
+     ALANLAR[].ajan, senin değişikliğin `lifeos.kisi.izin`de (modüller
+     arasında taşınır). Alanı olmayan kayıt herkese açıktır (eski hafıza). */
+  const IZIN = 'lifeos.kisi.izin';
+  function izinOku(){ try{ const v = JSON.parse(localStorage.getItem(IZIN) || 'null'); return v && typeof v === 'object' ? v : {}; }catch(e){ return {}; } }
+  function gorenler(alan){
+    if(!alan || !BY_ID[alan]) return null;
+    const o = izinOku()[alan];
+    return Array.isArray(o) ? o.filter(m => ['ays', 'spi', 'esp'].indexOf(m) >= 0) : BY_ID[alan].ajan.slice();
+  }
+  function izinli(alan, modul){ const g = gorenler(alan); return g == null || g.indexOf(modul) >= 0; }
+  function izinDegistir(alan, modul, acik){
+    if(!BY_ID[alan] || ['ays', 'spi', 'esp'].indexOf(modul) < 0) return false;
+    const v = izinOku();
+    const g = gorenler(alan).filter(m => m !== modul);
+    if(acik) g.push(modul);
+    v[alan] = g.sort();
+    try{ localStorage.setItem(IZIN, JSON.stringify(v)); }catch(e){ return false; }
+    return true;
+  }
+
+  return { ALANLAR, BY_ID, beyan, grupla, ozet, tanismaSorusu, cevapMetni, IZIN, gorenler, izinli, izinDegistir };
 })();
 
 /* ==== js/core/cikarim.js ==== */
@@ -31998,16 +32027,23 @@ window.LIFEOS.KING = (function(){
       const satir = k => '<li><span><b>' + kac(k.metin) + '</b><small>' + kac(ETK[k.katman] || 'kayıt')
         + (k.kendi ? '' : ' · ' + kac(MODUL_AD[k.modul] || k.modul) + '’de öğrenildi') + '</small></span>'
         + (k.kendi ? '<button type="button" class="king__cip king__cip--tehlike" data-king="kisi-sil:' + kac(k.id) + '">Sil</button>' : '') + '</li>';
-      const bolum = (ad, l) => l.length ? '<section class="king__kisi-alan"><h3>' + kac(ad) + '</h3><ul class="king__liste-kisi">' + l.map(satir).join('') + '</ul></section>' : '';
+      /* Faz 5: alan başına hangi modül ajanının göreceği (King hepsini görür). */
+      const izin = a => '<span class="king__izin" role="group" aria-label="' + kac(a.ad) + ' için ajan izinleri">'
+        + ['ays', 'spi', 'esp'].map(m => { const ac = K.izinli(a.id, m);
+          return '<button type="button" class="king__izin-dugme' + (ac ? ' is-acik' : '') + '" aria-pressed="' + (ac ? 'true' : 'false')
+            + '" data-king="kisi-izin:' + a.id + ':' + m + '" title="' + MODUL_AD[m] + ' ajanları ' + (ac ? 'görüyor' : 'görmüyor') + '">' + MODUL_AD[m] + '</button>'; }).join('')
+        + '</span>';
+      const bolum = (ad, l, a) => l.length ? '<section class="king__kisi-alan"><h3>' + kac(ad) + (a ? izin(a) : '') + '</h3><ul class="king__liste-kisi">' + l.map(satir).join('') + '</ul></section>' : '';
       return '<div class="king__menu" role="group" aria-label="Beni nasıl tanıyorsun">'
         + '<div class="king__menu-ust"><button type="button" class="king__geri" data-king="menu">‹ Geri</button><b>Beni nasıl tanıyorsun</b></div>'
         + '<p class="king__menu-not">' + K.ALANLAR.length + ' alandan ' + dolu + '’inde bilgi var. Sohbetten öğrendiklerim «sohbetten», '
-        + 'senin yazdıkların «senin sözün» diye durur. Hepsi bu bilgisayarda; sildiğin unutulur.</p>'
+        + 'senin yazdıkların «senin sözün» diye durur. Hepsi bu bilgisayarda; sildiğin unutulur. '
+        + 'King hepsini görür; alanın yanındaki AYS · SPİ · ESP o modülün ajanlarının görüp görmediğidir.</p>'
         + '<div class="king__kisi-ekle"><select data-kisi-alan aria-label="Alan">'
         + K.ALANLAR.map(a => '<option value="' + a.id + '"' + (a.id === kisiYeni.alan ? ' selected' : '') + '>' + kac(a.ad) + '</option>').join('')
         + '</select><input type="text" data-kisi-metin data-ayar-disi aria-label="Benim hakkımda" placeholder="Örneğin: Sabahları daha verimliyim" autocomplete="off"/>'
         + '<button type="button" class="king__cip king__cip--ana" data-king="kisi-ekle">Ekle</button></div>'
-        + (dolu || g.genel.length ? K.ALANLAR.map(a => bolum(a.ad, g[a.id])).join('') + bolum('Genel', g.genel)
+        + (dolu || g.genel.length ? K.ALANLAR.map(a => bolum(a.ad, g[a.id], a)).join('') + bolum('Genel', g.genel)
           : '<p class="king__menu-bos">Henüz seni tanımıyorum. «Balığı sevmem», «hobim satranç» gibi söylediklerini kendiliğinden not ederim.</p>')
         + '</div>';
     }
@@ -32661,6 +32697,11 @@ window.LIFEOS.KING = (function(){
         if(is === 'sorma-sifirla'){ ortam.depo.sil(SORMA); ciz(false); return; }
         if(is === 'tanisma-atla'){ bekleyenTanisma = null; cipler = null; soyle('Tamam, başka zaman.'); return; }
         if(is === 'kisi'){ menuAc('kisi'); disKisiTazele().then(() => { if(acik && menu === 'kisi') ciz(false); }); return; }
+        if(/^kisi-izin:[a-z]+:(ays|spi|esp)$/.test(is)){
+          const p = is.split(':'), K = KISI(), H = hafiza();
+          if(K){ K.izinDegistir(p[1], p[2], !K.izinli(p[1], p[2])); if(H && H.hkmeGonder) H.hkmeGonder(); ciz(false); }
+          return;
+        }
         if(/^kisi-sil:/.test(is)){ const H = hafiza(); if(H) H.unut(is.slice(9)).then(() => ciz(false)); return; }
         if(is === 'kisi-ekle'){
           const H = hafiza(), kt = c.closest('.king__menu');
@@ -33326,7 +33367,9 @@ LIFEOS.Hafiza = (function(){
      ajan «tahmin»i gerçek, «sohbetten»i senin sözün sanmasın. */
   function baglam(liste, opts){
     const o = opts || {};
-    const l = etkin(liste, o.kapsam).slice(-(o.limit || 12));
+    /* Kişi modeli izni (kisi.js, Faz 5): ajan yalnız izinli alanı görür. */
+    const K = (window.LIFEOS || {}).KISI;
+    const l = etkin(liste, o.kapsam).filter(x => !o.ajan || !x.alan || !K || K.izinli(x.alan, o.ajan)).slice(-(o.limit || 12));
     if(!l.length) return '';
     return 'KULLANICI HAKKINDA HATIRLANANLAR (etiketiyle; «tahmin» kesin değildir, '
       + '«senin sözün» kullanıcının kendi cümlesidir, değiştirme):\n'
@@ -33398,7 +33441,8 @@ LIFEOS.Hafiza = (function(){
         if(!f) return { ok:false, reason:'yok' };
         /* Görüntü ve sırası BİRLİKTE, ilk await'ten önce. */
         const items = etkin(liste()).map(x => ({ id:x.id, metin:x.metin, katman:x.katman,
-          kaynak:x.kaynak, at:x.at, alan:x.alan || null }));
+          kaynak:x.kaynak, at:x.at, alan:x.alan || null,
+          gorenler:x.alan && window.LIFEOS.KISI ? window.LIFEOS.KISI.gorenler(x.alan) : null }));
         const sira = ++sayac;
         const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
         const zaman = ctrl ? setTimeout(() => ctrl.abort(), 4000) : null;
@@ -64948,7 +64992,7 @@ SP.Office = (function(){
       ],
       uslup:'Türkçe yaz. Kısa cümle kur. En fazla 4 cümle.',
       /* Hafiza ETIKETIYLE gelir (LIFEOS.Hafiza.baglam); bos ise bolum yok. */
-      hafiza:SP.Hafizam ? SP.Hafizam.baglam() : '',
+      hafiza:SP.Hafizam ? SP.Hafizam.baglam({ ajan:'spi' }) : '',
       brifing:JSON.stringify(b),
     });
   }

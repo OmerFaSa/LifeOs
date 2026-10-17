@@ -653,6 +653,10 @@ MIGRATIONS = [
     ("usage", "is_id", "INTEGER"),
     # King'in teklifi (core/teklif.py): sinif, maliyet, sure, secenekler.
     ("is_emirleri", "teklif", "TEXT"),
+    # Kisi modeli (2026-10-17, KISI-PLANI Faz 5): kaydin yasam alani ve onu
+    # gorebilen modul ajanlari («ays,spi»; bos = yalniz King; NULL = eski kayit).
+    ("memories", "alan", "TEXT"),
+    ("memories", "gorenler", "TEXT"),
 ]
 
 

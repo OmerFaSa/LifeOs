@@ -185,6 +185,31 @@ def run():
         eq(metinler, ["laktoz dokunuyor"])
     test("modulde degisen ve silinen kayit HKM'ye yansir", t_module_sync_follows_module)
 
+    def t_kisi_izin():
+        """Kisi modeli Faz 5: King hepsini gorur; gorevli ajan yalniz kendi
+        modulu `gorenler`de olan alanli kaydi gorur; eski kayit eskisi gibi."""
+        con = db.connect(":memory:")
+        k = lambda id_, m, alan, g: dict(_kayit(id_, m), alan=alan, gorenler=g)
+        memory.esitle(con, "spi", [k("a", "Allaha inanıyorum", "deger", []),
+                                   k("b", "Balığı sevmem", "sevgi", ["ays", "spi", "esp"]),
+                                   _kayit("c", "akşam yemem")])
+        gorevli = sorted(x["text"] for x in memory.list_active(con, scope="bio"))
+        eq(gorevli, ["Balığı sevmem", "akşam yemem"])
+        king = sorted(x["text"] for x in memory.list_active(con, scope="king"))
+        eq(king, ["Allaha inanıyorum", "Balığı sevmem", "akşam yemem"])
+        satir = [x for x in memory.list_active(con, scope="king") if x["text"] == "Allaha inanıyorum"][0]
+        eq((satir["alan"], satir["gorenler"]), ("deger", ""))
+        # izin degisince (goruntu) gorevli de gorur
+        memory.esitle(con, "spi", [k("a", "Allaha inanıyorum", "deger", ["spi"]),
+                                   k("b", "Balığı sevmem", "sevgi", ["ays", "spi", "esp"]), _kayit("c", "akşam yemem")])
+        ok("Allaha inanıyorum" in [x["text"] for x in memory.list_active(con, scope="bio")])
+        # bozuk alan ve bilinmeyen modul atilir
+        memory.esitle(con, "esp", [k("x", "deneme", "<b>", ["hkm", "esp"])])
+        s = memory.list_active(con, scope="king")
+        x = [r for r in s if r["text"] == "deneme"][0]
+        eq((x["alan"], x["gorenler"]), (None, "esp"))
+    test("kisi modeli: King hepsini, ajan yalniz izinli alani gorur", t_kisi_izin)
+
     def t_module_sync_concurrent():
         """Modul kaydi ekler eklemez arka planda esitler; hemen ardindan
         ikinci esitleme gelir. Iki istek ayri baglantilarda AYNI ANDA

@@ -129,7 +129,9 @@ LIFEOS.Hafiza = (function(){
      ajan «tahmin»i gerçek, «sohbetten»i senin sözün sanmasın. */
   function baglam(liste, opts){
     const o = opts || {};
-    const l = etkin(liste, o.kapsam).slice(-(o.limit || 12));
+    /* Kişi modeli izni (kisi.js, Faz 5): ajan yalnız izinli alanı görür. */
+    const K = (window.LIFEOS || {}).KISI;
+    const l = etkin(liste, o.kapsam).filter(x => !o.ajan || !x.alan || !K || K.izinli(x.alan, o.ajan)).slice(-(o.limit || 12));
     if(!l.length) return '';
     return 'KULLANICI HAKKINDA HATIRLANANLAR (etiketiyle; «tahmin» kesin değildir, '
       + '«senin sözün» kullanıcının kendi cümlesidir, değiştirme):\n'
@@ -201,7 +203,8 @@ LIFEOS.Hafiza = (function(){
         if(!f) return { ok:false, reason:'yok' };
         /* Görüntü ve sırası BİRLİKTE, ilk await'ten önce. */
         const items = etkin(liste()).map(x => ({ id:x.id, metin:x.metin, katman:x.katman,
-          kaynak:x.kaynak, at:x.at, alan:x.alan || null }));
+          kaynak:x.kaynak, at:x.at, alan:x.alan || null,
+          gorenler:x.alan && window.LIFEOS.KISI ? window.LIFEOS.KISI.gorenler(x.alan) : null }));
         const sira = ++sayac;
         const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
         const zaman = ctrl ? setTimeout(() => ctrl.abort(), 4000) : null;

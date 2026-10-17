@@ -28,6 +28,28 @@
     });
   });
 
+  describe('Kişi — ajan izinleri (Faz 5)', () => {
+    it('varsayılan: inanç yalnız King; sevgi herkes; değişiklik saklanır', () => {
+      let eski = null;
+      try{ eski = localStorage.getItem(K().IZIN); localStorage.removeItem(K().IZIN); }catch(e){}
+      try{
+        expect(K().izinli('deger', 'spi')).toBe(false);
+        expect(K().izinli('sevgi', 'ays')).toBe(true);
+        expect(K().izinli(null, 'esp')).toBe(true);                  // alansız eski kayıt
+        K().izinDegistir('deger', 'spi', true);
+        expect(K().gorenler('deger')).toEqual(['spi']);
+        K().izinDegistir('sevgi', 'ays', false);
+        expect(K().izinli('sevgi', 'ays')).toBe(false);
+        const H = window.LIFEOS.Hafiza;
+        const l = [{ id:'a', metin:'Balığı sevmem', katman:'sohbet', kaynak:'kural', alan:'sevgi', durum:'etkin', at:'1' },
+          { id:'b', metin:'Allaha inanıyorum', katman:'sohbet', kaynak:'kural', alan:'deger', durum:'etkin', at:'2' }];
+        expect(H.baglam(l, { ajan:'ays' }).indexOf('Balığı') < 0).toBe(true);
+        expect(H.baglam(l, { ajan:'spi' })).toContain('inanıyorum');
+        expect(H.baglam(l)).toContain('Balığı');                       // King: hepsi
+      }finally{ try{ if(eski == null) localStorage.removeItem(K().IZIN); else localStorage.setItem(K().IZIN, eski); }catch(e){} }
+    });
+  });
+
   describe('Kişi — tanışma ve özet', () => {
     it('tanışma günde bir; en az bilinen alandan', () => {
       const kayit = K().ALANLAR.filter(a => a.id !== 'hobi').map(a => ({ alan:a.id, metin:'x', katman:'soz' }));

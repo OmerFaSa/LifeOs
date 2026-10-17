@@ -167,5 +167,27 @@ LIFEOS.KISI = (function(){
     return temiz(String(soru).replace(/\?$/, '')) + ' → ' + c;
   }
 
-  return { ALANLAR, BY_ID, beyan, grupla, ozet, tanismaSorusu, cevapMetni };
+  /* ---------------------------------------------------------- izinler (Faz 5)
+     King hepsini görür. Modül ajanı yalnız izinli alanı görür: varsayılan
+     ALANLAR[].ajan, senin değişikliğin `lifeos.kisi.izin`de (modüller
+     arasında taşınır). Alanı olmayan kayıt herkese açıktır (eski hafıza). */
+  const IZIN = 'lifeos.kisi.izin';
+  function izinOku(){ try{ const v = JSON.parse(localStorage.getItem(IZIN) || 'null'); return v && typeof v === 'object' ? v : {}; }catch(e){ return {}; } }
+  function gorenler(alan){
+    if(!alan || !BY_ID[alan]) return null;
+    const o = izinOku()[alan];
+    return Array.isArray(o) ? o.filter(m => ['ays', 'spi', 'esp'].indexOf(m) >= 0) : BY_ID[alan].ajan.slice();
+  }
+  function izinli(alan, modul){ const g = gorenler(alan); return g == null || g.indexOf(modul) >= 0; }
+  function izinDegistir(alan, modul, acik){
+    if(!BY_ID[alan] || ['ays', 'spi', 'esp'].indexOf(modul) < 0) return false;
+    const v = izinOku();
+    const g = gorenler(alan).filter(m => m !== modul);
+    if(acik) g.push(modul);
+    v[alan] = g.sort();
+    try{ localStorage.setItem(IZIN, JSON.stringify(v)); }catch(e){ return false; }
+    return true;
+  }
+
+  return { ALANLAR, BY_ID, beyan, grupla, ozet, tanismaSorusu, cevapMetni, IZIN, gorenler, izinli, izinDegistir };
 })();

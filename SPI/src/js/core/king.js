@@ -1290,16 +1290,23 @@ window.LIFEOS.KING = (function(){
       const satir = k => '<li><span><b>' + kac(k.metin) + '</b><small>' + kac(ETK[k.katman] || 'kayıt')
         + (k.kendi ? '' : ' · ' + kac(MODUL_AD[k.modul] || k.modul) + '’de öğrenildi') + '</small></span>'
         + (k.kendi ? '<button type="button" class="king__cip king__cip--tehlike" data-king="kisi-sil:' + kac(k.id) + '">Sil</button>' : '') + '</li>';
-      const bolum = (ad, l) => l.length ? '<section class="king__kisi-alan"><h3>' + kac(ad) + '</h3><ul class="king__liste-kisi">' + l.map(satir).join('') + '</ul></section>' : '';
+      /* Faz 5: alan başına hangi modül ajanının göreceği (King hepsini görür). */
+      const izin = a => '<span class="king__izin" role="group" aria-label="' + kac(a.ad) + ' için ajan izinleri">'
+        + ['ays', 'spi', 'esp'].map(m => { const ac = K.izinli(a.id, m);
+          return '<button type="button" class="king__izin-dugme' + (ac ? ' is-acik' : '') + '" aria-pressed="' + (ac ? 'true' : 'false')
+            + '" data-king="kisi-izin:' + a.id + ':' + m + '" title="' + MODUL_AD[m] + ' ajanları ' + (ac ? 'görüyor' : 'görmüyor') + '">' + MODUL_AD[m] + '</button>'; }).join('')
+        + '</span>';
+      const bolum = (ad, l, a) => l.length ? '<section class="king__kisi-alan"><h3>' + kac(ad) + (a ? izin(a) : '') + '</h3><ul class="king__liste-kisi">' + l.map(satir).join('') + '</ul></section>' : '';
       return '<div class="king__menu" role="group" aria-label="Beni nasıl tanıyorsun">'
         + '<div class="king__menu-ust"><button type="button" class="king__geri" data-king="menu">‹ Geri</button><b>Beni nasıl tanıyorsun</b></div>'
         + '<p class="king__menu-not">' + K.ALANLAR.length + ' alandan ' + dolu + '’inde bilgi var. Sohbetten öğrendiklerim «sohbetten», '
-        + 'senin yazdıkların «senin sözün» diye durur. Hepsi bu bilgisayarda; sildiğin unutulur.</p>'
+        + 'senin yazdıkların «senin sözün» diye durur. Hepsi bu bilgisayarda; sildiğin unutulur. '
+        + 'King hepsini görür; alanın yanındaki AYS · SPİ · ESP o modülün ajanlarının görüp görmediğidir.</p>'
         + '<div class="king__kisi-ekle"><select data-kisi-alan aria-label="Alan">'
         + K.ALANLAR.map(a => '<option value="' + a.id + '"' + (a.id === kisiYeni.alan ? ' selected' : '') + '>' + kac(a.ad) + '</option>').join('')
         + '</select><input type="text" data-kisi-metin data-ayar-disi aria-label="Benim hakkımda" placeholder="Örneğin: Sabahları daha verimliyim" autocomplete="off"/>'
         + '<button type="button" class="king__cip king__cip--ana" data-king="kisi-ekle">Ekle</button></div>'
-        + (dolu || g.genel.length ? K.ALANLAR.map(a => bolum(a.ad, g[a.id])).join('') + bolum('Genel', g.genel)
+        + (dolu || g.genel.length ? K.ALANLAR.map(a => bolum(a.ad, g[a.id], a)).join('') + bolum('Genel', g.genel)
           : '<p class="king__menu-bos">Henüz seni tanımıyorum. «Balığı sevmem», «hobim satranç» gibi söylediklerini kendiliğinden not ederim.</p>')
         + '</div>';
     }
@@ -1953,6 +1960,11 @@ window.LIFEOS.KING = (function(){
         if(is === 'sorma-sifirla'){ ortam.depo.sil(SORMA); ciz(false); return; }
         if(is === 'tanisma-atla'){ bekleyenTanisma = null; cipler = null; soyle('Tamam, başka zaman.'); return; }
         if(is === 'kisi'){ menuAc('kisi'); disKisiTazele().then(() => { if(acik && menu === 'kisi') ciz(false); }); return; }
+        if(/^kisi-izin:[a-z]+:(ays|spi|esp)$/.test(is)){
+          const p = is.split(':'), K = KISI(), H = hafiza();
+          if(K){ K.izinDegistir(p[1], p[2], !K.izinli(p[1], p[2])); if(H && H.hkmeGonder) H.hkmeGonder(); ciz(false); }
+          return;
+        }
         if(/^kisi-sil:/.test(is)){ const H = hafiza(); if(H) H.unut(is.slice(9)).then(() => ciz(false)); return; }
         if(is === 'kisi-ekle'){
           const H = hafiza(), kt = c.closest('.king__menu');
