@@ -37,6 +37,14 @@ Bunlar tercih değil **sözleşmedir**; bir öneri bunlardan birini kırıyorsa
    yine kapalı katalogdur (`brand/ortak/yetki.js`); eylemi modülün kendi
    kodu uygular, seviyeyi katalog belirler (§1.9) ve büyük eylemden önce
    dönüş noktası alınır. King hiçbir sayıyı uydurmaz.
+   **Kişi modeli (2026-10-17, depo sahibinin kararı, `belgeler/ekip/KISI-PLANI.md`):**
+   King kullanıcıyı 14 yaşam alanında tanır (inanç, maddiyat, ruh hâli
+   dahil); kişi modeli hafızanın kendisidir (`brand/ortak/kisi.js`). Açık
+   beyan («X'i sevmem») kural motoruyla kendiliğinden yazılır, «Geri al»
+   kalır; model yine kalıcı kayıt yazamaz. Her kayıt görünür ve silinir;
+   teşhis ve yetenek yargısı yok (§1.5). Kullanıcının kararıyla hassas
+   alanlar dahil kişi özeti modele gidebilir; ajan yalnız alanının izinli
+   kısmını görür, King hepsini.
 2. **Eksik veri sıfır değildir.** Dört etiket: `ölçüldü / tahmin /
    hesaplandı / veri yok`. Etiketsiz sayı hiçbir katmana girmez.
 3. **Sıfır çalışma zamanı bağımlılığı.** Üç arayüzde çerçeve, paket,

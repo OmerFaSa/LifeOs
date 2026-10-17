@@ -1700,6 +1700,11 @@ window.LIFEOS.HESAP = (function(){
     try{ return await api('/api/hesap/tekgun'); }
     catch(e){ if(e && e.kod === 401) return null; throw e; }
   }
+  /* Sunucu sözü 24: üç modülün kişi kayıtları (King öbür modülde öğrenileni de bilsin). */
+  async function kisi(){
+    try{ return await api('/api/hesap/kisi'); }
+    catch(e){ if(e && e.kod === 401) return null; throw e; }
+  }
   async function takvimAc(yenile){ return (await api('/api/hesap/takvim', { yenile:!!yenile })).takvim; }
   async function takvimKapat(){ return (await api('/api/hesap/takvim-kapat', {})).takvim; }
   /* Cihaza ad (söz 21); döner: tazelenmiş cihaz listesi. */
@@ -3500,7 +3505,7 @@ window.LIFEOS.HESAP = (function(){
     merkezAc, merkezKapat, merkezAcikMi, hatirlananlar, unut, sifreGucu, etkinlik, disaAktar, hesabiSil,
     ozetYaz, ozetOku, ozetCiz,
     girisKod, baglaKod, baglantilar, ikiAdimBaslat, ikiAdimOnayla, ikiAdimKapat, yedekYenile,
-    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
+    bagKoduAc, bagDurum, anahtarAc, anahtarSil, takvimAc, takvimKapat, tekGun, kisi, gelenBirak, cihazAdlandir, uyarilar, uyariGordum,
     yedekDurum, yedekle, yedekAyar, yedekOnizle, geriYukle, yedekIndir, yedekYukle,
     _ortam:ortam, _sifirla, _istek:istek, _ekBekle:() => ekSon || Promise.resolve(), _imza:imza,
     CEREZ, ONEK,

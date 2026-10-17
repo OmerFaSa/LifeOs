@@ -96,6 +96,8 @@ LIFEOS.Hafiza = (function(){
       kapsam:String(k.kapsam || 'hepsi').slice(0, 24),
       at:k.at || new Date().toISOString(), durum:'etkin',
     };
+    /* Kişi modeli (kisi.js, 2026-10-17): kaydın yaşam alanı; yoksa «genel». */
+    if(typeof k.alan === 'string' && /^[a-z]{2,16}$/.test(k.alan)) yeni.alan = k.alan;
     let sonuc = l.concat([yeni]);
     /* Sınır aşılırsa EN ESKİ çıkarım önce gider, sonra en eski sohbet;
        senin sözün en son gider — o senin yazdığındır. */
@@ -199,7 +201,7 @@ LIFEOS.Hafiza = (function(){
         if(!f) return { ok:false, reason:'yok' };
         /* Görüntü ve sırası BİRLİKTE, ilk await'ten önce. */
         const items = etkin(liste()).map(x => ({ id:x.id, metin:x.metin, katman:x.katman,
-          kaynak:x.kaynak, at:x.at }));
+          kaynak:x.kaynak, at:x.at, alan:x.alan || null }));
         const sira = ++sayac;
         const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
         const zaman = ctrl ? setTimeout(() => ctrl.abort(), 4000) : null;

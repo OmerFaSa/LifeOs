@@ -1558,6 +1558,27 @@ def run():
     test("Tek gun: modulun JSON plani; bicim ve boyut denetlenir, icerik anlasilmaz; dunku plan bayat; sabit sira",
          t_tek_gun)
 
+    # ------------------------------------------- Kisi modeli (soz 24)
+
+    def t_kisi():
+        with _Depo() as r:
+            k, j = _admin(r)
+            eq(r.d.kisi(k), {"moduller": []})
+            _hata(lambda: r.d.yayinla(k, "spi/kisi", "duz metin"), 400)
+            _hata(lambda: r.d.yayinla(k, "spi/kisi", '{"x":1}'), 400)                 # kayitlar yok
+            _hata(lambda: r.d.yayinla(k, "spi/kisi", "[1]"), 400)
+            _hata(lambda: r.d.yayinla(k, "hkm/kisi", '{"kayitlar":[]}'), 400)
+            _hata(lambda: r.d.yayinla(k, "ays/kisi", '{"kayitlar":["' + "a" * 140000 + '"]}'), 400)
+            r.d.yayinla(k, "esp/kisi", '{"kayitlar":[{"alan":"hobi","metin":"Hobim satranç"}]}')
+            r.d.yayinla(k, "ays/kisi", '{"kayitlar":[{"alan":"sevgi","metin":"Balığı sevmem"}]}')
+            v = r.d.kisi(k)
+            eq([m["modul"] for m in v["moduller"]], ["ays", "esp"])                   # sabit sira
+            eq(v["moduller"][1]["kayitlar"], [{"alan": "hobi", "metin": "Hobim satranç"}])
+            no(any(x["ad"].endswith("/kisi") for x in r.d.takvim(k)["yayinlar"]))    # takvime karismaz
+            eq(r.d.tek_gun(k)["moduller"], [])                                         # tek gune karismaz
+    test("Kisi modeli: modulun JSON kayitlari; bicim ve boyut denetlenir, icerik anlasilmaz; sabit sira",
+         t_kisi)
+
     # ------------------------------------------- King'in ilettigi satir (soz 23)
 
     def t_gelen_birak():

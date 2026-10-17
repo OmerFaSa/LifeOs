@@ -357,6 +357,74 @@
       expect(localStorage.getItem(k.TASIMA)).toBe(null);
     }));
 
+    /* Söz 22 (2026-10-17): «King her şeyi öğrenecek» (KISI-PLANI). */
+    function hafizali(k, o){
+      const st = { hafiza:[] };
+      const H = window.LIFEOS.Hafiza.kur({ store:() => ({ get:async () => null, set:async () => {} }), durum:() => st });
+      k.kur(Object.assign({ modul:'spi', git:() => {}, ozet:() => [], hafiza:() => H }, o || {}));
+      return H;
+    }
+    it('açık beyan kendiliğinden not edilir; «Geri al» unutur', () => sahneyle(async () => {
+      if(!window.LIFEOS.KISI || !window.LIFEOS.Hafiza) return;
+      const { k } = sahne();
+      k._ortam.kisiSunucu = async () => null;
+      const H = hafizali(k);
+      k.ac({ mini:true });
+      const r = await k.isle('Balığı hiç sevmem');
+      expect(r.tur).toBe('beyan');
+      expect(H.etkin().map(x => [x.alan, x.katman, x.kaynak, x.metin])).toEqual([['sevgi', 'sohbet', 'kural', 'Balığı hiç sevmem']]);
+      expect(k.akis().slice(-1)[0].metin).toContain('Not ettim');
+      await k.isle('geri al');
+      expect(H.etkin()).toHaveLength(0);
+    }));
+    it('beyanlı veri cümlesinde veri akışı sürer, beyan sessizce yazılır', () => sahneyle(async () => {
+      if(!window.LIFEOS.KISI || !window.LIFEOS.Hafiza) return;
+      const veri = { onizle:t => /içtim/.test(t) ? { metin:'Kahve 2 bardak', kaydet:async () => 'Kaydedildi' } : null };
+      const { k } = sahne({ veri });
+      k._ortam.kisiSunucu = async () => null;
+      const H = hafizali(k, { veri });
+      k.ac({ mini:true });
+      await k.isle('Kahveyi çok severim. 2 bardak içtim');
+      expect(H.etkin().map(x => x.metin)).toEqual(['Kahveyi çok severim']);
+      expect(k.akis().slice(-1)[0].onizleme.metin).toBe('Kahve 2 bardak');
+    }));
+    it('tanışma: günde bir soru; cevap «senin sözün» olarak sorunun alanına yazılır', () => sahneyle(async () => {
+      if(!window.LIFEOS.KISI || !window.LIFEOS.Hafiza) return;
+      const { k } = sahne();
+      k._ortam.kisiSunucu = async () => null;
+      const H = hafizali(k);
+      k.ac();
+      expect(k.tanismaVar()).toBe(true);
+      expect(k.akis()[0].metin).toContain('tanımak istiyorum');
+      await k.isle('kitap okumak');
+      const kay = H.etkin();
+      expect(kay).toHaveLength(1);
+      expect([kay[0].katman, kay[0].kaynak, !!kay[0].alan]).toEqual(['soz', 'kullanici', true]);
+      expect(kay[0].metin).toContain('→ kitap okumak');
+      k.kapat();
+      await new Promise(r => setTimeout(r, 400));
+      k._ortam.depo.sil('king.sohbet.spi');
+      k.ac();
+      expect(k.tanismaVar()).toBe(false);          // aynı gün ikinci soru yok
+    }));
+    it('«Beni nasıl tanıyorsun»: kendi kaydı silinir; öbür modülün kaydı modül adıyla, silinmez', () => sahneyle(async () => {
+      if(!window.LIFEOS.KISI || !window.LIFEOS.Hafiza) return;
+      const { k } = sahne();
+      k._ortam.kisiSunucu = async () => ({ moduller:[{ modul:'ays', kayitlar:[{ id:'a1', alan:'hobi', metin:'Hobim satranç', katman:'sohbet' }] }] });
+      const H = hafizali(k);
+      await k.disKisiTazele();
+      await H.ekle('Balığı sevmem', { katman:'sohbet', kaynak:'kural', alan:'sevgi' });
+      k.ac({ mini:false, mesaj:'x' });
+      k.menuAc('kisi');
+      const p = document.querySelector('.king__menu');
+      expect(p.textContent).toContain('Hobim satranç');
+      expect(p.textContent).toContain('AYS’de öğrenildi');
+      expect(p.querySelectorAll('[data-king^="kisi-sil:"]').length).toBe(1);
+      expect(k.kisiOzeti()).toContain('Balığı sevmem (sohbetten)');
+      await k.isle('hatırla: sabahları daha verimliyim');
+      expect(H.etkin().some(x => x.metin === 'sabahları daha verimliyim' && x.katman === 'soz')).toBe(true);
+    }));
+
     /* Söz 21 (2026-10-17): «King yazarken tıkı tıkı, açıp kapatabildiğimiz yazı yazma». */
     it('yeni cevap harf harf yazılır, seyrek tıklar; dokununca biter; kapatılınca tek seferde', () => sahneyle(async () => {
       const veri = { onizle:t => /uyku/.test(t) ? { metin:'Uyku 7 sa', kaydet:async () => 'Kaydedildi' } : null };

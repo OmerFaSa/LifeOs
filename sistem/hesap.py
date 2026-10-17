@@ -151,6 +151,13 @@
       kurallari gecerli: sunucu satiri ANLAMAZ, hicbir module yazmaz; satiri
       yalniz hedef modul alir, kendi koduyla okur ve Onaylar'a oneri yapar.
       Kaynak «King · <modul>» yazilir; kullanici basina saatte GELEN_SAAT_EN_COK.
+  24. KISI MODELI (2026-10-17, belgeler/ekip/KISI-PLANI.md: «King her seyi
+      ogrenecek»). Her modul kendi hafizasindaki kisi kayitlarini (alanli)
+      yayinlar (`<modul>/kisi`: JSON nesnesi, `kayitlar` listesi); sunucu
+      ANLAMAZ — yalniz bicim ve boyut. Uc modulunku birlikte verilir
+      (`GET /api/hesap/kisi`, oturumla): bir modulde ogrenilen digerindeki
+      King'e de ulasir. Silme kaydin modulunde yapilir; sunucu hicbir
+      module yazmaz.
 
    Yalniz Python standart kutuphanesi (AGENTS §1.3).
 """
@@ -230,6 +237,8 @@ BUGUN_RE = re.compile(r"^(ays|spi|esp)/bugun$")      # soz 21: modulun gunluk oz
 BUGUN_EN_UZUN = 400
 GUNPLAN_RE = re.compile(r"^(ays|spi|esp)/gun$")      # soz 22: modulun bugunku bloklari (JSON)
 GUNPLAN_EN_BUYUK = 64 * 1024
+KISI_RE = re.compile(r"^(ays|spi|esp)/kisi$")         # soz 24: modulun kisi kayitlari (JSON)
+KISI_EN_BUYUK = 128 * 1024
 GUN_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 YAYIN_EN_BUYUK = 512 * 1024
 TAKVIM_YOL_RE = re.compile(r"^/api/hesap/takvim/([A-Za-z0-9_\-]{20,64})\.ics$")
@@ -1565,9 +1574,21 @@ class Depo:
     def yayinla(self, kullanici, ad, icerik, adet=None, gun=None):
         """Modulun yayini: takvim (.ics) ya da gunluk ozet (soz 21; duz
         metin ve hangi gunun oldugu). Sunucu icerigi anlamaz."""
-        if not isinstance(ad, str) or not (YAYIN_RE.match(ad) or BUGUN_RE.match(ad) or GUNPLAN_RE.match(ad)):
+        if not isinstance(ad, str) or not (YAYIN_RE.match(ad) or BUGUN_RE.match(ad) or GUNPLAN_RE.match(ad)
+                                           or KISI_RE.match(ad)):
             raise Hata(400, "Geçersiz yayın.")
-        if GUNPLAN_RE.match(ad):
+        if KISI_RE.match(ad):
+            # Soz 24: icerik anlasilmaz; JSON nesnesi, `kayitlar` listesi, boyut.
+            if not isinstance(icerik, str) or len(icerik.encode("utf-8")) > KISI_EN_BUYUK:
+                raise Hata(400, "Kişi kayıtları boş ya da çok büyük.")
+            try:
+                v = json.loads(icerik)
+                if not isinstance(v, dict) or not isinstance(v.get("kayitlar"), list):
+                    raise ValueError
+            except ValueError:
+                raise Hata(400, "Kişi kayıtları okunamadı.")
+            gun = None
+        elif GUNPLAN_RE.match(ad):
             # Soz 22: icerik anlasilmaz; yalniz bicim (JSON nesnesi) ve boyut.
             if not isinstance(icerik, str) or len(icerik.encode("utf-8")) > GUNPLAN_EN_BUYUK:
                 raise Hata(400, "Günün planı boş ya da çok büyük.")
@@ -1663,6 +1684,23 @@ class Depo:
             moduller.append({"modul": modul, "gun": x["gun"], "bayat": x["gun"] != bugun,
                              "icerik": x["icerik"], "zaman": int(x["zaman"] * 1000)})
         return {"tarih": bugun, "moduller": moduller}
+
+    def kisi(self, kullanici):
+        """Soz 24: uc modulun kisi kayitlari, AYS, SPI, ESP sirasiyla; oldugu gibi."""
+        with self._islem() as c:
+            y = {x["ad"]: x for x in c.execute(
+                "SELECT ad, icerik, zaman FROM yayin WHERE kullanici=? AND ad LIKE '%/kisi'", (kullanici["id"],))}
+        moduller = []
+        for modul in ("ays", "spi", "esp"):
+            x = y.get(modul + "/kisi")
+            if x is None:
+                continue
+            try:
+                kayitlar = json.loads(x["icerik"]).get("kayitlar") or []
+            except (ValueError, AttributeError):
+                kayitlar = []
+            moduller.append({"modul": modul, "kayitlar": kayitlar, "zaman": int(x["zaman"] * 1000)})
+        return {"moduller": moduller}
 
     def takvim(self, kullanici):
         with self._islem() as c:
@@ -2444,6 +2482,8 @@ def isle(h):
                                        "yedek": d.kopya_ozet(k)})
             if yol == "/api/hesap/tekgun":
                 return _cevap(h, 200, d.tek_gun(k))
+            if yol == "/api/hesap/kisi":
+                return _cevap(h, 200, d.kisi(k))
             if yol == "/api/hesap/uyarilar":
                 return _cevap(h, 200, {"uyarilar": d.uyarilar(k, _jeton(h))})
             if yol == "/api/hesap/baglantilar":

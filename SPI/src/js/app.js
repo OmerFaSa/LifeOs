@@ -1559,6 +1559,11 @@ SP.App = (function(){
               ? { bugun:{ metin:SP.Screens.today.sesli(), gun:SP.U.todayISO() } } : {};
             /* Tek gün (sunucu sözü 22): bugünün saatli işleri ve öğünleri. */
             if(window.LIFEOS.TEKGUN && window.LIFEOS.TEKGUN.kuruluMu()) y.gun = window.LIFEOS.TEKGUN.parca();
+            /* Kişi modeli (sunucu sözü 24): bu modülde öğrenilenler öbür modüllerin King'ine. */
+            if(window.LIFEOS.KISI && SP.Hafizam){
+              const k = SP.Hafizam.etkin().slice(-150).map(x => ({ id:x.id, alan:x.alan || null, metin:x.metin, katman:x.katman, at:x.at }));
+              y.kisi = { metin:JSON.stringify({ kayitlar:k }) };
+            }
             return y;
           },
           gelen:async oge => {
@@ -1604,7 +1609,7 @@ SP.App = (function(){
       /* KING (brand/ortak/king.js): her yerden sade sohbet. Özet ve veri
          girişi bu modülün kendi koduyla (SP.Quick: önizleme, onayla kayıt). */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'spi', ekran:() => S.route, model:() => SP.LLM,
+        window.LIFEOS.KING.kur({ modul:'spi', ekran:() => S.route, model:() => SP.LLM, hafiza:() => SP.Hafizam,
           /* King'e gelen fotoğraf (king.js söz 11): Fotoğraftan öğün akışına. */
           foto:[{ ad:'Öğün olarak oku', is:async f => {
             go('meals');

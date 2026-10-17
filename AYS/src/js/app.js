@@ -1620,6 +1620,11 @@ R.App = (function(){
             if(R.Screens && R.Screens.today && R.Screens.today.sesli) y.bugun = { metin:R.Screens.today.sesli(), gun:U.todayISO() };
             /* Tek gün (sunucu sözü 22): bugünün blokları. */
             if(window.LIFEOS.TEKGUN && window.LIFEOS.TEKGUN.kuruluMu()) y.gun = window.LIFEOS.TEKGUN.parca();
+            /* Kişi modeli (sunucu sözü 24): bu modülde öğrenilenler öbür modüllerin King'ine. */
+            if(window.LIFEOS.KISI && R.Hafizam){
+              const k = R.Hafizam.etkin().slice(-150).map(x => ({ id:x.id, alan:x.alan || null, metin:x.metin, katman:x.katman, at:x.at }));
+              y.kisi = { metin:JSON.stringify({ kayitlar:k }) };
+            }
             return y;
           } });
       }
@@ -1648,7 +1653,7 @@ R.App = (function(){
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route, model:() => R.LLM,
+        window.LIFEOS.KING.kur({ modul:'ays', ekran:() => S.route, model:() => R.LLM, hafiza:() => R.Hafizam,
           /* King'e gelen fotoğraf (king.js söz 11): Soru çöz'ün kendi akışına. */
           foto:[{ ad:'Soruyu çöz', is:async f => {
             go('solve');

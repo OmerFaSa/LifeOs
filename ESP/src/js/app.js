@@ -1737,6 +1737,11 @@ ESP.App = (function(){
             if(ESP.Screens && ESP.Screens.today && ESP.Screens.today.sesli) y.bugun = { metin:ESP.Screens.today.sesli(), gun:ESP.U.todayISO() };
             /* Tek gün (sunucu sözü 22): bugünün blokları. */
             if(window.LIFEOS.TEKGUN && window.LIFEOS.TEKGUN.kuruluMu()) y.gun = window.LIFEOS.TEKGUN.parca();
+            /* Kişi modeli (sunucu sözü 24): bu modülde öğrenilenler öbür modüllerin King'ine. */
+            if(window.LIFEOS.KISI && ESP.Hafizam){
+              const k = ESP.Hafizam.etkin().slice(-150).map(x => ({ id:x.id, alan:x.alan || null, metin:x.metin, katman:x.katman, at:x.at }));
+              y.kisi = { metin:JSON.stringify({ kayitlar:k }) };
+            }
             return y;
           },
           yukle:async () => { await M.loadAll(); if(window.LIFEOS && window.LIFEOS.NOTUM) await window.LIFEOS.NOTUM.yukle(); },
@@ -1795,7 +1800,7 @@ ESP.App = (function(){
       }
       /* KING (brand/ortak/king.js): her yerden sade sohbet. */
       if(window.LIFEOS && window.LIFEOS.KING){
-        window.LIFEOS.KING.kur({ modul:'esp', ekran:() => S.route, model:() => ESP.LLM, hkm:() => ESP.Beacon, git:route => go(route),
+        window.LIFEOS.KING.kur({ modul:'esp', ekran:() => S.route, model:() => ESP.LLM, hkm:() => ESP.Beacon, git:route => go(route), hafiza:() => ESP.Hafizam,
           ozet:() => [ESP.Screens.today.headline()] });
       }
       /* TEK SATIR GİRİŞ (brand/ortak/giris.js): Bugün'deki kutu ve King aynı

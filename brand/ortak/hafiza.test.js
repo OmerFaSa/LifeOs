@@ -183,4 +183,12 @@
       expect(a.h.etkin()).toHaveLength(1);
     });
   });
+  describe('Hafıza — kişi alanı (2026-10-17)', () => {
+    it('geçerli alan saklanır, geçersizi atılır', () => {
+      const r1 = window.LIFEOS.Hafiza.ekle([], { metin:'Balığı sevmem', katman:'sohbet', kaynak:'kural', alan:'sevgi' });
+      expect(r1.kayit.alan).toBe('sevgi');
+      const r2 = window.LIFEOS.Hafiza.ekle([], { metin:'x', alan:'<script>' });
+      expect(r2.kayit.alan).toBe(undefined);
+    });
+  });
 })();
