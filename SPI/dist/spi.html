@@ -15365,7 +15365,7 @@ SP.Perde = (function(){
 
 window.SP = window.SP || {};
 
-SP.BUILD = { id:'80e3e5bd', at:'2026-10-17 11:18', dirty:true };
+SP.BUILD = { id:'44ee56ab', at:'2026-10-17 11:29', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -65733,6 +65733,140 @@ SP.Hazir = (function(){
     antrenmanSakla, antrenmanSil, antrenmanEkle, antrenmanOzet, bugunVar, bul, EN_COK };
 })();
 
+/* ==== js/core/vucut.js ==== */
+/* VÜCUT ANALİZİ — vücut kompozisyonu, kaynaklı formüllerle (KISI-PLANI Faz 6).
+
+   Depo sahibi (2026-10-17): «SPİ'de vücut kitle analizini daha donanımlı
+   yap.» Önce SPİ'de kilo, bel ve yağ oranı ALANI vardı ama hiçbiri
+   hesaba girmiyordu: BKİ, bel/boy oranı, yağsız kütle, kilo eğilimi yoktu.
+
+   Formüller ve kaynakları:
+     BKİ          kg / m²; bantlar DSÖ (WHO) yetişkin sınıflaması:
+                  < 18,5 · 18,5–24,9 · 25–29,9 · ≥ 30
+     Bel/boy      bel (cm) / boy (cm); ≥ 0,5 kardiyometabolik risk için
+                  yaygın «dikkat» eşiği (Ashwell ve ark.; NICE 2022).
+     Yağ oranı    ABD Donanması çevre yöntemi (Hodgdon ve Beckett, 1984),
+                  santimetre ile:
+                    erkek  495 / (1,0324 − 0,19077·log10(bel − boyun)
+                                  + 0,15456·log10(boy)) − 450
+                    kadın  495 / (1,29579 − 0,35004·log10(bel + kalça − boyun)
+                                  + 0,22100·log10(boy)) − 450
+                  Tipik hata ±3–4 puan: hep «tahmin».
+     Yağsız kütle kg × (1 − yağ/100); FFMI = yağsız kütle / m²;
+                  boya göre düzeltilmiş FFMI = FFMI + 6,1 × (1,8 − m)
+                  (Kouri ve ark., 1995).
+     Kilo eğilimi tartı günlük ±1–2 kg oynar (su, tuz, sindirim). Eğilim
+                  son 28 günün tartılarından Theil–Sen eğimiyle (kg/hafta);
+                  en az 6 tartı ve 14 günlük yayılım yoksa söylenmez.
+     Enerji       ortalama girilen kalori − eğilim × 7700 kcal/kg / 7 →
+                  harcamanın KABA tahmini; en az 14 öğün günü ve geçerli
+                  eğilim gerekir; öğün eksik girildiyse yanıltır (yazılır).
+
+   Sözler: eksik ölçü sıfır sayılmaz, o satır yazılmaz (AGENTS §1.2);
+   her değer etiketlidir (hesaplandı / tahmin); teşhis yok, «obez» bir
+   DSÖ bant adıdır ve bant olarak gösterilir, kişiye hüküm olarak değil
+   (§1.5). */
+
+window.SP = window.SP || {};
+
+SP.Vucut = (function(){
+  const yuvarla = (v, b) => { const k = Math.pow(10, b || 1); return Math.round(v * k) / k; };
+  const sayi = v => (v == null || v === '' || !isFinite(Number(v)) ? null : Number(v));
+
+  const BKI_BANT = [
+    { ust:18.5, ad:'Zayıf (DSÖ)', ton:'warn' },
+    { ust:25, ad:'Normal (DSÖ)', ton:'ok' },
+    { ust:30, ad:'Fazla kilolu (DSÖ)', ton:'warn' },
+    { ust:Infinity, ad:'Obez bandı (DSÖ)', ton:'warn' },
+  ];
+  function bki(kg, cm){
+    kg = sayi(kg); cm = sayi(cm);
+    if(!kg || !cm || cm < 100 || cm > 250) return null;
+    const m = cm / 100, v = kg / (m * m);
+    const b = BKI_BANT.find(x => v < x.ust);
+    return { deger:yuvarla(v, 1), bant:b.ad, ton:b.ton, etiket:'hesaplandı',
+      not:'BKİ kas ile yağı ayırmaz; kaslı bedende yüksek çıkabilir.' };
+  }
+  function belBoy(bel, cm){
+    bel = sayi(bel); cm = sayi(cm);
+    if(!bel || !cm) return null;
+    const v = bel / cm;
+    return { deger:yuvarla(v, 2), dikkat:v >= 0.5, etiket:'hesaplandı',
+      not:v >= 0.5 ? 'Bel, boyun yarısını geçmiş: yaygın kullanılan dikkat eşiği (teşhis değil).' : 'Bel, boyun yarısının altında.' };
+  }
+  function navyYag(cins, cm, boyun, bel, kalca){
+    cm = sayi(cm); boyun = sayi(boyun); bel = sayi(bel); kalca = sayi(kalca);
+    if(!cm || !boyun || !bel) return null;
+    let v;
+    if(cins === 'female'){
+      if(!kalca || bel + kalca - boyun <= 0) return null;
+      v = 495 / (1.29579 - 0.35004 * Math.log10(bel + kalca - boyun) + 0.22100 * Math.log10(cm)) - 450;
+    }else{
+      if(bel - boyun <= 0) return null;
+      v = 495 / (1.0324 - 0.19077 * Math.log10(bel - boyun) + 0.15456 * Math.log10(cm)) - 450;
+    }
+    if(!isFinite(v) || v < 2 || v > 70) return null;
+    return { deger:yuvarla(v, 1), etiket:'tahmin', yontem:'ABD Donanması çevre yöntemi', not:'Tipik hata ±3–4 puan.' };
+  }
+  function yagsiz(kg, yagYuzde, cm){
+    kg = sayi(kg); yagYuzde = sayi(yagYuzde); cm = sayi(cm);
+    if(!kg || yagYuzde == null || !cm) return null;
+    const m = cm / 100, ffm = kg * (1 - yagYuzde / 100), ffmi = ffm / (m * m);
+    return { kutle:yuvarla(ffm, 1), ffmi:yuvarla(ffmi, 1), ffmiDuz:yuvarla(ffmi + 6.1 * (1.8 - m), 1), yagKg:yuvarla(kg - ffm, 1) };
+  }
+
+  /* Theil–Sen: ikili eğimlerin ortancası (tek aykırı tartıdan etkilenmez). */
+  function theilSen(n){
+    const e = [];
+    for(let i = 0; i < n.length; i++) for(let j = i + 1; j < n.length; j++){
+      if(n[j].x !== n[i].x) e.push((n[j].y - n[i].y) / (n[j].x - n[i].x));
+    }
+    e.sort((a, b) => a - b);
+    return e.length ? (e.length % 2 ? e[(e.length - 1) / 2] : (e[e.length / 2 - 1] + e[e.length / 2]) / 2) : null;
+  }
+  /* seri: [{ tarih:'YYYY-AA-GG', kg }] (eski → yeni). */
+  function egilim(seri){
+    const l = (seri || []).filter(x => x && sayi(x.kg));
+    if(l.length < 6) return { ok:false, why:'Eğilim için son 28 günde en az 6 tartı gerekir (şimdi ' + l.length + ').' };
+    const t0 = Date.parse(l[0].tarih);
+    const n = l.map(x => ({ x:(Date.parse(x.tarih) - t0) / 86400000, y:Number(x.kg) }));
+    const yayilim = n[n.length - 1].x - n[0].x;
+    if(yayilim < 14) return { ok:false, why:'Tartılar en az 14 güne yayılmalı (şimdi ' + Math.round(yayilim) + ' gün).' };
+    const e = theilSen(n);
+    const son7 = l.slice(-7).map(x => Number(x.kg));
+    return { ok:true, haftalik:yuvarla(e * 7, 2), ortalama7:yuvarla(son7.reduce((a, b) => a + b, 0) / son7.length, 1),
+      yon:Math.abs(e * 7) < 0.1 ? 'sabit' : e > 0 ? 'artıyor' : 'azalıyor', etiket:'hesaplandı', tarti:l.length };
+  }
+  function enerji(ortKcal, gunSayisi, eg){
+    if(!eg || !eg.ok || !sayi(ortKcal) || (gunSayisi || 0) < 14) return null;
+    const harcama = ortKcal - eg.haftalik * 7700 / 7;
+    if(!isFinite(harcama) || harcama < 1000 || harcama > 6000) return null;
+    return { harcama:Math.round(harcama / 10) * 10, etiket:'tahmin',
+      not:'Girdiğin öğünler eksikse bu tahmin düşük çıkar.' };
+  }
+
+  /* Ekranın tek çağrısı: profil + son ölçüler + seriler → tablo satırları. */
+  function analiz(o){
+    const p = o.profil || {}, v = o.son || {};
+    const kg = sayi(v.weight), cm = sayi(p.heightCm);
+    const b = bki(kg, cm), bb = belBoy(v.waist, cm);
+    const navy = navyYag(p.sex, cm, v.neck, v.waist, v.hip);
+    const olculenYag = sayi(v.bodyfat);
+    const yag = olculenYag != null ? { deger:olculenYag, etiket:'ölçüldü', yontem:'cihaz ya da senin girdiğin' } : navy;
+    const ys = yag ? yagsiz(kg, yag.deger, cm) : null;
+    const eg = egilim(o.kilolar);
+    const en = enerji(o.ortKcal, o.ogunGun, eg);
+    const eksik = [];
+    if(!cm) eksik.push('boy (profil)');
+    if(!kg) eksik.push('kilo');
+    if(!sayi(v.waist)) eksik.push('bel');
+    if(!yag) eksik.push(p.sex === 'female' ? 'boyun ve kalça (yağ oranı için)' : 'boyun (yağ oranı için)');
+    return { bki:b, belBoy:bb, yag, navy, yagsiz:ys, egilim:eg, enerji:en, eksik };
+  }
+
+  return { bki, belBoy, navyYag, yagsiz, egilim, enerji, analiz, theilSen };
+})();
+
 /* ==== js/core/hatirlat.js ==== */
 /* HATIRLATMALAR (fikir 34 + 35) — ilaç/takviye, su ve hareket.
 
@@ -74102,6 +74236,55 @@ SP.Screens.move = (function(){
   /* Vücut fotoğrafları: kendini zaman içinde görmek için tek satır minik
      kare; ilki bugünündür. Fotoğraftan SAYI ÜRETİLMEZ — kilo, yağ oranı,
      endeks ölçülür, fotoğraftan tahmin edilmez (AGENTS §1.1). */
+  /* VÜCUT ANALİZİ (core/vucut.js, KISI-PLANI Faz 6): son ölçülerden BKİ,
+     bel/boy, yağ oranı (ölçülen ya da Donanma yöntemi), yağsız kütle, kilo
+     eğilimi ve kaba enerji tahmini. Eksik ölçü sıfır sayılmaz: satır yazılmaz,
+     neyin eksik olduğu söylenir. Boyun ve kalça burada girilir. */
+  function vucutVerisi(){
+    const son = {}, kilolar = [];
+    let kcal = 0, ogunGun = 0;
+    for(let i = 59; i >= 0; i--){
+      const d = U.iso(U.addDays(U.today(), -i));
+      const v = SP.S.vitals[d] || {};
+      ['weight', 'waist', 'bodyfat', 'neck', 'hip'].forEach(k => { if(v[k] != null && v[k] !== '') son[k] = Number(v[k]); });
+      if(i < 28 && v.weight != null) kilolar.push({ tarih:d, kg:Number(v.weight) });
+      if(i < 28){ const t = SP.Nutri.dayTotals(d); if(!t.empty){ kcal += t.kcal; ogunGun++; } }
+    }
+    return { profil:S.profile || {}, son, kilolar, ortKcal:ogunGun ? kcal / ogunGun : null, ogunGun };
+  }
+  function vucutAnalizKutusu(){
+    if(!SP.Vucut) return '';
+    const a = SP.Vucut.analiz(vucutVerisi());
+    const satir = (ad, deger, cert, not) => html`<div class="listitem"><div class="grow"><b class="small">${ad}</b>
+      ${when(not, () => html`<div class="tiny dim">${not}</div>`)}</div>
+      <span class="num small">${deger}</span>${P.cert(cert)}</div>`;
+    const kadin = (S.profile || {}).sex === 'female';
+    const vg = x => String(x).replace('.', ',');
+    return K.Entry({
+      wide:true, label:'Vücut analizi', hint:'vucut-analizi', meta:a.eksik.length ? a.eksik.length + ' ölçü eksik' : 'güncel',
+      body:html`<div class="list">
+        ${when(a.bki, () => satir('Beden kitle indeksi', vg(a.bki.deger) + ' · ' + a.bki.bant, 'derived', a.bki.not))}
+        ${when(a.belBoy, () => satir('Bel / boy oranı', String(a.belBoy.deger).replace('.', ','), 'derived', a.belBoy.not))}
+        ${when(a.yag, () => satir('Yağ oranı', '%' + String(a.yag.deger).replace('.', ','), a.yag.etiket === 'ölçüldü' ? 'measured' : 'estimated',
+          a.yag.yontem + (a.yag.not ? ' · ' + a.yag.not : '')))}
+        ${when(a.yagsiz, () => satir('Yağsız kütle', vg(a.yagsiz.kutle) + ' kg · FFMI ' + vg(a.yagsiz.ffmiDuz), a.yag && a.yag.etiket === 'ölçüldü' ? 'derived' : 'estimated',
+          'Yağ kütlesi ' + vg(a.yagsiz.yagKg) + ' kg; FFMI boya göre düzeltilmiş.'))}
+        ${a.egilim.ok
+          ? satir('Kilo eğilimi', (a.egilim.haftalik > 0 ? '+' : '') + String(a.egilim.haftalik).replace('.', ',') + ' kg/hafta · ' + a.egilim.yon, 'derived',
+              'Son 7 tartının ortalaması ' + vg(a.egilim.ortalama7) + ' kg; günlük oynama ayıklandı (' + a.egilim.tarti + ' tartı).')
+          : satir('Kilo eğilimi', '—', 'missing', a.egilim.why)}
+        ${when(a.enerji, () => satir('Günlük harcama (kaba)', a.enerji.harcama + ' kcal', 'estimated', a.enerji.not))}
+      </div>
+      ${when(a.eksik.length, () => html`<p class="tiny dim mt-8">Eksik: ${a.eksik.join(', ')}. Eksik ölçü sıfır sayılmaz; o satır yazılmaz.</p>`)}
+      <div class="cols-3 mt-8">
+        ${K.Input({ id:'vucut-bel', size:'sm', numeric:true, type:'number', step:'0.5', placeholder:'Bel (cm)', aria:'Bel çevresi (cm)' })}
+        ${K.Input({ id:'vucut-boyun', size:'sm', numeric:true, type:'number', step:'0.5', placeholder:'Boyun (cm)', aria:'Boyun çevresi (cm)' })}
+        ${when(kadin, () => K.Input({ id:'vucut-kalca', size:'sm', numeric:true, type:'number', step:'0.5', placeholder:'Kalça (cm)', aria:'Kalça çevresi (cm)' }))}
+      </div>
+      <div class="row mt-8">${K.Button({ label:'Ölçüleri kaydet', size:'sm', act:'vucut-olcu-kaydet' })}</div>`,
+    });
+  }
+
   function vucutKutusu(){
     if(!SP.Foto.var()) return '';
     const bugun = U.todayISO();
@@ -74418,6 +74601,7 @@ SP.Screens.move = (function(){
     bugun:() => html`${K.Ledger([DonenHareket(), hazirAntrenmanEntry(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), orderEntry(), halkaKutusu(), haftaKutusu()])}
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
     ilerleme:() => html`${K.Ledger([
+        vucutAnalizKutusu(),
         vucutKutusu(),
         K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
           body:loadBody() }),
@@ -74692,6 +74876,22 @@ SP.Screens.move = (function(){
       if(r.ok && h) UI.toast('«' + h.ad + '» silindi', { undo:async () => {
         await M.saveProfile({ hazirAntrenmanlar:[h].concat(SP.Hazir.antrenmanlar()) }); SP.App.render(); } });
     },
+    async 'vucut-olcu-kaydet'(){
+      const al = (id, min, max) => { const el = document.getElementById(id); const v = el && el.value !== '' ? Number(el.value) : null;
+        return v != null && isFinite(v) && v >= min && v <= max ? v : null; };
+      const patch = {};
+      const bel = al('vucut-bel', 40, 200), boyun = al('vucut-boyun', 20, 70), kalca = al('vucut-kalca', 50, 200);
+      if(bel != null) patch.waist = bel;
+      if(boyun != null) patch.neck = boyun;
+      if(kalca != null) patch.hip = kalca;
+      if(!Object.keys(patch).length){ UI.toast('Geçerli bir ölçü yazılmadı.'); return; }
+      const gun = U.todayISO(), once = Object.assign({}, SP.S.vitals[gun] || {});
+      await M.saveVitals(gun, patch);
+      SP.App.render();
+      UI.toast('Ölçüler kaydedildi', { undo:async () => {
+        const geri = {}; Object.keys(patch).forEach(k => { geri[k] = once[k] == null ? null : once[k]; });
+        await M.saveVitals(gun, geri); SP.App.render(); } });
+    },
     async 'del-session'(el){
       const id = el.dataset.id;
       UI.confirmSheet('Seansı sil', 'Bu seans ve ürettiği yük kaydından silinir.',
@@ -74783,6 +74983,8 @@ SP.Screens.move = (function(){
   return {
     id:'move',
     title:'Hareket',
+    /* Sıkı ölçü (en çok üç açık kart): vücut analizi gelince seans geçmişi tek satır. */
+    kucukVarsayilan:['seans-geçmişi'],
     headline(){
       const rx = SP.Move.prescription();
       if(!rx.readiness.ok) return 'Toparlanma ölçümü bekliyor.';

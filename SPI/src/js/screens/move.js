@@ -873,6 +873,55 @@ SP.Screens.move = (function(){
   /* Vücut fotoğrafları: kendini zaman içinde görmek için tek satır minik
      kare; ilki bugünündür. Fotoğraftan SAYI ÜRETİLMEZ — kilo, yağ oranı,
      endeks ölçülür, fotoğraftan tahmin edilmez (AGENTS §1.1). */
+  /* VÜCUT ANALİZİ (core/vucut.js, KISI-PLANI Faz 6): son ölçülerden BKİ,
+     bel/boy, yağ oranı (ölçülen ya da Donanma yöntemi), yağsız kütle, kilo
+     eğilimi ve kaba enerji tahmini. Eksik ölçü sıfır sayılmaz: satır yazılmaz,
+     neyin eksik olduğu söylenir. Boyun ve kalça burada girilir. */
+  function vucutVerisi(){
+    const son = {}, kilolar = [];
+    let kcal = 0, ogunGun = 0;
+    for(let i = 59; i >= 0; i--){
+      const d = U.iso(U.addDays(U.today(), -i));
+      const v = SP.S.vitals[d] || {};
+      ['weight', 'waist', 'bodyfat', 'neck', 'hip'].forEach(k => { if(v[k] != null && v[k] !== '') son[k] = Number(v[k]); });
+      if(i < 28 && v.weight != null) kilolar.push({ tarih:d, kg:Number(v.weight) });
+      if(i < 28){ const t = SP.Nutri.dayTotals(d); if(!t.empty){ kcal += t.kcal; ogunGun++; } }
+    }
+    return { profil:S.profile || {}, son, kilolar, ortKcal:ogunGun ? kcal / ogunGun : null, ogunGun };
+  }
+  function vucutAnalizKutusu(){
+    if(!SP.Vucut) return '';
+    const a = SP.Vucut.analiz(vucutVerisi());
+    const satir = (ad, deger, cert, not) => html`<div class="listitem"><div class="grow"><b class="small">${ad}</b>
+      ${when(not, () => html`<div class="tiny dim">${not}</div>`)}</div>
+      <span class="num small">${deger}</span>${P.cert(cert)}</div>`;
+    const kadin = (S.profile || {}).sex === 'female';
+    const vg = x => String(x).replace('.', ',');
+    return K.Entry({
+      wide:true, label:'Vücut analizi', hint:'vucut-analizi', meta:a.eksik.length ? a.eksik.length + ' ölçü eksik' : 'güncel',
+      body:html`<div class="list">
+        ${when(a.bki, () => satir('Beden kitle indeksi', vg(a.bki.deger) + ' · ' + a.bki.bant, 'derived', a.bki.not))}
+        ${when(a.belBoy, () => satir('Bel / boy oranı', String(a.belBoy.deger).replace('.', ','), 'derived', a.belBoy.not))}
+        ${when(a.yag, () => satir('Yağ oranı', '%' + String(a.yag.deger).replace('.', ','), a.yag.etiket === 'ölçüldü' ? 'measured' : 'estimated',
+          a.yag.yontem + (a.yag.not ? ' · ' + a.yag.not : '')))}
+        ${when(a.yagsiz, () => satir('Yağsız kütle', vg(a.yagsiz.kutle) + ' kg · FFMI ' + vg(a.yagsiz.ffmiDuz), a.yag && a.yag.etiket === 'ölçüldü' ? 'derived' : 'estimated',
+          'Yağ kütlesi ' + vg(a.yagsiz.yagKg) + ' kg; FFMI boya göre düzeltilmiş.'))}
+        ${a.egilim.ok
+          ? satir('Kilo eğilimi', (a.egilim.haftalik > 0 ? '+' : '') + String(a.egilim.haftalik).replace('.', ',') + ' kg/hafta · ' + a.egilim.yon, 'derived',
+              'Son 7 tartının ortalaması ' + vg(a.egilim.ortalama7) + ' kg; günlük oynama ayıklandı (' + a.egilim.tarti + ' tartı).')
+          : satir('Kilo eğilimi', '—', 'missing', a.egilim.why)}
+        ${when(a.enerji, () => satir('Günlük harcama (kaba)', a.enerji.harcama + ' kcal', 'estimated', a.enerji.not))}
+      </div>
+      ${when(a.eksik.length, () => html`<p class="tiny dim mt-8">Eksik: ${a.eksik.join(', ')}. Eksik ölçü sıfır sayılmaz; o satır yazılmaz.</p>`)}
+      <div class="cols-3 mt-8">
+        ${K.Input({ id:'vucut-bel', size:'sm', numeric:true, type:'number', step:'0.5', placeholder:'Bel (cm)', aria:'Bel çevresi (cm)' })}
+        ${K.Input({ id:'vucut-boyun', size:'sm', numeric:true, type:'number', step:'0.5', placeholder:'Boyun (cm)', aria:'Boyun çevresi (cm)' })}
+        ${when(kadin, () => K.Input({ id:'vucut-kalca', size:'sm', numeric:true, type:'number', step:'0.5', placeholder:'Kalça (cm)', aria:'Kalça çevresi (cm)' }))}
+      </div>
+      <div class="row mt-8">${K.Button({ label:'Ölçüleri kaydet', size:'sm', act:'vucut-olcu-kaydet' })}</div>`,
+    });
+  }
+
   function vucutKutusu(){
     if(!SP.Foto.var()) return '';
     const bugun = U.todayISO();
@@ -1189,6 +1238,7 @@ SP.Screens.move = (function(){
     bugun:() => html`${K.Ledger([DonenHareket(), hazirAntrenmanEntry(), pickSessionEntry(), todaySessionsEntry(), setKutusu(), orderEntry(), halkaKutusu(), haftaKutusu()])}
       <div class="mt-24">${raw(UI.rail(['recovery-order', 'readiness', 'load', 'progression']))}</div>`,
     ilerleme:() => html`${K.Ledger([
+        vucutAnalizKutusu(),
         vucutKutusu(),
         K.Entry({ wide:true, label:'Yük eğrisi', hint:'load', meta:'son 30 gün',
           body:loadBody() }),
@@ -1463,6 +1513,22 @@ SP.Screens.move = (function(){
       if(r.ok && h) UI.toast('«' + h.ad + '» silindi', { undo:async () => {
         await M.saveProfile({ hazirAntrenmanlar:[h].concat(SP.Hazir.antrenmanlar()) }); SP.App.render(); } });
     },
+    async 'vucut-olcu-kaydet'(){
+      const al = (id, min, max) => { const el = document.getElementById(id); const v = el && el.value !== '' ? Number(el.value) : null;
+        return v != null && isFinite(v) && v >= min && v <= max ? v : null; };
+      const patch = {};
+      const bel = al('vucut-bel', 40, 200), boyun = al('vucut-boyun', 20, 70), kalca = al('vucut-kalca', 50, 200);
+      if(bel != null) patch.waist = bel;
+      if(boyun != null) patch.neck = boyun;
+      if(kalca != null) patch.hip = kalca;
+      if(!Object.keys(patch).length){ UI.toast('Geçerli bir ölçü yazılmadı.'); return; }
+      const gun = U.todayISO(), once = Object.assign({}, SP.S.vitals[gun] || {});
+      await M.saveVitals(gun, patch);
+      SP.App.render();
+      UI.toast('Ölçüler kaydedildi', { undo:async () => {
+        const geri = {}; Object.keys(patch).forEach(k => { geri[k] = once[k] == null ? null : once[k]; });
+        await M.saveVitals(gun, geri); SP.App.render(); } });
+    },
     async 'del-session'(el){
       const id = el.dataset.id;
       UI.confirmSheet('Seansı sil', 'Bu seans ve ürettiği yük kaydından silinir.',
@@ -1554,6 +1620,8 @@ SP.Screens.move = (function(){
   return {
     id:'move',
     title:'Hareket',
+    /* Sıkı ölçü (en çok üç açık kart): vücut analizi gelince seans geçmişi tek satır. */
+    kucukVarsayilan:['seans-geçmişi'],
     headline(){
       const rx = SP.Move.prescription();
       if(!rx.readiness.ok) return 'Toparlanma ölçümü bekliyor.';
