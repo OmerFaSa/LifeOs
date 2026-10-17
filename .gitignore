@@ -14,6 +14,10 @@ node_modules
 # HKM: yerel token ve yerel ambar depoya girmez.
 HKM/config.json
 HKM/db/*.db
+# SQLite WAL kipinin yan dosyalari ve daemon gunlugu de ambarin parcasidir.
+HKM/db/*.db-shm
+HKM/db/*.db-wal
+HKM/db/daemon.log
 # Otomatik yedekler (core/yedek.py) kullanicinin verisidir; depoya girmez.
 HKM/db/yedek/
 
