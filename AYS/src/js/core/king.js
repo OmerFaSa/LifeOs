@@ -1838,6 +1838,7 @@ window.LIFEOS.KING = (function(){
     if(mini) el.classList.add('is-mini');
     document.body.appendChild(el);
     tasimaYaz();
+    cubukIsaretle();
     document.documentElement.classList.add(mini ? 'king-mini' : 'king-acik');
     ciz(mini ? false : undefined);
     /* Odak katmanı: soldaki kenar King'i açan tıkla uyanmış olabilir;
@@ -1845,6 +1846,13 @@ window.LIFEOS.KING = (function(){
     if(L.KABUK && typeof L.KABUK.kenarSakinlestir === 'function'){ try{ L.KABUK.kenarSakinlestir(); }catch(e){ /* kabuk yok */ } }
     /* Bir kare sonra: geçiş başlasın (ışık süzülür, baloncuk yükselir). */
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-acik')));
+  }
+
+  /* Büyük King sayfayı kilitler (king.css html.king-acik). Sayfa kayabiliyorsa
+     çubuğun yeri korunur; yoksa boş bir şerit açılmaz. Kilitten ÖNCE ölçülür. */
+  function cubukIsaretle(){
+    const h = document.documentElement;
+    h.classList.toggle('king-cubuk', h.scrollHeight > h.clientHeight);
   }
 
   /* Söz 9: küçük kutu. Perde ve ışık yok, sayfa kullanılır; kabuğun
@@ -1865,6 +1873,7 @@ window.LIFEOS.KING = (function(){
     const el = document.querySelector('[data-king]');
     if(el) el.classList.remove('is-mini');
     document.documentElement.classList.remove('king-mini');
+    cubukIsaretle();
     document.documentElement.classList.add('king-acik');
     ciz();
   }
@@ -1885,8 +1894,7 @@ window.LIFEOS.KING = (function(){
     if(!el) return;
     el.classList.remove('is-acik');
     el.classList.add('is-kapaniyor');
-    document.documentElement.classList.remove('king-acik');
-    document.documentElement.classList.remove('king-mini');
+    document.documentElement.classList.remove('king-acik', 'king-mini', 'king-cubuk');
     setTimeout(() => el.remove(), 360);
   }
 

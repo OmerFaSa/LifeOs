@@ -1069,4 +1069,43 @@
       expect(sh.k.akis().slice(-1)[0].metin).toContain('anlayamadım');
     }));
   });
+
+  /* Kullanıcı (2026-10-17): «King'de kaydırınca arkada sayfa kayıyor,
+     sonra yerinde sıkışıyor». Akış dibe gelince tekerlek arkadaki sayfaya
+     geçiyordu (Playwright: masaüstünde 208, telefonda 550 piksel); perdenin
+     üstünde de. Büyük King açıkken sayfa kilitli, akış kendi içinde kalır;
+     küçük kutuda sayfa serbesttir (söz 9). Test sayfası king.css'i
+     yüklemez: kural dosyadan okunup geçici olarak takılır. */
+  describe('King — kaydırma arkaya geçmez', () => {
+    async function stilli(fn){
+      const r = await fetch('../css/king.css');
+      const st = document.createElement('style');
+      st.textContent = await r.text();
+      document.head.appendChild(st);
+      try{ await fn(); } finally { st.remove(); }
+    }
+    const tasma = () => getComputedStyle(document.documentElement).overflowY;
+    it('büyük King açıkken sayfa kaymaz; küçülünce ve kapanınca serbest', () => stilli(() => sahneyle(async () => {
+      const once = tasma();
+      const { k } = sahne();
+      k.ac();
+      expect(tasma()).toBe('hidden');
+      const akis = document.querySelector('.king__akis');
+      expect(getComputedStyle(akis).overscrollBehaviorY).toBe('contain');
+      k.kucult();
+      expect(tasma()).toBe(once);
+      const son = document.querySelector('.king__mini-son');
+      if(son) expect(getComputedStyle(son).overscrollBehaviorY).toBe('contain');
+      k.buyut();
+      expect(tasma()).toBe('hidden');
+      k.kapat();
+      expect(tasma()).toBe(once);
+    })));
+    it('perdeye dokunuş kaydırma başlatmaz (telefon)', () => stilli(() => sahneyle(async () => {
+      const { k } = sahne();
+      k.ac();
+      expect(getComputedStyle(document.querySelector('.king-perde')).touchAction).toBe('none');
+      k.kapat();
+    })));
+  });
 })();

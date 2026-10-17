@@ -13432,7 +13432,13 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 @property --king-aci{ syntax:'<angle>'; inherits:false; initial-value:0deg; }
 
 .king{ position:fixed; inset:0; z-index:8990; pointer-events:none; }
-.king-perde{ position:absolute; inset:0; pointer-events:auto; opacity:0;
+/* Büyük King açıkken arkadaki sayfa KAYMAZ (2026-10-17, kullanıcı: «kaydırınca
+   arkada sayfa kayıyor, sonra sıkışıyor»): akışın dibinde ya da perdenin
+   üstünde tekerlek sayfaya geçiyordu. Çubuğun yeri korunur (king-cubuk:
+   sayfa kayabiliyorsa), içerik yana zıplamaz. Küçük kutuda sayfa serbest. */
+html.king-acik{ overflow:hidden; }
+html.king-acik.king-cubuk{ scrollbar-gutter:stable; }
+.king-perde{ position:absolute; inset:0; pointer-events:auto; opacity:0; touch-action:none;
   background:rgba(12,14,22,.2); -webkit-backdrop-filter:blur(4px) saturate(.9); backdrop-filter:blur(4px) saturate(.9);
   transition:opacity .52s cubic-bezier(.32,.72,0,1); }
 :root[data-theme="dark"] .king-perde{ background:rgba(0,0,0,.42); }
@@ -13477,7 +13483,7 @@ html.hesap-kapi-acik, html.hesap-merkez-acik{ overflow:hidden; }
 .king.is-kapaniyor .king__kutu{ opacity:0; transform:translate(-50%, 10px) scale(.985); transition-duration:.34s;
   transition-timing-function:cubic-bezier(.4,0,.2,1); }
 
-.king__akis{ display:flex; flex-direction:column; gap:10px; overflow-y:auto; min-height:0; padding:2px 2px 0; }
+.king__akis{ display:flex; flex-direction:column; gap:10px; overflow-y:auto; overscroll-behavior:contain; min-height:0; padding:2px 2px 0; }
 .king__balon{ display:flex; align-items:flex-start; gap:10px; max-width:100%; }
 .king__balon p{ margin:0; font-size:15px; line-height:1.45; color:var(--text); }
 .king__balon ul{ margin:6px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:3px; }
@@ -13639,7 +13645,7 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__buyut, .king__kucult{ margin-left:auto; }
 .king__buyut + .king__kapat, .king__kucult + .king__kapat{ margin-left:2px; }
 .king__buyut svg, .king__kucult svg{ fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-.king__mini-son{ display:flex; flex-direction:column; gap:3px; padding:2px 4px; font-size:14px; line-height:1.45; color:var(--text); overflow-y:auto; min-height:0; }
+.king__mini-son{ display:flex; flex-direction:column; gap:3px; padding:2px 4px; font-size:14px; line-height:1.45; color:var(--text); overflow-y:auto; overscroll-behavior:contain; min-height:0; }
 .king__mini-son p{ margin:0; }
 .king__mini-oz{ font-size:14px; font-weight:650; }
 .king__mini-soru{ color:var(--text); font-weight:550; }
@@ -16181,7 +16187,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'92a04dcc', at:'2026-10-17 13:16', dirty:true };
+ESP.BUILD = { id:'00671d16', at:'2026-10-17 20:28', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -34117,6 +34123,7 @@ window.LIFEOS.KING = (function(){
     if(mini) el.classList.add('is-mini');
     document.body.appendChild(el);
     tasimaYaz();
+    cubukIsaretle();
     document.documentElement.classList.add(mini ? 'king-mini' : 'king-acik');
     ciz(mini ? false : undefined);
     /* Odak katmanı: soldaki kenar King'i açan tıkla uyanmış olabilir;
@@ -34124,6 +34131,13 @@ window.LIFEOS.KING = (function(){
     if(L.KABUK && typeof L.KABUK.kenarSakinlestir === 'function'){ try{ L.KABUK.kenarSakinlestir(); }catch(e){ /* kabuk yok */ } }
     /* Bir kare sonra: geçiş başlasın (ışık süzülür, baloncuk yükselir). */
     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('is-acik')));
+  }
+
+  /* Büyük King sayfayı kilitler (king.css html.king-acik). Sayfa kayabiliyorsa
+     çubuğun yeri korunur; yoksa boş bir şerit açılmaz. Kilitten ÖNCE ölçülür. */
+  function cubukIsaretle(){
+    const h = document.documentElement;
+    h.classList.toggle('king-cubuk', h.scrollHeight > h.clientHeight);
   }
 
   /* Söz 9: küçük kutu. Perde ve ışık yok, sayfa kullanılır; kabuğun
@@ -34144,6 +34158,7 @@ window.LIFEOS.KING = (function(){
     const el = document.querySelector('[data-king]');
     if(el) el.classList.remove('is-mini');
     document.documentElement.classList.remove('king-mini');
+    cubukIsaretle();
     document.documentElement.classList.add('king-acik');
     ciz();
   }
@@ -34164,8 +34179,7 @@ window.LIFEOS.KING = (function(){
     if(!el) return;
     el.classList.remove('is-acik');
     el.classList.add('is-kapaniyor');
-    document.documentElement.classList.remove('king-acik');
-    document.documentElement.classList.remove('king-mini');
+    document.documentElement.classList.remove('king-acik', 'king-mini', 'king-cubuk');
     setTimeout(() => el.remove(), 360);
   }
 
