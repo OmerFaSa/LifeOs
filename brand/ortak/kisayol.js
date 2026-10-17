@@ -96,6 +96,8 @@ window.LIFEOS.KISAYOL = (function(){
     if(k === '/'){ if(ayar.palet){ ayar.palet(); return true; } return false; }
     if(k === 'N' || (kk === 'n' && e.shiftKey)){
       const N = window.LIFEOS.NOTUM;
+      const D = L.DEFTER;
+      if(D && D.kuruluMu && D.kuruluMu()){ D.ac(); return true; }
       if(N && N.kuruluMu && N.kuruluMu()){ N.panelAc(); return true; }
       return false;
     }
@@ -137,7 +139,8 @@ window.LIFEOS.KISAYOL = (function(){
     try{ l = (ayar && ayar.dugmeler) ? (ayar.dugmeler() || []) : []; }catch(e){ l = []; }
     l = l.filter(d => d && d.ad && (d.rota || d.is || d.doldur != null));
     const L = window.LIFEOS;
-    if(L.NOTUM && L.NOTUM.kuruluMu && L.NOTUM.kuruluMu()) l.push({ ad:'Notlarım', is:() => L.NOTUM.panelAc() });
+    if(L.DEFTER && L.DEFTER.kuruluMu && L.DEFTER.kuruluMu()) l.push({ ad:'Notlarım', is:() => L.DEFTER.ac() });
+    else if(L.NOTUM && L.NOTUM.kuruluMu && L.NOTUM.kuruluMu()) l.push({ ad:'Notlarım', is:() => L.NOTUM.panelAc() });
     if(L.KING && L.KING.ac) l.push({ ad:'King’e sor', is:() => L.KING.ac() });
     return l;
   }

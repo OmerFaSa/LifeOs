@@ -1,0 +1,88 @@
+/* DEFTER — biçim (brand/ortak/defter.js). Tek kaynak; ortak.py ile yayılır.
+   Masaüstü: solda notlar, sağda not. Telefon: liste ↔ not. */
+.defter{ position:fixed; inset:0; z-index:90; display:grid; place-items:center; }
+.defter__perde{ position:absolute; inset:0; background:rgba(10,12,20,.32); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+.defter__kutu{ position:relative; width:min(1180px, calc(100vw - 32px)); height:min(820px, calc(100vh - 32px)); display:flex; flex-direction:column;
+  background:var(--surface); color:var(--text); border-radius:24px; box-shadow:0 30px 80px -30px rgba(0,0,0,.45); overflow:hidden; }
+.defter__bas{ display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--border, rgba(0,0,0,.08)); }
+.defter__bas b{ font-size:16px; }
+.defter__bas [data-defter-say]{ font-size:12px; color:var(--text-2); }
+.defter__ara{ flex:1; min-width:0; min-height:36px; border:0; border-radius:12px; background:var(--surface-2); color:var(--text); font:inherit; font-size:14px; padding:0 12px; }
+.defter__yeni{ display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 14px; border:0; border-radius:999px; background:var(--text); color:var(--surface);
+  font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.defter__yeni svg, .defter__kapat svg, .defter__arac svg, .defter__dosya svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+.defter__kapat{ width:36px; height:36px; display:grid; place-items:center; border:0; border-radius:999px; background:transparent; color:var(--text-2); cursor:pointer; }
+.defter__kapat:hover{ background:var(--surface-2); }
+.defter__govdeler{ flex:1; min-height:0; display:grid; grid-template-columns:300px 1fr; }
+.defter__liste{ overflow-y:auto; padding:10px; border-right:1px solid var(--border, rgba(0,0,0,.08)); display:flex; flex-direction:column; gap:4px; }
+.defter__oge{ display:grid; grid-template-columns:1fr auto; gap:2px 8px; width:100%; padding:10px 12px; border:0; border-radius:12px; background:transparent;
+  color:var(--text); font:inherit; text-align:left; cursor:pointer; }
+.defter__oge:hover{ background:var(--surface-2); }
+.defter__oge.is-secili{ background:color-mix(in oklab, var(--primary) 12%, var(--surface)); }
+.defter__oge b{ font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.defter__oge span{ grid-column:1; font-size:12.5px; color:var(--text-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.defter__oge small{ grid-column:2; grid-row:1; font-size:11px; color:var(--text-2); }
+.defter__oge--ekran b::before{ content:'◦ '; color:var(--text-2); }
+.defter__bolum{ margin:12px 8px 4px; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--text-2); }
+.defter__bos, .defter__not{ font-size:13px; color:var(--text-2); margin:10px 8px; }
+.defter__sag{ min-width:0; overflow-y:auto; padding:18px 28px 22px; display:flex; flex-direction:column; gap:12px; }
+.defter__karsila{ margin:auto; text-align:center; max-width:420px; color:var(--text-2); }
+.defter__ust{ display:flex; align-items:center; gap:10px; }
+.defter__arac.defter__geri{ display:none; }
+.defter__baslik{ flex:1; min-width:0; border:0; background:transparent; color:var(--text); font:inherit; font-size:24px; font-weight:700; padding:4px 0; }
+.defter__baslik:focus{ outline:none; }
+.defter__kip{ min-height:34px; padding:0 14px; border:0; border-radius:999px; background:var(--surface-2); color:var(--text); font:inherit; font-size:13px; font-weight:600; cursor:pointer; }
+.defter__araclar{ display:flex; flex-wrap:wrap; gap:6px; }
+.defter__arac{ display:inline-flex; align-items:center; gap:6px; min-height:34px; padding:0 12px; border:0; border-radius:999px; background:var(--surface-2);
+  color:var(--text); font:inherit; font-size:13px; cursor:pointer; transition:transform 120ms ease; }
+.defter__arac:active{ transform:scale(.97); }
+.defter__arac.is-kayit{ background:var(--danger, #e5484d); color:#fff; }
+.defter__govde{ flex:1; min-height:320px; width:100%; resize:vertical; border:0; border-radius:16px; background:var(--surface-2); color:var(--text);
+  font:inherit; font-size:15px; line-height:1.6; padding:16px; }
+.defter__oku{ font-size:15.5px; line-height:1.65; }
+.defter__oku h2{ font-size:22px; margin:18px 0 8px; } .defter__oku h3{ font-size:18px; margin:16px 0 6px; } .defter__oku h4{ font-size:16px; margin:14px 0 4px; }
+.defter__oku p{ margin:0 0 10px; }
+.defter__oku code{ padding:1px 6px; border-radius:6px; background:var(--surface-2); font-size:.92em; }
+.defter__oku hr{ border:0; border-top:1px solid var(--border, rgba(0,0,0,.1)); margin:16px 0; }
+.defter__oku a{ color:var(--primary); }
+.defter__bag{ text-decoration:none; border-bottom:1px dashed currentColor; }
+.defter__etiket{ padding:1px 8px; border-radius:999px; background:var(--surface-2); color:var(--text-2); font-size:.88em; cursor:pointer; }
+.defter__yapilacak{ list-style:none; padding-left:0; }
+.defter__yapilacak .is-bitti{ text-decoration:line-through; color:var(--text-2); }
+.defter__gomulu{ margin:10px 0; }
+.defter__gomulu img, .defter__gomulu video{ display:block; max-width:100%; max-height:520px; border-radius:14px; background:var(--surface-2); }
+.defter__gomulu audio{ width:100%; }
+.defter__dosya{ display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border:0; border-radius:12px; background:var(--surface-2); color:var(--text); font:inherit; cursor:pointer; }
+.defter__dosya small{ color:var(--text-2); }
+.defter__yukleniyor, .defter__eksik{ font-size:13px; color:var(--text-2); }
+.defter__geriler{ display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; padding-top:10px; border-top:1px solid var(--border, rgba(0,0,0,.08)); font-size:13px; }
+.defter__geriler b{ color:var(--text-2); font-weight:600; }
+.defter__alt{ margin-top:auto; display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; font-size:12px; color:var(--text-2); }
+.defter__alt-is{ display:flex; gap:10px; }
+.defter__metin{ border:0; background:transparent; color:var(--text-2); font:inherit; font-size:12px; cursor:pointer; padding:4px 2px; min-height:24px; }
+.defter__metin:hover{ color:var(--text); }
+.defter__metin--sil{ color:var(--danger, #e5484d); }
+.defter :is(button, input, textarea):focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+
+/* Çizim tuvali */
+.defter-ciz{ position:fixed; inset:0; z-index:95; display:grid; place-items:center; background:rgba(10,12,20,.4); }
+.defter-ciz__kutu{ width:min(1100px, calc(100vw - 24px)); background:var(--surface); border-radius:20px; padding:12px; display:flex; flex-direction:column; gap:10px; }
+.defter-ciz__arac, .defter-ciz__alt{ display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+.defter-ciz__alt{ justify-content:flex-end; }
+.defter-ciz__arac button, .defter-ciz__alt button{ min-height:32px; padding:0 12px; border:0; border-radius:999px; background:var(--surface-2); color:var(--text); font:inherit; font-size:13px; cursor:pointer; }
+.defter-ciz__arac button.is-secili{ outline:2px solid var(--primary); }
+.defter-ciz__renk{ width:30px; padding:0 !important; }
+.defter-ciz__alt .is-ana{ background:var(--text); color:var(--surface); font-weight:600; }
+.defter-ciz__tuval{ width:100%; height:auto; aspect-ratio:1200/760; border-radius:12px; background:#fff; touch-action:none; cursor:crosshair; }
+
+@media (max-width:760px){
+  .defter__kutu{ width:100vw; height:100vh; border-radius:0; }
+  .defter__govdeler{ grid-template-columns:1fr; }
+  .defter__liste{ border-right:0; }
+  .defter.is-not .defter__liste{ display:none; }
+  .defter:not(.is-not) .defter__sag{ display:none; }
+  .defter__arac.defter__geri{ display:inline-flex; }
+  .defter__sag{ padding:14px 16px 18px; }
+  .defter__arac span{ display:none; }
+  .defter__yeni span{ display:none; }
+}

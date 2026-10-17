@@ -26,7 +26,7 @@ R.Palette = (function(){
     list.push(kip('karma', 'Karma test — konular karışık', 'zap'));
     list.push(kip('yanlis', 'Yanlışlarım — yeniden çöz', 'list'));
     list.push(go('learn','Öğrenme — video ve ders notu','play','Git'));
-    list.push({ group:'Git', label:'Notlarım — bütün notların', icon:'list', run(){ if(window.LIFEOS && window.LIFEOS.NOTUM) window.LIFEOS.NOTUM.panelAc(); } });
+    list.push({ group:'Git', label:'Notlarım — bütün notların', icon:'list', run(){ const L = window.LIFEOS || {}; if(L.DEFTER && L.DEFTER.kuruluMu()) L.DEFTER.ac(); else if(L.NOTUM) L.NOTUM.panelAc(); } });
     list.push(go('exams','Deneme','exam','Git'));
     list.push(go('quiz','Sınama — kendini test et','zap','Git'));
     list.push(go('cards','Tekrar ve yanlış defteri','cards','Git'));

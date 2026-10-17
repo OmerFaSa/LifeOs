@@ -1534,7 +1534,9 @@ window.LIFEOS.KING = (function(){
   function yerel(y, neden){
     if(y.tur === 'notlar'){
       kapat();
-      if(L.NOTUM && L.NOTUM.panelAc) L.NOTUM.panelAc();
+      /* Defter (NOT-PLANI) kuruluysa o; değilse eski Notlarım paneli. */
+      if(L.DEFTER && L.DEFTER.kuruluMu && L.DEFTER.kuruluMu()) L.DEFTER.ac();
+      else if(L.NOTUM && L.NOTUM.panelAc) L.NOTUM.panelAc();
       return y;
     }
     if(y.tur === 'ozet'){

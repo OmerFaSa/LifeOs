@@ -1698,6 +1698,11 @@ R.App = (function(){
           ekKaynak:() => R.KonuNotu.hepsi().map(x => ({ baglam:'konu:' + x.topic.id, metin:x.not, ad:x.topic.name, ust:x.subject.name,
             ac:async () => { await R.Ogren.sec(x.subject.id, x.topic.id); R.App.go('anlatim'); } })) });
       }
+      /* DEFTER (brand/ortak/defter.js, NOT-PLANI): resimli, çizimli, sesli notlar. */
+      if(window.LIFEOS && window.LIFEOS.DEFTER){
+        window.LIFEOS.DEFTER.kur({ modul:'ays', store:{ set:(p, d) => R.Store.set(p, d), list:c => R.Store.list(c), remove:p => R.Store.remove(p) } });
+        try{ await window.LIFEOS.DEFTER.yukle(); }catch(e){ /* defter boş başlar */ }
+      }
       if(window.LIFEOS && window.LIFEOS.GIRIS){
         window.LIFEOS.GIRIS.kur({ modul:'ays',
           onizle:t => {

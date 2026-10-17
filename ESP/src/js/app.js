@@ -1706,6 +1706,11 @@ ESP.App = (function(){
           ac:b => { const k = konuKarti(b); S.ui.topicOpen = String(b).replace(/^konu:/, ''); go((k && DISC_ROTA[k.discipline]) || 'today'); } });
         try{ await window.LIFEOS.NOTUM.yukle(); }catch(e){ /* notlar yüklenemedi; kutu boş başlar */ }
       }
+      /* DEFTER (brand/ortak/defter.js, NOT-PLANI): resimli, çizimli, sesli notlar. */
+      if(window.LIFEOS && window.LIFEOS.DEFTER){
+        window.LIFEOS.DEFTER.kur({ modul:'esp', store:{ set:(p, d) => ESP.Store.set(p, d), list:c => ESP.Store.list(c), remove:p => ESP.Store.remove(p) } });
+        try{ await window.LIFEOS.DEFTER.yukle(); }catch(e){ /* defter boş başlar */ }
+      }
       /* «Üç sistemi bağla» (HKM yüzü): gizli çerçevede yalnız eşle ve dön;
          ekran çizilmez (core/beacon.js hkmBagla). */
       if(ESP.Beacon && ESP.Beacon.bagCagrisiMi()){ await ESP.Beacon.hkmBagla(); return; }

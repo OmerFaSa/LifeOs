@@ -303,6 +303,9 @@ DOSYALAR = {
     "cikarim.test.js": "tests",
     "envanter.js":     "js/core",
     "envanter.test.js": "tests",
+    "defter.js":       "js/core",
+    "defter.css":      "css",
+    "defter.test.js":  "tests",
     # PUSULA — Kolay LifeOS planinin iki sayisi (KOLAY-PLANI §1, Faz 0, 2026-10-16).
     "pusula.js":       "js/core",
     "pusula.css":      "css",
