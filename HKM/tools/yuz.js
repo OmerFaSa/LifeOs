@@ -418,6 +418,36 @@ async function main(){
       }
       await ctx.close();
     }
+    /* ANİMASYON AYARI (2026-10-17, kullanıcı: «Merkez'de sol taraftaki
+       animasyonlar yok»): Windows'ta animasyon kapalıyken tarayıcı «azalt»
+       der; modüller LifeOS'un kendi ayarına bakar (varsayılan Tam), Merkez
+       ise doğrudan tarayıcıya bakıyordu ve kenarı hiç oynamıyordu. Aynı
+       kural: Tam (ya da çerez yok) oynar; Az durur; Sistem tarayıcıya uyar. */
+    {
+      const ctx = await browser.newContext({ viewport:{ width:1280, height:900 }, reducedMotion:'reduce' });
+      const sayfa = await ctx.newPage();
+      const kok = 'http://127.0.0.1:' + PORT + '/';
+      const sure = async kip => {
+        await ctx.clearCookies();
+        if(kip) await ctx.addCookies([{ name:'lifeos_hareket', value:kip, url:kok }]);
+        await sayfa.goto(kok, { waitUntil:'load' });
+        return sayfa.evaluate(() => {
+          const u = document.querySelector('.ust');
+          return { kenar:u ? getComputedStyle(u).transitionDuration : '', hareket:document.documentElement.getAttribute('data-hareket'),
+            mm:matchMedia('(prefers-reduced-motion: reduce)').matches };
+        });
+      };
+      const oynar = s => s.kenar.split(',').some(x => parseFloat(x) > 0);
+      for(const [kip, beklenen] of [[null, true], ['tam', true], ['az', false], ['sistem', false]]){
+        const s = await sure(kip);
+        const ad = kip ? '«' + kip + '»' : 'ayar yokken';
+        if(oynar(s) !== beklenen) hatalar.push('animasyon ayarı ' + ad + ' (tarayıcı azalt diyor): kenar '
+          + (beklenen ? 'oynamadı' : 'oynadı') + ' (' + s.kenar + ')');
+        if(s.mm === beklenen) hatalar.push('animasyon ayarı ' + ad + ': matchMedia azaltılmış hareketi yanlış söyledi');
+        if(s.hareket !== (kip || 'tam')) hatalar.push('animasyon ayarı ' + ad + ': data-hareket ' + s.hareket);
+      }
+      await ctx.close();
+    }
   }catch(err){
     hatalar.push('kosum hatasi: ' + (err && err.message ? err.message : err));
   }finally{

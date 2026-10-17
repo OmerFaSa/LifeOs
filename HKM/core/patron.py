@@ -456,29 +456,74 @@ def log(con, channel, role, text, now=None, agent="king"):
     con.commit()
 
 
-def history(con, limit=40, channel=None, agent=None):
+def _gorevli_kosulu(agent):
+    """Gorevlinin satirlari. Eski satirlarda gorevli bos olabilir; onlar
+    King'in akisi sayilir."""
+    if agent == "king":
+        return "(agent=? OR agent IS NULL OR agent='')", [agent]
+    return "agent=?", [agent]
+
+
+def history(con, limit=40, channel=None, agent=None, arsivli=False):
     """Konusma gecmisi. `agent` verilirse YALNIZ o gorevlinin akisi.
 
     Gorevli sutunu sonradan eklendi: eski satirlarda bos olabilir ve
     onlar King'in akisi sayilir — gecmisi silmek yerine yorumlamak, olmus
-    bir konusmayi yok saymamaktir."""
+    bir konusmayi yok saymamaktir. Arsive kaldirilan satir (sohbeti
+    temizle) varsayilan olarak gelmez: ne akista ne modelin baglaminda."""
     q = "SELECT * FROM conversations"
     kosul, args = [], []
+    if not arsivli:
+        kosul.append("COALESCE(arsiv,0)=0")
     if channel:
         kosul.append("channel=?")
         args.append(channel)
     if agent:
-        if agent == "king":
-            kosul.append("(agent=? OR agent IS NULL OR agent='')")
-        else:
-            kosul.append("agent=?")
-        args.append(agent)
+        k, a = _gorevli_kosulu(agent)
+        kosul.append(k)
+        args.extend(a)
     if kosul:
         q += " WHERE " + " AND ".join(kosul)
     q += " ORDER BY id DESC LIMIT ?"
     args.append(int(limit))
     rows = con.execute(q, args).fetchall()
     return [dict(r) for r in reversed(rows)]
+
+
+# --- sohbeti temizle / yedekle (kullanici, 2026-10-17) -----------------
+#
+# Temizle SILMEZ: gorevlinin acik akisi arsive kalkar (geri alinabilir,
+# kucuk aksiyon). Kalici silme yalniz arsivdekini siler; geri alinamaz,
+# bu yuzden cagiran acik onay ister (daemon 409). Gunluk tek mesaj
+# denetimi (already_sent) arsive bakmaz: temizlemek ikinci mesaj actirmaz.
+
+def sohbet_arsivle(con, agent):
+    k, a = _gorevli_kosulu(agent)
+    n = con.execute("UPDATE conversations SET arsiv=1 WHERE COALESCE(arsiv,0)=0 AND " + k, a).rowcount
+    con.commit()
+    return n
+
+
+def sohbet_geri(con, agent):
+    k, a = _gorevli_kosulu(agent)
+    n = con.execute("UPDATE conversations SET arsiv=0 WHERE arsiv=1 AND " + k, a).rowcount
+    con.commit()
+    return n
+
+
+def sohbet_disa(con, agent):
+    """Yedek: gorevlinin BUTUN satirlari, arsivdekiler dahil, eskiden yeniye."""
+    k, a = _gorevli_kosulu(agent)
+    rows = con.execute("SELECT id, channel, role, text, created_at, agent, COALESCE(arsiv,0) AS arsiv "
+                       "FROM conversations WHERE " + k + " ORDER BY id", a).fetchall()
+    return [dict(r) for r in rows]
+
+
+def sohbet_arsivi_sil(con, agent):
+    k, a = _gorevli_kosulu(agent)
+    n = con.execute("DELETE FROM conversations WHERE arsiv=1 AND " + k, a).rowcount
+    con.commit()
+    return n
 
 
 def already_sent(con, date, channel):

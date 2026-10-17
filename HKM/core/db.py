@@ -614,6 +614,9 @@ MIGRATIONS = [
     # Tek bir konusma akisi, dort ayri gorevlinin sozlerini birbirine
     # karistirirdi — ve «bunu kim soyledi» sorusu cevapsiz kalirdi.
     ("conversations", "agent", "TEXT"),
+    # Sohbeti temizle (2026-10-17): satir silinmez, arsive kalkar (1).
+    # Akista ve modelin baglaminda gorunmez; yedege girer, geri alinir.
+    ("conversations", "arsiv", "INTEGER NOT NULL DEFAULT 0"),
     ("attachments", "local_path", "TEXT"),
     ("attachments", "sha256", "TEXT"),
     ("attachments", "downloaded_at", "TEXT"),

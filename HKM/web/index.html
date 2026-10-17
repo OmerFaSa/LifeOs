@@ -26,6 +26,57 @@
     if(!az) document.documentElement.classList.add('gecis-gel');
   }catch(e){}
 })();
+/* ANİMASYON AYARI (2026-10-17, kullanıcı: «Merkez'de sol taraftaki
+   animasyonlar yok»). Windows'ta animasyon kapalıyken tarayıcı «azalt» der;
+   modüller LifeOS'un kendi ayarına bakar (brand/ortak/animasyon.js, çerez
+   lifeos_hareket, varsayılan Tam), Merkez doğrudan tarayıcıya bakıyordu ve
+   kenarı, geçişleri hiç oynamıyordu. Aynı dönüştürücü: prefers-reduced-
+   motion içeren medya kuralı ve matchMedia sorusu kipe göre yeniden
+   yazılır. Merkez tek dosyadır, ortak dosyayı yüklemez; kural kopyadır. */
+(function(){
+  var SORGU = /prefers-reduced-motion/i, OZELLIK = /^\(\s*prefers-reduced-motion\s*(?::\s*(reduce|no-preference)\s*)?\)$/i;
+  var kip = 'tam';
+  try{ kip = (/(?:^|;\s*)lifeos_hareket=(tam|az|sistem)/.exec(document.cookie || '') || [])[1] || 'tam'; }catch(e){}
+  document.documentElement.setAttribute('data-hareket', kip);
+  if(kip === 'sistem') return;
+  var az = kip === 'az';
+  function donustur(metin){
+    var hepsi = false, kalan = [];
+    String(metin).split(',').forEach(function(ham){
+      var q = ham.trim();
+      if(!q) return;
+      if(!SORGU.test(q)){ kalan.push(q); return; }
+      var m = /^(not\s+|only\s+)?([\s\S]*)$/i.exec(q);
+      var onek = (m[1] || '').trim().toLowerCase();
+      var parca = m[2].split(/\s+and\s+/i).map(function(s){ return s.trim(); }).filter(Boolean);
+      var dogru = true, geri = [];
+      parca.forEach(function(p){
+        var f = OZELLIK.exec(p);
+        if(!f){ geri.push(p); return; }
+        var deger = (f[1] || 'reduce').toLowerCase();
+        if(!(deger === 'no-preference' ? !az : az)) dogru = false;
+      });
+      if(geri.some(function(p){ return SORGU.test(p); })){ kalan.push(q); return; }
+      var degil = onek === 'not';
+      if(!dogru){ if(degil) hepsi = true; return; }
+      if(!geri.length){ if(!degil) hepsi = true; return; }
+      kalan.push((degil ? 'not ' + (/^\(/.test(geri[0]) ? 'all and ' : '') : onek === 'only' ? 'only ' : '') + geri.join(' and '));
+    });
+    if(hepsi) return 'all';
+    return kalan.length ? kalan.join(', ') : 'not all';
+  }
+  var gercek = window.matchMedia && window.matchMedia.bind(window);
+  if(gercek) window.matchMedia = function(q){ return gercek(SORGU.test(String(q)) ? donustur(String(q)) : q); };
+  function gez(kurallar){
+    Array.prototype.forEach.call(kurallar || [], function(r){
+      if(r.media && r.type === 4 && SORGU.test(r.media.mediaText)){ try{ r.media.mediaText = donustur(r.media.mediaText); }catch(e){} }
+      if(r.cssRules) gez(r.cssRules);
+    });
+  }
+  function uygula(){ Array.prototype.forEach.call(document.styleSheets, function(ss){ try{ gez(ss.cssRules); }catch(e){} }); }
+  uygula();
+  document.addEventListener('DOMContentLoaded', uygula);
+})();
 </script>
 <style>
 html.gecis-gel body{ animation:hkm-gecis .62s cubic-bezier(.32,.72,0,1) backwards; }
@@ -805,6 +856,14 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       <div class="gun"><h1>Sohbet</h1></div>
       <div class="card" id="gorevliler"></div>
       <div class="card" id="konusma">
+        <!-- Sohbeti yedekle / temizle (kullanıcı, 2026-10-17): temizlemek
+             silmez, arşive kaldırır; geri alınır. Kalıcı silme yalnız
+             arşivdekini siler ve ikinci dokunuşta sorar. -->
+        <div class="sohbet-arac" role="group" aria-label="Sohbet">
+          <button type="button" class="hayalet" id="sohbet-yedekle">Yedekle</button>
+          <button type="button" class="hayalet" id="sohbet-temizle">Temizle</button>
+        </div>
+        <p class="sohbet-arac__not" id="sohbet-arsiv" role="status" hidden></p>
         <div class="sohbet" id="konusmalar"></div>
         <div class="yaz yaz--hap">
           <textarea id="mesaj" rows="1" placeholder="Bir şey yaz…"
@@ -1689,6 +1748,55 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
       'Henüz konuşmadınız. Aşağıya bir şey yaz.');
     balonlarCiz($('bugun-konusmalar'), temiz.slice(-2),
       'Henüz konuşmadınız.');
+  }
+
+  /* ---------- sohbeti yedekle / temizle (2026-10-17) ----------
+     Seçili görevlinin akışı. Yedek tarayıcıya JSON dosyası olarak iner
+     (arşivdekiler dahil). Temizle arşive kaldırır; «Geri al» döndürür;
+     «Arşivi sil» geri alınamaz, ikinci dokunuşta sorar. */
+  var sohbetSilOnay = false;
+  function sohbetArsivCiz(metin, secenek){
+    var el = $('sohbet-arsiv');
+    if(!metin){ el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    el.innerHTML = '<span>' + esc(metin) + '</span>' + (secenek ? '<button type="button" class="hayalet" data-arsiv="geri">Geri al</button>'
+      + '<button type="button" class="hayalet hayalet--tehlike" data-arsiv="sil">' + (sohbetSilOnay ? 'Emin misin? Kalıcı sil' : 'Arşivi sil') + '</button>' : '');
+    Array.prototype.forEach.call(el.querySelectorAll('[data-arsiv]'), function(b){
+      b.addEventListener('click', function(){ b.dataset.arsiv === 'geri' ? sohbetGeri() : sohbetArsiviSil(metin); });
+    });
+  }
+  async function sohbetYedekle(){
+    var r = await api('/api/conversation/disa?agent=' + encodeURIComponent(GOREVLI));
+    if(r.status !== 200){ sohbetArsivCiz('Yedek alınamadı; Merkez’e ulaşılamadı.', false); return; }
+    var dosya = new Blob([JSON.stringify({ app:'lifeos-sohbet', agent:GOREVLI, at:new Date().toISOString(),
+      messages:r.body.messages }, null, 2)], { type:'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(dosya);
+    a.download = 'lifeos-sohbet-' + GOREVLI + '-' + bugun() + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+    sohbetArsivCiz(r.body.messages.length + ' mesaj yedeklendi (arşivdekiler dahil).', false);
+  }
+  async function sohbetTemizle(){
+    sohbetSilOnay = false;
+    var r = await api('/api/conversation/temizle', { method:'POST', body:JSON.stringify({ agent:GOREVLI }) });
+    if(r.status !== 200){ sohbetArsivCiz('Temizlenemedi; Merkez’e ulaşılamadı.', false); return; }
+    await konusmaYukle();
+    sohbetArsivCiz(r.body.arsivlenen ? r.body.arsivlenen + ' mesaj arşive kaldırıldı.' : 'Akış zaten boş.', r.body.arsivlenen > 0);
+  }
+  async function sohbetGeri(){
+    sohbetSilOnay = false;
+    var r = await api('/api/conversation/geri', { method:'POST', body:JSON.stringify({ agent:GOREVLI }) });
+    if(r.status !== 200){ sohbetArsivCiz('Geri alınamadı; Merkez’e ulaşılamadı.', false); return; }
+    await konusmaYukle();
+    sohbetArsivCiz(r.body.donen + ' mesaj geri geldi.', false);
+  }
+  async function sohbetArsiviSil(onceki){
+    if(!sohbetSilOnay){ sohbetSilOnay = true; sohbetArsivCiz(onceki, true); return; }
+    sohbetSilOnay = false;
+    var r = await api('/api/conversation/arsiv-sil', { method:'POST', body:JSON.stringify({ agent:GOREVLI, onay:true }) });
+    if(r.status !== 200){ sohbetArsivCiz('Silinemedi; Merkez’e ulaşılamadı.', false); return; }
+    sohbetArsivCiz(r.body.silinen + ' mesaj kalıcı silindi.', false);
   }
 
   async function konusmaYukle(){
@@ -5079,11 +5187,20 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
         el.hidden = el.dataset.bolme !== gorunum;
       });
     var cek = CEKMECE[gorunum] || gorunum;
+    /* Seçili zemin eski yerinden yenisine KAYAR (modüllerin kenarı,
+       kabuk.css «isaret-dikey»): eski üst kenar ölçülür, fark yeni seçiliye
+       --isaret-dy olarak yazılır. Önceki seçili yoksa yerinde belirir. */
+    var eski = document.querySelector('#gez a.on');
+    var eskiUst = eski && eski.dataset.yol !== cek ? eski.getBoundingClientRect().top : null;
     Array.prototype.forEach.call(
       document.querySelectorAll('#gez a'), function(a){
         var on = a.dataset.yol === cek;
         a.className = on ? 'on' : '';
         if(on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+        if(on && eskiUst !== null){
+          a.style.setProperty('--isaret-dy', (eskiUst - a.getBoundingClientRect().top) + 'px');
+          a.classList.add('is-kayan');
+        }
       });
     var bc = $('bolumcubugu'), grupVar = false;
     Array.prototype.forEach.call(
@@ -5751,6 +5868,8 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   $('ucbag').addEventListener('click', ucunuBagla);
   $('gonder').addEventListener('click', function(){
     mesajGonder('mesaj', 'gonder'); });
+  $('sohbet-yedekle').addEventListener('click', sohbetYedekle);
+  $('sohbet-temizle').addEventListener('click', sohbetTemizle);
   $('bugun-gonder').addEventListener('click', function(){
     mesajGonder('bugun-mesaj', 'bugun-gonder'); });
   /* Fikir 1: sesle tek cümle («bugün 2 saat matematik çalıştım, 7 saat
@@ -6459,7 +6578,21 @@ body:not(:has(#giris:not([hidden]))){ background:transparent; }
   .gez a[data-yol="ofis"]{ --ic:var(--ic-ofis); }
   .gez a[data-yol="sohbet"]{ --ic:var(--ic-sohbet); }
   .gez a[data-yol="ayarlar"]{ --ic:var(--ic-ayarlar); }
-  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .gez a{ width:44px; color:transparent; transition:color 0s, background .16s ease; }
+  /* Adlar modüllerin kenarı gibi gelir (kabuk.css «adlar satırın sonunda»):
+     yer açıldıktan sonra hafif bulanıktan netleşerek, 4 px soldan. Kapanışta
+     önce solar. Simge yerinden oynamaz. */
+  .gez__ad{ display:inline-block;
+    transition:opacity 340ms ease 140ms, transform 520ms cubic-bezier(.32,.72,0,1) 100ms, filter 340ms ease 140ms; }
+  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .gez a{ width:44px; transition:background .16s ease; }
+  .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .gez__ad{ opacity:0; transform:translateX(-4px); filter:blur(3px);
+    transition:opacity 140ms ease, transform 180ms ease, filter 140ms ease; }
+  /* Seçili zemin bir katmandır (::after): yeni çekmeceye eski yerinden kayar. */
+  .gez a{ isolation:isolate; }
+  header.ust .gez a.on{ background:transparent; }
+  .gez a.on::after{ content:''; position:absolute; inset:0; z-index:-1; border-radius:inherit; background:var(--yuzey); }
+  html[data-tema="koyu"] .gez a.on::after{ background:var(--yuzey-2); }
+  .gez a.on.is-kayan::after{ animation:gez-isaret 380ms cubic-bezier(.32,.72,0,1) both; }
+  @keyframes gez-isaret{ from{ transform:translateY(var(--isaret-dy, 0px)); } }
   .ust:is(:not(:hover), .ust--dinlen):not(:has(:focus-visible)) .bolumcubugu{ display:none; }
   .bolumcubugu{ width:196px; }
 
@@ -6475,7 +6608,10 @@ body:not(:has(#giris:not([hidden]))){ background:transparent; }
 }
 @media (min-width:1024px) and (prefers-reduced-motion: reduce){
   .ust, .ust:hover, .ust:has(:focus-visible){ transition:none; }
+  .gez__ad, .ust .gez__ad{ transition:none !important; filter:none !important; transform:none !important; }
+  .gez a.on.is-kayan::after{ animation:none; }
 }
+@media (min-width:1024px) and (prefers-color-scheme: dark){ html:not([data-tema="acik"]) .gez a.on::after{ background:var(--yuzey-2); } }
 
 /* ---- süzülen kart (kullanıcı, 2026-10-03: «kartlara da gölge ekle»):
    modüllerle aynı jeton (brand/ortak/kabuk.css «SÜZÜLEN KART»). Kart
@@ -6878,6 +7014,12 @@ button.hayalet:hover{ background:var(--gri-ray); color:var(--fg); }
 .yaz__ses:hover{ background:var(--gri-ray); color:var(--fg); }
 .yaz__ses[aria-pressed="true"]{ background:var(--mer-t); color:var(--mer); animation:hkm-king-nefes 1.6s ease-in-out infinite; }
 .yaz__not{ margin:8px 6px 0; font-size:12.5px; }
+/* Sohbet araçları (2026-10-17): kartın sağ üstünde iki sakin düğme;
+   arşiv satırı yalnız bir şey olunca. */
+.sohbet-arac{ display:flex; justify-content:flex-end; gap:2px; margin:-8px -8px 4px 0; }
+.sohbet-arac__not{ display:flex; flex-wrap:wrap; align-items:center; gap:4px 6px; margin:0 0 10px; font-size:12.5px; color:var(--dim); }
+.sohbet-arac__not span{ margin-right:4px; }
+button.hayalet--tehlike{ color:var(--danger); }
 .yaz__not:empty{ display:none; }
 
 /* Konsey: üç satır. */

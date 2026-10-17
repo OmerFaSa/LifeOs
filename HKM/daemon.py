@@ -44,6 +44,10 @@ Ucnoktalar:
     POST /api/chat/tani             sohbet zincirini dener, nerede koptugunu soyler
     GET  /api/agents                gorevliler ve her birinin hazir olup olmadigi
     GET  /api/conversation          son konusma kayitlari
+    POST /api/conversation/temizle  gorevlinin akisini arsive kaldirir ({agent}); silmez
+    POST /api/conversation/geri     arsivi akisa dondurur ({agent})
+    POST /api/conversation/arsiv-sil  yalniz arsivdekini kalici siler ({agent, onay:true})
+    GET  /api/conversation/disa?agent=  yedek: gorevlinin butun konusmasi (arsiv dahil)
     GET  /api/attachments           gelen medya ve analiz kuyrugu
     POST /api/pair/open             esleme penceresini acar (bearer ister)
     GET  /api/pair/status           pencere acik mi (bearer ister)
@@ -970,6 +974,11 @@ class Handler(BaseHTTPRequestHandler):
                                     "pairs": cross.scan(self.con, date, days)})
         if u.path == "/api/pair/status":
             return self._pair_status()
+        if u.path == "/api/conversation/disa":
+            ajan = ((q.get("agent") or [""])[0] or "").strip()
+            if not ajan:
+                return self._send(422, {"error": "agent gerekli"})
+            return self._send(200, {"agent": ajan, "messages": patron.sohbet_disa(self.con, ajan)})
         if u.path == "/api/conversation":
             try:
                 limit = int((q.get("limit") or [40])[0])
@@ -1284,6 +1293,26 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(401, {"error": "bearer gerekli"})
         if u.path.startswith("/api/meydan/"):
             return self._meydan_post(u)
+        if u.path in ("/api/conversation/temizle", "/api/conversation/geri",
+                      "/api/conversation/arsiv-sil"):
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                istek = _nesne(ham) or {}
+            except ValueError:
+                return self._send(400, {"error": "govde JSON nesnesi olmali"})
+            ajan = str(istek.get("agent") or "").strip()
+            if not ajan:
+                return self._send(422, {"error": "agent gerekli"})
+            if u.path.endswith("/temizle"):
+                return self._send(200, {"arsivlenen": patron.sohbet_arsivle(self.con, ajan)})
+            if u.path.endswith("/geri"):
+                return self._send(200, {"donen": patron.sohbet_geri(self.con, ajan)})
+            if istek.get("onay") is not True:
+                return self._send(409, {"error": "kalici silme acik onay ister",
+                                        "note": "Arşivdeki konuşma geri getirilemez; önce yedek almak iyi olur."})
+            return self._send(200, {"silinen": patron.sohbet_arsivi_sil(self.con, ajan)})
         if u.path == "/api/pair/open":
             ham, hata = self._read_body()
             if hata:

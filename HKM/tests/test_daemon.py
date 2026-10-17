@@ -461,6 +461,48 @@ def _run():
             eq(S.call("/api/conversation", token=None)[0], 401)
         test("mesaj ve konusma jetonsuz acilmaz", t_message_needs_token)
 
+        def t_sohbet_temizle_yedekle():
+            """Kullanici (2026-10-17): «sohbeti temizle; bazi seyleri silmemiz,
+            yedeklememiz lazim, secenegi olsun». Temizle SILMEZ: gorevlinin
+            akisini arsive kaldirir (gorunmez, modelin baglamina girmez),
+            «geri» dondurur. Yedek arsivdekileri de tasir. Kalici silme
+            yalniz ARSIVDEKINI siler ve acik onay ister. Oteki gorevlinin
+            akisina dokunulmaz; jetonsuz hicbiri acilmaz."""
+            con = db.connect(S.db_path)
+            con.execute("DELETE FROM conversations")
+            for i, (ajan, rol) in enumerate([("king", "user"), ("king", "manager"), (None, "user"),
+                                              ("bio", "user"), ("bio", "manager")]):
+                con.execute("INSERT INTO conversations(channel, role, text, created_at, agent) "
+                            "VALUES ('local', ?, ?, ?, ?)", (rol, "m%d" % i, BUGUN + "T09:0%d:00" % i, ajan))
+            con.commit()
+            akis = lambda a: [m["text"] for m in S.call("/api/conversation?limit=50&agent=" + a)[1]["messages"]]
+            eq(akis("king"), ["m0", "m1", "m2"])
+            kod, r = S.call("/api/conversation/temizle", body={"agent": "king"})
+            eq((kod, r["arsivlenen"]), (200, 3))
+            eq(akis("king"), [])
+            eq(akis("bio"), ["m3", "m4"])                       # oteki gorevli durur
+            from core import patron
+            eq(patron.history(con, limit=12, agent="king"), [])  # model baglamina da girmez
+            kod, y = S.call("/api/conversation/disa?agent=king")
+            eq(kod, 200)
+            eq([m["text"] for m in y["messages"]], ["m0", "m1", "m2"])
+            ok(all(m["arsiv"] == 1 for m in y["messages"]))
+            kod, r = S.call("/api/conversation/geri", body={"agent": "king"})
+            eq((kod, r["donen"]), (200, 3))
+            eq(akis("king"), ["m0", "m1", "m2"])
+            S.call("/api/conversation/temizle", body={"agent": "king"})
+            eq(S.call("/api/conversation/arsiv-sil", body={"agent": "king"})[0], 409)   # onaysiz silinmez
+            kod, r = S.call("/api/conversation/arsiv-sil", body={"agent": "king", "onay": True})
+            eq((kod, r["silinen"]), (200, 3))
+            eq(S.call("/api/conversation/geri", body={"agent": "king"})[1]["donen"], 0)
+            eq(akis("bio"), ["m3", "m4"])
+            eq(S.call("/api/conversation/temizle", body={"agent": ""})[0], 422)
+            for yol in ("/api/conversation/temizle", "/api/conversation/geri", "/api/conversation/arsiv-sil"):
+                eq(S.call(yol, body={"agent": "bio"}, token=None)[0], 401, yol)
+            eq(S.call("/api/conversation/disa?agent=bio", token=None)[0], 401)
+            con.close()
+        test("sohbet temizlenir, yedeklenir, geri alinir; arsiv onayla silinir", t_sohbet_temizle_yedekle)
+
         def t_wa_challenge():
             kod, govde = S.ham(
                 "/api/wa/webhook?hub.mode=subscribe&hub.verify_token=WADOGRULAMA"
