@@ -16669,7 +16669,7 @@ R.Perde = (function(){
 
 window.R = window.R || {};
 
-R.BUILD = { id:'2697f2ed', at:'2026-10-17 11:37', dirty:true };
+R.BUILD = { id:'bf7e382b', at:'2026-10-17 11:41', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -31674,6 +31674,17 @@ LIFEOS.CIKARIM = (function(){
       return { id:'spi-kahve:sik', alan:'sevgi',
         soru:'Son 30 günde ' + k + ' gün kahve içmişsin. Kahvesiz bir gün sana eksik gibi mi geliyor?',
         kanit:k + ' gün', kayit:'Kahveyi sever; neredeyse her gün içer (onayladı)' };
+    },
+    /* SPİ: kişisel tahmin ağının en etkili özelliği (yalnız model tabanı geçtiyse). */
+    function spiModel(v){
+      const m = v.spi && v.spi.model;
+      if(!m || !m.iyi || !(m.onem || []).length) return null;
+      const x = m.onem[0];
+      const yon = x.yon > 0 ? 'arttıkça kendini daha iyi hissediyorsun' : x.yon < 0 ? 'arttıkça kendini daha kötü hissediyorsun' : 'ruh hâlinle birlikte değişiyor';
+      return { id:'spi-model:' + x.ozellik + ':' + x.yon, alan:'ruh',
+        soru:'Ruh hâli modelim ' + m.n + ' gününden şunu öğrendi: «' + x.ad + '» ' + yon + '. Ruh hâlini en çok etkileyen şeylerden biri bu gibi.',
+        kanit:'model tabandan %' + m.kazanc + ' iyi; birliktelik, neden değil',
+        kayit:x.ad + ' ruh hâlini etkiliyor: ' + yon.replace('hissediyorsun', 'hissediyor') + ' (onayladı)' };
     },
     /* Radyo: çalışırken dinlenen tür (zayıf kanıt: soru olarak). */
     function sesTur(v){

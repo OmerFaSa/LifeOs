@@ -264,6 +264,17 @@ LIFEOS.CIKARIM = (function(){
         soru:'Son 30 günde ' + k + ' gün kahve içmişsin. Kahvesiz bir gün sana eksik gibi mi geliyor?',
         kanit:k + ' gün', kayit:'Kahveyi sever; neredeyse her gün içer (onayladı)' };
     },
+    /* SPİ: kişisel tahmin ağının en etkili özelliği (yalnız model tabanı geçtiyse). */
+    function spiModel(v){
+      const m = v.spi && v.spi.model;
+      if(!m || !m.iyi || !(m.onem || []).length) return null;
+      const x = m.onem[0];
+      const yon = x.yon > 0 ? 'arttıkça kendini daha iyi hissediyorsun' : x.yon < 0 ? 'arttıkça kendini daha kötü hissediyorsun' : 'ruh hâlinle birlikte değişiyor';
+      return { id:'spi-model:' + x.ozellik + ':' + x.yon, alan:'ruh',
+        soru:'Ruh hâli modelim ' + m.n + ' gününden şunu öğrendi: «' + x.ad + '» ' + yon + '. Ruh hâlini en çok etkileyen şeylerden biri bu gibi.',
+        kanit:'model tabandan %' + m.kazanc + ' iyi; birliktelik, neden değil',
+        kayit:x.ad + ' ruh hâlini etkiliyor: ' + yon.replace('hissediyorsun', 'hissediyor') + ' (onayladı)' };
+    },
     /* Radyo: çalışırken dinlenen tür (zayıf kanıt: soru olarak). */
     function sesTur(v){
       const s = v.ses;

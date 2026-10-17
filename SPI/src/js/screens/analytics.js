@@ -46,6 +46,27 @@ SP.Screens.analytics = (function(){
     });
   }
 
+  /* KİŞİSEL TAHMİN AĞI (core/tahmin.js): ruh hâli, senin verinden; dürüst sınama. */
+  function modelCard(){
+    if(!SP.Tahmin) return '';
+    const m = SP.Tahmin.durum();
+    if(!m.ok) return K.Card({ title:'Ruh hâli modeli', badge:K.Badge({ label:'öğreniyor', tone:'muted' }),
+      body:K.Notice({ tone:'info', body:m.why + ' Bugün ekranındaki «Günün hissi»ni işaretledikçe öğrenir.' }) });
+    const vg = x => String(x).replace('.', ',');
+    return K.Card({
+      title:'Ruh hâli modeli', sub:m.n + ' gün · ' + m.ozellikSayisi + ' özellik · ' + m.parametre + ' parametre',
+      badge:K.Badge({ label:m.iyi ? 'tabandan %' + m.kazanc + ' iyi' : 'henüz tabanı geçmedi', tone:m.iyi ? 'ok' : 'muted' }),
+      body:html`
+        ${when(m.iyi && m.bugun != null, () => K.Stat({ label:'Bugün için tahmin', value:vg(m.bugun) + ' / 5', note:'tahmin · ölçüm değil' }))}
+        <p class="tiny dim mt-8">Son ${m.sinav} günde ortalama hata ${vg(m.maeModel)}; «her gün ortanca his» diyen taban ${vg(m.maeTaban)}.
+          ${m.iyi ? '' : ' Model tabandan en az %10 iyi olmadan tahmin göstermez.'}</p>
+        ${when(m.onem.length, () => html`<div class="list mt-8">${map(m.onem.slice(0, 4), x => html`
+          <div class="listitem"><div class="grow"><b class="small">${x.ad}</b>
+            <div class="tiny dim">${x.yon > 0 ? 'arttıkça hissin yükseliyor' : x.yon < 0 ? 'arttıkça hissin düşüyor' : 'yönü belirsiz'} · birliktelik, neden değil</div></div>
+            ${P.cert('estimated')}</div>`)}</div>`)}`,
+    });
+  }
+
   function pairCard(){
     const a = S.ui.pairA || 'sleep';
     const b = S.ui.pairB || 'hrv';
@@ -452,7 +473,7 @@ SP.Screens.analytics = (function(){
      çubuğu sayfa içinde o okumaya kaydırır. Bir bölüm çizilemezse yalnız o
      bölüm sakin bir notla düşer; öteki dördü durur. */
   const BODIES = {
-    capraz:() => html`${K.Ledger(() => [crossCard(), pairCard()])}
+    capraz:() => html`${K.Ledger(() => [modelCard(), crossCard(), pairCard()])}
       <div class="mt-24">${raw(UI.rail(['correlation', 'trend', 'certainty']))}</div>`,
     hafta:() => html`${K.Ledger(() => [reportCard(), disciplineCard(),
         K.Entry({ label:'Raporun mantığı', meta:'sayı nereden gelir',

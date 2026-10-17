@@ -1627,7 +1627,9 @@ SP.App = (function(){
             }
             const katAd = {};
             (SP.FOOD_CATS || []).forEach(c => { katAd[c.id] = c.label; });
-            return { spi:{ yatis, yemekKat:kat, katAd, antrenman30:ant, uyku, hisUyku, kahveGun } };
+            let model = null;
+            try{ const t = SP.Tahmin && SP.Tahmin.durum(); if(t && t.ok) model = { iyi:t.iyi, onem:t.onem, n:t.n, kazanc:t.kazanc }; }catch(e){ model = null; }
+            return { spi:{ yatis, yemekKat:kat, katAd, antrenman30:ant, uyku, hisUyku, kahveGun, model } };
           },
           /* King'e gelen fotoğraf (king.js söz 11): Fotoğraftan öğün akışına. */
           foto:[{ ad:'Öğün olarak oku', is:async f => {
