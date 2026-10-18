@@ -197,5 +197,18 @@
       expect(S.forecasts[0].kind).toBe('minutes');
       expect(S.forecasts[0].guess).toBe(5);
     });
+
+    /* Analiz denetimi (Bulgu 5): mutlak hata ailesi (sessions oturum,
+       retention puan, readability puan) 100 ile çarpılıp yüzde olarak basılmaz. */
+    it('mutlak hata turleri (oturum, puan) yuzdeye carpilmaz; kendi birimiyle yazilir', async () => {
+      resetState();
+      kapali('sessions', 5, 3);
+      const fo = K().settled()[0];
+      expect(K().errorText(fo)).toBe('2 oturum');
+      expect(K().errorText(fo).indexOf('%')).toBe(-1);
+      const html = String(await ESP.Screens.analytics.render());
+      expect(html.indexOf('%200')).toBe(-1);
+      expect(html.indexOf('2 oturum') >= 0).toBeTruthy();
+    });
   });
 })();

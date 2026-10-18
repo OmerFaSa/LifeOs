@@ -228,8 +228,8 @@ R.Screens.analytics = (function(){
               K.Stat({ label:'İlk tahmin', value:U.fmtNum(first.rank), note:U.fmtShort(first.date) }),
               K.Stat({ label:'Son tahmin', value:U.fmtNum(last.rank), note:U.fmtShort(last.date),
                 tone:last.rank <= target ? 'ok' : null }),
-              K.Stat({ label:'Değişim', value:(moved > 0 ? '−' : '+')+U.fmtNum(Math.abs(moved)),
-                note:moved > 0 ? 'sıra iyileşti' : 'sıra geriledi',
+              K.Stat({ label:'Değişim', value:moved === 0 ? '0' : (moved > 0 ? '−' : '+')+U.fmtNum(Math.abs(moved)),
+                note:moved > 0 ? 'sıra iyileşti' : moved < 0 ? 'sıra geriledi' : 'sıra değişmedi',
                 tone:moved > 0 ? 'ok' : moved < 0 ? 'warn' : null }),
             ])}` }),
 

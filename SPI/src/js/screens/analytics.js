@@ -353,11 +353,9 @@ SP.Screens.analytics = (function(){
           headers:['Tür', { label:'Tahmin', num:true }, { label:'Gerçek', num:true },
             { label:'Sapma', num:true }],
           rows:SP.Calib.settled().slice(0, 10).map(fo => {
-            const h = SP.Calib.error(fo);
             return [(SP.Calib.kindOf(fo.kind) || {}).label || fo.kind,
               U.fmtNum(fo.guess), U.fmtNum(fo.actual),
-              h == null ? '—' : (h.type === 'brier' ? h.value.toFixed(2)
-                : '%' + Math.round(h.value * 100))];
+              SP.Calib.errorText(fo) || '—'];
           }) }))}`,
     });
   }
@@ -579,9 +577,8 @@ SP.Screens.analytics = (function(){
       const inp = document.getElementById('sp-calib-actual-' + id);
       const r = await SP.Calib.settle(id, inp ? inp.value : null);
       if(!r.ok){ UI.toast(r.error); return; }
-      const h = SP.Calib.error(r.forecast);
-      UI.toast(h && h.type === 'ape'
-        ? 'Kapandı — sapma %' + Math.round(h.value * 100) : 'Kapandı');
+      const yazi = SP.Calib.errorText(r.forecast);
+      UI.toast(yazi ? ('Kapandı — sapma ' + yazi) : 'Kapandı');
       SP.App.render();
     },
   };

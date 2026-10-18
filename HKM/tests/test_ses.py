@@ -102,6 +102,15 @@ def run():
         eq(con.execute("SELECT COUNT(*) FROM usage WHERE ok=0").fetchone()[0], 1)
 
     def t_piper_bul():
+        # Gercek kurulu Piper'i gormesin: yalniz verilen klasorde arar.
+        eski = ses._adaylar
+        ses._adaylar = lambda cfg: [ses.settings(cfg)["piper_yol"]] * 2
+        try:
+            _t_piper_bul()
+        finally:
+            ses._adaylar = eski
+
+    def _t_piper_bul():
         d = _piper_dizini()
         p = ses.piper_bul({"ses": {"piper_yol": d}}, ara=lambda x: None)
         eq((p["bulundu"], os.path.basename(p["exe"]), os.path.basename(p["ses"])),

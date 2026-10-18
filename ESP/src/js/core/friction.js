@@ -242,7 +242,7 @@ ESP.Friction = (function(){
         note:'Zamanlayıcı, oturum girişinin çoğunu ortadan kaldırır: '
            + 'başlat–bitir, kayıt kendiliğinden düşer.', act:'timer-hint' });
     }
-    const bek = (ESP.S.proposals || []).filter(p => p.status === 'pending').length;
+    const bek = (ESP.S.proposals || []).filter(p => p.state === 'proposed' || p.status === 'pending').length;
     if(bek > 4){
       out.push({ id:'clear-proposals', label:bek + ' bekleyen teklif',
         note:'Karar bekleyen her teklif, her açılışta yeniden okunuyor. '

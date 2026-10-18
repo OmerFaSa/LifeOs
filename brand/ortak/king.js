@@ -348,6 +348,38 @@ window.LIFEOS.KING = (function(){
     sentez:() => (typeof window !== 'undefined' && window.speechSynthesis && typeof window.SpeechSynthesisUtterance === 'function')
       ? window.speechSynthesis : null,
     soz:m => new window.SpeechSynthesisUtterance(m),
+    /* Söz 29: mikrofonu kaydeder; sessizlikte `sessiz` çağrılır. Mikrofon yoksa null. */
+    kayitAc:(typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+      && typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)) ? async sessiz => {
+      const akis = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } });
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const kaynak = ctx.createMediaStreamSource(akis);
+      const isle = ctx.createScriptProcessor(4096, 1, 1);
+      const parca = [];
+      let konustu = false, sessizN = 0, toplam = 0, bitti = false;
+      isle.onaudioprocess = e => {
+        const d = e.inputBuffer.getChannelData(0);
+        parca.push(new Float32Array(d));
+        toplam += d.length;
+        let t = 0;
+        for(let i = 0; i < d.length; i++) t += d[i] * d[i];
+        if(Math.sqrt(t / d.length) > 0.02){ konustu = true; sessizN = 0; } else if(konustu) sessizN += d.length;
+        const hz = ctx.sampleRate;
+        if(!bitti && ((konustu && sessizN > hz * 1.4) || toplam > hz * 60 || (!konustu && toplam > hz * 8))) sessiz();
+      };
+      kaynak.connect(isle); isle.connect(ctx.destination);
+      return { bitir:() => {
+        bitti = true;
+        try{ isle.disconnect(); kaynak.disconnect(); }catch(e){ /* kopuk */ }
+        try{ akis.getTracks().forEach(t => t.stop()); }catch(e){ /* durmus */ }
+        const hz = ctx.sampleRate;
+        try{ ctx.close(); }catch(e){ /* kapali */ }
+        const pcm = new Float32Array(toplam);
+        let o = 0;
+        parca.forEach(p => { pcm.set(p, o); o += p.length; });
+        return { pcm, hz, konustu };
+      } };
+    } : null,
     /* Söz 28: sunucunun WAV'ını çalar. Döner: 'bitti' | 'olmadi' (çalınamadı:
        tarayıcı izin vermedi ya da dosya bozuk). `tut` durdurucuyu alır. */
     oynat:(blob, tut, h) => new Promise(ok => {
@@ -924,6 +956,8 @@ window.LIFEOS.KING = (function(){
 
   function dinle(){
     if(dinleyen){ try{ dinleyen.stop(); }catch(e){ /* kapalı */ } return; }
+    const hk = !hkmDinlemez && ortam.kayitAc ? baglanti() : null;
+    if(hk){ kayitDinle(hk); return; }
     const T = ortam.tanima();
     if(!T) return;
     sus();
@@ -944,9 +978,13 @@ window.LIFEOS.KING = (function(){
       if(g) g.value = (kesin + ara).trim();
     };
     r.onerror = e => { hata = (e && e.error) || 'hata'; };
-    r.onend = () => {
-      dinleyen = null;
-      durum();
+    r.onend = () => { dinleyen = null; durum(); tanindi(son, hata); };
+    dinleyen = r;
+    try{ r.start(); }catch(e){ dinleyen = null; }
+    durum();
+  }
+  /* Tanima bitti (tarayici ya da HKM): metin ya da hata. */
+  function tanindi(son, hata){
       const g = typeof document !== 'undefined' ? document.querySelector('.king__girdi') : null;
       if(son){
         if(g) g.value = '';
@@ -967,10 +1005,68 @@ window.LIFEOS.KING = (function(){
       }else if(hata && hata !== 'aborted'){
         soyle(hata === 'no-speech' ? 'Bir şey duyamadım. Yeniden dener misin?' : 'Ses tanınamadı; yazarak da sorabilirsin.');
       }
+  }
+
+  /* Söz 29 (2026-10-19): HKM bağlıysa konuşma kaydedilir ve HKM yazıya döker:
+     bu PC'de Whisper varsa o (ücretsiz, ses çıkmaz), yoksa Gemini. HKM ikisini
+     de bulamazsa bir kez söylenir ve sonraki dinlemeler tarayıcının tanımasıyla
+     yapılır. Kayıt sessizlikte (1,4 sn) kendiliğinden biter. */
+  let hkmDinlemez = false;
+  function wavYap(pcm, hz){
+    const ORAN = 16000, n = Math.max(0, Math.floor(pcm.length * ORAN / hz));
+    const v = new DataView(new ArrayBuffer(44 + n * 2));
+    const yaz = (o, m) => { for(let i = 0; i < m.length; i++) v.setUint8(o + i, m.charCodeAt(i)); };
+    yaz(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); yaz(8, 'WAVEfmt '); v.setUint32(16, 16, true);
+    v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, ORAN, true); v.setUint32(28, ORAN * 2, true);
+    v.setUint16(32, 2, true); v.setUint16(34, 16, true); yaz(36, 'data'); v.setUint32(40, n * 2, true);
+    for(let i = 0; i < n; i++){
+      const x = Math.max(-1, Math.min(1, pcm[Math.min(pcm.length - 1, Math.floor(i * hz / ORAN))] || 0));
+      v.setInt16(44 + i * 2, x < 0 ? x * 0x8000 : x * 0x7fff, true);
+    }
+    const b = new Uint8Array(v.buffer);
+    let ikili = '';
+    for(let i = 0; i < b.length; i += 0x8000) ikili += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+    return btoa(ikili);
+  }
+  async function yaziyaDok(k, wav){
+    try{
+      const f = ortam.fetch;
+      const res = await f(k.url + '/api/dinle', { method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token }, body:JSON.stringify({ wav }) });
+      let g = null;
+      try{ g = await res.json(); }catch(e){ g = null; }
+      if(res.status === 200 && g && typeof g.metin === 'string') return g.metin;
+      if(res.status === 503) hkmDinlemez = true;
+      return null;
+    }catch(e){ return null; }
+  }
+  async function kayitDinle(k){
+    sus();
+    let kayit = null, bitti = false;
+    const sonlandir = async () => {
+      if(bitti) return;
+      bitti = true;
+      const r = kayit ? kayit.bitir() : null;
+      dinleyen = null;
+      durum();
+      if(!r || !r.konustu){ tanindi('', 'no-speech'); return; }
+      const g = typeof document !== 'undefined' ? document.querySelector('.king__girdi') : null;
+      const eski = g ? g.placeholder : '';
+      if(g) g.placeholder = 'Yazıya dökülüyor…';
+      const t = await yaziyaDok(k, wavYap(r.pcm, r.hz));
+      if(g) g.placeholder = eski;
+      if(t === null){
+        soyle(hkmDinlemez ? 'Bu bilgisayarda Whisper yok, Gemini de hazır değil; bundan sonra tarayıcının tanımasını deneyeceğim.'
+          : 'Ses yazıya dökülemedi; yazarak da sorabilirsin.');
+        return;
+      }
+      tanindi(t, t ? '' : 'no-speech');
     };
-    dinleyen = r;
-    try{ r.start(); }catch(e){ dinleyen = null; }
+    dinleyen = { stop:sonlandir, abort:() => { bitti = true; if(kayit) try{ kayit.bitir(); }catch(e){} dinleyen = null; durum(); } };
     durum();
+    try{ kayit = await ortam.kayitAc(() => { sonlandir(); }); }
+    catch(e){ bitti = true; dinleyen = null; durum(); tanindi('', 'not-allowed'); return; }
+    if(bitti && kayit) try{ kayit.bitir(); }catch(e){ /* durmus */ }
   }
 
   /* Söz 15: aynı günün son mesajları bu cihazda. */
@@ -2403,6 +2499,7 @@ window.LIFEOS.KING = (function(){
     envanter = null; ortam.depo.sil(USLUP);
     ortam.depo.sil(TANISMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
+    if(dinleyen){ try{ dinleyen.onend = dinleyen.onerror = null; dinleyen.abort(); }catch(e){ /* durmus */ } }
     sesli = false; dinleyen = null; konusuyor = 0; sesNo++; calan = null; sonMotor = '';
   }
 
@@ -2414,7 +2511,7 @@ window.LIFEOS.KING = (function(){
     cikarimAdaylari, cikarimKarti, cikarimOnayla, SORMA, sormaKomutu, sormaMi, sormaListesi,
     USLUP, envanterVar:() => !!envanter,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
-    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, sonMotor:() => sonMotor, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
+    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, wavYap, sonMotor:() => sonMotor, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     yeniSohbet, kayitAc, ARACLAR, aktifKayit:() => aktifKayit,
     KIPLER, kip, kipSec, klasorler, klasorEkle, klasorSil, kayitTasi, kayitAdlandir, kayitSabitle,

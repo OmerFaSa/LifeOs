@@ -181,6 +181,55 @@
       expect(/<li><b>\d+\./.test(out)).toBe(false);
       expect(out.indexOf('<details class="meetplan') >= 0).toBe(true);
     });
+
+    /* Analiz denetimi (Bulgu 1): ilk ve son tahmini sıra eşit olduğunda
+       (moved === 0) ekranda «+0» ve «sıra geriledi» yazmaz. */
+    it('Sıra geçmişi: ilk ve son tahmini sıra eşitken «sıra geriledi» demez', async () => {
+      resetState();
+      R.S.exams = [
+        R.Test.examWithNet('2026-09-01', 60),
+        R.Test.examWithNet('2026-09-08', 60),
+        R.Test.examWithNet('2026-09-15', 60),
+        R.Test.examWithNet('2026-09-22', 60),
+      ];
+      const out = String(await R.Screens.analytics.render());
+      expect(out.indexOf('sıra değişmedi') >= 0).toBe(true);
+      expect(out.indexOf('sıra geriledi') < 0).toBe(true);
+      expect(out.indexOf('+0') < 0).toBe(true);
+    });
+
+    /* Analiz denetimi (Bulgu 2 & 3):
+       - Tek testin süresi girilmiş tam TYT denemesinde girilmemiş testler
+         0 dakika sayılmaz (-125 dk üretilmez); tüm testlerin süresi varsa ölçülür.
+       - Soru gerçekleşme %70 altındayken danger tonu alır ve cümlesi boş kalmaz. */
+    it('İlerleme: eksik test süresi 0 sayılmaz; %70 altı soru gerçekleşme cümlesi boş kalmaz', async () => {
+      resetState();
+      await withTodayAsync('2026-09-20', async () => {
+        const w = R.Model.currentWeek();
+        R.S.weeks[R.Model.weekId(w)] = { id:R.Model.weekId(w), number:w, questionTarget:200, capacityMin:600 };
+        const gun = R.Model.ensureDay('2026-09-20');
+        gun.freeQ = 40;
+        const yarim = R.Test.makeExam({
+          date:'2026-09-19',
+          family:'TYT',
+          kind:'full',
+          duration:165,
+          tests:[
+            { name:'Türkçe', correct:30, wrong:0, blank:10, minutes:40 },
+            { name:'Matematik', correct:30, wrong:0, blank:10, minutes:null },
+          ],
+        });
+        R.S.exams = [yarim];
+
+        let out = String(await R.Screens.progress.render());
+        expect(/[-−]125/.test(out)).toBe(false);
+        expect(out.indexOf('hedefin dışında.') >= 0).toBe(true);
+
+        yarim.tests[1].minutes = 120;
+        out = String(await R.Screens.progress.render());
+        expect(/[-−]5/.test(out)).toBe(true);
+      });
+    });
   });
 
   /* Kullanıcı kararı (2026-09-24): yıllık tatil sınırı değiştirilebilir.

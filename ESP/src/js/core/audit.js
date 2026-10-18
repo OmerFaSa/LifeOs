@@ -573,12 +573,23 @@ ESP.Audit = (function(){
     history:historyFindings,
   };
 
+  /* Bir alanin taramasi patlarsa SESSIZCE bos donmez: denetim motorunun
+     kendi hatasini gizlemesi, denetimin amacina aykiridir. */
   function of(discId){
     const fn = BY_DISC[discId];
     if(!fn) return [];
     return ESP.Memo.of('audit:' + discId, function(){
       try{ return fn(); }
-      catch(e){ return []; }
+      catch(e){
+        const d = (ESP.DISCIPLINE_BY_ID || {})[discId];
+        const ad = (d && d.label) || discId;
+        return [bul('audit-error-' + discId, { severity:'warn', cert:'missing',
+          title:ad + ' taraması çalışmadı',
+          note:'Bu alanın denetimi bir hatayla durdu: '
+             + String((e && e.message) || e)
+             + '. Bu bir veri sorunu değil bir yazılım hatasıdır; '
+             + 'kayıtların etkilenmez.' })];
+      }
     });
   }
 

@@ -172,6 +172,19 @@
       expect(!!K().forLab('lab1')).toBeTruthy();
       expect(K().forLab('lab2')).toBe(null);
     });
+
+    /* Analiz denetimi (Bulgu 4): mutlak hata ailesi (weight kg, readiness puan,
+       sleep saat) ekranda 100 ile çarpılıp yüzde (%200) olarak basılmaz. */
+    it('mutlak hata türleri (kg, puan, saat) yüzdeye çarpılmaz; kendi birimiyle yazılır', async () => {
+      resetState();
+      kapali('weight', 75, 73);
+      const fo = K().settled()[0];
+      expect(K().errorText(fo)).toBe('2 kg');
+      expect(K().errorText(fo).indexOf('%')).toBe(-1);
+      const html = String(await SP.Screens.analytics.render());
+      expect(html.indexOf('%200')).toBe(-1);
+      expect(html.indexOf('2 kg') >= 0).toBeTruthy();
+    });
   });
 
   /* -------------------------------------------------------------- Goodhart */

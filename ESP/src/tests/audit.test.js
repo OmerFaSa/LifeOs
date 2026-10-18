@@ -257,5 +257,24 @@
         expect(/tembel|dağınık|başarısız|beceriksiz/i.test(f.note)).toBeFalsy();
       });
     });
+
+    /* Analiz denetimi (Bulgu 11): bir disiplinin taraması hata fırlatırsa
+       sessizce [] dönüp ekranı «denetim bulgusu yok» göstermez; uyarı döner. */
+    it('tarama hata firlatirsa sessizce temiz donmez, uyari bulgusu uretir', () => {
+      resetState();
+      const eski = S.cards;
+      try{
+        S.cards = [null, null, null, null, null, null];
+        ESP.Memo.bitir();
+        const bulgular = A().of('lang');
+        expect(bulgular.length).toBe(1);
+        expect(bulgular[0].id).toBe('audit-error-lang');
+        expect(bulgular[0].severity).toBe('warn');
+        expect(bulgular[0].cert).toBe('missing');
+      }finally{
+        S.cards = eski;
+        ESP.Memo.bitir();
+      }
+    });
   });
 })();
