@@ -155,6 +155,20 @@
         expect(!!f).toBeTruthy();
       });
     });
+
+    /* Analiz denetimi (Bulgu 13): müfredattaki konu kimliği (tr-01) yerine
+       konunun Türkçe adı (Sözcükte anlam) etikete yazılır. */
+    it('konu bulgularında ham konu kimliği değil Türkçe konu adı yazar', () => {
+      resetState();
+      withToday('2026-04-10', () => {
+        konu('tyt-turkce', 'tr-01', { state:'provisional', first:80, firstAt:'2026-03-10' });
+        konu('tyt-turkce', 'tr-02', { state:'reopened' });
+        konu('tyt-turkce', 'tr-03', { state:'practicing', first:70, firstAt:'2026-03-01' });
+        expect(bulgu('topics', 'topic-pending-second').items[0].label).toBe('Sözcükte anlam');
+        expect(bulgu('topics', 'topic-reopened').items[0].label).toBe('Söz yorumu, deyim ve atasözü');
+        expect(bulgu('topics', 'topic-near-miss').items[0].label).toBe('Cümlede anlam');
+      });
+    });
   });
 
   describe('denetim · tekrar', () => {
@@ -177,6 +191,20 @@
       const f = bulgu('cards', 'card-broken');
       expect(!!f).toBeTruthy();
       expect(f.items.length).toBe(2);
+    });
+
+    /* Analiz denetimi (Bulgu 14): tekrar borcu notunda İngilizce «Due» geçmez. */
+    it('tekrar borcu notu «Due kartların» değil «Vadesi gelen kartların» yazar', () => {
+      resetState();
+      withToday('2026-04-10', () => {
+        kart({ dueAt:'2026-04-01' });
+        kart({ dueAt:'2026-04-01' });
+        kart({ dueAt:'2026-04-15' });
+        const f = bulgu('cards', 'card-debt');
+        expect(!!f).toBeTruthy();
+        expect(f.note.indexOf('Vadesi gelen kartların') >= 0).toBe(true);
+        expect(f.note.indexOf('Due kartların') < 0).toBe(true);
+      });
     });
   });
 

@@ -22,8 +22,8 @@
    Sunucu gerekmez: modülün derlenmiş tek dosyası (dist/*.html) açılır;
    sabit port yoktur, öteki denetimlerle çakışmaz. Önce build.py koşar. */
 
+const fs = require('fs');
 const path = require('path');
-const { chromium } = require(path.join(__dirname, '..', 'ESP', 'node_modules', 'playwright'));
 
 const ESIK_ACIK = 3;
 const KOK = path.join(__dirname, '..');
@@ -40,7 +40,65 @@ const MODULLER = {
    kalabalığı gizler; dolu bir hesapta ekran nasıl görünür, o ölçülür. */
 const ORNEK = process.argv.includes('--ornek');
 
+/* VARSAYILAN ETIKETLI ONAY (katalog 022, statik). `confirmSheet(baslik,
+   mesaj, fn, tehlikeli, onay)` besinci arguman verilmezse dugme «Evet,
+   devam et» yazar. Ust duzey virgulleri sayar (dize, sablon, yorum atlanir). */
+function onaySay(t){
+  const out = [];
+  const re = /confirmSheet\s*\(/g;
+  let m;
+  while((m = re.exec(t))){
+    const once = t.slice(Math.max(0, m.index - 12), m.index);
+    if(/function\s+$/.test(once)) continue;
+    let i = re.lastIndex, derin = 0, virgul = 0, bos = true;
+    for(; i < t.length; i++){
+      const c = t[i];
+      if(c === '"' || c === "'" || c === '`'){
+        const q = c; i++;
+        while(i < t.length && t[i] !== q){ if(t[i] === '\\') i++; i++; }
+        bos = false; continue;
+      }
+      if(c === '/' && t[i + 1] === '*'){ i = t.indexOf('*/', i + 2) + 1; continue; }
+      if(c === '/' && t[i + 1] === '/'){ i = t.indexOf('\n', i); continue; }
+      if('([{'.indexOf(c) >= 0){ derin++; bos = false; continue; }
+      if(')]}'.indexOf(c) >= 0){ if(derin === 0) break; derin--; continue; }
+      if(c === ',' && derin === 0) virgul++;
+      else if(!/\s/.test(c)) bos = false;
+    }
+    const arguman = bos ? 0 : virgul + 1;
+    if(arguman < 5) out.push(t.slice(0, m.index).split('\n').length);
+  }
+  return out;
+}
+
+function varsayilanOnaylar(ad){
+  const kok = path.join(KOK, ad, 'src', 'js');
+  const out = [];
+  if(!fs.existsSync(kok)) return out;
+  const gez = d => fs.readdirSync(d, { withFileTypes:true }).forEach(e => {
+    const p = path.join(d, e.name);
+    if(e.isDirectory()) return gez(p);
+    if(!/\.js$/.test(e.name)) return;
+    onaySay(fs.readFileSync(p, 'utf8'))
+      .forEach(satir => out.push(path.relative(path.join(KOK, ad), p) + ':' + satir));
+  });
+  gez(kok);
+  return out;
+}
+
+function yalnizOnay(){
+  let n = 0;
+  Object.keys(MODULLER).forEach(ad => {
+    const onay = varsayilanOnaylar(ad);
+    n += onay.length;
+    console.log(ad + ': ' + (onay.length ? '✕ ' + onay.length + ' varsayılan etiketli onay: ' + onay.join(', ')
+      : 'her onay sonucu söylüyor'));
+  });
+  return n ? 1 : 0;
+}
+
 async function olc(ad, m){
+  const { chromium } = require(path.join(__dirname, '..', 'ESP', 'node_modules', 'playwright'));
   const b = await chromium.launch();
   const p = await b.newPage({ viewport:{ width:1280, height:900 } });
   if(ORNEK) await p.addInitScript(k => { try{ localStorage.setItem(k, 'ornek'); }catch(e){} }, m.profil);
@@ -79,24 +137,31 @@ async function olc(ad, m){
   return { sonuc, hata };
 }
 
-(async () => {
-  const sec = process.argv.slice(2).filter(a => !a.startsWith('--'));
-  const denetle = process.argv.includes('--denetle');
-  const hepsi = [], hatalar = [];
-  for(const ad of Object.keys(MODULLER)){
-    if(sec.length && sec.indexOf(ad) < 0) continue;
-    const r = await olc(ad, MODULLER[ad]);
-    hepsi.push(...r.sonuc);
-    r.hata.forEach(h => hatalar.push(ad + ': ' + h));
+module.exports = { onaySay };
+
+if(require.main === module){
+  if(process.argv.includes('--onay')){
+    process.exit(yalnizOnay());
   }
-  hepsi.sort((a, b) => (b.acik - a.acik) || (b.soz - a.soz));
-  const pad = (s, n) => String(s).padEnd(n);
-  console.log(pad('modül', 6) + pad('ekran', 14) + pad('açık', 6) + pad('söz', 7) + pad('düğme', 7) + pad('boy', 7) + 'açık kartlar');
-  hepsi.forEach(x => console.log(pad(x.ad, 6) + pad(x.r, 14) + pad(x.hata ? '—' : x.acik, 6) + pad(x.soz || '', 7) + pad(x.dugme || '', 7)
-    + pad(x.boy || '', 7) + (x.hata || ((x.acikBolum ? '[' + x.acikBolum + '] ' : '') + (x.acikKartlar || []).join(', ')))));
-  const asan = hepsi.filter(x => x.acik > ESIK_ACIK);
-  console.log('\n' + hepsi.length + ' ekran · kuralı aşan (açık > ' + ESIK_ACIK + '): ' + asan.length
-    + (hatalar.length ? ' · sayfa hatası: ' + hatalar.length : ''));
-  hatalar.slice(0, 5).forEach(h => console.log('  ' + h));
-  process.exit(denetle && (asan.length || hatalar.length) ? 1 : 0);
-})();
+  (async () => {
+    const sec = process.argv.slice(2).filter(a => !a.startsWith('--'));
+    const denetle = process.argv.includes('--denetle');
+    const hepsi = [], hatalar = [];
+    for(const ad of Object.keys(MODULLER)){
+      if(sec.length && sec.indexOf(ad) < 0) continue;
+      const r = await olc(ad, MODULLER[ad]);
+      hepsi.push(...r.sonuc);
+      r.hata.forEach(h => hatalar.push(ad + ': ' + h));
+    }
+    hepsi.sort((a, b) => (b.acik - a.acik) || (b.soz - a.soz));
+    const pad = (s, n) => String(s).padEnd(n);
+    console.log(pad('modül', 6) + pad('ekran', 14) + pad('açık', 6) + pad('söz', 7) + pad('düğme', 7) + pad('boy', 7) + 'açık kartlar');
+    hepsi.forEach(x => console.log(pad(x.ad, 6) + pad(x.r, 14) + pad(x.hata ? '—' : x.acik, 6) + pad(x.soz || '', 7) + pad(x.dugme || '', 7)
+      + pad(x.boy || '', 7) + (x.hata || ((x.acikBolum ? '[' + x.acikBolum + '] ' : '') + (x.acikKartlar || []).join(', ')))));
+    const asan = hepsi.filter(x => x.acik > ESIK_ACIK);
+    console.log('\n' + hepsi.length + ' ekran · kuralı aşan (açık > ' + ESIK_ACIK + '): ' + asan.length
+      + (hatalar.length ? ' · sayfa hatası: ' + hatalar.length : ''));
+    hatalar.slice(0, 5).forEach(h => console.log('  ' + h));
+    process.exit(denetle && (asan.length || hatalar.length) ? 1 : 0);
+  })();
+}

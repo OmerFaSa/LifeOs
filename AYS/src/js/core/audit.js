@@ -142,6 +142,12 @@ R.Audit = (function(){
         note:'Denetim için en az ' + ASGARI + ' konu kaydı gerekir.' })];
     }
 
+    function konuAdi(sid, tid){
+      const s = (R.SUBJECTS || []).find(x => x.id === sid);
+      const t = s && (s.topics || []).find(x => x.id === tid);
+      return (t && t.name) || tid;
+    }
+
     /* 1 — Gecici kapali kalmis konu: ilk test gecmis, ikincisi hic
        yapilmamis. Kapanis kuralinin yedi gunluk penceresi kaciriliyor. */
     const asili = durumlar.filter(t => t.state === 'provisional'
@@ -156,7 +162,7 @@ R.Audit = (function(){
            + 'yapılmadıkça konu kapanmaz ve «öğrendim» duygusu ölçülmemiş '
            + 'kalır.',
         items:asili.slice(0, 5).map(t => ({ id:t.topicId,
-          label:t.topicId, meta:gunFark(t.firstAt) + ' gün önce ilk test' })) }));
+          label:konuAdi(t.subjectId, t.topicId), meta:gunFark(t.firstAt) + ' gün önce ilk test' })) }));
     }
 
     /* 2 — Yeniden acilmis konular: kapanmis ama sonradan bozulmus. */
@@ -167,7 +173,7 @@ R.Audit = (function(){
         note:'Kapanmış sayılıp sonradan bozulan konular. Bunlar yeni konudan '
            + 'ÖNCE gelir: üstüne kurulan her şey aynı yerden çöker.',
         items:acilan.slice(0, 5).map(t => ({ id:t.topicId,
-          label:t.topicId, meta:'yeniden açık' })) }));
+          label:konuAdi(t.subjectId, t.topicId), meta:'yeniden açık' })) }));
     }
 
     /* 3 — Sinira takilmis konu: ilk test esigin hemen altinda kalmis
@@ -183,7 +189,7 @@ R.Audit = (function(){
            + 'konular. Bunlar en ucuz kazançtır: sıfırdan çalışılacak bir '
            + 'konudan çok daha az iş ister.',
         items:takili.slice(0, 5).map(t => ({ id:t.topicId,
-          label:t.topicId, meta:'%' + t.first })) }));
+          label:konuAdi(t.subjectId, t.topicId), meta:'%' + t.first })) }));
     }
 
     return out;
@@ -222,7 +228,7 @@ R.Audit = (function(){
     if(borc > 10){
       out.push(bul('card-debt', { severity:'warn', route:'cards',
         title:'Tekrar borcu %' + borc,
-        note:'Due kartların %' + borc + '\'i gecikmiş. Borç %10\'u geçtiğinde '
+        note:'Vadesi gelen kartların %' + borc + '\'i gecikmiş. Borç %10\'u geçtiğinde '
            + 'yeni kart üretmek, hatırlanmayanın üstüne yenisini koymaktır. '
            + 'Bu eşik bir bulgu değil sistemin seçimidir (Rehber → Eşiklerin '
            + 'dayanağı).' }));

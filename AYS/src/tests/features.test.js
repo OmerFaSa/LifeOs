@@ -133,6 +133,23 @@
       /* Kazanılan frekans payı × pratik doğruluğundan hesaplanır (2026-10-17). */
       expect(row.cert).toBe('derived');
     });
+
+    /* Analiz denetimi (Bulgu 12): blok pratiği olmasa bile Konular ekranından
+       ilk testi girilmiş (provisional/practicing) veya çalışmaya başlanmış
+       konular cert:'missing' («hiç çalışılmadı») sayılmaz. */
+    it('ilk testi girilmiş veya başlanmış konu "missing" sayılmaz', async function(){
+      resetState();
+      const sub = R.SUBJECTS[0], top = sub.topics[0], top2 = sub.topics[1];
+      await M.ensureTopics(sub.id);
+      await M.setTopicState(sub.id, top.id, { first:80, firstAt:U.todayISO() });
+      await M.setTopicState(sub.id, top2.id, { state:'learning' });
+      const rows = A.topicValue();
+      const r1 = rows.find(r => r.subjectId === sub.id && r.topicId === top.id);
+      const r2 = rows.find(r => r.subjectId === sub.id && r.topicId === top2.id);
+      expect(r1.cert).toBe('derived');
+      expect(r1.earned).toBeGreaterThan(0);
+      expect(r2.cert).toBe('derived');
+    });
   });
 
   describe('Sıra geçmişi ve unutma eğrisi', function(){

@@ -159,13 +159,14 @@ SP.Audit = (function(){
       const toplam = adlar.reduce((a, k) => a + yemekSay[k], 0);
       const enCok = adlar.reduce((m, k) => yemekSay[k] > yemekSay[m] ? k : m, adlar[0]);
       if(yemekSay[enCok] / toplam > 0.3){
+        const gidaAdi = ((SP.FOOD_BY_ID || {})[enCok] || {}).name || enCok;
         out.push(bul('meal-monotony', { severity:'info', route:'meals',
           title:'Kalemlerin %' + Math.round(100 * yemekSay[enCok] / toplam)
             + '\'i tek gıdadan',
           note:'Çeşitlilik bir hedef değildir ve az çeşit hatalı da değildir. '
              + 'Ama tek kaynağa bağlı bir öğün düzeni, o kaynak kesildiğinde '
              + 'bütün hedefleri birden düşürür.',
-          items:[{ id:enCok, label:enCok, meta:yemekSay[enCok] + ' kez' }] }));
+          items:[{ id:enCok, label:gidaAdi, meta:yemekSay[enCok] + ' kez' }] }));
       }
     }
 

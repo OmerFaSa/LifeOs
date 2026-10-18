@@ -377,7 +377,7 @@ ESP.Screens.analytics = (function(){
       }),
 
       ...ayrisan.map(p => K.Entry({
-        label:p.effortLabel.toUpperCase(),
+        label:String(p.effortLabel || '').charAt(0).toLocaleUpperCase('tr-TR') + String(p.effortLabel || '').slice(1),
         meta:'ayrıştı',
         note:p.note,
         body:K.Notice({ tone:'info', title:'Soru', body:p.question }),
@@ -621,7 +621,7 @@ ESP.Screens.analytics = (function(){
        dürüstlüğün meta kartları ve disiplin başına ayrışma kartları şerit. */
     get kucukVarsayilan(){
       const G = (window.LIFEOS || {}).Gizle;
-      const bayrak = G && ESP.Goodhart ? ESP.Goodhart.flags().map(p => G.anahtar(p.effortLabel.toUpperCase())) : [];
+      const bayrak = G && ESP.Goodhart ? ESP.Goodhart.flags().map(p => G.anahtar(p.effortLabel)) : [];
       return ['denge', 'haftalık-rota', 'seri', 'çapraz-bulgular', 'günün-brifingi',
         'denetim-defteri', 'sürtünme', 'gösterge-ayrışması', 'derin-alan-analizleri', 'kademeli-geri-bildirim-ipuçları'].concat(bayrak);
     },
