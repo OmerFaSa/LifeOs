@@ -23,12 +23,23 @@
       eksik: `aktif_tur`. Eksik veri «veri yok» diye ADIYLA soylenir,
       sifir yazilmaz (§1.2).
    6. HATA TURU DURDURMAZ. Her adim kendi basina; dusen adim turun
-      `hata` listesine yazilir, ritim calismaya devam eder."""
+      `hata` listesine yazilir, ritim calismaya devam eder.
+   7. MODELSIZ IS KENDILIGINDEN, MODELLI IS DOKUNUSLA. Kod isi (haftalik
+      rapor, haftada bir kez: `aktif_is`) sormadan yapilir. Model ve butce
+      isteyen is (eskiyen arastirmanin yenilenmesi) ACILMAZ; turda
+      «yapilabilir» diye listelenir, kullanici kartta dokununca King'e
+      HKM'nin kullanici yolundan (modul «hkm», sohbetteki istekle ayni)
+      gider ve King'in kapisindan (imkan, teklif, butce) gecer. Listeyi
+      sunucu kurar: istemci yalniz kimligi gonderir.
+   8. EKSIK ICERIK SOYLENIR, DOLDURULMAZ. Plani olmayan ya da suresi
+      gecmis etkin hedef modulun isidir: plani modul kendi sayisiyla kurar
+      (SPI hedef.plan govdesi kilo, tempo, enerji ister; HKM'de yoktur ve
+      uydurulmaz). Tur yalniz adiyla yazar."""
 
 import datetime
 import json
 
-from core import adlar, db, eksik, manager, saat
+from core import adlar, bam, db, depo, eksik, hedefag, king, manager, saat, weekly
 
 VARSAYILAN = {"enabled": False, "aralik_dk": 30}
 ALANLAR = {"enabled": bool, "aralik_dk": int}
@@ -37,6 +48,9 @@ NEDEN_AD = {"baslangic": "Sistem başlatıldı", "yeni_gun": "Yeni gün",
             "yeni_kayit": "Yeni kayıt geldi", "nabiz": "Düzenli kontrol", "elle": "Elle tarandı"}
 AKSAM_SAATI = 20         # bugunku sessizlik bu saatten sonra «eksik» sayilir
 TUR_TUT = 500
+ICERIK_EN_COK = 5
+YAPILABILIR_EN_COK = 3
+ESKI_DURUM = ("eskiyen", "degisti")       # core/depo.py _tazelik
 AYLAR = ("Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz",
          "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık")
 
@@ -171,6 +185,114 @@ def bekleyenler(con, gun):
     }
 
 
+def _acik_mi(con, tur_, govde):
+    """Ayni King isi zaten acik mi? Anahtar King'inkiyle ayni kurulur."""
+    temiz, hata = king._govde_temizle(tur_, govde)
+    if hata:
+        return True                             # kurulamayan is listeye girmez
+    anahtar = "hkm:%s:%s" % (tur_, king.ANAHTAR[tur_](temiz))
+    return bool(con.execute("SELECT 1 FROM is_emirleri WHERE anahtar=? AND durum IN (%s)"
+                            % ",".join("?" * len(king.ACIK)), (anahtar,) + king.ACIK).fetchone())
+
+
+def icerik(con, gun, at):
+    """Eksik icerik ve modelle yapilabilecek isler. Yalniz OKUR.
+    Doner: (icerik, yapilabilir)."""
+    out, yap = [], []
+    for h in hedefag.hedefler(con):
+        if h.get("durum") != "aktif" or h.get("modul") not in MODULLER:
+            continue
+        ad = adlar.modul(h["modul"])
+        if not h.get("plan"):
+            out.append({"tur": "hedef_plansiz", "modul": h["modul"],
+                        "metin": "%s · «%s» hedefinin henüz planı yok; plan %s’de kurulur."
+                                 % (ad, h["ozet"], ad)})
+        elif h.get("son_tarih") and h["son_tarih"] < gun:
+            out.append({"tur": "hedef_gecti", "modul": h["modul"],
+                        "metin": "%s · «%s» hedefinin son tarihi (%s) geçti; hedef hâlâ etkin."
+                                 % (ad, h["ozet"], _gun_yaz(h["son_tarih"]))})
+    tara = depo.tarayici(con, limit=200, now=at.isoformat(timespec="seconds"))
+    for k in tara["kayitlar"]:
+        t = k["tazelik"]
+        if t["durum"] not in ESKI_DURUM:
+            continue
+        g = (bam.kayit_getir(con, k["id"]) or {}).get("govde") or {}
+        if k["tur"] != "arastirma":
+            if g.get("dayanak"):
+                continue                        # dayandigi arastirma ayrica listelenir
+            out.append({"tur": "bam_eski", "modul": "hkm",
+                        "metin": "BAM · «%s»: %s" % (k["baslik"], t["metin"])})
+            continue
+        konu = str(g.get("konu") or "").strip()[:king.MAX_KONU]
+        govde = {"arastirma": {"konu": konu}}
+        if len(konu) < 3 or _acik_mi(con, "bam.arastirma", govde):
+            continue
+        yap.append({"id": "arastirma:%d" % k["id"], "tur": "bam.arastirma",
+                    "ad": king.TURLER["bam.arastirma"]["ad"], "konu": konu,
+                    "kayit_id": k["id"], "model": True, "govde": govde,
+                    "neden": "Sistem turu: araştırma kaydı #%d yenilenmeli (%s)."
+                             % (k["id"], t["metin"].rstrip(".")),
+                    "metin": "«%s» araştırmasını yenile: %s" % (konu, t["metin"])})
+    return out[:ICERIK_EN_COK], yap[:YAPILABILIR_EN_COK]
+
+
+def _donem(gun):
+    y, w, _ = datetime.date.fromisoformat(gun).isocalendar()
+    return "%d-W%02d" % (y, w)
+
+
+def haftalik(con, gun, at, th=None):
+    """Haftada BIR kez gecen haftanin raporu (kod, model yok). Bu hafta
+    yapildiysa None. Rapor kanala GITMEZ: gonderim zamanlayicinin isidir
+    (core/schedule.py weekly_day); bu yalniz hazirlar ve kartta gosterir."""
+    donem = _donem(gun)
+    if con.execute("SELECT 1 FROM aktif_is WHERE ad='haftalik' AND donem=?", (donem,)).fetchone():
+        return None
+    d = datetime.date.fromisoformat(gun)
+    pazar = (d - datetime.timedelta(days=d.isoweekday())).isoformat()
+    r = weekly.report(con, pazar, th=th)
+    ozet = {"from": r["from"], "to": r["to"], "donem": donem,
+            "gun": {m: int((r.get("days_seen") or {}).get(m) or 0) for m in MODULLER},
+            "karsilastirilan": sum(1 for s in r["rows"] if s.get("status") == "compared"),
+            "kazanim": [k["metin"] for k in r.get("kazanimlar") or []]}
+    con.execute("INSERT OR IGNORE INTO aktif_is(ad, donem, at, govde) VALUES ('haftalik',?,?,?)",
+                (donem, at.isoformat(timespec="seconds"), json.dumps(ozet, ensure_ascii=False)))
+    return ozet
+
+
+def _haftalik_cumle(o):
+    gelen = ["%s %d gün" % (adlar.modul(m), n) for m, n in o["gun"].items() if n]
+    aralik = "%s – %s" % (_gun_yaz(o["from"]), _gun_yaz(o["to"]))
+    if not gelen:
+        return "Geçen haftanın raporu hazırlandı (%s): o hafta hiç kayıt gelmedi." % aralik
+    bos = [adlar.modul(m) for m, n in o["gun"].items() if not n]
+    return "Geçen haftanın raporu hazırlandı (%s): %s kayıt%s; %s." % (
+        aralik, ", ".join(gelen), ("; %s kayıt yok" % ", ".join(bos)) if bos else "",
+        ("%d ölçü önceki haftayla karşılaştırıldı" % o["karsilastirilan"])
+        if o["karsilastirilan"] else "önceki haftayla karşılaştırılacak kadar ölçüm yok")
+
+
+def baslat(con, cfg, id_, now=None):
+    """Kartta dokunulan «yapilabilir» is. Liste SUNUCUDA yeniden kurulur;
+    istemcinin gonderdigi govdeye guvenilmez. King'in kapisindan gecer."""
+    at = _an(now)
+    _, yap = icerik(con, saat.bugun(at), at)
+    j = next((y for y in yap if y["id"] == id_), None)
+    if not j:
+        return {"ok": False, "status": 409,
+                "note": "Bu iş artık yapılabilir listesinde yok; sistemi yeniden tara."}
+    r = king.emir_ac(con, cfg, "hkm", j["tur"], j["govde"], konu=j["konu"], neden=j["neden"],
+                     now=at.isoformat(timespec="seconds"))
+    r = dict(r, status=200 if r.get("ok") else 422)
+    if r.get("ok"):
+        e = r.get("emir") or {}
+        r["note"] = r.get("note") or (
+            "King teklifini sundu; maliyeti görüp onaylayınca iş başlar." if r.get("teklif") else
+            "King işi reddetti; gerekçesi King ekranında." if r.get("karar") == "ret" else
+            "İş King’e gitti (#%s)." % e.get("id"))
+    return r
+
+
 def tur(con, cfg, neden="elle", now=None, th=None):
     """Bir tur: nabiz, brifing (oneri Onaylar'a), eksikler, bekleyenler.
     Hicbir kosulda firlatmaz; turu ambara yazar ve govdesini dondurur."""
@@ -179,7 +301,8 @@ def tur(con, cfg, neden="elle", now=None, th=None):
     olay = son_olay(con)
     govde = {"at": at.isoformat(timespec="seconds"), "gun": gun, "neden": neden,
              "neden_ad": NEDEN_AD.get(neden, neden), "nabiz": [], "yapilan": [],
-             "eksik": [], "bekleyen": {}, "hata": []}
+             "eksik": [], "icerik": [], "yapilabilir": [], "haftalik": None,
+             "bekleyen": {}, "hata": []}
 
     def adim(ad, fn):
         try:
@@ -210,12 +333,25 @@ def tur(con, cfg, neden="elle", now=None, th=None):
     def _eksik():
         govde["eksik"] = eksikler(con, gun, at, govde["nabiz"])
 
+    def _icerik():
+        govde["icerik"], govde["yapilabilir"] = icerik(con, gun, at)
+        for y in govde["yapilabilir"]:
+            y.pop("govde", None)                # kimlik yeter; govdeyi sunucu kurar
+
+    def _haftalik():
+        o = haftalik(con, gun, at, th=th)
+        if o:
+            govde["haftalik"] = o
+            govde["yapilan"].append(_haftalik_cumle(o))
+
     def _bekleyen():
         govde["bekleyen"] = bekleyenler(con, gun)
 
     adim("nabız", _nabiz)
     adim("brifing", _brifing)
     adim("eksikler", _eksik)
+    adim("içerik", _icerik)
+    adim("haftalık rapor", _haftalik)
     adim("bekleyenler", _bekleyen)
 
     con.execute("INSERT INTO aktif_tur(at, gun, neden, son_olay, govde) VALUES (?,?,?,?,?)",
@@ -245,7 +381,8 @@ def durum(con, cfg, n=8):
             g = {}
         gecmis.append({"id": r["id"], "at": r["at"], "neden": r["neden"],
                        "neden_ad": NEDEN_AD.get(r["neden"], r["neden"]),
-                       "yapilan": len(g.get("yapilan") or []), "eksik": len(g.get("eksik") or [])})
+                       "yapilan": len(g.get("yapilan") or []), "eksik": len(g.get("eksik") or []),
+                       "icerik": len(g.get("icerik") or [])})
     son = son_tur(con)
     return {"ayar": settings(cfg), "acik": settings(cfg)["enabled"],
             "son": son["govde"] if son else None, "gecmis": gecmis}

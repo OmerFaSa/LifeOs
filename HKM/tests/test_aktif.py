@@ -14,10 +14,20 @@
         Model cagrilmaz.
      6. Dusen adim turu durdurmaz; tur yine kaydedilir. Son 500 tur tutulur.
      7. Uclar bearer ister; «Simdi tara» kapaliyken de calisir; ayar
-        yamasi aktif kipi acar, bozuk deger 422."""
+        yamasi aktif kipi acar, bozuk deger 422.
+     8. Eksik icerik: plani olmayan ve suresi gecmis etkin hedef adiyla
+        yazilir; askidaki hedef yazilmaz. Tur hedef.plan ACMAZ (plan
+        sayilari modulde, uydurulmaz).
+     9. Eskiyen arastirma «yapilabilir»dir: tur King isi ACMAZ ve model
+        cagirmaz; dokununca (baslat) King'e modul «hkm» ile gider, acik
+        is listeden duser; listede olmayan kimlik 409.
+    10. Haftalik rapor haftada bir kez kendiliginden hazirlanir; kayitsiz
+        modul «kayıt yok» der, sifir yazmaz."""
 import datetime
 
-from core import aktif, db, manager, sync_engine
+import json
+
+from core import ai, aktif, db, hedefag, manager, sync_engine
 from tests.harness import eq, no, ok, suite, test
 
 G = "2026-09-20"
@@ -41,6 +51,24 @@ def _kayit(con, modul, gun, saat="08:00:00", **metrics):
 
 def _dun(gun=G, n=1):
     return (datetime.date.fromisoformat(gun) - datetime.timedelta(days=n)).isoformat()
+
+
+def _hedef(id_, ozet, durum="aktif", plan=None, son_tarih=None):
+    return {"id": id_, "ozet": ozet, "durum": durum, "paket": "kilo",
+            "son_tarih": son_tarih, "plan": plan}
+
+
+def _arastirma(con, konu, gun_once, gun=G, tur="arastirma", govde=None):
+    at = (datetime.date.fromisoformat(gun) - datetime.timedelta(days=gun_once)).isoformat()
+    cur = con.execute("INSERT INTO bam_kayitlar(tur, baslik, govde, dogruluk, created_at, anahtar) "
+                      "VALUES (?,?,?,?,?,?)",
+                      (tur, konu, json.dumps(govde if govde is not None else {"konu": konu}),
+                       "kaynakli", at + "T09:00:00", "k:" + konu))
+    return cur.lastrowid
+
+
+def _emir_sayisi(con):
+    return con.execute("SELECT COUNT(*) FROM is_emirleri").fetchone()[0]
 
 
 def run():
@@ -131,6 +159,71 @@ def run():
         d = aktif.durum(con, ACIK)
         eq((d["acik"], d["son"]["neden"], len(d["gecmis"])), (True, "elle", 8))
 
+    def t_icerik_hedef():
+        con = _con()
+        hedefag.esitle(con, "spi", [
+            _hedef("h1", "Kilo 80 → 75 kg"),
+            _hedef("h2", "Yürüyüş", plan={"bitis": "2026-12-01"}, son_tarih="2026-09-01"),
+            _hedef("h3", "Askıda hedef", durum="askida"),
+            _hedef("h4", "Planlı ve süresi var", plan={"bitis": "2026-12-01"}, son_tarih="2026-12-01")],
+            now=G + "T08:00:00")
+        g = aktif.tur(con, ACIK, "elle", now=_an())
+        eq(g["hata"], [])
+        m = [e["metin"] for e in g["icerik"]]
+        eq(m, ["SPİ · «Kilo 80 → 75 kg» hedefinin henüz planı yok; plan SPİ’de kurulur.",
+               "SPİ · «Yürüyüş» hedefinin son tarihi (1 Eylül) geçti; hedef hâlâ etkin."])
+        eq(_emir_sayisi(con), 0)
+        eq(aktif.durum(con, ACIK)["gecmis"][0]["icerik"], 2)
+
+    def t_yapilabilir():
+        con = _con()
+        cagri = []
+        eski = ai.ask
+        ai.ask = lambda *a, **k: cagri.append(1) or {"ok": False}
+        try:
+            rid = _arastirma(con, "Kreatin ve uyku", 120)
+            _arastirma(con, "Yeni konu", 10)                        # taze: listelenmez
+            _arastirma(con, "Eski not", 400, tur="materyal", govde={})
+            g = aktif.tur(con, ACIK, "elle", now=_an())
+            eq(g["hata"], [])
+            eq([y["id"] for y in g["yapilabilir"]], ["arastirma:%d" % rid])
+            y = g["yapilabilir"][0]
+            eq((y["tur"], y["model"], "govde" in y), ("bam.arastirma", True, False))
+            ok(any(e["metin"].startswith("BAM · «Eski not»") for e in g["icerik"]), g["icerik"])
+            eq(_emir_sayisi(con), 0)
+            eq(cagri, [])
+            no(aktif.baslat(con, {}, "arastirma:999", now=_an())["ok"], "listede olmayan")
+            eq(aktif.baslat(con, {}, "arastirma:999", now=_an())["status"], 409)
+            r = aktif.baslat(con, {}, y["id"], now=_an())
+            ok(r["ok"], r)
+            e = con.execute("SELECT modul, tur, konu, durum FROM is_emirleri").fetchone()
+            eq((e["modul"], e["tur"], e["konu"]), ("hkm", "bam.arastirma", "Kreatin ve uyku"))
+            ok(r["note"], r)
+            eq(cagri, [])
+            from core import king
+            if e["durum"] in king.ACIK:
+                eq(aktif.tur(con, ACIK, "elle", now=_an(saat="10:05:00"))["yapilabilir"], [])
+        finally:
+            ai.ask = eski
+
+    def t_haftalik():
+        con = _con()
+        pzt = "2026-09-21"                                          # pazartesi
+        for i in range(1, 8):
+            _kayit(con, "spi", _dun(pzt, i), sleep_hours=7)
+        g = aktif.tur(con, ACIK, "elle", now=_an(gun=pzt, saat="09:00:00"))
+        eq(g["hata"], [])
+        eq((g["haftalik"]["from"], g["haftalik"]["to"]), ("2026-09-14", "2026-09-20"))
+        eq(g["haftalik"]["gun"], {"ays": 0, "spi": 7, "esp": 0})
+        cumle = [y for y in g["yapilan"] if y.startswith("Geçen haftanın raporu")]
+        eq(cumle, ["Geçen haftanın raporu hazırlandı (14 Eylül – 20 Eylül): SPİ 7 gün kayıt; "
+                   "AYS, ESP kayıt yok; önceki haftayla karşılaştırılacak kadar ölçüm yok."])
+        no(" 0 " in cumle[0], "sifir yazilmadi")
+        ikinci = aktif.tur(con, ACIK, "elle", now=_an(gun="2026-09-24"))
+        eq(ikinci["haftalik"], None)
+        no(any(y.startswith("Geçen haftanın") for y in ikinci["yapilan"]), "haftada bir")
+        eq(aktif.tur(con, ACIK, "elle", now=_an(gun="2026-09-28"))["haftalik"]["donem"], "2026-W40")
+
     test("varsayılan kapalı; ayar doğrulanır", t_kapali)
     test("tetik: başlangıç, yeni kayıt, nabız, yeni gün", t_tetik)
     test("nabız: ölçüldü ya da veri yok, sıfır yok", t_nabiz)
@@ -138,6 +231,9 @@ def run():
     test("tur modüle yazmaz, model çağırmaz", t_modula_yazmaz)
     test("düşen adım turu durdurmaz", t_hata_durdurmaz)
     test("son 500 tur tutulur; durum okunur", t_budama)
+    test("eksik içerik: plansız ve süresi geçmiş hedef; tur plan açmaz", t_icerik_hedef)
+    test("eskiyen araştırma yapılabilir: tur açmaz, dokununca King’e", t_yapilabilir)
+    test("haftalık rapor haftada bir kez, sıfır yazmaz", t_haftalik)
 
 
 def run_daemon():
@@ -156,6 +252,9 @@ def run_daemon():
             st, c = s.call("/api/config", body={"aktif": {"enabled": True}})
             eq((st, c["config"]["aktif"]["enabled"]), (200, True))
             eq(s.call("/api/aktif")[1]["acik"], True)
+            eq(s.call("/api/aktif/baslat", token=None, body={"id": "x"})[0], 401)
+            st, r = s.call("/api/aktif/baslat", body={"id": "arastirma:1"})
+            eq((st, r["ok"]), (409, False))
         finally:
             s.close()
 

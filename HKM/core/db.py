@@ -604,6 +604,16 @@ CREATE TABLE IF NOT EXISTS aktif_tur (
   son_olay    INTEGER NOT NULL DEFAULT 0,        -- turun gordugu en son raw_events.id
   govde       TEXT NOT NULL                      -- JSON: nabiz, yapilan, eksik, bekleyen
 );
+
+-- Aktif kipin kendiliginden yaptigi kod isi (haftalik rapor): ayni
+-- donemde ikinci kez yapilmaz. Tur gecmisi budandigi icin ayri tutulur.
+CREATE TABLE IF NOT EXISTS aktif_is (
+  ad          TEXT NOT NULL,                     -- haftalik
+  donem       TEXT NOT NULL,                     -- 2026-W42
+  at          TEXT NOT NULL,
+  govde       TEXT NOT NULL,                     -- JSON ozet
+  PRIMARY KEY (ad, donem)
+);
 """
 
 

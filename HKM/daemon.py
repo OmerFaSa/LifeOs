@@ -80,6 +80,7 @@ Ucnoktalar:
     GET  /api/health                token istemez
     GET  /api/aktif                 aktif kip: acik mi, son tur, kisa gecmis (core/aktif.py)
     POST /api/aktif/tara            aktif kip: simdi bir tur (kapaliyken de calisir; module yazmaz)
+    POST /api/aktif/baslat          aktif kip: turun «yapilabilir» isi {id} -> King (kullanici yolu, modul hkm)
     GET  /api/merkez/hafta|gunluk|gecmis  katalog 120 haftalik ozet, 126 Merkez gunlugu, 119 oneri gecmisi (yalniz okur)
     GET  /                          tek dosyalik yerel yuz (token istemez;
                                     jetonu kullanici girer, veri yine korumali)
@@ -1701,6 +1702,16 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 body = {}
             return self._send(200, self._say(body))
+        if u.path == "/api/aktif/baslat":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = _nesne(ham)
+            except ValueError:
+                body = {}
+            r = aktif.baslat(self.con, self.server.config, str(body.get("id") or "")[:60])
+            return self._send(r.pop("status"), r)
         if u.path == "/api/aktif/tara":
             g = aktif.tur(self.con, self.server.config, "elle", th=self.server.thresholds)
             return self._send(200, {"ok": True, "tur": g,
