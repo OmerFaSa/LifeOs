@@ -28,7 +28,7 @@ import json
 import os
 import re
 
-from core import adlar, aktif, bildirim, butce, channels, media, models, ollama, schedule, thresholds, web
+from core import adlar, aktif, bildirim, butce, channels, media, models, ollama, schedule, ses, thresholds, web
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(ROOT, "config.json")
@@ -104,6 +104,8 @@ def read(cfg):
     out["aktif"] = aktif.settings(cfg)
     # Ollama (core/ollama.py): bulunca kendiliginden baglansin mi.
     out["ollama"] = ollama.settings(cfg)
+    # King'in sesi (core/ses.py): Gemini sesi ve Piper'in yeri.
+    out["ses"] = ses.settings(cfg)
     return out
 
 
@@ -114,7 +116,7 @@ def validate(patch):
         return False, ["gövde bir nesne olmalı"]
     for k in patch:
         if k not in ("thresholds", "channels", "schedule", "models",
-                     "budget", "media", "web", "king", "bildirim", "aktif", "ollama"):
+                     "budget", "media", "web", "king", "bildirim", "aktif", "ollama", "ses"):
             hata.append("bilinmeyen alan: %s" % k)
 
     # King'in onay kapisi (core/king.py teklif_gerekli): yalniz DUSUK sinif
@@ -139,6 +141,11 @@ def validate(patch):
         ok_o, hata_o = ollama.validate(patch["ollama"])
         if not ok_o:
             hata.extend(hata_o)
+
+    if patch.get("ses") is not None:
+        ok_s, hata_s = ses.validate(patch["ses"])
+        if not ok_s:
+            hata.extend(hata_s)
 
     if patch.get("bildirim") is not None:
         ok_n, hata_n = bildirim.validate(patch["bildirim"])
@@ -272,6 +279,8 @@ def apply(cfg, patch):
         yeni.setdefault("aktif", {}).update(patch["aktif"])
     if patch.get("ollama") is not None:
         yeni.setdefault("ollama", {}).update(patch["ollama"])
+    if patch.get("ses") is not None:
+        yeni.setdefault("ses", {}).update(patch["ses"])
     yeni["local_token"] = cfg.get("local_token")
     return yeni
 

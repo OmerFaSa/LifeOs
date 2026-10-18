@@ -210,7 +210,21 @@
       sil; klasör silinince sohbetler silinmez, «Sohbetler»e döner).
       Araçlar yazı alanındaki «+» menüsündedir (ARACLAR kataloğu).
       Sohbet yeniden adlandırılır (boş ad ilk soruya döner) ve sabitlenir;
-      sabitlenenler en üstte «Sabitlenenler»dedir. */
+      sabitlenenler en üstte «Sabitlenenler»dedir.
+  28. GÜZEL SES (depo sahibi, 2026-10-19: «internete bağlıyken Gemini, yerelde
+      Piper; PC, telefon, tablet hepsi; ayarlanabilsin»). HKM bağlıysa King
+      cevabı HKM'den WAV olarak ister (/api/ses, HKM/core/ses.py): internet
+      varsa Gemini'nin Türkçe sesi, yoksa PC'deki Piper. Alamazsa (HKM kapalı,
+      ikisi de yok) söz 7'deki gibi cihazın kendi sesine düşer; King hiç
+      susmaz. Seçim cihazda durur (Dinle ve Konuş panelinde «Ses»):
+        Otomatik  Gemini → Piper → cihaz (varsayılan)
+        Gemini    yalnız Gemini, olmazsa cihaz
+        Piper     yalnız Piper (metin bilgisayardan çıkmaz), olmazsa cihaz
+        Cihaz     yalnız cihazın sesi; HKM'ye ses isteği gitmez
+      Gemini seçiliyken (Otomatik dahil) okunacak cevabın METNİ Google'a
+      gider; bu söz 7'nin «metin hiçbir şirkete gitmez» sözünü o seçim için
+      değiştirir ve panel bunu söyler. Uzun cevap parça parça istenir;
+      biri çalarken sonraki hazırlanır. Sustur her şeyi keser. */
 
 window.LIFEOS = window.LIFEOS || {};
 
@@ -334,6 +348,23 @@ window.LIFEOS.KING = (function(){
     sentez:() => (typeof window !== 'undefined' && window.speechSynthesis && typeof window.SpeechSynthesisUtterance === 'function')
       ? window.speechSynthesis : null,
     soz:m => new window.SpeechSynthesisUtterance(m),
+    /* Söz 28: sunucunun WAV'ını çalar. Döner: 'bitti' | 'olmadi' (çalınamadı:
+       tarayıcı izin vermedi ya da dosya bozuk). `tut` durdurucuyu alır. */
+    oynat:(blob, tut) => new Promise(ok => {
+      if(typeof Audio !== 'function' || typeof URL === 'undefined') return ok('olmadi');
+      let u = null, bitti = false, basladi = false;
+      const son = s => { if(bitti) return; bitti = true; try{ URL.revokeObjectURL(u); }catch(e){} ok(s); };
+      try{
+        u = URL.createObjectURL(blob);
+        const a = new Audio(u);
+        a.onplaying = () => { basladi = true; };
+        a.onended = () => son('bitti');
+        a.onerror = () => son(basladi ? 'bitti' : 'olmadi');
+        tut({ dur:() => { try{ a.pause(); }catch(e){} son('bitti'); } });
+        const p = a.play();
+        if(p && p.catch) p.catch(() => son('olmadi'));
+      }catch(e){ son('olmadi'); }
+    }),
   };
   /* HKM'deki King'in modelli cevabı yerel modelde saniyeler sürebilir. */
   const MERKEZ_ZAMAN_ASIMI = 60000;
@@ -365,6 +396,13 @@ window.LIFEOS.KING = (function(){
   let paylasim = null;       // söz 16: { kare() → { mime, data }, bitir() }
   const TASIMA = 'lifeos.king';   // söz 18; animasyon.js TASINAN listesinde
   const CEVAP = 'lifeos.king.cevap';   // söz 19: 'oto' | 'ses' | 'yazi'; TASINAN'da
+  const SES = 'lifeos.king.ses';       // söz 28: 'oto' | 'gemini' | 'piper' | 'cihaz'; TASINAN'da
+  const SES_TERCIH = ['oto', 'gemini', 'piper', 'cihaz'];
+  const SES_AD = { oto:'Otomatik', gemini:'Gemini', piper:'Piper', cihaz:'Cihaz' };
+  const SES_IP = { oto:'İnternet varsa Gemini, yoksa bilgisayardaki Piper, o da yoksa cihazın sesi',
+    gemini:'Gemini’nin Türkçe sesi; metin Google’a gider', piper:'Bilgisayardaki Piper; metin bilgisayardan çıkmaz',
+    cihaz:'Yalnız bu cihazın kendi sesi' };
+  const SES_PARCA = 420;               // sunucudan istenen bir parçanın en çok harfi
   const GUNLUK_EN_COK = 120, ARSIV_EN_COK = 30;
   let menu = null;            // söz 19: null | 'menu' | 'kayitlar' | { id }
   let silOnay = null;         // söz 19: silinmek üzere seçilen kayıt
@@ -382,6 +420,9 @@ window.LIFEOS.KING = (function(){
   let sesli = false;         // son istek sesle geldiyse cevap da sesle (söz 7)
   let dinleyen = null;       // çalışan tanıma oturumu
   let konusuyor = 0;         // okunmayı bekleyen parça sayısı
+  let sesNo = 0;             // söz 28: her yeni okuma eskisini geçersiz kılar
+  let calan = null;          // çalan sunucu sesi ({ dur })
+  let sonMotor = '';         // son okumayı kim yaptı: gemini | piper | cihaz
 
   function kareCiz(kaynak, g, y){
     if(!g || !y) throw new Error('Ekran görüntüsü henüz hazır değil');
@@ -782,15 +823,87 @@ window.LIFEOS.KING = (function(){
     }
   }
   function sus(){
+    sesNo++;
+    if(calan){ const c = calan; calan = null; try{ c.dur(); }catch(e){ /* durmuş */ } }
     const sz = ortam.sentez();
     if(sz) try{ sz.cancel(); }catch(e){ /* yok */ }
     konusuyor = 0;
     durum();
   }
+  /* Söz 28: sesi kim okusun. */
+  function sesTercihi(){ const v = ortam.depo.oku(SES); return SES_TERCIH.indexOf(v) > 0 ? v : 'oto'; }
+  function sesTercihSec(v){
+    if(SES_TERCIH.indexOf(v) < 0) return false;
+    if(v === 'oto') ortam.depo.sil(SES); else ortam.depo.yaz(SES, v);
+    ciz(false);
+    return true;
+  }
+  /* Kısa cümleleri SES_PARCA harfe kadar birleştirir: her parça bir istek. */
+  function sesParcalari(metin){
+    return parcala(metin).reduce((l, p) => {
+      if(l.length && (l[l.length - 1] + ' ' + p).length <= SES_PARCA) l[l.length - 1] += ' ' + p; else l.push(p);
+      return l;
+    }, []);
+  }
+  async function sesGetir(k, metin){
+    const ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    const t = ctrl ? setTimeout(() => ctrl.abort(), 30000) : null;
+    try{
+      const f = ortam.fetch;
+      const res = await f(k.url + '/api/ses', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + k.token },
+        body:JSON.stringify({ metin, tercih:sesTercihi() }),
+        signal:ctrl ? ctrl.signal : undefined,
+      });
+      if(res.status !== 200 || typeof res.blob !== 'function') return null;
+      const motor = (res.headers && res.headers.get && res.headers.get('X-Ses-Motor')) || '';
+      return { blob:await res.blob(), motor };
+    }catch(e){
+      return null;
+    }finally{
+      if(t) clearTimeout(t);
+    }
+  }
+  /* Doner: true (okundu ya da kesildi) | false (ilk parça bile gelmedi: cihaza düş). */
+  async function sunucuSesi(k, metin, no){
+    const parcalar = sesParcalari(metin);
+    let sonraki = sesGetir(k, parcalar[0]);
+    for(let i = 0; i < parcalar.length; i++){
+      const r = await sonraki;
+      if(no !== sesNo) return true;
+      sonraki = r && i + 1 < parcalar.length ? sesGetir(k, parcalar[i + 1]) : null;
+      const s = r ? await ortam.oynat(r.blob, c => { calan = c; }) : 'olmadi';
+      calan = null;
+      if(no !== sesNo) return true;
+      if(s !== 'bitti'){
+        if(i === 0) return false;
+        cihazSesi(parcalar.slice(i).join(' '));
+        return true;
+      }
+      if(r.motor) sonMotor = r.motor;
+    }
+    konusuyor = 0;
+    durum();
+    sohbetDevam();
+    return true;
+  }
   function seslendir(metin){
+    if(!metin) return;
+    sus();
+    const no = sesNo;
+    const k = sesTercihi() === 'cihaz' ? null : baglanti();
+    if(!k || !ortam.oynat){ cihazSesi(metin); return; }
+    konusuyor = 1;
+    durum();
+    sunucuSesi(k, metin, no).then(ok => { if(!ok && no === sesNo) cihazSesi(metin); },
+      () => { if(no === sesNo) cihazSesi(metin); });
+  }
+  function cihazSesi(metin){
     const sz = ortam.sentez();
-    if(!sz || !metin) return;
+    if(!sz || !metin){ konusuyor = 0; durum(); return; }
     try{ sz.cancel(); }catch(e){ /* yok */ }
+    sonMotor = 'cihaz';
     const ses = sesSec(sz.getVoices ? sz.getVoices() : []);
     const parcalar = parcala(metin);
     konusuyor = parcalar.length;
@@ -1204,6 +1317,17 @@ window.LIFEOS.KING = (function(){
     konus:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg>',
     ekran:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="11.5" rx="2"/><path d="M9 20h6M12 16.5V20"/></svg>',
   };
+  /* Söz 28: sesin seçimi (Dinle ve Konuş panelinde). */
+  function sesSecHtml(){
+    const t = sesTercihi();
+    const not = t === 'piper' ? 'Metin bilgisayardan çıkmaz.' : t === 'cihaz' ? 'Cihazın kendi sesi.'
+      : 'İnternet varken okunacak metin Google’a gider.';
+    const son = sonMotor ? ' Son okuyan: ' + (SES_AD[sonMotor] || sonMotor) + '.' : '';
+    return '<div class="king__ses-sec" role="radiogroup" aria-label="King’in sesi"><span class="king__ses-ad">Ses</span>'
+      + SES_TERCIH.map(v => '<button type="button" role="radio" class="king__ses-sec-dug' + (v === t ? ' is-secili' : '')
+        + '" aria-checked="' + (v === t ? 'true' : 'false') + '" data-king="ses:' + v + '" title="' + kac(SES_IP[v]) + '">' + SES_AD[v] + '</button>').join('')
+      + '</div><span class="king__ses-not">' + kac(not + son) + '</span>';
+  }
   /* Kip paneli: Dinle, Konuş ve Ekran için yazı alanının üstünde tek şerit. */
   function kipPanel(){
     const k = kip();
@@ -1216,10 +1340,10 @@ window.LIFEOS.KING = (function(){
     if(k === 'konus') return '<div class="king__kip-panel king__kip-panel--konus" role="status">'
       + '<span class="king__ses-kure" aria-hidden="true">' + KURE + '</span>'
       + '<div class="king__kip-metin"><b class="king__ses-durum"><span class="d-dinliyor">Dinliyorum…</span><span class="d-konusuyor">King konuşuyor…</span><span class="d-sira">Sıra sende; konuşabilirsin</span></b>'
-      + '<span>Bitirmek için «tamam» de ya da Bitir’e dokun.</span></div>'
+      + '<span>Bitirmek için «tamam» de ya da Bitir’e dokun.</span>' + sesSecHtml() + '</div>'
       + '<button type="button" class="king__cip" data-king="kip:yaz">Bitir</button></div>';
     if(k === 'dinle') return '<div class="king__kip-panel king__kip-panel--dinle" role="status">'
-      + '<div class="king__kip-metin"><b>King cevapları sesli okuyor</b><span>Sen yazmaya devam et; konuşman gerekmez.</span></div>'
+      + '<div class="king__kip-metin"><b>King cevapları sesli okuyor</b><span>Sen yazmaya devam et; konuşman gerekmez.</span>' + sesSecHtml() + '</div>'
       + '<button type="button" class="king__cip" data-king="sus">Sustur</button>'
       + '<button type="button" class="king__cip" data-king="kip:yaz">Kapat</button></div>';
     return '';
@@ -2119,6 +2243,7 @@ window.LIFEOS.KING = (function(){
         if(is === 'temizle'){ menu = null; sohbetiTemizle(); return; }
         if(is === 'geri-getir'){ sohbetiGeriGetir(); return; }
         if(/^cevap:/.test(is)){ cevapSec(is.slice(6)); return; }
+        if(/^ses:/.test(is)){ sesTercihSec(is.slice(4)); return; }
         if(/^kayit:/.test(is)){ menu = { id:is.slice(6) }; silOnay = null; ciz(false); return; }
         if(/^indir:/.test(is)){ kayitIndir(is.slice(6)); return; }
         if(/^kopyala:/.test(is)){ kayitKopyala(is.slice(8)); return; }
@@ -2252,7 +2377,7 @@ window.LIFEOS.KING = (function(){
     envanter = null; ortam.depo.sil(USLUP);
     ortam.depo.sil(TANISMA);
     ayar = null; acik = false; mini = false; akis = []; bekleyenFoto = null; sonGeriAl = null; sesliSohbet = false; sessizSay = 0; cipler = null; bekleyen = null; bekleyenGit = null; bekleyenIlet = null;
-    sesli = false; dinleyen = null; konusuyor = 0;
+    sesli = false; dinleyen = null; konusuyor = 0; sesNo++; calan = null; sonMotor = '';
   }
 
   return {
@@ -2263,7 +2388,7 @@ window.LIFEOS.KING = (function(){
     cikarimAdaylari, cikarimKarti, cikarimOnayla, SORMA, sormaKomutu, sormaMi, sormaListesi,
     USLUP, envanterVar:() => !!envanter,
     yetkiUygula, bekleyenYetki:() => bekleyenYetki,
-    CEVAP, cevapBicimi, cevapSec, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
+    CEVAP, cevapBicimi, cevapSec, SES, sesTercihi, sesTercihSec, sesParcalari, seslendir, sus, sonMotor:() => sonMotor, sohbetiKaydet, sohbetiTemizle, sohbetiGeriGetir, kayitlar:arsivOku, kayitIndir,
     kayitKopyala, kayitSil, kayitMetni, menuAc, menuDurum:() => menu,
     yeniSohbet, kayitAc, ARACLAR, aktifKayit:() => aktifKayit,
     KIPLER, kip, kipSec, klasorler, klasorEkle, klasorSil, kayitTasi, kayitAdlandir, kayitSabitle,

@@ -83,6 +83,9 @@ Ucnoktalar:
     GET  /api/ollama                Ollama'yi simdi tarar: durum, modeller, oneri, son baglama (core/ollama.py)
     POST /api/ollama/bagla          {ekonomik?, standart?} bos ise oneri; yalniz Ollama'da olan model
     POST /api/ollama/geri           son baglamayi geri alir (bir daha kendiliginden baglanmaz)
+    GET  /api/ses/durum             King'in sesi: Gemini hazir mi, Piper bulundu mu (ses uretmez, para harcamaz)
+    POST /api/ses                   {metin, tercih: oto|gemini|piper} -> audio/wav; uretilemezse 503 + notlar
+                                    (modul King'i o zaman cihazin kendi sesine duser; core/ses.py)
     POST /api/aktif/baslat          aktif kip: turun «yapilabilir» isi {id} -> King (kullanici yolu, modul hkm)
     GET  /api/merkez/hafta|gunluk|gecmis  katalog 120 haftalik ozet, 126 Merkez gunlugu, 119 oneri gecmisi (yalniz okur)
     GET  /                          tek dosyalik yerel yuz (token istemez;
@@ -110,6 +113,7 @@ from core import motor, tarife  # noqa: E402
 from core import (ai, aktif, bam, bildirim, butce, channels, cikti, cozumle, cross, db, depo, gelen,  # noqa: E402
                   fis, hedefag, impact,
                   intents, kanal, king, manager, media, memory, merkez, models, motto, ollama, outbox, patron,
+                  ses,
                   profil, saat, schedule,
                   settings, sohbet, streak, sync_engine, thresholds, twin,
                   urunler, weekly, web, yedek, yoklama)
@@ -347,6 +351,18 @@ class Handler(BaseHTTPRequestHandler):
         self._cors()
         self.end_headers()
         self.wfile.write(body)
+
+    def _send_ses(self, wav, motor):
+        """King'in sesi: WAV ve hangi motorun urettigi (modul kartta yazar)."""
+        self.send_response(200)
+        self.send_header("Content-Type", "audio/wav")
+        self.send_header("Content-Length", str(len(wav)))
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Ses-Motor", motor)
+        self.send_header("Access-Control-Expose-Headers", "X-Ses-Motor")
+        self._cors()
+        self.end_headers()
+        self.wfile.write(wav)
 
     def _cors(self):
         origin = cors_origin(self.headers, self.server.config)
@@ -1129,6 +1145,8 @@ class Handler(BaseHTTPRequestHandler):
             # Motor servisinin durumu: sunucu motordan haberdardir (adres,
             # ayni makine mi, gecikme, modeller). Para harcamaz.
             return self._send(200, motor.dugum_durumu(self.server.config, con=self.con))
+        if u.path == "/api/ses/durum":
+            return self._send(200, ses.durum(self.con, self.server.config))
         if u.path == "/api/ollama":
             # Ayarlar acilinca TAZE tarama: kullanici simdiyi gorur.
             t = ollama.tara(self.server.config)
@@ -1710,6 +1728,19 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 body = {}
             return self._send(200, self._say(body))
+        if u.path == "/api/ses":
+            ham, hata = self._read_body()
+            if hata:
+                return self._send(413, {"error": hata})
+            try:
+                body = _nesne(ham)
+            except ValueError:
+                body = {}
+            r = ses.seslendir(self.con, self.server.config, body.get("metin"),
+                              str(body.get("tercih") or "oto"))
+            if not r["ok"]:
+                return self._send(503, {"ok": False, "notlar": r["notlar"]})
+            return self._send_ses(r["wav"], r["motor"])
         if u.path == "/api/ollama/bagla":
             ham, hata = self._read_body()
             if hata:

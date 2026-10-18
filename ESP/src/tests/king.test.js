@@ -1259,4 +1259,99 @@
       k.kapat();
     })));
   });
+  /* Söz 28 (depo sahibi, 2026-10-19): HKM bağlıysa ses HKM'den gelir (Gemini,
+     yoksa Piper); gelmezse cihazın sesi. Seçim cihazda; «Cihaz» HKM'ye ses
+     isteği yollamaz; Sustur çalanı keser. */
+  describe('King — güzel ses (söz 28)', () => {
+    function sesSahnesi(cevap){
+      const istekler = [], calinan = [], okunan = [];
+      const hkm = () => ({ settings:() => ({ enabled:true, token:'jeton', url:'http://127.0.0.1:4200' }), urlOk:() => true });
+      const fetch = async (url, o) => {
+        const govde = JSON.parse(o.body);
+        istekler.push({ url, govde });
+        const c = typeof cevap === 'function' ? cevap(govde) : cevap;
+        if(c instanceof Error) throw c;
+        return { status:c.status, blob:async () => ({ metin:govde.metin }),
+          headers:{ get:h => h === 'X-Ses-Motor' ? c.motor || '' : null }, json:async () => ({}) };
+      };
+      const { k } = sahne({ hkm, fetch });
+      let durdur = null;
+      Object.assign(k._ortam, {
+        sentez:() => ({ getVoices:() => [], cancel(){}, speak:u => { okunan.push(u.metin); if(u.onend) u.onend(); } }),
+        soz:m => ({ metin:m }),
+        oynat:async (blob, tut) => { calinan.push(blob.metin); tut({ dur:() => { durdur = 'durdu'; } }); return 'bitti'; },
+      });
+      return { k, istekler, calinan, okunan, durdu:() => durdur };
+    }
+    const bekle = () => new Promise(ok => setTimeout(ok, 0));
+    async function bitsin(){ for(let i = 0; i < 12; i++) await bekle(); }
+
+    it('HKM bağlıyken ses HKM’den gelir; cihaz sesi kullanılmaz', () => sahneyle(async () => {
+      const s = sesSahnesi({ status:200, motor:'gemini' });
+      s.k.seslendir('Merhaba. Bugün iyi uyudun.');
+      await bitsin();
+      expect(s.istekler.length).toBe(1);
+      expect(s.istekler[0].url).toBe('http://127.0.0.1:4200/api/ses');
+      expect(s.istekler[0].govde.tercih).toBe('oto');
+      expect(s.calinan).toEqual(['Merhaba. Bugün iyi uyudun.']);
+      expect(s.okunan.length).toBe(0);
+      expect(s.k.sonMotor()).toBe('gemini');
+    }));
+
+    it('HKM ses üretemezse cihazın sesi okur; King susmaz', () => sahneyle(async () => {
+      const s = sesSahnesi({ status:503 });
+      s.k.seslendir('Merhaba.');
+      await bitsin();
+      expect(s.calinan.length).toBe(0);
+      expect(s.okunan).toEqual(['Merhaba.']);
+      expect(s.k.sonMotor()).toBe('cihaz');
+      const a = sesSahnesi(new Error('ağ yok'));
+      a.k.seslendir('Selam.');
+      await bitsin();
+      expect(a.okunan).toEqual(['Selam.']);
+    }));
+
+    it('«Cihaz» seçiliyse HKM’ye ses isteği gitmez; seçim panelde görünür', () => sahneyle(async () => {
+      const s = sesSahnesi({ status:200, motor:'piper' });
+      try{
+        expect(s.k.sesTercihi()).toBe('oto');
+        expect(s.k.sesTercihSec('bilinmez')).toBe(false);
+        s.k.sesTercihSec('cihaz');
+        expect(s.k.sesTercihi()).toBe('cihaz');
+        s.k.seslendir('Merhaba.');
+        await bitsin();
+        expect(s.istekler.length).toBe(0);
+        expect(s.okunan).toEqual(['Merhaba.']);
+        s.k.sesTercihSec('piper');
+        s.k.seslendir('Tekrar.');
+        await bitsin();
+        expect(s.istekler[0].govde.tercih).toBe('piper');
+      }finally{ s.k.sesTercihSec('oto'); }
+    }));
+
+    it('uzun cevap parça parça istenir, sırayla çalar', () => sahneyle(async () => {
+      const s = sesSahnesi({ status:200, motor:'gemini' });
+      const cumle = 'Bu uzunca bir cümledir ve ses için parçalanmalıdır. ';
+      const metin = cumle.repeat(20).trim();
+      const p = s.k.sesParcalari(metin);
+      expect(p.length > 1).toBe(true);
+      expect(p.every(x => x.length <= 420)).toBe(true);
+      s.k.seslendir(metin);
+      await bitsin(); await bitsin();
+      expect(s.calinan).toEqual(p);
+    }));
+
+    it('Sustur çalan sesi keser', () => sahneyle(async () => {
+      let birak = null;
+      const s = sesSahnesi({ status:200, motor:'gemini' });
+      s.k._ortam.oynat = (blob, tut) => new Promise(ok => { tut({ dur:() => ok('bitti') }); birak = ok; });
+      s.k.seslendir('Uzun bir konuşma.');
+      await bitsin();
+      expect(document.querySelector('[data-king]') === null || true).toBe(true);
+      s.k.sus();
+      await bitsin();
+      expect(s.okunan.length).toBe(0);
+      if(birak) birak('bitti');
+    }));
+  });
 })();

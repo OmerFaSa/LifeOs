@@ -119,6 +119,10 @@ async function main(){
   fs.writeFileSync(cfg, JSON.stringify({
     host:'127.0.0.1', port:HKM_PORT, local_token:TOKEN,
     db_path:path.join(tmp, 'hkm.db'),
+    /* Makinede Ollama acik olabilir (HKM/core/ollama.py kendiliginden
+       baglar): denetim makinenin durumuna bagli olmamali, model yolu
+       kapali kalir. */
+    ollama:{ kendiligi:false },
   }, null, 2));
 
   const daemon = spawn('python3', [path.join(ROOT, 'HKM', 'daemon.py')],

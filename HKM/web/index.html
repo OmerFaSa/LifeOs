@@ -3014,6 +3014,69 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
     $('yerel-kaydet').addEventListener('click', function(){ yerYaz(null); });
     $('yerel-sina').addEventListener('click', yerelSina);
     ollamaYukle();
+    sesYukle();
+  }
+
+  /* KING'IN SESI (core/ses.py, king.js söz 28). İnternet varken Gemini'nin
+     Türkçe sesi, yoksa bu bilgisayardaki Piper; ikisi de yoksa cihazın
+     kendi sesi. Hangisinin kullanılacağını her cihaz King panelinde seçer;
+     burada Gemini'nin hangi sesi ve Piper'ın yeri ayarlanır. */
+  var SES_ORNEK = 'Merhaba, ben King. Bugün nasıl yardımcı olayım?';
+  function sesCiz(d, mesaj){
+    var k = $('ses-karti');
+    if(!k) return;
+    var g = d.gemini || {}, p = d.piper || {}, a = d.ayar || {};
+    var h = '<div class="tag">King’in sesi</div>'
+      + '<p class="ollama__not" style="font-size:13px">İnternet varken Gemini, yoksa bu bilgisayardaki Piper okur; '
+      + 'ikisi de yoksa cihazın kendi sesi. Hangisi kullanılsın, her cihazda King’in Dinle ve Konuş panelinden seçilir.</p>'
+      + '<p class="ollama__durum ollama__durum--' + (g.hazir ? 'bagli' : 'eksik') + '"><b>Gemini</b> · ' + esc(g.not || '') + '</p>'
+      + '<label style="display:block;font-size:12px;margin:6px 0">Gemini’nin sesi '
+      + '<select id="ses-gemini">' + (d.sesler || []).map(function(v){
+          return '<option' + (v === a.gemini_ses ? ' selected' : '') + '>' + esc(v) + '</option>'; }).join('') + '</select></label>'
+      + '<p class="ollama__durum ollama__durum--' + (p.bulundu ? 'bagli' : 'eksik') + '"><b>Piper</b> · ' + esc(p.metin || '') + '</p>'
+      + '<label style="display:block;font-size:12px;margin:6px 0">Piper klasörü (boşsa kendisi arar) '
+      + '<input id="ses-piper" placeholder="' + esc((p.aranan || [])[1] || '') + '" value="' + esc(a.piper_yol || '') + '"></label>'
+      + '<div class="row"><button id="ses-kaydet">Kaydet</button>'
+      + '<button id="ses-dene-gemini"' + (g.hazir ? '' : ' disabled') + '>Gemini’yi dinle</button>'
+      + '<button id="ses-dene-piper"' + (p.bulundu ? '' : ' disabled') + '>Piper’ı dinle</button></div>'
+      + '<p class="muted ollama__not" id="ses-not" role="status">' + esc(mesaj || '') + '</p>';
+    k.innerHTML = h;
+    $('ses-kaydet').addEventListener('click', sesKaydet);
+    $('ses-dene-gemini').addEventListener('click', function(){ sesDene('gemini'); });
+    $('ses-dene-piper').addEventListener('click', function(){ sesDene('piper'); });
+  }
+  async function sesYukle(mesaj){
+    var r = await api('/api/ses/durum');
+    if(r.status === 200) sesCiz(r.body, mesaj);
+    else if($('ses-karti')) $('ses-karti').innerHTML = sakinHata('Ses durumu alınamadı.', r.status);
+  }
+  async function sesKaydet(){
+    $('ses-not').textContent = 'Kaydediliyor…';
+    var r = await api('/api/config', { method:'POST', body:JSON.stringify({ ses:{
+      gemini_ses:$('ses-gemini').value, piper_yol:($('ses-piper').value || '').trim() } }) });
+    if(r.status === 200) sesYukle('Kaydedildi.');
+    else $('ses-not').textContent = 'Kaydedilmedi — ' + ((r.body && r.body.errors) ? r.body.errors.join(' · ') : r.status);
+  }
+  /* Örnek cümleyi okutur: ayar kaydedilmeden önce seçilen ses denenmez; önce kaydedilir. */
+  async function sesDene(motor){
+    var not = $('ses-not');
+    not.textContent = 'Hazırlanıyor…';
+    var k = await api('/api/config', { method:'POST', body:JSON.stringify({ ses:{ gemini_ses:$('ses-gemini').value } }) });
+    if(k.status !== 200){ not.textContent = 'Kaydedilmedi — ' + k.status; return; }
+    try{
+      var res = await fetch('/api/ses', { method:'POST', headers:{ 'Content-Type':'application/json',
+        'Authorization':'Bearer ' + token }, body:JSON.stringify({ metin:SES_ORNEK, tercih:motor }) });
+      if(res.status !== 200){
+        var j = {}; try{ j = await res.json(); }catch(e){}
+        not.textContent = 'Ses üretilemedi — ' + ((j.notlar || []).join(' ') || res.status);
+        return;
+      }
+      var u = URL.createObjectURL(await res.blob());
+      var a = new Audio(u);
+      a.onended = function(){ URL.revokeObjectURL(u); };
+      await a.play();
+      not.textContent = (motor === 'gemini' ? 'Gemini' : 'Piper') + ' okuyor.';
+    }catch(e){ not.textContent = 'Ses çalınamadı.'; }
   }
 
   /* OLLAMA (core/ollama.py). HKM bilgisayardaki Ollama'yı kendisi bulur:
@@ -3092,6 +3155,7 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   function yerKismi(o){
     var yer = o.yer || 'bulut', yl = o.yerel || {};
     var h = '<div id="ollama-karti" class="ollama"><div class="tag">Ollama</div><p class="muted">Bakılıyor…</p></div>'
+      + '<div id="ses-karti" class="ollama"><div class="tag">King’in sesi</div><p class="muted">Bakılıyor…</p></div>'
       + '<div class="tag">Nerede çalışsın</div><div class="row">';
     ['yerel', 'hibrit', 'bulut'].forEach(function(y){
       h += '<button data-yer="' + y + '"' + (y === yer ? ' class="primary" aria-pressed="true"' : '')
@@ -7471,7 +7535,7 @@ button.gorevli.on:hover{ background:var(--fg); }
 .ollama__liste li b{ font-weight:600; overflow-wrap:anywhere; }
 .ollama__rol{ margin-left:auto; font-size:12px; font-weight:600; color:var(--ok); }
 .ollama__ayar{ display:flex; align-items:center; gap:8px; margin-top:12px; font-size:13px; min-height:24px; }
-.ollama__ayar input{ width:20px; height:20px; flex:none; }
+.ollama__ayar input{ width:24px; height:24px; flex:none; margin:0; }
 .ollama__not{ margin:8px 0 0; font-size:12px; }
 .ollama__not:empty{ display:none; }
 .aktif__yap li{ display:flex; align-items:center; justify-content:space-between; gap:12px; }

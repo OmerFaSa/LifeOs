@@ -38,7 +38,9 @@ html.king-acik.king-cubuk{ scrollbar-gutter:stable; }
    kalıyordu. İnce parlak kenar (::before, 10 px) ve geniş yumuşak süzülme
    (::after, 72 px); ikisi de aynı dönen renklerle. */
 .king-isik::before, .king-isik::after{ content:''; position:absolute; inset:0;
-  background:conic-gradient(from var(--king-aci), #4F86FF, #2EC4A9, #F2A93B, #E9A6C1, #9A86FF, #4F86FF);
+  background:conic-gradient(from var(--king-aci), #4F86FF, #2EC4A9, #F2A93B, #9A86FF, #4F86FF);
+  /* Renkler King kuresinin renkleridir (.king__kure; 2026-10-19, kullanici:
+     «King'in logosundaki renkler»). Pembe yoktu kurede, kalkti. */
   -webkit-mask:linear-gradient(to bottom, #000, transparent) top / 100% var(--k) no-repeat,
     linear-gradient(to top, #000, transparent) bottom / 100% var(--k) no-repeat,
     linear-gradient(to right, #000, transparent) left / var(--k) 100% no-repeat,
@@ -52,9 +54,11 @@ html.king-acik.king-cubuk{ scrollbar-gutter:stable; }
    karede yeniden bulanıklaşıyordu: sohbet kaydırılırken takılma ve titreme
    (kullanıcı, 2026-10-18). Durgunken renkler yerinde, hareket yok. */
 .king.is-dinliyor .king-isik::before, .king.is-dinliyor .king-isik::after,
-.king.is-konusuyor .king-isik::before, .king.is-konusuyor .king-isik::after{ animation:king-don 3.2s linear infinite; }
-.king-isik::before{ --k:10px; opacity:.7; }
-.king-isik::after{ --k:72px; opacity:.32; }
+.king.is-konusuyor .king-isik::before, .king.is-konusuyor .king-isik::after{ animation:king-don 9s linear infinite; }
+/* KISIK (2026-10-19, kullanici: «cok dikkat dagitiyor»): ince kenar .7 -> .3,
+   genis suzulme .32 -> .12, donus 3,2 sn -> 9 sn, nabiz parlamasiz. */
+.king-isik::before{ --k:8px; opacity:.3; }
+.king-isik::after{ --k:56px; opacity:.12; }
 @keyframes king-don{ to{ --king-aci:360deg; } }
 
 /* ---------- baloncuk ---------- */
@@ -170,7 +174,7 @@ html.king-acik.king-cubuk{ scrollbar-gutter:stable; }
 .king__girdi{ border-width:1.5px; }
 .king__girdi:focus{ border-color:transparent;
   background:linear-gradient(var(--surface), var(--surface)) padding-box,
-    conic-gradient(from var(--king-aci), #4F86FF, #2EC4A9, #F2A93B, #E9A6C1, #9A86FF, #4F86FF) border-box;
+    conic-gradient(from var(--king-aci), #4F86FF, #2EC4A9, #F2A93B, #9A86FF, #4F86FF) border-box;
   animation:king-don 6s linear infinite; }
 .king__gonder{ transition:opacity .2s ease, transform .2s ease; }
 .king__yaz:has(.king__girdi:placeholder-shown) .king__gonder{ opacity:.35; }
@@ -189,6 +193,15 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 /* Kabuktaki giriş: kenarda «King», hızlı eklede «King'e sor». */
 .kmenu__hizli--king .king__kure{ width:18px; height:18px; animation:none; }
 
+/* Söz 28: sesin seçimi — dört küçük düğme, sade; seçili olan dolu. */
+.king__ses-sec{ display:flex; flex-wrap:wrap; align-items:center; gap:4px; margin-top:8px; }
+.king__ses-ad{ margin-right:4px; font-size:12px; font-weight:600; color:var(--text-2); }
+.king__ses-sec-dug{ min-height:28px; padding:0 10px; border:1px solid var(--line, rgba(0,0,0,.12)); border-radius:999px;
+  background:transparent; color:var(--text-2); font:inherit; font-size:12px; font-weight:600; cursor:pointer; }
+.king__ses-sec-dug.is-secili{ background:var(--text); border-color:var(--text); color:var(--surface); }
+.king__ses-sec-dug:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
+.king__ses-not{ display:block; margin-top:4px; font-size:11.5px; color:var(--text-2); }
+
 /* Ses (king.js söz 7): mikrofon düğmesi; dinlerken ve konuşurken kenar
    ışığı nabız gibi atar, küre hızlanır. Hareket azaltılmışsa yalnız renk. */
 .king__mik{ flex:none; width:40px; height:40px; display:grid; place-items:center; padding:0; border:0; border-radius:50%;
@@ -199,8 +212,8 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__mik:active{ transform:scale(.94); }
 .king__mik.is-acik{ color:#fff; background:var(--danger, #e5484d); animation:king-mik 1.4s ease-in-out infinite; }
 @keyframes king-mik{ 50%{ box-shadow:0 0 0 6px color-mix(in srgb, var(--danger, #e5484d) 22%, transparent); } }
-.king.is-dinliyor .king-isik, .king.is-konusuyor .king-isik{ animation:king-nabiz 1.6s ease-in-out infinite; }
-@keyframes king-nabiz{ 0%, 100%{ opacity:.75; } 50%{ opacity:1; filter:saturate(1.35) brightness(1.08); } }
+.king.is-dinliyor .king-isik, .king.is-konusuyor .king-isik{ animation:king-nabiz 2.4s ease-in-out infinite; }
+@keyframes king-nabiz{ 0%, 100%{ opacity:.8; } 50%{ opacity:1; } }
 .king.is-dinliyor .king__bas .king__kure, .king.is-konusuyor .king__bas .king__kure{ animation-duration:1.1s; }
 
 @media (prefers-reduced-motion:reduce){

@@ -22,6 +22,15 @@ try:
     _ollama.VARSAYILAN_GETIR = _ag_kapali
 except ImportError:                                  # pragma: no cover
     pass
+try:
+    from core import ses as _ses
+
+    def _piper_yok(*a, **k):
+        raise OSError("test: piper calistirilmaz")
+    _ses.VARSAYILAN_POST = lambda url, *a, **k: _ag_kapali(url)
+    _ses.VARSAYILAN_CALISTIR = _piper_yok
+except ImportError:                                  # pragma: no cover
+    pass
 
 
 def suite(name):
