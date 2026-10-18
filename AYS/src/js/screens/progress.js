@@ -31,10 +31,10 @@ R.Screens.progress = (function(){
     const history = C.completionHistory(8).map(h => h.value);
 
     const timeDrift = (function(){
-      const withTime = C.fullExams('TYT').slice(-3).filter(e => e.tests.some(t => t.minutes != null));
+      const withTime = C.fullExams('TYT').slice(-3).filter(e => (e.tests || []).length && e.tests.every(t => t.minutes != null));
       if(!withTime.length) return null;
       const last = withTime[withTime.length-1];
-      return U.sum(last.tests.map(t => t.minutes || 0)) - (last.duration || 165);
+      return U.sum(last.tests.map(t => Number(t.minutes) || 0)) - (last.duration || 165);
     })();
 
     return [
@@ -43,7 +43,7 @@ R.Screens.progress = (function(){
         tone:comp == null ? null : comp >= 85 ? 'ok' : comp >= 70 ? 'warn' : 'danger' },
       { key:'questionRate', num:qr && qr.pct != null ? qr.pct : null, birim:'%', value:qr && qr.pct != null ? '%'+qr.pct : '—', note:qr ? qr.solved+' / '+qr.target+' soru' : 'hedef girilmemiş',
         progress:qr ? qr.pct : null, target:90,
-        tone:qr && qr.pct >= 90 ? 'ok' : qr && qr.pct >= 70 ? 'warn' : null },
+        tone:!qr || qr.pct == null ? null : qr.pct >= 90 ? 'ok' : qr.pct >= 70 ? 'warn' : 'danger' },
       { key:'topicClosure', num:closure.pct, birim:'%', value:'%'+closure.pct, tone:closure.pct >= 55 ? 'ok' : 'warn',
         progress:closure.pct, target:55,
         note:closure.closed+' / '+closure.total+' konu' },

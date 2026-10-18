@@ -179,6 +179,25 @@
         expect(F().relief().length).toBe(0);
       });
     });
+
+    /* Analiz denetimi (Bulgu 10): ESP'de teklifler `state:'proposed'` taşır;
+       sürtünme yüksekken 4'ten fazla bekleyen teklif varsa `clear-proposals`
+       önerisi üretilir ve Analiz ekranındaki «Bak» eylemleri karşılıksız kalmaz. */
+    it('bekleyen teklifler state:proposed ile sayilir ve Analiz Bak eylemleri calisir', async () => {
+      resetState();
+      await withTodayAsync('2026-03-10', async () => {
+        S.usage = { days:{ '2026-03-10':{ date:'2026-03-10', adminMs:30 * 60000, ticks:60 } },
+          lastTick:null };
+        oturum('2026-03-10', 'lang', 5);
+        S.proposals = [1, 2, 3, 4, 5].map(i => ({ id:'p' + i, state:'proposed' }));
+        const r = F().relief();
+        expect(r.some(x => x.id === 'clear-proposals' && x.act === 'go-office')).toBeTruthy();
+        const h = ESP.Screens.analytics.handle;
+        ['go-profile', 'timer-hint', 'go-office', 'go-today'].forEach(act => {
+          expect(typeof h[act]).toBe('function');
+        });
+      });
+    });
   });
 
   describe('surtunme · dayaniklilik', () => {

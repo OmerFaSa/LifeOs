@@ -216,6 +216,16 @@ ESP.Calib = (function(){
       value:Math.abs(f.guess - f.actual) / Math.max(Math.abs(f.actual), 1) };
   }
 
+  /* Sapmanın insan dilindeki karşılığı — tek yerde (abs kendi biriminde,
+     ape yüzde, brier 0–1 olasılık puanı). */
+  function errorText(f){
+    const e = error(f);
+    if(!e) return null;
+    if(e.type === 'brier') return e.value.toFixed(2);
+    if(e.type === 'ape') return '%' + Math.round(e.value * 100);
+    return U.fmtNum(U.round(e.value, 2)) + (e.unit ? ' ' + e.unit : '');
+  }
+
   /* Bir tahminin bandı (0 keskin … 3 uzak). Türü ne olursa olsun aynı
      dört basamak: aileler ortalanamaz ama bantlar karşılaştırılabilir. */
   function bandOf(f){
@@ -337,7 +347,7 @@ ESP.Calib = (function(){
 
   return {
     open, settle, remove, load, norm,
-    list, settled, openList:open_, due, error, bandOf, errKind, bias, score, kindOf,
+    list, settled, openList:open_, due, error, errorText, bandOf, errKind, bias, score, kindOf,
     ASGARI, PENCERE,
   };
 })();

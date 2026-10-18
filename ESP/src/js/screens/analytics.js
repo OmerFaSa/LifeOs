@@ -424,11 +424,9 @@ ESP.Screens.analytics = (function(){
             headers:['Tür', { label:'Tahmin', num:true }, { label:'Gerçek', num:true },
               { label:'Sapma', num:true }],
             rows:ESP.Calib.settled().slice(0, 10).map(fo => {
-              const h = ESP.Calib.error(fo);
               return [(ESP.Calib.kindOf(fo.kind) || {}).label || fo.kind,
                 U.fmtNum(fo.guess), U.fmtNum(fo.actual),
-                h == null ? '—' : (h.type === 'brier' ? h.value.toFixed(2)
-                  : '%' + Math.round(h.value * 100))];
+                ESP.Calib.errorText(fo) || '—'];
             }) }))}`,
       }),
     ];
@@ -563,6 +561,10 @@ ESP.Screens.analytics = (function(){
 
   const handle = {
     async 'ana-tab'(el){ K.bolumeGit(el.dataset.tab); },
+    async 'go-profile'(){ ESP.App.go('profile'); },
+    async 'go-office'(){ ESP.App.go('office'); },
+    async 'go-today'(){ ESP.App.go('today'); },
+    async 'timer-hint'(){ ESP.App.go('today'); },
 
     async 'gen-briefing'(){
       delete S.officeBriefings[U.todayISO()];
@@ -591,10 +593,8 @@ ESP.Screens.analytics = (function(){
       const inp = document.getElementById('calib-actual-' + id);
       const r = await ESP.Calib.settle(id, inp ? inp.value : null);
       if(!r.ok){ ESP.UI.toast(r.error); return; }
-      const h = ESP.Calib.error(r.forecast);
-      ESP.UI.toast(h && h.type === 'ape'
-        ? 'Kapandı — sapma %' + Math.round(h.value * 100)
-        : 'Kapandı.');
+      const yazi = ESP.Calib.errorText(r.forecast);
+      ESP.UI.toast(yazi ? ('Kapandı — sapma ' + yazi) : 'Kapandı.');
       ESP.App.render();
     },
   };
