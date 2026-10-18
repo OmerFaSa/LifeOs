@@ -126,19 +126,23 @@ SP.Screens.team = (function(){
     return list.length ? list[list.length - 1].text : '';
   }
 
+  /* Ofis sohbeti King'in akışıyla ama sade (brand/ortak/ofissohbet.js,
+     2026-10-19): ajanın cevabı düz yazı, ad satırında küçük nokta; senin
+     sözün gri balon; cevabın altında kaynak ve kopyala. */
+  const OS = () => (window.LIFEOS || {}).OFISSOHBET;
   function chatBody(a){
     const msgs = S.officeChats[a.id] || [];
     return html`
-        <div class="chat">
+        <div class="chat osohbet" data-osohbet="${'spi:' + a.id}">
           <div class="msg msg--agent">
-            ${P.avatar(a.id, 'sm')}
-            <div class="msg__body"><p class="small">${a.opening}</p></div>
+            <div class="msg__who"><b>${a.name}</b><span>${a.role}</span></div>
+            <div class="msg__body"><p>${a.opening}</p></div>
           </div>
           ${map(msgs, m => html`
             <div class="${cls('msg', m.role === 'user' ? 'msg--me' : 'msg--agent')}">
-              ${when(m.role !== 'user', () => P.avatar(a.id, 'sm'))}
+              ${when(m.role !== 'user', () => html`<div class="msg__who"><b>${a.name}</b></div>`)}
               <div class="msg__body">
-                <p class="small">${m.text}</p>
+                <p data-osohbet-metin>${m.text}</p>
                 ${when(m.role !== 'user' && devirHedefi(a, m.text), () => {
                   const h = devirHedefi(a, m.text);
                   return html`<div class="devirdug">
@@ -147,17 +151,17 @@ SP.Screens.team = (function(){
                       act:'devret', data:{ 'data-id':h.id, 'data-q':sonSoru(a) } })}
                   </div>`;
                 })}
-                ${when(m.role !== 'user', () => html`<div class="row-sm mt-4">
-                  ${P.sourceBadge(m.source)}
-                  ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
-                  ${when(m.error, () => K.Badge({ label:'bağlantı hatası', tone:'danger' }))}
-                </div>`)}
               </div>
+              ${when(m.role !== 'user', () => html`<div class="osohbet__alt">
+                ${P.sourceBadge(m.source)}
+                ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
+                ${when(m.error, () => K.Badge({ label:'bağlantı hatası', tone:'danger' }))}
+                ${raw(OS() ? OS().kopyaHtml() : '')}
+              </div>`)}
             </div>`)}
-          ${when(busy, () => html`<div class="msg msg--agent">${P.avatar(a.id, 'sm')}
-            <div class="msg__body">${K.Skeleton({ rows:2,
-              label:a.name + ' düşünüyor',
-              hint:'brifingi okuyor ve cümleyi kuruyor' })}</div></div>`)}
+          ${when(busy, () => html`<div data-osohbet-bekle><div class="msg msg--agent" role="status">
+            <div class="msg__who"><b>${a.name}</b></div>
+            <div class="msg__body dim">Brifingi okuyor ve cümleyi kuruyor…</div></div></div>`)}
           ${oneriBlogu()}
         </div>`;
   }
@@ -168,12 +172,15 @@ SP.Screens.team = (function(){
       title:a.name, sub:a.role,
       badge:SP.Office.ready(a.id) ? K.Badge({ label:'model açık', tone:'info' })
         : K.Badge({ label:'hazır kurallar', tone:'muted', icon:false }),
-      body:chatBody(a),
-      foot:html`${raw(mentionYeri())}
-        <div class="quick">
+      /* Yazma alanı sohbetin ALTINDA (King gibi). `foot` defter kipinde
+         satırın sağ üstüne eylem olarak düşüyordu (2026-10-19). */
+      body:html`${chatBody(a)}${raw(mentionYeri())}
+        <div class="osohbet-yaz mt-10" data-osohbet-yaz>
+          ${K.Textarea({ id:'chat-text', rows:1, class:'osohbet-girdi', placeholder:'Sor ya da verini söyle…',
+            aria:'Soru ya da veri (örneğin: uyku 7 saat ve 45 dakika yürüdüm)', data:{ 'data-osohbet-girdi':'1' } })}
           ${K.Mic({ target:'chat-text' })}
-          ${K.Input({ id:'chat-text', placeholder:'Sorunu sor ya da verini söyle — «uyku 7 saat ve 45 dk yürüdüm»', aria:'Soru' })}
-          ${K.Button({ label:'Gönder', tone:'primary', act:'send-chat', disabled:busy })}
+          ${OS() ? raw(OS().gonderHtml({ act:'send-chat', kapali:busy }))
+            : K.Button({ label:'Gönder', tone:'primary', act:'send-chat', disabled:busy })}
         </div>`,
     });
   }

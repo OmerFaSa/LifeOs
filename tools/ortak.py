@@ -303,6 +303,11 @@ DOSYALAR = {
     "cikarim.test.js": "tests",
     "gecmis.js":       "js/core",
     "gecmis.test.js":  "tests",
+    # OFIS SOHBETI — King'in akisi, sade gorunus (2026-10-19): Enter, kaydirma yeri,
+    # sakin belirme, kopyala; King'e ozgu sus yok.
+    "ofissohbet.js":      "js/core",
+    "ofissohbet.css":     "css",
+    "ofissohbet.test.js": "tests",
     "envanter.js":     "js/core",
     "envanter.test.js": "tests",
     "defter.js":       "js/core",

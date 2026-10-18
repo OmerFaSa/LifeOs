@@ -14880,6 +14880,83 @@ html:not([data-zemin="yumusak"]) .zemin-isik{ display:none; }
 @media (prefers-reduced-motion:no-preference){
   .zemin-isik.is-gunaydin{ animation:zemin-nabiz 2.8s cubic-bezier(.32,.72,0,1) both; }
 }
+
+/* ==== css/ofissohbet.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/ofissohbet.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* OFİS SOHBETİ — King'in akışı, çok daha sade görünüş (2026-10-19).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/ofissohbet.css`; `python3 tools/ortak.py --yay`
+   üç arayüzün `src/css/` klasörüne kopyalar. Davranışı `ofissohbet.js`.
+   ==================================================================
+
+   King'e ayrılan hiçbir şey burada yok: renkli küre, kenar ışığı, buzlu
+   cam (backdrop-filter), gradyan, dönen ya da nabız atan şey. Düz yüzey,
+   ince çizgi, nötr renk; modülün rengi yalnız ad satırındaki 6 piksellik
+   nokta. Ajanın cevabı balon değil düz yazı; senin sözün açık gri balon.
+   Yalnız .osohbet ve .osohbet-yaz altında geçerlidir: başka ekranlardaki
+   .chat / .msg (koç, toplantı) değişmez. */
+
+.osohbet{ display:flex; flex-direction:column; gap:16px; overflow-y:auto; overflow-x:hidden;
+  overscroll-behavior:contain; padding:4px 2px 2px; }
+.osohbet .msg{ display:flex; flex-direction:column; gap:0; max-width:88%; min-width:0; }
+.osohbet .msg__body{ padding:0; border:0; border-radius:0; background:none; min-width:0;
+  font-size:var(--fs-base); line-height:1.55; color:var(--text); overflow-wrap:anywhere; }
+.osohbet .msg__body p{ margin:0; font-size:inherit; }
+.osohbet .msg__body p + p{ margin-top:6px; }
+
+/* Senin sözün: sağda, açık gri, çizgisiz. */
+.osohbet .msg--me{ align-self:flex-end; flex-direction:column; align-items:flex-end; }
+.osohbet .msg--me .msg__body{ padding:9px 14px; border-radius:18px 18px 6px 18px; background:var(--surface-2); }
+
+/* Ajanın cevabı: solda, düz yazı. Ad satırı küçük ve soluk; önünde
+   modülün renginde küçük nokta. */
+.osohbet .msg--agent{ align-self:flex-start; }
+.osohbet .msg__who{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin:0 0 3px;
+  font-size:var(--fs-xs); color:var(--text-3); }
+.osohbet .msg__who b{ font-weight:600; color:var(--text-2); }
+.osohbet .msg__who::before{ content:''; flex:none; width:6px; height:6px; border-radius:50%; background:var(--primary); }
+.osohbet .msg__who .agentav{ display:none; }
+.osohbet__alt{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:4px; min-height:28px; }
+.osohbet__alt .tiny{ color:var(--text-3); }
+
+/* Kopyala: soluk, çerçevesiz; dokunma hedefi 28 piksel. */
+.osohbet-kopya{ display:inline-grid; place-items:center; width:28px; height:28px; padding:0; margin-left:-6px;
+  border:0; border-radius:8px; background:none; color:var(--text-3); cursor:pointer; }
+.osohbet-kopya:hover{ background:var(--surface-2); color:var(--text-2); }
+.osohbet-kopya:focus-visible{ outline:2px solid var(--text-3); outline-offset:1px; }
+.osohbet-kopya svg{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.osohbet-kopya.is-kopyalandi{ color:var(--text); }
+
+/* Bekleyen cevap: düz, soluk bir satır; nokta dansı yok. */
+.osohbet [data-osohbet-bekle] .msg__body, .osohbet .msg__body.dim{ color:var(--text-3); }
+
+.osohbet .chat__empty{ padding:28px 12px; }
+.osohbet .chat__empty svg{ display:none; }
+
+/* Cevap sakin belirir (King'in sözü 21'in sadesi): yalnız saydamlık ve
+   4 piksel, bir kez. */
+@keyframes osohbet-belir{ from{ opacity:0; transform:translateY(4px); } }
+.osohbet .msg.is-yeni .msg__body{ animation:osohbet-belir .28s ease-out both; }
+@media (prefers-reduced-motion:reduce){ .osohbet .msg.is-yeni .msg__body{ animation:none; } }
+
+/* Yazma alanı: ince çizgili düz kutu; içinde kenarsız yazı ve yuvarlak
+   gönder. Odakta yalnız çizgi koyulaşır, halka yok. */
+.osohbet-yaz{ display:flex; align-items:flex-end; gap:4px; padding:5px 5px 5px 14px;
+  border:1px solid var(--border); border-radius:16px; background:var(--surface); }
+.osohbet-yaz:focus-within{ border-color:var(--border-strong); }
+.osohbet-yaz .osohbet-girdi, .osohbet-yaz .osohbet-girdi:hover, .osohbet-yaz .osohbet-girdi:focus{
+  flex:1 1 auto; width:auto; min-width:0; min-height:36px; max-height:160px; margin:0; padding:7px 0;
+  border:0; border-radius:0; background:none; box-shadow:none; outline:none; resize:none;
+  font:inherit; font-size:var(--fs-base); line-height:1.45; color:var(--text); }
+.osohbet-yaz .mic{ flex:none; }
+.osohbet-gonder{ flex:none; display:inline-grid; place-items:center; width:36px; height:36px; padding:0;
+  border:0; border-radius:50%; background:var(--text); color:var(--surface); cursor:pointer; }
+.osohbet-gonder:disabled{ opacity:.35; cursor:default; }
+.osohbet-gonder:focus-visible{ outline:2px solid var(--text-3); outline-offset:2px; }
+.osohbet-gonder svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 </style>
 <!-- SEVIYE:perde-bas · icerik brand/seviye/perde.html dosyasindan
      `python3 tools/seviye.py --yay` ile uretilir; ELLE DUZENLEME -->
@@ -16727,7 +16804,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'ee6ea6d5', at:'2026-10-18 18:49', dirty:true };
+ESP.BUILD = { id:'80224d87', at:'2026-10-18 21:55', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -32084,6 +32161,222 @@ LIFEOS.GECMIS = (function(){
   }
 
   return { liste, arsivle, al, sil, baslik, listeHtml, EN_COK, _anahtar:anahtar, _sifirla:() => { silOnay = null; } };
+})();
+
+/* ==== js/core/ofissohbet.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/ofissohbet.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* OFİS SOHBETİ — ajanlarla konuşulan yerin akışı (King gibi), sade görünüş.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/ofissohbet.js`; `python3 tools/ortak.py --yay` ile
+   üç arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Biçimi
+   `ofissohbet.css`.
+   ==================================================================
+
+   Depo sahibinin isteği (2026-10-19): «Ofis kısımlarının konuşmalarını
+   aynı King'te yaptığımız gibi yap ama onların tasarımları çok daha sade
+   olsun, King'in bir ayrıcalığı olsun.»
+
+   King'den alınan DAVRANIŞ (king.js'e bağlı değildir, kopya da değildir):
+     1. ENTER GÖNDERİR, Shift+Enter alt satır. Ctrl+Enter modülün kendi
+        kısayoludur; burada ikinci kez gönderilmez.
+     2. BOŞ KUTUDA ↑ son sorunu geri getirir.
+     3. YAZMA ALANI BÜYÜR: yazdıkça en çok altı satıra kadar uzar.
+     4. KAYDIRMA YERİ KORUNUR. Ekran yeniden çizilince sohbet en alta
+        atılmaz: altta okuyorsan ya da yeni mesaj geldiyse alta, yukarıda
+        okuyorsan kaldığın yerde kalır. İlk açılışta en alt.
+     5. CEVAP SAKİN BELİRİR: yalnız en yeni ajan cevabı, yalnız bir kez,
+        saydamlık ve 4 piksel (Görünüm › Animasyonlar «Az»da hiç).
+     6. CEVAP KOPYALANIR: her cevabın yanında küçük kopyala düğmesi.
+
+   King'e AYRILAN görünüş burada YOK: renkli küre, kenar ışığı, buzlu cam,
+   dönen ya da nabız atan şey. Ofis sohbeti düz yüzey, ince çizgi, nötr
+   renk; modülün rengi en fazla ad satırındaki küçük noktadır.
+
+   İşaretleme (modül kendi ekranında yazar):
+     <div class="chat osohbet" data-osohbet="ays:patron"> … .msg … </div>
+       ajan mesajının metni [data-osohbet-metin]; bekleyen satır
+       [data-osohbet-bekle] (sayılmaz).
+     <div class="osohbet-yaz" data-osohbet-yaz>
+       <textarea data-osohbet-girdi …> + gonderHtml({ act })
+     </div>
+   Bu dosya modüle yazmaz: gönderme, modülün kendi düğmesine (data-act)
+   tıklanarak olur. */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.OFISSOHBET = (function(){
+  'use strict';
+  const EN_YUKSEK = 160;            // yazma alanı en çok ~6 satır
+  const ALT_PAYI = 48;              // en alta bu kadar yakınsa «altta» sayılır
+  let durumlar = {};                // anahtar -> { n, altta, top }
+  let gorulen = typeof WeakSet === 'function' ? new WeakSet() : null;
+  let bagli = false;
+
+  function kac(t){
+    return String(t == null ? '' : t).replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+  }
+
+  /* Söz 1: hangi tuş gönderir. */
+  function gonderMi(e){
+    return !!e && e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey
+      && !e.isComposing && e.keyCode !== 229;
+  }
+
+  function alttaMi(el){
+    return !el || el.scrollHeight - el.scrollTop - el.clientHeight < ALT_PAYI;
+  }
+
+  /* Söz 4–5: yeni çizilen sohbet nereye kaysın, en yeni cevap belirsin mi. */
+  function karar(onceki, n){
+    if(!onceki) return { alta:true, yeni:false };
+    if(n > onceki.n) return { alta:true, yeni:true };
+    return onceki.altta ? { alta:true, yeni:false } : { alta:false, yeni:false, top:onceki.top };
+  }
+
+  function mesajlar(log){
+    return Array.from(log.querySelectorAll('.msg')).filter(m => !m.closest('[data-osohbet-bekle]'));
+  }
+
+  function kaydet(log){
+    const k = log.getAttribute('data-osohbet');
+    /* Sökülmüş eski kutunun geciken kaydırma olayı yenisinin yerini ezmesin. */
+    if(!k || log.isConnected === false) return;
+    durumlar[k] = { n:mesajlar(log).length, altta:alttaMi(log), top:log.scrollTop };
+  }
+
+  /* Yeni çizilmiş bir sohbet kutusuna sözleri uygular. */
+  function isle(log){
+    if(!log || !log.getAttribute) return;
+    if(gorulen){ if(gorulen.has(log)) return; gorulen.add(log); }
+    const k = log.getAttribute('data-osohbet') || '';
+    const l = mesajlar(log);
+    const d = karar(durumlar[k], l.length);
+    if(d.yeni){
+      const son = l[l.length - 1];
+      if(son && son.classList.contains('msg--agent')) son.classList.add('is-yeni');
+    }
+    log.scrollTop = d.alta ? log.scrollHeight : (d.top || 0);
+    durumlar[k] = { n:l.length, altta:d.alta, top:log.scrollTop };
+  }
+
+  function tara(kok){
+    const k = kok && kok.querySelectorAll ? kok : (typeof document !== 'undefined' ? document : null);
+    if(!k) return;
+    if(k.matches && k.matches('[data-osohbet]')) isle(k);
+    k.querySelectorAll('[data-osohbet]').forEach(isle);
+  }
+
+  /* Söz 3. */
+  function buyut(g){
+    if(!g || g.tagName !== 'TEXTAREA') return;
+    g.style.height = 'auto';
+    g.style.height = Math.min(g.scrollHeight, EN_YUKSEK) + 'px';
+  }
+
+  /* Söz 2: ekrandaki son kullanıcı mesajı. */
+  function sonSoru(kok){
+    const l = (kok || document).querySelectorAll('[data-osohbet] .msg--me [data-osohbet-metin], [data-osohbet] .msg--me .msg__body');
+    const s = l.length ? l[l.length - 1] : null;
+    return s ? String(s.textContent || '').trim() : '';
+  }
+
+  async function panoya(metin){
+    try{ await navigator.clipboard.writeText(metin); return true; }
+    catch(e){
+      try{
+        const t = document.createElement('textarea');
+        t.value = metin; t.setAttribute('readonly', ''); t.style.position = 'fixed'; t.style.opacity = '0';
+        document.body.appendChild(t); t.select();
+        const ok = document.execCommand('copy');
+        t.remove();
+        return !!ok;
+      }catch(er){ return false; }
+    }
+  }
+
+  function kopyaMetni(dugme){
+    const m = dugme && dugme.closest ? dugme.closest('.msg') : null;
+    const g = m && (m.querySelector('[data-osohbet-metin]') || m.querySelector('.msg__body'));
+    return g ? String(g.innerText || g.textContent || '').trim() : '';
+  }
+
+  const SVG_GONDER = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg>';
+  const SVG_KOPYA = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/>'
+    + '<path d="M15.5 8.5V6.5a2 2 0 0 0-2-2h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h2"/></svg>';
+
+  /* Gönder düğmesi: modülün eylemi (data-act) ile. */
+  function gonderHtml(o){
+    o = o || {};
+    return '<button type="button" class="osohbet-gonder" data-osohbet-gonder data-act="' + kac(o.act || '') + '"'
+      + (o.kapali ? ' disabled' : '') + ' aria-label="' + kac(o.ad || 'Gönder') + '" title="' + kac(o.ad || 'Gönder') + ' (Enter)">'
+      + SVG_GONDER + '</button>';
+  }
+
+  function kopyaHtml(){
+    return '<button type="button" class="osohbet-kopya" data-osohbet-kopyala aria-label="Cevabı kopyala" title="Kopyala">'
+      + SVG_KOPYA + '</button>';
+  }
+
+  function bagla(){
+    if(bagli || typeof document === 'undefined') return;
+    bagli = true;
+    document.addEventListener('keydown', e => {
+      const g = e.target && e.target.matches && e.target.matches('[data-osohbet-girdi]') ? e.target : null;
+      if(!g) return;
+      if(e.key === 'ArrowUp' && !g.value){
+        const s = sonSoru();
+        if(s){ e.preventDefault(); g.value = s; try{ g.setSelectionRange(s.length, s.length); }catch(er){ /* yok */ } buyut(g); }
+        return;
+      }
+      if(!gonderMi(e)) return;
+      e.preventDefault();
+      if(!String(g.value || '').trim()) return;
+      const kutu = g.closest('[data-osohbet-yaz]');
+      const d = kutu && kutu.querySelector('[data-osohbet-gonder]');
+      if(d && !d.disabled) d.click();
+    });
+    document.addEventListener('input', e => {
+      if(e.target && e.target.matches && e.target.matches('textarea[data-osohbet-girdi]')) buyut(e.target);
+    });
+    document.addEventListener('scroll', e => {
+      const t = e.target;
+      if(t && t.getAttribute && t.getAttribute('data-osohbet')) kaydet(t);
+    }, true);
+    document.addEventListener('click', e => {
+      const c = e.target && e.target.closest ? e.target.closest('[data-osohbet-kopyala]') : null;
+      if(!c) return;
+      e.preventDefault();
+      const metin = kopyaMetni(c);
+      if(!metin) return;
+      Promise.resolve(panoya(metin)).then(ok => {
+        if(!ok) return;
+        c.classList.add('is-kopyalandi'); c.setAttribute('aria-label', 'Kopyalandı');
+        setTimeout(() => { c.classList.remove('is-kopyalandi'); c.setAttribute('aria-label', 'Cevabı kopyala'); }, 1400);
+      });
+    });
+    /* Modüller ekranı baştan çizer: yeni gelen sohbet kutusu yakalanır. */
+    if(typeof MutationObserver === 'function' && document.documentElement){
+      new MutationObserver(kayitlar => {
+        for(const r of kayitlar){
+          for(const n of r.addedNodes){ if(n.nodeType === 1) tara(n); }
+        }
+      }).observe(document.documentElement, { childList:true, subtree:true });
+    }
+    tara(document);
+  }
+
+  if(typeof document !== 'undefined'){
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bagla);
+    else bagla();
+  }
+
+  return { gonderMi, alttaMi, karar, isle, tara, buyut, sonSoru, kopyaMetni, gonderHtml, kopyaHtml, bagla,
+    _durum:k => durumlar[k] || null,
+    _sifirla:() => { durumlar = {}; gorulen = typeof WeakSet === 'function' ? new WeakSet() : null; } };
 })();
 
 /* ==== js/core/envanter.js ==== */
@@ -82727,19 +83020,26 @@ ESP.Screens.team = (function(){
       aria-hidden="true">${ESP.UI.pp(a.id)}${a.initial}</span>`;
   }
 
-  function msgRow(m){
-    const kaynak = m.role === 'user' ? null
+  /* Ofis sohbeti King'in akışıyla ama sade (brand/ortak/ofissohbet.js,
+     2026-10-19): ajanın cevabı düz yazı, ad satırında küçük nokta; senin
+     sözün gri balon; cevabın altında kaynak, saat ve kopyala. */
+  const OS = () => (window.LIFEOS || {}).OFISSOHBET;
+  function msgRow(m, a){
+    const ben = m.role === 'user';
+    const kaynak = ben ? null
       : (m.source === 'model' ? { label:'model', tone:'info' }
          : { label:'kural motoru', tone:'muted' });
     return html`
-      <div class="${cls('msg', m.role === 'user' ? 'msg--me' : 'msg--agent')}">
-        <p>${m.text}</p>
-        ${ESP.Parts.onayDugmeleri(m)}
-        <div class="msg__foot">
+      <div class="${cls('msg', ben ? 'msg--me' : 'msg--agent')}">
+        ${when(!ben && a, () => html`<div class="msg__who"><b>${a.name}</b></div>`)}
+        <div class="msg__body"><p data-osohbet-metin>${m.text}</p>
+          ${ESP.Parts.onayDugmeleri(m)}</div>
+        <div class="${ben ? 'msg__foot' : 'msg__foot osohbet__alt'}">
           ${when(kaynak, () => K.Badge({ label:kaynak.label, tone:kaynak.tone, icon:false }))}
           ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
           ${when(m.error, () => K.Badge({ label:'hata', tone:'danger' }))}
           <span class="tiny dim">${saatOf(m.at)}</span>
+          ${when(!ben && OS(), () => raw(OS().kopyaHtml()))}
         </div>
       </div>`;
   }
@@ -82809,18 +83109,19 @@ ESP.Screens.team = (function(){
             act:'sohbet-yeni' })),
           wide:true,
           body:html`
-            <div class="chat">
+            <div class="chat osohbet" data-osohbet="${'esp:' + a.id}">
               ${mesajlar.length
-                ? map(mesajlar.slice(-20), msgRow)
+                ? map(mesajlar.slice(-20), m => msgRow(m, a))
                 : html`<p class="small muted">Henüz konuşma yok.
                     ${hazir ? '' : 'Yapay zekâ bağlı değil: cevaplar sistemin hazır kurallarından gelir.'}</p>`}
             </div>
             ${raw(mentionYeri())}
-            <div class="composer mt-10">
-              ${K.Textarea({ id:'chat-input', rows:2, class:'composer__input',
-                aria:'Ajana sorun', placeholder:'Sorunu yaz…' })}
+            <div class="osohbet-yaz mt-10" data-osohbet-yaz>
+              ${K.Textarea({ id:'chat-input', rows:1, class:'osohbet-girdi',
+                aria:'Ajana sorun', placeholder:'Sorunu yaz…', data:{ 'data-osohbet-girdi':'1' } })}
               ${K.Mic({ target:'chat-input' })}
-              ${K.Button({ label:'Gönder', tone:'primary', act:'send-chat' })}
+              ${OS() ? raw(OS().gonderHtml({ act:'send-chat' }))
+                : K.Button({ label:'Gönder', tone:'primary', act:'send-chat' })}
             </div>`,
         }),
 

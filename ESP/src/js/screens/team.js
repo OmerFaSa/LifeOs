@@ -34,19 +34,26 @@ ESP.Screens.team = (function(){
       aria-hidden="true">${ESP.UI.pp(a.id)}${a.initial}</span>`;
   }
 
-  function msgRow(m){
-    const kaynak = m.role === 'user' ? null
+  /* Ofis sohbeti King'in akışıyla ama sade (brand/ortak/ofissohbet.js,
+     2026-10-19): ajanın cevabı düz yazı, ad satırında küçük nokta; senin
+     sözün gri balon; cevabın altında kaynak, saat ve kopyala. */
+  const OS = () => (window.LIFEOS || {}).OFISSOHBET;
+  function msgRow(m, a){
+    const ben = m.role === 'user';
+    const kaynak = ben ? null
       : (m.source === 'model' ? { label:'model', tone:'info' }
          : { label:'kural motoru', tone:'muted' });
     return html`
-      <div class="${cls('msg', m.role === 'user' ? 'msg--me' : 'msg--agent')}">
-        <p>${m.text}</p>
-        ${ESP.Parts.onayDugmeleri(m)}
-        <div class="msg__foot">
+      <div class="${cls('msg', ben ? 'msg--me' : 'msg--agent')}">
+        ${when(!ben && a, () => html`<div class="msg__who"><b>${a.name}</b></div>`)}
+        <div class="msg__body"><p data-osohbet-metin>${m.text}</p>
+          ${ESP.Parts.onayDugmeleri(m)}</div>
+        <div class="${ben ? 'msg__foot' : 'msg__foot osohbet__alt'}">
           ${when(kaynak, () => K.Badge({ label:kaynak.label, tone:kaynak.tone, icon:false }))}
           ${when(m.blocked, () => K.Badge({ label:'kurallara takıldı', tone:'warn' }))}
           ${when(m.error, () => K.Badge({ label:'hata', tone:'danger' }))}
           <span class="tiny dim">${saatOf(m.at)}</span>
+          ${when(!ben && OS(), () => raw(OS().kopyaHtml()))}
         </div>
       </div>`;
   }
@@ -116,18 +123,19 @@ ESP.Screens.team = (function(){
             act:'sohbet-yeni' })),
           wide:true,
           body:html`
-            <div class="chat">
+            <div class="chat osohbet" data-osohbet="${'esp:' + a.id}">
               ${mesajlar.length
-                ? map(mesajlar.slice(-20), msgRow)
+                ? map(mesajlar.slice(-20), m => msgRow(m, a))
                 : html`<p class="small muted">Henüz konuşma yok.
                     ${hazir ? '' : 'Yapay zekâ bağlı değil: cevaplar sistemin hazır kurallarından gelir.'}</p>`}
             </div>
             ${raw(mentionYeri())}
-            <div class="composer mt-10">
-              ${K.Textarea({ id:'chat-input', rows:2, class:'composer__input',
-                aria:'Ajana sorun', placeholder:'Sorunu yaz…' })}
+            <div class="osohbet-yaz mt-10" data-osohbet-yaz>
+              ${K.Textarea({ id:'chat-input', rows:1, class:'osohbet-girdi',
+                aria:'Ajana sorun', placeholder:'Sorunu yaz…', data:{ 'data-osohbet-girdi':'1' } })}
               ${K.Mic({ target:'chat-input' })}
-              ${K.Button({ label:'Gönder', tone:'primary', act:'send-chat' })}
+              ${OS() ? raw(OS().gonderHtml({ act:'send-chat' }))
+                : K.Button({ label:'Gönder', tone:'primary', act:'send-chat' })}
             </div>`,
         }),
 

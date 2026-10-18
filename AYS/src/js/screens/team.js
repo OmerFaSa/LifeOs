@@ -37,22 +37,27 @@ R.Screens.team = (function(){
       aria-hidden="true">${R.UI.pp(agent.id)}${agent.initial}</span>`;
   }
 
+  /* Ofis sohbeti King'in akışıyla ama sade (brand/ortak/ofissohbet.js,
+     2026-10-19): ajanın cevabı düz yazı, ad satırında küçük nokta; senin
+     sözün gri balon; cevabın altında kaynak ve kopyala. */
+  const OS = () => (window.LIFEOS || {}).OFISSOHBET;
   function Bubble(agent, m){
     if(m.role === 'user'){
       return html`<div class="msg msg--me">
-        <div class="msg__body">${raw(U.esc(m.text).replace(/\n/g, '<br/>'))}</div>
+        <div class="msg__body" data-osohbet-metin>${raw(U.esc(m.text).replace(/\n/g, '<br/>'))}</div>
       </div>`;
     }
     return html`
       <div class="msg msg--agent">
-        <div class="msg__who">${Avatar(agent)}<b>${agent.name}</b>
-          <span class="dim">${agent.role}</span>
-          ${when(m.mode === 'kural', () => K.Badge({ label:'hazır kural', tone:'info' }))}
-        </div>
-        <div class="msg__body">${raw(U.esc(m.text).replace(/\n/g, '<br/>'))}${OnayDugmeleri(m)}</div>
+        <div class="msg__who"><b>${agent.name}</b><span>${agent.role}</span></div>
+        <div class="msg__body"><div data-osohbet-metin>${raw(U.esc(m.text).replace(/\n/g, '<br/>'))}</div>${OnayDugmeleri(m)}</div>
         ${when(m.warnings && m.warnings.length, () => html`
           <div class="msg__warn">${raw(UI.icon('warn'))} ${m.warnings.join(' ')}</div>`)}
         ${when(m.error, () => html`<div class="msg__warn">${raw(UI.icon('warn'))} ${m.error}</div>`)}
+        <div class="osohbet__alt">
+          ${when(m.mode === 'kural', () => html`<span class="tiny">hazır kural</span>`)}
+          ${raw(OS() ? OS().kopyaHtml() : '')}
+        </div>
       </div>`;
   }
 
@@ -300,22 +305,23 @@ R.Screens.team = (function(){
           : K.Notice({ tone:'info', title:'Model bağlı değil.',
               body:'Ajan yine de verine bakıp yanıtlıyor ama cümleleri kural motorundan geliyor.' })),
 
-        html`<div class="chat" id="chat-log">
+        html`<div class="chat osohbet" id="chat-log" data-osohbet="${'ays:' + agent.id}">
           ${msgs.length
             ? map(msgs, m => Bubble(agent, m))
             : html`<div class="chat__empty">${raw(UI.icon('guide'))}
                 <p>${agent.name} masasındaki raporu okudu. Sor ya da özet iste.</p></div>`}
-          <div id="chat-pending"></div>
+          <div id="chat-pending" data-osohbet-bekle></div>
         </div>`,
 
         K.Row(map(agent.ask, q => K.Chip({ label:q, act:'team-suggest', data:{ 'data-q':q } })), { wrap:true }),
 
         html`<div id="team-mention" class="team-mention"></div>
-        <div class="composer">
-          ${K.Textarea({ id:'team-input', rows:2, class:'composer__input',
+        <div class="osohbet-yaz" data-osohbet-yaz>
+          ${K.Textarea({ id:'team-input', rows:1, class:'osohbet-girdi',
             aria:agent.name + '’a soru yaz',
-            placeholder:agent.name + '’a sor…' })}
-          ${K.Button({ label:'Sor', icon:'zap', tone:'primary', act:'team-send' })}
+            placeholder:agent.name + '’a sor…', data:{ 'data-osohbet-girdi':'1' } })}
+          ${OS() ? raw(OS().gonderHtml({ act:'team-send', ad:'Sor' }))
+            : K.Button({ label:'Sor', icon:'zap', tone:'primary', act:'team-send' })}
         </div>`,
       ])),
 
@@ -362,7 +368,7 @@ R.Screens.team = (function(){
     if(!pending) return;
     pending.innerHTML = String(html`
       <div class="msg msg--agent">
-        <div class="msg__who">${Avatar(agent)}<b>${agent.name}</b><span class="dim">${agent.role}</span></div>
+        <div class="msg__who"><b>${agent.name}</b><span>${agent.role}</span></div>
         <div class="msg__body dim" id="chat-stream">${label}
           <span class="tiny">(ücretsiz modellerde ilk yanıt 10–60 sn sürebilir)</span></div>
       </div>`);
@@ -539,6 +545,6 @@ R.Screens.team = (function(){
       return String(R.C.Button({ label:'Ofis', icon:'guide', size:'sm', act:'go',
         data:{ 'data-route':'office' } }));
     },
-    render, handle, onKey, afterRender(){ mentionKur(); scrollLog(); }, mentionHtml,
+    render, handle, onKey, afterRender(){ mentionKur(); if(!OS()) scrollLog(); }, mentionHtml,
   };
 })();

@@ -1,0 +1,75 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/ofissohbet.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* OFİS SOHBETİ — King'in akışı, çok daha sade görünüş (2026-10-19).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/ofissohbet.css`; `python3 tools/ortak.py --yay`
+   üç arayüzün `src/css/` klasörüne kopyalar. Davranışı `ofissohbet.js`.
+   ==================================================================
+
+   King'e ayrılan hiçbir şey burada yok: renkli küre, kenar ışığı, buzlu
+   cam (backdrop-filter), gradyan, dönen ya da nabız atan şey. Düz yüzey,
+   ince çizgi, nötr renk; modülün rengi yalnız ad satırındaki 6 piksellik
+   nokta. Ajanın cevabı balon değil düz yazı; senin sözün açık gri balon.
+   Yalnız .osohbet ve .osohbet-yaz altında geçerlidir: başka ekranlardaki
+   .chat / .msg (koç, toplantı) değişmez. */
+
+.osohbet{ display:flex; flex-direction:column; gap:16px; overflow-y:auto; overflow-x:hidden;
+  overscroll-behavior:contain; padding:4px 2px 2px; }
+.osohbet .msg{ display:flex; flex-direction:column; gap:0; max-width:88%; min-width:0; }
+.osohbet .msg__body{ padding:0; border:0; border-radius:0; background:none; min-width:0;
+  font-size:var(--fs-base); line-height:1.55; color:var(--text); overflow-wrap:anywhere; }
+.osohbet .msg__body p{ margin:0; font-size:inherit; }
+.osohbet .msg__body p + p{ margin-top:6px; }
+
+/* Senin sözün: sağda, açık gri, çizgisiz. */
+.osohbet .msg--me{ align-self:flex-end; flex-direction:column; align-items:flex-end; }
+.osohbet .msg--me .msg__body{ padding:9px 14px; border-radius:18px 18px 6px 18px; background:var(--surface-2); }
+
+/* Ajanın cevabı: solda, düz yazı. Ad satırı küçük ve soluk; önünde
+   modülün renginde küçük nokta. */
+.osohbet .msg--agent{ align-self:flex-start; }
+.osohbet .msg__who{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin:0 0 3px;
+  font-size:var(--fs-xs); color:var(--text-3); }
+.osohbet .msg__who b{ font-weight:600; color:var(--text-2); }
+.osohbet .msg__who::before{ content:''; flex:none; width:6px; height:6px; border-radius:50%; background:var(--primary); }
+.osohbet .msg__who .agentav{ display:none; }
+.osohbet__alt{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-top:4px; min-height:28px; }
+.osohbet__alt .tiny{ color:var(--text-3); }
+
+/* Kopyala: soluk, çerçevesiz; dokunma hedefi 28 piksel. */
+.osohbet-kopya{ display:inline-grid; place-items:center; width:28px; height:28px; padding:0; margin-left:-6px;
+  border:0; border-radius:8px; background:none; color:var(--text-3); cursor:pointer; }
+.osohbet-kopya:hover{ background:var(--surface-2); color:var(--text-2); }
+.osohbet-kopya:focus-visible{ outline:2px solid var(--text-3); outline-offset:1px; }
+.osohbet-kopya svg{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
+.osohbet-kopya.is-kopyalandi{ color:var(--text); }
+
+/* Bekleyen cevap: düz, soluk bir satır; nokta dansı yok. */
+.osohbet [data-osohbet-bekle] .msg__body, .osohbet .msg__body.dim{ color:var(--text-3); }
+
+.osohbet .chat__empty{ padding:28px 12px; }
+.osohbet .chat__empty svg{ display:none; }
+
+/* Cevap sakin belirir (King'in sözü 21'in sadesi): yalnız saydamlık ve
+   4 piksel, bir kez. */
+@keyframes osohbet-belir{ from{ opacity:0; transform:translateY(4px); } }
+.osohbet .msg.is-yeni .msg__body{ animation:osohbet-belir .28s ease-out both; }
+@media (prefers-reduced-motion:reduce){ .osohbet .msg.is-yeni .msg__body{ animation:none; } }
+
+/* Yazma alanı: ince çizgili düz kutu; içinde kenarsız yazı ve yuvarlak
+   gönder. Odakta yalnız çizgi koyulaşır, halka yok. */
+.osohbet-yaz{ display:flex; align-items:flex-end; gap:4px; padding:5px 5px 5px 14px;
+  border:1px solid var(--border); border-radius:16px; background:var(--surface); }
+.osohbet-yaz:focus-within{ border-color:var(--border-strong); }
+.osohbet-yaz .osohbet-girdi, .osohbet-yaz .osohbet-girdi:hover, .osohbet-yaz .osohbet-girdi:focus{
+  flex:1 1 auto; width:auto; min-width:0; min-height:36px; max-height:160px; margin:0; padding:7px 0;
+  border:0; border-radius:0; background:none; box-shadow:none; outline:none; resize:none;
+  font:inherit; font-size:var(--fs-base); line-height:1.45; color:var(--text); }
+.osohbet-yaz .mic{ flex:none; }
+.osohbet-gonder{ flex:none; display:inline-grid; place-items:center; width:36px; height:36px; padding:0;
+  border:0; border-radius:50%; background:var(--text); color:var(--surface); cursor:pointer; }
+.osohbet-gonder:disabled{ opacity:.35; cursor:default; }
+.osohbet-gonder:focus-visible{ outline:2px solid var(--text-3); outline-offset:2px; }
+.osohbet-gonder svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
