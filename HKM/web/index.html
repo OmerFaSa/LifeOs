@@ -682,8 +682,116 @@ th{ font-size:12px; font-weight:500; color:var(--dim); }
   .card:first-child{ border-top:1px solid var(--line); }
 }
 </style>
+<style>
+/* Merkez karşılaması (gövdenin başındaki #hkm-kars). Modüllerin perdesiyle
+   aynı yazı: sistemin serif italiği, Merkez moru ince çizgi. */
+.hkm-kars{ position:fixed; inset:0; z-index:2147482000; display:grid; place-content:center; justify-items:center; gap:14px; padding:24px;
+  background:var(--bg);
+  text-align:center; transition:opacity .5s ease; }
+.hkm-kars::before{ content:''; position:absolute; inset:-20%; pointer-events:none;
+  background:radial-gradient(40% 36% at 50% 46%, color-mix(in oklab, var(--mer) 16%, transparent), transparent 70%); }
+.hkm-kars__selam{ position:relative; margin:0; width:max-content; max-width:min(760px, calc(100vw - 48px)); text-wrap:balance; font-family:ui-serif, 'New York', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  font-style:italic; font-weight:400; font-size:clamp(34px, 6vw, 64px); line-height:1.08; letter-spacing:-.01em; color:var(--fg);
+  opacity:0; transform:translateY(8px); filter:blur(4px);
+  transition:opacity .9s cubic-bezier(.32,.72,0,1), transform .9s cubic-bezier(.32,.72,0,1), filter .9s ease; }
+.hkm-kars__cizgi{ position:relative; width:28px; height:2px; border-radius:2px; background:var(--mer); opacity:0; transition:opacity .7s ease .4s; }
+.hkm-kars.is-hazir .hkm-kars__selam{ opacity:1; transform:none; filter:none; }
+.hkm-kars.is-hazir .hkm-kars__cizgi{ opacity:.6; }
+.hkm-kars.is-gidiyor{ opacity:0; pointer-events:none; }
+</style>
 </head>
 <body>
+<!-- KARŞILAMA (kullanıcı, 2026-10-18: «hoş geldin mesajı SPİ, ESP ve
+     Merkez için de; bölümlere özel, türlü türlü, aynısını bir daha görmek
+     zor bir ihtimal olsun»). Modüllerin perdesindeki italik selamın Merkez
+     karşılığı: sayfa açılırken kısa bir an, sonra kendiliğinden çekilir;
+     dokunuş ya da tuş hemen geçer. Merkez tek dosyadır, ortak dosyayı
+     yüklemez: selam listeleri brand/ortak/karsilama.js HAVUZ.tr'nin
+     kopyasıdır ve HKM/tests/test_yuz.py ikisinin aynı olduğunu sınar. Son
+     görülen 40 selam yeniden gelmez. LifeOS'un Animasyonlar ayarı «az»
+     (ya da «sistem» ve işletim sistemi azaltılmış) ise hiç görünmez. -->
+<div class="hkm-kars" id="hkm-kars" aria-hidden="true" hidden>
+  <p class="hkm-kars__selam"></p>
+  <span class="hkm-kars__cizgi"></span>
+</div>
+<script>
+(function(){
+  var el = document.getElementById('hkm-kars');
+  if(!el) return;
+  try{
+    var c = document.cookie || '', k = (/(?:^|;\s*)lifeos_hareket=(tam|az|sistem)/.exec(c) || [])[1] || 'tam';
+    var wd = false; try{ wd = !!navigator.webdriver; }catch(e){}
+    /* Denetim tarayıcısı (webdriver) açık ayar yoksa perdeyi görmez: yüzün denetimleri beklemesin. */
+    if(!/lifeos_hareket=/.test(c) && wd){ el.parentNode.removeChild(el); return; }
+    if(k === 'az' || (k === 'sistem' && window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)){ el.parentNode.removeChild(el); return; }
+  }catch(e){}
+  var KS_GENEL = ['Hoş geldin', 'Merhaba', 'Merhabalar', 'Tekrar hoş geldin', 'Seni görmek güzel',
+    'Bugün zinde misin?', 'Hazırsan başlayalım', 'Selam', 'Yeniden merhaba', 'Kaldığın yerden devam', 'Hadi bakalım',
+    'Bir adım daha', 'Sakin ve odaklı', 'Yavaş ama düzenli', 'Az ama her gün', 'Küçük bir adım yeter',
+    'Nefes al, başlayalım', 'Ne güzel, geldin', 'Bugüne birlikte bakalım', 'Gün senin', 'Bir bakalım neler var',
+    'Kısa bir tur atalım', 'Odak zamanı', 'Her gün biraz', 'Kapı açık, buyur', 'Yine buradasın, ne güzel',
+    'Düzen kuruluyor', 'Bugün de buradayız', 'Sade bir gün olsun', 'Adım adım'];
+  var KS_SABAH = ['Günaydın', 'Güzel bir sabah', 'Günaydın, bugün zinde misin?', 'Sabahın hayırlı olsun',
+    'Erken kalkmışsın', 'Kahven hazır mı?', 'Taze bir gün', 'Günaydın, yeni bir sayfa', 'Güne yumuşak bir başlangıç',
+    'Aydınlık bir sabah', 'Sabahın sakin saati'];
+  var KS_GUN = ['İyi günler', 'Günün nasıl geçiyor?', 'Günün ortasındayız', 'Tünaydın', 'Kısa bir mola mı?',
+    'Günün yarısı geride', 'Öğlen molası mı?', 'Günün geri kalanına bakalım', 'İyi bir öğleden sonra'];
+  var KS_AKSAM = ['İyi akşamlar', 'Akşamın hayırlı olsun', 'Günü toparlama vakti', 'Akşam sakinliği',
+    'Günün sonuna yaklaşıyoruz', 'Akşama merhaba', 'Günü kapatmadan önce', 'Hoş bir akşam', 'Akşam serinliğinde'];
+  var KS_GECE = ['Geç saatlere kaldın', 'Sakin bir gece', 'İyi geceler', 'Gece kuşu', 'Gece sessizliği',
+    'Uyku vakti yaklaşıyor', 'Bu saatte de buradasın', 'Kısa tutalım, gece oldu'];
+  var KS_PZT = ['Yeni hafta, yeni sayfa', 'Pazartesiye merhaba', 'Haftanın ilk günü', 'Haftaya yumuşak bir giriş'];
+  var KS_CUMA = ['Cuma geldi', 'Haftanın son düzlüğü', 'Hafta sonu kapıda', 'Hayırlı cumalar'];
+  var KS_HS = ['İyi hafta sonları', 'Hafta sonu ritmi', 'Hafta sonuna merhaba', 'Hafta sonu sakinliği'];
+  var KS_HKM = ['Merkeze hoş geldin', 'Merkez hazır', 'Üç modül, tek bakış', 'Her şey tek yerde',
+    'Genel tabloya bakalım', 'Kumanda masasına hoş geldin', 'Bugünün özeti burada', 'Hepsine birden bakalım',
+    'Merkeze merhaba', 'Büyük resme bakalım', 'Bütün iplikler burada', 'Sakin bir kontrol turu', 'Bir göz atalım',
+    'Düzenin kalbi', 'Hepsi yerinde mi?', 'Bugün neyi yönetiyoruz?', 'Haftanın tablosu burada', 'Kuşbakışı bir gün'];
+  var KS_ON_GENEL = ['Merhaba', 'Selam', 'Hoş geldin', 'Tekrar hoş geldin'];
+  var KS_ON_SABAH = ['Günaydın'];
+  var KS_ON_GUN = ['İyi günler', 'Tünaydın'];
+  var KS_ON_AKSAM = ['İyi akşamlar'];
+  var KS_ON_GECE = ['İyi geceler'];
+  var KS_EK = ['merkez hazır', 'genel tabloya bakalım', 'kuşbakışı bir gün', 'bugünün özeti burada',
+    'büyük resme bakalım', 'bir göz atalım', 'hepsi yerinde mi?', 'bugün neyi yönetiyoruz?'];
+  var HATIRA = 40, SON = 'lifeos.karsilama.son';
+  var d = new Date(), s = d.getHours(), g = d.getDay();
+  var v = s >= 5 && s < 11 ? 'SABAH' : s >= 11 && s < 17 ? 'GUN' : s >= 17 && s < 22 ? 'AKSAM' : 'GECE';
+  var VAKIT = { SABAH:KS_SABAH, GUN:KS_GUN, AKSAM:KS_AKSAM, GECE:KS_GECE };
+  var ON = { SABAH:KS_ON_SABAH, GUN:KS_ON_GUN, AKSAM:KS_ON_AKSAM, GECE:KS_ON_GECE };
+  var GUN = g === 1 ? KS_PZT : g === 5 ? KS_CUMA : g === 0 || g === 6 ? KS_HS : [];
+  var havuz = [];
+  function ekle(x){ if(havuz.indexOf(x) < 0) havuz.push(x); }
+  [].concat(KS_GENEL, VAKIT[v], GUN, KS_HKM).forEach(ekle);
+  [].concat(KS_ON_GENEL, ON[v]).forEach(function(a){ KS_EK.forEach(function(b){ if(b.indexOf(',') < 0) ekle(a + ', ' + b); }); });
+  /* Kendi selamları (Ayarlar › Karşılama) bu kökende yazılmışsa onlar. */
+  var ayar = null, son = {};
+  try{ ayar = JSON.parse(localStorage.getItem('lifeos.karsilama') || 'null'); }catch(e){}
+  if(ayar && ayar.selam === 'kendi' && ayar.kendi && ayar.kendi.length) havuz = ayar.kendi.filter(function(x){ return typeof x === 'string' && x.trim(); });
+  try{ son = JSON.parse(localStorage.getItem(SON) || '{}') || {}; }catch(e){}
+  var gorulen = Array.isArray(son.hkm) ? son.hkm : [];
+  var aday = havuz.filter(function(x){ return gorulen.indexOf(x) < 0; });
+  if(!aday.length) aday = havuz.length > 1 ? havuz.filter(function(x){ return x !== gorulen[gorulen.length - 1]; }) : havuz;
+  if(!aday.length) { el.parentNode.removeChild(el); return; }
+  var selam = aday[Math.floor(Math.random() * aday.length)];
+  son.hkm = gorulen.concat([selam]).slice(-HATIRA);
+  try{ localStorage.setItem(SON, JSON.stringify(son)); }catch(e){}
+  el.querySelector('.hkm-kars__selam').textContent = selam;
+  el.hidden = false;
+  var bitti = false;
+  function kapat(){
+    if(bitti) return;
+    bitti = true;
+    el.classList.add('is-gidiyor');
+    setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 520);
+    document.removeEventListener('keydown', kapat, true);
+  }
+  requestAnimationFrame(function(){ el.classList.add('is-hazir'); });
+  el.addEventListener('pointerdown', kapat);
+  document.addEventListener('keydown', kapat, true);
+  setTimeout(kapat, 2600);
+})();
+</script>
 <header class="ust">
   <div class="ust__ic">
     <p class="marka"><span class="marka__logo" aria-hidden="true"><b></b><b></b><b></b><b></b></span>LifeOS</p>

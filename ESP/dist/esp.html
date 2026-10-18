@@ -14304,6 +14304,40 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 }
 .sayfa--kapakli .bugun .vk .x35 .bd{ margin:0; padding-left:0; padding-right:0; }
 
+/* ---------- KAPAK: iki sütun (kullanıcı, 2026-10-18: «bir tık daha farklı,
+   daha minimalist; üstteki yazının tasarımını ve yerlerini değiştirebilirsin»)
+   Solda selam, cümle ve eylem; sağda sayılar dar bir defter gibi alt alta:
+   adı solda, değeri sağda, aralarında ince çizgi — altındaki kartsız
+   satırlarla aynı dil. Telefonda tek sütun. ---------- */
+.kapak{ min-height:min(60vh, 560px); padding-bottom:64px; }
+.kapak__ic{ display:grid; max-width:none; width:100%; align-items:start; column-gap:clamp(40px, 7vw, 96px);
+  grid-template-columns:minmax(0, 1fr); grid-template-areas:"selam" "cumle" "sayilar" "eylem"; }
+.kapak__selam{ grid-area:selam; margin:0 0 14px; font-size:clamp(20px, 2.4vw, 26px); color:var(--text-3); }
+.kapak .kapak__cumle{ grid-area:cumle; font-size:clamp(30px, 4.2vw, 50px); font-weight:650; letter-spacing:-.03em; line-height:1.04; max-width:16ch; }
+.kapak__eylem{ grid-area:eylem; margin-top:clamp(26px, 4vh, 36px); }
+.kapak__sayilar{ grid-area:sayilar; display:flex; flex-direction:column; flex-wrap:nowrap; gap:0; margin-top:clamp(26px, 4vh, 36px); }
+.kapak__sayi{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:baseline; column-gap:20px; min-width:0;
+  padding:14px 0; border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent); }
+.kapak__sayi:last-child{ border-bottom:1px solid color-mix(in oklab, var(--text) 10%, transparent); }
+.kapak__sayi .kapak__deger{ grid-column:2; grid-row:1; text-align:right; font-size:clamp(24px, 2.4vw, 30px); font-weight:550; }
+.kapak__sayi .kapak__ad{ grid-column:1; grid-row:1; font-size:14px; color:var(--text-2); }
+.kapak__ad i{ margin-top:2px; }
+.kapak__asagi{ background:transparent; -webkit-backdrop-filter:none; backdrop-filter:none; color:var(--text-3); }
+@media (min-width:900px){
+  .kapak__ic{ grid-template-columns:minmax(0, 1fr) minmax(240px, 300px);
+    grid-template-areas:"selam sayilar" "cumle sayilar" "eylem sayilar"; grid-template-rows:auto auto 1fr; }
+  .kapak__sayilar{ margin-top:6px; }
+}
+@media (max-width:679px){
+  .kapak__sayilar{ display:flex; width:100%; gap:0; }
+  .kapak__sayi{ padding:12px 0; }
+}
+@media (max-width:679px){
+  .kapak__sayi{ padding:10px 0; }
+  .kapak__sayi .kapak__ad i{ display:inline; margin:0 0 0 6px; }
+  .kapak__sayi .kapak__deger{ font-size:24px; }
+}
+
 /* ==== css/rehber.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/rehber.css içine yazılır; burası bir sonraki
@@ -16487,7 +16521,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'481bcf3e', at:'2026-10-18 11:33', dirty:true };
+ESP.BUILD = { id:'e9725507', at:'2026-10-18 12:01', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -32684,7 +32718,9 @@ LIFEOS.DEFTER = (function(){
 
    Sözler:
      1. SELAM bir havuzdan seçilir: seçilen dil, günün saati (sabah, gün,
-        akşam, gece) ve modülün kendi selamları. Aynı selam art arda gelmez.
+        akşam, gece), haftanın günü ve modülün kendi selamları; açılış sözü
+        ile modülün sorusu birleşerek yüzlerce selam olur. Son görülen 40
+        selam bir daha gelmez.
         «İyi misin?» gibi zorlama sorular havuzda yok (kullanıcı: «çok
         kasıtlı olur»). «Kendi selamlarım» seçiliyse yalnız onlar.
      2. NOT KURALDAN YA DA KULLANICIDAN. Sistem notu modülün kendi kural
@@ -32711,26 +32747,91 @@ LIFEOS.KARSILAMA = (function(){
   ]);
   const MODULLER = ['ays', 'spi', 'esp'];
 
-  /* Havuz: dil → { genel, sabah, gun, aksam, gece, ays, spi, esp }. */
+  /* Havuz: dil → { genel, sabah, gun, aksam, gece, pzt, cuma, hs, ays, spi, esp, hkm,
+     on:{ genel, sabah, … }, ek:{ ays, … } }. Tek selamların yanında BİRLEŞİK
+     selam da var: açılış sözü («Günaydın») + modülün küçük harfli sorusu
+     («bugün hangi konu?»). Kullanıcı (2026-10-18): «türlü türlü olsun,
+     aynısını bir daha görmek zor bir ihtimal olsun». Son görülen 40 selam
+     bir daha seçilmez (acilis). `hkm` Merkez'indir: Merkez tek dosyadır,
+     bu listeyi kopyalar; HKM/tests/test_yuz.py ikisinin aynı olduğunu sınar. */
   const HAVUZ = {
-    tr:{ genel:['Hoş geldin', 'Merhaba', 'Merhabalar', 'Tekrar hoş geldin', 'Seni görmek güzel', 'Bugün zinde misin?', 'Hazırsan başlayalım'],
-      sabah:['Günaydın', 'Güzel bir sabah', 'Günaydın, bugün zinde misin?'], gun:['İyi günler', 'Günün nasıl geçiyor?'],
-      aksam:['İyi akşamlar', 'Akşamın hayırlı olsun'], gece:['Geç saatlere kaldın', 'Sakin bir gece'],
-      ays:['Bugün hangi konu?', 'Çalışmaya hazır mısın?'], spi:['Bugün ne yapmayı planlıyorsun?', 'Bugün kendine nasıl bakacaksın?'],
-      esp:['Bugün ne düşünüyorsun?', 'Bugün neyi merak ediyorsun?'] },
-    en:{ genel:['Welcome back', 'Hello', 'Hi there', 'Good to see you', 'Ready for today?'],
-      sabah:['Good morning'], gun:['Good afternoon'], aksam:['Good evening'], gece:['Working late?', 'A quiet night'],
-      ays:['What are we studying today?'], spi:['What’s your plan for today?'], esp:['What’s on your mind today?'] },
-    de:{ genel:['Willkommen zurück', 'Hallo', 'Schön, dich zu sehen', 'Bereit für heute?'],
-      sabah:['Guten Morgen'], gun:['Guten Tag'], aksam:['Guten Abend'], gece:['Noch wach?'],
-      ays:['Was lernen wir heute?'], spi:['Was hast du heute vor?'], esp:['Was beschäftigt dich heute?'] },
-    fr:{ genel:['Bon retour', 'Bonjour', 'Content de te revoir', 'Prêt pour aujourd’hui ?'],
-      sabah:['Bonjour'], gun:['Bon après-midi'], aksam:['Bonsoir'], gece:['Encore debout ?'],
-      ays:['On étudie quoi aujourd’hui ?'], spi:['Qu’as-tu prévu aujourd’hui ?'], esp:['À quoi penses-tu aujourd’hui ?'] },
-    es:{ genel:['Bienvenido de nuevo', 'Hola', 'Qué bueno verte', '¿Listo para hoy?'],
-      sabah:['Buenos días'], gun:['Buenas tardes'], aksam:['Buenas tardes'], gece:['¿Trasnochando?'],
-      ays:['¿Qué estudiamos hoy?'], spi:['¿Qué planeas hoy?'], esp:['¿Qué tienes en mente hoy?'] },
+    tr:{
+      genel:['Hoş geldin', 'Merhaba', 'Merhabalar', 'Tekrar hoş geldin', 'Seni görmek güzel', 'Bugün zinde misin?',
+        'Hazırsan başlayalım', 'Selam', 'Yeniden merhaba', 'Kaldığın yerden devam', 'Hadi bakalım', 'Bir adım daha',
+        'Sakin ve odaklı', 'Yavaş ama düzenli', 'Az ama her gün', 'Küçük bir adım yeter', 'Nefes al, başlayalım',
+        'Ne güzel, geldin', 'Bugüne birlikte bakalım', 'Gün senin', 'Bir bakalım neler var', 'Kısa bir tur atalım',
+        'Odak zamanı', 'Her gün biraz', 'Kapı açık, buyur', 'Yine buradasın, ne güzel', 'Düzen kuruluyor',
+        'Bugün de buradayız', 'Sade bir gün olsun', 'Adım adım'],
+      sabah:['Günaydın', 'Güzel bir sabah', 'Günaydın, bugün zinde misin?', 'Sabahın hayırlı olsun', 'Erken kalkmışsın',
+        'Kahven hazır mı?', 'Taze bir gün', 'Günaydın, yeni bir sayfa', 'Güne yumuşak bir başlangıç', 'Aydınlık bir sabah',
+        'Sabahın sakin saati'],
+      gun:['İyi günler', 'Günün nasıl geçiyor?', 'Günün ortasındayız', 'Tünaydın', 'Kısa bir mola mı?', 'Günün yarısı geride',
+        'Öğlen molası mı?', 'Günün geri kalanına bakalım', 'İyi bir öğleden sonra'],
+      aksam:['İyi akşamlar', 'Akşamın hayırlı olsun', 'Günü toparlama vakti', 'Akşam sakinliği', 'Günün sonuna yaklaşıyoruz',
+        'Akşama merhaba', 'Günü kapatmadan önce', 'Hoş bir akşam', 'Akşam serinliğinde'],
+      gece:['Geç saatlere kaldın', 'Sakin bir gece', 'İyi geceler', 'Gece kuşu', 'Gece sessizliği', 'Uyku vakti yaklaşıyor',
+        'Bu saatte de buradasın', 'Kısa tutalım, gece oldu'],
+      pzt:['Yeni hafta, yeni sayfa', 'Pazartesiye merhaba', 'Haftanın ilk günü', 'Haftaya yumuşak bir giriş'],
+      cuma:['Cuma geldi', 'Haftanın son düzlüğü', 'Hafta sonu kapıda', 'Hayırlı cumalar'],
+      hs:['İyi hafta sonları', 'Hafta sonu ritmi', 'Hafta sonuna merhaba', 'Hafta sonu sakinliği'],
+      ays:['Bugün hangi konu?', 'Çalışmaya hazır mısın?', 'Masaya hoş geldin', 'Kalem kâğıt hazır mı?', 'Bugün neyi bitiriyoruz?',
+        'Bir konu daha kapanabilir', 'Soru çözme vakti', 'Defterini aç', 'Çalışma masasına merhaba', 'Sınav yolunda bir gün daha',
+        'Bugünün bloğu hazır mı?', 'Formüller yerinde mi?', 'Paragraf mı, problem mi?', 'Bir deneme, bir analiz',
+        'Konular sırada', 'Yavaş yavaş, konu konu', 'Sessizce çalışalım', 'Tekrar kartları bekliyor olabilir',
+        'Bugün kaç soru?', 'Odak masası hazır'],
+      spi:['Bugün ne yapmayı planlıyorsun?', 'Bugün kendine nasıl bakacaksın?', 'Bedenine merhaba', 'Su içtin mi?',
+        'Biraz hareket iyi gelir', 'Uykun nasıldı?', 'Nefesine bir bak', 'Esneme vakti mi?', 'Bir bardak suyla başla',
+        'Yürüyüş havası mı?', 'Bugün ne yiyeceksin?', 'Kendine iyi bak', 'Dinlenmek de plana dahil', 'Bugünün ritmi ne?',
+        'Bedeninin sesini dinle', 'Bugün antrenman var mı?', 'Hafif bir gün mü, yoğun bir gün mü?', 'Hareket zamanı',
+        'Öğünlerine bir bakalım', 'Omuzlarını gevşet'],
+      esp:['Bugün ne düşünüyorsun?', 'Bugün neyi merak ediyorsun?', 'Yeni bir şey öğrenelim mi?', 'Merakın nerede bugün?',
+        'Bir sayfa, bir fikir', 'Bugün hangi alan?', 'Gitar mı, kitap mı?', 'Biraz yazı, biraz okuma', 'Kelimeler seni bekliyor',
+        'Bugün neyi derinleştiriyoruz?', 'Küçük bir alıştırma?', 'Zihnine merhaba', 'Okuma köşesine hoş geldin',
+        'Fikirler için bir yer', 'Bugün neyi keşfedeceksin?', 'Bir alışkanlık daha', 'Yavaş öğren, derin öğren',
+        'Not defterin hazır', 'Bugün kimi okuyorsun?', 'Bir soru, bir cevap'],
+      hkm:['Merkeze hoş geldin', 'Merkez hazır', 'Üç modül, tek bakış', 'Her şey tek yerde', 'Genel tabloya bakalım',
+        'Kumanda masasına hoş geldin', 'Bugünün özeti burada', 'Hepsine birden bakalım', 'Merkeze merhaba',
+        'Büyük resme bakalım', 'Bütün iplikler burada', 'Sakin bir kontrol turu', 'Bir göz atalım', 'Düzenin kalbi',
+        'Hepsi yerinde mi?', 'Bugün neyi yönetiyoruz?', 'Haftanın tablosu burada', 'Kuşbakışı bir gün'],
+      on:{ genel:['Merhaba', 'Selam', 'Hoş geldin', 'Tekrar hoş geldin'], sabah:['Günaydın'], gun:['İyi günler', 'Tünaydın'],
+        aksam:['İyi akşamlar'], gece:['İyi geceler'] },
+      ek:{
+        ays:['bugün hangi konu?', 'çalışmaya hazır mısın?', 'bugün neyi bitiriyoruz?', 'soru çözme vakti', 'defterini aç',
+          'tekrar zamanı olabilir', 'bugün kaç soru?', 'masa hazır', 'konular sırada', 'bir konu daha kapanabilir'],
+        spi:['bugün ne yapmayı planlıyorsun?', 'su içtin mi?', 'uykun nasıldı?', 'biraz hareket iyi gelir', 'bugün ne yiyeceksin?',
+          'yürüyüş havası mı?', 'kendine iyi bak', 'bugünün ritmi ne?', 'nefesine bir bak', 'esneme vakti mi?'],
+        esp:['bugün ne düşünüyorsun?', 'bugün neyi merak ediyorsun?', 'yeni bir şey öğrenelim mi?', 'bugün hangi alan?',
+          'bugün neyi keşfedeceksin?', 'kelimeler seni bekliyor', 'bugün kimi okuyorsun?', 'küçük bir alıştırma?',
+          'okuma köşesi hazır', 'merakın nerede bugün?'],
+        hkm:['merkez hazır', 'genel tabloya bakalım', 'kuşbakışı bir gün', 'bugünün özeti burada', 'büyük resme bakalım',
+          'bir göz atalım', 'hepsi yerinde mi?', 'bugün neyi yönetiyoruz?'],
+      } },
+    en:{ genel:['Welcome back', 'Hello', 'Hi there', 'Good to see you', 'Ready for today?', 'Let’s begin', 'One step at a time',
+        'Little and often', 'Back again, nice', 'Calm and focused', 'Pick up where you left off', 'Here we go'],
+      sabah:['Good morning', 'A fresh day', 'Coffee ready?', 'Morning, a new page'], gun:['Good afternoon', 'How’s your day going?', 'Halfway there'],
+      aksam:['Good evening', 'Time to wind down', 'A calm evening'], gece:['Working late?', 'A quiet night', 'Night owl'],
+      pzt:['New week, new page'], cuma:['Friday at last'], hs:['Happy weekend'],
+      ays:['What are we studying today?', 'Ready to study?', 'Which topic today?', 'Time for some questions'],
+      spi:['What’s your plan for today?', 'Had some water?', 'How did you sleep?', 'A little movement helps'],
+      esp:['What’s on your mind today?', 'What are you curious about?', 'Learn something new?', 'Guitar or book?'],
+      hkm:['Welcome to the hub', 'Everything in one place', 'The big picture', 'Three modules, one view'] },
+    de:{ genel:['Willkommen zurück', 'Hallo', 'Schön, dich zu sehen', 'Bereit für heute?', 'Los geht’s', 'Schritt für Schritt', 'Ruhig und fokussiert'],
+      sabah:['Guten Morgen', 'Ein frischer Tag'], gun:['Guten Tag', 'Wie läuft dein Tag?'], aksam:['Guten Abend', 'Ein ruhiger Abend'],
+      gece:['Noch wach?', 'Eine stille Nacht'], pzt:['Neue Woche, neue Seite'], cuma:['Endlich Freitag'], hs:['Schönes Wochenende'],
+      ays:['Was lernen wir heute?', 'Welches Thema heute?'], spi:['Was hast du heute vor?', 'Schon Wasser getrunken?'],
+      esp:['Was beschäftigt dich heute?', 'Etwas Neues lernen?'], hkm:['Willkommen in der Zentrale', 'Alles an einem Ort'] },
+    fr:{ genel:['Bon retour', 'Bonjour', 'Content de te revoir', 'Prêt pour aujourd’hui ?', 'On y va', 'Pas à pas', 'Calme et concentré'],
+      sabah:['Bonjour', 'Une nouvelle journée'], gun:['Bon après-midi', 'Comment se passe ta journée ?'], aksam:['Bonsoir', 'Une soirée calme'],
+      gece:['Encore debout ?', 'Une nuit tranquille'], pzt:['Nouvelle semaine, nouvelle page'], cuma:['Enfin vendredi'], hs:['Bon week-end'],
+      ays:['On étudie quoi aujourd’hui ?', 'Quel sujet aujourd’hui ?'], spi:['Qu’as-tu prévu aujourd’hui ?', 'Tu as bu de l’eau ?'],
+      esp:['À quoi penses-tu aujourd’hui ?', 'Apprendre quelque chose ?'], hkm:['Bienvenue au centre', 'Tout au même endroit'] },
+    es:{ genel:['Bienvenido de nuevo', 'Hola', 'Qué bueno verte', '¿Listo para hoy?', 'Vamos allá', 'Paso a paso', 'Con calma y foco'],
+      sabah:['Buenos días', 'Un día nuevo'], gun:['Buenas tardes', '¿Qué tal tu día?'], aksam:['Buenas tardes', 'Una tarde tranquila'],
+      gece:['¿Trasnochando?', 'Una noche tranquila'], pzt:['Nueva semana, nueva página'], cuma:['Por fin viernes'], hs:['Buen fin de semana'],
+      ays:['¿Qué estudiamos hoy?', '¿Qué tema hoy?'], spi:['¿Qué planeas hoy?', '¿Ya tomaste agua?'],
+      esp:['¿Qué tienes en mente hoy?', '¿Aprender algo nuevo?'], hkm:['Bienvenido al centro', 'Todo en un lugar'] },
   };
+  const HATIRA = 40;
 
   const kac = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   function vakit(d){
@@ -32768,13 +32869,28 @@ LIFEOS.KARSILAMA = (function(){
 
   /* ------------------------------------------------------------ selam */
 
-  function havuz(o){
-    const H = HAVUZ[o.dil] || HAVUZ.tr;
-    return [].concat(H.genel, H[vakit(o.simdi)] || [], H[o.modul] || []);
+  function gunTuru(d){
+    const g = (d || new Date()).getDay();
+    return g === 1 ? 'pzt' : g === 5 ? 'cuma' : g === 0 || g === 6 ? 'hs' : '';
   }
+  function havuz(o){
+    const H = HAVUZ[o.dil] || HAVUZ.tr, v = vakit(o.simdi), gt = gunTuru(o.simdi);
+    const tek = [].concat(H.genel, H[v] || [], gt ? H[gt] || [] : [], H[o.modul] || []);
+    const on = H.on ? [].concat(H.on.genel || [], H.on[v] || []) : [];
+    const ek = H.ek && H.ek[o.modul] || [];
+    const bir = [];
+    on.forEach(a => ek.forEach(b => { if(b.indexOf(',') < 0) bir.push(a + ', ' + b); }));
+    const hepsi = [];
+    tek.concat(bir).forEach(x => { if(hepsi.indexOf(x) < 0) hepsi.push(x); });
+    return hepsi;
+  }
+  /* once: son görülen selam ya da son görülenlerin listesi; hepsi
+     görülmüşse yalnız en sonuncusu dışarıda kalır. */
   function sec(l, tohum, once){
     if(!l.length) return '';
-    const aday = l.length > 1 ? l.filter(x => x !== once) : l;
+    const gorulen = Array.isArray(once) ? once : once ? [once] : [];
+    let aday = l.filter(x => gorulen.indexOf(x) < 0);
+    if(!aday.length) aday = l.length > 1 ? l.filter(x => x !== gorulen[gorulen.length - 1]) : l;
     const i = Math.abs(Math.floor(Number(tohum) || 0)) % aday.length;
     return aday[i];
   }
@@ -32782,7 +32898,7 @@ LIFEOS.KARSILAMA = (function(){
   function selam(o){
     const a = ayarOku(o.ayar);
     const l = a.selam === 'kendi' && a.kendi.length ? a.kendi : havuz({ dil:a.dil, modul:o.modul, simdi:o.simdi });
-    return sec(l, o.tohum == null ? Date.now() / 997 : o.tohum, o.once);
+    return sec(l, o.tohum == null ? Math.random() * 1e9 : o.tohum, o.once);
   }
 
   /* ------------------------------------------------------------ not */
@@ -32809,10 +32925,10 @@ LIFEOS.KARSILAMA = (function(){
   function acilis(modul){
     if(bu && bu.modul === modul) return bu;
     const a = ayar(), simdi = new Date();
-    const once = (oku(SON) || {})[modul] || '';
-    const s = selam({ ayar:a, modul, simdi, once });
     const son = oku(SON) || {};
-    son[modul] = s;
+    const once = Array.isArray(son[modul]) ? son[modul].filter(x => typeof x === 'string') : son[modul] ? [String(son[modul])] : [];
+    const s = selam({ ayar:a, modul, simdi, once });
+    son[modul] = once.concat([s]).slice(-HATIRA);
     yaz(SON, son);
     bu = { modul, selam:s, not:not({ ayar:a, modul, onbellek:oku(NOT), bugun:bugunISO(simdi) }), dil:a.dil };
     return bu;
@@ -32885,7 +33001,7 @@ LIFEOS.KARSILAMA = (function(){
     if(notlar && modul) a.notlar[modul] = notlar.value.split('\n');
     const yeni = ayarYaz(a);
     const ornek = k.querySelector('.karsilama-ayar__ornek em');
-    if(ornek) ornek.textContent = selam({ ayar:yeni, modul:modul || 'ays', simdi:new Date(), tohum:Date.now() / 997 });
+    if(ornek) ornek.textContent = selam({ ayar:yeni, modul:modul || 'ays', simdi:new Date() });
     return yeni;
   }
 
@@ -32915,7 +33031,7 @@ LIFEOS.KARSILAMA = (function(){
     document.addEventListener('change', e => { if(e.target && e.target.closest && e.target.closest('[data-karsilama-alan]')) ayarDegisti(e.target); });
   }
 
-  return { AYAR, NOT, DILLER, HAVUZ, EN_COK, EN_UZUN, vakit, havuz, selam, not, notYaz, ayarOku, ayar, ayarYaz,
+  return { AYAR, NOT, DILLER, HAVUZ, HATIRA, EN_COK, EN_UZUN, vakit, gunTuru, havuz, selam, not, notYaz, ayarOku, ayar, ayarYaz,
     acilis, perdeyeYaz, kapakHtml, ayarHtml, ayarDegisti, bugunISO, _sifirla:() => { bu = null; } };
 })();
 

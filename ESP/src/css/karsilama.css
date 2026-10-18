@@ -143,3 +143,37 @@
   .sayfa--kapakli .bugun .vk .w17 .ls2 :is(div, button):nth-child(2){ border-top:0; }
 }
 .sayfa--kapakli .bugun .vk .x35 .bd{ margin:0; padding-left:0; padding-right:0; }
+
+/* ---------- KAPAK: iki sütun (kullanıcı, 2026-10-18: «bir tık daha farklı,
+   daha minimalist; üstteki yazının tasarımını ve yerlerini değiştirebilirsin»)
+   Solda selam, cümle ve eylem; sağda sayılar dar bir defter gibi alt alta:
+   adı solda, değeri sağda, aralarında ince çizgi — altındaki kartsız
+   satırlarla aynı dil. Telefonda tek sütun. ---------- */
+.kapak{ min-height:min(60vh, 560px); padding-bottom:64px; }
+.kapak__ic{ display:grid; max-width:none; width:100%; align-items:start; column-gap:clamp(40px, 7vw, 96px);
+  grid-template-columns:minmax(0, 1fr); grid-template-areas:"selam" "cumle" "sayilar" "eylem"; }
+.kapak__selam{ grid-area:selam; margin:0 0 14px; font-size:clamp(20px, 2.4vw, 26px); color:var(--text-3); }
+.kapak .kapak__cumle{ grid-area:cumle; font-size:clamp(30px, 4.2vw, 50px); font-weight:650; letter-spacing:-.03em; line-height:1.04; max-width:16ch; }
+.kapak__eylem{ grid-area:eylem; margin-top:clamp(26px, 4vh, 36px); }
+.kapak__sayilar{ grid-area:sayilar; display:flex; flex-direction:column; flex-wrap:nowrap; gap:0; margin-top:clamp(26px, 4vh, 36px); }
+.kapak__sayi{ display:grid; grid-template-columns:minmax(0, 1fr) auto; align-items:baseline; column-gap:20px; min-width:0;
+  padding:14px 0; border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent); }
+.kapak__sayi:last-child{ border-bottom:1px solid color-mix(in oklab, var(--text) 10%, transparent); }
+.kapak__sayi .kapak__deger{ grid-column:2; grid-row:1; text-align:right; font-size:clamp(24px, 2.4vw, 30px); font-weight:550; }
+.kapak__sayi .kapak__ad{ grid-column:1; grid-row:1; font-size:14px; color:var(--text-2); }
+.kapak__ad i{ margin-top:2px; }
+.kapak__asagi{ background:transparent; -webkit-backdrop-filter:none; backdrop-filter:none; color:var(--text-3); }
+@media (min-width:900px){
+  .kapak__ic{ grid-template-columns:minmax(0, 1fr) minmax(240px, 300px);
+    grid-template-areas:"selam sayilar" "cumle sayilar" "eylem sayilar"; grid-template-rows:auto auto 1fr; }
+  .kapak__sayilar{ margin-top:6px; }
+}
+@media (max-width:679px){
+  .kapak__sayilar{ display:flex; width:100%; gap:0; }
+  .kapak__sayi{ padding:12px 0; }
+}
+@media (max-width:679px){
+  .kapak__sayi{ padding:10px 0; }
+  .kapak__sayi .kapak__ad i{ display:inline; margin:0 0 0 6px; }
+  .kapak__sayi .kapak__deger{ font-size:24px; }
+}

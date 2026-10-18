@@ -51,6 +51,42 @@ def _tanitim_hkm():
     return re.findall(r"'((?:[^'\\]|\\.)*)'", m.group(1))
 
 
+KARSILAMA = KOK / "brand" / "ortak" / "karsilama.js"
+
+
+def _karsilama_tr():
+    """karsilama.js HAVUZ.tr: ust duzey listeler, on:{...} ve ek.hkm."""
+    k = KARSILAMA.read_text(encoding="utf-8")
+    tr = k[k.index("    tr:{"):k.index("    en:{")]
+    ust, on, ek = tr[:tr.index("on:{")], tr[tr.index("on:{"):tr.index("ek:{")], tr[tr.index("ek:{"):]
+
+    def dizi(metin, ad):
+        m = re.search(r"\b%s:\[(.*?)\]" % ad, metin, re.S)
+        return re.findall(r"'((?:[^'\\]|\\.)*)'", m.group(1)) if m else []
+
+    out = {}
+    for a in ("genel", "sabah", "gun", "aksam", "gece", "pzt", "cuma", "hs", "hkm"):
+        out["KS_" + a.upper()] = dizi(ust, a)
+    for a in ("genel", "sabah", "gun", "aksam", "gece"):
+        out["KS_ON_" + a.upper()] = dizi(on, a)
+    out["KS_EK"] = dizi(ek, "hkm")
+    return out
+
+
+def t_karsilama_ortak_havuz():
+    """Merkez'in italik selami modullerin havuzuyla AYNI (kullanici,
+    2026-10-18: «hos geldin Merkez icin de; turlu turlu»). Liste kopyadir;
+    biri degisip oteki degismezse burada kirilir."""
+    y = _yuz()
+    ok('id="hkm-kars"' in y)
+    for ad, beklenen in _karsilama_tr().items():
+        ok(len(beklenen) > 0, ad + " karsilama.js'te bulunamadi")
+        eq(_js_dizi(y, ad), beklenen)
+    # Gorulen 40 selam yeniden gelmez; ayar «az» ise hic gorunmez.
+    ok("HATIRA = 40" in y)
+    ok("k === 'az'" in y)
+
+
 def t_giris_seridi_uc_adim():
     """Giris ekraninda UC adim var ve ucu de bos degil."""
     g = _js_dizi(_yuz(), "GSERIT")
@@ -747,3 +783,4 @@ def run():
     test("Bugün sade: tek sistem kartı, üç satır + Tümü, King hapı, konsey satırı", t_bugun_sade)
     test("sistem seçici tıklayınca açılır; kenar yumuşak açılır (2026-10-05)", t_sistem_secici_ve_yumusak_acilis)
     test("ekranlar sade: başlık çekmecenin adı, satır, katlı form, açıklama ⓘ'de", t_ekranlar_sade)
+    test("karşılama: Merkez'in italik selamı modüllerin havuzuyla aynı (2026-10-18)", t_karsilama_ortak_havuz)

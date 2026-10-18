@@ -52,6 +52,36 @@
     });
   });
 
+  describe('Karşılama — türlü türlü (kullanıcı, 2026-10-18: «aynısını bir daha görmek zor bir ihtimal olsun»)', () => {
+    const PZT = new Date(2026, 9, 19, 8, 30), CRS = new Date(2026, 9, 21, 14, 0);
+    it('her modülün (Merkez dahil) Türkçe havuzunda en az 80 selam; birleşik selam tek virgüllü', () => {
+      ['ays', 'spi', 'esp', 'hkm'].forEach(m => [PZT, CRS, GECE].forEach(s => {
+        const l = K().havuz({ dil:'tr', modul:m, simdi:s });
+        expect(l.length >= 80).toBeTruthy();
+        expect(new Set(l).size).toBe(l.length);
+        l.forEach(x => { expect(x.split(',').length <= 2).toBe(true); expect(x.length <= 60).toBe(true); });
+      }));
+      expect(K().havuz({ dil:'tr', modul:'ays', simdi:PZT }).indexOf('Günaydın, bugün hangi konu?') >= 0).toBeTruthy();
+      expect(K().havuz({ dil:'tr', modul:'hkm', simdi:CRS }).indexOf('Merkeze hoş geldin') >= 0).toBeTruthy();
+    });
+    it('haftanın günü: pazartesi selamı yalnız pazartesi', () => {
+      expect(K().gunTuru(PZT)).toBe('pzt');
+      expect(K().havuz({ dil:'tr', modul:'spi', simdi:PZT }).indexOf('Yeni hafta, yeni sayfa') >= 0).toBeTruthy();
+      expect(K().havuz({ dil:'tr', modul:'spi', simdi:CRS }).indexOf('Yeni hafta, yeni sayfa') < 0).toBeTruthy();
+    });
+    it('son görülen 40 selam yeniden gelmez; hepsi görülmüşse yine de bir selam gelir', () => {
+      const gorulen = [];
+      for(let i = 0; i < K().HATIRA; i++){
+        const s = K().selam({ ayar:{ dil:'tr' }, modul:'esp', simdi:CRS, tohum:i * 7, once:gorulen.slice(-K().HATIRA) });
+        expect(gorulen.indexOf(s) < 0).toBe(true);
+        gorulen.push(s);
+      }
+      const l = K().havuz({ dil:'tr', modul:'esp', simdi:CRS });
+      const s = K().selam({ ayar:{ dil:'tr' }, modul:'esp', simdi:CRS, tohum:3, once:l });
+      expect(l.indexOf(s) >= 0 && s !== l[l.length - 1]).toBe(true);
+    });
+  });
+
   describe('Karşılama — alt not', () => {
     const BUGUN = '2026-10-18';
     it('sistem notu yalnız bugünün kural cümlesi; dünkü gösterilmez; kapalıysa boş', () => {
