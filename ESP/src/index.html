@@ -38,6 +38,7 @@
 <link rel="stylesheet" href="css/kisayol.css"/>
 <link rel="stylesheet" href="css/tekgun.css"/>
 <link rel="stylesheet" href="css/defter.css"/>
+<link rel="stylesheet" href="css/karsilama.css"/>
 <link rel="stylesheet" href="css/pusula.css"/>
 <link rel="stylesheet" href="css/sorukart.css"/>
 <link rel="stylesheet" href="css/zemin.css"/>
@@ -74,14 +75,17 @@
 
      Dosya `img/marka/kimlik-esp.webp` — her sistem kendi logosunu
      gösterir ve ad yer tutucudan gelir, üç yerde ayrı yazılmaz. -->
-<div id="marka-perde" class="perde perde--marka" role="dialog" aria-modal="true"
-  aria-label="Marka girişi">
-  <!-- Bulanık arka kopya: logonun kendi rengi zemine sızsın, kenarı
-       keskin bir daire gibi durmasın. -->
-  <img class="perde__ortam" src="img/marka/kimlik-esp.webp" alt=""
-    aria-hidden="true" onerror="this.remove()">
-  <img class="perde__logo" src="img/marka/kimlik-esp.webp" alt=""
-    aria-hidden="true" onerror="this.remove()">
+<!-- KARŞILAMA (kullanıcı, 2026-10-18): logonun yerine italik selam ve altında
+     küçük yazıyla bölümün o anki notu (brand/ortak/karsilama.js). Selam ve not
+     karsilama.js yüklenince yazılır; yüklenmezse 0,7 sn sonra varsayılan selam
+     görünür. Not modülün KENDİ kural cümlesidir ya da kullanıcının notu. -->
+<div id="marka-perde" class="perde perde--marka perde--karsilama" role="dialog" aria-modal="true"
+  aria-label="Karşılama">
+  <div class="karsilama" aria-live="polite">
+    <p class="karsilama__selam">Hoş geldin</p>
+    <span class="karsilama__cizgi" aria-hidden="true"></span>
+    <p class="karsilama__not" hidden></p>
+  </div>
   <div class="perde__araclar">
     <!-- Ses düğmesi YOK: logonun sesi yoktur. Video kalkınca onunla
          birlikte kalktı. -->
@@ -121,7 +125,21 @@
      build.py butun <script src>'leri govdenin ARDINA tasir: orada
      Perde bu betikten SONRA tanimlanir ve bekleme gercekten calisir.
      Iki surumun tek markupla yasamasinin bedeli bu kucuk dongudur. */
-  var deneme = 0;
+  var deneme = 0, kars = el.querySelector('.karsilama'), yazildi = false;
+  /* Karşılama yazılamazsa (betik yok) varsayılan selam görünür. */
+  setTimeout(function(){ if(kars && !yazildi) kars.classList.add('is-yedek'); }, 700);
+  /* Selam ayrı bekler: kaynak sürümde perde.js hemen, karsilama.js sayfanın
+     aşağısında yüklenir; tek dosya sürümünde ikisi de sonda. */
+  var kDeneme = 0;
+  (function selamBekle(){
+    if(!kars || yazildi) return;
+    if(window.LIFEOS && LIFEOS.KARSILAMA){
+      try{ yazildi = LIFEOS.KARSILAMA.perdeyeYaz(kars, 'esp'); }catch(e){ yazildi = true; kars.classList.add('is-yedek'); }
+      return;
+    }
+    if(++kDeneme > 100) return;   /* ~3 sn; yedek selam devrede */
+    setTimeout(selamBekle, 30);
+  })();
   (function bekle(){
     if(window.ESP && ESP.Perde){
       clearTimeout(kurtarma);
@@ -175,6 +193,7 @@
 <script src="js/core/cikarim.js"></script>
 <script src="js/core/envanter.js"></script>
 <script src="js/core/defter.js"></script>
+<script src="js/core/karsilama.js"></script>
 <script src="js/core/pusula.js"></script>
 <script src="js/core/sorukart.js"></script>
 <script src="js/core/king.js"></script>

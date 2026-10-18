@@ -1,0 +1,75 @@
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/karsilama.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KARŞILAMA ve BUGÜN KAPAĞI (brand/ortak/karsilama.js).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/karsilama.css`; `tools/ortak.py --yay` ile üç
+   arayüzün `src/css/` klasörüne birebir kopyalanır.
+   ==================================================================
+
+   Selamın italiği GERÇEK bir italik kesimdir: uygulamanın yazı tiplerinde
+   italik yok (sahte eğik yazı kötü görünür); sistemin serif italiği
+   kullanılır — Apple'da New York, Windows'ta Georgia. Rakamlar serif
+   değildir (kullanıcı: serif rakam göz yorar). */
+
+:root{ --karsilama-serif:ui-serif, 'New York', 'Iowan Old Style', Georgia, 'Times New Roman', serif; }
+
+/* ---------- perde: logo yerine selam ---------- */
+/* Zemin marka perdesinin buğulu camıdır (seviye.css .perde--marka, 2026-10-03 kararı);
+   yazı onun rengini alır. */
+.perde--karsilama{ display:grid; place-items:center; }
+.karsilama{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:14px;
+  max-width:min(680px, calc(100vw - 48px)); text-align:center; opacity:0; transform:translateY(8px); filter:blur(4px);
+  transition:opacity .9s cubic-bezier(.32,.72,0,1), transform .9s cubic-bezier(.32,.72,0,1), filter .9s ease; }
+.karsilama.is-hazir, .karsilama.is-yedek{ opacity:1; transform:none; filter:none; }
+.karsilama__selam{ margin:0; font-family:var(--karsilama-serif); font-style:italic; font-weight:400;
+  font-size:clamp(34px, 6vw, 64px); line-height:1.08; letter-spacing:-.01em; color:var(--pm-yazi, var(--text)); }
+.karsilama__not{ margin:0; max-width:46ch; font-size:clamp(14px, 1.6vw, 16px); line-height:1.5; color:var(--pm-yazi, var(--text-2));
+  opacity:0; transition:opacity .7s ease .55s; }
+.karsilama.is-hazir .karsilama__not{ opacity:.72; }
+.karsilama__cizgi{ width:28px; height:2px; border-radius:2px; background:var(--primary); opacity:.6; }
+/* Modül rengi zeminde çok hafif bir ışık: logonun bulanık kopyasının yerini alır. */
+.perde--karsilama::before{ content:''; position:absolute; inset:-20%; pointer-events:none;
+  background:radial-gradient(40% 36% at 50% 46%, color-mix(in oklab, var(--primary) 16%, transparent), transparent 70%); }
+
+/* ---------- Bugün kapağı ---------- */
+.kapak{ position:relative; width:100%; max-width:1180px; margin:0 auto; box-sizing:border-box;
+  min-height:min(68vh, 620px); padding:clamp(48px, 9vh, 112px) clamp(20px, 5vw, 64px) 72px; display:flex; flex-direction:column; justify-content:center; }
+.kapak__ic{ display:flex; flex-direction:column; align-items:flex-start; max-width:760px;
+  animation:kapak-gel .9s cubic-bezier(.32,.72,0,1) both; }
+@keyframes kapak-gel{ from{ opacity:0; transform:translateY(10px); filter:blur(3px); } }
+.kapak__selam{ margin:0 0 10px; font-family:var(--karsilama-serif); font-style:italic; font-weight:400;
+  font-size:clamp(24px, 3.2vw, 34px); line-height:1.15; color:var(--text-2); }
+.kapak .kapak__cumle{ margin:0; font-family:var(--font-body); font-variation-settings:normal; font-size:clamp(30px, 4.6vw, 52px); font-weight:700; letter-spacing:-.025em; line-height:1.06;
+  color:var(--text); max-width:20ch; outline:none; text-wrap:balance; }
+.kapak__sayilar{ display:flex; flex-wrap:wrap; gap:14px 44px; margin-top:clamp(28px, 4vh, 40px); }
+.kapak__sayi{ display:flex; flex-direction:column; gap:4px; min-width:84px; }
+.kapak__deger{ font-size:clamp(26px, 3vw, 34px); font-weight:650; letter-spacing:-.02em; line-height:1; color:var(--text); font-variant-numeric:tabular-nums; }
+.kapak__deger small{ margin-left:4px; font-size:.45em; font-weight:550; color:var(--text-3); letter-spacing:0; }
+.kapak__sayi[data-kesinlik="veri_yok"] .kapak__deger{ color:var(--text-3); }
+.kapak__ad{ font-size:13px; color:var(--text-2); }
+.kapak__ad i{ display:block; font-style:normal; font-size:11px; color:var(--text-3); }
+.kapak__eylem{ display:flex; flex-wrap:wrap; gap:10px; margin-top:clamp(28px, 4vh, 40px); }
+.kapak__asagi{ position:absolute; left:50%; bottom:14px; transform:translateX(-50%); width:40px; height:40px; display:grid; place-items:center;
+  border:0; border-radius:50%; background:color-mix(in oklab, var(--surface) 60%, transparent); color:var(--text-2); cursor:pointer;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); animation:kapak-nefes 2.8s ease-in-out 1.2s 2 both; }
+.kapak__asagi svg{ width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.kapak__asagi:hover{ color:var(--text); }
+@keyframes kapak-nefes{ 50%{ transform:translate(-50%, 4px); } }
+@media (max-width:679px){
+  .kapak{ min-height:auto; padding:28px 20px 64px; }
+  .kapak__sayilar{ display:grid; grid-template-columns:1fr 1fr; gap:18px 20px; width:100%; }
+}
+@media (prefers-reduced-motion:reduce){
+  .karsilama, .karsilama__not{ transition:none; }
+  .kapak__ic, .kapak__asagi{ animation:none; }
+}
+
+/* ---------- ayar ---------- */
+.karsilama-ayar{ display:flex; flex-direction:column; gap:14px; }
+.karsilama-ayar textarea{ resize:vertical; min-height:72px; font:inherit; }
+.karsilama-ayar__ornek{ margin:0; font-family:var(--karsilama-serif); font-size:20px; color:var(--text-2); }
+.karsilama-ayar small{ font-weight:400; color:var(--text-3); }
+/* Kapaklı sayfada levha kapağın altından başlar; başlık kapakta (h1). */
+.site--v5 .sayfa--kapakli{ margin-top:0; }

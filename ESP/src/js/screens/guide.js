@@ -310,6 +310,9 @@ ESP.Screens.guide = (function(){
       }),
       when(window.LIFEOS && window.LIFEOS.OrnekKip, () => K.Entry({ label:'Örnek veriyle dene',
         body:raw(window.LIFEOS.OrnekKip.ayarHtml(!!(ESP.Ornek && ESP.Ornek.acik()))) })),
+      /* Karşılama (2026-10-18): girişteki italik selam ve bölümün notu (brand/ortak/karsilama.js). */
+      when(window.LIFEOS && window.LIFEOS.KARSILAMA, () => K.Entry({ label:'Karşılama', meta:'girişteki selam ve not',
+        body:raw(window.LIFEOS.KARSILAMA.ayarHtml('esp')) })),
     ].filter(Boolean);
   }
 

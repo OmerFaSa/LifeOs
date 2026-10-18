@@ -235,7 +235,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.yazma', 'lifeos.king.sorma', 'lifeos.kisi.izin']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.yazma', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -373,28 +373,13 @@ window.LIFEOS = window.LIFEOS || {};
     kap.setAttribute('aria-hidden', 'true');
     kap.style.clipPath = k ? 'inset(' + Math.max(0, k.top) + 'px ' + Math.max(0, vw - k.right) + 'px '
       + Math.max(0, vh - k.bottom) + 'px ' + Math.max(0, k.left) + 'px round ' + r + 'px)' : 'inset(50% 50% 50% 50% round 24px)';
-    const adres = logoAdresi(o.modul, o.url);
-    const ortam = document.createElement('img'), logo = document.createElement('img');
-    ortam.className = 'lifeos-gecis__ortam'; logo.className = 'lifeos-gecis__logo';
-    ortam.alt = ''; logo.alt = '';
-    ortam.onerror = () => ortam.remove(); logo.onerror = () => logo.remove();
-    if(adres){ ortam.src = adres; logo.src = adres; }
-    kap.appendChild(ortam); kap.appendChild(logo);
+    /* LOGO YOK (kullanıcı, 2026-10-18: «geçerken logo yerine italik bir yazıyla hoş
+       geldin»): perde yalnız karttan büyür; selam ve not varılan modülün perdesinde
+       (brand/ortak/karsilama.js) — o modülün notunu yalnız o modül bilir. */
     document.body.appendChild(kap);
-    /* Logo kartın küçük işaretinden çıkar (FLIP): son yerine göre farkı
-       ve oranı başta verilir, sonra bırakılır. */
-    const lk = olc(o.logoKaynak) || k;
-    const son = Math.min(vw * 0.38, 300);
-    if(lk){
-      const dx = (lk.left + lk.width / 2) - vw / 2, dy = (lk.top + lk.height / 2) - vh / 2;
-      logo.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + Math.max(0.08, lk.width / son) + ')';
-    }else{
-      logo.style.transform = 'translateY(14px) scale(.94)';
-    }
     void kap.offsetWidth;                            // başlangıç çizilsin, sonra geçiş
     kap.classList.add('is-tam');
     kap.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';
-    logo.style.transform = '';
     const sure = typeof o.sure === 'number' ? o.sure : GECIS_MS + 40;
     setTimeout(() => {
       gecisCerezYaz(o.modul);

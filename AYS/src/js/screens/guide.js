@@ -675,6 +675,11 @@ R.Screens.guide = (function(){
               Üslup ev kurallarını geçersiz kılmaz: garanti, tıbbi tavsiye ve uykudan feda
               her üslupta yasaktır.</p>` }),
 
+        /* Karşılama (2026-10-18): modüle girerken italik selam ve bölümün notu;
+           dili, kendi selamların ve notların (brand/ortak/karsilama.js). */
+        when(window.LIFEOS && window.LIFEOS.KARSILAMA, () => K.Card({ title:'Karşılama', sub:'Girerken seni selamlayan cümle ve altındaki not',
+          body:raw(window.LIFEOS.KARSILAMA.ayarHtml('ays')) })),
+
         when(R.Bolum, () => K.Card({ title:'Bölümler',
           sub:'Kullanmadığın bölümü gizle; verisi silinmez',
           body:html`

@@ -14134,6 +14134,83 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .defter-raf__hata{ margin:0; font-size:13px; color:var(--danger, #c0392b); }
 @media (prefers-reduced-motion:reduce){ .defter-raf__eylem, .defter-raf__oge{ transition:none; } .defter-raf__eylem:active{ transform:none; } }
 
+/* ==== css/karsilama.css ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/karsilama.css içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KARŞILAMA ve BUGÜN KAPAĞI (brand/ortak/karsilama.js).
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/karsilama.css`; `tools/ortak.py --yay` ile üç
+   arayüzün `src/css/` klasörüne birebir kopyalanır.
+   ==================================================================
+
+   Selamın italiği GERÇEK bir italik kesimdir: uygulamanın yazı tiplerinde
+   italik yok (sahte eğik yazı kötü görünür); sistemin serif italiği
+   kullanılır — Apple'da New York, Windows'ta Georgia. Rakamlar serif
+   değildir (kullanıcı: serif rakam göz yorar). */
+
+:root{ --karsilama-serif:ui-serif, 'New York', 'Iowan Old Style', Georgia, 'Times New Roman', serif; }
+
+/* ---------- perde: logo yerine selam ---------- */
+/* Zemin marka perdesinin buğulu camıdır (seviye.css .perde--marka, 2026-10-03 kararı);
+   yazı onun rengini alır. */
+.perde--karsilama{ display:grid; place-items:center; }
+.karsilama{ position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:14px;
+  max-width:min(680px, calc(100vw - 48px)); text-align:center; opacity:0; transform:translateY(8px); filter:blur(4px);
+  transition:opacity .9s cubic-bezier(.32,.72,0,1), transform .9s cubic-bezier(.32,.72,0,1), filter .9s ease; }
+.karsilama.is-hazir, .karsilama.is-yedek{ opacity:1; transform:none; filter:none; }
+.karsilama__selam{ margin:0; font-family:var(--karsilama-serif); font-style:italic; font-weight:400;
+  font-size:clamp(34px, 6vw, 64px); line-height:1.08; letter-spacing:-.01em; color:var(--pm-yazi, var(--text)); }
+.karsilama__not{ margin:0; max-width:46ch; font-size:clamp(14px, 1.6vw, 16px); line-height:1.5; color:var(--pm-yazi, var(--text-2));
+  opacity:0; transition:opacity .7s ease .55s; }
+.karsilama.is-hazir .karsilama__not{ opacity:.72; }
+.karsilama__cizgi{ width:28px; height:2px; border-radius:2px; background:var(--primary); opacity:.6; }
+/* Modül rengi zeminde çok hafif bir ışık: logonun bulanık kopyasının yerini alır. */
+.perde--karsilama::before{ content:''; position:absolute; inset:-20%; pointer-events:none;
+  background:radial-gradient(40% 36% at 50% 46%, color-mix(in oklab, var(--primary) 16%, transparent), transparent 70%); }
+
+/* ---------- Bugün kapağı ---------- */
+.kapak{ position:relative; width:100%; max-width:1180px; margin:0 auto; box-sizing:border-box;
+  min-height:min(68vh, 620px); padding:clamp(48px, 9vh, 112px) clamp(20px, 5vw, 64px) 72px; display:flex; flex-direction:column; justify-content:center; }
+.kapak__ic{ display:flex; flex-direction:column; align-items:flex-start; max-width:760px;
+  animation:kapak-gel .9s cubic-bezier(.32,.72,0,1) both; }
+@keyframes kapak-gel{ from{ opacity:0; transform:translateY(10px); filter:blur(3px); } }
+.kapak__selam{ margin:0 0 10px; font-family:var(--karsilama-serif); font-style:italic; font-weight:400;
+  font-size:clamp(24px, 3.2vw, 34px); line-height:1.15; color:var(--text-2); }
+.kapak .kapak__cumle{ margin:0; font-family:var(--font-body); font-variation-settings:normal; font-size:clamp(30px, 4.6vw, 52px); font-weight:700; letter-spacing:-.025em; line-height:1.06;
+  color:var(--text); max-width:20ch; outline:none; text-wrap:balance; }
+.kapak__sayilar{ display:flex; flex-wrap:wrap; gap:14px 44px; margin-top:clamp(28px, 4vh, 40px); }
+.kapak__sayi{ display:flex; flex-direction:column; gap:4px; min-width:84px; }
+.kapak__deger{ font-size:clamp(26px, 3vw, 34px); font-weight:650; letter-spacing:-.02em; line-height:1; color:var(--text); font-variant-numeric:tabular-nums; }
+.kapak__deger small{ margin-left:4px; font-size:.45em; font-weight:550; color:var(--text-3); letter-spacing:0; }
+.kapak__sayi[data-kesinlik="veri_yok"] .kapak__deger{ color:var(--text-3); }
+.kapak__ad{ font-size:13px; color:var(--text-2); }
+.kapak__ad i{ display:block; font-style:normal; font-size:11px; color:var(--text-3); }
+.kapak__eylem{ display:flex; flex-wrap:wrap; gap:10px; margin-top:clamp(28px, 4vh, 40px); }
+.kapak__asagi{ position:absolute; left:50%; bottom:14px; transform:translateX(-50%); width:40px; height:40px; display:grid; place-items:center;
+  border:0; border-radius:50%; background:color-mix(in oklab, var(--surface) 60%, transparent); color:var(--text-2); cursor:pointer;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); animation:kapak-nefes 2.8s ease-in-out 1.2s 2 both; }
+.kapak__asagi svg{ width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.kapak__asagi:hover{ color:var(--text); }
+@keyframes kapak-nefes{ 50%{ transform:translate(-50%, 4px); } }
+@media (max-width:679px){
+  .kapak{ min-height:auto; padding:28px 20px 64px; }
+  .kapak__sayilar{ display:grid; grid-template-columns:1fr 1fr; gap:18px 20px; width:100%; }
+}
+@media (prefers-reduced-motion:reduce){
+  .karsilama, .karsilama__not{ transition:none; }
+  .kapak__ic, .kapak__asagi{ animation:none; }
+}
+
+/* ---------- ayar ---------- */
+.karsilama-ayar{ display:flex; flex-direction:column; gap:14px; }
+.karsilama-ayar textarea{ resize:vertical; min-height:72px; font:inherit; }
+.karsilama-ayar__ornek{ margin:0; font-family:var(--karsilama-serif); font-size:20px; color:var(--text-2); }
+.karsilama-ayar small{ font-weight:400; color:var(--text-3); }
+/* Kapaklı sayfada levha kapağın altından başlar; başlık kapakta (h1). */
+.site--v5 .sayfa--kapakli{ margin-top:0; }
+
 /* ==== css/pusula.css ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
    Düzeltme brand/ortak/pusula.css içine yazılır; burası bir sonraki
@@ -14426,14 +14503,17 @@ html:not([data-zemin="yumusak"]) .zemin-isik{ display:none; }
 
      Dosya `img/marka/kimlik-esp.webp` — her sistem kendi logosunu
      gösterir ve ad yer tutucudan gelir, üç yerde ayrı yazılmaz. -->
-<div id="marka-perde" class="perde perde--marka" role="dialog" aria-modal="true"
-  aria-label="Marka girişi">
-  <!-- Bulanık arka kopya: logonun kendi rengi zemine sızsın, kenarı
-       keskin bir daire gibi durmasın. -->
-  <img class="perde__ortam" src="img/marka/kimlik-esp.webp" alt=""
-    aria-hidden="true" onerror="this.remove()">
-  <img class="perde__logo" src="img/marka/kimlik-esp.webp" alt=""
-    aria-hidden="true" onerror="this.remove()">
+<!-- KARŞILAMA (kullanıcı, 2026-10-18): logonun yerine italik selam ve altında
+     küçük yazıyla bölümün o anki notu (brand/ortak/karsilama.js). Selam ve not
+     karsilama.js yüklenince yazılır; yüklenmezse 0,7 sn sonra varsayılan selam
+     görünür. Not modülün KENDİ kural cümlesidir ya da kullanıcının notu. -->
+<div id="marka-perde" class="perde perde--marka perde--karsilama" role="dialog" aria-modal="true"
+  aria-label="Karşılama">
+  <div class="karsilama" aria-live="polite">
+    <p class="karsilama__selam">Hoş geldin</p>
+    <span class="karsilama__cizgi" aria-hidden="true"></span>
+    <p class="karsilama__not" hidden></p>
+  </div>
   <div class="perde__araclar">
     <!-- Ses düğmesi YOK: logonun sesi yoktur. Video kalkınca onunla
          birlikte kalktı. -->
@@ -14472,7 +14552,21 @@ html:not([data-zemin="yumusak"]) .zemin-isik{ display:none; }
      build.py butun <script src>'leri govdenin ARDINA tasir: orada
      Perde bu betikten SONRA tanimlanir ve bekleme gercekten calisir.
      Iki surumun tek markupla yasamasinin bedeli bu kucuk dongudur. */
-  var deneme = 0;
+  var deneme = 0, kars = el.querySelector('.karsilama'), yazildi = false;
+  /* Karşılama yazılamazsa (betik yok) varsayılan selam görünür. */
+  setTimeout(function(){ if(kars && !yazildi) kars.classList.add('is-yedek'); }, 700);
+  /* Selam ayrı bekler: kaynak sürümde perde.js hemen, karsilama.js sayfanın
+     aşağısında yüklenir; tek dosya sürümünde ikisi de sonda. */
+  var kDeneme = 0;
+  (function selamBekle(){
+    if(!kars || yazildi) return;
+    if(window.LIFEOS && LIFEOS.KARSILAMA){
+      try{ yazildi = LIFEOS.KARSILAMA.perdeyeYaz(kars, 'esp'); }catch(e){ yazildi = true; kars.classList.add('is-yedek'); }
+      return;
+    }
+    if(++kDeneme > 100) return;   /* ~3 sn; yedek selam devrede */
+    setTimeout(selamBekle, 30);
+  })();
   (function bekle(){
     if(window.ESP && ESP.Perde){
       clearTimeout(kurtarma);
@@ -14741,7 +14835,7 @@ window.LIFEOS = window.LIFEOS || {};
 
   /* lifeos.king: King açıkken durumu (king.js söz 18) — modül değişince
      sağ üstteki kutu kaybolmasın. */
-  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.yazma', 'lifeos.king.sorma', 'lifeos.kisi.izin']);
+  const TASINAN = Object.freeze(['lifeos.hareket', 'lifeos.ses', 'lifeos.zemin', 'lifeos.king', 'lifeos.king.cevap', 'lifeos.king.yazma', 'lifeos.king.sorma', 'lifeos.kisi.izin', 'lifeos.karsilama']);
   const ISARET = '#lifeos=';
 
   function tasimaEkle(url){
@@ -14879,28 +14973,13 @@ window.LIFEOS = window.LIFEOS || {};
     kap.setAttribute('aria-hidden', 'true');
     kap.style.clipPath = k ? 'inset(' + Math.max(0, k.top) + 'px ' + Math.max(0, vw - k.right) + 'px '
       + Math.max(0, vh - k.bottom) + 'px ' + Math.max(0, k.left) + 'px round ' + r + 'px)' : 'inset(50% 50% 50% 50% round 24px)';
-    const adres = logoAdresi(o.modul, o.url);
-    const ortam = document.createElement('img'), logo = document.createElement('img');
-    ortam.className = 'lifeos-gecis__ortam'; logo.className = 'lifeos-gecis__logo';
-    ortam.alt = ''; logo.alt = '';
-    ortam.onerror = () => ortam.remove(); logo.onerror = () => logo.remove();
-    if(adres){ ortam.src = adres; logo.src = adres; }
-    kap.appendChild(ortam); kap.appendChild(logo);
+    /* LOGO YOK (kullanıcı, 2026-10-18: «geçerken logo yerine italik bir yazıyla hoş
+       geldin»): perde yalnız karttan büyür; selam ve not varılan modülün perdesinde
+       (brand/ortak/karsilama.js) — o modülün notunu yalnız o modül bilir. */
     document.body.appendChild(kap);
-    /* Logo kartın küçük işaretinden çıkar (FLIP): son yerine göre farkı
-       ve oranı başta verilir, sonra bırakılır. */
-    const lk = olc(o.logoKaynak) || k;
-    const son = Math.min(vw * 0.38, 300);
-    if(lk){
-      const dx = (lk.left + lk.width / 2) - vw / 2, dy = (lk.top + lk.height / 2) - vh / 2;
-      logo.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + Math.max(0.08, lk.width / son) + ')';
-    }else{
-      logo.style.transform = 'translateY(14px) scale(.94)';
-    }
     void kap.offsetWidth;                            // başlangıç çizilsin, sonra geçiş
     kap.classList.add('is-tam');
     kap.style.clipPath = 'inset(0px 0px 0px 0px round 0px)';
-    logo.style.transform = '';
     const sure = typeof o.sure === 'number' ? o.sure : GECIS_MS + 40;
     setTimeout(() => {
       gecisCerezYaz(o.modul);
@@ -16210,7 +16289,10 @@ ESP.Perde = (function(){
      (brand/ortak/animasyon.js «geçiş», <html class="gecis-gel">) logo
      kartın büyümesi sırasında zaten görüldü: perde kısa durur. Doğrudan
      açılışta eskisi gibi üç saniye. */
-  var MARKA_MS = 3000, MARKA_GECIS_MS = 1200;
+  /* 2026-10-18 (kullanıcı): perde artık logo değil, OKUNACAK bir selam ve
+     not taşır («3 saniye içinde okuyabileceğimiz»): geçişle gelinse de üç
+     saniye. «Geç» ve Esc her an kapatır. */
+  var MARKA_MS = 3000, MARKA_GECIS_MS = 3000;
   function markaSuresi(kok){
     kok = kok || (typeof document !== 'undefined' ? document.documentElement : null);
     return kok && kok.classList && kok.classList.contains('gecis-gel') ? MARKA_GECIS_MS : MARKA_MS;
@@ -16237,7 +16319,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'b9dcf35c', at:'2026-10-17 22:47', dirty:true };
+ESP.BUILD = { id:'501e38e2', at:'2026-10-18 00:20', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -32344,6 +32426,259 @@ LIFEOS.DEFTER = (function(){
   return { kur, yukle, ac, kapat, yeni, belgeOlustur, dosyalarEkle, rafHtml, rafBagla, kaydet, sil, md, baglantilar, etiketler, geriBaglantilar, ara, kutuCevir,
     medyaEkle, medya, disaAktarMetni, SABLONLAR, sayim, sar, satirOnek, tuval, notOlustur, yedekNesnesi, yedekYukle, yedekAl, alan, kac, notlar:() => notlar.slice(), sec:id => { secili = id; }, duzenle:v => { duzen = !!v; },
     kuruluMu:() => !!ayar, _ortam:ortam, _sifirla, _db:v => { db = v; } };
+})();
+
+/* ==== js/core/karsilama.js ==== */
+/* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
+   Düzeltme brand/ortak/karsilama.js içine yazılır; burası bir sonraki
+   `python3 tools/ortak.py --yay` ile yeniden üretilir. */
+/* KARŞILAMA — modüle girerken italik selam ve o anki not; Bugün kapağı.
+
+   ===================== BU DOSYA TEK KAYNAKTIR =====================
+   Kaynağı `brand/ortak/karsilama.js`; `python3 tools/ortak.py --yay` ile üç
+   arayüzün `src/js/core/` klasörüne BİREBİR kopyalanır. Biçimi `karsilama.css`.
+   ==================================================================
+
+   Kullanıcı (2026-10-18): «modüle geçerken logo yerine italik bir yazıyla
+   hoş geldin, merhaba, bugün zinde misin…; dili ayarlardan seçerim; altına
+   küçük yazıyla o bölümün o anki notu; özelleştirilebilir selam ve
+   mesajlar». Ve: «Bugün kısmı bambaşka, ana sayfa gibi olsun».
+
+   Sözler:
+     1. SELAM bir havuzdan seçilir: seçilen dil, günün saati (sabah, gün,
+        akşam, gece) ve modülün kendi selamları. Aynı selam art arda gelmez.
+        «İyi misin?» gibi zorlama sorular havuzda yok (kullanıcı: «çok
+        kasıtlı olur»). «Kendi selamlarım» seçiliyse yalnız onlar.
+     2. NOT KURALDAN YA DA KULLANICIDAN. Sistem notu modülün kendi kural
+        cümlesidir (Bugün'ün `sesli()` cümlesi, Siri'ye giden aynı cümle);
+        modül onu her çizimde önbelleğe yazar. Dünden kalan cümle
+        gösterilmez. Model burada hiçbir cümle yazmaz (AGENTS §1.1).
+     3. AYAR TAŞINIR. `lifeos.karsilama` (localStorage) modüller arası
+        geçişte taşınır (animasyon.js TASINAN); not önbelleği modülündür.
+     4. KAPAK sayfanın başında, levhanın üstünde: italik selam, kural
+        cümlesi (h1), en çok dört sayı (kesinliğiyle; ölçülmemiş «—»), tek
+        eylem. Tarih yazmaz (kullanıcı, 2026-10-02: «böyle tarih yazmasın»). */
+
+window.LIFEOS = window.LIFEOS || {};
+
+LIFEOS.KARSILAMA = (function(){
+  'use strict';
+  const AYAR = 'lifeos.karsilama';
+  const NOT = 'lifeos.karsilama.not';
+  const SON = 'lifeos.karsilama.son';
+  const EN_COK = 12, EN_UZUN = 60;
+  const DILLER = Object.freeze([
+    { id:'tr', ad:'Türkçe' }, { id:'en', ad:'English' }, { id:'de', ad:'Deutsch' },
+    { id:'fr', ad:'Français' }, { id:'es', ad:'Español' },
+  ]);
+  const MODULLER = ['ays', 'spi', 'esp'];
+
+  /* Havuz: dil → { genel, sabah, gun, aksam, gece, ays, spi, esp }. */
+  const HAVUZ = {
+    tr:{ genel:['Hoş geldin', 'Merhaba', 'Merhabalar', 'Tekrar hoş geldin', 'Seni görmek güzel', 'Bugün zinde misin?', 'Hazırsan başlayalım'],
+      sabah:['Günaydın', 'Güzel bir sabah', 'Günaydın, bugün zinde misin?'], gun:['İyi günler', 'Günün nasıl geçiyor?'],
+      aksam:['İyi akşamlar', 'Akşamın hayırlı olsun'], gece:['Geç saatlere kaldın', 'Sakin bir gece'],
+      ays:['Bugün hangi konu?', 'Çalışmaya hazır mısın?'], spi:['Bugün ne yapmayı planlıyorsun?', 'Bugün kendine nasıl bakacaksın?'],
+      esp:['Bugün ne düşünüyorsun?', 'Bugün neyi merak ediyorsun?'] },
+    en:{ genel:['Welcome back', 'Hello', 'Hi there', 'Good to see you', 'Ready for today?'],
+      sabah:['Good morning'], gun:['Good afternoon'], aksam:['Good evening'], gece:['Working late?', 'A quiet night'],
+      ays:['What are we studying today?'], spi:['What’s your plan for today?'], esp:['What’s on your mind today?'] },
+    de:{ genel:['Willkommen zurück', 'Hallo', 'Schön, dich zu sehen', 'Bereit für heute?'],
+      sabah:['Guten Morgen'], gun:['Guten Tag'], aksam:['Guten Abend'], gece:['Noch wach?'],
+      ays:['Was lernen wir heute?'], spi:['Was hast du heute vor?'], esp:['Was beschäftigt dich heute?'] },
+    fr:{ genel:['Bon retour', 'Bonjour', 'Content de te revoir', 'Prêt pour aujourd’hui ?'],
+      sabah:['Bonjour'], gun:['Bon après-midi'], aksam:['Bonsoir'], gece:['Encore debout ?'],
+      ays:['On étudie quoi aujourd’hui ?'], spi:['Qu’as-tu prévu aujourd’hui ?'], esp:['À quoi penses-tu aujourd’hui ?'] },
+    es:{ genel:['Bienvenido de nuevo', 'Hola', 'Qué bueno verte', '¿Listo para hoy?'],
+      sabah:['Buenos días'], gun:['Buenas tardes'], aksam:['Buenas tardes'], gece:['¿Trasnochando?'],
+      ays:['¿Qué estudiamos hoy?'], spi:['¿Qué planeas hoy?'], esp:['¿Qué tienes en mente hoy?'] },
+  };
+
+  const kac = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  function vakit(d){
+    const s = (d || new Date()).getHours();
+    return s >= 5 && s < 11 ? 'sabah' : s >= 11 && s < 17 ? 'gun' : s >= 17 && s < 22 ? 'aksam' : 'gece';
+  }
+  function liste(l){
+    const temiz = [];
+    (Array.isArray(l) ? l : []).forEach(x => {
+      const t = String(x == null ? '' : x).replace(/\s+/g, ' ').trim().slice(0, EN_UZUN);
+      if(t && temiz.indexOf(t) < 0 && temiz.length < EN_COK) temiz.push(t);
+    });
+    return temiz;
+  }
+
+  /* ------------------------------------------------------------ ayar */
+
+  function ayarOku(v){
+    v = v && typeof v === 'object' ? v : {};
+    const notlar = {};
+    MODULLER.forEach(m => { notlar[m] = liste(v.notlar && v.notlar[m]); });
+    return {
+      dil:DILLER.some(d => d.id === v.dil) ? v.dil : 'tr',
+      selam:v.selam === 'kendi' ? 'kendi' : 'karisik',
+      kendi:liste(v.kendi),
+      not:['sistem', 'kendi', 'ikisi', 'kapali'].indexOf(v.not) >= 0 ? v.not : 'sistem',
+      notlar,
+    };
+  }
+  function depo(){ try{ return window.localStorage; }catch(e){ return null; } }
+  function oku(anahtar){ try{ const d = depo(); return d ? JSON.parse(d.getItem(anahtar) || 'null') : null; }catch(e){ return null; } }
+  function yaz(anahtar, v){ try{ const d = depo(); if(d) d.setItem(anahtar, JSON.stringify(v)); return true; }catch(e){ return false; } }
+  function ayar(){ return ayarOku(oku(AYAR)); }
+  function ayarYaz(v){ const a = ayarOku(v); yaz(AYAR, a); return a; }
+
+  /* ------------------------------------------------------------ selam */
+
+  function havuz(o){
+    const H = HAVUZ[o.dil] || HAVUZ.tr;
+    return [].concat(H.genel, H[vakit(o.simdi)] || [], H[o.modul] || []);
+  }
+  function sec(l, tohum, once){
+    if(!l.length) return '';
+    const aday = l.length > 1 ? l.filter(x => x !== once) : l;
+    const i = Math.abs(Math.floor(Number(tohum) || 0)) % aday.length;
+    return aday[i];
+  }
+  /* o: { ayar, modul, simdi, tohum, once } */
+  function selam(o){
+    const a = ayarOku(o.ayar);
+    const l = a.selam === 'kendi' && a.kendi.length ? a.kendi : havuz({ dil:a.dil, modul:o.modul, simdi:o.simdi });
+    return sec(l, o.tohum == null ? Date.now() / 997 : o.tohum, o.once);
+  }
+
+  /* ------------------------------------------------------------ not */
+
+  /* o: { ayar, modul, onbellek:{ metin, gun }, bugun, tohum } */
+  function not(o){
+    const a = ayarOku(o.ayar);
+    const sistem = o.onbellek && o.onbellek.gun === o.bugun && o.onbellek.metin ? String(o.onbellek.metin) : '';
+    const kendi = sec(a.notlar[o.modul] || [], o.tohum == null ? Date.now() / 1009 : o.tohum, '');
+    if(a.not === 'kapali') return '';
+    if(a.not === 'sistem') return sistem;
+    if(a.not === 'kendi') return kendi;
+    return sistem || kendi;
+  }
+  /* Modül çağırır: Bugün'ün kural cümlesi (sesli) önbelleğe. */
+  function notYaz(metin, gun){ return yaz(NOT, { metin:String(metin || '').slice(0, 200), gun }); }
+
+  function bugunISO(d){
+    d = d || new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  /* Perde için: selam + not, bir açılışta bir kez (sonraki çağrı aynısını verir). */
+  let bu = null;
+  function acilis(modul){
+    if(bu && bu.modul === modul) return bu;
+    const a = ayar(), simdi = new Date();
+    const once = (oku(SON) || {})[modul] || '';
+    const s = selam({ ayar:a, modul, simdi, once });
+    const son = oku(SON) || {};
+    son[modul] = s;
+    yaz(SON, son);
+    bu = { modul, selam:s, not:not({ ayar:a, modul, onbellek:oku(NOT), bugun:bugunISO(simdi) }), dil:a.dil };
+    return bu;
+  }
+  /* Perdenin durağan kabına yazar (perde.html); kap yoksa sessiz. */
+  function perdeyeYaz(kap, modul){
+    if(!kap) return false;
+    const k = acilis(modul);
+    const s = kap.querySelector('.karsilama__selam'), n = kap.querySelector('.karsilama__not');
+    if(s){ s.textContent = k.selam; s.setAttribute('lang', k.dil); }
+    if(n){ n.textContent = k.not; n.hidden = !k.not; }
+    kap.classList.add('is-hazir');
+    return true;
+  }
+
+  /* ------------------------------------------------------------ kapak */
+
+  const KESINLIK = { measured:'ölçüldü', computed:'hesaplandı', estimated:'tahmin', veri_yok:'veri yok' };
+  /* o: { modul, selam, cumle, sayilar:[{ ad, deger, birim, kesinlik }], eylem:html, ikincil:html } */
+  function kapakHtml(o){
+    o = o || {};
+    const sayi = x => {
+      const yok = x.deger == null || x.deger === '';
+      const kes = yok ? 'veri_yok' : (x.kesinlik || 'computed');
+      return '<div class="kapak__sayi" data-kesinlik="' + kac(kes) + '">'
+        + '<span class="kapak__deger">' + (yok ? '—' : kac(x.deger) + (x.birim ? '<small>' + kac(x.birim) + '</small>' : '')) + '</span>'
+        + '<span class="kapak__ad">' + kac(x.ad) + '<i title="' + kac(KESINLIK[kes] || kes) + '">' + kac(KESINLIK[kes] || '') + '</i></span></div>';
+    };
+    const sayilar = (o.sayilar || []).slice(0, 4);
+    return '<section class="kapak kapak--' + kac(o.modul || '') + '" aria-label="Bugün">'
+      + '<div class="kapak__ic">'
+      + (o.selam ? '<p class="kapak__selam">' + kac(o.selam) + '</p>' : '')
+      + '<h1 class="kapak__cumle hero__title" tabindex="-1">' + kac(o.cumle || 'Bugün') + '</h1>'
+      + (sayilar.length ? '<div class="kapak__sayilar">' + sayilar.map(sayi).join('') + '</div>' : '')
+      + (o.eylem || o.ikincil ? '<div class="kapak__eylem">' + (o.eylem || '') + (o.ikincil || '') + '</div>' : '')
+      + '</div>'
+      + '<button type="button" class="kapak__asagi" data-kapak-asagi aria-label="Günün ayrıntısına in">'
+      + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>'
+      + '</section>';
+  }
+
+  /* ------------------------------------------------------------ ayar paneli */
+
+  function ayarHtml(modul){
+    const a = ayar();
+    const sec_ = (ad, deger, secenek) => '<div class="seg seg--block karsilama-ayar__seg" role="group" aria-label="' + kac(ad) + '">'
+      + secenek.map(([v, y]) => '<button type="button" class="' + (v === deger ? 'is-on' : '') + '" data-karsilama="' + kac(ad) + '" data-deger="' + kac(v) + '"'
+        + ' aria-pressed="' + (v === deger ? 'true' : 'false') + '">' + kac(y) + '</button>').join('') + '</div>';
+    return '<div class="karsilama-ayar" data-karsilama-ayar="' + kac(modul || '') + '">'
+      + '<label class="field"><span>Karşılama dili</span><select class="input" data-karsilama-alan="dil">'
+      + DILLER.map(d => '<option value="' + d.id + '"' + (d.id === a.dil ? ' selected' : '') + '>' + kac(d.ad) + '</option>').join('') + '</select></label>'
+      + '<div class="field"><span>Selam</span>' + sec_('selam', a.selam, [['karisik', 'Türlü türlü'], ['kendi', 'Kendi selamlarım']]) + '</div>'
+      + '<label class="field"><span>Kendi selamların <small>her satıra bir tane</small></span><textarea class="input" rows="3" data-karsilama-alan="kendi" placeholder="Selam&#10;Hadi bakalım">'
+      + kac(a.kendi.join('\n')) + '</textarea></label>'
+      + '<div class="field"><span>Altındaki not</span>' + sec_('not', a.not, [['sistem', 'Sistemin notu'], ['kendi', 'Kendi notlarım'], ['ikisi', 'İkisi'], ['kapali', 'Kapalı']]) + '</div>'
+      + (modul ? '<label class="field"><span>Bu bölüm için kendi notların <small>her satıra bir tane</small></span><textarea class="input" rows="3" data-karsilama-alan="notlar" placeholder="Matematiği ihmal etme">'
+        + kac((a.notlar[modul] || []).join('\n')) + '</textarea></label>' : '')
+      + '<p class="karsilama-ayar__ornek" aria-live="polite"><em>' + kac(selam({ ayar:a, modul:modul || 'ays', simdi:new Date(), tohum:1 })) + '</em></p>'
+      + '</div>';
+  }
+  function ayarDegisti(kok){
+    const k = kok && kok.closest ? kok.closest('[data-karsilama-ayar]') : null;
+    if(!k) return null;
+    const modul = k.getAttribute('data-karsilama-ayar');
+    const a = ayar();
+    const dil = k.querySelector('[data-karsilama-alan="dil"]'), kendi = k.querySelector('[data-karsilama-alan="kendi"]'),
+      notlar = k.querySelector('[data-karsilama-alan="notlar"]');
+    if(dil) a.dil = dil.value;
+    if(kendi) a.kendi = kendi.value.split('\n');
+    if(notlar && modul) a.notlar[modul] = notlar.value.split('\n');
+    const yeni = ayarYaz(a);
+    const ornek = k.querySelector('.karsilama-ayar__ornek em');
+    if(ornek) ornek.textContent = selam({ ayar:yeni, modul:modul || 'ays', simdi:new Date(), tohum:Date.now() / 997 });
+    return yeni;
+  }
+
+  if(typeof document !== 'undefined'){
+    /* Olaylar belge düzeyinde (animasyon seçicisi gibi): modülün data-act
+       işleyicisine düşmez. */
+    document.addEventListener('click', e => {
+      const t = e.target && e.target.closest ? e.target : null;
+      if(!t) return;
+      const b = t.closest('[data-karsilama]');
+      if(b){
+        e.preventDefault();
+        const a = ayar();
+        a[b.getAttribute('data-karsilama')] = b.getAttribute('data-deger');
+        ayarYaz(a);
+        const seg = b.parentElement;
+        Array.from(seg.children).forEach(x => { const on = x === b; x.classList.toggle('is-on', on); x.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+        ayarDegisti(b);
+        return;
+      }
+      if(t.closest('[data-kapak-asagi]')){
+        e.preventDefault();
+        const hedef = document.querySelector('.site__body .sayfa') || document.getElementById('main');
+        if(hedef) hedef.scrollIntoView({ behavior:'smooth', block:'start' });
+      }
+    });
+    document.addEventListener('change', e => { if(e.target && e.target.closest && e.target.closest('[data-karsilama-alan]')) ayarDegisti(e.target); });
+  }
+
+  return { AYAR, NOT, DILLER, HAVUZ, EN_COK, EN_UZUN, vakit, havuz, selam, not, notYaz, ayarOku, ayar, ayarYaz,
+    acilis, perdeyeYaz, kapakHtml, ayarHtml, ayarDegisti, bugunISO, _sifirla:() => { bu = null; } };
 })();
 
 /* ==== js/core/pusula.js ==== */
@@ -75839,7 +76174,31 @@ ESP.Screens.today = (function(){
     return raw(V.donen({ id:'esp-bugun', ad:'Bugün', ozet, maddeler:bugun }) + V.donen({ id:'esp-calisma', ad:'Çalışma', ozet, maddeler:calisma }));
   }
 
+  /* BUGÜN KAPAĞI (kullanıcı, 2026-10-18: «Bugün kısmı bambaşka, ana sayfa
+     gibi olsun»): levhanın üstünde. Selam perdedekiyle aynı açılıştan
+     (brand/ortak/karsilama.js); cümle kural motorunun başlık cümlesi;
+     sayılar bugünün KAYDINDAN — oturum yoksa «—» (veri yok), sıfır değil.
+     Tarih yok (2026-10-02 kararı). */
+  function kapak(){
+    const KS = window.LIFEOS && window.LIFEOS.KARSILAMA;
+    if(!KS) return '';
+    const t = U.todayISO();
+    const rows = M.sessionsOf(t);
+    const h = M.dueReminders(null, t).filter(r => ESP.Mod.isOn(r.disc)).length;
+    const n = ESP.Planner.nextAction();
+    const sayilar = [
+      { ad:'Oturum', deger:rows.length || null, kesinlik:'measured' },
+      { ad:'Süre', deger:rows.length ? rows.reduce((a, s) => a + (s.minutes || 0), 0) : null, birim:'dk', kesinlik:'measured' },
+      { ad:'Hatırlatıcı', deger:h, kesinlik:'computed' },
+    ];
+    return KS.kapakHtml({ modul:'esp', selam:KS.acilis('esp').selam, cumle:ESP.Screens.today.headline(), sayilar,
+      eylem:n.route && n.route !== 'today' ? String(K.Button({ label:'Sıradaki işi aç', tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '',
+      ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
+  }
+
   function render(){
+    /* Karşılamanın notu: bugünün kural cümlesi (Siri'ye giden aynı cümle). */
+    if(window.LIFEOS && window.LIFEOS.KARSILAMA && ESP.Screens.today.sesli) window.LIFEOS.KARSILAMA.notYaz(ESP.Screens.today.sesli(), U.todayISO());
     const O = ESP.Screens.onaylar;
     const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
     return html`<div class="bugun" data-oz="003">
@@ -76142,6 +76501,7 @@ ESP.Screens.today = (function(){
     headlineOz:'004',
     /* Siri «Bugün ne var?» (hesap sunucu sözü 21): günün cümlesi ve bugüne
        düşen hatırlatıcı sayısı (kapalı bölümünki sayılmaz). Kural metni. */
+    kapak,
     sesli(){
       const rows = M.sessionsOf(U.todayISO());
       const n = ESP.Planner.nextAction();
@@ -84079,6 +84439,9 @@ ESP.Screens.guide = (function(){
       }),
       when(window.LIFEOS && window.LIFEOS.OrnekKip, () => K.Entry({ label:'Örnek veriyle dene',
         body:raw(window.LIFEOS.OrnekKip.ayarHtml(!!(ESP.Ornek && ESP.Ornek.acik()))) })),
+      /* Karşılama (2026-10-18): girişteki italik selam ve bölümün notu (brand/ortak/karsilama.js). */
+      when(window.LIFEOS && window.LIFEOS.KARSILAMA, () => K.Entry({ label:'Karşılama', meta:'girişteki selam ve not',
+        body:raw(window.LIFEOS.KARSILAMA.ayarHtml('esp')) })),
     ].filter(Boolean);
   }
 
@@ -85553,10 +85916,11 @@ ESP.App = (function(){
         <div class="site site--v5">
           ${raw(safe(() => ustCubukHtml(sc)))}
           <div class="site__body">
-            <div class="wrapc sayfa">
+            ${raw(safe(() => sc.kapak ? sc.kapak() : '', ''))}
+            <div class="${'wrapc sayfa' + (sc.kapak ? ' sayfa--kapakli' : '')}">
               ${raw(safe(sayacHtml))}
               ${when(ornekAcik(), () => raw(LIFEOS.OrnekKip.seritHtml()))}
-              ${raw(safe(() => sayfaBasiHtml(sc)))}
+              ${raw(safe(() => sc.kapak ? '' : sayfaBasiHtml(sc)))}
               ${raw(safe(() => bolumCubuguHtml(sc), ''))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>

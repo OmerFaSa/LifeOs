@@ -265,7 +265,9 @@
       }finally{ A._yonlendir(eski); a.remove(); history.replaceState(history.state, '', adres); }
     }));
 
-    it('geçiş: kart yerinden büyür, logo perdenin yerine oturur, çerez yazılır, sonra sayfa değişir', async () => {
+    /* 2026-10-18 (kullanıcı: «geçerken logo yerine italik hoş geldin»): geçişte logo YOK;
+       selam ve not modülün perdesindedir (brand/ortak/karsilama.js). */
+    it('geçiş: kart yerinden büyür (logosuz), çerez yazılır, sonra sayfa değişir', async () => {
       let eskiKip = null;
       try{ eskiKip = localStorage.getItem(A.ANAHTAR); }catch(e){}
       A.ayarla('tam');
@@ -277,7 +279,8 @@
         expect(olay.defaultPrevented).toBe(true);
         const p = document.querySelector('.lifeos-gecis');
         expect(!!p).toBe(true);
-        expect(p.querySelector('.lifeos-gecis__logo').src).toBe('http://127.0.0.1:4183/img/marka/kimlik-spi.webp');
+        expect(p.querySelector('.lifeos-gecis__logo')).toBeNull();
+        expect(p.querySelector('img')).toBeNull();
         expect(p.classList.contains('is-tam')).toBe(true);
         /* İkinci tık ikinci perde açmaz. */
         a.dispatchEvent(new MouseEvent('click', { bubbles:true, cancelable:true, button:0 }));

@@ -1030,7 +1030,32 @@ SP.Screens.today = (function(){
       <p class="tiny dim mt-8">Eski ölçüm soluklaşır ve yaşını yazar; ölçülmemiş değer sıfır sayılmaz.</p>` });
   }
 
+  /* BUGÜN KAPAĞI (kullanıcı, 2026-10-18: «Bugün kısmı bambaşka, ana sayfa
+     gibi olsun»): levhanın üstünde. Selam perdedekiyle aynı açılıştan
+     (brand/ortak/karsilama.js); cümle kural motorunun başlık cümlesi;
+     sayılar bugünün KAYDINDAN — kayıt yoksa «—» (veri yok), sıfır değil.
+     Tarih yok (2026-10-02 kararı). */
+  function kapak(){
+    const KS = window.LIFEOS && window.LIFEOS.KARSILAMA;
+    if(!KS) return '';
+    const t = SP.U.todayISO();
+    const v = SP.S.vitals[t] || {};
+    const ogun = (SP.S.meals[t] || []).length;
+    const ws = (SP.S.workouts || []).filter(w => w && w.date === t);
+    const sayilar = [
+      { ad:'Uyku', deger:v.sleep == null ? null : SP.U.fmtNet(v.sleep), birim:'sa', kesinlik:'measured' },
+      { ad:'Su', deger:v.water == null ? null : Number(v.water).toLocaleString('tr-TR'), birim:'ml', kesinlik:'measured' },
+      { ad:'Öğün', deger:ogun || null, kesinlik:'measured' },
+      { ad:'Hareket', deger:ws.length ? ws.reduce((a, w) => a + (Number(w.minutes) || 0), 0) : null, birim:'dk', kesinlik:'measured' },
+    ];
+    return KS.kapakHtml({ modul:'spi', selam:KS.acilis('spi').selam, cumle:SP.Screens.today.headline(), sayilar,
+      eylem:String(K.Button({ label:'Günü kaydet', tone:'primary', act:'go', data:{ 'data-route':'gun' } })),
+      ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
+  }
+
   async function render(){
+    /* Karşılamanın notu: bugünün kural cümlesi (Siri'ye giden aynı cümle). */
+    if(window.LIFEOS && window.LIFEOS.KARSILAMA && SP.Screens.today.sesli) window.LIFEOS.KARSILAMA.notYaz(SP.Screens.today.sesli(), SP.U.todayISO());
     const acil = bugunUyarisi();
     const vakti = SP.HatirlatUI ? SP.HatirlatUI.vaktiRow() : '';
     /* «Bir soru»: ortak sade kart (brand/ortak/sorukart.js). */
@@ -1426,6 +1451,7 @@ SP.Screens.today = (function(){
     /* Siri «Bugün ne var?» (hesap sunucu sözü 21): bugünün cümlesi ve
        sıradaki hatırlatma. İlaç adı SÖYLENMEZ (hatirlat.js söz 3): yalnız
        «ilaç ya da takviye». Kural metni, model yok. */
+    kapak,
     sesli(simdi){
       const now = simdi || new Date();
       const r = SP.Move.readiness(SP.U.todayISO());

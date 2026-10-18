@@ -862,7 +862,31 @@ ESP.Screens.today = (function(){
     return raw(V.donen({ id:'esp-bugun', ad:'Bugün', ozet, maddeler:bugun }) + V.donen({ id:'esp-calisma', ad:'Çalışma', ozet, maddeler:calisma }));
   }
 
+  /* BUGÜN KAPAĞI (kullanıcı, 2026-10-18: «Bugün kısmı bambaşka, ana sayfa
+     gibi olsun»): levhanın üstünde. Selam perdedekiyle aynı açılıştan
+     (brand/ortak/karsilama.js); cümle kural motorunun başlık cümlesi;
+     sayılar bugünün KAYDINDAN — oturum yoksa «—» (veri yok), sıfır değil.
+     Tarih yok (2026-10-02 kararı). */
+  function kapak(){
+    const KS = window.LIFEOS && window.LIFEOS.KARSILAMA;
+    if(!KS) return '';
+    const t = U.todayISO();
+    const rows = M.sessionsOf(t);
+    const h = M.dueReminders(null, t).filter(r => ESP.Mod.isOn(r.disc)).length;
+    const n = ESP.Planner.nextAction();
+    const sayilar = [
+      { ad:'Oturum', deger:rows.length || null, kesinlik:'measured' },
+      { ad:'Süre', deger:rows.length ? rows.reduce((a, s) => a + (s.minutes || 0), 0) : null, birim:'dk', kesinlik:'measured' },
+      { ad:'Hatırlatıcı', deger:h, kesinlik:'computed' },
+    ];
+    return KS.kapakHtml({ modul:'esp', selam:KS.acilis('esp').selam, cumle:ESP.Screens.today.headline(), sayilar,
+      eylem:n.route && n.route !== 'today' ? String(K.Button({ label:'Sıradaki işi aç', tone:'primary', act:'go', data:{ 'data-route':n.route } })) : '',
+      ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
+  }
+
   function render(){
+    /* Karşılamanın notu: bugünün kural cümlesi (Siri'ye giden aynı cümle). */
+    if(window.LIFEOS && window.LIFEOS.KARSILAMA && ESP.Screens.today.sesli) window.LIFEOS.KARSILAMA.notYaz(ESP.Screens.today.sesli(), U.todayISO());
     const O = ESP.Screens.onaylar;
     const oneri = O && O.bekleyen() ? O.oneriAlani() : '';
     return html`<div class="bugun" data-oz="003">
@@ -1165,6 +1189,7 @@ ESP.Screens.today = (function(){
     headlineOz:'004',
     /* Siri «Bugün ne var?» (hesap sunucu sözü 21): günün cümlesi ve bugüne
        düşen hatırlatıcı sayısı (kapalı bölümünki sayılmaz). Kural metni. */
+    kapak,
     sesli(){
       const rows = M.sessionsOf(U.todayISO());
       const n = ESP.Planner.nextAction();

@@ -576,12 +576,13 @@
 
     /* «Daha hızlı açılış» (2026-10-08): geçişle gelindiyse logo kartın
        büyümesinde zaten görüldü; marka girişi kısa durur. */
-    it('marka girişi: doğrudan açılışta üç saniye, geçişle gelindiyse kısa', () => {
+    /* 2026-10-18: perde okunacak selam taşır; geçişle de üç saniye. */
+    it('marka girişi: doğrudan da geçişle de üç saniye (selam okunur)', () => {
       const kok = document.createElement('div');
       expect(P.markaSuresi(kok)).toBe(3000);
       kok.classList.add('gecis-gel');
-      expect(P.markaSuresi(kok)).toBe(1200);
-      expect(P.markaSuresi() === 3000 || P.markaSuresi() === 1200).toBe(true);   // sayfanın kendisi
+      expect(P.markaSuresi(kok)).toBe(3000);
+      expect(P.markaSuresi()).toBe(3000);   // sayfanın kendisi
     });
   });
 })();

@@ -556,7 +556,11 @@ SP.Screens.guide = (function(){
             <li>${SP.MINIMUM_DAY.move}</li><li>${SP.MINIMUM_DAY.sleep}</li></ul>` }),
       ])}
       <div class="mt-24">${raw(UI.rail(['minimum-day', 'next-action', 'certainty']))}</div>`,
-    model:() => html`${K.Ledger(() => [modelCard(), bolumCard(), hafizaCard(), quotaCard()])}
+    /* Karşılama (2026-10-18): girişteki italik selam ve bölümün notu (brand/ortak/karsilama.js). */
+    model:() => html`${K.Ledger(() => [modelCard(), bolumCard(),
+      when(window.LIFEOS && window.LIFEOS.KARSILAMA, () => K.Card({ title:'Karşılama', sub:'Girerken seni selamlayan cümle ve altındaki not',
+        body:raw(window.LIFEOS.KARSILAMA.ayarHtml('spi')) })),
+      hafizaCard(), quotaCard()].filter(Boolean))}
       <div class="mt-24">${raw(UI.rail(['no-model', 'grounding', 'privacy']))}</div>`,
     veri:() => html`${K.Ledger(() => [dataCard(), saglikCard(), storageHorizonCard(), storageCard(), hkmCard(),
       when(window.LIFEOS && window.LIFEOS.OrnekKip, () => K.Card({ title:'Örnek veriyle dene',

@@ -1331,11 +1331,40 @@ R.Screens.today = (function(){
     };
   }
 
+  /* BUGÜN KAPAĞI (kullanıcı, 2026-10-18: «Bugün kısmı bambaşka, ana sayfa
+     gibi olsun»): levhanın üstünde, zeminin üzerinde. Selam perdedekiyle
+     aynı açılıştan (brand/ortak/karsilama.js); cümle kural motorunun günün
+     cümlesi; sayılar ozetSayilari'ndan (kesinliğiyle). Tarih yok
+     (2026-10-02 kararı). Eylem «Şimdi» kartındaki «Başla» ile aynı iş. */
+  function kapak(){
+    const K = window.LIFEOS && window.LIFEOS.KARSILAMA;
+    if(!K) return '';
+    const dateISO = U.todayISO(), day = S.days[dateISO];
+    const kur = R.Setup && R.Setup.needed && R.Setup.needed();
+    const cumle = kur ? 'Programını kuralım.' : ((day && bugunCumlesi(day, dateISO)) || 'Bugün için plan yok.');
+    const o = day ? ozetSayilari(day, dateISO) : null;
+    const kes = { computed:'computed', estimated:'estimated', measured:'measured' };
+    const sayilar = o ? [
+      { ad:'Blok', deger:o.blok.deger, kesinlik:kes[o.blok.kesinlik] },
+      { ad:'Tekrar kartı', deger:o.kart.deger, kesinlik:kes[o.kart.kesinlik] },
+      { ad:'Seri', deger:o.seri.deger, birim:'gün', kesinlik:kes[o.seri.kesinlik] },
+      { ad:'Sınava', deger:o.kalan.deger, birim:'gün', kesinlik:kes[o.kalan.kesinlik] },
+    ] : [];
+    const a = kur ? null : C.nextAction();
+    const eylem = kur ? String(c.Button({ label:'Kuruluma başla', tone:'primary', act:'setup-open' }))
+      : a && (a.route || a.act) ? String(c.Button({ label:'Başla', tone:'primary', act:'next-action',
+        data:{ 'data-route':a.route || '', 'data-next':a.act || '', 'data-block':a.blockId || '', 'data-tab':a.tab || '' } })) : '';
+    return K.kapakHtml({ modul:'ays', selam:K.acilis('ays').selam, cumle, sayilar, eylem,
+      ikincil:'<button type="button" class="btn btn--ghost" data-kapak-asagi>Günün akışı</button>' });
+  }
+
   async function render(){
     const dateISO = U.todayISO();
     const n = M.currentWeek();
     await M.ensureWeek(n);
     const day = await M.ensureDay(U.today());
+    /* Karşılamanın notu: bugünün kural cümlesi (Siri'ye giden aynı cümle). */
+    if(window.LIFEOS && window.LIFEOS.KARSILAMA) window.LIFEOS.KARSILAMA.notYaz(bugunCumlesi(day, dateISO) || 'Bugün için plan yok.', dateISO);
     const acil = bugunUyarisi();
     const oneri = R.Screens.onaylar && R.Screens.onaylar.bekleyen() ? R.Screens.onaylar.oneriAlani() : '';
 
@@ -1837,6 +1866,7 @@ R.Screens.today = (function(){
       return (d && bugunCumlesi(d, U.todayISO())) || 'Bugün için plan yok.';
     },
     lede(){ return ''; },
+    kapak,
     cumle:bugunCumlesi,
     ozetSayilari,
     sureMetni,

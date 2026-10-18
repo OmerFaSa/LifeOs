@@ -576,10 +576,11 @@ ESP.App = (function(){
         <div class="site site--v5">
           ${raw(safe(() => ustCubukHtml(sc)))}
           <div class="site__body">
-            <div class="wrapc sayfa">
+            ${raw(safe(() => sc.kapak ? sc.kapak() : '', ''))}
+            <div class="${'wrapc sayfa' + (sc.kapak ? ' sayfa--kapakli' : '')}">
               ${raw(safe(sayacHtml))}
               ${when(ornekAcik(), () => raw(LIFEOS.OrnekKip.seritHtml()))}
-              ${raw(safe(() => sayfaBasiHtml(sc)))}
+              ${raw(safe(() => sc.kapak ? '' : sayfaBasiHtml(sc)))}
               ${raw(safe(() => bolumCubuguHtml(sc), ''))}
               <main class="content" id="main" tabindex="-1" aria-label="${sc.title}">${raw(body)}</main>
             </div>

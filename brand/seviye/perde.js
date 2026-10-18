@@ -993,7 +993,10 @@ __NS__.Perde = (function(){
      (brand/ortak/animasyon.js «geçiş», <html class="gecis-gel">) logo
      kartın büyümesi sırasında zaten görüldü: perde kısa durur. Doğrudan
      açılışta eskisi gibi üç saniye. */
-  var MARKA_MS = 3000, MARKA_GECIS_MS = 1200;
+  /* 2026-10-18 (kullanıcı): perde artık logo değil, OKUNACAK bir selam ve
+     not taşır («3 saniye içinde okuyabileceğimiz»): geçişle gelinse de üç
+     saniye. «Geç» ve Esc her an kapatır. */
+  var MARKA_MS = 3000, MARKA_GECIS_MS = 3000;
   function markaSuresi(kok){
     kok = kok || (typeof document !== 'undefined' ? document.documentElement : null);
     return kok && kok.classList && kok.classList.contains('gecis-gel') ? MARKA_GECIS_MS : MARKA_MS;

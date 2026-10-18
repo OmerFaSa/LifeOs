@@ -224,7 +224,10 @@ def perde_siniflari() -> list:
 #                   rutbe kutlamasinin idle videolari onu kullaniyor —
 #                   ama duragan markupta artik yok. Kod yolu yasiyor,
 #                   markup onu kullanmiyor: ikisi ayri sorulardir.
-PERDE_ISTEGE_BAGLI = {"perde__banner", "perde__video", "perde__ses"}
+# perde__ortam: 2026-10-18'den beri durağan marka perdesinde logo yok (karşılama
+# selamı, brand/ortak/karsilama.js); ortam yalnız kutlama videosunda perde.js
+# tarafından yaratılır.
+PERDE_ISTEGE_BAGLI = {"perde__banner", "perde__video", "perde__ses", "perde__ortam"}
 
 
 def perde_markup_eksigi(ad_alani: str) -> list:
