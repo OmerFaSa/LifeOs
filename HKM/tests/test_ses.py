@@ -104,7 +104,7 @@ def run():
     def t_piper_bul():
         # Gercek kurulu Piper'i gormesin: yalniz verilen klasorde arar.
         eski = ses._adaylar
-        ses._adaylar = lambda cfg: [ses.settings(cfg)["piper_yol"]]
+        ses._adaylar = lambda cfg: [ses.settings(cfg)["piper_yol"]] * 2
         try:
             _t_piper_bul()
         finally:
