@@ -1342,10 +1342,19 @@ window.LIFEOS.KING = (function(){
       + '<div class="king__kip-metin"><b class="king__ses-durum"><span class="d-dinliyor">Dinliyorum…</span><span class="d-konusuyor">King konuşuyor…</span><span class="d-sira">Sıra sende; konuşabilirsin</span></b>'
       + '<span>Bitirmek için «tamam» de ya da Bitir’e dokun.</span>' + sesSecHtml() + '</div>'
       + '<button type="button" class="king__cip" data-king="kip:yaz">Bitir</button></div>';
-    if(k === 'dinle') return '<div class="king__kip-panel king__kip-panel--dinle" role="status">'
-      + sesSecHtml()
-      + '<button type="button" class="king__cip" data-king="sus">Sustur</button>'
-      + '<button type="button" class="king__cip" data-king="kip:yaz">Kapat</button></div>';
+    if(k === 'dinle'){
+      /* Kose hapi (2026-10-19, «alan kaplamasin»): ses secimi tek dugme (dokundukca
+         sirayla degisir), Sustur ve Kapat yalniz simge. */
+      const t = sesTercihi();
+      return '<div class="king__kip-panel king__kip-panel--dinle" role="status">'
+        + '<button type="button" class="king__hap" data-king="ses-sonraki" title="' + kac('Ses: ' + SES_IP[t] + '. Değiştirmek için dokun.') + '">'
+        + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18V6L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6"/></svg>'
+        + SES_AD[t] + '</button>'
+        + '<button type="button" class="king__hap king__hap--simge" data-king="sus" aria-label="Sustur" title="Sustur">'
+        + '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2"/></svg></button>'
+        + '<button type="button" class="king__hap king__hap--simge" data-king="kip:yaz" aria-label="Kapat" title="Kapat">'
+        + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button></div>';
+    }
     return '';
   }
 
@@ -2244,6 +2253,7 @@ window.LIFEOS.KING = (function(){
         if(is === 'geri-getir'){ sohbetiGeriGetir(); return; }
         if(/^cevap:/.test(is)){ cevapSec(is.slice(6)); return; }
         if(/^ses:/.test(is)){ sesTercihSec(is.slice(4)); return; }
+        if(is === 'ses-sonraki'){ sesTercihSec(SES_TERCIH[(SES_TERCIH.indexOf(sesTercihi()) + 1) % SES_TERCIH.length]); return; }
         if(/^kayit:/.test(is)){ menu = { id:is.slice(6) }; silOnay = null; ciz(false); return; }
         if(/^indir:/.test(is)){ kayitIndir(is.slice(6)); return; }
         if(/^kopyala:/.test(is)){ kayitKopyala(is.slice(8)); return; }

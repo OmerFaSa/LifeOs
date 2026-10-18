@@ -199,10 +199,15 @@ html.king-acik .hizliekle{ opacity:0; pointer-events:none; transition:opacity .2
 .king__ses-sec-dug:focus-visible{ outline:2px solid var(--primary); outline-offset:2px; }
 .king__ses-not{ margin-left:6px; font-size:11.5px; color:var(--text-3, var(--text-2)); }
 .king__ses-not:empty{ display:none; }
-/* Dinle paneli tek ince satir (2026-10-19, «goz yoruyor»): baslik ve aciklama yok. */
-.king__kip-panel--dinle{ padding:6px 8px 6px 12px; gap:4px; background:transparent; box-shadow:none; border:0; }
-.king__kip-panel--dinle .king__ses-sec{ flex:1; margin:0; }
-.king__kip-panel--dinle .king__cip{ min-height:28px; padding:0 10px; font-size:12px; background:transparent; }
+/* Dinle: sagda kucuk hap (2026-10-19, «alan kaplamasin»). */
+.king__kip-panel--dinle{ display:inline-flex; align-self:flex-end; width:auto; margin-left:auto; padding:2px; gap:0;
+  background:var(--surface-2); border:0; box-shadow:none; border-radius:999px; }
+.king__hap{ display:inline-flex; align-items:center; gap:4px; min-height:28px; min-width:28px; padding:0 10px 0 8px; border:0;
+  border-radius:999px; background:transparent; color:var(--text-2); font:inherit; font-size:12px; font-weight:600; cursor:pointer; }
+.king__hap--simge{ justify-content:center; padding:0; }
+.king__hap:hover{ color:var(--text); }
+.king__hap:focus-visible{ outline:2px solid var(--primary); outline-offset:1px; }
+.king__hap svg{ width:15px; height:15px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .king__ses-sec-dug{ border-color:transparent; }
 
 /* Ses (king.js söz 7): mikrofon düğmesi; dinlerken ve konuşurken kenar
