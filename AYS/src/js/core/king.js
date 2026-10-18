@@ -1354,7 +1354,9 @@ window.LIFEOS.KING = (function(){
   }
   /* Dinle: baslikta, kiplerin solunda kucuk ses dugmeleri (2026-10-19, «kutu yerine sag ustte»). */
   function dinleHap(){
-    if(kip() !== 'dinle') return '';
+    /* Kaldirildi (2026-10-19, depo sahibi: «bu kaldi»): susturmak icin kureye dokun,
+       kapatmak icin «Yaz» kipi. */
+    if(kip() !== 'dinle' || true) return '';
     {
       /* Kose hapi (2026-10-19, «alan kaplamasin»): ses secimi tek dugme (dokundukca
          sirayla degisir), Sustur ve Kapat yalniz simge. */

@@ -16913,7 +16913,7 @@ ESP.Perde = (function(){
 
 window.ESP = window.ESP || {};
 
-ESP.BUILD = { id:'408ae182', at:'2026-10-18 22:56', dirty:true };
+ESP.BUILD = { id:'de58b902', at:'2026-10-18 22:58', dirty:true };
 
 /* ==== js/core/kesinlik.js ==== */
 /* ÜRETİLMİŞ KOPYA — BURAYI DÜZENLEME.
@@ -35529,7 +35529,9 @@ window.LIFEOS.KING = (function(){
   }
   /* Dinle: baslikta, kiplerin solunda kucuk ses dugmeleri (2026-10-19, «kutu yerine sag ustte»). */
   function dinleHap(){
-    if(kip() !== 'dinle') return '';
+    /* Kaldirildi (2026-10-19, depo sahibi: «bu kaldi»): susturmak icin kureye dokun,
+       kapatmak icin «Yaz» kipi. */
+    if(kip() !== 'dinle' || true) return '';
     {
       /* Kose hapi (2026-10-19, «alan kaplamasin»): ses secimi tek dugme (dokundukca
          sirayla degisir), Sustur ve Kapat yalniz simge. */
